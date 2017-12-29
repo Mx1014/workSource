@@ -1,8 +1,8 @@
 package com.everhomes.rest.quality;
 
-import javax.validation.constraints.NotNull;
-
 import com.everhomes.util.StringHelper;
+
+import javax.validation.constraints.NotNull;
 
 /**
  * <ul>
@@ -15,6 +15,7 @@ import com.everhomes.util.StringHelper;
  *  <li>offset: 偏移</li>
  *  <li>pageSize: 页面大小</li>
  *  <li>sampleId: 任务所属例行检查id</li>
+ *  <li>checkFlag: 检查统计的标志位</li>
  * </ul>
  */
 public class CountTasksCommand {
@@ -38,6 +39,8 @@ public class CountTasksCommand {
 	private Integer pageSize;
 
 	private Long sampleId;
+
+	private Boolean checkFlag;
 
 	public Long getSampleId() {
 		return sampleId;
@@ -109,6 +112,14 @@ public class CountTasksCommand {
 
 	public void setPageSize(Integer pageSize) {
 		this.pageSize = pageSize;
+	}
+
+	public Boolean getCheckFlag() {
+		return checkFlag;
+	}
+
+	public void setCheckFlag(Boolean checkFlag) {
+		this.checkFlag = checkFlag;
 	}
 
 	@Override

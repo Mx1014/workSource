@@ -1,6 +1,7 @@
 // @formatter:off
 package com.everhomes.poll;
 
+import java.sql.Timestamp;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.UUID;
@@ -9,7 +10,9 @@ import java.util.stream.Collectors;
 import com.everhomes.server.schema.tables.records.EhPollItemsRecord;
 import org.apache.commons.collections.CollectionUtils;
 import org.jooq.DSLContext;
+import org.jooq.Record;
 import org.jooq.SelectQuery;
+import org.jooq.SelectSeekStep1;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
 
@@ -125,6 +128,20 @@ public class PollProviderImpl implements PollProvider {
             pollVote=ConvertHelper.convert(result, PollVote.class);
         }
         return pollVote;
+    }
+
+
+    @Override
+    public List<PollVote> listPollVoteByUidAndPollId(Long uid, Long pollId) {
+        DSLContext context = dbProvider.getDslContext(AccessSpec.readWriteWith(EhPolls.class, pollId));
+        SelectQuery<EhPollVotesRecord> query = context.selectQuery(Tables.EH_POLL_VOTES);
+        query.addConditions(Tables.EH_POLL_VOTES.POLL_ID.eq(pollId));
+        query.addConditions(Tables.EH_POLL_VOTES.VOTER_UID.eq(uid));
+        query.addOrderBy(Tables.EH_POLL_VOTES.CREATE_TIME.desc());
+
+        List<PollVote> pollVotes = query.fetch().map(record ->  ConvertHelper.convert(record, PollVote.class));
+
+        return pollVotes;
     }
 
     @Override

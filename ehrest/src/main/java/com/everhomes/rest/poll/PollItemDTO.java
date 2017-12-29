@@ -2,25 +2,37 @@
 package com.everhomes.rest.poll;
 
 import com.everhomes.util.StringHelper;
+
 /**
- * 
- * @author elians
- *<ul>
- *<li>itemId:选项ID</li>
- *<li>subject:主题</li>
- *<li>coverUrl:选项路径</li>
- *<li>voteCount:选项投票统计</li>
- *<li>createTime:创建时间</li>
- *</ul>
+ * <ul>
+ *     <li>id: 选项ID</li>
+ *     <li>itemId: 选项ID</li>
+ *     <li>subject: 主题</li>
+ *     <li>coverUrl: 选项路径</li>
+ *     <li>voteCount: 选项投票统计</li>
+ *     <li>createTime: 创建时间</li>
+ *     <li>pollVoterStatus: 投票状态，当前用户是否已投此项 ,1 未投票，2 已投票， 参考{@link PollVoterStatus}</li>
+ * </ul>
  */
 public class PollItemDTO {
+    private Long id;
     private Long itemId;
     private String subject;
     private String coverUrl;
     private Integer voteCount;
     private String createTime;
-    
+    private Integer pollVoterStatus;
+
+
     public PollItemDTO() {
+    }
+
+    public Long getId() {
+        return id;
+    }
+
+    public void setId(Long id) {
+        this.id = id;
     }
 
     public Long getItemId() {
@@ -61,6 +73,14 @@ public class PollItemDTO {
 
     public void setCreateTime(String createTime) {
         this.createTime = createTime;
+    }
+
+    public Integer getPollVoterStatus() {
+        return pollVoterStatus;
+    }
+
+    public void setPollVoterStatus(Integer pollVoterStatus) {
+        this.pollVoterStatus = pollVoterStatus;
     }
 
     public String toString() {

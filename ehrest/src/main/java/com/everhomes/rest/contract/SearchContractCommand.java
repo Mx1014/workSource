@@ -38,6 +38,15 @@ public class SearchContractCommand {
     private Integer sortType;
 
     private String sortField;
+    private Long orgId;
+
+    public Long getOrgId() {
+        return orgId;
+    }
+
+    public void setOrgId(Long orgId) {
+        this.orgId = orgId;
+    }
 
     public String getSortField() {
         return sortField;

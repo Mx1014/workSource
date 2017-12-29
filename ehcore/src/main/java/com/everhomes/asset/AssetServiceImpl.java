@@ -265,25 +265,25 @@ public class AssetServiceImpl implements AssetService {
     }
 
     private void checkAssetPriviledgeForPropertyOrg(Long communityId, Long priviledgeId) {
-        ListServiceModuleAppsCommand cmd1 = new ListServiceModuleAppsCommand();
-        cmd1.setActionType((byte)13);
-        cmd1.setModuleId(PrivilegeConstants.ASSET_MODULE_ID);
-        cmd1.setNamespaceId(UserContext.getCurrentNamespaceId());
-        ListServiceModuleAppsResponse res = portalService.listServiceModuleAppsWithConditon(cmd1);
-        Long appId = null;
-        if(null != res && res.getServiceModuleApps().size() > 0){
-            appId = res.getServiceModuleApps().get(0).getId();
-        }
-        OrganizationMember member = organizationProvider.findAnyOrganizationMemberByNamespaceIdAndUserId(UserContext.getCurrentNamespaceId(), UserContext.currentUserId(), OrganizationType.ENTERPRISE.getCode());
-        if(member != null && !org.springframework.util.StringUtils.isEmpty(member.getGroupPath())){
-            Long organizaitonId = Long.valueOf(member.getGroupPath().split("/")[1]);
-            member.setOrganizationId(organizaitonId);
-        }
-        if(!userPrivilegeMgr.checkUserPrivilege(UserContext.currentUserId(), EntityType.ORGANIZATIONS.getCode(), member.getOrganizationId(), member.getOrganizationId(),priviledgeId , appId, null,communityId )){
-            throw RuntimeErrorException.errorWith(ErrorCodes.SCOPE_GENERAL, ErrorCodes.ERROR_ACCESS_DENIED,
-                    "Insufficient privilege");
-
-        }
+//        ListServiceModuleAppsCommand cmd1 = new ListServiceModuleAppsCommand();
+//        cmd1.setActionType((byte)13);
+//        cmd1.setModuleId(PrivilegeConstants.ASSET_MODULE_ID);
+//        cmd1.setNamespaceId(UserContext.getCurrentNamespaceId());
+//        ListServiceModuleAppsResponse res = portalService.listServiceModuleAppsWithConditon(cmd1);
+//        Long appId = null;
+//        if(null != res && res.getServiceModuleApps().size() > 0){
+//            appId = res.getServiceModuleApps().get(0).getId();
+//        }
+//        OrganizationMember member = organizationProvider.findAnyOrganizationMemberByNamespaceIdAndUserId(UserContext.getCurrentNamespaceId(), UserContext.currentUserId(), OrganizationType.ENTERPRISE.getCode());
+//        if(member != null && !org.springframework.util.StringUtils.isEmpty(member.getGroupPath())){
+//            Long organizaitonId = Long.valueOf(member.getGroupPath().split("/")[1]);
+//            member.setOrganizationId(organizaitonId);
+//        }
+//        if(!userPrivilegeMgr.checkUserPrivilege(UserContext.currentUserId(), EntityType.ORGANIZATIONS.getCode(), member.getOrganizationId(), member.getOrganizationId(),priviledgeId , appId, null,communityId )){
+//            throw RuntimeErrorException.errorWith(ErrorCodes.SCOPE_GENERAL, ErrorCodes.ERROR_ACCESS_DENIED,
+//                    "Insufficient privilege");
+//        }
+        userPrivilegeMgr.checkUserPrivilege(UserContext.currentUserId(), null, priviledgeId, PrivilegeConstants.ASSET_MODULE_ID, (byte)13, null, null, communityId);
     }
 
     @Override
@@ -493,7 +493,29 @@ public class AssetServiceImpl implements AssetService {
 
     @Override
     public ShowBillForClientDTO showBillForClient(ClientIdentityCommand cmd) {
-        //app用户的权限还未判断，是否可以查看账单
+        //企业用户的话判断是否为企业管理员
+//        out:{
+//            if(cmd.getTargetType().equals(AssetPaymentStrings.EH_ORGANIZATION)){
+//                Long userId = UserContext.currentUserId();
+//                ListServiceModuleAdministratorsCommand cmd1 = new ListServiceModuleAdministratorsCommand();
+//                cmd1.setOrganizationId(cmd.getTargetId());
+//                cmd1.setActivationFlag((byte)1);
+//                cmd1.setOwnerType("EhOrganizations");
+//                cmd1.setOwnerId(null);
+//                LOGGER.info("organization manager check for bill display, cmd = "+ cmd1.toString());
+//                List<OrganizationContactDTO> organizationContactDTOS = rolePrivilegeService.listOrganizationAdministrators(cmd1);
+//                LOGGER.info("organization manager check for bill display, orgContactsDTOs are = "+ organizationContactDTOS.toString());
+//                LOGGER.info("organization manager check for bill display, userId = "+ userId);
+//                for(OrganizationContactDTO dto : organizationContactDTOS){
+//                    Long targetId = dto.getTargetId();
+//                    if(targetId == userId){
+//                        break out;
+//                    }
+//                }
+//                throw RuntimeErrorException.errorWith(AssetErrorCodes.SCOPE,AssetErrorCodes.NOT_CORP_MANAGER,
+//                        "not valid corp manager");
+//            }
+//        }
         AssetVendor assetVendor = checkAssetVendor(UserContext.getCurrentNamespaceId(),0);
         String vendorName = assetVendor.getVendorName();
         AssetVendorHandler handler = getAssetVendorHandler(vendorName);
@@ -2630,6 +2652,28 @@ public class AssetServiceImpl implements AssetService {
         return response;
     }
     public List<ShowBillForClientV2DTO> showBillForClientV2(ShowBillForClientV2Command cmd) {
+//        out:{
+//            if(cmd.getTargetType().equals(AssetPaymentStrings.EH_ORGANIZATION)){
+//                Long userId = UserContext.currentUserId();
+//                ListServiceModuleAdministratorsCommand cmd1 = new ListServiceModuleAdministratorsCommand();
+//                cmd1.setOrganizationId(cmd.getTargetId());
+//                cmd1.setActivationFlag((byte)1);
+//                cmd1.setOwnerType("EhOrganizations");
+//                cmd1.setOwnerId(null);
+//                LOGGER.info("organization manager check for bill display, cmd = "+ cmd1.toString());
+//                List<OrganizationContactDTO> organizationContactDTOS = rolePrivilegeService.listOrganizationAdministrators(cmd1);
+//                LOGGER.info("organization manager check for bill display, orgContactsDTOs are = "+ organizationContactDTOS.toString());
+//                LOGGER.info("organization manager check for bill display, userId = "+ userId);
+//                for(OrganizationContactDTO dto : organizationContactDTOS){
+//                    Long targetId = dto.getTargetId();
+//                    if(targetId == userId){
+//                        break out;
+//                    }
+//                }
+//                throw RuntimeErrorException.errorWith(AssetErrorCodes.SCOPE,AssetErrorCodes.NOT_CORP_MANAGER,
+//                        "not valid corp manager");
+//            }
+//        }
         AssetVendor assetVendor = checkAssetVendor(UserContext.getCurrentNamespaceId(),0);
 //        AssetVendor assetVendor = checkAssetVendor(999983);
         String vendorName = assetVendor.getVendorName();

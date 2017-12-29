@@ -86,4 +86,6 @@ public interface EquipmentService {
 	Set<Long> getTaskGroupUsers(Long taskId, byte groupType);
 
 	FieldItemDTO findScopeFieldItemByFieldItemId(findScopeFieldItemCommand cmd);
+
+	void distributeTemplates();
 }

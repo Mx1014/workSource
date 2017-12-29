@@ -3,13 +3,22 @@ package com.everhomes.varField;
 
 import com.everhomes.constants.ErrorCodes;
 import com.everhomes.customer.CustomerService;
+import com.everhomes.entity.EntityType;
 import com.everhomes.naming.NameMapper;
+import com.everhomes.portal.PortalService;
+import com.everhomes.rest.acl.PrivilegeConstants;
+import com.everhomes.rest.acl.PrivilegeServiceErrorCode;
 import com.everhomes.rest.asset.ImportFieldsExcelResponse;
+import com.everhomes.rest.common.ServiceModuleConstants;
 import com.everhomes.rest.customer.*;
 import com.everhomes.rest.field.ExportFieldsExcelCommand;
+import com.everhomes.rest.launchpad.ActionType;
+import com.everhomes.rest.portal.ListServiceModuleAppsCommand;
+import com.everhomes.rest.portal.ListServiceModuleAppsResponse;
 import com.everhomes.rest.varField.*;
 import com.everhomes.sequence.SequenceProvider;
 import com.everhomes.user.UserContext;
+import com.everhomes.user.UserPrivilegeMgr;
 import com.everhomes.util.ConvertHelper;
 import com.everhomes.util.RuntimeErrorException;
 import com.everhomes.util.StringHelper;
@@ -63,6 +72,12 @@ public class FieldServiceImpl implements FieldService {
 
     @Autowired
     private SequenceProvider sequenceProvider;
+
+    @Autowired
+    private PortalService portalService;
+
+    @Autowired
+    private UserPrivilegeMgr userPrivilegeMgr;
 
 
     @Override
@@ -239,6 +254,9 @@ public class FieldServiceImpl implements FieldService {
 
     @Override
     public void exportExcelTemplate(ListFieldGroupCommand cmd,HttpServletResponse response){
+        if(ModuleName.ENTERPRISE_CUSTOMER.equals(ModuleName.fromName(cmd.getModuleName()))) {
+            customerService.checkCustomerAuth(cmd.getNamespaceId(), PrivilegeConstants.ENTERPRISE_CUSTOMER_MANAGE_IMPORT, cmd.getOrgId(), cmd.getCommunityId());
+        }
         List<FieldGroupDTO> groups = listFieldGroups(cmd);
         //设备巡检中字段 暂时单sheet
         if (cmd.getEquipmentCategoryName() != null) {
@@ -351,7 +369,7 @@ public class FieldServiceImpl implements FieldService {
         }
         return;
     }
-    private void sheetGenerate(List<FieldGroupDTO> groups, HSSFWorkbook workbook, ExcelUtils excel,Long customerId,Byte customerType,Integer namespaceId,Long communityId,String moduleName) {
+    private void sheetGenerate(List<FieldGroupDTO> groups, HSSFWorkbook workbook, ExcelUtils excel,Long customerId,Byte customerType,Integer namespaceId,Long communityId,String moduleName, Long orgId) {
         //遍历筛选过的sheet
         for( int i = 0; i < groups.size(); i++){
             //是否为叶节点的标识
@@ -359,7 +377,7 @@ public class FieldServiceImpl implements FieldService {
             FieldGroupDTO group = groups.get(i);
             //如果有叶节点，则送去轮回
             if(group.getChildrenGroup()!=null && group.getChildrenGroup().size()>0){
-                sheetGenerate(group.getChildrenGroup(),workbook,excel,customerId,customerType,namespaceId,communityId,moduleName);
+                sheetGenerate(group.getChildrenGroup(),workbook,excel,customerId,customerType,namespaceId,communityId,moduleName,orgId);
                 //母节点的标识改为false，命运从出生就断定，唯有世世代代的延续才能成为永恒的现象
                 isRealSheet = false;
             }
@@ -386,7 +404,7 @@ public class FieldServiceImpl implements FieldService {
                     headers[j] = field.getFieldDisplayName();
                 }
                 //获取一个sheet的数据,这里只有叶节点，将header传回作为顺序.传递field来确保顺序
-                List<List<String>> data = getDataOnFields(group,customerId,customerType,fields, communityId,namespaceId,moduleName);
+                List<List<String>> data = getDataOnFields(group,customerId,customerType,fields, communityId,namespaceId,moduleName,orgId);
                 try {
                     //写入workbook
                     System.out.println(sheetNum.get());
@@ -405,7 +423,7 @@ public class FieldServiceImpl implements FieldService {
      * 获取一个sheet的数据，通过sheet的中文名称进行匹配,同一个excel中sheet名称不会重复
      *
      */
-    private List<List<String>> getDataOnFields(FieldGroupDTO group, Long customerId, Byte customerType,List<FieldDTO> fields,Long communityId,Integer namespaceId,String moduleName) {
+    private List<List<String>> getDataOnFields(FieldGroupDTO group, Long customerId, Byte customerType,List<FieldDTO> fields,Long communityId,Integer namespaceId,String moduleName, Long orgId) {
         List<List<String>> data = new ArrayList<>();
         //使用groupName来对应不同的接口
         String sheetName = group.getGroupDisplayName();
@@ -415,6 +433,8 @@ public class FieldServiceImpl implements FieldService {
                 cmd1.setCustomerId(customerId);
                 cmd1.setCustomerType(customerType);
                 cmd1.setCommunityId(communityId);
+                cmd1.setNamespaceId(namespaceId);
+                cmd1.setOrgId(orgId);
                 List<CustomerTalentDTO> customerTalentDTOS = customerService.listCustomerTalents(cmd1);
                 if(customerTalentDTOS==null){
                     customerTalentDTOS = new ArrayList<>();
@@ -431,6 +451,8 @@ public class FieldServiceImpl implements FieldService {
                 cmd2.setCustomerId(customerId);
                 cmd2.setCustomerType(customerType);
                 cmd2.setCommunityId(communityId);
+                cmd2.setNamespaceId(namespaceId);
+                cmd2.setOrgId(orgId);
                 List<CustomerTrademarkDTO> customerTrademarkDTOS = customerService.listCustomerTrademarks(cmd2);
                 if(customerTrademarkDTOS == null){
                     customerTrademarkDTOS = new ArrayList<>();
@@ -445,6 +467,8 @@ public class FieldServiceImpl implements FieldService {
                 cmd3.setCustomerId(customerId);
                 cmd3.setCustomerType(customerType);
                 cmd3.setCommunityId(communityId);
+                cmd3.setNamespaceId(namespaceId);
+                cmd3.setOrgId(orgId);
                 List<CustomerPatentDTO> customerPatentDTOS = customerService.listCustomerPatents(cmd3);
                 if(customerPatentDTOS==null){
                     customerPatentDTOS = new ArrayList<>();
@@ -458,6 +482,9 @@ public class FieldServiceImpl implements FieldService {
                 ListCustomerCertificatesCommand cmd4 = new ListCustomerCertificatesCommand();
                 cmd4.setCustomerId(customerId);
                 cmd4.setCustomerType(customerType);
+                cmd4.setCommunityId(communityId);
+                cmd4.setNamespaceId(namespaceId);
+                cmd4.setOrgId(orgId);
                 List<CustomerCertificateDTO> customerCertificateDTOS = customerService.listCustomerCertificates(cmd4);
                 if(customerCertificateDTOS == null){
                     customerCertificateDTOS = new ArrayList<>();
@@ -472,6 +499,8 @@ public class FieldServiceImpl implements FieldService {
                 cmd5.setCustomerId(customerId);
                 cmd5.setCustomerType(customerType);
                 cmd5.setCommunityId(communityId);
+                cmd5.setNamespaceId(namespaceId);
+                cmd5.setOrgId(orgId);
                 List<CustomerApplyProjectDTO> customerApplyProjectDTOS = customerService.listCustomerApplyProjects(cmd5);
                 if(customerApplyProjectDTOS == null){
                     customerApplyProjectDTOS = new ArrayList<>();
@@ -486,6 +515,8 @@ public class FieldServiceImpl implements FieldService {
                 cmd6.setCustomerId(customerId);
                 cmd6.setCustomerType(customerType);
                 cmd6.setCommunityId(communityId);
+                cmd6.setNamespaceId(namespaceId);
+                cmd6.setOrgId(orgId);
                 List<CustomerCommercialDTO> customerCommercialDTOS = customerService.listCustomerCommercials(cmd6);
                 if(customerCommercialDTOS == null){
                     customerCommercialDTOS = new ArrayList<>();
@@ -499,6 +530,9 @@ public class FieldServiceImpl implements FieldService {
                 ListCustomerInvestmentsCommand cmd7 = new ListCustomerInvestmentsCommand();
                 cmd7.setCustomerId(customerId);
                 cmd7.setCustomerType(customerType);
+                cmd7.setCommunityId(communityId);
+                cmd7.setNamespaceId(namespaceId);
+                cmd7.setOrgId(orgId);
                 List<CustomerInvestmentDTO> customerInvestmentDTOS = customerService.listCustomerInvestments(cmd7);
                 if(customerInvestmentDTOS == null){
                     customerInvestmentDTOS = new ArrayList<>();
@@ -512,6 +546,9 @@ public class FieldServiceImpl implements FieldService {
                 ListCustomerEconomicIndicatorsCommand cmd8 = new ListCustomerEconomicIndicatorsCommand();
                 cmd8.setCustomerId(customerId);
                 cmd8.setCustomerType(customerType);
+                cmd8.setCommunityId(communityId);
+                cmd8.setNamespaceId(namespaceId);
+                cmd8.setOrgId(orgId);
                 List<CustomerEconomicIndicatorDTO> customerEconomicIndicatorDTOS = customerService.listCustomerEconomicIndicators(cmd8);
                 if(customerEconomicIndicatorDTOS == null){
                     customerEconomicIndicatorDTOS = new ArrayList<>();
@@ -525,6 +562,9 @@ public class FieldServiceImpl implements FieldService {
                 ListCustomerTrackingsCommand cmd9  = new ListCustomerTrackingsCommand();
                 cmd9.setCustomerId(customerId);
                 cmd9.setCustomerType(customerType);
+                cmd9.setCommunityId(communityId);
+                cmd9.setNamespaceId(namespaceId);
+                cmd9.setOrgId(orgId);
                 List<CustomerTrackingDTO> customerTrackingDTOS = customerService.listCustomerTrackings(cmd9);
                 if(customerTrackingDTOS == null) customerTrackingDTOS = new ArrayList<>();
                 for(int j = 0; j < customerTrackingDTOS.size(); j++){
@@ -535,6 +575,9 @@ public class FieldServiceImpl implements FieldService {
                 ListCustomerTrackingPlansCommand cmd10  = new ListCustomerTrackingPlansCommand();
                 cmd10.setCustomerId(customerId);
                 cmd10.setCustomerType(customerType);
+                cmd10.setCommunityId(communityId);
+                cmd10.setNamespaceId(namespaceId);
+                cmd10.setOrgId(orgId);
                 List<CustomerTrackingPlanDTO> customerTrackingPlanDTOS = customerService.listCustomerTrackingPlans(cmd10);
                 if(customerTrackingPlanDTOS == null) customerTrackingPlanDTOS = new ArrayList<>();
                 for(int j = 0; j < customerTrackingPlanDTOS.size(); j++){
@@ -545,6 +588,9 @@ public class FieldServiceImpl implements FieldService {
                 ListCustomerEntryInfosCommand cmd11 = new ListCustomerEntryInfosCommand();
                 cmd11.setCustomerId(customerId);
                 cmd11.setCustomerType(customerType);
+                cmd11.setCommunityId(communityId);
+                cmd11.setNamespaceId(namespaceId);
+                cmd11.setOrgId(orgId);
                 LOGGER.info("入驻信息 command"+cmd11);
                 List<CustomerEntryInfoDTO> customerEntryInfoDTOS = customerService.listCustomerEntryInfos(cmd11);
                 if(customerEntryInfoDTOS == null) customerEntryInfoDTOS = new ArrayList<>();
@@ -557,7 +603,10 @@ public class FieldServiceImpl implements FieldService {
                 ListCustomerDepartureInfosCommand cmd12 = new ListCustomerDepartureInfosCommand();
                 cmd12.setCommunityId(customerId);
                 cmd12.setCustomerType(customerType);
-                LOGGER.info("入驻信息 command"+cmd12);
+                cmd12.setCommunityId(communityId);
+                cmd12.setNamespaceId(namespaceId);
+                cmd12.setOrgId(orgId);
+                LOGGER.info("离场信息 command"+cmd12);
                 List<CustomerDepartureInfoDTO> customerDepartureInfoDTOS = customerService.listCustomerDepartureInfos(cmd12);
                 if(customerDepartureInfoDTOS == null) customerDepartureInfoDTOS = new ArrayList<>();
                 for(int j = 0; j < customerDepartureInfoDTOS.size(); j++){
@@ -735,8 +784,12 @@ public class FieldServiceImpl implements FieldService {
 
     @Override
     public void exportFieldsExcel(ExportFieldsExcelCommand cmd, HttpServletResponse response) {
+        if(ModuleName.ENTERPRISE_CUSTOMER.getName().equals(cmd.getModuleName())) {
+            customerService.checkCustomerAuth(cmd.getNamespaceId(), PrivilegeConstants.ENTERPRISE_CUSTOMER_MANAGE_EXPORT, cmd.getOrgId(), cmd.getCommunityId());
+        }
         //将command转换为listFieldGroup的参数command
         ListFieldGroupCommand cmd1 = ConvertHelper.convert(cmd, ListFieldGroupCommand.class);
+
         //获得客户所拥有的sheet
         List<FieldGroupDTO> allGroups = listFieldGroups(cmd1);
 //        if(allGroupsf==null) allGroupsf= new ArrayList<>();
@@ -774,7 +827,7 @@ public class FieldServiceImpl implements FieldService {
         //工具excel
         ExcelUtils excel = new ExcelUtils();
         //注入sheet的内容到workbook中
-        sheetGenerate(groups,workbook,excel,cmd.getCustomerId(),cmd.getCustomerType(),cmd.getNamespaceId(),cmd.getCommunityId(),cmd.getModuleName());
+        sheetGenerate(groups,workbook,excel,cmd.getCustomerId(),cmd.getCustomerType(),cmd.getNamespaceId(),cmd.getCommunityId(),cmd.getModuleName(), cmd.getOrgId());
         sheetNum.remove();
         //写入流
         ServletOutputStream out;

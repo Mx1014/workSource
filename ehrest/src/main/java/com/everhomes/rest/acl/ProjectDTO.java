@@ -13,6 +13,7 @@ import java.util.List;
  * <li>projectName: 项目名称</li>
  * <li>parentId: 父级Id</li>
  * <li>projects: 子集，参考{@link com.everhomes.rest.acl.ProjectDTO}</li>
+ * <li>communityType: 园区类型，参考{@link com.everhomes.rest.community.CommunityType}</li>
  * </ul>
  */
 public class ProjectDTO {
@@ -21,9 +22,18 @@ public class ProjectDTO {
 	private Long    projectId;
 	private String projectName;
 	private String  projectType;
+	private Byte  communityType;
 
 	@ItemType(ProjectDTO.class)
 	private List<ProjectDTO> projects;
+
+	public Byte getCommunityType() {
+		return communityType;
+	}
+
+	public void setCommunityType(Byte communityType) {
+		this.communityType = communityType;
+	}
 
 	public Long getProjectId() {
 		return projectId;

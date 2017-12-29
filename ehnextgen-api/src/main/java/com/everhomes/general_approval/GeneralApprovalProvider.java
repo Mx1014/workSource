@@ -25,4 +25,6 @@ public interface GeneralApprovalProvider {
     GeneralApproval getGeneralApprovalByTemplateId(Integer namespaceId, Long moduleId, Long ownerId, String ownerType, Long templateId);
 
 	GeneralApproval getGeneralApprovalByAttribute(Integer namespaceId, Long ownerId, String attribute);
-        }
+
+	void disableApprovalByFormOriginId(Long formOriginId, Long moduleId, String moduleType);
+}

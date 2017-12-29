@@ -12,6 +12,7 @@ public interface ConfigConstants {
     public static final String MANAGE_SHOP_URL = "manage.shop.url";
     public static final String POST_SHARE_URL = "post.share.url";
     public static final String ACTIVITY_SHARE_URL = "activity.share.url";
+    public static final String POLL_SHARE_URL = "poll.share.url";
     public static final String USER_COUPON_URL = "user.coupon.url";
     public static final String APP_AGREEMENTS_URL = "app.agreements.url";
     public static final String PREFIX_URL = "prefix.url";
