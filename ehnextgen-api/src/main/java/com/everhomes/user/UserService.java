@@ -16,6 +16,7 @@ import com.everhomes.rest.user.admin.*;
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
 
+import java.sql.Timestamp;
 import java.util.List;
 
 /**
@@ -286,4 +287,7 @@ public interface UserService {
      */
     SystemInfoResponse updateUserBySystemInfo(SystemInfoCommand cmd,
             HttpServletRequest request, HttpServletResponse response);
+
+
+    void syncUsersFromAnBangWuYe(SyncUsersFromAnBangWuYeCommand cmd);
 }

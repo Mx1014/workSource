@@ -161,7 +161,4 @@ public interface UserProvider {
      * 用于测试缓存使用是否正常，不要用于业务使用 by lqs 20171019
      */
     void updateCacheStatus();
-
-
-    void syncUsersFromAnBangWuYe(Timestamp timestamp);
 }

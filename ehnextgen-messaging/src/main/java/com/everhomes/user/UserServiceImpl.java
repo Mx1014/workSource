@@ -113,9 +113,16 @@ import org.springframework.context.ApplicationEventPublisher;
 import org.springframework.data.redis.core.RedisTemplate;
 import org.springframework.data.redis.core.ValueOperations;
 import org.springframework.data.redis.serializer.StringRedisSerializer;
+import org.springframework.http.HttpEntity;
+import org.springframework.http.HttpHeaders;
+import org.springframework.http.HttpMethod;
+import org.springframework.http.ResponseEntity;
 import org.springframework.stereotype.Component;
 import org.springframework.transaction.TransactionStatus;
 import org.springframework.util.CollectionUtils;
+import org.springframework.util.concurrent.ListenableFuture;
+import org.springframework.util.concurrent.ListenableFutureCallback;
+import org.springframework.web.client.AsyncRestTemplate;
 
 import javax.annotation.PostConstruct;
 import javax.servlet.http.Cookie;
@@ -172,7 +179,14 @@ public class UserServiceImpl implements UserService {
 
     private final Validator validator = Validation.buildDefaultValidatorFactory().getValidator();
 
-    @Autowired
+
+	private static String ANBANG_CLIENTID = "";
+	private static String ANBANG_CLIENTSECRET = "";
+	private static String ANBANG_OAUTH_URL = "http://host:port/api/auth/oauth/token";
+	private static String ANBANG_USERS_URL = "http://host:port/api/auth/users";
+
+
+	@Autowired
 	private DbProvider dbProvider;
 
 	@Autowired
@@ -5436,5 +5450,140 @@ public class UserServiceImpl implements UserService {
         
         return resp;
     }
+
+	@Override
+	public void syncUsersFromAnBangWuYe(SyncUsersFromAnBangWuYeCommand cmd) {
+		//调用授权接口
+
+		Date timestamp = null;
+		if(cmd.getIsAll() == 1){//全量
+			timestamp = null;
+		}else if(cmd.getIsAll() == 0){//从上次同步时间的增量
+			timestamp = DateHelper.currentGMTTime();
+		}
+		String secret = String.format("%s:%s", ANBANG_CLIENTID, ANBANG_CLIENTSECRET);
+		String baseStr = new String(Base64.getEncoder().encode(secret.getBytes()));
+
+		Map headerParam = new HashMap();
+		headerParam.put("Content-Type", "application/x-www-form-urlencoded");
+		headerParam.put("client_id", ANBANG_CLIENTID);
+		headerParam.put("client_secret", ANBANG_CLIENTSECRET);
+		headerParam.put("grant_type", "client_credentials");
+		headerParam.put("Authorization", baseStr);
+
+
+
+
+		try {
+			ListenableFuture<ResponseEntity<String>> auth_result = restCall(HttpMethod.POST, ANBANG_OAUTH_URL, headerParam, null, new ListenableFutureCallback<ResponseEntity<String>>() {
+
+				@Override
+				public void onSuccess(ResponseEntity<String> result) {
+					String acess_token = result.getBody().toString();
+					Map headerParam = new HashMap();
+					headerParam.put("Content-Type", "application/json");
+					headerParam.put("startdate", null);
+					headerParam.put("Authorization", "bearer "+ acess_token);
+					try {
+						ListenableFuture<ResponseEntity<String>> users_result = restCall(HttpMethod.GET, ANBANG_USERS_URL, headerParam, null, new ListenableFutureCallback<ResponseEntity<String>>(){
+
+							@Override
+							public void onSuccess(ResponseEntity<String> result) {
+
+							}
+
+							@Override
+							public void onFailure(Throwable ex) {
+
+							}
+						});
+					} catch (UnsupportedEncodingException e) {
+						e.printStackTrace();
+					}
+				}
+
+				@Override
+				public void onFailure(Throwable ex) {
+
+				}
+			});
+		} catch (UnsupportedEncodingException e) {
+			e.printStackTrace();
+		}
+
+		//todo visit Anbangwuye's implements
+
+//        if(timestamp != null){        //todo 参数传当前时间,为增量同步，只同步上次同步拘束时间~当前时间的数据
+//            //todo visit
+//            List<User> users = null;
+//            List<String> namespaceUserToken = new ArrayList<>();
+//            //如果有之前同步过的用户，删掉重建
+//            this.deleteUser(namespaceId, namespaceUserToken, NamespaceUserType.ANBANG.getCode());
+//            this.deleteIdentifier(namespaceId, uIds);
+//            createUsersAndUserIdentifiers(users);
+//        }else{
+//            //todo visit
+//            //todo 参数为null,为全量同步,同步所有的用户
+//            List<User> users = null;
+//            List<String> namespaceUserToken = new ArrayList<>();
+//
+//            //删除所有的同步用户
+//            this.deleteUser(namespaceId,null,NamespaceUserType.ANBANG.getCode());
+//            this.deleteIdentifier(namespaceId, uIds);
+//            createUsersAndUserIdentifiers(users);
+//        }
+
+	}
+
+	public ListenableFuture<ResponseEntity<String>> restCall(HttpMethod method, String url, Map headerParam, Map bodyParam, ListenableFutureCallback<ResponseEntity<String>> responseCallback) throws UnsupportedEncodingException {
+		AsyncRestTemplate template = new AsyncRestTemplate();
+//        String url = "";
+		HttpHeaders headers = new HttpHeaders();
+		headerParam.forEach((k,v)->{
+			headers.add(k.toString(),v.toString());
+		});
+		Map body = new HashMap();
+
+//        headers.add("Content-Type", "application/x-www-form-urlencoded;charset=UTF-8");
+
+//        AclinkLinglingRequest linglingReq = new AclinkLinglingRequest();
+//
+//        if(params != null) {
+//            linglingReq.setRequestParam(params);
+//        }
+//
+//        Map<String, String> authHeader = new HashMap<String, String>();
+//        authHeader.put("signature", signature);
+//        authHeader.put("token", token);
+//        linglingReq.setHeader(authHeader);
+
+//        String body = "MESSAGE=" + URLEncoder.encode(gson.toJson(linglingReq, AclinkLinglingRequest.class));
+
+		//String body = "MESSAGE=" + URLEncoder.encode("{requestParam:{deviceIds:[1008], keyEffecDay:200}, header:{signature:'f2877f02-5638-45ab-8425-8bd198f36a9b', token:1461381932233}}");
+		HttpEntity<Map> requestEntity = new HttpEntity<Map>(body, headers);
+		ListenableFuture<ResponseEntity<String>> future = template.exchange(url, method, requestEntity, String.class);
+
+		if(responseCallback != null) {
+			future.addCallback(responseCallback);
+		}
+
+		return future;
+	}
+
+
+	private void createUsersAndUserIdentifiers(List<User> users){
+		for (User user : users) {
+			this.userProvider.findUserByNamespaceUserTokenAndType(user.getNamespaceUserToken(), user.getNamespaceUserType());
+			this.userProvider.createUser(user);
+			UserIdentifier userIdentifier = new UserIdentifier();
+			userIdentifier.setOwnerUid(user.getId());
+			userIdentifier.setIdentifierType(IdentifierType.MOBILE.getCode());
+			userIdentifier.setIdentifierToken(user.getIdentifierToken());
+			userIdentifier.setNamespaceId(user.getNamespaceId());
+			userIdentifier.setClaimStatus(IdentifierClaimStatus.CLAIMED.getCode());
+			this.userProvider.createIdentifier(userIdentifier);
+		}
+
+	}
 
 }

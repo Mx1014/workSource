@@ -20,6 +20,7 @@ import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
 import javax.validation.Valid;
 
+import com.everhomes.rest.user.*;
 import org.apache.commons.lang.StringUtils;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -79,13 +80,6 @@ import com.everhomes.rest.rpc.server.PingResponsePdu;
 import com.everhomes.rest.ui.user.SceneDTO;
 import com.everhomes.rest.ui.user.SceneTokenDTO;
 import com.everhomes.rest.ui.user.SceneType;
-import com.everhomes.rest.user.ListLoginByPhoneCommand;
-import com.everhomes.rest.user.LoginToken;
-import com.everhomes.rest.user.RegisterLoginCommand;
-import com.everhomes.rest.user.SendMessageTestCommand;
-import com.everhomes.rest.user.SendMessageTestResponse;
-import com.everhomes.rest.user.UserLoginDTO;
-import com.everhomes.rest.user.UserLoginResponse;
 import com.everhomes.rest.admin.DecodeWebTokenCommand;
 import com.everhomes.sequence.LocalSequenceGenerator;
 import com.everhomes.sequence.SequenceService;
@@ -970,5 +964,21 @@ public class AdminController extends ControllerBase {
         response.setErrorDescription("OK");
         return response;
     }
-    
+
+    /**
+     * <b>URL: /user/syncUsersFromAnBangWuYe</b>
+     * <p>用于检查一些关键组件的状态，比如是否有内存可创建对象、是否可以正常连接redis，是否可以正常连接数据库等；</p>
+     */
+    @RequestMapping("checkCpnStatus")
+    @RestReturn(value = String.class )
+    @RequireAuthentication(false)
+    public RestResponse syncUsersFromAnBangWuYe(SyncUsersFromAnBangWuYeCommand cmd) {
+        userService.syncUsersFromAnBangWuYe(cmd);
+        RestResponse response = new RestResponse();
+        response.setErrorCode(ErrorCodes.SUCCESS);
+        response.setErrorDescription("OK");
+        return response;
+    }
+
+
 }
