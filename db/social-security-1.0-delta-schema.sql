@@ -340,3 +340,21 @@ CREATE TABLE `eh_social_security_inout_report` (
   KEY `i_eh_organization_id` (`organization_id`)
 ) ENGINE = INNODB DEFAULT CHARSET = utf8mb4 ;
 
+-- 社保增减表
+-- drop table eh_social_security_inout_month;
+CREATE TABLE `eh_social_security_inout_month` (
+  `id` BIGINT,
+  `namespace_id` INT (11) DEFAULT '0',
+  `organization_id` BIGINT,
+  `user_id` BIGINT,
+  `detail_id` BIGINT,
+  `data_type` VARCHAR(64) NOT NULL COMMENT 'SOCIAL,ACCUMULATION',
+  `start_time` TIMESTAMP COMMENT 'the start month',
+  `end_time` TIMESTAMP COMMENT 'the end month',
+  `creator_uid` BIGINT  DEFAULT '0',
+  `create_time` DATETIME,
+  `operator_uid` BIGINT,
+  `update_time` DATETIME,
+  PRIMARY KEY (`id`),
+  KEY `i_eh_organization_id` (`organization_id`)
+) ENGINE = INNODB DEFAULT CHARSET = utf8mb4 ;
