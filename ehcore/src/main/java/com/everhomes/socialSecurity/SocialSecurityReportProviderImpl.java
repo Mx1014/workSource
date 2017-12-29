@@ -9,6 +9,9 @@ import com.everhomes.listing.CrossShardListingLocator;
 import org.jooq.DSLContext;
 import org.jooq.Record;
 import org.jooq.SelectConditionStep;
+import org.jooq.SelectHavingStep;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
 
@@ -27,6 +30,7 @@ import com.everhomes.util.DateHelper;
 
 @Component
 public class SocialSecurityReportProviderImpl implements SocialSecurityReportProvider {
+	private static final Logger LOGGER = LoggerFactory.getLogger(SocialSecurityReportProviderImpl.class);
 
 	@Autowired
 	private DbProvider dbProvider;
@@ -77,7 +81,7 @@ public class SocialSecurityReportProviderImpl implements SocialSecurityReportPro
 
 	@Override
 	public SocialSecurityDepartmentSummary calculateSocialSecurityDepartmentSummary(List<Long> detailIds, String month) {
-		return getReadOnlyContext().select(Tables.EH_SOCIAL_SECURITY_REPORT.DETAIL_ID.countDistinct(),
+		SelectHavingStep<Record> step = getReadOnlyContext().select(Tables.EH_SOCIAL_SECURITY_REPORT.DETAIL_ID.countDistinct(),
 				Tables.EH_SOCIAL_SECURITY_REPORT.SOCIAL_SECURITY_SUM.sum(),
 				Tables.EH_SOCIAL_SECURITY_REPORT.SOCIAL_SECURITY_COMPANY_SUM.sum(),
 				Tables.EH_SOCIAL_SECURITY_REPORT.SOCIAL_SECURITY_EMPLOYEE_SUM.sum(),
@@ -106,53 +110,54 @@ public class SocialSecurityReportProviderImpl implements SocialSecurityReportPro
 						Tables.EH_SOCIAL_SECURITY_REPORT.CREATE_TIME,
 						Tables.EH_SOCIAL_SECURITY_REPORT.FILE_UID,
 						Tables.EH_SOCIAL_SECURITY_REPORT.FILE_TIME,
-						Tables.EH_SOCIAL_SECURITY_REPORT.ORGANIZATION_ID)
-				.fetchAny().map(r -> {
-					SocialSecurityDepartmentSummary summary = new SocialSecurityDepartmentSummary();
-					summary.setPayMonth(month);
-					summary.setSocialSecuritySum((BigDecimal) r.getValue(0));
-					summary.setSocialSecurityCompanySum((BigDecimal) r.getValue(1));
-					summary.setSocialSecurityEmployeeSum((BigDecimal) r.getValue(2));
-					summary.setPensionCompanySum((BigDecimal) r.getValue(3));
-					summary.setPensionEmployeeSum((BigDecimal) r.getValue(4));
-					summary.setMedicalCompanySum((BigDecimal) r.getValue(5));
-					summary.setMedicalEmployeeSum((BigDecimal) r.getValue(6));
-					summary.setInjuryCompanySum((BigDecimal) r.getValue(7));
-					summary.setInjuryEmployeeSum((BigDecimal) r.getValue(8));
-					summary.setUnemploymentCompanySum((BigDecimal) r.getValue(9));
-					summary.setUnemploymentEmployeeSum((BigDecimal) r.getValue(10));
-					summary.setBirthCompanySum((BigDecimal) r.getValue(11));
-					summary.setBirthEmployeeSum((BigDecimal) r.getValue(12));
-					summary.setCriticalIllnessCompanySum((BigDecimal) r.getValue(13));
-					summary.setCriticalIllnessEmployeeSum((BigDecimal) r.getValue(14));
-					summary.setAfterSocialSecurityCompanySum((BigDecimal) r.getValue(15));
-					summary.setAfterSocialSecurityEmployeeSum((BigDecimal) r.getValue(16));
-					summary.setAfterPensionCompanySum((BigDecimal) r.getValue(17));
-					summary.setAfterPensionEmployeeSum((BigDecimal) r.getValue(18));
-					summary.setAfterMedicalCompanySum((BigDecimal) r.getValue(19));
-					summary.setAfterMedicalEmployeeSum((BigDecimal) r.getValue(20));
-					summary.setAfterInjuryCompanySum((BigDecimal) r.getValue(21));
-					summary.setAfterInjuryEmployeeSum((BigDecimal) r.getValue(22));
-					summary.setAfterUnemploymentCompanySum((BigDecimal) r.getValue(23));
-					summary.setAfterUnemploymentEmployeeSum((BigDecimal) r.getValue(24));
-					summary.setAfterBirthCompanySum((BigDecimal) r.getValue(25));
-					summary.setAfterBirthEmployeeSum((BigDecimal) r.getValue(26));
-					summary.setAfterCriticalIllnessCompanySum((BigDecimal) r.getValue(27));
-					summary.setAfterCriticalIllnessEmployeeSum((BigDecimal) r.getValue(28));
-					summary.setDisabilitySum((BigDecimal) r.getValue(29));
-					summary.setCommercialInsurance((BigDecimal) r.getValue(30));
-					summary.setAccumulationFundSum((BigDecimal) r.getValue(31));
-					summary.setAccumulationFundCompanySum((BigDecimal) r.getValue(32));
-					summary.setAccumulationFundEmployeeSum((BigDecimal) r.getValue(33));
-					summary.setAfterAccumulationFundCompanySum((BigDecimal) r.getValue(34));
-					summary.setAfterAccumulationFundEmployeeSum((BigDecimal) r.getValue(35));
-					summary.setCreatorUid((Long) r.getValue(36));
-					summary.setCreateTime((Timestamp) r.getValue(37));
-					summary.setFileUid((Long) r.getValue(38));
-					summary.setFileTime((Timestamp) r.getValue(39));
-					summary.setOwnerId((Long) r.getValue(40));
-					return summary;
-				});
+						Tables.EH_SOCIAL_SECURITY_REPORT.ORGANIZATION_ID);
+		LOGGER.debug("sql is " + step.toString());
+		return step.fetchAny().map(r -> {
+			SocialSecurityDepartmentSummary summary = new SocialSecurityDepartmentSummary();
+			summary.setPayMonth(month);
+			summary.setSocialSecuritySum((BigDecimal) r.getValue(0));
+			summary.setSocialSecurityCompanySum((BigDecimal) r.getValue(1));
+			summary.setSocialSecurityEmployeeSum((BigDecimal) r.getValue(2));
+			summary.setPensionCompanySum((BigDecimal) r.getValue(3));
+			summary.setPensionEmployeeSum((BigDecimal) r.getValue(4));
+			summary.setMedicalCompanySum((BigDecimal) r.getValue(5));
+			summary.setMedicalEmployeeSum((BigDecimal) r.getValue(6));
+			summary.setInjuryCompanySum((BigDecimal) r.getValue(7));
+			summary.setInjuryEmployeeSum((BigDecimal) r.getValue(8));
+			summary.setUnemploymentCompanySum((BigDecimal) r.getValue(9));
+			summary.setUnemploymentEmployeeSum((BigDecimal) r.getValue(10));
+			summary.setBirthCompanySum((BigDecimal) r.getValue(11));
+			summary.setBirthEmployeeSum((BigDecimal) r.getValue(12));
+			summary.setCriticalIllnessCompanySum((BigDecimal) r.getValue(13));
+			summary.setCriticalIllnessEmployeeSum((BigDecimal) r.getValue(14));
+			summary.setAfterSocialSecurityCompanySum((BigDecimal) r.getValue(15));
+			summary.setAfterSocialSecurityEmployeeSum((BigDecimal) r.getValue(16));
+			summary.setAfterPensionCompanySum((BigDecimal) r.getValue(17));
+			summary.setAfterPensionEmployeeSum((BigDecimal) r.getValue(18));
+			summary.setAfterMedicalCompanySum((BigDecimal) r.getValue(19));
+			summary.setAfterMedicalEmployeeSum((BigDecimal) r.getValue(20));
+			summary.setAfterInjuryCompanySum((BigDecimal) r.getValue(21));
+			summary.setAfterInjuryEmployeeSum((BigDecimal) r.getValue(22));
+			summary.setAfterUnemploymentCompanySum((BigDecimal) r.getValue(23));
+			summary.setAfterUnemploymentEmployeeSum((BigDecimal) r.getValue(24));
+			summary.setAfterBirthCompanySum((BigDecimal) r.getValue(25));
+			summary.setAfterBirthEmployeeSum((BigDecimal) r.getValue(26));
+			summary.setAfterCriticalIllnessCompanySum((BigDecimal) r.getValue(27));
+			summary.setAfterCriticalIllnessEmployeeSum((BigDecimal) r.getValue(28));
+			summary.setDisabilitySum((BigDecimal) r.getValue(29));
+			summary.setCommercialInsurance((BigDecimal) r.getValue(30));
+			summary.setAccumulationFundSum((BigDecimal) r.getValue(31));
+			summary.setAccumulationFundCompanySum((BigDecimal) r.getValue(32));
+			summary.setAccumulationFundEmployeeSum((BigDecimal) r.getValue(33));
+			summary.setAfterAccumulationFundCompanySum((BigDecimal) r.getValue(34));
+			summary.setAfterAccumulationFundEmployeeSum((BigDecimal) r.getValue(35));
+			summary.setCreatorUid((Long) r.getValue(36));
+			summary.setCreateTime((Timestamp) r.getValue(37));
+			summary.setFileUid((Long) r.getValue(38));
+			summary.setFileTime((Timestamp) r.getValue(39));
+			summary.setOwnerId((Long) r.getValue(40));
+			return summary;
+		});
 	}
 
 	@Override
