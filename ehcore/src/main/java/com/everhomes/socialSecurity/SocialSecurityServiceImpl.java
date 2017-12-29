@@ -835,7 +835,9 @@ public class SocialSecurityServiceImpl implements SocialSecurityService {
         List<Long> detailIds = new ArrayList<>();
         if (null != organizationMembers) {
             for (OrganizationMember member : organizationMembers) {
-                detailIds.add(member.getDetailId());
+                if (null != member.getDetailId()) {
+                    detailIds.add(member.getDetailId());
+                }
             }
         }
         SocialSecurityDepartmentSummary summary = processSocialSecurityDepartmentSummary(dpt, detailIds, month);
