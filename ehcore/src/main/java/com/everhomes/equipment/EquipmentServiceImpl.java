@@ -921,7 +921,7 @@ public class EquipmentServiceImpl implements EquipmentService {
 
 	@Override
 	public void reviewEquipmentInspectionplan(ReviewEquipmentPlanCommand cmd) {
-		User user = UserContext.current().getUser();
+		//User user = UserContext.current().getUser();
 		//TODO:新增功能应该需要加上权限细化中的 下版本再搞
 
 		EquipmentInspectionPlans plan = equipmentProvider.getEquipmmentInspectionPlanById(cmd.getId());
@@ -933,8 +933,11 @@ public class EquipmentServiceImpl implements EquipmentService {
 
 		if (EquipmentPlanStatus.WATTING_FOR_APPOVING.equals(EquipmentPlanStatus.fromStatus(plan.getStatus()))) {
 			plan.setStatus(cmd.getReviewResult());
+			plan.setPlanMainId(0L);
 			equipmentProvider.updateEquipmentInspectionPlan(plan);
 			equipmentPlanSearcher.feedDoc(plan);
+			//处理原始计划和main_id
+			equipmentProvider.deleteEquipmentInspectionPlanMap(plan.getPlanMainId());
 		}
 	}
 
@@ -5196,6 +5199,24 @@ public class EquipmentServiceImpl implements EquipmentService {
 		equipmentProvider.deleteEquipmentInspectionPlanGroupMapByPlanId(exist.getId());
 		//删除repeatSetting  不删也可
 		repeatService.deleteRepeatSettingsById(exist.getRepeatSettingId());
+	}
+
+	@Override
+	public void createTaskByPlan(DeleteEquipmentPlanCommand cmd) {
+		EquipmentInspectionPlans plan = equipmentProvider.getEquipmmentInspectionPlanById(cmd.getId());
+		if (plan == null || plan.getStatus() == null
+				|| EquipmentPlanStatus.INACTIVE.equals(EquipmentPlanStatus.fromStatus(plan.getStatus()))) {
+			LOGGER.info("EquipmentInspectionScheduleJob standard is not exist or active! planId = " + cmd.getId());
+		} else {
+			boolean isRepeat = repeatService.isRepeatSettingActive(plan.getRepeatSettingId());
+			LOGGER.info("EquipmentInspectionScheduleJob: plan id = " + plan.getId()
+					+ "repeat setting id = " + plan.getRepeatSettingId() + "is repeat setting active: " + isRepeat);
+			if (isRepeat) {
+				this.coordinationProvider.getNamedLock(CoordinationLocks.CREATE_EQUIPMENT_TASK.getCode()).tryEnter(() -> {
+					createEquipmentTaskByPlan(plan);
+				});
+			}
+		}
 	}
 
 	@Override

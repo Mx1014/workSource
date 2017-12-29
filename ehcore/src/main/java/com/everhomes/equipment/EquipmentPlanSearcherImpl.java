@@ -5,6 +5,7 @@ import com.everhomes.configuration.ConfigurationProvider;
 import com.everhomes.listing.ListingLocator;
 import com.everhomes.repeat.RepeatService;
 import com.everhomes.rest.equipment.EquipmentInspectionPlanDTO;
+import com.everhomes.rest.equipment.EquipmentStandardStatus;
 import com.everhomes.rest.equipment.searchEquipmentInspectionPlansCommand;
 import com.everhomes.rest.equipment.searchEquipmentInspectionPlansResponse;
 import com.everhomes.rest.quality.OwnerType;
@@ -124,9 +125,10 @@ public class EquipmentPlanSearcherImpl extends AbstractElasticSearch implements 
                     .addHighlightedField("planNumber");
 
         }
-
-        FilterBuilder fb = FilterBuilders.termFilter("namespaceId", UserContext.getCurrentNamespaceId());
-        if(cmd.getTargetId() != null)
+        FilterBuilder nfb = FilterBuilders.termFilter("status", EquipmentStandardStatus.INACTIVE.getCode());
+        FilterBuilder fb = FilterBuilders.notFilter(nfb);
+        fb = FilterBuilders.termFilter("namespaceId", UserContext.getCurrentNamespaceId());
+        if (cmd.getTargetId() != null)
             fb = FilterBuilders.andFilter(fb, FilterBuilders.termFilter("targetId", cmd.getTargetId()));
 
         if(!StringUtils.isNullOrEmpty(cmd.getTargetType()))
@@ -183,22 +185,23 @@ public class EquipmentPlanSearcherImpl extends AbstractElasticSearch implements 
             plan.setExecutionFrequency(repeatService.getExecutionFrequency(repeatSetting));
             plan.setLimitTime(repeatService.getlimitTime(repeatSetting));
 
+            //取出所有有修改过的原始计划id
             List<Long> oldVersionPlanIds = new ArrayList<>();
             if (plan.getPlanMainId() != null && plan.getPlanMainId() != 0L) {
                 oldVersionPlanIds.add(plan.getPlanMainId());
             }
+            //resultSet of plan
             plans.add(ConvertHelper.convert(plan, EquipmentInspectionPlanDTO.class));
+            // 去掉原始计划显示  显示修改之后的
+            for (Long versionId : oldVersionPlanIds) {
+                plans.removeIf(p -> p.getId().equals(versionId));
+            }
 
         }
-        response.setEquipmentInspectionPlans(plans.removeIf((p)->));
+        response.setEquipmentInspectionPlans(plans);
 
         return response;
     }
-
-//    private void removeMainPlan(List<EquipmentInspectionPlanDTO> plans,Long mainId) {
-//        //MainId不为空的记录  取出mainID 删除mainId的记录
-//        plans.removeIf(equipmentInspectionPlanDTO -> Objects.equals(mainId, equipmentInspectionPlanDTO.getId()));
-//    }
 
     @Override
     public String getIndexType() {

@@ -1055,6 +1055,15 @@ public class EquipmentController extends ControllerBase {
 		return response;
 	}
 
-
+    /**
+     * <b>URL: /equipment/createTaskByPlan</b>
+     * <p>创建指定计划的任务</p>
+     */
+    @RequestMapping("createTaskByPlan")
+    @RestReturn(value = String.class)
+    public RestResponse createTaskByPlan(DeleteEquipmentPlanCommand cmd) {
+        equipmentService.createTaskByPlan(cmd);
+        return getSuccessResponse();
+    }
 
 }
