@@ -578,7 +578,7 @@ public class AssetProviderImpl implements AssetProvider {
             }
             //查询billItem的滞纳金
             BillDTO billDTO = dtos.get(i);
-            getReadOnlyContext().select(Tables.EH_PAYMENT_LATE_FINE.AMOUNT)
+            getReadOnlyContext().select(Tables.EH_PAYMENT_LATE_FINE.AMOUNT,Tables.EH_PAYMENT_LATE_FINE.NAME)
                     .from(Tables.EH_PAYMENT_LATE_FINE)
                     .leftOuterJoin(Tables.EH_PAYMENT_BILL_ITEMS)
                     .on(Tables.EH_PAYMENT_LATE_FINE.BILL_ITEM_ID.eq(Tables.EH_PAYMENT_BILL_ITEMS.ID))
@@ -586,6 +586,7 @@ public class AssetProviderImpl implements AssetProvider {
                     .fetch()
                     .forEach(r -> {
                         BillDTO fineDTO = (BillDTO)billDTO.clone();
+                        fineDTO.setBillItemName(r.getValue(Tables.EH_PAYMENT_LATE_FINE.NAME));
                         fineDTO.setAmountReceivable(r.getValue(Tables.EH_PAYMENT_LATE_FINE.AMOUNT));
                         fineDTO.setAmountReceived(new BigDecimal("0"));
                         fineDTO.setAmountOwed(r.getValue(Tables.EH_PAYMENT_LATE_FINE.AMOUNT));

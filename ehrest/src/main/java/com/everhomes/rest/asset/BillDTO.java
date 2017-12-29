@@ -23,7 +23,7 @@ import java.math.BigDecimal;
  * <li>payStatus:清账信息</li>
  *</ul>
  */
-public class BillDTO {
+public class BillDTO implements Cloneable{
     private Long billItemId;
     private Integer defaultOrder;
     private String dateStr;
@@ -200,4 +200,5 @@ public class BillDTO {
     public BillDTO() {
 
     }
+
 }
