@@ -110,9 +110,9 @@ public class SocialSecuritySettingProviderImpl implements SocialSecuritySettingP
     }
 
     @Override
-    public List<SocialSecuritySetting> listSocialSecuritySetting(Long ownerId) {
+    public List<SocialSecuritySetting> listSocialSecuritySetting(Long detailId) {
         return getReadOnlyContext().select().from(Tables.EH_SOCIAL_SECURITY_SETTINGS)
-                .where(Tables.EH_SOCIAL_SECURITY_SETTINGS.ORGANIZATION_ID.eq(ownerId))
+                .where(Tables.EH_SOCIAL_SECURITY_SETTINGS.DETAIL_ID.eq(detailId))
                 .orderBy(Tables.EH_SOCIAL_SECURITY_SETTINGS.ID.asc())
                 .fetch().map(r -> ConvertHelper.convert(r, SocialSecuritySetting.class));
     }
