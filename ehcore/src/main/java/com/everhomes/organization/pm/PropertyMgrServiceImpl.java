@@ -5729,7 +5729,7 @@ public class PropertyMgrServiceImpl implements PropertyMgrService {
     }
 
 	@Override
-	private void deleteAddressToOrgOwner(Integer namespaceId, Long addressId, Long orgOwnerId) {
+	public void deleteAddressToOrgOwner(Integer namespaceId, Long addressId, Long orgOwnerId) {
 		Address address = addressProvider.findAddressById(addressId);
 		if (address == null) {
 			LOGGER.error("The address is not exist, addressId = {}.", addressId);
