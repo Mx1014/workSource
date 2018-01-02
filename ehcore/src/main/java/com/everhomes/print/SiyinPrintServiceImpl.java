@@ -2,10 +2,8 @@
 package com.everhomes.print;
 
 import java.io.IOException;
-import java.io.UnsupportedEncodingException;
 import java.math.BigDecimal;
 import java.math.RoundingMode;
-import java.net.URLEncoder;
 import java.sql.Timestamp;
 import java.util.ArrayList;
 import java.util.Arrays;
@@ -20,6 +18,7 @@ import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 import java.util.stream.Collectors;
 
+import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
 
 import org.slf4j.Logger;
@@ -53,9 +52,10 @@ import com.everhomes.order.PayService;
 import com.everhomes.organization.OrganizationCommunity;
 import com.everhomes.organization.OrganizationProvider;
 import com.everhomes.organization.OrganizationService;
-import com.everhomes.qrcode.QRCodeService;
+import com.everhomes.qrcode.QRCodeController;
 import com.everhomes.rest.RestResponse;
 import com.everhomes.rest.approval.CommonStatus;
+import com.everhomes.rest.launchpad.ActionType;
 import com.everhomes.rest.order.CommonOrderCommand;
 import com.everhomes.rest.order.CommonOrderDTO;
 import com.everhomes.rest.order.OrderType;
@@ -65,6 +65,7 @@ import com.everhomes.rest.organization.OrganizationSimpleDTO;
 import com.everhomes.rest.print.DeleteQueueJobsCommand;
 import com.everhomes.rest.print.GetPrintLogonUrlCommand;
 import com.everhomes.rest.print.GetPrintLogonUrlResponse;
+import com.everhomes.rest.print.GetPrintQrcodeCommand;
 import com.everhomes.rest.print.GetPrintSettingCommand;
 import com.everhomes.rest.print.GetPrintSettingResponse;
 import com.everhomes.rest.print.GetPrintStatCommand;
@@ -110,14 +111,16 @@ import com.everhomes.rest.print.UnlockPrinterCommand;
 import com.everhomes.rest.print.UnlockPrinterResponse;
 import com.everhomes.rest.print.UpdatePrintSettingCommand;
 import com.everhomes.rest.print.UpdatePrintUserEmailCommand;
+import com.everhomes.rest.qrcode.GetQRCodeImageCommand;
+import com.everhomes.rest.qrcode.NewQRCodeCommand;
 import com.everhomes.rest.qrcode.QRCodeDTO;
+import com.everhomes.rest.qrcode.QRCodeHandler;
 import com.everhomes.settings.PaginationConfigHelper;
 import com.everhomes.user.User;
 import com.everhomes.user.UserContext;
 import com.everhomes.util.ConvertHelper;
 import com.everhomes.util.ExecutorUtil;
 import com.everhomes.util.RuntimeErrorException;
-import com.everhomes.util.StringHelper;
 import com.everhomes.util.Tuple;
 import com.everhomes.util.xml.XMLToJSON;
 /**
@@ -192,7 +195,7 @@ public class SiyinPrintServiceImpl implements SiyinPrintService {
 	private DbProvider dbProvider;
 	
 	@Autowired
-    private QRCodeService qrcodeService;
+	private QRCodeController qrController;
 	@Override
 	public GetPrintSettingResponse getPrintSetting(GetPrintSettingCommand cmd) {
 		//检查参数
@@ -1380,6 +1383,32 @@ public class SiyinPrintServiceImpl implements SiyinPrintService {
 			throw RuntimeErrorException.errorWith(ErrorCodes.SCOPE_GENERAL, ErrorCodes.ERROR_GENERAL_EXCEPTION, "/console/jobHandler return exception, message = "+e.getMessage());
 		}
 	
+	}
+	
+	@Override
+	public void getPrintQrcode(GetPrintQrcodeCommand cmd, HttpServletRequest req, HttpServletResponse rps) {
+		NewQRCodeCommand nQRCmd = new NewQRCodeCommand();
+		String cloudprinturl = configurationProvider.getValue("print.siyin.actiondata", "{\"url\":\"http://core.zuolin.com/cloud-print/build/index.html#/home#sign_suffix\"}");
+		nQRCmd.setActionData(cloudprinturl);
+		nQRCmd.setActionType(ActionType.OFFICIAL_URL.getCode());
+		nQRCmd.setDescription("cloud print");
+		nQRCmd.setExtra(cmd.getData());
+		nQRCmd.setHandler(QRCodeHandler.PRINT.getCode());
+		RestResponse restResponse = qrController.newQRCode(nQRCmd);
+		if(restResponse.getErrorCode() == 200){
+			GetQRCodeImageCommand gQRcmd = new GetQRCodeImageCommand();
+			QRCodeDTO dto = (QRCodeDTO)restResponse.getResponseObject();
+			gQRcmd.setHeight(cmd.getHeight());
+			gQRcmd.setWidth(cmd.getWidth());
+			gQRcmd.setQrid(dto.getQrid());
+			try {
+				qrController.getQRCodeImage(gQRcmd, req, rps);
+			} catch (Exception e) {
+				LOGGER.error("e",e);
+			}
+		}else{
+			LOGGER.error("create qrcode error "+restResponse);
+		}
 	}
 
 

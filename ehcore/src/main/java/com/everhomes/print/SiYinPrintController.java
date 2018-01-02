@@ -7,6 +7,7 @@ import java.util.Map;
 
 import javax.annotation.PostConstruct;
 import javax.servlet.http.HttpServlet;
+import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
 import javax.validation.Valid;
 
@@ -300,7 +301,7 @@ public class SiYinPrintController extends ControllerBase {
 	 
 	 /**
 	  * <b>URL: /siyinprint/unlockPrinter</b>
-	  * <p>19.直接解锁打印机,请先调用 /siyinprint/getPrintUnpaidOrder 接口检查未支付订单</p>
+	  * <p>19.直接解锁打印机或扫描驱动后调用的.请先调用 /siyinprint/getPrintUnpaidOrder 接口检查未支付订单</p>
 	  */
 	 @RequestMapping("unlockPrinter")
 	 @RestReturn(value=UnlockPrinterResponse.class)
@@ -374,6 +375,25 @@ public class SiYinPrintController extends ControllerBase {
 	 @RestReturn(value=String.class)
 	 public RestResponse deleteQueueJobs(DeleteQueueJobsCommand cmd) {
 	     siyinPrintService.deleteQueueJobs(cmd);
+	     RestResponse response = new RestResponse();
+	     response.setErrorCode(ErrorCodes.SUCCESS);
+	     response.setErrorDescription("OK");
+	     return response;
+	 }
+	 
+	 /**
+	  * <b>URL: /siyinprint/getPrintQrcode</b>
+	  * <p>25.提供给司印的二维码</p>
+	  */
+	 @RequestMapping("getPrintQrcode")
+	 @RestReturn(value=String.class)
+	 @RequireAuthentication(false)
+	 public RestResponse getPrintQrcode(@RequestParam(value="data", required=true) String data,
+			 @RequestParam(value="height", required=true) Integer height,
+			 @RequestParam(value="width", required=true) Integer width,
+			 HttpServletRequest req,HttpServletResponse rps) {
+		 GetPrintQrcodeCommand cmd = new GetPrintQrcodeCommand(data,height,width);
+	     siyinPrintService.getPrintQrcode(cmd,req,rps);
 	     RestResponse response = new RestResponse();
 	     response.setErrorCode(ErrorCodes.SUCCESS);
 	     response.setErrorDescription("OK");
