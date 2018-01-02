@@ -3642,6 +3642,9 @@ public class AssetProviderImpl implements AssetProvider {
         }
         query.addConditions(bill.OWNER_ID.eq(ownerId));
         query.addConditions(bill.TARGET_TYPE.eq(targetType));
+        if(targetType.equals(AssetPaymentStrings.EH_USER)){
+            targetId = UserContext.currentUserId();
+        }
         query.addConditions(bill.TARGET_ID.eq(targetId));
         query.fetch()
                 .map(r -> {
