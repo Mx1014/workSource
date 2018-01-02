@@ -32,7 +32,7 @@ import java.util.List;
  *  <li>status: 执行状态 参考{@link com.everhomes.rest.equipment.EquipmentTaskStatus}</li>
  *  <li>result: 执行结果 参考{@link com.everhomes.rest.equipment.EquipmentTaskResult}</li>
  *  <li>reviewResult: 审阅结果 参考{@link com.everhomes.rest.equipment.ReviewResult}</li>
- *  <li>equipments: 任务关联设备信息列表 参考{@link com.everhomes.rest.equipment.EquipmentsDTO}</li>
+ *  <li>equipments: 任务关联设备信息列表 参考{@link com.everhomes.rest.equipment.EquipmentStandardRelationDTO}</li>
  * </ul>
  */
 public class EquipmentTaskDTO {
@@ -115,8 +115,8 @@ public class EquipmentTaskDTO {
 	@Deprecated
 	private Byte pictureFlag;
 
-	@ItemType(EquipmentsDTO.class)
-	private List<EquipmentsDTO> equipments;
+	@ItemType(EquipmentStandardRelationDTO.class)
+	private List<EquipmentStandardRelationDTO> equipments;
 
 	public Long getId() {
 		return id;
@@ -430,11 +430,11 @@ public class EquipmentTaskDTO {
 		this.pictureFlag = pictureFlag;
 	}
 
-	public List<EquipmentsDTO> getEquipments() {
+	public List<EquipmentStandardRelationDTO> getEquipments() {
 		return equipments;
 	}
 
-	public void setEquipments(List<EquipmentsDTO> equipments) {
+	public void setEquipments(List<EquipmentStandardRelationDTO> equipments) {
 		this.equipments = equipments;
 	}
 

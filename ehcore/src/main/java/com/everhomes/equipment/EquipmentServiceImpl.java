@@ -176,7 +176,6 @@ import com.everhomes.rest.quality.OwnerType;
 import com.everhomes.rest.quality.ProcessType;
 import com.everhomes.rest.quality.QualityGroupType;
 import com.everhomes.rest.quality.QualityServiceErrorCode;
-import com.everhomes.rest.repeat.RepeatSettingsDTO;
 import com.everhomes.rest.repeat.TimeRangeDTO;
 import com.everhomes.rest.user.MessageChannelType;
 import com.everhomes.rest.user.UserServiceErrorCode;
@@ -413,13 +412,10 @@ public class EquipmentServiceImpl implements EquipmentService {
 			equipmentProvider.updateEquipmentStandard(standard);
 			equipmentStandardSearcher.feedDoc(standard);
 			//删除修改标准相关的巡检对象关联表
-			equipmentProvider.deleteEquipmentInspectionStandardMap(cmd.getId());
+			equipmentProvider.deleteEquipmentInspectionStandardMapByStandardId(cmd.getId());
 			//创建新的巡检对象和标准关联表
 			createEquipmentStandardsEquipmentsMap(standard, cmd.getEquipments());
 
-			/**
-			 * TODO:需要inactive所有的 equipment plans  task是根据planId来获取任务设备的所以不需要inactive
-			 */
 			//删除与当前删除标准相关的所有计划 只需要删除标准对应的巡检对象列表中对应条目
 			equipmentProvider.inActiveEquipmentPlansMapByStandardId(standard.getId());
 
@@ -479,14 +475,14 @@ public class EquipmentServiceImpl implements EquipmentService {
 	}*/
 
 	private EquipmentStandardsDTO converStandardToDto(EquipmentInspectionStandards standard) {
-		processRepeatSetting(standard);
+		//processRepeatSetting(standard);
 		EquipmentStandardsDTO standardDto = ConvertHelper.convert(standard, EquipmentStandardsDTO.class);
-		RepeatSettingsDTO repeatDto = ConvertHelper.convert(standard.getRepeat(), RepeatSettingsDTO.class);
-
-		EquipmentInspectionTemplates template = equipmentProvider.findEquipmentInspectionTemplate(standardDto.getTemplateId(), standardDto.getOwnerId(), standardDto.getOwnerType());
-		if(template != null) {
-			standardDto.setTemplateName(template.getName());
-		}
+//		RepeatSettingsDTO repeatDto = ConvertHelper.convert(standard.getRepeat(), RepeatSettingsDTO.class);
+//
+//		EquipmentInspectionTemplates template = equipmentProvider.findEquipmentInspectionTemplate(standardDto.getTemplateId(), standardDto.getOwnerId(), standardDto.getOwnerType());
+//		if(template != null) {
+//			standardDto.setTemplateName(template.getName());
+//		}
 
 		OrganizationMember member = organizationProvider.findOrganizationMemberByOrgIdAndUId(standard.getOperatorUid(),
 				standard.getOwnerId());
@@ -623,9 +619,7 @@ public class EquipmentServiceImpl implements EquipmentService {
 		equipmentProvider.updateEquipmentStandard(standard);
 		equipmentStandardSearcher.feedDoc(standard);
 
-		/**
-		 * TODO:删除相关巡检计划  处理方式：删除单条巡检条目r
-		 */
+		equipmentProvider.deleteEquipmentInspectionStandardMapByStandardId(standard.getId());
 		//inActive与删除标准相关的所有任务和计划  不需要删除计划 计划是通过planId关联巡检对象列表
 		equipmentProvider.inActiveEquipmentPlansMapByStandardId(standard.getId());
 		//inactiveTasksByStandardId(standard.getId());
@@ -938,7 +932,10 @@ public class EquipmentServiceImpl implements EquipmentService {
 			equipmentProvider.updateEquipmentInspectionPlan(plan);
 			equipmentPlanSearcher.feedDoc(plan);
 			//处理原始计划和main_id
-			equipmentProvider.deleteEquipmentInspectionPlanMap(plan.getPlanMainId());
+			if (plan.getPlanMainId() != null && plan.getPlanMainId() != 0L){
+				equipmentProvider.deleteEquipmentInspectionPlanMap(plan.getPlanMainId());
+				equipmentProvider.deleteEquipmentInspectionPlanById(plan.getPlanMainId());
+			}
 		}
 	}
 
@@ -4032,17 +4029,20 @@ public class EquipmentServiceImpl implements EquipmentService {
 					EquipmentServiceErrorCode.ERROR_EQUIPMENT_TASK_NOT_EXIST,
 					"任务不存在");
 		}
-		List<EquipmentsDTO> equipments = new ArrayList<>();
-		equipments = equipmentProvider.getEquipmmentInspectionPlanById(task.getPlanId())
-				.getEquipmentStandardRelations()
-				.stream().map((r) ->
-						ConvertHelper.convert(r, EquipmentsDTO.class))
-				.collect(Collectors.toList());
+		List<EquipmentStandardRelationDTO> equipments = new ArrayList<>();
+		DeleteEquipmentPlanCommand delCommand = new DeleteEquipmentPlanCommand();
+		delCommand.setId(task.getPlanId());
+		delCommand.setOwnerId(cmd.getOwnerId());
+		delCommand.setOwnerType(cmd.getOwnerType());
+		equipments = getEquipmmentInspectionPlanById(delCommand)
+				.getEquipmentStandardRelations();
+//				.stream().map((r) ->
+//						ConvertHelper.convert(r, EquipmentsDTO.class))
+//				.collect(Collectors.toList());
 
 
 		EquipmentTaskDTO dto = convertEquipmentTaskToDTO(task);
 		dto.setEquipments(equipments);
-
 
 		return dto;
 	}
@@ -5177,7 +5177,66 @@ public class EquipmentServiceImpl implements EquipmentService {
 		//填充计划的执行周期
 		equipmentInspectionPlan.setRepeatSettings(repeatService.findRepeatSettingById(cmd.getId()));
 
-		return ConvertHelper.convert(equipmentInspectionPlan, EquipmentInspectionPlanDTO.class);
+		return convertPlanToDto(equipmentInspectionPlan);
+	}
+
+	private EquipmentInspectionPlanDTO convertPlanToDto(EquipmentInspectionPlans equipmentInspectionPlan) {
+		EquipmentInspectionPlanDTO planDTO = ConvertHelper.convert(equipmentInspectionPlan, EquipmentInspectionPlanDTO.class);
+		List<StandardGroupDTO> executiveGroup = new ArrayList<>();
+		List<StandardGroupDTO> reviewGroup = new ArrayList<>();
+		if(equipmentInspectionPlan.getExecutiveGroup() != null) {
+			executiveGroup = equipmentInspectionPlan.getExecutiveGroup().stream().map((r) -> {
+
+				StandardGroupDTO dto = ConvertHelper.convert(r, StandardGroupDTO.class);
+				Organization group = organizationProvider.findOrganizationById(r.getGroupId());
+				OrganizationJobPosition position = organizationProvider.findOrganizationJobPositionById(r.getPositionId());
+				if(group != null) {
+					dto.setGroupName(group.getName());
+
+				}
+
+				if(position != null) {
+					if(dto.getGroupName() != null) {
+						dto.setGroupName(dto.getGroupName() + "-" + position.getName());
+					} else {
+						dto.setGroupName(position.getName());
+
+					}
+				}
+
+				return dto;
+			}).collect(Collectors.toList());
+
+		}
+
+
+		if(equipmentInspectionPlan.getReviewGroup() != null) {
+			reviewGroup = equipmentInspectionPlan.getReviewGroup().stream().map((r) -> {
+
+				StandardGroupDTO dto = ConvertHelper.convert(r, StandardGroupDTO.class);
+				Organization group = organizationProvider.findOrganizationById(r.getGroupId());
+				OrganizationJobPosition position = organizationProvider.findOrganizationJobPositionById(r.getPositionId());
+				if(group != null) {
+					dto.setGroupName(group.getName());
+
+				}
+
+				if(position != null) {
+					if(dto.getGroupName() != null) {
+						dto.setGroupName(dto.getGroupName() + "-" + position.getName());
+					} else {
+						dto.setGroupName(position.getName());
+
+					}
+				}
+
+				return dto;
+			}).collect(Collectors.toList());
+		}
+
+		planDTO.setReviewGroup(reviewGroup);
+		planDTO.setExecutiveGroup(executiveGroup);
+		return planDTO;
 	}
 
 	@Override
@@ -5187,7 +5246,7 @@ public class EquipmentServiceImpl implements EquipmentService {
 		exist.setDeleterUid(UserContext.currentUserId());
 		exist.setDeleterUid(UserContext.currentUserId());
 		//根据id删除巡检计划 置状态
-		equipmentProvider.deleteEquipmentInspectionPlanById(exist);
+		equipmentProvider.updateEquipmentInspectionPlan(exist);
 		//刪除巡检计划巡检对象关联
 		equipmentProvider.deleteEquipmentInspectionPlanMap(cmd.getId());
 		// 删除巡检计划关联审批检查组
@@ -5371,5 +5430,18 @@ public class EquipmentServiceImpl implements EquipmentService {
 		if (statuType != null)
 			plan.setStringStatus(statuType.getName());
 		return plan;
+	}
+
+	@Override
+	public List<EquipmentStandardRelationDTO> listEquipmentStandardRelationsByTaskId(ListTaskByIdCommand cmd) {
+		EquipmentInspectionTasks task  = equipmentProvider.findEquipmentTaskById(cmd.getTaskId());
+		if(task!=null){
+			DeleteEquipmentPlanCommand delcmd = new DeleteEquipmentPlanCommand();
+			delcmd.setOwnerType(cmd.getOwnerType());
+			delcmd.setId(task.getPlanId());
+			delcmd.setOwnerId(cmd.getOwnerId());
+			return getEquipmmentInspectionPlanById(delcmd).getEquipmentStandardRelations();
+		}
+		return null;
 	}
 }

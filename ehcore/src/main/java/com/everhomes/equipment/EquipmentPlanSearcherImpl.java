@@ -5,7 +5,7 @@ import com.everhomes.configuration.ConfigurationProvider;
 import com.everhomes.listing.ListingLocator;
 import com.everhomes.repeat.RepeatService;
 import com.everhomes.rest.equipment.EquipmentInspectionPlanDTO;
-import com.everhomes.rest.equipment.EquipmentStandardStatus;
+import com.everhomes.rest.equipment.EquipmentPlanStatus;
 import com.everhomes.rest.equipment.searchEquipmentInspectionPlansCommand;
 import com.everhomes.rest.equipment.searchEquipmentInspectionPlansResponse;
 import com.everhomes.rest.quality.OwnerType;
@@ -125,7 +125,7 @@ public class EquipmentPlanSearcherImpl extends AbstractElasticSearch implements 
                     .addHighlightedField("planNumber");
 
         }
-        FilterBuilder nfb = FilterBuilders.termFilter("status", EquipmentStandardStatus.INACTIVE.getCode());
+        FilterBuilder nfb = FilterBuilders.termFilter("status", EquipmentPlanStatus.INACTIVE.getCode());
         FilterBuilder fb = FilterBuilders.notFilter(nfb);
         fb = FilterBuilders.termFilter("namespaceId", UserContext.getCurrentNamespaceId());
         if (cmd.getTargetId() != null)

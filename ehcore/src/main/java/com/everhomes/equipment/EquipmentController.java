@@ -529,7 +529,7 @@ public class EquipmentController extends ControllerBase {
     @RequestMapping("listEquipmentStandardRelationsByTaskId")
     @RestReturn(value = EquipmentStandardRelationDTO.class, collection = true)
     public RestResponse listEquipmentStandardRelationsByTaskId(ListTaskByIdCommand cmd) {
-        List<EquipmentStandardRelationDTO> equipments = null;
+        List<EquipmentStandardRelationDTO> equipments = equipmentService.listEquipmentStandardRelationsByTaskId(cmd);
         return getRestResponse(equipments);
     }
 

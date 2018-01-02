@@ -160,7 +160,7 @@ public interface EquipmentProvider {
 
 	List<EquipmentInspectionEquipmentPlanMap> getEquipmentInspectionPlanMap(Long planId);
 
-    void deleteEquipmentInspectionPlanById(EquipmentInspectionPlans plan);
+    void deleteEquipmentInspectionPlanById(Long planId);
 
 	void deleteEquipmentInspectionPlanMap(Long id);
 
@@ -168,7 +168,7 @@ public interface EquipmentProvider {
 
     void updateEquipmentInspectionPlan(EquipmentInspectionPlans plan);
 
-    void deleteEquipmentInspectionStandardMap(Long  deleteId);
+    void deleteEquipmentInspectionStandardMapByStandardId(Long  deleteId);
 
 	void inActiveEquipmentPlansMapByStandardId(Long id);
 

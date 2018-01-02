@@ -42,6 +42,7 @@ import org.springframework.stereotype.Component;
 import javax.annotation.PostConstruct;
 import java.sql.Timestamp;
 import java.util.*;
+import java.util.stream.Collectors;
 
 @Component
 @DependsOn("platformContext")
@@ -1436,13 +1437,13 @@ public class EquipmentProviderImpl implements EquipmentProvider {
     }
 
     @Override
-    public void deleteEquipmentInspectionPlanById(EquipmentInspectionPlans plan) {
+    public void deleteEquipmentInspectionPlanById(Long  planId) {
         DSLContext context = this.dbProvider.getDslContext(AccessSpec.readWrite());
         EhEquipmentInspectionPlansDao dao = new EhEquipmentInspectionPlansDao(context.configuration());
         //dao.deleteById(id);
-        dao.update(plan);
+        dao.deleteById(planId);
 
-        DaoHelper.publishDaoAction(DaoAction.MODIFY, EhEquipmentInspectionPlans.class, plan.getId());
+        DaoHelper.publishDaoAction(DaoAction.MODIFY, EhEquipmentInspectionPlans.class, planId);
     }
 
     @Override
@@ -1488,7 +1489,7 @@ public class EquipmentProviderImpl implements EquipmentProvider {
     }
 
     @Override
-    public void deleteEquipmentInspectionStandardMap(Long standardId) {
+    public void deleteEquipmentInspectionStandardMapByStandardId(Long standardId) {
         DSLContext context = this.dbProvider.getDslContext(AccessSpec.readWrite());
         context.delete(Tables.EH_EQUIPMENT_INSPECTION_EQUIPMENT_STANDARD_MAP)
                 .where(Tables.EH_EQUIPMENT_INSPECTION_EQUIPMENT_PLAN_MAP.STANDARD_ID.eq(standardId))
@@ -1540,6 +1541,12 @@ public class EquipmentProviderImpl implements EquipmentProvider {
     public List<EquipmentInspectionTasks> listTaskByPlanMaps(List<EquipmentInspectionEquipmentPlanMap> planMaps, Timestamp startTime, Timestamp endTime, ListingLocator locator, int pageSize) {
 
         List<EquipmentInspectionTasks> tasks = new ArrayList<EquipmentInspectionTasks>();
+        List<Long> planIds = new ArrayList<>();
+        if (planMaps != null && planMaps.size() > 0) {
+            planIds = planMaps.stream()
+                    .map(EquipmentInspectionEquipmentPlanMap::getPlanId)
+                    .collect(Collectors.toList());
+        }
         DSLContext context = this.dbProvider.getDslContext(AccessSpec.readOnly());
         SelectQuery<EhEquipmentInspectionTasksRecord> query = context.selectQuery(Tables.EH_EQUIPMENT_INSPECTION_TASKS);
         if (startTime != null && !"".equals(startTime)) {
@@ -1550,6 +1557,7 @@ public class EquipmentProviderImpl implements EquipmentProvider {
             query.addConditions(Tables.EH_EQUIPMENT_INSPECTION_TASKS.EXECUTIVE_EXPIRE_TIME.le(endTime));
         }
         query.addConditions(Tables.EH_EQUIPMENT_INSPECTION_TASKS.ID.lt(locator.getAnchor()));
+        query.addConditions(Tables.EH_EQUIPMENT_INSPECTION_TASKS.PLAN_ID.in(planIds));
         query.addLimit(pageSize);
         query.addOrderBy(Tables.EH_EQUIPMENT_INSPECTION_TASKS.ID.desc());
 

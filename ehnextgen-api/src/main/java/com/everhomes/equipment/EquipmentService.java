@@ -102,4 +102,6 @@ public interface EquipmentService {
     void reviewEquipmentInspectionplan(ReviewEquipmentPlanCommand cmd);
 
 	void createTaskByPlan(DeleteEquipmentPlanCommand cmd);
+
+    List<EquipmentStandardRelationDTO> listEquipmentStandardRelationsByTaskId(ListTaskByIdCommand cmd);
 }
