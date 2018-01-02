@@ -1011,7 +1011,8 @@ public class EquipmentProviderImpl implements EquipmentProvider {
             if (standards != null && standards.size() > 0) {
                 Condition standardCon = null;
                 for (StandardAndStatus standardAndStatus : standards) {
-                    Condition con = Tables.EH_EQUIPMENT_INSPECTION_TASKS.STANDARD_ID.eq(standardAndStatus.getStandardId());
+                   // Condition con = Tables.EH_EQUIPMENT_INSPECTION_TASKS.STANDARD_ID.eq(standardAndStatus.getStandardId());
+                    Condition con = Tables.EH_EQUIPMENT_INSPECTION_TASKS.PLAN_ID.eq(standardAndStatus.getPlanId());
                     con = con.and(Tables.EH_EQUIPMENT_INSPECTION_TASKS.STATUS.in(standardAndStatus.getTaskStatus()));
 
                     if (standardCon == null) {
@@ -1538,7 +1539,8 @@ public class EquipmentProviderImpl implements EquipmentProvider {
     }
 
     @Override
-    public List<EquipmentInspectionTasks> listTaskByPlanMaps(List<EquipmentInspectionEquipmentPlanMap> planMaps, Timestamp startTime, Timestamp endTime, ListingLocator locator, int pageSize) {
+    public List<EquipmentInspectionTasks> listTaskByPlanMaps(List<EquipmentInspectionEquipmentPlanMap> planMaps,
+      Timestamp startTime, Timestamp endTime, ListingLocator locator, int pageSize,List<Byte> taskStatus) {
 
         List<EquipmentInspectionTasks> tasks = new ArrayList<EquipmentInspectionTasks>();
         List<Long> planIds = new ArrayList<>();
@@ -1555,6 +1557,9 @@ public class EquipmentProviderImpl implements EquipmentProvider {
 
         if (endTime != null && !"".equals(endTime)) {
             query.addConditions(Tables.EH_EQUIPMENT_INSPECTION_TASKS.EXECUTIVE_EXPIRE_TIME.le(endTime));
+        }
+        if(taskStatus!=null && taskStatus.size()>0){
+            query.addConditions(Tables.EH_EQUIPMENT_INSPECTION_TASKS.STATUS.in(taskStatus));
         }
         query.addConditions(Tables.EH_EQUIPMENT_INSPECTION_TASKS.ID.lt(locator.getAnchor()));
         query.addConditions(Tables.EH_EQUIPMENT_INSPECTION_TASKS.PLAN_ID.in(planIds));

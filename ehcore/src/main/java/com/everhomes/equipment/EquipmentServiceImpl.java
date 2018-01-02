@@ -3986,7 +3986,7 @@ public class EquipmentServiceImpl implements EquipmentService {
 		// standardIds, startTime, endTime, locator, pageSize+1, null);
 		//之前任务表中有设备id  V3.0.2中改为根据planId关联任务的巡检对象
 		List<EquipmentInspectionEquipmentPlanMap> planMaps = equipmentProvider.listPlanMapByEquipmentId(cmd.getEquipmentId());
-		List<EquipmentInspectionTasks> tasks = equipmentProvider.listTaskByPlanMaps(planMaps, startTime, endTime, locator, pageSize + 1);
+		List<EquipmentInspectionTasks> tasks = equipmentProvider.listTaskByPlanMaps(planMaps, startTime, endTime, locator, pageSize + 1,null);
 		if (tasks.size() > pageSize) {
 			tasks.remove(tasks.size() - 1);
 			response.setNextPageAnchor(tasks.get(tasks.size() - 1).getId());
@@ -4338,8 +4338,9 @@ public class EquipmentServiceImpl implements EquipmentService {
 	        taskStatus.add(EquipmentTaskStatus.WAITING_FOR_EXECUTING.getCode());
 	        taskStatus.add(EquipmentTaskStatus.NEED_MAINTENANCE.getCode());
 	        taskStatus.add(EquipmentTaskStatus.IN_MAINTENANCE.getCode());
-			tasks = equipmentProvider.listTasksByEquipmentId(equipment.getId(), null, null, null, locator, pageSize+1, taskStatus);
-			
+			//tasks = equipmentProvider.listTasksByEquipmentId(equipment.getId(), null, null, null, locator, pageSize+1, taskStatus);
+			List<EquipmentInspectionEquipmentPlanMap> planMaps = equipmentProvider.listPlanMapByEquipmentId(equipment.getId());
+			tasks = equipmentProvider.listTaskByPlanMaps(planMaps, null, null, locator, pageSize + 1,taskStatus);
 		} else {
 			//扫码任务做权限控制 只能扫出设备下有执行权限的任务
 			List<StandardAndStatus> standards = new ArrayList<>();
@@ -4351,11 +4352,13 @@ public class EquipmentServiceImpl implements EquipmentService {
 			reviewTaskStatus.add(EquipmentTaskStatus.NEED_MAINTENANCE.getCode());
 
 			List<ExecuteGroupAndPosition> groupDtos = listUserRelateGroups();
-			List<EquipmentInspectionStandardGroupMap> maps = equipmentProvider.listEquipmentInspectionStandardGroupMapByGroupAndPosition(groupDtos, null);
+			//List<EquipmentInspectionStandardGroupMap> maps = equipmentProvider.listEquipmentInspectionStandardGroupMapByGroupAndPosition(groupDtos, null);
+			List<EquipmentInspectionPlanGroupMap> maps = equipmentProvider.listEquipmentInspectionPlanGroupMapByGroupAndPosition(groupDtos, null);
 			if (maps != null && maps.size() > 0) {
-				for (EquipmentInspectionStandardGroupMap r : maps) {
+				for (EquipmentInspectionPlanGroupMap r : maps) {
 					StandardAndStatus standardAndStatus = new StandardAndStatus();
-					standardAndStatus.setStandardId(r.getStandardId());
+					//减少新建类使用上一版标准
+					standardAndStatus.setPlanId(r.getPlanId());
 					if (QualityGroupType.REVIEW_GROUP.equals(QualityGroupType.fromStatus(r.getGroupType()))) {
 						standardAndStatus.setTaskStatus(reviewTaskStatus);
 					}
@@ -4365,6 +4368,7 @@ public class EquipmentServiceImpl implements EquipmentService {
 					standards.add(standardAndStatus);
 				}
 			}
+			//tasks = equipmentProvider.listTasksByEquipmentIdAndStandards(equipment.getId(), standards, null, null, locator, pageSize+1);
 			tasks = equipmentProvider.listTasksByEquipmentIdAndStandards(equipment.getId(), standards, null, null, locator, pageSize+1);
 		}
         

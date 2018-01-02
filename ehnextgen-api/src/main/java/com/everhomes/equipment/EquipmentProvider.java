@@ -176,7 +176,7 @@ public interface EquipmentProvider {
 
 	List<EquipmentInspectionEquipmentPlanMap> listPlanMapByEquipmentId(Long equipmentId);
 
-	List<EquipmentInspectionTasks> listTaskByPlanMaps(List<EquipmentInspectionEquipmentPlanMap> planMaps, Timestamp startTime, Timestamp endTime, ListingLocator locator,int pageSize);
+	List<EquipmentInspectionTasks> listTaskByPlanMaps(List<EquipmentInspectionEquipmentPlanMap> planMaps, Timestamp startTime, Timestamp endTime, ListingLocator locator,int pageSize,List<Byte> taskStatus);
 
     void deleteEquipmentInspectionPlanGroupMapByPlanId(Long id);
 
