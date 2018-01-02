@@ -353,7 +353,7 @@ CREATE TABLE `eh_social_security_inout_time` (
   `organization_id` BIGINT,
   `user_id` BIGINT,
   `detail_id` BIGINT,
-  `type` VARCHAR(64) NOT NULL COMMENT '0-SOCIAL SECURITY, 1-ACCUMULATION FUND',
+  `type` TINYINT NOT NULL COMMENT '0-SOCIAL SECURITY, 1-ACCUMULATION FUND',
   `start_time` TIMESTAMP COMMENT 'the start month',
   `end_time` TIMESTAMP COMMENT 'the end month',
   `creator_uid` BIGINT  DEFAULT '0',
