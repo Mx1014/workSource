@@ -4497,4 +4497,29 @@ public class EnergyConsumptionServiceImpl implements EnergyConsumptionService {
         });
         return errorDataLogs;
     }
+
+    @Override
+    public SyncOfflineDataResponse syncOfflineData(SyncOfflineDataCommand cmd) {
+        SyncOfflineDataResponse response = new SyncOfflineDataResponse();
+        List<EnergyMeterCategory> categoryList = new ArrayList<>();
+        categoryList = meterCategoryProvider.listMeterCategories(UserContext.getCurrentNamespaceId(cmd.getNamespaceId()), cmd.getCategoryType(),
+                null, null, cmd.getCommunityId());
+        List<EnergyMeterCategoryMap> maps = energyMeterCategoryMapProvider.listEnergyMeterCategoryMap(cmd.getCommunityId());
+        if(maps != null && maps.size() > 0) {
+            List<Long> categoryIds = maps.stream().map(map -> {
+                return map.getCategoryId();
+            }).collect(Collectors.toList());
+            List<EnergyMeterCategory> categories = meterCategoryProvider.listMeterCategories(categoryIds, cmd.getCategoryType());
+            if(categories != null && categories.size() > 0) {
+                categoryList.addAll(categories);
+            }
+        }
+        List<EnergyMeterCategoryDTO> dtos = categoryList.stream().map(category -> {
+            EnergyMeterCategoryDTO dto = toMeterCategoryDto(category);
+            return dto;
+        }).collect(Collectors.toList());
+
+        response.setCategoryDTOs(dtos);
+        return response;
+    }
 }

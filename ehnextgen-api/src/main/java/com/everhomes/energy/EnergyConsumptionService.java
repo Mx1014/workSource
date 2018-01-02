@@ -269,4 +269,6 @@ public interface EnergyConsumptionService {
 
     HttpServletResponse exportTasksByEnergyPlan(SearchTasksByEnergyPlanCommand cmd, HttpServletResponse response);
     ImportFileTaskDTO importTasksByEnergyPlan(ImportTasksByEnergyPlanCommand cmd, MultipartFile mfile, Long userId);
+
+    SyncOfflineDataResponse syncOfflineData(SyncOfflineDataCommand cmd);
 }
