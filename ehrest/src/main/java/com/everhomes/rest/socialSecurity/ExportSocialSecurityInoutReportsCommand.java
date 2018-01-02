@@ -50,4 +50,11 @@ public class ExportSocialSecurityInoutReportsCommand {
 		return StringHelper.toJsonString(this);
 	}
 
+	public String getPaymentMonth() {
+		return paymentMonth;
+	}
+
+	public void setPaymentMonth(String paymentMonth) {
+		this.paymentMonth = paymentMonth;
+	}
 }
