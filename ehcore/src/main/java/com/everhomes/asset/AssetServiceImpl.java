@@ -488,7 +488,7 @@ public class AssetServiceImpl implements AssetService {
                 LOGGER.info("organization manager check for bill display, userId = "+ userId);
                 for(OrganizationContactDTO dto : organizationContactDTOS){
                     Long targetId = dto.getTargetId();
-                    if(targetId == userId){
+                    if(targetId.longValue() == userId.longValue()){
                         break out;
                     }
                 }
@@ -2733,7 +2733,7 @@ public class AssetServiceImpl implements AssetService {
                 LOGGER.info("organization manager check for bill display, userId = "+ userId);
                 for(OrganizationContactDTO dto : organizationContactDTOS){
                     Long targetId = dto.getTargetId();
-                    if(targetId == userId){
+                    if(targetId.longValue() == userId.longValue()){
                         break out;
                     }
                 }
