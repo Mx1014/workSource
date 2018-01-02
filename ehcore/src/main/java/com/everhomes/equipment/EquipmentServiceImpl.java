@@ -1488,7 +1488,8 @@ public class EquipmentServiceImpl implements EquipmentService {
 			accessory.setStatus((byte) 1);
 			equipmentProvider.creatEquipmentInspectionAccessories(accessory);
 		} else {
-			verifyEquipmentAccessories(accessory.getId(), accessory.getOwnerType(), accessory.getOwnerId());
+			EquipmentInspectionAccessories exist  = verifyEquipmentAccessories(accessory.getId(), accessory.getOwnerType(), accessory.getOwnerId());
+			accessory.setNamespaceId(exist.getNamespaceId());
 			equipmentProvider.updateEquipmentInspectionAccessories(accessory);
 		}
 
