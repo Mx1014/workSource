@@ -16,6 +16,7 @@ import com.everhomes.organization.*;
 import com.everhomes.region.Region;
 import com.everhomes.region.RegionProvider;
 
+import com.everhomes.rest.archives.ArchivesUtil;
 import com.everhomes.rest.organization.OrganizationGroupType;
 import com.everhomes.rest.organization.OrganizationMemberStatus;
 import com.everhomes.rest.socialSecurity.*;
@@ -1784,8 +1785,12 @@ public class SocialSecurityServiceImpl implements SocialSecurityService {
         inoutTime.setNamespaceId(memberDetail.getNamespaceId());
         inoutTime.setUserId(memberDetail.getTargetId());
         inoutTime.setDetailId(memberDetail.getId());
-//        inoutTime.
-
+        inoutTime.setType(cmd.getInOutType());
+        if(cmd.getStartTime() != null)
+            inoutTime.setStartTime(ArchivesUtil.parseDate(cmd.getStartTime()));
+        if(cmd.getEndTime() != null)
+            inoutTime.setEndTime(ArchivesUtil.parseDate(cmd.getEndTime()));
+        //todo:add it.
         return null;
     }
 }
