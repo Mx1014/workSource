@@ -16,6 +16,26 @@ public class ListCustomerTaxesCommand {
 
     private Long communityId;
 
+    private Long orgId;
+
+    private Integer namespaceId;
+
+    public Integer getNamespaceId() {
+        return namespaceId;
+    }
+
+    public void setNamespaceId(Integer namespaceId) {
+        this.namespaceId = namespaceId;
+    }
+
+    public Long getOrgId() {
+        return orgId;
+    }
+
+    public void setOrgId(Long orgId) {
+        this.orgId = orgId;
+    }
+
     public Long getCommunityId() {
         return communityId;
     }

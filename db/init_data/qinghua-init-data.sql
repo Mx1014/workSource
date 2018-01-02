@@ -3025,3 +3025,57 @@ INSERT INTO `eh_lease_configs` (`id`, `namespace_id`, `owner_type`, `owner_id`, 
 SET @eh_version_realm_id = IFNULL((SELECT MAX(id) FROM `eh_version_realm`), 1);
 INSERT INTO `eh_version_realm` (`id`, `realm`, `description`, `create_time`, `namespace_id`) VALUES ((@eh_version_realm_id := @eh_version_realm_id + 1), 'IOS_Xinweilai', NULL, NOW(), 999984);
 INSERT INTO `eh_version_realm` (`id`, `realm`, `description`, `create_time`, `namespace_id`) VALUES ((@eh_version_realm_id := @eh_version_realm_id + 1), 'Android_Xinweilai', NULL, NOW(), 999984);
+
+-- 报修多入口数据整理 add by sw 20171219
+UPDATE eh_launch_pad_items SET action_data = '{"url":"zl://propertyrepair/create?type=user&taskCategoryId=9&displayName=投诉建议"}' WHERE namespace_id = 999984 AND item_label = '投诉建议';
+UPDATE eh_launch_pad_items SET action_data = '{"url":"zl://propertyrepair/create?type=user&taskCategoryId=6&displayName=物业报修"}' WHERE namespace_id = 999984 AND item_label = '物业报修';
+
+DELETE from eh_web_menus where id >= 20392 and id <=20399;
+DELETE from eh_web_menus where id >= 20492 and id <=20499;
+DELETE from eh_web_menu_scopes where  menu_id >= 20392 and menu_id <=20399 and owner_id = 999984;
+DELETE from eh_web_menu_scopes where  menu_id >= 20492 and menu_id <=20499 and owner_id = 999984;
+
+SET @menu_scope_id = (SELECT MAX(id) FROM `eh_web_menu_scopes`);
+INSERT INTO `eh_web_menu_scopes`(`id`, `menu_id`,`menu_name`, `owner_type`, `owner_id`, `apply_policy`)
+  VALUES((@menu_scope_id := @menu_scope_id + 1),20100,'', 'EhNamespaces', 999984,2);
+INSERT INTO `eh_web_menu_scopes`(`id`, `menu_id`,`menu_name`, `owner_type`, `owner_id`, `apply_policy`)
+  VALUES((@menu_scope_id := @menu_scope_id + 1),20140,'', 'EhNamespaces', 999984,2);
+INSERT INTO `eh_web_menu_scopes`(`id`, `menu_id`,`menu_name`, `owner_type`, `owner_id`, `apply_policy`)
+  VALUES((@menu_scope_id := @menu_scope_id + 1),20150,'', 'EhNamespaces', 999984,2);
+INSERT INTO `eh_web_menu_scopes`(`id`, `menu_id`,`menu_name`, `owner_type`, `owner_id`, `apply_policy`)
+  VALUES((@menu_scope_id := @menu_scope_id + 1),20155,'', 'EhNamespaces', 999984,2);
+INSERT INTO `eh_web_menu_scopes`(`id`, `menu_id`,`menu_name`, `owner_type`, `owner_id`, `apply_policy`)
+  VALUES((@menu_scope_id := @menu_scope_id + 1),20158,'', 'EhNamespaces', 999984,2);
+INSERT INTO `eh_web_menu_scopes`(`id`, `menu_id`,`menu_name`, `owner_type`, `owner_id`, `apply_policy`)
+  VALUES((@menu_scope_id := @menu_scope_id + 1),20180,'', 'EhNamespaces', 999984,2);
+INSERT INTO `eh_web_menu_scopes`(`id`, `menu_id`,`menu_name`, `owner_type`, `owner_id`, `apply_policy`)
+  VALUES((@menu_scope_id := @menu_scope_id + 1),20190,'', 'EhNamespaces', 999984,2);
+INSERT INTO `eh_web_menu_scopes`(`id`, `menu_id`,`menu_name`, `owner_type`, `owner_id`, `apply_policy`)
+  VALUES((@menu_scope_id := @menu_scope_id + 1),20191,'', 'EhNamespaces', 999984,2);
+
+INSERT INTO `eh_web_menu_scopes`(`id`, `menu_id`,`menu_name`, `owner_type`, `owner_id`, `apply_policy`)
+  VALUES((@menu_scope_id := @menu_scope_id + 1),20230,'', 'EhNamespaces', 999984,2);
+INSERT INTO `eh_web_menu_scopes`(`id`, `menu_id`,`menu_name`, `owner_type`, `owner_id`, `apply_policy`)
+  VALUES((@menu_scope_id := @menu_scope_id + 1),20240,'', 'EhNamespaces', 999984,2);
+INSERT INTO `eh_web_menu_scopes`(`id`, `menu_id`,`menu_name`, `owner_type`, `owner_id`, `apply_policy`)
+  VALUES((@menu_scope_id := @menu_scope_id + 1),20250,'', 'EhNamespaces', 999984,2);
+INSERT INTO `eh_web_menu_scopes`(`id`, `menu_id`,`menu_name`, `owner_type`, `owner_id`, `apply_policy`)
+  VALUES((@menu_scope_id := @menu_scope_id + 1),20255,'', 'EhNamespaces', 999984,2);
+INSERT INTO `eh_web_menu_scopes`(`id`, `menu_id`,`menu_name`, `owner_type`, `owner_id`, `apply_policy`)
+  VALUES((@menu_scope_id := @menu_scope_id + 1),20258,'', 'EhNamespaces', 999984,2);
+INSERT INTO `eh_web_menu_scopes`(`id`, `menu_id`,`menu_name`, `owner_type`, `owner_id`, `apply_policy`)
+  VALUES((@menu_scope_id := @menu_scope_id + 1),20280,'', 'EhNamespaces', 999984,2);
+INSERT INTO `eh_web_menu_scopes`(`id`, `menu_id`,`menu_name`, `owner_type`, `owner_id`, `apply_policy`)
+  VALUES((@menu_scope_id := @menu_scope_id + 1),20290,'', 'EhNamespaces', 999984,2);
+INSERT INTO `eh_web_menu_scopes`(`id`, `menu_id`,`menu_name`, `owner_type`, `owner_id`, `apply_policy`)
+  VALUES((@menu_scope_id := @menu_scope_id + 1),20291,'', 'EhNamespaces', 999984,2);
+
+UPDATE eh_categories set parent_id = 9 where id = 205201;
+UPDATE eh_categories SET path = REPLACE(path, '物业报修', '投诉建议') WHERE parent_id = 9;
+UPDATE eh_categories SET path = REPLACE(path, '物业报修', '投诉建议') WHERE parent_id = 205201;
+
+DELETE from eh_categories where parent_id = 205312;
+DELETE from eh_categories where parent_id = 205313;
+DELETE from eh_categories where id = 5;
+
+UPDATE eh_categories set parent_id = 6 where parent_id = 5;

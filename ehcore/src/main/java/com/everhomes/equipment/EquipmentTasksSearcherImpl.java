@@ -1,10 +1,11 @@
 package com.everhomes.equipment;
 
 import com.everhomes.configuration.ConfigurationProvider;
-import com.everhomes.entity.EntityType;
 import com.everhomes.listing.CrossShardListingLocator;
 import com.everhomes.organization.OrganizationMember;
 import com.everhomes.organization.OrganizationProvider;
+import com.everhomes.portal.PortalService;
+import com.everhomes.rest.acl.PrivilegeConstants;
 import com.everhomes.rest.equipment.EquipmentTaskDTO;
 import com.everhomes.rest.equipment.ListEquipmentTasksResponse;
 import com.everhomes.rest.equipment.ReviewResult;
@@ -53,6 +54,9 @@ public class EquipmentTasksSearcherImpl extends AbstractElasticSearch implements
 
     @Autowired
     private UserPrivilegeMgr userPrivilegeMgr;
+
+    @Autowired
+    private PortalService portalService;
 
 	@Override
 	public void deleteById(Long id) {
@@ -110,12 +114,13 @@ public class EquipmentTasksSearcherImpl extends AbstractElasticSearch implements
 
 	@Override
 	public ListEquipmentTasksResponse query(SearchEquipmentTasksCommand cmd) {
-        Long privilegeId = configProvider.getLongValue(EquipmentConstant.EQUIPMENT_TASK_LIST, 0L);
+        /*Long privilegeId = configProvider.getLongValue(EquipmentConstant.EQUIPMENT_TASK_LIST, 0L);
         if(cmd.getTargetId() == null) {
             userPrivilegeMgr.checkCurrentUserAuthority(null, null, cmd.getOwnerId(), privilegeId);
         } else {
             userPrivilegeMgr.checkCurrentUserAuthority(EntityType.COMMUNITY.getCode(), cmd.getTargetId(), cmd.getOwnerId(), privilegeId);
-        }
+        }*/
+        checkUserPrivilege(cmd.getOwnerId(), PrivilegeConstants.EQUIPMENT_TASK_LIST,cmd.getTargetId());
 
 		SearchRequestBuilder builder = getClient().prepareSearch(getIndexName()).setTypes(getIndexType());
 		QueryBuilder qb = null;
@@ -243,6 +248,26 @@ public class EquipmentTasksSearcherImpl extends AbstractElasticSearch implements
 
         return response;
 	}
+    private void checkUserPrivilege(Long orgId, Long privilegeId, Long communityId) {
+        /*ListServiceModuleAppsCommand listServiceModuleAppsCommand = new ListServiceModuleAppsCommand();
+        listServiceModuleAppsCommand.setNamespaceId(UserContext.getCurrentNamespaceId());
+        listServiceModuleAppsCommand.setModuleId(EquipmentConstant.EQUIPMENT_MODULE);
+        ListServiceModuleAppsResponse apps = portalService.listServiceModuleAppsWithConditon(listServiceModuleAppsCommand);
+        boolean flag = false;
+        if (null != apps && null != apps.getServiceModuleApps() && apps.getServiceModuleApps().size() > 0) {
+            flag = userPrivilegeMgr.checkUserPrivilege(UserContext.currentUserId(), EntityType.ORGANIZATIONS.getCode(),
+                    orgId, orgId, privilegeId, apps.getServiceModuleApps().get(0).getId(), null, communityId);
+            if (!flag) {
+                LOGGER.error("Permission is denied, namespaceId={}, orgId={}, communityId={}," +
+                        " privilege={}", UserContext.getCurrentNamespaceId(), orgId, communityId, privilegeId);
+                throw RuntimeErrorException.errorWith(ErrorCodes.SCOPE_GENERAL, ErrorCodes.ERROR_ACCESS_DENIED,
+                        "Insufficient privilege");
+            }
+        }*/
+        userPrivilegeMgr.checkUserPrivilege(UserContext.currentUserId(), orgId, privilegeId, EquipmentConstant.EQUIPMENT_MODULE, null, null, null,communityId);
+
+
+    }
 
 	@Override
 	public String getIndexType() {

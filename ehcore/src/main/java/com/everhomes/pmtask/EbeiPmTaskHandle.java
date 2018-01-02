@@ -453,6 +453,7 @@ public class EbeiPmTaskHandle extends DefaultPmTaskHandle{
             task.setRequestorName(requestorName);
             task.setRequestorPhone(requestorPhone);
             task.setOrganizationName(cmd.getOrganizationName());
+            task.setIfUseFeelist((byte)0);
 
             pmTaskProvider.createTask(task);
             createFlowCase(task);

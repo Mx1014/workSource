@@ -104,17 +104,21 @@ public class EnergyYoyStatisticProviderImpl implements EnergyYoyStatisticProvide
     }
 
 	@Override
-	public List<EnergyYoyStatistic> listenergyYoyStatistics(Integer currentNamespaceId, String dateStr) {
-		DSLContext context = dbProvider.getDslContext(AccessSpec.readOnly()); 
-		List<EnergyYoyStatistic> result =  context.select().from(Tables.EH_ENERGY_YOY_STATISTICS)
-				.where(Tables.EH_ENERGY_YOY_STATISTICS.NAMESPACE_ID.eq(currentNamespaceId))
-				.and(Tables.EH_ENERGY_YOY_STATISTICS.DATE_STR.eq(dateStr))
-				.orderBy(Tables.EH_ENERGY_YOY_STATISTICS.COMMUNITY_ID.asc()).fetch().map((r) -> {
-			return ConvertHelper.convert(r, EnergyYoyStatistic.class);
-		});
-		if (null != result && result.size() > 0)
-			return result;
-		return null;
+	public List<EnergyYoyStatistic> listenergyYoyStatistics(Integer currentNamespaceId, String dateStr, Long communityId) {
+		DSLContext context = dbProvider.getDslContext(AccessSpec.readOnly());
+
+        SelectQuery<EhEnergyYoyStatisticsRecord> query = context.selectQuery(Tables.EH_ENERGY_YOY_STATISTICS);
+        query.addConditions(Tables.EH_ENERGY_YOY_STATISTICS.NAMESPACE_ID.eq(currentNamespaceId));
+        query.addConditions(Tables.EH_ENERGY_YOY_STATISTICS.DATE_STR.eq(dateStr));
+        if(communityId != null) {
+            query.addConditions(Tables.EH_ENERGY_YOY_STATISTICS.COMMUNITY_ID.eq(communityId));
+        }
+        query.addOrderBy(Tables.EH_ENERGY_YOY_STATISTICS.COMMUNITY_ID.asc());
+        List<EnergyYoyStatistic> objs = query.fetch().map((r) -> {
+            return ConvertHelper.convert(r, EnergyYoyStatistic.class);
+        });
+
+		return objs;
 	}
 
 	@Override

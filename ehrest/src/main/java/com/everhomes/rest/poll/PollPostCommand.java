@@ -18,6 +18,7 @@ import com.everhomes.util.StringHelper;
  *     <li>repeatFlag: 是否支持重复投票 0-否，1-是 {@link com.everhomes.rest.poll.RepeatFlag}</li>
  *     <li>repeatPeriod: 重复投票的时间间隔，单位是天。</li>
  *     <li>itemList: itemList {@link com.everhomes.rest.poll.PollItemDTO}</li>
+ *     <li>wechatPoll: 是否支持微信报名，0-不支持，1-支持 参考   参考{@link com.everhomes.rest.poll.WechatPollFlag }</li>
  * </ul>
  */
 public class PollPostCommand {
@@ -30,6 +31,7 @@ public class PollPostCommand {
     private String tag;
     private Byte repeatFlag;
     private Integer repeatPeriod;
+    private Byte wechatPoll;
 
     @ItemType(PollItemDTO.class)
     private List<PollItemDTO> itemList;
@@ -115,6 +117,14 @@ public class PollPostCommand {
 
     public void setRepeatPeriod(Integer repeatPeriod) {
         this.repeatPeriod = repeatPeriod;
+    }
+
+    public Byte getWechatPoll() {
+        return wechatPoll;
+    }
+
+    public void setWechatPoll(Byte wechatPoll) {
+        this.wechatPoll = wechatPoll;
     }
 
     public String toString() {

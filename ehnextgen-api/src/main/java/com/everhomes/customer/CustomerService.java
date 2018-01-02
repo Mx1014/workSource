@@ -129,4 +129,9 @@ public interface CustomerService {
     CustomerAccountDTO getCustomerAccount(GetCustomerAccountCommand cmd);
     List<CustomerAccountDTO> listCustomerAccounts(ListCustomerAccountsCommand cmd);
 
+    void checkCustomerAuth(Integer namespaceId, Long privilegeId, Long orgId, Long communityId);
+
+    SearchEnterpriseCustomerResponse queryEnterpriseCustomers(SearchEnterpriseCustomerCommand cmd);
+
+
 }

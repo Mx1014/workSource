@@ -11,7 +11,7 @@ public interface NewsProvider {
 
 	News findNewsById(Long id);
 
-	List<News> listNews(Long communityId, Long categoryId, Integer namespaceId, Long from, Integer pageSize);
+	List<News> listNews(Long communityId, Long categoryId, Integer namespaceId, Long from, Integer pageSize, boolean isSearchDraft);
 
 	Long getMaxTopIndex(Integer namespaceId);
 

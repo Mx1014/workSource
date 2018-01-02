@@ -5,6 +5,7 @@ import com.everhomes.db.DbProvider;
 import com.everhomes.listing.ListingLocator;
 import com.everhomes.listing.ListingQueryBuilderCallback;
 import com.everhomes.naming.NameMapper;
+import com.everhomes.rest.approval.TrueOrFalseFlag;
 import com.everhomes.rest.flow.*;
 import com.everhomes.sequence.SequenceProvider;
 import com.everhomes.server.schema.Tables;
@@ -151,25 +152,36 @@ public class FlowEventLogProviderImpl implements FlowEventLogProvider {
 
         FlowCaseSearchType searchType = FlowCaseSearchType.fromCode(cmd.getFlowCaseSearchType());
         if(FlowCaseSearchType.TODO_LIST.equals(searchType)) {
-            cond = cond.and(Tables.EH_FLOW_CASES.STATUS.in(FlowCaseStatus.INITIAL.getCode(), FlowCaseStatus.PROCESS.getCode()));
+            cond = cond.and(Tables.EH_FLOW_CASES.STATUS.in(
+                    FlowCaseStatus.INITIAL.getCode(),
+                    FlowCaseStatus.PROCESS.getCode())
+            );
             cond = cond.and(Tables.EH_FLOW_EVENT_LOGS.LOG_TYPE.eq(FlowLogType.NODE_ENTER.getCode()))
     		.and(Tables.EH_FLOW_EVENT_LOGS.FLOW_USER_ID.eq(cmd.getUserId()))
-    		.and(Tables.EH_FLOW_CASES.STEP_COUNT.eq(Tables.EH_FLOW_EVENT_LOGS.STEP_COUNT)); //step_cout must equal the same
-    	}
-    	else if (FlowCaseSearchType.DONE_LIST.equals(searchType)) {
+    		.and(Tables.EH_FLOW_CASES.STEP_COUNT.eq(Tables.EH_FLOW_EVENT_LOGS.STEP_COUNT)) //step_cout must equal the same
+            .and(Tables.EH_FLOW_EVENT_LOGS.ENTER_LOG_COMPLETE_FLAG.eq(TrueOrFalseFlag.FALSE.getCode()));
+        } else if (FlowCaseSearchType.DONE_LIST.equals(searchType)) {
             // cond = cond.and(Tables.EH_FLOW_CASES.PARENT_ID.eq(0L));
-            cond = cond.and(Tables.EH_FLOW_CASES.STATUS.in(FlowCaseStatus.INITIAL.getCode(), FlowCaseStatus.PROCESS.getCode(), FlowCaseStatus.FINISHED.getCode(), FlowCaseStatus.ABSORTED.getCode()));
+            cond = cond.and(Tables.EH_FLOW_CASES.STATUS.in(
+                    FlowCaseStatus.INITIAL.getCode(),
+                    FlowCaseStatus.PROCESS.getCode(),
+                    FlowCaseStatus.FINISHED.getCode(),
+                    FlowCaseStatus.ABSORTED.getCode())
+            );
     		cond = cond.and(Tables.EH_FLOW_EVENT_LOGS.LOG_TYPE.eq(FlowLogType.BUTTON_FIRED.getCode()))
     		.and(Tables.EH_FLOW_EVENT_LOGS.FLOW_USER_ID.eq(cmd.getUserId()))
     		.and(FlowEventCustomField.BUTTON_FIRED_COUNT.getField().eq(0L));
-    	}
-    	else if(FlowCaseSearchType.SUPERVISOR.equals(searchType)) {
+    	} else if(FlowCaseSearchType.SUPERVISOR.equals(searchType)) {
             cond = cond.and(Tables.EH_FLOW_CASES.PARENT_ID.eq(0L));
-            cond = cond.and(Tables.EH_FLOW_CASES.STATUS.in(FlowCaseStatus.INITIAL.getCode(), FlowCaseStatus.PROCESS.getCode(), FlowCaseStatus.FINISHED.getCode(), FlowCaseStatus.ABSORTED.getCode()));
+            cond = cond.and(Tables.EH_FLOW_CASES.STATUS.in(
+                    FlowCaseStatus.INITIAL.getCode(),
+                    FlowCaseStatus.PROCESS.getCode(),
+                    FlowCaseStatus.FINISHED.getCode(),
+                    FlowCaseStatus.ABSORTED.getCode())
+            );
             cond = cond.and(Tables.EH_FLOW_EVENT_LOGS.LOG_TYPE.eq(FlowLogType.FLOW_SUPERVISOR.getCode()))
     		.and(Tables.EH_FLOW_EVENT_LOGS.FLOW_USER_ID.eq(cmd.getUserId())); 
-    	}
-    	else {
+    	} else {
     		return null;
     	}
     	
@@ -233,12 +245,12 @@ public class FlowEventLogProviderImpl implements FlowEventLogProvider {
         }
 
         List<FlowCaseDetail> objs = query.fetch().map((r) -> {
-                    FlowCaseDetail detail = r.into(FlowCaseDetail.class);
-                    detail.setId(r.getValue(Tables.EH_FLOW_CASES.ID));
-                    detail.setEventLogId(r.getValue(Tables.EH_FLOW_EVENT_LOGS.ID));
-                    // objs.add(convertRecordToDetail(r));
-                    return detail;
-                });
+            FlowCaseDetail detail = r.into(FlowCaseDetail.class);
+            detail.setId(r.getValue(Tables.EH_FLOW_CASES.ID));
+            detail.setEventLogId(r.getValue(Tables.EH_FLOW_EVENT_LOGS.ID));
+            // objs.add(convertRecordToDetail(r));
+            return detail;
+        });
 
         if(objs.size() >= count) {
             locator.setAnchor(objs.get(objs.size() - 1).getEventLogId());
@@ -260,7 +272,8 @@ public class FlowEventLogProviderImpl implements FlowEventLogProvider {
 				query.addConditions(Tables.EH_FLOW_EVENT_LOGS.FLOW_USER_ID.eq(userId));
 				query.addConditions(Tables.EH_FLOW_EVENT_LOGS.STEP_COUNT.eq(flowCase.getStepCount()));
 				query.addConditions(Tables.EH_FLOW_EVENT_LOGS.FLOW_VERSION.eq(flowCase.getFlowVersion()));
-				
+				query.addConditions(Tables.EH_FLOW_EVENT_LOGS.ENTER_LOG_COMPLETE_FLAG.eq(TrueOrFalseFlag.FALSE.getCode()));
+
 				return query;
 			}
     	});  
@@ -286,6 +299,7 @@ public class FlowEventLogProviderImpl implements FlowEventLogProvider {
                 }
 				query.addConditions(Tables.EH_FLOW_EVENT_LOGS.STEP_COUNT.eq(flowCase.getStepCount()));
 				query.addConditions(Tables.EH_FLOW_EVENT_LOGS.FLOW_VERSION.eq(flowCase.getFlowVersion()));
+                query.addConditions(Tables.EH_FLOW_EVENT_LOGS.ENTER_LOG_COMPLETE_FLAG.eq(TrueOrFalseFlag.FALSE.getCode()));
 				
 				return query;
 			}
@@ -322,56 +336,6 @@ public class FlowEventLogProviderImpl implements FlowEventLogProvider {
     	}
     	
     	return null;
-    }
-    
-    private FlowCaseDetail convertRecordToDetail(Record r) {
-    	FlowCaseDetail o = new FlowCaseDetail();
-    	o.setId(r.getValue(Tables.EH_FLOW_CASES.ID));
-    	o.setNamespaceId(r.getValue(Tables.EH_FLOW_CASES.NAMESPACE_ID));
-    	o.setOwnerId(r.getValue(Tables.EH_FLOW_CASES.OWNER_ID));
-    	o.setOwnerType(r.getValue(Tables.EH_FLOW_CASES.OWNER_TYPE));
-    	o.setModuleId(r.getValue(Tables.EH_FLOW_CASES.MODULE_ID));
-    	o.setModuleType(r.getValue(Tables.EH_FLOW_CASES.MODULE_TYPE));
-    	o.setModuleName(r.getValue(Tables.EH_FLOW_CASES.MODULE_NAME));
-    	o.setApplierName(r.getValue(Tables.EH_FLOW_CASES.APPLIER_NAME));
-    	o.setApplierPhone(r.getValue(Tables.EH_FLOW_CASES.APPLIER_PHONE));
-    	o.setFlowMainId(r.getValue(Tables.EH_FLOW_CASES.FLOW_MAIN_ID));
-    	o.setFlowVersion(r.getValue(Tables.EH_FLOW_CASES.FLOW_VERSION));
-    	o.setApplyUserId(r.getValue(Tables.EH_FLOW_CASES.APPLY_USER_ID));
-    	o.setProcessUserId(r.getValue(Tables.EH_FLOW_CASES.PROCESS_USER_ID));
-    	o.setReferId(r.getValue(Tables.EH_FLOW_CASES.REFER_ID));
-    	o.setReferType(r.getValue(Tables.EH_FLOW_CASES.REFER_TYPE));
-    	o.setCurrentNodeId(r.getValue(Tables.EH_FLOW_CASES.CURRENT_NODE_ID));
-    	o.setStatus(r.getValue(Tables.EH_FLOW_CASES.STATUS));
-    	o.setRejectCount(r.getValue(Tables.EH_FLOW_CASES.REJECT_COUNT));
-    	o.setRejectNodeId(r.getValue(Tables.EH_FLOW_CASES.REJECT_NODE_ID));
-    	o.setStepCount(r.getValue(Tables.EH_FLOW_CASES.STEP_COUNT));
-    	o.setLastStepTime(r.getValue(Tables.EH_FLOW_CASES.LAST_STEP_TIME));
-    	o.setCreateTime(r.getValue(Tables.EH_FLOW_CASES.CREATE_TIME));
-    	o.setCaseType(r.getValue(Tables.EH_FLOW_CASES.CASE_TYPE));
-    	o.setContent(r.getValue(Tables.EH_FLOW_CASES.CONTENT));
-    	o.setEvaluateScore(r.getValue(Tables.EH_FLOW_CASES.EVALUATE_SCORE));
-    	o.setStringTag1(r.getValue(Tables.EH_FLOW_CASES.STRING_TAG1));
-    	o.setStringTag2(r.getValue(Tables.EH_FLOW_CASES.STRING_TAG2));
-    	o.setStringTag3(r.getValue(Tables.EH_FLOW_CASES.STRING_TAG3));
-    	o.setStringTag4(r.getValue(Tables.EH_FLOW_CASES.STRING_TAG4));
-    	o.setStringTag5(r.getValue(Tables.EH_FLOW_CASES.STRING_TAG5));
-    	o.setIntegralTag1(r.getValue(Tables.EH_FLOW_CASES.INTEGRAL_TAG1));
-    	o.setIntegralTag2(r.getValue(Tables.EH_FLOW_CASES.INTEGRAL_TAG2));
-    	o.setIntegralTag3(r.getValue(Tables.EH_FLOW_CASES.INTEGRAL_TAG3));
-    	o.setIntegralTag4(r.getValue(Tables.EH_FLOW_CASES.INTEGRAL_TAG4));
-    	o.setIntegralTag5(r.getValue(Tables.EH_FLOW_CASES.INTEGRAL_TAG5));
-    	o.setCurrentLaneId(r.getValue(Tables.EH_FLOW_CASES.CURRENT_LANE_ID));
-    	o.setParentId(r.getValue(Tables.EH_FLOW_CASES.PARENT_ID));
-    	o.setStartNodeId(r.getValue(Tables.EH_FLOW_CASES.START_NODE_ID));
-    	o.setEndNodeId(r.getValue(Tables.EH_FLOW_CASES.END_NODE_ID));
-    	o.setStartLinkId(r.getValue(Tables.EH_FLOW_CASES.START_LINK_ID));
-    	o.setEndLinkId(r.getValue(Tables.EH_FLOW_CASES.END_LINK_ID));
-        o.setTitle(r.getValue(Tables.EH_FLOW_CASES.TITLE));
-        o.setEvaluateStatus(r.getValue(Tables.EH_FLOW_CASES.EVALUATE_STATUS));
-
-        o.setEventLogId(r.getValue(Tables.EH_FLOW_EVENT_LOGS.ID));
-    	return o;
     }
     
     /**
