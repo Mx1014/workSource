@@ -26,7 +26,8 @@ import com.everhomes.util.StringHelper;
  * <li>sourceUrl: 原文链接</li>
  * <li>phone: 联系方式</li>
  * <li>communityIds: 可见范围</li>
- * <li>newsTagVals: 标签</li>
+ * <li>newsTagVals: 标签集合,参考{@link com.everhomes.rest.news.NewsTagValsDTO}</li>
+ * <li>status: 新闻状态,参考{@link com.everhomes.rest.news.NewsStatus}</li>
  * </ul>
  */
 public class CreateNewsCommand {
@@ -51,6 +52,7 @@ public class CreateNewsCommand {
 	@ItemType(NewsTagValsDTO.class)
 	private List<NewsTagValsDTO> newsTagVals;
 	private String visibleType;
+	private byte status;
 
 	public String getVisibleType() {
 		return visibleType;
@@ -176,4 +178,13 @@ public class CreateNewsCommand {
 	public void setNewsTagVals(List<NewsTagValsDTO> newsTagVals) {
 		this.newsTagVals = newsTagVals;
 	}
+
+	public byte getStatus() {
+		return status;
+	}
+
+	public void setStatus(byte status) {
+		this.status = status;
+	}
+	
 }

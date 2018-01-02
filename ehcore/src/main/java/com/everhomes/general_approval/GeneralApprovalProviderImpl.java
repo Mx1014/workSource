@@ -17,6 +17,7 @@ import com.everhomes.rest.general_approval.GeneralApprovalStatus;
 import com.everhomes.server.schema.tables.records.EhGeneralApprovalTemplatesRecord;
 import org.jooq.DSLContext;
 import org.jooq.SelectQuery;
+import org.jooq.UpdateQuery;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
 
@@ -170,4 +171,17 @@ public class GeneralApprovalProviderImpl implements GeneralApprovalProvider {
         return query.fetchOneInto(GeneralApproval.class);
     }
 
+    @Override
+    public void disableApprovalByFormOriginId(Long formOriginId, Long moduleId, String moduleType) {
+        DSLContext context = this.dbProvider.getDslContext(AccessSpec.readWrite());
+        UpdateQuery<EhGeneralApprovalsRecord> query = context.updateQuery(Tables.EH_GENERAL_APPROVALS);
+        query.addConditions(Tables.EH_GENERAL_APPROVALS.MODULE_ID.eq(moduleId));
+        query.addConditions(Tables.EH_GENERAL_APPROVALS.MODULE_TYPE.eq(moduleType));
+        query.addConditions(Tables.EH_GENERAL_APPROVALS.FORM_ORIGIN_ID.eq(formOriginId));
+        query.addConditions(Tables.EH_GENERAL_APPROVALS.STATUS.ne(GeneralApprovalStatus.DELETED.getCode()));
+
+        query.addValue(Tables.EH_GENERAL_APPROVALS.STATUS, GeneralApprovalStatus.INVALID.getCode());
+        query.addValue(Tables.EH_GENERAL_APPROVALS.FORM_ORIGIN_ID, 0L);
+        query.execute();
+    }
 }

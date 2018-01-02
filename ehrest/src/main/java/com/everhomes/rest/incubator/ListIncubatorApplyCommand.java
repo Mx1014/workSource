@@ -7,11 +7,12 @@ import com.everhomes.util.StringHelper;
  *     <li>namespaceId: namespaceId</li>
  *     <li>applyUserId: 申请人的uid</li>
  *     <li>approveStatus: 审批状态，0-待审批，1-拒绝，2-通过 参考 {@link ApproveStatus}</li>
- *     <li>needReject: 是否需要查询拒绝的数据 0-否，1-是，默认为1查询</li>
+ *     <li>needReject: 是否需要查询拒绝的数据 0-否，1-是，默认为1查询，此参数是为了适应页面需求（审核中以及通过的）</li>
  *     <li>keyWord: keyWord</li>
  *     <li>pageOffset: 页码</li>
  *     <li>pageSize: 数量</li>
  *     <li>orderBy: 排序方式，0-创建时间，1-审核时间</li>
+ *     <li>applyType: 申请类型 0-入孵，1-加速，2-入园，不传则不限{@link ApplyType}</li>
  * </ul>
  */
 public class ListIncubatorApplyCommand {
@@ -25,6 +26,7 @@ public class ListIncubatorApplyCommand {
 	private Integer pageOffset;
 	private Integer pageSize;
 	private Byte orderBy;
+	Byte applyType;
 
 	public Integer getNamespaceId() {
 		return namespaceId;
@@ -88,6 +90,14 @@ public class ListIncubatorApplyCommand {
 
 	public void setKeyWord(String keyWord) {
 		this.keyWord = keyWord;
+	}
+
+	public Byte getApplyType() {
+		return applyType;
+	}
+
+	public void setApplyType(Byte applyType) {
+		this.applyType = applyType;
 	}
 
 	@Override

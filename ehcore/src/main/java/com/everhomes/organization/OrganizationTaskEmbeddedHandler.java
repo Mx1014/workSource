@@ -220,4 +220,12 @@ public class OrganizationTaskEmbeddedHandler implements ForumEmbeddedHandler {
 
 		return str;
 	}
+
+	@Override
+	public void beforePostDelete(Post post) {
+	}
+
+	@Override
+	public void afterPostDelete(Post post) {
+	}
 }

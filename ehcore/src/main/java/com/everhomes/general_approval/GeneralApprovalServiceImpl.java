@@ -244,7 +244,7 @@ public class GeneralApprovalServiceImpl implements GeneralApprovalService {
             GeneralApprovalFlowCaseAdditionalFieldDTO fieldDTO = new GeneralApprovalFlowCaseAdditionalFieldDTO();
             List<OrganizationMember> member = organizationProvider.listOrganizationMembersByUId(user.getId());
             member = member.stream().filter(r -> {
-                return r.getGroupType().equals(OrganizationGroupType.DEPARTMENT.getCode());
+                return OrganizationGroupType.DEPARTMENT.getCode().equals(r.getGroupType());
             }).collect(Collectors.toList());
             if (member != null && member.size() > 0) {
                 Organization department = organizationProvider.findOrganizationById(member.get(0).getOrganizationId());
@@ -551,9 +551,10 @@ public class GeneralApprovalServiceImpl implements GeneralApprovalService {
 		this.generalFormProvider.deleteGeneralFormGroupsByFormOriginId(cmd.getFormOriginId());
 
         /***    更改与表单相关业务的状态    ***/
+        //  流程审批
+        disableApprovalByFormOriginId(cmd.getFormOriginId(), 52000L, "any-module");
         //  工作汇报
         workReportService.disableWorkReportByFormOriginId(cmd.getFormOriginId(), 54000L, "any-module");
-
     }
 
     @Override
@@ -1114,5 +1115,10 @@ public class GeneralApprovalServiceImpl implements GeneralApprovalService {
                 LOGGER.error("close error", e);
             }
         }
+    }
+
+    @Override
+    public void disableApprovalByFormOriginId(Long formOriginId, Long moduleId, String moduleType){
+        generalApprovalProvider.disableApprovalByFormOriginId(formOriginId, moduleId, moduleType);
     }
 }

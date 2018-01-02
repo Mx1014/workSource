@@ -605,7 +605,7 @@ public class ServiceModuleProviderImpl implements ServiceModuleProvider {
         if (custom_tag != null)
             condition = condition.and(Tables.EH_REFLECTION_SERVICE_MODULE_APPS.CUSTOM_TAG.eq(custom_tag));
         query.addConditions(condition);
-        EhReflectionServiceModuleAppsRecord record = query.fetchOne();
+        EhReflectionServiceModuleAppsRecord record = query.fetchAny();
         if (record != null) {
             return ConvertHelper.convert(record, ReflectionServiceModuleApp.class);
         }

@@ -10,14 +10,25 @@ import com.everhomes.configuration.ConfigurationProvider;
 import com.everhomes.contentserver.ContentServerService;
 import com.everhomes.db.DbProvider;
 import com.everhomes.entity.EntityType;
+import com.everhomes.filedownload.Task;
+import com.everhomes.filedownload.TaskService;
+import com.everhomes.naming.NameMapper;
+import com.everhomes.organization.Organization;
 import com.everhomes.organization.OrganizationService;
 import com.everhomes.rest.acl.admin.CreateOrganizationAdminCommand;
 import com.everhomes.rest.activity.ActivityServiceErrorCode;
+import com.everhomes.rest.common.TrueOrFalseFlag;
 import com.everhomes.rest.enterprise.CreateEnterpriseCommand;
+import com.everhomes.rest.filedownload.TaskRepeatFlag;
+import com.everhomes.rest.filedownload.TaskType;
 import com.everhomes.rest.incubator.*;
 import com.everhomes.rest.organization.OrganizationDTO;
+import com.everhomes.rest.poll.RepeatFlag;
 import com.everhomes.rest.user.IdentifierType;
+import com.everhomes.sequence.SequenceProvider;
+import com.everhomes.server.schema.tables.pojos.EhIncubatorApplies;
 import com.everhomes.settings.PaginationConfigHelper;
+import com.everhomes.sms.DateUtil;
 import com.everhomes.user.User;
 import com.everhomes.user.UserContext;
 import com.everhomes.user.UserIdentifier;
@@ -32,8 +43,7 @@ import org.springframework.transaction.TransactionStatus;
 import org.springframework.util.Assert;
 
 import java.sql.Timestamp;
-import java.util.ArrayList;
-import java.util.List;
+import java.util.*;
 
 @Component
 public class IncubatorServiceImpl implements IncubatorService {
@@ -59,6 +69,12 @@ public class IncubatorServiceImpl implements IncubatorService {
 	@Autowired
 	private ContentServerService contentServerService;
 
+	@Autowired
+	private TaskService taskService;
+
+	@Autowired
+	private SequenceProvider sequenceProvider;
+
 	@Override
 	public ListIncubatorApplyResponse listIncubatorApply(ListIncubatorApplyCommand cmd) {
 		Integer namespaceId = cmd.getNamespaceId();
@@ -75,7 +91,7 @@ public class IncubatorServiceImpl implements IncubatorService {
 			pageOffset = cmd.getPageOffset();
 		}
 
-		List<IncubatorApply>  list = incubatorProvider.listIncubatorApplies(namespaceId, applyUserId, keyWord, approveStatus, needReject, pageOffset, pageSize + 1, orderBy);
+		List<IncubatorApply>  list = incubatorProvider.listIncubatorApplies(namespaceId, applyUserId, keyWord, approveStatus, needReject, pageOffset, pageSize + 1, orderBy, cmd.getApplyType());
 
 		ListIncubatorApplyResponse response = new ListIncubatorApplyResponse();
 		if (list != null && list.size() > pageSize) {
@@ -88,14 +104,82 @@ public class IncubatorServiceImpl implements IncubatorService {
 			List<IncubatorApplyDTO> dtos = new ArrayList<>();
 			list.forEach(r ->{
 				IncubatorApplyDTO dto = ConvertHelper.convert(r, IncubatorApplyDTO.class);
-				populateApproveUserName(dto);
-				populateAttachments(dto);
+				populateDto(dto);
 				dtos.add(dto);
 			});
 			response.setDtos(dtos);
 		}
 
 		return response;
+	}
+
+
+	@Override
+	public List<IncubatorApplyDTO> listMyTeams() {
+		List<IncubatorApply> applies = new ArrayList<>();
+		List<Long> rootIds = incubatorProvider.listRootIdByUserId(UserContext.currentUserId());
+		if(rootIds != null){
+			for (Long rootId: rootIds){
+				IncubatorApply latestValidApply = incubatorProvider.findLatestValidByRootId(rootId);
+				if(latestValidApply != null){
+					applies.add(latestValidApply);
+				}
+			}
+		}
+
+		List<IncubatorApplyDTO> dtos = new ArrayList<>();
+		applies.forEach(r ->{
+			IncubatorApplyDTO dto = ConvertHelper.convert(r, IncubatorApplyDTO.class);
+			populateDto(dto);
+			dtos.add(dto);
+		});
+		return dtos;
+	}
+
+
+
+	@Override
+	public void exportIncubatorApply(ExportIncubatorApplyCommand cmd) {
+		Map<String, Object> params = new HashMap();
+
+		//如果是null的话会被传成“null”
+		if(cmd.getNamespaceId() != null){
+			params.put("namespaceId", cmd.getNamespaceId());
+		}
+		if(cmd.getKeyWord() != null){
+			params.put("keyWord", cmd.getKeyWord());
+		}
+		if(cmd.getApproveStatus() != null){
+			params.put("approveStatus", cmd.getApproveStatus());
+		}
+		if(cmd.getNeedReject() != null){
+			params.put("needReject", cmd.getNeedReject());
+		}
+		if(cmd.getOrderBy() != null){
+			params.put("orderBy", cmd.getOrderBy());
+		}
+		if(cmd.getApplyType() != null){
+			params.put("applyType", cmd.getApplyType());
+		}
+
+		String statusName = ApproveStatus.fromCode(cmd.getApproveStatus()) == null ? "全部": ApproveStatus.fromCode(cmd.getApproveStatus()).getText();
+		String fileName = String.format("入驻申请企业_%s_%s.xlsx", statusName, DateUtil.dateToStr(new Date(), DateUtil.NO_SLASH));
+
+		taskService.createTask(fileName, TaskType.FILEDOWNLOAD.getCode(), IncubatorApplyExportTaskHandler.class, params, TaskRepeatFlag.REPEAT.getCode(), new Date());
+	}
+
+	@Override
+	public IncubatorApplyDTO findIncubatorAppling() {
+		Long userId = UserContext.currentUserId();
+		List<IncubatorApply> incubatorApplies = incubatorProvider.listIncubatorAppling(userId);
+
+		if(incubatorApplies == null || incubatorApplies.size() == 0){
+			return null;
+		}
+
+		IncubatorApplyDTO dto = ConvertHelper.convert(incubatorApplies.get(0), IncubatorApplyDTO.class);
+		populateDto(dto);
+		return dto;
 	}
 
 	@Override
@@ -116,10 +200,19 @@ public class IncubatorServiceImpl implements IncubatorService {
 	@Override
 	public IncubatorApplyDTO addIncubatorApply(AddIncubatorApplyCommand cmd) {
 
-		if(cmd.getNamespaceId() == null || cmd.getCommunityId() == null){
-			LOGGER.error("ERROR_INVALID_PARAMS, namespaceId or communityId is null, namespaceid={}, communityId={}", cmd.getNamespaceId(), cmd.getCommunityId());
+		if(cmd.getNamespaceId() == null || cmd.getCommunityId() == null || cmd.getApplyType() == null){
+			LOGGER.error("ERROR_INVALID_PARAMS, namespaceId or communityId or applyType is null, namespaceid={}, communityId={}, applyType", cmd.getNamespaceId(), cmd.getCommunityId(), cmd.getApplyType());
 			throw RuntimeErrorException.errorWith(IncubatorServiceErrorCode.SCOPE, IncubatorServiceErrorCode.ERROR_INVALID_PARAMS,
 					"ERROR_INVALID_PARAMS");
+		}
+
+		IncubatorApplyDTO incubatorAppling = findIncubatorAppling();
+
+		//一个人只允许一个申请中的记录，如果是他的父节点是OK的（申请中的重新申请，后面会删除的），
+		if(incubatorAppling != null && !incubatorAppling.getId().equals(cmd.getParentId())){
+			LOGGER.error("incubatorAppling id={}", incubatorAppling.getId());
+			throw RuntimeErrorException.errorWith(IncubatorServiceErrorCode.SCOPE, IncubatorServiceErrorCode.ERROR_HAVE_WAITTING_APPLY,
+					"ERROR_HAVE_WAITTING_APPLY");
 		}
 
 		IncubatorApply incubatorApply = ConvertHelper.convert(cmd, IncubatorApply.class);
@@ -127,17 +220,27 @@ public class IncubatorServiceImpl implements IncubatorService {
 		incubatorApply.setApplyUserId(user.getId());
 		incubatorApply.setApproveStatus(ApproveStatus.WAIT.getCode());
 		incubatorApply.setCreateTime(new Timestamp(System.currentTimeMillis()));
-		dbProvider.execute((status)->{
-			incubatorProvider.createIncubatorApply(incubatorApply);
-			//如果是重新申请，更新父记录。此处的关系放在父记录维护是为了查询方便，不用每条记录都遍历查询子记录
-			if(cmd.getParentId() != null){
-				IncubatorApply parentIncubatorApply = incubatorProvider.findIncubatorApplyById(cmd.getParentId());
-				if(parentIncubatorApply != null){
-					parentIncubatorApply.setReApplyId(incubatorApply.getId());
-					incubatorProvider.updateIncubatorApply(parentIncubatorApply);
-				}
 
+
+		dbProvider.execute((status)->{
+
+
+			if(cmd.getParentId() == null){
+				long id = this.sequenceProvider.getNextSequence(NameMapper.getSequenceDomainFromTablePojo(EhIncubatorApplies.class));
+				incubatorApply.setId(id);
+				incubatorApply.setRootId(id);
+			}else {
+				IncubatorApply parent = incubatorProvider.findIncubatorApplyById(cmd.getParentId());
+				incubatorApply.setRootId(parent.getRootId());
+
+				//产品要求删除取消的，为了保证数据结构，设置新记录的parentid为grandfather的id
+				if(ApproveStatus.fromCode(parent.getApproveStatus()) == ApproveStatus.WAIT){
+					incubatorApply.setParentId(parent.getParentId());
+					incubatorProvider.deleteIncubatorApplyById(parent.getId());
+				}
 			}
+
+			incubatorProvider.createIncubatorApply(incubatorApply);
 
 			//保存附件
 			saveAttachment(cmd.getBusinessLicenceAttachments(), incubatorApply.getId(), user.getId(), IncubatorApplyAttachmentType.BUSINESS_LICENCE.getCode());
@@ -147,8 +250,7 @@ public class IncubatorServiceImpl implements IncubatorService {
 		});
 
 		IncubatorApplyDTO dto = ConvertHelper.convert(incubatorApply, IncubatorApplyDTO.class);
-		populateApproveUserName(dto);
-		populateAttachments(dto);
+		populateDto(dto);
 		return dto;
 	}
 
@@ -165,6 +267,11 @@ public class IncubatorServiceImpl implements IncubatorService {
 	}
 
 	@Override
+	public void cancelIncubatorApply(CancelIncubatorApplyCommand cmd) {
+		incubatorProvider.deleteIncubatorApplyById(cmd.getId());
+	}
+
+	@Override
 	public void approveIncubatorApply(ApproveIncubatorApplyCommand cmd) {
 		IncubatorApply incubatorApply = incubatorProvider.findIncubatorApplyById(cmd.getApplyId());
 		User applyUser = userProvider.findUserById(incubatorApply.getApplyUserId());
@@ -176,12 +283,16 @@ public class IncubatorServiceImpl implements IncubatorService {
 		incubatorApply.setApproveTime(new Timestamp(System.currentTimeMillis()));
 		incubatorApply.setApproveUserId(UserContext.currentUserId());
 
-		if(cmd.getApproveStatus().byteValue() == ApproveStatus.AGREE.getCode()){
-			dbProvider.execute((TransactionStatus status) -> {
-				//1、更新申请记录为成功
-				incubatorProvider.updateIncubatorApply(incubatorApply);
+		boolean haveAgreeFlag = checkExistAgreeByRootId(incubatorApply.getRootId());
 
-				//2、创建公司
+		dbProvider.execute((TransactionStatus status) -> {
+
+			//如果不同意或者之前同意过则直接更新记录，不用再重复创建公司了。
+			if(ApproveStatus.fromCode(cmd.getApproveStatus()) != ApproveStatus.AGREE || haveAgreeFlag){
+				incubatorProvider.updateIncubatorApply(incubatorApply);
+			}else {
+
+				//创建公司
 				CreateEnterpriseCommand enterpriseCmd = new CreateEnterpriseCommand();
 				enterpriseCmd.setName(incubatorApply.getTeamName());
 				enterpriseCmd.setNamespaceId(incubatorApply.getNamespaceId());
@@ -191,18 +302,20 @@ public class IncubatorServiceImpl implements IncubatorService {
 				enterpriseCmd.setLongitude(String.valueOf(communityGeoPoint.getLongitude()));
 				OrganizationDTO  organizationDTO = organizationService.createEnterprise(enterpriseCmd);
 
-				//3、添加当前用户为管理员
+				//添加当前用户为管理员
 				CreateOrganizationAdminCommand adminCommand = new CreateOrganizationAdminCommand();
 				adminCommand.setOrganizationId(organizationDTO.getId());
 				adminCommand.setContactToken(applyIdentifier.getIdentifierToken());
 				adminCommand.setContactName(applyUser.getNickName());
 				rolePrivilegeService.createOrganizationAdmin(adminCommand);
 
-				return null;
-			});
-		}else {
-			incubatorProvider.updateIncubatorApply(incubatorApply);
-		}
+				//更新申请记录为成功
+				incubatorApply.setOrganizationId(organizationDTO.getId());
+				incubatorProvider.updateIncubatorApply(incubatorApply);
+			}
+
+			return null;
+		});
 	}
 
 	@Override
@@ -210,9 +323,44 @@ public class IncubatorServiceImpl implements IncubatorService {
 		Assert.notNull(cmd.getId());
 		IncubatorApply incubatorApply = incubatorProvider.findIncubatorApplyById(cmd.getId());
 		IncubatorApplyDTO dto = ConvertHelper.convert(incubatorApply, IncubatorApplyDTO.class);
+		populateDto(dto);
+		return dto;
+	}
+
+
+	public boolean checkExistAgreeByRootId(Long rootId){
+		List<IncubatorApply> incubatorApplies = incubatorProvider.listIncubatorAppliesByRootId(rootId);
+		for(IncubatorApply in: incubatorApplies){
+			if(ApproveStatus.fromCode(in.getApproveStatus()) == ApproveStatus.AGREE){
+				return true;
+			}
+		}
+		return false;
+	}
+
+
+	private void populateDto(IncubatorApplyDTO dto){
 		populateApproveUserName(dto);
 		populateAttachments(dto);
-		return dto;
+		populateReApplyFlag(dto);
+	}
+
+	private void populateReApplyFlag(IncubatorApplyDTO dto){
+
+		//自己是审核中的是可以申请的
+		if(ApproveStatus.fromCode(dto.getApproveStatus()) == ApproveStatus.WAIT){
+			dto.setReApplyFlag(TrueOrFalseFlag.TRUE.getCode());
+			return;
+		}
+
+		//自己不是审核中，一个用户只允许一个审核中的，已经有的话不允许在申请
+		List<IncubatorApply> incubatorApplies = incubatorProvider.listIncubatorAppling(dto.getApplyUserId());
+		if(incubatorApplies == null || incubatorApplies.size() == 0){
+			dto.setReApplyFlag(TrueOrFalseFlag.TRUE.getCode());
+		}else {
+			dto.setReApplyFlag(TrueOrFalseFlag.FALSE.getCode());
+		}
+
 	}
 
 	private void populateApproveUserName(IncubatorApplyDTO dto){
@@ -246,6 +394,7 @@ public class IncubatorServiceImpl implements IncubatorService {
 
 	private IncubatorApplyAttachmentDTO convertIncubatorApplyAttachment(IncubatorApplyAttachment r){
 		IncubatorApplyAttachmentDTO temp = ConvertHelper.convert(r, IncubatorApplyAttachmentDTO.class);
+		temp.setCreateTime(null);
 		String contentUrl = contentServerService.parserUri(temp.getContentUri(), IncubatorApplyAttachment.class.getSimpleName(), 1L);
 		temp.setContentUrl(contentUrl);
 		return temp;

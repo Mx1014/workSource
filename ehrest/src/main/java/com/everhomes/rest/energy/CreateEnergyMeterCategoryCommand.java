@@ -19,7 +19,7 @@ public class CreateEnergyMeterCategoryCommand {
 
     @NotNull private Long ownerId;
     @NotNull private String ownerType;
-    @NotNull private Long communityId;
+    private Long communityId;
     @NotNull @Size(max = 255) private String name;
     @NotNull private Byte categoryType;
     private Integer namespaceId;
