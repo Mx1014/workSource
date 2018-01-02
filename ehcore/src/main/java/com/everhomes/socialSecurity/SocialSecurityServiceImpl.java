@@ -732,8 +732,8 @@ public class SocialSecurityServiceImpl implements SocialSecurityService {
 
     private void checkSocialSercurity(SocialSecurityBase base, SocialSecurityItemDTO itemDTO) {
         //检测企业基数边界
-        if (base.getCompanyRadixMax().compareTo(itemDTO.getCompanyRadix()) < 0 ||
-                base.getCompanyRadixMin().compareTo(itemDTO.getCompanyRadix()) > 0) {
+        if (!itemDTO.getCompanyRadix().equals(0) && (base.getCompanyRadixMax().compareTo(itemDTO.getCompanyRadix()) < 0 ||
+                base.getCompanyRadixMin().compareTo(itemDTO.getCompanyRadix()) > 0)) {
 
             LOGGER.error("校验不通过 [{}]的企业基数越界 最大值[{}] 最小值[{}] 实际[{}]",
                     itemDTO.getPayItem() != null ? itemDTO.getPayItem() : "公积金", base.getCompanyRadixMax(),
@@ -742,8 +742,8 @@ public class SocialSecurityServiceImpl implements SocialSecurityService {
                     "校验不通过");
         }
         //检测企业比例边界
-        if (base.getCompanyRatioMax() < itemDTO.getCompanyRatio() ||
-                base.getCompanyRatioMin() > itemDTO.getCompanyRatio()) {
+        if (!itemDTO.getCompanyRatio().equals(0) && (base.getCompanyRatioMax() < itemDTO.getCompanyRatio() ||
+                base.getCompanyRatioMin() > itemDTO.getCompanyRatio())) {
             LOGGER.error("校验不通过 [{}]的企业基数越界 最大值[{}] 最小值[{}] 实际[{}]",
                     itemDTO.getPayItem() == null ? "公积金" : itemDTO.getPayItem(), base.getCompanyRatioMax(),
                     base.getCompanyRatioMin(), itemDTO.getCompanyRatio());
@@ -751,8 +751,8 @@ public class SocialSecurityServiceImpl implements SocialSecurityService {
                     "校验不通过");
         }
         //检测个人基数边界
-        if (base.getEmployeeRadixMax().compareTo(itemDTO.getEmployeeRadix()) < 0 ||
-                base.getEmployeeRadixMin().compareTo(itemDTO.getEmployeeRadix()) > 0) {
+        if (!itemDTO.getEmployeeRadix().equals(0) && (base.getEmployeeRadixMax().compareTo(itemDTO.getEmployeeRadix()) < 0 ||
+                base.getEmployeeRadixMin().compareTo(itemDTO.getEmployeeRadix()) > 0)){
             LOGGER.error("校验不通过 [{}]的企业基数越界 最大值[{}] 最小值[{}] 实际[{}]",
                     itemDTO.getPayItem() == null ? "公积金" : itemDTO.getPayItem(), base.getEmployeeRadixMax(),
                     base.getEmployeeRadixMin(), itemDTO.getEmployeeRadix());
@@ -760,8 +760,8 @@ public class SocialSecurityServiceImpl implements SocialSecurityService {
                     "校验不通过");
         }
         //检测个人比例边界
-        if (base.getEmployeeRatioMax() < itemDTO.getEmployeeRatio() ||
-                base.getEmployeeRatioMin() > itemDTO.getEmployeeRatio()) {
+        if (!itemDTO.getEmployeeRatio().equals(0) && (base.getEmployeeRatioMax() < itemDTO.getEmployeeRatio() ||
+                base.getEmployeeRatioMin() > itemDTO.getEmployeeRatio())) {
             LOGGER.error("校验不通过 [{}]的企业基数越界 最大值[{}] 最小值[{}] 实际[{}]",
                     itemDTO.getPayItem() == null ? "公积金" : itemDTO.getPayItem(), base.getEmployeeRatioMax(),
                     base.getEmployeeRatioMin(), itemDTO.getEmployeeRatio());
@@ -771,7 +771,8 @@ public class SocialSecurityServiceImpl implements SocialSecurityService {
         //检测比例options
         if (StringUtils.isNotBlank(base.getRatioOptions())) {
             List<Integer> options = JSONObject.parseArray(base.getRatioOptions(), Integer.class);
-            if (options.contains(itemDTO.getCompanyRatio()) && options.contains(itemDTO.getEmployeeRatio())) {
+            if ((options.contains(itemDTO.getCompanyRatio()) || itemDTO.getCompanyRatio().equals(0))
+                    && (options.contains(itemDTO.getEmployeeRatio()) || itemDTO.getEmployeeRatio().equals(0))) {
                 //都在options就没问题
             } else {
                 LOGGER.error("校验不通过 [{}]的比例可选项 [{}]   实际[{} , {}]",
