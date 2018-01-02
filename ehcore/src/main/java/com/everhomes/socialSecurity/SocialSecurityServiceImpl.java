@@ -91,12 +91,12 @@ public class SocialSecurityServiceImpl implements SocialSecurityService {
         }
     };
 
-    private static ThreadLocal<SimpleDateFormat> dateSF = new ThreadLocal<SimpleDateFormat>(){
+    private static ThreadLocal<SimpleDateFormat> dateSF = new ThreadLocal<SimpleDateFormat>() {
         protected SimpleDateFormat initialValue() {
             return new SimpleDateFormat("yyyy-MM-dd");
         }
     };
-    
+
     private static final Logger LOGGER = LoggerFactory.getLogger(SocialSecurityServiceImpl.class);
 
     @Override
@@ -146,6 +146,7 @@ public class SocialSecurityServiceImpl implements SocialSecurityService {
         String paymentMonth = monthSF.get().format(DateHelper.currentGMTTime());
         addNewMonthPayments(paymentMonth, ownerId);
     }
+
     @Override
     public void newSocialSecurityEmployee(Long detailId) {
         OrganizationMemberDetails detail = organizationProvider.findOrganizationMemberDetailsByDetailId(detailId);
@@ -165,7 +166,7 @@ public class SocialSecurityServiceImpl implements SocialSecurityService {
     private void addEmployeeNewMonthPayments(String paymentMonth, OrganizationMemberDetails detail) {
         Set<Long> detailIds = new HashSet<>();
         detailIds.add(detail.getId());
-        createPayments(detailIds,paymentMonth);
+        createPayments(detailIds, paymentMonth);
     }
 
     private void createPayments(Set<Long> detailIds, String paymentMonth) {
@@ -194,7 +195,6 @@ public class SocialSecurityServiceImpl implements SocialSecurityService {
         }
         Long id = sequenceProvider.getNextSequence(NameMapper.getSequenceDomainFromTablePojo(EhSocialSecuritySettings.class));
         List<EhSocialSecuritySettings> settings = new ArrayList<>();
-        id = saveSocialSecuritySettings(ssBases, cityId, detail.getOrganizationId(), detail.getTargetId(), detail.getId(), detail.getNamespaceId(), id, settings);
         sequenceProvider.getNextSequenceBlock(NameMapper.getSequenceDomainFromTablePojo(EhSocialSecuritySettings.class), settings.size());
         socialSecuritySettingProvider.batchCreateSocialSecuritySetting(settings);
     }
@@ -202,7 +202,7 @@ public class SocialSecurityServiceImpl implements SocialSecurityService {
     private void addNewMonthPayments(String paymentMonth, Long ownerId) {
         //把属于该公司的所有要交社保的setting取出来
         //todo : 本月要交社保的人
-        Set<Long> detailIds = null;
+        Set<Long> detailIds;
         List<OrganizationMemberDetails> details = organizationProvider.listOrganizationMemberDetails(ownerId);
         if (null == details) {
             return;
@@ -417,7 +417,6 @@ public class SocialSecurityServiceImpl implements SocialSecurityService {
             for (Long id : detailIds) {
                 if (id < cmd.getPageAnchor()) {
                     beginNum++;
-                    continue;
                 } else {
                     break;
                 }
@@ -735,34 +734,39 @@ public class SocialSecurityServiceImpl implements SocialSecurityService {
         //检测企业基数边界
         if (base.getCompanyRadixMax().compareTo(itemDTO.getCompanyRadix()) < 0 ||
                 base.getCompanyRadixMin().compareTo(itemDTO.getCompanyRadix()) > 0) {
+
+            LOGGER.error("校验不通过 [{}]的企业基数越界 最大值[{}] 最小值[{}] 实际[{}]",
+                    itemDTO.getPayItem() != null ? itemDTO.getPayItem() : "公积金", base.getCompanyRadixMax(),
+                    base.getCompanyRadixMin(), itemDTO.getCompanyRadix());
             throw RuntimeErrorException.errorWith(SocialSecurityConstants.SCOPE, SocialSecurityConstants.ERROR_CHECK_SETTING,
-                    String.format("校验不通过 [{}]的企业基数越界 最大值[{}] 最小值[{}] 实际[{}]",
-                            itemDTO.getPayItem() == null ? "公积金" : itemDTO.getPayItem(), base.getCompanyRadixMax(),
-                            base.getCompanyRadixMin(), itemDTO.getCompanyRadix()));
+                    "校验不通过");
         }
         //检测企业比例边界
         if (base.getCompanyRatioMax() < itemDTO.getCompanyRatio() ||
                 base.getCompanyRatioMin() > itemDTO.getCompanyRatio()) {
+            LOGGER.error("校验不通过 [{}]的企业基数越界 最大值[{}] 最小值[{}] 实际[{}]",
+                    itemDTO.getPayItem() == null ? "公积金" : itemDTO.getPayItem(), base.getCompanyRatioMax(),
+                    base.getCompanyRatioMin(), itemDTO.getCompanyRatio());
             throw RuntimeErrorException.errorWith(SocialSecurityConstants.SCOPE, SocialSecurityConstants.ERROR_CHECK_SETTING,
-                    String.format("校验不通过 [{}]的企业基数越界 最大值[{}] 最小值[{}] 实际[{}]",
-                            itemDTO.getPayItem() == null ? "公积金" : itemDTO.getPayItem(), base.getCompanyRatioMax(),
-                            base.getCompanyRatioMin(), itemDTO.getCompanyRatio()));
+                    "校验不通过");
         }
         //检测个人基数边界
         if (base.getEmployeeRadixMax().compareTo(itemDTO.getEmployeeRadix()) < 0 ||
                 base.getEmployeeRadixMin().compareTo(itemDTO.getEmployeeRadix()) > 0) {
+            LOGGER.error("校验不通过 [{}]的企业基数越界 最大值[{}] 最小值[{}] 实际[{}]",
+                    itemDTO.getPayItem() == null ? "公积金" : itemDTO.getPayItem(), base.getEmployeeRadixMax(),
+                    base.getEmployeeRadixMin(), itemDTO.getEmployeeRadix());
             throw RuntimeErrorException.errorWith(SocialSecurityConstants.SCOPE, SocialSecurityConstants.ERROR_CHECK_SETTING,
-                    String.format("校验不通过 [{}]的企业基数越界 最大值[{}] 最小值[{}] 实际[{}]",
-                            itemDTO.getPayItem() == null ? "公积金" : itemDTO.getPayItem(), base.getEmployeeRadixMax(),
-                            base.getEmployeeRadixMin(), itemDTO.getEmployeeRadix()));
+                    "校验不通过");
         }
         //检测个人比例边界
         if (base.getEmployeeRatioMax() < itemDTO.getEmployeeRatio() ||
                 base.getEmployeeRatioMin() > itemDTO.getEmployeeRatio()) {
+            LOGGER.error("校验不通过 [{}]的企业基数越界 最大值[{}] 最小值[{}] 实际[{}]",
+                    itemDTO.getPayItem() == null ? "公积金" : itemDTO.getPayItem(), base.getEmployeeRatioMax(),
+                    base.getEmployeeRatioMin(), itemDTO.getEmployeeRatio());
             throw RuntimeErrorException.errorWith(SocialSecurityConstants.SCOPE, SocialSecurityConstants.ERROR_CHECK_SETTING,
-                    String.format("校验不通过 [{}]的企业基数越界 最大值[{}] 最小值[{}] 实际[{}]",
-                            itemDTO.getPayItem() == null ? "公积金" : itemDTO.getPayItem(), base.getEmployeeRatioMax(),
-                            base.getEmployeeRatioMin(), itemDTO.getEmployeeRatio()));
+                    "校验不通过");
         }
         //检测比例options
         if (StringUtils.isNotBlank(base.getRatioOptions())) {
@@ -770,10 +774,11 @@ public class SocialSecurityServiceImpl implements SocialSecurityService {
             if (options.contains(itemDTO.getCompanyRatio()) && options.contains(itemDTO.getEmployeeRatio())) {
                 //都在options就没问题
             } else {
+                LOGGER.error("校验不通过 [{}]的比例可选项 [{}]   实际[{} , {}]",
+                        itemDTO.getPayItem() == null ? "公积金" : itemDTO.getPayItem(), base.getRatioOptions(),
+                        itemDTO.getEmployeeRatio(), itemDTO.getCompanyRatio());
                 throw RuntimeErrorException.errorWith(SocialSecurityConstants.SCOPE, SocialSecurityConstants.ERROR_CHECK_SETTING,
-                        String.format("校验不通过 [{}]的比例可选项 [{}]   实际[{} , {}]",
-                                itemDTO.getPayItem() == null ? "公积金" : itemDTO.getPayItem(), base.getRatioOptions(),
-                                itemDTO.getEmployeeRatio(), itemDTO.getCompanyRatio()));
+                        "校验不通过");
             }
 
         }
@@ -897,7 +902,8 @@ public class SocialSecurityServiceImpl implements SocialSecurityService {
                 }
             }
         }
-        LOGGER.debug(String.format("开始计算部门-{} 的数据,\n下辖部门id {},\n人员id{}"), dpt.getName(), orgIds, detailIds);
+        LOGGER.debug("校验不通过");
+        LOGGER.error("开始计算部门-{} 的数据,\n下辖部门id {},\n人员id{}", dpt.getName(), orgIds, detailIds);
         SocialSecurityDepartmentSummary summary = processSocialSecurityDepartmentSummary(dpt, detailIds, month);
         socialSecurityDepartmentSummaryProvider.createSocialSecurityDepartmentSummary(summary);
     }
@@ -1230,11 +1236,11 @@ public class SocialSecurityServiceImpl implements SocialSecurityService {
             sheet = setNewSocialSecurityReportRow(sheet, summary);
         }
         return wb;
-        
+
     }
 
     private XSSFSheet setNewSocialSecurityReportRow(XSSFSheet sheet, SocialSecurityReport r) {
-        Row row = sheet.createRow(sheet.getLastRowNum()+1);
+        Row row = sheet.createRow(sheet.getLastRowNum() + 1);
         int i = -1;
         row.createCell(++i).setCellValue(r.getUserName());
         row.createCell(++i).setCellValue(dateSF.get().format(r.getEntryDate()));
@@ -1324,7 +1330,7 @@ public class SocialSecurityServiceImpl implements SocialSecurityService {
     }
 
     private XSSFSheet createSocialSecurityReportWBHead(XSSFSheet sheet) {
-        Row row = sheet.createRow(sheet.getLastRowNum()+1);
+        Row row = sheet.createRow(sheet.getLastRowNum() + 1);
         int i = -1;
         row.createCell(++i).setCellValue("姓名");
         row.createCell(++i).setCellValue("入职日期");
@@ -1456,7 +1462,7 @@ public class SocialSecurityServiceImpl implements SocialSecurityService {
     }
 
     private XSSFSheet setNewSocialSecurityDepartmentSummarysRow(XSSFSheet sheet, SocialSecurityDepartmentSummary summary) {
-        Row row = sheet.createRow(sheet.getLastRowNum()+1);
+        Row row = sheet.createRow(sheet.getLastRowNum() + 1);
         int i = -1;
         row.createCell(++i).setCellValue(summary.getDeptName());
         row.createCell(++i).setCellValue(summary.getEmployeeCount());
@@ -1500,7 +1506,7 @@ public class SocialSecurityServiceImpl implements SocialSecurityService {
     }
 
     private XSSFSheet createSocialSecurityDepartmentSummarysWBHead(XSSFSheet sheet) {
-        Row row = sheet.createRow(sheet.getLastRowNum()+1);
+        Row row = sheet.createRow(sheet.getLastRowNum() + 1);
         int i = -1;
         row.createCell(++i).setCellValue("部门");
         row.createCell(++i).setCellValue("人数");
@@ -1589,7 +1595,7 @@ public class SocialSecurityServiceImpl implements SocialSecurityService {
     }
 
     private XSSFSheet setNewSocialSecurityInoutReportRow(XSSFSheet sheet, SocialSecurityInoutReport r) {
-        Row row = sheet.createRow(sheet.getLastRowNum()+1);
+        Row row = sheet.createRow(sheet.getLastRowNum() + 1);
         int i = -1;
         row.createCell(++i).setCellValue(r.getUserName());
         row.createCell(++i).setCellValue(dateSF.get().format(r.getEntryDate()));
@@ -1617,7 +1623,7 @@ public class SocialSecurityServiceImpl implements SocialSecurityService {
     }
 
     private XSSFSheet createSocialSecurityInoutReportWBHead(XSSFSheet sheet) {
-        Row row = sheet.createRow(sheet.getLastRowNum()+1);
+        Row row = sheet.createRow(sheet.getLastRowNum() + 1);
         int i = -1;
         row.createCell(++i).setCellValue("姓名");
         row.createCell(++i).setCellValue("入职日期");
@@ -1756,7 +1762,7 @@ public class SocialSecurityServiceImpl implements SocialSecurityService {
         return response;
     }
 
-    public SocialSecurityEmployeesCountResponse getSocialSecurityEmployeesCount(Long organizationId, Long month){
+    public SocialSecurityEmployeesCountResponse getSocialSecurityEmployeesCount(Long organizationId, Long month) {
         SocialSecurityEmployeesCountResponse response = new SocialSecurityEmployeesCountResponse();
         response.setSocialSecurity(2);
         response.setAccumulationFund(3);
