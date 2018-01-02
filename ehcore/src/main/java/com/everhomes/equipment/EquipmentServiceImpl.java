@@ -5037,7 +5037,6 @@ public class EquipmentServiceImpl implements EquipmentService {
 
 		//创建巡检计划
 		plan.setRepeatSettingId(repeatSettings.getId());
-		plan.setPlanVersion(1L);
 		EquipmentInspectionPlans createdPlan = equipmentProvider.createEquipmentInspectionPlans(plan);
 		equipmentPlanSearcher.feedDoc(plan);
 		//创建计划巡检对象标准关联
