@@ -544,14 +544,15 @@ public class AssetProviderImpl implements AssetProvider {
         DSLContext context = this.dbProvider.getDslContext(AccessSpec.readOnly());
         EhPaymentBillItems t = Tables.EH_PAYMENT_BILL_ITEMS.as("t");
         EhAddresses t2 = Tables.EH_ADDRESSES.as("t2");
-        context.select(t.DATE_STR,t.CHARGING_ITEM_NAME,t.AMOUNT_RECEIVABLE,t.AMOUNT_RECEIVED,t.AMOUNT_OWED,t.STATUS,t.ID,t2.APARTMENT_NAME,t2.BUILDING_NAME,t.BILL_GROUP_RULE_ID)
+        String sql = context.select(t.DATE_STR,t.CHARGING_ITEM_NAME,t.AMOUNT_RECEIVABLE,t.AMOUNT_RECEIVED,t.AMOUNT_OWED,t.STATUS,t.ID,t2.APARTMENT_NAME,t2.BUILDING_NAME,t.BILL_GROUP_RULE_ID)
                 .from(t)
                 .leftOuterJoin(t2)
                 .on(t.ADDRESS_ID.eq(t2.ID))
                 .where(t.BILL_ID.eq(billId))
                 .limit(pageOffSet,pageSize+1)
-                .fetch()
-                .map(r ->{
+                .getSQL();
+        context.fetch(sql)
+                .forEach(r ->{
                     BillDTO dto =new BillDTO();
                     dto.setTargetName(targetName);
                     dto.setDateStr(r.getValue(t.DATE_STR));
@@ -565,7 +566,7 @@ public class AssetProviderImpl implements AssetProvider {
                     dto.setApartmentName(r.getValue(t2.APARTMENT_NAME));
                     dto.setBuildingName(r.getValue(t2.BUILDING_NAME));
                     dtos.add(dto);
-                    return null;});
+                    });
         for(int i = 0; i < dtos.size(); i ++){
             if(org.apache.commons.lang.StringUtils.isEmpty(dtos.get(i).getBillItemName())) {
                 BillDTO dto = dtos.get(i);
