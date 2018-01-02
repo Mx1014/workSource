@@ -1,6 +1,9 @@
 package com.everhomes.rest.quality;
 
+import com.everhomes.discover.ItemType;
 import com.everhomes.util.StringHelper;
+
+import java.util.List;
 
 /**
  * <ul>
@@ -14,6 +17,7 @@ import com.everhomes.util.StringHelper;
  *  <li>inspectionType: 规范类型 0: 类型, 1: 规范, 2: 规范事项</li>
  *  <li>scopeType: specification可见范围类型 0: all, 1: community</li>
  *  <li>scopeId: 看见范围具体Id，全部为0</li>
+ *  <li>communities: 应用的项目id列表</li>
  * </ul>
  */
 public class CreateQualitySpecificationCommand {
@@ -37,6 +41,9 @@ public class CreateQualitySpecificationCommand {
 	private Double weight;
   
 	private Byte inspectionType;
+
+	@ItemType(Long.class)
+	private List<Long> communities;
 
 	public String getOwnerType() {
 		return ownerType;
@@ -117,7 +124,15 @@ public class CreateQualitySpecificationCommand {
 	public void setInspectionType(Byte inspectionType) {
 		this.inspectionType = inspectionType;
 	}
-	
+
+	public List<Long> getCommunities() {
+		return communities;
+	}
+
+	public void setCommunities(List<Long> communities) {
+		this.communities = communities;
+	}
+
 	@Override
     public String toString() {
         return StringHelper.toJsonString(this);

@@ -32,6 +32,7 @@ public class UploadFileInfoDTO {
     private String userToken;
     private String contentServer;
     private Long complete;
+    private Byte readOnly;
     
     @ItemType(UploadFileInfo.class)
     private List<UploadFileInfo> infos;
@@ -130,6 +131,16 @@ public class UploadFileInfoDTO {
     public void setTitle(String title) {
         this.title = title;
     }
+
+    public Byte getReadOnly() {
+        return readOnly;
+    }
+
+
+    public void setReadOnly(Byte readOnly) {
+        this.readOnly = readOnly;
+    }
+
 
     @Override
     public String toString() {

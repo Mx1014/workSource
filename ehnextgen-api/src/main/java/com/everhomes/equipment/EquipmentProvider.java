@@ -9,7 +9,6 @@ import java.util.List;
 import java.util.Map;
 import java.util.Set;
 
-
 public interface EquipmentProvider {
 	
 	void creatEquipmentStandard(EquipmentInspectionStandards standard);
@@ -85,7 +84,7 @@ public interface EquipmentProvider {
 	EquipmentInspectionTemplateItemMap findEquipmentInspectionTemplateItemMap(Long id);
 	List<EquipmentInspectionTemplateItemMap> listEquipmentInspectionTemplateItemMap(Long templateId);
 	List<EquipmentInspectionTemplates> listInspectionTemplates(Long ownerId, String ownerType, String name);
-	List<EquipmentInspectionTemplates> listInspectionTemplates(Integer namespaceId, String name);
+	List<EquipmentInspectionTemplates> listInspectionTemplates(Integer namespaceId, String name ,Long  targetId);
 	List<EquipmentInspectionStandards> listEquipmentInspectionStandardsByTemplateId(Long templateId);
 	
 	void createEquipmentStandardMap(EquipmentStandardMap map);
@@ -144,6 +143,19 @@ public interface EquipmentProvider {
 	List<ItemResultStat> statItemResults(Long equipmentId, Long standardId, Timestamp startTime, Timestamp endTime);
 
 	List<EquipmentInspectionTasks> listDelayTasks(Long inspectionCategoryId, List<Long> standards, String targetType, Long targetId, Integer offset, Integer pageSize, Byte adminFlag, Timestamp startTime);
+
+	void createEquipmentModelCommunityMap(EquipmentModelCommunityMap map);
+
+	List<EquipmentModelCommunityMap> listModelCommunityMapByCommunityId(Long targetId, byte modelType);
+
+	void deleteModelCommunityMapByModelIdAndCommunityId(Long modelId, Long targetId, byte modelType);
+
+	List<Integer> listDistinctNameSpace();
+
+	List<Long> listModelCommunityMapByModelId(Long modelId, byte modelType);
+
+	void deleteModelCommunityMapByModelId(Long modelId, byte modelType);
+
 
 	//add inactiveEquipmentStandardMap
     void inActiveEquipmentStandardMap(EquipmentStandardMap equipmentStandardMap);

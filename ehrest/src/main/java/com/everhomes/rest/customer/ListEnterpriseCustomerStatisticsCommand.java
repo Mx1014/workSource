@@ -18,6 +18,16 @@ public class ListEnterpriseCustomerStatisticsCommand {
 
     private Long endDate;
 
+    private Long orgId;
+
+    public Long getOrgId() {
+        return orgId;
+    }
+
+    public void setOrgId(Long orgId) {
+        this.orgId = orgId;
+    }
+
     public Integer getNamespaceId() {
         return namespaceId;
     }

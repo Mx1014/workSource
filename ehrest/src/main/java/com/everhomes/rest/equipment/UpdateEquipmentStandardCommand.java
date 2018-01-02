@@ -20,6 +20,7 @@ import java.util.List;
  *  <li>inspectionCategoryId: 巡检对象类型id</li>
  *  <li>items: 标准关联的巡检项目 参考{@link com.everhomes.rest.equipment.InspectionItemDTO}</li>
  *  <li>equipmentsDTO: 标准关联的设备列表 参考{@link com.everhomes.rest.equipment.EquipmentsDTO}</li>
+ *  <li>communities: 应用项目id列表</li>
  * </ul>
  */
 public class UpdateEquipmentStandardCommand {
@@ -66,6 +67,9 @@ public class UpdateEquipmentStandardCommand {
 	@Deprecated
 	@ItemType(StandardGroupDTO.class)
 	private List<StandardGroupDTO> group;
+
+	@ItemType(Long.class)
+	private  List<Long> communities;
 
 	@ItemType(InspectionItemDTO.class)
 	private  List<InspectionItemDTO>  items;
@@ -223,6 +227,14 @@ public class UpdateEquipmentStandardCommand {
 
 	public void setEquipments(List<EquipmentsDTO> equipments) {
 		this.equipments = equipments;
+	}
+
+	public List<Long> getCommunities() {
+		return communities;
+	}
+
+	public void setCommunities(List<Long> communities) {
+		this.communities = communities;
 	}
 
 	@Override

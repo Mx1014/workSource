@@ -87,6 +87,8 @@ public interface EquipmentService {
 
 	FieldItemDTO findScopeFieldItemByFieldItemId(findScopeFieldItemCommand cmd);
 
+	void distributeTemplates();
+
     EquipmentInspectionPlanDTO createEquipmentsInspectionPlan(UpdateEquipmentPlanCommand cmd);
 
 	EquipmentInspectionPlanDTO updateEquipmentInspectionPlan(UpdateEquipmentPlanCommand cmd);

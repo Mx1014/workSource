@@ -1,5 +1,7 @@
 package com.everhomes.equipment;
 
+import java.util.List;
+
 import com.everhomes.discover.ItemType;
 import com.everhomes.repeat.RepeatSettings;
 import com.everhomes.server.schema.tables.pojos.EhEquipmentInspectionStandards;
@@ -16,6 +18,12 @@ public class EquipmentInspectionStandards extends EhEquipmentInspectionStandards
 	private RepeatSettings repeat;
 	
 	private Integer equipmentsCount;
+
+	@ItemType(Long.class)
+	private List<Long> communities;
+
+	private  String  targetName;
+
 
 	//add in PM.V3.2
 	@ItemType(EquipmentInspectionEquipments.class)
@@ -82,6 +90,22 @@ public class EquipmentInspectionStandards extends EhEquipmentInspectionStandards
 
 	public void setEquipments(List<EquipmentInspectionEquipments> equipments) {
 		this.equipments = equipments;
+	}
+
+	public List<Long> getCommunities() {
+		return communities;
+	}
+
+	public void setCommunities(List<Long> communities) {
+		this.communities = communities;
+	}
+
+	public String getTargetName() {
+		return targetName;
+	}
+
+	public void setTargetName(String targetName) {
+		this.targetName = targetName;
 	}
 
 	@Override

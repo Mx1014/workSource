@@ -34,6 +34,24 @@ public class CreateCustomerEntryInfoCommand {
     private Long contractEndDate;
     private Integer contractEndMonth;
     private String remark;
+    private Long orgId;
+    private Long communityId;
+
+    public Long getCommunityId() {
+        return communityId;
+    }
+
+    public void setCommunityId(Long communityId) {
+        this.communityId = communityId;
+    }
+
+    public Long getOrgId() {
+        return orgId;
+    }
+
+    public void setOrgId(Long orgId) {
+        this.orgId = orgId;
+    }
 
     public String getAddress() {
         return address;

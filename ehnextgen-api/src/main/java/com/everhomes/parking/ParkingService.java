@@ -41,6 +41,8 @@ public interface ParkingService {
 
     ListParkingCardRequestResponse searchParkingCardRequests(SearchParkingCardRequestsCommand cmd);
 
+    void exportParkingCardRequests(SearchParkingCardRequestsCommand cmd, HttpServletResponse response);
+
     void setParkingLotConfig(SetParkingLotConfigCommand cmd);
 
     void notifyParkingRechargeOrderPayment(PayCallbackCommand cmd);

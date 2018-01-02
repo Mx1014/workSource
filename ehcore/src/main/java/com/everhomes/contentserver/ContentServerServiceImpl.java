@@ -34,8 +34,14 @@ import org.springframework.web.multipart.MultipartFile;
 
 import javax.annotation.PostConstruct;
 import javax.annotation.PreDestroy;
+import java.net.URLEncoder;
 import java.io.InputStream;
-import java.util.*;
+import java.util.ArrayList;
+import java.util.HashMap;
+import java.util.List;
+import java.util.Map;
+import java.util.Random;
+import java.util.UUID;
 import java.util.concurrent.TimeUnit;
 import java.util.stream.Collectors;
 
@@ -490,7 +496,7 @@ public class ContentServerServiceImpl implements ContentServerService {
         try {
             MultipartEntityBuilder builder = MultipartEntityBuilder.create();
             builder.addBinaryBody("upload_file", fileStream,
-                    ContentType.APPLICATION_OCTET_STREAM, fileName);
+                    ContentType.APPLICATION_OCTET_STREAM, URLEncoder.encode(fileName, "UTF-8"));
             HttpEntity multipart = builder.build();
 
             httpPost.setEntity(multipart);
@@ -655,6 +661,7 @@ public class ContentServerServiceImpl implements ContentServerService {
         dto.setUserId(userId);
         dto.setUserToken(cmd.getUserToken());
         dto.setTitle(cmd.getTitle());
+        dto.setReadOnly(cmd.getReadOnly());
         
         obj = redisTemplate.opsForValue().getAndSet(key, StringHelper.toJsonString(dto));
         if(obj != null) {
@@ -760,6 +767,15 @@ public class ContentServerServiceImpl implements ContentServerService {
         UploadFileInfoDTO dto = (UploadFileInfoDTO)StringHelper.fromJsonString(str, UploadFileInfoDTO.class);
         if(dto.getComplete() != null && dto.getComplete() > 0) {
             return dto;
+        }
+        
+        if(dto.getInfos() != null) {
+            for(UploadFileInfo info : dto.getInfos()) {
+                if(info.getUri() != null && !info.getUri().isEmpty() && info.getUrl() != null && info.getUrl().isEmpty()) {
+                info.setUrl(this.parserUri(info.getUri()));    
+                }
+                
+            }
         }
         
         dto.setComplete(1l);

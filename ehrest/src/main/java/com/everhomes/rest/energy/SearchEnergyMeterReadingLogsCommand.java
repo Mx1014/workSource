@@ -24,6 +24,7 @@ import javax.validation.constraints.NotNull;
 public class SearchEnergyMeterReadingLogsCommand {
 
     @NotNull private Long organizationId;
+    private Integer namespaceId;
     private Long communityId;
     private String keyword;
     private String meterNumber;
@@ -40,6 +41,14 @@ public class SearchEnergyMeterReadingLogsCommand {
     private Long buildingId;
     private Long pageAnchor;
     private Integer pageSize;
+
+    public Integer getNamespaceId() {
+        return namespaceId;
+    }
+
+    public void setNamespaceId(Integer namespaceId) {
+        this.namespaceId = namespaceId;
+    }
 
     public Long getBuildingId() {
         return buildingId;

@@ -12,6 +12,7 @@ import java.util.List;
  *  <li>id: 标准id</li>
  *  <li>ownerId: 标准所属的主体id</li>
  *  <li>ownerType: 标准所属的主体，参考{@link com.everhomes.rest.quality.OwnerType}</li>
+ *  <li>targetId: 标准所属项目id  为0则是在全部里</li>
  *  <li>name: 标准名称</li>
  *  <li>repeatType: 0:no repeat 1: by day 2:by week 3: by month 4:year</li>
  *  <li>standardSource: 标准来源</li>
@@ -26,6 +27,8 @@ import java.util.List;
  *  <li>updateTime: 更新该标准的时间</li>
  *  <li>deleterUid: 删除该标准的用户id</li>
  *  <li>deleteTime: 删除该标准的时间</li>
+ *  <li>communities: 标准关联的项目</li>
+ *  <li>targetName: 标准所属项目名称  权限细化在全部中显示</li>
  * </ul>
  */
 public class EquipmentStandardsDTO {
@@ -35,12 +38,15 @@ public class EquipmentStandardsDTO {
 	private String name;
 
 	private  Byte repeatType;
-	
+
 	private String ownerType;
 	
 	private Long ownerId;
 
 	@Deprecated
+
+	private Long  targetId;
+
 	private String standardNumber;
 	
 	private String standardSource;
@@ -62,7 +68,7 @@ public class EquipmentStandardsDTO {
 
 	@ItemType(EquipmentsDTO.class)
 	private List<EquipmentsDTO> equipments;
-	
+
 	private Integer equipmentsCount;
 	
 	private Byte status;
@@ -90,6 +96,9 @@ public class EquipmentStandardsDTO {
 	@Deprecated
 	private Integer reviewExpiredDays;
 
+	private  String targetName;
+
+
 	@Deprecated
 	@ItemType(StandardGroupDTO.class)
 	private List<StandardGroupDTO> executiveGroup;
@@ -97,7 +106,10 @@ public class EquipmentStandardsDTO {
 	@Deprecated
 	@ItemType(StandardGroupDTO.class)
 	private List<StandardGroupDTO> reviewGroup;
-	
+
+	@ItemType(Long.class)
+	private  List<Long> communities;
+
 	public Long getId() {
 		return id;
 	}
@@ -312,6 +324,30 @@ public class EquipmentStandardsDTO {
 
 	public void setEquipments(List<EquipmentsDTO> equipments) {
 		this.equipments = equipments;
+	}
+
+	public Long getTargetId() {
+		return targetId;
+	}
+
+	public void setTargetId(Long targetId) {
+		this.targetId = targetId;
+	}
+
+	public List<Long> getCommunities() {
+		return communities;
+	}
+
+	public void setCommunities(List<Long> communities) {
+		this.communities = communities;
+	}
+
+	public String getTargetName() {
+		return targetName;
+	}
+
+	public void setTargetName(String targetName) {
+		this.targetName = targetName;
 	}
 
 	@Override

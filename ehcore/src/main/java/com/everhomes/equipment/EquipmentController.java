@@ -282,7 +282,23 @@ public class EquipmentController extends ControllerBase {
         response.setErrorDescription("OK");
         return response;
     }
-
+    
+//    /**
+//	 * <b>URL: /equipment/creatEquipmentAccessories</b>
+//	 * <p>创建备品备件</p>
+//	 */
+//	@RequestMapping("creatEquipmentAccessories")
+//	@RestReturn(value = EquipmentAccessoriesDTO.class)
+//	public RestResponse creatEquipmentAccessories(UpdateEquipmentAccessoriesCommand cmd) {
+//		
+//		EquipmentAccessoriesDTO accessories = equipmentService.creatEquipmentAccessories(cmd);
+//		
+//		RestResponse response = new RestResponse(accessories);
+//		response.setErrorCode(ErrorCodes.SUCCESS);
+//		response.setErrorDescription("OK");
+//		return response;
+//	}
+	
 	/**
 	 * <b>URL: /equipment/updateEquipmentAccessories</b>
 	 * <p>创建或修改备品备件</p>
@@ -709,7 +725,6 @@ public class EquipmentController extends ControllerBase {
     /**
      * <b>URL: /equipment/syncEquipmentAccessoriesIndex</b>
      * <p>搜索索引同步</p>
-     *
      * @return {String.class}
      */
     @RequestMapping("syncEquipmentAccessoriesIndex")
@@ -1054,6 +1069,22 @@ public class EquipmentController extends ControllerBase {
 		response.setErrorDescription("OK");
 		return response;
 	}
+
+	/**
+	 * <b>URL: /equipment/syscTemplates</b>
+	 * <p>不同域空间下巡检模板全部应用到对应域空间下所有项目</p>
+	 */
+	@RequestMapping("distributeTemplates")
+	@RestReturn(value = String.class)
+	public RestResponse distribute () {
+
+		equipmentService.distributeTemplates();
+		RestResponse response = new RestResponse();
+		response.setErrorCode(ErrorCodes.SUCCESS);
+		response.setErrorDescription("OK");
+		return response;
+	}
+
 
     /**
      * <b>URL: /equipment/createTaskByPlan</b>

@@ -5,7 +5,9 @@ import java.sql.Timestamp;
 import java.text.ParseException;
 import java.text.SimpleDateFormat;
 import java.util.Date;
+import java.util.List;
 
+import com.everhomes.rest.forum.PostStatus;
 import com.everhomes.rest.hotTag.HotFlag;
 import com.everhomes.rest.activity.*;
 import org.apache.commons.lang.StringUtils;
@@ -57,6 +59,9 @@ public class ActivityEmbeddedHandler implements ForumEmbeddedHandler {
     
     @Autowired
     private LocaleStringProvider localeStringProvider;
+
+	@Autowired
+	private ActivityProivider activityProivider;
 
     @Override
     public String renderEmbeddedObjectSnapshot(Post post) {
@@ -426,4 +431,41 @@ public class ActivityEmbeddedHandler implements ForumEmbeddedHandler {
         return post;
     }
 
+	@Override
+	public void beforePostDelete(Post post) {
+
+	}
+
+	@Override
+	public void afterPostDelete(Post post) {
+		ActivityPostCommand cmd = (ActivityPostCommand) StringHelper.fromJsonString(post.getEmbeddedJson(),
+				ActivityPostCommand.class);
+		cmd.setId(post.getEmbeddedId());
+		cmd.setMaxQuantity(post.getMaxQuantity());
+		activityService.updatePost(cmd, post.getId());
+
+
+		Activity activity = activityProivider.findActivityById(post.getEmbeddedId());
+
+		if (activity != null) {
+			List<ActivityRoster> activityRosters = activityProivider.listRosters(activity.getId(), ActivityRosterStatus.NORMAL);
+			for( int i=0; i< activityRosters.size(); i++){
+				//如果有退款，先退款再取消订单
+				ActivityRoster tempRoster = activityRosters.get(i);
+				if(tempRoster.getStatus() != null && tempRoster.getStatus().byteValue() == ActivityRosterStatus.NORMAL.getCode()){
+					activityService.signupOrderRefund(activity, tempRoster.getUid());
+
+					tempRoster.setStatus(ActivityRosterStatus.CANCEL.getCode());
+					tempRoster.setCancelTime(new Timestamp(DateHelper.currentGMTTime().getTime()));
+					activityProivider.updateRoster(tempRoster);
+				}
+
+			}
+
+			activity.setStatus(PostStatus.INACTIVE.getCode());
+			activity.setDeleteTime(new Timestamp(DateHelper.currentGMTTime().getTime()));
+			activityProivider.updateActivity(activity);
+		}
+
+	}
 }

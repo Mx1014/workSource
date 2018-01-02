@@ -54,7 +54,7 @@ public class SearchProviderImpl implements SearchProvider {
 			}
 			return HttpUtils.postJson(url, json, TIME_OUT, CHARSET);
 		} catch (IOException e) {
-			LOGGER.error("request to elasticsearch error: url=" + url + ", json=" + json);
+			LOGGER.error("request to elasticsearch error: url=" + url + ", json=" + json,e);
 			throw RuntimeErrorException.errorWith(SearchErrorCode.SCOPE,
 					SearchErrorCode.ERROR_REQUEST_ELASTICSEARCH_ERROR, "request to elasticsearch error");
 		}
@@ -70,7 +70,7 @@ public class SearchProviderImpl implements SearchProvider {
 		try {
 			return HttpUtils.get(url, null, TIME_OUT, CHARSET);
 		} catch (Exception e) {
-			LOGGER.error("request to elasticsearch error: url=" + url);
+			LOGGER.error("request to elasticsearch error: url=" + url,e);
 			throw RuntimeErrorException.errorWith(SearchErrorCode.SCOPE,
 					SearchErrorCode.ERROR_REQUEST_ELASTICSEARCH_ERROR, "request to elasticsearch error");
 		}
@@ -200,7 +200,7 @@ public class SearchProviderImpl implements SearchProvider {
 		try {
 			return HttpUtils.deleteJson(url, json, TIME_OUT, CHARSET);
 		} catch (IOException e) {
-			LOGGER.error("request to elasticsearch error: url=" + url + ", json=" + json);
+			LOGGER.error("request to elasticsearch error: url=" + url + ", json=" + json,e);
 			throw RuntimeErrorException.errorWith(SearchErrorCode.SCOPE,
 					SearchErrorCode.ERROR_REQUEST_ELASTICSEARCH_ERROR, "request to elasticsearch error");
 		}
