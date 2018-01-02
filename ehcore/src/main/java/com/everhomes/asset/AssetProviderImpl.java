@@ -551,7 +551,7 @@ public class AssetProviderImpl implements AssetProvider {
                 .where(t.BILL_ID.eq(billId))
                 .limit(pageOffSet,pageSize+1)
                 .getSQL();
-        context.fetch(sql,billId,pageOffSet,pageSize)
+        context.fetch(sql,billId,pageSize,pageOffSet)
                 .forEach(r ->{
                     BillDTO dto =new BillDTO();
                     dto.setDateStr(r.getValue(t.DATE_STR));
