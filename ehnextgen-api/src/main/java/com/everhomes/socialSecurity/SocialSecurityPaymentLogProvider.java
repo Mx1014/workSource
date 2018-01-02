@@ -1,6 +1,8 @@
 // @formatter:off
 package com.everhomes.socialSecurity;
 
+import com.everhomes.listing.CrossShardListingLocator;
+
 import java.util.List;
 
 public interface SocialSecurityPaymentLogProvider {
@@ -14,4 +16,6 @@ public interface SocialSecurityPaymentLogProvider {
 	List<SocialSecurityPaymentLog> listSocialSecurityPaymentLog();
 
 	void deleteMonthLog(Long ownerId, String paymentMonth);
+
+	SocialSecurityPaymentLog findAnyOneSocialSecurityPaymentLog(Long ownerId, String paymentMonth);
 }

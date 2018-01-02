@@ -8,6 +8,7 @@ import com.everhomes.rest.organization.ImportFileTaskDTO;
 import org.springframework.web.multipart.MultipartFile;
 
 import javax.servlet.http.HttpServletResponse;
+import java.util.List;
 
 public interface ArchivesService {
 
@@ -77,4 +78,6 @@ public interface ArchivesService {
     ImportFileResponse<ImportArchivesEmployeesDTO> getImportEmployeesResult(GetImportFileResultCommand cmd);
 
     void remindArchivesEmployee(RemindArchivesEmployeeCommand cmd);
+
+    List<Long> listSocialSecurityEmployees(Long organizationId, Long departmentId, String keywords, List<Byte> socialSecurityItem);
 }

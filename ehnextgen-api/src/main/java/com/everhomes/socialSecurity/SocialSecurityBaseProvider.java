@@ -17,7 +17,7 @@ public interface SocialSecurityBaseProvider {
 
 	List<Long> listCities();
 
-	List<SocialSecurityBase> listSocialSecurityBase(Long ownerId, String householdType);
+	List<SocialSecurityBase> listSocialSecurityBase(Long cityId, String householdType);
 	List<SocialSecurityBase> listSocialSecurityBase(Long ownerId, Byte accumOrSocial);
 
 	SocialSecurityBase findSocialSecurityBaseByCondition(Long cityId, String householdType, Byte accumOrSocial, String payItem);

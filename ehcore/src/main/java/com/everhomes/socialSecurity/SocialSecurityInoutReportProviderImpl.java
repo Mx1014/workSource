@@ -4,7 +4,10 @@ package com.everhomes.socialSecurity;
 import java.sql.Timestamp;
 import java.util.List;
 
+import com.everhomes.listing.CrossShardListingLocator;
 import org.jooq.DSLContext;
+import org.jooq.Record;
+import org.jooq.SelectConditionStep;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
 
@@ -35,7 +38,7 @@ public class SocialSecurityInoutReportProviderImpl implements SocialSecurityInou
 		Long id = sequenceProvider.getNextSequence(NameMapper.getSequenceDomainFromTablePojo(EhSocialSecurityInoutReport.class));
 		socialSecurityInoutReport.setId(id);
 		socialSecurityInoutReport.setCreateTime(new Timestamp(DateHelper.currentGMTTime().getTime()));
-		socialSecurityInoutReport.setCreatorUid(UserContext.current().getUser().getId());
+//		socialSecurityInoutReport.setCreatorUid(UserContext.current().getUser().getId());
 		socialSecurityInoutReport.setUpdateTime(socialSecurityInoutReport.getCreateTime());
 		socialSecurityInoutReport.setOperatorUid(socialSecurityInoutReport.getCreatorUid());
 		getReadWriteDao().insert(socialSecurityInoutReport);
@@ -63,7 +66,30 @@ public class SocialSecurityInoutReportProviderImpl implements SocialSecurityInou
 				.orderBy(Tables.EH_SOCIAL_SECURITY_INOUT_REPORT.ID.asc())
 				.fetch().map(r -> ConvertHelper.convert(r, SocialSecurityInoutReport.class));
 	}
-	
+
+	@Override
+	public void deleteSocialSecurityInoutReportByMonth(Long ownerId, String month) {
+
+		getReadWriteContext().delete(Tables.EH_SOCIAL_SECURITY_INOUT_REPORT)
+				.where(Tables.EH_SOCIAL_SECURITY_INOUT_REPORT.ORGANIZATION_ID.eq(ownerId))
+				.and(Tables.EH_SOCIAL_SECURITY_INOUT_REPORT.PAY_MONTH.eq(month)).execute();
+	}
+
+	@Override
+	public List<SocialSecurityInoutReport> listSocialSecurityInoutReport(Long ownerId, String paymentMonth, CrossShardListingLocator locator, int pageSize) {
+		SelectConditionStep<Record> step = getReadOnlyContext().select().from(Tables.EH_SOCIAL_SECURITY_INOUT_REPORT)
+				.where(Tables.EH_SOCIAL_SECURITY_INOUT_REPORT.ORGANIZATION_ID.eq(ownerId));
+		if (null != paymentMonth) {
+			step = step.and(Tables.EH_SOCIAL_SECURITY_INOUT_REPORT.PAY_MONTH.eq(paymentMonth));
+		}
+		if (null != locator && locator.getAnchor() != null) {
+			step.and(Tables.EH_SOCIAL_SECURITY_INOUT_REPORT.ID.gt(locator.getAnchor()));
+		}
+		step.limit(pageSize);
+		return step.orderBy(Tables.EH_SOCIAL_SECURITY_INOUT_REPORT.ID.asc())
+				.fetch().map(r -> ConvertHelper.convert(r, SocialSecurityInoutReport.class));
+	}
+
 	private EhSocialSecurityInoutReportDao getReadWriteDao() {
 		return getDao(getReadWriteContext());
 	}

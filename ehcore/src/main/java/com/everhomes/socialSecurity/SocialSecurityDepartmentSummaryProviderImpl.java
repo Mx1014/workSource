@@ -4,7 +4,10 @@ package com.everhomes.socialSecurity;
 import java.sql.Timestamp;
 import java.util.List;
 
+import com.everhomes.listing.CrossShardListingLocator;
 import org.jooq.DSLContext;
+import org.jooq.Record;
+import org.jooq.SelectConditionStep;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
 
@@ -35,9 +38,9 @@ public class SocialSecurityDepartmentSummaryProviderImpl implements SocialSecuri
 		Long id = sequenceProvider.getNextSequence(NameMapper.getSequenceDomainFromTablePojo(EhSocialSecurityDepartmentSummary.class));
 		socialSecurityDepartmentSummary.setId(id);
 		socialSecurityDepartmentSummary.setCreateTime(new Timestamp(DateHelper.currentGMTTime().getTime()));
-		socialSecurityDepartmentSummary.setCreatorUid(UserContext.current().getUser().getId());
+//		socialSecurityDepartmentSummary.setCreatorUid(UserContext.current().getUser().getId());
 		socialSecurityDepartmentSummary.setUpdateTime(socialSecurityDepartmentSummary.getCreateTime());
-		socialSecurityDepartmentSummary.setOperatorUid(socialSecurityDepartmentSummary.getCreatorUid());
+//		socialSecurityDepartmentSummary.setOperatorUid(socialSecurityDepartmentSummary.getCreatorUid());
 		getReadWriteDao().insert(socialSecurityDepartmentSummary);
 		DaoHelper.publishDaoAction(DaoAction.CREATE, EhSocialSecurityDepartmentSummary.class, null);
 	}
@@ -63,7 +66,29 @@ public class SocialSecurityDepartmentSummaryProviderImpl implements SocialSecuri
 				.orderBy(Tables.EH_SOCIAL_SECURITY_DEPARTMENT_SUMMARY.ID.asc())
 				.fetch().map(r -> ConvertHelper.convert(r, SocialSecurityDepartmentSummary.class));
 	}
-	
+
+	@Override
+	public void deleteSocialSecurityDptReports(Long ownerId, String month) {
+		getReadWriteContext().delete(Tables.EH_SOCIAL_SECURITY_DEPARTMENT_SUMMARY)
+				.where(Tables.EH_SOCIAL_SECURITY_DEPARTMENT_SUMMARY.OWNER_ID.eq(ownerId))
+				.and(Tables.EH_SOCIAL_SECURITY_DEPARTMENT_SUMMARY.PAY_MONTH.eq(month)).execute();
+	}
+
+	@Override
+	public List<SocialSecurityDepartmentSummary> listSocialSecurityDepartmentSummary(Long ownerId, String paymentMonth, CrossShardListingLocator locator, int pageSize) {
+		SelectConditionStep<Record> step = getReadOnlyContext().select().from(Tables.EH_SOCIAL_SECURITY_DEPARTMENT_SUMMARY)
+				.where(Tables.EH_SOCIAL_SECURITY_DEPARTMENT_SUMMARY.OWNER_ID.eq(ownerId));
+		if (null != paymentMonth) {
+			step = step.and(Tables.EH_SOCIAL_SECURITY_DEPARTMENT_SUMMARY.PAY_MONTH.eq(paymentMonth));
+		}
+		if (null != locator && locator.getAnchor() != null) {
+			step.and(Tables.EH_SOCIAL_SECURITY_DEPARTMENT_SUMMARY.ID.gt(locator.getAnchor()));
+		}
+		step.limit(pageSize);
+		return step.orderBy(Tables.EH_SOCIAL_SECURITY_DEPARTMENT_SUMMARY.ID.asc())
+				.fetch().map(r -> ConvertHelper.convert(r, SocialSecurityDepartmentSummary.class));
+	}
+
 	private EhSocialSecurityDepartmentSummaryDao getReadWriteDao() {
 		return getDao(getReadWriteContext());
 	}
