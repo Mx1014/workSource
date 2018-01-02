@@ -19,14 +19,16 @@ import com.everhomes.region.RegionProvider;
 import com.everhomes.rest.organization.OrganizationGroupType;
 import com.everhomes.rest.organization.OrganizationMemberStatus;
 import com.everhomes.rest.socialSecurity.*;
-import com.everhomes.rest.ui.user.ContactSignUpStatus;
 import com.everhomes.sequence.SequenceProvider;
 import com.everhomes.server.schema.tables.pojos.EhSocialSecurityPayments;
 import com.everhomes.server.schema.tables.pojos.EhSocialSecuritySettings;
 import com.everhomes.util.ConvertHelper;
 import com.everhomes.util.DateHelper;
 import com.everhomes.util.RuntimeErrorException;
-import org.apache.commons.logging.Log;
+import org.apache.poi.ss.usermodel.Row;
+import org.apache.poi.ss.usermodel.Workbook;
+import org.apache.poi.xssf.usermodel.XSSFSheet;
+import org.apache.poi.xssf.usermodel.XSSFWorkbook;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -88,6 +90,13 @@ public class SocialSecurityServiceImpl implements SocialSecurityService {
             return new SimpleDateFormat("yyyyMM");
         }
     };
+
+    private static ThreadLocal<SimpleDateFormat> dateSF = new ThreadLocal<SimpleDateFormat>() {
+        protected SimpleDateFormat initialValue() {
+            return new SimpleDateFormat("yyyy-MM-dd");
+        }
+    };
+
     private static final Logger LOGGER = LoggerFactory.getLogger(SocialSecurityServiceImpl.class);
 
     @Override
@@ -129,20 +138,38 @@ public class SocialSecurityServiceImpl implements SocialSecurityService {
         Community community = communityProvider.findCommunityById(organizationCommunity.getCommunityId());
         Long cityId = getZuolinNamespaceCityId(community.getCityId());
         List<HouseholdTypesDTO> hTs = socialSecurityBaseProvider.listHouseholdTypesByCity(cityId);
+        if (null == hTs) {
+            cityId = SocialSecurityConstants.DEFAULT_CITY;
+            hTs = socialSecurityBaseProvider.listHouseholdTypesByCity(cityId);
+        }
         addNewSocialSecuritySettings(cityId, hTs.get(0).getHouseholdTypeName(), ownerId);
         String paymentMonth = monthSF.get().format(DateHelper.currentGMTTime());
         addNewMonthPayments(paymentMonth, ownerId);
     }
 
-    private void addNewMonthPayments(String paymentMonth, Long ownerId) {
-        //把属于该公司的所有要交社保的setting取出来
-        //todo : 本月要交社保的人
-        Set<Long> detailIds = null;
-        List<OrganizationMemberDetails> details = organizationProvider.listOrganizationMemberDetails(ownerId);
-        if (null == details) {
-            return;
+    @Override
+    public void newSocialSecurityEmployee(Long detailId) {
+        OrganizationMemberDetails detail = organizationProvider.findOrganizationMemberDetailsByDetailId(detailId);
+        OrganizationCommunity organizationCommunity = organizationProvider.findOrganizationCommunityByOrgId(detail.getOrganizationId());
+        Community community = communityProvider.findCommunityById(organizationCommunity.getCommunityId());
+        Long cityId = getZuolinNamespaceCityId(community.getCityId());
+        List<HouseholdTypesDTO> hTs = socialSecurityBaseProvider.listHouseholdTypesByCity(cityId);
+        if (null == hTs) {
+            cityId = SocialSecurityConstants.DEFAULT_CITY;
+            hTs = socialSecurityBaseProvider.listHouseholdTypesByCity(cityId);
         }
-        detailIds = details.stream().map(r -> r.getId()).collect(Collectors.toSet());
+        addEmployeeNewSocialSecuritySettings(cityId, hTs.get(0).getHouseholdTypeName(), detail);
+        String paymentMonth = monthSF.get().format(DateHelper.currentGMTTime());
+        addEmployeeNewMonthPayments(paymentMonth, detail);
+    }
+
+    private void addEmployeeNewMonthPayments(String paymentMonth, OrganizationMemberDetails detail) {
+        Set<Long> detailIds = new HashSet<>();
+        detailIds.add(detail.getId());
+        createPayments(detailIds, paymentMonth);
+    }
+
+    private void createPayments(Set<Long> detailIds, String paymentMonth) {
         List<SocialSecuritySetting> settings = socialSecuritySettingProvider.listSocialSecuritySetting(detailIds);
         List<EhSocialSecurityPayments> payments = new ArrayList<>();
         Long id = sequenceProvider.getNextSequence(NameMapper.getSequenceDomainFromTablePojo(EhSocialSecurityPayments.class));
@@ -153,6 +180,35 @@ public class SocialSecurityServiceImpl implements SocialSecurityService {
         }
         sequenceProvider.getNextSequenceBlock(NameMapper.getSequenceDomainFromTablePojo(EhSocialSecurityPayments.class), payments.size());
         socialSecurityPaymentProvider.batchCreateSocialSecurityPayment(payments);
+    }
+
+    private void addEmployeeNewSocialSecuritySettings(Long cityId, String householdTypeName, OrganizationMemberDetails detail) {
+        List<SocialSecurityBase> ssBases = socialSecurityBaseProvider.listSocialSecurityBase(cityId,
+                householdTypeName, AccumOrSocail.SOCAIL.getCode());
+        if (null == ssBases) {
+            ssBases = new ArrayList<>();
+        }
+        List<SocialSecurityBase> afBases = socialSecurityBaseProvider.listSocialSecurityBase(cityId,
+                null, AccumOrSocail.ACCUM.getCode());
+        if (null != afBases) {
+            ssBases.addAll(afBases);
+        }
+        Long id = sequenceProvider.getNextSequence(NameMapper.getSequenceDomainFromTablePojo(EhSocialSecuritySettings.class));
+        List<EhSocialSecuritySettings> settings = new ArrayList<>();
+        sequenceProvider.getNextSequenceBlock(NameMapper.getSequenceDomainFromTablePojo(EhSocialSecuritySettings.class), settings.size());
+        socialSecuritySettingProvider.batchCreateSocialSecuritySetting(settings);
+    }
+
+    private void addNewMonthPayments(String paymentMonth, Long ownerId) {
+        //把属于该公司的所有要交社保的setting取出来
+        //todo : 本月要交社保的人
+        Set<Long> detailIds;
+        List<OrganizationMemberDetails> details = organizationProvider.listOrganizationMemberDetails(ownerId);
+        if (null == details) {
+            return;
+        }
+        detailIds = details.stream().map(r -> r.getId()).collect(Collectors.toSet());
+        createPayments(detailIds, paymentMonth);
     }
 
     private Long getZuolinNamespaceCityId(Long cityId) {
@@ -361,7 +417,6 @@ public class SocialSecurityServiceImpl implements SocialSecurityService {
             for (Long id : detailIds) {
                 if (id < cmd.getPageAnchor()) {
                     beginNum++;
-                    continue;
                 } else {
                     break;
                 }
@@ -543,7 +598,7 @@ public class SocialSecurityServiceImpl implements SocialSecurityService {
 
             // 查询设置的城市户籍档次的数据规则
             List<SocialSecurityBase> bases = socialSecurityBaseProvider.listSocialSecurityBase(cmd.getSocialSecurityPayment().getCityId(),
-                    cmd.getHouseholdType());
+                    cmd.getSocialSecurityPayment().getHouseholdType());
             // 校验数据是否合法
             checkSocialSercurity(bases, cmd.getSocialSecurityPayment().getItems());
             // 保存setting表数据
@@ -679,34 +734,39 @@ public class SocialSecurityServiceImpl implements SocialSecurityService {
         //检测企业基数边界
         if (base.getCompanyRadixMax().compareTo(itemDTO.getCompanyRadix()) < 0 ||
                 base.getCompanyRadixMin().compareTo(itemDTO.getCompanyRadix()) > 0) {
+
+            LOGGER.error("校验不通过 [{}]的企业基数越界 最大值[{}] 最小值[{}] 实际[{}]",
+                    itemDTO.getPayItem() != null ? itemDTO.getPayItem() : "公积金", base.getCompanyRadixMax(),
+                    base.getCompanyRadixMin(), itemDTO.getCompanyRadix());
             throw RuntimeErrorException.errorWith(SocialSecurityConstants.SCOPE, SocialSecurityConstants.ERROR_CHECK_SETTING,
-                    String.format("校验不通过 [{}]的企业基数越界 最大值[{}] 最小值[{}] 实际[{}]",
-                            itemDTO.getPayItem() == null ? "公积金" : itemDTO.getPayItem(), base.getCompanyRadixMax(),
-                            base.getCompanyRadixMin(), itemDTO.getCompanyRadix()));
+                    "校验不通过");
         }
         //检测企业比例边界
         if (base.getCompanyRatioMax() < itemDTO.getCompanyRatio() ||
                 base.getCompanyRatioMin() > itemDTO.getCompanyRatio()) {
+            LOGGER.error("校验不通过 [{}]的企业基数越界 最大值[{}] 最小值[{}] 实际[{}]",
+                    itemDTO.getPayItem() == null ? "公积金" : itemDTO.getPayItem(), base.getCompanyRatioMax(),
+                    base.getCompanyRatioMin(), itemDTO.getCompanyRatio());
             throw RuntimeErrorException.errorWith(SocialSecurityConstants.SCOPE, SocialSecurityConstants.ERROR_CHECK_SETTING,
-                    String.format("校验不通过 [{}]的企业基数越界 最大值[{}] 最小值[{}] 实际[{}]",
-                            itemDTO.getPayItem() == null ? "公积金" : itemDTO.getPayItem(), base.getCompanyRatioMax(),
-                            base.getCompanyRatioMin(), itemDTO.getCompanyRatio()));
+                    "校验不通过");
         }
         //检测个人基数边界
         if (base.getEmployeeRadixMax().compareTo(itemDTO.getEmployeeRadix()) < 0 ||
                 base.getEmployeeRadixMin().compareTo(itemDTO.getEmployeeRadix()) > 0) {
+            LOGGER.error("校验不通过 [{}]的企业基数越界 最大值[{}] 最小值[{}] 实际[{}]",
+                    itemDTO.getPayItem() == null ? "公积金" : itemDTO.getPayItem(), base.getEmployeeRadixMax(),
+                    base.getEmployeeRadixMin(), itemDTO.getEmployeeRadix());
             throw RuntimeErrorException.errorWith(SocialSecurityConstants.SCOPE, SocialSecurityConstants.ERROR_CHECK_SETTING,
-                    String.format("校验不通过 [{}]的企业基数越界 最大值[{}] 最小值[{}] 实际[{}]",
-                            itemDTO.getPayItem() == null ? "公积金" : itemDTO.getPayItem(), base.getEmployeeRadixMax(),
-                            base.getEmployeeRadixMin(), itemDTO.getEmployeeRadix()));
+                    "校验不通过");
         }
         //检测个人比例边界
         if (base.getEmployeeRatioMax() < itemDTO.getEmployeeRatio() ||
                 base.getEmployeeRatioMin() > itemDTO.getEmployeeRatio()) {
+            LOGGER.error("校验不通过 [{}]的企业基数越界 最大值[{}] 最小值[{}] 实际[{}]",
+                    itemDTO.getPayItem() == null ? "公积金" : itemDTO.getPayItem(), base.getEmployeeRatioMax(),
+                    base.getEmployeeRatioMin(), itemDTO.getEmployeeRatio());
             throw RuntimeErrorException.errorWith(SocialSecurityConstants.SCOPE, SocialSecurityConstants.ERROR_CHECK_SETTING,
-                    String.format("校验不通过 [{}]的企业基数越界 最大值[{}] 最小值[{}] 实际[{}]",
-                            itemDTO.getPayItem() == null ? "公积金" : itemDTO.getPayItem(), base.getEmployeeRatioMax(),
-                            base.getEmployeeRatioMin(), itemDTO.getEmployeeRatio()));
+                    "校验不通过");
         }
         //检测比例options
         if (StringUtils.isNotBlank(base.getRatioOptions())) {
@@ -714,10 +774,11 @@ public class SocialSecurityServiceImpl implements SocialSecurityService {
             if (options.contains(itemDTO.getCompanyRatio()) && options.contains(itemDTO.getEmployeeRatio())) {
                 //都在options就没问题
             } else {
+                LOGGER.error("校验不通过 [{}]的比例可选项 [{}]   实际[{} , {}]",
+                        itemDTO.getPayItem() == null ? "公积金" : itemDTO.getPayItem(), base.getRatioOptions(),
+                        itemDTO.getEmployeeRatio(), itemDTO.getCompanyRatio());
                 throw RuntimeErrorException.errorWith(SocialSecurityConstants.SCOPE, SocialSecurityConstants.ERROR_CHECK_SETTING,
-                        String.format("校验不通过 [{}]的比例可选项 [{}]   实际[{} , {}]",
-                                itemDTO.getPayItem() == null ? "公积金" : itemDTO.getPayItem(), base.getRatioOptions(),
-                                itemDTO.getEmployeeRatio(), itemDTO.getCompanyRatio()));
+                        "校验不通过");
             }
 
         }
@@ -730,7 +791,7 @@ public class SocialSecurityServiceImpl implements SocialSecurityService {
             }
         }
         throw RuntimeErrorException.errorWith(SocialSecurityConstants.SCOPE, SocialSecurityConstants.ERROR_CHECK_SETTING,
-                "校验不通过 没有找到[" + itemDTO.getPayItem() == null ? "公积金" : itemDTO.getPayItem() + "]的基础数据 ");
+                "校验不通过 没有找到[" + (itemDTO.getPayItem() == null ? "公积金" : itemDTO.getPayItem()) + "]的基础数据 ");
     }
 
     @Override
@@ -841,7 +902,8 @@ public class SocialSecurityServiceImpl implements SocialSecurityService {
                 }
             }
         }
-        LOGGER.debug(String.format("开始计算部门-{} 的数据,\n下辖部门id {},\n人员id{}"), dpt.getName(), orgIds, detailIds);
+        LOGGER.debug("校验不通过");
+        LOGGER.error("开始计算部门-{} 的数据,\n下辖部门id {},\n人员id{}", dpt.getName(), orgIds, detailIds);
         SocialSecurityDepartmentSummary summary = processSocialSecurityDepartmentSummary(dpt, detailIds, month);
         socialSecurityDepartmentSummaryProvider.createSocialSecurityDepartmentSummary(summary);
     }
@@ -1156,9 +1218,198 @@ public class SocialSecurityServiceImpl implements SocialSecurityService {
 
     @Override
     public void exportSocialSecurityReports(ExportSocialSecurityReportsCommand cmd) {
-        // TODO Auto-generated method stub
+        List<SocialSecurityReport> result = socialSecurityReportProvider.listSocialSecurityReport(cmd.getOwnerId(),
+                cmd.getPaymentMonth(), null, Integer.MAX_VALUE - 1);
+        XSSFWorkbook wb = createSocialSecurityReportWorkBook(result);
+        // TODO 导出
 
     }
+
+    private XSSFWorkbook createSocialSecurityReportWorkBook(List<SocialSecurityReport> result) {
+        XSSFWorkbook wb = new XSSFWorkbook();
+        XSSFSheet sheet = wb.createSheet("InoutReport");
+        if (null == result || result.size() == 0) {
+            return wb;
+        }
+        sheet = createSocialSecurityReportWBHead(sheet);
+        for (SocialSecurityReport summary : result) {
+            sheet = setNewSocialSecurityReportRow(sheet, summary);
+        }
+        return wb;
+
+    }
+
+    private XSSFSheet setNewSocialSecurityReportRow(XSSFSheet sheet, SocialSecurityReport r) {
+        Row row = sheet.createRow(sheet.getLastRowNum() + 1);
+        int i = -1;
+        row.createCell(++i).setCellValue(r.getUserName());
+        row.createCell(++i).setCellValue(dateSF.get().format(r.getEntryDate()));
+        row.createCell(++i).setCellValue(r.getContactToken());
+        row.createCell(++i).setCellValue(r.getIdNumber());
+        row.createCell(++i).setCellValue(r.getDegree());
+        row.createCell(++i).setCellValue(r.getSalaryCardBank());
+        row.createCell(++i).setCellValue(r.getSalaryCardNumber());
+        row.createCell(++i).setCellValue(r.getDeptName());
+        row.createCell(++i).setCellValue(r.getSocialSecurityNumber());
+        row.createCell(++i).setCellValue(r.getProvidentFundNumber());
+        row.createCell(++i).setCellValue(dateSF.get().format(r.getOutWorkDate()));
+        row.createCell(++i).setCellValue(r.getHouseholdType());
+        row.createCell(++i).setCellValue(r.getSocialSecurityCityName());
+        row.createCell(++i).setCellValue(r.getPayMonth());
+        row.createCell(++i).setCellValue(checkNullBigDecimal(r.getSocialSecurityRadix()));
+        row.createCell(++i).setCellValue(checkNullBigDecimal(r.getSocialSecuritySum()));
+        row.createCell(++i).setCellValue(checkNullBigDecimal(r.getSocialSecurityCompanySum()));
+        row.createCell(++i).setCellValue(checkNullBigDecimal(r.getSocialSecurityEmployeeSum()));
+        row.createCell(++i).setCellValue(r.getAccumulationFundCityName());
+        row.createCell(++i).setCellValue(r.getPayMonth());
+        row.createCell(++i).setCellValue(checkNullBigDecimal(r.getAccumulationFundRadix()));
+        row.createCell(++i).setCellValue(checkNullBigDecimal(r.getAccumulationFundCompanyRadix()));
+        row.createCell(++i).setCellValue(r.getAccumulationFundCompanyRatio());
+        row.createCell(++i).setCellValue(checkNullBigDecimal(r.getAccumulationFundEmployeeRadix()));
+        row.createCell(++i).setCellValue(r.getAccumulationFundEmployeeRatio());
+        row.createCell(++i).setCellValue(checkNullBigDecimal(r.getAccumulationFundSum()));
+        row.createCell(++i).setCellValue(checkNullBigDecimal(r.getAccumulationFundCompanySum()));
+        row.createCell(++i).setCellValue(checkNullBigDecimal(r.getAccumulationFundEmployeeSum()));
+        row.createCell(++i).setCellValue("");
+        //养老
+        row.createCell(++i).setCellValue(checkNullBigDecimal(r.getPensionCompanyRadix()));
+        row.createCell(++i).setCellValue(r.getPensionCompanyRatio());
+        row.createCell(++i).setCellValue(checkNullBigDecimal(r.getPensionCompanySum()));
+        row.createCell(++i).setCellValue(checkNullBigDecimal(r.getPensionEmployeeRadix()));
+        row.createCell(++i).setCellValue(r.getPensionEmployeeRatio());
+        row.createCell(++i).setCellValue(checkNullBigDecimal(r.getPensionEmployeeSum()));
+        //失业
+        row.createCell(++i).setCellValue(checkNullBigDecimal(r.getUnemploymentCompanyRadix()));
+        row.createCell(++i).setCellValue(r.getUnemploymentCompanyRatio());
+        row.createCell(++i).setCellValue(checkNullBigDecimal(r.getUnemploymentCompanySum()));
+        row.createCell(++i).setCellValue(checkNullBigDecimal(r.getUnemploymentEmployeeRadix()));
+        row.createCell(++i).setCellValue(r.getUnemploymentEmployeeRatio());
+        row.createCell(++i).setCellValue(checkNullBigDecimal(r.getUnemploymentEmployeeSum()));
+        //医疗
+        row.createCell(++i).setCellValue(checkNullBigDecimal(r.getMedicalCompanyRadix()));
+        row.createCell(++i).setCellValue(r.getMedicalCompanyRatio());
+        row.createCell(++i).setCellValue(checkNullBigDecimal(r.getMedicalCompanySum()));
+        row.createCell(++i).setCellValue(checkNullBigDecimal(r.getMedicalEmployeeRadix()));
+        row.createCell(++i).setCellValue(r.getMedicalEmployeeRatio());
+        row.createCell(++i).setCellValue(checkNullBigDecimal(r.getMedicalEmployeeSum()));
+        //工伤
+        row.createCell(++i).setCellValue(checkNullBigDecimal(r.getInjuryCompanyRadix()));
+        row.createCell(++i).setCellValue(r.getInjuryCompanyRatio());
+        row.createCell(++i).setCellValue(checkNullBigDecimal(r.getInjuryCompanySum()));
+        //生育
+        row.createCell(++i).setCellValue(checkNullBigDecimal(r.getBirthCompanyRadix()));
+        row.createCell(++i).setCellValue(r.getBirthCompanyRatio());
+        row.createCell(++i).setCellValue(checkNullBigDecimal(r.getBirthCompanySum()));
+        //大病
+        row.createCell(++i).setCellValue(checkNullBigDecimal(r.getCriticalIllnessCompanyRadix()));
+        row.createCell(++i).setCellValue(r.getCriticalIllnessCompanyRatio());
+        row.createCell(++i).setCellValue(checkNullBigDecimal(r.getCriticalIllnessCompanySum()));
+        row.createCell(++i).setCellValue(checkNullBigDecimal(r.getCriticalIllnessEmployeeRadix()));
+        row.createCell(++i).setCellValue(r.getCriticalIllnessEmployeeRatio());
+        row.createCell(++i).setCellValue(checkNullBigDecimal(r.getCriticalIllnessEmployeeSum()));
+
+        //补缴
+        row.createCell(++i).setCellValue(checkNullBigDecimal(r.getAfterSocialSecurityCompanySum()));
+        row.createCell(++i).setCellValue(checkNullBigDecimal(r.getAfterSocialSecurityEmployeeSum()));
+        row.createCell(++i).setCellValue(checkNullBigDecimal(r.getAfterAccumulationFundCompanySum()));
+        row.createCell(++i).setCellValue(checkNullBigDecimal(r.getAfterAccumulationFundEmployeeSum()));
+        row.createCell(++i).setCellValue(checkNullBigDecimal(r.getAfterPensionCompanySum()));
+        row.createCell(++i).setCellValue(checkNullBigDecimal(r.getAfterPensionEmployeeSum()));
+        row.createCell(++i).setCellValue(checkNullBigDecimal(r.getAfterUnemploymentCompanySum()));
+        row.createCell(++i).setCellValue(checkNullBigDecimal(r.getAfterUnemploymentEmployeeSum()));
+        row.createCell(++i).setCellValue(checkNullBigDecimal(r.getAfterMedicalCompanySum()));
+        row.createCell(++i).setCellValue(checkNullBigDecimal(r.getAfterMedicalEmployeeSum()));
+        row.createCell(++i).setCellValue(checkNullBigDecimal(r.getAfterInjuryCompanySum()));
+        row.createCell(++i).setCellValue(checkNullBigDecimal(r.getAfterBirthCompanySum()));
+        row.createCell(++i).setCellValue(checkNullBigDecimal(r.getAfterCriticalIllnessCompanySum()));
+        row.createCell(++i).setCellValue(checkNullBigDecimal(r.getAfterCriticalIllnessEmployeeSum()));
+        //商业保险残障金
+        row.createCell(++i).setCellValue(checkNullBigDecimal(r.getDisabilitySum()));
+        row.createCell(++i).setCellValue(checkNullBigDecimal(r.getCommercialInsurance()));
+        return sheet;
+    }
+
+    private XSSFSheet createSocialSecurityReportWBHead(XSSFSheet sheet) {
+        Row row = sheet.createRow(sheet.getLastRowNum() + 1);
+        int i = -1;
+        row.createCell(++i).setCellValue("姓名");
+        row.createCell(++i).setCellValue("入职日期");
+        row.createCell(++i).setCellValue("手机号");
+        row.createCell(++i).setCellValue("身份证号");
+        row.createCell(++i).setCellValue("学历");
+        row.createCell(++i).setCellValue("开户行");
+        row.createCell(++i).setCellValue("银行卡号");
+        row.createCell(++i).setCellValue("部门");
+        row.createCell(++i).setCellValue("社保电脑号");
+        row.createCell(++i).setCellValue("公积金账号");
+        row.createCell(++i).setCellValue("离职日期");
+        row.createCell(++i).setCellValue("户籍类型");
+        row.createCell(++i).setCellValue("参保城市");
+        row.createCell(++i).setCellValue("社保月份");
+        row.createCell(++i).setCellValue("社保基数");
+        row.createCell(++i).setCellValue("社保合计");
+        row.createCell(++i).setCellValue("社保企业");
+        row.createCell(++i).setCellValue("社保个人");
+        row.createCell(++i).setCellValue("公积金城市");
+        row.createCell(++i).setCellValue("公积金月份");
+        row.createCell(++i).setCellValue("公积金基数");
+        row.createCell(++i).setCellValue("公积金企业基数");
+        row.createCell(++i).setCellValue("公积金企业比例");
+        row.createCell(++i).setCellValue("公积金个人基数");
+        row.createCell(++i).setCellValue("公积金个人比例");
+        row.createCell(++i).setCellValue("公积金合计");
+        row.createCell(++i).setCellValue("公积金企业");
+        row.createCell(++i).setCellValue("公积金个人");
+        row.createCell(++i).setCellValue("公积金需纳税额");
+        row.createCell(++i).setCellValue("养老企业基数");
+        row.createCell(++i).setCellValue("养老企业比例");
+        row.createCell(++i).setCellValue("养老企业");
+        row.createCell(++i).setCellValue("养老个人基数");
+        row.createCell(++i).setCellValue("养老个人比例");
+        row.createCell(++i).setCellValue("养老个人");
+        row.createCell(++i).setCellValue("失业企业基数");
+        row.createCell(++i).setCellValue("失业企业比例");
+        row.createCell(++i).setCellValue("失业企业");
+        row.createCell(++i).setCellValue("失业个人基数");
+        row.createCell(++i).setCellValue("失业个人比例");
+        row.createCell(++i).setCellValue("失业个人");
+        row.createCell(++i).setCellValue("医疗企业基数");
+        row.createCell(++i).setCellValue("医疗企业比例");
+        row.createCell(++i).setCellValue("医疗企业");
+        row.createCell(++i).setCellValue("医疗个人基数");
+        row.createCell(++i).setCellValue("医疗个人比例");
+        row.createCell(++i).setCellValue("医疗个人");
+        row.createCell(++i).setCellValue("工伤企业基数");
+        row.createCell(++i).setCellValue("工伤企业比例");
+        row.createCell(++i).setCellValue("工伤企业");
+        row.createCell(++i).setCellValue("生育企业基数");
+        row.createCell(++i).setCellValue("生育企业比例");
+        row.createCell(++i).setCellValue("生育企业");
+        row.createCell(++i).setCellValue("大病企业基数");
+        row.createCell(++i).setCellValue("大病企业比例");
+        row.createCell(++i).setCellValue("大病企业");
+        row.createCell(++i).setCellValue("大病个人基数");
+        row.createCell(++i).setCellValue("大病个人比例");
+        row.createCell(++i).setCellValue("大病个人");
+        row.createCell(++i).setCellValue("社保补缴企业");
+        row.createCell(++i).setCellValue("社保补缴个人");
+        row.createCell(++i).setCellValue("公积金补缴企业");
+        row.createCell(++i).setCellValue("公积金补缴个人");
+        row.createCell(++i).setCellValue("养老补缴企业");
+        row.createCell(++i).setCellValue("养老补缴个人");
+        row.createCell(++i).setCellValue("失业补缴企业");
+        row.createCell(++i).setCellValue("失业补缴个人");
+        row.createCell(++i).setCellValue("医疗补缴企业");
+        row.createCell(++i).setCellValue("医疗补缴个人");
+        row.createCell(++i).setCellValue("工伤补缴企业");
+        row.createCell(++i).setCellValue("生育补缴企业");
+        row.createCell(++i).setCellValue("大病补缴企业");
+        row.createCell(++i).setCellValue("大病补缴个人");
+        row.createCell(++i).setCellValue("残障金");
+        row.createCell(++i).setCellValue("商业保险");
+        return sheet;
+    }
+
 
     @Override
     public ListSocialSecurityDepartmentSummarysResponse listSocialSecurityDepartmentSummarys(
@@ -1191,8 +1442,107 @@ public class SocialSecurityServiceImpl implements SocialSecurityService {
     @Override
     public void exportSocialSecurityDepartmentSummarys(
             ExportSocialSecurityDepartmentSummarysCommand cmd) {
-        // TODO Auto-generated method stub
+        List<SocialSecurityDepartmentSummary> result = socialSecurityDepartmentSummaryProvider.listSocialSecurityDepartmentSummary(cmd.getOwnerId(),
+                cmd.getPaymentMonth(), null, Integer.MAX_VALUE - 1);
+        Workbook workBook = createSocialSecurityDepartmentSummarysWorkBook(result);
+        // TODO: 2018/1/2 导出
+    }
 
+    private Workbook createSocialSecurityDepartmentSummarysWorkBook(List<SocialSecurityDepartmentSummary> result) {
+        XSSFWorkbook wb = new XSSFWorkbook();
+        XSSFSheet sheet = wb.createSheet("DepartmentSummary");
+        if (null == result || result.size() == 0) {
+            return wb;
+        }
+        sheet = createSocialSecurityDepartmentSummarysWBHead(sheet);
+        for (SocialSecurityDepartmentSummary summary : result) {
+            sheet = setNewSocialSecurityDepartmentSummarysRow(sheet, summary);
+        }
+        return wb;
+    }
+
+    private XSSFSheet setNewSocialSecurityDepartmentSummarysRow(XSSFSheet sheet, SocialSecurityDepartmentSummary summary) {
+        Row row = sheet.createRow(sheet.getLastRowNum() + 1);
+        int i = -1;
+        row.createCell(++i).setCellValue(summary.getDeptName());
+        row.createCell(++i).setCellValue(summary.getEmployeeCount());
+        row.createCell(++i).setCellValue(checkNullBigDecimal(summary.getSocialSecuritySum()));
+        row.createCell(++i).setCellValue(checkNullBigDecimal(summary.getSocialSecurityCompanySum()));
+        row.createCell(++i).setCellValue(checkNullBigDecimal(summary.getSocialSecurityEmployeeSum()));
+        row.createCell(++i).setCellValue(checkNullBigDecimal(summary.getPensionCompanySum()));
+        row.createCell(++i).setCellValue(checkNullBigDecimal(summary.getPensionEmployeeSum()));
+        row.createCell(++i).setCellValue(checkNullBigDecimal(summary.getMedicalCompanySum()));
+        row.createCell(++i).setCellValue(checkNullBigDecimal(summary.getMedicalEmployeeSum()));
+        row.createCell(++i).setCellValue(checkNullBigDecimal(summary.getInjuryCompanySum()));
+        row.createCell(++i).setCellValue(checkNullBigDecimal(summary.getUnemploymentCompanySum()));
+        row.createCell(++i).setCellValue(checkNullBigDecimal(summary.getUnemploymentEmployeeSum()));
+        row.createCell(++i).setCellValue(checkNullBigDecimal(summary.getBirthCompanySum()));
+        row.createCell(++i).setCellValue("");
+        row.createCell(++i).setCellValue("");
+        row.createCell(++i).setCellValue(checkNullBigDecimal(summary.getAfterSocialSecurityCompanySum()));
+        row.createCell(++i).setCellValue(checkNullBigDecimal(summary.getAfterSocialSecurityEmployeeSum()));
+        row.createCell(++i).setCellValue(checkNullBigDecimal(summary.getAfterPensionCompanySum()));
+        row.createCell(++i).setCellValue(checkNullBigDecimal(summary.getAfterPensionEmployeeSum()));
+        row.createCell(++i).setCellValue(checkNullBigDecimal(summary.getAfterUnemploymentCompanySum()));
+        row.createCell(++i).setCellValue(checkNullBigDecimal(summary.getAfterUnemploymentEmployeeSum()));
+        row.createCell(++i).setCellValue(checkNullBigDecimal(summary.getAfterMedicalCompanySum()));
+        row.createCell(++i).setCellValue(checkNullBigDecimal(summary.getAfterMedicalEmployeeSum()));
+        row.createCell(++i).setCellValue(checkNullBigDecimal(summary.getAfterInjuryCompanySum()));
+        row.createCell(++i).setCellValue(checkNullBigDecimal(summary.getAfterBirthCompanySum()));
+        row.createCell(++i).setCellValue("");
+        row.createCell(++i).setCellValue("");
+        row.createCell(++i).setCellValue(checkNullBigDecimal(summary.getDisabilitySum()));
+        row.createCell(++i).setCellValue(checkNullBigDecimal(summary.getCommercialInsurance()));
+        row.createCell(++i).setCellValue(checkNullBigDecimal(summary.getAccumulationFundSum()));
+        row.createCell(++i).setCellValue(checkNullBigDecimal(summary.getAccumulationFundCompanySum()));
+        row.createCell(++i).setCellValue(checkNullBigDecimal(summary.getAccumulationFundEmployeeSum()));
+        row.createCell(++i).setCellValue(checkNullBigDecimal(summary.getAfterAccumulationFundCompanySum()));
+        row.createCell(++i).setCellValue(checkNullBigDecimal(summary.getAfterAccumulationFundEmployeeSum()));
+        return sheet;
+    }
+
+    private String checkNullBigDecimal(BigDecimal bd) {
+        return bd == null ? "" : bd.toString();
+    }
+
+    private XSSFSheet createSocialSecurityDepartmentSummarysWBHead(XSSFSheet sheet) {
+        Row row = sheet.createRow(sheet.getLastRowNum() + 1);
+        int i = -1;
+        row.createCell(++i).setCellValue("部门");
+        row.createCell(++i).setCellValue("人数");
+        row.createCell(++i).setCellValue("社保合计");
+        row.createCell(++i).setCellValue("社保企业合计");
+        row.createCell(++i).setCellValue("社保个人合计");
+        row.createCell(++i).setCellValue("养老企业");
+        row.createCell(++i).setCellValue("养老个人");
+        row.createCell(++i).setCellValue("医疗企业");
+        row.createCell(++i).setCellValue("医疗个人");
+        row.createCell(++i).setCellValue("工伤企业");
+        row.createCell(++i).setCellValue("失业企业");
+        row.createCell(++i).setCellValue("失业个人");
+        row.createCell(++i).setCellValue("生育企业");
+        row.createCell(++i).setCellValue("大病企业");
+        row.createCell(++i).setCellValue("大病个人");
+        row.createCell(++i).setCellValue("社保补缴企业");
+        row.createCell(++i).setCellValue("社保补缴个人");
+        row.createCell(++i).setCellValue("养老补缴企业");
+        row.createCell(++i).setCellValue("养老补缴个人");
+        row.createCell(++i).setCellValue("失业补缴企业");
+        row.createCell(++i).setCellValue("失业补缴个人");
+        row.createCell(++i).setCellValue("医疗补缴企业");
+        row.createCell(++i).setCellValue("医疗补缴个人");
+        row.createCell(++i).setCellValue("工伤补缴企业");
+        row.createCell(++i).setCellValue("生育补缴企业");
+        row.createCell(++i).setCellValue("大病补缴企业");
+        row.createCell(++i).setCellValue("大病补缴个人");
+        row.createCell(++i).setCellValue("残障金");
+        row.createCell(++i).setCellValue("商业保险");
+        row.createCell(++i).setCellValue("公积金合计");
+        row.createCell(++i).setCellValue("公积金企业");
+        row.createCell(++i).setCellValue("公积金个人");
+        row.createCell(++i).setCellValue("公积金补缴企业");
+        row.createCell(++i).setCellValue("公积金补缴个人");
+        return sheet;
     }
 
     @Override
@@ -1225,8 +1575,79 @@ public class SocialSecurityServiceImpl implements SocialSecurityService {
 
     @Override
     public void exportSocialSecurityInoutReports(ExportSocialSecurityInoutReportsCommand cmd) {
-        // TODO Auto-generated method stub
+        List<SocialSecurityInoutReport> result = socialSecurityInoutReportProvider.listSocialSecurityInoutReport(cmd.getOwnerId(),
+                cmd.getPaymentMonth(), null, Integer.MAX_VALUE - 1);
+        Workbook workBook = createSocialSecurityInoutReportsWorkBook(result);
+// TODO: 2018/1/2 导出 
+    }
 
+    private Workbook createSocialSecurityInoutReportsWorkBook(List<SocialSecurityInoutReport> result) {
+        XSSFWorkbook wb = new XSSFWorkbook();
+        XSSFSheet sheet = wb.createSheet("InoutReport");
+        if (null == result || result.size() == 0) {
+            return wb;
+        }
+        sheet = createSocialSecurityInoutReportWBHead(sheet);
+        for (SocialSecurityInoutReport summary : result) {
+            sheet = setNewSocialSecurityInoutReportRow(sheet, summary);
+        }
+        return wb;
+    }
+
+    private XSSFSheet setNewSocialSecurityInoutReportRow(XSSFSheet sheet, SocialSecurityInoutReport r) {
+        Row row = sheet.createRow(sheet.getLastRowNum() + 1);
+        int i = -1;
+        row.createCell(++i).setCellValue(r.getUserName());
+        row.createCell(++i).setCellValue(dateSF.get().format(r.getEntryDate()));
+        row.createCell(++i).setCellValue(dateSF.get().format(r.getOutWorkDate()));
+        row.createCell(++i).setCellValue(r.getContactToken());
+        row.createCell(++i).setCellValue(r.getIdNumber());
+        row.createCell(++i).setCellValue(r.getDegree());
+        row.createCell(++i).setCellValue(r.getSalaryCardBank());
+        row.createCell(++i).setCellValue(r.getSalaryCardNumber());
+        row.createCell(++i).setCellValue(r.getDeptName());
+        row.createCell(++i).setCellValue(r.getSocialSecurityNumber());
+        row.createCell(++i).setCellValue(r.getProvidentFundNumber());
+        row.createCell(++i).setCellValue(r.getHouseholdType());
+        row.createCell(++i).setCellValue(checkNullBigDecimal(r.getSocialSecurityRadix()));
+        row.createCell(++i).setCellValue(r.getSocialSecurityCityName());
+        row.createCell(++i).setCellValue(checkNullBigDecimal(r.getSocialSecurityIncrease()));
+        row.createCell(++i).setCellValue(checkNullBigDecimal(r.getSocialSecurityDecrease()));
+        row.createCell(++i).setCellValue(checkNullBigDecimal(r.getSocialSecurityAfter()));
+        row.createCell(++i).setCellValue(checkNullBigDecimal(r.getAccumulationFundRadix()));
+        row.createCell(++i).setCellValue(r.getAccumulationFundCityName());
+        row.createCell(++i).setCellValue(checkNullBigDecimal(r.getAccumulationFundIncrease()));
+        row.createCell(++i).setCellValue(checkNullBigDecimal(r.getAccumulationFundDecrease()));
+        row.createCell(++i).setCellValue(checkNullBigDecimal(r.getAccumulationFundAfter()));
+        return sheet;
+    }
+
+    private XSSFSheet createSocialSecurityInoutReportWBHead(XSSFSheet sheet) {
+        Row row = sheet.createRow(sheet.getLastRowNum() + 1);
+        int i = -1;
+        row.createCell(++i).setCellValue("姓名");
+        row.createCell(++i).setCellValue("入职日期");
+        row.createCell(++i).setCellValue("离职日期");
+        row.createCell(++i).setCellValue("手机号");
+        row.createCell(++i).setCellValue("身份证号");
+        row.createCell(++i).setCellValue("学历");
+        row.createCell(++i).setCellValue("开户行");
+        row.createCell(++i).setCellValue("银行卡号");
+        row.createCell(++i).setCellValue("部门");
+        row.createCell(++i).setCellValue("社保电脑号");
+        row.createCell(++i).setCellValue("公积金账号");
+        row.createCell(++i).setCellValue("户籍类型");
+        row.createCell(++i).setCellValue("社保基数");
+        row.createCell(++i).setCellValue("参保城市");
+        row.createCell(++i).setCellValue("社保增");
+        row.createCell(++i).setCellValue("社保减");
+        row.createCell(++i).setCellValue("社保补缴");
+        row.createCell(++i).setCellValue("公积金基数");
+        row.createCell(++i).setCellValue("公积金城市");
+        row.createCell(++i).setCellValue("公积金增");
+        row.createCell(++i).setCellValue("公积金减");
+        row.createCell(++i).setCellValue("公积金补缴");
+        return sheet;
     }
 
     @Override
@@ -1341,7 +1762,7 @@ public class SocialSecurityServiceImpl implements SocialSecurityService {
         return response;
     }
 
-    public SocialSecurityEmployeesCountResponse getSocialSecurityEmployeesCount(Long organizationId, Long month){
+    public SocialSecurityEmployeesCountResponse getSocialSecurityEmployeesCount(Long organizationId, Long month) {
         SocialSecurityEmployeesCountResponse response = new SocialSecurityEmployeesCountResponse();
         response.setSocialSecurity(2);
         response.setAccumulationFund(3);

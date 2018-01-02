@@ -11,6 +11,8 @@ interface SocialSecurityService {
 	void addSocialSecurity(AddSocialSecurityCommand cmd);
 
 
+	void newSocialSecurityEmployee(Long detailId);
+
 	ListSocialSecurityCitiesResponse listSocialSecurityCities(ListSocialSecurityCitiesCommand cmd);
 
 
