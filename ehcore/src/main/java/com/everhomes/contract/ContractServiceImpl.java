@@ -132,6 +132,9 @@ public class ContractServiceImpl implements ContractService {
 	private ScheduleProvider scheduleProvider;
 
 	@Autowired
+	private ContractPaymentPlanProvider contractPaymentPlanProvider;
+
+	@Autowired
 	private ContractAttachmentProvider contractAttachmentProvider;
 
 	@Autowired
@@ -595,12 +598,50 @@ public class ContractServiceImpl implements ContractService {
 	}
 
 	@Override
-	public PaymentContractDetailDTO createPaymentContract(CreatePaymentContractCommand cmd) {
-		return null;
+	public ContractDetailDTO createPaymentContract(CreatePaymentContractCommand cmd) {
+		if(ContractType.NEW.equals(ContractType.fromStatus(cmd.getContractType()))) {
+			checkContractAuth(cmd.getNamespaceId(), PrivilegeConstants.PAYMENT_CONTRACT_CREATE, cmd.getOrganizationId(), cmd.getCommunityId());
+		} else if(ContractType.RENEW.equals(ContractType.fromStatus(cmd.getContractType()))) {
+			checkContractAuth(cmd.getNamespaceId(), PrivilegeConstants.PAYMENT_CONTRACT_RENEW, cmd.getOrganizationId(), cmd.getCommunityId());
+		} else if(ContractType.CHANGE.equals(ContractType.fromStatus(cmd.getContractType()))) {
+			checkContractAuth(cmd.getNamespaceId(), PrivilegeConstants.PAYMENT_CONTRACT_CHANGE, cmd.getOrganizationId(), cmd.getCommunityId());
+		}
+
+		Contract contract = ConvertHelper.convert(cmd, Contract.class);
+		if(cmd.getContractNumber() != null) {
+			checkContractNumberUnique(cmd.getNamespaceId(), cmd.getContractNumber());
+		} else {
+			contract.setContractNumber(generateContractNumber());
+		}
+
+		if(cmd.getContractStartDate() != null) {
+			contract.setContractStartDate(new Timestamp(cmd.getContractStartDate()));
+		}
+		if(cmd.getContractEndDate() != null) {
+			contract.setContractEndDate(new Timestamp(cmd.getContractEndDate()));
+		}
+		if(cmd.getSignedTime() != null) {
+			contract.setSignedTime(new Timestamp(cmd.getSignedTime()));
+		}
+		contract.setCreateUid(UserContext.currentUserId());
+		contract.setCreateTime(new Timestamp(DateHelper.currentGMTTime().getTime()));
+		contract.setStatus(ContractStatus.DRAFT.getCode()); //存草稿状态
+		contractProvider.createContract(contract);
+
+		dealContractAttachments(contract.getId(), cmd.getAttachments());
+		dealContractPlans(contract.getId(), cmd.getPlans());
+		contractProvider.updateContract(contract);
+		contractSearcher.feedDoc(contract);
+
+		FindContractCommand command = new FindContractCommand();
+		command.setId(contract.getId());
+		command.setPartyAId(contract.getPartyAId());
+		ContractDetailDTO contractDetailDTO = findContract(command);
+		return contractDetailDTO;
 	}
 
 	@Override
-	public PaymentContractDetailDTO updatePaymentContract(UpdatePaymentContractCommand cmd) {
+	public ContractDetailDTO updatePaymentContract(UpdatePaymentContractCommand cmd) {
 		return null;
 	}
 
@@ -1032,6 +1073,33 @@ public class ContractServiceImpl implements ContractService {
 		if(map.size() > 0) {
 			map.forEach((id, attachment) -> {
 				contractAttachmentProvider.deleteContractAttachment(attachment);
+			});
+		}
+	}
+
+	private void dealContractPlans(Long contractId, List<ContractPaymentPlanDTO> plans) {
+		List<ContractPaymentPlan> existPlans = contractPaymentPlanProvider.listByContractId(contractId);
+		Map<Long, ContractPaymentPlan> map = new HashMap<>();
+		if(existPlans != null && existPlans.size() > 0) {
+			existPlans.forEach(plan -> {
+				map.put(plan.getId(), plan);
+			});
+		}
+
+		if(plans != null && plans.size() > 0) {
+			plans.forEach(plan -> {
+				if(plan.getId() == null) {
+					ContractPaymentPlan contractPaymentPlan = ConvertHelper.convert(plan, ContractPaymentPlan.class);
+					contractPaymentPlan.setContractId(contractId);
+					contractPaymentPlanProvider.createContractPaymentPlan(contractPaymentPlan);
+				} else {
+					map.remove(plan.getId());
+				}
+			});
+		}
+		if(map.size() > 0) {
+			map.forEach((id, plan) -> {
+				contractPaymentPlanProvider.deleteContractPaymentPlan(plan);
 			});
 		}
 	}

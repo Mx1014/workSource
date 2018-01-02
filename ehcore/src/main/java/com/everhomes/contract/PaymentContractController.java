@@ -37,7 +37,7 @@ public class PaymentContractController extends ControllerBase {
      * <b>URL: /payment_contract/createPaymentContract</b>
      */
     @RequestMapping("createPaymentContract")
-    @RestReturn(PaymentContractDetailDTO.class)
+    @RestReturn(ContractDetailDTO.class)
     public RestResponse createPaymentContract(CreatePaymentContractCommand cmd){
         return new RestResponse(getContractService().createPaymentContract(cmd));
     }
@@ -47,7 +47,7 @@ public class PaymentContractController extends ControllerBase {
      * <b>URL: /payment_contract/updatePaymentContract</b>
      */
     @RequestMapping("updatePaymentContract")
-    @RestReturn(PaymentContractDetailDTO.class)
+    @RestReturn(ContractDetailDTO.class)
     public RestResponse updatePaymentContract(UpdatePaymentContractCommand cmd){
         return new RestResponse(getContractService().updatePaymentContract(cmd));
     }

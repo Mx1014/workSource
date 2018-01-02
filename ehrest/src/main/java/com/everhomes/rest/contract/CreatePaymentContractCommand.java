@@ -66,7 +66,7 @@ import java.util.List;
  * Created by ying.xiong on 2017/12/28.
  */
 public class CreatePaymentContractCommand {
-
+    private Long organizationId;
     private Long parentId;
     private Long rootParentId;
     private Byte contractType;
@@ -127,6 +127,14 @@ public class CreatePaymentContractCommand {
     private List<ContractAttachmentDTO> attachments;
     @ItemType(ContractPaymentPlanDTO.class)
     private List<ContractPaymentPlanDTO> plans;
+
+    public Long getOrganizationId() {
+        return organizationId;
+    }
+
+    public void setOrganizationId(Long organizationId) {
+        this.organizationId = organizationId;
+    }
 
     public Integer getAgeLimit() {
         return ageLimit;
