@@ -1422,6 +1422,8 @@ public class EquipmentProviderImpl implements EquipmentProvider {
 
     @Override
     public void createEquipmentPlanMaps(EquipmentInspectionEquipmentPlanMap map) {
+        Long id = this.sequenceProvider.getNextSequence(NameMapper.getSequenceDomainFromTablePojo(EquipmentInspectionEquipmentPlanMap.class));
+        map.setId(id);
         DSLContext context = this.dbProvider.getDslContext(AccessSpec.readWrite());
         EhEquipmentInspectionEquipmentPlanMapDao dao = new EhEquipmentInspectionEquipmentPlanMapDao(context.configuration());
         dao.insert(map);
@@ -2809,6 +2811,8 @@ public class EquipmentProviderImpl implements EquipmentProvider {
 
     @Override
     public void createEquipmentInspectionPlanGroupMap(EquipmentInspectionPlanGroupMap map) {
+        Long id = this.sequenceProvider.getNextSequence(NameMapper.getSequenceDomainFromTablePojo(EquipmentInspectionPlanGroupMap.class));
+        map.setId(id);
         DSLContext context = this.dbProvider.getDslContext(AccessSpec.readWrite());
         EhEquipmentInspectionPlanGroupMapDao dao = new EhEquipmentInspectionPlanGroupMapDao(context.configuration());
         dao.insert(map);

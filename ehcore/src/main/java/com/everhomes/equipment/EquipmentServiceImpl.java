@@ -257,6 +257,7 @@ import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Calendar;
 import java.util.Collections;
+import java.util.Comparator;
 import java.util.HashMap;
 import java.util.HashSet;
 import java.util.List;
@@ -780,7 +781,7 @@ public class EquipmentServiceImpl implements EquipmentService {
 	public EquipmentStandardsDTO findEquipmentStandard(DeleteEquipmentStandardCommand cmd) {
 		
 		EquipmentInspectionStandards standard = verifyEquipmentStandard(cmd.getStandardId());
-		
+
 		//填充关联设备数equipmentsCount
 		processEquipmentsCount(standard);
 		//填充执行周期repeat
@@ -5112,6 +5113,7 @@ public class EquipmentServiceImpl implements EquipmentService {
 		plan.setNamespaceId(exist.getNamespaceId());
 
 		//创建巡检计划的执行周期
+		repeatService.deleteRepeatSettingsById(cmd.getRepeatSettings().getId());
 		RepeatSettings repeatSettings = plan.getRepeatSettings();
 		repeatService.createRepeatSettings(repeatSettings);
 		plan.setRepeatSettingId(repeatSettings.getId());
@@ -5121,14 +5123,14 @@ public class EquipmentServiceImpl implements EquipmentService {
 			//mainId为空则创建副本 副本最多只有一份
 			plan.setPlanMainId(cmd.getId());
 			plan.setOperatorUid(UserContext.currentUserId());
+			plan.setUpdateTime(new Timestamp(DateHelper.currentGMTTime().getTime()));
 			equipmentProvider.createEquipmentInspectionPlans(plan);
 
 		} else {
-			plan.setOperatorUid(UserContext.currentUserId());
-			plan.setUpdateTime(new Timestamp(DateHelper.currentGMTTime().getTime()));
 			plan.setPlanMainId(exist.getPlanMainId());
+			plan.setCreateTime(exist.getCreateTime());
+			plan.setCreatorUid(exist.getCreatorUid());
 			equipmentProvider.updateEquipmentInspectionPlan(plan);
-			repeatService.deleteRepeatSettingsById(cmd.getRepeatSettings().getId());
 		}
 		updatePlan = plan;
 
@@ -5174,7 +5176,7 @@ public class EquipmentServiceImpl implements EquipmentService {
 
 		EquipmentInspectionPlans equipmentInspectionPlan = equipmentProvider.getEquipmmentInspectionPlanById(cmd.getId());
 		//填充巡检计划相关的巡检对象(需排序)
-		processEquipmentInspectionObjectsByPlanId(cmd.getId(),equipmentInspectionPlan);
+		processEquipmentInspectionObjectsByPlanId(cmd.getId(), equipmentInspectionPlan);
 		//填充计划的执行组审批组
 		equipmentProvider.populatePlanGroups(equipmentInspectionPlan);
 		//填充计划的执行周期
@@ -5396,12 +5398,17 @@ public class EquipmentServiceImpl implements EquipmentService {
 			relations.setEquipmentName(equipment.getName());
 			relations.setStandardName(standard.getName());
 			relations.setRepeatType(standard.getRepeatType());
+			relations.setOrder(map.getDefaultOrder());
 
 			relationDTOS.add(relations);
 
 		}
+		//sort equipmentStandardRelations
+		List<EquipmentStandardRelationDTO> relations = relationDTOS.stream()
+				.sorted(Comparator.comparing(EquipmentStandardRelationDTO::getOrder))
+				.collect(Collectors.toList());
 		//process  EquipmentStandardRelation to plan
-		equipmentInspectionPlan.setEquipmentStandardRelations(relationDTOS);
+		equipmentInspectionPlan.setEquipmentStandardRelations(relations);
 
 	}
 
