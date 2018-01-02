@@ -9962,6 +9962,7 @@ CREATE TABLE `eh_pm_tasks` (
   `remark_source` VARCHAR(32),
   `remark` VARCHAR(1024),
   `organization_name` VARCHAR(128) COMMENT '报修的任务的公司名称',
+  `if_use_feelist` tinyint DEFAULT '0' COMMENT '是否使用费用清单 0不使用 1 使用',
   PRIMARY KEY (`id`)
 ) ENGINE=INNODB DEFAULT CHARSET=utf8mb4;
 
