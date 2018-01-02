@@ -1773,4 +1773,15 @@ public class SocialSecurityServiceImpl implements SocialSecurityService {
         return response;
     }
 
+    public SocialSecurityInoutTimeDTO addSocialSecurityInOutTime(AddSocialSecurityInOutTimeCommand cmd){
+        SocialSecurityInoutTime inoutTime = new SocialSecurityInoutTime();
+        OrganizationMemberDetails memberDetail = organizationProvider.findOrganizationMemberDetailsByDetailId(cmd.getDetailId());
+
+        inoutTime.setNamespaceId(memberDetail.getNamespaceId());
+        inoutTime.setUserId(memberDetail.getTargetId());
+        inoutTime.setDetailId(memberDetail.getId());
+//        inoutTime.
+
+        return null;
+    }
 }
