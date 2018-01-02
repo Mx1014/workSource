@@ -1395,7 +1395,7 @@ public class NewsServiceImpl implements NewsService {
 				comment.setDeleteTime(new Timestamp(DateHelper.currentGMTTime().getTime()));
 				commentProvider.updateComment(EhNewsComment.class, comment);
 
-				news.setChildCount(news.getChildCount() - 1L);
+				news.setChildCount(news.getChildCount()<=0?0:news.getChildCount() - 1L);
 				newsProvider.updateNews(news);
 				return true;
 			});
