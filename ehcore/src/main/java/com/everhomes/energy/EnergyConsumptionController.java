@@ -722,4 +722,16 @@ public class EnergyConsumptionController extends ControllerBase {
         return response(energyConsumptionService.importTasksByEnergyPlan(cmd, files[0], userId));
     }
 
+    /**
+     * <p>同步离线数据</p>
+     * <b>URL: /energy/syncOfflineData</b>
+     */
+    @RestReturn(SyncOfflineDataResponse.class)
+    @RequestMapping("syncOfflineData")
+    public RestResponse syncOfflineData(SyncOfflineDataCommand cmd) {
+        return response(energyConsumptionService.syncOfflineData(cmd));
+    }
+
+
+
 }
