@@ -566,34 +566,36 @@ public class AssetProviderImpl implements AssetProvider {
                     dto.setBuildingName(r.getValue(t2.BUILDING_NAME));
                     dtos.add(dto);
                     });
-//
-//        for(int i = 0; i < dtos.size(); i ++){
-//            BillDTO dto = dtos.get(i);
-//            dto.setTargetName(targetName);
-//            if(org.apache.commons.lang.StringUtils.isEmpty(dto.getBillItemName())) {
-//                String projectLevelName = context.select(itemScope.PROJECT_LEVEL_NAME)
-//                        .from(itemScope, groupRule)
-//                        .where(groupRule.CHARGING_STANDARDS_ID.eq(itemScope.ID))
-//                        .and(groupRule.ID.eq(dto.getBillGroupRuleId()))
-//                        .fetchOne(itemScope.PROJECT_LEVEL_NAME);
-//                dto.setBillItemName(projectLevelName);
-//            }
-//            //查询billItem的滞纳金
-//            getReadOnlyContext().select(Tables.EH_PAYMENT_LATE_FINE.AMOUNT,Tables.EH_PAYMENT_LATE_FINE.NAME)
-//                    .from(Tables.EH_PAYMENT_LATE_FINE)
-//                    .leftOuterJoin(Tables.EH_PAYMENT_BILL_ITEMS)
-//                    .on(Tables.EH_PAYMENT_LATE_FINE.BILL_ITEM_ID.eq(Tables.EH_PAYMENT_BILL_ITEMS.ID))
-//                    .where(Tables.EH_PAYMENT_LATE_FINE.BILL_ITEM_ID.eq(dto.getBillItemId()))
-//                    .fetch()
-//                    .forEach(r -> {
-//                        BillDTO fineDTO = (BillDTO)dto.clone();
-//                        fineDTO.setBillItemName(r.getValue(Tables.EH_PAYMENT_LATE_FINE.NAME));
-//                        fineDTO.setAmountReceivable(r.getValue(Tables.EH_PAYMENT_LATE_FINE.AMOUNT));
-//                        fineDTO.setAmountReceived(new BigDecimal("0"));
-//                        fineDTO.setAmountOwed(r.getValue(Tables.EH_PAYMENT_LATE_FINE.AMOUNT));
-//                        dtos.add(fineDTO);
-//                    });
-//        }
+
+        for(int i = 0; i < dtos.size(); i ++){
+            BillDTO dto = dtos.get(i);
+            dto.setTargetName(targetName);
+            LOGGER.info("start to iterate name");
+            if(org.apache.commons.lang.StringUtils.isEmpty(dto.getBillItemName())) {
+                String projectLevelName = context.select(itemScope.PROJECT_LEVEL_NAME)
+                        .from(itemScope, groupRule)
+                        .where(groupRule.CHARGING_STANDARDS_ID.eq(itemScope.ID))
+                        .and(groupRule.ID.eq(dto.getBillGroupRuleId()))
+                        .fetchOne(itemScope.PROJECT_LEVEL_NAME);
+                dto.setBillItemName(projectLevelName);
+            }
+            LOGGER.info("start to iterate late fine");
+            //查询billItem的滞纳金
+            getReadOnlyContext().select(Tables.EH_PAYMENT_LATE_FINE.AMOUNT,Tables.EH_PAYMENT_LATE_FINE.NAME)
+                    .from(Tables.EH_PAYMENT_LATE_FINE)
+                    .leftOuterJoin(Tables.EH_PAYMENT_BILL_ITEMS)
+                    .on(Tables.EH_PAYMENT_LATE_FINE.BILL_ITEM_ID.eq(Tables.EH_PAYMENT_BILL_ITEMS.ID))
+                    .where(Tables.EH_PAYMENT_LATE_FINE.BILL_ITEM_ID.eq(dto.getBillItemId()))
+                    .fetch()
+                    .forEach(r -> {
+                        BillDTO fineDTO = (BillDTO)dto.clone();
+                        fineDTO.setBillItemName(r.getValue(Tables.EH_PAYMENT_LATE_FINE.NAME));
+                        fineDTO.setAmountReceivable(r.getValue(Tables.EH_PAYMENT_LATE_FINE.AMOUNT));
+                        fineDTO.setAmountReceived(new BigDecimal("0"));
+                        fineDTO.setAmountOwed(r.getValue(Tables.EH_PAYMENT_LATE_FINE.AMOUNT));
+                        dtos.add(fineDTO);
+                    });
+        }
         return dtos;
     }
 
