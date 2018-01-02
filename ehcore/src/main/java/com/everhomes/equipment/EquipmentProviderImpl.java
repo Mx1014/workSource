@@ -1493,7 +1493,7 @@ public class EquipmentProviderImpl implements EquipmentProvider {
     public void deleteEquipmentInspectionStandardMapByStandardId(Long standardId) {
         DSLContext context = this.dbProvider.getDslContext(AccessSpec.readWrite());
         context.delete(Tables.EH_EQUIPMENT_INSPECTION_EQUIPMENT_STANDARD_MAP)
-                .where(Tables.EH_EQUIPMENT_INSPECTION_EQUIPMENT_PLAN_MAP.STANDARD_ID.eq(standardId))
+                .where(Tables.EH_EQUIPMENT_INSPECTION_EQUIPMENT_STANDARD_MAP.STANDARD_ID.eq(standardId))
                 .execute();
     }
 
