@@ -340,9 +340,9 @@ CREATE TABLE `eh_social_security_inout_report` (
   KEY `i_eh_organization_id` (`organization_id`)
 ) ENGINE = INNODB DEFAULT CHARSET = utf8mb4 ;
 
--- 社保增减表
--- drop table eh_social_security_inout_month;
-CREATE TABLE `eh_social_security_inout_month` (
+-- 社保增减时间表
+-- drop table eh_social_security_inout_time;
+CREATE TABLE `eh_social_security_inout_time` (
   `id` BIGINT,
   `namespace_id` INT (11) DEFAULT '0',
   `organization_id` BIGINT,
