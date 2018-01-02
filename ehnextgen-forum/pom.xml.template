@@ -159,10 +159,10 @@
 	                    </execution>
 	                </executions>
 	            </plugin>
-	
 	        </plugins>
     	</pluginManagement>
     </build>
+
     <profiles>
     	<profile>
     		<id>codegen-tools</id>

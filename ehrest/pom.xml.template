@@ -129,6 +129,7 @@
 	            
 	        </plugins>
     </build>
+
     <profiles>
     	<profile>
     		<id>codegen-tools</id>
