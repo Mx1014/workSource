@@ -1847,7 +1847,7 @@ public class ParkingServiceImpl implements ParkingService {
 	}
 
 	@Override
-	public void refundParkingOrder(UpdateParkingOrderCommand cmd){
+	public void refundParkingOrder(RefundParkingOrderCommand cmd){
 		ParkingLot parkingLot = checkParkingLot(cmd.getOwnerType(), cmd.getOwnerId(), cmd.getParkingLotId());
 
 		long startTime = System.currentTimeMillis();
@@ -1868,7 +1868,7 @@ public class ParkingServiceImpl implements ParkingService {
 		parkingProvider.updateParkingRechargeOrder(order);
 	}
 
-	private void refundParkingOrderV2 (UpdateParkingOrderCommand cmd, ParkingRechargeOrder order) {
+	private void refundParkingOrderV2 (RefundParkingOrderCommand cmd, ParkingRechargeOrder order) {
 
 		Long refoundOrderNo = createOrderNo(System.currentTimeMillis());
 
@@ -1889,7 +1889,7 @@ public class ParkingServiceImpl implements ParkingService {
 		}
 	}
 
-	private void refundParkingOrderV1 (UpdateParkingOrderCommand cmd, ParkingRechargeOrder order) {
+	private void refundParkingOrderV1 (RefundParkingOrderCommand cmd, ParkingRechargeOrder order) {
 		PayZuolinRefundCommand refundCmd = new PayZuolinRefundCommand();
 		String refundApi =  configProvider.getValue(UserContext.getCurrentNamespaceId(),"pay.zuolin.refound", "POST /EDS_PAY/rest/pay_common/refund/save_refundInfo_record");
 		String appKey = configProvider.getValue(UserContext.getCurrentNamespaceId(),"pay.appKey", "");

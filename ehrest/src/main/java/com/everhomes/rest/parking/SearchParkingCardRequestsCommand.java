@@ -11,13 +11,16 @@ import com.everhomes.util.StringHelper;
  * <li>plateNumber: 车牌号</li>
  * <li>plateOwnerName: 车主名称</li>
  * <li>plateOwnerPhone: 车主手机号</li>
- * <li>status: 申请状态，{@link com.everhomes.rest.parking.ParkingCardRequestStatus}</li>
+ * <li>plateOwnerEntperiseName: plateOwnerEntperiseName</li>
  * <li>startDate: 开始时间</li>
  * <li>endDate: 结束时间</li>
- * <li>carBrand: 车品牌</li>
- * <li>carSerieName: 车系</li>
+ * <li>status: 申请状态，{@link com.everhomes.rest.parking.ParkingCardRequestStatus}</li>
  * <li>pageAnchor: 本页开始的锚点</li>
  * <li>pageSize: 每页的数量</li>
+ * <li>flowId: flowId</li>
+ * <li>carBrand: 车品牌</li>
+ * <li>carSerieName: 车系</li>
+ * <li>cardTypeId: 卡类型id</li>
  * </ul>
  */
 public class SearchParkingCardRequestsCommand {
@@ -33,7 +36,7 @@ public class SearchParkingCardRequestsCommand {
     private Byte status;
     private Long pageAnchor;
     private Integer pageSize;
-    
+
     private Long flowId;
     private String carBrand;
     private String carSerieName;
@@ -100,22 +103,22 @@ public class SearchParkingCardRequestsCommand {
     }
 
     public Long getStartDate() {
-		return startDate;
-	}
+        return startDate;
+    }
 
-	public void setStartDate(Long startDate) {
-		this.startDate = startDate;
-	}
+    public void setStartDate(Long startDate) {
+        this.startDate = startDate;
+    }
 
-	public Long getEndDate() {
-		return endDate;
-	}
+    public Long getEndDate() {
+        return endDate;
+    }
 
-	public void setEndDate(Long endDate) {
-		this.endDate = endDate;
-	}
+    public void setEndDate(Long endDate) {
+        this.endDate = endDate;
+    }
 
-	public Byte getStatus() {
+    public Byte getStatus() {
         return status;
     }
 
@@ -140,39 +143,39 @@ public class SearchParkingCardRequestsCommand {
     }
 
     public String getCarBrand() {
-		return carBrand;
-	}
+        return carBrand;
+    }
 
-	public void setCarBrand(String carBrand) {
-		this.carBrand = carBrand;
-	}
+    public void setCarBrand(String carBrand) {
+        this.carBrand = carBrand;
+    }
 
-	public String getCarSerieName() {
-		return carSerieName;
-	}
+    public String getCarSerieName() {
+        return carSerieName;
+    }
 
-	public void setCarSerieName(String carSerieName) {
-		this.carSerieName = carSerieName;
-	}
+    public void setCarSerieName(String carSerieName) {
+        this.carSerieName = carSerieName;
+    }
 
-	@Override
+    @Override
     public String toString() {
         return StringHelper.toJsonString(this);
     }
 
-	public Long getFlowId() {
-		return flowId;
-	}
+    public Long getFlowId() {
+        return flowId;
+    }
 
-	public void setFlowId(Long flowId) {
-		this.flowId = flowId;
-	}
+    public void setFlowId(Long flowId) {
+        this.flowId = flowId;
+    }
 
-	public String getPlateOwnerEntperiseName() {
-		return plateOwnerEntperiseName;
-	}
+    public String getPlateOwnerEntperiseName() {
+        return plateOwnerEntperiseName;
+    }
 
-	public void setPlateOwnerEntperiseName(String plateOwnerEntperiseName) {
-		this.plateOwnerEntperiseName = plateOwnerEntperiseName;
-	}
+    public void setPlateOwnerEntperiseName(String plateOwnerEntperiseName) {
+        this.plateOwnerEntperiseName = plateOwnerEntperiseName;
+    }
 }

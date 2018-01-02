@@ -2,8 +2,15 @@ package com.everhomes.rest.parking;
 
 import javax.validation.constraints.NotNull;
 
+
 /**
- * Created by Administrator on 2017/4/10.
+ * <ul>
+ * <li>ownerType: 归属的类型，{@link com.everhomes.rest.parking.ParkingOwnerType}</li>
+ * <li>ownerId: 归属的ID，如小区ID</li>
+ * <li>parkingLotId: 停车场ID</li>
+ * <li>plateNumber: 车牌</li>
+ * <li>organizationId: 公司id</li>
+ * </ul>
  */
 public class GetParkingCarLockInfoCommand {
     @NotNull

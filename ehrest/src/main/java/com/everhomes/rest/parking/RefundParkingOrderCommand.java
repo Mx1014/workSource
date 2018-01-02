@@ -1,17 +1,19 @@
 package com.everhomes.rest.parking;
 
+import com.everhomes.util.StringHelper;
+
 import javax.validation.constraints.NotNull;
 
 /**
  * <ul>
- * <li>ownerType: 归属的类型，{@link com.everhomes.rest.parking.ParkingOwnerType}</li>
- * <li>ownerId: 归属的ID，如小区ID</li>
- * <li>parkingLotId: 停车场ID</li>
- * <li>plateNumber: 车牌</li>
- * <li>lockStatus: {@link ParkingCarLockStatus}</li>
+ * <li>ownerType : 目前是community 参考 {@link ParkingOwnerType}</li>
+ * <li>ownerId : 目前是小区/园区ID</li>
+ * <li>parkingLotId : 停车场id</li>
+ * <li>plateNumber : 车牌</li>
+ * <li>orderId : 订单id</li>
  * </ul>
  */
-public class LockParkingCarCommand {
+public class RefundParkingOrderCommand {
     @NotNull
     private String ownerType;
     @NotNull
@@ -21,7 +23,7 @@ public class LockParkingCarCommand {
     @NotNull
     private String plateNumber;
 
-    private Byte lockStatus;
+    private Long orderId;
 
     public String getOwnerType() {
         return ownerType;
@@ -55,11 +57,16 @@ public class LockParkingCarCommand {
         this.plateNumber = plateNumber;
     }
 
-    public Byte getLockStatus() {
-        return lockStatus;
+    public Long getOrderId() {
+        return orderId;
     }
 
-    public void setLockStatus(Byte lockStatus) {
-        this.lockStatus = lockStatus;
+    public void setOrderId(Long orderId) {
+        this.orderId = orderId;
+    }
+
+    @Override
+    public String toString() {
+        return StringHelper.toJsonString(this);
     }
 }
