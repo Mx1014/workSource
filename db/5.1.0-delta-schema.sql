@@ -1,3 +1,8 @@
+-- 删除品质关联类型字段  start by  jiarui
+ALTER TABLE `eh_quality_inspection_model_community_map`
+  DROP COLUMN `category_id`;
+--  删除品质关联类型字段  end  by  jiarui
+
 -- 工作汇报1.0 add by nan.rong
 -- 工作汇报模板表
 CREATE TABLE `eh_work_report_templates` (
@@ -138,3 +143,4 @@ CREATE TABLE `eh_work_report_val_comment_attachments` (
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4;
 
 -- end by nan.rong
+
