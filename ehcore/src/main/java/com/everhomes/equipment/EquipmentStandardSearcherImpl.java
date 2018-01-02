@@ -1,18 +1,23 @@
 package com.everhomes.equipment;
 
+import com.everhomes.community.Community;
+import com.everhomes.community.CommunityProvider;
 import com.everhomes.configuration.ConfigurationProvider;
-
-import com.everhomes.entity.EntityType;
 import com.everhomes.listing.CrossShardListingLocator;
+import com.everhomes.portal.PortalService;
 import com.everhomes.repeat.RepeatService;
-
-import com.everhomes.repeat.RepeatSettings;
-import com.everhomes.rest.equipment.*;
+import com.everhomes.rest.acl.PrivilegeConstants;
+import com.everhomes.rest.equipment.EquipmentModelType;
+import com.everhomes.rest.equipment.EquipmentStandardStatus;
+import com.everhomes.rest.equipment.EquipmentStandardsDTO;
+import com.everhomes.rest.equipment.SearchEquipmentStandardsCommand;
+import com.everhomes.rest.equipment.SearchEquipmentStandardsResponse;
+import com.everhomes.rest.equipment.TargetIdFlag;
+import com.everhomes.rest.repeat.RepeatSettingsDTO;
 import com.everhomes.search.AbstractElasticSearch;
 import com.everhomes.search.EquipmentStandardSearcher;
 import com.everhomes.search.SearchUtils;
 import com.everhomes.settings.PaginationConfigHelper;
-import com.everhomes.rest.repeat.RepeatSettingsDTO;
 import com.everhomes.user.UserContext;
 import com.everhomes.user.UserPrivilegeMgr;
 import com.everhomes.util.ConvertHelper;
@@ -35,6 +40,7 @@ import org.springframework.stereotype.Component;
 import java.io.IOException;
 import java.util.ArrayList;
 import java.util.List;
+import java.util.Objects;
 
 @Component
 public class EquipmentStandardSearcherImpl extends AbstractElasticSearch implements EquipmentStandardSearcher{
@@ -240,7 +246,7 @@ public class EquipmentStandardSearcherImpl extends AbstractElasticSearch impleme
             for (EquipmentModelCommunityMap map : maps) {
                 EquipmentInspectionStandards standard = equipmentProvider.findStandardById(map.getModelId());
                 if (standard != null) {
-                    processRepeatSetting(standard);
+                   // processRepeatSetting(standard);
                     EquipmentStandardsDTO dto = ConvertHelper.convert(standard, EquipmentStandardsDTO.class);
                     dto.setDescription("");
                     if (null != standard.getRepeat()) {

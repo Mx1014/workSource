@@ -2862,8 +2862,6 @@ public class EquipmentProviderImpl implements EquipmentProvider {
 				.and(Tables.EH_EQUIPMENT_MODEL_COMMUNITY_MAP.MODEL_TYPE.eq(modelType))
 				.execute();
 	}
-        return results;
-    }
 
     @Override
     public void deleteEquipmentInspectionPlanGroupMapByPlanId(Long planId) {

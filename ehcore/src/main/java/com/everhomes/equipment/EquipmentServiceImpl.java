@@ -179,7 +179,6 @@ import com.everhomes.rest.quality.OwnerType;
 import com.everhomes.rest.quality.ProcessType;
 import com.everhomes.rest.quality.QualityGroupType;
 import com.everhomes.rest.quality.QualityServiceErrorCode;
-import com.everhomes.rest.repeat.RepeatServiceErrorCode;
 import com.everhomes.rest.repeat.TimeRangeDTO;
 import com.everhomes.rest.user.MessageChannelType;
 import com.everhomes.rest.user.UserServiceErrorCode;
@@ -419,6 +418,7 @@ public class EquipmentServiceImpl implements EquipmentService {
 			createEquipmentStandardsEquipmentsMap(standard, cmd.getEquipments());
 
 		} else {
+			EquipmentInspectionStandards exist = verifyEquipmentStandard(cmd.getId());
 			standard = ConvertHelper.convert(cmd, EquipmentInspectionStandards.class);
 			standard.setRepeatSettingId(exist.getRepeatSettingId());
 			standard.setStatus(exist.getStatus());
@@ -431,27 +431,6 @@ public class EquipmentServiceImpl implements EquipmentService {
 				standard.setStatus(EquipmentStandardStatus.NOT_COMPLETED.getCode());
 			} else {
 				standard.setStatus(EquipmentStandardStatus.ACTIVE.getCode());
-
-			if (EquipmentStandardStatus.NOT_COMPLETED.equals(EquipmentStandardStatus.fromStatus(standard.getStatus()))) {
-				if (cmd.getRepeat() == null) {
-					throw RuntimeErrorException.errorWith(RepeatServiceErrorCode.SCOPE,
-							RepeatServiceErrorCode.ERROR_REPEAT_SETTING_NOT_EXIST,
-							"执行周期为空");
-				}
-				if (cmd.getRepeat() != null) {
-					repeat = ConvertHelper.convert(cmd.getRepeat(), RepeatSettings.class);
-					if (cmd.getRepeat().getStartDate() != null)
-						repeat.setStartDate(new Date(cmd.getRepeat().getStartDate()));
-					if (cmd.getRepeat().getEndDate() != null)
-						repeat.setEndDate(new Date(cmd.getRepeat().getEndDate()));
-
-					repeat.setCreatorUid(user.getId());
-					repeatService.createRepeatSettings(repeat);
-
-					standard.setRepeatSettingId(repeat.getId());
-					standard.setStatus(EquipmentStandardStatus.ACTIVE.getCode());
-				}
-			}
 
 			//创建标准的模板表和item关系表
 			createEquipmentStandardItems(standard,cmd);
@@ -556,8 +535,15 @@ public class EquipmentServiceImpl implements EquipmentService {
 		standards.setItems(items);
 	}
 
-	/*private void unReviewEquipmentStandardRelations(EquipmentStandardMap map) {
-	private void checkUserPrivilege(Long orgId, Long privilegeId, Long communityId) {
+//	private void unReviewEquipmentStandardRelations(EquipmentStandardMap map) {
+//		map.setReviewStatus(EquipmentReviewStatus.WAITING_FOR_APPROVAL.getCode());
+//		map.setReviewResult(ReviewResult.NONE.getCode());
+//		map.setStatus(EquipmentStandardStatus.INACTIVE.getCode());
+//		equipmentProvider.updateEquipmentStandardMap(map);
+//		equipmentStandardMapSearcher.feedDoc(map);
+//
+//	}
+private void checkUserPrivilege(Long orgId, Long privilegeId, Long communityId) {
 //		ListServiceModuleAppsCommand listServiceModuleAppsCommand = new ListServiceModuleAppsCommand();
 //		listServiceModuleAppsCommand.setNamespaceId(UserContext.getCurrentNamespaceId());
 //		listServiceModuleAppsCommand.setModuleId(EquipmentConstant.EQUIPMENT_MODULE);
@@ -573,17 +559,8 @@ public class EquipmentServiceImpl implements EquipmentService {
 //			throw RuntimeErrorException.errorWith(ErrorCodes.SCOPE_GENERAL, ErrorCodes.ERROR_ACCESS_DENIED,
 //					"Insufficient privilege");
 //		}
-		userPrivilegeMgr.checkUserPrivilege(UserContext.currentUserId(), orgId, privilegeId, EquipmentConstant.EQUIPMENT_MODULE, null, null, null,communityId);
-	}
-
-	private void unReviewEquipmentStandardRelations(EquipmentStandardMap map) {
-		map.setReviewStatus(EquipmentReviewStatus.WAITING_FOR_APPROVAL.getCode());
-		map.setReviewResult(ReviewResult.NONE.getCode());
-		map.setStatus(EquipmentStandardStatus.INACTIVE.getCode());
-		equipmentProvider.updateEquipmentStandardMap(map);
-		equipmentStandardMapSearcher.feedDoc(map);
-
-	}*/
+	userPrivilegeMgr.checkUserPrivilege(UserContext.currentUserId(), orgId, privilegeId, EquipmentConstant.EQUIPMENT_MODULE, null, null, null,communityId);
+}
 
 	private EquipmentStandardsDTO converStandardToDto(EquipmentInspectionStandards standard) {
 		//processRepeatSetting(standard);
@@ -651,10 +628,6 @@ public class EquipmentServiceImpl implements EquipmentService {
 	        	return dto;
 	        }).collect(Collectors.toList());
 		}*/
-
-		standardDto.setRepeat(repeatDto);
-		standardDto.setExecutiveGroup(executiveGroup);
-		standardDto.setReviewGroup(reviewGroup);
 
 		//standardDto.setRepeat(repeatDto);
 		/*standardDto.setExecutiveGroup(executiveGroup);
@@ -935,8 +908,7 @@ public class EquipmentServiceImpl implements EquipmentService {
 		equipmentProvider.populateEquipments(standard);
 		//填充标准中的巡检项
 		equipmentProvider.populateItems(standard);
-
-		equipmentProvider.populateStandardGroups(standard);
+		//equipmentProvider.populateStandardGroups(standard);
 
 		EquipmentStandardsDTO dto = converStandardToDto(standard);
 
