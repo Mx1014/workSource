@@ -2054,6 +2054,10 @@ public class SequenceServiceImpl implements SequenceService {
         syncTableSequence(null, EhForumServiceTypes.class, Tables.EH_FORUM_SERVICE_TYPES.getName(), (dbContext) -> {
             return dbContext.select(Tables.EH_FORUM_SERVICE_TYPES.ID.max()).from(Tables.EH_FORUM_SERVICE_TYPES).fetchOne().value1();
         });
+
+        syncTableSequence(null, EhSocialSecurityInoutTime.class, Tables.EH_SOCIAL_SECURITY_INOUT_TIME.getName(), (dbContext) -> {
+            return dbContext.select(Tables.EH_SOCIAL_SECURITY_INOUT_TIME.ID.max()).from(Tables.EH_SOCIAL_SECURITY_INOUT_TIME).fetchOne().value1();
+        });
     }
 
     @SuppressWarnings("rawtypes")
