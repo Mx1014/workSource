@@ -102,5 +102,6 @@ public interface ServiceModuleProvider {
     Map<Long, ServiceModuleApp> listReflectionAcitveAppIdByNamespaceId(Integer namespaceId);
 
     List<ServiceModuleFunction> listFunctions(Long moduleId, List<Long> privilegeIds);
+    List<ServiceModuleFunction> listFunctionsByIds(List<Long> ids);
     List<ServiceModuleExcludeFunction> listExcludeFunctions(Integer namespaceId, Long comunityId, Long moduleId);
 }
