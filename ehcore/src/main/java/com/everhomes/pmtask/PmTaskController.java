@@ -563,6 +563,20 @@ public class PmTaskController extends ControllerBase {
         return resp;
     }
 
+    /**
+     * <b>URL: /pmtask/syncCategories</b>
+     * <p>给不同项目拷贝分类(用后删除)</p>
+     */
+    @RequestMapping("syncCategories")
+    @RestReturn(value=String.class)
+    public RestResponse syncCategories() {
+        pmTaskService.syncCategories();
+        RestResponse response = new RestResponse();
+        response.setErrorCode(ErrorCodes.SUCCESS);
+        response.setErrorDescription("OK");
+        return response;
+    }
+
     /*---------------------------- start 以下接口是为了给客户端打rest包，已经废弃----------------------------------*/
 	/**
      * <b>URL: /pmtask/getPrivileges</b>

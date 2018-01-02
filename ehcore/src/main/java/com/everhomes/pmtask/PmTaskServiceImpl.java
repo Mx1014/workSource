@@ -2561,4 +2561,20 @@ public class PmTaskServiceImpl implements PmTaskService {
 		flowService.processAutoStep(stepDTO);
 	}
 
+	@Override
+	public void syncCategories() {
+		List<Category> list = categoryProvider.listTaskCategories(null, 6L, null,
+				null, null);
+		List<Category> list2 = null;
+		while (list!=null && list.size()>0)
+			list.forEach(r->{
+				Integer namespaceId = r.getNamespaceId();
+				List<Community> communities = communityProvider.listCommunitiesByNamespaceId(namespaceId);
+				communities.forEach(p->{
+					Category category = ConvertHelper.convert(r,Category.class);
+					category.setId(null);
+					
+				});
+			});
+	}
 }

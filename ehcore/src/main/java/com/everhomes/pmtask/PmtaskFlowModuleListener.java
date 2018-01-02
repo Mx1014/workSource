@@ -13,6 +13,7 @@ import com.everhomes.flow.conditionvariable.FlowConditionStringVariable;
 import com.everhomes.flow.node.FlowGraphNodeEnd;
 import com.everhomes.general_form.GeneralFormVal;
 import com.everhomes.general_form.GeneralFormValProvider;
+import com.everhomes.portal.PortalService;
 import com.everhomes.rest.category.CategoryDTO;
 import com.everhomes.rest.flow.*;
 import com.everhomes.rest.general_approval.GeneralFormFieldType;
@@ -21,6 +22,9 @@ import com.everhomes.rest.general_approval.PostApprovalFormSubformItemValue;
 import com.everhomes.rest.general_approval.PostApprovalFormSubformValue;
 import com.everhomes.rest.parking.ParkingErrorCode;
 import com.everhomes.rest.pmtask.*;
+import com.everhomes.rest.portal.ListServiceModuleAppsCommand;
+import com.everhomes.rest.portal.ListServiceModuleAppsResponse;
+import com.everhomes.rest.portal.ServiceModuleAppDTO;
 import com.everhomes.rest.sms.SmsTemplateCode;
 import com.everhomes.rest.user.IdentifierType;
 import com.everhomes.sms.SmsProvider;
@@ -75,6 +79,8 @@ public class PmtaskFlowModuleListener implements FlowModuleListener {
 	private GeneralFormValProvider generalFormValProvider;
 	@Autowired
 	FlowEventLogProvider flowEventLogProvider;
+	@Autowired
+	private PortalService portalService;
 
 	private Long moduleId = FlowConstants.PM_TASK_MODULE;
 
@@ -571,20 +577,17 @@ public class PmtaskFlowModuleListener implements FlowModuleListener {
 	@Override
 	public List<FlowServiceTypeDTO> listServiceTypes(Integer namespaceId, String ownerType, Long ownerId) {
 
-		List<Category> categories = new ArrayList<>();
+		List<ServiceModuleAppDTO> apps = new ArrayList<>();
 		for (Long id: PmTaskAppType.TYPES) {
-			categories.addAll(categoryProvider.listTaskCategories(namespaceId, id, null,
-					null, null));
+			ListServiceModuleAppsCommand listServiceModuleAppsCommand = new ListServiceModuleAppsCommand();
+			listServiceModuleAppsCommand.setNamespaceId(namespaceId);
+			listServiceModuleAppsCommand.setModuleId(FlowConstants.PM_TASK_MODULE);
+			listServiceModuleAppsCommand.setCustomTag(String.valueOf(id));
+			ListServiceModuleAppsResponse app = portalService.listServiceModuleAppsWithConditon(listServiceModuleAppsCommand);
+			if (app!=null && app.getServiceModuleApps().size()>0)
+				apps.addAll(app.getServiceModuleApps());
 		}
-
-		if(namespaceId == 999983) {
-			EbeiPmTaskHandle handler = PlatformContext.getComponent(PmTaskHandle.PMTASK_PREFIX + PmTaskHandle.EBEI);
-			CategoryDTO dto = handler.createCategoryDTO();
-			Category category = ConvertHelper.convert(dto, Category.class);
-			categories.add(category);
-		}
-
-		return categories.stream().map(c -> {
+		return apps.stream().map(c -> {
 			FlowServiceTypeDTO dto = new FlowServiceTypeDTO();
 			dto.setId(c.getId());
 			dto.setNamespaceId(namespaceId);
