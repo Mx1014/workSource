@@ -43,7 +43,7 @@ import com.everhomes.rest.general_approval.GeneralFormDataSourceType;
 import com.everhomes.rest.general_approval.GeneralFormFieldType;
 import com.everhomes.rest.general_approval.PostApprovalFormItem;
 import com.everhomes.rest.general_approval.PostApprovalFormTextValue;
-import com.everhomes.rest.general_approval.PostGeneralFormCommand;
+import com.everhomes.rest.general_approval.PostGeneralFormValCommand;
 import com.everhomes.rest.general_approval.PostGeneralFormDTO;
 import com.everhomes.rest.techpark.expansion.ApplyEntryResponse;
 import com.everhomes.user.UserContext;
@@ -131,16 +131,16 @@ public class ZJAuthorizationModuleHandler implements AuthorizationModuleHandler 
     	return isdebug;
     }
 	@Override
-	public PostGeneralFormDTO personalAuthorization(PostGeneralFormCommand cmd) {
+	public PostGeneralFormDTO personalAuthorization(PostGeneralFormValCommand cmd) {
 		return authorization(cmd,PERSONAL_AUTHORIZATION);
 	}
 
 	@Override
-	public PostGeneralFormDTO organiztionAuthorization(PostGeneralFormCommand cmd) {
+	public PostGeneralFormDTO organiztionAuthorization(PostGeneralFormValCommand cmd) {
 		return authorization(cmd,ORGANIZATION_AUTHORIZATION);
 	}
 
-	public PostGeneralFormDTO authorization(PostGeneralFormCommand cmd, String type) {
+	public PostGeneralFormDTO authorization(PostGeneralFormValCommand cmd, String type) {
 		getSettinginfo(cmd);
 		Map<String, String> params = generateParams(cmd,type);
 		if(ORGANIZATION_AUTHORIZATION.equals(type)){
@@ -219,7 +219,7 @@ public class ZJAuthorizationModuleHandler implements AuthorizationModuleHandler 
 
 	}
 	//获取对应的对接放的url，appkey,secretkey
-	private void getSettinginfo(PostGeneralFormCommand cmd) {
+	private void getSettinginfo(PostGeneralFormValCommand cmd) {
 		this.isdebug = configProvider.getBooleanValue("debug.flag",false);
 		String stringCommunity = configProvider.getValue("zj_communites","人才公寓");
 		this.communites = stringCommunity.split(",");
@@ -243,7 +243,7 @@ public class ZJAuthorizationModuleHandler implements AuthorizationModuleHandler 
 		});
 	}
 
-	private PostGeneralFormDTO processGeneralFormDTO(PostGeneralFormCommand cmd, ZjgkJsonEntity<List<ZjgkResponse>> entity,String type, FlowCase flowCase) {
+	private PostGeneralFormDTO processGeneralFormDTO(PostGeneralFormValCommand cmd, ZjgkJsonEntity<List<ZjgkResponse>> entity, String type, FlowCase flowCase) {
 		PostGeneralFormDTO dto = ConvertHelper.convert(cmd, PostGeneralFormDTO.class);
 
 		List<PostApprovalFormItem> items = new ArrayList<>();
@@ -274,7 +274,7 @@ public class ZJAuthorizationModuleHandler implements AuthorizationModuleHandler 
 		return "zl://workflow/detail?flowCaseId="+flowCaseId+"&flowUserType="+string+"&moduleId="+moduleId  ;
 	}
 
-	private AuthorizationThirdPartyRecord createFamily(PostGeneralFormCommand cmd,ZjgkJsonEntity<List<ZjgkResponse>> entity, Map<String, String> params, String authorizationType) {
+	private AuthorizationThirdPartyRecord createFamily(PostGeneralFormValCommand cmd, ZjgkJsonEntity<List<ZjgkResponse>> entity, Map<String, String> params, String authorizationType) {
 		List<ZjgkResponse> list = entity.getResponse();
 		AuthorizationThirdPartyRecord record = null;
 		if(entity.isSuccess() && list != null && list.size() > 0){
@@ -387,7 +387,7 @@ public class ZJAuthorizationModuleHandler implements AuthorizationModuleHandler 
 	}
 
 	//调用认证接口，需要生成认证的command
-	private ClaimAddressCommand generateClaimAddressCommand(PostGeneralFormCommand cmd, ZjgkResponse zjgkResponse) {
+	private ClaimAddressCommand generateClaimAddressCommand(PostGeneralFormValCommand cmd, ZjgkResponse zjgkResponse) {
 		String communityName = zjgkResponse.getCommunityName();
 		List<Community> communities = communityProvider.listCommunityByNamespaceIdAndName(cmd.getNamespaceId(), communityName);
 		ClaimAddressCommand claimcmd = new ClaimAddressCommand();
@@ -403,8 +403,8 @@ public class ZJAuthorizationModuleHandler implements AuthorizationModuleHandler 
 		return claimcmd;
 	}
 
-	private AuthorizationThirdPartyRecord generateUserAuthorizationRecord(PostGeneralFormCommand cmd, Map<String, String> params,
-																		  String authorizationType,ZjgkJsonEntity<List<ZjgkResponse>> entity) {
+	private AuthorizationThirdPartyRecord generateUserAuthorizationRecord(PostGeneralFormValCommand cmd, Map<String, String> params,
+                                                                          String authorizationType, ZjgkJsonEntity<List<ZjgkResponse>> entity) {
 		AuthorizationThirdPartyRecord record = new AuthorizationThirdPartyRecord();
 		record.setNamespaceId(UserContext.getCurrentNamespaceId());
 		record.setOwnerType(cmd.getOwnerType());
@@ -427,7 +427,7 @@ public class ZJAuthorizationModuleHandler implements AuthorizationModuleHandler 
 		return record;
 	}
 
-	private FlowCase createWorkFlow(PostGeneralFormCommand cmd, ZjgkJsonEntity<List<ZjgkResponse>> entity, String authorizationType, Map<String, String> params) {
+	private FlowCase createWorkFlow(PostGeneralFormValCommand cmd, ZjgkJsonEntity<List<ZjgkResponse>> entity, String authorizationType, Map<String, String> params) {
 
 		GeneralModuleInfo ga = new GeneralModuleInfo();
 
@@ -516,7 +516,7 @@ public class ZJAuthorizationModuleHandler implements AuthorizationModuleHandler 
 //		return buffer.toString();
 //	}
 
-	private Map<String, String> generateParams(PostGeneralFormCommand cmd, String type){
+	private Map<String, String> generateParams(PostGeneralFormValCommand cmd, String type){
 		List<PostApprovalFormItem> values = cmd.getValues();
 		Map<String, String> params= new HashMap<String,String>();
 		//神码有点神，什么几把认证都要穿这个个几把。

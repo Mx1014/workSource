@@ -12,9 +12,6 @@ import com.everhomes.general_approval.GeneralApprovalVal;
 import com.everhomes.general_approval.GeneralApprovalValProvider;
 import com.everhomes.listing.ListingLocator;
 import com.everhomes.listing.ListingQueryBuilderCallback;
-import com.everhomes.rest.flow.*;
-import com.everhomes.listing.ListingLocator;
-import com.everhomes.listing.ListingQueryBuilderCallback;
 import com.everhomes.rest.flow.FlowCaseEntity;
 import com.everhomes.rest.flow.FlowCaseEntityType;
 import com.everhomes.rest.flow.FlowCaseFileDTO;
@@ -27,6 +24,7 @@ import com.everhomes.util.ConvertHelper;
 import com.everhomes.util.DateHelper;
 import com.everhomes.util.RuntimeErrorException;
 
+import com.everhomes.workReport.WorkReportService;
 import org.jooq.Condition;
 import org.jooq.Record;
 import org.jooq.SelectQuery;
@@ -39,284 +37,317 @@ import org.springframework.transaction.TransactionStatus;
 import org.springframework.util.StringUtils;
 
 import java.sql.Timestamp;
-import java.util.ArrayList;
-import java.util.Arrays;
-import java.util.List;
+import java.util.*;
 import java.util.stream.Collectors;
 
 @Component
 public class GeneralFormServiceImpl implements GeneralFormService {
 
-	private static final Logger LOGGER = LoggerFactory.getLogger(GeneralFormServiceImpl.class);
+    private static final Logger LOGGER = LoggerFactory.getLogger(GeneralFormServiceImpl.class);
 
-	@Autowired
-	private GeneralFormProvider generalFormProvider;
-	@Autowired
-	private DbProvider dbProvider;
-	@Autowired
-	private GeneralFormValProvider generalFormValProvider;
-	@Autowired
-	private ContentServerService contentServerService;
+    @Autowired
+    private GeneralFormProvider generalFormProvider;
+
+    @Autowired
+    private DbProvider dbProvider;
+
+    @Autowired
+    private GeneralFormValProvider generalFormValProvider;
+
+    @Autowired
+    private ContentServerService contentServerService;
 
     @Autowired
     private GeneralApprovalValProvider generalApprovalValProvider;
 
-	@Override
-	public GeneralFormDTO getTemplateByFormId(GetTemplateByFormIdCommand cmd) {
-		//
-		GeneralForm form = this.generalFormProvider.getActiveGeneralFormByOriginId(cmd.getFormId());
-		if(form == null )
-			throw RuntimeErrorException.errorWith(GeneralApprovalServiceErrorCode.SCOPE, 
-					GeneralApprovalServiceErrorCode.ERROR_FORM_NOTFOUND, "form not found");
+    @Override
+    public GeneralFormDTO getTemplateByFormId(GetTemplateByFormIdCommand cmd) {
+        GeneralForm form = this.generalFormProvider.getActiveGeneralFormByOriginId(cmd.getFormId());
+        if (form == null)
+            throw RuntimeErrorException.errorWith(GeneralApprovalServiceErrorCode.SCOPE,
+                    GeneralApprovalServiceErrorCode.ERROR_FORM_NOTFOUND, "form not found");
 
-		GeneralFormDTO dto = ConvertHelper.convert(form, GeneralFormDTO.class);
-//		form.setFormVersion(form.getFormVersion());
-		List<GeneralFormFieldDTO> fieldDTOs = JSONObject.parseArray(form.getTemplateText(), GeneralFormFieldDTO.class);
-//		//增加一个隐藏的field 用于存放sourceId
-//		GeneralFormFieldDTO sourceIdField = new GeneralFormFieldDTO();
-//		sourceIdField.setDataSourceType(GeneralFormDataSourceType.SOURCE_ID.getCode());
-//		sourceIdField.setFieldType(GeneralFormFieldType.SINGLE_LINE_TEXT.getCode());
-//		sourceIdField.setFieldName(GeneralFormDataSourceType.SOURCE_ID.getCode());
-//		sourceIdField.setRequiredFlag(NormalFlag.NEED.getCode());
-//		sourceIdField.setDynamicFlag(NormalFlag.NEED.getCode());
-//		sourceIdField.setVisibleType(GeneralFormDataVisibleType.HIDDEN.getCode());
-//		fieldDTOs.add(sourceIdField);
-		
-//		GeneralFormFieldDTO organizationIdField = new GeneralFormFieldDTO();
-//		organizationIdField.setDataSourceType(GeneralFormDataSourceType.ORGANIZATION_ID.getCode());
-//		organizationIdField.setFieldType(GeneralFormFieldType.SINGLE_LINE_TEXT.getCode());
-//		organizationIdField.setFieldName(GeneralFormDataSourceType.ORGANIZATION_ID.getCode());
-//		organizationIdField.setRequiredFlag(NormalFlag.NEED.getCode());
-//		organizationIdField.setDynamicFlag(NormalFlag.NEED.getCode());
-//		organizationIdField.setVisibleType(GeneralFormDataVisibleType.HIDDEN.getCode());
-//		fieldDTOs.add(organizationIdField);
+        GeneralFormDTO dto = ConvertHelper.convert(form, GeneralFormDTO.class);
+        List<GeneralFormFieldDTO> fieldDTOs = JSONObject.parseArray(form.getTemplateText(), GeneralFormFieldDTO.class);
+        dto.setFormFields(fieldDTOs);
+        return dto;
+    }
 
-		dto.setFormFields(fieldDTOs);
-		return dto;
-	}
+    @Override
+    public GeneralFormDTO getTemplateBySourceId(GetTemplateBySourceIdCommand cmd) {
+        GeneralFormModuleHandler handler = getOrderHandler(cmd.getSourceType());
 
-	@Override
-	public GeneralFormDTO   getTemplateBySourceId(GetTemplateBySourceIdCommand cmd) {
-		GeneralFormModuleHandler handler = getOrderHandler(cmd.getSourceType());
+        return handler.getTemplateBySourceId(cmd);
+    }
 
-		return handler.getTemplateBySourceId(cmd);
-	}
+    @Override
+    public PostGeneralFormDTO postGeneralForm(PostGeneralFormValCommand cmd) {
+        GeneralFormModuleHandler handler = getOrderHandler(cmd.getSourceType());
+        PostGeneralFormDTO dto = handler.postGeneralFormVal(cmd);
 
-	@Override
-	public PostGeneralFormDTO postGeneralForm(PostGeneralFormCommand cmd) {
-		GeneralFormModuleHandler handler = getOrderHandler(cmd.getSourceType());
-		PostGeneralFormDTO dto = handler.postGeneralForm(cmd);
+        return dto;
+    }
 
-		return dto;
-	}
+    private GeneralFormModuleHandler getOrderHandler(String type) {
+        String handler = GeneralFormModuleHandler.GENERAL_FORM_MODULE_HANDLER_PREFIX + type;
+        return PlatformContext.getComponent(handler);
+    }
 
-	private GeneralFormModuleHandler getOrderHandler(String type) {
-		String handler = GeneralFormModuleHandler.GENERAL_FORM_MODULE_HANDLER_PREFIX + type;
-		return PlatformContext.getComponent(handler);
-	}
+    @Override
+    public void addGeneralFormValues(addGeneralFormValuesCommand cmd) {
+        // 把values 存起来
+        if (null != cmd.getValues()) {
+            GeneralForm form = generalFormProvider.getActiveGeneralFormByOriginId(cmd.getGeneralFormId());
 
-	@Override
-	public void addGeneralFormValues(addGeneralFormValuesCommand cmd) {
-		// 把values 存起来
-		if (null != cmd.getValues()) {
-			GeneralForm form = generalFormProvider.getActiveGeneralFormByOriginId(cmd.getGeneralFormId());
+            dbProvider.execute(status -> {
+                if (form.getStatus().equals(GeneralFormStatus.CONFIG.getCode())) {
+                    // 使用表单/审批 注意状态 config
+                    form.setStatus(GeneralFormStatus.RUNNING.getCode());
+                    generalFormProvider.updateGeneralForm(form);
+                }
 
-			dbProvider.execute(status -> {
-				if (form.getStatus().equals(GeneralFormStatus.CONFIG.getCode())) {
-					// 使用表单/审批 注意状态 config
-					form.setStatus(GeneralFormStatus.RUNNING.getCode());
-					generalFormProvider.updateGeneralForm(form);
-				}
+                for (PostApprovalFormItem val : cmd.getValues()) {
+                    GeneralFormVal obj = new GeneralFormVal();
+                    //与表单信息一致
+                    obj.setNamespaceId(form.getNamespaceId());
+                    obj.setOrganizationId(form.getOrganizationId());
+                    obj.setOwnerId(form.getOwnerId());
+                    obj.setOwnerType(form.getOwnerType());
+                    obj.setModuleId(form.getModuleId());
+                    obj.setModuleType(form.getModuleType());
+                    obj.setFormOriginId(form.getFormOriginId());
+                    obj.setFormVersion(form.getFormVersion());
 
-				for (PostApprovalFormItem val : cmd.getValues()) {
-					GeneralFormVal obj = new GeneralFormVal();
-					//与表单信息一致
-					obj.setNamespaceId(form.getNamespaceId());
-					obj.setOrganizationId(form.getOrganizationId());
-					obj.setOwnerId(form.getOwnerId());
-					obj.setOwnerType(form.getOwnerType());
-					obj.setModuleId(form.getModuleId());
-					obj.setModuleType(form.getModuleType());
-					obj.setFormOriginId(form.getFormOriginId());
-					obj.setFormVersion(form.getFormVersion());
+                    obj.setSourceType(cmd.getSourceType());
+                    obj.setSourceId(cmd.getSourceId());
+                    obj.setFieldName(val.getFieldName());
+                    obj.setFieldType(val.getFieldType());
+                    obj.setFieldValue(val.getFieldValue());
+                    generalFormValProvider.createGeneralFormVal(obj);
+                }
+                return null;
+            });
+        }
+    }
 
-					obj.setSourceType(cmd.getSourceType());
-					obj.setSourceId(cmd.getSourceId());
-					obj.setFieldName(val.getFieldName());
-					obj.setFieldType(val.getFieldType());
-					obj.setFieldValue(val.getFieldValue());
-					generalFormValProvider.createGeneralFormVal(obj);
-				}
-				return null;
-			});
-		}
-	}
+    @Override
+    public List<PostApprovalFormItem> getGeneralFormValues(GetGeneralFormValuesCommand cmd) {
+        List<PostApprovalFormItem> results = new ArrayList<>();
+        List<GeneralFormVal> values = generalFormValProvider.queryGeneralFormVals(cmd.getSourceType(), cmd.getSourceId());
 
-	@Override
-	public List<PostApprovalFormItem> getGeneralFormValues(GetGeneralFormValuesCommand cmd) {
-		List<PostApprovalFormItem> result = new ArrayList<>();
-		List<GeneralFormVal> vals = generalFormValProvider.queryGeneralFormVals(cmd.getSourceType(), cmd.getSourceId());
+        if (null != values && values.size() != 0) {
+            GeneralForm form = this.generalFormProvider.getActiveGeneralFormByOriginIdAndVersion(
+                    values.get(0).getFormOriginId(), values.get(0).getFormVersion());
+            List<GeneralFormFieldDTO> fieldDTOs = JSONObject.parseArray(form.getTemplateText(),
+                    GeneralFormFieldDTO.class);
 
-		if (null != vals && vals.size() != 0) {
-			GeneralForm form = this.generalFormProvider.getActiveGeneralFormByOriginIdAndVersion(
-					vals.get(0).getFormOriginId(), vals.get(0).getFormVersion());
-			LOGGER.info("!!!!!!!!!!!!!!!!!!!!!!!!!!!!, form={}, id={}, version={}", form, vals.get(0).getFormOriginId(), vals.get(0).getFormVersion());
-			List<GeneralFormFieldDTO> fieldDTOs = JSONObject.parseArray(form.getTemplateText(),
-					GeneralFormFieldDTO.class);
+            if (null == cmd.getOriginFieldFlag()) {
+                cmd.setOriginFieldFlag(NormalFlag.NONEED.getCode());
+            }
 
-			if (null == cmd.getOriginFieldFlag()) {
-				cmd.setOriginFieldFlag(NormalFlag.NONEED.getCode());
-			}
+            for (GeneralFormVal val : values) {
+                try {
+                    GeneralFormFieldDTO dto = getFieldDTO(val.getFieldName(), fieldDTOs);
+                    //  若没有找到字段则跳过
+                    if (null == dto) {
+//						LOGGER.error("+++++++++++++++++++error! cannot fand this field  name :["+val.getFieldName()+"] \n form   "+JSON.toJSONString(fieldDTOs));
+                        continue;
+                    }
+                    //  若没有值则不用返回
+                    if (StringUtils.isEmpty(val.getFieldValue())) {
+                        continue;
+                    }
+                    PostApprovalFormItem formVal = new PostApprovalFormItem();
 
-			for (GeneralFormVal val : vals) {
-				try{
+                    if (NormalFlag.NEED.getCode() == cmd.getOriginFieldFlag()) {
+                        formVal.setFieldName(dto.getFieldName());
+                        formVal.setFieldDisplayName(dto.getFieldDisplayName());
+                    } else {
+                        formVal.setFieldName(dto.getFieldDisplayName() == null ? dto.getFieldName() : dto.getFieldDisplayName());
+                    }
+                    formVal.setFieldType(val.getFieldType());
 
-					GeneralFormFieldDTO dto = getFieldDTO(val.getFieldName(),fieldDTOs);
-					if(null == dto ){
-						LOGGER.error("+++++++++++++++++++error! cannot fand this field  name :["+val.getFieldName()+"] \n form   "+JSON.toJSONString(fieldDTOs));
-						continue;
-					}
-					if (StringUtils.isEmpty(val.getFieldValue())) {
-						continue;
-					}
-					PostApprovalFormItem formVal = new PostApprovalFormItem();
+                    GeneralFormFieldType fieldType = GeneralFormFieldType.fromCode(val.getFieldType());
+                    if (null != fieldType) {
+                        switch (GeneralFormFieldType.fromCode(val.getFieldType())) {
+                            case SINGLE_LINE_TEXT:
+                            case NUMBER_TEXT:
+                            case DATE:
+                            case DROP_BOX:
+                                results.add(processDropBoxField(formVal, val.getFieldValue(), cmd.getOriginFieldFlag()));
+                                break;
+                            case MULTI_LINE_TEXT:
+                                results.add(processMultiLineTextField(formVal, val.getFieldValue(), cmd.getOriginFieldFlag()));
+                                break;
+                            case IMAGE:
+                                formVal = processImageField(formVal, val.getFieldValue());
+                                if (formVal != null)
+                                    results.add(formVal);
+                                break;
+                            case FILE:
+                                formVal = processFileField(formVal, val.getFieldValue());
+                                if (formVal != null)
+                                    results.add(formVal);
+                                break;
+                            case INTEGER_TEXT:
+                                results.add(processIntegerTextField(formVal, val.getFieldValue(), cmd.getOriginFieldFlag()));
+                                break;
+                            case SUBFORM:
+                                results.add(processSubFormField(formVal, dto, val.getFieldValue(), cmd.getOriginFieldFlag()));
+                                break;
+                        }
+                    }
+                } catch (NullPointerException e) {
+                    LOGGER.error(" ********** null pointer val = " + JSON.toJSONString(val), e);
+                } catch (Exception e) {
+                    LOGGER.error(" ********** error  = " + JSON.toJSONString(val), e);
+                }
+            }
+        }
+        return results;
+    }
 
-					if (NormalFlag.NEED.getCode() == cmd.getOriginFieldFlag()) {
-						formVal.setFieldName(dto.getFieldName());
-						formVal.setFieldDisplayName(dto.getFieldDisplayName());
-					}else {
-						formVal.setFieldName(dto.getFieldDisplayName() == null ? dto.getFieldName() : dto.getFieldDisplayName());
-					}
-					formVal.setFieldType(val.getFieldType());
+    /**********     form field process start      **********/
 
-					GeneralFormFieldType fieldType = GeneralFormFieldType.fromCode(val.getFieldType());
-					if (null != fieldType) {
-						switch (GeneralFormFieldType.fromCode(val.getFieldType())) {
-							case SINGLE_LINE_TEXT:
-							case NUMBER_TEXT:
-							case DATE:
-							case DROP_BOX :
-								if (NormalFlag.NEED.getCode() == cmd.getOriginFieldFlag()) {
-									formVal.setFieldValue(val.getFieldValue());
-								}else{
-									formVal.setFieldValue(JSON.parseObject(val.getFieldValue(), PostApprovalFormTextValue.class).getText());
-								}
-								result.add(formVal);
-								break;
-							case MULTI_LINE_TEXT:
-								if (NormalFlag.NEED.getCode() == cmd.getOriginFieldFlag()) {
-									formVal.setFieldValue(val.getFieldValue());
-								}else{
-									formVal.setFieldValue(JSON.parseObject(val.getFieldValue(), PostApprovalFormTextValue.class).getText());
-								}
-								result.add(formVal);
-								break;
-							case IMAGE:
-								//工作流images怎么传
-								PostApprovalFormImageValue imageValue = JSON.parseObject(val.getFieldValue(), PostApprovalFormImageValue.class);
-								List<String> urls = new ArrayList<>();
-								for(String uriString : imageValue.getUris()){
-									String url = this.contentServerService.parserUri(uriString, EntityType.USER.getCode(), UserContext.current().getUser().getId());
-									urls.add(url);
-								}
-								imageValue.setUrls(urls);
-								formVal.setFieldValue(imageValue.toString());
-//							PostApprovalFormItem formVal2 = ConvertHelper.convert(formVal, PostApprovalFormItem.class);
-								result.add(formVal);
-								break;
-							case FILE:
-								//TODO:工作流需要新增类型file
-								PostApprovalFormFileValue fileValue = JSON.parseObject(val.getFieldValue(), PostApprovalFormFileValue.class);
-								if (null == fileValue || fileValue.getFiles() == null )
-									break;
-								List<FlowCaseFileDTO> files = new ArrayList<>();
-								for(PostApprovalFormFileDTO dto2 : fileValue.getFiles()){
-									FlowCaseFileDTO fileDTO = new FlowCaseFileDTO();
-									String url = this.contentServerService.parserUri(dto2.getUri(), EntityType.USER.getCode(), UserContext.current().getUser().getId());
-									ContentServerResource resource = contentServerService.findResourceByUri(dto2.getUri());
-									fileDTO.setUri(dto2.getUri());
-									fileDTO.setUrl(url);
-									fileDTO.setFileName(dto2.getFileName());
-									fileDTO.setFileSize(resource.getResourceSize());
-									files.add(fileDTO);
-								}
-								FlowCaseFileValue value = new FlowCaseFileValue();
-								value.setFiles(files);
-								formVal.setFieldValue(JSON.toJSONString(value));
-								result.add(formVal);
-								break;
-							case INTEGER_TEXT:
-								if (NormalFlag.NEED.getCode() == cmd.getOriginFieldFlag()) {
-									formVal.setFieldValue(val.getFieldValue());
-								}else{
-									formVal.setFieldValue(JSON.parseObject(val.getFieldValue(), PostApprovalFormTextValue.class).getText());
-								}
-								result.add(formVal);
-								break;
-							case SUBFORM:
+    private PostApprovalFormItem processDropBoxField(PostApprovalFormItem formVal, String jsonVal, Byte originFieldFlag) {
+        if (NormalFlag.NEED.getCode() == originFieldFlag) {
+            formVal.setFieldValue(jsonVal);
+        } else {
+            formVal.setFieldValue(JSON.parseObject(jsonVal, PostApprovalFormTextValue.class).getText());
+        }
+        return formVal;
+    }
 
-//								PostApprovalFormSubformValue subFormValue = JSON.parseObject(val.getFieldValue(), PostApprovalFormSubformValue.class);
-//								//取出设置的子表单fields
-//								GeneralFormSubformDTO subFromExtra = JSON.parseObject(dto.getFieldExtra(), GeneralFormSubformDTO.class) ;
-//								//给子表单计数从1开始
-//								int formCount = 1;
-//								//循环取出每一个子表单值
-//								for(PostApprovalFormSubformItemValue subForm1:subFormValue.getForms()){
-//									e = new FlowCaseEntity();
-//									e.setKey(dto.getFieldDisplayName()==null?dto.getFieldName():dto.getFieldDisplayName());
-//									e.setEntityType(FlowCaseEntityType.LIST.getCode());
-//									e.setValue(formCount++ +"");
-//									entities.add(e);
-//									List<GeneralApprovalVal> subVals = new ArrayList<>();
-//									//循环取出一个子表单的每一个字段值
-//									for(PostApprovalFormItem subFromValue1:subForm1.getValues()){
-//										GeneralApprovalVal obj =  new GeneralApprovalVal();
-//										obj.setFieldName(subFromValue1.getFieldName());
-//										obj.setFieldType(subFromValue1.getFieldType());
-//										obj.setFieldStr3(subFromValue1.getFieldValue());
-//										subVals.add(obj);
-//									}
-//									List<FlowCaseEntity> subSingleEntities = new ArrayList<>();
-//									processEntities(subSingleEntities, subVals,subFromExtra.getFormFields());
-//									entities.addAll(subSingleEntities);
-//								}
-								break;
-						}
-					}
-				}catch(NullPointerException e){
-					LOGGER.error(" ********** 空指针错误  val = "+JSON.toJSONString(val), e);
-				}catch(Exception e){
-					LOGGER.error(" ********** 这是什么错误  = "+JSON.toJSONString(val), e);
+    private PostApprovalFormItem processMultiLineTextField(PostApprovalFormItem formVal, String jsonVal, Byte originFieldFlag) {
+        if (NormalFlag.NEED.getCode() == originFieldFlag) {
+            formVal.setFieldValue(jsonVal);
+        } else {
+            formVal.setFieldValue(JSON.parseObject(jsonVal, PostApprovalFormTextValue.class).getText());
+        }
+        return formVal;
+    }
 
-				}
-			}
-		}
+    private PostApprovalFormItem processImageField(PostApprovalFormItem formVal, String jsonVal) {
+        PostApprovalFormImageValue imageObj = JSON.parseObject(jsonVal, PostApprovalFormImageValue.class);
+        if (null == imageObj || imageObj.getUris() == null)
+            return null;
+        GeneralFormImageValue imageValue = new GeneralFormImageValue();
+        imageValue.setUris(imageObj.getUris());
+        List<String> urls = new ArrayList<>();
+        for (String uriString : imageObj.getUris()) {
+            String url = this.contentServerService.parserUri(uriString, EntityType.USER.getCode(), UserContext.current().getUser().getId());
+            urls.add(url);
+        }
+        imageValue.setUrls(urls);
+        formVal.setFieldValue(imageValue.toString());
+        return formVal;
+    }
 
-		return result;
-	}
+    private PostApprovalFormItem processFileField(PostApprovalFormItem formVal, String jsonVal) {
+        PostApprovalFormFileValue fileObj = JSON.parseObject(jsonVal, PostApprovalFormFileValue.class);
+        if (null == fileObj || fileObj.getFiles() == null)
+            return null;
+        List<GeneralFormFileValueDTO> files = new ArrayList<>();
+        for (PostApprovalFormFileDTO dto2 : fileObj.getFiles()) {
+            GeneralFormFileValueDTO fileDTO = new GeneralFormFileValueDTO();
+            String url = this.contentServerService.parserUri(dto2.getUri(), EntityType.USER.getCode(), UserContext.current().getUser().getId());
+            ContentServerResource resource = contentServerService.findResourceByUri(dto2.getUri());
+            fileDTO.setUri(dto2.getUri());
+            fileDTO.setUrl(url);
+            fileDTO.setFileName(dto2.getFileName());
+            fileDTO.setFileSize(resource.getResourceSize());
+            files.add(fileDTO);
+        }
+        GeneralFormFileValue fileValue = new GeneralFormFileValue();
+        fileValue.setFiles(files);
+        formVal.setFieldValue(fileValue.toString());
+        return formVal;
+    }
 
-	@Override
-	public List<FlowCaseEntity> getGeneralFormFlowEntities(GetGeneralFormValuesCommand cmd) {
-		return getGeneralFormFlowEntities(cmd, false);
-	}
-		
-	@Override
-	public List<FlowCaseEntity> getGeneralFormFlowEntities(GetGeneralFormValuesCommand cmd, boolean showDefaultFields) {
+    private PostApprovalFormItem processIntegerTextField(PostApprovalFormItem formVal, String jsonVal, Byte originFieldFlag) {
+        if (NormalFlag.NEED.getCode() == originFieldFlag) {
+            formVal.setFieldValue(jsonVal);
+        } else {
+            formVal.setFieldValue(JSON.parseObject(jsonVal, PostApprovalFormTextValue.class).getText());
+        }
+        return formVal;
+    }
 
-		List<GeneralFormVal> vals = generalFormValProvider.queryGeneralFormVals(cmd.getSourceType(), cmd.getSourceId());
+    private PostApprovalFormItem processSubFormField(PostApprovalFormItem formVal, GeneralFormFieldDTO dto, String jsonVal, Byte originFieldFlag) {
+        //  取出子表单字段值
+        PostApprovalFormSubformValue postSubFormValue = JSON.parseObject(jsonVal, PostApprovalFormSubformValue.class);
+        List<GeneralFormSubFormValueDTO> subForms = new ArrayList<>();
+        //  解析子表单的值
+        for (PostApprovalFormSubformItemValue itemValue : postSubFormValue.getForms()) {
+            subForms.add(processSubFormItemField(dto.getFieldExtra(), itemValue, originFieldFlag));
+        }
+        GeneralFormSubFormValue subFormValue = new GeneralFormSubFormValue();
+        subFormValue.setSubForms(subForms);
+        formVal.setFieldValue(subFormValue.toString());
+        return formVal;
+    }
 
-		List<FlowCaseEntity> entities = new ArrayList<>();
+    private GeneralFormSubFormValueDTO processSubFormItemField(String extraJson, PostApprovalFormSubformItemValue value, Byte originFieldFlag) {
+        //  1.取出子表单字段初始内容
+        //  2.将子表单中的值解析
+        //  3.将得到的Value放入原有的Extra类中，并组装放入fieldValue中
+        GeneralFormSubFormValueDTO result = JSON.parseObject(extraJson, GeneralFormSubFormValueDTO.class);
+        Map<String, String> fieldMap = new HashMap<>();
 
-		if (null != vals && vals.size() != 0) {
-			GeneralForm form = this.generalFormProvider.getActiveGeneralFormByOriginIdAndVersion(
-					vals.get(0).getFormOriginId(), vals.get(0).getFormVersion());
-			List<GeneralFormFieldDTO> fieldDTOs = JSONObject.parseArray(form.getTemplateText(),
-					GeneralFormFieldDTO.class);
+        for (PostApprovalFormItem formVal : value.getValues()) {
+            switch (GeneralFormFieldType.fromCode(formVal.getFieldType())) {
+                case SINGLE_LINE_TEXT:
+                case NUMBER_TEXT:
+                case DATE:
+                case DROP_BOX:
+                    processDropBoxField(formVal, formVal.getFieldValue(), originFieldFlag);
+                    break;
+                case MULTI_LINE_TEXT:
+                    processMultiLineTextField(formVal, formVal.getFieldValue(), originFieldFlag);
+                    break;
+                case IMAGE:
+                    processImageField(formVal, formVal.getFieldValue());
+                    break;
+                case FILE:
+                    processFileField(formVal, formVal.getFieldValue());
+                    break;
+                case INTEGER_TEXT:
+                    processIntegerTextField(formVal, formVal.getFieldValue(), originFieldFlag);
+                    break;
+                case SUBFORM:
+                    break;
+            }
+            fieldMap.put(formVal.getFieldName(), formVal.getFieldValue());
+        }
+        for (GeneralFormFieldDTO dto : result.getFormFields())
+            dto.setFieldValue(fieldMap.get(dto.getFieldName()));
+        return result;
+    }
 
-			processFlowEntities(entities, vals, fieldDTOs, showDefaultFields);
-		}
-		return entities;
-	}
+    /**********     form field process end      **********/
+
+    @Override
+    public List<FlowCaseEntity> getGeneralFormFlowEntities(GetGeneralFormValuesCommand cmd) {
+        return getGeneralFormFlowEntities(cmd, false);
+    }
+
+    @Override
+    public List<FlowCaseEntity> getGeneralFormFlowEntities(GetGeneralFormValuesCommand cmd, boolean showDefaultFields) {
+
+        List<GeneralFormVal> vals = generalFormValProvider.queryGeneralFormVals(cmd.getSourceType(), cmd.getSourceId());
+
+        List<FlowCaseEntity> entities = new ArrayList<>();
+
+        if (null != vals && vals.size() != 0) {
+            GeneralForm form = this.generalFormProvider.getActiveGeneralFormByOriginIdAndVersion(
+                    vals.get(0).getFormOriginId(), vals.get(0).getFormVersion());
+            List<GeneralFormFieldDTO> fieldDTOs = JSONObject.parseArray(form.getTemplateText(),
+                    GeneralFormFieldDTO.class);
+
+            processFlowEntities(entities, vals, fieldDTOs, showDefaultFields);
+        }
+        return entities;
+    }
 
     @Override
     public GeneralFormFieldDTO getGeneralFormValueByOwner(String moduleType, Long moduleId, String ownerType, Long ownerId, String fieldName) {
@@ -345,161 +376,162 @@ public class GeneralFormServiceImpl implements GeneralFormService {
     }
 
     @Override
-	public void processFlowEntities(List<FlowCaseEntity> entities, List<GeneralFormVal> vals, List<GeneralFormFieldDTO> fieldDTOs) {
-		processFlowEntities(entities, vals, fieldDTOs, false);
-	}
-	
-	@Override
-	public void processFlowEntities(List<FlowCaseEntity> entities, List<GeneralFormVal> vals, List<GeneralFormFieldDTO> fieldDTOs, boolean showDefaultFields) {
+    public void processFlowEntities(List<FlowCaseEntity> entities, List<GeneralFormVal> vals, List<GeneralFormFieldDTO> fieldDTOs) {
+        processFlowEntities(entities, vals, fieldDTOs, false);
+    }
 
-		List<String> defaultFields = Arrays.stream(GeneralFormDataSourceType.values()).map(GeneralFormDataSourceType::getCode)
-				.collect(Collectors.toList());
+    @Override
+    public void processFlowEntities(List<FlowCaseEntity> entities, List<GeneralFormVal> vals, List<GeneralFormFieldDTO> fieldDTOs, boolean showDefaultFields) {
 
-		for (GeneralFormVal val : vals) {
-			try{
-				if (showDefaultFields || !defaultFields.contains(val.getFieldName())) {
-					// 不在默认fields的就是自定义字符串，组装这些
-					GeneralFormFieldDTO dto = getFieldDTO(val.getFieldName(), fieldDTOs);
-					if(null == dto || GeneralFormDataVisibleType.fromCode(dto.getVisibleType()) == GeneralFormDataVisibleType.HIDDEN){
-						LOGGER.error("+++++++++++++++++++error! cannot fand this field  name :["+val.getFieldName()+"] \n form   "+JSON.toJSONString(fieldDTOs));
-						continue;
-					}
+        List<String> defaultFields = Arrays.stream(GeneralFormDataSourceType.values()).map(GeneralFormDataSourceType::getCode)
+                .collect(Collectors.toList());
 
-					entities.addAll(resolveFormVal(dto, val));
+        for (GeneralFormVal val : vals) {
+            try {
+                if (showDefaultFields || !defaultFields.contains(val.getFieldName())) {
+                    // 不在默认fields的就是自定义字符串，组装这些
+                    GeneralFormFieldDTO dto = getFieldDTO(val.getFieldName(), fieldDTOs);
+                    if (null == dto || GeneralFormDataVisibleType.fromCode(dto.getVisibleType()) == GeneralFormDataVisibleType.HIDDEN) {
+                        LOGGER.error("+++++++++++++++++++error! cannot fand this field  name :[" + val.getFieldName() + "] \n form   " + JSON.toJSONString(fieldDTOs));
+                        continue;
+                    }
 
-				}
-			}catch(NullPointerException e){
-				LOGGER.error(" ********** 空指针错误  val = "+JSON.toJSONString(val), e);
-			}catch(Exception e){
-				LOGGER.error(" ********** 这是什么错误  = "+JSON.toJSONString(val), e);
+                    entities.addAll(resolveFormVal(dto, val));
 
-			}
-		}
-	}
-	@Override
-	public List<FlowCaseEntity> resolveFormVal(GeneralFormFieldDTO dto, GeneralFormVal val) {
+                }
+            } catch (NullPointerException e) {
+                LOGGER.error(" ********** 空指针错误  val = " + JSON.toJSONString(val), e);
+            } catch (Exception e) {
+                LOGGER.error(" ********** 这是什么错误  = " + JSON.toJSONString(val), e);
 
-		List<FlowCaseEntity> entities = new ArrayList<>();
-		FlowCaseEntity e = new FlowCaseEntity();
+            }
+        }
+    }
 
-		e.setKey(dto.getFieldDisplayName()==null?dto.getFieldName():dto.getFieldDisplayName());
+    @Override
+    public List<FlowCaseEntity> resolveFormVal(GeneralFormFieldDTO dto, GeneralFormVal val) {
 
-		switch (GeneralFormFieldType.fromCode(val.getFieldType())) {
-			case SINGLE_LINE_TEXT:
-			case NUMBER_TEXT:
-			case DATE:
-			case DROP_BOX :
-				e.setEntityType(FlowCaseEntityType.LIST.getCode());
-				e.setValue(JSON.parseObject(val.getFieldValue(), PostApprovalFormTextValue.class).getText());
-				entities.add(e);
-				break;
-			case MULTI_LINE_TEXT:
-				e.setEntityType(FlowCaseEntityType.MULTI_LINE.getCode());
-				e.setValue(JSON.parseObject(val.getFieldValue(), PostApprovalFormTextValue.class).getText());
-				entities.add(e);
-				break;
-			case IMAGE:
-				e.setEntityType(FlowCaseEntityType.IMAGE.getCode());
-				//工作流images怎么传
-				PostApprovalFormImageValue imageValue = JSON.parseObject(val.getFieldValue(), PostApprovalFormImageValue.class);
-				for(String uriString : imageValue.getUris()){
-					String url = this.contentServerService.parserUri(uriString, EntityType.USER.getCode(), UserContext.current().getUser().getId());
-					e.setValue(url);
-					FlowCaseEntity e2 = ConvertHelper.convert(e, FlowCaseEntity.class);
-					entities.add(e2);
-				}
-				break;
-			case FILE:
+        List<FlowCaseEntity> entities = new ArrayList<>();
+        FlowCaseEntity e = new FlowCaseEntity();
+
+        e.setKey(dto.getFieldDisplayName() == null ? dto.getFieldName() : dto.getFieldDisplayName());
+
+        switch (GeneralFormFieldType.fromCode(val.getFieldType())) {
+            case SINGLE_LINE_TEXT:
+            case NUMBER_TEXT:
+            case DATE:
+            case DROP_BOX:
+                e.setEntityType(FlowCaseEntityType.LIST.getCode());
+                e.setValue(JSON.parseObject(val.getFieldValue(), PostApprovalFormTextValue.class).getText());
+                entities.add(e);
+                break;
+            case MULTI_LINE_TEXT:
+                e.setEntityType(FlowCaseEntityType.MULTI_LINE.getCode());
+                e.setValue(JSON.parseObject(val.getFieldValue(), PostApprovalFormTextValue.class).getText());
+                entities.add(e);
+                break;
+            case IMAGE:
+                e.setEntityType(FlowCaseEntityType.IMAGE.getCode());
+                //工作流images怎么传
+                PostApprovalFormImageValue imageValue = JSON.parseObject(val.getFieldValue(), PostApprovalFormImageValue.class);
+                for (String uriString : imageValue.getUris()) {
+                    String url = this.contentServerService.parserUri(uriString, EntityType.USER.getCode(), UserContext.current().getUser().getId());
+                    e.setValue(url);
+                    FlowCaseEntity e2 = ConvertHelper.convert(e, FlowCaseEntity.class);
+                    entities.add(e2);
+                }
+                break;
+            case FILE:
 //						e.setEntityType(FlowCaseEntityType.F.getCode());
-				//TODO:工作流需要新增类型file
-				e.setEntityType(FlowCaseEntityType.FILE.getCode());
-				PostApprovalFormFileValue fileValue = JSON.parseObject(val.getFieldValue(), PostApprovalFormFileValue.class);
-				if (null == fileValue || fileValue.getFiles() ==null )
-					break;
-				List<FlowCaseFileDTO> files = new ArrayList<>();
-				for(PostApprovalFormFileDTO dto2 : fileValue.getFiles()){
-					FlowCaseFileDTO fileDTO = new FlowCaseFileDTO();
-					String url = this.contentServerService.parserUri(dto2.getUri(), EntityType.USER.getCode(), UserContext.current().getUser().getId());
-					ContentServerResource resource = contentServerService.findResourceByUri(dto2.getUri());
-					fileDTO.setUrl(url);
-					fileDTO.setFileName(dto2.getFileName());
-					fileDTO.setFileSize(resource.getResourceSize());
-					files.add(fileDTO);
-				}
-				FlowCaseFileValue value = new FlowCaseFileValue();
-				value.setFiles(files);
-				e.setValue(JSON.toJSONString(value));
-				entities.add(e);
-				break;
-			case INTEGER_TEXT:
-				e.setEntityType(FlowCaseEntityType.LIST.getCode());
-				e.setValue(JSON.parseObject(val.getFieldValue(), PostApprovalFormTextValue.class).getText());
-				entities.add(e);
-				break;
-			case SUBFORM:
+                //TODO:工作流需要新增类型file
+                e.setEntityType(FlowCaseEntityType.FILE.getCode());
+                PostApprovalFormFileValue fileValue = JSON.parseObject(val.getFieldValue(), PostApprovalFormFileValue.class);
+                if (null == fileValue || fileValue.getFiles() == null)
+                    break;
+                List<FlowCaseFileDTO> files = new ArrayList<>();
+                for (PostApprovalFormFileDTO dto2 : fileValue.getFiles()) {
+                    FlowCaseFileDTO fileDTO = new FlowCaseFileDTO();
+                    String url = this.contentServerService.parserUri(dto2.getUri(), EntityType.USER.getCode(), UserContext.current().getUser().getId());
+                    ContentServerResource resource = contentServerService.findResourceByUri(dto2.getUri());
+                    fileDTO.setUrl(url);
+                    fileDTO.setFileName(dto2.getFileName());
+                    fileDTO.setFileSize(resource.getResourceSize());
+                    files.add(fileDTO);
+                }
+                FlowCaseFileValue value = new FlowCaseFileValue();
+                value.setFiles(files);
+                e.setValue(JSON.toJSONString(value));
+                entities.add(e);
+                break;
+            case INTEGER_TEXT:
+                e.setEntityType(FlowCaseEntityType.LIST.getCode());
+                e.setValue(JSON.parseObject(val.getFieldValue(), PostApprovalFormTextValue.class).getText());
+                entities.add(e);
+                break;
+            case SUBFORM:
 
-				PostApprovalFormSubformValue subFormValue = JSON.parseObject(val.getFieldValue(), PostApprovalFormSubformValue.class);
-				//取出设置的子表单fields
-				GeneralFormSubformDTO subFromExtra = JSON.parseObject(dto.getFieldExtra(), GeneralFormSubformDTO.class) ;
-				//给子表单计数从1开始
-				int formCount = 1;
-				//循环取出每一个子表单值
-				for(PostApprovalFormSubformItemValue subForm1:subFormValue.getForms()){
-					e = new FlowCaseEntity();
-					e.setKey(dto.getFieldDisplayName()==null?dto.getFieldName():dto.getFieldDisplayName());
-					e.setEntityType(FlowCaseEntityType.LIST.getCode());
-					e.setValue(formCount++ +"");
-					entities.add(e);
-					List<GeneralFormVal> subVals = new ArrayList<>();
-					//循环取出一个子表单的每一个字段值
-					for(PostApprovalFormItem subFromValue1:subForm1.getValues()){
-						GeneralFormVal obj =  new GeneralFormVal();
-						obj.setFieldName(subFromValue1.getFieldName());
-						obj.setFieldType(subFromValue1.getFieldType());
-						obj.setFieldValue(subFromValue1.getFieldValue());
-						subVals.add(obj);
-					}
-					List<FlowCaseEntity> subSingleEntities = new ArrayList<>();
-					processFlowEntities(subSingleEntities, subVals,subFromExtra.getFormFields());
-					entities.addAll(subSingleEntities);
-				}
-				break;
-		}
+                PostApprovalFormSubformValue subFormValue = JSON.parseObject(val.getFieldValue(), PostApprovalFormSubformValue.class);
+                //取出设置的子表单fields
+                GeneralFormSubformDTO subFromExtra = JSON.parseObject(dto.getFieldExtra(), GeneralFormSubformDTO.class);
+                //给子表单计数从1开始
+                int formCount = 1;
+                //循环取出每一个子表单值
+                for (PostApprovalFormSubformItemValue subForm1 : subFormValue.getForms()) {
+                    e = new FlowCaseEntity();
+                    e.setKey(dto.getFieldDisplayName() == null ? dto.getFieldName() : dto.getFieldDisplayName());
+                    e.setEntityType(FlowCaseEntityType.LIST.getCode());
+                    e.setValue(formCount++ + "");
+                    entities.add(e);
+                    List<GeneralFormVal> subVals = new ArrayList<>();
+                    //循环取出一个子表单的每一个字段值
+                    for (PostApprovalFormItem subFromValue1 : subForm1.getValues()) {
+                        GeneralFormVal obj = new GeneralFormVal();
+                        obj.setFieldName(subFromValue1.getFieldName());
+                        obj.setFieldType(subFromValue1.getFieldType());
+                        obj.setFieldValue(subFromValue1.getFieldValue());
+                        subVals.add(obj);
+                    }
+                    List<FlowCaseEntity> subSingleEntities = new ArrayList<>();
+                    processFlowEntities(subSingleEntities, subVals, subFromExtra.getFormFields());
+                    entities.addAll(subSingleEntities);
+                }
+                break;
+        }
 
-		return entities;
-	}
+        return entities;
+    }
 
-	private GeneralFormFieldDTO getFieldDTO(String fieldName, List<GeneralFormFieldDTO> fieldDTOs) {
-		for (GeneralFormFieldDTO val : fieldDTOs) {
-			if (val.getFieldName().equals(fieldName))
-				return val;
-		}
-		return null;
-	}
+    private GeneralFormFieldDTO getFieldDTO(String fieldName, List<GeneralFormFieldDTO> fieldDTOs) {
+        for (GeneralFormFieldDTO val : fieldDTOs) {
+            if (val.getFieldName().equals(fieldName))
+                return val;
+        }
+        return null;
+    }
 
-	@Override
-	public GeneralFormDTO createGeneralForm(CreateApprovalFormCommand cmd) {
+    @Override
+    public GeneralFormDTO createGeneralForm(CreateApprovalFormCommand cmd) {
 
-		GeneralForm form = ConvertHelper.convert(cmd, GeneralForm.class);
-		form.setTemplateType(GeneralFormTemplateType.DEFAULT_JSON.getCode());
-		form.setStatus(GeneralFormStatus.CONFIG.getCode());
-		form.setNamespaceId(UserContext.getCurrentNamespaceId());
-		form.setFormVersion(0L);
-		form.setTemplateText(JSON.toJSONString(cmd.getFormFields()));
+        GeneralForm form = ConvertHelper.convert(cmd, GeneralForm.class);
+        form.setTemplateType(GeneralFormTemplateType.DEFAULT_JSON.getCode());
+        form.setStatus(GeneralFormStatus.CONFIG.getCode());
+        form.setNamespaceId(UserContext.getCurrentNamespaceId());
+        form.setFormVersion(0L);
+        form.setTemplateText(JSON.toJSONString(cmd.getFormFields()));
 
-		if(cmd.getDeleteFlag() == null)
-			form.setDeleteFlag(Byte.valueOf("1"));
-		if(cmd.getModifyFlag() == null)
-			form.setModifyFlag(Byte.valueOf("1"));
-		if(cmd.getFormAttribute() == null)
-			form.setFormAttribute(GeneralApprovalAttribute.CUSTOMIZE.getCode());
+        if (cmd.getDeleteFlag() == null)
+            form.setDeleteFlag(Byte.valueOf("1"));
+        if (cmd.getModifyFlag() == null)
+            form.setModifyFlag(Byte.valueOf("1"));
+        if (cmd.getFormAttribute() == null)
+            form.setFormAttribute(GeneralApprovalAttribute.CUSTOMIZE.getCode());
 
-		this.generalFormProvider.createGeneralForm(form);
+        this.generalFormProvider.createGeneralForm(form);
 
-		//  创建字段组(此时表单已经建立，故在建立字段组时即可同步)
+        //  创建字段组(此时表单已经建立，故在建立字段组时即可同步)
         GeneralFormGroup group = createGeneralFormGroup(form, cmd.getFormGroups());
 
-        return processGeneralFormDTO(form,group);
+        return processGeneralFormDTO(form, group);
     }
 
     private GeneralFormDTO processGeneralFormDTO(GeneralForm form, GeneralFormGroup group) {
@@ -516,83 +548,83 @@ public class GeneralFormServiceImpl implements GeneralFormService {
         return dto;
     }
 
-	@Override
-	public GeneralFormDTO updateGeneralForm(UpdateApprovalFormCommand cmd) {
-		return this.dbProvider.execute((TransactionStatus status) -> {
-			GeneralForm form = this.generalFormProvider.getActiveGeneralFormByOriginId(cmd
-					.getFormOriginId());
-			if (null == form || form.getStatus().equals(GeneralFormStatus.INVALID.getCode()))
-				throw RuntimeErrorException.errorWith(ErrorCodes.SCOPE_GENERAL,
-						ErrorCodes.ERROR_INVALID_PARAMETER, "form not found");
+    @Override
+    public GeneralFormDTO updateGeneralForm(UpdateApprovalFormCommand cmd) {
+        return this.dbProvider.execute((TransactionStatus status) -> {
+            GeneralForm form = this.generalFormProvider.getActiveGeneralFormByOriginId(cmd
+                    .getFormOriginId());
+            if (null == form || form.getStatus().equals(GeneralFormStatus.INVALID.getCode()))
+                throw RuntimeErrorException.errorWith(ErrorCodes.SCOPE_GENERAL,
+                        ErrorCodes.ERROR_INVALID_PARAMETER, "form not found");
 
-			if (form.getStatus().equals(GeneralFormStatus.CONFIG.getCode())) {
-				// 如果是config状态的直接改,
-				//这里更新老的form之后才把表单内容，才把内容设置到新表单里面 by dengs issue:12817
-				form.setFormName(cmd.getFormName());
-				form.setUpdateTime(new Timestamp(DateHelper.currentGMTTime().getTime()));
-				form.setTemplateText(JSON.toJSONString(cmd.getFormFields()));
-				this.generalFormProvider.updateGeneralForm(form);
-			} else if (form.getStatus().equals(GeneralFormStatus.RUNNING.getCode())) {
-				// 如果是RUNNING状态的,置原form为失效,重新create一个版本+1的config状态的form
-				form.setStatus(GeneralFormStatus.INVALID.getCode());
-				form.setUpdateTime(new Timestamp(DateHelper.currentGMTTime().getTime()));
-				//这里更新老的form之后才把表单内容，才把内容设置到新z表单里面 by dengs issue:12817
-				this.generalFormProvider.updateGeneralForm(form);
-				form.setFormName(cmd.getFormName());
-				form.setTemplateText(JSON.toJSONString(cmd.getFormFields()));
-				form.setFormVersion(form.getFormVersion() + 1);
-				form.setStatus(GeneralFormStatus.CONFIG.getCode());
-				form.setCreateTime(new Timestamp(DateHelper.currentGMTTime().getTime()));
-				form.setUpdateTime(null);
-				this.generalFormProvider.createGeneralForm(form);
-			}
-
-			//  对字段组进行修改
-            GeneralFormGroup group = generalFormProvider.findGeneralFormGroupByFormOriginId(form.getFormOriginId());
-			if(group == null){
-			    //  若为空说明之前的表单建立并未建字段组
-                createGeneralFormGroup(form,cmd.getFormGroups());
-            }else{
-			    //  不为空则说明之前的表单建立过字段组
-                updateGeneralFormGroupByFormId(group,form,cmd.getFormGroups());
+            if (form.getStatus().equals(GeneralFormStatus.CONFIG.getCode())) {
+                // 如果是config状态的直接改,
+                //这里更新老的form之后才把表单内容，才把内容设置到新表单里面 by dengs issue:12817
+                form.setFormName(cmd.getFormName());
+                form.setUpdateTime(new Timestamp(DateHelper.currentGMTTime().getTime()));
+                form.setTemplateText(JSON.toJSONString(cmd.getFormFields()));
+                this.generalFormProvider.updateGeneralForm(form);
+            } else if (form.getStatus().equals(GeneralFormStatus.RUNNING.getCode())) {
+                // 如果是RUNNING状态的,置原form为失效,重新create一个版本+1的config状态的form
+                form.setStatus(GeneralFormStatus.INVALID.getCode());
+                form.setUpdateTime(new Timestamp(DateHelper.currentGMTTime().getTime()));
+                //这里更新老的form之后才把表单内容，才把内容设置到新z表单里面 by dengs issue:12817
+                this.generalFormProvider.updateGeneralForm(form);
+                form.setFormName(cmd.getFormName());
+                form.setTemplateText(JSON.toJSONString(cmd.getFormFields()));
+                form.setFormVersion(form.getFormVersion() + 1);
+                form.setStatus(GeneralFormStatus.CONFIG.getCode());
+                form.setCreateTime(new Timestamp(DateHelper.currentGMTTime().getTime()));
+                form.setUpdateTime(null);
+                this.generalFormProvider.createGeneralForm(form);
             }
-			return processGeneralFormDTO(form,group);
-		});
-	}
 
-	/**
-	 * 取状态不为失效的form
-	 * */
-	@Override
-	public ListGeneralFormResponse listGeneralForms(ListGeneralFormsCommand cmd) {
+            //  对字段组进行修改
+            GeneralFormGroup group = generalFormProvider.findGeneralFormGroupByFormOriginId(form.getFormOriginId());
+            if (group == null) {
+                //  若为空说明之前的表单建立并未建字段组
+                createGeneralFormGroup(form, cmd.getFormGroups());
+            } else {
+                //  不为空则说明之前的表单建立过字段组
+                updateGeneralFormGroupByFormId(group, form, cmd.getFormGroups());
+            }
+            return processGeneralFormDTO(form, group);
+        });
+    }
 
-		List<GeneralForm> forms = this.generalFormProvider.queryGeneralForms(new ListingLocator(),
-				Integer.MAX_VALUE - 1, new ListingQueryBuilderCallback() {
-					@Override
-					public SelectQuery<? extends Record> buildCondition(ListingLocator locator,
-							SelectQuery<? extends Record> query) {
-						query.addConditions(Tables.EH_GENERAL_FORMS.OWNER_ID.eq(cmd.getOwnerId()));
-						query.addConditions(Tables.EH_GENERAL_FORMS.OWNER_TYPE.eq(cmd
-								.getOwnerType()));
-						Condition condition = DSL.trueCondition();
-                        if (cmd.getModuleId()!=null && cmd.getModuleType()!=null){
+    /**
+     * 取状态不为失效的form
+     */
+    @Override
+    public ListGeneralFormResponse listGeneralForms(ListGeneralFormsCommand cmd) {
+
+        List<GeneralForm> forms = this.generalFormProvider.queryGeneralForms(new ListingLocator(),
+                Integer.MAX_VALUE - 1, new ListingQueryBuilderCallback() {
+                    @Override
+                    public SelectQuery<? extends Record> buildCondition(ListingLocator locator,
+                                                                        SelectQuery<? extends Record> query) {
+                        query.addConditions(Tables.EH_GENERAL_FORMS.OWNER_ID.eq(cmd.getOwnerId()));
+                        query.addConditions(Tables.EH_GENERAL_FORMS.OWNER_TYPE.eq(cmd
+                                .getOwnerType()));
+                        Condition condition = DSL.trueCondition();
+                        if (cmd.getModuleId() != null && cmd.getModuleType() != null) {
                             condition = condition.and(Tables.EH_GENERAL_FORMS.MODULE_ID.eq(cmd.getModuleId()));
                             condition = condition.and(Tables.EH_GENERAL_FORMS.MODULE_TYPE.eq(cmd.getModuleType()));
                         }
-						query.addConditions(condition);
-						query.addConditions(Tables.EH_GENERAL_FORMS.STATUS
-								.ne(GeneralFormStatus.INVALID.getCode()));
-						return query;
-					}
-				});
-		ListGeneralFormResponse resp = new ListGeneralFormResponse();
-		resp.setForms(forms.stream().map((r) -> {
-			return processGeneralFormDTO(r);
-		}).collect(Collectors.toList()));
-		return resp;
-	}
+                        query.addConditions(condition);
+                        query.addConditions(Tables.EH_GENERAL_FORMS.STATUS
+                                .ne(GeneralFormStatus.INVALID.getCode()));
+                        return query;
+                    }
+                });
+        ListGeneralFormResponse resp = new ListGeneralFormResponse();
+        resp.setForms(forms.stream().map((r) -> {
+            return processGeneralFormDTO(r);
+        }).collect(Collectors.toList()));
+        return resp;
+    }
 
-	//  listGeneralForms 中调用的方法，不知道list为何也需要转换
+    //  listGeneralForms 中调用的方法，不知道list为何也需要转换
     private GeneralFormDTO processGeneralFormDTO(GeneralForm form) {
         GeneralFormDTO dto = ConvertHelper.convert(form, GeneralFormDTO.class);
         List<GeneralFormFieldDTO> fieldDTOs = JSONObject.parseArray(form.getTemplateText(), GeneralFormFieldDTO.class);
@@ -600,30 +632,30 @@ public class GeneralFormServiceImpl implements GeneralFormService {
         return dto;
     }
 
-	@Override
-	public void deleteGeneralFormById(GeneralFormIdCommand cmd) {
-		//  删除是状态置为invalid
-		this.generalFormProvider.invalidForms(cmd.getFormOriginId());
-		//  删除与表单相关控件组
+    @Override
+    public void deleteGeneralFormById(GeneralFormIdCommand cmd) {
+        //  删除是状态置为invalid
+        this.generalFormProvider.invalidForms(cmd.getFormOriginId());
+        //  删除与表单相关控件组
         this.generalFormProvider.deleteGeneralFormGroupsByFormOriginId(cmd.getFormOriginId());
-	}
+    }
 
-	@Override
-	public GeneralFormDTO getGeneralForm(GeneralFormIdCommand cmd) {
-		GeneralForm form = this.generalFormProvider.getActiveGeneralFormByOriginId(cmd
-				.getFormOriginId());
+    @Override
+    public GeneralFormDTO getGeneralForm(GeneralFormIdCommand cmd) {
+        GeneralForm form = this.generalFormProvider.getActiveGeneralFormByOriginId(cmd
+                .getFormOriginId());
 
         //  added by R 20170830, 获取字段组
         GeneralFormGroup group = generalFormProvider.findGeneralFormGroupByFormOriginId(form.getFormOriginId());
-		GeneralFormDTO result = processGeneralFormDTO(form,group);
-		//	added by LiMingDang for approval1.6
-		if (cmd.getModuleType() != null)
-			result.setModuleType(cmd.getModuleType());
-		return result;
-	}
+        GeneralFormDTO result = processGeneralFormDTO(form, group);
+        //	added by LiMingDang for approval1.6
+        if (cmd.getModuleType() != null)
+            result.setModuleType(cmd.getModuleType());
+        return result;
+    }
 
     //  表单控件组的新增(与表单绑定故作为私有方法)
-	@Override
+    @Override
     public GeneralFormGroup createGeneralFormGroup(GeneralForm form, List<GeneralFormGroupDTO> groupDTOS) {
         if (groupDTOS != null) {
             GeneralFormGroup group = new GeneralFormGroup();
@@ -648,12 +680,52 @@ public class GeneralFormServiceImpl implements GeneralFormService {
     }
 
     //  表单控件组的修改(与表单绑定故作为私有方法)
-	@Override
+    @Override
     public void updateGeneralFormGroupByFormId(GeneralFormGroup group, GeneralForm form, List<GeneralFormGroupDTO> groupDTOS) {
         group.setFormOriginId(form.getFormOriginId());
         group.setFormVersion(form.getFormVersion());
         group.setTemplateText(JSON.toJSONString(groupDTOS));
         generalFormProvider.updateGeneralFormGroup(group);
+    }
+
+    @Override
+    public Long createGeneralFormByTemplate(Long templateId, CreateFormTemplatesCommand cmd) {
+        GeneralFormTemplate form = generalFormProvider.findGeneralFormTemplateByIdAndModuleId(
+                templateId, cmd.getModuleId());
+        GeneralForm gf = generalFormProvider.getGeneralFormByTemplateId(cmd.getModuleId(), cmd.getOwnerId(),
+                cmd.getOwnerType(), form.getId());
+        if (gf != null) {
+            gf = convertFormFromTemplate(gf, form, cmd);
+            generalFormProvider.updateGeneralForm(gf);
+            return gf.getFormOriginId();
+        } else {
+            gf = ConvertHelper.convert(form, GeneralForm.class);
+            gf = convertFormFromTemplate(gf, form, cmd);
+            gf.setStatus(GeneralFormStatus.CONFIG.getCode());
+            gf.setFormVersion(0L);
+            Long formOriginId = generalFormProvider.createGeneralForm(gf);
+            return formOriginId;
+        }
+    }
+
+    private GeneralForm convertFormFromTemplate(GeneralForm gf, GeneralFormTemplate form, CreateFormTemplatesCommand cmd) {
+        gf.setFormAttribute(GeneralApprovalAttribute.DEFAULT.getCode());
+        gf.setNamespaceId(UserContext.getCurrentNamespaceId());
+        gf.setFormTemplateId(form.getId());
+        gf.setFormTemplateVersion(form.getVersion());
+        gf.setOwnerId(cmd.getOwnerId());
+        gf.setOwnerId(cmd.getOwnerId());
+        gf.setOwnerType(cmd.getOwnerType());
+        gf.setOrganizationId(cmd.getOrganizationId());
+        return gf;
+    }
+
+    @Override
+    public PostGeneralFormDTO updateGeneralFormVal(PostGeneralFormValCommand cmd) {
+        GeneralFormModuleHandler handler = getOrderHandler(cmd.getSourceType());
+        PostGeneralFormDTO dto = handler.updateGeneralFormVal(cmd);
+
+        return dto;
     }
 }
 
