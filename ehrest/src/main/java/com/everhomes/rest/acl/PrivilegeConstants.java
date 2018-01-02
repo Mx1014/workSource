@@ -191,7 +191,7 @@ public interface PrivilegeConstants {
     long ENERGY_PLAN_CREATE = 21014L;
     long ENERGY_PLAN_LIST = 21015L;
     long ENERGY_PLAN_DELETE = 21016L;
-    //物业缴费权限
+    //物业缴费权限 by great wentian
     long ASSET_MODULE_ID = 20400L;
     long ASSET_DEAL_VIEW = 204001006L;
     long ASSET_MANAGEMENT_VIEW = 204001001L;
@@ -229,5 +229,98 @@ public interface PrivilegeConstants {
     long PUNCH_STATISTIC_QUERY = 42005L;//    查看打卡记录 （细化权限，下同）
     long PUNCH_STATISTIC_EXPORT = 42006L;//    导出打卡记录
 
-    //付款管理
+    //设备巡检权限
+    long EQUIPMENT_STANDARD_UPDATE = 30067L;  //	设备巡检 标准新增修改权限
+    long EQUIPMENT_STANDARD_LIST = 30068L;   //设备巡检 标准查看权限
+    long EQUIPMENT_STANDARD_DELETE = 30069L;  //设备巡检 标准删除权限
+    long EQUIPMENT_RELATION_LIST = 30082L;    //设备巡检 巡检关联审批查看权限
+    long EQUIPMENT_RELATION_REVIEW = 30070L;  //设备巡检 巡检关联审批审核权限
+    long EQUIPMENT_RELATION_DELETE = 30071L;  //设备巡检 巡检关联审批删除失效关联权限
+    long EQUIPMENT_LIST = 30072L;            //设备巡检 巡检对象查看权限
+    long EQUIPMENT_UPDATE = 30073L;        //设备巡检 巡检对象新增修改权限
+    long EQUIPMENT_DELETE = 30074L;          //设备巡检 巡检对象删除权限
+    long EQUIPMENT_TASK_LIST = 30075L;       //设备巡检 任务查询权限
+    long EQUIPMENT_ITEM_LIST = 30076L;        //设备巡检 巡检项查看权限
+    long EQUIPMENT_ITEM_CREATE = 30077L;      //设备巡检 巡检项新增权限
+    long EQUIPMENT_ITEM_DELETE = 30078L;       //设备巡检 巡检项删除权限
+    long EQUIPMENT_ITEM_UPDATE = 30079L;       //设备巡检 巡检项修改权限
+    long EQUIPMENT_STAT_PANDECT = 30080L;      //设备巡检 统计总览权限
+    long EQUIPMENT_STAT_ALLTASK = 30081L;     //设备巡检 统计查看所有任务权限
+
+
+
+
+    //客户和合同的权限
+    long ENTERPRISE_CUSTOMER_CREATE = 21101L;//客户的增加
+    long ENTERPRISE_CUSTOMER_UPDATE = 21102L;//客户的修改
+    long ENTERPRISE_CUSTOMER_IMPORT = 21103L;//客户的导入
+    long ENTERPRISE_CUSTOMER_SYNC = 21104L;//客户的同步
+    long ENTERPRISE_CUSTOMER_DELETE = 21105L;//客户的删
+    long ENTERPRISE_CUSTOMER_LIST = 21106L;//客户的查
+    long ENTERPRISE_CUSTOMER_MANAGE_LIST = 21107L;//管理的查
+    long ENTERPRISE_CUSTOMER_MANAGE_CREATE = 21108L;//管理的新增
+    long ENTERPRISE_CUSTOMER_MANAGE_UPDATE = 21109L;//管理的修改
+    long ENTERPRISE_CUSTOMER_MANAGE_DELETE = 21110L;//管理的删
+    long ENTERPRISE_CUSTOMER_MANAGE_IMPORT = 21111L;//管理的导入
+    long ENTERPRISE_CUSTOMER_MANAGE_EXPORT = 21112L;//管理的导出
+    long ENTERPRISE_CUSTOMER_STAT = 21113L;//客户的统计分析查看
+
+    long CONTRACT_CREATE = 21201L;//新增合同
+    long CONTRACT_LAUNCH = 21202L;//签约 发起审批
+    long CONTRACT_UPDATE = 21203L;//修改
+    long CONTRACT_DELETE = 21204L;//删除
+    long CONTRACT_INVALID = 21205L;//作废
+    long CONTRACT_ENTRY = 21206L;//入场
+    long CONTRACT_LIST = 21207L;//查看
+    long CONTRACT_RENEW = 21208L;//续约
+    long CONTRACT_CHANGE = 21209L;//变更
+    long CONTRACT_PARAM_LIST = 21210L;//合同参数查看
+    long CONTRACT_PARAM_UPDATE = 21211L;//合同参数修改
+    long CONTRACT_FLOW = 21212L;//合同工作流
+    long CONTRACT_SYNC = 21213L;//从第三方同步合同
+    long CONTRACT_DENUNCIATION = 21214L;//退约
+
+
+//    ----------品质核查----------
+    long QUALITY_CATEGORY_LIST = 30044L;//品质核查 类型管理查看权限
+    long QUALITY_CATEGORY_CREATE = 30045L;//品质核查 类型管理新增权限
+    long QUALITY_CATEGORY_DELETE = 30046L;//品质核查 类型管理删除权限
+    long QUALITY_CATEGORY_UPDATE = 30047L;//品质核查 类型管理修改权限
+    long QUALITY_SPECIFICATION_LIST = 30048L;//品质核查 规范管理查看权限
+    long QUALITY_SPECIFICATION_CREATE = 30049L;//品质核查 规范管理新增权限
+    long QUALITY_SPECIFICATION_DELETE = 30050L;//品质核查 规范管理删除权限
+    long QUALITY_SPECIFICATION_UPDATE = 30051L;//品质核查 规范管理修改权限
+    long QUALITY_STANDARD_LIST = 30052L;//品质核查 标准管理查看权限
+    long QUALITY_STANDARD_CREATE = 30053L;//品质核查 标准管理新增权限
+    long QUALITY_STANDARD_DELETE = 30054L;//品质核查 标准管理删除权限
+    long QUALITY_STANDARD_UPDATE = 30055L;//品质核查 标准管理修改权限
+    long QUALITY_STANDARDREVIEW_LIST = 30056L;//品质核查 标准审批查看权限
+    long QUALITY_STANDARDREVIEW_REVIEW = 30057L;//品质核查 标准审批审核权限
+    long QUALITY_TASK_LIST = 30058L;//品质核查 任务查询权限
+    long QUALITY_STAT_SCORE = 30059L;//品质核查 分数统计查看权限
+    long QUALITY_STAT_TASK = 30060L;//品质核查 任务数统计查看权限
+    long QUALITY_UPDATELOG_LIST = 30061L;//品质核查 修改记录查看权限
+    long QUALITY_SAMPLE_LIST = 30062L;//品质核查 绩效考核查看权限
+    long QUALITY_SAMPLE_CREATE = 30063L;//品质核查 绩效考核新增权限
+    long QUALITY_SAMPLE_UPDATE = 30064L;//品质核查 绩效考核修改权限
+    long QUALITY_SAMPLE_DELETE = 30065L;//品质核查 绩效考核删除权限
+    long QUALITY_STAT_SAMPLE = 30066L;//品质核查 检查统计查看权限
+
+    // 仓库管理
+    long WAREHOUSE_MODULE_ID = 21000L;
+    long WAREHOUSE_REPO_VIEW = 210001001L;
+    long WAREHOUSE_REPO_OPERATION = 210001002L;
+    long WAREHOUSE_MATERIAL_CATEGORY_ALL = 210001003L;
+    long WAREHOUSE_MATERIAL_INFO_ALL = 210001004L;
+    long WAREHOUSE_REPO_MAINTAIN_SEARCH = 210001005L;
+    long WAREHOUSE_REPO_MAINTAIN_INSTOCK = 210001006L;
+    //和210001005L進行合并
+    long WAREHOUSE_REPO_MAINTAIN_LOG_SEARCH = 210001007L;
+    long WAREHOUSE_REPO_MAINTAIN_LOG_EXPORT = 210001008L;
+    long WAREHOUSE_CLAIM_MANAGEMENT_SEARCH = 210001009L;
+    long WAREHOUSE_CLAIM_MANAGEMENT_APPLICATION = 210001010L;
+    long WAREHOUSE_PARAMETER_FLOWCASE_CONFIG = 210001011L;
+    long WAREHOUSE_PARAMETER_CONFIG = 210001012L;
+    long WAREHOUSE_REPO_MAINTAIN_OUTSTOCK = 210001013L;
+
 }

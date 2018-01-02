@@ -83,7 +83,7 @@
             eh_namespace_details | eh_wifi_settings | eh_user_launch_pad_items | eh_hot_tags | eh_app_urls |
             eh_news | eh_news_attachments | eh_news_comment |
             eh_stat_orders | eh_stat_transactions | eh_stat_refunds | eh_stat_settlements | eh_stat_service_settlement_results | eh_stat_task_logs | eh_stat_service |
-            eh_wifi_settings | eh_equipment_inspection_standards | eh_equipment_inspection_equipments | eh_equipment_inspection_accessories |
+            eh_wifi_settings | eh_equipment_inspection_standards | eh_equipment_model_community_map | eh_equipment_inspection_equipments | eh_equipment_inspection_accessories |
             eh_equipment_inspection_accessory_map | eh_equipment_inspection_equipment_parameters | eh_equipment_inspection_equipment_attachments |
             eh_equipment_inspection_tasks | eh_equipment_inspection_task_attachments | eh_equipment_inspection_task_logs |
             eh_rentalv2_default_rules | eh_rentalv2_time_interval | eh_rentalv2_close_dates | eh_rentalv2_resources | eh_rentalv2_resource_ranges | eh_rentalv2_resource_pics |
@@ -151,7 +151,7 @@
             eh_service_module_apps | eh_portal_navigation_bars | eh_portal_layouts | eh_portal_item_groups | eh_portal_items | eh_portal_layout_templates | eh_portal_item_categories | eh_portal_content_scopes | eh_portal_publish_logs | eh_portal_launch_pad_mappings |
             eh_talents | eh_talent_categories | eh_talent_query_histories | eh_talent_requests | eh_talent_message_senders |
             eh_authorizations | eh_authorization_relations | eh_service_module_assignment_relations | eh_domains |
-            eh_quality_inspection_samples | eh_quality_inspection_sample_group_map | eh_quality_inspection_sample_community_map | eh_quality_inspection_sample_score_stat | eh_quality_inspection_sample_community_specification_stat |
+            eh_quality_inspection_samples | eh_quality_inspection_sample_group_map | eh_quality_inspection_sample_community_map | eh_quality_inspection_sample_score_stat | eh_quality_inspection_sample_community_specification_stat | eh_quality_inspection_model_community_map |
             eh_news_communities | eh_news_comment_rule |
             eh_rentalv2_price_rules |
             eh_organization_member_details | eh_organization_member_educations | eh_organization_member_work_experiences | eh_organization_member_insurances |
@@ -198,8 +198,7 @@
             eh_payment_withdraw_orders |eh_community_organization_detail_display |
             eh_forum_service_types |
             eh_me_web_menus |
-	        eh_authorization_control_configs | eh_reflection_service_module_apps | 
-            eh_customer_entry_infos | eh_customer_departure_infos |
+	        eh_authorization_control_configs | eh_reflection_service_module_apps | eh_customer_entry_infos | eh_customer_departure_infos |
 			eh_service_module_exclude_functions | eh_service_module_functions | eh_customer_accounts | eh_customer_taxes |
             eh_payment_withdraw_orders |
 			eh_payment_withdraw_orders |eh_community_organization_detail_display |
@@ -207,6 +206,7 @@
             eh_me_web_menus | eh_customer_entry_infos | eh_customer_departure_infos |
             eh_point_systems | eh_point_rule_categories | eh_point_scores | eh_point_rules | eh_point_logs | eh_point_goods | eh_point_rule_configs |
             eh_point_tutorials | eh_point_tutorial_to_point_rule_mappings | eh_point_event_logs | eh_system_events | eh_point_actions | eh_point_rule_to_event_mappings |
+            eh_energy_meter_category_map | eh_energy_meter_fomular_map | eh_tasks |
             eh_contract_payment_plans | eh_payment_applications |
         </includes>
 

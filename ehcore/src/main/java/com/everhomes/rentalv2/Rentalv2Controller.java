@@ -113,6 +113,26 @@ public class Rentalv2Controller extends ControllerBase {
 		response.setErrorDescription("OK");
 		return response;
 	}
+
+	/**
+	 * <b>URL: /rental/findRentalSiteMonthStatusByWeek</b>
+	 * <p>
+	 * 查询某服务预约某月的状态(粒度为自然周)
+	 * </p>
+	 */
+
+	@RequestMapping("findRentalSiteMonthStatusByWeek")
+	@RestReturn(value = FindRentalSiteMonthStatusByWeekCommandResponse.class)
+	public RestResponse findRentalSiteMonthStatusByWeek(@Valid FindRentalSiteMonthStatusByWeekCommand cmd) {
+		FindRentalSiteMonthStatusByWeekCommandResponse findRentalSiteMonthStatusByWeekCommandResponse = rentalService
+				.findRentalSiteMonthStatusByWeek(cmd);
+		RestResponse response = new RestResponse(
+				findRentalSiteMonthStatusByWeekCommandResponse);
+		response.setErrorCode(ErrorCodes.SUCCESS);
+		response.setErrorDescription("OK");
+		return response;
+	}
+
 	/**
 	 * <b>URL: /rental/findRentalSiteYearStatus</b>
 	 * <p>
@@ -144,6 +164,24 @@ public class Rentalv2Controller extends ControllerBase {
 	public RestResponse findAutoAssignRentalSiteMonthStatus(@Valid FindAutoAssignRentalSiteMonthStatusCommand cmd) {
 		FindAutoAssignRentalSiteMonthStatusResponse resp = rentalService
 				.findAutoAssignRentalSiteMonthStatus(cmd);
+		RestResponse response = new RestResponse(resp);
+		response.setErrorCode(ErrorCodes.SUCCESS);
+		response.setErrorDescription("OK");
+		return response;
+	}
+
+	/**
+	 * <b>URL: /rental/findAutoAssignRentalSiteMonthStatusByWeek</b>
+	 * <p>
+	 * 查询带场所编号的资源一月的单元格(以周为粒度)
+	 * </p>
+	 */
+
+	@RequestMapping("findAutoAssignRentalSiteMonthStatusByWeek")
+	@RestReturn(value = FindAutoAssignRentalSiteMonthStatusByWeekResponse.class)
+	public RestResponse findAutoAssignRentalSiteMonthStatusByWeek(@Valid FindAutoAssignRentalSiteMonthStatusByWeekCommand cmd) {
+		FindAutoAssignRentalSiteMonthStatusByWeekResponse resp = rentalService
+				.findAutoAssignRentalSiteMonthStatusByWeek(cmd);
 		RestResponse response = new RestResponse(resp);
 		response.setErrorCode(ErrorCodes.SUCCESS);
 		response.setErrorDescription("OK");
@@ -299,6 +337,22 @@ public class Rentalv2Controller extends ControllerBase {
 	public RestResponse getRentalBillPayInfoV2(GetRentalBillPayInfoCommand cmd) {
 		PreOrderDTO result = rentalService.getRentalBillPayInfoV2(cmd);
 		RestResponse response = new RestResponse(result);
+		response.setErrorCode(ErrorCodes.SUCCESS);
+		response.setErrorDescription("OK");
+		return response;
+	}
+
+	/**
+	 * <b>URL: /rental/changeRentalBillPayInfo</b>
+	 * <p>
+	 * 修改订单信息
+	 * </p>
+	 */
+	@RequestMapping("changeRentalBillPayInfo")
+	@RestReturn(value = String.class)
+	public RestResponse changeRentalBillPayInfo(ChangeRentalBillPayInfoCommand cmd) {
+		rentalService.changeRentalBillPayInfo(cmd);
+		RestResponse response = new RestResponse();
 		response.setErrorCode(ErrorCodes.SUCCESS);
 		response.setErrorDescription("OK");
 		return response;

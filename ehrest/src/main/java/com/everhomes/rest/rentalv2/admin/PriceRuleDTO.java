@@ -10,12 +10,13 @@ import com.everhomes.util.StringHelper;
  * 
  * <ul>
  * <li>rentalType: 0按小时，1按半天，2按天，3按半天带晚上，4按月，参考{@link com.everhomes.rest.rentalv2.RentalType}</li>
+ * <li>priceType: 0 按时长定价 1 起步价模式</li>
  * <li>workdayPrice: 园区客户工作日价</li>
- * <li>weekendPrice: 园区客户节假日价</li>
+ * <li>initiatePrice: 园区客户起步后价格</li>
  * <li>orgMemberWorkdayPrice: 集团内部工作日价</li>
- * <li>orgMemberWeekendPrice: 集团内部节假日价</li>
+ * <li>orgMemberInitiatePrice: 集团内部起步后价格</li>
  * <li>approvingUserWorkdayPrice: 外部客户工作日价</li>
- * <li>approvingUserWeekendPrice: 外部客户节假日价</li>
+ * <li>approvingUserInitiatePrice: 外部客户起步后价格</li>
  * <li>discountType: 折扣类型，0不打折，1满减，2满天减，3比例折扣，参考{@link com.everhomes.rest.rentalv2.admin.DiscountType}</li>
  * <li>fullPrice: 满</li>
  * <li>cutPrice: 减</li>
@@ -33,12 +34,13 @@ import com.everhomes.util.StringHelper;
 public class PriceRuleDTO {
 	private Long id;
 	private Byte rentalType;
+	private Byte priceType;
 	private BigDecimal workdayPrice;
-	private BigDecimal weekendPrice;
+	private BigDecimal initiatePrice;
 	private BigDecimal orgMemberWorkdayPrice;
-	private BigDecimal orgMemberWeekendPrice;
+	private BigDecimal orgMemberInitiatePrice;
 	private BigDecimal approvingUserWorkdayPrice;
-	private BigDecimal approvingUserWeekendPrice;
+	private BigDecimal approvingUserInitiatePrice;
 	private Byte discountType;
 	private BigDecimal fullPrice;
 	private BigDecimal cutPrice;
@@ -82,6 +84,14 @@ public class PriceRuleDTO {
 		return rentalType;
 	}
 
+	public Byte getPriceType() {
+		return priceType;
+	}
+
+	public void setPriceType(Byte priceType) {
+		this.priceType = priceType;
+	}
+
 	public void setRentalType(Byte rentalType) {
 		this.rentalType = rentalType;
 	}
@@ -94,13 +104,6 @@ public class PriceRuleDTO {
 		this.workdayPrice = workdayPrice;
 	}
 
-	public BigDecimal getWeekendPrice() {
-		return weekendPrice;
-	}
-
-	public void setWeekendPrice(BigDecimal weekendPrice) {
-		this.weekendPrice = weekendPrice;
-	}
 
 	public BigDecimal getOrgMemberWorkdayPrice() {
 		return orgMemberWorkdayPrice;
@@ -110,13 +113,6 @@ public class PriceRuleDTO {
 		this.orgMemberWorkdayPrice = orgMemberWorkdayPrice;
 	}
 
-	public BigDecimal getOrgMemberWeekendPrice() {
-		return orgMemberWeekendPrice;
-	}
-
-	public void setOrgMemberWeekendPrice(BigDecimal orgMemberWeekendPrice) {
-		this.orgMemberWeekendPrice = orgMemberWeekendPrice;
-	}
 
 	public BigDecimal getApprovingUserWorkdayPrice() {
 		return approvingUserWorkdayPrice;
@@ -126,12 +122,28 @@ public class PriceRuleDTO {
 		this.approvingUserWorkdayPrice = approvingUserWorkdayPrice;
 	}
 
-	public BigDecimal getApprovingUserWeekendPrice() {
-		return approvingUserWeekendPrice;
+	public BigDecimal getInitiatePrice() {
+		return initiatePrice;
 	}
 
-	public void setApprovingUserWeekendPrice(BigDecimal approvingUserWeekendPrice) {
-		this.approvingUserWeekendPrice = approvingUserWeekendPrice;
+	public void setInitiatePrice(BigDecimal initiatePrice) {
+		this.initiatePrice = initiatePrice;
+	}
+
+	public BigDecimal getOrgMemberInitiatePrice() {
+		return orgMemberInitiatePrice;
+	}
+
+	public void setOrgMemberInitiatePrice(BigDecimal orgMemberInitiatePrice) {
+		this.orgMemberInitiatePrice = orgMemberInitiatePrice;
+	}
+
+	public BigDecimal getApprovingUserInitiatePrice() {
+		return approvingUserInitiatePrice;
+	}
+
+	public void setApprovingUserInitiatePrice(BigDecimal approvingUserInitiatePrice) {
+		this.approvingUserInitiatePrice = approvingUserInitiatePrice;
 	}
 
 	public Byte getDiscountType() {

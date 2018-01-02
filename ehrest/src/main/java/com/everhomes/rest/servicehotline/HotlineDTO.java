@@ -12,7 +12,8 @@ import com.everhomes.util.StringHelper;
  * <li>userId: 用户id</li>   
  * <li>description: 备注 </li>   
  * <li>defaultOrder: 排序字段</li>   
- * <li>avatar: 头像</li>   
+ * <li>avatar: 头像</li>
+ * <li>phone: 手机号</li>
  * </ul>
  */
 public class HotlineDTO {
@@ -24,6 +25,7 @@ public class HotlineDTO {
     private String description;
     private Integer defaultOrder; 
     private String avatar;
+    private String phone;
     
 
     public Long getId() {
@@ -105,6 +107,13 @@ public class HotlineDTO {
 		this.avatar = avatar;
 	}
 
+	public String getPhone() {
+		return phone;
+	}
+
+	public void setPhone(String phone) {
+		this.phone = phone;
+	}
 
 	@Override
     public String toString() {

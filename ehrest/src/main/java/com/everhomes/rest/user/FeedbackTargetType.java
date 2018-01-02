@@ -8,11 +8,12 @@ import com.everhomes.util.StringHelper;
  *	<li>POST : 1</li>
  *  <li>ADDRESS : 2</li>
  *  <li>FORUM : 3</li>
+ *  <li>NEWS : 4</li>
  * </ul>
  *
  */
 public enum FeedbackTargetType {
-	NONE((byte)0), POST((byte)1), ADDRESS((byte)2), FORUM((byte)3);
+	NONE((byte)0), POST((byte)1), ADDRESS((byte)2), FORUM((byte)3),NEWS((byte)4);
 	
 	private byte code;
 	

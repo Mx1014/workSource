@@ -17,9 +17,9 @@ import java.util.List;
  *     <li>planBookAttachments: planBookAttachments {@link com.everhomes.rest.incubator.IncubatorApplyAttachmentDTO}</li>
  *     <li>chargerName: chargerName</li>
  *     <li>chargerPhone: chargerPhone</li>
- *     <li>chargerEmail: chargerEmail</li>
  *     <li>chargerWechat: chargerWechat</li>
  *     <li>parentId: 如果是重新申请的，需要传之前记录的id</li>
+ *     <li>applyType: 申请类型 0-入孵，1-加速，2-入园{@link ApplyType}</li>
  * </ul>
  */
 public class AddIncubatorApplyCommand {
@@ -36,8 +36,8 @@ public class AddIncubatorApplyCommand {
 	String chargerName;
 	String chargerPhone;
 	String chargerEmail;
-	String chargerWechat;
 	Long parentId;
+	Byte applyType;
 
 	public Integer getNamespaceId() {
 		return namespaceId;
@@ -119,20 +119,20 @@ public class AddIncubatorApplyCommand {
 		this.chargerEmail = chargerEmail;
 	}
 
-	public String getChargerWechat() {
-		return chargerWechat;
-	}
-
-	public void setChargerWechat(String chargerWechat) {
-		this.chargerWechat = chargerWechat;
-	}
-
 	public Long getParentId() {
 		return parentId;
 	}
 
 	public void setParentId(Long parentId) {
 		this.parentId = parentId;
+	}
+
+	public Byte getApplyType() {
+		return applyType;
+	}
+
+	public void setApplyType(Byte applyType) {
+		this.applyType = applyType;
 	}
 
 	@Override

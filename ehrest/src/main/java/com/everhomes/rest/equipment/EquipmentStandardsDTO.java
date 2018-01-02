@@ -1,17 +1,18 @@
 package com.everhomes.rest.equipment;
 
-import java.sql.Timestamp;
-import java.util.List;
-
 import com.everhomes.discover.ItemType;
 import com.everhomes.rest.repeat.RepeatSettingsDTO;
 import com.everhomes.util.StringHelper;
+
+import java.sql.Timestamp;
+import java.util.List;
 
 /**
  * <ul>
  *  <li>id: 标准id</li>
  *  <li>ownerId: 标准所属的主体id</li>
  *  <li>ownerType: 标准所属的主体，参考{@link com.everhomes.rest.quality.OwnerType}</li>
+ *  <li>targetId: 标准所属项目id  为0则是在全部里</li>
  *  <li>name: 标准名称</li>
  *  <li>standardNumber: 标准编号</li>
  *  <li>standardSource: 标准来源</li>
@@ -31,6 +32,8 @@ import com.everhomes.util.StringHelper;
  *  <li>templateId: 巡检项模板id</li>
  *  <li>templateName: 巡检项模板名称</li>
  *  <li>reviewExpiredDays: 审批过期时间限制（天）</li>
+ *  <li>communities: 标准关联的项目</li>
+ *  <li>targetName: 标准所属项目名称  权限细化在全部中显示</li>
  * </ul>
  */
 public class EquipmentStandardsDTO {
@@ -42,6 +45,8 @@ public class EquipmentStandardsDTO {
 	private String ownerType;
 	
 	private Long ownerId;
+
+	private Long  targetId;
 	
 	private String standardNumber;
 	
@@ -79,13 +84,18 @@ public class EquipmentStandardsDTO {
 	private String templateName;
 	
 	private Integer reviewExpiredDays;
+
+	private  String targetName;
 	
 	@ItemType(StandardGroupDTO.class)
 	private List<StandardGroupDTO> executiveGroup;
 
 	@ItemType(StandardGroupDTO.class)
 	private List<StandardGroupDTO> reviewGroup;
-	
+
+	@ItemType(Long.class)
+	private  List<Long> communities;
+
 	public Long getId() {
 		return id;
 	}
@@ -276,6 +286,30 @@ public class EquipmentStandardsDTO {
 
 	public void setReviewGroup(List<StandardGroupDTO> reviewGroup) {
 		this.reviewGroup = reviewGroup;
+	}
+
+	public Long getTargetId() {
+		return targetId;
+	}
+
+	public void setTargetId(Long targetId) {
+		this.targetId = targetId;
+	}
+
+	public List<Long> getCommunities() {
+		return communities;
+	}
+
+	public void setCommunities(List<Long> communities) {
+		this.communities = communities;
+	}
+
+	public String getTargetName() {
+		return targetName;
+	}
+
+	public void setTargetName(String targetName) {
+		this.targetName = targetName;
 	}
 
 	@Override

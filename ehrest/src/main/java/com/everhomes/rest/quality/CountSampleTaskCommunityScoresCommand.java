@@ -16,6 +16,7 @@ import java.util.List;
  *  <li>specificationId: 父类型id  </li>
  *  <li>pageAnchor: 锚点</li>
  *  <li>pageSize: 页面大小</li>
+ *  <li>targetIdString: 导出excel使用</li>
  * </ul>
  * Created by ying.xiong on 2017/6/3.
  */
@@ -39,6 +40,8 @@ public class CountSampleTaskCommunityScoresCommand {
     private Long pageAnchor;
 
     private Integer pageSize;
+
+    private String targetIdString;
 
     public Long getOwnerId() {
         return ownerId;
@@ -102,6 +105,14 @@ public class CountSampleTaskCommunityScoresCommand {
 
     public void setTargetType(String targetType) {
         this.targetType = targetType;
+    }
+
+    public String getTargetIdString() {
+        return targetIdString;
+    }
+
+    public void setTargetIdString(String targetIdString) {
+        this.targetIdString = targetIdString;
     }
 
     @Override

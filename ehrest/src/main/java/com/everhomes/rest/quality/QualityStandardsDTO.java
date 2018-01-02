@@ -32,6 +32,7 @@ import com.everhomes.util.StringHelper;
  *  <li>reviewerUid: 标准审阅人id</li>
  *  <li>reviewTime: 标准审阅时间</li>
  *  <li>specifications: 标准关联的规范 参考{@link com.everhomes.rest.quality.QualityInspectionSpecificationDTO}</li>
+ *  <li>communities: 应用到项目的ids</li>
  * </ul>
  */
 
@@ -59,6 +60,9 @@ public class QualityStandardsDTO {
 
 	@ItemType(StandardGroupDTO.class)
 	private List<StandardGroupDTO> reviewGroup;
+
+	@ItemType(Long.class)
+	private List<Long> communities;
 	
 	private Byte status;
 	
@@ -279,6 +283,14 @@ public class QualityStandardsDTO {
 
 	public void setTargetName(String targetName) {
 		this.targetName = targetName;
+	}
+
+	public List<Long> getCommunities() {
+		return communities;
+	}
+
+	public void setCommunities(List<Long> communities) {
+		this.communities = communities;
 	}
 
 	@Override

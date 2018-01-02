@@ -506,7 +506,10 @@ public class DoorAuthProviderImpl implements DoorAuthProvider {
         resp.setTotal(new Long((Integer)rlt.get(0).getValue("c")));
 
         rlt = context.select(Tables.EH_DOOR_AUTH.ID.count().as("c")).from(Tables.EH_DOOR_AUTH)
-                .where(condition.and(Tables.EH_DOOR_AUTH.STATUS.eq(DoorAuthStatus.INVALID.getCode()))).fetch();
+                .where(condition.and(
+                        Tables.EH_DOOR_AUTH.STATUS.eq(DoorAuthStatus.INVALID.getCode())
+                        .or(Tables.EH_DOOR_AUTH.VALID_END_MS.lt(DateHelper.currentGMTTime().getTime()))
+                        )).fetch();
 
         resp.setInvalidCount(new Long((Integer)rlt.get(0).getValue("c")));
 

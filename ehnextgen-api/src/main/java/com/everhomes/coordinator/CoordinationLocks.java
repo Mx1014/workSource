@@ -112,7 +112,8 @@ public enum CoordinationLocks {
 	POINT_UPDATE_POINT_SCORE("point.update.pointScore"),
 
     SYNC_CONTRACT("sync.contract"),
-    FORUM_SETTING("forum.setting")
+    FORUM_SETTING("forum.setting"),
+    AUTH_RELATION("auth_relation")
     ;
 
     private String code;
