@@ -642,7 +642,35 @@ public class ContractServiceImpl implements ContractService {
 
 	@Override
 	public ContractDetailDTO updatePaymentContract(UpdatePaymentContractCommand cmd) {
-		return null;
+		checkContractAuth(cmd.getNamespaceId(), PrivilegeConstants.PAYMENT_CONTRACT_CREATE, cmd.getOrganizationId(), cmd.getCommunityId());
+		Contract exist = checkContract(cmd.getId());
+		Contract contract = ConvertHelper.convert(cmd, Contract.class);
+		Contract existContract = contractProvider.findActiveContractByContractNumber(cmd.getNamespaceId(), cmd.getContractNumber());
+		if(existContract != null && !existContract.getId().equals(contract.getId())) {
+			LOGGER.error("contractNumber {} in namespace {} already exist!", cmd.getContractNumber(), cmd.getNamespaceId());
+			throw RuntimeErrorException.errorWith(ContractErrorCode.SCOPE, ContractErrorCode.ERROR_CONTRACTNUMBER_EXIST,
+					"contractNumber is already exist");
+		}
+		if(cmd.getContractStartDate() != null) {
+			contract.setContractStartDate(new Timestamp(cmd.getContractStartDate()));
+		}
+		if(cmd.getContractEndDate() != null) {
+			contract.setContractEndDate(new Timestamp(cmd.getContractEndDate()));
+		}
+		if(cmd.getSignedTime() != null) {
+			contract.setSignedTime(new Timestamp(cmd.getSignedTime()));
+		}
+		contract.setCreateTime(exist.getCreateTime());
+		contractProvider.updateContract(contract);
+
+		dealContractAttachments(contract.getId(), cmd.getAttachments());
+		dealContractPlans(contract.getId(), cmd.getPlans());
+		if(ContractStatus.WAITING_FOR_APPROVAL.equals(ContractStatus.fromStatus(contract.getStatus()))) {
+			addToFlowCase(contract);
+		}
+		contractSearcher.feedDoc(contract);
+
+		return ConvertHelper.convert(contract, ContractDetailDTO.class);
 	}
 
 	private void generatePaymentExpectancies(Contract contract, List<ContractChargingItemDTO> chargingItems, List<ContractChargingChangeDTO> adjusts, List<ContractChargingChangeDTO> frees) {

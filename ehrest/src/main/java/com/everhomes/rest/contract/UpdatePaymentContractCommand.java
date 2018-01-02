@@ -68,6 +68,7 @@ import java.util.List;
  */
 public class UpdatePaymentContractCommand {
 
+    private Long organizationId;
     private Long id;
     private Long parentId;
     private Long rootParentId;
@@ -129,6 +130,14 @@ public class UpdatePaymentContractCommand {
     private List<ContractAttachmentDTO> attachments;
     @ItemType(ContractPaymentPlanDTO.class)
     private List<ContractPaymentPlanDTO> plans;
+
+    public Long getOrganizationId() {
+        return organizationId;
+    }
+
+    public void setOrganizationId(Long organizationId) {
+        this.organizationId = organizationId;
+    }
 
     public String getPaymentModeItemName() {
         return paymentModeItemName;
