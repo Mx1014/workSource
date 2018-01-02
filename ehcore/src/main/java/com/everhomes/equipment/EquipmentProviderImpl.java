@@ -10,16 +10,84 @@ import com.everhomes.db.DbProvider;
 import com.everhomes.listing.CrossShardListingLocator;
 import com.everhomes.listing.ListingLocator;
 import com.everhomes.naming.NameMapper;
-import com.everhomes.rest.equipment.*;
+import com.everhomes.rest.equipment.AdminFlag;
+import com.everhomes.rest.equipment.EquipmentPlanStatus;
+import com.everhomes.rest.equipment.EquipmentReviewStatus;
+import com.everhomes.rest.equipment.EquipmentStatus;
+import com.everhomes.rest.equipment.EquipmentTaskProcessResult;
+import com.everhomes.rest.equipment.EquipmentTaskProcessType;
+import com.everhomes.rest.equipment.EquipmentTaskResult;
+import com.everhomes.rest.equipment.EquipmentTaskStatus;
+import com.everhomes.rest.equipment.ExecuteGroupAndPosition;
+import com.everhomes.rest.equipment.ItemResultNormalFlag;
+import com.everhomes.rest.equipment.ItemResultStat;
+import com.everhomes.rest.equipment.ItemValueType;
+import com.everhomes.rest.equipment.ReviewResult;
+import com.everhomes.rest.equipment.ReviewedTaskStat;
+import com.everhomes.rest.equipment.StandardAndStatus;
+import com.everhomes.rest.equipment.Status;
+import com.everhomes.rest.equipment.TaskCountDTO;
+import com.everhomes.rest.equipment.TasksStatData;
 import com.everhomes.rest.quality.QualityGroupType;
 import com.everhomes.scheduler.EquipmentInspectionScheduleJob;
 import com.everhomes.scheduler.ScheduleProvider;
 import com.everhomes.search.EquipmentTasksSearcher;
 import com.everhomes.sequence.SequenceProvider;
 import com.everhomes.server.schema.Tables;
-import com.everhomes.server.schema.tables.daos.*;
-import com.everhomes.server.schema.tables.pojos.*;
-import com.everhomes.server.schema.tables.records.*;
+import com.everhomes.server.schema.tables.daos.EhEquipmentInspectionAccessoriesDao;
+import com.everhomes.server.schema.tables.daos.EhEquipmentInspectionAccessoryMapDao;
+import com.everhomes.server.schema.tables.daos.EhEquipmentInspectionEquipmentAttachmentsDao;
+import com.everhomes.server.schema.tables.daos.EhEquipmentInspectionEquipmentParametersDao;
+import com.everhomes.server.schema.tables.daos.EhEquipmentInspectionEquipmentPlanMapDao;
+import com.everhomes.server.schema.tables.daos.EhEquipmentInspectionEquipmentStandardMapDao;
+import com.everhomes.server.schema.tables.daos.EhEquipmentInspectionEquipmentsDao;
+import com.everhomes.server.schema.tables.daos.EhEquipmentInspectionItemResultsDao;
+import com.everhomes.server.schema.tables.daos.EhEquipmentInspectionItemsDao;
+import com.everhomes.server.schema.tables.daos.EhEquipmentInspectionPlanGroupMapDao;
+import com.everhomes.server.schema.tables.daos.EhEquipmentInspectionPlansDao;
+import com.everhomes.server.schema.tables.daos.EhEquipmentInspectionStandardGroupMapDao;
+import com.everhomes.server.schema.tables.daos.EhEquipmentInspectionStandardsDao;
+import com.everhomes.server.schema.tables.daos.EhEquipmentInspectionTaskAttachmentsDao;
+import com.everhomes.server.schema.tables.daos.EhEquipmentInspectionTaskLogsDao;
+import com.everhomes.server.schema.tables.daos.EhEquipmentInspectionTasksDao;
+import com.everhomes.server.schema.tables.daos.EhEquipmentInspectionTemplateItemMapDao;
+import com.everhomes.server.schema.tables.daos.EhEquipmentInspectionTemplatesDao;
+import com.everhomes.server.schema.tables.daos.EhEquipmentModelCommunityMapDao;
+import com.everhomes.server.schema.tables.pojos.EhEquipmentInspectionAccessories;
+import com.everhomes.server.schema.tables.pojos.EhEquipmentInspectionAccessoryMap;
+import com.everhomes.server.schema.tables.pojos.EhEquipmentInspectionEquipmentAttachments;
+import com.everhomes.server.schema.tables.pojos.EhEquipmentInspectionEquipmentParameters;
+import com.everhomes.server.schema.tables.pojos.EhEquipmentInspectionEquipmentPlanMap;
+import com.everhomes.server.schema.tables.pojos.EhEquipmentInspectionEquipmentStandardMap;
+import com.everhomes.server.schema.tables.pojos.EhEquipmentInspectionEquipments;
+import com.everhomes.server.schema.tables.pojos.EhEquipmentInspectionItemResults;
+import com.everhomes.server.schema.tables.pojos.EhEquipmentInspectionItems;
+import com.everhomes.server.schema.tables.pojos.EhEquipmentInspectionPlans;
+import com.everhomes.server.schema.tables.pojos.EhEquipmentInspectionStandardGroupMap;
+import com.everhomes.server.schema.tables.pojos.EhEquipmentInspectionStandards;
+import com.everhomes.server.schema.tables.pojos.EhEquipmentInspectionTaskAttachments;
+import com.everhomes.server.schema.tables.pojos.EhEquipmentInspectionTaskLogs;
+import com.everhomes.server.schema.tables.pojos.EhEquipmentInspectionTasks;
+import com.everhomes.server.schema.tables.pojos.EhEquipmentInspectionTemplateItemMap;
+import com.everhomes.server.schema.tables.pojos.EhEquipmentInspectionTemplates;
+import com.everhomes.server.schema.tables.pojos.EhEquipmentModelCommunityMap;
+import com.everhomes.server.schema.tables.records.EhEquipmentInspectionAccessoriesRecord;
+import com.everhomes.server.schema.tables.records.EhEquipmentInspectionAccessoryMapRecord;
+import com.everhomes.server.schema.tables.records.EhEquipmentInspectionCategoriesRecord;
+import com.everhomes.server.schema.tables.records.EhEquipmentInspectionEquipmentAttachmentsRecord;
+import com.everhomes.server.schema.tables.records.EhEquipmentInspectionEquipmentParametersRecord;
+import com.everhomes.server.schema.tables.records.EhEquipmentInspectionEquipmentStandardMapRecord;
+import com.everhomes.server.schema.tables.records.EhEquipmentInspectionEquipmentsRecord;
+import com.everhomes.server.schema.tables.records.EhEquipmentInspectionItemResultsRecord;
+import com.everhomes.server.schema.tables.records.EhEquipmentInspectionPlanGroupMapRecord;
+import com.everhomes.server.schema.tables.records.EhEquipmentInspectionPlansRecord;
+import com.everhomes.server.schema.tables.records.EhEquipmentInspectionStandardGroupMapRecord;
+import com.everhomes.server.schema.tables.records.EhEquipmentInspectionStandardsRecord;
+import com.everhomes.server.schema.tables.records.EhEquipmentInspectionTaskAttachmentsRecord;
+import com.everhomes.server.schema.tables.records.EhEquipmentInspectionTaskLogsRecord;
+import com.everhomes.server.schema.tables.records.EhEquipmentInspectionTasksRecord;
+import com.everhomes.server.schema.tables.records.EhEquipmentInspectionTemplateItemMapRecord;
+import com.everhomes.server.schema.tables.records.EhEquipmentInspectionTemplatesRecord;
 import com.everhomes.sharding.ShardIterator;
 import com.everhomes.sharding.ShardingProvider;
 import com.everhomes.user.UserContext;
@@ -27,7 +95,11 @@ import com.everhomes.util.ConvertHelper;
 import com.everhomes.util.DateHelper;
 import com.everhomes.util.IterationMapReduceCallback.AfterAction;
 import com.mysql.jdbc.StringUtils;
-import org.jooq.*;
+import org.jooq.Condition;
+import org.jooq.DSLContext;
+import org.jooq.Field;
+import org.jooq.Record;
+import org.jooq.SelectQuery;
 import org.jooq.impl.DSL;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -41,7 +113,12 @@ import org.springframework.stereotype.Component;
 
 import javax.annotation.PostConstruct;
 import java.sql.Timestamp;
-import java.util.*;
+import java.util.ArrayList;
+import java.util.HashMap;
+import java.util.HashSet;
+import java.util.List;
+import java.util.Map;
+import java.util.Set;
 import java.util.stream.Collectors;
 
 @Component
@@ -2938,5 +3015,27 @@ public class EquipmentProviderImpl implements EquipmentProvider {
                 + ", elapse=" + (endTime - startTime));
 
         return maps;
+    }
+
+    @Override
+    public List<EquipmentInspectionTasks> listTasksByPlanId(Long planId, CrossShardListingLocator locator, int pageSize) {
+        List<EquipmentInspectionTasks> tasks = new ArrayList<>();
+        DSLContext context = this.dbProvider.getDslContext(AccessSpec.readWrite());
+        SelectQuery<EhEquipmentInspectionTasksRecord> query = context.selectQuery(Tables.EH_EQUIPMENT_INSPECTION_TASKS);
+        if(locator.getAnchor()!=null && locator.getAnchor()!=0L){
+            query.addConditions(Tables.EH_EQUIPMENT_INSPECTION_TASKS.ID.lt(locator.getAnchor()));
+        }
+        query.addConditions(Tables.EH_EQUIPMENT_INSPECTION_TASKS.PLAN_ID.eq(planId));
+        query.addConditions(Tables.EH_EQUIPMENT_INSPECTION_TASKS.STATUS.ne(EquipmentTaskStatus.NONE.getCode()));
+        query.addOrderBy(Tables.EH_EQUIPMENT_INSPECTION_TASKS.ID.desc());
+        query.addLimit(pageSize+1);
+        tasks =  query.fetchInto(EquipmentInspectionTasks.class);
+        if(tasks.size()>pageSize){
+            tasks.remove(tasks.size()-1);
+            locator.setAnchor(tasks.get(tasks.size()).getId());
+        }else {
+            locator.setAnchor(null);
+        }
+        return  tasks;
     }
 }

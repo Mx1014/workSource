@@ -239,12 +239,9 @@ public class EquipmentController extends ControllerBase {
     @RequestMapping("searchEquipmentStandardRelations")
     @RestReturn(value = SearchEquipmentStandardRelationsResponse.class)
     public RestResponse searchEquipmentStandardRelations(SearchEquipmentStandardRelationsCommand cmd) {
-        //增加搜索条件  repeatType
         SearchEquipmentStandardRelationsResponse relations = equipmentStandardMapSearcher.query(cmd);
-
         return getRestResponse(relations);
     }
-
 
 	/**
 	 * <b>URL: /equipment/exportEquipments</b>
@@ -282,22 +279,7 @@ public class EquipmentController extends ControllerBase {
         response.setErrorDescription("OK");
         return response;
     }
-    
-//    /**
-//	 * <b>URL: /equipment/creatEquipmentAccessories</b>
-//	 * <p>创建备品备件</p>
-//	 */
-//	@RequestMapping("creatEquipmentAccessories")
-//	@RestReturn(value = EquipmentAccessoriesDTO.class)
-//	public RestResponse creatEquipmentAccessories(UpdateEquipmentAccessoriesCommand cmd) {
-//		
-//		EquipmentAccessoriesDTO accessories = equipmentService.creatEquipmentAccessories(cmd);
-//		
-//		RestResponse response = new RestResponse(accessories);
-//		response.setErrorCode(ErrorCodes.SUCCESS);
-//		response.setErrorDescription("OK");
-//		return response;
-//	}
+
 	
 	/**
 	 * <b>URL: /equipment/updateEquipmentAccessories</b>
@@ -1070,20 +1052,20 @@ public class EquipmentController extends ControllerBase {
 		return response;
 	}
 
-	/**
-	 * <b>URL: /equipment/syscTemplates</b>
-	 * <p>不同域空间下巡检模板全部应用到对应域空间下所有项目</p>
-	 */
-	@RequestMapping("distributeTemplates")
-	@RestReturn(value = String.class)
-	public RestResponse distribute () {
-
-		equipmentService.distributeTemplates();
-		RestResponse response = new RestResponse();
-		response.setErrorCode(ErrorCodes.SUCCESS);
-		response.setErrorDescription("OK");
-		return response;
-	}
+//	/**
+//	 * <b>URL: /equipment/distributeTemplates</b>
+//	 * <p>不同域空间下巡检模板全部应用到对应域空间下所有项目</p>
+//	 */
+//	@RequestMapping("distributeTemplates")
+//	@RestReturn(value = String.class)
+//	public RestResponse distribute () {
+//
+//		equipmentService.distributeTemplates();
+//		RestResponse response = new RestResponse();
+//		response.setErrorCode(ErrorCodes.SUCCESS);
+//		response.setErrorDescription("OK");
+//		return response;
+//	}
 
 
     /**
