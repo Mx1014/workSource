@@ -787,6 +787,9 @@ public class SocialSecurityServiceImpl implements SocialSecurityService {
 
     private SocialSecurityBase findSSBase(List<SocialSecurityBase> bases, SocialSecurityItemDTO itemDTO) {
         for (SocialSecurityBase base : bases) {
+            if (base.getAccumOrSocail().equals(AccumOrSocail.ACCUM.getCode())) {
+                return base;
+            }
             if (base.getPayItem().equals(itemDTO.getPayItem())) {
                 return base;
             }
