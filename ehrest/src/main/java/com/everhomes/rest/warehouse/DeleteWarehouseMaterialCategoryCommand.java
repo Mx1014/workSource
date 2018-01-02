@@ -18,6 +18,7 @@ public class DeleteWarehouseMaterialCategoryCommand {
 
     private Long categoryId;
 
+
     public Long getCategoryId() {
         return categoryId;
     }

@@ -27,6 +27,15 @@ public class ExportFieldsExcelCommand {
     private String includedGroupIds;
 
     private Long communityId;
+    private Long orgId;
+
+    public Long getOrgId() {
+        return orgId;
+    }
+
+    public void setOrgId(Long orgId) {
+        this.orgId = orgId;
+    }
 
     public String getModuleName() {
         return moduleName;

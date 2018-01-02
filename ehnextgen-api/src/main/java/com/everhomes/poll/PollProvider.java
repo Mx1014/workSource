@@ -19,6 +19,8 @@ public interface PollProvider {
 
     PollVote findPollVoteByUidAndPollId(Long uid,Long pollId);
 
+    List<PollVote> listPollVoteByUidAndPollId(Long uid, Long pollId);
+
     void updatePoll(Poll poll);
 
     Poll findByPostId(Long postId);

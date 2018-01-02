@@ -105,6 +105,20 @@ public class ModuleController extends ControllerBase {
     }
 
     /**
+     * <b>URL: /module/checkUserRelatedProjectAllFlag</b>
+     * <p>查询用户是否在某个应用下具有全部的项目</p>
+     */
+    @RequestMapping("checkUserRelatedProjectAllFlag")
+    @RestReturn(value=ProjectDTO.class, collection = true)
+    public RestResponse checkUserRelatedProjectAllFlag(@Valid ListUserRelatedProjectByModuleCommand cmd) {
+        RestResponse response = new RestResponse(serviceModuleService.checkUserRelatedProjectAllFlag(cmd));
+        response.setErrorCode(ErrorCodes.SUCCESS);
+        response.setErrorDescription("OK");
+        return response;
+    }
+
+
+    /**
      * <b>URL: /module/listUserRelatedProjectByModuleId</b>
      * <p>用户的在这个模块下的项目列表</p>
      */

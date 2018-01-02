@@ -194,10 +194,7 @@ update eh_service_modules set action_type = 46 WHERE id = 50100 and name = '组�
 
 update eh_service_modules set action_type = null where id = 50400 and name = '人事档案';
 
+
 -- 更新提示
 SET @sid = (SELECT MAX(id) FROM `eh_locale_strings`);
 INSERT INTO `eh_locale_strings` (`id`, `scope`, `code`, `locale`, `text`) VALUES ((@sid:=@sid+1), 'privilege', '100055', 'zh_CN', '校验应用权限失败');
-
--- 更新应用名
-update eh_reflection_service_module_apps set name = '考勤管理' where name like '%打卡%';
-update eh_reflection_service_module_apps set name = '组织架构' where name like '%通讯录%';

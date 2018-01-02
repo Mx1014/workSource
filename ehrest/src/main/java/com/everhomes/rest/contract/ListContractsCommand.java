@@ -39,10 +39,20 @@ public class ListContractsCommand {
 	private Long pageAnchor;
 
 	private Integer pageSize;
+
+	private Long orgId;
 	
 
 	public ListContractsCommand() {
 
+	}
+
+	public Long getOrgId() {
+		return orgId;
+	}
+
+	public void setOrgId(Long orgId) {
+		this.orgId = orgId;
 	}
 
 	public Byte getCustomerType() {

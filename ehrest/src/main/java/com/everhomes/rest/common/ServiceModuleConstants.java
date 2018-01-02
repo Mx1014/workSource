@@ -17,4 +17,8 @@ public interface ServiceModuleConstants {
 
     long NEWS_MODULE = 10800L;
 
+    long ENTERPRISE_CUSTOMER_MODULE = 21100L;
+    long CONTRACT_MODULE = 21200L;
+    long ENERGY_MODULE = 49100L;
+
 }

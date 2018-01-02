@@ -30,6 +30,34 @@ public class UpdateCustomerPatentCommand {
     private Integer softwareCopyrights;
     private Integer icLayout;
 
+    private Integer namespaceId;
+    private Long orgId;
+    private Long communityId;
+
+    public Integer getNamespaceId() {
+        return namespaceId;
+    }
+
+    public void setNamespaceId(Integer namespaceId) {
+        this.namespaceId = namespaceId;
+    }
+
+    public Long getCommunityId() {
+        return communityId;
+    }
+
+    public void setCommunityId(Long communityId) {
+        this.communityId = communityId;
+    }
+
+    public Long getOrgId() {
+        return orgId;
+    }
+
+    public void setOrgId(Long orgId) {
+        this.orgId = orgId;
+    }
+
     public Integer getEffectiveIntellectualProperties() {
         return effectiveIntellectualProperties;
     }

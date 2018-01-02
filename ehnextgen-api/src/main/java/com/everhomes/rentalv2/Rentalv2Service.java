@@ -26,6 +26,8 @@ public interface Rentalv2Service {
 
 	void addRentalSiteSimpleRules(AddRentalSiteRulesAdminCommand cmd);
 
+	void changeRentalBillPayInfo(ChangeRentalBillPayInfoCommand cmd);
+
 	void cancelRentalBill(CancelRentalBillCommand cmd);
 
 	void deleteRentalSiteItem(DeleteItemAdminCommand cmd);
@@ -98,6 +100,9 @@ public interface Rentalv2Service {
 	FindRentalSiteMonthStatusCommandResponse findRentalSiteMonthStatus(
 			FindRentalSiteMonthStatusCommand cmd);
 
+	FindRentalSiteMonthStatusByWeekCommandResponse findRentalSiteMonthStatusByWeek(
+			FindRentalSiteMonthStatusByWeekCommand cmd);
+
 
 	void deleteResource(DeleteResourceCommand cmd);
 
@@ -118,6 +123,9 @@ public interface Rentalv2Service {
 
 	FindAutoAssignRentalSiteMonthStatusResponse findAutoAssignRentalSiteMonthStatus(
 			FindAutoAssignRentalSiteMonthStatusCommand cmd);
+
+	FindAutoAssignRentalSiteMonthStatusByWeekResponse findAutoAssignRentalSiteMonthStatusByWeek(
+			FindAutoAssignRentalSiteMonthStatusByWeekCommand cmd);
 
 
 	void addCheckOperator(AddCheckOperatorCommand cmd);

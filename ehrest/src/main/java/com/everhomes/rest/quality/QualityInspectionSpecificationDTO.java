@@ -1,10 +1,10 @@
 package com.everhomes.rest.quality;
 
-import java.sql.Timestamp;
-import java.util.List;
-
 import com.everhomes.discover.ItemType;
 import com.everhomes.util.StringHelper;
+
+import java.sql.Timestamp;
+import java.util.List;
 
 /**
  * <ul>
@@ -22,6 +22,7 @@ import com.everhomes.util.StringHelper;
  *  <li>namespaceId: 域空间id</li>
  *  <li>scopeType: specification可见范围类型 0: all, 1: community</li>
  *  <li>scopeId: 看见范围具体Id，全部为0</li>
+ *  <li>scopeName: specification的所在项目名称</li>
  *  <li>applyPolicy: 应用策略 0: add, 1: modify, 2: delete</li>
  *  <li>referId: 关联规范id</li>
  *  <li>creatorUid: 创建者uid</li>
@@ -40,6 +41,8 @@ public class QualityInspectionSpecificationDTO {
 	private Byte scopeCode;
   
 	private Long scopeId;
+
+	private String scopeName;
   
 	private Long parentId;
   
@@ -221,7 +224,15 @@ public class QualityInspectionSpecificationDTO {
 	public void setChildrens(List<QualityInspectionSpecificationDTO> childrens) {
 		this.childrens = childrens;
 	}
-	
+
+	public String getScopeName() {
+		return scopeName;
+	}
+
+	public void setScopeName(String scopeName) {
+		this.scopeName = scopeName;
+	}
+
 	@Override
     public String toString() {
         return StringHelper.toJsonString(this);

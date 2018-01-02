@@ -38,7 +38,7 @@ public class GroupParametersResponse {
 	}
 
 	public GroupParametersResponse(Integer namespaceId, Byte createFlag, Byte verifyFlag, Byte memberPostFlag,
-								   Byte memberCommentFlag, Byte adminBroadcastFlag, Integer broadcastCountm, Byte clubType) {
+								   Byte memberCommentFlag, Byte adminBroadcastFlag, Integer broadcastCount, Byte clubType) {
 		super();
 		this.namespaceId = namespaceId;
 		this.createFlag = createFlag;
