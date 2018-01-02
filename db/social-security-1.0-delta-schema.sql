@@ -1,6 +1,6 @@
 -- 社保建表social_security
 -- 社保基准表
-DROP TABLE eh_social_security_bases;
+-- DROP TABLE eh_social_security_bases;
 CREATE TABLE `eh_social_security_bases` (
   `id` BIGINT,
   `city_id` BIGINT DEFAULT '0',
@@ -29,7 +29,7 @@ CREATE TABLE `eh_social_security_bases` (
 ) ENGINE = INNODB DEFAULT CHARSET = utf8mb4 ;
 
 -- 社保设置表
-DROP TABLE eh_social_security_settings;
+-- DROP TABLE eh_social_security_settings;
 CREATE TABLE `eh_social_security_settings` (
   `id` BIGINT,
   `city_id` BIGINT DEFAULT '0',
@@ -57,7 +57,7 @@ CREATE TABLE `eh_social_security_settings` (
 ) ENGINE = INNODB DEFAULT CHARSET = utf8mb4 ;
 
 -- 社保缴费表
-DROP TABLE eh_social_security_payments;
+-- DROP TABLE eh_social_security_payments;
 CREATE TABLE `eh_social_security_payments` (
   `id` BIGINT,
   `city_id` BIGINT DEFAULT '0',
@@ -91,7 +91,7 @@ CREATE TABLE `eh_social_security_payments` (
 ) ENGINE = INNODB DEFAULT CHARSET = utf8mb4 ;
 
 -- 社保缴费历史表
-DROP TABLE eh_social_security_payment_logs;
+-- DROP TABLE eh_social_security_payment_logs;
 CREATE TABLE `eh_social_security_payment_logs` (
   `id` BIGINT,
   `city_id` BIGINT DEFAULT '0',
@@ -124,7 +124,7 @@ CREATE TABLE `eh_social_security_payment_logs` (
 ) ENGINE = INNODB DEFAULT CHARSET = utf8mb4 ;
 
 -- 汇总表
-DROP TABLE eh_social_security_summary;
+-- DROP TABLE eh_social_security_summary;
 CREATE TABLE `eh_social_security_summary` (
   `id` BIGINT,
   `namespace_id` INT (11) DEFAULT '0',
@@ -143,7 +143,7 @@ CREATE TABLE `eh_social_security_summary` (
 ) ENGINE = INNODB DEFAULT CHARSET = utf8mb4 ;
 
 -- 部门汇总表
-DROP TABLE eh_social_security_department_summary;
+-- DROP TABLE eh_social_security_department_summary;
 CREATE TABLE `eh_social_security_department_summary` (
   `id` BIGINT,
   `namespace_id` INT (11) DEFAULT '0',
@@ -199,7 +199,7 @@ CREATE TABLE `eh_social_security_department_summary` (
 ) ENGINE = INNODB DEFAULT CHARSET = utf8mb4 ;
 
 -- 社保报表
-DROP TABLE eh_social_security_report;
+-- DROP TABLE eh_social_security_report;
 CREATE TABLE `eh_social_security_report` (
   `id` BIGINT,
   `namespace_id` INT (11) DEFAULT '0',
@@ -302,7 +302,7 @@ CREATE TABLE `eh_social_security_report` (
 ) ENGINE = INNODB DEFAULT CHARSET = utf8mb4 ;
 
 -- 社保增减员报表
-DROP TABLE eh_social_security_inout_report;
+-- DROP TABLE eh_social_security_inout_report;
 CREATE TABLE `eh_social_security_inout_report` (
   `id` BIGINT,
   `namespace_id` INT (11) DEFAULT '0',
