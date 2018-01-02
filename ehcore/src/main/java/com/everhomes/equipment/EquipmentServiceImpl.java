@@ -5404,11 +5404,9 @@ public class EquipmentServiceImpl implements EquipmentService {
 
 		}
 		//sort equipmentStandardRelations
-		List<EquipmentStandardRelationDTO> relations = relationDTOS.stream()
-				.sorted(Comparator.comparing(EquipmentStandardRelationDTO::getOrder))
-				.collect(Collectors.toList());
+		relationDTOS.sort(Comparator.comparingLong(EquipmentStandardRelationDTO::getOrder));
 		//process  EquipmentStandardRelation to plan
-		equipmentInspectionPlan.setEquipmentStandardRelations(relations);
+		equipmentInspectionPlan.setEquipmentStandardRelations(relationDTOS);
 
 	}
 
