@@ -20,6 +20,7 @@ import com.everhomes.db.DbProvider;
 import com.everhomes.entity.EntityType;
 import com.everhomes.equipment.EquipmentInspectionStandardGroupMap;
 import com.everhomes.equipment.EquipmentInspectionTasks;
+import com.everhomes.listing.CrossShardListingLocator;
 import com.everhomes.locale.LocaleString;
 import com.everhomes.locale.LocaleStringProvider;
 import com.everhomes.locale.LocaleStringService;
@@ -39,6 +40,7 @@ import com.everhomes.rest.approval.MeterFormulaVariable;
 import com.everhomes.rest.approval.TrueOrFalseFlag;
 import com.everhomes.rest.common.ImportFileResponse;
 import com.everhomes.rest.common.ServiceModuleConstants;
+import com.everhomes.rest.community.BuildingDTO;
 import com.everhomes.rest.customer.ImportEnterpriseCustomerDataDTO;
 import com.everhomes.rest.energy.*;
 import com.everhomes.rest.equipment.ExecuteGroupAndPosition;
@@ -64,6 +66,7 @@ import com.everhomes.search.EnergyMeterReadingLogSearcher;
 import com.everhomes.search.EnergyMeterSearcher;
 import com.everhomes.search.EnergyMeterTaskSearcher;
 import com.everhomes.search.EnergyPlanSearcher;
+import com.everhomes.settings.PaginationConfigHelper;
 import com.everhomes.techpark.rental.RentalServiceImpl;
 import com.everhomes.user.User;
 import com.everhomes.user.UserContext;
@@ -4504,9 +4507,9 @@ public class EnergyConsumptionServiceImpl implements EnergyConsumptionService {
         List<EnergyMeterCategory> categoryList = new ArrayList<>();
         categoryList = meterCategoryProvider.listMeterCategories(UserContext.getCurrentNamespaceId(cmd.getNamespaceId()), cmd.getCategoryType(),
                 null, null, cmd.getCommunityId());
-        List<EnergyMeterCategoryMap> maps = energyMeterCategoryMapProvider.listEnergyMeterCategoryMap(cmd.getCommunityId());
-        if(maps != null && maps.size() > 0) {
-            List<Long> categoryIds = maps.stream().map(map -> {
+        List<EnergyMeterCategoryMap> categoryMaps = energyMeterCategoryMapProvider.listEnergyMeterCategoryMap(cmd.getCommunityId());
+        if(categoryMaps != null && categoryMaps.size() > 0) {
+            List<Long> categoryIds = categoryMaps.stream().map(map -> {
                 return map.getCategoryId();
             }).collect(Collectors.toList());
             List<EnergyMeterCategory> categories = meterCategoryProvider.listMeterCategories(categoryIds, cmd.getCategoryType());
@@ -4518,8 +4521,58 @@ public class EnergyConsumptionServiceImpl implements EnergyConsumptionService {
             EnergyMeterCategoryDTO dto = toMeterCategoryDto(category);
             return dto;
         }).collect(Collectors.toList());
-
         response.setCategoryDTOs(dtos);
+
+        CrossShardListingLocator locator = new CrossShardListingLocator();
+        List<com.everhomes.community.Building> buildings = communityProvider.ListBuildingsByCommunityId(locator, Integer.MAX_VALUE-1,cmd.getCommunityId(), UserContext.getCurrentNamespaceId(cmd.getNamespaceId()), null);
+        List<BuildingDTO> buildingDTOs = buildings.stream().map((r) -> {
+            BuildingDTO dto = ConvertHelper.convert(r, BuildingDTO.class);
+            dto.setBuildingName(dto.getName());
+            dto.setName(org.apache.commons.lang.StringUtils.isBlank(dto.getAliasName()) ? dto.getName() : dto.getAliasName());
+
+            return dto;
+        }).collect(Collectors.toList());
+        response.setBuildings(buildingDTOs);
+
+        List<ExecuteGroupAndPosition> groupDtos = listUserRelateGroups();
+        List<EnergyPlanGroupMap> maps = energyPlanProvider.lisEnergyPlanGroupMapByGroupAndPosition(groupDtos);
+        if (maps != null && maps.size() > 0) {
+            List<Long> planIds = maps.stream().map(map -> {
+                return map.getPlanId();
+            }).collect(Collectors.toList());
+            List<EnergyMeterTask> tasks = energyMeterTaskProvider.listEnergyMeterTasksByPlan(planIds, cmd.getCommunityId(), cmd.getOwnerId(), 0L, Integer.MAX_VALUE-1);
+
+            if(tasks != null && tasks.size() > 0) {
+                List<EnergyMeterTaskDTO> taskDTOs = tasks.stream().map(task -> {
+                    EnergyMeterTaskDTO dto = ConvertHelper.convert(task, EnergyMeterTaskDTO.class);
+                    EnergyMeter meter = meterProvider.findById(task.getNamespaceId(), task.getMeterId());
+                    dto.setBillCategoryId(meter.getBillCategoryId());
+                    // 项目
+                    EnergyMeterCategory billCategory = meterCategoryProvider.findById(UserContext.getCurrentNamespaceId(task.getNamespaceId()), meter.getBillCategoryId());
+                    dto.setBillCategory(billCategory != null ? billCategory.getName() : null);
+
+                    dto.setMeterName(meter.getName());
+                    dto.setMeterNumber(meter.getMeterNumber());
+                    dto.setMeterType(meter.getMeterType());
+                    dto.setMaxReading(meter.getMaxReading());
+                    dto.setStartReading(meter.getStartReading());
+                    // 日读表差
+                    dto.setDayPrompt(this.processDayPrompt(meter, meter.getNamespaceId()));
+                    // 月读表差
+                    dto.setMonthPrompt(this.processMonthPrompt(meter, meter.getNamespaceId()));
+                    List<EnergyMeterAddress> addressMap = energyMeterAddressProvider.listByMeterId(task.getMeterId());
+                    if(addressMap != null && addressMap.size() > 0) {
+                        dto.setApartmentFloor(addressMap.get(0).getApartmentFloor());
+                        dto.setBuildingId(addressMap.get(0).getBuildingId());
+                        dto.setBuildingName(addressMap.get(0).getBuildingName());
+                        dto.setApartmentName(addressMap.get(0).getApartmentName());
+                    }
+                    return dto;
+                }).collect(Collectors.toList());
+                response.setTaskDTOs(taskDTOs);
+            }
+
+        }
         return response;
     }
 }
