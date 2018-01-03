@@ -160,10 +160,10 @@ VALUES (5200000, '积分系统', 5000000, NULL, 'integral-management', 0, 2, '/5
 INSERT INTO `eh_web_menus` (`id`, `name`, `parent_id`, `icon_url`, `data_type`, `leaf_flag`, `status`, `path`, `type`, `sort_num`, `module_id`, `level`, `condition_type`, `category`)
 VALUES (5210000, '积分系统', 5200000, NULL, 'integral-management', 0, 2, '/5000000/5200000/5210000', 'zuolin', 10, 47000, 2, 'namespace', 'page');
 
-INSERT INTO `eh_web_menus` (`id`, `name`, `parent_id`, `icon_url`, `data_type`, `leaf_flag`, `status`, `path`, `type`, `sort_num`, `module_id`, `level`, `condition_type`, `category`)
-VALUES (1200000, '短信管理', 1000000, NULL, 'sms-management', 0, 2, '/1100000/1100000', 'zuolin', 10, 12200, 2, 'namespace', 'module');
-INSERT INTO `eh_web_menus` (`id`, `name`, `parent_id`, `icon_url`, `data_type`, `leaf_flag`, `status`, `path`, `type`, `sort_num`, `module_id`, `level`, `condition_type`, `category`)
-VALUES (1210000, '短信管理', 1200000, NULL, 'sms-management', 0, 2, '/1100000/1100000/1110000', 'zuolin', 10, 12200, 2, 'namespace', 'page');
+# INSERT INTO `eh_web_menus` (`id`, `name`, `parent_id`, `icon_url`, `data_type`, `leaf_flag`, `status`, `path`, `type`, `sort_num`, `module_id`, `level`, `condition_type`, `category`)
+# VALUES (1200000, '短信管理', 1000000, NULL, 'sms-management', 0, 2, '/1100000/1100000', 'zuolin', 10, 12200, 2, 'namespace', 'module');
+# INSERT INTO `eh_web_menus` (`id`, `name`, `parent_id`, `icon_url`, `data_type`, `leaf_flag`, `status`, `path`, `type`, `sort_num`, `module_id`, `level`, `condition_type`, `category`)
+# VALUES (1210000, '短信管理', 1200000, NULL, 'sms-management', 0, 2, '/1100000/1100000/1110000', 'zuolin', 10, 12200, 2, 'namespace', 'page');
 
 SET @locale_strings_id = IFNULL((SELECT MAX(id) FROM `eh_locale_strings`), 0);
 INSERT INTO `eh_locale_strings` (`id`, `scope`, `code`, `locale`, `text`)
