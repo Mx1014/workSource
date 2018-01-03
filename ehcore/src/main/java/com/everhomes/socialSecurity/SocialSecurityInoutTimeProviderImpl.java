@@ -73,7 +73,7 @@ public class SocialSecurityInoutTimeProviderImpl implements SocialSecurityInoutT
 
     //  查询指定公司、指定月份下需要交社保的人
     @Override
-    public List<Long> listSocialSecurityEmployeeDetailIds(Long ownerId, String payMonth, Byte inOutTime){
+    public List<Long> listSocialSecurityEmployeeDetailIdsByPayMonth(Long ownerId, String payMonth, Byte inOutTime){
         List<Long> results = new ArrayList<>();
         DSLContext context = dbProvider.getDslContext(AccessSpec.readOnly());
         SelectQuery<EhSocialSecurityInoutTimeRecord> query = context.selectQuery(Tables.EH_SOCIAL_SECURITY_INOUT_TIME);

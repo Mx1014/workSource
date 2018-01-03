@@ -1912,8 +1912,8 @@ public class SocialSecurityServiceImpl implements SocialSecurityService {
     }
 
     @Override
-    public List<Long> listSocialSecurityEmployeeDetailIds(Long ownerId, String payMonth) {
-        List<Long> detailIds = socialSecurityInoutTimeProvider.listSocialSecurityEmployeeDetailIds(ownerId, payMonth, InOutType.SOCIAL_SECURITY.getCode());
+    public List<Long> listSocialSecurityEmployeeDetailIdsByPayMonth(Long ownerId, String payMonth) {
+        List<Long> detailIds = socialSecurityInoutTimeProvider.listSocialSecurityEmployeeDetailIdsByPayMonth(ownerId, payMonth, InOutType.SOCIAL_SECURITY.getCode());
         return detailIds;
     }
 }

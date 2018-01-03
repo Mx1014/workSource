@@ -85,5 +85,5 @@ interface SocialSecurityService {
 
 	SocialSecurityEmployeeDTO getSocialSecurityEmployeeInfo(Long detailId);
 
-    List<Long> listSocialSecurityEmployeeDetailIds(Long ownerId, String payMonth);
+    List<Long> listSocialSecurityEmployeeDetailIdsByPayMonth(Long ownerId, String payMonth);
 }

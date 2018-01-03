@@ -12,5 +12,5 @@ public interface SocialSecurityInoutTimeProvider {
 
     SocialSecurityInoutTime getSocialSecurityInoutTimeByDetailId(Byte inOutType, Long detailId);
 
-    List<Long> listSocialSecurityEmployeeDetailIds(Long ownerId, String payMonth, Byte inOutTime);
+    List<Long> listSocialSecurityEmployeeDetailIdsByPayMonth(Long ownerId, String payMonth, Byte inOutTime);
 }
