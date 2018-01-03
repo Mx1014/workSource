@@ -257,6 +257,17 @@ public class ContractController extends ControllerBase {
 	}
 
 	/**
+	 * <p>判断是否是管理员</p>
+	 * <b>URL: /contract/checkAdmin</b>
+	 */
+	@RequestMapping("checkAdmin")
+	@RestReturn(Boolean.class)
+	public RestResponse checkAdmin(CheckAdminCommand cmd){
+		ContractService contractService = getContractService(cmd.getNamespaceId());
+		return new RestResponse(contractService.checkAdmin(cmd));
+	}
+
+	/**
 	 * <b>URL: /contract/syncContractsFromThirdPart</b>
 	 * <p>从第三方同步合同</p>
 	 */

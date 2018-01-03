@@ -2,6 +2,7 @@ package com.everhomes.contract;
 
 import com.alibaba.fastjson.JSONObject;
 import com.alibaba.fastjson.TypeReference;
+import com.everhomes.acl.RolePrivilegeService;
 import com.everhomes.community.Community;
 import com.everhomes.community.CommunityProvider;
 import com.everhomes.configuration.ConfigurationProvider;
@@ -9,6 +10,7 @@ import com.everhomes.constants.ErrorCodes;
 import com.everhomes.customer.EnterpriseCustomer;
 import com.everhomes.customer.EnterpriseCustomerProvider;
 import com.everhomes.http.HttpUtils;
+import com.everhomes.rest.acl.ListServiceModuleAdministratorsCommand;
 import com.everhomes.rest.asset.PaymentVariable;
 import com.everhomes.rest.community.CommunityType;
 import com.everhomes.rest.contract.*;
@@ -16,6 +18,8 @@ import com.everhomes.rest.customer.CustomerType;
 import com.everhomes.rest.openapi.shenzhou.ShenzhouJsonEntity;
 import com.everhomes.rest.openapi.shenzhou.ZJContract;
 import com.everhomes.rest.openapi.shenzhou.ZJContractDetail;
+import com.everhomes.rest.organization.OrganizationContactDTO;
+import com.everhomes.user.UserContext;
 import com.everhomes.user.UserIdentifier;
 import com.everhomes.user.UserProvider;
 import com.everhomes.util.ConvertHelper;
@@ -76,6 +80,9 @@ public class ZJContractHandler implements ContractService{
 
     @Autowired
     private FieldService fieldService;
+
+    @Autowired
+    private RolePrivilegeService rolePrivilegeService;
 
     @Override
     public ListContractsResponse listContracts(ListContractsCommand cmd) {
@@ -643,5 +650,26 @@ public class ZJContractHandler implements ContractService{
         }
 
         return ts;
+    }
+
+    @Override
+    public Boolean checkAdmin(CheckAdminCommand cmd) {
+        Long userId = UserContext.currentUserId();
+        ListServiceModuleAdministratorsCommand cmd1 = new ListServiceModuleAdministratorsCommand();
+        cmd1.setOrganizationId(cmd.getOrganizationId());
+        cmd1.setActivationFlag((byte) 1);
+        cmd1.setOwnerType("EhOrganizations");
+        cmd1.setOwnerId(null);
+        LOGGER.info("organization manager check for bill display, cmd = " + cmd1.toString());
+        List<OrganizationContactDTO> organizationContactDTOS = rolePrivilegeService.listOrganizationAdministrators(cmd1);
+        LOGGER.info("organization manager check for bill display, orgContactsDTOs are = " + organizationContactDTOS.toString());
+        LOGGER.info("organization manager check for bill display, userId = " + userId);
+        for (OrganizationContactDTO dto : organizationContactDTOS) {
+            Long targetId = dto.getTargetId();
+            if (targetId.longValue() == userId.longValue()) {
+                return true;
+            }
+        }
+        return false;
     }
 }

@@ -14,14 +14,11 @@ import java.util.Map;
 import java.util.Set;
 import java.util.stream.Collectors;
 
+import com.everhomes.acl.RolePrivilegeService;
 import com.everhomes.address.Address;
 import com.everhomes.address.AddressProvider;
 
-import com.everhomes.asset.AssetPaymentStrings;
-import com.everhomes.asset.AssetProvider;
-import com.everhomes.asset.AssetService;
-import com.everhomes.asset.AssetVendor;
-import com.everhomes.asset.AssetVendorHandler;
+import com.everhomes.asset.*;
 
 import com.everhomes.bootstrap.PlatformContext;
 import com.everhomes.constants.ErrorCodes;
@@ -41,6 +38,7 @@ import com.everhomes.organization.*;
 import com.everhomes.organization.pm.CommunityAddressMapping;
 import com.everhomes.organization.pm.PropertyMgrProvider;
 import com.everhomes.portal.PortalService;
+import com.everhomes.rest.acl.ListServiceModuleAdministratorsCommand;
 import com.everhomes.rest.acl.PrivilegeConstants;
 import com.everhomes.rest.acl.PrivilegeServiceErrorCode;
 import com.everhomes.rest.approval.CommonStatus;
@@ -54,6 +52,7 @@ import com.everhomes.rest.flow.FlowModuleType;
 import com.everhomes.rest.flow.FlowOwnerType;
 import com.everhomes.rest.launchpad.ActionType;
 import com.everhomes.rest.namespace.NamespaceCommunityType;
+import com.everhomes.rest.organization.OrganizationContactDTO;
 import com.everhomes.rest.organization.pm.AddressMappingStatus;
 import com.everhomes.rest.portal.ListServiceModuleAppsCommand;
 import com.everhomes.rest.portal.ListServiceModuleAppsResponse;
@@ -186,6 +185,9 @@ public class ContractServiceImpl implements ContractService {
 
 	@Autowired
 	private UserPrivilegeMgr userPrivilegeMgr;
+
+	@Autowired
+	private RolePrivilegeService rolePrivilegeService;
 
 	private void checkContractAuth(Integer namespaceId, Long privilegeId, Long orgId, Long communityId) {
 		ListServiceModuleAppsCommand cmd = new ListServiceModuleAppsCommand();
@@ -1652,5 +1654,26 @@ public class ContractServiceImpl implements ContractService {
 				}
 			});
 		});
+	}
+
+	@Override
+	public Boolean checkAdmin(CheckAdminCommand cmd) {
+		Long userId = UserContext.currentUserId();
+		ListServiceModuleAdministratorsCommand cmd1 = new ListServiceModuleAdministratorsCommand();
+		cmd1.setOrganizationId(cmd.getOrganizationId());
+		cmd1.setActivationFlag((byte) 1);
+		cmd1.setOwnerType("EhOrganizations");
+		cmd1.setOwnerId(null);
+		LOGGER.info("organization manager check for bill display, cmd = " + cmd1.toString());
+		List<OrganizationContactDTO> organizationContactDTOS = rolePrivilegeService.listOrganizationAdministrators(cmd1);
+		LOGGER.info("organization manager check for bill display, orgContactsDTOs are = " + organizationContactDTOS.toString());
+		LOGGER.info("organization manager check for bill display, userId = " + userId);
+		for (OrganizationContactDTO dto : organizationContactDTOS) {
+			Long targetId = dto.getTargetId();
+			if (targetId.longValue() == userId.longValue()) {
+				return true;
+			}
+		}
+		return false;
 	}
 }
