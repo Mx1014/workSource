@@ -4,7 +4,7 @@ import com.everhomes.util.StringHelper;
 
 /**
  * <ul>
- * 	<li>NONE : 0</li>
+ * 	<li>NONE : 0失效</li>
  *	<li>WAITING_FOR_EXECUTING : 1 待执行</li>
  *	<li>NEED_MAINTENANCE : 2 需维修</li>
  *	<li>IN_MAINTENANCE : 3 待维修</li>
@@ -13,8 +13,9 @@ import com.everhomes.util.StringHelper;
  * </ul>
  */
 public enum EquipmentTaskStatus {
+	//现调整为只有 失效  待执行  已完成 已延期
 	NONE((byte)0, ""), WAITING_FOR_EXECUTING((byte)1, "待执行"), NEED_MAINTENANCE((byte)2, "需维修"), 
-	IN_MAINTENANCE((byte)3, "待维修"), CLOSE((byte)4, "已完成"), DELAY((byte)5, "已过期");
+	IN_MAINTENANCE((byte)3, "待维修"), CLOSE((byte)4, "已完成"), DELAY((byte)5, "已延期");
 	
 	private byte code;
 	private String name;

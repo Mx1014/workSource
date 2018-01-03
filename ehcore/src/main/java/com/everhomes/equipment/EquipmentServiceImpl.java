@@ -681,6 +681,7 @@ private void checkUserPrivilege(Long orgId, Long privilegeId, Long communityId) 
 				equipmentProvider.deleteModelCommunityMapByModelId(standard.getId(), EquipmentModelType.STANDARD.getCode());
 			}
 
+			//删除标准和设备的关联关系
 			equipmentProvider.deleteEquipmentInspectionStandardMapByStandardId(standard.getId());
 			//inActive与删除标准相关的所有任务和计划  不需要删除计划 计划是通过planId关联巡检对象列表
 			equipmentProvider.inActiveEquipmentPlansMapByStandardId(standard.getId());
@@ -1872,45 +1873,45 @@ private void checkUserPrivilege(Long orgId, Long privilegeId, Long communityId) 
 					log.setProcessResult(EquipmentTaskProcessResult.COMPLETE_DELAY.getCode());
 				}
 
-			} else if (EquipmentTaskResult.NEED_MAINTENANCE_OK.equals(EquipmentTaskResult.fromStatus(cmd.getVerificationResult()))) {
-				task.setStatus(EquipmentTaskStatus.NEED_MAINTENANCE.getCode());
-				task.setExecutiveTime(now);
-				task.setExecutorType(OwnerType.USER.getCode());
-				task.setExecutorId(user.getId());
-				log.setProcessType(EquipmentTaskProcessType.NEED_MAINTENANCE.getCode());
-				if (task.getExecutiveExpireTime() == null || now.before(task.getExecutiveExpireTime())) {
-					task.setResult(EquipmentTaskResult.NEED_MAINTENANCE_OK.getCode());
-					log.setProcessResult(EquipmentTaskProcessResult.NEED_MAINTENANCE_OK.getCode());
-				} else {
-					task.setResult(EquipmentTaskResult.NEED_MAINTENANCE_DELAY.getCode());
-					log.setProcessResult(EquipmentTaskProcessResult.NEED_MAINTENANCE_DELAY.getCode());
-				}
-			} else if (EquipmentTaskResult.NEED_MAINTENANCE_OK_COMPLETE_OK.equals(EquipmentTaskResult.fromStatus(cmd.getVerificationResult()))) {
-				task.setStatus(EquipmentTaskStatus.CLOSE.getCode());
-				task.setProcessTime(now);
-				task.setOperatorType(OwnerType.USER.getCode());
-				task.setOperatorId(user.getId());
-				log.setProcessType(EquipmentTaskProcessType.COMPLETE_MAINTENANCE.getCode());
-				if (task.getProcessExpireTime() == null || now.before(task.getProcessExpireTime())) {
-					task.setResult(EquipmentTaskResult.NEED_MAINTENANCE_OK_COMPLETE_OK.getCode());
-					log.setProcessResult(EquipmentTaskProcessResult.NEED_MAINTENANCE_OK_COMPLETE_OK.getCode());
-				} else {
-					task.setResult(EquipmentTaskResult.NEED_MAINTENANCE_OK_COMPLETE_DELAY.getCode());
-					log.setProcessResult(EquipmentTaskProcessResult.NEED_MAINTENANCE_OK_COMPLETE_DELAY.getCode());
-				}
-			} else if (EquipmentTaskResult.NEED_MAINTENANCE_DELAY_COMPLETE_OK.equals(EquipmentTaskResult.fromStatus(cmd.getVerificationResult()))) {
-				task.setStatus(EquipmentTaskStatus.CLOSE.getCode());
-				task.setProcessTime(now);
-				task.setOperatorType(OwnerType.USER.getCode());
-				task.setOperatorId(user.getId());
-				log.setProcessType(EquipmentTaskProcessType.COMPLETE_MAINTENANCE.getCode());
-				if (task.getProcessExpireTime() == null || now.before(task.getProcessExpireTime())) {
-					task.setResult(EquipmentTaskResult.NEED_MAINTENANCE_DELAY_COMPLETE_OK.getCode());
-					log.setProcessResult(EquipmentTaskProcessResult.NEED_MAINTENANCE_DELAY_COMPLETE_OK.getCode());
-				} else {
-					task.setResult(EquipmentTaskResult.NEED_MAINTENANCE_DELAY_COMPLETE_DELAY.getCode());
-					log.setProcessResult(EquipmentTaskProcessResult.NEED_MAINTENANCE_DELAY_COMPLETE_DELAY.getCode());
-				}
+//			} else if (EquipmentTaskResult.NEED_MAINTENANCE_OK.equals(EquipmentTaskResult.fromStatus(cmd.getVerificationResult()))) {
+//				task.setStatus(EquipmentTaskStatus.NEED_MAINTENANCE.getCode());
+//				task.setExecutiveTime(now);
+//				task.setExecutorType(OwnerType.USER.getCode());
+//				task.setExecutorId(user.getId());
+//				log.setProcessType(EquipmentTaskProcessType.NEED_MAINTENANCE.getCode());
+//				if (task.getExecutiveExpireTime() == null || now.before(task.getExecutiveExpireTime())) {
+//					task.setResult(EquipmentTaskResult.NEED_MAINTENANCE_OK.getCode());
+//					log.setProcessResult(EquipmentTaskProcessResult.NEED_MAINTENANCE_OK.getCode());
+//				} else {
+//					task.setResult(EquipmentTaskResult.NEED_MAINTENANCE_DELAY.getCode());
+//					log.setProcessResult(EquipmentTaskProcessResult.NEED_MAINTENANCE_DELAY.getCode());
+//				}
+//			} else if (EquipmentTaskResult.NEED_MAINTENANCE_OK_COMPLETE_OK.equals(EquipmentTaskResult.fromStatus(cmd.getVerificationResult()))) {
+//				task.setStatus(EquipmentTaskStatus.CLOSE.getCode());
+//				task.setProcessTime(now);
+//				task.setOperatorType(OwnerType.USER.getCode());
+//				task.setOperatorId(user.getId());
+//				log.setProcessType(EquipmentTaskProcessType.COMPLETE_MAINTENANCE.getCode());
+//				if (task.getProcessExpireTime() == null || now.before(task.getProcessExpireTime())) {
+//					task.setResult(EquipmentTaskResult.NEED_MAINTENANCE_OK_COMPLETE_OK.getCode());
+//					log.setProcessResult(EquipmentTaskProcessResult.NEED_MAINTENANCE_OK_COMPLETE_OK.getCode());
+//				} else {
+//					task.setResult(EquipmentTaskResult.NEED_MAINTENANCE_OK_COMPLETE_DELAY.getCode());
+//					log.setProcessResult(EquipmentTaskProcessResult.NEED_MAINTENANCE_OK_COMPLETE_DELAY.getCode());
+//				}
+//			} else if (EquipmentTaskResult.NEED_MAINTENANCE_DELAY_COMPLETE_OK.equals(EquipmentTaskResult.fromStatus(cmd.getVerificationResult()))) {
+//				task.setStatus(EquipmentTaskStatus.CLOSE.getCode());
+//				task.setProcessTime(now);
+//				task.setOperatorType(OwnerType.USER.getCode());
+//				task.setOperatorId(user.getId());
+//				log.setProcessType(EquipmentTaskProcessType.COMPLETE_MAINTENANCE.getCode());
+//				if (task.getProcessExpireTime() == null || now.before(task.getProcessExpireTime())) {
+//					task.setResult(EquipmentTaskResult.NEED_MAINTENANCE_DELAY_COMPLETE_OK.getCode());
+//					log.setProcessResult(EquipmentTaskProcessResult.NEED_MAINTENANCE_DELAY_COMPLETE_OK.getCode());
+//				} else {
+//					task.setResult(EquipmentTaskResult.NEED_MAINTENANCE_DELAY_COMPLETE_DELAY.getCode());
+//					log.setProcessResult(EquipmentTaskProcessResult.NEED_MAINTENANCE_DELAY_COMPLETE_DELAY.getCode());
+//				}
 			}
 
 			EquipmentTaskDTO dto = null;
@@ -2007,21 +2008,21 @@ private void checkUserPrivilege(Long orgId, Long privilegeId, Long communityId) 
 			}
 		}
 
-        Organization group = organizationProvider.findOrganizationById(task.getExecutiveGroupId());
-		OrganizationJobPosition position = organizationProvider.findOrganizationJobPositionById(task.getPositionId());
-		if(group != null) {
-			dto.setGroupName(group.getName());
-
-		}
-
-		if(position != null) {
-			if(dto.getGroupName() != null) {
-				dto.setGroupName(dto.getGroupName() + "-" + position.getName());
-			} else {
-				dto.setGroupName(position.getName());
-
-			}
-		}
+//        Organization group = organizationProvider.findOrganizationById(task.getExecutiveGroupId());
+//		OrganizationJobPosition position = organizationProvider.findOrganizationJobPositionById(task.getPositionId());
+//		if(group != null) {
+//			dto.setGroupName(group.getName());
+//
+//		}
+//
+//		if(position != null) {
+//			if(dto.getGroupName() != null) {
+//				dto.setGroupName(dto.getGroupName() + "-" + position.getName());
+//			} else {
+//				dto.setGroupName(position.getName());
+//
+//			}
+//		}
 
 		if(task.getExecutorId() != null && task.getExecutorId() != 0) {
 			//总公司分公司 by xiongying20170328
@@ -2828,9 +2829,15 @@ private void checkUserPrivilege(Long orgId, Long privilegeId, Long communityId) 
 				results = itemResults.stream()
 						.map(result -> ConvertHelper.convert(result, InspectionItemResult.class))
 						.collect(Collectors.toList());
-				EquipmentInspectionEquipments equipment = equipmentProvider.findEquipmentById(itemResults.get(0).getEquipmentId());
+				//兼容上一版 只有在result表中才有equipmentId
+				EquipmentInspectionEquipments equipment = new EquipmentInspectionEquipments();
+				if (r.getTargetId() != null && r.getTargetId() != 0) {
+					equipment = equipmentProvider.findEquipmentById(r.getTargetId());
+				} else {
+					equipment = equipmentProvider.findEquipmentById(itemResults.get(0).getEquipmentId());
+				}
 				if (equipment != null)
-				dto.setEquipmentName(equipment.getName());
+					dto.setEquipmentName(equipment.getName());
 			}
 			dto.setItemResults(results);
 
@@ -4116,13 +4123,13 @@ private void checkUserPrivilege(Long orgId, Long privilegeId, Long communityId) 
 					"任务不存在");
 		}
 		List<EquipmentStandardRelationDTO> equipments = new ArrayList<>();
-		DeleteEquipmentPlanCommand delCommand = new DeleteEquipmentPlanCommand();
-		delCommand.setId(task.getPlanId());
-		delCommand.setOwnerId(cmd.getOwnerId());
-		delCommand.setOwnerType(cmd.getOwnerType());
-		if (getEquipmmentInspectionPlanById(delCommand) != null)
-			equipments = getEquipmmentInspectionPlanById(delCommand)
-					.getEquipmentStandardRelations();
+//		DeleteEquipmentPlanCommand delCommand = new DeleteEquipmentPlanCommand();
+//		delCommand.setId(task.getPlanId());
+//		delCommand.setOwnerId(cmd.getOwnerId());
+//		delCommand.setOwnerType(cmd.getOwnerType());
+//		if (getEquipmmentInspectionPlanById(delCommand) != null)
+//			equipments = getEquipmmentInspectionPlanById(delCommand)
+//					.getEquipmentStandardRelations();
 
 		EquipmentTaskDTO dto = convertEquipmentTaskToDTO(task);
 		dto.setEquipments(equipments);
@@ -5513,7 +5520,6 @@ private void checkUserPrivilege(Long orgId, Long privilegeId, Long communityId) 
 		task.setResult(EquipmentTaskResult.NONE.getCode());
 		task.setReviewResult(ReviewResult.NONE.getCode());
 		List<TimeRangeDTO> timeRanges = repeatService.analyzeTimeRange(plan.getRepeatSettings().getTimeRanges());
-
 		if(timeRanges != null && timeRanges.size() > 0) {
 			if (LOGGER.isInfoEnabled()) {
 				LOGGER.info("creatTaskByPlan, timeRanges = " + timeRanges);
@@ -5663,42 +5669,46 @@ private void checkUserPrivilege(Long orgId, Long privilegeId, Long communityId) 
 	@Override
 	public List<EquipmentStandardRelationDTO> listEquipmentStandardRelationsByTaskId(ListTaskByIdCommand cmd) {
 		EquipmentInspectionTasks task  = equipmentProvider.findEquipmentTaskById(cmd.getTaskId());
-		if(task!=null){
+		if (task != null) {
 			DeleteEquipmentPlanCommand delcmd = new DeleteEquipmentPlanCommand();
 			delcmd.setOwnerType(cmd.getOwnerType());
 			delcmd.setId(task.getPlanId());
 			delcmd.setOwnerId(cmd.getOwnerId());
-			return getEquipmmentInspectionPlanById(delcmd).getEquipmentStandardRelations();
+			EquipmentInspectionPlanDTO planDTO = getEquipmmentInspectionPlanById(delcmd);
+			if (planDTO != null)
+				return planDTO.getEquipmentStandardRelations();
 		}
 		return null;
 	}
 
 	@Override
 	public void syscStandardToEqiupmentPlan() {
-		Integer pageSize = 200;
-		CrossShardListingLocator locator = new CrossShardListingLocator();
-		List<EquipmentStandardMap> maps = equipmentProvider.listEquipmentStandardMap(locator, pageSize);
-		Integer nameSpaceId = 0;
+//		Integer pageSize = 200;
+//		CrossShardListingLocator locator = new CrossShardListingLocator();
 		EquipmentInspectionEquipments equipment = new EquipmentInspectionEquipments();
 		EquipmentInspectionStandards standards = new EquipmentInspectionStandards();
+		List<EquipmentStandardMap> maps = new ArrayList<>();
 		List<EquipmentInspectionStandardGroupMap> groupMaps = new ArrayList<>();
 
+		maps = equipmentProvider.listQualifiedEquipmentStandardMap(null);
 		for (EquipmentStandardMap map : maps) {
 			equipment = equipmentProvider.findEquipmentById(map.getTargetId());
 			standards = equipmentProvider.findStandardById(map.getStandardId());
 			EquipmentInspectionPlans plan = new EquipmentInspectionPlans();
 			if (equipment != null) {
-				nameSpaceId = equipment.getNamespaceId();
+				plan.setNamespaceId(equipment.getNamespaceId());
 				plan.setName(equipment.getName());
 			}
-			plan.setNamespaceId(nameSpaceId);
-			plan.setStatus(EquipmentPlanStatus.QUALIFIED.getCode());
-			plan.setPlanType(standards.getStandardType());
-			plan.setTargetId(standards.getTargetId());
-			plan.setTargetType(standards.getTargetType());
-			plan.setRepeatSettingId(standards.getRepeatSettingId());
-			equipmentProvider.createEquipmentInspectionPlans(plan);
+			if (standards != null) {
+				plan.setStatus(EquipmentPlanStatus.QUALIFIED.getCode());
+				plan.setPlanType(standards.getStandardType());
+				plan.setTargetId(standards.getTargetId());
+				plan.setTargetType(standards.getTargetType());
+				plan.setRepeatSettingId(standards.getRepeatSettingId());
+			}
 
+			equipmentProvider.createEquipmentInspectionPlans(plan);
+			if (standards != null)
 			groupMaps = equipmentProvider.listEquipmentInspectionStandardGroupMapByStandardId(standards.getId());
 			EquipmentInspectionPlanGroupMap planGroupMap = new EquipmentInspectionPlanGroupMap();
 			groupMaps.forEach((m) -> {
@@ -5710,5 +5720,6 @@ private void checkUserPrivilege(Long orgId, Long privilegeId, Long communityId) 
 				equipmentProvider.createEquipmentInspectionPlanGroupMap(planGroupMap);
 			});
 		}
+
 	}
 }
