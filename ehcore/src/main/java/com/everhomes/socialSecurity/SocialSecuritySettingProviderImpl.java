@@ -160,6 +160,32 @@ public class SocialSecuritySettingProviderImpl implements SocialSecuritySettingP
         DaoHelper.publishDaoAction(DaoAction.CREATE, EhSocialSecuritySettings.class, null);
     }
 
+    @Override
+    public void syncRadixAndRatioToPayments(Long ownerId) {
+        //同步社保
+        getReadWriteContext().update(Tables.EH_SOCIAL_SECURITY_PAYMENTS)
+                .set(Tables.EH_SOCIAL_SECURITY_PAYMENTS.COMPANY_RADIX, Tables.EH_SOCIAL_SECURITY_SETTINGS.COMPANY_RADIX)
+                .set(Tables.EH_SOCIAL_SECURITY_PAYMENTS.COMPANY_RATIO, Tables.EH_SOCIAL_SECURITY_SETTINGS.COMPANY_RATIO)
+                .set(Tables.EH_SOCIAL_SECURITY_PAYMENTS.EMPLOYEE_RADIX, Tables.EH_SOCIAL_SECURITY_SETTINGS.EMPLOYEE_RADIX)
+                .set(Tables.EH_SOCIAL_SECURITY_PAYMENTS.EMPLOYEE_RATIO, Tables.EH_SOCIAL_SECURITY_SETTINGS.EMPLOYEE_RATIO)
+                .from(Tables.EH_SOCIAL_SECURITY_PAYMENTS, Tables.EH_SOCIAL_SECURITY_SETTINGS)
+                .where(Tables.EH_SOCIAL_SECURITY_PAYMENTS.DETAIL_ID.eq(Tables.EH_SOCIAL_SECURITY_SETTINGS.DETAIL_ID))
+                .and(Tables.EH_SOCIAL_SECURITY_PAYMENTS.PAY_ITEM.eq(Tables.EH_SOCIAL_SECURITY_SETTINGS.PAY_ITEM))
+                .and(Tables.EH_SOCIAL_SECURITY_PAYMENTS.ACCUM_OR_SOCAIL.eq(Tables.EH_SOCIAL_SECURITY_SETTINGS.ACCUM_OR_SOCAIL))
+                .execute();
+        //同步公积金
+        getReadWriteContext().update(Tables.EH_SOCIAL_SECURITY_PAYMENTS)
+                .set(Tables.EH_SOCIAL_SECURITY_PAYMENTS.COMPANY_RADIX, Tables.EH_SOCIAL_SECURITY_SETTINGS.COMPANY_RADIX)
+                .set(Tables.EH_SOCIAL_SECURITY_PAYMENTS.COMPANY_RATIO, Tables.EH_SOCIAL_SECURITY_SETTINGS.COMPANY_RATIO)
+                .set(Tables.EH_SOCIAL_SECURITY_PAYMENTS.EMPLOYEE_RADIX, Tables.EH_SOCIAL_SECURITY_SETTINGS.EMPLOYEE_RADIX)
+                .set(Tables.EH_SOCIAL_SECURITY_PAYMENTS.EMPLOYEE_RATIO, Tables.EH_SOCIAL_SECURITY_SETTINGS.EMPLOYEE_RATIO)
+                .from(Tables.EH_SOCIAL_SECURITY_PAYMENTS, Tables.EH_SOCIAL_SECURITY_SETTINGS)
+                .where(Tables.EH_SOCIAL_SECURITY_PAYMENTS.DETAIL_ID.eq(Tables.EH_SOCIAL_SECURITY_SETTINGS.DETAIL_ID))
+                .and(Tables.EH_SOCIAL_SECURITY_PAYMENTS.ACCUM_OR_SOCAIL.eq(Tables.EH_SOCIAL_SECURITY_SETTINGS.ACCUM_OR_SOCAIL))
+                .and(Tables.EH_SOCIAL_SECURITY_PAYMENTS.ACCUM_OR_SOCAIL.eq(AccumOrSocail.ACCUM.getCode()))
+                .execute();
+    }
+
     private EhSocialSecuritySettingsDao getReadWriteDao() {
         return getDao(getReadWriteContext());
     }

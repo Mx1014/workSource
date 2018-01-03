@@ -36,4 +36,6 @@ public interface SocialSecuritySettingProvider {
 	SocialSecuritySetting findSocialSecuritySettingByDetailIdAndAOS(Long detailId, AccumOrSocail socail);
 
 	void batchCreateSocialSecuritySetting(List<EhSocialSecuritySettings> settings);
+
+	void syncRadixAndRatioToPayments(Long ownerId);
 }

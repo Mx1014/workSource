@@ -230,7 +230,12 @@ public class SocialSecurityServiceImpl implements SocialSecurityService {
 
     private Long getZuolinNamespaceCityId(Long cityId) {
         Region currentNSCity = regionProvider.findRegionById(cityId);
-        Region zuolinCity = regionProvider.findRegionByName(0, currentNSCity.getName());
+        return getZuolinNamespaceCityId(currentNSCity.getName());
+    }
+
+    private Long getZuolinNamespaceCityId(String name) {
+
+        Region zuolinCity = regionProvider.findRegionByName(0, name);
         if (null == zuolinCity) {
             return SocialSecurityConstants.DEFAULT_CITY;
         }
@@ -873,10 +878,27 @@ public class SocialSecurityServiceImpl implements SocialSecurityService {
             if (null == detail) {
                 LOGGER.error("can not find organization member ,contact token is " + userContact);
             }else{
+                String ssCityName = r.getB();
+                Long ssCityId = getZuolinNamespaceCityId(ssCityName);
+                String afCityName = r.getC();
+                Long afCItyId = getZuolinNamespaceCityId(afCityName);
+                String houseType = r.getD();
+                List<SocialSecurityBase> ssBases = socialSecurityBaseProvider.listSocialSecurityBase(ssCityId, houseType, AccumOrSocail.SOCAIL.getCode());
+                if (null == ssBases) {
+
+                }
+                List<SocialSecurityBase> afBases = socialSecurityBaseProvider.listSocialSecurityBase(afCItyId,
+                        null, AccumOrSocail.ACCUM.getCode());
+                if (null == afBases) {
+
+                }
 
             }
 
         }
+        //设置完后同步一下
+        socialSecuritySettingProvider.syncRadixAndRatioToPayments(ownerId);
+
     }
 
     @Override
@@ -907,6 +929,8 @@ public class SocialSecurityServiceImpl implements SocialSecurityService {
 
     private void calculateReports(Long ownerId) {
 
+        //同步setting表的值到payment表
+        socialSecuritySettingProvider.syncRadixAndRatioToPayments(ownerId);
         //社保报表
         calculateSocialSecurityReports(ownerId);
 
