@@ -887,7 +887,7 @@ public class PmTaskServiceImpl implements PmTaskService {
 		if(null == cmd.getPageSize())
 			cmd.setPageSize(100000);
 		List<PmTaskDTO> list = pmTaskSearch.searchDocsByType(cmd.getStatus(), cmd.getKeyword(), cmd.getOwnerId(), cmd.getOwnerType(), cmd.getTaskCategoryId(), 
-				cmd.getStartDate(), cmd.getEndDate(), cmd.getAddressId(), cmd.getBuildingName(), cmd.getPageAnchor(), cmd.getPageSize());
+				cmd.getStartDate(), cmd.getEndDate(), cmd.getAddressId(), cmd.getBuildingName(),cmd.getCreatorType(), cmd.getPageAnchor(), cmd.getPageSize());
 		
 		
 		Workbook wb = null;
@@ -1288,13 +1288,13 @@ public class PmTaskServiceImpl implements PmTaskService {
 				Category ancestor = categoryProvider.findCategoryById(id);
 
 				if (null != ancestor) {
-					List<Category> categories = categoryProvider.listTaskCategories(n.getId(), ancestor.getId(), null, null, null);
+					List<Category> categories = categoryProvider.listTaskCategories(n.getId(),null,null, ancestor.getId(), null, null, null);
 					if (null != categories && !categories.isEmpty()) {
 						List<Community> communities = communityProvider.listCommunitiesByNamespaceId(n.getId());
 						for (Community community : communities) {
 							for (Category taskCategory : categories) {
 								createTaskStatistics(community.getId(), taskCategory.getId(), 0L, startDate, endDate, now, n.getId());
-								List<Category> tempCategories = categoryProvider.listTaskCategories(n.getId(), taskCategory.getId(), null, null, null);
+								List<Category> tempCategories = categoryProvider.listTaskCategories(n.getId(), null,null,taskCategory.getId(), null, null, null);
 								for (Category category : tempCategories) {
 									createTaskStatistics(community.getId(), taskCategory.getId(), category.getId(), startDate, endDate, now, n.getId());
 								}
@@ -2041,7 +2041,11 @@ public class PmTaskServiceImpl implements PmTaskService {
 				});
 			}
 			List<OrgAddressDTO> addressDTOs = convertAddress(organizations, communityId);
-
+			//选一个公司获得通讯录名字
+			if (organizations.size()>0){
+				OrganizationMember member = organizationProvider.findOrganizationMemberByOrgIdAndUId(user.getId(),organizations.get(0).getId());
+				response.setUserName(member.getContactName());
+			}
 			response.setOrganizationList(addressDTOs);
 //	    	}
 
@@ -2070,6 +2074,7 @@ public class PmTaskServiceImpl implements PmTaskService {
 							dto.setOrganizationId(o.getId());
 							dto.setDisplayName(o.getName());
 							dto.setAddressId(address.getId());
+							dto.setCommunityName(o.getCommunityName());
 							addresses.add(dto);
 						}
 						return null;
@@ -2533,10 +2538,8 @@ public class PmTaskServiceImpl implements PmTaskService {
 	private void cancelTask(Long id){
 		PmTask task = checkPmTask(id);
 
-		//更新工作流case状态
+
 		FlowCase flowCase = flowCaseProvider.getFlowCaseById(task.getFlowCaseId());
-		flowCase.setStatus(FlowCaseStatus.ABSORTED.getCode());
-		flowCaseProvider.updateFlowCase(flowCase);
 		//节点状态流转
 		FlowAutoStepDTO stepDTO = ConvertHelper.convert(flowCase, FlowAutoStepDTO.class);
 		stepDTO.setFlowCaseId(flowCase.getId());
@@ -2549,10 +2552,7 @@ public class PmTaskServiceImpl implements PmTaskService {
 	private void finishTask(Long id){
 		PmTask task = checkPmTask(id);
 
-		//更新工作流case状态
 		FlowCase flowCase = flowCaseProvider.getFlowCaseById(task.getFlowCaseId());
-		flowCase.setStatus(FlowCaseStatus.FINISHED.getCode());
-		flowCaseProvider.updateFlowCase(flowCase);
 		//节点状态流转
 		FlowAutoStepDTO stepDTO = ConvertHelper.convert(flowCase, FlowAutoStepDTO.class);
 		stepDTO.setFlowCaseId(flowCase.getId());
@@ -2563,18 +2563,52 @@ public class PmTaskServiceImpl implements PmTaskService {
 
 	@Override
 	public void syncCategories() {
-		List<Category> list = categoryProvider.listTaskCategories(null, 6L, null,
+		List<Category> list = categoryProvider.listTaskCategories(null,null,null, 6L, null,
 				null, null);
-		List<Category> list2 = null;
-		while (list!=null && list.size()>0)
-			list.forEach(r->{
-				Integer namespaceId = r.getNamespaceId();
+		List<Category> list2 = new ArrayList<>();
+		while (list!=null && list.size()>0) {
+			for (Category c:list) {
+				Integer namespaceId = c.getNamespaceId();
+				List<Category> list3 = categoryProvider.listTaskCategories(null,null,null, c.getId(), null,
+						null, null);
+				if (list3 != null)
+					list2.addAll(list3);
+				if (namespaceId == null)
+					continue;
 				List<Community> communities = communityProvider.listCommunitiesByNamespaceId(namespaceId);
-				communities.forEach(p->{
-					Category category = ConvertHelper.convert(r,Category.class);
-					category.setId(null);
-					
+				communities.forEach(p -> {
+					Category category = ConvertHelper.convert(c, Category.class);
+					category.setOwnerType("community");
+					category.setOwnerId(p.getId());
+					categoryProvider.createCategory(category);
 				});
-			});
+			}
+			list = list2;
+			list2 = new ArrayList<>();
+		}
+
+		list = categoryProvider.listTaskCategories(null,null,null, 9L, null,
+				null, null);
+		list2 = new ArrayList<>();
+		while (list!=null && list.size()>0) {
+			for (Category c:list) {
+				Integer namespaceId = c.getNamespaceId();
+				List<Category> list3 = categoryProvider.listTaskCategories(null,null,null, c.getId(), null,
+						null, null);
+				if (list3 != null)
+					list2.addAll(list3);
+				if (namespaceId == null)
+					continue;
+				List<Community> communities = communityProvider.listCommunitiesByNamespaceId(namespaceId);
+				communities.forEach(p -> {
+					Category category = ConvertHelper.convert(c, Category.class);
+					category.setOwnerType("community");
+					category.setOwnerId(p.getId());
+					categoryProvider.createCategory(category);
+				});
+			}
+			list = list2;
+			list2 = new ArrayList<>();
+		}
 	}
 }

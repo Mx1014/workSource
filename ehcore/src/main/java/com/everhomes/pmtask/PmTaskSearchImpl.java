@@ -10,6 +10,7 @@ import java.util.Map;
 import com.everhomes.category.Category;
 import com.everhomes.category.CategoryProvider;
 import com.everhomes.rest.pmtask.PmTaskAppType;
+import com.everhomes.rest.pmtask.PmtaskCreatorType;
 import org.apache.commons.lang.StringUtils;
 import org.elasticsearch.action.bulk.BulkRequestBuilder;
 import org.elasticsearch.action.search.SearchRequestBuilder;
@@ -71,6 +72,7 @@ public class PmTaskSearchImpl extends AbstractElasticSearch implements PmTaskSea
             b.field("requestorName", task.getRequestorName());
             b.field("requestorPhone", task.getRequestorPhone());
             b.field("buildingName", task.getBuildingName());
+            b.field("organizationUid",task.getOrganizationUid());
 
             Category appType = categoryProvider.findCategoryById(task.getTaskCategoryId());
             //多入口查全部数据
@@ -151,7 +153,7 @@ public class PmTaskSearchImpl extends AbstractElasticSearch implements PmTaskSea
 
     @Override
     public List<PmTaskDTO> searchDocsByType(Byte status, String queryString,Long ownerId, String ownerType, Long categoryId, Long startDate, 
-    		Long endDate, Long addressId, String buildingName, Long pageAnchor, Integer pageSize) {
+    		Long endDate, Long addressId, String buildingName,Byte creatorType, Long pageAnchor, Integer pageSize) {
         SearchRequestBuilder builder = getClient().prepareSearch(getIndexName()).setTypes(getIndexType());
         
         
@@ -182,6 +184,13 @@ public class PmTaskSearchImpl extends AbstractElasticSearch implements PmTaskSea
         	if(null == rb)
         		rb = QueryBuilders.rangeQuery("createTime");
             rb.lt(endDate);
+            qb = qb.must(rb);
+        }
+        if (null!=creatorType){
+            if (creatorType.equals(PmtaskCreatorType.SELF.getCode()))
+                rb = QueryBuilders.rangeQuery("organizationUid").lte(0l);
+            if (creatorType.equals(PmtaskCreatorType.OTHERS.getCode()))
+                rb = QueryBuilders.rangeQuery("organizationUid").gt(0l);
             qb = qb.must(rb);
         }
 
