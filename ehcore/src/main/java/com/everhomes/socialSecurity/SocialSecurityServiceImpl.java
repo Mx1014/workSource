@@ -67,6 +67,8 @@ public class SocialSecurityServiceImpl implements SocialSecurityService {
     @Autowired
     private SocialSecurityPaymentLogProvider socialSecurityPaymentLogProvider;
     @Autowired
+    private SocialSecurityInoutTimeProvider socialSecurityInoutTimeProvider;
+    @Autowired
     private RegionProvider regionProvider;
     @Autowired
     private OrganizationProvider organizationProvider;
@@ -1818,7 +1820,11 @@ public class SocialSecurityServiceImpl implements SocialSecurityService {
             inoutTime.setStartTime(ArchivesUtil.parseDate(cmd.getStartTime()));
         if(cmd.getEndTime() != null)
             inoutTime.setEndTime(ArchivesUtil.parseDate(cmd.getEndTime()));
-        //todo:add it.
-        return null;
+        socialSecurityInoutTimeProvider.createSocialSecurityInoutTime(inoutTime);
+
+        //  return back.
+        SocialSecurityInoutTimeDTO dto = ConvertHelper.convert(inoutTime, SocialSecurityInoutTimeDTO.class);
+        dto.setInOutType(inoutTime.getType());
+        return dto;
     }
 }

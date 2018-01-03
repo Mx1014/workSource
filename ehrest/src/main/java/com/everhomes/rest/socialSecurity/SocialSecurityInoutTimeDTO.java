@@ -2,13 +2,13 @@ package com.everhomes.rest.socialSecurity;
 
 import com.everhomes.util.StringHelper;
 
-import java.sql.Timestamp;
+import java.sql.Date;
 
 /**
  * <ul>
  * <li>userId: 用户id</li>
  * <li>detailId: 用户detailId</li>
- * <li>timeType: 类型：</li>
+ * <li>timeType: 类型：0-社保，1-公积金</li>
  * <li>startTime: startTime</li>
  * <li>endTime: endTime</li>
  * </ul>
@@ -21,11 +21,11 @@ public class SocialSecurityInoutTimeDTO {
 
 	private Long detailId;
 
-	private String timeType;
+	private Byte inOutType;
 
-	private Timestamp startTime;
+	private Date startTime;
 
-	private Timestamp endTime;
+	private Date endTime;
 
 	public SocialSecurityInoutTimeDTO() {
 	}
@@ -59,27 +59,27 @@ public class SocialSecurityInoutTimeDTO {
 		this.detailId = detailId;
 	}
 
-	public String getTimeType() {
-		return timeType;
+	public Byte getInOutType() {
+		return inOutType;
 	}
 
-	public void setTimeType(String timeType) {
-		this.timeType = timeType;
+	public void setInOutType(Byte inOutType) {
+		this.inOutType = inOutType;
 	}
 
-	public Timestamp getStartTime() {
+	public Date getStartTime() {
 		return startTime;
 	}
 
-	public void setStartTime(Timestamp startTime) {
+	public void setStartTime(Date startTime) {
 		this.startTime = startTime;
 	}
 
-	public Timestamp getEndTime() {
+	public Date getEndTime() {
 		return endTime;
 	}
 
-	public void setEndTime(Timestamp endTime) {
+	public void setEndTime(Date endTime) {
 		this.endTime = endTime;
 	}
 }
