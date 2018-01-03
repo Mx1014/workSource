@@ -167,6 +167,7 @@
     	<profile>
     		<id>codegen-tools</id>
     		<properties>
+                <maven.install.skip>true</maven.install.skip>
                 <maven.deploy.skip>true</maven.deploy.skip>
             </properties>
     		<build>
@@ -188,17 +189,6 @@
     						</annotationProcessorPaths>
     					</configuration>
     				</plugin>
-    				<plugin>
-                        <groupId>org.apache.maven.plugins</groupId>
-                        <artifactId>maven-jar-plugin</artifactId>
-                        <version>3.0.2</version>
-                        <configuration>
-                            <skipIfEmpty>true</skipIfEmpty>
-                            <excludes>
-                                <exclude>**/*</exclude>
-                            </excludes>
-                        </configuration>
-                    </plugin>
     			</plugins>
     		</build>
     	</profile>
