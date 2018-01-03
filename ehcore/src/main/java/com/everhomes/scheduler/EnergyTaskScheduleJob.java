@@ -303,7 +303,7 @@ public class EnergyTaskScheduleJob extends QuartzJobBean {
             } else {//门牌有没有默认计价条款、所属楼栋有没有默认计价条款、所属园区有没有默认计价条款 eh_default_charging_item_properties
                 List<DefaultChargingItemProperty> properties = defaultChargingItemProvider.findByPropertyId(DefaultChargingItemPropertyType.APARTMENT.getCode(), address.getAddressId(), meter.getMeterType());
                 LOGGER.debug("EnergyMeterAddress apartment properties: {}", StringHelper.toJsonString(properties));
-                if(properties != null) {
+                if(properties != null && properties.size() > 0) {
                     List<FeeRules> feeRules = new ArrayList<>();
                     properties.forEach(property -> {
                         DefaultChargingItem item = defaultChargingItemProvider.findById(property.getDefaultChargingItemId());
@@ -317,7 +317,7 @@ public class EnergyTaskScheduleJob extends QuartzJobBean {
                 } else {
                     properties = defaultChargingItemProvider.findByPropertyId(DefaultChargingItemPropertyType.BUILDING.getCode(), address.getBuildingId(), meter.getMeterType());
                     LOGGER.debug("EnergyMeterAddress building properties: {}", StringHelper.toJsonString(properties));
-                    if(properties != null) {
+                    if(properties != null && properties.size() > 0) {
                         List<FeeRules> feeRules = new ArrayList<>();
                         properties.forEach(property -> {
                             DefaultChargingItem item = defaultChargingItemProvider.findById(property.getDefaultChargingItemId());
@@ -331,7 +331,7 @@ public class EnergyTaskScheduleJob extends QuartzJobBean {
                     } else {
                         properties = defaultChargingItemProvider.findByPropertyId(DefaultChargingItemPropertyType.COMMUNITY.getCode(), meter.getCommunityId(), meter.getMeterType());
                         LOGGER.debug("EnergyMeterAddress contract properties: {}", StringHelper.toJsonString(contractChargingItemAddresses));
-                        if(properties != null) {
+                        if(properties != null && properties.size() > 0) {
                             List<FeeRules> feeRules = new ArrayList<>();
                             properties.forEach(property -> {
                                 DefaultChargingItem item = defaultChargingItemProvider.findById(property.getDefaultChargingItemId());
