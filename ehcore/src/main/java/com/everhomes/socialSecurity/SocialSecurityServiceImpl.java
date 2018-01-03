@@ -10,6 +10,7 @@ import com.everhomes.community.CommunityProvider;
 import com.everhomes.configuration.ConfigurationProvider;
 import com.everhomes.coordinator.CoordinationLocks;
 import com.everhomes.coordinator.CoordinationProvider;
+import com.everhomes.db.DbProvider;
 import com.everhomes.listing.CrossShardListingLocator;
 import com.everhomes.naming.NameMapper;
 import com.everhomes.organization.*;
@@ -38,6 +39,7 @@ import org.springframework.data.redis.core.ValueOperations;
 import org.springframework.data.redis.serializer.StringRedisSerializer;
 import org.springframework.stereotype.Component;
 import org.apache.commons.lang.StringUtils;
+import org.springframework.transaction.TransactionStatus;
 
 import java.math.BigDecimal;
 import java.text.ParseException;
@@ -50,6 +52,8 @@ import java.util.stream.Collectors;
 
 @Component
 public class SocialSecurityServiceImpl implements SocialSecurityService {
+    @Autowired
+    private DbProvider dbProvider;
     @Autowired
     private SocialSecurityBaseProvider socialSecurityBaseProvider;
     @Autowired
@@ -149,7 +153,7 @@ public class SocialSecurityServiceImpl implements SocialSecurityService {
     }
 
     @Override
-    public void newSocialSecurityEmployee(Long detailId,String inMonth) {
+    public void newSocialSecurityEmployee(Long detailId, String inMonth) {
         OrganizationMemberDetails detail = organizationProvider.findOrganizationMemberDetailsByDetailId(detailId);
         OrganizationCommunity organizationCommunity = organizationProvider.findOrganizationCommunityByOrgId(detail.getOrganizationId());
         Community community = communityProvider.findCommunityById(organizationCommunity.getCommunityId());
@@ -627,36 +631,40 @@ public class SocialSecurityServiceImpl implements SocialSecurityService {
 
     @Override
     public void updateSocialSecurityPayment(UpdateSocialSecurityPaymentCommand cmd) {
-        //社保设置
-        if (NormalFlag.fromCode(cmd.getPayCurrentSocialSecurityFlag()) == NormalFlag.YES) {
 
-            // 查询设置的城市户籍档次的数据规则
-            List<SocialSecurityBase> bases = socialSecurityBaseProvider.listSocialSecurityBase(cmd.getSocialSecurityPayment().getCityId(),
-                    cmd.getSocialSecurityPayment().getHouseholdType());
-            // 校验数据是否合法
-            checkSocialSercurity(bases, cmd.getSocialSecurityPayment().getItems());
-            // 保存setting表数据
-            saveSocialSecuritySettings(cmd.getSocialSecurityPayment(), cmd.getDetailId(), AccumOrSocail.SOCAIL.getCode());
-            // 保存当月payments数据
-            saveSocialSecurityPayment(cmd.getSocialSecurityPayment(), cmd.getDetailId(), NormalFlag.NO.getCode(), AccumOrSocail.SOCAIL.getCode());
-            if (NormalFlag.fromCode(cmd.getAfterPaySocialSecurityFlag()) == NormalFlag.YES) {
-                saveSocialSecurityPayment(cmd.getAfterSocialSecurityPayment(), cmd.getDetailId(), NormalFlag.YES.getCode(), AccumOrSocail.SOCAIL.getCode());
+        dbProvider.execute((TransactionStatus status) -> {
+            //社保设置
+            if (NormalFlag.fromCode(cmd.getPayCurrentSocialSecurityFlag()) == NormalFlag.YES) {
+
+                // 查询设置的城市户籍档次的数据规则
+                List<SocialSecurityBase> bases = socialSecurityBaseProvider.listSocialSecurityBase(cmd.getSocialSecurityPayment().getCityId(),
+                        cmd.getSocialSecurityPayment().getHouseholdType());
+                // 校验数据是否合法
+                checkSocialSercurity(bases, cmd.getSocialSecurityPayment().getItems());
+                // 保存setting表数据
+                saveSocialSecuritySettings(cmd.getSocialSecurityPayment(), cmd.getDetailId(), AccumOrSocail.SOCAIL.getCode());
+                // 保存当月payments数据
+                saveSocialSecurityPayment(cmd.getSocialSecurityPayment(), cmd.getDetailId(), NormalFlag.NO.getCode(), AccumOrSocail.SOCAIL.getCode());
+                if (NormalFlag.fromCode(cmd.getAfterPaySocialSecurityFlag()) == NormalFlag.YES) {
+                    saveSocialSecurityPayment(cmd.getAfterSocialSecurityPayment(), cmd.getDetailId(), NormalFlag.YES.getCode(), AccumOrSocail.SOCAIL.getCode());
+                }
             }
-        }
-        //公积金设置
-        if (NormalFlag.fromCode(cmd.getPayCurrentAccumulationFundFlag()) == NormalFlag.YES) {
-            // 查询设置的城市户籍档次的数据规则
-            List<SocialSecurityBase> bases = socialSecurityBaseProvider.listSocialSecurityBase(cmd.getAccumulationFundPayment().getCityId(), AccumOrSocail.ACCUM.getCode());
-            // 校验数据是否合法
-            checkSocialSercurity(bases, cmd.getAccumulationFundPayment().getItems());
-            // 保存setting表数据
-            saveSocialSecuritySettings(cmd.getAccumulationFundPayment(), cmd.getDetailId(), AccumOrSocail.ACCUM.getCode());
-            // 保存当月payments数据
-            saveSocialSecurityPayment(cmd.getAccumulationFundPayment(), cmd.getDetailId(), NormalFlag.NO.getCode(), AccumOrSocail.ACCUM.getCode());
-            if (NormalFlag.fromCode(cmd.getAfterPaySocialSecurityFlag()) == NormalFlag.YES) {
-                saveSocialSecurityPayment(cmd.getAfterSocialSecurityPayment(), cmd.getDetailId(), NormalFlag.YES.getCode(), AccumOrSocail.ACCUM.getCode());
+            //公积金设置
+            if (NormalFlag.fromCode(cmd.getPayCurrentAccumulationFundFlag()) == NormalFlag.YES) {
+                // 查询设置的城市户籍档次的数据规则
+                List<SocialSecurityBase> bases = socialSecurityBaseProvider.listSocialSecurityBase(cmd.getAccumulationFundPayment().getCityId(), AccumOrSocail.ACCUM.getCode());
+                // 校验数据是否合法
+                checkSocialSercurity(bases, cmd.getAccumulationFundPayment().getItems());
+                // 保存setting表数据
+                saveSocialSecuritySettings(cmd.getAccumulationFundPayment(), cmd.getDetailId(), AccumOrSocail.ACCUM.getCode());
+                // 保存当月payments数据
+                saveSocialSecurityPayment(cmd.getAccumulationFundPayment(), cmd.getDetailId(), NormalFlag.NO.getCode(), AccumOrSocail.ACCUM.getCode());
+                if (NormalFlag.fromCode(cmd.getAfterPaySocialSecurityFlag()) == NormalFlag.YES) {
+                    saveSocialSecurityPayment(cmd.getAfterSocialSecurityPayment(), cmd.getDetailId(), NormalFlag.YES.getCode(), AccumOrSocail.ACCUM.getCode());
+                }
             }
-        }
+            return null;
+        });
     }
 
     private void saveSocialSecurityPayment(SocialSecurityPaymentDetailDTO socialSecurityPayment, Long detailId, Byte afterPay, Byte accumOrSocial) {
