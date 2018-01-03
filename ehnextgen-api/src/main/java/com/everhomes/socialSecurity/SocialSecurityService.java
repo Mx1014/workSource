@@ -5,6 +5,7 @@ import com.everhomes.rest.socialSecurity.*;
 import org.springframework.web.multipart.MultipartFile;
 
 import java.math.BigDecimal;
+import java.util.List;
 
 interface SocialSecurityService {
 
@@ -83,4 +84,6 @@ interface SocialSecurityService {
 	SocialSecurityEmployeesCountResponse getSocialSecurityEmployeesCount(Long organizationId, Long month);
 
 	SocialSecurityEmployeeDTO getSocialSecurityEmployeeInfo(Long detailId);
+
+    List<Long> listSocialSecurityEmployeeDetailIds(Long ownerId, String payMonth);
 }
