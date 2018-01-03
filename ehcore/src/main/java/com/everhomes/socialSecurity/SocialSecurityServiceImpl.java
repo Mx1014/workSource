@@ -149,7 +149,7 @@ public class SocialSecurityServiceImpl implements SocialSecurityService {
     }
 
     @Override
-    public void newSocialSecurityEmployee(Long detailId) {
+    public void newSocialSecurityEmployee(Long detailId,String inMonth) {
         OrganizationMemberDetails detail = organizationProvider.findOrganizationMemberDetailsByDetailId(detailId);
         OrganizationCommunity organizationCommunity = organizationProvider.findOrganizationCommunityByOrgId(detail.getOrganizationId());
         Community community = communityProvider.findCommunityById(organizationCommunity.getCommunityId());
@@ -160,8 +160,13 @@ public class SocialSecurityServiceImpl implements SocialSecurityService {
             hTs = socialSecurityBaseProvider.listHouseholdTypesByCity(cityId);
         }
         addEmployeeNewSocialSecuritySettings(cityId, hTs.get(0).getHouseholdTypeName(), detail);
-        String paymentMonth = monthSF.get().format(DateHelper.currentGMTTime());
-        addEmployeeNewMonthPayments(paymentMonth, detail);
+
+        String paymentMonth = socialSecurityPaymentProvider.findPaymentMonthByOwnerId(detail.getOrganizationId());
+        if(null == paymentMonth)
+            paymentMonth = monthSF.get().format(DateHelper.currentGMTTime());
+        if (Integer.valueOf(paymentMonth) >= Integer.valueOf(inMonth)) {
+            addEmployeeNewMonthPayments(paymentMonth, detail);
+        }
     }
 
     private void addEmployeeNewMonthPayments(String paymentMonth, OrganizationMemberDetails detail) {
