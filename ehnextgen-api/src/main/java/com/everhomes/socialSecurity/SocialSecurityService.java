@@ -2,6 +2,7 @@
 package com.everhomes.socialSecurity;
 
 import com.everhomes.rest.socialSecurity.*;
+import org.springframework.web.multipart.MultipartFile;
 
 import java.math.BigDecimal;
 
@@ -35,8 +36,7 @@ interface SocialSecurityService {
 	void updateSocialSecurityPayment(UpdateSocialSecurityPaymentCommand cmd);
 
 
-	void importSocialSecurityPayments(ImportSocialSecurityPaymentsCommand cmd);
-
+	void importSocialSecurityPayments(ImportSocialSecurityPaymentsCommand cmd, MultipartFile file);
 
 	CalculateSocialSecurityReportsResponse calculateSocialSecurityReports(CalculateSocialSecurityReportsCommand cmd);
 
