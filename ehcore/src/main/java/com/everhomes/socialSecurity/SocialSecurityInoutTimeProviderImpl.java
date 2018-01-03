@@ -66,6 +66,6 @@ public class SocialSecurityInoutTimeProviderImpl implements SocialSecurityInoutT
         SelectQuery<EhSocialSecurityInoutTimeRecord> query = context.selectQuery(Tables.EH_SOCIAL_SECURITY_INOUT_TIME);
         query.addConditions(Tables.EH_SOCIAL_SECURITY_INOUT_TIME.DETAIL_ID.eq(detailId));
         query.addConditions(Tables.EH_SOCIAL_SECURITY_INOUT_TIME.TYPE.eq(inOutType));
-        return query.fetchOneInto(SocialSecurityInoutTime.class);
+        return query.fetchAnyInto(SocialSecurityInoutTime.class);
     }
 }

@@ -17,10 +17,8 @@ import com.everhomes.organization.*;
 import com.everhomes.region.Region;
 import com.everhomes.region.RegionProvider;
 
-import com.everhomes.rest.archives.ArchivesUtil;
 import com.everhomes.rest.organization.OrganizationGroupType;
 import com.everhomes.rest.organization.OrganizationMemberStatus;
-import com.everhomes.rest.salary.SalaryServiceErrorCode;
 import com.everhomes.rest.socialSecurity.*;
 import com.everhomes.sequence.SequenceProvider;
 import com.everhomes.server.schema.tables.pojos.EhSocialSecurityPayments;
@@ -1904,10 +1902,11 @@ public class SocialSecurityServiceImpl implements SocialSecurityService {
             dto.setDismissTime(memberDetail.getDismissTime());
 
             SocialSecurityInoutTime social = socialSecurityInoutTimeProvider.getSocialSecurityInoutTimeByDetailId(InOutType.SOCIAL_SECURITY.getCode(), detailId);
-
+            if(social != null){
+                dto.setSocialSecurityStartMonth(social.getStartMonth());
+                dto.setSocialSecurityEndMonth(social.getEndMonth());
+            }
         }
-
         return dto;
-
     }
 }
