@@ -25,9 +25,12 @@ import java.math.BigDecimal;
 public class CreatePaymentApplicationCommand {
     private Integer namespaceId;
     private Long contractId;
+    private Long communityId;
+    private Long ownerId;
     private Long requestId;
     private Long applicantUid;
     private Long applicantOrgId;
+    private String title;
     private String payee;
     private String payer;
     private String dueBank;
@@ -36,14 +39,28 @@ public class CreatePaymentApplicationCommand {
     private Double paymentRate;
     private String remark;
 
-    private Long orgId;
-
-    public Long getOrgId() {
-        return orgId;
+    public Long getCommunityId() {
+        return communityId;
     }
 
-    public void setOrgId(Long orgId) {
-        this.orgId = orgId;
+    public void setCommunityId(Long communityId) {
+        this.communityId = communityId;
+    }
+
+    public Long getOwnerId() {
+        return ownerId;
+    }
+
+    public void setOwnerId(Long ownerId) {
+        this.ownerId = ownerId;
+    }
+
+    public String getTitle() {
+        return title;
+    }
+
+    public void setTitle(String title) {
+        this.title = title;
     }
 
     public Long getApplicantOrgId() {

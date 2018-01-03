@@ -21,6 +21,25 @@ public class SearchPaymentApplicationCommand {
     private Long pageAnchor;
     private Integer pageSize;
 
+    private Long communityId;
+    private Long ownerId;
+
+    public Long getCommunityId() {
+        return communityId;
+    }
+
+    public void setCommunityId(Long communityId) {
+        this.communityId = communityId;
+    }
+
+    public Long getOwnerId() {
+        return ownerId;
+    }
+
+    public void setOwnerId(Long ownerId) {
+        this.ownerId = ownerId;
+    }
+
     public String getApplicantName() {
         return applicantName;
     }

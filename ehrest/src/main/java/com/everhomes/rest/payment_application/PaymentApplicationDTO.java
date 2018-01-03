@@ -34,7 +34,10 @@ import java.sql.Timestamp;
 public class PaymentApplicationDTO {
     private Long id;
     private Integer namespaceId;
+    private Long communityId;
+    private Long ownerId;
     private Long contractId;
+    private String title;
     private String contractName;
     private String contractNumber;
     private String customerName;
@@ -55,6 +58,30 @@ public class PaymentApplicationDTO {
     private Byte status;
     private Long createUid;
     private Timestamp createTime;
+
+    public Long getCommunityId() {
+        return communityId;
+    }
+
+    public void setCommunityId(Long communityId) {
+        this.communityId = communityId;
+    }
+
+    public Long getOwnerId() {
+        return ownerId;
+    }
+
+    public void setOwnerId(Long ownerId) {
+        this.ownerId = ownerId;
+    }
+
+    public String getTitle() {
+        return title;
+    }
+
+    public void setTitle(String title) {
+        this.title = title;
+    }
 
     public String getApplicantName() {
         return applicantName;

@@ -290,6 +290,11 @@ public interface PrivilegeConstants {
     long PAYMENT_CONTRACT_RENEW = 21208L;//续约 付款
     long PAYMENT_CONTRACT_CHANGE = 21209L;//变更 付款
     long PAYMENT_CONTRACT_DENUNCIATION = 21214L;//退约 付款
+
+//    -------- 付款申请单 --------
+    long PAYMENT_APPLICATION_CREATE = 21301L;//创建
+    long PAYMENT_APPLICATION_LIST = 21302L;//查看
+
 //    ----------品质核查----------
     long QUALITY_CATEGORY_LIST = 30044L;//品质核查 类型管理查看权限
     long QUALITY_CATEGORY_CREATE = 30045L;//品质核查 类型管理新增权限

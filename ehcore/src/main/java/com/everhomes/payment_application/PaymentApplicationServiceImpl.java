@@ -9,13 +9,17 @@ import com.everhomes.openapi.ContractProvider;
 import com.everhomes.organization.Organization;
 import com.everhomes.organization.OrganizationMember;
 import com.everhomes.organization.OrganizationProvider;
+import com.everhomes.rest.acl.PrivilegeConstants;
+import com.everhomes.rest.common.ServiceModuleConstants;
 import com.everhomes.rest.flow.CreateFlowCaseCommand;
 import com.everhomes.rest.flow.FlowConstants;
 import com.everhomes.rest.flow.FlowModuleType;
 import com.everhomes.rest.flow.FlowOwnerType;
+import com.everhomes.rest.launchpad.ActionType;
 import com.everhomes.rest.payment_application.*;
 import com.everhomes.search.PaymentApplicationSearcher;
 import com.everhomes.user.UserContext;
+import com.everhomes.user.UserPrivilegeMgr;
 import com.everhomes.util.ConvertHelper;
 import com.everhomes.util.RuntimeErrorException;
 import org.slf4j.Logger;
@@ -51,11 +55,16 @@ public class PaymentApplicationServiceImpl implements PaymentApplicationService 
     @Autowired
     private LocaleStringService localeStringService;
 
+    @Autowired
+    private UserPrivilegeMgr userPrivilegeMgr;
+
     @Override
     public PaymentApplicationDTO createPaymentApplication(CreatePaymentApplicationCommand cmd) {
+        userPrivilegeMgr.checkUserPrivilege(UserContext.currentUserId(), cmd.getOwnerId(), PrivilegeConstants.PAYMENT_APPLICATION_CREATE, ServiceModuleConstants.PAYMENT_APPLICATION_MODULE, ActionType.OFFICIAL_URL.getCode(), null, null,cmd.getCommunityId());
         PaymentApplication application = ConvertHelper.convert(cmd, PaymentApplication.class);
         paymentApplicationProvider.createPaymentApplication(application);
         addToFlowCase(application);
+        paymentApplicationSearcher.feedDoc(application);
         return toPaymentApplicationDTO(application);
     }
 
@@ -67,6 +76,7 @@ public class PaymentApplicationServiceImpl implements PaymentApplicationService 
 
     @Override
     public SearchPaymentApplicationResponse searchPaymentApplications(SearchPaymentApplicationCommand cmd) {
+        userPrivilegeMgr.checkUserPrivilege(UserContext.currentUserId(), cmd.getOwnerId(), PrivilegeConstants.PAYMENT_APPLICATION_LIST, ServiceModuleConstants.PAYMENT_APPLICATION_MODULE, ActionType.OFFICIAL_URL.getCode(), null, null,cmd.getCommunityId());
         return paymentApplicationSearcher.query(cmd);
     }
 
@@ -95,7 +105,7 @@ public class PaymentApplicationServiceImpl implements PaymentApplicationService 
 
     private void addToFlowCase(PaymentApplication application) {
         Flow flow = flowService.getEnabledFlow(application.getNamespaceId(), FlowConstants.PAYMENT_APPLICATION_MODULE,
-                FlowModuleType.NO_MODULE.getCode(), application.getId(), FlowOwnerType.PAYMENT_APPLICATION.getCode());
+                FlowModuleType.NO_MODULE.getCode(), application.getCommunityId(), FlowOwnerType.PAYMENT_APPLICATION.getCode());
         if(null == flow) {
             LOGGER.error("Enable request flow not found, moduleId={}", FlowConstants.CONTRACT_MODULE);
             throw RuntimeErrorException.errorWith(PaymentApplicationErrorCode.SCOPE, PaymentApplicationErrorCode.ERROR_ENABLE_FLOW,
@@ -104,8 +114,8 @@ public class PaymentApplicationServiceImpl implements PaymentApplicationService 
                             UserContext.current().getUser().getLocale(),"Enable request flow not found."));
         }
         CreateFlowCaseCommand createFlowCaseCommand = new CreateFlowCaseCommand();
-        createFlowCaseCommand.setCurrentOrganizationId(application.get);
-        createFlowCaseCommand.setTitle(application.getName() + "付款申请");
+        createFlowCaseCommand.setCurrentOrganizationId(application.getOwnerId());
+        createFlowCaseCommand.setTitle(application.getTitle() + "付款申请");
         createFlowCaseCommand.setApplyUserId(application.getCreateUid());
         createFlowCaseCommand.setFlowMainId(flow.getFlowMainId());
         createFlowCaseCommand.setFlowVersion(flow.getFlowVersion());

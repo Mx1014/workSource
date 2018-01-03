@@ -16,13 +16,17 @@ import com.everhomes.server.schema.tables.records.EhPaymentApplicationsRecord;
 import com.everhomes.sharding.ShardIterator;
 import com.everhomes.util.ConvertHelper;
 import com.everhomes.util.IterationMapReduceCallback;
+import com.everhomes.warehouse.WarehouseMenuIds;
 import org.jooq.DSLContext;
+import org.jooq.Record;
 import org.jooq.SelectQuery;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
 
 import java.util.ArrayList;
 import java.util.List;
+import java.util.Set;
+import java.util.stream.Collectors;
 
 /**
  * Created by ying.xiong on 2017/12/27.
@@ -89,5 +93,28 @@ public class PaymentApplicationProviderImpl implements PaymentApplicationProvide
         });
 
         return applications;
+    }
+
+
+    @Override
+    public String findPaymentApplicationMenuName() {
+        DSLContext context = this.dbProvider.getDslContext(AccessSpec.readOnly());
+        SelectQuery<Record> query = context.selectQuery();
+        query.addSelect(Tables.EH_WEB_MENUS.NAME);
+        query.addFrom(Tables.EH_WEB_MENUS);
+        query.addConditions(Tables.EH_WEB_MENUS.ID.eq(21300L));
+        return query.fetchOne(Tables.EH_WEB_MENUS.NAME);
+    }
+
+    @Override
+    public Set<Long> findPaymentApplicationNamespace() {
+        DSLContext context = this.dbProvider.getDslContext(AccessSpec.readOnly());
+        SelectQuery<Record> query = context.selectQuery();
+        query.addSelect(Tables.EH_WEB_MENU_SCOPES.OWNER_ID);
+        query.addFrom(Tables.EH_WEB_MENU_SCOPES);
+        query.addConditions(Tables.EH_WEB_MENU_SCOPES.OWNER_TYPE.eq("EhNamespaces"));
+        query.addConditions(Tables.EH_WEB_MENU_SCOPES.MENU_ID.eq(21300L));
+        List<Long> fetch = query.fetch(Tables.EH_WEB_MENU_SCOPES.OWNER_ID);
+        return fetch.stream().collect(Collectors.toSet());
     }
 }
