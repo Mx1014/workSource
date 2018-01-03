@@ -1,10 +1,10 @@
 package com.everhomes.rest.equipment;
 
-import java.sql.Timestamp;
-import java.util.List;
-
 import com.everhomes.discover.ItemType;
 import com.everhomes.util.StringHelper;
+
+import java.sql.Timestamp;
+import java.util.List;
 
 /**
  * <ul>
@@ -27,6 +27,7 @@ import com.everhomes.util.StringHelper;
  *  <li>createTime: 创建时间</li>
  *  <li>attachments: 附件， 参考{@link com.everhomes.rest.equipment.EquipmentTaskAttachmentDTO}</li>
  *  <li>reviewResult: 对巡检完成、维修完成、需维修三种需要审阅的记录补充审阅记录 参考{@link com.everhomes.rest.equipment.ReviewResult}</li>
+ *  <li>equipmentName: 设备名称</li>
  * </ul>
  */
 public class EquipmentTaskLogsDTO {
@@ -60,6 +61,8 @@ public class EquipmentTaskLogsDTO {
 	private Long templateId;
 	
 	private String templateName;
+
+	private String 	equipmentName;
 
 	@ItemType(InspectionItemResult.class)
     private List<InspectionItemResult> itemResults; 
@@ -221,6 +224,14 @@ public class EquipmentTaskLogsDTO {
 
 	public void setReviewResult(Byte reviewResult) {
 		this.reviewResult = reviewResult;
+	}
+
+	public String getEquipmentName() {
+		return equipmentName;
+	}
+
+	public void setEquipmentName(String equipmentName) {
+		this.equipmentName = equipmentName;
 	}
 
 	@Override

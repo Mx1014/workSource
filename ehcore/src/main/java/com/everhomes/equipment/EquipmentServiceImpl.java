@@ -1842,9 +1842,13 @@ private void checkUserPrivilege(Long orgId, Long privilegeId, Long communityId) 
 		//process_time operator_type operator_id
 		if(EquipmentTaskStatus.WAITING_FOR_EXECUTING.equals(EquipmentTaskStatus.fromStatus(task.getStatus()))
 				|| EquipmentTaskStatus.IN_MAINTENANCE.equals(EquipmentTaskStatus.fromStatus(task.getStatus()))) {
-			EquipmentInspectionStandards standard = equipmentProvider.findStandardById(task.getStandardId());
-			if (standard != null) {
-				task.setReviewExpiredDate(addDays(now, standard.getReviewExpiredDays()));
+//			EquipmentInspectionStandards standard = equipmentProvider.findStandardById(task.getStandardId());
+//			if (standard != null) {
+//				task.setReviewExpiredDate(addDays(now, standard.getReviewExpiredDays()));
+//			}
+			EquipmentInspectionPlans plan = equipmentProvider.getEquipmmentInspectionPlanById(task.getPlanId());
+			if (plan != null) {
+				task.setReviewExpiredDate(addDays(now, plan.getReviewExpiredDays()));
 			}
 
 
@@ -1910,15 +1914,13 @@ private void checkUserPrivilege(Long orgId, Long privilegeId, Long communityId) 
 				}
 			}
 
-			if (cmd.getMessage() != null) {
-
-				log.setProcessMessage(cmd.getMessage());
-			}
-
 			EquipmentTaskDTO dto = null;
 			equipmentProvider.updateEquipmentTask(task);
 			equipmentTasksSearcher.feedDoc(task);
 			for (int i = 0; i < cmd.getEquipmentTaskReportDetails().size(); i++) {
+				if (cmd.getEquipmentTaskReportDetails().get(i).getMessage() != null) {
+					log.setProcessMessage(cmd.getEquipmentTaskReportDetails().get(i).getMessage());
+				}
 				dto = updateEquipmentTasksAttachmentAndLogs(task, log, cmd.getEquipmentTaskReportDetails().get(i).getAttachments());
 
 				List<InspectionItemResult> itemResults = cmd.getEquipmentTaskReportDetails().get(i).getItemResults();
@@ -1972,11 +1974,10 @@ private void checkUserPrivilege(Long orgId, Long privilegeId, Long communityId) 
 
 	private List<EquipmentTaskDTO> convertEquipmentTasksToDTO(List<EquipmentInspectionTasks> tasks) {
 
-		List<EquipmentTaskDTO> dtoList = tasks.stream().map((r) -> {
-
-			EquipmentTaskDTO dto = convertEquipmentTaskToDTO(r);
-        	return dto;
-        }).filter(task->task!=null).collect(Collectors.toList());
+		List<EquipmentTaskDTO> dtoList = tasks.stream().
+				map(this::convertEquipmentTaskToDTO).
+				filter(Objects::nonNull).
+				collect(Collectors.toList());
 
 		return dtoList;
 	}
@@ -1986,29 +1987,22 @@ private void checkUserPrivilege(Long orgId, Long privilegeId, Long communityId) 
 		EquipmentTaskDTO dto = ConvertHelper.convert(task, EquipmentTaskDTO.class);
 
 //总公司 分公司 by xiongying20170328
-		EquipmentInspectionStandards standard = equipmentProvider.findStandardById(task.getStandardId());
+	//	EquipmentInspectionStandards standard = equipmentProvider.findStandardById(task.getStandardId());
 //		EquipmentInspectionStandards standard = equipmentProvider.findStandardById(task.getStandardId(),
 //				task.getOwnerType(), task.getOwnerId());
-		if(standard != null) {
-			dto.setStandardDescription(standard.getDescription());
-			dto.setStandardName(standard.getName());
-            dto.setTaskType(standard.getStandardType());
 
-            EquipmentInspectionTemplates template = equipmentProvider.findEquipmentInspectionTemplate(standard.getTemplateId(), standard.getOwnerId(), standard.getOwnerType());
-    		if(template != null) {
-    			dto.setTemplateId(template.getId());
-    			dto.setTemplateName(template.getName());
-    		}
+		EquipmentInspectionPlans plan = equipmentProvider.getEquipmmentInspectionPlanById(task.getPlanId());
+		dto.setTaskType(plan.getPlanType());
+		List<EquipmentInspectionEquipmentPlanMap> planMaps = equipmentProvider.getEquipmentInspectionPlanMap(task.getPlanId());
+		EquipmentStandardRelationDTO relationDTO = new EquipmentStandardRelationDTO();
+		if (planMaps != null && planMaps.size() > 0) {
+			for (EquipmentInspectionEquipmentPlanMap map : planMaps) {
+				EquipmentInspectionEquipments equipment = equipmentProvider.findEquipmentById(map.getEquimentId());
+				relationDTO.setEquipmentName(equipment.getName());
+				relationDTO.setLocation(equipment.getLocation());
+				dto.getEquipments().add(relationDTO);
+			}
 		}
-
-		EquipmentInspectionEquipments equipment = equipmentProvider.findEquipmentById(task.getEquipmentId());
-//		EquipmentInspectionEquipments equipment = equipmentProvider.findEquipmentById(task.getEquipmentId(), task.getOwnerType(), task.getOwnerId());
-        if(null != equipment) {
-        	dto.setEquipmentName(equipment.getName());
-        	dto.setEquipmentLocation(equipment.getLocation());
-        	dto.setQrCodeFlag(equipment.getQrCodeFlag());
-			dto.setPictureFlag(equipment.getPictureFlag());
-        }
 
         Organization group = organizationProvider.findOrganizationById(task.getExecutiveGroupId());
 		OrganizationJobPosition position = organizationProvider.findOrganizationJobPositionById(task.getPositionId());
@@ -2809,19 +2803,18 @@ private void checkUserPrivilege(Long orgId, Long privilegeId, Long communityId) 
 
         response.setNextPageAnchor(nextPageAnchor);
 
-        EquipmentInspectionStandards standard = equipmentProvider.findStandardById(task.getStandardId());
-		if(standard != null) {
+		EquipmentInspectionPlans plan = equipmentProvider.getEquipmmentInspectionPlanById(task.getPlanId());
+		if(plan != null) {
+			response.setTaskType(plan.getPlanType());
+		}
+		EquipmentInspectionStandards standard = equipmentProvider.findStandardById(task.getStandardId());
+		if(standard!=null){
 			response.setTaskType(standard.getStandardType());
 		}
-
-		EquipmentTaskDTO taskDto = convertEquipmentTaskToDTO(task);
-
 
         List<EquipmentTaskLogsDTO> dtos = logs.stream().map((r) -> {
 
         	EquipmentTaskLogsDTO dto = ConvertHelper.convert(r, EquipmentTaskLogsDTO.class);
-        	dto.setTemplateId(taskDto.getTemplateId());
-        	dto.setTemplateName(taskDto.getTemplateName());
 
         	List<EquipmentInspectionItemResults> itemResults = equipmentProvider.findEquipmentInspectionItemResultsByLogId(dto.getId());
 
@@ -2830,8 +2823,11 @@ private void checkUserPrivilege(Long orgId, Long privilegeId, Long communityId) 
         		results = itemResults.stream().map(result -> {
         			return ConvertHelper.convert(result, InspectionItemResult.class);
         		}).collect(Collectors.toList());
-        	}
-        	dto.setItemResults(results);
+				EquipmentInspectionEquipments equipment = equipmentProvider.findEquipmentById(itemResults.get(0).getEquipmentId());
+				if(equipment!=null)
+				dto.setEquipmentName(equipment.getName());
+			}
+			dto.setItemResults(results);
 
 			//总公司 分公司 by xiongying20170328
 			if(r.getOperatorId() != null && r.getOperatorId() != 0) {
@@ -4119,12 +4115,9 @@ private void checkUserPrivilege(Long orgId, Long privilegeId, Long communityId) 
 		delCommand.setId(task.getPlanId());
 		delCommand.setOwnerId(cmd.getOwnerId());
 		delCommand.setOwnerType(cmd.getOwnerType());
-		equipments = getEquipmmentInspectionPlanById(delCommand)
-				.getEquipmentStandardRelations();
-//				.stream().map((r) ->
-//						ConvertHelper.convert(r, EquipmentsDTO.class))
-//				.collect(Collectors.toList());
-
+		if (getEquipmmentInspectionPlanById(delCommand) != null)
+			equipments = getEquipmmentInspectionPlanById(delCommand)
+					.getEquipmentStandardRelations();
 
 		EquipmentTaskDTO dto = convertEquipmentTaskToDTO(task);
 		dto.setEquipments(equipments);
@@ -5238,7 +5231,7 @@ private void checkUserPrivilege(Long orgId, Long privilegeId, Long communityId) 
 		User user = UserContext.current().getUser();
 		plan.setCreatorUid(user.getId());
 		plan.setNamespaceId(UserContext.getCurrentNamespaceId());
-		if (cmd.getEquipmentStandardRelations() == null || cmd.getEquipmentStandardRelations().size() != 0
+		if (cmd.getEquipmentStandardRelations() == null || cmd.getEquipmentStandardRelations().size() == 0
 				|| cmd.getRepeatSettings() ==null) {
 			plan.setStatus(EquipmentPlanStatus.WAITTING_FOR_STARTING.getCode());
 		} else {
