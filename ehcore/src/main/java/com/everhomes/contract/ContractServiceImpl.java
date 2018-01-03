@@ -1493,6 +1493,7 @@ public class ContractServiceImpl implements ContractService {
 		processContractChargingItems(dto);
 		processContractAttachments(dto);
 		processContractChargingChanges(dto);
+		processContractPaymentPlans(dto);
 		return dto;
 	}
 
@@ -1748,6 +1749,18 @@ public class ContractServiceImpl implements ContractService {
 				return attachmentDto;
 			}).collect(Collectors.toList());
 			dto.setAttachments(dtos);
+		}
+	}
+
+	private void processContractPaymentPlans(ContractDetailDTO dto) {
+		List<ContractPaymentPlan> contractPlans = contractPaymentPlanProvider.listByContractId(dto.getId());
+		if(contractPlans != null && contractPlans.size() > 0) {
+			List<ContractPaymentPlanDTO> dtos = contractPlans.stream().map(plan -> {
+				ContractPaymentPlanDTO planDTO = ConvertHelper.convert(plan, ContractPaymentPlanDTO.class);
+				planDTO.setPaidTime(plan.getPaidTime().getTime());
+				return planDTO;
+			}).collect(Collectors.toList());
+			dto.setPlans(dtos);
 		}
 	}
 

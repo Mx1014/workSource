@@ -52,6 +52,17 @@ public class PaymentApplicationProviderImpl implements PaymentApplicationProvide
     }
 
     @Override
+    public void updatePaymentApplication(PaymentApplication application) {
+        assert(application.getId() != null);
+
+        DSLContext context = this.dbProvider.getDslContext(AccessSpec.readWriteWith(EhPaymentApplications.class, application.getId()));
+        EhPaymentApplicationsDao dao = new EhPaymentApplicationsDao(context.configuration());
+        dao.update(application);
+
+        DaoHelper.publishDaoAction(DaoAction.MODIFY, EhPaymentApplications.class, application.getId());
+    }
+
+    @Override
     public PaymentApplication findPaymentApplication(Long id) {
         DSLContext context = this.dbProvider.getDslContext(AccessSpec.readWrite());
         EhPaymentApplicationsDao dao = new EhPaymentApplicationsDao(context.configuration());

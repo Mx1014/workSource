@@ -183,6 +183,17 @@ public class ContractDetailDTO {
     @ItemType(ContractAttachmentDTO.class)
     private List<ContractAttachmentDTO> attachments;
 
+    @ItemType(ContractPaymentPlanDTO.class)
+    private List<ContractPaymentPlanDTO> plans;
+
+    public List<ContractPaymentPlanDTO> getPlans() {
+        return plans;
+    }
+
+    public void setPlans(List<ContractPaymentPlanDTO> plans) {
+        this.plans = plans;
+    }
+
     public Integer getRentCycle() {
         return rentCycle;
     }
