@@ -482,13 +482,41 @@ public class SocialSecurityServiceImpl implements SocialSecurityService {
         if (null == bases) {
             return response;
         }
+        List<SocialSecuritySetting> settings = null;
+        if (null != cmd.getDetailId()) {
+             settings = socialSecuritySettingProvider.listSocialSecuritySetting(cmd.getDetailId());
+        }
+
+        List<SocialSecuritySetting> finalSettings = settings;
         response.setItems(bases.stream().map(r -> {
             SocialSecurityItemDTO dto = new SocialSecurityItemDTO();
             copyRadixAndRatio(dto, r);
+            if (null != finalSettings) {
+                SocialSecuritySetting setting = findSetting(r.getAccumOrSocail(), r.getPayItem(), finalSettings);
+                if (null != setting) {
+                    dto.setCompanyRatio(setting.getCompanyRatio());
+                    dto.setCompanyRadix(setting.getCompanyRadix());
+                    dto.setEmployeeRadix(setting.getEmployeeRadix());
+                    dto.setEmployeeRatio(setting.getEmployeeRatio());
+                }
+            }
             return dto;
         }).collect(Collectors.toList()));
         return response;
     }
+
+    private SocialSecuritySetting findSetting(Byte accumOrSocail, String payItem, List<SocialSecuritySetting> finalSettings) {
+        for (SocialSecuritySetting setting : finalSettings) {
+            if (AccumOrSocail.ACCUM == AccumOrSocail.fromCode(accumOrSocail) &&
+                    AccumOrSocail.ACCUM == AccumOrSocail.fromCode(setting.getAccumOrSocail())) {
+                return setting;
+            } else if (setting.getPayItem().equals(payItem)) {
+                return setting;
+            }
+        }
+        return null;
+    }
+
 
     @Override
     public GetSocialSecurityPaymentDetailsResponse getSocialSecurityPaymentDetails(

@@ -5,7 +5,7 @@ import com.everhomes.util.StringHelper;
 
 /**
  * 
- * <ul>参数:
+ * <ul>
  * <li>ownerType: 所属类型 organization</li>
  * <li>ownerId: 所属id 公司id</li>
  * <li>detailId: 人员的detailId</li>
@@ -25,6 +25,8 @@ public class GetSocialSecurityRuleCommand {
 	private String householdType;
 
 	private Byte accumOrsocial;
+
+	private Long detailId;
 
 	public Byte getAccumOrsocial() {
 		return accumOrsocial;
@@ -71,4 +73,11 @@ public class GetSocialSecurityRuleCommand {
 		return StringHelper.toJsonString(this);
 	}
 
+	public Long getDetailId() {
+		return detailId;
+	}
+
+	public void setDetailId(Long detailId) {
+		this.detailId = detailId;
+	}
 }
