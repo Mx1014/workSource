@@ -8,8 +8,8 @@ import java.sql.Date;
  * <li>userId: 用户id</li>
  * <li>checkInTime: 入职时间</li>
  * <li>dismissTime: 离职时间</li>
- * <li>socialSecurityStartMonth: socialSecurityStartMonth</li>
- * <li>socialSecurityEndMonth: socialSecurityEndMonth</li>
+ * <li>socialSecurityStartMonth: 社保增月</li>
+ * <li>socialSecurityEndMonth: 社保减月</li>
  * </ul>
  */
 public class SocialSecurityEmployeeDTO {

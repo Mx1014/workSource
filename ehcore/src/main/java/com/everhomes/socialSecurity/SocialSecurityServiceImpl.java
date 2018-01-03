@@ -1915,22 +1915,29 @@ public class SocialSecurityServiceImpl implements SocialSecurityService {
         return dto;
     }
 
-    public SocialSecurityEmployeeDTO getSocialSecurityEmployeeInfo(Long detailId){
+    @Override
+    public SocialSecurityEmployeeDTO getSocialSecurityEmployeeInfo(Long detailId) {
         SocialSecurityEmployeeDTO dto = new SocialSecurityEmployeeDTO();
 
         OrganizationMemberDetails memberDetail = organizationProvider.findOrganizationMemberDetailsByDetailId(detailId);
-        if(memberDetail != null){
+        if (memberDetail != null) {
             dto.setDetailId(memberDetail.getId());
             dto.setUserId(memberDetail.getTargetId());
             dto.setCheckInTime(memberDetail.getCheckInTime());
             dto.setDismissTime(memberDetail.getDismissTime());
 
             SocialSecurityInoutTime social = socialSecurityInoutTimeProvider.getSocialSecurityInoutTimeByDetailId(InOutType.SOCIAL_SECURITY.getCode(), detailId);
-            if(social != null){
+            if (social != null) {
                 dto.setSocialSecurityStartMonth(social.getStartMonth());
                 dto.setSocialSecurityEndMonth(social.getEndMonth());
             }
         }
         return dto;
+    }
+
+    @Override
+    public List<Long> listSocialSecurityEmployeeDetailIdsByPayMonth(Long ownerId, String payMonth) {
+        List<Long> detailIds = socialSecurityInoutTimeProvider.listSocialSecurityEmployeeDetailIdsByPayMonth(ownerId, payMonth, InOutType.SOCIAL_SECURITY.getCode());
+        return detailIds;
     }
 }

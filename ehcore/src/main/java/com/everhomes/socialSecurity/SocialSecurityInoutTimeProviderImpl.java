@@ -19,6 +19,8 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
 
 import java.sql.Timestamp;
+import java.util.ArrayList;
+import java.util.List;
 
 @Component
 public class SocialSecurityInoutTimeProviderImpl implements SocialSecurityInoutTimeProvider{
@@ -67,5 +69,22 @@ public class SocialSecurityInoutTimeProviderImpl implements SocialSecurityInoutT
         query.addConditions(Tables.EH_SOCIAL_SECURITY_INOUT_TIME.DETAIL_ID.eq(detailId));
         query.addConditions(Tables.EH_SOCIAL_SECURITY_INOUT_TIME.TYPE.eq(inOutType));
         return query.fetchAnyInto(SocialSecurityInoutTime.class);
+    }
+
+    //  查询指定公司、指定月份下需要交社保的人
+    @Override
+    public List<Long> listSocialSecurityEmployeeDetailIdsByPayMonth(Long ownerId, String payMonth, Byte inOutTime){
+        List<Long> results = new ArrayList<>();
+        DSLContext context = dbProvider.getDslContext(AccessSpec.readOnly());
+        SelectQuery<EhSocialSecurityInoutTimeRecord> query = context.selectQuery(Tables.EH_SOCIAL_SECURITY_INOUT_TIME);
+        query.addConditions(Tables.EH_SOCIAL_SECURITY_INOUT_TIME.ORGANIZATION_ID.eq(ownerId));
+        query.addConditions(Tables.EH_SOCIAL_SECURITY_INOUT_TIME.START_MONTH.lt(payMonth));
+        query.addConditions(Tables.EH_SOCIAL_SECURITY_INOUT_TIME.START_MONTH.gt(payMonth));
+        query.addConditions(Tables.EH_SOCIAL_SECURITY_INOUT_TIME.TYPE.eq(inOutTime));
+        query.fetch().map(r ->{
+            results.add(r.getDetailId());
+            return null;
+        });
+        return results;
     }
 }
