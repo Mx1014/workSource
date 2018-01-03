@@ -1064,7 +1064,7 @@ public class AssetServiceImpl implements AssetService {
      */
     @Override
     public void paymentExpectancies_re_struct(PaymentExpectanciesCommand cmd) {
-
+          LOGGER.info("cmd for paymentExpectancies is : " + cmd.toString());
 //        List<RentAdjust> rentAdjusts = cmd.getRentAdjusts();
 //        List<RentFree> rentFrees = cmd.getRentFrees();
 //        if(rentAdjusts!=null && rentAdjusts.size()>0){

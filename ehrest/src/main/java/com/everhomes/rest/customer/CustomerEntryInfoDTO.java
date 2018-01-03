@@ -41,6 +41,54 @@ public class CustomerEntryInfoDTO {
     private Integer contractEndMonth;
     private String remark;
 
+    private String building;
+    private String apartment;
+    private Byte apartmentLivingStatus;
+
+    private Double chargeArea;
+
+    private String orientation;
+
+    public String getApartment() {
+        return apartment;
+    }
+
+    public void setApartment(String apartment) {
+        this.apartment = apartment;
+    }
+
+    public String getBuilding() {
+        return building;
+    }
+
+    public void setBuilding(String building) {
+        this.building = building;
+    }
+
+    public Byte getApartmentLivingStatus() {
+        return apartmentLivingStatus;
+    }
+
+    public void setApartmentLivingStatus(Byte apartmentLivingStatus) {
+        this.apartmentLivingStatus = apartmentLivingStatus;
+    }
+
+    public Double getChargeArea() {
+        return chargeArea;
+    }
+
+    public void setChargeArea(Double chargeArea) {
+        this.chargeArea = chargeArea;
+    }
+
+    public String getOrientation() {
+        return orientation;
+    }
+
+    public void setOrientation(String orientation) {
+        this.orientation = orientation;
+    }
+
     public String getAddressName() {
         return addressName;
     }
