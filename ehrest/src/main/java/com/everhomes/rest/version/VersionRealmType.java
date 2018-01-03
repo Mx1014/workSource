@@ -149,6 +149,9 @@ public enum VersionRealmType {
     ANDROID_XINWEILAI("Android_Xinweilai"),
     IOS_XINWEILAI("IOS_Xinweilai"),
 
+    ANDROID_WANZHIHUI("ANDROID_WANZHIHUI"),
+    IOS_WANZHIHUI("IOS_WANZHIHUI"),
+
     ;
 
     private String code;
