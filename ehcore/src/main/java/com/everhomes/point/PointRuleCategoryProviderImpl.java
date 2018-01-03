@@ -27,29 +27,29 @@ import java.util.List;
 @Repository
 public class PointRuleCategoryProviderImpl implements PointRuleCategoryProvider {
 
-	@Autowired
-	private DbProvider dbProvider;
+    @Autowired
+    private DbProvider dbProvider;
 
-	@Autowired
-	private SequenceProvider sequenceProvider;
+    @Autowired
+    private SequenceProvider sequenceProvider;
 
-	@Override
-	public void createPointRuleCategory(PointRuleCategory pointRuleCategory) {
-		Long id = sequenceProvider.getNextSequence(NameMapper.getSequenceDomainFromTablePojo(EhPointRuleCategories.class));
-		pointRuleCategory.setId(id);
-		pointRuleCategory.setCreateTime(DateUtils.currentTimestamp());
-		// pointRuleCategory.setCreatorUid(UserContext.currentUserId());
-		rwDao().insert(pointRuleCategory);
-		DaoHelper.publishDaoAction(DaoAction.CREATE, EhPointRuleCategories.class, id);
-	}
+    @Override
+    public void createPointRuleCategory(PointRuleCategory pointRuleCategory) {
+        Long id = sequenceProvider.getNextSequence(NameMapper.getSequenceDomainFromTablePojo(EhPointRuleCategories.class));
+        pointRuleCategory.setId(id);
+        pointRuleCategory.setCreateTime(DateUtils.currentTimestamp());
+        // pointRuleCategory.setCreatorUid(UserContext.currentUserId());
+        rwDao().insert(pointRuleCategory);
+        DaoHelper.publishDaoAction(DaoAction.CREATE, EhPointRuleCategories.class, id);
+    }
 
-	@Override
-	public void updatePointRuleCategory(PointRuleCategory pointRuleCategory) {
-		// pointRuleCategory.setUpdateTime(DateUtils.currentTimestamp());
-		// pointRuleCategory.setUpdateUid(UserContext.currentUserId());
+    @Override
+    public void updatePointRuleCategory(PointRuleCategory pointRuleCategory) {
+        // pointRuleCategory.setUpdateTime(DateUtils.currentTimestamp());
+        // pointRuleCategory.setUpdateUid(UserContext.currentUserId());
         rwDao().update(pointRuleCategory);
-		DaoHelper.publishDaoAction(DaoAction.MODIFY, EhPointRuleCategories.class, pointRuleCategory.getId());
-	}
+        DaoHelper.publishDaoAction(DaoAction.MODIFY, EhPointRuleCategories.class, pointRuleCategory.getId());
+    }
 
     @Override
     public List<PointRuleCategory> query(ListingLocator locator, int count, ListingQueryBuilderCallback callback) {
@@ -60,7 +60,7 @@ public class PointRuleCategoryProviderImpl implements PointRuleCategoryProvider 
             callback.buildCondition(locator, query);
         }
         if (locator.getAnchor() != null) {
-            query.addConditions(t.ID.lt(locator.getAnchor()));
+            query.addConditions(t.ID.le(locator.getAnchor()));
         }
 
         if (count > 0) {
@@ -78,10 +78,10 @@ public class PointRuleCategoryProviderImpl implements PointRuleCategoryProvider 
         return list;
     }
 
-	@Override
-	public PointRuleCategory findById(Long id) {
-		return ConvertHelper.convert(dao().findById(id), PointRuleCategory.class);
-	}
+    @Override
+    public PointRuleCategory findById(Long id) {
+        return ConvertHelper.convert(dao().findById(id), PointRuleCategory.class);
+    }
 
     @Override
     public List<PointRuleCategory> listPointRuleCategories() {
@@ -118,12 +118,12 @@ public class PointRuleCategoryProviderImpl implements PointRuleCategoryProvider 
     private EhPointRuleCategoriesDao rwDao() {
         DSLContext context = dbProvider.getDslContext(AccessSpec.readWrite());
         return new EhPointRuleCategoriesDao(context.configuration());
-	}
+    }
 
-	private EhPointRuleCategoriesDao dao() {
+    private EhPointRuleCategoriesDao dao() {
         DSLContext context = dbProvider.getDslContext(AccessSpec.readOnly());
         return new EhPointRuleCategoriesDao(context.configuration());
-	}
+    }
 
     private DSLContext context() {
         return dbProvider.getDslContext(AccessSpec.readOnly());

@@ -3,12 +3,13 @@ package com.everhomes.rest.flow;
 import com.everhomes.util.StringHelper;
 
 /**
- * 获取变量列表
  * <ul>
- * <li>flowVariableType {@link com.everhomes.rest.flow.FlowVariableType}</li>
+ *     <li>namespaceId: namespaceId</li>
+ *     <li>flowVariableType: {@link com.everhomes.rest.flow.FlowVariableType}</li>
+ *     <li>entityType: entityType</li>
+ *     <li>entityId: entityId</li>
+ *     <li>keyword: keyword</li>
  * </ul>
- * @author janson
- *
  */
 public class ListFlowVariablesCommand {
 
@@ -16,6 +17,7 @@ public class ListFlowVariablesCommand {
     private String flowVariableType;
     private String entityType;
     private Long entityId;
+    private String keyword;
 
     public Integer getNamespaceId() {
         return namespaceId;
@@ -47,6 +49,14 @@ public class ListFlowVariablesCommand {
 
     public void setEntityId(Long entityId) {
         this.entityId = entityId;
+    }
+
+    public String getKeyword() {
+        return keyword;
+    }
+
+    public void setKeyword(String keyword) {
+        this.keyword = keyword;
     }
 
     @Override
