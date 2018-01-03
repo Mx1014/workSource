@@ -4,11 +4,13 @@ package com.everhomes.socialSecurity;
 import com.everhomes.rest.socialSecurity.*;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.web.bind.annotation.RequestMapping;
+import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.RestController;
 
 import com.everhomes.controller.ControllerBase;
 import com.everhomes.discover.RestReturn;
 import com.everhomes.rest.RestResponse;
+import org.springframework.web.multipart.MultipartFile;
 
 @RestController
 @RequestMapping("/socialSecurity")
@@ -116,8 +118,8 @@ public class SocialSecurityController extends ControllerBase {
 	 */
 	@RequestMapping("importSocialSecurityPayments")
 	@RestReturn(String.class)
-	public RestResponse importSocialSecurityPayments(ImportSocialSecurityPaymentsCommand cmd){
-		socialSecurityService.importSocialSecurityPayments(cmd);
+	public RestResponse importSocialSecurityPayments(@RequestParam(value =  "attachment") MultipartFile[] files , ImportSocialSecurityPaymentsCommand cmd){
+		socialSecurityService.importSocialSecurityPayments(cmd, files[0]);
 		return new RestResponse();
 	}
 

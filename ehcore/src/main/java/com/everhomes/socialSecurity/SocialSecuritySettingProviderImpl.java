@@ -105,8 +105,12 @@ public class SocialSecuritySettingProviderImpl implements SocialSecuritySettingP
         if (null != itemDTO) {
             step = step.and(Tables.EH_SOCIAL_SECURITY_SETTINGS.PAY_ITEM.eq(itemDTO.getPayItem()));
         }
-        return step.orderBy(Tables.EH_SOCIAL_SECURITY_SETTINGS.ID.asc())
-                .fetchAny().map(r -> ConvertHelper.convert(r, SocialSecuritySetting.class));
+        Record result = step.orderBy(Tables.EH_SOCIAL_SECURITY_SETTINGS.ID.asc())
+                .fetchAny();
+        if (null == result) {
+            return null;
+        }
+        return result.map(r -> ConvertHelper.convert(r, SocialSecuritySetting.class));
     }
 
     @Override

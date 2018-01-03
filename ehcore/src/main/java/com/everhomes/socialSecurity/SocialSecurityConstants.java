@@ -8,4 +8,5 @@ public class SocialSecurityConstants {
 	public static final int ERROR_NO_PAYMENTS = 10002;
 	/**default city : 深圳*/
 	public static final Long DEFAULT_CITY = 13905L;
+	public static final int ERROR_FILE_IS_EMPTY = 10003;
 }
