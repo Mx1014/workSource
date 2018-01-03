@@ -17,6 +17,8 @@ import com.everhomes.rest.user.*;
 import com.everhomes.rest.version.VersionRealmType;
 import com.everhomes.user.*;
 import com.everhomes.util.*;
+import com.everhomes.version.VersionProvider;
+import com.everhomes.version.VersionRealm;
 import org.jooq.tools.StringUtils;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -70,6 +72,9 @@ public class WebRequestInterceptor implements HandlerInterceptor {
 
     @Autowired
     private DomainService domainService;
+
+    @Autowired
+    private VersionProvider versionProvider;
 
     public WebRequestInterceptor() {
     }
@@ -283,12 +288,19 @@ public class WebRequestInterceptor implements HandlerInterceptor {
         UserContext context = UserContext.current();
         context.setVersion("0.0.0");
 
+
         userAgents.forEach((k, v) -> {
-            if (VersionRealmType.fromCode(k) != null) {
-                context.setVersion(v);
-                context.setVersionRealm(k);
-                return;
+            //弃用代码枚举，使用数据库读取的方式。原因是很多人忘了写枚举  edit by yanjun 20180103
+//            if (VersionRealmType.fromCode(k) != null) {
+            if(k != null){
+                VersionRealm versionRealm = versionProvider.findVersionRealmByName(k);
+                if(versionRealm != null){
+                    context.setVersion(v);
+                    context.setVersionRealm(k);
+                    return;
+                }
             }
+
         });
     }
 
