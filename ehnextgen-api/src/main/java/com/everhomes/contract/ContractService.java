@@ -42,4 +42,5 @@ public interface ContractService {
 	void syncContractsFromThirdPart(SyncContractsFromThirdPartCommand cmd);
 
 	Boolean checkAdmin(CheckAdminCommand cmd);
+	ContractDetailDTO findContractForApp(FindContractCommand cmd);
 }

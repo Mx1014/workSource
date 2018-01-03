@@ -1684,6 +1684,18 @@ public class ContractServiceImpl implements ContractService {
 	}
 
 	@Override
+	public ContractDetailDTO findContractForApp(FindContractCommand cmd) {
+		CheckAdminCommand cmd1 = new CheckAdminCommand();
+		cmd1.setNamespaceId(cmd.getNamespaceId());
+		cmd1.setOrganizationId(cmd.getOrganizationId());
+		if(checkAdmin(cmd1)) {
+			return findContract(cmd);
+		}
+
+		return null;
+	}
+
+	@Override
 	public Boolean checkAdmin(CheckAdminCommand cmd) {
 		Long userId = UserContext.currentUserId();
 		ListServiceModuleAdministratorsCommand cmd1 = new ListServiceModuleAdministratorsCommand();
