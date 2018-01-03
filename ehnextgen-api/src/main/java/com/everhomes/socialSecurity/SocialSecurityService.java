@@ -10,8 +10,7 @@ interface SocialSecurityService {
  
 	void addSocialSecurity(AddSocialSecurityCommand cmd);
 
-
-	void newSocialSecurityEmployee(Long detailId);
+	void newSocialSecurityEmployee(Long detailId, String inMonth);
 
 	ListSocialSecurityCitiesResponse listSocialSecurityCities(ListSocialSecurityCitiesCommand cmd);
 
