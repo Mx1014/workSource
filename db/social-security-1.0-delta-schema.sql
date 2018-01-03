@@ -290,6 +290,7 @@ CREATE TABLE `eh_social_security_report` (
   `after_critical_illness_employee_sum` DECIMAL (10, 2) COMMENT '补缴大病个人合计',
   `disability_sum` DECIMAL (10, 2) COMMENT '残障金',
   `commercial_insurance` DECIMAL (10, 2) COMMENT '商业保险',
+  `is_work` TINYINT COMMENT '入职离职:0正常,1入职,-1离职',
   `creator_uid` BIGINT  DEFAULT '0',
   `create_time` DATETIME,
   `operator_uid` BIGINT,
