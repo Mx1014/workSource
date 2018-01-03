@@ -2,35 +2,32 @@ package com.everhomes.rest.equipment;
 
 
 import com.everhomes.discover.ItemType;
-import com.everhomes.rest.forum.AttachmentDescriptor;
 import com.everhomes.util.StringHelper;
 
-import javax.validation.constraints.NotNull;
 import java.util.List;
 
 /**
  * <ul>
- *  <li>attachments: 上报内容图片   对应设备id   参考{@link  com.everhomes.rest.equipment.Attachment}</li>
+ *  <li>attachments: 上报内容图片     参考{@link  com.everhomes.rest.equipment.Attachment}</li>
  *  <li>message: 上报信息</li>
  *  <li>itemResults: 设备参数 参考{@link com.everhomes.rest.equipment.InspectionItemResult}</li>
  * </ul>
  */
 public class EquipmentTaskReportDetail {
 
-    @NotNull
     @ItemType(Attachment.class)
-    private List<AttachmentDescriptor> attachments;
+    private List<Attachment> attachments;
 
     private String message;
 
     @ItemType(InspectionItemResult.class)
     private List<InspectionItemResult> itemResults;
 
-    public List<AttachmentDescriptor> getAttachments() {
+    public List<Attachment> getAttachments() {
         return attachments;
     }
 
-    public void setAttachments(List<AttachmentDescriptor> attachments) {
+    public void setAttachments(List<Attachment> attachments) {
         this.attachments = attachments;
     }
 

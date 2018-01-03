@@ -1,6 +1,7 @@
 package com.everhomes.rest.equipment;
 
 import com.everhomes.discover.ItemType;
+import com.everhomes.rest.forum.AttachmentDescriptor;
 import com.everhomes.util.StringHelper;
 
 import javax.validation.constraints.NotNull;
@@ -31,11 +32,11 @@ public class ReportEquipmentTaskCommand {
 	@ItemType(EquipmentTaskReportDetail.class)
 	private  List<EquipmentTaskReportDetail>  equipmentTaskReportDetails;
 
-
+	//-----------------以下为上版使用任务上报参数----------------------------------------------
 	@Deprecated
 	@NotNull
-	@ItemType(Attachment.class)
-    private List<Attachment> attachments;
+	@ItemType(AttachmentDescriptor.class)
+    private List<AttachmentDescriptor> attachments;
 
 	@Deprecated
 	private String message;
@@ -60,11 +61,11 @@ public class ReportEquipmentTaskCommand {
 		this.verificationResult = verificationResult;
 	}
 
-	public List<Attachment> getAttachments() {
+	public List<AttachmentDescriptor> getAttachments() {
 		return attachments;
 	}
 
-	public void setAttachments(List<Attachment> attachments) {
+	public void setAttachments(List<AttachmentDescriptor> attachments) {
 		this.attachments = attachments;
 	}
 

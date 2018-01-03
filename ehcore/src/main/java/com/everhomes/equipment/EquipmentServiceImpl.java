@@ -47,6 +47,7 @@ import com.everhomes.rest.category.CategoryAdminStatus;
 import com.everhomes.rest.category.CategoryConstants;
 import com.everhomes.rest.category.CategoryDTO;
 import com.everhomes.rest.equipment.AdminFlag;
+import com.everhomes.rest.equipment.Attachment;
 import com.everhomes.rest.equipment.CreateEquipmentCategoryCommand;
 import com.everhomes.rest.equipment.CreateInspectionTemplateCommand;
 import com.everhomes.rest.equipment.DeleteEquipmentAccessoriesCommand;
@@ -148,7 +149,6 @@ import com.everhomes.rest.equipment.VerifyEquipmentLocationCommand;
 import com.everhomes.rest.equipment.VerifyEquipmentLocationResponse;
 import com.everhomes.rest.equipment.findScopeFieldItemCommand;
 import com.everhomes.rest.equipment.searchEquipmentInspectionPlansCommand;
-import com.everhomes.rest.forum.AttachmentDescriptor;
 import com.everhomes.rest.messaging.MessageBodyType;
 import com.everhomes.rest.messaging.MessageChannel;
 import com.everhomes.rest.messaging.MessageDTO;
@@ -1843,7 +1843,7 @@ private void checkUserPrivilege(Long orgId, Long privilegeId, Long communityId) 
 		if(EquipmentTaskStatus.WAITING_FOR_EXECUTING.equals(EquipmentTaskStatus.fromStatus(task.getStatus()))
 				|| EquipmentTaskStatus.IN_MAINTENANCE.equals(EquipmentTaskStatus.fromStatus(task.getStatus()))) {
 			EquipmentInspectionStandards standard = equipmentProvider.findStandardById(task.getStandardId());
-			if(standard != null) {
+			if (standard != null) {
 				task.setReviewExpiredDate(addDays(now, standard.getReviewExpiredDays()));
 			}
 
@@ -1854,14 +1854,14 @@ private void checkUserPrivilege(Long orgId, Long privilegeId, Long communityId) 
 			log.setOperatorId(user.getId());
 
 			task.setReviewResult(ReviewResult.NONE.getCode());
-			if(EquipmentTaskResult.COMPLETE_OK.equals(EquipmentTaskResult.fromStatus(cmd.getVerificationResult()))) {
+			if (EquipmentTaskResult.COMPLETE_OK.equals(EquipmentTaskResult.fromStatus(cmd.getVerificationResult()))) {
 
 				task.setStatus(EquipmentTaskStatus.CLOSE.getCode());
 				task.setExecutiveTime(now);
 				task.setExecutorType(OwnerType.USER.getCode());
 				task.setExecutorId(user.getId());
 				log.setProcessType(EquipmentTaskProcessType.COMPLETE.getCode());
-				if(task.getExecutiveExpireTime() == null || now.before(task.getExecutiveExpireTime())) {
+				if (task.getExecutiveExpireTime() == null || now.before(task.getExecutiveExpireTime())) {
 					task.setResult(EquipmentTaskResult.COMPLETE_OK.getCode());
 					log.setProcessResult(EquipmentTaskProcessResult.COMPLETE_OK.getCode());
 				} else {
@@ -1869,45 +1869,39 @@ private void checkUserPrivilege(Long orgId, Long privilegeId, Long communityId) 
 					log.setProcessResult(EquipmentTaskProcessResult.COMPLETE_DELAY.getCode());
 				}
 
-			}
-
-			else if(EquipmentTaskResult.NEED_MAINTENANCE_OK.equals(EquipmentTaskResult.fromStatus(cmd.getVerificationResult()))) {
+			} else if (EquipmentTaskResult.NEED_MAINTENANCE_OK.equals(EquipmentTaskResult.fromStatus(cmd.getVerificationResult()))) {
 				task.setStatus(EquipmentTaskStatus.NEED_MAINTENANCE.getCode());
 				task.setExecutiveTime(now);
 				task.setExecutorType(OwnerType.USER.getCode());
 				task.setExecutorId(user.getId());
 				log.setProcessType(EquipmentTaskProcessType.NEED_MAINTENANCE.getCode());
-				if(task.getExecutiveExpireTime() == null || now.before(task.getExecutiveExpireTime())) {
+				if (task.getExecutiveExpireTime() == null || now.before(task.getExecutiveExpireTime())) {
 					task.setResult(EquipmentTaskResult.NEED_MAINTENANCE_OK.getCode());
 					log.setProcessResult(EquipmentTaskProcessResult.NEED_MAINTENANCE_OK.getCode());
 				} else {
 					task.setResult(EquipmentTaskResult.NEED_MAINTENANCE_DELAY.getCode());
 					log.setProcessResult(EquipmentTaskProcessResult.NEED_MAINTENANCE_DELAY.getCode());
 				}
-			}
-
-			else if(EquipmentTaskResult.NEED_MAINTENANCE_OK_COMPLETE_OK.equals(EquipmentTaskResult.fromStatus(cmd.getVerificationResult()))) {
+			} else if (EquipmentTaskResult.NEED_MAINTENANCE_OK_COMPLETE_OK.equals(EquipmentTaskResult.fromStatus(cmd.getVerificationResult()))) {
 				task.setStatus(EquipmentTaskStatus.CLOSE.getCode());
 				task.setProcessTime(now);
 				task.setOperatorType(OwnerType.USER.getCode());
 				task.setOperatorId(user.getId());
 				log.setProcessType(EquipmentTaskProcessType.COMPLETE_MAINTENANCE.getCode());
-				if(task.getProcessExpireTime() == null || now.before(task.getProcessExpireTime())) {
+				if (task.getProcessExpireTime() == null || now.before(task.getProcessExpireTime())) {
 					task.setResult(EquipmentTaskResult.NEED_MAINTENANCE_OK_COMPLETE_OK.getCode());
 					log.setProcessResult(EquipmentTaskProcessResult.NEED_MAINTENANCE_OK_COMPLETE_OK.getCode());
 				} else {
 					task.setResult(EquipmentTaskResult.NEED_MAINTENANCE_OK_COMPLETE_DELAY.getCode());
 					log.setProcessResult(EquipmentTaskProcessResult.NEED_MAINTENANCE_OK_COMPLETE_DELAY.getCode());
 				}
-			}
-
-			else if(EquipmentTaskResult.NEED_MAINTENANCE_DELAY_COMPLETE_OK.equals(EquipmentTaskResult.fromStatus(cmd.getVerificationResult()))) {
+			} else if (EquipmentTaskResult.NEED_MAINTENANCE_DELAY_COMPLETE_OK.equals(EquipmentTaskResult.fromStatus(cmd.getVerificationResult()))) {
 				task.setStatus(EquipmentTaskStatus.CLOSE.getCode());
 				task.setProcessTime(now);
 				task.setOperatorType(OwnerType.USER.getCode());
 				task.setOperatorId(user.getId());
 				log.setProcessType(EquipmentTaskProcessType.COMPLETE_MAINTENANCE.getCode());
-				if(task.getProcessExpireTime() == null || now.before(task.getProcessExpireTime())) {
+				if (task.getProcessExpireTime() == null || now.before(task.getProcessExpireTime())) {
 					task.setResult(EquipmentTaskResult.NEED_MAINTENANCE_DELAY_COMPLETE_OK.getCode());
 					log.setProcessResult(EquipmentTaskProcessResult.NEED_MAINTENANCE_DELAY_COMPLETE_OK.getCode());
 				} else {
@@ -1916,29 +1910,32 @@ private void checkUserPrivilege(Long orgId, Long privilegeId, Long communityId) 
 				}
 			}
 
-			if(cmd.getMessage() != null) {
+			if (cmd.getMessage() != null) {
 
 				log.setProcessMessage(cmd.getMessage());
 			}
 
-            EquipmentTaskDTO dto = null;
-            for (int i=0;i<cmd.getEquipmentTaskReportDetails().size();i++) {
-                dto = updateEquipmentTasks(task, log, cmd.getEquipmentTaskReportDetails().get(i).getAttachments());
-            }
-            List<InspectionItemResult> itemResults = cmd.getItemResults();
-			if(itemResults != null && itemResults.size() > 0) {
+			EquipmentTaskDTO dto = null;
+			equipmentProvider.updateEquipmentTask(task);
+			equipmentTasksSearcher.feedDoc(task);
+			for (int i = 0; i < cmd.getEquipmentTaskReportDetails().size(); i++) {
+				dto = updateEquipmentTasksAttachmentAndLogs(task, log, cmd.getEquipmentTaskReportDetails().get(i).getAttachments());
 
-				for(InspectionItemResult itemResult : itemResults) {
-					EquipmentInspectionItemResults result = ConvertHelper.convert(itemResult, EquipmentInspectionItemResults.class);
-					result.setTaskLogId(log.getId());
-					result.setCommunityId(task.getTargetId());
-					result.setStandardId(task.getStandardId());
-					result.setEquipmentId(task.getEquipmentId());
-					result.setInspectionCategoryId(task.getInspectionCategoryId());
-					result.setNamespaceId(task.getNamespaceId());
-					equipmentProvider.createEquipmentInspectionItemResults(result);
+				List<InspectionItemResult> itemResults = cmd.getEquipmentTaskReportDetails().get(i).getItemResults();
+				if (itemResults != null && itemResults.size() > 0) {
+
+					for (InspectionItemResult itemResult : itemResults) {
+						EquipmentInspectionItemResults result = ConvertHelper.convert(itemResult, EquipmentInspectionItemResults.class);
+						result.setTaskLogId(log.getId());
+						result.setCommunityId(task.getTargetId());
+						result.setStandardId(task.getStandardId());
+						result.setEquipmentId(task.getEquipmentId());
+						result.setInspectionCategoryId(task.getInspectionCategoryId());
+						result.setNamespaceId(task.getNamespaceId());
+						equipmentProvider.createEquipmentInspectionItemResults(result);
+					}
 				}
-			}
+		}
 
 			return dto;
 
@@ -1950,11 +1947,11 @@ private void checkUserPrivilege(Long orgId, Long privilegeId, Long communityId) 
 
 	}
 
-	private EquipmentTaskDTO updateEquipmentTasks(EquipmentInspectionTasks task,
-			EquipmentInspectionTasksLogs log, List<AttachmentDescriptor> attachmentList) {
+	private EquipmentTaskDTO updateEquipmentTasksAttachmentAndLogs(EquipmentInspectionTasks task,
+			EquipmentInspectionTasksLogs log, List<Attachment> attachmentList) {
 
-		equipmentProvider.updateEquipmentTask(task);
-		equipmentTasksSearcher.feedDoc(task);
+//		equipmentProvider.updateEquipmentTask(task);
+//		equipmentTasksSearcher.feedDoc(task);
 
 		log.setInspectionCategoryId(task.getInspectionCategoryId());
 		log.setCommunityId(task.getTargetId());
@@ -2080,14 +2077,14 @@ private void checkUserPrivilege(Long orgId, Long privilegeId, Long communityId) 
 		return dto;
 	}
 
-	private void processLogAttachments(long userId, List<AttachmentDescriptor> attachmentList, EquipmentInspectionTasksLogs log) {
+	private void processLogAttachments(long userId, List<Attachment> attachmentList, EquipmentInspectionTasksLogs log) {
         List<EquipmentInspectionTasksAttachments> results = null;
 
         if(attachmentList != null) {
             results = new ArrayList<EquipmentInspectionTasksAttachments>();
 
             EquipmentInspectionTasksAttachments attachment = null;
-            for(AttachmentDescriptor descriptor : attachmentList) {
+            for(Attachment descriptor : attachmentList) {
                 attachment = new EquipmentInspectionTasksAttachments();
                 attachment.setCreatorUid(userId);
                 attachment.setLogId(log.getId());
@@ -2260,8 +2257,9 @@ private void checkUserPrivilege(Long orgId, Long privilegeId, Long communityId) 
 			String notifyTextForApplicant = localeTemplateService.getLocaleTemplateString(scope, code, locale, notifyMap, "");
 			sendMessageToUser(cmd.getOperatorId(), notifyTextForApplicant);
 		}
-
-		updateEquipmentTasks(task, log, null);
+		equipmentProvider.updateEquipmentTask(task);
+		equipmentTasksSearcher.feedDoc(task);
+		updateEquipmentTasksAttachmentAndLogs(task, log, null);
 	}
 
 	@Override
