@@ -171,6 +171,8 @@ public enum VersionRealmType {
     iOS_ChuangYeChang("iOS_ChuangYeChang"),
     ANDROID_QIDIXIANGSHAN("Android_QiDiXiangShan"),
     IOS_QIDIXIANGSHAN("IOS_QiDiXiangShan"),
+    ANDROID_XINWEICHUANGYUAN("Android_XinWeiChuangYuan"),
+    IOS_XINWEICHUANGYUAN("iOS_XinWeiChuangYuan"),
     ANDROID_WANZHIHUI("Android_WanZhiHui"),
     IOS_WANZHIHUI("iOS_WanZhiHui")
     ;
