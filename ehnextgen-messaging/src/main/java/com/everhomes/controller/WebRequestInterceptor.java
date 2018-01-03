@@ -17,8 +17,6 @@ import com.everhomes.rest.user.*;
 import com.everhomes.rest.version.VersionRealmType;
 import com.everhomes.user.*;
 import com.everhomes.util.*;
-import com.everhomes.version.VersionProvider;
-import com.everhomes.version.VersionRealm;
 import org.jooq.tools.StringUtils;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -72,9 +70,6 @@ public class WebRequestInterceptor implements HandlerInterceptor {
 
     @Autowired
     private DomainService domainService;
-
-    @Autowired
-    private VersionProvider versionProvider;
 
     public WebRequestInterceptor() {
     }
@@ -133,7 +128,7 @@ public class WebRequestInterceptor implements HandlerInterceptor {
             // 由于服务器注册接口被攻击，从日志分析来看IP和手机号都不一样，但useragent并没有按标准的形式，故可以通过useragent来做限制，
             // 通过配置一黑名单，含黑名单关键字的useragent会被禁止掉 by lqs 20170516
             checkUserAgent(request.getRequestURI(), userAgents);
-            
+
             setupNamespaceIdContext(userAgents);
             setupVersionContext(userAgents);
             setupScheme(userAgents);
@@ -169,7 +164,7 @@ public class WebRequestInterceptor implements HandlerInterceptor {
                         setupUserContext(token);
                         MDC.put("uid", String.valueOf(UserContext.current().getUser().getId()));
                         return true;
-                    } 
+                    }
 
                     //Kickoff state support
                     // 把踢出校验这一步移到checkRequestSignature前面
@@ -177,7 +172,7 @@ public class WebRequestInterceptor implements HandlerInterceptor {
                         throw RuntimeErrorException.errorWith(UserServiceErrorCode.SCOPE,
                                 UserServiceErrorCode.ERROR_KICKOFF_BY_OTHER, "Kickoff by others");
                     }
-                    
+
                     if (this.checkRequestSignature(request)) {
                         setupUserContextForApp(UserContext.current().getCallerApp());
                         //TODO Added by Janson
@@ -288,19 +283,12 @@ public class WebRequestInterceptor implements HandlerInterceptor {
         UserContext context = UserContext.current();
         context.setVersion("0.0.0");
 
-
         userAgents.forEach((k, v) -> {
-            //弃用代码枚举，使用数据库读取的方式。原因是很多人忘了写枚举  edit by yanjun 20180103
-//            if (VersionRealmType.fromCode(k) != null) {
-            if(k != null){
-                VersionRealm versionRealm = versionProvider.findVersionRealmByName(k);
-                if(versionRealm != null){
-                    context.setVersion(v);
-                    context.setVersionRealm(k);
-                    return;
-                }
+            if (VersionRealmType.fromCode(k) != null) {
+                context.setVersion(v);
+                context.setVersionRealm(k);
+                return;
             }
-
         });
     }
 

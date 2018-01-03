@@ -149,6 +149,30 @@ public enum VersionRealmType {
     ANDROID_XINWEILAI("Android_Xinweilai"),
     IOS_XINWEILAI("IOS_Xinweilai"),
 
+    ANDROID_CSHIDAI("Android_CShiDai"),
+    IOS_CSHIDAI("iOS_CShiDai"),
+    ANDROID_DASHAHEJIANTOU("Android_DaShaHeJianTou"),
+    IOS_DASHAHEJIANTOU("iOS_DaShaHeJianTou"),
+    ANDROID_TEFAXINXIGANG("Android_TeFaXinXiGang"),
+    IOS_TEFAXINXIGANG("iOS_TeFaXinXiGang"),
+    ANDROID_LUFU("Android_LuFu"),
+    IOS_LUFU("iOS_LuFu"),
+    ANDROID_ZHIFUHUI("Android_ZhiFuHui"),
+    IOS_ZHIFUHUI("iOS_ZhiFuHui"),
+    ANDROID_QIDIPARK("Android_QiDiPark"),
+    IOS_QIDIPARK("iOS_QiDiPark"),
+    ANDROID_GUANGXINGYUANPARK("Android_GuangXingYuanPark"),
+    IOS_GUANGXINGYUANPARK("IOS_GuangXingYuanPark"),
+    ANDROID_HANGZHOUYUESPACE("Android_HangZhouYueSpace"),
+    IOS_HANGZHOUYUESPACE("iOS_HangZhouYueSpace"),
+    ANDROID_ELIVECORE("Android_ELiveCore"),
+    IOS_ELIVECORE("iOS_ELiveCore"),
+    ANDROID_CHUANGYECHANG("Android_ChuangYeChang"),
+    iOS_ChuangYeChang("iOS_ChuangYeChang"),
+    ANDROID_QIDIXIANGSHAN("Android_QiDiXiangShan"),
+    IOS_QIDIXIANGSHAN("IOS_QiDiXiangShan"),
+    ANDROID_WANZHIHUI("Android_WanZhiHui"),
+    IOS_WANZHIHUI("iOS_WanZhiHui")
     ;
 
     private String code;

@@ -20,6 +20,7 @@ import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
 import javax.validation.Valid;
 
+import com.everhomes.rest.version.VersionRealmType;
 import org.apache.commons.lang.StringUtils;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -970,5 +971,27 @@ public class AdminController extends ControllerBase {
         response.setErrorDescription("OK");
         return response;
     }
-    
+
+
+
+    /**
+     *
+     * 生成代码VersionRealmType枚举值
+     * @return
+     */
+    @RequestMapping("listVersionRealmTypeInCodeEnum")
+    @RestReturn(Map.class)
+    public RestResponse listVersionRealmTypeInCodeEnum() {
+        SystemUserPrivilegeMgr resolver = PlatformContext.getComponent("SystemUser");
+        resolver.checkUserPrivilege(UserContext.current().getUser().getId(), 0);
+        Map map = new HashMap<String, String>();
+        for (VersionRealmType versionRealmType: VersionRealmType.values()){
+            map.put(versionRealmType.name(), versionRealmType.getCode());
+        }
+        RestResponse response = new RestResponse(map);
+        response.setErrorCode(ErrorCodes.SUCCESS);
+        response.setErrorDescription("OK");
+        return response;
+    }
+
 }
