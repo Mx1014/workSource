@@ -27,6 +27,7 @@ import com.everhomes.server.schema.tables.pojos.EhSocialSecurityPayments;
 import com.everhomes.server.schema.tables.pojos.EhSocialSecuritySettings;
 import com.everhomes.util.ConvertHelper;
 import com.everhomes.util.DateHelper;
+import com.everhomes.util.IntegerUtil;
 import com.everhomes.util.RuntimeErrorException;
 import com.everhomes.util.excel.RowResult;
 import com.everhomes.util.excel.handler.PropMrgOwnerHandler;
@@ -47,6 +48,7 @@ import org.springframework.web.multipart.MultipartFile;
 
 import java.io.IOException;
 import java.math.BigDecimal;
+import java.sql.Timestamp;
 import java.text.ParseException;
 import java.text.SimpleDateFormat;
 import java.util.*;
@@ -1059,6 +1061,17 @@ public class SocialSecurityServiceImpl implements SocialSecurityService {
         report.setCreateTime(userPayments.get(0).getCreateTime());
         report.setFileUid(userPayments.get(0).getFileUid());
         report.setFileTime(userPayments.get(0).getFileTime());
+        SocialSecurityEmployeeDTO dto = getSocialSecurityEmployeeInfo(detail.getOrganizationId());
+        if (dto.getDismissTime() != null && Integer.valueOf(report.getPayMonth()) >=
+                Integer.valueOf(dateSF.get().format(dto.getDismissTime()))) {
+            report.setIsWork(IsWork.IS_OUT.getCode());
+        }else{
+            if (Integer.valueOf(dateSF.get().format(dto.getCheckInTime())).equals(report.getPayMonth())) {
+                report.setIsWork(IsWork.IS_NEW.getCode());
+            } else {
+                report.setIsWork(IsWork.NORMAL.getCode());
+            }
+        }
         for (SocialSecurityPayment userPayment : userPayments) {
             report.setCreatorUid(userPayment.getCreatorUid());
             report.setCreateTime(userPayment.getCreateTime());
@@ -1788,6 +1801,8 @@ public class SocialSecurityServiceImpl implements SocialSecurityService {
     @Override
     public ListUserInoutHistoryResponse listUserInoutHistory(ListUserInoutHistoryCommand cmd) {
         // TODO: 2017/12/21 人事档案提供
+        SocialSecurityEmployeeDTO result = getSocialSecurityEmployeeInfo(cmd.getDetailId());
+
         return new ListUserInoutHistoryResponse();
     }
 
