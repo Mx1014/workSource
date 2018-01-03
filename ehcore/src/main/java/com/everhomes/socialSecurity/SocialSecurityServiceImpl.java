@@ -1804,6 +1804,11 @@ public class SocialSecurityServiceImpl implements SocialSecurityService {
 
     public SocialSecurityEmployeesCountResponse getSocialSecurityEmployeesCount(Long organizationId, Long month) {
         SocialSecurityEmployeesCountResponse response = new SocialSecurityEmployeesCountResponse();
+
+
+
+
+
         response.setSocialSecurity(2);
         response.setAccumulationFund(3);
         response.setGrowth(0);
@@ -1821,15 +1826,35 @@ public class SocialSecurityServiceImpl implements SocialSecurityService {
         inoutTime.setUserId(memberDetail.getTargetId());
         inoutTime.setDetailId(memberDetail.getId());
         inoutTime.setType(cmd.getInOutType());
-        if(cmd.getStartTime() != null)
-            inoutTime.setStartTime(ArchivesUtil.parseDate(cmd.getStartTime()));
-        if(cmd.getEndTime() != null)
-            inoutTime.setEndTime(ArchivesUtil.parseDate(cmd.getEndTime()));
+        if(cmd.getStartMonth() != null)
+            inoutTime.setStartMonth(cmd.getStartMonth());
+        if(cmd.getEndMonth() != null)
+            inoutTime.setEndMonth(cmd.getEndMonth());
+
         socialSecurityInoutTimeProvider.createSocialSecurityInoutTime(inoutTime);
+        newSocialSecurityEmployee(cmd.getDetailId(), cmd.getStartMonth());
 
         //  return back.
         SocialSecurityInoutTimeDTO dto = ConvertHelper.convert(inoutTime, SocialSecurityInoutTimeDTO.class);
         dto.setInOutType(inoutTime.getType());
         return dto;
+    }
+
+    public SocialSecurityEmployeeDTO getSocialSecurityEmployeeInfo(Long detailId){
+        SocialSecurityEmployeeDTO dto = new SocialSecurityEmployeeDTO();
+
+        OrganizationMemberDetails memberDetail = organizationProvider.findOrganizationMemberDetailsByDetailId(detailId);
+        if(memberDetail != null){
+            dto.setDetailId(memberDetail.getId());
+            dto.setUserId(memberDetail.getTargetId());
+            dto.setCheckInTime(memberDetail.getCheckInTime());
+            dto.setDismissTime(memberDetail.getDismissTime());
+
+            SocialSecurityInoutTime social = socialSecurityInoutTimeProvider.getSocialSecurityInoutTimeByDetailId(InOutType.SOCIAL_SECURITY.getCode(), detailId);
+
+        }
+
+        return dto;
+
     }
 }
