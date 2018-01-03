@@ -156,9 +156,9 @@ VALUES ((@eh_service_module_privileges_id := @eh_service_module_privileges_id + 
 
 
 INSERT INTO `eh_web_menus` (`id`, `name`, `parent_id`, `icon_url`, `data_type`, `leaf_flag`, `status`, `path`, `type`, `sort_num`, `module_id`, `level`, `condition_type`, `category`)
-VALUES (5200000, '积分系统', 5000000, NULL, 'integral-management', 0, 2, '/5000000/5200000', 'zuolin', 10, 47000, 2, 'namespace', 'module');
+VALUES (5500000, '积分系统', 5000000, NULL, 'integral-management', 0, 2, '/5000000/5500000', 'zuolin', 10, 47000, 2, 'namespace', 'module');
 INSERT INTO `eh_web_menus` (`id`, `name`, `parent_id`, `icon_url`, `data_type`, `leaf_flag`, `status`, `path`, `type`, `sort_num`, `module_id`, `level`, `condition_type`, `category`)
-VALUES (5210000, '积分系统', 5200000, NULL, 'integral-management', 0, 2, '/5000000/5200000/5210000', 'zuolin', 10, 47000, 2, 'namespace', 'page');
+VALUES (5510000, '积分系统', 5500000, NULL, 'integral-management', 0, 2, '/5000000/5500000/5510000', 'zuolin', 10, 47000, 2, 'namespace', 'page');
 
 # INSERT INTO `eh_web_menus` (`id`, `name`, `parent_id`, `icon_url`, `data_type`, `leaf_flag`, `status`, `path`, `type`, `sort_num`, `module_id`, `level`, `condition_type`, `category`)
 # VALUES (1200000, '短信管理', 1000000, NULL, 'sms-management', 0, 2, '/1100000/1100000', 'zuolin', 10, 12200, 2, 'namespace', 'module');
