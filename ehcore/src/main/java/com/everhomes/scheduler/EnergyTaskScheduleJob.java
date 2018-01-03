@@ -36,6 +36,7 @@ import com.everhomes.user.UserProvider;
 import com.everhomes.util.ConvertHelper;
 import com.everhomes.util.DateHelper;
 import com.everhomes.util.ExecutorUtil;
+import com.everhomes.util.StringHelper;
 import com.google.gson.Gson;
 import com.google.gson.reflect.TypeToken;
 import org.quartz.JobExecutionContext;
@@ -281,9 +282,11 @@ public class EnergyTaskScheduleJob extends QuartzJobBean {
         if(addresses != null && addresses.size() > 0) {
             BigDecimal amount = calculateAmount(task, meter);
             EnergyMeterAddress address = addresses.get(0);
+            LOGGER.debug("EnergyMeterAddress: {}", StringHelper.toJsonString(address));
             //eh_contract_charging_item_addresses
             Timestamp endDate = getEndDate(task.getExecutiveExpireTime(), task.getExecutiveStartTime());
             List<ContractChargingItemAddress> contractChargingItemAddresses = contractChargingItemAddressProvider.findByAddressId(address.getAddressId(), meter.getMeterType(), task.getExecutiveStartTime(), endDate);
+            LOGGER.debug("EnergyMeterAddress contract properties: {}", StringHelper.toJsonString(contractChargingItemAddresses));
             if(contractChargingItemAddresses != null && contractChargingItemAddresses.size() > 0) {
                 List<FeeRules> feeRules = new ArrayList<>();
                 List<Long> contractId = new ArrayList<>();
@@ -299,6 +302,7 @@ public class EnergyTaskScheduleJob extends QuartzJobBean {
                 generateFlag = true;
             } else {//门牌有没有默认计价条款、所属楼栋有没有默认计价条款、所属园区有没有默认计价条款 eh_default_charging_item_properties
                 List<DefaultChargingItemProperty> properties = defaultChargingItemProvider.findByPropertyId(DefaultChargingItemPropertyType.APARTMENT.getCode(), address.getAddressId(), meter.getMeterType());
+                LOGGER.debug("EnergyMeterAddress apartment properties: {}", StringHelper.toJsonString(properties));
                 if(properties != null) {
                     List<FeeRules> feeRules = new ArrayList<>();
                     properties.forEach(property -> {
@@ -312,6 +316,7 @@ public class EnergyTaskScheduleJob extends QuartzJobBean {
                     generateFlag = true;
                 } else {
                     properties = defaultChargingItemProvider.findByPropertyId(DefaultChargingItemPropertyType.BUILDING.getCode(), address.getBuildingId(), meter.getMeterType());
+                    LOGGER.debug("EnergyMeterAddress building properties: {}", StringHelper.toJsonString(properties));
                     if(properties != null) {
                         List<FeeRules> feeRules = new ArrayList<>();
                         properties.forEach(property -> {
@@ -324,7 +329,8 @@ public class EnergyTaskScheduleJob extends QuartzJobBean {
                         paymentExpectancies_re_struct(task, address, feeRules, null);
                         generateFlag = true;
                     } else {
-                        properties = defaultChargingItemProvider.findByPropertyId(DefaultChargingItemPropertyType.BUILDING.getCode(), meter.getCommunityId(), meter.getMeterType());
+                        properties = defaultChargingItemProvider.findByPropertyId(DefaultChargingItemPropertyType.COMMUNITY.getCode(), meter.getCommunityId(), meter.getMeterType());
+                        LOGGER.debug("EnergyMeterAddress contract properties: {}", StringHelper.toJsonString(contractChargingItemAddresses));
                         if(properties != null) {
                             List<FeeRules> feeRules = new ArrayList<>();
                             properties.forEach(property -> {
