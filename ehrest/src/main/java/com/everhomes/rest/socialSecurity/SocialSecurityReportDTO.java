@@ -95,6 +95,7 @@ import com.everhomes.util.StringHelper;
  * <li>commercialInsurance:商业保险</li>
  * <li>fileUid:归档人</li>
  * <li>fileTime:归档时间</li>
+ * <li>isWork:归档时间</li>
  * </ul>
  */
 public class SocialSecurityReportDTO {
@@ -189,6 +190,8 @@ public class SocialSecurityReportDTO {
 	private BigDecimal commercialInsurance;
 	private Long fileUid;
 	private Long fileTime;
+	private Byte isWork;
+
 
 	@Override
 	public String toString() {
@@ -921,5 +924,13 @@ public class SocialSecurityReportDTO {
 
 	public void setAfterAccumulationFundEmployeeSum(BigDecimal afterAccumulationFundEmployeeSum) {
 		this.afterAccumulationFundEmployeeSum = afterAccumulationFundEmployeeSum;
+	}
+
+	public Byte getIsWork() {
+		return isWork;
+	}
+
+	public void setIsWork(Byte isWork) {
+		this.isWork = isWork;
 	}
 }
