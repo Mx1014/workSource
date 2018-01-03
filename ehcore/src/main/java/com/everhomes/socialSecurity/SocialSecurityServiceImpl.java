@@ -219,12 +219,13 @@ public class SocialSecurityServiceImpl implements SocialSecurityService {
     private void addNewMonthPayments(String paymentMonth, Long ownerId) {
         //把属于该公司的所有要交社保的setting取出来
         //todo : 本月要交社保的人
-        Set<Long> detailIds;
-        List<OrganizationMemberDetails> details = organizationProvider.listOrganizationMemberDetails(ownerId);
-        if (null == details) {
-            return;
-        }
-        detailIds = details.stream().map(r -> r.getId()).collect(Collectors.toSet());
+        Set<Long> detailIds = new HashSet<>();
+        detailIds.addAll(listSocialSecurityEmployeeDetailIdsByPayMonth(ownerId,paymentMonth));
+//        List<OrganizationMemberDetails> details = organizationProvider.listOrganizationMemberDetails(ownerId);
+//        if (null == details) {
+//            return;
+//        }
+//        detailIds = details.stream().map(r -> r.getId()).collect(Collectors.toSet());
         createPayments(detailIds, paymentMonth);
     }
 
