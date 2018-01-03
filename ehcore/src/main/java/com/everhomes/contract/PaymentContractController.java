@@ -59,6 +59,7 @@ public class PaymentContractController extends ControllerBase {
     @RequestMapping("deletePaymentContract")
     @RestReturn(String.class)
     public RestResponse deletePaymentContract(DeleteContractCommand cmd){
+        cmd.setPaymentFlag((byte)1);
         getContractService().deleteContract(cmd);
         return new RestResponse();
     }
@@ -70,6 +71,7 @@ public class PaymentContractController extends ControllerBase {
     @RequestMapping("denunciationContract")
     @RestReturn(String.class)
     public RestResponse denunciationContract(DenunciationContractCommand cmd){
+        cmd.setPaymentFlag((byte)1);
         getContractService().denunciationContract(cmd);
         return new RestResponse();
     }
@@ -92,6 +94,7 @@ public class PaymentContractController extends ControllerBase {
     @RequestMapping("reviewContract")
     @RestReturn(String.class)
     public RestResponse reviewContract(ReviewContractCommand cmd){
+        cmd.setPaymentFlag((byte)1);
         getContractService().reviewContract(cmd);
         return new RestResponse();
     }
