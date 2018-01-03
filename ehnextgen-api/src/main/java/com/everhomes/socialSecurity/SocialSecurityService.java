@@ -81,4 +81,6 @@ interface SocialSecurityService {
 	GetSocialSecurityReportsHeadResponse getSocialSecurityReportsHead(GetSocialSecurityReportsHeadCommand cmd);
 
 	SocialSecurityEmployeesCountResponse getSocialSecurityEmployeesCount(Long organizationId, Long month);
+
+	SocialSecurityEmployeeDTO getSocialSecurityEmployeeInfo(Long detailId);
 }

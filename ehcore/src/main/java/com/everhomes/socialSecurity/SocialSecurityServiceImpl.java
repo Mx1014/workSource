@@ -1876,6 +1876,7 @@ public class SocialSecurityServiceImpl implements SocialSecurityService {
         return dto;
     }
 
+    @Override
     public SocialSecurityEmployeeDTO getSocialSecurityEmployeeInfo(Long detailId){
         SocialSecurityEmployeeDTO dto = new SocialSecurityEmployeeDTO();
 
