@@ -43,7 +43,7 @@ public interface EquipmentProvider {
 	void updateEquipmentTask(EquipmentInspectionTasks task);
 	
 	void createEquipmentInspectionTasksLogs(EquipmentInspectionTasksLogs log);
-	List<EquipmentInspectionTasksLogs> listLogsByTaskId(ListingLocator locator, int count, Long taskId, List<Byte> processType);
+	List<EquipmentInspectionTasksLogs> listLogsByTaskId(ListingLocator locator, int count, Long taskId, List<Byte> processType,Long equipmentId);
 	void createEquipmentInspectionTasksAttachment(EquipmentInspectionTasksAttachments attachment);
 	List<EquipmentInspectionTasksAttachments> listTaskAttachmentsByLogId(Long logId);
 	
@@ -199,4 +199,6 @@ public interface EquipmentProvider {
     List<EquipmentInspectionPlanGroupMap> listEquipmentInspectionPlanGroupMapByGroupAndPosition(List<ExecuteGroupAndPosition> groupDtos, List<ExecuteGroupAndPosition> reviewGroups);
 
 	List<EquipmentInspectionTasks> listTasksByPlanId(Long planId, CrossShardListingLocator locator, int pageSize);
+
+    List<EquipmentInspectionStandardGroupMap> listEquipmentInspectionStandardGroupMapByStandardId(Long id);
 }

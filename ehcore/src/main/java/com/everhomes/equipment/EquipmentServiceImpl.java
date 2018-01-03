@@ -1934,7 +1934,7 @@ private void checkUserPrivilege(Long orgId, Long privilegeId, Long communityId) 
 //						result.setStandardId(task.getStandardId());
 //						result.setEquipmentId(task.getEquipmentId());
 						//这里因为一个任务对应多个设备了 需要增加设备id来确定log是哪个设备的  之前是通过taskid确认因为一对一
-						result.setEquipmentId(cmd.getEquipmentTaskReportDetails().get(i).getTargetId());
+						result.setEquipmentId(cmd.getEquipmentTaskReportDetails().get(i).getEquipmentId());
 						result.setInspectionCategoryId(task.getInspectionCategoryId());
 						result.setNamespaceId(task.getNamespaceId());
 						equipmentProvider.createEquipmentInspectionItemResults(result);
@@ -2782,15 +2782,15 @@ private void checkUserPrivilege(Long orgId, Long privilegeId, Long communityId) 
 	}
 
 	@Override
-	public ListLogsByTaskIdResponse listLogsByTaskId(
-			ListLogsByTaskIdCommand cmd) {
+	public ListLogsByTaskIdResponse listLogsByTaskId(ListLogsByTaskIdCommand cmd) {
 		EquipmentInspectionTasks task = verifyEquipmentTask(cmd.getTaskId(), cmd.getOwnerType(), cmd.getOwnerId());
 
 		CrossShardListingLocator locator = new CrossShardListingLocator();
         locator.setAnchor(cmd.getPageAnchor());
         int pageSize = PaginationConfigHelper.getPageSize(configurationProvider, cmd.getPageSize());
         //根据任务id取出所有待执行和待维修的任务log
-		List<EquipmentInspectionTasksLogs> logs = equipmentProvider.listLogsByTaskId(locator, pageSize + 1, task.getId(), cmd.getProcessType());
+		List<EquipmentInspectionTasksLogs> logs = equipmentProvider.listLogsByTaskId(locator, pageSize + 1,
+				task.getId(), cmd.getProcessType(),cmd.getEquipmentId());
 
 		ListLogsByTaskIdResponse response = new ListLogsByTaskIdResponse();
 		if(null == logs) {
@@ -5671,5 +5671,44 @@ private void checkUserPrivilege(Long orgId, Long privilegeId, Long communityId) 
 			return getEquipmmentInspectionPlanById(delcmd).getEquipmentStandardRelations();
 		}
 		return null;
+	}
+
+	@Override
+	public void syscStandardToEqiupmentPlan() {
+		Integer pageSize = 200;
+		CrossShardListingLocator locator = new CrossShardListingLocator();
+		List<EquipmentStandardMap> maps = equipmentProvider.listEquipmentStandardMap(locator, pageSize);
+		Integer nameSpaceId = 0;
+		EquipmentInspectionEquipments equipment = new EquipmentInspectionEquipments();
+		EquipmentInspectionStandards standards = new EquipmentInspectionStandards();
+		List<EquipmentInspectionStandardGroupMap> groupMaps = new ArrayList<>();
+
+		for (EquipmentStandardMap map : maps) {
+			equipment = equipmentProvider.findEquipmentById(map.getTargetId());
+			standards = equipmentProvider.findStandardById(map.getStandardId());
+			EquipmentInspectionPlans plan = new EquipmentInspectionPlans();
+			if (equipment != null) {
+				nameSpaceId = equipment.getNamespaceId();
+				plan.setName(equipment.getName());
+			}
+			plan.setNamespaceId(nameSpaceId);
+			plan.setStatus(EquipmentPlanStatus.QUALIFIED.getCode());
+			plan.setPlanType(standards.getStandardType());
+			plan.setTargetId(standards.getTargetId());
+			plan.setTargetType(standards.getTargetType());
+			plan.setRepeatSettingId(standards.getRepeatSettingId());
+			equipmentProvider.createEquipmentInspectionPlans(plan);
+
+			groupMaps = equipmentProvider.listEquipmentInspectionStandardGroupMapByStandardId(standards.getId());
+			EquipmentInspectionPlanGroupMap planGroupMap = new EquipmentInspectionPlanGroupMap();
+			groupMaps.forEach((m) -> {
+				planGroupMap.setPlanId(plan.getId());
+				planGroupMap.setCreateTime(m.getCreateTime());
+				planGroupMap.setGroupId(m.getGroupId());
+				planGroupMap.setGroupType(m.getGroupType());
+				planGroupMap.setPositionId(m.getPositionId());
+				equipmentProvider.createEquipmentInspectionPlanGroupMap(planGroupMap);
+			});
+		}
 	}
 }

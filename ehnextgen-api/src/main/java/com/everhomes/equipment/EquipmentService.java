@@ -106,4 +106,6 @@ public interface EquipmentService {
 	void createTaskByPlan(DeleteEquipmentPlanCommand cmd);
 
     List<EquipmentStandardRelationDTO> listEquipmentStandardRelationsByTaskId(ListTaskByIdCommand cmd);
+
+    void syscStandardToEqiupmentPlan();
 }

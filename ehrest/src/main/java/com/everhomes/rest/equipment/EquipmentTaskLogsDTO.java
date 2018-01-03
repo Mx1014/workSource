@@ -21,8 +21,6 @@ import java.util.List;
  *  <li>processEndTime: 操作截止时间</li>
  *  <li>processResult: 操作结果 参考{@link com.everhomes.rest.equipment.EquipmentTaskProcessResult}</li>
  *  <li>processMessage: 操作内容</li>
- *  <li>templateId: 模板id</li>
- *  <li>templateName: 模板名称</li>
  *  <li>itemResults: 设备参数 参考{@link com.everhomes.rest.equipment.InspectionItemResult}</li>
  *  <li>createTime: 创建时间</li>
  *  <li>attachments: 附件， 参考{@link com.everhomes.rest.equipment.EquipmentTaskAttachmentDTO}</li>
@@ -57,9 +55,10 @@ public class EquipmentTaskLogsDTO {
 	private Byte processResult;
 	
 	private String processMessage;
-	
+
+	@Deprecated
 	private Long templateId;
-	
+	@Deprecated
 	private String templateName;
 
 	private String 	equipmentName;
