@@ -282,11 +282,9 @@ public class EnergyTaskScheduleJob extends QuartzJobBean {
         if(addresses != null && addresses.size() > 0) {
             BigDecimal amount = calculateAmount(task, meter);
             EnergyMeterAddress address = addresses.get(0);
-            LOGGER.debug("EnergyMeterAddress: {}", StringHelper.toJsonString(address));
             //eh_contract_charging_item_addresses
             Timestamp endDate = getEndDate(task.getExecutiveExpireTime(), task.getExecutiveStartTime());
             List<ContractChargingItemAddress> contractChargingItemAddresses = contractChargingItemAddressProvider.findByAddressId(address.getAddressId(), meter.getMeterType(), task.getExecutiveStartTime(), endDate);
-            LOGGER.debug("EnergyMeterAddress contract properties: {}", StringHelper.toJsonString(contractChargingItemAddresses));
             if(contractChargingItemAddresses != null && contractChargingItemAddresses.size() > 0) {
                 List<FeeRules> feeRules = new ArrayList<>();
                 List<Long> contractId = new ArrayList<>();
@@ -302,7 +300,6 @@ public class EnergyTaskScheduleJob extends QuartzJobBean {
                 generateFlag = true;
             } else {//门牌有没有默认计价条款、所属楼栋有没有默认计价条款、所属园区有没有默认计价条款 eh_default_charging_item_properties
                 List<DefaultChargingItemProperty> properties = defaultChargingItemProvider.findByPropertyId(DefaultChargingItemPropertyType.APARTMENT.getCode(), address.getAddressId(), meter.getMeterType());
-                LOGGER.debug("EnergyMeterAddress apartment properties: {}", StringHelper.toJsonString(properties));
                 if(properties != null && properties.size() > 0) {
                     List<FeeRules> feeRules = new ArrayList<>();
                     properties.forEach(property -> {
@@ -316,7 +313,6 @@ public class EnergyTaskScheduleJob extends QuartzJobBean {
                     generateFlag = true;
                 } else {
                     properties = defaultChargingItemProvider.findByPropertyId(DefaultChargingItemPropertyType.BUILDING.getCode(), address.getBuildingId(), meter.getMeterType());
-                    LOGGER.debug("EnergyMeterAddress building properties: {}", StringHelper.toJsonString(properties));
                     if(properties != null && properties.size() > 0) {
                         List<FeeRules> feeRules = new ArrayList<>();
                         properties.forEach(property -> {
@@ -330,7 +326,6 @@ public class EnergyTaskScheduleJob extends QuartzJobBean {
                         generateFlag = true;
                     } else {
                         properties = defaultChargingItemProvider.findByPropertyId(DefaultChargingItemPropertyType.COMMUNITY.getCode(), meter.getCommunityId(), meter.getMeterType());
-                        LOGGER.debug("EnergyMeterAddress contract properties: {}", StringHelper.toJsonString(contractChargingItemAddresses));
                         if(properties != null && properties.size() > 0) {
                             List<FeeRules> feeRules = new ArrayList<>();
                             properties.forEach(property -> {
@@ -373,6 +368,7 @@ public class EnergyTaskScheduleJob extends QuartzJobBean {
 //      没合同时  eh_organization_owner_address eh_organization_addresses
         if(command.getContractIdType() == 0) {
             OrganizationAddress organizationAddress = organizationProvider.findActiveOrganizationAddressByAddressId(address.getAddressId());
+            LOGGER.debug("paymentExpectancies_re_struct organizationAddress: {}", StringHelper.toJsonString(organizationAddress));
             if(organizationAddress != null) {
                 command.setTargetType("eh_organization");
                 command.setTargetId(organizationAddress.getOrganizationId());
@@ -380,15 +376,24 @@ public class EnergyTaskScheduleJob extends QuartzJobBean {
                 command.setTargetName(detail.getDisplayName());
                 command.setNoticeTel(detail.getContact());
             } else {
-                List<CommunityPmOwner> pmOwners = propertyMgrProvider.listCommunityPmOwners(task.getTargetId(), address.getAddressId());
-                if(pmOwners != null && pmOwners.size() > 0) {
+                List<OrganizationOwnerAddress> addresses = propertyMgrProvider.listOrganizationOwnerAuthAddressByAddressId(task.getNamespaceId(), address.getAddressId());
+                LOGGER.debug("paymentExpectancies_re_struct organizationAddress: {}", StringHelper.toJsonString(addresses));
+                if(addresses != null && addresses.size() > 0) {
                     command.setTargetType("eh_user");
-                    command.setTargetName(pmOwners.get(0).getContactName());
-                    command.setNoticeTel(pmOwners.get(0).getContactToken());
-                    UserIdentifier identifier = userProvider.findClaimedIdentifierByToken(pmOwners.get(0).getNamespaceId(), pmOwners.get(0).getContactToken());
-                    if(identifier != null) {
-                        command.setTargetId(identifier.getOwnerUid());
+                    for(OrganizationOwnerAddress ownerAddress : addresses) {
+                        CommunityPmOwner pmOwner = propertyMgrProvider.findPropOwnerById(ownerAddress.getOrganizationOwnerId());
+                        if(pmOwner != null) {
+                            command.setTargetName(pmOwner.getContactName());
+                            command.setNoticeTel(pmOwner.getContactToken());
+                            UserIdentifier identifier = userProvider.findClaimedIdentifierByToken(pmOwner.getNamespaceId(), pmOwner.getContactToken());
+                            if(identifier != null) {
+                                command.setTargetId(identifier.getOwnerUid());
+                                break ;
+                            }
+                        }
+
                     }
+
                 }
             }
         } else {
