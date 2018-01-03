@@ -1009,14 +1009,14 @@ private void checkUserPrivilege(Long orgId, Long privilegeId, Long communityId) 
 
 		if (EquipmentPlanStatus.WATTING_FOR_APPOVING.equals(EquipmentPlanStatus.fromStatus(plan.getStatus()))) {
 			plan.setStatus(cmd.getReviewResult());
-			plan.setPlanMainId(0L);
+			//plan.setPlanMainId(0L);
 			equipmentProvider.updateEquipmentInspectionPlan(plan);
 			equipmentPlanSearcher.feedDoc(plan);
-			//处理原始计划和main_id
-			if (plan.getPlanMainId() != null && plan.getPlanMainId() != 0L){
-				equipmentProvider.deleteEquipmentInspectionPlanMap(plan.getPlanMainId());
-				equipmentProvider.deleteEquipmentInspectionPlanById(plan.getPlanMainId());
-			}
+//			//处理原始计划和main_id
+//			if (plan.getPlanMainId() != null && plan.getPlanMainId() != 0L){
+//				equipmentProvider.deleteEquipmentInspectionPlanMap(plan.getPlanMainId());
+//				equipmentProvider.deleteEquipmentInspectionPlanById(plan.getPlanMainId());
+//			}
 		}
 	}
 
@@ -1851,7 +1851,6 @@ private void checkUserPrivilege(Long orgId, Long privilegeId, Long communityId) 
 				task.setReviewExpiredDate(addDays(now, plan.getReviewExpiredDays()));
 			}
 
-
 			EquipmentInspectionTasksLogs log = new EquipmentInspectionTasksLogs();
 			log.setTaskId(task.getId());
 			log.setOperatorType(OwnerType.USER.getCode());
@@ -1921,6 +1920,8 @@ private void checkUserPrivilege(Long orgId, Long privilegeId, Long communityId) 
 				if (cmd.getEquipmentTaskReportDetails().get(i).getMessage() != null) {
 					log.setProcessMessage(cmd.getEquipmentTaskReportDetails().get(i).getMessage());
 				}
+				//任务多设备log表增加设备id
+				log.setEquipmentId(cmd.getEquipmentTaskReportDetails().get(i).getEquipmentId());
 				dto = updateEquipmentTasksAttachmentAndLogs(task, log, cmd.getEquipmentTaskReportDetails().get(i).getAttachments());
 
 				List<InspectionItemResult> itemResults = cmd.getEquipmentTaskReportDetails().get(i).getItemResults();
@@ -1930,8 +1931,10 @@ private void checkUserPrivilege(Long orgId, Long privilegeId, Long communityId) 
 						EquipmentInspectionItemResults result = ConvertHelper.convert(itemResult, EquipmentInspectionItemResults.class);
 						result.setTaskLogId(log.getId());
 						result.setCommunityId(task.getTargetId());
-						result.setStandardId(task.getStandardId());
-						result.setEquipmentId(task.getEquipmentId());
+//						result.setStandardId(task.getStandardId());
+//						result.setEquipmentId(task.getEquipmentId());
+						//这里因为一个任务对应多个设备了 需要增加设备id来确定log是哪个设备的  之前是通过taskid确认因为一对一
+						result.setEquipmentId(cmd.getEquipmentTaskReportDetails().get(i).getTargetId());
 						result.setInspectionCategoryId(task.getInspectionCategoryId());
 						result.setNamespaceId(task.getNamespaceId());
 						equipmentProvider.createEquipmentInspectionItemResults(result);
@@ -2786,6 +2789,7 @@ private void checkUserPrivilege(Long orgId, Long privilegeId, Long communityId) 
 		CrossShardListingLocator locator = new CrossShardListingLocator();
         locator.setAnchor(cmd.getPageAnchor());
         int pageSize = PaginationConfigHelper.getPageSize(configurationProvider, cmd.getPageSize());
+        //根据任务id取出所有待执行和待维修的任务log
 		List<EquipmentInspectionTasksLogs> logs = equipmentProvider.listLogsByTaskId(locator, pageSize + 1, task.getId(), cmd.getProcessType());
 
 		ListLogsByTaskIdResponse response = new ListLogsByTaskIdResponse();
@@ -2803,6 +2807,7 @@ private void checkUserPrivilege(Long orgId, Long privilegeId, Long communityId) 
 
         response.setNextPageAnchor(nextPageAnchor);
 
+        //兼容之前的通过标准来拿任务类型
 		EquipmentInspectionPlans plan = equipmentProvider.getEquipmmentInspectionPlanById(task.getPlanId());
 		if(plan != null) {
 			response.setTaskType(plan.getPlanType());
@@ -2819,12 +2824,12 @@ private void checkUserPrivilege(Long orgId, Long privilegeId, Long communityId) 
         	List<EquipmentInspectionItemResults> itemResults = equipmentProvider.findEquipmentInspectionItemResultsByLogId(dto.getId());
 
         	List<InspectionItemResult> results = new ArrayList<InspectionItemResult>();
-        	if(itemResults != null && itemResults.size() > 0) {
-        		results = itemResults.stream().map(result -> {
-        			return ConvertHelper.convert(result, InspectionItemResult.class);
-        		}).collect(Collectors.toList());
+			if (itemResults != null && itemResults.size() > 0) {
+				results = itemResults.stream()
+						.map(result -> ConvertHelper.convert(result, InspectionItemResult.class))
+						.collect(Collectors.toList());
 				EquipmentInspectionEquipments equipment = equipmentProvider.findEquipmentById(itemResults.get(0).getEquipmentId());
-				if(equipment!=null)
+				if (equipment != null)
 				dto.setEquipmentName(equipment.getName());
 			}
 			dto.setItemResults(results);
@@ -5265,6 +5270,7 @@ private void checkUserPrivilege(Long orgId, Long privilegeId, Long communityId) 
 			createdPlan.setEquipmentStandardRelations(equipmentStandardRelation);
 		//巡检计划增加审批和执行人员
 		List<StandardGroupDTO> groupList = cmd.getGroupList();
+		equipmentProvider.deleteEquipmentInspectionPlanGroupMapByPlanId(plan.getId());
 		processPlanGroups(groupList, createdPlan);
 
 		return ConvertHelper.convert(createdPlan, EquipmentInspectionPlanDTO.class);
@@ -5273,7 +5279,6 @@ private void checkUserPrivilege(Long orgId, Long privilegeId, Long communityId) 
 	private void processPlanGroups(List<StandardGroupDTO> groupList, EquipmentInspectionPlans plan) {
 		List<EquipmentInspectionPlanGroupMap> executiveGroup = null;
 		List<EquipmentInspectionPlanGroupMap> reviewGroup = null;
-		this.equipmentProvider.deleteEquipmentInspectionPlanGroupMapByPlanId(plan.getId());
 
 		if (groupList != null && groupList.size() > 0) {
 			executiveGroup = new ArrayList<>();
@@ -5320,23 +5325,10 @@ private void checkUserPrivilege(Long orgId, Long privilegeId, Long communityId) 
 		RepeatSettings repeatSettings = plan.getRepeatSettings();
 		repeatService.createRepeatSettings(repeatSettings);
 		plan.setRepeatSettingId(repeatSettings.getId());
+		//plan.setPlanMainId(exist.getPlanMainId());
 
-		//需要记录update的plan的 mainId 在新的plans审批通过后删除mainId的plan
-		if (exist.getPlanMainId() == null) {
-			//mainId为空则创建副本 副本最多只有一份
-			plan.setPlanMainId(cmd.getId());
-			plan.setOperatorUid(UserContext.currentUserId());
-			plan.setUpdateTime(new Timestamp(DateHelper.currentGMTTime().getTime()));
-			equipmentProvider.createEquipmentInspectionPlans(plan);
-
-		} else {
-			plan.setPlanMainId(exist.getPlanMainId());
-			plan.setCreateTime(exist.getCreateTime());
-			plan.setCreatorUid(exist.getCreatorUid());
-			equipmentProvider.updateEquipmentInspectionPlan(plan);
-		}
+		equipmentProvider.updateEquipmentInspectionPlan(plan);
 		updatePlan = plan;
-
 		//创建计划巡检对象标准关联
 		List<EquipmentStandardRelationDTO> equipmentStandardRelation = new ArrayList<>();
 		equipmentProvider.deleteEquipmentInspectionPlanMap(plan.getId());
@@ -5357,7 +5349,8 @@ private void checkUserPrivilege(Long orgId, Long privilegeId, Long communityId) 
 		}
 		//巡检计划增加审批和执行人员
 		processPlanGroups(cmd.getGroupList(), plan);
-		inActiveTaskByPlanId(plan.getId());
+		//inActive 所有关联任务当前时间节点之前任务继续   状态变成待审核
+		//inActiveTaskByPlanId(plan.getId());
 		updatePlan.setEquipmentStandardRelations(equipmentStandardRelation);
 
 		return ConvertHelper.convert(updatePlan,EquipmentInspectionPlanDTO.class);
@@ -5483,6 +5476,8 @@ private void checkUserPrivilege(Long orgId, Long privilegeId, Long communityId) 
 		equipmentProvider.deleteEquipmentInspectionPlanGroupMapByPlanId(exist.getId());
 		//删除repeatSetting  不删也可
 		repeatService.deleteRepeatSettingsById(exist.getRepeatSettingId());
+		//删除所有此计划产生的计划
+		inActiveTaskByPlanId(cmd.getId());
 	}
 
 	@Override

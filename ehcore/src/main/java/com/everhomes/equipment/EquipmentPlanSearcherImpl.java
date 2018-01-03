@@ -185,17 +185,17 @@ public class EquipmentPlanSearcherImpl extends AbstractElasticSearch implements 
             plan.setExecutionFrequency(repeatService.getExecutionFrequency(repeatSetting));
             plan.setLimitTime(repeatService.getlimitTime(repeatSetting));
 
-            //取出所有有修改过的原始计划id
-            List<Long> oldVersionPlanIds = new ArrayList<>();
-            if (plan.getPlanMainId() != null && plan.getPlanMainId() != 0L) {
-                oldVersionPlanIds.add(plan.getPlanMainId());
-            }
-            //resultSet of plan
-            plans.add(ConvertHelper.convert(plan, EquipmentInspectionPlanDTO.class));
-            // 去掉原始计划显示  显示修改之后的
-            for (Long versionId : oldVersionPlanIds) {
-                plans.removeIf(p -> p.getId().equals(versionId));
-            }
+//            //取出所有有修改过的原始计划id
+//            List<Long> oldVersionPlanIds = new ArrayList<>();
+//            if (plan.getPlanMainId() != null && plan.getPlanMainId() != 0L) {
+//                oldVersionPlanIds.add(plan.getPlanMainId());
+//            }
+//            //resultSet of plan
+//            plans.add(ConvertHelper.convert(plan, EquipmentInspectionPlanDTO.class));
+//            // 去掉原始计划显示  显示修改之后的
+//            for (Long versionId : oldVersionPlanIds) {
+//                plans.removeIf(p -> p.getId().equals(versionId));
+//            }
 
         }
         response.setEquipmentInspectionPlans(plans);
