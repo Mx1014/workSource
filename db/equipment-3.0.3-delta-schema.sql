@@ -14,7 +14,6 @@ CREATE TABLE `eh_equipment_inspection_plans` (
   `review_expired_days` int(11) NOT NULL DEFAULT '0' COMMENT 'review_expired_days',
   `repeat_setting_id` bigint(20) NOT NULL DEFAULT '0' COMMENT 'refers to eh_repeatsetting ',
   `remarks` text,
-  `plan_main_id` bigint(20) NOT NULL DEFAULT '0' COMMENT 'refer to old version plan for modifying plan',
   `creator_uid` bigint(20) NOT NULL DEFAULT '0',
   `create_time` datetime DEFAULT NULL,
   `operator_uid` bigint(20) DEFAULT NULL,
