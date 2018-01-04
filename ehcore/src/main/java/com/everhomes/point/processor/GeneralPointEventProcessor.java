@@ -46,8 +46,8 @@ public class GeneralPointEventProcessor implements IGeneralPointEventProcessor {
     @Override
     public String[] init() {
         SystemEvent[] values = SystemEvent.values();
-        String[] events = new String[values.length - 1];
-        for (int i = 0; i < events.length; i++) {
+        String[] events = new String[values.length];
+        for (int i = 0; i < values.length; i++) {
             events[i] = values[i].getCode();
         }
         return events;
