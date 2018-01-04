@@ -1410,6 +1410,7 @@ public class ContractServiceImpl implements ContractService {
 				ListEnterpriseCustomerContractsCommand command = new ListEnterpriseCustomerContractsCommand();
 				command.setNamespaceId(cmd.getNamespaceId());
 				command.setCommunityId(cmd.getCommunityId());
+				command.setStatus(cmd.getStatus());
 				command.setEnterpriseCustomerId(customer.getId());
 				return listEnterpriseCustomerContracts(command);
 			}
@@ -1434,6 +1435,7 @@ public class ContractServiceImpl implements ContractService {
 						ListIndividualCustomerContractsCommand command = new ListIndividualCustomerContractsCommand();
 						command.setNamespaceId(cmd.getNamespaceId());
 						command.setCommunityId(cmd.getCommunityId());
+						command.setStatus(cmd.getStatus());
 						command.setIndividualCustomerId(owner.getId());
 						List<ContractDTO> dtos = listIndividualCustomerContracts(command);
 						if(dtos != null && dtos.size() > 0) {
@@ -1484,7 +1486,7 @@ public class ContractServiceImpl implements ContractService {
 //			return response;
 //		}
 
-		List<Contract> contracts = contractProvider.listContractByCustomerId(cmd.getCommunityId(), cmd.getIndividualCustomerId(), CustomerType.INDIVIDUAL.getCode());
+		List<Contract> contracts = contractProvider.listContractByCustomerId(cmd.getCommunityId(), cmd.getIndividualCustomerId(), CustomerType.INDIVIDUAL.getCode(), cmd.getStatus());
 		if(contracts != null && contracts.size() > 0) {
 			return contracts.stream().map(contract -> ConvertHelper.convert(contract, ContractDTO.class)).collect(Collectors.toList());
 		}
