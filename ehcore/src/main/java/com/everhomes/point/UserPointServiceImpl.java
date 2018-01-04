@@ -47,6 +47,21 @@ public class UserPointServiceImpl implements UserPointService {
     @Autowired
     private UserActivityProvider userActivityProvider;
 
+    private static Timestamp getCurrentTime() {
+        return new Timestamp(DateHelper.currentGMTTime().getTime());
+    }
+
+    private static Timestamp getTodayStartTime() {
+        Calendar cal = Calendar.getInstance();
+        cal.set(Calendar.HOUR, 0);
+        cal.set(Calendar.SECOND, 0);
+        cal.set(Calendar.MINUTE, 0);
+        cal.set(Calendar.MILLISECOND, 0);
+        cal.set(Calendar.HOUR_OF_DAY, 0);
+        cal.setTimeZone(TimeZone.getTimeZone("GMT"));
+        return new Timestamp(cal.getTimeInMillis());
+    }
+
     @Override
     public void addPoint(AddUserPointCommand cmd) {
         assert (cmd.getPoint() != null);
@@ -59,24 +74,24 @@ public class UserPointServiceImpl implements UserPointService {
         // handle point type to validate
         try {
             switch (type) {
-            case ADDRESS_APPROVAL:
-                handleAddressPass(userScore);
-                break;
-            case APP_OPENED:
-                handOpenApp(userScore);
-                break;
-            case CREATE_TOPIC:
-            case CREATE_COMMENT:
-            case INVITED_USER:
-                handleRepeat(userScore);
-                break;
-            case AVATAR:
-                handleAvatarPass(userScore);
-                break;
-            case OTHER:
-            default:
-                LOGGER.error("cannot known");
-                break;
+                case ADDRESS_APPROVAL:
+                    handleAddressPass(userScore);
+                    break;
+                case APP_OPENED:
+                    handOpenApp(userScore);
+                    break;
+                case CREATE_TOPIC:
+                case CREATE_COMMENT:
+                case INVITED_USER:
+                    handleRepeat(userScore);
+                    break;
+                case AVATAR:
+                    handleAvatarPass(userScore);
+                    break;
+                case OTHER:
+                default:
+                    LOGGER.error("cannot known");
+                    break;
             }
         } catch (Exception e) {
             LOGGER.error("handle score error", e);
@@ -202,21 +217,6 @@ public class UserPointServiceImpl implements UserPointService {
             userProvider.updateUser(user);
             return status;
         });
-    }
-
-    private static Timestamp getCurrentTime() {
-        return new Timestamp(DateHelper.currentGMTTime().getTime());
-    }
-
-    private static Timestamp getTodayStartTime() {
-        Calendar cal = Calendar.getInstance();
-        cal.set(Calendar.HOUR, 0);
-        cal.set(Calendar.SECOND, 0);
-        cal.set(Calendar.MINUTE, 0);
-        cal.set(Calendar.MILLISECOND, 0);
-        cal.set(Calendar.HOUR_OF_DAY, 0);
-        cal.setTimeZone(TimeZone.getTimeZone("GMT"));
-        return new Timestamp(cal.getTimeInMillis());
     }
 
     @Override

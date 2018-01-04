@@ -30,6 +30,7 @@ public class ListPointLogsCommand {
 
     private Long userId;
     private Byte arithmeticType;
+    private Byte operatorType;
     private Long pageAnchor;
     private Integer pageSize;
 
@@ -103,6 +104,14 @@ public class ListPointLogsCommand {
 
     public void setEventName(String eventName) {
         this.eventName = eventName;
+    }
+
+    public Byte getOperatorType() {
+        return operatorType;
+    }
+
+    public void setOperatorType(Byte operatorType) {
+        this.operatorType = operatorType;
     }
 
     @Override

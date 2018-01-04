@@ -34,6 +34,21 @@ import com.everhomes.rest.forum.PostContentType;
 import com.everhomes.server.schema.tables.pojos.EhForumPosts;
 import com.everhomes.user.User;
 import com.everhomes.user.UserContext;
+import com.everhomes.util.*;
+import org.apache.commons.collections.CollectionUtils;
+import org.apache.commons.lang.StringUtils;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
+import org.springframework.beans.BeanUtils;
+import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.stereotype.Component;
+
+import java.sql.Timestamp;
+import java.text.SimpleDateFormat;
+import java.util.ArrayList;
+import java.util.Date;
+import java.util.List;
+import java.util.stream.Collectors;
 import com.everhomes.util.ConvertHelper;
 import com.everhomes.util.DateHelper;
 import com.everhomes.util.RuntimeErrorException;
@@ -244,8 +259,12 @@ public class PollServiceImpl implements PollService {
 
             event.setEntityType(EhForumPosts.class.getSimpleName());
             event.setEntityId(post.getId());
+            Long embeddedAppId = post.getEmbeddedAppId() != null ? post.getEmbeddedAppId() : 0;
             event.setEventName(SystemEvent.FORUM_POST_VOTE.suffix(
-                    post.getContentCategory(), post.getModuleType(), post.getModuleCategoryId()));
+                    post.getModuleType(), post.getModuleCategoryId(), embeddedAppId));
+
+            event.addParam("embeddedAppId", String.valueOf(embeddedAppId));
+            event.addParam("post", StringHelper.toJsonString(post));
         });
     }
 
@@ -472,7 +491,7 @@ public class PollServiceImpl implements PollService {
         return false;
 
     }
-    
+
     private static Date convert(String time,String format){
         SimpleDateFormat f=new SimpleDateFormat(format);
         try {

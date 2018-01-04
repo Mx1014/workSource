@@ -10,9 +10,9 @@ import com.everhomes.listing.ListingQueryBuilderCallback;
 import com.everhomes.naming.NameMapper;
 import com.everhomes.sequence.SequenceProvider;
 import com.everhomes.server.schema.Tables;
-import com.everhomes.server.schema.tables.records.EhPointRuleConfigsRecord;
 import com.everhomes.server.schema.tables.daos.EhPointRuleConfigsDao;
 import com.everhomes.server.schema.tables.pojos.EhPointRuleConfigs;
+import com.everhomes.server.schema.tables.records.EhPointRuleConfigsRecord;
 import com.everhomes.util.ConvertHelper;
 import com.everhomes.util.DateUtils;
 import org.jooq.DSLContext;
@@ -25,29 +25,29 @@ import java.util.List;
 @Repository
 public class PointRuleConfigProviderImpl implements PointRuleConfigProvider {
 
-	@Autowired
-	private DbProvider dbProvider;
+    @Autowired
+    private DbProvider dbProvider;
 
-	@Autowired
-	private SequenceProvider sequenceProvider;
+    @Autowired
+    private SequenceProvider sequenceProvider;
 
-	@Override
-	public void createPointRuleConfig(PointRuleConfig pointRuleConfig) {
-		Long id = sequenceProvider.getNextSequence(NameMapper.getSequenceDomainFromTablePojo(EhPointRuleConfigs.class));
-		pointRuleConfig.setId(id);
-		pointRuleConfig.setCreateTime(DateUtils.currentTimestamp());
-		// pointRuleConfig.setCreatorUid(UserContext.currentUserId());
-		rwDao().insert(pointRuleConfig);
-		DaoHelper.publishDaoAction(DaoAction.CREATE, EhPointRuleConfigs.class, id);
-	}
+    @Override
+    public void createPointRuleConfig(PointRuleConfig pointRuleConfig) {
+        Long id = sequenceProvider.getNextSequence(NameMapper.getSequenceDomainFromTablePojo(EhPointRuleConfigs.class));
+        pointRuleConfig.setId(id);
+        pointRuleConfig.setCreateTime(DateUtils.currentTimestamp());
+        // pointRuleConfig.setCreatorUid(UserContext.currentUserId());
+        rwDao().insert(pointRuleConfig);
+        DaoHelper.publishDaoAction(DaoAction.CREATE, EhPointRuleConfigs.class, id);
+    }
 
-	@Override
-	public void updatePointRuleConfig(PointRuleConfig pointRuleConfig) {
-		// pointRuleConfig.setUpdateTime(DateUtils.currentTimestamp());
-		// pointRuleConfig.setUpdateUid(UserContext.currentUserId());
+    @Override
+    public void updatePointRuleConfig(PointRuleConfig pointRuleConfig) {
+        // pointRuleConfig.setUpdateTime(DateUtils.currentTimestamp());
+        // pointRuleConfig.setUpdateUid(UserContext.currentUserId());
         rwDao().update(pointRuleConfig);
-		DaoHelper.publishDaoAction(DaoAction.MODIFY, EhPointRuleConfigs.class, pointRuleConfig.getId());
-	}
+        DaoHelper.publishDaoAction(DaoAction.MODIFY, EhPointRuleConfigs.class, pointRuleConfig.getId());
+    }
 
     @Override
     public List<PointRuleConfig> query(ListingLocator locator, int count, ListingQueryBuilderCallback callback) {
@@ -58,7 +58,7 @@ public class PointRuleConfigProviderImpl implements PointRuleConfigProvider {
             callback.buildCondition(locator, query);
         }
         if (locator.getAnchor() != null) {
-            query.addConditions(t.ID.lt(locator.getAnchor()));
+            query.addConditions(t.ID.le(locator.getAnchor()));
         }
 
         if (count > 0) {
@@ -76,10 +76,10 @@ public class PointRuleConfigProviderImpl implements PointRuleConfigProvider {
         return list;
     }
 
-	@Override
-	public PointRuleConfig findById(Long id) {
-		return ConvertHelper.convert(dao().findById(id), PointRuleConfig.class);
-	}
+    @Override
+    public PointRuleConfig findById(Long id) {
+        return ConvertHelper.convert(dao().findById(id), PointRuleConfig.class);
+    }
 
     @Override
     public void deleteBySystemId(Long systemId) {
@@ -107,12 +107,12 @@ public class PointRuleConfigProviderImpl implements PointRuleConfigProvider {
     private EhPointRuleConfigsDao rwDao() {
         DSLContext context = dbProvider.getDslContext(AccessSpec.readWrite());
         return new EhPointRuleConfigsDao(context.configuration());
-	}
+    }
 
-	private EhPointRuleConfigsDao dao() {
+    private EhPointRuleConfigsDao dao() {
         DSLContext context = dbProvider.getDslContext(AccessSpec.readOnly());
         return new EhPointRuleConfigsDao(context.configuration());
-	}
+    }
 
     private DSLContext context() {
         return dbProvider.getDslContext(AccessSpec.readOnly());

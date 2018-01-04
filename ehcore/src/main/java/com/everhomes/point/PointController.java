@@ -16,13 +16,10 @@ import org.springframework.web.bind.annotation.RestController;
  * 积分
  * Created by xq.tian on 2017/11/23.
  */
-@RestDoc(value="Point controller", site="core")
+@RestDoc(value = "Point controller", site = "core")
 @RestController
 @RequestMapping("/point")
 public class PointController extends ControllerBase {
-
-    @Autowired
-    private PointService pointService;
 
     private static final RestResponse SUCCESS = new RestResponse() {
         {
@@ -30,6 +27,9 @@ public class PointController extends ControllerBase {
             this.setErrorCode(ErrorCodes.SUCCESS);
         }
     };
+
+    @Autowired
+    private PointService pointService;
 
     /**
      * <b>URL: /point/getUserPoint</b>
@@ -86,7 +86,7 @@ public class PointController extends ControllerBase {
     @RequestMapping("listPointGoods")
     public RestResponse listPointGoods(ListPointGoodsCommand cmd) {
         cmd.setStatus(PointCommonStatus.ENABLED.getCode());
-        ListPointGoodsResponse response = pointService.listPointGoods(cmd);
+        ListPointGoodsResponse response = pointService.listEnabledPointGoods(cmd);
         return success(response);
     }
 
@@ -116,10 +116,11 @@ public class PointController extends ControllerBase {
      * <b>URL: /point/listPointMallBanners</b>
      * <p>获取积分商城的banner</p>
      */
-    @RestReturn(ListPointMallBannersResponse.class)
+    @RestReturn(ListPointBannersResponse.class)
     @RequestMapping("listPointMallBanners")
-    public RestResponse listPointMallBanners(ListPointMallBannersCommand cmd) {
-        ListPointMallBannersResponse response = pointService.listPointMallBanners(cmd);
+    public RestResponse listPointMallBanners(ListPointBannersCommand cmd) {
+        cmd.setStatus(PointCommonStatus.ENABLED.getCode());
+        ListPointBannersResponse response = pointService.listPointBanners(cmd);
         return success(response);
     }
 

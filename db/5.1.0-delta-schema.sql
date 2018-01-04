@@ -144,3 +144,44 @@ CREATE TABLE `eh_work_report_val_comment_attachments` (
 
 -- end by nan.rong
 
+-- 积分 1.2 add by xq.tian  2018/01/03
+ALTER TABLE `eh_point_logs` ADD COLUMN `event_happen_time` BIGINT;
+ALTER TABLE `eh_point_logs` ADD COLUMN `extra` TEXT;
+
+-- 积分banner
+-- DROP TABLE IF EXISTS `eh_point_banners`;
+CREATE TABLE `eh_point_banners` (
+  `id` BIGINT,
+  `namespace_id` INTEGER NOT NULL DEFAULT 0,
+  `system_id` BIGINT,
+  `name` VARCHAR(128),
+  `poster_uri` VARCHAR(128),
+  `action_type` TINYINT NOT NULL DEFAULT '0' COMMENT 'according to document',
+  `action_data` TEXT COMMENT 'the parameters depend on item_type, json format',
+  `status` TINYINT NOT NULL DEFAULT 2 COMMENT '0: inactive, 1: disabled, 2: enabled',
+  `default_order` INTEGER NOT NULL DEFAULT 0,
+  `creator_uid` BIGINT,
+  `create_time` DATETIME(3),
+  `update_uid` BIGINT,
+  `update_time` DATETIME(3),
+  PRIMARY KEY (`id`)
+) ENGINE=INNODB DEFAULT CHARSET=utf8mb4;
+
+ALTER TABLE `eh_point_goods` ADD COLUMN shop_number VARCHAR(128);
+ALTER TABLE `eh_point_goods` ADD COLUMN system_id BIGINT NOT NULL DEFAULT 0;
+
+ALTER TABLE `eh_point_goods` DROP COLUMN poster_uri;
+ALTER TABLE `eh_point_goods` DROP COLUMN poster_url;
+ALTER TABLE `eh_point_goods` DROP COLUMN detail_url;
+ALTER TABLE `eh_point_goods` DROP COLUMN points;
+ALTER TABLE `eh_point_goods` DROP COLUMN sold_amount;
+ALTER TABLE `eh_point_goods` DROP COLUMN original_price;
+ALTER TABLE `eh_point_goods` DROP COLUMN discount_price;
+ALTER TABLE `eh_point_goods` DROP COLUMN point_rule;
+ALTER TABLE `eh_point_goods` DROP COLUMN display_name;
+
+ALTER TABLE `eh_point_rules` ADD COLUMN extra TEXT;
+ALTER TABLE `eh_point_rules` MODIFY COLUMN `limit_type` TEXT;
+ALTER TABLE `eh_point_rule_configs` MODIFY COLUMN `limit_type` TEXT;
+
+ALTER TABLE `eh_point_tutorial_to_point_rule_mappings` MODIFY COLUMN description VARCHAR(128);

@@ -2,10 +2,13 @@ package com.everhomes.point;
 
 import com.everhomes.bus.LocalEvent;
 
-import java.util.List; /**
+import java.util.List;
+import java.util.Map;
+
+/**
  * Created by xq.tian on 2017/12/7.
  */
-public interface PointEventProcessor {
+public interface BasePointEventProcessor {
 
     String[] init();
 
@@ -13,5 +16,9 @@ public interface PointEventProcessor {
 
     List<PointResultAction> getResultActions(List<PointAction> pointActions, LocalEvent localEvent, PointRule rule, PointSystem pointSystem, PointRuleCategory category);
 
-    List<PointRule> getPointRules(PointSystem pointSystem, LocalEvent localEvent, PointEventLog log);
+    List<PointRule> getPointRules(LocalEvent localEvent);
+
+    boolean isContinue(BasePointEventProcessor eventProcessor);
+
+    PointEventGroup getEventGroup(Map<String, PointEventGroup> eventNameToPointEventGroupMap, LocalEvent localEvent, String subscriptionPath);
 }
