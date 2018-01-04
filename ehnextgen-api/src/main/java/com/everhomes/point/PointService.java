@@ -95,4 +95,6 @@ public interface PointService {
     ListPointGoodsResponse listEnabledPointGoods(ListPointGoodsCommand cmd);
 
     CheckUserInfoResponse checkUserInfo(CheckUserInfoCommand cmd);
+
+    PointScoreDTO getUserPointForOpenAPI(GetUserPointCommand cmd);
 }
