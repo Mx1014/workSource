@@ -688,10 +688,8 @@ public class SocialSecurityServiceImpl implements SocialSecurityService {
     private void saveSocialSecurityPayment(SocialSecurityPaymentDetailDTO socialSecurityPayment, Long detailId, Byte afterPay, Byte accumOrSocial) {
         String paymentMonth = socialSecurityPaymentProvider.findPaymentMonthByDetail(detailId);
         for (SocialSecurityItemDTO itemDTO : socialSecurityPayment.getItems()) {
-            LOGGER.debug("开始payment插入" + itemDTO);
             SocialSecurityPayment payment = socialSecurityPaymentProvider.findSocialSecurityPayment(detailId, itemDTO.getPayItem(), accumOrSocial);
             if (null == payment) {
-                LOGGER.debug("没有payment 新建一个");
                 createSocialSecurityPayment(itemDTO, detailId, accumOrSocial, paymentMonth, afterPay);
             } else {
                 copyRadixAndRatio(payment, itemDTO);
@@ -704,9 +702,9 @@ public class SocialSecurityServiceImpl implements SocialSecurityService {
     private void createSocialSecurityPayment(SocialSecurityItemDTO itemDTO, Long detailId, Byte accumOrSocial, String paymentMonth, Byte afterPay) {
 //        SocialSecuritySetting setting = socialSecuritySettingProvider.findSocialSecuritySettingByDetailIdAndItem(detailId, itemDTO, accumOrSocial);
         SocialSecurityPayment payment = processSocialSecurityPayment(itemDTO, paymentMonth, afterPay);
+        payment.setDetailId(detailId);
         payment.setAccumOrSocail(accumOrSocial);
         copyRadixAndRatio(payment, itemDTO);
-        LOGGER.debug("新建的payment" + StringHelper.toJsonString(payment));
         socialSecurityPaymentProvider.createSocialSecurityPayment(payment);
 
     }
