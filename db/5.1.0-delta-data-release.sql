@@ -30,5 +30,15 @@ INSERT INTO `eh_locale_templates`(`id`, `scope`, `code`, `locale`, `description`
 INSERT INTO `eh_locale_templates`(`id`, `scope`, `code`, `locale`, `description`, `text`, `namespace_id`) VALUES (@tem_ip := @tem_ip + 1, 'work.report.notification', 6, 'zh_CN', '读者被读者评论', '${creatorName}在${applierName}的${reportName}中回复了你', 0);
 INSERT INTO `eh_locale_templates`(`id`, `scope`, `code`, `locale`, `description`, `text`, `namespace_id`) VALUES (@tem_ip := @tem_ip + 1, 'work.report.notification', 7, 'zh_CN', '作者的汇报被评论', '${creatorName}在你的${reportName}中发表了评论', 0);
 
+-- menu & scope
+SET @scope_id = (SELECT MAX(id) FROM eh_web_menu_scopes);
+INSERT INTO `eh_web_menu_scopes` (`id`, `menu_id`, `menu_name`, `owner_type`, `owner_id`, `apply_policy`) VALUES (@scope_id := @scope_id + 1, '54000', '', 'EhNamespaces', '1', '2');
+INSERT INTO `eh_web_menu_scopes` (`id`, `menu_id`, `menu_name`, `owner_type`, `owner_id`, `apply_policy`) VALUES (@scope_id := @scope_id + 1, '54010', '', 'EhNamespaces', '1', '2');
+INSERT INTO `eh_web_menu_scopes` (`id`, `menu_id`, `menu_name`, `owner_type`, `owner_id`, `apply_policy`) VALUES (@scope_id := @scope_id + 1, '54020', '', 'EhNamespaces', '1', '2');
+
+SET @item_id = (SELECT MAX(id) FROM eh_launch_pad_items);
+INSERT INTO `eh_launch_pad_items` (`id`, `namespace_id`, `app_id`, `scope_code`, `scope_id`, `item_location`, `item_group`, `item_name`, `item_label`, `icon_uri`, `item_width`, `item_height`, `action_type`, `action_data`, `default_order`, `apply_policy`, `min_version`, `display_flag`, `display_layout`, `bgcolor`, `tag`, `target_type`, `target_id`, `delete_flag`, `scene_type`, `scale_type`, `service_categry_id`, `selected_icon_uri`, `more_order`, `alias_icon_uri`, `categry_name`) VALUES (@item_id := @item_id + 1, '1', '0', '0', '0', '/home', 'Bizs', '工作汇报', '工作汇报', 'cs://1/image/aW1hZ2UvTVRvek1tTmpOVGRtTUdSaE1HTmlPV1V6WVRjNE5qSTRZelJpWTJGbE1UaGxOQQ', '1', '1', '60', '{\"url\":\"zl://work-report/main\"}', '20', '0', '1', '1', '', '0', NULL, NULL, NULL, '0', 'pm_admin', '0', '88', NULL, '0', NULL, NULL);
+INSERT INTO `eh_launch_pad_items` (`id`, `namespace_id`, `app_id`, `scope_code`, `scope_id`, `item_location`, `item_group`, `item_name`, `item_label`, `icon_uri`, `item_width`, `item_height`, `action_type`, `action_data`, `default_order`, `apply_policy`, `min_version`, `display_flag`, `display_layout`, `bgcolor`, `tag`, `target_type`, `target_id`, `delete_flag`, `scene_type`, `scale_type`, `service_categry_id`, `selected_icon_uri`, `more_order`, `alias_icon_uri`, `categry_name`) VALUES (@item_id := @item_id + 1, '1', '0', '0', '0', '/home', 'Bizs', '工作汇报', '工作汇报', 'cs://1/image/aW1hZ2UvTVRvek1tTmpOVGRtTUdSaE1HTmlPV1V6WVRjNE5qSTRZelJpWTJGbE1UaGxOQQ', '1', '1', '60', '{\"url\":\"zl://work-report/main\"}', '20', '0', '1', '1', '', '0', NULL, NULL, NULL, '0', 'park_tourist', '0', '90', NULL, '0', NULL, NULL);
+
 
 -- end by nan.rong
