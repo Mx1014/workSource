@@ -1405,14 +1405,21 @@ public class ContractServiceImpl implements ContractService {
 	@Override
 	public List<ContractDTO> listCustomerContracts(ListCustomerContractsCommand cmd) {
 		if(CustomerType.ENTERPRISE.equals(CustomerType.fromStatus(cmd.getTargetType()))) {
-			EnterpriseCustomer customer = enterpriseCustomerProvider.findByOrganizationId(cmd.getTargetId());
-			if(customer != null) {
-				ListEnterpriseCustomerContractsCommand command = new ListEnterpriseCustomerContractsCommand();
-				command.setNamespaceId(cmd.getNamespaceId());
-				command.setCommunityId(cmd.getCommunityId());
-				command.setStatus(cmd.getStatus());
-				command.setEnterpriseCustomerId(customer.getId());
-				return listEnterpriseCustomerContracts(command);
+			if(cmd.getAdminFlag() == 1) {
+				CheckAdminCommand cmd1 = new CheckAdminCommand();
+				cmd1.setNamespaceId(cmd.getNamespaceId());
+				cmd1.setOrganizationId(cmd.getTargetId());
+				if(checkAdmin(cmd1)) {
+					EnterpriseCustomer customer = enterpriseCustomerProvider.findByOrganizationId(cmd.getTargetId());
+					if(customer != null) {
+						ListEnterpriseCustomerContractsCommand command = new ListEnterpriseCustomerContractsCommand();
+						command.setNamespaceId(cmd.getNamespaceId());
+						command.setCommunityId(cmd.getCommunityId());
+						command.setStatus(cmd.getStatus());
+						command.setEnterpriseCustomerId(customer.getId());
+						return listEnterpriseCustomerContracts(command);
+					}
+				}
 			}
 
 		} else if(CustomerType.INDIVIDUAL.equals(CustomerType.fromStatus(cmd.getTargetType()))) {
