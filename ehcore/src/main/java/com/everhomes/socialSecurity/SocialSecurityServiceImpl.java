@@ -703,6 +703,10 @@ public class SocialSecurityServiceImpl implements SocialSecurityService {
 //        SocialSecuritySetting setting = socialSecuritySettingProvider.findSocialSecuritySettingByDetailIdAndItem(detailId, itemDTO, accumOrSocial);
         SocialSecurityPayment payment = processSocialSecurityPayment(itemDTO, paymentMonth, afterPay);
         payment.setDetailId(detailId);
+        OrganizationMemberDetails detail = organizationProvider.findOrganizationMemberDetailsByDetailId(detailId);
+        payment.setNamespaceId(detail.getNamespaceId());
+        payment.setOrganizationId(detail.getOrganizationId());
+        payment.setUserId(detail.getTargetId());
         payment.setAccumOrSocail(accumOrSocial);
         copyRadixAndRatio(payment, itemDTO);
         socialSecurityPaymentProvider.createSocialSecurityPayment(payment);
