@@ -54,6 +54,18 @@ CREATE TABLE `eh_equipment_inspection_plan_group_map` (
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4;
 -- 巡检计划 执行组审批组 关联表 end  by jiarui
 
+CREATE TABLE `eh_equipment_inspection_review_date` (
+  `id` bigint(20) NOT NULL,
+  `owner_type` varchar(64) NOT NULL COMMENT 'refer to object type EhEquipmentInspectionTasks/EhQualityInspectionTasks...',
+  `scope_type` tinyint(4) NOT NULL DEFAULT '0' COMMENT '0: all; 1: namespace; 2: community',
+  `scope_id` bigint(20) NOT NULL,
+  `review_expired_days` int(11) NOT NULL DEFAULT '0' COMMENT 'review_expired_days',
+  `status` tinyint(4) NOT NULL COMMENT '0: invalid, 1: valid',
+  `create_time` datetime NOT NULL COMMENT 'record create time',
+  PRIMARY KEY (`id`)
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4;
+
+
 -- eh_equipment_inspection_tasks 增加plan_id字段 用于关联task和equipments
 ALTER TABLE `ehcore`.`eh_equipment_inspection_tasks`
 ADD COLUMN `plan_id`  bigint(20) NOT NULL ;

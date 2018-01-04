@@ -201,4 +201,6 @@ public interface EquipmentProvider {
 	List<EquipmentInspectionTasks> listTasksByPlanId(Long planId, CrossShardListingLocator locator, int pageSize);
 
     List<EquipmentInspectionStandardGroupMap> listEquipmentInspectionStandardGroupMapByStandardId(Long id);
+
+    List<EquipmentStandardMap> listAllActiveEquipmentStandardMap();
 }

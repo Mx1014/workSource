@@ -1468,10 +1468,12 @@ public class EquipmentProviderImpl implements EquipmentProvider {
         DSLContext context = this.dbProvider.getDslContext(AccessSpec.readOnly());
         SelectQuery<EhEquipmentInspectionEquipmentStandardMapRecord> query = context.selectQuery(Tables.EH_EQUIPMENT_INSPECTION_EQUIPMENT_STANDARD_MAP);
         query.addConditions(Tables.EH_EQUIPMENT_INSPECTION_EQUIPMENT_STANDARD_MAP.STANDARD_ID.eq(standard.getId()));
+        List<EquipmentInspectionEquipments> equipments = new ArrayList<>();
         query.fetch().map((r)->{
-            standard.getEquipments().add(findEquipmentById(r.getTargetId()));
+            equipments.add(findEquipmentById(r.getTargetId()));
             return null;
         });
+        standard.setEquipments(equipments);
     }
 
     @Override
@@ -1479,10 +1481,12 @@ public class EquipmentProviderImpl implements EquipmentProvider {
         DSLContext context = this.dbProvider.getDslContext(AccessSpec.readOnly());
         SelectQuery<EhEquipmentInspectionTemplateItemMapRecord> query = context.selectQuery(Tables.EH_EQUIPMENT_INSPECTION_TEMPLATE_ITEM_MAP);
         query.addConditions(Tables.EH_EQUIPMENT_INSPECTION_TEMPLATE_ITEM_MAP.ID.eq(standard.getTemplateId()));
+        List<EquipmentInspectionItems> items = new ArrayList<>();
         query.fetch().map((r)->{
-            standard.getItems().add(findEquipmentInspectionItem(r.getItemId()));
+            items.add(findEquipmentInspectionItem(r.getItemId()));
             return null;
         });
+        standard.setItems(items);
     }
 
     @Override
@@ -3049,5 +3053,13 @@ public class EquipmentProviderImpl implements EquipmentProvider {
         return  context.selectFrom(Tables.EH_EQUIPMENT_INSPECTION_STANDARD_GROUP_MAP)
                 .where(Tables.EH_EQUIPMENT_INSPECTION_STANDARD_GROUP_MAP.STANDARD_ID.eq(id))
                 .fetchInto(EquipmentInspectionStandardGroupMap.class);
+    }
+
+    @Override
+    public List<EquipmentStandardMap> listAllActiveEquipmentStandardMap() {
+        DSLContext context = this.dbProvider.getDslContext(AccessSpec.readOnly());
+        return context.selectFrom(Tables.EH_EQUIPMENT_INSPECTION_EQUIPMENT_STANDARD_MAP)
+                .where(Tables.EH_EQUIPMENT_INSPECTION_EQUIPMENT_STANDARD_MAP.STATUS.eq(Status.ACTIVE.getCode()))
+                .fetchInto(EquipmentStandardMap.class);
     }
 }
