@@ -711,6 +711,12 @@ public class SocialSecurityServiceImpl implements SocialSecurityService {
         payment.setAfterPayFlag(afterPay);
         return payment;
     }
+    private SocialSecurityPayment processSocialSecurityPayment(SocialSecuritySetting setting, String paymentMonth, Byte afterPay) {
+        SocialSecurityPayment payment = ConvertHelper.convert(setting, SocialSecurityPayment.class);
+        payment.setPayMonth(paymentMonth);
+        payment.setAfterPayFlag(afterPay);
+        return payment;
+    }
 
     private void copyRadixAndRatio(SocialSecurityPayment target, SocialSecurityItemDTO itemDTO) {
         target.setCompanyRadix(itemDTO.getCompanyRadix());
