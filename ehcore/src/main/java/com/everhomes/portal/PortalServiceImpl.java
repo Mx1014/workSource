@@ -1811,7 +1811,7 @@ public class PortalServiceImpl implements PortalService {
 				LOGGER.info("syncLaunchPadData namespaceId={}  end", dto.getId());
 
 			} catch (Exception e) {
-				LOGGER.error("syncLaunchPadData namespaceId=" + dto.getId() + "  end", e);
+				LOGGER.error("syncLaunchPadData namespaceId=" + dto.getId() + " exception", e);
 			}
 		}
 
