@@ -2013,7 +2013,7 @@ private void checkUserPrivilege(Long orgId, Long privilegeId, Long communityId) 
 			}
 		}
 		//兼容之前的版本任务
-		if (dto.getEquipments() == null && dto.getEquipments().size() == 0) {
+		if (dto.getEquipments() == null || dto.getEquipments().size() == 0) {
 			EquipmentInspectionEquipments equipment = null;
 			if (task.getEquipmentId() != null) {
 				equipment = equipmentProvider.findEquipmentById(task.getEquipmentId());
