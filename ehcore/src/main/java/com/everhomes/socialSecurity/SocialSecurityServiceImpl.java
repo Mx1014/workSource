@@ -27,6 +27,7 @@ import com.everhomes.user.UserContext;
 import com.everhomes.util.ConvertHelper;
 import com.everhomes.util.DateHelper;
 import com.everhomes.util.RuntimeErrorException;
+import com.everhomes.util.StringHelper;
 import com.everhomes.util.excel.RowResult;
 import com.everhomes.util.excel.handler.PropMrgOwnerHandler;
 import org.apache.poi.ss.usermodel.Row;
@@ -686,16 +687,18 @@ public class SocialSecurityServiceImpl implements SocialSecurityService {
 
     private void saveSocialSecurityPayment(SocialSecurityPaymentDetailDTO socialSecurityPayment, Long detailId, Byte afterPay, Byte accumOrSocial) {
         String paymentMonth = socialSecurityPaymentProvider.findPaymentMonthByDetail(detailId);
-        socialSecurityPaymentProvider.setUserCityAndHTByAccumOrSocial(detailId, accumOrSocial, socialSecurityPayment.getCityId(), socialSecurityPayment.getHouseholdType());
         for (SocialSecurityItemDTO itemDTO : socialSecurityPayment.getItems()) {
+            LOGGER.debug("开始payment插入" + itemDTO);
             SocialSecurityPayment payment = socialSecurityPaymentProvider.findSocialSecurityPayment(detailId, itemDTO.getPayItem(), accumOrSocial);
             if (null == payment) {
+                LOGGER.debug("没有payment 新建一个");
                 createSocialSecurityPayment(itemDTO, detailId, accumOrSocial, paymentMonth, afterPay);
             } else {
                 copyRadixAndRatio(payment, itemDTO);
                 socialSecurityPaymentProvider.updateSocialSecurityPayment(payment);
             }
         }
+        socialSecurityPaymentProvider.setUserCityAndHTByAccumOrSocial(detailId, accumOrSocial, socialSecurityPayment.getCityId(), socialSecurityPayment.getHouseholdType());
     }
 
     private void createSocialSecurityPayment(SocialSecurityItemDTO itemDTO, Long detailId, Byte accumOrSocial, String paymentMonth, Byte afterPay) {
@@ -703,6 +706,7 @@ public class SocialSecurityServiceImpl implements SocialSecurityService {
         SocialSecurityPayment payment = processSocialSecurityPayment(itemDTO, paymentMonth, afterPay);
         payment.setAccumOrSocail(accumOrSocial);
         copyRadixAndRatio(payment, itemDTO);
+        LOGGER.debug("新建的payment" + StringHelper.toJsonString(payment));
         socialSecurityPaymentProvider.createSocialSecurityPayment(payment);
 
     }
@@ -755,7 +759,7 @@ public class SocialSecurityServiceImpl implements SocialSecurityService {
                 accumOrSocial, itemDTO.getPayItem());
         OrganizationMemberDetails detail = organizationProvider.findOrganizationMemberDetailsByDetailId(detailId);
         SocialSecuritySetting setting = processSocialSecuritySetting(base, socialSecurityPayment.getCityId(),
-                detail.getOrganizationId(), detail.getTargetId(), detail.getId(), detail.getNamespaceId(),itemDTO);
+                detail.getOrganizationId(), detail.getTargetId(), detail.getId(), detail.getNamespaceId(), itemDTO);
         copyRadixAndRatio(setting, socialSecurityPayment, itemDTO);
         socialSecuritySettingProvider.createSocialSecuritySetting(setting);
 
@@ -890,8 +894,8 @@ public class SocialSecurityServiceImpl implements SocialSecurityService {
                 ImportFileResponse response = new ImportFileResponse();
                 response.setTitle("导入社保设置");
                 //  将 excel 的中的数据读取
-                String fileLog="";
-                batchUpdateSSSettingAndPayments(resultList, cmd.getOwnerId(),fileLog,response);
+                String fileLog = "";
+                batchUpdateSSSettingAndPayments(resultList, cmd.getOwnerId(), fileLog, response);
                 return response;
             }
         }, task);
@@ -924,7 +928,7 @@ public class SocialSecurityServiceImpl implements SocialSecurityService {
             String userContact = r.getA();
             OrganizationMemberDetails detail = organizationProvider.findOrganizationMemberDetailsByOrganizationIdAndContactToken(ownerId, userContact);
             if (null == detail) {
-                response.setFileLog("找不到用户: 手机号"+userContact);
+                response.setFileLog("找不到用户: 手机号" + userContact);
                 LOGGER.error("can not find organization member ,contact token is " + userContact);
 
             } else {
