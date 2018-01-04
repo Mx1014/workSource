@@ -698,15 +698,15 @@ public class SocialSecurityServiceImpl implements SocialSecurityService {
     }
 
     private void createSocialSecurityPayment(SocialSecurityItemDTO itemDTO, Long detailId, Byte accumOrSocial, String paymentMonth, Byte afterPay) {
-        SocialSecuritySetting setting = socialSecuritySettingProvider.findSocialSecuritySettingByDetailIdAndItem(detailId, itemDTO, accumOrSocial);
-        SocialSecurityPayment payment = processSocialSecurityPayment(setting, paymentMonth, afterPay);
+//        SocialSecuritySetting setting = socialSecuritySettingProvider.findSocialSecuritySettingByDetailIdAndItem(detailId, itemDTO, accumOrSocial);
+        SocialSecurityPayment payment = processSocialSecurityPayment(itemDTO, paymentMonth, afterPay);
         copyRadixAndRatio(payment, itemDTO);
         socialSecurityPaymentProvider.createSocialSecurityPayment(payment);
 
     }
 
-    private SocialSecurityPayment processSocialSecurityPayment(SocialSecuritySetting setting, String paymentMonth, Byte afterPay) {
-        SocialSecurityPayment payment = ConvertHelper.convert(setting, SocialSecurityPayment.class);
+    private SocialSecurityPayment processSocialSecurityPayment(SocialSecurityItemDTO itemDTO, String paymentMonth, Byte afterPay) {
+        SocialSecurityPayment payment = ConvertHelper.convert(itemDTO, SocialSecurityPayment.class);
         payment.setPayMonth(paymentMonth);
         payment.setAfterPayFlag(afterPay);
         return payment;
