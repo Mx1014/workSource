@@ -274,7 +274,7 @@ public class SocialSecurityServiceImpl implements SocialSecurityService {
         if (null != bases) {
             for (SocialSecurityBase base : bases) {
                 EhSocialSecuritySettings setting = processSocialSecuritySetting(base, cityId, orgId, userId,
-                        detailId, namespaceId);
+                        detailId, namespaceId, null);
 //                socialSecuritySettingProvider.createSocialSecuritySetting(setting);
                 setting.setId(id++);
                 setting.setRadix(setting.getCompanyRadix());
@@ -755,17 +755,19 @@ public class SocialSecurityServiceImpl implements SocialSecurityService {
                 accumOrSocial, itemDTO.getPayItem());
         OrganizationMemberDetails detail = organizationProvider.findOrganizationMemberDetailsByDetailId(detailId);
         SocialSecuritySetting setting = processSocialSecuritySetting(base, socialSecurityPayment.getCityId(),
-                detail.getOrganizationId(), detail.getTargetId(), detail.getId(), detail.getNamespaceId());
+                detail.getOrganizationId(), detail.getTargetId(), detail.getId(), detail.getNamespaceId(),itemDTO);
         copyRadixAndRatio(setting, socialSecurityPayment, itemDTO);
         socialSecuritySettingProvider.createSocialSecuritySetting(setting);
 
     }
 
     private SocialSecuritySetting processSocialSecuritySetting(SocialSecurityBase base, Long cityId, Long orgId, Long userId,
-                                                               Long detailId, Integer namespaceId) {
+                                                               Long detailId, Integer namespaceId, SocialSecurityItemDTO itemDTO) {
         SocialSecuritySetting setting = ConvertHelper.convert(base, SocialSecuritySetting.class);
         if (null == setting) {
-            setting = new SocialSecuritySetting();
+            setting = ConvertHelper.convert(itemDTO, SocialSecuritySetting.class);
+            setting.setPayItem(itemDTO.getPayItem());
+            setting.setAccumOrSocail(AccumOrSocail.SOCAIL.getCode());
         }
         setting.setCityId(cityId);
         setting.setOrganizationId(orgId);

@@ -101,10 +101,11 @@ public class SocialSecuritySettingProviderImpl implements SocialSecuritySettingP
                 .where(Tables.EH_SOCIAL_SECURITY_SETTINGS.DETAIL_ID.eq(detailId));
         if (null != accumOrSocial) {
             step = step.and(Tables.EH_SOCIAL_SECURITY_SETTINGS.ACCUM_OR_SOCAIL.eq(accumOrSocial));
+            if (accumOrSocial.equals(AccumOrSocail.SOCAIL.getCode())) {
+                step = step.and(Tables.EH_SOCIAL_SECURITY_SETTINGS.PAY_ITEM.eq(itemDTO.getPayItem()));
+            }
         }
-        if (null != itemDTO) {
-            step = step.and(Tables.EH_SOCIAL_SECURITY_SETTINGS.PAY_ITEM.eq(itemDTO.getPayItem()));
-        }
+
         Record result = step.orderBy(Tables.EH_SOCIAL_SECURITY_SETTINGS.ID.asc())
                 .fetchAny();
         if (null == result) {
