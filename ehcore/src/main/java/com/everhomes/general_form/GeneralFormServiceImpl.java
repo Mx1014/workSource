@@ -614,6 +614,8 @@ public class GeneralFormServiceImpl implements GeneralFormService {
                         query.addConditions(condition);
                         query.addConditions(Tables.EH_GENERAL_FORMS.STATUS
                                 .ne(GeneralFormStatus.INVALID.getCode()));
+
+                        query.addOrderBy(Tables.EH_GENERAL_FORMS.CREATE_TIME.asc());
                         return query;
                     }
                 });
