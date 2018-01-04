@@ -1373,28 +1373,41 @@ public class ContractServiceImpl implements ContractService {
 	}
 
 	private void dealParamGroupMap(Long id, List<ContractParamGroupMapDTO> notifyGroups, List<ContractParamGroupMapDTO> paidGroups) {
-		List<ContractParamGroupMap> groupMaps = contractAttachmentProvider.listByContractId(contractId);
-		Map<Long, ContractAttachment> map = new HashMap<>();
-		if(existAttachments != null && existAttachments.size() > 0) {
-			existAttachments.forEach(attachment -> {
-				map.put(attachment.getId(), attachment);
+		List<ContractParamGroupMap> existNotifyGroups = contractProvider.listByParamId(id, ContractParamGroupType.NOTIFY_GROUP.getCode());
+		List<ContractParamGroupMap> existPaidGroups = contractProvider.listByParamId(id, ContractParamGroupType.PAY_GROUP.getCode());
+		Map<Long, ContractParamGroupMap> notifyGroupMap = new HashMap<>();
+		if(existNotifyGroups != null && existNotifyGroups.size() > 0) {
+			existNotifyGroups.forEach(notifyGroup -> {
+				notifyGroupMap.put(notifyGroup.getId(), notifyGroup);
 			});
+		}
+
+		Map<Long, ContractParamGroupMap> paidGroupMap = new HashMap<>();
+		if(existPaidGroups != null && existPaidGroups.size() > 0) {
+			existPaidGroups.forEach(paidGroup -> {
+				paidGroupMap.put(paidGroup.getId(), paidGroup);
+			});
+		}
+		dealParamGroupMap(id, notifyGroups, notifyGroupMap);
+		dealParamGroupMap(id, paidGroups, paidGroupMap);
+
 	}
 
-		if(attachments != null && attachments.size() > 0) {
-			attachments.forEach(attachment -> {
-				if(attachment.getId() == null) {
-					ContractAttachment contractAttachment = ConvertHelper.convert(attachment, ContractAttachment.class);
-					contractAttachment.setContractId(contractId);
-					contractAttachmentProvider.createContractAttachment(contractAttachment);
+	private void dealParamGroupMap(Long id, List<ContractParamGroupMapDTO> groups, Map<Long, ContractParamGroupMap> map) {
+		if(groups != null && groups.size() > 0) {
+			groups.forEach(group -> {
+				if(group.getId() == null) {
+					ContractParamGroupMap paramGroupMap = ConvertHelper.convert(group, ContractParamGroupMap.class);
+					paramGroupMap.setParamId(id);
+					contractProvider.createContractParamGroupMap(paramGroupMap);
 				} else {
-					map.remove(attachment.getId());
+					map.remove(group.getId());
 				}
 			});
 		}
 		if(map.size() > 0) {
-			map.forEach((id, attachment) -> {
-				contractAttachmentProvider.deleteContractAttachment(attachment);
+			map.forEach((mapId, group) -> {
+				contractProvider.deleteContractParamGroupMap(group);
 			});
 		}
 	}
@@ -1405,14 +1418,28 @@ public class ContractServiceImpl implements ContractService {
 		ContractParam communityExist = contractProvider.findContractParamByCommunityId(cmd.getNamespaceId(), cmd.getCommunityId());
 
 		if(communityExist != null) {
-			return ConvertHelper.convert(communityExist, ContractParamDTO.class);
+			return toContractParamDTO(communityExist);
 		} else if(communityExist == null && cmd.getCommunityId() != null) {
 			communityExist = contractProvider.findContractParamByCommunityId(cmd.getNamespaceId(), null);
 			if(communityExist != null) {
-				return ConvertHelper.convert(communityExist, ContractParamDTO.class);
+				return toContractParamDTO(communityExist);
 			}
 		}
 		return null;
+	}
+
+	private ContractParamDTO toContractParamDTO(ContractParam param) {
+		ContractParamDTO dto = ConvertHelper.convert(param, ContractParamDTO.class);
+		List<ContractParamGroupMap> notifyGroups = contractProvider.listByParamId(param.getId(), ContractParamGroupType.NOTIFY_GROUP.getCode());
+		List<ContractParamGroupMap> paidGroups = contractProvider.listByParamId(param.getId(), ContractParamGroupType.PAY_GROUP.getCode());
+
+		if(notifyGroups != null && notifyGroups.size() > 0) {
+			dto.setNotifyGroups(notifyGroups.stream().map(group -> ConvertHelper.convert(group, ContractParamGroupMapDTO.class)).collect(Collectors.toList()));
+		}
+		if(paidGroups != null && paidGroups.size() > 0) {
+			dto.setPaidGroups(paidGroups.stream().map(group -> ConvertHelper.convert(group, ContractParamGroupMapDTO.class)).collect(Collectors.toList()));
+		}
+		return dto;
 	}
 
 	@Override

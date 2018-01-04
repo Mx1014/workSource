@@ -109,6 +109,8 @@ public class ContractScheduleJob extends QuartzJobBean {
                                     }
                                 }
                             }
+
+                            notifyPaid();
                         });
                     }
                 }
