@@ -40,6 +40,12 @@ SET @item_id = (SELECT MAX(id) FROM eh_launch_pad_items);
 INSERT INTO `eh_launch_pad_items` (`id`, `namespace_id`, `app_id`, `scope_code`, `scope_id`, `item_location`, `item_group`, `item_name`, `item_label`, `icon_uri`, `item_width`, `item_height`, `action_type`, `action_data`, `default_order`, `apply_policy`, `min_version`, `display_flag`, `display_layout`, `bgcolor`, `tag`, `target_type`, `target_id`, `delete_flag`, `scene_type`, `scale_type`, `service_categry_id`, `selected_icon_uri`, `more_order`, `alias_icon_uri`, `categry_name`) VALUES (@item_id := @item_id + 1, '1', '0', '0', '0', '/home', 'Bizs', '工作汇报', '工作汇报', 'cs://1/image/aW1hZ2UvTVRvek1tTmpOVGRtTUdSaE1HTmlPV1V6WVRjNE5qSTRZelJpWTJGbE1UaGxOQQ', '1', '1', '60', '{\"url\":\"zl://work-report/main\"}', '20', '0', '1', '1', '', '0', NULL, NULL, NULL, '0', 'pm_admin', '0', '88', NULL, '0', NULL, NULL);
 INSERT INTO `eh_launch_pad_items` (`id`, `namespace_id`, `app_id`, `scope_code`, `scope_id`, `item_location`, `item_group`, `item_name`, `item_label`, `icon_uri`, `item_width`, `item_height`, `action_type`, `action_data`, `default_order`, `apply_policy`, `min_version`, `display_flag`, `display_layout`, `bgcolor`, `tag`, `target_type`, `target_id`, `delete_flag`, `scene_type`, `scale_type`, `service_categry_id`, `selected_icon_uri`, `more_order`, `alias_icon_uri`, `categry_name`) VALUES (@item_id := @item_id + 1, '1', '0', '0', '0', '/home', 'Bizs', '工作汇报', '工作汇报', 'cs://1/image/aW1hZ2UvTVRvek1tTmpOVGRtTUdSaE1HTmlPV1V6WVRjNE5qSTRZelJpWTJGbE1UaGxOQQ', '1', '1', '60', '{\"url\":\"zl://work-report/main\"}', '20', '0', '1', '1', '', '0', NULL, NULL, NULL, '0', 'park_tourist', '0', '90', NULL, '0', NULL, NULL);
 
+-- module & scope
+INSERT INTO `eh_service_modules` (`id`, `name`, `parent_id`, `path`, `type`, `level`, `status`, `default_order`, `create_time`, `instance_config`, `action_type`, `update_time`, `operator_uid`, `creator_uid`, `description`, `multiple_flag`, `module_control_type`) VALUES ('54000', '工作汇报', '50000', '/50000/54000', '1', '2', '2', '0', '2017-12-20 11:50:20', NULL, '60', '2017-12-20 10:45:46', '0', '0', '0', '0', NULL);
+
+SET @scope_id = (SELECT MAX(id) FROM eh_service_module_scopes);
+INSERT INTO `eh_service_module_scopes` (`id`, `namespace_id`, `module_id`, `module_name`, `owner_type`, `owner_id`, `default_order`, `apply_policy`) VALUES (@scope_id := @scope_id + 1, '1', '54000', '', 'EhNamespaces', '1', NULL, '2');
+
 
 -- end by nan.rong
 
