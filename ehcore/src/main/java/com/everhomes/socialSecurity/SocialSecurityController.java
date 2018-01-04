@@ -1,6 +1,7 @@
 // @formatter:off
 package com.everhomes.socialSecurity;
 
+import com.everhomes.rest.organization.ImportFileTaskDTO;
 import com.everhomes.rest.socialSecurity.*;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.web.bind.annotation.RequestMapping;
@@ -117,10 +118,10 @@ public class SocialSecurityController extends ControllerBase {
 	 * <b>URL: /socialSecurity/importSocialSecurityPayments</b>
 	 */
 	@RequestMapping("importSocialSecurityPayments")
-	@RestReturn(String.class)
+	@RestReturn(ImportFileTaskDTO.class)
 	public RestResponse importSocialSecurityPayments(@RequestParam(value =  "attachment") MultipartFile[] files , ImportSocialSecurityPaymentsCommand cmd){
-		socialSecurityService.importSocialSecurityPayments(cmd, files[0]);
-		return new RestResponse();
+		ImportFileTaskDTO dto = socialSecurityService.importSocialSecurityPayments(cmd, files[0]);
+		return new RestResponse(dto);
 	}
 
 	/**

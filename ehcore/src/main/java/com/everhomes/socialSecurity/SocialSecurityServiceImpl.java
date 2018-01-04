@@ -17,19 +17,18 @@ import com.everhomes.organization.*;
 import com.everhomes.region.Region;
 import com.everhomes.region.RegionProvider;
 
-import com.everhomes.rest.organization.OrganizationGroupType;
-import com.everhomes.rest.organization.OrganizationMemberStatus;
+import com.everhomes.rest.common.ImportFileResponse;
+import com.everhomes.rest.organization.*;
 import com.everhomes.rest.socialSecurity.*;
 import com.everhomes.sequence.SequenceProvider;
 import com.everhomes.server.schema.tables.pojos.EhSocialSecurityPayments;
 import com.everhomes.server.schema.tables.pojos.EhSocialSecuritySettings;
+import com.everhomes.user.UserContext;
 import com.everhomes.util.ConvertHelper;
 import com.everhomes.util.DateHelper;
-import com.everhomes.util.IntegerUtil;
 import com.everhomes.util.RuntimeErrorException;
 import com.everhomes.util.excel.RowResult;
 import com.everhomes.util.excel.handler.PropMrgOwnerHandler;
-import org.apache.commons.logging.Log;
 import org.apache.poi.ss.usermodel.Row;
 import org.apache.poi.ss.usermodel.Workbook;
 import org.apache.poi.xssf.usermodel.XSSFSheet;
@@ -47,7 +46,6 @@ import org.springframework.web.multipart.MultipartFile;
 
 import java.io.IOException;
 import java.math.BigDecimal;
-import java.sql.Timestamp;
 import java.text.ParseException;
 import java.text.SimpleDateFormat;
 import java.util.*;
@@ -58,6 +56,9 @@ import java.util.stream.Collectors;
 
 @Component
 public class SocialSecurityServiceImpl implements SocialSecurityService {
+
+    @Autowired
+    private ImportFileService importFileService;
     @Autowired
     private DbProvider dbProvider;
     @Autowired
@@ -221,7 +222,7 @@ public class SocialSecurityServiceImpl implements SocialSecurityService {
         //把属于该公司的所有要交社保的setting取出来
         //todo : 本月要交社保的人
         Set<Long> detailIds = new HashSet<>();
-        detailIds.addAll(listSocialSecurityEmployeeDetailIdsByPayMonth(ownerId,paymentMonth));
+        detailIds.addAll(listSocialSecurityEmployeeDetailIdsByPayMonth(ownerId, paymentMonth));
 //        List<OrganizationMemberDetails> details = organizationProvider.listOrganizationMemberDetails(ownerId);
 //        if (null == details) {
 //            return;
@@ -700,6 +701,7 @@ public class SocialSecurityServiceImpl implements SocialSecurityService {
     private void createSocialSecurityPayment(SocialSecurityItemDTO itemDTO, Long detailId, Byte accumOrSocial, String paymentMonth, Byte afterPay) {
 //        SocialSecuritySetting setting = socialSecuritySettingProvider.findSocialSecuritySettingByDetailIdAndItem(detailId, itemDTO, accumOrSocial);
         SocialSecurityPayment payment = processSocialSecurityPayment(itemDTO, paymentMonth, afterPay);
+        payment.setAccumOrSocail(accumOrSocial);
         copyRadixAndRatio(payment, itemDTO);
         socialSecurityPaymentProvider.createSocialSecurityPayment(payment);
 
@@ -707,10 +709,12 @@ public class SocialSecurityServiceImpl implements SocialSecurityService {
 
     private SocialSecurityPayment processSocialSecurityPayment(SocialSecurityItemDTO itemDTO, String paymentMonth, Byte afterPay) {
         SocialSecurityPayment payment = ConvertHelper.convert(itemDTO, SocialSecurityPayment.class);
-        payment.setPayMonth(paymentMonth);
+        payment.setPayItem(itemDTO.getPayItem());
         payment.setAfterPayFlag(afterPay);
+        payment.setPayMonth(paymentMonth);
         return payment;
     }
+
     private SocialSecurityPayment processSocialSecurityPayment(SocialSecuritySetting setting, String paymentMonth, Byte afterPay) {
         SocialSecurityPayment payment = ConvertHelper.convert(setting, SocialSecurityPayment.class);
         payment.setPayMonth(paymentMonth);
@@ -868,8 +872,31 @@ public class SocialSecurityServiceImpl implements SocialSecurityService {
     }
 
     @Override
-    public void importSocialSecurityPayments(ImportSocialSecurityPaymentsCommand cmd, MultipartFile file) {
+    public ImportFileTaskDTO importSocialSecurityPayments(ImportSocialSecurityPaymentsCommand cmd, MultipartFile file) {
         // TODO Auto-generated method stub
+        ImportFileTask task = new ImportFileTask();
+        List resultList = processorExcel(file);
+        task.setOwnerType("SOCIAL_OWNER_TYPE");
+        task.setOwnerId(cmd.getOwnerId());
+        task.setType(ImportFileTaskType.SOCIAL_SERCURITY_PAYMENTS.getCode());
+        task.setCreatorUid(UserContext.currentUserId());
+
+        //  调用导入方法
+        importFileService.executeTask(new ExecuteImportTaskCallback() {
+            @Override
+            public ImportFileResponse importFile() {
+                ImportFileResponse response = new ImportFileResponse();
+                response.setTitle("导入社保设置");
+                //  将 excel 的中的数据读取
+                String fileLog="";
+                batchUpdateSSSettingAndPayments(resultList, cmd.getOwnerId(),fileLog,response);
+                return response;
+            }
+        }, task);
+        return ConvertHelper.convert(task, ImportFileTaskDTO.class);
+    }
+
+    private List processorExcel(MultipartFile file) {
         try {
             List resultList = PropMrgOwnerHandler.processorExcel(file.getInputStream());
             if (resultList.isEmpty()) {
@@ -877,22 +904,28 @@ public class SocialSecurityServiceImpl implements SocialSecurityService {
                 throw RuntimeErrorException.errorWith(SocialSecurityConstants.SCOPE, SocialSecurityConstants.ERROR_FILE_IS_EMPTY,
                         "File content is empty");
             }
-            batchUpdateSSSettingAndPayments(resultList, cmd.getOwnerId());
+            return resultList;
         } catch (IOException e) {
             LOGGER.error("file process excel error ", e);
             e.printStackTrace();
         }
+
+        return null;
     }
 
-    private void batchUpdateSSSettingAndPayments(List list, Long ownerId) {
+    private void batchUpdateSSSettingAndPayments(List list, Long ownerId, String fileLog, ImportFileResponse response) {
         //
+        ImportFileResultLog<Map<String, String>> log = new ImportFileResultLog<>(SocialSecurityConstants.SCOPE);
+        response.setLogs(new ArrayList<>());
         for (int i = 1; i < list.size(); i++) {
             RowResult r = (RowResult) list.get(i);
             String userContact = r.getA();
             OrganizationMemberDetails detail = organizationProvider.findOrganizationMemberDetailsByOrganizationIdAndContactToken(ownerId, userContact);
             if (null == detail) {
+                response.setFileLog("找不到用户: 手机号"+userContact);
                 LOGGER.error("can not find organization member ,contact token is " + userContact);
-            }else{
+
+            } else {
                 String ssCityName = r.getB();
                 Long ssCityId = getZuolinNamespaceCityId(ssCityName);
                 String afCityName = r.getC();
@@ -1102,7 +1135,7 @@ public class SocialSecurityServiceImpl implements SocialSecurityService {
         if (dto.getDismissTime() != null && Integer.valueOf(report.getPayMonth()) >=
                 Integer.valueOf(dateSF.get().format(dto.getDismissTime()))) {
             report.setIsWork(IsWork.IS_OUT.getCode());
-        }else{
+        } else {
             if (null != dto.getCheckInTime() &&
                     Integer.valueOf(dateSF.get().format(dto.getCheckInTime())).equals(report.getPayMonth())) {
                 report.setIsWork(IsWork.IS_NEW.getCode());
@@ -1901,9 +1934,6 @@ public class SocialSecurityServiceImpl implements SocialSecurityService {
         SocialSecurityEmployeesCountResponse response = new SocialSecurityEmployeesCountResponse();
 
 
-
-
-
         response.setSocialSecurity(2);
         response.setAccumulationFund(3);
         response.setGrowth(0);
@@ -1921,9 +1951,9 @@ public class SocialSecurityServiceImpl implements SocialSecurityService {
         inoutTime.setUserId(memberDetail.getTargetId());
         inoutTime.setDetailId(memberDetail.getId());
         inoutTime.setType(cmd.getInOutType());
-        if(cmd.getStartMonth() != null)
+        if (cmd.getStartMonth() != null)
             inoutTime.setStartMonth(cmd.getStartMonth());
-        if(cmd.getEndMonth() != null)
+        if (cmd.getEndMonth() != null)
             inoutTime.setEndMonth(cmd.getEndMonth());
 
         socialSecurityInoutTimeProvider.createSocialSecurityInoutTime(inoutTime);

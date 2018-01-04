@@ -15,6 +15,8 @@ public class ImportFileResultLog<T> {
 
     private String errorDescription;
 
+
+
     public T getData() {
         return data;
     }
