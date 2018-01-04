@@ -1089,11 +1089,13 @@ public class SocialSecurityServiceImpl implements SocialSecurityService {
         report.setFileUid(userPayments.get(0).getFileUid());
         report.setFileTime(userPayments.get(0).getFileTime());
         SocialSecurityEmployeeDTO dto = getSocialSecurityEmployeeInfo(detail.getOrganizationId());
+        //TODO: 这里以后也要改
         if (dto.getDismissTime() != null && Integer.valueOf(report.getPayMonth()) >=
                 Integer.valueOf(dateSF.get().format(dto.getDismissTime()))) {
             report.setIsWork(IsWork.IS_OUT.getCode());
         }else{
-            if (Integer.valueOf(dateSF.get().format(dto.getCheckInTime())).equals(report.getPayMonth())) {
+            if (null != dto.getCheckInTime() &&
+                    Integer.valueOf(dateSF.get().format(dto.getCheckInTime())).equals(report.getPayMonth())) {
                 report.setIsWork(IsWork.IS_NEW.getCode());
             } else {
                 report.setIsWork(IsWork.NORMAL.getCode());
