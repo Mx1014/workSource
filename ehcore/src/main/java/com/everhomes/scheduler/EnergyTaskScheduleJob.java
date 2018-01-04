@@ -398,6 +398,7 @@ public class EnergyTaskScheduleJob extends QuartzJobBean {
             }
         } else {
             Contract contract = contractProvider.findContractById(command.getContractId());
+            command.setContractNum(contract.getContractNumber());
             if(CustomerType.ENTERPRISE.equals(CustomerType.fromStatus(contract.getCustomerType()))) {
                 command.setTargetType("eh_organization");
                 EnterpriseCustomer customer = enterpriseCustomerProvider.findById(contract.getCustomerId());
