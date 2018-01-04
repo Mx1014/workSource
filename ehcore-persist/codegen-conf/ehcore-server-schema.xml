@@ -208,6 +208,7 @@
             eh_point_tutorials | eh_point_tutorial_to_point_rule_mappings | eh_point_event_logs | eh_system_events | eh_point_actions | eh_point_rule_to_event_mappings |
             eh_energy_meter_category_map | eh_energy_meter_fomular_map | eh_tasks |
             eh_parking_spaces | eh_parking_space_logs |
+            eh_rentalv2_order_rules |
         </includes>
 
             <!-- All elements that are excluded from your schema

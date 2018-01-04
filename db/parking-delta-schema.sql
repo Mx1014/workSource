@@ -64,7 +64,7 @@ ADD COLUMN `source_type` varchar(255) DEFAULT NULL COMMENT 'default_rule, resour
 ADD COLUMN `source_id` bigint(20) DEFAULT NULL,
 ADD COLUMN `resource_type` varchar(64) DEFAULT NULL COMMENT '资源类型',
 ADD COLUMN `holiday_open_flag` tinyint(4) DEFAULT NULL COMMENT '节假日是否开放预约: 1-是, 0-否',
-ADD COLUMN `holiday_type` tinyint(4) DEFAULT NULL COMMENT '1-普通双休, 0-同步中国节假日',
+ADD COLUMN `holiday_type` tinyint(4) DEFAULT NULL COMMENT '1-普通双休, 2-同步中国节假日',
 ADD COLUMN `refund_strategy` tinyint(4) DEFAULT NULL COMMENT '1-custom, 2-full',
 ADD COLUMN `overtime_strategy` tinyint(4) DEFAULT NULL COMMENT '1-custom, 2-full';
 
@@ -88,9 +88,11 @@ drop column approving_user_weekend_price,
 drop column rental_type,
 drop column exclusive_flag;
 
+UPDATE eh_rentalv2_default_rules set source_type = 'default_rule' where source_type IS NULL;
 -- 资源表中规则信息迁移到规则表中
-INSERT INTO `eh_rentalv2_default_rules` (`id`, `owner_type`, `owner_id`, `resource_type_id`, `rental_start_time`, `rental_end_time`, `refund_flag`, `refund_ratio`, `creator_uid`, `create_time`, `auto_assign`, `multi_unit`, `multi_time_interval`, `need_pay`, `resource_counts`, `begin_date`, `end_date`, `open_weekday`, `rental_start_time_flag`, `rental_end_time_flag`, `source_type`, `source_id`)
-SELECT (@id := @id + 1), 'organization', organization_id, resource_type_id, rental_start_time, rental_end_time, refund_flag, refund_ratio, creator_uid, create_time, auto_assign, multi_unit, multi_time_interval, need_pay, resource_counts, begin_date, end_date, open_weekday, rental_start_time_flag, rental_end_time_flag, 'resource_rule', id  from eh_rentalv2_resources;
+SET @id = (SELECT MAX(id) FROM `eh_rentalv2_default_rules`);
+INSERT INTO `eh_rentalv2_default_rules` (`id`, `owner_type`, `owner_id`, `resource_type_id`, `rental_start_time`, `rental_end_time`, `refund_flag`, `refund_ratio`, `creator_uid`, `create_time`, `auto_assign`, `multi_unit`, `multi_time_interval`, `need_pay`, `resource_counts`, `begin_date`, `end_date`, `day_open_time`, `day_close_time`, `open_weekday`, `rental_start_time_flag`, `rental_end_time_flag`, `source_type`, `source_id`)
+SELECT (@id := @id + 1), 'organization', organization_id, resource_type_id, rental_start_time, rental_end_time, refund_flag, refund_ratio, creator_uid, create_time, auto_assign, multi_unit, multi_time_interval, need_pay, resource_counts, begin_date, end_date, day_open_time, day_close_time, open_weekday, rental_start_time_flag, rental_end_time_flag, 'resource_rule', id  from eh_rentalv2_resources;
 
 
 ALTER TABLE `eh_rentalv2_resources`
