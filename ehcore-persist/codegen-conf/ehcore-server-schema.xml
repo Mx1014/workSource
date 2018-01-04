@@ -198,6 +198,7 @@
             eh_me_web_menus | eh_customer_entry_infos | eh_customer_departure_infos |
             eh_social_security_bases | eh_social_security_settings | eh_social_security_payments |  eh_social_security_payment_logs | 
 			eh_social_security_summary | eh_social_security_department_summary | eh_social_security_report | eh_social_security_inout_report | eh_social_security_inout_time |
+			eh_social_security_inout_log |
         </includes>
 
             <!-- All elements that are excluded from your schema
