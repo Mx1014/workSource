@@ -756,10 +756,12 @@ public class SocialSecurityServiceImpl implements SocialSecurityService {
         setting.setUserId(userId);
         setting.setDetailId(detailId);
         setting.setNamespaceId(namespaceId);
-        setting.setCompanyRadix(base.getCompanyRadixMin());
-        setting.setEmployeeRadix(base.getEmployeeRadixMin());
-        setting.setCompanyRatio(base.getCompanyRatioMin());
-        setting.setEmployeeRatio(base.getEmployeeRatioMin());
+        if (null != base) {
+            setting.setCompanyRadix(base.getCompanyRadixMin());
+            setting.setEmployeeRadix(base.getEmployeeRadixMin());
+            setting.setCompanyRatio(base.getCompanyRatioMin());
+            setting.setEmployeeRatio(base.getEmployeeRatioMin());
+        }
         return setting;
     }
 
