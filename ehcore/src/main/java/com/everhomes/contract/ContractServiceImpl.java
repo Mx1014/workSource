@@ -1697,11 +1697,12 @@ public class ContractServiceImpl implements ContractService {
 		CheckAdminCommand cmd1 = new CheckAdminCommand();
 		cmd1.setNamespaceId(cmd.getNamespaceId());
 		cmd1.setOrganizationId(cmd.getOrganizationId());
-		if(checkAdmin(cmd1)) {
-			return findContract(cmd);
-		}
-
-		return null;
+		return findContract(cmd);
+//		if(checkAdmin(cmd1)) {
+//			return findContract(cmd);
+//		}
+//
+//		return null;
 	}
 
 	@Override
