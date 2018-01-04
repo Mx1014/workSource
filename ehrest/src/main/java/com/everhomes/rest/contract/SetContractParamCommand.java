@@ -30,6 +30,16 @@ public class SetContractParamCommand {
     private Integer receivableDate;
     private Byte receivableUnit;
 
+    private Integer paidPeriod;
+
+    public Integer getPaidPeriod() {
+        return paidPeriod;
+    }
+
+    public void setPaidPeriod(Integer paidPeriod) {
+        this.paidPeriod = paidPeriod;
+    }
+
     public Long getId() {
         return id;
     }

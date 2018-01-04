@@ -207,7 +207,7 @@
             eh_point_systems | eh_point_rule_categories | eh_point_scores | eh_point_rules | eh_point_logs | eh_point_goods | eh_point_rule_configs |
             eh_point_tutorials | eh_point_tutorial_to_point_rule_mappings | eh_point_event_logs | eh_system_events | eh_point_actions | eh_point_rule_to_event_mappings |
             eh_energy_meter_category_map | eh_energy_meter_fomular_map | eh_tasks |
-            eh_contract_payment_plans | eh_payment_applications |
+            eh_contract_payment_plans | eh_payment_applications | eh_contract_param_group_map |
         </includes>
 
             <!-- All elements that are excluded from your schema
