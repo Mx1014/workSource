@@ -8,6 +8,7 @@ import java.util.List;
 import com.everhomes.rest.socialSecurity.NormalFlag;
 import com.everhomes.user.User;
 import org.jooq.DSLContext;
+import org.jooq.Record;
 import org.jooq.Record1;
 import org.jooq.SelectConditionStep;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -105,28 +106,41 @@ public class SocialSecurityPaymentProviderImpl implements SocialSecurityPaymentP
 
     @Override
     public SocialSecurityPayment findSocialSecurityPayment(Long detailId, String payItem, Byte accumOrSocial) {
-        return getReadOnlyContext().select().from(Tables.EH_SOCIAL_SECURITY_PAYMENTS)
+        Record record = getReadOnlyContext().select().from(Tables.EH_SOCIAL_SECURITY_PAYMENTS)
                 .where(Tables.EH_SOCIAL_SECURITY_PAYMENTS.DETAIL_ID.eq(detailId))
                 .and(Tables.EH_SOCIAL_SECURITY_PAYMENTS.PAY_ITEM.eq(payItem))
                 .and(Tables.EH_SOCIAL_SECURITY_PAYMENTS.ACCUM_OR_SOCAIL.eq(accumOrSocial))
                 .orderBy(Tables.EH_SOCIAL_SECURITY_PAYMENTS.ID.asc())
-                .fetchAny().map(r -> ConvertHelper.convert(r, SocialSecurityPayment.class));
+                .fetchAny();
+        if (null == record) {
+            return null;
+        }
+        return record.map(r -> ConvertHelper.convert(r, SocialSecurityPayment.class));
     }
 
 
     @Override
     public String findPaymentMonthByDetail(Long detailId) {
-        return getReadOnlyContext().selectDistinct(Tables.EH_SOCIAL_SECURITY_PAYMENTS.PAY_MONTH).from(Tables.EH_SOCIAL_SECURITY_PAYMENTS)
+        Record1<String> record = getReadOnlyContext().selectDistinct(Tables.EH_SOCIAL_SECURITY_PAYMENTS.PAY_MONTH).from(Tables.EH_SOCIAL_SECURITY_PAYMENTS)
                 .where(Tables.EH_SOCIAL_SECURITY_PAYMENTS.DETAIL_ID.eq(detailId))
-                .fetchAny().value1();
+                .fetchAny();
+        if (null == record) {
+            return null;
+        }
+        return record.value1();
     }
 
     @Override
     public Integer countUnFieldUsers(Long ownerId) {
-        return getReadOnlyContext().selectDistinct(Tables.EH_SOCIAL_SECURITY_PAYMENTS.DETAIL_ID.countDistinct()).from(Tables.EH_SOCIAL_SECURITY_PAYMENTS)
+        Record1<Integer> record = getReadOnlyContext().selectDistinct(Tables.EH_SOCIAL_SECURITY_PAYMENTS.DETAIL_ID.countDistinct()).from(Tables.EH_SOCIAL_SECURITY_PAYMENTS)
                 .where(Tables.EH_SOCIAL_SECURITY_PAYMENTS.ORGANIZATION_ID.eq(ownerId))
                 .and(Tables.EH_SOCIAL_SECURITY_PAYMENTS.IS_FILED.eq(NormalFlag.NO.getCode()))
-                .fetchAny().value1();
+                .fetchAny();
+
+        if (null == record) {
+            return null;
+        }
+        return record.value1();
     }
 
     @Override
