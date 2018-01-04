@@ -544,6 +544,29 @@ public class PointServiceImpl implements PointService {
         return response;
     }
 
+    @Override
+    public PointScoreDTO getUserPointForOpenAPI(GetUserPointCommand cmd) {
+        ValidatorUtil.validate(cmd);
+
+        Integer namespaceId = cmd.getNamespaceId() != null ? cmd.getNamespaceId() : UserContext.getCurrentNamespaceId();
+        Long uid = cmd.getUid() != null ? cmd.getUid() : UserContext.currentUserId();
+
+        PointScoreDTO scoreDTO = null;
+        List<PointSystem> enabledPointSystems = pointSystemProvider.getEnabledPointSystems(namespaceId);
+
+        if (enabledPointSystems != null && enabledPointSystems.size() > 0) {
+            PointSystem system = enabledPointSystems.get(0);
+
+            scoreDTO = pointScoreProvider.findUserPointScore(namespaceId, system.getId(), uid, PointScoreDTO.class);
+            if (scoreDTO == null) {
+                scoreDTO = new PointScoreDTO();
+                scoreDTO.setScore(0L);
+            }
+            scoreDTO.setPointName(system.getPointName());
+        }
+        return scoreDTO;
+    }
+
     private ListPointGoodsResponse fetchPointGoodsFromBiz(
             Integer namespaceId, Long pageNo, int pageSize, List<PointGood> goods, Map<String, Object> params) {
         Map<String, Object> bodyMap = new HashMap<>();

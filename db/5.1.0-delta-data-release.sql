@@ -30,6 +30,22 @@ INSERT INTO `eh_locale_templates`(`id`, `scope`, `code`, `locale`, `description`
 INSERT INTO `eh_locale_templates`(`id`, `scope`, `code`, `locale`, `description`, `text`, `namespace_id`) VALUES (@tem_ip := @tem_ip + 1, 'work.report.notification', 6, 'zh_CN', '读者被读者评论', '${creatorName}在${applierName}的${reportName}中回复了你', 0);
 INSERT INTO `eh_locale_templates`(`id`, `scope`, `code`, `locale`, `description`, `text`, `namespace_id`) VALUES (@tem_ip := @tem_ip + 1, 'work.report.notification', 7, 'zh_CN', '作者的汇报被评论', '${creatorName}在你的${reportName}中发表了评论', 0);
 
+-- menu & scope
+SET @scope_id = (SELECT MAX(id) FROM eh_web_menu_scopes);
+INSERT INTO `eh_web_menu_scopes` (`id`, `menu_id`, `menu_name`, `owner_type`, `owner_id`, `apply_policy`) VALUES (@scope_id := @scope_id + 1, '54000', '', 'EhNamespaces', '1', '2');
+INSERT INTO `eh_web_menu_scopes` (`id`, `menu_id`, `menu_name`, `owner_type`, `owner_id`, `apply_policy`) VALUES (@scope_id := @scope_id + 1, '54010', '', 'EhNamespaces', '1', '2');
+INSERT INTO `eh_web_menu_scopes` (`id`, `menu_id`, `menu_name`, `owner_type`, `owner_id`, `apply_policy`) VALUES (@scope_id := @scope_id + 1, '54020', '', 'EhNamespaces', '1', '2');
+
+SET @item_id = (SELECT MAX(id) FROM eh_launch_pad_items);
+INSERT INTO `eh_launch_pad_items` (`id`, `namespace_id`, `app_id`, `scope_code`, `scope_id`, `item_location`, `item_group`, `item_name`, `item_label`, `icon_uri`, `item_width`, `item_height`, `action_type`, `action_data`, `default_order`, `apply_policy`, `min_version`, `display_flag`, `display_layout`, `bgcolor`, `tag`, `target_type`, `target_id`, `delete_flag`, `scene_type`, `scale_type`, `service_categry_id`, `selected_icon_uri`, `more_order`, `alias_icon_uri`, `categry_name`) VALUES (@item_id := @item_id + 1, '1', '0', '0', '0', '/home', 'Bizs', '工作汇报', '工作汇报', 'cs://1/image/aW1hZ2UvTVRvek1tTmpOVGRtTUdSaE1HTmlPV1V6WVRjNE5qSTRZelJpWTJGbE1UaGxOQQ', '1', '1', '60', '{\"url\":\"zl://work-report/main\"}', '20', '0', '1', '1', '', '0', NULL, NULL, NULL, '0', 'pm_admin', '0', '88', NULL, '0', NULL, NULL);
+INSERT INTO `eh_launch_pad_items` (`id`, `namespace_id`, `app_id`, `scope_code`, `scope_id`, `item_location`, `item_group`, `item_name`, `item_label`, `icon_uri`, `item_width`, `item_height`, `action_type`, `action_data`, `default_order`, `apply_policy`, `min_version`, `display_flag`, `display_layout`, `bgcolor`, `tag`, `target_type`, `target_id`, `delete_flag`, `scene_type`, `scale_type`, `service_categry_id`, `selected_icon_uri`, `more_order`, `alias_icon_uri`, `categry_name`) VALUES (@item_id := @item_id + 1, '1', '0', '0', '0', '/home', 'Bizs', '工作汇报', '工作汇报', 'cs://1/image/aW1hZ2UvTVRvek1tTmpOVGRtTUdSaE1HTmlPV1V6WVRjNE5qSTRZelJpWTJGbE1UaGxOQQ', '1', '1', '60', '{\"url\":\"zl://work-report/main\"}', '20', '0', '1', '1', '', '0', NULL, NULL, NULL, '0', 'park_tourist', '0', '90', NULL, '0', NULL, NULL);
+
+-- module & scope
+INSERT INTO `eh_service_modules` (`id`, `name`, `parent_id`, `path`, `type`, `level`, `status`, `default_order`, `create_time`, `instance_config`, `action_type`, `update_time`, `operator_uid`, `creator_uid`, `description`, `multiple_flag`, `module_control_type`) VALUES ('54000', '工作汇报', '50000', '/50000/54000', '1', '2', '2', '0', '2017-12-20 11:50:20', NULL, '60', '2017-12-20 10:45:46', '0', '0', '0', '0', NULL);
+
+SET @scope_id = (SELECT MAX(id) FROM eh_service_module_scopes);
+INSERT INTO `eh_service_module_scopes` (`id`, `namespace_id`, `module_id`, `module_name`, `owner_type`, `owner_id`, `default_order`, `apply_policy`) VALUES (@scope_id := @scope_id + 1, '1', '54000', '', 'EhNamespaces', '1', NULL, '2');
+
 
 -- end by nan.rong
 
@@ -39,6 +55,9 @@ INSERT INTO `eh_locale_templates` (`id`, `scope`, `code`, `locale`, `description
 VALUES ((@locale_templates_id := @locale_templates_id + 1), 'point', 10000, 'zh_CN', '您的积分将于12月31日过期，请及时使用。', '您的积分将于12月31日过期，请及时使用。', 0);
 INSERT INTO `eh_locale_templates` (`id`, `scope`, `code`, `locale`, `description`, `text`, `namespace_id`)
 VALUES ((@locale_templates_id := @locale_templates_id + 1), 'point', 10001, 'zh_CN', '积分通用的模板', '{"messageTitle":"积分消息","resetPointDesc":"积分重置","resetPointCate":"系统","exportLogTitle":"昵称,手机,功能模块,行为,积分变化,日期","exportLogFileName":"用户积分历史"}', 0);
+
+-- 删除非威新的积分日志
+DELETE FROM `eh_point_logs` WHERE `namespace_id` <> 999991;
 
 DELETE FROM `eh_point_rules`;
 INSERT INTO `eh_point_rules` (`id`, `namespace_id`, `category_id`, `module_id`, `display_name`, `description`, `arithmetic_type`, `points`, `limit_type`, `limit_data`, `binding_rule_id`, `status`, `display_flag`, `create_time`, `creator_uid`, `update_time`, `update_uid`, `extra`) VALUES (1, 0, 1, 0, '注册成功', '注册成功', 1, 10, '{"type":2}', '{"times":1}', 0, 2, 1, NULL, NULL, NULL, NULL, NULL);
@@ -160,10 +179,10 @@ VALUES (5500000, '积分系统', 5000000, NULL, 'integral-management', 0, 2, '/5
 INSERT INTO `eh_web_menus` (`id`, `name`, `parent_id`, `icon_url`, `data_type`, `leaf_flag`, `status`, `path`, `type`, `sort_num`, `module_id`, `level`, `condition_type`, `category`)
 VALUES (5510000, '积分系统', 5500000, NULL, 'integral-management', 0, 2, '/5000000/5500000/5510000', 'zuolin', 10, 47000, 2, 'namespace', 'page');
 
-# INSERT INTO `eh_web_menus` (`id`, `name`, `parent_id`, `icon_url`, `data_type`, `leaf_flag`, `status`, `path`, `type`, `sort_num`, `module_id`, `level`, `condition_type`, `category`)
-# VALUES (1200000, '短信管理', 1000000, NULL, 'sms-management', 0, 2, '/1100000/1100000', 'zuolin', 10, 12200, 2, 'namespace', 'module');
-# INSERT INTO `eh_web_menus` (`id`, `name`, `parent_id`, `icon_url`, `data_type`, `leaf_flag`, `status`, `path`, `type`, `sort_num`, `module_id`, `level`, `condition_type`, `category`)
-# VALUES (1210000, '短信管理', 1200000, NULL, 'sms-management', 0, 2, '/1100000/1100000/1110000', 'zuolin', 10, 12200, 2, 'namespace', 'page');
+INSERT INTO `eh_web_menus` (`id`, `name`, `parent_id`, `icon_url`, `data_type`, `leaf_flag`, `status`, `path`, `type`, `sort_num`, `module_id`, `level`, `condition_type`, `category`)
+VALUES (1200000, '短信管理', 1000000, NULL, 'sms-management', 0, 2, '/1100000/1100000', 'zuolin', 10, 12200, 2, 'namespace', 'module');
+INSERT INTO `eh_web_menus` (`id`, `name`, `parent_id`, `icon_url`, `data_type`, `leaf_flag`, `status`, `path`, `type`, `sort_num`, `module_id`, `level`, `condition_type`, `category`)
+VALUES (1210000, '短信管理', 1200000, NULL, 'sms-management', 0, 2, '/1100000/1100000/1110000', 'zuolin', 10, 12200, 2, 'namespace', 'page');
 
 SET @locale_strings_id = IFNULL((SELECT MAX(id) FROM `eh_locale_strings`), 0);
 INSERT INTO `eh_locale_strings` (`id`, `scope`, `code`, `locale`, `text`)
@@ -177,6 +196,6 @@ VALUES ((@locale_strings_id := @locale_strings_id + 1), 'point', '10005', 'zh_CN
 INSERT INTO `eh_locale_strings` (`id`, `scope`, `code`, `locale`, `text`)
 VALUES ((@locale_strings_id := @locale_strings_id + 1), 'point', '10006', 'zh_CN', '验证码错误');
 INSERT INTO `eh_locale_strings` (`id`, `scope`, `code`, `locale`, `text`)
-VALUES ((@locale_strings_id := @locale_strings_id + 1), 'point', '10007', 'zh_CN', '积分系统名称已存在');
+VALUES ((@locale_strings_id := @locale_strings_id + 1), 'point', '10007', 'zh_CN', '名称已存在');
 INSERT INTO `eh_locale_strings` (`id`, `scope`, `code`, `locale`, `text`)
-VALUES ((@locale_strings_id := @locale_strings_id + 1), 'point', '10008', 'zh_CN', '积分名称已存在');
+VALUES ((@locale_strings_id := @locale_strings_id + 1), 'point', '10008', 'zh_CN', '虚拟货币名称已存在');

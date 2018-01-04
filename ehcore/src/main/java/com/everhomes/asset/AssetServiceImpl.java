@@ -2282,6 +2282,29 @@ public class AssetServiceImpl implements AssetService {
 
     @Override
     public FindUserInfoForPaymentResponse findUserInfoForPayment(FindUserInfoForPaymentCommand cmd) {
+        //企业用户的话判断是否为企业管理员
+        out:{
+            if(cmd.getTargetType().equals(AssetPaymentStrings.EH_ORGANIZATION)){
+                Long userId = UserContext.currentUserId();
+                ListServiceModuleAdministratorsCommand cmd1 = new ListServiceModuleAdministratorsCommand();
+                cmd1.setOrganizationId(cmd.getTargetId());
+                cmd1.setActivationFlag((byte)1);
+                cmd1.setOwnerType("EhOrganizations");
+                cmd1.setOwnerId(null);
+                LOGGER.info("organization manager check for bill display, cmd = "+ cmd1.toString());
+                List<OrganizationContactDTO> organizationContactDTOS = rolePrivilegeService.listOrganizationAdministrators(cmd1);
+                LOGGER.info("organization manager check for bill display, orgContactsDTOs are = "+ organizationContactDTOS.toString());
+                LOGGER.info("organization manager check for bill display, userId = "+ userId);
+                for(OrganizationContactDTO dto : organizationContactDTOS){
+                    Long targetId = dto.getTargetId();
+                    if(targetId.longValue() == userId.longValue()){
+                        break out;
+                    }
+                }
+                throw RuntimeErrorException.errorWith(AssetErrorCodes.SCOPE,AssetErrorCodes.NOT_CORP_MANAGER,
+                        "not valid corp manager");
+            }
+        }
         AssetVendor assetVendor = checkAssetVendor(UserContext.getCurrentNamespaceId(),0);
         String vendor = assetVendor.getVendorName();
         AssetVendorHandler handler = getAssetVendorHandler(vendor);
@@ -2725,7 +2748,7 @@ public class AssetServiceImpl implements AssetService {
         }
         switch (namespaceId){
             case 999971:
-                if(cmd.getOwnerType()!=null && cmd.getOwnerType().equals(AssetPaymentStrings.EH_USER)) hasPay = 0;
+                if(cmd.getOwnerType()!=null && cmd.getOwnerType().equals(AssetPaymentStrings.EH_USER)) hasPay = 1;
                 break;
             case 999983:
                 hasContractView = 0;

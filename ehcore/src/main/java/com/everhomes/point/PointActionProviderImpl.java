@@ -18,6 +18,8 @@ import com.everhomes.util.DateUtils;
 import org.jooq.DSLContext;
 import org.jooq.SelectQuery;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.cache.annotation.CacheEvict;
+import org.springframework.cache.annotation.Cacheable;
 import org.springframework.stereotype.Repository;
 
 import java.sql.Timestamp;
@@ -32,6 +34,7 @@ public class PointActionProviderImpl implements PointActionProvider {
     @Autowired
     private SequenceProvider sequenceProvider;
 
+    @CacheEvict(value = "PointAction", allEntries = true)
     @Override
     public void createPointAction(PointAction pointAction) {
         Long id = sequenceProvider.getNextSequence(NameMapper.getSequenceDomainFromTablePojo(EhPointActions.class));
@@ -42,6 +45,7 @@ public class PointActionProviderImpl implements PointActionProvider {
         DaoHelper.publishDaoAction(DaoAction.CREATE, EhPointActions.class, id);
     }
 
+    @CacheEvict(value = "PointAction", allEntries = true)
     @Override
     public void updatePointAction(PointAction pointAction) {
         // pointAction.setUpdateTime(DateUtils.currentTimestamp());
@@ -77,11 +81,13 @@ public class PointActionProviderImpl implements PointActionProvider {
         return list;
     }
 
+    @Cacheable(value = "PointAction", key = "{#root.methodName, #root.args}")
     @Override
     public PointAction findById(Long id) {
         return ConvertHelper.convert(dao().findById(id), PointAction.class);
     }
 
+    @CacheEvict(value = "PointAction", allEntries = true)
     @Override
     public void createPointActions(List<PointAction> pointActions) {
         Timestamp createTime = DateUtils.currentTimestamp();
@@ -93,6 +99,7 @@ public class PointActionProviderImpl implements PointActionProvider {
         rwDao().insert(pointActions.toArray(new EhPointActions[pointActions.size()]));
     }
 
+    @Cacheable(value = "PointAction", key = "{#root.methodName, #root.args}")
     @Override
     public List<PointAction> listByOwner(Integer namespaceId, String ownerType, Long ownerId) {
         com.everhomes.server.schema.tables.EhPointActions t = Tables.EH_POINT_ACTIONS;

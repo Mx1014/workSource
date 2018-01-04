@@ -96,10 +96,9 @@ public class SmsServiceImpl implements SmsService {
     @Override
     public ListSmsLogsResponse listReportLogs(ListReportLogCommand cmd) {
         if(!this.aclProvider.checkAccess("system", null, EhUsers.class.getSimpleName(), 
-                UserContext.current().getUser().getId(), Privilege.Write, null)) {
-            
-                throw RuntimeErrorException.errorWith(ErrorCodes.SCOPE_GENERAL, ErrorCodes.ERROR_ACCESS_DENIED, "Access denied");
-            }
+            UserContext.current().getUser().getId(), Privilege.Write, null)) {
+            throw RuntimeErrorException.errorWith(ErrorCodes.SCOPE_GENERAL, ErrorCodes.ERROR_ACCESS_DENIED, "Access denied");
+        }
         
         ListingLocator locator = new ListingLocator();
         locator.setAnchor(cmd.getPageAnchor());
@@ -146,6 +145,11 @@ public class SmsServiceImpl implements SmsService {
     private SmsLogDTO toSmsLogDTO(SmsLog smsLog) {
         SmsLogDTO dto = ConvertHelper.convert(smsLog, SmsLogDTO.class);
         dto.setCreateTime(smsLog.getCreateTime().toLocalDateTime().toString());
+        if (smsLog.getReportTime() != null) {
+            dto.setReportTime(smsLog.getReportTime().toLocalDateTime().toString());
+        } else {
+            dto.setReportTime("");
+        }
         return dto;
     }
 }

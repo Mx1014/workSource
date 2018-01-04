@@ -604,23 +604,20 @@ public class GeneralFormServiceImpl implements GeneralFormService {
                     public SelectQuery<? extends Record> buildCondition(ListingLocator locator,
                                                                         SelectQuery<? extends Record> query) {
                         query.addConditions(Tables.EH_GENERAL_FORMS.OWNER_ID.eq(cmd.getOwnerId()));
-                        query.addConditions(Tables.EH_GENERAL_FORMS.OWNER_TYPE.eq(cmd
-                                .getOwnerType()));
+                        query.addConditions(Tables.EH_GENERAL_FORMS.OWNER_TYPE.eq(cmd.getOwnerType()));
                         Condition condition = DSL.trueCondition();
                         if (cmd.getModuleId() != null && cmd.getModuleType() != null) {
                             condition = condition.and(Tables.EH_GENERAL_FORMS.MODULE_ID.eq(cmd.getModuleId()));
                             condition = condition.and(Tables.EH_GENERAL_FORMS.MODULE_TYPE.eq(cmd.getModuleType()));
                         }
+                        condition = condition.and(Tables.EH_GENERAL_FORMS.STATUS.ne(GeneralFormStatus.INVALID.getCode()));
                         query.addConditions(condition);
-                        query.addConditions(Tables.EH_GENERAL_FORMS.STATUS
-                                .ne(GeneralFormStatus.INVALID.getCode()));
+                        query.addOrderBy(Tables.EH_GENERAL_FORMS.FORM_ORIGIN_ID.asc());
                         return query;
                     }
                 });
         ListGeneralFormResponse resp = new ListGeneralFormResponse();
-        resp.setForms(forms.stream().map((r) -> {
-            return processGeneralFormDTO(r);
-        }).collect(Collectors.toList()));
+        resp.setForms(forms.stream().map((r) -> processGeneralFormDTO(r)).collect(Collectors.toList()));
         return resp;
     }
 

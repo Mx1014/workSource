@@ -17,6 +17,8 @@ import com.everhomes.util.ConvertHelper;
 import org.jooq.DSLContext;
 import org.jooq.SelectQuery;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.cache.annotation.CacheEvict;
+import org.springframework.cache.annotation.Cacheable;
 import org.springframework.stereotype.Repository;
 
 import java.util.List;
@@ -30,6 +32,7 @@ public class PointRuleToEventMappingProviderImpl implements PointRuleToEventMapp
     @Autowired
     private SequenceProvider sequenceProvider;
 
+    @CacheEvict(value = "PointRuleToEventMapping", allEntries = true)
     @Override
     public void createPointRuleToEventMapping(PointRuleToEventMapping pointRuleToEventMapping) {
         Long id = sequenceProvider.getNextSequence(NameMapper.getSequenceDomainFromTablePojo(EhPointRuleToEventMappings.class));
@@ -40,6 +43,7 @@ public class PointRuleToEventMappingProviderImpl implements PointRuleToEventMapp
         DaoHelper.publishDaoAction(DaoAction.CREATE, EhPointRuleToEventMappings.class, id);
     }
 
+    @CacheEvict(value = "PointRuleToEventMapping", allEntries = true)
     @Override
     public void updatePointRuleToEventMapping(PointRuleToEventMapping pointRuleToEventMapping) {
         // pointRuleToEventMapping.setUpdateTime(DateUtils.currentTimestamp());
@@ -75,11 +79,13 @@ public class PointRuleToEventMappingProviderImpl implements PointRuleToEventMapp
         return list;
     }
 
+    @Cacheable(value = "PointRuleToEventMapping", key = "{#root.methodName, #root.args}")
     @Override
     public PointRuleToEventMapping findById(Long id) {
         return ConvertHelper.convert(dao().findById(id), PointRuleToEventMapping.class);
     }
 
+    @Cacheable(value = "PointRuleToEventMapping", key = "{#root.methodName, #root.args}")
     @Override
     public List<PointRuleToEventMapping> listByPointRule(Long pointRuleId) {
         com.everhomes.server.schema.tables.EhPointRuleToEventMappings t = Tables.EH_POINT_RULE_TO_EVENT_MAPPINGS;
@@ -91,6 +97,7 @@ public class PointRuleToEventMappingProviderImpl implements PointRuleToEventMapp
         });
     }
 
+    @CacheEvict(value = "PointRuleToEventMapping", allEntries = true)
     @Override
     public void createPointRuleToEventMappings(List<PointRuleToEventMapping> mappings) {
         for (PointRuleToEventMapping mapping : mappings) {
@@ -100,6 +107,7 @@ public class PointRuleToEventMappingProviderImpl implements PointRuleToEventMapp
         rwDao().insert(mappings.toArray(new EhPointRuleToEventMappings[mappings.size()]));
     }
 
+    @Cacheable(value = "PointRuleToEventMapping", key = "{#root.methodName, #root.args}")
     @Override
     public List<PointRuleToEventMapping> listByEventName(String eventName) {
         com.everhomes.server.schema.tables.EhPointRuleToEventMappings t = Tables.EH_POINT_RULE_TO_EVENT_MAPPINGS;
