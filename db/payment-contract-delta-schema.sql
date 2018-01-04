@@ -18,6 +18,18 @@ ALTER TABLE `eh_contracts` ADD COLUMN `paid_time` DATETIME COMMENT '预计付款
 ALTER TABLE `eh_contracts` ADD COLUMN `lump_sum_payment` DECIMAL(10,2) COMMENT '一次性付款金额';
 ALTER TABLE `eh_contracts` ADD COLUMN `treaty_particulars` text COMMENT '合同摘要';
 
+ALTER TABLE eh_contract_params ADD COLUMN `paid_period` int(11) NOT NULL DEFAULT '0' COMMENT '付款日期';
+
+CREATE TABLE `eh_contract_param_group_map` (		
+  `id` BIGINT NOT NULL COMMENT 'id',		=	
+  `param_id` BIGINT NOT NULL DEFAULT 0 COMMENT 'refernece to the id of eh_contract_params',		
+  `group_id` BIGINT NOT NULL DEFAULT 0 COMMENT 'refernece to the id of eh_organizations',		
+  `position_id` BIGINT NOT NULL DEFAULT 0 COMMENT 'refernece to the id of eh_organization_job_positions',		
+  `create_time` DATETIME,
+  		
+  PRIMARY KEY (`id`)		
+) ENGINE=INNODB DEFAULT CHARSET=utf8mb4;
+
 CREATE TABLE `eh_contract_payment_plans` (
   `id` BIGINT NOT NULL COMMENT 'id of the record',
   `namespace_id` INTEGER NOT NULL DEFAULT 0 COMMENT 'namespace of owner resource, redundant info to quick namespace related queries',
