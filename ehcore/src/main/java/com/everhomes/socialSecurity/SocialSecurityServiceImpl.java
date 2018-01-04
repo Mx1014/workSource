@@ -18,12 +18,13 @@ import com.everhomes.region.Region;
 import com.everhomes.region.RegionProvider;
 
 import com.everhomes.rest.archives.ArchivesUtil;
-import com.everhomes.rest.organization.OrganizationGroupType;
-import com.everhomes.rest.organization.OrganizationMemberStatus;
+import com.everhomes.rest.common.ImportFileResponse;
+import com.everhomes.rest.organization.*;
 import com.everhomes.rest.socialSecurity.*;
 import com.everhomes.sequence.SequenceProvider;
 import com.everhomes.server.schema.tables.pojos.EhSocialSecurityPayments;
 import com.everhomes.server.schema.tables.pojos.EhSocialSecuritySettings;
+import com.everhomes.user.UserContext;
 import com.everhomes.util.*;
 import com.everhomes.util.excel.RowResult;
 import com.everhomes.util.excel.handler.PropMrgOwnerHandler;
@@ -54,6 +55,9 @@ import java.util.stream.Collectors;
 
 @Component
 public class SocialSecurityServiceImpl implements SocialSecurityService {
+
+    @Autowired
+    private ImportFileService importFileService;
     @Autowired
     private DbProvider dbProvider;
     @Autowired
@@ -219,7 +223,7 @@ public class SocialSecurityServiceImpl implements SocialSecurityService {
         //把属于该公司的所有要交社保的setting取出来
         //todo : 本月要交社保的人
         Set<Long> detailIds = new HashSet<>();
-        detailIds.addAll(listSocialSecurityEmployeeDetailIdsByPayMonth(ownerId,paymentMonth));
+        detailIds.addAll(listSocialSecurityEmployeeDetailIdsByPayMonth(ownerId, paymentMonth));
 //        List<OrganizationMemberDetails> details = organizationProvider.listOrganizationMemberDetails(ownerId);
 //        if (null == details) {
 //            return;
@@ -271,7 +275,7 @@ public class SocialSecurityServiceImpl implements SocialSecurityService {
         if (null != bases) {
             for (SocialSecurityBase base : bases) {
                 EhSocialSecuritySettings setting = processSocialSecuritySetting(base, cityId, orgId, userId,
-                        detailId, namespaceId);
+                        detailId, namespaceId, null);
 //                socialSecuritySettingProvider.createSocialSecuritySetting(setting);
                 setting.setId(id++);
                 setting.setRadix(setting.getCompanyRadix());
@@ -690,7 +694,6 @@ public class SocialSecurityServiceImpl implements SocialSecurityService {
 
     private void saveSocialSecurityPayment(SocialSecurityPaymentDetailDTO socialSecurityPayment, Long detailId, Byte afterPay, Byte accumOrSocial) {
         String paymentMonth = socialSecurityPaymentProvider.findPaymentMonthByDetail(detailId);
-        socialSecurityPaymentProvider.setUserCityAndHTByAccumOrSocial(detailId, accumOrSocial, socialSecurityPayment.getCityId(), socialSecurityPayment.getHouseholdType());
         for (SocialSecurityItemDTO itemDTO : socialSecurityPayment.getItems()) {
             SocialSecurityPayment payment = socialSecurityPaymentProvider.findSocialSecurityPayment(detailId, itemDTO.getPayItem(), accumOrSocial);
             if (null == payment) {
@@ -700,11 +703,18 @@ public class SocialSecurityServiceImpl implements SocialSecurityService {
                 socialSecurityPaymentProvider.updateSocialSecurityPayment(payment);
             }
         }
+        socialSecurityPaymentProvider.setUserCityAndHTByAccumOrSocial(detailId, accumOrSocial, socialSecurityPayment.getCityId(), socialSecurityPayment.getHouseholdType());
     }
 
     private void createSocialSecurityPayment(SocialSecurityItemDTO itemDTO, Long detailId, Byte accumOrSocial, String paymentMonth, Byte afterPay) {
 //        SocialSecuritySetting setting = socialSecuritySettingProvider.findSocialSecuritySettingByDetailIdAndItem(detailId, itemDTO, accumOrSocial);
         SocialSecurityPayment payment = processSocialSecurityPayment(itemDTO, paymentMonth, afterPay);
+        payment.setDetailId(detailId);
+        OrganizationMemberDetails detail = organizationProvider.findOrganizationMemberDetailsByDetailId(detailId);
+        payment.setNamespaceId(detail.getNamespaceId());
+        payment.setOrganizationId(detail.getOrganizationId());
+        payment.setUserId(detail.getTargetId());
+        payment.setAccumOrSocail(accumOrSocial);
         copyRadixAndRatio(payment, itemDTO);
         socialSecurityPaymentProvider.createSocialSecurityPayment(payment);
 
@@ -712,10 +722,12 @@ public class SocialSecurityServiceImpl implements SocialSecurityService {
 
     private SocialSecurityPayment processSocialSecurityPayment(SocialSecurityItemDTO itemDTO, String paymentMonth, Byte afterPay) {
         SocialSecurityPayment payment = ConvertHelper.convert(itemDTO, SocialSecurityPayment.class);
-        payment.setPayMonth(paymentMonth);
+        payment.setPayItem(itemDTO.getPayItem());
         payment.setAfterPayFlag(afterPay);
+        payment.setPayMonth(paymentMonth);
         return payment;
     }
+
     private SocialSecurityPayment processSocialSecurityPayment(SocialSecuritySetting setting, String paymentMonth, Byte afterPay) {
         SocialSecurityPayment payment = ConvertHelper.convert(setting, SocialSecurityPayment.class);
         payment.setPayMonth(paymentMonth);
@@ -756,17 +768,19 @@ public class SocialSecurityServiceImpl implements SocialSecurityService {
                 accumOrSocial, itemDTO.getPayItem());
         OrganizationMemberDetails detail = organizationProvider.findOrganizationMemberDetailsByDetailId(detailId);
         SocialSecuritySetting setting = processSocialSecuritySetting(base, socialSecurityPayment.getCityId(),
-                detail.getOrganizationId(), detail.getTargetId(), detail.getId(), detail.getNamespaceId());
+                detail.getOrganizationId(), detail.getTargetId(), detail.getId(), detail.getNamespaceId(), itemDTO);
         copyRadixAndRatio(setting, socialSecurityPayment, itemDTO);
         socialSecuritySettingProvider.createSocialSecuritySetting(setting);
 
     }
 
     private SocialSecuritySetting processSocialSecuritySetting(SocialSecurityBase base, Long cityId, Long orgId, Long userId,
-                                                               Long detailId, Integer namespaceId) {
+                                                               Long detailId, Integer namespaceId, SocialSecurityItemDTO itemDTO) {
         SocialSecuritySetting setting = ConvertHelper.convert(base, SocialSecuritySetting.class);
         if (null == setting) {
-            setting = new SocialSecuritySetting();
+            setting = ConvertHelper.convert(itemDTO, SocialSecuritySetting.class);
+            setting.setPayItem(itemDTO.getPayItem());
+            setting.setAccumOrSocail(AccumOrSocail.SOCAIL.getCode());
         }
         setting.setCityId(cityId);
         setting.setOrganizationId(orgId);
@@ -873,8 +887,31 @@ public class SocialSecurityServiceImpl implements SocialSecurityService {
     }
 
     @Override
-    public void importSocialSecurityPayments(ImportSocialSecurityPaymentsCommand cmd, MultipartFile file) {
+    public ImportFileTaskDTO importSocialSecurityPayments(ImportSocialSecurityPaymentsCommand cmd, MultipartFile file) {
         // TODO Auto-generated method stub
+        ImportFileTask task = new ImportFileTask();
+        List resultList = processorExcel(file);
+        task.setOwnerType("SOCIAL_OWNER_TYPE");
+        task.setOwnerId(cmd.getOwnerId());
+        task.setType(ImportFileTaskType.SOCIAL_SERCURITY_PAYMENTS.getCode());
+        task.setCreatorUid(UserContext.currentUserId());
+
+        //  调用导入方法
+        importFileService.executeTask(new ExecuteImportTaskCallback() {
+            @Override
+            public ImportFileResponse importFile() {
+                ImportFileResponse response = new ImportFileResponse();
+                response.setTitle("导入社保设置");
+                //  将 excel 的中的数据读取
+                String fileLog = "";
+                batchUpdateSSSettingAndPayments(resultList, cmd.getOwnerId(), fileLog, response);
+                return response;
+            }
+        }, task);
+        return ConvertHelper.convert(task, ImportFileTaskDTO.class);
+    }
+
+    private List processorExcel(MultipartFile file) {
         try {
             List resultList = PropMrgOwnerHandler.processorExcel(file.getInputStream());
             if (resultList.isEmpty()) {
@@ -882,22 +919,28 @@ public class SocialSecurityServiceImpl implements SocialSecurityService {
                 throw RuntimeErrorException.errorWith(SocialSecurityConstants.SCOPE, SocialSecurityConstants.ERROR_FILE_IS_EMPTY,
                         "File content is empty");
             }
-            batchUpdateSSSettingAndPayments(resultList, cmd.getOwnerId());
+            return resultList;
         } catch (IOException e) {
             LOGGER.error("file process excel error ", e);
             e.printStackTrace();
         }
+
+        return null;
     }
 
-    private void batchUpdateSSSettingAndPayments(List list, Long ownerId) {
+    private void batchUpdateSSSettingAndPayments(List list, Long ownerId, String fileLog, ImportFileResponse response) {
         //
+        ImportFileResultLog<Map<String, String>> log = new ImportFileResultLog<>(SocialSecurityConstants.SCOPE);
+        response.setLogs(new ArrayList<>());
         for (int i = 1; i < list.size(); i++) {
             RowResult r = (RowResult) list.get(i);
             String userContact = r.getA();
             OrganizationMemberDetails detail = organizationProvider.findOrganizationMemberDetailsByOrganizationIdAndContactToken(ownerId, userContact);
             if (null == detail) {
+                response.setFileLog("找不到用户: 手机号" + userContact);
                 LOGGER.error("can not find organization member ,contact token is " + userContact);
-            }else{
+
+            } else {
                 String ssCityName = r.getB();
                 Long ssCityId = getZuolinNamespaceCityId(ssCityName);
                 String afCityName = r.getC();
@@ -1107,7 +1150,7 @@ public class SocialSecurityServiceImpl implements SocialSecurityService {
         if (dto.getDismissTime() != null && Integer.valueOf(report.getPayMonth()) >=
                 Integer.valueOf(dateSF.get().format(dto.getDismissTime()))) {
             report.setIsWork(IsWork.IS_OUT.getCode());
-        }else{
+        } else {
             if (null != dto.getCheckInTime() &&
                     Integer.valueOf(dateSF.get().format(dto.getCheckInTime())).equals(report.getPayMonth())) {
                 report.setIsWork(IsWork.IS_NEW.getCode());

@@ -5,6 +5,7 @@ import java.math.BigDecimal;
 import java.sql.Timestamp;
 import java.util.List;
 
+import com.everhomes.rest.socialSecurity.AccumOrSocail;
 import com.everhomes.rest.socialSecurity.NormalFlag;
 import com.everhomes.user.User;
 import org.jooq.DSLContext;
@@ -81,8 +82,7 @@ public class SocialSecurityPaymentProviderImpl implements SocialSecurityPaymentP
                 .fetchAny();
         if (null == result) {
             return null;
-        }
-        else return result.value1();
+        } else return result.value1();
     }
 
     @Override
@@ -106,11 +106,14 @@ public class SocialSecurityPaymentProviderImpl implements SocialSecurityPaymentP
 
     @Override
     public SocialSecurityPayment findSocialSecurityPayment(Long detailId, String payItem, Byte accumOrSocial) {
-        Record record = getReadOnlyContext().select().from(Tables.EH_SOCIAL_SECURITY_PAYMENTS)
+        SelectConditionStep<Record> step = getReadOnlyContext().select().from(Tables.EH_SOCIAL_SECURITY_PAYMENTS)
                 .where(Tables.EH_SOCIAL_SECURITY_PAYMENTS.DETAIL_ID.eq(detailId))
-                .and(Tables.EH_SOCIAL_SECURITY_PAYMENTS.PAY_ITEM.eq(payItem))
-                .and(Tables.EH_SOCIAL_SECURITY_PAYMENTS.ACCUM_OR_SOCAIL.eq(accumOrSocial))
-                .orderBy(Tables.EH_SOCIAL_SECURITY_PAYMENTS.ID.asc())
+                .and(Tables.EH_SOCIAL_SECURITY_PAYMENTS.ACCUM_OR_SOCAIL.eq(accumOrSocial));
+        if (accumOrSocial.equals(AccumOrSocail.SOCAIL.getCode())) {
+            step = step.and(Tables.EH_SOCIAL_SECURITY_PAYMENTS.PAY_ITEM.eq(payItem));
+
+        }
+        Record record = step.orderBy(Tables.EH_SOCIAL_SECURITY_PAYMENTS.ID.asc())
                 .fetchAny();
         if (null == record) {
             return null;
