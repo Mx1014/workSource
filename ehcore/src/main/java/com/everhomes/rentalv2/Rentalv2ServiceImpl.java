@@ -52,7 +52,6 @@ import org.apache.poi.ss.usermodel.Workbook;
 import org.apache.poi.xssf.usermodel.XSSFWorkbook;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
-import org.springframework.beans.*;
 import org.springframework.beans.BeanUtils;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpStatus;
@@ -386,7 +385,10 @@ public class Rentalv2ServiceImpl implements Rentalv2Service {
 				cmd.getResourceType(), cmd.getResourceTypeId(), cmd.getSourceType(), cmd.getSourceId());
 
 		if(null == rule){
-			return addDefaultRule(cmd);
+			addDefaultRule(cmd.getOwnerType(), cmd.getOwnerId(), cmd.getResourceType(), cmd.getResourceTypeId(),
+					cmd.getSourceType(), cmd.getSourceId());
+			rule = this.rentalv2Provider.getRentalDefaultRule(cmd.getOwnerType(), cmd.getOwnerId(),
+					cmd.getResourceType(), cmd.getResourceTypeId(), cmd.getSourceType(), cmd.getSourceId());
 		}
 
 		return convert(rule, cmd.getSourceType());
@@ -466,19 +468,20 @@ public class Rentalv2ServiceImpl implements Rentalv2Service {
 		return ConvertHelper.convert(priceRule, PriceRuleDTO.class);
 	}
 
-	private QueryDefaultRuleAdminResponse addDefaultRule(QueryDefaultRuleAdminCommand cmd) {
+	private void addDefaultRule(String ownerType, Long ownerId, String resourceType, Long resourceTypeId,
+														 String sourceType, Long sourceId) {
 		AddDefaultRuleAdminCommand addCmd = new AddDefaultRuleAdminCommand();
-        addCmd.setOwnerType(cmd.getOwnerType());
-        addCmd.setOwnerId(cmd.getOwnerId());
-		addCmd.setResourceType(cmd.getResourceType());
-        addCmd.setResourceTypeId(cmd.getResourceTypeId());
+        addCmd.setOwnerType(ownerType);
+        addCmd.setOwnerId(ownerId);
+		addCmd.setResourceType(resourceType);
+        addCmd.setResourceTypeId(resourceTypeId);
 		//设置为默认规则类型
-		addCmd.setSourceType(cmd.getSourceType());
-		addCmd.setSourceId(cmd.getSourceId());
+		addCmd.setSourceType(sourceType);
+		addCmd.setSourceId(sourceId);
 
 		addCmd.setSiteCounts(1.0);
 		addCmd.setAutoAssign(NormalFlag.NONEED.getCode());
-        addCmd.setMultiUnit(NormalFlag.NEED.getCode());
+        addCmd.setMultiUnit(NormalFlag.NONEED.getCode());
         addCmd.setNeedPay(NormalFlag.NEED.getCode());
         addCmd.setMultiTimeInterval(NormalFlag.NEED.getCode());
 		//设置默认开放时间，当前时间+100天
@@ -493,23 +496,21 @@ public class Rentalv2ServiceImpl implements Rentalv2Service {
 		addCmd.setRefundFlag(NormalFlag.NEED.getCode());
 		addCmd.setRefundRatio(30);
         //附件信息
-        AttachmentConfigDTO attachment = new AttachmentConfigDTO();
-		attachment.setAttachmentType(AttachmentType.ATTACHMENT.getCode());
-		attachment.setMustOptions(NormalFlag.NONEED.getCode());
-		addCmd.setAttachments(Collections.singletonList(attachment));
+//        AttachmentConfigDTO attachment = new AttachmentConfigDTO();
+//		attachment.setAttachmentType(AttachmentType.ATTACHMENT.getCode());
+//		attachment.setMustOptions(NormalFlag.NONEED.getCode());
+//		addCmd.setAttachments(Collections.singletonList(attachment));
 		//设置每周开放日期
-		addCmd.setOpenWeekday(Arrays.asList(1, 2, 3, 4));
+		addCmd.setOpenWeekday(Arrays.asList(1, 2, 3, 4, 5, 6, 7));
         //设置关闭日期
         addCmd.setCloseDates(null);
-		//设置按天模式 每天开放时间
-		addCmd.setDayOpenTime(8D);
-		addCmd.setDayCloseTime(22D);
+
 //        addCmd.setCancelTime(0L);
 //        addCmd.setExclusiveFlag(NormalFlag.NONEED.getCode());
 //        addCmd.setUnit(1.0);
 		//设置价格
 		PriceRuleDTO priceRuleDTO = new PriceRuleDTO();
-		priceRuleDTO.setRentalType(RentalType.DAY.getCode());
+		priceRuleDTO.setRentalType(RentalType.HOUR.getCode());
 		priceRuleDTO.setPriceType(RentalPriceType.LINEARITY.getCode());
 		//金额全部初始化为0 防止空指针
 		priceRuleDTO.setWorkdayPrice(new BigDecimal(0));
@@ -519,11 +520,16 @@ public class Rentalv2ServiceImpl implements Rentalv2Service {
 		priceRuleDTO.setOrgMemberWorkdayPrice(new BigDecimal(0));
 		priceRuleDTO.setOrgMemberInitiatePrice(new BigDecimal(0));
 		addCmd.setPriceRules(Collections.singletonList(priceRuleDTO));
-		addCmd.setRentalTypes(Collections.singletonList(RentalType.DAY.getCode()));
+		addCmd.setRentalTypes(Collections.singletonList(RentalType.HOUR.getCode()));
+		//设置按小时模式 每天开放时间
+		TimeIntervalDTO timeIntervalDTO = new TimeIntervalDTO();
+		timeIntervalDTO.setTimeStep(0.5D);
+		timeIntervalDTO.setBeginTime(8D);
+		timeIntervalDTO.setEndTime(22D);
+		addCmd.setTimeIntervals(Collections.singletonList(timeIntervalDTO));
 		
 		this.addRule(addCmd);
 
-		return ConvertHelper.convert(addCmd, QueryDefaultRuleAdminResponse.class);
 	}
 
 	private void populateRentalRule(QueryDefaultRuleAdminResponse response, String ownerType, Long ownerId) {
@@ -706,9 +712,6 @@ public class Rentalv2ServiceImpl implements Rentalv2Service {
 
 		this.dbProvider.execute((TransactionStatus status) -> {
 			RentalDefaultRule newRule = ConvertHelper.convert(cmd, RentalDefaultRule.class);
-//			if(null==newDefaultRule.getCancelFlag()) {
-//				newDefaultRule.setCancelFlag(NormalFlag.NEED.getCode());
-//			}
 
 			if (NormalFlag.NONEED.getCode() == cmd.getRentalEndTimeFlag()) {
 				newRule.setRentalEndTime(0L);
@@ -6663,5 +6666,273 @@ public class Rentalv2ServiceImpl implements Rentalv2Service {
 			return null;
 		});
 
+	}
+
+	@Override
+	public void updateResourceTimeRule(UpdateResourceTimeRuleCommand cmd) {
+
+		RentalDefaultRule rule = this.rentalv2Provider.getRentalDefaultRule(cmd.getOwnerType(), cmd.getOwnerId(),
+				cmd.getResourceType(), cmd.getResourceTypeId(), cmd.getSourceType(), cmd.getSourceId());
+
+		if(null == rule){
+			throw RuntimeErrorException.errorWith(RentalServiceErrorCode.SCOPE,
+					RentalServiceErrorCode.ERROR_DEFAULT_RULE_NOT_FOUND, "RentalDefaultRule not found");
+		}
+
+		BeanUtils.copyProperties(cmd, rule);
+
+		List<PriceRuleDTO> priceRules = buildDefaultPriceRule(cmd.getRentalTypes());
+
+		this.dbProvider.execute((TransactionStatus status) -> {
+
+			this.rentalv2Provider.updateRentalDefaultRule(rule);
+
+			String priceRuleType = null;
+			String ownerType = null;
+			String halfOwnerType = null;
+			Long id = null;
+			if (RuleSourceType.DEFAULT.getCode().equals(rule.getSourceType())) {
+				priceRuleType = PriceRuleType.DEFAULT.getCode();
+				ownerType = EhRentalv2DefaultRules.class.getSimpleName();
+				halfOwnerType = RentalTimeIntervalOwnerType.DEFAULT_HALF_DAY.getCode();
+				id = rule.getId();
+			}else if (RuleSourceType.RESOURCE.getCode().equals(rule.getSourceType())) {
+				priceRuleType = PriceRuleType.RESOURCE.getCode();
+				ownerType = EhRentalv2Resources.class.getSimpleName();
+				halfOwnerType = RentalTimeIntervalOwnerType.RESOURCE_HALF_DAY.getCode();
+				id = rule.getSourceId();
+			}
+
+			// set half day time intervals
+			//先删除
+			rentalv2Provider.deleteTimeIntervalsByOwnerId(halfOwnerType, id);
+			setRentalRuleTimeIntervals(halfOwnerType, id, cmd.getHalfDayTimeIntervals());
+
+			//time intervals
+			//先删除
+			this.rentalv2Provider.deleteTimeIntervalsByOwnerId(ownerType, id);
+			setRentalRuleTimeIntervals(ownerType, id, cmd.getTimeIntervals());
+
+			//设置关闭日期close dates
+			rentalv2Provider.deleteRentalCloseDatesByOwnerId(ownerType, id);
+			setRentalRuleCloseDates(cmd.getCloseDates(), id, ownerType);
+
+			//先删除后添加
+			rentalv2PriceRuleProvider.deletePriceRuleByOwnerId(priceRuleType, id);
+			createPriceRules(PriceRuleType.fromCode(priceRuleType), id, priceRules);
+
+			return null;
+		});
+	}
+
+	@Override
+	public ResourceTimeRuleDTO getResourceTimeRule(GetResourceTimeRuleCommand cmd) {
+		RentalDefaultRule rule = this.rentalv2Provider.getRentalDefaultRule(cmd.getOwnerType(), cmd.getOwnerId(),
+				cmd.getResourceType(), cmd.getResourceTypeId(), cmd.getSourceType(), cmd.getSourceId());
+
+		if(null == rule){
+			addDefaultRule(cmd.getOwnerType(), cmd.getOwnerId(), cmd.getResourceType(), cmd.getResourceTypeId(),
+					cmd.getSourceType(), cmd.getSourceId());
+			rule = this.rentalv2Provider.getRentalDefaultRule(cmd.getOwnerType(), cmd.getOwnerId(),
+					cmd.getResourceType(), cmd.getResourceTypeId(), cmd.getSourceType(), cmd.getSourceId());
+		}
+
+		return convertResourceTimeRuleDTO(rule, cmd.getSourceType());
+	}
+
+	private ResourceTimeRuleDTO convertResourceTimeRuleDTO(RentalDefaultRule rule, String sourceType) {
+		ResourceTimeRuleDTO dto = ConvertHelper.convert(rule, ResourceTimeRuleDTO.class);
+
+		if(null != rule.getBeginDate()) {
+			dto.setBeginDate(rule.getBeginDate().getTime());
+		}
+		if(null != rule.getEndDate()) {
+			dto.setEndDate(rule.getEndDate().getTime());
+		}
+
+		String ownerType = null;
+		Long ownerId = null;
+		if (RuleSourceType.DEFAULT.getCode().equals(sourceType)) {
+			ownerType = EhRentalv2DefaultRules.class.getSimpleName();
+			ownerId = rule.getId();
+		}else if (RuleSourceType.RESOURCE.getCode().equals(sourceType)) {
+			ownerType = EhRentalv2Resources.class.getSimpleName();
+			ownerId = rule.getSourceId();
+		}
+
+		String halfOwnerType = RentalTimeIntervalOwnerType.DEFAULT_HALF_DAY.getCode();
+		if (EhRentalv2Resources.class.getSimpleName().equals(ownerType)) {
+			halfOwnerType = RentalTimeIntervalOwnerType.RESOURCE_HALF_DAY.getCode();
+		}
+
+		List<RentalTimeInterval> halfTimeIntervals = rentalv2Provider.queryRentalTimeIntervalByOwner(halfOwnerType, ownerId);
+		if(null != halfTimeIntervals) {
+			dto.setHalfDayTimeIntervals(halfTimeIntervals.stream().map(h -> ConvertHelper.convert(h, TimeIntervalDTO.class))
+					.collect(Collectors.toList()));
+		}
+
+		List<RentalTimeInterval> timeIntervals = rentalv2Provider.queryRentalTimeIntervalByOwner(ownerType, ownerId);
+		if(null != timeIntervals){
+			dto.setTimeIntervals(timeIntervals.stream().map(t -> ConvertHelper.convert(t, TimeIntervalDTO.class))
+					.collect(Collectors.toList()));
+		}
+		List<RentalCloseDate> closeDates = rentalv2Provider.queryRentalCloseDateByOwner(ownerType, ownerId);
+		if(null != closeDates){
+			dto.setCloseDates(closeDates.stream().filter(d -> null != d.getCloseDate()).map(c -> c.getCloseDate().getTime())
+					.collect(Collectors.toList()));
+		}
+
+		return dto;
+	}
+
+	@Override
+	public void updateResourcePriceRule(UpdateResourcePriceRuleCommand cmd) {
+		RentalDefaultRule rule = this.rentalv2Provider.getRentalDefaultRule(cmd.getOwnerType(), cmd.getOwnerId(),
+				cmd.getResourceType(), cmd.getResourceTypeId(), cmd.getSourceType(), cmd.getSourceId());
+
+		if(null == rule){
+			throw RuntimeErrorException.errorWith(RentalServiceErrorCode.SCOPE,
+					RentalServiceErrorCode.ERROR_DEFAULT_RULE_NOT_FOUND, "RentalDefaultRule not found");
+		}
+
+		BeanUtils.copyProperties(cmd, rule);
+
+		this.dbProvider.execute((TransactionStatus status) -> {
+
+			this.rentalv2Provider.updateRentalDefaultRule(rule);
+
+			String priceRuleType = null;
+			Long ownerId = null;
+			if (RuleSourceType.DEFAULT.getCode().equals(rule.getSourceType())) {
+				priceRuleType = PriceRuleType.DEFAULT.getCode();
+				ownerId = rule.getId();
+			}else if (RuleSourceType.RESOURCE.getCode().equals(rule.getSourceType())) {
+				priceRuleType = PriceRuleType.RESOURCE.getCode();
+				ownerId = rule.getSourceId();
+			}
+
+			//先删除后添加
+			rentalv2PriceRuleProvider.deletePriceRuleByOwnerId(priceRuleType, ownerId);
+			createPriceRules(PriceRuleType.fromCode(priceRuleType), ownerId, cmd.getPriceRules());
+			//先删除后添加
+			rentalv2PricePackageProvider.deletePricePackageByOwnerId(priceRuleType, ownerId);
+			createPricePackages(PriceRuleType.fromCode(priceRuleType), ownerId, cmd.getPricePackages());
+
+			return null;
+		});
+	}
+
+	@Override
+	public ResourcePriceRuleDTO getResourcePriceRule(GetResourcePriceRuleCommand cmd) {
+		RentalDefaultRule rule = this.rentalv2Provider.getRentalDefaultRule(cmd.getOwnerType(), cmd.getOwnerId(),
+				cmd.getResourceType(), cmd.getResourceTypeId(), cmd.getSourceType(), cmd.getSourceId());
+
+
+		return convertResourcePriceRuleDTO(rule, cmd.getSourceType());
+	}
+
+	private ResourcePriceRuleDTO convertResourcePriceRuleDTO(RentalDefaultRule rule, String sourceType) {
+		ResourcePriceRuleDTO dto = ConvertHelper.convert(rule, ResourcePriceRuleDTO.class);
+
+		String priceRuleType = null;
+		Long id = null;
+		if (RuleSourceType.DEFAULT.getCode().equals(sourceType)) {
+			priceRuleType = PriceRuleType.DEFAULT.getCode();
+			id = rule.getId();
+		}else if (RuleSourceType.RESOURCE.getCode().equals(sourceType)) {
+			priceRuleType = PriceRuleType.RESOURCE.getCode();
+			id = rule.getSourceId();
+		}
+
+		List<Rentalv2PriceRule> priceRules = rentalv2PriceRuleProvider.listPriceRuleByOwner(priceRuleType, id);
+		dto.setPriceRules(priceRules.stream().map(this::convert).collect(Collectors.toList()));
+		dto.setRentalTypes(priceRules.stream().map(Rentalv2PriceRule::getRentalType).collect(Collectors.toList()));
+
+		List<Rentalv2PricePackage> pricePackages = rentalv2PricePackageProvider.listPricePackageByOwner(priceRuleType, id,null,null);
+		dto.setPricePackages(pricePackages.stream().map(r->ConvertHelper.convert(r,PricePackageDTO.class)).collect(Collectors.toList()));
+
+		return dto;
+	}
+
+	@Override
+	public void updateResourceRentalRule(UpdateResourceRentalRuleCommand cmd) {
+		RentalDefaultRule rule = this.rentalv2Provider.getRentalDefaultRule(cmd.getOwnerType(), cmd.getOwnerId(),
+				cmd.getResourceType(), cmd.getResourceTypeId(), cmd.getSourceType(), cmd.getSourceId());
+
+		if(null == rule){
+			throw RuntimeErrorException.errorWith(RentalServiceErrorCode.SCOPE,
+					RentalServiceErrorCode.ERROR_DEFAULT_RULE_NOT_FOUND, "RentalDefaultRule not found");
+		}
+
+		BeanUtils.copyProperties(cmd, rule);
+		rentalv2Provider.updateRentalDefaultRule(rule);
+
+	}
+
+	@Override
+	public ResourceRentalRuleDTO getResourceRentalRule(GetResourceRentalRuleCommand cmd) {
+		RentalDefaultRule rule = this.rentalv2Provider.getRentalDefaultRule(cmd.getOwnerType(), cmd.getOwnerId(),
+				cmd.getResourceType(), cmd.getResourceTypeId(), cmd.getSourceType(), cmd.getSourceId());
+
+
+		return ConvertHelper.convert(rule, ResourceRentalRuleDTO.class);
+	}
+
+	@Override
+	public void updateResourceOrderRule(UpdateResourceOrderRuleCommand cmd) {
+		RentalDefaultRule rule = this.rentalv2Provider.getRentalDefaultRule(cmd.getOwnerType(), cmd.getOwnerId(),
+				cmd.getResourceType(), cmd.getResourceTypeId(), cmd.getSourceType(), cmd.getSourceId());
+
+		if(null == rule){
+			throw RuntimeErrorException.errorWith(RentalServiceErrorCode.SCOPE,
+					RentalServiceErrorCode.ERROR_DEFAULT_RULE_NOT_FOUND, "RentalDefaultRule not found");
+		}
+
+		BeanUtils.copyProperties(cmd, rule);
+
+		this.dbProvider.execute((TransactionStatus status) -> {
+
+			this.rentalv2Provider.updateRentalDefaultRule(rule);
+
+			//先删除后添加
+			rentalv2Provider.deleteRentalOrderRules(rule.getSourceType(), rule.getId(), RentalOrderHandleType.REFUND.getCode());
+			createRentalOrderRules(rule.getSourceType(), rule.getId(), cmd.getRefundStrategies());
+			//先删除后添加
+			rentalv2Provider.deleteRentalOrderRules(rule.getSourceType(), rule.getId(), RentalOrderHandleType.OVERTIME.getCode());
+			createRentalOrderRules(rule.getSourceType(), rule.getId(), cmd.getOvertimeStrategies());
+
+			return null;
+		});
+	}
+
+	private void createRentalOrderRules(String ownerType, Long ownerId, List<RentalOrderRuleDTO> orderRules) {
+		if (orderRules != null && !orderRules.isEmpty()) {
+
+			orderRules.forEach(r -> {
+				RentalOrderRule rule = ConvertHelper.convert(r, RentalOrderRule.class);
+				rule.setOwnerId(ownerId);
+				rule.setOwnerType(ownerType);
+				rentalv2Provider.createRentalOrderRule(rule);
+			});
+		}
+	}
+
+	@Override
+	public ResourceOrderRuleDTO getResourceOrderRule(GetResourceOrderRuleCommand cmd) {
+		RentalDefaultRule rule = this.rentalv2Provider.getRentalDefaultRule(cmd.getOwnerType(), cmd.getOwnerId(),
+				cmd.getResourceType(), cmd.getResourceTypeId(), cmd.getSourceType(), cmd.getSourceId());
+
+		ResourceOrderRuleDTO dto = ConvertHelper.convert(rule, ResourceOrderRuleDTO.class);
+
+		List<RentalOrderRule> refundRules = rentalv2Provider.listRentalOrderRules(rule.getSourceType(), rule.getId(),
+				RentalOrderHandleType.REFUND.getCode());
+
+		List<RentalOrderRule> overTimeRules = rentalv2Provider.listRentalOrderRules(rule.getSourceType(), rule.getId(),
+				RentalOrderHandleType.OVERTIME.getCode());
+
+		dto.setRefundStrategies(refundRules.stream().map(r -> ConvertHelper.convert(r, RentalOrderRuleDTO.class)).collect(Collectors.toList()));
+		dto.setOvertimeStrategies(overTimeRules.stream().map(r -> ConvertHelper.convert(r, RentalOrderRuleDTO.class)).collect(Collectors.toList()));
+
+		return dto;
 	}
 }

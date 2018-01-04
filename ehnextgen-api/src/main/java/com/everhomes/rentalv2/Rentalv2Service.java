@@ -4,6 +4,7 @@ import java.util.List;
 import java.util.Map;
 
 import javax.servlet.http.HttpServletResponse;
+import javax.validation.Valid;
 
 import com.everhomes.rest.order.CommonOrderDTO;
 import com.everhomes.rest.order.PreOrderDTO;
@@ -170,4 +171,19 @@ public interface Rentalv2Service {
 
 	void rentalSchedule();
 
+	void updateResourceTimeRule(UpdateResourceTimeRuleCommand cmd);
+
+	ResourceTimeRuleDTO getResourceTimeRule(GetResourceTimeRuleCommand cmd);
+
+	void updateResourcePriceRule(UpdateResourcePriceRuleCommand cmd);
+
+	ResourcePriceRuleDTO getResourcePriceRule(GetResourcePriceRuleCommand cmd);
+
+	void updateResourceRentalRule(UpdateResourceRentalRuleCommand cmd);
+
+	ResourceRentalRuleDTO getResourceRentalRule(GetResourceRentalRuleCommand cmd);
+
+	void updateResourceOrderRule(UpdateResourceOrderRuleCommand cmd);
+
+	ResourceOrderRuleDTO getResourceOrderRule(GetResourceOrderRuleCommand cmd);
 }

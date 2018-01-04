@@ -645,4 +645,141 @@ public class Rentalv2AdminController extends ControllerBase {
 //		return response;
 //	}
 
+	/*-------------------------------------------新的更新资源规则接口---------------------------------- */
+
+	/**
+	 *
+	 * <b>URL: /rental/admin/updateResourceTimeRule<b>
+	 * <p>
+	 * 修改时间规则
+	 * </p>
+	 */
+	@RequestMapping("updateResourceTimeRule")
+	@RestReturn(String.class)
+	public RestResponse updateResourceTimeRule(UpdateResourceTimeRuleCommand cmd) {
+		rentalService.updateResourceTimeRule(cmd);
+		RestResponse response = new RestResponse();
+		response.setErrorCode(ErrorCodes.SUCCESS);
+		response.setErrorDescription("OK");
+		return response;
+	}
+
+	/**
+	 *
+	 * <b>URL: /rental/admin/getResourceTimeRule<b>
+	 * <p>
+	 * 获取时间规则
+	 * </p>
+	 */
+	@RequestMapping("getResourceTimeRule")
+	@RestReturn(ResourceTimeRuleDTO.class)
+	public RestResponse getResourceTimeRule(GetResourceTimeRuleCommand cmd) {
+
+		RestResponse response = new RestResponse(rentalService.getResourceTimeRule(cmd));
+		response.setErrorCode(ErrorCodes.SUCCESS);
+		response.setErrorDescription("OK");
+		return response;
+	}
+
+	/**
+	 *
+	 * <b>URL: /rental/admin/updateResourcePriceRule<b>
+	 * <p>
+	 * 修改价格规则
+	 * </p>
+	 */
+	@RequestMapping("updateResourcePriceRule")
+	@RestReturn(String.class)
+	public RestResponse updateResourcePriceRule(UpdateResourcePriceRuleCommand cmd) {
+		rentalService.updateResourcePriceRule(cmd);
+		RestResponse response = new RestResponse();
+		response.setErrorCode(ErrorCodes.SUCCESS);
+		response.setErrorDescription("OK");
+		return response;
+	}
+
+	/**
+	 *
+	 * <b>URL: /rental/admin/getResourcePriceRule<b>
+	 * <p>
+	 * 获取价格规则
+	 * </p>
+	 */
+	@RequestMapping("getResourcePriceRule")
+	@RestReturn(ResourcePriceRuleDTO.class)
+	public RestResponse getResourcePriceRule(GetResourcePriceRuleCommand cmd) {
+
+		RestResponse response = new RestResponse(rentalService.getResourcePriceRule(cmd));
+		response.setErrorCode(ErrorCodes.SUCCESS);
+		response.setErrorDescription("OK");
+		return response;
+	}
+
+	/**
+	 *
+	 * <b>URL: /rental/admin/updateResourceRentalRule<b>
+	 * <p>
+	 * 修改预约规则
+	 * </p>
+	 */
+	@RequestMapping("updateResourceRentalRule")
+	@RestReturn(String.class)
+	public RestResponse updateResourceRentalRule(UpdateResourceRentalRuleCommand cmd) {
+		rentalService.updateResourceRentalRule(cmd);
+		RestResponse response = new RestResponse();
+		response.setErrorCode(ErrorCodes.SUCCESS);
+		response.setErrorDescription("OK");
+		return response;
+	}
+
+	/**
+	 *
+	 * <b>URL: /rental/admin/getResourceRentalRule<b>
+	 * <p>
+	 * 获取预约规则
+	 * </p>
+	 */
+	@RequestMapping("getResourceRentalRule")
+	@RestReturn(ResourceRentalRuleDTO.class)
+	public RestResponse getResourceRentalRule(GetResourceRentalRuleCommand cmd) {
+
+		RestResponse response = new RestResponse(rentalService.getResourceRentalRule(cmd));
+		response.setErrorCode(ErrorCodes.SUCCESS);
+		response.setErrorDescription("OK");
+		return response;
+	}
+
+	/**
+	 *
+	 * <b>URL: /rental/admin/updateResourceOrderRule<b>
+	 * <p>
+	 * 修改订单规则
+	 * </p>
+	 */
+	@RequestMapping("updateResourceOrderRule")
+	@RestReturn(String.class)
+	public RestResponse updateResourceOrderRule(UpdateResourceOrderRuleCommand cmd) {
+		rentalService.updateResourceOrderRule(cmd);
+		RestResponse response = new RestResponse();
+		response.setErrorCode(ErrorCodes.SUCCESS);
+		response.setErrorDescription("OK");
+		return response;
+	}
+
+	/**
+	 *
+	 * <b>URL: /rental/admin/getResourceOrderRule<b>
+	 * <p>
+	 * 获取订单规则
+	 * </p>
+	 */
+	@RequestMapping("getResourceOrderRule")
+	@RestReturn(ResourceOrderRuleDTO.class)
+	public RestResponse getResourceOrderRule(GetResourceOrderRuleCommand cmd) {
+
+		RestResponse response = new RestResponse(rentalService.getResourceOrderRule(cmd));
+		response.setErrorCode(ErrorCodes.SUCCESS);
+		response.setErrorDescription("OK");
+		return response;
+	}
 }
