@@ -463,17 +463,18 @@ public class EquipmentServiceImpl implements EquipmentService {
 	}
 
 	private void createEquipmentStandardsEquipmentsMap(EquipmentInspectionStandards standard, List<EquipmentsDTO> equipments) {
-
-		EquipmentStandardMap equipmentStandardMap = new EquipmentStandardMap();
-		equipmentStandardMap.setStandardId(standard.getId());
-		List<EquipmentInspectionEquipments> createdEquipments = new ArrayList<>();
-		for (EquipmentsDTO equipment : equipments) {
-			equipmentStandardMap.setTargetId(equipment.getId());
-			equipmentStandardMap.setTargetType(InspectionStandardMapTargetType.EQUIPMENT.getCode());
-			equipmentProvider.createEquipmentStandardMap(equipmentStandardMap);
-			createdEquipments.add(ConvertHelper.convert(equipment,EquipmentInspectionEquipments.class));
+		if (equipments != null && equipments.size() > 0) {
+			EquipmentStandardMap equipmentStandardMap = new EquipmentStandardMap();
+			equipmentStandardMap.setStandardId(standard.getId());
+			List<EquipmentInspectionEquipments> createdEquipments = new ArrayList<>();
+			for (EquipmentsDTO equipment : equipments) {
+				equipmentStandardMap.setTargetId(equipment.getId());
+				equipmentStandardMap.setTargetType(InspectionStandardMapTargetType.EQUIPMENT.getCode());
+				equipmentProvider.createEquipmentStandardMap(equipmentStandardMap);
+				createdEquipments.add(ConvertHelper.convert(equipment, EquipmentInspectionEquipments.class));
+			}
+			standard.setEquipments(createdEquipments);
 		}
-		standard.setEquipments(createdEquipments);
 	}
 
 	private void createEquipmentStandardItems(EquipmentInspectionStandards standards, UpdateEquipmentStandardCommand cmd) {
