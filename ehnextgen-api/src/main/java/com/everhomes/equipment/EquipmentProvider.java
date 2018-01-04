@@ -203,4 +203,12 @@ public interface EquipmentProvider {
     List<EquipmentInspectionStandardGroupMap> listEquipmentInspectionStandardGroupMapByStandardId(Long id);
 
     List<EquipmentStandardMap> listAllActiveEquipmentStandardMap();
+
+    void createReviewExpireDays(EquipmentInspectionReviewDate reviewDate);
+
+	void updateReviewExpireDays(EquipmentInspectionReviewDate reviewDate);
+
+	EquipmentInspectionReviewDate getEquipmentInspectiomExpireDaysById(Long id);
+
+    EquipmentInspectionReviewDate getEquipmentInspectiomExpireDays(Long scopeId, Byte scopeType);
 }

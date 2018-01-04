@@ -1001,14 +1001,34 @@ public class EquipmentController extends ControllerBase {
         return getSuccessResponse();
     }
     /**
-     * <b>URL: /equipment/checkEquipmentInspectionNumber</b>
-     * <p>检查设备巡检编号是否存在</p>
+     * <b>URL: /equipment/setReviewExpireDaysCommand</b>
+     * <p>设置任务审批过期时间</p>
      */
     @RequestMapping("setReviewExpireDays")
-    @RestReturn(value = CheckResultResponse.class)
+    @RestReturn(value = String.class)
     public RestResponse setReviewExpireDays(SetReviewExpireDaysCommand cmd) {
         equipmentService.setReviewExpireDays(cmd);
         return getSuccessResponse();
+    }
+    /**
+     * <b>URL: /equipment/deleteReviewExpireDays</b>
+     * <p>删除任务审批过期时间</p>
+     */
+    @RequestMapping("setReviewExpireDays")
+    @RestReturn(value = String.class)
+    public RestResponse deleteReviewExpireDays(SetReviewExpireDaysCommand cmd) {
+        equipmentService.deleteReviewExpireDays(cmd);
+        return getSuccessResponse();
+    }
+    /**
+     * <b>URL: /equipment/listReviewExpireDays</b>
+     * <p>列出任务审批过期时间</p>
+     */
+    @RequestMapping("setReviewExpireDays")
+    @RestReturn(value = String.class)
+    public RestResponse listReviewExpireDays(SetReviewExpireDaysCommand cmd) {
+        EquipmentInspectionReviewDateDTO reviewDate = equipmentService.listReviewExpireDays(cmd);
+        return getRestResponse(reviewDate);
     }
 
 

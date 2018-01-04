@@ -28,6 +28,7 @@ import com.everhomes.rest.equipment.StandardAndStatus;
 import com.everhomes.rest.equipment.Status;
 import com.everhomes.rest.equipment.TaskCountDTO;
 import com.everhomes.rest.equipment.TasksStatData;
+import com.everhomes.rest.pmNotify.PmNotifyConfigurationStatus;
 import com.everhomes.rest.quality.QualityGroupType;
 import com.everhomes.scheduler.EquipmentInspectionScheduleJob;
 import com.everhomes.scheduler.ScheduleProvider;
@@ -45,6 +46,7 @@ import com.everhomes.server.schema.tables.daos.EhEquipmentInspectionItemResultsD
 import com.everhomes.server.schema.tables.daos.EhEquipmentInspectionItemsDao;
 import com.everhomes.server.schema.tables.daos.EhEquipmentInspectionPlanGroupMapDao;
 import com.everhomes.server.schema.tables.daos.EhEquipmentInspectionPlansDao;
+import com.everhomes.server.schema.tables.daos.EhEquipmentInspectionReviewDateDao;
 import com.everhomes.server.schema.tables.daos.EhEquipmentInspectionStandardGroupMapDao;
 import com.everhomes.server.schema.tables.daos.EhEquipmentInspectionStandardsDao;
 import com.everhomes.server.schema.tables.daos.EhEquipmentInspectionTaskAttachmentsDao;
@@ -81,6 +83,7 @@ import com.everhomes.server.schema.tables.records.EhEquipmentInspectionEquipment
 import com.everhomes.server.schema.tables.records.EhEquipmentInspectionItemResultsRecord;
 import com.everhomes.server.schema.tables.records.EhEquipmentInspectionPlanGroupMapRecord;
 import com.everhomes.server.schema.tables.records.EhEquipmentInspectionPlansRecord;
+import com.everhomes.server.schema.tables.records.EhEquipmentInspectionReviewDateRecord;
 import com.everhomes.server.schema.tables.records.EhEquipmentInspectionStandardGroupMapRecord;
 import com.everhomes.server.schema.tables.records.EhEquipmentInspectionStandardsRecord;
 import com.everhomes.server.schema.tables.records.EhEquipmentInspectionTaskAttachmentsRecord;
@@ -3061,5 +3064,39 @@ public class EquipmentProviderImpl implements EquipmentProvider {
         return context.selectFrom(Tables.EH_EQUIPMENT_INSPECTION_EQUIPMENT_STANDARD_MAP)
                 .where(Tables.EH_EQUIPMENT_INSPECTION_EQUIPMENT_STANDARD_MAP.STATUS.eq(Status.ACTIVE.getCode()))
                 .fetchInto(EquipmentStandardMap.class);
+    }
+
+    @Override
+    public void createReviewExpireDays(EquipmentInspectionReviewDate reviewDate) {
+        Long id = sequenceProvider.getNextSequence(NameMapper.getSequenceDomainFromTablePojo(EquipmentInspectionReviewDate.class));
+        DSLContext context = this.dbProvider.getDslContext(AccessSpec.readWrite());
+        EhEquipmentInspectionReviewDateDao dateDao = new EhEquipmentInspectionReviewDateDao(context.configuration());
+        reviewDate.setId(id);
+        reviewDate.setCreateTime(new Timestamp(DateHelper.currentGMTTime().getTime()));
+        dateDao.insert(reviewDate);
+    }
+
+    @Override
+    public void updateReviewExpireDays(EquipmentInspectionReviewDate reviewDate) {
+        DSLContext context = this.dbProvider.getDslContext(AccessSpec.readWrite());
+        EhEquipmentInspectionReviewDateDao dateDao = new EhEquipmentInspectionReviewDateDao(context.configuration());
+        dateDao.update(reviewDate);
+    }
+
+    public EquipmentInspectionReviewDate getEquipmentInspectiomExpireDaysById(Long id) {
+        DSLContext context = this.dbProvider.getDslContext(AccessSpec.readWrite());
+        EhEquipmentInspectionReviewDateDao dateDao = new EhEquipmentInspectionReviewDateDao(context.configuration());
+        return ConvertHelper.convert(dateDao.findById(id), EquipmentInspectionReviewDate.class);
+    }
+
+    @Override
+    public EquipmentInspectionReviewDate getEquipmentInspectiomExpireDays(Long scopeId, Byte scopeType) {
+        DSLContext context = dbProvider.getDslContext(AccessSpec.readOnly());
+        SelectQuery<EhEquipmentInspectionReviewDateRecord> query = context.selectQuery(Tables.EH_EQUIPMENT_INSPECTION_REVIEW_DATE);
+        query.addConditions(Tables.EH_EQUIPMENT_INSPECTION_REVIEW_DATE.SCOPE_TYPE.eq(scopeType));
+        query.addConditions(Tables.EH_EQUIPMENT_INSPECTION_REVIEW_DATE.SCOPE_ID.eq(scopeId));
+        query.addConditions(Tables.EH_EQUIPMENT_INSPECTION_REVIEW_DATE.STATUS.eq(PmNotifyConfigurationStatus.VAILD.getCode()));
+        return ConvertHelper.convert(query.fetchAny(), EquipmentInspectionReviewDate.class);
+
     }
 }

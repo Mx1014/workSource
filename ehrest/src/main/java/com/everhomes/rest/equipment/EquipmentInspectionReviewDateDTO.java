@@ -1,6 +1,5 @@
 package com.everhomes.rest.equipment;
 
-
 import com.everhomes.util.StringHelper;
 
 /**
@@ -12,8 +11,7 @@ import com.everhomes.util.StringHelper;
  * <li>status: 状态 参考{@link com.everhomes.rest.pmNotify.PmNotifyConfigurationStatus}</li>
  * </ul>
  **/
-public class SetReviewExpireDaysCommand {
-
+public class EquipmentInspectionReviewDateDTO {
     private Long id;
 
     private Integer namespaceId;

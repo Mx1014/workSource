@@ -110,4 +110,8 @@ public interface EquipmentService {
     void syscStandardToEqiupmentPlan();
 
     void setReviewExpireDays(SetReviewExpireDaysCommand cmd);
+
+    void deleteReviewExpireDays(SetReviewExpireDaysCommand cmd);
+
+    EquipmentInspectionReviewDateDTO listReviewExpireDays(SetReviewExpireDaysCommand cmd);
 }

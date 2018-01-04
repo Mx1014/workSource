@@ -63,6 +63,7 @@ import com.everhomes.rest.equipment.EquipmentAttachmentDTO;
 import com.everhomes.rest.equipment.EquipmentCategories;
 import com.everhomes.rest.equipment.EquipmentInspectionCategoryDTO;
 import com.everhomes.rest.equipment.EquipmentInspectionPlanDTO;
+import com.everhomes.rest.equipment.EquipmentInspectionReviewDateDTO;
 import com.everhomes.rest.equipment.EquipmentModelType;
 import com.everhomes.rest.equipment.EquipmentNotificationTemplateCode;
 import com.everhomes.rest.equipment.EquipmentParameterDTO;
@@ -5194,6 +5195,59 @@ private void checkUserPrivilege(Long orgId, Long privilegeId, Long communityId) 
 
 	@Override
 	public void setReviewExpireDays(SetReviewExpireDaysCommand cmd) {
+		if(cmd.getReviewExpiredDays()!=null){
+			EquipmentInspectionReviewDate reviewDate = new EquipmentInspectionReviewDate();
+			reviewDate.setOwnerType(EntityType.EQUIPMENT_TASK.getCode());
+			reviewDate.setReviewExpiredDays(cmd.getReviewExpiredDays());
+			if(cmd.getCommunityId() != null && cmd.getCommunityId() != 0L) {
+				reviewDate.setScopeId(cmd.getCommunityId());
+				reviewDate.setScopeType(PmNotifyScopeType.COMMUNITY.getCode());
+			} else {
+				reviewDate.setScopeId(cmd.getNamespaceId().longValue());
+				reviewDate.setScopeType(PmNotifyScopeType.NAMESPACE.getCode());
+			}
+			if(cmd.getId() == null) {
+				reviewDate.setStatus(PmNotifyConfigurationStatus.VAILD.getCode());
+				equipmentProvider.createReviewExpireDays(reviewDate);
+			} else {
+				reviewDate.setStatus(PmNotifyConfigurationStatus.VAILD.getCode());
+				equipmentProvider.updateReviewExpireDays(reviewDate);
+			}
+		}
+	}
+
+	@Override
+	public void deleteReviewExpireDays(SetReviewExpireDaysCommand cmd) {
+		if(cmd.getId()!=null){
+			EquipmentInspectionReviewDate reviewDate = equipmentProvider.getEquipmentInspectiomExpireDaysById(cmd.getId());
+			reviewDate.setStatus(PmNotifyConfigurationStatus.INVAILD.getCode());
+		}
+	}
+
+	@Override
+	public EquipmentInspectionReviewDateDTO listReviewExpireDays(SetReviewExpireDaysCommand cmd) {
+		Byte scopeType = PmNotifyScopeType.NAMESPACE.getCode();
+		Long scopeId = cmd.getNamespaceId().longValue();
+		EquipmentInspectionReviewDate reviewDate = null;
+		if (cmd.getCommunityId() != null && cmd.getCommunityId() != 0L) {
+			scopeType = PmNotifyScopeType.COMMUNITY.getCode();
+			scopeId = cmd.getCommunityId();
+			 reviewDate = equipmentProvider.getEquipmentInspectiomExpireDays(scopeId, scopeType);
+
+		}
+		if (reviewDate != null) {
+			return ConvertHelper.convert(reviewDate, EquipmentInspectionReviewDateDTO.class);
+		} else {
+			//scopeType是community的情况下 如果拿不到数据，则返回该域空间下的设置
+			if (PmNotifyScopeType.COMMUNITY.equals(PmNotifyScopeType.fromCode(scopeType))) {
+				scopeType = PmNotifyScopeType.NAMESPACE.getCode();
+				scopeId = cmd.getNamespaceId().longValue();
+				reviewDate = equipmentProvider.getEquipmentInspectiomExpireDays(scopeId, scopeType);
+				ConvertHelper.convert(reviewDate, EquipmentInspectionReviewDateDTO.class);
+			}
+		}
+
+		return null;
 
 	}
 
