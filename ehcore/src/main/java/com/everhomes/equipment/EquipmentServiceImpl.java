@@ -1996,7 +1996,12 @@ private void checkUserPrivilege(Long orgId, Long privilegeId, Long communityId) 
 //				task.getOwnerType(), task.getOwnerId());
 
 		EquipmentInspectionPlans plan = equipmentProvider.getEquipmmentInspectionPlanById(task.getPlanId());
-		dto.setTaskType(plan.getPlanType());
+		EquipmentInspectionStandards standard = equipmentProvider.findStandardById(task.getStandardId());
+		if (plan != null) {
+			dto.setTaskType(plan.getPlanType());
+		} else if (standard != null) {
+			dto.setTaskType(standard.getStandardType());
+		}
 		List<EquipmentInspectionEquipmentPlanMap> planMaps = equipmentProvider.getEquipmentInspectionPlanMap(task.getPlanId());
 		EquipmentStandardRelationDTO relationDTO = new EquipmentStandardRelationDTO();
 		if (planMaps != null && planMaps.size() > 0) {
