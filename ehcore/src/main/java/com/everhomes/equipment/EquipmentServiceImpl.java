@@ -1852,7 +1852,15 @@ private void checkUserPrivilege(Long orgId, Long privilegeId, Long communityId) 
 //			}
 			EquipmentInspectionPlans plan = equipmentProvider.getEquipmmentInspectionPlanById(task.getPlanId());
 			if (plan != null) {
-				task.setReviewExpiredDate(addDays(now, plan.getReviewExpiredDays()));
+				//改为统一设置
+				// task.setReviewExpiredDate(addDays(now, plan.getReviewExpiredDays()));
+				SetReviewExpireDaysCommand command = new SetReviewExpireDaysCommand();
+				command.setCommunityId(plan.getTargetId());
+				command.setNamespaceId(plan.getNamespaceId());
+				EquipmentInspectionReviewDateDTO date = listReviewExpireDays(command);
+				if (date != null)
+					task.setReviewExpiredDate(addDays(now, date.getReviewExpiredDays()));
+
 			}
 
 			EquipmentInspectionTasksLogs log = new EquipmentInspectionTasksLogs();
@@ -5222,6 +5230,7 @@ private void checkUserPrivilege(Long orgId, Long privilegeId, Long communityId) 
 		if(cmd.getId()!=null){
 			EquipmentInspectionReviewDate reviewDate = equipmentProvider.getEquipmentInspectiomExpireDaysById(cmd.getId());
 			reviewDate.setStatus(PmNotifyConfigurationStatus.INVAILD.getCode());
+			equipmentProvider.updateReviewExpireDays(reviewDate);
 		}
 	}
 
@@ -5790,9 +5799,25 @@ private void checkUserPrivilege(Long orgId, Long privilegeId, Long communityId) 
 				plan.setTargetId(standards.getTargetId());
 				plan.setTargetType(standards.getTargetType());
 				plan.setRepeatSettingId(standards.getRepeatSettingId());
+				plan.setInspectionCategoryId(standards.getInspectionCategoryId());
+				plan.setOwnerType(standards.getOwnerType());
+				plan.setOwnerId(standards.getOwnerId());
 			}
-
 			equipmentProvider.createEquipmentInspectionPlans(plan);
+			EquipmentInspectionEquipmentPlanMap planMap = new EquipmentInspectionEquipmentPlanMap();
+			if (equipment != null)
+				planMap.setEquimentId(equipment.getId());
+			planMap.setPlanId(plan.getId());
+			if (standards != null){
+				planMap.setStandardId(standards.getId());
+				planMap.setNamespaceId(standards.getNamespaceId());
+				planMap.setTargetType(standards.getTargetType());
+				planMap.setTargetId(standards.getTargetId());
+				planMap.setOwnerId(standards.getOwnerId());
+				planMap.setOwnerType(standards.getOwnerType());
+			}
+			equipmentProvider.createEquipmentPlanMaps(planMap);
+
 			if (standards != null)
 			groupMaps = equipmentProvider.listEquipmentInspectionStandardGroupMapByStandardId(standards.getId());
 			EquipmentInspectionPlanGroupMap planGroupMap = new EquipmentInspectionPlanGroupMap();
