@@ -122,6 +122,7 @@ import com.everhomes.rest.equipment.SearchEquipmentStandardsResponse;
 import com.everhomes.rest.equipment.SearchEquipmentTasksCommand;
 import com.everhomes.rest.equipment.SearchEquipmentsCommand;
 import com.everhomes.rest.equipment.SearchEquipmentsResponse;
+import com.everhomes.rest.equipment.SetReviewExpireDaysCommand;
 import com.everhomes.rest.equipment.StandardAndStatus;
 import com.everhomes.rest.equipment.StandardGroupDTO;
 import com.everhomes.rest.equipment.StandardRepeatType;
@@ -5188,6 +5189,11 @@ private void checkUserPrivilege(Long orgId, Long privilegeId, Long communityId) 
 				}
 			}
 		}
+
+	}
+
+	@Override
+	public void setReviewExpireDays(SetReviewExpireDaysCommand cmd) {
 
 	}
 

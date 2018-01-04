@@ -56,7 +56,7 @@ CREATE TABLE `eh_equipment_inspection_plan_group_map` (
 
 CREATE TABLE `eh_equipment_inspection_review_date` (
   `id` bigint(20) NOT NULL,
-  `owner_type` varchar(64) NOT NULL COMMENT 'refer to object type EhEquipmentInspectionTasks/EhQualityInspectionTasks...',
+  `owner_type` varchar(64) NOT NULL COMMENT 'refer to object type EhEquipmentInspectionTasksReviewExpireDays...',
   `scope_type` tinyint(4) NOT NULL DEFAULT '0' COMMENT '0: all; 1: namespace; 2: community',
   `scope_id` bigint(20) NOT NULL,
   `review_expired_days` int(11) NOT NULL DEFAULT '0' COMMENT 'review_expired_days',

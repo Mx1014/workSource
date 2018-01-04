@@ -1004,12 +1004,11 @@ public class EquipmentController extends ControllerBase {
      * <b>URL: /equipment/checkEquipmentInspectionNumber</b>
      * <p>检查设备巡检编号是否存在</p>
      */
-    @RequestMapping("checkEquipmentInspectionNumber")
+    @RequestMapping("setReviewExpireDays")
     @RestReturn(value = CheckResultResponse.class)
-    public RestResponse checkEquipmentInspectionNumber(CheckEquipmentInspectionNumberCommand cmd) {
-        //equipmentService.deletePmNotifyParams(cmd);
-        CheckResultResponse checkResultResponse =null;
-        return getRestResponse(checkResultResponse);
+    public RestResponse setReviewExpireDays(SetReviewExpireDaysCommand cmd) {
+        equipmentService.setReviewExpireDays(cmd);
+        return getSuccessResponse();
     }
 
 
