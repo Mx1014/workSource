@@ -29,6 +29,7 @@ import com.everhomes.util.IntegerUtil;
 import com.everhomes.util.RuntimeErrorException;
 import com.everhomes.util.excel.RowResult;
 import com.everhomes.util.excel.handler.PropMrgOwnerHandler;
+import org.apache.commons.logging.Log;
 import org.apache.poi.ss.usermodel.Row;
 import org.apache.poi.ss.usermodel.Workbook;
 import org.apache.poi.xssf.usermodel.XSSFSheet;
@@ -1119,6 +1120,10 @@ public class SocialSecurityServiceImpl implements SocialSecurityService {
                 report.setAccumulationFundSum(report.getAccumulationFundCompanySum().add(report.getAccumulationFundEmployeeSum()));
             } else if (NormalFlag.YES == NormalFlag.fromCode(userPayment.getIsDefault())) {
                 //统计社保
+                if (userPayment.getPayItem() == null) {
+                    LOGGER.error("脏数据, payitem = null" + userPayment);
+                    continue;
+                }
                 report.setSocialSecurityCompanySum(calculateAmount(userPayment.getCompanyRadix(), userPayment.getCompanyRatio()));
                 report.setSocialSecurityEmployeeSum(calculateAmount(userPayment.getEmployeeRadix(), userPayment.getEmployeeRatio()));
                 report.setSocialSecuritySum(report.getSocialSecurityCompanySum().add(report.getSocialSecurityEmployeeSum()));
