@@ -364,3 +364,21 @@ CREATE TABLE `eh_social_security_inout_time` (
   PRIMARY KEY (`id`),
   KEY `i_eh_organization_id` (`organization_id`)
 ) ENGINE = INNODB DEFAULT CHARSET = utf8mb4 ;
+
+CREATE TABLE `eh_social_security_inout_log` (
+  `id` BIGINT,
+  `namespace_id` INT (11) DEFAULT '0',
+  `organization_id` BIGINT,
+  `user_id` BIGINT,
+  `detail_id` BIGINT,
+  `type` TINYINT NOT NULL COMMENT '0社保增员1社保减员2公积金增员3公积金减员4社保补缴5公积金补缴',
+  `log_month` VARCHAR(8) COMMENT 'the start month, yyyyMM',
+  `log_date`DATE COMMENT 'log具体日期',
+  `creator_uid` BIGINT  DEFAULT '0',
+  `create_time` DATETIME,
+  `operator_uid` BIGINT,
+  `update_time` DATETIME,
+  PRIMARY KEY (`id`),
+  KEY `i_eh_organization_id` (`organization_id`)
+) ENGINE = INNODB DEFAULT CHARSET = utf8mb4 ;
+
