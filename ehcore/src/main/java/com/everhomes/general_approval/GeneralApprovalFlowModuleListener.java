@@ -97,34 +97,31 @@ public class GeneralApprovalFlowModuleListener implements FlowModuleListener {
     public void onFlowCaseAbsorted(FlowCaseState ctx) {
         // TODO Auto-generated method stub
         FlowCase flowCase = ctx.getGrantParentState().getFlowCase();
-        LOGGER.debug("审批被驳回,handler 执行 onFlowCaseAbsorted  userType : "+ ctx.getCurrentEvent().getUserType());
+        LOGGER.debug("审批被驳回,handler 执行 onFlowCaseAbsorted  userType : " + ctx.getCurrentEvent().getUserType());
         GeneralApprovalHandler handler = getGeneralApprovalHandler(flowCase.getReferId());
         handler.onFlowCaseAbsorted(ctx);
-    	
+
     }
-    
 
 
-    
-	public GeneralApprovalHandler getGeneralApprovalHandler(Long referId) { 
+    public GeneralApprovalHandler getGeneralApprovalHandler(Long referId) {
 
         GeneralApproval ga = generalApprovalProvider.getGeneralApprovalById(referId);
-		return getGeneralApprovalHandler(ga.getApprovalAttribute());
-	}
-	
-	public GeneralApprovalHandler getGeneralApprovalHandler(String generalApprovalAttribute) {
-		if (generalApprovalAttribute != null) {
-			GeneralApprovalHandler handler = PlatformContext.getComponent(GeneralApprovalHandler.GENERAL_APPROVAL_PREFIX
-					+ generalApprovalAttribute);
-			if (handler != null) {
-				return handler;
-			}
-		}
-		return PlatformContext.getComponent(GeneralApprovalDefaultHandler.GENERAL_APPROVAL_DEFAULT_HANDLER_NAME);
-	}
+        return getGeneralApprovalHandler(ga.getApprovalAttribute());
+    }
+
+    public GeneralApprovalHandler getGeneralApprovalHandler(String generalApprovalAttribute) {
+        if (generalApprovalAttribute != null) {
+            GeneralApprovalHandler handler = PlatformContext.getComponent(GeneralApprovalHandler.GENERAL_APPROVAL_PREFIX
+                    + generalApprovalAttribute);
+            if (handler != null) {
+                return handler;
+            }
+        }
+        return PlatformContext.getComponent(GeneralApprovalDefaultHandler.GENERAL_APPROVAL_DEFAULT_HANDLER_NAME);
+    }
 
 
-    
     @Override
     public void onFlowCaseCreating(FlowCase flowCase) {
         PostApprovalFormCommand cmd = JSON.parseObject(flowCase.getContent(), PostApprovalFormCommand.class);
@@ -135,10 +132,10 @@ public class GeneralApprovalFlowModuleListener implements FlowModuleListener {
                 break;
             String key = entities.get(i).getKey();
             //  将"null"屏蔽为空字符串
-            String value = StringUtils.isEmpty(entities.get(i).getValue()) ? "无" : entities.get(i).getValue() ;
+            String value = StringUtils.isEmpty(entities.get(i).getValue()) ? "无" : entities.get(i).getValue();
             content += (key + " : " + value + "\n");
         }
-        content = content.substring(0,content.length()-1);
+        content = content.substring(0, content.length() - 1);
         flowCase.setContent(content);
     }
 
@@ -205,7 +202,7 @@ public class GeneralApprovalFlowModuleListener implements FlowModuleListener {
     @Override
     public void onFlowCaseEnd(FlowCaseState ctx) {
         // 审批通过 ( 如果 stepType 不是驳回 就是正常结束,进入处理 )
-        if (!(ctx.getStepType() == FlowStepType.ABSORT_STEP)){
+        if (!(ctx.getStepType() == FlowStepType.ABSORT_STEP)) {
             FlowCase flowCase = ctx.getGrantParentState().getFlowCase();
             LOGGER.debug("审批终止(通过),handler 执行 onFlowCaseEnd  step type:" + ctx.getStepType());
             GeneralApprovalHandler handler;
@@ -225,7 +222,7 @@ public class GeneralApprovalFlowModuleListener implements FlowModuleListener {
     }
 
     @Override
-	public String onFlowCaseBriefRender(FlowCase flowCase, FlowUserType flowUserType) {
+    public String onFlowCaseBriefRender(FlowCase flowCase, FlowUserType flowUserType) {
         // TODO Auto-generated method stub
         return null;
     }
@@ -651,13 +648,10 @@ public class GeneralApprovalFlowModuleListener implements FlowModuleListener {
     @Override
     public List<FlowServiceTypeDTO> listServiceTypes(Integer namespaceId, String ownerType, Long ownerId) {
         ListGeneralApprovalCommand command = new ListGeneralApprovalCommand();
-        List<GeneralApproval> gas = this.generalApprovalProvider.queryGeneralApprovals(new ListingLocator(),
+        List<GeneralApproval> ga = this.generalApprovalProvider.queryGeneralApprovals(new ListingLocator(),
                 Integer.MAX_VALUE - 1, (locator, query) -> {
                     query.addConditions(Tables.EH_GENERAL_APPROVALS.NAMESPACE_ID.eq(namespaceId));
-                    query.addConditions(Tables.EH_GENERAL_APPROVALS.STATUS.in(
-                            GeneralApprovalStatus.RUNNING.getCode(),
-                            GeneralApprovalStatus.INVALID.getCode())
-                    );
+                    query.addConditions(Tables.EH_GENERAL_APPROVALS.STATUS.eq(GeneralApprovalStatus.RUNNING.getCode()));
 
                     if (ownerType != null && ownerId != null) {
                         query.addConditions(Tables.EH_GENERAL_APPROVALS.OWNER_TYPE.eq(ownerType));
@@ -665,8 +659,8 @@ public class GeneralApprovalFlowModuleListener implements FlowModuleListener {
                     }
                     return query;
                 });
-        if(gas != null) {
-            List<FlowServiceTypeDTO> result = gas.stream().map(r -> {
+        if (ga != null) {
+            List<FlowServiceTypeDTO> result = ga.stream().map(r -> {
                 FlowServiceTypeDTO dto = new FlowServiceTypeDTO();
                 dto.setId(r.getId());
                 dto.setNamespaceId(r.getNamespaceId());
