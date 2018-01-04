@@ -96,10 +96,11 @@ public class SocialSecurityPaymentProviderImpl implements SocialSecurityPaymentP
     @Override
     public void setUserCityAndHTByAccumOrSocial(Long detailId, Byte accumOrSocial, Long cityId, String householdType) {
         getReadWriteContext().update(Tables.EH_SOCIAL_SECURITY_PAYMENTS)
-                .set(Tables.EH_SOCIAL_SECURITY_PAYMENTS.ACCUM_OR_SOCAIL, accumOrSocial)
                 .set(Tables.EH_SOCIAL_SECURITY_PAYMENTS.CITY_ID, cityId)
                 .set(Tables.EH_SOCIAL_SECURITY_PAYMENTS.HOUSEHOLD_TYPE, householdType)
-                .where(Tables.EH_SOCIAL_SECURITY_PAYMENTS.DETAIL_ID.eq(detailId)).execute();
+                .where(Tables.EH_SOCIAL_SECURITY_PAYMENTS.DETAIL_ID.eq(detailId))
+                .and(Tables.EH_SOCIAL_SECURITY_PAYMENTS.ACCUM_OR_SOCAIL.eq(accumOrSocial))
+                .execute();
     }
 
     @Override
