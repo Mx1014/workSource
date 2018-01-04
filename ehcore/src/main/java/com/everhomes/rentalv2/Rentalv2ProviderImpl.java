@@ -367,6 +367,9 @@ public class Rentalv2ProviderImpl implements Rentalv2Provider {
 		long id = sequenceProvider.getNextSequence(NameMapper
 				.getSequenceDomainFromTablePojo(EhRentalv2ItemsOrders.class));
 		rib.setId(id);
+		rib.setCreateTime(new Timestamp(DateHelper.currentGMTTime().getTime()));
+		rib.setCreatorUid(UserContext.currentUserId());
+
 		DSLContext context = dbProvider.getDslContext(AccessSpec.readWrite());
 		EhRentalv2ItemsOrdersRecord record = ConvertHelper.convert(rib,
 				EhRentalv2ItemsOrdersRecord.class);
@@ -384,6 +387,9 @@ public class Rentalv2ProviderImpl implements Rentalv2Provider {
 		long id = sequenceProvider.getNextSequence(NameMapper
 				.getSequenceDomainFromTablePojo(EhRentalv2ResourceOrders.class));
 		rsb.setId(id);
+		rsb.setCreateTime(new Timestamp(DateHelper.currentGMTTime().getTime()));
+		rsb.setCreatorUid(UserContext.currentUserId());
+
 		DSLContext context = dbProvider.getDslContext(AccessSpec.readWrite());
 		EhRentalv2ResourceOrdersRecord record = ConvertHelper.convert(rsb,
 				EhRentalv2ResourceOrdersRecord.class);
@@ -1178,18 +1184,10 @@ public class Rentalv2ProviderImpl implements Rentalv2Provider {
 				.ne(SiteBillStatus.REFUNDED.getCode()));
 		condition = condition.and(Tables.EH_RENTALV2_ORDERS.STATUS
 				.ne(SiteBillStatus.REFUNDING.getCode()));
-
-		/*---start modify by sw----*/
-		//修改以前线下订单只有一个状态
-		//线下订单重新定义状态，产品定义在已支付节点之前，该资源状态是未预约，但是支付之后该资源就表示已预约
-		//判断 待审批和待支付状态
-		//		condition = condition.and(Tables.EH_RENTALV2_ORDERS.STATUS
-//				.ne(SiteBillStatus.OFFLINE_PAY.getCode()));
 		condition = condition.and(Tables.EH_RENTALV2_ORDERS.STATUS
 				.ne(SiteBillStatus.APPROVING.getCode()));
 		condition = condition.and(Tables.EH_RENTALV2_ORDERS.STATUS
 				.ne(SiteBillStatus.PAYINGFINAL.getCode()));
-		/*---end----*/
 		condition = condition.and(Tables.EH_RENTALV2_ORDERS.STATUS
 				.ne(SiteBillStatus.INACTIVE.getCode()));
 
@@ -1388,6 +1386,9 @@ public class Rentalv2ProviderImpl implements Rentalv2Provider {
 		long id = sequenceProvider.getNextSequence(NameMapper
 				.getSequenceDomainFromTablePojo(EhRentalv2OrderAttachments.class));
 		rba.setId(id);
+		rba.setCreateTime(new Timestamp(DateHelper.currentGMTTime().getTime()));
+		rba.setCreatorUid(UserContext.currentUserId());
+
 		DSLContext context = dbProvider.getDslContext(AccessSpec.readWrite());
 		EhRentalv2OrderAttachmentsRecord record = ConvertHelper.convert(rba,
 				EhRentalv2OrderAttachmentsRecord.class);
@@ -1405,6 +1406,9 @@ public class Rentalv2ProviderImpl implements Rentalv2Provider {
 		long id = sequenceProvider.getNextSequence(NameMapper
 				.getSequenceDomainFromTablePojo(EhRentalv2OrderPayorderMap.class));
 		billmap.setId(id);
+		billmap.setCreateTime(new Timestamp(DateHelper.currentGMTTime().getTime()));
+		billmap.setCreatorUid(UserContext.currentUserId());
+
 		DSLContext context = dbProvider.getDslContext(AccessSpec.readWrite());
 		EhRentalv2OrderPayorderMapRecord record = ConvertHelper.convert(billmap,
 				EhRentalv2OrderPayorderMapRecord.class);
@@ -1423,7 +1427,6 @@ public class Rentalv2ProviderImpl implements Rentalv2Provider {
 		SelectJoinStep<Record> step = context
 				.select()
 				.from(Tables.EH_RENTALV2_RESOURCE_ORDERS);
-			 
 
 		Condition condition = Tables.EH_RENTALV2_RESOURCE_ORDERS.RENTAL_ORDER_ID
 				.equal(id);

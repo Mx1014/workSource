@@ -57,11 +57,11 @@ public class CancelLockedRentalOrderAction implements Runnable {
 	public void run() {
 		// 取消订单
 		RentalOrder rentalBill = rentalProvider.findRentalBillById(Long.valueOf(rentalBillId));
-		if (rentalBill.getStatus().equals(SiteBillStatus.LOCKED.getCode())) {
-			rentalBill.setStatus(SiteBillStatus.FAIL.getCode());
-			rentalBill.setVisibleFlag(VisibleFlag.UNVISIBLE.getCode());
-			rentalProvider.updateRentalBill(rentalBill);
-			rentalProvider.deleteRentalBillById(rentalBill.getId());
+//		if (rentalBill.getStatus().equals(SiteBillStatus.LOCKED.getCode())) {
+//			rentalBill.setStatus(SiteBillStatus.FAIL.getCode());
+//			rentalBill.setVisibleFlag(VisibleFlag.UNVISIBLE.getCode());
+//			rentalProvider.updateRentalBill(rentalBill);
+//			rentalProvider.deleteRentalBillById(rentalBill.getId());
 //			RentalResource site = this.rentalProvider.getRentalSiteById(rentalBill.getRentalResourceId());
 //			RentalRule rule = this.rentalProvider.getRentalRule(site.getOwnerId(), site.getOwnerType(), site.getSiteType());
 //			StringBuffer sb = new StringBuffer();
@@ -78,7 +78,7 @@ public class CancelLockedRentalOrderAction implements Runnable {
 //			sb.append(")");
 //			sb.append("由于超期被取消了 > <,请重新预订");
 //			sendMessageToUser(rentalBill.getRentalUid(),sb.toString());
-		}
+//		}
 		
 	}
 
