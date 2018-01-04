@@ -621,7 +621,9 @@ public class SocialSecurityServiceImpl implements SocialSecurityService {
     private SocialSecurityItemDTO processSocialSecurityItemDTO(SocialSecurityPayment r) {
         SocialSecurityItemDTO dto = ConvertHelper.convert(r, SocialSecurityItemDTO.class);
         SocialSecurityBase base = socialSecurityBaseProvider.findSocialSecurityBaseByCondition(r.getCityId(), r.getHouseholdType(), r.getAccumOrSocail(), r.getPayItem());
-        copyRadixAndRatio(dto, base);
+        if (null != base) {
+            copyRadixAndRatio(dto, base);
+        }
         return dto;
     }
 
