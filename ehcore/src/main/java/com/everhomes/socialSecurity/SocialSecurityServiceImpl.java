@@ -754,6 +754,9 @@ public class SocialSecurityServiceImpl implements SocialSecurityService {
     private SocialSecuritySetting processSocialSecuritySetting(SocialSecurityBase base, Long cityId, Long orgId, Long userId,
                                                                Long detailId, Integer namespaceId) {
         SocialSecuritySetting setting = ConvertHelper.convert(base, SocialSecuritySetting.class);
+        if (null == setting) {
+            setting = new SocialSecuritySetting();
+        }
         setting.setCityId(cityId);
         setting.setOrganizationId(orgId);
         setting.setUserId(userId);
@@ -1010,7 +1013,6 @@ public class SocialSecurityServiceImpl implements SocialSecurityService {
                 }
             }
         }
-        LOGGER.debug("校验不通过");
         LOGGER.error("开始计算部门-{} 的数据,\n下辖部门id {},\n人员id{}", dpt.getName(), orgIds, detailIds);
         SocialSecurityDepartmentSummary summary = processSocialSecurityDepartmentSummary(dpt, detailIds, month);
         socialSecurityDepartmentSummaryProvider.createSocialSecurityDepartmentSummary(summary);
