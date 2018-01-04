@@ -650,9 +650,7 @@ public class Rentalv2AdminController extends ControllerBase {
 	/**
 	 *
 	 * <b>URL: /rental/admin/updateResourceTimeRule<b>
-	 * <p>
-	 * 修改时间规则
-	 * </p>
+	 * <p>修改时间规则</p>
 	 */
 	@RequestMapping("updateResourceTimeRule")
 	@RestReturn(String.class)
@@ -667,9 +665,7 @@ public class Rentalv2AdminController extends ControllerBase {
 	/**
 	 *
 	 * <b>URL: /rental/admin/getResourceTimeRule<b>
-	 * <p>
-	 * 获取时间规则
-	 * </p>
+	 * <p>获取时间规则</p>
 	 */
 	@RequestMapping("getResourceTimeRule")
 	@RestReturn(ResourceTimeRuleDTO.class)
@@ -684,9 +680,7 @@ public class Rentalv2AdminController extends ControllerBase {
 	/**
 	 *
 	 * <b>URL: /rental/admin/updateResourcePriceRule<b>
-	 * <p>
-	 * 修改价格规则
-	 * </p>
+	 * <p>修改价格规则</p>
 	 */
 	@RequestMapping("updateResourcePriceRule")
 	@RestReturn(String.class)
@@ -701,9 +695,7 @@ public class Rentalv2AdminController extends ControllerBase {
 	/**
 	 *
 	 * <b>URL: /rental/admin/getResourcePriceRule<b>
-	 * <p>
-	 * 获取价格规则
-	 * </p>
+	 * <p>获取价格规则</p>
 	 */
 	@RequestMapping("getResourcePriceRule")
 	@RestReturn(ResourcePriceRuleDTO.class)
@@ -718,9 +710,7 @@ public class Rentalv2AdminController extends ControllerBase {
 	/**
 	 *
 	 * <b>URL: /rental/admin/updateResourceRentalRule<b>
-	 * <p>
-	 * 修改预约规则
-	 * </p>
+	 * <p>修改预约规则</p>
 	 */
 	@RequestMapping("updateResourceRentalRule")
 	@RestReturn(String.class)
@@ -735,9 +725,7 @@ public class Rentalv2AdminController extends ControllerBase {
 	/**
 	 *
 	 * <b>URL: /rental/admin/getResourceRentalRule<b>
-	 * <p>
-	 * 获取预约规则
-	 * </p>
+	 * <p>获取预约规则</p>
 	 */
 	@RequestMapping("getResourceRentalRule")
 	@RestReturn(ResourceRentalRuleDTO.class)
@@ -752,9 +740,7 @@ public class Rentalv2AdminController extends ControllerBase {
 	/**
 	 *
 	 * <b>URL: /rental/admin/updateResourceOrderRule<b>
-	 * <p>
-	 * 修改订单规则
-	 * </p>
+	 * <p>修改订单规则</p>
 	 */
 	@RequestMapping("updateResourceOrderRule")
 	@RestReturn(String.class)
@@ -769,9 +755,7 @@ public class Rentalv2AdminController extends ControllerBase {
 	/**
 	 *
 	 * <b>URL: /rental/admin/getResourceOrderRule<b>
-	 * <p>
-	 * 获取订单规则
-	 * </p>
+	 * <p>获取订单规则</p>
 	 */
 	@RequestMapping("getResourceOrderRule")
 	@RestReturn(ResourceOrderRuleDTO.class)
@@ -782,4 +766,5 @@ public class Rentalv2AdminController extends ControllerBase {
 		response.setErrorDescription("OK");
 		return response;
 	}
+
 }

@@ -15,7 +15,7 @@ import java.util.List;
  * <li>sourceType: sourceType 默认规则：default_rule， 资源规则：resource_rule{@link RuleSourceType}</li>
  * <li>sourceId: 资源id，如果是默认规则，则不填</li>
  * <li>holidayOpenFlag: holidayOpenFlag</li>
- * <li>holidayType: 节假日类型 {@link RentalHolidayType}</li>
+ * <li>holidayType: 节假日类型 {@link com.everhomes.rest.rentalv2.admin.RentalHolidayType}</li>
  * <li>beginDate: 开放日期</li>
  * <li>endDate: 结束日期</li>
  * <li>dayOpenTime: 按天模式下 每天开始时间</li>
