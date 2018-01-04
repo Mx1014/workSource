@@ -5,7 +5,7 @@ import com.everhomes.util.StringHelper;
 /**
  * <ul>
  * <li>detailId: 员工detailId</li>
- * <li>inOutType: 增减类型：0-社保, 1-公积金</li>
+ * <li>inOutType: 增减类型：0-社保, 1-公积金 参考{@link InOutTimeType}</li>
  * <li>startMonth: 开始时间</li>
  * <li>endMonth: 结束时间</li>
  * </ul>

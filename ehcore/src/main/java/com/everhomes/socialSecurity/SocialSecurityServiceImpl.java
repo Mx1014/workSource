@@ -17,19 +17,16 @@ import com.everhomes.organization.*;
 import com.everhomes.region.Region;
 import com.everhomes.region.RegionProvider;
 
+import com.everhomes.rest.archives.ArchivesUtil;
 import com.everhomes.rest.organization.OrganizationGroupType;
 import com.everhomes.rest.organization.OrganizationMemberStatus;
 import com.everhomes.rest.socialSecurity.*;
 import com.everhomes.sequence.SequenceProvider;
 import com.everhomes.server.schema.tables.pojos.EhSocialSecurityPayments;
 import com.everhomes.server.schema.tables.pojos.EhSocialSecuritySettings;
-import com.everhomes.util.ConvertHelper;
-import com.everhomes.util.DateHelper;
-import com.everhomes.util.IntegerUtil;
-import com.everhomes.util.RuntimeErrorException;
+import com.everhomes.util.*;
 import com.everhomes.util.excel.RowResult;
 import com.everhomes.util.excel.handler.PropMrgOwnerHandler;
-import org.apache.commons.logging.Log;
 import org.apache.poi.ss.usermodel.Row;
 import org.apache.poi.ss.usermodel.Workbook;
 import org.apache.poi.xssf.usermodel.XSSFSheet;
@@ -47,7 +44,6 @@ import org.springframework.web.multipart.MultipartFile;
 
 import java.io.IOException;
 import java.math.BigDecimal;
-import java.sql.Timestamp;
 import java.text.ParseException;
 import java.text.SimpleDateFormat;
 import java.util.*;
@@ -78,6 +74,8 @@ public class SocialSecurityServiceImpl implements SocialSecurityService {
     private SocialSecurityPaymentLogProvider socialSecurityPaymentLogProvider;
     @Autowired
     private SocialSecurityInoutTimeProvider socialSecurityInoutTimeProvider;
+    @Autowired
+    private SocialSecurityInoutLogProvider socialSecurityInoutLogProvider;
     @Autowired
     private RegionProvider regionProvider;
     @Autowired
@@ -491,6 +489,13 @@ public class SocialSecurityServiceImpl implements SocialSecurityService {
             ListSocialSecurityEmployeeStatusCommand cmd) {
         // TODO 这个要人事档案提供一些接口
         ListSocialSecurityEmployeeStatusResponse response = new ListSocialSecurityEmployeeStatusResponse();
+
+        response.setPaySocialSecurityNumber(2);
+        response.setPayAccumulationFundNumber(3);
+        response.setIncreaseNumber(0);
+        response.setDecreaseNumber(0);
+        response.setInWorkNumber(9);
+        response.setOutWorkNumber(7);
         return response;
     }
 
@@ -1897,42 +1902,69 @@ public class SocialSecurityServiceImpl implements SocialSecurityService {
         return response;
     }
 
-    public SocialSecurityEmployeesCountResponse getSocialSecurityEmployeesCount(Long organizationId, Long month) {
-        SocialSecurityEmployeesCountResponse response = new SocialSecurityEmployeesCountResponse();
-
-
-
-
-
-        response.setSocialSecurity(2);
-        response.setAccumulationFund(3);
-        response.setGrowth(0);
-        response.setReduce(0);
-        response.setCheckIn(9);
-        response.setDismiss(7);
-        return response;
-    }
-
     public SocialSecurityInoutTimeDTO addSocialSecurityInOutTime(AddSocialSecurityInOutTimeCommand cmd) {
-        SocialSecurityInoutTime inoutTime = new SocialSecurityInoutTime();
+        SocialSecurityInoutTime time = new SocialSecurityInoutTime();
         OrganizationMemberDetails memberDetail = organizationProvider.findOrganizationMemberDetailsByDetailId(cmd.getDetailId());
 
-        inoutTime.setNamespaceId(memberDetail.getNamespaceId());
-        inoutTime.setUserId(memberDetail.getTargetId());
-        inoutTime.setDetailId(memberDetail.getId());
-        inoutTime.setType(cmd.getInOutType());
+        time.setNamespaceId(memberDetail.getNamespaceId());
+        time.setUserId(memberDetail.getTargetId());
+        time.setDetailId(memberDetail.getId());
+        time.setType(cmd.getInOutType());
         if(cmd.getStartMonth() != null)
-            inoutTime.setStartMonth(cmd.getStartMonth());
+            time.setStartMonth(cmd.getStartMonth());
         if(cmd.getEndMonth() != null)
-            inoutTime.setEndMonth(cmd.getEndMonth());
+            time.setEndMonth(cmd.getEndMonth());
 
-        socialSecurityInoutTimeProvider.createSocialSecurityInoutTime(inoutTime);
+        //  1.create inOut time.
+        socialSecurityInoutTimeProvider.createSocialSecurityInoutTime(time);
+        //  2.create the log.
+        SocialSecurityInoutLog log = convertToSocialSecurityInOutLog(time);
+        socialSecurityInoutLogProvider.createSocialSecurityInoutLog(log);
+        //  3.social...
         newSocialSecurityEmployee(cmd.getDetailId(), cmd.getStartMonth());
 
         //  return back.
-        SocialSecurityInoutTimeDTO dto = ConvertHelper.convert(inoutTime, SocialSecurityInoutTimeDTO.class);
-        dto.setInOutType(inoutTime.getType());
+        SocialSecurityInoutTimeDTO dto = ConvertHelper.convert(time, SocialSecurityInoutTimeDTO.class);
+        dto.setInOutType(time.getType());
         return dto;
+    }
+
+    private SocialSecurityInoutLog convertToSocialSecurityInOutLog(SocialSecurityInoutTime time){
+        SocialSecurityInoutLog log = new SocialSecurityInoutLog();
+        log.setNamespaceId(time.getNamespaceId());
+        log.setOrganizationId(time.getOrganizationId());
+        log.setUserId(time.getUserId());
+        log.setDetailId(time.getDetailId());
+        log.setLogDate(ArchivesUtil.currentDate());
+
+        //  check the time type and then set the log type.
+        //  1) social security & startTime
+        //  2) social security & endTime
+        //  3) accumulation fund & startTime
+        //  4) accumulation fund & endTime
+
+        if(time.getType().equals(InOutTimeType.SOCIAL_SECURITY.getCode())){
+            if(time.getStartMonth()!=null){
+                log.setType(InOutLogType.SOCIAL_SECURITY_IN.getCode());
+                log.setLogMonth(time.getStartMonth());
+            }
+            else if(time.getEndMonth() != null){
+                log.setType(InOutLogType.SOCIAL_SECURITY_OUT.getCode());
+                log.setLogMonth(time.getEndMonth());
+            }
+        }else if(time.getType().equals(InOutTimeType.ACCUMULATION_FUND.getCode())){
+            if(time.getStartMonth()!=null){
+                log.setType(InOutLogType.ACCUMULATION_FUND_IN.getCode());
+                log.setLogMonth(time.getStartMonth());
+            }
+            else if(time.getEndMonth() != null){
+                log.setType(InOutLogType.ACCUMULATION_FUND_OUT.getCode());
+                log.setLogMonth(time.getEndMonth());
+            }
+        }
+
+        //  return it.
+        return log;
     }
 
     @Override
@@ -1946,7 +1978,7 @@ public class SocialSecurityServiceImpl implements SocialSecurityService {
             dto.setCheckInTime(memberDetail.getCheckInTime());
             dto.setDismissTime(memberDetail.getDismissTime());
 
-            SocialSecurityInoutTime social = socialSecurityInoutTimeProvider.getSocialSecurityInoutTimeByDetailId(InOutType.SOCIAL_SECURITY.getCode(), detailId);
+            SocialSecurityInoutTime social = socialSecurityInoutTimeProvider.getSocialSecurityInoutTimeByDetailId(InOutTimeType.SOCIAL_SECURITY.getCode(), detailId);
             if (social != null) {
                 dto.setSocialSecurityStartMonth(social.getStartMonth());
                 dto.setSocialSecurityEndMonth(social.getEndMonth());
@@ -1957,7 +1989,7 @@ public class SocialSecurityServiceImpl implements SocialSecurityService {
 
     @Override
     public List<Long> listSocialSecurityEmployeeDetailIdsByPayMonth(Long ownerId, String payMonth) {
-        List<Long> detailIds = socialSecurityInoutTimeProvider.listSocialSecurityEmployeeDetailIdsByPayMonth(ownerId, payMonth, InOutType.SOCIAL_SECURITY.getCode());
+        List<Long> detailIds = socialSecurityInoutTimeProvider.listSocialSecurityEmployeeDetailIdsByPayMonth(ownerId, payMonth, InOutTimeType.SOCIAL_SECURITY.getCode());
         return detailIds;
     }
 }

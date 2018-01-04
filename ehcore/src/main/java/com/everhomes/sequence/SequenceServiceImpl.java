@@ -2058,6 +2058,10 @@ public class SequenceServiceImpl implements SequenceService {
         syncTableSequence(null, EhSocialSecurityInoutTime.class, Tables.EH_SOCIAL_SECURITY_INOUT_TIME.getName(), (dbContext) -> {
             return dbContext.select(Tables.EH_SOCIAL_SECURITY_INOUT_TIME.ID.max()).from(Tables.EH_SOCIAL_SECURITY_INOUT_TIME).fetchOne().value1();
         });
+
+        syncTableSequence(null, EhSocialSecurityInoutLog.class, Tables.EH_SOCIAL_SECURITY_INOUT_LOG.getName(), (dbContext) -> {
+            return dbContext.select(Tables.EH_SOCIAL_SECURITY_INOUT_LOG.ID.max()).from(Tables.EH_SOCIAL_SECURITY_INOUT_LOG).fetchOne().value1();
+        });
     }
 
     @SuppressWarnings("rawtypes")
