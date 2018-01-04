@@ -6,8 +6,10 @@ CREATE TABLE `eh_portal_versions` (
   `publish_version` int(11) NOT NULL,
   `sync_time` datetime DEFAULT NULL,
   `publish_time` datetime DEFAULT NULL,
-  `status` tinyint(4) DEFAULT NULL COMMENT '1-edit,2-publis success, 3-publish fail'
+  `status` tinyint(4) DEFAULT NULL COMMENT '1-edit,2-publis success, 3-publish fail',
+  PRIMARY KEY (`id`)
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4;
+
 
 ALTER TABLE `eh_portal_content_scopes` ADD COLUMN `version_id`  bigint(20) NULL;
 ALTER TABLE `eh_portal_item_categories` ADD COLUMN `version_id`  bigint(20) NULL;
