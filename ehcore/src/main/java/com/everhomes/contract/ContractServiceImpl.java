@@ -1360,14 +1360,43 @@ public class ContractServiceImpl implements ContractService {
 		ContractParam communityExist = contractProvider.findContractParamByCommunityId(cmd.getNamespaceId(), cmd.getCommunityId());
 		if(cmd.getId() == null && communityExist == null) {
 			contractProvider.createContractParam(param);
+			dealParamGroupMap(param.getId(), cmd.getNotifyGroups(), cmd.getPaidGroups());
 		} else if(cmd.getId() != null && communityExist != null && cmd.getId().equals(communityExist.getId())){
 			contractProvider.updateContractParam(param);
+			dealParamGroupMap(param.getId(), cmd.getNotifyGroups(), cmd.getPaidGroups());
 		} else {
 			LOGGER.error("the community already have param: cmd: {}, exist: {}", cmd, communityExist);
 			throw RuntimeErrorException.errorWith(ContractErrorCode.SCOPE, ContractErrorCode.ERROR_CONTRACT_PARAM_NOT_EXIST,
 					"community contract param is already exit");
 		}
 
+	}
+
+	private void dealParamGroupMap(Long id, List<ContractParamGroupMapDTO> notifyGroups, List<ContractParamGroupMapDTO> paidGroups) {
+		List<ContractParamGroupMap> groupMaps = contractAttachmentProvider.listByContractId(contractId);
+		Map<Long, ContractAttachment> map = new HashMap<>();
+		if(existAttachments != null && existAttachments.size() > 0) {
+			existAttachments.forEach(attachment -> {
+				map.put(attachment.getId(), attachment);
+			});
+	}
+
+		if(attachments != null && attachments.size() > 0) {
+			attachments.forEach(attachment -> {
+				if(attachment.getId() == null) {
+					ContractAttachment contractAttachment = ConvertHelper.convert(attachment, ContractAttachment.class);
+					contractAttachment.setContractId(contractId);
+					contractAttachmentProvider.createContractAttachment(contractAttachment);
+				} else {
+					map.remove(attachment.getId());
+				}
+			});
+		}
+		if(map.size() > 0) {
+			map.forEach((id, attachment) -> {
+				contractAttachmentProvider.deleteContractAttachment(attachment);
+			});
+		}
 	}
 
 	@Override

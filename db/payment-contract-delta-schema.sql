@@ -23,6 +23,7 @@ ALTER TABLE eh_contract_params ADD COLUMN `paid_period` INTEGER NOT NULL DEFAULT
 CREATE TABLE `eh_contract_param_group_map` (		
   `id` BIGINT NOT NULL COMMENT 'id',	
   `param_id` BIGINT NOT NULL DEFAULT 0 COMMENT 'refernece to the id of eh_contract_params',		
+  `group_type` TINYINT NOT NULL DEFAULT '0' COMMENT '0: none, 1: notify group, 2: pay group',
   `group_id` BIGINT NOT NULL DEFAULT 0 COMMENT 'refernece to the id of eh_organizations',		
   `position_id` BIGINT NOT NULL DEFAULT 0 COMMENT 'refernece to the id of eh_organization_job_positions',		
   `create_time` DATETIME,
