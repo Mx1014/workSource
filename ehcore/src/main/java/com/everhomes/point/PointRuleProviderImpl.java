@@ -92,7 +92,7 @@ public class PointRuleProviderImpl implements PointRuleProvider {
         return list;
     }
 
-    @Cacheable(value = "PointRule")
+    @Cacheable(value = "PointRule", key = "{#root.methodName, #root.args}")
     @Override
     public PointRule findById(Long id) {
         return ConvertHelper.convert(dao().findById(id), PointRule.class);
@@ -202,6 +202,7 @@ public class PointRuleProviderImpl implements PointRuleProvider {
         return list;
     }
 
+    @Cacheable(value = "PointRule", key = "{#root.methodName, #root.args}")
     @Override
     public List<PointRule> listPointRuleByIds(List<Long> ruleIds) {
         com.everhomes.server.schema.tables.EhPointRules t = Tables.EH_POINT_RULES;
@@ -212,6 +213,7 @@ public class PointRuleProviderImpl implements PointRuleProvider {
         });
     }
 
+    @Cacheable(value = "PointRule", key = "{#root.methodName, #root.args}")
     @Override
     public List<PointRule> listPointRuleByCategoryId(Long categoryId) {
         com.everhomes.server.schema.tables.EhPointRules t = Tables.EH_POINT_RULES;
