@@ -2012,6 +2012,18 @@ private void checkUserPrivilege(Long orgId, Long privilegeId, Long communityId) 
 				dto.getEquipments().add(relationDTO);
 			}
 		}
+		//兼容之前的版本任务
+		if (dto.getEquipments() == null && dto.getEquipments().size() == 0) {
+			EquipmentInspectionEquipments equipment = null;
+			if (task.getEquipmentId() != null) {
+				equipment = equipmentProvider.findEquipmentById(task.getEquipmentId());
+			}
+			if (null != equipment) {
+				dto.setEquipmentName(equipment.getName());
+				dto.setEquipmentLocation(equipment.getLocation());
+			}
+		}
+
 
 //        Organization group = organizationProvider.findOrganizationById(task.getExecutiveGroupId());
 //		OrganizationJobPosition position = organizationProvider.findOrganizationJobPositionById(task.getPositionId());
