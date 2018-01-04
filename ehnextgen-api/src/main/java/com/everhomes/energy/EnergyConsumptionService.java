@@ -259,6 +259,7 @@ public interface EnergyConsumptionService {
     ListEnergyPlanMetersResponse setEnergyPlanMeterOrder(SetEnergyPlanMeterOrderCommand cmd);
     ListUserEnergyPlanTasksResponse listUserEnergyPlanTasks(ListUserEnergyPlanTasksCommand cmd);
     void readTaskMeter(ReadTaskMeterCommand cmd);
+    void readTaskMeterOffline(ReadTaskMeterOfflineCommand cmd);
 
     void createTask(CreateEnergyTaskCommand cmd);
     void creatMeterTask(EnergyPlanMeterMap map, EnergyPlan plan);

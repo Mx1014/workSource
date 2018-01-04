@@ -662,6 +662,21 @@ public class EnergyConsumptionController extends ControllerBase {
     }
 
     /**
+     * <p>执行抄表任务-- 离线</p>
+     * <b>URL: /energy/readTaskMeterOffline</b>
+     */
+    @RestReturn(String.class)
+    @RequestMapping("readTaskMeterOffline")
+    public RestResponse readTaskMeterOffline(ReadTaskMeterOfflineCommand cmd) {
+        energyConsumptionService.readTaskMeterOffline(cmd);
+
+        RestResponse resp = new RestResponse();
+        resp.setErrorCode(ErrorCodes.SUCCESS);
+        resp.setErrorDescription("OK");
+        return resp;
+    }
+
+    /**
      * <p>同步计划索引</p>
      * <b>URL: /energy/syncEnergyPlanIndex</b>
      */

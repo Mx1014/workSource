@@ -3549,6 +3549,16 @@ public class EnergyConsumptionServiceImpl implements EnergyConsumptionService {
         LOGGER.debug("TrackUserRelatedCost: listUserRelateGroups userId = " + user.getId() + ", elapse=" + (endTime - startTime));
         return groupDtos;
     }
+
+    @Override
+    public void readTaskMeterOffline(ReadTaskMeterOfflineCommand cmd) {
+        if(cmd.getMeterReading() != null && cmd.getMeterReading().size() > 0) {
+            cmd.getMeterReading().forEach(read -> {
+                readTaskMeter(read);
+            });
+        }
+    }
+
     @Override
     public void readTaskMeter(ReadTaskMeterCommand cmd) {
         EnergyMeterTask task = energyMeterTaskProvider.findEnergyMeterTaskById(cmd.getTaskId());
