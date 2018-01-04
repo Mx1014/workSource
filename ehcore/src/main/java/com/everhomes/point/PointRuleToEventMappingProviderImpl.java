@@ -24,29 +24,29 @@ import java.util.List;
 @Repository
 public class PointRuleToEventMappingProviderImpl implements PointRuleToEventMappingProvider {
 
-	@Autowired
-	private DbProvider dbProvider;
+    @Autowired
+    private DbProvider dbProvider;
 
-	@Autowired
-	private SequenceProvider sequenceProvider;
+    @Autowired
+    private SequenceProvider sequenceProvider;
 
-	@Override
-	public void createPointRuleToEventMapping(PointRuleToEventMapping pointRuleToEventMapping) {
-		Long id = sequenceProvider.getNextSequence(NameMapper.getSequenceDomainFromTablePojo(EhPointRuleToEventMappings.class));
-		pointRuleToEventMapping.setId(id);
-		// pointRuleToEventMapping.setCreateTime(DateUtils.currentTimestamp());
-		// pointRuleToEventMapping.setCreatorUid(UserContext.currentUserId());
-		rwDao().insert(pointRuleToEventMapping);
-		DaoHelper.publishDaoAction(DaoAction.CREATE, EhPointRuleToEventMappings.class, id);
-	}
+    @Override
+    public void createPointRuleToEventMapping(PointRuleToEventMapping pointRuleToEventMapping) {
+        Long id = sequenceProvider.getNextSequence(NameMapper.getSequenceDomainFromTablePojo(EhPointRuleToEventMappings.class));
+        pointRuleToEventMapping.setId(id);
+        // pointRuleToEventMapping.setCreateTime(DateUtils.currentTimestamp());
+        // pointRuleToEventMapping.setCreatorUid(UserContext.currentUserId());
+        rwDao().insert(pointRuleToEventMapping);
+        DaoHelper.publishDaoAction(DaoAction.CREATE, EhPointRuleToEventMappings.class, id);
+    }
 
-	@Override
-	public void updatePointRuleToEventMapping(PointRuleToEventMapping pointRuleToEventMapping) {
-		// pointRuleToEventMapping.setUpdateTime(DateUtils.currentTimestamp());
-		// pointRuleToEventMapping.setUpdateUid(UserContext.currentUserId());
+    @Override
+    public void updatePointRuleToEventMapping(PointRuleToEventMapping pointRuleToEventMapping) {
+        // pointRuleToEventMapping.setUpdateTime(DateUtils.currentTimestamp());
+        // pointRuleToEventMapping.setUpdateUid(UserContext.currentUserId());
         rwDao().update(pointRuleToEventMapping);
-		DaoHelper.publishDaoAction(DaoAction.MODIFY, EhPointRuleToEventMappings.class, pointRuleToEventMapping.getId());
-	}
+        DaoHelper.publishDaoAction(DaoAction.MODIFY, EhPointRuleToEventMappings.class, pointRuleToEventMapping.getId());
+    }
 
     @Override
     public List<PointRuleToEventMapping> query(ListingLocator locator, int count, ListingQueryBuilderCallback callback) {
@@ -57,7 +57,7 @@ public class PointRuleToEventMappingProviderImpl implements PointRuleToEventMapp
             callback.buildCondition(locator, query);
         }
         if (locator.getAnchor() != null) {
-            query.addConditions(t.ID.lt(locator.getAnchor()));
+            query.addConditions(t.ID.le(locator.getAnchor()));
         }
 
         if (count > 0) {
@@ -75,10 +75,10 @@ public class PointRuleToEventMappingProviderImpl implements PointRuleToEventMapp
         return list;
     }
 
-	@Override
-	public PointRuleToEventMapping findById(Long id) {
-		return ConvertHelper.convert(dao().findById(id), PointRuleToEventMapping.class);
-	}
+    @Override
+    public PointRuleToEventMapping findById(Long id) {
+        return ConvertHelper.convert(dao().findById(id), PointRuleToEventMapping.class);
+    }
 
     @Override
     public List<PointRuleToEventMapping> listByPointRule(Long pointRuleId) {
@@ -114,12 +114,12 @@ public class PointRuleToEventMappingProviderImpl implements PointRuleToEventMapp
     private EhPointRuleToEventMappingsDao rwDao() {
         DSLContext context = dbProvider.getDslContext(AccessSpec.readWrite());
         return new EhPointRuleToEventMappingsDao(context.configuration());
-	}
+    }
 
-	private EhPointRuleToEventMappingsDao dao() {
+    private EhPointRuleToEventMappingsDao dao() {
         DSLContext context = dbProvider.getDslContext(AccessSpec.readOnly());
         return new EhPointRuleToEventMappingsDao(context.configuration());
-	}
+    }
 
     private DSLContext context() {
         return dbProvider.getDslContext(AccessSpec.readOnly());

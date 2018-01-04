@@ -3,6 +3,7 @@ package com.everhomes.rest.point;
 import com.everhomes.discover.ItemType;
 import com.everhomes.util.StringHelper;
 
+import java.util.ArrayList;
 import java.util.List;
 
 /**
@@ -16,7 +17,7 @@ public class ListPointGoodsResponse {
     private Long nextPageAnchor;
 
     @ItemType(PointLogDTO.class)
-    private List<PointGoodDTO> goods;
+    private List<PointGoodDTO> goods = new ArrayList<>();
 
     public Long getNextPageAnchor() {
         return nextPageAnchor;

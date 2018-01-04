@@ -16,14 +16,14 @@ import java.sql.Timestamp;
  *     <li>description: 描述</li>
  *     <li>arithmeticType: 算数计算类型 {@link com.everhomes.rest.point.PointArithmeticType}</li>
  *     <li>points: 积分数量</li>
- *     <li>limitType: 限制类型 {@link com.everhomes.rest.point.PointRuleLimitType}</li>
+ *     <li>limitType: 限制类型, e.g: {"type": 1} {@link com.everhomes.rest.point.PointRuleLimitType}</li>
  *     <li>limitData: 限制data, e.g: {"times": 1}</li>
- *     <li>eventName: 事件名称</li>
  *     <li>status: status</li>
  *     <li>createTime: createTime</li>
  *     <li>creatorUid: creatorUid</li>
  *     <li>updateTime: updateTime</li>
  *     <li>updateUid: updateUid</li>
+ *     <li>extra: 特殊的配置信息，json格式</li>
  * </ul>
  */
 public class PointRuleDTO {
@@ -38,13 +38,14 @@ public class PointRuleDTO {
     private String description;
     private Byte arithmeticType;
     private Long points;
-    private Byte limitType;
+    private String limitType;
     private String limitData;
     private Byte status;
     private Timestamp createTime;
     private Long creatorUid;
     private Timestamp updateTime;
     private Long updateUid;
+    private String extra;
 
     public Long getId() {
         return id;
@@ -92,14 +93,6 @@ public class PointRuleDTO {
 
     public void setDescription(String description) {
         this.description = description;
-    }
-
-    public Byte getLimitType() {
-        return limitType;
-    }
-
-    public void setLimitType(Byte limitType) {
-        this.limitType = limitType;
     }
 
     public String getLimitData() {
@@ -180,6 +173,22 @@ public class PointRuleDTO {
 
     public void setCategoryName(String categoryName) {
         this.categoryName = categoryName;
+    }
+
+    public String getExtra() {
+        return extra;
+    }
+
+    public void setExtra(String extra) {
+        this.extra = extra;
+    }
+
+    public String getLimitType() {
+        return limitType;
+    }
+
+    public void setLimitType(String limitType) {
+        this.limitType = limitType;
     }
 
     @Override

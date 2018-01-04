@@ -3606,6 +3606,9 @@ public class AssetProviderImpl implements AssetProvider {
         List<ListAllBillsForClientDTO> list = new ArrayList<>();
         DSLContext context = getReadOnlyContext();
         ArrayList<Long> groupIds = new ArrayList<>();
+        if(targetType.equals(AssetPaymentStrings.EH_USER)){
+            targetId = UserContext.currentUserId();
+        }
         EhPaymentBills bill = Tables.EH_PAYMENT_BILLS.as("bill");
         SelectQuery<Record> query = context.selectQuery();
         query.addFrom(bill);

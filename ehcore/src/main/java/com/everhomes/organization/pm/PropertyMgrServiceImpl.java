@@ -4772,14 +4772,15 @@ public class PropertyMgrServiceImpl implements PropertyMgrService {
                     ownerAddress.setNamespaceId(currentUser.getNamespaceId());
                     ownerAddress.setOrganizationOwnerId(ownerId);
                     ownerAddress.setLivingStatus(addressCmd.getLivingStatus());
-					ownerAddress.setAuthType(OrganizationOwnerAddressAuthType.INACTIVE.getCode());
+					ownerAddress.setAuthType(OrganizationOwnerAddressAuthType.ACTIVE.getCode());
                     if (addressCmd.getCheckInDate() != null) {
                         createOrganizationOwnerBehavior(ownerId, address.getId(), addressCmd.getCheckInDate(), OrganizationOwnerBehaviorType.IMMIGRATION);
                     }
                     // 如果小区里有该手机号的用户, 则自动审核当前客户
-                    autoApprovalOrganizationOwnerAddress(cmd.getCommunityId(), cmd.getContactToken(), ownerAddress);
+					//只有在申请了才会自动通过，现要改为只要是注册用户不管申没申请都自动同步给客户 19558 by xiongying20171219
+//                    autoApprovalOrganizationOwnerAddress(cmd.getCommunityId(), cmd.getContactToken(), ownerAddress);
                     propertyMgrProvider.createOrganizationOwnerAddress(ownerAddress);
-                    // getIntoFamily(address, cmd.getContactToken(), currentUser.getNamespaceId());
+					getIntoFamily(address, cmd.getContactToken(), currentUser.getNamespaceId());
                 } else {
                     LOGGER.error("CreateOrganizationOwner: address id is wrong! addressId = {}", addressCmd.getAddressId());
                 }
@@ -4991,9 +4992,18 @@ public class PropertyMgrServiceImpl implements PropertyMgrService {
 				identifier.getNamespaceId(), identifier.getIdentifierToken());
 		if(null != owners && owners.size() > 0) {
 			for(CommunityPmOwner owner : owners) {
-				Address address = addressProvider.findAddressById(owner.getAddressId());
-				//jiarujiating
-				getIntoFamily(address, identifier.getIdentifierToken(), identifier.getNamespaceId());
+				List<OrganizationOwnerAddress> ownerAddressList = propertyMgrProvider.listOrganizationOwnerAddressByOwnerId(identifier.getNamespaceId(), owner.getId());
+//				Address address = addressProvider.findAddressById(owner.getAddressId());
+				if(ownerAddressList != null && ownerAddressList.size() > 0) {
+					for(OrganizationOwnerAddress ownerAddress : ownerAddressList) {
+						Address address = addressProvider.findAddressById(ownerAddress.getAddressId());
+						if(address != null) {
+							//jiarujiating
+							getIntoFamily(address, identifier.getIdentifierToken(), identifier.getNamespaceId());
+						}
+					}
+				}
+
 			}
 		}
 	}
@@ -5205,6 +5215,20 @@ public class PropertyMgrServiceImpl implements PropertyMgrService {
 				dto.setAddress(address.getAddress());
 				dto.setAddressId(address.getId());
 				dto.setApartment(address.getApartmentName());
+				dto.setChargeArea(address.getChargeArea());
+				dto.setOrientation(address.getOrientation());
+				if (address.getLivingStatus() == null) {
+					CommunityAddressMapping mapping =  propertyMgrProvider.findAddressMappingByAddressId(address.getId());
+					if(mapping != null){
+						address.setLivingStatus(mapping.getLivingStatus());
+					}
+					else{
+						address.setLivingStatus(AddressMappingStatus.LIVING.getCode());
+					}
+				}
+				dto.setApartmentLivingStatus(address.getLivingStatus());
+
+
 			}
 
             LocaleString addressStatusLocale = localeStringProvider.find(OrganizationOwnerLocaleStringScope.AUTH_TYPE_SCOPE,
@@ -5626,14 +5650,38 @@ public class PropertyMgrServiceImpl implements PropertyMgrService {
                     "The organization owner %s already in address %s.", cmd.getOrgOwnerId(), cmd.getAddressId());
         }
         ownerAddress = createOrganizationOwnerAddress(address.getId(), cmd.getLivingStatus(), currentNamespaceId(),
-                cmd.getOrgOwnerId(), OrganizationOwnerAddressAuthType.INACTIVE);
+                cmd.getOrgOwnerId(), OrganizationOwnerAddressAuthType.ACTIVE);
         // 自动审核用户与客户
+		//只有在申请了才会自动通过，现要改为只要是注册用户不管申没申请都自动同步给客户 19558 by xiongying20171219
         CommunityPmOwner pmOwner = propertyMgrProvider.findPropOwnerById(cmd.getOrgOwnerId());
         if (pmOwner != null) {
-            autoApprovalOrganizationOwnerAddress(address.getCommunityId(), pmOwner.getContactToken(), ownerAddress);
+			getIntoFamily(address, pmOwner.getContactToken(), pmOwner.getNamespaceId());
+//            autoApprovalOrganizationOwnerAddress(address.getCommunityId(), pmOwner.getContactToken(), ownerAddress);
         }
         return buildOrganizationOwnerAddressDTO(cmd, address, ownerAddress);
     }
+
+	@Override
+	public void addAddressToOrganizationOwner(Integer namespaceId, Long addressId, Long orgOwnerId) {
+		Address address = addressProvider.findAddressById(addressId);
+		if (address == null) {
+			LOGGER.error("The address is not exist, addressId = {}.", addressId);
+			return ;
+		}
+		OrganizationOwnerAddress ownerAddress = propertyMgrProvider.findOrganizationOwnerAddressByOwnerAndAddress(
+				namespaceId, orgOwnerId, addressId);
+		if (ownerAddress != null) {
+			LOGGER.error("The organization owner {} already in address {}.", orgOwnerId, addressId);
+			return ;
+		}
+		createOrganizationOwnerAddress(address.getId(), AddressLivingStatus.ACTIVE.getCode(), namespaceId,
+				orgOwnerId, OrganizationOwnerAddressAuthType.ACTIVE);
+
+		CommunityPmOwner pmOwner = propertyMgrProvider.findPropOwnerById(orgOwnerId);
+		if (pmOwner != null) {
+			getIntoFamily(address, pmOwner.getContactToken(), pmOwner.getNamespaceId());
+		}
+	}
 
     @Override
     public OrganizationOwnerAddress createOrganizationOwnerAddress(Long addressId, Byte livingStatus, Integer namespaceId,
@@ -5679,6 +5727,33 @@ public class PropertyMgrServiceImpl implements PropertyMgrService {
 
         createAuditLog(ownerAddress.getId(), ownerAddress.getClass());
     }
+
+	@Override
+	public void deleteAddressToOrgOwner(Integer namespaceId, Long addressId, Long orgOwnerId) {
+		Address address = addressProvider.findAddressById(addressId);
+		if (address == null) {
+			LOGGER.error("The address is not exist, addressId = {}.", addressId);
+			return ;
+		}
+		OrganizationOwnerAddress ownerAddress = propertyMgrProvider.findOrganizationOwnerAddressByOwnerAndAddress(
+				namespaceId, orgOwnerId, address.getId());
+		if (ownerAddress == null) {
+			LOGGER.error("The ownerAddress is not exist.");
+			return ;
+		}
+		propertyMgrProvider.deleteOrganizationOwnerAddress(ownerAddress);
+		// 创建删除行为记录
+		createOrganizationOwnerBehavior(ownerAddress.getOrganizationOwnerId(), ownerAddress.getAddressId(),
+				System.currentTimeMillis(), OrganizationOwnerBehaviorType.DELETE);
+
+		// 如果当前用户在该地址下认证过,则移除认证状态
+		Family family = this.familyProvider.findFamilyByAddressId(addressId);
+		if (family != null) {
+			leaveFamilyByOwnerId(orgOwnerId, family.getId());
+		}
+
+		createAuditLog(ownerAddress.getId(), ownerAddress.getClass());
+	}
 
     private void createAuditLog(Long resourceId, Class<?> resourceType){
         AuditLog log = new AuditLog();
