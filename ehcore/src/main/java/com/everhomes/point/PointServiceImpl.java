@@ -2,9 +2,7 @@
 package com.everhomes.point;
 
 import com.everhomes.PictureValidate.PictureValidateService;
-import com.everhomes.bus.LocalEvent;
-import com.everhomes.bus.LocalEventBus;
-import com.everhomes.bus.SystemEvent;
+import com.everhomes.bus.*;
 import com.everhomes.configuration.ConfigConstants;
 import com.everhomes.configuration.ConfigurationProvider;
 import com.everhomes.contentserver.ContentServerService;
@@ -130,6 +128,9 @@ public class PointServiceImpl implements PointService {
     @Autowired
     private ScheduleProvider scheduleProvider;
 
+    @Autowired
+    private BusBridgeProvider busBridgeProvider;
+
     @Override
     public ListPointSystemsResponse listPointSystems(ListPointSystemsCommand cmd) {
         ValidatorUtil.validate(cmd);
@@ -231,7 +232,12 @@ public class PointServiceImpl implements PointService {
 
     @Override
     public void restartEventLogScheduler() {
-        pointEventLogScheduler.initScheduledTask();
+        // 发布到远程
+        LocalBusSubscriber subscriber = (LocalBusSubscriber) this.busBridgeProvider;
+        subscriber.onLocalBusMessage(this, "PointEventLogSchedulerRestart", null, "");
+
+        // 发布到本地
+        LocalEventBus.publish("PointEventLogSchedulerRestart", null, null);
     }
 
     @Override
