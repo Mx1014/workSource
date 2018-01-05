@@ -5611,6 +5611,7 @@ private void checkUserPrivilege(Long orgId, Long privilegeId, Long communityId) 
 		task.setStatus(EquipmentTaskStatus.WAITING_FOR_EXECUTING.getCode());
 		task.setResult(EquipmentTaskResult.NONE.getCode());
 		task.setReviewResult(ReviewResult.NONE.getCode());
+		plan.setRepeatSettings(repeatService.findRepeatSettingById(plan.getRepeatSettingId()));
 		List<TimeRangeDTO> timeRanges = repeatService.analyzeTimeRange(plan.getRepeatSettings().getTimeRanges());
 		if(timeRanges != null && timeRanges.size() > 0) {
 			if (LOGGER.isInfoEnabled()) {
