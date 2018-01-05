@@ -35,7 +35,7 @@ public class PointLocalBusSubscriber implements LocalBusSubscriber, ApplicationL
 
     private static final Logger LOGGER = LoggerFactory.getLogger(PointLocalBusSubscriber.class);
 
-    private static final int SCHEDULE_INTERVAL_SECONDS = 60;
+    private static final int SCHEDULE_DURATION_SECONDS = 60;
 
     private final static Random random = new Random();
 
@@ -84,7 +84,7 @@ public class PointLocalBusSubscriber implements LocalBusSubscriber, ApplicationL
     }
 
     private void initScheduledExecutorService() {
-        scheduledExecutorService.schedule(this::persistAllEventLog, SCHEDULE_INTERVAL_SECONDS, TimeUnit.SECONDS);
+        scheduledExecutorService.schedule(this::persistAllEventLog, SCHEDULE_DURATION_SECONDS, TimeUnit.SECONDS);
     }
 
     private void initVMShutdownHook() {
@@ -101,7 +101,7 @@ public class PointLocalBusSubscriber implements LocalBusSubscriber, ApplicationL
         } catch (Exception e) {
             LOGGER.error("Point persist group event log error", e);
         } finally {
-            scheduledExecutorService.schedule(this::persistAllEventLog, SCHEDULE_INTERVAL_SECONDS, TimeUnit.SECONDS);
+            scheduledExecutorService.schedule(this::persistAllEventLog, SCHEDULE_DURATION_SECONDS, TimeUnit.SECONDS);
         }
     }
 

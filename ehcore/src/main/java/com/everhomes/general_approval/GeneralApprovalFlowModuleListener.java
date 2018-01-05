@@ -652,6 +652,7 @@ public class GeneralApprovalFlowModuleListener implements FlowModuleListener {
                 Integer.MAX_VALUE - 1, (locator, query) -> {
                     query.addConditions(Tables.EH_GENERAL_APPROVALS.NAMESPACE_ID.eq(namespaceId));
                     query.addConditions(Tables.EH_GENERAL_APPROVALS.STATUS.eq(GeneralApprovalStatus.RUNNING.getCode()));
+                    query.addConditions(Tables.EH_GENERAL_APPROVALS.MODULE_ID.eq(52000L));
 
                     if (ownerType != null && ownerId != null) {
                         query.addConditions(Tables.EH_GENERAL_APPROVALS.OWNER_TYPE.eq(ownerType));

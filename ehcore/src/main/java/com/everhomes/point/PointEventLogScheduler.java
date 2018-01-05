@@ -1,6 +1,7 @@
 package com.everhomes.point;
 
 import com.everhomes.bootstrap.PlatformContext;
+import com.everhomes.bus.LocalBusSubscriber;
 import com.everhomes.bus.LocalEvent;
 import com.everhomes.bus.LocalEventBus;
 import com.everhomes.configuration.ConfigConstants;
@@ -31,6 +32,7 @@ import java.util.*;
 import java.util.concurrent.Executors;
 import java.util.concurrent.ScheduledExecutorService;
 import java.util.concurrent.TimeUnit;
+import java.util.function.BiConsumer;
 
 /**
  * Created by xq.tian on 2017/12/6.
@@ -40,7 +42,7 @@ public class PointEventLogScheduler implements ApplicationListener<ContextRefres
 
     private static final Logger LOGGER = LoggerFactory.getLogger(PointEventLogScheduler.class);
 
-    private static final int SCHEDULE_INTERVAL_SECONDS = 60;
+    private static final int SCHEDULE_DURATION_SECONDS = 60;
 
     private final static Random random = new Random();
 
@@ -48,7 +50,7 @@ public class PointEventLogScheduler implements ApplicationListener<ContextRefres
     private String serverId;
 
     private ScheduledExecutorService scheduledExecutorService = Executors.newScheduledThreadPool(
-            4, new CustomizableThreadFactory("PointEventLogSchedule-"));
+            1, new CustomizableThreadFactory("PointEventLogSchedule-"));
 
     @Autowired(required = false)
     private List<IPointEventProcessor> eventProcessors;
@@ -97,43 +99,62 @@ public class PointEventLogScheduler implements ApplicationListener<ContextRefres
                 && serverId != null && serverId.trim().length() > 0) {
             initEventProcessor();
             initScheduledTask();
+            initRestartSubscriber();
         }
     }
 
     private void initEventProcessor() {
+        BiConsumer<String, BasePointEventProcessor> putCon = processorMap::put;
+
         // 通用处理器
         if (generalProcessors != null) {
-            for (IGeneralPointEventProcessor processor : generalProcessors) {
-                try {
-                    String[] events = processor.init();
-                    for (String event : events) {
-                        processorMap.put(event, processor);
-                        LocalEventBus.subscribe(event, pointLocalBusSubscriber);
-                    }
-                } catch (Exception e) {
-                    e.printStackTrace();
-                }
-            }
+            // 通用处理器需要单独订阅
+            BiConsumer<String, BasePointEventProcessor> andThen = putCon.andThen(
+                    (event, processor) -> LocalEventBus.subscribe(event, pointLocalBusSubscriber)
+            );
+            initProcessor(generalProcessors, andThen);
         }
+
         // 具体处理器
         if (eventProcessors != null) {
-            for (IPointEventProcessor processor : eventProcessors) {
-                try {
-                    String[] events = processor.init();
-                    for (String event : events) {
-                        processorMap.put(event, processor);
-                    }
-                } catch (Exception e) {
-                    e.printStackTrace();
-                }
-            }
+            initProcessor(eventProcessors, putCon);
         } else {
             LOGGER.warn("There is no event processor found.");
         }
     }
 
-    void initScheduledTask() {
-        scheduledExecutorService.schedule(this::doProcessAll, SCHEDULE_INTERVAL_SECONDS, TimeUnit.SECONDS);
+    private void initProcessor(List<? extends BasePointEventProcessor> processors, BiConsumer<String, BasePointEventProcessor> consumer) {
+        for (BasePointEventProcessor processor : processors) {
+            try {
+                String[] events = processor.init();
+                for (String event : events) {
+                    consumer.accept(event, processor);
+                }
+            } catch (Exception e) {
+                e.printStackTrace();
+            }
+        }
+    }
+
+    private void initScheduledTask() {
+        scheduledExecutorService.schedule(this::doProcessAll, SCHEDULE_DURATION_SECONDS, TimeUnit.SECONDS);
+    }
+
+    private void initRestartSubscriber() {
+        LocalEventBus.subscribe("PointEventLogSchedulerRestart", (sender, subject, args, subscriptionPath) -> {
+            if (scheduledExecutorService.isTerminated()) {
+                LOGGER.info("PointEventLogSchedulerRestart success, scheduledExecutorService.isTerminated() is {}.",
+                        scheduledExecutorService.isTerminated());
+
+                scheduledExecutorService = Executors.newScheduledThreadPool(
+                        1, new CustomizableThreadFactory("PointEventLogSchedule-"));
+                initScheduledTask();
+            } else {
+                LOGGER.info("PointEventLogSchedulerRestart skipped, scheduledExecutorService.isTerminated() is {}.",
+                        scheduledExecutorService.isTerminated());
+            }
+            return LocalBusSubscriber.Action.none;
+        });
     }
 
     private void doProcessAll() {
@@ -145,13 +166,15 @@ public class PointEventLogScheduler implements ApplicationListener<ContextRefres
             }
 
             doProcessGroups();
-            scheduledExecutorService.schedule(this::doProcessAll, SCHEDULE_INTERVAL_SECONDS, TimeUnit.SECONDS);
+            scheduledExecutorService.schedule(this::doProcessAll, SCHEDULE_DURATION_SECONDS, TimeUnit.SECONDS);
 
             if (i == 1) {
                 long end = System.currentTimeMillis();
                 LOGGER.info("End process point event log, elapsed {}s", (end - start) / 1000);
             }
         } catch (Exception e) {
+            scheduledExecutorService.shutdown();
+
             LOGGER.error("Process point event log error.", e);
             sendExceptionMail(e);
         }
@@ -169,7 +192,7 @@ public class PointEventLogScheduler implements ApplicationListener<ContextRefres
              PrintStream stream = new PrintStream(out)) {
             e.printStackTrace(stream);
             String message = out.toString("UTF-8");
-            handler.sendMail(0, account, xqt, "PointEventLogSchedule error (" + home + ")", message);
+            handler.sendMail(0, account, xqt, "PointEventLogSchedule error (" + serverId + ")(" + home + ")", message);
         } catch (Exception ignored) { }
         // ------------------------------------------------------------------------
     }
@@ -180,14 +203,14 @@ public class PointEventLogScheduler implements ApplicationListener<ContextRefres
             try {
                 doProcessGroup(category, null);
             } catch (Throwable t) {
-                LOGGER.error("Point event log scheduler do process group error, categoryId = ;" + category.getId(), t);
-                throw t;
+                LOGGER.error("Point event log scheduler do process group error, categoryId = " + category.getId(), t);
+                throw new RuntimeException("DoProcessGroup categoryId = " + category.getId(), t);
             }
         }
     }
 
     void doProcessGroup(PointRuleCategory category, Integer namespaceId) {
-        coordinationProvider.getNamedLock(CoordinationLocks.POINT_CATEGORY_SCHEDULE.getCode() + category.getId()).enter(() -> {
+        coordinationProvider.getNamedLock(CoordinationLocks.POINT_CATEGORY_SCHEDULE.getCode() + category.getId()).tryEnter(() -> {
             ListingLocator locator = new ListingLocator();
             do {
                 List<PointEventLog> pointEventLogs = pointEventLogProvider.listEventLog(namespaceId, category.getId(),
@@ -270,7 +293,6 @@ public class PointEventLogScheduler implements ApplicationListener<ContextRefres
                     });
                 }
             } while (locator.getAnchor() != null);
-            return true;
         });
     }
 

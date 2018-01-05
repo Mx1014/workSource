@@ -10894,6 +10894,7 @@ public class OrganizationServiceImpl implements OrganizationService {
         List<OrganizationTreeDTO> trees = new ArrayList<OrganizationTreeDTO>();
         OrganizationTreeDTO allTreeDTO = ConvertHelper.convert(dto, OrganizationTreeDTO.class);
         allTreeDTO.setOrganizationName("全部");
+        allTreeDTO.setOrder(Integer.valueOf(-1));
         trees.add(allTreeDTO);
         for (OrganizationTreeDTO orgTreeDTO : dtos) {
             if (orgTreeDTO.getParentId().equals(dto.getOrganizationId())) {

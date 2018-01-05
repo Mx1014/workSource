@@ -2,9 +2,7 @@
 package com.everhomes.point;
 
 import com.everhomes.PictureValidate.PictureValidateService;
-import com.everhomes.bus.LocalEvent;
-import com.everhomes.bus.LocalEventBus;
-import com.everhomes.bus.SystemEvent;
+import com.everhomes.bus.*;
 import com.everhomes.configuration.ConfigConstants;
 import com.everhomes.configuration.ConfigurationProvider;
 import com.everhomes.contentserver.ContentServerService;
@@ -130,6 +128,9 @@ public class PointServiceImpl implements PointService {
     @Autowired
     private ScheduleProvider scheduleProvider;
 
+    @Autowired
+    private BusBridgeProvider busBridgeProvider;
+
     @Override
     public ListPointSystemsResponse listPointSystems(ListPointSystemsCommand cmd) {
         ValidatorUtil.validate(cmd);
@@ -210,12 +211,6 @@ public class PointServiceImpl implements PointService {
             dbProvider.execute(s -> {
                 pointSystemProvider.updatePointSystem(pointSystem);
                 pointRuleConfigProvider.deleteBySystemId(pointSystem.getId());
-
-                // pointRuleProvider.deleteBySystemId(pointSystem.getId());
-                // pointRuleToEventMappingProvider.deleteBySystemId(pointSystem.getId());
-                // pointTutorialProvider.deleteBySystemId(pointSystem.getId());
-                // pointTutorialToPointRuleMappingProvider.deleteBySystemId(pointSystem.getId());
-                // pointActionProvider.deleteBySystemId(pointSystem.getId());
                 return true;
             });
         }
@@ -231,7 +226,12 @@ public class PointServiceImpl implements PointService {
 
     @Override
     public void restartEventLogScheduler() {
-        pointEventLogScheduler.initScheduledTask();
+        // 发布到本地
+        LocalEventBus.publish("PointEventLogSchedulerRestart", null, null);
+
+        // 发布到远程
+        LocalBusSubscriber subscriber = (LocalBusSubscriber) this.busBridgeProvider;
+        subscriber.onLocalBusMessage(this, "PointEventLogSchedulerRestart", null, "");
     }
 
     @Override
@@ -287,8 +287,6 @@ public class PointServiceImpl implements PointService {
         }
         String url = getPointSystemUrl(system.getId());
         point.setUrl(url);
-
-        // point.setUrl(String.format("http://10.1.10.79/integral-management/build/index.html?systemId=%s&ehnavigatorstyle=2#/home#sign_suffix", 1));
 
         TrueOrFalseFlag flag = TrueOrFalseFlag.fromCode(system.getPointExchangeFlag());
         if (flag != null) {
