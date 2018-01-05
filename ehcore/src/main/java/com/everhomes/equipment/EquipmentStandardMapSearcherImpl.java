@@ -10,6 +10,7 @@ import com.everhomes.rest.equipment.EquipmentStandardRelationDTO;
 import com.everhomes.rest.equipment.InspectionStandardMapTargetType;
 import com.everhomes.rest.equipment.SearchEquipmentStandardRelationsCommand;
 import com.everhomes.rest.equipment.SearchEquipmentStandardRelationsResponse;
+import com.everhomes.rest.equipment.Status;
 import com.everhomes.rest.quality.OwnerType;
 import com.everhomes.search.AbstractElasticSearch;
 import com.everhomes.search.EquipmentStandardMapSearcher;
@@ -148,8 +149,10 @@ public class EquipmentStandardMapSearcherImpl extends AbstractElasticSearch impl
 
         FilterBuilder fb = null;
         //V3.0.2去掉设备和标准关联审批
-        /*FilterBuilder nfb = FilterBuilders.termFilter("reviewStatus", EquipmentReviewStatus.DELETE.getCode());
+       /* FilterBuilder nfb = FilterBuilders.termFilter("reviewStatus", EquipmentReviewStatus.DELETE.getCode());
     	fb = FilterBuilders.notFilter(nfb);*/
+        FilterBuilder nfb = FilterBuilders.termFilter("status", Status.INACTIVE.getCode());
+    	fb = FilterBuilders.notFilter(nfb);
 		//总公司分公司的原因改用namespaceId by xiongying20170328
 		fb = FilterBuilders.termFilter("namespaceId", UserContext.getCurrentNamespaceId());
 //    	fb = FilterBuilders.andFilter(fb, FilterBuilders.termFilter("ownerId", cmd.getOwnerId()));
@@ -273,6 +276,7 @@ public class EquipmentStandardMapSearcherImpl extends AbstractElasticSearch impl
             	//add repeatType
 				b.field("repeatType", standard.getRepeatType());
 				b.field("namespaceId", standard.getNamespaceId());
+				b.field("status", standard.getStatus());
             } else {
             	b.field("standardNumber", "");
             }

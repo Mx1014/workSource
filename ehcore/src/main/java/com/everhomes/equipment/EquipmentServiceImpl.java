@@ -634,8 +634,8 @@ private void checkUserPrivilege(Long orgId, Long privilegeId, Long communityId) 
 	}
 
 	private void inActiveEquipmentStandardRelations(EquipmentStandardMap map) {
-		map.setReviewStatus(EquipmentReviewStatus.INACTIVE.getCode());
-		map.setReviewResult(ReviewResult.INACTIVE.getCode());
+//		map.setReviewStatus(EquipmentReviewStatus.INACTIVE.getCode());
+//		map.setReviewResult(ReviewResult.INACTIVE.getCode());
 		map.setStatus(EquipmentStandardStatus.INACTIVE.getCode());
 		equipmentProvider.updateEquipmentStandardMap(map);
 		equipmentStandardMapSearcher.feedDoc(map);
@@ -691,11 +691,11 @@ private void checkUserPrivilege(Long orgId, Long privilegeId, Long communityId) 
 			List<EquipmentStandardMap> maps = equipmentProvider.findByStandardId(standard.getId());
 			if (maps != null && maps.size() > 0) {
 				for (EquipmentStandardMap map : maps) {
-					inActiveEquipmentStandardRelations(map);
+					//inActiveEquipmentStandardRelations(map);
 					//设备状态修改为不完整
-					EquipmentInspectionEquipments equipmet = equipmentProvider.findEquipmentById(map.getTargetId());
-					equipmet.setStatus(EquipmentStatus.INCOMPLETE.getCode());
-					equipmentProvider.updateEquipmentInspectionEquipment(equipmet);
+					EquipmentInspectionEquipments equipment = equipmentProvider.findEquipmentById(map.getTargetId());
+					equipment.setStatus(EquipmentStatus.INCOMPLETE.getCode());
+					equipmentProvider.updateEquipmentInspectionEquipment(equipment);
 				}
 			}
 
@@ -1295,7 +1295,7 @@ private void checkUserPrivilege(Long orgId, Long privilegeId, Long communityId) 
 								map.setReviewStatus(EquipmentReviewStatus.INACTIVE.getCode());
 								//fix bug #20247
 								map.setStatus(EquipmentStandardStatus.INACTIVE.getCode());
-								equipmentProvider.updateEquipmentStandardMap(map);
+								//equipmentProvider.updateEquipmentStandardMap(map);
 								equipmentStandardMapSearcher.feedDoc(map);
 							});
 						}
@@ -1323,8 +1323,8 @@ private void checkUserPrivilege(Long orgId, Long privilegeId, Long communityId) 
                 }
 			}
 
-			List<EquipmentAttachmentDTO> attachments = new ArrayList<EquipmentAttachmentDTO>();
-		    List<EquipmentAccessoryMapDTO> eqAccessoryMap = new ArrayList<EquipmentAccessoryMapDTO>();
+			List<EquipmentAttachmentDTO> attachments = new ArrayList<>();
+		    List<EquipmentAccessoryMapDTO> eqAccessoryMap = new ArrayList<>();
 
 			if(cmd.getEqAccessoryMap() != null) {
 				for(EquipmentAccessoryMapDTO map : cmd.getEqAccessoryMap()) {
@@ -1384,11 +1384,11 @@ private void checkUserPrivilege(Long orgId, Long privilegeId, Long communityId) 
 				EquipmentInspectionStandards standard = equipmentProvider.findStandardById(mapdto.getStandardId());
 				if(standard != null) {
 					mapdto.setStandardName(standard.getName());
-					OrganizationMember member = organizationProvider.findOrganizationMemberByOrgIdAndUId(mapdto.getReviewerUid(),
-							standard.getOwnerId());
-					if(null != member) {
-						mapdto.setReviewerName(member.getContactName());
-					}
+//					OrganizationMember member = organizationProvider.findOrganizationMemberByOrgIdAndUId(mapdto.getReviewerUid(),
+//							standard.getOwnerId());
+//					if(null != member) {
+//						mapdto.setReviewerName(member.getContactName());
+//					}
 				}
 				equipmentStandardMap.add(mapdto);
 

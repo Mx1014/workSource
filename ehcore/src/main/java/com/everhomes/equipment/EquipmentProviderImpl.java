@@ -442,7 +442,7 @@ public class EquipmentProviderImpl implements EquipmentProvider {
        // query.addConditions(Tables.EH_EQUIPMENT_INSPECTION_EQUIPMENT_STANDARD_MAP.REVIEW_STATUS.eq(EquipmentReviewStatus.WAITING_FOR_APPROVAL.getCode())
         //        .or(Tables.EH_EQUIPMENT_INSPECTION_EQUIPMENT_STANDARD_MAP.REVIEW_STATUS.eq(EquipmentReviewStatus.REVIEWED.getCode()).and(Tables.EH_EQUIPMENT_INSPECTION_EQUIPMENT_STANDARD_MAP.REVIEW_RESULT.eq(ReviewResult.QUALIFIED.getCode()))));
         //兼容上版本的关联关系
-        query.addConditions(Tables.EH_EQUIPMENT_INSPECTION_EQUIPMENT_STANDARD_MAP.REVIEW_RESULT.ne(ReviewResult.UNQUALIFIED.getCode()));
+       // query.addConditions(Tables.EH_EQUIPMENT_INSPECTION_EQUIPMENT_STANDARD_MAP.REVIEW_RESULT.ne(ReviewResult.UNQUALIFIED.getCode()));
         List<EquipmentStandardMap> result = new ArrayList<EquipmentStandardMap>();
         query.fetch().map((r) -> {
             result.add(ConvertHelper.convert(r, EquipmentStandardMap.class));
