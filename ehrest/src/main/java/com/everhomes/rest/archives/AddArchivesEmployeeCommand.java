@@ -26,6 +26,8 @@ import java.util.List;
  * <li>contractPartyId: 合同主体</li>
  * <li>regionCode: 手机区号</li>
  * <li>contactToken: 手机号</li>
+ * <li>socialSecurityStartMonth: 社保增员月</li>
+ * <li>accumulationFundStartMonth: 公积金增员月</li>
  * </ul>
  */
 public class AddArchivesEmployeeCommand {
@@ -66,6 +68,11 @@ public class AddArchivesEmployeeCommand {
     private String regionCode;
 
     private String contactToken;
+
+    //  added by Rong for social security at 01.05-2018
+    private String socialSecurityStartMonth;
+
+    private String accumulationFundStartMonth;
 
     public AddArchivesEmployeeCommand() {
     }
@@ -204,6 +211,22 @@ public class AddArchivesEmployeeCommand {
 
     public void setContactToken(String contactToken) {
         this.contactToken = contactToken;
+    }
+
+    public String getSocialSecurityStartMonth() {
+        return socialSecurityStartMonth;
+    }
+
+    public void setSocialSecurityStartMonth(String socialSecurityStartMonth) {
+        this.socialSecurityStartMonth = socialSecurityStartMonth;
+    }
+
+    public String getAccumulationFundStartMonth() {
+        return accumulationFundStartMonth;
+    }
+
+    public void setAccumulationFundStartMonth(String accumulationFundStartMonth) {
+        this.accumulationFundStartMonth = accumulationFundStartMonth;
     }
 
     @Override
