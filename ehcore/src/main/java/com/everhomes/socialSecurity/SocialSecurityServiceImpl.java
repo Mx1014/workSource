@@ -626,6 +626,8 @@ public class SocialSecurityServiceImpl implements SocialSecurityService {
         Region city = regionProvider.findRegionById(dto.getCityId());
         if (null != city) dto.setCityName(city.getName());
         dto.setHouseholdType(payments.get(0).getHouseholdType());
+        SocialSecuritySetting setting = socialSecuritySettingProvider.listSocialSecuritySetting(payments.get(0).getDetailId()).get(0);
+        dto.setRadix(setting.getRadix());
         dto.setItems(payments.stream().map(this::processSocialSecurityItemDTO).collect(Collectors.toList()));
         return dto;
     }
@@ -950,26 +952,80 @@ public class SocialSecurityServiceImpl implements SocialSecurityService {
                 log.setCode(SocialSecurityConstants.ERROR_CHECK_CONTACT);
                 continue;
             } else {
-                String ssCityName = r.getB();
+                String ssCityName = r.getC();
                 Long ssCityId = getZuolinNamespaceCityId(ssCityName);
-                String afCityName = r.getC();
+                String afCityName = r.getD();
                 Long afCItyId = getZuolinNamespaceCityId(afCityName);
-                String houseType = r.getD();
+                String houseType = r.getE();
                 List<SocialSecurityBase> ssBases = socialSecurityBaseProvider.listSocialSecurityBase(ssCityId, houseType, AccumOrSocail.SOCAIL.getCode());
                 if (null == ssBases) {
-
+                    LOGGER.error("没有这个城市或者户籍档次 " + ssCityName+houseType);
+                    log.setErrorLog("没有这个户籍城市或者户籍档次");
+                    log.setCode(SocialSecurityConstants.ERROR_CHECK_SOCIAL_CITY);
+                    continue;
                 }
                 List<SocialSecurityBase> afBases = socialSecurityBaseProvider.listSocialSecurityBase(afCItyId,
                         null, AccumOrSocail.ACCUM.getCode());
                 if (null == afBases) {
-
+                    LOGGER.error("没有这个公积金城市" + afCityName);
+                    log.setErrorLog("没有这个公积金城市");
+                    log.setCode(SocialSecurityConstants.ERROR_CHECK_SOCIAL_CITY);
+                    continue;
                 }
-
+                importUpdateSetting(detail, ssBases, afBases, r, log);
             }
 
         }
         //设置完后同步一下
         socialSecuritySettingProvider.syncRadixAndRatioToPayments(ownerId);
+
+    }
+
+    private void importUpdateSetting(OrganizationMemberDetails detail, List<SocialSecurityBase> ssBases, List<SocialSecurityBase> afBases, RowResult r, ImportFileResultLog<Map<String, String>> log) {
+        List<SocialSecuritySetting> settings = socialSecuritySettingProvider.listSocialSecuritySetting(detail.getId());
+        // 社保
+        String ssRadixString = r.getF();
+        BigDecimal ssRadixNum = null;
+        if (StringUtils.isNotBlank(ssRadixString)) {
+            ssRadixNum = new BigDecimal(ssRadixString);
+            if (ssRadixNum.compareTo(new BigDecimal(0)) <= 0) {
+                String errorString = "社保基数必须大于0" + ssRadixString;
+                LOGGER.error(errorString);
+                log.setErrorLog(errorString);
+                log.setCode(SocialSecurityConstants.ERROR_CHECK_SSRADIX);
+                return ;
+            }
+//            socialSecuritySettingProvider.updateSocialSecuritySettingRadix(detail.getId(), ssRadixNum);
+
+        }
+        // 公积金
+        String afRadixString = r.getG();
+        BigDecimal afRadix = null;
+        if (StringUtils.isNotBlank(afRadixString)) {
+            afRadix = new BigDecimal(afRadixString);
+            if (afRadix.compareTo(new BigDecimal(0)) <= 0) {
+                String errorString = "公积金基数必须大于0" + ssRadixString;
+                LOGGER.error(errorString);
+                log.setErrorLog(errorString);
+                log.setCode(SocialSecurityConstants.ERROR_CHECK_AFRADIX);
+                return ;
+            }
+//            socialSecuritySettingProvider.updateSocialSecuritySettingRadix(detail.getId(), ssRadixNum);
+
+        }
+        // 养老
+        // 医疗
+        // 生育
+        // 工伤
+        // 失业
+        // 残障
+        // 补充
+
+        for (SocialSecuritySetting setting : settings) {
+            if (setting.getAccumOrSocail().equals(AccumOrSocail.SOCAIL.getCode())) {
+
+            }
+        }
 
     }
 
@@ -1931,7 +1987,8 @@ public class SocialSecurityServiceImpl implements SocialSecurityService {
 
 
     @Override
-    public ListUserInoutHistoryResponse listUserInoutHistory(ListUserInoutHistoryCommand cmd) {
+    public ListUserInoutHistoryResponse
+    listUserInoutHistory(ListUserInoutHistoryCommand cmd) {
         // TODO: 2017/12/21 人事档案提供
         SocialSecurityEmployeeDTO result = getSocialSecurityEmployeeInfo(cmd.getDetailId());
 
