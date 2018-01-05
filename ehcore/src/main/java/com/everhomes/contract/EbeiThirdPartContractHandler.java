@@ -5,6 +5,8 @@ import com.alibaba.fastjson.TypeReference;
 import com.everhomes.address.Address;
 import com.everhomes.address.AddressProvider;
 import com.everhomes.bootstrap.PlatformContext;
+import com.everhomes.building.Building;
+import com.everhomes.building.BuildingProvider;
 import com.everhomes.community.Community;
 import com.everhomes.community.CommunityProvider;
 import com.everhomes.configuration.ConfigurationProvider;
@@ -14,6 +16,8 @@ import com.everhomes.customer.EnterpriseCustomerProvider;
 import com.everhomes.db.DbProvider;
 import com.everhomes.http.HttpUtils;
 import com.everhomes.openapi.*;
+import com.everhomes.organization.OrganizationAddress;
+import com.everhomes.organization.OrganizationProvider;
 import com.everhomes.organization.pm.CommunityAddressMapping;
 import com.everhomes.organization.pm.PropertyMgrProvider;
 import com.everhomes.rest.address.NamespaceAddressType;
@@ -25,6 +29,7 @@ import com.everhomes.rest.customer.EbeiJsonEntity;
 import com.everhomes.rest.customer.NamespaceCustomerType;
 import com.everhomes.rest.openapi.shenzhou.DataType;
 import com.everhomes.rest.openapi.shenzhou.SyncFlag;
+import com.everhomes.rest.organization.OrganizationAddressStatus;
 import com.everhomes.rest.organization.pm.AddressMappingStatus;
 import com.everhomes.search.ContractSearcher;
 import com.everhomes.user.UserContext;
@@ -92,6 +97,12 @@ public class EbeiThirdPartContractHandler implements ThirdPartContractHandler {
 
     @Autowired
     private DbProvider dbProvider;
+
+    @Autowired
+    private OrganizationProvider organizationProvider;
+
+    @Autowired
+    private BuildingProvider buildingProvider;
 
     @Override
     public void syncContractsFromThirdPart(String pageOffset, String version, String communityIdentifier) {
@@ -475,4 +486,73 @@ public class EbeiThirdPartContractHandler implements ThirdPartContractHandler {
         dealContractApartments(contract, ebeiContract.getHouseInfoList());
         contractSearcher.feedDoc(contract);
     }
+
+    private void insertOrUpdateOrganizationAddresses(List<EbeiContractRoomInfo> apartmentIdentifier, EnterpriseCustomer customer){
+        List<OrganizationAddress> myOrganizationAddressList = organizationProvider.listOrganizationAddressByOrganizationId(customer.getOrganizationId());
+        List<EbeiContractRoomInfo> apartments = apartmentIdentifier;
+        LOGGER.debug("insertOrUpdateOrganizationAddresses customer: {}, myOrganizationAddressList: {}, apartments: {}",
+                customer.getName(), StringHelper.toJsonString(myOrganizationAddressList), StringHelper.toJsonString(apartmentIdentifier));
+        for (OrganizationAddress organizationAddress : myOrganizationAddressList) {
+            Address address = addressProvider.findAddressById(organizationAddress.getAddressId());
+            if (address != null && address.getNamespaceAddressType() != null && address.getNamespaceAddressToken() != null) {
+                if (address.getNamespaceAddressType().equals(NamespaceAddressType.EBEI.getCode())) {
+                    for(EbeiContractRoomInfo identifier : apartmentIdentifier) {
+                        if(address.getNamespaceAddressToken().equals(identifier.getInfoId())) {
+                            apartments.remove(identifier);
+                        }
+                    }
+                }
+            } else {
+                deleteOrganizationAddress(organizationAddress);
+            }
+        }
+        LOGGER.debug("insertOrUpdateOrganizationAddresses after remove apartments: {}", StringHelper.toJsonString(apartmentIdentifier));
+        if(apartments != null && apartments.size() > 0) {
+            apartments.forEach(apartment -> {
+                insertOrganizationAddress(apartment, customer);
+            });
+        }
+
+    }
+
+    private void insertOrganizationAddress(EbeiContractRoomInfo apartmentIdentifier, EnterpriseCustomer customer) {
+        if (apartmentIdentifier == null) {
+            return;
+        }
+        Long before = System.currentTimeMillis();
+        Address address = addressProvider.findAddressByNamespaceTypeAndName(NamespaceAddressType.EBEI.getCode(), apartmentIdentifier.getInfoId());
+        Long after = System.currentTimeMillis();
+        LOGGER.info("address time before index:{}", after-before);
+        if (address == null) {
+            return;
+        }
+        Building building = buildingProvider.findBuildingByName(customer.getNamespaceId(), address.getCommunityId(), address.getBuildingName());
+
+        OrganizationAddress organizationAddress = new OrganizationAddress();
+        organizationAddress.setOrganizationId(customer.getOrganizationId());
+        organizationAddress.setStatus(OrganizationAddressStatus.ACTIVE.getCode());
+        organizationAddress.setCreatorUid(1L);
+        organizationAddress.setCreateTime(new Timestamp(DateHelper.currentGMTTime().getTime()));
+        organizationAddress.setOperatorUid(1L);
+        organizationAddress.setUpdateTime(organizationAddress.getCreateTime());
+        organizationAddress.setAddressId(address.getId());
+        if (building == null) {
+            organizationAddress.setBuildingId(0L);
+        }else {
+            organizationAddress.setBuildingId(building.getId());
+            organizationAddress.setBuildingName(building.getName());
+        }
+
+        organizationProvider.createOrganizationAddress(organizationAddress);
+    }
+
+    private void deleteOrganizationAddress(OrganizationAddress organizationAddress) {
+        if (OrganizationAddressStatus.fromCode(organizationAddress.getStatus()) != OrganizationAddressStatus.INACTIVE) {
+            organizationAddress.setStatus(OrganizationAddressStatus.INACTIVE.getCode());
+            organizationAddress.setOperatorUid(1L);
+            organizationAddress.setUpdateTime(new Timestamp(DateHelper.currentGMTTime().getTime()));
+            organizationProvider.updateOrganizationAddress(organizationAddress);
+        }
+    }
+
 }

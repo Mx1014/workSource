@@ -1378,8 +1378,6 @@ public class ZJGKOpenServiceImpl {
     private void insertOrUpdateOrganizationAddresses(List<CommunityAddressDTO> apartmentIdentifier, EnterpriseCustomer customer){
         List<OrganizationAddress> myOrganizationAddressList = organizationProvider.listOrganizationAddressByOrganizationId(customer.getOrganizationId());
         List<CommunityAddressDTO> apartments = apartmentIdentifier;
-        LOGGER.debug("insertOrUpdateOrganizationAddresses customer: {}, myOrganizationAddressList: {}, apartments: {}",
-                customer.getName(), StringHelper.toJsonString(myOrganizationAddressList), StringHelper.toJsonString(apartmentIdentifier));
         for (OrganizationAddress organizationAddress : myOrganizationAddressList) {
             Address address = addressProvider.findAddressById(organizationAddress.getAddressId());
             if (address != null && address.getNamespaceAddressType() != null && address.getNamespaceAddressToken() != null) {
@@ -1394,7 +1392,7 @@ public class ZJGKOpenServiceImpl {
                 deleteOrganizationAddress(organizationAddress);
             }
         }
-        LOGGER.debug("insertOrUpdateOrganizationAddresses after remove apartments: {}", StringHelper.toJsonString(apartmentIdentifier));
+
         if(apartments != null && apartments.size() > 0) {
             apartments.forEach(apartment -> {
                 insertOrganizationAddress(apartment, customer);
