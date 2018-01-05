@@ -5611,6 +5611,7 @@ private void checkUserPrivilege(Long orgId, Long privilegeId, Long communityId) 
 		task.setStatus(EquipmentTaskStatus.WAITING_FOR_EXECUTING.getCode());
 		task.setResult(EquipmentTaskResult.NONE.getCode());
 		task.setReviewResult(ReviewResult.NONE.getCode());
+		task.setPlanId(plan.getId());
 		plan.setRepeatSettings(repeatService.findRepeatSettingById(plan.getRepeatSettingId()));
 		List<TimeRangeDTO> timeRanges = repeatService.analyzeTimeRange(plan.getRepeatSettings().getTimeRanges());
 		if(timeRanges != null && timeRanges.size() > 0) {
@@ -5790,6 +5791,8 @@ private void checkUserPrivilege(Long orgId, Long privilegeId, Long communityId) 
 			if (equipment != null) {
 				plan.setNamespaceId(equipment.getNamespaceId());
 				plan.setName(equipment.getName());
+				plan.setTargetId(standards.getTargetId());
+				plan.setTargetType(standards.getTargetType());
 			}
 			if (standards != null) {
 				if (EquipmentReviewStatus.REVIEWED.equals(EquipmentReviewStatus.fromStatus(map.getReviewStatus()))
@@ -5799,8 +5802,6 @@ private void checkUserPrivilege(Long orgId, Long privilegeId, Long communityId) 
 					plan.setStatus(EquipmentPlanStatus.WATTING_FOR_APPOVING.getCode());
 				}
 				plan.setPlanType(standards.getStandardType());
-				plan.setTargetId(standards.getTargetId());
-				plan.setTargetType(standards.getTargetType());
 				plan.setRepeatSettingId(standards.getRepeatSettingId());
 				plan.setInspectionCategoryId(standards.getInspectionCategoryId());
 				plan.setOwnerType(standards.getOwnerType());
@@ -5814,8 +5815,6 @@ private void checkUserPrivilege(Long orgId, Long privilegeId, Long communityId) 
 			if (standards != null){
 				planMap.setStandardId(standards.getId());
 				planMap.setNamespaceId(standards.getNamespaceId());
-				planMap.setTargetType(standards.getTargetType());
-				planMap.setTargetId(standards.getTargetId());
 				planMap.setOwnerId(standards.getOwnerId());
 				planMap.setOwnerType(standards.getOwnerType());
 			}
