@@ -5,7 +5,7 @@ import java.sql.Timestamp;
 import java.util.List;
 import java.util.Set;
 
-import com.everhomes.rest.socialSecurity.AccumOrSocail;
+import com.everhomes.rest.socialSecurity.AccumOrSocial;
 import com.everhomes.rest.socialSecurity.SocialSecurityItemDTO;
 import com.everhomes.rest.socialSecurity.SsorAfPay;
 import org.jooq.DSLContext;
@@ -101,7 +101,7 @@ public class SocialSecuritySettingProviderImpl implements SocialSecuritySettingP
                 .where(Tables.EH_SOCIAL_SECURITY_SETTINGS.DETAIL_ID.eq(detailId));
         if (null != accumOrSocial) {
             step = step.and(Tables.EH_SOCIAL_SECURITY_SETTINGS.ACCUM_OR_SOCAIL.eq(accumOrSocial));
-            if (accumOrSocial.equals(AccumOrSocail.SOCAIL.getCode())) {
+            if (accumOrSocial.equals(AccumOrSocial.SOCAIL.getCode())) {
                 step = step.and(Tables.EH_SOCIAL_SECURITY_SETTINGS.PAY_ITEM.eq(itemDTO.getPayItem()));
             }
         }
@@ -143,7 +143,7 @@ public class SocialSecuritySettingProviderImpl implements SocialSecuritySettingP
     }
 
     @Override
-    public SocialSecuritySetting findSocialSecuritySettingByDetailIdAndAOS(Long detailId, AccumOrSocail socail) {
+    public SocialSecuritySetting findSocialSecuritySettingByDetailIdAndAOS(Long detailId, AccumOrSocial socail) {
         List<SocialSecuritySetting> results = getReadOnlyContext().select().from(Tables.EH_SOCIAL_SECURITY_SETTINGS)
                 .where(Tables.EH_SOCIAL_SECURITY_SETTINGS.DETAIL_ID.eq(detailId))
                 .and(Tables.EH_SOCIAL_SECURITY_SETTINGS.ACCUM_OR_SOCAIL.eq(socail.getCode()))
@@ -182,7 +182,7 @@ public class SocialSecuritySettingProviderImpl implements SocialSecuritySettingP
                 .set(Tables.EH_SOCIAL_SECURITY_PAYMENTS.COMPANY_RATIO, Tables.EH_SOCIAL_SECURITY_SETTINGS.COMPANY_RATIO)
                 .set(Tables.EH_SOCIAL_SECURITY_PAYMENTS.EMPLOYEE_RADIX, Tables.EH_SOCIAL_SECURITY_SETTINGS.EMPLOYEE_RADIX)
                 .set(Tables.EH_SOCIAL_SECURITY_PAYMENTS.EMPLOYEE_RATIO, Tables.EH_SOCIAL_SECURITY_SETTINGS.EMPLOYEE_RATIO)
-                .where(Tables.EH_SOCIAL_SECURITY_PAYMENTS.ACCUM_OR_SOCAIL.eq(AccumOrSocail.ACCUM.getCode()))
+                .where(Tables.EH_SOCIAL_SECURITY_PAYMENTS.ACCUM_OR_SOCAIL.eq(AccumOrSocial.ACCUM.getCode()))
                 .execute();
     }
 

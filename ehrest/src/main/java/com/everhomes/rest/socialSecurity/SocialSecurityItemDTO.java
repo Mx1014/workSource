@@ -24,7 +24,7 @@ import com.everhomes.util.StringHelper;
  * </ul>
  */
 public class SocialSecurityItemDTO {
-
+	private Byte accumOrSocial;
 	private String payItem; 
 	private BigDecimal companyRadix;
 	private Integer companyRatio;
@@ -149,5 +149,13 @@ public class SocialSecurityItemDTO {
 	@Override
 	public String toString() {
 		return StringHelper.toJsonString(this);
-	}	
+	}
+
+	public Byte getAccumOrSocial() {
+		return accumOrSocial;
+	}
+
+	public void setAccumOrSocial(Byte accumOrSocial) {
+		this.accumOrSocial = accumOrSocial;
+	}
 }

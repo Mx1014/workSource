@@ -11,17 +11,21 @@ package com.everhomes.rest.socialSecurity;
  * </ul>
  */
 public enum InOutLogType {
-    SOCIAL_SECURITY_IN((byte) 0), SOCIAL_SECURITY_OUT((byte) 1),
-    ACCUMULATION_FUND_IN((byte) 2), ACCUMULATION_FUND_OUT((byte) 3);
+    SOCIAL_SECURITY_IN((byte) 0,"社保增员"), SOCIAL_SECURITY_OUT((byte) 1,"社保减员"),
+    ACCUMULATION_FUND_IN((byte) 2,"公积金增员"), ACCUMULATION_FUND_OUT((byte) 3,"公积金减员");
 
     private byte code;
+    private String describe;
 
-    private InOutLogType(Byte code) {
+    private InOutLogType(byte code, String describe) {
         this.code = code;
+        this.describe = describe;
     }
-
     public byte getCode() {
         return this.code;
+    }
+    public String getDescribe() {
+        return describe;
     }
 
     public static InOutLogType fromCode(Byte code) {
