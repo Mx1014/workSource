@@ -73,6 +73,8 @@ public interface PmTaskService {
 
 	NamespaceHandlerDTO getNamespaceHandler(GetNamespaceHandlerCommand cmd);
 
+	GetIfHideRepresentResponse getIfHideRepresent(GetIfHideRepresentCommand cmd);
+
 //	void synchronizedData(SearchTasksCommand cmd);
 
 	void deleteTaskHistoryAddress(DeleteTaskHistoryAddressCommand cmd);

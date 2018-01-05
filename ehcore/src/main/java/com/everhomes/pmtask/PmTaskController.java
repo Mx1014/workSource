@@ -372,6 +372,21 @@ public class PmTaskController extends ControllerBase {
         response.setErrorDescription("OK");
         return response;
     }
+
+    /**
+     * <b>URL: /pmtask/getIfHideRepresent</b>
+     * <p>判断是否隐藏代发按钮</p>
+     */
+    @RequestMapping("getIfHideRepresent")
+    @RestReturn(value=GetIfHideRepresentResponse.class)
+    public RestResponse getIfHideRepresent(GetIfHideRepresentCommand cmd) {
+        GetIfHideRepresentResponse dto = pmTaskService.getIfHideRepresent(cmd);
+        RestResponse response = new RestResponse(dto);
+        response.setErrorCode(ErrorCodes.SUCCESS);
+        response.setErrorDescription("OK");
+        return response;
+    }
+
     
     /**
      * <b>URL: /pmtask/exportTasks</b>

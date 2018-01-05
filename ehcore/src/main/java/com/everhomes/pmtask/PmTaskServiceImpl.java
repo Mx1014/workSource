@@ -2128,7 +2128,15 @@ public class PmTaskServiceImpl implements PmTaskService {
 		return dto;
 	}
 
-//	@Override
+	@Override
+	public GetIfHideRepresentResponse getIfHideRepresent(GetIfHideRepresentCommand cmd) {
+		Integer namespaceId = cmd.getNamespaceId()==null ? UserContext.getCurrentNamespaceId():cmd.getNamespaceId();
+		GetIfHideRepresentResponse response = new GetIfHideRepresentResponse();
+		response.setIfHide(configProvider.getIntValue(namespaceId,"pmtask.hide.represent",0));
+		return response;
+	}
+
+	//	@Override
 //	public void synchronizedData(SearchTasksCommand cmd) {
 //
 //		User user = UserContext.current().getUser();
