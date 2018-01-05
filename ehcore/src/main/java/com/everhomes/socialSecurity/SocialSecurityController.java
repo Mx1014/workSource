@@ -205,7 +205,6 @@ public class SocialSecurityController extends ControllerBase {
     @RestReturn(FileSocialSecurityResponse.class)
     public RestResponse fileSocialSecurity(FileSocialSecurityCommand cmd) {
         return new RestResponse(socialSecurityService.fileSocialSecurity(cmd);
-        );
     }
 
     /**
