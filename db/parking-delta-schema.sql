@@ -131,7 +131,13 @@ ADD COLUMN `resource_type` varchar(64) DEFAULT NULL COMMENT '资源类型';
 ALTER TABLE `eh_rentalv2_cells`
 drop column unit,
 drop column exclusive_flag,
-drop column rental_step;
+drop column rental_step,
+drop column halfresource_price,
+drop column halfresource_original_price,
+drop column half_org_member_original_price,
+drop column half_org_member_price,
+drop column half_approving_user_original_price,
+drop column half_approving_user_price;
 
 
 ALTER TABLE `eh_rentalv2_orders`
