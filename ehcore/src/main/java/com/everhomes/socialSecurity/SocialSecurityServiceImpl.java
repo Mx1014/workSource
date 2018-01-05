@@ -543,7 +543,8 @@ public class SocialSecurityServiceImpl implements SocialSecurityService {
             if (AccumOrSocial.ACCUM == AccumOrSocial.fromCode(accumOrSocail) &&
                     AccumOrSocial.ACCUM == AccumOrSocial.fromCode(setting.getAccumOrSocail())) {
                 return setting;
-            } else if (setting.getPayItem().equals(payItem)) {
+            } else if (AccumOrSocial.SOCAIL == AccumOrSocial.fromCode(setting.getAccumOrSocail()) &&
+                    setting.getPayItem().equals(payItem)) {
                 return setting;
             }
         }
@@ -1065,7 +1066,7 @@ public class SocialSecurityServiceImpl implements SocialSecurityService {
             if (null == setting) {
                 base = findSSBaseWithOutException(bases, item);
                 if (null == base) {
-                    setting = new SocialSecuritySetting();
+                    setting = ConvertHelper.convert(item,SocialSecuritySetting.class);
                     setting.setCityId(cityId);
                     setting.setOrganizationId(detail.getOrganizationId());
                     setting.setUserId(detail.getTargetId());
