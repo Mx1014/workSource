@@ -119,11 +119,13 @@ import java.math.BigDecimal;
 import java.math.RoundingMode;
 import java.net.URL;
 import java.sql.Date;
+import java.sql.Time;
 import java.sql.Timestamp;
 import java.text.ParseException;
 import java.text.SimpleDateFormat;
 import java.time.LocalDate;
 import java.time.LocalDateTime;
+import java.time.format.DateTimeFormatter;
 import java.util.*;
 import java.util.List;
 import java.util.concurrent.TimeUnit;
@@ -157,6 +159,8 @@ public class EnergyConsumptionServiceImpl implements EnergyConsumptionService {
             return new SimpleDateFormat("yyyyMM");
         }
     };
+
+    DateTimeFormatter dateSF = DateTimeFormatter.ofPattern("yyyy-MM-dd hh:mm:ss");
 
     @Autowired
     private CommunityProvider communityProvider;
@@ -4511,12 +4515,24 @@ public class EnergyConsumptionServiceImpl implements EnergyConsumptionService {
         return errorDataLogs;
     }
 
+    private Timestamp dateStrToTimestamp(String str) {
+        if(str != null) {
+            LocalDate localDate = LocalDate.parse(str,dateSF);
+            Timestamp ts = new Timestamp(Date.valueOf(localDate).getTime());
+            return ts;
+        }
+        return null;
+    }
+
     @Override
     public SyncOfflineDataResponse syncOfflineData(SyncOfflineDataCommand cmd) {
         SyncOfflineDataResponse response = new SyncOfflineDataResponse();
+        Timestamp buildingUpdateTime = dateStrToTimestamp(cmd.getBuildingUpdateTime());
+        Timestamp categoryUpdateTime = dateStrToTimestamp(cmd.getCategoryUpdateTime());
+        Timestamp taskUpdateTime = dateStrToTimestamp(cmd.getTaskUpdateTime());
         List<EnergyMeterCategory> categoryList = new ArrayList<>();
         categoryList = meterCategoryProvider.listMeterCategories(UserContext.getCurrentNamespaceId(cmd.getNamespaceId()), cmd.getCategoryType(),
-                null, null, cmd.getCommunityId());
+                null, null, cmd.getCommunityId(), categoryUpdateTime);
         List<EnergyMeterCategoryMap> categoryMaps = energyMeterCategoryMapProvider.listEnergyMeterCategoryMap(cmd.getCommunityId());
         if(categoryMaps != null && categoryMaps.size() > 0) {
             List<Long> categoryIds = categoryMaps.stream().map(map -> {
@@ -4529,17 +4545,25 @@ public class EnergyConsumptionServiceImpl implements EnergyConsumptionService {
         }
         List<EnergyMeterCategoryDTO> dtos = categoryList.stream().map(category -> {
             EnergyMeterCategoryDTO dto = toMeterCategoryDto(category);
+            if(category.getUpdateTime() == null) {
+                category.setUpdateTime(category.getCreateTime());
+            }
+            dto.setLastTime(dateSF.format(category.getUpdateTime().toInstant()));
             return dto;
         }).collect(Collectors.toList());
         response.setCategoryDTOs(dtos);
 
         CrossShardListingLocator locator = new CrossShardListingLocator();
-        List<com.everhomes.community.Building> buildings = communityProvider.ListBuildingsByCommunityId(locator, Integer.MAX_VALUE-1,cmd.getCommunityId(), UserContext.getCurrentNamespaceId(cmd.getNamespaceId()), null);
+        List<com.everhomes.community.Building> buildings = communityProvider.ListBuildingsByCommunityId(locator, Integer.MAX_VALUE-1,
+                cmd.getCommunityId(), UserContext.getCurrentNamespaceId(cmd.getNamespaceId()), null, buildingUpdateTime);
         List<BuildingDTO> buildingDTOs = buildings.stream().map((r) -> {
             BuildingDTO dto = ConvertHelper.convert(r, BuildingDTO.class);
             dto.setBuildingName(dto.getName());
             dto.setName(org.apache.commons.lang.StringUtils.isBlank(dto.getAliasName()) ? dto.getName() : dto.getAliasName());
-
+            if(r.getOperateTime() == null) {
+                r.setOperateTime(r.getCreateTime());
+            }
+            dto.setLastTime(dateSF.format(r.getOperateTime().toInstant()));
             return dto;
         }).collect(Collectors.toList());
         response.setBuildings(buildingDTOs);
@@ -4550,11 +4574,16 @@ public class EnergyConsumptionServiceImpl implements EnergyConsumptionService {
             List<Long> planIds = maps.stream().map(map -> {
                 return map.getPlanId();
             }).collect(Collectors.toList());
-            List<EnergyMeterTask> tasks = energyMeterTaskProvider.listEnergyMeterTasksByPlan(planIds, cmd.getCommunityId(), cmd.getOwnerId(), 0L, Integer.MAX_VALUE-1);
+            List<EnergyMeterTask> tasks = energyMeterTaskProvider.listEnergyMeterTasksByPlan(planIds, cmd.getCommunityId(),
+                    cmd.getOwnerId(), 0L, Integer.MAX_VALUE-1, taskUpdateTime);
 
             if(tasks != null && tasks.size() > 0) {
                 List<EnergyMeterTaskDTO> taskDTOs = tasks.stream().map(task -> {
                     EnergyMeterTaskDTO dto = ConvertHelper.convert(task, EnergyMeterTaskDTO.class);
+                    if(task.getUpdateTime() == null) {
+                        task.setUpdateTime(task.getCreateTime());
+                    }
+                    dto.setLastTime(dateSF.format(task.getUpdateTime().toInstant()));
                     EnergyMeter meter = meterProvider.findById(task.getNamespaceId(), task.getMeterId());
                     dto.setBillCategoryId(meter.getBillCategoryId());
                     // 项目

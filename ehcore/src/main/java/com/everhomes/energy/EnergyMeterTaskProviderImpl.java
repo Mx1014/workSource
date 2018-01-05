@@ -22,6 +22,7 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
 
 import java.sql.Timestamp;
+import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
@@ -111,6 +112,31 @@ public class EnergyMeterTaskProviderImpl implements EnergyMeterTaskProvider {
                 .and(Tables.EH_ENERGY_METER_TASKS.TARGET_ID.eq(targetId))
                 .orderBy(Tables.EH_ENERGY_METER_TASKS.PLAN_ID, Tables.EH_ENERGY_METER_TASKS.DEFAULT_ORDER)
                 .limit(pageSize).fetchInto(EnergyMeterTask.class);
+    }
+
+    @Override
+    public List<EnergyMeterTask> listEnergyMeterTasksByPlan(List<Long> planIds, Long targetId, Long ownerId, long pageAnchor, int pageSize, Timestamp lastUpdateTime) {
+        List<EnergyMeterTask> tasks = new ArrayList<>();
+        DSLContext context = this.dbProvider.getDslContext(AccessSpec.readOnly());
+
+        SelectQuery<EhEnergyMeterTasksRecord> query = context.selectQuery(Tables.EH_ENERGY_METER_TASKS);
+        query.addConditions(Tables.EH_ENERGY_METER_TASKS.ID.ge(pageAnchor));
+        query.addConditions(Tables.EH_ENERGY_METER_TASKS.PLAN_ID.in(planIds));
+        query.addConditions(Tables.EH_ENERGY_METER_TASKS.STATUS.ne(EnergyTaskStatus.INACTIVE.getCode()));
+        query.addConditions(Tables.EH_ENERGY_METER_TASKS.TARGET_ID.eq(targetId));
+        query.addOrderBy(Tables.EH_ENERGY_METER_TASKS.PLAN_ID, Tables.EH_ENERGY_METER_TASKS.DEFAULT_ORDER);
+
+        if(lastUpdateTime != null) {
+            query.addConditions(Tables.EH_ENERGY_METER_TASKS.CREATE_TIME.ge(lastUpdateTime)
+                    .or(Tables.EH_ENERGY_METER_TASKS.UPDATE_TIME.ge(lastUpdateTime)));
+        }
+        query.addLimit(pageSize);
+        query.fetch().map((r) -> {
+            tasks.add(ConvertHelper.convert(r, EnergyMeterTask.class));
+            return null;
+        });
+
+        return tasks;
     }
 
     @Override

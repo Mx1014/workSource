@@ -12,6 +12,36 @@ public class SyncOfflineDataCommand {
 
     private Long ownerId;
 
+    private String buildingUpdateTime;
+
+    private String categoryUpdateTime;
+
+    private String taskUpdateTime;
+
+    public String getBuildingUpdateTime() {
+        return buildingUpdateTime;
+    }
+
+    public void setBuildingUpdateTime(String buildingUpdateTime) {
+        this.buildingUpdateTime = buildingUpdateTime;
+    }
+
+    public String getCategoryUpdateTime() {
+        return categoryUpdateTime;
+    }
+
+    public void setCategoryUpdateTime(String categoryUpdateTime) {
+        this.categoryUpdateTime = categoryUpdateTime;
+    }
+
+    public String getTaskUpdateTime() {
+        return taskUpdateTime;
+    }
+
+    public void setTaskUpdateTime(String taskUpdateTime) {
+        this.taskUpdateTime = taskUpdateTime;
+    }
+
     public Long getOwnerId() {
         return ownerId;
     }
