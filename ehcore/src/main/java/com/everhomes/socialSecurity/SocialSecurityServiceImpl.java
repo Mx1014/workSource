@@ -22,6 +22,7 @@ import com.everhomes.rest.common.ImportFileResponse;
 import com.everhomes.rest.organization.*;
 import com.everhomes.rest.socialSecurity.*;
 import com.everhomes.sequence.SequenceProvider;
+import com.everhomes.server.schema.tables.pojos.EhSocialSecurityPaymentLogs;
 import com.everhomes.server.schema.tables.pojos.EhSocialSecurityPayments;
 import com.everhomes.server.schema.tables.pojos.EhSocialSecuritySettings;
 import com.everhomes.user.UserContext;
@@ -559,6 +560,7 @@ public class SocialSecurityServiceImpl implements SocialSecurityService {
         if (null == memberDetail) {
             return response;
         }
+        response.setIdNumber(memberDetail.getIdNumber());
         response.setDetailId(memberDetail.getId());
         response.setUserName(memberDetail.getContactName());
         response.setSocialSecurityNo(memberDetail.getSocialSecurityNumber());
@@ -930,16 +932,23 @@ public class SocialSecurityServiceImpl implements SocialSecurityService {
 
     private void batchUpdateSSSettingAndPayments(List list, Long ownerId, String fileLog, ImportFileResponse response) {
         //
-        ImportFileResultLog<Map<String, String>> log = new ImportFileResultLog<>(SocialSecurityConstants.SCOPE);
         response.setLogs(new ArrayList<>());
         for (int i = 1; i < list.size(); i++) {
             RowResult r = (RowResult) list.get(i);
+            ImportFileResultLog<Map<String, String>> log = new ImportFileResultLog<>(SocialSecurityConstants.SCOPE);
+            if (null == response.getLogs()) {
+                response.setLogs(new ArrayList<>());
+            }
+            response.getLogs().add(log);
+            log.setData(r.getCells());
             String userContact = r.getA();
             OrganizationMemberDetails detail = organizationProvider.findOrganizationMemberDetailsByOrganizationIdAndContactToken(ownerId, userContact);
             if (null == detail) {
-                response.setFileLog("找不到用户: 手机号" + userContact);
+//                response.setFileLog("找不到用户: 手机号" + userContact);
                 LOGGER.error("can not find organization member ,contact token is " + userContact);
-
+                log.setErrorLog("找不到用户: 手机号" + userContact);
+                log.setCode(SocialSecurityConstants.ERROR_CHECK_CONTACT);
+                continue;
             } else {
                 String ssCityName = r.getB();
                 Long ssCityId = getZuolinNamespaceCityId(ssCityName);
@@ -963,6 +972,7 @@ public class SocialSecurityServiceImpl implements SocialSecurityService {
         socialSecuritySettingProvider.syncRadixAndRatioToPayments(ownerId);
 
     }
+
 
     @Override
     public CalculateSocialSecurityReportsResponse calculateSocialSecurityReports(CalculateSocialSecurityReportsCommand cmd) {
@@ -1832,7 +1842,8 @@ public class SocialSecurityServiceImpl implements SocialSecurityService {
     }
 
     @Override
-    public void fileSocialSecurity(FileSocialSecurityCommand cmd) {
+    public FileSocialSecurityResponse fileSocialSecurity(FileSocialSecurityCommand cmd) {
+
         //归档-这个时候就计算归档表了
         List<SocialSecurityPayment> payments = socialSecurityPaymentProvider.listSocialSecurityPayment(cmd.getOwnerId());
 
@@ -1841,22 +1852,53 @@ public class SocialSecurityServiceImpl implements SocialSecurityService {
                     "没有当月缴费数据!");
         }
         String paymonth = payments.get(0).getPayMonth();
-        if (!paymonth.equals(cmd.getPaymentMonth())) {
+        if (!paymonth.equals(cmd.getPayMonth())) {
             throw RuntimeErrorException.errorWith(SocialSecurityConstants.SCOPE, SocialSecurityConstants.ERROR_NO_PAYMENTS,
-                    "没有当月缴费数据!");
+                    "归档月份错误! 月份[" + paymonth + "],参数[" + cmd + "]");
         }
+        String seed = SocialSecurityConstants.SCOPE + "fileSocialSecurity"+ cmd.getOwnerId() + DateHelper.currentGMTTime().getTime();
+        String key = Base64.getEncoder().encodeToString(seed.getBytes());
+        ValueOperations<String, String> valueOperations = getValueOperations(key);
+        int timeout = 15;
+        TimeUnit unit = TimeUnit.MINUTES;
+        // 先放一个和key一样的值,表示这个人key有效
+        valueOperations.set(key, key, timeout, unit);
+        //线程池中处理计算规则
+        calculateExecutorPool.execute(new Runnable() {
+            @Override
+            public void run() {
+                try {
+                    fileSocialSecurity(cmd.getOwnerId(),cmd.getPayMonth(),payments);
+                } catch (Exception e) {
+                    LOGGER.error("calculate reports error!! cmd is  :" + cmd, e);
+                } finally {
+                    //处理完成删除key,表示这个key已经完成了
+                    deleteValueOperations(key);
+                }
+            }
+        });
+        return new FileSocialSecurityResponse(key);
+
+    }
+
+    private void fileSocialSecurity(Long ownerId, String payMonth, List<SocialSecurityPayment> payments) {
         //删除之前当月的归档表
-        socialSecurityPaymentLogProvider.deleteMonthLog(cmd.getOwnerId(), cmd.getPaymentMonth());
+        socialSecurityPaymentLogProvider.deleteMonthLog(ownerId, payMonth);
+        Long id = sequenceProvider.getNextSequenceBlock(NameMapper.getSequenceDomainFromTablePojo(EhSocialSecurityPaymentLogs.class), payments.size()+1);
+        List<EhSocialSecurityPaymentLogs> logs = new ArrayList<>();
         for (SocialSecurityPayment payment : payments) {
-            SocialSecurityPaymentLog paymentLog = ConvertHelper.convert(payment, SocialSecurityPaymentLog.class);
-            socialSecurityPaymentLogProvider.createSocialSecurityPaymentLog(paymentLog);
+            EhSocialSecurityPaymentLogs paymentLog = ConvertHelper.convert(payment, EhSocialSecurityPaymentLogs.class);
+            paymentLog.setId(id++);
+            logs.add(paymentLog);
+//            socialSecurityPaymentLogProvider.createSocialSecurityPaymentLog(paymentLog);
         }
+        socialSecurityPaymentLogProvider.batchCreateSocialSecurityPaymentLog(logs);
         //归档汇总表
-        socialSecuritySummaryProvider.deleteSocialSecuritySummary(cmd.getOwnerId(), cmd.getPaymentMonth());
-        SocialSecuritySummary summary = socialSecurityPaymentProvider.calculateSocialSecuritySummary(cmd.getOwnerId(), cmd.getPaymentMonth());
+        socialSecuritySummaryProvider.deleteSocialSecuritySummary(ownerId, payMonth);
+        SocialSecuritySummary summary = socialSecurityPaymentProvider.calculateSocialSecuritySummary(ownerId, payMonth);
         socialSecuritySummaryProvider.createSocialSecuritySummary(summary);
         //更新归档状态
-        socialSecurityPaymentProvider.updateSocialSecurityPaymentFileStatus(cmd.getOwnerId());
+        socialSecurityPaymentProvider.updateSocialSecurityPaymentFileStatus(ownerId);
     }
 
     @Override
@@ -1922,19 +1964,19 @@ public class SocialSecurityServiceImpl implements SocialSecurityService {
     @Override
     public GetSocialSecurityReportsHeadResponse getSocialSecurityReportsHead(GetSocialSecurityReportsHeadCommand cmd) {
         GetSocialSecurityReportsHeadResponse response = new GetSocialSecurityReportsHeadResponse();
-        response.setPaymentMonth(cmd.getPaymentMonth());
+        response.setPayMonth(cmd.getPayMonth());
         List<SocialSecurityPayment> result = socialSecurityPaymentProvider.listSocialSecurityPayment(cmd.getOwnerId());
         if (null == result) {
             return null;
         }
-        if (result.get(0).getPayMonth().equals(cmd.getPaymentMonth())) {
+        if (result.get(0).getPayMonth().equals(cmd.getPayMonth())) {
             response.setCreateTime(result.get(0).getCreateTime().getTime());
             response.setCreatorUid(result.get(0).getCreatorUid());
             response.setFileUid(result.get(0).getFileUid());
             response.setFileTime(result.get(0).getFileTime().getTime());
             return response;
         }
-        SocialSecurityPaymentLog log = socialSecurityPaymentLogProvider.findAnyOneSocialSecurityPaymentLog(cmd.getOwnerId(), cmd.getPaymentMonth());
+        SocialSecurityPaymentLog log = socialSecurityPaymentLogProvider.findAnyOneSocialSecurityPaymentLog(cmd.getOwnerId(), cmd.getPayMonth());
         if (null == log) {
             return null;
         }

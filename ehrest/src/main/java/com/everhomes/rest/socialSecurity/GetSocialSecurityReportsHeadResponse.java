@@ -14,7 +14,7 @@ import com.everhomes.util.StringHelper;
  */
 public class GetSocialSecurityReportsHeadResponse {
 
-    private String paymentMonth;
+    private String payMonth;
     private Long creatorUid;
     private Long createTime;
     private Long fileUid;
@@ -58,11 +58,12 @@ public class GetSocialSecurityReportsHeadResponse {
         this.fileUid = fileUid;
     }
 
-    public String getPaymentMonth() {
-        return paymentMonth;
+
+    public String getPayMonth() {
+        return payMonth;
     }
 
-    public void setPaymentMonth(String paymentMonth) {
-        this.paymentMonth = paymentMonth;
+    public void setPayMonth(String payMonth) {
+        this.payMonth = payMonth;
     }
 }

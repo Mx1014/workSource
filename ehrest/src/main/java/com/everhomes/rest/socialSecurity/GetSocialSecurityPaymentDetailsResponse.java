@@ -1,6 +1,7 @@
 // @formatter:off
 package com.everhomes.rest.socialSecurity;
 
+import java.math.BigDecimal;
 import java.util.List;
 
 import com.everhomes.discover.ItemType;
@@ -28,7 +29,9 @@ public class GetSocialSecurityPaymentDetailsResponse {
 	private Long detailId;
 	private String userName;
 	private String socialSecurityNo;
-	
+	private String idNumber;
+	private BigDecimal salaryRadix;
+
 	private Byte payCurrentSocialSecurityFlag;
 
 	private Byte afterPaySocialSecurityFlag;
@@ -146,5 +149,21 @@ public class GetSocialSecurityPaymentDetailsResponse {
 
 	public void setUserName(String userName) {
 		this.userName = userName;
+	}
+
+	public String getIdNumber() {
+		return idNumber;
+	}
+
+	public void setIdNumber(String idNumber) {
+		this.idNumber = idNumber;
+	}
+
+	public BigDecimal getSalaryRadix() {
+		return salaryRadix;
+	}
+
+	public void setSalaryRadix(BigDecimal salaryRadix) {
+		this.salaryRadix = salaryRadix;
 	}
 }
