@@ -29,7 +29,6 @@ import com.everhomes.user.UserContext;
 import com.everhomes.util.*;
 import com.everhomes.util.excel.RowResult;
 import com.everhomes.util.excel.handler.PropMrgOwnerHandler;
-import org.apache.commons.collections.map.HashedMap;
 import org.apache.poi.ss.usermodel.Row;
 import org.apache.poi.ss.usermodel.Workbook;
 import org.apache.poi.xssf.usermodel.XSSFSheet;
@@ -1843,7 +1842,8 @@ public class SocialSecurityServiceImpl implements SocialSecurityService {
     }
 
     @Override
-    public void fileSocialSecurity(FileSocialSecurityCommand cmd) {
+    public FileSocialSecurityResponse fileSocialSecurity(FileSocialSecurityCommand cmd) {
+
         //归档-这个时候就计算归档表了
         List<SocialSecurityPayment> payments = socialSecurityPaymentProvider.listSocialSecurityPayment(cmd.getOwnerId());
 
@@ -1856,8 +1856,34 @@ public class SocialSecurityServiceImpl implements SocialSecurityService {
             throw RuntimeErrorException.errorWith(SocialSecurityConstants.SCOPE, SocialSecurityConstants.ERROR_NO_PAYMENTS,
                     "归档月份错误! 月份[" + paymonth + "],参数[" + cmd + "]");
         }
+        String seed = SocialSecurityConstants.SCOPE + "fileSocialSecurity"+ cmd.getOwnerId() + DateHelper.currentGMTTime().getTime();
+        String key = Base64.getEncoder().encodeToString(seed.getBytes());
+        ValueOperations<String, String> valueOperations = getValueOperations(key);
+        int timeout = 15;
+        TimeUnit unit = TimeUnit.MINUTES;
+        // 先放一个和key一样的值,表示这个人key有效
+        valueOperations.set(key, key, timeout, unit);
+        //线程池中处理计算规则
+        calculateExecutorPool.execute(new Runnable() {
+            @Override
+            public void run() {
+                try {
+                    fileSocialSecurity(cmd.getOwnerId(),cmd.getPayMonth(),payments);
+                } catch (Exception e) {
+                    LOGGER.error("calculate reports error!! cmd is  :" + cmd, e);
+                } finally {
+                    //处理完成删除key,表示这个key已经完成了
+                    deleteValueOperations(key);
+                }
+            }
+        });
+        return new FileSocialSecurityResponse(key);
+
+    }
+
+    private void fileSocialSecurity(Long ownerId, String payMonth, List<SocialSecurityPayment> payments) {
         //删除之前当月的归档表
-        socialSecurityPaymentLogProvider.deleteMonthLog(cmd.getOwnerId(), cmd.getPayMonth());
+        socialSecurityPaymentLogProvider.deleteMonthLog(ownerId, payMonth);
         Long id = sequenceProvider.getNextSequenceBlock(NameMapper.getSequenceDomainFromTablePojo(EhSocialSecurityPaymentLogs.class), payments.size()+1);
         List<EhSocialSecurityPaymentLogs> logs = new ArrayList<>();
         for (SocialSecurityPayment payment : payments) {
@@ -1868,11 +1894,11 @@ public class SocialSecurityServiceImpl implements SocialSecurityService {
         }
         socialSecurityPaymentLogProvider.batchCreateSocialSecurityPaymentLog(logs);
         //归档汇总表
-        socialSecuritySummaryProvider.deleteSocialSecuritySummary(cmd.getOwnerId(), cmd.getPayMonth());
-        SocialSecuritySummary summary = socialSecurityPaymentProvider.calculateSocialSecuritySummary(cmd.getOwnerId(), cmd.getPayMonth());
+        socialSecuritySummaryProvider.deleteSocialSecuritySummary(ownerId, payMonth);
+        SocialSecuritySummary summary = socialSecurityPaymentProvider.calculateSocialSecuritySummary(ownerId, payMonth);
         socialSecuritySummaryProvider.createSocialSecuritySummary(summary);
         //更新归档状态
-        socialSecurityPaymentProvider.updateSocialSecurityPaymentFileStatus(cmd.getOwnerId());
+        socialSecurityPaymentProvider.updateSocialSecurityPaymentFileStatus(ownerId);
     }
 
     @Override
@@ -1938,19 +1964,19 @@ public class SocialSecurityServiceImpl implements SocialSecurityService {
     @Override
     public GetSocialSecurityReportsHeadResponse getSocialSecurityReportsHead(GetSocialSecurityReportsHeadCommand cmd) {
         GetSocialSecurityReportsHeadResponse response = new GetSocialSecurityReportsHeadResponse();
-        response.setPaymentMonth(cmd.getPaymentMonth());
+        response.setPayMonth(cmd.getPayMonth());
         List<SocialSecurityPayment> result = socialSecurityPaymentProvider.listSocialSecurityPayment(cmd.getOwnerId());
         if (null == result) {
             return null;
         }
-        if (result.get(0).getPayMonth().equals(cmd.getPaymentMonth())) {
+        if (result.get(0).getPayMonth().equals(cmd.getPayMonth())) {
             response.setCreateTime(result.get(0).getCreateTime().getTime());
             response.setCreatorUid(result.get(0).getCreatorUid());
             response.setFileUid(result.get(0).getFileUid());
             response.setFileTime(result.get(0).getFileTime().getTime());
             return response;
         }
-        SocialSecurityPaymentLog log = socialSecurityPaymentLogProvider.findAnyOneSocialSecurityPaymentLog(cmd.getOwnerId(), cmd.getPaymentMonth());
+        SocialSecurityPaymentLog log = socialSecurityPaymentLogProvider.findAnyOneSocialSecurityPaymentLog(cmd.getOwnerId(), cmd.getPayMonth());
         if (null == log) {
             return null;
         }

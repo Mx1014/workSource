@@ -63,7 +63,7 @@ interface SocialSecurityService {
 	void exportSocialSecurityInoutReports(ExportSocialSecurityInoutReportsCommand cmd);
 
 
-	void fileSocialSecurity(FileSocialSecurityCommand cmd);
+	FileSocialSecurityResponse fileSocialSecurity(FileSocialSecurityCommand cmd);
 
 
 	ListSocialSecurityHistoryFilesResponse listSocialSecurityHistoryFiles(ListSocialSecurityHistoryFilesCommand cmd);
