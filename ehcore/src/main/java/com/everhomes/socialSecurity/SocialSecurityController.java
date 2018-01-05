@@ -204,7 +204,7 @@ public class SocialSecurityController extends ControllerBase {
     @RequestMapping("fileSocialSecurity")
     @RestReturn(FileSocialSecurityResponse.class)
     public RestResponse fileSocialSecurity(FileSocialSecurityCommand cmd) {
-        return new RestResponse(socialSecurityService.fileSocialSecurity(cmd);
+        return new RestResponse(socialSecurityService.fileSocialSecurity(cmd));
     }
 
     /**
