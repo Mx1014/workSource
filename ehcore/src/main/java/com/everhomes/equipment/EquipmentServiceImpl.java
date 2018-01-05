@@ -1858,8 +1858,12 @@ private void checkUserPrivilege(Long orgId, Long privilegeId, Long communityId) 
 				command.setCommunityId(plan.getTargetId());
 				command.setNamespaceId(plan.getNamespaceId());
 				EquipmentInspectionReviewDateDTO date = listReviewExpireDays(command);
-				if (date != null)
+				if (date != null){
 					task.setReviewExpiredDate(addDays(now, date.getReviewExpiredDays()));
+				}else {
+					//没有审批过期时间的情况
+					task.setReviewExpiredDate(addDays(now, Integer.MAX_VALUE));
+				}
 
 			}
 
@@ -5772,8 +5776,6 @@ private void checkUserPrivilege(Long orgId, Long privilegeId, Long communityId) 
 
 	@Override
 	public void syscStandardToEqiupmentPlan() {
-//		Integer pageSize = 200;
-//		CrossShardListingLocator locator = new CrossShardListingLocator();
 		EquipmentInspectionEquipments equipment = new EquipmentInspectionEquipments();
 		EquipmentInspectionStandards standards = new EquipmentInspectionStandards();
 		List<EquipmentStandardMap> maps = new ArrayList<>();

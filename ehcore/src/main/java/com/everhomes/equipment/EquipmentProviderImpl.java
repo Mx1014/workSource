@@ -439,8 +439,10 @@ public class EquipmentProviderImpl implements EquipmentProvider {
         query.addConditions(Tables.EH_EQUIPMENT_INSPECTION_EQUIPMENT_STANDARD_MAP.STATUS.eq(Status.ACTIVE.getCode()));
 
         //只展示带审核的关联标准和审核通过的 add by xiongying20170927
-        query.addConditions(Tables.EH_EQUIPMENT_INSPECTION_EQUIPMENT_STANDARD_MAP.REVIEW_STATUS.eq(EquipmentReviewStatus.WAITING_FOR_APPROVAL.getCode())
-                .or(Tables.EH_EQUIPMENT_INSPECTION_EQUIPMENT_STANDARD_MAP.REVIEW_STATUS.eq(EquipmentReviewStatus.REVIEWED.getCode()).and(Tables.EH_EQUIPMENT_INSPECTION_EQUIPMENT_STANDARD_MAP.REVIEW_RESULT.eq(ReviewResult.QUALIFIED.getCode()))));
+       // query.addConditions(Tables.EH_EQUIPMENT_INSPECTION_EQUIPMENT_STANDARD_MAP.REVIEW_STATUS.eq(EquipmentReviewStatus.WAITING_FOR_APPROVAL.getCode())
+        //        .or(Tables.EH_EQUIPMENT_INSPECTION_EQUIPMENT_STANDARD_MAP.REVIEW_STATUS.eq(EquipmentReviewStatus.REVIEWED.getCode()).and(Tables.EH_EQUIPMENT_INSPECTION_EQUIPMENT_STANDARD_MAP.REVIEW_RESULT.eq(ReviewResult.QUALIFIED.getCode()))));
+        //兼容上版本的关联关系
+        query.addConditions(Tables.EH_EQUIPMENT_INSPECTION_EQUIPMENT_STANDARD_MAP.REVIEW_RESULT.ne(ReviewResult.UNQUALIFIED.getCode()));
         List<EquipmentStandardMap> result = new ArrayList<EquipmentStandardMap>();
         query.fetch().map((r) -> {
             result.add(ConvertHelper.convert(r, EquipmentStandardMap.class));
@@ -1471,6 +1473,7 @@ public class EquipmentProviderImpl implements EquipmentProvider {
         DSLContext context = this.dbProvider.getDslContext(AccessSpec.readOnly());
         SelectQuery<EhEquipmentInspectionEquipmentStandardMapRecord> query = context.selectQuery(Tables.EH_EQUIPMENT_INSPECTION_EQUIPMENT_STANDARD_MAP);
         query.addConditions(Tables.EH_EQUIPMENT_INSPECTION_EQUIPMENT_STANDARD_MAP.STANDARD_ID.eq(standard.getId()));
+        query.addConditions(Tables.EH_EQUIPMENT_INSPECTION_EQUIPMENT_STANDARD_MAP.STATUS.eq(Status.ACTIVE.getCode()));
         List<EquipmentInspectionEquipments> equipments = new ArrayList<>();
         query.fetch().map((r)->{
             equipments.add(findEquipmentById(r.getTargetId()));
@@ -1952,7 +1955,6 @@ public class EquipmentProviderImpl implements EquipmentProvider {
             SelectQuery<EhEquipmentInspectionTasksRecord> query = context.selectQuery(Tables.EH_EQUIPMENT_INSPECTION_TASKS);
             if (locator.getAnchor() != null && locator.getAnchor() != 0)
                 query.addConditions(Tables.EH_EQUIPMENT_INSPECTION_TASKS.ID.gt(locator.getAnchor()));
-
 
             query.addConditions(Tables.EH_EQUIPMENT_INSPECTION_TASKS.STATUS.in(EquipmentTaskStatus.CLOSE.getCode(), EquipmentTaskStatus.NEED_MAINTENANCE.getCode()));
             query.addConditions(Tables.EH_EQUIPMENT_INSPECTION_TASKS.REVIEW_EXPIRED_DATE.lt(current));
