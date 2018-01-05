@@ -4,6 +4,7 @@ package com.everhomes.socialSecurity;
 import java.sql.Timestamp;
 import java.util.List;
 
+import com.everhomes.server.schema.tables.pojos.EhSocialSecurityPayments;
 import org.jooq.DSLContext;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
@@ -80,6 +81,13 @@ public class SocialSecurityPaymentLogProviderImpl implements SocialSecurityPayme
 				.and(Tables.EH_SOCIAL_SECURITY_PAYMENT_LOGS.PAY_MONTH.eq(paymentMonth))
 				.orderBy(Tables.EH_SOCIAL_SECURITY_PAYMENT_LOGS.ID.asc())
 				.fetchAny().map(r -> ConvertHelper.convert(r, SocialSecurityPaymentLog.class));
+	}
+
+	@Override
+	public void batchCreateSocialSecurityPaymentLog(List<EhSocialSecurityPaymentLogs> logs) {
+		getReadWriteDao().insert(logs);
+		DaoHelper.publishDaoAction(DaoAction.CREATE, EhSocialSecurityPaymentLogs.class, null);
+
 	}
 
 	private EhSocialSecurityPaymentLogsDao getReadWriteDao() {

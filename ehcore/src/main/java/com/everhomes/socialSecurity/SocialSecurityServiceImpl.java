@@ -22,6 +22,7 @@ import com.everhomes.rest.common.ImportFileResponse;
 import com.everhomes.rest.organization.*;
 import com.everhomes.rest.socialSecurity.*;
 import com.everhomes.sequence.SequenceProvider;
+import com.everhomes.server.schema.tables.pojos.EhSocialSecurityPaymentLogs;
 import com.everhomes.server.schema.tables.pojos.EhSocialSecurityPayments;
 import com.everhomes.server.schema.tables.pojos.EhSocialSecuritySettings;
 import com.everhomes.user.UserContext;
@@ -1851,19 +1852,24 @@ public class SocialSecurityServiceImpl implements SocialSecurityService {
                     "没有当月缴费数据!");
         }
         String paymonth = payments.get(0).getPayMonth();
-        if (!paymonth.equals(cmd.getPaymentMonth())) {
+        if (!paymonth.equals(cmd.getPayMonth())) {
             throw RuntimeErrorException.errorWith(SocialSecurityConstants.SCOPE, SocialSecurityConstants.ERROR_NO_PAYMENTS,
                     "归档月份错误! 月份[" + paymonth + "],参数[" + cmd + "]");
         }
         //删除之前当月的归档表
-        socialSecurityPaymentLogProvider.deleteMonthLog(cmd.getOwnerId(), cmd.getPaymentMonth());
+        socialSecurityPaymentLogProvider.deleteMonthLog(cmd.getOwnerId(), cmd.getPayMonth());
+        Long id = sequenceProvider.getNextSequenceBlock(NameMapper.getSequenceDomainFromTablePojo(EhSocialSecurityPaymentLogs.class), payments.size()+1);
+        List<EhSocialSecurityPaymentLogs> logs = new ArrayList<>();
         for (SocialSecurityPayment payment : payments) {
-            SocialSecurityPaymentLog paymentLog = ConvertHelper.convert(payment, SocialSecurityPaymentLog.class);
-            socialSecurityPaymentLogProvider.createSocialSecurityPaymentLog(paymentLog);
+            EhSocialSecurityPaymentLogs paymentLog = ConvertHelper.convert(payment, EhSocialSecurityPaymentLogs.class);
+            paymentLog.setId(id++);
+            logs.add(paymentLog);
+//            socialSecurityPaymentLogProvider.createSocialSecurityPaymentLog(paymentLog);
         }
+        socialSecurityPaymentLogProvider.batchCreateSocialSecurityPaymentLog(logs);
         //归档汇总表
-        socialSecuritySummaryProvider.deleteSocialSecuritySummary(cmd.getOwnerId(), cmd.getPaymentMonth());
-        SocialSecuritySummary summary = socialSecurityPaymentProvider.calculateSocialSecuritySummary(cmd.getOwnerId(), cmd.getPaymentMonth());
+        socialSecuritySummaryProvider.deleteSocialSecuritySummary(cmd.getOwnerId(), cmd.getPayMonth());
+        SocialSecuritySummary summary = socialSecurityPaymentProvider.calculateSocialSecuritySummary(cmd.getOwnerId(), cmd.getPayMonth());
         socialSecuritySummaryProvider.createSocialSecuritySummary(summary);
         //更新归档状态
         socialSecurityPaymentProvider.updateSocialSecurityPaymentFileStatus(cmd.getOwnerId());

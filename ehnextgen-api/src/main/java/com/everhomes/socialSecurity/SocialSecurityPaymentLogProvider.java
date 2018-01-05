@@ -2,6 +2,7 @@
 package com.everhomes.socialSecurity;
 
 import com.everhomes.listing.CrossShardListingLocator;
+import com.everhomes.server.schema.tables.pojos.EhSocialSecurityPaymentLogs;
 
 import java.util.List;
 
@@ -18,4 +19,6 @@ public interface SocialSecurityPaymentLogProvider {
 	void deleteMonthLog(Long ownerId, String paymentMonth);
 
 	SocialSecurityPaymentLog findAnyOneSocialSecurityPaymentLog(Long ownerId, String paymentMonth);
+
+	void batchCreateSocialSecurityPaymentLog(List<EhSocialSecurityPaymentLogs> logs);
 }
