@@ -17,7 +17,7 @@ import com.everhomes.organization.*;
 import com.everhomes.region.Region;
 import com.everhomes.region.RegionProvider;
 
-import com.everhomes.rest.archives.ArchivesUtil;
+import com.everhomes.archives.ArchivesUtil;
 import com.everhomes.rest.common.ImportFileResponse;
 import com.everhomes.rest.organization.*;
 import com.everhomes.rest.socialSecurity.*;

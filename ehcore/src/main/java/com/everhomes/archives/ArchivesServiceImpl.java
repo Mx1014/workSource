@@ -16,6 +16,7 @@ import com.everhomes.rest.common.ImportFileResponse;
 import com.everhomes.rest.general_approval.*;
 import com.everhomes.rest.organization.*;
 import com.everhomes.rest.rentalv2.NormalFlag;
+import com.everhomes.rest.socialSecurity.AddSocialSecurityInOutTimeCommand;
 import com.everhomes.rest.user.IdentifierType;
 import com.everhomes.rest.user.UserGender;
 import com.everhomes.rest.user.UserServiceErrorCode;
@@ -55,7 +56,6 @@ import java.util.*;
 import java.util.regex.Pattern;
 import java.util.stream.Collectors;
 
-import static com.everhomes.rest.acl.PrivilegeConstants.BATCH_EXPORT_PERSON;
 import static com.everhomes.util.RuntimeErrorException.errorWith;
 
 @Component
@@ -807,22 +807,23 @@ public class ArchivesServiceImpl implements ArchivesService {
                 dto.setContactToken(memberDetail.getContactToken());
             }
 
-            //  3.查询若存在于离职列表则删除
+            //  3.增加社保信息
+/*            AddSocialSecurityInOutTimeCommand timeCommand = new AddSocialSecurityInOutTimeCommand();
+            timeCommand.setDetailId(detailId);
+            timeCommand.set
+            socialSecurityMonth*/
+
+            //  4.查询若存在于离职列表则删除
             deleteArchivesDismissEmployees(detailId, cmd.getOrganizationId());
 
-            //  4.增加入职记录
+            //  5.增加入职记录
             checkInArchivesEmployeesLogs(cmd.getOrganizationId(), detailId, cmd.getCheckInTime());
+
+            //  6.增加
             return null;
         });
         return dto;
     }
-
-    /*
-     * 获取部门名称
-     */
-/*    private String getDepartmentName(List<Long> ids) {
-
-    }*/
 
     @Override
     public void updateArchivesEmployee(UpdateArchivesEmployeeCommand cmd) {
