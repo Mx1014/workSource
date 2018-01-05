@@ -121,6 +121,19 @@ public class CustomerController extends ControllerBase {
     @RequestMapping("searchEnterpriseCustomer")
     @RestReturn(value = SearchEnterpriseCustomerResponse.class)
     public RestResponse searchEnterpriseCustomer(@Valid SearchEnterpriseCustomerCommand cmd) {
+        RestResponse response = new RestResponse(customerService.queryEnterpriseCustomers(cmd));
+        response.setErrorCode(ErrorCodes.SUCCESS);
+        response.setErrorDescription("OK");
+        return response;
+    }
+
+    /**
+     * <b>URL: /customer/searchEnterpriseCustomerWithoutAuth</b>
+     * <p>列出企业客户（不进行权限校验）</p>
+     */
+    @RequestMapping("searchEnterpriseCustomerWithoutAuth")
+    @RestReturn(value = SearchEnterpriseCustomerResponse.class)
+    public RestResponse searchEnterpriseCustomerWithoutAuth(@Valid SearchEnterpriseCustomerCommand cmd) {
         RestResponse response = new RestResponse(enterpriseCustomerSearcher.queryEnterpriseCustomers(cmd));
         response.setErrorCode(ErrorCodes.SUCCESS);
         response.setErrorDescription("OK");
@@ -170,6 +183,7 @@ public class CustomerController extends ControllerBase {
     @RequestMapping("createCustomerTax")
     @RestReturn(value = String.class)
     public RestResponse createCustomerTax(@Valid CreateCustomerTaxCommand cmd) {
+        customerService.createCustomerTax(cmd);
         RestResponse response = new RestResponse();
         response.setErrorCode(ErrorCodes.SUCCESS);
         response.setErrorDescription("OK");
@@ -183,6 +197,7 @@ public class CustomerController extends ControllerBase {
     @RequestMapping("updateCustomerTax")
     @RestReturn(value = String.class)
     public RestResponse updateCustomerTax(@Valid UpdateCustomerTaxCommand cmd) {
+        customerService.updateCustomerTax(cmd);
         RestResponse response = new RestResponse();
         response.setErrorCode(ErrorCodes.SUCCESS);
         response.setErrorDescription("OK");
@@ -196,6 +211,7 @@ public class CustomerController extends ControllerBase {
     @RequestMapping("deleteCustomerTax")
     @RestReturn(value = String.class)
     public RestResponse deleteCustomerTax(@Valid DeleteCustomerTaxCommand cmd) {
+        customerService.deleteCustomerTax(cmd);
         RestResponse response = new RestResponse();
         response.setErrorCode(ErrorCodes.SUCCESS);
         response.setErrorDescription("OK");
@@ -203,13 +219,13 @@ public class CustomerController extends ControllerBase {
     }
 
     /**
-     * <b>URL: /customer/findCustomerTax</b>
+     * <b>URL: /customer/getCustomerTax</b>
      * <p>查看企业客户税务信息</p>
      */
-    @RequestMapping("findCustomerTax")
+    @RequestMapping("getCustomerTax")
     @RestReturn(value = CustomerTaxDTO.class)
-    public RestResponse findCustomerTax(@Valid GetCustomerTaxCommand cmd) {
-        RestResponse response = new RestResponse();
+    public RestResponse getCustomerTax(@Valid GetCustomerTaxCommand cmd) {
+        RestResponse response = new RestResponse(customerService.getCustomerTax(cmd));
         response.setErrorCode(ErrorCodes.SUCCESS);
         response.setErrorDescription("OK");
         return response;
@@ -222,7 +238,7 @@ public class CustomerController extends ControllerBase {
     @RequestMapping("listCustomerTaxes")
     @RestReturn(value = CustomerTaxDTO.class, collection = true)
     public RestResponse listCustomerTaxes(@Valid ListCustomerTaxesCommand cmd) {
-        RestResponse response = new RestResponse();
+        RestResponse response = new RestResponse(customerService.listCustomerTaxes(cmd));
         response.setErrorCode(ErrorCodes.SUCCESS);
         response.setErrorDescription("OK");
         return response;
@@ -236,6 +252,7 @@ public class CustomerController extends ControllerBase {
     @RequestMapping("createCustomerAccount")
     @RestReturn(value = String.class)
     public RestResponse createCustomerAccount(@Valid CreateCustomerAccountCommand cmd) {
+        customerService.createCustomerAccount(cmd);
         RestResponse response = new RestResponse();
         response.setErrorCode(ErrorCodes.SUCCESS);
         response.setErrorDescription("OK");
@@ -249,6 +266,7 @@ public class CustomerController extends ControllerBase {
     @RequestMapping("updateCustomerAccount")
     @RestReturn(value = String.class)
     public RestResponse updateCustomerAccount(@Valid UpdateCustomerAccountCommand cmd) {
+        customerService.updateCustomerAccount(cmd);
         RestResponse response = new RestResponse();
         response.setErrorCode(ErrorCodes.SUCCESS);
         response.setErrorDescription("OK");
@@ -262,6 +280,7 @@ public class CustomerController extends ControllerBase {
     @RequestMapping("deleteCustomerAccount")
     @RestReturn(value = String.class)
     public RestResponse deleteCustomerAccount(@Valid DeleteCustomerAccountCommand cmd) {
+        customerService.deleteCustomerAccount(cmd);
         RestResponse response = new RestResponse();
         response.setErrorCode(ErrorCodes.SUCCESS);
         response.setErrorDescription("OK");
@@ -269,13 +288,13 @@ public class CustomerController extends ControllerBase {
     }
 
     /**
-     * <b>URL: /customer/findCustomerAccount</b>
+     * <b>URL: /customer/getCustomerAccount</b>
      * <p>查看企业客户银行账号</p>
      */
-    @RequestMapping("findCustomerAccount")
+    @RequestMapping("getCustomerAccount")
     @RestReturn(value = CustomerAccountDTO.class)
-    public RestResponse findCustomerAccount(@Valid GetCustomerAccountCommand cmd) {
-        RestResponse response = new RestResponse();
+    public RestResponse getCustomerAccount(@Valid GetCustomerAccountCommand cmd) {
+        RestResponse response = new RestResponse(customerService.getCustomerAccount(cmd));
         response.setErrorCode(ErrorCodes.SUCCESS);
         response.setErrorDescription("OK");
         return response;
@@ -288,7 +307,7 @@ public class CustomerController extends ControllerBase {
     @RequestMapping("listCustomerAccounts")
     @RestReturn(value = CustomerAccountDTO.class, collection = true)
     public RestResponse listCustomerAccounts(@Valid ListCustomerAccountsCommand cmd) {
-        RestResponse response = new RestResponse();
+        RestResponse response = new RestResponse(customerService.listCustomerAccounts(cmd));
         response.setErrorCode(ErrorCodes.SUCCESS);
         response.setErrorDescription("OK");
         return response;

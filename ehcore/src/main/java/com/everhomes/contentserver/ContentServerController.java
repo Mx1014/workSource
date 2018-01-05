@@ -201,4 +201,26 @@ public class ContentServerController extends ControllerBase {
         response.setErrorDescription("OK");
         return response;
     }
+
+    /**
+     * 
+     * <b>URL: /contentServer/markReadComplete</b>
+     * <p>获取上传文件的结果</p>
+     * @return OK 成功
+     */
+    @RequestMapping("markReadComplete")
+    @RestReturn(value = String.class)
+    public RestResponse markReadComplete(UploadIdCommand cmd) {
+        UploadFileInfoDTO dto = contentService.queryUploadResult(cmd.getUploadId());
+        RestResponse response = new RestResponse();
+        if(dto != null) {
+            response.setErrorCode(ErrorCodes.SUCCESS);
+            response.setErrorDescription("OK");
+        } else {
+            response.setErrorCode(ErrorCodes.ERROR_GENERAL_EXCEPTION);
+            response.setErrorDescription("Error");            
+        }
+        
+        return response;
+    }
 }

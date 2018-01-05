@@ -18,8 +18,18 @@ public class ListFieldGroupCommand {
 
     private Long communityId;
 
+    private Long orgId;
+
     // 暂时增加用于物业巡检使用
     private String  equipmentCategoryName;
+
+    public Long getOrgId() {
+        return orgId;
+    }
+
+    public void setOrgId(Long orgId) {
+        this.orgId = orgId;
+    }
 
     public Long getCommunityId() {
         return communityId;

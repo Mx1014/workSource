@@ -9,31 +9,37 @@ import java.util.List;
 /**
  * <ul>
  *     <li>id: 标签ID</li>
+ *     <li>parentId: 父ID</li>
  *     <li>namespaceId: namespaceId</li>
  *     <li>communityId: communityId</li>
  *     <li>applyUserId: applyUserId</li>
- *     <li>teamName: teamName</li>
- *     <li>projectType: projectType</li>
- *     <li>projectName: projectName</li>
- *     <li>businessLicenceUri: {[],[]}</li>
- *     <li>businessLicenceAttachments: businessLicenceAttachments {@link com.everhomes.rest.incubator.IncubatorApplyAttachmentDTO}</li>
- *     <li>planBookAttachments: planBookAttachments {@link com.everhomes.rest.incubator.IncubatorApplyAttachmentDTO}</li>
- *     <li>chargerName: chargerName</li>
- *     <li>chargerPhone: chargerPhone</li>
- *     <li>chargerEmail: chargerEmail</li>
- *     <li>chargerWechat: chargerWechat</li>
- *     <li>approveUserId: approveUserId</li>
- *     <li>approveUserName: approveUserName</li>
+ *     <li>teamName: 团队名称</li>
+ *     <li>projectType: 项目类型</li>
+ *     <li>projectName: 项目名称</li>
+ *     <li>businessLicenceUri: 营业执照扫描件 {[],[]}</li>
+ *     <li>businessLicenceAttachments: 营业执照扫描件 {@link com.everhomes.rest.incubator.IncubatorApplyAttachmentDTO}</li>
+ *     <li>planBookAttachments: 创业计划书 {@link com.everhomes.rest.incubator.IncubatorApplyAttachmentDTO}</li>
+ *     <li>chargerName: 负责人名称</li>
+ *     <li>chargerPhone: 负责人电话</li>
+ *     <li>chargerEmail: 负责人邮件</li>
+ *     <li>approveUserId: 审核人id</li>
+ *     <li>approveUserName: 审核人名称</li>
  *     <li>approveStatus: 审批状态，0-待审批，1-拒绝，2-通过 参考 {@link ApproveStatus}</li>
- *     <li>approveTime: approveTime</li>
- *     <li>approveOpinion: approveOpinion</li>
- *     <li>createTime: createTime</li>
- *     <li>reApplyId: 如果该记录被拒绝后又重新申请，此字段为新申请记录的Id</li>
+ *     <li>approveTime: 审核时间</li>
+ *     <li>approveOpinion: 审批意见</li>
+ *     <li>createTime: 创建时间</li>
+ *     <li>reApplyFlag: 是否允许重新申请 0-否，1-是 参考{@link com.everhomes.rest.common.TrueOrFalseFlag}</li>
+ *     <li>applyType: 申请类型 0-入孵，1-加速，2-入园{@link ApplyType}</li>
+ *     <li>businessLicenceText: excel中营业执照扫描件字段的描述，用于导出</li>
+ *     <li>planBookAttachmentText: excel中创业计划书字段的描述，用于导出</li>
+ *     <li>applyTypeText: excel中申请类型字段的描述，用于导出</li>
+ *     <li>createTimeText: excel中申请时间字段的描述，用于导出</li>
  * </ul>
  */
 public class IncubatorApplyDTO {
 
 	Long id;
+	Long parentId;
 	Integer namespaceId;
 	Long communityId;
 	Long applyUserId;
@@ -48,15 +54,19 @@ public class IncubatorApplyDTO {
 	String chargerName;
 	String chargerPhone;
 	String chargerEmail;
-	String chargerWechat;
 	Long approveUserId;
 	String approveUserName;
 	Byte approveStatus;
 	Timestamp approveTime;
 	String approveOpinion;
 	Timestamp createTime;
-	Long reApplyId;
+	Byte reApplyFlag;
+	Byte applyType;
 
+	String businessLicenceText;
+	String planBookAttachmentText;
+	String applyTypeText;
+	String createTimeText;
 
 	public Long getId() {
 		return id;
@@ -64,6 +74,14 @@ public class IncubatorApplyDTO {
 
 	public void setId(Long id) {
 		this.id = id;
+	}
+
+	public Long getParentId() {
+		return parentId;
+	}
+
+	public void setParentId(Long parentId) {
+		this.parentId = parentId;
 	}
 
 	public Integer getNamespaceId() {
@@ -162,14 +180,6 @@ public class IncubatorApplyDTO {
 		this.chargerEmail = chargerEmail;
 	}
 
-	public String getChargerWechat() {
-		return chargerWechat;
-	}
-
-	public void setChargerWechat(String chargerWechat) {
-		this.chargerWechat = chargerWechat;
-	}
-
 	public Long getApproveUserId() {
 		return approveUserId;
 	}
@@ -218,12 +228,52 @@ public class IncubatorApplyDTO {
 		this.createTime = createTime;
 	}
 
-	public Long getReApplyId() {
-		return reApplyId;
+	public Byte getApplyType() {
+		return applyType;
 	}
 
-	public void setReApplyId(Long reApplyId) {
-		this.reApplyId = reApplyId;
+	public void setApplyType(Byte applyType) {
+		this.applyType = applyType;
+	}
+
+	public Byte getReApplyFlag() {
+		return reApplyFlag;
+	}
+
+	public void setReApplyFlag(Byte reApplyFlag) {
+		this.reApplyFlag = reApplyFlag;
+	}
+
+	public String getBusinessLicenceText() {
+		return businessLicenceText;
+	}
+
+	public void setBusinessLicenceText(String businessLicenceText) {
+		this.businessLicenceText = businessLicenceText;
+	}
+
+	public String getPlanBookAttachmentText() {
+		return planBookAttachmentText;
+	}
+
+	public void setPlanBookAttachmentText(String planBookAttachmentText) {
+		this.planBookAttachmentText = planBookAttachmentText;
+	}
+
+	public String getApplyTypeText() {
+		return applyTypeText;
+	}
+
+	public void setApplyTypeText(String applyTypeText) {
+		this.applyTypeText = applyTypeText;
+	}
+
+	public String getCreateTimeText() {
+		return createTimeText;
+	}
+
+	public void setCreateTimeText(String createTimeText) {
+		this.createTimeText = createTimeText;
 	}
 
 	@Override

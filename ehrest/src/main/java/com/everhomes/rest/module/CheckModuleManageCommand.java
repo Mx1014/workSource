@@ -11,6 +11,7 @@ import javax.validation.constraints.NotNull;
  * <li>ownerId: 范围id</li>
  * <li>moduleId: 模块id</li>
  * <li>organizationId: 公司id</li>
+ * <li>appId: 应用id</li>
  * </ul>
  */
 public class CheckModuleManageCommand {
@@ -26,6 +27,8 @@ public class CheckModuleManageCommand {
 
     @NotNull
     private Long moduleId;
+
+    private Long appId;
 
     @NotNull
     private Long userId;
@@ -76,4 +79,11 @@ public class CheckModuleManageCommand {
         return StringHelper.toJsonString(this);
     }
 
+    public Long getAppId() {
+        return appId;
+    }
+
+    public void setAppId(Long appId) {
+        this.appId = appId;
+    }
 }

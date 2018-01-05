@@ -15,6 +15,16 @@ public class ListEnterpriseCustomerContractsCommand {
 
     private Integer namespaceId;
 
+    private Byte status;
+
+    public Byte getStatus() {
+        return status;
+    }
+
+    public void setStatus(Byte status) {
+        this.status = status;
+    }
+
     public Long getCommunityId() {
         return communityId;
     }

@@ -39,6 +39,8 @@ public class AddArchivesContactCommand {
 
     private String workEmail;
 
+    private Long detailId;
+
     @ItemType(Long.class)
     private List<Long> departmentIds;
 
@@ -152,5 +154,13 @@ public class AddArchivesContactCommand {
     @Override
     public String toString() {
         return StringHelper.toJsonString(this);
+    }
+
+    public Long getDetailId() {
+        return detailId;
+    }
+
+    public void setDetailId(Long detailId) {
+        this.detailId = detailId;
     }
 }

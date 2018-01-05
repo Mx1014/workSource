@@ -11,7 +11,7 @@ public interface EnterpriseApplyEntryProvider {
 	
 	EnterpriseDetail getEnterpriseDetailById(Long id);
 	
-	List<EnterpriseOpRequest> listApplyEntrys(EnterpriseOpRequest request, ListingLocator locator, int pageSize);
+	List<EnterpriseOpRequest> listApplyEntrys(EnterpriseOpRequest request, ListingLocator locator, Integer pageSize);
 	
 	boolean createApplyEntry(EnterpriseOpRequest enterpriseOpRequest);
 	
@@ -44,7 +44,7 @@ public interface EnterpriseApplyEntryProvider {
  
 
 	List<EnterpriseOpRequest> listApplyEntrys(EnterpriseOpRequest request, ListingLocator locator,
-			int pageSize, List<Long> idList);
+											  Integer pageSize, List<Long> idList);
 
 	void updateApplyEntry(EnterpriseOpRequest request);
 
@@ -64,7 +64,7 @@ public interface EnterpriseApplyEntryProvider {
 
 	LeaseFormRequest findLeaseRequestFormById(Long id);
 
-	LeaseFormRequest findLeaseRequestForm(Integer namespaceId, Long ownerId, String ownerType, String sourceType);
+	LeaseFormRequest findLeaseRequestForm(Integer namespaceId, Long ownerId, String ownerType, String sourceType, Long categoryId);
 	
 	List<LeaseFormRequest> listLeaseRequestForm(Integer namespaceId, Long ownerId, String ownerType);
 }

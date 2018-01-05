@@ -1040,7 +1040,7 @@ public class UserProviderImpl implements UserProvider {
     public List<AclinkUser> searchDoorUsers(ListAclinkUserCommand cmd, CrossShardListingLocator locator, int pageSize) {
 	    Integer namespaceId = cmd.getNamespaceId();
 	    Long organizationId = cmd.getOrganizationId();
-	    Long buildingId = cmd.getBuildingId();
+//	    Long buildingId = cmd.getBuildingId();
 	    String buildingName =  cmd.getBuildingName();
 	    Byte isAuth = cmd.getIsAuth();
 	    String keyword = cmd.getKeyword();
@@ -1101,11 +1101,11 @@ public class UserProviderImpl implements UserProvider {
                     cond = cond.and(Tables.EH_ORGANIZATION_MEMBERS.ORGANIZATION_ID.eq(organizationId));
                     }
                 
-                if(buildingId != null) {
-                    useAddress = true;
-                    useMembers = true;
-                    cond = cond.and(Tables.EH_ORGANIZATION_ADDRESSES.BUILDING_ID.eq(buildingId));
-                    }
+//                if(buildingId != null) {
+//                    useAddress = true;
+//                    useMembers = true;
+//                    cond = cond.and(Tables.EH_ORGANIZATION_ADDRESSES.BUILDING_ID.eq(buildingId));
+//                    }
                 
                 if(buildingName != null && !buildingName.isEmpty()) {
                     useAddress = true;

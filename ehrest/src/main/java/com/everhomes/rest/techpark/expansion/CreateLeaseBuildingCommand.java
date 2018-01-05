@@ -26,12 +26,21 @@ public class CreateLeaseBuildingCommand {
     private String trafficDescription;
     private Long generalFormId;
     private Byte customFormFlag;
+    private Long categoryId;
 
     @ItemType(BuildingForRentAttachmentDTO.class)
     private List<BuildingForRentAttachmentDTO> attachments;
 
     @ItemType(PostApprovalFormItem.class)
     private List<PostApprovalFormItem> formValues;
+
+    public Long getCategoryId() {
+        return categoryId;
+    }
+
+    public void setCategoryId(Long categoryId) {
+        this.categoryId = categoryId;
+    }
 
     public Integer getNamespaceId() {
         return namespaceId;

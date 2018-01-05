@@ -5,6 +5,7 @@ package com.everhomes.rest.customer;
  *     <li>id: id</li>
  *     <li>customerType: 客户类型 0: enterprise; 1: individual</li>
  *     <li>customerId: 客户id</li>
+ *     <li>communityId: 项目id</li>
  * </ul>
  * Created by ying.xiong on 2017/8/3.
  */
@@ -15,6 +16,36 @@ public class GetCustomerTaxCommand {
     private Byte customerType;
 
     private Long customerId;
+
+    private Long communityId;
+
+    private Long orgId;
+
+    private Integer namespaceId;
+
+    public Integer getNamespaceId() {
+        return namespaceId;
+    }
+
+    public void setNamespaceId(Integer namespaceId) {
+        this.namespaceId = namespaceId;
+    }
+
+    public Long getOrgId() {
+        return orgId;
+    }
+
+    public void setOrgId(Long orgId) {
+        this.orgId = orgId;
+    }
+
+    public Long getCommunityId() {
+        return communityId;
+    }
+
+    public void setCommunityId(Long communityId) {
+        this.communityId = communityId;
+    }
 
     public Long getId() {
         return id;

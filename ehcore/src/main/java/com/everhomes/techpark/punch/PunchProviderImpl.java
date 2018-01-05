@@ -176,7 +176,7 @@ public class PunchProviderImpl implements PunchProvider {
 		step.where(condition);
 		List<PunchLog> result = step.orderBy(Tables.EH_PUNCH_LOGS.USER_ID.asc(),
 				Tables.EH_PUNCH_LOGS.PUNCH_DATE.asc(),Tables.EH_PUNCH_LOGS.PUNCH_INTERVAL_NO.asc(),
-				Tables.EH_PUNCH_LOGS.PUNCH_TYPE.asc())
+				Tables.EH_PUNCH_LOGS.PUNCH_TYPE.asc(),Tables.EH_PUNCH_LOGS.PUNCH_TIME.asc())
 				.fetch().map((r) -> {
 					return ConvertHelper.convert(r, PunchLog.class);
 				});
@@ -2835,7 +2835,11 @@ long id = sequenceProvider.getNextSequence(key);
 			result = step.orderBy(Tables.EH_APPROVAL_CATEGORIES.ID).fetch().map((r) -> {
 				ExtDTO dto = new ExtDTO();
 				dto.setName(r.value1());
-				dto.setTimeCount(r.value2().toString());
+				if (r.value2() == null)
+					dto.setTimeCount("0");
+				else
+					dto.setTimeCount(r.value2().toString());
+
 				return dto;
 			});
 			if (null == result || result.size() == 0) {

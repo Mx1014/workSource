@@ -280,6 +280,7 @@ public class ContractProviderImpl implements ContractProvider {
         return list;
     }
 
+	@Override
 	public List<Contract> listContractByCustomerId(Long communityId, Long customerId, byte customerType) {
 		DSLContext context = dbProvider.getDslContext(AccessSpec.readOnly());
 		SelectQuery<EhContractsRecord> query = context.selectQuery(Tables.EH_CONTRACTS);
@@ -289,6 +290,30 @@ public class ContractProviderImpl implements ContractProvider {
 		}
 		query.addConditions(Tables.EH_CONTRACTS.CUSTOMER_TYPE.eq(customerType));
 		query.addConditions(Tables.EH_CONTRACTS.STATUS.ne(ContractStatus.INACTIVE.getCode()));
+
+		List<Contract> result = new ArrayList<>();
+		query.fetch().map((r) -> {
+			result.add(ConvertHelper.convert(r, Contract.class));
+			return null;
+		});
+		return result;
+	}
+
+	@Override
+	public List<Contract> listContractByCustomerId(Long communityId, Long customerId, byte customerType, Byte status) {
+		DSLContext context = dbProvider.getDslContext(AccessSpec.readOnly());
+		SelectQuery<EhContractsRecord> query = context.selectQuery(Tables.EH_CONTRACTS);
+		query.addConditions(Tables.EH_CONTRACTS.CUSTOMER_ID.eq(customerId));
+		if(communityId != null) {
+			query.addConditions(Tables.EH_CONTRACTS.COMMUNITY_ID.eq(communityId));
+		}
+		query.addConditions(Tables.EH_CONTRACTS.CUSTOMER_TYPE.eq(customerType));
+
+		if(status != null) {
+			query.addConditions(Tables.EH_CONTRACTS.STATUS.eq(status));
+		} else {
+			query.addConditions(Tables.EH_CONTRACTS.STATUS.ne(ContractStatus.INACTIVE.getCode()));
+		}
 
 		List<Contract> result = new ArrayList<>();
 		query.fetch().map((r) -> {
@@ -446,11 +471,18 @@ public class ContractProviderImpl implements ContractProvider {
 	}
 
 	@Override
-	public ContractParam findContractParamByCommunityId(Long communityId) {
+	public ContractParam findContractParamByCommunityId(Integer namespaceId, Long communityId) {
 
 		DSLContext context = dbProvider.getDslContext(AccessSpec.readOnly());
 		SelectQuery<EhContractParamsRecord> query = context.selectQuery(Tables.EH_CONTRACT_PARAMS);
-		query.addConditions(Tables.EH_CONTRACT_PARAMS.COMMUNITY_ID.eq(communityId));
+		query.addConditions(Tables.EH_CONTRACT_PARAMS.NAMESPACE_ID.eq(namespaceId));
+		if(communityId != null) {
+			query.addConditions(Tables.EH_CONTRACT_PARAMS.COMMUNITY_ID.eq(communityId));
+		}
+		if(communityId == null) {
+			query.addConditions(Tables.EH_CONTRACT_PARAMS.COMMUNITY_ID.eq(0L)
+					.or(Tables.EH_CONTRACT_PARAMS.COMMUNITY_ID.isNull()));
+		}
 
 		List<ContractParam> result = new ArrayList<>();
 		query.fetch().map((r) -> {

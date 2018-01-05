@@ -9,7 +9,9 @@ import javax.validation.constraints.NotNull;
  * <ul>
  * <li>ownerType: 范围权限</li>
  * <li>ownerId: 范围id</li>
- * <li>menuId: 菜单id</li>
+ * <li>moduleId: 模块id</li>
+ * <li>userId: 用户id</li>
+ * <li>organizationId: 企业id</li>
  * </ul>
  */
 public class ListUserRelatedProjectByModuleCommand {

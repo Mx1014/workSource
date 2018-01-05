@@ -32,4 +32,28 @@ public interface PortalPublishHandler {
     String getAppInstanceConfig(Integer namespaceId, String actionData);
 
     String processInstanceConfig(String instanceConfig);
+
+    /**
+     * 根据图标信息，传回多入口的标志ID
+     * @param namespaceId
+     * @param moudleId
+     * @param actionData
+     * @param instanceConfig
+     * @return
+     */
+    default String getCustomTag(Integer namespaceId, Long moudleId, String actionData, String instanceConfig){
+        return null;
+    }
+
+    /**
+     * 根据图标信息，传回多入口的菜单Id
+     * @param namespaceId
+     * @param moudleId
+     * @param actionData
+     * @param instanceConfig
+     * @return
+     */
+    default Long getWebMenuId(Integer namespaceId, Long moudleId, String actionData, String instanceConfig){
+        return null;
+    }
 }

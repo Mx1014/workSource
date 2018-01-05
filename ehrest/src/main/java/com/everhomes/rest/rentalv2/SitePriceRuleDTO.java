@@ -13,6 +13,7 @@ import com.everhomes.util.StringHelper;
  * 
  * <ul>
  * <li>rentalType: 0按小时，1按半天，2按天，3按半天带晚上，4按月，参考{@link com.everhomes.rest.rentalv2.RentalType}</li>
+ * <li>priceType: 0 按时长定价 1 起步价模式</li>
  * <li>minPrice: 最小价格</li>
  * <li>maxPrice: 最大价格</li>
  * <li>discountType: 折扣类型，0不打折，1满减，2满天减，3比例折扣，参考{@link com.everhomes.rest.rentalv2.admin.DiscountType}</li>
@@ -24,6 +25,7 @@ import com.everhomes.util.StringHelper;
  */
 public class SitePriceRuleDTO {
 	private Byte rentalType;
+	private Byte priceType;
 	private BigDecimal maxPrice;
 	private BigDecimal minPrice;
 	private String priceStr;
@@ -68,6 +70,14 @@ public class SitePriceRuleDTO {
 
 	public void setPricePackages(List<SitePricePackageDTO> pricePackages) {
 		this.pricePackages = pricePackages;
+	}
+
+	public Byte getPriceType() {
+		return priceType;
+	}
+
+	public void setPriceType(Byte priceType) {
+		this.priceType = priceType;
 	}
 
 	@Override

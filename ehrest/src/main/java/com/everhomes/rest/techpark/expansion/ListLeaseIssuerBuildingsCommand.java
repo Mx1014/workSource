@@ -25,6 +25,16 @@ public class ListLeaseIssuerBuildingsCommand {
 
     private Integer pageSize;
 
+    private Long categoryId;
+
+    public Long getCategoryId() {
+        return categoryId;
+    }
+
+    public void setCategoryId(Long categoryId) {
+        this.categoryId = categoryId;
+    }
+
     public Long getCommunityId() {
         return communityId;
     }

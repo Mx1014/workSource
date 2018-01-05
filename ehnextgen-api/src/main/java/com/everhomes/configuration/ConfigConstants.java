@@ -12,6 +12,7 @@ public interface ConfigConstants {
     public static final String MANAGE_SHOP_URL = "manage.shop.url";
     public static final String POST_SHARE_URL = "post.share.url";
     public static final String ACTIVITY_SHARE_URL = "activity.share.url";
+    public static final String POLL_SHARE_URL = "poll.share.url";
     public static final String USER_COUPON_URL = "user.coupon.url";
     public static final String APP_AGREEMENTS_URL = "app.agreements.url";
     public static final String PREFIX_URL = "prefix.url";
@@ -130,15 +131,20 @@ public interface ConfigConstants {
     public static final String QUESTIONNAIRE_REMIND_TIME_INTERVAL = "questionnaire.remind.time.interval";
 
     String PARKING_CAR_VERIFICATION_FLOWCASE_URL = "parking.car.verification.flowCase.url";
+
     String ARCHIVES_FORM_ORIGIN_ID = "archives.form.origin.id";
 
     String APP_SYSTEM_UPLOAD_URL_IN_BROWSER = "app.system.upload_url_in_browser";
 
+    String RELOCATION_FLOWCASE_URL = "relocation.flowCase.url";
+
+    String POINT_DETAIL_PATH = "point.detail.path";
 
     public static final String ASSET_PAYMENT_ZJH_URL = "asset.payment.zjh.url";
     public static final String ASSET_PAYMENT_ZJH_API_8 = "asset.payment.zjh.api.2.2.4.8";
     public static final String ASSET_PAYMENT_ZJH_API_9 = "asset.payment.zjh.api.2.2.4.9";
     public static final String ASSET_PAYMENT_ZJH_API_10 = "asset.payment.zjh.api.2.2.4.10";
     public static final String ASSET_PAYMENT_ZJH_API_15 = "asset.payment.zjh.api.2.2.4.15";
+	public static final String MY_PUBLISH_FLAG = "my.publish.flag";
 
 }

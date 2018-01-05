@@ -1,22 +1,37 @@
 //@formatter:off
 package com.everhomes.asset;
 
+import com.everhomes.constants.ErrorCodes;
+import com.everhomes.entity.EntityType;
 import com.everhomes.order.PaymentAccount;
 import com.everhomes.order.PaymentServiceConfig;
 import com.everhomes.order.PaymentUser;
+import com.everhomes.organization.OrganizationMember;
+import com.everhomes.organization.OrganizationProvider;
 import com.everhomes.pay.order.TransactionType;
-import com.everhomes.rest.asset.ListPaymentBillCmd;
-import com.everhomes.rest.asset.ListPaymentBillResp;
-import com.everhomes.rest.asset.PaymentAccountResp;
-import com.everhomes.rest.asset.ReSortCmd;
+import com.everhomes.portal.PortalService;
+import com.everhomes.rest.acl.PrivilegeConstants;
+import com.everhomes.rest.acl.PrivilegeServiceErrorCode;
+import com.everhomes.rest.asset.*;
+import com.everhomes.rest.order.OrderType;
+
+import com.everhomes.rest.organization.OrganizationMemberGroupType;
+import com.everhomes.rest.organization.OrganizationMemberTargetType;
+
+import com.everhomes.rest.organization.OrganizationType;
+import com.everhomes.rest.portal.ListServiceModuleAppsCommand;
+import com.everhomes.rest.portal.ListServiceModuleAppsResponse;
 import com.everhomes.rest.order.OrderType;
 import com.everhomes.rest.user.UserInfo;
 import com.everhomes.user.UserContext;
+import com.everhomes.user.UserPrivilegeMgr;
 import com.everhomes.util.ConvertHelper;
+import com.everhomes.util.RuntimeErrorException;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
+import org.springframework.util.StringUtils;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -30,9 +45,19 @@ public class PaymentServiceImpl implements PaymentService {
     private AssetProvider assetProvider;
     @Autowired
     private RemoteAccessService remoteAccessService;
+    @Autowired
+    private PortalService portalService;
+    @Autowired
+    private UserPrivilegeMgr userPrivilegeMgr;
+    @Autowired
+    private OrganizationProvider organizationProvider;
+
     private static final Logger LOGGER = LoggerFactory.getLogger(PaymentServiceImpl.class);
     @Override
     public ListPaymentBillResp listPaymentBill(ListPaymentBillCmd cmd) throws Exception {
+        //权限校验
+        userPrivilegeMgr.checkUserPrivilege(UserContext.currentUserId(), null, PrivilegeConstants.ASSET_DEAL_VIEW, PrivilegeConstants.ASSET_MODULE_ID, (byte)13, null, null, cmd.getCommunityId());
+
         if(cmd.getNamespaceId() == null){
             cmd.setNamespaceId(UserContext.getCurrentNamespaceId());
         }
@@ -89,4 +114,5 @@ public class PaymentServiceImpl implements PaymentService {
         }
         return null;
     }
+
 }

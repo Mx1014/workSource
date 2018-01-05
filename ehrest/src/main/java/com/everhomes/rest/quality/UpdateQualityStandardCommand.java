@@ -1,11 +1,10 @@
 package com.everhomes.rest.quality;
 
-import java.util.List;
-
-import javax.validation.constraints.NotNull;
-
 import com.everhomes.discover.ItemType;
 import com.everhomes.util.StringHelper;
+
+import javax.validation.constraints.NotNull;
+import java.util.List;
 
 /**
  * <ul>
@@ -19,6 +18,7 @@ import com.everhomes.util.StringHelper;
  *  <li>description: 具体内容</li>
  *  <li>specificationIds: eh_quality_inspection_specifications表的id</li>
  *  <li>group: 业务组信息 com.everhomes.rest.quality.StandardGroupDTO</li>
+ *  <li>communities: 应用到的项目id列表</li>
  * </ul>
  */
 public class UpdateQualityStandardCommand {
@@ -46,6 +46,9 @@ public class UpdateQualityStandardCommand {
 	private Long targetId;
 	
 	private String targetType;
+
+	@ItemType(Long.class)
+	private List<Long> communities;
 
 	public Long getId() {
 		return id;
@@ -125,6 +128,14 @@ public class UpdateQualityStandardCommand {
 
 	public void setTargetType(String targetType) {
 		this.targetType = targetType;
+	}
+
+	public List<Long> getCommunities() {
+		return communities;
+	}
+
+	public void setCommunities(List<Long> communities) {
+		this.communities = communities;
 	}
 
 	@Override
