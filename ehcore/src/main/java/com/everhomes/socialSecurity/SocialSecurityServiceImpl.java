@@ -29,6 +29,7 @@ import com.everhomes.user.UserContext;
 import com.everhomes.util.*;
 import com.everhomes.util.excel.RowResult;
 import com.everhomes.util.excel.handler.PropMrgOwnerHandler;
+import org.apache.commons.collections.map.HashedMap;
 import org.apache.poi.ss.usermodel.Row;
 import org.apache.poi.ss.usermodel.Workbook;
 import org.apache.poi.xssf.usermodel.XSSFSheet;
@@ -222,7 +223,6 @@ public class SocialSecurityServiceImpl implements SocialSecurityService {
 
     private void addNewMonthPayments(String paymentMonth, Long ownerId) {
         //把属于该公司的所有要交社保的setting取出来
-        //todo : 本月要交社保的人
         Set<Long> detailIds = new HashSet<>();
         detailIds.addAll(listSocialSecurityEmployeeDetailIdsByPayMonth(ownerId, paymentMonth));
 //        List<OrganizationMemberDetails> details = organizationProvider.listOrganizationMemberDetails(ownerId);
@@ -368,7 +368,6 @@ public class SocialSecurityServiceImpl implements SocialSecurityService {
     public ListSocialSecurityPaymentsResponse listSocialSecurityPayments(
             ListSocialSecurityPaymentsCommand cmd) {
 
-        // TODO 通过组织架构拿到新增人员的detailIds
         this.coordinationProvider.getNamedLock(CoordinationLocks.SOCIAL_SECURITY_LIST_PAYMENTS.getCode() + cmd.getOwnerId()).enter(() -> {
             String month = socialSecurityPaymentProvider.findPaymentMonthByOwnerId(cmd.getOwnerId());
             if (null == month) {
@@ -403,7 +402,6 @@ public class SocialSecurityServiceImpl implements SocialSecurityService {
 //                            payFlag = SsorAfPay.ACCUMULATIONFUNDPAY;
 //                        }
 //                        break;
-//                    //todo : 等楠哥接口出来看这里怎么写
 //                }
 //            }
 //        }
@@ -984,7 +982,7 @@ public class SocialSecurityServiceImpl implements SocialSecurityService {
                 importUpdateSetting(detail, ssBases, afBases, r, log, ssCityId, afCItyId,response);
             }
         }
-        response.setTotalCount((long) list.size());
+        response.setTotalCount((long) list.size() -1);
         response.setFailCount((long) response.getLogs().size());
         //设置完后同步一下
         socialSecuritySettingProvider.syncRadixAndRatioToPayments(ownerId);
@@ -2161,10 +2159,38 @@ public class SocialSecurityServiceImpl implements SocialSecurityService {
     @Override
     public ListUserInoutHistoryResponse
     listUserInoutHistory(ListUserInoutHistoryCommand cmd) {
-        // TODO: 2017/12/21 人事档案提供
-        SocialSecurityEmployeeDTO result = getSocialSecurityEmployeeInfo(cmd.getDetailId());
+        List<SocialSecurityInoutLog> logs = socialSecurityInoutLogProvider.listSocialSecurityInoutLogs(cmd.getOwnerId(), cmd.getDetailId());
 
-        return new ListUserInoutHistoryResponse();
+        List<UserInoutHistoryDTO> history = new ArrayList<>();
+
+        Map<String, List<Byte>> historyMap = new HashedMap();
+        if (null != logs) {
+
+            for (SocialSecurityInoutLog log : logs) {
+                if (null == historyMap.get(log.getLogMonth())) {
+                    List<Byte> list = new ArrayList<>();
+                    list.add(log.getType());
+                    historyMap.put(log.getLogMonth(), list);
+                } else {
+                    historyMap.get(log.getLogMonth()).add(log.getType());
+                }
+            }
+            for (String month : historyMap.keySet()) {
+                UserInoutHistoryDTO dto = new UserInoutHistoryDTO();
+                dto.setMonth(month);
+                StringBuilder sb = null;
+                for (Byte logType : historyMap.get(month)) {
+                    if (null == sb) {
+                        sb = new StringBuilder();
+                    } else {
+                        sb.append("、");
+                    }
+                    sb.append(InOutLogType.fromCode(logType).getDescribe());
+                }
+                history.add(dto);
+            }
+        }
+        return new ListUserInoutHistoryResponse(history);
     }
 
     @Override
