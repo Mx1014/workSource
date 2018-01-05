@@ -109,8 +109,11 @@ public class ContractScheduleJob extends QuartzJobBean {
                                     }
                                 }
                             }
+                            Timestamp time = addPeriod(now, param.getPaidPeriod(), PeriodUnit.DAY.getCode());
+                            if(time.after(contract.getContractEndDate())) {
+                                notifyPaid();
+                            }
 
-                            notifyPaid();
                         });
                     }
                 }
