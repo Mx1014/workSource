@@ -1529,7 +1529,7 @@ public class EquipmentProviderImpl implements EquipmentProvider {
     public List<EquipmentInspectionEquipmentPlanMap> getEquipmentInspectionPlanMap(Long planId) {
         DSLContext context = this.dbProvider.getDslContext(AccessSpec.readOnly());
         return context.selectFrom(Tables.EH_EQUIPMENT_INSPECTION_EQUIPMENT_PLAN_MAP)
-                .where(Tables.EH_EQUIPMENT_INSPECTION_EQUIPMENT_PLAN_MAP.ID.eq(planId))
+                .where(Tables.EH_EQUIPMENT_INSPECTION_EQUIPMENT_PLAN_MAP.PLAN_ID.eq(planId))
                 .orderBy(Tables.EH_EQUIPMENT_INSPECTION_EQUIPMENT_PLAN_MAP.DEFAULT_ORDER)
                 .fetchInto(EquipmentInspectionEquipmentPlanMap.class);
     }

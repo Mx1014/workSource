@@ -2020,12 +2020,13 @@ private void checkUserPrivilege(Long orgId, Long privilegeId, Long communityId) 
 		}
 		List<EquipmentInspectionEquipmentPlanMap> planMaps = equipmentProvider.getEquipmentInspectionPlanMap(task.getPlanId());
 		EquipmentStandardRelationDTO relationDTO = new EquipmentStandardRelationDTO();
+		List<EquipmentStandardRelationDTO> equipmentStandardRelations = new ArrayList<>();
 		if (planMaps != null && planMaps.size() > 0) {
 			for (EquipmentInspectionEquipmentPlanMap map : planMaps) {
 				EquipmentInspectionEquipments equipment = equipmentProvider.findEquipmentById(map.getEquimentId());
 				relationDTO.setEquipmentName(equipment.getName());
 				relationDTO.setLocation(equipment.getLocation());
-				dto.getEquipments().add(relationDTO);
+				equipmentStandardRelations.add(relationDTO);
 			}
 		}
 		//兼容之前的版本任务
@@ -2035,10 +2036,11 @@ private void checkUserPrivilege(Long orgId, Long privilegeId, Long communityId) 
 				equipment = equipmentProvider.findEquipmentById(task.getEquipmentId());
 			}
 			if (null != equipment) {
-				dto.setEquipmentName(equipment.getName());
-				dto.setEquipmentLocation(equipment.getLocation());
+				relationDTO.setEquipmentName(equipment.getName());
+				relationDTO.setLocation(equipment.getLocation());
 			}
 		}
+		dto.setEquipments(equipmentStandardRelations);
 
 
 //        Organization group = organizationProvider.findOrganizationById(task.getExecutiveGroupId());
@@ -4165,8 +4167,6 @@ private void checkUserPrivilege(Long orgId, Long privilegeId, Long communityId) 
 //					.getEquipmentStandardRelations();
 
 		EquipmentTaskDTO dto = convertEquipmentTaskToDTO(task);
-		dto.setEquipments(equipments);
-
 		return dto;
 	}
 
@@ -5791,8 +5791,8 @@ private void checkUserPrivilege(Long orgId, Long privilegeId, Long communityId) 
 			if (equipment != null) {
 				plan.setNamespaceId(equipment.getNamespaceId());
 				plan.setName(equipment.getName());
-				plan.setTargetId(standards.getTargetId());
-				plan.setTargetType(standards.getTargetType());
+				plan.setTargetId(equipment.getTargetId());
+				plan.setTargetType(equipment.getTargetType());
 			}
 			if (standards != null) {
 				if (EquipmentReviewStatus.REVIEWED.equals(EquipmentReviewStatus.fromStatus(map.getReviewStatus()))
@@ -5809,8 +5809,11 @@ private void checkUserPrivilege(Long orgId, Long privilegeId, Long communityId) 
 			}
 			equipmentProvider.createEquipmentInspectionPlans(plan);
 			EquipmentInspectionEquipmentPlanMap planMap = new EquipmentInspectionEquipmentPlanMap();
-			if (equipment != null)
+			if (equipment != null){
 				planMap.setEquimentId(equipment.getId());
+				planMap.setTargetId(equipment.getTargetId());
+				planMap.setTargetType(equipment.getTargetType());
+			}
 			planMap.setPlanId(plan.getId());
 			if (standards != null){
 				planMap.setStandardId(standards.getId());
