@@ -299,6 +299,10 @@ public class EbeiThirdPartContractHandler implements ThirdPartContractHandler {
             if(customer != null) {
                 customer.setContactAddress("");
                 customerProvider.updateEnterpriseCustomer(customer);
+                List<OrganizationAddress> myOrganizationAddressList = organizationProvider.listOrganizationAddressByOrganizationId(customer.getOrganizationId());
+                for (OrganizationAddress organizationAddress : myOrganizationAddressList) {
+                    deleteOrganizationAddress(organizationAddress);
+                }
             }
         }
 
@@ -350,6 +354,7 @@ public class EbeiThirdPartContractHandler implements ThirdPartContractHandler {
             }
             customer.setContactAddress(ebeiContract.getBuildingRename());
             customerProvider.updateEnterpriseCustomer(customer);
+            insertOrUpdateOrganizationAddresses(ebeiContract.getHouseInfoList(),customer);
             contract.setCustomerId(customer.getId());
         }
         contract.setCreateUid(UserContext.currentUserId());
@@ -480,6 +485,7 @@ public class EbeiThirdPartContractHandler implements ThirdPartContractHandler {
             }
             customer.setContactAddress(ebeiContract.getBuildingRename());
             customerProvider.updateEnterpriseCustomer(customer);
+            insertOrUpdateOrganizationAddresses(ebeiContract.getHouseInfoList(),customer);
             contract.setCustomerId(customer.getId());
         }
         contractProvider.updateContract(contract);
