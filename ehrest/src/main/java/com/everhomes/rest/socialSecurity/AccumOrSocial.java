@@ -6,12 +6,12 @@ package com.everhomes.rest.socialSecurity;
  * <li>ACCUM(2):公积金 </li>
  * </ul>
  */
-public enum AccumOrSocail {
+public enum AccumOrSocial {
 
 	SOCAIL((byte)1),ACCUM((byte)2);
 
     private byte code;
-    private AccumOrSocail(Byte code) {
+    private AccumOrSocial(Byte code) {
         this.code = code;
     }
     
@@ -19,11 +19,11 @@ public enum AccumOrSocail {
         return this.code;
     }
     
-    public static AccumOrSocail fromCode(Byte code) {
+    public static AccumOrSocial fromCode(Byte code) {
         if (null == code) {
             return null;
         }
-        for(AccumOrSocail t : AccumOrSocail.values()) {
+        for(AccumOrSocial t : AccumOrSocial.values()) {
             if (t.code == code) {
                 return t;
             }

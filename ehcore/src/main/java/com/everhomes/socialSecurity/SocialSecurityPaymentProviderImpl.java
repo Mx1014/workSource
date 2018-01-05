@@ -5,9 +5,8 @@ import java.math.BigDecimal;
 import java.sql.Timestamp;
 import java.util.List;
 
-import com.everhomes.rest.socialSecurity.AccumOrSocail;
+import com.everhomes.rest.socialSecurity.AccumOrSocial;
 import com.everhomes.rest.socialSecurity.NormalFlag;
-import com.everhomes.user.User;
 import org.jooq.DSLContext;
 import org.jooq.Record;
 import org.jooq.Record1;
@@ -109,7 +108,7 @@ public class SocialSecurityPaymentProviderImpl implements SocialSecurityPaymentP
         SelectConditionStep<Record> step = getReadOnlyContext().select().from(Tables.EH_SOCIAL_SECURITY_PAYMENTS)
                 .where(Tables.EH_SOCIAL_SECURITY_PAYMENTS.DETAIL_ID.eq(detailId))
                 .and(Tables.EH_SOCIAL_SECURITY_PAYMENTS.ACCUM_OR_SOCAIL.eq(accumOrSocial));
-        if (accumOrSocial.equals(AccumOrSocail.SOCAIL.getCode())) {
+        if (accumOrSocial.equals(AccumOrSocial.SOCAIL.getCode())) {
             step = step.and(Tables.EH_SOCIAL_SECURITY_PAYMENTS.PAY_ITEM.eq(payItem));
 
         }
