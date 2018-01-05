@@ -4990,6 +4990,8 @@ public class PropertyMgrServiceImpl implements PropertyMgrService {
 		// TODO Auto-generated method stub
 		List<CommunityPmOwner> owners = propertyMgrProvider.listCommunityPmOwnersByToken(
 				identifier.getNamespaceId(), identifier.getIdentifierToken());
+		LOGGER.debug("processUserForOwner: user identifier: {}, owners: {}",
+				identifier.getIdentifierToken(), StringHelper.toJsonString(owners));
 		if(null != owners && owners.size() > 0) {
 			for(CommunityPmOwner owner : owners) {
 				List<OrganizationOwnerAddress> ownerAddressList = propertyMgrProvider.listOrganizationOwnerAddressByOwnerId(identifier.getNamespaceId(), owner.getId());
