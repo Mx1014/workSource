@@ -39,6 +39,7 @@ CREATE TABLE `eh_contract_payment_plans` (
   `paid_amount` DECIMAL(10,2) COMMENT '应付金额',
   `paid_time` DATETIME COMMENT '应付日期',
   `remark` VARCHAR(256) COMMENT '备注',
+  `notify_flag` TINYINT NOT NULL DEFAULT 0 COMMENT '0: no; 1: notified',
   `status` TINYINT NOT NULL DEFAULT 1 COMMENT '0: inactive; 1: waiting for approval; 2: active',
   `create_uid` BIGINT NOT NULL DEFAULT 0,
   `create_time` DATETIME,
