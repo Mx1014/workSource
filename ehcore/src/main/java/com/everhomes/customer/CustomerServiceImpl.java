@@ -1921,6 +1921,17 @@ public class CustomerServiceImpl implements CustomerService {
     }
 
     @Override
+    public List<CustomerEntryInfoDTO> listCustomerEntryInfosWithoutAuth(ListCustomerEntryInfosCommand cmd) {
+        List<CustomerEntryInfo> entryInfos = enterpriseCustomerProvider.listCustomerEntryInfos(cmd.getCustomerId());
+        if(entryInfos != null && entryInfos.size() > 0) {
+            return entryInfos.stream().map(entryInfo -> {
+                return convertCustomerEntryInfoDTO(entryInfo);
+            }).collect(Collectors.toList());
+        }
+        return null;
+    }
+
+    @Override
     public void updateCustomerDepartureInfo(UpdateCustomerDepartureInfoCommand cmd) {
         checkCustomerAuth(cmd.getNamespaceId(), PrivilegeConstants.ENTERPRISE_CUSTOMER_MANAGE_UPDATE, cmd.getOrgId(), cmd.getCommunityId());
         CustomerDepartureInfo exist = checkCustomerDepartureInfo(cmd.getId(), cmd.getCustomerId());
