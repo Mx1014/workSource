@@ -140,6 +140,14 @@ drop column half_approving_user_original_price,
 drop column half_approving_user_price;
 
 
+ALTER TABLE `eh_rentalv2_price_rules`
+drop column weekend_price,
+drop column org_member_weekend_price,
+drop column approving_user_weekend_price;
+
+ALTER TABLE `eh_rentalv2_price_rules`
+ADD COLUMN `user_price_type` tinyint(4) DEFAULT NULL COMMENT '用户价格类型, 1:统一价格 2：用户类型价格';
+
 ALTER TABLE `eh_rentalv2_orders`
 ADD COLUMN `resource_type` varchar(64) DEFAULT NULL COMMENT '资源类型';
 
