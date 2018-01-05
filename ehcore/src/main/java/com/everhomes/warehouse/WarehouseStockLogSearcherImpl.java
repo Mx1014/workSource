@@ -1,9 +1,15 @@
 package com.everhomes.warehouse;
 
 import com.everhomes.configuration.ConfigurationProvider;
+import com.everhomes.entity.EntityType;
 import com.everhomes.listing.CrossShardListingLocator;
 import com.everhomes.organization.OrganizationMember;
 import com.everhomes.organization.OrganizationProvider;
+import com.everhomes.portal.PortalService;
+import com.everhomes.rest.acl.PrivilegeConstants;
+import com.everhomes.rest.acl.PrivilegeServiceErrorCode;
+import com.everhomes.rest.portal.ListServiceModuleAppsCommand;
+import com.everhomes.rest.portal.ListServiceModuleAppsResponse;
 import com.everhomes.rest.warehouse.SearchWarehouseStockLogsCommand;
 import com.everhomes.rest.warehouse.SearchWarehouseStockLogsResponse;
 import com.everhomes.rest.warehouse.WarehouseStockLogDTO;
@@ -12,7 +18,9 @@ import com.everhomes.search.SearchUtils;
 import com.everhomes.search.WarehouseStockLogSearcher;
 import com.everhomes.settings.PaginationConfigHelper;
 import com.everhomes.user.UserContext;
+import com.everhomes.user.UserPrivilegeMgr;
 import com.everhomes.util.ConvertHelper;
+import com.everhomes.util.RuntimeErrorException;
 import org.elasticsearch.action.bulk.BulkRequestBuilder;
 import org.elasticsearch.action.search.SearchRequestBuilder;
 import org.elasticsearch.action.search.SearchResponse;
@@ -51,6 +59,12 @@ public class WarehouseStockLogSearcherImpl extends AbstractElasticSearch impleme
 
     @Autowired
     private OrganizationProvider organizationProvider;
+
+    @Autowired
+    private UserPrivilegeMgr userPrivilegeMgr;
+
+    @Autowired
+    private PortalService portalService;
 
     @Override
     public void deleteById(Long id) {
@@ -108,6 +122,7 @@ public class WarehouseStockLogSearcherImpl extends AbstractElasticSearch impleme
 
     @Override
     public SearchWarehouseStockLogsResponse query(SearchWarehouseStockLogsCommand cmd) {
+        checkAssetPriviledgeForPropertyOrg(cmd.getCommunityId(),PrivilegeConstants.WAREHOUSE_REPO_MAINTAIN_SEARCH,cmd.getOwnerId());
         SearchRequestBuilder builder = getClient().prepareSearch(getIndexName()).setTypes(getIndexType());
         QueryBuilder qb = null;
         if(cmd.getMaterialName() == null || cmd.getMaterialName().isEmpty()) {
@@ -125,6 +140,8 @@ public class WarehouseStockLogSearcherImpl extends AbstractElasticSearch impleme
         FilterBuilder fb = FilterBuilders.termFilter("namespaceId", UserContext.getCurrentNamespaceId());
         fb = FilterBuilders.andFilter(fb, FilterBuilders.termFilter("ownerId", cmd.getOwnerId()));
         fb = FilterBuilders.andFilter(fb, FilterBuilders.termFilter("ownerType", cmd.getOwnerType()));
+        //新增， 兼容性还没有
+        fb = FilterBuilders.andFilter(fb, FilterBuilders.termFilter("communityId", cmd.getCommunityId()));
 
         if(cmd.getWarehouseId() != null) {
             fb = FilterBuilders.andFilter(fb, FilterBuilders.termFilter("warehouseId", cmd.getWarehouseId()));
@@ -194,12 +211,12 @@ public class WarehouseStockLogSearcherImpl extends AbstractElasticSearch impleme
                 dto.setDeliveryUserName(deliveries.get(0).getContactName());
             }
 
-            Warehouses warehouse = warehouseProvider.findWarehouse(dto.getWarehouseId(), cmd.getOwnerType(), cmd.getOwnerId());
+            Warehouses warehouse = warehouseProvider.findWarehouse(dto.getWarehouseId(), cmd.getOwnerType(), cmd.getOwnerId(),cmd.getCommunityId());
             if(warehouse != null) {
                 dto.setWarehouseName(warehouse.getName());
             }
 
-            WarehouseMaterials material = warehouseProvider.findWarehouseMaterials(dto.getMaterialId(), cmd.getOwnerType(), cmd.getOwnerId());
+            WarehouseMaterials material = warehouseProvider.findWarehouseMaterials(dto.getMaterialId(), cmd.getOwnerType(), cmd.getOwnerId(),cmd.getCommunityId());
             if(material != null) {
                 dto.setMaterialName(material.getName());
                 dto.setMaterialNumber(material.getMaterialNumber());
@@ -226,6 +243,7 @@ public class WarehouseStockLogSearcherImpl extends AbstractElasticSearch impleme
             b.field("materialId", log.getMaterialId());
             b.field("requestType", log.getRequestType());
             b.field("createTime", log.getCreateTime());
+            b.field("communityId", log.getCommunityId());
 
             if(log.getRequestUid() != null) {
                 b.field("requestUid", log.getRequestUid());
@@ -240,7 +258,7 @@ public class WarehouseStockLogSearcherImpl extends AbstractElasticSearch impleme
                 b.field("requestName", "");
             }
 
-            WarehouseMaterials material = warehouseProvider.findWarehouseMaterials(log.getMaterialId(), log.getOwnerType(), log.getOwnerId());
+            WarehouseMaterials material = warehouseProvider.findWarehouseMaterials(log.getMaterialId(), log.getOwnerType(), log.getOwnerId(),log.getCommunityId());
             if(material != null) {
                 b.field("materialName", material.getName());
                 b.field("materialNumber", material.getMaterialNumber());
@@ -263,6 +281,18 @@ public class WarehouseStockLogSearcherImpl extends AbstractElasticSearch impleme
         List<Long> results = new ArrayList<Long>();
         Long totalHits= rsp.getHits().getTotalHits();
         return totalHits;
+    }
+    private void checkAssetPriviledgeForPropertyOrg(Long communityId, Long priviledgeId, Long OrganizationId) {
+        ListServiceModuleAppsCommand cmd1 = new ListServiceModuleAppsCommand();
+        cmd1.setActionType((byte)13);
+        cmd1.setModuleId(PrivilegeConstants.WAREHOUSE_MODULE_ID);
+        cmd1.setNamespaceId(UserContext.getCurrentNamespaceId());
+        ListServiceModuleAppsResponse res = portalService.listServiceModuleAppsWithConditon(cmd1);
+        Long appId = res.getServiceModuleApps().get(0).getId();
+        if(!userPrivilegeMgr.checkUserPrivilege(UserContext.currentUserId(), EntityType.ORGANIZATIONS.getCode(), OrganizationId, OrganizationId,priviledgeId , appId, null,communityId )){
+            throw RuntimeErrorException.errorWith(PrivilegeServiceErrorCode.SCOPE, PrivilegeServiceErrorCode.ERROR_CHECK_APP_PRIVILEGE,
+                    "check app privilege error");
+        }
     }
 
     @Override

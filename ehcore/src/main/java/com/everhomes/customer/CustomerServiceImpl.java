@@ -18,9 +18,21 @@ import com.everhomes.address.AddressProvider;
 import com.everhomes.bootstrap.PlatformContext;
 import com.everhomes.contract.ContractService;
 import com.everhomes.organization.*;
+import com.everhomes.portal.PortalService;
+import com.everhomes.rest.acl.PrivilegeConstants;
+import com.everhomes.rest.acl.PrivilegeServiceErrorCode;
+import com.everhomes.rest.common.ServiceModuleConstants;
 import com.everhomes.rest.contract.ContractStatus;
 import com.everhomes.rest.customer.*;
+import com.everhomes.rest.launchpad.ActionType;
 import com.everhomes.rest.organization.*;
+
+import com.everhomes.rest.portal.ListServiceModuleAppsCommand;
+import com.everhomes.rest.portal.ListServiceModuleAppsResponse;
+import com.everhomes.user.UserPrivilegeMgr;
+
+import com.everhomes.user.UserProvider;
+
 import org.apache.commons.lang.StringUtils;
 import org.apache.lucene.spatial.geohash.GeoHashUtils;
 import org.apache.tomcat.jni.Time;
@@ -153,6 +165,33 @@ public class CustomerServiceImpl implements CustomerService {
     @Autowired
     private FieldService fieldService;
 
+    @Autowired
+    private UserProvider userProvider;
+
+    @Autowired
+    private PortalService portalService;
+
+    @Autowired
+    private UserPrivilegeMgr userPrivilegeMgr;
+
+    @Override
+    public void checkCustomerAuth(Integer namespaceId, Long privilegeId, Long orgId, Long communityId) {
+//        ListServiceModuleAppsCommand cmd = new ListServiceModuleAppsCommand();
+//        cmd.setNamespaceId(namespaceId);
+//        cmd.setModuleId(ServiceModuleConstants.ENTERPRISE_CUSTOMER_MODULE);
+//        cmd.setActionType(ActionType.OFFICIAL_URL.getCode());
+//        ListServiceModuleAppsResponse apps = portalService.listServiceModuleAppsWithConditon(cmd);
+//        Long appId = apps.getServiceModuleApps().get(0).getId();
+//        if(!userPrivilegeMgr.checkUserPrivilege(UserContext.currentUserId(), EntityType.ORGANIZATIONS.getCode(), orgId,
+//                orgId, privilegeId, appId, null, communityId)) {
+//            LOGGER.error("Permission is prohibited, namespaceId={}, orgId={}, ownerType={}, ownerId={}, privilegeId={}",
+//                    namespaceId, orgId, EntityType.COMMUNITY.getCode(), communityId, privilegeId);
+//            throw RuntimeErrorException.errorWith(PrivilegeServiceErrorCode.SCOPE, PrivilegeServiceErrorCode.ERROR_CHECK_APP_PRIVILEGE,
+//                    "check user privilege error");
+//        }
+        userPrivilegeMgr.checkUserPrivilege(UserContext.currentUserId(), orgId, privilegeId, ServiceModuleConstants.ENTERPRISE_CUSTOMER_MODULE, ActionType.OFFICIAL_URL.getCode(), null, null,communityId);
+    }
+
     private void checkPrivilege(Integer ns) {
         Integer namespaceId = UserContext.getCurrentNamespaceId(ns);
         //产品功能 #20796
@@ -198,8 +237,15 @@ public class CustomerServiceImpl implements CustomerService {
     }
 
     @Override
+    public SearchEnterpriseCustomerResponse queryEnterpriseCustomers(SearchEnterpriseCustomerCommand cmd) {
+        checkCustomerAuth(cmd.getNamespaceId(), PrivilegeConstants.ENTERPRISE_CUSTOMER_LIST, cmd.getOrgId(), cmd.getCommunityId());
+        return enterpriseCustomerSearcher.queryEnterpriseCustomers(cmd);
+    }
+
+    @Override
     public EnterpriseCustomerDTO createEnterpriseCustomer(CreateEnterpriseCustomerCommand cmd) {
         checkPrivilege(cmd.getNamespaceId());
+        checkCustomerAuth(cmd.getNamespaceId(), PrivilegeConstants.ENTERPRISE_CUSTOMER_CREATE, cmd.getOrgId(), cmd.getCommunityId());
         checkEnterpriseCustomerNumberUnique(null, cmd.getNamespaceId(), cmd.getCustomerNumber(), cmd.getName());
         EnterpriseCustomer customer = ConvertHelper.convert(cmd, EnterpriseCustomer.class);
         customer.setNamespaceId((null != cmd.getNamespaceId() ? cmd.getNamespaceId() : UserContext.getCurrentNamespaceId()));
@@ -320,6 +366,10 @@ public class CustomerServiceImpl implements CustomerService {
             }
         }
 
+        //21002 企业管理1.4（来源于第三方数据，企业名称栏为灰色不可修改） add by xiongying20171219
+        if(!StringUtils.isEmpty(customer.getNamespaceCustomerType())) {
+            dto.setThirdPartFlag(true);
+        }
         return dto;
     }
 
@@ -374,6 +424,7 @@ public class CustomerServiceImpl implements CustomerService {
     public EnterpriseCustomerDTO updateEnterpriseCustomer(UpdateEnterpriseCustomerCommand cmd) {
         EnterpriseCustomer customer = checkEnterpriseCustomer(cmd.getId());
         checkPrivilege(customer.getNamespaceId());
+        checkCustomerAuth(cmd.getNamespaceId(), PrivilegeConstants.ENTERPRISE_CUSTOMER_UPDATE, cmd.getOrgId(), cmd.getCommunityId());
         //产品功能 #20796 同步过来的客户名称不可改
         if(NamespaceCustomerType.EBEI.equals(NamespaceCustomerType.fromCode(customer.getNamespaceCustomerType()))
                 || NamespaceCustomerType.SHENZHOU.equals(NamespaceCustomerType.fromCode(customer.getNamespaceCustomerType())) ) {
@@ -390,12 +441,15 @@ public class CustomerServiceImpl implements CustomerService {
         updateCustomer.setOrganizationId(customer.getOrganizationId());
         updateCustomer.setCreateTime(customer.getCreateTime());
         updateCustomer.setCreatorUid(customer.getCreatorUid());
+        updateCustomer.setNamespaceCustomerToken(customer.getNamespaceCustomerToken());
+        updateCustomer.setNamespaceCustomerType(customer.getNamespaceCustomerType());
+
         if(cmd.getCorpEntryDate() != null) {
             updateCustomer.setCorpEntryDate(new Timestamp(cmd.getCorpEntryDate()));
         }
 
         if(cmd.getFoundingTime() != null) {
-            customer.setFoundingTime(new Timestamp(cmd.getFoundingTime()));
+            updateCustomer.setFoundingTime(new Timestamp(cmd.getFoundingTime()));
         }
         updateCustomer.setStatus(CommonStatus.ACTIVE.getCode());
         //保存经纬度
@@ -458,6 +512,7 @@ public class CustomerServiceImpl implements CustomerService {
 
     @Override
     public void deleteEnterpriseCustomer(DeleteEnterpriseCustomerCommand cmd) {
+        checkCustomerAuth(cmd.getNamespaceId(), PrivilegeConstants.ENTERPRISE_CUSTOMER_DELETE, cmd.getOrgId(), cmd.getCommunityId());
         EnterpriseCustomer customer = checkEnterpriseCustomer(cmd.getId());
         checkPrivilege(customer.getNamespaceId());
         //产品功能 #20796 同步过来的不能删
@@ -499,6 +554,7 @@ public class CustomerServiceImpl implements CustomerService {
 
     @Override
     public ImportFileTaskDTO importEnterpriseCustomer(ImportEnterpriseCustomerDataCommand cmd, MultipartFile mfile, Long userId) {
+        checkCustomerAuth(cmd.getNamespaceId(), PrivilegeConstants.ENTERPRISE_CUSTOMER_IMPORT, cmd.getOrgId(), cmd.getCommunityId());
         checkPrivilege(cmd.getNamespaceId());
         ImportFileTask task = new ImportFileTask();
         try {
@@ -758,13 +814,162 @@ public class CustomerServiceImpl implements CustomerService {
     }
 
     @Override
+    public void createCustomerAccount(CreateCustomerAccountCommand cmd) {
+        checkCustomerAuth(cmd.getNamespaceId(), PrivilegeConstants.ENTERPRISE_CUSTOMER_MANAGE_CREATE, cmd.getOrgId(), cmd.getCommunityId());
+        CustomerAccount account = ConvertHelper.convert(cmd, CustomerAccount.class);
+        enterpriseCustomerProvider.createCustomerAccount(account);
+    }
+
+    @Override
+    public void createCustomerTax(CreateCustomerTaxCommand cmd) {
+        checkCustomerAuth(cmd.getNamespaceId(), PrivilegeConstants.ENTERPRISE_CUSTOMER_MANAGE_CREATE, cmd.getOrgId(), cmd.getCommunityId());
+        CustomerTax tax = ConvertHelper.convert(cmd, CustomerTax.class);
+        enterpriseCustomerProvider.createCustomerTax(tax);
+    }
+
+    @Override
+    public void deleteCustomerAccount(DeleteCustomerAccountCommand cmd) {
+        checkCustomerAuth(cmd.getNamespaceId(), PrivilegeConstants.ENTERPRISE_CUSTOMER_MANAGE_DELETE, cmd.getOrgId(), cmd.getCommunityId());
+        CustomerAccount account = checkCustomerAccount(cmd.getId(), cmd.getCustomerId());
+        enterpriseCustomerProvider.deleteCustomerAccount(account);
+    }
+
+    @Override
+    public void deleteCustomerTax(DeleteCustomerTaxCommand cmd) {
+        checkCustomerAuth(cmd.getNamespaceId(), PrivilegeConstants.ENTERPRISE_CUSTOMER_MANAGE_DELETE, cmd.getOrgId(), cmd.getCommunityId());
+        CustomerTax tax = checkCustomerTax(cmd.getId(), cmd.getCustomerId());
+        enterpriseCustomerProvider.deleteCustomerTax(tax);
+    }
+
+    @Override
+    public CustomerAccountDTO getCustomerAccount(GetCustomerAccountCommand cmd) {
+        CustomerAccount account = checkCustomerAccount(cmd.getId(), cmd.getCustomerId());
+        return convertCustomerAccountDTO(account, cmd.getCommunityId());
+    }
+
+    @Override
+    public CustomerTaxDTO getCustomerTax(GetCustomerTaxCommand cmd) {
+        checkCustomerAuth(cmd.getNamespaceId(), PrivilegeConstants.ENTERPRISE_CUSTOMER_MANAGE_LIST, cmd.getOrgId(), cmd.getCommunityId());
+        CustomerTax tax = checkCustomerTax(cmd.getId(), cmd.getCustomerId());
+        return convertCustomerTaxDTO(tax, cmd.getCommunityId());
+    }
+
+    private CustomerAccount checkCustomerAccount(Long id, Long customerId) {
+        CustomerAccount account = enterpriseCustomerProvider.findCustomerAccountById(id);
+        if(account == null || !account.getCustomerId().equals(customerId)
+                || !CommonStatus.ACTIVE.equals(CommonStatus.fromCode(account.getStatus()))) {
+            LOGGER.error("enterprise customer account is not exist or active. id: {}, account: {}", id, account);
+            throw RuntimeErrorException.errorWith(CustomerErrorCode.SCOPE, CustomerErrorCode.ERROR_CUSTOMER_ACCOUNT_NOT_EXIST,
+                    "customer account is not exist or active");
+        }
+        return account;
+    }
+
+    private CustomerTax checkCustomerTax(Long id, Long customerId) {
+        CustomerTax tax = enterpriseCustomerProvider.findCustomerTaxById(id);
+        if(tax == null || !tax.getCustomerId().equals(customerId)
+                || !CommonStatus.ACTIVE.equals(CommonStatus.fromCode(tax.getStatus()))) {
+            LOGGER.error("enterprise customer tax is not exist or active. id: {}, tax: {}", id, tax);
+            throw RuntimeErrorException.errorWith(CustomerErrorCode.SCOPE, CustomerErrorCode.ERROR_CUSTOMER_TAX_NOT_EXIST,
+                    "customer tax is not exist or active");
+        }
+        return tax;
+    }
+
+    private CustomerAccountDTO convertCustomerAccountDTO(CustomerAccount account, Long communityId) {
+        CustomerAccountDTO dto = ConvertHelper.convert(account, CustomerAccountDTO.class);
+
+        if(dto.getAccountTypeId() != null) {
+            ScopeFieldItem scopeFieldItem = fieldService.findScopeFieldItemByFieldItemId(account.getNamespaceId(), communityId, dto.getAccountTypeId());
+            if(scopeFieldItem != null) {
+                dto.setAccountTypeName(scopeFieldItem.getItemDisplayName());
+            }
+        }
+
+        if(dto.getAccountNumberTypeId() != null) {
+            ScopeFieldItem scopeFieldItem = fieldService.findScopeFieldItemByFieldItemId(account.getNamespaceId(), communityId, dto.getAccountNumberTypeId());
+            if(scopeFieldItem != null) {
+                dto.setAccountNumberTypeName(scopeFieldItem.getItemDisplayName());
+            }
+        }
+
+        if(dto.getContractId() != null) {
+            Contract contract = contractProvider.findContractById(dto.getContractId());
+            if(contract != null) {
+                dto.setContractName(contract.getName());
+            }
+        }
+
+        return dto;
+    }
+
+    private CustomerTaxDTO convertCustomerTaxDTO(CustomerTax tax, Long communityId) {
+        CustomerTaxDTO dto = ConvertHelper.convert(tax, CustomerTaxDTO.class);
+
+        if(dto.getTaxPayerTypeId() != null) {
+            ScopeFieldItem scopeFieldItem = fieldService.findScopeFieldItemByFieldItemId(tax.getNamespaceId(), communityId, dto.getTaxPayerTypeId());
+            if(scopeFieldItem != null) {
+                dto.setTaxPayerTypeName(scopeFieldItem.getItemDisplayName());
+            }
+        }
+
+        return dto;
+    }
+
+    @Override
+    public List<CustomerAccountDTO> listCustomerAccounts(ListCustomerAccountsCommand cmd) {
+        checkCustomerAuth(cmd.getNamespaceId(), PrivilegeConstants.ENTERPRISE_CUSTOMER_MANAGE_LIST, cmd.getOrgId(), cmd.getCommunityId());
+        List<CustomerAccount> accounts = enterpriseCustomerProvider.listCustomerAccountsByCustomerId(cmd.getCustomerId());
+        if(accounts != null && accounts.size() > 0) {
+            return accounts.stream().map(account -> {
+                return convertCustomerAccountDTO(account, cmd.getCommunityId());
+            }).collect(Collectors.toList());
+        }
+        return null;
+    }
+
+    @Override
+    public List<CustomerTaxDTO> listCustomerTaxes(ListCustomerTaxesCommand cmd) {
+        checkCustomerAuth(cmd.getNamespaceId(), PrivilegeConstants.ENTERPRISE_CUSTOMER_MANAGE_LIST, cmd.getOrgId(), cmd.getCommunityId());
+        List<CustomerTax> taxes = enterpriseCustomerProvider.listCustomerTaxesByCustomerId(cmd.getCustomerId());
+        if(taxes != null && taxes.size() > 0) {
+            return taxes.stream().map(tax -> {
+                return convertCustomerTaxDTO(tax, cmd.getCommunityId());
+            }).collect(Collectors.toList());
+        }
+        return null;
+    }
+
+    @Override
+    public void updateCustomerAccount(UpdateCustomerAccountCommand cmd) {
+        checkCustomerAuth(cmd.getNamespaceId(), PrivilegeConstants.ENTERPRISE_CUSTOMER_MANAGE_UPDATE, cmd.getOrgId(), cmd.getCommunityId());
+        CustomerAccount exist = checkCustomerAccount(cmd.getId(), cmd.getCustomerId());
+        CustomerAccount account = ConvertHelper.convert(cmd, CustomerAccount.class);
+        account.setCreateTime(exist.getCreateTime());
+        account.setCreateUid(exist.getCreateUid());
+        enterpriseCustomerProvider.updateCustomerAccount(account);
+    }
+
+    @Override
+    public void updateCustomerTax(UpdateCustomerTaxCommand cmd) {
+        checkCustomerAuth(cmd.getNamespaceId(), PrivilegeConstants.ENTERPRISE_CUSTOMER_MANAGE_UPDATE, cmd.getOrgId(), cmd.getCommunityId());
+        CustomerTax exist = checkCustomerTax(cmd.getId(), cmd.getCustomerId());
+        CustomerTax tax = ConvertHelper.convert(cmd, CustomerTax.class);
+        tax.setCreateTime(exist.getCreateTime());
+        tax.setCreateUid(exist.getCreateUid());
+        enterpriseCustomerProvider.updateCustomerTax(tax);
+    }
+
+    @Override
     public void createCustomerTalent(CreateCustomerTalentCommand cmd) {
+        checkCustomerAuth(cmd.getNamespaceId(), PrivilegeConstants.ENTERPRISE_CUSTOMER_MANAGE_CREATE, cmd.getOrgId(), cmd.getCommunityId());
         CustomerTalent talent = ConvertHelper.convert(cmd, CustomerTalent.class);
         enterpriseCustomerProvider.createCustomerTalent(talent);
     }
 
     @Override
     public void deleteCustomerTalent(DeleteCustomerTalentCommand cmd) {
+        checkCustomerAuth(cmd.getNamespaceId(), PrivilegeConstants.ENTERPRISE_CUSTOMER_MANAGE_DELETE, cmd.getOrgId(), cmd.getCommunityId());
         CustomerTalent talent = checkCustomerTalent(cmd.getId(), cmd.getCustomerId());
         enterpriseCustomerProvider.deleteCustomerTalent(talent);
 
@@ -832,6 +1037,7 @@ public class CustomerServiceImpl implements CustomerService {
 
     @Override
     public List<CustomerTalentDTO> listCustomerTalents(ListCustomerTalentsCommand cmd) {
+        checkCustomerAuth(cmd.getNamespaceId(), PrivilegeConstants.ENTERPRISE_CUSTOMER_MANAGE_LIST, cmd.getOrgId(), cmd.getCommunityId());
         List<CustomerTalent> talents = enterpriseCustomerProvider.listCustomerTalentsByCustomerId(cmd.getCustomerId());
         if(talents != null && talents.size() > 0) {
             return talents.stream().map(talent -> {
@@ -854,6 +1060,7 @@ public class CustomerServiceImpl implements CustomerService {
 
     @Override
     public void updateCustomerTalent(UpdateCustomerTalentCommand cmd) {
+        checkCustomerAuth(cmd.getNamespaceId(), PrivilegeConstants.ENTERPRISE_CUSTOMER_MANAGE_UPDATE, cmd.getOrgId(), cmd.getCommunityId());
         CustomerTalent exist = checkCustomerTalent(cmd.getId(), cmd.getCustomerId());
         CustomerTalent talent = ConvertHelper.convert(cmd, CustomerTalent.class);
         talent.setCreateTime(exist.getCreateTime());
@@ -864,6 +1071,7 @@ public class CustomerServiceImpl implements CustomerService {
 
     @Override
     public void createCustomerApplyProject(CreateCustomerApplyProjectCommand cmd) {
+        checkCustomerAuth(cmd.getNamespaceId(), PrivilegeConstants.ENTERPRISE_CUSTOMER_MANAGE_CREATE, cmd.getOrgId(), cmd.getCommunityId());
         CustomerApplyProject project = ConvertHelper.convert(cmd, CustomerApplyProject.class);
         if(cmd.getProjectCompleteDate() != null) {
             project.setProjectCompleteDate(new Timestamp(cmd.getProjectCompleteDate()));
@@ -876,6 +1084,7 @@ public class CustomerServiceImpl implements CustomerService {
 
     @Override
     public void createCustomerCommercial(CreateCustomerCommercialCommand cmd) {
+        checkCustomerAuth(cmd.getNamespaceId(), PrivilegeConstants.ENTERPRISE_CUSTOMER_MANAGE_CREATE, cmd.getOrgId(), cmd.getCommunityId());
         CustomerCommercial commercial = ConvertHelper.convert(cmd, CustomerCommercial.class);
         if(cmd.getCancelDate() != null) {
             commercial.setCancelDate(new Timestamp(cmd.getCancelDate()));
@@ -901,12 +1110,16 @@ public class CustomerServiceImpl implements CustomerService {
         if(cmd.getLiquidationCommitteeRecoredDate() != null) {
             commercial.setLiquidationCommitteeRecoredDate(new Timestamp(cmd.getLiquidationCommitteeRecoredDate()));
         }
+        if(cmd.getBranchRegisteredDate() != null) {
+            commercial.setBranchRegisteredDate(new Timestamp(cmd.getBranchRegisteredDate()));
+        }
 
         enterpriseCustomerProvider.createCustomerCommercial(commercial);
     }
 
     @Override
     public void createCustomerPatent(CreateCustomerPatentCommand cmd) {
+        checkCustomerAuth(cmd.getNamespaceId(), PrivilegeConstants.ENTERPRISE_CUSTOMER_MANAGE_CREATE, cmd.getOrgId(), cmd.getCommunityId());
         CustomerPatent patent = ConvertHelper.convert(cmd, CustomerPatent.class);
         if(cmd.getRegisteDate() != null) {
             patent.setRegisteDate(new Timestamp(cmd.getRegisteDate()));
@@ -916,6 +1129,7 @@ public class CustomerServiceImpl implements CustomerService {
 
     @Override
     public void createCustomerTrademark(CreateCustomerTrademarkCommand cmd) {
+        checkCustomerAuth(cmd.getNamespaceId(), PrivilegeConstants.ENTERPRISE_CUSTOMER_MANAGE_CREATE, cmd.getOrgId(), cmd.getCommunityId());
         CustomerTrademark trademark = ConvertHelper.convert(cmd, CustomerTrademark.class);
         if(cmd.getRegisteDate() != null) {
             trademark.setRegisteDate(new Timestamp(cmd.getRegisteDate()));
@@ -925,6 +1139,7 @@ public class CustomerServiceImpl implements CustomerService {
 
     @Override
     public void deleteCustomerApplyProject(DeleteCustomerApplyProjectCommand cmd) {
+        checkCustomerAuth(cmd.getNamespaceId(), PrivilegeConstants.ENTERPRISE_CUSTOMER_MANAGE_DELETE, cmd.getOrgId(), cmd.getCommunityId());
         CustomerApplyProject project = checkCustomerApplyProject(cmd.getId(), cmd.getCustomerId());
         enterpriseCustomerProvider.deleteCustomerApplyProject(project);
     }
@@ -942,6 +1157,7 @@ public class CustomerServiceImpl implements CustomerService {
 
     @Override
     public void deleteCustomerCommercial(DeleteCustomerCommercialCommand cmd) {
+        checkCustomerAuth(cmd.getNamespaceId(), PrivilegeConstants.ENTERPRISE_CUSTOMER_MANAGE_DELETE, cmd.getOrgId(), cmd.getCommunityId());
         CustomerCommercial commercial = checkCustomerCommercial(cmd.getId(), cmd.getCustomerId());
         enterpriseCustomerProvider.deleteCustomerCommercial(commercial);
     }
@@ -959,6 +1175,7 @@ public class CustomerServiceImpl implements CustomerService {
 
     @Override
     public void deleteCustomerPatent(DeleteCustomerPatentCommand cmd) {
+        checkCustomerAuth(cmd.getNamespaceId(), PrivilegeConstants.ENTERPRISE_CUSTOMER_MANAGE_DELETE, cmd.getOrgId(), cmd.getCommunityId());
         CustomerPatent patent = checkCustomerPatent(cmd.getId(), cmd.getCustomerId());
         enterpriseCustomerProvider.deleteCustomerPatent(patent);
     }
@@ -976,6 +1193,7 @@ public class CustomerServiceImpl implements CustomerService {
 
     @Override
     public void deleteCustomerTrademark(DeleteCustomerTrademarkCommand cmd) {
+        checkCustomerAuth(cmd.getNamespaceId(), PrivilegeConstants.ENTERPRISE_CUSTOMER_MANAGE_DELETE, cmd.getOrgId(), cmd.getCommunityId());
         CustomerTrademark talent = checkCustomerTrademark(cmd.getId(), cmd.getCustomerId());
         enterpriseCustomerProvider.deleteCustomerTrademark(talent);
     }
@@ -1109,6 +1327,7 @@ public class CustomerServiceImpl implements CustomerService {
 
     @Override
     public List<CustomerApplyProjectDTO> listCustomerApplyProjects(ListCustomerApplyProjectsCommand cmd) {
+        checkCustomerAuth(cmd.getNamespaceId(), PrivilegeConstants.ENTERPRISE_CUSTOMER_MANAGE_LIST, cmd.getOrgId(), cmd.getCommunityId());
         List<CustomerApplyProject> projects = enterpriseCustomerProvider.listCustomerApplyProjectsByCustomerId(cmd.getCustomerId());
         if(projects != null && projects.size() > 0) {
             return projects.stream().map(project -> {
@@ -1120,6 +1339,7 @@ public class CustomerServiceImpl implements CustomerService {
 
     @Override
     public List<CustomerCommercialDTO> listCustomerCommercials(ListCustomerCommercialsCommand cmd) {
+        checkCustomerAuth(cmd.getNamespaceId(), PrivilegeConstants.ENTERPRISE_CUSTOMER_MANAGE_LIST, cmd.getOrgId(), cmd.getCommunityId());
         List<CustomerCommercial> commercials = enterpriseCustomerProvider.listCustomerCommercialsByCustomerId(cmd.getCustomerId());
         if(commercials != null && commercials.size() > 0) {
             return commercials.stream().map(commercial -> {
@@ -1131,6 +1351,7 @@ public class CustomerServiceImpl implements CustomerService {
 
     @Override
     public List<CustomerPatentDTO> listCustomerPatents(ListCustomerPatentsCommand cmd) {
+        checkCustomerAuth(cmd.getNamespaceId(), PrivilegeConstants.ENTERPRISE_CUSTOMER_MANAGE_LIST, cmd.getOrgId(), cmd.getCommunityId());
         List<CustomerPatent> patents = enterpriseCustomerProvider.listCustomerPatentsByCustomerId(cmd.getCustomerId());
         if(patents != null && patents.size() > 0) {
             return patents.stream().map(patent -> {
@@ -1142,6 +1363,7 @@ public class CustomerServiceImpl implements CustomerService {
 
     @Override
     public List<CustomerTrademarkDTO> listCustomerTrademarks(ListCustomerTrademarksCommand cmd) {
+        checkCustomerAuth(cmd.getNamespaceId(), PrivilegeConstants.ENTERPRISE_CUSTOMER_MANAGE_LIST, cmd.getOrgId(), cmd.getCommunityId());
         List<CustomerTrademark> trademarks = enterpriseCustomerProvider.listCustomerTrademarksByCustomerId(cmd.getCustomerId());
         if(trademarks != null && trademarks.size() > 0) {
             return trademarks.stream().map(trademark -> {
@@ -1153,6 +1375,7 @@ public class CustomerServiceImpl implements CustomerService {
 
     @Override
     public void updateCustomerApplyProject(UpdateCustomerApplyProjectCommand cmd) {
+        checkCustomerAuth(cmd.getNamespaceId(), PrivilegeConstants.ENTERPRISE_CUSTOMER_MANAGE_UPDATE, cmd.getOrgId(), cmd.getCommunityId());
         CustomerApplyProject exist = checkCustomerApplyProject(cmd.getId(), cmd.getCustomerId());
         CustomerApplyProject project = ConvertHelper.convert(cmd, CustomerApplyProject.class);
         if(cmd.getProjectCompleteDate() != null) {
@@ -1168,6 +1391,7 @@ public class CustomerServiceImpl implements CustomerService {
 
     @Override
     public void updateCustomerCommercial(UpdateCustomerCommercialCommand cmd) {
+        checkCustomerAuth(cmd.getNamespaceId(), PrivilegeConstants.ENTERPRISE_CUSTOMER_MANAGE_UPDATE, cmd.getOrgId(), cmd.getCommunityId());
         CustomerCommercial exist = checkCustomerCommercial(cmd.getId(), cmd.getCustomerId());
         CustomerCommercial commercial = ConvertHelper.convert(cmd, CustomerCommercial.class);
 
@@ -1195,6 +1419,9 @@ public class CustomerServiceImpl implements CustomerService {
         if(cmd.getLiquidationCommitteeRecoredDate() != null) {
             commercial.setLiquidationCommitteeRecoredDate(new Timestamp(cmd.getLiquidationCommitteeRecoredDate()));
         }
+        if(cmd.getBranchRegisteredDate() != null) {
+            commercial.setBranchRegisteredDate(new Timestamp(cmd.getBranchRegisteredDate()));
+        }
         commercial.setCreateTime(exist.getCreateTime());
         commercial.setCreateUid(exist.getCreateUid());
         commercial.setStatus(exist.getStatus());
@@ -1203,6 +1430,7 @@ public class CustomerServiceImpl implements CustomerService {
 
     @Override
     public void updateCustomerPatent(UpdateCustomerPatentCommand cmd) {
+        checkCustomerAuth(cmd.getNamespaceId(), PrivilegeConstants.ENTERPRISE_CUSTOMER_MANAGE_UPDATE, cmd.getOrgId(), cmd.getCommunityId());
         CustomerPatent exist = checkCustomerPatent(cmd.getId(), cmd.getCustomerId());
         CustomerPatent patent = ConvertHelper.convert(cmd, CustomerPatent.class);
         if(cmd.getRegisteDate() != null) {
@@ -1216,6 +1444,7 @@ public class CustomerServiceImpl implements CustomerService {
 
     @Override
     public void updateCustomerTrademark(UpdateCustomerTrademarkCommand cmd) {
+        checkCustomerAuth(cmd.getNamespaceId(), PrivilegeConstants.ENTERPRISE_CUSTOMER_MANAGE_UPDATE, cmd.getOrgId(), cmd.getCommunityId());
         CustomerTrademark exist = checkCustomerTrademark(cmd.getId(), cmd.getCustomerId());
         CustomerTrademark trademark = ConvertHelper.convert(cmd, CustomerTrademark.class);
         if(cmd.getRegisteDate() != null) {
@@ -1229,6 +1458,7 @@ public class CustomerServiceImpl implements CustomerService {
 
     @Override
     public void createCustomerEconomicIndicator(CreateCustomerEconomicIndicatorCommand cmd) {
+        checkCustomerAuth(cmd.getNamespaceId(), PrivilegeConstants.ENTERPRISE_CUSTOMER_MANAGE_CREATE, cmd.getOrgId(), cmd.getCommunityId());
         CustomerEconomicIndicator indicator = ConvertHelper.convert(cmd, CustomerEconomicIndicator.class);
         if(cmd.getMonth() != null) {
             indicator.setMonth(new Timestamp(cmd.getMonth()));
@@ -1258,6 +1488,7 @@ public class CustomerServiceImpl implements CustomerService {
 
     @Override
     public void createCustomerInvestment(CreateCustomerInvestmentCommand cmd) {
+        checkCustomerAuth(cmd.getNamespaceId(), PrivilegeConstants.ENTERPRISE_CUSTOMER_MANAGE_CREATE, cmd.getOrgId(), cmd.getCommunityId());
         CustomerInvestment investment = ConvertHelper.convert(cmd, CustomerInvestment.class);
         if(cmd.getInvestmentTime() != null) {
             investment.setInvestmentTime(new Timestamp(cmd.getInvestmentTime()));
@@ -1267,6 +1498,7 @@ public class CustomerServiceImpl implements CustomerService {
 
     @Override
     public void deleteCustomerEconomicIndicator(DeleteCustomerEconomicIndicatorCommand cmd) {
+        checkCustomerAuth(cmd.getNamespaceId(), PrivilegeConstants.ENTERPRISE_CUSTOMER_MANAGE_DELETE, cmd.getOrgId(), cmd.getCommunityId());
         CustomerEconomicIndicator indicator = checkCustomerEconomicIndicator(cmd.getId(), cmd.getCustomerId());
         enterpriseCustomerProvider.deleteCustomerEconomicIndicator(indicator);
 
@@ -1312,6 +1544,7 @@ public class CustomerServiceImpl implements CustomerService {
 
     @Override
     public void deleteCustomerInvestment(DeleteCustomerInvestmentCommand cmd) {
+        checkCustomerAuth(cmd.getNamespaceId(), PrivilegeConstants.ENTERPRISE_CUSTOMER_MANAGE_DELETE, cmd.getOrgId(), cmd.getCommunityId());
         CustomerInvestment investment = checkCustomerInvestment(cmd.getId(), cmd.getCustomerId());
         enterpriseCustomerProvider.deleteCustomerInvestment(investment);
     }
@@ -1341,6 +1574,7 @@ public class CustomerServiceImpl implements CustomerService {
 
     @Override
     public List<CustomerEconomicIndicatorDTO> listCustomerEconomicIndicators(ListCustomerEconomicIndicatorsCommand cmd) {
+        checkCustomerAuth(cmd.getNamespaceId(), PrivilegeConstants.ENTERPRISE_CUSTOMER_MANAGE_LIST, cmd.getOrgId(), cmd.getCommunityId());
         List<CustomerEconomicIndicator> indicators = enterpriseCustomerProvider.listCustomerEconomicIndicatorsByCustomerId(cmd.getCustomerId());
         if(indicators != null && indicators.size() > 0) {
             return indicators.stream().map(indicator -> {
@@ -1352,6 +1586,7 @@ public class CustomerServiceImpl implements CustomerService {
 
     @Override
     public List<CustomerInvestmentDTO> listCustomerInvestments(ListCustomerInvestmentsCommand cmd) {
+        checkCustomerAuth(cmd.getNamespaceId(), PrivilegeConstants.ENTERPRISE_CUSTOMER_MANAGE_LIST, cmd.getOrgId(), cmd.getCommunityId());
         List<CustomerInvestment> investments = enterpriseCustomerProvider.listCustomerInvestmentsByCustomerId(cmd.getCustomerId());
         if(investments != null && investments.size() > 0) {
             return investments.stream().map(investment -> {
@@ -1363,6 +1598,7 @@ public class CustomerServiceImpl implements CustomerService {
 
     @Override
     public void updateCustomerEconomicIndicator(UpdateCustomerEconomicIndicatorCommand cmd) {
+        checkCustomerAuth(cmd.getNamespaceId(), PrivilegeConstants.ENTERPRISE_CUSTOMER_MANAGE_UPDATE, cmd.getOrgId(), cmd.getCommunityId());
         CustomerEconomicIndicator exist = checkCustomerEconomicIndicator(cmd.getId(), cmd.getCustomerId());
         CustomerEconomicIndicator indicator = ConvertHelper.convert(cmd, CustomerEconomicIndicator.class);
         if(cmd.getMonth() != null) {
@@ -1463,6 +1699,7 @@ public class CustomerServiceImpl implements CustomerService {
 
     @Override
     public void updateCustomerInvestment(UpdateCustomerInvestmentCommand cmd) {
+        checkCustomerAuth(cmd.getNamespaceId(), PrivilegeConstants.ENTERPRISE_CUSTOMER_MANAGE_UPDATE, cmd.getOrgId(), cmd.getCommunityId());
         CustomerInvestment exist = checkCustomerInvestment(cmd.getId(), cmd.getCustomerId());
         CustomerInvestment investment = ConvertHelper.convert(cmd, CustomerInvestment.class);
         if(cmd.getInvestmentTime() != null) {
@@ -1476,6 +1713,7 @@ public class CustomerServiceImpl implements CustomerService {
 
     @Override
     public void createCustomerCertificate(CreateCustomerCertificateCommand cmd) {
+        checkCustomerAuth(cmd.getNamespaceId(), PrivilegeConstants.ENTERPRISE_CUSTOMER_MANAGE_CREATE, cmd.getOrgId(), cmd.getCommunityId());
         CustomerCertificate certificate = ConvertHelper.convert(cmd, CustomerCertificate.class);
         if(cmd.getRegisteDate() != null) {
             certificate.setRegisteDate(new Timestamp(cmd.getRegisteDate()));
@@ -1485,6 +1723,7 @@ public class CustomerServiceImpl implements CustomerService {
 
     @Override
     public void deleteCustomerCertificate(DeleteCustomerCertificateCommand cmd) {
+        checkCustomerAuth(cmd.getNamespaceId(), PrivilegeConstants.ENTERPRISE_CUSTOMER_MANAGE_DELETE, cmd.getOrgId(), cmd.getCommunityId());
         CustomerCertificate certificate = checkCustomerCertificate(cmd.getId(), cmd.getCustomerId());
         enterpriseCustomerProvider.deleteCustomerCertificate(certificate);
     }
@@ -1508,6 +1747,7 @@ public class CustomerServiceImpl implements CustomerService {
 
     @Override
     public List<CustomerCertificateDTO> listCustomerCertificates(ListCustomerCertificatesCommand cmd) {
+        checkCustomerAuth(cmd.getNamespaceId(), PrivilegeConstants.ENTERPRISE_CUSTOMER_MANAGE_LIST, cmd.getOrgId(), cmd.getCommunityId());
         List<CustomerCertificate> certificates = enterpriseCustomerProvider.listCustomerCertificatesByCustomerId(cmd.getCustomerId());
         if(certificates != null && certificates.size() > 0) {
             return certificates.stream().map(certificate -> {
@@ -1519,6 +1759,7 @@ public class CustomerServiceImpl implements CustomerService {
 
     @Override
     public void updateCustomerCertificate(UpdateCustomerCertificateCommand cmd) {
+        checkCustomerAuth(cmd.getNamespaceId(), PrivilegeConstants.ENTERPRISE_CUSTOMER_MANAGE_UPDATE, cmd.getOrgId(), cmd.getCommunityId());
         CustomerCertificate exist = checkCustomerCertificate(cmd.getId(), cmd.getCustomerId());
         CustomerCertificate certificate = ConvertHelper.convert(cmd, CustomerCertificate.class);
         if(cmd.getRegisteDate() != null) {
@@ -1532,6 +1773,7 @@ public class CustomerServiceImpl implements CustomerService {
 
     @Override
     public void createCustomerDepartureInfo(CreateCustomerDepartureInfoCommand cmd) {
+        checkCustomerAuth(cmd.getNamespaceId(), PrivilegeConstants.ENTERPRISE_CUSTOMER_MANAGE_CREATE, cmd.getOrgId(), cmd.getCommunityId());
         CustomerDepartureInfo departureInfo = ConvertHelper.convert(cmd, CustomerDepartureInfo.class);
         if(cmd.getReviewTime() != null) {
             departureInfo.setReviewTime(new Timestamp(cmd.getReviewTime()));
@@ -1541,6 +1783,7 @@ public class CustomerServiceImpl implements CustomerService {
 
     @Override
     public void createCustomerEntryInfo(CreateCustomerEntryInfoCommand cmd) {
+        checkCustomerAuth(cmd.getNamespaceId(), PrivilegeConstants.ENTERPRISE_CUSTOMER_MANAGE_CREATE, cmd.getOrgId(), cmd.getCommunityId());
         CustomerEntryInfo entryInfo = ConvertHelper.convert(cmd, CustomerEntryInfo.class);
         if(cmd.getContractEndDate() != null) {
             entryInfo.setContractEndDate(new Timestamp(cmd.getContractEndDate()));
@@ -1553,12 +1796,14 @@ public class CustomerServiceImpl implements CustomerService {
 
     @Override
     public void deleteCustomerDepartureInfo(DeleteCustomerDepartureInfoCommand cmd) {
+        checkCustomerAuth(cmd.getNamespaceId(), PrivilegeConstants.ENTERPRISE_CUSTOMER_MANAGE_DELETE, cmd.getOrgId(), cmd.getCommunityId());
         CustomerDepartureInfo departureInfo = checkCustomerDepartureInfo(cmd.getId(), cmd.getCustomerId());
         enterpriseCustomerProvider.deleteCustomerDepartureInfo(departureInfo);
     }
 
     @Override
     public void deleteCustomerEntryInfo(DeleteCustomerEntryInfoCommand cmd) {
+        checkCustomerAuth(cmd.getNamespaceId(), PrivilegeConstants.ENTERPRISE_CUSTOMER_MANAGE_DELETE, cmd.getOrgId(), cmd.getCommunityId());
         CustomerEntryInfo entryInfo = checkCustomerEntryInfo(cmd.getId(), cmd.getCustomerId());
         enterpriseCustomerProvider.deleteCustomerEntryInfo(entryInfo);
     }
@@ -1602,6 +1847,7 @@ public class CustomerServiceImpl implements CustomerService {
 
     @Override
     public List<CustomerDepartureInfoDTO> listCustomerDepartureInfos(ListCustomerDepartureInfosCommand cmd) {
+        checkCustomerAuth(cmd.getNamespaceId(), PrivilegeConstants.ENTERPRISE_CUSTOMER_MANAGE_LIST, cmd.getOrgId(), cmd.getCommunityId());
         List<CustomerDepartureInfo> departureInfos = enterpriseCustomerProvider.listCustomerDepartureInfos(cmd.getCustomerId());
         if(departureInfos != null && departureInfos.size() > 0) {
             return departureInfos.stream().map(departureInfo -> {
@@ -1644,6 +1890,7 @@ public class CustomerServiceImpl implements CustomerService {
 
     @Override
     public List<CustomerEntryInfoDTO> listCustomerEntryInfos(ListCustomerEntryInfosCommand cmd) {
+        checkCustomerAuth(cmd.getNamespaceId(), PrivilegeConstants.ENTERPRISE_CUSTOMER_MANAGE_LIST, cmd.getOrgId(), cmd.getCommunityId());
         List<CustomerEntryInfo> entryInfos = enterpriseCustomerProvider.listCustomerEntryInfos(cmd.getCustomerId());
         if(entryInfos != null && entryInfos.size() > 0) {
             return entryInfos.stream().map(entryInfo -> {
@@ -1655,6 +1902,7 @@ public class CustomerServiceImpl implements CustomerService {
 
     @Override
     public void updateCustomerDepartureInfo(UpdateCustomerDepartureInfoCommand cmd) {
+        checkCustomerAuth(cmd.getNamespaceId(), PrivilegeConstants.ENTERPRISE_CUSTOMER_MANAGE_UPDATE, cmd.getOrgId(), cmd.getCommunityId());
         CustomerDepartureInfo exist = checkCustomerDepartureInfo(cmd.getId(), cmd.getCustomerId());
         CustomerDepartureInfo departureInfo = ConvertHelper.convert(cmd, CustomerDepartureInfo.class);
         if(cmd.getReviewTime() != null) {
@@ -1668,6 +1916,7 @@ public class CustomerServiceImpl implements CustomerService {
 
     @Override
     public void updateCustomerEntryInfo(UpdateCustomerEntryInfoCommand cmd) {
+        checkCustomerAuth(cmd.getNamespaceId(), PrivilegeConstants.ENTERPRISE_CUSTOMER_MANAGE_UPDATE, cmd.getOrgId(), cmd.getCommunityId());
         CustomerEntryInfo exist = checkCustomerEntryInfo(cmd.getId(), cmd.getCustomerId());
         CustomerEntryInfo entryInfo = ConvertHelper.convert(cmd, CustomerEntryInfo.class);
         if(cmd.getContractEndDate() != null) {
@@ -1684,6 +1933,7 @@ public class CustomerServiceImpl implements CustomerService {
 
     @Override
     public CustomerIndustryStatisticsResponse listCustomerIndustryStatistics(ListEnterpriseCustomerStatisticsCommand cmd) {
+        checkCustomerAuth(cmd.getNamespaceId(), PrivilegeConstants.ENTERPRISE_CUSTOMER_STAT, cmd.getOrgId(), cmd.getCommunityId());
         CustomerIndustryStatisticsResponse response = new CustomerIndustryStatisticsResponse();
         List<CustomerIndustryStatisticsDTO> dtos = new ArrayList<>();
         Map<Long, Long> industries = enterpriseCustomerProvider.listEnterpriseCustomerIndustryByCommunityId(cmd.getCommunityId());
@@ -1706,6 +1956,7 @@ public class CustomerServiceImpl implements CustomerService {
 
     @Override
     public CustomerIntellectualPropertyStatisticsResponse listCustomerIntellectualPropertyStatistics(ListEnterpriseCustomerStatisticsCommand cmd) {
+        checkCustomerAuth(cmd.getNamespaceId(), PrivilegeConstants.ENTERPRISE_CUSTOMER_STAT, cmd.getOrgId(), cmd.getCommunityId());
         List<EnterpriseCustomer> customers = enterpriseCustomerProvider.listEnterpriseCustomerByCommunity(cmd.getCommunityId());
         List<Long> customerIds = new ArrayList<>();
         customers.forEach(customer -> {
@@ -1752,6 +2003,7 @@ public class CustomerServiceImpl implements CustomerService {
 
     @Override
     public CustomerProjectStatisticsResponse listCustomerProjectStatistics(ListEnterpriseCustomerStatisticsCommand cmd) {
+        checkCustomerAuth(cmd.getNamespaceId(), PrivilegeConstants.ENTERPRISE_CUSTOMER_STAT, cmd.getOrgId(), cmd.getCommunityId());
         List<EnterpriseCustomer> customers = enterpriseCustomerProvider.listEnterpriseCustomerByCommunity(cmd.getCommunityId());
         List<Long> customerIds = new ArrayList<>();
         customers.forEach(customer -> {
@@ -1785,6 +2037,7 @@ public class CustomerServiceImpl implements CustomerService {
 
     @Override
     public CustomerSourceStatisticsResponse listCustomerSourceStatistics(ListEnterpriseCustomerStatisticsCommand cmd) {
+        checkCustomerAuth(cmd.getNamespaceId(), PrivilegeConstants.ENTERPRISE_CUSTOMER_STAT, cmd.getOrgId(), cmd.getCommunityId());
         CustomerSourceStatisticsResponse response = new CustomerSourceStatisticsResponse();
         List<CustomerSourceStatisticsDTO> dtos = new ArrayList<>();
         Map<Long, Long> sources = enterpriseCustomerProvider.listEnterpriseCustomerSourceByCommunityId(cmd.getCommunityId());
@@ -1807,6 +2060,7 @@ public class CustomerServiceImpl implements CustomerService {
 
     @Override
     public CustomerTalentStatisticsResponse listCustomerTalentStatistics(ListEnterpriseCustomerStatisticsCommand cmd) {
+        checkCustomerAuth(cmd.getNamespaceId(), PrivilegeConstants.ENTERPRISE_CUSTOMER_STAT, cmd.getOrgId(), cmd.getCommunityId());
         List<EnterpriseCustomer> customers = enterpriseCustomerProvider.listEnterpriseCustomerByCommunity(cmd.getCommunityId());
         List<Long> customerIds = new ArrayList<>();
         customers.forEach(customer -> {
@@ -1835,6 +2089,7 @@ public class CustomerServiceImpl implements CustomerService {
 
     @Override
     public EnterpriseCustomerStatisticsDTO listEnterpriseCustomerStatistics(ListEnterpriseCustomerStatisticsCommand cmd) {
+        checkCustomerAuth(cmd.getNamespaceId(), PrivilegeConstants.ENTERPRISE_CUSTOMER_STAT, cmd.getOrgId(), cmd.getCommunityId());
         EnterpriseCustomerStatisticsDTO dto = new EnterpriseCustomerStatisticsDTO();
         List<EnterpriseCustomer> customers = enterpriseCustomerProvider.listEnterpriseCustomerByCommunity(cmd.getCommunityId());
         dto.setCustomerCount(customers.size() & 0xFFFFFFFFL);
@@ -1862,6 +2117,7 @@ public class CustomerServiceImpl implements CustomerService {
 
     @Override
     public ListCustomerAnnualStatisticsResponse listCustomerAnnualStatistics(ListCustomerAnnualStatisticsCommand cmd) {
+        checkCustomerAuth(cmd.getNamespaceId(), PrivilegeConstants.ENTERPRISE_CUSTOMER_STAT, cmd.getOrgId(), cmd.getCommunityId());
         Timestamp now = new Timestamp(DateHelper.currentGMTTime().getTime());
         ListCustomerAnnualStatisticsResponse response = new ListCustomerAnnualStatisticsResponse();
         CrossShardListingLocator locator = new CrossShardListingLocator();
@@ -1995,6 +2251,7 @@ public class CustomerServiceImpl implements CustomerService {
 
     @Override
     public void syncEnterpriseCustomers(SyncCustomersCommand cmd) {
+        checkCustomerAuth(cmd.getNamespaceId(), PrivilegeConstants.ENTERPRISE_CUSTOMER_SYNC, cmd.getOrgId(), cmd.getCommunityId());
         if(cmd.getNamespaceId() == 999971) {
             this.coordinationProvider.getNamedLock(CoordinationLocks.SYNC_ENTERPRISE_CUSTOMER.getCode() + cmd.getNamespaceId() + cmd.getCommunityId()).tryEnter(()-> {
                 ExecutorUtil.submit(new Runnable() {
@@ -2069,6 +2326,7 @@ public class CustomerServiceImpl implements CustomerService {
     
 	@Override
 	public List<CustomerTrackingDTO> listCustomerTrackings(ListCustomerTrackingsCommand cmd) {
+        checkCustomerAuth(cmd.getNamespaceId(), PrivilegeConstants.ENTERPRISE_CUSTOMER_MANAGE_LIST, cmd.getOrgId(), cmd.getCommunityId());
 		List<CustomerTracking> trackings = enterpriseCustomerProvider.listCustomerTrackingsByCustomerId(cmd.getCustomerId());
         if(trackings != null && trackings.size() > 0) {
             return trackings.stream().map(tracking -> {
@@ -2080,6 +2338,7 @@ public class CustomerServiceImpl implements CustomerService {
 
 	@Override
 	public CustomerTrackingDTO getCustomerTracking(GetCustomerTrackingCommand cmd) {
+        checkCustomerAuth(cmd.getNamespaceId(), PrivilegeConstants.ENTERPRISE_CUSTOMER_MANAGE_LIST, cmd.getOrgId(), cmd.getCommunityId());
 		CustomerTracking tracking = checkCustomerTracking(cmd.getId(), cmd.getCustomerId());
         return convertCustomerTrackingDTO(tracking);
 	}
@@ -2118,6 +2377,7 @@ public class CustomerServiceImpl implements CustomerService {
 
 	@Override
 	public CustomerTrackingDTO updateCustomerTracking(UpdateCustomerTrackingCommand cmd) {
+        checkCustomerAuth(cmd.getNamespaceId(), PrivilegeConstants.ENTERPRISE_CUSTOMER_MANAGE_UPDATE, cmd.getOrgId(), cmd.getCommunityId());
 		CustomerTracking exist = checkCustomerTracking(cmd.getId(), cmd.getCustomerId());
 		CustomerTracking tracking = ConvertHelper.convert(cmd, CustomerTracking.class);
 		if(cmd.getTrackingTime() != null){
@@ -2139,13 +2399,14 @@ public class CustomerServiceImpl implements CustomerService {
 
 	@Override
 	public void deleteCustomerTracking(DeleteCustomerTrackingCommand cmd) {
+        checkCustomerAuth(cmd.getNamespaceId(), PrivilegeConstants.ENTERPRISE_CUSTOMER_MANAGE_DELETE, cmd.getOrgId(), cmd.getCommunityId());
 		CustomerTracking tracking = checkCustomerTracking(cmd.getId(), cmd.getCustomerId());
 	    enterpriseCustomerProvider.deleteCustomerTracking(tracking);
 	}
 
 	@Override
 	public void createCustomerTracking(CreateCustomerTrackingCommand cmd) {
-		
+        checkCustomerAuth(cmd.getNamespaceId(), PrivilegeConstants.ENTERPRISE_CUSTOMER_MANAGE_CREATE, cmd.getOrgId(), cmd.getCommunityId());
 		EnterpriseCustomer customer = checkEnterpriseCustomer(cmd.getCustomerId());
 		CustomerTracking tracking = ConvertHelper.convert(cmd, CustomerTracking.class);
 		if(cmd.getTrackingTime() != null){
@@ -2171,6 +2432,7 @@ public class CustomerServiceImpl implements CustomerService {
 
 	@Override
 	public List<CustomerTrackingPlanDTO> listCustomerTrackingPlans(ListCustomerTrackingPlansCommand cmd) {
+        checkCustomerAuth(cmd.getNamespaceId(), PrivilegeConstants.ENTERPRISE_CUSTOMER_MANAGE_LIST, cmd.getOrgId(), cmd.getCommunityId());
 		List<CustomerTrackingPlan> plans = enterpriseCustomerProvider.listCustomerTrackingPlans(cmd.getCustomerId());
         if(plans != null && plans.size() > 0) {
             return plans.stream().map(plan -> {
@@ -2182,6 +2444,7 @@ public class CustomerServiceImpl implements CustomerService {
 
 	@Override
 	public CustomerTrackingPlanDTO getCustomerTrackingPlan(GetCustomerTrackingPlanCommand cmd) {
+        checkCustomerAuth(cmd.getNamespaceId(), PrivilegeConstants.ENTERPRISE_CUSTOMER_MANAGE_LIST, cmd.getOrgId(), cmd.getCommunityId());
 		CustomerTrackingPlan plan = checkCustomerTrackingPlan(cmd.getId(), cmd.getCustomerId());
         CustomerTrackingPlanDTO  customerTrackingPlanDTO = convertCustomerTrackingPlanDTO(plan);
         //更新状态为已读
@@ -2200,6 +2463,7 @@ public class CustomerServiceImpl implements CustomerService {
 
 	@Override
 	public CustomerTrackingPlanDTO updateCustomerTrackingPlan(UpdateCustomerTrackingPlanCommand cmd) {
+        checkCustomerAuth(cmd.getNamespaceId(), PrivilegeConstants.ENTERPRISE_CUSTOMER_MANAGE_UPDATE, cmd.getOrgId(), cmd.getCommunityId());
 		CustomerTrackingPlan exist = checkCustomerTrackingPlan(cmd.getId(), cmd.getCustomerId());
 		CustomerTrackingPlan plan = ConvertHelper.convert(cmd, CustomerTrackingPlan.class);
 		if(cmd.getTrackingTime() != null){
@@ -2218,6 +2482,7 @@ public class CustomerServiceImpl implements CustomerService {
 
 	@Override
 	public void deleteCustomerTrackingPlan(DeleteCustomerTrackingPlanCommand cmd) {
+        checkCustomerAuth(cmd.getNamespaceId(), PrivilegeConstants.ENTERPRISE_CUSTOMER_MANAGE_DELETE, cmd.getOrgId(), cmd.getCommunityId());
 		CustomerTrackingPlan plan = checkCustomerTrackingPlan(cmd.getId(), cmd.getCustomerId());
 	    enterpriseCustomerProvider.deleteCustomerTrackingPlan(plan);
 	}
@@ -2235,6 +2500,7 @@ public class CustomerServiceImpl implements CustomerService {
 
 	@Override
 	public void createCustomerTrackingPlan(CreateCustomerTrackingPlanCommand cmd) {
+        checkCustomerAuth(cmd.getNamespaceId(), PrivilegeConstants.ENTERPRISE_CUSTOMER_MANAGE_CREATE, cmd.getOrgId(), cmd.getCommunityId());
 		CustomerTrackingPlan plan = ConvertHelper.convert(cmd, CustomerTrackingPlan.class);
 		if(cmd.getTrackingTime() != null){
 			plan.setTrackingTime(new Timestamp(cmd.getTrackingTime()));
@@ -2266,10 +2532,15 @@ public class CustomerServiceImpl implements CustomerService {
 	private CustomerEventDTO convertCustomerEventDTO(CustomerEvent event) {
 		CustomerEventDTO dto = ConvertHelper.convert(event, CustomerEventDTO.class);
         if(dto.getCreatorUid() != null) {
-        	OrganizationMemberDetails detail = organizationProvider.findOrganizationMemberDetailsByTargetId(dto.getCreatorUid());
-        	if(null != detail && null != detail.getContactName()){
-        		dto.setCreatorName(detail.getContactName());
-        	}        	
+            //用户可能不在组织架构中 所以用nickname
+//        	OrganizationMemberDetails detail = organizationProvider.findOrganizationMemberDetailsByTargetId(dto.getCreatorUid());
+//            if(null != detail && null != detail.getContactName()){
+//        		dto.setCreatorName(detail.getContactName());
+//        	}
+            User user = userProvider.findUserById(dto.getCreatorUid());
+            if(user != null) {
+                dto.setCreatorName(user.getNickName());
+            }
         }
         return dto;
 	}

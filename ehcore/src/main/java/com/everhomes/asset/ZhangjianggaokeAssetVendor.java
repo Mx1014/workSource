@@ -387,7 +387,7 @@ public class ZhangjianggaokeAssetVendor implements AssetVendorHandler{
                     list.add(dto);
                 }
                 if(dates.first()!=null && dates.last()!=null){
-                    result.setDatestr(yyyyMMdd.format(dates.first())+"~"+yyyyMMdd.format(dates.last()));
+                    result.setDatestr(yyyyMMdd.format(dates.first())+"至"+yyyyMMdd.format(dates.last()));
                 }
                 result.setAmountOwed(amountOwed);
                 result.setAmountReceivable(amountReceivable);
@@ -774,6 +774,7 @@ public class ZhangjianggaokeAssetVendor implements AssetVendorHandler{
         //组装command ， 请求支付模块的下预付单
         PreOrderCommand cmd2pay = new PreOrderCommand();
 //        cmd2pay.setAmount(amountsInCents);
+        cmd2pay.setCommunityId(cmd.getCommunityId());
         cmd2pay.setAmount(1l);
         cmd2pay.setClientAppName(cmd.getClientAppName());
         cmd2pay.setExpiration(ZjgkPaymentConstants.EXPIRE_TIME_15_MIN_IN_SEC);

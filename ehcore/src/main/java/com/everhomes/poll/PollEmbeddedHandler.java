@@ -1,9 +1,11 @@
 package com.everhomes.poll;
 
+import java.sql.Timestamp;
 import java.util.HashMap;
 import java.util.Map;
 
 import com.everhomes.hotTag.HotTag;
+import com.everhomes.rest.forum.PostStatus;
 import com.everhomes.rest.hotTag.HotFlag;
 import com.everhomes.rest.hotTag.HotTagServiceType;
 import com.everhomes.search.HotTagSearcher;
@@ -42,6 +44,9 @@ public class PollEmbeddedHandler implements ForumEmbeddedHandler {
 
     @Autowired
     private HotTagSearcher hotTagSearcher;
+
+    @Autowired
+    private PollProvider pollProvider;
 
     @Override
     public String renderEmbeddedObjectSnapshot(Post post) {
@@ -119,4 +124,18 @@ public class PollEmbeddedHandler implements ForumEmbeddedHandler {
         return post;
     }
 
+    @Override
+    public void beforePostDelete(Post post) {
+    }
+
+    @Override
+    public void afterPostDelete(Post post) {
+        PollPostCommand cmd = (PollPostCommand) StringHelper.fromJsonString(post.getEmbeddedJson(),
+                PollPostCommand.class);
+        cmd.setId(post.getEmbeddedId());
+        Poll poll = pollProvider.findByPostId(post.getId());
+        poll.setStatus(PostStatus.INACTIVE.getCode());
+        poll.setDeleteTime(new Timestamp(System.currentTimeMillis()));
+        pollProvider.updatePoll(poll);
+    }
 }

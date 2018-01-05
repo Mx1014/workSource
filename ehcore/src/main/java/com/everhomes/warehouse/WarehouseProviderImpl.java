@@ -21,6 +21,7 @@ import com.everhomes.util.ConvertHelper;
 import com.everhomes.util.DateHelper;
 import com.everhomes.util.IterationMapReduceCallback;
 import org.jooq.DSLContext;
+import org.jooq.Record;
 import org.jooq.SelectQuery;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -30,6 +31,8 @@ import org.springframework.stereotype.Component;
 import java.sql.Timestamp;
 import java.util.ArrayList;
 import java.util.List;
+import java.util.Set;
+import java.util.stream.Collectors;
 
 /**
  * Created by ying.xiong on 2017/5/12.
@@ -79,12 +82,13 @@ public class WarehouseProviderImpl implements WarehouseProvider {
     }
 
     @Override
-    public Warehouses findWarehouse(Long id, String ownerType, Long ownerId) {
+    public Warehouses findWarehouse(Long id, String ownerType, Long ownerId, Long communityId) {
         DSLContext context = dbProvider.getDslContext(AccessSpec.readOnly());
         SelectQuery<EhWarehousesRecord> query = context.selectQuery(Tables.EH_WAREHOUSES);
         query.addConditions(Tables.EH_WAREHOUSES.ID.eq(id));
         query.addConditions(Tables.EH_WAREHOUSES.OWNER_TYPE.eq(ownerType));
         query.addConditions(Tables.EH_WAREHOUSES.OWNER_ID.eq(ownerId));
+        query.addConditions(Tables.EH_WAREHOUSES.COMMUNITY_ID.eq(communityId));
 
         List<Warehouses> result = new ArrayList<Warehouses>();
         query.fetch().map((r) -> {
@@ -98,12 +102,13 @@ public class WarehouseProviderImpl implements WarehouseProvider {
     }
 
     @Override
-    public Warehouses findWarehouseByNumber(String warehouseNumber, String ownerType, Long ownerId) {
+    public Warehouses findWarehouseByNumber(String warehouseNumber, String ownerType, Long ownerId,Long communityId) {
         DSLContext context = dbProvider.getDslContext(AccessSpec.readOnly());
         SelectQuery<EhWarehousesRecord> query = context.selectQuery(Tables.EH_WAREHOUSES);
         query.addConditions(Tables.EH_WAREHOUSES.WAREHOUSE_NUMBER.eq(warehouseNumber));
         query.addConditions(Tables.EH_WAREHOUSES.OWNER_TYPE.eq(ownerType));
         query.addConditions(Tables.EH_WAREHOUSES.OWNER_ID.eq(ownerId));
+        query.addConditions(Tables.EH_WAREHOUSES.COMMUNITY_ID.eq(communityId));
         query.addConditions(Tables.EH_WAREHOUSES.STATUS.eq(Status.ACTIVE.getCode()));
 
         List<Warehouses> result = new ArrayList<Warehouses>();
@@ -237,12 +242,13 @@ public class WarehouseProviderImpl implements WarehouseProvider {
     }
 
     @Override
-    public WarehouseMaterials findWarehouseMaterials(Long id, String ownerType, Long ownerId) {
+    public WarehouseMaterials findWarehouseMaterials(Long id, String ownerType, Long ownerId,Long communityId) {
         DSLContext context = dbProvider.getDslContext(AccessSpec.readOnly());
         SelectQuery<EhWarehouseMaterialsRecord> query = context.selectQuery(Tables.EH_WAREHOUSE_MATERIALS);
         query.addConditions(Tables.EH_WAREHOUSE_MATERIALS.ID.eq(id));
         query.addConditions(Tables.EH_WAREHOUSE_MATERIALS.OWNER_TYPE.eq(ownerType));
         query.addConditions(Tables.EH_WAREHOUSE_MATERIALS.OWNER_ID.eq(ownerId));
+        query.addConditions(Tables.EH_WAREHOUSE_MATERIALS.COMMUNITY_ID.eq(communityId));
 
         List<WarehouseMaterials> result = new ArrayList<WarehouseMaterials>();
         query.fetch().map((r) -> {
@@ -256,12 +262,16 @@ public class WarehouseProviderImpl implements WarehouseProvider {
     }
 
     @Override
-    public WarehouseMaterials findWarehouseMaterialsByNumber(String materialNumber, String ownerType, Long ownerId) {
+    public WarehouseMaterials findWarehouseMaterialsByNumber(String materialNumber, String ownerType, Long ownerId,Long communityId) {
         DSLContext context = dbProvider.getDslContext(AccessSpec.readOnly());
         SelectQuery<EhWarehouseMaterialsRecord> query = context.selectQuery(Tables.EH_WAREHOUSE_MATERIALS);
         query.addConditions(Tables.EH_WAREHOUSE_MATERIALS.MATERIAL_NUMBER.eq(materialNumber));
         query.addConditions(Tables.EH_WAREHOUSE_MATERIALS.OWNER_TYPE.eq(ownerType));
         query.addConditions(Tables.EH_WAREHOUSE_MATERIALS.OWNER_ID.eq(ownerId));
+        //eh_warehouse_materials表中已经规定了所属者，所以不再为了增加园区维度而新建scope表，对旧的数据找到所有公司所在的园区进行填写即可(任一个园区？或者全部）
+        if(communityId != null){
+            query.addConditions(Tables.EH_WAREHOUSE_MATERIALS.COMMUNITY_ID.eq(communityId));
+        }
         query.addConditions(Tables.EH_WAREHOUSE_MATERIALS.STATUS.eq(Status.ACTIVE.getCode()));
 
         List<WarehouseMaterials> result = new ArrayList<WarehouseMaterials>();
@@ -448,13 +458,15 @@ public class WarehouseProviderImpl implements WarehouseProvider {
     }
 
     @Override
-    public WarehouseStocks findWarehouseStocksByWarehouseAndMaterial(Long warehouseId, Long materialId, String ownerType, Long ownerId) {
+    public WarehouseStocks findWarehouseStocksByWarehouseAndMaterial(Long warehouseId, Long materialId, String ownerType, Long ownerId, Long communityId) {
         DSLContext context = dbProvider.getDslContext(AccessSpec.readOnly());
         SelectQuery<EhWarehouseStocksRecord> query = context.selectQuery(Tables.EH_WAREHOUSE_STOCKS);
         query.addConditions(Tables.EH_WAREHOUSE_STOCKS.WAREHOUSE_ID.eq(warehouseId));
         query.addConditions(Tables.EH_WAREHOUSE_STOCKS.MATERIAL_ID.eq(materialId));
         query.addConditions(Tables.EH_WAREHOUSE_STOCKS.OWNER_TYPE.eq(ownerType));
         query.addConditions(Tables.EH_WAREHOUSE_STOCKS.OWNER_ID.eq(ownerId));
+        //增加园区维度的约束,不进行非空判断，对于如何兼容还不确定方向
+        query.addConditions(Tables.EH_WAREHOUSE_STOCKS.COMMUNITY_ID.eq(communityId));
         query.addConditions(Tables.EH_WAREHOUSE_STOCKS.STATUS.eq(Status.ACTIVE.getCode()));
 
         List<WarehouseStocks> result = new ArrayList<WarehouseStocks>();
@@ -502,6 +514,28 @@ public class WarehouseProviderImpl implements WarehouseProvider {
         });
 
         return result;
+    }
+
+    @Override
+    public Set<Long> findWarehouseNamespace() {
+        DSLContext context = this.dbProvider.getDslContext(AccessSpec.readOnly());
+        SelectQuery<Record> query = context.selectQuery();
+        query.addSelect(Tables.EH_WEB_MENU_SCOPES.OWNER_ID);
+        query.addFrom(Tables.EH_WEB_MENU_SCOPES);
+        query.addConditions(Tables.EH_WEB_MENU_SCOPES.OWNER_TYPE.eq("EhNamespaces"));
+        query.addConditions(Tables.EH_WEB_MENU_SCOPES.MENU_ID.eq(WarehouseMenuIds.WAREHOUSE_MANAGEMENT));
+        List<Long> fetch = query.fetch(Tables.EH_WEB_MENU_SCOPES.OWNER_ID);
+        return fetch.stream().collect(Collectors.toSet());
+    }
+
+    @Override
+    public String findWarehouseMenuName() {
+        DSLContext context = this.dbProvider.getDslContext(AccessSpec.readOnly());
+        SelectQuery<Record> query = context.selectQuery();
+        query.addSelect(Tables.EH_WEB_MENUS.NAME);
+        query.addFrom(Tables.EH_WEB_MENUS);
+        query.addConditions(Tables.EH_WEB_MENUS.ID.eq(WarehouseMenuIds.WAREHOUSE_MANAGEMENT));
+        return query.fetchOne(Tables.EH_WEB_MENUS.NAME);
     }
 
     @Override
@@ -845,12 +879,13 @@ public class WarehouseProviderImpl implements WarehouseProvider {
     }
 
     @Override
-    public List<WarehouseRequestMaterials> listWarehouseRequestMaterials(Long requestId, String ownerType, Long ownerId) {
+    public List<WarehouseRequestMaterials> listWarehouseRequestMaterials(Long requestId, String ownerType, Long ownerId,Long communityId) {
         DSLContext context = dbProvider.getDslContext(AccessSpec.readOnly());
         SelectQuery<EhWarehouseRequestMaterialsRecord> query = context.selectQuery(Tables.EH_WAREHOUSE_REQUEST_MATERIALS);
         query.addConditions(Tables.EH_WAREHOUSE_REQUEST_MATERIALS.REQUEST_ID.eq(requestId));
         query.addConditions(Tables.EH_WAREHOUSE_REQUEST_MATERIALS.OWNER_TYPE.eq(ownerType));
         query.addConditions(Tables.EH_WAREHOUSE_REQUEST_MATERIALS.OWNER_ID.eq(ownerId));
+        query.addConditions(Tables.EH_WAREHOUSE_REQUEST_MATERIALS.COMMUNITY_ID.eq(communityId));
 
         List<WarehouseRequestMaterials> result = new ArrayList<>();
         query.fetch().map((r) -> {
@@ -878,12 +913,13 @@ public class WarehouseProviderImpl implements WarehouseProvider {
     }
 
     @Override
-    public List<WarehouseRequestMaterials> listWarehouseRequestMaterials(List<Long> ids, String ownerType, Long ownerId) {
+    public List<WarehouseRequestMaterials> listWarehouseRequestMaterials(List<Long> ids, String ownerType, Long ownerId,Long communityId) {
         DSLContext context = dbProvider.getDslContext(AccessSpec.readOnly());
         SelectQuery<EhWarehouseRequestMaterialsRecord> query = context.selectQuery(Tables.EH_WAREHOUSE_REQUEST_MATERIALS);
         query.addConditions(Tables.EH_WAREHOUSE_REQUEST_MATERIALS.ID.in(ids));
         query.addConditions(Tables.EH_WAREHOUSE_REQUEST_MATERIALS.OWNER_TYPE.eq(ownerType));
         query.addConditions(Tables.EH_WAREHOUSE_REQUEST_MATERIALS.OWNER_ID.eq(ownerId));
+        query.addConditions(Tables.EH_WAREHOUSE_REQUEST_MATERIALS.COMMUNITY_ID.eq(communityId));
 
         query.addOrderBy(Tables.EH_WAREHOUSE_REQUEST_MATERIALS.ID.desc());
         List<WarehouseRequestMaterials> result = new ArrayList<>();
@@ -895,12 +931,15 @@ public class WarehouseProviderImpl implements WarehouseProvider {
     }
 
     @Override
-    public WarehouseRequests findWarehouseRequests(Long id, String ownerType, Long ownerId) {
+    public WarehouseRequests findWarehouseRequests(Long id, String ownerType, Long ownerId,Long communityId) {
         DSLContext context = dbProvider.getDslContext(AccessSpec.readOnly());
         SelectQuery<EhWarehouseRequestsRecord> query = context.selectQuery(Tables.EH_WAREHOUSE_REQUESTS);
         query.addConditions(Tables.EH_WAREHOUSE_REQUESTS.ID.eq(id));
-        query.addConditions(Tables.EH_WAREHOUSE_REQUESTS.OWNER_TYPE.eq(ownerType));
+        if(ownerType != null){
+            query.addConditions(Tables.EH_WAREHOUSE_REQUESTS.OWNER_TYPE.eq(ownerType));
+        }
         query.addConditions(Tables.EH_WAREHOUSE_REQUESTS.OWNER_ID.eq(ownerId));
+        query.addConditions(Tables.EH_WAREHOUSE_REQUESTS.COMMUNITY_ID.eq(communityId));
 
         List<WarehouseRequests> result = new ArrayList<WarehouseRequests>();
         query.fetch().map((r) -> {

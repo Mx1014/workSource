@@ -155,20 +155,21 @@ public class PmtaskFlowModuleListener implements FlowModuleListener {
 				pmTaskProvider.updateTask(task);
 
 				//TODO: 同步数据到科技园 （当受理之后才同步） 此处由于不好获取工作流中分配的人，所以当节点值（ASSIGNING）待分配时
+				//应项目经理需求，关掉同步数据到科技园 modify by sw 20171214
 				// 在fireButton存在eh_pm_task_logs表中，onFlowCaseStateChanged方法是状态已经更新之后，此处节点值是当前节点的下一个节点
-				Integer namespaceId = UserContext.getCurrentNamespaceId();
-				if(namespaceId == 1000000) {
-					LOGGER.debug("synchronizedTaskToTechpark, stepType={}, tag1={}, nodeType={}", stepType, tag1, nodeType);
-					List<PmTaskLog> logs = pmTaskProvider.listPmTaskLogs(task.getId(), PmTaskFlowStatus.PROCESSING.getCode());
-					if (null != logs && logs.size() != 0) {
-						for (PmTaskLog r: logs) {
-							if (null != r.getTargetId()) {
-								synchronizedTaskToTechpark(task, r.getTargetId(), flow.getOrganizationId());
-								break;
-							}
-						}
-					}
-				}
+//				Integer namespaceId = UserContext.getCurrentNamespaceId();
+//				if(namespaceId == 1000000) {
+//					LOGGER.debug("synchronizedTaskToTechpark, stepType={}, tag1={}, nodeType={}", stepType, tag1, nodeType);
+//					List<PmTaskLog> logs = pmTaskProvider.listPmTaskLogs(task.getId(), PmTaskFlowStatus.PROCESSING.getCode());
+//					if (null != logs && logs.size() != 0) {
+//						for (PmTaskLog r: logs) {
+//							if (null != r.getTargetId()) {
+//								synchronizedTaskToTechpark(task, r.getTargetId(), flow.getOrganizationId());
+//								break;
+//							}
+//						}
+//					}
+//				}
 			}else if ("COMPLETED".equals(nodeType)) {
 				task.setStatus(pmTaskCommonService.convertFlowStatus(nodeType));
 				pmTaskProvider.updateTask(task);
@@ -201,6 +202,7 @@ public class PmtaskFlowModuleListener implements FlowModuleListener {
 					log.setLogContent(content);
 					ctx.getLogs().add(log);
 				}
+				task.setIfUseFeelist((byte)1);
 			}
 		}else if(FlowStepType.ABSORT_STEP.getCode().equals(stepType)) {
 
@@ -308,46 +310,47 @@ public class PmtaskFlowModuleListener implements FlowModuleListener {
 
 		//填写费用清单
 		List<GeneralFormVal> list = generalFormValProvider.queryGeneralFormVals(EntityType.PM_TASK.getCode(),task.getId());
-		if (flowCase.getStatus() == FlowCaseStatus.FINISHED.getCode())
-			if (list!=null && list.size()>0){
-				e = new FlowCaseEntity();
-				e.setEntityType(FlowCaseEntityType.TEXT.getCode());
-				e.setKey("费用清单");
-				String content = "";
-				List<PostApprovalFormItem> items = list.stream().map(p->ConvertHelper.convert(p, PostApprovalFormItem.class))
-						.collect(Collectors.toList());
-				content += "本次服务的费用清单如下，请进行确认\n";
-				Long total = Long.valueOf(getTextString(getFormItem(items,"总计").getFieldValue()));
-				content += "总计:"+total+"元\n";
-				Long serviceFee = Long.valueOf(getTextString(getFormItem(items,"服务费").getFieldValue()));
-				content += "服务费:"+total+"元\n";
-				content += "物品费:"+(total-serviceFee)+"元\n";
-				PostApprovalFormItem subForm = getFormItem(items,"物品");
-				if (subForm!=null) {
-					PostApprovalFormSubformValue subFormValue = JSON.parseObject(subForm.getFieldValue(), PostApprovalFormSubformValue.class);
-					List<PostApprovalFormSubformItemValue> array = subFormValue.getForms();
-					if (array.size()!=0) {
-						content += "物品费详情：\n";
-						Gson g=new Gson();
-						for (PostApprovalFormSubformItemValue itemValue : array){
-							List<PostApprovalFormItem> values = itemValue.getValues();
-							content += getTextString(getFormItem(values,"物品名称").getFieldValue())+":";
-							content += getTextString(getFormItem(values,"小计").getFieldValue())+"元";
-							content += "("+getTextString(getFormItem(values,"单价").getFieldValue())+"元*"+
-									getTextString(getFormItem(values,"数量").getFieldValue())+")";
+		if (task.getIfUseFeelist()!=null && task.getIfUseFeelist()==1)
+			if (flowCase.getStatus() == FlowCaseStatus.FINISHED.getCode())
+				if (list!=null && list.size()>0){
+					e = new FlowCaseEntity();
+					e.setEntityType(FlowCaseEntityType.TEXT.getCode());
+					e.setKey("费用清单");
+					String content = "";
+					List<PostApprovalFormItem> items = list.stream().map(p->ConvertHelper.convert(p, PostApprovalFormItem.class))
+							.collect(Collectors.toList());
+					content += "本次服务的费用清单如下，请进行确认\n";
+					Long total = Long.valueOf(getTextString(getFormItem(items,"总计").getFieldValue()));
+					content += "总计:"+total+"元\n";
+					Long serviceFee = Long.valueOf(getTextString(getFormItem(items,"服务费").getFieldValue()));
+					content += "服务费:"+total+"元\n";
+					content += "物品费:"+(total-serviceFee)+"元\n";
+					PostApprovalFormItem subForm = getFormItem(items,"物品");
+					if (subForm!=null) {
+						PostApprovalFormSubformValue subFormValue = JSON.parseObject(subForm.getFieldValue(), PostApprovalFormSubformValue.class);
+						List<PostApprovalFormSubformItemValue> array = subFormValue.getForms();
+						if (array.size()!=0) {
+							content += "物品费详情：\n";
+							Gson g=new Gson();
+							for (PostApprovalFormSubformItemValue itemValue : array){
+								List<PostApprovalFormItem> values = itemValue.getValues();
+								content += getTextString(getFormItem(values,"物品名称").getFieldValue())+":";
+								content += getTextString(getFormItem(values,"小计").getFieldValue())+"元";
+								content += "("+getTextString(getFormItem(values,"单价").getFieldValue())+"元*"+
+										getTextString(getFormItem(values,"数量").getFieldValue())+")";
+							}
+							content += "如对上述费用有疑义请附言说明";
 						}
-						content += "如对上述费用有疑义请附言说明";
 					}
+					e.setValue(content);
+					entities.add(e);
+				}else {
+					e = new FlowCaseEntity();
+					e.setEntityType(FlowCaseEntityType.LIST.getCode());
+					e.setKey("费用清单");
+					e.setValue("本次服务没有产生维修费");
+					entities.add(e);
 				}
-				e.setValue(content);
-				entities.add(e);
-			}else {
-				e = new FlowCaseEntity();
-				e.setEntityType(FlowCaseEntityType.LIST.getCode());
-				e.setKey("费用清单");
-				e.setValue("本次服务没有产生维修费");
-				entities.add(e);
-			}
 		JSONObject jo = JSONObject.parseObject(JSONObject.toJSONString(dto));
 		jo.put("formUrl",processFormURL(EntityType.PM_TASK.getCode(),""+task.getId(),FlowOwnerType.PMTASK.getCode(),"","费用确认"));
 		if (flowUserType!=null)

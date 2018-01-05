@@ -8,6 +8,7 @@ package com.everhomes.rest.module;
  * <li>projectId: 项目id</li>
  * <li>projectType: 项目类型 </li>
  * <li>projectName: 项目名称 </li>
+ * <li>projectName: 项目名称 </li>
  * </ul>
  */
 public class Project {
@@ -15,6 +16,7 @@ public class Project {
 	private Long    projectId;
 	private String  projectType;
 	private String projectName;
+	private Byte  communityType;
 
 	public Project(){
 
@@ -23,6 +25,14 @@ public class Project {
 	public Project(String projectType, Long projectId){
 		this.projectId = projectId;
 		this.projectType = projectType;
+	}
+
+	public Byte getCommunityType() {
+		return communityType;
+	}
+
+	public void setCommunityType(Byte communityType) {
+		this.communityType = communityType;
 	}
 
 	public Long getProjectId() {

@@ -36,6 +36,7 @@ public interface ContractProvider {
 
 	List<Contract> listContractByOrganizationId(Long organizationId);
 	List<Contract> listContractByCustomerId(Long communityId, Long customerId, byte customerType);
+	List<Contract> listContractByCustomerId(Long communityId, Long customerId, byte customerType, Byte status);
 
 	Map<Long, Contract> listContractsByIds(List<Long> ids);
 	List<Contract> listContracts(CrossShardListingLocator locator, Integer pageSize);
@@ -49,7 +50,7 @@ public interface ContractProvider {
 
 	void createContractParam(ContractParam param);
 	void updateContractParam(ContractParam param);
-	ContractParam findContractParamByCommunityId(Long communityId);
+	ContractParam findContractParamByCommunityId(Integer namespaceId, Long communityId);
 	Map<Long, List<Contract>> listContractGroupByCommunity();
 	String findLastContractVersionByCommunity(Integer namespaceId, Long communityId);
 

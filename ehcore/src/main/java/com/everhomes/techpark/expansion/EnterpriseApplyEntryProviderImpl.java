@@ -56,7 +56,7 @@ public class EnterpriseApplyEntryProviderImpl implements EnterpriseApplyEntryPro
 
 	@Override
 	public List<EnterpriseOpRequest> listApplyEntrys(EnterpriseOpRequest request,
-			ListingLocator locator, int pageSize) {
+			ListingLocator locator, Integer pageSize) {
 		return listApplyEntrys(request, locator, pageSize, null);
 	}
 
@@ -107,6 +107,7 @@ public class EnterpriseApplyEntryProviderImpl implements EnterpriseApplyEntryPro
 				.eq(Tables.EH_LEASE_PROMOTIONS.ID));
 
 		Condition cond = Tables.EH_LEASE_PROMOTIONS.NAMESPACE_ID.eq(leasePromotion.getNamespaceId());
+		cond = cond.and(Tables.EH_LEASE_PROMOTIONS.CATEGORY_ID.eq(leasePromotion.getCategoryId()));
 		cond = cond.and(Tables.EH_LEASE_PROMOTIONS.STATUS.ne(LeasePromotionStatus.INACTIVE.getCode()));
 
 		if(!StringUtils.isEmpty(leasePromotion.getCommunityId())){
@@ -329,15 +330,14 @@ public class EnterpriseApplyEntryProviderImpl implements EnterpriseApplyEntryPro
 
 	@Override
 	public List<EnterpriseOpRequest> listApplyEntrys(EnterpriseOpRequest request,
-													 ListingLocator locator, int pageSize, List<Long> idList) {
+													 ListingLocator locator, Integer pageSize, List<Long> idList) {
 		DSLContext context = dbProvider.getDslContext(AccessSpec.readWrite());
-		pageSize = pageSize + 1;
-		Condition cond =  Tables.EH_ENTERPRISE_OP_REQUESTS.ID.gt(0L);
+
+		Condition cond = Tables.EH_ENTERPRISE_OP_REQUESTS.NAMESPACE_ID.eq(request.getNamespaceId());
+		cond = cond.and(Tables.EH_ENTERPRISE_OP_REQUESTS.CATEGORY_ID.eq(request.getCategoryId()));
+
 		SelectQuery<EhEnterpriseOpRequestsRecord> query = context.selectQuery(Tables.EH_ENTERPRISE_OP_REQUESTS);
 
-		if(!StringUtils.isEmpty(request.getNamespaceId())){
-			cond = cond.and(Tables.EH_ENTERPRISE_OP_REQUESTS.NAMESPACE_ID.eq(request.getNamespaceId()));
-		}
 		if(!StringUtils.isEmpty(request.getCommunityId())){
 			cond = cond.and(Tables.EH_ENTERPRISE_OP_REQUESTS.COMMUNITY_ID.eq(request.getCommunityId()));
 		}
@@ -353,16 +353,17 @@ public class EnterpriseApplyEntryProviderImpl implements EnterpriseApplyEntryPro
 			cond = cond.and(Tables.EH_ENTERPRISE_OP_REQUESTS.ISSUER_TYPE.eq(request.getIssuerType()));
 		}
 
-		if(null != request.getApplyType()){
-			cond = cond.and(Tables.EH_ENTERPRISE_OP_REQUESTS.APPLY_TYPE.eq(request.getApplyType()));
-		}
-
 		if(!StringUtils.isEmpty(request.getStatus())){
 			cond = cond.and(Tables.EH_ENTERPRISE_OP_REQUESTS.STATUS.eq(request.getStatus()));
 		}
 
 		if(!StringUtils.isEmpty(request.getSourceType())){
-			cond = cond.and(Tables.EH_ENTERPRISE_OP_REQUESTS.SOURCE_TYPE.eq(request.getSourceType()));
+			if (request.getSourceType().equals(ApplyEntrySourceType.LEASE_PROJECT.getCode())) {
+				cond = cond.and(Tables.EH_ENTERPRISE_OP_REQUESTS.SOURCE_TYPE.eq(ApplyEntrySourceType.LEASE_PROJECT.getCode())
+					.or(Tables.EH_ENTERPRISE_OP_REQUESTS.SOURCE_TYPE.eq(ApplyEntrySourceType.BUILDING.getCode())));
+			}else {
+				cond = cond.and(Tables.EH_ENTERPRISE_OP_REQUESTS.SOURCE_TYPE.eq(request.getSourceType()));
+			}
 		}
 
 		if(null != idList && idList.size()>0){
@@ -375,12 +376,17 @@ public class EnterpriseApplyEntryProviderImpl implements EnterpriseApplyEntryPro
 
 		query.addConditions(cond);
 		query.addOrderBy(Tables.EH_ENTERPRISE_OP_REQUESTS.ID.desc());
-		query.addLimit(pageSize);
-		List<EnterpriseOpRequest> enterpriseOpRequests = query.fetch().map(new DefaultRecordMapper(Tables.EH_ENTERPRISE_OP_REQUESTS.recordType(), EnterpriseOpRequest.class));
 
-		if (enterpriseOpRequests.size() >= pageSize) {
-			locator.setAnchor(enterpriseOpRequests.get(enterpriseOpRequests.size() - 1).getId());
-			enterpriseOpRequests.remove(enterpriseOpRequests.size() - 1);
+		if (null != pageSize) {
+			pageSize = pageSize + 1;
+			query.addLimit(pageSize);
+		}
+
+		List<EnterpriseOpRequest> enterpriseOpRequests = query.fetch().map(new DefaultRecordMapper(Tables.EH_ENTERPRISE_OP_REQUESTS.recordType(), EnterpriseOpRequest.class));
+		int listSize = enterpriseOpRequests.size();
+		if (null != pageSize && listSize >= pageSize) {
+			locator.setAnchor(enterpriseOpRequests.get(listSize - 1).getId());
+			enterpriseOpRequests.remove(listSize - 1);
 		} else {
 			locator.setAnchor(null);
 		}
@@ -444,12 +450,14 @@ public class EnterpriseApplyEntryProviderImpl implements EnterpriseApplyEntryPro
 	}
 
 	@Override
-	public LeaseFormRequest findLeaseRequestForm(Integer namespaceId, Long ownerId, String ownerType, String sourceType) {
+	public LeaseFormRequest findLeaseRequestForm(Integer namespaceId, Long ownerId, String ownerType, String sourceType,
+												 Long categoryId) {
 
 		DSLContext context = dbProvider.getDslContext(AccessSpec.readWriteWith(EhLeaseFormRequests.class));
 
 		SelectQuery query = context.selectQuery(Tables.EH_LEASE_FORM_REQUESTS);
 		query.addConditions(Tables.EH_LEASE_FORM_REQUESTS.NAMESPACE_ID.eq(namespaceId));
+		query.addConditions(Tables.EH_LEASE_FORM_REQUESTS.CATEGORY_ID.eq(categoryId));
 
 		if (null != ownerId) {
 			query.addConditions(Tables.EH_LEASE_FORM_REQUESTS.OWNER_ID.eq(ownerId));

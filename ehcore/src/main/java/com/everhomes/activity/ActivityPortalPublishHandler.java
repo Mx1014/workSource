@@ -330,4 +330,35 @@ public class ActivityPortalPublishHandler implements PortalPublishHandler {
 		}
 		return StringHelper.toJsonString(config);
 	}
+
+	@Override
+	public String getCustomTag(Integer namespaceId, Long moudleId, String actionData, String instanceConfig) {
+
+		ActivityActionData actionDataObj = (ActivityActionData)StringHelper.fromJsonString(actionData, ActivityActionData.class);
+
+		if(actionDataObj != null && actionDataObj.getCategoryId() != null){
+			return String.valueOf(actionDataObj.getCategoryId());
+		}
+
+		return null;
+	}
+
+	@Override
+	public Long getWebMenuId(Integer namespaceId, Long moudleId, String actionData, String instanceConfig) {
+
+		ActivityActionData actionDataObj = (ActivityActionData)StringHelper.fromJsonString(actionData, ActivityActionData.class);
+		if(actionDataObj == null){
+			return null;
+		}
+
+		if(actionDataObj.getCategoryId() == null || actionDataObj.getCategoryId().longValue() == 1){
+			return 10600L;
+		}else if (actionDataObj.getCategoryId().longValue() == 2){
+			return 10602L;
+		}else if (actionDataObj.getCategoryId().longValue() == 3){
+			return 10603L;
+		}
+
+		return null;
+	}
 }

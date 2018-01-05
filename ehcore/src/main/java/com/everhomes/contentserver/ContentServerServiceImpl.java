@@ -1,28 +1,16 @@
 package com.everhomes.contentserver;
 
-import com.alibaba.fastjson.JSONObject;
 import com.everhomes.bigcollection.Accessor;
 import com.everhomes.bigcollection.BigCollectionProvider;
-import com.everhomes.bus.BusBridgeProvider;
-import com.everhomes.bus.LocalBus;
-import com.everhomes.bus.LocalBusOneshotSubscriber;
-import com.everhomes.bus.LocalBusOneshotSubscriberBuilder;
-import com.everhomes.bus.LocalBusSubscriber;
-import com.everhomes.bus.LocalBusSubscriber.Action;
+import com.everhomes.bus.*;
 import com.everhomes.constants.ErrorCodes;
 import com.everhomes.rest.RestResponse;
 import com.everhomes.rest.contentserver.*;
 import com.everhomes.rest.contentserver.WebSocketConstant;
 import com.everhomes.rest.messaging.ImageBody;
 import com.everhomes.rest.rpc.PduFrame;
-import com.everhomes.user.User;
 import com.everhomes.user.UserContext;
-import com.everhomes.util.ConvertHelper;
-import com.everhomes.util.ExecutorUtil;
-import com.everhomes.util.RuntimeErrorException;
-import com.everhomes.util.StringHelper;
-import com.everhomes.util.WebTokenGenerator;
-
+import com.everhomes.util.*;
 import org.apache.commons.collections.CollectionUtils;
 import org.apache.commons.io.FilenameUtils;
 import org.apache.commons.lang.StringUtils;
@@ -46,7 +34,7 @@ import org.springframework.web.multipart.MultipartFile;
 
 import javax.annotation.PostConstruct;
 import javax.annotation.PreDestroy;
-
+import java.net.URLEncoder;
 import java.io.InputStream;
 import java.util.ArrayList;
 import java.util.HashMap;
@@ -176,7 +164,7 @@ public class ContentServerServiceImpl implements ContentServerService {
     @Cacheable(value = "selectContentServer",unless="#result==null")
     @Override
     public ContentServer selectContentServer() throws Exception {
-        LOGGER.info("Enter select content server");
+        // LOGGER.info("Enter select content server");
         List<ContentServer> servers = contentServerProvider.listContentServers();
         if (CollectionUtils.isEmpty(servers)) {
             LOGGER.error("cannot find content storage");
@@ -200,9 +188,9 @@ public class ContentServerServiceImpl implements ContentServerService {
 
     @Override
     public List<String> parserUri(List<String> uris, String ownerType, Long ownerId) {
-        if (LOGGER.isDebugEnabled()) {
-            LOGGER.debug("rebuild url");
-        }
+        // if (LOGGER.isDebugEnabled()) {
+        //     LOGGER.debug("rebuild url");
+        // }
         if (CollectionUtils.isEmpty(uris)) {
             return new ArrayList<String>();
         }
@@ -404,9 +392,9 @@ public class ContentServerServiceImpl implements ContentServerService {
                     return null;
                 }
             }
-            if (LOGGER.isDebugEnabled()) {
-                LOGGER.debug("getScheme using port = {}", port);
-            }
+            // if (LOGGER.isDebugEnabled()) {
+            //     LOGGER.debug("getScheme using port = {}", port);
+            // }
             if(80 == port || 443 == port){
                 return HTTPS;
             }else{
@@ -422,18 +410,18 @@ public class ContentServerServiceImpl implements ContentServerService {
         try {
             ContentServer server = selectContentServer();
 
-            if (LOGGER.isDebugEnabled()) {
-                LOGGER.debug("selectContentServer public address is: {}, public port is: {}", server.getPublicPort(), server.getPublicAddress());
-                LOGGER.debug("current scheme is: {}", UserContext.current().getScheme());
-            }
+            // if (LOGGER.isDebugEnabled()) {
+            //     LOGGER.debug("selectContentServer public address is: {}, public port is: {}", server.getPublicPort(), server.getPublicAddress());
+            //     LOGGER.debug("current scheme is: {}", UserContext.current().getScheme());
+            // }
 
             // https 默认端口443 by sfyan 20161226
             Integer port = server.getPublicPort();
 
             String scheme = getScheme(port);
-            if (LOGGER.isDebugEnabled()) {
-                LOGGER.debug("getContentServer getScheme schema = {}", scheme);
-            }
+            // if (LOGGER.isDebugEnabled()) {
+            //     LOGGER.debug("getContentServer getScheme schema = {}", scheme);
+            // }
             if(scheme.equals(HTTPS)){
                 port = 443;
             }
@@ -508,7 +496,7 @@ public class ContentServerServiceImpl implements ContentServerService {
         try {
             MultipartEntityBuilder builder = MultipartEntityBuilder.create();
             builder.addBinaryBody("upload_file", fileStream,
-                    ContentType.APPLICATION_OCTET_STREAM, fileName);
+                    ContentType.APPLICATION_OCTET_STREAM, URLEncoder.encode(fileName, "UTF-8"));
             HttpEntity multipart = builder.build();
 
             httpPost.setEntity(multipart);
@@ -673,6 +661,7 @@ public class ContentServerServiceImpl implements ContentServerService {
         dto.setUserId(userId);
         dto.setUserToken(cmd.getUserToken());
         dto.setTitle(cmd.getTitle());
+        dto.setReadOnly(cmd.getReadOnly());
         
         obj = redisTemplate.opsForValue().getAndSet(key, StringHelper.toJsonString(dto));
         if(obj != null) {
@@ -778,6 +767,15 @@ public class ContentServerServiceImpl implements ContentServerService {
         UploadFileInfoDTO dto = (UploadFileInfoDTO)StringHelper.fromJsonString(str, UploadFileInfoDTO.class);
         if(dto.getComplete() != null && dto.getComplete() > 0) {
             return dto;
+        }
+        
+        if(dto.getInfos() != null) {
+            for(UploadFileInfo info : dto.getInfos()) {
+                if(info.getUri() != null && !info.getUri().isEmpty() && info.getUrl() != null && info.getUrl().isEmpty()) {
+                info.setUrl(this.parserUri(info.getUri()));    
+                }
+                
+            }
         }
         
         dto.setComplete(1l);

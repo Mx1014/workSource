@@ -8,4 +8,6 @@ public interface ForumEmbeddedHandler {
     String renderEmbeddedObjectDetails(Post post);
     Post preProcessEmbeddedObject(Post post);
     Post postProcessEmbeddedObject(Post post);
+    void beforePostDelete(Post post);
+    void afterPostDelete(Post post);
 }

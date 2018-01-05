@@ -3,6 +3,9 @@ package com.everhomes.print;
 
 import com.everhomes.rest.order.PreOrderDTO;
 import com.everhomes.rest.print.*;
+
+import javax.servlet.http.HttpServletResponse;
+
 import org.springframework.web.context.request.async.DeferredResult;
 
 import com.everhomes.rest.RestResponse;
@@ -43,7 +46,15 @@ public interface SiyinPrintService {
 
 	ListPrintingJobsResponse listPrintingJobs(ListPrintingJobsCommand cmd);
 
-	void unlockPrinter(UnlockPrinterCommand cmd);
+	UnlockPrinterResponse unlockPrinter(UnlockPrinterCommand cmd);
 
 	void jobLogNotification(String jobData);
+
+	ListQueueJobsResponse listQueueJobs(ListQueueJobsCommand cmd);
+
+	void releaseQueueJobs(ReleaseQueueJobsCommand cmd);
+
+	void deleteQueueJobs(DeleteQueueJobsCommand cmd);
+
+	void mfpLogNotification(String jobData, HttpServletResponse response);
 }

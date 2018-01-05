@@ -10,6 +10,7 @@ import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 
+import com.everhomes.organization.OrganizationMember;
 import com.everhomes.rest.customer.*;
 import com.everhomes.server.schema.tables.daos.*;
 import com.everhomes.server.schema.tables.pojos.*;
@@ -326,14 +327,128 @@ public class EnterpriseCustomerProviderImpl implements EnterpriseCustomerProvide
     }
 
     @Override
+    public void createCustomerAccount(CustomerAccount account) {
+        long id = this.sequenceProvider.getNextSequence(NameMapper.getSequenceDomainFromTablePojo(EhCustomerAccounts.class));
+        account.setId(id);
+        account.setCreateTime(new Timestamp(DateHelper.currentGMTTime().getTime()));
+        account.setCreateUid(UserContext.current().getUser().getId());
+        account.setStatus(CommonStatus.ACTIVE.getCode());
+
+        DSLContext context = this.dbProvider.getDslContext(AccessSpec.readWriteWith(EhCustomerAccounts.class, id));
+        EhCustomerAccountsDao dao = new EhCustomerAccountsDao(context.configuration());
+        dao.insert(account);
+        DaoHelper.publishDaoAction(DaoAction.CREATE, EhCustomerAccounts.class, null);
+    }
+
+    @Override
+    public void createCustomerTax(CustomerTax tax) {
+        long id = this.sequenceProvider.getNextSequence(NameMapper.getSequenceDomainFromTablePojo(EhCustomerTaxes.class));
+        tax.setId(id);
+        tax.setCreateTime(new Timestamp(DateHelper.currentGMTTime().getTime()));
+        tax.setCreateUid(UserContext.current().getUser().getId());
+        tax.setStatus(CommonStatus.ACTIVE.getCode());
+
+        DSLContext context = this.dbProvider.getDslContext(AccessSpec.readWriteWith(EhCustomerTaxes.class, id));
+        EhCustomerTaxesDao dao = new EhCustomerTaxesDao(context.configuration());
+        dao.insert(tax);
+        DaoHelper.publishDaoAction(DaoAction.CREATE, EhCustomerTaxes.class, null);
+    }
+
+    @Override
+    public void deleteCustomerAccount(CustomerAccount account) {
+        assert(account.getId() != null);
+
+        DSLContext context = this.dbProvider.getDslContext(AccessSpec.readWriteWith(EhCustomerAccounts.class, account.getId()));
+        EhCustomerAccountsDao dao = new EhCustomerAccountsDao(context.configuration());
+        dao.delete(account);
+        DaoHelper.publishDaoAction(DaoAction.MODIFY, EhCustomerAccounts.class, account.getId());
+    }
+
+    @Override
+    public void deleteCustomerTax(CustomerTax tax) {
+        assert(tax.getId() != null);
+
+        DSLContext context = this.dbProvider.getDslContext(AccessSpec.readWriteWith(EhCustomerTaxes.class, tax.getId()));
+        EhCustomerTaxesDao dao = new EhCustomerTaxesDao(context.configuration());
+        dao.delete(tax);
+        DaoHelper.publishDaoAction(DaoAction.MODIFY, EhCustomerTaxes.class, tax.getId());
+    }
+
+    @Override
+    public CustomerAccount findCustomerAccountById(Long id) {
+        DSLContext context = dbProvider.getDslContext(AccessSpec.readOnly());
+        EhCustomerAccountsDao dao = new EhCustomerAccountsDao(context.configuration());
+        return ConvertHelper.convert(dao.findById(id), CustomerAccount.class);
+    }
+
+    @Override
+    public CustomerTax findCustomerTaxById(Long id) {
+        DSLContext context = dbProvider.getDslContext(AccessSpec.readOnly());
+        EhCustomerTaxesDao dao = new EhCustomerTaxesDao(context.configuration());
+        return ConvertHelper.convert(dao.findById(id), CustomerTax.class);
+    }
+
+    @Override
+    public List<CustomerAccount> listCustomerAccountsByCustomerId(Long customerId) {
+        DSLContext context = dbProvider.getDslContext(AccessSpec.readOnly());
+        SelectQuery<EhCustomerAccountsRecord> query = context.selectQuery(Tables.EH_CUSTOMER_ACCOUNTS);
+        query.addConditions(Tables.EH_CUSTOMER_ACCOUNTS.CUSTOMER_ID.eq(customerId));
+        query.addConditions(Tables.EH_CUSTOMER_ACCOUNTS.STATUS.eq(CommonStatus.ACTIVE.getCode()));
+
+        List<CustomerAccount> result = new ArrayList<>();
+        query.fetch().map((r) -> {
+            result.add(ConvertHelper.convert(r, CustomerAccount.class));
+            return null;
+        });
+
+        return result;
+    }
+
+    @Override
+    public List<CustomerTax> listCustomerTaxesByCustomerId(Long customerId) {
+        DSLContext context = dbProvider.getDslContext(AccessSpec.readOnly());
+        SelectQuery<EhCustomerTaxesRecord> query = context.selectQuery(Tables.EH_CUSTOMER_TAXES);
+        query.addConditions(Tables.EH_CUSTOMER_TAXES.CUSTOMER_ID.eq(customerId));
+        query.addConditions(Tables.EH_CUSTOMER_TAXES.STATUS.eq(CommonStatus.ACTIVE.getCode()));
+
+        List<CustomerTax> result = new ArrayList<>();
+        query.fetch().map((r) -> {
+            result.add(ConvertHelper.convert(r, CustomerTax.class));
+            return null;
+        });
+
+        return result;
+    }
+
+    @Override
+    public void updateCustomerAccount(CustomerAccount account) {
+        DSLContext context = this.dbProvider.getDslContext(AccessSpec.readWriteWith(EhCustomerAccounts.class, account.getId()));
+        EhCustomerAccountsDao dao = new EhCustomerAccountsDao(context.configuration());
+
+        account.setOperatorUid(UserContext.current().getUser().getId());
+        account.setUpdateTime(new Timestamp(DateHelper.currentGMTTime().getTime()));
+        dao.update(account);
+        DaoHelper.publishDaoAction(DaoAction.MODIFY, EhCustomerAccounts.class, account.getId());
+    }
+
+    @Override
+    public void updateCustomerTax(CustomerTax tax) {
+        DSLContext context = this.dbProvider.getDslContext(AccessSpec.readWriteWith(EhCustomerTaxes.class, tax.getId()));
+        EhCustomerTaxesDao dao = new EhCustomerTaxesDao(context.configuration());
+
+        tax.setOperatorUid(UserContext.current().getUser().getId());
+        tax.setUpdateTime(new Timestamp(DateHelper.currentGMTTime().getTime()));
+        dao.update(tax);
+        DaoHelper.publishDaoAction(DaoAction.MODIFY, EhCustomerTaxes.class, tax.getId());
+    }
+
+    @Override
     public void createCustomerTalent(CustomerTalent talent) {
         long id = this.sequenceProvider.getNextSequence(NameMapper.getSequenceDomainFromTablePojo(EhCustomerTalents.class));
         talent.setId(id);
         talent.setCreateTime(new Timestamp(DateHelper.currentGMTTime().getTime()));
         talent.setCreatorUid(UserContext.current().getUser().getId());
         talent.setStatus(CommonStatus.ACTIVE.getCode());
-
-        LOGGER.info("createCustomerTalent: " + talent);
 
         DSLContext context = this.dbProvider.getDslContext(AccessSpec.readWriteWith(EhCustomerTalents.class, id));
         EhCustomerTalentsDao dao = new EhCustomerTalentsDao(context.configuration());
@@ -1350,7 +1465,7 @@ public class EnterpriseCustomerProviderImpl implements EnterpriseCustomerProvide
 	private String compareEnterpriseCustomer(EnterpriseCustomer customer, EnterpriseCustomer exist) {
 		//查出模板配置的参数
 		ListFieldCommand command = new ListFieldCommand();
-		command.setNamespaceId(CustomerTrackingTemplateCode.NAMESPACE);
+		command.setNamespaceId(customer.getNamespaceId());
 		command.setModuleName(CustomerTrackingTemplateCode.MODULE_NAME);
 		command.setGroupPath(CustomerTrackingTemplateCode.GROUP_PATH);
 		command.setCommunityId(customer.getCommunityId());
@@ -1376,8 +1491,10 @@ public class EnterpriseCustomerProviderImpl implements EnterpriseCustomerProvide
 				if(null != objNew || null != objOld){
 					if(!(objNew == null ? "" : objNew).equals((objOld == null ? "" : objOld))){
 						String  content = "";
-						String  newData = objNew == null ? "null" : objNew.toString();
-						String  oldData = objOld == null ? "null" : objOld.toString();
+						String  newData = objNew == null ? "空" : objNew.toString();
+						String  oldData = objOld == null ? "空" : objOld.toString();
+                        LOGGER.debug("compareEnterpriseCustomer FieldName: {}; newData: {}; oldData: {}",
+                                field.getFieldName(), newData, oldData);
 						if(field.getFieldName().lastIndexOf("ItemId") > -1){
 							ScopeFieldItem levelItemNew = fieldProvider.findScopeFieldItemByFieldItemId(customer.getNamespaceId(), customer.getCommunityId(),(objNew == null ? -1l : Long.parseLong(objNew.toString())));
 					        if(levelItemNew != null) {
@@ -1398,6 +1515,10 @@ public class EnterpriseCustomerProviderImpl implements EnterpriseCustomerProvide
 					        	oldData = levelItemOld.getItemDisplayName();
 					        }
 						}
+                        if("trackingUid".equals(field.getFieldName())) {
+                            oldData = exist.getTrackingName();
+                            newData = customer.getTrackingName();
+                        }
 						Map<String,Object> map = new HashMap<String,Object>();
 						map.put("display", field.getFieldDisplayName());
 						map.put("oldData", oldData);

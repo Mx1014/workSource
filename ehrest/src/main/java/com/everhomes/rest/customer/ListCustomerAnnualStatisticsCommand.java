@@ -29,6 +29,16 @@ public class ListCustomerAnnualStatisticsCommand {
 
     private Integer pageSize;
 
+    private Long orgId;
+
+    public Long getOrgId() {
+        return orgId;
+    }
+
+    public void setOrgId(Long orgId) {
+        this.orgId = orgId;
+    }
+
     public Long getPageAnchor() {
         return pageAnchor;
     }

@@ -1,6 +1,7 @@
 package com.everhomes.rest.acl;
 
 import com.everhomes.discover.ItemType;
+import com.everhomes.rest.portal.ServiceModuleAppDTO;
 
 import java.io.Serializable;
 import java.util.List;
@@ -15,6 +16,7 @@ import java.util.List;
  * <li>path: 层次关系</li>
  * <li>level: 级别</li>
  * <li>serviceModules: 子业务模块</li>
+ * <li>serviceModuleApps: 模块关联应用</li>
  * <li>description: 描述</li>
  * <li>updateTime: 更新时间</li>
  * <li>createTime: 创建时间</li>
@@ -38,6 +40,9 @@ public class ServiceModuleDTO implements Serializable {
 	@ItemType(ServiceModuleDTO.class)
 	private List<ServiceModuleDTO> serviceModules;
 
+	@ItemType(ServiceModuleDTO.class)
+	private List<ServiceModuleAppDTO> serviceModuleApps;
+
 	private Byte type;
 
 	private String description;
@@ -53,6 +58,8 @@ public class ServiceModuleDTO implements Serializable {
 	private String instanceConfig;
 
 	private Byte multipleFlag;
+
+	private String moduleControlType;
 
 	public Long getId() {
 		return id;
@@ -172,5 +179,21 @@ public class ServiceModuleDTO implements Serializable {
 
 	public void setMultipleFlag(Byte multipleFlag) {
 		this.multipleFlag = multipleFlag;
+	}
+
+	public List<ServiceModuleAppDTO> getServiceModuleApps() {
+		return serviceModuleApps;
+	}
+
+	public void setServiceModuleApps(List<ServiceModuleAppDTO> serviceModuleApps) {
+		this.serviceModuleApps = serviceModuleApps;
+	}
+
+	public String getModuleControlType() {
+		return moduleControlType;
+	}
+
+	public void setModuleControlType(String moduleControlType) {
+		this.moduleControlType = moduleControlType;
 	}
 }

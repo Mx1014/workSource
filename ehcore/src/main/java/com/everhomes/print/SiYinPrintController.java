@@ -1,10 +1,13 @@
 // @formatter:off
 package com.everhomes.print;
 
+import java.io.IOException;
 import java.util.HashMap;
 import java.util.Map;
 
 import javax.annotation.PostConstruct;
+import javax.servlet.http.HttpServlet;
+import javax.servlet.http.HttpServletResponse;
 import javax.validation.Valid;
 
 import com.everhomes.rest.order.PreOrderDTO;
@@ -32,14 +35,12 @@ import sun.misc.BASE64Decoder;
 @RestController
 @RequestMapping("/siyinprint")
 public class SiYinPrintController extends ControllerBase {
-	private static final Logger LOGGER = LoggerFactory.getLogger(SiYinPrintController.class);
-	
 	@Autowired
 	private SiyinPrintService siyinPrintService;
 	
 	 /**
 	  * <b>URL: /siyinprint/getPrintSetting</b>
-	  * <p>获取打印设置信息</p>
+	  * <p>1.获取打印设置信息(后台管理)</p>
 	  */
 	 @RequestMapping("getPrintSetting")
 	 @RestReturn(value=GetPrintSettingResponse.class)
@@ -52,7 +53,7 @@ public class SiYinPrintController extends ControllerBase {
 	 
 	 /**
 	  * <b>URL: /siyinprint/updatePrintSetting</b>
-	  * <p>更新打印设置信息</p>
+	  * <p>2.更新打印设置信息(后台管理)</p>
 	  */
 	 @RequestMapping("updatePrintSetting")
 	 @RestReturn(value=String.class)
@@ -67,7 +68,7 @@ public class SiYinPrintController extends ControllerBase {
 	 
 	 /**
 	  * <b>URL: /siyinprint/getPrintStat</b>
-	  * <p>获取打印统计</p>
+	  * <p>3.获取打印统计(后台管理)</p>
 	  */
 	 @RequestMapping("getPrintStat")
 	 @RestReturn(value=GetPrintStatResponse.class)
@@ -81,7 +82,7 @@ public class SiYinPrintController extends ControllerBase {
 	 
 	 /**
 	  * <b>URL: /siyinprint/listPrintRecords</b>
-	  * <p>查询打印记录</p>
+	  * <p>4.查询打印记录(后台管理)</p>
 	  */
 	 @RequestMapping("listPrintRecords")
 	 @RestReturn(value=ListPrintRecordsResponse.class)
@@ -95,7 +96,7 @@ public class SiYinPrintController extends ControllerBase {
 	 
 	 /**
 	  * <b>URL: /siyinprint/listPrintJobTypes</b>
-	  * <p>获取打印模块类型列表 目前有打印/复印/扫描</p>
+	  * <p>5.获取打印模块类型列表 目前有打印/复印/扫描(后台管理)</p>
 	  */
 	 @RequestMapping("listPrintJobTypes")
 	 @RestReturn(value=ListPrintJobTypesResponse.class)
@@ -109,7 +110,7 @@ public class SiYinPrintController extends ControllerBase {
 	 
 	 /**
 	  * <b>URL: /siyinprint/listPrintOrderStatus</b>
-	  * <p>获取账单状态列表 目前有未支付/支付</p>
+	  * <p>6.获取账单状态列表 目前有未支付/支付(后台管理)</p>
 	  */
 	 @RequestMapping("listPrintOrderStatus")
 	 @RestReturn(value=ListPrintOrderStatusResponse.class)
@@ -123,7 +124,7 @@ public class SiYinPrintController extends ControllerBase {
 	 
 	 /**
 	  * <b>URL: /siyinprint/listPrintUserOrganizations</b>
-	  * <p>获取所在用户所在企业</p>
+	  * <p>7.获取所在用户所在企业</p>
 	  */
 	 @RequestMapping("listPrintUserOrganizations")
 	 @RestReturn(value=ListPrintUserOrganizationsResponse.class)
@@ -137,7 +138,7 @@ public class SiYinPrintController extends ControllerBase {
 	 
 	 /**
 	  * <b>URL: /siyinprint/updatePrintUserEmail</b>
-	  * <p>更新用户(扫描时)发件邮箱</p>
+	  * <p>8.更新用户(扫描时)发件邮箱</p>
 	  */
 	 @RequestMapping("updatePrintUserEmail")
 	 @RestReturn(value=String.class)
@@ -151,7 +152,7 @@ public class SiYinPrintController extends ControllerBase {
 	 
 	 /**
 	  * <b>URL: /siyinprint/getPrintUserEmail</b>
-	  * <p>获取用户(扫描时)发件邮箱</p>
+	  * <p>9.获取用户(扫描时)发件邮箱</p>
 	  */
 	 @RequestMapping("getPrintUserEmail")
 	 @RestReturn(value=GetPrintUserEmailResponse.class)
@@ -165,7 +166,7 @@ public class SiYinPrintController extends ControllerBase {
 	 
 	 /**
 	  * <b>URL: /siyinprint/getPrintLogonUrl</b>
-	  * <p>获取用户登录的URL，/print/informPrint，提供给前端生成二维码</p>
+	  * <p>10.获取用户登录的URL，/print/informPrint，提供给前端生成二维码</p>
 	  */
 	 @RequestMapping("getPrintLogonUrl")
 	 @RestReturn(value=GetPrintLogonUrlResponse.class)
@@ -179,7 +180,7 @@ public class SiYinPrintController extends ControllerBase {
 	 
 	 /**
 	  * <b>URL: /siyinprint/logonPrint</b>
-	  * <p>web调用，登录打印机，如果手机扫了二维码，那么就会登录成功，否则不会登录成功。</p>
+	  * <p>11.web调用，登录打印机，如果手机扫了二维码，那么就会登录成功，否则不会登录成功。</p>
 	  */
 	 @RequestMapping("logonPrint")
 	 @RestReturn(value=String.class)
@@ -198,7 +199,7 @@ public class SiYinPrintController extends ControllerBase {
 	 
 	 /**
 	  * <b>URL: /siyinprint/informPrint</b>
-	  * <p>用户扫描二维码，调用此接口，判断登录，通知web，登录成功或者失败</p>
+	  * <p>12.用户扫描二维码，调用此接口，判断登录，通知web，登录成功或者失败</p>
 	  */
 	 @RequestMapping("informPrint")
 	 @RestReturn(value=InformPrintResponse.class)
@@ -212,7 +213,7 @@ public class SiYinPrintController extends ControllerBase {
 	 
 	 /**
 	  * <b>URL: /siyinprint/printImmediately</b>
-	  * <p>立即打印,增加任务数量,废弃</p>
+	  * <p>13.立即打印,增加任务数量,废弃</p>
 	  */
 	 @RequestMapping("printImmediately")
 	 @RestReturn(value=String.class)
@@ -226,7 +227,7 @@ public class SiYinPrintController extends ControllerBase {
 	 
 	 /**
 	  * <b>URL: /siyinprint/listPrintOrders</b>
-	  * <p>查询订单列表</p>
+	  * <p>14.查询订单列表(app)</p>
 	  */
 	 @RequestMapping("listPrintOrders")
 	 @RestReturn(value=ListPrintOrdersResponse.class)
@@ -240,7 +241,7 @@ public class SiYinPrintController extends ControllerBase {
 	 
 	 /**
 	  * <b>URL: /siyinprint/getPrintUnpaidOrder</b>
-	  * <p>查询是否存在未支付订单</p>
+	  * <p>15.查询是否存在未支付订单</p>
 	  */
 	 @RequestMapping("getPrintUnpaidOrder")
 	 @RestReturn(value=GetPrintUnpaidOrderResponse.class)
@@ -254,7 +255,7 @@ public class SiYinPrintController extends ControllerBase {
 	 
 	 /**
 	  * <b>URL: /siyinprint/payPrintOrder</b>
-	  * <p>支付订单</p>
+	  * <p>16.支付订单</p>
 	  */
 	 @RequestMapping("payPrintOrder")
 	 @RestReturn(value=CommonOrderDTO.class)
@@ -268,7 +269,7 @@ public class SiYinPrintController extends ControllerBase {
 
 	/**
 	 * <b>URL: /siyinprint/payPrintOrderV2</b>
-	 * <p>支付订单</p>
+	 * <p>17.新支付订单</p>
 	 */
 	@RequestMapping("payPrintOrderV2")
 	@RestReturn(value=PreOrderDTO.class)
@@ -282,7 +283,7 @@ public class SiYinPrintController extends ControllerBase {
 	 
 	 /**
 	  * <b>URL: /siyinprint/listPrintingJobs</b>
-	  * <p>查询正在进行的任务</p>
+	  * <p>18.查询正在进行的任务</p>
 	  */
 	 @RequestMapping("listPrintingJobs")
 	 @RestReturn(value=ListPrintingJobsResponse.class)
@@ -296,13 +297,13 @@ public class SiYinPrintController extends ControllerBase {
 	 
 	 /**
 	  * <b>URL: /siyinprint/unlockPrinter</b>
-	  * <p>直接解锁打印机,请先调用 /siyinprint/getPrintUnpaidOrder 接口检查未支付订单</p>
+	  * <p>19.直接解锁打印机,请先调用 /siyinprint/getPrintUnpaidOrder 接口检查未支付订单</p>
 	  */
 	 @RequestMapping("unlockPrinter")
-	 @RestReturn(value=String.class)
+	 @RestReturn(value=UnlockPrinterResponse.class)
 	 public RestResponse unlockPrinter(UnlockPrinterCommand cmd) {
-		 siyinPrintService.unlockPrinter(cmd);
-	     RestResponse response = new RestResponse();
+		 UnlockPrinterResponse r = siyinPrintService.unlockPrinter(cmd);
+	     RestResponse response = new RestResponse(r);
 	     response.setErrorCode(ErrorCodes.SUCCESS);
 	     response.setErrorDescription("OK");
 	     return response;
@@ -311,7 +312,7 @@ public class SiYinPrintController extends ControllerBase {
 	 /**
 	  * 
 	  * <b>URL: /siyinprint/jobLogNotification</b>
-	  * <p>司印方调用，任务日志处理</p>
+	  * <p>20.司印方调用，任务日志处理</p>
 	  */
 	 @RequestMapping("jobLogNotification")
 	 @RestReturn(String.class)
@@ -327,17 +328,52 @@ public class SiYinPrintController extends ControllerBase {
 	/**
 	 * 
 	 * <b>URL: /siyinprint/mfpLogNotification</b>
-	 * <p>司印方调用，任务日志处理</p>
+	 * <p>21.司印方调用，任务日志处理</p>
 	 */
     @RequestMapping("mfpLogNotification")
-    @RestReturn(String.class)
     @RequireAuthentication(false)
-    public RestResponse mfpLogNotification(@RequestParam(value="jobData", required=true) String jobData){
-    	Map<String, PrintSettingColorTypeDTO> map = new HashMap<String, PrintSettingColorTypeDTO>();
-    	map.put("athree", new PrintSettingColorTypeDTO());
-    	map.put("afour", new PrintSettingColorTypeDTO());
-    	map.put("afive", new PrintSettingColorTypeDTO());
-        RestResponse restResponse = new RestResponse(map);
-        return restResponse;
+    public void mfpLogNotification(@RequestParam(value="jobData", required=true) String jobData, HttpServletResponse response){
+    	siyinPrintService.mfpLogNotification(jobData,response);
     }
+    
+    /**
+	  * <b>URL: /siyinprint/listQueueJobs</b>
+	  * <p>22.查询待打印的任务</p>
+	  */
+	 @RequestMapping("listQueueJobs")
+	 @RestReturn(value=ListQueueJobsResponse.class)
+	 public RestResponse listQueueJobs(ListQueueJobsCommand cmd) {
+	     RestResponse response = new RestResponse(siyinPrintService.listQueueJobs(cmd));
+	     response.setErrorCode(ErrorCodes.SUCCESS);
+	     response.setErrorDescription("OK");
+	     return response;
+	 }
+	 
+	 /**
+	  * <b>URL: /siyinprint/releaseQueueJobs</b>
+	  * <p>23.放行指定的待打印任务</p>
+	  */
+	 @RequestMapping("releaseQueueJobs")
+	 @RestReturn(value=String.class)
+	 public RestResponse releaseQueueJobs(ReleaseQueueJobsCommand cmd) {
+	     siyinPrintService.releaseQueueJobs(cmd);
+	     RestResponse response = new RestResponse();
+	     response.setErrorCode(ErrorCodes.SUCCESS);
+	     response.setErrorDescription("OK");
+	     return response;
+	 }
+	 
+	 /**
+	  * <b>URL: /siyinprint/deleteQueueJobs</b>
+	  * <p>24.删除指定的待打印任务</p>
+	  */
+	 @RequestMapping("deleteQueueJobs")
+	 @RestReturn(value=String.class)
+	 public RestResponse deleteQueueJobs(DeleteQueueJobsCommand cmd) {
+	     siyinPrintService.deleteQueueJobs(cmd);
+	     RestResponse response = new RestResponse();
+	     response.setErrorCode(ErrorCodes.SUCCESS);
+	     response.setErrorDescription("OK");
+	     return response;
+	 }
 }

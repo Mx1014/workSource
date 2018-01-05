@@ -15,7 +15,8 @@ public interface EnterpriseLeaseIssuerProvider {
 
     void deleteLeaseIssuer(LeaseIssuer leaseIssuer);
 
-    List<LeaseIssuer> listLeaseIssers(Integer namespaceId, Long organizationId, String keyword, Long pageAnchor, Integer pageSize);
+    List<LeaseIssuer> listLeaseIssuers(Integer namespaceId, Long organizationId, String keyword, Long categoryId,
+                                       Long pageAnchor, Integer pageSize);
 
     LeasePromotionConfig getLeasePromotionConfigByNamespaceId(Integer namespaceId);
 
@@ -23,21 +24,21 @@ public interface EnterpriseLeaseIssuerProvider {
 
     void deleteLeaseIssuerAddressByLeaseIssuerId(Long leaseIssuerId);
 
-    List<LeaseIssuerAddress> listLeaseIsserAddresses(Long leaseIssuerId, Long buildingId);
+    List<LeaseIssuerAddress> listLeaseIssuerAddresses(Long leaseIssuerId, Long buildingId);
 
-    List<LeaseIssuerAddress> listLeaseIsserBuildings(Long leaseIssuerId);
+    List<LeaseIssuerAddress> listLeaseIssuerBuildings(Long leaseIssuerId);
 
-    LeaseIssuer fingLeaseIssersByOrganizationId(Integer namespaceId, Long organizationId);
+    LeaseIssuer fingLeaseIssuersByOrganizationId(Integer namespaceId, Long organizationId, Long categoryId);
 
-    LeaseIssuer findLeaseIssersByContact(Integer namespaceId, String contact);
+    LeaseIssuer findLeaseIssuersByContact(Integer namespaceId, String contact, Long categoryId);
 
-    List<LeasePromotionConfig> listLeasePromotionConfigByNamespaceId(Integer namespaceId);
+    List<LeasePromotionConfig> listLeasePromotionConfigs(Integer namespaceId, Long categoryId);
 
     void createLeasePromotionConfig(LeasePromotionConfig config);
 
-    LeasePromotionConfig findLeasePromotionConfig(Integer namespaceId, String configName);
+    LeasePromotionConfig findLeasePromotionConfig(Integer namespaceId, String configName, Long categoryId);
 
-    void deleteLeasePromotionConfig(Integer namespaceId, String configName);
+    void deleteLeasePromotionConfig(Integer namespaceId, String configName, Long categoryId);
 
     void updateLeasePromotionConfig(LeasePromotionConfig config);
 }

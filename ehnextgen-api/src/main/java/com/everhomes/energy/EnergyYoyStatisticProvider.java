@@ -19,7 +19,7 @@ public interface EnergyYoyStatisticProvider {
 	List<EnergyYoyStatistic> queryEnergyYoyStatistics(ListingLocator locator, int count,
 			ListingQueryBuilderCallback queryBuilderCallback);
 
-	List<EnergyYoyStatistic>  listenergyYoyStatistics(Integer currentNamespaceId, String dateStr);
+	List<EnergyYoyStatistic>  listenergyYoyStatistics(Integer currentNamespaceId, String dateStr, Long communityId);
  
 	EnergyYoyStatistic getEnergyYoyStatisticByCommuniytyAndDate(Long communityId, String date);
 

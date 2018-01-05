@@ -6,17 +6,26 @@ import com.everhomes.constants.ErrorCodes;
 import com.everhomes.controller.ControllerBase;
 import com.everhomes.discover.RestDoc;
 import com.everhomes.discover.RestReturn;
+import com.everhomes.entity.EntityType;
+import com.everhomes.portal.PortalService;
 import com.everhomes.rest.RestResponse;
 import com.everhomes.rest.RestResponseBase;
+import com.everhomes.rest.acl.ListServiceModuleAdministratorsCommand;
+import com.everhomes.rest.acl.PrivilegeConstants;
+import com.everhomes.rest.acl.PrivilegeServiceErrorCode;
 import com.everhomes.rest.asset.*;
 import com.everhomes.rest.contract.FindContractCommand;
 import com.everhomes.rest.order.PreOrderDTO;
+import com.everhomes.rest.organization.OrganizationContactDTO;
 import com.everhomes.rest.pmkexing.ListOrganizationsByPmAdminDTO;
+import com.everhomes.rest.portal.ListServiceModuleAppsCommand;
+import com.everhomes.rest.portal.ListServiceModuleAppsResponse;
 import com.everhomes.rest.user.UserInfo;
 import com.everhomes.rest.user.UserServiceErrorCode;
 import com.everhomes.rest.user.admin.ImportDataResponse;
 import com.everhomes.user.User;
 import com.everhomes.user.UserContext;
+import com.everhomes.user.UserPrivilegeMgr;
 import com.everhomes.util.RequireAuthentication;
 import com.everhomes.util.RuntimeErrorException;
 import org.slf4j.Logger;
@@ -31,6 +40,30 @@ import javax.validation.Valid;
 import java.math.BigDecimal;
 import java.util.List;
 
+/**
+ **************************************************************
+ *                                                            *
+ *   .=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-.       *
+ *    |                     ______                     |      *
+ *    |                  .-"      "-.                  |      *
+ *    |                 /            \                 |      *
+ *    |     _          |              |          _     |      *
+ *    |    ( \         |,  .-.  .-.  ,|         / )    |      *
+ *    |     > "=._     | )(__/  \__)( |     _.=" <     |      *
+ *    |    (_/"=._"=._ |/     /\     \| _.="_.="\_)    |      *
+ *    |           "=._"(_     ^^     _)"_.="           |      *
+ *    |               "=\__|IIIIII|__/="               |      *
+ *    |              _.="| \IIIIII/ |"=._              |      *
+ *    |    _     _.="_.="\          /"=._"=._     _    |      *
+ *    |   ( \_.="_.="     `--------`     "=._"=._/ )   |      *
+ *    |    > _.="                            "=._ <    |      *
+ *    |   (_/                                    \_)   |      *
+ *    |                                                |      *
+ *    '-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-='      *
+ *                                                            *
+ *           LASCIATE OGNI SPERANZA, VOI CH'ENTRATE           *
+ **************************************************************
+ */
 @RestDoc(value = "Asset Controller", site = "core")
 @RestController
 @RequestMapping("/asset")
@@ -43,6 +76,10 @@ public class AssetController extends ControllerBase {
     private ConfigurationProvider configurationProvider;
     @Autowired
     private PaymentService paymentService;
+    @Autowired
+    private PortalService portalService;
+    @Autowired
+    private UserPrivilegeMgr userPrivilegeMgr;
 
 //    根据用户查关联模板字段列表（必填字段最前，关联表中最新version的字段按default_order和id排序）
     /**
@@ -1091,7 +1128,7 @@ public class AssetController extends ControllerBase {
     }
     /**
      * <b>URL: /asset/autoNoticeConfig</b>
-     * <p></p>
+     * <p>自动缴费配置</p>
      */
     @RequestMapping("autoNoticeConfig")
     @RestReturn(String.class)
@@ -1105,7 +1142,7 @@ public class AssetController extends ControllerBase {
 
     /**
      * <b>URL: /asset/listAutoNoticeConfig</b>
-     * <p></p>
+     * <p>设置自动催缴</p>
      */
     @RequestMapping("listAutoNoticeConfig")
     @RestReturn(ListAutoNoticeConfigResponse.class)
@@ -1119,7 +1156,7 @@ public class AssetController extends ControllerBase {
 
     /**
      * <b>URL: /asset/activeAutoBillNotice</b>
-     * <p></p>
+     * <p>主动调用定期催缴的功能</p>
      */
     @RequestMapping("activeAutoBillNotice")
     @RestReturn(String.class)
@@ -1146,7 +1183,7 @@ public class AssetController extends ControllerBase {
 
     /**
      * <b>URL: /asset/functionDisableList</b>
-     * <p></p>
+     * <p>功能失效列表</p>
      */
     @RequestMapping("functionDisableList")
     @RestReturn(value = FunctionDisableListDto.class)
@@ -1171,5 +1208,4 @@ public class AssetController extends ControllerBase {
         restResponse.setErrorDescription("OK");
         return restResponse;
     }
-
 }

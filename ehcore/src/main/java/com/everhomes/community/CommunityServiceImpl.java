@@ -259,6 +259,7 @@ public class CommunityServiceImpl implements CommunityService {
 			checkCommunityNumberUnique(community.getId(), cmd.getCommunityNumber(), community.getNamespaceId());
 		}
 		community.setCommunityNumber(cmd.getCommunityNumber());
+		community.setAliasName(cmd.getAliasName());
 		community.setAreaId(cmd.getAreaId());
 		community.setCityId(cmd.getCityId());
 		community.setOperatorUid(userId);

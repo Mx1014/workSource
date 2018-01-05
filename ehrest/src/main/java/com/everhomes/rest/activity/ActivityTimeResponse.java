@@ -1,6 +1,7 @@
 // @formatter:off
 package com.everhomes.rest.activity;
 
+import com.everhomes.rest.forum.InteractFlag;
 import com.everhomes.util.StringHelper;
 
 /**
@@ -14,6 +15,7 @@ import com.everhomes.util.StringHelper;
  *     <li>orderHours: 订单小时数</li>
  *     <li>orderTime: 订单时长</li>
  *     <li>wechatSignup: 是否支持微信报名，0-不支持，1-支持 参考  参考{@link com.everhomes.rest.activity.WechatSignupFlag }</li>
+ *     <li>interactFlag: 是否支持交互 {@link InteractFlag}</li>
  * </ul>
  */
 public class ActivityTimeResponse {
@@ -26,6 +28,7 @@ public class ActivityTimeResponse {
 	private Integer orderHours;
 	private Long orderTime;
 	private Byte wechatSignup;
+	private Byte interactFlag;
 
 	public Integer getNamespaceId() {
 		return namespaceId;
@@ -97,6 +100,14 @@ public class ActivityTimeResponse {
 
 	public void setCategoryId(Long categoryId) {
 		this.categoryId = categoryId;
+	}
+
+	public Byte getInteractFlag() {
+		return interactFlag;
+	}
+
+	public void setInteractFlag(Byte interactFlag) {
+		this.interactFlag = interactFlag;
 	}
 
 	@Override

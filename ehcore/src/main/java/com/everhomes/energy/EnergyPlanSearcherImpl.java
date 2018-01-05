@@ -5,21 +5,29 @@ import com.everhomes.entity.EntityType;
 import com.everhomes.organization.Organization;
 import com.everhomes.organization.OrganizationJobPosition;
 import com.everhomes.organization.OrganizationProvider;
+import com.everhomes.portal.PortalService;
 import com.everhomes.repeat.RepeatProvider;
 import com.everhomes.repeat.RepeatSettings;
 import com.everhomes.rest.acl.PrivilegeConstants;
+import com.everhomes.rest.acl.PrivilegeServiceErrorCode;
 import com.everhomes.rest.approval.CommonStatus;
+import com.everhomes.rest.common.ServiceModuleConstants;
 import com.everhomes.rest.energy.EnergyPlanDTO;
 import com.everhomes.rest.energy.EnergyPlanGroupDTO;
 import com.everhomes.rest.energy.SearchEnergyPlansCommand;
 import com.everhomes.rest.energy.SearchEnergyPlansResponse;
+import com.everhomes.rest.launchpad.ActionType;
+import com.everhomes.rest.portal.ListServiceModuleAppsCommand;
+import com.everhomes.rest.portal.ListServiceModuleAppsResponse;
 import com.everhomes.rest.repeat.RepeatSettingsDTO;
 import com.everhomes.search.AbstractElasticSearch;
 import com.everhomes.search.EnergyPlanSearcher;
 import com.everhomes.search.SearchUtils;
 import com.everhomes.settings.PaginationConfigHelper;
+import com.everhomes.user.UserContext;
 import com.everhomes.user.UserPrivilegeMgr;
 import com.everhomes.util.ConvertHelper;
+import com.everhomes.util.RuntimeErrorException;
 import com.everhomes.util.StringHelper;
 import org.elasticsearch.action.bulk.BulkRequestBuilder;
 import org.elasticsearch.action.search.SearchRequestBuilder;
@@ -64,6 +72,24 @@ public class EnergyPlanSearcherImpl extends AbstractElasticSearch implements Ene
 
     @Autowired
     private UserPrivilegeMgr userPrivilegeMgr;
+    @Autowired
+    private PortalService portalService;
+
+    private void checkEnergyAuth(Integer namespaceId, Long privilegeId, Long orgId, Long communityId) {
+        ListServiceModuleAppsCommand cmd = new ListServiceModuleAppsCommand();
+        cmd.setNamespaceId(namespaceId);
+        cmd.setModuleId(ServiceModuleConstants.ENERGY_MODULE);
+        cmd.setActionType(ActionType.OFFICIAL_URL.getCode());
+        ListServiceModuleAppsResponse apps = portalService.listServiceModuleAppsWithConditon(cmd);
+        Long appId = apps.getServiceModuleApps().get(0).getId();
+        if(!userPrivilegeMgr.checkUserPrivilege(UserContext.currentUserId(), EntityType.ORGANIZATIONS.getCode(), orgId,
+                orgId, privilegeId, appId, null, communityId)) {
+            LOGGER.error("Permission is prohibited, namespaceId={}, orgId={}, ownerType={}, ownerId={}, privilegeId={}",
+                    namespaceId, orgId, EntityType.COMMUNITY.getCode(), communityId, privilegeId);
+            throw RuntimeErrorException.errorWith(PrivilegeServiceErrorCode.SCOPE, PrivilegeServiceErrorCode.ERROR_CHECK_APP_PRIVILEGE,
+                    "check user privilege error");
+        }
+    }
 
     @Override
     public String getIndexType() {
@@ -157,7 +183,8 @@ public class EnergyPlanSearcherImpl extends AbstractElasticSearch implements Ene
 
     @Override
     public SearchEnergyPlansResponse query(SearchEnergyPlansCommand cmd) {
-        userPrivilegeMgr.checkCurrentUserAuthority(EntityType.COMMUNITY.getCode(), cmd.getCommunityId(), cmd.getOrganizationId(), PrivilegeConstants.ENERGY_PLAN_LIST);
+//        userPrivilegeMgr.checkCurrentUserAuthority(EntityType.COMMUNITY.getCode(), cmd.getCommunityId(), cmd.getOrganizationId(), PrivilegeConstants.ENERGY_PLAN_LIST);
+        checkEnergyAuth(cmd.getNamespaceId(), PrivilegeConstants.ENERGY_PLAN_LIST, cmd.getOrganizationId(),  cmd.getCommunityId());
         SearchRequestBuilder builder = getClient().prepareSearch(getIndexName()).setTypes(getIndexType());
         QueryBuilder qb = null;
         if(cmd.getKeywords() == null || cmd.getKeywords().isEmpty()) {
