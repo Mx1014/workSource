@@ -10,7 +10,6 @@ CREATE TABLE `eh_equipment_inspection_plans` (
   `plan_type` tinyint(4) NOT NULL DEFAULT '0' COMMENT 'the type of plan 0: 巡检  1: 保养',
   `name` varchar(1024) DEFAULT NULL COMMENT 'the name of plan_number',
   `status` tinyint(4) NOT NULL DEFAULT '0' COMMENT 'status of plans  0:waitting for starting 1: waitting for approving  2: Active 3:inActive',
-  `review_result` tinyint(4) NOT NULL DEFAULT '0' COMMENT '0:none, 1:qualified 2:unqualified 3:review_delay',
   `repeat_setting_id` bigint(20) NOT NULL DEFAULT '0' COMMENT 'refers to eh_repeatsetting ',
   `remarks` text,
   `creator_uid` bigint(20) NOT NULL DEFAULT '0',
