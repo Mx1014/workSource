@@ -9,4 +9,5 @@ public class SocialSecurityConstants {
 	/**default city : 深圳*/
 	public static final Long DEFAULT_CITY = 13905L;
 	public static final int ERROR_FILE_IS_EMPTY = 10003;
+	public static final Integer ERROR_CHECK_CONTACT = 10004;
 }

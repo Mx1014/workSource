@@ -30,6 +30,7 @@ import com.everhomes.util.RuntimeErrorException;
 import com.everhomes.util.StringHelper;
 import com.everhomes.util.excel.RowResult;
 import com.everhomes.util.excel.handler.PropMrgOwnerHandler;
+import org.apache.commons.collections.map.HashedMap;
 import org.apache.poi.ss.usermodel.Row;
 import org.apache.poi.ss.usermodel.Workbook;
 import org.apache.poi.xssf.usermodel.XSSFSheet;
@@ -552,6 +553,7 @@ public class SocialSecurityServiceImpl implements SocialSecurityService {
         if (null == memberDetail) {
             return response;
         }
+        response.setIdNumber(memberDetail.getIdNumber());
         response.setDetailId(memberDetail.getId());
         response.setUserName(memberDetail.getContactName());
         response.setSocialSecurityNo(memberDetail.getSocialSecurityNumber());
@@ -923,16 +925,23 @@ public class SocialSecurityServiceImpl implements SocialSecurityService {
 
     private void batchUpdateSSSettingAndPayments(List list, Long ownerId, String fileLog, ImportFileResponse response) {
         //
-        ImportFileResultLog<Map<String, String>> log = new ImportFileResultLog<>(SocialSecurityConstants.SCOPE);
         response.setLogs(new ArrayList<>());
         for (int i = 1; i < list.size(); i++) {
             RowResult r = (RowResult) list.get(i);
+            ImportFileResultLog<Map<String, String>> log = new ImportFileResultLog<>(SocialSecurityConstants.SCOPE);
+            if (null == response.getLogs()) {
+                response.setLogs(new ArrayList<>());
+            }
+            response.getLogs().add(log);
+            log.setData(r.getCells());
             String userContact = r.getA();
             OrganizationMemberDetails detail = organizationProvider.findOrganizationMemberDetailsByOrganizationIdAndContactToken(ownerId, userContact);
             if (null == detail) {
-                response.setFileLog("找不到用户: 手机号" + userContact);
+//                response.setFileLog("找不到用户: 手机号" + userContact);
                 LOGGER.error("can not find organization member ,contact token is " + userContact);
-
+                log.setErrorLog("找不到用户: 手机号" + userContact);
+                log.setCode(SocialSecurityConstants.ERROR_CHECK_CONTACT);
+                continue;
             } else {
                 String ssCityName = r.getB();
                 Long ssCityId = getZuolinNamespaceCityId(ssCityName);
@@ -956,6 +965,7 @@ public class SocialSecurityServiceImpl implements SocialSecurityService {
         socialSecuritySettingProvider.syncRadixAndRatioToPayments(ownerId);
 
     }
+
 
     @Override
     public CalculateSocialSecurityReportsResponse calculateSocialSecurityReports(CalculateSocialSecurityReportsCommand cmd) {
@@ -1836,7 +1846,7 @@ public class SocialSecurityServiceImpl implements SocialSecurityService {
         String paymonth = payments.get(0).getPayMonth();
         if (!paymonth.equals(cmd.getPaymentMonth())) {
             throw RuntimeErrorException.errorWith(SocialSecurityConstants.SCOPE, SocialSecurityConstants.ERROR_NO_PAYMENTS,
-                    "没有当月缴费数据!");
+                    "归档月份错误! 月份[" + paymonth + "],参数[" + cmd + "]");
         }
         //删除之前当月的归档表
         socialSecurityPaymentLogProvider.deleteMonthLog(cmd.getOwnerId(), cmd.getPaymentMonth());
