@@ -38,8 +38,7 @@ public class ZhongBaiChangParkingVendorHandler extends DefaultParkingVendorHandl
 
 			// 格式yyyyMMddHHmmss
 			String validEnd = entity.getData().getEndTime();
-			Long endTime = Utils.strToLong(validEnd, Utils.DateStyle.DATE_TIME_STR);
-			;
+			Long endTime = Utils.strToLong(validEnd, Utils.DateStyle.DATE_TIME);
 
 			setCardStatus(parkingLot, endTime, parkingCardDTO);// 这里设置过期可用，正常可用
 
