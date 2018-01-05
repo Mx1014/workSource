@@ -4710,7 +4710,7 @@ public class PropertyMgrServiceImpl implements PropertyMgrService {
         newPmOwner.setCreateTime(new Timestamp(DateHelper.currentGMTTime().getTime()));
         newPmOwner.setStatus(OrganizationOwnerStatus.NORMAL.getCode());
         newPmOwner.setAvatar(memberUser.getAvatar());
-        newPmOwner.setOrgOwnerTypeId(8L);// 没想到怎么做比较好, 先写死, 归类为"无"
+        newPmOwner.setOrgOwnerTypeId(7L);// 先写死, 归类为"其他"
         newPmOwner.setGender(memberUser.getGender());
         newPmOwner.setCommunityId(memberUser.getCommunityId() == null ? null : memberUser.getCommunityId().toString());
         newPmOwner.setContactType(ContactType.MOBILE.getCode());
@@ -4990,8 +4990,7 @@ public class PropertyMgrServiceImpl implements PropertyMgrService {
 		// TODO Auto-generated method stub
 		List<CommunityPmOwner> owners = propertyMgrProvider.listCommunityPmOwnersByToken(
 				identifier.getNamespaceId(), identifier.getIdentifierToken());
-		LOGGER.debug("processUserForOwner: user identifier: {}, owners: {}",
-				identifier.getIdentifierToken(), StringHelper.toJsonString(owners));
+		LOGGER.debug("processUserForOwner: user identifier: {}, owners: {}", identifier.getIdentifierToken(), StringHelper.toJsonString(owners));
 		if(null != owners && owners.size() > 0) {
 			for(CommunityPmOwner owner : owners) {
 				List<OrganizationOwnerAddress> ownerAddressList = propertyMgrProvider.listOrganizationOwnerAddressByOwnerId(identifier.getNamespaceId(), owner.getId());
