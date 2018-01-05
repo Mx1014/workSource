@@ -5743,7 +5743,11 @@ public class FlowServiceImpl implements FlowService {
         List<FlowServiceTypeDTO> serviceTypes = new ArrayList<>();
         Integer namespaceId = UserContext.getCurrentNamespaceId();
 
-        serviceTypes.addAll(flowListenerManager.listFlowServiceTypes(namespaceId, cmd.getModuleId(), EntityType.ORGANIZATIONS.getCode(), cmd.getOrganizationId()));
+        List<FlowServiceTypeDTO> types = flowListenerManager.listFlowServiceTypes(namespaceId, cmd.getModuleId(),
+                EntityType.ORGANIZATIONS.getCode(), cmd.getOrganizationId());
+        if (types != null) {
+            serviceTypes.addAll(types);
+        }
 
         List<FlowServiceTypeDTO> nsServiceTypes = flowServiceTypeProvider.listFlowServiceType(
                 namespaceId, cmd.getModuleId(), EntityType.ORGANIZATIONS.getCode(), cmd.getOrganizationId(), FlowServiceTypeDTO.class);

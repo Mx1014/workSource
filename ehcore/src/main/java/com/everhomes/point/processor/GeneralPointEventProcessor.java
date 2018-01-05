@@ -55,7 +55,6 @@ public class GeneralPointEventProcessor implements IGeneralPointEventProcessor {
 
     @Override
     public PointEventProcessResult execute(LocalEvent localEvent, PointRule rule, PointSystem pointSystem, PointRuleCategory pointRuleCategory) {
-
         boolean isValidEvent = isValidEvent(localEvent);
         if (!isValidEvent) {
             return null;
