@@ -5,6 +5,7 @@ import com.everhomes.db.DaoAction;
 import com.everhomes.db.DaoHelper;
 import com.everhomes.db.DbProvider;
 import com.everhomes.naming.NameMapper;
+import com.everhomes.rest.approval.CommonStatus;
 import com.everhomes.sequence.SequenceProvider;
 import com.everhomes.server.schema.Tables;
 import com.everhomes.server.schema.tables.daos.EhContractPaymentPlansDao;
@@ -64,6 +65,7 @@ public class ContractPaymentPlanProviderImpl implements ContractPaymentPlanProvi
         DSLContext context = dbProvider.getDslContext(AccessSpec.readOnly());
         SelectQuery<EhContractPaymentPlansRecord> query = context.selectQuery(Tables.EH_CONTRACT_PAYMENT_PLANS);
         query.addConditions(Tables.EH_CONTRACT_PAYMENT_PLANS.CONTRACT_ID.eq(contractId));
+        query.addConditions(Tables.EH_CONTRACT_PAYMENT_PLANS.STATUS.eq(CommonStatus.ACTIVE.getCode()));
 
         List<ContractPaymentPlan> result = new ArrayList<>();
         query.fetch().map((r) -> {
