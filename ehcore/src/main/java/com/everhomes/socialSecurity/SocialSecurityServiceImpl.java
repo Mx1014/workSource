@@ -1117,19 +1117,20 @@ public class SocialSecurityServiceImpl implements SocialSecurityService {
             } else {
                 setting.setEmployeeRatio(employeeRatio);
             }
+            if (StringUtils.isNotBlank(base.getRatioOptions())) {
+                List<Integer> options = JSONObject.parseArray(base.getRatioOptions(), Integer.class);
+                if (options.contains(employeeRatio) || employeeRatio.equals(0)) {
+                    //都在options就没问题
+                } else {
+                    return itemDTO.getPayItem() == null ? "公积金" : itemDTO.getPayItem() + "的比例可选项 万分之: [{" + base.getRatioOptions() + "}]   ";
+                }
+
+            }
         } else {
             setting.setEmployeeRatio(employeeRatio);
         }
 
-        if (StringUtils.isNotBlank(base.getRatioOptions())) {
-            List<Integer> options = JSONObject.parseArray(base.getRatioOptions(), Integer.class);
-            if (options.contains(employeeRatio) || employeeRatio.equals(0)) {
-                //都在options就没问题
-            } else {
-                return itemDTO.getPayItem() == null ? "公积金" : itemDTO.getPayItem() + "的比例可选项 万分之: [{" + base.getRatioOptions() + "}]   ";
-            }
 
-        }
         return null;
     }
 
@@ -1142,18 +1143,19 @@ public class SocialSecurityServiceImpl implements SocialSecurityService {
             } else {
                 setting.setCompanyRatio(companyRatio);
             }
+            if (StringUtils.isNotBlank(base.getRatioOptions())) {
+                List<Integer> options = JSONObject.parseArray(base.getRatioOptions(), Integer.class);
+                if (options.contains(companyRatio) || companyRatio.equals(0)) {
+                    //都在options就没问题
+                } else {
+                    return itemDTO.getPayItem() == null ? "公积金" : itemDTO.getPayItem() + "的比例可选项 万分之: [{" + base.getRatioOptions() + "}]   ";
+                }
+
+            }
         } else {
             setting.setCompanyRatio(companyRatio);
         }
-        if (StringUtils.isNotBlank(base.getRatioOptions())) {
-            List<Integer> options = JSONObject.parseArray(base.getRatioOptions(), Integer.class);
-            if (options.contains(companyRatio) || companyRatio.equals(0)) {
-                //都在options就没问题
-            } else {
-                return itemDTO.getPayItem() == null ? "公积金" : itemDTO.getPayItem() + "的比例可选项 万分之: [{" + base.getRatioOptions() + "}]   ";
-            }
 
-        }
         return null;
     }
 
