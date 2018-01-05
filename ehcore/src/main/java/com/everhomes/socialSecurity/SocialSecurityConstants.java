@@ -10,4 +10,7 @@ public class SocialSecurityConstants {
 	public static final Long DEFAULT_CITY = 13905L;
 	public static final int ERROR_FILE_IS_EMPTY = 10003;
 	public static final Integer ERROR_CHECK_CONTACT = 10004;
+	public static final Integer ERROR_CHECK_SOCIAL_CITY = 10005;
+	public static final Integer ERROR_CHECK_SSRADIX = 10006;
+	public static final Integer ERROR_CHECK_AFRADIX = 10007;
 }
