@@ -5,9 +5,6 @@ import com.everhomes.address.Address;
 import com.everhomes.address.AddressProvider;
 import com.everhomes.address.AddressService;
 import com.everhomes.bootstrap.PlatformContext;
-import com.everhomes.bus.LocalEventBus;
-import com.everhomes.bus.LocalEventContext;
-import com.everhomes.bus.SystemEvent;
 import com.everhomes.business.Business;
 import com.everhomes.business.BusinessProvider;
 import com.everhomes.community.Community;
@@ -50,12 +47,10 @@ import com.everhomes.rest.ui.user.UserProfileDTO;
 import com.everhomes.rest.user.*;
 import com.everhomes.rest.version.VersionRequestCommand;
 import com.everhomes.rest.version.VersionUrlResponse;
-import com.everhomes.rest.visibility.VisibleRegionType;
 import com.everhomes.rest.yellowPage.GetRequestInfoResponse;
 import com.everhomes.scheduler.RunningFlag;
 import com.everhomes.scheduler.ScheduleProvider;
 import com.everhomes.server.schema.tables.pojos.EhCommunities;
-import com.everhomes.server.schema.tables.pojos.EhForumPosts;
 import com.everhomes.settings.PaginationConfigHelper;
 import com.everhomes.statistics.terminal.AppVersion;
 import com.everhomes.statistics.terminal.StatTerminalProvider;
@@ -619,7 +614,7 @@ public class UserActivityServiceImpl implements UserActivityService {
 
 //    }
 
-    private void feedbackEvent(Feedback feedback) {
+    /*private void feedbackEvent(Feedback feedback) {
         Post post = forumProvider.findPostById(feedback.getTargetId());
         if(post == null) {
             return;
@@ -650,7 +645,7 @@ public class UserActivityServiceImpl implements UserActivityService {
                 event.addParam("parentPost", StringHelper.toJsonString(tempParentPost));
             }
         });
-    }
+    }*/
 	
     @Override
     public void addUserFavorite(AddUserFavoriteCommand cmd) {

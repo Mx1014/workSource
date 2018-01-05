@@ -150,7 +150,7 @@ public class PointEventLogScheduler implements ApplicationListener<ContextRefres
                         1, new CustomizableThreadFactory("PointEventLogSchedule-"));
                 initScheduledTask();
             } else {
-                LOGGER.info("PointEventLogSchedulerRestart failed, scheduledExecutorService.isTerminated() is {}.",
+                LOGGER.info("PointEventLogSchedulerRestart skipped, scheduledExecutorService.isTerminated() is {}.",
                         scheduledExecutorService.isTerminated());
             }
             return LocalBusSubscriber.Action.none;
