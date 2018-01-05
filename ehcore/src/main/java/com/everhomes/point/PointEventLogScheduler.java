@@ -143,9 +143,15 @@ public class PointEventLogScheduler implements ApplicationListener<ContextRefres
     private void initRestartSubscriber() {
         LocalEventBus.subscribe("PointEventLogSchedulerRestart", (sender, subject, args, subscriptionPath) -> {
             if (scheduledExecutorService.isTerminated()) {
+                LOGGER.info("PointEventLogSchedulerRestart success, scheduledExecutorService.isTerminated() is {}.",
+                        scheduledExecutorService.isTerminated());
+
                 scheduledExecutorService = Executors.newScheduledThreadPool(
                         1, new CustomizableThreadFactory("PointEventLogSchedule-"));
                 initScheduledTask();
+            } else {
+                LOGGER.info("PointEventLogSchedulerRestart failed, scheduledExecutorService.isTerminated() is {}.",
+                        scheduledExecutorService.isTerminated());
             }
             return LocalBusSubscriber.Action.none;
         });
@@ -186,7 +192,7 @@ public class PointEventLogScheduler implements ApplicationListener<ContextRefres
              PrintStream stream = new PrintStream(out)) {
             e.printStackTrace(stream);
             String message = out.toString("UTF-8");
-            handler.sendMail(0, account, xqt, "PointEventLogSchedule error (" + home + ")", message);
+            handler.sendMail(0, account, xqt, "PointEventLogSchedule error (" + serverId + ")(" + home + ")", message);
         } catch (Exception ignored) { }
         // ------------------------------------------------------------------------
     }

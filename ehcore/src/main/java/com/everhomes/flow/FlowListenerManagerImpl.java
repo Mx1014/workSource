@@ -234,16 +234,22 @@ public class FlowListenerManagerImpl implements FlowListenerManager, Application
 
     @Override
     public List<FlowServiceTypeDTO> listFlowServiceTypes(Integer namespaceId, Long moduleId, String ownerType, Long ownerId) {
-        List<FlowServiceTypeDTO> serviceTypes = new ArrayList<>();
         if (moduleId != null) {
             FlowModuleInst moduleInst = moduleMap.get(moduleId);
             if (moduleInst != null) {
-                serviceTypes.addAll(listFlowServiceTypesFromListener(moduleInst, namespaceId, ownerType, ownerId));
+                return listFlowServiceTypesFromListener(moduleInst, namespaceId, ownerType, ownerId);
             }
         } else {
-            moduleMap.forEach((k, v) -> serviceTypes.addAll(listFlowServiceTypesFromListener(v, namespaceId, ownerType, ownerId)));
+            List<FlowServiceTypeDTO> serviceTypes = new ArrayList<>();
+            moduleMap.forEach((k, v) -> {
+                List<FlowServiceTypeDTO> types = listFlowServiceTypesFromListener(v, namespaceId, ownerType, ownerId);
+                if (types != null) {
+                    serviceTypes.addAll(types);
+                }
+            });
+            return serviceTypes;
         }
-        return serviceTypes;
+        return null;
     }
 
     private List<FlowServiceTypeDTO> listFlowServiceTypesFromListener(FlowModuleInst moduleInst, Integer namespaceId, String ownerType, Long ownerId) {
