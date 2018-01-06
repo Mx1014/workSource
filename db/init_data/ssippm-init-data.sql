@@ -566,7 +566,7 @@ INSERT INTO `eh_service_alliances` (`id`, `parent_id`, `owner_type`, `owner_id`,
 ((@eh_service_alliances_id:=@eh_service_alliances_id+1), '0', 'community', '240111044332059733', '地产服务', '地产服务', '0', '', NULL, NULL, NULL, '2', @eh_service_alliances_id, NULL, NULL, NULL, '1', '0', NULL, NULL, '', NULL, ' ', NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, '1', NOW(), NULL, NULL, '2', NULL, '2', '1');
 
 -- by nan.rong 新增工作汇报菜单及入口，20180106
-update eh_launch_pad_items set action_type = 60, action_data = '{\"url\":\"zl://work-report/main\"}' where icon_uri= "cs://1/image/aW1hZ2UvTVRwbE9HUXhNR0ZoWkRCbFlUVXhObUptTmpKaFptUXdZVEF3WWpGa09EWXhOQQ" and namespace_id=999977;
+update eh_launch_pad_items set action_type = 68, action_data = '{"title":"工作汇报"}' where icon_uri= "cs://1/image/aW1hZ2UvTVRwbE9HUXhNR0ZoWkRCbFlUVXhObUptTmpKaFptUXdZVEF3WWpGa09EWXhOQQ" and namespace_id=999977;
 
 SET @scope_id = (SELECT MAX(id) FROM eh_web_menu_scopes);
 INSERT INTO `eh_web_menu_scopes` (`id`, `menu_id`, `menu_name`, `owner_type`, `owner_id`, `apply_policy`) VALUES (@scope_id := @scope_id + 1, '54000', '', 'EhNamespaces', '999977', '2');
