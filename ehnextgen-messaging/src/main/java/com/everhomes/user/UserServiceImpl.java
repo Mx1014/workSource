@@ -5472,9 +5472,7 @@ public class UserServiceImpl implements UserService {
 		String baseStr = new String(Base64.getEncoder().encode(secret.getBytes()));
 
 		MultiValueMap<String, Object> headerParam = new LinkedMultiValueMap<String, Object>();
-//		headerParam.add("Content-Type",  MediaType.APPLICATION_FORM_URLENCODED);
 		headerParam.add("Authorization", "Basic " + baseStr);
-//		headerParam.add("Authorization", baseStr);
 
 
 
@@ -5494,9 +5492,6 @@ public class UserServiceImpl implements UserService {
 
 					Map headerParam = new HashMap();
 					headerParam.put("Authorization", "bearer "+ acess_token);
-
-//					Map bodyParam = new HashMap();
-//					bodyParam.put("startDate", timestampList.get(0));
 
 					StringBuffer getUrl = new StringBuffer(ANBANG_USERS_URL);
 					if(timestampList.get(0) != null){
@@ -5536,7 +5531,7 @@ public class UserServiceImpl implements UserService {
 										user.setNamespaceUserToken(r.get("id") != null ? r.get("id").toString() : "");
 										user.setUpdateTime(new Timestamp(DateHelper.currentGMTTime().getTime()));
 										user.setNamespaceUserType(NamespaceUserType.ANBANG.getCode());
-										user.set
+										user.setThirdData(r.toString());
 										return user;
 									}).collect(Collectors.toList());
 
