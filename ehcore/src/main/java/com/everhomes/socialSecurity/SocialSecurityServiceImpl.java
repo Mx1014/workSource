@@ -2242,6 +2242,7 @@ public class SocialSecurityServiceImpl implements SocialSecurityService {
         return response;
     }
 
+    @Override
     public SocialSecurityInoutTimeDTO addSocialSecurityInOutTime(AddSocialSecurityInOutTimeCommand cmd) {
         SocialSecurityInoutTime time = new SocialSecurityInoutTime();
         OrganizationMemberDetails memberDetail = organizationProvider.findOrganizationMemberDetailsByDetailId(cmd.getDetailId());

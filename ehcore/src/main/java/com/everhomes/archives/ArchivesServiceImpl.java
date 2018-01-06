@@ -17,11 +17,13 @@ import com.everhomes.rest.general_approval.*;
 import com.everhomes.rest.organization.*;
 import com.everhomes.rest.rentalv2.NormalFlag;
 import com.everhomes.rest.socialSecurity.AddSocialSecurityInOutTimeCommand;
+import com.everhomes.rest.socialSecurity.InOutTimeType;
 import com.everhomes.rest.user.IdentifierType;
 import com.everhomes.rest.user.UserGender;
 import com.everhomes.rest.user.UserServiceErrorCode;
 import com.everhomes.rest.user.UserStatus;
 import com.everhomes.server.schema.Tables;
+import com.everhomes.socialSecurity.SocialSecurityService;
 import com.everhomes.user.*;
 import com.everhomes.util.ConvertHelper;
 import com.everhomes.util.DateHelper;
@@ -107,6 +109,9 @@ public class ArchivesServiceImpl implements ArchivesService {
 
     @Autowired
     private ArchivesConfigurationService archivesConfigurationService;
+
+    @Autowired
+    private SocialSecurityService socialSecurityService;
 
     @Override
     public ArchivesContactDTO addArchivesContact(AddArchivesContactCommand cmd) {
@@ -807,11 +812,11 @@ public class ArchivesServiceImpl implements ArchivesService {
                 dto.setContactToken(memberDetail.getContactToken());
             }
 
-            //  3.增加社保信息
-/*            AddSocialSecurityInOutTimeCommand timeCommand = new AddSocialSecurityInOutTimeCommand();
-            timeCommand.setDetailId(detailId);
-            timeCommand.set
-            socialSecurityMonth*/
+            //  3.增加社保、公积金信息
+            if(cmd.getSocialSecurityStartMonth() != null)
+                addSocialSecurityStartMonth(detailId, ArchivesUtil.socialSecurityMonth(cmd.getSocialSecurityStartMonth()));
+            if(cmd.getAccumulationFundStartMonth() != null)
+                addAccumulationFundStartMonth(detailId, ArchivesUtil.socialSecurityMonth(cmd.getAccumulationFundStartMonth()));
 
             //  4.查询若存在于离职列表则删除
             deleteArchivesDismissEmployees(detailId, cmd.getOrganizationId());
@@ -819,11 +824,27 @@ public class ArchivesServiceImpl implements ArchivesService {
             //  5.增加入职记录
             checkInArchivesEmployeesLogs(cmd.getOrganizationId(), detailId, cmd.getCheckInTime());
 
-            //  6.增加
             return null;
         });
         return dto;
     }
+
+    private void addSocialSecurityStartMonth(Long detailId, String startMonth) {
+        AddSocialSecurityInOutTimeCommand command = new AddSocialSecurityInOutTimeCommand();
+        command.setDetailId(detailId);
+        command.setInOutType(InOutTimeType.SOCIAL_SECURITY.getCode());
+        command.setStartMonth(startMonth);
+        socialSecurityService.addSocialSecurityInOutTime(command);
+    }
+
+    private void addAccumulationFundStartMonth(Long detailId, String startMonth) {
+        AddSocialSecurityInOutTimeCommand command = new AddSocialSecurityInOutTimeCommand();
+        command.setDetailId(detailId);
+        command.setInOutType(InOutTimeType.ACCUMULATION_FUND.getCode());
+        command.setStartMonth(startMonth);
+        socialSecurityService.addSocialSecurityInOutTime(command);
+    }
+
 
     @Override
     public void updateArchivesEmployee(UpdateArchivesEmployeeCommand cmd) {
