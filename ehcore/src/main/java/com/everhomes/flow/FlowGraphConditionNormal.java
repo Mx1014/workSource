@@ -5,18 +5,16 @@ import com.everhomes.flow.conditionvariable.FlowConditionStringVariable;
 import com.everhomes.rest.flow.FlowConditionExpressionVarType;
 import com.everhomes.rest.flow.FlowConditionLogicOperatorType;
 import com.everhomes.rest.flow.FlowConditionRelationalOperatorType;
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
 
 /**
  * Created by xq.tian on 2017/9/19.
  */
 public class FlowGraphConditionNormal extends FlowGraphCondition {
 
-    private static final Logger LOGGER = LoggerFactory.getLogger(FlowGraphConditionNormal.class);
+    // transient private static final Logger LOGGER = LoggerFactory.getLogger(FlowGraphConditionNormal.class);
 
-    private FlowListenerManager listenerManager;
-    private FlowService flowService;
+    transient private FlowListenerManager listenerManager;
+    transient private FlowService flowService;
 
     public FlowGraphConditionNormal() {
         listenerManager = PlatformContext.getComponent(FlowListenerManager.class);

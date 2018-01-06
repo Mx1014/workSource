@@ -13,7 +13,7 @@ import java.util.stream.Collectors;
 
 public class FlowGraphNodeCondition extends FlowGraphNode {
 
-    private FlowEventLogProvider flowEventLogProvider;
+    transient private FlowEventLogProvider flowEventLogProvider;
 
     public FlowGraphNodeCondition() {
         flowEventLogProvider = PlatformContext.getComponent(FlowEventLogProvider.class);

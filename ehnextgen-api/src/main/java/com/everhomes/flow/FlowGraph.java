@@ -1,25 +1,26 @@
 package com.everhomes.flow;
 
+import java.io.Serializable;
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 
-public class FlowGraph {
+public class FlowGraph implements Serializable {
 
     private Flow flow;
     private List<FlowGraphNode> nodes;
     private List<FlowGraphLane> lanes;
     private List<FlowGraphBranch> branches;
 
-    private Map<Long, FlowGraphNode> idToNode;
-    private Map<Long, FlowGraphLane> idToLane;
-    private Map<Integer, FlowGraphNode> levelToNode;
-    private Map<Integer, FlowGraphLane> levelToLane;
-    private Map<Long, FlowGraphButton> idToButton;
-    private Map<Long, FlowGraphAction> idToAction;
-    private Map<Long, FlowGraphBranch> originalNodeToBranch;
-    private Map<Long, List<FlowGraphBranch>> convergenceNodeToBranches;
+    transient private Map<Long, FlowGraphNode> idToNode;
+    transient private Map<Long, FlowGraphLane> idToLane;
+    transient private Map<Integer, FlowGraphNode> levelToNode;
+    transient private Map<Integer, FlowGraphLane> levelToLane;
+    transient private Map<Long, FlowGraphButton> idToButton;
+    transient private Map<Long, FlowGraphAction> idToAction;
+    transient private Map<Long, FlowGraphBranch> originalNodeToBranch;
+    transient private Map<Long, List<FlowGraphBranch>> convergenceNodeToBranches;
 
     private List<FlowEvaluateItem> evaluateItems;
 
