@@ -86,11 +86,14 @@ public class SocialSecurityPaymentProviderImpl implements SocialSecurityPaymentP
 
     @Override
     public List<SocialSecurityPayment> listSocialSecurityPayment(Long ownerId) {
-        return getReadOnlyContext().select().from(Tables.EH_SOCIAL_SECURITY_PAYMENTS)
+        List<SocialSecurityPayment> results = getReadOnlyContext().select().from(Tables.EH_SOCIAL_SECURITY_PAYMENTS)
                 .where(Tables.EH_SOCIAL_SECURITY_PAYMENTS.ORGANIZATION_ID.eq(ownerId))
                 .orderBy(Tables.EH_SOCIAL_SECURITY_PAYMENTS.ID.asc())
                 .fetch().map(r -> ConvertHelper.convert(r, SocialSecurityPayment.class));
-
+        if (null == results || results.size() == 0) {
+            return null;
+        }
+        return results;
     }
 
     @Override
