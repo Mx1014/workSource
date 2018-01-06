@@ -160,7 +160,7 @@ public class EnergyConsumptionServiceImpl implements EnergyConsumptionService {
         }
     };
 
-    DateTimeFormatter dateSF = DateTimeFormatter.ofPattern("yyyy-MM-dd hh:mm:ss");
+    DateTimeFormatter dateSF = DateTimeFormatter.ofPattern("yyyy-MM-dd HH:mm:ss");
 
     @Autowired
     private CommunityProvider communityProvider;
@@ -3348,6 +3348,7 @@ public class EnergyConsumptionServiceImpl implements EnergyConsumptionService {
                             energyMeterTaskSearcher.feedDoc(task);
                             readTask = true;
                             read.setTaskId(task.getId());
+                            break;
                         }
                         if(readTask) {
                             readEnergyMeter(read);
@@ -3555,12 +3556,82 @@ public class EnergyConsumptionServiceImpl implements EnergyConsumptionService {
     }
 
     @Override
-    public void readTaskMeterOffline(ReadTaskMeterOfflineCommand cmd) {
+    public ReadTaskMeterOfflineResponse readTaskMeterOffline(ReadTaskMeterOfflineCommand cmd) {
+        ReadTaskMeterOfflineResponse response = new ReadTaskMeterOfflineResponse();
         if(cmd.getMeterReading() != null && cmd.getMeterReading().size() > 0) {
+            List<ReadTaskMeterOfflineResultLog> logs = new ArrayList<>();
             cmd.getMeterReading().forEach(read -> {
-                readTaskMeter(read);
+                ReadTaskMeterOfflineResultLog log = new ReadTaskMeterOfflineResultLog();
+                log.setTaskId(read.getTaskId());
+                EnergyMeterTask task = energyMeterTaskProvider.findEnergyMeterTaskById(read.getTaskId());
+                if (task == null) {
+                    LOGGER.error("EnergyTask not exist, id = {}", read.getTaskId());
+                    log.setErrorCode(ErrorCodes.ERROR_GENERAL_EXCEPTION);
+                    log.setErrorDescription(localeStringService.getLocalizedString(String.valueOf(EnergyConsumptionServiceErrorCode.SCOPE),
+                            String.valueOf(EnergyConsumptionServiceErrorCode.ERR_METER_TASK_NOT_EXIST),
+                            UserContext.current().getUser().getLocale(),"EnergyTask not exist"));
+                    return;
+                }
+                if(task.getExecutiveExpireTime().before(new Timestamp(DateHelper.currentGMTTime().getTime()))) {
+                    LOGGER.error("EnergyTask already close, id = {}, expire time: {}", read.getTaskId(), task.getExecutiveExpireTime());
+                    log.setErrorCode(ErrorCodes.ERROR_GENERAL_EXCEPTION);
+                    log.setErrorDescription(localeStringService.getLocalizedString(String.valueOf(EnergyConsumptionServiceErrorCode.SCOPE),
+                            String.valueOf(EnergyConsumptionServiceErrorCode.ERR_METER_TASK_ALREADY_CLOSE),
+                            UserContext.current().getUser().getLocale(),"EnergyTask already close"));
+                    return;
+                }
+
+                EnergyMeter meter = meterProvider.findById(task.getNamespaceId(), task.getMeterId());
+                if(!EnergyMeterStatus.ACTIVE.equals(EnergyMeterStatus.fromCode(meter.getStatus()))) {
+                    LOGGER.error("EnergyTask meter status is not active, meter = {}", meter);
+                    log.setErrorCode(ErrorCodes.ERROR_GENERAL_EXCEPTION);
+                    log.setErrorDescription(localeStringService.getLocalizedString(String.valueOf(EnergyConsumptionServiceErrorCode.SCOPE),
+                            String.valueOf(EnergyConsumptionServiceErrorCode.ERR_METER_NOT_EXIST),
+                            UserContext.current().getUser().getLocale(),"EnergyTask meter status is not active"));
+                }
+
+                // 读数大于最大量程
+                if (read.getCurrReading().doubleValue() > meter.getMaxReading().doubleValue()) {
+                    LOGGER.error("Current reading greater then meter max reading, meterId = ", meter.getId());
+                    log.setErrorCode(ErrorCodes.ERROR_GENERAL_EXCEPTION);
+                    log.setErrorDescription(localeStringService.getLocalizedString(String.valueOf(EnergyConsumptionServiceErrorCode.SCOPE),
+                            String.valueOf(EnergyConsumptionServiceErrorCode.ERR_CURR_READING_GREATER_THEN_MAX_READING),
+                            UserContext.current().getUser().getLocale(),"Current reading greater then meter max reading"));
+                    return;
+                }
+
+                task.setReading(read.getCurrReading());
+                task.setStatus(EnergyTaskStatus.READ.getCode());
+                task.setOperatorUid(UserContext.currentUserId());
+                task.setUpdateTime(new Timestamp(DateHelper.currentGMTTime().getTime()));
+                energyMeterTaskProvider.updateEnergyMeterTask(task);
+                energyMeterTaskSearcher.feedDoc(task);
+
+
+                EnergyMeterReadingLog readingLog = new EnergyMeterReadingLog();
+                readingLog.setStatus(EnergyCommonStatus.ACTIVE.getCode());
+                readingLog.setTaskId(read.getTaskId());
+                readingLog.setReading(read.getCurrReading());
+                readingLog.setCommunityId(meter.getCommunityId());
+                readingLog.setMeterId(meter.getId());
+                readingLog.setNamespaceId(UserContext.getCurrentNamespaceId(task.getNamespaceId()));
+                readingLog.setOperateTime(new Timestamp(DateHelper.currentGMTTime().getTime()));
+                readingLog.setOperatorId(UserContext.currentUserId());
+                readingLog.setResetMeterFlag(read.getResetMeterFlag() != null ? read.getResetMeterFlag() : TrueOrFalseFlag.FALSE.getCode());
+                dbProvider.execute(r -> {
+                    meterReadingLogProvider.createEnergyMeterReadingLog(readingLog);
+                    meter.setLastReading(readingLog.getReading());
+                    meter.setLastReadTime(Timestamp.valueOf(LocalDateTime.now()));
+                    meterProvider.updateEnergyMeter(meter);
+                    return true;
+                });
+                readingLogSearcher.feedDoc(readingLog);
+                meterSearcher.feedDoc(meter);
+
+                log.setErrorCode(ErrorCodes.SUCCESS);
             });
         }
+        return response;
     }
 
     @Override
@@ -4548,7 +4619,7 @@ public class EnergyConsumptionServiceImpl implements EnergyConsumptionService {
             if(category.getUpdateTime() == null) {
                 category.setUpdateTime(category.getCreateTime());
             }
-            dto.setLastTime(dateSF.format(category.getUpdateTime().toInstant()));
+            dto.setLastTime(category.getUpdateTime().toLocalDateTime().format(dateSF));
             return dto;
         }).collect(Collectors.toList());
         response.setCategoryDTOs(dtos);

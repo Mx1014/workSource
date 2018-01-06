@@ -665,12 +665,10 @@ public class EnergyConsumptionController extends ControllerBase {
      * <p>执行抄表任务-- 离线</p>
      * <b>URL: /energy/readTaskMeterOffline</b>
      */
-    @RestReturn(String.class)
+    @RestReturn(ReadTaskMeterOfflineResponse.class)
     @RequestMapping("readTaskMeterOffline")
     public RestResponse readTaskMeterOffline(ReadTaskMeterOfflineCommand cmd) {
-        energyConsumptionService.readTaskMeterOffline(cmd);
-
-        RestResponse resp = new RestResponse();
+        RestResponse resp = new RestResponse(energyConsumptionService.readTaskMeterOffline(cmd));
         resp.setErrorCode(ErrorCodes.SUCCESS);
         resp.setErrorDescription("OK");
         return resp;

@@ -5,6 +5,9 @@ import com.everhomes.discover.ItemType;
 import java.util.List;
 
 /**
+ * <ul>
+ *     <li>meterReading: 执行抄表任务</li>
+ * </ul>
  * Created by ying.xiong on 2018/1/4.
  */
 public class ReadTaskMeterOfflineCommand {
