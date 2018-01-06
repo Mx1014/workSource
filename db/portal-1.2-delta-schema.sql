@@ -16,6 +16,7 @@ ALTER TABLE `eh_portal_content_scopes` ADD COLUMN `version_id`  bigint(20) NULL;
 ALTER TABLE `eh_portal_item_categories` ADD COLUMN `version_id`  bigint(20) NULL;
 ALTER TABLE `eh_portal_item_groups` ADD COLUMN `version_id`  bigint(20) NULL;
 ALTER TABLE `eh_portal_items` ADD COLUMN `version_id`  bigint(20) NULL;
+ALTER TABLE `eh_portal_launch_pad_mappings` ADD COLUMN `namespace_id`  int(20) NULL;
 ALTER TABLE `eh_portal_launch_pad_mappings` ADD COLUMN `version_id`  bigint(20) NULL;
 ALTER TABLE `eh_portal_layouts` ADD COLUMN `version_id`  bigint(20) NULL;
 ALTER TABLE `eh_service_module_apps` ADD COLUMN `version_id`  bigint(20) NULL;
