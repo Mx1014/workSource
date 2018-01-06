@@ -68,6 +68,9 @@ public class ContractScheduleJob extends QuartzJobBean {
     @Override
     protected void executeInternal(JobExecutionContext context) throws JobExecutionException {
         Timestamp now = new Timestamp(DateHelper.currentGMTTime().getTime());
+        if(LOGGER.isInfoEnabled()) {
+            LOGGER.info("ContractScheduleJob" + now);
+        }
         Map<Long, List<Contract>> contracts = contractProvider.listContractGroupByCommunity();
         if(contracts != null && contracts.size() > 0) {
             contracts.forEach((communityId, contractList) -> {
