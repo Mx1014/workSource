@@ -10061,6 +10061,24 @@ CREATE TABLE `eh_point_actions` (
   PRIMARY KEY (`id`)
 ) ENGINE=INNODB DEFAULT CHARSET=utf8mb4;
 
+DROP TABLE IF EXISTS `eh_point_banners`;
+CREATE TABLE `eh_point_banners` (
+  `id` bigint(20) NOT NULL DEFAULT '0',
+  `namespace_id` int(11) NOT NULL DEFAULT '0',
+  `system_id` bigint(20) DEFAULT NULL,
+  `name` varchar(128) DEFAULT NULL,
+  `poster_uri` varchar(128) DEFAULT NULL,
+  `action_type` tinyint(4) NOT NULL DEFAULT '0' COMMENT 'according to document',
+  `action_data` text COMMENT 'the parameters depend on item_type, json format',
+  `status` tinyint(4) NOT NULL DEFAULT '2' COMMENT '0: inactive, 1: disabled, 2: enabled',
+  `default_order` int(11) NOT NULL DEFAULT '0',
+  `creator_uid` bigint(20) DEFAULT NULL,
+  `create_time` datetime(3) DEFAULT NULL,
+  `update_uid` bigint(20) DEFAULT NULL,
+  `update_time` datetime(3) DEFAULT NULL,
+  PRIMARY KEY (`id`)
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4;
+
 DROP TABLE IF EXISTS `eh_point_event_logs`;
 
 
@@ -10081,27 +10099,20 @@ DROP TABLE IF EXISTS `eh_point_goods`;
 
 
 CREATE TABLE `eh_point_goods` (
-  `id` BIGINT NOT NULL,
-  `namespace_id` INTEGER NOT NULL DEFAULT 0,
-  `number` VARCHAR(32) NOT NULL DEFAULT '',
-  `display_name` VARCHAR(32) NOT NULL DEFAULT '',
-  `poster_uri` VARCHAR(512) NOT NULL DEFAULT '',
-  `poster_url` VARCHAR(512) NOT NULL DEFAULT '',
-  `detail_url` VARCHAR(512) NOT NULL DEFAULT '',
-  `points` BIGINT NOT NULL DEFAULT 0,
-  `sold_amount` BIGINT NOT NULL DEFAULT 0,
-  `original_price` DECIMAL(10,2) NOT NULL DEFAULT '0.00',
-  `discount_price` DECIMAL(10,2) NOT NULL DEFAULT '0.00',
-  `point_rule` VARCHAR(256) NOT NULL DEFAULT '',
-  `status` TINYINT NOT NULL DEFAULT 2 COMMENT '0: inactive, 1: disabled, 2: enabled',
-  `top_status` TINYINT NOT NULL DEFAULT 2 COMMENT '0: inactive, 1: disabled, 2: enabled',
-  `top_time` DATETIME(3),
-  `create_time` DATETIME(3),
-  `creator_uid` BIGINT,
-  `update_time` DATETIME(3),
-  `update_uid` BIGINT,
+  `id` bigint(20) NOT NULL,
+  `namespace_id` int(11) NOT NULL DEFAULT '0',
+  `number` varchar(32) NOT NULL DEFAULT '',
+  `status` tinyint(4) NOT NULL DEFAULT '2' COMMENT '0: inactive, 1: disabled, 2: enabled',
+  `top_status` tinyint(4) NOT NULL DEFAULT '2' COMMENT '0: inactive, 1: disabled, 2: enabled',
+  `top_time` datetime(3) DEFAULT NULL,
+  `create_time` datetime(3) DEFAULT NULL,
+  `creator_uid` bigint(20) DEFAULT NULL,
+  `update_time` datetime(3) DEFAULT NULL,
+  `update_uid` bigint(20) DEFAULT NULL,
+  `shop_number` varchar(128) DEFAULT NULL,
+  `system_id` bigint(20) NOT NULL DEFAULT '0',
   PRIMARY KEY (`id`)
-) ENGINE=INNODB DEFAULT CHARSET=utf8mb4;
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4;
 
 DROP TABLE IF EXISTS `eh_point_logs`;
 
@@ -10129,6 +10140,8 @@ CREATE TABLE `eh_point_logs` (
   `description` VARCHAR(128) NOT NULL DEFAULT '' COMMENT 'description',
   `status` TINYINT NOT NULL DEFAULT 2 COMMENT '0: inactive, 1: waitingForConfirmation, 2: active',
   `create_time` DATETIME(3),
+  `event_happen_time` bigint(20) DEFAULT NULL,
+  `extra` text,
   PRIMARY KEY (`id`)
 ) ENGINE=INNODB DEFAULT CHARSET=utf8mb4;
 
@@ -10159,7 +10172,7 @@ CREATE TABLE `eh_point_rule_configs` (
   `rule_id` BIGINT NOT NULL DEFAULT 0 COMMENT 'ref eh_point_rules id',
   `description` VARCHAR(64) NOT NULL,
   `points` BIGINT NOT NULL DEFAULT 0,
-  `limit_type` TINYINT NOT NULL DEFAULT 1 COMMENT '1: times per day, 2: times',
+  `limit_type` TEXT,
   `limit_data` TEXT,
   `status` TINYINT NOT NULL DEFAULT 2 COMMENT '0: inactive, 1: disabled, 2: enabled',
   `create_time` DATETIME(3),
@@ -10193,7 +10206,7 @@ CREATE TABLE `eh_point_rules` (
   `description` VARCHAR(64) NOT NULL,
   `arithmetic_type` TINYINT NOT NULL DEFAULT 1 COMMENT '1: add, 2: subtract',
   `points` BIGINT NOT NULL DEFAULT 0,
-  `limit_type` TINYINT NOT NULL DEFAULT 1 COMMENT '1: times per day, 2: times',
+  `limit_type` TEXT,
   `limit_data` TEXT,
   `binding_rule_id` BIGINT NOT NULL DEFAULT 0 COMMENT 'binding rule id',
   `status` TINYINT NOT NULL DEFAULT 2 COMMENT '0: inactive, 1: disabled, 2: enabled',
@@ -10202,6 +10215,7 @@ CREATE TABLE `eh_point_rules` (
   `creator_uid` BIGINT,
   `update_time` DATETIME(3),
   `update_uid` BIGINT,
+  `extra` text,
   PRIMARY KEY (`id`)
 ) ENGINE=INNODB DEFAULT CHARSET=utf8mb4;
 
@@ -10249,7 +10263,7 @@ CREATE TABLE `eh_point_tutorial_to_point_rule_mappings` (
   `system_id` BIGINT NOT NULL DEFAULT 0 COMMENT 'ref eh_point_systems id',
   `tutorial_id` BIGINT NOT NULL DEFAULT 0 COMMENT 'ref eh_point_tutorials id',
   `rule_id` BIGINT NOT NULL DEFAULT 0 COMMENT 'ref eh_point_rules id',
-  `description` VARCHAR(128) NOT NULL DEFAULT '' COMMENT 'description',
+  `description` VARCHAR(128),
   `create_time` DATETIME(3),
   PRIMARY KEY (`id`)
 ) ENGINE=INNODB DEFAULT CHARSET=utf8mb4;
@@ -11168,7 +11182,6 @@ CREATE TABLE `eh_quality_inspection_model_community_map` (
   `target_type` VARCHAR(255) DEFAULT NULL,
   `target_id` BIGINT DEFAULT NULL COMMENT 'community id ',
   `create_time` DATETIME DEFAULT NULL ON UPDATE CURRENT_TIMESTAMP,
-  `category_id` BIGINT DEFAULT '0',
   PRIMARY KEY (`id`)
 ) ENGINE=INNODB DEFAULT CHARSET=utf8mb4;
 
@@ -16116,6 +16129,129 @@ CREATE TABLE `eh_wifi_settings` (
   PRIMARY KEY (`id`)
 ) ENGINE=INNODB DEFAULT CHARSET=utf8mb4;
 
+DROP TABLE IF EXISTS `eh_work_report_scope_map`;
+CREATE TABLE `eh_work_report_scope_map` (
+  `id` bigint(20) NOT NULL COMMENT 'id of the report scope id',
+  `namespace_id` int(11) NOT NULL DEFAULT '0',
+  `report_id` bigint(20) NOT NULL COMMENT 'id of the report',
+  `source_type` varchar(64) NOT NULL COMMENT 'ORGANIZATION, MEMBERDETAIL',
+  `source_id` bigint(20) NOT NULL COMMENT 'id of the scope',
+  `source_description` varchar(128) DEFAULT NULL COMMENT 'the description of the scope class',
+  `create_time` datetime DEFAULT NULL COMMENT 'record create time',
+  PRIMARY KEY (`id`)
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4;
+
+DROP TABLE IF EXISTS `eh_work_report_templates`;
+CREATE TABLE `eh_work_report_templates` (
+  `id` bigint(20) NOT NULL COMMENT 'id of the report template',
+  `namespace_id` int(11) NOT NULL DEFAULT '0',
+  `owner_id` bigint(20) NOT NULL,
+  `owner_type` varchar(64) NOT NULL,
+  `organization_id` bigint(20) NOT NULL DEFAULT '0',
+  `module_id` bigint(20) DEFAULT NULL COMMENT 'the module id',
+  `module_type` varchar(64) DEFAULT NULL COMMENT 'the module type',
+  `report_name` varchar(128) NOT NULL,
+  `report_type` tinyint(4) DEFAULT NULL COMMENT '0-Day, 1-Week, 2-Month',
+  `report_attribute` varchar(128) NOT NULL DEFAULT 'CUSTOMIZE' COMMENT 'DEFAULT,CUSTOMIZE',
+  `form_template_id` bigint(20) NOT NULL DEFAULT '0' COMMENT 'The id of the template form',
+  `modify_flag` tinyint(4) NOT NULL DEFAULT '1' COMMENT '0: no, 1: yes',
+  `delete_flag` tinyint(4) NOT NULL DEFAULT '1' COMMENT '0: no, 1: yes',
+  `icon_uri` varchar(1024) DEFAULT NULL COMMENT 'the avatar of the approval',
+  `update_time` datetime DEFAULT NULL COMMENT 'last update time',
+  `create_time` datetime DEFAULT NULL COMMENT 'record create time',
+  PRIMARY KEY (`id`)
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4;
+
+DROP TABLE IF EXISTS `eh_work_report_val_comment_attachments`;
+CREATE TABLE `eh_work_report_val_comment_attachments` (
+  `id` bigint(20) NOT NULL COMMENT 'the id of the report val map',
+  `namespace_id` int(11) NOT NULL DEFAULT '0',
+  `comment_id` bigint(20) NOT NULL COMMENT 'the id of the comment',
+  `content_type` varchar(32) DEFAULT NULL COMMENT 'the type of the content',
+  `content_uri` varchar(2048) DEFAULT NULL COMMENT 'attachment object link info on storage',
+  `status` tinyint(4) NOT NULL DEFAULT '1' COMMENT '0: invalid, 1: valid',
+  `creator_user_id` bigint(20) NOT NULL COMMENT 'the user id of the creator',
+  `create_time` datetime DEFAULT NULL COMMENT 'record create time',
+  PRIMARY KEY (`id`)
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4;
+
+DROP TABLE IF EXISTS `eh_work_report_val_comments`;
+CREATE TABLE `eh_work_report_val_comments` (
+  `id` bigint(20) NOT NULL COMMENT 'the id of the report val map',
+  `namespace_id` int(11) NOT NULL DEFAULT '0',
+  `owner_id` bigint(20) DEFAULT NULL,
+  `owner_type` varchar(64) DEFAULT NULL,
+  `report_val_id` bigint(20) NOT NULL COMMENT 'the id of the report val',
+  `parent_comment_id` bigint(20) DEFAULT NULL COMMENT 'the parent id of the',
+  `content_type` varchar(32) DEFAULT NULL COMMENT 'the type of the content',
+  `content` text COMMENT 'the comment',
+  `status` tinyint(4) NOT NULL DEFAULT '1' COMMENT '0: invalid, 1: valid',
+  `creator_user_id` bigint(20) NOT NULL COMMENT 'the user id of the creator',
+  `create_time` datetime DEFAULT NULL COMMENT 'record create time',
+  PRIMARY KEY (`id`)
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4;
+
+DROP TABLE IF EXISTS `eh_work_report_val_receiver_map`;
+CREATE TABLE `eh_work_report_val_receiver_map` (
+  `id` bigint(20) NOT NULL COMMENT 'the id of the report val map',
+  `namespace_id` int(11) NOT NULL DEFAULT '0',
+  `report_val_id` bigint(20) NOT NULL COMMENT 'the id of the report val',
+  `receiver_user_id` bigint(20) NOT NULL COMMENT 'the id of the receiver',
+  `receiver_name` varchar(256) DEFAULT NULL COMMENT 'the name of the receiver',
+  `receiver_avatar` varchar(2048) DEFAULT NULL COMMENT 'the avatar of the receiver',
+  `read_status` tinyint(4) NOT NULL DEFAULT '0' COMMENT '0-unread 1-read',
+  `update_time` datetime DEFAULT NULL COMMENT 'last update time',
+  `create_time` datetime DEFAULT NULL COMMENT 'record create time',
+  PRIMARY KEY (`id`)
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4;
+
+DROP TABLE IF EXISTS `eh_work_report_vals`;
+CREATE TABLE `eh_work_report_vals` (
+  `id` bigint(20) NOT NULL COMMENT 'id of the report val',
+  `namespace_id` int(11) NOT NULL DEFAULT '0',
+  `owner_id` bigint(20) NOT NULL,
+  `owner_type` varchar(64) NOT NULL,
+  `organization_id` bigint(20) NOT NULL DEFAULT '0',
+  `module_id` bigint(20) DEFAULT NULL COMMENT 'the module id',
+  `module_type` varchar(64) DEFAULT NULL COMMENT 'the module type',
+  `module_name` varchar(64) DEFAULT NULL,
+  `content` varchar(128) DEFAULT NULL COMMENT 'the content of the report',
+  `report_id` bigint(20) NOT NULL COMMENT 'the id of the report',
+  `report_time` datetime DEFAULT NULL COMMENT 'the target time of the report',
+  `applier_name` varchar(64) DEFAULT NULL COMMENT 'the name of the applier',
+  `applier_user_id` bigint(20) DEFAULT NULL COMMENT 'the userId of the applier',
+  `status` tinyint(4) NOT NULL DEFAULT '1' COMMENT '0-invalid, 1-valid',
+  `report_type` tinyint(4) NOT NULL COMMENT '0-Day, 1-Week, 2-Month',
+  `update_time` datetime DEFAULT NULL COMMENT 'last update time',
+  `create_time` datetime DEFAULT NULL COMMENT 'record create time',
+  PRIMARY KEY (`id`)
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4;
+
+DROP TABLE IF EXISTS `eh_work_reports`;
+CREATE TABLE `eh_work_reports` (
+  `id` bigint(20) NOT NULL COMMENT 'id of the report',
+  `namespace_id` int(11) NOT NULL DEFAULT '0',
+  `owner_id` bigint(20) NOT NULL,
+  `owner_type` varchar(64) NOT NULL,
+  `organization_id` bigint(20) NOT NULL DEFAULT '0',
+  `module_id` bigint(20) DEFAULT NULL COMMENT 'the module id',
+  `module_type` varchar(64) DEFAULT NULL COMMENT 'the module type',
+  `report_name` varchar(128) NOT NULL,
+  `status` tinyint(4) NOT NULL DEFAULT '1' COMMENT '0-invalid, 1-valid, 2-running',
+  `report_type` tinyint(4) DEFAULT NULL COMMENT '0-Day, 1-Week, 2-Month',
+  `report_attribute` varchar(128) NOT NULL DEFAULT 'CUSTOMIZE' COMMENT 'DEFAULT,CUSTOMIZE',
+  `form_origin_id` bigint(20) NOT NULL DEFAULT '0' COMMENT 'The id of the original form',
+  `form_version` bigint(20) NOT NULL DEFAULT '0' COMMENT 'the current using version',
+  `report_template_id` bigint(20) DEFAULT '0' COMMENT 'the id in eh_general_approval_templates',
+  `modify_flag` tinyint(4) NOT NULL DEFAULT '1' COMMENT '0: no, 1: yes',
+  `delete_flag` tinyint(4) NOT NULL DEFAULT '1' COMMENT '0: no, 1: yes',
+  `icon_uri` varchar(1024) DEFAULT NULL COMMENT 'the avatar of the approval',
+  `operator_user_id` bigint(20) DEFAULT '0' COMMENT 'the user id of the operator',
+  `operator_name` varchar(128) DEFAULT NULL COMMENT 'the name of the operator',
+  `update_time` datetime DEFAULT NULL COMMENT 'last update time',
+  `create_time` datetime DEFAULT NULL COMMENT 'record create time',
+  PRIMARY KEY (`id`)
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4;
 
 --
 -- member of global sharding group
