@@ -18,6 +18,8 @@ import com.everhomes.rest.address.admin.ListBuildingByCommunityIdsCommand;
 import com.everhomes.rest.app.AppConstants;
 import com.everhomes.rest.asset.CheckPaymentUserCommand;
 import com.everhomes.rest.asset.CheckPaymentUserResponse;
+import com.everhomes.rest.asset.PushUsersCommand;
+import com.everhomes.rest.asset.PushUsersResponse;
 import com.everhomes.rest.business.*;
 import com.everhomes.rest.category.CategoryAdminStatus;
 import com.everhomes.rest.category.CategoryConstants;
@@ -825,6 +827,17 @@ public class BusinessOpenController extends ControllerBase {
 	@RestReturn(value = CheckPaymentUserResponse.class)
 	public RestResponse checkPaymentUser(CheckPaymentUserCommand cmd){
 		CheckPaymentUserResponse response = businessService.checkPaymentUser(cmd);
+		RestResponse restResponse = new RestResponse(response);
+		restResponse.setErrorCode(ErrorCodes.SUCCESS);
+		restResponse.setErrorDescription("OK");
+		return restResponse;
+	}
+
+	@RequestMapping("pushUsers")
+	@RestReturn(value = CheckPaymentUserResponse.class)
+	public RestResponse pushUsers(PushUsersCommand cmd){
+		cmd.setNamespaceId(0);
+		PushUsersResponse response = this.userService.createUsersForAnBang(cmd);
 		RestResponse restResponse = new RestResponse(response);
 		restResponse.setErrorCode(ErrorCodes.SUCCESS);
 		restResponse.setErrorDescription("OK");

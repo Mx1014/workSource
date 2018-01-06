@@ -161,3 +161,6 @@ ALTER TABLE eh_energy_meter_setting_logs ADD COLUMN `community_id` BIGINT NOT NU
 
 
 -- auth分支结束
+
+
+ALTER TABLE `eh_users` ADD COLUMN `third_data` varchar(2048) DEFAULT NULL COMMENT 'third_data for AnBang';

@@ -2,6 +2,7 @@
 package com.everhomes.user;
 
 
+import com.alibaba.fastjson.JSON;
 import com.everhomes.acl.AclProvider;
 import com.everhomes.acl.PortalRoleResolver;
 import com.everhomes.acl.Role;
@@ -62,11 +63,14 @@ import com.everhomes.naming.NameMapper;
 import com.everhomes.news.NewsService;
 import com.everhomes.organization.*;
 import com.everhomes.organization.pm.PropertyMgrService;
+import com.everhomes.point.UserLevel;
 import com.everhomes.point.UserPointService;
 import com.everhomes.region.Region;
 import com.everhomes.region.RegionProvider;
 import com.everhomes.rest.address.*;
 import com.everhomes.rest.app.AppConstants;
+import com.everhomes.rest.asset.PushUsersCommand;
+import com.everhomes.rest.asset.PushUsersResponse;
 import com.everhomes.rest.asset.TargetDTO;
 import com.everhomes.rest.business.ShopDTO;
 import com.everhomes.rest.community.CommunityType;
@@ -113,13 +117,12 @@ import org.springframework.context.ApplicationEventPublisher;
 import org.springframework.data.redis.core.RedisTemplate;
 import org.springframework.data.redis.core.ValueOperations;
 import org.springframework.data.redis.serializer.StringRedisSerializer;
-import org.springframework.http.HttpEntity;
-import org.springframework.http.HttpHeaders;
-import org.springframework.http.HttpMethod;
-import org.springframework.http.ResponseEntity;
+import org.springframework.http.*;
 import org.springframework.stereotype.Component;
 import org.springframework.transaction.TransactionStatus;
 import org.springframework.util.CollectionUtils;
+import org.springframework.util.LinkedMultiValueMap;
+import org.springframework.util.MultiValueMap;
 import org.springframework.util.concurrent.ListenableFuture;
 import org.springframework.util.concurrent.ListenableFutureCallback;
 import org.springframework.web.client.AsyncRestTemplate;
@@ -180,10 +183,10 @@ public class UserServiceImpl implements UserService {
     private final Validator validator = Validation.buildDefaultValidatorFactory().getValidator();
 
 
-	private static String ANBANG_CLIENTID = "";
-	private static String ANBANG_CLIENTSECRET = "";
-	private static String ANBANG_OAUTH_URL = "http://host:port/api/auth/oauth/token";
-	private static String ANBANG_USERS_URL = "http://host:port/api/auth/users";
+	private static String ANBANG_CLIENTID = "zuolin";
+	private static String ANBANG_CLIENTSECRET = "enVvbGluMjAxODAxMDI=";
+	private static String ANBANG_OAUTH_URL = "http://139.196.255.176:8000/api/auth/oauth/token";
+	private static String ANBANG_USERS_URL = "http://139.196.255.176:8000/api/auth/syn/users";
 
 
 	@Autowired
@@ -5454,47 +5457,99 @@ public class UserServiceImpl implements UserService {
 	@Override
 	public void syncUsersFromAnBangWuYe(SyncUsersFromAnBangWuYeCommand cmd) {
 		//调用授权接口
-
-		Date timestamp = null;
+		String timestamp = null;
 		if(cmd.getIsAll() == 1){//全量
 			timestamp = null;
 		}else if(cmd.getIsAll() == 0){//从上次同步时间的增量
-			timestamp = DateHelper.currentGMTTime();
+			SimpleDateFormat  formatter = new SimpleDateFormat ("yyyy-MM-dd HH:mm:ss");
+			timestamp = formatter.format(DateHelper.currentGMTTime());
+//			timestamp = DateHelper.currentGMTTime().getTime();
 		}
+		List<String> timestampList = new ArrayList<>();
+		timestampList.add(timestamp);
+
 		String secret = String.format("%s:%s", ANBANG_CLIENTID, ANBANG_CLIENTSECRET);
 		String baseStr = new String(Base64.getEncoder().encode(secret.getBytes()));
 
-		Map headerParam = new HashMap();
-		headerParam.put("Content-Type", "application/x-www-form-urlencoded");
-		headerParam.put("client_id", ANBANG_CLIENTID);
-		headerParam.put("client_secret", ANBANG_CLIENTSECRET);
-		headerParam.put("grant_type", "client_credentials");
-		headerParam.put("Authorization", baseStr);
+		MultiValueMap<String, Object> headerParam = new LinkedMultiValueMap<String, Object>();
+//		headerParam.add("Content-Type",  MediaType.APPLICATION_FORM_URLENCODED);
+		headerParam.add("Authorization", "Basic " + baseStr);
+//		headerParam.add("Authorization", baseStr);
 
 
 
+		MultiValueMap<String, Object> bodyParam = new LinkedMultiValueMap<String, Object>();
+		bodyParam.add("client_id", ANBANG_CLIENTID);
+		bodyParam.add("client_secret", ANBANG_CLIENTSECRET);
+		bodyParam.add("grant_type", "client_credentials");
 
 		try {
-			ListenableFuture<ResponseEntity<String>> auth_result = restCall(HttpMethod.POST, ANBANG_OAUTH_URL, headerParam, null, new ListenableFutureCallback<ResponseEntity<String>>() {
+			ListenableFuture<ResponseEntity<String>> auth_result = restCall(HttpMethod.POST, MediaType.APPLICATION_FORM_URLENCODED, ANBANG_OAUTH_URL, headerParam, bodyParam, new ListenableFutureCallback<ResponseEntity<String>>() {
 
 				@Override
 				public void onSuccess(ResponseEntity<String> result) {
-					String acess_token = result.getBody().toString();
+					Map resultMap = JSON.parseObject(result.getBody().toString());
+					String acess_token = String.valueOf(resultMap.get("access_token"));
+
+
 					Map headerParam = new HashMap();
-					headerParam.put("Content-Type", "application/json");
-					headerParam.put("startdate", null);
 					headerParam.put("Authorization", "bearer "+ acess_token);
+
+//					Map bodyParam = new HashMap();
+//					bodyParam.put("startDate", timestampList.get(0));
+
+					StringBuffer getUrl = new StringBuffer(ANBANG_USERS_URL);
+					if(timestampList.get(0) != null){
+						getUrl.append("?").append("startDate=").append(timestampList.get(0));
+					}
+
 					try {
-						ListenableFuture<ResponseEntity<String>> users_result = restCall(HttpMethod.GET, ANBANG_USERS_URL, headerParam, null, new ListenableFutureCallback<ResponseEntity<String>>(){
+						ListenableFuture<ResponseEntity<String>> users_result = restCall(HttpMethod.GET, MediaType.APPLICATION_JSON, getUrl.toString() , headerParam, null, new ListenableFutureCallback<ResponseEntity<String>>(){
 
 							@Override
 							public void onSuccess(ResponseEntity<String> result) {
+								List<Map> userList = (List) JSON.parseObject(result.getBody().toString()).get("data");
+								if(userList != null && userList.size() > 0) {
+									if (timestampList.get(0) == null) {//todo 参数为null,为全量同步,同步所有的用户
+										// 删除全部的用户
+										userProvider.deleteUserAndUserIdentifiers(0, null, NamespaceUserType.ANBANG.getCode());
+									}else{  //todo 参数传当前时间,为增量同步，只同步上次同步拘束时间~当前时间的数据
+										//如果有之前同步过的用户，删掉重建
+										List<String> namespaceUserTokens = new ArrayList<>();
+										for (Map userInfo : userList) {
+											namespaceUserTokens.add(userInfo.get("id").toString());
+										}
+										userProvider.deleteUserAndUserIdentifiers(0, namespaceUserTokens, NamespaceUserType.ANBANG.getCode());
+									}
+									LOGGER.debug("AnBang user size" + userList.size());
 
+									List<User> users = userList.stream().map(r -> {
+										User user = new User();
+										user.setNamespaceId(0);
+										user.setNickName(r.get("nickname") != null ? r.get("nickname").toString() : "");
+										user.setIdentifierToken(r.get("login") != null ? r.get("login").toString() : "");
+										user.setAvatar(r.get("avatar") != null ? r.get("avatar").toString() : "");
+//										user.setCreateTime(r.get("createdDate") != null ?Timestamp.valueOf(r.get("createdDate").toString()) : null);
+										user.setPasswordHash(r.get("password") != null ? r.get("password").toString() : "");
+										user.setStatus(UserStatus.ACTIVE.getCode());
+										user.setLocale(Locale.CHINA.toString());
+										user.setNamespaceUserToken(r.get("id") != null ? r.get("id").toString() : "");
+										user.setUpdateTime(new Timestamp(DateHelper.currentGMTTime().getTime()));
+										user.setNamespaceUserType(NamespaceUserType.ANBANG.getCode());
+										user.set
+										return user;
+									}).collect(Collectors.toList());
+
+									//create
+									createUsersAndUserIdentifiers(users);
+								}
 							}
 
 							@Override
 							public void onFailure(Throwable ex) {
-
+								LOGGER.error(ex.getMessage());
+								throw RuntimeErrorException.errorWith(ErrorCodes.SCOPE_GENERAL, ErrorCodes.ERROR_GENERAL_EXCEPTION,
+										"Unable to sync2");
 							}
 						});
 					} catch (UnsupportedEncodingException e) {
@@ -5504,46 +5559,55 @@ public class UserServiceImpl implements UserService {
 
 				@Override
 				public void onFailure(Throwable ex) {
-
+					LOGGER.error(ex.getMessage());
+					throw RuntimeErrorException.errorWith(ErrorCodes.SCOPE_GENERAL, ErrorCodes.ERROR_GENERAL_EXCEPTION,
+							"Unable to sync1");
 				}
 			});
 		} catch (UnsupportedEncodingException e) {
 			e.printStackTrace();
 		}
 
-		//todo visit Anbangwuye's implements
-
-//        if(timestamp != null){        //todo 参数传当前时间,为增量同步，只同步上次同步拘束时间~当前时间的数据
-//            //todo visit
-//            List<User> users = null;
-//            List<String> namespaceUserToken = new ArrayList<>();
-//            //如果有之前同步过的用户，删掉重建
-//            this.deleteUser(namespaceId, namespaceUserToken, NamespaceUserType.ANBANG.getCode());
-//            this.deleteIdentifier(namespaceId, uIds);
-//            createUsersAndUserIdentifiers(users);
-//        }else{
-//            //todo visit
-//            //todo 参数为null,为全量同步,同步所有的用户
-//            List<User> users = null;
-//            List<String> namespaceUserToken = new ArrayList<>();
-//
-//            //删除所有的同步用户
-//            this.deleteUser(namespaceId,null,NamespaceUserType.ANBANG.getCode());
-//            this.deleteIdentifier(namespaceId, uIds);
-//            createUsersAndUserIdentifiers(users);
-//        }
-
 	}
 
-	public ListenableFuture<ResponseEntity<String>> restCall(HttpMethod method, String url, Map headerParam, Map bodyParam, ListenableFutureCallback<ResponseEntity<String>> responseCallback) throws UnsupportedEncodingException {
-		AsyncRestTemplate template = new AsyncRestTemplate();
-//        String url = "";
-		HttpHeaders headers = new HttpHeaders();
-		headerParam.forEach((k,v)->{
-			headers.add(k.toString(),v.toString());
+	@Override
+	public PushUsersResponse createUsersForAnBang(PushUsersCommand cmd) {
+		dbProvider.execute(r -> {
+			User user = new User();
+			user.setStatus(UserStatus.ACTIVE.getCode());
+			user.setNamespaceId(cmd.getNamespaceId());
+			user.setNickName(cmd.getNickName());
+			user.setGender(UserGender.UNDISCLOSURED.getCode());
+			user.setNamespaceUserType(NamespaceUserType.ANBANG.getCode());
+			user.setLevel(UserLevel.L1.getCode());
+			String salt = EncryptionUtils.createRandomSalt();
+			user.setSalt(salt);
+			try {
+				user.setPasswordHash(EncryptionUtils.hashPassword(String.format("%s%s", "8d969eef6ecad3c29a3a629280e686cf0c3f5d5a86aff3ca12020c923adc6c92", salt)));
+			} catch (Exception e) {
+				LOGGER.error("encode password failed");
+				throw RuntimeErrorException.errorWith(UserServiceErrorCode.SCOPE, UserServiceErrorCode.ERROR_INVALID_PASSWORD, "Unable to create password hash");
+			}
+			userProvider.createUser(user);
+			UserIdentifier userIdentifier = new UserIdentifier();
+			userIdentifier.setOwnerUid(user.getId());
+			userIdentifier.setIdentifierType(IdentifierType.MOBILE.getCode());
+			userIdentifier.setIdentifierToken(cmd.getIdentifierToken());
+			userIdentifier.setNamespaceId(cmd.getNamespaceId());
+			userIdentifier.setClaimStatus(IdentifierClaimStatus.CLAIMED.getCode());
+			userProvider.createIdentifier(userIdentifier);
+			return null;
 		});
-		Map body = new HashMap();
+		return null;
+	}
 
+	public ListenableFuture<ResponseEntity<String>> restCall(HttpMethod method, MediaType mediaType, String url, Map headerParam, Map bodyParam, ListenableFutureCallback<ResponseEntity<String>> responseCallback) throws UnsupportedEncodingException {
+		AsyncRestTemplate template = new AsyncRestTemplate();
+		HttpHeaders headers = new HttpHeaders();
+		headers.setContentType(mediaType);
+		headerParam.forEach((k,v)->{
+			headers.add(k.toString(), v.toString().replace("[","").replace("]",""));
+		});
 //        headers.add("Content-Type", "application/x-www-form-urlencoded;charset=UTF-8");
 
 //        AclinkLinglingRequest linglingReq = new AclinkLinglingRequest();
@@ -5558,9 +5622,9 @@ public class UserServiceImpl implements UserService {
 //        linglingReq.setHeader(authHeader);
 
 //        String body = "MESSAGE=" + URLEncoder.encode(gson.toJson(linglingReq, AclinkLinglingRequest.class));
-
 		//String body = "MESSAGE=" + URLEncoder.encode("{requestParam:{deviceIds:[1008], keyEffecDay:200}, header:{signature:'f2877f02-5638-45ab-8425-8bd198f36a9b', token:1461381932233}}");
-		HttpEntity<Map> requestEntity = new HttpEntity<Map>(body, headers);
+//		HttpEntity<MultiValueMap<String,String>> requestEntity = new HttpEntity<MultiValueMap<String,String>>(bodyParam, headers);
+ 		HttpEntity<Map<String,String>> requestEntity = new HttpEntity<Map<String,String>>(bodyParam, headers);
 		ListenableFuture<ResponseEntity<String>> future = template.exchange(url, method, requestEntity, String.class);
 
 		if(responseCallback != null) {
@@ -5573,7 +5637,7 @@ public class UserServiceImpl implements UserService {
 
 	private void createUsersAndUserIdentifiers(List<User> users){
 		for (User user : users) {
-			this.userProvider.findUserByNamespaceUserTokenAndType(user.getNamespaceUserToken(), user.getNamespaceUserType());
+//			this.userProvider.findUserByNamespaceUserTokenAndType(user.getNamespaceUserToken(), user.getNamespaceUserType());
 			this.userProvider.createUser(user);
 			UserIdentifier userIdentifier = new UserIdentifier();
 			userIdentifier.setOwnerUid(user.getId());

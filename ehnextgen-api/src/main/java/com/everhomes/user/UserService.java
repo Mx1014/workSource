@@ -3,8 +3,9 @@ package com.everhomes.user;
 
 import com.everhomes.community.Community;
 import com.everhomes.rest.address.CommunityDTO;
+import com.everhomes.rest.asset.PushUsersCommand;
+import com.everhomes.rest.asset.PushUsersResponse;
 import com.everhomes.rest.asset.TargetDTO;
-import com.everhomes.rest.community.admin.ListUserCommunitiesCommand;
 import com.everhomes.rest.family.FamilyDTO;
 import com.everhomes.rest.link.RichLinkDTO;
 import com.everhomes.rest.organization.OrganizationDTO;
@@ -16,7 +17,6 @@ import com.everhomes.rest.user.admin.*;
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
 
-import java.sql.Timestamp;
 import java.util.List;
 
 /**
@@ -290,4 +290,7 @@ public interface UserService {
 
 
     void syncUsersFromAnBangWuYe(SyncUsersFromAnBangWuYeCommand cmd);
+
+
+    PushUsersResponse createUsersForAnBang(PushUsersCommand cmd);
 }

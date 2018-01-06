@@ -30,6 +30,7 @@ import com.everhomes.sequence.SequenceProvider;
 import com.everhomes.server.schema.Tables;
 import com.everhomes.server.schema.tables.daos.*;
 import com.everhomes.server.schema.tables.pojos.*;
+import com.everhomes.server.schema.tables.records.EhUserIdentifiersRecord;
 import com.everhomes.server.schema.tables.records.EhUserLikesRecord;
 import com.everhomes.server.schema.tables.records.EhUsersRecord;
 import com.everhomes.sharding.ShardIterator;
@@ -166,8 +167,35 @@ public class UserProviderImpl implements UserProvider {
     }
 
     @Override
-    public void deleteUser(Integer namespaceId, List<String> namespaceUserTokens, String namespaceUserType) {
+    public void deleteUserAndUserIdentifiers(Integer namespaceId, List<String> namespaceUserTokens, String namespaceUserType) {
+        List<Long> userIds = this.listUsersByNamespaceUserInfo(namespaceId, namespaceUserTokens, namespaceUserType);
+        DSLContext context = this.dbProvider.getDslContext(AccessSpec.readWrite());
+        // delete users
+        DeleteQuery<EhUsersRecord> query_user = context.deleteQuery(Tables.EH_USERS);
+        query_user.addConditions(Tables.EH_USERS.ID.in(userIds));
+        query_user.execute();
 
+        // delete userIdentifiers
+        DeleteQuery<EhUserIdentifiersRecord> query_userIdentifiers = context.deleteQuery(Tables.EH_USER_IDENTIFIERS);
+        query_userIdentifiers.addConditions(Tables.EH_USER_IDENTIFIERS.OWNER_UID.in(userIds));
+        query_userIdentifiers.execute();
+    }
+
+    @Override
+    public List<Long> listUsersByNamespaceUserInfo(Integer namespaceId, List<String> namespaceUserTokens, String namespaceUserType) {
+        DSLContext context = this.dbProvider.getDslContext(AccessSpec.readWrite());
+        SelectQuery<EhUsersRecord> query = context.selectQuery(Tables.EH_USERS);
+        if(namespaceUserTokens  != null && namespaceUserTokens.size() > 0)
+            query.addConditions(Tables.EH_USERS.NAMESPACE_USER_TOKEN.in(namespaceUserTokens));
+        if(!StringUtils.isEmpty(namespaceUserType))
+            query.addConditions(Tables.EH_USERS.NAMESPACE_USER_TYPE.eq(namespaceUserType));
+
+        List<Long> result = new ArrayList<>();
+        query.fetch().map((r) -> {
+            result.add(r.getId());
+            return null;
+        });
+        return result;
     }
 
     @Cacheable(value = "User-Id", key = "#id", unless = "#result == null")
