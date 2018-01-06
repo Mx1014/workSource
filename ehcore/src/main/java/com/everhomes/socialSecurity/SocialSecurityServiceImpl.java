@@ -2353,8 +2353,8 @@ public class SocialSecurityServiceImpl implements SocialSecurityService {
             //  2.create the log.
             SocialSecurityInoutLog log = convertToSocialSecurityInOutLog(time);
             socialSecurityInoutLogProvider.createSocialSecurityInoutLog(log);
-            //  3.social...
-            newSocialSecurityEmployee(cmd.getDetailId(), cmd.getStartMonth());
+            //  todo:3.social...
+//            newSocialSecurityEmployee(cmd.getDetailId(), cmd.getStartMonth());
 
             //  return back.
             SocialSecurityInoutTimeDTO dto = ConvertHelper.convert(time, SocialSecurityInoutTimeDTO.class);
