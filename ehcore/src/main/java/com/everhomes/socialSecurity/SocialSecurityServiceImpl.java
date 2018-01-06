@@ -2430,6 +2430,6 @@ public class SocialSecurityServiceImpl implements SocialSecurityService {
     @Override
     public List<Long> listSocialSecurityEmployeeDetailIdsByPayMonth(Long ownerId, String payMonth) {
         List<Long> detailIds = socialSecurityInoutTimeProvider.listSocialSecurityEmployeeDetailIdsByPayMonth(ownerId, payMonth, InOutTimeType.SOCIAL_SECURITY.getCode());
-        return detailIds;
+        return archivesService.listSocialSecurityEmployees(ownerId,null,null,null);
     }
 }
