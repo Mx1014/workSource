@@ -8,10 +8,12 @@ import com.everhomes.openapi.ContractBuildingMappingProvider;
 import com.everhomes.openapi.ContractProvider;
 import com.everhomes.organization.pm.CommunityAddressMapping;
 import com.everhomes.organization.pm.PropertyMgrProvider;
+import com.everhomes.organization.pm.PropertyMgrService;
 import com.everhomes.rest.contract.ContractParamDTO;
 import com.everhomes.rest.contract.ContractStatus;
 import com.everhomes.rest.contract.GetContractParamCommand;
 import com.everhomes.rest.contract.PeriodUnit;
+import com.everhomes.rest.customer.CustomerType;
 import com.everhomes.rest.organization.pm.AddressMappingStatus;
 import com.everhomes.scheduler.ScheduleProvider;
 import com.everhomes.search.ContractSearcher;
@@ -57,6 +59,8 @@ public class ContractScheduleJob extends QuartzJobBean {
 
     @Autowired
     private PropertyMgrProvider propertyMgrProvider;
+    @Autowired
+    private PropertyMgrService propertyMgrService;
 
     @Autowired
     private CommunityProvider communityProvider;
@@ -118,10 +122,15 @@ public class ContractScheduleJob extends QuartzJobBean {
 
     private void dealAddressLivingStatus(Contract contract, byte livingStatus) {
         List<ContractBuildingMapping> mappings = contractBuildingMappingProvider.listByContract(contract.getId());
+        boolean individualFlag = CustomerType.INDIVIDUAL.equals(CustomerType.fromStatus(contract.getCustomerType())) ? true : false;
         mappings.forEach(mapping -> {
             CommunityAddressMapping addressMapping = propertyMgrProvider.findAddressMappingByAddressId(mapping.getAddressId());
             addressMapping.setLivingStatus(livingStatus);
             propertyMgrProvider.updateOrganizationAddressMapping(addressMapping);
+
+            if(individualFlag) {
+                propertyMgrService.addAddressToOrganizationOwner(contract.getNamespaceId(), mapping.getAddressId(), contract.getCustomerId());
+            }
         });
     }
 

@@ -1,5 +1,10 @@
 package com.everhomes.rest.parking;
 
+/**
+ * <ul>
+ * <li>configId: configId</li>
+ * </ul>
+ */
 public class GetParkingRequestCardAgreementCommand {
 	private Long configId;
 

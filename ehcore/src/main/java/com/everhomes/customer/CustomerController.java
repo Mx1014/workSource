@@ -1274,6 +1274,19 @@ public class CustomerController extends ControllerBase {
         return response;
     }
 
+    /**
+     * <b>URL: /customer/listCustomerEntryInfosWithoutAuth</b>
+     * <p>列出入驻信息(无权限)</p>
+     */
+    @RequestMapping("listCustomerEntryInfosWithoutAuth")
+    @RestReturn(value = CustomerEntryInfoDTO.class, collection = true)
+    public RestResponse listCustomerEntryInfosWithoutAuth(@Valid ListCustomerEntryInfosCommand cmd) {
+        RestResponse response = new RestResponse(customerService.listCustomerEntryInfosWithoutAuth(cmd));
+        response.setErrorCode(ErrorCodes.SUCCESS);
+        response.setErrorDescription("OK");
+        return response;
+    }
+
     //离场信息
     /**
      * <b>URL: /customer/createCustomerDepartureInfo</b>

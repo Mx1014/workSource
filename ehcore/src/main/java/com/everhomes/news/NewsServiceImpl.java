@@ -1395,7 +1395,7 @@ public class NewsServiceImpl implements NewsService {
 				comment.setDeleteTime(new Timestamp(DateHelper.currentGMTTime().getTime()));
 				commentProvider.updateComment(EhNewsComment.class, comment);
 
-				news.setChildCount(news.getChildCount() - 1L);
+				news.setChildCount(news.getChildCount()<=0?0:news.getChildCount() - 1L);
 				newsProvider.updateNews(news);
 				return true;
 			});
@@ -1410,12 +1410,12 @@ public class NewsServiceImpl implements NewsService {
 			throw RuntimeErrorException.errorWith(NewsServiceErrorCode.SCOPE,
 					NewsServiceErrorCode.ERROR_NEWS_NEWSID_COMMENTID_NOT_MATCH, "newsId and commentId not match");
 		}
-		if (comment.getCreatorUid().longValue() != userId.longValue()) {
-			LOGGER.error("userId and commentId not match, operatorId=" + userId + ", userId=" + userId + ", commentId"
-					+ commentId);
-			throw RuntimeErrorException.errorWith(NewsServiceErrorCode.SCOPE,
-					NewsServiceErrorCode.ERROR_NEWS_NEWSID_COMMENTID_NOT_MATCH, "userId and commentId not match");
-		}
+//		if (comment.getCreatorUid().longValue() != userId.longValue()) {
+//			LOGGER.error("userId and commentId not match, operatorId=" + userId + ", userId=" + userId + ", commentId"
+//					+ commentId);
+//			throw RuntimeErrorException.errorWith(NewsServiceErrorCode.SCOPE,
+//					NewsServiceErrorCode.ERROR_NEWS_NEWSID_COMMENTID_NOT_MATCH, "userId and commentId not match");
+//		}
 	}
 
 	@Override

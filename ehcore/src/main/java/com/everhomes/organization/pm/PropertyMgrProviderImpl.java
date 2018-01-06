@@ -2034,7 +2034,17 @@ public class PropertyMgrProviderImpl implements PropertyMgrProvider {
                 .fetchInto(OrganizationOwnerAddress.class);
     }
 
-    @Override
+	@Override
+	public List<OrganizationOwnerAddress> listOrganizationOwnerAuthAddressByAddressId(Integer namespaceId, Long addressId) {
+		DSLContext context = dbProvider.getDslContext(AccessSpec.readOnly());
+		return context.select().from(Tables.EH_ORGANIZATION_OWNER_ADDRESS)
+				.where(Tables.EH_ORGANIZATION_OWNER_ADDRESS.NAMESPACE_ID.eq(namespaceId))
+				.and(Tables.EH_ORGANIZATION_OWNER_ADDRESS.ADDRESS_ID.eq(addressId))
+				.and(Tables.EH_ORGANIZATION_OWNER_ADDRESS.AUTH_TYPE.eq(OrganizationOwnerAddressAuthType.ACTIVE.getCode()))
+				.fetchInto(OrganizationOwnerAddress.class);
+	}
+
+	@Override
     public ParkingCardCategory findParkingCardCategory(Byte cardType) {
         DSLContext context = dbProvider.getDslContext(AccessSpec.readOnly());
         return context.select().from(Tables.EH_PARKING_CARD_CATEGORIES)

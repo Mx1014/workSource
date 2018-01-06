@@ -8,7 +8,8 @@ package com.everhomes.rest.servicehotline;
  * <li>ownerId: ownerId </li>  
  * <li>serviceType:类型</li>  
  * <li>switchFlag:  0-close  1-open</li>   
- * <li>displayName: 显示名称 如"专属客服"</li>   
+ * <li>displayName: 显示名称 如"专属客服"</li>
+ * <li>namespaceId: 域空间Id</li>
  * </ul>
  */
 public class SetHotlineSubjectCommand {
@@ -17,6 +18,7 @@ public class SetHotlineSubjectCommand {
     private Integer serviceType;
     private Byte switchFlag;
     private String displayName;
+	private Integer namespaceId;
 	public String getOwnerType() {
 		return ownerType;
 	}
@@ -47,7 +49,12 @@ public class SetHotlineSubjectCommand {
 	public void setDisplayName(String displayName) {
 		this.displayName = displayName;
 	}
-    
-    
 
+	public Integer getNamespaceId() {
+		return namespaceId;
+	}
+
+	public void setNamespaceId(Integer namespaceId) {
+		this.namespaceId = namespaceId;
+	}
 }

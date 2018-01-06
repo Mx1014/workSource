@@ -22,6 +22,8 @@ public class FindContractCommand {
 
     private Long partyAId;
 
+    private Long organizationId;
+
     public FindContractCommand() {
     }
 
@@ -31,6 +33,14 @@ public class FindContractCommand {
         this.namespaceId = namespaceId;
         this.communityId = communityId;
         this.partyAId = partyAId;
+    }
+
+    public Long getOrganizationId() {
+        return organizationId;
+    }
+
+    public void setOrganizationId(Long organizationId) {
+        this.organizationId = organizationId;
     }
 
     public Long getId() {

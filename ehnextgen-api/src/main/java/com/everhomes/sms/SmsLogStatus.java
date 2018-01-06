@@ -2,11 +2,11 @@ package com.everhomes.sms;
 
 /**
  * <ul>
- *     <li>REPORT_SUCCESS((byte) 1): REPORT_SUCCESS</li>
- *     <li>SEND_SUCCESS((byte) 2): SEND_SUCCESS</li>
- *     <li>UNKNOWN((byte) 3): UNKNOWN</li>
- *     <li>SEND_FAILED((byte) 4): SEND_FAILED</li>
- *     <li>REPORT_FAILED((byte) 5): REPORT_FAILED</li>
+ *     <li>REPORT_SUCCESS((byte) 1): 报告成功</li>
+ *     <li>SEND_SUCCESS((byte) 2): 发送成功</li>
+ *     <li>UNKNOWN((byte) 3): 未知</li>
+ *     <li>SEND_FAILED((byte) 4): 发送失败</li>
+ *     <li>REPORT_FAILED((byte) 5): 报告失败</li>
  * </ul>
  */
 public enum SmsLogStatus {

@@ -5,10 +5,16 @@ import java.util.List;
 import com.everhomes.discover.ItemType;
 import com.everhomes.util.StringHelper;
 
+/**
+ * <ul>
+ * <li>nextPageAnchor: 下一页瞄</li>
+ * <li>carSeries: 卡系列列表 {@link com.everhomes.rest.parking.ParkingCarSerieDTO}</li>
+ * </ul>
+ */
 public class ListParkingCarSeriesResponse {
 
 	private Long nextPageAnchor;
-	
+
 	@ItemType(ParkingCarSerieDTO.class)
 	private List<ParkingCarSerieDTO> carSeries;
 
@@ -27,10 +33,10 @@ public class ListParkingCarSeriesResponse {
 	public void setCarSeries(List<ParkingCarSerieDTO> carSeries) {
 		this.carSeries = carSeries;
 	}
-	
+
 	@Override
-    public String toString() {
-        return StringHelper.toJsonString(this);
-    }
-	
+	public String toString() {
+		return StringHelper.toJsonString(this);
+	}
+
 }

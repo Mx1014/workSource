@@ -1392,6 +1392,7 @@ public class ZJGKOpenServiceImpl {
                 deleteOrganizationAddress(organizationAddress);
             }
         }
+
         if(apartments != null && apartments.size() > 0) {
             apartments.forEach(apartment -> {
                 insertOrganizationAddress(apartment, customer);
@@ -1414,7 +1415,7 @@ public class ZJGKOpenServiceImpl {
         Building building = buildingProvider.findBuildingByName(customer.getNamespaceId(), address.getCommunityId(), address.getBuildingName());
 
         OrganizationAddress organizationAddress = new OrganizationAddress();
-        organizationAddress.setOrganizationId(customer.getId());
+        organizationAddress.setOrganizationId(customer.getOrganizationId());
         organizationAddress.setStatus(OrganizationAddressStatus.ACTIVE.getCode());
         organizationAddress.setCreatorUid(1L);
         organizationAddress.setCreateTime(new Timestamp(DateHelper.currentGMTTime().getTime()));

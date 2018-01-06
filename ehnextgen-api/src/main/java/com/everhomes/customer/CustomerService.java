@@ -72,6 +72,7 @@ public interface CustomerService {
     void deleteCustomerEntryInfo(DeleteCustomerEntryInfoCommand cmd);
     CustomerEntryInfoDTO getCustomerEntryInfo(GetCustomerEntryInfoCommand cmd);
     List<CustomerEntryInfoDTO> listCustomerEntryInfos(ListCustomerEntryInfosCommand cmd);
+    List<CustomerEntryInfoDTO> listCustomerEntryInfosWithoutAuth(ListCustomerEntryInfosCommand cmd);
 
     void createCustomerDepartureInfo(CreateCustomerDepartureInfoCommand cmd);
     void updateCustomerDepartureInfo(UpdateCustomerDepartureInfoCommand cmd);

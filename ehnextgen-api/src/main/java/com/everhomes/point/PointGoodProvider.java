@@ -3,7 +3,6 @@ package com.everhomes.point;
 
 import com.everhomes.listing.ListingLocator;
 import com.everhomes.listing.ListingQueryBuilderCallback;
-import com.everhomes.rest.point.ListPointGoodsCommand;
 
 import java.util.List;
 
@@ -17,5 +16,11 @@ public interface PointGoodProvider {
 
 	PointGood findById(Long id);
 
-    List<PointGood> listPointGood(Integer namespaceId, ListPointGoodsCommand cmd, int pageSize, ListingLocator locator);
+    List<PointGood> listPointGood(Integer namespaceId, Long systemId, Byte status, int pageSize, ListingLocator locator);
+
+    List<PointGood> listEnabledPointGoods(Integer namespaceId, Long systemId, int pageSize, ListingLocator locator);
+
+    PointGood findBySystemAndGood(Long systemId, String number, String shopNumber);
+
+    void deletePointGoods(List<PointGood> goods);
 }

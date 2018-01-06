@@ -557,7 +557,7 @@ public class FlowServiceImpl implements FlowService {
 
             List<FlowVariable> currentProcessor = flowVariableProvider.findVariables(0, 0L,
                     null, 0L, null, FlowVariableUserResolver.ALL_CURRENT_NODE_PROCESSORS,
-                    "hidden");
+                    "hidden", "");
 
             if (currentProcessor != null && currentProcessor.size() > 0) {
                 singleCmd.setSourceIdA(currentProcessor.get(0).getId());
@@ -1831,7 +1831,7 @@ public class FlowServiceImpl implements FlowService {
 
         List<FlowVariable> currentProcessor = flowVariableProvider.findVariables(0, 0L,
                 null, 0L, null, FlowVariableUserResolver.ALL_CURRENT_NODE_PROCESSORS,
-                "hidden");
+                "hidden", "");
 
         if (currentProcessor != null && currentProcessor.size() > 0) {
             singleCmd.setSourceIdA(currentProcessor.get(0).getId());
@@ -2686,25 +2686,25 @@ public class FlowServiceImpl implements FlowService {
         List<FlowVariable> vars = new ArrayList<>();
         String para = null;
         List<FlowVariable> vars2 = flowVariableProvider.findVariables(cmd.getNamespaceId()
-                , flow.getOwnerId(), flow.getOwnerType(), flow.getModuleId(), flow.getModuleType(), para, cmd.getFlowVariableType());
+                , flow.getOwnerId(), flow.getOwnerType(), flow.getModuleId(), flow.getModuleType(), para, cmd.getFlowVariableType(), cmd.getKeyword());
         if (vars2 != null) {
             vars.addAll(vars2);
         }
         vars2 = flowVariableProvider.findVariables(cmd.getNamespaceId()
-                , 0L, null, flow.getModuleId(), flow.getModuleType(), para, cmd.getFlowVariableType());
+                , 0L, null, flow.getModuleId(), flow.getModuleType(), para, cmd.getFlowVariableType(), cmd.getKeyword());
         if (vars2 != null) {
             vars.addAll(vars2);
         }
 
         vars2 = flowVariableProvider.findVariables(cmd.getNamespaceId()
-                , 0L, null, 0L, null, para, cmd.getFlowVariableType());
+                , 0L, null, 0L, null, para, cmd.getFlowVariableType(), cmd.getKeyword());
         if (vars2 != null) {
             vars.addAll(vars2);
         }
 
         if (!cmd.getNamespaceId().equals(0)) {
             vars2 = flowVariableProvider.findVariables(0
-                    , 0L, null, 0L, null, para, cmd.getFlowVariableType());
+                    , 0L, null, 0L, null, para, cmd.getFlowVariableType(), cmd.getKeyword());
             if (vars2 != null) {
                 vars.addAll(vars2);
             }
@@ -2751,7 +2751,7 @@ public class FlowServiceImpl implements FlowService {
         } else {
             FlowVariableResponse resp = new FlowVariableResponse();
             List<FlowVariable> vars = flowVariableProvider.findVariables(0
-                    , 0L, null, 0L, null, null, cmd.getFlowVariableType());
+                    , 0L, null, 0L, null, null, cmd.getFlowVariableType(), cmd.getKeyword());
 
             List<FlowVariableDTO> dtos = new ArrayList<>();
             Map<String, Long> map = new HashMap<>();
@@ -3814,25 +3814,25 @@ public class FlowServiceImpl implements FlowService {
         List<FlowVariable> vars = new ArrayList<>();
 
         List<FlowVariable> vars2 = flowVariableProvider.findVariables(fc.getNamespaceId()
-                , fc.getOwnerId(), fc.getOwnerType(), fc.getModuleId(), fc.getModuleType(), para, FlowVariableType.TEXT.getCode());
+                , fc.getOwnerId(), fc.getOwnerType(), fc.getModuleId(), fc.getModuleType(), para, FlowVariableType.TEXT.getCode(), "");
         if (vars2 != null) {
             vars.addAll(vars2);
         }
         vars2 = flowVariableProvider.findVariables(fc.getNamespaceId()
-                , 0L, null, fc.getModuleId(), fc.getModuleType(), para, FlowVariableType.TEXT.getCode());
+                , 0L, null, fc.getModuleId(), fc.getModuleType(), para, FlowVariableType.TEXT.getCode(), "");
         if (vars2 != null) {
             vars.addAll(vars2);
         }
 
         vars2 = flowVariableProvider.findVariables(fc.getNamespaceId()
-                , 0L, null, 0L, null, para, FlowVariableType.TEXT.getCode());
+                , 0L, null, 0L, null, para, FlowVariableType.TEXT.getCode(), "");
         if (vars2 != null) {
             vars.addAll(vars2);
         }
 
         if (!fc.getNamespaceId().equals(0)) {
             vars2 = flowVariableProvider.findVariables(0
-                    , 0L, null, 0L, null, para, FlowVariableType.TEXT.getCode());
+                    , 0L, null, 0L, null, para, FlowVariableType.TEXT.getCode(), "");
             if (vars2 != null) {
                 vars.addAll(vars2);
             }
@@ -5743,7 +5743,11 @@ public class FlowServiceImpl implements FlowService {
         List<FlowServiceTypeDTO> serviceTypes = new ArrayList<>();
         Integer namespaceId = UserContext.getCurrentNamespaceId();
 
-        serviceTypes.addAll(flowListenerManager.listFlowServiceTypes(namespaceId, cmd.getModuleId(), EntityType.ORGANIZATIONS.getCode(), cmd.getOrganizationId()));
+        List<FlowServiceTypeDTO> types = flowListenerManager.listFlowServiceTypes(namespaceId, cmd.getModuleId(),
+                EntityType.ORGANIZATIONS.getCode(), cmd.getOrganizationId());
+        if (types != null) {
+            serviceTypes.addAll(types);
+        }
 
         List<FlowServiceTypeDTO> nsServiceTypes = flowServiceTypeProvider.listFlowServiceType(
                 namespaceId, cmd.getModuleId(), EntityType.ORGANIZATIONS.getCode(), cmd.getOrganizationId(), FlowServiceTypeDTO.class);

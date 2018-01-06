@@ -6,7 +6,10 @@ import com.everhomes.util.StringHelper;
 import java.util.List;
 
 /**
- * @author sw on 2017/10/31.
+ * <ul>
+ * <li>nextPageAnchor: nextPageAnchor</li>
+ * <li>requests: requests {@link com.everhomes.rest.parking.ParkingCarVerificationDTO}</li>
+ * </ul>
  */
 public class SearchParkingCarVerificationResponse {
 

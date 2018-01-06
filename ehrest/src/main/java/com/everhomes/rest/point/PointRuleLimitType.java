@@ -9,7 +9,10 @@ package com.everhomes.rest.point;
 public enum PointRuleLimitType {
 
     TIMES_PER_DAY((byte) 1),
-    TIMES((byte) 2),;
+    TIMES((byte) 2),
+    CONTINUOUS((byte) 3),
+
+    ;
 
     private Byte code;
 

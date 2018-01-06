@@ -12,19 +12,17 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RestController;
 
+import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
 
 /**
  * 积分
  * Created by xq.tian on 2017/11/23.
  */
-@RestDoc(value="Point admin controller", site="core")
+@RestDoc(value = "Point admin controller", site = "core")
 @RestController
 @RequestMapping("/admin/point")
 public class PointAdminController extends ControllerBase {
-
-    @Autowired
-    private PointService pointService;
 
     private static final RestResponse SUCCESS = new RestResponse() {
         {
@@ -32,6 +30,9 @@ public class PointAdminController extends ControllerBase {
             this.setErrorCode(ErrorCodes.SUCCESS);
         }
     };
+
+    @Autowired
+    private PointService pointService;
 
     /**
      * <b>URL: /admin/point/getPointSystem</b>
@@ -127,7 +128,8 @@ public class PointAdminController extends ControllerBase {
      */
     @RestReturn(PointLogDTO.class)
     @RequestMapping("createPointLog")
-    public RestResponse createPointLog(CreatePointLogCommand cmd) {
+    public RestResponse createPointLog(CreatePointLogCommand cmd, HttpServletRequest request) {
+        cmd.setSessionId(request.getSession().getId());
         PointLogDTO dto = pointService.createPointLog(cmd);
         return success(dto);
     }
@@ -162,6 +164,17 @@ public class PointAdminController extends ControllerBase {
     @RequestMapping("listPointLogs")
     public RestResponse listPointLogs(ListPointLogsCommand cmd) {
         ListPointLogsResponse response = pointService.listPointLogs(cmd);
+        return success(response);
+    }
+
+    /**
+     * <b>URL: /admin/point/listManuallyPointLogs</b>
+     * <p>获取手工积分记录列表</p>
+     */
+    @RestReturn(ListPointLogsResponse.class)
+    @RequestMapping("listManuallyPointLogs")
+    public RestResponse listManuallyPointLogs(ListPointLogsCommand cmd) {
+        ListPointLogsResponse response = pointService.listManuallyPointLogs(cmd);
         return success(response);
     }
 
@@ -275,60 +288,81 @@ public class PointAdminController extends ControllerBase {
         return SUCCESS;
     }
 
-    // 给电商提供的接口
+    /**
+     * <b>URL: /admin/point/createPointBanner</b>
+     * <p>创建积分商城的banner</p>
+     */
+    @RestReturn(PointBannerDTO.class)
+    @RequestMapping("createPointBanner")
+    public RestResponse createPointBanner(CreatePointBannerCommand cmd) {
+        PointBannerDTO dto = pointService.createPointBanner(cmd);
+        return success(dto);
+    }
 
     /**
-     * <b>URL: /admin/point/notifySyncPointGoods</b>
-     * <p>通知积分系统去读取电商的数据</p>
+     * <b>URL: /admin/point/updatePointBanner</b>
+     * <p>修改积分商城的banner</p>
+     */
+    @RestReturn(PointBannerDTO.class)
+    @RequestMapping("updatePointBanner")
+    public RestResponse updatePointBanner(UpdatePointBannerCommand cmd) {
+        PointBannerDTO dto = pointService.updatePointBanner(cmd);
+        return success(dto);
+    }
+
+    /**
+     * <b>URL: /admin/point/updatePointBannerStatus</b>
+     * <p>修改积分商城的banner开关</p>
+     */
+    @RestReturn(PointBannerDTO.class)
+    @RequestMapping("updatePointBannerStatus")
+    public RestResponse updatePointBannerStatus(UpdatePointBannerStatusCommand cmd) {
+        PointBannerDTO dto = pointService.updatePointBannerStatus(cmd);
+        return success(dto);
+    }
+
+    /**
+     * <b>URL: /admin/point/listPointBannersBySystemId</b>
+     * <p>积分商城的banner列表</p>
+     */
+    @RestReturn(ListPointBannersResponse.class)
+    @RequestMapping("listPointBannersBySystemId")
+    public RestResponse listPointBanners(ListPointBannersCommand cmd) {
+        ListPointBannersResponse response = pointService.listPointBanners(cmd);
+        return success(response);
+    }
+
+    /**
+     * <b>URL: /admin/point/deletePointBanner</b>
+     * <p>删除积分商城的banner</p>
      */
     @RestReturn(String.class)
-    @RequestMapping("notifySyncPointGoods")
-    public RestResponse notifySyncPointGoods() {
-
+    @RequestMapping("deletePointBanner")
+    public RestResponse deletePointBanner(DeletePointBannerCommand cmd) {
+        pointService.deletePointBanner(cmd);
         return SUCCESS;
     }
 
     /**
-     * <b>URL: /admin/point/publishEvent</b>
-     * <p>发布事件</p>
+     * <b>URL: /admin/point/reorderPointBanners</b>
+     * <p>积分商城的banner重排序</p>
      */
-    @RestReturn(PublishEventResultDTO.class)
-    @RequestMapping("publishEvent")
-    public RestResponse publishEvent(PublishEventCommand cmd) {
-
+    @RestReturn(String.class)
+    @RequestMapping("reorderPointBanners")
+    public RestResponse reorderPointBanners(ReorderPointBannersCommand cmd) {
+        pointService.reorderPointBanners(cmd);
         return SUCCESS;
     }
 
     /**
-     * <b>URL: /admin/point/getUserPoint</b>
-     * <p>获取用户积分</p>
+     * <b>URL: /admin/point/checkUserInfo</b>
+     * <p>检查用户</p>
      */
-    @RestReturn(PointScoreDTO.class)
-    @RequestMapping("getUserPoint")
-    public RestResponse getUserPoint(GetUserPointCommand cmd) {
-        PointScoreDTO dto = pointService.getUserPoint(cmd);
-        return success(dto);
-    }
-
-    /**
-     * <b>URL: /admin/point/getPointRule</b>
-     * <p>获取积分规则</p>
-     */
-    @RestReturn(PointRuleDTO.class)
-    @RequestMapping("getPointRule")
-    public RestResponse getPointRule(GetPointRuleCommand cmd) {
-        PointRuleDTO dto = pointService.getPointRule(cmd);
-        return success(dto);
-    }
-
-    /**
-     * <b>URL: /admin/point/getEnabledPointSystem</b>
-     * <p>获取启用的积分系统</p>
-     */
-    @RestReturn(GetEnabledPointSystemResponse.class)
-    @RequestMapping("getEnabledPointSystem")
-    public RestResponse getEnabledPointSystem(GetEnabledPointSystemCommand cmd) {
-        GetEnabledPointSystemResponse response = pointService.getEnabledPointSystem(cmd);
+    @RestReturn(CheckUserInfoResponse.class)
+    @RequestMapping("checkUserInfo")
+    public RestResponse checkUserInfo(CheckUserInfoCommand cmd, HttpServletRequest request) {
+        cmd.setSessionId(request.getSession().getId());
+        CheckUserInfoResponse response = pointService.checkUserInfo(cmd);
         return success(response);
     }
 
