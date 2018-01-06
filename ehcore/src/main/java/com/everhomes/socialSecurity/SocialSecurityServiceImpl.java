@@ -12,18 +12,15 @@ import com.everhomes.coordinator.CoordinationLocks;
 import com.everhomes.coordinator.CoordinationProvider;
 import com.everhomes.db.DbProvider;
 import com.everhomes.filedownload.TaskService;
-import com.everhomes.incubator.IncubatorApplyExportTaskHandler;
 import com.everhomes.listing.CrossShardListingLocator;
 import com.everhomes.naming.NameMapper;
 import com.everhomes.organization.*;
 import com.everhomes.region.Region;
 import com.everhomes.region.RegionProvider;
 import com.everhomes.archives.ArchivesUtil;
-import com.everhomes.rest.archives.ImportArchivesContactsDTO;
 import com.everhomes.rest.common.ImportFileResponse;
 import com.everhomes.rest.filedownload.TaskRepeatFlag;
 import com.everhomes.rest.filedownload.TaskType;
-import com.everhomes.rest.incubator.ApproveStatus;
 import com.everhomes.rest.organization.*;
 import com.everhomes.rest.socialSecurity.*;
 import com.everhomes.sequence.SequenceProvider;
@@ -942,7 +939,9 @@ public class SocialSecurityServiceImpl implements SocialSecurityService {
             @Override
             public ImportFileResponse importFile() {
                 ImportFileResponse response = new ImportFileResponse();
-                response.setTitle("导入社保设置");
+                Map<String, String> title = new HashedMap();
+                title.put("导入社保设置", "导入社保设置");
+                response.setTitle(title);
                 //  将 excel 的中的数据读取
                 String fileLog = "";
                 batchUpdateSSSettingAndPayments(resultList, cmd.getOwnerId(), fileLog, response);
@@ -977,7 +976,7 @@ public class SocialSecurityServiceImpl implements SocialSecurityService {
             ImportFileResultLog<Map<String, String>> log = new ImportFileResultLog<>(SocialSecurityConstants.SCOPE);
 //            response.getLogs().add(log);
             log.setData(r.getCells());
-            String userContact = r.getA();
+            String userContact = r.getA().trim();
             OrganizationMemberDetails detail = organizationProvider.findOrganizationMemberDetailsByOrganizationIdAndContactToken(ownerId, userContact);
             if (null == detail) {
 //                response.setFileLog("找不到用户: 手机号" + userContact);
@@ -1054,36 +1053,36 @@ public class SocialSecurityServiceImpl implements SocialSecurityService {
         }
         String companyString = r.getH();
         String emloyeeString = r.getI();
-        addImportItemDTO(dtos, companyString, emloyeeString, AccumOrSocial.ACCUM, "");
+        addImportItemDTO(dtos,ssRadix, companyString, emloyeeString, AccumOrSocial.ACCUM, "");
         // 养老
 
         companyString = r.getJ();
         emloyeeString = "";
-        addImportItemDTO(dtos, companyString, emloyeeString, AccumOrSocial.SOCAIL, "养老");
+        addImportItemDTO(dtos, ssRadix, companyString, emloyeeString, AccumOrSocial.SOCAIL, "养老");
         // 医疗
         companyString = r.getK();
         emloyeeString = "";
-        addImportItemDTO(dtos, companyString, emloyeeString, AccumOrSocial.SOCAIL, "医疗");
+        addImportItemDTO(dtos, ssRadix, companyString, emloyeeString, AccumOrSocial.SOCAIL, "医疗");
         // 生育
         companyString = r.getL();
         emloyeeString = "";
-        addImportItemDTO(dtos, companyString, emloyeeString, AccumOrSocial.SOCAIL, "生育");
+        addImportItemDTO(dtos, ssRadix, companyString, emloyeeString, AccumOrSocial.SOCAIL, "生育");
         // 工伤
         companyString = r.getM();
         emloyeeString = "";
-        addImportItemDTO(dtos, companyString, emloyeeString, AccumOrSocial.SOCAIL, "工伤");
+        addImportItemDTO(dtos, ssRadix, companyString, emloyeeString, AccumOrSocial.SOCAIL, "工伤");
         // 失业
         companyString = r.getN();
         emloyeeString = "";
-        addImportItemDTO(dtos, companyString, emloyeeString, AccumOrSocial.SOCAIL, "失业");
+        addImportItemDTO(dtos, ssRadix, companyString, emloyeeString, AccumOrSocial.SOCAIL, "失业");
         // 残障
         companyString = r.getO();
         emloyeeString = "";
-        addImportItemDTO(dtos, companyString, emloyeeString, AccumOrSocial.SOCAIL, "残障金");
+        addImportItemDTO(dtos, ssRadix, companyString, emloyeeString, AccumOrSocial.SOCAIL, "残障金");
         // 商业保险
         companyString = r.getP();
         emloyeeString = "";
-        addImportItemDTO(dtos, companyString, emloyeeString, AccumOrSocial.SOCAIL, "商业保险");
+        addImportItemDTO(dtos, ssRadix, companyString, emloyeeString, AccumOrSocial.SOCAIL, "商业保险");
 
         for (SocialSecurityItemDTO item : dtos) {
             SocialSecuritySetting setting = findSetting(item.getAccumOrSocial(), item.getPayItem(), settings);
@@ -1212,7 +1211,7 @@ public class SocialSecurityServiceImpl implements SocialSecurityService {
         }
     }
 
-    private void addImportItemDTO(List<SocialSecurityItemDTO> dtos, String companyString, String emloyeeString, AccumOrSocial accumOrSocail, String payItem) {
+    private void addImportItemDTO(List<SocialSecurityItemDTO> dtos, BigDecimal ssRadix, String companyString, String emloyeeString, AccumOrSocial accumOrSocail, String payItem) {
         if (StringUtils.isNotBlank(companyString) || StringUtils.isNotBlank(emloyeeString)) {
             SocialSecurityItemDTO dto = new SocialSecurityItemDTO();
             dto.setAccumOrSocial(accumOrSocail.getCode());
