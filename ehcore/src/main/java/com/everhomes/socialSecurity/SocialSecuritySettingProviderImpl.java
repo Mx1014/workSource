@@ -117,7 +117,7 @@ public class SocialSecuritySettingProviderImpl implements SocialSecuritySettingP
                 .where(Tables.EH_SOCIAL_SECURITY_SETTINGS.DETAIL_ID.eq(detailId))
                 .orderBy(Tables.EH_SOCIAL_SECURITY_SETTINGS.ID.asc())
                 .fetch();
-        if (null == record) {
+        if (null == record || record.size() == 0) {
             return null;
         }
         return record.map(r -> ConvertHelper.convert(r, SocialSecuritySetting.class));
@@ -128,7 +128,7 @@ public class SocialSecuritySettingProviderImpl implements SocialSecuritySettingP
         Result<Record> record = getReadOnlyContext().select().from(Tables.EH_SOCIAL_SECURITY_SETTINGS)
                 .where(Tables.EH_SOCIAL_SECURITY_SETTINGS.DETAIL_ID.in(detailIds))
                 .orderBy(Tables.EH_SOCIAL_SECURITY_SETTINGS.ID.asc()).fetch();
-        if (null == record) {
+        if (null == record || record.size() == 0) {
             return null;
         }
         return record.map(r -> ConvertHelper.convert(r, SocialSecuritySetting.class));
@@ -196,7 +196,7 @@ public class SocialSecuritySettingProviderImpl implements SocialSecuritySettingP
                 .where(Tables.EH_SOCIAL_SECURITY_SETTINGS.ORGANIZATION_ID.eq(ownerId))
                 .orderBy(Tables.EH_SOCIAL_SECURITY_SETTINGS.ID.asc())
                 .fetch();
-        if (null == record) {
+        if (null == record || record.size() == 0) {
             return null;
         }
         return record.map(r -> ConvertHelper.convert(r, SocialSecuritySetting.class));
