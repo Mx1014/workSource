@@ -1098,6 +1098,7 @@ public class SocialSecurityServiceImpl implements SocialSecurityService {
                     setting.setOrganizationId(detail.getOrganizationId());
                     setting.setUserId(detail.getTargetId());
                     setting.setDetailId(detail.getId());
+                    setting.setAccumOrSocail(item.getAccumOrSocial());
                     setting.setNamespaceId(detail.getNamespaceId());
                 } else {
                     setting = processSocialSecuritySetting(base, cityId, detail.getOrganizationId(),
