@@ -122,14 +122,15 @@ public class EnergyMeterTaskProviderImpl implements EnergyMeterTaskProvider {
         SelectQuery<EhEnergyMeterTasksRecord> query = context.selectQuery(Tables.EH_ENERGY_METER_TASKS);
         query.addConditions(Tables.EH_ENERGY_METER_TASKS.ID.ge(pageAnchor));
         query.addConditions(Tables.EH_ENERGY_METER_TASKS.PLAN_ID.in(planIds));
-        query.addConditions(Tables.EH_ENERGY_METER_TASKS.STATUS.ne(EnergyTaskStatus.INACTIVE.getCode()));
+        query.addConditions(Tables.EH_ENERGY_METER_TASKS.STATUS.in(EnergyTaskStatus.READ.getCode(), EnergyTaskStatus.NON_READ.getCode()));
         query.addConditions(Tables.EH_ENERGY_METER_TASKS.TARGET_ID.eq(targetId));
-        query.addOrderBy(Tables.EH_ENERGY_METER_TASKS.PLAN_ID, Tables.EH_ENERGY_METER_TASKS.DEFAULT_ORDER);
 
         if(lastUpdateTime != null) {
             query.addConditions(Tables.EH_ENERGY_METER_TASKS.CREATE_TIME.ge(lastUpdateTime)
                     .or(Tables.EH_ENERGY_METER_TASKS.UPDATE_TIME.ge(lastUpdateTime)));
         }
+
+        query.addOrderBy(Tables.EH_ENERGY_METER_TASKS.PLAN_ID, Tables.EH_ENERGY_METER_TASKS.DEFAULT_ORDER);
         query.addLimit(pageSize);
         query.fetch().map((r) -> {
             tasks.add(ConvertHelper.convert(r, EnergyMeterTask.class));
