@@ -39,7 +39,7 @@ public class SocialSecurityReportsTaskHandler implements FileDownloadTaskHandler
 
     @Autowired
     SocialSecurityService socialSecurityService;
-    
+
     @Override
     public void beforeExecute(Map<String, Object> params) {
 
@@ -63,9 +63,9 @@ public class SocialSecurityReportsTaskHandler implements FileDownloadTaskHandler
         Long taskId = (Long) params.get("taskId");
 
 
-        List<SocialSecurityReport> result = socialSecurityReportProvider.listSocialSecurityReport(ownerId,
-                payMonth, null, Integer.MAX_VALUE - 1);
-
+//        List<SocialSecurityReport> result = socialSecurityReportProvider.listSocialSecurityReport(ownerId,
+//                payMonth, null, Integer.MAX_VALUE - 1);
+//
 //        ,
 //        ExcelUtils excelUtils = new ExcelUtils(fileName, "");
 //        List<String> propertyNames = new ArrayList<String>(Arrays.asList("projectName", "projectType", "teamName", "businessLicenceText", "planBookAttachmentText", "chargerName", "chargerPhone", "chargerEmail", "applyTypeText", "createTimeText"));
@@ -73,7 +73,20 @@ public class SocialSecurityReportsTaskHandler implements FileDownloadTaskHandler
 //        List<Integer> titleSizes = new ArrayList<Integer>(Arrays.asList(10, 10, 20, 10, 10, 10, 10, 20, 10, 10, 10, 10));
 //        excelUtils.setNeedSequenceColumn(true);
 //        OutputStream outputStream = excelUtils.getOutputStream(propertyNames, titleNames, titleSizes, result);
-        OutputStream outputStream = socialSecurityService.getSocialSecurityReportsOutputStream(ownerId,payMonth);
+
+        OutputStream outputStream = null;
+
+        String reportType = null;
+        if (params.get("reportType") != null) {
+            reportType = String.valueOf(params.get("reportType"));
+        }
+        if (reportType.equals("exportSocialSecurityReports")) {
+            outputStream = socialSecurityService.getSocialSecurityReportsOutputStream(ownerId, payMonth);
+        } else if (reportType.equals("exportSocialSecurityDepartmentSummarys")) {
+            outputStream = socialSecurityService.getSocialSecurityDepartmentSummarysOutputStream(ownerId, payMonth);
+        } else if (reportType.equals("exportSocialSecurityInoutReports")) {
+            outputStream = socialSecurityService.getSocialSecurityInoutReportsOutputStream(ownerId, payMonth);
+        }
         CsFileLocationDTO fileLocationDTO = fileDownloadTaskService.uploadToContenServer(fileName, outputStream);
 
 
@@ -90,39 +103,6 @@ public class SocialSecurityReportsTaskHandler implements FileDownloadTaskHandler
 
     }
 
-
-    private void populateExportString(IncubatorApplyDTO dto) {
-        if (dto == null) {
-            return;
-        }
-
-        List<IncubatorApplyAttachment> businessLicence = incubatorProvider.listAttachmentsByApplyId(dto.getId(), IncubatorApplyAttachmentType.BUSINESS_LICENCE.getCode());
-        if (businessLicence != null && businessLicence.size() > 0) {
-            dto.setBusinessLicenceText("请到后台下载");
-        } else {
-            dto.setBusinessLicenceText("无");
-        }
-
-        List<IncubatorApplyAttachment> planBook = incubatorProvider.listAttachmentsByApplyId(dto.getId(), IncubatorApplyAttachmentType.PLAN_BOOK.getCode());
-        if (planBook != null && planBook.size() > 0) {
-            dto.setPlanBookAttachmentText("请到后台下载");
-        } else {
-            dto.setPlanBookAttachmentText("无");
-        }
-
-        ApplyType applyType = ApplyType.fromCode(dto.getApplyType());
-        if (applyType != null) {
-            dto.setApplyTypeText(applyType.getText());
-        } else {
-            dto.setApplyTypeText("全部");
-        }
-
-        if (dto.getCreateTime() != null) {
-            SimpleDateFormat f = new SimpleDateFormat("yyyy-MM-dd HH:mm");
-            dto.setCreateTimeText(f.format(dto.getCreateTime()));
-        }
-
-    }
 
     @Override
     public void commit(Map<String, Object> params) {

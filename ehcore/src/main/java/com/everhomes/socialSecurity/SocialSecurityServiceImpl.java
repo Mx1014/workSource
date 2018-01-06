@@ -1648,31 +1648,6 @@ public class SocialSecurityServiceImpl implements SocialSecurityService {
         return dto;
     }
 
-    @Override
-    public void exportSocialSecurityReports(ExportSocialSecurityReportsCommand cmd) {
-
-        // TODO 导出
-        Map<String, Object> params = new HashMap();
-
-        //如果是null的话会被传成“null”
-        params.put("ownerId", cmd.getOwnerId());
-        params.put("payMonth", cmd.getPaymentMonth());
-
-        String fileName = String.format("导出社保报表_%s.xlsx", DateUtil.dateToStr(new Date(), DateUtil.NO_SLASH));
-
-        taskService.createTask(fileName, TaskType.FILEDOWNLOAD.getCode(), SocialSecurityReportsTaskHandler.class, params, TaskRepeatFlag.REPEAT.getCode(), new Date());
-
-    }
-    @Override
-    public OutputStream getSocialSecurityReportsOutputStream(Long ownerId, String payMonth) {
-        List<SocialSecurityReport> result = socialSecurityReportProvider.listSocialSecurityReport(ownerId,
-                payMonth, null, Integer.MAX_VALUE - 1);
-        XSSFWorkbook workbook = createSocialSecurityReportWorkBook(result);
-        ByteArrayOutputStream out = new ByteArrayOutputStream(); 
-        workbook.write(out);
-        return out;
-
-    }
 
     private XSSFWorkbook createSocialSecurityReportWorkBook(List<SocialSecurityReport> result) {
         XSSFWorkbook wb = new XSSFWorkbook();
@@ -1889,12 +1864,98 @@ public class SocialSecurityServiceImpl implements SocialSecurityService {
     }
 
     @Override
+    public void exportSocialSecurityReports(ExportSocialSecurityReportsCommand cmd) {
+
+        // TODO 导出
+        Map<String, Object> params = new HashMap();
+
+        //如果是null的话会被传成“null”
+        params.put("ownerId", cmd.getOwnerId());
+        params.put("payMonth", cmd.getPaymentMonth());
+        params.put("reportType","exportSocialSecurityReports");
+        String fileName = String.format("导出社保报表_%s.xlsx", DateUtil.dateToStr(new Date(), DateUtil.NO_SLASH));
+
+        taskService.createTask(fileName, TaskType.FILEDOWNLOAD.getCode(), SocialSecurityReportsTaskHandler.class, params, TaskRepeatFlag.REPEAT.getCode(), new Date());
+
+    }
+    @Override
+    public OutputStream getSocialSecurityReportsOutputStream(Long ownerId, String payMonth) {
+        List<SocialSecurityReport> result = socialSecurityReportProvider.listSocialSecurityReport(ownerId,
+                payMonth, null, Integer.MAX_VALUE - 1);
+        XSSFWorkbook workbook = createSocialSecurityReportWorkBook(result);
+        ByteArrayOutputStream out = new ByteArrayOutputStream();
+        try {
+            workbook.write(out);
+        } catch (IOException e) {
+            LOGGER.error("something woring with build output stream");
+            e.printStackTrace();
+        }
+        return out;
+
+    }
+    @Override
+    public OutputStream getSocialSecurityDepartmentSummarysOutputStream(Long ownerId, String payMonth) {
+        List<SocialSecurityDepartmentSummary> result = socialSecurityDepartmentSummaryProvider.listSocialSecurityDepartmentSummary(
+                ownerId,payMonth, null, Integer.MAX_VALUE - 1);
+        Workbook workbook = createSocialSecurityDepartmentSummarysWorkBook(result);
+        ByteArrayOutputStream out = new ByteArrayOutputStream();
+        try {
+            workbook.write(out);
+        } catch (IOException e) {
+            LOGGER.error("something woring with build output stream");
+            e.printStackTrace();
+        }
+        return out;
+
+    }
+
+    @Override
+    public OutputStream getSocialSecurityInoutReportsOutputStream(Long ownerId, String payMonth) {
+
+        List<SocialSecurityInoutReport> result = socialSecurityInoutReportProvider.listSocialSecurityInoutReport(
+                ownerId,payMonth, null, Integer.MAX_VALUE - 1);
+        Workbook workbook = createSocialSecurityInoutReportsWorkBook(result);
+        ByteArrayOutputStream out = new ByteArrayOutputStream();
+        try {
+            workbook.write(out);
+        } catch (IOException e) {
+            LOGGER.error("something woring with build output stream");
+            e.printStackTrace();
+        }
+        return out;
+
+    }
+
+    @Override
+    public void exportSocialSecurityInoutReports(ExportSocialSecurityInoutReportsCommand cmd) {
+// TODO: 2018/1/2 导出
+        // TODO 导出
+        Map<String, Object> params = new HashMap();
+
+        //如果是null的话会被传成“null”
+        params.put("ownerId", cmd.getOwnerId());
+        params.put("payMonth", cmd.getPaymentMonth());
+        params.put("reportType","exportSocialSecurityInoutReports");
+        String fileName = String.format("导出社保部门汇总报表_%s.xlsx", DateUtil.dateToStr(new Date(), DateUtil.NO_SLASH));
+
+        taskService.createTask(fileName, TaskType.FILEDOWNLOAD.getCode(), SocialSecurityReportsTaskHandler.class, params, TaskRepeatFlag.REPEAT.getCode(), new Date());
+
+    }
+
+    @Override
     public void exportSocialSecurityDepartmentSummarys(
             ExportSocialSecurityDepartmentSummarysCommand cmd) {
-        List<SocialSecurityDepartmentSummary> result = socialSecurityDepartmentSummaryProvider.listSocialSecurityDepartmentSummary(cmd.getOwnerId(),
-                cmd.getPaymentMonth(), null, Integer.MAX_VALUE - 1);
-        Workbook workBook = createSocialSecurityDepartmentSummarysWorkBook(result);
-        // TODO: 2018/1/2 导出
+        // TODO 导出
+        Map<String, Object> params = new HashMap();
+
+        //如果是null的话会被传成“null”
+        params.put("ownerId", cmd.getOwnerId());
+        params.put("payMonth", cmd.getPaymentMonth());
+        params.put("reportType","exportSocialSecurityDepartmentSummarys");
+        String fileName = String.format("导出社保部门汇总报表_%s.xlsx", DateUtil.dateToStr(new Date(), DateUtil.NO_SLASH));
+
+        taskService.createTask(fileName, TaskType.FILEDOWNLOAD.getCode(), SocialSecurityReportsTaskHandler.class, params, TaskRepeatFlag.REPEAT.getCode(), new Date());
+
     }
 
     private Workbook createSocialSecurityDepartmentSummarysWorkBook(List<SocialSecurityDepartmentSummary> result) {
@@ -2022,13 +2083,6 @@ public class SocialSecurityServiceImpl implements SocialSecurityService {
         return dto;
     }
 
-    @Override
-    public void exportSocialSecurityInoutReports(ExportSocialSecurityInoutReportsCommand cmd) {
-        List<SocialSecurityInoutReport> result = socialSecurityInoutReportProvider.listSocialSecurityInoutReport(cmd.getOwnerId(),
-                cmd.getPaymentMonth(), null, Integer.MAX_VALUE - 1);
-        Workbook workBook = createSocialSecurityInoutReportsWorkBook(result);
-// TODO: 2018/1/2 导出 
-    }
 
     private Workbook createSocialSecurityInoutReportsWorkBook(List<SocialSecurityInoutReport> result) {
         XSSFWorkbook wb = new XSSFWorkbook();

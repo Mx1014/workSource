@@ -58,11 +58,15 @@ public interface SocialSecurityService {
 	ListSocialSecurityDepartmentSummarysResponse listSocialSecurityDepartmentSummarys(ListSocialSecurityDepartmentSummarysCommand cmd);
 
 
+	OutputStream getSocialSecurityDepartmentSummarysOutputStream(Long ownerId, String payMonth);
+
 	void exportSocialSecurityDepartmentSummarys(ExportSocialSecurityDepartmentSummarysCommand cmd);
 
 
 	ListSocialSecurityInoutReportsResponse listSocialSecurityInoutReports(ListSocialSecurityInoutReportsCommand cmd);
 
+
+	OutputStream getSocialSecurityInoutReportsOutputStream(Long ownerId, String payMonth);
 
 	void exportSocialSecurityInoutReports(ExportSocialSecurityInoutReportsCommand cmd);
 
