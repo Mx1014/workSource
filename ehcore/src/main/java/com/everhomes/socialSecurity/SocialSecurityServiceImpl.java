@@ -2345,30 +2345,46 @@ public class SocialSecurityServiceImpl implements SocialSecurityService {
 
     @Override
     public SocialSecurityInoutTimeDTO addSocialSecurityInOutTime(AddSocialSecurityInOutTimeCommand cmd) {
-        SocialSecurityInoutTime time = new SocialSecurityInoutTime();
         OrganizationMemberDetails memberDetail = organizationProvider.findOrganizationMemberDetailsByDetailId(cmd.getDetailId());
 
-        time.setNamespaceId(memberDetail.getNamespaceId());
-        time.setUserId(memberDetail.getTargetId());
-        time.setDetailId(memberDetail.getId());
-        time.setType(cmd.getInOutType());
-        if (cmd.getStartMonth() != null)
-            time.setStartMonth(cmd.getStartMonth());
-        if (cmd.getEndMonth() != null)
-            time.setEndMonth(cmd.getEndMonth());
+        if (memberDetail != null) {
+            //  1.create inOut time.
+            SocialSecurityInoutTime time = createSocialSecurityInoutTime(cmd, memberDetail);
+            //  2.create the log.
+            SocialSecurityInoutLog log = convertToSocialSecurityInOutLog(time);
+            socialSecurityInoutLogProvider.createSocialSecurityInoutLog(log);
+            //  3.social...
+            newSocialSecurityEmployee(cmd.getDetailId(), cmd.getStartMonth());
 
-        //  1.create inOut time.
-        socialSecurityInoutTimeProvider.createSocialSecurityInoutTime(time);
-        //  2.create the log.
-        SocialSecurityInoutLog log = convertToSocialSecurityInOutLog(time);
-        socialSecurityInoutLogProvider.createSocialSecurityInoutLog(log);
-        //  3.social...
-        newSocialSecurityEmployee(cmd.getDetailId(), cmd.getStartMonth());
+            //  return back.
+            SocialSecurityInoutTimeDTO dto = ConvertHelper.convert(time, SocialSecurityInoutTimeDTO.class);
+            dto.setInOutType(time.getType());
+            return dto;
+        }
+        return null;
+    }
 
-        //  return back.
-        SocialSecurityInoutTimeDTO dto = ConvertHelper.convert(time, SocialSecurityInoutTimeDTO.class);
-        dto.setInOutType(time.getType());
-        return dto;
+    private SocialSecurityInoutTime createSocialSecurityInoutTime(AddSocialSecurityInOutTimeCommand cmd, OrganizationMemberDetails memberDetail) {
+        SocialSecurityInoutTime time = socialSecurityInoutTimeProvider.getSocialSecurityInoutTimeByDetailId(cmd.getInOutType(), cmd.getDetailId());
+        if (time != null) {
+            if (cmd.getStartMonth() != null)
+                time.setStartMonth(cmd.getStartMonth());
+            if (cmd.getEndMonth() != null)
+                time.setEndMonth(cmd.getEndMonth());
+            socialSecurityInoutTimeProvider.updateSocialSecurityInoutTime(time);
+        } else {
+            time = new SocialSecurityInoutTime();
+            time.setNamespaceId(memberDetail.getNamespaceId());
+            time.setUserId(memberDetail.getTargetId());
+            time.setDetailId(memberDetail.getId());
+            time.setType(cmd.getInOutType());
+            if (cmd.getStartMonth() != null)
+                time.setStartMonth(cmd.getStartMonth());
+            if (cmd.getEndMonth() != null)
+                time.setEndMonth(cmd.getEndMonth());
+            socialSecurityInoutTimeProvider.createSocialSecurityInoutTime(time);
+        }
+        return time;
     }
 
     private SocialSecurityInoutLog convertToSocialSecurityInOutLog(SocialSecurityInoutTime time) {
