@@ -4634,7 +4634,7 @@ public class EnergyConsumptionServiceImpl implements EnergyConsumptionService {
             if(r.getOperateTime() == null) {
                 r.setOperateTime(r.getCreateTime());
             }
-            dto.setLastTime(dateSF.format(r.getOperateTime().toInstant()));
+            dto.setLastTime(r.getOperateTime().toLocalDateTime().format(dateSF));
             return dto;
         }).collect(Collectors.toList());
         response.setBuildings(buildingDTOs);
@@ -4654,7 +4654,7 @@ public class EnergyConsumptionServiceImpl implements EnergyConsumptionService {
                     if(task.getUpdateTime() == null) {
                         task.setUpdateTime(task.getCreateTime());
                     }
-                    dto.setLastTime(dateSF.format(task.getUpdateTime().toInstant()));
+                    dto.setLastTime(task.getUpdateTime().toLocalDateTime().format(dateSF));
                     EnergyMeter meter = meterProvider.findById(task.getNamespaceId(), task.getMeterId());
                     dto.setBillCategoryId(meter.getBillCategoryId());
                     // 项目
