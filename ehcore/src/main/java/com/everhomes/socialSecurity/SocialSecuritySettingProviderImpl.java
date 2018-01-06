@@ -8,10 +8,7 @@ import java.util.Set;
 import com.everhomes.rest.socialSecurity.AccumOrSocial;
 import com.everhomes.rest.socialSecurity.SocialSecurityItemDTO;
 import com.everhomes.rest.socialSecurity.SsorAfPay;
-import org.jooq.DSLContext;
-import org.jooq.Record;
-import org.jooq.Record1;
-import org.jooq.SelectConditionStep;
+import org.jooq.*;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
 
@@ -116,18 +113,25 @@ public class SocialSecuritySettingProviderImpl implements SocialSecuritySettingP
 
     @Override
     public List<SocialSecuritySetting> listSocialSecuritySetting(Long detailId) {
-        return getReadOnlyContext().select().from(Tables.EH_SOCIAL_SECURITY_SETTINGS)
+        Result<Record> record = getReadOnlyContext().select().from(Tables.EH_SOCIAL_SECURITY_SETTINGS)
                 .where(Tables.EH_SOCIAL_SECURITY_SETTINGS.DETAIL_ID.eq(detailId))
                 .orderBy(Tables.EH_SOCIAL_SECURITY_SETTINGS.ID.asc())
-                .fetch().map(r -> ConvertHelper.convert(r, SocialSecuritySetting.class));
+                .fetch();
+        if (null == record) {
+            return null;
+        }
+        return record.map(r -> ConvertHelper.convert(r, SocialSecuritySetting.class));
     }
 
     @Override
     public List<SocialSecuritySetting> listSocialSecuritySetting(Set<Long> detailIds) {
-        return getReadOnlyContext().select().from(Tables.EH_SOCIAL_SECURITY_SETTINGS)
+        Result<Record> record = getReadOnlyContext().select().from(Tables.EH_SOCIAL_SECURITY_SETTINGS)
                 .where(Tables.EH_SOCIAL_SECURITY_SETTINGS.DETAIL_ID.in(detailIds))
-                .orderBy(Tables.EH_SOCIAL_SECURITY_SETTINGS.ID.asc())
-                .fetch().map(r -> ConvertHelper.convert(r, SocialSecuritySetting.class));
+                .orderBy(Tables.EH_SOCIAL_SECURITY_SETTINGS.ID.asc()).fetch();
+        if (null == record) {
+            return null;
+        }
+        return record.map(r -> ConvertHelper.convert(r, SocialSecuritySetting.class));
     }
 
     @Override
@@ -184,6 +188,18 @@ public class SocialSecuritySettingProviderImpl implements SocialSecuritySettingP
                 .set(Tables.EH_SOCIAL_SECURITY_PAYMENTS.EMPLOYEE_RATIO, Tables.EH_SOCIAL_SECURITY_SETTINGS.EMPLOYEE_RATIO)
                 .where(Tables.EH_SOCIAL_SECURITY_PAYMENTS.ACCUM_OR_SOCAIL.eq(AccumOrSocial.ACCUM.getCode()))
                 .execute();
+    }
+
+    @Override
+    public List<SocialSecuritySetting> listSocialSecuritySettingByOwner(Long ownerId) {
+        Result<Record> record = getReadOnlyContext().select().from(Tables.EH_SOCIAL_SECURITY_SETTINGS)
+                .where(Tables.EH_SOCIAL_SECURITY_SETTINGS.ORGANIZATION_ID.eq(ownerId))
+                .orderBy(Tables.EH_SOCIAL_SECURITY_SETTINGS.ID.asc())
+                .fetch();
+        if (null == record) {
+            return null;
+        }
+        return record.map(r -> ConvertHelper.convert(r, SocialSecuritySetting.class));
     }
 
     private EhSocialSecuritySettingsDao getReadWriteDao() {

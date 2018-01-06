@@ -165,15 +165,18 @@ public class SocialSecurityServiceImpl implements SocialSecurityService {
 
     private void newSocialSecurityOrg(Long ownerId) {
 //        Organization org = organizationProvider.findOrganizationById(ownerId);
-        OrganizationCommunity organizationCommunity = organizationProvider.findOrganizationCommunityByOrgId(ownerId);
-        Community community = communityProvider.findCommunityById(organizationCommunity.getCommunityId());
-        Long cityId = getZuolinNamespaceCityId(community.getCityId());
-        List<HouseholdTypesDTO> hTs = socialSecurityBaseProvider.listHouseholdTypesByCity(cityId);
-        if (null == hTs) {
-            cityId = SocialSecurityConstants.DEFAULT_CITY;
-            hTs = socialSecurityBaseProvider.listHouseholdTypesByCity(cityId);
+        List<SocialSecuritySetting> settings = socialSecuritySettingProvider.listSocialSecuritySettingByOwner(ownerId);
+        if (null == settings) {
+            OrganizationCommunity organizationCommunity = organizationProvider.findOrganizationCommunityByOrgId(ownerId);
+            Community community = communityProvider.findCommunityById(organizationCommunity.getCommunityId());
+            Long cityId = getZuolinNamespaceCityId(community.getCityId());
+            List<HouseholdTypesDTO> hTs = socialSecurityBaseProvider.listHouseholdTypesByCity(cityId);
+            if (null == hTs) {
+                cityId = SocialSecurityConstants.DEFAULT_CITY;
+                hTs = socialSecurityBaseProvider.listHouseholdTypesByCity(cityId);
+            }
+            addNewSocialSecuritySettings(cityId, hTs.get(0).getHouseholdTypeName(), ownerId);
         }
-        addNewSocialSecuritySettings(cityId, hTs.get(0).getHouseholdTypeName(), ownerId);
         String paymentMonth = monthSF.get().format(DateHelper.currentGMTTime());
         addNewMonthPayments(paymentMonth, ownerId);
     }
