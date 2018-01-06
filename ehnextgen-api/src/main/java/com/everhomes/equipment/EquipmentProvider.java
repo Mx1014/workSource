@@ -182,7 +182,7 @@ public interface EquipmentProvider {
 
     void deleteEquipmentInspectionStandardMapByStandardId(Long  deleteId);
 
-	void inActiveEquipmentPlansMapByStandardId(Long id);
+	void deleteEquipmentPlansMapByStandardId(Long standardId);
 
     List<EquipmentInspectionPlans> ListQualifiedEquipmentInspectionPlans(ListingLocator locator, int pageSize);
 
@@ -211,4 +211,6 @@ public interface EquipmentProvider {
 	EquipmentInspectionReviewDate getEquipmentInspectiomExpireDaysById(Long id);
 
     EquipmentInspectionReviewDate getEquipmentInspectiomExpireDays(Long scopeId, Byte scopeType);
+
+    void deleteEquipmentPlansMapByEquipmentId(Long equipmentId);
 }

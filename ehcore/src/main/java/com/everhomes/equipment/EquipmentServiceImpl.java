@@ -453,7 +453,7 @@ public class EquipmentServiceImpl implements EquipmentService {
 				equipmentStandardSearcher.feedDoc(standard);
 			}
 
-			equipmentProvider.inActiveEquipmentPlansMapByStandardId(standard.getId());//删除标准对应的巡检对象列表中对应条目
+			equipmentProvider.deleteEquipmentPlansMapByStandardId(standard.getId());//删除标准对应的巡检对象列表中对应条目
 
 		}
 		equipmentProvider.deleteEquipmentInspectionStandardMapByStandardId(cmd.getId());//删除修改标准相关的巡检对象关联表
@@ -687,7 +687,7 @@ private void checkUserPrivilege(Long orgId, Long privilegeId, Long communityId) 
 			//删除标准和设备的关联关系
 			equipmentProvider.deleteEquipmentInspectionStandardMapByStandardId(standard.getId());
 			//inActive与删除标准相关的所有任务和计划  不需要删除计划 计划是通过planId关联巡检对象列表
-			equipmentProvider.inActiveEquipmentPlansMapByStandardId(standard.getId());
+			equipmentProvider.deleteEquipmentPlansMapByStandardId(standard.getId());
 			List<EquipmentStandardMap> maps = equipmentProvider.findByStandardId(standard.getId());
 			if (maps != null && maps.size() > 0) {
 				for (EquipmentStandardMap map : maps) {
@@ -1159,10 +1159,10 @@ private void checkUserPrivilege(Long orgId, Long privilegeId, Long communityId) 
 						EquipmentStandardMap map = ConvertHelper.convert(dto, EquipmentStandardMap.class);
 						map.setTargetId(equipment.getId());
 						map.setTargetType(InspectionStandardMapTargetType.EQUIPMENT.getCode());
-						map.setReviewerUid(0L);
-						map.setReviewTime(null);
-						map.setReviewResult(ReviewResult.NONE.getCode());
-						map.setReviewStatus(EquipmentReviewStatus.WAITING_FOR_APPROVAL.getCode());
+//						map.setReviewerUid(0L);
+//						map.setReviewTime(null);
+//						map.setReviewResult(ReviewResult.NONE.getCode());
+//						map.setReviewStatus(EquipmentReviewStatus.WAITING_FOR_APPROVAL.getCode());
 						map.setCreatorUid(user.getId());
 
 						equipmentProvider.createEquipmentStandardMap(map);
@@ -1240,6 +1240,8 @@ private void checkUserPrivilege(Long orgId, Long privilegeId, Long communityId) 
 
 			equipmentProvider.updateEquipmentInspectionEquipment(equipment);
 			equipmentSearcher.feedDoc(equipment);
+			//删除计划关联表中的该设备
+			equipmentProvider.deleteEquipmentPlansMapByEquipmentId(equipment.getId());
 
 			//不带id的create，其他的看map表中的standardId在不在cmd里面 不在的删掉
 			List<Long> updateStandardIds = new ArrayList<Long>();
@@ -1254,10 +1256,10 @@ private void checkUserPrivilege(Long orgId, Long privilegeId, Long communityId) 
 							EquipmentStandardMap map = ConvertHelper.convert(dto, EquipmentStandardMap.class);
 							map.setTargetId(equipment.getId());
 							map.setTargetType(InspectionStandardMapTargetType.EQUIPMENT.getCode());
-							map.setReviewerUid(0L);
-							map.setReviewTime(null);
-							map.setReviewResult(ReviewResult.NONE.getCode());
-							map.setReviewStatus(EquipmentReviewStatus.WAITING_FOR_APPROVAL.getCode());
+//							map.setReviewerUid(0L);
+//							map.setReviewTime(null);
+//							map.setReviewResult(ReviewResult.NONE.getCode());
+//							map.setReviewStatus(EquipmentReviewStatus.WAITING_FOR_APPROVAL.getCode());
 							map.setCreatorUid(user.getId());
 
 							equipmentProvider.createEquipmentStandardMap(map);
@@ -1272,10 +1274,10 @@ private void checkUserPrivilege(Long orgId, Long privilegeId, Long communityId) 
 								map = ConvertHelper.convert(dto, EquipmentStandardMap.class);
 								map.setTargetId(equipment.getId());
 								map.setTargetType(InspectionStandardMapTargetType.EQUIPMENT.getCode());
-								map.setReviewerUid(0L);
-								map.setReviewTime(null);
-								map.setReviewResult(ReviewResult.NONE.getCode());
-								map.setReviewStatus(EquipmentReviewStatus.WAITING_FOR_APPROVAL.getCode());
+//								map.setReviewerUid(0L);
+//								map.setReviewTime(null);
+//								map.setReviewResult(ReviewResult.NONE.getCode());
+//								map.setReviewStatus(EquipmentReviewStatus.WAITING_FOR_APPROVAL.getCode());
 								map.setCreatorUid(user.getId());
 
 								equipmentProvider.createEquipmentStandardMap(map);
@@ -1292,10 +1294,10 @@ private void checkUserPrivilege(Long orgId, Long privilegeId, Long communityId) 
 						LOGGER.debug("equipment standard maps after remove: {}", maps);
 						if(maps.size() > 0) {
 							maps.forEach(map -> {
-								map.setReviewStatus(EquipmentReviewStatus.INACTIVE.getCode());
+//								map.setReviewStatus(EquipmentReviewStatus.INACTIVE.getCode());
 								//fix bug #20247
-								map.setStatus(EquipmentStandardStatus.INACTIVE.getCode());
-								//equipmentProvider.updateEquipmentStandardMap(map);
+								map.setStatus(Status.INACTIVE.getCode());
+								equipmentProvider.updateEquipmentStandardMap(map);
 								equipmentStandardMapSearcher.feedDoc(map);
 							});
 						}
@@ -1318,7 +1320,7 @@ private void checkUserPrivilege(Long orgId, Long privilegeId, Long communityId) 
                         equipmentProvider.updateEquipmentStandardMap(map);
                         equipmentStandardMapSearcher.feedDoc(map);
 
-                        inactiveTasks(equipment.getId(), map.getStandardId());
+                        //inactiveTasks(equipment.getId(), map.getStandardId());
                     }
                 }
 			}
@@ -1477,7 +1479,10 @@ private void checkUserPrivilege(Long orgId, Long privilegeId, Long communityId) 
 			}
 		}
 
-		inactiveTasksByEquipmentId(equipment.getId());
+		//inactiveTasksByEquipmentId(equipment.getId());
+		//新的模式中直接删除计划中设备的关系表即可
+		equipmentProvider.deleteEquipmentPlansMapByEquipmentId(equipment.getId());
+
 
 	}
 

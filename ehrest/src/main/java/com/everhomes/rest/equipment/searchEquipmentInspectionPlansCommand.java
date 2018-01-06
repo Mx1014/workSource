@@ -11,7 +11,6 @@ import javax.validation.constraints.NotNull;
  *  <li>targetId: 计划所属管理处id</li>
  *  <li>targetType: 计划所属管理处类型</li>
  *  <li>status: 计划状态 参考{@link com.everhomes.rest.equipment.EquipmentPlanStatus}</li>
- *  <li>reviewResult: 计划审核状态 参考{@link com.everhomes.rest.equipment.EquipmentInspectionPlanResult}</li>
  *  <li>planType: 类型 参考{@link com.everhomes.rest.equipment.StandardType}</li>
  *  <li>repeatType: 执行周期类型 repeatType: 0:no repeat 1: by day 2:by week 3: by month 4:year</li>
  *  <li>keyword: 查询关键字</li>
@@ -31,8 +30,6 @@ public class searchEquipmentInspectionPlansCommand {
     private String targetType;
 
     private Byte status;
-
-    private Byte reviewResult;
 
     private  Byte planType;
 
@@ -84,14 +81,6 @@ public class searchEquipmentInspectionPlansCommand {
 
     public void setStatus(Byte status) {
         this.status = status;
-    }
-
-    public Byte getReviewResult() {
-        return reviewResult;
-    }
-
-    public void setReviewResult(Byte reviewResult) {
-        this.reviewResult = reviewResult;
     }
 
     public Byte getPlanType() {

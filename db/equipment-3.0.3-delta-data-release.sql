@@ -6,7 +6,7 @@ WHERE STATUS =2  AND repeat_type IS NULL;
 -- 上版未置状态数据修改
 UPDATE eh_equipment_inspection_equipment_standard_map
 SET `status` = 0
-WHERE review_status IN (0, 3) OR review_result = 2;
+WHERE review_status IN (0, 3 ,4) OR review_result = 2;
 -- 上版bug数据修改
 
 --  标准数据增加周期类型 及关系表状态 end by jiarui 20180105
