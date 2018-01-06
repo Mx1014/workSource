@@ -1214,7 +1214,7 @@ public class SocialSecurityServiceImpl implements SocialSecurityService {
     }
 
     private void addImportItemDTO(List<SocialSecurityItemDTO> dtos, BigDecimal ssRadix, String companyString, String emloyeeString, AccumOrSocial accumOrSocail, String payItem) {
-        if (StringUtils.isNotBlank(companyString) || StringUtils.isNotBlank(emloyeeString)) {
+        if (StringUtils.isNotBlank(companyString) || StringUtils.isNotBlank(emloyeeString) || null != ssRadix) {
             SocialSecurityItemDTO dto = new SocialSecurityItemDTO();
             dto.setAccumOrSocial(accumOrSocail.getCode());
             dto.setPayItem(payItem);
