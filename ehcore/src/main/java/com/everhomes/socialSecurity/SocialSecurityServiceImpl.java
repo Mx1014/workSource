@@ -1098,6 +1098,7 @@ public class SocialSecurityServiceImpl implements SocialSecurityService {
                     setting.setOrganizationId(detail.getOrganizationId());
                     setting.setUserId(detail.getTargetId());
                     setting.setDetailId(detail.getId());
+                    setting.setAccumOrSocail(item.getAccumOrSocial());
                     setting.setNamespaceId(detail.getNamespaceId());
                 } else {
                     setting = processSocialSecuritySetting(base, cityId, detail.getOrganizationId(),
@@ -1123,6 +1124,7 @@ public class SocialSecurityServiceImpl implements SocialSecurityService {
                 response.getLogs().add(log);
                 return;
             }
+            LOGGER.debug("dto是{} 要更新的setting是{}",item,StringHelper.toJsonString(setting));
             if (setting.getId() == null) {
                 //如果没有id ,说明是新建的setting,同时创建一个payment
                 socialSecuritySettingProvider.createSocialSecuritySetting(setting);
