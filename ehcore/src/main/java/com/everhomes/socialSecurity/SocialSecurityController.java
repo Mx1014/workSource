@@ -1,16 +1,21 @@
 // @formatter:off
 package com.everhomes.socialSecurity;
 
+import com.everhomes.rest.common.ImportFileResponse;
+import com.everhomes.rest.organization.GetImportFileResultCommand;
 import com.everhomes.rest.organization.ImportFileTaskDTO;
 import com.everhomes.rest.socialSecurity.*;
+
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.RestController;
 
+import com.everhomes.constants.ErrorCodes;
 import com.everhomes.controller.ControllerBase;
 import com.everhomes.discover.RestReturn;
 import com.everhomes.rest.RestResponse;
+
 import org.springframework.web.multipart.MultipartFile;
 
 @RestController
@@ -124,6 +129,18 @@ public class SocialSecurityController extends ControllerBase {
         return new RestResponse(dto);
     }
 
+    /**
+     * <b>URL: /socialSecurity/getImportSocialSecurityPaymentsResult</b>
+     * <p>9-2.查询导入修改社保具体项目设置导入结果</p>
+     */
+    @RequestMapping("getImportSocialSecurityPaymentsResult")
+    @RestReturn(value = ImportFileResponse.class)
+    public RestResponse getImportSocialSecurityPaymentsResult(GetImportSocialSecurityPaymentsResultCommand cmd) {
+        RestResponse response = new RestResponse(socialSecurityService.getImportSocialSecurityPaymentsResult(cmd));
+        response.setErrorCode(ErrorCodes.SUCCESS);
+        response.setErrorDescription("OK");
+        return response;
+    }
     /**
      * <p>10.汇总计算报表接口</p>
      * <b>URL: /socialSecurity/calculateSocialSecurityReports</b>
