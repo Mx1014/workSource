@@ -942,7 +942,9 @@ public class SocialSecurityServiceImpl implements SocialSecurityService {
             @Override
             public ImportFileResponse importFile() {
                 ImportFileResponse response = new ImportFileResponse();
-                response.setTitle("导入社保设置");
+                Map<String, String> title = new HashedMap();
+                title.put("导入社保设置", "导入社保设置");
+                response.setTitle(title);
                 //  将 excel 的中的数据读取
                 String fileLog = "";
                 batchUpdateSSSettingAndPayments(resultList, cmd.getOwnerId(), fileLog, response);
