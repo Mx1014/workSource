@@ -1682,7 +1682,7 @@ public class ArchivesServiceImpl implements ArchivesService {
                 if(cmd.getSocialSecurityEndMonth() != null)
                     addSocialSecurityEndMonth(detailId, employee.getOrganizationId(), ArchivesUtil.socialSecurityMonth(cmd.getSocialSecurityEndMonth()));
                 if(cmd.getAccumulationFundEndMonth() != null)
-                    addAccumulationFundEndMonth(detailId, employee.getOrganizationId(), ArchivesUtil.socialSecurityMonth(cmd.getSocialSecurityEndMonth()));
+                    addAccumulationFundEndMonth(detailId, employee.getOrganizationId(), ArchivesUtil.socialSecurityMonth(cmd.getAccumulationFundEndMonth()));
 
 
                     //  3.删除员工权限
