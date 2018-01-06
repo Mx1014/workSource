@@ -980,5 +980,19 @@ public class AdminController extends ControllerBase {
         return response;
     }
 
+    /**
+     * <b>URL: /pushUserDemo</b>
+     * <p>同步用户</p>
+     */
+    @RequestMapping("pushUserDemo")
+    @RestReturn(value = String.class )
+    @RequireAuthentication(false)
+    public RestResponse pushUserDemo() {
+        userService.pushUserDemo();
+        RestResponse response = new RestResponse();
+        response.setErrorCode(ErrorCodes.SUCCESS);
+        response.setErrorDescription("OK");
+        return response;
+    }
 
 }

@@ -293,4 +293,6 @@ public interface UserService {
 
 
     PushUsersResponse createUsersForAnBang(PushUsersCommand cmd);
+
+    void pushUserDemo();
 }

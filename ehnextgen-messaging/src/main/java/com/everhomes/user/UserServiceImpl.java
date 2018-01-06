@@ -128,6 +128,8 @@ import org.springframework.util.concurrent.ListenableFutureCallback;
 import org.springframework.web.client.AsyncRestTemplate;
 
 import javax.annotation.PostConstruct;
+import javax.crypto.Mac;
+import javax.crypto.spec.SecretKeySpec;
 import javax.servlet.http.Cookie;
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
@@ -139,6 +141,9 @@ import javax.validation.metadata.ConstraintDescriptor;
 import java.io.UnsupportedEncodingException;
 import java.net.URLEncoder;
 import java.nio.charset.Charset;
+import java.security.InvalidKeyException;
+import java.security.InvalidParameterException;
+import java.security.NoSuchAlgorithmException;
 import java.sql.Timestamp;
 import java.text.ParseException;
 import java.text.SimpleDateFormat;
@@ -5566,6 +5571,62 @@ public class UserServiceImpl implements UserService {
 	}
 
 	@Override
+	public void pushUserDemo() {
+		MultiValueMap<String, Object> headerParam = new LinkedMultiValueMap<String, Object>();
+
+//		MultiValueMap<String, Object> bodyParam = new LinkedMultiValueMap<String, Object>();
+//		bodyParam.add("appKey", "578580df-7015-4a42-b61f-b5c0ec0bc38a");
+//		bodyParam.add("timestamp", "client_credentials");
+//		bodyParam.add("nonce", "client_credentials");
+//		bodyParam.add("crypto", "client_credentials");
+//		bodyParam.add("nickName", "client_credentials");
+//		bodyParam.add("identifierToken", "client_credentials");
+//		bodyParam.add("avatar", "client_credentials");
+//		bodyParam.add("signature", this.computeSignature(bodyParam,"S2rPpM5fGsgAx6CeAMTb5R2MOIsHmiScPmqCNR+NsD2TjeUlmuuls6xt1WYO/YqsGnLUMt1RKRnB5xzoVjwOng=="));
+
+		Map bodyMap = new HashMap();
+		bodyMap.put("appKey", "578580df-7015-4a42-b61f-b5c0ec0bc38a");
+		bodyMap.put("timestamp", String.valueOf(DateHelper.currentGMTTime().getTime()));
+		bodyMap.put("nonce", "123123124142");
+		bodyMap.put("secretKey", "S2rPpM5fGsgAx6CeAMTb5R2MOIsHmiScPmqCNR");
+		bodyMap.put("nickName", "王大发");
+		bodyMap.put("identifierToken", "18617156652");
+		bodyMap.put("avatar", "1231412sjkl;dkjasdj$^&*");
+
+		MultiValueMap bodyParam = new LinkedMultiValueMap<String, Object>();
+		bodyParam.add("appKey", "578580df-7015-4a42-b61f-b5c0ec0bc38a");
+		bodyParam.add("timestamp", String.valueOf(DateHelper.currentGMTTime().getTime()));
+		bodyParam.add("nonce", "123123124142");
+		bodyParam.add("secretKey", "S2rPpM5fGsgAx6CeAMTb5R2MOIsHmiScPmqCNR");
+		bodyParam.add("nickName", "王大发");
+		bodyParam.add("identifierToken", "18617156652");
+		bodyParam.add("avatar", "1231412sjkl;dkjasdj$^&*");
+
+//		bodyParam.put("crypto", "client_credentials");
+
+		bodyParam.add("signature", SignatureHelper.computeSignature(bodyMap,"S2rPpM5fGsgAx6CeAMTb5R2MOIsHmiScPmqCNR+NsD2TjeUlmuuls6xt1WYO/YqsGnLUMt1RKRnB5xzoVjwOng=="));
+
+
+		try {
+			ListenableFuture<ResponseEntity<String>> auth_result = restCall(HttpMethod.POST, MediaType.APPLICATION_FORM_URLENCODED, "http://10.1.110.45:8080/evh/openapi/pushUsers", headerParam, bodyParam, new ListenableFutureCallback<ResponseEntity<String>>() {
+
+                @Override
+                public void onSuccess(ResponseEntity<String> result) {
+                    LOGGER.debug(result.toString());
+                }
+
+                @Override
+                public void onFailure(Throwable ex) {
+                    LOGGER.error(ex.getMessage());
+                }
+            });
+		} catch (UnsupportedEncodingException e) {
+			e.printStackTrace();
+		}
+	}
+
+
+	@Override
 	public PushUsersResponse createUsersForAnBang(PushUsersCommand cmd) {
 		dbProvider.execute(r -> {
 			User user = new User();
@@ -5575,6 +5636,7 @@ public class UserServiceImpl implements UserService {
 			user.setGender(UserGender.UNDISCLOSURED.getCode());
 			user.setNamespaceUserType(NamespaceUserType.ANBANG.getCode());
 			user.setLevel(UserLevel.L1.getCode());
+			user.setAvatar(cmd.getAvatar() != null ? cmd.getAvatar() : "");
 			String salt = EncryptionUtils.createRandomSalt();
 			user.setSalt(salt);
 			try {
