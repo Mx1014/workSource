@@ -7,6 +7,7 @@ import com.everhomes.rest.socialSecurity.*;
 
 import org.springframework.web.multipart.MultipartFile;
 
+import java.io.OutputStream;
 import java.math.BigDecimal;
 import java.util.List;
 import java.util.Map;
@@ -93,4 +94,6 @@ public interface SocialSecurityService {
 
 	ImportFileResponse<Map<String, String>> getImportSocialSecurityPaymentsResult(
 			GetImportSocialSecurityPaymentsResultCommand cmd);
+
+	OutputStream getSocialSecurityReportsOutputStream(Long ownerId, String payMonth);
 }

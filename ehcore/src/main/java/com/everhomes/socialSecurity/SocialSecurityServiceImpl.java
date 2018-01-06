@@ -52,6 +52,7 @@ import org.apache.commons.lang.StringUtils;
 import org.springframework.transaction.TransactionStatus;
 import org.springframework.web.multipart.MultipartFile;
 
+import java.io.ByteArrayOutputStream;
 import java.io.IOException;
 import java.io.OutputStream;
 import java.math.BigDecimal;
@@ -1662,11 +1663,14 @@ public class SocialSecurityServiceImpl implements SocialSecurityService {
         taskService.createTask(fileName, TaskType.FILEDOWNLOAD.getCode(), SocialSecurityReportsTaskHandler.class, params, TaskRepeatFlag.REPEAT.getCode(), new Date());
 
     }
-
+    @Override
     public OutputStream getSocialSecurityReportsOutputStream(Long ownerId, String payMonth) {
         List<SocialSecurityReport> result = socialSecurityReportProvider.listSocialSecurityReport(ownerId,
                 payMonth, null, Integer.MAX_VALUE - 1);
-        XSSFWorkbook wb = createSocialSecurityReportWorkBook(result);
+        XSSFWorkbook workbook = createSocialSecurityReportWorkBook(result);
+        ByteArrayOutputStream out = new ByteArrayOutputStream(); 
+        workbook.write(out);
+        return out;
 
     }
 
