@@ -13,7 +13,6 @@ import com.everhomes.naming.NameMapper;
 import com.everhomes.rest.equipment.AdminFlag;
 import com.everhomes.rest.equipment.EquipmentPlanStatus;
 import com.everhomes.rest.equipment.EquipmentReviewStatus;
-import com.everhomes.rest.equipment.EquipmentStandardStatus;
 import com.everhomes.rest.equipment.EquipmentStatus;
 import com.everhomes.rest.equipment.EquipmentTaskProcessResult;
 import com.everhomes.rest.equipment.EquipmentTaskProcessType;
@@ -1591,7 +1590,7 @@ public class EquipmentProviderImpl implements EquipmentProvider {
     public void deleteEquipmentInspectionStandardMapByStandardId(Long standardId) {
         DSLContext context = this.dbProvider.getDslContext(AccessSpec.readWrite());
         context.update(Tables.EH_EQUIPMENT_INSPECTION_EQUIPMENT_STANDARD_MAP)
-                .set(Tables.EH_EQUIPMENT_INSPECTION_EQUIPMENT_STANDARD_MAP.STATUS,(EquipmentStandardStatus.INACTIVE.getCode()))
+                .set(Tables.EH_EQUIPMENT_INSPECTION_EQUIPMENT_STANDARD_MAP.STATUS,(Status.INACTIVE.getCode()))
                 .where(Tables.EH_EQUIPMENT_INSPECTION_EQUIPMENT_STANDARD_MAP.STANDARD_ID.eq(standardId))
                 .execute();
     }

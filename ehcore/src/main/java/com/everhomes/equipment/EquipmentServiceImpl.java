@@ -1117,10 +1117,10 @@ private void checkUserPrivilege(Long orgId, Long privilegeId, Long communityId) 
 								EquipmentStandardMap map = ConvertHelper.convert(dto, EquipmentStandardMap.class);
 								map.setTargetId(equipment.getId());
 								map.setTargetType(InspectionStandardMapTargetType.EQUIPMENT.getCode());
-								map.setReviewerUid(0L);
-								map.setReviewTime(null);
-								map.setReviewResult(ReviewResult.NONE.getCode());
-								map.setReviewStatus(EquipmentReviewStatus.WAITING_FOR_APPROVAL.getCode());
+//								map.setReviewerUid(0L);
+//								map.setReviewTime(null);
+//								map.setReviewResult(ReviewResult.NONE.getCode());
+//								map.setReviewStatus(EquipmentReviewStatus.WAITING_FOR_APPROVAL.getCode());
 								map.setCreatorUid(user.getId());
 
 								equipmentProvider.createEquipmentStandardMap(map);
@@ -1128,8 +1128,8 @@ private void checkUserPrivilege(Long orgId, Long privilegeId, Long communityId) 
 							}
 						}
 
-						List<EquipmentAttachmentDTO> attachments = new ArrayList<EquipmentAttachmentDTO>();
-					    List<EquipmentAccessoryMapDTO> eqAccessoryMap = new ArrayList<EquipmentAccessoryMapDTO>();
+						List<EquipmentAttachmentDTO> attachments = new ArrayList<>();
+					    List<EquipmentAccessoryMapDTO> eqAccessoryMap = new ArrayList<>();
 
 						if(cmd.getEqAccessoryMap() != null) {
 							for(EquipmentAccessoryMapDTO map : cmd.getEqAccessoryMap()) {
@@ -1170,8 +1170,8 @@ private void checkUserPrivilege(Long orgId, Long privilegeId, Long communityId) 
 					}
 				}
 
-				List<EquipmentAttachmentDTO> attachments = new ArrayList<EquipmentAttachmentDTO>();
-			    List<EquipmentAccessoryMapDTO> eqAccessoryMap = new ArrayList<EquipmentAccessoryMapDTO>();
+				List<EquipmentAttachmentDTO> attachments = new ArrayList<>();
+			    List<EquipmentAccessoryMapDTO> eqAccessoryMap = new ArrayList<>();
 
 				if(cmd.getEqAccessoryMap() != null) {
 					for(EquipmentAccessoryMapDTO map : cmd.getEqAccessoryMap()) {
@@ -1314,7 +1314,7 @@ private void checkUserPrivilege(Long orgId, Long privilegeId, Long communityId) 
 			if (maps != null) {
 				for(EquipmentStandardMap map : maps) {
                     if(!updateStandardIds.contains(map.getStandardId())) {
-                        map.setReviewStatus(EquipmentReviewStatus.INACTIVE.getCode());
+                        //map.setReviewStatus(EquipmentReviewStatus.INACTIVE.getCode());
                         //fix bug #20247
 						map.setStatus(EquipmentStandardStatus.INACTIVE.getCode());
                         equipmentProvider.updateEquipmentStandardMap(map);
