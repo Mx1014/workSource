@@ -14,6 +14,8 @@ import java.util.List;
  * <li>dismissReason: 离职原因 参考{@link com.everhomes.rest.archives.ArchivesDismissReason}</li>
  * <li>dismissTime: 离职日期</li>
  * <li>dismissRemark: 离职备注</li>
+ * <li>socialSecurityEndMonth: 社保减员月 0-本月 1-次月 参考{@link com.everhomes.rest.archives.SocialSecurityMonthType}</li>
+ * <li>accumulationFundEndMonth: 离职减员月 0-本月 1-次月 参考{@link com.everhomes.rest.archives.SocialSecurityMonthType}</li>
  * </ul>
  */
 public class DismissArchivesEmployeesCommand {
@@ -30,6 +32,11 @@ public class DismissArchivesEmployeesCommand {
     private Date dismissTime;
 
     private String dismissRemark;
+
+    //  added by Rong for social security at 01.05-2018
+    private Byte socialSecurityEndMonth;
+
+    private Byte accumulationFundEndMonth;
 
     public DismissArchivesEmployeesCommand() {
     }
@@ -74,18 +81,28 @@ public class DismissArchivesEmployeesCommand {
         this.dismissTime = ArchivesUtil.parseDate(dismissTime);
     }
 
-/*
-    public void setDismissTime(Date dismissTime) {
-        this.dismissTime = dismissTime;
-    }
-*/
-
     public String getDismissRemark() {
         return dismissRemark;
     }
 
     public void setDismissRemark(String dismissRemark) {
         this.dismissRemark = dismissRemark;
+    }
+
+    public Byte getSocialSecurityEndMonth() {
+        return socialSecurityEndMonth;
+    }
+
+    public void setSocialSecurityEndMonth(Byte socialSecurityEndMonth) {
+        this.socialSecurityEndMonth = socialSecurityEndMonth;
+    }
+
+    public Byte getAccumulationFundEndMonth() {
+        return accumulationFundEndMonth;
+    }
+
+    public void setAccumulationFundEndMonth(Byte accumulationFundEndMonth) {
+        this.accumulationFundEndMonth = accumulationFundEndMonth;
     }
 
     @Override

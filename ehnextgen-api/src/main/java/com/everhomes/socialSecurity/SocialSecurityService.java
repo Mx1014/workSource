@@ -8,7 +8,7 @@ import org.springframework.web.multipart.MultipartFile;
 import java.math.BigDecimal;
 import java.util.List;
 
-interface SocialSecurityService {
+public interface SocialSecurityService {
 
  
 	void addSocialSecurity(AddSocialSecurityCommand cmd);
@@ -81,6 +81,8 @@ interface SocialSecurityService {
 	GetSocialSecurityReportStatusResponse getSocialSecurityReportStatus(GetSocialSecurityReportStatusCommand cmd);
 
 	GetSocialSecurityReportsHeadResponse getSocialSecurityReportsHead(GetSocialSecurityReportsHeadCommand cmd);
+
+	SocialSecurityInoutTimeDTO addSocialSecurityInOutTime(AddSocialSecurityInOutTimeCommand cmd);
 
 	SocialSecurityEmployeeDTO getSocialSecurityEmployeeInfo(Long detailId);
 

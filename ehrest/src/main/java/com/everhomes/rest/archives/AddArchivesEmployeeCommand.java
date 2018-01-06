@@ -26,8 +26,8 @@ import java.util.List;
  * <li>contractPartyId: 合同主体</li>
  * <li>regionCode: 手机区号</li>
  * <li>contactToken: 手机号</li>
- * <li>socialSecurityStartMonth: 社保增员月</li>
- * <li>accumulationFundStartMonth: 公积金增员月</li>
+ * <li>socialSecurityStartMonth: 社保增员月 0-本月 1-次月 参考{@link com.everhomes.rest.archives.SocialSecurityMonthType}</li>
+ * <li>accumulationFundStartMonth: 公积金增员月 0-本月 1-次月 参考{@link com.everhomes.rest.archives.SocialSecurityMonthType}</li>
  * </ul>
  */
 public class AddArchivesEmployeeCommand {
@@ -70,9 +70,9 @@ public class AddArchivesEmployeeCommand {
     private String contactToken;
 
     //  added by Rong for social security at 01.05-2018
-    private String socialSecurityStartMonth;
+    private Byte socialSecurityStartMonth;
 
-    private String accumulationFundStartMonth;
+    private Byte accumulationFundStartMonth;
 
     public AddArchivesEmployeeCommand() {
     }
@@ -213,19 +213,19 @@ public class AddArchivesEmployeeCommand {
         this.contactToken = contactToken;
     }
 
-    public String getSocialSecurityStartMonth() {
+    public Byte getSocialSecurityStartMonth() {
         return socialSecurityStartMonth;
     }
 
-    public void setSocialSecurityStartMonth(String socialSecurityStartMonth) {
+    public void setSocialSecurityStartMonth(Byte socialSecurityStartMonth) {
         this.socialSecurityStartMonth = socialSecurityStartMonth;
     }
 
-    public String getAccumulationFundStartMonth() {
+    public Byte getAccumulationFundStartMonth() {
         return accumulationFundStartMonth;
     }
 
-    public void setAccumulationFundStartMonth(String accumulationFundStartMonth) {
+    public void setAccumulationFundStartMonth(Byte accumulationFundStartMonth) {
         this.accumulationFundStartMonth = accumulationFundStartMonth;
     }
 
