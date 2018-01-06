@@ -2375,6 +2375,7 @@ public class SocialSecurityServiceImpl implements SocialSecurityService {
         } else {
             time = new SocialSecurityInoutTime();
             time.setNamespaceId(memberDetail.getNamespaceId());
+            time.setOrganizationId(cmd.getOrganizationId());
             time.setUserId(memberDetail.getTargetId());
             time.setDetailId(memberDetail.getId());
             time.setType(cmd.getInOutType());
