@@ -39,5 +39,7 @@ public interface SocialSecuritySettingProvider {
 
 	void syncRadixAndRatioToPayments(Long ownerId);
 
+	List<SocialSecuritySetting> listSocialSecuritySettingByOwner(Long ownerId);
+
 //	void updateSocialSecuritySettingRadix(Long id, BigDecimal bigDecimal);
 }

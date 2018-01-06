@@ -2,11 +2,14 @@
 package com.everhomes.socialSecurity;
 
 import com.everhomes.rest.common.ImportFileResponse;
+import com.everhomes.rest.organization.GetImportFileResultCommand;
 import com.everhomes.rest.organization.ImportFileTaskDTO;
 import com.everhomes.rest.socialSecurity.*;
 
 import org.springframework.web.multipart.MultipartFile;
 
+import javax.servlet.http.HttpServletResponse;
+import java.io.OutputStream;
 import java.math.BigDecimal;
 import java.util.List;
 import java.util.Map;
@@ -41,6 +44,8 @@ public interface SocialSecurityService {
 	void updateSocialSecurityPayment(UpdateSocialSecurityPaymentCommand cmd);
 
 
+	void exportImportFileFailResults(GetImportFileResultCommand cmd, HttpServletResponse httpResponse);
+
 	ImportFileTaskDTO importSocialSecurityPayments(ImportSocialSecurityPaymentsCommand cmd, MultipartFile file);
 
 	CalculateSocialSecurityReportsResponse calculateSocialSecurityReports(CalculateSocialSecurityReportsCommand cmd);
@@ -57,11 +62,15 @@ public interface SocialSecurityService {
 	ListSocialSecurityDepartmentSummarysResponse listSocialSecurityDepartmentSummarys(ListSocialSecurityDepartmentSummarysCommand cmd);
 
 
+	OutputStream getSocialSecurityDepartmentSummarysOutputStream(Long ownerId, String payMonth);
+
 	void exportSocialSecurityDepartmentSummarys(ExportSocialSecurityDepartmentSummarysCommand cmd);
 
 
 	ListSocialSecurityInoutReportsResponse listSocialSecurityInoutReports(ListSocialSecurityInoutReportsCommand cmd);
 
+
+	OutputStream getSocialSecurityInoutReportsOutputStream(Long ownerId, String payMonth);
 
 	void exportSocialSecurityInoutReports(ExportSocialSecurityInoutReportsCommand cmd);
 
@@ -91,6 +100,8 @@ public interface SocialSecurityService {
 
     List<Long> listSocialSecurityEmployeeDetailIdsByPayMonth(Long ownerId, String payMonth);
 
-	ImportFileResponse<Map<String, String>> getImportSocialSecurityPaymentsResult(
+	ImportFileResponse getImportSocialSecurityPaymentsResult(
 			GetImportSocialSecurityPaymentsResultCommand cmd);
+
+	OutputStream getSocialSecurityReportsOutputStream(Long ownerId, String payMonth);
 }
