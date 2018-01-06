@@ -3629,7 +3629,9 @@ public class EnergyConsumptionServiceImpl implements EnergyConsumptionService {
                 meterSearcher.feedDoc(meter);
 
                 log.setErrorCode(ErrorCodes.SUCCESS);
+                logs.add(log);
             });
+            response.setLogs(logs);
         }
         return response;
     }
