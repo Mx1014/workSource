@@ -40,13 +40,13 @@ public class AddArchivesEmployeeCommand {
 
     private Byte gender;
 
-    private Date checkInTime;
+    private String checkInTime;
 
     private Byte employeeType;
 
     private Byte employeeStatus;
 
-    private Date employmentTime;
+    private String employmentTime;
 
     @ItemType(Long.class)
     private List<Long> departmentIds;
@@ -101,12 +101,12 @@ public class AddArchivesEmployeeCommand {
         this.gender = gender;
     }
 
-    public Date getCheckInTime() {
+    public String getCheckInTime() {
         return checkInTime;
     }
 
     public void setCheckInTime(String checkInTime) {
-        this.checkInTime = ArchivesUtil.parseDate(checkInTime);
+        this.checkInTime = checkInTime;
     }
 
     public Byte getEmployeeType() {
@@ -125,12 +125,12 @@ public class AddArchivesEmployeeCommand {
         this.employeeStatus = employeeStatus;
     }
 
-    public Date getEmploymentTime() {
+    public String getEmploymentTime() {
         return employmentTime;
     }
 
     public void setEmploymentTime(String employmentTime) {
-        this.employmentTime = ArchivesUtil.parseDate(employmentTime);
+        this.employmentTime = employmentTime;
     }
 
     public List<Long> getDepartmentIds() {

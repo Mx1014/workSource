@@ -29,7 +29,7 @@ public class DismissArchivesEmployeesCommand {
 
     private Byte dismissReason;
 
-    private Date dismissTime;
+    private String dismissTime;
 
     private String dismissRemark;
 
@@ -73,12 +73,12 @@ public class DismissArchivesEmployeesCommand {
         this.dismissReason = dismissReason;
     }
 
-    public Date getDismissTime() {
+    public String getDismissTime() {
         return dismissTime;
     }
 
     public void setDismissTime(String dismissTime) {
-        this.dismissTime = ArchivesUtil.parseDate(dismissTime);
+        this.dismissTime = dismissTime;
     }
 
     public String getDismissRemark() {

@@ -698,7 +698,7 @@ public class ArchivesServiceImpl implements ArchivesService {
                 log.setDetailId(detailId);
                 log.setOrganizationId(cmd.getOrganizationId());
                 log.setOperationType(ArchivesOperationType.EMPLOY.getCode());
-                log.setOperationTime(cmd.getEmploymentTime());
+                log.setOperationTime(ArchivesUtil.parseDate(cmd.getEmploymentTime()));
                 log.setOperationReason(cmd.getEmploymentEvaluation());
                 log.setOperatorUid(userId);
                 log.setOperatorName(getArchivesContactName(userId, cmd.getOrganizationId()));
@@ -721,7 +721,7 @@ public class ArchivesServiceImpl implements ArchivesService {
                 log.setDetailId(detailId);
                 log.setOrganizationId(cmd.getOrganizationId());
                 log.setOperationType(ArchivesOperationType.TRANSFER.getCode());
-                log.setOperationTime(cmd.getEffectiveTime());
+                log.setOperationTime(ArchivesUtil.parseDate(cmd.getEffectiveTime()));
                 log.setOperationCategory(cmd.getTransferType());
                 log.setOperationReason(cmd.getTransferReason());
                 log.setOperationRemark(remark);
@@ -743,7 +743,7 @@ public class ArchivesServiceImpl implements ArchivesService {
                 log.setDetailId(detailId);
                 log.setOrganizationId(cmd.getOrganizationId());
                 log.setOperationType(ArchivesOperationType.DISMISS.getCode());
-                log.setOperationTime(cmd.getDismissTime());
+                log.setOperationTime(ArchivesUtil.parseDate(cmd.getDismissTime()));
                 log.setOperationCategory(cmd.getDismissType());
                 log.setOperationReason(convertToArchivesInfo(cmd.getDismissReason(), "dismissReason"));
                 log.setOperationRemark(cmd.getDismissRemark());
@@ -790,15 +790,15 @@ public class ArchivesServiceImpl implements ArchivesService {
             OrganizationMemberDetails memberDetail = organizationProvider.findOrganizationMemberDetailsByDetailId(detailId);
             if (memberDetail != null) {
                 if (cmd.getCheckInTime() != null)
-                    memberDetail.setCheckInTime(cmd.getCheckInTime());
+                    memberDetail.setCheckInTime(ArchivesUtil.parseDate(cmd.getCheckInTime()));
                 else
                     memberDetail.setCheckInTime(ArchivesUtil.currentDate());
                 memberDetail.setEmployeeType(cmd.getEmployeeType());
                 memberDetail.setEmployeeStatus(cmd.getEmployeeStatus());
                 if (cmd.getEmploymentTime() == null)
-                    memberDetail.setEmploymentTime(cmd.getCheckInTime());
+                    memberDetail.setEmploymentTime(ArchivesUtil.parseDate(cmd.getCheckInTime()));
                 else
-                    memberDetail.setEmploymentTime(cmd.getEmploymentTime());
+                    memberDetail.setEmploymentTime(ArchivesUtil.parseDate(cmd.getEmploymentTime()));
                 memberDetail.setEmployeeNo(cmd.getEmployeeNo());
                 memberDetail.setEnName(cmd.getEnName());
                 memberDetail.setContactShortToken(cmd.getContactShortToken());
@@ -822,7 +822,7 @@ public class ArchivesServiceImpl implements ArchivesService {
             deleteArchivesDismissEmployees(detailId, cmd.getOrganizationId());
 
             //  5.增加入职记录
-            checkInArchivesEmployeesLogs(cmd.getOrganizationId(), detailId, cmd.getCheckInTime());
+            checkInArchivesEmployeesLogs(cmd.getOrganizationId(), detailId, ArchivesUtil.parseDate(cmd.getCheckInTime()));
 
             return null;
         });
@@ -1005,12 +1005,12 @@ public class ArchivesServiceImpl implements ArchivesService {
 
         ListOrganizationContactCommand orgCommand = new ListOrganizationContactCommand();
         orgCommand.setOrganizationId(cmd.getOrganizationId());
-        orgCommand.setCheckInTimeStart(cmd.getCheckInTimeStart());
-        orgCommand.setCheckInTimeEnd(cmd.getCheckInTimeEnd());
-        orgCommand.setEmploymentTimeStart(cmd.getEmploymentTimeStart());
-        orgCommand.setEmploymentTimeEnd(cmd.getEmploymentTimeEnd());
-        orgCommand.setContractEndTimeStart(cmd.getContractTimeStart());
-        orgCommand.setContractEndTimeEnd(cmd.getContractTimeEnd());
+        orgCommand.setCheckInTimeStart(ArchivesUtil.parseDate(cmd.getCheckInTimeStart()));
+        orgCommand.setCheckInTimeEnd(ArchivesUtil.parseDate(cmd.getCheckInTimeEnd()));
+        orgCommand.setEmploymentTimeStart(ArchivesUtil.parseDate(cmd.getEmploymentTimeStart()));
+        orgCommand.setEmploymentTimeEnd(ArchivesUtil.parseDate(cmd.getEmploymentTimeEnd()));
+        orgCommand.setContractEndTimeStart(ArchivesUtil.parseDate(cmd.getContractTimeStart()));
+        orgCommand.setContractEndTimeEnd(ArchivesUtil.parseDate(cmd.getContractTimeEnd()));
         orgCommand.setEmployeeStatus(cmd.getEmployeeStatus());
         orgCommand.setContractPartyId(cmd.getContractPartyId());
         orgCommand.setKeywords(cmd.getKeywords());
@@ -1494,14 +1494,14 @@ public class ArchivesServiceImpl implements ArchivesService {
 
         //   离职日期判断
         if (cmd.getDismissTimeStart() != null && cmd.getDismissTimeEnd() != null) {
-            condition = condition.and(Tables.EH_ARCHIVES_DISMISS_EMPLOYEES.DISMISS_TIME.ge(cmd.getDismissTimeStart()));
-            condition = condition.and(Tables.EH_ARCHIVES_DISMISS_EMPLOYEES.DISMISS_TIME.le(cmd.getDismissTimeEnd()));
+            condition = condition.and(Tables.EH_ARCHIVES_DISMISS_EMPLOYEES.DISMISS_TIME.ge(ArchivesUtil.parseDate(cmd.getDismissTimeStart())));
+            condition = condition.and(Tables.EH_ARCHIVES_DISMISS_EMPLOYEES.DISMISS_TIME.le(ArchivesUtil.parseDate(cmd.getDismissTimeEnd())));
         }
 
         //   入职日期判断
         if (cmd.getCheckInTimeStart() != null && cmd.getCheckInTimeEnd() != null) {
-            condition = condition.and(Tables.EH_ARCHIVES_DISMISS_EMPLOYEES.CHECK_IN_TIME.ge(cmd.getCheckInTimeStart()));
-            condition = condition.and(Tables.EH_ARCHIVES_DISMISS_EMPLOYEES.CHECK_IN_TIME.le(cmd.getCheckInTimeEnd()));
+            condition = condition.and(Tables.EH_ARCHIVES_DISMISS_EMPLOYEES.CHECK_IN_TIME.ge(ArchivesUtil.parseDate(cmd.getCheckInTimeStart())));
+            condition = condition.and(Tables.EH_ARCHIVES_DISMISS_EMPLOYEES.CHECK_IN_TIME.le(ArchivesUtil.parseDate(cmd.getCheckInTimeEnd())));
         }
 
         //   合同主体判断
@@ -1552,7 +1552,7 @@ public class ArchivesServiceImpl implements ArchivesService {
             //  1.更新员工转正时间
             for (Long detailId : cmd.getDetailIds()) {
                 OrganizationMemberDetails detail = organizationProvider.findOrganizationMemberDetailsByDetailId(detailId);
-                detail.setEmploymentTime(cmd.getEmploymentTime());
+                detail.setEmploymentTime(ArchivesUtil.parseDate(cmd.getEmploymentTime()));
                 organizationProvider.updateOrganizationMemberDetails(detail, detail.getId());
             }
             //  2.若为当前日期则立即执行
@@ -1563,7 +1563,7 @@ public class ArchivesServiceImpl implements ArchivesService {
                 ArchivesConfigurations configuration = new ArchivesConfigurations();
                 configuration.setOrganizationId(cmd.getOrganizationId());
                 configuration.setOperationType(ArchivesOperationType.EMPLOY.getCode());
-                configuration.setOperationTime(cmd.getEmploymentTime());
+                configuration.setOperationTime(ArchivesUtil.parseDate(cmd.getEmploymentTime()));
                 configuration.setOperationInformation(StringHelper.toJsonString(cmd));
                 archivesProvider.createArchivesConfigurations(configuration);
 
@@ -1584,7 +1584,7 @@ public class ArchivesServiceImpl implements ArchivesService {
                 //  1.更新员工状态
                 OrganizationMemberDetails detail = organizationProvider.findOrganizationMemberDetailsByDetailId(detailId);
                 detail.setEmployeeStatus(EmployeeStatus.ON_THE_JOB.getCode());
-                detail.setEmploymentTime(cmd.getEmploymentTime());
+                detail.setEmploymentTime(ArchivesUtil.parseDate(cmd.getEmploymentTime()));
                 organizationProvider.updateOrganizationMemberDetails(detail, detail.getId());
             }
             return null;
@@ -1602,7 +1602,7 @@ public class ArchivesServiceImpl implements ArchivesService {
                 ArchivesConfigurations configuration = new ArchivesConfigurations();
                 configuration.setOrganizationId(cmd.getOrganizationId());
                 configuration.setOperationType(ArchivesOperationType.TRANSFER.getCode());
-                configuration.setOperationTime(cmd.getEffectiveTime());
+                configuration.setOperationTime(ArchivesUtil.parseDate(cmd.getEffectiveTime()));
                 configuration.setOperationInformation(StringHelper.toJsonString(cmd));
                 archivesProvider.createArchivesConfigurations(configuration);
             }
@@ -1631,7 +1631,7 @@ public class ArchivesServiceImpl implements ArchivesService {
             //  1.更新员工离职时间
             for (Long detailId : cmd.getDetailIds()) {
                 OrganizationMemberDetails detail = organizationProvider.findOrganizationMemberDetailsByDetailId(detailId);
-                detail.setDismissTime(cmd.getDismissTime());
+                detail.setDismissTime(ArchivesUtil.parseDate(cmd.getDismissTime()));
                 organizationProvider.updateOrganizationMemberDetails(detail, detail.getId());
             }
             //  2.若为当天则立即执行
@@ -1642,7 +1642,7 @@ public class ArchivesServiceImpl implements ArchivesService {
                 ArchivesConfigurations configuration = new ArchivesConfigurations();
                 configuration.setOrganizationId(cmd.getOrganizationId());
                 configuration.setOperationType(ArchivesOperationType.DISMISS.getCode());
-                configuration.setOperationTime(cmd.getDismissTime());
+                configuration.setOperationTime(ArchivesUtil.parseDate(cmd.getDismissTime()));
                 configuration.setOperationInformation(StringHelper.toJsonString(cmd));
                 archivesProvider.createArchivesConfigurations(configuration);
             }
@@ -1669,7 +1669,7 @@ public class ArchivesServiceImpl implements ArchivesService {
                 dismissEmployee.setEmployeeStatus(employee.getEmployeeStatus());
                 dismissEmployee.setDepartment(employee.getDepartment());
                 dismissEmployee.setCheckInTime(employee.getCheckInTime());
-                dismissEmployee.setDismissTime(cmd.getDismissTime());
+                dismissEmployee.setDismissTime(ArchivesUtil.parseDate(cmd.getDismissTime()));
                 dismissEmployee.setDismissType(cmd.getDismissType());
                 dismissEmployee.setDismissReason(cmd.getDismissReason());
                 dismissEmployee.setDismissRemarks(cmd.getDismissRemark());
