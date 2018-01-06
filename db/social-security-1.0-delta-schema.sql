@@ -379,6 +379,7 @@ CREATE TABLE `eh_social_security_inout_log` (
   `operator_uid` BIGINT,
   `update_time` DATETIME,
   PRIMARY KEY (`id`),
+  KEY `i_eh_user_detail_id` (`detail_id`),
   KEY `i_eh_organization_id` (`organization_id`)
 ) ENGINE = INNODB DEFAULT CHARSET = utf8mb4 ;
 

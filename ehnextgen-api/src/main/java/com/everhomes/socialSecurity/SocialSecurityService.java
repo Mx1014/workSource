@@ -1,12 +1,15 @@
 // @formatter:off
 package com.everhomes.socialSecurity;
 
+import com.everhomes.rest.common.ImportFileResponse;
 import com.everhomes.rest.organization.ImportFileTaskDTO;
 import com.everhomes.rest.socialSecurity.*;
+
 import org.springframework.web.multipart.MultipartFile;
 
 import java.math.BigDecimal;
 import java.util.List;
+import java.util.Map;
 
 public interface SocialSecurityService {
 
@@ -87,4 +90,7 @@ public interface SocialSecurityService {
 	SocialSecurityEmployeeDTO getSocialSecurityEmployeeInfo(Long detailId);
 
     List<Long> listSocialSecurityEmployeeDetailIdsByPayMonth(Long ownerId, String payMonth);
+
+	ImportFileResponse<Map<String, String>> getImportSocialSecurityPaymentsResult(
+			GetImportSocialSecurityPaymentsResultCommand cmd);
 }

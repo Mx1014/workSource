@@ -16,8 +16,8 @@ import com.everhomes.naming.NameMapper;
 import com.everhomes.organization.*;
 import com.everhomes.region.Region;
 import com.everhomes.region.RegionProvider;
-
 import com.everhomes.archives.ArchivesUtil;
+import com.everhomes.rest.archives.ImportArchivesContactsDTO;
 import com.everhomes.rest.common.ImportFileResponse;
 import com.everhomes.rest.organization.*;
 import com.everhomes.rest.socialSecurity.*;
@@ -29,6 +29,7 @@ import com.everhomes.user.UserContext;
 import com.everhomes.util.*;
 import com.everhomes.util.excel.RowResult;
 import com.everhomes.util.excel.handler.PropMrgOwnerHandler;
+
 import org.apache.commons.collections.map.HashedMap;
 import org.apache.poi.ss.usermodel.Row;
 import org.apache.poi.ss.usermodel.Workbook;
@@ -897,6 +898,11 @@ public class SocialSecurityServiceImpl implements SocialSecurityService {
         return null;
     }
 
+    @Override
+    public ImportFileResponse<Map<String, String>> getImportSocialSecurityPaymentsResult(GetImportSocialSecurityPaymentsResultCommand cmd) {
+        return importFileService.getImportFileResult(cmd.getTaskId());
+    }
+    
     @Override
     public ImportFileTaskDTO importSocialSecurityPayments(ImportSocialSecurityPaymentsCommand cmd, MultipartFile file) {
         // TODO Auto-generated method stub
