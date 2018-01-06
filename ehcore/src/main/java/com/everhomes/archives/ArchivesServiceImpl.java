@@ -814,9 +814,9 @@ public class ArchivesServiceImpl implements ArchivesService {
 
             //  3.增加社保、公积金信息
             if(cmd.getSocialSecurityStartMonth() != null)
-                addSocialSecurityStartMonth(detailId, ArchivesUtil.socialSecurityMonth(cmd.getSocialSecurityStartMonth()));
+                addSocialSecurityStartMonth(detailId, memberDetail.getOrganizationId(), ArchivesUtil.socialSecurityMonth(cmd.getSocialSecurityStartMonth()));
             if(cmd.getAccumulationFundStartMonth() != null)
-                addAccumulationFundStartMonth(detailId, ArchivesUtil.socialSecurityMonth(cmd.getAccumulationFundStartMonth()));
+                addAccumulationFundStartMonth(detailId, memberDetail.getOrganizationId(), ArchivesUtil.socialSecurityMonth(cmd.getAccumulationFundStartMonth()));
 
             //  4.查询若存在于离职列表则删除
             deleteArchivesDismissEmployees(detailId, cmd.getOrganizationId());
@@ -829,17 +829,19 @@ public class ArchivesServiceImpl implements ArchivesService {
         return dto;
     }
 
-    private void addSocialSecurityStartMonth(Long detailId, String startMonth) {
+    private void addSocialSecurityStartMonth(Long detailId, Long organizationId, String startMonth) {
         AddSocialSecurityInOutTimeCommand command = new AddSocialSecurityInOutTimeCommand();
         command.setDetailId(detailId);
+        command.setOrganizationId(detailId);
         command.setInOutType(InOutTimeType.SOCIAL_SECURITY.getCode());
         command.setStartMonth(startMonth);
         socialSecurityService.addSocialSecurityInOutTime(command);
     }
 
-    private void addAccumulationFundStartMonth(Long detailId, String startMonth) {
+    private void addAccumulationFundStartMonth(Long detailId, Long organizationId, String startMonth) {
         AddSocialSecurityInOutTimeCommand command = new AddSocialSecurityInOutTimeCommand();
         command.setDetailId(detailId);
+        command.setOrganizationId(detailId);
         command.setInOutType(InOutTimeType.ACCUMULATION_FUND.getCode());
         command.setStartMonth(startMonth);
         socialSecurityService.addSocialSecurityInOutTime(command);
@@ -1678,9 +1680,9 @@ public class ArchivesServiceImpl implements ArchivesService {
 
                 //  2.社保减员月
                 if(cmd.getSocialSecurityEndMonth() != null)
-                    addSocialSecurityEndMonth(detailId, ArchivesUtil.socialSecurityMonth(cmd.getSocialSecurityEndMonth()));
+                    addSocialSecurityEndMonth(detailId, employee.getOrganizationId(), ArchivesUtil.socialSecurityMonth(cmd.getSocialSecurityEndMonth()));
                 if(cmd.getAccumulationFundEndMonth() != null)
-                    addAccumulationFundEndMonth(detailId, ArchivesUtil.socialSecurityMonth(cmd.getSocialSecurityEndMonth()));
+                    addAccumulationFundEndMonth(detailId, employee.getOrganizationId(), ArchivesUtil.socialSecurityMonth(cmd.getSocialSecurityEndMonth()));
 
 
                     //  3.删除员工权限
@@ -1695,17 +1697,19 @@ public class ArchivesServiceImpl implements ArchivesService {
         });
     }
 
-    private void addSocialSecurityEndMonth(Long detailId, String endMonth){
+    private void addSocialSecurityEndMonth(Long detailId, Long organizationId, String endMonth){
         AddSocialSecurityInOutTimeCommand command = new AddSocialSecurityInOutTimeCommand();
         command.setDetailId(detailId);
+        command.setOrganizationId(organizationId);
         command.setInOutType(InOutTimeType.SOCIAL_SECURITY.getCode());
         command.setEndMonth(endMonth);
         socialSecurityService.addSocialSecurityInOutTime(command);
     }
 
-    private void addAccumulationFundEndMonth(Long detailId, String endMonth){
+    private void addAccumulationFundEndMonth(Long detailId, Long organizationId, String endMonth){
         AddSocialSecurityInOutTimeCommand command = new AddSocialSecurityInOutTimeCommand();
         command.setDetailId(detailId);
+        command.setOrganizationId(organizationId);
         command.setInOutType(InOutTimeType.ACCUMULATION_FUND.getCode());
         command.setEndMonth(endMonth);
         socialSecurityService.addSocialSecurityInOutTime(command);
