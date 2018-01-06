@@ -18,6 +18,8 @@ import com.everhomes.rest.RestResponse;
 
 import org.springframework.web.multipart.MultipartFile;
 
+import javax.servlet.http.HttpServletResponse;
+
 @RestController
 @RequestMapping("/socialSecurity")
 public class SocialSecurityController extends ControllerBase {
@@ -141,6 +143,21 @@ public class SocialSecurityController extends ControllerBase {
         response.setErrorDescription("OK");
         return response;
     }
+
+    /**
+     * <b>URL: /socialSecurity/exportImportFileFailResults</b>
+     * <p>9-3.查询导入结果</p>
+     */
+    @RequestMapping("exportImportFileFailResults")
+    @RestReturn(value = String.class)
+    public RestResponse exportImportFileFailResults(GetImportFileResultCommand cmd, HttpServletResponse httpResponse) {
+        socialSecurityService.exportImportFileFailResults(cmd, httpResponse);
+        RestResponse response = new RestResponse();
+        response.setErrorCode(ErrorCodes.SUCCESS);
+        response.setErrorDescription("OK");
+        return response;
+    }
+
     /**
      * <p>10.汇总计算报表接口</p>
      * <b>URL: /socialSecurity/calculateSocialSecurityReports</b>

@@ -2,11 +2,13 @@
 package com.everhomes.socialSecurity;
 
 import com.everhomes.rest.common.ImportFileResponse;
+import com.everhomes.rest.organization.GetImportFileResultCommand;
 import com.everhomes.rest.organization.ImportFileTaskDTO;
 import com.everhomes.rest.socialSecurity.*;
 
 import org.springframework.web.multipart.MultipartFile;
 
+import javax.servlet.http.HttpServletResponse;
 import java.io.OutputStream;
 import java.math.BigDecimal;
 import java.util.List;
@@ -41,6 +43,8 @@ public interface SocialSecurityService {
 
 	void updateSocialSecurityPayment(UpdateSocialSecurityPaymentCommand cmd);
 
+
+	void exportImportFileFailResults(GetImportFileResultCommand cmd, HttpServletResponse httpResponse);
 
 	ImportFileTaskDTO importSocialSecurityPayments(ImportSocialSecurityPaymentsCommand cmd, MultipartFile file);
 

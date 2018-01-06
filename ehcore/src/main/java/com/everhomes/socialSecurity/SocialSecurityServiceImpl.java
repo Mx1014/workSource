@@ -52,6 +52,7 @@ import org.apache.commons.lang.StringUtils;
 import org.springframework.transaction.TransactionStatus;
 import org.springframework.web.multipart.MultipartFile;
 
+import javax.servlet.http.HttpServletResponse;
 import java.io.ByteArrayOutputStream;
 import java.io.IOException;
 import java.io.OutputStream;
@@ -911,7 +912,12 @@ public class SocialSecurityServiceImpl implements SocialSecurityService {
     public ImportFileResponse<Map<String, String>> getImportSocialSecurityPaymentsResult(GetImportSocialSecurityPaymentsResultCommand cmd) {
         return importFileService.getImportFileResult(cmd.getTaskId());
     }
-    
+
+    @Override
+    public void exportImportFileFailResults(GetImportFileResultCommand cmd, HttpServletResponse httpResponse) {
+        importFileService.exportImportFileFailResultXls(httpResponse, cmd.getTaskId());
+    }
+
     @Override
     public ImportFileTaskDTO importSocialSecurityPayments(ImportSocialSecurityPaymentsCommand cmd, MultipartFile file) {
         // TODO Auto-generated method stub
