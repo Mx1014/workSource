@@ -26,17 +26,17 @@ public class ListArchivesEmployeesCommand {
 
     private Long organizationId;
 
-    private Date checkInTimeStart;
+    private String checkInTimeStart;
 
-    private Date checkInTimeEnd;
+    private String checkInTimeEnd;
 
-    private Date employmentTimeStart;
+    private String employmentTimeStart;
 
-    private Date employmentTimeEnd;
+    private String employmentTimeEnd;
 
-    private Date contractTimeStart;
+    private String contractTimeStart;
 
-    private Date contractTimeEnd;
+    private String contractTimeEnd;
 
     private Byte employeeStatus;
 
@@ -55,52 +55,52 @@ public class ListArchivesEmployeesCommand {
     public ListArchivesEmployeesCommand() {
     }
 
-    public Date getCheckInTimeStart() {
+    public String getCheckInTimeStart() {
         return checkInTimeStart;
     }
 
     public void setCheckInTimeStart(String checkInTimeStart) {
-        this.checkInTimeStart = ArchivesUtil.parseDate(checkInTimeStart);
+        this.checkInTimeStart = checkInTimeStart;
     }
 
-    public Date getCheckInTimeEnd() {
+    public String getCheckInTimeEnd() {
         return checkInTimeEnd;
     }
 
     public void setCheckInTimeEnd(String checkInTimeEnd) {
-        this.checkInTimeEnd = ArchivesUtil.parseDate(checkInTimeEnd);
+        this.checkInTimeEnd = checkInTimeEnd;
     }
 
-    public Date getEmploymentTimeStart() {
+    public String getEmploymentTimeStart() {
         return employmentTimeStart;
     }
 
     public void setEmploymentTimeStart(String employmentTimeStart) {
-        this.employmentTimeStart =  ArchivesUtil.parseDate(employmentTimeStart);
+        this.employmentTimeStart = employmentTimeStart;
     }
 
-    public Date getEmploymentTimeEnd() {
+    public String getEmploymentTimeEnd() {
         return employmentTimeEnd;
     }
 
     public void setEmploymentTimeEnd(String employmentTimeEnd) {
-        this.employmentTimeEnd =  ArchivesUtil.parseDate(employmentTimeEnd);
+        this.employmentTimeEnd = employmentTimeEnd;
     }
 
-    public Date getContractTimeStart() {
+    public String getContractTimeStart() {
         return contractTimeStart;
     }
 
     public void setContractTimeStart(String contractTimeStart) {
-        this.contractTimeStart =  ArchivesUtil.parseDate(contractTimeStart);
+        this.contractTimeStart = contractTimeStart;
     }
 
-    public Date getContractTimeEnd() {
+    public String getContractTimeEnd() {
         return contractTimeEnd;
     }
 
     public void setContractTimeEnd(String contractTimeEnd) {
-        this.contractTimeEnd =  ArchivesUtil.parseDate(contractTimeEnd);
+        this.contractTimeEnd = contractTimeEnd;
     }
 
     public Byte getEmployeeStatus() {
