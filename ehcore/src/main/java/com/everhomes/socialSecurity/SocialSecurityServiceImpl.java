@@ -979,7 +979,7 @@ public class SocialSecurityServiceImpl implements SocialSecurityService {
             ImportFileResultLog<Map<String, String>> log = new ImportFileResultLog<>(SocialSecurityConstants.SCOPE);
 //            response.getLogs().add(log);
             log.setData(r.getCells());
-            String userContact = r.getA();
+            String userContact = r.getA().trim();
             OrganizationMemberDetails detail = organizationProvider.findOrganizationMemberDetailsByOrganizationIdAndContactToken(ownerId, userContact);
             if (null == detail) {
 //                response.setFileLog("找不到用户: 手机号" + userContact);
