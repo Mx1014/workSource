@@ -11,6 +11,8 @@ import com.everhomes.configuration.ConfigurationProvider;
 import com.everhomes.coordinator.CoordinationLocks;
 import com.everhomes.coordinator.CoordinationProvider;
 import com.everhomes.db.DbProvider;
+import com.everhomes.filedownload.TaskService;
+import com.everhomes.incubator.IncubatorApplyExportTaskHandler;
 import com.everhomes.listing.CrossShardListingLocator;
 import com.everhomes.naming.NameMapper;
 import com.everhomes.organization.*;
@@ -19,12 +21,16 @@ import com.everhomes.region.RegionProvider;
 
 import com.everhomes.rest.archives.ArchivesUtil;
 import com.everhomes.rest.common.ImportFileResponse;
+import com.everhomes.rest.filedownload.TaskRepeatFlag;
+import com.everhomes.rest.filedownload.TaskType;
+import com.everhomes.rest.incubator.ApproveStatus;
 import com.everhomes.rest.organization.*;
 import com.everhomes.rest.socialSecurity.*;
 import com.everhomes.sequence.SequenceProvider;
 import com.everhomes.server.schema.tables.pojos.EhSocialSecurityPaymentLogs;
 import com.everhomes.server.schema.tables.pojos.EhSocialSecurityPayments;
 import com.everhomes.server.schema.tables.pojos.EhSocialSecuritySettings;
+import com.everhomes.sms.DateUtil;
 import com.everhomes.user.UserContext;
 import com.everhomes.util.*;
 import com.everhomes.util.excel.RowResult;
@@ -46,6 +52,7 @@ import org.springframework.transaction.TransactionStatus;
 import org.springframework.web.multipart.MultipartFile;
 
 import java.io.IOException;
+import java.io.OutputStream;
 import java.math.BigDecimal;
 import java.text.ParseException;
 import java.text.SimpleDateFormat;
@@ -57,7 +64,8 @@ import java.util.stream.Collectors;
 
 @Component
 public class SocialSecurityServiceImpl implements SocialSecurityService {
-
+    @Autowired
+    private TaskService taskService;
     @Autowired
     private ImportFileService importFileService;
     @Autowired
@@ -979,10 +987,10 @@ public class SocialSecurityServiceImpl implements SocialSecurityService {
                     response.getLogs().add(log);
                     continue;
                 }
-                importUpdateSetting(detail, ssBases, afBases, r, log, ssCityId, afCItyId,response);
+                importUpdateSetting(detail, ssBases, afBases, r, log, ssCityId, afCItyId, response);
             }
         }
-        response.setTotalCount((long) list.size() -1);
+        response.setTotalCount((long) list.size() - 1);
         response.setFailCount((long) response.getLogs().size());
         //设置完后同步一下
         socialSecuritySettingProvider.syncRadixAndRatioToPayments(ownerId);
@@ -1064,7 +1072,7 @@ public class SocialSecurityServiceImpl implements SocialSecurityService {
             if (null == setting) {
                 base = findSSBaseWithOutException(bases, item);
                 if (null == base) {
-                    setting = ConvertHelper.convert(item,SocialSecuritySetting.class);
+                    setting = ConvertHelper.convert(item, SocialSecuritySetting.class);
                     setting.setCityId(cityId);
                     setting.setOrganizationId(detail.getOrganizationId());
                     setting.setUserId(detail.getTargetId());
@@ -1100,7 +1108,7 @@ public class SocialSecurityServiceImpl implements SocialSecurityService {
                 String payMonth = socialSecurityPaymentProvider.findPaymentMonthByOwnerId(detail.getOrganizationId());
                 SocialSecurityPayment payment = processSocialSecurityPayment(setting, payMonth, NormalFlag.NO.getCode());
                 socialSecurityPaymentProvider.createSocialSecurityPayment(payment);
-            }else{
+            } else {
                 socialSecuritySettingProvider.updateSocialSecuritySetting(setting);
             }
         }
@@ -1635,10 +1643,24 @@ public class SocialSecurityServiceImpl implements SocialSecurityService {
 
     @Override
     public void exportSocialSecurityReports(ExportSocialSecurityReportsCommand cmd) {
-        List<SocialSecurityReport> result = socialSecurityReportProvider.listSocialSecurityReport(cmd.getOwnerId(),
-                cmd.getPaymentMonth(), null, Integer.MAX_VALUE - 1);
-        XSSFWorkbook wb = createSocialSecurityReportWorkBook(result);
+
         // TODO 导出
+        Map<String, Object> params = new HashMap();
+
+        //如果是null的话会被传成“null”
+        params.put("ownerId", cmd.getOwnerId());
+        params.put("payMonth", cmd.getPaymentMonth());
+
+        String fileName = String.format("导出社保报表_%s.xlsx", DateUtil.dateToStr(new Date(), DateUtil.NO_SLASH));
+
+        taskService.createTask(fileName, TaskType.FILEDOWNLOAD.getCode(), SocialSecurityReportsTaskHandler.class, params, TaskRepeatFlag.REPEAT.getCode(), new Date());
+
+    }
+
+    public OutputStream getSocialSecurityReportsOutputStream(Long ownerId, String payMonth) {
+        List<SocialSecurityReport> result = socialSecurityReportProvider.listSocialSecurityReport(ownerId,
+                payMonth, null, Integer.MAX_VALUE - 1);
+        XSSFWorkbook wb = createSocialSecurityReportWorkBook(result);
 
     }
 
