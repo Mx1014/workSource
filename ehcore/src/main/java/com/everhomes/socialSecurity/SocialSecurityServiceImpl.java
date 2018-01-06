@@ -2252,7 +2252,7 @@ public class SocialSecurityServiceImpl implements SocialSecurityService {
     public SocialSecurityInoutTimeDTO addSocialSecurityInOutTime(AddSocialSecurityInOutTimeCommand cmd) {
         OrganizationMemberDetails memberDetail = organizationProvider.findOrganizationMemberDetailsByDetailId(cmd.getDetailId());
 
-        if(memberDetail != null){
+        if (memberDetail != null) {
             //  1.create inOut time.
             SocialSecurityInoutTime time = createSocialSecurityInoutTime(cmd, memberDetail);
             //  2.create the log.
@@ -2269,16 +2269,15 @@ public class SocialSecurityServiceImpl implements SocialSecurityService {
         return null;
     }
 
-    private SocialSecurityInoutTime createSocialSecurityInoutTime(AddSocialSecurityInOutTimeCommand cmd, OrganizationMemberDetails memberDetail){
+    private SocialSecurityInoutTime createSocialSecurityInoutTime(AddSocialSecurityInOutTimeCommand cmd, OrganizationMemberDetails memberDetail) {
         SocialSecurityInoutTime time = socialSecurityInoutTimeProvider.getSocialSecurityInoutTimeByDetailId(cmd.getInOutType(), cmd.getDetailId());
-        if(time != null)
-        {
+        if (time != null) {
             if (cmd.getStartMonth() != null)
                 time.setStartMonth(cmd.getStartMonth());
             if (cmd.getEndMonth() != null)
                 time.setEndMonth(cmd.getEndMonth());
             socialSecurityInoutTimeProvider.updateSocialSecurityInoutTime(time);
-        }else{
+        } else {
             time = new SocialSecurityInoutTime();
             time.setNamespaceId(memberDetail.getNamespaceId());
             time.setUserId(memberDetail.getTargetId());
