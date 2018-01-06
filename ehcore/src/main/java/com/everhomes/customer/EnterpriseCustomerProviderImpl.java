@@ -1516,7 +1516,12 @@ public class EnterpriseCustomerProviderImpl implements EnterpriseCustomerProvide
 					        }
 						}
                         if("trackingUid".equals(field.getFieldName())) {
-                            oldData = exist.getTrackingName();
+                            if("-1".equals(oldData)) {
+                                oldData = "空";
+                            } else {
+                                oldData = exist.getTrackingName();
+                            }
+
                             newData = customer.getTrackingName();
                         }
 						Map<String,Object> map = new HashMap<String,Object>();
