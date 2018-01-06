@@ -100,7 +100,7 @@ public interface SocialSecurityService {
 
     List<Long> listSocialSecurityEmployeeDetailIdsByPayMonth(Long ownerId, String payMonth);
 
-	ImportFileResponse<Map<String, String>> getImportSocialSecurityPaymentsResult(
+	ImportFileResponse getImportSocialSecurityPaymentsResult(
 			GetImportSocialSecurityPaymentsResultCommand cmd);
 
 	OutputStream getSocialSecurityReportsOutputStream(Long ownerId, String payMonth);

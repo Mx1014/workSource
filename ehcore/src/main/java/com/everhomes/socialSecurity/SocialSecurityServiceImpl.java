@@ -918,7 +918,7 @@ public class SocialSecurityServiceImpl implements SocialSecurityService {
     }
 
     @Override
-    public ImportFileResponse<Map<String, String>> getImportSocialSecurityPaymentsResult(GetImportSocialSecurityPaymentsResultCommand cmd) {
+    public ImportFileResponse getImportSocialSecurityPaymentsResult(GetImportSocialSecurityPaymentsResultCommand cmd) {
         return importFileService.getImportFileResult(cmd.getTaskId());
     }
 
