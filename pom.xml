@@ -6,15 +6,22 @@
     <version>0.0.1-SNAPSHOT</version>
     <packaging>pom</packaging>
 
+    <distributionManagement>
+        <repository>
+            <id>everhomes.repo</id>
+            <name>Internal Repository</name>
+            <url>http://mvn-mirror.lab.everhomes.com:8081/artifactory/libs-snapshot-local</url>
+        </repository>
+    </distributionManagement>
+
     <modules>
         <module>ehrest</module> 
-       <!--<module>ehcore-persist</module>-->
+        <!--<module>ehcore-persist</module>-->
         <!--<module>ehrest-response</module>-->
         <module>ehnextgen-api</module>
         <module>ehnextgen-messaging</module>
         <module>ehnextgen-forum</module>
-        <module>ehborder</module>
+        <!--<module>ehborder</module>-->
         <module>ehcore</module>
     </modules>
 </project>
-

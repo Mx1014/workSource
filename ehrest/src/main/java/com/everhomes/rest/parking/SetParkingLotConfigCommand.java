@@ -14,15 +14,19 @@ import com.everhomes.util.StringHelper;
  * <li>maxExpiredDay: 最多过期天数</li>
  * <li>expiredRechargeMonthCount: 过期续交时，预交月数</li>
  * <li>expiredRechargeType: 预交，计费方式 1: 整月，2:实际天数   {@link ParkingCardExpiredRechargeType}</li>
+ * <li>monthlyDiscountFlag: 月卡是否启用优惠 0：不启用，1：启用 {@link ParkingConfigFlag}</li>
+ * <li>monthlyDiscount: 月卡优惠折扣</li>
+ * <li>tempFeeDiscountFlag: 临时车是否启用优惠 0：不启用，1：启用 {@link ParkingConfigFlag}</li>
+ * <li>tempFeeDiscount: 临时车优惠折扣</li>
  * </ul>
  */
 public class SetParkingLotConfigCommand {
 	@NotNull
-    private String ownerType;
+	private String ownerType;
 	@NotNull
-    private Long ownerId;
+	private Long ownerId;
 	@NotNull
-    private Long parkingLotId;
+	private Long parkingLotId;
 
 	//是否支持过期充值
 	private Byte expiredRechargeFlag;
@@ -72,31 +76,31 @@ public class SetParkingLotConfigCommand {
 	}
 
 	public SetParkingLotConfigCommand() {
-    }
-    
-    public String getOwnerType() {
-        return ownerType;
-    }
+	}
 
-    public void setOwnerType(String ownerType) {
-        this.ownerType = ownerType;
-    }
+	public String getOwnerType() {
+		return ownerType;
+	}
 
-    public Long getOwnerId() {
-        return ownerId;
-    }
+	public void setOwnerType(String ownerType) {
+		this.ownerType = ownerType;
+	}
 
-    public void setOwnerId(Long ownerId) {
-        this.ownerId = ownerId;
-    }
+	public Long getOwnerId() {
+		return ownerId;
+	}
 
-    public Long getParkingLotId() {
-        return parkingLotId;
-    }
+	public void setOwnerId(Long ownerId) {
+		this.ownerId = ownerId;
+	}
 
-    public void setParkingLotId(Long parkingLotId) {
-        this.parkingLotId = parkingLotId;
-    }
+	public Long getParkingLotId() {
+		return parkingLotId;
+	}
+
+	public void setParkingLotId(Long parkingLotId) {
+		this.parkingLotId = parkingLotId;
+	}
 
 	public Byte getExpiredRechargeFlag() {
 		return expiredRechargeFlag;
@@ -131,7 +135,7 @@ public class SetParkingLotConfigCommand {
 	}
 
 	@Override
-    public String toString() {
-        return StringHelper.toJsonString(this);
-    }
+	public String toString() {
+		return StringHelper.toJsonString(this);
+	}
 }

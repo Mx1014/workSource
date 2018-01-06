@@ -2,8 +2,6 @@ package com.everhomes.rest.point;
 
 import com.everhomes.util.StringHelper;
 
-import javax.validation.constraints.NotNull;
-
 /**
  * <ul>
  *     <li>namespaceId: namespaceId</li>
@@ -14,7 +12,6 @@ import javax.validation.constraints.NotNull;
 public class GetUserPointCommand {
 
     private Integer namespaceId;
-    @NotNull
     private Long systemId;
     private Long uid;
 

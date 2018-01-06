@@ -82,6 +82,8 @@ public class AddRentalBillCommand {
 		this.packageName = packageName;
 	}
 
+
+
 	//	public Long getStartTime() {
 //		return startTime;
 //	}

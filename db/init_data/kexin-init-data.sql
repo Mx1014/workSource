@@ -1783,3 +1783,6 @@ INSERT INTO `eh_web_menu_scopes` (`id`, `menu_id`, `menu_name`, `owner_type`, `o
 VALUES ((@eh_web_menu_scopes_id := @eh_web_menu_scopes_id + 1), '10602', '旅游与团建', 'EhNamespaces', '999983', '1');
 
 
+SET @id = (SELECT MAX(id) FROM `eh_launch_pad_items`);
+INSERT INTO `eh_launch_pad_items` (`id`, `namespace_id`, `app_id`, `scope_code`, `scope_id`, `item_location`, `item_group`, `item_name`, `item_label`, `icon_uri`, `item_width`, `item_height`, `action_type`, `action_data`, `default_order`, `apply_policy`, `min_version`, `display_flag`, `display_layout`, `bgcolor`, `tag`, `target_type`, `target_id`, `delete_flag`, `scene_type`, `scale_type`, `service_categry_id`, `selected_icon_uri`, `more_order`, `alias_icon_uri`, `categry_name`)
+	VALUES ((@id := @id + 1), '999983', '0', '0', '0', '/home', 'Bizs', '物品放行', '物品放行', 'cs://1/image/aW1hZ2UvTVRvME5tRmhOelV6WW1JeE5UZzROMlkyWldFd05ETm1PREZtTkRVNE1UbGxNUQ', '1', '1', '13', '{\"url\":\"https://core.zuolin.com/goods-move/build/index.html?ns=999983&hideNavigationBar=1&ehnavigatorstyle=0#home#sign_suffix\"}', '3', '0', '1', '0', '', '0', NULL, NULL, NULL, '1', 'pm_admin', '1', NULL, NULL, '0', NULL, NULL);

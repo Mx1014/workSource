@@ -13,6 +13,7 @@ import com.everhomes.flow.conditionvariable.FlowConditionStringVariable;
 import com.everhomes.flow.node.FlowGraphNodeEnd;
 import com.everhomes.general_form.GeneralFormVal;
 import com.everhomes.general_form.GeneralFormValProvider;
+import com.everhomes.portal.PortalService;
 import com.everhomes.rest.category.CategoryDTO;
 import com.everhomes.rest.flow.*;
 import com.everhomes.rest.general_approval.GeneralFormFieldType;
@@ -21,6 +22,9 @@ import com.everhomes.rest.general_approval.PostApprovalFormSubformItemValue;
 import com.everhomes.rest.general_approval.PostApprovalFormSubformValue;
 import com.everhomes.rest.parking.ParkingErrorCode;
 import com.everhomes.rest.pmtask.*;
+import com.everhomes.rest.portal.ListServiceModuleAppsCommand;
+import com.everhomes.rest.portal.ListServiceModuleAppsResponse;
+import com.everhomes.rest.portal.ServiceModuleAppDTO;
 import com.everhomes.rest.sms.SmsTemplateCode;
 import com.everhomes.rest.user.IdentifierType;
 import com.everhomes.sms.SmsProvider;
@@ -75,6 +79,8 @@ public class PmtaskFlowModuleListener implements FlowModuleListener {
 	private GeneralFormValProvider generalFormValProvider;
 	@Autowired
 	FlowEventLogProvider flowEventLogProvider;
+	@Autowired
+	PortalService portalService;
 
 	private Long moduleId = FlowConstants.PM_TASK_MODULE;
 
@@ -202,6 +208,7 @@ public class PmtaskFlowModuleListener implements FlowModuleListener {
 					log.setLogContent(content);
 					ctx.getLogs().add(log);
 				}
+				task.setIfUseFeelist((byte)1);
 			}
 		}else if(FlowStepType.ABSORT_STEP.getCode().equals(stepType)) {
 
@@ -309,46 +316,47 @@ public class PmtaskFlowModuleListener implements FlowModuleListener {
 
 		//填写费用清单
 		List<GeneralFormVal> list = generalFormValProvider.queryGeneralFormVals(EntityType.PM_TASK.getCode(),task.getId());
-		if (flowCase.getStatus() == FlowCaseStatus.FINISHED.getCode())
-			if (list!=null && list.size()>0){
-				e = new FlowCaseEntity();
-				e.setEntityType(FlowCaseEntityType.TEXT.getCode());
-				e.setKey("费用清单");
-				String content = "";
-				List<PostApprovalFormItem> items = list.stream().map(p->ConvertHelper.convert(p, PostApprovalFormItem.class))
-						.collect(Collectors.toList());
-				content += "本次服务的费用清单如下，请进行确认\n";
-				Long total = Long.valueOf(getTextString(getFormItem(items,"总计").getFieldValue()));
-				content += "总计:"+total+"元\n";
-				Long serviceFee = Long.valueOf(getTextString(getFormItem(items,"服务费").getFieldValue()));
-				content += "服务费:"+total+"元\n";
-				content += "物品费:"+(total-serviceFee)+"元\n";
-				PostApprovalFormItem subForm = getFormItem(items,"物品");
-				if (subForm!=null) {
-					PostApprovalFormSubformValue subFormValue = JSON.parseObject(subForm.getFieldValue(), PostApprovalFormSubformValue.class);
-					List<PostApprovalFormSubformItemValue> array = subFormValue.getForms();
-					if (array.size()!=0) {
-						content += "物品费详情：\n";
-						Gson g=new Gson();
-						for (PostApprovalFormSubformItemValue itemValue : array){
-							List<PostApprovalFormItem> values = itemValue.getValues();
-							content += getTextString(getFormItem(values,"物品名称").getFieldValue())+":";
-							content += getTextString(getFormItem(values,"小计").getFieldValue())+"元";
-							content += "("+getTextString(getFormItem(values,"单价").getFieldValue())+"元*"+
-									getTextString(getFormItem(values,"数量").getFieldValue())+")";
+		if (task.getIfUseFeelist()!=null && task.getIfUseFeelist()==1)
+			if (flowCase.getStatus() == FlowCaseStatus.FINISHED.getCode())
+				if (list!=null && list.size()>0){
+					e = new FlowCaseEntity();
+					e.setEntityType(FlowCaseEntityType.TEXT.getCode());
+					e.setKey("费用清单");
+					String content = "";
+					List<PostApprovalFormItem> items = list.stream().map(p->ConvertHelper.convert(p, PostApprovalFormItem.class))
+							.collect(Collectors.toList());
+					content += "本次服务的费用清单如下，请进行确认\n";
+					Long total = Long.valueOf(getTextString(getFormItem(items,"总计").getFieldValue()));
+					content += "总计:"+total+"元\n";
+					Long serviceFee = Long.valueOf(getTextString(getFormItem(items,"服务费").getFieldValue()));
+					content += "服务费:"+total+"元\n";
+					content += "物品费:"+(total-serviceFee)+"元\n";
+					PostApprovalFormItem subForm = getFormItem(items,"物品");
+					if (subForm!=null) {
+						PostApprovalFormSubformValue subFormValue = JSON.parseObject(subForm.getFieldValue(), PostApprovalFormSubformValue.class);
+						List<PostApprovalFormSubformItemValue> array = subFormValue.getForms();
+						if (array.size()!=0) {
+							content += "物品费详情：\n";
+							Gson g=new Gson();
+							for (PostApprovalFormSubformItemValue itemValue : array){
+								List<PostApprovalFormItem> values = itemValue.getValues();
+								content += getTextString(getFormItem(values,"物品名称").getFieldValue())+":";
+								content += getTextString(getFormItem(values,"小计").getFieldValue())+"元";
+								content += "("+getTextString(getFormItem(values,"单价").getFieldValue())+"元*"+
+										getTextString(getFormItem(values,"数量").getFieldValue())+")";
+							}
+							content += "如对上述费用有疑义请附言说明";
 						}
-						content += "如对上述费用有疑义请附言说明";
 					}
+					e.setValue(content);
+					entities.add(e);
+				}else {
+					e = new FlowCaseEntity();
+					e.setEntityType(FlowCaseEntityType.LIST.getCode());
+					e.setKey("费用清单");
+					e.setValue("本次服务没有产生维修费");
+					entities.add(e);
 				}
-				e.setValue(content);
-				entities.add(e);
-			}else {
-				e = new FlowCaseEntity();
-				e.setEntityType(FlowCaseEntityType.LIST.getCode());
-				e.setKey("费用清单");
-				e.setValue("本次服务没有产生维修费");
-				entities.add(e);
-			}
 		JSONObject jo = JSONObject.parseObject(JSONObject.toJSONString(dto));
 		jo.put("formUrl",processFormURL(EntityType.PM_TASK.getCode(),""+task.getId(),FlowOwnerType.PMTASK.getCode(),"","费用确认"));
 		if (flowUserType!=null)
@@ -571,20 +579,17 @@ public class PmtaskFlowModuleListener implements FlowModuleListener {
 	@Override
 	public List<FlowServiceTypeDTO> listServiceTypes(Integer namespaceId, String ownerType, Long ownerId) {
 
-		List<Category> categories = new ArrayList<>();
+		List<ServiceModuleAppDTO> apps = new ArrayList<>();
 		for (Long id: PmTaskAppType.TYPES) {
-			categories.addAll(categoryProvider.listTaskCategories(namespaceId, id, null,
-					null, null));
+			ListServiceModuleAppsCommand listServiceModuleAppsCommand = new ListServiceModuleAppsCommand();
+			listServiceModuleAppsCommand.setNamespaceId(namespaceId);
+			listServiceModuleAppsCommand.setModuleId(FlowConstants.PM_TASK_MODULE);
+			listServiceModuleAppsCommand.setCustomTag(String.valueOf(id));
+			ListServiceModuleAppsResponse app = portalService.listServiceModuleAppsWithConditon(listServiceModuleAppsCommand);
+			if (app!=null && app.getServiceModuleApps().size()>0)
+				apps.addAll(app.getServiceModuleApps());
 		}
-
-		if(namespaceId == 999983) {
-			EbeiPmTaskHandle handler = PlatformContext.getComponent(PmTaskHandle.PMTASK_PREFIX + PmTaskHandle.EBEI);
-			CategoryDTO dto = handler.createCategoryDTO();
-			Category category = ConvertHelper.convert(dto, Category.class);
-			categories.add(category);
-		}
-
-		return categories.stream().map(c -> {
+		return apps.stream().map(c -> {
 			FlowServiceTypeDTO dto = new FlowServiceTypeDTO();
 			dto.setId(c.getId());
 			dto.setNamespaceId(namespaceId);

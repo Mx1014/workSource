@@ -9,6 +9,7 @@ import javax.validation.constraints.NotNull;
  *     <li>systemId: systemId</li>
  *     <li>status: status</li>
  *     <li>pageAnchor: 锚点</li>
+ *     <li>namespaceId: namespaceId</li>
  *     <li>pageSize: pageSize</li>
  * </ul>
  */
@@ -18,6 +19,7 @@ public class ListPointGoodsCommand {
     private Long systemId;
     private Byte status;
     private Long pageAnchor;
+    private Integer namespaceId;
     private Integer pageSize;
 
     public Long getSystemId() {
@@ -50,6 +52,14 @@ public class ListPointGoodsCommand {
 
     public void setStatus(Byte status) {
         this.status = status;
+    }
+
+    public Integer getNamespaceId() {
+        return namespaceId;
+    }
+
+    public void setNamespaceId(Integer namespaceId) {
+        this.namespaceId = namespaceId;
     }
 
     @Override

@@ -39,6 +39,16 @@ public class UpdateWarehouseCommand {
 
     private Byte status;
 
+    private Long communityId;
+
+    public Long getCommunityId() {
+        return communityId;
+    }
+
+    public void setCommunityId(Long communityId) {
+        this.communityId = communityId;
+    }
+
     public String getContact() {
         return contact;
     }

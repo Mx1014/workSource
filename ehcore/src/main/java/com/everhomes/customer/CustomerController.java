@@ -121,6 +121,19 @@ public class CustomerController extends ControllerBase {
     @RequestMapping("searchEnterpriseCustomer")
     @RestReturn(value = SearchEnterpriseCustomerResponse.class)
     public RestResponse searchEnterpriseCustomer(@Valid SearchEnterpriseCustomerCommand cmd) {
+        RestResponse response = new RestResponse(customerService.queryEnterpriseCustomers(cmd));
+        response.setErrorCode(ErrorCodes.SUCCESS);
+        response.setErrorDescription("OK");
+        return response;
+    }
+
+    /**
+     * <b>URL: /customer/searchEnterpriseCustomerWithoutAuth</b>
+     * <p>列出企业客户（不进行权限校验）</p>
+     */
+    @RequestMapping("searchEnterpriseCustomerWithoutAuth")
+    @RestReturn(value = SearchEnterpriseCustomerResponse.class)
+    public RestResponse searchEnterpriseCustomerWithoutAuth(@Valid SearchEnterpriseCustomerCommand cmd) {
         RestResponse response = new RestResponse(enterpriseCustomerSearcher.queryEnterpriseCustomers(cmd));
         response.setErrorCode(ErrorCodes.SUCCESS);
         response.setErrorDescription("OK");
@@ -1256,6 +1269,19 @@ public class CustomerController extends ControllerBase {
     @RestReturn(value = CustomerEntryInfoDTO.class, collection = true)
     public RestResponse listCustomerEntryInfos(@Valid ListCustomerEntryInfosCommand cmd) {
         RestResponse response = new RestResponse(customerService.listCustomerEntryInfos(cmd));
+        response.setErrorCode(ErrorCodes.SUCCESS);
+        response.setErrorDescription("OK");
+        return response;
+    }
+
+    /**
+     * <b>URL: /customer/listCustomerEntryInfosWithoutAuth</b>
+     * <p>列出入驻信息(无权限)</p>
+     */
+    @RequestMapping("listCustomerEntryInfosWithoutAuth")
+    @RestReturn(value = CustomerEntryInfoDTO.class, collection = true)
+    public RestResponse listCustomerEntryInfosWithoutAuth(@Valid ListCustomerEntryInfosCommand cmd) {
+        RestResponse response = new RestResponse(customerService.listCustomerEntryInfosWithoutAuth(cmd));
         response.setErrorCode(ErrorCodes.SUCCESS);
         response.setErrorDescription("OK");
         return response;

@@ -25,29 +25,29 @@ import java.util.List;
 @Repository
 public class PointTutorialToPointRuleMappingProviderImpl implements PointTutorialToPointRuleMappingProvider {
 
-	@Autowired
-	private DbProvider dbProvider;
+    @Autowired
+    private DbProvider dbProvider;
 
-	@Autowired
-	private SequenceProvider sequenceProvider;
+    @Autowired
+    private SequenceProvider sequenceProvider;
 
-	@Override
-	public void createPointTutorialToPointRuleMapping(PointTutorialToPointRuleMapping pointTutorialToPointRuleMapping) {
-		Long id = sequenceProvider.getNextSequence(NameMapper.getSequenceDomainFromTablePojo(EhPointTutorialToPointRuleMappings.class));
-		pointTutorialToPointRuleMapping.setId(id);
-		pointTutorialToPointRuleMapping.setCreateTime(DateUtils.currentTimestamp());
-		// pointTutorialToPointRuleMapping.setCreatorUid(UserContext.currentUserId());
-		rwDao().insert(pointTutorialToPointRuleMapping);
-		DaoHelper.publishDaoAction(DaoAction.CREATE, EhPointTutorialToPointRuleMappings.class, id);
-	}
+    @Override
+    public void createPointTutorialToPointRuleMapping(PointTutorialToPointRuleMapping pointTutorialToPointRuleMapping) {
+        Long id = sequenceProvider.getNextSequence(NameMapper.getSequenceDomainFromTablePojo(EhPointTutorialToPointRuleMappings.class));
+        pointTutorialToPointRuleMapping.setId(id);
+        pointTutorialToPointRuleMapping.setCreateTime(DateUtils.currentTimestamp());
+        // pointTutorialToPointRuleMapping.setCreatorUid(UserContext.currentUserId());
+        rwDao().insert(pointTutorialToPointRuleMapping);
+        DaoHelper.publishDaoAction(DaoAction.CREATE, EhPointTutorialToPointRuleMappings.class, id);
+    }
 
-	@Override
-	public void updatePointTutorialToPointRuleMapping(PointTutorialToPointRuleMapping pointTutorialToPointRuleMapping) {
-		// pointTutorialToPointRuleMapping.setUpdateTime(DateUtils.currentTimestamp());
-		// pointTutorialToPointRuleMapping.setUpdateUid(UserContext.currentUserId());
+    @Override
+    public void updatePointTutorialToPointRuleMapping(PointTutorialToPointRuleMapping pointTutorialToPointRuleMapping) {
+        // pointTutorialToPointRuleMapping.setUpdateTime(DateUtils.currentTimestamp());
+        // pointTutorialToPointRuleMapping.setUpdateUid(UserContext.currentUserId());
         rwDao().update(pointTutorialToPointRuleMapping);
-		DaoHelper.publishDaoAction(DaoAction.MODIFY, EhPointTutorialToPointRuleMappings.class, pointTutorialToPointRuleMapping.getId());
-	}
+        DaoHelper.publishDaoAction(DaoAction.MODIFY, EhPointTutorialToPointRuleMappings.class, pointTutorialToPointRuleMapping.getId());
+    }
 
     @Override
     public List<PointTutorialToPointRuleMapping> query(ListingLocator locator, int count, ListingQueryBuilderCallback callback) {
@@ -58,7 +58,7 @@ public class PointTutorialToPointRuleMappingProviderImpl implements PointTutoria
             callback.buildCondition(locator, query);
         }
         if (locator.getAnchor() != null) {
-            query.addConditions(t.ID.lt(locator.getAnchor()));
+            query.addConditions(t.ID.le(locator.getAnchor()));
         }
         if (count > 0) {
             query.addLimit(count + 1);
@@ -75,10 +75,10 @@ public class PointTutorialToPointRuleMappingProviderImpl implements PointTutoria
         return list;
     }
 
-	@Override
-	public PointTutorialToPointRuleMapping findById(Long id) {
-		return ConvertHelper.convert(dao().findById(id), PointTutorialToPointRuleMapping.class);
-	}
+    @Override
+    public PointTutorialToPointRuleMapping findById(Long id) {
+        return ConvertHelper.convert(dao().findById(id), PointTutorialToPointRuleMapping.class);
+    }
 
     @Override
     public List<PointTutorialToPointRuleMapping> listMappings(Long tutorialId, int pageSize, ListingLocator locator) {
@@ -111,12 +111,12 @@ public class PointTutorialToPointRuleMappingProviderImpl implements PointTutoria
     private EhPointTutorialToPointRuleMappingsDao rwDao() {
         DSLContext context = dbProvider.getDslContext(AccessSpec.readWrite());
         return new EhPointTutorialToPointRuleMappingsDao(context.configuration());
-	}
+    }
 
-	private EhPointTutorialToPointRuleMappingsDao dao() {
+    private EhPointTutorialToPointRuleMappingsDao dao() {
         DSLContext context = dbProvider.getDslContext(AccessSpec.readOnly());
         return new EhPointTutorialToPointRuleMappingsDao(context.configuration());
-	}
+    }
 
     private DSLContext context() {
         return dbProvider.getDslContext(AccessSpec.readOnly());

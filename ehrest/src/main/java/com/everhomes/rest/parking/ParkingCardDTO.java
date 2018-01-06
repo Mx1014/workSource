@@ -3,7 +3,7 @@ package com.everhomes.rest.parking;
 import com.everhomes.util.StringHelper;
 
 /**
- * <ul>停车卡信息。由于停车卡在系统属于一个虚拟概念，在不同厂商不一样，如在博思高厂商则有一个卡对应，而在ETCP厂商则有车位来对应。
+ * <ul>
  * <li>ownerType: 归属的类型，{@link com.everhomes.rest.parking.ParkingOwnerType}</li>
  * <li>ownerId: 归属的ID，如小区ID</li>
  * <li>parkingLotId: 停车场ID</li>
@@ -13,19 +13,21 @@ import com.everhomes.util.StringHelper;
  * <li>plateOwnerPhone: 车主手机号</li>
  * <li>cardTypeId: 卡类型id</li>
  * <li>cardType: 卡类型名称</li>
- * <li>cardName: 卡名称</li>
  * <li>cardNumber: 卡号</li>
+ * <li>cardName: 卡名称</li>
  * <li>startTime: 开始时间</li>
  * <li>endTime: 到期时间</li>
+ * <li>isValid: isValid</li>
  * <li>freeAmount: 免费金额</li>
- * <li>isSupportOnlinePaid: 是否支持线上支付</li>
+ * <li>isSupportOnlinePaid: 是否支持线上支付 {@link ParkingConfigFlag}</li>
+ * <li>cardStatus: cardStatus {@link ParkingCardStatus}</li>
  * </ul>
  */
 public class ParkingCardDTO {
-    private String ownerType;
-    private Long ownerId;
-    private Long parkingLotId;
-    private String vendorName;
+	private String ownerType;
+	private Long ownerId;
+	private Long parkingLotId;
+	private String vendorName;
 	private String plateNumber;
 	private String plateOwnerName;
 	private String plateOwnerPhone;
@@ -37,14 +39,14 @@ public class ParkingCardDTO {
 	private Long endTime;
 	@Deprecated
 	private Boolean isValid;
-	
-    private String freeAmount;
-    private Byte isSupportOnlinePaid;
 
-    private Byte cardStatus;
+	private String freeAmount;
+	private Byte isSupportOnlinePaid;
+
+	private Byte cardStatus;
 
 	public ParkingCardDTO() {
-	    
+
 	}
 
 	public Byte getCardStatus() {
@@ -56,68 +58,68 @@ public class ParkingCardDTO {
 	}
 
 	public String getOwnerType() {
-        return ownerType;
-    }
+		return ownerType;
+	}
 
-    public void setOwnerType(String ownerType) {
-        this.ownerType = ownerType;
-    }
+	public void setOwnerType(String ownerType) {
+		this.ownerType = ownerType;
+	}
 
-    public Long getOwnerId() {
-        return ownerId;
-    }
+	public Long getOwnerId() {
+		return ownerId;
+	}
 
-    public void setOwnerId(Long ownerId) {
-        this.ownerId = ownerId;
-    }
+	public void setOwnerId(Long ownerId) {
+		this.ownerId = ownerId;
+	}
 
-    public Long getParkingLotId() {
-        return parkingLotId;
-    }
+	public Long getParkingLotId() {
+		return parkingLotId;
+	}
 
-    public void setParkingLotId(Long parkingLotId) {
-        this.parkingLotId = parkingLotId;
-    }
+	public void setParkingLotId(Long parkingLotId) {
+		this.parkingLotId = parkingLotId;
+	}
 
-    public String getVendorName() {
-        return vendorName;
-    }
+	public String getVendorName() {
+		return vendorName;
+	}
 
-    public void setVendorName(String vendorName) {
-        this.vendorName = vendorName;
-    }
+	public void setVendorName(String vendorName) {
+		this.vendorName = vendorName;
+	}
 
-    public String getPlateNumber() {
-        return plateNumber;
-    }
+	public String getPlateNumber() {
+		return plateNumber;
+	}
 
-    public void setPlateNumber(String plateNumber) {
-        this.plateNumber = plateNumber;
-    }
+	public void setPlateNumber(String plateNumber) {
+		this.plateNumber = plateNumber;
+	}
 
-    public String getPlateOwnerName() {
-        return plateOwnerName;
-    }
+	public String getPlateOwnerName() {
+		return plateOwnerName;
+	}
 
-    public void setPlateOwnerName(String plateOwnerName) {
-        this.plateOwnerName = plateOwnerName;
-    }
+	public void setPlateOwnerName(String plateOwnerName) {
+		this.plateOwnerName = plateOwnerName;
+	}
 
-    public String getPlateOwnerPhone() {
-        return plateOwnerPhone;
-    }
+	public String getPlateOwnerPhone() {
+		return plateOwnerPhone;
+	}
 
-    public void setPlateOwnerPhone(String plateOwnerPhone) {
-        this.plateOwnerPhone = plateOwnerPhone;
-    }
+	public void setPlateOwnerPhone(String plateOwnerPhone) {
+		this.plateOwnerPhone = plateOwnerPhone;
+	}
 
-    public String getCardNumber() {
-        return cardNumber;
-    }
+	public String getCardNumber() {
+		return cardNumber;
+	}
 
-    public void setCardNumber(String cardNumber) {
-        this.cardNumber = cardNumber;
-    }
+	public void setCardNumber(String cardNumber) {
+		this.cardNumber = cardNumber;
+	}
 
 	public Long getStartTime() {
 		return startTime;
@@ -136,14 +138,15 @@ public class ParkingCardDTO {
 	}
 
 	@Override
-    public String toString() {
-        return StringHelper.toJsonString(this);
-    }
+	public String toString() {
+		return StringHelper.toJsonString(this);
+	}
 
 	@Deprecated
 	public Boolean getIsValid() {
 		return isValid;
 	}
+
 	@Deprecated
 	public void setIsValid(Boolean isValid) {
 		this.isValid = isValid;

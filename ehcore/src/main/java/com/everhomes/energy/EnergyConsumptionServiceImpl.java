@@ -8,6 +8,7 @@ import com.everhomes.bigcollection.BigCollectionProvider;
 import com.everhomes.bootstrap.PlatformContext;
 import com.everhomes.building.Building;
 import com.everhomes.building.BuildingProvider;
+import com.everhomes.category.Category;
 import com.everhomes.community.Community;
 import com.everhomes.community.CommunityProvider;
 import com.everhomes.configuration.ConfigConstants;
@@ -27,17 +28,21 @@ import com.everhomes.module.ServiceModuleService;
 import com.everhomes.organization.*;
 import com.everhomes.pmNotify.PmNotifyRecord;
 import com.everhomes.pmNotify.PmNotifyService;
+import com.everhomes.portal.PortalService;
 import com.everhomes.repeat.RepeatService;
 import com.everhomes.repeat.RepeatSettings;
 import com.everhomes.rest.acl.PrivilegeConstants;
+import com.everhomes.rest.acl.PrivilegeServiceErrorCode;
 import com.everhomes.rest.address.CommunityDTO;
 import com.everhomes.rest.approval.CommonStatus;
 import com.everhomes.rest.approval.MeterFormulaVariable;
 import com.everhomes.rest.approval.TrueOrFalseFlag;
 import com.everhomes.rest.common.ImportFileResponse;
+import com.everhomes.rest.common.ServiceModuleConstants;
 import com.everhomes.rest.customer.ImportEnterpriseCustomerDataDTO;
 import com.everhomes.rest.energy.*;
 import com.everhomes.rest.equipment.ExecuteGroupAndPosition;
+import com.everhomes.rest.launchpad.ActionType;
 import com.everhomes.rest.module.ListUserRelatedProjectByModuleCommand;
 import com.everhomes.rest.organization.*;
 import com.everhomes.rest.pmNotify.*;
@@ -45,6 +50,8 @@ import com.everhomes.rest.pmtask.ListAuthorizationCommunityByUserResponse;
 import com.everhomes.rest.pmtask.ListAuthorizationCommunityCommand;
 import com.everhomes.rest.pmtask.PmTaskCheckPrivilegeFlag;
 import com.everhomes.rest.pmtask.PmTaskErrorCode;
+import com.everhomes.rest.portal.ListServiceModuleAppsCommand;
+import com.everhomes.rest.portal.ListServiceModuleAppsResponse;
 import com.everhomes.rest.repeat.RepeatServiceErrorCode;
 import com.everhomes.rest.repeat.RepeatSettingStatus;
 import com.everhomes.rest.repeat.RepeatSettingsDTO;
@@ -265,8 +272,33 @@ public class EnergyConsumptionServiceImpl implements EnergyConsumptionService {
     @Autowired
     private ImportFileService importFileService;
 
+    @Autowired
+    private EnergyMeterCategoryMapProvider energyMeterCategoryMapProvider;
+
+    @Autowired
+    private EnergyMeterFormulaMapProvider energyMeterFormulaMapProvider;
+
     static final String TASK_EXECUTE = "energyTask.isexecute";
     final StringRedisSerializer stringRedisSerializer = new StringRedisSerializer();
+
+    @Autowired
+    private PortalService portalService;
+
+    private void checkEnergyAuth(Integer namespaceId, Long privilegeId, Long orgId, Long communityId) {
+        ListServiceModuleAppsCommand cmd = new ListServiceModuleAppsCommand();
+        cmd.setNamespaceId(namespaceId);
+        cmd.setModuleId(ServiceModuleConstants.ENERGY_MODULE);
+        cmd.setActionType(ActionType.OFFICIAL_URL.getCode());
+        ListServiceModuleAppsResponse apps = portalService.listServiceModuleAppsWithConditon(cmd);
+        Long appId = apps.getServiceModuleApps().get(0).getId();
+        if(!userPrivilegeMgr.checkUserPrivilege(UserContext.currentUserId(), EntityType.ORGANIZATIONS.getCode(), orgId,
+                orgId, privilegeId, appId, null, communityId)) {
+            LOGGER.error("Permission is prohibited, namespaceId={}, orgId={}, ownerType={}, ownerId={}, privilegeId={}",
+                    namespaceId, orgId, EntityType.COMMUNITY.getCode(), communityId, privilegeId);
+            throw RuntimeErrorException.errorWith(PrivilegeServiceErrorCode.SCOPE, PrivilegeServiceErrorCode.ERROR_CHECK_APP_PRIVILEGE,
+                    "check user privilege error");
+        }
+    }
 
     @PostConstruct
     public void init() {
@@ -358,7 +390,12 @@ public class EnergyConsumptionServiceImpl implements EnergyConsumptionService {
     public EnergyMeterDTO createEnergyMeter(CreateEnergyMeterCommand cmd) {
 //        validate(cmd);
 //        checkCurrentUserNotInOrg(cmd.getOwnerId());
-        userPrivilegeMgr.checkCurrentUserAuthority(EntityType.COMMUNITY.getCode(), cmd.getCommunityId(), cmd.getOwnerId(), PrivilegeConstants.METER_CREATE);
+        checkEnergyAuth(cmd.getNamespaceId(), PrivilegeConstants.METER_CREATE, cmd.getOwnerId(), cmd.getCommunityId());
+//        if(cmd.getCommunityId() == null) {
+//            userPrivilegeMgr.checkCurrentUserAuthority(null, null, cmd.getOwnerId(), PrivilegeConstants.METER_CREATE);
+//        } else {
+//            userPrivilegeMgr.checkCurrentUserAuthority(EntityType.COMMUNITY.getCode(), cmd.getCommunityId(), cmd.getOwnerId(), PrivilegeConstants.METER_CREATE);
+//        }
 
         checkEnergyMeterUnique(null, cmd.getCommunityId(), cmd.getMeterNumber(), cmd.getName());
 
@@ -413,10 +450,10 @@ public class EnergyConsumptionServiceImpl implements EnergyConsumptionService {
             updateCmd.setCalculationType(cmd.getCalculationType());
             updateCmd.setConfigId(cmd.getConfigId());
             updateCmd.setNamespaceId(UserContext.getCurrentNamespaceId(cmd.getNamespaceId()));
-            this.insertMeterSettingLog(EnergyMeterSettingType.PRICE, updateCmd);
-            this.insertMeterSettingLog(EnergyMeterSettingType.RATE, updateCmd);
-            this.insertMeterSettingLog(EnergyMeterSettingType.AMOUNT_FORMULA, updateCmd);
-            this.insertMeterSettingLog(EnergyMeterSettingType.COST_FORMULA, updateCmd);
+            this.insertMeterSettingLog(EnergyMeterSettingType.PRICE, updateCmd, meter.getCommunityId());
+            this.insertMeterSettingLog(EnergyMeterSettingType.RATE, updateCmd, meter.getCommunityId());
+            this.insertMeterSettingLog(EnergyMeterSettingType.AMOUNT_FORMULA, updateCmd, meter.getCommunityId());
+            this.insertMeterSettingLog(EnergyMeterSettingType.COST_FORMULA, updateCmd, meter.getCommunityId());
 
             // 创建一条初始读表记录
             ReadEnergyMeterCommand readEnergyMeterCmd = new ReadEnergyMeterCommand();
@@ -674,7 +711,8 @@ public class EnergyConsumptionServiceImpl implements EnergyConsumptionService {
 //        checkCurrentUserNotInOrg(cmd.getOrganizationId());
         Tuple<EnergyMeter, Boolean> result = coordinationProvider.getNamedLock(CoordinationLocks.ENERGY_METER.getCode() + cmd.getMeterId()).enter(() -> {
             EnergyMeter meter = this.findMeterById(cmd.getMeterId(),cmd.getNamespaceId());
-            userPrivilegeMgr.checkCurrentUserAuthority(EntityType.COMMUNITY.getCode(), meter.getCommunityId(), cmd.getOrganizationId(), PrivilegeConstants.METER_CREATE);
+//            userPrivilegeMgr.checkCurrentUserAuthority(EntityType.COMMUNITY.getCode(), meter.getCommunityId(), cmd.getOrganizationId(), PrivilegeConstants.METER_CREATE);
+            checkEnergyAuth(cmd.getNamespaceId(), PrivilegeConstants.METER_CREATE, cmd.getOrganizationId(),  meter.getCommunityId());
             checkEnergyMeterUnique(meter.getId(), meter.getCommunityId(), cmd.getMeterNumber(), cmd.getName());
             if (cmd.getName() != null) {
                 meter.setName(cmd.getName());
@@ -682,19 +720,19 @@ public class EnergyConsumptionServiceImpl implements EnergyConsumptionService {
             if (cmd.getMeterNumber() != null) {
                 meter.setMeterNumber(cmd.getMeterNumber());
             }
-            userPrivilegeMgr.checkCurrentUserAuthority(EntityType.COMMUNITY.getCode(), meter.getCommunityId(), meter.getOwnerId(), PrivilegeConstants.METER_CREATE);
+//            userPrivilegeMgr.checkCurrentUserAuthority(EntityType.COMMUNITY.getCode(), meter.getCommunityId(), meter.getOwnerId(), PrivilegeConstants.METER_CREATE);
             dbProvider.execute(r -> {
                 if (cmd.getPrice() != null || cmd.getConfigId() != null) {
-                    this.insertMeterSettingLog(EnergyMeterSettingType.PRICE, cmd);
+                    this.insertMeterSettingLog(EnergyMeterSettingType.PRICE, cmd, meter.getCommunityId());
                 }
                 if (cmd.getRate() != null) {
-                    this.insertMeterSettingLog(EnergyMeterSettingType.RATE, cmd);
+                    this.insertMeterSettingLog(EnergyMeterSettingType.RATE, cmd, meter.getCommunityId());
                 }
                 if (cmd.getAmountFormulaId() != null) {
-                    this.insertMeterSettingLog(EnergyMeterSettingType.AMOUNT_FORMULA, cmd);
+                    this.insertMeterSettingLog(EnergyMeterSettingType.AMOUNT_FORMULA, cmd, meter.getCommunityId());
                 }
                 if (cmd.getCostFormulaId() != null) {
-                    this.insertMeterSettingLog(EnergyMeterSettingType.COST_FORMULA, cmd);
+                    this.insertMeterSettingLog(EnergyMeterSettingType.COST_FORMULA, cmd, meter.getCommunityId());
                 }
                 meterProvider.updateEnergyMeter(meter);
                 processEnergyMeterAddresses(meter.getId(), cmd.getAddresses());
@@ -706,7 +744,7 @@ public class EnergyConsumptionServiceImpl implements EnergyConsumptionService {
         return result.second() ? toEnergyMeterDTO(result.first(),cmd.getNamespaceId()) : new EnergyMeterDTO();
     }
 
-    private void insertMeterSettingLog(EnergyMeterSettingType settingType, UpdateEnergyMeterCommand cmd) {
+    private void insertMeterSettingLog(EnergyMeterSettingType settingType, UpdateEnergyMeterCommand cmd, Long communityId) {
         checkUpdateCommand(cmd);
         EnergyMeterSettingLog log = new EnergyMeterSettingLog();
         log.setStatus(EnergyCommonStatus.ACTIVE.getCode());
@@ -716,6 +754,7 @@ public class EnergyConsumptionServiceImpl implements EnergyConsumptionService {
             log.setEndTime(new Timestamp(cmd.getEndTime()));
         }
         log.setMeterId(cmd.getMeterId());
+        log.setCommunityId(communityId);
         log.setSettingType(settingType.getCode());
         log.setNamespaceId(UserContext.getCurrentNamespaceId(cmd.getNamespaceId()));
         switch (settingType) {
@@ -760,7 +799,8 @@ public class EnergyConsumptionServiceImpl implements EnergyConsumptionService {
     public SearchEnergyMeterResponse searchEnergyMeter(SearchEnergyMeterCommand cmd) {
         validate(cmd);
 //        checkCurrentUserNotInOrg(cmd.getOrganizationId());
-        userPrivilegeMgr.checkCurrentUserAuthority(EntityType.COMMUNITY.getCode(), cmd.getCommunityId(), cmd.getOrganizationId(), PrivilegeConstants.METER_LIST);
+//        userPrivilegeMgr.checkCurrentUserAuthority(EntityType.COMMUNITY.getCode(), cmd.getCommunityId(), cmd.getOrganizationId(), PrivilegeConstants.METER_LIST);
+        checkEnergyAuth(cmd.getNamespaceId(), PrivilegeConstants.METER_LIST, cmd.getOrganizationId(),  cmd.getCommunityId());
         return meterSearcher.queryMeters(cmd);
     }
 
@@ -768,7 +808,8 @@ public class EnergyConsumptionServiceImpl implements EnergyConsumptionService {
     public void changeEnergyMeter(ChangeEnergyMeterCommand cmd) {
         validate(cmd);
 //        checkCurrentUserNotInOrg(cmd.getOrganizationId());
-        userPrivilegeMgr.checkCurrentUserAuthority(EntityType.COMMUNITY.getCode(), cmd.getCommunityId(), cmd.getOrganizationId(), PrivilegeConstants.METER_CHANGE);
+//        userPrivilegeMgr.checkCurrentUserAuthority(EntityType.COMMUNITY.getCode(), cmd.getCommunityId(), cmd.getOrganizationId(), PrivilegeConstants.METER_CHANGE);
+        checkEnergyAuth(cmd.getNamespaceId(), PrivilegeConstants.METER_CHANGE, cmd.getOrganizationId(),  cmd.getCommunityId());
         EnergyMeter meter = this.findMeterById(cmd.getMeterId(),cmd.getNamespaceId());
 
         // 创建读表记录
@@ -815,7 +856,8 @@ public class EnergyConsumptionServiceImpl implements EnergyConsumptionService {
     public void updateEnergyMeterStatus(UpdateEnergyMeterStatusCommand cmd) {
         validate(cmd);
 //        checkCurrentUserNotInOrg(cmd.getOrganizationId());
-        userPrivilegeMgr.checkCurrentUserAuthority(EntityType.COMMUNITY.getCode(), cmd.getCommunityId(), cmd.getOrganizationId(), PrivilegeConstants.METER_INACTIVE);
+//        userPrivilegeMgr.checkCurrentUserAuthority(EntityType.COMMUNITY.getCode(), cmd.getCommunityId(), cmd.getOrganizationId(), PrivilegeConstants.METER_INACTIVE);
+        checkEnergyAuth(cmd.getNamespaceId(), PrivilegeConstants.METER_INACTIVE, cmd.getOrganizationId(),  cmd.getCommunityId());
         coordinationProvider.getNamedLock(CoordinationLocks.ENERGY_METER.getCode() + cmd.getMeterId()).tryEnter(() -> {
             EnergyMeter meter = this.findMeterById(cmd.getMeterId(),cmd.getNamespaceId());
             meter.setStatus(cmd.getStatus());
@@ -853,7 +895,8 @@ public class EnergyConsumptionServiceImpl implements EnergyConsumptionService {
     public EnergyMeterReadingLogDTO readEnergyMeter(ReadEnergyMeterCommand cmd) {
         validate(cmd);
 //        checkCurrentUserNotInOrg(cmd.getOrganizationId());
-        userPrivilegeMgr.checkCurrentUserAuthority(EntityType.COMMUNITY.getCode(), cmd.getCommunityId(), cmd.getOrganizationId(), PrivilegeConstants.METER_READ);
+//        userPrivilegeMgr.checkCurrentUserAuthority(EntityType.COMMUNITY.getCode(), cmd.getCommunityId(), cmd.getOrganizationId(), PrivilegeConstants.METER_READ);
+        checkEnergyAuth(cmd.getNamespaceId(), PrivilegeConstants.ENERGY_SETTING, cmd.getOrganizationId(),  cmd.getCommunityId());
         EnergyMeter meter = this.findMeterById(cmd.getMeterId(),cmd.getNamespaceId());
 
         // 读数大于最大量程
@@ -879,6 +922,7 @@ public class EnergyConsumptionServiceImpl implements EnergyConsumptionService {
             return true;
         });
         readingLogSearcher.feedDoc(log);
+        meterSearcher.feedDoc(meter);
         return toEnergyMeterReadingLogDTO(log);
     }
 
@@ -898,7 +942,8 @@ public class EnergyConsumptionServiceImpl implements EnergyConsumptionService {
     public void batchUpdateEnergyMeterSettings(BatchUpdateEnergyMeterSettingsCommand cmd) {
         validate(cmd);
 ////        checkCurrentUserNotInOrg(cmd.getOrganizationId());
-        userPrivilegeMgr.checkCurrentUserAuthority(EntityType.COMMUNITY.getCode(), cmd.getCommunityId(), cmd.getOrganizationId(), PrivilegeConstants.METER_BATCHUPDATE);
+//        userPrivilegeMgr.checkCurrentUserAuthority(EntityType.COMMUNITY.getCode(), cmd.getCommunityId(), cmd.getOrganizationId(), PrivilegeConstants.METER_BATCHUPDATE);
+        checkEnergyAuth(cmd.getNamespaceId(), PrivilegeConstants.METER_BATCHUPDATE, cmd.getOrganizationId(),  cmd.getCommunityId());
         if (cmd.getMeterIds() != null) {
             List<EnergyMeter> meters = meterProvider.listByIds(UserContext.getCurrentNamespaceId(cmd.getNamespaceId()), cmd.getMeterIds());
             if (meters != null && meters.size() > 0) {
@@ -921,7 +966,7 @@ public class EnergyConsumptionServiceImpl implements EnergyConsumptionService {
                         updateCmd.setRate(cmd.getRate());
                         updateCmd.setStartTime(cmd.getRateStart());
                         updateCmd.setEndTime(cmd.getRateEnd());
-                        this.insertMeterSettingLog(EnergyMeterSettingType.RATE, updateCmd);
+                        this.insertMeterSettingLog(EnergyMeterSettingType.RATE, updateCmd, r.getCommunityId());
                         r.setRate(cmd.getRate());
                     }
 //                    // 费用
@@ -937,7 +982,7 @@ public class EnergyConsumptionServiceImpl implements EnergyConsumptionService {
                         updateCmd.setAmountFormulaId(cmd.getAmountFormulaId());
                         updateCmd.setStartTime(cmd.getAmountFormulaStart());
                         updateCmd.setEndTime(cmd.getAmountFormulaEnd());
-                        this.insertMeterSettingLog(EnergyMeterSettingType.AMOUNT_FORMULA, updateCmd);
+                        this.insertMeterSettingLog(EnergyMeterSettingType.AMOUNT_FORMULA, updateCmd, r.getCommunityId());
                         r.setAmountFormulaId(cmd.getAmountFormulaId());
                     }
                     meterProvider.updateEnergyMeter(r);
@@ -950,7 +995,8 @@ public class EnergyConsumptionServiceImpl implements EnergyConsumptionService {
     public SearchEnergyMeterReadingLogsResponse searchEnergyMeterReadingLogs(SearchEnergyMeterReadingLogsCommand cmd) {
         validate(cmd);
 //        checkCurrentUserNotInOrg(cmd.getOrganizationId());
-        userPrivilegeMgr.checkCurrentUserAuthority(EntityType.COMMUNITY.getCode(), cmd.getCommunityId(), cmd.getOrganizationId(), PrivilegeConstants.METER_READING_SEARCH);
+//        userPrivilegeMgr.checkCurrentUserAuthority(EntityType.COMMUNITY.getCode(), cmd.getCommunityId(), cmd.getOrganizationId(), PrivilegeConstants.METER_READING_SEARCH);
+        checkEnergyAuth(cmd.getNamespaceId(), PrivilegeConstants.METER_READING_SEARCH, cmd.getOrganizationId(),  cmd.getCommunityId());
         return readingLogSearcher.queryMeterReadingLogs(cmd);
     }
 
@@ -958,7 +1004,8 @@ public class EnergyConsumptionServiceImpl implements EnergyConsumptionService {
     public void deleteEnergyMeterReadingLog(DeleteEnergyMeterReadingLogCommand cmd) {
         validate(cmd);
 //        checkCurrentUserNotInOrg(cmd.getOrganizationId());
-        userPrivilegeMgr.checkCurrentUserAuthority(EntityType.COMMUNITY.getCode(), cmd.getCommunityId(), cmd.getOrganizationId(), PrivilegeConstants.METER_READING_DELETE);
+        checkEnergyAuth(cmd.getNamespaceId(), PrivilegeConstants.METER_READING_DELETE, cmd.getOrganizationId(),  cmd.getCommunityId());
+//        userPrivilegeMgr.checkCurrentUserAuthority(EntityType.COMMUNITY.getCode(), cmd.getCommunityId(), cmd.getOrganizationId(), PrivilegeConstants.METER_READING_DELETE);
         EnergyMeterReadingLog log = meterReadingLogProvider.getEnergyMeterReadingLogById(cmd.getLogId());
         if (log == null) {
             LOGGER.error("The energy meter reading log is not exist, id = {}", cmd.getLogId());
@@ -1058,7 +1105,13 @@ public class EnergyConsumptionServiceImpl implements EnergyConsumptionService {
     public EnergyMeterFormulaDTO createEnergyMeterFormula(CreateEnergyMeterFormulaCommand cmd) {
         validate(cmd);
 //        checkCurrentUserNotInOrg(cmd.getOwnerId());
-        userPrivilegeMgr.checkCurrentUserAuthority(EntityType.COMMUNITY.getCode(), cmd.getCommunityId(), cmd.getOwnerId(), PrivilegeConstants.ENERGY_SETTING);
+        checkEnergyAuth(cmd.getNamespaceId(), PrivilegeConstants.ENERGY_SETTING, cmd.getOwnerId(),  cmd.getCommunityId());
+//        if(cmd.getCommunityId() == null) {
+//            userPrivilegeMgr.checkCurrentUserAuthority(null, null, cmd.getOwnerId(), PrivilegeConstants.ENERGY_SETTING);
+//        } else {
+//            userPrivilegeMgr.checkCurrentUserAuthority(EntityType.COMMUNITY.getCode(), cmd.getCommunityId(), cmd.getOwnerId(), PrivilegeConstants.ENERGY_SETTING);
+//        }
+
         // 预处理公式的表达式
         String processedExpression = this.processFormulaExpression(cmd.getExpression());
         // 检查公式的合法性
@@ -1067,6 +1120,9 @@ public class EnergyConsumptionServiceImpl implements EnergyConsumptionService {
         EnergyMeterFormula formula = new EnergyMeterFormula();
         formula.setOwnerId(cmd.getOwnerId());
         formula.setOwnerType(cmd.getOwnerType());
+        if(cmd.getCommunityId() == null) {
+            formula.setCommunityId(0L);
+        }
         formula.setCommunityId(cmd.getCommunityId());
 
         formula.setStatus(EnergyCommonStatus.ACTIVE.getCode());
@@ -1080,6 +1136,22 @@ public class EnergyConsumptionServiceImpl implements EnergyConsumptionService {
         formula.setNamespaceId(UserContext.getCurrentNamespaceId(cmd.getNamespaceId()));
         formula.setDisplayExpression(cmd.getExpression());
         meterFormulaProvider.createEnergyMeterFormula(formula);
+        if(cmd.getCommunityId() == null) {
+            List<CommunityDTO> communitydtos = organizationService.listAllChildrenOrganizationCoummunities(cmd.getOwnerId());
+//            List<OrganizationCommunity> communities = organizationProvider.listOrganizationCommunities(cmd.getOwnerId());
+            if(communitydtos != null && communitydtos.size() > 0) {
+                Long uId = UserContext.currentUserId();
+                communitydtos.forEach(community -> {
+                    EnergyMeterFormulaMap map = new EnergyMeterFormulaMap();
+                    map.setOwnerId(cmd.getOwnerId());
+                    map.setNamespaceId(cmd.getNamespaceId());
+                    map.setCommunityId(community.getId());
+                    map.setFomularId(formula.getId());
+                    map.setCreatorUid(uId);
+                    energyMeterFormulaMapProvider.createEnergyMeterFormulaMap(map);
+                });
+            }
+        }
         return toEnergyMeterFormulaDTO(formula);
     }
 
@@ -1124,17 +1196,37 @@ public class EnergyConsumptionServiceImpl implements EnergyConsumptionService {
     public EnergyMeterCategoryDTO createEnergyMeterCategory(CreateEnergyMeterCategoryCommand cmd) {
         validate(cmd);
 //        checkCurrentUserNotInOrg(cmd.getOwnerId());
-        userPrivilegeMgr.checkCurrentUserAuthority(EntityType.COMMUNITY.getCode(), cmd.getCommunityId(), cmd.getOwnerId(), PrivilegeConstants.ENERGY_SETTING);
-        EnergyMeterCategory category = new EnergyMeterCategory();
-        category.setOwnerId(cmd.getOwnerId());
-        category.setOwnerType(cmd.getOwnerType());
-        category.setCommunityId(cmd.getCommunityId());
-        category.setNamespaceId(UserContext.getCurrentNamespaceId(cmd.getNamespaceId()));
-        category.setName(cmd.getName());
+        checkEnergyAuth(cmd.getNamespaceId(), PrivilegeConstants.ENERGY_SETTING, cmd.getOwnerId(),  cmd.getCommunityId());
+//        if(cmd.getCommunityId() == null) {
+//            userPrivilegeMgr.checkCurrentUserAuthority(null, null, cmd.getOwnerId(), PrivilegeConstants.ENERGY_SETTING);
+//        } else {
+//            userPrivilegeMgr.checkCurrentUserAuthority(EntityType.COMMUNITY.getCode(), cmd.getCommunityId(), cmd.getOwnerId(), PrivilegeConstants.ENERGY_SETTING);
+//        }
+
+        EnergyMeterCategory category = ConvertHelper.convert(cmd, EnergyMeterCategory.class);
+        if(cmd.getCommunityId() == null) {
+            category.setCommunityId(0L);
+        }
         category.setDeleteFlag(TrueOrFalseFlag.TRUE.getCode());
-        category.setCategoryType(cmd.getCategoryType());
         category.setStatus(EnergyCommonStatus.ACTIVE.getCode());
         meterCategoryProvider.createEnergyMeterCategory(category);
+        //全部里面建的自动关联各个项目 energy3.2
+        if(cmd.getCommunityId() == null) {
+            List<CommunityDTO> communitydtos = organizationService.listAllChildrenOrganizationCoummunities(cmd.getOwnerId());
+//            List<OrganizationCommunity> communities = organizationProvider.listOrganizationCommunities(cmd.getOwnerId());
+            if(communitydtos != null && communitydtos.size() > 0) {
+                Long uId = UserContext.currentUserId();
+                communitydtos.forEach(community -> {
+                    EnergyMeterCategoryMap map = new EnergyMeterCategoryMap();
+                    map.setOwnerId(cmd.getOwnerId());
+                    map.setNamespaceId(cmd.getNamespaceId());
+                    map.setCommunityId(community.getId());
+                    map.setCategoryId(category.getId());
+                    map.setCreatorUid(uId);
+                    energyMeterCategoryMapProvider.createEnergyMeterCategoryMap(map);
+                });
+            }
+        }
         return ConvertHelper.convert(category, EnergyMeterCategoryDTO.class);
     }
 
@@ -1142,7 +1234,12 @@ public class EnergyConsumptionServiceImpl implements EnergyConsumptionService {
     public EnergyMeterCategoryDTO updateEnergyMeterCategory(UpdateEnergyMeterCategoryCommand cmd) {
         validate(cmd);
 //        checkCurrentUserNotInOrg(cmd.getOrganizationId());
-        userPrivilegeMgr.checkCurrentUserAuthority(EntityType.COMMUNITY.getCode(), cmd.getCommunityId(), cmd.getOrganizationId(), PrivilegeConstants.ENERGY_SETTING);
+//        if(cmd.getCommunityId() == null) {
+//            userPrivilegeMgr.checkCurrentUserAuthority(null, null, cmd.getOrganizationId(), PrivilegeConstants.ENERGY_SETTING);
+//        } else {
+//            userPrivilegeMgr.checkCurrentUserAuthority(EntityType.COMMUNITY.getCode(), cmd.getCommunityId(), cmd.getOrganizationId(), PrivilegeConstants.ENERGY_SETTING);
+//        }
+        checkEnergyAuth(cmd.getNamespaceId(), PrivilegeConstants.ENERGY_SETTING, cmd.getOrganizationId(),  cmd.getCommunityId());
         Tuple<EnergyMeterCategory, Boolean> result = coordinationProvider.getNamedLock(CoordinationLocks.ENERGY_METER_CATEGORY.getCode() + cmd.getCategoryId()).enter(() -> {
             EnergyMeterCategory category = meterCategoryProvider.findById(UserContext.getCurrentNamespaceId(cmd.getNamespaceId()), cmd.getCategoryId());
             if (category != null) {
@@ -1158,17 +1255,43 @@ public class EnergyConsumptionServiceImpl implements EnergyConsumptionService {
     public void deleteEnergyMeterCategory(DeleteEnergyMeterCategoryCommand cmd) {
         validate(cmd);
 //        checkCurrentUserNotInOrg(cmd.getOrganizationId());
-        userPrivilegeMgr.checkCurrentUserAuthority(EntityType.COMMUNITY.getCode(), cmd.getCommunityId(), cmd.getOrganizationId(), PrivilegeConstants.ENERGY_SETTING);
+//        if(cmd.getCommunityId() == null) {
+//            userPrivilegeMgr.checkCurrentUserAuthority(null, null, cmd.getOrganizationId(), PrivilegeConstants.ENERGY_SETTING);
+//        } else {
+//            userPrivilegeMgr.checkCurrentUserAuthority(EntityType.COMMUNITY.getCode(), cmd.getCommunityId(), cmd.getOrganizationId(), PrivilegeConstants.ENERGY_SETTING);
+//        }
+        checkEnergyAuth(cmd.getNamespaceId(), PrivilegeConstants.ENERGY_SETTING, cmd.getOrganizationId(),  cmd.getCommunityId());
         coordinationProvider.getNamedLock(CoordinationLocks.ENERGY_METER_CATEGORY.getCode() + cmd.getCategoryId()).tryEnter(() -> {
             EnergyMeterCategory category = meterCategoryProvider.findById(UserContext.getCurrentNamespaceId(cmd.getNamespaceId()), cmd.getCategoryId());
+
             if (category != null) {
-                EnergyMeter meter = meterProvider.findAnyByCategoryId(UserContext.getCurrentNamespaceId(cmd.getNamespaceId()), category.getId());
-                if (meter != null) {
-                    LOGGER.info("Energy meter category has been reference, categoryId = {}", category.getId());
-                    throw errorWith(SCOPE, ERR_METER_CATEGORY_HAS_BEEN_REFERENCE, "Energy meter category has been reference");
+                //项目里删全部的 实质是解除关联关系
+                if((category.getCommunityId() == null || category.getCommunityId() == 0L) && cmd.getCommunityId() != null) {
+                    EnergyMeter meter = meterProvider.findAnyByCategoryId(UserContext.getCurrentNamespaceId(cmd.getNamespaceId()), cmd.getCommunityId(), category.getId());
+                    if (meter != null) {
+                        LOGGER.info("Energy meter category has been reference, categoryId = {}", category.getId());
+                        throw errorWith(SCOPE, ERR_METER_CATEGORY_HAS_BEEN_REFERENCE, "Energy meter category has been reference");
+                    }
+                    EnergyMeterCategoryMap map = energyMeterCategoryMapProvider.findEnergyMeterCategoryMap(cmd.getCommunityId(), cmd.getCategoryId());
+                    if(map != null) {
+                        map.setStatus(EnergyCommonStatus.INACTIVE.getCode());
+                        map.setOperatorUid(UserContext.currentUserId());
+                        map.setOperateTime(new Timestamp(DateHelper.currentGMTTime().getTime()));
+                        energyMeterCategoryMapProvider.updateEnergyMeterCategoryMap(map);
+                    }
+
+                } else {
+                    //在全部里删全部和项目的，项目里删自己的 都是直接置inactive
+                    EnergyMeter meter = meterProvider.findAnyByCategoryId(UserContext.getCurrentNamespaceId(cmd.getNamespaceId()), category.getId());
+                    if (meter != null) {
+                        LOGGER.info("Energy meter category has been reference, categoryId = {}", category.getId());
+                        throw errorWith(SCOPE, ERR_METER_CATEGORY_HAS_BEEN_REFERENCE, "Energy meter category has been reference");
+                    }
+                    category.setStatus(EnergyCommonStatus.INACTIVE.getCode());
+                    meterCategoryProvider.updateEnergyMeterCategory(category);
                 }
-                category.setStatus(EnergyCommonStatus.INACTIVE.getCode());
-                meterCategoryProvider.updateEnergyMeterCategory(category);
+
+
 //                meterCategoryProvider.deleteEnergyMeterCategory(category);
             }
         });
@@ -1178,8 +1301,8 @@ public class EnergyConsumptionServiceImpl implements EnergyConsumptionService {
     public ImportFileTaskDTO importEnergyMeter(ImportEnergyMeterCommand cmd, MultipartFile file, Long userId) {
         validate(cmd);
 //        checkCurrentUserNotInOrg(cmd.getOwnerId());
-        userPrivilegeMgr.checkCurrentUserAuthority(EntityType.COMMUNITY.getCode(), cmd.getCommunityId(), cmd.getOwnerId(), PrivilegeConstants.METER_IMPORT);
-
+//        userPrivilegeMgr.checkCurrentUserAuthority(EntityType.COMMUNITY.getCode(), cmd.getCommunityId(), cmd.getOwnerId(), PrivilegeConstants.METER_IMPORT);
+        checkEnergyAuth(cmd.getNamespaceId(), PrivilegeConstants.METER_IMPORT, cmd.getOwnerId(),  cmd.getCommunityId());
         ImportFileTask task = new ImportFileTask();
         try {
             //解析excel
@@ -1324,7 +1447,7 @@ public class EnergyConsumptionServiceImpl implements EnergyConsumptionService {
 
     private List<ImportFileResultLog<ImportEnergyMeterDataDTO>> importEnergyMeterData(ImportEnergyMeterCommand cmd, List<ImportEnergyMeterDataDTO> list, Long userId){
         List<ImportFileResultLog<ImportEnergyMeterDataDTO>> errorDataLogs = new ArrayList<>();
-        Integer namespaceId = UserContext.getCurrentNamespaceId();
+        Integer namespaceId = UserContext.getCurrentNamespaceId(cmd.getNamespaceId());
         list.forEach(str -> {
             ImportFileResultLog<ImportEnergyMeterDataDTO> log = new ImportFileResultLog<>(EnergyConsumptionServiceErrorCode.SCOPE);
             EnergyMeter meter = new EnergyMeter();
@@ -1464,10 +1587,10 @@ public class EnergyConsumptionServiceImpl implements EnergyConsumptionService {
                 updateCmd.setCalculationType(meter.getCalculationType());
                 updateCmd.setConfigId(meter.getConfigId());
                 updateCmd.setNamespaceId(UserContext.getCurrentNamespaceId(cmd.getNamespaceId()));
-                this.insertMeterSettingLog(EnergyMeterSettingType.PRICE, updateCmd);
-                this.insertMeterSettingLog(EnergyMeterSettingType.RATE, updateCmd);
-                this.insertMeterSettingLog(EnergyMeterSettingType.AMOUNT_FORMULA, updateCmd);
-                this.insertMeterSettingLog(EnergyMeterSettingType.COST_FORMULA, updateCmd);
+                this.insertMeterSettingLog(EnergyMeterSettingType.PRICE, updateCmd, meter.getCommunityId());
+                this.insertMeterSettingLog(EnergyMeterSettingType.RATE, updateCmd, meter.getCommunityId());
+                this.insertMeterSettingLog(EnergyMeterSettingType.AMOUNT_FORMULA, updateCmd, meter.getCommunityId());
+                this.insertMeterSettingLog(EnergyMeterSettingType.COST_FORMULA, updateCmd, meter.getCommunityId());
 
                 // 创建一条初始读表记录
                 ReadEnergyMeterCommand readEnergyMeterCmd = new ReadEnergyMeterCommand();
@@ -1586,7 +1709,8 @@ public class EnergyConsumptionServiceImpl implements EnergyConsumptionService {
 
     @Override
     public EnergyStatDTO getEnergyStatByDay(EnergyStatCommand cmd) {
-        userPrivilegeMgr.checkCurrentUserAuthority(EntityType.COMMUNITY.getCode(), cmd.getCommunityId(), cmd.getOrganizationId(), PrivilegeConstants.ENERGY_STAT_BY_DAY);
+        checkEnergyAuth(cmd.getNamespaceId(), PrivilegeConstants.ENERGY_STAT_BY_DAY, cmd.getOrganizationId(),  cmd.getCommunityId());
+//        userPrivilegeMgr.checkCurrentUserAuthority(EntityType.COMMUNITY.getCode(), cmd.getCommunityId(), cmd.getOrganizationId(), PrivilegeConstants.ENERGY_STAT_BY_DAY);
         //查所有符合条件的记录
         EnergyStatDTO result = new EnergyStatDTO();
         result.setBillDayStats(new ArrayList<>());
@@ -1816,7 +1940,8 @@ public class EnergyConsumptionServiceImpl implements EnergyConsumptionService {
 
     @Override
     public EnergyStatDTO getEnergyStatByMonth(EnergyStatCommand cmd)   {
-        userPrivilegeMgr.checkCurrentUserAuthority(EntityType.COMMUNITY.getCode(), cmd.getCommunityId(), cmd.getOrganizationId(), PrivilegeConstants.ENERGY_STAT_BY_MONTH);
+        checkEnergyAuth(cmd.getNamespaceId(), PrivilegeConstants.ENERGY_STAT_BY_MONTH, cmd.getOrganizationId(),  cmd.getCommunityId());
+//        userPrivilegeMgr.checkCurrentUserAuthority(EntityType.COMMUNITY.getCode(), cmd.getCommunityId(), cmd.getOrganizationId(), PrivilegeConstants.ENERGY_STAT_BY_MONTH);
         SimpleDateFormat dateStrSF = new SimpleDateFormat("yyyy年MM月");
 
         //TODO: check cmd
@@ -1970,8 +2095,8 @@ public class EnergyConsumptionServiceImpl implements EnergyConsumptionService {
 
     @Override
     public List<EnergyStatByYearDTO> getEnergyStatisticByYear(EnergyStatCommand cmd) {
-        userPrivilegeMgr.checkCurrentUserAuthority(EntityType.COMMUNITY.getCode(), cmd.getCommunityId(), cmd.getOrganizationId(), PrivilegeConstants.ENERGY_STAT_BY_YEAR);
-
+//        userPrivilegeMgr.checkCurrentUserAuthority(EntityType.COMMUNITY.getCode(), cmd.getCommunityId(), cmd.getOrganizationId(), PrivilegeConstants.ENERGY_STAT_BY_YEAR);
+        checkEnergyAuth(cmd.getNamespaceId(), PrivilegeConstants.ENERGY_STAT_BY_YEAR, cmd.getOrganizationId(),  cmd.getCommunityId());
         List<EnergyStatByYearDTO> result = new ArrayList<>();
         Calendar statDate = Calendar.getInstance();
         statDate.setTime(new Date(cmd.getStatDate()));
@@ -2041,10 +2166,10 @@ public class EnergyConsumptionServiceImpl implements EnergyConsumptionService {
      */
     @Override
     public List<EnergyCommunityYoyStatDTO> getEnergyStatisticByYoy(EnergyStatCommand cmd) {
-        userPrivilegeMgr.checkCurrentUserAuthority(EntityType.COMMUNITY.getCode(), cmd.getCommunityId(), cmd.getOrganizationId(), PrivilegeConstants.ENERGY_STAT_BY_YOY);
-
+//        userPrivilegeMgr.checkCurrentUserAuthority(EntityType.COMMUNITY.getCode(), cmd.getCommunityId(), cmd.getOrganizationId(), PrivilegeConstants.ENERGY_STAT_BY_YOY);
+        checkEnergyAuth(cmd.getNamespaceId(), PrivilegeConstants.ENERGY_STAT_BY_YOY, cmd.getOrganizationId(),  cmd.getCommunityId());
         List<EnergyYoyStatistic> stats = this.energyYoyStatisticProvider.listenergyYoyStatistics(UserContext.getCurrentNamespaceId(cmd.getNamespaceId()),
-                monthSF.get().format(new Date(cmd.getStatDate())));
+                monthSF.get().format(new Date(cmd.getStatDate())), cmd.getCommunityId());
         if(null == stats)
             return null;
 
@@ -2117,29 +2242,100 @@ public class EnergyConsumptionServiceImpl implements EnergyConsumptionService {
     @Override
     public List<EnergyMeterFormulaDTO> listEnergyMeterFormulas(ListEnergyMeterFormulasCommand cmd) {
         validate(cmd);
+        List<EnergyMeterFormula> formulas = new ArrayList<>();
+        //全部则查全部的和各个项目的
+        if(cmd.getCommunityId() == null) {
+            formulas = meterFormulaProvider.listMeterFormulas(cmd.getOwnerId(), cmd.getOwnerType(),
+                    null, UserContext.getCurrentNamespaceId(cmd.getNamespaceId()), cmd.getFormulaType());
+        }
+
+        //单项目则查自己加的和关联的全部的
+        else if(cmd.getCommunityId() != null) {
+            formulas = meterFormulaProvider.listMeterFormulas(cmd.getOwnerId(), cmd.getOwnerType(),
+                    cmd.getCommunityId(), UserContext.getCurrentNamespaceId(cmd.getNamespaceId()), cmd.getFormulaType());
+            List<EnergyMeterFormulaMap> maps = energyMeterFormulaMapProvider.listEnergyMeterFormulaMap(cmd.getCommunityId());
+            if(maps != null && maps.size() > 0) {
+                List<Long> formulaIds = maps.stream().map(map -> {
+                    return map.getFomularId();
+                }).collect(Collectors.toList());
+                List<EnergyMeterFormula> formulaList = meterFormulaProvider.listMeterFormulas(formulaIds, cmd.getFormulaType()) ;
+                if(formulaList != null && formulaList.size() > 0) {
+                    formulas.addAll(formulaList);
+                }
+            }
+
+        }
 //        checkCurrentUserNotInOrg(cmd.getOwnerId());
 //        userPrivilegeMgr.checkCurrentUserAuthority(EntityType.COMMUNITY.getCode(), cmd.getCommunityId(), cmd.getOwnerId(), PrivilegeConstants.ENERGY_SETTING);
-        List<EnergyMeterFormula> formulas = meterFormulaProvider.listMeterFormulas(cmd.getOwnerId(), cmd.getOwnerType(),
-                cmd.getCommunityId(), UserContext.getCurrentNamespaceId(cmd.getNamespaceId()), cmd.getFormulaType());
-        return formulas.stream().map(this::toEnergyMeterFormulaDTO).collect(Collectors.toList());
+
+        List<EnergyMeterFormulaDTO> dtos = formulas.stream().map(formula -> {
+            EnergyMeterFormulaDTO dto = toEnergyMeterFormulaDTO(formula);
+            List<String> communityName = new ArrayList<String>();
+            if(dto.getCommunityId() == null || dto.getCommunityId() == 0L) {
+                List<Long> communityIds = energyMeterFormulaMapProvider.listCommunityIdByFormula(dto.getId());
+                List<Community> communities = communityProvider.findCommunitiesByIds(communityIds);
+                if(communities != null && communities.size() > 0) {
+                    communities.forEach(community -> {
+                        if(community != null) {
+                            communityName.add(community.getName());
+                        }
+                    });
+                }
+            } else {
+                Community community = communityProvider.findCommunityById(dto.getCommunityId());
+                if(community != null) {
+                    communityName.add(community.getName());
+                }
+            }
+            dto.setCommunityName(communityName);
+            return dto;
+        }).collect(Collectors.toList());
+
+        return dtos;
     }
 
     @Override
     public void deleteEnergyMeterFormula(DeleteEnergyMeterFormulaCommand cmd) {
         validate(cmd);
 //        checkCurrentUserNotInOrg(cmd.getOrganizationId());
-        userPrivilegeMgr.checkCurrentUserAuthority(EntityType.COMMUNITY.getCode(), cmd.getCommunityId(), cmd.getOrganizationId(), PrivilegeConstants.ENERGY_SETTING);
+//        if(cmd.getCommunityId() == null) {
+//            userPrivilegeMgr.checkCurrentUserAuthority(null, null, cmd.getOrganizationId(), PrivilegeConstants.ENERGY_SETTING);
+//        } else {
+//            userPrivilegeMgr.checkCurrentUserAuthority(EntityType.COMMUNITY.getCode(), cmd.getCommunityId(), cmd.getOrganizationId(), PrivilegeConstants.ENERGY_SETTING);
+//        }
+        checkEnergyAuth(cmd.getNamespaceId(), PrivilegeConstants.ENERGY_SETTING, cmd.getOrganizationId(),  cmd.getCommunityId());
         coordinationProvider.getNamedLock(CoordinationLocks.ENERGY_METER_FORMULA.getCode() + cmd.getFormulaId()).tryEnter(() -> {
             EnergyMeterFormula formula = meterFormulaProvider.findById(UserContext.getCurrentNamespaceId(cmd.getNamespaceId()), cmd.getFormulaId());
+
             if (formula != null) {
-                // 查看当前公式是否被引用, 被引用则无法删除
-                EnergyMeterSettingLog settingLog = meterSettingLogProvider.findSettingByFormulaId(UserContext.getCurrentNamespaceId(cmd.getNamespaceId()), formula.getId());
-                if (settingLog != null) {
-                    LOGGER.info("The formula has been reference, formula id = {}", formula.getId());
-                    throw errorWith(SCOPE, ERR_FORMULA_HAS_BEEN_REFERENCE, "The formula has been reference");
+                //项目里删全部的 实质是解除关联关系
+                if((formula.getCommunityId() == null || formula.getCommunityId() == 0L) && cmd.getCommunityId() != null) {
+                    EnergyMeterSettingLog settingLog = meterSettingLogProvider.findAnySettingByFormulaId(UserContext.getCurrentNamespaceId(cmd.getNamespaceId()), cmd.getCommunityId(), formula.getId());
+                    if (settingLog != null) {
+                        LOGGER.info("The formula has been reference, formula id = {}", formula.getId());
+                        throw errorWith(SCOPE, ERR_FORMULA_HAS_BEEN_REFERENCE, "The formula has been reference");
+                    }
+
+                    EnergyMeterFormulaMap map = energyMeterFormulaMapProvider.findEnergyMeterFormulaMap(cmd.getCommunityId(), formula.getId());
+                    if(map != null) {
+                        map.setStatus(EnergyCommonStatus.INACTIVE.getCode());
+                        map.setOperatorUid(UserContext.currentUserId());
+                        map.setOperateTime(new Timestamp(DateHelper.currentGMTTime().getTime()));
+                        energyMeterFormulaMapProvider.updateEnergyMeterFormulaMap(map);
+                    }
+
                 } else {
-                    meterFormulaProvider.deleteFormula(formula);
+                    //在全部里删全部和项目的，项目里删自己的 都是直接置inactive
+                    // 查看当前公式是否被引用, 被引用则无法删除
+                    EnergyMeterSettingLog settingLog = meterSettingLogProvider.findSettingByFormulaId(UserContext.getCurrentNamespaceId(cmd.getNamespaceId()), formula.getId());
+                    if (settingLog != null) {
+                        LOGGER.info("The formula has been reference, formula id = {}", formula.getId());
+                        throw errorWith(SCOPE, ERR_FORMULA_HAS_BEEN_REFERENCE, "The formula has been reference");
+                    } else {
+                        meterFormulaProvider.deleteFormula(formula);
+                    }
                 }
+
             }
         });
     }
@@ -2271,7 +2467,12 @@ public class EnergyConsumptionServiceImpl implements EnergyConsumptionService {
     public List<EnergyMeterDefaultSettingDTO> listEnergyDefaultSettings(ListEnergyDefaultSettingsCommand cmd) {
         validate(cmd);
 //        checkCurrentUserNotInOrg(cmd.getOwnerId());
-        userPrivilegeMgr.checkCurrentUserAuthority(EntityType.COMMUNITY.getCode(), cmd.getCommunityId(), cmd.getOwnerId(), PrivilegeConstants.ENERGY_SETTING);
+//        if(cmd.getCommunityId() == null) {
+//            userPrivilegeMgr.checkCurrentUserAuthority(null, null, cmd.getOwnerId(), PrivilegeConstants.ENERGY_SETTING);
+//        } else {
+//            userPrivilegeMgr.checkCurrentUserAuthority(EntityType.COMMUNITY.getCode(), cmd.getCommunityId(), cmd.getOwnerId(), PrivilegeConstants.ENERGY_SETTING);
+//        }
+        checkEnergyAuth(cmd.getNamespaceId(), PrivilegeConstants.ENERGY_SETTING, cmd.getOwnerId(),  cmd.getCommunityId());
         List<EnergyMeterDefaultSetting> settings = new ArrayList<>();
         if (cmd.getMeterType() != null) {
             settings = defaultSettingProvider.listDefaultSetting(cmd.getOwnerId(), cmd.getOwnerType(),
@@ -2322,9 +2523,54 @@ public class EnergyConsumptionServiceImpl implements EnergyConsumptionService {
         validate(cmd);
 //        checkCurrentUserNotInOrg(cmd.getOwnerId());
 //        userPrivilegeMgr.checkCurrentUserAuthority(EntityType.COMMUNITY.getCode(), cmd.getCommunityId(), cmd.getOwnerId(), PrivilegeConstants.ENERGY_SETTING);
-        List<EnergyMeterCategory> categoryList = meterCategoryProvider.listMeterCategories(UserContext.getCurrentNamespaceId(cmd.getNamespaceId()), cmd.getCategoryType(),
-                cmd.getOwnerId(), cmd.getOwnerType(), cmd.getCommunityId());
-        return categoryList.stream().map(this::toMeterCategoryDto).collect(Collectors.toList());
+        List<EnergyMeterCategory> categoryList = new ArrayList<>();
+        //全部则查全部的和各个项目的
+        if(cmd.getCommunityId() == null) {
+            categoryList = meterCategoryProvider.listMeterCategories(UserContext.getCurrentNamespaceId(cmd.getNamespaceId()), cmd.getCategoryType(),
+                    cmd.getOwnerId(), cmd.getOwnerType(), null);
+        }
+
+        //单项目则查自己加的和关联的全部的
+        else if(cmd.getCommunityId() != null) {
+            categoryList = meterCategoryProvider.listMeterCategories(UserContext.getCurrentNamespaceId(cmd.getNamespaceId()), cmd.getCategoryType(),
+                    cmd.getOwnerId(), cmd.getOwnerType(), cmd.getCommunityId());
+            List<EnergyMeterCategoryMap> maps = energyMeterCategoryMapProvider.listEnergyMeterCategoryMap(cmd.getCommunityId());
+            if(maps != null && maps.size() > 0) {
+                List<Long> categoryIds = maps.stream().map(map -> {
+                    return map.getCategoryId();
+                }).collect(Collectors.toList());
+                List<EnergyMeterCategory> categories = meterCategoryProvider.listMeterCategories(categoryIds, cmd.getCategoryType());
+                if(categories != null && categories.size() > 0) {
+                    categoryList.addAll(categories);
+                }
+            }
+
+        }
+
+        List<EnergyMeterCategoryDTO> dtos = categoryList.stream().map(category -> {
+            EnergyMeterCategoryDTO dto = toMeterCategoryDto(category);
+            List<String> communityName = new ArrayList<String>();
+            if(dto.getCommunityId() == null || dto.getCommunityId() == 0L) {
+                List<Long> communityIds = energyMeterCategoryMapProvider.listCommunityIdByCategory(dto.getId());
+                List<Community> communities = communityProvider.findCommunitiesByIds(communityIds);
+                if(communities != null && communities.size() > 0) {
+                    communities.forEach(community -> {
+                        if(community != null) {
+                            communityName.add(community.getName());
+                        }
+                    });
+                }
+            } else {
+                Community community = communityProvider.findCommunityById(dto.getCommunityId());
+                if(community != null) {
+                    communityName.add(community.getName());
+                }
+            }
+            dto.setCommunityName(communityName);
+            return dto;
+        }).collect(Collectors.toList());
+
+        return dtos;
     }
 
     @Override
@@ -2904,7 +3150,13 @@ public class EnergyConsumptionServiceImpl implements EnergyConsumptionService {
 
     @Override
     public EnergyMeterPriceConfigDTO createEnergyMeterPriceConfig(CreateEnergyMeterPriceConfigCommand cmd) {
-        userPrivilegeMgr.checkCurrentUserAuthority(EntityType.COMMUNITY.getCode(), cmd.getCommunityId(), cmd.getOwnerId(), PrivilegeConstants.ENERGY_SETTING);
+//        if(cmd.getCommunityId() == null) {
+//            userPrivilegeMgr.checkCurrentUserAuthority(null, null, cmd.getOwnerId(), PrivilegeConstants.ENERGY_SETTING);
+//        } else {
+//            userPrivilegeMgr.checkCurrentUserAuthority(EntityType.COMMUNITY.getCode(), cmd.getCommunityId(), cmd.getOwnerId(), PrivilegeConstants.ENERGY_SETTING);
+//        }
+        checkEnergyAuth(cmd.getNamespaceId(), PrivilegeConstants.ENERGY_SETTING, cmd.getOwnerId(),  cmd.getCommunityId());
+
         EnergyMeterPriceConfig priceConfig = ConvertHelper.convert(cmd, EnergyMeterPriceConfig.class);
         priceConfig.setStatus(EnergyCommonStatus.ACTIVE.getCode());
         priceConfig.setNamespaceId(UserContext.getCurrentNamespaceId(cmd.getNamespaceId()));
@@ -2938,7 +3190,12 @@ public class EnergyConsumptionServiceImpl implements EnergyConsumptionService {
     public void deleteEnergyMeterPriceConfig(DelelteEnergyMeterPriceConfigCommand cmd) {
         validate(cmd);
 //        checkCurrentUserNotInOrg(cmd.getOwnerId());
-        userPrivilegeMgr.checkCurrentUserAuthority(EntityType.COMMUNITY.getCode(), cmd.getCommunityId(), cmd.getOwnerId(), PrivilegeConstants.ENERGY_SETTING);
+//        if(cmd.getCommunityId() == null) {
+//            userPrivilegeMgr.checkCurrentUserAuthority(null, null, cmd.getOwnerId(), PrivilegeConstants.ENERGY_SETTING);
+//        } else {
+//            userPrivilegeMgr.checkCurrentUserAuthority(EntityType.COMMUNITY.getCode(), cmd.getCommunityId(), cmd.getOwnerId(), PrivilegeConstants.ENERGY_SETTING);
+//        }
+        checkEnergyAuth(cmd.getNamespaceId(), PrivilegeConstants.ENERGY_SETTING, cmd.getOwnerId(),  cmd.getCommunityId());
         coordinationProvider.getNamedLock(CoordinationLocks.ENERGY_METER_PRICE_CONFIG.getCode() + cmd.getId()).tryEnter(() -> {
             EnergyMeterPriceConfig priceConfig = priceConfigProvider.findById(cmd.getId(), cmd.getOwnerId(), cmd.getOwnerType(),
                     cmd.getCommunityId(),UserContext.getCurrentNamespaceId(cmd.getNamespaceId()));
@@ -3070,7 +3327,8 @@ public class EnergyConsumptionServiceImpl implements EnergyConsumptionService {
                                     || EnergyTaskStatus.INACTIVE.equals(EnergyTaskStatus.fromCode(task.getStatus()))) {
                                 continue;
                             }
-                            userPrivilegeMgr.checkCurrentUserAuthority(EntityType.COMMUNITY.getCode(), task.getTargetId(), task.getOwnerId(), PrivilegeConstants.METER_READ);
+//                            userPrivilegeMgr.checkCurrentUserAuthority(EntityType.COMMUNITY.getCode(), task.getTargetId(), task.getOwnerId(), PrivilegeConstants.METER_READ);
+                            checkEnergyAuth(task.getNamespaceId(), PrivilegeConstants.METER_READ, task.getOwnerId(), task.getTargetId());
                             EnergyMeter meter = meterProvider.findById(task.getNamespaceId(), task.getMeterId());
                             if(!EnergyMeterStatus.ACTIVE.equals(EnergyMeterStatus.fromCode(meter.getStatus()))) {
                                 continue;
@@ -3100,7 +3358,8 @@ public class EnergyConsumptionServiceImpl implements EnergyConsumptionService {
 
     @Override
     public void deleteEnergyPlan(DeleteEnergyPlanCommand cmd) {
-        userPrivilegeMgr.checkCurrentUserAuthority(EntityType.COMMUNITY.getCode(), cmd.getTargetId(), cmd.getOwnerId(), PrivilegeConstants.ENERGY_PLAN_DELETE);
+        checkEnergyAuth(cmd.getNamespaceId(), PrivilegeConstants.ENERGY_PLAN_DELETE, cmd.getOwnerId(),  cmd.getTargetId());
+//        userPrivilegeMgr.checkCurrentUserAuthority(EntityType.COMMUNITY.getCode(), cmd.getTargetId(), cmd.getOwnerId(), PrivilegeConstants.ENERGY_PLAN_DELETE);
         EnergyPlan plan = energyPlanProvider.findEnergyPlanById(cmd.getPlanId());
         plan.setStatus(CommonStatus.INACTIVE.getCode());
         plan.setDeleterUid(UserContext.currentUserId());
@@ -3122,7 +3381,8 @@ public class EnergyConsumptionServiceImpl implements EnergyConsumptionService {
 
     @Override
     public EnergyPlanDTO findEnergyPlanDetails(FindEnergyPlanDetailsCommand cmd) {
-        userPrivilegeMgr.checkCurrentUserAuthority(EntityType.COMMUNITY.getCode(), cmd.getTargetId(), cmd.getOwnerId(), PrivilegeConstants.ENERGY_PLAN_LIST);
+        checkEnergyAuth(cmd.getNamespaceId(), PrivilegeConstants.ENERGY_PLAN_LIST, cmd.getOwnerId(),  cmd.getTargetId());
+//        userPrivilegeMgr.checkCurrentUserAuthority(EntityType.COMMUNITY.getCode(), cmd.getTargetId(), cmd.getOwnerId(), PrivilegeConstants.ENERGY_PLAN_LIST);
         EnergyPlan plan = energyPlanProvider.findEnergyPlanById(cmd.getPlanId());
         return toEnergyPlanDTO(plan);
     }
@@ -3156,7 +3416,8 @@ public class EnergyConsumptionServiceImpl implements EnergyConsumptionService {
 
     @Override
     public ListEnergyPlanMetersResponse setEnergyPlanMeterOrder(SetEnergyPlanMeterOrderCommand cmd) {
-        userPrivilegeMgr.checkCurrentUserAuthority(EntityType.COMMUNITY.getCode(), cmd.getCommunityId(), cmd.getOrganizationId(), PrivilegeConstants.ENERGY_PLAN_CREATE);
+        checkEnergyAuth(cmd.getNamespaceId(), PrivilegeConstants.ENERGY_PLAN_CREATE, cmd.getOrganizationId(),  cmd.getCommunityId());
+//        userPrivilegeMgr.checkCurrentUserAuthority(EntityType.COMMUNITY.getCode(), cmd.getCommunityId(), cmd.getOrganizationId(), PrivilegeConstants.ENERGY_PLAN_CREATE);
         ListEnergyPlanMetersResponse response = new ListEnergyPlanMetersResponse();
         if(cmd.getMeters() != null && cmd.getMeters().size() > 0) {
             cmd.getMeters().forEach(meter -> {
@@ -3312,6 +3573,9 @@ public class EnergyConsumptionServiceImpl implements EnergyConsumptionService {
         ReadEnergyMeterCommand command = ConvertHelper.convert(cmd, ReadEnergyMeterCommand.class);
         command.setMeterId(task.getMeterId());
         command.setTaskId(task.getId());
+        command.setNamespaceId(task.getNamespaceId());
+        command.setCommunityId(cmd.getCommunityId());
+        command.setOrganizationId(cmd.getOrganizationId());
         readEnergyMeter(command);
     }
 
@@ -3444,7 +3708,8 @@ public class EnergyConsumptionServiceImpl implements EnergyConsumptionService {
 
     @Override
     public EnergyPlanDTO updateEnergyPlan(UpdateEnergyPlanCommand cmd) {
-        userPrivilegeMgr.checkCurrentUserAuthority(EntityType.COMMUNITY.getCode(), cmd.getTargetId(), cmd.getOwnerId(), PrivilegeConstants.ENERGY_PLAN_CREATE);
+//        userPrivilegeMgr.checkCurrentUserAuthority(EntityType.COMMUNITY.getCode(), cmd.getTargetId(), cmd.getOwnerId(), PrivilegeConstants.ENERGY_PLAN_CREATE);
+        checkEnergyAuth(cmd.getNamespaceId(), PrivilegeConstants.ENERGY_PLAN_CREATE, cmd.getOwnerId(),  cmd.getTargetId());
         checkMeterPlanAssigment(cmd.getId(), cmd.getMeters());
         EnergyPlan plan = ConvertHelper.convert(cmd, EnergyPlan.class);
         RepeatSettings repeat = dealEnergyPlanRepeat(cmd.getRepeat());

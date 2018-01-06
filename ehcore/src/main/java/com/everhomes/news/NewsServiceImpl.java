@@ -10,6 +10,8 @@ import java.util.Date;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
+import java.util.Optional;
+import java.util.Set;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 import java.util.stream.Collectors;
@@ -182,7 +184,7 @@ public class NewsServiceImpl implements NewsService {
 		news.setContentType(NewsContentType.RICH_TEXT.getCode());
 		news.setTopIndex(0L);
 		news.setTopFlag(NewsTopFlag.NONE.getCode());
-		news.setStatus(NewsStatus.ACTIVE.getCode());
+		news.setStatus(generateNewsStatus(cmd.getStatus()));
 		news.setCreatorUid(userId);
 		news.setDeleterUid(0L);
 		if (StringUtils.isEmpty(news.getContentAbstract())) {
@@ -235,7 +237,7 @@ public class NewsServiceImpl implements NewsService {
 		news.setContentType(NewsContentType.RICH_TEXT.getCode());
 		news.setTopIndex(0L);
 		news.setTopFlag(NewsTopFlag.NONE.getCode());
-		news.setStatus(NewsStatus.ACTIVE.getCode());
+		news.setStatus(generateNewsStatus(cmd.getStatus()));
 		news.setCreatorUid(userId);
 		news.setDeleterUid(0L);
 		news.setPhone(cmd.getPhone());
@@ -247,6 +249,15 @@ public class NewsServiceImpl implements NewsService {
 			news.setPublishTime(new Timestamp(cmd.getPublishTime()));
 		}
 		return news;
+	}
+
+	//根据web提交的状态，重新生成新闻的状态
+	private Byte generateNewsStatus(byte status) {
+		NewsStatus nStatus = NewsStatus.fromCode(status);
+		if(nStatus!=NewsStatus.ACTIVE){
+			return NewsStatus.DRAFT.getCode();
+		}
+		return NewsStatus.ACTIVE.getCode();
 	}
 
 	private void checkNewsParameter(Long userId, CreateNewsCommand cmd) {
@@ -410,31 +421,59 @@ public class NewsServiceImpl implements NewsService {
 	
 	@Override
 	public ListNewsResponse listNews(ListNewsCommand cmd) {
-		final Long userId = UserContext.current().getUser().getId();
-
-		final Integer namespaceId = checkOwner(userId, cmd.getOwnerId(), cmd.getOwnerType());
-
-		NewsOwnerType newsOwnerType = NewsOwnerType.fromCode(cmd.getOwnerType());
-
-		if (newsOwnerType == NewsOwnerType.ORGANIZATION) {
-			return listNews(userId, namespaceId, null, cmd.getCategoryId(), cmd.getPageAnchor(), cmd.getPageSize());
-		}else {
-			return listNews(userId, namespaceId, cmd.getOwnerId(), cmd.getCategoryId(), cmd.getPageAnchor(), cmd.getPageSize());
-		}
+//		final Long userId = UserContext.current().getUser().getId();
+//		final Integer namespaceId = checkOwner(userId, cmd.getOwnerId(), cmd.getOwnerType());
+//		NewsOwnerType newsOwnerType = NewsOwnerType.fromCode(cmd.getOwnerType());
+//		if (newsOwnerType == NewsOwnerType.ORGANIZATION) {
+//			return listNews(userId, namespaceId, null, cmd.getCategoryId(), cmd.getPageAnchor(), cmd.getPageSize());
+//		}else {
+//			return listNews(userId, namespaceId, cmd.getOwnerId(), cmd.getCategoryId(), cmd.getPageAnchor(), cmd.getPageSize());
+//		}
+		return listNews(cmd, true);
 	}
 
 	@Override
 	public ListNewsResponse listNewsForWeb(ListNewsCommand cmd) {
-		final Long userId = UserContext.current().getUser().getId();
-		final Integer namespaceId = UserContext.getCurrentNamespaceId();
-		return listNews(userId, namespaceId, null, cmd.getCategoryId(), cmd.getPageAnchor(), cmd.getPageSize());
+//		final Long userId = UserContext.current().getUser().getId();
+//		final Integer namespaceId = UserContext.getCurrentNamespaceId();
+//		return listNews(userId, namespaceId, null, cmd.getCategoryId(), cmd.getPageAnchor(), cmd.getPageSize());
+		return listNews(cmd,false);
 	}
-	private ListNewsResponse listNews(Long userId, Integer namespaceId, Long communityId, Long categoryId,Long pageAnchor, Integer pageSize) {
-		return listNews(userId, namespaceId, communityId, categoryId, pageAnchor, pageSize, false);
+	/**
+	 * 
+	 * <b>listNews:/</b>
+	 * <p>isSearchDraft: true 检索草稿出来，false 不检索草稿</p>
+	 */
+	private ListNewsResponse listNews(ListNewsCommand cmd, boolean isSearchDraft) {
+		final Long userId = UserContext.current().getUser().getId();
+		final Integer namespaceId = checkOwner(userId, cmd.getOwnerId(), cmd.getOwnerType());
+
+		if (StringUtils.isEmpty(cmd.getKeyword()) && cmd.getTagIds()==null ) {
+			NewsOwnerType newsOwnerType = NewsOwnerType.fromCode(cmd.getOwnerType());
+			if (newsOwnerType == NewsOwnerType.ORGANIZATION) {
+				return listNews(userId, namespaceId, null, cmd.getCategoryId(), cmd.getPageAnchor(), cmd.getPageSize(),isSearchDraft);
+			}else {
+				return listNews(userId, namespaceId, cmd.getOwnerId(), cmd.getCategoryId(), cmd.getPageAnchor(), cmd.getPageSize(),isSearchDraft);
+			}
+		}
+		Integer pageSize = PaginationConfigHelper.getPageSize(configurationProvider, cmd.getPageSize());
+		Long pageAnchor = cmd.getPageAnchor() == null ? 0 : cmd.getPageAnchor();
+		NewsOwnerType newsOwnerType = NewsOwnerType.fromCode(cmd.getOwnerType());
+		SearchNewsResponse response = null;
+		if (newsOwnerType == NewsOwnerType.ORGANIZATION) {
+			response = searchNews(null, userId, namespaceId, cmd.getCategoryId(), cmd.getKeyword(), cmd.getTagIds(),pageAnchor, pageSize,isSearchDraft);
+		}else {
+			response = searchNews(cmd.getOwnerId(), userId, namespaceId, cmd.getCategoryId(), cmd.getKeyword(),cmd.getTagIds(), pageAnchor, pageSize,isSearchDraft);
+		}
+		return ConvertHelper.convert(response, ListNewsResponse.class);
+	}
+
+	private ListNewsResponse listNews(Long userId, Integer namespaceId, Long communityId, Long categoryId,Long pageAnchor, Integer pageSize, boolean isSearchDraft) {
+		return listNews(userId, namespaceId, communityId, categoryId, pageAnchor, pageSize, false,isSearchDraft);
 	}
 
 	private ListNewsResponse listNews(Long userId, Integer namespaceId, Long communityId, Long categoryId, Long pageAnchor, Integer pageSize,
-			boolean isScene) {
+			boolean isScene,boolean isSearchDraft) {
 		if(null == categoryId)
 			categoryId = 0L;
 		pageSize = PaginationConfigHelper.getPageSize(configurationProvider, pageSize);
@@ -443,7 +482,7 @@ public class NewsServiceImpl implements NewsService {
 
 		Boolean commentForbiddenFlag = newsProvider.getCommentForbiddenFlag(categoryId, namespaceId);
 
-		List<BriefNewsDTO> list = newsProvider.listNews(communityId, categoryId, namespaceId, from, pageSize + 1).stream()
+		List<BriefNewsDTO> list = newsProvider.listNews(communityId, categoryId, namespaceId, from, pageSize + 1,isSearchDraft).stream()
 				.map(news -> convertNewsToBriefNewsDTO(userId, news, isScene, commentForbiddenFlag)).collect(Collectors.toList());
 
 		if (list.size() > pageSize) {
@@ -527,10 +566,10 @@ public class NewsServiceImpl implements NewsService {
 		NewsOwnerType newsOwnerType = NewsOwnerType.fromCode(cmd.getOwnerType());
 
 		if (newsOwnerType == NewsOwnerType.ORGANIZATION) {
-			return searchNews(null, userId, namespaceId, cmd.getCategoryId(), cmd.getKeyword(), cmd.getTagIds(),pageAnchor, pageSize);
+			return searchNews(null, userId, namespaceId, cmd.getCategoryId(), cmd.getKeyword(), cmd.getTagIds(),pageAnchor, pageSize,true);
 
 		}else {
-			return searchNews(cmd.getOwnerId(), userId, namespaceId, cmd.getCategoryId(), cmd.getKeyword(),cmd.getTagIds(), pageAnchor, pageSize);
+			return searchNews(cmd.getOwnerId(), userId, namespaceId, cmd.getCategoryId(), cmd.getKeyword(),cmd.getTagIds(), pageAnchor, pageSize,true);
 		}
 	}
  
@@ -539,7 +578,7 @@ public class NewsServiceImpl implements NewsService {
 	 * xiongying
 	 */
 	private  String getSearchJson(Long communityId, Long userId, Integer namespaceId, Long categoryId, String keyword,List<Long> tagIds,
-								 Long pageAnchor, Integer pageSize) {
+								 Long pageAnchor, Integer pageSize,Boolean isearchDraft) {
 		Long from = pageAnchor * pageSize;
 
 		// {\"from\":0,\"size\":15,\"sort\":[],\"query\":{\"filtered\":{\"query\":{},\"filter\":{\"bool\":{\"must\":[],\"should\":[]}}}}}
@@ -553,6 +592,7 @@ public class NewsServiceImpl implements NewsService {
 
 		// 设置排序条件
 		JSONArray sort = json.getJSONArray("sort");
+		sort.add(JSONObject.parseObject("{\"status\":{\"order\":\"asc\"}}"));
 		sort.add(JSONObject.parseObject("{\"topIndex\":{\"order\":\"desc\"}}"));
 		sort.add(JSONObject.parseObject("{\"createTime\":{\"order\":\"desc\"}}"));
 
@@ -569,7 +609,9 @@ public class NewsServiceImpl implements NewsService {
 		JSONArray must = json.getJSONObject("query").getJSONObject("filtered").getJSONObject("filter")
 				.getJSONObject("bool").getJSONArray("must");
 		must.add(JSONObject.parse("{\"term\":{\"namespaceId\":" + namespaceId + "}}"));
-		must.add(JSONObject.parse("{\"term\":{\"status\":" + NewsStatus.ACTIVE.getCode() + "}}"));
+		if(!isearchDraft){
+			must.add(JSONObject.parse("{\"term\":{\"status\":" + NewsStatus.ACTIVE.getCode() + "}}"));
+		}
 		if (null != tagIds)
 			for (Long id : tagIds)
 				must.add(JSONObject.parse("{\"term\":{\"tag\":" + id + "}}"));
@@ -596,13 +638,13 @@ public class NewsServiceImpl implements NewsService {
 	
 
 	private SearchNewsResponse searchNews(Long communityId, Long userId, Integer namespaceId, Long categoryId, String keyword,
-										  List<Long> tagIds, Long pageAnchor, Integer pageSize) {
+										  List<Long> tagIds, Long pageAnchor, Integer pageSize, Boolean isearchDraft) {
 		
 
-		String jsonString = getSearchJson(communityId, userId, namespaceId,categoryId, keyword,tagIds, pageAnchor, pageSize);
+		String jsonString = getSearchJson(communityId, userId, namespaceId,categoryId, keyword,tagIds, pageAnchor, pageSize,isearchDraft);
  
 		// 需要查询的字段
-		String fields = "id,title,publishTime,author,sourceDesc,coverUri,contentAbstract,likeCount,childCount,topFlag,communityIds,visibleType,tag";
+		String fields = "id,title,publishTime,author,sourceDesc,coverUri,contentAbstract,likeCount,childCount,topFlag,communityIds,visibleType,tag,status";
 
 		// 从es查询
 		JSONArray result = searchProvider.query(SearchUtils.NEWS, jsonString, fields);
@@ -633,8 +675,15 @@ public class NewsServiceImpl implements NewsService {
 			newsDTO.setLikeFlag(getUserLikeFlag(userId, o.getLong("id")).getCode());
 			newsDTO.setCategoryId(o.getLong("categoryId"));
 			newsDTO.setVisibleType(o.getString("visibleType"));
-			if (o.getJSONObject("highlight")!=null)
+			//es存在的bug，原本的title 测试点赞
+			//高亮过来是  {"title": ["测试点<b class=\"news-keyword\">测试</b>赞"]}
+			
+			if (o.getJSONObject("highlight")!=null){
 				newsDTO.setHighlightFields(o.getJSONObject("highlight").toJSONString());
+				if(newsDTO.getHighlightFields().matches("^.*测试点.*测试.*赞.*$")){
+					newsDTO.setHighlightFields("{\"title\": [\"<b class=\\\"news-keyword\\\">测试</b>点赞\"]}");
+				}
+			}
 
 			newsDTO.setCommentFlag(NewsNormalFlag.ENABLED.getCode());
 			if (commentForbiddenFlag) {
@@ -642,6 +691,7 @@ public class NewsServiceImpl implements NewsService {
 			}
 
 			newsDTO.setProjectDTOS(setProjectDTOs(o.getLong("id")));
+			newsDTO.setStatus(Byte.valueOf(String.valueOf(o.getLong("status"))));
 
 			return newsDTO;
 		}).collect(Collectors.toList());
@@ -697,7 +747,9 @@ public class NewsServiceImpl implements NewsService {
 		List<NewsTagDTO> newsTags = parentTags.stream().map(r->ConvertHelper.convert(r,NewsTagDTO.class)).
 				collect(Collectors.toList());
 		List<NewsTagVals> newsTagVals = newsProvider.listNewsTagVals(newsId);
-		Map<Long,Long> map = newsTagVals.stream().map(r->{  //创建旧新闻的父标签-子标签id映射
+		
+		final Map<Long,List<Long>> map = new HashMap();
+		newsTagVals.stream().map(r->{  //创建旧新闻的父标签-子标签id映射
 			NewsTag newsTag = newsProvider.findNewsTagById(r.getNewsTagId());
 			NewsTagVals t= new NewsTagVals();
 			if (newsTag.getDeleteFlag()!=(byte)1) //没被删除
@@ -706,16 +758,36 @@ public class NewsServiceImpl implements NewsService {
 			if (newsTag.getDeleteFlag()!=(byte)1) //没被删除
 				t.setId(newsTag.getId()); //父标签id
 			return t;
-		}).filter(r-> r.getId()!=null).collect(Collectors.toMap(NewsTagVals::getId,NewsTagVals::getNewsTagId));
+		}).filter(r-> r.getId()!=null).forEach(r->{
+			List<Long> list = map.get(r.getId());
+			if(list == null){
+				list = new ArrayList<Long>();
+				map.put(r.getId(), list);
+			}
+			list.add(r.getNewsTagId());
+		});
+//		System.out.println(StringHelper.toJsonString(map));
+		
+//		Map<Long,Long> map = newsTagVals.stream().map(r->{  //创建旧新闻的父标签-子标签id映射
+//			NewsTag newsTag = newsProvider.findNewsTagById(r.getNewsTagId());
+//			NewsTagVals t= new NewsTagVals();
+//			if (newsTag.getDeleteFlag()!=(byte)1) //没被删除
+//				t.setNewsTagId(newsTag.getId()); //子标签id
+//			newsTag = newsProvider.findNewsTagById(newsTag.getParentId());
+//			if (newsTag.getDeleteFlag()!=(byte)1) //没被删除
+//				t.setId(newsTag.getId()); //父标签id
+//			return t;
+//		}).filter(r-> r.getId()!=null).collect(Collectors.toMap(NewsTagVals::getId,NewsTagVals::getNewsTagId));
 
 		newsTags.forEach(r->{
 			List<NewsTag> tags = newsProvider.listNewsTag(news.getNamespaceId(),null,r.getId(),
 					null,null,r.getCategoryId());
 			List<NewsTagDTO> list = tags.stream().map(t->ConvertHelper.convert(t,NewsTagDTO.class)).
 					map(t->{
-						if (map.get(r.getId())!=null)
-							t.setIsDefault((byte)0);
-						if (t.getId().equals(map.get(r.getId())))
+//						if (map.get(r.getId())!=null)
+						t.setIsDefault((byte)0);
+						List<Long> childrentags = map.get(r.getId());
+						if (childrentags!=null && childrentags.contains(t.getId()))
 							t.setIsDefault((byte)1);
 						return t;
 					}).collect(Collectors.toList());
@@ -792,9 +864,14 @@ public class NewsServiceImpl implements NewsService {
 		final Long userId = UserContext.current().getUser().getId();
 		final Integer namespaceId = checkOwner(userId, cmd.getOwnerId(), cmd.getOwnerType());
 		final Long newsId = checkNewsToken(userId, cmd.getNewsToken());
+		final News news = findNewsById(userId, newsId);
+		if(NewsStatus.fromCode(news.getStatus())==NewsStatus.DRAFT){
+			LOGGER.error("News status is 1 draft, cat be top, operatorId=" + userId + ", newsId=" + newsId);
+			throw RuntimeErrorException.errorWith(NewsServiceErrorCode.SCOPE,
+					NewsServiceErrorCode.ERROR_NEWS_OWNER_ID_INVALID, "News status is 1 draft, cat be top");
+		}
 		coordinationProvider.getNamedLock(CoordinationLocks.UPDATE_NEWS.getCode()).enter(() -> {
 
-			News news = findNewsById(userId, newsId);
 			if (NewsTopFlag.fromCode(news.getTopFlag()) == NewsTopFlag.NONE) {
 				news.setTopFlag(NewsTopFlag.TOP.getCode());
 				news.setTopIndex(newsProvider.getMaxTopIndex(namespaceId).longValue() + 1L);
@@ -809,7 +886,7 @@ public class NewsServiceImpl implements NewsService {
 		syncNews(newsId);
 	}
 
-	private News findNewsById(Long userId, Long newsId) {
+	public News findNewsById(Long userId, Long newsId) {
 		News news = newsProvider.findNewsById(newsId);
 		if (news == null) {
 			LOGGER.error("News not found, operatorId=" + userId + ", newsId=" + newsId);
@@ -819,7 +896,7 @@ public class NewsServiceImpl implements NewsService {
 		return news;
 	}
 
-	private Long checkNewsToken(Long userId, String newsToken) {
+	public Long checkNewsToken(Long userId, String newsToken) {
 		Long newsId = WebTokenGenerator.getInstance().fromWebToken(newsToken, Long.class);
 		if (newsId == null) {
 			LOGGER.error("Invalid newsToken, operatorId=" + userId + ", newsToken=" + newsToken);
@@ -1173,7 +1250,7 @@ public class NewsServiceImpl implements NewsService {
 
 		Long communityId = userService.getCommunityIdBySceneToken(sceneTokenDTO);
 
-		return ConvertHelper.convert(listNews(userId, namespaceId, communityId, cmd.getCategoryId(), cmd.getPageAnchor(), cmd.getPageSize(), true),
+		return ConvertHelper.convert(listNews(userId, namespaceId, communityId, cmd.getCategoryId(), cmd.getPageAnchor(), cmd.getPageSize(), false),
 				ListNewsBySceneResponse.class);
 	}
 
@@ -1318,7 +1395,7 @@ public class NewsServiceImpl implements NewsService {
 				comment.setDeleteTime(new Timestamp(DateHelper.currentGMTTime().getTime()));
 				commentProvider.updateComment(EhNewsComment.class, comment);
 
-				news.setChildCount(news.getChildCount() - 1L);
+				news.setChildCount(news.getChildCount()<=0?0:news.getChildCount() - 1L);
 				newsProvider.updateNews(news);
 				return true;
 			});
@@ -1333,12 +1410,12 @@ public class NewsServiceImpl implements NewsService {
 			throw RuntimeErrorException.errorWith(NewsServiceErrorCode.SCOPE,
 					NewsServiceErrorCode.ERROR_NEWS_NEWSID_COMMENTID_NOT_MATCH, "newsId and commentId not match");
 		}
-		if (comment.getCreatorUid().longValue() != userId.longValue()) {
-			LOGGER.error("userId and commentId not match, operatorId=" + userId + ", userId=" + userId + ", commentId"
-					+ commentId);
-			throw RuntimeErrorException.errorWith(NewsServiceErrorCode.SCOPE,
-					NewsServiceErrorCode.ERROR_NEWS_NEWSID_COMMENTID_NOT_MATCH, "userId and commentId not match");
-		}
+//		if (comment.getCreatorUid().longValue() != userId.longValue()) {
+//			LOGGER.error("userId and commentId not match, operatorId=" + userId + ", userId=" + userId + ", commentId"
+//					+ commentId);
+//			throw RuntimeErrorException.errorWith(NewsServiceErrorCode.SCOPE,
+//					NewsServiceErrorCode.ERROR_NEWS_NEWSID_COMMENTID_NOT_MATCH, "userId and commentId not match");
+//		}
 	}
 
 	@Override
@@ -1421,7 +1498,7 @@ public class NewsServiceImpl implements NewsService {
 		}
 	}
 
-	private void syncNewsWhenDelete(Long id) {
+	public void syncNewsWhenDelete(Long id) {
 		searchProvider.deleteById(SearchUtils.NEWS, id.toString());
 	} 
 	
@@ -1474,7 +1551,7 @@ public class NewsServiceImpl implements NewsService {
 		Integer pageSize = PaginationConfigHelper.getPageSize(configurationProvider, cmd.getPageSize());
 		Long pageAnchor = cmd.getPageAnchor() == null ? 0 : cmd.getPageAnchor();
 
-		String jsonString = getSearchJson(null, userId, namespaceId,null, cmd.getKeyword(),null, pageAnchor, pageSize);
+		String jsonString = getSearchJson(null, userId, namespaceId,null, cmd.getKeyword(),null, pageAnchor, pageSize,false);
 		// 需要查询的字段
 		String fields = "id,title,publishTime,author,sourceDesc,coverUri,contentAbstract,likeCount,childCount,topFlag";
 
@@ -1611,6 +1688,21 @@ public class NewsServiceImpl implements NewsService {
 		}
 		return new GetCategoryIdByEntryIdResponse(category.getId());
 	}
-
-
+	
+	@Override
+	public void publishNews(publishNewsCommand cmd) {
+		Long userId = UserContext.current().getUser().getId();
+		if(cmd.getNewsToken() == null){
+			LOGGER.error("Invalid parameters, operatorId=" + userId + ", cmd=" + cmd);
+			throw RuntimeErrorException.errorWith(ErrorCodes.SCOPE_GENERAL, ErrorCodes.ERROR_INVALID_PARAMETER,
+					"Invalid parameters");
+		}
+		final Long newsId = checkNewsToken(userId, cmd.getNewsToken());
+		News news = findNewsById(userId, newsId);
+		NewsStatus eStatus = NewsStatus.fromCode(news.getStatus());
+		if(eStatus == NewsStatus.DRAFT){
+			news.setStatus(NewsStatus.ACTIVE.getCode());
+			newsProvider.updateNews(news);
+		}
+	}
 }

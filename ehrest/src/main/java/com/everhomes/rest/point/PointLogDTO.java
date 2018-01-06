@@ -25,6 +25,8 @@ import java.sql.Timestamp;
  *     <li>description: 描述</li>
  *     <li>status: status</li>
  *     <li>createTime: createTime</li>
+ *     <li>extra: extra</li>
+ *     <li>discountPrice: 给</li>
  * </ul>
  */
 public class PointLogDTO {
@@ -48,6 +50,9 @@ public class PointLogDTO {
     private String description;
     private Byte status;
     private Timestamp createTime;
+    private String extra;
+
+    private Float discountPrice;
 
     public Long getId() {
         return id;
@@ -199,6 +204,22 @@ public class PointLogDTO {
 
     public void setCreateTime(Timestamp createTime) {
         this.createTime = createTime;
+    }
+
+    public String getExtra() {
+        return extra;
+    }
+
+    public void setExtra(String extra) {
+        this.extra = extra;
+    }
+
+    public Float getDiscountPrice() {
+        return discountPrice;
+    }
+
+    public void setDiscountPrice(Float discountPrice) {
+        this.discountPrice = discountPrice;
     }
 
     @Override

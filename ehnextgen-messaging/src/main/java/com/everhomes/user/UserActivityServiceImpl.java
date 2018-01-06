@@ -5,9 +5,6 @@ import com.everhomes.address.Address;
 import com.everhomes.address.AddressProvider;
 import com.everhomes.address.AddressService;
 import com.everhomes.bootstrap.PlatformContext;
-import com.everhomes.bus.LocalEventBus;
-import com.everhomes.bus.LocalEventContext;
-import com.everhomes.bus.SystemEvent;
 import com.everhomes.business.Business;
 import com.everhomes.business.BusinessProvider;
 import com.everhomes.community.Community;
@@ -50,12 +47,10 @@ import com.everhomes.rest.ui.user.UserProfileDTO;
 import com.everhomes.rest.user.*;
 import com.everhomes.rest.version.VersionRequestCommand;
 import com.everhomes.rest.version.VersionUrlResponse;
-import com.everhomes.rest.visibility.VisibleRegionType;
 import com.everhomes.rest.yellowPage.GetRequestInfoResponse;
 import com.everhomes.scheduler.RunningFlag;
 import com.everhomes.scheduler.ScheduleProvider;
 import com.everhomes.server.schema.tables.pojos.EhCommunities;
-import com.everhomes.server.schema.tables.pojos.EhForumPosts;
 import com.everhomes.settings.PaginationConfigHelper;
 import com.everhomes.statistics.terminal.AppVersion;
 import com.everhomes.statistics.terminal.StatTerminalProvider;
@@ -467,19 +462,32 @@ public class UserActivityServiceImpl implements UserActivityService {
 
     @Override
     public void addFeedback(FeedbackCommand cmd) {
-    	
-    	//如果post已经被删除，则不能在举报了。 add by yanjun 20170510
-    	if(cmd.getTargetType() == FeedbackTargetType.POST.getCode()){
-    		Post post = forumProvider.findPostById(cmd.getTargetId());
-    		if(post != null && post.getStatus() != PostStatus.ACTIVE.getCode()){
-    			LOGGER.error("Forum post already deleted, " + "topicId=" + cmd.getTargetId());
-    			throw RuntimeErrorException.errorWith(ForumServiceErrorCode.SCOPE,
-    					ForumServiceErrorCode.ERROR_FORUM_TOPIC_DELETED, "post was deleted"); 
-    		}
-    	}
-    	
+
+
+        FeedbackHandler handler = getFeedBackHandler(cmd.getTargetType());
+
+        dbProvider.execute(status -> {
+
+            if(handler != null){
+                //业务实现
+                handler.beforeAddFeedback(cmd);
+            }
+
+            Feedback feedback = addFeedbackCommon(cmd);
+
+            if(handler != null){
+                //业务实现
+                handler.afterAddFeedback(feedback);
+            }
+
+            return null;
+        });
+
+    }
+
+    private Feedback addFeedbackCommon(FeedbackCommand cmd){
         User user = UserContext.current().getUser();
-        
+
         Feedback feedback = ConvertHelper.convert(cmd, Feedback.class);
         feedback.setNamespaceId(UserContext.getCurrentNamespaceId());
         feedback.setStatus(Byte.parseByte("0"));
@@ -496,35 +504,17 @@ public class UserActivityServiceImpl implements UserActivityService {
         }
         feedback.setCreateTime(new Timestamp(DateHelper.currentGMTTime().getTime()));
         userActivityProvider.addFeedback(feedback, feedback.getOwnerUid());
-        
-        if(cmd.getFeedbackType()== null || cmd.getFeedbackType() == 0){
-        	NewTopicCommand ntc = new NewTopicCommand();
-        	ntc.setForumId(ForumConstants.FEEDBACK_FORUM);
-        	ntc.setCreatorTag(EntityType.USER.getCode());
-        	ntc.setTargetTag(EntityType.USER.getCode());
-        	ntc.setContentCategory(feedback.getContentCategory());
-//        	ntc.setActionCategory(actionCategory);
-        	ntc.setSubject(feedback.getSubject());
-        	if(feedback.getProofResourceUri() == null || "".equals(feedback.getProofResourceUri()))
-        		ntc.setContentType(PostContentType.TEXT.getCode());
-        	else{
-        		ntc.setContentType(PostContentType.IMAGE.getCode());
-        	}
-        	ntc.setContent(feedback.getContent());
-        	ntc.setVisibleRegionType(VisibleRegionType.COMMUNITY.getCode());
-        	ntc.setVisibleRegionId(0L);
-        	
-        	forumService.createTopic(ntc);
-        }
+        return feedback;
     }
 
     @Override
-    public ListFeedbacksResponse ListFeedbacks(ListFeedbacksCommand cmd) {
+    public ListFeedbacksResponse listFeedbacks(ListFeedbacksCommand cmd) {
     	ListFeedbacksResponse response = new ListFeedbacksResponse();
     	CrossShardListingLocator locator = new CrossShardListingLocator();
     	locator.setAnchor(cmd.getPageAnchor());
     	int pageSize = PaginationConfigHelper.getPageSize(configurationProvider, cmd.getPageSize());
-    	List<Feedback> results = userActivityProvider.ListFeedbacks(locator, UserContext.getCurrentNamespaceId(), FeedbackTargetType.POST.getCode(), cmd.getStatus(), pageSize + 1);
+//    	List<Feedback> results = userActivityProvider.ListFeedbacks(locator, UserContext.getCurrentNamespaceId(), FeedbackTargetType.POST.getCode(), cmd.getStatus(), pageSize + 1);
+    	List<Feedback> results = userActivityProvider.ListFeedbacks(locator, UserContext.getCurrentNamespaceId(), null, cmd.getStatus(), pageSize + 1);
     	if (null == results)
     		return response;
     	Long nextPageAnchor = null;
@@ -540,18 +530,16 @@ public class UserActivityServiceImpl implements UserActivityService {
     		if(user != null){
     			feedbackDto.setOwnerNickName(user.getNickName());
     		}
-    		//获取被举报对象的标题，默认取post，其他类型不管。
-    		if(feedbackDto.getTargetType() == FeedbackTargetType.POST.getCode()){
-    			Post post = forumProvider.findPostById(feedbackDto.getTargetId());
-        		if(post != null){
-        			feedbackDto.setTargetSubject(post.getSubject());
-        			feedbackDto.setForumId(post.getForumId());
-        			feedbackDto.setTargetStatus(post.getStatus());
-        		}
-    		}
+
     		FeedbackContentCategoryType contentCategory = FeedbackContentCategoryType.fromStatus(feedbackDto.getContentCategory().byteValue());
     		feedbackDto.setContentCategoryText(contentCategory.getText());
-    		
+
+            FeedbackHandler handler = getFeedBackHandler(feedbackDto.getTargetType());
+            if(handler != null){
+                //业务实现
+                handler.populateFeedbackDTO(feedbackDto);
+            }
+
     		feedbackDtos.add(feedbackDto);
     	});
     	response.setNextPageAnchor(nextPageAnchor); 
@@ -561,73 +549,83 @@ public class UserActivityServiceImpl implements UserActivityService {
 
 	@Override
 	public void updateFeedback(UpdateFeedbackCommand cmd) {
-		Feedback feedback = userActivityProvider.findFeedbackById(cmd.getId());
-		if(feedback == null){
-			LOGGER.error("feedback is not exist");
+        Feedback feedback = userActivityProvider.findFeedbackById(cmd.getId());
+        if (feedback == null) {
+            LOGGER.error("feedback is not exist");
             throw RuntimeErrorException.errorWith(UserServiceErrorCode.SCOPE,
                     UserServiceErrorCode.ERROR_INVALID_PARAMS, "feedback is not exist");
-		}
-		feedback.setStatus((byte)1);
-		feedback.setVerifyType(cmd.getVerifyType());
-		feedback.setHandleType(cmd.getHandleType());
-		//更新自己的状态
-		userActivityProvider.updateFeedback(feedback);
-		
-		//如果处理方式是删除，将相同目标帖子举报的核实状态更新为已处理，处理方式为无
-		if(feedback.getHandleType() == FeedbackHandleType.DELETE.getCode()){
-			userActivityProvider.updateOtherFeedback(feedback.getTargetId(), feedback.getId(), feedback.getVerifyType(), FeedbackHandleType.NONE.getCode());
-		}
-		
-		//当前只对post类型的举报做实际处理，处理的方式只有删除
-		if(feedback.getTargetType() == FeedbackTargetType.POST.getCode() && feedback.getHandleType() == FeedbackHandleType.DELETE.getCode()){
-			 Post post = forumProvider.findPostById(feedback.getTargetId());
-			 if(post != null){
-				 forumService.deletePost(post.getForumId(), post.getId(), null, null, null);
-             }
         }
+        feedback.setStatus((byte) 1);
+        feedback.setVerifyType(cmd.getVerifyType());
+        feedback.setHandleType(cmd.getHandleType());
+        FeedbackHandler handler = getFeedBackHandler(feedback.getTargetType());
 
-        //举报管理事件 add by yanjun 20171211
-        feedbackEvent(feedback);
+        dbProvider.execute(status -> {
+
+            if (handler != null) {
+                //业务实现
+                handler.beforeUpdateFeedback(cmd);
+            }
+
+            //更新自己的状态
+            userActivityProvider.updateFeedback(feedback);
+            //如果处理方式是删除，将相同目标帖子举报的核实状态更新为已处理，处理方式为无
+            if (feedback.getHandleType() == FeedbackHandleType.DELETE.getCode()) {
+                userActivityProvider.updateOtherFeedback(feedback.getTargetId(), feedback.getId(), feedback.getVerifyType(), FeedbackHandleType.NONE.getCode());
+            }
+
+            if (handler != null) {
+                //业务实现
+                handler.afterUpdateFeedback(feedback);
+            }
+
+            return null;
+        });
+
+        //事件处理（比如扣积分等）
+        if (handler != null) {
+            handler.feedbackEvent(feedback);
+        }
     }
 
-    private void feedbackEvent(Feedback feedback){
-        //此处只对接帖子的举报
-        if (feedback.getTargetType() != FeedbackTargetType.POST.getCode()) {
-            return;
+    private FeedbackHandler getFeedBackHandler(Byte feedbackTargetType){
+        FeedbackHandler handler = null;
+        if(feedbackTargetType != null) {
+            handler = PlatformContext.getComponent(FeedbackHandler.FEEDBACKHANDLER + feedbackTargetType);
         }
-        if (FeedbackVerifyType.fromStatus(feedback.getVerifyType()) == FeedbackVerifyType.FALSE) {
-            return;
-        }
+        return handler;
+    }
+//		//更新自己的状态
+//		userActivityProvider.updateFeedback(feedback);
+//
+//		//如果处理方式是删除，将相同目标帖子举报的核实状态更新为已处理，处理方式为无
+//		if(feedback.getHandleType() == FeedbackHandleType.DELETE.getCode()){
+//			userActivityProvider.updateOtherFeedback(feedback.getTargetId(), feedback.getId(), feedback.getVerifyType(), FeedbackHandleType.NONE.getCode());
+//		}
+//
+//		//当前只对post类型的举报做实际处理，处理的方式只有删除
+//		if(feedback.getTargetType() == FeedbackTargetType.POST.getCode() && feedback.getHandleType() == FeedbackHandleType.DELETE.getCode()){
+//			 Post post = forumProvider.findPostById(feedback.getTargetId());
+//			 if(post != null){
+//				 forumService.deletePost(post.getForumId(), post.getId(), null, null, null);
+//             }
+//        }
+
+
+//    }
+
+    /*private void feedbackEvent(Feedback feedback) {
         Post post = forumProvider.findPostById(feedback.getTargetId());
-        if(post == null){
+        if(post == null) {
             return;
         }
-
-        /*String eventName = null;
-        switch (ForumModuleType.fromCode(post.getModuleType())){
-            case FORUM:
-                eventName = SystemEvent.FORUM_POST_REPORT.suffix(post.getModuleCategoryId());
-                break;
-            case ACTIVITY:
-                eventName = SystemEvent.ACTIVITY_ACTIVITY_REPORT.suffix(post.getModuleCategoryId());
-                break;
-            case ANNOUNCEMENT:
-                break;
-            case CLUB:
-                break;
-            case GUILD:
-                break;
-            case FEEDBACK:
-                break;
+        Post parentPost = null;
+        if (post.getParentPostId() != null && post.getParentPostId() != 0) {
+            parentPost = forumProvider.findPostById(post.getParentPostId());
         }
-        if(eventName == null){
-            return;
-        }
-
-        final String finalEventName = eventName;*/
-
         Integer namespaceId = UserContext.getCurrentNamespaceId();
 
+        Post tempParentPost = parentPost;
         LocalEventBus.publish(event -> {
             LocalEventContext context = new LocalEventContext();
             context.setUid(post.getCreatorUid());
@@ -636,10 +634,18 @@ public class UserActivityServiceImpl implements UserActivityService {
 
             event.setEntityType(EhForumPosts.class.getSimpleName());
             event.setEntityId(post.getId());
+            Long embeddedAppId = post.getEmbeddedAppId() != null ? post.getEmbeddedAppId() : 0;
             event.setEventName(SystemEvent.FORUM_POST_REPORT.suffix(
-                    post.getContentCategory(), post.getModuleType(), post.getModuleCategoryId()));
+                    post.getModuleType(), post.getModuleCategoryId(), embeddedAppId));
+
+            event.addParam("embeddedAppId", String.valueOf(embeddedAppId));
+            event.addParam("feedback", StringHelper.toJsonString(feedback));
+            event.addParam("post", StringHelper.toJsonString(post));
+            if (tempParentPost != null) {
+                event.addParam("parentPost", StringHelper.toJsonString(tempParentPost));
+            }
         });
-    }
+    }*/
 	
     @Override
     public void addUserFavorite(AddUserFavoriteCommand cmd) {
@@ -858,10 +864,6 @@ public class UserActivityServiceImpl implements UserActivityService {
     @Override
     public GetUserTreasureResponse getUserTreasureV2() {
         GetUserTreasureResponse rsp = new GetUserTreasureResponse();
-        UserTreasureDTO point = new UserTreasureDTO();
-        point.setCount(0L);
-        point.setStatus(TrueOrFalseFlag.TRUE.getCode());
-        point.setUrlStatus(TrueOrFalseFlag.FALSE.getCode());
 
         UserTreasureDTO coupon = new UserTreasureDTO();
         coupon.setCount(0L);
@@ -874,8 +876,10 @@ public class UserActivityServiceImpl implements UserActivityService {
         order.setUrlStatus(TrueOrFalseFlag.FALSE.getCode());
 
         rsp.setCoupon(coupon);
-        rsp.setPoint(point);
         rsp.setOrder(order);
+
+        UserTreasureDTO point = pointService.getPointTreasure();
+        rsp.setPoint(point);
 
         if(!userService.isLogon()) {
             return rsp;
@@ -883,14 +887,18 @@ public class UserActivityServiceImpl implements UserActivityService {
 
         User user = UserContext.current().getUser();
 
-        UserProfile couponCount = userActivityProvider.findUserProfileBySpecialKey(user.getId(), UserProfileContstant.RECEIVED_COUPON_COUNT);
-        UserProfile orderCount = userActivityProvider.findUserProfileBySpecialKey(user.getId(), UserProfileContstant.RECEIVED_ORDER_COUNT);
+        BizMyUserCenterCountResponse response = fetchBizMyUserCenterCount(user);
 
-        if(couponCount != null) {
-            coupon.setCount(NumberUtils.toLong(couponCount.getItemValue(), 0));
-        }
-        if(orderCount != null) {
-            order.setCount(NumberUtils.toLong(orderCount.getItemValue(), 0));
+        // UserProfile couponCount = userActivityProvider.findUserProfileBySpecialKey(user.getId(), UserProfileContstant.RECEIVED_COUPON_COUNT);
+        // UserProfile orderCount = userActivityProvider.findUserProfileBySpecialKey(user.getId(), UserProfileContstant.RECEIVED_ORDER_COUNT);
+
+        if (response != null && response.getResponse() != null) {
+            long promotionCount = response.getResponse().promotionCount;
+            long shoppingCardCount = response.getResponse().shoppingCardCount;
+            long orderCount = response.getResponse().orderCount;
+
+            coupon.setCount(promotionCount + shoppingCardCount);
+            order.setCount(orderCount);
         }
 
         coupon.setUrl(getMyCoupon());
@@ -899,9 +907,36 @@ public class UserActivityServiceImpl implements UserActivityService {
         order.setUrl(getMyOrderUrl());
         order.setUrlStatus(TrueOrFalseFlag.TRUE.getCode());
 
-        pointService.processUserPoint(point);
-
         return rsp;
+    }
+
+    private BizMyUserCenterCountResponse fetchBizMyUserCenterCount(User user) {
+        Map<String, Object> param = new HashMap<>();
+        param.put("namespaceId", user.getNamespaceId());
+        param.put("userId", user.getId());
+
+        Map<String, Object> bodyMap = new HashMap<>();
+        bodyMap.put("body", param);
+
+        String paramJson = StringHelper.toJsonString(bodyMap);
+
+        BizMyUserCenterCountResponse response = null;
+        try {
+            if (LOGGER.isDebugEnabled()) {
+                LOGGER.debug("Fetch user treasure from biz, param = {}", paramJson);
+            }
+            ResponseEntity<String> responseEntity = bizHttpRestCallProvider.syncRestCall(
+                    "/rest/openapi/myCenter/myUserCenterCount", paramJson);
+
+            String body = responseEntity.getBody();
+            if (LOGGER.isDebugEnabled()) {
+                LOGGER.debug("Fetch user treasure from biz, response = {}", body);
+            }
+            response = (BizMyUserCenterCountResponse) StringHelper.fromJsonString(body, BizMyUserCenterCountResponse.class);
+        } catch (Exception e) {
+            LOGGER.error("User treasure biz call error", e);
+        }
+        return response;
     }
 
     @Override

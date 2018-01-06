@@ -6,12 +6,18 @@ import java.util.List;
 import com.everhomes.discover.ItemType;
 import com.everhomes.util.StringHelper;
 
+/**
+ * <ul>
+ *     <li>poll: poll {@link com.everhomes.rest.poll.PollDTO}</li>
+ *     <li>items: items {@link com.everhomes.rest.poll.PollItemDTO}</li>
+ * </ul>
+ */
 public class PollShowResultResponse {
     private PollDTO poll;
-    
+
     @ItemType(PollItemDTO.class)
     private List<PollItemDTO> items;
-    
+
     public PollShowResultResponse() {
     }
 
@@ -30,7 +36,7 @@ public class PollShowResultResponse {
     public void setItems(List<PollItemDTO> items) {
         this.items = items;
     }
-    
+
     public String toString() {
         return StringHelper.toJsonString(this);
     }

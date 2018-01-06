@@ -884,17 +884,20 @@ public class OrganizationServiceImpl implements OrganizationService {
             }
             dto.setId(organization.getId());
             dto.setEnterpriseName(organization.getName());
-            if(dto.getEnterpriseName() == null || com.mysql.jdbc.StringUtils.isNullOrEmpty(dto.getEnterpriseName()))
-                dto.setEnterpriseName(org.getDisplayName());
+            if(org != null) {
+                if(dto.getEnterpriseName() == null || com.mysql.jdbc.StringUtils.isNullOrEmpty(dto.getEnterpriseName()))
+                    dto.setEnterpriseName(org.getDisplayName());
+
+                dto.setAvatarUri(org.getAvatar());
+                if (!StringUtils.isEmpty(org.getAvatar()))
+                    dto.setAvatarUrl(contentServerService.parserUri(dto.getAvatarUri(), EntityType.ORGANIZATIONS.getCode(), organization.getId()));
+
+            }
 
             String pinyin = PinYinHelper.getPinYin(dto.getEnterpriseName());
             dto.setFullInitial(PinYinHelper.getFullCapitalInitial(pinyin));
             dto.setFullPinyin(pinyin.replaceAll(" ", ""));
             dto.setInitial(PinYinHelper.getCapitalInitial(dto.getFullPinyin()));
-
-            dto.setAvatarUri(org.getAvatar());
-            if (!StringUtils.isEmpty(org.getAvatar()))
-                dto.setAvatarUrl(contentServerService.parserUri(dto.getAvatarUri(), EntityType.ORGANIZATIONS.getCode(), organization.getId()));
 
             List<OrganizationAddress> organizationAddresses = organizationProvider.findOrganizationAddressByOrganizationId(organization.getId());
 
@@ -3104,7 +3107,7 @@ public class OrganizationServiceImpl implements OrganizationService {
                 if (scopeStrs.length == 2) {
                     if (EntityType.AUTHORIZATION_RELATION == EntityType.fromCode(scopeStrs[0])) {
                         AuthorizationRelation authorizationRelation = authorizationProvider.findAuthorizationRelationById(Long.valueOf(scopeStrs[1]));
-                        if (EntityType.fromCode(authorizationRelation.getOwnerType()) == EntityType.ORGANIZATIONS) {
+                        if (authorizationRelation != null && EntityType.fromCode(authorizationRelation.getOwnerType()) == EntityType.ORGANIZATIONS) {
                             organizationIds.add(authorizationRelation.getOwnerId());
                         }
                     }
@@ -10891,6 +10894,7 @@ public class OrganizationServiceImpl implements OrganizationService {
         List<OrganizationTreeDTO> trees = new ArrayList<OrganizationTreeDTO>();
         OrganizationTreeDTO allTreeDTO = ConvertHelper.convert(dto, OrganizationTreeDTO.class);
         allTreeDTO.setOrganizationName("全部");
+        allTreeDTO.setOrder(Integer.valueOf(-1));
         trees.add(allTreeDTO);
         for (OrganizationTreeDTO orgTreeDTO : dtos) {
             if (orgTreeDTO.getParentId().equals(dto.getOrganizationId())) {
@@ -14236,24 +14240,8 @@ public class OrganizationServiceImpl implements OrganizationService {
 
     @Override
     public void checkOrganizationpPivilege(Long orgId, Long pivilegeId){
-        ListServiceModuleAppsCommand listServiceModuleAppsCommand = new ListServiceModuleAppsCommand();
-        listServiceModuleAppsCommand.setNamespaceId(UserContext.getCurrentNamespaceId());
-        listServiceModuleAppsCommand.setModuleId(FlowConstants.ORGANIZATION_MODULE);
-        ListServiceModuleAppsResponse apps = portalService.listServiceModuleAppsWithConditon(listServiceModuleAppsCommand);
         Long organizaitonId = getTopEnterpriserIdOfOrganization(orgId);
-        Long appId = null;
-        if(null != apps && apps.getServiceModuleApps().size() > 0){
-            appId = apps.getServiceModuleApps().get(0).getId();
-        }
-        if (null != apps) {
-            if(!userPrivilegeMgr.checkUserPrivilege(UserContext.currentUserId(), EntityType.ORGANIZATIONS.getCode(), organizaitonId, organizaitonId, pivilegeId, appId, orgId, null)){
-                LOGGER.error("error_no_privileged. orgId = {}, userId = {}, pivilegeId={}", orgId, UserContext.currentUserId(), pivilegeId);
-                throw RuntimeErrorException.errorWith(PrivilegeServiceErrorCode.SCOPE, PrivilegeServiceErrorCode.ERROR_CHECK_APP_PRIVILEGE,
-                        "check app privilege error");
-            }
-        }else{
-            LOGGER.error("no appId. rgId = {}, userId = {}", orgId, UserContext.currentUserId());
-        }
+        userPrivilegeMgr.checkUserPrivilege(UserContext.currentUserId(), organizaitonId, pivilegeId, FlowConstants.ORGANIZATION_MODULE, null, null, orgId, null);
     }
 
     @Override

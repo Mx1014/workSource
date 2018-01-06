@@ -17,7 +17,7 @@ import java.util.List;
  * <li>formGroups: 表单控件组 {@link com.everhomes.rest.general_approval.GeneralFormGroupDTO}</li>
  * <li>approvalAttribute: 表单属性 比如: DEFAULT-系统默认 参考{@link com.everhomes.rest.general_approval.GeneralApprovalAttribute}</li>
  * <li>modifyFlag: 是否可修改 0-不可修改 1-可以修改</li>
- * <li>deleteFlag: 是否可修改 0-不可删除 1-可以删除</li>
+ * <li>deleteFlag: 是否可删除 0-不可删除 1-可以删除</li>
  * </ul>
  * @author janson
  *

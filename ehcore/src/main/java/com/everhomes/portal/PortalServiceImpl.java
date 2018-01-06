@@ -20,6 +20,7 @@ import com.everhomes.listing.ListingQueryBuilderCallback;
 import com.everhomes.module.ServiceModule;
 import com.everhomes.module.ServiceModuleProvider;
 import com.everhomes.module.ServiceModuleService;
+import com.everhomes.namespace.NamespacesService;
 import com.everhomes.organization.Organization;
 import com.everhomes.organization.OrganizationCommunityRequest;
 import com.everhomes.organization.OrganizationProvider;
@@ -30,6 +31,7 @@ import com.everhomes.rest.common.ScopeType;
 import com.everhomes.rest.community.CommunityDoc;
 import com.everhomes.rest.community.CommunityType;
 import com.everhomes.rest.launchpad.*;
+import com.everhomes.rest.namespace.admin.NamespaceInfoDTO;
 import com.everhomes.rest.organization.OrganizationGroupType;
 import com.everhomes.rest.organization.OrganizationType;
 import com.everhomes.rest.organization.SearchOrganizationCommand;
@@ -129,6 +131,9 @@ public class PortalServiceImpl implements PortalService {
 
 	@Autowired
 	private ServiceModuleService serviceModuleService;
+
+	@Autowired
+	private NamespacesService namespacesService;
 
 	@Override
 	public ListServiceModuleAppsResponse listServiceModuleApps(ListServiceModuleAppsCommand cmd) {
@@ -1783,34 +1788,32 @@ public class PortalServiceImpl implements PortalService {
 			list.add(new Tuple<>(cmd.getLocation(), cmd.getName()));
 		}
 
+		List<NamespaceInfoDTO> namespaceInfoDTOS = new ArrayList<>();
+		if(cmd.getNamespaceId() != null){
+			NamespaceInfoDTO newdto = new NamespaceInfoDTO();
+			newdto.setId(cmd.getNamespaceId());
+			namespaceInfoDTOS.add(newdto);
+		}else {
+			namespaceInfoDTOS = namespacesService.listNamespace();
+		}
 
-		Integer namespaceId = UserContext.getCurrentNamespaceId();
-		User user = userProvider.findUserById(UserContext.currentUserId());
-		//执行太慢，开一个线程来做
-		ExecutorUtil.submit(new Runnable() {
-			@Override
-			public void run() {
-				try {
-					UserContext.setCurrentNamespaceId(namespaceId);
-					UserContext.setCurrentUser(user);
+		for(NamespaceInfoDTO dto: namespaceInfoDTOS){
+			//一个个域空间同步
+			try {
 
+				LOGGER.info("syncLaunchPadData namespaceId={}  start", dto.getId());
+				dbProvider.execute((status -> {
 					for (Tuple<String, String> t: list) {
-						dbProvider.execute(status -> {
-							syncLayout(cmd.getNamespaceId(), t.first(), t.second());
-							return null;
-						});
+						syncLayout(dto.getId(), t.first(), t.second());
 					}
+					return null;
+				}));
+				LOGGER.info("syncLaunchPadData namespaceId={}  end", dto.getId());
 
-					//设置完成之后要清空
-					UserContext.setCurrentNamespaceId(null);
-					UserContext.setCurrentUser(null);
-				} catch (Exception e) {
-					LOGGER.error("syncLaunchPadData error", e);
-				}
+			} catch (Exception e) {
+				LOGGER.error("syncLaunchPadData namespaceId=" + dto.getId() + "  end", e);
 			}
-		});
-
-
+		}
 
 	}
 
@@ -2091,7 +2094,7 @@ public class PortalServiceImpl implements PortalService {
 		moduleApp.setOperatorUid(user.getId());
 
 		ServiceModule serviceModule = null;
-		if(ActionType.fromCode(actionType) == ActionType.OFFICIAL_URL || ActionType.ROUTER == ActionType.fromCode(actionType)){
+		if(ActionType.fromCode(actionType) == ActionType.OFFICIAL_URL || ActionType.ROUTER == ActionType.fromCode(actionType) || ActionType.OFFLINE_WEBAPP  == ActionType.fromCode(actionType)){
 			Set<String> beans = PortalUrlParserBeanUtil.getkeys();
 			Long moduleId = 0L;
 			for (String bean : beans) {
@@ -2106,7 +2109,7 @@ public class PortalServiceImpl implements PortalService {
 					}
 				}
 			}
-		}else if(ActionType.OFFLINE_WEBAPP  == ActionType.fromCode(actionType) || ActionType.THIRDPART_URL  == ActionType.fromCode(actionType) ){
+		}else if(ActionType.THIRDPART_URL  == ActionType.fromCode(actionType) ){
 			return moduleApp;
 		}else{
 			List<ServiceModule> serviceModules = serviceModuleProvider.listServiceModule(actionType);

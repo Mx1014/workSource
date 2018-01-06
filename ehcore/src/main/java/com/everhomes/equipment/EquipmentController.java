@@ -90,7 +90,7 @@ public class EquipmentController extends ControllerBase {
 		response.setErrorDescription("OK");
 		return response;
 	}
-	
+
 	/**
 	 * <b>URL: /equipment/findEquipmentStandard</b>
 	 * <p>根据id查询巡检标准</p>
@@ -1139,6 +1139,21 @@ public class EquipmentController extends ControllerBase {
 	@RestReturn(value = FieldItemDTO.class)
 	public RestResponse findScopeFieldItemByBusinessValue (findScopeFieldItemCommand cmd) {
 		RestResponse response = new RestResponse(equipmentService.findScopeFieldItemByFieldItemId(cmd));
+		response.setErrorCode(ErrorCodes.SUCCESS);
+		response.setErrorDescription("OK");
+		return response;
+	}
+
+	/**
+	 * <b>URL: /equipment/syscTemplates</b>
+	 * <p>不同域空间下巡检模板全部应用到对应域空间下所有项目</p>
+	 */
+	@RequestMapping("distributeTemplates")
+	@RestReturn(value = String.class)
+	public RestResponse distribute () {
+
+		equipmentService.distributeTemplates();
+		RestResponse response = new RestResponse();
 		response.setErrorCode(ErrorCodes.SUCCESS);
 		response.setErrorDescription("OK");
 		return response;

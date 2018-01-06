@@ -41,6 +41,8 @@ public interface ParkingService {
 
     ListParkingCardRequestResponse searchParkingCardRequests(SearchParkingCardRequestsCommand cmd);
 
+    void exportParkingCardRequests(SearchParkingCardRequestsCommand cmd, HttpServletResponse response);
+
     void setParkingLotConfig(SetParkingLotConfigCommand cmd);
 
     void notifyParkingRechargeOrderPayment(PayCallbackCommand cmd);
@@ -84,7 +86,7 @@ public interface ParkingService {
 
     ParkingRechargeOrderDTO updateParkingOrder(UpdateParkingOrderCommand cmd);
 
-    void refundParkingOrder(UpdateParkingOrderCommand cmd);
+    void refundParkingOrder(RefundParkingOrderCommand cmd);
 
     DeferredResult getRechargeOrderResult(GetRechargeResultCommand cmd);
 

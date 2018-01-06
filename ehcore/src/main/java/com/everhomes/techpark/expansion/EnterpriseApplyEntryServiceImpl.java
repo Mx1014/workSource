@@ -37,6 +37,7 @@ import com.everhomes.openapi.Contract;
 import com.everhomes.openapi.ContractBuildingMappingProvider;
 import com.everhomes.openapi.ContractProvider;
 import com.everhomes.organization.*;
+import com.everhomes.portal.PortalService;
 import com.everhomes.rest.acl.ListServiceModuleAdministratorsCommand;
 import com.everhomes.rest.acl.ProjectDTO;
 import com.everhomes.rest.address.AddressDTO;
@@ -48,6 +49,8 @@ import com.everhomes.rest.flow.*;
 import com.everhomes.rest.general_approval.*;
 import com.everhomes.rest.organization.OrganizationContactDTO;
 import com.everhomes.rest.pmtask.PmTaskErrorCode;
+import com.everhomes.rest.portal.ListServiceModuleAppsCommand;
+import com.everhomes.rest.portal.ListServiceModuleAppsResponse;
 import com.everhomes.rest.rentalv2.NormalFlag;
 import com.everhomes.rest.sms.SmsTemplateCode;
 import com.everhomes.rest.techpark.expansion.*;
@@ -118,6 +121,9 @@ public class EnterpriseApplyEntryServiceImpl implements EnterpriseApplyEntryServ
 	private GeneralFormProvider generalFormProvider;
 	private EnterpriseApplyBuildingProvider enterpriseApplyBuildingProvider;
 	private LocaleStringService localeStringService;
+
+	@Autowired
+	private PortalService portalService;
 
 	@Override
 	public GetEnterpriseDetailByIdResponse getEnterpriseDetailById(GetEnterpriseDetailByIdCommand cmd) {
@@ -719,6 +725,17 @@ public class EnterpriseApplyEntryServiceImpl implements EnterpriseApplyEntryServ
 		flowCaseCmd.setProjectId(projectId);
 		flowCaseCmd.setCurrentOrganizationId(request.getEnterpriseId());
 		flowCaseCmd.setServiceType("园区入驻");
+
+
+		ListServiceModuleAppsCommand listServiceModuleAppsCommand = new ListServiceModuleAppsCommand();
+		listServiceModuleAppsCommand.setNamespaceId(UserContext.getCurrentNamespaceId());
+		listServiceModuleAppsCommand.setModuleId(40100L);
+		ListServiceModuleAppsResponse apps = portalService.listServiceModuleAppsWithConditon(listServiceModuleAppsCommand);
+
+		if (apps!=null && apps.getServiceModuleApps().size()>0)
+			flowCaseCmd.setTitle(apps.getServiceModuleApps().get(0).getName());
+		else
+			flowCaseCmd.setTitle("园区入驻");
 
 		return flowService.createFlowCase(flowCaseCmd);
 

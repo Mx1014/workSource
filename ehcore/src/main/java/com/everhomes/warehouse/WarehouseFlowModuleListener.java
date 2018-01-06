@@ -1,10 +1,7 @@
 package com.everhomes.warehouse;
 
 import com.everhomes.flow.*;
-import com.everhomes.rest.flow.FlowCaseEntity;
-import com.everhomes.rest.flow.FlowCaseStatus;
-import com.everhomes.rest.flow.FlowModuleDTO;
-import com.everhomes.rest.flow.FlowUserType;
+import com.everhomes.rest.flow.*;
 import com.everhomes.rest.warehouse.ReviewResult;
 import com.everhomes.search.WarehouseRequestMaterialSearcher;
 import com.everhomes.user.UserProvider;
@@ -16,7 +13,9 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
 
 import java.sql.Timestamp;
+import java.util.ArrayList;
 import java.util.List;
+import java.util.Set;
 
 /**
  * Created by ying.xiong on 2017/5/17.
@@ -30,6 +29,20 @@ public class WarehouseFlowModuleListener implements FlowModuleListener {
 
     @Autowired
     private UserProvider userProvider;
+
+    @Override
+    public List<FlowServiceTypeDTO> listServiceTypes(Integer namespaceId, String ownerType, Long ownerId) {
+        List<FlowServiceTypeDTO> list = new ArrayList<>();
+        FlowServiceTypeDTO dto = new FlowServiceTypeDTO();
+        Set<Long> namespaceIds = warehouseProvider.findWarehouseNamespace();
+            if(namespaceIds.contains(Long.valueOf(namespaceId))){
+                dto.setNamespaceId(namespaceId);
+                dto.setId(null);
+                dto.setServiceName(warehouseProvider.findWarehouseMenuName());
+                list.add(dto);
+        }
+        return list;
+    }
 
     @Autowired
     private WarehouseProvider warehouseProvider;
@@ -88,7 +101,7 @@ public class WarehouseFlowModuleListener implements FlowModuleListener {
         FlowCase flowCase = ctx.getFlowCase();
         Long operatorId = ctx.getOperator().getId();
         Timestamp current = new Timestamp(DateHelper.currentGMTTime().getTime());
-        WarehouseRequests request = warehouseProvider.findWarehouseRequests(flowCase.getReferId(), flowCase.getProjectType(), flowCase.getProjectId());
+        WarehouseRequests request = warehouseProvider.findWarehouseRequests(flowCase.getReferId(),null , flowCase.getOrganizationId(),flowCase.getProjectId());
         if(FlowCaseStatus.ABSORTED.equals(FlowCaseStatus.fromCode(flowCase.getStatus()))) {
             request.setReviewResult(ReviewResult.UNQUALIFIED.getCode());
             request.setUpdateTime(current);
@@ -105,7 +118,7 @@ public class WarehouseFlowModuleListener implements FlowModuleListener {
     }
 
     private void updateWarehouseRequestMaterials(WarehouseRequests request, Long operatorId) {
-        List<WarehouseRequestMaterials> materials = warehouseProvider.listWarehouseRequestMaterials(request.getId(), request.getOwnerType(), request.getOwnerId());
+        List<WarehouseRequestMaterials> materials = warehouseProvider.listWarehouseRequestMaterials(request.getId(), request.getOwnerType(), request.getOwnerId(),request.getCommunityId());
         if(materials != null && materials.size() > 0) {
             Timestamp current = new Timestamp(DateHelper.currentGMTTime().getTime());
             materials.forEach(material -> {

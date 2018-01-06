@@ -1,13 +1,19 @@
 package com.everhomes.contract;
 
+import com.everhomes.community.Community;
+import com.everhomes.community.CommunityProvider;
 import com.everhomes.openapi.Contract;
 import com.everhomes.openapi.ContractBuildingMapping;
 import com.everhomes.openapi.ContractBuildingMappingProvider;
 import com.everhomes.openapi.ContractProvider;
 import com.everhomes.organization.pm.CommunityAddressMapping;
 import com.everhomes.organization.pm.PropertyMgrProvider;
+import com.everhomes.organization.pm.PropertyMgrService;
+import com.everhomes.rest.contract.ContractParamDTO;
 import com.everhomes.rest.contract.ContractStatus;
+import com.everhomes.rest.contract.GetContractParamCommand;
 import com.everhomes.rest.contract.PeriodUnit;
+import com.everhomes.rest.customer.CustomerType;
 import com.everhomes.rest.organization.pm.AddressMappingStatus;
 import com.everhomes.scheduler.ScheduleProvider;
 import com.everhomes.search.ContractSearcher;
@@ -53,6 +59,11 @@ public class ContractScheduleJob extends QuartzJobBean {
 
     @Autowired
     private PropertyMgrProvider propertyMgrProvider;
+    @Autowired
+    private PropertyMgrService propertyMgrService;
+
+    @Autowired
+    private CommunityProvider communityProvider;
 
     @Override
     protected void executeInternal(JobExecutionContext context) throws JobExecutionException {
@@ -60,7 +71,16 @@ public class ContractScheduleJob extends QuartzJobBean {
         Map<Long, List<Contract>> contracts = contractProvider.listContractGroupByCommunity();
         if(contracts != null && contracts.size() > 0) {
             contracts.forEach((communityId, contractList) -> {
-                ContractParam param = contractProvider.findContractParamByCommunityId(communityId);
+                Community community = communityProvider.findCommunityById(communityId);
+                if(community == null) {
+                    return;
+                }
+
+                ContractParam communityExist = contractProvider.findContractParamByCommunityId(community.getNamespaceId(), communityId);
+                if(communityExist == null && communityId != null) {
+                    communityExist = contractProvider.findContractParamByCommunityId(community.getNamespaceId(), null);
+                }
+                ContractParam param = communityExist;
                 if(param != null) {
                     if(contractList != null) {
                         contractList.forEach(contract -> {
@@ -102,10 +122,15 @@ public class ContractScheduleJob extends QuartzJobBean {
 
     private void dealAddressLivingStatus(Contract contract, byte livingStatus) {
         List<ContractBuildingMapping> mappings = contractBuildingMappingProvider.listByContract(contract.getId());
+        boolean individualFlag = CustomerType.INDIVIDUAL.equals(CustomerType.fromStatus(contract.getCustomerType())) ? true : false;
         mappings.forEach(mapping -> {
             CommunityAddressMapping addressMapping = propertyMgrProvider.findAddressMappingByAddressId(mapping.getAddressId());
             addressMapping.setLivingStatus(livingStatus);
             propertyMgrProvider.updateOrganizationAddressMapping(addressMapping);
+
+            if(individualFlag) {
+                propertyMgrService.addAddressToOrganizationOwner(contract.getNamespaceId(), mapping.getAddressId(), contract.getCustomerId());
+            }
         });
     }
 

@@ -72,6 +72,7 @@ public interface CustomerService {
     void deleteCustomerEntryInfo(DeleteCustomerEntryInfoCommand cmd);
     CustomerEntryInfoDTO getCustomerEntryInfo(GetCustomerEntryInfoCommand cmd);
     List<CustomerEntryInfoDTO> listCustomerEntryInfos(ListCustomerEntryInfosCommand cmd);
+    List<CustomerEntryInfoDTO> listCustomerEntryInfosWithoutAuth(ListCustomerEntryInfosCommand cmd);
 
     void createCustomerDepartureInfo(CreateCustomerDepartureInfoCommand cmd);
     void updateCustomerDepartureInfo(UpdateCustomerDepartureInfoCommand cmd);
@@ -128,5 +129,10 @@ public interface CustomerService {
     void deleteCustomerAccount(DeleteCustomerAccountCommand cmd);
     CustomerAccountDTO getCustomerAccount(GetCustomerAccountCommand cmd);
     List<CustomerAccountDTO> listCustomerAccounts(ListCustomerAccountsCommand cmd);
+
+    void checkCustomerAuth(Integer namespaceId, Long privilegeId, Long orgId, Long communityId);
+
+    SearchEnterpriseCustomerResponse queryEnterpriseCustomers(SearchEnterpriseCustomerCommand cmd);
+
 
 }

@@ -299,7 +299,18 @@ public class ParkingController extends ControllerBase {
         response.setErrorDescription("OK");
         return response;
     }
-    
+
+    /**
+     * <b>URL: /parking/exportParkingCardRequests</b>
+     * <p>导出指定园区/小区、停车场、车牌对应的月卡申请列表</p>
+     */
+    @RequestMapping("exportParkingCardRequests")
+    @RestReturn(value=ListParkingCardRequestResponse.class)
+    public void exportParkingCardRequests(SearchParkingCardRequestsCommand cmd, HttpServletResponse response) {
+
+        parkingService.exportParkingCardRequests(cmd, response);
+    }
+
     /**
      * <b>URL: /parking/requestParkingCard</b>
      * <p>申请月卡</p>
@@ -329,9 +340,10 @@ public class ParkingController extends ControllerBase {
         response.setErrorDescription("OK");
         return response;
     }
-    
+
     /**
      * <b>URL: /parking/setParkingLotConfig</b>
+     * <p>设置充值参数</p>
      */
     @RequestMapping("setParkingLotConfig")
     @RestReturn(value=String.class)
@@ -377,7 +389,7 @@ public class ParkingController extends ControllerBase {
     
     /**
      * <b>URL: /parking/getParkingRequestCardAgreement</b>
-     * <p>获取申请月卡参数</p>
+     * <p>获取申请月卡协议内容</p>
      */
     @RequireAuthentication(false)
     @RequestMapping("getParkingRequestCardAgreement")
@@ -583,11 +595,11 @@ public class ParkingController extends ControllerBase {
 
     /**
      * <b>URL: /parking/refundParkingOrder</b>
-     * <p>更新订单</p>
+     * <p>退款</p>
      */
     @RequestMapping("refundParkingOrder")
     @RestReturn(value=String.class)
-    public RestResponse refundParkingOrder(UpdateParkingOrderCommand cmd) {
+    public RestResponse refundParkingOrder(RefundParkingOrderCommand cmd) {
 
         parkingService.refundParkingOrder(cmd);
         RestResponse response = new RestResponse();

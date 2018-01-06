@@ -10,7 +10,8 @@ import com.everhomes.util.StringHelper;
  * <li>ownerId: ownerId</li>  
  * <li>pageAnchor: 不解释</li>  
  * <li>pageSize: 不解释</li>  
- * <li>serviceType: topic的serviceType</li>   
+ * <li>serviceType: topic的serviceType</li>
+ * <li>namespaceId: 域空间</li>
  * </ul>
  */
 public class GetHotlineListCommand {
@@ -25,6 +26,8 @@ public class GetHotlineListCommand {
 	private Integer pageSize;
 
 	private Byte  serviceType;
+
+	private Integer namespaceId;
 
 	public String getOwnerType() {
 		return ownerType;
@@ -65,10 +68,16 @@ public class GetHotlineListCommand {
 	public void setServiceType(Byte serviceType) {
 		this.serviceType = serviceType;
 	}
-	
 
-	 
-    @Override
+	public Integer getNamespaceId() {
+		return namespaceId;
+	}
+
+	public void setNamespaceId(Integer namespaceId) {
+		this.namespaceId = namespaceId;
+	}
+
+	@Override
     public String toString() {
         return StringHelper.toJsonString(this);
     } 

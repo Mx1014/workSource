@@ -1152,7 +1152,8 @@ INSERT INTO `eh_web_menu_scopes`(`id`, `menu_id`,`menu_name`, `owner_type`, `own
 SET @module_scope_id = (SELECT MAX(id) FROM `eh_service_module_scopes`);
 INSERT INTO `eh_service_module_scopes` (`id`, `namespace_id`, `module_id`, `module_name`, `owner_type`, `owner_id`, `default_order`, `apply_policy`) VALUES ((@module_scope_id := @module_scope_id + 1), '999991', '40300', '', 'EhNamespaces', '999991', NULL, '2');
 
-
+-- 删除 smart 租车 by liyanheng
+delete from eh_launch_pad_items where item_label = "smart租车" and namespace_id = 999991 and item_group = "resourceGroup";
 
 
 

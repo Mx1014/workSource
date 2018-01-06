@@ -232,60 +232,39 @@ public class FlowListenerManagerImpl implements FlowListenerManager, Application
         return null;
     }
 
-    /*@Override
-    public List<FlowPredefinedParamDTO> listFlowPredefinedParam(Flow flow, FlowEntityType flowEntityType, String ownerType, Long ownerId) {
-        FlowModuleInst inst = moduleMap.get(flow.getModuleId());
-        if (inst != null) {
-            FlowModuleListener listener = inst.getListener();
-            List<FlowPredefinedParamDTO> dtoList = null;
-            try {
-                dtoList = listener.listFlowPredefinedParam(flow, flowEntityType, ownerType, ownerId);
-            } catch (Exception e) {
-                wrapError(e, listener);
-            }
-            if (dtoList != null) {
-                return dtoList;
-            }
-        }
-        return new ArrayList<>();
-    }*/
-
     @Override
     public List<FlowServiceTypeDTO> listFlowServiceTypes(Integer namespaceId, Long moduleId, String ownerType, Long ownerId) {
-        List<FlowServiceTypeDTO> serviceTypes = new ArrayList<>();
         if (moduleId != null) {
             FlowModuleInst moduleInst = moduleMap.get(moduleId);
             if (moduleInst != null) {
-                FlowModuleListener listener = moduleInst.getListener();
-                try {
-                    List<FlowServiceTypeDTO> types = listener.listServiceTypes(namespaceId, ownerType, ownerId);
-                    if (types != null) {
-                        for (FlowServiceTypeDTO type : types) {
-                            type.setModuleId(moduleId);
-                        }
-                        serviceTypes.addAll(types);
-                    }
-                } catch (Exception e) {
-                    wrapError(e, listener);
+                List<FlowServiceTypeDTO> types = listFlowServiceTypesFromListener(moduleInst, namespaceId, ownerType, ownerId);
+                if (types != null) {
+                    types.forEach(r -> r.setModuleId(moduleId));
+                    return types;
                 }
             }
         } else {
+            List<FlowServiceTypeDTO> serviceTypes = new ArrayList<>();
             moduleMap.forEach((k, v) -> {
-                FlowModuleListener listener = v.getListener();
-                try {
-                    List<FlowServiceTypeDTO> types = listener.listServiceTypes(namespaceId, ownerType, ownerId);
-                    if (types != null) {
-                        for (FlowServiceTypeDTO type : types) {
-                            type.setModuleId(k);
-                        }
-                        serviceTypes.addAll(types);
-                    }
-                } catch (Exception e) {
-                    wrapError(e, listener);
+                List<FlowServiceTypeDTO> types = listFlowServiceTypesFromListener(v, namespaceId, ownerType, ownerId);
+                if (types != null) {
+                    types.forEach(r -> r.setModuleId(k));
+                    serviceTypes.addAll(types);
                 }
             });
+            return serviceTypes;
         }
-        return serviceTypes;
+        return null;
+    }
+
+    private List<FlowServiceTypeDTO> listFlowServiceTypesFromListener(FlowModuleInst moduleInst, Integer namespaceId, String ownerType, Long ownerId) {
+        FlowModuleListener listener = moduleInst.getListener();
+        try {
+            return listener.listServiceTypes(namespaceId, ownerType, ownerId);
+        } catch (Exception e) {
+            wrapError(e, listener);
+            throw e; // always not reach here
+        }
     }
 
     @Override
@@ -389,7 +368,7 @@ public class FlowListenerManagerImpl implements FlowListenerManager, Application
         }
     }
 
-    private void wrapError(Exception e, FlowModuleListener listener) {
+    private void wrapError(Exception e, FlowModuleListener listener) throws RuntimeException {
         if (e instanceof RuntimeErrorException) {
             throw ((RuntimeErrorException) e);
         }

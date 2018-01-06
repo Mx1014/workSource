@@ -110,9 +110,11 @@ public enum CoordinationLocks {
 
 	POINT_UPDATE_RULE_CATEGORY_SERVER_ID("point.update.ruleCategory.serverId"),
 	POINT_UPDATE_POINT_SCORE("point.update.pointScore"),
+	POINT_CATEGORY_SCHEDULE("point.category.schedule"),
 
     SYNC_CONTRACT("sync.contract"),
-    FORUM_SETTING("forum.setting")
+    FORUM_SETTING("forum.setting"),
+    AUTH_RELATION("auth_relation")
     ;
 
     private String code;
