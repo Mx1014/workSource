@@ -225,7 +225,6 @@ import org.apache.poi.ss.usermodel.Row;
 import org.apache.poi.ss.usermodel.Sheet;
 import org.apache.poi.ss.usermodel.Workbook;
 import org.apache.poi.xssf.usermodel.XSSFWorkbook;
-import org.bouncycastle.asn1.cms.TimeStampAndCRL;
 import org.elasticsearch.common.geo.GeoHashUtils;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -455,9 +454,8 @@ public class EquipmentServiceImpl implements EquipmentService {
 			}
 
 			equipmentProvider.deleteEquipmentPlansMapByStandardId(standard.getId());//删除标准对应的巡检对象列表中对应条目
-
+			equipmentProvider.deleteEquipmentInspectionStandardMapByStandardId(cmd.getId());//删除修改标准相关的巡检对象关联表
 		}
-		equipmentProvider.deleteEquipmentInspectionStandardMapByStandardId(cmd.getId());//删除修改标准相关的巡检对象关联表
 		createEquipmentStandardsEquipmentsMap(standard, cmd.getEquipments());//创建新的巡检对象和标准关联表
 
 		return converStandardToDto(standard);
@@ -1015,7 +1013,7 @@ private void checkUserPrivilege(Long orgId, Long privilegeId, Long communityId) 
 		if (EquipmentPlanStatus.WATTING_FOR_APPOVING.equals(EquipmentPlanStatus.fromStatus(plan.getStatus()))) {
 			plan.setStatus(cmd.getReviewResult());
 			//plan.setPlanMainId(0L);
-			plan.setReviewerId(UserContext.currentUserId());
+			plan.setReviewerUid(UserContext.currentUserId());
 			plan.setReviewTime(new Timestamp(DateHelper.currentGMTTime().getTime()));
 			equipmentProvider.updateEquipmentInspectionPlan(plan);
 			equipmentPlanSearcher.feedDoc(plan);
