@@ -225,6 +225,7 @@ import org.apache.poi.ss.usermodel.Row;
 import org.apache.poi.ss.usermodel.Sheet;
 import org.apache.poi.ss.usermodel.Workbook;
 import org.apache.poi.xssf.usermodel.XSSFWorkbook;
+import org.bouncycastle.asn1.cms.TimeStampAndCRL;
 import org.elasticsearch.common.geo.GeoHashUtils;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -1014,6 +1015,8 @@ private void checkUserPrivilege(Long orgId, Long privilegeId, Long communityId) 
 		if (EquipmentPlanStatus.WATTING_FOR_APPOVING.equals(EquipmentPlanStatus.fromStatus(plan.getStatus()))) {
 			plan.setStatus(cmd.getReviewResult());
 			//plan.setPlanMainId(0L);
+			plan.setReviewerId(UserContext.currentUserId());
+			plan.setReviewTime(new Timestamp(DateHelper.currentGMTTime().getTime()));
 			equipmentProvider.updateEquipmentInspectionPlan(plan);
 			equipmentPlanSearcher.feedDoc(plan);
 //			//处理原始计划和main_id
