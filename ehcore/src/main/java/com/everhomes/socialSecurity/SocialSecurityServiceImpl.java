@@ -276,10 +276,13 @@ public class SocialSecurityServiceImpl implements SocialSecurityService {
         if (null != afBases) {
             ssBases.addAll(afBases);
         }
-        List<OrganizationMemberDetails> details = organizationProvider.listOrganizationMemberDetails(ownerId);
+        //TODO:
+        List<Long> detailIds = archivesService.listSocialSecurityEmployees(ownerId, null,null,null);
+//        List<OrganizationMemberDetails> details = organizationProvider.listOrganizationMemberDetails(ownerId);
         Long id = sequenceProvider.getNextSequence(NameMapper.getSequenceDomainFromTablePojo(EhSocialSecuritySettings.class));
         List<EhSocialSecuritySettings> settings = new ArrayList<>();
-        for (OrganizationMemberDetails detail : details) {
+        for (Long detailId : detailIds) {
+            OrganizationMemberDetails detail = organizationProvider.findOrganizationMemberDetailsByDetailId(detailId);
             id = saveSocialSecuritySettings(ssBases, cityId, ownerId, detail.getTargetId(), detail.getId(), detail.getNamespaceId(), id, settings);
 //            id = saveSocialSecuritySettings(afBases, cityId, ownerId, detail.getTargetId(), detail.getId(), detail.getNamespaceId(), id, settings);
         }
