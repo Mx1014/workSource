@@ -42,6 +42,8 @@ import com.everhomes.rest.organization.*;
 import com.everhomes.rest.pmtask.*;
 import com.everhomes.rest.portal.ListServiceModuleAppsCommand;
 import com.everhomes.rest.portal.ListServiceModuleAppsResponse;
+import com.everhomes.rest.ui.user.SceneTokenDTO;
+import com.everhomes.rest.ui.user.SceneType;
 import com.everhomes.scheduler.RunningFlag;
 import com.everhomes.scheduler.ScheduleProvider;
 import com.everhomes.user.*;
@@ -158,6 +160,8 @@ public class PmTaskServiceImpl implements PmTaskService {
 	private CommunityService communityService;
 	@Autowired
 	private PortalService portalService;
+	@Autowired
+	private UserService userService;
 
 	@Override
 	public SearchTasksResponse searchTasks(SearchTasksCommand cmd) {
@@ -1966,6 +1970,67 @@ public class PmTaskServiceImpl implements PmTaskService {
 	}
 
 	@Override
+	public ListOrganizationCommunityBySceneTokenResponse listOrganizationCommunityBySceneToken(ListOrganizationCommunityBySceneTokenCommand cmd) {
+		SceneTokenDTO sceneTokenDTO = null;
+		if (null != cmd.getSceneToken()) {
+			User user = UserContext.current().getUser();
+			sceneTokenDTO = userService.checkSceneToken(user.getId(), cmd.getSceneToken());
+		}
+		if (sceneTokenDTO==null)
+			return null;
+		ListOrganizationCommunityBySceneTokenResponse response = new ListOrganizationCommunityBySceneTokenResponse();
+		SceneType sceneType = SceneType.fromCode(sceneTokenDTO.getScene());
+		List<Community> communities = new ArrayList<>();
+		List<CommunityDTO> result = new ArrayList<>();
+		Community community = null;
+		switch (sceneType) {
+			case DEFAULT:
+			case PARK_TOURIST:
+			case ENTERPRISE_NOAUTH:
+				community = communityProvider.findCommunityById(sceneTokenDTO.getEntityId());
+				if (community != null)
+					communities.add(community);
+
+				break;
+			case FAMILY:
+				FamilyDTO family = familyProvider.getFamilyById(sceneTokenDTO.getEntityId());
+
+				if (family != null) {
+					community = communityProvider.findCommunityById(family.getCommunityId());
+				} else {
+					if (LOGGER.isWarnEnabled()) {
+						LOGGER.warn("Family not found, sceneToken=" + sceneTokenDTO);
+					}
+				}
+				if (community != null) {
+					communities.add(community);
+				}
+
+				break;
+			case PM_ADMIN:// 无小区ID
+				communities.addAll(communityProvider.listCommunitiesByNamespaceId(UserContext.getCurrentNamespaceId()));
+				break;
+			case ENTERPRISE: // 增加两场景，与园区企业保持一致
+				List<OrganizationDTO> organizationDTOS = organizationService.listUserRelateOrganizations(
+						UserContext.getCurrentNamespaceId(),UserContext.currentUserId(),OrganizationGroupType.ENTERPRISE);
+
+				communities.addAll(organizationDTOS.stream().map(r->{
+					Community co = communityProvider.findCommunityById(r.getCommunityId());
+					return co;
+				}).collect(Collectors.toList()));
+				break;
+			default:
+				LOGGER.error("Unsupported scene for simple user, sceneToken=" + sceneTokenDTO);
+				break;
+		}
+		communities.forEach(r->{
+			result.add(ConvertHelper.convert(r, CommunityDTO.class));
+		});
+		response.setCommunities(result);
+		return response;
+	}
+
+	@Override
 	public GetUserRelatedAddressByCommunityResponse getUserRelatedAddressesByCommunity(GetUserRelatedAddressesByCommunityCommand cmd) {
 
 		GetUserRelatedAddressByCommunityResponse response = new GetUserRelatedAddressByCommunityResponse();
@@ -2133,6 +2198,19 @@ public class PmTaskServiceImpl implements PmTaskService {
 		Integer namespaceId = cmd.getNamespaceId()==null ? UserContext.getCurrentNamespaceId():cmd.getNamespaceId();
 		GetIfHideRepresentResponse response = new GetIfHideRepresentResponse();
 		response.setIfHide(configProvider.getIntValue(namespaceId,"pmtask.hide.represent",0));
+
+		SceneTokenDTO sceneTokenDTO = null;
+		if (null != cmd.getSceneToken()) {
+			User user = UserContext.current().getUser();
+			sceneTokenDTO = userService.checkSceneToken(user.getId(), cmd.getSceneToken());
+		}
+		Integer ifAdmain = 0;
+		if (sceneTokenDTO != null) {
+			String scene = sceneTokenDTO.getScene();
+			if (SceneType.PM_ADMIN.getCode().equals(scene))
+				ifAdmain = 1;
+		}
+		response.setIfHide(response.getIfHide()&ifAdmain);
 		return response;
 	}
 

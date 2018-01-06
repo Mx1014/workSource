@@ -288,6 +288,20 @@ public class PmTaskController extends ControllerBase {
 	}
 
     /**
+     * <b>URL: /pmtask/listOrganizationCommunityBySceneToken</b>
+     * <p>获取机构人员 办公地点小区列表</p>
+     */
+    @RequestMapping("listOrganizationCommunityBySceneToken")
+    @RestReturn(value=ListOrganizationCommunityBySceneTokenResponse.class)
+    public RestResponse listOrganizationCommunityBySceneToken(ListOrganizationCommunityBySceneTokenCommand cmd) {
+        ListOrganizationCommunityBySceneTokenResponse resp = pmTaskService.listOrganizationCommunityBySceneToken(cmd);
+        RestResponse response = new RestResponse(resp);
+        response.setErrorCode(ErrorCodes.SUCCESS);
+        response.setErrorDescription("OK");
+        return response;
+    }
+
+    /**
      * <b>URL: /pmtask/listAuthorizationCommunityByUser</b>
      * <p>授权人员 管理小区列表</p>
      */

@@ -89,6 +89,8 @@ public interface PmTaskService {
 
 	ListAuthorizationCommunityByUserResponse listOrganizationCommunityByUser(ListOrganizationCommunityByUserCommand cmd);
 
+	ListOrganizationCommunityBySceneTokenResponse listOrganizationCommunityBySceneToken(ListOrganizationCommunityBySceneTokenCommand cmd);
+
 	void syncTaskStatistics(HttpServletResponse resp);
 
 	void syncCategories();
