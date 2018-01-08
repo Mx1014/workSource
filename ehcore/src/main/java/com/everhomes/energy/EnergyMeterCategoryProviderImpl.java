@@ -99,8 +99,8 @@ public class EnergyMeterCategoryProviderImpl implements EnergyMeterCategoryProvi
         }
 
         if(lastUpdateTime != null) {
-            query.addConditions(EH_ENERGY_METER_CATEGORIES.CREATE_TIME.ge(lastUpdateTime)
-            .or(EH_ENERGY_METER_CATEGORIES.UPDATE_TIME.ge(lastUpdateTime)));
+            query.addConditions(EH_ENERGY_METER_CATEGORIES.CREATE_TIME.gt(lastUpdateTime)
+            .or(EH_ENERGY_METER_CATEGORIES.UPDATE_TIME.gt(lastUpdateTime)));
         }
         query.fetch().map((r) -> {
             categories.add(ConvertHelper.convert(r, EnergyMeterCategory.class));

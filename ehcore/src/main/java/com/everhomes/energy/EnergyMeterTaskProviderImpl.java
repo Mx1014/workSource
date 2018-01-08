@@ -18,6 +18,8 @@ import com.everhomes.util.ConvertHelper;
 import com.everhomes.util.DateHelper;
 import org.jooq.DSLContext;
 import org.jooq.SelectQuery;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
 
@@ -32,6 +34,7 @@ import java.util.Map;
  */
 @Component
 public class EnergyMeterTaskProviderImpl implements EnergyMeterTaskProvider {
+    private static final Logger LOGGER = LoggerFactory.getLogger(EnergyMeterTaskProviderImpl.class);
     @Autowired
     private DbProvider dbProvider;
 
@@ -126,12 +129,17 @@ public class EnergyMeterTaskProviderImpl implements EnergyMeterTaskProvider {
         query.addConditions(Tables.EH_ENERGY_METER_TASKS.TARGET_ID.eq(targetId));
 
         if(lastUpdateTime != null) {
-            query.addConditions(Tables.EH_ENERGY_METER_TASKS.CREATE_TIME.ge(lastUpdateTime)
-                    .or(Tables.EH_ENERGY_METER_TASKS.UPDATE_TIME.ge(lastUpdateTime)));
+            query.addConditions(Tables.EH_ENERGY_METER_TASKS.CREATE_TIME.gt(lastUpdateTime)
+                    .or(Tables.EH_ENERGY_METER_TASKS.UPDATE_TIME.gt(lastUpdateTime)));
         }
 
         query.addOrderBy(Tables.EH_ENERGY_METER_TASKS.PLAN_ID, Tables.EH_ENERGY_METER_TASKS.DEFAULT_ORDER);
         query.addLimit(pageSize);
+
+        if(LOGGER.isDebugEnabled()) {
+            LOGGER.debug("listEnergyMeterTasksByPlan, sql=" + query.getSQL());
+            LOGGER.debug("listEnergyMeterTasksByPlan, bindValues=" + query.getBindValues());
+        }
         query.fetch().map((r) -> {
             tasks.add(ConvertHelper.convert(r, EnergyMeterTask.class));
             return null;

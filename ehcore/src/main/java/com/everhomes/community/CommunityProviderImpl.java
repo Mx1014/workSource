@@ -787,8 +787,8 @@ public class CommunityProviderImpl implements CommunityProvider {
         }
 
         if(lastUpdateTime != null) {
-            query.addConditions(Tables.EH_BUILDINGS.CREATE_TIME.ge(lastUpdateTime)
-                    .or(Tables.EH_BUILDINGS.OPERATE_TIME.ge(lastUpdateTime)));
+            query.addConditions(Tables.EH_BUILDINGS.CREATE_TIME.gt(lastUpdateTime)
+                    .or(Tables.EH_BUILDINGS.OPERATE_TIME.gt(lastUpdateTime)));
         }
 
         query.addConditions(Tables.EH_BUILDINGS.STATUS.eq(CommunityAdminStatus.ACTIVE.getCode()));
