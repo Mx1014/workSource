@@ -1104,7 +1104,7 @@ public class SocialSecurityServiceImpl implements SocialSecurityService {
                 return;
             }
         }
-        addImportItemDTO(dtos, syRadix, "100%", "0%", AccumOrSocial.SOCAIL, "残障金");
+        addImportItemDTO(dtos, syRadix, "100%", "0%", AccumOrSocial.SOCAIL, "商业保险");
 
         for (SocialSecurityItemDTO item : dtos) {
             SocialSecuritySetting setting = findSetting(item.getAccumOrSocial(), item.getPayItem(), settings);
