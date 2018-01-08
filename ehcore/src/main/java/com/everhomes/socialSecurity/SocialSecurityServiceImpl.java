@@ -1436,7 +1436,7 @@ public class SocialSecurityServiceImpl implements SocialSecurityService {
         SocialSecurityEmployeeDTO dto = getSocialSecurityEmployeeInfo(detailId);
         //TODO: 这里以后也要改
         if (dto.getDismissTime() != null && Integer.valueOf(payMonth) >=
-                Integer.valueOf(dateSF.get().format(dto.getDismissTime()))) {
+                Integer.valueOf(monthSF.get().format(dto.getDismissTime()))) {
             return IsWork.IS_OUT.getCode();
         } else {
             if (null != dto.getCheckInTime() &&
