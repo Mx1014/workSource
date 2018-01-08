@@ -2362,9 +2362,11 @@ public class SocialSecurityServiceImpl implements SocialSecurityService {
         if (result.get(0).getPayMonth().equals(cmd.getPayMonth())) {
             response.setCreateTime(result.get(0).getCreateTime().getTime());
             response.setCreatorUid(result.get(0).getCreatorUid());
+
             response.setFileUid(result.get(0).getFileUid());
             if(null!= result.get(0).getFileTime())
                 response.setFileTime(result.get(0).getFileTime().getTime());
+            processCreatorName(response,cmd.getOwnerId());
             return response;
         }
         SocialSecurityPaymentLog log = socialSecurityPaymentLogProvider.findAnyOneSocialSecurityPaymentLog(cmd.getOwnerId(), cmd.getPayMonth());
@@ -2375,7 +2377,23 @@ public class SocialSecurityServiceImpl implements SocialSecurityService {
         response.setCreatorUid(log.getCreatorUid());
         response.setFileUid(log.getFileUid());
         response.setFileTime(log.getFileTime().getTime());
+        processCreatorName(response,cmd.getOwnerId());
         return response;
+    }
+
+    private void processCreatorName(GetSocialSecurityReportsHeadResponse response, Long ownerId) {
+        if (null != response.getCreatorUid()) {
+            OrganizationMember detail = organizationProvider.findOrganizationMemberByOrgIdAndUId(response.getCreatorUid(), ownerId);
+            if (null != detail) {
+                response.setCreatorName(detail.getContactName());
+            }
+        }
+        if (null != response.getFileUid()) {
+            OrganizationMember detail = organizationProvider.findOrganizationMemberByOrgIdAndUId(response.getFileUid(), ownerId);
+            if (null != detail) {
+                response.setFileName(detail.getContactName());
+            }
+        }
     }
 
     @Override

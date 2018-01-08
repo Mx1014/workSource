@@ -16,9 +16,11 @@ public class GetSocialSecurityReportsHeadResponse {
 
     private String payMonth;
     private Long creatorUid;
+    private String creatorName;
     private Long createTime;
     private Long fileUid;
     private Long fileTime;
+    private String fileName;
 
 
     @Override
@@ -65,5 +67,21 @@ public class GetSocialSecurityReportsHeadResponse {
 
     public void setPayMonth(String payMonth) {
         this.payMonth = payMonth;
+    }
+
+    public String getCreatorName() {
+        return creatorName;
+    }
+
+    public void setCreatorName(String creatorName) {
+        this.creatorName = creatorName;
+    }
+
+    public String getFileName() {
+        return fileName;
+    }
+
+    public void setFileName(String fileName) {
+        this.fileName = fileName;
     }
 }
