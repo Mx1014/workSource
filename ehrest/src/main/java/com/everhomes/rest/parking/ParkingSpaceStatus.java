@@ -6,10 +6,11 @@ package com.everhomes.rest.parking;
  * <ul>
  * <li>OPEN((byte)1): 开放</li>
  * <li>CLOSE((byte)0): 关闭</li>
+ * <li>DELETED((byte)-1): 被删除</li>
  * </ul>
  */
 public enum ParkingSpaceStatus {
-    OPEN((byte)1), CLOSE((byte)0);
+    OPEN((byte)1), CLOSE((byte)0), DELETED((byte)-1);
 
     private byte code;
     private ParkingSpaceStatus(byte code) {

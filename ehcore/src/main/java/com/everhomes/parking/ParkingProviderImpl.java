@@ -160,7 +160,9 @@ public class ParkingProviderImpl implements ParkingProvider {
     private void populateParkingConfigInfo(ParkingLot parkingLot) {
 		String configJson = parkingLot.getConfigJson();
 		ParkingLotConfig temp = JSONObject.parseObject(configJson, ParkingLotConfig.class);
-		BeanUtils.copyProperties(temp, parkingLot);
+		ParkingLotConfig initTemp = new ParkingLotConfig();
+		BeanUtils.copyProperties(temp, initTemp);
+		BeanUtils.copyProperties(initTemp, parkingLot);
 
 //		parkingLot.setTempfeeFlag(temp.getTempfeeFlag());
 //		parkingLot.setRateFlag(temp.getRateFlag());
@@ -1085,7 +1087,7 @@ public class ParkingProviderImpl implements ParkingProvider {
 			query.addConditions(Tables.EH_PARKING_SPACES.LOCK_STATUS.eq(lockStatus));
 		}
 
-		query.addConditions(Tables.EH_PARKING_SPACES.STATUS.ne(ParkingCarVerificationStatus.INACTIVE.getCode()));
+		query.addConditions(Tables.EH_PARKING_SPACES.STATUS.ne(ParkingSpaceStatus.DELETED.getCode()));
 
 		query.addOrderBy(Tables.EH_PARKING_SPACES.ID.asc());
 		if (null != pageSize) {

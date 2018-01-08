@@ -767,4 +767,17 @@ public class Rentalv2AdminController extends ControllerBase {
 		return response;
 	}
 
+	/**
+	 * <b>URL: /rental/admin/searchRentalOrders</b>
+	 * <p>查询订单</p>
+	 */
+	@RequestMapping("searchRentalOrders")
+	@RestReturn(value = SearchRentalOrdersResponse.class)
+	public RestResponse searchRentalOrders(SearchRentalOrdersCommand cmd) {
+
+		RestResponse response = new RestResponse(rentalService.searchRentalOrders(cmd));
+		response.setErrorCode(ErrorCodes.SUCCESS);
+		response.setErrorDescription("OK");
+		return response;
+	}
 }

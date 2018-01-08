@@ -183,4 +183,8 @@ public interface Rentalv2Provider {
 	void deleteRentalOrderRules(String ownerType, Long ownerId, Byte handleType);
 
 	List<RentalOrderRule> listRentalOrderRules(String ownerType, Long ownerId, Byte handleType);
+
+	List<RentalOrder> searchRentalOrders(Long resourceTypeId, String resourceType, Long rentalSiteId, Byte billStatus,
+										 Long startTime, Long endTime, String tag1, String tag2, Long pageAnchor ,
+										 Integer pageSize);
 }

@@ -11,6 +11,7 @@ import com.everhomes.bus.LocalBusOneshotSubscriber;
 import com.everhomes.bus.LocalBusOneshotSubscriberBuilder;
 import com.everhomes.rest.order.PreOrderDTO;
 import com.everhomes.rest.parking.*;
+import com.everhomes.rest.rentalv2.DeleteParkingSpaceCommand;
 import com.everhomes.util.RuntimeErrorException;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.web.bind.annotation.RequestMapping;
@@ -786,6 +787,22 @@ public class ParkingController extends ControllerBase {
     public RestResponse updateParkingSpaceStatus(UpdateParkingSpaceStatusCommand cmd) {
 
         parkingService.updateParkingSpaceStatus(cmd);
+
+        RestResponse response = new RestResponse();
+        response.setErrorCode(ErrorCodes.SUCCESS);
+        response.setErrorDescription("OK");
+        return response;
+    }
+
+    /**
+     * <b>URL: /parking/deleteParkingSpace</b>
+     * <p>删除停车位</p>
+     */
+    @RequestMapping("deleteParkingSpace")
+    @RestReturn(value=String.class)
+    public RestResponse deleteParkingSpace(DeleteParkingSpaceCommand cmd) {
+
+        parkingService.deleteParkingSpace(cmd);
 
         RestResponse response = new RestResponse();
         response.setErrorCode(ErrorCodes.SUCCESS);

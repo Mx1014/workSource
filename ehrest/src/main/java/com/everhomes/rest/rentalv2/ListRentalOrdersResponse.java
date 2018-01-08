@@ -19,8 +19,6 @@ public class ListRentalOrdersResponse {
 
 	@Override
 	public String toString() {
-
-
 		return StringHelper.toJsonString(this);
 	}
 

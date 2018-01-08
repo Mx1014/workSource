@@ -7326,4 +7326,34 @@ public class Rentalv2ServiceImpl implements Rentalv2Service {
 
 
 	}
+
+	@Override
+	public SearchRentalOrdersResponse searchRentalOrders(SearchRentalOrdersCommand cmd) {
+
+		SearchRentalOrdersResponse response = new SearchRentalOrdersResponse();
+
+		Integer pageSize = PaginationConfigHelper.getPageSize(configurationProvider, cmd.getPageSize());
+
+		List<RentalOrder> orders = rentalv2Provider.searchRentalOrders(cmd.getResourceTypeId(), cmd.getResourceType(),
+				cmd.getRentalSiteId(), cmd.getBillStatus(), cmd.getStartTime(), cmd.getEndTime(), cmd.getTag1(),
+				cmd.getTag2(), cmd.getPageAnchor(), pageSize);
+
+		int size = orders.size();
+		if(size > 0){
+			response.setRentalBills(orders.stream().map(r -> {
+				RentalOrderDTO dto = ConvertHelper.convert(r, RentalOrderDTO.class);
+				convertRentalOrderDTO(dto, r);
+				return dto;
+			}).collect(Collectors.toList()));
+
+			if(size != pageSize){
+				response.setNextPageAnchor(null);
+			}else{
+				response.setNextPageAnchor(orders.get(size-1).getReserveTime().getTime());
+			}
+		}
+
+		return response;
+
+	}
 }

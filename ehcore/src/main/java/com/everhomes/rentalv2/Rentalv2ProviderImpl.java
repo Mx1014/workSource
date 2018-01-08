@@ -892,6 +892,45 @@ public class Rentalv2ProviderImpl implements Rentalv2Provider {
 	}
 
 	@Override
+	public List<RentalOrder> searchRentalOrders(Long resourceTypeId, String resourceType, Long rentalSiteId, Byte billStatus,
+												Long startTime, Long endTime, String tag1, String tag2, Long pageAnchor ,
+												Integer pageSize){
+		DSLContext context = dbProvider.getDslContext(AccessSpec.readOnly());
+		SelectJoinStep<Record> step = context.select().from(Tables.EH_RENTALV2_ORDERS);
+
+		Condition condition = Tables.EH_RENTALV2_ORDERS.STATUS.ne(SiteBillStatus.INACTIVE.getCode());
+
+		if (StringUtils.isNotBlank(resourceType))
+			condition = condition.and(Tables.EH_RENTALV2_ORDERS.RESOURCE_TYPE.equal(resourceType));
+		if (StringUtils.isNotBlank(tag1))
+			condition = condition.and(Tables.EH_RENTALV2_ORDERS.STRING_TAG1.equal(tag1));
+		if (StringUtils.isNotBlank(tag2))
+			condition = condition.and(Tables.EH_RENTALV2_ORDERS.STRING_TAG2.equal(tag2));
+		if(null != resourceTypeId)
+			condition = condition.and(Tables.EH_RENTALV2_ORDERS.RESOURCE_TYPE_ID.equal(resourceTypeId));
+		if (null != rentalSiteId)
+			condition = condition.and(Tables.EH_RENTALV2_ORDERS.RENTAL_RESOURCE_ID.equal(rentalSiteId));
+		if (null != startTime) {
+			condition = condition.and(Tables.EH_RENTALV2_ORDERS.RESERVE_TIME.gt(new Timestamp(startTime)));
+		}
+		if (null != endTime) {
+			condition = condition.and(Tables.EH_RENTALV2_ORDERS.RESERVE_TIME.lt(new Timestamp(endTime)));
+		}
+		if (null != billStatus)
+			condition = condition.and(Tables.EH_RENTALV2_ORDERS.STATUS.equal(billStatus));
+
+		if(null != pageAnchor && pageAnchor != 0)
+			condition = condition.and(Tables.EH_RENTALV2_ORDERS.RESERVE_TIME.lt(new Timestamp(pageAnchor)));
+
+		step.orderBy(Tables.EH_RENTALV2_ORDERS.RESERVE_TIME.desc());
+		if (pageSize != null)
+			step.limit(pageSize);
+		step.where(condition);
+
+		return step.fetch().map((r) -> ConvertHelper.convert(r, RentalOrder.class));
+	}
+
+	@Override
 	public List<RentalResource> findRentalSites(Long  resourceTypeId, String keyword, ListingLocator locator,
 			Integer pageSize, Byte status,List<Long> siteIds,Long communityId) {
 		DSLContext context = dbProvider.getDslContext(AccessSpec.readOnly());

@@ -194,4 +194,6 @@ public interface Rentalv2Service {
 	ListRentalOrdersResponse listRentalOrders(ListRentalOrdersCommand cmd);
 
 	RentalOrderDTO getRentalOrderDetail(GetRentalOrderDetailCommand cmd);
+
+	SearchRentalOrdersResponse searchRentalOrders(SearchRentalOrdersCommand cmd);
 }

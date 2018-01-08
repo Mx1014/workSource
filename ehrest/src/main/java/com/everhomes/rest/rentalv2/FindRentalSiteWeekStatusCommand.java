@@ -14,7 +14,7 @@ import com.everhomes.util.StringHelper;
  * <li>priceType: 0 按时长定价 1 起步价模式</li>
  * </ul>
  */
-public class FindRentalSiteWeekStatusCommand {
+public class  FindRentalSiteWeekStatusCommand {
 
 	private String resourceType;
 	@NotNull

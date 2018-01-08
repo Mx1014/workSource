@@ -29,6 +29,7 @@ import com.everhomes.rest.order.*;
 import com.everhomes.rest.parking.*;
 import com.everhomes.rest.pay.controller.CreateOrderRestResponse;
 import com.everhomes.rest.pmtask.PmTaskErrorCode;
+import com.everhomes.rest.rentalv2.DeleteParkingSpaceCommand;
 import com.everhomes.rest.rentalv2.PayZuolinRefundCommand;
 import com.everhomes.rest.rentalv2.PayZuolinRefundResponse;
 import com.everhomes.rest.rentalv2.RentalServiceErrorCode;
@@ -2376,6 +2377,20 @@ public class ParkingServiceImpl implements ParkingService {
 
 		parkingProvider.updateParkingSpace(parkingSpace);
 
+	}
+
+	@Override
+	public void deleteParkingSpace(DeleteParkingSpaceCommand cmd) {
+		ParkingSpace parkingSpace = parkingProvider.findParkingSpaceById(cmd.getId());
+
+		if (null == parkingSpace) {
+			LOGGER.error("ParkingSpace not found, cmd={}", cmd);
+			throw RuntimeErrorException.errorWith(ErrorCodes.SCOPE_GENERAL, ErrorCodes.ERROR_INVALID_PARAMETER,
+					"ParkingSpace not found.");
+		}
+
+		parkingSpace.setStatus(ParkingSpaceStatus.DELETED.getCode());
+		parkingProvider.updateParkingSpace(parkingSpace);
 	}
 
 	@Override
