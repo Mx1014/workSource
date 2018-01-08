@@ -5468,7 +5468,6 @@ public class UserServiceImpl implements UserService {
 		}else if(cmd.getIsAll() == 0){//从上次同步时间的增量
 			SimpleDateFormat  formatter = new SimpleDateFormat ("yyyy-MM-dd HH:mm:ss");
 			timestamp = formatter.format(DateHelper.currentGMTTime());
-//			timestamp = DateHelper.currentGMTTime().getTime();
 		}
 		List<String> timestampList = new ArrayList<>();
 		timestampList.add(timestamp);
@@ -5486,103 +5485,95 @@ public class UserServiceImpl implements UserService {
 		bodyParam.add("client_secret", ANBANG_CLIENTSECRET);
 		bodyParam.add("grant_type", "client_credentials");
 
-		try {
-			ListenableFuture<ResponseEntity<String>> auth_result = restCall(HttpMethod.POST, MediaType.APPLICATION_FORM_URLENCODED, ANBANG_OAUTH_URL, headerParam, bodyParam, new ListenableFutureCallback<ResponseEntity<String>>() {
+		dbProvider.execute(r -> {
+			try {
+				ListenableFuture<ResponseEntity<String>> auth_result = restCall(HttpMethod.POST, MediaType.APPLICATION_FORM_URLENCODED, ANBANG_OAUTH_URL, headerParam, bodyParam, new ListenableFutureCallback<ResponseEntity<String>>() {
 
-				@Override
-				public void onSuccess(ResponseEntity<String> result) {
-					Map resultMap = JSON.parseObject(result.getBody().toString());
-					String acess_token = String.valueOf(resultMap.get("access_token"));
+					@Override
+					public void onSuccess(ResponseEntity<String> result) {
+						Map resultMap = JSON.parseObject(result.getBody().toString());
+						String acess_token = String.valueOf(resultMap.get("access_token"));
 
 
-					Map headerParam = new HashMap();
-					headerParam.put("Authorization", "bearer "+ acess_token);
+						Map headerParam = new HashMap();
+						headerParam.put("Authorization", "bearer "+ acess_token);
 
-					StringBuffer getUrl = new StringBuffer(ANBANG_USERS_URL);
-					if(timestampList.get(0) != null){
-						getUrl.append("?").append("startDate=").append(timestampList.get(0));
-					}
+						StringBuffer getUrl = new StringBuffer(ANBANG_USERS_URL);
+						if(timestampList.get(0) != null){
+							getUrl.append("?").append("startDate=").append(timestampList.get(0));
+						}
 
-					try {
-						ListenableFuture<ResponseEntity<String>> users_result = restCall(HttpMethod.GET, MediaType.APPLICATION_JSON, getUrl.toString() , headerParam, null, new ListenableFutureCallback<ResponseEntity<String>>(){
+						try {
+							ListenableFuture<ResponseEntity<String>> users_result = restCall(HttpMethod.GET, MediaType.APPLICATION_JSON, getUrl.toString() , headerParam, null, new ListenableFutureCallback<ResponseEntity<String>>(){
 
-							@Override
-							public void onSuccess(ResponseEntity<String> result) {
-								List<Map> userList = (List) JSON.parseObject(result.getBody().toString()).get("data");
-								if(userList != null && userList.size() > 0) {
-									if (timestampList.get(0) == null) {//todo 参数为null,为全量同步,同步所有的用户
-										// 删除全部的用户
-										userProvider.deleteUserAndUserIdentifiers(0, null, NamespaceUserType.ANBANG.getCode());
-									}else{  //todo 参数传当前时间,为增量同步，只同步上次同步拘束时间~当前时间的数据
-										//如果有之前同步过的用户，删掉重建
-										List<String> namespaceUserTokens = new ArrayList<>();
-										for (Map userInfo : userList) {
-											namespaceUserTokens.add(userInfo.get("id").toString());
+								@Override
+								public void onSuccess(ResponseEntity<String> result) {
+									List<Map> userList = (List) JSON.parseObject(result.getBody().toString()).get("data");
+									if(userList != null && userList.size() > 0) {
+										if (timestampList.get(0) == null) {//todo 参数为null,为全量同步,同步所有的用户
+											// 删除全部的用户
+											userProvider.deleteUserAndUserIdentifiers(0, null, NamespaceUserType.ANBANG.getCode());
+										}else{  //todo 参数传当前时间,为增量同步，只同步上次同步拘束时间~当前时间的数据
+											//如果有之前同步过的用户，删掉重建
+											List<String> namespaceUserTokens = new ArrayList<>();
+											for (Map userInfo : userList) {
+												namespaceUserTokens.add(userInfo.get("id").toString());
+											}
+											userProvider.deleteUserAndUserIdentifiers(0, namespaceUserTokens, NamespaceUserType.ANBANG.getCode());
 										}
-										userProvider.deleteUserAndUserIdentifiers(0, namespaceUserTokens, NamespaceUserType.ANBANG.getCode());
+										LOGGER.debug("AnBang user size" + userList.size());
+
+										List<User> users = userList.stream().map(r -> {
+											User user = new User();
+											user.setNamespaceId(0);
+											user.setNickName(r.get("nickname") != null ? r.get("nickname").toString() : "");
+											user.setIdentifierToken(r.get("login") != null ? r.get("login").toString() : "");
+											user.setAvatar(r.get("avatar") != null ? r.get("avatar").toString() : "");
+											user.setCreateTime(r.get("createdDate") != null ?Timestamp.valueOf(r.get("createdDate").toString()) : null);
+											user.setPasswordHash(r.get("password") != null ? r.get("password").toString() : "");
+											user.setStatus(UserStatus.ACTIVE.getCode());
+											user.setLocale(Locale.CHINA.toString());
+											user.setNamespaceUserToken(r.get("id") != null ? r.get("id").toString() : "");
+											user.setUpdateTime(new Timestamp(DateHelper.currentGMTTime().getTime()));
+											user.setNamespaceUserType(NamespaceUserType.ANBANG.getCode());
+											user.setThirdData(r.toString());
+											return user;
+										}).collect(Collectors.toList());
+
+										//create
+										createUsersAndUserIdentifiers(users);
 									}
-									LOGGER.debug("AnBang user size" + userList.size());
-
-									List<User> users = userList.stream().map(r -> {
-										User user = new User();
-										user.setNamespaceId(0);
-										user.setNickName(r.get("nickname") != null ? r.get("nickname").toString() : "");
-										user.setIdentifierToken(r.get("login") != null ? r.get("login").toString() : "");
-										user.setAvatar(r.get("avatar") != null ? r.get("avatar").toString() : "");
-//										user.setCreateTime(r.get("createdDate") != null ?Timestamp.valueOf(r.get("createdDate").toString()) : null);
-										user.setPasswordHash(r.get("password") != null ? r.get("password").toString() : "");
-										user.setStatus(UserStatus.ACTIVE.getCode());
-										user.setLocale(Locale.CHINA.toString());
-										user.setNamespaceUserToken(r.get("id") != null ? r.get("id").toString() : "");
-										user.setUpdateTime(new Timestamp(DateHelper.currentGMTTime().getTime()));
-										user.setNamespaceUserType(NamespaceUserType.ANBANG.getCode());
-										user.setThirdData(r.toString());
-										return user;
-									}).collect(Collectors.toList());
-
-									//create
-									createUsersAndUserIdentifiers(users);
 								}
-							}
 
-							@Override
-							public void onFailure(Throwable ex) {
-								LOGGER.error(ex.getMessage());
-								throw RuntimeErrorException.errorWith(ErrorCodes.SCOPE_GENERAL, ErrorCodes.ERROR_GENERAL_EXCEPTION,
-										"Unable to sync2");
-							}
-						});
-					} catch (UnsupportedEncodingException e) {
-						e.printStackTrace();
+								@Override
+								public void onFailure(Throwable ex) {
+									LOGGER.error(ex.getMessage());
+									throw RuntimeErrorException.errorWith(ErrorCodes.SCOPE_GENERAL, ErrorCodes.ERROR_GENERAL_EXCEPTION,
+											"Unable to sync2");
+								}
+							});
+						} catch (UnsupportedEncodingException e) {
+							e.printStackTrace();
+						}
 					}
-				}
 
-				@Override
-				public void onFailure(Throwable ex) {
-					LOGGER.error(ex.getMessage());
-					throw RuntimeErrorException.errorWith(ErrorCodes.SCOPE_GENERAL, ErrorCodes.ERROR_GENERAL_EXCEPTION,
-							"Unable to sync1");
-				}
-			});
-		} catch (UnsupportedEncodingException e) {
-			e.printStackTrace();
-		}
-
+					@Override
+					public void onFailure(Throwable ex) {
+						LOGGER.error(ex.getMessage());
+						throw RuntimeErrorException.errorWith(ErrorCodes.SCOPE_GENERAL, ErrorCodes.ERROR_GENERAL_EXCEPTION,
+								"Unable to sync1");
+					}
+				});
+			} catch (UnsupportedEncodingException e) {
+				e.printStackTrace();
+			}
+			return null;
+		});
 	}
 
 	@Override
 	public void pushUserDemo() {
 		MultiValueMap<String, Object> headerParam = new LinkedMultiValueMap<String, Object>();
-
-//		MultiValueMap<String, Object> bodyParam = new LinkedMultiValueMap<String, Object>();
-//		bodyParam.add("appKey", "578580df-7015-4a42-b61f-b5c0ec0bc38a");
-//		bodyParam.add("timestamp", "client_credentials");
-//		bodyParam.add("nonce", "client_credentials");
-//		bodyParam.add("crypto", "client_credentials");
-//		bodyParam.add("nickName", "client_credentials");
-//		bodyParam.add("identifierToken", "client_credentials");
-//		bodyParam.add("avatar", "client_credentials");
-//		bodyParam.add("signature", this.computeSignature(bodyParam,"S2rPpM5fGsgAx6CeAMTb5R2MOIsHmiScPmqCNR+NsD2TjeUlmuuls6xt1WYO/YqsGnLUMt1RKRnB5xzoVjwOng=="));
 
 		Map bodyMap = new HashMap();
 		bodyMap.put("appKey", "578580df-7015-4a42-b61f-b5c0ec0bc38a");
@@ -5601,8 +5592,6 @@ public class UserServiceImpl implements UserService {
 		bodyParam.add("nickName", "王大发");
 		bodyParam.add("identifierToken", "18617156652");
 		bodyParam.add("avatar", "1231412sjkl;dkjasdj$^&*");
-
-//		bodyParam.put("crypto", "client_credentials");
 
 		bodyParam.add("signature", SignatureHelper.computeSignature(bodyMap,"S2rPpM5fGsgAx6CeAMTb5R2MOIsHmiScPmqCNR+NsD2TjeUlmuuls6xt1WYO/YqsGnLUMt1RKRnB5xzoVjwOng=="));
 
@@ -5702,6 +5691,7 @@ public class UserServiceImpl implements UserService {
 			userIdentifier.setIdentifierToken(user.getIdentifierToken());
 			userIdentifier.setNamespaceId(user.getNamespaceId());
 			userIdentifier.setClaimStatus(IdentifierClaimStatus.CLAIMED.getCode());
+			userIdentifier.setRegionCode(86);
 			this.userProvider.createIdentifier(userIdentifier);
 		}
 
