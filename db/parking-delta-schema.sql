@@ -166,8 +166,8 @@ ADD COLUMN `actual_end_time` datetime DEFAULT NULL COMMENT '实际使用结束�
 ALTER TABLE `eh_rentalv2_orders`
 drop column reserve_money,
 drop column pay_start_time,
-drop column pay_end_time;
-
+drop column pay_end_time,
+drop column resource_type2;
 
 
 
