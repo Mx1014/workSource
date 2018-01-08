@@ -1426,7 +1426,9 @@ public class SocialSecurityServiceImpl implements SocialSecurityService {
         List<OrganizationMemberDetails> details = organizationProvider.listOrganizationMemberDetails(ownerId);
         for (OrganizationMemberDetails detail : details) {
             SocialSecurityReport report = calculateUserSocialSecurityReport(detail, payments);
-            socialSecurityReportProvider.createSocialSecurityReport(report);
+            if (null != report) {
+                socialSecurityReportProvider.createSocialSecurityReport(report);
+            }
         }
     }
 
@@ -1452,6 +1454,9 @@ public class SocialSecurityServiceImpl implements SocialSecurityService {
     private SocialSecurityReport calculateUserSocialSecurityReport(OrganizationMemberDetails detail, List<SocialSecurityPayment> payments) {
         SocialSecurityReport report = newSocialSecurityReport(detail);
         List<SocialSecurityPayment> userPayments = findSSpaymentsByDetail(detail.getId(), payments);
+        if (null == userPayments || userPayments.size() == 0) {
+            return null;
+        }
         report.setPayMonth(userPayments.get(0).getPayMonth());
         report.setCreatorUid(userPayments.get(0).getCreatorUid());
         report.setCreateTime(userPayments.get(0).getCreateTime());
