@@ -162,7 +162,9 @@ ADD COLUMN `user_name` varchar(20) DEFAULT NULL COMMENT '申请人姓名',
 ADD COLUMN `address_id` bigint(20) DEFAULT NULL COMMENT '楼栋门牌ID',
 ADD COLUMN `refund_amount` decimal(10,2) DEFAULT NULL,
 ADD COLUMN `actual_start_time` datetime DEFAULT NULL COMMENT '实际使用开始时间',
-ADD COLUMN `actual_end_time` datetime DEFAULT NULL COMMENT '实际使用结束时间';
+ADD COLUMN `actual_end_time` datetime DEFAULT NULL COMMENT '实际使用结束时间',
+ADD COLUMN `string_tag1` varchar(128) DEFAULT NULL,
+ADD COLUMN `string_tag2` varchar(128) DEFAULT NULL;
 
 ALTER TABLE `eh_rentalv2_orders`
 drop column reserve_money,
