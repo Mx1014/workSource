@@ -4,11 +4,12 @@ package com.everhomes.rest.rentalv2;
 /**
  * 
  * <ul>
+ * <li>DEFAULT: default, 以前的资源预约都默认default</li>
  * <li>VIP_PARKING: vip_parking</li>
  * </ul>
  */
 public enum RentalResourceType {
-	VIP_PARKING("vip_parking");
+	DEFAULT("default"), VIP_PARKING("vip_parking");
 
 	private String code;
 

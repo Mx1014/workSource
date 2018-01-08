@@ -150,9 +150,21 @@ drop column approving_user_weekend_price;
 ALTER TABLE `eh_rentalv2_price_rules`
 ADD COLUMN `user_price_type` tinyint(4) DEFAULT NULL COMMENT '用户价格类型, 1:统一价格 2：用户类型价格';
 
+ALTER TABLE eh_rentalv2_orders CHANGE requestor_organization_id user_enterprise_id bigint(20) DEFAULT NULL COMMENT '申请人公司ID';
+
 ALTER TABLE `eh_rentalv2_orders`
 ADD COLUMN `resource_type` varchar(64) DEFAULT NULL COMMENT '资源类型',
-ADD COLUMN `custom_object` text;
+ADD COLUMN `custom_object` text,
+ADD COLUMN `user_enterprise_name` varchar(64) DEFAULT NULL COMMENT '申请人公司名称',
+ADD COLUMN `user_phone` varchar(20) DEFAULT NULL COMMENT '申请人手机',
+ADD COLUMN `user_name` varchar(20) DEFAULT NULL COMMENT '申请人姓名',
+ADD COLUMN `address_id` bigint(20) DEFAULT NULL COMMENT '楼栋门牌ID';
+
+
+ALTER TABLE `eh_rentalv2_orders`
+drop column reserve_money,
+drop column pay_start_time,
+drop column pay_end_time;
 
 
 
