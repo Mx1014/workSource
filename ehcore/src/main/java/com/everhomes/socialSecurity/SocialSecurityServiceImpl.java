@@ -274,7 +274,7 @@ public class SocialSecurityServiceImpl implements SocialSecurityService {
             ssBases.addAll(afBases);
         }
         //TODO:
-        List<Long> detailIds = archivesService.listSocialSecurityEmployees(ownerId, null,null,null);
+        List<Long> detailIds = archivesService.listSocialSecurityEmployees(ownerId, null, null, null);
 //        List<OrganizationMemberDetails> details = organizationProvider.listOrganizationMemberDetails(ownerId);
         Long id = sequenceProvider.getNextSequence(NameMapper.getSequenceDomainFromTablePojo(EhSocialSecuritySettings.class));
         List<EhSocialSecuritySettings> settings = new ArrayList<>();
@@ -578,7 +578,7 @@ public class SocialSecurityServiceImpl implements SocialSecurityService {
         }
         response.setIdNumber(memberDetail.getIdNumber());
         response.setDetailId(memberDetail.getId());
-        response.setIsWork(getIsWork(memberDetail.getId(),response.getPaymentMonth()));
+        response.setIsWork(getIsWork(memberDetail.getId(), response.getPaymentMonth()));
         response.setUserName(memberDetail.getContactName());
         response.setSocialSecurityNo(memberDetail.getSocialSecurityNumber());
         //社保本月缴费
@@ -1054,7 +1054,7 @@ public class SocialSecurityServiceImpl implements SocialSecurityService {
         }
         String companyString = r.getH();
         String emloyeeString = r.getI();
-        addImportItemDTO(dtos,ssRadix, companyString, emloyeeString, AccumOrSocial.ACCUM, "");
+        addImportItemDTO(dtos, ssRadix, companyString, emloyeeString, AccumOrSocial.ACCUM, "");
         // 养老
 
         companyString = r.getJ();
@@ -1148,7 +1148,7 @@ public class SocialSecurityServiceImpl implements SocialSecurityService {
                 response.getLogs().add(log);
                 return;
             }
-            LOGGER.debug("dto是{} 要更新的setting是{}",item,StringHelper.toJsonString(setting));
+            LOGGER.debug("dto是{} 要更新的setting是{}", item, StringHelper.toJsonString(setting));
             if (setting.getId() == null) {
                 //如果没有id ,说明是新建的setting,同时创建一个payment
                 socialSecuritySettingProvider.createSocialSecuritySetting(setting);
@@ -1241,7 +1241,7 @@ public class SocialSecurityServiceImpl implements SocialSecurityService {
     }
 
     private void addImportItemDTO(List<SocialSecurityItemDTO> dtos, BigDecimal radix, String companyString, String emloyeeString, AccumOrSocial accumOrSocail, String payItem) {
-        if (StringUtils.isNotBlank(companyString) || StringUtils.isNotBlank(emloyeeString) || null != radix ) {
+        if (StringUtils.isNotBlank(companyString) || StringUtils.isNotBlank(emloyeeString) || null != radix) {
             SocialSecurityItemDTO dto = new SocialSecurityItemDTO();
             dto.setAccumOrSocial(accumOrSocail.getCode());
             dto.setPayItem(payItem);
@@ -1432,7 +1432,7 @@ public class SocialSecurityServiceImpl implements SocialSecurityService {
         }
     }
 
-    private Byte getIsWork(Long detailId,String payMonth) {
+    private Byte getIsWork(Long detailId, String payMonth) {
         SocialSecurityEmployeeDTO dto = getSocialSecurityEmployeeInfo(detailId);
         //TODO: 这里以后也要改
         if (dto.getDismissTime() != null && Integer.valueOf(payMonth) >=
@@ -1462,7 +1462,7 @@ public class SocialSecurityServiceImpl implements SocialSecurityService {
         report.setCreateTime(userPayments.get(0).getCreateTime());
         report.setFileUid(userPayments.get(0).getFileUid());
         report.setFileTime(userPayments.get(0).getFileTime());
-        report.setIsWork(getIsWork(detail.getId(),report.getPayMonth()));
+        report.setIsWork(getIsWork(detail.getId(), report.getPayMonth()));
         for (SocialSecurityPayment userPayment : userPayments) {
             report.setCreatorUid(userPayment.getCreatorUid());
             report.setCreateTime(userPayment.getCreateTime());
@@ -1486,7 +1486,7 @@ public class SocialSecurityServiceImpl implements SocialSecurityService {
                     continue;
                 }
                 report.setSocialSecurityCompanySum(calculateAmount(userPayment.getCompanyRadix(), userPayment.getCompanyRatio()
-                        ,report.getSocialSecurityCompanySum()));
+                        , report.getSocialSecurityCompanySum()));
                 report.setSocialSecurityEmployeeSum(calculateAmount(userPayment.getEmployeeRadix(), userPayment.getEmployeeRatio()
                         , report.getSocialSecurityEmployeeSum()));
                 report.setSocialSecuritySum(report.getSocialSecurityCompanySum().add(report.getSocialSecurityEmployeeSum()));
@@ -1604,7 +1604,8 @@ public class SocialSecurityServiceImpl implements SocialSecurityService {
     }
 
     public BigDecimal calculateAmount(BigDecimal radix, Integer ratio, BigDecimal addSum) {
-
+        ratio = (ratio == null) ? 0 : ratio;
+        radix = (radix == null) ? new BigDecimal(0) : radix;
         return radix.multiply(new BigDecimal(ratio)).divide(new BigDecimal(10000), 2, BigDecimal.ROUND_HALF_UP)
                 .add(addSum == null ? new BigDecimal(0) : addSum);
     }
@@ -1927,12 +1928,13 @@ public class SocialSecurityServiceImpl implements SocialSecurityService {
         //如果是null的话会被传成“null”
         params.put("ownerId", cmd.getOwnerId());
         params.put("payMonth", cmd.getPayMonth());
-        params.put("reportType","exportSocialSecurityReports");
+        params.put("reportType", "exportSocialSecurityReports");
         String fileName = String.format("导出社保报表_%s.xlsx", DateUtil.dateToStr(new Date(), DateUtil.NO_SLASH));
 
         taskService.createTask(fileName, TaskType.FILEDOWNLOAD.getCode(), SocialSecurityReportsTaskHandler.class, params, TaskRepeatFlag.REPEAT.getCode(), new Date());
 
     }
+
     @Override
     public OutputStream getSocialSecurityReportsOutputStream(Long ownerId, String payMonth) {
         List<SocialSecurityReport> result = socialSecurityReportProvider.listSocialSecurityReport(ownerId,
@@ -1948,10 +1950,11 @@ public class SocialSecurityServiceImpl implements SocialSecurityService {
         return out;
 
     }
+
     @Override
     public OutputStream getSocialSecurityDepartmentSummarysOutputStream(Long ownerId, String payMonth) {
         List<SocialSecurityDepartmentSummary> result = socialSecurityDepartmentSummaryProvider.listSocialSecurityDepartmentSummary(
-                ownerId,payMonth, null, Integer.MAX_VALUE - 1);
+                ownerId, payMonth, null, Integer.MAX_VALUE - 1);
         Workbook workbook = createSocialSecurityDepartmentSummarysWorkBook(result);
         ByteArrayOutputStream out = new ByteArrayOutputStream();
         try {
@@ -1968,7 +1971,7 @@ public class SocialSecurityServiceImpl implements SocialSecurityService {
     public OutputStream getSocialSecurityInoutReportsOutputStream(Long ownerId, String payMonth) {
 
         List<SocialSecurityInoutReport> result = socialSecurityInoutReportProvider.listSocialSecurityInoutReport(
-                ownerId,payMonth, null, Integer.MAX_VALUE - 1);
+                ownerId, payMonth, null, Integer.MAX_VALUE - 1);
         Workbook workbook = createSocialSecurityInoutReportsWorkBook(result);
         ByteArrayOutputStream out = new ByteArrayOutputStream();
         try {
@@ -1990,7 +1993,7 @@ public class SocialSecurityServiceImpl implements SocialSecurityService {
         //如果是null的话会被传成“null”
         params.put("ownerId", cmd.getOwnerId());
         params.put("payMonth", cmd.getPayMonth());
-        params.put("reportType","exportSocialSecurityInoutReports");
+        params.put("reportType", "exportSocialSecurityInoutReports");
         String fileName = String.format("导出社保部门汇总报表_%s.xlsx", DateUtil.dateToStr(new Date(), DateUtil.NO_SLASH));
 
         taskService.createTask(fileName, TaskType.FILEDOWNLOAD.getCode(), SocialSecurityReportsTaskHandler.class, params, TaskRepeatFlag.REPEAT.getCode(), new Date());
@@ -2006,7 +2009,7 @@ public class SocialSecurityServiceImpl implements SocialSecurityService {
         //如果是null的话会被传成“null”
         params.put("ownerId", cmd.getOwnerId());
         params.put("payMonth", cmd.getPayMonth());
-        params.put("reportType","exportSocialSecurityDepartmentSummarys");
+        params.put("reportType", "exportSocialSecurityDepartmentSummarys");
         String fileName = String.format("导出社保部门汇总报表_%s.xlsx", DateUtil.dateToStr(new Date(), DateUtil.NO_SLASH));
 
         taskService.createTask(fileName, TaskType.FILEDOWNLOAD.getCode(), SocialSecurityReportsTaskHandler.class, params, TaskRepeatFlag.REPEAT.getCode(), new Date());
@@ -2370,9 +2373,9 @@ public class SocialSecurityServiceImpl implements SocialSecurityService {
             response.setCreatorUid(result.get(0).getCreatorUid());
 
             response.setFileUid(result.get(0).getFileUid());
-            if(null!= result.get(0).getFileTime())
+            if (null != result.get(0).getFileTime())
                 response.setFileTime(result.get(0).getFileTime().getTime());
-            processCreatorName(response,cmd.getOwnerId());
+            processCreatorName(response, cmd.getOwnerId());
             return response;
         }
         SocialSecurityPaymentLog log = socialSecurityPaymentLogProvider.findAnyOneSocialSecurityPaymentLog(cmd.getOwnerId(), cmd.getPayMonth());
@@ -2383,7 +2386,7 @@ public class SocialSecurityServiceImpl implements SocialSecurityService {
         response.setCreatorUid(log.getCreatorUid());
         response.setFileUid(log.getFileUid());
         response.setFileTime(log.getFileTime().getTime());
-        processCreatorName(response,cmd.getOwnerId());
+        processCreatorName(response, cmd.getOwnerId());
         return response;
     }
 
@@ -2506,6 +2509,6 @@ public class SocialSecurityServiceImpl implements SocialSecurityService {
     @Override
     public List<Long> listSocialSecurityEmployeeDetailIdsByPayMonth(Long ownerId, String payMonth) {
         List<Long> detailIds = socialSecurityInoutTimeProvider.listSocialSecurityEmployeeDetailIdsByPayMonth(ownerId, payMonth, InOutTimeType.SOCIAL_SECURITY.getCode());
-        return archivesService.listSocialSecurityEmployees(ownerId,null,null,null);
+        return archivesService.listSocialSecurityEmployees(ownerId, null, null, null);
     }
 }
