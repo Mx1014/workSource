@@ -5,6 +5,7 @@ import com.everhomes.configuration.ConfigurationProvider;
 import com.everhomes.listing.ListingLocator;
 import com.everhomes.repeat.RepeatProvider;
 import com.everhomes.repeat.RepeatService;
+import com.everhomes.repeat.RepeatSettings;
 import com.everhomes.rest.equipment.EquipmentInspectionPlanDTO;
 import com.everhomes.rest.equipment.EquipmentPlanStatus;
 import com.everhomes.rest.equipment.searchEquipmentInspectionPlansCommand;
@@ -182,12 +183,15 @@ public class EquipmentPlanSearcherImpl extends AbstractElasticSearch implements 
                 removeMainPlan(plans,plan.getPlanMainId());
             }*/
             //填充执行开始时间  执行频率  执行时长
-            RepeatSettingsDTO repeatSetting =ConvertHelper.
-                    convert(repeatProvider.findRepeatSettingById(plan.getRepeatSettingId()), RepeatSettingsDTO.class);
+            RepeatSettings repeatSettings = repeatProvider.findRepeatSettingById(plan.getRepeatSettingId());
+            if(repeatSettings!=null){
+                RepeatSettingsDTO repeatSettingDTO =ConvertHelper.
+                        convert(repeatProvider.findRepeatSettingById(plan.getRepeatSettingId()), RepeatSettingsDTO.class);
 
-            plan.setExecuteStartTime(repeatService.getExecuteStartTime(repeatSetting));
-            plan.setExecutionFrequency(repeatService.getExecutionFrequency(repeatSetting));
-            plan.setLimitTime(repeatService.getlimitTime(repeatSetting));
+                plan.setExecuteStartTime(repeatService.getExecuteStartTime(repeatSettingDTO));
+                plan.setExecutionFrequency(repeatService.getExecutionFrequency(repeatSettingDTO));
+                plan.setLimitTime(repeatService.getlimitTime(repeatSettingDTO));
+            }
 
 //            //取出所有有修改过的原始计划id
 //            List<Long> oldVersionPlanIds = new ArrayList<>();
@@ -226,7 +230,9 @@ public class EquipmentPlanSearcherImpl extends AbstractElasticSearch implements 
             b.field("status", plan.getStatus());
 
             //关联计划的周期类型
-            b.field("repeatType", repeatProvider.findRepeatSettingById(plan.getRepeatSettingId()).getRepeatType());
+            RepeatSettings repeat = repeatProvider.findRepeatSettingById(plan.getRepeatSettingId());
+            if (repeat != null)
+                b.field("repeatType", repeat.getRepeatType());
 
             b.endObject();
             return b;
