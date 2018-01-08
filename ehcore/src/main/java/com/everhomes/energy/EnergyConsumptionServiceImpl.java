@@ -4595,8 +4595,8 @@ public class EnergyConsumptionServiceImpl implements EnergyConsumptionService {
 
     private Timestamp dateStrToTimestamp(String str) {
         if(str != null) {
-            LocalDate localDate = LocalDate.parse(str,dateSF);
-            Timestamp ts = new Timestamp(Date.valueOf(localDate).getTime());
+            LocalDateTime localDate = LocalDateTime.parse(str,dateSF);
+            Timestamp ts = Timestamp.valueOf(localDate);
             return ts;
         }
         return null;
