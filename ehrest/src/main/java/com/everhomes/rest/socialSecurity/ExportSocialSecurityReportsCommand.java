@@ -8,7 +8,7 @@ import com.everhomes.util.StringHelper;
  * <ul>参数:
  * <li>ownerType: 所属类型 organization</li>
  * <li>ownerId: 所属id 公司id</li>
- * <li>paymentMonth: 月份如201702</li>
+ * <li>payMonth: 月份如201702</li>
  * </ul>
  */
 public class ExportSocialSecurityReportsCommand {
@@ -17,7 +17,7 @@ public class ExportSocialSecurityReportsCommand {
 
 	private Long ownerId;
 
-	private String paymentMonth;
+	private String payMonth;
 
 	public ExportSocialSecurityReportsCommand() {
 
@@ -50,11 +50,12 @@ public class ExportSocialSecurityReportsCommand {
 		return StringHelper.toJsonString(this);
 	}
 
-	public String getPaymentMonth() {
-		return paymentMonth;
+
+	public String getPayMonth() {
+		return payMonth;
 	}
 
-	public void setPaymentMonth(String paymentMonth) {
-		this.paymentMonth = paymentMonth;
+	public void setPayMonth(String payMonth) {
+		this.payMonth = payMonth;
 	}
 }

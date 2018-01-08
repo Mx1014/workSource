@@ -1578,7 +1578,6 @@ public class SocialSecurityServiceImpl implements SocialSecurityService {
                         break;
                 }
             } else {
-                //暂时不统计商业保险
                 switch (PayItem.fromCode(userPayment.getPayItem())) {
                     case DISABLE:
                         report.setDisabilitySum(calculateAmount(userPayment.getCompanyRadix(), userPayment.getCompanyRatio())
@@ -1681,7 +1680,7 @@ public class SocialSecurityServiceImpl implements SocialSecurityService {
         CrossShardListingLocator locator = new CrossShardListingLocator();
         locator.setAnchor(cmd.getPageAnchor());
         List<SocialSecurityReport> result = socialSecurityReportProvider.listSocialSecurityReport(cmd.getOwnerId(),
-                cmd.getPaymentMonth(), locator, pageSize + 1);
+                cmd.getPayMonth(), locator, pageSize + 1);
         if (null == result)
             return response;
         Long nextPageAnchor = null;
@@ -1896,7 +1895,7 @@ public class SocialSecurityServiceImpl implements SocialSecurityService {
         CrossShardListingLocator locator = new CrossShardListingLocator();
         locator.setAnchor(cmd.getPageAnchor());
         List<SocialSecurityDepartmentSummary> result = socialSecurityDepartmentSummaryProvider.listSocialSecurityDepartmentSummary(cmd.getOwnerId(),
-                cmd.getPaymentMonth(), locator, pageSize + 1);
+                cmd.getPayMonth(), locator, pageSize + 1);
         if (null == result)
             return response;
         Long nextPageAnchor = null;
@@ -1922,7 +1921,7 @@ public class SocialSecurityServiceImpl implements SocialSecurityService {
 
         //如果是null的话会被传成“null”
         params.put("ownerId", cmd.getOwnerId());
-        params.put("payMonth", cmd.getPaymentMonth());
+        params.put("payMonth", cmd.getPayMonth());
         params.put("reportType","exportSocialSecurityReports");
         String fileName = String.format("导出社保报表_%s.xlsx", DateUtil.dateToStr(new Date(), DateUtil.NO_SLASH));
 
@@ -1985,7 +1984,7 @@ public class SocialSecurityServiceImpl implements SocialSecurityService {
 
         //如果是null的话会被传成“null”
         params.put("ownerId", cmd.getOwnerId());
-        params.put("payMonth", cmd.getPaymentMonth());
+        params.put("payMonth", cmd.getPayMonth());
         params.put("reportType","exportSocialSecurityInoutReports");
         String fileName = String.format("导出社保部门汇总报表_%s.xlsx", DateUtil.dateToStr(new Date(), DateUtil.NO_SLASH));
 
@@ -2116,7 +2115,7 @@ public class SocialSecurityServiceImpl implements SocialSecurityService {
         CrossShardListingLocator locator = new CrossShardListingLocator();
         locator.setAnchor(cmd.getPageAnchor());
         List<SocialSecurityInoutReport> result = socialSecurityInoutReportProvider.listSocialSecurityInoutReport(cmd.getOwnerId(),
-                cmd.getPaymentMonth(), locator, pageSize + 1);
+                cmd.getPayMonth(), locator, pageSize + 1);
         if (null == result)
             return response;
         Long nextPageAnchor = null;
