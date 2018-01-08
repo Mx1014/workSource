@@ -127,6 +127,7 @@ public class EnergyMeterTaskProviderImpl implements EnergyMeterTaskProvider {
         query.addConditions(Tables.EH_ENERGY_METER_TASKS.PLAN_ID.in(planIds));
         query.addConditions(Tables.EH_ENERGY_METER_TASKS.STATUS.in(EnergyTaskStatus.READ.getCode(), EnergyTaskStatus.NON_READ.getCode()));
         query.addConditions(Tables.EH_ENERGY_METER_TASKS.TARGET_ID.eq(targetId));
+        query.addConditions(Tables.EH_ENERGY_METER_TASKS.EXECUTIVE_EXPIRE_TIME.ge(new Timestamp(DateHelper.currentGMTTime().getTime())));
 
         if(lastUpdateTime != null) {
             query.addConditions(Tables.EH_ENERGY_METER_TASKS.CREATE_TIME.gt(lastUpdateTime)

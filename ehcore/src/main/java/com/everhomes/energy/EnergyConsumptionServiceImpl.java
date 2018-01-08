@@ -3570,6 +3570,7 @@ public class EnergyConsumptionServiceImpl implements EnergyConsumptionService {
                     log.setErrorDescription(localeStringService.getLocalizedString(String.valueOf(EnergyConsumptionServiceErrorCode.SCOPE),
                             String.valueOf(EnergyConsumptionServiceErrorCode.ERR_METER_TASK_NOT_EXIST),
                             UserContext.current().getUser().getLocale(),"EnergyTask not exist"));
+                    logs.add(log);
                     return;
                 }
                 if(task.getExecutiveExpireTime().before(new Timestamp(DateHelper.currentGMTTime().getTime()))) {
@@ -3578,6 +3579,7 @@ public class EnergyConsumptionServiceImpl implements EnergyConsumptionService {
                     log.setErrorDescription(localeStringService.getLocalizedString(String.valueOf(EnergyConsumptionServiceErrorCode.SCOPE),
                             String.valueOf(EnergyConsumptionServiceErrorCode.ERR_METER_TASK_ALREADY_CLOSE),
                             UserContext.current().getUser().getLocale(),"EnergyTask already close"));
+                    logs.add(log);
                     return;
                 }
 
@@ -3588,6 +3590,8 @@ public class EnergyConsumptionServiceImpl implements EnergyConsumptionService {
                     log.setErrorDescription(localeStringService.getLocalizedString(String.valueOf(EnergyConsumptionServiceErrorCode.SCOPE),
                             String.valueOf(EnergyConsumptionServiceErrorCode.ERR_METER_NOT_EXIST),
                             UserContext.current().getUser().getLocale(),"EnergyTask meter status is not active"));
+                    logs.add(log);
+                    return;
                 }
 
                 // 读数大于最大量程
@@ -3597,6 +3601,7 @@ public class EnergyConsumptionServiceImpl implements EnergyConsumptionService {
                     log.setErrorDescription(localeStringService.getLocalizedString(String.valueOf(EnergyConsumptionServiceErrorCode.SCOPE),
                             String.valueOf(EnergyConsumptionServiceErrorCode.ERR_CURR_READING_GREATER_THEN_MAX_READING),
                             UserContext.current().getUser().getLocale(),"Current reading greater then meter max reading"));
+                    logs.add(log);
                     return;
                 }
 
