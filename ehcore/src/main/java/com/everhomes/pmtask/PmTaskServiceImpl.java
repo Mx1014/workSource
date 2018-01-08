@@ -1913,7 +1913,10 @@ public class PmTaskServiceImpl implements PmTaskService {
 			response.setCommunities(result);
 
 		}else{
-			response.setCommunities(dtos);
+			response.setCommunities(communityProvider.listCommunitiesByNamespaceId(UserContext.getCurrentNamespaceId()).
+			stream().map(r->{
+				return ConvertHelper.convert(r,CommunityDTO.class);
+			}).collect(Collectors.toList()));
 		}
 
 		//TODO: LEILV
