@@ -121,7 +121,8 @@ drop column day_open_time,
 drop column day_close_time,
 drop column day_begin_time,
 drop column day_end_time,
-drop column need_pay;
+drop column need_pay,
+drop column resource_type2;
 
 ALTER TABLE `eh_rentalv2_resources`
 ADD COLUMN `resource_type` varchar(64) DEFAULT NULL COMMENT '资源类型';
@@ -171,6 +172,10 @@ drop column resource_type2;
 
 
 
+UPDATE eh_rentalv2_default_rules set resource_type = 'default';
+UPDATE eh_rentalv2_resources set resource_type = 'default';
+UPDATE eh_rentalv2_cells set resource_type = 'default';
+UPDATE eh_rentalv2_orders set resource_type = 'default';
 
 
 
