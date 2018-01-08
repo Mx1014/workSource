@@ -7,7 +7,7 @@ import com.everhomes.util.StringHelper;
  */
 public class SearchRentalOrdersCommand {
     private String resourceType;
-    private Long rentalSiteId ;
+    private Long resourceId ;
     private Long resourceTypeId;
     private Long startTime;
     private Long endTime;
@@ -47,12 +47,12 @@ public class SearchRentalOrdersCommand {
         this.resourceType = resourceType;
     }
 
-    public Long getRentalSiteId() {
-        return rentalSiteId;
+    public Long getResourceId() {
+        return resourceId;
     }
 
-    public void setRentalSiteId(Long rentalSiteId) {
-        this.rentalSiteId = rentalSiteId;
+    public void setResourceId(Long resourceId) {
+        this.resourceId = resourceId;
     }
 
     public Long getResourceTypeId() {
