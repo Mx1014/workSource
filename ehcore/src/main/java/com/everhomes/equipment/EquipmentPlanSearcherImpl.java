@@ -3,6 +3,7 @@ package com.everhomes.equipment;
 
 import com.everhomes.configuration.ConfigurationProvider;
 import com.everhomes.listing.ListingLocator;
+import com.everhomes.repeat.RepeatProvider;
 import com.everhomes.repeat.RepeatService;
 import com.everhomes.rest.equipment.EquipmentInspectionPlanDTO;
 import com.everhomes.rest.equipment.EquipmentPlanStatus;
@@ -47,6 +48,9 @@ public class EquipmentPlanSearcherImpl extends AbstractElasticSearch implements 
 
     @Autowired
     private ConfigurationProvider configProvider;
+
+    @Autowired
+    private RepeatProvider repeatProvider;
 
     @Autowired
     private RepeatService repeatService;
@@ -179,7 +183,7 @@ public class EquipmentPlanSearcherImpl extends AbstractElasticSearch implements 
             }*/
             //填充执行开始时间  执行频率  执行时长
             RepeatSettingsDTO repeatSetting =ConvertHelper.
-                    convert(repeatService.findRepeatSettingById(plan.getRepeatSettingId()), RepeatSettingsDTO.class);
+                    convert(repeatProvider.findRepeatSettingById(plan.getRepeatSettingId()), RepeatSettingsDTO.class);
 
             plan.setExecuteStartTime(repeatService.getExecuteStartTime(repeatSetting));
             plan.setExecutionFrequency(repeatService.getExecutionFrequency(repeatSetting));
@@ -222,7 +226,7 @@ public class EquipmentPlanSearcherImpl extends AbstractElasticSearch implements 
             b.field("status", plan.getStatus());
 
             //关联计划的周期类型
-            b.field("repeatType", repeatService.findRepeatSettingById(plan.getRepeatSettingId()).getRepeatType());
+            b.field("repeatType", repeatProvider.findRepeatSettingById(plan.getRepeatSettingId()).getRepeatType());
 
             b.endObject();
             return b;
