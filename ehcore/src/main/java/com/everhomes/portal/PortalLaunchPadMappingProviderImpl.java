@@ -2,6 +2,7 @@
 package com.everhomes.portal;
 
 import java.sql.Timestamp;
+import java.util.ArrayList;
 import java.util.List;
 
 import org.jooq.Condition;
@@ -41,6 +42,29 @@ public class PortalLaunchPadMappingProviderImpl implements PortalLaunchPadMappin
 	}
 
 	@Override
+	public void createPortalLaunchPadMappings(List<PortalLaunchPadMapping> portalLaunchPadMappings) {
+		if(portalLaunchPadMappings.size() == 0){
+			return;
+		}
+
+		/**
+		 * 有id使用原来的id，没有则生成新的
+		 */
+		Long id = sequenceProvider.getNextSequenceBlock(NameMapper.getSequenceDomainFromTablePojo(EhPortalLaunchPadMappings.class), (long)portalLaunchPadMappings.size());
+		List<EhPortalLaunchPadMappings> mappings = new ArrayList<>();
+		for (PortalLaunchPadMapping mapping: portalLaunchPadMappings) {
+			if(mapping.getId() != null){
+				id ++;
+				mapping.setId(id);
+			}
+			mapping.setCreateTime(new Timestamp(DateHelper.currentGMTTime().getTime()));
+			mappings.add(ConvertHelper.convert(mapping, EhPortalLaunchPadMappings.class));
+		}
+		getReadWriteDao().insert(mappings);
+		DaoHelper.publishDaoAction(DaoAction.CREATE, EhPortalLaunchPadMappings.class, null);
+	}
+
+	@Override
 	public void updatePortalLaunchPadMapping(PortalLaunchPadMapping portalLaunchPadMapping) {
 		assert (portalLaunchPadMapping.getId() != null);
 		getReadWriteDao().update(portalLaunchPadMapping);
@@ -75,7 +99,7 @@ public class PortalLaunchPadMappingProviderImpl implements PortalLaunchPadMappin
 				.orderBy(Tables.EH_PORTAL_LAUNCH_PAD_MAPPINGS.ID.asc())
 				.fetch().map(r -> ConvertHelper.convert(r, PortalLaunchPadMapping.class));
 	}
-	
+
 	private EhPortalLaunchPadMappingsDao getReadWriteDao() {
 		return getDao(getReadWriteContext());
 	}

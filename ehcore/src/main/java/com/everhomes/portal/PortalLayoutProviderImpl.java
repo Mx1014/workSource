@@ -2,6 +2,7 @@
 package com.everhomes.portal;
 
 import java.sql.Timestamp;
+import java.util.ArrayList;
 import java.util.List;
 
 import com.everhomes.rest.portal.PortalLayoutStatus;
@@ -47,6 +48,31 @@ public class PortalLayoutProviderImpl implements PortalLayoutProvider {
 		DaoHelper.publishDaoAction(DaoAction.CREATE, EhPortalLayouts.class, null);
 	}
 
+
+	@Override
+	public void createPortalLayouts(List<PortalLayout> portalLayouts) {
+		if(portalLayouts.size() == 0){
+			return;
+		}
+
+		/**
+		 * 有id使用原来的id，没有则生成新的
+		 */
+		Long id = sequenceProvider.getNextSequenceBlock(NameMapper.getSequenceDomainFromTablePojo(EhPortalLayouts.class), (long)portalLayouts.size());
+		List<EhPortalLayouts> mappings = new ArrayList<>();
+		for (PortalLayout layout: portalLayouts) {
+			if(layout.getId() == null){
+				id ++;
+				layout.setId(id);
+			}
+			layout.setCreateTime(new Timestamp(DateHelper.currentGMTTime().getTime()));
+			mappings.add(ConvertHelper.convert(layout, EhPortalLayouts.class));
+		}
+		getReadWriteDao().insert(mappings);
+		DaoHelper.publishDaoAction(DaoAction.CREATE, EhPortalLayouts.class, null);
+	}
+
+
 	@Override
 	public void updatePortalLayout(PortalLayout portalLayout) {
 		assert (portalLayout.getId() != null);
@@ -64,22 +90,34 @@ public class PortalLayoutProviderImpl implements PortalLayoutProvider {
 
 	@Override
 	public PortalLayout getPortalLayout(Integer namespaceId, String name) {
-		List<PortalLayout> layouts = listPortalLayout(namespaceId, name);
+		List<PortalLayout> layouts = listPortalLayout(namespaceId, name, );
 		if(layouts.size() > 0)
 			return layouts.get(0);
 		return null;
 	}
 
 	@Override
-	public List<PortalLayout> listPortalLayout(Integer namespaceId, String name) {
+	public List<PortalLayout> listPortalLayout(Integer namespaceId, String name, Long versionId) {
 		Condition cond = Tables.EH_PORTAL_LAYOUTS.NAMESPACE_ID.eq(namespaceId);
 		if(!StringUtils.isEmpty(name)){
 			cond = cond.and(Tables.EH_PORTAL_LAYOUTS.NAME.eq(name));
+		}
+		if(versionId != null){
+			cond = cond.and(Tables.EH_PORTAL_LAYOUTS.VERSION_ID.eq(versionId));
 		}
 		return getReadOnlyContext().select().from(Tables.EH_PORTAL_LAYOUTS)
 				.where(Tables.EH_PORTAL_LAYOUTS.STATUS.eq(PortalLayoutStatus.ACTIVE.getCode()))
 				.and(cond)
 				.orderBy(Tables.EH_PORTAL_LAYOUTS.ID.asc())
+				.fetch().map(r -> ConvertHelper.convert(r, PortalLayout.class));
+	}
+
+	@Override
+	public List<PortalLayout> listPortalLayoutByVersion(Integer namespaceId, Long versionId) {
+
+		return getReadOnlyContext().select().from(Tables.EH_PORTAL_LAYOUTS)
+				.where(Tables.EH_PORTAL_LAYOUTS.NAMESPACE_ID.eq(namespaceId))
+				.and(Tables.EH_PORTAL_LAYOUTS.VERSION_ID.eq(versionId))
 				.fetch().map(r -> ConvertHelper.convert(r, PortalLayout.class));
 	}
 	

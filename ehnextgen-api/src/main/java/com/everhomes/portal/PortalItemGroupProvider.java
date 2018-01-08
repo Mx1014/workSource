@@ -15,4 +15,5 @@ public interface PortalItemGroupProvider {
 
 	void createPortalItemGroups(List<PortalItemGroup> portalItemGroups);
 
+    List<PortalItemGroup> listPortalItemGroupByVersion(Integer namespaceId, Long versionId);
 }

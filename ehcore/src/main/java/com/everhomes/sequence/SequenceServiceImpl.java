@@ -2660,6 +2660,10 @@ public class SequenceServiceImpl implements SequenceService {
         syncTableSequence(null, EhReflectionServiceModuleApps.class, Tables.EH_REFLECTION_SERVICE_MODULE_APPS.getName(), (dbContext) -> {
             return dbContext.select(Tables.EH_REFLECTION_SERVICE_MODULE_APPS.ID.max()).from(Tables.EH_REFLECTION_SERVICE_MODULE_APPS).fetchOne().value1();
         });
+
+        syncTableSequence(null, EhPortalVersions.class, Tables.EH_PORTAL_VERSIONS.getName(), (dbContext) -> {
+            return dbContext.select(Tables.EH_PORTAL_VERSIONS.ID.max()).from(Tables.EH_PORTAL_VERSIONS).fetchOne().value1();
+        });
     }
 
     @SuppressWarnings("rawtypes")

@@ -53,11 +53,16 @@ public class ServiceModuleAppProviderImpl implements ServiceModuleAppProvider {
 		if(serviceModuleApps.size() == 0){
 			return;
 		}
+		/**
+		 * 有id使用原来的id，没有则生成新的
+		 */
 		Long id = sequenceProvider.getNextSequenceBlock(NameMapper.getSequenceDomainFromTablePojo(EhServiceModuleApps.class), (long)serviceModuleApps.size());
 		List<EhServiceModuleApps> moduleApps = new ArrayList<>();
 		for (ServiceModuleApp moduleApp: serviceModuleApps) {
-			id ++;
-			moduleApp.setId(id);
+			if(moduleApp.getId() == null){
+				id ++;
+				moduleApp.setId(id);
+			}
 			moduleApp.setCreateTime(new Timestamp(DateHelper.currentGMTTime().getTime()));
 			moduleApp.setUpdateTime(moduleApp.getCreateTime());
 			moduleApps.add(ConvertHelper.convert(moduleApp, EhServiceModuleApps.class));
@@ -121,6 +126,14 @@ public class ServiceModuleAppProviderImpl implements ServiceModuleAppProvider {
 				.orderBy(Tables.EH_SERVICE_MODULE_APPS.ID.asc())
 				.fetch().map(r -> ConvertHelper.convert(r, ServiceModuleApp.class));
 	}
+
+	@Override
+	public List<ServiceModuleApp> listServiceModuleAppByVersion(Integer namespaceId, Long versionId) {
+		return getReadOnlyContext().select().from(Tables.EH_SERVICE_MODULE_APPS)
+				.where(Tables.EH_SERVICE_MODULE_APPS.NAMESPACE_ID.eq(namespaceId))
+				.and(Tables.EH_SERVICE_MODULE_APPS.VERSION_ID.eq(versionId))
+				.fetch().map(r -> ConvertHelper.convert(r, ServiceModuleApp.class));
+	}
 	
 	private EhServiceModuleAppsDao getReadWriteDao() {
 		return getDao(getReadWriteContext());
@@ -144,5 +157,10 @@ public class ServiceModuleAppProviderImpl implements ServiceModuleAppProvider {
 
 	private DSLContext getContext(AccessSpec accessSpec) {
 		return dbProvider.getDslContext(accessSpec);
+	}
+
+	@Override
+	public ServiceModuleApp findServiceModuleApp(Integer namespaceId, Long versionId, Long moduleId, String customTag) {
+		return null;
 	}
 }

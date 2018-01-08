@@ -10,7 +10,9 @@ public interface PortalItemProvider {
 
 	void createPortalItem(PortalItem portalItem);
 
-	void updatePortalItem(PortalItem portalItem);
+    void createPortalItems(List<PortalItem> portalItems);
+
+    void updatePortalItem(PortalItem portalItem);
 
 	PortalItem findPortalItemById(Long id);
 
@@ -26,5 +28,7 @@ public interface PortalItemProvider {
 
 	List<PortalItem> listPortalItems(Long itemCategoryId, Long itemGroupId);
 
-	PortalItem getPortalItemByGroupNameAndName(Integer namespaceId, String location, String groupName, String name, Long itemGroupId);
+    List<PortalItem> listPortalItemByVersion(Integer namespaceId, Long versionId);
+
+    PortalItem getPortalItemByGroupNameAndName(Integer namespaceId, String location, String groupName, String name, Long itemGroupId);
 }

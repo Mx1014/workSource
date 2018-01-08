@@ -51,6 +51,31 @@ public class PortalItemProviderImpl implements PortalItemProvider {
 	}
 
 	@Override
+	public void createPortalItems(List<PortalItem> portalItems) {
+		if(portalItems.size() == 0){
+			return;
+		}
+		/**
+		 * 有id使用原来的id，没有则生成新的
+		 */
+		Long id = sequenceProvider.getNextSequenceBlock(NameMapper.getSequenceDomainFromTablePojo(EhPortalItems.class), (long)portalItems.size());
+		List<EhPortalItems> items = new ArrayList<>();
+		for (PortalItem item: portalItems) {
+			if(item.getId() == null){
+				id ++;
+				item.setId(id);
+			}
+			item.setCreateTime(new Timestamp(DateHelper.currentGMTTime().getTime()));
+			item.setUpdateTime(item.getCreateTime());
+			items.add(ConvertHelper.convert(item, EhPortalItems.class));
+		}
+		getReadWriteDao().insert(items);
+		DaoHelper.publishDaoAction(DaoAction.CREATE, EhPortalItems.class, null);
+	}
+
+
+
+	@Override
 	public void updatePortalItem(PortalItem portalItem) {
 		assert (portalItem.getId() != null);
 		portalItem.setUpdateTime(new Timestamp(DateHelper.currentGMTTime().getTime()));
@@ -110,6 +135,14 @@ public class PortalItemProviderImpl implements PortalItemProvider {
 		return getReadOnlyContext().select().from(Tables.EH_PORTAL_ITEMS)
 				.where(cond)
 				.orderBy(Tables.EH_PORTAL_ITEMS.DEFAULT_ORDER.asc(),Tables.EH_PORTAL_ITEMS.ID.desc())
+				.fetch().map(r -> ConvertHelper.convert(r, PortalItem.class));
+	}
+
+	@Override
+	public List<PortalItem> listPortalItemByVersion(Integer namespaceId, Long versionId) {
+		return getReadOnlyContext().select().from(Tables.EH_PORTAL_ITEMS)
+				.where(Tables.EH_PORTAL_ITEMS.NAMESPACE_ID.eq(namespaceId))
+				.and(Tables.EH_PORTAL_ITEMS.VERSION_ID.eq(versionId))
 				.fetch().map(r -> ConvertHelper.convert(r, PortalItem.class));
 	}
 
