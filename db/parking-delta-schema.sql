@@ -158,8 +158,10 @@ ADD COLUMN `custom_object` text,
 ADD COLUMN `user_enterprise_name` varchar(64) DEFAULT NULL COMMENT '申请人公司名称',
 ADD COLUMN `user_phone` varchar(20) DEFAULT NULL COMMENT '申请人手机',
 ADD COLUMN `user_name` varchar(20) DEFAULT NULL COMMENT '申请人姓名',
-ADD COLUMN `address_id` bigint(20) DEFAULT NULL COMMENT '楼栋门牌ID';
-
+ADD COLUMN `address_id` bigint(20) DEFAULT NULL COMMENT '楼栋门牌ID',
+ADD COLUMN `refund_amount` decimal(10,2) DEFAULT NULL,
+ADD COLUMN `actual_start_time` datetime DEFAULT NULL COMMENT '实际使用开始时间',
+ADD COLUMN `actual_end_time` datetime DEFAULT NULL COMMENT '实际使用结束时间';
 
 ALTER TABLE `eh_rentalv2_orders`
 drop column reserve_money,
