@@ -2038,7 +2038,7 @@ public class PortalServiceImpl implements PortalService {
 		}
 
 		for (LaunchPadLayout padLayout: padLayouts) {
-			layout = portalLayoutProvider.getPortalLayout(padLayout.getNamespaceId(), name);
+			layout = portalLayoutProvider.getPortalLayout(padLayout.getNamespaceId(), name, versionId);
 			if(null == layout){
 				layout = ConvertHelper.convert(padLayout, PortalLayout.class);
 				LaunchPadLayoutJson layoutJson = (LaunchPadLayoutJson)StringHelper.fromJsonString(padLayout.getLayoutJson(), LaunchPadLayoutJson.class);
@@ -2057,6 +2057,7 @@ public class PortalServiceImpl implements PortalService {
 					itemGroup.setStatus(layout.getStatus());
 					itemGroup.setCreatorUid(user.getId());
 					itemGroup.setOperatorUid(user.getId());
+					itemGroup.setVersionId(versionId);
 					if(null != padLayoutGroup.getSeparatorFlag()){
 						itemGroup.setSeparatorFlag(padLayoutGroup.getSeparatorFlag().byteValue());
 					}

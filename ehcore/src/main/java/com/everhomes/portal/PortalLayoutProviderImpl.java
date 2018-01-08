@@ -89,8 +89,8 @@ public class PortalLayoutProviderImpl implements PortalLayoutProvider {
 	}
 
 	@Override
-	public PortalLayout getPortalLayout(Integer namespaceId, String name) {
-		List<PortalLayout> layouts = listPortalLayout(namespaceId, name, );
+	public PortalLayout getPortalLayout(Integer namespaceId, String name, Long versionId) {
+		List<PortalLayout> layouts = listPortalLayout(namespaceId, name, versionId);
 		if(layouts.size() > 0)
 			return layouts.get(0);
 		return null;
