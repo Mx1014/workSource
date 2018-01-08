@@ -832,7 +832,7 @@ public class ArchivesServiceImpl implements ArchivesService {
     private void addSocialSecurityStartMonth(Long detailId, Long organizationId, String startMonth) {
         AddSocialSecurityInOutTimeCommand command = new AddSocialSecurityInOutTimeCommand();
         command.setDetailId(detailId);
-        command.setOrganizationId(detailId);
+        command.setOrganizationId(organizationId);
         command.setInOutType(InOutTimeType.SOCIAL_SECURITY.getCode());
         command.setStartMonth(startMonth);
         socialSecurityService.addSocialSecurityInOutTime(command);
@@ -841,7 +841,7 @@ public class ArchivesServiceImpl implements ArchivesService {
     private void addAccumulationFundStartMonth(Long detailId, Long organizationId, String startMonth) {
         AddSocialSecurityInOutTimeCommand command = new AddSocialSecurityInOutTimeCommand();
         command.setDetailId(detailId);
-        command.setOrganizationId(detailId);
+        command.setOrganizationId(organizationId);
         command.setInOutType(InOutTimeType.ACCUMULATION_FUND.getCode());
         command.setStartMonth(startMonth);
         socialSecurityService.addSocialSecurityInOutTime(command);
@@ -1682,7 +1682,7 @@ public class ArchivesServiceImpl implements ArchivesService {
                 if(cmd.getSocialSecurityEndMonth() != null)
                     addSocialSecurityEndMonth(detailId, employee.getOrganizationId(), ArchivesUtil.socialSecurityMonth(cmd.getSocialSecurityEndMonth()));
                 if(cmd.getAccumulationFundEndMonth() != null)
-                    addAccumulationFundEndMonth(detailId, employee.getOrganizationId(), ArchivesUtil.socialSecurityMonth(cmd.getSocialSecurityEndMonth()));
+                    addAccumulationFundEndMonth(detailId, employee.getOrganizationId(), ArchivesUtil.socialSecurityMonth(cmd.getAccumulationFundEndMonth()));
 
 
                     //  3.删除员工权限

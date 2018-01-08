@@ -2352,7 +2352,7 @@ public class SocialSecurityServiceImpl implements SocialSecurityService {
             //  1.create inOut time.
             SocialSecurityInoutTime time = createSocialSecurityInoutTime(cmd, memberDetail);
             //  2.create the log.
-            SocialSecurityInoutLog log = convertToSocialSecurityInOutLog(time);
+            SocialSecurityInoutLog log = convertToSocialSecurityInOutLog(cmd.getStartMonth(), cmd.getEndMonth(), time);
             socialSecurityInoutLogProvider.createSocialSecurityInoutLog(log);
             //  todo:3.social...
 //            newSocialSecurityEmployee(cmd.getDetailId(), cmd.getStartMonth());
@@ -2389,7 +2389,7 @@ public class SocialSecurityServiceImpl implements SocialSecurityService {
         return time;
     }
 
-    private SocialSecurityInoutLog convertToSocialSecurityInOutLog(SocialSecurityInoutTime time) {
+    private SocialSecurityInoutLog convertToSocialSecurityInOutLog(String startMonth, String endMonth, SocialSecurityInoutTime time) {
         SocialSecurityInoutLog log = new SocialSecurityInoutLog();
         log.setNamespaceId(time.getNamespaceId());
         log.setOrganizationId(time.getOrganizationId());
@@ -2404,20 +2404,20 @@ public class SocialSecurityServiceImpl implements SocialSecurityService {
         //  4) accumulation fund & endTime
 
         if (time.getType().equals(InOutTimeType.SOCIAL_SECURITY.getCode())) {
-            if (time.getStartMonth() != null) {
+            if (startMonth != null) {
                 log.setType(InOutLogType.SOCIAL_SECURITY_IN.getCode());
-                log.setLogMonth(time.getStartMonth());
-            } else if (time.getEndMonth() != null) {
+                log.setLogMonth(startMonth);
+            } else if (endMonth != null) {
                 log.setType(InOutLogType.SOCIAL_SECURITY_OUT.getCode());
-                log.setLogMonth(time.getEndMonth());
+                log.setLogMonth(endMonth);
             }
         } else if (time.getType().equals(InOutTimeType.ACCUMULATION_FUND.getCode())) {
-            if (time.getStartMonth() != null) {
+            if (startMonth != null) {
                 log.setType(InOutLogType.ACCUMULATION_FUND_IN.getCode());
-                log.setLogMonth(time.getStartMonth());
-            } else if (time.getEndMonth() != null) {
+                log.setLogMonth(startMonth);
+            } else if (endMonth != null) {
                 log.setType(InOutLogType.ACCUMULATION_FUND_OUT.getCode());
-                log.setLogMonth(time.getEndMonth());
+                log.setLogMonth(endMonth);
             }
         }
 
