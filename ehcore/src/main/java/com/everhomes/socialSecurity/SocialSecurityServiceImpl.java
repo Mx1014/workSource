@@ -1440,7 +1440,7 @@ public class SocialSecurityServiceImpl implements SocialSecurityService {
         report.setCreateTime(userPayments.get(0).getCreateTime());
         report.setFileUid(userPayments.get(0).getFileUid());
         report.setFileTime(userPayments.get(0).getFileTime());
-        SocialSecurityEmployeeDTO dto = getSocialSecurityEmployeeInfo(detail.getOrganizationId());
+        SocialSecurityEmployeeDTO dto = getSocialSecurityEmployeeInfo(detail.getId());
         //TODO: 这里以后也要改
         if (dto.getDismissTime() != null && Integer.valueOf(report.getPayMonth()) >=
                 Integer.valueOf(dateSF.get().format(dto.getDismissTime()))) {
