@@ -3516,6 +3516,12 @@ public class Rentalv2ServiceImpl implements Rentalv2Service {
 			bill.setUserName(cmd.getUserName());
 			bill.setUserPhone(cmd.getUserPhone());
 			bill.setAddressId(cmd.getAddressId());
+			//当是vip车位预约时设置车位编号
+			if (bill.getResourceType().equals(RentalV2ResourceType.VIP_PARKING.getCode())) {
+				VipParkingUseInfoDTO parkingInfo = JSONObject.parseObject(cmd.getCustomObject(), VipParkingUseInfoDTO.class);
+				bill.setStringTag1(parkingInfo.getSpaceNo());
+				bill.setStringTag2(parkingInfo.getPlateNumber());
+			}
 
 			if(bill.getPayMode().equals(PayMode.OFFLINE_PAY.getCode())
 					|| bill.getPayMode().equals(PayMode.APPROVE_ONLINE_PAY.getCode())) {
