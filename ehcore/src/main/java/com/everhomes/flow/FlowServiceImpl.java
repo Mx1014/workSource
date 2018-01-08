@@ -72,8 +72,9 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.BeanUtils;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.cache.annotation.CacheEvict;
+import org.springframework.cache.annotation.Cacheable;
 import org.springframework.data.redis.core.RedisTemplate;
-import org.springframework.data.redis.serializer.JdkSerializationRedisSerializer;
 import org.springframework.data.redis.serializer.StringRedisSerializer;
 import org.springframework.stereotype.Component;
 import org.springframework.transaction.TransactionStatus;
@@ -1978,22 +1979,10 @@ public class FlowServiceImpl implements FlowService {
 
         FlowGraph snapshotGraph = graphMap.get(fmt);
         if (snapshotGraph == null) {
-            Accessor acc = this.bigCollectionProvider.getMapAccessor("flowGraph", "");
-            RedisTemplate template = acc.getTemplate(new JdkSerializationRedisSerializer());
-            snapshotGraph = (FlowGraph) template.opsForHash().get(acc.getBucketName(), fmt);
-            if (snapshotGraph == null) {
-                snapshotGraph = getSnapshotGraph(flowId, flowVer);
-                if (LOGGER.isDebugEnabled()) {
-                    LOGGER.debug("Get flow graph from db, flowId = {}, flowVer = {}", flowId, flowVer);
-                }
+            snapshotGraph = getSnapshotGraph(flowId, flowVer);
+            snapshotGraph.saveIds();
 
-                graphMap.put(fmt, snapshotGraph);
-                template.opsForHash().put(acc.getBucketName(), fmt, snapshotGraph);
-            } else {
-                if (LOGGER.isDebugEnabled()) {
-                    LOGGER.debug("Get flow graph from redis cache, flowId = {}, flowVer = {}", flowId, flowVer);
-                }
-            }
+            // graphMap.put(fmt, snapshotGraph);
         } else {
             if (LOGGER.isDebugEnabled()) {
                 LOGGER.debug("Get flow graph from memory cache, flowId = {}, flowVer = {}", flowId, flowVer);
@@ -2002,14 +1991,11 @@ public class FlowServiceImpl implements FlowService {
         return snapshotGraph;
     }
 
-    private void clearSnapshotGraph(Flow snapshotFlow) {
+    @CacheEvict(value = "FlowGraph", key = "{#snapshotFlow.flowMainId, #snapshotFlow.flowVersion}")
+    public void clearSnapshotGraph(Flow snapshotFlow) {
         if (snapshotFlow != null) {
             String fmt = String.format("%d:%d", snapshotFlow.getFlowMainId(), snapshotFlow.getFlowVersion());
-
             graphMap.remove(fmt);
-
-            Accessor acc = this.bigCollectionProvider.getMapAccessor("flowGraph", "");
-            acc.deleteMapValue(fmt);
         }
     }
 
@@ -2019,9 +2005,15 @@ public class FlowServiceImpl implements FlowService {
         clearSnapshotGraph(snapshotFlow);
     }
 
-    private FlowGraph getSnapshotGraph(Long flowId, Integer flowVer) {
+    @Cacheable(value = "FlowGraph")
+    @Override
+    public FlowGraph getSnapshotGraph(Long flowId, Integer flowVer) {
         if (flowVer <= 0) {
             throw RuntimeErrorException.errorWith(FlowServiceErrorCode.SCOPE, FlowServiceErrorCode.ERROR_FLOW_SNAPSHOT_NOEXISTS, "snapshot noexists");
+        }
+
+        if (LOGGER.isDebugEnabled()) {
+            LOGGER.debug("Get flow graph from db, flowId = {}, flowVer = {}", flowId, flowVer);
         }
 
         FlowGraph flowGraph = new FlowGraph();
@@ -2076,7 +2068,7 @@ public class FlowServiceImpl implements FlowService {
 
         flowGraphCompatible(flow, flowGraph);
 
-        flowGraph.saveIds();
+        // flowGraph.saveIds();
 
         return flowGraph;
     }

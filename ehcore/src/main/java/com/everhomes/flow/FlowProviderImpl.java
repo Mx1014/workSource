@@ -20,6 +20,7 @@ import org.jooq.DSLContext;
 import org.jooq.Record;
 import org.jooq.SelectQuery;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.cache.annotation.Cacheable;
 import org.springframework.stereotype.Component;
 
 import java.sql.Timestamp;
@@ -266,6 +267,7 @@ public class FlowProviderImpl implements FlowProvider {
 //		return null;
 //	}
 
+    @Cacheable(value = "Flow", key = "{#root.methodName, #root.args}")
     @Override
     public Flow getEnabledConfigFlow(Integer namespaceId, String projectType, Long projectId, Long moduleId, String moduleType, Long ownerId, String ownerType) {
         List<Flow> flows = this.queryFlows(new ListingLocator(), 1, (locator, query) -> {
@@ -295,6 +297,7 @@ public class FlowProviderImpl implements FlowProvider {
         return null;
     }
 
+    @Cacheable(value = "Flow", key = "{#root.methodName, #root.args}")
     @Override
     public Flow getSnapshotFlowById(Long flowId) {
         List<Flow> flows = this.queryFlows(new ListingLocator(), 1, (locator, query) -> {
