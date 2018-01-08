@@ -1080,7 +1080,7 @@ public class SocialSecurityServiceImpl implements SocialSecurityService {
         BigDecimal czRadix = null;
         if (StringUtils.isNotBlank(czRadixString)) {
             czRadix = new BigDecimal(czRadixString);
-            if (afRadix.compareTo(new BigDecimal(0)) <= 0) {
+            if (czRadix.compareTo(new BigDecimal(0)) <= 0) {
                 String errorString = "残障金基数必须大于0" + czRadixString;
                 LOGGER.error(errorString);
                 log.setErrorLog(errorString);
@@ -1095,7 +1095,7 @@ public class SocialSecurityServiceImpl implements SocialSecurityService {
         BigDecimal syRadix = null;
         if (StringUtils.isNotBlank(syRadixString)) {
             syRadix = new BigDecimal(syRadixString);
-            if (afRadix.compareTo(new BigDecimal(0)) <= 0) {
+            if (syRadix.compareTo(new BigDecimal(0)) <= 0) {
                 String errorString = "商业保险基数必须大于0" + syRadixString;
                 LOGGER.error(errorString);
                 log.setErrorLog(errorString);
