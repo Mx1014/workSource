@@ -3,7 +3,6 @@ package com.everhomes.rest.parking;
 
 import com.everhomes.util.StringHelper;
 
-import java.math.BigDecimal;
 import java.sql.Timestamp;
 
 /**
@@ -56,14 +55,33 @@ public class ParkingLotDTO {
 
     private Byte invoiceFlag;
 
-    private byte businessLicenseFlag;
+    private Byte businessLicenseFlag;
 
-    public byte getBusinessLicenseFlag() {
+    private Byte vipParkingFlag;
+    private String vipParkingUrl;
+
+    public Byte getBusinessLicenseFlag() {
         return businessLicenseFlag;
     }
 
-    public void setBusinessLicenseFlag(byte businessLicenseFlag) {
+    public void setBusinessLicenseFlag(Byte businessLicenseFlag) {
         this.businessLicenseFlag = businessLicenseFlag;
+    }
+
+    public Byte getVipParkingFlag() {
+        return vipParkingFlag;
+    }
+
+    public void setVipParkingFlag(Byte vipParkingFlag) {
+        this.vipParkingFlag = vipParkingFlag;
+    }
+
+    public String getVipParkingUrl() {
+        return vipParkingUrl;
+    }
+
+    public void setVipParkingUrl(String vipParkingUrl) {
+        this.vipParkingUrl = vipParkingUrl;
     }
 
     public Byte getInvoiceFlag() {
