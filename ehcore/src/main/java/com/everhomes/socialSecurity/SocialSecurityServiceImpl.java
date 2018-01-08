@@ -1027,7 +1027,7 @@ public class SocialSecurityServiceImpl implements SocialSecurityService {
         if (StringUtils.isNotBlank(ssRadixString)) {
             ssRadix = new BigDecimal(ssRadixString);
             if (ssRadix.compareTo(new BigDecimal(0)) <= 0) {
-                String errorString = "社保基数必须大于0" + ssRadixString;
+                String errorString = "社保基数必须大于0 现在值: " + ssRadixString;
                 LOGGER.error(errorString);
                 log.setErrorLog(errorString);
                 log.setCode(SocialSecurityConstants.ERROR_CHECK_SSRADIX);
@@ -1043,7 +1043,7 @@ public class SocialSecurityServiceImpl implements SocialSecurityService {
         if (StringUtils.isNotBlank(afRadixString)) {
             afRadix = new BigDecimal(afRadixString);
             if (afRadix.compareTo(new BigDecimal(0)) <= 0) {
-                String errorString = "公积金基数必须大于0" + ssRadixString;
+                String errorString = "公积金基数必须大于0 现在值: " + ssRadixString;
                 LOGGER.error(errorString);
                 log.setErrorLog(errorString);
                 log.setCode(SocialSecurityConstants.ERROR_CHECK_AFRADIX);
@@ -1080,8 +1080,8 @@ public class SocialSecurityServiceImpl implements SocialSecurityService {
         BigDecimal czRadix = null;
         if (StringUtils.isNotBlank(czRadixString)) {
             czRadix = new BigDecimal(czRadixString);
-            if (czRadix.compareTo(new BigDecimal(0)) <= 0) {
-                String errorString = "残障金基数必须大于0" + czRadixString;
+            if (czRadix.compareTo(new BigDecimal(0)) < 0) {
+                String errorString = "残障金基数必须大于0 现在值: " + czRadixString;
                 LOGGER.error(errorString);
                 log.setErrorLog(errorString);
                 log.setCode(SocialSecurityConstants.ERROR_CHECK_AFRADIX);
@@ -1095,8 +1095,8 @@ public class SocialSecurityServiceImpl implements SocialSecurityService {
         BigDecimal syRadix = null;
         if (StringUtils.isNotBlank(syRadixString)) {
             syRadix = new BigDecimal(syRadixString);
-            if (syRadix.compareTo(new BigDecimal(0)) <= 0) {
-                String errorString = "商业保险基数必须大于0" + syRadixString;
+            if (syRadix.compareTo(new BigDecimal(0)) < 0) {
+                String errorString = "商业保险基数必须大于0 现在值: " + syRadixString;
                 LOGGER.error(errorString);
                 log.setErrorLog(errorString);
                 log.setCode(SocialSecurityConstants.ERROR_CHECK_AFRADIX);
