@@ -41,6 +41,11 @@ public class ServiceModuleAppProviderImpl implements ServiceModuleAppProvider {
 	public void createServiceModuleApp(ServiceModuleApp serviceModuleApp) {
 		Long id = sequenceProvider.getNextSequence(NameMapper.getSequenceDomainFromTablePojo(EhServiceModuleApps.class));
 		serviceModuleApp.setId(id);
+
+		if(serviceModuleApp.getOriginId() == null){
+			serviceModuleApp.setOriginId(id);
+		}
+
 		serviceModuleApp.setCreateTime(new Timestamp(DateHelper.currentGMTTime().getTime()));
 		serviceModuleApp.setUpdateTime(serviceModuleApp.getCreateTime());
 		getReadWriteDao().insert(serviceModuleApp);

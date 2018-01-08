@@ -107,6 +107,10 @@ public class PortalItemCategoryProviderImpl implements PortalItemCategoryProvide
 			cond = cond.and(Tables.EH_PORTAL_ITEM_CATEGORIES.NAME.eq(name));
 		}
 
+//		if(!StringUtils.isEmpty(name)){
+//			cond = cond.and(Tables.EH_PORTAL_ITEM_CATEGORIES.VERSION_ID.eq(versionId));
+//		}
+
 		return getReadOnlyContext().select().from(Tables.EH_PORTAL_ITEM_CATEGORIES)
 				.where(Tables.EH_PORTAL_ITEM_CATEGORIES.NAMESPACE_ID.eq(namespaceId))
 				.and(cond)

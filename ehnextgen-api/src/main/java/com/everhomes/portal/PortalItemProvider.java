@@ -28,7 +28,7 @@ public interface PortalItemProvider {
 
 	List<PortalItem> listPortalItems(Long itemCategoryId, Long itemGroupId);
 
-    List<PortalItem> listPortalItemByVersion(Integer namespaceId, Long versionId);
+    List<PortalItem> listPortalItemByVersion(Integer namespaceId);
 
     PortalItem getPortalItemByGroupNameAndName(Integer namespaceId, String location, String groupName, String name, Long itemGroupId);
 }

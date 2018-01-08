@@ -91,26 +91,26 @@ public class PortalItemProviderImpl implements PortalItemProvider {
 
 	@Override
 	public List<PortalItem> listPortalItems(Long itemCategoryId, Long itemGroupId){
-		return listPortalItems(itemCategoryId, null, null, itemGroupId, PortalItemStatus.INACTIVE.getCode());
+		return listPortalItems(itemCategoryId, null, null, itemGroupId, PortalItemStatus.INACTIVE.getCode(), null);
 	}
 
 	@Override
 	public List<PortalItem> listPortalItemByCategoryId(Long itemCategoryId){
-		return listPortalItems(itemCategoryId, null, null, null, PortalItemStatus.INACTIVE.getCode());
+		return listPortalItems(itemCategoryId, null, null, null, PortalItemStatus.INACTIVE.getCode(), null);
 	}
 
 	@Override
 	public List<PortalItem> listPortalItemByGroupId(Long itemGroupId){
-		return listPortalItems(null, null, null, itemGroupId, PortalItemStatus.INACTIVE.getCode());
+		return listPortalItems(null, null, null, itemGroupId, PortalItemStatus.INACTIVE.getCode(), null);
 	}
 
 	@Override
 	public List<PortalItem> listPortalItemByGroupId(Long itemGroupId, Byte neStatus){
-		return listPortalItems(null, null, null, itemGroupId, neStatus);
+		return listPortalItems(null, null, null, itemGroupId, neStatus, null);
 	}
 
 	@Override
-	public List<PortalItem> listPortalItems(Long itemCategoryId, Integer namespaceId, String actionType, Long itemGroupId, Byte neStatus) {
+	public List<PortalItem> listPortalItems(Long itemCategoryId, Integer namespaceId, String actionType, Long itemGroupId, Byte neStatus, Long versionId) {
 		Condition cond = Tables.EH_PORTAL_ITEMS.ID.isNotNull();
 		if(null != neStatus)
 			cond = cond.and(Tables.EH_PORTAL_ITEMS.STATUS.ne(neStatus));
@@ -130,6 +130,10 @@ public class PortalItemProviderImpl implements PortalItemProvider {
 
 		if(null != itemGroupId){
 			cond = cond.and(Tables.EH_PORTAL_ITEMS.ITEM_GROUP_ID.eq(itemGroupId));
+		}
+
+		if(versionId != null){
+			cond = cond.and(Tables.EH_PORTAL_ITEMS.VERSION_ID.eq(versionId));
 		}
 
 		return getReadOnlyContext().select().from(Tables.EH_PORTAL_ITEMS)
@@ -176,6 +180,10 @@ public class PortalItemProviderImpl implements PortalItemProvider {
 		if(null != itemGroupId){
 			cond = cond.and(Tables.EH_PORTAL_ITEMS.ITEM_GROUP_ID.eq(itemGroupId));
 		}
+
+//		if(versionId != null){
+//			cond = cond.and(Tables.EH_PORTAL_ITEMS.VERSION_ID.eq(versionId));
+//		}
 
 		return getReadOnlyContext().select().from(Tables.EH_PORTAL_ITEMS)
 				.where(cond)
