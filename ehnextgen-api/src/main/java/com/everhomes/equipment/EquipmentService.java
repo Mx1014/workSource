@@ -107,7 +107,7 @@ public interface EquipmentService {
 
     List<EquipmentStandardRelationDTO> listEquipmentStandardRelationsByTaskId(ListTaskByIdCommand cmd);
 
-    void syscStandardToEqiupmentPlan();
+    void syncStandardToEqiupmentPlan();
 
     void setReviewExpireDays(SetReviewExpireDaysCommand cmd);
 

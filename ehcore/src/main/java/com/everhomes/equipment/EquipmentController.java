@@ -1161,12 +1161,12 @@ public class EquipmentController extends ControllerBase {
      * <b>URL: /equipment/syscStandardToEqiupmentPlan</b>
      * <p>同步所有的标准-设备关联表到计划中</p>
      */
-    @RequestMapping("syscStandardToEqiupmentPlan")
+    @RequestMapping("syncStandardToEqiupmentPlan")
     @RestReturn(value = String.class)
-    public RestResponse syscStandardToEqiupmentPlan() {
+    public RestResponse syncStandardToEqiupmentPlan() {
         UserPrivilegeMgr resolver = PlatformContext.getComponent("SystemUser");
         resolver.checkUserPrivilege(UserContext.current().getUser().getId(), 0);
-        equipmentService.syscStandardToEqiupmentPlan();
+        equipmentService.syncStandardToEqiupmentPlan();
         return getSuccessResponse();
     }
 

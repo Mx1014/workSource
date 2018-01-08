@@ -33,6 +33,7 @@ import com.everhomes.pmNotify.PmNotifyProvider;
 import com.everhomes.pmNotify.PmNotifyRecord;
 import com.everhomes.pmNotify.PmNotifyService;
 import com.everhomes.portal.PortalService;
+import com.everhomes.repeat.RepeatProvider;
 import com.everhomes.repeat.RepeatService;
 import com.everhomes.repeat.RepeatSettings;
 import com.everhomes.rest.acl.ListServiceModuleAdministratorsCommand;
@@ -303,6 +304,9 @@ public class EquipmentServiceImpl implements EquipmentService {
 
 	@Autowired
 	private RepeatService repeatService;
+
+	@Autowired
+	private RepeatProvider repeatProvider;
 
 	@Autowired
 	private DbProvider dbProvider;
@@ -5504,7 +5508,7 @@ private void checkUserPrivilege(Long orgId, Long privilegeId, Long communityId) 
 		//填充计划的执行组审批组
 		equipmentProvider.populatePlanGroups(equipmentInspectionPlan);
 		//填充计划的执行周期
-		equipmentInspectionPlan.setRepeatSettings(repeatService.findRepeatSettingById(cmd.getId()));
+		equipmentInspectionPlan.setRepeatSettings(repeatProvider.findRepeatSettingById(equipmentInspectionPlan.getRepeatSettingId()));
 
 		return convertPlanToDto(equipmentInspectionPlan);
 	}
@@ -5785,7 +5789,7 @@ private void checkUserPrivilege(Long orgId, Long privilegeId, Long communityId) 
 	}
 
 	@Override
-	public void syscStandardToEqiupmentPlan() {
+	public void syncStandardToEqiupmentPlan() {
 		EquipmentInspectionEquipments equipment = new EquipmentInspectionEquipments();
 		EquipmentInspectionStandards standards = new EquipmentInspectionStandards();
 		List<EquipmentStandardMap> maps = new ArrayList<>();

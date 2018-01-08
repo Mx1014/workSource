@@ -1,7 +1,7 @@
 --  标准数据增加周期类型及关系表状态start by jiarui 20180105
 UPDATE eh_equipment_inspection_standards
 SET repeat_type = (SELECT repeat_type FROM eh_repeat_settings WHERE id = eh_equipment_inspection_standards.repeat_setting_id)
-WHERE STATUS =2  AND repeat_type IS NULL;
+WHERE STATUS =2  AND repeat_type =0;
 
 -- 上版未置状态数据修改
 UPDATE eh_equipment_inspection_equipment_standard_map
