@@ -1076,13 +1076,35 @@ public class SocialSecurityServiceImpl implements SocialSecurityService {
         emloyeeString = "";
         addImportItemDTO(dtos, ssRadix, companyString, emloyeeString, AccumOrSocial.SOCAIL, "失业");
         // 残障
-        companyString = r.getO();
-        emloyeeString = "";
-        addImportItemDTO(dtos, ssRadix, companyString, emloyeeString, AccumOrSocial.SOCAIL, "残障金");
+        String czRadixString = r.getO();
+        BigDecimal czRadix = null;
+        if (StringUtils.isNotBlank(czRadixString)) {
+            czRadix = new BigDecimal(czRadixString);
+            if (afRadix.compareTo(new BigDecimal(0)) <= 0) {
+                String errorString = "残障金基数必须大于0" + czRadixString;
+                LOGGER.error(errorString);
+                log.setErrorLog(errorString);
+                log.setCode(SocialSecurityConstants.ERROR_CHECK_AFRADIX);
+                response.getLogs().add(log);
+                return;
+            }
+        }
+        addImportItemDTO(dtos, czRadix, "100%", "0%", AccumOrSocial.SOCAIL, "残障金");
         // 商业保险
-        companyString = r.getP();
-        emloyeeString = "";
-        addImportItemDTO(dtos, ssRadix, companyString, emloyeeString, AccumOrSocial.SOCAIL, "商业保险");
+        String syRadixString = r.getP();
+        BigDecimal syRadix = null;
+        if (StringUtils.isNotBlank(syRadixString)) {
+            syRadix = new BigDecimal(syRadixString);
+            if (afRadix.compareTo(new BigDecimal(0)) <= 0) {
+                String errorString = "商业保险基数必须大于0" + syRadixString;
+                LOGGER.error(errorString);
+                log.setErrorLog(errorString);
+                log.setCode(SocialSecurityConstants.ERROR_CHECK_AFRADIX);
+                response.getLogs().add(log);
+                return;
+            }
+        }
+        addImportItemDTO(dtos, syRadix, "100%", "0%", AccumOrSocial.SOCAIL, "残障金");
 
         for (SocialSecurityItemDTO item : dtos) {
             SocialSecuritySetting setting = findSetting(item.getAccumOrSocial(), item.getPayItem(), settings);
@@ -1107,8 +1129,9 @@ public class SocialSecurityServiceImpl implements SocialSecurityService {
                 }
             }
             if (null != radix) {
-                importCalculateRadix(radix, base, item, setting);
+                setting.setRadix(radix);
             }
+            importCalculateRadix(radix, base, item, setting);
             String errorString = null;
             if (null != item.getCompanyRatio()) {
                 errorString = importCalculateCompanyRatio(item.getCompanyRatio(), base, item, setting);
@@ -1190,31 +1213,34 @@ public class SocialSecurityServiceImpl implements SocialSecurityService {
     }
 
     private void importCalculateRadix(BigDecimal afRadix, SocialSecurityBase base, SocialSecurityItemDTO item, SocialSecuritySetting setting) {
-        setting.setRadix(afRadix);
-        if (null != base && afRadix.intValue() != 0) {
-            if (afRadix.compareTo(base.getCompanyRadixMin()) < 0) {
+        BigDecimal compayRadix = item.getCompanyRadix();
+        BigDecimal employeeRadix = item.getEmployeeRadix();
+        if (null != base && compayRadix.intValue() != 0) {
+            if (compayRadix.compareTo(base.getCompanyRadixMin()) < 0) {
                 setting.setCompanyRadix(base.getCompanyRadixMin());
-            } else if (afRadix.compareTo(base.getCompanyRadixMax()) > 0) {
+            } else if (compayRadix.compareTo(base.getCompanyRadixMax()) > 0) {
                 setting.setCompanyRadix(base.getCompanyRadixMax());
             } else {
-                setting.setCompanyRadix(afRadix);
-            }
-
-            if (afRadix.compareTo(base.getEmployeeRadixMin()) < 0) {
-                setting.setEmployeeRadix(base.getEmployeeRadixMin());
-            } else if (afRadix.compareTo(base.getEmployeeRadixMax()) > 0) {
-                setting.setEmployeeRadix(base.getEmployeeRadixMax());
-            } else {
-                setting.setEmployeeRadix(afRadix);
+                setting.setCompanyRadix(compayRadix);
             }
         } else {
-            setting.setCompanyRadix(afRadix);
-            setting.setEmployeeRadix(afRadix);
+            setting.setCompanyRadix(compayRadix);
+        }
+        if (null != base && employeeRadix.intValue() != 0) {
+            if (employeeRadix.compareTo(base.getEmployeeRadixMin()) < 0) {
+                setting.setEmployeeRadix(base.getEmployeeRadixMin());
+            } else if (employeeRadix.compareTo(base.getEmployeeRadixMax()) > 0) {
+                setting.setEmployeeRadix(base.getEmployeeRadixMax());
+            } else {
+                setting.setEmployeeRadix(employeeRadix);
+            }
+        } else {
+            setting.setEmployeeRadix(employeeRadix);
         }
     }
 
-    private void addImportItemDTO(List<SocialSecurityItemDTO> dtos, BigDecimal ssRadix, String companyString, String emloyeeString, AccumOrSocial accumOrSocail, String payItem) {
-        if (StringUtils.isNotBlank(companyString) || StringUtils.isNotBlank(emloyeeString) || null != ssRadix) {
+    private void addImportItemDTO(List<SocialSecurityItemDTO> dtos, BigDecimal radix, String companyString, String emloyeeString, AccumOrSocial accumOrSocail, String payItem) {
+        if (StringUtils.isNotBlank(companyString) || StringUtils.isNotBlank(emloyeeString) || null != radix ) {
             SocialSecurityItemDTO dto = new SocialSecurityItemDTO();
             dto.setAccumOrSocial(accumOrSocail.getCode());
             dto.setPayItem(payItem);
@@ -1226,6 +1252,8 @@ public class SocialSecurityServiceImpl implements SocialSecurityService {
                 employeeRatio = (int) Double.parseDouble(emloyeeString.replace("%", "")) * 100;
             dto.setCompanyRatio(companyRatio);
             dto.setEmployeeRatio(employeeRatio);
+            dto.setCompanyRadix(radix);
+            dto.setEmployeeRadix(radix);
             dtos.add(dto);
         }
     }
@@ -2352,7 +2380,7 @@ public class SocialSecurityServiceImpl implements SocialSecurityService {
             //  1.create inOut time.
             SocialSecurityInoutTime time = createSocialSecurityInoutTime(cmd, memberDetail);
             //  2.create the log.
-            SocialSecurityInoutLog log = convertToSocialSecurityInOutLog(cmd.getStartMonth(), cmd.getEndMonth(), time);
+            SocialSecurityInoutLog log = convertToSocialSecurityInOutLog(time);
             socialSecurityInoutLogProvider.createSocialSecurityInoutLog(log);
             //  todo:3.social...
 //            newSocialSecurityEmployee(cmd.getDetailId(), cmd.getStartMonth());
@@ -2389,7 +2417,7 @@ public class SocialSecurityServiceImpl implements SocialSecurityService {
         return time;
     }
 
-    private SocialSecurityInoutLog convertToSocialSecurityInOutLog(String startMonth, String endMonth, SocialSecurityInoutTime time) {
+    private SocialSecurityInoutLog convertToSocialSecurityInOutLog(SocialSecurityInoutTime time) {
         SocialSecurityInoutLog log = new SocialSecurityInoutLog();
         log.setNamespaceId(time.getNamespaceId());
         log.setOrganizationId(time.getOrganizationId());
@@ -2404,20 +2432,20 @@ public class SocialSecurityServiceImpl implements SocialSecurityService {
         //  4) accumulation fund & endTime
 
         if (time.getType().equals(InOutTimeType.SOCIAL_SECURITY.getCode())) {
-            if (startMonth != null) {
+            if (time.getStartMonth() != null) {
                 log.setType(InOutLogType.SOCIAL_SECURITY_IN.getCode());
-                log.setLogMonth(startMonth);
-            } else if (endMonth != null) {
+                log.setLogMonth(time.getStartMonth());
+            } else if (time.getEndMonth() != null) {
                 log.setType(InOutLogType.SOCIAL_SECURITY_OUT.getCode());
-                log.setLogMonth(endMonth);
+                log.setLogMonth(time.getEndMonth());
             }
         } else if (time.getType().equals(InOutTimeType.ACCUMULATION_FUND.getCode())) {
-            if (startMonth != null) {
+            if (time.getStartMonth() != null) {
                 log.setType(InOutLogType.ACCUMULATION_FUND_IN.getCode());
-                log.setLogMonth(startMonth);
-            } else if (endMonth != null) {
+                log.setLogMonth(time.getStartMonth());
+            } else if (time.getEndMonth() != null) {
                 log.setType(InOutLogType.ACCUMULATION_FUND_OUT.getCode());
-                log.setLogMonth(endMonth);
+                log.setLogMonth(time.getEndMonth());
             }
         }
 

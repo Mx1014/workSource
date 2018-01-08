@@ -6,6 +6,7 @@ import java.util.List;
 
 import com.everhomes.server.schema.tables.pojos.EhSocialSecurityPayments;
 import org.jooq.DSLContext;
+import org.jooq.Record;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
 
@@ -25,92 +26,96 @@ import com.everhomes.util.DateHelper;
 @Component
 public class SocialSecurityPaymentLogProviderImpl implements SocialSecurityPaymentLogProvider {
 
-	@Autowired
-	private DbProvider dbProvider;
+    @Autowired
+    private DbProvider dbProvider;
 
-	@Autowired
-	private SequenceProvider sequenceProvider;
+    @Autowired
+    private SequenceProvider sequenceProvider;
 
-	@Override
-	public void createSocialSecurityPaymentLog(SocialSecurityPaymentLog socialSecurityPaymentLog) {
-		Long id = sequenceProvider.getNextSequence(NameMapper.getSequenceDomainFromTablePojo(EhSocialSecurityPaymentLogs.class));
-		socialSecurityPaymentLog.setId(id);
-		socialSecurityPaymentLog.setCreateTime(new Timestamp(DateHelper.currentGMTTime().getTime()));
-		socialSecurityPaymentLog.setCreatorUid(UserContext.current().getUser().getId());
-		socialSecurityPaymentLog.setUpdateTime(socialSecurityPaymentLog.getCreateTime());
-		socialSecurityPaymentLog.setOperatorUid(socialSecurityPaymentLog.getCreatorUid());
-		getReadWriteDao().insert(socialSecurityPaymentLog);
-		DaoHelper.publishDaoAction(DaoAction.CREATE, EhSocialSecurityPaymentLogs.class, null);
-	}
+    @Override
+    public void createSocialSecurityPaymentLog(SocialSecurityPaymentLog socialSecurityPaymentLog) {
+        Long id = sequenceProvider.getNextSequence(NameMapper.getSequenceDomainFromTablePojo(EhSocialSecurityPaymentLogs.class));
+        socialSecurityPaymentLog.setId(id);
+        socialSecurityPaymentLog.setCreateTime(new Timestamp(DateHelper.currentGMTTime().getTime()));
+        socialSecurityPaymentLog.setCreatorUid(UserContext.current().getUser().getId());
+        socialSecurityPaymentLog.setUpdateTime(socialSecurityPaymentLog.getCreateTime());
+        socialSecurityPaymentLog.setOperatorUid(socialSecurityPaymentLog.getCreatorUid());
+        getReadWriteDao().insert(socialSecurityPaymentLog);
+        DaoHelper.publishDaoAction(DaoAction.CREATE, EhSocialSecurityPaymentLogs.class, null);
+    }
 
-	@Override
-	public void updateSocialSecurityPaymentLog(SocialSecurityPaymentLog socialSecurityPaymentLog) {
-		assert (socialSecurityPaymentLog.getId() != null);
-		socialSecurityPaymentLog.setUpdateTime(new Timestamp(DateHelper.currentGMTTime().getTime()));
-		socialSecurityPaymentLog.setOperatorUid(UserContext.current().getUser().getId());
-		getReadWriteDao().update(socialSecurityPaymentLog);
-		DaoHelper.publishDaoAction(DaoAction.MODIFY, EhSocialSecurityPaymentLogs.class, socialSecurityPaymentLog.getId());
-	}
+    @Override
+    public void updateSocialSecurityPaymentLog(SocialSecurityPaymentLog socialSecurityPaymentLog) {
+        assert (socialSecurityPaymentLog.getId() != null);
+        socialSecurityPaymentLog.setUpdateTime(new Timestamp(DateHelper.currentGMTTime().getTime()));
+        socialSecurityPaymentLog.setOperatorUid(UserContext.current().getUser().getId());
+        getReadWriteDao().update(socialSecurityPaymentLog);
+        DaoHelper.publishDaoAction(DaoAction.MODIFY, EhSocialSecurityPaymentLogs.class, socialSecurityPaymentLog.getId());
+    }
 
-	@Override
-	public SocialSecurityPaymentLog findSocialSecurityPaymentLogById(Long id) {
-		assert (id != null);
-		return ConvertHelper.convert(getReadOnlyDao().findById(id), SocialSecurityPaymentLog.class);
-	}
-	
-	@Override
-	public List<SocialSecurityPaymentLog> listSocialSecurityPaymentLog() {
-		return getReadOnlyContext().select().from(Tables.EH_SOCIAL_SECURITY_PAYMENT_LOGS)
-				.orderBy(Tables.EH_SOCIAL_SECURITY_PAYMENT_LOGS.ID.asc())
-				.fetch().map(r -> ConvertHelper.convert(r, SocialSecurityPaymentLog.class));
-	}
+    @Override
+    public SocialSecurityPaymentLog findSocialSecurityPaymentLogById(Long id) {
+        assert (id != null);
+        return ConvertHelper.convert(getReadOnlyDao().findById(id), SocialSecurityPaymentLog.class);
+    }
 
-	@Override
-	public void deleteMonthLog(Long ownerId, String paymentMonth) {
+    @Override
+    public List<SocialSecurityPaymentLog> listSocialSecurityPaymentLog() {
+        return getReadOnlyContext().select().from(Tables.EH_SOCIAL_SECURITY_PAYMENT_LOGS)
+                .orderBy(Tables.EH_SOCIAL_SECURITY_PAYMENT_LOGS.ID.asc())
+                .fetch().map(r -> ConvertHelper.convert(r, SocialSecurityPaymentLog.class));
+    }
+
+    @Override
+    public void deleteMonthLog(Long ownerId, String paymentMonth) {
 
 
-		getReadWriteContext().delete(Tables.EH_SOCIAL_SECURITY_PAYMENT_LOGS)
-				.where(Tables.EH_SOCIAL_SECURITY_PAYMENT_LOGS.ORGANIZATION_ID.eq(ownerId))
-				.and(Tables.EH_SOCIAL_SECURITY_PAYMENT_LOGS.PAY_MONTH.eq(paymentMonth)).execute();
-	}
+        getReadWriteContext().delete(Tables.EH_SOCIAL_SECURITY_PAYMENT_LOGS)
+                .where(Tables.EH_SOCIAL_SECURITY_PAYMENT_LOGS.ORGANIZATION_ID.eq(ownerId))
+                .and(Tables.EH_SOCIAL_SECURITY_PAYMENT_LOGS.PAY_MONTH.eq(paymentMonth)).execute();
+    }
 
-	@Override
-	public SocialSecurityPaymentLog findAnyOneSocialSecurityPaymentLog(Long ownerId, String paymentMonth) {
-		return getReadOnlyContext().select().from(Tables.EH_SOCIAL_SECURITY_PAYMENT_LOGS)
-				.where(Tables.EH_SOCIAL_SECURITY_PAYMENT_LOGS.ORGANIZATION_ID.eq(ownerId))
-				.and(Tables.EH_SOCIAL_SECURITY_PAYMENT_LOGS.PAY_MONTH.eq(paymentMonth))
-				.orderBy(Tables.EH_SOCIAL_SECURITY_PAYMENT_LOGS.ID.asc())
-				.fetchAny().map(r -> ConvertHelper.convert(r, SocialSecurityPaymentLog.class));
-	}
+    @Override
+    public SocialSecurityPaymentLog findAnyOneSocialSecurityPaymentLog(Long ownerId, String paymentMonth) {
+        Record record = getReadOnlyContext().select().from(Tables.EH_SOCIAL_SECURITY_PAYMENT_LOGS)
+                .where(Tables.EH_SOCIAL_SECURITY_PAYMENT_LOGS.ORGANIZATION_ID.eq(ownerId))
+                .and(Tables.EH_SOCIAL_SECURITY_PAYMENT_LOGS.PAY_MONTH.eq(paymentMonth))
+                .orderBy(Tables.EH_SOCIAL_SECURITY_PAYMENT_LOGS.ID.asc())
+                .fetchAny();
+        if (null == record) {
+            return null;
+        }
+        return record.map(r -> ConvertHelper.convert(r, SocialSecurityPaymentLog.class));
+    }
 
-	@Override
-	public void batchCreateSocialSecurityPaymentLog(List<EhSocialSecurityPaymentLogs> logs) {
-		getReadWriteDao().insert(logs);
-		DaoHelper.publishDaoAction(DaoAction.CREATE, EhSocialSecurityPaymentLogs.class, null);
+    @Override
+    public void batchCreateSocialSecurityPaymentLog(List<EhSocialSecurityPaymentLogs> logs) {
+        getReadWriteDao().insert(logs);
+        DaoHelper.publishDaoAction(DaoAction.CREATE, EhSocialSecurityPaymentLogs.class, null);
 
-	}
+    }
 
-	private EhSocialSecurityPaymentLogsDao getReadWriteDao() {
-		return getDao(getReadWriteContext());
-	}
+    private EhSocialSecurityPaymentLogsDao getReadWriteDao() {
+        return getDao(getReadWriteContext());
+    }
 
-	private EhSocialSecurityPaymentLogsDao getReadOnlyDao() {
-		return getDao(getReadOnlyContext());
-	}
+    private EhSocialSecurityPaymentLogsDao getReadOnlyDao() {
+        return getDao(getReadOnlyContext());
+    }
 
-	private EhSocialSecurityPaymentLogsDao getDao(DSLContext context) {
-		return new EhSocialSecurityPaymentLogsDao(context.configuration());
-	}
+    private EhSocialSecurityPaymentLogsDao getDao(DSLContext context) {
+        return new EhSocialSecurityPaymentLogsDao(context.configuration());
+    }
 
-	private DSLContext getReadWriteContext() {
-		return getContext(AccessSpec.readWrite());
-	}
+    private DSLContext getReadWriteContext() {
+        return getContext(AccessSpec.readWrite());
+    }
 
-	private DSLContext getReadOnlyContext() {
-		return getContext(AccessSpec.readOnly());
-	}
+    private DSLContext getReadOnlyContext() {
+        return getContext(AccessSpec.readOnly());
+    }
 
-	private DSLContext getContext(AccessSpec accessSpec) {
-		return dbProvider.getDslContext(accessSpec);
-	}
+    private DSLContext getContext(AccessSpec accessSpec) {
+        return dbProvider.getDslContext(accessSpec);
+    }
 }
