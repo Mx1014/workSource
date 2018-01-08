@@ -1480,8 +1480,10 @@ public class SocialSecurityServiceImpl implements SocialSecurityService {
                     LOGGER.error("脏数据, payitem = null" + userPayment);
                     continue;
                 }
-                report.setSocialSecurityCompanySum(calculateAmount(userPayment.getCompanyRadix(), userPayment.getCompanyRatio()));
-                report.setSocialSecurityEmployeeSum(calculateAmount(userPayment.getEmployeeRadix(), userPayment.getEmployeeRatio()));
+                report.setSocialSecurityCompanySum(calculateAmount(userPayment.getCompanyRadix(), userPayment.getCompanyRatio()
+                        ,report.getSocialSecurityCompanySum()));
+                report.setSocialSecurityEmployeeSum(calculateAmount(userPayment.getEmployeeRadix(), userPayment.getEmployeeRatio()
+                        , report.getSocialSecurityEmployeeSum()));
                 report.setSocialSecuritySum(report.getSocialSecurityCompanySum().add(report.getSocialSecurityEmployeeSum()));
                 switch (PayItem.fromCode(userPayment.getPayItem())) {
                     case PENSION:
