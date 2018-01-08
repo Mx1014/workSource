@@ -5584,6 +5584,7 @@ private void checkUserPrivilege(Long orgId, Long privilegeId, Long communityId) 
 		repeatService.deleteRepeatSettingsById(exist.getRepeatSettingId());
 		//删除所有此计划产生的任务
 		inActiveTaskByPlanId(cmd.getId());
+		equipmentPlanSearcher.deleteById(cmd.getId());
 	}
 
 	@Override

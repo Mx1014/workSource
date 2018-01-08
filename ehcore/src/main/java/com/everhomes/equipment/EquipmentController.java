@@ -92,7 +92,6 @@ import com.everhomes.search.EquipmentTasksSearcher;
 import com.everhomes.user.User;
 import com.everhomes.user.UserContext;
 import com.everhomes.user.UserPrivilegeMgr;
-import com.everhomes.user.admin.SystemUserPrivilegeMgr;
 import com.everhomes.util.RuntimeErrorException;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -756,7 +755,7 @@ public class EquipmentController extends ControllerBase {
     @RequestMapping("syncEquipmentStandardIndex")
     @RestReturn(value = String.class)
     public RestResponse syncEquipmentStandardIndex() {
-        SystemUserPrivilegeMgr resolver = PlatformContext.getComponent("SystemUser");
+        UserPrivilegeMgr resolver = PlatformContext.getComponent("SystemUser");
         resolver.checkUserPrivilege(UserContext.current().getUser().getId(), 0);
 
         equipmentStandardSearcher.syncFromDb();
@@ -771,7 +770,7 @@ public class EquipmentController extends ControllerBase {
     @RequestMapping("syncEquipmentIndex")
     @RestReturn(value = String.class)
     public RestResponse syncEquipmentIndex() {
-        SystemUserPrivilegeMgr resolver = PlatformContext.getComponent("SystemUser");
+        UserPrivilegeMgr resolver = PlatformContext.getComponent("SystemUser");
         resolver.checkUserPrivilege(UserContext.current().getUser().getId(), 0);
 
         equipmentSearcher.syncFromDb();
@@ -786,7 +785,7 @@ public class EquipmentController extends ControllerBase {
     @RequestMapping("syncEquipmentAccessoriesIndex")
     @RestReturn(value = String.class)
     public RestResponse syncEquipmentAccessoriesIndex() {
-        SystemUserPrivilegeMgr resolver = PlatformContext.getComponent("SystemUser");
+        UserPrivilegeMgr resolver = PlatformContext.getComponent("SystemUser");
         resolver.checkUserPrivilege(UserContext.current().getUser().getId(), 0);
 
         equipmentAccessoriesSearcher.syncFromDb();
@@ -801,7 +800,7 @@ public class EquipmentController extends ControllerBase {
     @RequestMapping("syncEquipmentTasksIndex")
     @RestReturn(value = String.class)
     public RestResponse syncEquipmentTasksIndex() {
-        SystemUserPrivilegeMgr resolver = PlatformContext.getComponent("SystemUser");
+        UserPrivilegeMgr resolver = PlatformContext.getComponent("SystemUser");
         resolver.checkUserPrivilege(UserContext.current().getUser().getId(), 0);
 
         equipmentTasksSearcher.syncFromDb();
@@ -817,7 +816,7 @@ public class EquipmentController extends ControllerBase {
     @RequestMapping("syncEquipmentPlansIndex")
     @RestReturn(value = String.class)
     public RestResponse syncEquipmentPlansIndex() {
-        SystemUserPrivilegeMgr resolver = PlatformContext.getComponent("SystemUser");
+        UserPrivilegeMgr resolver = PlatformContext.getComponent("SystemUser");
         resolver.checkUserPrivilege(UserContext.current().getUser().getId(), 0);
 
          equipmentPlanSearcher.syncFromDb();
@@ -832,7 +831,7 @@ public class EquipmentController extends ControllerBase {
     @RequestMapping("syncEquipmentStandardMapIndex")
     @RestReturn(value=String.class)
     public RestResponse syncEquipmentStandardMapIndex() {
-    	SystemUserPrivilegeMgr resolver = PlatformContext.getComponent("SystemUser");
+        UserPrivilegeMgr resolver = PlatformContext.getComponent("SystemUser");
         resolver.checkUserPrivilege(UserContext.current().getUser().getId(), 0);
         
         equipmentStandardMapSearcher.syncFromDb();
