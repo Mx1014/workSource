@@ -20,13 +20,22 @@ public class ParkingLotConfig {
 
     private Byte invoiceFlag;
 
-    private byte businessLicenseFlag;
+    private Byte businessLicenseFlag;
+    private Byte vipParkingFlag;
 
-    public byte getBusinessLicenseFlag() {
+    public Byte getVipParkingFlag() {
+        return vipParkingFlag;
+    }
+
+    public void setVipParkingFlag(Byte vipParkingFlag) {
+        this.vipParkingFlag = vipParkingFlag;
+    }
+
+    public Byte getBusinessLicenseFlag() {
         return businessLicenseFlag;
     }
 
-    public void setBusinessLicenseFlag(byte businessLicenseFlag) {
+    public void setBusinessLicenseFlag(Byte businessLicenseFlag) {
         this.businessLicenseFlag = businessLicenseFlag;
     }
 

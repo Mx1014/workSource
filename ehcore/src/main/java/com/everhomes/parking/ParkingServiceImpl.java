@@ -234,6 +234,14 @@ public class ParkingServiceImpl implements ParkingService {
 		List<ParkingLotDTO> parkingLotList = list.stream().map(r -> {
 			ParkingLotDTO dto = ConvertHelper.convert(r, ParkingLotDTO.class);
 
+			if (r.getVipParkingFlag() == ParkingConfigFlag.SUPPORT.getCode()) {
+				String homeUrl = configProvider.getValue(ConfigConstants.HOME_URL, "");
+				String detailUrl = configProvider.getValue(ConfigConstants.APPLY_ENTRY_DETAIL_URL, "");
+
+				detailUrl = String.format(detailUrl, dto.getId());
+				dto.setVipParkingUrl(homeUrl + detailUrl);
+			}
+
 			Flow flow = flowService.getEnabledFlow(user.getNamespaceId(), ParkingFlowConstant.PARKING_RECHARGE_MODULE,
 					FlowModuleType.NO_MODULE.getCode(), r.getId(), FlowOwnerType.PARKING.getCode());
 			//当没有设置工作流的时候，表示是禁用模式
