@@ -578,6 +578,7 @@ public class SocialSecurityServiceImpl implements SocialSecurityService {
         }
         response.setIdNumber(memberDetail.getIdNumber());
         response.setDetailId(memberDetail.getId());
+        response.setIsWork(getIsWork(memberDetail.getId(),response.getPaymentMonth()));
         response.setUserName(memberDetail.getContactName());
         response.setSocialSecurityNo(memberDetail.getSocialSecurityNumber());
         //社保本月缴费
@@ -1429,6 +1430,22 @@ public class SocialSecurityServiceImpl implements SocialSecurityService {
         }
     }
 
+    private Byte getIsWork(Long detailId,String payMonth) {
+        SocialSecurityEmployeeDTO dto = getSocialSecurityEmployeeInfo(detailId);
+        //TODO: 这里以后也要改
+        if (dto.getDismissTime() != null && Integer.valueOf(payMonth) >=
+                Integer.valueOf(dateSF.get().format(dto.getDismissTime()))) {
+            return IsWork.IS_OUT.getCode();
+        } else {
+            if (null != dto.getCheckInTime() &&
+                    Integer.valueOf(dateSF.get().format(dto.getCheckInTime())).equals(payMonth)) {
+                return IsWork.IS_NEW.getCode();
+            } else {
+                return IsWork.NORMAL.getCode();
+            }
+        }
+    }
+
     /**
      * 计算社保报表
      */
@@ -1440,19 +1457,7 @@ public class SocialSecurityServiceImpl implements SocialSecurityService {
         report.setCreateTime(userPayments.get(0).getCreateTime());
         report.setFileUid(userPayments.get(0).getFileUid());
         report.setFileTime(userPayments.get(0).getFileTime());
-        SocialSecurityEmployeeDTO dto = getSocialSecurityEmployeeInfo(detail.getId());
-        //TODO: 这里以后也要改
-        if (dto.getDismissTime() != null && Integer.valueOf(report.getPayMonth()) >=
-                Integer.valueOf(dateSF.get().format(dto.getDismissTime()))) {
-            report.setIsWork(IsWork.IS_OUT.getCode());
-        } else {
-            if (null != dto.getCheckInTime() &&
-                    Integer.valueOf(dateSF.get().format(dto.getCheckInTime())).equals(report.getPayMonth())) {
-                report.setIsWork(IsWork.IS_NEW.getCode());
-            } else {
-                report.setIsWork(IsWork.NORMAL.getCode());
-            }
-        }
+        report.setIsWork(getIsWork(detail.getId(),report.getPayMonth()));
         for (SocialSecurityPayment userPayment : userPayments) {
             report.setCreatorUid(userPayment.getCreatorUid());
             report.setCreateTime(userPayment.getCreateTime());

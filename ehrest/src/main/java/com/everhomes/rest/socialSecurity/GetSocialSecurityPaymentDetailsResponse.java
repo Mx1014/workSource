@@ -12,6 +12,7 @@ import com.everhomes.util.StringHelper;
  * <ul>返回值:
  * <li>detailId: detailid</li>
  * <li>userName: 用户姓名</li>
+ * <li>isWork: 员工在职状态{@link IsWork}</li>
  * <li>socialSecurityNo: 社保/公积金号</li>
  * <li>payCurrentSocialSecurityFlag: 当月缴社保标识</li>
  * <li>afterPaySocialSecurityFlag: 补缴社保标识</li>
@@ -31,6 +32,7 @@ public class GetSocialSecurityPaymentDetailsResponse {
 	private String socialSecurityNo;
 	private String idNumber;
 	private BigDecimal salaryRadix;
+	private Byte isWork;
 
 	private Byte payCurrentSocialSecurityFlag;
 
@@ -165,5 +167,13 @@ public class GetSocialSecurityPaymentDetailsResponse {
 
 	public void setSalaryRadix(BigDecimal salaryRadix) {
 		this.salaryRadix = salaryRadix;
+	}
+
+	public Byte getIsWork() {
+		return isWork;
+	}
+
+	public void setIsWork(Byte isWork) {
+		this.isWork = isWork;
 	}
 }
