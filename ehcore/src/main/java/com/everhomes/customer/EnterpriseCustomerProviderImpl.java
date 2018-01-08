@@ -1522,7 +1522,12 @@ public class EnterpriseCustomerProviderImpl implements EnterpriseCustomerProvide
                                 oldData = exist.getTrackingName();
                             }
 
-                            newData = customer.getTrackingName();
+                            if("-1".equals(newData)) {
+                                newData = "空";
+                            } else {
+                                newData = customer.getTrackingName();
+                            }
+
                         }
 						Map<String,Object> map = new HashMap<String,Object>();
 						map.put("display", field.getFieldDisplayName());
