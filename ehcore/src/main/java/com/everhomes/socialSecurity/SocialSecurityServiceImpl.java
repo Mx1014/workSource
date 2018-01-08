@@ -2358,7 +2358,8 @@ public class SocialSecurityServiceImpl implements SocialSecurityService {
             response.setCreateTime(result.get(0).getCreateTime().getTime());
             response.setCreatorUid(result.get(0).getCreatorUid());
             response.setFileUid(result.get(0).getFileUid());
-            response.setFileTime(result.get(0).getFileTime().getTime());
+            if(null!= result.get(0).getFileTime())
+                response.setFileTime(result.get(0).getFileTime().getTime());
             return response;
         }
         SocialSecurityPaymentLog log = socialSecurityPaymentLogProvider.findAnyOneSocialSecurityPaymentLog(cmd.getOwnerId(), cmd.getPayMonth());
