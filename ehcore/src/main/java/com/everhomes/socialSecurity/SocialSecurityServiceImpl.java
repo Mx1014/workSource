@@ -1438,7 +1438,7 @@ public class SocialSecurityServiceImpl implements SocialSecurityService {
             return IsWork.IS_OUT.getCode();
         } else {
             if (null != dto.getCheckInTime() &&
-                    Integer.valueOf(dateSF.get().format(dto.getCheckInTime())).equals(payMonth)) {
+                    Integer.valueOf(monthSF.get().format(dto.getCheckInTime())).equals(payMonth)) {
                 return IsWork.IS_NEW.getCode();
             } else {
                 return IsWork.NORMAL.getCode();
