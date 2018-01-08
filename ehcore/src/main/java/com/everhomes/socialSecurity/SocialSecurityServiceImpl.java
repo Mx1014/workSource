@@ -2000,7 +2000,7 @@ public class SocialSecurityServiceImpl implements SocialSecurityService {
 
         //如果是null的话会被传成“null”
         params.put("ownerId", cmd.getOwnerId());
-        params.put("payMonth", cmd.getPaymentMonth());
+        params.put("payMonth", cmd.getPayMonth());
         params.put("reportType","exportSocialSecurityDepartmentSummarys");
         String fileName = String.format("导出社保部门汇总报表_%s.xlsx", DateUtil.dateToStr(new Date(), DateUtil.NO_SLASH));
 
