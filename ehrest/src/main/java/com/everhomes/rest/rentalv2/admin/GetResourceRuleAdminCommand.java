@@ -2,13 +2,14 @@ package com.everhomes.rest.rentalv2.admin;
 
 import javax.validation.constraints.NotNull;
 
+import com.everhomes.rest.rentalv2.RentalV2ResourceType;
 import com.everhomes.util.StringHelper;
 
 /**
  * <ul>
  * 查某资源的规则 
  * <li>resourceId: resource id</li>
- * <li>resourceType: resourceType {@link com.everhomes.rest.rentalv2.RentalResourceType}</li>
+ * <li>resourceType: resourceType {@link RentalV2ResourceType}</li>
  * </ul>
  */
 public class GetResourceRuleAdminCommand {

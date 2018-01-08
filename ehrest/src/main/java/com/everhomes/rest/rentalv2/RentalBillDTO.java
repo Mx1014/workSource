@@ -4,7 +4,6 @@ import java.math.BigDecimal;
 import java.util.List;
 
 import com.everhomes.discover.ItemType;
-import com.everhomes.rest.rentalv2.admin.AttachmentConfigDTO;
 import com.everhomes.util.StringHelper;
 
 /**
@@ -25,13 +24,10 @@ import com.everhomes.util.StringHelper;
  * <li>startTime: 开始时间</li>
  * <li>endTime: 结束时间</li>
  * <li>reserveTime: 预订时间</li>
- * <li>payStartTime: 支付开始时间</li>
  * <li>payTime: 支付时间</li>
  * <li>cancelTime: 取消时间</li>
- * <li>payDeadLineTime: 最后支付时间</li>
  * <li>sitePrice: 场所总价</li>
  * <li>totalPrice: 全部总价包含物品</li>
- * <li>reservePrice: 订金</li>
  * <li>paidPrice: 已付金额</li>
  * <li>unPayPrice: 未付金额</li>
  * <li>invoiceFlag: invoiceFlag</li>
@@ -52,7 +48,7 @@ import com.everhomes.util.StringHelper;
  * <li>toastFlag: toastFlag</li>
  * <li>confirmationPrompt: 确认提示(非必填)</li>
  * <li>flowCaseId: flowCaseId</li>
- * <li>resourceType: resourceType {@link com.everhomes.rest.rentalv2.RentalResourceType}</li>
+ * <li>resourceType: resourceType {@link RentalV2ResourceType}</li>
  * <li>customObject: 业务资源数据</li>
  * </ul>
  */
@@ -73,13 +69,13 @@ public class RentalBillDTO {
 	private Long startTime;
 	private Long endTime;
 	private Long reserveTime;
-	private Long payStartTime;
+	//	private Long payStartTime;
 	private Long payTime;
 	private Long cancelTime;
-	private Long payDeadLineTime;
+	//	private Long payDeadLineTime;
 	private BigDecimal sitePrice;
 	private BigDecimal totalPrice;
-	private BigDecimal reservePrice;
+	//	private BigDecimal reservePrice;
 	private BigDecimal paidPrice;
 	private BigDecimal unPayPrice;
 	private Byte invoiceFlag;
@@ -211,14 +207,6 @@ public class RentalBillDTO {
 		this.invoiceFlag = invoiceFlag;
 	}
 
-	public Long getPayDeadLineTime() {
-		return payDeadLineTime;
-	}
-
-	public void setPayDeadLineTime(Long payDeadLineTime) {
-		this.payDeadLineTime = payDeadLineTime;
-	}
-
 	public Long getCancelTime() {
 		return cancelTime;
 	}
@@ -233,14 +221,6 @@ public class RentalBillDTO {
 
 	public void setPayTime(Long payTime) {
 		this.payTime = payTime;
-	}
-
-	public Long getPayStartTime() {
-		return payStartTime;
-	}
-
-	public void setPayStartTime(Long payStartTime) {
-		this.payStartTime = payStartTime;
 	}
 
 	public Long getReserveTime() {
@@ -305,14 +285,6 @@ public class RentalBillDTO {
 
 	public void setTotalPrice(BigDecimal totalPrice) {
 		this.totalPrice = totalPrice;
-	}
-
-	public BigDecimal getReservePrice() {
-		return reservePrice;
-	}
-
-	public void setReservePrice(BigDecimal reservePrice) {
-		this.reservePrice = reservePrice;
 	}
 
 	public BigDecimal getPaidPrice() {

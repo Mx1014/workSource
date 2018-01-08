@@ -6,7 +6,7 @@ import java.math.BigDecimal;
 
 /**
  * <ul>
- * <li>resourceType: resourceType {@link com.everhomes.rest.rentalv2.RentalResourceType}</li>
+ * <li>resourceType: resourceType {@link RentalV2ResourceType}</li>
  * <li>resourceTypeId: 资源类型id</li>
  * <li>rentalBillId: 订单id</li>
  * <li>orderNo: 订单编号</li>

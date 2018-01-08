@@ -5,11 +5,12 @@ import java.util.List;
 import javax.validation.constraints.NotNull;
 
 import com.everhomes.discover.ItemType;
+import com.everhomes.rest.rentalv2.RentalV2ResourceType;
 import com.everhomes.util.StringHelper;
 
 /**
  * <ul>
- * <li>resourceType: resourceType {@link com.everhomes.rest.rentalv2.RentalResourceType}</li>
+ * <li>resourceType: resourceType {@link RentalV2ResourceType}</li>
  * <li>rentalSiteId: 资源id</li>
  * <li>autoAssign: 是否需要自动分配资源</li>
  * <li>multiUnit: 是否允许预约多个场所</li>

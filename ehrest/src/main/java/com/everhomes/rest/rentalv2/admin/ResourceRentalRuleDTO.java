@@ -1,5 +1,6 @@
 package com.everhomes.rest.rentalv2.admin;
 
+import com.everhomes.rest.rentalv2.RentalV2ResourceType;
 import com.everhomes.rest.rentalv2.RuleSourceType;
 import com.everhomes.util.StringHelper;
 
@@ -8,7 +9,7 @@ import com.everhomes.util.StringHelper;
  * <li>ownerType: ownerType {@link com.everhomes.rest.rentalv2.RentalOwnerType}</li>
  * <li>ownerId: 园区id</li>
  * <li>resourceTypeId: 图标id</li>
- * <li>resourceType: resourceType {@link com.everhomes.rest.rentalv2.RentalResourceType}</li>
+ * <li>resourceType: resourceType {@link RentalV2ResourceType}</li>
  * <li>sourceType: sourceType 默认规则：default_rule， 资源规则：resource_rule{@link RuleSourceType}</li>
  * <li>sourceId: 资源id，如果是默认规则，则不填</li>
  * <li>multiTimeInterval: 是否允许预约多个时段</li>

@@ -627,52 +627,33 @@ public class Rentalv2ProviderImpl implements Rentalv2Provider {
 	}
 
 	@Override
-	public Integer deleteResourceCells(Long rentalSiteId, Long beginDate,
-			Long endDate) {
-		DSLContext context = dbProvider.getDslContext(AccessSpec.readOnly());
-		DeleteWhereStep<EhRentalv2CellsRecord> step = context
-				.delete(Tables.EH_RENTALV2_CELLS);
-		Condition condition = Tables.EH_RENTALV2_CELLS.RENTAL_RESOURCE_ID
-				.equal(rentalSiteId);
-		if (null != beginDate && null != endDate) {
-			condition = condition
-					.and(Tables.EH_RENTALV2_CELLS.RESOURCE_RENTAL_DATE.between(
-							new Date(beginDate), new Date(endDate)));
-		}
-		step.where(condition);
-		Integer deleteCount = step.execute();
-		return deleteCount;
-	}
-
-	@Override
-	public List<RentalOrder> listRentalBills(Long id,Long userId,Long resourceTypeId,
+	public List<RentalOrder> listRentalBills(Long id, Long userId, String resourceType, Long resourceTypeId,
 			ListingLocator locator, int count, List<Byte> status, Byte payMode) {
-		final List<RentalOrder> result = new ArrayList<RentalOrder>();
-		Condition condition = Tables.EH_RENTALV2_ORDERS.ID.lt(locator.getAnchor());
-		condition = condition.and(Tables.EH_RENTALV2_ORDERS.STATUS.ne(SiteBillStatus.INACTIVE.getCode()));
+		final List<RentalOrder> result = new ArrayList<>();
+		Condition condition = Tables.EH_RENTALV2_ORDERS.STATUS.ne(SiteBillStatus.INACTIVE.getCode());
 
-		//TODO:
-		if(null!=resourceTypeId)
-			condition = condition.and(Tables.EH_RENTALV2_ORDERS.RESOURCE_TYPE_ID
-				.eq(resourceTypeId));
-//		condition = condition.and(Tables.EH_RENTALV2_ORDERS.OWNER_TYPE
-//				.eq(ownerType));
-//		if (StringUtils.isNotEmpty(siteType))
-//			condition = condition.and(Tables.EH_RENTALV2_ORDERS.RESOURCE_TYPE
-//					.eq(siteType));
+		if (null != locator.getAnchor()) {
+			condition = condition.and(Tables.EH_RENTALV2_ORDERS.ID.lt(locator.getAnchor()));
+		}
+
+		if(null != resourceTypeId) {
+			condition = condition.and(Tables.EH_RENTALV2_ORDERS.RESOURCE_TYPE_ID.eq(resourceTypeId));
+		}
+		if (StringUtils.isNotBlank(resourceType)) {
+			condition = condition.and(Tables.EH_RENTALV2_ORDERS.RESOURCE_TYPE.eq(resourceType));
+		}
 		if (null != id)
 			condition = condition.and(Tables.EH_RENTALV2_ORDERS.ID.eq(id));
 		if (null != payMode) {
 			condition = condition.and(Tables.EH_RENTALV2_ORDERS.PAY_MODE.eq(payMode));
 		}
 		if (null != userId) {
-			condition = condition.and(Tables.EH_RENTALV2_ORDERS.RENTAL_UID
-					.eq(userId));
+			condition = condition.and(Tables.EH_RENTALV2_ORDERS.RENTAL_UID.eq(userId));
 		}
-		if (null != status)
+		if (null != status) {
 			condition = condition.and(Tables.EH_RENTALV2_ORDERS.STATUS.in(status));
-		condition = condition.and(Tables.EH_RENTALV2_ORDERS.VISIBLE_FLAG
-				.eq(VisibleFlag.VISIBLE.getCode()));
+		}
+		condition = condition.and(Tables.EH_RENTALV2_ORDERS.VISIBLE_FLAG.eq(VisibleFlag.VISIBLE.getCode()));
 		final Condition condition2 = condition;
 		this.dbProvider.mapReduce(
 				AccessSpec.readOnlyWith(EhCommunities.class),
@@ -695,8 +676,7 @@ public class Rentalv2ProviderImpl implements Rentalv2Provider {
 
 		return result;
 	}
- 
-	
+
 	@Override
 	public RentalResource getRentalSiteById(Long rentalSiteId) {
 		DSLContext context = dbProvider.getDslContext(AccessSpec.readOnly());
@@ -1876,12 +1856,12 @@ public class Rentalv2ProviderImpl implements Rentalv2Provider {
 	}
  
 	@Override
-	public void deleteRentalCellsByResourceId(Long rentalSiteId) {
+	public void deleteRentalCellsByResourceId(String resourceType, Long rentalSiteId) {
 		DSLContext context = dbProvider.getDslContext(AccessSpec.readOnly());
 		DeleteWhereStep<EhRentalv2CellsRecord> step = context
 				.delete(Tables.EH_RENTALV2_CELLS);
-		Condition condition = Tables.EH_RENTALV2_CELLS.RENTAL_RESOURCE_ID
-				.equal(rentalSiteId);
+		Condition condition = Tables.EH_RENTALV2_CELLS.RENTAL_RESOURCE_ID.equal(rentalSiteId)
+								.and(Tables.EH_RENTALV2_CELLS.RESOURCE_TYPE.equal(resourceType));
 		step.where(condition);
 		step.execute();
 	} 
@@ -1937,16 +1917,10 @@ public class Rentalv2ProviderImpl implements Rentalv2Provider {
 		DSLContext context = dbProvider.getDslContext(AccessSpec.readOnly());
 		Record record = context.select(DSL.max(Tables.EH_RENTALV2_CELLS.PRICE), DSL.min(Tables.EH_RENTALV2_CELLS.PRICE),
 				DSL.max(Tables.EH_RENTALV2_CELLS.ORIGINAL_PRICE), DSL.min(Tables.EH_RENTALV2_CELLS.ORIGINAL_PRICE),
-				DSL.max(Tables.EH_RENTALV2_CELLS.HALFRESOURCE_PRICE), DSL.min(Tables.EH_RENTALV2_CELLS.HALFRESOURCE_PRICE),
-				DSL.max(Tables.EH_RENTALV2_CELLS.HALFRESOURCE_ORIGINAL_PRICE), DSL.min(Tables.EH_RENTALV2_CELLS.HALFRESOURCE_ORIGINAL_PRICE),
 				DSL.max(Tables.EH_RENTALV2_CELLS.ORG_MEMBER_PRICE), DSL.min(Tables.EH_RENTALV2_CELLS.ORG_MEMBER_PRICE),
 				DSL.max(Tables.EH_RENTALV2_CELLS.ORG_MEMBER_ORIGINAL_PRICE), DSL.min(Tables.EH_RENTALV2_CELLS.ORG_MEMBER_ORIGINAL_PRICE),
-				DSL.max(Tables.EH_RENTALV2_CELLS.HALF_ORG_MEMBER_PRICE), DSL.min(Tables.EH_RENTALV2_CELLS.HALF_ORG_MEMBER_PRICE),
-				DSL.max(Tables.EH_RENTALV2_CELLS.HALF_ORG_MEMBER_ORIGINAL_PRICE), DSL.min(Tables.EH_RENTALV2_CELLS.HALF_ORG_MEMBER_ORIGINAL_PRICE),
 				DSL.max(Tables.EH_RENTALV2_CELLS.APPROVING_USER_PRICE), DSL.min(Tables.EH_RENTALV2_CELLS.APPROVING_USER_PRICE),
-				DSL.max(Tables.EH_RENTALV2_CELLS.APPROVING_USER_ORIGINAL_PRICE), DSL.min(Tables.EH_RENTALV2_CELLS.APPROVING_USER_ORIGINAL_PRICE),
-				DSL.max(Tables.EH_RENTALV2_CELLS.HALF_APPROVING_USER_PRICE), DSL.min(Tables.EH_RENTALV2_CELLS.HALF_APPROVING_USER_PRICE),
-				DSL.max(Tables.EH_RENTALV2_CELLS.HALF_APPROVING_USER_ORIGINAL_PRICE), DSL.min(Tables.EH_RENTALV2_CELLS.HALF_APPROVING_USER_ORIGINAL_PRICE)
+				DSL.max(Tables.EH_RENTALV2_CELLS.APPROVING_USER_ORIGINAL_PRICE), DSL.min(Tables.EH_RENTALV2_CELLS.APPROVING_USER_ORIGINAL_PRICE)
 				)
 			.from(Tables.EH_RENTALV2_CELLS)
 			.where(Tables.EH_RENTALV2_CELLS.RENTAL_RESOURCE_ID.eq(resourceId))
@@ -1956,29 +1930,17 @@ public class Rentalv2ProviderImpl implements Rentalv2Provider {
 			.fetchOne();
 		if (record != null) {
 			BigDecimal maxPrice = max(record.getValue(DSL.max(Tables.EH_RENTALV2_CELLS.PRICE)),
-					record.getValue(DSL.max(Tables.EH_RENTALV2_CELLS.ORIGINAL_PRICE)),
-					record.getValue(DSL.max(Tables.EH_RENTALV2_CELLS.HALFRESOURCE_PRICE)),
-					record.getValue(DSL.max(Tables.EH_RENTALV2_CELLS.HALFRESOURCE_ORIGINAL_PRICE)));
+					record.getValue(DSL.max(Tables.EH_RENTALV2_CELLS.ORIGINAL_PRICE)));
 			BigDecimal minPrice = min(record.getValue(DSL.min(Tables.EH_RENTALV2_CELLS.PRICE)),
-					record.getValue(DSL.min(Tables.EH_RENTALV2_CELLS.ORIGINAL_PRICE)),
-					record.getValue(DSL.min(Tables.EH_RENTALV2_CELLS.HALFRESOURCE_PRICE)),
-					record.getValue(DSL.min(Tables.EH_RENTALV2_CELLS.HALFRESOURCE_ORIGINAL_PRICE)));
+					record.getValue(DSL.min(Tables.EH_RENTALV2_CELLS.ORIGINAL_PRICE)));
 			BigDecimal maxOrgMemberPrice = max(record.getValue(DSL.max(Tables.EH_RENTALV2_CELLS.ORG_MEMBER_PRICE)),
-					record.getValue(DSL.max(Tables.EH_RENTALV2_CELLS.ORG_MEMBER_ORIGINAL_PRICE)),
-					record.getValue(DSL.max(Tables.EH_RENTALV2_CELLS.HALF_ORG_MEMBER_PRICE)),
-					record.getValue(DSL.max(Tables.EH_RENTALV2_CELLS.HALF_ORG_MEMBER_ORIGINAL_PRICE)));
+					record.getValue(DSL.max(Tables.EH_RENTALV2_CELLS.ORG_MEMBER_ORIGINAL_PRICE)));
 			BigDecimal minOrgMemberPrice = min(record.getValue(DSL.min(Tables.EH_RENTALV2_CELLS.ORG_MEMBER_PRICE)),
-					record.getValue(DSL.min(Tables.EH_RENTALV2_CELLS.ORG_MEMBER_ORIGINAL_PRICE)),
-					record.getValue(DSL.min(Tables.EH_RENTALV2_CELLS.HALF_ORG_MEMBER_PRICE)),
-					record.getValue(DSL.min(Tables.EH_RENTALV2_CELLS.HALF_ORG_MEMBER_ORIGINAL_PRICE)));
+					record.getValue(DSL.min(Tables.EH_RENTALV2_CELLS.ORG_MEMBER_ORIGINAL_PRICE)));
 			BigDecimal maxApprovingUserPrice = max(record.getValue(DSL.max(Tables.EH_RENTALV2_CELLS.APPROVING_USER_PRICE)),
-					record.getValue(DSL.max(Tables.EH_RENTALV2_CELLS.APPROVING_USER_ORIGINAL_PRICE)),
-					record.getValue(DSL.max(Tables.EH_RENTALV2_CELLS.HALF_APPROVING_USER_PRICE)),
-					record.getValue(DSL.max(Tables.EH_RENTALV2_CELLS.HALF_APPROVING_USER_ORIGINAL_PRICE)));
+					record.getValue(DSL.max(Tables.EH_RENTALV2_CELLS.APPROVING_USER_ORIGINAL_PRICE)));
 			BigDecimal minApprovingUserPrice = min(record.getValue(DSL.min(Tables.EH_RENTALV2_CELLS.APPROVING_USER_PRICE)),
-					record.getValue(DSL.min(Tables.EH_RENTALV2_CELLS.APPROVING_USER_ORIGINAL_PRICE)),
-					record.getValue(DSL.min(Tables.EH_RENTALV2_CELLS.HALF_APPROVING_USER_PRICE)),
-					record.getValue(DSL.min(Tables.EH_RENTALV2_CELLS.HALF_APPROVING_USER_ORIGINAL_PRICE)));
+					record.getValue(DSL.min(Tables.EH_RENTALV2_CELLS.APPROVING_USER_ORIGINAL_PRICE)));
 			return new MaxMinPrice(maxPrice, minPrice, maxOrgMemberPrice, minOrgMemberPrice, maxApprovingUserPrice, minApprovingUserPrice);
 		}
 		return null;

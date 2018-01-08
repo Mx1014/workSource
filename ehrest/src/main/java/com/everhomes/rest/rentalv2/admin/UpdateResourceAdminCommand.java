@@ -31,6 +31,8 @@ import com.everhomes.util.StringHelper;
  * </ul>
  */
 public class UpdateResourceAdminCommand {
+
+	private String resourceType;
 	private Long id;
 	@NotNull
 	private String siteName;
@@ -66,6 +68,13 @@ public class UpdateResourceAdminCommand {
 		return StringHelper.toJsonString(this);
 	}
 
+	public String getResourceType() {
+		return resourceType;
+	}
+
+	public void setResourceType(String resourceType) {
+		this.resourceType = resourceType;
+	}
 
 	public Long getId() {
 		return id;

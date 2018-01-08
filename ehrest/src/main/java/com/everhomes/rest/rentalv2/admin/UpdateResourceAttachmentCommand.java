@@ -1,6 +1,5 @@
 package com.everhomes.rest.rentalv2.admin;
 
-import java.math.BigDecimal;
 import java.util.List;
 
 import javax.validation.constraints.NotNull;
@@ -16,6 +15,8 @@ import com.everhomes.util.StringHelper;
  * </ul>
  */
 public class UpdateResourceAttachmentCommand {
+
+	private String resourceType;
 	@NotNull
 	private Long rentalSiteId; 
 	@ItemType(AttachmentConfigDTO.class)
@@ -24,6 +25,15 @@ public class UpdateResourceAttachmentCommand {
     public String toString() {
         return StringHelper.toJsonString(this);
     }
+
+	public String getResourceType() {
+		return resourceType;
+	}
+
+	public void setResourceType(String resourceType) {
+		this.resourceType = resourceType;
+	}
+
 	public Long getRentalSiteId() {
 		return rentalSiteId;
 	}

@@ -269,7 +269,7 @@ public class Rentalv2Controller extends ControllerBase {
 	 */
 	@RequestMapping("findRentalSiteItemsAndAttachments")
 	@RestReturn(value = FindRentalSiteItemsAndAttachmentsResponse.class)
-	public RestResponse findRentalSiteItems(@Valid FindRentalSiteItemsAndAttachmentsCommand cmd) { 
+	public RestResponse findRentalSiteItems(@Valid FindRentalSiteItemsAndAttachmentsCommand cmd) {
 		FindRentalSiteItemsAndAttachmentsResponse findRentalSiteItemsCommandResponse = rentalService.findRentalSiteItems(cmd);
 		RestResponse response = new RestResponse(
 				findRentalSiteItemsCommandResponse);
@@ -540,4 +540,32 @@ public class Rentalv2Controller extends ControllerBase {
 		response.setErrorDescription("OK");
 		return response;
 	}
+
+	/**
+	 * <b>URL: /rental/renewRentalOrder</b>
+	 * <p>订单续费</p>
+	 */
+	@RequestMapping("renewRentalOrder")
+	@RestReturn(value = RentalOrderDTO.class)
+	public RestResponse renewRentalOrder(RenewRentalOrderCommand cmd) {
+		RestResponse response = new RestResponse();
+		response.setErrorCode(ErrorCodes.SUCCESS);
+		response.setErrorDescription("OK");
+		return response;
+	}
+
+//	/**
+//	 *
+//	 * <b>URL: /rental/getRentalOrderRule<b>
+//	 * <p>查询订单的规则</p>
+//	 */
+//	@RequestMapping("getRentalOrderRule")
+//	@RestReturn(RentalOrderRuleDTO.class)
+//	public RestResponse getRentalOrderRule(GetRentalOrderRuleCommand cmd) {
+//
+//		RestResponse response = new RestResponse();
+//		response.setErrorCode(ErrorCodes.SUCCESS);
+//		response.setErrorDescription("OK");
+//		return response;
+//	}
 }

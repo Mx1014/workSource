@@ -24,8 +24,6 @@ public interface Rentalv2Provider {
 
 	List<RentalResourceOrder> findRentalSiteBillBySiteRuleId(Long siteRuleId);
 
-	Integer deleteResourceCells(Long rentalSiteId, Long beginDate, Long endDate);
-
 	RentalResource getRentalSiteById(Long rentalSiteId);
 
 	List<RentalItemsOrder> findRentalItemsBillBySiteBillId(Long rentalBillId);
@@ -54,7 +52,7 @@ public interface Rentalv2Provider {
 
 	RentalOrderPayorderMap findRentalBillPaybillMapByOrderNo(String orderNo);
 
-	List<RentalOrder> listRentalBills(Long id,Long userId, Long resourceTypeId, ListingLocator locator,
+	List<RentalOrder> listRentalBills(Long id, Long userId, String resourceType, Long resourceTypeId, ListingLocator locator,
 			int count, List<Byte> status, Byte payMode);
 
 	List<RentalOrder> listRentalBills(Long resourceTypeId, Long organizationId, Long rentalSiteId, ListingLocator locator, Byte billStatus,
@@ -157,7 +155,7 @@ public interface Rentalv2Provider {
 
 	RentalCell getRentalCellById(Long cellId);
  
-	void deleteRentalCellsByResourceId(Long rentalSiteId); 
+	void deleteRentalCellsByResourceId(String resourceType, Long rentalSiteId);
 
 	List<RentalOrder> listSiteRentalByUpdateTimeAndAnchor(Integer namespaceId, Long timestamp, Long pageAnchor, int pageSize);
 

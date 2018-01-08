@@ -8,12 +8,12 @@ package com.everhomes.rest.rentalv2;
  * <li>VIP_PARKING: vip_parking</li>
  * </ul>
  */
-public enum RentalResourceType {
+public enum RentalV2ResourceType {
 	DEFAULT("default"), VIP_PARKING("vip_parking");
 
 	private String code;
 
-	private RentalResourceType(String code) {
+	private RentalV2ResourceType(String code) {
 		this.code = code;
 	}
 	
@@ -21,9 +21,9 @@ public enum RentalResourceType {
 		return code;
 	}
 	
-	public static RentalResourceType fromCode(String code) {
+	public static RentalV2ResourceType fromCode(String code) {
 		if (code != null && !code.isEmpty()) {
-			for (RentalResourceType priceRuleType : RentalResourceType.values()) {
+			for (RentalV2ResourceType priceRuleType : RentalV2ResourceType.values()) {
 				if (priceRuleType.code.equals(code)) {
 					return priceRuleType;
 				}

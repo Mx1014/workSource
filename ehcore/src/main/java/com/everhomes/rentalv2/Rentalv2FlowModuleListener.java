@@ -210,14 +210,14 @@ public class Rentalv2FlowModuleListener implements FlowModuleListener {
 		e.setKey(this.localeStringService.getLocalizedString(RentalNotificationTemplateCode.FLOW_SCOPE,
 				"organization", RentalNotificationTemplateCode.locale, ""));
 
-		Long orgId = order.getRequestorOrganizationId();
+		Long orgId = order.getUserEnterpriseId();
 		if (null != orgId) {
 			Organization org = organizationProvider.findOrganizationById(orgId);
 			e.setValue(org.getName());
 		}else {
-			List<OrganizationSimpleDTO> organizaiotnDTOs =this.organizationService.listUserRelateOrgs(new ListUserRelatedOrganizationsCommand(),user);
+			List<OrganizationSimpleDTO> organizationDTOs =this.organizationService.listUserRelateOrgs(new ListUserRelatedOrganizationsCommand(),user);
 
-			for(OrganizationSimpleDTO org : organizaiotnDTOs ){
+			for(OrganizationSimpleDTO org : organizationDTOs){
 				if (StringUtils.isNotBlank(e.getValue()))
 					e.setValue(e.getValue() + "、" + org.getName());
 				else

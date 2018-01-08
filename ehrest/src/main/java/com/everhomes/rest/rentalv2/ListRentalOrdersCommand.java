@@ -8,7 +8,7 @@ import javax.validation.constraints.NotNull;
  * <ul>查询订单
  * <li>rentalSiteId：资源id</li>
  * <li>organizationId：机构id</li>
- * <li>resourceType：资源类型 {@link com.everhomes.rest.rentalv2.RentalResourceType}</li>
+ * <li>resourceType：资源类型 {@link RentalV2ResourceType}</li>
  * <li>resourceTypeId：资源类型id</li>
  * <li>pageAnchor: 分页的锚点，本次开始取的位置</li>
  * <li>pageSize: 每页的数量</li>

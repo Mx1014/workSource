@@ -6,7 +6,7 @@ import java.math.BigDecimal;
 
 /**
  * <ul>
- * <li>resourceType: resourceType {@link com.everhomes.rest.rentalv2.RentalResourceType}</li>
+ * <li>resourceType: resourceType {@link RentalV2ResourceType}</li>
  * <li>resourceTypeId: 资源类型id</li>
  * <li>rentalBillId: 订单id</li>
  * <li>orderNo: 订单编号</li>
@@ -59,6 +59,7 @@ public class RentalOrderDTO {
 	private Long createTime;
 	private Long payTime;
 	private Long overTime;
+	private Long cancelTime;
 	private BigDecimal totalAmount;
 	private BigDecimal paidAmount;
 	private BigDecimal unPayAmount;
@@ -71,6 +72,14 @@ public class RentalOrderDTO {
 	@Override
 	public String toString() {
 		return StringHelper.toJsonString(this);
+	}
+
+	public Long getCancelTime() {
+		return cancelTime;
+	}
+
+	public void setCancelTime(Long cancelTime) {
+		this.cancelTime = cancelTime;
 	}
 
 	public Long getActualStartTime() {

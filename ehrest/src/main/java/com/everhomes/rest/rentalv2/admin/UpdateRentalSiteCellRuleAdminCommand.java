@@ -34,6 +34,8 @@ import java.util.List;
  * </ul>
  */
 public class UpdateRentalSiteCellRuleAdminCommand {
+
+	private String resourceType;
 	private Long resourceId;
 	private Long ruleId;
 	//按小时或者半天
@@ -45,9 +47,6 @@ public class UpdateRentalSiteCellRuleAdminCommand {
 	private java.math.BigDecimal originalPrice;
 	private java.math.BigDecimal price;
 	private BigDecimal initiatePrice;
-	private java.math.BigDecimal halfsitePrice;
-	private java.math.BigDecimal halfsiteOriginalPrice;
-
 
 	private java.lang.Double counts;
 	private Byte loopType;
@@ -67,6 +66,14 @@ public class UpdateRentalSiteCellRuleAdminCommand {
 	@ItemType(PricePackageDTO.class)
 	private List<PricePackageDTO> sitePackages;
 	private Long sitePackageId;
+
+	public String getResourceType() {
+		return resourceType;
+	}
+
+	public void setResourceType(String resourceType) {
+		this.resourceType = resourceType;
+	}
 
 	public Byte getRentalType() {
 		return rentalType;
@@ -151,22 +158,6 @@ public class UpdateRentalSiteCellRuleAdminCommand {
 
 	public void setEndDate(Long endDate) {
 		this.endDate = endDate;
-	}
-
-	public java.math.BigDecimal getHalfsitePrice() {
-		return halfsitePrice;
-	}
-
-	public void setHalfsitePrice(java.math.BigDecimal halfsitePrice) {
-		this.halfsitePrice = halfsitePrice;
-	}
-
-	public java.math.BigDecimal getHalfsiteOriginalPrice() {
-		return halfsiteOriginalPrice;
-	}
-
-	public void setHalfsiteOriginalPrice(java.math.BigDecimal halfsiteOriginalPrice) {
-		this.halfsiteOriginalPrice = halfsiteOriginalPrice;
 	}
 
 	public List<PricePackageDTO> getSitePackages() {

@@ -186,4 +186,12 @@ public interface Rentalv2Service {
 	void updateResourceOrderRule(UpdateResourceOrderRuleCommand cmd);
 
 	ResourceOrderRuleDTO getResourceOrderRule(GetResourceOrderRuleCommand cmd);
+
+	AddRentalOrderUsingInfoResponse addRentalOrderUsingInfo(AddRentalOrderUsingInfoCommand cmd);
+
+	AddRentalOrderUsingInfoV2Response addRentalOrderUsingInfoV2(AddRentalOrderUsingInfoCommand cmd);
+
+	ListRentalOrdersResponse listRentalOrders(ListRentalOrdersCommand cmd);
+
+	RentalOrderDTO getRentalOrderDetail(GetRentalOrderDetailCommand cmd);
 }

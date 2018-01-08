@@ -13,7 +13,8 @@ import com.everhomes.util.StringHelper;
  * <li>pageSize: 每页的数量</li>
  * </ul>
  */
-public class GetRefundOrderListCommand {  
+public class GetRefundOrderListCommand {
+	private String resourceType;
 	private java.lang.Long       resourceTypeId; 
 	private Long startTime; 
 	private Long endTime;
@@ -24,11 +25,17 @@ public class GetRefundOrderListCommand {
 	
 	@Override
     public String toString() {
-
-		
         return StringHelper.toJsonString(this);
     }
- 
+
+	public String getResourceType() {
+		return resourceType;
+	}
+
+	public void setResourceType(String resourceType) {
+		this.resourceType = resourceType;
+	}
+
 	public java.lang.Long getResourceTypeId() {
 		return resourceTypeId;
 	}

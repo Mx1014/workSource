@@ -60,7 +60,7 @@ public class UpdateRentalOrderStatusToPayingFinalAction implements Runnable {
 			rentalBill.setStatus(SiteBillStatus.PAYINGFINAL.getCode());
 			rentalProvider.updateRentalBill(rentalBill);
 			//TODO: 发通知
-			RentalResource site = this.rentalProvider.getRentalSiteById(rentalBill.getRentalResourceId());
+//			RentalResource site = this.rentalProvider.getRentalSiteById(rentalBill.getRentalResourceId());
 //			RentalRule rule = this.rentalProvider.getRentalRule(site.getOwnerId(), site.getOwnerType(), site.getSiteType());
 //			StringBuffer sb = new StringBuffer();
 //			sb.append("您预定的："); 

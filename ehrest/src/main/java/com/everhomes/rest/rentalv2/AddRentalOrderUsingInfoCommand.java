@@ -6,7 +6,7 @@ import javax.validation.constraints.NotNull;
 /**
  * <ul>
  * <li>rentalBillId: 订单id</li>
- * <li>resourceType: resourceType {@link com.everhomes.rest.rentalv2.RentalResourceType}</li>
+ * <li>resourceType: resourceType {@link RentalV2ResourceType}</li>
  * <li>customObject: 业务数据 各个资源类型不一样 {@link com.everhomes.rest.rentalv2.VipParkingUseInfoDTO}</li>
  * <li>clientAppName: clientAppName</li>
  * <li>paymentType: paymentType</li>
