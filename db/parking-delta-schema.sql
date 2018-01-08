@@ -169,8 +169,7 @@ ADD COLUMN `string_tag2` varchar(128) DEFAULT NULL;
 ALTER TABLE `eh_rentalv2_orders`
 drop column reserve_money,
 drop column pay_start_time,
-drop column pay_end_time,
-drop column resource_type2;
+drop column pay_end_time;
 
 
 
