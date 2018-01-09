@@ -341,6 +341,20 @@ public class UserProviderImpl implements UserProvider {
         DaoHelper.publishDaoAction(DaoAction.MODIFY, EhUserIdentifiers.class, userIdentifier.getId());
     }
 
+    @Override
+    public void updateIdentifierByUid(UserIdentifier userIdentifier) {
+        DSLContext context = this.dbProvider.getDslContext(AccessSpec.readOnlyWith(EhUsers.class));
+        UpdateQuery<EhUserIdentifiersRecord> query = context.updateQuery(Tables.EH_USER_IDENTIFIERS);
+        query.addValue(Tables.EH_USER_IDENTIFIERS.IDENTIFIER_TOKEN, userIdentifier.getIdentifierToken());
+        query.addValue(Tables.EH_USER_IDENTIFIERS.NAMESPACE_ID, userIdentifier.getNamespaceId());
+        query.addValue(Tables.EH_USER_IDENTIFIERS.VERIFICATION_CODE, userIdentifier.getVerificationCode());
+        query.addValue(Tables.EH_USER_IDENTIFIERS.REGION_CODE, userIdentifier.getRegionCode());
+        query.addValue(Tables.EH_USER_IDENTIFIERS.IDENTIFIER_TYPE, userIdentifier.getIdentifierType());
+        query.addValue(Tables.EH_USER_IDENTIFIERS.NOTIFY_TIME, new Timestamp(DateHelper.currentGMTTime().getTime()));
+        query.addConditions(Tables.EH_USER_IDENTIFIERS.OWNER_UID.eq(userIdentifier.getOwnerUid()));
+        query.execute();
+    }
+
     @Caching(evict = {@CacheEvict(value = "UserIdentifier-Id", key = "#userIdentifier.id"),
             @CacheEvict(value = "UserIdentifier-Claiming", key = "#userIdentifier.identifierToken"),
             @CacheEvict(value = "UserIdentifier-List", key = "#userIdentifier.ownerUid"),

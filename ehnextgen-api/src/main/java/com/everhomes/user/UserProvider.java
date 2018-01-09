@@ -28,6 +28,7 @@ public interface UserProvider {
 
     void createIdentifier(UserIdentifier userIdentifier);
     void updateIdentifier(UserIdentifier userIdentifier);
+    void updateIdentifierByUid(UserIdentifier userIdentifier);
     void deleteIdentifier(UserIdentifier userIdentifier);
     void deleteIdentifier(long id);
     void deleteIdentifier(Integer namespaceId, List<Long> uIds);

@@ -5510,17 +5510,17 @@ public class UserServiceImpl implements UserService {
 								public void onSuccess(ResponseEntity<String> result) {
 									List<Map> userList = (List) JSON.parseObject(result.getBody().toString()).get("data");
 									if(userList != null && userList.size() > 0) {
-										if (timestampList.get(0) == null) {//todo 参数为null,为全量同步,同步所有的用户
-											// 删除全部的用户
-											userProvider.deleteUserAndUserIdentifiers(0, null, NamespaceUserType.ANBANG.getCode());
-										}else{  //todo 参数传当前时间,为增量同步，只同步上次同步拘束时间~当前时间的数据
-											//如果有之前同步过的用户，删掉重建
-											List<String> namespaceUserTokens = new ArrayList<>();
-											for (Map userInfo : userList) {
-												namespaceUserTokens.add(userInfo.get("id").toString());
-											}
-											userProvider.deleteUserAndUserIdentifiers(0, namespaceUserTokens, NamespaceUserType.ANBANG.getCode());
-										}
+//										if (timestampList.get(0) == null) {//todo 参数为null,为全量同步,同步所有的用户
+//											// 删除全部的用户
+//											userProvider.deleteUserAndUserIdentifiers(0, null, NamespaceUserType.ANBANG.getCode());
+//										}else{  //todo 参数传当前时间,为增量同步，只同步上次同步拘束时间~当前时间的数据
+//											//如果有之前同步过的用户，删掉重建
+//											List<String> namespaceUserTokens = new ArrayList<>();
+//											for (Map userInfo : userList) {
+//												namespaceUserTokens.add(userInfo.get("id").toString());
+//											}
+//											userProvider.deleteUserAndUserIdentifiers(0, namespaceUserTokens, NamespaceUserType.ANBANG.getCode());
+//										}
 										LOGGER.debug("AnBang user size" + userList.size());
 
 										List<User> users = userList.stream().map(r -> {
@@ -5542,6 +5542,7 @@ public class UserServiceImpl implements UserService {
 
 										//create
 										createUsersAndUserIdentifiers(users);
+										LOGGER.debug("AnBang createUsersAndUserIdentifiers completed");
 									}
 								}
 
@@ -5577,29 +5578,31 @@ public class UserServiceImpl implements UserService {
 
 		Map bodyMap = new HashMap();
 		bodyMap.put("appKey", "578580df-7015-4a42-b61f-b5c0ec0bc38a");
-		bodyMap.put("timestamp", String.valueOf(DateHelper.currentGMTTime().getTime()));
-		bodyMap.put("nonce", "123123124142");
-		bodyMap.put("secretKey", "S2rPpM5fGsgAx6CeAMTb5R2MOIsHmiScPmqCNR");
-		bodyMap.put("nickName", "王大发");
-		bodyMap.put("identifierToken", "18617156652");
-		bodyMap.put("avatar", "1231412sjkl;dkjasdj$^&*");
-		bodyMap.put("namespaceUserToken", "123142313121424124124");
+//		bodyMap.put("timestamp", String.valueOf(DateHelper.currentGMTTime().getTime()));
+		bodyMap.put("timestamp", "1515490912375");
+		bodyMap.put("nonce", "10036426855237293345");
+		bodyMap.put("secretKey", "S2rPpM5fGsgAx6CeAMTb5R2MOIsHmiScPmqCNR+NsD2TjeUlmuuls6xt1WYO/YqsGnLUMt1RKRnB5xzoVjwOng==");
+		bodyMap.put("nickName", "慧盟管家");
+		bodyMap.put("identifierToken", "18844157372");
+		bodyMap.put("avatar", null);
+		bodyMap.put("namespaceUserToken", "2018103116310798698");
 
 		MultiValueMap bodyParam = new LinkedMultiValueMap<String, Object>();
 		bodyParam.add("appKey", "578580df-7015-4a42-b61f-b5c0ec0bc38a");
-		bodyParam.add("timestamp", String.valueOf(DateHelper.currentGMTTime().getTime()));
-		bodyParam.add("nonce", "123123124142");
-		bodyParam.add("secretKey", "S2rPpM5fGsgAx6CeAMTb5R2MOIsHmiScPmqCNR");
-		bodyParam.add("nickName", "王大发");
-		bodyParam.add("identifierToken", "18617156652");
-		bodyParam.add("avatar", "1231412sjkl;dkjasdj$^&*");
-		bodyParam.add("namespaceUserToken", "123142313121424124124");
+//		bodyParam.add("timestamp", String.valueOf(DateHelper.currentGMTTime().getTime()));
+		bodyParam.add("timestamp", "1515490912375");
+		bodyParam.add("nonce", "10036426855237293345");
+		bodyParam.add("secretKey", "S2rPpM5fGsgAx6CeAMTb5R2MOIsHmiScPmqCNR+NsD2TjeUlmuuls6xt1WYO/YqsGnLUMt1RKRnB5xzoVjwOng==");
+		bodyParam.add("nickName", "慧盟管家");
+		bodyParam.add("identifierToken", "18844157372");
+		bodyParam.add("avatar", null);
+		bodyParam.add("namespaceUserToken", "2018103116310798698");
 
 		bodyParam.add("signature", SignatureHelper.computeSignature(bodyMap,"S2rPpM5fGsgAx6CeAMTb5R2MOIsHmiScPmqCNR+NsD2TjeUlmuuls6xt1WYO/YqsGnLUMt1RKRnB5xzoVjwOng=="));
 
 
 		try {
-			ListenableFuture<ResponseEntity<String>> auth_result = restCall(HttpMethod.POST, MediaType.APPLICATION_FORM_URLENCODED, "http://127.0.0.1:8080/evh/openapi/pushUsers", headerParam, bodyParam, new ListenableFutureCallback<ResponseEntity<String>>() {
+			ListenableFuture<ResponseEntity<String>> auth_result = restCall(HttpMethod.POST, MediaType.APPLICATION_FORM_URLENCODED, "http://printtest.zuolin.com/evh/openapi/pushUsers", headerParam, bodyParam, new ListenableFutureCallback<ResponseEntity<String>>() {
 
                 @Override
                 public void onSuccess(ResponseEntity<String> result) {
@@ -5621,10 +5624,10 @@ public class UserServiceImpl implements UserService {
 	public PushUsersResponse createUsersForAnBang(PushUsersCommand cmd) {
 		dbProvider.execute(r -> {
 			List<String> tokens = Collections.singletonList(cmd.getNamespaceUserToken());
-			this.userProvider.deleteUserAndUserIdentifiers(0,tokens,NamespaceUserType.ANBANG.getCode());
+//			this.userProvider.deleteUserAndUserIdentifiers(0,tokens,NamespaceUserType.ANBANG.getCode());
 			User user = new User();
 			user.setStatus(UserStatus.ACTIVE.getCode());
-			user.setNamespaceId(cmd.getNamespaceId());
+			user.setNamespaceId(0);
 			user.setNickName(cmd.getNickName());
 			user.setGender(UserGender.UNDISCLOSURED.getCode());
 			user.setNamespaceUserType(NamespaceUserType.ANBANG.getCode());
@@ -5639,14 +5642,10 @@ public class UserServiceImpl implements UserService {
 				LOGGER.error("encode password failed");
 				throw RuntimeErrorException.errorWith(UserServiceErrorCode.SCOPE, UserServiceErrorCode.ERROR_INVALID_PASSWORD, "Unable to create password hash");
 			}
-			userProvider.createUser(user);
-			UserIdentifier userIdentifier = new UserIdentifier();
-			userIdentifier.setOwnerUid(user.getId());
-			userIdentifier.setIdentifierType(IdentifierType.MOBILE.getCode());
-			userIdentifier.setIdentifierToken(cmd.getIdentifierToken());
-			userIdentifier.setNamespaceId(cmd.getNamespaceId());
-			userIdentifier.setClaimStatus(IdentifierClaimStatus.CLAIMED.getCode());
-			userProvider.createIdentifier(userIdentifier);
+
+			List<User> users = new ArrayList<>();
+			users.add(user);
+			createUsersAndUserIdentifiers(users);
 			return null;
 		});
 		return null;
@@ -5689,7 +5688,8 @@ public class UserServiceImpl implements UserService {
 	private void createUsersAndUserIdentifiers(List<User> users){
 		for (User user : users) {
 //			this.userProvider.findUserByNamespaceUserTokenAndType(user.getNamespaceUserToken(), user.getNamespaceUserType());
-			this.userProvider.createUser(user);
+			User old_user = this.userProvider.findUserByNamespaceUserTokenAndType(user.getNamespaceUserToken(),NamespaceUserType.ANBANG.getCode());
+			// create userIdentifier
 			UserIdentifier userIdentifier = new UserIdentifier();
 			userIdentifier.setOwnerUid(user.getId());
 			userIdentifier.setIdentifierType(IdentifierType.MOBILE.getCode());
@@ -5697,9 +5697,19 @@ public class UserServiceImpl implements UserService {
 			userIdentifier.setNamespaceId(user.getNamespaceId());
 			userIdentifier.setClaimStatus(IdentifierClaimStatus.CLAIMED.getCode());
 			userIdentifier.setRegionCode(86);
-			this.userProvider.createIdentifier(userIdentifier);
-		}
 
+			if(old_user != null && old_user.getId() != null){
+				user.setId(old_user.getId());
+				this.userProvider.updateUser(user);
+				this.userProvider.updateIdentifierByUid(userIdentifier);
+			}else{
+				this.userProvider.createUser(user);
+				userIdentifier.setOwnerUid(user.getId());
+				userIdentifier.setCreateTime(new Timestamp(DateHelper.currentGMTTime().getTime()));
+				userIdentifier.setNotifyTime(new Timestamp(DateHelper.currentGMTTime().getTime()));
+				this.userProvider.createIdentifier(userIdentifier);
+			}
+		}
 	}
 
 }
