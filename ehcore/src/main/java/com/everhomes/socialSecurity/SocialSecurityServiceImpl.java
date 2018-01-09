@@ -2254,6 +2254,7 @@ public class SocialSecurityServiceImpl implements SocialSecurityService {
 
     private void fileSocialSecurity(Long ownerId, String payMonth, List<SocialSecurityPayment> payments) {
         //删除之前当月的归档表
+        LOGGER.debug("开始归档报表");
         socialSecurityPaymentLogProvider.deleteMonthLog(ownerId, payMonth);
         Long id = sequenceProvider.getNextSequenceBlock(NameMapper.getSequenceDomainFromTablePojo(EhSocialSecurityPaymentLogs.class), payments.size() + 1);
         List<EhSocialSecurityPaymentLogs> logs = new ArrayList<>();
@@ -2264,6 +2265,8 @@ public class SocialSecurityServiceImpl implements SocialSecurityService {
 //            socialSecurityPaymentLogProvider.createSocialSecurityPaymentLog(paymentLog);
         }
         socialSecurityPaymentLogProvider.batchCreateSocialSecurityPaymentLog(logs);
+        LOGGER.debug("开始计算汇总表");
+
         //归档汇总表
         socialSecuritySummaryProvider.deleteSocialSecuritySummary(ownerId, payMonth);
         SocialSecuritySummary summary = socialSecurityPaymentProvider.calculateSocialSecuritySummary(ownerId, payMonth);
