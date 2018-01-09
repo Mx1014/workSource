@@ -45,7 +45,7 @@ CREATE TABLE `eh_rentalv2_order_rules` (
   `owner_id` bigint(20) DEFAULT NULL,
   `handle_type` tinyint(4) DEFAULT NULL COMMENT '1: 退款, 2: 加收',
   `duration_type` tinyint(4) DEFAULT NULL COMMENT '1: 时长内, 2: 时长外',
-  `duration_unit` varchar(20) DEFAULT NULL COMMENT '时长单位，比如 天，小时',
+  `duration_unit` tinyint(4) DEFAULT NULL COMMENT '时长单位，比如 天，小时',
   `duration` double DEFAULT NULL COMMENT '时长',
   `factor` double DEFAULT NULL COMMENT '价格系数',
 
