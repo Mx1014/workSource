@@ -34,6 +34,8 @@ public interface Rentalv2Provider {
 
 	RentalOrder findRentalBillById(Long rentalBillId);
 
+	RentalOrder findRentalBillByOrderNo(String orderNo);
+
 	void updateRentalSite(RentalResource rentalsite);
 
 	void deleteRentalSiteItemById(Long rentalSiteItemId);
@@ -44,13 +46,13 @@ public interface Rentalv2Provider {
 
 	Long createRentalBillAttachment(RentalOrderAttachment rba);
 
-	Long createRentalBillPaybillMap(RentalOrderPayorderMap billmap);
+//	Long createRentalBillPaybillMap(RentalOrderPayorderMap billmap);
 
 	List<RentalResourceOrder> findRentalResourceOrderByOrderId(Long id);
 
 	List<RentalOrderAttachment> findRentalBillAttachmentByBillId(Long rentalBillId);
 
-	RentalOrderPayorderMap findRentalBillPaybillMapByOrderNo(String orderNo);
+//	RentalOrderPayorderMap findRentalBillPaybillMapByOrderNo(String orderNo);
 
 	List<RentalOrder> listRentalBills(Long id, Long userId, String resourceType, Long resourceTypeId, ListingLocator locator,
 			int count, List<Byte> status, Byte payMode);
@@ -122,7 +124,7 @@ public interface Rentalv2Provider {
 
 	Integer countRentalSiteItemRentalCount(List<Long> rentalBillIds);
 
-	List<RentalOrderPayorderMap> findRentalBillPaybillMapByBillId(Long id);
+//	List<RentalOrderPayorderMap> findRentalBillPaybillMapByBillId(Long id);
 
 	Long createRentalRefundOrder(RentalRefundOrder rentalRefundOrder);
 
@@ -154,7 +156,7 @@ public interface Rentalv2Provider {
 	List<RentalResourceNumber> queryRentalResourceNumbersByOwner(
 			String simpleName, Long id);
 
-	void updateRentalOrderPayorderMap(RentalOrderPayorderMap orderMap);
+//	void updateRentalOrderPayorderMap(RentalOrderPayorderMap orderMap);
 
 	RentalCell getRentalCellById(Long cellId);
  

@@ -778,6 +778,22 @@ public class Rentalv2ProviderImpl implements Rentalv2Provider {
 	}
 
 	@Override
+	public RentalOrder findRentalBillByOrderNo(String orderNo) {
+		DSLContext context = dbProvider.getDslContext(AccessSpec.readOnly());
+		SelectJoinStep<Record> step = context.select().from(
+				Tables.EH_RENTALV2_ORDERS);
+		Condition condition = Tables.EH_RENTALV2_ORDERS.ORDER_NO.equal(orderNo);
+		step.where(condition);
+		List<RentalOrder> result = step.fetch().map((r) -> {
+					return ConvertHelper.convert(r, RentalOrder.class);
+				});
+
+		if (null != result && result.size() > 0)
+			return result.get(0);
+		return null;
+	}
+
+	@Override
 	public void updateRentalSite(RentalResource rentalsite) {
 		assert (rentalsite.getId() == null);
 
@@ -978,16 +994,16 @@ public class Rentalv2ProviderImpl implements Rentalv2Provider {
 		DaoHelper.publishDaoAction(DaoAction.MODIFY, EhRentalv2Orders.class,
 				bill.getId());
 	}
-	@Override
-	public void updateRentalOrderPayorderMap(RentalOrderPayorderMap ordeMap) {
-		assert (ordeMap.getId() == null);
-		DSLContext context = dbProvider.getDslContext(AccessSpec.readWrite());
-		EhRentalv2OrderPayorderMapDao dao = new EhRentalv2OrderPayorderMapDao(context.configuration());
-		
-		dao.update(ordeMap);
-		DaoHelper.publishDaoAction(DaoAction.MODIFY, EhRentalv2OrderPayorderMap.class,
-				ordeMap.getId());
-	}
+//	@Override
+//	public void updateRentalOrderPayorderMap(RentalOrderPayorderMap ordeMap) {
+//		assert (ordeMap.getId() == null);
+//		DSLContext context = dbProvider.getDslContext(AccessSpec.readWrite());
+//		EhRentalv2OrderPayorderMapDao dao = new EhRentalv2OrderPayorderMapDao(context.configuration());
+//
+//		dao.update(ordeMap);
+//		DaoHelper.publishDaoAction(DaoAction.MODIFY, EhRentalv2OrderPayorderMap.class,
+//				ordeMap.getId());
+//	}
 
 	@Override
 	public Long createRentalBillAttachment(RentalOrderAttachment rba) {
@@ -1009,25 +1025,25 @@ public class Rentalv2ProviderImpl implements Rentalv2Provider {
 		return id;
 	}
 
-	@Override
-	public Long createRentalBillPaybillMap(RentalOrderPayorderMap billmap) {
-		long id = sequenceProvider.getNextSequence(NameMapper
-				.getSequenceDomainFromTablePojo(EhRentalv2OrderPayorderMap.class));
-		billmap.setId(id);
-		billmap.setCreateTime(new Timestamp(DateHelper.currentGMTTime().getTime()));
-		billmap.setCreatorUid(UserContext.currentUserId());
-
-		DSLContext context = dbProvider.getDslContext(AccessSpec.readWrite());
-		EhRentalv2OrderPayorderMapRecord record = ConvertHelper.convert(billmap,
-				EhRentalv2OrderPayorderMapRecord.class);
-		InsertQuery<EhRentalv2OrderPayorderMapRecord> query = context
-				.insertQuery(Tables.EH_RENTALV2_ORDER_PAYORDER_MAP);
-		query.setRecord(record);
-		query.execute();
-		DaoHelper.publishDaoAction(DaoAction.CREATE,
-				EhRentalv2OrderPayorderMap.class, null);
-		return id;
-	}
+//	@Override
+//	public Long createRentalBillPaybillMap(RentalOrderPayorderMap billmap) {
+//		long id = sequenceProvider.getNextSequence(NameMapper
+//				.getSequenceDomainFromTablePojo(EhRentalv2OrderPayorderMap.class));
+//		billmap.setId(id);
+//		billmap.setCreateTime(new Timestamp(DateHelper.currentGMTTime().getTime()));
+//		billmap.setCreatorUid(UserContext.currentUserId());
+//
+//		DSLContext context = dbProvider.getDslContext(AccessSpec.readWrite());
+//		EhRentalv2OrderPayorderMapRecord record = ConvertHelper.convert(billmap,
+//				EhRentalv2OrderPayorderMapRecord.class);
+//		InsertQuery<EhRentalv2OrderPayorderMapRecord> query = context
+//				.insertQuery(Tables.EH_RENTALV2_ORDER_PAYORDER_MAP);
+//		query.setRecord(record);
+//		query.execute();
+//		DaoHelper.publishDaoAction(DaoAction.CREATE,
+//				EhRentalv2OrderPayorderMap.class, null);
+//		return id;
+//	}
 
 	@Override
 	public List<RentalResourceOrder> findRentalResourceOrderByOrderId(Long id) {
@@ -1072,39 +1088,39 @@ public class Rentalv2ProviderImpl implements Rentalv2Provider {
 		return result;
 	}
 
-	@Override
-	public RentalOrderPayorderMap findRentalBillPaybillMapByOrderNo(String orderNo) {
-		DSLContext context = dbProvider.getDslContext(AccessSpec.readOnly());
-		SelectJoinStep<Record> step = context.select().from(
-				Tables.EH_RENTALV2_ORDER_PAYORDER_MAP);
-		Condition condition = Tables.EH_RENTALV2_ORDER_PAYORDER_MAP.ORDER_NO
-				.equal(Long.valueOf(orderNo));
-		step.where(condition);
-		List<RentalOrderPayorderMap> result = step
-				.orderBy(Tables.EH_RENTALV2_ORDER_PAYORDER_MAP.ID.desc()).fetch()
-				.map((r) -> {
-					return ConvertHelper.convert(r, RentalOrderPayorderMap.class);
-				});
-		if (null != result && result.size() > 0)
-			return result.get(0);
-		return null;
-	}
-	public List<RentalOrderPayorderMap> findRentalBillPaybillMapByBillId(Long id){
-		DSLContext context = dbProvider.getDslContext(AccessSpec.readOnly());
-		SelectJoinStep<Record> step = context.select().from(
-				Tables.EH_RENTALV2_ORDER_PAYORDER_MAP);
-		Condition condition = Tables.EH_RENTALV2_ORDER_PAYORDER_MAP.ORDER_ID
-				.equal(id);
-		step.where(condition);
-		List<RentalOrderPayorderMap> result = step
-				.orderBy(Tables.EH_RENTALV2_ORDER_PAYORDER_MAP.ID.desc()).fetch()
-				.map((r) -> {
-					return ConvertHelper.convert(r, RentalOrderPayorderMap.class);
-				});
-		if (null != result && result.size() > 0)
-			return result;
-		return null;
-	}
+//	@Override
+//	public RentalOrderPayorderMap findRentalBillPaybillMapByOrderNo(String orderNo) {
+//		DSLContext context = dbProvider.getDslContext(AccessSpec.readOnly());
+//		SelectJoinStep<Record> step = context.select().from(
+//				Tables.EH_RENTALV2_ORDER_PAYORDER_MAP);
+//		Condition condition = Tables.EH_RENTALV2_ORDER_PAYORDER_MAP.ORDER_NO
+//				.equal(Long.valueOf(orderNo));
+//		step.where(condition);
+//		List<RentalOrderPayorderMap> result = step
+//				.orderBy(Tables.EH_RENTALV2_ORDER_PAYORDER_MAP.ID.desc()).fetch()
+//				.map((r) -> {
+//					return ConvertHelper.convert(r, RentalOrderPayorderMap.class);
+//				});
+//		if (null != result && result.size() > 0)
+//			return result.get(0);
+//		return null;
+//	}
+//	public List<RentalOrderPayorderMap> findRentalBillPaybillMapByBillId(Long id){
+//		DSLContext context = dbProvider.getDslContext(AccessSpec.readOnly());
+//		SelectJoinStep<Record> step = context.select().from(
+//				Tables.EH_RENTALV2_ORDER_PAYORDER_MAP);
+//		Condition condition = Tables.EH_RENTALV2_ORDER_PAYORDER_MAP.ORDER_ID
+//				.equal(id);
+//		step.where(condition);
+//		List<RentalOrderPayorderMap> result = step
+//				.orderBy(Tables.EH_RENTALV2_ORDER_PAYORDER_MAP.ID.desc()).fetch()
+//				.map((r) -> {
+//					return ConvertHelper.convert(r, RentalOrderPayorderMap.class);
+//				});
+//		if (null != result && result.size() > 0)
+//			return result;
+//		return null;
+//	}
 	@Override
 	public List<RentalOrder> listRentalBills(Long ownerId, String ownerType,
 			String siteType, Long rentalSiteId, Long beginDate, Long endDate) {

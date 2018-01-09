@@ -78,8 +78,6 @@ public class UpdateDefaultRuleAdminCommand {
 //	@ItemType(Long.class)
 //	private List<Long> closeDates;
 
-	@ItemType(SiteNumberDTO.class)
-	private List<SiteNumberDTO> siteNumbers;
 	//	private Long cancelTime;
 	private Byte refundFlag;
 	private Integer refundRatio;
@@ -112,9 +110,11 @@ public class UpdateDefaultRuleAdminCommand {
 	@ItemType(TimeIntervalDTO.class)
 	private List<TimeIntervalDTO> halfDayTimeIntervals;
 	//迁移到资源中
-	private Double siteCounts;
-	private Byte autoAssign;
-	private Byte multiUnit;
+//	private Double siteCounts;
+//	private Byte autoAssign;
+//	private Byte multiUnit;
+//	@ItemType(SiteNumberDTO.class)
+//	private List<SiteNumberDTO> siteNumbers;
 
 	@Override
 	public String toString() {
@@ -194,22 +194,6 @@ public class UpdateDefaultRuleAdminCommand {
 		this.resourceTypeId = resourceTypeId;
 	}
 
-	public Byte getAutoAssign() {
-		return autoAssign;
-	}
-
-	public void setAutoAssign(Byte autoAssign) {
-		this.autoAssign = autoAssign;
-	}
-
-	public Byte getMultiUnit() {
-		return multiUnit;
-	}
-
-	public void setMultiUnit(Byte multiUnit) {
-		this.multiUnit = multiUnit;
-	}
-
 	public Byte getNeedPay() {
 		return needPay;
 	}
@@ -258,14 +242,6 @@ public class UpdateDefaultRuleAdminCommand {
 		this.timeIntervals = timeIntervals;
 	}
 
-	public Double getSiteCounts() {
-		return siteCounts;
-	}
-
-	public void setSiteCounts(Double siteCounts) {
-		this.siteCounts = siteCounts;
-	}
-
 	public Byte getRefundFlag() {
 		return refundFlag;
 	}
@@ -280,14 +256,6 @@ public class UpdateDefaultRuleAdminCommand {
 
 	public void setRefundRatio(Integer refundRatio) {
 		this.refundRatio = refundRatio;
-	}
-
-	public List<SiteNumberDTO> getSiteNumbers() {
-		return siteNumbers;
-	}
-
-	public void setSiteNumbers(List<SiteNumberDTO> siteNumbers) {
-		this.siteNumbers = siteNumbers;
 	}
 
 	public Byte getRentalStartTimeFlag() {

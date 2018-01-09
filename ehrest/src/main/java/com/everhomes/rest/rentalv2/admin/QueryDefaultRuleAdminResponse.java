@@ -68,14 +68,16 @@ public class QueryDefaultRuleAdminResponse {
 
 //	private Byte exclusiveFlag;
 //	private Double unit;
-	private Byte multiUnit;
+
 	@ItemType(AttachmentConfigDTO.class)
 	private List<AttachmentConfigDTO> attachments;
-	private Double siteCounts;
-	@ItemType(SiteNumberDTO.class)
-	private List<SiteNumberDTO> siteNumbers;
 
-	private Byte autoAssign;
+//	@ItemType(SiteNumberDTO.class)
+//	private List<SiteNumberDTO> siteNumbers;
+//
+//	private Byte multiUnit;
+//	private Byte autoAssign;
+//	private Double siteCounts;
 	private Byte needPay;
 	private Byte multiTimeInterval;
 
@@ -201,22 +203,6 @@ public class QueryDefaultRuleAdminResponse {
 		this.priceRules = priceRules;
 	}
 
-	public Byte getAutoAssign() {
-		return autoAssign;
-	}
-
-	public void setAutoAssign(Byte autoAssign) {
-		this.autoAssign = autoAssign;
-	}
-
-	public Byte getMultiUnit() {
-		return multiUnit;
-	}
-
-	public void setMultiUnit(Byte multiUnit) {
-		this.multiUnit = multiUnit;
-	}
-
 	public Byte getNeedPay() {
 		return needPay;
 	}
@@ -297,14 +283,6 @@ public class QueryDefaultRuleAdminResponse {
 		this.closeDates = closeDates;
 	}
 
-	public Double getSiteCounts() {
-		return siteCounts;
-	}
-
-	public void setSiteCounts(Double siteCounts) {
-		this.siteCounts = siteCounts;
-	}
-
 	public Byte getRefundFlag() {
 		return refundFlag;
 	}
@@ -319,12 +297,6 @@ public class QueryDefaultRuleAdminResponse {
 
 	public void setRefundRatio(Integer refundRatio) {
 		this.refundRatio = refundRatio;
-	}
-	public List<SiteNumberDTO> getSiteNumbers() {
-		return siteNumbers;
-	}
-	public void setSiteNumbers(List<SiteNumberDTO> siteNumbers) {
-		this.siteNumbers = siteNumbers;
 	}
 
 	public List<PricePackageDTO> getPricePackages() {

@@ -1,4 +1,4 @@
-package com.everhomes.rentalv2.handler;
+package com.everhomes.rentalv2.resource_handler;
 
 import com.everhomes.rentalv2.RentalResource;
 import com.everhomes.rentalv2.RentalResourceHandler;

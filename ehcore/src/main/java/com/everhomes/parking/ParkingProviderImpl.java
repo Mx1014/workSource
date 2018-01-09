@@ -1034,6 +1034,44 @@ public class ParkingProviderImpl implements ParkingProvider {
 	}
 
 	@Override
+	public ParkingSpace findParkingSpaceBySpaceNo(String spaceNo) {
+		DSLContext context = this.dbProvider.getDslContext(AccessSpec.readWrite());
+		EhParkingSpacesDao dao = new EhParkingSpacesDao(context.configuration());
+
+		return ConvertHelper.convert(dao.fetchOne(Tables.EH_PARKING_SPACES.SPACE_NO, spaceNo), ParkingSpace.class);
+
+	}
+
+	@Override
+	public ParkingSpace findParkingSpaceByLockId(String lockId) {
+		DSLContext context = this.dbProvider.getDslContext(AccessSpec.readWrite());
+		EhParkingSpacesDao dao = new EhParkingSpacesDao(context.configuration());
+
+		return ConvertHelper.convert(dao.fetchOne(Tables.EH_PARKING_SPACES.LOCK_ID, lockId), ParkingSpace.class);
+
+	}
+
+	@Override
+	public Integer countParkingSpace(Integer namespaceId, String ownerType, Long ownerId, Long parkingLotId) {
+		final Integer[] count = new Integer[1];
+		this.dbProvider.mapReduce(AccessSpec.readOnlyWith(EhParkingSpaces.class), null,
+				(DSLContext context, Object reducingContext)-> {
+
+					SelectJoinStep<Record1<Integer>> query = context.selectCount()
+							.from(Tables.EH_PARKING_SPACES);
+
+					Condition condition = Tables.EH_PARKING_SPACES.OWNER_TYPE.equal(ownerType);
+					condition = condition.and(Tables.EH_PARKING_SPACES.OWNER_ID.equal(ownerId));
+					condition = condition.and(Tables.EH_PARKING_SPACES.NAMESPACE_ID.eq(namespaceId));
+					condition = condition.and(Tables.EH_PARKING_SPACES.PARKING_LOT_ID.eq(parkingLotId));
+
+					count[0] = query.where(condition).fetchOneInto(Integer.class);
+					return true;
+				});
+		return count[0];
+	}
+
+	@Override
 	public void updateParkingSpace(ParkingSpace parkingSpace) {
 		DSLContext context = this.dbProvider.getDslContext(AccessSpec.readWrite());
 		EhParkingSpacesDao dao = new EhParkingSpacesDao(context.configuration());
@@ -1068,7 +1106,7 @@ public class ParkingProviderImpl implements ParkingProvider {
 	@Override
 	public List<ParkingSpace> searchParkingSpaces(Integer namespaceId, String ownerType, Long ownerId, Long parkingLotId,
 												  String keyword, String lockStatus, Long pageAnchor, Integer pageSize) {
-		DSLContext context = this.dbProvider.getDslContext(AccessSpec.readOnlyWith(EhParkingCarVerifications.class));
+		DSLContext context = this.dbProvider.getDslContext(AccessSpec.readOnlyWith(EhParkingSpaces.class));
 		SelectQuery<EhParkingSpacesRecord> query = context.selectQuery(Tables.EH_PARKING_SPACES);
 
 		query.addConditions(Tables.EH_PARKING_SPACES.NAMESPACE_ID.eq(namespaceId));
@@ -1098,7 +1136,7 @@ public class ParkingProviderImpl implements ParkingProvider {
 
 	@Override
 	public List<ParkingSpaceLog> listParkingSpaceLogs(String spaceNo, Long startTime, Long endTime, Long pageAnchor, Integer pageSize) {
-		DSLContext context = this.dbProvider.getDslContext(AccessSpec.readOnlyWith(EhParkingCarVerifications.class));
+		DSLContext context = this.dbProvider.getDslContext(AccessSpec.readOnlyWith(EhParkingSpaceLogs.class));
 		SelectQuery<EhParkingSpaceLogsRecord> query = context.selectQuery(Tables.EH_PARKING_SPACE_LOGS);
 
 		query.addConditions(Tables.EH_PARKING_SPACE_LOGS.SPACE_NO.eq(spaceNo));
@@ -1111,7 +1149,7 @@ public class ParkingProviderImpl implements ParkingProvider {
 			query.addConditions(Tables.EH_PARKING_SPACE_LOGS.OPERATE_TIME.ge(new Timestamp(startTime)));
 		}
 		if (null != endTime) {
-			query.addConditions(Tables.EH_PARKING_SPACE_LOGS.OPERATE_TIME.le(new Timestamp(startTime)));
+			query.addConditions(Tables.EH_PARKING_SPACE_LOGS.OPERATE_TIME.le(new Timestamp(endTime)));
 		}
 		query.addOrderBy(Tables.EH_PARKING_SPACE_LOGS.OPERATE_TIME.desc());
 		if (null != pageSize) {

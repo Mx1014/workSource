@@ -2338,7 +2338,23 @@ public class ParkingServiceImpl implements ParkingService {
 	@Override
 	public ParkingSpaceDTO addParkingSpace(AddParkingSpaceCommand cmd) {
 
-		ParkingSpace parkingSpace = ConvertHelper.convert(cmd, ParkingSpace.class);
+		ParkingSpace parkingSpace = parkingProvider.findParkingSpaceBySpaceNo(cmd.getSpaceNo());
+
+		if (null != parkingSpace) {
+			LOGGER.error("SpaceNo exist, cmd={}", cmd);
+			throw RuntimeErrorException.errorWith(ErrorCodes.SCOPE_GENERAL, ErrorCodes.ERROR_INVALID_PARAMETER,
+					"SpaceNo exist.");
+		}
+
+		parkingSpace = parkingProvider.findParkingSpaceByLockId(cmd.getLockId());
+
+		if (null != parkingSpace) {
+			LOGGER.error("LockId exist, cmd={}", cmd);
+			throw RuntimeErrorException.errorWith(ErrorCodes.SCOPE_GENERAL, ErrorCodes.ERROR_INVALID_PARAMETER,
+					"LockId exist.");
+		}
+
+		parkingSpace = ConvertHelper.convert(cmd, ParkingSpace.class);
 
 		parkingProvider.createParkingSpace(parkingSpace);
 

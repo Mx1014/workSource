@@ -1,4 +1,4 @@
-package com.everhomes.rentalv2.handler;
+package com.everhomes.rentalv2.resource_handler;
 
 import com.everhomes.parking.ParkingLot;
 import com.everhomes.parking.ParkingProvider;
@@ -6,6 +6,7 @@ import com.everhomes.rentalv2.RentalResource;
 import com.everhomes.rentalv2.RentalResourceHandler;
 import com.everhomes.rentalv2.RentalResourceType;
 import com.everhomes.rentalv2.Rentalv2Provider;
+import com.everhomes.rest.rentalv2.NormalFlag;
 import com.everhomes.rest.rentalv2.RentalV2ResourceType;
 import com.everhomes.user.UserContext;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -27,6 +28,9 @@ public class VipParkingRentalResourceHandler implements RentalResourceHandler {
 
         ParkingLot parkingLot = parkingProvider.findParkingLotById(id);
 
+        Integer count = parkingProvider.countParkingSpace(parkingLot.getNamespaceId(), parkingLot.getOwnerType(),
+                parkingLot.getOwnerId(),parkingLot.getId());
+
         RentalResourceType type = rentalv2Provider.findRentalResourceTypes(UserContext.getCurrentNamespaceId(),
                 RentalV2ResourceType.VIP_PARKING.getCode());
 
@@ -35,6 +39,9 @@ public class VipParkingRentalResourceHandler implements RentalResourceHandler {
         resource.setResourceName(parkingLot.getName());
         resource.setResourceType(RentalV2ResourceType.VIP_PARKING.getCode());
         resource.setResourceTypeId(type.getId());
+        resource.setResourceCounts(Double.valueOf(count));
+        resource.setAutoAssign(NormalFlag.NONEED.getCode());
+        resource.setMultiUnit(NormalFlag.NONEED.getCode());
 
         return resource;
     }

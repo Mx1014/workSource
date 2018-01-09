@@ -56,8 +56,10 @@ public class AddDefaultRuleAdminCommand {
 	private Long resourceTypeId;
 	//	private Byte exclusiveFlag;
 //	private Double unit;
-	private Byte autoAssign;
-	private Byte multiUnit;
+//	private Byte autoAssign;
+//	private Byte multiUnit;
+//	private Double siteCounts;
+
 	private Byte needPay;
 	private Byte multiTimeInterval;
 	@ItemType(AttachmentConfigDTO.class)
@@ -74,9 +76,8 @@ public class AddDefaultRuleAdminCommand {
 	private List<Integer> openWeekday;
 	@ItemType(Long.class)
 	private List<Long> closeDates;
-	private Double siteCounts;
-	@ItemType(SiteNumberDTO.class)
-	private List<SiteNumberDTO> siteNumbers;
+//	@ItemType(SiteNumberDTO.class)
+//	private List<SiteNumberDTO> siteNumbers;
 	//	private Long cancelTime;
 	private Byte refundFlag;
 	private Integer refundRatio;
@@ -113,9 +114,49 @@ public class AddDefaultRuleAdminCommand {
 //	@Deprecated
 //	private BigDecimal approvingUserWeekendPrice;
 
+	private Byte refundStrategy;
+	private Byte overtimeStrategy;
+
+	@ItemType(RentalOrderRuleDTO.class)
+	private List<RentalOrderRuleDTO> refundStrategies;
+	@ItemType(RentalOrderRuleDTO.class)
+	private List<RentalOrderRuleDTO> overtimeStrategies;
+
 	@Override
 	public String toString() {
 		return StringHelper.toJsonString(this);
+	}
+
+	public Byte getRefundStrategy() {
+		return refundStrategy;
+	}
+
+	public void setRefundStrategy(Byte refundStrategy) {
+		this.refundStrategy = refundStrategy;
+	}
+
+	public Byte getOvertimeStrategy() {
+		return overtimeStrategy;
+	}
+
+	public void setOvertimeStrategy(Byte overtimeStrategy) {
+		this.overtimeStrategy = overtimeStrategy;
+	}
+
+	public List<RentalOrderRuleDTO> getRefundStrategies() {
+		return refundStrategies;
+	}
+
+	public void setRefundStrategies(List<RentalOrderRuleDTO> refundStrategies) {
+		this.refundStrategies = refundStrategies;
+	}
+
+	public List<RentalOrderRuleDTO> getOvertimeStrategies() {
+		return overtimeStrategies;
+	}
+
+	public void setOvertimeStrategies(List<RentalOrderRuleDTO> overtimeStrategies) {
+		this.overtimeStrategies = overtimeStrategies;
 	}
 
 	public Double getDayOpenTime() {
@@ -206,22 +247,6 @@ public class AddDefaultRuleAdminCommand {
 		this.resourceTypeId = resourceTypeId;
 	}
 
-	public Byte getAutoAssign() {
-		return autoAssign;
-	}
-
-	public void setAutoAssign(Byte autoAssign) {
-		this.autoAssign = autoAssign;
-	}
-
-	public Byte getMultiUnit() {
-		return multiUnit;
-	}
-
-	public void setMultiUnit(Byte multiUnit) {
-		this.multiUnit = multiUnit;
-	}
-
 	public Byte getNeedPay() {
 		return needPay;
 	}
@@ -302,14 +327,6 @@ public class AddDefaultRuleAdminCommand {
 		this.closeDates = closeDates;
 	}
 
-	public Double getSiteCounts() {
-		return siteCounts;
-	}
-
-	public void setSiteCounts(Double siteCounts) {
-		this.siteCounts = siteCounts;
-	}
-
 	public Byte getRefundFlag() {
 		return refundFlag;
 	}
@@ -324,14 +341,6 @@ public class AddDefaultRuleAdminCommand {
 
 	public void setRefundRatio(Integer refundRatio) {
 		this.refundRatio = refundRatio;
-	}
-
-	public List<SiteNumberDTO> getSiteNumbers() {
-		return siteNumbers;
-	}
-
-	public void setSiteNumbers(List<SiteNumberDTO> siteNumbers) {
-		this.siteNumbers = siteNumbers;
 	}
 
 	public Byte getRentalStartTimeFlag() {

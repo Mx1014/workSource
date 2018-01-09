@@ -64,27 +64,31 @@ public class RentalOrderCallBackHandler implements PaymentCallBackHandler {
 
 			this.dbProvider.execute((TransactionStatus status) -> {
 
-				RentalOrderPayorderMap orderMap= rentalProvider.findRentalBillPaybillMapByOrderNo(String.valueOf(cmd.getOrderId()));
-				RentalOrder order = rentalProvider.findRentalBillById(orderMap.getOrderId());
+//				RentalOrderPayorderMap orderMap= rentalProvider.findRentalBillPaybillMapByOrderNo(String.valueOf(cmd.getOrderId()));
+//				RentalOrder order = rentalProvider.findRentalBillById(orderMap.getOrderId());
+
+				RentalOrder order = rentalProvider.findRentalBillByOrderNo(String.valueOf(cmd.getOrderId()));
 
 				BigDecimal payAmount = payService.changePayAmount(cmd.getAmount());
 
 				order.setPaidMoney(order.getPaidMoney().add(payAmount));
+				order.setPayTime(new Timestamp(DateHelper.currentGMTTime().getTime()));
+
 				PaymentType paymentType = PaymentType.fromCode(cmd.getPaymentType());
 				if (null != paymentType) {
 					if (paymentType.name().toUpperCase().startsWith("WECHAT")) {
 						order.setVendorType(VendorType.WEI_XIN.getCode());
-						orderMap.setVendorType(VendorType.WEI_XIN.getCode());
+//						orderMap.setVendorType(VendorType.WEI_XIN.getCode());
 					}else {
 						order.setVendorType(VendorType.ZHI_FU_BAO.getCode());
-						orderMap.setVendorType(VendorType.ZHI_FU_BAO.getCode());
+//						orderMap.setVendorType(VendorType.ZHI_FU_BAO.getCode());
 					}
 				}
 
 				order.setOperateTime(new Timestamp(DateHelper.currentGMTTime().getTime()));
 
-				orderMap.setOperateTime(new Timestamp(DateHelper.currentGMTTime().getTime()));
-				rentalProvider.updateRentalOrderPayorderMap(orderMap);
+//				orderMap.setOperateTime(new Timestamp(DateHelper.currentGMTTime().getTime()));
+//				rentalProvider.updateRentalOrderPayorderMap(orderMap);
 
 				if(order.getStatus().equals(SiteBillStatus.PAYINGFINAL.getCode())){
 					//判断支付金额与订单金额是否相同
@@ -164,10 +168,10 @@ public class RentalOrderCallBackHandler implements PaymentCallBackHandler {
 
 	@Override
 	public void refundSuccess(SrvOrderPaymentNotificationCommand cmd) {
-		RentalOrderPayorderMap orderMap= rentalProvider.findRentalBillPaybillMapByOrderNo(String.valueOf(cmd.getOrderId()));
-		RentalOrder order = rentalProvider.findRentalBillById(orderMap.getOrderId());
-		order.setStatus(SiteBillStatus.REFUNDED.getCode());
-		rentalProvider.updateRentalBill(order);
+//		RentalOrderPayorderMap orderMap= rentalProvider.findRentalBillPaybillMapByOrderNo(String.valueOf(cmd.getOrderId()));
+//		RentalOrder order = rentalProvider.findRentalBillById(orderMap.getOrderId());
+//		order.setStatus(SiteBillStatus.REFUNDED.getCode());
+//		rentalProvider.updateRentalBill(order);
 	}
 
 	@Override

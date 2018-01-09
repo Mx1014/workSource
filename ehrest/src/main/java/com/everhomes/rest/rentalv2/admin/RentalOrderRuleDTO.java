@@ -14,7 +14,7 @@ public class RentalOrderRuleDTO {
     private Long id;
     private Byte handleType;
     private Byte durationType;
-    private String durationUnit;
+    private Byte durationUnit;
     private Double duration;
     private Double factor;
 
@@ -42,11 +42,11 @@ public class RentalOrderRuleDTO {
         this.durationType = durationType;
     }
 
-    public String getDurationUnit() {
+    public Byte getDurationUnit() {
         return durationUnit;
     }
 
-    public void setDurationUnit(String durationUnit) {
+    public void setDurationUnit(Byte durationUnit) {
         this.durationUnit = durationUnit;
     }
 

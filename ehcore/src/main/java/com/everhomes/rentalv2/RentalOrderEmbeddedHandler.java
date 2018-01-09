@@ -65,15 +65,19 @@ public class RentalOrderEmbeddedHandler implements OrderEmbeddedHandler {
 		if(cmd.getPayStatus().toLowerCase().equals("success")) {
 			this.dbProvider.execute((TransactionStatus status) -> {
 
-				RentalOrderPayorderMap orderMap= rentalProvider.findRentalBillPaybillMapByOrderNo(cmd.getOrderNo());
-				RentalOrder order = rentalProvider.findRentalBillById(orderMap.getOrderId());
+//				RentalOrderPayorderMap orderMap= rentalProvider.findRentalBillPaybillMapByOrderNo(cmd.getOrderNo());
+//				RentalOrder order = rentalProvider.findRentalBillById(orderMap.getOrderId());
+
+				RentalOrder order = rentalProvider.findRentalBillByOrderNo(String.valueOf(cmd.getOrderNo()));
+
 				order.setPaidMoney(order.getPaidMoney().add(new java.math.BigDecimal(cmd.getPayAmount())));
 				order.setVendorType(cmd.getVendorType());
-				orderMap.setVendorType(cmd.getVendorType());
+//				orderMap.setVendorType(cmd.getVendorType());
 				order.setOperateTime(new Timestamp(DateHelper.currentGMTTime().getTime()));
+				order.setPayTime(new Timestamp(DateHelper.currentGMTTime().getTime()));
 
-				orderMap.setOperateTime(new Timestamp(DateHelper.currentGMTTime().getTime()));
-				rentalProvider.updateRentalOrderPayorderMap(orderMap);
+//				orderMap.setOperateTime(new Timestamp(DateHelper.currentGMTTime().getTime()));
+//				rentalProvider.updateRentalOrderPayorderMap(orderMap);
 
 				if(order.getStatus().equals(SiteBillStatus.PAYINGFINAL.getCode())){
 					//判断支付金额与订单金额是否相同

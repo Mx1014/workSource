@@ -139,4 +139,9 @@ public interface ParkingProvider {
 
     List<ParkingSpaceLog> listParkingSpaceLogs(String spaceNo, Long startTime, Long endTime, Long pageAnchor, Integer pageSize);
 
+    ParkingSpace findParkingSpaceByLockId(String lockId);
+
+    ParkingSpace findParkingSpaceBySpaceNo(String spaceNo);
+
+    Integer countParkingSpace(Integer namespaceId, String ownerType, Long ownerId, Long parkingLotId);
 }
