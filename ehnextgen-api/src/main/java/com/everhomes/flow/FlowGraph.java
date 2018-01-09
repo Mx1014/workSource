@@ -5,6 +5,7 @@ import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
+import java.util.function.Consumer;
 
 public class FlowGraph implements Serializable {
 
@@ -29,18 +30,29 @@ public class FlowGraph implements Serializable {
     private FlowGraphNode startNode;
 
     public FlowGraph() {
-        nodes = new ArrayList<>();
-        lanes = new ArrayList<>();
-        branches = new ArrayList<>();
-        evaluateItems = new ArrayList<>();
-        idToNode = new HashMap<>();
-        idToButton = new HashMap<>();
-        idToAction = new HashMap<>();
-        idToLane = new HashMap<>();
-        originalNodeToBranch = new HashMap<>();
-        convergenceNodeToBranches = new HashMap<>();
-        levelToNode = new HashMap<>();
-        levelToLane = new HashMap<>();
+        initFields();
+    }
+
+    public void initFields() {
+        ifNull(nodes, o -> nodes = new ArrayList<>());
+        ifNull(lanes, o -> lanes = new ArrayList<>());
+        ifNull(branches, o -> branches = new ArrayList<>());
+        ifNull(evaluateItems, o -> evaluateItems = new ArrayList<>());
+
+        ifNull(idToNode, o -> idToNode = new HashMap<>());
+        ifNull(idToButton, o -> idToButton = new HashMap<>());
+        ifNull(idToAction, o -> idToAction = new HashMap<>());
+        ifNull(idToLane, o -> idToLane = new HashMap<>());
+        ifNull(originalNodeToBranch, o -> originalNodeToBranch = new HashMap<>());
+        ifNull(convergenceNodeToBranches, o -> convergenceNodeToBranches = new HashMap<>());
+        ifNull(levelToNode, o -> levelToNode = new HashMap<>());
+        ifNull(levelToLane, o -> levelToLane = new HashMap<>());
+    }
+
+    private <Type> void ifNull(Type o, Consumer<Type> con) {
+        if (o == null) {
+            con.accept(o);
+        }
     }
 
     private void saveNodeIds(FlowGraphNode node) {

@@ -215,9 +215,6 @@ public interface FlowService {
 	 */
 	FlowSubjectDTO postSubject(FlowPostSubjectCommand cmd);
 
-    @Cacheable(value = "FlowGraph")
-    FlowGraph getSnapshotGraph(Long flowId, Integer flowVer);
-
     /**
 	 * 触发工作流按钮事件的响应
 	 * @param cmd

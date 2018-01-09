@@ -213,6 +213,7 @@ public class FlowProviderImpl implements FlowProvider {
         updateFlow(flow);
     }
 
+    @Cacheable(value = "findSnapshotFlow")
     @Override
     public Flow findSnapshotFlow(Long flowId, Integer flowVer) {
         ListingLocator locator = new ListingLocator();
@@ -267,7 +268,6 @@ public class FlowProviderImpl implements FlowProvider {
 //		return null;
 //	}
 
-    @Cacheable(value = "Flow", key = "{#root.methodName, #root.args}")
     @Override
     public Flow getEnabledConfigFlow(Integer namespaceId, String projectType, Long projectId, Long moduleId, String moduleType, Long ownerId, String ownerType) {
         List<Flow> flows = this.queryFlows(new ListingLocator(), 1, (locator, query) -> {
@@ -297,7 +297,6 @@ public class FlowProviderImpl implements FlowProvider {
         return null;
     }
 
-    @Cacheable(value = "Flow", key = "{#root.methodName, #root.args}")
     @Override
     public Flow getSnapshotFlowById(Long flowId) {
         List<Flow> flows = this.queryFlows(new ListingLocator(), 1, (locator, query) -> {
