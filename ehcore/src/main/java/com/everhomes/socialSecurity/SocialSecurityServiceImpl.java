@@ -2272,6 +2272,7 @@ public class SocialSecurityServiceImpl implements SocialSecurityService {
         socialSecuritySummaryProvider.deleteSocialSecuritySummary(ownerId, payMonth);
         socialSecurityPaymentProvider.updateSocialSecurityPaymentFileStatus(ownerId, userId);
         SocialSecuritySummary summary = socialSecurityPaymentProvider.calculateSocialSecuritySummary(ownerId, payMonth);
+        LOGGER.debug("sumary = " + StringHelper.toJsonString(summary));
         socialSecuritySummaryProvider.createSocialSecuritySummary(summary);
         //更新归档状态
     }
