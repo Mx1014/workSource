@@ -171,8 +171,8 @@ public class SocialSecurityPaymentProviderImpl implements SocialSecurityPaymentP
                 Tables.EH_SOCIAL_SECURITY_PAYMENTS.NAMESPACE_ID,
                 Tables.EH_SOCIAL_SECURITY_PAYMENTS.ORGANIZATION_ID,
                 Tables.EH_SOCIAL_SECURITY_PAYMENTS.PAY_MONTH,
-                Tables.EH_SOCIAL_SECURITY_PAYMENTS.CREATOR_UID,
-                Tables.EH_SOCIAL_SECURITY_PAYMENTS.CREATE_TIME,
+                Tables.EH_SOCIAL_SECURITY_PAYMENTS.CREATOR_UID.max(),
+                Tables.EH_SOCIAL_SECURITY_PAYMENTS.CREATE_TIME.max(),
                 Tables.EH_SOCIAL_SECURITY_PAYMENTS.FILE_UID,
                 Tables.EH_SOCIAL_SECURITY_PAYMENTS.FILE_TIME,
                 Tables.EH_SOCIAL_SECURITY_PAYMENTS.COMPANY_RADIX.multiply(Tables.EH_SOCIAL_SECURITY_PAYMENTS.COMPANY_RADIX)
@@ -186,8 +186,8 @@ public class SocialSecurityPaymentProviderImpl implements SocialSecurityPaymentP
                         Tables.EH_SOCIAL_SECURITY_PAYMENTS.NAMESPACE_ID,
                         Tables.EH_SOCIAL_SECURITY_PAYMENTS.ORGANIZATION_ID,
                         Tables.EH_SOCIAL_SECURITY_PAYMENTS.PAY_MONTH,
-                        Tables.EH_SOCIAL_SECURITY_PAYMENTS.CREATOR_UID,
-                        Tables.EH_SOCIAL_SECURITY_PAYMENTS.CREATE_TIME,
+//                        Tables.EH_SOCIAL_SECURITY_PAYMENTS.CREATOR_UID,
+//                        Tables.EH_SOCIAL_SECURITY_PAYMENTS.CREATE_TIME,
                         Tables.EH_SOCIAL_SECURITY_PAYMENTS.FILE_UID,
                         Tables.EH_SOCIAL_SECURITY_PAYMENTS.FILE_TIME)
                 .orderBy(Tables.EH_SOCIAL_SECURITY_PAYMENTS.ID.asc());
