@@ -18,9 +18,6 @@ import org.jooq.DSLContext;
 import org.jooq.Record;
 import org.jooq.SelectQuery;
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.cache.annotation.CacheEvict;
-import org.springframework.cache.annotation.Cacheable;
-import org.springframework.cache.annotation.Caching;
 import org.springframework.stereotype.Component;
 
 import java.sql.Timestamp;
@@ -62,7 +59,7 @@ public class FlowNodeProviderImpl implements FlowNodeProvider {
         dao.deleteById(obj.getId());
     }
 
-    @Cacheable(value = "getFlowNodeById", key = "#id")
+    // @Cacheable(value = "getFlowNodeById", key = "#id")
     @Override
     public FlowNode getFlowNodeById(Long id) {
         try {
@@ -113,7 +110,7 @@ public class FlowNodeProviderImpl implements FlowNodeProvider {
         obj.setCreateTime(new Timestamp(l2));
     }
 
-    @Cacheable(value = "findFlowNodeByName", key = "{#flowMainId, #flowVersion}")
+    // @Cacheable(value = "findFlowNodeByName", key = "{#flowMainId, #flowVersion, #nodeName}")
     @Override
     public FlowNode findFlowNodeByName(Long flowMainId, Integer flowVersion, String nodeName) {
         ListingLocator locator = new ListingLocator();
@@ -138,7 +135,7 @@ public class FlowNodeProviderImpl implements FlowNodeProvider {
         return flowNodes.get(0);
     }
 
-    @Cacheable(value = "findFlowNodesByFlowId")
+    // @Cacheable(value = "findFlowNodesByFlowId")
     @Override
     public List<FlowNode> findFlowNodesByFlowId(Long flowMainId, Integer flowVersion) {
         return queryFlowNodes(new ListingLocator(), 200, (locator, query) -> {
@@ -159,11 +156,11 @@ public class FlowNodeProviderImpl implements FlowNodeProvider {
                 .execute();
     }
 
-    @Caching(evict = {
-            @CacheEvict(value = "findFlowNodesByFlowId", key = "{#flowMainId, #flowVersion}"),
-            @CacheEvict(value = "findFlowNodeByName", key = "{#flowMainId, #flowVersion}"),
-            @CacheEvict(value = "getFlowNodeById", key = "#retainNodeIdList"),
-    })
+    // @Caching(evict = {
+    //         @CacheEvict(value = "findFlowNodesByFlowId", key = "{#flowMainId, #flowVersion}"),
+    //         @CacheEvict(value = "findFlowNodeByName", key = "{#flowMainId, #flowVersion}"),
+    //         @CacheEvict(value = "getFlowNodeById", key = "#retainNodeIdList"),
+    // })
     @Override
     public void deleteFlowNode(Long flowMainId, Integer flowVersion, List<Long> retainNodeIdList) {
         DSLContext context = dbProvider.getDslContext(AccessSpec.readWrite());

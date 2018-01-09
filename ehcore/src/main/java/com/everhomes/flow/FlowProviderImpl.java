@@ -20,7 +20,6 @@ import org.jooq.DSLContext;
 import org.jooq.Record;
 import org.jooq.SelectQuery;
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.cache.annotation.Cacheable;
 import org.springframework.stereotype.Component;
 
 import java.sql.Timestamp;
@@ -213,7 +212,6 @@ public class FlowProviderImpl implements FlowProvider {
         updateFlow(flow);
     }
 
-    @Cacheable(value = "findSnapshotFlow")
     @Override
     public Flow findSnapshotFlow(Long flowId, Integer flowVer) {
         ListingLocator locator = new ListingLocator();
