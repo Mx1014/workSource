@@ -673,6 +673,7 @@ public class SocialSecurityServiceImpl implements SocialSecurityService {
         dto.setEmployeeRadixMin(base.getEmployeeRadixMin());
         dto.setEmployeeRatioMax(base.getEmployeeRatioMax());
         dto.setEmployeeRatioMin(base.getEmployeeRatioMin());
+        dto.setRatioOptions(base.getRatioOptions());
     }
 
     @Override
