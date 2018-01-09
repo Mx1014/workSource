@@ -19,7 +19,7 @@ import java.util.List;
  *  <li>status: 标准状态 参考{@link com.everhomes.rest.equipment.EquipmentStandardStatus}</li>
  *  <li>equipmentsCount: 使用此标准的设备数</li>
  *  <li>items: 标准关联的巡检项目 参考{@link com.everhomes.rest.equipment.InspectionItemDTO}</li>
- *  <li>equipmentsDTO: 标准关联的设备列表 参考{@link com.everhomes.rest.equipment.EquipmentsDTO}</li>
+ *  <li>equipments: 标准关联的设备列表 参考{@link com.everhomes.rest.equipment.EquipmentsDTO}</li>
  *  <li>creatorUid: 创建该标准的用户id</li>
  *  <li>createTime: 创建该标准的时间</li>
  *  <li>operatorUid: 最后对该标准进行修改的用户id</li>

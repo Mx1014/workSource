@@ -5752,7 +5752,7 @@ private void checkUserPrivilege(Long orgId, Long privilegeId, Long communityId) 
 				List<EquipmentStandardMap> equipmentStandardMaps = equipmentProvider.
 						findEquipmentStandardMap(standard.getId(), equipment.getId(),
 								InspectionStandardMapTargetType.EQUIPMENT.getCode());
-				if (equipmentStandardMaps != null) {
+				if (equipmentStandardMaps != null && equipmentStandardMaps.size() > 0) {
 					relations.setId(equipmentStandardMaps.get(0).getId());
 				}
 
