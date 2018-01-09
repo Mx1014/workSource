@@ -115,8 +115,24 @@ public class EquipmentTaskDTO {
 	@Deprecated
 	private Byte pictureFlag;
 
+	private Timestamp lastSyncTime;
+
+	private Timestamp createTime;
+
+	private Timestamp reviewTime;
+
+	private Long planId;
+
 	@ItemType(EquipmentStandardRelationDTO.class)
 	private List<EquipmentStandardRelationDTO> equipments;
+
+	public Long getPlanId() {
+		return planId;
+	}
+
+	public void setPlanId(Long planId) {
+		this.planId = planId;
+	}
 
 	public Long getId() {
 		return id;
@@ -436,6 +452,30 @@ public class EquipmentTaskDTO {
 
 	public void setEquipments(List<EquipmentStandardRelationDTO> equipments) {
 		this.equipments = equipments;
+	}
+
+	public Timestamp getLastSyncTime() {
+		return lastSyncTime;
+	}
+
+	public void setLastSyncTime(Timestamp lastSyncTime) {
+		this.lastSyncTime = lastSyncTime;
+	}
+
+	public Timestamp getCreateTime() {
+		return createTime;
+	}
+
+	public void setCreateTime(Timestamp createTime) {
+		this.createTime = createTime;
+	}
+
+	public Timestamp getReviewTime() {
+		return reviewTime;
+	}
+
+	public void setReviewTime(Timestamp reviewTime) {
+		this.reviewTime = reviewTime;
 	}
 
 	@Override

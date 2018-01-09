@@ -79,6 +79,7 @@ import com.everhomes.rest.equipment.EquipmentStatus;
 import com.everhomes.rest.equipment.EquipmentTaskAttachmentDTO;
 import com.everhomes.rest.equipment.EquipmentTaskDTO;
 import com.everhomes.rest.equipment.EquipmentTaskLogsDTO;
+import com.everhomes.rest.equipment.EquipmentTaskOfflineResponse;
 import com.everhomes.rest.equipment.EquipmentTaskProcessResult;
 import com.everhomes.rest.equipment.EquipmentTaskProcessType;
 import com.everhomes.rest.equipment.EquipmentTaskResult;
@@ -196,7 +197,6 @@ import com.everhomes.search.EquipmentStandardMapSearcher;
 import com.everhomes.search.EquipmentStandardSearcher;
 import com.everhomes.search.EquipmentTasksSearcher;
 import com.everhomes.server.schema.tables.pojos.EhEquipmentInspectionEquipmentPlanMap;
-import com.everhomes.server.schema.tables.pojos.EhEquipmentInspectionStandards;
 import com.everhomes.settings.PaginationConfigHelper;
 import com.everhomes.sms.DateUtil;
 import com.everhomes.techpark.rental.RentalServiceImpl;
@@ -207,7 +207,6 @@ import com.everhomes.user.UserPrivilegeMgr;
 import com.everhomes.user.UserProvider;
 import com.everhomes.util.ConvertHelper;
 import com.everhomes.util.DateHelper;
-import com.everhomes.util.DateUtils;
 import com.everhomes.util.DownloadUtils;
 import com.everhomes.util.QRCodeConfig;
 import com.everhomes.util.QRCodeEncoder;
@@ -1830,13 +1829,17 @@ private void checkUserPrivilege(Long orgId, Long privilegeId, Long communityId) 
 		User user = UserContext.current().getUser();
 		Timestamp now = new Timestamp(System.currentTimeMillis());
 		EquipmentInspectionTasks task = verifyEquipmentTask(cmd.getTaskId(), cmd.getOwnerType(), cmd.getOwnerId());
-
-		Timestamp laterTime = DateUtils.getLaterTime(task.getExecutiveExpireTime(), task.getProcessExpireTime());
-		if(EquipmentTaskStatus.WAITING_FOR_EXECUTING.equals(EquipmentTaskStatus.fromStatus(task.getStatus()))
-				 && laterTime.before(now)) {
-			equipmentProvider.closeTask(task);
-		} else if(EquipmentTaskStatus.IN_MAINTENANCE.equals(EquipmentTaskStatus.fromStatus(task.getStatus()))
-				 && task.getProcessExpireTime() != null && task.getProcessExpireTime().before(now)) {
+		//对接物业报修 所有上报任务都是已完成
+//		Timestamp laterTime = DateUtils.getLaterTime(task.getExecutiveExpireTime(), task.getProcessExpireTime());
+//		if(EquipmentTaskStatus.WAITING_FOR_EXECUTING.equals(EquipmentTaskStatus.fromStatus(task.getStatus()))
+//				 && laterTime.before(now)) {
+//			equipmentProvider.closeTask(task);
+//		} else if(EquipmentTaskStatus.IN_MAINTENANCE.equals(EquipmentTaskStatus.fromStatus(task.getStatus()))
+//				 && task.getProcessExpireTime() != null && task.getProcessExpireTime().before(now)) {
+//			equipmentProvider.closeTask(task);
+//		}
+		if (EquipmentTaskStatus.WAITING_FOR_EXECUTING.equals(EquipmentTaskStatus.fromStatus(task.getStatus()))
+				&& task.getExecutiveExpireTime().before(now)) {
 			equipmentProvider.closeTask(task);
 		}
 
@@ -1871,9 +1874,9 @@ private void checkUserPrivilege(Long orgId, Long privilegeId, Long communityId) 
 				EquipmentInspectionReviewDateDTO date = listReviewExpireDays(command);
 				if (date != null){
 					task.setReviewExpiredDate(addDays(now, date.getReviewExpiredDays()));
-				}else {
+				} else {
 					//没有审批过期时间的情况
-					task.setReviewExpiredDate(addDays(now, Integer.MAX_VALUE));
+					task.setReviewExpiredDate(addDays(now, Integer.MAX_VALUE - 1));
 				}
 
 			}
@@ -1898,47 +1901,48 @@ private void checkUserPrivilege(Long orgId, Long privilegeId, Long communityId) 
 					task.setResult(EquipmentTaskResult.COMPLETE_DELAY.getCode());
 					log.setProcessResult(EquipmentTaskProcessResult.COMPLETE_DELAY.getCode());
 				}
-
-			} else if (EquipmentTaskResult.NEED_MAINTENANCE_OK.equals(EquipmentTaskResult.fromStatus(cmd.getVerificationResult()))) {
-				task.setStatus(EquipmentTaskStatus.NEED_MAINTENANCE.getCode());
-				task.setExecutiveTime(now);
-				task.setExecutorType(OwnerType.USER.getCode());
-				task.setExecutorId(user.getId());
-				log.setProcessType(EquipmentTaskProcessType.NEED_MAINTENANCE.getCode());
-				if (task.getExecutiveExpireTime() == null || now.before(task.getExecutiveExpireTime())) {
-					task.setResult(EquipmentTaskResult.NEED_MAINTENANCE_OK.getCode());
-					log.setProcessResult(EquipmentTaskProcessResult.NEED_MAINTENANCE_OK.getCode());
-				} else {
-					task.setResult(EquipmentTaskResult.NEED_MAINTENANCE_DELAY.getCode());
-					log.setProcessResult(EquipmentTaskProcessResult.NEED_MAINTENANCE_DELAY.getCode());
-				}
-			} else if (EquipmentTaskResult.NEED_MAINTENANCE_OK_COMPLETE_OK.equals(EquipmentTaskResult.fromStatus(cmd.getVerificationResult()))) {
-				task.setStatus(EquipmentTaskStatus.CLOSE.getCode());
-				task.setProcessTime(now);
-				task.setOperatorType(OwnerType.USER.getCode());
-				task.setOperatorId(user.getId());
-				log.setProcessType(EquipmentTaskProcessType.COMPLETE_MAINTENANCE.getCode());
-				if (task.getProcessExpireTime() == null || now.before(task.getProcessExpireTime())) {
-					task.setResult(EquipmentTaskResult.NEED_MAINTENANCE_OK_COMPLETE_OK.getCode());
-					log.setProcessResult(EquipmentTaskProcessResult.NEED_MAINTENANCE_OK_COMPLETE_OK.getCode());
-				} else {
-					task.setResult(EquipmentTaskResult.NEED_MAINTENANCE_OK_COMPLETE_DELAY.getCode());
-					log.setProcessResult(EquipmentTaskProcessResult.NEED_MAINTENANCE_OK_COMPLETE_DELAY.getCode());
-				}
-			} else if (EquipmentTaskResult.NEED_MAINTENANCE_DELAY_COMPLETE_OK.equals(EquipmentTaskResult.fromStatus(cmd.getVerificationResult()))) {
-				task.setStatus(EquipmentTaskStatus.CLOSE.getCode());
-				task.setProcessTime(now);
-				task.setOperatorType(OwnerType.USER.getCode());
-				task.setOperatorId(user.getId());
-				log.setProcessType(EquipmentTaskProcessType.COMPLETE_MAINTENANCE.getCode());
-				if (task.getProcessExpireTime() == null || now.before(task.getProcessExpireTime())) {
-					task.setResult(EquipmentTaskResult.NEED_MAINTENANCE_DELAY_COMPLETE_OK.getCode());
-					log.setProcessResult(EquipmentTaskProcessResult.NEED_MAINTENANCE_DELAY_COMPLETE_OK.getCode());
-				} else {
-					task.setResult(EquipmentTaskResult.NEED_MAINTENANCE_DELAY_COMPLETE_DELAY.getCode());
-					log.setProcessResult(EquipmentTaskProcessResult.NEED_MAINTENANCE_DELAY_COMPLETE_DELAY.getCode());
-				}
 			}
+
+//			} else if (EquipmentTaskResult.NEED_MAINTENANCE_OK.equals(EquipmentTaskResult.fromStatus(cmd.getVerificationResult()))) {
+//				task.setStatus(EquipmentTaskStatus.NEED_MAINTENANCE.getCode());
+//				task.setExecutiveTime(now);
+//				task.setExecutorType(OwnerType.USER.getCode());
+//				task.setExecutorId(user.getId());
+//				log.setProcessType(EquipmentTaskProcessType.NEED_MAINTENANCE.getCode());
+//				if (task.getExecutiveExpireTime() == null || now.before(task.getExecutiveExpireTime())) {
+//					task.setResult(EquipmentTaskResult.NEED_MAINTENANCE_OK.getCode());
+//					log.setProcessResult(EquipmentTaskProcessResult.NEED_MAINTENANCE_OK.getCode());
+//				} else {
+//					task.setResult(EquipmentTaskResult.NEED_MAINTENANCE_DELAY.getCode());
+//					log.setProcessResult(EquipmentTaskProcessResult.NEED_MAINTENANCE_DELAY.getCode());
+//				}
+//			} else if (EquipmentTaskResult.NEED_MAINTENANCE_OK_COMPLETE_OK.equals(EquipmentTaskResult.fromStatus(cmd.getVerificationResult()))) {
+//				task.setStatus(EquipmentTaskStatus.CLOSE.getCode());
+//				task.setProcessTime(now);
+//				task.setOperatorType(OwnerType.USER.getCode());
+//				task.setOperatorId(user.getId());
+//				log.setProcessType(EquipmentTaskProcessType.COMPLETE_MAINTENANCE.getCode());
+//				if (task.getProcessExpireTime() == null || now.before(task.getProcessExpireTime())) {
+//					task.setResult(EquipmentTaskResult.NEED_MAINTENANCE_OK_COMPLETE_OK.getCode());
+//					log.setProcessResult(EquipmentTaskProcessResult.NEED_MAINTENANCE_OK_COMPLETE_OK.getCode());
+//				} else {
+//					task.setResult(EquipmentTaskResult.NEED_MAINTENANCE_OK_COMPLETE_DELAY.getCode());
+//					log.setProcessResult(EquipmentTaskProcessResult.NEED_MAINTENANCE_OK_COMPLETE_DELAY.getCode());
+//				}
+//			} else if (EquipmentTaskResult.NEED_MAINTENANCE_DELAY_COMPLETE_OK.equals(EquipmentTaskResult.fromStatus(cmd.getVerificationResult()))) {
+//				task.setStatus(EquipmentTaskStatus.CLOSE.getCode());
+//				task.setProcessTime(now);
+//				task.setOperatorType(OwnerType.USER.getCode());
+//				task.setOperatorId(user.getId());
+//				log.setProcessType(EquipmentTaskProcessType.COMPLETE_MAINTENANCE.getCode());
+//				if (task.getProcessExpireTime() == null || now.before(task.getProcessExpireTime())) {
+//					task.setResult(EquipmentTaskResult.NEED_MAINTENANCE_DELAY_COMPLETE_OK.getCode());
+//					log.setProcessResult(EquipmentTaskProcessResult.NEED_MAINTENANCE_DELAY_COMPLETE_OK.getCode());
+//				} else {
+//					task.setResult(EquipmentTaskResult.NEED_MAINTENANCE_DELAY_COMPLETE_DELAY.getCode());
+//					log.setProcessResult(EquipmentTaskProcessResult.NEED_MAINTENANCE_DELAY_COMPLETE_DELAY.getCode());
+//				}
+//			}
 
 			EquipmentTaskDTO dto = null;
 			equipmentProvider.updateEquipmentTask(task);
@@ -3713,7 +3717,6 @@ private void checkUserPrivilege(Long orgId, Long privilegeId, Long communityId) 
 
 			return null;
 		}).filter(Objects::nonNull).collect(Collectors.toList());
-
 		List<EquipmentTaskDTO> dtos = tasks.stream().map((r) ->
 				ConvertHelper.convert(r, EquipmentTaskDTO.class))
 				.collect(Collectors.toList());
@@ -4254,7 +4257,7 @@ private void checkUserPrivilege(Long orgId, Long privilegeId, Long communityId) 
 		}
 		InspectionTemplateDTO dto = ConvertHelper.convert(template, InspectionTemplateDTO.class);
 
-		List<InspectionItemDTO> items = listTemplateItems(dto);
+		List<InspectionItemDTO> items = listTemplateItems(dto,cmd.getStandardId());
 		return items;
 	}
 
@@ -4431,7 +4434,7 @@ private void checkUserPrivilege(Long orgId, Long privilegeId, Long communityId) 
  				"模板不存在");
 		}
 		InspectionTemplateDTO dto = ConvertHelper.convert(template, InspectionTemplateDTO.class);
-		List<InspectionItemDTO> items = listTemplateItems(dto);
+		List<InspectionItemDTO> items = listTemplateItems(dto,null);
 		if(items != null && items.size() > 0) {
 			dto.setItems(items);
 		}
@@ -4442,15 +4445,16 @@ private void checkUserPrivilege(Long orgId, Long privilegeId, Long communityId) 
 		return dto;
 	}
 
-	private List<InspectionItemDTO> listTemplateItems(InspectionTemplateDTO template) {
+	private List<InspectionItemDTO> listTemplateItems(InspectionTemplateDTO template,Long standardId) {
 		List<EquipmentInspectionTemplateItemMap> maps = equipmentProvider.listEquipmentInspectionTemplateItemMap(template.getId());
 		if(maps != null && maps.size() > 0) {
-			List<InspectionItemDTO> items = new ArrayList<InspectionItemDTO>();
+			List<InspectionItemDTO> items = new ArrayList<>();
 			for(EquipmentInspectionTemplateItemMap map : maps) {
 
 				EquipmentInspectionItems item = equipmentProvider.findEquipmentInspectionItem(map.getItemId());
 				if(item != null) {
 					InspectionItemDTO itemDto = ConvertHelper.convert(item, InspectionItemDTO.class);
+					itemDto.setStandardId(standardId);
 					items.add(itemDto);
 				}
 			}
@@ -5723,14 +5727,17 @@ private void checkUserPrivilege(Long orgId, Long privilegeId, Long communityId) 
 		if (planMaps != null && planMaps.size() > 0) {
 			for (EhEquipmentInspectionEquipmentPlanMap map : planMaps) {
 				EquipmentInspectionEquipments equipment = equipmentProvider.findEquipmentById(map.getEquimentId());
-				EhEquipmentInspectionStandards standard = equipmentProvider.findStandardById(map.getStandardId());
+				EquipmentInspectionStandards standard = equipmentProvider.findStandardById(map.getStandardId());
 
 				EquipmentStandardRelationDTO relations = new EquipmentStandardRelationDTO();
 				//根据id查询计划的详情巡检对象栏  只需要如下几个字段
 				relations.setEquipmentName(equipment.getName());
+				relations.setEquipmentId(equipment.getId());
 				relations.setStandardName(standard.getName());
+				relations.setStandardId(standard.getId());
 				relations.setRepeatType(standard.getRepeatType());
 				relations.setOrder(map.getDefaultOrder());
+				relations.setPlanId(planId);
 
 				relationDTOS.add(relations);
 
@@ -5848,5 +5855,36 @@ private void checkUserPrivilege(Long orgId, Long privilegeId, Long communityId) 
 			});
 		}
 
+	}
+
+	@Override
+	public EquipmentTaskOfflineResponse listEquipmentTasksDetails(ListEquipmentTasksCommand cmd) {
+		ListEquipmentTasksResponse response = listEquipmentTasks(cmd);//当前登录人的任务信息
+
+		EquipmentTaskOfflineResponse offlineResponse = new EquipmentTaskOfflineResponse();
+		List<EquipmentTaskDTO> tasks = response.getTasks();//任务表包含planId
+		List<EquipmentStandardRelationDTO> equipments = new ArrayList<>();//设备标准关联表 设备id 标准id
+		List<InspectionItemDTO> items = new ArrayList<>();//巡检item表包含standardId
+
+		tasks.forEach((task) -> {
+			if (task.getReviewTime() == null) {
+				task.setLastSyncTime(task.getCreateTime());
+			} else {
+				task.setLastSyncTime(task.getCreateTime());
+			}
+			EquipmentInspectionPlans plan = equipmentProvider.getEquipmmentInspectionPlanById(task.getPlanId());
+			//填充巡检计划相关的巡检对象(需排序)
+			processEquipmentInspectionObjectsByPlanId(task.getPlanId(), plan);
+			equipments.addAll(plan.getEquipmentStandardRelations());
+		});
+		offlineResponse.setEquipments(equipments);
+		ListParametersByStandardIdCommand listParametersByStandardIdCommand = new ListParametersByStandardIdCommand();
+		equipments.forEach((relation) -> {
+			listParametersByStandardIdCommand.setStandardId(relation.getStandardId());
+			List<InspectionItemDTO> itemDTOS = listParametersByStandardId(listParametersByStandardIdCommand);
+			items.addAll(itemDTOS);
+		});
+		offlineResponse.setItems(items);
+		return offlineResponse;
 	}
 }

@@ -7,6 +7,7 @@ import java.sql.Timestamp;
 /**
  * <ul>
  *  <li>equipmentId: 设备id</li>
+ *  <li>planId: 计划id</li>
  *  <li>targetId: 标准所属管理处id</li>
  *  <li>targetName: 标准所属管理处名</li>
  *  <li>equipmentName: 设备名称</li>
@@ -25,7 +26,9 @@ public class EquipmentStandardRelationDTO {
 	private Long id;
 	
 	private Long equipmentId;
-	
+
+	private Long planId;
+
 	private Long targetId;
 	
 	private String targetName;
@@ -78,6 +81,14 @@ public class EquipmentStandardRelationDTO {
 
 	public void setEquipmentId(Long equipmentId) {
 		this.equipmentId = equipmentId;
+	}
+
+	public Long getPlanId() {
+		return planId;
+	}
+
+	public void setPlanId(Long planId) {
+		this.planId = planId;
 	}
 
 	public Long getTargetId() {

@@ -33,6 +33,9 @@ public class InspectionItemDTO {
 	
 	private String valueJason;
 
+	//add for offline
+	private  Long standardId;
+
 	public Long getId() {
 		return id;
 	}
@@ -87,6 +90,14 @@ public class InspectionItemDTO {
 
 	public void setValueJason(String valueJason) {
 		this.valueJason = valueJason;
+	}
+
+	public Long getStandardId() {
+		return standardId;
+	}
+
+	public void setStandardId(Long standardId) {
+		this.standardId = standardId;
 	}
 
 	@Override

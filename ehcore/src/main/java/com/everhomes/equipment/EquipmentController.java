@@ -22,7 +22,7 @@ import com.everhomes.rest.equipment.EquipmentInspectionReviewDateDTO;
 import com.everhomes.rest.equipment.EquipmentStandardRelationDTO;
 import com.everhomes.rest.equipment.EquipmentStandardsDTO;
 import com.everhomes.rest.equipment.EquipmentTaskDTO;
-import com.everhomes.rest.equipment.EquipmentTaskOffLineDTO;
+import com.everhomes.rest.equipment.EquipmentTaskOfflineResponse;
 import com.everhomes.rest.equipment.EquipmentsDTO;
 import com.everhomes.rest.equipment.ExportEquipmentsCardCommand;
 import com.everhomes.rest.equipment.GetInspectionObjectByQRCodeCommand;
@@ -103,7 +103,6 @@ import org.springframework.web.multipart.MultipartFile;
 
 import javax.servlet.http.HttpServletResponse;
 import javax.validation.Valid;
-import java.util.ArrayList;
 import java.util.List;
 
 @RestDoc(value = "Equipment Controller", site = "core")
@@ -559,10 +558,10 @@ public class EquipmentController extends ControllerBase {
      * <p>获取任务所有信息 用于离线</p>
      */
     @RequestMapping("listEquipmentTasksDetails")
-    @RestReturn(value = EquipmentTaskOffLineDTO.class,collection = true)
+    @RestReturn(value = EquipmentTaskOfflineResponse.class)
     public RestResponse listEquipmentTasksDetails(ListEquipmentTasksCommand cmd) {
-        //TODO:按照前端要求 根据参数将应用中所有需要的表数据传回
-        List<EquipmentTaskOffLineDTO> tasksDetail = new ArrayList<>();
+        //TODO: 根据参数将应用中所有需要的表数据传回
+        EquipmentTaskOfflineResponse tasksDetail = equipmentService.listEquipmentTasksDetails(cmd);
 
         return getRestResponse(tasksDetail);
     }

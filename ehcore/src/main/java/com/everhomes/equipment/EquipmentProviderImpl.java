@@ -2511,7 +2511,8 @@ public class EquipmentProviderImpl implements EquipmentProvider {
         Condition con = null;
 //		if(executeStandardIds != null && executeStandardIds.size() > 0) {
         if (AdminFlag.NO.equals(AdminFlag.fromStatus(adminFlag))) {
-            Condition con4 = Tables.EH_EQUIPMENT_INSPECTION_TASKS.STANDARD_ID.in(executeStandardIds);
+           // Condition con4 = Tables.EH_EQUIPMENT_INSPECTION_TASKS.STANDARD_ID.in(executeStandardIds);  3.0.3
+            Condition con4 = Tables.EH_EQUIPMENT_INSPECTION_TASKS.PLAN_ID.in(executeStandardIds);
             con4 = con4.and(Tables.EH_EQUIPMENT_INSPECTION_TASKS.STATUS.eq(EquipmentTaskStatus.WAITING_FOR_EXECUTING.getCode()));
 
             Condition con5 = Tables.EH_EQUIPMENT_INSPECTION_TASKS.OPERATOR_ID.eq(UserContext.current().getUser().getId());
@@ -2523,7 +2524,8 @@ public class EquipmentProviderImpl implements EquipmentProvider {
 
 //		if(reviewStandardIds != null && reviewStandardIds.size() > 0) {
         if (AdminFlag.NO.equals(AdminFlag.fromStatus(adminFlag))) {
-            Condition con3 = Tables.EH_EQUIPMENT_INSPECTION_TASKS.STANDARD_ID.in(reviewStandardIds);
+//            Condition con3 = Tables.EH_EQUIPMENT_INSPECTION_TASKS.STANDARD_ID.in(reviewStandardIds);  3.0.3
+            Condition con3 = Tables.EH_EQUIPMENT_INSPECTION_TASKS.PLAN_ID.in(reviewStandardIds);
 
             //巡检完成关闭的任务
             Condition con1 = Tables.EH_EQUIPMENT_INSPECTION_TASKS.STATUS.in(EquipmentTaskStatus.CLOSE.getCode(), EquipmentTaskStatus.DELAY.getCode());

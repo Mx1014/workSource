@@ -114,4 +114,6 @@ public interface EquipmentService {
     void deleteReviewExpireDays(SetReviewExpireDaysCommand cmd);
 
     EquipmentInspectionReviewDateDTO listReviewExpireDays(SetReviewExpireDaysCommand cmd);
+
+	EquipmentTaskOfflineResponse listEquipmentTasksDetails(ListEquipmentTasksCommand cmd);
 }
