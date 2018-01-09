@@ -2098,7 +2098,7 @@ public class Rentalv2ProviderImpl implements Rentalv2Provider {
 	public List<RentalOrderRule> listRentalOrderRules(String ownerType, Long ownerId, Byte handleType) {
 		DSLContext context = dbProvider.getDslContext(AccessSpec.readWrite());
 
-		return context.select().from(Tables.EH_RENTALV2_PRICE_RULES)
+		return context.select().from(Tables.EH_RENTALV2_ORDER_RULES)
 				.where(Tables.EH_RENTALV2_ORDER_RULES.OWNER_TYPE.eq(ownerType))
 				.and(Tables.EH_RENTALV2_ORDER_RULES.OWNER_ID.eq(ownerId))
 				.and(Tables.EH_RENTALV2_ORDER_RULES.HANDLE_TYPE.eq(handleType))
