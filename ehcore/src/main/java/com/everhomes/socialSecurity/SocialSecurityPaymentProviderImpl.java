@@ -8,6 +8,7 @@ import java.util.List;
 import com.everhomes.rest.socialSecurity.AccumOrSocial;
 import com.everhomes.rest.socialSecurity.NormalFlag;
 import org.jooq.*;
+import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
 
@@ -26,6 +27,8 @@ import com.everhomes.util.DateHelper;
 
 @Component
 public class SocialSecurityPaymentProviderImpl implements SocialSecurityPaymentProvider {
+    private static final org.slf4j.Logger LOGGER = LoggerFactory.getLogger(SocialSecurityPaymentProviderImpl.class);
+
     @Autowired
     private SocialSecurityService socialSecurityService;
     @Autowired
@@ -152,10 +155,10 @@ public class SocialSecurityPaymentProviderImpl implements SocialSecurityPaymentP
     }
 
     @Override
-    public void updateSocialSecurityPaymentFileStatus(Long ownerId) {
+    public void updateSocialSecurityPaymentFileStatus(Long ownerId, Long userId) {
         getReadWriteContext().update(Tables.EH_SOCIAL_SECURITY_PAYMENTS).set(Tables.EH_SOCIAL_SECURITY_PAYMENTS.IS_FILED, NormalFlag.YES.getCode())
                 .set(Tables.EH_SOCIAL_SECURITY_PAYMENTS.FILE_TIME, new Timestamp(DateHelper.currentGMTTime().getTime()))
-                .set(Tables.EH_SOCIAL_SECURITY_PAYMENTS.FILE_UID, UserContext.currentUserId())
+                .set(Tables.EH_SOCIAL_SECURITY_PAYMENTS.FILE_UID, userId)
                 .where(Tables.EH_SOCIAL_SECURITY_PAYMENTS.ORGANIZATION_ID.eq(ownerId)).execute();
     }
 
@@ -185,6 +188,7 @@ public class SocialSecurityPaymentProviderImpl implements SocialSecurityPaymentP
                         Tables.EH_SOCIAL_SECURITY_PAYMENTS.FILE_UID,
                         Tables.EH_SOCIAL_SECURITY_PAYMENTS.FILE_TIME)
                 .orderBy(Tables.EH_SOCIAL_SECURITY_PAYMENTS.ID.asc());
+        LOGGER.debug("sql: " + step);
         return step.fetchAny().map(r -> {
             SocialSecuritySummary summary = new SocialSecuritySummary();
             summary.setNamespaceId((Integer) r.getValue(0));

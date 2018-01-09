@@ -2232,6 +2232,7 @@ public class SocialSecurityServiceImpl implements SocialSecurityService {
         ValueOperations<String, String> valueOperations = getValueOperations(key);
         int timeout = 15;
         TimeUnit unit = TimeUnit.MINUTES;
+        Long userId = UserContext.currentUserId();
         // 先放一个和key一样的值,表示这个人key有效
         valueOperations.set(key, key, timeout, unit);
         //线程池中处理计算规则
@@ -2239,7 +2240,7 @@ public class SocialSecurityServiceImpl implements SocialSecurityService {
             @Override
             public void run() {
                 try {
-                    fileSocialSecurity(cmd.getOwnerId(), cmd.getPayMonth(), payments);
+                    fileSocialSecurity(cmd.getOwnerId(), cmd.getPayMonth(), payments, userId);
                 } catch (Exception e) {
                     LOGGER.error("calculate reports error!! cmd is  :" + cmd, e);
                 } finally {
@@ -2252,7 +2253,7 @@ public class SocialSecurityServiceImpl implements SocialSecurityService {
 
     }
 
-    private void fileSocialSecurity(Long ownerId, String payMonth, List<SocialSecurityPayment> payments) {
+    private void fileSocialSecurity(Long ownerId, String payMonth, List<SocialSecurityPayment> payments, Long userId) {
         //删除之前当月的归档表
         LOGGER.debug("开始归档报表");
         socialSecurityPaymentLogProvider.deleteMonthLog(ownerId, payMonth);
@@ -2272,7 +2273,7 @@ public class SocialSecurityServiceImpl implements SocialSecurityService {
         SocialSecuritySummary summary = socialSecurityPaymentProvider.calculateSocialSecuritySummary(ownerId, payMonth);
         socialSecuritySummaryProvider.createSocialSecuritySummary(summary);
         //更新归档状态
-        socialSecurityPaymentProvider.updateSocialSecurityPaymentFileStatus(ownerId);
+        socialSecurityPaymentProvider.updateSocialSecurityPaymentFileStatus(ownerId, userId);
     }
 
     @Override
