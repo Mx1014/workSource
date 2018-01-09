@@ -1,6 +1,8 @@
 package com.everhomes.domain;
 
+import com.everhomes.contentserver.ContentServerService;
 import com.everhomes.db.DbProvider;
+import com.everhomes.entity.EntityType;
 import com.everhomes.rest.domain.DomainDTO;
 import com.everhomes.rest.domain.GetDomainInfoCommand;
 import com.everhomes.util.ConvertHelper;
@@ -22,6 +24,9 @@ public class DomainServiceImpl implements DomainService {
     @Autowired
     private DbProvider dbProvider;
 
+    @Autowired
+    private ContentServerService contentServerService;
+
     @Override
     public DomainDTO getDomainInfo(GetDomainInfoCommand cmd, HttpServletRequest request) {
         String domain = "";
@@ -32,7 +37,13 @@ public class DomainServiceImpl implements DomainService {
         }
         Domain domainInfo = domainProvider.findDomainByDomain(domain);
 
-        return ConvertHelper.convert(domainInfo, DomainDTO.class);
+        DomainDTO dto = ConvertHelper.convert(domainInfo, DomainDTO.class);
+        if(dto.getIconUri() != null){
+            String url = contentServerService.parserUri(dto.getIconUri(), EntityType.DOMAIN.getCode(), domainInfo.getId());
+            dto.setIconUrl(url);
+        }
+        
+        return dto;
     }
 
 }
