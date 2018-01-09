@@ -542,8 +542,12 @@ public class YellowPageProviderImpl implements YellowPageProvider {
         SelectQuery<EhServiceAllianceCategoriesRecord> query = context.selectQuery(Tables.EH_SERVICE_ALLIANCE_CATEGORIES);
         Condition condition = null;
         
-        if(parentId != null)
+        if(parentId != null){
             condition = Tables.EH_SERVICE_ALLIANCE_CATEGORIES.PARENT_ID.eq(parentId);
+            if(parentId==0){
+            	condition = condition.and(Tables.EH_SERVICE_ALLIANCE_CATEGORIES.ENTRY_ID.isNotNull());
+            }
+        }
         else
             condition = Tables.EH_SERVICE_ALLIANCE_CATEGORIES.PARENT_ID.isNull().or(Tables.EH_SERVICE_ALLIANCE_CATEGORIES.PARENT_ID.eq(0L));
             
