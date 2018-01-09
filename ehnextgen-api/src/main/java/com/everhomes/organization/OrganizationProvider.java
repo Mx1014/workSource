@@ -541,4 +541,6 @@ public interface OrganizationProvider {
 	List checkOrgExistInOrgOrPaths(Integer namespaceId, Long organizationId, List<Long> orgIds, List<String> orgPaths);
 	
 	List<OrganizationMemberDetails> listOrganizationMemberDetails(Long ownerId);
+
+	List<Long> queryOrganizationPersonnelDetailIds(ListingLocator locator, Integer pageSize, Long organizationId, ListingQueryBuilderCallback queryBuilderCallback);
 }
