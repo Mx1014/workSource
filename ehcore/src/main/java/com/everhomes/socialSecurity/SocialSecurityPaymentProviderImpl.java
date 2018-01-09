@@ -140,7 +140,7 @@ public class SocialSecurityPaymentProviderImpl implements SocialSecurityPaymentP
     public Integer countUnFieldUsers(Long ownerId) {
         Record1<Integer> record = getReadOnlyContext().selectDistinct(Tables.EH_SOCIAL_SECURITY_PAYMENTS.DETAIL_ID.countDistinct()).from(Tables.EH_SOCIAL_SECURITY_PAYMENTS)
                 .where(Tables.EH_SOCIAL_SECURITY_PAYMENTS.ORGANIZATION_ID.eq(ownerId))
-                .and(Tables.EH_SOCIAL_SECURITY_PAYMENTS.IS_FILED.eq(NormalFlag.NO.getCode()))
+                .and(Tables.EH_SOCIAL_SECURITY_PAYMENTS.IS_FILED.ne(NormalFlag.YES.getCode()))
                 .fetchAny();
 
         if (null == record) {
