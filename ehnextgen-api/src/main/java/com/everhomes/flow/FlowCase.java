@@ -40,7 +40,7 @@ public class FlowCase extends EhFlowCases {
     }
 
     public Long getProjectIdA() {
-        return FlowCaseCustomField.PROJECT_TYPE_A.getIntegralValue(this);
+        return FlowCaseCustomField.PROJECT_ID_A.getIntegralValue(this);
     }
 
 	public void incrStepCount() {
