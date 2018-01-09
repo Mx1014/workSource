@@ -22,6 +22,8 @@ import com.everhomes.bus.LocalBusOneshotSubscriberBuilder;
 import com.everhomes.configuration.ConfigConstants;
 import com.everhomes.order.PayService;
 import com.everhomes.parking.handler.DefaultParkingVendorHandler;
+import com.everhomes.rentalv2.RentalCommonServiceImpl;
+import com.everhomes.rentalv2.RentalResourceHandler;
 import com.everhomes.rentalv2.utils.RentalUtils;
 import com.everhomes.rest.RestResponse;
 import com.everhomes.rest.activity.ActivityRosterPayVersionFlag;
@@ -29,10 +31,7 @@ import com.everhomes.rest.order.*;
 import com.everhomes.rest.parking.*;
 import com.everhomes.rest.pay.controller.CreateOrderRestResponse;
 import com.everhomes.rest.pmtask.PmTaskErrorCode;
-import com.everhomes.rest.rentalv2.DeleteParkingSpaceCommand;
-import com.everhomes.rest.rentalv2.PayZuolinRefundCommand;
-import com.everhomes.rest.rentalv2.PayZuolinRefundResponse;
-import com.everhomes.rest.rentalv2.RentalServiceErrorCode;
+import com.everhomes.rest.rentalv2.*;
 
 import com.everhomes.server.schema.Tables;
 import com.everhomes.util.*;
@@ -118,6 +117,8 @@ public class ParkingServiceImpl implements ParkingService {
 	private LocalBusOneshotSubscriberBuilder localBusSubscriberBuilder;
 	@Autowired
 	private PayService payService;
+	@Autowired
+	private RentalCommonServiceImpl rentalCommonService;
 
 	@Override
 	public List<ParkingCardDTO> listParkingCards(ListParkingCardsCommand cmd) {
@@ -2338,6 +2339,8 @@ public class ParkingServiceImpl implements ParkingService {
 	@Override
 	public ParkingSpaceDTO addParkingSpace(AddParkingSpaceCommand cmd) {
 
+		ParkingLot parkingLot = parkingProvider.findParkingLotById(cmd.getParkingLotId());
+
 		ParkingSpace parkingSpace = parkingProvider.findParkingSpaceBySpaceNo(cmd.getSpaceNo());
 
 		if (null != parkingSpace) {
@@ -2358,6 +2361,9 @@ public class ParkingServiceImpl implements ParkingService {
 
 		parkingProvider.createParkingSpace(parkingSpace);
 
+		RentalResourceHandler handler = rentalCommonService.getRentalResourceHandler(RentalV2ResourceType.VIP_PARKING.getCode());
+
+		handler.updateRentalResource(JSONObject.toJSONString(parkingLot));
 		return ConvertHelper.convert(parkingSpace, ParkingSpaceDTO.class);
 	}
 

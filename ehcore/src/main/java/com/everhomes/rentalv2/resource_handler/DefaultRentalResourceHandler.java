@@ -23,4 +23,9 @@ public class DefaultRentalResourceHandler implements RentalResourceHandler {
 
         return rs;
     }
+
+    @Override
+    public void updateRentalResource(String resourceJson) {
+
+    }
 }

@@ -13,7 +13,7 @@ import java.math.BigDecimal;
 /**
  * @author sw on 2018/1/5.
  */
-@Component(RentalOrderHandler.RENTAL_ORDER_HANDLER_PREFIX + "vip_parking")
+@Component(RentalMessageHandler.RENTAL_MESSAGE_HANDLER_PREFIX + "vip_parking")
 public class VipParkingRentalMessageHandler implements RentalMessageHandler {
 
     @Autowired

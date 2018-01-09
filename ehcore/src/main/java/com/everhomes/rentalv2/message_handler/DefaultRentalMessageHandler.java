@@ -12,7 +12,7 @@ import java.math.RoundingMode;
 /**
  * @author sw on 2018/1/5.
  */
-@Component(RentalOrderHandler.RENTAL_ORDER_HANDLER_PREFIX + "default")
+@Component(RentalMessageHandler.RENTAL_MESSAGE_HANDLER_PREFIX + "default")
 public class DefaultRentalMessageHandler implements RentalMessageHandler {
 
     @Autowired

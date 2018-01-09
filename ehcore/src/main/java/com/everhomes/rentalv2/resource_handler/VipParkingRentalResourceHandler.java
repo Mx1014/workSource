@@ -45,4 +45,9 @@ public class VipParkingRentalResourceHandler implements RentalResourceHandler {
 
         return resource;
     }
+
+    @Override
+    public void updateRentalResource(String resourceJson) {
+
+    }
 }

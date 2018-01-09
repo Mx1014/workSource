@@ -8,4 +8,6 @@ public interface RentalResourceHandler {
     String RENTAL_RESOURCE_HANDLER_PREFIX = "RentalResourceHandler-";
     String DEFAULT = "default";
     RentalResource getRentalResourceById(Long id);
+
+    void updateRentalResource(String resourceJson);
 }
