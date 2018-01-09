@@ -5,6 +5,7 @@ public class PushUsersCommand {
     private String identifierToken;
     private Integer namespaceId;
     private String avatar;
+    private String namespaceUserToken;
 
     public Integer getNamespaceId() {
         return namespaceId;
@@ -36,6 +37,14 @@ public class PushUsersCommand {
 
     public void setAvatar(String avatar) {
         this.avatar = avatar;
+    }
+
+    public String getNamespaceUserToken() {
+        return namespaceUserToken;
+    }
+
+    public void setNamespaceUserToken(String namespaceUserToken) {
+        this.namespaceUserToken = namespaceUserToken;
     }
 }
 

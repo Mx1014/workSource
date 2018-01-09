@@ -5597,7 +5597,7 @@ public class UserServiceImpl implements UserService {
 
 
 		try {
-			ListenableFuture<ResponseEntity<String>> auth_result = restCall(HttpMethod.POST, MediaType.APPLICATION_FORM_URLENCODED, "http://10.1.110.45:8080/evh/openapi/pushUsers", headerParam, bodyParam, new ListenableFutureCallback<ResponseEntity<String>>() {
+			ListenableFuture<ResponseEntity<String>> auth_result = restCall(HttpMethod.POST, MediaType.APPLICATION_FORM_URLENCODED, "http://127.0.0.1:8080/evh/openapi/pushUsers", headerParam, bodyParam, new ListenableFutureCallback<ResponseEntity<String>>() {
 
                 @Override
                 public void onSuccess(ResponseEntity<String> result) {
@@ -5618,12 +5618,15 @@ public class UserServiceImpl implements UserService {
 	@Override
 	public PushUsersResponse createUsersForAnBang(PushUsersCommand cmd) {
 		dbProvider.execute(r -> {
+			List<String> tokens = Collections.singletonList(cmd.getNamespaceUserToken());
+			this.userProvider.deleteUserAndUserIdentifiers(0,tokens,NamespaceUserType.ANBANG.getCode());
 			User user = new User();
 			user.setStatus(UserStatus.ACTIVE.getCode());
 			user.setNamespaceId(cmd.getNamespaceId());
 			user.setNickName(cmd.getNickName());
 			user.setGender(UserGender.UNDISCLOSURED.getCode());
 			user.setNamespaceUserType(NamespaceUserType.ANBANG.getCode());
+			user.setNamespaceUserToken(cmd.getNamespaceUserToken());
 			user.setLevel(UserLevel.L1.getCode());
 			user.setAvatar(cmd.getAvatar() != null ? cmd.getAvatar() : "");
 			String salt = EncryptionUtils.createRandomSalt();
