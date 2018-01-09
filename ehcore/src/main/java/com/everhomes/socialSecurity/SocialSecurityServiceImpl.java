@@ -464,10 +464,10 @@ public class SocialSecurityServiceImpl implements SocialSecurityService {
                 }
             }
         }
-        if (pageSize < beginNum + detailIds.size()) {
+        if (pageSize + beginNum < detailIds.size()) {
             nextPageAnchor = detailIds.get(pageSize);
         }
-        for (int i = beginNum; i < beginNum + pageSize; i++) {
+        for (int i = beginNum; i < beginNum + pageSize && i < detailIds.size(); i++) {
             SocialSecurityPaymentDTO dto = processSocialSecurityItemDTO(detailIds.get(i));
             results.add(dto);
         }
