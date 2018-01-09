@@ -444,6 +444,11 @@ public boolean checkUserPrivilege(Long userId, String ownerType, Long ownerId, L
                 }
                 if(null != organization){
                     if(OrganizationType.PM == OrganizationType.fromCode(organization.getOrganizationType())){
+                        if (this.aclProvider.checkAccess("system", null, com.everhomes.server.schema.tables.pojos.EhUsers.class.getSimpleName(), UserContext.current().getUser().getId(), Privilege.Write, null)) {
+                            LOGGER.debug("check root privilege success.userId={}, ownerType={}, ownerId={}, organizationId={}, privilegeId={}", userId, ownerType, ownerId, currentOrgId, privilegeId);
+                            return true;
+                        }
+
                         if(checkSuperAdmin(userId, currentOrgId)){
                             LOGGER.debug("check super admin privilege success.userId={}, ownerType={}, ownerId={}, organizationId={}, privilegeId={}" , userId, ownerType, ownerId, currentOrgId, privilegeId);
                             return true;
