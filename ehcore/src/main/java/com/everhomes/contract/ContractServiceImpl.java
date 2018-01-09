@@ -74,6 +74,8 @@ import org.apache.commons.lang.math.RandomUtils;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.context.ApplicationListener;
+import org.springframework.context.event.ContextRefreshedEvent;
 import org.springframework.scheduling.annotation.Scheduled;
 import org.springframework.stereotype.Component;
 
@@ -100,7 +102,7 @@ import javax.annotation.PostConstruct;
 import javax.servlet.http.HttpServletResponse;
 
 @Component(ContractService.CONTRACT_PREFIX + "")
-public class ContractServiceImpl implements ContractService {
+public class ContractServiceImpl implements ContractService, , ApplicationListener<ContextRefreshedEvent> {
 	
 	private static final Logger LOGGER = LoggerFactory.getLogger(ContractServiceImpl.class);
 
@@ -212,14 +214,23 @@ public class ContractServiceImpl implements ContractService {
 		}
 	}
 
-	@PostConstruct
-	public void setup(){
-		String triggerName = ContractScheduleJob.SCHEDELE_NAME + System.currentTimeMillis();
+	@Override
+	public void onApplicationEvent(ContextRefreshedEvent contextRefreshedEvent) {
+		String triggerName = "contract-" + System.currentTimeMillis();
 		String jobName = triggerName;
-		String cronExpression = ContractScheduleJob.CRON_EXPRESSION;
+		String cronExpression = "0 0 2 * * ?";
 		//启动定时任务
-		scheduleProvider.scheduleCronJob(triggerName, jobName, cronExpression, ContractScheduleJob.class, null);
+		scheduleProvider.scheduleCronJob(triggerName, jobName, cronExpression, ContractScheduleJob.class, new HashMap());
 	}
+
+//	@PostConstruct
+//	public void setup(){
+//		String triggerName = ContractScheduleJob.SCHEDELE_NAME + System.currentTimeMillis();
+//		String jobName = triggerName;
+//		String cronExpression = ContractScheduleJob.CRON_EXPRESSION;
+//		//启动定时任务
+//		scheduleProvider.scheduleCronJob(triggerName, jobName, cronExpression, ContractScheduleJob.class, null);
+//	}
 
 	@Override
 	public ListContractsResponse listContracts(ListContractsCommand cmd) {
