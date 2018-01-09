@@ -27,6 +27,22 @@ public class FlowCase extends EhFlowCases {
 		this.customObject = customObject;
 	}
 
+    public void setProjectTypeA(String projectTypeA) {
+        FlowCaseCustomField.PROJECT_TYPE_A.setStringValue(this, projectTypeA);
+    }
+
+    public String getProjectTypeA() {
+        return FlowCaseCustomField.PROJECT_TYPE_A.getStringValue(this);
+    }
+
+    public void setProjectIdA(Long projectIdA) {
+        FlowCaseCustomField.PROJECT_ID_A.setIntegralValue(this, projectIdA);
+    }
+
+    public Long getProjectIdA() {
+        return FlowCaseCustomField.PROJECT_TYPE_A.getIntegralValue(this);
+    }
+
 	public void incrStepCount() {
 	    this.setStepCount(this.getStepCount() + 1);
     }
