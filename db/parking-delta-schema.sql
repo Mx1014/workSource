@@ -106,7 +106,6 @@ drop column exclusive_flag;
 ALTER TABLE `eh_rentalv2_resources`
 drop column rental_start_time_flag,
 drop column rental_end_time_flag,
-drop column resource_counts,
 drop column open_weekday,
 drop column begin_date,
 drop column end_date,
@@ -114,8 +113,9 @@ drop column rental_start_time,
 drop column rental_end_time,
 drop column refund_flag,
 drop column refund_ratio,
-drop column auto_assign,
-drop column multi_unit,
+--drop column auto_assign,
+--drop column multi_unit,
+--drop column resource_counts,
 drop column multi_time_interval,
 drop column day_open_time,
 drop column day_close_time,
@@ -179,6 +179,8 @@ UPDATE eh_rentalv2_cells set resource_type = 'default';
 UPDATE eh_rentalv2_orders set resource_type = 'default';
 
 
+INSERT INTO `eh_rentalv2_resource_types` (`id`, `name`, `page_type`, `icon_uri`, `status`, `namespace_id`, `pay_mode`, `unauth_visible`, `menu_type`, `identify`)
+	VALUES ('12500', 'VIP车位预约', '0', NULL, '2', '1000000', '0', '0', '1', 'vip_parking');
 
 
 
