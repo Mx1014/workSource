@@ -16,6 +16,7 @@ import javax.validation.constraints.NotNull;
  *  <li>keyword: 查询关键字</li>
  *  <li>pageAnchor: 锚点</li>
  *  <li>pageSize: 页面大小</li>
+ *  <li>namespaceId: namespaceId</li>
  * </ul>
  */
 public class searchEquipmentInspectionPlansCommand {
@@ -42,6 +43,8 @@ public class searchEquipmentInspectionPlansCommand {
     private Long inspectionCategoryId;
 
     private Byte repeatType;
+
+    private Integer namespaceId;
 
     public Long getOwnerId() {
         return ownerId;
@@ -129,6 +132,14 @@ public class searchEquipmentInspectionPlansCommand {
 
     public void setRepeatType(Byte repeatType) {
         this.repeatType = repeatType;
+    }
+
+    public Integer getNamespaceId() {
+        return namespaceId;
+    }
+
+    public void setNamespaceId(Integer namespaceId) {
+        this.namespaceId = namespaceId;
     }
 
     @Override

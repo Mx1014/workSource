@@ -23,9 +23,9 @@ import java.util.List;
  *  <li>remarks: 计划备注内容</li>
  *  <li>inspectionCategoryId: 巡检对象类型id</li>
  *  <li>repeatSettings: 执行周期 参考{@link com.everhomes.rest.repeat.RepeatSettingsDTO}</li>
- *  <li>reviewExpiredDays: 审批过期时间 </li>
  *  <li>equipmentStandardRelations: 设备标准关系 参考{@link com.everhomes.rest.equipment.EquipmentStandardRelationDTO}</li>
  *  <li>groupList: {@link com.everhomes.rest.equipment.StandardGroupDTO}</li>
+ *  <li>namespaceId: namespaceId</li>
  *  </ul>
  */
 public class UpdateEquipmentPlanCommand {
@@ -51,7 +51,7 @@ public class UpdateEquipmentPlanCommand {
 
     private RepeatSettingsDTO repeatSettings;
 
-    private Integer reviewExpiredDays;
+    private Integer namespaceId;
 
     @ItemType(EquipmentStandardRelationDTO.class)
     private List<EquipmentStandardRelationDTO> equipmentStandardRelations;
@@ -161,6 +161,15 @@ public class UpdateEquipmentPlanCommand {
 
     public void setGroupList(List<StandardGroupDTO> groupList) {
         this.groupList = groupList;
+    }
+
+
+    public Integer getNamespaceId() {
+        return namespaceId;
+    }
+
+    public void setNamespaceId(Integer namespaceId) {
+        this.namespaceId = namespaceId;
     }
 
     @Override

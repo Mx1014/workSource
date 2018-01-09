@@ -18,6 +18,7 @@ import javax.validation.constraints.NotNull;
  *  <li>pageSize: 页面大小</li>
  *  <li>inspectionCategoryId: 巡检对象类型id</li>
  *  <li>targetIdFlag: 要不要取没有targetId的数据 参考{@link com.everhomes.rest.equipment.TargetIdFlag}</li>
+ *  <li>namespaceId: 域空间id</li>
  * </ul>
  */
 public class SearchEquipmentStandardsCommand {
@@ -51,6 +52,8 @@ public class SearchEquipmentStandardsCommand {
 	private Long inspectionCategoryId;
 
 	private Byte targetIdFlag;
+
+	private Integer namespaceId;
 
 	public Byte getTargetIdFlag() {
 		return targetIdFlag;
@@ -154,6 +157,14 @@ public class SearchEquipmentStandardsCommand {
 
 	public void setRepeatType(Byte repeatType) {
 		this.repeatType = repeatType;
+	}
+
+	public Integer getNamespaceId() {
+		return namespaceId;
+	}
+
+	public void setNamespaceId(Integer namespaceId) {
+		this.namespaceId = namespaceId;
 	}
 
 	@Override

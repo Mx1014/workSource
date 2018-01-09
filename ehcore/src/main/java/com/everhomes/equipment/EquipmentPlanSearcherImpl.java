@@ -16,7 +16,6 @@ import com.everhomes.search.AbstractElasticSearch;
 import com.everhomes.search.EquipmentPlanSearcher;
 import com.everhomes.search.SearchUtils;
 import com.everhomes.settings.PaginationConfigHelper;
-import com.everhomes.user.UserContext;
 import com.everhomes.util.ConvertHelper;
 import com.mysql.jdbc.StringUtils;
 import org.elasticsearch.action.bulk.BulkRequestBuilder;
@@ -132,7 +131,7 @@ public class EquipmentPlanSearcherImpl extends AbstractElasticSearch implements 
         }
         FilterBuilder nfb = FilterBuilders.termFilter("status", EquipmentPlanStatus.INACTIVE.getCode());
         FilterBuilder fb = FilterBuilders.notFilter(nfb);
-        fb = FilterBuilders.termFilter("namespaceId", UserContext.getCurrentNamespaceId());
+        fb = FilterBuilders.termFilter("namespaceId", cmd.getNamespaceId());
         if (cmd.getTargetId() != null)
             fb = FilterBuilders.andFilter(fb, FilterBuilders.termFilter("targetId", cmd.getTargetId()));
 

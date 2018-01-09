@@ -152,7 +152,7 @@ public class EquipmentStandardSearcherImpl extends AbstractElasticSearch impleme
         fb = FilterBuilders.notFilter(nfb);
 
         // 改用namespaceId by xiongying20170328
-        fb = FilterBuilders.andFilter(fb, FilterBuilders.termFilter("namespaceId", UserContext.getCurrentNamespaceId()));
+        fb = FilterBuilders.andFilter(fb, FilterBuilders.termFilter("namespaceId", cmd.getNamespaceId()));
     	/*fb = FilterBuilders.andFilter(fb, FilterBuilders.termFilter("ownerId", cmd.getOwnerId()));
         fb = FilterBuilders.andFilter(fb, FilterBuilders.termFilter("ownerType", OwnerType.fromCode(cmd.getOwnerType()).getCode()));*/
         if(cmd.getTargetId() != null) {

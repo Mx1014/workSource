@@ -16,6 +16,7 @@ import javax.validation.constraints.NotNull;
  *  <li>keyword: 查询关键字</li>
  *  <li>pageAnchor: 锚点</li>
  *  <li>pageSize: 页面大小</li>
+ *  <li>namespaceId: namespaceId</li>
  * </ul>
  */
 public class SearchEquipmentStandardRelationsCommand {
@@ -47,6 +48,8 @@ public class SearchEquipmentStandardRelationsCommand {
     private Long inspectionCategoryId;
 
     private Long categoryId;
+
+	private Integer namespaceId;
 
 	public Long getOwnerId() {
 		return ownerId;
@@ -142,6 +145,14 @@ public class SearchEquipmentStandardRelationsCommand {
 
 	public void setCategoryId(Long categoryId) {
 		this.categoryId = categoryId;
+	}
+
+	public Integer getNamespaceId() {
+		return namespaceId;
+	}
+
+	public void setNamespaceId(Integer namespaceId) {
+		this.namespaceId = namespaceId;
 	}
 
 	@Override

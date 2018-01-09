@@ -14,6 +14,7 @@ import java.util.List;
  *  <li>ownerType: 标准所属的主体，参考{@link com.everhomes.rest.quality.OwnerType}</li>
  *  <li>targetId: 标准所属项目id</li>
  *  <li>targetType: 标准所属项目类型</li>
+ *  <li>namespaceId: 域空间id</li>
  *  <li>name: 标准名称</li>
  *  <li>repeatType: 0:no repeat 1: by day 2:by week 3: by month 4:year</li>
  *  <li>standardSource: 标准来源</li>
@@ -39,6 +40,8 @@ public class UpdateEquipmentStandardCommand {
 
 	@NotNull
 	private String targetType;
+
+	private Integer namespaceId;
 
 	private String name;
 
@@ -235,6 +238,14 @@ public class UpdateEquipmentStandardCommand {
 
 	public void setCommunities(List<Long> communities) {
 		this.communities = communities;
+	}
+
+	public Integer getNamespaceId() {
+		return namespaceId;
+	}
+
+	public void setNamespaceId(Integer namespaceId) {
+		this.namespaceId = namespaceId;
 	}
 
 	@Override

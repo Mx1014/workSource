@@ -49,6 +49,7 @@ import java.util.List;
  *  <li>price: 购买价格</li>
  *  <li>buyTime: 购买日期</li>
  *  <li>depreciationYears: 折旧年限</li>
+ *  <li>namespaceId: namespaceId</li>
  * </ul>
  */
 public class UpdateEquipmentsCommand {
@@ -137,6 +138,8 @@ public class UpdateEquipmentsCommand {
 	private Long buyTime;
 
 	private Long depreciationYear;
+
+	private Integer namespaceId;
 
 
 	public Byte getPictureFlag() {
@@ -458,6 +461,14 @@ public class UpdateEquipmentsCommand {
 
 	public void setDepreciationYear(Long depreciationYear) {
 		this.depreciationYear = depreciationYear;
+	}
+
+	public Integer getNamespaceId() {
+		return namespaceId;
+	}
+
+	public void setNamespaceId(Integer namespaceId) {
+		this.namespaceId = namespaceId;
 	}
 
 	@Override

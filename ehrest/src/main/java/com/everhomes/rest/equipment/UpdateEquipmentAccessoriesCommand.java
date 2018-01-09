@@ -1,8 +1,8 @@
 package com.everhomes.rest.equipment;
 
-import javax.validation.constraints.NotNull;
-
 import com.everhomes.util.StringHelper;
+
+import javax.validation.constraints.NotNull;
 
 /**
  * <ul>
@@ -16,6 +16,7 @@ import com.everhomes.util.StringHelper;
  *  <li>modelNumber: 备品型号</li>
  *  <li>specification: 规格</li>
  *  <li>location: 存放地点</li>
+ *  <li>namespaceId: namespaceId</li>
  * </ul>
  */
 public class UpdateEquipmentAccessoriesCommand {
@@ -41,6 +42,8 @@ public class UpdateEquipmentAccessoriesCommand {
 	private String specification;
 	
 	private String location;
+
+	private Integer namespaceId;
 
 	public Long getId() {
 		return id;
@@ -121,7 +124,15 @@ public class UpdateEquipmentAccessoriesCommand {
 	public void setLocation(String location) {
 		this.location = location;
 	}
-	
+
+	public Integer getNamespaceId() {
+		return namespaceId;
+	}
+
+	public void setNamespaceId(Integer namespaceId) {
+		this.namespaceId = namespaceId;
+	}
+
 	@Override
     public String toString() {
         return StringHelper.toJsonString(this);

@@ -141,7 +141,7 @@ public class EquipmentTasksSearcherImpl extends AbstractElasticSearch implements
 //        FilterBuilder fb = FilterBuilders.notFilter(nfb);
 //产品要求把已失效的任务也显示出来 add by xiongying20170217
         //改用namespaceId add by xiongying 20170328
-        FilterBuilder fb = FilterBuilders.termFilter("namespaceId", UserContext.getCurrentNamespaceId());
+        FilterBuilder fb = FilterBuilders.termFilter("namespaceId", cmd.getNamespaceId());
 //        FilterBuilder fb = FilterBuilders.termFilter("ownerId", cmd.getOwnerId());
 ////        fb = FilterBuilders.andFilter(fb, FilterBuilders.termFilter("ownerId", cmd.getOwnerId()));
 //        fb = FilterBuilders.andFilter(fb, FilterBuilders.termFilter("ownerType", OwnerType.fromCode(cmd.getOwnerType()).getCode()));

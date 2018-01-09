@@ -387,7 +387,7 @@ public class EquipmentServiceImpl implements EquipmentService {
 		if (cmd.getId() == null) {
 			standard = ConvertHelper.convert(cmd, EquipmentInspectionStandards.class);
 			standard.setCreatorUid(user.getId());
-			standard.setNamespaceId(UserContext.getCurrentNamespaceId());
+			standard.setNamespaceId(cmd.getNamespaceId());
 			if (cmd.getEquipments() == null || cmd.getEquipments().size() == 0) {
 				standard.setStatus(EquipmentStandardStatus.NOT_COMPLETED.getCode());
 			} else {
@@ -418,7 +418,7 @@ public class EquipmentServiceImpl implements EquipmentService {
 			standard.setOperatorUid(user.getId());
 			standard.setCreatorUid(exist.getCreatorUid());
 			standard.setCreateTime(exist.getCreateTime());
-			standard.setNamespaceId(UserContext.getCurrentNamespaceId());
+			standard.setNamespaceId(cmd.getNamespaceId());
 			if (cmd.getEquipments() == null || cmd.getEquipments().size() == 0) {
 				standard.setStatus(EquipmentStandardStatus.NOT_COMPLETED.getCode());
 			} else {
@@ -1101,7 +1101,7 @@ private void checkUserPrivilege(Long orgId, Long privilegeId, Long communityId) 
 			equipment.setGeohash(geohash);
 			equipment.setCreatorUid(user.getId());
 			equipment.setOperatorUid(user.getId());
-			equipment.setNamespaceId(UserContext.getCurrentNamespaceId());
+			equipment.setNamespaceId(cmd.getNamespaceId());
 
 
 			if(cmd.getTargetId() == null || cmd.getTargetId() == 0L) {
@@ -1201,7 +1201,7 @@ private void checkUserPrivilege(Long orgId, Long privilegeId, Long communityId) 
 			equipment = ConvertHelper.convert(cmd, EquipmentInspectionEquipments.class);
 			equipment.setGeohash(exist.getGeohash());
 			equipment.setQrCodeToken(exist.getQrCodeToken());
-			equipment.setNamespaceId(UserContext.getCurrentNamespaceId());
+			equipment.setNamespaceId(cmd.getNamespaceId());
 
 			if(cmd.getInstallationTime() != null)
 				equipment.setInstallationTime(new Timestamp(cmd.getInstallationTime()));
@@ -1701,7 +1701,7 @@ private void checkUserPrivilege(Long orgId, Long privilegeId, Long communityId) 
 			UpdateEquipmentAccessoriesCommand cmd) {
 		EquipmentInspectionAccessories accessory = ConvertHelper.convert(cmd, EquipmentInspectionAccessories.class);
 		if(cmd.getId() == null) {
-			accessory.setNamespaceId(UserContext.getCurrentNamespaceId());
+			accessory.setNamespaceId(cmd.getNamespaceId());
 			accessory.setStatus((byte) 1);
 			equipmentProvider.creatEquipmentInspectionAccessories(accessory);
 		} else {
@@ -2701,7 +2701,7 @@ private void checkUserPrivilege(Long orgId, Long privilegeId, Long communityId) 
 //		EquipmentInspectionEquipments equipment = equipmentProvider.findEquipmentById(equipmentId, ownerType, ownerId);
 
 		//改用namespaceId by xiongying20170328
-		EquipmentInspectionEquipments equipment = equipmentProvider.findEquipmentById(equipmentId, UserContext.getCurrentNamespaceId());
+		EquipmentInspectionEquipments equipment = equipmentProvider.findEquipmentById(equipmentId);
 
 		if(equipment == null) {
 			throw RuntimeErrorException.errorWith(EquipmentServiceErrorCode.SCOPE,
@@ -3319,7 +3319,7 @@ private void checkUserPrivilege(Long orgId, Long privilegeId, Long communityId) 
 	private List<String> importEquipmentStandardsData(ImportOwnerCommand cmd, List<String> list, Long userId){
 		List<String> errorDataLogs = new ArrayList<String>();
 
-		Integer namespaceId = UserContext.getCurrentNamespaceId();
+		Integer namespaceId = cmd.getNamespaceId();
 
 		for (String str : list) {
 			String[] s = str.split("\\|\\|");
@@ -3429,7 +3429,8 @@ private void checkUserPrivilege(Long orgId, Long privilegeId, Long communityId) 
 	private List<String> importEquipmentAccessoriesData(ImportOwnerCommand cmd, List<String> list, Long userId){
 		List<String> errorDataLogs = new ArrayList<String>();
 
-		Integer namespaceId = UserContext.getCurrentNamespaceId();
+		//Integer namespaceId = UserContext.getCurrentNamespaceId();
+		Integer namespaceId = cmd.getNamespaceId();
 
 		for (String str : list) {
 			String[] s = str.split("\\|\\|");
@@ -4089,7 +4090,7 @@ private void checkUserPrivilege(Long orgId, Long privilegeId, Long communityId) 
 
 			return orgs;
 		} else {
-			List<OrganizationDTO> groupDtos = organizationService.listUserRelateOrganizations(UserContext.getCurrentNamespaceId(),
+			List<OrganizationDTO> groupDtos = organizationService.listUserRelateOrganizations(cmd.getNamespaceId(),
 					user.getId(), OrganizationGroupType.GROUP);
 			List<OrganizationDTO> dtos = new ArrayList<OrganizationDTO>();
 
@@ -4197,7 +4198,7 @@ private void checkUserPrivilege(Long orgId, Long privilegeId, Long communityId) 
 	@Override
 	public void createEquipmentCategory(CreateEquipmentCategoryCommand cmd) {
 
-		Integer namespaceId = UserContext.getCurrentNamespaceId();
+		Integer namespaceId = cmd.getNamespaceId();
 		Long parentId = cmd.getParentId();
 		String path = "";
 		Category category = getEquipmentCategory(parentId);
@@ -4486,10 +4487,10 @@ private void checkUserPrivilege(Long orgId, Long privilegeId, Long communityId) 
 		List<EquipmentInspectionTemplates> templates = new ArrayList<>();
 		if (cmd.getTargetId() != null && cmd.getTargetId() == 0L) {
 			//这个是全部里面查看
-			templates = equipmentProvider.listInspectionTemplates(UserContext.getCurrentNamespaceId(), cmd.getName(), null);
+			templates = equipmentProvider.listInspectionTemplates(cmd.getNamespaceId(), cmd.getName(), null);
 		} else {
 			//先查出来属于项目自定义的模板
-			templates = equipmentProvider.listInspectionTemplates(UserContext.getCurrentNamespaceId(), cmd.getName(), cmd.getTargetId());
+			templates = equipmentProvider.listInspectionTemplates(cmd.getNamespaceId(), cmd.getName(), cmd.getTargetId());
 			//获取所有有referId的集合
 			List<Long> removeIds = new ArrayList<>();
 			if (templates != null && templates.size() > 0) {
@@ -4646,7 +4647,7 @@ private void checkUserPrivilege(Long orgId, Long privilegeId, Long communityId) 
 
 	@Override
 	public List<EquipmentInspectionCategoryDTO> listEquipmentInspectionCategories(ListEquipmentInspectionCategoriesCommand cmd) {
-		List<EquipmentInspectionCategories> categories = equipmentProvider.listEquipmentInspectionCategories(cmd.getOwnerId(), UserContext.getCurrentNamespaceId());
+		List<EquipmentInspectionCategories> categories = equipmentProvider.listEquipmentInspectionCategories(cmd.getOwnerId(), cmd.getNamespaceId());
 		List<EquipmentInspectionCategoryDTO> dtos = new ArrayList<EquipmentInspectionCategoryDTO>();
 		if(categories != null && categories.size() > 0) {
 			dtos = categories.stream().map(r -> {
@@ -5359,7 +5360,7 @@ private void checkUserPrivilege(Long orgId, Long privilegeId, Long communityId) 
 		EquipmentInspectionPlans plan = ConvertHelper.convert(cmd, EquipmentInspectionPlans.class);
 		User user = UserContext.current().getUser();
 		plan.setCreatorUid(user.getId());
-		plan.setNamespaceId(UserContext.getCurrentNamespaceId());
+		plan.setNamespaceId(cmd.getNamespaceId());
 		if (cmd.getEquipmentStandardRelations() == null || cmd.getEquipmentStandardRelations().size() == 0
 				|| cmd.getRepeatSettings() ==null) {
 			plan.setStatus(EquipmentPlanStatus.WAITTING_FOR_STARTING.getCode());
@@ -5379,7 +5380,7 @@ private void checkUserPrivilege(Long orgId, Long privilegeId, Long communityId) 
 		for (EquipmentStandardRelationDTO relation : cmd.getEquipmentStandardRelations()) {
 			EquipmentInspectionEquipmentPlanMap equipmentPlanMap = new EquipmentInspectionEquipmentPlanMap();
 			equipmentPlanMap.setDefaultOrder(relation.getOrder());
-			equipmentPlanMap.setNamespaceId(UserContext.getCurrentNamespaceId());
+			equipmentPlanMap.setNamespaceId(cmd.getNamespaceId());
 			equipmentPlanMap.setOwnerId(cmd.getOwnerId());
 			equipmentPlanMap.setOwnerType(cmd.getOwnerType());
 			equipmentPlanMap.setPlanId(createdPlan.getId());
@@ -5459,7 +5460,7 @@ private void checkUserPrivilege(Long orgId, Long privilegeId, Long communityId) 
 		for (EquipmentStandardRelationDTO relation : cmd.getEquipmentStandardRelations()) {
 			EquipmentInspectionEquipmentPlanMap equipmentPlanMap = new EquipmentInspectionEquipmentPlanMap();
 			equipmentPlanMap.setDefaultOrder(relation.getOrder());
-			equipmentPlanMap.setNamespaceId(UserContext.getCurrentNamespaceId());
+			equipmentPlanMap.setNamespaceId(cmd.getNamespaceId());
 			equipmentPlanMap.setOwnerId(cmd.getOwnerId());
 			equipmentPlanMap.setOwnerType(cmd.getOwnerType());
 			equipmentPlanMap.setPlanId(updatePlan.getId());
