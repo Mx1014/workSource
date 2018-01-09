@@ -24,6 +24,15 @@ public class UnlockPrinterCommand {
 	
 	@ItemType(Byte.class)
 	private List<Byte> privileges;
+	private Integer namespaceId;
+
+	public Integer getNamespaceId() {
+		return namespaceId;
+	}
+
+	public void setNamespaceId(Integer namespaceId) {
+		this.namespaceId = namespaceId;
+	}
 
 	public List<Byte> getPrivileges() {
 		return privileges;

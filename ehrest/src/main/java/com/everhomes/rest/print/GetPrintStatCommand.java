@@ -21,6 +21,15 @@ public class GetPrintStatCommand {
 	private Long ownerId;
     private Long startTime;
     private Long endTime;
+	private Integer namespaceId;
+
+	public Integer getNamespaceId() {
+		return namespaceId;
+	}
+
+	public void setNamespaceId(Integer namespaceId) {
+		this.namespaceId = namespaceId;
+	}
 	public String getOwnerType() {
 		return ownerType;
 	}

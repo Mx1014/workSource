@@ -185,3 +185,10 @@ ALTER TABLE `eh_point_rules` MODIFY COLUMN `limit_type` TEXT;
 ALTER TABLE `eh_point_rule_configs` MODIFY COLUMN `limit_type` TEXT;
 
 ALTER TABLE `eh_point_tutorial_to_point_rule_mappings` MODIFY COLUMN description VARCHAR(128);
+
+
+-- 创建唯一索引
+CREATE UNIQUE INDEX index_activeAppId ON eh_reflection_service_module_apps(active_app_id);  
+
+-- 创建联合索引
+ALTER TABLE eh_reflection_service_module_apps ADD UNIQUE INDEX index_active_union (namespace_id,module_id,custom_tag);
