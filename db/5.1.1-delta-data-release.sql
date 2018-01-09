@@ -1,0 +1,2 @@
+-- 广兴源停车场基本配置 ，修改联系人 by dengs,20180109
+INSERT INTO `eh_parking_lots` (`id`, `owner_type`, `owner_id`, `name`, `vendor_name`, `vendor_lot_token`, `status`, `creator_uid`, `create_time`, `namespace_id`, `recharge_json`, `config_json`) VALUES ('10024', 'community', '240111044332060016', '中百畅停车场', 'ZHONG_BAI_CHANG', '', '2', '1', now(), '999958', null, '{\r\n  \"tempfeeFlag\": 0,\r\n  \"rateFlag\": 1,\r\n  \"lockCarFlag\": 0,\r\n  \"searchCarFlag\": 0,\r\n  \"currentInfoType\": 0,\r\n  \"contact\": \"12345\"\r\n}');
