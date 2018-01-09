@@ -68,6 +68,9 @@ public class ContractScheduleJob extends QuartzJobBean {
     @Override
     protected void executeInternal(JobExecutionContext context) throws JobExecutionException {
         Timestamp now = new Timestamp(DateHelper.currentGMTTime().getTime());
+        if(LOGGER.isInfoEnabled()) {
+            LOGGER.info("ContractScheduleJob" + now);
+        }
         Map<Long, List<Contract>> contracts = contractProvider.listContractGroupByCommunity();
         if(contracts != null && contracts.size() > 0) {
             contracts.forEach((communityId, contractList) -> {
@@ -81,40 +84,40 @@ public class ContractScheduleJob extends QuartzJobBean {
                     communityExist = contractProvider.findContractParamByCommunityId(community.getNamespaceId(), null);
                 }
                 ContractParam param = communityExist;
-                if(param != null) {
-                    if(contractList != null) {
-                        contractList.forEach(contract -> {
-                            //当前时间在合同到期时间之后 直接过期
-                            if(now.after(contract.getContractEndDate())) {
-                                contract.setStatus(ContractStatus.EXPIRED.getCode());
-                                contractProvider.updateContract(contract);
-                                contractSearcher.feedDoc(contract);
-                                dealAddressLivingStatus(contract, AddressMappingStatus.FREE.getCode());
-                            } else {
-                                if(ContractStatus.ACTIVE.equals(ContractStatus.fromStatus(contract.getStatus()))) {
-                                    //正常合同转即将过期
-                                    Timestamp time = addPeriod(now, param.getExpiringPeriod(), param.getExpiringUnit());
-                                    if(time.after(contract.getContractEndDate())) {
-                                        contract.setStatus(ContractStatus.EXPIRING.getCode());
+
+                if(contractList != null) {
+                    contractList.forEach(contract -> {
+                        //当前时间在合同到期时间之后 直接过期
+                        if(now.after(contract.getContractEndDate())) {
+                            contract.setStatus(ContractStatus.EXPIRED.getCode());
+                            contractProvider.updateContract(contract);
+                            contractSearcher.feedDoc(contract);
+                            dealAddressLivingStatus(contract, AddressMappingStatus.FREE.getCode());
+                        }
+                        else if(param != null) {
+                            if(ContractStatus.ACTIVE.equals(ContractStatus.fromStatus(contract.getStatus()))) {
+                                //正常合同转即将过期
+                                Timestamp time = addPeriod(now, param.getExpiringPeriod(), param.getExpiringUnit());
+                                if(time.after(contract.getContractEndDate())) {
+                                    contract.setStatus(ContractStatus.EXPIRING.getCode());
+                                    contractProvider.updateContract(contract);
+                                    contractSearcher.feedDoc(contract);
+                                }
+
+                            } else if(ContractStatus.APPROVE_QUALITIED.equals(ContractStatus.fromStatus(contract.getStatus()))) {
+                                //审批通过没有转为正常合同 过期
+                                if(contract.getReviewTime() != null) {
+                                    Timestamp time = addPeriod(contract.getReviewTime(), param.getExpiredPeriod(), param.getExpiredUnit());
+                                    if(time.before(now)) {
+                                        contract.setStatus(ContractStatus.EXPIRED.getCode());
                                         contractProvider.updateContract(contract);
                                         contractSearcher.feedDoc(contract);
-                                    }
-
-                                } else if(ContractStatus.APPROVE_QUALITIED.equals(ContractStatus.fromStatus(contract.getStatus()))) {
-                                    //审批通过没有转为正常合同 过期
-                                    if(contract.getReviewTime() != null) {
-                                        Timestamp time = addPeriod(contract.getReviewTime(), param.getExpiredPeriod(), param.getExpiredUnit());
-                                        if(time.before(now)) {
-                                            contract.setStatus(ContractStatus.EXPIRED.getCode());
-                                            contractProvider.updateContract(contract);
-                                            contractSearcher.feedDoc(contract);
-                                            dealAddressLivingStatus(contract, AddressMappingStatus.FREE.getCode());
-                                        }
+                                        dealAddressLivingStatus(contract, AddressMappingStatus.FREE.getCode());
                                     }
                                 }
                             }
-                        });
-                    }
+                        }
+                    });
                 }
             });
         }

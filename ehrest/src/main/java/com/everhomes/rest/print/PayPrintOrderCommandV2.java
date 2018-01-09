@@ -20,6 +20,15 @@ public class PayPrintOrderCommandV2 {
 	private String ownerType;
 	private Long ownerId;
 	private String clientAppName;
+	private Integer namespaceId;
+
+	public Integer getNamespaceId() {
+		return namespaceId;
+	}
+
+	public void setNamespaceId(Integer namespaceId) {
+		this.namespaceId = namespaceId;
+	}
 
 	private Integer paymentType;
 	public PayPrintOrderCommandV2() {
