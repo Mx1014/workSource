@@ -206,22 +206,27 @@ public class EquipmentStandardMapSearcherImpl extends AbstractElasticSearch impl
         	if(map != null) {
 	        	EquipmentInspectionEquipments equipment = equipmentProvider.findEquipmentById(map.getTargetId());
 	        	EquipmentStandardRelationDTO dto = new EquipmentStandardRelationDTO();
-	        	dto.setId(map.getId());
-	        	dto.setEquipmentId(equipment.getId());
-	        	dto.setTargetId(equipment.getTargetId());
+				dto.setId(map.getId());
+				if (equipment != null) {
+					dto.setEquipmentId(equipment.getId());
+					dto.setTargetId(equipment.getTargetId());
 //	        	Organization group = organizationProvider.findOrganizationById(dto.getTargetId());
 				/*Community community = communityProvider.findCommunityById(dto.getTargetId());
-	    		if(community != null)
+				if(community != null)
 	    			dto.setTargetName(community.getName());*/
-	    		
-	    		dto.setEquipmentName(equipment.getName());
-	    		dto.setEquipmentModel(equipment.getEquipmentModel());
-	    		dto.setStatus(equipment.getStatus());
-	    		dto.setStandardId(map.getStandardId());
-	    		EquipmentInspectionStandards standard = equipmentProvider.findStandardById(map.getStandardId());
-	            if(standard != null) {
-	            	dto.setStandardName(standard.getName());
-	            }
+
+					dto.setEquipmentName(equipment.getName());
+					dto.setEquipmentModel(equipment.getEquipmentModel());
+					dto.setLocation(equipment.getLocation());
+					dto.setStatus(equipment.getStatus());
+					dto.setSequenceNo(equipment.getSequenceNo());
+				}
+				EquipmentInspectionStandards standard = equipmentProvider.findStandardById(map.getStandardId());
+				if (standard != null) {
+					dto.setStandardName(standard.getName());
+					dto.setRepeatType(standard.getRepeatType());
+					dto.setStandardId(standard.getId());
+				}
 	            
 	            /*dto.setReviewResult(map.getReviewResult());
 	            dto.setReviewStatus(map.getReviewStatus());

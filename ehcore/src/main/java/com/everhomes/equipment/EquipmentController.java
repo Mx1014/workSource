@@ -1144,6 +1144,17 @@ public class EquipmentController extends ControllerBase {
 //		return response;
 //	}
 
+    /**
+     * <b>URL: /equipment/createRepairsTask</b>
+     * <p>创建物业报修任务</p>
+     */
+    @RequestMapping("createRepairsTask")
+    @RestReturn(value = String.class)
+    public RestResponse createRepairsTask(DeleteEquipmentPlanCommand cmd) {
+       // equipmentService.createRepairsTask(cmd);
+        return getSuccessResponse();
+    }
+
 
     /**
      * <b>URL: /equipment/createTaskByPlan</b>
