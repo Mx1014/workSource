@@ -244,6 +244,8 @@ public class PunchServiceImpl implements PunchService {
 	private MessagingService messagingService;
 
 	@Autowired
+	private PunchOperationLogProvider punchOperationLogProvider;
+	@Autowired
 	private PunchProvider punchProvider;
 	@Autowired
 	private PunchSchedulingProvider punchSchedulingProvider;
@@ -7508,7 +7510,7 @@ public class PunchServiceImpl implements PunchService {
 	public PunchGroupDTO updatePunchGroup(PunchGroupDTO cmd) {
 		//
 //		this.dbProvider.execute((status) -> {
-
+			
 			if (cmd.getRuleType() == null)
 				throw RuntimeErrorException.errorWith(ErrorCodes.SCOPE_GENERAL,
 						ErrorCodes.ERROR_INVALID_PARAMETER,
@@ -7531,7 +7533,7 @@ public class PunchServiceImpl implements PunchService {
 //			}
 //			Long t2 = System.currentTimeMillis();
 //			LOGGER.debug("saveUnion Time2 "+  t2 + "cost: "+ (t2-t1) + "save start");
-
+			addOperateLog(pr.getId(),pr.getName(),cmd.toString(),pr.getOwnerId());
 
 			//添加关联
 			SaveUniongroupConfiguresCommand command = new SaveUniongroupConfiguresCommand();
@@ -7593,6 +7595,22 @@ public class PunchServiceImpl implements PunchService {
 //			return null;
 //		});
 		return  null;
+	}
+
+	private void addOperateLog(Long ruleId, String name, String string, Long orgId) {
+		// TODO Auto-generated method stub
+		PunchOperationLog log = new PunchOperationLog();
+		log.setCreateTime(new Timestamp(DateHelper.currentGMTTime().getTime()));
+		log.setNamespaceId(UserContext.getCurrentNamespaceId());
+		log.setOperatorUid(UserContext.currentUserId());
+		User user = userProvider.findUserById(UserContext.currentUserId());
+		if(null != user)
+			log.setOperatorName(user.getNickName());
+		log.setOrganizationId(orgId);
+		log.setRuleId(ruleId);
+		log.setRuleName(name);
+		log.setRequestParameter(string);
+		punchOperationLogProvider.createPunchOperationLog(log);
 	}
 
 	private boolean isEmployeeInList(UniongroupMemberDetail employee, List<UniongroupMemberDetail> newEmployees) {
