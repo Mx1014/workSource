@@ -2270,10 +2270,12 @@ public class SocialSecurityServiceImpl implements SocialSecurityService {
 
         //归档汇总表
         socialSecuritySummaryProvider.deleteSocialSecuritySummary(ownerId, payMonth);
+        socialSecurityPaymentProvider.updateSocialSecurityPaymentFileStatus(ownerId, userId);
         SocialSecuritySummary summary = socialSecurityPaymentProvider.calculateSocialSecuritySummary(ownerId, payMonth);
+        LOGGER.debug("sumary = " + StringHelper.toJsonString(summary));
+        summary.setCreatorUid(userId);
         socialSecuritySummaryProvider.createSocialSecuritySummary(summary);
         //更新归档状态
-        socialSecurityPaymentProvider.updateSocialSecurityPaymentFileStatus(ownerId, userId);
     }
 
     @Override

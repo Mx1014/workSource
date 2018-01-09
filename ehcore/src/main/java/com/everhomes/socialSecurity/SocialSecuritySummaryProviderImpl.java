@@ -38,7 +38,7 @@ public class SocialSecuritySummaryProviderImpl implements SocialSecuritySummaryP
 		Long id = sequenceProvider.getNextSequence(NameMapper.getSequenceDomainFromTablePojo(EhSocialSecuritySummary.class));
 		socialSecuritySummary.setId(id);
 		socialSecuritySummary.setCreateTime(new Timestamp(DateHelper.currentGMTTime().getTime()));
-		socialSecuritySummary.setCreatorUid(UserContext.current().getUser().getId());
+//		socialSecuritySummary.setCreatorUid(UserContext.current().getUser().getId());
 //		socialSecuritySummary.setUpdateTime(socialSecuritySummary.getCreateTime());
 //		socialSecuritySummary.setOperatorUid(socialSecuritySummary.getCreatorUid());
 		getReadWriteDao().insert(socialSecuritySummary);

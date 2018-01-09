@@ -7,6 +7,7 @@ import java.util.List;
 
 import com.everhomes.rest.socialSecurity.AccumOrSocial;
 import com.everhomes.rest.socialSecurity.NormalFlag;
+import com.everhomes.server.schema.tables.records.EhSocialSecurityPaymentsRecord;
 import org.jooq.*;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -139,7 +140,7 @@ public class SocialSecurityPaymentProviderImpl implements SocialSecurityPaymentP
     public Integer countUnFieldUsers(Long ownerId) {
         Record1<Integer> record = getReadOnlyContext().selectDistinct(Tables.EH_SOCIAL_SECURITY_PAYMENTS.DETAIL_ID.countDistinct()).from(Tables.EH_SOCIAL_SECURITY_PAYMENTS)
                 .where(Tables.EH_SOCIAL_SECURITY_PAYMENTS.ORGANIZATION_ID.eq(ownerId))
-                .and(Tables.EH_SOCIAL_SECURITY_PAYMENTS.IS_FILED.eq(NormalFlag.NO.getCode()))
+                .and(Tables.EH_SOCIAL_SECURITY_PAYMENTS.IS_FILED.ne(NormalFlag.YES.getCode()))
                 .fetchAny();
 
         if (null == record) {
@@ -156,10 +157,12 @@ public class SocialSecurityPaymentProviderImpl implements SocialSecurityPaymentP
 
     @Override
     public void updateSocialSecurityPaymentFileStatus(Long ownerId, Long userId) {
-        getReadWriteContext().update(Tables.EH_SOCIAL_SECURITY_PAYMENTS).set(Tables.EH_SOCIAL_SECURITY_PAYMENTS.IS_FILED, NormalFlag.YES.getCode())
+        UpdateConditionStep<EhSocialSecurityPaymentsRecord> step = getReadWriteContext().update(Tables.EH_SOCIAL_SECURITY_PAYMENTS).set(Tables.EH_SOCIAL_SECURITY_PAYMENTS.IS_FILED, NormalFlag.YES.getCode())
                 .set(Tables.EH_SOCIAL_SECURITY_PAYMENTS.FILE_TIME, new Timestamp(DateHelper.currentGMTTime().getTime()))
                 .set(Tables.EH_SOCIAL_SECURITY_PAYMENTS.FILE_UID, userId)
-                .where(Tables.EH_SOCIAL_SECURITY_PAYMENTS.ORGANIZATION_ID.eq(ownerId)).execute();
+                .where(Tables.EH_SOCIAL_SECURITY_PAYMENTS.ORGANIZATION_ID.eq(ownerId));
+        LOGGER.debug("update sql:" + step);
+        step.execute();
     }
 
     @Override
@@ -168,8 +171,8 @@ public class SocialSecurityPaymentProviderImpl implements SocialSecurityPaymentP
                 Tables.EH_SOCIAL_SECURITY_PAYMENTS.NAMESPACE_ID,
                 Tables.EH_SOCIAL_SECURITY_PAYMENTS.ORGANIZATION_ID,
                 Tables.EH_SOCIAL_SECURITY_PAYMENTS.PAY_MONTH,
-                Tables.EH_SOCIAL_SECURITY_PAYMENTS.CREATOR_UID,
-                Tables.EH_SOCIAL_SECURITY_PAYMENTS.CREATE_TIME,
+                Tables.EH_SOCIAL_SECURITY_PAYMENTS.CREATOR_UID.max(),
+                Tables.EH_SOCIAL_SECURITY_PAYMENTS.CREATE_TIME.max(),
                 Tables.EH_SOCIAL_SECURITY_PAYMENTS.FILE_UID,
                 Tables.EH_SOCIAL_SECURITY_PAYMENTS.FILE_TIME,
                 Tables.EH_SOCIAL_SECURITY_PAYMENTS.COMPANY_RADIX.multiply(Tables.EH_SOCIAL_SECURITY_PAYMENTS.COMPANY_RADIX)
@@ -183,8 +186,8 @@ public class SocialSecurityPaymentProviderImpl implements SocialSecurityPaymentP
                         Tables.EH_SOCIAL_SECURITY_PAYMENTS.NAMESPACE_ID,
                         Tables.EH_SOCIAL_SECURITY_PAYMENTS.ORGANIZATION_ID,
                         Tables.EH_SOCIAL_SECURITY_PAYMENTS.PAY_MONTH,
-                        Tables.EH_SOCIAL_SECURITY_PAYMENTS.CREATOR_UID,
-                        Tables.EH_SOCIAL_SECURITY_PAYMENTS.CREATE_TIME,
+//                        Tables.EH_SOCIAL_SECURITY_PAYMENTS.CREATOR_UID,
+//                        Tables.EH_SOCIAL_SECURITY_PAYMENTS.CREATE_TIME,
                         Tables.EH_SOCIAL_SECURITY_PAYMENTS.FILE_UID,
                         Tables.EH_SOCIAL_SECURITY_PAYMENTS.FILE_TIME)
                 .orderBy(Tables.EH_SOCIAL_SECURITY_PAYMENTS.ID.asc());
