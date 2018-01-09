@@ -19,6 +19,17 @@ public class SyncOfflineDataResponse {
     @ItemType(EnergyMeterTaskDTO.class)
     private List<EnergyMeterTaskDTO> taskDTOs;
 
+    @ItemType(EnergyMeterReadingLogDTO.class)
+    private List<EnergyMeterReadingLogDTO> logDTOs;
+
+    public List<EnergyMeterReadingLogDTO> getLogDTOs() {
+        return logDTOs;
+    }
+
+    public void setLogDTOs(List<EnergyMeterReadingLogDTO> logDTOs) {
+        this.logDTOs = logDTOs;
+    }
+
     public List<EnergyMeterTaskDTO> getTaskDTOs() {
         return taskDTOs;
     }

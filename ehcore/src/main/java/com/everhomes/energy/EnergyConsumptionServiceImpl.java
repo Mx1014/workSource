@@ -4656,7 +4656,9 @@ public class EnergyConsumptionServiceImpl implements EnergyConsumptionService {
                     cmd.getOwnerId(), 0L, Integer.MAX_VALUE-1, taskUpdateTime);
 
             if(tasks != null && tasks.size() > 0) {
+                Set<Long> meterIds = new HashSet<>();
                 List<EnergyMeterTaskDTO> taskDTOs = tasks.stream().map(task -> {
+                    meterIds.add(task.getMeterId());
                     EnergyMeterTaskDTO dto = ConvertHelper.convert(task, EnergyMeterTaskDTO.class);
                     if(task.getUpdateTime() == null) {
                         task.setUpdateTime(task.getCreateTime());
@@ -4687,6 +4689,32 @@ public class EnergyConsumptionServiceImpl implements EnergyConsumptionService {
                     return dto;
                 }).collect(Collectors.toList());
                 response.setTaskDTOs(taskDTOs);
+
+                List<EnergyMeterReadingLog> logs = meterReadingLogProvider.listMeterReadingLogsByMeterIds(cmd.getNamespaceId(), meterIds);
+                if(logs != null && logs.size() > 0) {
+                    List<EnergyMeterReadingLogDTO> logDTOs = new ArrayList<>();
+                    logs.forEach(log -> {
+                        EnergyMeterReadingLogDTO logDTO = ConvertHelper.convert(log, EnergyMeterReadingLogDTO.class);
+                        EnergyMeter meter = meterProvider.findById(log.getNamespaceId(), log.getMeterId());
+                        if(meter != null) {
+                            logDTO.setMeterType(meter.getMeterType());
+                            logDTO.setMeterNumber(meter.getMeterNumber());
+                            logDTO.setMeterName(meter.getName());
+
+                            List<EnergyMeterAddress> existAddress = energyMeterAddressProvider.listByMeterId(meter.getId());
+                            if(existAddress != null && existAddress.size() > 0) {
+                                logDTO.setMeterAddress(existAddress.get(0).getBuildingName()+"-"+existAddress.get(0).getApartmentName());
+                            }
+
+                        }
+                        User operator = userProvider.findUserById(log.getOperatorId());
+                        if(operator != null) {
+                            logDTO.setOperatorName(operator.getNickName());
+                        }
+                        logDTOs.add(logDTO);
+                    });
+                    response.setLogDTOs(logDTOs);
+                }
             }
 
         }
