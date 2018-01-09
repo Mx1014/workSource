@@ -9,6 +9,7 @@ import com.everhomes.discover.RestReturn;
 import com.everhomes.rest.RestResponse;
 import com.everhomes.rest.category.CategoryDTO;
 import com.everhomes.rest.equipment.CreateEquipmentCategoryCommand;
+import com.everhomes.rest.equipment.CreateEquipmentRepairCommand;
 import com.everhomes.rest.equipment.DeleteEquipmentAccessoriesCommand;
 import com.everhomes.rest.equipment.DeleteEquipmentCategoryCommand;
 import com.everhomes.rest.equipment.DeleteEquipmentPlanCommand;
@@ -1129,29 +1130,15 @@ public class EquipmentController extends ControllerBase {
 		return response;
 	}
 
-//	/**
-//	 * <b>URL: /equipment/distributeTemplates</b>
-//	 * <p>不同域空间下巡检模板全部应用到对应域空间下所有项目</p>
-//	 */
-//	@RequestMapping("distributeTemplates")
-//	@RestReturn(value = String.class)
-//	public RestResponse distribute () {
-//
-//		equipmentService.distributeTemplates();
-//		RestResponse response = new RestResponse();
-//		response.setErrorCode(ErrorCodes.SUCCESS);
-//		response.setErrorDescription("OK");
-//		return response;
-//	}
-
     /**
      * <b>URL: /equipment/createRepairsTask</b>
      * <p>创建物业报修任务</p>
      */
     @RequestMapping("createRepairsTask")
     @RestReturn(value = String.class)
-    public RestResponse createRepairsTask(DeleteEquipmentPlanCommand cmd) {
+    public RestResponse createRepairsTask(CreateEquipmentRepairCommand cmd) {
        // equipmentService.createRepairsTask(cmd);
+        //TODO:物业模块生成一条维修记录 调用报修的接口
         return getSuccessResponse();
     }
 

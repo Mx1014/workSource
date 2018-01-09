@@ -2004,7 +2004,8 @@ public class EquipmentProviderImpl implements EquipmentProvider {
     @Override
     public void closeReviewTasks(EquipmentInspectionTasks task) {
         DSLContext context = dbProvider.getDslContext(AccessSpec.readOnly());
-        task.setReviewResult(ReviewResult.REVIEW_DELAY.getCode());
+        //task.setReviewResult(ReviewResult.REVIEW_DELAY.getCode());  3.0.3
+        task.setResult(EquipmentTaskStatus.REVIEW_DELAY.getCode());//3.0.3
 //		task.setReviewTime(new Timestamp(System.currentTimeMillis()));
         EhEquipmentInspectionTasks t = ConvertHelper.convert(task, EhEquipmentInspectionTasks.class);
         EhEquipmentInspectionTasksDao dao = new EhEquipmentInspectionTasksDao(context.configuration());
@@ -2237,8 +2238,8 @@ public class EquipmentProviderImpl implements EquipmentProvider {
 
         for (EquipmentInspectionPlans plan : plans) {
             planIds.add(plan.getId());
-            plan.setExecutiveGroup(new ArrayList<EquipmentInspectionPlanGroupMap>());
-            plan.setReviewGroup(new ArrayList<EquipmentInspectionPlanGroupMap>());
+            plan.setExecutiveGroup(new ArrayList<>());
+            plan.setReviewGroup(new ArrayList<>());
             mapPlans.put(plan.getId(), plan);
         }
 

@@ -2196,20 +2196,25 @@ private void checkUserPrivilege(Long orgId, Long privilegeId, Long communityId) 
 		Timestamp now = new Timestamp(System.currentTimeMillis());
 		EquipmentInspectionTasks task = verifyEquipmentTask(cmd.getTaskId(), cmd.getOwnerType(), cmd.getOwnerId());
 
-		if((EquipmentTaskStatus.CLOSE.equals(EquipmentTaskStatus.fromStatus(task.getStatus()))
-				 || EquipmentTaskStatus.NEED_MAINTENANCE.equals(EquipmentTaskStatus.fromStatus(task.getStatus())))
-				 && task.getReviewExpiredDate() != null && task.getReviewExpiredDate().before(now)) {
+//		if((EquipmentTaskStatus.CLOSE.equals(EquipmentTaskStatus.fromStatus(task.getStatus()))
+//				 || EquipmentTaskStatus.NEED_MAINTENANCE.equals(EquipmentTaskStatus.fromStatus(task.getStatus())))
+//				 && task.getReviewExpiredDate() != null && task.getReviewExpiredDate().before(now)) {
+//			equipmentProvider.closeReviewTasks(task);
+//		}
+
+
+//		if((EquipmentTaskStatus.CLOSE.equals(EquipmentTaskStatus.fromStatus(task.getStatus()))
+//				 || EquipmentTaskStatus.NEED_MAINTENANCE.equals(EquipmentTaskStatus.fromStatus(task.getStatus())))
+//				&& ReviewResult.REVIEW_DELAY.equals(EquipmentTaskResult.fromStatus(task.getReviewResult()))) {
+//			LOGGER.error("task is closed");
+//			throw RuntimeErrorException.errorWith(EquipmentServiceErrorCode.SCOPE,
+//					EquipmentServiceErrorCode.ERROR_EQUIPMENT_TASK_CLOSE,
+//				"该任务已关闭");
+//		}
+		if((EquipmentTaskStatus.CLOSE.equals(EquipmentTaskStatus.fromStatus(task.getStatus())))
+				&& task.getReviewExpiredDate() != null && task.getReviewExpiredDate().before(now)) {
+			//判断审批过期
 			equipmentProvider.closeReviewTasks(task);
-		}
-
-
-		if((EquipmentTaskStatus.CLOSE.equals(EquipmentTaskStatus.fromStatus(task.getStatus()))
-				 || EquipmentTaskStatus.NEED_MAINTENANCE.equals(EquipmentTaskStatus.fromStatus(task.getStatus())))
-				&& ReviewResult.REVIEW_DELAY.equals(EquipmentTaskResult.fromStatus(task.getReviewResult()))) {
-			LOGGER.error("task is closed");
-			throw RuntimeErrorException.errorWith(EquipmentServiceErrorCode.SCOPE,
-					EquipmentServiceErrorCode.ERROR_EQUIPMENT_TASK_CLOSE,
-				"该任务已关闭");
 		}
 
 		if(EquipmentTaskStatus.NONE.equals(EquipmentTaskStatus.fromStatus(task.getStatus()))) {
@@ -2224,7 +2229,7 @@ private void checkUserPrivilege(Long orgId, Long privilegeId, Long communityId) 
 		log.setOperatorType(OwnerType.USER.getCode());
 		log.setOperatorId(user.getId());
 
-		task.setReviewResult(cmd.getReviewResult());
+		//task.setReviewResult(cmd.getReviewResult());
 		task.setReviewerId(user.getId());
 		task.setReviewTime(new Timestamp(System.currentTimeMillis()));
 
@@ -2236,35 +2241,40 @@ private void checkUserPrivilege(Long orgId, Long privilegeId, Long communityId) 
 			log.setProcessResult(EquipmentTaskProcessResult.REVIEW_UNQUALIFIED.getCode());
 		}
 		//0:none, 1: qualified, 2: unqualified
-		if(EquipmentTaskStatus.CLOSE.equals(EquipmentTaskStatus.fromStatus(task.getStatus()))) {
+		if (EquipmentTaskStatus.CLOSE.equals(EquipmentTaskStatus.fromStatus(task.getStatus()))) {
 
-			if(ReviewResult.UNQUALIFIED.equals(ReviewResult.fromStatus(cmd.getReviewResult())) &&
-					(EquipmentTaskResult.COMPLETE_DELAY.equals(EquipmentTaskResult.fromStatus(task.getResult())) ||
-							EquipmentTaskResult.COMPLETE_OK.equals(EquipmentTaskResult.fromStatus(task.getResult())))) {
+			if (ReviewResult.UNQUALIFIED.equals(ReviewResult.fromStatus(cmd.getReviewResult()))) {
 				task.setStatus(EquipmentTaskStatus.WAITING_FOR_EXECUTING.getCode());
-				task.setResult(EquipmentTaskResult.NONE.getCode());
+			} else if (ReviewResult.QUALIFIED.equals(ReviewResult.fromStatus(cmd.getReviewResult()))) {
+				task.setStatus(EquipmentTaskStatus.QUALIFIED.getCode());
 			}
-
-			if(ReviewResult.UNQUALIFIED.equals(ReviewResult.fromStatus(cmd.getReviewResult())) &&
-					(EquipmentTaskResult.NEED_MAINTENANCE_DELAY_COMPLETE_DELAY.equals(EquipmentTaskResult.fromStatus(task.getResult())) ||
-							EquipmentTaskResult.NEED_MAINTENANCE_DELAY_COMPLETE_OK.equals(EquipmentTaskResult.fromStatus(task.getResult())) ||
-							EquipmentTaskResult.NEED_MAINTENANCE_OK_COMPLETE_OK.equals(EquipmentTaskResult.fromStatus(task.getResult())) ||
-							EquipmentTaskResult.NEED_MAINTENANCE_OK_COMPLETE_DELAY.equals(EquipmentTaskResult.fromStatus(task.getResult())))) {
-				task.setStatus(EquipmentTaskStatus.IN_MAINTENANCE.getCode());
-			}
+//			if(ReviewResult.UNQUALIFIED.equals(ReviewResult.fromStatus(cmd.getReviewResult())) &&
+//					(EquipmentTaskResult.COMPLETE_DELAY.equals(EquipmentTaskResult.fromStatus(task.getResult())) ||
+//							EquipmentTaskResult.COMPLETE_OK.equals(EquipmentTaskResult.fromStatus(task.getResult())))) {
+//				task.setStatus(EquipmentTaskStatus.WAITING_FOR_EXECUTING.getCode());
+//				task.setResult(EquipmentTaskResult.NONE.getCode());
+//			}
+//
+//			if(ReviewResult.UNQUALIFIED.equals(ReviewResult.fromStatus(cmd.getReviewResult())) &&
+//					(EquipmentTaskResult.NEED_MAINTENANCE_DELAY_COMPLETE_DELAY.equals(EquipmentTaskResult.fromStatus(task.getResult())) ||
+//							EquipmentTaskResult.NEED_MAINTENANCE_DELAY_COMPLETE_OK.equals(EquipmentTaskResult.fromStatus(task.getResult())) ||
+//							EquipmentTaskResult.NEED_MAINTENANCE_OK_COMPLETE_OK.equals(EquipmentTaskResult.fromStatus(task.getResult())) ||
+//							EquipmentTaskResult.NEED_MAINTENANCE_OK_COMPLETE_DELAY.equals(EquipmentTaskResult.fromStatus(task.getResult())))) {
+//				task.setStatus(EquipmentTaskStatus.IN_MAINTENANCE.getCode());
+//			}
 		}
 
-		else if(EquipmentTaskStatus.NEED_MAINTENANCE.equals(EquipmentTaskStatus.fromStatus(task.getStatus()))) {
-
-			if(ReviewResult.UNQUALIFIED.equals(ReviewResult.fromStatus(cmd.getReviewResult()))) {
-				task.setStatus(EquipmentTaskStatus.WAITING_FOR_EXECUTING.getCode());
-				task.setResult(EquipmentTaskResult.NONE.getCode());
-			}
-
-			else if(ReviewResult.QUALIFIED.equals(ReviewResult.fromStatus(cmd.getReviewResult()))) {
-				task.setStatus(EquipmentTaskStatus.IN_MAINTENANCE.getCode());
-			}
-		}
+//		else if(EquipmentTaskStatus.NEED_MAINTENANCE.equals(EquipmentTaskStatus.fromStatus(task.getStatus()))) {
+//
+//			if(ReviewResult.UNQUALIFIED.equals(ReviewResult.fromStatus(cmd.getReviewResult()))) {
+//				task.setStatus(EquipmentTaskStatus.WAITING_FOR_EXECUTING.getCode());
+//				task.setResult(EquipmentTaskResult.NONE.getCode());
+//			}
+//
+//			else if(ReviewResult.QUALIFIED.equals(ReviewResult.fromStatus(cmd.getReviewResult()))) {
+//				task.setStatus(EquipmentTaskStatus.IN_MAINTENANCE.getCode());
+//			}
+//		}
 
 
 		if(cmd.getOperatorType() != null) {
@@ -5738,6 +5748,13 @@ private void checkUserPrivilege(Long orgId, Long privilegeId, Long communityId) 
 				relations.setRepeatType(standard.getRepeatType());
 				relations.setOrder(map.getDefaultOrder());
 				relations.setPlanId(planId);
+
+				List<EquipmentStandardMap> equipmentStandardMaps = equipmentProvider.
+						findEquipmentStandardMap(standard.getId(), equipment.getId(),
+								InspectionStandardMapTargetType.EQUIPMENT.getCode());
+				if (equipmentStandardMaps != null) {
+					relations.setId(equipmentStandardMaps.get(0).getId());
+				}
 
 				relationDTOS.add(relations);
 

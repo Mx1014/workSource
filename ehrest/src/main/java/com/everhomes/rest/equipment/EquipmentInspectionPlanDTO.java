@@ -22,6 +22,8 @@ import java.util.List;
  *  <li>remarks: 计划备注内容</li>
  *  <li>repeatSettings: 执行周期 参考{@link com.everhomes.rest.repeat.RepeatSettingsDTO}</li>
  *  <li>equipmentStandardRelations: 设备标准关系 参考{@link com.everhomes.rest.equipment.EquipmentStandardRelationDTO}</li>
+ *  <li>executiveGroup: 执行组</li>
+ *  <li>reviewGroup: 审批组</li>
  * </ul>
  */
 
