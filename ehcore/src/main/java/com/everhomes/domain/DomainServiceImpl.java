@@ -38,11 +38,11 @@ public class DomainServiceImpl implements DomainService {
         Domain domainInfo = domainProvider.findDomainByDomain(domain);
 
         DomainDTO dto = ConvertHelper.convert(domainInfo, DomainDTO.class);
-        if(dto.getIconUri() != null){
+        if(dto != null && dto.getIconUri() != null){
             String url = contentServerService.parserUri(dto.getIconUri(), EntityType.DOMAIN.getCode(), domainInfo.getId());
             dto.setIconUrl(url);
         }
-        
+
         return dto;
     }
 

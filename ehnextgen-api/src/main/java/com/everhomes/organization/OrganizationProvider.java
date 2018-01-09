@@ -537,4 +537,6 @@ public interface OrganizationProvider {
 	void createCommunityOrganizationDetailDisplay(CommunityOrganizationDetailDisplay detailDisplay);
 	void updateCommunityOrganizationDetailDisplay(CommunityOrganizationDetailDisplay detailDisplay);
 	List checkOrgExistInOrgOrPaths(Integer namespaceId, Long organizationId, List<Long> orgIds, List<String> orgPaths);
+
+	List<Organization> listPMOrganizations(Integer namespaceId);
 }

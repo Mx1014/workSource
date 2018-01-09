@@ -159,6 +159,7 @@ import java.util.*;
 import java.util.concurrent.ExecutorService;
 import java.util.concurrent.Executors;
 import java.util.stream.Collectors;
+import java.util.stream.Stream;
 
 import static com.everhomes.util.RuntimeErrorException.errorWith;
 
@@ -14262,5 +14263,19 @@ public class OrganizationServiceImpl implements OrganizationService {
         }
         return null;
     }
+
+    @Override
+    public ListPMOrganizationsResponse listPMOrganizations(ListPMOrganizationsCommand cmd){
+        List<Organization> organizations = organizationProvider.listPMOrganizations(cmd.getNamespaceId());
+        ListPMOrganizationsResponse response = new ListPMOrganizationsResponse();
+        if(organizations != null){
+            List<OrganizationDTO> collect = organizations.stream().map(r -> ConvertHelper.convert(r, OrganizationDTO.class)).collect(Collectors.toList());
+            response.setDtos(collect);
+        }
+        return response;
+    }
+
+
+
 }
 

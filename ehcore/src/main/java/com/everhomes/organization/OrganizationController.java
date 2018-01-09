@@ -1919,4 +1919,17 @@ public class OrganizationController extends ControllerBase {
         response.setErrorDescription("OK");
         return response;
     }
+
+    /**
+     * <b>URL: /org/listPMOrganizations</b>
+     * <p>查询管理公司列表</p>
+     */
+    @RequestMapping("listPMOrganizations")
+    @RestReturn(value = ListPMOrganizationsResponse.class)
+    public RestResponse listPMOrganizations(@Valid ListPMOrganizationsCommand cmd) {
+        RestResponse response = new RestResponse(organizationService.listPMOrganizations(cmd));
+        response.setErrorCode(ErrorCodes.SUCCESS);
+        response.setErrorDescription("OK");
+        return response;
+    }
 }

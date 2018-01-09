@@ -590,4 +590,6 @@ public interface OrganizationService {
 
 	// 根据detailId获取部门
 	Long getDepartmentByDetailId(Long detailId);
+
+	ListPMOrganizationsResponse listPMOrganizations(ListPMOrganizationsCommand cmd);
 }
