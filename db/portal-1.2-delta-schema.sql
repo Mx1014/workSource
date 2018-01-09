@@ -18,3 +18,4 @@ ALTER TABLE `eh_portal_items` ADD COLUMN `version_id`  bigint(20) NULL;
 ALTER TABLE `eh_service_module_apps` ADD COLUMN `version_id`  bigint(20) NULL;
 ALTER TABLE `eh_service_module_apps` ADD COLUMN `origin_id`  bigint(20) NULL;
 ALTER TABLE `eh_portal_publish_logs` ADD COLUMN `version_id`  bigint(20) NULL AFTER `namespace_id`;
+ALTER TABLE `eh_portal_publish_logs` ADD COLUMN `process`  int(11) NULL;

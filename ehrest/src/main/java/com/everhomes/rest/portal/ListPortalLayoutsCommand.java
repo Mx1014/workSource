@@ -4,23 +4,16 @@ package com.everhomes.rest.portal;
 import com.everhomes.util.StringHelper;
 
 /**
- * 
- * <ul>参数:
- * <li>namespaceId: 域空间</li>
+ * <ul>
+ *     <li>namespaceId: 域空间</li>
+ *     <li>versionId: versionId</li>
  * </ul>
  */
 public class ListPortalLayoutsCommand {
 
 	private Integer namespaceId;
 
-	public ListPortalLayoutsCommand() {
-
-	}
-
-	public ListPortalLayoutsCommand(Integer namespaceId) {
-		super();
-		this.namespaceId = namespaceId;
-	}
+	private Long versionId;
 
 	public Integer getNamespaceId() {
 		return namespaceId;
@@ -28,6 +21,14 @@ public class ListPortalLayoutsCommand {
 
 	public void setNamespaceId(Integer namespaceId) {
 		this.namespaceId = namespaceId;
+	}
+
+	public Long getVersionId() {
+		return versionId;
+	}
+
+	public void setVersionId(Long versionId) {
+		this.versionId = versionId;
 	}
 
 	@Override

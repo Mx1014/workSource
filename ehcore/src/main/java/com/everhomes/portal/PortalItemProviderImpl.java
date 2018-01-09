@@ -143,14 +143,6 @@ public class PortalItemProviderImpl implements PortalItemProvider {
 	}
 
 	@Override
-	public List<PortalItem> listPortalItemByVersion(Integer namespaceId, Long versionId) {
-		return getReadOnlyContext().select().from(Tables.EH_PORTAL_ITEMS)
-				.where(Tables.EH_PORTAL_ITEMS.NAMESPACE_ID.eq(namespaceId))
-				.and(Tables.EH_PORTAL_ITEMS.VERSION_ID.eq(versionId))
-				.fetch().map(r -> ConvertHelper.convert(r, PortalItem.class));
-	}
-
-	@Override
 	public PortalItem getPortalItemByGroupNameAndName(Integer namespaceId, String location, String groupName, String name, Long itemGroupId){
 		List<PortalItem> portalItems = listPortalItems(namespaceId, location, groupName, name, itemGroupId);
 		if(portalItems.size() > 0){

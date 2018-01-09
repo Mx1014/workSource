@@ -296,7 +296,7 @@ public class PortalServiceImpl implements PortalService {
 	@Override
 	public ListPortalLayoutsResponse listPortalLayouts(ListPortalLayoutsCommand cmd) {
 		Integer namespaceId = UserContext.getCurrentNamespaceId(cmd.getNamespaceId());
-		List<PortalLayout> portalLayouts = portalLayoutProvider.listPortalLayout(namespaceId, null);
+		List<PortalLayout> portalLayouts = portalLayoutProvider.listPortalLayout(namespaceId, null, cmd.getVersionId());
 		return new ListPortalLayoutsResponse(portalLayouts.stream().map(r ->{
 			return processPortalLayoutDTO(r);
 		}).collect(Collectors.toList()));
@@ -949,7 +949,7 @@ public class PortalServiceImpl implements PortalService {
 	private PortalItemCategoryDTO processPortalItemCategoryDTO(PortalItemCategory portalItemCategory){
 		PortalItemCategoryDTO dto = ConvertHelper.convert(portalItemCategory, PortalItemCategoryDTO.class);
 		dto.setName(portalItemCategory.getLabel());
-		List<PortalItem> portalItems = getItemAllOrMore(portalItemCategory.getNamespaceId(),portalItemCategory.getItemGroupId(), AllOrMoreType.ALL);
+		List<PortalItem> portalItems = getItemAllOrMore(portalItemCategory.getNamespaceId(),portalItemCategory.getItemGroupId(), AllOrMoreType.ALL, null);
 		if(portalItems.size() > 0){
 			AllOrMoreActionData actionData = (AllOrMoreActionData)StringHelper.fromJsonString(portalItems.get(0).getActionData(), AllOrMoreActionData.class);
 			if(null == AlignType.fromCode(portalItemCategory.getAlign())){
@@ -976,7 +976,7 @@ public class PortalServiceImpl implements PortalService {
 	public PortalItemDTO getAllOrMoreItem(GetItemAllOrMoreCommand cmd){
 		Integer namespaceId = UserContext.getCurrentNamespaceId(cmd.getNamespaceId());
 		checkPortalItemGroup(cmd.getItemGroupId());
-		List<PortalItem> items = getItemAllOrMore(namespaceId, cmd.getItemGroupId(), AllOrMoreType.fromCode(cmd.getMoreOrAllType()), null);
+		List<PortalItem> items = getItemAllOrMore(namespaceId, cmd.getItemGroupId(), AllOrMoreType.fromCode(cmd.getMoreOrAllType()), cmd.getVersionId());
 		if(items.size() > 0){
 			return processPortalItemDTO(items.get(0));
 		}
@@ -1316,6 +1316,8 @@ public class PortalServiceImpl implements PortalService {
 
 						portalPublishLog.setStatus(PortalPublishLogStatus.SUCCESS.getCode());
 						portalPublishLogProvider.updatePortalPublishLog(portalPublishLog);
+
+						copyPortalToNewVersion(namespaceId, cmd.getVersionId());
 						return null;
 					});
 				}catch (Exception e){
@@ -1924,7 +1926,7 @@ public class PortalServiceImpl implements PortalService {
 			List<PortalLaunchPadMapping> newPortalLaunchPadMapping = getNewPortalLaunchPadMapping(EntityType.PORTAL_LAYOUT.getCode(), layout.getId(), id);
 			portalLaunchPadMappings.addAll(newPortalLaunchPadMapping);
 
-			copyPortalItemGroupToNewVersion(namespaceId, layout.getId(), id);
+			copyPortalItemGroupToNewVersion(namespaceId, layout.getId(), id, newVersionId);
 
 			layout.setId(id);
 			layout.setVersionId(newVersionId);
@@ -1941,7 +1943,7 @@ public class PortalServiceImpl implements PortalService {
 	}
 
 
-	private void copyPortalItemGroupToNewVersion(Integer namespaceId, Long oldLayoutId, Long newLayoutId) {
+	private void copyPortalItemGroupToNewVersion(Integer namespaceId, Long oldLayoutId, Long newLayoutId, Long newVersionId) {
 
 		List<PortalItemGroup> portalitemGroups = portalItemGroupProvider.listPortalItemGroup(oldLayoutId);
 		if(portalitemGroups == null || portalitemGroups.size() == 0 ){
@@ -1962,14 +1964,15 @@ public class PortalServiceImpl implements PortalService {
 				portalLaunchPadMappings.addAll(newPortalLaunchPadMapping);
 
 				//复制category
-				boolean categoryFlag = copyPortalItemCategoryToNewVersion(namespaceId, itemGroup.getId(), id);
+				boolean categoryFlag = copyPortalItemCategoryToNewVersion(namespaceId, itemGroup.getId(), id, newVersionId);
 				if(!categoryFlag){
 					//复制item
-					copyPortalItemToNewVersion(namespaceId, itemGroup.getId(), id, null, null);
+					copyPortalItemToNewVersion(namespaceId, itemGroup.getId(), id, null, null, newVersionId);
 				}
 
 				itemGroup.setId(id);
 				itemGroup.setLayoutId(newLayoutId);
+				itemGroup.setVersionId(newVersionId);
 				itemGroup.setCreateTime(createTimestamp);
 				itemGroup.setUpdateTime(createTimestamp);
 
@@ -1983,7 +1986,7 @@ public class PortalServiceImpl implements PortalService {
 	}
 
 
-	private boolean copyPortalItemCategoryToNewVersion(Integer namespaceId, Long oldItemGroupId, Long newItemGroupId) {
+	private boolean copyPortalItemCategoryToNewVersion(Integer namespaceId, Long oldItemGroupId, Long newItemGroupId, Long newVersionId) {
 
 		List<PortalItemCategory> portalItemCategories = portalItemCategoryProvider.listPortalItemCategory(namespaceId, oldItemGroupId);
 		if(portalItemCategories ==  null || portalItemCategories.size() == 0 ){
@@ -2005,11 +2008,11 @@ public class PortalServiceImpl implements PortalService {
 				portalLaunchPadMappings.addAll(newPortalLaunchPadMapping);
 
 				//复制item
-				copyPortalItemToNewVersion(namespaceId, oldItemGroupId, newItemGroupId, itemCategory.getId(), id);
+				copyPortalItemToNewVersion(namespaceId, oldItemGroupId, newItemGroupId, itemCategory.getId(), id, newVersionId);
 
 				itemCategory.setId(id);
 				itemCategory.setItemGroupId(newItemGroupId);
-				//itemCategory.setVersionId(newVersionId);
+				itemCategory.setVersionId(newVersionId);
 				itemCategory.setCreateTime(createTimestamp);
 				itemCategory.setUpdateTime(createTimestamp);
 			}
@@ -2023,7 +2026,7 @@ public class PortalServiceImpl implements PortalService {
 	}
 
 
-	private void copyPortalItemToNewVersion(Integer namespaceId, Long oldItemGroupId, Long newItemGroupId, Long oldItemCategoryId, Long newItemCategoryId) {
+	private void copyPortalItemToNewVersion(Integer namespaceId, Long oldItemGroupId, Long newItemGroupId, Long oldItemCategoryId, Long newItemCategoryId, Long newVersionId) {
 
 		List<PortalItem> portalItems = portalItemProvider.listPortalItems(oldItemGroupId, oldItemCategoryId);
 		if(portalItems == null || portalItems.size() == 0 ){
@@ -2045,7 +2048,7 @@ public class PortalServiceImpl implements PortalService {
 			item.setId(id);
 			item.setItemGroupId(newItemGroupId);
 			item.setItemCategoryId(newItemCategoryId);
-			//item.setVersionId(newVersionId);
+			item.setVersionId(newVersionId);
 			item.setCreateTime(createTimestamp);
 			item.setUpdateTime(createTimestamp);
 		}
@@ -2124,6 +2127,7 @@ public class PortalServiceImpl implements PortalService {
 					itemGroup.setStatus(layout.getStatus());
 					itemGroup.setCreatorUid(user.getId());
 					itemGroup.setOperatorUid(user.getId());
+					itemGroup.setVersionId(newVersion.getId());
 					if(null != padLayoutGroup.getSeparatorFlag()){
 						itemGroup.setSeparatorFlag(padLayoutGroup.getSeparatorFlag().byteValue());
 					}
@@ -2148,7 +2152,7 @@ public class PortalServiceImpl implements PortalService {
 						itemGroup.setInstanceConfig(StringHelper.toJsonString(config));
 						portalItemGroupProvider.createPortalItemGroup(itemGroup);
 						if(name.equals("ServiceMarketLayout"))
-							syncItemCategory(itemGroup.getNamespaceId(),itemGroup.getId());
+							syncItemCategory(itemGroup.getNamespaceId(),itemGroup.getId(), newVersion.getId());
 						syncItem(itemGroup.getNamespaceId(), location, itemGroup.getName(), itemGroup.getId(), newVersion);
 					}else if(Widget.fromCode(padLayoutGroup.getWidget()) == Widget.BANNERS){
 						BannersInstanceConfig instanceConfig = (BannersInstanceConfig)StringHelper.fromJsonString(StringHelper.toJsonString(padLayoutGroup.getInstanceConfig()), BannersInstanceConfig.class);
@@ -2252,7 +2256,7 @@ public class PortalServiceImpl implements PortalService {
 		return layout;
 	}
 
-	private void syncItemCategory(Integer namespaceId, Long itemGroupId){
+	private void syncItemCategory(Integer namespaceId, Long itemGroupId, Long versionId){
 		User user = UserContext.current().getUser();
 		List<ItemServiceCategry> categories = launchPadProvider.listItemServiceCategries(namespaceId);
 		for (ItemServiceCategry category: categories) {
@@ -2262,6 +2266,7 @@ public class PortalServiceImpl implements PortalService {
 				portalItemCategory.setItemGroupId(itemGroupId);
 				portalItemCategory.setDefaultOrder(category.getOrder());
 				portalItemCategory.setStatus(PortalItemCategoryStatus.ACTIVE.getCode());
+				portalItemCategory.setVersionId(versionId);
 
 				// 添加item 分类
 				portalItemCategoryProvider.createPortalItemCategory(portalItemCategory);
@@ -2295,6 +2300,7 @@ public class PortalServiceImpl implements PortalService {
 				item.setStatus(PortalItemStatus.ACTIVE.getCode());
 				item.setCreatorUid(user.getId());
 				item.setOperatorUid(user.getId());
+				item.setVersionId(newVersion.getId());
 				PortalItemCategory category = portalItemCategoryProvider.getPortalItemCategoryByName(namespaceId, itemGroupId, padItem.getCategryName());
 				if(null != category){
 					item.setItemCategoryId(category.getId());

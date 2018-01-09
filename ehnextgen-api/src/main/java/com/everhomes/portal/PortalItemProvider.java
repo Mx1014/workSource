@@ -24,11 +24,9 @@ public interface PortalItemProvider {
 
 	List<PortalItem> listPortalItems(CrossShardListingLocator locator, Integer pageSize, ListingQueryBuilderCallback queryBuilderCallback);
 
-	List<PortalItem> listPortalItems(Long itemCategoryId, Integer namespaceId, String actionType, Long itemGroupId, Byte neStatus);
+	List<PortalItem> listPortalItems(Long itemCategoryId, Integer namespaceId, String actionType, Long itemGroupId, Byte neStatus, Long versionId);
 
 	List<PortalItem> listPortalItems(Long itemCategoryId, Long itemGroupId);
-
-    List<PortalItem> listPortalItemByVersion(Integer namespaceId);
 
     PortalItem getPortalItemByGroupNameAndName(Integer namespaceId, String location, String groupName, String name, Long itemGroupId);
 }
