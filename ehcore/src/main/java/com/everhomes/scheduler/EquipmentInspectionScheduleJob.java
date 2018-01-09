@@ -70,10 +70,11 @@ private static final Logger LOGGER = LoggerFactory.getLogger(EquipmentInspection
 
 	private void createTaskByPlan() {
 		if (LOGGER.isInfoEnabled()){
-			LOGGER.info("EquipmentInspectionScheduleJob:createTask.....");
+			LOGGER.info("EquipmentInspectionScheduleJob:createTaskByPlan.....");
 		}
 		int pageSize = 200;
 		ListingLocator locator = new ListingLocator();
+		locator.setAnchor(0L);
 		while (locator.getAnchor() != null) {
 			List<EquipmentInspectionPlans> plans = equipmentProvider.ListQualifiedEquipmentInspectionPlans(locator, pageSize);
 			for (EquipmentInspectionPlans plan : plans) {
