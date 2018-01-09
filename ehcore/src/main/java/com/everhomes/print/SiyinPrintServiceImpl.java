@@ -554,7 +554,11 @@ public class SiyinPrintServiceImpl implements SiyinPrintService {
 		}
 
 		Long paysummay = payService.changePayAmount(order.getOrderTotalFee());
-		PreOrderDTO dto = payService.createAppPreOrder(UserContext.getCurrentNamespaceId(),cmd.getClientAppName(),
+		Integer namespaceId = cmd.getNamespaceId();
+		if(namespaceId == null){
+			namespaceId = UserContext.getCurrentNamespaceId();
+		}
+		PreOrderDTO dto = payService.createAppPreOrder(namespaceId,cmd.getClientAppName(),
 				OrderType.OrderTypeEnum.PRINT_ORDER.getPycode(),order.getOrderNo(),UserContext.current().getUser().getId(),paysummay);
 		return dto;
 	}
@@ -700,18 +704,22 @@ public class SiyinPrintServiceImpl implements SiyinPrintService {
         	LOGGER.error("Unknown readerName = {}, register on table eh_siyin_print_printers",cmd.getReaderName());
 			throw RuntimeErrorException.errorWith(ErrorCodes.SCOPE_GENERAL, ErrorCodes.ERROR_INVALID_PARAMETER, "Unknown readerName = "+cmd.getReaderName());
         }
-        mappingReaderToUser(cmd.getReaderName());
+        Integer namespaceId = cmd.getNamespaceId();
+        if(namespaceId == null){
+        	namespaceId = UserContext.getCurrentNamespaceId();
+		}
+        mappingReaderToUser(cmd.getReaderName(),namespaceId);
         return directLogin(moduleIp,printer,loginData);
 	}
 	
-	private void mappingReaderToUser(String readerName) {
+	private void mappingReaderToUser(String readerName, Integer namespaceId) {
 		//理论上应该给这里加锁，但是解锁打印机应该是低频率，这里上锁。
 		SiyinUserPrinterMapping mapping = siyinUserPrinterMappingProvider.findSiyinUserPrinterMappingByUserAndPrinter(UserContext.current().getUser().getId(),readerName);
 		if(mapping==null){
 			mapping = new SiyinUserPrinterMapping();
 			mapping.setUserId(UserContext.current().getUser().getId());
 			mapping.setReaderName(readerName);
-			mapping.setNamespaceId(UserContext.getCurrentNamespaceId());
+			mapping.setNamespaceId(namespaceId);
 			mapping.setUnlockTimes(1L);
 			siyinUserPrinterMappingProvider.createSiyinUserPrinterMapping(mapping);
 		}else{
@@ -953,23 +961,27 @@ public class SiyinPrintServiceImpl implements SiyinPrintService {
 	private List<SiyinPrintSetting> checkUpdatePrintSettingCommand(UpdatePrintSettingCommand cmd) {
 		// TODO Auto-generated method stub
 		checkOwner(cmd.getOwnerType(),cmd.getOwnerId());
-		List<SiyinPrintSetting> list = checkPaperSizePriceDTO(cmd.getPaperSizePriceDTO(),cmd.getOwnerType(),cmd.getOwnerId());
-		list.add(checkColorTypeDTO(cmd.getColorTypeDTO(),cmd.getOwnerType(),cmd.getOwnerId()));
-		list.add(checkCourseList(cmd.getScanCopyCourseList(),cmd.getPrintCourseList(),cmd.getOwnerType(),cmd.getOwnerId(),cmd.getHotline()));
+		Integer namespaceId = cmd.getNamespaceId();
+		if(namespaceId == null){
+			namespaceId = UserContext.getCurrentNamespaceId();
+		}
+		List<SiyinPrintSetting> list = checkPaperSizePriceDTO(cmd.getPaperSizePriceDTO(),cmd.getOwnerType(),cmd.getOwnerId(),namespaceId);
+		list.add(checkColorTypeDTO(cmd.getColorTypeDTO(),cmd.getOwnerType(),cmd.getOwnerId(),namespaceId));
+		list.add(checkCourseList(cmd.getScanCopyCourseList(),cmd.getPrintCourseList(),cmd.getOwnerType(),cmd.getOwnerId(),cmd.getHotline(),namespaceId));
 		return list;
 	}
 
 	/**
 	 * 检查打印/复印扫描教程并产生实体
 	 */
-	private SiyinPrintSetting checkCourseList(List<String> printCourseList,List<String> scancopyCourseList, String ownerType, Long ownerId,String hotline) {
+	private SiyinPrintSetting checkCourseList(List<String> printCourseList,List<String> scancopyCourseList, String ownerType, Long ownerId,String hotline,Integer namespaceId) {
 		SiyinPrintSetting setting = new SiyinPrintSetting();
 		setting.setScanCopyCourse("");
 		setting.setPrintCourse("");
 		setting.setOwnerType(ownerType);
 		setting.setOwnerId(ownerId);
 		setting.setSettingType(PrintSettingType.COURSE_HOTLINE.getCode());
-		setting.setNamespaceId(UserContext.getCurrentNamespaceId());
+		setting.setNamespaceId(namespaceId);
 		
 		setting.setScanCopyCourse(getLocalActivityString(PrintErrorCode.PRINT_COURSE_LIST));
 		setting.setPrintCourse(getLocalActivityString(PrintErrorCode.SCAN_COPY_COURSE_LIST));
@@ -981,7 +993,7 @@ public class SiyinPrintServiceImpl implements SiyinPrintService {
 	/**
 	 * 检查打印扫描价格的DTO，并生成实体
 	 */
-	private List<SiyinPrintSetting> checkPaperSizePriceDTO(PrintSettingPaperSizePriceDTO paperSizePriceDTO, String string, Long long1) {
+	private List<SiyinPrintSetting> checkPaperSizePriceDTO(PrintSettingPaperSizePriceDTO paperSizePriceDTO, String string, Long long1,Integer namespaceId) {
 		// TODO Auto-generated method stub
 		if(paperSizePriceDTO == null){
 			paperSizePriceDTO = new PrintSettingPaperSizePriceDTO();
@@ -1021,10 +1033,10 @@ public class SiyinPrintServiceImpl implements SiyinPrintService {
 		settinga5.setPaperSize(PrintPaperSizeType.A5.getCode());
 		settinga6.setPaperSize(PrintPaperSizeType.A6.getCode());
 		
-		settinga3.setNamespaceId(UserContext.getCurrentNamespaceId());
-		settinga4.setNamespaceId(UserContext.getCurrentNamespaceId());
-		settinga5.setNamespaceId(UserContext.getCurrentNamespaceId());
-		settinga6.setNamespaceId(UserContext.getCurrentNamespaceId());
+		settinga3.setNamespaceId(namespaceId);
+		settinga4.setNamespaceId(namespaceId);
+		settinga5.setNamespaceId(namespaceId);
+		settinga6.setNamespaceId(namespaceId);
 		return new ArrayList<SiyinPrintSetting>(Arrays.asList(new SiyinPrintSetting[]{settinga3,settinga4,settinga5,settinga6}));
 	}
 
@@ -1032,14 +1044,14 @@ public class SiyinPrintServiceImpl implements SiyinPrintService {
 	/**
 	 * 检查扫描价格，并生成实体
 	 */
-	private SiyinPrintSetting checkColorTypeDTO(PrintSettingColorTypeDTO colorTypeDTO, String string, Long long1) {
+	private SiyinPrintSetting checkColorTypeDTO(PrintSettingColorTypeDTO colorTypeDTO, String string, Long long1,Integer namespaceId) {
 		colorTypeDTO = checkPrice(colorTypeDTO);
 		SiyinPrintSetting setting = ConvertHelper.convert(colorTypeDTO, SiyinPrintSetting.class);
 		setting.setOwnerType(string);
 		setting.setOwnerId(long1);
 		setting.setSettingType(PrintSettingType.PRINT_COPY_SCAN.getCode());
 		setting.setJobType(PrintJobTypeType.SCAN.getCode());
-		setting.setNamespaceId(UserContext.getCurrentNamespaceId());
+		setting.setNamespaceId(namespaceId);
 		return setting;
 	}
 	
@@ -1163,7 +1175,11 @@ public class SiyinPrintServiceImpl implements SiyinPrintService {
 			siyinPrintEmail.setStatus(CommonStatus.ACTIVE.getCode());
 			return siyinPrintEmail;
 		}
-		siyinPrintEmail.setNamespaceId(UserContext.getCurrentNamespaceId());
+		Integer namespaceId = cmd.getNamespaceId();
+		if(namespaceId == null){
+			namespaceId = UserContext.getCurrentNamespaceId();
+		}
+		siyinPrintEmail.setNamespaceId(namespaceId);
 		siyinPrintEmail.setUserId(UserContext.current().getUser().getId());
 		siyinPrintEmail.setStatus(CommonStatus.ACTIVE.getCode());
 		return siyinPrintEmail;
@@ -1181,7 +1197,11 @@ public class SiyinPrintServiceImpl implements SiyinPrintService {
 	@Override
 	public ListQueueJobsResponse listQueueJobs(ListQueueJobsCommand cmd) {
         String siyinUrl =  configurationProvider.getValue(PrintErrorCode.PRINT_SIYIN_SERVER_URL, "http://siyin.zuolin.com:8119");
-        List<SiyinUserPrinterMapping> mappings = siyinUserPrinterMappingProvider.listSiyinUserPrinterMappingByUserId(UserContext.current().getUser().getId(), UserContext.getCurrentNamespaceId());
+		Integer namespaceId = cmd.getNamespaceId();
+		if(namespaceId == null){
+			namespaceId = UserContext.getCurrentNamespaceId();
+		}
+        List<SiyinUserPrinterMapping> mappings = siyinUserPrinterMappingProvider.listSiyinUserPrinterMappingByUserId(UserContext.current().getUser().getId(), namespaceId);
         List<String> readers = new ArrayList<>(5);
         if(mappings == null || mappings.size() == 0){
         	List<SiyinPrintPrinter> lists = siyinPrintPrinterProvider.listSiyinPrintPrinter();

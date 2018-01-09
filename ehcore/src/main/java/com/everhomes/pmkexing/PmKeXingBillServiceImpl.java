@@ -273,6 +273,8 @@ public class PmKeXingBillServiceImpl implements PmKeXingBillService {
             cmd.setTargetId(targetId);
             cmd.setTargetType(CustomerType.ENTERPRISE.getCode());
         }
+        //合同方面新增了cmd的默认参数
+        cmd.setAdminFlag((byte)1);
         cmd.setNamespaceId(namespaceId);
         cmd.setCommunityId(ownerId);
 
