@@ -21,6 +21,8 @@ INSERT INTO `eh_social_security_bases` (`id`, `city_id`, `household_type`, `pay_
 INSERT INTO `eh_social_security_bases` (`id`, `city_id`, `household_type`, `pay_item`, `company_radix_min`, `company_radix_max`, `company_ratio_min`, `company_ratio_max`, `employee_radix_min`, `employee_radix_max`, `employee_ratio_min`, `employee_ratio_max`, `editable_flag`, `is_default`, `effect_time_begin`, `effect_time_end`, `ratio_options`, `accum_or_socail`, `creator_uid`, `create_time`, `operator_uid`, `update_time`) VALUES('20','13905','外埠三档','失业','2130.00','2130.00','80','100','2130.00','2130.00','100','100','0','1','2017-07-01 00:00:00','2018-06-30 00:00:00',NULL,'1','0','2017-12-28 13:53:41',NULL,NULL);
 INSERT INTO `eh_social_security_bases` (`id`, `city_id`, `household_type`, `pay_item`, `company_radix_min`, `company_radix_max`, `company_ratio_min`, `company_ratio_max`, `employee_radix_min`, `employee_radix_max`, `employee_ratio_min`, `employee_ratio_max`, `editable_flag`, `is_default`, `effect_time_begin`, `effect_time_end`, `ratio_options`, `accum_or_socail`, `creator_uid`, `create_time`, `operator_uid`, `update_time`) VALUES('21','13905','外埠三档','工伤','2130.00','22440.00','14','114','2130.00','22440.00','0','0','0','1','2017-07-01 00:00:00','2018-06-30 00:00:00','[14,28,49,63,66,78,96,114]','1','0','2017-12-28 13:53:41',NULL,NULL);
 
+-- 暂时取消ratio options
+UPDATE eh_social_security_bases SET ratio_options = NULL ;
 
  
 INSERT INTO `EH_WEB_MENUS` (`id`, `name`, `parent_id`, `icon_url`, `data_type`, `leaf_flag`, `status`, `path`, `type`, `sort_num`, `module_id`, `level`, `condition_type`, `category`) VALUES('51300','社保管理','50000',NULL,'','1','2','/50000/51300','park','539','51300','2',NULL,'module');
