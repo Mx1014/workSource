@@ -61,7 +61,7 @@ public class ServiceModuleAppProviderImpl implements ServiceModuleAppProvider {
 		/**
 		 * 有id使用原来的id，没有则生成新的
 		 */
-		Long id = sequenceProvider.getNextSequenceBlock(NameMapper.getSequenceDomainFromTablePojo(EhServiceModuleApps.class), (long)serviceModuleApps.size());
+		Long id = sequenceProvider.getNextSequenceBlock(NameMapper.getSequenceDomainFromTablePojo(EhServiceModuleApps.class), (long)serviceModuleApps.size() + 1);
 		List<EhServiceModuleApps> moduleApps = new ArrayList<>();
 		for (ServiceModuleApp moduleApp: serviceModuleApps) {
 			if(moduleApp.getId() == null){
@@ -92,13 +92,13 @@ public class ServiceModuleAppProviderImpl implements ServiceModuleAppProvider {
 	}
 
 	@Override
-	public List<ServiceModuleApp> listServiceModuleApp(Integer namespaceId, Long moduleId){
-		return listServiceModuleApp(namespaceId, moduleId, null, null, null);
+	public List<ServiceModuleApp> listServiceModuleApp(Integer namespaceId, Long moduleId, Long versionId){
+		return listServiceModuleApp(namespaceId, moduleId, null, null, null, versionId);
 	}
 
 	@Override
-	public List<ServiceModuleApp> listServiceModuleAppByActionType(Integer namespaceId, Byte actionType){
-		return listServiceModuleApp(namespaceId, null, actionType, null, null);
+	public List<ServiceModuleApp> listServiceModuleAppByActionType(Integer namespaceId, Byte actionType, Long versionId){
+		return listServiceModuleApp(namespaceId, null, actionType, null, null, versionId);
 	}
 
 	@Override
@@ -115,7 +115,7 @@ public class ServiceModuleAppProviderImpl implements ServiceModuleAppProvider {
 
 
 	@Override
-	public List<ServiceModuleApp> listServiceModuleApp(Integer namespaceId, Long moduleId, Byte actionType, String customTag, String customPath) {
+	public List<ServiceModuleApp> listServiceModuleApp(Integer namespaceId, Long moduleId, Byte actionType, String customTag, String customPath, Long versionId) {
 		Condition cond = Tables.EH_SERVICE_MODULE_APPS.NAMESPACE_ID.eq(namespaceId);
 		if(null != moduleId)
 			cond = cond.and(Tables.EH_SERVICE_MODULE_APPS.MODULE_ID.eq(moduleId));
@@ -125,18 +125,12 @@ public class ServiceModuleAppProviderImpl implements ServiceModuleAppProvider {
 			cond = cond.and(Tables.EH_SERVICE_MODULE_APPS.CUSTOM_TAG.eq(customTag));
 		if(null != customPath)
 			cond = cond.and(Tables.EH_SERVICE_MODULE_APPS.CUSTOM_PATH.eq(customPath));
+		if(null != versionId)
+			cond = cond.and(Tables.EH_SERVICE_MODULE_APPS.VERSION_ID.eq(versionId));
 		return getReadOnlyContext().select().from(Tables.EH_SERVICE_MODULE_APPS)
 				.where(cond)
 				.and(Tables.EH_SERVICE_MODULE_APPS.STATUS.eq(ServiceModuleAppStatus.ACTIVE.getCode()))
 				.orderBy(Tables.EH_SERVICE_MODULE_APPS.ID.asc())
-				.fetch().map(r -> ConvertHelper.convert(r, ServiceModuleApp.class));
-	}
-
-	@Override
-	public List<ServiceModuleApp> listServiceModuleAppByVersion(Integer namespaceId, Long versionId) {
-		return getReadOnlyContext().select().from(Tables.EH_SERVICE_MODULE_APPS)
-				.where(Tables.EH_SERVICE_MODULE_APPS.NAMESPACE_ID.eq(namespaceId))
-				.and(Tables.EH_SERVICE_MODULE_APPS.VERSION_ID.eq(versionId))
 				.fetch().map(r -> ConvertHelper.convert(r, ServiceModuleApp.class));
 	}
 	

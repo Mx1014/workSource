@@ -151,7 +151,7 @@ public class PortalServiceImpl implements PortalService {
 
 	@Override
 	public ListServiceModuleAppsResponse listServiceModuleApps(ListServiceModuleAppsCommand cmd) {
-		List<ServiceModuleApp> moduleApps = serviceModuleAppProvider.listServiceModuleApp(cmd.getNamespaceId(), cmd.getModuleId());
+		List<ServiceModuleApp> moduleApps = serviceModuleAppProvider.listServiceModuleApp(cmd.getNamespaceId(), cmd.getModuleId(), cmd.getVersionId());
 		return new ListServiceModuleAppsResponse(moduleApps.stream().map(r ->{
 			return processServiceModuleAppDTO(r);
 		}).collect(Collectors.toList()));
@@ -1295,6 +1295,8 @@ public class PortalServiceImpl implements PortalService {
 		portalPublishLog.setStatus(PortalPublishLogStatus.PUBLISHING.getCode());
 		portalPublishLog.setCreatorUid(user.getId());
 		portalPublishLog.setOperatorUid(user.getId());
+		portalPublishLog.setVersionId(cmd.getVersionId());
+		portalPublishLog.setProcess(0);
 		portalPublishLogProvider.createPortalPublishLog(portalPublishLog);
 
 		ExecutorUtil.submit(new Runnable() {
@@ -1312,12 +1314,16 @@ public class PortalServiceImpl implements PortalService {
 							publishLayout(layout);
 						}
 
-						copyPortalToNewVersion(namespaceId, cmd.getVersionId());
 
-						portalPublishLog.setStatus(PortalPublishLogStatus.SUCCESS.getCode());
+						portalPublishLog.setProcess(60);
 						portalPublishLogProvider.updatePortalPublishLog(portalPublishLog);
 
 						copyPortalToNewVersion(namespaceId, cmd.getVersionId());
+
+						portalPublishLog.setProcess(100);
+						portalPublishLog.setStatus(PortalPublishLogStatus.SUCCESS.getCode());
+						portalPublishLogProvider.updatePortalPublishLog(portalPublishLog);
+
 						return null;
 					});
 				}catch (Exception e){
@@ -1851,6 +1857,7 @@ public class PortalServiceImpl implements PortalService {
 		if(maxVersion == null){
 			newVersion.setSyncVersion(1);
 			newVersion.setPublishVersion(0);
+			newVersion.setSyncTime(new Timestamp(System.currentTimeMillis()));
 		}else {
 
 			newVersion.setParentId(maxVersion.getParentId());
@@ -1887,23 +1894,33 @@ public class PortalServiceImpl implements PortalService {
 		PortalVersion newPortalVersion = getNewPortalVersion(namespaceId, (byte) 0);
 
 		//2.复制一份app
-		List<ServiceModuleApp> serviceModuleApps = serviceModuleAppProvider.listServiceModuleAppByVersion(namespaceId, oldVersionId);
+		copyServiceModuleAppToNewVersion(namespaceId, oldVersionId, newPortalVersion.getId());
 
-		if(serviceModuleApps != null && serviceModuleApps.size() > 0){
-			for (ServiceModuleApp app: serviceModuleApps){
-				app.setOriginId(app.getId());
-				app.setId(null);
-				app.setVersionId(newPortalVersion.getId());
-				app.setCreateTime(createTimestamp);
-				app.setUpdateTime(createTimestamp);
-			}
-			serviceModuleAppProvider.createServiceModuleApps(serviceModuleApps);
-		}
-
+		//3.复制PortalLayout、PortalItemGroup、PortalItemCategory、PortalItem
 		copyPortalLayoutToNewVersion(namespaceId, oldVersionId, newPortalVersion.getId());
 
 
 		return newPortalVersion.getId();
+	}
+
+	private void copyServiceModuleAppToNewVersion(Integer namespaceId, Long oldVersionId, Long newVersionId){
+		List<ServiceModuleApp> serviceModuleApps = serviceModuleAppProvider.listServiceModuleApp(namespaceId, null, oldVersionId);
+
+		if(serviceModuleApps == null || serviceModuleApps.size() == 0){
+			return;
+		}
+
+		Timestamp createTimestamp = new Timestamp(System.currentTimeMillis());
+
+		for (ServiceModuleApp app: serviceModuleApps){
+			app.setOriginId(app.getId());
+			app.setId(null);
+			app.setVersionId(newVersionId);
+			app.setCreateTime(createTimestamp);
+			app.setUpdateTime(createTimestamp);
+		}
+		serviceModuleAppProvider.createServiceModuleApps(serviceModuleApps);
+
 	}
 
 	private void copyPortalLayoutToNewVersion(Integer namespaceId, Long oldVersionId, Long newVersionId){
@@ -2028,7 +2045,7 @@ public class PortalServiceImpl implements PortalService {
 
 	private void copyPortalItemToNewVersion(Integer namespaceId, Long oldItemGroupId, Long newItemGroupId, Long oldItemCategoryId, Long newItemCategoryId, Long newVersionId) {
 
-		List<PortalItem> portalItems = portalItemProvider.listPortalItems(oldItemGroupId, oldItemCategoryId);
+		List<PortalItem> portalItems = portalItemProvider.listPortalItems(oldItemCategoryId, oldItemGroupId);
 		if(portalItems == null || portalItems.size() == 0 ){
 			return;
 		}
@@ -2416,8 +2433,8 @@ public class PortalServiceImpl implements PortalService {
 			this.serviceModuleService.getOrCreateReflectionServiceModuleApp(namespaceId, actionData, moduleApp.getInstanceConfig(), itemLabel, serviceModule);
 
 			//设置OriginId为父辈的OriginId，如果父辈不存在则在createServiceModuleApp中将OriginId设置为自己的id
-			if(!newVersion.getId().equals(newVersion.getParentId())){
-				ServiceModuleApp parentServiceModuleApp = getParentServiceModuleApp(namespaceId, newVersion.getParentId(), actionData, moduleApp.getInstanceConfig(), serviceModule);
+			if(newVersion.getParentId() != null){
+				ServiceModuleApp parentServiceModuleApp = getParentServiceModuleApp(namespaceId, newVersion, actionData, moduleApp.getInstanceConfig(), serviceModule);
 				if(parentServiceModuleApp != null){
 					moduleApp.setOriginId(parentServiceModuleApp.getOriginId());
 				}
@@ -2428,9 +2445,8 @@ public class PortalServiceImpl implements PortalService {
 		return moduleApp;
 	}
 
-	private ServiceModuleApp getParentServiceModuleApp(Integer namespaceId, Long versionId, String actionData, String instanceConfig, ServiceModule serviceModule){
+	private ServiceModuleApp getParentServiceModuleApp(Integer namespaceId, PortalVersion newVersion, String actionData, String instanceConfig, ServiceModule serviceModule){
 
-		PortalVersion newPortalVersion = portalVersionProvider.findPortalVersionById(versionId);
 		String customTag = null;
 		String handlerPrefix = PortalPublishHandler.PORTAL_PUBLISH_OBJECT_PREFIX;
 		PortalPublishHandler handler = PlatformContext.getComponent(handlerPrefix + serviceModule.getId());
@@ -2439,7 +2455,7 @@ public class PortalServiceImpl implements PortalService {
 			LOGGER.debug("get customTag from handler = {}, customTag =s {}",handler,customTag);
 		}
 		//找上一版本的serviceModuleApp
-		ServiceModuleApp parentServiceModuleApp = serviceModuleAppProvider.findServiceModuleApp(namespaceId, newPortalVersion.getParentId(), serviceModule.getId(), customTag);
+		ServiceModuleApp parentServiceModuleApp = serviceModuleAppProvider.findServiceModuleApp(namespaceId, newVersion.getParentId(), serviceModule.getId(), customTag);
 		return parentServiceModuleApp;
 	}
 
@@ -2513,6 +2529,18 @@ public class PortalServiceImpl implements PortalService {
 
 		return handler;
 	}
+
+	@Override
+	public ListPortalVersionResponse listPortalVersions(ListPortalVersionCommand cmd){
+		List<PortalVersion> list = portalVersionProvider.listPortalVersion(cmd.getNamespaceId(), cmd.getStatus());
+
+		List<PortalVersionDTO> dtos = list.stream().map(r -> ConvertHelper.convert(r, PortalVersionDTO.class)).collect(Collectors.toList());
+
+		ListPortalVersionResponse response = new ListPortalVersionResponse();
+		response.setDtos(dtos);
+		return response;
+	}
+
 
 
 

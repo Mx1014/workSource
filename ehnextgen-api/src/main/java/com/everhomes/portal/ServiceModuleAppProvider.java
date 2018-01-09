@@ -13,17 +13,15 @@ public interface ServiceModuleAppProvider {
 
 	ServiceModuleApp findServiceModuleAppById(Long id);
 
-	List<ServiceModuleApp> listServiceModuleApp(Integer namespaceId, Long moduleId);
+	List<ServiceModuleApp> listServiceModuleApp(Integer namespaceId, Long moduleId, Long versionId);
 
-	List<ServiceModuleApp> listServiceModuleAppByActionType(Integer namespaceId, Byte actionType);
+	List<ServiceModuleApp> listServiceModuleAppByActionType(Integer namespaceId, Byte actionType, Long versionId);
 
 	List<ServiceModuleAppDTO> listServiceModuleAppsByModuleIds(Integer namespaceId, List<Long> moduleIds);
 
 	void createServiceModuleApps(List<ServiceModuleApp> serviceModuleApps);
 
-	List<ServiceModuleApp> listServiceModuleApp(Integer namespaceId, Long moduleId, Byte actionType, String customTag, String customPath);
-
-    List<ServiceModuleApp> listServiceModuleAppByVersion(Integer namespaceId, Long versionId);
+	List<ServiceModuleApp> listServiceModuleApp(Integer namespaceId, Long moduleId, Byte actionType, String customTag, String customPath, Long versionId);
 
     ServiceModuleApp findServiceModuleApp(Integer namespaceId, Long versionId, Long moduleId, String customTag);
 }

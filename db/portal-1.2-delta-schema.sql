@@ -11,11 +11,11 @@ CREATE TABLE `eh_portal_versions` (
   PRIMARY KEY (`id`)
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4;
 
-ALTER TABLE `eh_portal_layouts` ADD COLUMN `version_id`  bigint(20) NULL;
-ALTER TABLE `eh_portal_item_groups` ADD COLUMN `version_id`  bigint(20) NULL;
-ALTER TABLE `eh_portal_item_categories` ADD COLUMN `version_id`  bigint(20) NULL;
-ALTER TABLE `eh_portal_items` ADD COLUMN `version_id`  bigint(20) NULL;
-ALTER TABLE `eh_service_module_apps` ADD COLUMN `version_id`  bigint(20) NULL;
-ALTER TABLE `eh_service_module_apps` ADD COLUMN `origin_id`  bigint(20) NULL;
+ALTER TABLE `eh_portal_layouts` ADD COLUMN `version_id`  bigint(20) NULL AFTER `namespace_id`;
+ALTER TABLE `eh_portal_item_groups` ADD COLUMN `version_id`  bigint(20) NULL AFTER `namespace_id`;
+ALTER TABLE `eh_portal_item_categories` ADD COLUMN `version_id`  bigint(20) NULL AFTER `namespace_id`;
+ALTER TABLE `eh_portal_items` ADD COLUMN `version_id`  bigint(20) NULL AFTER `namespace_id`;
+ALTER TABLE `eh_service_module_apps` ADD COLUMN `version_id`  bigint(20) NULL AFTER `namespace_id`;
+ALTER TABLE `eh_service_module_apps` ADD COLUMN `origin_id`  bigint(20) NULL AFTER `version_id`;
 ALTER TABLE `eh_portal_publish_logs` ADD COLUMN `version_id`  bigint(20) NULL AFTER `namespace_id`;
-ALTER TABLE `eh_portal_publish_logs` ADD COLUMN `process`  int(11) NULL;
+ALTER TABLE `eh_portal_publish_logs` ADD COLUMN `process`  int(11) NULL AFTER `version_id`;

@@ -55,7 +55,7 @@ public class PortalContentScopeProviderImpl implements PortalContentScopeProvide
 		/**
 		 * 有id使用原来的id，没有则生成新的
 		 */
-		Long id = sequenceProvider.getNextSequenceBlock(NameMapper.getSequenceDomainFromTablePojo(EhPortalContentScopes.class), (long)portalContentScopes.size());
+		Long id = sequenceProvider.getNextSequenceBlock(NameMapper.getSequenceDomainFromTablePojo(EhPortalContentScopes.class), (long)portalContentScopes.size() + 1);
 		List<EhPortalContentScopes> scopes = new ArrayList<>();
 		for (PortalContentScope scope: portalContentScopes) {
 			if(scope.getId() == null){

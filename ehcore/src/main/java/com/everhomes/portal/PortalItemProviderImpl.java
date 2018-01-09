@@ -58,7 +58,7 @@ public class PortalItemProviderImpl implements PortalItemProvider {
 		/**
 		 * 有id使用原来的id，没有则生成新的
 		 */
-		Long id = sequenceProvider.getNextSequenceBlock(NameMapper.getSequenceDomainFromTablePojo(EhPortalItems.class), (long)portalItems.size());
+		Long id = sequenceProvider.getNextSequenceBlock(NameMapper.getSequenceDomainFromTablePojo(EhPortalItems.class), (long)portalItems.size() + 1);
 		List<EhPortalItems> items = new ArrayList<>();
 		for (PortalItem item: portalItems) {
 			if(item.getId() == null){

@@ -58,7 +58,7 @@ public class PortalLayoutProviderImpl implements PortalLayoutProvider {
 		/**
 		 * 有id使用原来的id，没有则生成新的
 		 */
-		Long id = sequenceProvider.getNextSequenceBlock(NameMapper.getSequenceDomainFromTablePojo(EhPortalLayouts.class), (long)portalLayouts.size());
+		Long id = sequenceProvider.getNextSequenceBlock(NameMapper.getSequenceDomainFromTablePojo(EhPortalLayouts.class), (long)portalLayouts.size() + 1);
 		List<EhPortalLayouts> mappings = new ArrayList<>();
 		for (PortalLayout layout: portalLayouts) {
 			if(layout.getId() == null){

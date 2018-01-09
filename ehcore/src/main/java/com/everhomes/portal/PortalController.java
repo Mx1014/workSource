@@ -1,6 +1,7 @@
 // @formatter:off
 package com.everhomes.portal;
 
+import com.everhomes.constants.ErrorCodes;
 import com.everhomes.rest.portal.*;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.web.bind.annotation.RequestMapping;
@@ -481,6 +482,21 @@ public class PortalController extends ControllerBase {
 	@RestReturn(PortalItemDTO.class)
 	public RestResponse getAllOrMoreItem(GetItemAllOrMoreCommand cmd){
 		return new RestResponse(portalService.getAllOrMoreItem(cmd));
+	}
+
+	/**
+	 * <p>获取版本</p>
+	 * <b>URL: /portal/listPortalVersions</b>
+	 */
+	@RequestMapping("listPortalVersions")
+	@RestReturn(ListPortalVersionResponse.class)
+	public RestResponse listPortalVersions(ListPortalVersionCommand cmd){
+		ListPortalVersionResponse res = portalService.listPortalVersions(cmd);
+
+		RestResponse response = new RestResponse(res);
+		response.setErrorCode(ErrorCodes.SUCCESS);
+		response.setErrorDescription("OK");
+		return response;
 	}
 
 	/**

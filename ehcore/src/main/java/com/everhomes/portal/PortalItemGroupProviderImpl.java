@@ -59,7 +59,7 @@ public class PortalItemGroupProviderImpl implements PortalItemGroupProvider {
 		/**
 		 * 有id使用原来的id，没有则生成新的
 		 */
-		Long id = sequenceProvider.getNextSequenceBlock(NameMapper.getSequenceDomainFromTablePojo(EhPortalItemGroups.class), (long)portalItemGroups.size());
+		Long id = sequenceProvider.getNextSequenceBlock(NameMapper.getSequenceDomainFromTablePojo(EhPortalItemGroups.class), (long)portalItemGroups.size() + 1);
 		List<EhPortalItemGroups> groups = new ArrayList<>();
 		for (PortalItemGroup group: portalItemGroups) {
 			if(group.getId() == null){

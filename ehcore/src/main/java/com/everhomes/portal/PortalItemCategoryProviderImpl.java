@@ -55,7 +55,7 @@ public class PortalItemCategoryProviderImpl implements PortalItemCategoryProvide
 		/**
 		 * 有id使用原来的id，没有则生成新的
 		 */
-		Long id = sequenceProvider.getNextSequenceBlock(NameMapper.getSequenceDomainFromTablePojo(EhPortalItemCategories.class), (long)portalItemCategories.size());
+		Long id = sequenceProvider.getNextSequenceBlock(NameMapper.getSequenceDomainFromTablePojo(EhPortalItemCategories.class), (long)portalItemCategories.size() + 1);
 		List<EhPortalItemCategories> categories = new ArrayList<>();
 		for (PortalItemCategory category: portalItemCategories) {
 			if(category.getId() == null){

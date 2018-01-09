@@ -50,10 +50,10 @@ public class PortalLaunchPadMappingProviderImpl implements PortalLaunchPadMappin
 		/**
 		 * 有id使用原来的id，没有则生成新的
 		 */
-		Long id = sequenceProvider.getNextSequenceBlock(NameMapper.getSequenceDomainFromTablePojo(EhPortalLaunchPadMappings.class), (long)portalLaunchPadMappings.size());
+		Long id = sequenceProvider.getNextSequenceBlock(NameMapper.getSequenceDomainFromTablePojo(EhPortalLaunchPadMappings.class), (long)portalLaunchPadMappings.size() + 1);
 		List<EhPortalLaunchPadMappings> mappings = new ArrayList<>();
 		for (PortalLaunchPadMapping mapping: portalLaunchPadMappings) {
-			if(mapping.getId() != null){
+			if(mapping.getId() == null){
 				id ++;
 				mapping.setId(id);
 			}
