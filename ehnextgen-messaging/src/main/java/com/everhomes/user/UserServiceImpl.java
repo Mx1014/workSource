@@ -5583,6 +5583,7 @@ public class UserServiceImpl implements UserService {
 		bodyMap.put("nickName", "王大发");
 		bodyMap.put("identifierToken", "18617156652");
 		bodyMap.put("avatar", "1231412sjkl;dkjasdj$^&*");
+		bodyMap.put("namespaceUserToken", "123142313121424124124");
 
 		MultiValueMap bodyParam = new LinkedMultiValueMap<String, Object>();
 		bodyParam.add("appKey", "578580df-7015-4a42-b61f-b5c0ec0bc38a");
@@ -5592,6 +5593,7 @@ public class UserServiceImpl implements UserService {
 		bodyParam.add("nickName", "王大发");
 		bodyParam.add("identifierToken", "18617156652");
 		bodyParam.add("avatar", "1231412sjkl;dkjasdj$^&*");
+		bodyParam.add("namespaceUserToken", "123142313121424124124");
 
 		bodyParam.add("signature", SignatureHelper.computeSignature(bodyMap,"S2rPpM5fGsgAx6CeAMTb5R2MOIsHmiScPmqCNR+NsD2TjeUlmuuls6xt1WYO/YqsGnLUMt1RKRnB5xzoVjwOng=="));
 
