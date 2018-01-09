@@ -6544,6 +6544,10 @@ public class Rentalv2ServiceImpl implements Rentalv2Service {
 					"Invalid namespaceId parameter in the command");
 		}
 
+		if (StringUtils.isBlank(cmd.getResourceType())) {
+			cmd.setResourceType(RentalV2ResourceType.DEFAULT.getCode());
+		}
+
 		GetResourceTypeListResponse response = new GetResourceTypeListResponse();
 		if(cmd.getPageAnchor() == null)
 			cmd.setPageAnchor(Long.MAX_VALUE); 
@@ -6552,7 +6556,7 @@ public class Rentalv2ServiceImpl implements Rentalv2Service {
 		locator.setAnchor(cmd.getPageAnchor());
 
 		List<RentalResourceType> resourceTypes =  this.rentalv2Provider.findRentalResourceTypes(cmd.getNamespaceId(),
-				cmd.getMenuType(), locator);
+				cmd.getMenuType(), cmd.getResourceType(), locator);
 		if(null == resourceTypes) {
 			return response;
 		}

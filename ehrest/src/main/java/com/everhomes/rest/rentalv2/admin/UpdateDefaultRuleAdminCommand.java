@@ -59,8 +59,6 @@ public class UpdateDefaultRuleAdminCommand {
 
 	//	private Byte exclusiveFlag;
 //	private Double unit;
-	private Byte autoAssign;
-	private Byte multiUnit;
 	private Byte needPay;
 	private Byte multiTimeInterval;
 //	@ItemType(AttachmentConfigDTO.class)
@@ -79,7 +77,7 @@ public class UpdateDefaultRuleAdminCommand {
 //	private List<Integer> openWeekday;
 //	@ItemType(Long.class)
 //	private List<Long> closeDates;
-	private Double siteCounts;
+
 	@ItemType(SiteNumberDTO.class)
 	private List<SiteNumberDTO> siteNumbers;
 	//	private Long cancelTime;
@@ -113,6 +111,10 @@ public class UpdateDefaultRuleAdminCommand {
 
 	@ItemType(TimeIntervalDTO.class)
 	private List<TimeIntervalDTO> halfDayTimeIntervals;
+	//迁移到资源中
+	private Double siteCounts;
+	private Byte autoAssign;
+	private Byte multiUnit;
 
 	@Override
 	public String toString() {

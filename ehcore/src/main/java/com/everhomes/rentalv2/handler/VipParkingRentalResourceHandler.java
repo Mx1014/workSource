@@ -4,7 +4,10 @@ import com.everhomes.parking.ParkingLot;
 import com.everhomes.parking.ParkingProvider;
 import com.everhomes.rentalv2.RentalResource;
 import com.everhomes.rentalv2.RentalResourceHandler;
+import com.everhomes.rentalv2.RentalResourceType;
+import com.everhomes.rentalv2.Rentalv2Provider;
 import com.everhomes.rest.rentalv2.RentalV2ResourceType;
+import com.everhomes.user.UserContext;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
 
@@ -16,17 +19,22 @@ public class VipParkingRentalResourceHandler implements RentalResourceHandler {
 
     @Autowired
     private ParkingProvider parkingProvider;
+    @Autowired
+    private Rentalv2Provider rentalv2Provider;
 
     @Override
     public RentalResource getRentalResourceById(Long id) {
 
         ParkingLot parkingLot = parkingProvider.findParkingLotById(id);
 
+        RentalResourceType type = rentalv2Provider.findRentalResourceTypes(UserContext.getCurrentNamespaceId(),
+                RentalV2ResourceType.VIP_PARKING.getCode());
+
         RentalResource resource = new RentalResource();
         resource.setId(parkingLot.getId());
         resource.setResourceName(parkingLot.getName());
         resource.setResourceType(RentalV2ResourceType.VIP_PARKING.getCode());
-
+        resource.setResourceTypeId(type.getId());
 
         return resource;
     }

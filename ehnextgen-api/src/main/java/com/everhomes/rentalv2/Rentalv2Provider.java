@@ -142,7 +142,10 @@ public interface Rentalv2Provider {
 
 	void updateRentalResourceType(RentalResourceType resourceType);
 
-	List<RentalResourceType> findRentalResourceTypes(Integer namespaceId, Byte menuType, ListingLocator locator);
+	List<RentalResourceType> findRentalResourceTypes(Integer namespaceId, Byte menuType, String resourceType,
+													 ListingLocator locator);
+
+	RentalResourceType findRentalResourceTypes(Integer namespaceId, String resourceType);
 
 	void createRentalResourceNumber(RentalResourceNumber resourceNumber);
 

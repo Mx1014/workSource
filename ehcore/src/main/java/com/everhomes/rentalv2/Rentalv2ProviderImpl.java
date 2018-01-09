@@ -1807,15 +1807,16 @@ public class Rentalv2ProviderImpl implements Rentalv2Provider {
 	}
 
 	@Override
-	public RentalResourceType findRentalResourceTypeById (Long resoureceTypeId) {
+	public RentalResourceType findRentalResourceTypeById (Long resourceTypeId) {
 
 		DSLContext context = dbProvider.getDslContext(AccessSpec.readOnly());
 		EhRentalv2ResourceTypesDao dao = new EhRentalv2ResourceTypesDao(context.configuration());
-		return ConvertHelper.convert(dao.findById(resoureceTypeId), RentalResourceType.class);
+		return ConvertHelper.convert(dao.findById(resourceTypeId), RentalResourceType.class);
 	}
 
 	@Override
-	public List<RentalResourceType> findRentalResourceTypes(Integer namespaceId, Byte menuType, ListingLocator locator) {
+	public List<RentalResourceType> findRentalResourceTypes(Integer namespaceId, Byte menuType, String resourceType,
+															ListingLocator locator) {
 		DSLContext context = dbProvider.getDslContext(AccessSpec.readOnly());
 		SelectJoinStep<Record> step = context.select().from(
 				Tables.EH_RENTALV2_RESOURCE_TYPES);
@@ -1824,6 +1825,10 @@ public class Rentalv2ProviderImpl implements Rentalv2Provider {
 
 		if(null != namespaceId){
 			condition = condition.and(Tables.EH_RENTALV2_RESOURCE_TYPES.NAMESPACE_ID.equal(namespaceId));
+		}
+
+		if (StringUtils.isNotBlank(resourceType)) {
+			condition = condition.and(Tables.EH_RENTALV2_RESOURCE_TYPES.IDENTIFY.equal(resourceType));
 		}
 
 		if (null != menuType) {
@@ -1840,6 +1845,33 @@ public class Rentalv2ProviderImpl implements Rentalv2Provider {
 		if (null != result && result.size() > 0)
 			return result ;
 		return null;
+
+	}
+
+	@Override
+	public RentalResourceType findRentalResourceTypes(Integer namespaceId, String resourceType) {
+		DSLContext context = dbProvider.getDslContext(AccessSpec.readOnly());
+		SelectJoinStep<Record> step = context.select().from(
+				Tables.EH_RENTALV2_RESOURCE_TYPES);
+
+		Condition condition = Tables.EH_RENTALV2_RESOURCE_TYPES.STATUS.equal(ResourceTypeStatus.NORMAL.getCode());
+
+		if(null != namespaceId){
+			condition = condition.and(Tables.EH_RENTALV2_RESOURCE_TYPES.NAMESPACE_ID.equal(namespaceId));
+		}
+
+		if (StringUtils.isNotBlank(resourceType)) {
+			condition = condition.and(Tables.EH_RENTALV2_RESOURCE_TYPES.IDENTIFY.equal(resourceType));
+		}
+
+		step.where(condition);
+
+		RentalResourceType result = step.fetchAny()
+				.map((r) -> {
+					return ConvertHelper.convert(r, RentalResourceType.class);
+				});
+
+		return result;
 
 	}
 

@@ -13,6 +13,7 @@ import com.everhomes.util.StringHelper;
  */
 public class GetResourceTypeListCommand {
 
+	private String resourceType;
 	private Integer namespaceId;
 	private Long communityId;
 
@@ -25,7 +26,15 @@ public class GetResourceTypeListCommand {
     public String toString() {
         return StringHelper.toJsonString(this);
     }
-	
+
+	public String getResourceType() {
+		return resourceType;
+	}
+
+	public void setResourceType(String resourceType) {
+		this.resourceType = resourceType;
+	}
+
 	public Integer getNamespaceId() {
 		return namespaceId;
 	}
