@@ -464,10 +464,10 @@ public class SocialSecurityServiceImpl implements SocialSecurityService {
                 }
             }
         }
-        if (pageSize < beginNum + detailIds.size()) {
+        if (pageSize + beginNum < detailIds.size()) {
             nextPageAnchor = detailIds.get(pageSize);
         }
-        for (int i = beginNum; i < beginNum + pageSize; i++) {
+        for (int i = beginNum; i < beginNum + pageSize && i < detailIds.size(); i++) {
             SocialSecurityPaymentDTO dto = processSocialSecurityItemDTO(detailIds.get(i));
             results.add(dto);
         }
@@ -673,6 +673,7 @@ public class SocialSecurityServiceImpl implements SocialSecurityService {
         dto.setEmployeeRadixMin(base.getEmployeeRadixMin());
         dto.setEmployeeRatioMax(base.getEmployeeRatioMax());
         dto.setEmployeeRatioMin(base.getEmployeeRatioMin());
+        dto.setRatioOptions(base.getRatioOptions());
     }
 
     @Override
@@ -2231,6 +2232,7 @@ public class SocialSecurityServiceImpl implements SocialSecurityService {
         ValueOperations<String, String> valueOperations = getValueOperations(key);
         int timeout = 15;
         TimeUnit unit = TimeUnit.MINUTES;
+        Long userId = UserContext.currentUserId();
         // 先放一个和key一样的值,表示这个人key有效
         valueOperations.set(key, key, timeout, unit);
         //线程池中处理计算规则
@@ -2238,7 +2240,7 @@ public class SocialSecurityServiceImpl implements SocialSecurityService {
             @Override
             public void run() {
                 try {
-                    fileSocialSecurity(cmd.getOwnerId(), cmd.getPayMonth(), payments);
+                    fileSocialSecurity(cmd.getOwnerId(), cmd.getPayMonth(), payments, userId);
                 } catch (Exception e) {
                     LOGGER.error("calculate reports error!! cmd is  :" + cmd, e);
                 } finally {
@@ -2251,8 +2253,9 @@ public class SocialSecurityServiceImpl implements SocialSecurityService {
 
     }
 
-    private void fileSocialSecurity(Long ownerId, String payMonth, List<SocialSecurityPayment> payments) {
+    private void fileSocialSecurity(Long ownerId, String payMonth, List<SocialSecurityPayment> payments, Long userId) {
         //删除之前当月的归档表
+        LOGGER.debug("开始归档报表");
         socialSecurityPaymentLogProvider.deleteMonthLog(ownerId, payMonth);
         Long id = sequenceProvider.getNextSequenceBlock(NameMapper.getSequenceDomainFromTablePojo(EhSocialSecurityPaymentLogs.class), payments.size() + 1);
         List<EhSocialSecurityPaymentLogs> logs = new ArrayList<>();
@@ -2263,12 +2266,14 @@ public class SocialSecurityServiceImpl implements SocialSecurityService {
 //            socialSecurityPaymentLogProvider.createSocialSecurityPaymentLog(paymentLog);
         }
         socialSecurityPaymentLogProvider.batchCreateSocialSecurityPaymentLog(logs);
+        LOGGER.debug("开始计算汇总表");
+
         //归档汇总表
         socialSecuritySummaryProvider.deleteSocialSecuritySummary(ownerId, payMonth);
         SocialSecuritySummary summary = socialSecurityPaymentProvider.calculateSocialSecuritySummary(ownerId, payMonth);
         socialSecuritySummaryProvider.createSocialSecuritySummary(summary);
         //更新归档状态
-        socialSecurityPaymentProvider.updateSocialSecurityPaymentFileStatus(ownerId);
+        socialSecurityPaymentProvider.updateSocialSecurityPaymentFileStatus(ownerId, userId);
     }
 
     @Override

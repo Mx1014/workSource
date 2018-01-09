@@ -7,10 +7,8 @@ import java.util.List;
 
 import com.everhomes.rest.socialSecurity.AccumOrSocial;
 import com.everhomes.rest.socialSecurity.NormalFlag;
-import org.jooq.DSLContext;
-import org.jooq.Record;
-import org.jooq.Record1;
-import org.jooq.SelectConditionStep;
+import org.jooq.*;
+import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
 
@@ -29,6 +27,8 @@ import com.everhomes.util.DateHelper;
 
 @Component
 public class SocialSecurityPaymentProviderImpl implements SocialSecurityPaymentProvider {
+    private static final org.slf4j.Logger LOGGER = LoggerFactory.getLogger(SocialSecurityPaymentProviderImpl.class);
+
     @Autowired
     private SocialSecurityService socialSecurityService;
     @Autowired
@@ -155,16 +155,16 @@ public class SocialSecurityPaymentProviderImpl implements SocialSecurityPaymentP
     }
 
     @Override
-    public void updateSocialSecurityPaymentFileStatus(Long ownerId) {
+    public void updateSocialSecurityPaymentFileStatus(Long ownerId, Long userId) {
         getReadWriteContext().update(Tables.EH_SOCIAL_SECURITY_PAYMENTS).set(Tables.EH_SOCIAL_SECURITY_PAYMENTS.IS_FILED, NormalFlag.YES.getCode())
                 .set(Tables.EH_SOCIAL_SECURITY_PAYMENTS.FILE_TIME, new Timestamp(DateHelper.currentGMTTime().getTime()))
-                .set(Tables.EH_SOCIAL_SECURITY_PAYMENTS.FILE_UID, UserContext.currentUserId())
+                .set(Tables.EH_SOCIAL_SECURITY_PAYMENTS.FILE_UID, userId)
                 .where(Tables.EH_SOCIAL_SECURITY_PAYMENTS.ORGANIZATION_ID.eq(ownerId)).execute();
     }
 
     @Override
     public SocialSecuritySummary calculateSocialSecuritySummary(Long ownerId, String paymentMonth) {
-        return getReadOnlyContext().select(
+        SelectSeekStep1<Record9<Integer, Long, String, Long, Timestamp, Long, Timestamp, BigDecimal, BigDecimal>, Long> step = getReadOnlyContext().select(
                 Tables.EH_SOCIAL_SECURITY_PAYMENTS.NAMESPACE_ID,
                 Tables.EH_SOCIAL_SECURITY_PAYMENTS.ORGANIZATION_ID,
                 Tables.EH_SOCIAL_SECURITY_PAYMENTS.PAY_MONTH,
@@ -187,20 +187,21 @@ public class SocialSecurityPaymentProviderImpl implements SocialSecurityPaymentP
                         Tables.EH_SOCIAL_SECURITY_PAYMENTS.CREATE_TIME,
                         Tables.EH_SOCIAL_SECURITY_PAYMENTS.FILE_UID,
                         Tables.EH_SOCIAL_SECURITY_PAYMENTS.FILE_TIME)
-                .orderBy(Tables.EH_SOCIAL_SECURITY_PAYMENTS.ID.asc())
-                .fetchAny().map(r -> {
-                    SocialSecuritySummary summary = new SocialSecuritySummary();
-                    summary.setNamespaceId((Integer) r.getValue(0));
-                    summary.setOrganizationId((Long) r.getValue(1));
-                    summary.setPayMonth((String) r.getValue(2));
-                    summary.setCreatorUid((Long) r.getValue(3));
-                    summary.setCreateTime((Timestamp) r.getValue(4));
-                    summary.setFileUid((Long) r.getValue(5));
-                    summary.setFileTime((Timestamp) r.getValue(6));
-                    summary.setCompanyPayment((BigDecimal) r.getValue(7));
-                    summary.setEmployeePayment((BigDecimal) r.getValue(8));
-                    return summary;
-                });
+                .orderBy(Tables.EH_SOCIAL_SECURITY_PAYMENTS.ID.asc());
+        LOGGER.debug("sql: " + step);
+        return step.fetchAny().map(r -> {
+            SocialSecuritySummary summary = new SocialSecuritySummary();
+            summary.setNamespaceId((Integer) r.getValue(0));
+            summary.setOrganizationId((Long) r.getValue(1));
+            summary.setPayMonth((String) r.getValue(2));
+            summary.setCreatorUid((Long) r.getValue(3));
+            summary.setCreateTime((Timestamp) r.getValue(4));
+            summary.setFileUid((Long) r.getValue(5));
+            summary.setFileTime((Timestamp) r.getValue(6));
+            summary.setCompanyPayment((BigDecimal) r.getValue(7));
+            summary.setEmployeePayment((BigDecimal) r.getValue(8));
+            return summary;
+        });
 
     }
 

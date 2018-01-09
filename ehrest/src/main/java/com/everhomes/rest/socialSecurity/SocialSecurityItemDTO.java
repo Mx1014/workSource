@@ -20,6 +20,7 @@ import com.everhomes.util.StringHelper;
  * <li>employeeRadixMax: 个人基数最大值(最小等于最大的时候不可更改)</li>
  * <li>employeeRatioMin: 个人比例最小值</li>
  * <li>employeeRatioMax: 个人比例最大值(最小等于最大的时候不可更改)</li>
+ * <li>ratioOptions: 比例可选项</li>
  * <li>isDefault: 1-是社保默认项 0-是补充保险</li>
  * </ul>
  */
@@ -37,7 +38,8 @@ public class SocialSecurityItemDTO {
     private BigDecimal employeeRadixMin;
     private BigDecimal employeeRadixMax;
     private Integer employeeRatioMin;
-    private Integer employeeRatioMax;
+	private Integer employeeRatioMax;
+	private String ratioOptions;
 	private Byte editableFlag;
 	private Byte isDefault;
 	private Byte isNew;
@@ -157,5 +159,13 @@ public class SocialSecurityItemDTO {
 
 	public void setAccumOrSocial(Byte accumOrSocial) {
 		this.accumOrSocial = accumOrSocial;
+	}
+
+	public String getRatioOptions() {
+		return ratioOptions;
+	}
+
+	public void setRatioOptions(String ratioOptions) {
+		this.ratioOptions = ratioOptions;
 	}
 }
