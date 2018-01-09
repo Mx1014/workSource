@@ -2273,6 +2273,7 @@ public class SocialSecurityServiceImpl implements SocialSecurityService {
         socialSecurityPaymentProvider.updateSocialSecurityPaymentFileStatus(ownerId, userId);
         SocialSecuritySummary summary = socialSecurityPaymentProvider.calculateSocialSecuritySummary(ownerId, payMonth);
         LOGGER.debug("sumary = " + StringHelper.toJsonString(summary));
+        summary.setCreatorUid(userId);
         socialSecuritySummaryProvider.createSocialSecuritySummary(summary);
         //更新归档状态
     }
