@@ -1138,7 +1138,7 @@ public class EquipmentController extends ControllerBase {
     @RestReturn(value = String.class)
     public RestResponse createRepairsTask(CreateEquipmentRepairCommand cmd) {
        // equipmentService.createRepairsTask(cmd);
-        //TODO:物业模块生成一条维修记录 调用报修的接口
+        //TODO:物业模块生成一条维修记录  log 表中需维修状态保留  调用报修的接口
         return getSuccessResponse();
     }
 

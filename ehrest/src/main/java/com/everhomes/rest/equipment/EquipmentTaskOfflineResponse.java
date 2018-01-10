@@ -1,11 +1,14 @@
 package com.everhomes.rest.equipment;
 
 import com.everhomes.discover.ItemType;
+import com.everhomes.util.StringHelper;
 
 import java.util.List;
 
 /**
- * Created by rui.jia  2018/1/9 09 :41
+ * <li>offlineTasks:离线任务列表</li>
+ * <li>equipments:离线任务列表</li>
+ * <li>items:离线任务列表</li>
  */
 
 public class EquipmentTaskOfflineResponse {
@@ -41,5 +44,10 @@ public class EquipmentTaskOfflineResponse {
 
     public void setItems(List<InspectionItemDTO> items) {
         this.items = items;
+    }
+
+    @Override
+    public String toString() {
+        return StringHelper.toJsonString(this);
     }
 }

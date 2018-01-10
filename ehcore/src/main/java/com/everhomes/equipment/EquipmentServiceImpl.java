@@ -82,6 +82,7 @@ import com.everhomes.rest.equipment.EquipmentTaskLogsDTO;
 import com.everhomes.rest.equipment.EquipmentTaskOfflineResponse;
 import com.everhomes.rest.equipment.EquipmentTaskProcessResult;
 import com.everhomes.rest.equipment.EquipmentTaskProcessType;
+import com.everhomes.rest.equipment.EquipmentTaskReportDetail;
 import com.everhomes.rest.equipment.EquipmentTaskResult;
 import com.everhomes.rest.equipment.EquipmentTaskStatus;
 import com.everhomes.rest.equipment.EquipmentsDTO;
@@ -1858,12 +1859,13 @@ private void checkUserPrivilege(Long orgId, Long privilegeId, Long communityId) 
 		}
 
 		//process_time operator_type operator_id
-		if(EquipmentTaskStatus.WAITING_FOR_EXECUTING.equals(EquipmentTaskStatus.fromStatus(task.getStatus()))
-				|| EquipmentTaskStatus.IN_MAINTENANCE.equals(EquipmentTaskStatus.fromStatus(task.getStatus()))) {
+//		if(EquipmentTaskStatus.WAITING_FOR_EXECUTING.equals(EquipmentTaskStatus.fromStatus(task.getStatus()))
+//				|| EquipmentTaskStatus.IN_MAINTENANCE.equals(EquipmentTaskStatus.fromStatus(task.getStatus()))) {
 //			EquipmentInspectionStandards standard = equipmentProvider.findStandardById(task.getStandardId());
 //			if (standard != null) {
 //				task.setReviewExpiredDate(addDays(now, standard.getReviewExpiredDays()));
 //			}
+		if(EquipmentTaskStatus.WAITING_FOR_EXECUTING.equals(EquipmentTaskStatus.fromStatus(task.getStatus()))) {
 			EquipmentInspectionPlans plan = equipmentProvider.getEquipmmentInspectionPlanById(task.getPlanId());
 			if (plan != null) {
 				//改为统一设置
@@ -1893,12 +1895,12 @@ private void checkUserPrivilege(Long orgId, Long privilegeId, Long communityId) 
 				task.setExecutiveTime(now);
 				task.setExecutorType(OwnerType.USER.getCode());
 				task.setExecutorId(user.getId());
-				log.setProcessType(EquipmentTaskProcessType.COMPLETE.getCode());
+				log.setProcessType(EquipmentTaskProcessType.COMPLETE.getCode());//日志记录类型  完成上报 现在是ask状态置为执行已完成
 				if (task.getExecutiveExpireTime() == null || now.before(task.getExecutiveExpireTime())) {
-					task.setResult(EquipmentTaskResult.COMPLETE_OK.getCode());
+					//task.setResult(EquipmentTaskResult.COMPLETE_OK.getCode());
 					log.setProcessResult(EquipmentTaskProcessResult.COMPLETE_OK.getCode());
 				} else {
-					task.setResult(EquipmentTaskResult.COMPLETE_DELAY.getCode());
+					//task.setResult(EquipmentTaskResult.COMPLETE_DELAY.getCode());
 					log.setProcessResult(EquipmentTaskProcessResult.COMPLETE_DELAY.getCode());
 				}
 			}
@@ -1947,15 +1949,17 @@ private void checkUserPrivilege(Long orgId, Long privilegeId, Long communityId) 
 			EquipmentTaskDTO dto = null;
 			equipmentProvider.updateEquipmentTask(task);
 			equipmentTasksSearcher.feedDoc(task);
+			//多个设备巡检详情上报(一个任务支持多个设备)
 			for (int i = 0; i < cmd.getEquipmentTaskReportDetails().size(); i++) {
-				if (cmd.getEquipmentTaskReportDetails().get(i).getMessage() != null) {
-					log.setProcessMessage(cmd.getEquipmentTaskReportDetails().get(i).getMessage());
+				EquipmentTaskReportDetail reportDetail = cmd.getEquipmentTaskReportDetails().get(i);
+				if (reportDetail.getMessage() != null) {
+					log.setProcessMessage(reportDetail.getMessage());
 				}
 				//任务多设备log表增加设备id
 				log.setEquipmentId(cmd.getEquipmentTaskReportDetails().get(i).getEquipmentId());
 				dto = updateEquipmentTasksAttachmentAndLogs(task, log, cmd.getEquipmentTaskReportDetails().get(i).getAttachments());
 
-				List<InspectionItemResult> itemResults = cmd.getEquipmentTaskReportDetails().get(i).getItemResults();
+				List<InspectionItemResult> itemResults = reportDetail.getItemResults();
 				if (itemResults != null && itemResults.size() > 0) {
 
 					for (InspectionItemResult itemResult : itemResults) {
@@ -1965,8 +1969,8 @@ private void checkUserPrivilege(Long orgId, Long privilegeId, Long communityId) 
 //						result.setStandardId(task.getStandardId());
 //						result.setEquipmentId(task.getEquipmentId());
 						//这里因为一个任务对应多个设备了 需要增加设备id来确定log是哪个设备的  之前是通过taskid确认因为一对一
-						result.setEquipmentId(cmd.getEquipmentTaskReportDetails().get(i).getEquipmentId());
-						result.setStandardId(cmd.getEquipmentTaskReportDetails().get(i).getStandardId());
+						result.setEquipmentId(reportDetail.getEquipmentId());
+						result.setStandardId(reportDetail.getStandardId());
 						result.setInspectionCategoryId(task.getInspectionCategoryId());
 						result.setNamespaceId(task.getNamespaceId());
 						equipmentProvider.createEquipmentInspectionItemResults(result);
@@ -2276,21 +2280,21 @@ private void checkUserPrivilege(Long orgId, Long privilegeId, Long communityId) 
 //			}
 //		}
 
-
-		if(cmd.getOperatorType() != null) {
-			task.setOperatorType(cmd.getOperatorType());
-			log.setTargetType(cmd.getOperatorType());
-		}
-
-		if(cmd.getOperatorId() != null) {
-			task.setOperatorId(cmd.getOperatorId());
-			log.setTargetId(cmd.getOperatorId());
-		}
-
-		if(cmd.getEndTime() != null) {
-			task.setProcessExpireTime(new Timestamp(cmd.getEndTime()));
-			log.setProcessEndTime(task.getProcessExpireTime());
-		}
+//     维修人 维修时间 维修类型对接物业报修后去除
+//		if(cmd.getOperatorType() != null) {
+//			task.setOperatorType(cmd.getOperatorType());
+//			log.setTargetType(cmd.getOperatorType());
+//		}
+//
+//		if(cmd.getOperatorId() != null) {
+//			task.setOperatorId(cmd.getOperatorId());
+//			log.setTargetId(cmd.getOperatorId());
+//		}
+//
+//		if(cmd.getEndTime() != null) {
+//			task.setProcessExpireTime(new Timestamp(cmd.getEndTime()));
+//			log.setProcessEndTime(task.getProcessExpireTime());
+//		}
 
 		if(!StringUtils.isEmpty(cmd.getOperatorType()) && cmd.getOperatorId() != null
 				 && cmd.getEndTime() != null) {
@@ -2300,6 +2304,7 @@ private void checkUserPrivilege(Long orgId, Long privilegeId, Long communityId) 
 			List<OrganizationMember> operators = organizationProvider.listOrganizationMembersByUId(task.getOperatorId());
 			Map<String, Object> map = new HashMap<String, Object>();
 			map.put("reviewerName", reviewers.get(0).getContactName());
+			//以下都可以去除 暂时保留   v3.0.3
 			map.put("operatorName", operators.get(0).getContactName());
 			map.put("deadline", timeToStr(new Timestamp(cmd.getEndTime())));
 
@@ -2313,7 +2318,7 @@ private void checkUserPrivilege(Long orgId, Long privilegeId, Long communityId) 
 			notifyMap.put("deadline", timeToStr(new Timestamp(cmd.getEndTime())));
 			int code = EquipmentNotificationTemplateCode.ASSIGN_TASK_NOTIFY_OPERATOR;
 			String notifyTextForApplicant = localeTemplateService.getLocaleTemplateString(scope, code, locale, notifyMap, "");
-			sendMessageToUser(cmd.getOperatorId(), notifyTextForApplicant);
+			//sendMessageToUser(cmd.getOperatorId(), notifyTextForApplicant);
 		}
 		equipmentProvider.updateEquipmentTask(task);
 		equipmentTasksSearcher.feedDoc(task);

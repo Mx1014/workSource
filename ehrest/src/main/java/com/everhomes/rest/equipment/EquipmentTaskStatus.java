@@ -14,8 +14,12 @@ import com.everhomes.util.StringHelper;
  */
 public enum EquipmentTaskStatus {
 
-	NONE((byte) 0, ""), WAITING_FOR_EXECUTING((byte) 1, "待执行"), NEED_MAINTENANCE((byte) 2, "需维修"),
-	IN_MAINTENANCE((byte) 3, "待维修"), CLOSE((byte) 4, "已完成"), DELAY((byte) 5, "任务已延期"),
+	NONE((byte) 0, ""),
+	WAITING_FOR_EXECUTING((byte) 1, "待执行"),
+	NEED_MAINTENANCE((byte) 2, "需维修"),//取消
+	IN_MAINTENANCE((byte) 3, "待维修"), //取消
+	CLOSE((byte) 4, "已完成"),
+	DELAY((byte) 5, "任务已延期"),
 	WAITTING_FOR_APPROVAL((byte) 6, "待审核"),
 	QUALIFIED((byte) 7, "审核通过"),
 	UNQUALIFIED((byte) 8, "审核不通过"),
