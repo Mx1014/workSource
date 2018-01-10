@@ -57,6 +57,10 @@ public class ListSocialSecurityPaymentsCommand {
 
 	}
 
+	public ListSocialSecurityPaymentsCommand(Long ownerId) {
+		this.ownerId = ownerId;
+	}
+
 	public ListSocialSecurityPaymentsCommand(String ownerType, Long ownerId, Long socialSecurityCityId, Long accumulationFundCityId, Long deptId, String keywords, List<Byte> filterItems, Long pageAnchor, Integer pageSize) {
 		super();
 		this.ownerType = ownerType;

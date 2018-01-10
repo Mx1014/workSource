@@ -26,6 +26,8 @@ import com.everhomes.rest.organization.*;
 import com.everhomes.rest.socialSecurity.*;
 import com.everhomes.sequence.SequenceProvider;
 import com.everhomes.server.schema.Tables;
+import com.everhomes.server.schema.tables.EhOrganizationMemberDetails;
+import com.everhomes.server.schema.tables.EhOrganizationMembers;
 import com.everhomes.server.schema.tables.pojos.EhSocialSecurityPaymentLogs;
 import com.everhomes.server.schema.tables.pojos.EhSocialSecurityPayments;
 import com.everhomes.server.schema.tables.pojos.EhSocialSecuritySettings;
@@ -95,6 +97,8 @@ public class SocialSecurityServiceImpl implements SocialSecurityService {
     @Autowired
     private RegionProvider regionProvider;
     @Autowired
+    private OrganizationService organizationService;
+    @Autowired
     private OrganizationProvider organizationProvider;
     @Autowired
     private CommunityProvider communityProvider;
@@ -102,8 +106,6 @@ public class SocialSecurityServiceImpl implements SocialSecurityService {
     private BigCollectionProvider bigCollectionProvider;
     @Autowired
     private ConfigurationProvider configurationProvider;
-    @Autowired
-    private ArchivesService archivesService;
     @Autowired
     private SequenceProvider sequenceProvider;
     @Autowired
@@ -282,13 +284,14 @@ public class SocialSecurityServiceImpl implements SocialSecurityService {
             ssBases.addAll(afBases);
         }
         //TODO:
-        List<Long> detailIds = archivesService.listSocialSecurityEmployees(ownerId, null, null, null);
+        ListSocialSecurityPaymentsCommand command = new ListSocialSecurityPaymentsCommand(ownerId);
+        List<SocialSecurityEmployeeDTO> members = listSocialSecurityEmployeeDetailIds(command);
+//        List<Long> detailIds = archivesService.listSocialSecurityEmployees(ownerId, null, null, null);
 //        List<OrganizationMemberDetails> details = organizationProvider.listOrganizationMemberDetails(ownerId);
         Long id = sequenceProvider.getNextSequence(NameMapper.getSequenceDomainFromTablePojo(EhSocialSecuritySettings.class));
         List<EhSocialSecuritySettings> settings = new ArrayList<>();
-        for (Long detailId : detailIds) {
-            OrganizationMemberDetails detail = organizationProvider.findOrganizationMemberDetailsByDetailId(detailId);
-            id = saveSocialSecuritySettings(ssBases, cityId, ownerId, detail.getTargetId(), detail.getId(), detail.getNamespaceId(), id, settings);
+        for (SocialSecurityEmployeeDTO dto : members) {
+            id = saveSocialSecuritySettings(ssBases, cityId, ownerId, dto.getUserId(), dto.getDetailId(), dto.getNamespaceId(), id, settings);
 //            id = saveSocialSecuritySettings(afBases, cityId, ownerId, detail.getTargetId(), detail.getId(), detail.getNamespaceId(), id, settings);
         }
         sequenceProvider.getNextSequenceBlock(NameMapper.getSequenceDomainFromTablePojo(EhSocialSecuritySettings.class), settings.size());
@@ -402,7 +405,7 @@ public class SocialSecurityServiceImpl implements SocialSecurityService {
             return null;
 
         });
-        List<Long> detailIds = listSocialSecurityEmployeeDetailIds(cmd);
+        List<SocialSecurityEmployeeDTO> members = listSocialSecurityEmployeeDetailIds(cmd);
 
 //        SsorAfPay payFlag = null;
 //        if (null != cmd.getFilterItems()) {
@@ -2501,19 +2504,35 @@ public class SocialSecurityServiceImpl implements SocialSecurityService {
         return log;
     }
 
-    public List<Long> listSocialSecurityEmployeeDetailIds(ListSocialSecurityPaymentsCommand cmd) {
-        //  1.set the departmentId
+    public List<SocialSecurityEmployeeDTO> listSocialSecurityEmployeeDetailIds(ListSocialSecurityPaymentsCommand cmd) {
+        List<SocialSecurityEmployeeDTO> results = new ArrayList<>();
+        EhOrganizationMemberDetails t2 = Tables.EH_ORGANIZATION_MEMBER_DETAILS.as("t2");
+
+        //  set the departmentId
         Long organizationId = cmd.getOwnerId();
         if (cmd.getDeptId() != null)
             organizationId = cmd.getDeptId();
 
-        List<Long> results = organizationProvider.queryOrganizationPersonnelDetailIds(new ListingLocator(), Integer.MAX_VALUE - 1, organizationId, (locator, query) -> {
+        List<OrganizationMember> records = organizationProvider.queryOrganizationPersonnelDetailIds(new ListingLocator(), Integer.MAX_VALUE - 1, organizationId, (locator, query) -> {
             if (cmd.getSocialSecurityStatus() != null)
-                query.addConditions(Tables.EH_ORGANIZATION_MEMBER_DETAILS.SOCIAL_SECURITY_STATUS.eq(cmd.getSocialSecurityStatus()));
+                query.addConditions(t2.SOCIAL_SECURITY_STATUS.eq(cmd.getSocialSecurityStatus()));
             if (cmd.getAccumulationFundStatus() != null)
-                query.addConditions(Tables.EH_ORGANIZATION_MEMBER_DETAILS.ACCUMULATION_FUND_STATUS.eq(cmd.getAccumulationFundStatus()));
-
+                query.addConditions(t2.ACCUMULATION_FUND_STATUS.eq(cmd.getAccumulationFundStatus()));
             return query;
+        });
+
+        records.stream().map(r ->{
+            SocialSecurityEmployeeDTO dto = new SocialSecurityEmployeeDTO();
+            dto.setContactName(r.getContactName());
+            dto.setUserId(r.getTargetId());
+            dto.setDetailId(r.getDetailId());
+            dto.setNamespaceId(r.getNamespaceId());
+            dto.setDepartmentName(getDepartmentName(r.getDetailId()));
+            dto.setCheckInTime(r.getCheckInTime());
+            dto.setSocialSecurityStatus(r.getSocialSecurityStatus());
+            dto.setAccumulationFundStatus(r.getAccumulationFundStatus());
+            results.add(dto);
+            return null;
         });
         return results;
     }
@@ -2539,6 +2558,14 @@ public class SocialSecurityServiceImpl implements SocialSecurityService {
         date = c.getTime();
         java.sql.Date sqlDate = new java.sql.Date(date.getTime());
         return sqlDate;
+    }
+
+    private String getDepartmentName(Long detailId){
+        Long departmentId = organizationService.getDepartmentByDetailId(detailId);
+        Organization department = organizationProvider.findOrganizationById(departmentId);
+        if(department != null)
+            return department.getName();
+        return null;
     }
 
     @Override

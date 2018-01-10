@@ -6070,10 +6070,10 @@ public class OrganizationProviderImpl implements OrganizationProvider {
 	}*/
 
 	@Override
-	public List<Long> queryOrganizationPersonnelDetailIds(ListingLocator locator, Integer pageSize, Long organizationId, ListingQueryBuilderCallback queryBuilderCallback) {
-        DSLContext context = dbProvider.getDslContext(AccessSpec.readOnly());
-        List<Long> results = new ArrayList<>();
+	public List<OrganizationMember> queryOrganizationPersonnelDetailIds(ListingLocator locator, Integer pageSize, Long organizationId, ListingQueryBuilderCallback queryBuilderCallback) {
+        List<OrganizationMember> results = new ArrayList<>();
 
+		DSLContext context = dbProvider.getDslContext(AccessSpec.readOnly());
         TableLike t1 = Tables.EH_ORGANIZATION_MEMBERS.as("t1");
         TableLike t2 = Tables.EH_ORGANIZATION_MEMBER_DETAILS.as("t2");
         SelectQuery<Record> query = context.selectQuery();
@@ -6095,7 +6095,13 @@ public class OrganizationProviderImpl implements OrganizationProvider {
 		query.addLimit(pageSize);
 		query.addGroupBy(t1.field("contact_token"));
 
-		results = query.fetchInto(Long.class);
+		List<OrganizationMember> records = query.fetch().map(new OrganizationMemberRecordMapper());
+		if(records !=null){
+			records.stream().map(r ->{
+				results.add(ConvertHelper.convert(r, OrganizationMember.class));
+				return null;
+			});
+		}
 		return results;
 	}
 }
