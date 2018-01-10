@@ -49,4 +49,21 @@ public class DomainProviderImpl implements DomainProvider {
         return null;
     }
 
+    /**
+     * 现在用于测试
+     * @return
+     */
+    @Override
+    public List<Domain> listAllDomains() {
+        List<Domain> results = new ArrayList<>();
+        DSLContext context = dbProvider.getDslContext(AccessSpec.readOnly());
+        SelectQuery<EhDomainsRecord> query = context.selectQuery(Tables.EH_DOMAINS);
+        query.fetch().map((r) -> {
+            results.add(ConvertHelper.convert(r, Domain.class));
+            return null;
+        });
+
+        return results;
+    }
+
 }

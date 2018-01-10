@@ -13,6 +13,9 @@ import org.springframework.stereotype.Service;
 import org.springframework.util.StringUtils;
 
 import javax.servlet.http.HttpServletRequest;
+import java.util.List;
+import java.util.stream.Collectors;
+import java.util.stream.Stream;
 
 @Service
 public class DomainServiceImpl implements DomainService {
@@ -44,6 +47,27 @@ public class DomainServiceImpl implements DomainService {
         }
 
         return dto;
+    }
+
+    /**
+     * 用于测试
+     * @return
+     */
+    @Override
+    public List<DomainDTO> listAllDomains() {
+
+        List<Domain> domains = domainProvider.listAllDomains();
+
+        List<DomainDTO> list = domains.stream().map(r -> {
+            DomainDTO dto = ConvertHelper.convert(r, DomainDTO.class);
+            if (dto.getIconUri() != null) {
+                String url = contentServerService.parserUri(dto.getIconUri(), EntityType.DOMAIN.getCode(), dto.getId());
+                dto.setIconUrl(url);
+            }
+            return dto;
+        }).collect(Collectors.toList());
+
+        return list;
     }
 
 }

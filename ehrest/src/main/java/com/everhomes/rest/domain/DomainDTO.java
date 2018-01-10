@@ -4,6 +4,7 @@ import com.everhomes.util.StringHelper;
 
 /**
  * <ul>
+ *     <li>Id: Id</li>
  *     <li>namespaceId: 域空间</li>
  *     <li>portalType: 门户类型，左邻域类型：zuolin，物业公司:pm 和企业：enterprise</li>
  *     <li>portalId: 配置类型，左邻域类型填0，物业公司和企业填具体id</li>
@@ -14,6 +15,8 @@ import com.everhomes.util.StringHelper;
  * </ul>
  */
 public class DomainDTO {
+
+	private Long Id;
 
 	private Integer namespaceId;
 
@@ -28,6 +31,14 @@ public class DomainDTO {
 	private String iconUrl;
 
 	private String name;
+
+	public Long getId() {
+		return Id;
+	}
+
+	public void setId(Long id) {
+		Id = id;
+	}
 
 	public Integer getNamespaceId() {
 		return namespaceId;
