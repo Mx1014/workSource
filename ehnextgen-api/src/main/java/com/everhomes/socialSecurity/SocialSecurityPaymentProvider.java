@@ -38,4 +38,6 @@ public interface SocialSecurityPaymentProvider {
 	List<Long> listDetailsByPayFlag(List<Long> detailIds, Byte accOrSocial);
 
 	void batchCreateSocialSecurityPayment(List<EhSocialSecurityPayments> payments);
+
+	void deleteSocialSecurityPaymentsByDetailIds(List<Long> detailIds);
 }

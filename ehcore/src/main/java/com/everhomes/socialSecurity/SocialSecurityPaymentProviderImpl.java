@@ -225,6 +225,13 @@ public class SocialSecurityPaymentProviderImpl implements SocialSecurityPaymentP
         DaoHelper.publishDaoAction(DaoAction.CREATE, EhSocialSecurityPayments.class, null);
     }
 
+    @Override
+    public void deleteSocialSecurityPaymentsByDetailIds(List<Long> detailIds) {
+
+        getReadWriteContext().delete(Tables.EH_SOCIAL_SECURITY_PAYMENTS)
+                .where(Tables.EH_SOCIAL_SECURITY_PAYMENTS.DETAIL_ID.in(detailIds)).execute();
+    }
+
 
     private EhSocialSecurityPaymentsDao getReadWriteDao() {
         return getDao(getReadWriteContext());

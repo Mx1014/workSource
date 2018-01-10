@@ -124,9 +124,10 @@ public class SocialSecuritySettingProviderImpl implements SocialSecuritySettingP
     }
 
     @Override
-    public List<SocialSecuritySetting> listSocialSecuritySetting(Set<Long> detailIds) {
+    public List<SocialSecuritySetting> listSocialSecuritySetting(Set<Long> detailIds, AccumOrSocial accumOrSocial) {
         Result<Record> record = getReadOnlyContext().select().from(Tables.EH_SOCIAL_SECURITY_SETTINGS)
                 .where(Tables.EH_SOCIAL_SECURITY_SETTINGS.DETAIL_ID.in(detailIds))
+                .and(Tables.EH_SOCIAL_SECURITY_SETTINGS.ACCUM_OR_SOCAIL.eq(accumOrSocial.getCode()))
                 .orderBy(Tables.EH_SOCIAL_SECURITY_SETTINGS.ID.asc()).fetch();
         if (null == record || record.size() == 0) {
             return null;
