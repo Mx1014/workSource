@@ -3,6 +3,8 @@ package com.everhomes.controller;
 
 import com.everhomes.app.App;
 import com.everhomes.app.AppProvider;
+import com.everhomes.bigcollection.Accessor;
+import com.everhomes.bigcollection.BigCollectionProvider;
 import com.everhomes.configuration.ConfigurationProvider;
 import com.everhomes.constants.ErrorCodes;
 import com.everhomes.contentserver.ContentServer;
@@ -22,6 +24,8 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.slf4j.MDC;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.data.redis.core.RedisTemplate;
+import org.springframework.data.redis.serializer.StringRedisSerializer;
 import org.springframework.web.method.HandlerMethod;
 import org.springframework.web.servlet.HandlerInterceptor;
 import org.springframework.web.servlet.ModelAndView;
@@ -32,6 +36,7 @@ import javax.servlet.http.HttpServletResponse;
 import java.net.InetAddress;
 import java.util.*;
 import java.util.Map.Entry;
+import java.util.concurrent.TimeUnit;
 
 /**
  * Interceptor that checks REST API signatures
@@ -70,6 +75,11 @@ public class WebRequestInterceptor implements HandlerInterceptor {
 
     @Autowired
     private DomainService domainService;
+
+    @Autowired
+    private BigCollectionProvider bigCollectionProvider;
+
+    private final StringRedisSerializer stringRedisSerializer = new StringRedisSerializer();
 
     public WebRequestInterceptor() {
     }
@@ -133,6 +143,8 @@ public class WebRequestInterceptor implements HandlerInterceptor {
             setupVersionContext(userAgents);
             setupScheme(userAgents);
             setupDomain(request);
+            //加上频率控制
+            frequencyControlHandler(request,handler);
             if (isProtected(handler)) {
                 LoginToken token = userService.getLoginToken(request);
                 // isValid转移到UserServiceImpl，使得其它地方也可以调（如第三方登录WebRequestWeixinInterceptor） by lqs 20160922
@@ -209,7 +221,7 @@ public class WebRequestInterceptor implements HandlerInterceptor {
             }
             return true;
         } finally {
-            if (LOGGER.isDebugEnabled()) {
+             if (LOGGER.isDebugEnabled()) {
 
                 StringBuffer sb = new StringBuffer();
                 sb.append("{");
@@ -706,5 +718,33 @@ public class WebRequestInterceptor implements HandlerInterceptor {
         } catch (Exception e) {
             LOGGER.error("Failed to check the user-agent in http/https header, userAgents={}", userAgents, e);
         }
+    }
+
+    private void frequencyControlHandler(HttpServletRequest request, Object handler) throws FrequencyControlException {
+        if (handler instanceof HandlerMethod) {
+            HandlerMethod handlerMethod = (HandlerMethod) handler;
+            FrequencyControl control = handlerMethod.getMethod().getAnnotation(FrequencyControl.class);
+            if (control != null) {
+                String ip = request.getLocalAddr();
+                String url = request.getRequestURL().toString();
+                String key = "req_limit_".concat(url).concat(ip).concat("hash") + request.getParameterMap().hashCode();
+
+                Map<String, Integer> coutMap = new HashMap<String, Integer>();
+
+                Accessor acc = this.bigCollectionProvider.getMapAccessor(key, "");
+                RedisTemplate redisTemplate = acc.getTemplate(stringRedisSerializer);
+                Object redisCount = redisTemplate.opsForValue().get(key);
+                if (redisCount == null) {
+                    redisTemplate.opsForValue().set(key, "1", control.time(), TimeUnit.MILLISECONDS);
+                } else {
+                    redisTemplate.opsForValue().increment(key, 1);
+                    if (Integer.valueOf(redisTemplate.opsForValue().get(key).toString()) > control.count()) {
+                        LOGGER.info("用户IP[" + ip + "]访问地址[" + url + "]超过了限定的次数[" + control.count() + "]");
+                        throw new FrequencyControlException("\"用户IP[\" + ip + \"]访问地址[\" + url + \"]超过了限定的次数[\" + control.count() + \"]\"");
+                    }
+                }
+            }
+        }
+
     }
 }
