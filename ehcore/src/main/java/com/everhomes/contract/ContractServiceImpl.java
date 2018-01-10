@@ -625,7 +625,6 @@ public class ContractServiceImpl implements ContractService {
 		}
 		contract.setCreateUid(UserContext.currentUserId());
 		contract.setCreateTime(new Timestamp(DateHelper.currentGMTTime().getTime()));
-		contract.setStatus(ContractStatus.DRAFT.getCode()); //存草稿状态
 		contractProvider.createContract(contract);
 
 		dealContractAttachments(contract.getId(), cmd.getAttachments());
