@@ -1,5 +1,7 @@
 package com.everhomes.rest.domain;
 
+import com.everhomes.util.StringHelper;
+
 /**
  * <ul>
  *     <li>namespaceId: 域空间</li>
@@ -8,6 +10,7 @@ package com.everhomes.rest.domain;
  *     <li>domain: 域名</li>
  *     <li>iconUri: iconUri</li>
  *     <li>iconUrl: iconUrl</li>
+ *     <li>name: name</li>
  * </ul>
  */
 public class DomainDTO {
@@ -23,6 +26,8 @@ public class DomainDTO {
 	private String iconUri;
 
 	private String iconUrl;
+
+	private String name;
 
 	public Integer getNamespaceId() {
 		return namespaceId;
@@ -70,5 +75,18 @@ public class DomainDTO {
 
 	public void setIconUrl(String iconUrl) {
 		this.iconUrl = iconUrl;
+	}
+
+	public String getName() {
+		return name;
+	}
+
+	public void setName(String name) {
+		this.name = name;
+	}
+
+	@Override
+	public String toString() {
+		return StringHelper.toJsonString(this);
 	}
 }
