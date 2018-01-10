@@ -2512,4 +2512,16 @@ public class SocialSecurityServiceImpl implements SocialSecurityService {
         List<Long> detailIds = socialSecurityInoutTimeProvider.listSocialSecurityEmployeeDetailIdsByPayMonth(ownerId, payMonth, InOutTimeType.SOCIAL_SECURITY.getCode());
         return archivesService.listSocialSecurityEmployees(ownerId, null, null, null);
     }
+	@Override
+	public void increseSocialSecurity(IncreseSocialSecurityCommand cmd) {
+	
+
+	}
+
+	@Override
+	public void decreseSocialSecurity(DecreseSocialSecurityCommand cmd) {
+	
+
+	}
+
 }
