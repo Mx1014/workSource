@@ -150,8 +150,24 @@ public class ZhongBaiChangParkingVendorHandler extends DefaultParkingVendorHandl
 			params.put("end_date", endTime);
 			params.put("remark", null);
 			params.put("signature", ZhongBaiChangSignatureUtil.getSign(params, secretKey));
-			String result = Utils.post(url + url_context, JSONObject.parseObject(StringHelper.toJsonString(params)),
+			String result = null;
+			try{
+				result = Utils.post(url + url_context, JSONObject.parseObject(StringHelper.toJsonString(params)),
 					StandardCharsets.UTF_8);
+			}catch (Exception e) {
+				LOGGER.error("The request error,", e);
+				return false;
+			}
+			//将充值信息存入订单
+			order.setErrorDescriptionJson(result);
+			String validEnd = card.getData().getEndTime();
+			//计算这一次的充值时间开始日期
+			Long startPeriod = Utils.strToLong(validEnd, Utils.DateStyle.DATE_TIME);
+
+			
+			order.setStartPeriod(new Timestamp(startPeriod));
+			order.setEndPeriod(Utils.getTimestampByAddNatureMonth(startPeriod, order.getMonthCount().intValue()));
+			
 			ZhongBaiChangCardInfo<ZhongBaiChangData> entity = JSONObject.parseObject(result,
 					new TypeReference<ZhongBaiChangCardInfo<ZhongBaiChangData>>() {
 					});
