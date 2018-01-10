@@ -5,7 +5,6 @@ import com.everhomes.configuration.ConfigurationProvider;
 import com.everhomes.listing.CrossShardListingLocator;
 import com.everhomes.organization.OrganizationProvider;
 import com.everhomes.portal.PortalService;
-import com.everhomes.rest.acl.PrivilegeConstants;
 import com.everhomes.rest.equipment.EquipmentStandardRelationDTO;
 import com.everhomes.rest.equipment.InspectionStandardMapTargetType;
 import com.everhomes.rest.equipment.SearchEquipmentStandardRelationsCommand;
@@ -131,7 +130,7 @@ public class EquipmentStandardMapSearcherImpl extends AbstractElasticSearch impl
 		} else {
 			userPrivilegeMgr.checkCurrentUserAuthority(null, null, cmd.getOwnerId(), privilegeId);
 		}*/
-		checkUserPrivilege(cmd.getOwnerId(), PrivilegeConstants.EQUIPMENT_RELATION_LIST,cmd.getTargetId());
+		//checkUserPrivilege(cmd.getOwnerId(), PrivilegeConstants.EQUIPMENT_RELATION_LIST,cmd.getTargetId());
 
 		SearchRequestBuilder builder = getClient().prepareSearch(getIndexName()).setTypes(getIndexType());
 		QueryBuilder qb = null;
