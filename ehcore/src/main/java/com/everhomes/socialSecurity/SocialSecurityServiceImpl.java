@@ -13,6 +13,7 @@ import com.everhomes.coordinator.CoordinationProvider;
 import com.everhomes.db.DbProvider;
 import com.everhomes.filedownload.TaskService;
 import com.everhomes.listing.CrossShardListingLocator;
+import com.everhomes.listing.ListingLocator;
 import com.everhomes.naming.NameMapper;
 import com.everhomes.organization.*;
 import com.everhomes.region.Region;
@@ -24,6 +25,7 @@ import com.everhomes.rest.filedownload.TaskType;
 import com.everhomes.rest.organization.*;
 import com.everhomes.rest.socialSecurity.*;
 import com.everhomes.sequence.SequenceProvider;
+import com.everhomes.server.schema.Tables;
 import com.everhomes.server.schema.tables.pojos.EhSocialSecurityPaymentLogs;
 import com.everhomes.server.schema.tables.pojos.EhSocialSecurityPayments;
 import com.everhomes.server.schema.tables.pojos.EhSocialSecuritySettings;
@@ -209,6 +211,9 @@ public class SocialSecurityServiceImpl implements SocialSecurityService {
         List<SocialSecuritySetting> settings = socialSecuritySettingProvider.listSocialSecuritySetting(detailIds);
         List<EhSocialSecurityPayments> payments = new ArrayList<>();
         Long id = sequenceProvider.getNextSequence(NameMapper.getSequenceDomainFromTablePojo(EhSocialSecurityPayments.class));
+        if (null == settings) {
+            return;
+        }
         for (SocialSecuritySetting setting : settings) {
             EhSocialSecurityPayments payment = processSocialSecurityPayment(setting, paymentMonth, NormalFlag.NO.getCode());
             payment.setId(id++);
@@ -239,12 +244,15 @@ public class SocialSecurityServiceImpl implements SocialSecurityService {
         //把属于该公司的所有要交社保的setting取出来
         Set<Long> detailIds = new HashSet<>();
         detailIds.addAll(listSocialSecurityEmployeeDetailIdsByPayMonth(ownerId, paymentMonth));
+        if (null != detailIds) {
+
 //        List<OrganizationMemberDetails> details = organizationProvider.listOrganizationMemberDetails(ownerId);
 //        if (null == details) {
 //            return;
 //        }
 //        detailIds = details.stream().map(r -> r.getId()).collect(Collectors.toSet());
-        createPayments(detailIds, paymentMonth);
+            createPayments(detailIds, paymentMonth);
+        }
     }
 
     private Long getZuolinNamespaceCityId(Long cityId) {
@@ -394,7 +402,7 @@ public class SocialSecurityServiceImpl implements SocialSecurityService {
             return null;
 
         });
-        List<Long> detailIds = archivesService.listSocialSecurityEmployees(cmd.getOwnerId(), cmd.getDeptId(), cmd.getKeywords(), cmd.getFilterItems());
+        List<Long> detailIds = queryOrganizationPersonnelDetailIds(cmd);
 
 //        SsorAfPay payFlag = null;
 //        if (null != cmd.getFilterItems()) {
@@ -2232,6 +2240,7 @@ public class SocialSecurityServiceImpl implements SocialSecurityService {
         ValueOperations<String, String> valueOperations = getValueOperations(key);
         int timeout = 15;
         TimeUnit unit = TimeUnit.MINUTES;
+        Long userId = UserContext.currentUserId();
         // 先放一个和key一样的值,表示这个人key有效
         valueOperations.set(key, key, timeout, unit);
         //线程池中处理计算规则
@@ -2239,7 +2248,7 @@ public class SocialSecurityServiceImpl implements SocialSecurityService {
             @Override
             public void run() {
                 try {
-                    fileSocialSecurity(cmd.getOwnerId(), cmd.getPayMonth(), payments);
+                    fileSocialSecurity(cmd.getOwnerId(), cmd.getPayMonth(), payments, userId);
                 } catch (Exception e) {
                     LOGGER.error("calculate reports error!! cmd is  :" + cmd, e);
                 } finally {
@@ -2252,8 +2261,9 @@ public class SocialSecurityServiceImpl implements SocialSecurityService {
 
     }
 
-    private void fileSocialSecurity(Long ownerId, String payMonth, List<SocialSecurityPayment> payments) {
+    private void fileSocialSecurity(Long ownerId, String payMonth, List<SocialSecurityPayment> payments, Long userId) {
         //删除之前当月的归档表
+        LOGGER.debug("开始归档报表");
         socialSecurityPaymentLogProvider.deleteMonthLog(ownerId, payMonth);
         Long id = sequenceProvider.getNextSequenceBlock(NameMapper.getSequenceDomainFromTablePojo(EhSocialSecurityPaymentLogs.class), payments.size() + 1);
         List<EhSocialSecurityPaymentLogs> logs = new ArrayList<>();
@@ -2264,12 +2274,16 @@ public class SocialSecurityServiceImpl implements SocialSecurityService {
 //            socialSecurityPaymentLogProvider.createSocialSecurityPaymentLog(paymentLog);
         }
         socialSecurityPaymentLogProvider.batchCreateSocialSecurityPaymentLog(logs);
+        LOGGER.debug("开始计算汇总表");
+
         //归档汇总表
         socialSecuritySummaryProvider.deleteSocialSecuritySummary(ownerId, payMonth);
+        socialSecurityPaymentProvider.updateSocialSecurityPaymentFileStatus(ownerId, userId);
         SocialSecuritySummary summary = socialSecurityPaymentProvider.calculateSocialSecuritySummary(ownerId, payMonth);
+        LOGGER.debug("sumary = " + StringHelper.toJsonString(summary));
+        summary.setCreatorUid(userId);
         socialSecuritySummaryProvider.createSocialSecuritySummary(summary);
         //更新归档状态
-        socialSecurityPaymentProvider.updateSocialSecurityPaymentFileStatus(ownerId);
     }
 
     @Override
@@ -2487,6 +2501,46 @@ public class SocialSecurityServiceImpl implements SocialSecurityService {
         return log;
     }
 
+    public List<Long> queryOrganizationPersonnelDetailIds(ListSocialSecurityPaymentsCommand cmd){
+        //  1.set the departmentId
+        Long organizationId = cmd.getOwnerId();
+        if(cmd.getDeptId()!=null)
+            organizationId = cmd.getDeptId();
+
+        List<Long> results = organizationProvider.queryOrganizationPersonnelDetailIds(new ListingLocator(),Integer.MAX_VALUE-1,organizationId,(locator, query) -> {
+            if(cmd.getSocialSecurityStatus()!=null)
+                query.addConditions(Tables.EH_ORGANIZATION_MEMBER_DETAILS.SOCIAL_SECURITY_STATUS.eq(cmd.getSocialSecurityStatus()));
+            if(cmd.getAccumulationFundStatus()!=null)
+                query.addConditions(Tables.EH_ORGANIZATION_MEMBER_DETAILS.ACCUMULATION_FUND_STATUS.eq(cmd.getAccumulationFundStatus()));
+
+            return query;
+        });
+        return results;
+    }
+
+    private java.sql.Date getTheFirstDate(String m) throws ParseException {
+        Calendar c = Calendar.getInstance();
+        SimpleDateFormat df = new SimpleDateFormat("yyyyMM");
+        Date date = df.parse(m);
+        c.setTime(date);
+        c.add(Calendar.MONTH, 0);
+        c.set(Calendar.DAY_OF_MONTH,1); //  设置为1号,当前日期既为本月第一天
+        date = c.getTime();
+        java.sql.Date sqlDate = new java.sql.Date(date.getTime());
+        return sqlDate;
+    }
+
+    private java.sql.Date getTheLastDate(String m) throws ParseException {
+        Calendar c = Calendar.getInstance();
+        SimpleDateFormat df = new SimpleDateFormat("yyyyMM");
+        Date date = df.parse(m);
+        c.setTime(date);
+        c.set(Calendar.DAY_OF_MONTH, c.getActualMaximum(Calendar.DAY_OF_MONTH)); //  获取当前月最后一天
+        date = c.getTime();
+        java.sql.Date sqlDate = new java.sql.Date(date.getTime());
+        return sqlDate;
+    }
+
     @Override
     public SocialSecurityEmployeeDTO getSocialSecurityEmployeeInfo(Long detailId) {
         SocialSecurityEmployeeDTO dto = new SocialSecurityEmployeeDTO();
@@ -2510,7 +2564,7 @@ public class SocialSecurityServiceImpl implements SocialSecurityService {
     @Override
     public List<Long> listSocialSecurityEmployeeDetailIdsByPayMonth(Long ownerId, String payMonth) {
         List<Long> detailIds = socialSecurityInoutTimeProvider.listSocialSecurityEmployeeDetailIdsByPayMonth(ownerId, payMonth, InOutTimeType.SOCIAL_SECURITY.getCode());
-        return archivesService.listSocialSecurityEmployees(ownerId, null, null, null);
+        return detailIds;
     }
 	@Override
 	public void increseSocialSecurity(IncreseSocialSecurityCommand cmd) {

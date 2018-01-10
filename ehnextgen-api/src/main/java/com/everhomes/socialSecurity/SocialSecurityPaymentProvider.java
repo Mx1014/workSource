@@ -31,7 +31,7 @@ public interface SocialSecurityPaymentProvider {
 
 	void deleteSocialSecurityPayments(Long ownerId);
 
-	void updateSocialSecurityPaymentFileStatus(Long ownerId);
+	void updateSocialSecurityPaymentFileStatus(Long ownerId, Long userId);
 
 	SocialSecuritySummary calculateSocialSecuritySummary(Long ownerId, String paymentMonth);
 
