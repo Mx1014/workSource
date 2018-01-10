@@ -16,6 +16,10 @@ import com.everhomes.util.StringHelper;
  * <li>deptId: 部门id</li>
  * <li>keywords: 查询关键词-员工姓名</li>
  * <li>filterItems: 筛选项-多选</li>
+ * <li>socialSecurityStatus: 0-未缴, 1-在缴</li>
+ * <li>accumulationFundStatus: 0-未缴, 1-在缴</li>
+ * <li>checkInMonth: 入职月份</li>
+ * <li>dismissMonth: 离职月份</li>
  * <li>pageAnchor: 锚点</li>
  * <li>pageSize: 每页大小</li>
  * </ul>
@@ -34,8 +38,16 @@ public class ListSocialSecurityPaymentsCommand {
 
 	private String keywords;
 
+	private Byte socialSecurityStatus;
+
+	private Byte accumulationFundStatus;
+
+	private String checkInMonth;
+
+	private String dismissMonth;
+/*
 	@ItemType(Byte.class)
-	private List<Byte> filterItems;
+	private List<Byte> filterItems;*/
 
 	private Long pageAnchor;
 
@@ -53,7 +65,7 @@ public class ListSocialSecurityPaymentsCommand {
 		this.accumulationFundCityId = accumulationFundCityId;
 		this.deptId = deptId;
 		this.keywords = keywords;
-		this.filterItems = filterItems;
+//		this.filterItems = filterItems;
 		this.pageAnchor = pageAnchor;
 		this.pageSize = pageSize;
 	}
@@ -106,12 +118,36 @@ public class ListSocialSecurityPaymentsCommand {
 		this.keywords = keywords;
 	}
 
-	public List<Byte> getFilterItems() {
-		return filterItems;
+	public Byte getSocialSecurityStatus() {
+		return socialSecurityStatus;
 	}
 
-	public void setFilterItems(List<Byte> filterItems) {
-		this.filterItems = filterItems;
+	public void setSocialSecurityStatus(Byte socialSecurityStatus) {
+		this.socialSecurityStatus = socialSecurityStatus;
+	}
+
+	public Byte getAccumulationFundStatus() {
+		return accumulationFundStatus;
+	}
+
+	public void setAccumulationFundStatus(Byte accumulationFundStatus) {
+		this.accumulationFundStatus = accumulationFundStatus;
+	}
+
+	public String getCheckInMonth() {
+		return checkInMonth;
+	}
+
+	public void setCheckInMonth(String checkInMonth) {
+		this.checkInMonth = checkInMonth;
+	}
+
+	public String getDismissMonth() {
+		return dismissMonth;
+	}
+
+	public void setDismissMonth(String dismissMonth) {
+		this.dismissMonth = dismissMonth;
 	}
 
 	public Long getPageAnchor() {

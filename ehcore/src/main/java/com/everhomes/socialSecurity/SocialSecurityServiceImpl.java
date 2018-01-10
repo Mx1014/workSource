@@ -13,6 +13,7 @@ import com.everhomes.coordinator.CoordinationProvider;
 import com.everhomes.db.DbProvider;
 import com.everhomes.filedownload.TaskService;
 import com.everhomes.listing.CrossShardListingLocator;
+import com.everhomes.listing.ListingLocator;
 import com.everhomes.naming.NameMapper;
 import com.everhomes.organization.*;
 import com.everhomes.region.Region;
@@ -24,6 +25,7 @@ import com.everhomes.rest.filedownload.TaskType;
 import com.everhomes.rest.organization.*;
 import com.everhomes.rest.socialSecurity.*;
 import com.everhomes.sequence.SequenceProvider;
+import com.everhomes.server.schema.Tables;
 import com.everhomes.server.schema.tables.pojos.EhSocialSecurityPaymentLogs;
 import com.everhomes.server.schema.tables.pojos.EhSocialSecurityPayments;
 import com.everhomes.server.schema.tables.pojos.EhSocialSecuritySettings;
@@ -400,7 +402,7 @@ public class SocialSecurityServiceImpl implements SocialSecurityService {
             return null;
 
         });
-        List<Long> detailIds = archivesService.listSocialSecurityEmployees(cmd.getOwnerId(), cmd.getDeptId(), cmd.getKeywords(), cmd.getFilterItems());
+        List<Long> detailIds = queryOrganizationPersonnelDetailIds(cmd);
 
 //        SsorAfPay payFlag = null;
 //        if (null != cmd.getFilterItems()) {
@@ -2497,6 +2499,46 @@ public class SocialSecurityServiceImpl implements SocialSecurityService {
 
         //  return it.
         return log;
+    }
+
+    public List<Long> queryOrganizationPersonnelDetailIds(ListSocialSecurityPaymentsCommand cmd){
+        //  1.set the departmentId
+        Long organizationId = cmd.getOwnerId();
+        if(cmd.getDeptId()!=null)
+            organizationId = cmd.getDeptId();
+
+        List<Long> results = organizationProvider.queryOrganizationPersonnelDetailIds(new ListingLocator(),Integer.MAX_VALUE-1,organizationId,(locator, query) -> {
+            if(cmd.getSocialSecurityStatus()!=null)
+                query.addConditions(Tables.EH_ORGANIZATION_MEMBER_DETAILS.SOCIAL_SECURITY_STATUS.eq(cmd.getSocialSecurityStatus()));
+            if(cmd.getAccumulationFundStatus()!=null)
+                query.addConditions(Tables.EH_ORGANIZATION_MEMBER_DETAILS.ACCUMULATION_FUND_STATUS.eq(cmd.getAccumulationFundStatus()));
+
+            return query;
+        });
+        return results;
+    }
+
+    private java.sql.Date getTheFirstDate(String m) throws ParseException {
+        Calendar c = Calendar.getInstance();
+        SimpleDateFormat df = new SimpleDateFormat("yyyyMM");
+        Date date = df.parse(m);
+        c.setTime(date);
+        c.add(Calendar.MONTH, 0);
+        c.set(Calendar.DAY_OF_MONTH,1); //  设置为1号,当前日期既为本月第一天
+        date = c.getTime();
+        java.sql.Date sqlDate = new java.sql.Date(date.getTime());
+        return sqlDate;
+    }
+
+    private java.sql.Date getTheLastDate(String m) throws ParseException {
+        Calendar c = Calendar.getInstance();
+        SimpleDateFormat df = new SimpleDateFormat("yyyyMM");
+        Date date = df.parse(m);
+        c.setTime(date);
+        c.set(Calendar.DAY_OF_MONTH, c.getActualMaximum(Calendar.DAY_OF_MONTH)); //  获取当前月最后一天
+        date = c.getTime();
+        java.sql.Date sqlDate = new java.sql.Date(date.getTime());
+        return sqlDate;
     }
 
     @Override

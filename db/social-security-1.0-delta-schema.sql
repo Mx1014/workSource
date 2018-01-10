@@ -383,3 +383,5 @@ CREATE TABLE `eh_social_security_inout_log` (
   KEY `i_eh_organization_id` (`organization_id`)
 ) ENGINE = INNODB DEFAULT CHARSET = utf8mb4 ;
 
+ALTER TABLE `eh_organization_member_details` ADD COLUMN `social_security_status` TINYINT NOT NULL DEFAULT 0 COMMENT '0-pending, 1-paying';
+ALTER TABLE `eh_organization_member_details` ADD COLUMN `accumulation_fund_status` TINYINT NOT NULL DEFAULT 0 COMMENT '0-pending, 1-paying';
