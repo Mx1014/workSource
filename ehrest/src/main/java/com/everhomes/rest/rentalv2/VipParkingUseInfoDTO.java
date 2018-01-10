@@ -20,6 +20,7 @@ public class VipParkingUseInfoDTO {
     private String plateNumber;
     private String plateOwnerName;
     private String plateOwnerPhone;
+    private String plateOwnerEnterpriseName;
     private String priceStr;
     private String spaceNo;
     private String spaceAddress;
@@ -27,6 +28,14 @@ public class VipParkingUseInfoDTO {
     @Override
     public String toString() {
         return StringHelper.toJsonString(this);
+    }
+
+    public String getPlateOwnerEnterpriseName() {
+        return plateOwnerEnterpriseName;
+    }
+
+    public void setPlateOwnerEnterpriseName(String plateOwnerEnterpriseName) {
+        this.plateOwnerEnterpriseName = plateOwnerEnterpriseName;
     }
 
     public Long getParkingLotId() {
