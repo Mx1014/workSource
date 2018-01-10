@@ -81,7 +81,6 @@ import com.everhomes.listing.CrossShardListingLocator;
 import com.everhomes.listing.ListingLocator;
 import com.everhomes.locale.LocaleStringService;
 import com.everhomes.locale.LocaleTemplateService;
-import com.everhomes.messaging.MessagingService;
 import com.everhomes.naming.NameMapper;
 import com.everhomes.organization.OrganizationMember;
 import com.everhomes.organization.OrganizationProvider;
@@ -316,16 +315,13 @@ public class Rentalv2ServiceImpl implements Rentalv2Service {
 	}
 
 	private void createPriceRules(PriceRuleType priceRuleType, Long ruleId, List<PriceRuleDTO> priceRules) {
-		LOGGER.debug("test enter cerate resource price rules, defaultRule={}", JSON.toJSON(priceRules));
 
 		if (priceRules != null && !priceRules.isEmpty()) {
-			LOGGER.debug("test foreach cerate resource price rules, defaultRule={}", JSON.toJSON(priceRules));
 
 			priceRules.forEach(p->createPriceRule(priceRuleType, ruleId, p));
 		}
 	}
 	private void createPricePackages(PriceRuleType priceRuleType, Long ruleId,List<PricePackageDTO> pricePackages){
-		LOGGER.debug("test enter cerate resource price packages, defaultRule={}", JSON.toJSON(pricePackages));
 
 		if (pricePackages!=null && !pricePackages.isEmpty()){
 			pricePackages.forEach(p->createPricePackage(priceRuleType,ruleId,p));
@@ -1562,7 +1558,7 @@ public class Rentalv2ServiceImpl implements Rentalv2Service {
 
 			//用基于服务器平台的锁添加订单（包括验证和添加）
 			Tuple<Long, Boolean> tuple = this.coordinationProvider
-					.getNamedLock(CoordinationLocks.CREATE_RENTAL_BILL.getCode() + rs.getId())
+					.getNamedLock(CoordinationLocks.CREATE_RENTAL_BILL.getCode() + rs.getResourceType() + rs.getId())
 					.enter(() -> {
 						// this.groupProvider.updateGroup(group);
 						this.validateRentalBill(cmd.getRules());
@@ -2801,6 +2797,7 @@ public class Rentalv2ServiceImpl implements Rentalv2Service {
 			PriceRuleDTO rule = new PriceRuleDTO();
 			rule.setRentalType(r);
 			rule.setPriceType(RentalPriceType.LINEARITY.getCode());
+			rule.setUserPriceType(RentalUserPriceType.UNIFICATION.getCode());
 			rule.setInitiatePrice(new BigDecimal(0));
 			rule.setWorkdayPrice(new BigDecimal(0));
 			rule.setApprovingUserWorkdayPrice(new BigDecimal(0));
@@ -3345,9 +3342,9 @@ public class Rentalv2ServiceImpl implements Rentalv2Service {
 					order.setStatus(SiteBillStatus.FAIL.getCode());
 				}
 				//更新bill状态
-				//只要退款就给管理员发消息,不管是退款中还是已退款
 				order.setStatus(SiteBillStatus.REFUNDED.getCode());
 				rentalv2Provider.updateRentalBill(order);
+				//只要退款就给管理员发消息,不管是退款中还是已退款
 				onOrderCancel(order);
 				if (order.getDoorAuthId() != null) //解除门禁授权
 					doorAccessService.deleteDoorAuth(order.getDoorAuthId());
@@ -6001,15 +5998,12 @@ public class Rentalv2ServiceImpl implements Rentalv2Service {
 		List<AddRentalSiteSingleSimpleRule> addSingleRules = new ArrayList<>();
 
 		BigDecimal workdayPrice = priceRule.getWorkdayPrice() == null ? new BigDecimal(0) : priceRule.getWorkdayPrice();
-		BigDecimal weekendPrice = priceRule.getWeekendPrice() == null ? new BigDecimal(0) : priceRule.getWeekendPrice();
 		BigDecimal initiatePrice = priceRule.getInitiatePrice() == null ? new BigDecimal(0) : priceRule.getInitiatePrice();
 
 		BigDecimal orgMemberWorkdayPrice = priceRule.getOrgMemberWorkdayPrice() == null ? new BigDecimal(0) : priceRule.getOrgMemberWorkdayPrice();
-		BigDecimal orgMemberWeekendPrice = priceRule.getOrgMemberWeekendPrice() == null ? new BigDecimal(0) : priceRule.getOrgMemberWeekendPrice();
 		BigDecimal orgMemberInitiatePrice = priceRule.getOrgMemberInitiatePrice() == null ? new BigDecimal(0) : priceRule.getOrgMemberInitiatePrice();
 
 		BigDecimal approvingUserWorkdayPrice = priceRule.getApprovingUserWorkdayPrice() == null ? new BigDecimal(0) : priceRule.getApprovingUserWorkdayPrice();
-		BigDecimal approvingUserWeekendPrice = priceRule.getApprovingUserWeekendPrice() == null ? new BigDecimal(0) : priceRule.getApprovingUserWeekendPrice();
 		BigDecimal approvingUserInitiatePrice = priceRule.getApprovingUserInitiatePrice() == null ? new BigDecimal(0) : priceRule.getApprovingUserInitiatePrice();
 
 
@@ -6033,13 +6027,10 @@ public class Rentalv2ServiceImpl implements Rentalv2Service {
 					singleCmd.setEndTime(timeInterval.getEndTime());
 					singleCmd.setTimeStep(timeInterval.getTimeStep());
 					singleCmd.setWorkdayPrice(workdayPrice);
-					singleCmd.setWeekendPrice(weekendPrice);
 					singleCmd.setInitiatePrice(initiatePrice);
 					singleCmd.setOrgMemberWorkdayPrice(orgMemberWorkdayPrice);
-					singleCmd.setOrgMemberWeekendPrice(orgMemberWeekendPrice);
 					singleCmd.setOrgMemberInitiatePrice(orgMemberInitiatePrice);
 					singleCmd.setApprovingUserWorkdayPrice(approvingUserWorkdayPrice);
-					singleCmd.setApprovingUserWeekendPrice(approvingUserWeekendPrice);
 					singleCmd.setApprovingUserInitiatePrice(approvingUserInitiatePrice);
 
 					singleCmd.setSiteCounts(resource.getResourceCounts());
@@ -6055,13 +6046,10 @@ public class Rentalv2ServiceImpl implements Rentalv2Service {
 			singleCmd.setRentalType(priceRule.getRentalType());
 			singleCmd.setPriceType(priceRule.getPriceType());
 			singleCmd.setWorkdayPrice(workdayPrice);
-			singleCmd.setWeekendPrice(weekendPrice);
 			singleCmd.setInitiatePrice(initiatePrice);
 			singleCmd.setOrgMemberWorkdayPrice(orgMemberWorkdayPrice);
-			singleCmd.setOrgMemberWeekendPrice(orgMemberWeekendPrice);
 			singleCmd.setOrgMemberInitiatePrice(orgMemberInitiatePrice);
 			singleCmd.setApprovingUserWorkdayPrice(approvingUserWorkdayPrice);
-			singleCmd.setApprovingUserWeekendPrice(approvingUserWeekendPrice);
 			singleCmd.setApprovingUserInitiatePrice(approvingUserInitiatePrice);
 
 			singleCmd.setSiteCounts(resource.getResourceCounts());
@@ -6291,8 +6279,7 @@ public class Rentalv2ServiceImpl implements Rentalv2Service {
 				if(cmd.getLoopType().equals(LoopType.ONLYTHEDAY.getCode())){
 					//当天的
 					
-						if(cmd.getRentalType().equals(RentalType.HOUR.getCode()))
-							{
+						if(cmd.getRentalType().equals(RentalType.HOUR.getCode())) {
 								//按小时
 								Timestamp beginTime = Timestamp.valueOf(dateSF.get().format(choseRSR.getBeginTime().getTime())+ " "
 										+ String.valueOf( cmd.getBeginTime().intValue())
@@ -6306,9 +6293,7 @@ public class Rentalv2ServiceImpl implements Rentalv2Service {
 										+ ":00");
 								changeRentalSiteRules = findRentalSiteRuleByDate(choseRSR.getRentalResourceId(),choseRSR.getResourceNumber(),beginTime,endTime,
 										null, dateSF.get().format(choseRSR.getResourceRentalDate()));
-							}
-						
-						else if(cmd.getRentalType().equals(RentalType.HALFDAY.getCode())){
+						}else if(cmd.getRentalType().equals(RentalType.HALFDAY.getCode())){
 							List<Byte> ampmList = new ArrayList<>();
 							//0早上1下午2晚上
 							if(AmorpmFlag.AM.getCode()>=cmd.getBeginTime()&&AmorpmFlag.AM.getCode()<=cmd.getEndTime())
@@ -6318,8 +6303,7 @@ public class Rentalv2ServiceImpl implements Rentalv2Service {
 							
 							changeRentalSiteRules = findRentalSiteRuleByDate(choseRSR.getRentalResourceId(),choseRSR.getResourceNumber(),null,null,
 									ampmList,dateSF.get().format(choseRSR.getResourceRentalDate()));
-						}
-						else if(cmd.getRentalType().equals(RentalType.THREETIMEADAY.getCode())){
+						}else if(cmd.getRentalType().equals(RentalType.THREETIMEADAY.getCode())){
 							List<Byte> ampmList = new ArrayList<>();
 							//0早上1下午2晚上
 							if(AmorpmFlag.AM.getCode()>=cmd.getBeginTime()&&AmorpmFlag.AM.getCode()<=cmd.getEndTime())
@@ -6330,8 +6314,7 @@ public class Rentalv2ServiceImpl implements Rentalv2Service {
 								ampmList.add(AmorpmFlag.NIGHT.getCode());
 							changeRentalSiteRules = findRentalSiteRuleByDate(choseRSR.getRentalResourceId(),choseRSR.getResourceNumber(),null,null,
 									ampmList, dateSF.get().format(choseRSR.getResourceRentalDate()));
-						}
-						else if(cmd.getRentalType().equals(RentalType.DAY.getCode())){
+						}else if(cmd.getRentalType().equals(RentalType.DAY.getCode())){
 							 
 							changeRentalSiteRules = findRentalSiteRuleByDate(choseRSR.getRentalResourceId(),choseRSR.getResourceNumber(),null,null,
 									null, dateSF.get().format(choseRSR.getResourceRentalDate()));
@@ -7030,12 +7013,15 @@ public class Rentalv2ServiceImpl implements Rentalv2Service {
 
 		String ownerType = null;
 		Long ownerId = null;
+		String priceRuleType = null;
 		if (RuleSourceType.DEFAULT.getCode().equals(sourceType)) {
 			ownerType = EhRentalv2DefaultRules.class.getSimpleName();
 			ownerId = rule.getId();
+			priceRuleType = PriceRuleType.DEFAULT.getCode();
 		}else if (RuleSourceType.RESOURCE.getCode().equals(sourceType)) {
 			ownerType = EhRentalv2Resources.class.getSimpleName();
 			ownerId = rule.getSourceId();
+			priceRuleType = PriceRuleType.RESOURCE.getCode();
 		}
 
 		String halfOwnerType = RentalTimeIntervalOwnerType.DEFAULT_HALF_DAY.getCode();
@@ -7060,6 +7046,9 @@ public class Rentalv2ServiceImpl implements Rentalv2Service {
 					.collect(Collectors.toList()));
 		}
 
+		List<Rentalv2PriceRule> priceRules = rentalv2PriceRuleProvider.listPriceRuleByOwner(priceRuleType, ownerId);
+		dto.setRentalTypes(priceRules.stream().map(Rentalv2PriceRule::getRentalType).collect(Collectors.toList()));
+
 		return dto;
 	}
 
@@ -7077,6 +7066,10 @@ public class Rentalv2ServiceImpl implements Rentalv2Service {
 			throw RuntimeErrorException.errorWith(RentalServiceErrorCode.SCOPE,
 					RentalServiceErrorCode.ERROR_DEFAULT_RULE_NOT_FOUND, "RentalDefaultRule not found");
 		}
+
+		buildPriceRules(cmd.getPriceRules());
+
+		buildPricePackages(cmd.getPricePackages());
 
 		BeanUtils.copyProperties(cmd, rule);
 
@@ -7103,6 +7096,52 @@ public class Rentalv2ServiceImpl implements Rentalv2Service {
 
 			return null;
 		});
+	}
+
+	private void buildPriceRules(List<PriceRuleDTO> priceRuleDTOS) {
+		if (null != priceRuleDTOS && !priceRuleDTOS.isEmpty()) {
+			//统一价格时，将3种价格都设置成一样
+			if (priceRuleDTOS.get(0).getUserPriceType() == RentalUserPriceType.UNIFICATION.getCode()) {
+					priceRuleDTOS.forEach(r -> {
+					r.setOrgMemberInitiatePrice(r.getInitiatePrice());
+					r.setOrgMemberWorkdayPrice(r.getWorkdayPrice());
+					r.setOrgMemberDiscountType(r.getDiscountType());
+					r.setOrgMemberDiscountRatio(r.getDiscountRatio());
+					r.setOrgMemberFullPrice(r.getFullPrice());
+					r.setOrgMemberCutPrice(r.getCutPrice());
+
+					r.setApprovingUserInitiatePrice(r.getInitiatePrice());
+					r.setApprovingUserWorkdayPrice(r.getWorkdayPrice());
+					r.setApprovingUserDiscountType(r.getDiscountType());
+					r.setApprovingUserDiscountRatio(r.getDiscountRatio());
+					r.setApprovingUserFullPrice(r.getFullPrice());
+					r.setApprovingUserCutPrice(r.getCutPrice());
+				});
+			}
+		}
+	}
+
+	private void buildPricePackages(List<PricePackageDTO> pricePackageDTOS) {
+		if (null != pricePackageDTOS && !pricePackageDTOS.isEmpty()) {
+			//统一价格时，将3种价格都设置成一样
+			if (pricePackageDTOS.get(0).getUserPriceType() == RentalUserPriceType.UNIFICATION.getCode()) {
+					pricePackageDTOS.forEach(r -> {
+					r.setOrgMemberInitiatePrice(r.getInitiatePrice());
+					r.setOrgMemberPrice(r.getPrice());
+					r.setOrgMemberDiscountType(r.getDiscountType());
+					r.setOrgMemberDiscountRatio(r.getDiscountRatio());
+					r.setOrgMemberFullPrice(r.getFullPrice());
+					r.setOrgMemberCutPrice(r.getCutPrice());
+
+					r.setApprovingUserInitiatePrice(r.getInitiatePrice());
+					r.setApprovingUserPrice(r.getPrice());
+					r.setApprovingUserDiscountType(r.getDiscountType());
+					r.setApprovingUserDiscountRatio(r.getDiscountRatio());
+					r.setApprovingUserFullPrice(r.getFullPrice());
+					r.setApprovingUserCutPrice(r.getCutPrice());
+				});
+			}
+		}
 	}
 
 	@Override
@@ -7137,6 +7176,11 @@ public class Rentalv2ServiceImpl implements Rentalv2Service {
 
 		List<Rentalv2PricePackage> pricePackages = rentalv2PricePackageProvider.listPricePackageByOwner(priceRuleType, id,null,null);
 		dto.setPricePackages(pricePackages.stream().map(r->ConvertHelper.convert(r,PricePackageDTO.class)).collect(Collectors.toList()));
+
+		if (!priceRules.isEmpty()) {
+			dto.setPriceType(priceRules.get(0).getPriceType());
+			dto.setUserPriceType(priceRules.get(0).getUserPriceType());
+		}
 
 		return dto;
 	}
@@ -7431,5 +7475,32 @@ public class Rentalv2ServiceImpl implements Rentalv2Service {
 
 		return response;
 
+	}
+
+	@Override
+	public GetRenewRentalOrderInfoResponse getRenewRentalOrderInfo(GetRenewRentalOrderInfoCommand cmd) {
+
+		RentalOrder bill = rentalv2Provider.findRentalBillById(cmd.getRentalBillId());
+		//使用中才可以续费
+		if (!bill.getStatus().equals(SiteBillStatus.IN_USING.getCode())) {
+			throw RuntimeErrorException.errorWith(ErrorCodes.SCOPE_GENERAL,ErrorCodes.ERROR_INVALID_PARAMETER,
+					"Invalid parameter");
+		}
+
+		RentalResource rs = rentalCommonService.getRentalResource(bill.getResourceType(), bill.getRentalResourceId());
+
+		processCells(rs, bill.getRentalType());
+
+		Timestamp startTime = bill.getStartTime();
+		Timestamp endTime = bill.getEndTime();
+//		changeRentalSiteRules = findRentalSiteRuleByDate(bill.getRentalResourceId(),choseRSR.getResourceNumber(),
+//				beginTime,endTime, null, dateSF.get().format(bill.getRentalDate()));
+
+		return null;
+	}
+
+	@Override
+	public RentalOrderDTO renewRentalOrder(RenewRentalOrderCommand cmd) {
+		return null;
 	}
 }

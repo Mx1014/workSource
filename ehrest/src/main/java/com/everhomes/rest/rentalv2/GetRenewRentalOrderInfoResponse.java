@@ -3,7 +3,13 @@ package com.everhomes.rest.rentalv2;
 import java.math.BigDecimal;
 
 /**
- * @author sw on 2018/1/10.
+ * <ul>
+ * <li>rentalBillId: 订单id</li>
+ * <li>rentalType: rentalType</li>
+ * <li>timeStep: timeStep</li>
+ * <li>endTime: 续费结束时间</li>
+ * <li>amount: 金额</li>
+ * </ul>
  */
 public class GetRenewRentalOrderInfoResponse {
 

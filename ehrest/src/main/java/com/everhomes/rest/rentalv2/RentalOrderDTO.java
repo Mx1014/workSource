@@ -26,12 +26,15 @@ import java.util.Date;
  * <li>createTime: 订单创建时间</li>
  * <li>payTime: 支付时间</li>
  * <li>overTime: 超时时间 单位分钟</li>
+ * <li>cancelTime: cancelTime</li>
  * <li>totalAmount: 总金额</li>
  * <li>paidAmount: 已支付金额</li>
  * <li>unPayAmount: 欠费金额</li>
  * <li>refundAmount: 退款金额</li>
  * <li>status: 订单状态  参考{@link SiteBillStatus}</li>
  * <li>customObject: 业务数据 各个资源类型不一样 {@link com.everhomes.rest.rentalv2.VipParkingUseInfoDTO}</li>
+ * <li>rentalType: rentalType</li>
+ * <li>timeStep: timeStep</li>
  * </ul>
  */
 public class RentalOrderDTO {

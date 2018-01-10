@@ -56,9 +56,20 @@ public class ResourceTimeRuleDTO {
     @ItemType(TimeIntervalDTO.class)
     private List<TimeIntervalDTO> halfDayTimeIntervals;
 
+    @ItemType(Byte.class)
+    private List<Byte> rentalTypes;
+
     @Override
     public String toString() {
         return StringHelper.toJsonString(this);
+    }
+
+    public List<Byte> getRentalTypes() {
+        return rentalTypes;
+    }
+
+    public void setRentalTypes(List<Byte> rentalTypes) {
+        this.rentalTypes = rentalTypes;
     }
 
     public String getOwnerType() {

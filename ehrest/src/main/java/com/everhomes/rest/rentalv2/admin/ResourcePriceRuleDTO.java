@@ -43,9 +43,27 @@ public class ResourcePriceRuleDTO {
     @ItemType(PricePackageDTO.class)
     private List<PricePackageDTO> pricePackages;
 
+    private Byte userPriceType;
+    private Byte priceType;
     @Override
     public String toString() {
         return StringHelper.toJsonString(this);
+    }
+
+    public Byte getPriceType() {
+        return priceType;
+    }
+
+    public void setPriceType(Byte priceType) {
+        this.priceType = priceType;
+    }
+
+    public Byte getUserPriceType() {
+        return userPriceType;
+    }
+
+    public void setUserPriceType(Byte userPriceType) {
+        this.userPriceType = userPriceType;
     }
 
     public String getOwnerType() {

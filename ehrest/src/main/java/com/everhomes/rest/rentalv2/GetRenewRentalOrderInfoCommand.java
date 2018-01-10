@@ -1,7 +1,13 @@
 package com.everhomes.rest.rentalv2;
 
+
 /**
- * @author sw on 2018/1/10.
+ * <ul>
+ * <li>rentalBillId: 订单id</li>
+ * <li>rentalType: rentalType</li>
+ * <li>timeStep: timeStep</li>
+ * <li>cellCount: 单元格数量</li>
+ * </ul>
  */
 public class GetRenewRentalOrderInfoCommand {
     private Long rentalBillId;
@@ -9,7 +15,7 @@ public class GetRenewRentalOrderInfoCommand {
     private Byte rentalType;
     private Double timeStep;
 
-    private Double totalTime;
+    private Double cellCount;
 
     public Double getTimeStep() {
         return timeStep;
@@ -35,11 +41,11 @@ public class GetRenewRentalOrderInfoCommand {
         this.rentalType = rentalType;
     }
 
-    public Double getTotalTime() {
-        return totalTime;
+    public Double getCellCount() {
+        return cellCount;
     }
 
-    public void setTotalTime(Double totalTime) {
-        this.totalTime = totalTime;
+    public void setCellCount(Double cellCount) {
+        this.cellCount = cellCount;
     }
 }

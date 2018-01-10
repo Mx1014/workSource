@@ -5,16 +5,22 @@ import com.everhomes.util.StringHelper;
 import java.math.BigDecimal;
 
 /**
- * @author sw on 2018/1/8.
+ * <ul>
+ * <li>rentalBillId: 订单id</li>
+ * <li>rentalType: rentalType</li>
+ * <li>timeStep: timeStep</li>
+ * <li>endTime: 续费结束时间</li>
+ * <li>amount: 金额</li>
+ * </ul>
  */
 public class RenewRentalOrderCommand {
     private Long rentalBillId;
     private Byte rentalType;
     private Double timeStep;
 
-	private Long endTime;
+    private Long endTime;
 
-	private BigDecimal amount;
+    private BigDecimal amount;
 
     @Override
     public String toString() {

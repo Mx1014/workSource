@@ -77,7 +77,6 @@ public class AddRentalSiteSingleSimpleRule {
 	@ItemType(Long.class)
 	private List<Long> closeDates;
 	private BigDecimal workdayPrice;
-	private BigDecimal weekendPrice;
 	private BigDecimal initiatePrice;
 	private Double siteCounts;
 	@ItemType(SiteNumberDTO.class)
@@ -89,12 +88,10 @@ public class AddRentalSiteSingleSimpleRule {
 	private Byte rentalStartTimeFlag;
 	private Byte rentalEndTimeFlag;
 	private BigDecimal orgMemberWorkdayPrice;
-	private BigDecimal orgMemberWeekendPrice;
 	private BigDecimal orgMemberInitiatePrice;
 
 	private BigDecimal approvingUserInitiatePrice;
 	private BigDecimal approvingUserWorkdayPrice;
-	private BigDecimal approvingUserWeekendPrice;
 
 	@ItemType(TimeIntervalDTO.class)
 	private List<TimeIntervalDTO> halfDayTimeIntervals;
@@ -253,16 +250,6 @@ public class AddRentalSiteSingleSimpleRule {
 	}
 
 
-	public BigDecimal getWeekendPrice() {
-		return weekendPrice;
-	}
-
-
-	public void setWeekendPrice(BigDecimal weekendPrice) {
-		this.weekendPrice = weekendPrice;
-	}
-
-
 	public Double getSiteCounts() {
 		return siteCounts;
 	}
@@ -337,28 +324,12 @@ public class AddRentalSiteSingleSimpleRule {
 		this.orgMemberWorkdayPrice = orgMemberWorkdayPrice;
 	}
 
-	public BigDecimal getOrgMemberWeekendPrice() {
-		return orgMemberWeekendPrice;
-	}
-
-	public void setOrgMemberWeekendPrice(BigDecimal orgMemberWeekendPrice) {
-		this.orgMemberWeekendPrice = orgMemberWeekendPrice;
-	}
-
 	public BigDecimal getApprovingUserWorkdayPrice() {
 		return approvingUserWorkdayPrice;
 	}
 
 	public void setApprovingUserWorkdayPrice(BigDecimal approvingUserWorkdayPrice) {
 		this.approvingUserWorkdayPrice = approvingUserWorkdayPrice;
-	}
-
-	public BigDecimal getApprovingUserWeekendPrice() {
-		return approvingUserWeekendPrice;
-	}
-
-	public void setApprovingUserWeekendPrice(BigDecimal approvingUserWeekendPrice) {
-		this.approvingUserWeekendPrice = approvingUserWeekendPrice;
 	}
 
 	public List<TimeIntervalDTO> getHalfDayTimeIntervals() {

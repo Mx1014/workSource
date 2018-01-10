@@ -187,7 +187,9 @@ UPDATE eh_rentalv2_orders set resource_type = 'default';
 INSERT INTO `eh_rentalv2_resource_types` (`id`, `name`, `page_type`, `icon_uri`, `status`, `namespace_id`, `pay_mode`, `unauth_visible`, `menu_type`, `identify`)
 	VALUES ('12500', 'VIP车位预约', '0', NULL, '2', '1000000', '0', '0', '1', 'vip_parking');
 
+UPDATE eh_rentalv2_price_rules set user_price_type = 1;
 
+UPDATE eh_rentalv2_price_packages set user_price_type = 1;
 
 
 
