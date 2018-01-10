@@ -61,7 +61,7 @@ public class ZhongBaiChangParkingVendorHandler extends DefaultParkingVendorHandl
 
 	private ZhongBaiChangCardInfo<ZhongBaiChangData> getCardInfo(String plateNumber) {
 		String url = configProvider.getValue("parking.guangxinyuan.url", "http://187k01282j.iask.in");
-		String url_context = configProvider.getValue("parking.guangxinyuan.listParkingCardsByPlate.url_context",
+		String url_context = configProvider.getValue("parking.guangxinyuan.getcard.url_context",
 				"/index/member/queryMemBerByCarNo.action");
 		String trade_code = configProvider.getValue("parking.guangxinyuan.trade_code", "YYZZ_GXYS4672_GXYT7374");
 		String secretKey = configProvider.getValue("parking.guangxinyuan.secretKey", "YYZZ_GXYS4672_GXYT7374");
@@ -131,7 +131,7 @@ public class ZhongBaiChangParkingVendorHandler extends DefaultParkingVendorHandl
 		if (card != null && card.isSuccess() && card.getData() != null) {
 			String url = configProvider.getValue("parking.guangxinyuan.url", "http://187k01282j.iask.in");
 			String url_context = configProvider.getValue(
-					"parking.guangxinyuan.notifyParkingRechargeOrderPayment.url_context", "/index/member/update.action");
+					"parking.guangxinyuan.recharge.url_context", "/index/member/update.action");
 			String trade_code = configProvider.getValue("parking.guangxinyuan.trade_code", "YYZZ_GXYS4672_GXYT7374");
 			String secretKey = configProvider.getValue("parking.guangxinyuan.secretKey", "YYZZ_GXYS4672_GXYT7374");
 
