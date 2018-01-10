@@ -727,7 +727,7 @@ public class WebRequestInterceptor implements HandlerInterceptor {
             if (control != null) {
                 String ip = request.getLocalAddr();
                 String url = request.getRequestURL().toString();
-                String key = "req_limit_".concat(url).concat(ip);
+                String key = "req_limit_".concat(url).concat(ip).concat("hash") + request.getParameterMap().hashCode();
 
                 Map<String, Integer> coutMap = new HashMap<String, Integer>();
 
