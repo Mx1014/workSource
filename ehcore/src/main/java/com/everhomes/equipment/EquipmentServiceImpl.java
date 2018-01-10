@@ -4182,7 +4182,7 @@ private void checkUserPrivilege(Long orgId, Long privilegeId, Long communityId) 
 					EquipmentServiceErrorCode.ERROR_EQUIPMENT_TASK_NOT_EXIST,
 					"任务不存在");
 		}
-		List<EquipmentStandardRelationDTO> equipments = new ArrayList<>();
+		//List<EquipmentStandardRelationDTO> equipments = new ArrayList<>();
 //		DeleteEquipmentPlanCommand delCommand = new DeleteEquipmentPlanCommand();
 //		delCommand.setId(task.getPlanId());
 //		delCommand.setOwnerId(cmd.getOwnerId());

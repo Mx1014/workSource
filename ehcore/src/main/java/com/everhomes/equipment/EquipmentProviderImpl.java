@@ -1604,26 +1604,20 @@ public class EquipmentProviderImpl implements EquipmentProvider {
     }
 
     @Override
-    public List<EquipmentInspectionPlans> ListQualifiedEquipmentInspectionPlans(ListingLocator locator, int pageSize) {
+    public List<EquipmentInspectionPlans> listQualifiedEquipmentInspectionPlans() {
         DSLContext context = this.dbProvider.getDslContext(AccessSpec.readOnly());
         List<EquipmentInspectionPlans> plans = new ArrayList<>();
+        LOGGER.info("listQualifiedEquipmentInspectionPlans provider");
         SelectQuery<EhEquipmentInspectionPlansRecord> query = context.selectQuery(Tables.EH_EQUIPMENT_INSPECTION_PLANS);
         query.addConditions(Tables.EH_EQUIPMENT_INSPECTION_PLANS.STATUS.eq(EquipmentPlanStatus.QUALIFIED.getCode()));
-        if (locator.getAnchor() != null && locator.getAnchor() != 0) {
-            query.addConditions(Tables.EH_EQUIPMENT_INSPECTION_PLANS.ID.lt(locator.getAnchor()));
-        }
+
         query.addOrderBy(Tables.EH_EQUIPMENT_INSPECTION_PLANS.ID.desc());
-        query.addLimit(pageSize+1);
         query.fetch().map((r) -> {
             plans.add(ConvertHelper.convert(r, EquipmentInspectionPlans.class));
             return null;
         });
-        if (pageSize < plans.size()) {
-            plans.remove(pageSize + 1);
-            locator.setAnchor(plans.get(plans.size() - 1).getId());
-        } else {
-            locator.setAnchor(null);
-        }
+        LOGGER.info("listQualifiedEquipmentInspectionPlans" + query.getSQL());
+        LOGGER.info("plans.size()" + plans.size());
 
         return plans;
     }

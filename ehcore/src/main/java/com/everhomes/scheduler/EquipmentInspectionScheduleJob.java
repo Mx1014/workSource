@@ -6,7 +6,6 @@ import com.everhomes.equipment.EquipmentInspectionPlans;
 import com.everhomes.equipment.EquipmentProvider;
 import com.everhomes.equipment.EquipmentService;
 import com.everhomes.equipment.EquipmentStandardMap;
-import com.everhomes.listing.ListingLocator;
 import com.everhomes.repeat.RepeatService;
 import com.everhomes.util.DateHelper;
 import org.quartz.JobExecutionContext;
@@ -19,7 +18,6 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.context.annotation.Scope;
 import org.springframework.scheduling.quartz.QuartzJobBean;
 import org.springframework.stereotype.Component;
-import org.springframework.transaction.TransactionStatus;
 
 import java.sql.Timestamp;
 import java.util.List;
@@ -72,25 +70,25 @@ private static final Logger LOGGER = LoggerFactory.getLogger(EquipmentInspection
 		if (LOGGER.isInfoEnabled()){
 			LOGGER.info("EquipmentInspectionScheduleJob:createTaskByPlan.....");
 		}
-		int pageSize = 200;
-		ListingLocator locator = new ListingLocator();
-		locator.setAnchor(0L);
-		while (locator.getAnchor() != null) {
-			List<EquipmentInspectionPlans> plans = equipmentProvider.ListQualifiedEquipmentInspectionPlans(locator, pageSize);
-			for (EquipmentInspectionPlans plan : plans) {
-				//判断repeatSettings是否Active
-				dbProvider.execute((TransactionStatus status) -> {
-					if (checkPlanRepeat(plan)) {
-						//不需要校验 展示的时候过滤即可
-						equipmentService.createEquipmentTaskByPlan(plan);
-						plan.setLastCreateTasktime(new Timestamp(DateHelper.currentGMTTime().getTime()));
-						equipmentProvider.updateEquipmentInspectionPlan(plan);
-					}
-					return null;
-				});
 
+			List<EquipmentInspectionPlans> plans = equipmentProvider.listQualifiedEquipmentInspectionPlans();
+			System.out.println(plans);
+			if (plans != null && plans.size() > 0) {
+				for (EquipmentInspectionPlans plan : plans) {
+					//判断repeatSettings是否Active
+					//dbProvider.execute((TransactionStatus status) -> {
+						if (checkPlanRepeat(plan)) {
+							//不需要校验 展示的时候过滤即可
+							LOGGER.info("EquipmentInspectionScheduleJob: createEquipmentTaskByPlan.");
+							equipmentService.createEquipmentTaskByPlan(plan);
+							plan.setLastCreateTasktime(new Timestamp(DateHelper.currentGMTTime().getTime()));
+							equipmentProvider.updateEquipmentInspectionPlan(plan);
+						}
+//						return null;
+//					});
+
+				}
 			}
-		}
 	}
 
 	private boolean checkPlanRepeat(EquipmentInspectionPlans plan) {

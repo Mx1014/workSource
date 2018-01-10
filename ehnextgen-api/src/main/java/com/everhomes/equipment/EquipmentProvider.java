@@ -184,7 +184,7 @@ public interface EquipmentProvider {
 
 	void deleteEquipmentPlansMapByStandardId(Long standardId);
 
-    List<EquipmentInspectionPlans> ListQualifiedEquipmentInspectionPlans(ListingLocator locator, int pageSize);
+    List<EquipmentInspectionPlans> listQualifiedEquipmentInspectionPlans();
 
 	List<EquipmentInspectionEquipmentPlanMap> listPlanMapByEquipmentId(Long equipmentId);
 
