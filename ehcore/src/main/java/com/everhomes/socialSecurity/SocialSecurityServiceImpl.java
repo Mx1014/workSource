@@ -250,29 +250,22 @@ public class SocialSecurityServiceImpl implements SocialSecurityService {
         cmd.setOwnerId(ownerId);
         cmd.setPageSize(Integer.MAX_VALUE - 1);
         cmd.setAccumulationFundStatus(NormalFlag.YES.getCode());
-        List<Long> result = listSocialSecurityEmployeeDetailIds(cmd);
-//        detailIds.addAll(listSocialSecurityEmployeeDetailIdsByPayMonth(ownerId, paymentMonth));
+        List<SocialSecurityEmployeeDTO> result = listSocialSecurityEmployeeDetailIds(cmd);
         if (null != result) {
-
-//        List<OrganizationMemberDetails> details = organizationProvider.listOrganizationMemberDetails(ownerId);
-//        if (null == details) {
-//            return;
-//        }
-//        detailIds = details.stream().map(r -> r.getId()).collect(Collectors.toSet());
+            for (SocialSecurityEmployeeDTO dto : result) {
+                detailIds.add(dto.getDetailId());
+            }
             createPayments(detailIds, paymentMonth, AccumOrSocial.ACCUM);
         }
 
         cmd.setSocialSecurityStatus(NormalFlag.YES.getCode());
         cmd.setAccumulationFundStatus(null);
         result = listSocialSecurityEmployeeDetailIds(cmd);
-//        detailIds.addAll(listSocialSecurityEmployeeDetailIdsByPayMonth(ownerId, paymentMonth));
         if (null != result) {
+            for (SocialSecurityEmployeeDTO dto : result) {
+                detailIds.add(dto.getDetailId());
+            }
 
-//        List<OrganizationMemberDetails> details = organizationProvider.listOrganizationMemberDetails(ownerId);
-//        if (null == details) {
-//            return;
-//        }
-//        detailIds = details.stream().map(r -> r.getId()).collect(Collectors.toSet());
             createPayments(detailIds, paymentMonth, AccumOrSocial.SOCAIL);
         }
     }
@@ -303,7 +296,6 @@ public class SocialSecurityServiceImpl implements SocialSecurityService {
         if (null != afBases) {
             ssBases.addAll(afBases);
         }
-        //TODO:
         ListSocialSecurityPaymentsCommand command = new ListSocialSecurityPaymentsCommand(ownerId);
         List<SocialSecurityEmployeeDTO> members = listSocialSecurityEmployeeDetailIds(command);
 //        List<Long> detailIds = archivesService.listSocialSecurityEmployees(ownerId, null, null, null);
@@ -458,6 +450,12 @@ public class SocialSecurityServiceImpl implements SocialSecurityService {
         int pageSize = cmd.getPageSize() == null ? 10 : cmd.getPageSize();
         CrossShardListingLocator locator = new CrossShardListingLocator();
         locator.setAnchor(cmd.getPageAnchor());
+        List<Long> detailIds = new ArrayList<>();
+        if (null != members) {
+            for(SocialSecurityEmployeeDTO member: members) {
+                detailIds.add(member.getDetailId());
+            }
+        }
         if (null != cmd.getSocialSecurityCityId()) {
             detailIds = socialSecuritySettingProvider.listDetailsByCityId(detailIds, cmd.getSocialSecurityCityId(), AccumOrSocial.SOCAIL.getCode());
 
