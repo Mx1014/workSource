@@ -204,11 +204,12 @@ public class SocialSecurityServiceImpl implements SocialSecurityService {
     private void addEmployeeNewMonthPayments(String paymentMonth, OrganizationMemberDetails detail) {
         Set<Long> detailIds = new HashSet<>();
         detailIds.add(detail.getId());
-        createPayments(detailIds, paymentMonth);
+        createPayments(detailIds, paymentMonth, AccumOrSocial.ACCUM);
+        createPayments(detailIds, paymentMonth, AccumOrSocial.SOCAIL);
     }
 
-    private void createPayments(Set<Long> detailIds, String paymentMonth) {
-        List<SocialSecuritySetting> settings = socialSecuritySettingProvider.listSocialSecuritySetting(detailIds);
+    private void createPayments(Set<Long> detailIds, String paymentMonth, AccumOrSocial accumOrSocial) {
+        List<SocialSecuritySetting> settings = socialSecuritySettingProvider.listSocialSecuritySetting(detailIds, accumOrSocial);
         List<EhSocialSecurityPayments> payments = new ArrayList<>();
         Long id = sequenceProvider.getNextSequence(NameMapper.getSequenceDomainFromTablePojo(EhSocialSecurityPayments.class));
         if (null == settings) {
@@ -243,15 +244,34 @@ public class SocialSecurityServiceImpl implements SocialSecurityService {
     private void addNewMonthPayments(String paymentMonth, Long ownerId) {
         //把属于该公司的所有要交社保的setting取出来
         Set<Long> detailIds = new HashSet<>();
-        detailIds.addAll(listSocialSecurityEmployeeDetailIdsByPayMonth(ownerId, paymentMonth));
-        if (null != detailIds) {
+        ListSocialSecurityPaymentsCommand cmd = new ListSocialSecurityPaymentsCommand();
+        cmd.setOwnerId(ownerId);
+        cmd.setPageSize(Integer.MAX_VALUE - 1);
+        cmd.setAccumulationFundStatus(NormalFlag.YES.getCode());
+        List<Long> result = listSocialSecurityEmployeeDetailIds(cmd);
+//        detailIds.addAll(listSocialSecurityEmployeeDetailIdsByPayMonth(ownerId, paymentMonth));
+        if (null != result) {
 
 //        List<OrganizationMemberDetails> details = organizationProvider.listOrganizationMemberDetails(ownerId);
 //        if (null == details) {
 //            return;
 //        }
 //        detailIds = details.stream().map(r -> r.getId()).collect(Collectors.toSet());
-            createPayments(detailIds, paymentMonth);
+            createPayments(detailIds, paymentMonth,AccumOrSocial.ACCUM);
+        }
+
+        cmd.setSocialSecurityStatus(NormalFlag.YES.getCode());
+        cmd.setAccumulationFundStatus(null);
+        result = listSocialSecurityEmployeeDetailIds(cmd);
+//        detailIds.addAll(listSocialSecurityEmployeeDetailIdsByPayMonth(ownerId, paymentMonth));
+        if (null != result) {
+
+//        List<OrganizationMemberDetails> details = organizationProvider.listOrganizationMemberDetails(ownerId);
+//        if (null == details) {
+//            return;
+//        }
+//        detailIds = details.stream().map(r -> r.getId()).collect(Collectors.toSet());
+            createPayments(detailIds, paymentMonth,AccumOrSocial.SOCAIL);
         }
     }
 
@@ -688,6 +708,7 @@ public class SocialSecurityServiceImpl implements SocialSecurityService {
     public void updateSocialSecurityPayment(UpdateSocialSecurityPaymentCommand cmd) {
 
         dbProvider.execute((TransactionStatus status) -> {
+            OrganizationMemberDetails detail = organizationProvider.findOrganizationMemberDetailsByDetailId(cmd.getDetailId());
             //社保设置
             if (NormalFlag.fromCode(cmd.getPayCurrentSocialSecurityFlag()) == NormalFlag.YES) {
 
@@ -699,9 +720,11 @@ public class SocialSecurityServiceImpl implements SocialSecurityService {
                 // 保存setting表数据
                 saveSocialSecuritySettings(cmd.getSocialSecurityPayment(), cmd.getDetailId(), AccumOrSocial.SOCAIL.getCode());
                 // 保存当月payments数据
-                saveSocialSecurityPayment(cmd.getSocialSecurityPayment(), cmd.getDetailId(), NormalFlag.NO.getCode(), AccumOrSocial.SOCAIL.getCode());
-                if (NormalFlag.fromCode(cmd.getAfterPaySocialSecurityFlag()) == NormalFlag.YES) {
-                    saveSocialSecurityPayment(cmd.getAfterSocialSecurityPayment(), cmd.getDetailId(), NormalFlag.YES.getCode(), AccumOrSocial.SOCAIL.getCode());
+                if (NormalFlag.YES == NormalFlag.fromCode(detail.getSocialSecurityStatus())) {
+                    saveSocialSecurityPayment(cmd.getSocialSecurityPayment(), cmd.getDetailId(), NormalFlag.NO.getCode(), AccumOrSocial.SOCAIL.getCode());
+                    if (NormalFlag.fromCode(cmd.getAfterPaySocialSecurityFlag()) == NormalFlag.YES) {
+                        saveSocialSecurityPayment(cmd.getAfterSocialSecurityPayment(), cmd.getDetailId(), NormalFlag.YES.getCode(), AccumOrSocial.SOCAIL.getCode());
+                    }
                 }
             }
             //公积金设置
@@ -712,10 +735,12 @@ public class SocialSecurityServiceImpl implements SocialSecurityService {
                 checkSocialSercurity(bases, cmd.getAccumulationFundPayment().getItems());
                 // 保存setting表数据
                 saveSocialSecuritySettings(cmd.getAccumulationFundPayment(), cmd.getDetailId(), AccumOrSocial.ACCUM.getCode());
-                // 保存当月payments数据
-                saveSocialSecurityPayment(cmd.getAccumulationFundPayment(), cmd.getDetailId(), NormalFlag.NO.getCode(), AccumOrSocial.ACCUM.getCode());
-                if (NormalFlag.fromCode(cmd.getAfterPaySocialSecurityFlag()) == NormalFlag.YES) {
-                    saveSocialSecurityPayment(cmd.getAfterSocialSecurityPayment(), cmd.getDetailId(), NormalFlag.YES.getCode(), AccumOrSocial.ACCUM.getCode());
+                if (NormalFlag.YES == NormalFlag.fromCode(detail.getAccumulationFundStatus())) {
+                    // 保存当月payments数据
+                    saveSocialSecurityPayment(cmd.getAccumulationFundPayment(), cmd.getDetailId(), NormalFlag.NO.getCode(), AccumOrSocial.ACCUM.getCode());
+                    if (NormalFlag.fromCode(cmd.getAfterPaySocialSecurityFlag()) == NormalFlag.YES) {
+                        saveSocialSecurityPayment(cmd.getAfterSocialSecurityPayment(), cmd.getDetailId(), NormalFlag.YES.getCode(), AccumOrSocial.ACCUM.getCode());
+                    }
                 }
             }
             return null;
@@ -2524,7 +2549,7 @@ public class SocialSecurityServiceImpl implements SocialSecurityService {
         Date date = df.parse(m);
         c.setTime(date);
         c.add(Calendar.MONTH, 0);
-        c.set(Calendar.DAY_OF_MONTH,1); //  设置为1号,当前日期既为本月第一天
+        c.set(Calendar.DAY_OF_MONTH, 1); //  设置为1号,当前日期既为本月第一天
         date = c.getTime();
         java.sql.Date sqlDate = new java.sql.Date(date.getTime());
         return sqlDate;
@@ -2566,16 +2591,17 @@ public class SocialSecurityServiceImpl implements SocialSecurityService {
         List<Long> detailIds = socialSecurityInoutTimeProvider.listSocialSecurityEmployeeDetailIdsByPayMonth(ownerId, payMonth, InOutTimeType.SOCIAL_SECURITY.getCode());
         return detailIds;
     }
-	@Override
-	public void increseSocialSecurity(IncreseSocialSecurityCommand cmd) {
-	
 
-	}
+    @Override
+    public void increseSocialSecurity(IncreseSocialSecurityCommand cmd) {
 
-	@Override
-	public void decreseSocialSecurity(DecreseSocialSecurityCommand cmd) {
-	
 
-	}
+    }
+
+    @Override
+    public void decreseSocialSecurity(DecreseSocialSecurityCommand cmd) {
+
+
+    }
 
 }

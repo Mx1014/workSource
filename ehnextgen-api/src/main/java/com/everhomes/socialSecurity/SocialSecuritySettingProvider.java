@@ -29,7 +29,7 @@ public interface SocialSecuritySettingProvider {
 
 	List<SocialSecuritySetting> listSocialSecuritySetting(Long detailId);
 
-	List<SocialSecuritySetting> listSocialSecuritySetting(Set<Long> detailIds);
+	List<SocialSecuritySetting> listSocialSecuritySetting(Set<Long> detailIds, AccumOrSocial accumOrSocial);
 
 	List<Long> listDetailsByCityId(List<Long> detailIds, Long socialSecurityCityId, byte code);
 
