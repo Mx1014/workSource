@@ -396,7 +396,7 @@ public class SocialSecurityServiceImpl implements SocialSecurityService {
             return null;
 
         });
-        List<Long> detailIds = queryOrganizationPersonnelDetailIds(cmd);
+        List<Long> detailIds = listSocialSecurityEmployeeDetailIds(cmd);
 
 //        SsorAfPay payFlag = null;
 //        if (null != cmd.getFilterItems()) {
@@ -2495,16 +2495,16 @@ public class SocialSecurityServiceImpl implements SocialSecurityService {
         return log;
     }
 
-    public List<Long> queryOrganizationPersonnelDetailIds(ListSocialSecurityPaymentsCommand cmd){
+    public List<Long> listSocialSecurityEmployeeDetailIds(ListSocialSecurityPaymentsCommand cmd) {
         //  1.set the departmentId
         Long organizationId = cmd.getOwnerId();
-        if(cmd.getDeptId()!=null)
+        if (cmd.getDeptId() != null)
             organizationId = cmd.getDeptId();
 
-        List<Long> results = organizationProvider.queryOrganizationPersonnelDetailIds(new ListingLocator(),Integer.MAX_VALUE-1,organizationId,(locator, query) -> {
-            if(cmd.getSocialSecurityStatus()!=null)
+        List<Long> results = organizationProvider.queryOrganizationPersonnelDetailIds(new ListingLocator(), Integer.MAX_VALUE - 1, organizationId, (locator, query) -> {
+            if (cmd.getSocialSecurityStatus() != null)
                 query.addConditions(Tables.EH_ORGANIZATION_MEMBER_DETAILS.SOCIAL_SECURITY_STATUS.eq(cmd.getSocialSecurityStatus()));
-            if(cmd.getAccumulationFundStatus()!=null)
+            if (cmd.getAccumulationFundStatus() != null)
                 query.addConditions(Tables.EH_ORGANIZATION_MEMBER_DETAILS.ACCUMULATION_FUND_STATUS.eq(cmd.getAccumulationFundStatus()));
 
             return query;
