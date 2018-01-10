@@ -182,7 +182,7 @@ public class FlowGraph implements Serializable {
         return originalNodeToBranch.get(originalNodeId);
     }
 
-    public List<FlowGraphBranch> getBranchByConvergenceNode(Long convergenceNodeId) {
+    public List<FlowGraphBranch> getBranchByConvNode(Long convergenceNodeId) {
         return convergenceNodeToBranches.get(convergenceNodeId);
     }
 

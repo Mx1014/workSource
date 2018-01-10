@@ -468,7 +468,7 @@ public class FlowServiceImpl implements FlowService {
                 flowNodeProvider.updateFlowNode(nodeObj);
             } else {
                 nodeObj.setGotoProcessButtonName(buttonDefName(UserContext.getCurrentNamespaceId(), FlowStepType.GO_TO_PROCESS));
-                nodeObj.setParams("");
+                // nodeObj.setParams("");
                 nodeObj.setNeedAllProcessorComplete(TrueOrFalseFlag.FALSE.getCode());
 
                 // 不存在的node, 创建
@@ -5775,10 +5775,17 @@ public class FlowServiceImpl implements FlowService {
         List<FlowButtonDTO> btnList = new ArrayList<>();
 
         List<FlowCase> allFlowCase = getAllFlowCase(flowCase.getId());
-        for (FlowCase aCase : allFlowCase) {
-            List<FlowButton> buttons = flowGraph.getGraphNode(aCase.getCurrentNodeId()).getApplierButtons()
-                    .stream().map(FlowGraphButton::getFlowButton).collect(Collectors.toList());
-            for (FlowButton button : buttons) {
+
+        List<Long> currentNodeIdList = allFlowCase.stream()
+                .filter(r -> !Objects.equals(r.getCurrentNodeId(), r.getEndNodeId()))
+                .map(FlowCase::getCurrentNodeId)
+                .distinct()
+                .collect(Collectors.toList());
+
+        for (Long currentNodeId : currentNodeIdList) {
+            FlowGraphNode graphNode = flowGraph.getGraphNode(currentNodeId);
+            for (FlowGraphButton graphButton : graphNode.getApplierButtons()) {
+                FlowButton button = graphButton.getFlowButton();
                 if (button.getStatus().equals(FlowButtonStatus.ENABLED.getCode())) {
                     FlowButtonDTO btnDTO = ConvertHelper.convert(button, FlowButtonDTO.class);
                     FlowStepType stepType = FlowStepType.fromCode(button.getFlowStepType());
@@ -5793,7 +5800,6 @@ public class FlowServiceImpl implements FlowService {
                 }
             }
         }
-
 
         /*Long currentNodeId = flowCase.getCurrentNodeId();
         FlowGraphLane graphLane = flowGraph.getGraphLane(flowCase.getCurrentLaneId());

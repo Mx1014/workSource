@@ -2,6 +2,7 @@
 package com.everhomes.flow;
 
 import com.everhomes.bootstrap.PlatformContext;
+import com.everhomes.enterprise.EnterpriseContactService;
 import com.everhomes.entity.EntityType;
 import com.everhomes.organization.OrganizationMember;
 import com.everhomes.organization.OrganizationService;
@@ -27,6 +28,9 @@ public class FlowUserSelectionServiceImpl implements FlowUserSelectionService {
 
     @Autowired
     private FlowVariableProvider flowVariableProvider;
+
+    @Autowired
+    private EnterpriseContactService enterpriseContactService;
 
     /**
      * <ul>此函数需要关注三个问题：
@@ -74,7 +78,7 @@ public class FlowUserSelectionServiceImpl implements FlowUserSelectionService {
             else if (FlowUserSelectionType.POSITION.getCode().equals(sel.getSelectType())) {
                 //sourceA is position, sourceB is department
                 Long organizationId = orgId;
-                if (sel.getOrganizationId() != null) {
+                if (sel.getOrganizationId() != null && sel.getOrganizationId() != 0) {
                     organizationId = sel.getOrganizationId();
                 }
 
@@ -92,7 +96,7 @@ public class FlowUserSelectionServiceImpl implements FlowUserSelectionService {
                         break;
                     // 具体部门岗位
                     default:
-                        userIds = listUsersByJobPosition(organizationId, sel.getSourceIdB(), sel.getSourceIdA());
+                        userIds = listUsersByDepartmentJobPosition(sel.getNamespaceId(), organizationId, sel.getSourceIdB(), sel.getSourceIdA());
                         break;
                 }
 
@@ -128,7 +132,7 @@ public class FlowUserSelectionServiceImpl implements FlowUserSelectionService {
             // 经理
             else if (FlowUserSelectionType.MANAGER.getCode().equals(sel.getSelectType())) {
                 Long organizationId = orgId;
-                if (sel.getOrganizationId() != null) {
+                if (sel.getOrganizationId() != null && sel.getOrganizationId() != 0) {
                     organizationId = sel.getOrganizationId();
                 }
 
@@ -185,6 +189,20 @@ public class FlowUserSelectionServiceImpl implements FlowUserSelectionService {
             }
         }
         return users.stream().distinct().collect(Collectors.toList());
+    }
+
+    private List<Long> listUsersByDepartmentJobPosition(Integer namespaceId, Long organizationId, Long departmentId, Long departmentJobPosId) {
+        ListOrganizationContactCommand cmd = new ListOrganizationContactCommand();
+        cmd.setOrganizationId(departmentJobPosId);
+        cmd.setNamespaceId(namespaceId);
+        cmd.setPageSize(10000);
+        ListOrganizationMemberCommandResponse response = enterpriseContactService.listOrganizationPersonnels(cmd);
+        if (response != null && response.getMembers() != null) {
+            return response.getMembers().stream()
+                    .filter(r -> OrganizationMemberTargetType.fromCode(r.getTargetType()) == OrganizationMemberTargetType.USER)
+                    .map(OrganizationMemberDTO::getTargetId).collect(Collectors.toList());
+        }
+        return new ArrayList<>();
     }
 
     private List<Long> listUsersByJobPosition(Long organizationId, Long departmentId, Long jobPositionId) {
