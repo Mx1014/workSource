@@ -190,6 +190,9 @@ public class ContractServiceImpl implements ContractService {
 	@Autowired
 	private UserPrivilegeMgr userPrivilegeMgr;
 
+	private String flowcaseContractOwnerType = FlowOwnerType.CONTRACT.getCode();
+	private String flowcasePaymentContractOwnerType = FlowOwnerType.PAYMENT_CONTRACT.getCode();
+
 	private void checkContractAuth(Integer namespaceId, Long privilegeId, Long orgId, Long communityId) {
 		ListServiceModuleAppsCommand cmd = new ListServiceModuleAppsCommand();
 		cmd.setNamespaceId(namespaceId);
@@ -630,6 +633,10 @@ public class ContractServiceImpl implements ContractService {
 
 		dealContractAttachments(contract.getId(), cmd.getAttachments());
 		dealContractPlans(contract.getId(), cmd.getPlans());
+
+		if(ContractStatus.WAITING_FOR_APPROVAL.equals(ContractStatus.fromStatus(contract.getStatus()))) {
+			addToFlowCase(contract, flowcasePaymentContractOwnerType);
+		}
 		contractProvider.updateContract(contract);
 		contractSearcher.feedDoc(contract);
 
@@ -666,7 +673,7 @@ public class ContractServiceImpl implements ContractService {
 		dealContractAttachments(contract.getId(), cmd.getAttachments());
 		dealContractPlans(contract.getId(), cmd.getPlans());
 		if(ContractStatus.WAITING_FOR_APPROVAL.equals(ContractStatus.fromStatus(contract.getStatus()))) {
-			addToFlowCase(contract);
+			addToFlowCase(contract, flowcasePaymentContractOwnerType);
 		}
 		contractSearcher.feedDoc(contract);
 
@@ -834,9 +841,11 @@ public class ContractServiceImpl implements ContractService {
 	}
 
 
-	private void addToFlowCase(Contract contract) {
-		Flow flow = flowService.getEnabledFlow(contract.getNamespaceId(), FlowConstants.CONTRACT_MODULE,
-				FlowModuleType.NO_MODULE.getCode(), contract.getCommunityId(), FlowOwnerType.CONTRACT.getCode());
+	private void addToFlowCase(Contract contract, String flowcaseOwnerType) {
+//		Flow flow = flowService.getEnabledFlow(contract.getNamespaceId(), FlowConstants.CONTRACT_MODULE,
+//				FlowModuleType.NO_MODULE.getCode(), contract.getCommunityId(), FlowOwnerType.CONTRACT.getCode());
+		Flow flow = flowService.getEnabledFlow(contract.getNamespaceId(),EntityType.COMMUNITY.getCode(),contract.getCommunityId(),
+				FlowConstants.CONTRACT_MODULE, FlowModuleType.NO_MODULE.getCode(), contract.getCommunityId(), flowcaseOwnerType);
 		if(null == flow) {
 			LOGGER.error("Enable request flow not found, moduleId={}", FlowConstants.CONTRACT_MODULE);
 			throw RuntimeErrorException.errorWith(ContractErrorCode.SCOPE, ContractErrorCode.ERROR_ENABLE_FLOW,
@@ -1177,7 +1186,7 @@ public class ContractServiceImpl implements ContractService {
 //		contractSearcher.feedDoc(contract);
 		dealContractChargingChanges(contract, cmd.getAdjusts(), cmd.getFrees());
 		if(ContractStatus.WAITING_FOR_APPROVAL.equals(ContractStatus.fromStatus(contract.getStatus()))) {
-			addToFlowCase(contract);
+			addToFlowCase(contract, flowcaseContractOwnerType);
 		}
 		contractSearcher.feedDoc(contract);
 		ExecutorUtil.submit(new Runnable() {
@@ -1204,8 +1213,11 @@ public class ContractServiceImpl implements ContractService {
 		contract.setDenunciationTime(new Timestamp(DateHelper.currentGMTTime().getTime()));
 		contractProvider.updateContract(contract);
 		contractSearcher.feedDoc(contract);
-
-		addToFlowCase(contract);
+		if(cmd.getPaymentFlag() == 1) {
+			addToFlowCase(contract, flowcasePaymentContractOwnerType);
+		}else {
+			addToFlowCase(contract, flowcaseContractOwnerType);
+		}
 
 	}
 
@@ -1295,7 +1307,11 @@ public class ContractServiceImpl implements ContractService {
 			contract.setStatus(cmd.getResult());
 			contractProvider.updateContract(contract);
 			contractSearcher.feedDoc(contract);
-			addToFlowCase(contract);
+			if(cmd.getPaymentFlag() == 1) {
+				addToFlowCase(contract, flowcasePaymentContractOwnerType);
+			}else {
+				addToFlowCase(contract, flowcaseContractOwnerType);
+			}
 
 		}
 
