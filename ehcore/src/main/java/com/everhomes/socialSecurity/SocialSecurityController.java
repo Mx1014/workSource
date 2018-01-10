@@ -292,4 +292,26 @@ public class SocialSecurityController extends ControllerBase {
         return new RestResponse(socialSecurityService.getSocialSecurityReportsHead(cmd));
     }
 
+	/**
+	 * <p>22.社保增员-批量</p>
+	 * <b>URL: /socialSecurity/increseSocialSecurity</b>
+	 */
+	@RequestMapping("increseSocialSecurity")
+	@RestReturn(String.class)
+	public RestResponse increseSocialSecurity(IncreseSocialSecurityCommand cmd){
+		socialSecurityService.increseSocialSecurity(cmd);
+		return new RestResponse();
+	}
+
+	/**
+	 * <p>22.社保减员-批量</p>
+	 * <b>URL: /socialSecurity/decreseSocialSecurity</b>
+	 */
+	@RequestMapping("decreseSocialSecurity")
+	@RestReturn(String.class)
+	public RestResponse decreseSocialSecurity(DecreseSocialSecurityCommand cmd){
+		socialSecurityService.decreseSocialSecurity(cmd);
+		return new RestResponse();
+	}
+
 }

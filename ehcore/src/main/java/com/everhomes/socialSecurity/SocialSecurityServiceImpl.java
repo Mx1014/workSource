@@ -211,6 +211,9 @@ public class SocialSecurityServiceImpl implements SocialSecurityService {
         List<SocialSecuritySetting> settings = socialSecuritySettingProvider.listSocialSecuritySetting(detailIds);
         List<EhSocialSecurityPayments> payments = new ArrayList<>();
         Long id = sequenceProvider.getNextSequence(NameMapper.getSequenceDomainFromTablePojo(EhSocialSecurityPayments.class));
+        if (null == settings) {
+            return;
+        }
         for (SocialSecuritySetting setting : settings) {
             EhSocialSecurityPayments payment = processSocialSecurityPayment(setting, paymentMonth, NormalFlag.NO.getCode());
             payment.setId(id++);
@@ -241,12 +244,15 @@ public class SocialSecurityServiceImpl implements SocialSecurityService {
         //把属于该公司的所有要交社保的setting取出来
         Set<Long> detailIds = new HashSet<>();
         detailIds.addAll(listSocialSecurityEmployeeDetailIdsByPayMonth(ownerId, paymentMonth));
+        if (null != detailIds) {
+
 //        List<OrganizationMemberDetails> details = organizationProvider.listOrganizationMemberDetails(ownerId);
 //        if (null == details) {
 //            return;
 //        }
 //        detailIds = details.stream().map(r -> r.getId()).collect(Collectors.toSet());
-        createPayments(detailIds, paymentMonth);
+            createPayments(detailIds, paymentMonth);
+        }
     }
 
     private Long getZuolinNamespaceCityId(Long cityId) {
@@ -2560,4 +2566,16 @@ public class SocialSecurityServiceImpl implements SocialSecurityService {
         List<Long> detailIds = socialSecurityInoutTimeProvider.listSocialSecurityEmployeeDetailIdsByPayMonth(ownerId, payMonth, InOutTimeType.SOCIAL_SECURITY.getCode());
         return detailIds;
     }
+	@Override
+	public void increseSocialSecurity(IncreseSocialSecurityCommand cmd) {
+	
+
+	}
+
+	@Override
+	public void decreseSocialSecurity(DecreseSocialSecurityCommand cmd) {
+	
+
+	}
+
 }

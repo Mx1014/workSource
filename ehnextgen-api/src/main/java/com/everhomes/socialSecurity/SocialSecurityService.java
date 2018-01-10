@@ -104,4 +104,10 @@ public interface SocialSecurityService {
 			GetImportSocialSecurityPaymentsResultCommand cmd);
 
 	OutputStream getSocialSecurityReportsOutputStream(Long ownerId, String payMonth);
+
+	public void increseSocialSecurity(IncreseSocialSecurityCommand cmd);
+
+
+	public void decreseSocialSecurity(DecreseSocialSecurityCommand cmd);
+
 }
