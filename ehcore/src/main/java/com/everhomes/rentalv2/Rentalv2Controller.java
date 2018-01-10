@@ -543,6 +543,19 @@ public class Rentalv2Controller extends ControllerBase {
 
 	/**
 	 * <b>URL: /rental/renewRentalOrder</b>
+	 * <p>校验并获取续费信息</p>
+	 */
+	@RequestMapping("renewRentalOrder")
+	@RestReturn(value = GetRenewRentalOrderInfoResponse.class)
+	public RestResponse getRenewRentalOrderInfo(GetRenewRentalOrderInfoCommand cmd) {
+		RestResponse response = new RestResponse();
+		response.setErrorCode(ErrorCodes.SUCCESS);
+		response.setErrorDescription("OK");
+		return response;
+	}
+
+	/**
+	 * <b>URL: /rental/renewRentalOrder</b>
 	 * <p>订单续费</p>
 	 */
 	@RequestMapping("renewRentalOrder")
@@ -554,18 +567,4 @@ public class Rentalv2Controller extends ControllerBase {
 		return response;
 	}
 
-//	/**
-//	 *
-//	 * <b>URL: /rental/getRentalOrderRule<b>
-//	 * <p>查询订单的规则</p>
-//	 */
-//	@RequestMapping("getRentalOrderRule")
-//	@RestReturn(RentalOrderRuleDTO.class)
-//	public RestResponse getRentalOrderRule(GetRentalOrderRuleCommand cmd) {
-//
-//		RestResponse response = new RestResponse();
-//		response.setErrorCode(ErrorCodes.SUCCESS);
-//		response.setErrorDescription("OK");
-//		return response;
-//	}
 }

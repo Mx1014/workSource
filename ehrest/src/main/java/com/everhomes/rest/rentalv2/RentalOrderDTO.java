@@ -3,6 +3,7 @@ package com.everhomes.rest.rentalv2;
 import com.everhomes.util.StringHelper;
 
 import java.math.BigDecimal;
+import java.util.Date;
 
 /**
  * <ul>
@@ -69,9 +70,29 @@ public class RentalOrderDTO {
 
 	private String customObject;
 
+	private Byte rentalType;
+
+	private Double timeStep;
+
 	@Override
 	public String toString() {
 		return StringHelper.toJsonString(this);
+	}
+
+	public Double getTimeStep() {
+		return timeStep;
+	}
+
+	public void setTimeStep(Double timeStep) {
+		this.timeStep = timeStep;
+	}
+
+	public Byte getRentalType() {
+		return rentalType;
+	}
+
+	public void setRentalType(Byte rentalType) {
+		this.rentalType = rentalType;
 	}
 
 	public Long getCancelTime() {

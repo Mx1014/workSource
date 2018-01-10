@@ -1,25 +1,19 @@
 package com.everhomes.rest.rentalv2;
 
-import com.everhomes.util.StringHelper;
-
 import java.math.BigDecimal;
 
 /**
- * @author sw on 2018/1/8.
+ * @author sw on 2018/1/10.
  */
-public class RenewRentalOrderCommand {
+public class GetRenewRentalOrderInfoResponse {
+
     private Long rentalBillId;
     private Byte rentalType;
     private Double timeStep;
 
-	private Long endTime;
+    private Long endTime;
 
-	private BigDecimal amount;
-
-    @Override
-    public String toString() {
-        return StringHelper.toJsonString(this);
-    }
+    private BigDecimal amount;
 
     public Double getTimeStep() {
         return timeStep;

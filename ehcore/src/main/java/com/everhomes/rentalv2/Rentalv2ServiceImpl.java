@@ -7370,6 +7370,13 @@ public class Rentalv2ServiceImpl implements Rentalv2Service {
 		dto.setStatus(bill.getStatus());
 		//支付方式
 		dto.setVendorType(bill.getVendorType());
+		dto.setRentalType(bill.getRentalType());
+		List<RentalTimeInterval> timeIntervals = rentalv2Provider.queryRentalTimeIntervalByOwner(EhRentalv2Resources.class.getSimpleName(),
+				bill.getRentalResourceId());
+		if(null != timeIntervals && !timeIntervals.isEmpty()){
+			dto.setTimeStep(timeIntervals.get(0).getTimeStep());
+		}
+
 		// 订单的rules
 //		dto.setRentalSiteRules(new ArrayList<>());
 //		List<RentalResourceOrder> rsbs = rentalv2Provider.findRentalResourceOrderByOrderId(bill.getId());
