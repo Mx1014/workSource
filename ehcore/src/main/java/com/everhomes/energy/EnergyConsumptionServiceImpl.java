@@ -4700,6 +4700,7 @@ public class EnergyConsumptionServiceImpl implements EnergyConsumptionService {
                             logDTO.setMeterType(meter.getMeterType());
                             logDTO.setMeterNumber(meter.getMeterNumber());
                             logDTO.setMeterName(meter.getName());
+                            logDTO.setOrganizationId(meter.getOwnerId());
 
                             List<EnergyMeterAddress> existAddress = energyMeterAddressProvider.listByMeterId(meter.getId());
                             if(existAddress != null && existAddress.size() > 0) {
