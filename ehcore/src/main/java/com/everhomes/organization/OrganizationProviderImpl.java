@@ -6077,7 +6077,6 @@ public class OrganizationProviderImpl implements OrganizationProvider {
         TableLike t1 = Tables.EH_ORGANIZATION_MEMBERS.as("t1");
         TableLike t2 = Tables.EH_ORGANIZATION_MEMBER_DETAILS.as("t2");
         SelectQuery<Record> query = context.selectQuery();
-//        query.addSelect(t1.field("detail_id"));
 		query.addFrom(t1);
 		query.addJoin(t2,JoinType.LEFT_OUTER_JOIN,t1.field("detail_id").eq(t2.field("id")));
 		queryBuilderCallback.buildCondition(locator,query);
