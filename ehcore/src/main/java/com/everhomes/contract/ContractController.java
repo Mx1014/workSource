@@ -68,6 +68,7 @@ public class ContractController extends ControllerBase {
 			ListContractsCommand command = ConvertHelper.convert(cmd, ListContractsCommand.class);
 			return new RestResponse(contractService.listContracts(command));
 		}
+		cmd.setPaymentFlag((byte)0);
 		return new RestResponse(contractSearcher.queryContracts(cmd));
 	}
 
