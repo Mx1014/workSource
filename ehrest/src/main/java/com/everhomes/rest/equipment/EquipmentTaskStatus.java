@@ -15,20 +15,18 @@ import com.everhomes.util.StringHelper;
 public enum EquipmentTaskStatus {
 
 	NONE((byte) 0, ""),
-	WAITING_FOR_EXECUTING((byte) 1, "待执行"),
+	WAITING_FOR_EXECUTING((byte) 1, "任务待执行"),
 	NEED_MAINTENANCE((byte) 2, "需维修"),//取消
 	IN_MAINTENANCE((byte) 3, "待维修"), //取消
-	CLOSE((byte) 4, "已完成"),
+	CLOSE((byte) 4, "任务完成待审核"),
 	DELAY((byte) 5, "任务已延期"),
-	WAITTING_FOR_APPROVAL((byte) 6, "待审核"),
-	QUALIFIED((byte) 7, "审核通过"),
-	UNQUALIFIED((byte) 8, "审核不通过"),
-	REVIEW_DELAY((byte) 9, "审批过期");
+	QUALIFIED((byte) 6, "任务完成审核通过"),
+	REVIEW_DELAY((byte) 7, "任务完成审批过期");
 	
 	private byte code;
 	private String name;
 	
-	private EquipmentTaskStatus(byte code, String name){
+	 EquipmentTaskStatus(byte code, String name){
 		this.code = code;
 		this.name = name;
 	}

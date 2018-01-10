@@ -1981,9 +1981,9 @@ public class EquipmentProviderImpl implements EquipmentProvider {
         DSLContext context = dbProvider.getDslContext(AccessSpec.readOnly());
 
         if (task.getStatus().equals(EquipmentTaskStatus.WAITING_FOR_EXECUTING.getCode()))
-            task.setResult(EquipmentTaskResult.COMPLETE_DELAY.getCode());
-        if (task.getStatus().equals(EquipmentTaskStatus.IN_MAINTENANCE.getCode()))
-            task.setResult(EquipmentTaskResult.NEED_MAINTENANCE_OK_COMPLETE_DELAY.getCode());
+            //task.setResult(EquipmentTaskResult.COMPLETE_DELAY.getCode());
+//        if (task.getStatus().equals(EquipmentTaskStatus.IN_MAINTENANCE.getCode()))
+//            task.setResult(EquipmentTaskResult.NEED_MAINTENANCE_OK_COMPLETE_DELAY.getCode());
 
         task.setStatus(EquipmentTaskStatus.DELAY.getCode());
 //		task.setReviewResult(ReviewResult.NONE.getCode());
@@ -2617,66 +2617,20 @@ public class EquipmentProviderImpl implements EquipmentProvider {
         DSLContext context = dbProvider.getDslContext(AccessSpec.readOnly());
         TasksStatData resp = new TasksStatData();
 
-        final Field<Byte> delay = DSL.decode().when(Tables.EH_EQUIPMENT_INSPECTION_TASKS.STATUS
+        final Field<Byte> delayTasks = DSL.decode().when(Tables.EH_EQUIPMENT_INSPECTION_TASKS.STATUS
                 .eq(EquipmentTaskStatus.DELAY.getCode()), EquipmentTaskStatus.DELAY.getCode());
 
-        Condition delayInspectionCondition = Tables.EH_EQUIPMENT_INSPECTION_TASKS.STATUS
-                .eq(EquipmentTaskStatus.DELAY.getCode());
-
-        delayInspectionCondition = delayInspectionCondition
-                .and(Tables.EH_EQUIPMENT_INSPECTION_TASKS.RESULT
-                        .in(EquipmentTaskResult.COMPLETE_DELAY.getCode(),
-                                EquipmentTaskResult.NEED_MAINTENANCE_DELAY.getCode()));
-
-        final Field<Byte> delayInspection = DSL.decode()
-                .when(delayInspectionCondition, EquipmentTaskStatus.DELAY.getCode());
-
-        Condition delayMaintanceCondition = Tables.EH_EQUIPMENT_INSPECTION_TASKS.STATUS
-                .eq(EquipmentTaskStatus.DELAY.getCode());
-
-        delayMaintanceCondition = delayMaintanceCondition
-                .and(Tables.EH_EQUIPMENT_INSPECTION_TASKS.RESULT
-                        .in(EquipmentTaskResult.NEED_MAINTENANCE_DELAY_COMPLETE_DELAY.getCode(),
-                                EquipmentTaskResult.NEED_MAINTENANCE_OK_COMPLETE_DELAY.getCode()));
-
-        final Field<Byte> delayMaintance = DSL.decode()
-                .when(delayMaintanceCondition, EquipmentTaskStatus.DELAY.getCode());
 
         final Field<Byte> reviewDelay = DSL.decode()
-                .when(Tables.EH_EQUIPMENT_INSPECTION_TASKS.REVIEW_RESULT.eq(ReviewResult.REVIEW_DELAY.getCode()),
-                        ReviewResult.REVIEW_DELAY.getCode());
+                .when(Tables.EH_EQUIPMENT_INSPECTION_TASKS.STATUS.eq(EquipmentTaskStatus.REVIEW_DELAY.getCode()),
+                        EquipmentTaskStatus.REVIEW_DELAY.getCode());
 
         final Field<Byte> waitingForExecuting = DSL.decode()
                 .when(Tables.EH_EQUIPMENT_INSPECTION_TASKS.STATUS.eq(EquipmentTaskStatus.WAITING_FOR_EXECUTING.getCode()),
                         EquipmentTaskStatus.WAITING_FOR_EXECUTING.getCode());
 
-        final Field<Byte> needMaintance = DSL.decode()
-                .when(Tables.EH_EQUIPMENT_INSPECTION_TASKS.STATUS.eq(EquipmentTaskStatus.NEED_MAINTENANCE.getCode()),
-                        EquipmentTaskStatus.NEED_MAINTENANCE.getCode());
-
-        final Field<Byte> inMaintance = DSL.decode()
-                .when(Tables.EH_EQUIPMENT_INSPECTION_TASKS.STATUS.eq(EquipmentTaskStatus.IN_MAINTENANCE.getCode()),
-                        EquipmentTaskStatus.IN_MAINTENANCE.getCode());
-
-        Condition completeMaintanceCondition = Tables.EH_EQUIPMENT_INSPECTION_TASKS.RESULT
-                .in(EquipmentTaskResult.NEED_MAINTENANCE_DELAY_COMPLETE_OK.getCode(),
-                        EquipmentTaskResult.NEED_MAINTENANCE_OK_COMPLETE_OK.getCode());
-
-        if (startTime != null && endTime != null) {
-            completeMaintanceCondition = completeMaintanceCondition
-                    .and(Tables.EH_EQUIPMENT_INSPECTION_TASKS.PROCESS_TIME.between(startTime, endTime));
-        } else if (startTime == null && endTime != null) {
-            completeMaintanceCondition = completeMaintanceCondition
-                    .and(Tables.EH_EQUIPMENT_INSPECTION_TASKS.PROCESS_TIME.le(endTime));
-        } else if (startTime != null && endTime == null) {
-            completeMaintanceCondition = completeMaintanceCondition
-                    .and(Tables.EH_EQUIPMENT_INSPECTION_TASKS.PROCESS_TIME.ge(startTime));
-        }
-
-        final Field<Byte> completeMaintance = DSL.decode().when(completeMaintanceCondition, EquipmentTaskResult.NEED_MAINTENANCE_OK_COMPLETE_OK.getCode());
-
         Condition completeInspectionCondition = Tables.EH_EQUIPMENT_INSPECTION_TASKS.RESULT
-                .eq(EquipmentTaskResult.COMPLETE_OK.getCode());
+                .eq(EquipmentTaskStatus.QUALIFIED.getCode());
 
         if (startTime != null && endTime != null) {
             completeInspectionCondition = completeInspectionCondition
@@ -2689,10 +2643,10 @@ public class EquipmentProviderImpl implements EquipmentProvider {
                     .and(Tables.EH_EQUIPMENT_INSPECTION_TASKS.EXECUTIVE_TIME.ge(startTime));
         }
 
-        final Field<Byte> completeInspection = DSL.decode().when(completeInspectionCondition, EquipmentTaskResult.COMPLETE_OK.getCode());
+        final Field<Byte> completeInspection = DSL.decode().when(completeInspectionCondition, EquipmentTaskStatus.QUALIFIED.getCode());
 
         Condition completeWaitingForApprovalCondition = Tables.EH_EQUIPMENT_INSPECTION_TASKS.RESULT
-                .eq(EquipmentTaskResult.COMPLETE_OK.getCode());
+                .eq(EquipmentTaskStatus.CLOSE.getCode());
 
         completeWaitingForApprovalCondition = completeWaitingForApprovalCondition
                 .and(Tables.EH_EQUIPMENT_INSPECTION_TASKS.REVIEW_RESULT.eq(ReviewResult.NONE.getCode()));
@@ -2700,49 +2654,16 @@ public class EquipmentProviderImpl implements EquipmentProvider {
         final Field<Byte> completeInspectionWaitingForApproval = DSL.decode()
                 .when(completeWaitingForApprovalCondition, ReviewResult.NONE.getCode());
 
-        Condition completeMaintanceWaitingForApprovalCondition = Tables.EH_EQUIPMENT_INSPECTION_TASKS.RESULT
-                .in(EquipmentTaskResult.NEED_MAINTENANCE_DELAY_COMPLETE_OK.getCode(),
-                        EquipmentTaskResult.NEED_MAINTENANCE_OK_COMPLETE_OK.getCode());
-
-        completeMaintanceWaitingForApprovalCondition = completeMaintanceWaitingForApprovalCondition
-                .and(Tables.EH_EQUIPMENT_INSPECTION_TASKS.REVIEW_RESULT.eq(ReviewResult.NONE.getCode()));
-
-        final Field<Byte> completeMaintanceWaitingForApproval = DSL.decode()
-                .when(completeMaintanceWaitingForApprovalCondition, ReviewResult.NONE.getCode());
-
-        Condition completeReviewDelayCondition = Tables.EH_EQUIPMENT_INSPECTION_TASKS.RESULT
-                .in(EquipmentTaskResult.COMPLETE_OK.getCode(),
-                        EquipmentTaskResult.NEED_MAINTENANCE_DELAY_COMPLETE_OK.getCode(),
-                        EquipmentTaskResult.NEED_MAINTENANCE_OK_COMPLETE_OK.getCode());
-
-        completeReviewDelayCondition = completeReviewDelayCondition
-                .and(Tables.EH_EQUIPMENT_INSPECTION_TASKS.REVIEW_RESULT
-                        .eq(ReviewResult.REVIEW_DELAY.getCode()));
-
-        final Field<Byte> completeReviewDelay = DSL.decode()
-                .when(completeReviewDelayCondition, ReviewResult.REVIEW_DELAY.getCode());
-
-        Condition needMaintanceReviewDelayCondition = Tables.EH_EQUIPMENT_INSPECTION_TASKS.RESULT
-                .eq(EquipmentTaskResult.NEED_MAINTENANCE_OK.getCode());
-
-        needMaintanceReviewDelayCondition = needMaintanceReviewDelayCondition
-                .and(Tables.EH_EQUIPMENT_INSPECTION_TASKS.REVIEW_RESULT
-                        .eq(ReviewResult.REVIEW_DELAY.getCode()));
-        final Field<Byte> needMaintanceReviewDelay = DSL.decode().when(needMaintanceReviewDelayCondition, ReviewResult.REVIEW_DELAY.getCode());
         final Field<?>[] fields = {DSL.count().as("total"),
                 DSL.count(waitingForExecuting).as("waitingForExecuting"),
-                DSL.count(inMaintance).as("inMaintance"),
-                DSL.count(needMaintance).as("needMaintance"),
+                // DSL.count(inMaintance).as("inMaintance"),
+                // DSL.count(needMaintance).as("needMaintance"),
                 DSL.count(completeInspection).as("completeInspection"),
-                DSL.count(completeMaintance).as("completeMaintance"),
+                //  DSL.count(completeMaintance).as("completeMaintance"),
                 DSL.count(completeInspectionWaitingForApproval).as("completeInspectionWaitingForApproval"),
-                DSL.count(completeMaintanceWaitingForApproval).as("completeMaintanceWaitingForApproval"),
-                DSL.count(delay).as("delay"),
-                DSL.count(reviewDelay).as("reviewDelay"),
-                DSL.count(delayInspection).as("delayInspection"),
-                DSL.count(delayMaintance).as("delayMaintance"),
-                DSL.count(completeReviewDelay).as("completeReviewDelay"),
-                DSL.count(needMaintanceReviewDelay).as("needMaintanceReviewDelay")};
+                // DSL.count(completeMaintanceWaitingForApproval).as("completeMaintanceWaitingForApproval"),
+                DSL.count(delayTasks).as("delayTasks"),
+                DSL.count(reviewDelay).as("reviewDelay")};
 
         final SelectQuery<Record> query = context.selectQuery();
         query.addSelect(fields);
@@ -2755,7 +2676,6 @@ public class EquipmentProviderImpl implements EquipmentProvider {
         if (!StringUtils.isNullOrEmpty(targetType)) {
             query.addConditions(Tables.EH_EQUIPMENT_INSPECTION_TASKS.TARGET_TYPE.eq(targetType));
         }
-
 
 //		if(startTime != null) {
 //			query.addConditions(Tables.EH_EQUIPMENT_INSPECTION_TASKS.CREATE_TIME.ge(startTime));
@@ -2774,17 +2694,11 @@ public class EquipmentProviderImpl implements EquipmentProvider {
             resp.setCompleteMaintance(r.getValue("completeMaintance", Long.class));
             resp.setComplete(resp.getCompleteInspection() + resp.getCompleteMaintance());
             resp.setCompleteWaitingForApproval(r.getValue("completeInspectionWaitingForApproval", Long.class));
-            resp.setCompleteMaintanceWaitingForApproval(r.getValue("completeMaintanceWaitingForApproval", Long.class));
             resp.setInMaintance(r.getValue("inMaintance", Long.class));
-            resp.setNeedMaintanceWaitingForApproval(r.getValue("needMaintance", Long.class));
             resp.setWaitingForExecuting(r.getValue("waitingForExecuting", Long.class));
             resp.setTotalTasks(r.getValue("total", Long.class));
             resp.setDelay(r.getValue("delay", Long.class));
             resp.setReviewDelayTasks(r.getValue("reviewDelay", Long.class));
-            resp.setDelayInspection(r.getValue("delayInspection", Long.class));
-            resp.setDelayMaintance(r.getValue("delayMaintance", Long.class));
-            resp.setCompleteReviewDelay(r.getValue("completeReviewDelay", Long.class));
-            resp.setNeedMaintanceReviewDelay(r.getValue("needMaintanceReviewDelay", Long.class));
             return null;
         });
         return resp;
@@ -2796,7 +2710,10 @@ public class EquipmentProviderImpl implements EquipmentProvider {
         ReviewedTaskStat stat = new ReviewedTaskStat();
         final Field<Byte> qualifiedTasks = DSL.decode().when(Tables.EH_EQUIPMENT_INSPECTION_TASK_LOGS.PROCESS_RESULT.eq(EquipmentTaskProcessResult.REVIEW_QUALIFIED.getCode()), EquipmentTaskProcessResult.REVIEW_QUALIFIED.getCode());
         final Field<Byte> unqualifiedTasks = DSL.decode().when(Tables.EH_EQUIPMENT_INSPECTION_TASK_LOGS.PROCESS_RESULT.eq(EquipmentTaskProcessResult.REVIEW_UNQUALIFIED.getCode()), EquipmentTaskProcessResult.REVIEW_UNQUALIFIED.getCode());
-        final Field<?>[] fields = {DSL.count(qualifiedTasks).as("qualifiedTasks"), DSL.count(unqualifiedTasks).as("unqualifiedTasks")};
+        final Field<?>[] fields = {
+                DSL.count(qualifiedTasks).as("qualifiedTasks"),
+                DSL.count(unqualifiedTasks).as("unqualifiedTasks")
+        };
         final SelectQuery<Record> query = context.selectQuery();
         query.addSelect(fields);
         query.addFrom(Tables.EH_EQUIPMENT_INSPECTION_TASK_LOGS);

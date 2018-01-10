@@ -1839,10 +1839,10 @@ private void checkUserPrivilege(Long orgId, Long privilegeId, Long communityId) 
 //				 && task.getProcessExpireTime() != null && task.getProcessExpireTime().before(now)) {
 //			equipmentProvider.closeTask(task);
 //		}
-		if (EquipmentTaskStatus.WAITING_FOR_EXECUTING.equals(EquipmentTaskStatus.fromStatus(task.getStatus()))
-				&& task.getExecutiveExpireTime().before(now)) {
-			equipmentProvider.closeTask(task);
-		}
+//		if (EquipmentTaskStatus.WAITING_FOR_EXECUTING.equals(EquipmentTaskStatus.fromStatus(task.getStatus()))
+//				&& task.getExecutiveExpireTime().before(now)) {
+//			equipmentProvider.closeTask(task);
+//		}
 
 		if(EquipmentTaskStatus.CLOSE.equals(EquipmentTaskStatus.fromStatus(task.getStatus()))) {
 			LOGGER.error("task is closed");
@@ -1888,8 +1888,8 @@ private void checkUserPrivilege(Long orgId, Long privilegeId, Long communityId) 
 			log.setOperatorType(OwnerType.USER.getCode());
 			log.setOperatorId(user.getId());
 
-			task.setReviewResult(ReviewResult.NONE.getCode());
-			if (EquipmentTaskResult.COMPLETE_OK.equals(EquipmentTaskResult.fromStatus(cmd.getVerificationResult()))) {
+			//task.setReviewResult(ReviewResult.NONE.getCode());
+			//if (EquipmentTaskResult.COMPLETE_OK.equals(EquipmentTaskResult.fromStatus(cmd.getVerificationResult()))) {
 
 				task.setStatus(EquipmentTaskStatus.CLOSE.getCode());
 				task.setExecutiveTime(now);
@@ -1903,7 +1903,7 @@ private void checkUserPrivilege(Long orgId, Long privilegeId, Long communityId) 
 					//task.setResult(EquipmentTaskResult.COMPLETE_DELAY.getCode());
 					log.setProcessResult(EquipmentTaskProcessResult.COMPLETE_DELAY.getCode());
 				}
-			}
+			//}
 
 //			} else if (EquipmentTaskResult.NEED_MAINTENANCE_OK.equals(EquipmentTaskResult.fromStatus(cmd.getVerificationResult()))) {
 //				task.setStatus(EquipmentTaskStatus.NEED_MAINTENANCE.getCode());
@@ -2215,11 +2215,11 @@ private void checkUserPrivilege(Long orgId, Long privilegeId, Long communityId) 
 //					EquipmentServiceErrorCode.ERROR_EQUIPMENT_TASK_CLOSE,
 //				"该任务已关闭");
 //		}
-		if((EquipmentTaskStatus.CLOSE.equals(EquipmentTaskStatus.fromStatus(task.getStatus())))
-				&& task.getReviewExpiredDate() != null && task.getReviewExpiredDate().before(now)) {
-			//判断审批过期
-			equipmentProvider.closeReviewTasks(task);
-		}
+//		if((EquipmentTaskStatus.CLOSE.equals(EquipmentTaskStatus.fromStatus(task.getStatus())))
+//				&& task.getReviewExpiredDate() != null && task.getReviewExpiredDate().before(now)) {
+//			//判断审批过期
+//			equipmentProvider.closeReviewTasks(task);
+//		}
 
 		if(EquipmentTaskStatus.NONE.equals(EquipmentTaskStatus.fromStatus(task.getStatus()))) {
 			LOGGER.error("task is inactive");
@@ -2296,30 +2296,30 @@ private void checkUserPrivilege(Long orgId, Long privilegeId, Long communityId) 
 //			log.setProcessEndTime(task.getProcessExpireTime());
 //		}
 
-		if(!StringUtils.isEmpty(cmd.getOperatorType()) && cmd.getOperatorId() != null
-				 && cmd.getEndTime() != null) {
-//			OrganizationMember reviewer = organizationProvider.findOrganizationMemberByOrgIdAndUId(task.getReviewerId(), task.getOwnerId());
-//			OrganizationMember operator = organizationProvider.findOrganizationMemberByOrgIdAndUId(task.getOperatorId(), task.getExecutiveGroupId());
-			List<OrganizationMember> reviewers = organizationProvider.listOrganizationMembersByUId(task.getReviewerId());
-			List<OrganizationMember> operators = organizationProvider.listOrganizationMembersByUId(task.getOperatorId());
-			Map<String, Object> map = new HashMap<String, Object>();
-			map.put("reviewerName", reviewers.get(0).getContactName());
-			//以下都可以去除 暂时保留   v3.0.3
-			map.put("operatorName", operators.get(0).getContactName());
-			map.put("deadline", timeToStr(new Timestamp(cmd.getEndTime())));
-
-			String scope = EquipmentNotificationTemplateCode.SCOPE;
-			String locale = "zh_CN";
-			int msgCode = EquipmentNotificationTemplateCode.ASSIGN_TASK_MSG;
-			String msg = localeTemplateService.getLocaleTemplateString(scope, msgCode, locale, map, "");
-			log.setProcessMessage(msg);
-
-			Map<String, Object> notifyMap = new HashMap<String, Object>();
-			notifyMap.put("deadline", timeToStr(new Timestamp(cmd.getEndTime())));
-			int code = EquipmentNotificationTemplateCode.ASSIGN_TASK_NOTIFY_OPERATOR;
-			String notifyTextForApplicant = localeTemplateService.getLocaleTemplateString(scope, code, locale, notifyMap, "");
-			//sendMessageToUser(cmd.getOperatorId(), notifyTextForApplicant);
-		}
+//		if(!StringUtils.isEmpty(cmd.getOperatorType()) && cmd.getOperatorId() != null
+//				 && cmd.getEndTime() != null) {
+////			OrganizationMember reviewer = organizationProvider.findOrganizationMemberByOrgIdAndUId(task.getReviewerId(), task.getOwnerId());
+////			OrganizationMember operator = organizationProvider.findOrganizationMemberByOrgIdAndUId(task.getOperatorId(), task.getExecutiveGroupId());
+//			List<OrganizationMember> reviewers = organizationProvider.listOrganizationMembersByUId(task.getReviewerId());
+//			List<OrganizationMember> operators = organizationProvider.listOrganizationMembersByUId(task.getOperatorId());
+//			Map<String, Object> map = new HashMap<String, Object>();
+//			map.put("reviewerName", reviewers.get(0).getContactName());
+//			//以下都可以去除 暂时保留   v3.0.3
+//			map.put("operatorName", operators.get(0).getContactName());
+//			map.put("deadline", timeToStr(new Timestamp(cmd.getEndTime())));
+//
+//			String scope = EquipmentNotificationTemplateCode.SCOPE;
+//			String locale = "zh_CN";
+//			int msgCode = EquipmentNotificationTemplateCode.ASSIGN_TASK_MSG;
+//			String msg = localeTemplateService.getLocaleTemplateString(scope, msgCode, locale, map, "");
+//			log.setProcessMessage(msg);
+//
+//			Map<String, Object> notifyMap = new HashMap<String, Object>();
+//			notifyMap.put("deadline", timeToStr(new Timestamp(cmd.getEndTime())));
+//			int code = EquipmentNotificationTemplateCode.ASSIGN_TASK_NOTIFY_OPERATOR;
+//			String notifyTextForApplicant = localeTemplateService.getLocaleTemplateString(scope, code, locale, notifyMap, "");
+//			//sendMessageToUser(cmd.getOperatorId(), notifyTextForApplicant);
+//		}
 		equipmentProvider.updateEquipmentTask(task);
 		equipmentTasksSearcher.feedDoc(task);
 		updateEquipmentTasksAttachmentAndLogs(task, log, null);
