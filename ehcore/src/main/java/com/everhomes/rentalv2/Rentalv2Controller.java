@@ -542,10 +542,10 @@ public class Rentalv2Controller extends ControllerBase {
 	}
 
 	/**
-	 * <b>URL: /rental/renewRentalOrder</b>
+	 * <b>URL: /rental/getRenewRentalOrderInfo</b>
 	 * <p>校验并获取续费信息</p>
 	 */
-	@RequestMapping("renewRentalOrder")
+	@RequestMapping("getRenewRentalOrderInfo")
 	@RestReturn(value = GetRenewRentalOrderInfoResponse.class)
 	public RestResponse getRenewRentalOrderInfo(GetRenewRentalOrderInfoCommand cmd) {
 		RestResponse response = new RestResponse();
