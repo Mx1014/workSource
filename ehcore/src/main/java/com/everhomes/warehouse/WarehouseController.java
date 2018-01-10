@@ -659,4 +659,16 @@ public class WarehouseController extends ControllerBase {
         return res;
     }
 
+    /**
+     * <b>URL: /warehouse/findMaterialLogsBySupplier</b>
+     * <p>查询供应商的供货记录</p>
+     */
+    @RequestMapping("findMaterialLogsBySupplier")
+    @RestReturn(value=FindMaterialLogsBySupplierResponse.class)
+    public RestResponse findMaterialLogsBySupplier(FindMaterialLogsBySupplierCommand cmd) {
+        RestResponse res = new RestResponse();
+        res.setErrorCode(ErrorCodes.SUCCESS);
+        res.setErrorDescription("OK");
+        return res;
+    }
 }

@@ -29,6 +29,7 @@ CREATE TABLE `eh_supplier`(
 
 -- 采购管理schemas
 -- 采购单
+
 CREATE TABLE `eh_purchase_request`(
   `id` BIGINT NOT NULL,
   `applicant_id` BIGINT DEFAULT NULL COMMENT '申请人id',
