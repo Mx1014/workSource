@@ -12,8 +12,8 @@ import com.everhomes.util.StringHelper;
  * <li>ownerType: 所属类型 organization</li>
  * <li>ownerId: 所属id 公司id</li>
  * <li>detailIds: 人员的detailIds</li>
- * <li>socialSecurityPayments: 社保缴纳项 参考{@link com.everhomes.rest.socialSecurity.SocialSecurityPaymentDetailDTO}</li>
- * <li>accumulationFundPayments: 公积金缴纳项 参考{@link com.everhomes.rest.socialSecurity.SocialSecurityPaymentDetailDTO}</li>
+ * <li>socialSecurityPayment: 社保缴纳项 参考{@link com.everhomes.rest.socialSecurity.SocialSecurityPaymentDetailDTO}</li>
+ * <li>accumulationFundPayment: 公积金缴纳项 参考{@link com.everhomes.rest.socialSecurity.SocialSecurityPaymentDetailDTO}</li>
  * </ul>
  */
 public class IncreseSocialSecurityCommand {
@@ -25,22 +25,14 @@ public class IncreseSocialSecurityCommand {
 	@ItemType(Long.class)
 	private List<Long> detailIds;
 
-	private SocialSecurityPaymentDetailDTO  socialSecurityPayments;
+	private SocialSecurityPaymentDetailDTO  socialSecurityPayment;
 
-	private SocialSecurityPaymentDetailDTO accumulationFundPayments;
+	private SocialSecurityPaymentDetailDTO accumulationFundPayment;
 
 	public IncreseSocialSecurityCommand() {
 
 	}
 
-	public IncreseSocialSecurityCommand(String ownerType, Long ownerId, List<Long> detailIds, SocialSecurityPaymentDetailDTO  socialSecurityPayments, SocialSecurityPaymentDetailDTO accumulationFundPayments) {
-		super();
-		this.ownerType = ownerType;
-		this.ownerId = ownerId;
-		this.detailIds = detailIds;
-		this.socialSecurityPayments = socialSecurityPayments;
-		this.accumulationFundPayments = accumulationFundPayments;
-	}
 
 	public String getOwnerType() {
 		return ownerType;
@@ -66,25 +58,25 @@ public class IncreseSocialSecurityCommand {
 		this.detailIds = detailIds;
 	}
 
-	public SocialSecurityPaymentDetailDTO  getSocialSecurityPayments() {
-		return socialSecurityPayments;
-	}
-
-	public void setSocialSecurityPayments(SocialSecurityPaymentDetailDTO  socialSecurityPayments) {
-		this.socialSecurityPayments = socialSecurityPayments;
-	}
-
-	public SocialSecurityPaymentDetailDTO getAccumulationFundPayments() {
-		return accumulationFundPayments;
-	}
-
-	public void setAccumulationFundPayments(SocialSecurityPaymentDetailDTO accumulationFundPayments) {
-		this.accumulationFundPayments = accumulationFundPayments;
-	}
 
 	@Override
 	public String toString() {
 		return StringHelper.toJsonString(this);
 	}
 
+	public SocialSecurityPaymentDetailDTO getSocialSecurityPayment() {
+		return socialSecurityPayment;
+	}
+
+	public void setSocialSecurityPayment(SocialSecurityPaymentDetailDTO socialSecurityPayment) {
+		this.socialSecurityPayment = socialSecurityPayment;
+	}
+
+	public SocialSecurityPaymentDetailDTO getAccumulationFundPayment() {
+		return accumulationFundPayment;
+	}
+
+	public void setAccumulationFundPayment(SocialSecurityPaymentDetailDTO accumulationFundPayment) {
+		this.accumulationFundPayment = accumulationFundPayment;
+	}
 }

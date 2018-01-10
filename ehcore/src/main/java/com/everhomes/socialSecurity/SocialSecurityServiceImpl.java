@@ -257,7 +257,7 @@ public class SocialSecurityServiceImpl implements SocialSecurityService {
 //            return;
 //        }
 //        detailIds = details.stream().map(r -> r.getId()).collect(Collectors.toSet());
-            createPayments(detailIds, paymentMonth,AccumOrSocial.ACCUM);
+            createPayments(detailIds, paymentMonth, AccumOrSocial.ACCUM);
         }
 
         cmd.setSocialSecurityStatus(NormalFlag.YES.getCode());
@@ -271,7 +271,7 @@ public class SocialSecurityServiceImpl implements SocialSecurityService {
 //            return;
 //        }
 //        detailIds = details.stream().map(r -> r.getId()).collect(Collectors.toSet());
-            createPayments(detailIds, paymentMonth,AccumOrSocial.SOCAIL);
+            createPayments(detailIds, paymentMonth, AccumOrSocial.SOCAIL);
         }
     }
 
@@ -2594,14 +2594,119 @@ public class SocialSecurityServiceImpl implements SocialSecurityService {
 
     @Override
     public void increseSocialSecurity(IncreseSocialSecurityCommand cmd) {
+        //先校验
+        if (null != cmd.getAccumulationFundPayment()) {
+            // 查询设置的城市户籍档次的数据规则
+            List<SocialSecurityBase> bases = socialSecurityBaseProvider.listSocialSecurityBase(cmd.getAccumulationFundPayment().getCityId(), AccumOrSocial.ACCUM.getCode());
+            // 校验数据是否合法
+            checkSocialSercurity(bases, cmd.getAccumulationFundPayment().getItems());
+        }
+        if (null != cmd.getSocialSecurityPayment()) {
+            // 查询设置的城市户籍档次的数据规则
+            List<SocialSecurityBase> bases = socialSecurityBaseProvider.listSocialSecurityBase(cmd.getSocialSecurityPayment().getCityId(),
+                    cmd.getSocialSecurityPayment().getHouseholdType());
+            // 校验数据是否合法
+            checkSocialSercurity(bases, cmd.getSocialSecurityPayment().getItems());
+        }
+        //在存储
+        if (null != cmd.getDetailIds()) {
+            for (Long detailId : cmd.getDetailIds()) {
+                OrganizationMemberDetails detail = organizationProvider.findOrganizationMemberDetailsByDetailId(detailId);
+                if (null != cmd.getAccumulationFundPayment()) {
+                    if (NormalFlag.NO == NormalFlag.fromCode(detail.getAccumulationFundStatus())) {
+                        increseMemberDetail(detail, AccumOrSocial.ACCUM);
+                    }
+                    // 保存setting表数据
+                    saveSocialSecuritySettings(cmd.getAccumulationFundPayment(), detailId, AccumOrSocial.ACCUM.getCode());
+                    // 保存当月payments数据
+                    saveSocialSecurityPayment(cmd.getAccumulationFundPayment(), detailId, NormalFlag.NO.getCode(), AccumOrSocial.ACCUM.getCode());
+                }
+                if (null != cmd.getSocialSecurityPayment()) {
+                    if (NormalFlag.NO == NormalFlag.fromCode(detail.getSocialSecurityStatus())) {
+                        increseMemberDetail(detail, AccumOrSocial.SOCAIL);
+                    }
+                    // 保存setting表数据
+                    saveSocialSecuritySettings(cmd.getSocialSecurityPayment(), detailId, AccumOrSocial.SOCAIL.getCode());
+                    // 保存当月payments数据
+                    saveSocialSecurityPayment(cmd.getSocialSecurityPayment(), detailId, NormalFlag.NO.getCode(), AccumOrSocial.SOCAIL.getCode());
+                }
+            }
+        }
+    }
 
 
+    void increseMemberDetail(OrganizationMemberDetails detail, AccumOrSocial accum) {
+        if (AccumOrSocial.ACCUM == accum) {
+            detail.setAccumulationFundStatus(NormalFlag.YES.getCode());
+        } else {
+            detail.setSocialSecurityStatus(NormalFlag.YES.getCode());
+        }
+        increseLog(detail.getNamespaceId(), detail.getOrganizationId(), detail.getTargetId(), detail.getId(), accum);
+        organizationProvider.updateOrganizationMemberDetails(detail, detail.getId());
+    }
+
+    void increseLog(Integer namepsaceId, Long orgId, Long userId, Long detailId, AccumOrSocial accumOrSocial) {
+        SocialSecurityInoutLog log = new SocialSecurityInoutLog();
+        log.setNamespaceId(namepsaceId);
+        log.setOrganizationId(orgId);
+        log.setUserId(userId);
+        log.setDetailId(detailId);
+        if (AccumOrSocial.ACCUM == accumOrSocial) {
+            log.setType(InOutLogType.ACCUMULATION_FUND_IN.getCode());
+        } else {
+            log.setType(InOutLogType.SOCIAL_SECURITY_IN.getCode());
+        }
+        Date date = DateHelper.currentGMTTime();
+        String month = monthSF.get().format(date);
+        log.setLogDate((java.sql.Date) date);
+        log.setLogMonth(month);
+        socialSecurityInoutLogProvider.createSocialSecurityInoutLog(log);
+    }
+
+    void decreseMemberDetail(OrganizationMemberDetails detail, AccumOrSocial accum) {
+        if (AccumOrSocial.ACCUM == accum) {
+            detail.setAccumulationFundStatus(NormalFlag.NO.getCode());
+        } else {
+            detail.setSocialSecurityStatus(NormalFlag.NO.getCode());
+        }
+        decreseLog(detail.getNamespaceId(), detail.getOrganizationId(), detail.getTargetId(), detail.getId(), accum);
+        organizationProvider.updateOrganizationMemberDetails(detail, detail.getId());
+    }
+
+    void decreseLog(Integer namepsaceId, Long orgId, Long userId, Long detailId, AccumOrSocial accumOrSocial) {
+        SocialSecurityInoutLog log = new SocialSecurityInoutLog();
+        log.setNamespaceId(namepsaceId);
+        log.setOrganizationId(orgId);
+        log.setUserId(userId);
+        log.setDetailId(detailId);
+        if (AccumOrSocial.ACCUM == accumOrSocial) {
+            log.setType(InOutLogType.ACCUMULATION_FUND_OUT.getCode());
+        } else {
+            log.setType(InOutLogType.SOCIAL_SECURITY_OUT.getCode());
+        }
+        Date date = DateHelper.currentGMTTime();
+        String month = monthSF.get().format(date);
+        log.setLogDate((java.sql.Date) date);
+        log.setLogMonth(month);
+        socialSecurityInoutLogProvider.createSocialSecurityInoutLog(log);
     }
 
     @Override
     public void decreseSocialSecurity(DecreseSocialSecurityCommand cmd) {
+        dbProvider.execute((TransactionStatus status) -> {
+            for (Long detailId : cmd.getDetailIds()) {
+                OrganizationMemberDetails detail = organizationProvider.findOrganizationMemberDetailsByDetailId(detailId);
+                if (NormalFlag.YES == NormalFlag.fromCode(detail.getAccumulationFundStatus())) {
+                    decreseMemberDetail(detail, AccumOrSocial.ACCUM);
+                }
+                if (NormalFlag.YES == NormalFlag.fromCode(detail.getSocialSecurityStatus())) {
+                    decreseMemberDetail(detail, AccumOrSocial.SOCAIL);
+                }
 
-
+            }
+            socialSecurityPaymentProvider.deleteSocialSecurityPaymentsByDetailIds(cmd.getDetailIds());
+            return null;
+        });
     }
 
 }
