@@ -155,8 +155,8 @@ public class EquipmentProviderImpl implements EquipmentProvider {
 
     @PostConstruct
     public void init() {
-        //String cronExpression = configurationProvider.getValue(ConfigConstants.SCHEDULE_EQUIPMENT_TASK_TIME, "0 0 0 * * ? ");
-        String cronExpression = configurationProvider.getValue(ConfigConstants.SCHEDULE_EQUIPMENT_TASK_TIME, "0 */5 * * * ?");
+        String cronExpression = configurationProvider.getValue(ConfigConstants.SCHEDULE_EQUIPMENT_TASK_TIME, "0 0 0 * * ? ");
+//        String cronExpression = configurationProvider.getValue(ConfigConstants.SCHEDULE_EQUIPMENT_TASK_TIME, "0 */5 * * * ?");
 
         String taskServer = configurationProvider.getValue(ConfigConstants.TASK_SERVER_ADDRESS, "127.0.0.1");
         LOGGER.info("================================================taskServer: " + taskServer + ", equipmentIp: " + equipmentIp);
