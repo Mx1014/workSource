@@ -2,8 +2,8 @@ package com.everhomes.rest.socialSecurity;
 
 /**
  * <ul>
- * <li>SOCIALSECURITYPAY(1): 社保在缴</li>
- * <li>ACCUMULATIONFUNDPAY(2): 公积金在缴</li>
+ * <li>SOCIALSECURITYUNPAY(1): 社保在缴</li>
+ * <li>ACCUMULATIONFUND_UNPAY(2): 公积金在缴</li>
  * <li>BOTHPAY(3): 社保和公积金在缴</li>
  * </ul>
  */

@@ -2,7 +2,6 @@
 package com.everhomes.socialSecurity;
 
 import com.alibaba.fastjson.JSONObject;
-import com.everhomes.archives.ArchivesService;
 import com.everhomes.bigcollection.Accessor;
 import com.everhomes.bigcollection.BigCollectionProvider;
 import com.everhomes.community.Community;
@@ -27,7 +26,6 @@ import com.everhomes.rest.socialSecurity.*;
 import com.everhomes.sequence.SequenceProvider;
 import com.everhomes.server.schema.Tables;
 import com.everhomes.server.schema.tables.EhOrganizationMemberDetails;
-import com.everhomes.server.schema.tables.EhOrganizationMembers;
 import com.everhomes.server.schema.tables.pojos.EhSocialSecurityPaymentLogs;
 import com.everhomes.server.schema.tables.pojos.EhSocialSecurityPayments;
 import com.everhomes.server.schema.tables.pojos.EhSocialSecuritySettings;
@@ -377,12 +375,12 @@ public class SocialSecurityServiceImpl implements SocialSecurityService {
         ListFilterItemsResponse response = new ListFilterItemsResponse();
         List<FilterItemDTO> items = new ArrayList<>();
         FilterItemDTO dto = new FilterItemDTO();
-        dto.setId(SocialSecurityItem.SOCIALSECURITYPAY.getCode());
-        dto.setItemName(SocialSecurityItem.SOCIALSECURITYPAY.getDescribe());
+        dto.setId(SocialSecurityItem.SOCIALSECURITYUNPAY.getCode());
+        dto.setItemName(SocialSecurityItem.SOCIALSECURITYUNPAY.getDescribe());
         items.add(dto);
         dto = new FilterItemDTO();
-        dto.setId(SocialSecurityItem.ACCUMULATIONFUNDPAY.getCode());
-        dto.setItemName(SocialSecurityItem.ACCUMULATIONFUNDPAY.getDescribe());
+        dto.setId(SocialSecurityItem.ACCUMULATIONFUND_UNPAY.getCode());
+        dto.setItemName(SocialSecurityItem.ACCUMULATIONFUND_UNPAY.getDescribe());
         items.add(dto);
 //        dto = new FilterItemDTO();
 //        dto.setId(SocialSecurityItem.INCREASE.getCode());
@@ -427,19 +425,19 @@ public class SocialSecurityServiceImpl implements SocialSecurityService {
 //                }
 //                SocialSecurityItem item = SocialSecurityItem.fromCode(filterItem);
 //                switch (item) {
-//                    case SOCIALSECURITYPAY:
-//                        if (payFlag != null && payFlag == SsorAfPay.ACCUMULATIONFUNDPAY) {
+//                    case SOCIALSECURITYUNPAY:
+//                        if (payFlag != null && payFlag == SsorAfPay.ACCUMULATIONFUND_UNPAY) {
 //                            payFlag = SsorAfPay.BOTHPAY;
 //                        } else {
-//                            payFlag = SsorAfPay.SOCIALSECURITYPAY;
+//                            payFlag = SsorAfPay.SOCIALSECURITYUNPAY;
 //                        }
 //                        break;
 //
-//                    case ACCUMULATIONFUNDPAY:
-//                        if (payFlag != null && payFlag == SsorAfPay.SOCIALSECURITYPAY) {
+//                    case ACCUMULATIONFUND_UNPAY:
+//                        if (payFlag != null && payFlag == SsorAfPay.SOCIALSECURITYUNPAY) {
 //                            payFlag = SsorAfPay.BOTHPAY;
 //                        } else {
-//                            payFlag = SsorAfPay.ACCUMULATIONFUNDPAY;
+//                            payFlag = SsorAfPay.ACCUMULATIONFUND_UNPAY;
 //                        }
 //                        break;
 //                }
@@ -465,11 +463,11 @@ public class SocialSecurityServiceImpl implements SocialSecurityService {
 
         }
 //        if (null != payFlag) {
-//            if (SsorAfPay.BOTHPAY == payFlag || SsorAfPay.SOCIALSECURITYPAY == payFlag) {
+//            if (SsorAfPay.BOTHPAY == payFlag || SsorAfPay.SOCIALSECURITYUNPAY == payFlag) {
 //                detailIds = socialSecurityPaymentProvider.listDetailsByPayFlag(detailIds, AccumOrSocial.SOCAIL.getCode());
 //            }
 //
-//            if (SsorAfPay.BOTHPAY == payFlag || SsorAfPay.ACCUMULATIONFUNDPAY == payFlag) {
+//            if (SsorAfPay.BOTHPAY == payFlag || SsorAfPay.ACCUMULATIONFUND_UNPAY == payFlag) {
 //                detailIds = socialSecurityPaymentProvider.listDetailsByPayFlag(detailIds, AccumOrSocial.ACCUM.getCode());
 //            }
 //        }
