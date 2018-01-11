@@ -24,10 +24,19 @@ public class VipParkingUseInfoDTO {
     private String priceStr;
     private String spaceNo;
     private String spaceAddress;
+    private String lockId;
 
     @Override
     public String toString() {
         return StringHelper.toJsonString(this);
+    }
+
+    public String getLockId() {
+        return lockId;
+    }
+
+    public void setLockId(String lockId) {
+        this.lockId = lockId;
     }
 
     public String getPlateOwnerEnterpriseName() {
