@@ -28,6 +28,9 @@ public class SocialSecurityPaymentDTO {
 	private String accumulationFundCity;
 	private BigDecimal socialSecurityRadix;
 	private BigDecimal accumulationFundRadix;
+	private Byte socialSecurityStatus;
+
+	private Byte accumulationFundStatus;
 
 	public String getUserName() {
 		return userName;
@@ -113,5 +116,21 @@ public class SocialSecurityPaymentDTO {
 
 	public void setDetailId(Long detailId) {
 		this.detailId = detailId;
+	}
+
+	public Byte getSocialSecurityStatus() {
+		return socialSecurityStatus;
+	}
+
+	public void setSocialSecurityStatus(Byte socialSecurityStatus) {
+		this.socialSecurityStatus = socialSecurityStatus;
+	}
+
+	public Byte getAccumulationFundStatus() {
+		return accumulationFundStatus;
+	}
+
+	public void setAccumulationFundStatus(Byte accumulationFundStatus) {
+		this.accumulationFundStatus = accumulationFundStatus;
 	}
 }
