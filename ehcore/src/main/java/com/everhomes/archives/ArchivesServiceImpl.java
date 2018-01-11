@@ -2478,30 +2478,4 @@ public class ArchivesServiceImpl implements ArchivesService {
     private void sendEmails(List<ArchivesNotifications> notifyLists) {
 
     }
-
-    @Override
-    public List<Long> listSocialSecurityEmployees(Long organizationId, Long departmentId, String keywords, List<Byte> socialSecurityItem) {
-        List<Long> result = new ArrayList<>();
-
-        ListOrganizationContactCommand orgCommand = new ListOrganizationContactCommand();
-        orgCommand.setOrganizationId(organizationId);
-        orgCommand.setKeywords(keywords);
-        if (departmentId != null) {
-            orgCommand.setOrganizationId(departmentId);
-            List<String> groupTypes = new ArrayList<>();
-            groupTypes.add(OrganizationGroupType.DEPARTMENT.getCode());
-            groupTypes.add(OrganizationGroupType.DIRECT_UNDER_ENTERPRISE.getCode());
-            orgCommand.setTargetTypes(groupTypes);
-        }
-        orgCommand.setPageSize(1000000);
-        orgCommand.setFilterScopeTypes(Collections.singletonList(FilterOrganizationContactScopeType.CHILD_ENTERPRISE.getCode()));
-        ListOrganizationMemberCommandResponse members = organizationService.listOrganizationPersonnelsWithDownStream(orgCommand);
-
-        if (members.getMembers() != null && members.getMembers().size() > 0)
-            members.getMembers().forEach(r -> {
-                result.add(r.getDetailId());
-            });
-        return result;
-    }
-
 }

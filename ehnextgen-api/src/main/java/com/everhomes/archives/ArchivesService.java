@@ -78,6 +78,4 @@ public interface ArchivesService {
     ImportFileResponse<ImportArchivesEmployeesDTO> getImportEmployeesResult(GetImportFileResultCommand cmd);
 
     void remindArchivesEmployee(RemindArchivesEmployeeCommand cmd);
-
-    List<Long> listSocialSecurityEmployees(Long organizationId, Long departmentId, String keywords, List<Byte> socialSecurityItem);
 }
