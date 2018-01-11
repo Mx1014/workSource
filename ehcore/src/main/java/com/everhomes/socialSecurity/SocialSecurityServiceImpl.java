@@ -2607,7 +2607,7 @@ public class SocialSecurityServiceImpl implements SocialSecurityService {
                         .and(Tables.EH_SOCIAL_SECURITY_SETTINGS.CITY_ID.eq(cmd.getSocialSecurityCityId()))
                         .and(Tables.EH_SOCIAL_SECURITY_SETTINGS.ACCUM_OR_SOCAIL.eq(AccumOrSocial.SOCAIL.getCode()))));
             }
-            int offset = (cmd.getPageOffset() -1) * (pageSize);
+            int offset = ((cmd.getPageOffset()==null?1:cmd.getPageOffset()) -1) * (pageSize);
             query.addOrderBy(t2.field("check_in_time").desc());
             query.addLimit(offset, pageSize+1);
             return query;
