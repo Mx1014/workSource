@@ -957,5 +957,32 @@ public class DoorAuthProviderImpl implements DoorAuthProvider {
         
         return users;
     }
+    
+    @Override
+    public DoorAuth queryValidDoorAuthByVisitorPhone(Long doorId, String phone) {
+        ListingLocator locator = new ListingLocator();
+        long now = DateHelper.currentGMTTime().getTime();
+
+        List<DoorAuth> auths = queryDoorAuth(locator, 1, new ListingQueryBuilderCallback() {
+
+            @Override
+            public SelectQuery<? extends Record> buildCondition(ListingLocator locator,
+                    SelectQuery<? extends Record> query) {
+                Condition c1 = Tables.EH_DOOR_AUTH.AUTH_TYPE.ne(DoorAuthType.FOREVER.getCode()).
+                        and(Tables.EH_DOOR_AUTH.VALID_FROM_MS.le(now).
+                        and(Tables.EH_DOOR_AUTH.VALID_END_MS.ge(now)));
+                query.addConditions(Tables.EH_DOOR_AUTH.PHONE.eq(phone));
+                query.addConditions(Tables.EH_DOOR_AUTH.DOOR_ID.eq(doorId));
+                query.addConditions(Tables.EH_DOOR_AUTH.STATUS.eq(DoorAuthStatus.VALID.getCode()));
+                query.addConditions(c1);
+                return query;
+            }
+        });
+
+        if(auths == null || auths.size() == 0) {
+            return null;
+        }
+        return auths.get(0);
+    }
 
 }
