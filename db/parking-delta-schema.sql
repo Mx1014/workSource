@@ -168,6 +168,7 @@ ADD COLUMN `actual_start_time` datetime DEFAULT NULL COMMENT '实际使用开始
 ADD COLUMN `actual_end_time` datetime DEFAULT NULL COMMENT '实际使用结束时间',
 ADD COLUMN `string_tag1` varchar(128) DEFAULT NULL,
 ADD COLUMN `string_tag2` varchar(128) DEFAULT NULL,
+ADD COLUMN `scene` varchar(64) DEFAULT NULL COMMENT '下单时场景信息，用来计算价格',
 ADD COLUMN `refund_strategy` tinyint(4) DEFAULT NULL COMMENT '1-custom, 2-full',
 ADD COLUMN `overtime_strategy` tinyint(4) DEFAULT NULL COMMENT '1-custom, 2-full';
 
