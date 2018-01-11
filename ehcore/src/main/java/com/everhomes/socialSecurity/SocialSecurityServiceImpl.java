@@ -500,12 +500,12 @@ public class SocialSecurityServiceImpl implements SocialSecurityService {
 //            SocialSecurityPaymentDTO dto = processSocialSecurityItemDTO(detailIds.get(i), members);
 //            results.add(dto);
 //        }
-        Long nextPageAnchor = null;
+        Integer nextPageOffset = null;
         if (result != null && result.size() > pageSize) {
             result.remove(result.size() - 1);
-            nextPageAnchor = result.get(result.size() - 1).getDetailId();
+            nextPageOffset += cmd.getPageOffset();
         }
-        response.setNextPageAnchor(nextPageAnchor);
+        response.setNextPageOffset(nextPageOffset);
         response.setSocialSecurityPayments(result.stream().map(this::processSocialSecurityItemDTO).collect(Collectors.toList()));
         response.setPaymentMonth(socialSecurityPaymentProvider.findPaymentMonthByOwnerId(cmd.getOwnerId()));
         return response;
@@ -2567,8 +2567,6 @@ public class SocialSecurityServiceImpl implements SocialSecurityService {
     public List<SocialSecurityEmployeeDTO> listSocialSecurityEmployees(ListSocialSecurityPaymentsCommand cmd) {
         List<SocialSecurityEmployeeDTO> results = new ArrayList<>();
         EhOrganizationMemberDetails t2 = Tables.EH_ORGANIZATION_MEMBER_DETAILS.as("t2");
-        CrossShardListingLocator locator = new CrossShardListingLocator();
-        locator.setAnchor(cmd.getPageAnchor());
         Integer pageSize;
         if (cmd.getPageSize() != null)
             pageSize = cmd.getPageSize();
@@ -2579,7 +2577,7 @@ public class SocialSecurityServiceImpl implements SocialSecurityService {
         if (cmd.getDeptId() != null)
             organizationId = cmd.getDeptId();
 
-        List<OrganizationMember> records = organizationProvider.queryOrganizationPersonnels(locator, pageSize + 1, organizationId, (loc, query) -> {
+        List<OrganizationMember> records = organizationProvider.queryOrganizationPersonnels(new ListingLocator(),  organizationId, (locator, query) -> {
             if (cmd.getSocialSecurityStatus() != null)
                 query.addConditions(t2.SOCIAL_SECURITY_STATUS.eq(cmd.getSocialSecurityStatus()));
             if (cmd.getAccumulationFundStatus() != null)
@@ -2602,6 +2600,9 @@ public class SocialSecurityServiceImpl implements SocialSecurityService {
                         .and(Tables.EH_SOCIAL_SECURITY_SETTINGS.CITY_ID.eq(cmd.getSocialSecurityCityId()))
                         .and(Tables.EH_SOCIAL_SECURITY_SETTINGS.ACCUM_OR_SOCAIL.eq(AccumOrSocial.SOCAIL.getCode()))));
             }
+            int offset = (cmd.getPageOffset() -1) * (pageSize);
+            query.addOrderBy(t2.field("check_in_time").desc());
+            query.addLimit(offset, pageSize+1);
             return query;
         });
 

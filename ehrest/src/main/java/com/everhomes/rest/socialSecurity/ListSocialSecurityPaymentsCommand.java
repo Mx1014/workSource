@@ -49,7 +49,7 @@ public class ListSocialSecurityPaymentsCommand {
 	@ItemType(Byte.class)
 	private List<Byte> filterItems;*/
 
-	private Long pageAnchor;
+	private Integer pageOffset;
 
 	private Integer pageSize;
 
@@ -61,7 +61,7 @@ public class ListSocialSecurityPaymentsCommand {
 		this.ownerId = ownerId;
 	}
 
-	public ListSocialSecurityPaymentsCommand(String ownerType, Long ownerId, Long socialSecurityCityId, Long accumulationFundCityId, Long deptId, String keywords, List<Byte> filterItems, Long pageAnchor, Integer pageSize) {
+	public ListSocialSecurityPaymentsCommand(String ownerType, Long ownerId, Long socialSecurityCityId, Long accumulationFundCityId, Long deptId, String keywords, Integer pageOffset, Integer pageSize) {
 		super();
 		this.ownerType = ownerType;
 		this.ownerId = ownerId;
@@ -69,8 +69,7 @@ public class ListSocialSecurityPaymentsCommand {
 		this.accumulationFundCityId = accumulationFundCityId;
 		this.deptId = deptId;
 		this.keywords = keywords;
-//		this.filterItems = filterItems;
-		this.pageAnchor = pageAnchor;
+		this.pageOffset = pageOffset;
 		this.pageSize = pageSize;
 	}
 
@@ -154,12 +153,12 @@ public class ListSocialSecurityPaymentsCommand {
 		this.dismissMonth = dismissMonth;
 	}
 
-	public Long getPageAnchor() {
-		return pageAnchor;
+	public Integer getPageOffset() {
+		return pageOffset;
 	}
 
-	public void setPageAnchor(Long pageAnchor) {
-		this.pageAnchor = pageAnchor;
+	public void setPageOffset(Integer pageOffset) {
+		this.pageOffset = pageOffset;
 	}
 
 	public Integer getPageSize() {

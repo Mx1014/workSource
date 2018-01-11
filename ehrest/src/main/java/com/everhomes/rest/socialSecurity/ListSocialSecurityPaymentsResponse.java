@@ -9,14 +9,14 @@ import com.everhomes.util.StringHelper;
 /**
  * 
  * <ul>返回值:
- * <li>nextPageAnchor: 下页锚点</li>
+ * <li>nextPageOffset: 下页页码</li>
  * <li>socialSecurityPayments: 社保缴费列表 参考{@link com.everhomes.rest.socialSecurity.SocialSecurityPaymentDTO}</li>
  * <li>paymentMonth: 月份如201702</li>
  * </ul>
  */
 public class ListSocialSecurityPaymentsResponse {
 
-	private Long nextPageAnchor;
+	private Integer nextPageOffset;
 
 	@ItemType(SocialSecurityPaymentDTO.class)
 	private List<SocialSecurityPaymentDTO> socialSecurityPayments;
@@ -27,19 +27,18 @@ public class ListSocialSecurityPaymentsResponse {
 
 	}
 
-	public ListSocialSecurityPaymentsResponse(Long nextPageAnchor, List<SocialSecurityPaymentDTO> socialSecurityPayments, String paymentMonth) {
-		super();
-		this.nextPageAnchor = nextPageAnchor;
+	public ListSocialSecurityPaymentsResponse(Integer nextPageOffset, List<SocialSecurityPaymentDTO> socialSecurityPayments, String paymentMonth) {
+		this.nextPageOffset = nextPageOffset;
 		this.socialSecurityPayments = socialSecurityPayments;
 		this.paymentMonth = paymentMonth;
 	}
 
-	public Long getNextPageAnchor() {
-		return nextPageAnchor;
+	public Integer getNextPageOffset() {
+		return nextPageOffset;
 	}
 
-	public void setNextPageAnchor(Long nextPageAnchor) {
-		this.nextPageAnchor = nextPageAnchor;
+	public void setNextPageOffset(Integer nextPageOffset) {
+		this.nextPageOffset = nextPageOffset;
 	}
 
 	public List<SocialSecurityPaymentDTO> getSocialSecurityPayments() {
