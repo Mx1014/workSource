@@ -5880,7 +5880,7 @@ private void checkUserPrivilege(Long orgId, Long privilegeId, Long communityId) 
 				equipmentProvider.createEquipmentInspectionPlanGroupMap(planGroupMap);
 			});
 		}
-
+		LOGGER.info("sync for standard_equipment_map to eqiupmentInspectionPlan task ok.....");
 	}
 
 	@Override
