@@ -619,7 +619,11 @@ public class ExcelUtils {
 //        }else{
 //            throw new Exception("解析的文件格式有误！");
 //        }
-        wb = new XSSFWorkbook(inStr);
+        try{
+            wb = new XSSFWorkbook(inStr);
+        }catch (Exception e){
+            wb = new HSSFWorkbook(inStr);
+        }
         return wb;
     }
 
