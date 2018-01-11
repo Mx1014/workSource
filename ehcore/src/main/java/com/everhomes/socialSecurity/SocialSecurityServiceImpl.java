@@ -553,6 +553,8 @@ public class SocialSecurityServiceImpl implements SocialSecurityService {
         // TODO 这个要人事档案提供一些接口
         ListSocialSecurityEmployeeStatusResponse response = new ListSocialSecurityEmployeeStatusResponse();
 
+
+
         response.setPaySocialSecurityNumber(2);
         response.setPayAccumulationFundNumber(3);
         response.setIncreaseNumber(0);
