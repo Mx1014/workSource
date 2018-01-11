@@ -504,7 +504,7 @@ public class SocialSecurityServiceImpl implements SocialSecurityService {
         Integer nextPageOffset = null;
         if (result != null && result.size() > pageSize) {
             result.remove(result.size() - 1);
-            nextPageOffset += cmd.getPageOffset();
+            nextPageOffset = cmd.getPageOffset() + 1;
         }
         response.setNextPageOffset(nextPageOffset);
         response.setSocialSecurityPayments(result.stream().map(this::processSocialSecurityItemDTO).collect(Collectors.toList()));
