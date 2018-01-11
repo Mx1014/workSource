@@ -6082,13 +6082,13 @@ public class OrganizationProviderImpl implements OrganizationProvider {
 
 		Condition condition = t1.field("id").gt(0L);
 		if (locator != null && locator.getAnchor() != null)
-			condition = condition.and(t1.field("detail_id").lt(locator.getAnchor()));
+			condition = condition.and(t1.field("detail_id").gt(locator.getAnchor()));
 		Organization org = findOrganizationById(organizationId);
 		condition = condition.and(t1.field("group_path").like(org.getPath() + "%"));
 		condition = condition.and(t1.field("status").eq(OrganizationMemberStatus.ACTIVE.getCode()));
 		// 不包括经理
 		condition = condition.and(t1.field("group_type").notEqual(OrganizationGroupType.MANAGER.getCode()));
-
+		query.addOrderBy(t1.field("detail_id").asc());
 		query.addConditions(condition);
 		query.addLimit(pageSize);
 		query.addGroupBy(t1.field("contact_token"));
