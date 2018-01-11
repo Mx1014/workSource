@@ -20,7 +20,7 @@ import com.everhomes.util.StringHelper;
  * <li>accumulationFundStatus: 0-未缴, 1-在缴</li>
  * <li>checkInMonth: 入职月份</li>
  * <li>dismissMonth: 离职月份</li>
- * <li>pageAnchor: 锚点</li>
+ * <li>pageOffset: 页码</li>
  * <li>pageSize: 每页大小</li>
  * </ul>
  */
