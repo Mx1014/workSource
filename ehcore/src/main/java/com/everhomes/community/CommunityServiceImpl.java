@@ -3863,6 +3863,12 @@ public class CommunityServiceImpl implements CommunityService {
 	@Override
 	public List<ProjectDTO> getTreeProjectCategories(GetTreeProjectCategoriesCommand cmd){
 		Integer namespaceId = UserContext.getCurrentNamespaceId();
+	    if(cmd.getOwnerId() != null) {
+	        Organization org = organizationProvider.findOrganizationById(cmd.getOwnerId());
+	        if(org != null && org.getNamespaceId() != null) {
+	            namespaceId = org.getNamespaceId();
+	        }
+	    }
 		List<Community> communities = communityProvider.listCommunitiesByNamespaceId(namespaceId);
 		List<ProjectDTO> projects = new ArrayList<>();
 		for (Community community: communities) {
