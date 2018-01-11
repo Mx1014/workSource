@@ -447,8 +447,9 @@ public class SocialSecurityServiceImpl implements SocialSecurityService {
 //            cmd.setPageAnchor(0L);
         ListSocialSecurityPaymentsResponse response = new ListSocialSecurityPaymentsResponse();
         int pageSize = cmd.getPageSize() == null ? 20 : cmd.getPageSize();
+        if (cmd.getPageOffset() == null) cmd.setPageOffset(1);
         List<SocialSecurityEmployeeDTO> result = listSocialSecurityEmployees(cmd);
-        LOGGER.debug("楠哥返回的"+result);
+        LOGGER.debug("楠哥返回的" + result);
 //        CrossShardListingLocator locator = new CrossShardListingLocator();
 //        locator.setAnchor(cmd.getPageAnchor());
 //        List<Long> detailIds = new ArrayList<>();
@@ -517,24 +518,24 @@ public class SocialSecurityServiceImpl implements SocialSecurityService {
 //        OrganizationMemberDetails detail = organizationProvider.findOrganizationMemberDetailsByDetailId(dto.getDetailId());
 //        SocialSecurityEmployeeDTO detail = findSocialSecurityEmployeeDTO(members, detailId);
 //        if (null != detail) {
-            dto.setUserName(detail.getContactName());
-            dto.setDeptName(detail.getDepartmentName());
-            dto.setAccumulationFundStatus(detail.getAccumulationFundStatus());
-            dto.setSocialSecurityStatus(detail.getSocialSecurityStatus());
-            //// TODO: 2017/12/27  入职离职日期
+        dto.setUserName(detail.getContactName());
+        dto.setDeptName(detail.getDepartmentName());
+        dto.setAccumulationFundStatus(detail.getAccumulationFundStatus());
+        dto.setSocialSecurityStatus(detail.getSocialSecurityStatus());
+        //// TODO: 2017/12/27  入职离职日期
 //            dto.setEntryDate(detail.get);
-            SocialSecuritySetting accSetting = socialSecuritySettingProvider.findSocialSecuritySettingByDetailIdAndAOS(detail.getDetailId(), AccumOrSocial.ACCUM);
-            SocialSecuritySetting socSetting = socialSecuritySettingProvider.findSocialSecuritySettingByDetailIdAndAOS(detail.getDetailId(), AccumOrSocial.SOCAIL);
-            if (null != socSetting) {
-                dto.setSocialSecurityRadix(socSetting.getRadix());
-                Region city = regionProvider.findRegionById(socSetting.getCityId());
-                if (null != city) dto.setSocialSecurityCity(city.getName());
-            }
-            if (null != accSetting) {
-                dto.setAccumulationFundRadix(accSetting.getRadix());
-                Region city = regionProvider.findRegionById(accSetting.getCityId());
-                if (null != city) dto.setAccumulationFundCity(city.getName());
-            }
+        SocialSecuritySetting accSetting = socialSecuritySettingProvider.findSocialSecuritySettingByDetailIdAndAOS(detail.getDetailId(), AccumOrSocial.ACCUM);
+        SocialSecuritySetting socSetting = socialSecuritySettingProvider.findSocialSecuritySettingByDetailIdAndAOS(detail.getDetailId(), AccumOrSocial.SOCAIL);
+        if (null != socSetting) {
+            dto.setSocialSecurityRadix(socSetting.getRadix());
+            Region city = regionProvider.findRegionById(socSetting.getCityId());
+            if (null != city) dto.setSocialSecurityCity(city.getName());
+        }
+        if (null != accSetting) {
+            dto.setAccumulationFundRadix(accSetting.getRadix());
+            Region city = regionProvider.findRegionById(accSetting.getCityId());
+            if (null != city) dto.setAccumulationFundCity(city.getName());
+        }
 //        } else {
 //            dto.setUserName("找不到这个人");
 //        }
@@ -561,8 +562,8 @@ public class SocialSecurityServiceImpl implements SocialSecurityService {
         cal.setTime(new Date());
 
         Integer paySocialSecurityNumber = organizationProvider.queryOrganizationPersonnelCounts(new ListingLocator(), cmd.getOwnerId(), ((locator, query) -> {
-          query.addConditions(Tables.EH_ORGANIZATION_MEMBER_DETAILS.SOCIAL_SECURITY_STATUS.eq(SocialSecurityStatus.PENDING.getCode()));
-          return query;
+            query.addConditions(Tables.EH_ORGANIZATION_MEMBER_DETAILS.SOCIAL_SECURITY_STATUS.eq(SocialSecurityStatus.PENDING.getCode()));
+            return query;
         }));
 
         Integer accumulationFundNumber = organizationProvider.queryOrganizationPersonnelCounts(new ListingLocator(), cmd.getOwnerId(), ((locator, query) -> {
@@ -571,12 +572,12 @@ public class SocialSecurityServiceImpl implements SocialSecurityService {
         }));
 
         Integer inWorkNumber = 0;
-        if(cmd.getSocialSecurityMonth() != null)
+        if (cmd.getSocialSecurityMonth() != null)
             inWorkNumber = organizationProvider.queryOrganizationPersonnelCounts(new ListingLocator(), cmd.getOwnerId(), ((locator, query) -> {
-            query.addConditions(Tables.EH_ORGANIZATION_MEMBER_DETAILS.CHECK_IN_TIME.ge(getTheFirstDate(cmd.getSocialSecurityMonth())));
-            query.addConditions(Tables.EH_ORGANIZATION_MEMBER_DETAILS.CHECK_IN_TIME.le(getTheLastDate(cmd.getSocialSecurityMonth())));
-            return query;
-        }));
+                query.addConditions(Tables.EH_ORGANIZATION_MEMBER_DETAILS.CHECK_IN_TIME.ge(getTheFirstDate(cmd.getSocialSecurityMonth())));
+                query.addConditions(Tables.EH_ORGANIZATION_MEMBER_DETAILS.CHECK_IN_TIME.le(getTheLastDate(cmd.getSocialSecurityMonth())));
+                return query;
+            }));
         response.setPaySocialSecurityNumber(paySocialSecurityNumber);
         response.setPayAccumulationFundNumber(accumulationFundNumber);
         response.setInWorkNumber(inWorkNumber);
@@ -1181,10 +1182,10 @@ public class SocialSecurityServiceImpl implements SocialSecurityService {
         for (SocialSecurityItemDTO item : dtos) {
             if (item.getAccumOrSocial().equals(AccumOrSocial.ACCUM.getCode())
                     && NormalFlag.YES != NormalFlag.fromCode(detail.getAccumulationFundStatus())) {
-                increseMemberDetail(detail,AccumOrSocial.ACCUM);
-            }else if (item.getAccumOrSocial().equals(AccumOrSocial.SOCAIL.getCode())
+                increseMemberDetail(detail, AccumOrSocial.ACCUM);
+            } else if (item.getAccumOrSocial().equals(AccumOrSocial.SOCAIL.getCode())
                     && NormalFlag.YES != NormalFlag.fromCode(detail.getSocialSecurityStatus())) {
-                increseMemberDetail(detail,AccumOrSocial.SOCAIL);
+                increseMemberDetail(detail, AccumOrSocial.SOCAIL);
             }
             SocialSecuritySetting setting = findSetting(item.getAccumOrSocial(), item.getPayItem(), settings);
             List<SocialSecurityBase> bases = (item.getAccumOrSocial().equals(AccumOrSocial.ACCUM.getCode())) ? afBases : ssBases;
@@ -2503,7 +2504,7 @@ public class SocialSecurityServiceImpl implements SocialSecurityService {
         if (cmd.getDeptId() != null)
             organizationId = cmd.getDeptId();
 
-        List<OrganizationMember> records = organizationProvider.queryOrganizationPersonnels(new ListingLocator(),  organizationId, (locator, query) -> {
+        List<OrganizationMember> records = organizationProvider.queryOrganizationPersonnels(new ListingLocator(), organizationId, (locator, query) -> {
             if (cmd.getSocialSecurityStatus() != null)
                 query.addConditions(t2.SOCIAL_SECURITY_STATUS.eq(cmd.getSocialSecurityStatus()));
             if (cmd.getAccumulationFundStatus() != null)
@@ -2526,9 +2527,9 @@ public class SocialSecurityServiceImpl implements SocialSecurityService {
                         .and(Tables.EH_SOCIAL_SECURITY_SETTINGS.CITY_ID.eq(cmd.getSocialSecurityCityId()))
                         .and(Tables.EH_SOCIAL_SECURITY_SETTINGS.ACCUM_OR_SOCAIL.eq(AccumOrSocial.SOCAIL.getCode()))));
             }
-            int offset = (cmd.getPageOffset() -1) * (pageSize);
+            int offset = ((cmd.getPageOffset() == null ? 1 : cmd.getPageOffset()) - 1) * (pageSize);
             query.addOrderBy(t2.field("check_in_time").desc());
-            query.addLimit(offset, pageSize+1);
+            query.addLimit(offset, pageSize + 1);
             return query;
         });
 
