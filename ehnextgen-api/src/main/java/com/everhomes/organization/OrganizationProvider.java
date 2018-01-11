@@ -542,5 +542,7 @@ public interface OrganizationProvider {
 	
 	List<OrganizationMemberDetails> listOrganizationMemberDetails(Long ownerId);
 
-	List<OrganizationMember> queryOrganizationPersonnelDetailIds(ListingLocator locator, Integer pageSize, Long organizationId, ListingQueryBuilderCallback queryBuilderCallback);
+	Integer queryOrganizationPersonnelCounts(ListingLocator locator, Long organizationId, ListingQueryBuilderCallback queryBuilderCallback);
+	
+	List<OrganizationMember> queryOrganizationPersonnels(ListingLocator locator, Integer pageSize, Long organizationId, ListingQueryBuilderCallback queryBuilderCallback);
 }

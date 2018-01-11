@@ -96,7 +96,7 @@ public interface SocialSecurityService {
 
 	SocialSecurityInoutTimeDTO addSocialSecurityInOutTime(AddSocialSecurityInOutTimeCommand cmd);
 
-	List<SocialSecurityEmployeeDTO> listSocialSecurityEmployeeDetailIds(ListSocialSecurityPaymentsCommand cmd);
+	List<SocialSecurityEmployeeDTO> listSocialSecurityEmployees(ListSocialSecurityPaymentsCommand cmd);
 
 	SocialSecurityEmployeeDTO getSocialSecurityEmployeeInfo(Long detailId);
 

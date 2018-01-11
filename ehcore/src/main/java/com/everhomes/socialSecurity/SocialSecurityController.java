@@ -7,7 +7,6 @@ import com.everhomes.rest.organization.ImportFileTaskDTO;
 import com.everhomes.rest.socialSecurity.*;
 
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.beans.factory.annotation.Value;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.RestController;
@@ -319,7 +318,7 @@ public class SocialSecurityController extends ControllerBase {
     @RequestMapping("testInterface")
     @RestReturn(value = SocialSecurityEmployeeDTO.class, collection = true)
     public RestResponse testInterface(ListSocialSecurityPaymentsCommand cmd){
-        List<SocialSecurityEmployeeDTO> res = socialSecurityService.listSocialSecurityEmployeeDetailIds(cmd);
+        List<SocialSecurityEmployeeDTO> res = socialSecurityService.listSocialSecurityEmployees(cmd);
         return new RestResponse(res);
     }
 
