@@ -926,7 +926,7 @@ public class Rentalv2ServiceImpl implements Rentalv2Service {
 	public void addItem(AddItemAdminCommand cmd) {
 		if (null== cmd.getItemType()) {
 			throw RuntimeErrorException.errorWith(ErrorCodes.SCOPE_GENERAL,
-					ErrorCodes.ERROR_INVALID_PARAMETER, "Invalid paramter item type can not be null");
+					ErrorCodes.ERROR_INVALID_PARAMETER, "Invalid parameter item type can not be null");
 		}
 
 		RentalItem siteItem = ConvertHelper.convert(cmd,RentalItem.class );
@@ -940,11 +940,11 @@ public class Rentalv2ServiceImpl implements Rentalv2Service {
 	public FindRentalSiteItemsAndAttachmentsResponse findRentalSiteItems(FindRentalSiteItemsAndAttachmentsCommand cmd) {
 		if (null==cmd.getRentalSiteId()) {
 			throw RuntimeErrorException.errorWith(ErrorCodes.SCOPE_GENERAL,
-					ErrorCodes.ERROR_INVALID_PARAMETER, "Invalid paramter site id can not be null");
+					ErrorCodes.ERROR_INVALID_PARAMETER, "Invalid parameter site id can not be null");
 		}
 		if (null==cmd.getRentalSiteRuleIds()) {
 			throw RuntimeErrorException.errorWith(ErrorCodes.SCOPE_GENERAL,
-					ErrorCodes.ERROR_INVALID_PARAMETER, "Invalid paramter rule ids can not be null");
+					ErrorCodes.ERROR_INVALID_PARAMETER, "Invalid parameter rule ids can not be null");
 		}
 
 		FindRentalSiteItemsAndAttachmentsResponse response = new FindRentalSiteItemsAndAttachmentsResponse();
@@ -2114,8 +2114,7 @@ public class Rentalv2ServiceImpl implements Rentalv2Service {
                         Map<String, String> map = new HashMap<>();
                         map.put("useTime", order.getUseDetail());
                         map.put("resourceName", order.getResourceName());
-                        sendMessageCode(order.getRentalUid(),  RentalNotificationTemplateCode.locale, map,
-                                RentalNotificationTemplateCode.RENTAL_CANCEL_CODE);
+                        rentalCommonService.sendMessageCode(order.getRentalUid(), map, RentalNotificationTemplateCode.RENTAL_CANCEL_CODE);
 
                         String templateScope = SmsTemplateCode.SCOPE;
                         int templateId = SmsTemplateCode.RENTAL_CANCEL_CODE;
@@ -2252,47 +2251,6 @@ public class Rentalv2ServiceImpl implements Rentalv2Service {
 			}
 		}
 	}
-	/**
-	 * 给成功的订单发推送
-	 * 
-	 * */
-	@Override
-	public void addOrderSendMessage(RentalOrder rentalBill){
-		//消息推送
-		//定时任务给用户推送
-		if (rentalBill.getResourceType().equals(RentalV2ResourceType.DEFAULT.getCode())) {
-			User user =this.userProvider.findUserById(rentalBill.getRentalUid()) ;
-			if (null == user )
-				return;
-			Map<String, String> map;
-
-			RentalResource rs = rentalCommonService.getRentalResource(rentalBill.getResourceType(), rentalBill.getRentalResourceId());
-
-//			RentalResource rs = this.rentalv2Provider.getRentalSiteById(rentalBill.getRentalResourceId());
-			if(null == rs)
-				return;
-
-			try{
-
-				map = new HashMap<>();
-				map.put("userName", user.getNickName());
-				map.put("resourceName", rentalBill.getResourceName());
-				map.put("useDetail", rentalBill.getUseDetail());
-				map.put("rentalCount", rentalBill.getRentalCount()==null?"1":""+rentalBill.getRentalCount());
-				sendMessageCode(rs.getChargeUid(),  RentalNotificationTemplateCode.locale, map, RentalNotificationTemplateCode.RENTAL_ADMIN_NOTIFY);
-			}catch(Exception e){
-				LOGGER.error("SEND MESSAGE FAILED ,cause "+e.getLocalizedMessage());
-			}
-		}
-	}
-	
-	@Override
-    public void sendMessageCode(Long uid, String locale, Map<String, String> map, int code) {
-        String scope = RentalNotificationTemplateCode.SCOPE;
-        
-        String notifyTextForOther = localeTemplateService.getLocaleTemplateString(scope, code, locale, map, "");
-		rentalCommonService.sendMessageToUser(uid, notifyTextForOther);
-    }
 
 	@Override
 	public void validateRentalBill(List<RentalBillRuleDTO> ruleDTOs) {
@@ -3313,7 +3271,7 @@ public class Rentalv2ServiceImpl implements Rentalv2Service {
 				//默认是已退款
 
 				if ((order.getRefundFlag().equals(NormalFlag.NEED.getCode())
-						|| order.getRefundStrategy() != RentalOrderStrategy.NONE.getCode())
+						|| (null != order.getRefundStrategy() && order.getRefundStrategy() != RentalOrderStrategy.NONE.getCode()))
 						&& (order.getPaidMoney().compareTo(new BigDecimal(0)) == 1)){
 
 					BigDecimal orderAmount = handler.calculateRefundAmount(order, timestamp);
@@ -3408,18 +3366,6 @@ public class Rentalv2ServiceImpl implements Rentalv2Service {
 					RentalServiceErrorCode.ERROR_REFUND_ERROR,
 					"bill refund error");
 		}
-	}
-
-	/**
-	 * 取消订单发推送
-	 * 
-	 * */
-	@Override
-	public void cancelOrderSendMessage(RentalOrder rentalBill){
-
-		RentalMessageHandler handler = rentalCommonService.getRentalMessageHandler(rentalBill.getResourceType());
-
-		handler.cancelOrderSendMessage(rentalBill);
 	}
 	
 	/***给支付相关的参数签名*/
@@ -3768,7 +3714,9 @@ public class Rentalv2ServiceImpl implements Rentalv2Service {
 			this.flowService.processAutoStep(dto);
 		}
 		//发消息
-		cancelOrderSendMessage(order);
+		RentalMessageHandler handler = rentalCommonService.getRentalMessageHandler(order.getResourceType());
+
+		handler.cancelOrderSendMessage(order);
 	}
 	@Override
 	public void onOrderSuccess(RentalOrder order) {
@@ -3782,7 +3730,10 @@ public class Rentalv2ServiceImpl implements Rentalv2Service {
 		}
 
 		//发消息给管理员
-		addOrderSendMessage(order);
+		RentalMessageHandler handler = rentalCommonService.getRentalMessageHandler(order.getResourceType());
+
+		handler.addOrderSendMessage(order);
+
 		//发短信在对接支付的handler  RentalOrderEmbeddedHandler //TODO:看是否需要移到这里
 	}
 	private FlowCase createFlowCase(RentalOrder order){

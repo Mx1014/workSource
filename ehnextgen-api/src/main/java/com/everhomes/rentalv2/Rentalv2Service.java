@@ -106,13 +106,6 @@ public interface Rentalv2Service {
 
 	void deleteResource(DeleteResourceCommand cmd);
 
-
-	void addOrderSendMessage(RentalOrder rentalBill);
-
-
-	void cancelOrderSendMessage(RentalOrder rentalBill);
-
-
 	void sendRentalSuccessSms(Integer namespaceId, String phoneNumber,
 			RentalOrder order);
 
@@ -153,9 +146,6 @@ public interface Rentalv2Service {
 
 
 	void changeRentalOrderStatus(RentalOrder order, Byte status, Boolean cancelOtherOrderFlag);
-
-
-	void sendMessageCode(Long uid, String locale, Map<String, String> map, int code);
 
 	RentalSiteDTO findRentalSiteById(FindRentalSiteByIdCommand cmd);
 

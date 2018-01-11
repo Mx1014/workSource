@@ -1,5 +1,6 @@
 package com.everhomes.rentalv2.message_handler;
 
+import com.everhomes.locale.LocaleTemplateService;
 import com.everhomes.parking.ParkingProvider;
 import com.everhomes.rentalv2.*;
 import com.everhomes.user.User;
@@ -8,6 +9,8 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
 
 import java.math.BigDecimal;
+import java.util.HashMap;
+import java.util.Map;
 
 /**
  * @author sw on 2018/1/5.
@@ -21,21 +24,26 @@ public class VipParkingRentalMessageHandler implements RentalMessageHandler {
     private Rentalv2Provider rentalv2Provider;
     @Autowired
     private RentalCommonServiceImpl rentalCommonService;
+    @Autowired
+    private LocaleTemplateService localeTemplateService;
 
     @Override
     public void cancelOrderSendMessage(RentalOrder rentalBill) {
 
+        RentalResourceType type = rentalv2Provider.findRentalResourceTypeById(rentalBill.getResourceTypeId());
+
+        Map<String, String> map = new HashMap<>();
+        map.put("resourceTypeName", type.getName());
+        String content = localeTemplateService.getLocaleTemplateString(RentalNotificationTemplateCode.SCOPE,
+                RentalNotificationTemplateCode.RENTAL_USER_CANCEL_ORDER, RentalNotificationTemplateCode.locale, map, "");
+
         //给预约人推送
-        StringBuilder content = new StringBuilder();
-//        content.append(user.getNickName());
-        content.append("取消了");
-//        content.append(rentalBill.getResourceName());
-//        content.append("\n使用详情：");
-//        content.append(rentalBill.getUseDetail());
-//        if(null != rentalBill.getRentalCount() ){
-//            managerContent.append("\n预约数：");
-//            managerContent.append(rentalBill.getRentalCount());
-//        }
-        rentalCommonService.sendMessageToUser(rentalBill.getRentalUid(), content.toString());
+        rentalCommonService.sendRouterMessageToUser(rentalBill.getRentalUid(), content,
+                rentalBill.getId(), rentalBill.getResourceType());
+    }
+
+    @Override
+    public void addOrderSendMessage(RentalOrder rentalBill) {
+
     }
 }

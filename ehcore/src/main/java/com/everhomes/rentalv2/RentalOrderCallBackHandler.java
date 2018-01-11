@@ -56,7 +56,8 @@ public class RentalOrderCallBackHandler implements PaymentCallBackHandler {
 	private FlowCaseProvider flowCaseProvider;
 	@Autowired
 	private SmsProvider smsProvider;
-
+	@Autowired
+	private RentalCommonServiceImpl rentalCommonService;
 	@Autowired
 	private PayService payService;
 	@Override
@@ -127,7 +128,7 @@ public class RentalOrderCallBackHandler implements PaymentCallBackHandler {
 							Map<String, String> map = new HashMap<>();
 							map.put("useTime", order.getUseDetail());
 							map.put("resourceName", order.getResourceName());
-							rentalService.sendMessageCode(order.getRentalUid(),  RentalNotificationTemplateCode.locale, map,
+							rentalCommonService.sendMessageCode(order.getRentalUid(), map,
 									RentalNotificationTemplateCode.RENTAL_PAY_SUCCESS_CODE);
 
 							String templateScope = SmsTemplateCode.SCOPE;

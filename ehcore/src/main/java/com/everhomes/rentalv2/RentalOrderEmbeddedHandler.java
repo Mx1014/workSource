@@ -51,7 +51,7 @@ public class RentalOrderEmbeddedHandler implements OrderEmbeddedHandler {
 	@Autowired
 	private SmsProvider smsProvider;
 	@Autowired
-	private Rentalv2Service rentalv2Service;
+	private RentalCommonServiceImpl rentalCommonService;
 
 	@Override
 	public void paySuccess(PayCallbackCommand cmd) {
@@ -116,7 +116,7 @@ public class RentalOrderEmbeddedHandler implements OrderEmbeddedHandler {
 							Map<String, String> map = new HashMap<>();
 							map.put("useTime", order.getUseDetail());
 							map.put("resourceName", order.getResourceName());
-							rentalService.sendMessageCode(order.getRentalUid(),  RentalNotificationTemplateCode.locale, map,
+							rentalCommonService.sendMessageCode(order.getRentalUid(), map,
 									RentalNotificationTemplateCode.RENTAL_PAY_SUCCESS_CODE);
 
 							String templateScope = SmsTemplateCode.SCOPE;

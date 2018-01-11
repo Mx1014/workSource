@@ -31,7 +31,6 @@ import com.everhomes.organization.OrganizationProvider;
 import com.everhomes.organization.OrganizationService;
 import com.everhomes.rest.organization.ListUserRelatedOrganizationsCommand;
 import com.everhomes.rest.organization.OrganizationSimpleDTO;
-import com.everhomes.rest.rentalv2.NormalFlag;
 import com.everhomes.rest.rentalv2.admin.AttachmentType;
 import com.everhomes.rest.sms.SmsTemplateCode;
 import com.everhomes.rest.user.IdentifierType;
@@ -47,8 +46,7 @@ import com.everhomes.util.Tuple;
 public class Rentalv2FlowModuleListener implements FlowModuleListener {
 
 	private static final Logger LOGGER = LoggerFactory.getLogger(Rentalv2FlowModuleListener.class);
-	@Autowired
-	private FlowUserSelectionProvider flowUserSelectionProvider;
+
 	@Autowired
 	private FlowService flowService;
 	@Autowired
@@ -70,9 +68,10 @@ public class Rentalv2FlowModuleListener implements FlowModuleListener {
     @Autowired
     private LocaleTemplateService localeTemplateService;
 	@Autowired
-	private Rentalv2Service rentalService;
-	@Autowired
 	private SmsProvider smsProvider;
+	@Autowired
+	private RentalCommonServiceImpl rentalCommonService;
+
 	@Override
 	public FlowModuleInfo initModule() {
 		FlowModuleInfo module = new FlowModuleInfo();
@@ -534,15 +533,13 @@ public class Rentalv2FlowModuleListener implements FlowModuleListener {
 			map.put("offlinePayeeName", contactName);
 			map.put("offlinePayeeContact", contactToken);
 			map.put("offlineCashierAddress", order.getOfflineCashierAddress());
-			rentalService.sendMessageCode(order.getRentalUid(),  RentalNotificationTemplateCode.locale, map,
-					RentalNotificationTemplateCode.RENTAL_APPLY_SUCCESS_CODE);
+			rentalCommonService.sendMessageCode(order.getRentalUid(), map, RentalNotificationTemplateCode.RENTAL_APPLY_SUCCESS_CODE);
 		}else if (SmsTemplateCode.RENTAL_APPLY_FAILURE_CODE == templateId) {
 
 			Map<String, String> map = new HashMap<>();
 			map.put("useTime", order.getUseDetail());
 			map.put("resourceName", order.getResourceName());
-			rentalService.sendMessageCode(order.getRentalUid(),  RentalNotificationTemplateCode.locale, map,
-					RentalNotificationTemplateCode.RENTAL_APPLY_FAILURE_CODE);
+			rentalCommonService.sendMessageCode(order.getRentalUid(), map, RentalNotificationTemplateCode.RENTAL_APPLY_FAILURE_CODE);
 			//审批驳回
 			smsProvider.addToTupleList(variables, "useTime", order.getUseDetail());
 			smsProvider.addToTupleList(variables, "resourceName", order.getResourceName());
@@ -551,8 +548,7 @@ public class Rentalv2FlowModuleListener implements FlowModuleListener {
 			Map<String, String> map = new HashMap<>();
 			map.put("useTime", order.getUseDetail());
 			map.put("resourceName", order.getResourceName());
-			rentalService.sendMessageCode(order.getRentalUid(),  RentalNotificationTemplateCode.locale, map,
-					RentalNotificationTemplateCode.RENTAL_PAY_SUCCESS_CODE);
+			rentalCommonService.sendMessageCode(order.getRentalUid(), map, RentalNotificationTemplateCode.RENTAL_PAY_SUCCESS_CODE);
 
 			//支付成功
 			smsProvider.addToTupleList(variables, "useTime", order.getUseDetail());
@@ -579,8 +575,7 @@ public class Rentalv2FlowModuleListener implements FlowModuleListener {
 			Map<String, String> map = new HashMap<>();
 			map.put("useTime", order.getUseDetail());
 			map.put("resourceName", order.getResourceName());
-			rentalService.sendMessageCode(order.getRentalUid(),  RentalNotificationTemplateCode.locale, map,
-					RentalNotificationTemplateCode.APPROVE_RENTAL_APPLY_SUCCESS_CODE);
+			rentalCommonService.sendMessageCode(order.getRentalUid(), map, RentalNotificationTemplateCode.APPROVE_RENTAL_APPLY_SUCCESS_CODE);
 			//审批线上支付模式 审批通过短信
 			smsProvider.addToTupleList(variables, "useTime", order.getUseDetail());
 			smsProvider.addToTupleList(variables, "resourceName", order.getResourceName());
@@ -589,8 +584,7 @@ public class Rentalv2FlowModuleListener implements FlowModuleListener {
 			Map<String, String> map = new HashMap<>();
 			map.put("useTime", order.getUseDetail());
 			map.put("resourceName", order.getResourceName());
-			rentalService.sendMessageCode(order.getRentalUid(),  RentalNotificationTemplateCode.locale, map,
-					RentalNotificationTemplateCode.RENTAL_CANCEL_CODE);
+			rentalCommonService.sendMessageCode(order.getRentalUid(), map, RentalNotificationTemplateCode.RENTAL_CANCEL_CODE);
 
 			//预约失败
 			smsProvider.addToTupleList(variables, "useTime", order.getUseDetail());
@@ -601,8 +595,7 @@ public class Rentalv2FlowModuleListener implements FlowModuleListener {
 			Map<String, String> map = new HashMap<>();
 			map.put("useTime", order.getUseDetail());
 			map.put("resourceName", order.getResourceName());
-			rentalService.sendMessageCode(order.getRentalUid(),  RentalNotificationTemplateCode.locale, map,
-					RentalNotificationTemplateCode.RENTAL_REMIND_CODE);
+			rentalCommonService.sendMessageCode(order.getRentalUid(), map, RentalNotificationTemplateCode.RENTAL_REMIND_CODE);
 
 			//线下支付客户催办
 

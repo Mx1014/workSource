@@ -7,5 +7,7 @@ public interface RentalMessageHandler {
     String RENTAL_MESSAGE_HANDLER_PREFIX = "RentalMessageHandler-";
     String DEFAULT = "default";
 
-    public void cancelOrderSendMessage(RentalOrder rentalBill);
+    void cancelOrderSendMessage(RentalOrder rentalBill);
+
+    void addOrderSendMessage(RentalOrder rentalBill);
 }

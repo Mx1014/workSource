@@ -193,6 +193,8 @@ UPDATE eh_rentalv2_price_rules set user_price_type = 1;
 UPDATE eh_rentalv2_price_packages set user_price_type = 1;
 
 
+INSERT INTO `eh_locale_templates` (`scope`, `code`, `locale`, `description`, `text`, `namespace_id`)
+	VALUES ('rental.notification', '13', 'zh_CN', '用户取消订单推送消息', '订单取消通知：您的${resourceTypeName}订单已成功取消。', '0');
 
 
 
