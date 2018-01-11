@@ -6068,8 +6068,30 @@ public class OrganizationProviderImpl implements OrganizationProvider {
 		}
 		return result;
 	}*/
+
 	@Override
-	public List<OrganizationMember> queryOrganizationPersonnelDetailIds(ListingLocator locator, Integer pageSize, Long organizationId, ListingQueryBuilderCallback queryBuilderCallback) {
+	public Integer queryOrganizationPersonnelCounts(ListingLocator locator, Long organizationId, ListingQueryBuilderCallback queryBuilderCallback) {
+		DSLContext context = dbProvider.getDslContext(AccessSpec.readOnly());
+		SelectQuery<Record> query = context.selectQuery();
+		query.addFrom(Tables.EH_ORGANIZATION_MEMBERS);
+		query.addJoin(Tables.EH_ORGANIZATION_MEMBER_DETAILS, JoinType.LEFT_OUTER_JOIN, Tables.EH_ORGANIZATION_MEMBERS.DETAIL_ID.eq(Tables.EH_ORGANIZATION_MEMBER_DETAILS.ID));
+		queryBuilderCallback.buildCondition(locator, query);
+
+		Condition condition = Tables.EH_ORGANIZATION_MEMBERS.ID.gt(0L);
+
+		Organization org = findOrganizationById(organizationId);
+		condition = condition.and(Tables.EH_ORGANIZATION_MEMBERS.GROUP_PATH.like(org.getPath() + "%"));
+		condition = condition.and(Tables.EH_ORGANIZATION_MEMBERS.STATUS.eq(OrganizationMemberStatus.ACTIVE.getCode()));
+		// 不包括经理
+		condition = condition.and(Tables.EH_ORGANIZATION_MEMBERS.GROUP_TYPE.notEqual(OrganizationGroupType.MANAGER.getCode()));
+		query.addConditions(condition);
+		query.addGroupBy(Tables.EH_ORGANIZATION_MEMBERS.CONTACT_TOKEN);
+
+		return query.fetchCount();
+	}
+
+	@Override
+	public List<OrganizationMember> queryOrganizationPersonnels(ListingLocator locator, Integer pageSize, Long organizationId, ListingQueryBuilderCallback queryBuilderCallback) {
 		List<OrganizationMember> results = new ArrayList<>();
 
 		DSLContext context = dbProvider.getDslContext(AccessSpec.readOnly());

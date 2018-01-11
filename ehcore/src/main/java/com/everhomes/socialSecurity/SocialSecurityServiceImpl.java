@@ -41,7 +41,6 @@ import org.apache.poi.ss.usermodel.Row;
 import org.apache.poi.ss.usermodel.Workbook;
 import org.apache.poi.xssf.usermodel.XSSFSheet;
 import org.apache.poi.xssf.usermodel.XSSFWorkbook;
-import org.jooq.Operator;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -250,7 +249,7 @@ public class SocialSecurityServiceImpl implements SocialSecurityService {
         cmd.setOwnerId(ownerId);
         cmd.setPageSize(Integer.MAX_VALUE - 1);
         cmd.setAccumulationFundStatus(NormalFlag.YES.getCode());
-        List<SocialSecurityEmployeeDTO> result = listSocialSecurityEmployeeDetailIds(cmd);
+        List<SocialSecurityEmployeeDTO> result = listSocialSecurityEmployees(cmd);
         if (null != result) {
             for (SocialSecurityEmployeeDTO dto : result) {
                 detailIds.add(dto.getDetailId());
@@ -260,7 +259,7 @@ public class SocialSecurityServiceImpl implements SocialSecurityService {
 
         cmd.setSocialSecurityStatus(NormalFlag.YES.getCode());
         cmd.setAccumulationFundStatus(null);
-        result = listSocialSecurityEmployeeDetailIds(cmd);
+        result = listSocialSecurityEmployees(cmd);
         if (null != result) {
             for (SocialSecurityEmployeeDTO dto : result) {
                 detailIds.add(dto.getDetailId());
@@ -297,7 +296,7 @@ public class SocialSecurityServiceImpl implements SocialSecurityService {
             ssBases.addAll(afBases);
         }
         ListSocialSecurityPaymentsCommand command = new ListSocialSecurityPaymentsCommand(ownerId);
-        List<SocialSecurityEmployeeDTO> members = listSocialSecurityEmployeeDetailIds(command);
+        List<SocialSecurityEmployeeDTO> members = listSocialSecurityEmployees(command);
 //        List<Long> detailIds = archivesService.listSocialSecurityEmployees(ownerId, null, null, null);
 //        List<OrganizationMemberDetails> details = organizationProvider.listOrganizationMemberDetails(ownerId);
         Long id = sequenceProvider.getNextSequence(NameMapper.getSequenceDomainFromTablePojo(EhSocialSecuritySettings.class));
@@ -417,7 +416,7 @@ public class SocialSecurityServiceImpl implements SocialSecurityService {
             return null;
 
         });
-        List<SocialSecurityEmployeeDTO> result = listSocialSecurityEmployeeDetailIds(cmd);
+        List<SocialSecurityEmployeeDTO> result = listSocialSecurityEmployees(cmd);
 
 //        SsorAfPay payFlag = null;
 //        if (null != cmd.getFilterItems()) {
@@ -556,16 +555,30 @@ public class SocialSecurityServiceImpl implements SocialSecurityService {
     @Override
     public ListSocialSecurityEmployeeStatusResponse listSocialSecurityEmployeeStatus(
             ListSocialSecurityEmployeeStatusCommand cmd) {
-        // TODO 这个要人事档案提供一些接口
         ListSocialSecurityEmployeeStatusResponse response = new ListSocialSecurityEmployeeStatusResponse();
+        Calendar cal = Calendar.getInstance();
+        cal.setTime(new Date());
 
+        Integer paySocialSecurityNumber = organizationProvider.queryOrganizationPersonnelCounts(new ListingLocator(), cmd.getOwnerId(), ((locator, query) -> {
+          query.addConditions(Tables.EH_ORGANIZATION_MEMBER_DETAILS.SOCIAL_SECURITY_STATUS.eq(SocialSecurityStatus.PENDING.getCode()));
+          return query;
+        }));
 
+        Integer accumulationFundNumber = organizationProvider.queryOrganizationPersonnelCounts(new ListingLocator(), cmd.getOwnerId(), ((locator, query) -> {
+            query.addConditions(Tables.EH_ORGANIZATION_MEMBER_DETAILS.ACCUMULATION_FUND_STATUS.eq(SocialSecurityStatus.PENDING.getCode()));
+            return query;
+        }));
 
-        response.setPaySocialSecurityNumber(2);
-        response.setPayAccumulationFundNumber(3);
-        response.setIncreaseNumber(0);
-        response.setDecreaseNumber(0);
-        response.setInWorkNumber(9);
+        Integer inWorkNumber = 0;
+        if(cmd.getSocialSecurityMonth() != null)
+            inWorkNumber = organizationProvider.queryOrganizationPersonnelCounts(new ListingLocator(), cmd.getOwnerId(), ((locator, query) -> {
+            query.addConditions(Tables.EH_ORGANIZATION_MEMBER_DETAILS.CHECK_IN_TIME.ge(getTheFirstDate(cmd.getSocialSecurityMonth())));
+            query.addConditions(Tables.EH_ORGANIZATION_MEMBER_DETAILS.CHECK_IN_TIME.le(getTheLastDate(cmd.getSocialSecurityMonth())));
+            return query;
+        }));
+        response.setPaySocialSecurityNumber(paySocialSecurityNumber);
+        response.setPayAccumulationFundNumber(accumulationFundNumber);
+        response.setInWorkNumber(inWorkNumber);
         response.setOutWorkNumber(7);
         return response;
     }
@@ -2550,7 +2563,7 @@ public class SocialSecurityServiceImpl implements SocialSecurityService {
     }
 
     @Override
-    public List<SocialSecurityEmployeeDTO> listSocialSecurityEmployeeDetailIds(ListSocialSecurityPaymentsCommand cmd) {
+    public List<SocialSecurityEmployeeDTO> listSocialSecurityEmployees(ListSocialSecurityPaymentsCommand cmd) {
         List<SocialSecurityEmployeeDTO> results = new ArrayList<>();
         EhOrganizationMemberDetails t2 = Tables.EH_ORGANIZATION_MEMBER_DETAILS.as("t2");
         CrossShardListingLocator locator = new CrossShardListingLocator();
@@ -2565,7 +2578,7 @@ public class SocialSecurityServiceImpl implements SocialSecurityService {
         if (cmd.getDeptId() != null)
             organizationId = cmd.getDeptId();
 
-        List<OrganizationMember> records = organizationProvider.queryOrganizationPersonnelDetailIds(locator, pageSize + 1, organizationId, (loc, query) -> {
+        List<OrganizationMember> records = organizationProvider.queryOrganizationPersonnels(locator, pageSize + 1, organizationId, (loc, query) -> {
             if (cmd.getSocialSecurityStatus() != null)
                 query.addConditions(t2.SOCIAL_SECURITY_STATUS.eq(cmd.getSocialSecurityStatus()));
             if (cmd.getAccumulationFundStatus() != null)
