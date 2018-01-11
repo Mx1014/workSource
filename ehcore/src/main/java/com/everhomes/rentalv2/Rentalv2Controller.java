@@ -548,7 +548,7 @@ public class Rentalv2Controller extends ControllerBase {
 	@RequestMapping("getRenewRentalOrderInfo")
 	@RestReturn(value = GetRenewRentalOrderInfoResponse.class)
 	public RestResponse getRenewRentalOrderInfo(GetRenewRentalOrderInfoCommand cmd) {
-		RestResponse response = new RestResponse();
+		RestResponse response = new RestResponse(rentalService.getRenewRentalOrderInfo(cmd));
 		response.setErrorCode(ErrorCodes.SUCCESS);
 		response.setErrorDescription("OK");
 		return response;
@@ -561,7 +561,7 @@ public class Rentalv2Controller extends ControllerBase {
 	@RequestMapping("renewRentalOrder")
 	@RestReturn(value = RentalOrderDTO.class)
 	public RestResponse renewRentalOrder(RenewRentalOrderCommand cmd) {
-		RestResponse response = new RestResponse();
+		RestResponse response = new RestResponse(rentalService.renewRentalOrder(cmd));
 		response.setErrorCode(ErrorCodes.SUCCESS);
 		response.setErrorDescription("OK");
 		return response;

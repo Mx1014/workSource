@@ -11,6 +11,15 @@ import com.everhomes.rest.order.PreOrderDTO;
 public class AddRentalOrderUsingInfoV2Response {
     private PreOrderDTO preOrderDTO;
     private String flowCaseUrl;
+    private Long billId;
+
+    public Long getBillId() {
+        return billId;
+    }
+
+    public void setBillId(Long billId) {
+        this.billId = billId;
+    }
 
     public PreOrderDTO getPreOrderDTO() {
         return preOrderDTO;

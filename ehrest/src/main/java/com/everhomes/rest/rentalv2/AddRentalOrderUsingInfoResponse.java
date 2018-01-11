@@ -13,6 +13,16 @@ public class AddRentalOrderUsingInfoResponse {
 
     private String flowCaseUrl;
 
+    private Long billId;
+
+    public Long getBillId() {
+        return billId;
+    }
+
+    public void setBillId(Long billId) {
+        this.billId = billId;
+    }
+
     public CommonOrderDTO getOrderDTO() {
         return orderDTO;
     }

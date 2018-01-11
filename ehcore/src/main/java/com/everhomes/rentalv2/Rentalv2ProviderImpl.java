@@ -816,33 +816,6 @@ public class Rentalv2ProviderImpl implements Rentalv2Provider {
 	}
 
 	@Override
-	public Double sumRentalRuleBillSumCounts(Long siteRuleId) {
-		DSLContext context = dbProvider.getDslContext(AccessSpec.readOnly());
-		SelectOnConditionStep<Record1<BigDecimal>> step = context
-				.select(Tables.EH_RENTALV2_RESOURCE_ORDERS.RENTAL_COUNT.sum())
-				.from(Tables.EH_RENTALV2_RESOURCE_ORDERS)
-				.join(Tables.EH_RENTALV2_ORDERS)
-				.on(Tables.EH_RENTALV2_ORDERS.ID
-						.eq(Tables.EH_RENTALV2_RESOURCE_ORDERS.RENTAL_ORDER_ID));
-		Condition condition = Tables.EH_RENTALV2_RESOURCE_ORDERS.RENTAL_RESOURCE_RULE_ID
-				.equal(siteRuleId);
-		condition = condition.and(Tables.EH_RENTALV2_ORDERS.STATUS
-				.ne(SiteBillStatus.FAIL.getCode()));
-		condition = condition.and(Tables.EH_RENTALV2_ORDERS.STATUS
-				.ne(SiteBillStatus.REFUNDED.getCode()));
-		condition = condition.and(Tables.EH_RENTALV2_ORDERS.STATUS
-				.ne(SiteBillStatus.REFUNDING.getCode()));
-		condition = condition.and(Tables.EH_RENTALV2_ORDERS.STATUS
-				.ne(SiteBillStatus.APPROVING.getCode()));
-		condition = condition.and(Tables.EH_RENTALV2_ORDERS.STATUS
-				.ne(SiteBillStatus.PAYINGFINAL.getCode()));
-		condition = condition.and(Tables.EH_RENTALV2_ORDERS.STATUS
-				.ne(SiteBillStatus.INACTIVE.getCode()));
-
-		return step.where(condition).fetchOneInto(Double.class);
-	}
-
-	@Override
 	public List<RentalOrder> listRentalBills(Long resourceTypeId, Long organizationId, Long rentalSiteId, ListingLocator locator, Byte billStatus,
 			String vendorType , Integer pageSize, Long startTime, Long endTime,
 			Byte invoiceFlag,Long userId){
@@ -1062,7 +1035,7 @@ public class Rentalv2ProviderImpl implements Rentalv2Provider {
 				.map((r) -> {
 					return ConvertHelper.convert(r, RentalResourceOrder.class);
 				});;
- 
+
 
 		return result;
 	}

@@ -18,6 +18,8 @@ public class RenewRentalOrderCommand {
     private Byte rentalType;
     private Double timeStep;
 
+    private Double cellCount;
+
     private Long endTime;
 
     private BigDecimal amount;
@@ -25,6 +27,14 @@ public class RenewRentalOrderCommand {
     @Override
     public String toString() {
         return StringHelper.toJsonString(this);
+    }
+
+    public Double getCellCount() {
+        return cellCount;
+    }
+
+    public void setCellCount(Double cellCount) {
+        this.cellCount = cellCount;
     }
 
     public Double getTimeStep() {

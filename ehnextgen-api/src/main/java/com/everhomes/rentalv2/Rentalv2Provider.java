@@ -40,8 +40,6 @@ public interface Rentalv2Provider {
 
 	void deleteRentalSiteItemById(Long rentalSiteItemId);
 
-	Double sumRentalRuleBillSumCounts(Long siteRuleId);
-
 	void updateRentalBill(RentalOrder bill);
 
 	Long createRentalBillAttachment(RentalOrderAttachment rba);
