@@ -4,6 +4,7 @@ CREATE TABLE `eh_portal_versions` (
   `namespace_id` int(11) NOT NULL,
   `parent_id` bigint(20) DEFAULT NULL,
   `name` varchar(255) DEFAULT NULL,
+  `create_time` datetime DEFAULT NULL,
   `sync_time` datetime DEFAULT NULL,
   `publish_time` datetime DEFAULT NULL,
   `status` tinyint(4) DEFAULT NULL COMMENT '0-init,1-edit,2-publis success, 3-publish fail',
