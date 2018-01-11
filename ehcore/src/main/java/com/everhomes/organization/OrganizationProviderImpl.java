@@ -6092,7 +6092,7 @@ public class OrganizationProviderImpl implements OrganizationProvider {
 		query.addConditions(condition);
 		query.addLimit(pageSize);
 		query.addGroupBy(t1.field("contact_token"));
-
+LOGGER.debug("sql : "+query.toString());
 		List<OrganizationMember> records = query.fetch().map(new OrganizationMemberRecordMapper());
 		if (records != null) {
 			records.forEach(r -> {
