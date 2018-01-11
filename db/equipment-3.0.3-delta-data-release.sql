@@ -15,4 +15,8 @@ UPDATE eh_equipment_inspection_tasks
 SET `status` = 6
 WHERE `status` = 4 AND review_result = 2;
 
+UPDATE eh_equipment_inspection_tasks
+SET `status` = 7
+WHERE `status` = 4 AND review_result = 4;
+
 -- 巡检任务状态统一 end by jiarui 20180105

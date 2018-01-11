@@ -2000,7 +2000,7 @@ public class EquipmentProviderImpl implements EquipmentProvider {
     public void closeReviewTasks(EquipmentInspectionTasks task) {
         DSLContext context = dbProvider.getDslContext(AccessSpec.readOnly());
         //task.setReviewResult(ReviewResult.REVIEW_DELAY.getCode());  3.0.3
-        task.setResult(EquipmentTaskStatus.REVIEW_DELAY.getCode());//3.0.3
+        task.setStatus(EquipmentTaskStatus.REVIEW_DELAY.getCode());//3.0.3
 //		task.setReviewTime(new Timestamp(System.currentTimeMillis()));
         EhEquipmentInspectionTasks t = ConvertHelper.convert(task, EhEquipmentInspectionTasks.class);
         EhEquipmentInspectionTasksDao dao = new EhEquipmentInspectionTasksDao(context.configuration());
