@@ -2,6 +2,7 @@ package com.everhomes.rest.socialSecurity;
 
 import com.everhomes.discover.ItemType;
 import com.everhomes.rest.organization.OrganizationDTO;
+import com.everhomes.util.StringHelper;
 
 import java.sql.Date;
 
@@ -132,5 +133,10 @@ public class SocialSecurityEmployeeDTO {
 
     public void setSocialSecurityEndMonth(String socialSecurityEndMonth) {
         this.socialSecurityEndMonth = socialSecurityEndMonth;
+    }
+
+    @Override
+    public String toString() {
+        return StringHelper.toJsonString(this);
     }
 }
