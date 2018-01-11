@@ -447,7 +447,7 @@ public class SocialSecurityServiceImpl implements SocialSecurityService {
 //            cmd.setPageAnchor(0L);
         ListSocialSecurityPaymentsResponse response = new ListSocialSecurityPaymentsResponse();
         int pageSize = cmd.getPageSize() == null ? 20 : cmd.getPageSize();
-        List<SocialSecurityEmployeeDTO> result = listSocialSecurityEmployeeDetailIds(cmd);
+        List<SocialSecurityEmployeeDTO> result = listSocialSecurityEmployees(cmd);
         LOGGER.debug("楠哥返回的"+result);
 //        CrossShardListingLocator locator = new CrossShardListingLocator();
 //        locator.setAnchor(cmd.getPageAnchor());
