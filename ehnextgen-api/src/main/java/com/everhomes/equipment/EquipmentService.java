@@ -116,4 +116,6 @@ public interface EquipmentService {
     EquipmentInspectionReviewDateDTO listReviewExpireDays(SetReviewExpireDaysCommand cmd);
 
 	EquipmentTaskOfflineResponse listEquipmentTasksDetails(ListEquipmentTasksCommand cmd);
+
+	OfflineEquipmentTaskReportResponse offlineEquipmentTaskReport(OfflineEquipmentTaskReportCommand cmd);
 }

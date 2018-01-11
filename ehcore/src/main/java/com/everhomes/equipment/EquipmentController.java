@@ -42,6 +42,8 @@ import com.everhomes.rest.equipment.ListTaskByIdCommand;
 import com.everhomes.rest.equipment.ListTasksByEquipmentIdCommand;
 import com.everhomes.rest.equipment.ListTasksByTokenCommand;
 import com.everhomes.rest.equipment.ListUserHistoryTasksCommand;
+import com.everhomes.rest.equipment.OfflineEquipmentTaskReportCommand;
+import com.everhomes.rest.equipment.OfflineEquipmentTaskReportResponse;
 import com.everhomes.rest.equipment.ReportEquipmentTaskCommand;
 import com.everhomes.rest.equipment.ReviewEquipmentPlanCommand;
 import com.everhomes.rest.equipment.ReviewEquipmentTaskCommand;
@@ -641,6 +643,18 @@ public class EquipmentController extends ControllerBase {
         EquipmentTaskDTO dto = equipmentService.reportEquipmentTask(cmd);
 
         return getRestResponse(dto);
+    }
+    /**
+     * <b>URL: /equipment/offlineEquipmentTaskReport</b>
+     * <p>离线任务上报</p>
+     */
+    @RequestMapping("offlineEquipmentTaskReport")
+    @RestReturn(value = EquipmentTaskDTO.class)
+    public RestResponse offlineEquipmentTaskReport(OfflineEquipmentTaskReportCommand cmd) {
+
+        OfflineEquipmentTaskReportResponse reportResponse = equipmentService.offlineEquipmentTaskReport(cmd);
+
+        return getRestResponse(reportResponse);
     }
 
     /**

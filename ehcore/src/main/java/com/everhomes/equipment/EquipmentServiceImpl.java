@@ -111,6 +111,9 @@ import com.everhomes.rest.equipment.ListTaskByIdCommand;
 import com.everhomes.rest.equipment.ListTasksByEquipmentIdCommand;
 import com.everhomes.rest.equipment.ListTasksByTokenCommand;
 import com.everhomes.rest.equipment.ListUserHistoryTasksCommand;
+import com.everhomes.rest.equipment.OfflineEquipmentTaskReportCommand;
+import com.everhomes.rest.equipment.OfflineEquipmentTaskReportLog;
+import com.everhomes.rest.equipment.OfflineEquipmentTaskReportResponse;
 import com.everhomes.rest.equipment.QRCodeFlag;
 import com.everhomes.rest.equipment.ReportEquipmentTaskCommand;
 import com.everhomes.rest.equipment.ReviewEquipmentPlanCommand;
@@ -5909,5 +5912,32 @@ private void checkUserPrivilege(Long orgId, Long privilegeId, Long communityId) 
 		});
 		offlineResponse.setItems(items);
 		return offlineResponse;
+	}
+
+	@Override
+	public OfflineEquipmentTaskReportResponse offlineEquipmentTaskReport(OfflineEquipmentTaskReportCommand cmd) {
+
+		List<ReportEquipmentTaskCommand> reportEquipmentTaskCommands = cmd.getReportEquipmentTaskCommands();
+		List<OfflineEquipmentTaskReportLog> logs = new ArrayList<>();
+		OfflineEquipmentTaskReportResponse reportResponse = new OfflineEquipmentTaskReportResponse();
+		OfflineEquipmentTaskReportLog log = new OfflineEquipmentTaskReportLog();
+
+		if (reportEquipmentTaskCommands != null && reportEquipmentTaskCommands.size() > 0) {
+			for (ReportEquipmentTaskCommand command : reportEquipmentTaskCommands) {
+				EquipmentInspectionTasks task = equipmentProvider.findEquipmentTaskById(command.getTaskId());
+				if (task == null) {
+					LOGGER.error("equipment inspection not exist, id = {}", command.getTaskId());
+					log.setErrorCode(ErrorCodes.ERROR_GENERAL_EXCEPTION);
+					log.setErrorDescription(localeStringService.getLocalizedString(String.valueOf(EquipmentServiceErrorCode.SCOPE),
+							String.valueOf(EquipmentServiceErrorCode.ERROR_EQUIPMENT_TASK_NOT_EXIST),
+							UserContext.current().getUser().getLocale(), "equipment inspection task  not exist"));
+					logs.add(log);
+				}
+				this.reportEquipmentTask(command);
+			}
+			reportResponse.setLogs(logs);
+			return reportResponse;
+		}
+		return null;
 	}
 }
