@@ -3,14 +3,15 @@ CREATE TABLE `eh_portal_versions` (
   `id` bigint(20) NOT NULL,
   `namespace_id` int(11) NOT NULL,
   `parent_id` bigint(20) DEFAULT NULL,
-  `version` int(11) DEFAULT NULL,
-  `sub_version` int(11) DEFAULT NULL,
-  `create_time` datetime DEFAULT NULL ON UPDATE CURRENT_TIMESTAMP,
+  `big_version` int(11) DEFAULT NULL,
+  `minor_version` int(11) DEFAULT NULL,
+  `create_time` datetime DEFAULT NULL,
   `sync_time` datetime DEFAULT NULL,
   `publish_time` datetime DEFAULT NULL,
   `status` tinyint(4) DEFAULT NULL COMMENT '0-init,1-edit,2-publis success, 3-publish fail',
   PRIMARY KEY (`id`)
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4;
+
 
 ALTER TABLE `eh_portal_layouts` ADD COLUMN `version_id`  bigint(20) NULL AFTER `namespace_id`;
 ALTER TABLE `eh_portal_item_groups` ADD COLUMN `version_id`  bigint(20) NULL AFTER `namespace_id`;
