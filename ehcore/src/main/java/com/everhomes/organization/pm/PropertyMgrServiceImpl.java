@@ -2534,6 +2534,7 @@ public class PropertyMgrServiceImpl implements PropertyMgrService {
 		dto.setAddressId(addressId);
 		dto.setAreaSize(apartmentDTO.getAreaSize());
 		dto.setEnterpriseName(apartmentDTO.getEnterpriseName());
+		dto.setApartmentFloor(apartmentDTO.getApartmentFloor());
 		
 		//设置家庭信息
 		setFamilyInfo(dto, familyMap);
