@@ -1179,6 +1179,13 @@ public class SocialSecurityServiceImpl implements SocialSecurityService {
         addImportItemDTO(dtos, syRadix, "100%", "0%", AccumOrSocial.SOCAIL, "商业保险");
 
         for (SocialSecurityItemDTO item : dtos) {
+            if (item.getAccumOrSocial().equals(AccumOrSocial.ACCUM.getCode())
+                    && NormalFlag.YES != NormalFlag.fromCode(detail.getAccumulationFundStatus())) {
+                increseMemberDetail(detail,AccumOrSocial.ACCUM);
+            }else if (item.getAccumOrSocial().equals(AccumOrSocial.SOCAIL.getCode())
+                    && NormalFlag.YES != NormalFlag.fromCode(detail.getSocialSecurityStatus())) {
+                increseMemberDetail(detail,AccumOrSocial.SOCAIL);
+            }
             SocialSecuritySetting setting = findSetting(item.getAccumOrSocial(), item.getPayItem(), settings);
             List<SocialSecurityBase> bases = (item.getAccumOrSocial().equals(AccumOrSocial.ACCUM.getCode())) ? afBases : ssBases;
             Long cityId = (item.getAccumOrSocial().equals(AccumOrSocial.ACCUM.getCode())) ? afCItyId : ssCityId;
@@ -2710,7 +2717,7 @@ public class SocialSecurityServiceImpl implements SocialSecurityService {
             for (Long detailId : cmd.getDetailIds()) {
                 OrganizationMemberDetails detail = organizationProvider.findOrganizationMemberDetailsByDetailId(detailId);
                 if (null != cmd.getAccumulationFundPayment()) {
-                    if (NormalFlag.NO == NormalFlag.fromCode(detail.getAccumulationFundStatus())) {
+                    if (NormalFlag.YES != NormalFlag.fromCode(detail.getAccumulationFundStatus())) {
                         increseMemberDetail(detail, AccumOrSocial.ACCUM);
                     }
                     // 保存setting表数据
@@ -2719,7 +2726,7 @@ public class SocialSecurityServiceImpl implements SocialSecurityService {
                     saveSocialSecurityPayment(cmd.getAccumulationFundPayment(), detailId, NormalFlag.NO.getCode(), AccumOrSocial.ACCUM.getCode());
                 }
                 if (null != cmd.getSocialSecurityPayment()) {
-                    if (NormalFlag.NO == NormalFlag.fromCode(detail.getSocialSecurityStatus())) {
+                    if (NormalFlag.YES != NormalFlag.fromCode(detail.getSocialSecurityStatus())) {
                         increseMemberDetail(detail, AccumOrSocial.SOCAIL);
                     }
                     // 保存setting表数据
