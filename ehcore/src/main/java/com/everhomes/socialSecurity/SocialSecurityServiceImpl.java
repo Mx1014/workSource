@@ -42,6 +42,7 @@ import org.apache.poi.ss.usermodel.Row;
 import org.apache.poi.ss.usermodel.Workbook;
 import org.apache.poi.xssf.usermodel.XSSFSheet;
 import org.apache.poi.xssf.usermodel.XSSFWorkbook;
+import org.jooq.Operator;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -2527,24 +2528,37 @@ public class SocialSecurityServiceImpl implements SocialSecurityService {
         return log;
     }
 
+    @Override
     public List<SocialSecurityEmployeeDTO> listSocialSecurityEmployeeDetailIds(ListSocialSecurityPaymentsCommand cmd) {
         List<SocialSecurityEmployeeDTO> results = new ArrayList<>();
         EhOrganizationMemberDetails t2 = Tables.EH_ORGANIZATION_MEMBER_DETAILS.as("t2");
-
+        CrossShardListingLocator locator = new CrossShardListingLocator();
+        locator.setAnchor(cmd.getPageAnchor());
+        Integer pageSize;
+        if(cmd.getPageSize() != null)
+            pageSize = cmd.getPageSize();
+        else
+            pageSize = 20;
         //  set the departmentId
         Long organizationId = cmd.getOwnerId();
         if (cmd.getDeptId() != null)
             organizationId = cmd.getDeptId();
 
-        List<OrganizationMember> records = organizationProvider.queryOrganizationPersonnelDetailIds(new ListingLocator(), Integer.MAX_VALUE - 1, organizationId, (locator, query) -> {
+        List<OrganizationMember> records = organizationProvider.queryOrganizationPersonnelDetailIds(locator, pageSize + 1, organizationId, (loc, query) -> {
             if (cmd.getSocialSecurityStatus() != null)
                 query.addConditions(t2.SOCIAL_SECURITY_STATUS.eq(cmd.getSocialSecurityStatus()));
             if (cmd.getAccumulationFundStatus() != null)
                 query.addConditions(t2.ACCUMULATION_FUND_STATUS.eq(cmd.getAccumulationFundStatus()));
+            if (cmd.getCheckInMonth() != null) {
+                query.addConditions(t2.CHECK_IN_TIME.ge(getTheFirstDate(cmd.getCheckInMonth())).and(t2.CHECK_IN_TIME.le(getTheLastDate(cmd.getCheckInMonth()))));
+            }
+            if (cmd.getKeywords() != null) {
+                query.addConditions(t2.CONTACT_TOKEN.eq(cmd.getKeywords()).or(t2.CONTACT_NAME.like(cmd.getKeywords())));
+            }
             return query;
         });
 
-        records.stream().map(r ->{
+        records.forEach(r ->{
             SocialSecurityEmployeeDTO dto = new SocialSecurityEmployeeDTO();
             dto.setContactName(r.getContactName());
             dto.setUserId(r.getTargetId());
@@ -2555,32 +2569,42 @@ public class SocialSecurityServiceImpl implements SocialSecurityService {
             dto.setSocialSecurityStatus(r.getSocialSecurityStatus());
             dto.setAccumulationFundStatus(r.getAccumulationFundStatus());
             results.add(dto);
-            return null;
         });
         return results;
+
     }
 
-    private java.sql.Date getTheFirstDate(String m) throws ParseException {
+    private java.sql.Date getTheFirstDate(String m) {
         Calendar c = Calendar.getInstance();
         SimpleDateFormat df = new SimpleDateFormat("yyyyMM");
-        Date date = df.parse(m);
-        c.setTime(date);
-        c.add(Calendar.MONTH, 0);
-        c.set(Calendar.DAY_OF_MONTH, 1); //  设置为1号,当前日期既为本月第一天
-        date = c.getTime();
-        java.sql.Date sqlDate = new java.sql.Date(date.getTime());
-        return sqlDate;
+        try {
+            Date date = df.parse(m);
+            c.setTime(date);
+            c.add(Calendar.MONTH, 0);
+            c.set(Calendar.DAY_OF_MONTH, 1); //  设置为1号,当前日期既为本月第一天
+            date = c.getTime();
+            java.sql.Date sqlDate = new java.sql.Date(date.getTime());
+            return sqlDate;
+        } catch (ParseException e) {
+            LOGGER.error("transfer format error");
+            return null;
+        }
     }
 
-    private java.sql.Date getTheLastDate(String m) throws ParseException {
+    private java.sql.Date getTheLastDate(String m) {
         Calendar c = Calendar.getInstance();
         SimpleDateFormat df = new SimpleDateFormat("yyyyMM");
-        Date date = df.parse(m);
-        c.setTime(date);
-        c.set(Calendar.DAY_OF_MONTH, c.getActualMaximum(Calendar.DAY_OF_MONTH)); //  获取当前月最后一天
-        date = c.getTime();
-        java.sql.Date sqlDate = new java.sql.Date(date.getTime());
-        return sqlDate;
+        try {
+            Date date = df.parse(m);
+            c.setTime(date);
+            c.set(Calendar.DAY_OF_MONTH, c.getActualMaximum(Calendar.DAY_OF_MONTH)); //  获取当前月最后一天
+            date = c.getTime();
+            java.sql.Date sqlDate = new java.sql.Date(date.getTime());
+            return sqlDate;
+        } catch (ParseException e) {
+            LOGGER.error("transfer format error");
+            return null;
+        }
     }
 
     private String getDepartmentName(Long detailId){
@@ -2611,11 +2635,11 @@ public class SocialSecurityServiceImpl implements SocialSecurityService {
         return dto;
     }
 
-    @Override
+/*    @Override
     public List<Long> listSocialSecurityEmployeeDetailIdsByPayMonth(Long ownerId, String payMonth) {
         List<Long> detailIds = socialSecurityInoutTimeProvider.listSocialSecurityEmployeeDetailIdsByPayMonth(ownerId, payMonth, InOutTimeType.SOCIAL_SECURITY.getCode());
         return detailIds;
-    }
+    }*/
 
     @Override
     public void increseSocialSecurity(IncreseSocialSecurityCommand cmd) {

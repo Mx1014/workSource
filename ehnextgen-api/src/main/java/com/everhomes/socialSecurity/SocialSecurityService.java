@@ -96,9 +96,11 @@ public interface SocialSecurityService {
 
 	SocialSecurityInoutTimeDTO addSocialSecurityInOutTime(AddSocialSecurityInOutTimeCommand cmd);
 
+	List<SocialSecurityEmployeeDTO> listSocialSecurityEmployeeDetailIds(ListSocialSecurityPaymentsCommand cmd);
+
 	SocialSecurityEmployeeDTO getSocialSecurityEmployeeInfo(Long detailId);
 
-    List<Long> listSocialSecurityEmployeeDetailIdsByPayMonth(Long ownerId, String payMonth);
+//    List<Long> listSocialSecurityEmployeeDetailIdsByPayMonth(Long ownerId, String payMonth);
 
 	ImportFileResponse getImportSocialSecurityPaymentsResult(
 			GetImportSocialSecurityPaymentsResultCommand cmd);

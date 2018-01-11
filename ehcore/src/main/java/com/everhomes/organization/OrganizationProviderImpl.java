@@ -6068,24 +6068,23 @@ public class OrganizationProviderImpl implements OrganizationProvider {
 		}
 		return result;
 	}*/
-
 	@Override
 	public List<OrganizationMember> queryOrganizationPersonnelDetailIds(ListingLocator locator, Integer pageSize, Long organizationId, ListingQueryBuilderCallback queryBuilderCallback) {
-        List<OrganizationMember> results = new ArrayList<>();
+		List<OrganizationMember> results = new ArrayList<>();
 
 		DSLContext context = dbProvider.getDslContext(AccessSpec.readOnly());
-        TableLike t1 = Tables.EH_ORGANIZATION_MEMBERS.as("t1");
-        TableLike t2 = Tables.EH_ORGANIZATION_MEMBER_DETAILS.as("t2");
-        SelectQuery<Record> query = context.selectQuery();
+		TableLike t1 = Tables.EH_ORGANIZATION_MEMBERS.as("t1");
+		TableLike t2 = Tables.EH_ORGANIZATION_MEMBER_DETAILS.as("t2");
+		SelectQuery<Record> query = context.selectQuery();
 		query.addFrom(t1);
-		query.addJoin(t2,JoinType.LEFT_OUTER_JOIN,t1.field("detail_id").eq(t2.field("id")));
-		queryBuilderCallback.buildCondition(locator,query);
+		query.addJoin(t2, JoinType.LEFT_OUTER_JOIN, t1.field("detail_id").eq(t2.field("id")));
+		queryBuilderCallback.buildCondition(locator, query);
 
 		Condition condition = t1.field("id").gt(0L);
 		if (locator != null && locator.getAnchor() != null)
 			condition = condition.and(t1.field("detail_id").lt(locator.getAnchor()));
 		Organization org = findOrganizationById(organizationId);
-		condition = condition.and(t1.field("group_path").like(org.getPath()+"%"));
+		condition = condition.and(t1.field("group_path").like(org.getPath() + "%"));
 		condition = condition.and(t1.field("status").eq(OrganizationMemberStatus.ACTIVE.getCode()));
 		// 不包括经理
 		condition = condition.and(t1.field("group_type").notEqual(OrganizationGroupType.MANAGER.getCode()));
@@ -6095,10 +6094,9 @@ public class OrganizationProviderImpl implements OrganizationProvider {
 		query.addGroupBy(t1.field("contact_token"));
 
 		List<OrganizationMember> records = query.fetch().map(new OrganizationMemberRecordMapper());
-		if(records !=null){
-			records.stream().map(r ->{
+		if (records != null) {
+			records.forEach(r -> {
 				results.add(ConvertHelper.convert(r, OrganizationMember.class));
-				return null;
 			});
 		}
 		return results;
