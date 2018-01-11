@@ -26,7 +26,17 @@ public class CreateResourceCategoryCommand {
 
     private Byte type;
 
+    private Integer namespaceId;
+
     public CreateResourceCategoryCommand() {
+    }
+
+    public Integer getNamespaceId() {
+        return namespaceId;
+    }
+
+    public void setNamespaceId(Integer namespaceId) {
+        this.namespaceId = namespaceId;
     }
 
     public String getOwnerType() {
