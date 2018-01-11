@@ -417,7 +417,6 @@ public class SocialSecurityServiceImpl implements SocialSecurityService {
             return null;
 
         });
-        List<SocialSecurityEmployeeDTO> result = listSocialSecurityEmployeeDetailIds(cmd);
 
 //        SsorAfPay payFlag = null;
 //        if (null != cmd.getFilterItems()) {
@@ -448,7 +447,8 @@ public class SocialSecurityServiceImpl implements SocialSecurityService {
 //        if (cmd.getPageAnchor() == null)
 //            cmd.setPageAnchor(0L);
         ListSocialSecurityPaymentsResponse response = new ListSocialSecurityPaymentsResponse();
-        int pageSize = cmd.getPageSize() == null ? 10 : cmd.getPageSize();
+        int pageSize = cmd.getPageSize() == null ? 20 : cmd.getPageSize();
+        List<SocialSecurityEmployeeDTO> result = listSocialSecurityEmployeeDetailIds(cmd);
 //        CrossShardListingLocator locator = new CrossShardListingLocator();
 //        locator.setAnchor(cmd.getPageAnchor());
 //        List<Long> detailIds = new ArrayList<>();
@@ -513,7 +513,7 @@ public class SocialSecurityServiceImpl implements SocialSecurityService {
 
     private SocialSecurityPaymentDTO processSocialSecurityItemDTO(SocialSecurityEmployeeDTO detail) {
         SocialSecurityPaymentDTO dto = new SocialSecurityPaymentDTO();
-//        dto.setDetailId(detailId);
+        dto.setDetailId(detail.getDetailId());
 //        OrganizationMemberDetails detail = organizationProvider.findOrganizationMemberDetailsByDetailId(dto.getDetailId());
 //        SocialSecurityEmployeeDTO detail = findSocialSecurityEmployeeDTO(members, detailId);
 //        if (null != detail) {
