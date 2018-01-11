@@ -3640,7 +3640,7 @@ public class Rentalv2ServiceImpl implements Rentalv2Service {
 		response.setOrderType(OrderType.OrderTypeEnum.RENTALORDER.getPycode());
 		response.setOrderNo(bill.getOrderNo());
 		response.setAmount(bill.getPayTotalMoney());
-
+		response.setBillId(bill.getId());
 		// 客户端生成订单
 		if (ActivityRosterPayVersionFlag.V1 == version) {
 			this.setSignatureParam(response);
@@ -7347,6 +7347,7 @@ public class Rentalv2ServiceImpl implements Rentalv2Service {
 		AddRentalOrderUsingInfoResponse response = new AddRentalOrderUsingInfoResponse();
 		response.setOrderDTO(dto);
 		response.setFlowCaseUrl(tempResp.getFlowCaseUrl());
+		response.setBillId(tempResp.getBillId());
 		return response;
 	}
 
