@@ -685,40 +685,32 @@ public class AclinkController extends ControllerBase {
     }
     
     /**
-     * <b>URL: /aclink/aliTest</b>
+     * <b>URL: /aclink/aliqr</b>
      * <p>alitest 001</p>
      * @return 
      */
     @SuppressDiscover
     @RequireAuthentication(false)
-    @RequestMapping("aliTest")
-    public String aliTest(HttpServletRequest request, HttpServletResponse response) {
-        String redirectUrl = "https://openauth.alipay.com/oauth2/publicAppAuthorize.htm?app_id=2017072507886723&scope=auth_user&state=testbyzuolin&redirect_uri=";
-        try {
-            redirectUrl += URLEncoder.encode("https://ali.ddns.to/evh/aclink/aliTest2?", "utf-8");
-        } catch (UnsupportedEncodingException e) {
-            // TODO Auto-generated catch block
-            e.printStackTrace();
-        }
-        try {
-            response.sendRedirect(redirectUrl);
-        } catch (IOException e) {
-            // TODO Auto-generated catch block
-            e.printStackTrace();
-        }
-        return "";
+    @RequestMapping("aliqr")
+    public void aliQR(HttpServletRequest request, HttpServletResponse response) {
+        doorAccessService.doAlipayRedirect(request, response);
     }
     
     /**
-     * <b>URL: /aclink/aliTest</b>
-     * <p>alitest 002</p>
+     * <b>URL: /aclink/getAliQR</b>
+     * <p>getAliQR from alipay</p>
      * @return 
      */
-    @SuppressDiscover
     @RequireAuthentication(false)
-    @RequestMapping("aliTest2")
-    public String aliTest2(HttpServletRequest request) {
-        return doorAccessService.aliTest2(request);
+    @RequestMapping("getAliQR")
+    public RestResponse getAliQR(HttpServletRequest request) {
+        RestResponse response = new RestResponse();
+        
+        response.setResponseObject(doorAccessService.getAlipayQR(request));
+        
+        response.setErrorCode(ErrorCodes.SUCCESS);
+        response.setErrorDescription("OK");
+        return response;
     }
     
     /**
