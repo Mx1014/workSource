@@ -497,7 +497,7 @@ public class SocialSecurityServiceImpl implements SocialSecurityService {
             nextPageAnchor = detailIds.get(pageSize);
         }
         for (int i = beginNum; i < beginNum + pageSize && i < detailIds.size(); i++) {
-            SocialSecurityPaymentDTO dto = processSocialSecurityItemDTO(detailIds.get(i));
+            SocialSecurityPaymentDTO dto = processSocialSecurityItemDTO(detailIds.get(i), members);
             results.add(dto);
         }
         response.setNextPageAnchor(nextPageAnchor);
@@ -506,13 +506,16 @@ public class SocialSecurityServiceImpl implements SocialSecurityService {
         return response;
     }
 
-    private SocialSecurityPaymentDTO processSocialSecurityItemDTO(Long detailId) {
+    private SocialSecurityPaymentDTO processSocialSecurityItemDTO(Long detailId, List<SocialSecurityEmployeeDTO> members) {
         SocialSecurityPaymentDTO dto = new SocialSecurityPaymentDTO();
         dto.setDetailId(detailId);
-        OrganizationMemberDetails detail = organizationProvider.findOrganizationMemberDetailsByDetailId(dto.getDetailId());
+//        OrganizationMemberDetails detail = organizationProvider.findOrganizationMemberDetailsByDetailId(dto.getDetailId());
+        SocialSecurityEmployeeDTO detail = findSocialSecurityEmployeeDTO(members, detailId);
         if (null != detail) {
             dto.setUserName(detail.getContactName());
-            dto.setDeptName(detail.getDepartment());
+            dto.setDeptName(detail.getDepartmentName());
+            dto.setAccumulationFundStatus(detail.getAccumulationFundStatus());
+            dto.setSocialSecurityStatus(detail.getSocialSecurityStatus());
             //// TODO: 2017/12/27  入职离职日期
 //            dto.setEntryDate(detail.get);
             SocialSecuritySetting accSetting = socialSecuritySettingProvider.findSocialSecuritySettingByDetailIdAndAOS(detailId, AccumOrSocial.ACCUM);
@@ -531,6 +534,18 @@ public class SocialSecurityServiceImpl implements SocialSecurityService {
             dto.setUserName("找不到这个人");
         }
         return dto;
+    }
+
+    private SocialSecurityEmployeeDTO findSocialSecurityEmployeeDTO(List<SocialSecurityEmployeeDTO> members, Long detailId) {
+        if (null != members) {
+            for (SocialSecurityEmployeeDTO member : members) {
+                if (member.getDetailId().equals(detailId)) {
+                    return member;
+                }
+
+            }
+        }
+        return null;
     }
 
     @Override
