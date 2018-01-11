@@ -12,6 +12,16 @@ CREATE TABLE `eh_portal_versions` (
   PRIMARY KEY (`id`)
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4;
 
+-- 预览版本可见用户表
+CREATE TABLE `eh_portal_version_users` (
+  `id` bigint(20) NOT NULL,
+  `user_id` bigint(20) NOT NULL,
+  `namespace_id` int(11) NOT NULL,
+  `version_id` bigint(20) DEFAULT NULL,
+  `create_time` datetime DEFAULT NULL,
+  PRIMARY KEY (`id`)
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4;
+
 
 ALTER TABLE `eh_portal_layouts` ADD COLUMN `version_id`  bigint(20) NULL AFTER `namespace_id`;
 ALTER TABLE `eh_portal_item_groups` ADD COLUMN `version_id`  bigint(20) NULL AFTER `namespace_id`;
