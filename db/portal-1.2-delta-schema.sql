@@ -19,3 +19,7 @@ ALTER TABLE `eh_service_module_apps` ADD COLUMN `version_id`  bigint(20) NULL AF
 ALTER TABLE `eh_service_module_apps` ADD COLUMN `origin_id`  bigint(20) NULL AFTER `version_id`;
 ALTER TABLE `eh_portal_publish_logs` ADD COLUMN `version_id`  bigint(20) NULL AFTER `namespace_id`;
 ALTER TABLE `eh_portal_publish_logs` ADD COLUMN `process`  int(11) NULL AFTER `version_id`;
+
+
+ALTER TABLE `eh_web_menu_scopes` ADD COLUMN `app_id`  bigint(20) NULL COMMENT 'eh_service_module_app id';
+ALTER TABLE `eh_web_menu_scopes` DROP INDEX `u_menu_scope_owner` , ADD UNIQUE INDEX `u_menu_scope_owner` (`menu_id`, `owner_type`, `owner_id`, `app_id`) USING BTREE ;
