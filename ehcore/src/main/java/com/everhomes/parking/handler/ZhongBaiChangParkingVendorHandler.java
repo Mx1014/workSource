@@ -170,7 +170,7 @@ public class ZhongBaiChangParkingVendorHandler extends DefaultParkingVendorHandl
 					});
 			if(entity != null && entity.isSuccess()){//存在返回为success，但是没有更新结束日期失败的情况，所以重新查询
 				ZhongBaiChangCardInfo<ZhongBaiChangData> rechangedcard = getCardInfo(order.getPlateNumber());
-				long rechangeEndTime = Utils.strToLong(card.getData().getEndTime(), Utils.DateStyle.DATE_TIME);
+				long rechangeEndTime = Utils.strToLong(rechangedcard.getData().getEndTime(), Utils.DateStyle.DATE_TIME);
 				if(rechangeEndTime == rechargeEndTimestamp.getTime()){
 					return true;
 				}
