@@ -168,7 +168,13 @@ public class ZhongBaiChangParkingVendorHandler extends DefaultParkingVendorHandl
 			ZhongBaiChangCardInfo<ZhongBaiChangData> entity = JSONObject.parseObject(result,
 					new TypeReference<ZhongBaiChangCardInfo<ZhongBaiChangData>>() {
 					});
-			return entity != null && entity.isSuccess();
+			if(entity != null && entity.isSuccess()){//存在返回为success，但是没有更新结束日期失败的情况，所以重新查询
+				ZhongBaiChangCardInfo<ZhongBaiChangData> rechangedcard = getCardInfo(order.getPlateNumber());
+				long rechangeEndTime = Utils.strToLong(card.getData().getEndTime(), Utils.DateStyle.DATE_TIME);
+				if(rechangeEndTime == rechargeEndTimestamp.getTime()){
+					return true;
+				}
+			}
 		}
 		return false;
 	}
