@@ -94,8 +94,6 @@ public interface SocialSecurityService {
 
 	GetSocialSecurityReportsHeadResponse getSocialSecurityReportsHead(GetSocialSecurityReportsHeadCommand cmd);
 
-	SocialSecurityInoutTimeDTO addSocialSecurityInOutTime(AddSocialSecurityInOutTimeCommand cmd);
-
 	List<SocialSecurityEmployeeDTO> listSocialSecurityEmployees(ListSocialSecurityPaymentsCommand cmd);
 
 	SocialSecurityEmployeeDTO getSocialSecurityEmployeeInfo(Long detailId);
