@@ -143,9 +143,11 @@ public class ZhongBaiChangParkingVendorHandler extends DefaultParkingVendorHandl
 			params.put("start_date", card.getData().getStartTime());
 
 			// 根据充值的几个月，重新计算月卡结束日期
-			Long lEndTime = Utils.strToLong(card.getData().getEndTime(), Utils.DateStyle.DATE_TIME);
-			Timestamp tempEnd = Utils.getTimestampByAddNatureMonth(lEndTime, order.getMonthCount().intValue());
-			String endTime = Utils.dateToStr(tempEnd, Utils.DateStyle.DATE_TIME);
+			//这里加一秒钟，原因是自然月只会计算时间到 月末那一天的 23:59:59 秒
+			//下一充值，需要从 月初第一天的 00:00:00 开始计算
+			Timestamp rechargeStartTimestamp = new Timestamp(Utils.strToLong(card.getData().getEndTime(), Utils.DateStyle.DATE_TIME)+1000);
+			Timestamp rechargeEndTimestamp = Utils.getTimestampByAddNatureMonth(rechargeStartTimestamp.getTime(), order.getMonthCount().intValue());
+			String endTime = Utils.dateToStr(rechargeEndTimestamp, Utils.DateStyle.DATE_TIME);
 
 			params.put("end_date", endTime);
 			params.put("remark", null);
@@ -160,18 +162,19 @@ public class ZhongBaiChangParkingVendorHandler extends DefaultParkingVendorHandl
 			}
 			//将充值信息存入订单
 			order.setErrorDescriptionJson(result);
-			String validEnd = card.getData().getEndTime();
-			//计算这一次的充值时间开始日期
-			Long startPeriod = Utils.strToLong(validEnd, Utils.DateStyle.DATE_TIME);
-
-			
-			order.setStartPeriod(new Timestamp(startPeriod));
-			order.setEndPeriod(Utils.getTimestampByAddNatureMonth(startPeriod, order.getMonthCount().intValue()));
+			order.setStartPeriod(rechargeStartTimestamp);
+			order.setEndPeriod(rechargeEndTimestamp);
 			
 			ZhongBaiChangCardInfo<ZhongBaiChangData> entity = JSONObject.parseObject(result,
 					new TypeReference<ZhongBaiChangCardInfo<ZhongBaiChangData>>() {
 					});
-			return entity != null && entity.isSuccess();
+			if(entity != null && entity.isSuccess()){//存在返回为success，但是没有更新结束日期失败的情况，所以重新查询
+				ZhongBaiChangCardInfo<ZhongBaiChangData> rechangedcard = getCardInfo(order.getPlateNumber());
+				long rechangeEndTime = Utils.strToLong(rechangedcard.getData().getEndTime(), Utils.DateStyle.DATE_TIME);
+				if(rechangeEndTime == rechargeEndTimestamp.getTime()){
+					return true;
+				}
+			}
 		}
 		return false;
 	}

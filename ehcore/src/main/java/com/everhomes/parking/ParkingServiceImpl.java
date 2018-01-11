@@ -1993,7 +1993,8 @@ public class ParkingServiceImpl implements ParkingService {
 
 				String respStr = (String) pingResponse;
 
-				ParkingRechargeOrderDTO dto = ConvertHelper.convert(respStr, ParkingRechargeOrderDTO.class);
+//				ParkingRechargeOrderDTO dto = ConvertHelper.convert(respStr, ParkingRechargeOrderDTO.class);
+				ParkingRechargeOrderDTO dto = JSONObject.parseObject(respStr, ParkingRechargeOrderDTO.class);
 				ParkingLot parkingLot = checkParkingLot(order.getOwnerType(), order.getOwnerId(), order.getParkingLotId());
 				dto.setParkingLotName(parkingLot.getName());
 				dto.setContact(parkingLot.getContact());
