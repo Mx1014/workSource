@@ -9,6 +9,7 @@ import com.everhomes.community.CommunityProvider;
 import com.everhomes.configuration.ConfigurationProvider;
 import com.everhomes.coordinator.CoordinationLocks;
 import com.everhomes.coordinator.CoordinationProvider;
+import com.everhomes.db.AccessSpec;
 import com.everhomes.db.DbProvider;
 import com.everhomes.filedownload.TaskService;
 import com.everhomes.listing.CrossShardListingLocator;
@@ -416,7 +417,7 @@ public class SocialSecurityServiceImpl implements SocialSecurityService {
             return null;
 
         });
-        List<SocialSecurityEmployeeDTO> members = listSocialSecurityEmployeeDetailIds(cmd);
+        List<SocialSecurityEmployeeDTO> result = listSocialSecurityEmployeeDetailIds(cmd);
 
 //        SsorAfPay payFlag = null;
 //        if (null != cmd.getFilterItems()) {
@@ -444,25 +445,26 @@ public class SocialSecurityServiceImpl implements SocialSecurityService {
 //                }
 //            }
 //        }
-        if (cmd.getPageAnchor() == null)
-            cmd.setPageAnchor(0L);
+//        if (cmd.getPageAnchor() == null)
+//            cmd.setPageAnchor(0L);
+        ListSocialSecurityPaymentsResponse response = new ListSocialSecurityPaymentsResponse();
         int pageSize = cmd.getPageSize() == null ? 10 : cmd.getPageSize();
-        CrossShardListingLocator locator = new CrossShardListingLocator();
-        locator.setAnchor(cmd.getPageAnchor());
-        List<Long> detailIds = new ArrayList<>();
-        if (null != members) {
-            for(SocialSecurityEmployeeDTO member: members) {
-                detailIds.add(member.getDetailId());
-            }
-        }
-        if (null != cmd.getSocialSecurityCityId()) {
-            detailIds = socialSecuritySettingProvider.listDetailsByCityId(detailIds, cmd.getSocialSecurityCityId(), AccumOrSocial.SOCAIL.getCode());
-
-        }
-        if (null != cmd.getAccumulationFundCityId()) {
-            detailIds = socialSecuritySettingProvider.listDetailsByCityId(detailIds, cmd.getAccumulationFundCityId(), AccumOrSocial.ACCUM.getCode());
-
-        }
+//        CrossShardListingLocator locator = new CrossShardListingLocator();
+//        locator.setAnchor(cmd.getPageAnchor());
+//        List<Long> detailIds = new ArrayList<>();
+//        if (null != members) {
+//            for (SocialSecurityEmployeeDTO member : members) {
+//                detailIds.add(member.getDetailId());
+//            }
+//        }
+//        if (null != cmd.getSocialSecurityCityId()) {
+//            detailIds = socialSecuritySettingProvider.listDetailsByCityId(detailIds, cmd.getSocialSecurityCityId(), AccumOrSocial.SOCAIL.getCode());
+//
+//        }
+//        if (null != cmd.getAccumulationFundCityId()) {
+//            detailIds = socialSecuritySettingProvider.listDetailsByCityId(detailIds, cmd.getAccumulationFundCityId(), AccumOrSocial.ACCUM.getCode());
+//
+//        }
 //        if (null != payFlag) {
 //            if (SsorAfPay.BOTHPAY == payFlag || SsorAfPay.SOCIALSECURITYUNPAY == payFlag) {
 //                detailIds = socialSecurityPaymentProvider.listDetailsByPayFlag(detailIds, AccumOrSocial.SOCAIL.getCode());
@@ -476,49 +478,53 @@ public class SocialSecurityServiceImpl implements SocialSecurityService {
 //        List<SocialSecurityPaymentDTO> results = socialSecuritySettingProvider.listSocialSecuritySetting(
 //                         cmd.getDeptId(), cmd.getKeywords(),
 //                        payFlag, detailIds, locator);
-        ListSocialSecurityPaymentsResponse response = new ListSocialSecurityPaymentsResponse();
-        List<SocialSecurityPaymentDTO> results = new ArrayList<>();
-        if (null == detailIds) {
-            return null;
-        }
+//        List<SocialSecurityPaymentDTO> results = new ArrayList<>();
+//        if (null == detailIds) {
+//            return null;
+//        }
+//        Long nextPageAnchor = null;
+//        int beginNum = 0;
+//        if (null != cmd.getPageAnchor()) {
+//            for (Long id : detailIds) {
+//                if (id < cmd.getPageAnchor()) {
+//                    beginNum++;
+//                } else {
+//                    break;
+//                }
+//            }
+//        }
+//        if (pageSize + beginNum < detailIds.size()) {
+//            nextPageAnchor = detailIds.get(pageSize);
+//        }
+//        for (int i = beginNum; i < beginNum + pageSize && i < detailIds.size(); i++) {
+//            SocialSecurityPaymentDTO dto = processSocialSecurityItemDTO(detailIds.get(i), members);
+//            results.add(dto);
+//        }
         Long nextPageAnchor = null;
-        int beginNum = 0;
-        if (null != cmd.getPageAnchor()) {
-            for (Long id : detailIds) {
-                if (id < cmd.getPageAnchor()) {
-                    beginNum++;
-                } else {
-                    break;
-                }
-            }
-        }
-        if (pageSize + beginNum < detailIds.size()) {
-            nextPageAnchor = detailIds.get(pageSize);
-        }
-        for (int i = beginNum; i < beginNum + pageSize && i < detailIds.size(); i++) {
-            SocialSecurityPaymentDTO dto = processSocialSecurityItemDTO(detailIds.get(i), members);
-            results.add(dto);
+        if (result != null && result.size() > pageSize) {
+            result.remove(result.size() - 1);
+            nextPageAnchor = result.get(result.size() - 1).getDetailId();
         }
         response.setNextPageAnchor(nextPageAnchor);
-        response.setSocialSecurityPayments(results);
+        response.setSocialSecurityPayments(result.stream().map(this::processSocialSecurityItemDTO).collect(Collectors.toList()));
         response.setPaymentMonth(socialSecurityPaymentProvider.findPaymentMonthByOwnerId(cmd.getOwnerId()));
         return response;
     }
 
-    private SocialSecurityPaymentDTO processSocialSecurityItemDTO(Long detailId, List<SocialSecurityEmployeeDTO> members) {
+    private SocialSecurityPaymentDTO processSocialSecurityItemDTO(SocialSecurityEmployeeDTO detail) {
         SocialSecurityPaymentDTO dto = new SocialSecurityPaymentDTO();
-        dto.setDetailId(detailId);
+//        dto.setDetailId(detailId);
 //        OrganizationMemberDetails detail = organizationProvider.findOrganizationMemberDetailsByDetailId(dto.getDetailId());
-        SocialSecurityEmployeeDTO detail = findSocialSecurityEmployeeDTO(members, detailId);
-        if (null != detail) {
+//        SocialSecurityEmployeeDTO detail = findSocialSecurityEmployeeDTO(members, detailId);
+//        if (null != detail) {
             dto.setUserName(detail.getContactName());
             dto.setDeptName(detail.getDepartmentName());
             dto.setAccumulationFundStatus(detail.getAccumulationFundStatus());
             dto.setSocialSecurityStatus(detail.getSocialSecurityStatus());
             //// TODO: 2017/12/27  入职离职日期
 //            dto.setEntryDate(detail.get);
-            SocialSecuritySetting accSetting = socialSecuritySettingProvider.findSocialSecuritySettingByDetailIdAndAOS(detailId, AccumOrSocial.ACCUM);
-            SocialSecuritySetting socSetting = socialSecuritySettingProvider.findSocialSecuritySettingByDetailIdAndAOS(detailId, AccumOrSocial.SOCAIL);
+            SocialSecuritySetting accSetting = socialSecuritySettingProvider.findSocialSecuritySettingByDetailIdAndAOS(detail.getDetailId(), AccumOrSocial.ACCUM);
+            SocialSecuritySetting socSetting = socialSecuritySettingProvider.findSocialSecuritySettingByDetailIdAndAOS(detail.getDetailId(), AccumOrSocial.SOCAIL);
             if (null != socSetting) {
                 dto.setSocialSecurityRadix(socSetting.getRadix());
                 Region city = regionProvider.findRegionById(socSetting.getCityId());
@@ -529,23 +535,23 @@ public class SocialSecurityServiceImpl implements SocialSecurityService {
                 Region city = regionProvider.findRegionById(accSetting.getCityId());
                 if (null != city) dto.setAccumulationFundCity(city.getName());
             }
-        } else {
-            dto.setUserName("找不到这个人");
-        }
+//        } else {
+//            dto.setUserName("找不到这个人");
+//        }
         return dto;
     }
 
-    private SocialSecurityEmployeeDTO findSocialSecurityEmployeeDTO(List<SocialSecurityEmployeeDTO> members, Long detailId) {
-        if (null != members) {
-            for (SocialSecurityEmployeeDTO member : members) {
-                if (member.getDetailId().equals(detailId)) {
-                    return member;
-                }
-
-            }
-        }
-        return null;
-    }
+//    private SocialSecurityEmployeeDTO findSocialSecurityEmployeeDTO(List<SocialSecurityEmployeeDTO> members, Long detailId) {
+//        if (null != members) {
+//            for (SocialSecurityEmployeeDTO member : members) {
+//                if (member.getDetailId().equals(detailId)) {
+//                    return member;
+//                }
+//
+//            }
+//        }
+//        return null;
+//    }
 
     @Override
     public ListSocialSecurityEmployeeStatusResponse listSocialSecurityEmployeeStatus(
@@ -2550,7 +2556,7 @@ public class SocialSecurityServiceImpl implements SocialSecurityService {
         CrossShardListingLocator locator = new CrossShardListingLocator();
         locator.setAnchor(cmd.getPageAnchor());
         Integer pageSize;
-        if(cmd.getPageSize() != null)
+        if (cmd.getPageSize() != null)
             pageSize = cmd.getPageSize();
         else
             pageSize = 20;
@@ -2570,10 +2576,22 @@ public class SocialSecurityServiceImpl implements SocialSecurityService {
             if (cmd.getKeywords() != null) {
                 query.addConditions(t2.CONTACT_TOKEN.eq(cmd.getKeywords()).or(t2.CONTACT_NAME.like(cmd.getKeywords())));
             }
+            if (cmd.getAccumulationFundCityId() != null) {
+                query.addConditions(t2.ID.in(dbProvider.getDslContext(AccessSpec.readOnly()).selectDistinct(Tables.EH_SOCIAL_SECURITY_SETTINGS.DETAIL_ID)
+                        .from(Tables.EH_SOCIAL_SECURITY_SETTINGS).where(Tables.EH_SOCIAL_SECURITY_SETTINGS.ORGANIZATION_ID.eq(cmd.getOwnerId()))
+                        .and(Tables.EH_SOCIAL_SECURITY_SETTINGS.CITY_ID.eq(cmd.getAccumulationFundCityId()))
+                        .and(Tables.EH_SOCIAL_SECURITY_SETTINGS.ACCUM_OR_SOCAIL.eq(AccumOrSocial.ACCUM.getCode()))));
+            }
+            if (cmd.getSocialSecurityCityId() != null) {
+                query.addConditions(t2.ID.in(dbProvider.getDslContext(AccessSpec.readOnly()).selectDistinct(Tables.EH_SOCIAL_SECURITY_SETTINGS.DETAIL_ID)
+                        .from(Tables.EH_SOCIAL_SECURITY_SETTINGS).where(Tables.EH_SOCIAL_SECURITY_SETTINGS.ORGANIZATION_ID.eq(cmd.getOwnerId()))
+                        .and(Tables.EH_SOCIAL_SECURITY_SETTINGS.CITY_ID.eq(cmd.getSocialSecurityCityId()))
+                        .and(Tables.EH_SOCIAL_SECURITY_SETTINGS.ACCUM_OR_SOCAIL.eq(AccumOrSocial.SOCAIL.getCode()))));
+            }
             return query;
         });
 
-        records.forEach(r ->{
+        records.forEach(r -> {
             SocialSecurityEmployeeDTO dto = new SocialSecurityEmployeeDTO();
             dto.setContactName(r.getContactName());
             dto.setUserId(r.getTargetId());
@@ -2622,10 +2640,10 @@ public class SocialSecurityServiceImpl implements SocialSecurityService {
         }
     }
 
-    private String getDepartmentName(Long detailId){
+    private String getDepartmentName(Long detailId) {
         Long departmentId = organizationService.getDepartmentByDetailId(detailId);
         Organization department = organizationProvider.findOrganizationById(departmentId);
-        if(department != null)
+        if (department != null)
             return department.getName();
         return null;
     }
