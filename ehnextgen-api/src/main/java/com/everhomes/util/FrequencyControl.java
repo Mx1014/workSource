@@ -22,4 +22,7 @@ public @interface FrequencyControl {
      * 时间段，单位为毫秒，默认值2秒钟
      */
     long time() default 2000;
+
+    String[] key() default "";
+
 }

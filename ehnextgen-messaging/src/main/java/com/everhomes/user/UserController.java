@@ -369,7 +369,6 @@ public class UserController extends ControllerBase {
 	 * <p>登录</p>
 	 * @return {@link LogonCommandResponse}
 	 */
-	@FrequencyControl(count = 1)
 	@RequestMapping("logon")
 	@RequireAuthentication(false)
 	@RestReturn(LogonCommandResponse.class)

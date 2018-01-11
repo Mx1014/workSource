@@ -809,7 +809,7 @@ public class OrganizationController extends ControllerBase {
      * <b>URL: /org/applyForEnterpriseContact</b>
      * <p>申请加入企业</p>
      */
-    @FrequencyControl(count = 1)
+    @FrequencyControl(count = 1 , key={"#cmd.organizationId","#cmd.targetId","cmd.contactToken", "cmd.contactName"})
     @RequestMapping("applyForEnterpriseContact")
     @RestReturn(value = OrganizationDTO.class)
     public RestResponse applyForEnterpriseContact(@Valid CreateOrganizationMemberCommand cmd) {

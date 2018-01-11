@@ -19,13 +19,20 @@ import com.everhomes.rest.user.*;
 import com.everhomes.rest.version.VersionRealmType;
 import com.everhomes.user.*;
 import com.everhomes.util.*;
+import net.sf.cglib.beans.BeanMap;
+import org.apache.poi.util.StringUtil;
 import org.jooq.tools.StringUtils;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.slf4j.MDC;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.core.LocalVariableTableParameterNameDiscoverer;
+import org.springframework.core.MethodParameter;
 import org.springframework.data.redis.core.RedisTemplate;
 import org.springframework.data.redis.serializer.StringRedisSerializer;
+import org.springframework.expression.ExpressionParser;
+import org.springframework.expression.spel.standard.SpelExpressionParser;
+import org.springframework.expression.spel.support.StandardEvaluationContext;
 import org.springframework.web.method.HandlerMethod;
 import org.springframework.web.servlet.HandlerInterceptor;
 import org.springframework.web.servlet.ModelAndView;
@@ -727,9 +734,27 @@ public class WebRequestInterceptor implements HandlerInterceptor {
             if (control != null) {
                 String ip = request.getLocalAddr();
                 String url = request.getRequestURL().toString();
-                String key = "req_limit_".concat(url).concat(ip).concat("hash") + request.getParameterMap().hashCode();
 
-                Map<String, Integer> coutMap = new HashMap<String, Integer>();
+                LocalVariableTableParameterNameDiscoverer u = new LocalVariableTableParameterNameDiscoverer();
+                String[] paraNameArr = u.getParameterNames(handlerMethod.getMethod());
+
+                String[] spelKey = control.key();
+
+                Map<String, String[]> parameterMap = request.getParameterMap();
+
+
+                StringBuffer keyBuffer = new StringBuffer();
+                for (String s : spelKey) {
+                    String attribute = s.split(paraNameArr[0]+".")[1];
+                    if(!org.springframework.util.StringUtils.isEmpty(attribute)){
+                        if(parameterMap.get(attribute) != null && parameterMap.get(attribute).length > 0){
+                            keyBuffer.append(parameterMap.get(attribute)[0]);
+                        }
+                    }
+                }
+
+                String key = "req_limit_".concat(url).concat(ip).concat("?") + keyBuffer.toString();
+                LOGGER.debug("current frequencyControl key" + key);
 
                 Accessor acc = this.bigCollectionProvider.getMapAccessor(key, "");
                 RedisTemplate redisTemplate = acc.getTemplate(stringRedisSerializer);
@@ -739,12 +764,13 @@ public class WebRequestInterceptor implements HandlerInterceptor {
                 } else {
                     redisTemplate.opsForValue().increment(key, 1);
                     if (Integer.valueOf(redisTemplate.opsForValue().get(key).toString()) > control.count()) {
-                        LOGGER.info("用户IP[" + ip + "]访问地址[" + url + "]超过了限定的次数[" + control.count() + "]");
-                        throw new FrequencyControlException("\"用户IP[\" + ip + \"]访问地址[\" + url + \"]超过了限定的次数[\" + control.count() + \"]\"");
+                        LOGGER.info("user's IP[" + ip + "] post [" + url + "] more than [" + control.count() + "]");
+                        throw new FrequencyControlException("user's IP[\" + ip + \"] post [\" + url + \"] more than [\" + control.count() + \"]");
                     }
                 }
             }
         }
 
     }
+
 }
