@@ -489,6 +489,7 @@ public class EquipmentServiceImpl implements EquipmentService {
 		templates.setName(standards.getName());
 		templates.setOwnerId(cmd.getOwnerId());
 		templates.setOwnerType(cmd.getOwnerType());
+		templates.setNamespaceId(cmd.getNamespaceId());
 		Long templateId = equipmentProvider.createEquipmentInspectionTemplates(templates);
 		standards.setTemplateId(templateId);
 		EquipmentInspectionTemplateItemMap templateItemMap = new EquipmentInspectionTemplateItemMap();
@@ -4905,9 +4906,9 @@ private void checkUserPrivilege(Long orgId, Long privilegeId, Long communityId) 
 		cal.setTime(new Timestamp(cmd.getDateTime()));
 
 		TasksStatData stat = equipmentProvider.statDaysEquipmentTasks(cmd.getTargetId(), cmd.getTargetType(),
-				cmd.getInspectionCategoryId(), getDayBegin(cal, 0), getDayEnd(cal, 0));
+				cmd.getInspectionCategoryId(), getDayBegin(cal, 0), getDayEnd(cal, 0),cmd.getNamespaceId());
 		ReviewedTaskStat reviewStat = equipmentProvider.statDaysReviewedTasks(cmd.getTargetId(),
-				cmd.getInspectionCategoryId(), getDayBegin(cal, 0), getDayEnd(cal, 0));
+				cmd.getInspectionCategoryId(), getDayBegin(cal, 0), getDayEnd(cal, 0),cmd.getNamespaceId());
 		StatTodayEquipmentTasksResponse response = ConvertHelper.convert(stat, StatTodayEquipmentTasksResponse.class);
 		response.setReviewQualified(reviewStat.getQualifiedTasks());
 		response.setReviewUnqualified(reviewStat.getUnqualifiedTasks());
@@ -4929,9 +4930,9 @@ private void checkUserPrivilege(Long orgId, Long privilegeId, Long communityId) 
 		Calendar cal = Calendar.getInstance();
 		cal.setTime(new Timestamp(DateHelper.currentGMTTime().getTime()));
 		TasksStatData statTasks = equipmentProvider.statDaysEquipmentTasks(cmd.getTargetId(), cmd.getTargetType(),
-				cmd.getInspectionCategoryId(), getDayBegin(cal, -cmd.getLastDays()), getDayEnd(cal, 0));
+				cmd.getInspectionCategoryId(), getDayBegin(cal, -cmd.getLastDays()), getDayEnd(cal, 0),cmd.getNamespaceId());
 		ReviewedTaskStat reviewStat = equipmentProvider.statDaysReviewedTasks(cmd.getTargetId(),
-				cmd.getInspectionCategoryId(), getDayBegin(cal, -cmd.getLastDays()), getDayEnd(cal, 0));
+				cmd.getInspectionCategoryId(), getDayBegin(cal, -cmd.getLastDays()), getDayEnd(cal, 0),cmd.getNamespaceId());
 
 		StatLastDaysEquipmentTasksResponse response = new StatLastDaysEquipmentTasksResponse();
 		response.setComplete(statTasks.getComplete());
@@ -4961,9 +4962,9 @@ private void checkUserPrivilege(Long orgId, Long privilegeId, Long communityId) 
 			end = new Timestamp((cmd.getEndTime()));
 		}
 		TasksStatData statTasks = equipmentProvider.statDaysEquipmentTasks(cmd.getTargetId(), cmd.getTargetType(),
-				cmd.getInspectionCategoryId(), begin, end);
+				cmd.getInspectionCategoryId(), begin, end,cmd.getNamespaceId());
 		ReviewedTaskStat reviewStat = equipmentProvider.statDaysReviewedTasks(cmd.getTargetId(),
-				cmd.getInspectionCategoryId(), begin, end);
+				cmd.getInspectionCategoryId(), begin, end,cmd.getNamespaceId());
 
 		StatIntervalAllEquipmentTasksResponse response = ConvertHelper.convert(statTasks, StatIntervalAllEquipmentTasksResponse.class);
 		response.setReviewUnqualified(reviewStat.getUnqualifiedTasks());

@@ -244,7 +244,7 @@ public class EquipmentProviderImpl implements EquipmentProvider {
         equipment.setId(id);
         equipment.setCreateTime(new Timestamp(DateHelper.currentGMTTime().getTime()));
         equipment.setUpdateTime(new Timestamp(DateHelper.currentGMTTime().getTime()));
-        equipment.setNamespaceId(UserContext.getCurrentNamespaceId());
+        //equipment.setNamespaceId(UserContext.getCurrentNamespaceId());
 
         LOGGER.info("creatEquipmentInspectionEquipment: " + equipment);
 
@@ -1237,7 +1237,7 @@ public class EquipmentProviderImpl implements EquipmentProvider {
         template.setId(id);
         template.setCreateTime(new Timestamp(DateHelper.currentGMTTime().getTime()));
         template.setStatus(Status.ACTIVE.getCode());
-        template.setNamespaceId(UserContext.getCurrentNamespaceId());
+       // template.setNamespaceId(UserContext.getCurrentNamespaceId());
 
         LOGGER.info("createEquipmentInspectionTemplates: " + template);
 
@@ -2612,7 +2612,8 @@ public class EquipmentProviderImpl implements EquipmentProvider {
     }
 
     @Override
-    public TasksStatData statDaysEquipmentTasks(Long targetId, String targetType, Long inspectionCategoryId, Timestamp startTime, Timestamp endTime) {
+    public TasksStatData statDaysEquipmentTasks(Long targetId, String targetType, Long inspectionCategoryId,
+                                                Timestamp startTime, Timestamp endTime,Integer namespaceId) {
 
         DSLContext context = dbProvider.getDslContext(AccessSpec.readOnly());
         TasksStatData resp = new TasksStatData();
@@ -2668,7 +2669,8 @@ public class EquipmentProviderImpl implements EquipmentProvider {
         final SelectQuery<Record> query = context.selectQuery();
         query.addSelect(fields);
         query.addFrom(Tables.EH_EQUIPMENT_INSPECTION_TASKS);
-        query.addConditions(Tables.EH_EQUIPMENT_INSPECTION_TASKS.NAMESPACE_ID.eq(UserContext.getCurrentNamespaceId()));
+      //  query.addConditions(Tables.EH_EQUIPMENT_INSPECTION_TASKS.NAMESPACE_ID.eq(UserContext.getCurrentNamespaceId()));
+        query.addConditions(Tables.EH_EQUIPMENT_INSPECTION_TASKS.NAMESPACE_ID.eq(namespaceId));
 
         if (targetId != null) {
             query.addConditions(Tables.EH_EQUIPMENT_INSPECTION_TASKS.TARGET_ID.eq(targetId));
@@ -2705,7 +2707,8 @@ public class EquipmentProviderImpl implements EquipmentProvider {
     }
 
     @Override
-    public ReviewedTaskStat statDaysReviewedTasks(Long communityId, Long inspectionCategoryId, Timestamp startTime, Timestamp endTime) {
+    public ReviewedTaskStat statDaysReviewedTasks(Long communityId, Long inspectionCategoryId, Timestamp startTime,
+                                                  Timestamp endTime, Integer namespaceId) {
         DSLContext context = dbProvider.getDslContext(AccessSpec.readOnly());
         ReviewedTaskStat stat = new ReviewedTaskStat();
         final Field<Byte> qualifiedTasks = DSL.decode().when(Tables.EH_EQUIPMENT_INSPECTION_TASK_LOGS.PROCESS_RESULT.eq(EquipmentTaskProcessResult.REVIEW_QUALIFIED.getCode()), EquipmentTaskProcessResult.REVIEW_QUALIFIED.getCode());
@@ -2719,7 +2722,8 @@ public class EquipmentProviderImpl implements EquipmentProvider {
         query.addFrom(Tables.EH_EQUIPMENT_INSPECTION_TASK_LOGS);
         query.addConditions(Tables.EH_EQUIPMENT_INSPECTION_TASK_LOGS.INSPECTION_CATEGORY_ID.eq(inspectionCategoryId));
         query.addConditions(Tables.EH_EQUIPMENT_INSPECTION_TASK_LOGS.PROCESS_TYPE.eq(EquipmentTaskProcessType.REVIEW.getCode()));
-        query.addConditions(Tables.EH_EQUIPMENT_INSPECTION_TASK_LOGS.NAMESPACE_ID.eq(UserContext.getCurrentNamespaceId()));
+        //query.addConditions(Tables.EH_EQUIPMENT_INSPECTION_TASK_LOGS.NAMESPACE_ID.eq(UserContext.getCurrentNamespaceId()));
+        query.addConditions(Tables.EH_EQUIPMENT_INSPECTION_TASK_LOGS.NAMESPACE_ID.eq(namespaceId));
         if (communityId != null) {
             query.addConditions(Tables.EH_EQUIPMENT_INSPECTION_TASK_LOGS.COMMUNITY_ID.eq(communityId));
         }
