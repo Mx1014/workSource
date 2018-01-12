@@ -13,5 +13,7 @@ public interface DomainService {
 
     DomainDTO getDomainInfo(GetDomainInfoCommand cmd, HttpServletRequest request);
 
+    Domain findDomainByNamespaceId(Integer namespaceId);
+
     List<DomainDTO> listAllDomains();
 }

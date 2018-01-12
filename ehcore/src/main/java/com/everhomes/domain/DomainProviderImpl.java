@@ -49,6 +49,25 @@ public class DomainProviderImpl implements DomainProvider {
         return null;
     }
 
+
+    @Cacheable(value = "DomainInfo-namespaceId", key="#namespaceId", unless="#result == null")
+    @Override
+    public Domain findDomainByNamespaceId(Integer namespaceId) {
+        List<Domain> results = new ArrayList<>();
+        DSLContext context = dbProvider.getDslContext(AccessSpec.readOnly());
+        SelectQuery<EhDomainsRecord> query = context.selectQuery(Tables.EH_DOMAINS);
+        Condition cond = Tables.EH_DOMAINS.NAMESPACE_ID.eq(namespaceId);
+        query.addConditions(cond);
+        query.fetch().map((r) -> {
+            results.add(ConvertHelper.convert(r, Domain.class));
+            return null;
+        });
+        if(results.size() > 0){
+            return results.get(0);
+        }
+        return null;
+    }
+
     /**
      * 现在用于测试
      * @return
