@@ -5412,7 +5412,7 @@ private void checkUserPrivilege(Long orgId, Long privilegeId, Long communityId) 
 				equipmentPlanMap.setTargetId(cmd.getTargetId());
 				equipmentPlanMap.setTargetType(cmd.getTargetType());
 				equipmentPlanMap.setStandardId(relation.getStandardId());
-				equipmentPlanMap.setEquimentId(relation.getTargetId());
+				equipmentPlanMap.setEquimentId(relation.getEquipmentId());
 
 				equipmentProvider.createEquipmentPlanMaps(equipmentPlanMap);
 				equipmentStandardRelation.add(relation);
@@ -5773,18 +5773,26 @@ private void checkUserPrivilege(Long orgId, Long privilegeId, Long communityId) 
 				EquipmentInspectionStandards standard = equipmentProvider.findStandardById(map.getStandardId());
 
 				EquipmentStandardRelationDTO relations = new EquipmentStandardRelationDTO();
+				List<EquipmentStandardMap> equipmentStandardMaps = new ArrayList<>();
 				//根据id查询计划的详情巡检对象栏  只需要如下几个字段
-				relations.setEquipmentName(equipment.getName());
-				relations.setEquipmentId(equipment.getId());
-				relations.setStandardName(standard.getName());
-				relations.setStandardId(standard.getId());
-				relations.setRepeatType(standard.getRepeatType());
+				if (equipment != null) {
+					relations.setEquipmentName(equipment.getName());
+					relations.setEquipmentId(equipment.getId());
+				}
+				if (standard != null) {
+					relations.setStandardName(standard.getName());
+					relations.setStandardId(standard.getId());
+					relations.setRepeatType(standard.getRepeatType());
+
+					equipmentStandardMaps = equipmentProvider.
+							findEquipmentStandardMap(standard.getId(), equipment.getId(),
+									InspectionStandardMapTargetType.EQUIPMENT.getCode());
+				}
+
+
 				relations.setOrder(map.getDefaultOrder());
 				relations.setPlanId(planId);
 
-				List<EquipmentStandardMap> equipmentStandardMaps = equipmentProvider.
-						findEquipmentStandardMap(standard.getId(), equipment.getId(),
-								InspectionStandardMapTargetType.EQUIPMENT.getCode());
 				if (equipmentStandardMaps != null && equipmentStandardMaps.size() > 0) {
 					relations.setId(equipmentStandardMaps.get(0).getId());
 				}
