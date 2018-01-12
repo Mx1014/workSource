@@ -66,29 +66,29 @@ public class SmsProviderImpl implements SmsProvider {
     }
 
     private SmsHandler getHandler(Integer namespaceId, String phoneNumber) {
-        String handlerStr = configurationProvider.getValue(namespaceId, VCODE_SEND_TYPE, "MW");
-        String[] handlerNames = handlerStr.split(",");
+        String handlerStr = configurationProvider.getValue(namespaceId, VCODE_SEND_TYPE, "YZX");
+        String[] configHandlers = handlerStr.split(",");
 
         String selectedHandlerName = null;
 
-        Map<String, SmsLog> handlerToSmsLogMap = smsLogProvider.findLastLogByMobile(namespaceId, phoneNumber, handlerNames);
+        Map<String, SmsLog> handlerToSmsLogMap = smsLogProvider.findLastLogByMobile(namespaceId, phoneNumber, configHandlers);
         if (handlerToSmsLogMap != null) {
-            if (handlerToSmsLogMap.size() < handlerNames.length) {
-                Set<String> sendHandlers = handlerToSmsLogMap.keySet();
-                for (String handlerName : handlerNames) {
-                    if (!sendHandlers.contains(handlerName)) {
+            if (handlerToSmsLogMap.size() < configHandlers.length) {
+                Set<String> sentHandlers = handlerToSmsLogMap.keySet();
+                for (String handler : configHandlers) {
+                    if (!sentHandlers.contains(handler)) {
                         SmsLog smsLog = new SmsLog();
                         smsLog.setStatus(SmsLogStatus.UNKNOWN.getCode());
-                        smsLog.setHandler(handlerName);
+                        smsLog.setHandler(handler);
                         smsLog.setCreateTime(new Timestamp(System.currentTimeMillis() - 100 * 60 * 1000));
-                        handlerToSmsLogMap.put(handlerName, smsLog);
+                        handlerToSmsLogMap.put(handler, smsLog);
                     }
                 }
             }
             selectedHandlerName = selectHandler(handlerToSmsLogMap.entrySet(), SmsLogStatus.REPORT_SUCCESS);
         }
         if (selectedHandlerName == null || SmsLogStatus.fromCode(handlerToSmsLogMap.get(selectedHandlerName).getStatus()) == SmsLogStatus.REPORT_FAILED) {
-            selectedHandlerName = handlerNames[0];
+            selectedHandlerName = configHandlers[0];
         }
         return handlers.get(selectedHandlerName.toLowerCase());
     }
@@ -105,19 +105,6 @@ public class SmsProviderImpl implements SmsProvider {
                 selectedHandlerName = smsLog.getHandler();
                 break;
             }
-
-            /*SmsLogStatus status = SmsLogStatus.fromCode(smsLog.getStatus());
-            if (status == expectStatus) {
-                if (smsLog.getCreateTime() != null) {
-                    if ((System.currentTimeMillis() - smsLog.getCreateTime().getTime()) > 3 * 60 * 1000) {
-                        selectedHandlerName = smsLog.getHandler();
-                        break;
-                    }
-                } else {
-                    selectedHandlerName = smsLog.getHandler();
-                    break;
-                }
-            }*/
         }
         if (selectedHandlerName == null && expectStatus.ordinal() < SmsLogStatus.values().length - 1) {
             return selectHandler(entries, SmsLogStatus.values()[expectStatus.ordinal() + 1]);

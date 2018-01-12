@@ -235,7 +235,7 @@ public class YouXunTongSmsHandler implements SmsHandler, ApplicationListener<Con
        ]
      */
     @Override
-    public List<SmsReportDTO> report(String reportBody) {
+    public SmsReportResponse report(String reportBody) {
         Gson gson = new GsonBuilder().disableHtmlEscaping().create();
         List<Report> reportList = gson.fromJson(reportBody, new TypeToken<List<Report>>(){}.getType());
         if (reportList == null) {
@@ -253,7 +253,7 @@ public class YouXunTongSmsHandler implements SmsHandler, ApplicationListener<Con
             }
             reportDTOS.add(dto);
         }
-        return reportDTOS;
+        return new SmsReportResponse(reportDTOS);
     }
 
     private static class Report {

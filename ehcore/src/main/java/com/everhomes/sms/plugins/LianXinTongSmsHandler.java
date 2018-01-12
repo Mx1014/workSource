@@ -239,7 +239,7 @@ public class LianXinTongSmsHandler implements SmsHandler, ApplicationListener<Co
         {"destId":"12306123","mobile":"18211111111","msgId":"1234567890001","reqId":"","status":"DELIVERD"}
     */
     @Override
-    public List<SmsReportDTO> report(String reportBody) {
+    public SmsReportResponse report(String reportBody) {
         Report report = (Report) StringHelper.fromJsonString(reportBody, Report.class);
         if (report == null) {
             return null;
@@ -252,7 +252,7 @@ public class LianXinTongSmsHandler implements SmsHandler, ApplicationListener<Co
         } else {
             dto.setStatus(SmsLogStatus.REPORT_FAILED.getCode());
         }
-        return Collections.singletonList(dto);
+        return new SmsReportResponse(Collections.singletonList(dto));
     }
 
     private static class Result {

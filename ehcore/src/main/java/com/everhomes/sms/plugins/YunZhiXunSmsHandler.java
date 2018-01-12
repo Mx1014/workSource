@@ -164,7 +164,7 @@ public class YunZhiXunSmsHandler implements SmsHandler, ApplicationListener<Cont
     }*/
 
     @Override
-    public List<SmsReportDTO> report(String reportBody) {
+    public SmsReportResponse report(String reportBody) {
         YzxSmsReport report = xmlToBean(reportBody, YzxSmsReport.class);
         String smsId = report.smsId;
         if (smsId == null) {
@@ -179,9 +179,10 @@ public class YunZhiXunSmsHandler implements SmsHandler, ApplicationListener<Cont
             dto.setStatus(SmsLogStatus.REPORT_FAILED.getCode());
         }
 
-        dto.setResponseContentType("text/xml;charset=utf-8");
-        dto.setResponseBody("<?xml version=\"1.0\" encoding=\"UTF-8\"?>\n<response>\n<retcode>0</retcode>\n</response>");
-        return Collections.singletonList(dto);
+        SmsReportResponse response = new SmsReportResponse(Collections.singletonList(dto));
+        response.setResponseContentType("text/xml;charset=utf-8");
+        response.setResponseBody("<?xml version=\"1.0\" encoding=\"UTF-8\"?>\n<response>\n<retcode>0</retcode>\n</response>");
+        return response;
     }
 
     @Override
