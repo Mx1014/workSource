@@ -2284,7 +2284,7 @@ public class CustomerServiceImpl implements CustomerService {
     public void syncEnterpriseCustomers(SyncCustomersCommand cmd) {
         checkCustomerAuth(cmd.getNamespaceId(), PrivilegeConstants.ENTERPRISE_CUSTOMER_SYNC, cmd.getOrgId(), cmd.getCommunityId());
         if(cmd.getNamespaceId() == 999971) {
-//            this.coordinationProvider.getNamedLock(CoordinationLocks.SYNC_ENTERPRISE_CUSTOMER.getCode() + cmd.getNamespaceId() + cmd.getCommunityId()).tryEnter(()-> {
+            this.coordinationProvider.getNamedLock(CoordinationLocks.SYNC_ENTERPRISE_CUSTOMER.getCode() + cmd.getNamespaceId() + cmd.getCommunityId()).tryEnter(()-> {
                 ExecutorUtil.submit(new Runnable() {
                     @Override
                     public void run() {
@@ -2293,6 +2293,7 @@ public class CustomerServiceImpl implements CustomerService {
                                 zjgkOpenService.syncEnterprises("0", null);
                             } else {
                                 Community community = communityProvider.findCommunityById(cmd.getCommunityId());
+                                LOGGER.debug("syncEnterpriseCustomers community: {}", StringHelper.toJsonString(community));
                                 if(community != null) {
                                     zjgkOpenService.syncEnterprises("0", community.getNamespaceCommunityToken());
                                 }
@@ -2303,7 +2304,7 @@ public class CustomerServiceImpl implements CustomerService {
                         }
                     }
                 });
-//            });
+            });
         } else {
             this.coordinationProvider.getNamedLock(CoordinationLocks.SYNC_ENTERPRISE_CUSTOMER.getCode() + cmd.getNamespaceId() + cmd.getCommunityId()).tryEnter(()-> {
                 ExecutorUtil.submit(new Runnable() {
