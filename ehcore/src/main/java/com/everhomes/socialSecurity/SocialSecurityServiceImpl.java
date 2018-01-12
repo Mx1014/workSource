@@ -729,7 +729,7 @@ public class SocialSecurityServiceImpl implements SocialSecurityService {
         }
         return dto;
     }
- 
+
 
     /**
      * 把基础规则数据赋值给itemDTO
@@ -2769,7 +2769,7 @@ public class SocialSecurityServiceImpl implements SocialSecurityService {
         }
         Date date = DateHelper.currentGMTTime();
         String month = monthSF.get().format(date);
-        log.setLogDate((java.sql.Date) date);
+        log.setLogDate(new java.sql.Date(date.getTime()));
         log.setLogMonth(month);
         socialSecurityInoutLogProvider.createSocialSecurityInoutLog(log);
     }
@@ -2797,7 +2797,7 @@ public class SocialSecurityServiceImpl implements SocialSecurityService {
         }
         Date date = DateHelper.currentGMTTime();
         String month = monthSF.get().format(date);
-        log.setLogDate((java.sql.Date) date);
+        log.setLogDate(new java.sql.Date(date.getTime()));
         log.setLogMonth(month);
         socialSecurityInoutLogProvider.createSocialSecurityInoutLog(log);
     }
