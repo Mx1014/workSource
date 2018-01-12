@@ -79,6 +79,7 @@ public class SocialSecurityPaymentProviderImpl implements SocialSecurityPaymentP
         Record1<String> result = getReadOnlyContext().selectDistinct(Tables.EH_SOCIAL_SECURITY_PAYMENTS.PAY_MONTH)
                 .from(Tables.EH_SOCIAL_SECURITY_PAYMENTS)
                 .where(Tables.EH_SOCIAL_SECURITY_PAYMENTS.ORGANIZATION_ID.eq(ownerId))
+                .and(Tables.EH_SOCIAL_SECURITY_PAYMENTS.PAY_MONTH.isNotNull())
                 .fetchAny();
         if (null == result) {
             return null;
