@@ -1,7 +1,6 @@
 package com.everhomes.varField;
 
 
-import com.everhomes.bootstrap.PlatformContext;
 import com.everhomes.constants.ErrorCodes;
 import com.everhomes.customer.CustomerService;
 import com.everhomes.dynamicExcel.*;
@@ -81,6 +80,9 @@ public class FieldServiceImpl implements FieldService {
     @Autowired
     private UserPrivilegeMgr userPrivilegeMgr;
 
+    @Autowired
+    private DynamicExcelService dynamicExcelService;
+
 
     @Override
     public List<SystemFieldGroupDTO> listSystemFieldGroups(ListSystemFieldGroupCommand cmd) {
@@ -116,17 +118,98 @@ public class FieldServiceImpl implements FieldService {
      */
     @Override
     public void exportDynamicExcelTemplate(ListFieldGroupCommand cmd, HttpServletResponse response) {
-        //try to call exportDynamicExcel
+        //try to call dynamicExcelService.exportDynamicExcel
+        //参考代码：管理员校验
+        if(ModuleName.ENTERPRISE_CUSTOMER.equals(ModuleName.fromName(cmd.getModuleName()))) {
+            customerService.checkCustomerAuth(cmd.getNamespaceId(), PrivilegeConstants.ENTERPRISE_CUSTOMER_MANAGE_IMPORT, cmd.getOrgId(), cmd.getCommunityId());
+        }
+        //参考代码：寻找所有的group
+        boolean 只要叶节点吗 = true;
+        List<FieldGroupDTO> result = 找到所有的group(cmd,只要叶节点吗);
+    }
+
+    private List<FieldGroupDTO> 找到所有的group(ListFieldGroupCommand cmd,boolean onlyLeaf) {
+        List<FieldGroupDTO> result = new ArrayList<>();
+        List<FieldGroupDTO> groups = listFieldGroups(cmd);
+        //设备巡检中字段 暂时单sheet
+        if (cmd.getEquipmentCategoryName() != null) {
+            List<FieldGroupDTO> temp = new ArrayList<>();
+            for (FieldGroupDTO  group :groups) {
+                if (group.getGroupDisplayName().equals(cmd.getEquipmentCategoryName())) {
+                    //groups 中只有一个sheet 只保留传过来的那个（物业巡检）
+                    temp.add(group);
+                }
+            }
+            groups = temp;
+        }
+        //先去掉 名为“基本信息” 的sheet，建议使用stream的方式
+        if(groups==null){
+            groups = new ArrayList<FieldGroupDTO>();
+        }
+        for( int i = 0; i < groups.size(); i++){
+            FieldGroupDTO group = groups.get(i);
+            if(group.getGroupDisplayName().equals("基本信息")){
+                groups.remove(i);
+            }
+        }
+        if(onlyLeaf){
+            getAllGroups(groups,result);
+        }else{
+            result = groups;
+        }
+        return result;
     }
 
     @Override
     public void exportDynamicExcel(ExportFieldsExcelCommand cmd, HttpServletResponse response) {
-        // try to call exportDynamicExcel
+        // try to call dynamicExcelService.exportDynamicExcel
+        //参考代码：匹配出客户选中的group
+        boolean 只要子节点group = true;
+        List<FieldGroupDTO> result = 匹配选中的group获得所有的group(cmd,只要子节点group);
+
+    }
+
+    /**
+     *
+     * @param cmd
+     * @param onlyLeaf
+     * @return 返回空列表而非null
+     */
+    private List<FieldGroupDTO> 匹配选中的group获得所有的group(ExportFieldsExcelCommand cmd,boolean onlyLeaf) {
+        //管理员权限校验
+        if(ModuleName.ENTERPRISE_CUSTOMER.getName().equals(cmd.getModuleName())) {
+            customerService.checkCustomerAuth(cmd.getNamespaceId(), PrivilegeConstants.ENTERPRISE_CUSTOMER_MANAGE_EXPORT, cmd.getOrgId(), cmd.getCommunityId());
+        }
+        //将command转换为listFieldGroup的参数command
+        ListFieldGroupCommand cmd1 = ConvertHelper.convert(cmd, ListFieldGroupCommand.class);
+        //获得客户所拥有的sheet
+        List<FieldGroupDTO> allGroups = listFieldGroups(cmd1);
+        List<FieldGroupDTO> groups = new ArrayList<>();
+        if(onlyLeaf){
+            getAllGroups(allGroups,groups);
+        }else{
+            groups = allGroups;
+        }
+        //双重循环匹配浏览器所传的sheetName，获得目标sheet集合
+        if(StringUtils.isEmpty(cmd.getIncludedGroupIds())) {
+            return groups;
+        }
+        String[] split = cmd.getIncludedGroupIds().split(",");
+        for(int i = 0 ; i < split.length; i ++){
+            long targetGroupId = Long.parseLong(split[i]);
+            for(int j = 0; j < allGroups.size(); j++){
+                Long id = allGroups.get(j).getGroupId();
+                if(id.compareTo(targetGroupId) == 0){
+                    groups.add(allGroups.get(j));
+                }
+            }
+        }
+        return groups;
     }
 
     @Override
     public ImportFieldsExcelResponse importDynamicExcel(ImportFieldExcelCommand cmd, MultipartFile file) {
-        // try to call importMultiSheet
+        // try to call dynamicExcelService.importMultiSheet
         return null;
     }
 
@@ -903,9 +986,9 @@ public class FieldServiceImpl implements FieldService {
         List<FieldGroupDTO> partGroups = listFieldGroups(cmd1);
         if(partGroups==null) partGroups = new ArrayList<>();
         List<FieldGroupDTO> groups = new ArrayList<>();
-        for(int i = 0; i < partGroups.size(); i++){
-            getAllGroups(partGroups.get(i),groups);
-        }
+
+        getAllGroups(partGroups,groups);
+
         int numberOfSheets = workbook.getNumberOfSheets();
         int sheets = 0;
         int rows = 0;
@@ -1151,15 +1234,21 @@ public class FieldServiceImpl implements FieldService {
         return response;
     }
 
-    private void getAllGroups(FieldGroupDTO group,List<FieldGroupDTO> allGroups) {
-        if(group.getChildrenGroup()!=null&&group.getChildrenGroup().size()>0){
-            for(int i = 0; i < group.getChildrenGroup().size(); i++){
-                getAllGroups(group.getChildrenGroup().get(i),allGroups);
+    private void getAllGroups(List<FieldGroupDTO> groups,List<FieldGroupDTO> allGroups) {
+        //遍历筛选过的sheet
+        for( int i = 0; i < groups.size(); i++){
+            //是否为叶节点的标识
+            boolean isRealSheet = true;
+            FieldGroupDTO group = groups.get(i);
+            //如果有叶节点，则送去轮回
+            if(group.getChildrenGroup()!=null && group.getChildrenGroup().size()>0){
+                getAllGroups(group.getChildrenGroup(), allGroups);
+                //父节点的标识改为false
+                isRealSheet = false;
             }
-        }else{
-            if(group.getChildrenGroup()==null||group.getChildrenGroup().size()<1){
+            //加入结果group列表
+            if(isRealSheet){
                 allGroups.add(group);
-                return;
             }
         }
     }
@@ -1469,226 +1558,6 @@ public class FieldServiceImpl implements FieldService {
         return dto;
     }
 
-    /**
-     *
-     * @param response 输出流
-     * @param code 业务码
-     * @param dynamicSheets
-     * @param baseInfo 不填,则走默认的
-     * @param enumSupport true：会将枚举值放入说明中； false：不会将枚举放入说明
-     */
-    public void exporDynamicExcel(HttpServletResponse response, String code, List<DynamicSheet> dynamicSheets, String baseInfo, boolean enumSupport, boolean withData){
-        Workbook workbook = new XSSFWorkbook();
-        DynamicExcelHandler h = getHandler(code);
-        //遍历筛选过的sheet
-        for( int i = 0; i < dynamicSheets.size(); i++){
-            DynamicSheet sheet = dynamicSheets.get(i);
-            Map<String, DynamicField> fieldMap = sheet.getDynamicFields();
-            List<DynamicField> fields = new ArrayList<>(fieldMap.values());
-            List<List<String>> data = null;
-            String intro = baseInfo;
-            if(withData){
-                //获取数据
-                data = h.getExportData(fields,sheet);
-            }
 
-            if(StringUtils.isEmpty(baseInfo)){
-                intro = DynamicExcelStrings.baseIntro;
-            }
-            if(enumSupport){
-                intro += DynamicExcelStrings.enumNotice;
-                for(DynamicField df : fields){
-                    if(df.isMandatory()){
-                        String enumItem = df.getDisplayName() + ":";
-                        for(String enumStr : df.getAllowedValued()){
-                            enumItem += enumStr + "  ";
-                        }
-                        enumItem += "\n";
-                        intro += enumItem;
-                    }
-                }
-            }
-            try {
-                DebugExcelUtil.exportExcel(workbook,sheetNum.get(),sheet.getDisplayName(),intro,fields,data);
-                sheetNum.set(sheetNum.get()+1);
-            } catch (Exception e) {
-                LOGGER.info("one sheet export failed, sheet name = {}",sheet.getDisplayName());
-            }
-        }
-        sheetNum.remove();
-        //写入流
-        ServletOutputStream out;
-        ByteArrayOutputStream byteArray = new ByteArrayOutputStream();
-        SimpleDateFormat sdf = new SimpleDateFormat("yyyyMMddHHmmss");
-        String fileName = "客户数据导出"+sdf.format(Calendar.getInstance().getTime());
-        fileName = fileName + ".xls";
-        response.setContentType("application/msexcel");
-        try {
-            response.setHeader("Content-Disposition", "attachment; filename=" + URLEncoder.encode(fileName, "UTF-8").replaceAll("\\+", "%20"));
-        } catch (UnsupportedEncodingException e) {
-            e.printStackTrace();
-        }
-        try {
-            out = response.getOutputStream();
-            workbook.write(byteArray);
-            out.write(byteArray.toByteArray());
-            out.flush();
-        } catch (IOException e) {
-            e.printStackTrace();
-        } finally {
-            if(byteArray!=null){
-                byteArray = null;
-            }
-        }
-    }
-
-    /**
-     *
-     * @param file 有效的excel文件
-     * @param code 业务码
-     * @param headerRow 标题行为第几行，默认为第2行
-     * @param storage 传递调用者参数用
-     * @return DynamicImportResponse
-     */
-    public DynamicImportResponse importMultiSheet(MultipartFile file, String code, Integer headerRow, Object storage) {
-        DynamicImportResponse response = new DynamicImportResponse();
-        Workbook workbook = null;
-        try{
-            workbook = ExcelUtils.getWorkbook(file.getInputStream(), file.getOriginalFilename());
-            if(workbook == null) {int err = 1/0;}
-        }catch (Exception e){
-            LOGGER.info("import multi sheet failed, failed to get inputStream, workbook is null? = {}, error = {}"
-                    ,workbook==null,e);
-            response.setFailCause("import multi sheet failed, failed to get inputStream,workbook is null >"
-                    +String.valueOf(workbook == null));
-            return response;
-        }
-        DynamicExcelHandler h = getHandler(code);
-        //遍历所有的sheet
-        sheet:for(int i = 0; i < workbook.getNumberOfSheets(); i++) {
-            try{
-                Sheet sheet = workbook.getSheetAt(i);
-                DynamicSheet ds = h.getDynamicSheet(sheet.getSheetName(), storage);
-                //获得sheet的容器对象
-                String className = ds.getClassName();
-                Class<?> sheetClass = null;
-                try {
-                    sheetClass = Class.forName(className);
-                } catch (ClassNotFoundException e) {
-                    LOGGER.error("import failed,class not found exception, group name is = {}", sheet.getSheetName());
-                    continue sheet;
-                }
-                List<Object> sheetClassObjs = new ArrayList<>();
-                Row headRow = null;
-                if (headerRow != null) {
-                    headRow = sheet.getRow(headerRow);
-                } else {
-                    headRow = sheet.getRow(1);
-                    headerRow = 1;
-                }
-                List<DynamicField> headers = new ArrayList<>();
-                //获得了 dynamicField的列表
-                for (int j = headRow.getFirstCellNum(); j < headRow.getLastCellNum(); j++) {
-                    Cell cell = headRow.getCell(j);
-                    String headerDisplay = ExcelUtils.getCellValue(cell);
-                    headers.add(ds.getDynamicFields().get(headerDisplay));
-                }
-                //数据的获得
-                for (int j = headerRow + 1; j <= sheet.getLastRowNum(); j++) {
-                    Row row = sheet.getRow(j);
-                    //构建sheet的实例
-                    Object sheetClassInstance = null;
-                    try {
-                        sheetClassInstance = sheetClass.newInstance();
-                    } catch (Exception e) {
-                        LOGGER.error("sheetClass new Instance failed, sheetClass = {}", sheetClass.getSimpleName());
-                        continue sheet;
-                    }
-                    for (int k = row.getFirstCellNum(); k < row.getLastCellNum(); k++) {
-                        Cell cell = row.getCell(k);
-                        String cellValue = ExcelUtils.getCellValue(cell);
-                        DynamicField df = headers.get(k);
-                        try {
-                            setToObj(df, sheetClassInstance, cellValue);
-                        } catch (Exception e) {
-                            LOGGER.error("set2Obj failed, sheetClass = {},fieldName = {}, cellValue = {}",
-                                    sheetClass.getSimpleName(), df.getFieldName(), cellValue);
-                        }
-                    }
-                    sheetClassObjs.add(sheetClassInstance);
-                }
-                //插入
-                try {
-                    h.save2Schema(sheetClassObjs, sheetClass);
-                    Integer successRowNumber = response.getSuccessRowNumber();
-                    successRowNumber += sheetClassObjs.size();
-                    response.setSuccessRowNumber(successRowNumber);
-                } catch (Exception e) {
-                    LOGGER.error("save2Schema failed, sheetClass = {},sheeClassObjsNum = {}",
-                            sheetClass.getSimpleName(), sheetClassObjs.size());
-                    Integer failedRowNumber = response.getFailedRowNumber();
-                    failedRowNumber += sheetClassObjs.size();
-                    response.setFailedRowNumber(failedRowNumber);
-                    continue sheet;
-                }
-            }catch(Exception e){}
-        }
-        try{
-            //后处理
-            h.postProcess(response);
-        }catch (Exception e){}
-        return response;
-    }
-
-    private void setToObj(DynamicField df, Object dto,String value) throws Exception {
-        Class<?> clz = dto.getClass().getSuperclass();
-        Object val = value;
-        String type = clz.getDeclaredField(df.getFieldName()).getType().getSimpleName();
-        if(StringUtils.isEmpty(value)){
-            val = null;
-        }else{
-            switch(type){
-                case "BigDecimal":
-                    val = new BigDecimal(value);
-                    break;
-                case "Long":
-                    val = Long.parseLong(value);
-                    break;
-                case "Timestamp":
-                    if(value.length()<1){
-                        val = null;
-                        break;
-                    }
-                    Date date = new Date();
-                    SimpleDateFormat sdf = new SimpleDateFormat(df.getDateFormat());
-                    try {
-                        date = sdf.parse(value);
-                    } catch (ParseException e) {
-                        val = null;
-                        break;
-                    }
-                    val = new Timestamp(date.getTime());
-                    break;
-                case "Integer":
-                    val = Integer.parseInt(value);
-                    break;
-                case "Byte":
-                    val = Byte.parseByte(value);
-                    break;
-                case "String":
-                    if(value.trim().length()<1){
-                        val = null;
-                        break;
-                    }
-            }
-        }
-        PropertyDescriptor pd = new PropertyDescriptor(df.getFieldName(),clz);
-        Method writeMethod = pd.getWriteMethod();
-        writeMethod.invoke(dto,val);
-    }
-
-    private DynamicExcelHandler getHandler(String code) {
-        return PlatformContext.getComponent(DynamicExcelStrings.DYNAMIC_EXCEL_HANDLER + code);
-    }
 
 }
