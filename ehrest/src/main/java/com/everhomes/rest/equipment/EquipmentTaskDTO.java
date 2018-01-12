@@ -115,7 +115,7 @@ public class EquipmentTaskDTO {
 	@Deprecated
 	private Byte pictureFlag;
 
-	private Timestamp lastSyncTime;
+	private String lastSyncTime;
 
 	private Timestamp createTime;
 
@@ -454,11 +454,11 @@ public class EquipmentTaskDTO {
 		this.equipments = equipments;
 	}
 
-	public Timestamp getLastSyncTime() {
+	public String getLastSyncTime() {
 		return lastSyncTime;
 	}
 
-	public void setLastSyncTime(Timestamp lastSyncTime) {
+	public void setLastSyncTime(String lastSyncTime) {
 		this.lastSyncTime = lastSyncTime;
 	}
 

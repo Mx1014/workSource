@@ -202,6 +202,7 @@ import com.everhomes.search.EquipmentStandardMapSearcher;
 import com.everhomes.search.EquipmentStandardSearcher;
 import com.everhomes.search.EquipmentTasksSearcher;
 import com.everhomes.server.schema.tables.pojos.EhEquipmentInspectionEquipmentPlanMap;
+import com.everhomes.server.schema.tables.pojos.EhEquipmentInspectionTasks;
 import com.everhomes.settings.PaginationConfigHelper;
 import com.everhomes.sms.DateUtil;
 import com.everhomes.techpark.rental.RentalServiceImpl;
@@ -3599,9 +3600,9 @@ private void checkUserPrivilege(Long orgId, Long privilegeId, Long communityId) 
 			response.setNextPageAnchor((long) (offset + 1));
 		}
 
-		Set<Long> taskEquipmentIds = tasks.stream().map(r -> {
-			return r.getEquipmentId();
-		}).filter(r -> r != null).collect(Collectors.toSet());
+		Set<Long> taskEquipmentIds = tasks.stream().
+				map(EhEquipmentInspectionTasks::getEquipmentId).
+				filter(Objects::nonNull).collect(Collectors.toSet());
 
 
 		Map<Long, EquipmentInspectionEquipments> equipmentsMap = equipmentProvider.listEquipmentsById(taskEquipmentIds);
@@ -3614,7 +3615,7 @@ private void checkUserPrivilege(Long orgId, Long privilegeId, Long communityId) 
 				dto.setEquipmentName(equipment.getName());
 			}
 			return dto;
-		}).filter(r -> r != null).collect(Collectors.toList());
+		}).filter(Objects::nonNull).collect(Collectors.toList());
 
 		response.setTasks(dtos);
 		return response;
@@ -5917,9 +5918,13 @@ private void checkUserPrivilege(Long orgId, Long privilegeId, Long communityId) 
 
 		tasks.forEach((task) -> {
 			if (task.getReviewTime() == null) {
-				task.setLastSyncTime(task.getCreateTime());
+				if (task.getExecutiveTime() != null) {
+					task.setLastSyncTime(task.getExecutiveTime().toLocalDateTime().format(dateSF));
+				} else {
+					task.setLastSyncTime(task.getCreateTime().toLocalDateTime().format(dateSF));
+				}
 			} else {
-				task.setLastSyncTime(task.getCreateTime());
+				task.setLastSyncTime(task.getReviewTime().toLocalDateTime().format(dateSF));
 			}
 			EquipmentInspectionPlans plan = equipmentProvider.getEquipmmentInspectionPlanById(task.getPlanId());
 			//填充巡检计划相关的巡检对象(需排序)

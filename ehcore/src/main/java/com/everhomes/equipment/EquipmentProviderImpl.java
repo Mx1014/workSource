@@ -2543,7 +2543,8 @@ public class EquipmentProviderImpl implements EquipmentProvider {
         }
 
         if(lastSyncTime!=null){
-            query.addConditions(Tables.EH_EQUIPMENT_INSPECTION_TASKS.CREATE_TIME.gt(lastSyncTime));
+            query.addConditions(Tables.EH_EQUIPMENT_INSPECTION_TASKS.CREATE_TIME.gt(lastSyncTime).
+                    or(Tables.EH_EQUIPMENT_INSPECTION_TASKS.CREATE_TIME.gt(lastSyncTime)));
         }
 
 
