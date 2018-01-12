@@ -45,6 +45,7 @@ import com.everhomes.rest.quality.ListUserHistoryTasksCommand;
 import com.everhomes.rest.quality.QualityInspectionSpecificationDTO;
 import com.everhomes.rest.quality.QualityInspectionTaskDTO;
 import com.everhomes.rest.quality.QualityInspectionTaskRecordsDTO;
+import com.everhomes.rest.quality.QualityOfflineTaskDetailsResponse;
 import com.everhomes.rest.quality.QualityStandardsDTO;
 import com.everhomes.rest.quality.ReportRectifyResultCommand;
 import com.everhomes.rest.quality.ReportVerificationResultCommand;
@@ -905,5 +906,20 @@ public class QualityController extends ControllerBase {
 		HttpServletResponse response = qualityService.exportSampleTaskCommunityScores(cmd, httpResponse);
 		return response;
 
+	}
+
+	/**
+	 * <b>URL: /quality/getOfflineTaskDetail</b>
+	 * <p>品质核查离线获取任务相关信息</p>
+	 * @return {QualityOfflineTaskDetailsResponse.class}
+	 */
+	@RequestMapping("getOfflineTaskDetail")
+	@RestReturn(value=CurrentUserInfoDTO.class)
+	public RestResponse getOfflineTaskDetail(ListQualityInspectionTasksCommand cmd) {
+		QualityOfflineTaskDetailsResponse offlineTaskDetail = qualityService.getOfflineTaskDetail(cmd);
+		RestResponse res = new RestResponse(offlineTaskDetail);
+		res.setErrorCode(ErrorCodes.SUCCESS);
+		res.setErrorDescription("OK");
+		return res;
 	}
 }

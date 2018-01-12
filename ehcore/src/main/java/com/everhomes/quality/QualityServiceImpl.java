@@ -110,6 +110,7 @@ import com.everhomes.rest.quality.QualityInspectionTaskReviewResult;
 import com.everhomes.rest.quality.QualityInspectionTaskStatus;
 import com.everhomes.rest.quality.QualityModelType;
 import com.everhomes.rest.quality.QualityNotificationTemplateCode;
+import com.everhomes.rest.quality.QualityOfflineTaskDetailsResponse;
 import com.everhomes.rest.quality.QualityServiceErrorCode;
 import com.everhomes.rest.quality.QualityStandardStatus;
 import com.everhomes.rest.quality.QualityStandardsDTO;
@@ -1063,7 +1064,7 @@ public class QualityServiceImpl implements QualityService {
 			//管理员查询所有任务
 			tasks = qualityProvider.listVerificationTasks(offset, pageSize + 1, ownerId, ownerType, targetId, targetType,
             		cmd.getTaskType(), null, startDate, endDate,
-            		cmd.getExecuteStatus(), cmd.getReviewStatus(), timeCompared, null, cmd.getManualFlag(), null);
+            		cmd.getExecuteStatus(), cmd.getReviewStatus(), timeCompared, null, cmd.getManualFlag(), null,cmd.getNamespaceId());
 		} else {
 			List<ExecuteGroupAndPosition> groupDtos = listUserRelateGroups();
 //			List<Long> standardIds = qualityProvider.listQualityInspectionStandardGroupMapByGroup(groupDtos, QualityGroupType.REVIEW_GROUP.getCode());
@@ -1087,9 +1088,10 @@ public class QualityServiceImpl implements QualityService {
 					}
 
 				}
+				//增加前台传namespaceId  参数数量以后再重构
 				tasks = qualityProvider.listVerificationTasks(offset, pageSize + 1, ownerId, ownerType, targetId, targetType,
 						cmd.getTaskType(), user.getId(), startDate, endDate,
-						cmd.getExecuteStatus(), cmd.getReviewStatus(), timeCompared, executeStandardIds, cmd.getManualFlag(), groupDtos);
+						cmd.getExecuteStatus(), cmd.getReviewStatus(), timeCompared, executeStandardIds, cmd.getManualFlag(), groupDtos ,cmd.getNamespaceId());
 			}
 
 
@@ -4603,5 +4605,19 @@ public class QualityServiceImpl implements QualityService {
 		for (ScoreDTO score : scores) {
 			row.createCell(++i).setCellValue(score.getScore());
 		}
+	}
+
+	@Override
+	public QualityOfflineTaskDetailsResponse getOfflineTaskDetail(ListQualityInspectionTasksCommand cmd) {
+		//处理传过来的lastSyncTime
+		cmd.setPageSize(Integer.MAX_VALUE-1);
+		ListQualityInspectionTasksResponse tasksResponse = listQualityInspectionTasks(cmd);
+		QualityOfflineTaskDetailsResponse offlineTaskDetailsResponse = new QualityOfflineTaskDetailsResponse();
+
+		offlineTaskDetailsResponse.setTasks(tasksResponse.getTasks());
+		tasksResponse.getTasks().forEach((task)->{
+
+		});
+		return null;
 	}
 }
