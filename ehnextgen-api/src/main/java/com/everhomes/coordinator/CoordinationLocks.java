@@ -115,7 +115,8 @@ public enum CoordinationLocks {
     FORUM_SETTING("forum.setting"),
     AUTH_RELATION("auth_relation"),
 
-    SOCIAL_SECURITY_LIST_PAYMENTS("social_security_list_payments")
+    SOCIAL_SECURITY_LIST_PAYMENTS("social_security_list_payments"),
+    SOCIAL_SECURITY_INCRESE("social_security_increse")
     ;
 
     private String code;

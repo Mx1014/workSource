@@ -794,6 +794,9 @@ public class SocialSecurityServiceImpl implements SocialSecurityService {
 
     private void saveSocialSecurityPayment(SocialSecurityPaymentDetailDTO socialSecurityPayment, Long detailId, Byte afterPay, Byte accumOrSocial) {
         String paymentMonth = socialSecurityPaymentProvider.findPaymentMonthByDetail(detailId);
+        if (null == paymentMonth) {
+            paymentMonth =  monthSF.get().format(DateHelper.currentGMTTime());
+        }
         for (SocialSecurityItemDTO itemDTO : socialSecurityPayment.getItems()) {
             SocialSecurityPayment payment = socialSecurityPaymentProvider.findSocialSecurityPayment(detailId, itemDTO.getPayItem(), accumOrSocial);
             if (null == payment) {
@@ -2722,25 +2725,29 @@ public class SocialSecurityServiceImpl implements SocialSecurityService {
         //在存储
         if (null != cmd.getDetailIds()) {
             for (Long detailId : cmd.getDetailIds()) {
-                OrganizationMemberDetails detail = organizationProvider.findOrganizationMemberDetailsByDetailId(detailId);
-                if (null != cmd.getAccumulationFundPayment()) {
-                    if (NormalFlag.YES != NormalFlag.fromCode(detail.getAccumulationFundStatus())) {
-                        increseMemberDetail(detail, AccumOrSocial.ACCUM);
+                this.coordinationProvider.getNamedLock(CoordinationLocks.SOCIAL_SECURITY_INCRESE.getCode() + detailId).enter(() -> {
+
+                    OrganizationMemberDetails detail = organizationProvider.findOrganizationMemberDetailsByDetailId(detailId);
+                    if (null != cmd.getAccumulationFundPayment()) {
+                        if (NormalFlag.YES != NormalFlag.fromCode(detail.getAccumulationFundStatus())) {
+                            increseMemberDetail(detail, AccumOrSocial.ACCUM);
+                        }
+                        // 保存setting表数据
+                        saveSocialSecuritySettings(cmd.getAccumulationFundPayment(), detailId, AccumOrSocial.ACCUM.getCode());
+                        // 保存当月payments数据
+                        saveSocialSecurityPayment(cmd.getAccumulationFundPayment(), detailId, NormalFlag.NO.getCode(), AccumOrSocial.ACCUM.getCode());
                     }
-                    // 保存setting表数据
-                    saveSocialSecuritySettings(cmd.getAccumulationFundPayment(), detailId, AccumOrSocial.ACCUM.getCode());
-                    // 保存当月payments数据
-                    saveSocialSecurityPayment(cmd.getAccumulationFundPayment(), detailId, NormalFlag.NO.getCode(), AccumOrSocial.ACCUM.getCode());
-                }
-                if (null != cmd.getSocialSecurityPayment()) {
-                    if (NormalFlag.YES != NormalFlag.fromCode(detail.getSocialSecurityStatus())) {
-                        increseMemberDetail(detail, AccumOrSocial.SOCAIL);
+                    if (null != cmd.getSocialSecurityPayment()) {
+                        if (NormalFlag.YES != NormalFlag.fromCode(detail.getSocialSecurityStatus())) {
+                            increseMemberDetail(detail, AccumOrSocial.SOCAIL);
+                        }
+                        // 保存setting表数据
+                        saveSocialSecuritySettings(cmd.getSocialSecurityPayment(), detailId, AccumOrSocial.SOCAIL.getCode());
+                        // 保存当月payments数据
+                        saveSocialSecurityPayment(cmd.getSocialSecurityPayment(), detailId, NormalFlag.NO.getCode(), AccumOrSocial.SOCAIL.getCode());
                     }
-                    // 保存setting表数据
-                    saveSocialSecuritySettings(cmd.getSocialSecurityPayment(), detailId, AccumOrSocial.SOCAIL.getCode());
-                    // 保存当月payments数据
-                    saveSocialSecurityPayment(cmd.getSocialSecurityPayment(), detailId, NormalFlag.NO.getCode(), AccumOrSocial.SOCAIL.getCode());
-                }
+                    return null;
+                });
             }
         }
     }
