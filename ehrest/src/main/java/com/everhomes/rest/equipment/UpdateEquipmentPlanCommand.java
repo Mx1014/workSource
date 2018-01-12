@@ -53,6 +53,8 @@ public class UpdateEquipmentPlanCommand {
 
     private Integer namespaceId;
 
+    private Long inspectionCategoryId;
+
     @ItemType(EquipmentStandardRelationDTO.class)
     private List<EquipmentStandardRelationDTO> equipmentStandardRelations;
 
@@ -170,6 +172,14 @@ public class UpdateEquipmentPlanCommand {
 
     public void setNamespaceId(Integer namespaceId) {
         this.namespaceId = namespaceId;
+    }
+
+    public Long getInspectionCategoryId() {
+        return inspectionCategoryId;
+    }
+
+    public void setInspectionCategoryId(Long inspectionCategoryId) {
+        this.inspectionCategoryId = inspectionCategoryId;
     }
 
     @Override
