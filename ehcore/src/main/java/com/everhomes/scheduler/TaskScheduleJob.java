@@ -109,7 +109,7 @@ public class TaskScheduleJob extends QuartzJobBean {
 
         } catch (Exception e) {
             //1、更新任务状态为失败
-            taskService.updateTaskStatus(taskId, TaskStatus.FAIL.getCode(),  "unexpected exception.");
+//            taskService.updateTaskStatus(taskId, TaskStatus.FAIL.getCode(),  "unexpected exception.");
             e.printStackTrace();
         }
     }
