@@ -49,6 +49,12 @@ public class DomainServiceImpl implements DomainService {
         return dto;
     }
 
+
+    @Override
+    public Domain findDomainByNamespaceId(Integer namespaceId){
+        return domainProvider.findDomainByNamespaceId(namespaceId);
+    }
+
     /**
      * 用于测试
      * @return
