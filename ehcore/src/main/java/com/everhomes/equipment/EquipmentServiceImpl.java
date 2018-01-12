@@ -187,6 +187,7 @@ import com.everhomes.rest.quality.OwnerType;
 import com.everhomes.rest.quality.ProcessType;
 import com.everhomes.rest.quality.QualityGroupType;
 import com.everhomes.rest.quality.QualityServiceErrorCode;
+import com.everhomes.rest.repeat.RepeatServiceErrorCode;
 import com.everhomes.rest.repeat.TimeRangeDTO;
 import com.everhomes.rest.user.MessageChannelType;
 import com.everhomes.rest.user.UserServiceErrorCode;
@@ -5371,8 +5372,10 @@ private void checkUserPrivilege(Long orgId, Long privilegeId, Long communityId) 
 		plan.setCreatorUid(user.getId());
 		plan.setNamespaceId(cmd.getNamespaceId());
 		if (cmd.getEquipmentStandardRelations() == null || cmd.getEquipmentStandardRelations().size() == 0
-				|| cmd.getRepeatSettings() ==null) {
-			plan.setStatus(EquipmentPlanStatus.WAITTING_FOR_STARTING.getCode());
+				|| cmd.getRepeatSettings() == null) {
+			throw RuntimeErrorException.errorWith(EquipmentServiceErrorCode.SCOPE,
+					RepeatServiceErrorCode.ERROR_REPEAT_SETTING_NOT_EXIST,
+					"计划周期为空");
 		} else {
 			plan.setStatus(EquipmentPlanStatus.WATTING_FOR_APPOVING.getCode());
 		}
@@ -5392,20 +5395,22 @@ private void checkUserPrivilege(Long orgId, Long privilegeId, Long communityId) 
 		equipmentPlanSearcher.feedDoc(plan);
 		//创建计划巡检对象标准关联
 		List<EquipmentStandardRelationDTO> equipmentStandardRelation = new ArrayList<>();
-		for (EquipmentStandardRelationDTO relation : cmd.getEquipmentStandardRelations()) {
-			EquipmentInspectionEquipmentPlanMap equipmentPlanMap = new EquipmentInspectionEquipmentPlanMap();
-			equipmentPlanMap.setDefaultOrder(relation.getOrder());
-			equipmentPlanMap.setNamespaceId(cmd.getNamespaceId());
-			equipmentPlanMap.setOwnerId(cmd.getOwnerId());
-			equipmentPlanMap.setOwnerType(cmd.getOwnerType());
-			equipmentPlanMap.setPlanId(createdPlan.getId());
-			equipmentPlanMap.setTargetId(cmd.getTargetId());
-			equipmentPlanMap.setTargetType(cmd.getTargetType());
-			equipmentPlanMap.setStandardId(relation.getStandardId());
-			equipmentPlanMap.setEquimentId(relation.getTargetId());
+		if (cmd.getEquipmentStandardRelations() != null && cmd.getEquipmentStandardRelations().size() > 0) {
+			for (EquipmentStandardRelationDTO relation : cmd.getEquipmentStandardRelations()) {
+				EquipmentInspectionEquipmentPlanMap equipmentPlanMap = new EquipmentInspectionEquipmentPlanMap();
+				equipmentPlanMap.setDefaultOrder(relation.getOrder());
+				equipmentPlanMap.setNamespaceId(cmd.getNamespaceId());
+				equipmentPlanMap.setOwnerId(cmd.getOwnerId());
+				equipmentPlanMap.setOwnerType(cmd.getOwnerType());
+				equipmentPlanMap.setPlanId(createdPlan.getId());
+				equipmentPlanMap.setTargetId(cmd.getTargetId());
+				equipmentPlanMap.setTargetType(cmd.getTargetType());
+				equipmentPlanMap.setStandardId(relation.getStandardId());
+				equipmentPlanMap.setEquimentId(relation.getTargetId());
 
-			equipmentProvider.createEquipmentPlanMaps(equipmentPlanMap);
-			equipmentStandardRelation.add(relation);
+				equipmentProvider.createEquipmentPlanMaps(equipmentPlanMap);
+				equipmentStandardRelation.add(relation);
+			}
 		}
 			createdPlan.setEquipmentStandardRelations(equipmentStandardRelation);
 		//巡检计划增加审批和执行人员
