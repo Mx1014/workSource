@@ -5377,7 +5377,7 @@ private void checkUserPrivilege(Long orgId, Long privilegeId, Long communityId) 
 			plan.setStatus(EquipmentPlanStatus.WATTING_FOR_APPOVING.getCode());
 		}
 		//创建巡检计划的执行周期
-		RepeatSettings repeatSettings = plan.getRepeatSettings();
+		RepeatSettings repeatSettings = ConvertHelper.convert(cmd.getRepeatSettings(), RepeatSettings.class);
 		repeatService.createRepeatSettings(repeatSettings);
 		plan.setRepeatSettingId(repeatSettings.getId());
 
