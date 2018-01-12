@@ -18,7 +18,6 @@ import com.everhomes.naming.NameMapper;
 import com.everhomes.organization.*;
 import com.everhomes.region.Region;
 import com.everhomes.region.RegionProvider;
-import com.everhomes.archives.ArchivesUtil;
 import com.everhomes.rest.common.ImportFileResponse;
 import com.everhomes.rest.filedownload.TaskRepeatFlag;
 import com.everhomes.rest.filedownload.TaskType;
@@ -668,32 +667,36 @@ public class SocialSecurityServiceImpl implements SocialSecurityService {
                 }
             }
         }
+        Set<Long> detailIds = new HashSet<>();
+        detailIds.add(cmd.getDetailId());
+        List<SocialSecuritySetting> ssSettings = socialSecuritySettingProvider.listSocialSecuritySetting(detailIds, AccumOrSocial.SOCAIL);
+        List<SocialSecuritySetting> afSettings = socialSecuritySettingProvider.listSocialSecuritySetting(detailIds, AccumOrSocial.ACCUM);
         if (ssPayments.size() == 0) {
             response.setPayCurrentSocialSecurityFlag(NormalFlag.NO.getCode());
         } else {
             response.setPayCurrentSocialSecurityFlag(NormalFlag.YES.getCode());
-            response.setSocialSecurityPayment(processSocialSecurityPaymentDetailDTO(ssPayments));
         }
+        response.setSocialSecurityPayment(processSocialSecurityPaymentDetailDTO(ssSettings));
         //社保补缴
         if (ssafterPayments.size() == 0) {
             response.setAfterPaySocialSecurityFlag(NormalFlag.NO.getCode());
         } else {
             response.setAfterPaySocialSecurityFlag(NormalFlag.YES.getCode());
-            response.setAfterSocialSecurityPayment(processSocialSecurityPaymentDetailDTO(ssafterPayments));
+            response.setAfterSocialSecurityPayment(processSocialSecurityPaymentDetailDTO(ssSettings));
         }
         //公积金本月缴费
         if (afPayments.size() == 0) {
             response.setPayCurrentAccumulationFundFlag(NormalFlag.NO.getCode());
         } else {
             response.setPayCurrentAccumulationFundFlag(NormalFlag.YES.getCode());
-            response.setAccumulationFundPayment(processSocialSecurityPaymentDetailDTO(afPayments));
         }
+        response.setAccumulationFundPayment(processSocialSecurityPaymentDetailDTO(afSettings));
         //公积金补缴
         if (afafterPayments.size() == 0) {
             response.setAfterPayAccumulationFundFlag(NormalFlag.NO.getCode());
         } else {
             response.setAfterPayAccumulationFundFlag(NormalFlag.YES.getCode());
-            response.setAfterAccumulationFundPayment(processSocialSecurityPaymentDetailDTO(afafterPayments));
+            response.setAfterAccumulationFundPayment(processSocialSecurityPaymentDetailDTO(afSettings));
         }
         return response;
     }
@@ -703,26 +706,30 @@ public class SocialSecurityServiceImpl implements SocialSecurityService {
 //		return dto;
 //	}
 
-    private SocialSecurityPaymentDetailDTO processSocialSecurityPaymentDetailDTO(List<SocialSecurityPayment> payments) {
+    private SocialSecurityPaymentDetailDTO processSocialSecurityPaymentDetailDTO(List<SocialSecuritySetting> settings) {
+        if (null == settings || settings.size() == 0) {
+            return null;
+        }
         SocialSecurityPaymentDetailDTO dto = new SocialSecurityPaymentDetailDTO();
-        dto.setCityId(payments.get(0).getCityId());
+        dto.setCityId(settings.get(0).getCityId());
         Region city = regionProvider.findRegionById(dto.getCityId());
         if (null != city) dto.setCityName(city.getName());
-        dto.setHouseholdType(payments.get(0).getHouseholdType());
-        SocialSecuritySetting setting = socialSecuritySettingProvider.listSocialSecuritySetting(payments.get(0).getDetailId()).get(0);
-        dto.setRadix(setting.getRadix());
-        dto.setItems(payments.stream().map(this::processSocialSecurityItemDTO).collect(Collectors.toList()));
+        dto.setHouseholdType(settings.get(0).getHouseholdType());
+        dto.setRadix(settings.get(0).getRadix());
+        dto.setItems(settings.stream().map(this::processSocialSecurityItemDTO).collect(Collectors.toList()));
         return dto;
     }
 
-    private SocialSecurityItemDTO processSocialSecurityItemDTO(SocialSecurityPayment r) {
-        SocialSecurityItemDTO dto = ConvertHelper.convert(r, SocialSecurityItemDTO.class);
-        SocialSecurityBase base = socialSecurityBaseProvider.findSocialSecurityBaseByCondition(r.getCityId(), r.getHouseholdType(), r.getAccumOrSocail(), r.getPayItem());
+    private SocialSecurityItemDTO processSocialSecurityItemDTO(SocialSecuritySetting setting) {
+        SocialSecurityItemDTO dto = ConvertHelper.convert(setting, SocialSecurityItemDTO.class);
+        SocialSecurityBase base = socialSecurityBaseProvider.findSocialSecurityBaseByCondition(setting.getCityId(), setting.getHouseholdType(),
+                setting.getAccumOrSocail(), setting.getPayItem());
         if (null != base) {
             copyRadixAndRatio(dto, base);
         }
         return dto;
     }
+ 
 
     /**
      * 把基础规则数据赋值给itemDTO
