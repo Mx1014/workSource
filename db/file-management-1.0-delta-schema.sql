@@ -28,6 +28,26 @@ CREATE TABLE `eh_file_management_catalog_scopes` (
   PRIMARY KEY (`id`)
 ) ENGINE = INNODB DEFAULT CHARSET = utf8mb4 ;
 
+-- DROP TABLE eh_file_management_contents;
+CREATE TABLE `eh_file_management_contents` (
+  `id` BIGINT,
+  `namespace_id` INT NOT NULL DEFAULT 0,
+  `owner_id` BIGINT,
+  `owner_type` VARCHAR (64),
+  `catalog_id` BIGINT COMMENT 'the id of the catalog',
+  `name` VARCHAR(256) NOT NULL COMMENT 'the name of the content',
+  `size` INT NOT NULL COMMENT 'the size of the content',
+  `parent_id` BIGINT COMMENT 'the parent id of the folder',
+  `content_type` VARCHAR(32) COMMENT 'file, folder',
+  `content_uri` VARCHAR(2048) COMMENT 'the uri of the content',
+  `status` TINYINT NOT NULL DEFAULT 1 '0-invalid, 1-valid',
+  `creator_uid` BIGINT  DEFAULT 0,
+  `create_time` DATETIME,
+  `operator_uid` BIGINT,
+  `update_time` DATETIME,
+  PRIMARY KEY (`id`)
+) ENGINE = INNODB DEFAULT CHARSET = utf8mb4 ;
+
 -- end by nan.rong
 
 

@@ -7,26 +7,26 @@ import java.util.List;
 
 /**
  * <ul>
- * <li>catalogId: 目录id</li>
- * <li>scopes: 选择对象列表 参考{@link com.everhomes.rest.filemanagement.FileCatalogScopeDTO}</li>
+ * <li>nextPageAnchor: 下一页锚点</li>
+ * <li>scopes: 可见人员 参考{@link com.everhomes.rest.filemanagement.FileCatalogScopeDTO}</li>
  * </ul>
  */
-public class AddFileCatalogScopesCommand {
+public class ListFielCatalogScopeResponse {
 
-    private Long catalogId;
+    private Long nextPageAnchor;
 
     @ItemType(FileCatalogScopeDTO.class)
     private List<FileCatalogScopeDTO> scopes;
 
-    public AddFileCatalogScopesCommand() {
+    public ListFielCatalogScopeResponse() {
     }
 
-    public Long getCatalogId() {
-        return catalogId;
+    public Long getNextPageAnchor() {
+        return nextPageAnchor;
     }
 
-    public void setCatalogId(Long catalogId) {
-        this.catalogId = catalogId;
+    public void setNextPageAnchor(Long nextPageAnchor) {
+        this.nextPageAnchor = nextPageAnchor;
     }
 
     public List<FileCatalogScopeDTO> getScopes() {

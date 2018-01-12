@@ -15,4 +15,15 @@ public interface FileManagementService {
     FileCatalogDTO listFileCatalogs(ListFileCatalogsCommand cmd);
 
     List<FileCatalogDTO> addFileCatalogScopes(AddFileCatalogScopesCommand cmd);
+
+    void deleteFileCatalogScopes(FileCatalogScopesIdCommand cmd);
+
+    void enableFileCatalogScopeDownload(FileCatalogScopesIdCommand cmd);
+
+    void disableFileCatalogScopeDownload(FileCatalogScopesIdCommand cmd);
+
+    ListFielCatalogScopeResponse listFileCatalogScopes(FileCatalogIdCommand cmd);
+
+    FileContentDTO addFileContent(AddFileContentCommand cmd);
+
 }

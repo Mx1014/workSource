@@ -87,4 +87,74 @@ public class FileManagementController extends ControllerBase {
         response.setErrorDescription("OK");
         return response;
     }
+
+    /**
+     * <b>URL: /fileManagement/deleteFileCatalogScopes</b>
+     * <p>2-2.删除目录可见人员</p>
+     */
+    @RequestMapping("deleteFileCatalogScopes")
+    @RestReturn(value = String.class)
+    public RestResponse deleteFileCatalogScopes(FileCatalogScopesIdCommand cmd) {
+        fileManagementService.deleteFileCatalogScopes(cmd);
+        RestResponse response = new RestResponse();
+        response.setErrorCode(ErrorCodes.SUCCESS);
+        response.setErrorDescription("OK");
+        return response;
+    }
+
+    /**
+     * <b>URL: /fileManagement/enableFileCatalogScopeDownload</b>
+     * <p>2-3.添加人员下载权限</p>
+     */
+    @RequestMapping("enableFileCatalogScopeDownload")
+    @RestReturn(value = String.class)
+    public RestResponse enableFileCatalogScopeDownload(FileCatalogScopesIdCommand cmd) {
+        fileManagementService.enableFileCatalogScopeDownload(cmd);
+        RestResponse response = new RestResponse();
+        response.setErrorCode(ErrorCodes.SUCCESS);
+        response.setErrorDescription("OK");
+        return response;
+    }
+
+    /**
+     * <b>URL: /fileManagement/disableFileCatalogScopeDownload</b>
+     * <p>2-4.取消人员下载权限</p>
+     */
+    @RequestMapping("disableFileCatalogScopeDownload")
+    @RestReturn(value = String.class)
+    public RestResponse disableFileCatalogScopeDownload(FileCatalogScopesIdCommand cmd) {
+        fileManagementService.disableFileCatalogScopeDownload(cmd);
+        RestResponse response = new RestResponse();
+        response.setErrorCode(ErrorCodes.SUCCESS);
+        response.setErrorDescription("OK");
+        return response;
+    }
+
+    /**
+     * <b>URL: /fileManagement/listFileCatalogScopes</b>
+     * <p>2-6.查看目录可见人员</p>
+     */
+    @RequestMapping("listFileCatalogScopes")
+    @RestReturn(value = ListFielCatalogScopeResponse.class)
+    public RestResponse listFileCatalogScopes(FileCatalogIdCommand cmd) {
+        ListFielCatalogScopeResponse res = fileManagementService.listFileCatalogScopes(cmd);
+        RestResponse response = new RestResponse(res);
+        response.setErrorCode(ErrorCodes.SUCCESS);
+        response.setErrorDescription("OK");
+        return response;
+    }
+
+    /**
+     * <b>URL: /fileManagement/addFileContent</b>
+     * <p>3-1.新增文件、文件夹</p>
+     */
+    @RequestMapping("addFileContent")
+    @RestReturn(value = FileContentDTO.class)
+    public RestResponse addFileContent(AddFileContentCommand cmd) {
+        FileContentDTO res = fileManagementService.addFileContent(cmd);
+        RestResponse response = new RestResponse(res);
+        response.setErrorCode(ErrorCodes.SUCCESS);
+        response.setErrorDescription("OK");
+        return response;
+    }
 }
