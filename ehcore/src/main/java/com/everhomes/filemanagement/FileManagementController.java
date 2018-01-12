@@ -157,4 +157,18 @@ public class FileManagementController extends ControllerBase {
         response.setErrorDescription("OK");
         return response;
     }
+
+    /**
+     * <b>URL: /fileManagement/deleteFileContents</b>
+     * <p>3-2.删除文件、文件夹</p>
+     */
+    @RequestMapping("deleteFileContents")
+    @RestReturn(value = String.class)
+    public RestResponse deleteFileContents(DeleteFileContentCommand cmd) {
+        fileManagementService.deleteFileContents(cmd);
+        RestResponse response = new RestResponse();
+        response.setErrorCode(ErrorCodes.SUCCESS);
+        response.setErrorDescription("OK");
+        return response;
+    }
 }

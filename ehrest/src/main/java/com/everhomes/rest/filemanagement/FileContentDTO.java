@@ -1,4 +1,119 @@
 package com.everhomes.rest.filemanagement;
 
+import com.everhomes.util.StringHelper;
+
+import java.sql.Timestamp;
+
+/**
+ * <ul>
+ * <li>id: 内容id</li>
+ * <li>catalogId: 所属目录id</li>
+ * <li>name: 名称</li>
+ * <li>size: 大小</li>
+ * <li>parentId: 父级id</li>
+ * <li>contentType: 内容类型</li>
+ * <li>contentUri: 内容uri</li>
+ * <li>contentUrl: 内容url(下载链接)</li>
+ * <li>createTime: 创建时间</li>
+ * </ul>
+ */
 public class FileContentDTO {
+
+    private Long id;
+
+    private Long catalogId;
+
+    private String name;
+
+    private Integer size;
+
+    private Long parentId;
+
+    private String contentType;
+
+    private String contentUri;
+
+    private String contentUrl;
+
+    private Timestamp createTime;
+
+    public FileContentDTO() {
+    }
+
+    public Long getId() {
+        return id;
+    }
+
+    public void setId(Long id) {
+        this.id = id;
+    }
+
+    public Long getCatalogId() {
+        return catalogId;
+    }
+
+    public void setCatalogId(Long catalogId) {
+        this.catalogId = catalogId;
+    }
+
+    public String getName() {
+        return name;
+    }
+
+    public void setName(String name) {
+        this.name = name;
+    }
+
+    public Integer getSize() {
+        return size;
+    }
+
+    public void setSize(Integer size) {
+        this.size = size;
+    }
+
+    public Long getParentId() {
+        return parentId;
+    }
+
+    public void setParentId(Long parentId) {
+        this.parentId = parentId;
+    }
+
+    public String getContentType() {
+        return contentType;
+    }
+
+    public void setContentType(String contentType) {
+        this.contentType = contentType;
+    }
+
+    public String getContentUri() {
+        return contentUri;
+    }
+
+    public void setContentUri(String contentUri) {
+        this.contentUri = contentUri;
+    }
+
+    public String getContentUrl() {
+        return contentUrl;
+    }
+
+    public void setContentUrl(String contentUrl) {
+        this.contentUrl = contentUrl;
+    }
+
+    public Timestamp getCreateTime() {
+        return createTime;
+    }
+
+    public void setCreateTime(Timestamp createTime) {
+        this.createTime = createTime;
+    }
+
+    @Override
+    public String toString() {
+        return StringHelper.toJsonString(this);
+    }
 }

@@ -26,4 +26,6 @@ public interface FileManagementService {
 
     FileContentDTO addFileContent(AddFileContentCommand cmd);
 
+    void deleteFileContents(DeleteFileContentCommand cmd);
+
 }

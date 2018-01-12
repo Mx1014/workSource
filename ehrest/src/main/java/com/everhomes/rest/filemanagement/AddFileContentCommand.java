@@ -77,7 +77,6 @@ public class AddFileContentCommand {
         this.contentUri = contentUri;
     }
 
-
     @Override
     public String toString() {
         return StringHelper.toJsonString(this);

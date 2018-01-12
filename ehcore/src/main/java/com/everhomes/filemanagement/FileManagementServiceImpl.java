@@ -56,4 +56,9 @@ public class FileManagementServiceImpl implements  FileManagementService{
     public FileContentDTO addFileContent(AddFileContentCommand cmd) {
         return null;
     }
+
+    @Override
+    public void deleteFileContents(DeleteFileContentCommand cmd) {
+
+    }
 }
