@@ -2472,7 +2472,7 @@ public class PropertyMgrServiceImpl implements PropertyMgrService {
 		Map<Long, Family> familyMap = familyProvider.mapFamilyByAddressIds(aptIdList);
 		
 		//处理每个门牌入住的人数
-		Map<Long, Integer> ownerCountMap = propertyMgrProvider.mapOrganizationOwnerCountByAddressIds(UserContext.getCurrentNamespaceId(), aptIdList);
+		Map<Long, Integer> ownerCountMap = propertyMgrProvider.mapOrganizationOwnerCountByAddressIds(UserContext.getCurrentNamespaceId(cmd.getNamespaceId()), aptIdList);
 		
 		//处理小区地址关联表
 		Map<Long, CommunityAddressMapping> communityAddressMappingMap = propertyMgrProvider.mapAddressMappingByAddressIds(aptIdList);
@@ -5856,7 +5856,7 @@ public class PropertyMgrServiceImpl implements PropertyMgrService {
             throw errorWith(AddressServiceErrorCode.SCOPE, AddressServiceErrorCode.ERROR_ADDRESS_NOT_EXIST,
                     "The address %s is not exist.", cmd.getAddressId());
         }
-        Integer namespaceId = currentNamespaceId();
+        Integer namespaceId = cmd.getNamespaceId();
         List<OrganizationOwnerAddress> ownerAddressList = propertyMgrProvider.listOrganizationOwnerAddressByAddressId(
                 namespaceId, address.getId());
 
@@ -6011,7 +6011,7 @@ public class PropertyMgrServiceImpl implements PropertyMgrService {
 			dto.setOrgOwnerType(ownerType != null ? ownerType.getDisplayName() : null);
 			return dto;
 		};
-		return propertyMgrProvider.listOrganizationOwnersByAddressId(user.getNamespaceId(), address.getId(), mapper);
+		return propertyMgrProvider.listOrganizationOwnersByAddressId(address.getNamespaceId(), address.getId(), mapper);
 	}
 
     @Override
