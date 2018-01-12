@@ -19,7 +19,8 @@ CREATE TABLE `eh_portal_version_users` (
   `namespace_id` int(11) NOT NULL,
   `version_id` bigint(20) DEFAULT NULL,
   `create_time` datetime DEFAULT NULL,
-  PRIMARY KEY (`id`)
+  PRIMARY KEY (`id`),
+  KEY `u_user_id` (`user_id`)
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4;
 
 

@@ -40,7 +40,7 @@ public class PortalVersionProviderImpl implements PortalVersionProvider {
 		DSLContext context = dbProvider.getDslContext(AccessSpec.readOnly());
 		EhPortalVersionsDao dao = new EhPortalVersionsDao(context.configuration());
 		dao.insert(portalVersion);
-		DaoHelper.publishDaoAction(DaoAction.CREATE, EhPortalItems.class, null);
+		DaoHelper.publishDaoAction(DaoAction.CREATE, EhPortalVersions.class, null);
 	}
 
 	@Override
@@ -48,7 +48,7 @@ public class PortalVersionProviderImpl implements PortalVersionProvider {
 		DSLContext context = dbProvider.getDslContext(AccessSpec.readOnly());
 		EhPortalVersionsDao dao = new EhPortalVersionsDao(context.configuration());
 		dao.update(portalVersion);
-		DaoHelper.publishDaoAction(DaoAction.MODIFY, EhPortalItems.class, null);
+		DaoHelper.publishDaoAction(DaoAction.MODIFY, EhPortalVersions.class, null);
 	}
 
 	@Override
@@ -67,7 +67,7 @@ public class PortalVersionProviderImpl implements PortalVersionProvider {
 		DSLContext context = dbProvider.getDslContext(AccessSpec.readOnly());
 		SelectQuery<EhPortalVersionsRecord> query = context.selectQuery(Tables.EH_PORTAL_VERSIONS);
 		query.addConditions(Tables.EH_PORTAL_VERSIONS.NAMESPACE_ID.eq(namespaceId));
-		query.addOrderBy(Tables.EH_PORTAL_VERSIONS.ID.desc());
+		query.addOrderBy(Tables.EH_PORTAL_VERSIONS.BIG_VERSION.desc());
 		query.addLimit(1);
 		return query.fetchAnyInto(PortalVersion.class);
 	}

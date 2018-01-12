@@ -11,6 +11,8 @@ import com.everhomes.domain.Domain;
 import com.everhomes.domain.DomainService;
 import com.everhomes.messaging.MessagingKickoffService;
 import com.everhomes.namespace.Namespace;
+import com.everhomes.portal.PortalVersionUser;
+import com.everhomes.portal.PortalVersionUserProvider;
 import com.everhomes.rest.app.AppConstants;
 import com.everhomes.rest.domain.DomainDTO;
 import com.everhomes.rest.user.*;
@@ -70,6 +72,9 @@ public class WebRequestInterceptor implements HandlerInterceptor {
 
     @Autowired
     private DomainService domainService;
+
+    @Autowired
+    private PortalVersionUserProvider portalVersionUserProvider;
 
     public WebRequestInterceptor() {
     }
@@ -463,6 +468,11 @@ public class WebRequestInterceptor implements HandlerInterceptor {
 
         User user = this.userProvider.findUserById(login.getUserId());
         context.setUser(user);
+
+        PortalVersionUser portalVersionUserByUser = this.portalVersionUserProvider.findPortalVersionUserByUserId(login.getUserId());
+        if(portalVersionUserByUser != null){
+            context.setPreviewPortalVersionId(portalVersionUserByUser.getVersionId());
+        }
     }
 
     private void setupAnnonymousUserContext() {

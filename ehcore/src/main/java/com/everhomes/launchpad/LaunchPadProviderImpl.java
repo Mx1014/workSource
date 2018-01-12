@@ -14,6 +14,7 @@ import com.everhomes.server.schema.tables.daos.EhItemServiceCategriesDao;
 import com.everhomes.server.schema.tables.pojos.*;
 import com.everhomes.server.schema.tables.records.EhItemServiceCategriesRecord;
 import com.everhomes.server.schema.tables.records.EhLaunchPadItemsRecord;
+import com.everhomes.user.UserContext;
 import org.jooq.*;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -422,6 +423,10 @@ public class LaunchPadProviderImpl implements LaunchPadProvider {
 		if(!StringUtils.isEmpty(name)){
 			query.where(Tables.EH_LAUNCH_PAD_LAYOUTS.NAME.eq(name));
 		}
+
+		//增加版本功能，默认找正式版本，有特别标识的找该版本功能
+		query.where(getPreviewPortalVersionCondition());
+
 		query.fetch().map(r -> {
 			list.add(ConvertHelper.convert(r,LaunchPadLayout.class));
 			return null;
@@ -712,5 +717,14 @@ public class LaunchPadProviderImpl implements LaunchPadProvider {
 		}
 
 		return null;
+	}
+
+	private Condition getPreviewPortalVersionCondition(){
+		Condition condition = Tables.EH_LAUNCH_PAD_LAYOUTS.PREVIEW_PORTAL_VERSION_ID.isNull();
+
+		if(UserContext.current().getPreviewPortalVersionId() != null){
+			condition = Tables.EH_LAUNCH_PAD_LAYOUTS.PREVIEW_PORTAL_VERSION_ID.eq(UserContext.current().getPreviewPortalVersionId());
+		}
+		return condition;
 	}
 }

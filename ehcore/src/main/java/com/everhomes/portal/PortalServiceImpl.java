@@ -1828,7 +1828,7 @@ public class PortalServiceImpl implements PortalService {
 				LOGGER.info("syncLaunchPadData namespaceId={}  start", dto.getId());
 				dbProvider.execute((status -> {
 					//获取一个版本号
-					PortalVersion portalVersion = getNewPortalVersion(dto.getId(), (byte) 1);
+					PortalVersion portalVersion = cteatePortalVersion(dto.getId());
 
 					for (Tuple<String, String> t: list) {
 						syncLayout(dto.getId(), t.first(), t.second(), portalVersion);
@@ -1848,35 +1848,54 @@ public class PortalServiceImpl implements PortalService {
 
 	}
 
-	private PortalVersion getNewPortalVersion(Integer namespaceId, Byte syncFlag){
+	/**
+	 * 基于已发布的最新的版本产生一个新大的版本号，一般用于同步和发布
+	 * @param namespaceId
+	 * @return
+	 */
+	private PortalVersion cteatePortalVersion(Integer namespaceId){
 
-		PortalVersion maxVersion = portalVersionProvider.findMaxVersion(namespaceId);
+		PortalVersion oldVersion = portalVersionProvider.findMaxVersion(namespaceId);
 		PortalVersion newVersion = new PortalVersion();
-		newVersion.setStatus(PortalVersionStatus.INIT.getCode());
 		newVersion.setNamespaceId(namespaceId);
-		if(maxVersion == null){
-			newVersion.setSyncVersion(1);
-			newVersion.setPublishVersion(0);
-			newVersion.setSyncTime(new Timestamp(System.currentTimeMillis()));
+
+		newVersion.setStatus(PortalVersionStatus.INIT.getCode());
+		newVersion.setMinorVersion(0);
+		newVersion.setCreateTime(new Timestamp(System.currentTimeMillis()));
+		newVersion.setSyncTime(new Timestamp(System.currentTimeMillis()));
+
+		if(oldVersion != null){
+			newVersion.setBigVersion(oldVersion.getBigVersion() + 1);
+			newVersion.setParentId(oldVersion.getId());
 		}else {
-
-			newVersion.setParentId(maxVersion.getParentId());
-
-			//查看同步还是发布
-			if(syncFlag.byteValue() == 1){
-				newVersion.setSyncVersion(maxVersion.getSyncVersion() + 1);
-				newVersion.setPublishVersion(0);
-				newVersion.setSyncTime(new Timestamp(System.currentTimeMillis()));
-			}else {
-				newVersion.setSyncVersion(maxVersion.getSyncVersion());
-				newVersion.setPublishVersion(maxVersion.getPublishVersion() + 1);
-				newVersion.setSyncTime(maxVersion.getSyncTime());
-			}
+			newVersion.setBigVersion(1);
 		}
 
 		portalVersionProvider.createPortalVersion(newVersion);
 		return newVersion;
 	}
+
+	/**
+	 * 基于大版本产生一个小版本
+	 * @param versionId
+	 * @return
+	 */
+	private PortalVersion cteateSubPortalVersion(Long versionId){
+
+		PortalVersion oldVersion = portalVersionProvider.findPortalVersionById(versionId);
+		PortalVersion newVersion = new PortalVersion();
+		newVersion.setNamespaceId(oldVersion.getNamespaceId());
+		newVersion.setParentId(versionId);
+		newVersion.setBigVersion(oldVersion.getBigVersion());
+		newVersion.setMinorVersion(1);
+		newVersion.setStatus(PortalVersionStatus.INIT.getCode());
+		newVersion.setCreateTime(new Timestamp(System.currentTimeMillis()));
+		newVersion.setSyncTime(new Timestamp(System.currentTimeMillis()));
+
+		portalVersionProvider.createPortalVersion(newVersion);
+		return newVersion;
+	}
+
 
 	private Long copyPortalToNewVersion(Integer namespaceId, Long oldVersionId){
 
@@ -1891,7 +1910,7 @@ public class PortalServiceImpl implements PortalService {
 		Timestamp createTimestamp = new Timestamp(System.currentTimeMillis());
 
 		//1.获取一个新版本
-		PortalVersion newPortalVersion = getNewPortalVersion(namespaceId, (byte) 0);
+		PortalVersion newPortalVersion = cteateSubPortalVersion(oldVersionId);
 
 		//2.复制一份app
 		copyServiceModuleAppToNewVersion(namespaceId, oldVersionId, newPortalVersion.getId());
