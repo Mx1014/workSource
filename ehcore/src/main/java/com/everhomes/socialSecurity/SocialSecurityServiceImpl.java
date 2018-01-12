@@ -1815,7 +1815,7 @@ public class SocialSecurityServiceImpl implements SocialSecurityService {
         Row row = sheet.createRow(sheet.getLastRowNum() + 1);
         int i = -1;
         row.createCell(++i).setCellValue(r.getUserName());
-        row.createCell(++i).setCellValue(dateSF.get().format(r.getEntryDate()));
+        row.createCell(++i).setCellValue(r.getEntryDate() == null ? "":dateSF.get().format(r.getEntryDate()));
         row.createCell(++i).setCellValue(r.getContactToken());
         row.createCell(++i).setCellValue(r.getIdNumber());
         row.createCell(++i).setCellValue(r.getDegree());
@@ -1824,7 +1824,7 @@ public class SocialSecurityServiceImpl implements SocialSecurityService {
         row.createCell(++i).setCellValue(r.getDeptName());
         row.createCell(++i).setCellValue(r.getSocialSecurityNumber());
         row.createCell(++i).setCellValue(r.getProvidentFundNumber());
-        row.createCell(++i).setCellValue(dateSF.get().format(r.getOutWorkDate()));
+        row.createCell(++i).setCellValue(r.getOutWorkDate() == null ? "":dateSF.get().format(r.getOutWorkDate()));
         row.createCell(++i).setCellValue(r.getHouseholdType());
         row.createCell(++i).setCellValue(r.getSocialSecurityCityName());
         row.createCell(++i).setCellValue(r.getPayMonth());
@@ -2251,8 +2251,8 @@ public class SocialSecurityServiceImpl implements SocialSecurityService {
         Row row = sheet.createRow(sheet.getLastRowNum() + 1);
         int i = -1;
         row.createCell(++i).setCellValue(r.getUserName());
-        row.createCell(++i).setCellValue(dateSF.get().format(r.getEntryDate()));
-        row.createCell(++i).setCellValue(dateSF.get().format(r.getOutWorkDate()));
+        row.createCell(++i).setCellValue(r.getEntryDate() == null ? "":dateSF.get().format(r.getEntryDate()));
+        row.createCell(++i).setCellValue(r.getOutWorkDate() == null ? "":dateSF.get().format(r.getOutWorkDate()));
         row.createCell(++i).setCellValue(r.getContactToken());
         row.createCell(++i).setCellValue(r.getIdNumber());
         row.createCell(++i).setCellValue(r.getDegree());
