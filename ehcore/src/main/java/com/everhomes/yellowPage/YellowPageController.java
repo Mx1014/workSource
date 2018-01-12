@@ -467,7 +467,7 @@ public class YellowPageController  extends ControllerBase {
    	 */
    	@RequestMapping("getCategoryIdByEntryId")
    	@RestReturn(value = GetCategoryIdByEntryIdResponse.class)
-   	public RestResponse listServiceAllianceCategories(GetCategoryIdByEntryIdCommand cmd) {
+   	public RestResponse getCategoryIdByEntryId(GetCategoryIdByEntryIdCommand cmd) {
    		return new RestResponse(yellowPageService.getCategoryIdByEntryId(cmd));
    	}
 

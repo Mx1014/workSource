@@ -27,6 +27,7 @@ import com.everhomes.rest.user.MessageChannelType;
 import com.everhomes.rest.user.RequestFieldDTO;
 import com.everhomes.rest.yellowPage.GetRequestInfoResponse;
 import com.everhomes.rest.yellowPage.ServiceAllianceBelongType;
+import com.everhomes.rest.yellowPage.ServiceAllianceWorkFlowStatus;
 import com.everhomes.user.*;
 import com.everhomes.util.RouterBuilder;
 import com.everhomes.util.StringHelper;
@@ -135,43 +136,16 @@ public class ServiceAllianceFlowModuleListener extends GeneralApprovalFlowModule
 				.getFormOriginId());
 		List<PostApprovalFormItem> values = cmd.getValues();
 		List<GeneralFormFieldDTO> fieldDTOs = JSONObject.parseArray(form.getTemplateText(), GeneralFormFieldDTO.class);
-//		PostApprovalFormItem nameVal = getFormFieldDTO(GeneralFormDataSourceType.USER_NAME.getCode(),values);
-//		if(null != nameVal){
-//			GeneralFormFieldDTO dto = getFieldDTO(nameVal.getFieldName(),fieldDTOs); 
-//			contentBuffer.append(dto.getFieldDisplayName());
-//			contentBuffer.append(" : ");
-//			contentBuffer.append(JSON.parseObject(nameVal.getFieldValue(), PostApprovalFormTextValue.class).getText());
-//		}
-//		PostApprovalFormItem contactVal = getFormFieldDTO(GeneralFormDataSourceType.USER_PHONE.getCode(),values);
-//		if(null != contactVal){
-//			if(contentBuffer.length()>1)
-//				contentBuffer.append("\n");
-//			GeneralFormFieldDTO dto = getFieldDTO(contactVal.getFieldName(),fieldDTOs); 
-//			contentBuffer.append(dto.getFieldDisplayName());
-//			contentBuffer.append(" : ");
-//			contentBuffer.append(JSON.parseObject(contactVal.getFieldValue(), PostApprovalFormTextValue.class).getText());
-//		}
-//		PostApprovalFormItem entpriseVal = getFormFieldDTO(GeneralFormDataSourceType.USER_COMPANY.getCode(),values);
-//		if(null != entpriseVal){
-//			if(contentBuffer.length()>1)
-//				contentBuffer.append("\n");
-//			GeneralFormFieldDTO dto = getFieldDTO(entpriseVal.getFieldName(),fieldDTOs); 
-//			contentBuffer.append(dto.getFieldDisplayName());
-//			contentBuffer.append(" : ");
-//			contentBuffer.append(JSON.parseObject(entpriseVal.getFieldValue(), PostApprovalFormTextValue.class).getText());
-//		}
-//		contentBuffer.append("申请类型");
-//		contentBuffer.append(" : ");
-//		contentBuffer.append(ga.getApprovalName());
 		PostApprovalFormItem sourceVal = getFormFieldDTO(GeneralFormDataSourceType.SOURCE_ID.getCode(),values);
 		Long yellowPageId = 0l;
+		ServiceAlliances  yellowPage = null;
 		if(null != sourceVal){
 			if(contentBuffer.length()>1)
 				contentBuffer.append("\n");
 			yellowPageId = Long.valueOf(JSON.parseObject(sourceVal.getFieldValue(), PostApprovalFormTextValue.class).getText());
-			ServiceAlliances  yellowPage = yellowPageProvider.findServiceAllianceById(yellowPageId,null,null); 
+			yellowPage = yellowPageProvider.findServiceAllianceById(yellowPageId,null,null); 
 			ServiceAllianceCategories  parentPage = yellowPageProvider.findCategoryById(yellowPage.getParentId());
-
+			
 			contentBuffer.append("服务名称 : ");
 			contentBuffer.append(yellowPage.getName());
 			flowCase.setTitle(parentPage.getName());
@@ -179,12 +153,20 @@ public class ServiceAllianceFlowModuleListener extends GeneralApprovalFlowModule
 			request.setType(yellowPage.getParentId());
 			
 		}
-//		flowCase.setModuleName(ga.getApprovalName());
 		flowCase.setContent(contentBuffer.toString());
 		
-		//服务联盟加一个申请
+		Byte status = flowCase.getStatus();
+		if(FlowCaseType.fromCode(flowCase.getCaseType()) == FlowCaseType.DUMB){
+			status = ServiceAllianceWorkFlowStatus.NONE.getCode();
+		}
+		//同步申请到es
+		syncRequest(values, request, flowCase,yellowPage,status);
+		//发送消息给相关人员
+		sendMessage(yellowPageId,flowCase);
+	}
+
+	private void syncRequest(List<PostApprovalFormItem> values,ServiceAllianceRequestInfo request,FlowCase flowCase,ServiceAlliances  sa, Byte status) {
 		PostApprovalFormItem organizationVal = getFormFieldDTO(GeneralFormDataSourceType.ORGANIZATION_ID.getCode(),values);
-		
 		User user = this.userProvider.findUserById(flowCase.getApplyUserId());
 		UserIdentifier identifier = userProvider.findClaimedIdentifierByOwnerAndType(user.getId(), IdentifierType.MOBILE.getCode());
 		request.setJumpType(2L);
@@ -193,12 +175,8 @@ public class ServiceAllianceFlowModuleListener extends GeneralApprovalFlowModule
 		request.setCreatorOrganizationId(Long.valueOf(JSON.parseObject(organizationVal.getFieldValue(), PostApprovalFormTextValue.class).getText()));
 		request.setCreatorMobile(identifier.getIdentifierToken());
 		if (EntityType.COMMUNITY.getCode().equals(flowCase.getProjectType()) || "community".equals(flowCase.getProjectType())){
-			// bydengs,修改owner
 	       	request.setOwnerType(ServiceAllianceBelongType.COMMUNITY.getCode());
 	       	request.setOwnerId(flowCase.getProjectId());
-//			request.setOwnerType(EntityType.ORGANIZATIONS.getCode());
-//			List<Organization> communityList = organizationProvider.findOrganizationByCommunityId(flowCase.getProjectId());
-//			request.setOwnerId(communityList.get(0).getId());
 		}else{
 			OrganizationCommunityRequest ocr =organizationProvider.getOrganizationCommunityRequestByOrganizationId(flowCase.getProjectId());
         	if(ocr != null){
@@ -210,11 +188,17 @@ public class ServiceAllianceFlowModuleListener extends GeneralApprovalFlowModule
         	}
 		}
 		request.setFlowCaseId(flowCase.getId());
-		request.setId(flowCase.getId());
 		request.setCreatorUid(UserContext.current().getUser().getId());
+		request.setSecondCategoryId(sa.getCategoryId());
+		request.setSecondCategoryName(sa.getServiceType());
+		request.setSecondCategoryId(sa.getCategoryId());
+		request.setWorkflowStatus(status);
+		request.setId(flowCase.getId());
 		request.setTemplateType("flowCase");
 		serviceAllianceRequestInfoSearcher.feedDoc(request);
+	}
 
+	private void sendMessage(Long yellowPageId, FlowCase flowCase) {
 		//推送消息
 		//给服务公司留的手机号推消息
 		if (yellowPageId!=0) {
@@ -345,6 +329,46 @@ public class ServiceAllianceFlowModuleListener extends GeneralApprovalFlowModule
 		return handler;
 	}
 
+	@Override
+	public void onFlowCaseEnd(FlowCaseState ctx) {
+		syncRequest(ctx);
+	}
+	
+	private void syncRequest(FlowCaseState ctx) {
+		 // 更新状态
+       FlowCase flowCase = ctx.getFlowCase();
+       Byte status = flowCase.getStatus();
+
+       if (status != null) {
+   		ServiceAllianceRequestInfo request = new ServiceAllianceRequestInfo();
+	   	List<GeneralApprovalVal> lists = generalApprovalValProvider.queryGeneralApprovalValsByFlowCaseId(flowCase.getId());
+	    List<PostApprovalFormItem> values = lists.stream().map(r -> {
+	         PostApprovalFormItem value = new PostApprovalFormItem();
+	         value.setFieldName(r.getFieldName());
+	         value.setFieldType(r.getFieldType());
+	         value.setFieldValue(r.getFieldStr3());
+	         return value;
+	    }).collect(Collectors.toList());
+	    PostApprovalFormItem sourceVal = getFormFieldDTO(GeneralFormDataSourceType.SOURCE_ID.getCode(),values);
+   		Long yellowPageId = 0L;
+   		ServiceAlliances  yellowPage = null;
+   		if(null != sourceVal){
+   			yellowPageId = Long.valueOf(JSON.parseObject(sourceVal.getFieldValue(), PostApprovalFormTextValue.class).getText());
+   			yellowPage = yellowPageProvider.findServiceAllianceById(yellowPageId,null,null); 
+   			request.setServiceAllianceId(yellowPageId);
+   			request.setType(yellowPage.getParentId());
+   			
+   		}
+   		syncRequest(values, request, flowCase,yellowPage,status);
+       }
+	
+	}
+	
+	@Override
+	public void onFlowCaseAbsorted(FlowCaseState ctx) {
+//		syncRequest(ctx);
+	}
+	
 	@Override
 	public List<FlowCaseEntity> onFlowCaseDetailRender(FlowCase flowCase, FlowUserType flowUserType) {
 		if (flowCase.getOwnerType()!=null && !FlowOwnerType.GENERAL_APPROVAL.getCode().equals(flowCase.getOwnerType()))
