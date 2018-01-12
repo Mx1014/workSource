@@ -207,7 +207,7 @@ public class EnterpriseCustomerSearcherImpl extends AbstractElasticSearch implem
         FilterBuilder fb = null;
         FilterBuilder nfb = FilterBuilders.termFilter("status", CommonStatus.INACTIVE.getCode());
         fb = FilterBuilders.notFilter(nfb);
-        fb = FilterBuilders.andFilter(fb, FilterBuilders.termFilter("namespaceId", UserContext.getCurrentNamespaceId(cmd.getNamespaceId())));
+        fb = FilterBuilders.andFilter(fb, FilterBuilders.termFilter("namespaceId", cmd.getNamespaceId()));
         fb = FilterBuilders.andFilter(fb, FilterBuilders.termFilter("communityId", cmd.getCommunityId()));
 
         if(cmd.getCustomerCategoryId() != null)
