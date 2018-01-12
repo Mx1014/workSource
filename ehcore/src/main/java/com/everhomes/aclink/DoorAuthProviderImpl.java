@@ -963,7 +963,7 @@ public class DoorAuthProviderImpl implements DoorAuthProvider {
         ListingLocator locator = new ListingLocator();
         long now = DateHelper.currentGMTTime().getTime();
 
-        List<DoorAuth> auths = queryDoorAuth(locator, 1, new ListingQueryBuilderCallback() {
+        List<DoorAuth> auths = queryDoorAuthByTime(locator, 1, new ListingQueryBuilderCallback() {
 
             @Override
             public SelectQuery<? extends Record> buildCondition(ListingLocator locator,

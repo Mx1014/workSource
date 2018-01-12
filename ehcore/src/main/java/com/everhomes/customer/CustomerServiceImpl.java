@@ -2293,6 +2293,7 @@ public class CustomerServiceImpl implements CustomerService {
                                 zjgkOpenService.syncEnterprises("0", null);
                             } else {
                                 Community community = communityProvider.findCommunityById(cmd.getCommunityId());
+//                                LOGGER.debug("syncEnterpriseCustomers community: {}", StringHelper.toJsonString(community));
                                 if(community != null) {
                                     zjgkOpenService.syncEnterprises("0", community.getNamespaceCommunityToken());
                                 }
