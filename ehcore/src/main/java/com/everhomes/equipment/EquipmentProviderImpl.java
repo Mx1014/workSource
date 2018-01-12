@@ -2462,7 +2462,7 @@ public class EquipmentProviderImpl implements EquipmentProvider {
     @Override
     public List<EquipmentInspectionTasks> listEquipmentInspectionTasksUseCache(List<Byte> taskStatus, Long inspectionCategoryId,
                                                                                List<String> targetType, List<Long> targetId, List<Long> executeStandardIds, List<Long> reviewStandardIds,
-                                                                               Integer offset, Integer pageSize, String cacheKey, Byte adminFlag) {
+                                                                               Integer offset, Integer pageSize, String cacheKey, Byte adminFlag,Timestamp lastSyncTime) {
         long startTime = System.currentTimeMillis();
         List<EquipmentInspectionTasks> result = new ArrayList<EquipmentInspectionTasks>();
 
@@ -2540,6 +2540,10 @@ public class EquipmentProviderImpl implements EquipmentProvider {
 
         if (con != null) {
             query.addConditions(con);
+        }
+
+        if(lastSyncTime!=null){
+            query.addConditions(Tables.EH_EQUIPMENT_INSPECTION_TASKS.CREATE_TIME.gt(lastSyncTime));
         }
 
 

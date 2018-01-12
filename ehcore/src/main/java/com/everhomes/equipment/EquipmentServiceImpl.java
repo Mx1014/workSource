@@ -3628,7 +3628,12 @@ private void checkUserPrivilege(Long orgId, Long privilegeId, Long communityId) 
 			return listDelayTasks(cmd);
 		}
 
-		long startTime = System.currentTimeMillis();
+		//long startTime = System.currentTimeMillis();
+		Timestamp lastSyncTime = null;
+		if (cmd.getLastSyncTime() != null) {
+			lastSyncTime = dateStrToTimestamp(cmd.getLastSyncTime());
+		}
+
 		ListEquipmentTasksResponse response = new ListEquipmentTasksResponse();
 		User user = UserContext.current().getUser();
 
@@ -3641,9 +3646,9 @@ private void checkUserPrivilege(Long orgId, Long privilegeId, Long communityId) 
 		}
 		Integer offset = cmd.getPageAnchor().intValue();
 
-		List<EquipmentInspectionTasks> tasks = new ArrayList<EquipmentInspectionTasks>();
-		List<String> targetTypes = new ArrayList<String>();
-		List<Long> targetIds = new ArrayList<Long>();
+		List<EquipmentInspectionTasks> tasks = new ArrayList<>();
+		List<String> targetTypes = new ArrayList<>();
+		List<Long> targetIds = new ArrayList<>();
 		if(cmd.getTargetType() != null)
 			targetTypes.add(cmd.getTargetType());
 		if(cmd.getTargetId() != null)
@@ -3681,7 +3686,7 @@ private void checkUserPrivilege(Long orgId, Long privilegeId, Long communityId) 
 			String cacheKey = convertListEquipmentInspectionTasksCache(cmd.getTaskStatus(), cmd.getInspectionCategoryId(),
 					targetTypes, targetIds, null, null, offset, userId);
 			allTasks = equipmentProvider.listEquipmentInspectionTasksUseCache(cmd.getTaskStatus(), cmd.getInspectionCategoryId(),
-					targetTypes, targetIds, null, null, offset, pageSize + 1, cacheKey, AdminFlag.YES.getCode());
+					targetTypes, targetIds, null, null, offset, pageSize + 1, cacheKey, AdminFlag.YES.getCode(),lastSyncTime);
 
 		}
 		if(!isAdmin) {
@@ -3710,7 +3715,7 @@ private void checkUserPrivilege(Long orgId, Long privilegeId, Long communityId) 
 
 
 			allTasks = equipmentProvider.listEquipmentInspectionTasksUseCache(cmd.getTaskStatus(), cmd.getInspectionCategoryId(),
-					targetTypes, targetIds, executeStandardIds, reviewStandardIds, offset, pageSize + 1, cacheKey, AdminFlag.NO.getCode());
+					targetTypes, targetIds, executeStandardIds, reviewStandardIds, offset, pageSize + 1, cacheKey, AdminFlag.NO.getCode(),lastSyncTime);
 
 
 		}
