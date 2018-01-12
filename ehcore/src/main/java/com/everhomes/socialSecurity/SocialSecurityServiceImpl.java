@@ -1869,7 +1869,7 @@ public class SocialSecurityServiceImpl implements SocialSecurityService {
         row.createCell(++i).setCellValue(checkNullInteger(r.getMedicalCompanyRatio()));
         row.createCell(++i).setCellValue(checkNullBigDecimal(r.getMedicalCompanySum()));
         row.createCell(++i).setCellValue(checkNullBigDecimal(r.getMedicalEmployeeRadix()));
-        row.createCell(++i).setCellValue(checkNullInteger(r.getMedicalEmployeeRatio());
+        row.createCell(++i).setCellValue(checkNullInteger(r.getMedicalEmployeeRatio()));
         row.createCell(++i).setCellValue(checkNullBigDecimal(r.getMedicalEmployeeSum()));
         //工伤
         row.createCell(++i).setCellValue(checkNullBigDecimal(r.getInjuryCompanyRadix()));
