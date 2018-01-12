@@ -1429,6 +1429,9 @@ public class SocialSecurityServiceImpl implements SocialSecurityService {
         socialSecurityDepartmentSummaryProvider.deleteSocialSecurityDptReports(ownerId, month);
         List<Organization> orgs = findOrganizationDpts(ownerId);
         for (Organization dpt : orgs) {
+            if (null == dpt) {
+                continue;
+            }
             calculateSocialSecurityDptReports(dpt, month);
         }
 
