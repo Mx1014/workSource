@@ -5378,6 +5378,12 @@ private void checkUserPrivilege(Long orgId, Long privilegeId, Long communityId) 
 		}
 		//创建巡检计划的执行周期
 		RepeatSettings repeatSettings = ConvertHelper.convert(cmd.getRepeatSettings(), RepeatSettings.class);
+		if(cmd.getRepeatSettings().getStartDate() != null)
+			repeatSettings.setStartDate(new Date(cmd.getRepeatSettings().getStartDate()));
+		if(cmd.getRepeatSettings().getEndDate() != null)
+			repeatSettings.setEndDate(new Date(cmd.getRepeatSettings().getEndDate()));
+
+		repeatSettings.setCreatorUid(user.getId());
 		repeatService.createRepeatSettings(repeatSettings);
 		plan.setRepeatSettingId(repeatSettings.getId());
 
@@ -5456,7 +5462,13 @@ private void checkUserPrivilege(Long orgId, Long privilegeId, Long communityId) 
 
 		//创建巡检计划的执行周期
 		repeatService.deleteRepeatSettingsById(cmd.getRepeatSettings().getId());
-		RepeatSettings repeatSettings = plan.getRepeatSettings();
+		RepeatSettings repeatSettings = ConvertHelper.convert(cmd.getRepeatSettings(), RepeatSettings.class);
+		if(cmd.getRepeatSettings().getStartDate() != null)
+			repeatSettings.setStartDate(new Date(cmd.getRepeatSettings().getStartDate()));
+		if(cmd.getRepeatSettings().getEndDate() != null)
+			repeatSettings.setEndDate(new Date(cmd.getRepeatSettings().getEndDate()));
+
+		repeatSettings.setCreatorUid(UserContext.currentUserId());
 		repeatService.createRepeatSettings(repeatSettings);
 		plan.setRepeatSettingId(repeatSettings.getId());
 		//plan.setPlanMainId(exist.getPlanMainId());
