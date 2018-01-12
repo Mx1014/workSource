@@ -39,3 +39,4 @@ ALTER TABLE `eh_web_menu_scopes` DROP INDEX `u_menu_scope_owner` , ADD UNIQUE IN
 
 ALTER TABLE `eh_launch_pad_layouts` ADD COLUMN `preview_portal_version_id`  bigint(20) NULL COMMENT '预览版本的id，正式版本数据不要配置该数据';
 ALTER TABLE `eh_launch_pad_items` ADD COLUMN `preview_portal_version_id`  bigint(20) NULL COMMENT '预览版本的id，正式版本数据不要配置该数据';
+ALTER TABLE `eh_item_service_categries` ADD COLUMN `preview_portal_version_id`  bigint(20) NULL COMMENT '预览版本的id，正式版本数据不要配置该数据';
