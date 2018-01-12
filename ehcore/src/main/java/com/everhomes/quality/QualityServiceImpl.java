@@ -286,7 +286,7 @@ public class QualityServiceImpl implements QualityService {
 		standard.setDescription(cmd.getDescription());
 		standard.setCreatorUid(user.getId());
 		standard.setOperatorUid(user.getId());
-		standard.setNamespaceId(user.getNamespaceId());
+		standard.setNamespaceId(cmd.getNamespaceId());
 		if(repeat == null) {
 			standard.setRepeatSettingId(0L);
 		} else {
@@ -298,12 +298,13 @@ public class QualityServiceImpl implements QualityService {
 			standard.setTargetType(cmd.getTargetType());
 
 			qualityProvider.createQualityInspectionStandards(standard);
-			createQualityInspectionStandardLogs(standard, QualityInspectionLogProcessType.INSERT.getCode(), user.getId());
+			createQualityInspectionStandardLogs(standard, QualityInspectionLogProcessType.INSERT.getCode(),
+					user.getId(),cmd.getNamespaceId());
 
 			List<StandardGroupDTO> groupList = cmd.getGroup();
 			processStandardGroups(groupList, standard);
 			processRepeatSetting(standard);
-			processStandardSpecification(standard, cmd.getSpecificationIds());
+			processStandardSpecification(standard, cmd.getSpecificationIds(),cmd.getNamespaceId());
 
 			QualityStandardsDTO dto = ConvertHelper.convert(standard, QualityStandardsDTO.class);
 			convertSpecificationToDTO(standard, dto);
@@ -328,12 +329,13 @@ public class QualityServiceImpl implements QualityService {
 				}
 			}
 			//创建标准操作日志
-			createQualityInspectionStandardLogs(standard, QualityInspectionLogProcessType.INSERT.getCode(), user.getId());
+			createQualityInspectionStandardLogs(standard, QualityInspectionLogProcessType.INSERT.getCode(),
+					user.getId(),cmd.getNamespaceId());
 
 			List<StandardGroupDTO> groupList = cmd.getGroup();
 			processStandardGroups(groupList, standard);
 			processRepeatSetting(standard);
-			processStandardSpecification(standard, cmd.getSpecificationIds());
+			processStandardSpecification(standard, cmd.getSpecificationIds(),cmd.getNamespaceId());
 
 			dto = ConvertHelper.convert(standard, QualityStandardsDTO.class);
 			convertSpecificationToDTO(standard, dto);
@@ -341,14 +343,14 @@ public class QualityServiceImpl implements QualityService {
 			return dto;
 		}
 
-
-
 	}
 
-	private void createQualityInspectionStandardLogs(QualityInspectionStandards standard, Byte processType, Long userId) {
+	private void createQualityInspectionStandardLogs(QualityInspectionStandards standard, Byte processType,
+													 Long userId,Integer namespaceId) {
 
 		QualityInspectionLogs log = new QualityInspectionLogs();
-		log.setNamespaceId(UserContext.getCurrentNamespaceId());
+		//log.setNamespaceId(UserContext.getCurrentNamespaceId());
+		log.setNamespaceId(namespaceId);
 		log.setOwnerType(standard.getOwnerType());
 		log.setOwnerId(standard.getOwnerId());
 		log.setTargetType(QualityInspectionLogType.STANDARD.getCode());
@@ -372,7 +374,8 @@ public class QualityServiceImpl implements QualityService {
 		}
 
 		QualityInspectionStandards standard = verifiedStandardById(cmd.getId());
-		standard.setNamespaceId(user.getNamespaceId());
+		//standard.setNamespaceId(user.getNamespaceId());
+		standard.setNamespaceId(cmd.getNamespaceId());
 		standard.setOwnerId(cmd.getOwnerId());
 		standard.setOwnerType(cmd.getOwnerType());
 		standard.setTargetId(cmd.getTargetId());
@@ -407,12 +410,13 @@ public class QualityServiceImpl implements QualityService {
 			}
 		}
 
-		createQualityInspectionStandardLogs(standard, QualityInspectionLogProcessType.UPDATE.getCode(), user.getId());
+		createQualityInspectionStandardLogs(standard, QualityInspectionLogProcessType.UPDATE.getCode(),
+				user.getId(),cmd.getNamespaceId());
 
 		List<StandardGroupDTO> groupList = cmd.getGroup();
 		processStandardGroups(groupList, standard);
 		processRepeatSetting(standard);
-		processStandardSpecification(standard, cmd.getSpecificationIds());
+		processStandardSpecification(standard, cmd.getSpecificationIds(),cmd.getNamespaceId());
 		QualityStandardsDTO dto = ConvertHelper.convert(standard, QualityStandardsDTO.class);
 		convertSpecificationToDTO(standard, dto);
 		return dto;
@@ -435,13 +439,13 @@ public class QualityServiceImpl implements QualityService {
 		}
 	}
 
-	private void processStandardSpecification(QualityInspectionStandards standard, List<Long> specificationIds) {
+	private void processStandardSpecification(QualityInspectionStandards standard, List<Long> specificationIds, Integer namespaceId) {
 		List<QualityInspectionSpecifications> specifications = new ArrayList<QualityInspectionSpecifications>();
 		qualityProvider.deleteQualityInspectionStandardSpecificationMapByStandardId(standard.getId());
 
 		if(specificationIds != null && specificationIds.size() > 0) {
 			User user = UserContext.current().getUser();
-			Integer namespaceId = UserContext.current().getNamespaceId();
+//			Integer namespaceId = UserContext.current().getNamespaceId();
 			 for(Long specificationId : specificationIds) {
 				 QualityInspectionStandardSpecificationMap map = new QualityInspectionStandardSpecificationMap();
 				  map.setStandardId(standard.getId());
@@ -541,7 +545,8 @@ public class QualityServiceImpl implements QualityService {
 			}
 		}
 
-		createQualityInspectionStandardLogs(standard, QualityInspectionLogProcessType.DELETE.getCode(), user.getId());
+		createQualityInspectionStandardLogs(standard, QualityInspectionLogProcessType.DELETE.getCode(),
+				user.getId(),cmd.getNamespaceId());
 
 	}
 
@@ -630,7 +635,7 @@ public class QualityServiceImpl implements QualityService {
 			category.setName(cmd.getName());
 			category.setOwnerType(cmd.getOwnerType());
 			category.setOwnerId(cmd.getOwnerId());
-			category.setNamespaceId(user.getNamespaceId());
+			category.setNamespaceId(user.getNamespaceId());//暂时不用的api
 			category.setStatus(QualityInspectionCategoryStatus.ACTIVE.getCode());
 			category.setCreatorUid(user.getId());
 			if(cmd.getParentId() != null) {
@@ -1552,7 +1557,7 @@ public class QualityServiceImpl implements QualityService {
 
 		}
 
-		QualityInspectionTaskDTO dto = updateVerificationTasks(task, record, cmd.getAttachments(), cmd.getItemResults());
+		QualityInspectionTaskDTO dto = updateVerificationTasks(task, record, cmd.getAttachments(), cmd.getItemResults(),cmd.getNamespaceId());
 		return dto;
 
 	}
@@ -1576,7 +1581,7 @@ public class QualityServiceImpl implements QualityService {
 		record.setProcessType(ProcessType.REVIEW.getCode());
 		record.setProcessResult(cmd.getReviewResult());
 
-		updateVerificationTasks(task, record, null, null);
+		updateVerificationTasks(task, record, null, null,cmd.getNamespaceId());
 
 		if(cmd.getReviewResult() != null
 				&& cmd.getReviewResult() == QualityInspectionTaskReviewResult.UNQUALIFIED.getCode()) {
@@ -1704,7 +1709,7 @@ public class QualityServiceImpl implements QualityService {
 
 //		processTaskAttachments(user.getId(),  cmd.getAttachments(), task, QualityTaskType.RECTIFY_TASK.getCode());
 //		qualityProvider.populateTaskAttachment(task);
-		QualityInspectionTaskDTO dto = updateVerificationTasks(task, record, cmd.getAttachments(), null);
+		QualityInspectionTaskDTO dto = updateVerificationTasks(task, record, cmd.getAttachments(), null,cmd.getNamespaceId());
 		return dto;
 	}
 
@@ -1909,7 +1914,7 @@ public class QualityServiceImpl implements QualityService {
 	}
 
 	private QualityInspectionTaskDTO updateVerificationTasks(QualityInspectionTasks task, QualityInspectionTaskRecords record,
-			List<AttachmentDescriptor> attachmentList, List<ReportSpecificationItemResultsDTO> itemResults) {
+			List<AttachmentDescriptor> attachmentList, List<ReportSpecificationItemResultsDTO> itemResults,Integer namespaceId) {
 
 		qualityProvider.updateVerificationTasks(task);
 		taskSearcher.feedDoc(task);
@@ -1927,7 +1932,7 @@ public class QualityServiceImpl implements QualityService {
 		Long taskId = task.getId();
 		Long recordId = record.getId();
 
-		processSpecificationItemResults(itemResults, ownerId, ownerType, targetId, targetType, task, recordId);
+		processSpecificationItemResults(itemResults, ownerId, ownerType, targetId, targetType, task, recordId,namespaceId);
 
 		QualityInspectionTaskRecords lastRecord = qualityProvider.listLastRecordByTaskId(task.getId());
 		this.qualityProvider.populateRecordAttachment(lastRecord);
@@ -2014,11 +2019,11 @@ public class QualityServiceImpl implements QualityService {
 	 }
 
 	 private void processSpecificationItemResults(List<ReportSpecificationItemResultsDTO> itemResults, Long ownerId, String ownerType,
-			 Long targetId, String targetType, QualityInspectionTasks task, Long recordId) {
+			 Long targetId, String targetType, QualityInspectionTasks task, Long recordId,Integer namespaceId) {
 
 		 if(itemResults != null && itemResults.size() > 0) {
 			 Long uid = UserContext.current().getUser().getId();
-			 Integer namespaceId = UserContext.getCurrentNamespaceId();
+			 //Integer namespaceId = UserContext.getCurrentNamespaceId();
 
 			 for(ReportSpecificationItemResultsDTO itemResult : itemResults) {
 				 QualityInspectionSpecificationItemResults result = ConvertHelper.convert(itemResult, QualityInspectionSpecificationItemResults.class);
@@ -2712,7 +2717,8 @@ public class QualityServiceImpl implements QualityService {
 		String day = sdf.format(current);
 
 		QualityInspectionTasks task = new QualityInspectionTasks();
-		task.setNamespaceId(user.getNamespaceId());
+		//task.setNamespaceId(user.getNamespaceId());
+		task.setNamespaceId(cmd.getNamespaceId());
 		task.setOwnerType(cmd.getOwnerType());
 		task.setOwnerId(cmd.getOwnerId());
 		task.setTargetId(cmd.getTargetId());
@@ -2818,7 +2824,8 @@ public class QualityServiceImpl implements QualityService {
 		}
 
 		QualityInspectionSpecifications specification = ConvertHelper.convert(cmd, QualityInspectionSpecifications.class);
-		specification.setNamespaceId(UserContext.getCurrentNamespaceId());
+		//specification.setNamespaceId(UserContext.getCurrentNamespaceId());
+		specification.setNamespaceId(cmd.getNamespaceId());
 		specification.setCreatorUid(UserContext.current().getUser().getId());
 		specification.setApplyPolicy(SpecificationApplyPolicy.ADD.getCode());
 		if(cmd.getParentId() != null) {
@@ -2866,7 +2873,7 @@ public class QualityServiceImpl implements QualityService {
 			if(SpecificationScopeCode.COMMUNITY.equals(SpecificationScopeCode.fromCode(cmd.getScopeCode()))
 					&& !specification.getScopeId().equals(cmd.getScopeId())) {
 				QualityInspectionSpecifications newSpecification = ConvertHelper.convert(cmd, QualityInspectionSpecifications.class);
-				newSpecification.setNamespaceId(UserContext.getCurrentNamespaceId());
+				newSpecification.setNamespaceId(cmd.getNamespaceId());
 				newSpecification.setApplyPolicy(SpecificationApplyPolicy.MODIFY.getCode());
 				newSpecification.setReferId(specification.getId());
 				newSpecification.setCreatorUid(UserContext.current().getUser().getId());
@@ -3340,7 +3347,7 @@ public class QualityServiceImpl implements QualityService {
 				Timestamp recordTime = taskRecordTime.get(record.getTaskId());
 				if(recordTime == null) {
 					taskRecordTime.put(record.getTaskId(),record.getCreateTime());
-				}else if(recordTime != null && recordTime.before(record.getCreateTime())) {
+				}else if(recordTime.before(record.getCreateTime())) {
 					taskRecordTime.put(record.getTaskId(),record.getCreateTime());
 				}
 			}
@@ -3487,11 +3494,12 @@ public class QualityServiceImpl implements QualityService {
 	@Override
 	public SampleQualityInspectionDTO createSampleQualityInspection(CreateSampleQualityInspectionCommand cmd) {
 
-		checkManager(cmd.getOwnerId(), cmd.getOwnerType());
+		checkManager(cmd.getOwnerId(), cmd.getOwnerType(),cmd.getNamespaceId());
 
 		QualityInspectionSamples sample = ConvertHelper.convert(cmd, QualityInspectionSamples.class);
 		Long uid = UserContext.current().getUser().getId();
-		Integer namespaceId = UserContext.getCurrentNamespaceId();
+//		Integer namespaceId = UserContext.getCurrentNamespaceId();
+		Integer namespaceId = cmd.getNamespaceId();
 		sample.setStartTime(new Timestamp(cmd.getStartTime()));
 		sample.setEndTime(new Timestamp(cmd.getEndTime()));
 		sample.setCreatorUid(uid);
@@ -3528,7 +3536,7 @@ public class QualityServiceImpl implements QualityService {
 	@Override
 	public void deleteSampleQualityInspection(FindSampleQualityInspectionCommand cmd) {
 
-		checkManager(cmd.getOwnerId(), cmd.getOwnerType());
+		checkManager(cmd.getOwnerId(), cmd.getOwnerType(),cmd.getNamespaceId());
 
 		List<QualityInspectionTasks> tasks = qualityProvider.listTaskByParentId(cmd.getId());
 		if(tasks != null && tasks.size() > 0) {
@@ -4017,7 +4025,8 @@ public class QualityServiceImpl implements QualityService {
 			getNewestScoreStat(stat);
 		} else {
 			stat = new QualityInspectionSampleScoreStat();
-			stat.setNamespaceId(UserContext.getCurrentNamespaceId());
+//			stat.setNamespaceId(UserContext.getCurrentNamespaceId());
+			stat.setNamespaceId(cmd.getNamespaceId());
 			List<QualityInspectionSampleCommunityMap> communityMaps = qualityProvider.findQualityInspectionSampleCommunityMapBySample(cmd.getSampleId());
 			if(communityMaps != null) {
 				stat.setCommunityCount(communityMaps.size());
@@ -4063,7 +4072,8 @@ public class QualityServiceImpl implements QualityService {
 		List<SampleTaskScoreDTO> dtos = response.getSampleTasks();
 		if(dtos != null && dtos.size() > 0) {
 			response.setSampleTasks(dtos.stream().map(dto -> {
-				QualityInspectionSampleScoreStat scoreStat = getSampleScoreStat(dto.getId(), dto.getOwnerType(), dto.getOwnerId());
+				QualityInspectionSampleScoreStat scoreStat = getSampleScoreStat(dto.getId(), dto.getOwnerType(),
+						dto.getOwnerId(),cmd.getNamespaceId());
 				dto.setCommunityCount(scoreStat.getCommunityCount());
 				dto.setHighestScore(scoreStat.getHighestScore());
 				dto.setLowestScore(scoreStat.getLowestScore());
@@ -4362,13 +4372,14 @@ public class QualityServiceImpl implements QualityService {
 	}
 
 
-	private QualityInspectionSampleScoreStat getSampleScoreStat(Long sampleId, String ownerType, Long ownerId) {
+	private QualityInspectionSampleScoreStat getSampleScoreStat(Long sampleId, String ownerType, Long ownerId, Integer namespaceId) {
 		QualityInspectionSampleScoreStat scoreStat = qualityProvider.findQualityInspectionSampleScoreStat(sampleId);
 		if(scoreStat != null) {
 			getNewestScoreStat(scoreStat);
 		} else {
 			scoreStat = new QualityInspectionSampleScoreStat();
-			scoreStat.setNamespaceId(UserContext.getCurrentNamespaceId());
+			//scoreStat.setNamespaceId(UserContext.getCurrentNamespaceId());
+			scoreStat.setNamespaceId(namespaceId);
 			List<QualityInspectionSampleCommunityMap> communityMaps = qualityProvider.findQualityInspectionSampleCommunityMapBySample(sampleId);
 			if(communityMaps != null) {
 				scoreStat.setCommunityCount(communityMaps.size());
@@ -4489,9 +4500,10 @@ public class QualityServiceImpl implements QualityService {
 
 	}
 
-	private void checkManager(Long ownerId, String ownerType) {
+	private void checkManager(Long ownerId, String ownerType,Integer namespaceId) {
 		ListServiceModuleAppsCommand listServiceModuleAppsCommand = new ListServiceModuleAppsCommand();
-		listServiceModuleAppsCommand.setNamespaceId(UserContext.getCurrentNamespaceId());
+		//listServiceModuleAppsCommand.setNamespaceId(UserContext.getCurrentNamespaceId());
+		listServiceModuleAppsCommand.setNamespaceId(namespaceId);
 		listServiceModuleAppsCommand.setModuleId(QualityConstant.QUALITY_MODULE);
 		ListServiceModuleAppsResponse apps = portalService.listServiceModuleAppsWithConditon(listServiceModuleAppsCommand);
 		CheckModuleManageCommand checkModuleManageCommand = new CheckModuleManageCommand();
@@ -4503,7 +4515,7 @@ public class QualityServiceImpl implements QualityService {
 			checkModuleManageCommand.setAppId(apps.getServiceModuleApps().get(0).getId());
 		}
 		if (serviceModuleService.checkModuleManage(checkModuleManageCommand) == 0) {
-			LOGGER.error("Permission is denied, namespaceId={}, orgId={},", UserContext.getCurrentNamespaceId(), ownerId);
+			LOGGER.error("Permission is denied, namespaceId={}, orgId={},", namespaceId, ownerId);
 			throw RuntimeErrorException.errorWith(ErrorCodes.SCOPE_GENERAL, ErrorCodes.ERROR_ACCESS_DENIED,
 					"权限不足");
 		}
