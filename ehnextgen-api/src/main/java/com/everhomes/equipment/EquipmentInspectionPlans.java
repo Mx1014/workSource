@@ -2,7 +2,6 @@ package com.everhomes.equipment;
 
 import com.everhomes.discover.ItemType;
 import com.everhomes.repeat.RepeatSettings;
-import com.everhomes.rest.equipment.EquipmentStandardRelationDTO;
 import com.everhomes.server.schema.tables.pojos.EhEquipmentInspectionPlans;
 import com.everhomes.util.StringHelper;
 
@@ -23,7 +22,7 @@ public class EquipmentInspectionPlans  extends EhEquipmentInspectionPlans{
 
     private String limitTime;
 
-    private List<EquipmentStandardRelationDTO> equipmentStandardRelations;
+    //private List<EquipmentStandardRelationDTO> equipmentStandardRelations;
 
     @ItemType(EquipmentInspectionPlanGroupMap.class)
     private List<EquipmentInspectionPlanGroupMap> executiveGroup;
@@ -39,13 +38,13 @@ public class EquipmentInspectionPlans  extends EhEquipmentInspectionPlans{
         this.repeatSettings = repeatSettings;
     }
 
-    public List<EquipmentStandardRelationDTO> getEquipmentStandardRelations() {
-        return equipmentStandardRelations;
-    }
-
-    public void setEquipmentStandardRelations(List<EquipmentStandardRelationDTO> equipmentStandardRelations) {
-        this.equipmentStandardRelations = equipmentStandardRelations;
-    }
+//    public List<EquipmentStandardRelationDTO> getEquipmentStandardRelations() {
+//        return equipmentStandardRelations;
+//    }
+//
+//    public void setEquipmentStandardRelations(List<EquipmentStandardRelationDTO> equipmentStandardRelations) {
+//        this.equipmentStandardRelations = equipmentStandardRelations;
+//    }
 
     public String getExecuteStartTime() {
         return executeStartTime;

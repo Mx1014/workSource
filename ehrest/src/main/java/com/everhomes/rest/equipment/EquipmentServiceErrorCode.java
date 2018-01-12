@@ -32,4 +32,5 @@ public interface EquipmentServiceErrorCode {
      int ERROR_EQUIPMENT_STANDARD_MAP_NOT_EXIST = 10023;//设备-标准关联不存在
      int ERROR_EQUIPMENT_TASK_CLOSE = 10024;//任务已关闭
      int ERROR_PLAN_ALREADY_DELETED = 10025;//计划已经删除
+     int ERROR_EQUIPMENT_PLAN_NOT_EXIST = 10026;//计划已经删除
 }

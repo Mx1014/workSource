@@ -188,6 +188,7 @@ import com.everhomes.rest.quality.ProcessType;
 import com.everhomes.rest.quality.QualityGroupType;
 import com.everhomes.rest.quality.QualityServiceErrorCode;
 import com.everhomes.rest.repeat.RepeatServiceErrorCode;
+import com.everhomes.rest.repeat.RepeatSettingsDTO;
 import com.everhomes.rest.repeat.TimeRangeDTO;
 import com.everhomes.rest.user.MessageChannelType;
 import com.everhomes.rest.user.UserServiceErrorCode;
@@ -5418,13 +5419,15 @@ private void checkUserPrivilege(Long orgId, Long privilegeId, Long communityId) 
 				equipmentStandardRelation.add(relation);
 			}
 		}
-			createdPlan.setEquipmentStandardRelations(equipmentStandardRelation);
+		//createdPlan.setEquipmentStandardRelations(equipmentStandardRelation);
 		//巡检计划增加审批和执行人员
 		List<StandardGroupDTO> groupList = cmd.getGroupList();
 		equipmentProvider.deleteEquipmentInspectionPlanGroupMapByPlanId(plan.getId());
 		processPlanGroups(groupList, createdPlan);
 
-		return ConvertHelper.convert(createdPlan, EquipmentInspectionPlanDTO.class);
+		EquipmentInspectionPlanDTO planDTO = ConvertHelper.convert(createdPlan, EquipmentInspectionPlanDTO.class);
+		planDTO.setEquipmentStandardRelations(equipmentStandardRelation);
+		return planDTO;
 	}
 
 	private void processPlanGroups(List<StandardGroupDTO> groupList, EquipmentInspectionPlans plan) {
@@ -5508,9 +5511,11 @@ private void checkUserPrivilege(Long orgId, Long privilegeId, Long communityId) 
 		processPlanGroups(cmd.getGroupList(), plan);
 		//inActive 所有关联任务当前时间节点之前任务继续   状态变成待审核
 		//inActiveTaskByPlanId(plan.getId());
-		updatePlan.setEquipmentStandardRelations(equipmentStandardRelation);
+		//updatePlan.setEquipmentStandardRelations(equipmentStandardRelation);
 
-		return ConvertHelper.convert(updatePlan,EquipmentInspectionPlanDTO.class);
+		EquipmentInspectionPlanDTO planDTO =  ConvertHelper.convert(updatePlan,EquipmentInspectionPlanDTO.class);
+		planDTO.setEquipmentStandardRelations(equipmentStandardRelation);
+		return planDTO;
 	}
 
 	private void inActiveTaskByPlanId(Long planId) {
@@ -5550,18 +5555,27 @@ private void checkUserPrivilege(Long orgId, Long privilegeId, Long communityId) 
 	public EquipmentInspectionPlanDTO getEquipmmentInspectionPlanById(DeleteEquipmentPlanCommand cmd) {
 
 		EquipmentInspectionPlans equipmentInspectionPlan = equipmentProvider.getEquipmmentInspectionPlanById(cmd.getId());
-		//填充巡检计划相关的巡检对象(需排序)
-		processEquipmentInspectionObjectsByPlanId(cmd.getId(), equipmentInspectionPlan);
+		if (equipmentInspectionPlan == null) {
+			throw RuntimeErrorException.errorWith(EquipmentServiceErrorCode.SCOPE,
+					EquipmentServiceErrorCode.ERROR_EQUIPMENT_PLAN_NOT_EXIST, "计划不存在");
+		}
+
 		//填充计划的执行组审批组
 		equipmentProvider.populatePlanGroups(equipmentInspectionPlan);
 		//填充计划的执行周期
 		equipmentInspectionPlan.setRepeatSettings(repeatProvider.findRepeatSettingById(equipmentInspectionPlan.getRepeatSettingId()));
-
+		//这里填充relation关系表
 		return convertPlanToDto(equipmentInspectionPlan);
 	}
 
 	private EquipmentInspectionPlanDTO convertPlanToDto(EquipmentInspectionPlans equipmentInspectionPlan) {
 		EquipmentInspectionPlanDTO planDTO = ConvertHelper.convert(equipmentInspectionPlan, EquipmentInspectionPlanDTO.class);
+		RepeatSettingsDTO repeatSettingsDTO = ConvertHelper.convert(equipmentInspectionPlan.getRepeatSettings(), RepeatSettingsDTO.class);
+		planDTO.setRepeatSettings(repeatSettingsDTO);
+
+		//填充巡检计划相关的巡检对象(需排序)
+		processEquipmentInspectionObjectsByPlanId(equipmentInspectionPlan.getId(), planDTO);
+
 		List<StandardGroupDTO> executiveGroup = new ArrayList<>();
 		List<StandardGroupDTO> reviewGroup = new ArrayList<>();
 		if(equipmentInspectionPlan.getExecutiveGroup() != null) {
@@ -5763,7 +5777,7 @@ private void checkUserPrivilege(Long orgId, Long privilegeId, Long communityId) 
 		}
 	}
 
-	private void processEquipmentInspectionObjectsByPlanId(Long planId, EquipmentInspectionPlans equipmentInspectionPlan) {
+	private void processEquipmentInspectionObjectsByPlanId(Long planId, EquipmentInspectionPlanDTO planDTO) {
 
 		List<EquipmentInspectionEquipmentPlanMap> planMaps = equipmentProvider.getEquipmentInspectionPlanMap(planId);
 		List<EquipmentStandardRelationDTO> relationDTOS = new ArrayList<>();
@@ -5778,15 +5792,14 @@ private void checkUserPrivilege(Long orgId, Long privilegeId, Long communityId) 
 				if (equipment != null) {
 					relations.setEquipmentName(equipment.getName());
 					relations.setEquipmentId(equipment.getId());
+					equipmentStandardMaps = equipmentProvider.
+							findEquipmentStandardMap(standard.getId(), equipment.getId(),
+									InspectionStandardMapTargetType.EQUIPMENT.getCode());
 				}
 				if (standard != null) {
 					relations.setStandardName(standard.getName());
 					relations.setStandardId(standard.getId());
 					relations.setRepeatType(standard.getRepeatType());
-
-					equipmentStandardMaps = equipmentProvider.
-							findEquipmentStandardMap(standard.getId(), equipment.getId(),
-									InspectionStandardMapTargetType.EQUIPMENT.getCode());
 				}
 
 
@@ -5804,7 +5817,7 @@ private void checkUserPrivilege(Long orgId, Long privilegeId, Long communityId) 
 			relationDTOS.sort(Comparator.comparingLong(EquipmentStandardRelationDTO::getOrder));
 		}
 		//process  EquipmentStandardRelation to plan
-		equipmentInspectionPlan.setEquipmentStandardRelations(relationDTOS);
+		planDTO.setEquipmentStandardRelations(relationDTOS);
 
 	}
 
@@ -5935,9 +5948,10 @@ private void checkUserPrivilege(Long orgId, Long privilegeId, Long communityId) 
 				task.setLastSyncTime(task.getReviewTime().toLocalDateTime().format(dateSF));
 			}
 			EquipmentInspectionPlans plan = equipmentProvider.getEquipmmentInspectionPlanById(task.getPlanId());
+			EquipmentInspectionPlanDTO planDTO = ConvertHelper.convert(plan, EquipmentInspectionPlanDTO.class);
 			//填充巡检计划相关的巡检对象(需排序)
-			processEquipmentInspectionObjectsByPlanId(task.getPlanId(), plan);
-			equipments.addAll(plan.getEquipmentStandardRelations());
+			processEquipmentInspectionObjectsByPlanId(task.getPlanId(), planDTO);
+			equipments.addAll(planDTO.getEquipmentStandardRelations());
 		});
 		offlineResponse.setEquipments(equipments);
 		ListParametersByStandardIdCommand listParametersByStandardIdCommand = new ListParametersByStandardIdCommand();
