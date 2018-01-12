@@ -71,4 +71,9 @@ public interface FieldService {
     List<SystemFieldItemDTO> listSystemFieldItems(ListSystemFieldItemCommand cmd);
 
 
+    void exportDynamicExcelTemplate(ListFieldGroupCommand cmd, HttpServletResponse response);
+
+    void exportDynamicExcel(ExportFieldsExcelCommand cmd, HttpServletResponse response);
+
+    ImportFieldsExcelResponse importDynamicExcel(ImportFieldExcelCommand cmd, MultipartFile file);
 }

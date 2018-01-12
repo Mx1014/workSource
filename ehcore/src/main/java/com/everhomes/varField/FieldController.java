@@ -7,6 +7,7 @@ import com.everhomes.rest.RestResponse;
 import com.everhomes.rest.asset.ImportFieldsExcelResponse;
 import com.everhomes.rest.field.ExportFieldsExcelCommand;
 import com.everhomes.rest.varField.*;
+import com.everhomes.util.RequireAuthentication;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RestController;
@@ -213,6 +214,42 @@ public class FieldController extends ControllerBase {
         return restResponse;
     }
 
+    // 数据导入导出 重构
+    /**
+     * <p>模板的导出</p>
+     * <b>URL: /varField/exportExcelTemplateRe</b>
+     */
+    @RequireAuthentication(false)
+    @RequestMapping("exportExcelTemplateRe")
+    public void exportExcelTemplateRe(@Valid ListFieldGroupCommand cmd,HttpServletResponse response){
+        fieldService.exportDynamicExcelTemplate(cmd,response);
+
+    }
+
+    /**
+     * <p>excel数据的导出</p>
+     * <b>URL: /varField/exportFieldsExcelRe</b>
+     */
+    @RequireAuthentication(false)
+    @RequestMapping("exportFieldsExcelRe")
+    public void exportFieldsExcelRe(@Valid ExportFieldsExcelCommand cmd, HttpServletResponse response){
+        fieldService.exportDynamicExcel(cmd,response);
+    }
+
+    /**
+     * <p>excel数据导入</p>
+     * <b>URL: /varField/importFieldsExcelRe</b>
+     */
+    @RequireAuthentication(false)
+    @RequestMapping("importFieldsExcelRe")
+    @RestReturn(ImportFieldsExcelResponse.class)
+    public RestResponse importFieldsExcelRe(@Valid ImportFieldExcelCommand cmd, MultipartFile file){
+        ImportFieldsExcelResponse response = fieldService.importDynamicExcel(cmd,file);
+        RestResponse restResponse = new RestResponse(response);
+        restResponse.setErrorCode(200);
+        restResponse.setErrorDescription("OK");
+        return restResponse;
+    }
 
 
 }
