@@ -2028,7 +2028,7 @@ public class SocialSecurityServiceImpl implements SocialSecurityService {
         params.put("ownerId", cmd.getOwnerId());
         params.put("payMonth", cmd.getPayMonth());
         params.put("reportType", "exportSocialSecurityReports");
-        String fileName = String.format("导出社保报表_%s.xlsx", DateUtil.dateToStr(new Date(), DateUtil.NO_SLASH));
+        String fileName = String.format("%s社保报表.xlsx", cmd.getPayMonth());
 
         taskService.createTask(fileName, TaskType.FILEDOWNLOAD.getCode(), SocialSecurityReportsTaskHandler.class, params, TaskRepeatFlag.REPEAT.getCode(), new Date());
 
@@ -2093,7 +2093,7 @@ public class SocialSecurityServiceImpl implements SocialSecurityService {
         params.put("ownerId", cmd.getOwnerId());
         params.put("payMonth", cmd.getPayMonth());
         params.put("reportType", "exportSocialSecurityInoutReports");
-        String fileName = String.format("导出社保部门汇总报表_%s.xlsx", DateUtil.dateToStr(new Date(), DateUtil.NO_SLASH));
+        String fileName = String.format("%s社保部门汇总报表.xlsx", cmd.getPayMonth());
 
         taskService.createTask(fileName, TaskType.FILEDOWNLOAD.getCode(), SocialSecurityReportsTaskHandler.class, params, TaskRepeatFlag.REPEAT.getCode(), new Date());
 
@@ -2109,7 +2109,7 @@ public class SocialSecurityServiceImpl implements SocialSecurityService {
         params.put("ownerId", cmd.getOwnerId());
         params.put("payMonth", cmd.getPayMonth());
         params.put("reportType", "exportSocialSecurityDepartmentSummarys");
-        String fileName = String.format("导出社保部门汇总报表_%s.xlsx", DateUtil.dateToStr(new Date(), DateUtil.NO_SLASH));
+        String fileName = String.format("%s社保部门汇总报表.xlsx",cmd.getPayMonth());
 
         taskService.createTask(fileName, TaskType.FILEDOWNLOAD.getCode(), SocialSecurityReportsTaskHandler.class, params, TaskRepeatFlag.REPEAT.getCode(), new Date());
 
