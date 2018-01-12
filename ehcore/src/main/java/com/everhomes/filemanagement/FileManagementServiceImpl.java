@@ -1,10 +1,9 @@
 package com.everhomes.filemanagement;
 
-import com.everhomes.rest.filemanagement.AddFileCatalogCommand;
-import com.everhomes.rest.filemanagement.FileCatalogDTO;
-import com.everhomes.rest.filemanagement.FileCatalogIdCommand;
-import com.everhomes.rest.filemanagement.UpdateFileCatalogNameCommand;
+import com.everhomes.rest.filemanagement.*;
 import org.springframework.stereotype.Component;
+
+import java.util.List;
 
 @Component
 public class FileManagementServiceImpl implements  FileManagementService{
@@ -20,6 +19,41 @@ public class FileManagementServiceImpl implements  FileManagementService{
 
     @Override
     public FileCatalogDTO updateFileCatalogName(UpdateFileCatalogNameCommand cmd) {
+        return null;
+    }
+
+    @Override
+    public FileCatalogDTO listFileCatalogs(ListFileCatalogsCommand cmd) {
+        return null;
+    }
+
+    @Override
+    public List<FileCatalogDTO> addFileCatalogScopes(AddFileCatalogScopesCommand cmd) {
+        return null;
+    }
+
+    @Override
+    public void deleteFileCatalogScopes(FileCatalogScopesIdCommand cmd) {
+
+    }
+
+    @Override
+    public void enableFileCatalogScopeDownload(FileCatalogScopesIdCommand cmd) {
+
+    }
+
+    @Override
+    public void disableFileCatalogScopeDownload(FileCatalogScopesIdCommand cmd) {
+
+    }
+
+    @Override
+    public ListFielCatalogScopeResponse listFileCatalogScopes(FileCatalogIdCommand cmd) {
+        return null;
+    }
+
+    @Override
+    public FileContentDTO addFileContent(AddFileContentCommand cmd) {
         return null;
     }
 }
