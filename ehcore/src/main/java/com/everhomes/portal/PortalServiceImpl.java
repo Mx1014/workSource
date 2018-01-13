@@ -1323,9 +1323,11 @@ public class PortalServiceImpl implements PortalService {
 						portalPublishLog.setProcess(60);
 						portalPublishLogProvider.updatePortalPublishLog(portalPublishLog);
 
-						updateVersionAfterPublish(cmd.getVersionId());
-
-						copyPortalToNewVersion(namespaceId, cmd.getVersionId());
+						//正式发布之后将当前版本改成大版本，再在此基础上生成一个小本版
+						if(PortalPublishType.fromCode(cmd.getPublishType()) == PortalPublishType.RELEASE){
+							updateVersionAfterPublish(cmd.getVersionId());
+							copyPortalToNewVersion(namespaceId, cmd.getVersionId());
+						}
 
 						portalPublishLog.setProcess(100);
 						portalPublishLog.setStatus(PortalPublishLogStatus.SUCCESS.getCode());
@@ -1346,8 +1348,14 @@ public class PortalServiceImpl implements PortalService {
 		return ConvertHelper.convert(portalPublishLog, PortalPublishLogDTO.class);
 	}
 
+
+
 	public PortalPublishLogDTO getPortalPublishLog(GetPortalPublishLogCommand cmd){
 		return ConvertHelper.convert(portalPublishLogProvider.findPortalPublishLogById(cmd.getId()), PortalPublishLogDTO.class);
+	}
+
+	private void updatePortalPublishLog(Long Id, Integer process, Byte status){
+
 	}
 
 
