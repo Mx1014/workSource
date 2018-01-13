@@ -129,7 +129,9 @@ public class WebRequestInterceptor implements HandlerInterceptor {
             // 通过配置一黑名单，含黑名单关键字的useragent会被禁止掉 by lqs 20170516
             checkUserAgent(request.getRequestURI(), userAgents);
 
-            setupNamespaceIdContext(userAgents);
+            //设置上下文的域空间信息
+            setupNamespaceIdContext(userAgents, request.getParameterMap());
+
             setupVersionContext(userAgents);
             setupScheme(userAgents);
             setupDomain(request);
@@ -443,7 +445,13 @@ public class WebRequestInterceptor implements HandlerInterceptor {
         return null;
     }
 
-    private void setupNamespaceIdContext(Map<String, String> userAgents) {
+    /**
+     * 优先从 Header 的 userAgents 判断 namespaceId，若没有，则从请求信息确认
+     * 请求内容如果有 namespaceId 这个值，则设置域空间 ID;
+     * 如果已经从 userAgent 知道域空间 ID，则忽略
+     * @param requestMap
+     */
+    private void setupNamespaceIdContext(Map<String, String> userAgents, Map<String, String[]> paramMap) {
         UserContext context = UserContext.current();
         context.setNamespaceId(Namespace.DEFAULT_NAMESPACE);
 
@@ -451,6 +459,19 @@ public class WebRequestInterceptor implements HandlerInterceptor {
             String ns = userAgents.get("ns");
             Integer namespaceId = Integer.valueOf(ns);
             context.setNamespaceId(namespaceId);
+        } else {
+            //主要应用场景是新的管理后台 by Janson
+            String ns = getParamValue(paramMap, "namespaceId");
+            if(ns != null && !ns.isEmpty()) {
+                try {
+                    Integer namespaceId = Integer.valueOf(ns);
+                    context.setNamespaceId(namespaceId);
+                } catch(NumberFormatException ex) {
+                    LOGGER.warn("parse namespaceId failed", ex);
+                }
+
+            }
+
         }
 
 
