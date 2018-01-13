@@ -1030,7 +1030,7 @@ public class SocialSecurityServiceImpl implements SocialSecurityService {
                 ImportFileResponse response = new ImportFileResponse();
 //                Map<String, String> title = new HashedMap();
 //                title.put("导入社保设置", "导入社保设置");
-                response.setTitle(resultList.get(0));
+//                response.setTitle(resultList.get(0));
                 //  将 excel 的中的数据读取
                 String fileLog = "";
                 batchUpdateSSSettingAndPayments(resultList, cmd.getOwnerId(), fileLog, response);
@@ -1061,6 +1061,7 @@ public class SocialSecurityServiceImpl implements SocialSecurityService {
         //
         RowResult title = (RowResult) list.get(0);
         Map<String, String> titleMap = title.getCells();
+        response.setTitle(titleMap);
         response.setLogs(new ArrayList<>());
         for (int i = 1; i < list.size(); i++) {
             RowResult r = (RowResult) list.get(i);
