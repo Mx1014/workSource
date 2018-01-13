@@ -676,18 +676,18 @@ public class YellowPageServiceImpl implements YellowPageService {
 	@Override
 	public ServiceAllianceDTO getServiceAlliance(GetServiceAllianceCommand cmd) {
 		ServiceAlliances sa = this.yellowPageProvider.queryServiceAllianceTopic(null,null,cmd.getType());
-		if (null == sa)
-		{
+		if (null == sa){
 			LOGGER.error("can not find the topic community ID = "+cmd.getOwnerId() +"; and type = " + cmd.getType()); 
 			return null;
 		}
 		populateServiceAlliance(sa);
 		
+		ServiceAllianceDTO dto = ConvertHelper.convert(sa,ServiceAllianceDTO.class);
 		if(null == sa.getServiceType() && null != sa.getCategoryId()) {
 			ServiceAllianceCategories category = yellowPageProvider.findCategoryById(sa.getCategoryId());
-			sa.setServiceType(category.getName());
+			dto.setServiceType(category.getName());
+			dto.setDisplayMode(category.getDisplayMode());
 		}
-		ServiceAllianceDTO dto = ConvertHelper.convert(sa,ServiceAllianceDTO.class);
 		if(!StringUtils.isEmpty(dto.getTemplateType())) {
 			RequestTemplates template = userActivityProvider.getCustomRequestTemplate(dto.getTemplateType());
 			if(template != null) {
@@ -714,15 +714,6 @@ public class YellowPageServiceImpl implements YellowPageService {
 			cmd.setOwnerId(cmd.getCommunityId());
 			cmd.setOwnerType("community");
 		}
-		// ownerId 一般传入小区、园区id，这里的ownerId当作域空间来使用，暂时屏蔽掉，不知道会不会引发其他的问题 modify by sw 20170421
-//		else if(null != cmd.getOwnerId()){
-//
-////			List<Community> communities = communityProvider.listCommunitiesByNamespaceId(cmd.getOwnerId().intValue());
-////			if(null != communities && 0 != communities.size()){
-////				cmd.setOwnerId(communities.get(0).getId());
-////				cmd.setOwnerType("community");
-////			}
-//		}
 
 		ServiceAllianceListResponse response = new ServiceAllianceListResponse();
 		response.setSkipType((byte) 0);
