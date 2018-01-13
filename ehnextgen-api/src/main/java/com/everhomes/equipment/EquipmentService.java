@@ -118,4 +118,6 @@ public interface EquipmentService {
 	EquipmentTaskOfflineResponse listEquipmentTasksDetails(ListEquipmentTasksCommand cmd);
 
 	OfflineEquipmentTaskReportResponse offlineEquipmentTaskReport(OfflineEquipmentTaskReportCommand cmd);
+
+    void createRepairsTask(CreateEquipmentRepairCommand cmd);
 }

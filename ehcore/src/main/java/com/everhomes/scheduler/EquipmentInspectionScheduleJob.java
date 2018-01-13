@@ -67,28 +67,27 @@ private static final Logger LOGGER = LoggerFactory.getLogger(EquipmentInspection
 	}
 
 	private void createTaskByPlan() {
-		if (LOGGER.isInfoEnabled()){
+		if (LOGGER.isInfoEnabled()) {
 			LOGGER.info("EquipmentInspectionScheduleJob:createTaskByPlan.....");
 		}
 
-			List<EquipmentInspectionPlans> plans = equipmentProvider.listQualifiedEquipmentInspectionPlans();
-			System.out.println(plans);
-			if (plans != null && plans.size() > 0) {
-				for (EquipmentInspectionPlans plan : plans) {
-					//判断repeatSettings是否Active
-					//dbProvider.execute((TransactionStatus status) -> {
-						if (checkPlanRepeat(plan)) {
-							//不需要校验 展示的时候过滤即可
-							LOGGER.info("EquipmentInspectionScheduleJob: createEquipmentTaskByPlan.");
-							equipmentService.createEquipmentTaskByPlan(plan);
-							plan.setLastCreateTasktime(new Timestamp(DateHelper.currentGMTTime().getTime()));
-							equipmentProvider.updateEquipmentInspectionPlan(plan);
-						}
+		List<EquipmentInspectionPlans> plans = equipmentProvider.listQualifiedEquipmentInspectionPlans();
+		System.out.println(plans);
+		if (plans != null && plans.size() > 0) {
+			for (EquipmentInspectionPlans plan : plans) {
+				//dbProvider.execute((TransactionStatus status) -> {
+				if (checkPlanRepeat(plan)) {
+					//不需要校验 展示的时候过滤即可
+					LOGGER.info("EquipmentInspectionScheduleJob: createEquipmentTaskByPlan.");
+					equipmentService.createEquipmentTaskByPlan(plan);
+					plan.setLastCreateTasktime(new Timestamp(DateHelper.currentGMTTime().getTime()));
+					equipmentProvider.updateEquipmentInspectionPlan(plan);
+				}
 //						return null;
 //					});
 
-				}
 			}
+		}
 	}
 
 	private boolean checkPlanRepeat(EquipmentInspectionPlans plan) {

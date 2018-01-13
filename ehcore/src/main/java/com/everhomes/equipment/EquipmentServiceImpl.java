@@ -50,6 +50,7 @@ import com.everhomes.rest.category.CategoryDTO;
 import com.everhomes.rest.equipment.AdminFlag;
 import com.everhomes.rest.equipment.Attachment;
 import com.everhomes.rest.equipment.CreateEquipmentCategoryCommand;
+import com.everhomes.rest.equipment.CreateEquipmentRepairCommand;
 import com.everhomes.rest.equipment.CreateInspectionTemplateCommand;
 import com.everhomes.rest.equipment.DeleteEquipmentAccessoriesCommand;
 import com.everhomes.rest.equipment.DeleteEquipmentCategoryCommand;
@@ -1837,7 +1838,7 @@ private void checkUserPrivilege(Long orgId, Long privilegeId, Long communityId) 
 		User user = UserContext.current().getUser();
 		Timestamp now = new Timestamp(System.currentTimeMillis());
 		EquipmentInspectionTasks task = verifyEquipmentTask(cmd.getTaskId(), cmd.getOwnerType(), cmd.getOwnerId());
-		//对接物业报修 所有上报任务都是已完成
+		//对接物业报修 所有上报任务都是状态已完成
 //		Timestamp laterTime = DateUtils.getLaterTime(task.getExecutiveExpireTime(), task.getProcessExpireTime());
 //		if(EquipmentTaskStatus.WAITING_FOR_EXECUTING.equals(EquipmentTaskStatus.fromStatus(task.getStatus()))
 //				 && laterTime.before(now)) {
@@ -2861,7 +2862,8 @@ private void checkUserPrivilege(Long orgId, Long privilegeId, Long communityId) 
 		CrossShardListingLocator locator = new CrossShardListingLocator();
         locator.setAnchor(cmd.getPageAnchor());
         int pageSize = PaginationConfigHelper.getPageSize(configurationProvider, cmd.getPageSize());
-        //根据任务id取出所有待执行和待维修的任务log
+        //根据任务id取出所有待执行和待维修的任务log  0: none, 1: complete, 2: complete maintenance, 3: review, 4: need maintenance
+		//上版维修情况取2  ，任务记录取1  4  ，  对接报修后取2
 		List<EquipmentInspectionTasksLogs> logs = equipmentProvider.listLogsByTaskId(locator, pageSize + 1,
 				task.getId(), cmd.getProcessType(),cmd.getEquipmentId());
 
@@ -2903,8 +2905,8 @@ private void checkUserPrivilege(Long orgId, Long privilegeId, Long communityId) 
 						.collect(Collectors.toList());
 				//兼容上一版 只有在result表中才有equipmentId
 				EquipmentInspectionEquipments equipment = new EquipmentInspectionEquipments();
-				if (r.getTargetId() != null && r.getTargetId() != 0) {
-					equipment = equipmentProvider.findEquipmentById(r.getTargetId());
+				if (r.getEquipmentId() != null && r.getEquipmentId() != 0) {
+					equipment = equipmentProvider.findEquipmentById(r.getEquipmentId());
 				} else {
 					equipment = equipmentProvider.findEquipmentById(itemResults.get(0).getEquipmentId());
 				}
@@ -2950,10 +2952,8 @@ private void checkUserPrivilege(Long orgId, Long privilegeId, Long communityId) 
 	        	}
 	        	dto.setAttachments(attachments);
         	}
-
-        	if(EquipmentTaskProcessType.COMPLETE.equals(EquipmentTaskProcessType.fromStatus(dto.getProcessType()))
-        			|| EquipmentTaskProcessType.COMPLETE_MAINTENANCE.equals(EquipmentTaskProcessType.fromStatus(dto.getProcessType()))
-        			|| EquipmentTaskProcessType.NEED_MAINTENANCE.equals(EquipmentTaskProcessType.fromStatus(dto.getProcessType()))) {
+			//这里改成任务完成状态需要拿到当前最近的一条任务审批记录  （之前是完成  需维修  维修完成）
+        	if(EquipmentTaskProcessType.COMPLETE.equals(EquipmentTaskProcessType.fromStatus(dto.getProcessType()))) {
         		EquipmentInspectionTasksLogs reviewLog =  equipmentProvider.getNearestReviewLogAfterProcess(dto.getTaskId(), dto.getId());
         		if(null == reviewLog) {
         			dto.setReviewResult(ReviewResult.NONE.getCode());
@@ -5185,9 +5185,9 @@ private void checkUserPrivilege(Long orgId, Long privilegeId, Long communityId) 
 		}
 		List<PmNotifyConfigurations> configurations = pmNotifyProvider.listScopePmNotifyConfigurations(EntityType.EQUIPMENT_TASK.getCode(), scopeType, scopeId);
 		if(configurations != null && configurations.size() > 0) {
-			List<PmNotifyParamDTO> params = configurations.stream().map(configuration -> {
-				return convertPmNotifyConfigurationsToDTO(cmd.getNamespaceId(), configuration);
-			}).collect(Collectors.toList());
+			List<PmNotifyParamDTO> params = configurations.stream()
+					.map(configuration -> convertPmNotifyConfigurationsToDTO(cmd.getNamespaceId(), configuration))
+					.collect(Collectors.toList());
 			return params;
 		} else {
 			//scopeType是community的情况下 如果拿不到数据，则返回该域空间下的设置 ps以后可以再else一下 域空间的没有返回all的
@@ -5196,9 +5196,9 @@ private void checkUserPrivilege(Long orgId, Long privilegeId, Long communityId) 
 				scopeId = cmd.getNamespaceId().longValue();
 				List<PmNotifyConfigurations> namespaceConfigurations = pmNotifyProvider.listScopePmNotifyConfigurations(EntityType.EQUIPMENT_TASK.getCode(), scopeType, scopeId);
 				if(namespaceConfigurations != null && namespaceConfigurations.size() > 0) {
-					List<PmNotifyParamDTO> params = namespaceConfigurations.stream().map(configuration -> {
-						return convertPmNotifyConfigurationsToDTO(cmd.getNamespaceId(), configuration);
-					}).collect(Collectors.toList());
+					List<PmNotifyParamDTO> params = namespaceConfigurations.stream()
+							.map(configuration -> convertPmNotifyConfigurationsToDTO(cmd.getNamespaceId(), configuration))
+							.collect(Collectors.toList());
 					return params;
 				}
 			}
@@ -5989,5 +5989,23 @@ private void checkUserPrivilege(Long orgId, Long privilegeId, Long communityId) 
 			return reportResponse;
 		}
 		return null;
+	}
+
+	@Override
+	public void createRepairsTask(CreateEquipmentRepairCommand cmd) {
+
+		EquipmentInspectionTasks tasks = verifyEquipmentTask(cmd.getTaskId(), null, null);
+		EquipmentInspectionTasksLogs tasksLog = new EquipmentInspectionTasksLogs();
+		tasksLog.setEquipmentId(cmd.getEquipmentId());
+		tasksLog.setOperatorType(OwnerType.USER.getCode());
+		tasksLog.setOperatorId(UserContext.currentUserId());
+		tasksLog.setInspectionCategoryId(tasks.getInspectionCategoryId());
+		tasksLog.setCommunityId(tasks.getTargetId());
+		tasksLog.setNamespaceId(cmd.getNamespaceId());
+		tasksLog.setTaskId(cmd.getTaskId());
+		tasksLog.setProcessResult(EquipmentTaskProcessResult.NEED_MAINTENANCE_OK.getCode());
+		equipmentProvider.createEquipmentInspectionTasksLogs(tasksLog);
+
+		//TODO:物业模块生成一条维修记录  log 表中需维修状态保留  调用报修的接口
 	}
 }

@@ -542,10 +542,8 @@ public class EquipmentProviderImpl implements EquipmentProvider {
     }
 
     @Override
-    public void createEquipmentInspectionTasksLogs(
-            EquipmentInspectionTasksLogs log) {
+    public void createEquipmentInspectionTasksLogs(EquipmentInspectionTasksLogs log) {
         long id = this.sequenceProvider.getNextSequence(NameMapper.getSequenceDomainFromTablePojo(EhEquipmentInspectionTaskLogs.class));
-
         log.setId(id);
         log.setProcessTime(new Timestamp(DateHelper.currentGMTTime().getTime()));
         log.setCreateTime(new Timestamp(DateHelper.currentGMTTime().getTime()));

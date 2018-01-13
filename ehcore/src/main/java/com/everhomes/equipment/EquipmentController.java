@@ -683,19 +683,6 @@ public class EquipmentController extends ControllerBase {
         return getSuccessResponse();
     }
 
-//    /**
-//     * <b>URL: /equipment/createEquipmentTask</b>
-//     * <p>创建某设备的任务</p>
-//     */
-//    @RequestMapping("createEquipmentTask")
-//    @RestReturn(value = String.class)
-//    public RestResponse createEquipmentTask(DeleteEquipmentsCommand cmd) {
-//
-//        equipmentService.createEquipmentTask(cmd);
-//
-//        return getSuccessResponse();
-//    }
-
     /**
      * <b>URL: /equipment/listLogsByTaskId</b>
      * <p>查看任务的操作记录</p>
@@ -1110,7 +1097,7 @@ public class EquipmentController extends ControllerBase {
      * <p>列出任务审批过期时间</p>
      */
     @RequestMapping("listReviewExpireDays")
-    @RestReturn(value = String.class)
+    @RestReturn(value = EquipmentInspectionReviewDateDTO.class)
     public RestResponse listReviewExpireDays(SetReviewExpireDaysCommand cmd) {
         EquipmentInspectionReviewDateDTO reviewDate = equipmentService.listReviewExpireDays(cmd);
         return getRestResponse(reviewDate);
@@ -1151,8 +1138,8 @@ public class EquipmentController extends ControllerBase {
     @RequestMapping("createRepairsTask")
     @RestReturn(value = String.class)
     public RestResponse createRepairsTask(CreateEquipmentRepairCommand cmd) {
-       // equipmentService.createRepairsTask(cmd);
-        //TODO:物业模块生成一条维修记录  log 表中需维修状态保留  调用报修的接口
+        equipmentService.createRepairsTask(cmd);
+
         return getSuccessResponse();
     }
 
