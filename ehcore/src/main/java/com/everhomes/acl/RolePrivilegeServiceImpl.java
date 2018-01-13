@@ -1549,7 +1549,9 @@ public class RolePrivilegeServiceImpl implements RolePrivilegeService {
         String organizationName = "NotFound";
         if (organizationDetail == null || organizationDetail.getDisplayName() == null) {
             Organization organization = organizationProvider.findOrganizationById(organizationId);
-            organizationName = defaultIfNull(organization.getName(), organizationName);
+			if(organization != null) {
+				organizationName = defaultIfNull(organization.getName(), organizationName);
+			}
         } else {
             organizationName = organizationDetail.getDisplayName();
         }
