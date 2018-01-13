@@ -1588,7 +1588,7 @@ public class OrganizationServiceImpl implements OrganizationService {
                 DeleteEnterpriseCustomerCommand command = new DeleteEnterpriseCustomerCommand();
                 command.setId(customer.getId());
                 command.setCommunityId(customer.getCommunityId());
-                customerService.deleteEnterpriseCustomer(command);
+                customerService.deleteEnterpriseCustomer(command, false);
             }
 
             organization.setStatus(OrganizationStatus.DELETED.getCode());
