@@ -1879,11 +1879,14 @@ public class RolePrivilegeServiceImpl implements RolePrivilegeService {
 				organizationSearcher.feedDoc(o);
 			}
 		}
-        sendMessageAfterChangeOrganizationAdmin(
-                ConvertHelper.convert(member, OrganizationContactDTO.class),
-                OrganizationNotificationTemplateCode.DELETE_ORGANIZATION_ADMIN_MESSAGE_TO_TARGET_TEMPLATE,
-                OrganizationNotificationTemplateCode.DELETE_ORGANIZATION_ADMIN_MESSAGE_TO_OTHER_TEMPLATE
-        );
+		if(OrganizationMemberTargetType.fromCode(member.getTargetType()) == OrganizationMemberTargetType.USER){
+			sendMessageAfterChangeOrganizationAdmin(
+					ConvertHelper.convert(member, OrganizationContactDTO.class),
+					OrganizationNotificationTemplateCode.DELETE_ORGANIZATION_ADMIN_MESSAGE_TO_TARGET_TEMPLATE,
+					OrganizationNotificationTemplateCode.DELETE_ORGANIZATION_ADMIN_MESSAGE_TO_OTHER_TEMPLATE
+			);
+		}
+
 	}
 
 	@Override
