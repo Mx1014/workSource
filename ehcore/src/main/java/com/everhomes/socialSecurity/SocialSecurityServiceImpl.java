@@ -1094,7 +1094,7 @@ public class SocialSecurityServiceImpl implements SocialSecurityService {
                 if (null == afBases) {
                     LOGGER.error("没有这个公积金城市" + afCityName);
                     log.setErrorLog("没有这个公积金城市");
-                    log.setCode(SocialSecurityConstants.ERROR_CHECK_SOCIAL_CITY);
+                    log.setCode(SocialSecurityConstants.ERROR_CHECK_ACCUM_CITY);
                     log.setErrorDescription(log.getErrorLog());
                     response.getLogs().add(log);
                     continue;
@@ -1177,7 +1177,7 @@ public class SocialSecurityServiceImpl implements SocialSecurityService {
                 String errorString = "残障金基数必须大于0 现在值: " + czRadixString;
                 LOGGER.error(errorString);
                 log.setErrorLog(errorString);
-                log.setCode(SocialSecurityConstants.ERROR_CHECK_AFRADIX);
+                log.setCode(SocialSecurityConstants.ERROR_CHECK_SSRADIX);
                 log.setErrorDescription(log.getErrorLog());
                 response.getLogs().add(log);
                 return;
@@ -1193,7 +1193,7 @@ public class SocialSecurityServiceImpl implements SocialSecurityService {
                 String errorString = "商业保险基数必须大于0 现在值: " + syRadixString;
                 LOGGER.error(errorString);
                 log.setErrorLog(errorString);
-                log.setCode(SocialSecurityConstants.ERROR_CHECK_AFRADIX);
+                log.setCode(SocialSecurityConstants.ERROR_CHECK_SSRADIX);
                 log.setErrorDescription(log.getErrorLog());
                 response.getLogs().add(log);
                 return;

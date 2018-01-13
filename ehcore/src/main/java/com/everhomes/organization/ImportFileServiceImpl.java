@@ -177,6 +177,8 @@ public class ImportFileServiceImpl implements ImportFileService{
                     for (Map.Entry<String, String> entry : data.entrySet()) {
                         row.createCell(cellNum ++).setCellValue(entry.getValue());
                     }
+                    LOGGER.debug("log is "+ log);
+                    LOGGER.debug("log error description is blank? "+ StringUtils.isBlank(log.getErrorDescription());
                     if (StringUtils.isNotBlank(log.getErrorDescription())) {
                         row.createCell(titleMap.size()).setCellValue(log.getErrorDescription());
                     } else {
