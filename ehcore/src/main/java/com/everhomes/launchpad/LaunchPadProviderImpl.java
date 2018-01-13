@@ -16,6 +16,7 @@ import com.everhomes.server.schema.tables.records.EhItemServiceCategriesRecord;
 import com.everhomes.server.schema.tables.records.EhLaunchPadItemsRecord;
 import com.everhomes.user.UserContext;
 import org.jooq.*;
+import org.jooq.impl.DSL;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -284,6 +285,10 @@ public class LaunchPadProviderImpl implements LaunchPadProvider {
 		Condition condition = Tables.EH_LAUNCH_PAD_ITEMS.ITEM_GROUP.eq(itemGroup);
 		condition = condition.and(Tables.EH_LAUNCH_PAD_ITEMS.ITEM_LOCATION.eq(itemLocation));
 		condition = condition.and(Tables.EH_LAUNCH_PAD_ITEMS.NAMESPACE_ID.eq(namespaceId));
+
+		//增加版本功能，默认找正式版本，有特别标识的找该版本功能
+		condition = condition.and(getPreviewPortalVersionCondition(Tables.EH_LAUNCH_PAD_ITEMS.getName()));
+
 		step.where(condition).fetch().map((r) ->{
 			items.add(ConvertHelper.convert(r, LaunchPadItem.class));
 			return null;
@@ -425,7 +430,7 @@ public class LaunchPadProviderImpl implements LaunchPadProvider {
 		}
 
 		//增加版本功能，默认找正式版本，有特别标识的找该版本功能
-		query.where(getPreviewPortalVersionCondition());
+		query.where(getPreviewPortalVersionCondition(Tables.EH_LAUNCH_PAD_LAYOUTS.getName()));
 
 		query.fetch().map(r -> {
 			list.add(ConvertHelper.convert(r,LaunchPadLayout.class));
@@ -656,6 +661,10 @@ public class LaunchPadProviderImpl implements LaunchPadProvider {
 			query.addConditions(Tables.EH_ITEM_SERVICE_CATEGRIES.ITEM_LOCATION.eq(itemLocation));
 		if(!StringUtils.isEmpty(itemGroup))
 			query.addConditions(Tables.EH_ITEM_SERVICE_CATEGRIES.ITEM_GROUP.eq(itemGroup));
+
+		//增加版本功能，默认找正式版本，有特别标识的找该版本功能
+		query.addConditions(getPreviewPortalVersionCondition(Tables.EH_ITEM_SERVICE_CATEGRIES.getName()));
+
 		if(null != callback){
 			callback.buildCondition(null, query);
 		}
@@ -719,12 +728,20 @@ public class LaunchPadProviderImpl implements LaunchPadProvider {
 		return null;
 	}
 
-	private Condition getPreviewPortalVersionCondition(){
-		Condition condition = Tables.EH_LAUNCH_PAD_LAYOUTS.PREVIEW_PORTAL_VERSION_ID.isNull();
-
+	private Condition getPreviewPortalVersionCondition(String tableName){
+		String sql = tableName + ".PREVIEW_PORTAL_VERSION_ID is null";
 		if(UserContext.current().getPreviewPortalVersionId() != null){
-			condition = Tables.EH_LAUNCH_PAD_LAYOUTS.PREVIEW_PORTAL_VERSION_ID.eq(UserContext.current().getPreviewPortalVersionId());
+			sql = tableName + ".PREVIEW_PORTAL_VERSION_ID = " + UserContext.current().getPreviewPortalVersionId();
 		}
-		return condition;
+		return DSL.condition(sql);
 	}
+
+	public void deletePreviewVersionItems(Integer namespaceId){
+		DSLContext context = dbProvider.getDslContext(AccessSpec.readOnlyWith(EhLaunchPadItems.class));
+		DeleteQuery query = context.deleteQuery(Tables.EH_LAUNCH_PAD_ITEMS);
+		query.addConditions(Tables.EH_LAUNCH_PAD_ITEMS.NAMESPACE_ID.eq(namespaceId));
+		query.addConditions(Tables.EH_LAUNCH_PAD_ITEMS.PREVIEW_PORTAL_VERSION_ID.isNotNull());
+		query.execute();
+	}
+
 }

@@ -1304,19 +1304,24 @@ public class PortalServiceImpl implements PortalService {
 			public void run() {
 				try{
 					UserContext.setCurrentUser(user);
+					//同步和发布的时候不用预览账号
+					UserContext.current().setPreviewPortalVersionId(null);
 					dbProvider.execute((status) -> {
+						//TODO 清理预览版本服务广场数据
 
 						//发布item分类
-						publishItemCategory(namespaceId, cmd.getVersionId());
+						publishItemCategory(namespaceId, cmd.getVersionId(), cmd.getPublishType());
 
 						for (PortalLayout layout: layouts) {
 							//发布layout
-							publishLayout(layout);
+							publishLayout(layout, cmd.getVersionId(), cmd.getPublishType());
 						}
 
 
 						portalPublishLog.setProcess(60);
 						portalPublishLogProvider.updatePortalPublishLog(portalPublishLog);
+
+						updateVersionAfterPublish(cmd.getVersionId());
 
 						copyPortalToNewVersion(namespaceId, cmd.getVersionId());
 
@@ -1344,7 +1349,26 @@ public class PortalServiceImpl implements PortalService {
 	}
 
 
-	private void publishLayout(PortalLayout layout){
+	private void removePreviewVersion(Integer namespaceId){
+
+
+	}
+
+	/**
+	 * 发布成功后将版本号改成新的大版本
+	 * @param versionId
+	 */
+	private void updateVersionAfterPublish(Long versionId){
+		PortalVersion publishVersion = portalVersionProvider.findPortalVersionById(versionId);
+		PortalVersion maxVersion = portalVersionProvider.findMaxVersion(publishVersion.getNamespaceId());
+
+		publishVersion.setBigVersion(maxVersion.getBigVersion() + 1);
+		publishVersion.setMinorVersion(0);
+
+		portalVersionProvider.updatePortalVersion(publishVersion);
+	}
+
+	private void publishLayout(PortalLayout layout, Long versionId, Byte publishType){
 
 		User user = UserContext.current().getUser();
 
@@ -1462,12 +1486,14 @@ public class PortalServiceImpl implements PortalService {
 
 			if(Widget.fromCode(group.getWidget()) == Widget.NAVIGATOR){
 				// 发布item
-				publishItem(itemGroup);
+				publishItem(itemGroup, versionId, publishType);
 			}
 		}
 		layoutJson.setGroups(groups);
 		LaunchPadLayout launchPadLayout = new LaunchPadLayout();
-		if(portalLaunchPadMappings.size() > 0){
+
+		//正式发布才能更改layout，预览的都用新增的，正式发布时会清除掉当前域空间所有的预览版本数据。
+		if(portalLaunchPadMappings.size() > 0  && PortalPublishType.fromCode(publishType) == PortalPublishType.RELEASE){
 			for (PortalLaunchPadMapping mapping: portalLaunchPadMappings) {
 				launchPadLayout = launchPadProvider.findLaunchPadLayoutById(mapping.getLaunchPadContentId());
 				if(null != launchPadLayout){
@@ -1478,6 +1504,7 @@ public class PortalServiceImpl implements PortalService {
 					layoutJson.setVersionCode(versionCode.toString());
 					String json = StringHelper.toJsonString(layoutJson);
 					launchPadLayout.setLayoutJson(json);
+
 					launchPadProvider.updateLaunchPadLayout(launchPadLayout);
 
 				}
@@ -1494,6 +1521,11 @@ public class PortalServiceImpl implements PortalService {
 			launchPadLayout.setApplyPolicy((byte)0);
 			launchPadLayout.setScopeId(0L);
 			launchPadLayout.setLayoutJson(json);
+
+			if(PortalPublishType.fromCode(publishType) == PortalPublishType.PREVIEW){
+				launchPadLayout.setPreviewPortalVersionId(versionId);
+			}
+
 			for (SceneType sceneType: SceneType.values()) {
 				if(sceneType == SceneType.DEFAULT ||
 						sceneType == SceneType.PARK_TOURIST ||
@@ -1587,7 +1619,7 @@ public class PortalServiceImpl implements PortalService {
 		}
 	}
 
-	private void publishItem(PortalItemGroup itemGroup){
+	private void publishItem(PortalItemGroup itemGroup, Long versionId, Byte publishType){
 		User user = UserContext.current().getUser();
 		List<PortalItem> portalItems = portalItemProvider.listPortalItemByGroupId(itemGroup.getId(), null);
 		Map<Long, String> categoryIdMap = getItemCategoryMap(itemGroup.getNamespaceId());
@@ -1596,7 +1628,12 @@ public class PortalServiceImpl implements PortalService {
 
 			if(null != mappings && mappings.size() > 0){
 				for (PortalLaunchPadMapping mapping: mappings) {
-					launchPadProvider.deleteLaunchPadItem(mapping.getLaunchPadContentId());
+
+					//正式发布才能删除items，预览的都用新增的，正式发布时会清除掉当前域空间所有的预览版本数据。
+					if(PortalPublishType.fromCode(publishType) == PortalPublishType.RELEASE){
+						launchPadProvider.deleteLaunchPadItem(mapping.getLaunchPadContentId());
+					}
+
 					portalLaunchPadMappingProvider.deletePortalLaunchPadMapping(mapping.getId());
 				}
 			}
@@ -1656,6 +1693,11 @@ public class PortalServiceImpl implements PortalService {
 						item.setActionData(StringHelper.toJsonString(actionData));
 						item.setDeleteFlag(DeleteFlagType.NO.getCode());
 					}
+
+					if(PortalPublishType.fromCode(publishType) == PortalPublishType.PREVIEW){
+						item.setPreviewPortalVersionId(versionId);
+					}
+
 					launchPadProvider.createLaunchPadItem(item);
 
 					PortalLaunchPadMapping mapping = new PortalLaunchPadMapping();
@@ -1721,7 +1763,7 @@ public class PortalServiceImpl implements PortalService {
 		return null;
 	}
 
-	public void publishItemCategory(Integer namespaceId, Long versionId){
+	public void publishItemCategory(Integer namespaceId, Long versionId, Byte publishType){
 		User user = UserContext.current().getUser();
 		List<PortalItem> allItems = getItemAllOrMore(namespaceId, null, AllOrMoreType.ALL, versionId);
 		for (PortalItem item: allItems) {
@@ -1731,7 +1773,12 @@ public class PortalServiceImpl implements PortalService {
 				List<PortalLaunchPadMapping> mappings = portalLaunchPadMappingProvider.listPortalLaunchPadMapping(EntityType.PORTAL_ITEM_CATEGORY.getCode(), category.getId(), null);
 				if(null != mappings && mappings.size() > 0){
 					for (PortalLaunchPadMapping mapping: mappings) {
-						launchPadProvider.deleteItemServiceCategryById(mapping.getLaunchPadContentId());
+
+						//正式发布才能删除Categry，预览的都用新增的，正式发布时会清除掉当前域空间所有的预览版本数据。
+						if(PortalPublishType.fromCode(publishType) == PortalPublishType.RELEASE){
+							launchPadProvider.deleteItemServiceCategryById(mapping.getLaunchPadContentId());
+						}
+
 						portalLaunchPadMappingProvider.deletePortalLaunchPadMapping(mapping.getId());
 					}
 				}
@@ -1775,6 +1822,11 @@ public class PortalServiceImpl implements PortalService {
 						itemCategory.setOrder(category.getDefaultOrder());
 						itemCategory.setItemLocation(item.getItemLocation());
 						itemCategory.setItemGroup(item.getGroupName());
+
+						if(PortalPublishType.fromCode(publishType) == PortalPublishType.PREVIEW){
+							itemCategory.setPreviewPortalVersionId(versionId);
+						}
+
 						launchPadProvider.createItemServiceCategry(itemCategory);
 
 						PortalLaunchPadMapping mapping = new PortalLaunchPadMapping();
@@ -1802,6 +1854,9 @@ public class PortalServiceImpl implements PortalService {
 	@Override
 	public void syncLaunchPadData(SyncLaunchPadDataCommand cmd){
 
+		//同步和发布的时候不用预览账号
+		UserContext.current().setPreviewPortalVersionId(null);
+
 		List<Tuple<String, String>> list = new ArrayList<>();
 
 		if(StringUtils.isEmpty(cmd.getLocation()) || StringUtils.isEmpty(cmd.getName())){
@@ -1828,15 +1883,15 @@ public class PortalServiceImpl implements PortalService {
 				LOGGER.info("syncLaunchPadData namespaceId={}  start", dto.getId());
 				dbProvider.execute((status -> {
 					//获取一个版本号
-					PortalVersion portalVersion = cteatePortalVersion(dto.getId());
+					PortalVersion portalVersion = cteateBigPortalVersion(dto.getId());
 
 					for (Tuple<String, String> t: list) {
 						syncLayout(dto.getId(), t.first(), t.second(), portalVersion);
 					}
 
-					//更新新的版本为编辑状态
-					portalVersion.setStatus(PortalVersionStatus.EDIT.getCode());
-					portalVersionProvider.updatePortalVersion(portalVersion);
+					//同步完之后fork一个小版本，用于编辑
+					copyPortalToNewVersion(dto.getId(), portalVersion.getId());
+
 					return null;
 				}));
 				LOGGER.info("syncLaunchPadData namespaceId={}  end", dto.getId());
@@ -1853,7 +1908,7 @@ public class PortalServiceImpl implements PortalService {
 	 * @param namespaceId
 	 * @return
 	 */
-	private PortalVersion cteatePortalVersion(Integer namespaceId){
+	private PortalVersion cteateBigPortalVersion(Integer namespaceId){
 
 		PortalVersion oldVersion = portalVersionProvider.findMaxVersion(namespaceId);
 		PortalVersion newVersion = new PortalVersion();
@@ -1880,7 +1935,7 @@ public class PortalServiceImpl implements PortalService {
 	 * @param versionId
 	 * @return
 	 */
-	private PortalVersion cteateSubPortalVersion(Long versionId){
+	private PortalVersion createMinorPortalVersion(Long versionId){
 
 		PortalVersion oldVersion = portalVersionProvider.findPortalVersionById(versionId);
 		PortalVersion newVersion = new PortalVersion();
@@ -1899,18 +1954,8 @@ public class PortalServiceImpl implements PortalService {
 
 	private Long copyPortalToNewVersion(Integer namespaceId, Long oldVersionId){
 
-		//将以下几张表的数据copy到新的版本
-//		eh_portal_layouts
-//		eh_portal_item_groups
-//		eh_portal_item_categories
-//		eh_portal_items
-//		eh_portal_content_scopes
-//		eh_portal_launch_pad_mappings
-//		eh_service_module_apps
-		Timestamp createTimestamp = new Timestamp(System.currentTimeMillis());
-
 		//1.获取一个新版本
-		PortalVersion newPortalVersion = cteateSubPortalVersion(oldVersionId);
+		PortalVersion newPortalVersion = createMinorPortalVersion(oldVersionId);
 
 		//2.复制一份app
 		copyServiceModuleAppToNewVersion(namespaceId, oldVersionId, newPortalVersion.getId());

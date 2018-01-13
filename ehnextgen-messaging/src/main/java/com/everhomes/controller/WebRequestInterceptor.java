@@ -133,7 +133,7 @@ public class WebRequestInterceptor implements HandlerInterceptor {
             // 由于服务器注册接口被攻击，从日志分析来看IP和手机号都不一样，但useragent并没有按标准的形式，故可以通过useragent来做限制，
             // 通过配置一黑名单，含黑名单关键字的useragent会被禁止掉 by lqs 20170516
             checkUserAgent(request.getRequestURI(), userAgents);
-            
+
             setupNamespaceIdContext(userAgents);
             setupVersionContext(userAgents);
             setupScheme(userAgents);
