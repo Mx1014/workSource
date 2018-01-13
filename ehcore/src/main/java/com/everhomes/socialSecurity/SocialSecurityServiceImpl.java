@@ -1058,12 +1058,18 @@ public class SocialSecurityServiceImpl implements SocialSecurityService {
 
     private void batchUpdateSSSettingAndPayments(List list, Long ownerId, String fileLog, ImportFileResponse response) {
         //
+        RowResult title = (RowResult) list.get(0);
+        Map<String, String> titleMap = title.getCells();
         response.setLogs(new ArrayList<>());
         for (int i = 1; i < list.size(); i++) {
             RowResult r = (RowResult) list.get(i);
             ImportFileResultLog<Map<String, String>> log = new ImportFileResultLog<>(SocialSecurityConstants.SCOPE);
 //            response.getLogs().add(log);
-            log.setData(r.getCells());
+            Map<String, String> data = new HashMap();
+            for (Map.Entry<String, String> entry : titleMap.entrySet()) {
+                data.put(entry.getKey(), r.getCells().get(entry.getKey()));
+            }
+                log.setData(data);
             String userContact = r.getA().trim();
             OrganizationMemberDetails detail = organizationProvider.findOrganizationMemberDetailsByOrganizationIdAndContactToken(ownerId, userContact);
             if (null == detail) {
