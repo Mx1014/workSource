@@ -3,6 +3,7 @@ package com.everhomes.rest.quality;
 import com.everhomes.util.StringHelper;
 
 import javax.validation.constraints.NotNull;
+import java.sql.Timestamp;
 
 /**
  * <ul>
@@ -63,6 +64,8 @@ public class ListQualityInspectionTasksCommand {
 	private Integer namespaceId;
 
 	private String lastSyncTime;
+
+	private Timestamp latestUpdateTime;
 	
 	public Long getOwnerId() {
 		return ownerId;
@@ -198,6 +201,14 @@ public class ListQualityInspectionTasksCommand {
 
 	public void setLastSyncTime(String lastSyncTime) {
 		this.lastSyncTime = lastSyncTime;
+	}
+
+	public Timestamp getLatestUpdateTime() {
+		return latestUpdateTime;
+	}
+
+	public void setLatestUpdateTime(Timestamp latestUpdateTime) {
+		this.latestUpdateTime = latestUpdateTime;
 	}
 
 	@Override

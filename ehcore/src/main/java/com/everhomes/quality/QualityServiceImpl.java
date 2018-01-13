@@ -177,6 +177,8 @@ import java.sql.Date;
 import java.sql.Timestamp;
 import java.text.ParseException;
 import java.text.SimpleDateFormat;
+import java.time.LocalDate;
+import java.time.format.DateTimeFormatter;
 import java.util.ArrayList;
 import java.util.Calendar;
 import java.util.Collections;
@@ -197,6 +199,8 @@ public class QualityServiceImpl implements QualityService {
 	final String downloadDir ="\\download\\";
 
 	private static final Logger LOGGER = LoggerFactory.getLogger(QualityServiceImpl.class);
+
+	DateTimeFormatter dateSF = DateTimeFormatter.ofPattern("yyyy/MM/dd");
 
 	@Autowired
 	private QualityProvider qualityProvider;
@@ -1063,8 +1067,8 @@ public class QualityServiceImpl implements QualityService {
 		if(isAdmin) {
 			//管理员查询所有任务
 			tasks = qualityProvider.listVerificationTasks(offset, pageSize + 1, ownerId, ownerType, targetId, targetType,
-            		cmd.getTaskType(), null, startDate, endDate,
-            		cmd.getExecuteStatus(), cmd.getReviewStatus(), timeCompared, null, cmd.getManualFlag(), null,cmd.getNamespaceId());
+            		cmd.getTaskType(), null, startDate, endDate, cmd.getExecuteStatus(), cmd.getReviewStatus(),
+					timeCompared, null, cmd.getManualFlag(), null,cmd.getNamespaceId(),cmd.getLatestUpdateTime());
 		} else {
 			List<ExecuteGroupAndPosition> groupDtos = listUserRelateGroups();
 //			List<Long> standardIds = qualityProvider.listQualityInspectionStandardGroupMapByGroup(groupDtos, QualityGroupType.REVIEW_GROUP.getCode());
@@ -1090,8 +1094,8 @@ public class QualityServiceImpl implements QualityService {
 				}
 				//增加前台传namespaceId  参数数量以后再重构
 				tasks = qualityProvider.listVerificationTasks(offset, pageSize + 1, ownerId, ownerType, targetId, targetType,
-						cmd.getTaskType(), user.getId(), startDate, endDate,
-						cmd.getExecuteStatus(), cmd.getReviewStatus(), timeCompared, executeStandardIds, cmd.getManualFlag(), groupDtos ,cmd.getNamespaceId());
+						cmd.getTaskType(), user.getId(), startDate, endDate, cmd.getExecuteStatus(), cmd.getReviewStatus(),
+						timeCompared, executeStandardIds, cmd.getManualFlag(), groupDtos ,cmd.getNamespaceId(),cmd.getLatestUpdateTime());
 			}
 
 
@@ -4610,14 +4614,27 @@ public class QualityServiceImpl implements QualityService {
 	@Override
 	public QualityOfflineTaskDetailsResponse getOfflineTaskDetail(ListQualityInspectionTasksCommand cmd) {
 		//处理传过来的lastSyncTime
-		cmd.setPageSize(Integer.MAX_VALUE-1);
+		cmd.setPageSize(Integer.MAX_VALUE - 1);
+		cmd.setLatestUpdateTime(dateStrToTimestamp(cmd.getLastSyncTime()));
 		ListQualityInspectionTasksResponse tasksResponse = listQualityInspectionTasks(cmd);
 		QualityOfflineTaskDetailsResponse offlineTaskDetailsResponse = new QualityOfflineTaskDetailsResponse();
 
 		offlineTaskDetailsResponse.setTasks(tasksResponse.getTasks());
-		tasksResponse.getTasks().forEach((task)->{
-
+		tasksResponse.getTasks().forEach((task) -> {
+			if (task.getExecutiveTime() == null) {
+				task.setLastSyncTime(task.getCreateTime().toLocalDateTime().format(dateSF));
+			} else {
+				if (task.getProcessTime() == null) {
+					task.setLastSyncTime(task.getExecutiveTime().toLocalDateTime().format(dateSF));
+				} else {
+					task.setLastSyncTime(task.getProcessTime().toLocalDateTime().format(dateSF));
+				}
+			}
 		});
 		return null;
+	}
+	private Timestamp dateStrToTimestamp(String str) {
+		LocalDate localDate = LocalDate.parse(str,dateSF);
+		return  new Timestamp(Date.valueOf(localDate).getTime());
 	}
 }
