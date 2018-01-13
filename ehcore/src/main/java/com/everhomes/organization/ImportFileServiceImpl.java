@@ -165,7 +165,7 @@ public class ImportFileServiceImpl implements ImportFileService{
                             titleRow.createCell(cellNum ++).setCellValue(entry.getValue());
                         }
                     }
-
+                    LOGGER.debug("data size ={} .title:{}",data.size(),StringHelper.toJsonString(data));
                     titleRow.createCell(cellNum ++).setCellValue("错误原因");
                 }
 
@@ -177,7 +177,7 @@ public class ImportFileServiceImpl implements ImportFileService{
                     for (Map.Entry<String, String> entry : data.entrySet()) {
                         row.createCell(cellNum ++).setCellValue(entry.getValue());
                     }
-                    LOGGER.debug("log is "+ log);
+                    LOGGER.debug("title size ={} .title:{}",titleMap.size(),StringHelper.toJsonString(titleMap));
                     if (StringUtils.isNotBlank(log.getErrorDescription())) {
                         row.createCell(titleMap.size()).setCellValue(log.getErrorDescription());
                     } else {
