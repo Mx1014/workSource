@@ -796,10 +796,11 @@ public class SocialSecurityServiceImpl implements SocialSecurityService {
 
         String paymentMonth = socialSecurityPaymentProvider.findPaymentMonthByDetail(detailId);
         if (null == paymentMonth) {
-            paymentMonth =  monthSF.get().format(DateHelper.currentGMTTime());
+            paymentMonth = monthSF.get().format(DateHelper.currentGMTTime());
         }
         return paymentMonth;
     }
+
     private void saveSocialSecurityPayment(SocialSecurityPaymentDetailDTO socialSecurityPayment, Long detailId, Byte afterPay, Byte accumOrSocial) {
         String paymentMonth = getPayMonth(detailId);
         for (SocialSecurityItemDTO itemDTO : socialSecurityPayment.getItems()) {
@@ -1067,9 +1068,9 @@ public class SocialSecurityServiceImpl implements SocialSecurityService {
 //            response.getLogs().add(log);
             Map<String, String> data = new HashMap();
             for (Map.Entry<String, String> entry : titleMap.entrySet()) {
-                data.put(entry.getKey(), r.getCells().get(entry.getKey()));
+                data.put(entry.getKey(), (r.getCells().get(entry.getKey()) == null) ? "" : r.getCells().get(entry.getKey()));
             }
-                log.setData(data);
+            log.setData(data);
             String userContact = r.getA().trim();
             OrganizationMemberDetails detail = organizationProvider.findOrganizationMemberDetailsByOrganizationIdAndContactToken(ownerId, userContact);
             if (null == detail) {
@@ -1840,7 +1841,7 @@ public class SocialSecurityServiceImpl implements SocialSecurityService {
         Row row = sheet.createRow(sheet.getLastRowNum() + 1);
         int i = -1;
         row.createCell(++i).setCellValue(r.getUserName());
-        row.createCell(++i).setCellValue(r.getEntryDate() == null ? "":dateSF.get().format(r.getEntryDate()));
+        row.createCell(++i).setCellValue(r.getEntryDate() == null ? "" : dateSF.get().format(r.getEntryDate()));
         row.createCell(++i).setCellValue(r.getContactToken());
         row.createCell(++i).setCellValue(r.getIdNumber());
         row.createCell(++i).setCellValue(r.getDegree());
@@ -1849,7 +1850,7 @@ public class SocialSecurityServiceImpl implements SocialSecurityService {
         row.createCell(++i).setCellValue(r.getDeptName());
         row.createCell(++i).setCellValue(r.getSocialSecurityNumber());
         row.createCell(++i).setCellValue(r.getProvidentFundNumber());
-        row.createCell(++i).setCellValue(r.getOutWorkDate() == null ? "":dateSF.get().format(r.getOutWorkDate()));
+        row.createCell(++i).setCellValue(r.getOutWorkDate() == null ? "" : dateSF.get().format(r.getOutWorkDate()));
         row.createCell(++i).setCellValue(r.getHouseholdType());
         row.createCell(++i).setCellValue(r.getSocialSecurityCityName());
         row.createCell(++i).setCellValue(r.getPayMonth());
@@ -2127,7 +2128,7 @@ public class SocialSecurityServiceImpl implements SocialSecurityService {
         params.put("ownerId", cmd.getOwnerId());
         params.put("payMonth", cmd.getPayMonth());
         params.put("reportType", "exportSocialSecurityDepartmentSummarys");
-        String fileName = String.format("%s社保部门汇总报表.xlsx",cmd.getPayMonth());
+        String fileName = String.format("%s社保部门汇总报表.xlsx", cmd.getPayMonth());
 
         taskService.createTask(fileName, TaskType.FILEDOWNLOAD.getCode(), SocialSecurityReportsTaskHandler.class, params, TaskRepeatFlag.REPEAT.getCode(), new Date());
 
@@ -2276,8 +2277,8 @@ public class SocialSecurityServiceImpl implements SocialSecurityService {
         Row row = sheet.createRow(sheet.getLastRowNum() + 1);
         int i = -1;
         row.createCell(++i).setCellValue(r.getUserName());
-        row.createCell(++i).setCellValue(r.getEntryDate() == null ? "":dateSF.get().format(r.getEntryDate()));
-        row.createCell(++i).setCellValue(r.getOutWorkDate() == null ? "":dateSF.get().format(r.getOutWorkDate()));
+        row.createCell(++i).setCellValue(r.getEntryDate() == null ? "" : dateSF.get().format(r.getEntryDate()));
+        row.createCell(++i).setCellValue(r.getOutWorkDate() == null ? "" : dateSF.get().format(r.getOutWorkDate()));
         row.createCell(++i).setCellValue(r.getContactToken());
         row.createCell(++i).setCellValue(r.getIdNumber());
         row.createCell(++i).setCellValue(r.getDegree());
