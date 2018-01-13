@@ -81,7 +81,7 @@ public class FileManagementController extends ControllerBase {
      */
     @RequestMapping("listAvailableFileContents")
     @RestReturn(value = ListFileCatalogResponse.class)
-    public RestResponse listAvailableFileContents(listFileContentCommand cmd) {
+    public RestResponse listAvailableFileContents(ListFileCatalogsCommand cmd) {
         ListFileCatalogResponse res = fileManagementService.listAvailableFileContents(cmd);
         RestResponse response = new RestResponse(res);
         response.setErrorCode(ErrorCodes.SUCCESS);
@@ -222,7 +222,7 @@ public class FileManagementController extends ControllerBase {
      */
     @RequestMapping("listFileContents")
     @RestReturn(value = ListFileContentResponse.class)
-    public RestResponse listFileContents(listFileContentCommand cmd) {
+    public RestResponse listFileContents(ListFileContentCommand cmd) {
         ListFileContentResponse res = fileManagementService.listFileContents(cmd);
         RestResponse response = new RestResponse(res);
         response.setErrorCode(ErrorCodes.SUCCESS);

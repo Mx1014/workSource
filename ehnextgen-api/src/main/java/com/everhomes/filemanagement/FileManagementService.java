@@ -14,7 +14,7 @@ public interface FileManagementService {
 
     ListFileCatalogResponse listFileCatalogs(ListFileCatalogsCommand cmd);
 
-    ListFileCatalogResponse listAvailableFileContents(listFileContentCommand cmd);
+    ListFileCatalogResponse listAvailableFileContents(ListFileCatalogsCommand cmd);
 
     ListFileContentResponse enterFileCatalog(FileCatalogIdCommand cmd);
 
@@ -34,5 +34,5 @@ public interface FileManagementService {
 
     FileContentDTO updateFileContentName(UpdateFileContentNameCommand cmd);
 
-    ListFileContentResponse listFileContents(listFileContentCommand cmd);
+    ListFileContentResponse listFileContents(ListFileContentCommand cmd);
 }

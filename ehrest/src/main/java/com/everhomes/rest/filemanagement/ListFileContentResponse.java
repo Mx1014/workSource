@@ -7,16 +7,23 @@ import java.util.List;
 
 /**
  * <ul>
- * <li>nextPageOffset: 下一页页码</li>
- * <li>contents: 内容列表，参考{@link com.everhomes.rest.filemanagement.FileContentDTO}</li>
+ * <li>downloadPermission: 下载权限 0-拒绝下载 1-允许下载</li>
+ * <li>folders: 文件夹列表 {@link com.everhomes.rest.filemanagement.FileContentDTO}</li>
+ * <li>files: 文件列表 {@link com.everhomes.rest.filemanagement.FileContentDTO}</li>
  * </ul>
  */
 public class ListFileContentResponse {
 
     private Integer nextPageOffset;
 
+    private Byte downloadPermission;
+
     @ItemType(FileContentDTO.class)
-    private List<FileContentDTO> contents;
+    private List<FileContentDTO> folders;
+
+    @ItemType(FileContentDTO.class)
+    private List<FileContentDTO> files;
+
 
     public ListFileContentResponse() {
     }
@@ -29,12 +36,28 @@ public class ListFileContentResponse {
         this.nextPageOffset = nextPageOffset;
     }
 
-    public List<FileContentDTO> getContents() {
-        return contents;
+    public Byte getDownloadPermission() {
+        return downloadPermission;
     }
 
-    public void setContents(List<FileContentDTO> contents) {
-        this.contents = contents;
+    public void setDownloadPermission(Byte downloadPermission) {
+        this.downloadPermission = downloadPermission;
+    }
+
+    public List<FileContentDTO> getFolders() {
+        return folders;
+    }
+
+    public void setFolders(List<FileContentDTO> folders) {
+        this.folders = folders;
+    }
+
+    public List<FileContentDTO> getFiles() {
+        return files;
+    }
+
+    public void setFiles(List<FileContentDTO> files) {
+        this.files = files;
     }
 
     @Override

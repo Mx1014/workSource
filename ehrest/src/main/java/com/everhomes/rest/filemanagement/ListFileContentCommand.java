@@ -6,11 +6,9 @@ import com.everhomes.util.StringHelper;
  * <ul>
  * <li>contentId: 内容id</li>
  * <li>keywords: 关键词</li>
- * <li>pageOffset: 页码</li>
- * <li>pageSize: 页面大小</li>
  * </ul>
  */
-public class listFileContentCommand {
+public class ListFileContentCommand {
 
     private Long contentId;
 
@@ -20,7 +18,7 @@ public class listFileContentCommand {
 
     private Integer pageSize;
 
-    public listFileContentCommand() {
+    public ListFileContentCommand() {
     }
 
     public Long getContentId() {

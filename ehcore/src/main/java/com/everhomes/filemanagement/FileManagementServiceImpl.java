@@ -28,7 +28,7 @@ public class FileManagementServiceImpl implements  FileManagementService{
     }
 
     @Override
-    public ListFileCatalogResponse listAvailableFileContents(listFileContentCommand cmd) {
+    public ListFileCatalogResponse listAvailableFileContents(ListFileCatalogsCommand cmd) {
         return null;
     }
 
@@ -78,7 +78,7 @@ public class FileManagementServiceImpl implements  FileManagementService{
     }
 
     @Override
-    public ListFileContentResponse listFileContents(listFileContentCommand cmd) {
+    public ListFileContentResponse listFileContents(ListFileContentCommand cmd) {
         return null;
     }
 }
