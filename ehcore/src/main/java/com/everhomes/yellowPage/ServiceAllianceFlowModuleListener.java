@@ -112,9 +112,18 @@ public class ServiceAllianceFlowModuleListener extends GeneralApprovalFlowModule
 		List<ServiceAllianceNotifyTargets> emails = yellowPageProvider.listNotifyTargets(category.getNamespaceId(), ContactType.EMAIL.getCode(),
 				category.getId(), locator, Integer.MAX_VALUE);
 	}
-
+	
 	@Override
 	public void onFlowCaseCreating(FlowCase flowCase) {
+		try{
+			sOnFlowCaseCreating(flowCase);
+		}catch (Exception e) {
+			LOGGER.info("sOnFlowCaseCreating : ",e);
+			throw e;
+		}
+	}
+
+	public void sOnFlowCaseCreating(FlowCase flowCase) {
 		//旧表单直接退出
 		if(flowCase.getOwnerType()!=null && !FlowOwnerType.GENERAL_APPROVAL.getCode().equals(flowCase.getOwnerType()))
 			return;
@@ -239,11 +248,11 @@ public class ServiceAllianceFlowModuleListener extends GeneralApprovalFlowModule
 				meta.put(MessageMetaConstant.META_OBJECT, StringHelper.toJsonString(metaObject));
 
 				if(serviceOrg.getContactMemid()!=null && serviceOrg.getContactMemid()!=0) {
-					OrganizationMember member = organizationProvider.findOrganizationMemberById(serviceOrg.getContactMemid());
+//					OrganizationMember member = organizationProvider.findOrganizationMemberById(serviceOrg.getContactMemid());
 
-					MessageDTO messageDto = createMessageDto(body, meta, member.getTargetId().toString());
+					MessageDTO messageDto = createMessageDto(body, meta, String.valueOf(serviceOrg.getContactMemid()));
 					messagingService.routeMessage(User.SYSTEM_USER_LOGIN, AppConstants.APPID_MESSAGING, MessageChannelType.USER.getCode(),
-							member.getTargetId().toString(), messageDto, MessagingConstants.MSG_FLAG_STORED_PUSH.getCode());
+							String.valueOf(serviceOrg.getContactMemid()), messageDto, MessagingConstants.MSG_FLAG_STORED_PUSH.getCode());
 				}
 
 				if (targets != null && targets.size() > 0) {
