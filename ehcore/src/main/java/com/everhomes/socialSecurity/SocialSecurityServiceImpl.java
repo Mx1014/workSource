@@ -1485,6 +1485,9 @@ public class SocialSecurityServiceImpl implements SocialSecurityService {
         if (detailIds != null && detailIds.size() > 0) {
             summary = socialSecurityReportProvider.calculateSocialSecurityDepartmentSummary(detailIds, month);
         }
+        if (null == summary) {
+            summary = new SocialSecurityDepartmentSummary();
+        }
         summary.setNamespaceId(dpt.getNamespaceId());
         summary.setDeptId(dpt.getId());
         summary.setDeptName(processOrgPathName(dpt.getPath()));
