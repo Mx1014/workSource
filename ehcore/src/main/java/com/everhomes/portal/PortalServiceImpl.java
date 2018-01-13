@@ -1307,7 +1307,9 @@ public class PortalServiceImpl implements PortalService {
 					//同步和发布的时候不用预览账号
 					UserContext.current().setPreviewPortalVersionId(null);
 					dbProvider.execute((status) -> {
-						//TODO 清理预览版本服务广场数据
+
+						//清理预览版本服务广场数据
+						removePreviewVersion(namespaceId);
 
 						//发布item分类
 						publishItemCategory(namespaceId, cmd.getVersionId(), cmd.getPublishType());
@@ -1350,8 +1352,9 @@ public class PortalServiceImpl implements PortalService {
 
 
 	private void removePreviewVersion(Integer namespaceId){
-
-
+		launchPadProvider.deletePreviewVersionItems(namespaceId);
+		launchPadProvider.deletePreviewVersionCategories(namespaceId);
+		launchPadProvider.deletePreviewVersionLayouts(namespaceId);
 	}
 
 	/**

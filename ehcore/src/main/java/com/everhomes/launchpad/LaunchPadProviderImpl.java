@@ -736,11 +736,30 @@ public class LaunchPadProviderImpl implements LaunchPadProvider {
 		return DSL.condition(sql);
 	}
 
+	@Override
 	public void deletePreviewVersionItems(Integer namespaceId){
 		DSLContext context = dbProvider.getDslContext(AccessSpec.readOnlyWith(EhLaunchPadItems.class));
 		DeleteQuery query = context.deleteQuery(Tables.EH_LAUNCH_PAD_ITEMS);
 		query.addConditions(Tables.EH_LAUNCH_PAD_ITEMS.NAMESPACE_ID.eq(namespaceId));
 		query.addConditions(Tables.EH_LAUNCH_PAD_ITEMS.PREVIEW_PORTAL_VERSION_ID.isNotNull());
+		query.execute();
+	}
+
+	@Override
+	public void deletePreviewVersionLayouts(Integer namespaceId){
+		DSLContext context = dbProvider.getDslContext(AccessSpec.readOnlyWith(EhLaunchPadLayouts.class));
+		DeleteQuery query = context.deleteQuery(Tables.EH_LAUNCH_PAD_LAYOUTS);
+		query.addConditions(Tables.EH_LAUNCH_PAD_LAYOUTS.NAMESPACE_ID.eq(namespaceId));
+		query.addConditions(Tables.EH_LAUNCH_PAD_LAYOUTS.PREVIEW_PORTAL_VERSION_ID.isNotNull());
+		query.execute();
+	}
+
+	@Override
+	public void deletePreviewVersionCategories(Integer namespaceId){
+		DSLContext context = dbProvider.getDslContext(AccessSpec.readOnlyWith(EhItemServiceCategries.class));
+		DeleteQuery query = context.deleteQuery(Tables.EH_ITEM_SERVICE_CATEGRIES);
+		query.addConditions(Tables.EH_ITEM_SERVICE_CATEGRIES.NAMESPACE_ID.eq(namespaceId));
+		query.addConditions(Tables.EH_ITEM_SERVICE_CATEGRIES.PREVIEW_PORTAL_VERSION_ID.isNotNull());
 		query.execute();
 	}
 

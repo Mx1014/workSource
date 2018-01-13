@@ -52,4 +52,10 @@ public interface LaunchPadProvider {
     List<LaunchPadItem> findLaunchPadItem(Integer namespaceId,String itemGroup,String location);
 
     List<LaunchPadItem> findLaunchPadItem(Integer namespaceId,String itemGroup, String location, String itemName, Byte scopeCode, Long scopeId);
+
+    void deletePreviewVersionItems(Integer namespaceId);
+
+    void deletePreviewVersionLayouts(Integer namespaceId);
+
+    void deletePreviewVersionCategories(Integer namespaceId);
 }
