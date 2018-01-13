@@ -35,9 +35,9 @@ public class PunchOperationLogProviderImpl implements PunchOperationLogProvider 
 		Long id = sequenceProvider.getNextSequence(NameMapper.getSequenceDomainFromTablePojo(EhPunchOperationLogs.class));
 		punchOperationLog.setId(id);
 		punchOperationLog.setCreateTime(new Timestamp(DateHelper.currentGMTTime().getTime()));
-		punchOperationLog.setCreatorUid(UserContext.current().getUser().getId());
-		punchOperationLog.setUpdateTime(punchOperationLog.getCreateTime());
-		punchOperationLog.setOperatorUid(punchOperationLog.getCreatorUid());
+//		punchOperationLog.setCreatorUid(UserContext.current().getUser().getId());
+//		punchOperationLog.setUpdateTime(punchOperationLog.getCreateTime());
+//		punchOperationLog.setOperatorUid(punchOperationLog.getCreatorUid());
 		getReadWriteDao().insert(punchOperationLog);
 		DaoHelper.publishDaoAction(DaoAction.CREATE, EhPunchOperationLogs.class, null);
 	}
@@ -45,7 +45,7 @@ public class PunchOperationLogProviderImpl implements PunchOperationLogProvider 
 	@Override
 	public void updatePunchOperationLog(PunchOperationLog punchOperationLog) {
 		assert (punchOperationLog.getId() != null);
-		punchOperationLog.setUpdateTime(new Timestamp(DateHelper.currentGMTTime().getTime()));
+//		punchOperationLog.setUpdateTime(new Timestamp(DateHelper.currentGMTTime().getTime()));
 		punchOperationLog.setOperatorUid(UserContext.current().getUser().getId());
 		getReadWriteDao().update(punchOperationLog);
 		DaoHelper.publishDaoAction(DaoAction.MODIFY, EhPunchOperationLogs.class, punchOperationLog.getId());
