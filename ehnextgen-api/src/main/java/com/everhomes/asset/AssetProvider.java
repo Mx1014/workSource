@@ -272,4 +272,22 @@ public interface AssetProvider {
     List<PaymentBills> findPaidBillsByIds(List<String> billIds);
 
     void reCalBillById(long billId);
+
+    SettledBillRes getSettledBills(int pageSize, long pageAnchor);
+
+    void changeBillToDue(Long id);
+
+    List<PaymentBillItems> getBillItemsByBillIds(List<Long> overdueBillIds);
+
+    void updatePaymentItem(PaymentBillItems item);
+
+    BigDecimal getLateFineAmountByItemId(Long id);
+
+    void createLateFine(PaymentLateFine fine);
+
+    void updateBillAmountOwedDueToFine(BigDecimal fineAmount, Long billId);
+
+    List<ListLateFineStandardsDTO> listLateFineStandards(Long ownerId, String ownerType, Integer namespaceId);
+
+    void updateLateFineAndBill(PaymentLateFine fine, BigDecimal fineAmount, Long billId);
 }

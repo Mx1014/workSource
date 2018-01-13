@@ -18,12 +18,14 @@ import com.everhomes.acl.RolePrivilegeService;
 import com.everhomes.address.Address;
 import com.everhomes.address.AddressProvider;
 
-import com.everhomes.asset.*;
+
+import com.everhomes.asset.AssetPaymentConstants;
+import com.everhomes.asset.AssetProvider;
+import com.everhomes.asset.AssetService;
+
 
 import com.everhomes.bootstrap.PlatformContext;
-import com.everhomes.constants.ErrorCodes;
 import com.everhomes.contentserver.ContentServerService;
-import com.everhomes.customer.CustomerHandle;
 import com.everhomes.customer.EnterpriseCustomer;
 import com.everhomes.customer.EnterpriseCustomerProvider;
 import com.everhomes.customer.IndividualCustomerProvider;
@@ -31,8 +33,6 @@ import com.everhomes.entity.EntityType;
 import com.everhomes.flow.Flow;
 import com.everhomes.flow.FlowService;
 import com.everhomes.locale.LocaleStringService;
-import com.everhomes.namespace.Namespace;
-import com.everhomes.namespace.NamespaceResource;
 import com.everhomes.openapi.ContractBuildingMapping;
 import com.everhomes.organization.*;
 import com.everhomes.organization.pm.CommunityAddressMapping;
@@ -52,6 +52,7 @@ import com.everhomes.rest.flow.CreateFlowCaseCommand;
 import com.everhomes.rest.flow.FlowConstants;
 import com.everhomes.rest.flow.FlowModuleType;
 import com.everhomes.rest.flow.FlowOwnerType;
+
 import com.everhomes.rest.launchpad.ActionType;
 import com.everhomes.rest.namespace.NamespaceCommunityType;
 import com.everhomes.rest.organization.OrganizationContactDTO;
@@ -62,6 +63,7 @@ import com.everhomes.rest.portal.ListServiceModuleAppsCommand;
 import com.everhomes.rest.portal.ListServiceModuleAppsResponse;
 import com.everhomes.rest.repeat.RangeDTO;
 import com.everhomes.rest.repeat.TimeRangeDTO;
+
 import com.everhomes.search.ContractSearcher;
 import com.everhomes.user.*;
 import com.everhomes.util.*;
@@ -83,7 +85,6 @@ import com.everhomes.community.CommunityProvider;
 import com.everhomes.configuration.ConfigurationProvider;
 import com.everhomes.coordinator.CoordinationLocks;
 import com.everhomes.coordinator.CoordinationProvider;
-import com.everhomes.coordinator.NamedLock;
 import com.everhomes.openapi.Contract;
 import com.everhomes.openapi.ContractBuildingMappingProvider;
 import com.everhomes.openapi.ContractProvider;
@@ -97,7 +98,6 @@ import com.everhomes.settings.PaginationConfigHelper;
 import com.everhomes.sms.SmsProvider;
 
 import javax.annotation.PostConstruct;
-import javax.servlet.http.HttpServletResponse;
 
 @Component(ContractService.CONTRACT_PREFIX + "")
 public class ContractServiceImpl implements ContractService {
@@ -604,7 +604,7 @@ public class ContractServiceImpl implements ContractService {
 	}
 
 	private void generatePaymentExpectancies(Contract contract, List<ContractChargingItemDTO> chargingItems, List<ContractChargingChangeDTO> adjusts, List<ContractChargingChangeDTO> frees) {
-		assetService.upodateBillStatusOnContractStatusChange(contract.getId(), AssetPaymentStrings.CONTRACT_CANCEL);
+		assetService.upodateBillStatusOnContractStatusChange(contract.getId(), AssetPaymentConstants.CONTRACT_CANCEL);
 
 		if((chargingItems == null || chargingItems.size() == 0)
 				&& (adjusts == null || adjusts.size() == 0) && (frees == null || frees.size() == 0)) {
@@ -724,6 +724,7 @@ public class ContractServiceImpl implements ContractService {
 			FeeRules feeRule = new FeeRules();
 			feeRule.setChargingItemId(chargingItem.getChargingItemId());
 			feeRule.setChargingStandardId(chargingItem.getChargingStandardId());
+			feeRule.setLateFeeStandardId(chargingItem.getLateFeeStandardId());
 			if(chargingItem.getChargingStartTime() != null){
 				feeRule.setDateStrBegin(new Date(chargingItem.getChargingStartTime()));
 			}
@@ -1227,7 +1228,7 @@ public class ContractServiceImpl implements ContractService {
 			}
 		}
 
-		assetService.upodateBillStatusOnContractStatusChange(contract.getId(), AssetPaymentStrings.CONTRACT_SAVE);
+		assetService.upodateBillStatusOnContractStatusChange(contract.getId(), AssetPaymentConstants.CONTRACT_SAVE);
 		if(contract.getParentId() != null) {
 			Contract parentContract = contractProvider.findContractById(contract.getParentId());
 			if(parentContract != null) {
@@ -1609,6 +1610,8 @@ public class ContractServiceImpl implements ContractService {
 				itemDto.setChargingItemName(itemName);
 				String standardName = assetProvider.getStandardNameById(itemDto.getChargingStandardId());
 				itemDto.setChargingStandardName(standardName);
+				String lateFeeStandardName = assetProvider.getStandardNameById(itemDto.getLateFeeStandardId());
+				itemDto.setLateFeeStandardName(lateFeeStandardName);
 				processContractChargingItemAddresses(itemDto);
 
 				return itemDto;

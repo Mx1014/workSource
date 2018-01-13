@@ -1,13 +1,6 @@
--- domain 增加name, icon
-ALTER TABLE `eh_domains` ADD COLUMN `icon_uri`  varchar(255) NULL AFTER `create_time`;
-ALTER TABLE `eh_domains` ADD COLUMN `name`  varchar(255) NULL AFTER `namespace_id`;
-
-ALTER TABLE `eh_web_menu_scopes` ADD COLUMN `app_id`  bigint(20) NULL COMMENT 'eh_service_module_app id';
-ALTER TABLE `eh_web_menu_scopes` DROP INDEX `u_menu_scope_owner` , ADD UNIQUE INDEX `u_menu_scope_owner` (`menu_id`, `owner_type`, `owner_id`, `app_id`) USING BTREE ;
-
--- 账单item关联滞纳金 by wentian
+-- 账单item关联滞纳金
 ALTER TABLE `eh_payment_bill_items` ADD COLUMN `late_fine_standard_id` BIGINT DEFAULT NULL COMMENT '滞纳金标准id';
--- 滞纳金表 by wentian
+-- 滞纳金表
 DROP TABLE IF EXISTS `eh_payment_late_fine`;
 CREATE TABLE `eh_payment_late_fine`(
   `id` BIGINT NOT NULL COMMENT 'primary key',
@@ -24,3 +17,7 @@ CREATE TABLE `eh_payment_late_fine`(
   `customer_type` VARCHAR(20) NOT NULL COMMENT 'break of user info benefits',
   PRIMARY KEY (`id`)
 ) ENGINE = INNODB DEFAULT CHARSET = utf8mb4;
+
+-- 滞纳金变量 by wentian
+SET @var_id = (SELECT max(`id`) from `eh_payment_variables`);
+INSERT INTO `eh_payment_variables` (`id`, `charging_standard_id`, `charging_items_id`, `name`, `creator_uid`, `create_time`, `operator_uid`, `update_time`, `identifier`) VALUES (@var_id:=@var_id+1, NULL, '6', '欠费', '0', '2017-10-16 09:31:00', NULL, '2017-10-16 09:31:00', 'qf');

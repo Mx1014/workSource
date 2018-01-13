@@ -22,10 +22,8 @@ import com.everhomes.rest.group.GroupDiscriminator;
 import com.everhomes.rest.order.OrderType;
 import com.everhomes.rest.order.PreOrderCommand;
 import com.everhomes.rest.order.PreOrderDTO;
-import com.everhomes.rest.organization.OrganizationDTO;
 import com.everhomes.rest.organization.SearchOrganizationCommand;
 import com.everhomes.rest.search.GroupQueryResult;
-import com.everhomes.rest.techpark.company.ContactType;
 import com.everhomes.search.OrganizationSearcher;
 import com.everhomes.server.schema.tables.pojos.EhAssetBills;
 import com.everhomes.settings.PaginationConfigHelper;
@@ -33,8 +31,6 @@ import com.everhomes.user.*;
 import com.everhomes.util.ConvertHelper;
 import com.everhomes.util.RuntimeErrorException;
 import com.everhomes.util.excel.ExcelUtils;
-import com.sun.xml.bind.AnyTypeAdapter;
-import freemarker.core.ArithmeticEngine;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -385,7 +381,7 @@ public class ZuolinAssetVendorHandler implements AssetVendorHandler {
     }
 
     private void checkCustomerParameter(String targetType, Long targetId) {
-        if(!targetType.equals(AssetPaymentStrings.EH_USER) && !targetType.equals(AssetPaymentStrings.EH_ORGANIZATION)){
+        if(!targetType.equals(AssetPaymentConstants.EH_USER) && !targetType.equals(AssetPaymentConstants.EH_ORGANIZATION)){
             LOGGER.error("target type is neither eh_user nor eh_organization");
             throw RuntimeErrorException.errorWith(ErrorCodes.SCOPE_GENERAL,ErrorCodes.ERROR_INVALID_PARAMETER,"target type is neither eh_user nor eh_organization");
         }
@@ -403,11 +399,11 @@ public class ZuolinAssetVendorHandler implements AssetVendorHandler {
 //        ListCustomerContractsCommand cmd1 = new ListCustomerContractsCommand();
 //        cmd1.setNamespaceId(UserContext.getCurrentNamespaceId());
 //        cmd1.setCommunityId(cmd.getCommunityId());
-//        if(targeType.equals(AssetPaymentStrings.EH_USER)){
+//        if(targeType.equals(AssetPaymentConstants.EH_USER)){
 //            cmd1.setTargetId(UserContext.currentUserId());
 //            cmd1.setTargetType(CustomerType.INDIVIDUAL.getCode());
 //            res.setCustomerName(UserContext.current().getUser().getNickName());
-//        }else if(targeType.equals(AssetPaymentStrings.EH_ORGANIZATION)){
+//        }else if(targeType.equals(AssetPaymentConstants.EH_ORGANIZATION)){
 //            cmd1.setTargetId(cmd.getTargetId());
 //            cmd1.setTargetType(CustomerType.ENTERPRISE.getCode());
 //            OrganizationDTO organizationById = organizationService.getOrganizationById(cmd.getTargetId());
@@ -743,6 +739,8 @@ public class ZuolinAssetVendorHandler implements AssetVendorHandler {
 //        contracts.stream().forEach(r -> contractMap.put(r.getId(),r));
 //        contracts.stream().forEach(r -> contractIds.add(r.getId()));
 //        List<PaymentBills> bills = assetProvider.findSettledBillsByContractIds(contractIds);
+
+        //定位用户，如果是个人用户，前端拿不到用户id，从会话中获得
         if(cmd.getTargetType().equals(AssetPaymentStrings.EH_USER)){
             cmd.setTargetId(UserContext.currentUserId());
         }
@@ -838,7 +836,7 @@ public class ZuolinAssetVendorHandler implements AssetVendorHandler {
 
     @Override
     public List<ListAllBillsForClientDTO> listAllBillsForClient(ListAllBillsForClientCommand cmd) {
-        return assetProvider.listAllBillsForClient(cmd.getNamespaceId(),cmd.getOwnerType(),cmd.getOwnerId(),cmd.getTargetType(),cmd.getOwnerType().equals(AssetPaymentStrings.EH_USER)?UserContext.currentUserId():cmd.getTargetId());
+        return assetProvider.listAllBillsForClient(cmd.getNamespaceId(),cmd.getOwnerType(),cmd.getOwnerId(),cmd.getTargetType(),cmd.getOwnerType().equals(AssetPaymentConstants.EH_USER)?UserContext.currentUserId():cmd.getTargetId());
     }
 
 
@@ -917,10 +915,10 @@ public class ZuolinAssetVendorHandler implements AssetVendorHandler {
     }
     private List<ContractDTO> listCustomerContracts(String targetType,Long targetId,Integer namespaceId,Long communityId){
         ListCustomerContractsCommand cmd = new ListCustomerContractsCommand();
-        if(targetType.equals(AssetPaymentStrings.EH_ORGANIZATION)){
+        if(targetType.equals(AssetPaymentConstants.EH_ORGANIZATION)){
             cmd.setTargetType(CustomerType.ENTERPRISE.getCode());
             cmd.setTargetId(targetId);
-        }else if(targetType.equals(AssetPaymentStrings.EH_USER)){
+        }else if(targetType.equals(AssetPaymentConstants.EH_USER)){
             cmd.setTargetType(CustomerType.INDIVIDUAL.getCode());
             cmd.setTargetId(UserContext.currentUserId());
         }
