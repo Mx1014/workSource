@@ -329,6 +329,9 @@ public class DoorAuthProviderImpl implements DoorAuthProvider {
         return auths.get(0);
     }
 
+    /**
+     * 返回所有非 Forever 的授权记录
+     */
     @Override
     public List<DoorAuth> queryDoorAuthByApproveId(ListingLocator locator, Long approveId, int count) {
 
@@ -338,7 +341,7 @@ public class DoorAuthProviderImpl implements DoorAuthProvider {
             public SelectQuery<? extends Record> buildCondition(ListingLocator locator,
                     SelectQuery<? extends Record> query) {
                 query.addConditions(Tables.EH_DOOR_AUTH.APPROVE_USER_ID.eq(approveId));
-                query.addConditions(Tables.EH_DOOR_AUTH.AUTH_TYPE.eq(DoorAuthType.TEMPERATE.getCode()));
+                query.addConditions(Tables.EH_DOOR_AUTH.AUTH_TYPE.ne(DoorAuthType.FOREVER.getCode()));
                 return query;
             }
 
