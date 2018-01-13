@@ -217,6 +217,20 @@ public class Utils {
         headers.put(HTTP.CONTENT_TYPE, MimeType.APPLICATION_JSON);
         return post(url, param, headers);
     }
+    
+    /**
+    *
+    * @param url
+    * @param params
+    * @param charset
+    * @return
+    */
+    public static String post(String url, JSONObject params,Charset charset) {
+    	  //设置body json格式
+        Map<String, String> headers = new HashMap<>();
+        headers.put(HTTP.CONTENT_TYPE, MimeType.APPLICATION_JSON);
+        return post(url, params, headers,charset);
+    }
 
     /**
     *

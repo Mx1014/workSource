@@ -924,6 +924,8 @@ public class ZuolinAssetVendorHandler implements AssetVendorHandler {
             cmd.setTargetType(CustomerType.INDIVIDUAL.getCode());
             cmd.setTargetId(UserContext.currentUserId());
         }
+        //合同方面新增了cmd的默认参数
+        cmd.setAdminFlag((byte)1);
         cmd.setNamespaceId(namespaceId);
         cmd.setCommunityId(communityId);
         return contractService.listCustomerContracts(cmd);
