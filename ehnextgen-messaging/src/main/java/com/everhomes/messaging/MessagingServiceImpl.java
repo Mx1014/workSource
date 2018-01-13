@@ -1,14 +1,17 @@
 // @formatter:off
 package com.everhomes.messaging;
 
+import com.alibaba.fastjson.JSONObject;
+import com.everhomes.bigcollection.Accessor;
+import com.everhomes.bus.*;
 import com.everhomes.configuration.ConfigurationProvider;
 import com.everhomes.msgbox.Message;
 import com.everhomes.msgbox.MessageBoxProvider;
 import com.everhomes.msgbox.MessageLocator;
+import com.everhomes.rest.RestResponse;
 import com.everhomes.rest.app.AppConstants;
-import com.everhomes.rest.messaging.MessageChannel;
-import com.everhomes.rest.messaging.MessageDTO;
-import com.everhomes.rest.messaging.MessageMetaConstant;
+import com.everhomes.rest.contentserver.UploadFileInfoDTO;
+import com.everhomes.rest.messaging.*;
 import com.everhomes.rest.user.FetchMessageCommandResponse;
 import com.everhomes.rest.user.FetchPastToRecentMessageCommand;
 import com.everhomes.rest.user.FetchRecentToPastMessageAdminCommand;
@@ -16,15 +19,18 @@ import com.everhomes.rest.user.FetchRecentToPastMessageCommand;
 import com.everhomes.settings.PaginationConfigHelper;
 import com.everhomes.user.UserContext;
 import com.everhomes.user.UserLogin;
-import com.everhomes.util.ConvertHelper;
-import com.everhomes.util.Name;
+import com.everhomes.util.*;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.data.redis.core.RedisTemplate;
 import org.springframework.stereotype.Component;
+import org.springframework.web.context.request.async.DeferredResult;
 
 import javax.annotation.PostConstruct;
+import java.security.Key;
 import java.util.ArrayList;
+import java.util.Date;
 import java.util.List;
 import java.util.Map;
 import java.util.concurrent.ConcurrentHashMap;
@@ -41,6 +47,10 @@ import java.util.stream.Collectors;
 public class MessagingServiceImpl implements MessagingService {
     private static final Logger LOGGER = LoggerFactory.getLogger(MessagingServiceImpl.class);
 
+//    private static BlockingEventStored blockingEventStored = new BlockingEventStored();
+
+    private static final ConcurrentHashMap stored = new ConcurrentHashMap();
+
     @Autowired
     private List<MessageRoutingHandler> handlers; //TODO 给企业一个新的消息信道？
     private Map<String, MessageRoutingHandler> handlerMap = new ConcurrentHashMap<>();
@@ -50,6 +60,23 @@ public class MessagingServiceImpl implements MessagingService {
 
     @Autowired
     private ConfigurationProvider configProvider;
+
+    @Autowired
+    private LocalBusOneshotSubscriberBuilder localBusSubscriberBuilder;
+
+    @Autowired
+    private BusBridgeProvider busBridgeProvider;
+
+    @Autowired
+    private LocalBus localBus;
+
+    @Autowired
+    private LocalBusProvider localBusProvider;
+
+    @Autowired
+    private LocalBusTaskScheduler scheduler;
+
+    static final Integer MAX_TIME_OUT =30*60*1000;
     
     public MessagingServiceImpl() {
     }
@@ -256,4 +283,202 @@ public class MessagingServiceImpl implements MessagingService {
         
         return dto;
     }
+
+
+//    @Override
+//    public DeferredResult<BlockingEventResponse> blockingEvent(String subjectId, String type, Integer timeOut) {
+//        if(timeOut == 0 || timeOut > MAX_TIME_OUT){
+//            return null;
+//        }
+//        String subject = "blockingEventKey." + subjectId;
+//        DeferredResult deferredResult = new DeferredResult();
+//        BlockingEventResponse response = BlockingEventResponse.build(blockingEventStored, subject);
+//
+//        switch (type){
+//            case "ONESHOT":
+//                localBusSubscriberBuilder.build(subject, new LocalBusOneshotSubscriber() {
+//                    @Override
+//                    public Action onLocalBusMessage(Object sender, String subject, Object dtoResp, String path) {
+//                        response.setSubject(subject);
+//                        response.setStatus(BlockingEventStatus.CONTINUTE);
+//                        response.incrCalledTime();
+//                        blockingEventStored.remove(subject + ".calledTimes");
+//                        deferredResult.setResult(response);
+//                        return null;
+//                    }
+//                    @Override
+//                    public void onLocalBusListeningTimeout() {
+//                        //wait again
+//                        response.setStatus(BlockingEventStatus.TIMEOUT);
+//                        deferredResult.setResult(response);
+//                    }
+//
+//                }).setTimeout(timeOut).create();
+//
+//                break;
+//            case "ORORDINARY":
+//                LocalBusSubscriber subscriber = null;
+//                if((LocalBusSubscriber)blockingEventStored.get(subject + "subscriber") != null){
+//                    subscriber = (LocalBusSubscriber)blockingEventStored.get(subject+"subscriber");
+//                }else{
+//                    subscriber = new LocalBusSubscriber(){
+//                        @Override
+//                        public Action onLocalBusMessage(Object sender, String subject, Object dtoResp, String path) {
+//                            response.setSubject(subject);
+//                            response.setStatus(BlockingEventStatus.CONTINUTE);
+//                            response.incrCalledTime();
+//                            blockingEventStored.remove(subject + ".calledTimes");
+//                            blockingEventStored.remove(subject + "subscriber");
+//                            deferredResult.setResult(response);
+//                            return null;
+//                        }
+//                    };
+//
+//                    //把subscriber存起来
+//                    blockingEventStored.set(subject+"subscriber",subscriber);
+//                }
+//
+//                this.localBusProvider.subscribe(subject, subscriber);
+//                if (timeOut != null) {
+//                    Date startTime = new Date(DateHelper.currentGMTTime().getTime() + timeOut.longValue());
+//                    this.scheduler.getScheduler().schedule(new Runnable() {
+//                        public void run() {
+//                            localBusProvider.unsubscribe(subject, (LocalBusSubscriber)BlockingEventStored.get(subject+"subscriber"));
+//                            blockingEventStored.remove(subject + ".calledTimes");
+//                            blockingEventStored.remove(subject);
+//                            response.setStatus(BlockingEventStatus.TIMEOUT);
+//                            deferredResult.setResult(response);
+//                        }
+//                    }, startTime);
+//                }
+//                break;
+//        }
+//
+//
+//
+//        //dto 只有一个线程能成功，如果某一个线程失败，则需要重新请求 uuid
+//        return deferredResult;
+//    }
+
+    @Override
+    public DeferredResult<BlockingEventResponse> blockingEvent(String subjectId, String type, Integer timeOut) {
+        if(timeOut == 0 || timeOut > MAX_TIME_OUT){
+            return null;
+        }
+        String subject = "blockingEventKey." + subjectId;
+        DeferredResult deferredResult = new DeferredResult();
+        BlockingEventResponse response = BlockingEventResponse.build(stored, subject);
+
+        switch (type){
+            case "ONESHOT":
+                localBusSubscriberBuilder.build(subject, new LocalBusOneshotSubscriber() {
+                    @Override
+                    public Action onLocalBusMessage(Object sender, String subject, Object dtoResp, String path) {
+                        response.setSubject(subject);
+                        response.setStatus(BlockingEventStatus.CONTINUTE);
+                        response.incrCalledTime();
+                        stored.remove(subject + ".calledTimes");
+                        deferredResult.setResult(response);
+                        return null;
+                    }
+                    @Override
+                    public void onLocalBusListeningTimeout() {
+                        //wait again
+                        response.setStatus(BlockingEventStatus.TIMEOUT);
+                        deferredResult.setResult(response);
+                    }
+
+                }).setTimeout(timeOut).create();
+
+                break;
+            case "ORORDINARY":
+//                LocalBusSubscriber subscriber = null;
+//                if((LocalBusSubscriber)stored.get(subject + "subscriber") != null){
+//                    subscriber = (LocalBusSubscriber)stored.get(subject+"subscriber");
+//                }else{
+//                    subscriber = new LocalBusSubscriber(){
+//                        @Override
+//                        public Action onLocalBusMessage(Object sender, String subject, Object dtoResp, String path) {
+//                            response.setSubject(subject);
+//                            response.setStatus(BlockingEventStatus.CONTINUTE);
+//                            response.incrCalledTime();
+//                            stored.remove(subject + ".calledTimes");
+//                            stored.remove(subject + "subscriber");
+//                            deferredResult.setResult(response);
+//                            return null;
+//                        }
+//                    };
+//
+//                    //把subscriber存起来
+//                    stored.put(subject+"subscriber",subscriber);
+//                }
+
+                this.localBusProvider.subscribe(subject, new LocalBusSubscriber() {
+                    @Override
+                    public Action onLocalBusMessage(Object sender, String subject, Object dtoResp, String path) {
+                        response.setSubject(subject);
+                        response.setStatus(BlockingEventStatus.CONTINUTE);
+                        response.incrCalledTime();
+                        stored.remove(subject + ".calledTimes");
+                        stored.remove(subject + "subscriber");
+                        deferredResult.setResult(response);
+                        return null;
+                    }
+                });
+                if (timeOut != null) {
+                    Date startTime = new Date(DateHelper.currentGMTTime().getTime() + timeOut.longValue());
+                    this.scheduler.getScheduler().schedule(new Runnable() {
+                        public void run() {
+                            localBusProvider.unsubscribe(subject, (LocalBusSubscriber)stored.get(subject+"subscriber"));
+                            stored.remove(subject + ".calledTimes");
+                            stored.remove(subject);
+                            response.setStatus(BlockingEventStatus.TIMEOUT);
+                            deferredResult.setResult(response);
+                        }
+                    }, startTime);
+                }
+                break;
+        }
+
+    `
+
+        //dto 只有一个线程能成功，如果某一个线程失败，则需要重新请求 uuid
+        return deferredResult;
+    }
+
+
+
+    @Override
+    public String signalBlockingEvent(String uploadId, String message) {
+        String subject = "blockingEventKey." + uploadId;
+//        UploadFileInfoDTO dto = signalFileDTO(cmd, UserContext.currentUserId());
+        ExecutorUtil.submit(new Thread(new Runnable() {
+            @Override
+            public void run() {
+                try {
+                    LocalBusSubscriber localBusSubscriber = (LocalBusSubscriber) busBridgeProvider;
+                    localBusSubscriber.onLocalBusMessage(null, subject, StringHelper.toJsonString(message), null);
+                } catch (Exception e) {
+                    LOGGER.error("submit LocalBusSubscriber failed, subject=" + subject, e);
+                }
+
+                try {
+                    localBus.publish(null, subject, StringHelper.toJsonString(message));
+                    stored.put(subject,)
+                } catch (Exception e) {
+                    LOGGER.error("submit localBus failed, subject=" + subject, e);
+                }
+
+            }
+        },"signalBlockingEvent"));
+
+        return "ok";
+    }
+
+
+    private static void setExpireKey(){
+
+    }
+
+
 }

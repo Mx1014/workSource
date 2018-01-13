@@ -2,12 +2,16 @@
 package com.everhomes.controller;
 
 import java.io.PrintWriter;
+import java.util.Date;
 import java.util.HashMap;
 import java.util.Map;
 
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
 
+import com.everhomes.border.BlockingEventHandler;
+import com.everhomes.rest.messaging.BlockingEventCommand;
+import com.everhomes.rest.messaging.BlockingEventResponse;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -32,7 +36,10 @@ public class MessagingController {
     
     @Autowired
     private ApplicationContext applicationContext;
-    
+
+    @Autowired
+    private BlockingEventHandler blockingEventHandler;
+
     @Value("${admin.auth:@$##fyhbuRR45678}")
     private String auth;
     
@@ -91,4 +98,5 @@ public class MessagingController {
         
         return null;
     }
+
 }
