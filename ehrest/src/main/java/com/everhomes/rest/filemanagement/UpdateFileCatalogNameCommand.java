@@ -2,6 +2,12 @@ package com.everhomes.rest.filemanagement;
 
 import com.everhomes.util.StringHelper;
 
+/**
+ * <ul>
+ * <li>catalogId: 目录id</li>
+ * <li>catalogName: 目录名称</li>
+ * </ul>
+ */
 public class UpdateFileCatalogNameCommand {
 
     private Long catalogId;

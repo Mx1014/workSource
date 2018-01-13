@@ -5,12 +5,18 @@ import com.everhomes.util.StringHelper;
 
 import java.util.List;
 
+/**
+ * <ul>
+ * <li>catalogId: catalogId</li>
+ * <li>sourceIds: 选择对象id列表</li>
+ * </ul>
+ */
 public class FileCatalogScopesIdCommand {
 
     private Long catalogId;
 
     @ItemType(Long.class)
-    private List<Long> sourceId;
+    private List<Long> sourceIds;
 
     public FileCatalogScopesIdCommand() {
     }
@@ -23,12 +29,12 @@ public class FileCatalogScopesIdCommand {
         this.catalogId = catalogId;
     }
 
-    public List<Long> getSourceId() {
-        return sourceId;
+    public List<Long> getSourceIds() {
+        return sourceIds;
     }
 
-    public void setSourceId(List<Long> sourceId) {
-        this.sourceId = sourceId;
+    public void setSourceIds(List<Long> sourceIds) {
+        this.sourceIds = sourceIds;
     }
 
     @Override
