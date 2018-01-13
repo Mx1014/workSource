@@ -1066,6 +1066,7 @@ public class SocialSecurityServiceImpl implements SocialSecurityService {
                 LOGGER.error("can not find organization member ,contact token is " + userContact);
                 log.setErrorLog("找不到用户: 手机号" + userContact);
                 log.setCode(SocialSecurityConstants.ERROR_CHECK_CONTACT);
+                log.setErrorDescription(log.getErrorLog());
                 response.getLogs().add(log);
                 continue;
             } else {
@@ -1079,6 +1080,7 @@ public class SocialSecurityServiceImpl implements SocialSecurityService {
                     LOGGER.error("没有这个城市或者户籍档次 " + ssCityName + houseType);
                     log.setErrorLog("没有这个户籍城市或者户籍档次");
                     log.setCode(SocialSecurityConstants.ERROR_CHECK_SOCIAL_CITY);
+                    log.setErrorDescription(log.getErrorLog());
                     response.getLogs().add(log);
                     continue;
                 }
@@ -1088,6 +1090,7 @@ public class SocialSecurityServiceImpl implements SocialSecurityService {
                     LOGGER.error("没有这个公积金城市" + afCityName);
                     log.setErrorLog("没有这个公积金城市");
                     log.setCode(SocialSecurityConstants.ERROR_CHECK_SOCIAL_CITY);
+                    log.setErrorDescription(log.getErrorLog());
                     response.getLogs().add(log);
                     continue;
                 }
@@ -1114,6 +1117,7 @@ public class SocialSecurityServiceImpl implements SocialSecurityService {
                 LOGGER.error(errorString);
                 log.setErrorLog(errorString);
                 log.setCode(SocialSecurityConstants.ERROR_CHECK_SSRADIX);
+                log.setErrorDescription(log.getErrorLog());
                 response.getLogs().add(log);
                 return;
             }
@@ -1130,6 +1134,7 @@ public class SocialSecurityServiceImpl implements SocialSecurityService {
                 LOGGER.error(errorString);
                 log.setErrorLog(errorString);
                 log.setCode(SocialSecurityConstants.ERROR_CHECK_AFRADIX);
+                log.setErrorDescription(log.getErrorLog());
                 response.getLogs().add(log);
                 return;
             }
@@ -1168,6 +1173,7 @@ public class SocialSecurityServiceImpl implements SocialSecurityService {
                 LOGGER.error(errorString);
                 log.setErrorLog(errorString);
                 log.setCode(SocialSecurityConstants.ERROR_CHECK_AFRADIX);
+                log.setErrorDescription(log.getErrorLog());
                 response.getLogs().add(log);
                 return;
             }
@@ -1183,6 +1189,7 @@ public class SocialSecurityServiceImpl implements SocialSecurityService {
                 LOGGER.error(errorString);
                 log.setErrorLog(errorString);
                 log.setCode(SocialSecurityConstants.ERROR_CHECK_AFRADIX);
+                log.setErrorDescription(log.getErrorLog());
                 response.getLogs().add(log);
                 return;
             }
