@@ -33,6 +33,7 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
 import org.springframework.util.StringUtils;
 
+import com.alibaba.fastjson.JSON;
 import com.alibaba.fastjson.JSONObject;
 import com.alibaba.fastjson.TypeReference;
 import com.everhomes.auditlog.AuditLog;
@@ -49,11 +50,15 @@ import com.everhomes.contentserver.ContentServerService;
 import com.everhomes.entity.EntityType;
 import com.everhomes.general_approval.GeneralApproval;
 import com.everhomes.general_approval.GeneralApprovalProvider;
+import com.everhomes.general_form.GeneralForm;
+import com.everhomes.general_form.GeneralFormProvider;
 import com.everhomes.listing.CrossShardListingLocator;
 import com.everhomes.locale.LocaleStringService;
 import com.everhomes.organization.Organization;
 import com.everhomes.organization.OrganizationCommunity;
 import com.everhomes.organization.OrganizationProvider;
+import com.everhomes.parking.bosigao.BosigaoCardInfo;
+import com.everhomes.parking.bosigao.BosigaoJsonEntity;
 import com.everhomes.reserver.ReserverEntity;
 import com.everhomes.rest.app.AppConstants;
 import com.everhomes.rest.approval.CommonStatus;
@@ -62,13 +67,23 @@ import com.everhomes.rest.comment.OwnerTokenDTO;
 import com.everhomes.rest.comment.OwnerType;
 import com.everhomes.rest.flow.FlowModuleType;
 import com.everhomes.rest.forum.PostContentType;
+import com.everhomes.rest.general_approval.GeneralApprovalAttribute;
 import com.everhomes.rest.general_approval.GeneralApprovalStatus;
 import com.everhomes.rest.general_approval.GeneralApprovalSupportType;
+import com.everhomes.rest.general_approval.GeneralFormDataVisibleType;
+import com.everhomes.rest.general_approval.GeneralFormFieldDTO;
+import com.everhomes.rest.general_approval.GeneralFormFieldType;
+import com.everhomes.rest.general_approval.GeneralFormRenderType;
 import com.everhomes.rest.general_approval.GeneralFormSourceType;
+import com.everhomes.rest.general_approval.GeneralFormStatus;
+import com.everhomes.rest.general_approval.GeneralFormTemplateType;
+import com.everhomes.rest.general_approval.GeneralFormValidatorType;
 import com.everhomes.rest.servicehotline.GetHotlineListCommand;
 import com.everhomes.rest.servicehotline.GetHotlineListResponse;
 import com.everhomes.rest.servicehotline.ServiceType;
 import com.everhomes.rest.techpark.company.ContactType;
+import com.everhomes.rest.user.FieldDTO;
+import com.everhomes.rest.user.FieldTemplateDTO;
 import com.everhomes.rest.yellowPage.AddNotifyTargetCommand;
 import com.everhomes.rest.yellowPage.AddYellowPageCommand;
 import com.everhomes.rest.yellowPage.AttachmentDTO;
@@ -136,6 +151,8 @@ import com.everhomes.util.RuntimeErrorException;
 import com.everhomes.util.SignatureHelper;
 import com.everhomes.util.StringHelper;
 import com.everhomes.util.WebTokenGenerator;
+import com.google.gson.Gson;
+import com.google.gson.reflect.TypeToken;
 
 import freemarker.cache.StringTemplateLoader;
 import freemarker.template.Configuration;
@@ -152,7 +169,6 @@ public class YellowPageServiceImpl implements YellowPageService {
 	
     @Autowired
     private YellowPageProvider yellowPageProvider;
-
     @Autowired
     private BuildingProvider buildingProvider;
     
@@ -176,6 +192,9 @@ public class YellowPageServiceImpl implements YellowPageService {
 	
 	@Autowired
 	private UserActivityProvider userActivityProvider;
+	
+	@Autowired
+	private GeneralFormProvider generalFormProvider;
     
     private StringTemplateLoader templateLoader;
     
@@ -1670,5 +1689,124 @@ public class YellowPageServiceImpl implements YellowPageService {
 			resp.setCategoryId(category.getId());
 		}
 		return resp;
+	}
+	
+	@Override
+	public void syncOldForm() {
+		List<ServiceAlliances> oldFormSAList = yellowPageProvider.findOldFormServiceAlliance();
+		if(oldFormSAList!=null && oldFormSAList.size()>0){
+			Map<String,GeneralForm> formMap = generateFormMap(); 
+			oldFormSAList.forEach(sa->{
+				if(JumpType.fromCode(sa.getIntegralTag1()) == JumpType.TEMPLATE){
+					sa.setIntegralTag3(JumpType.TEMPLATE.getCode());
+					sa.setStringTag3(sa.getStringTag2());
+					
+					GeneralForm form = createForm(sa, formMap.get(sa.getStringTag2()));
+					sa.setIntegralTag1(JumpType.MODULE.getCode());
+					sa.setModuleUrl("zl://approval/create?approvalId=-1&sourceId="+sa.getId()+"&formId="+form.getFormOriginId());
+					//替换moduleUrl,替换格式如此 	zl://approval/create?approvalId=-1&sourceId=6&formId=1
+					if(replaceModuleUrl(sa)){
+						this.yellowPageProvider.updateServiceAlliances(sa);
+					}
+				}
+			});
+		}else{
+			throw RuntimeErrorException
+			.errorWith(ErrorCodes.SCOPE_GENERAL, ErrorCodes.ERROR_GENERAL_EXCEPTION, "未查询到使用老表单的机构，如需再次同步，请删除相关数据重试");
+		}
+	}
+
+	private GeneralForm createForm(ServiceAlliances sa, GeneralForm generalForm) {
+		ServiceAllianceCategories  category = yellowPageProvider.findCategoryById(sa.getParentId());
+		GeneralForm  form = generalFormProvider.getGeneralFormByTag1(category.getNamespaceId(),FlowModuleType.SERVICE_ALLIANCE.getCode(),sa.getParentId(),sa.getStringTag2());
+		if(form==null){
+			generalForm.setNamespaceId(UserContext.getCurrentNamespaceId());
+			generalForm.setModuleType(FlowModuleType.SERVICE_ALLIANCE.getCode());
+			generalForm.setModuleId(sa.getParentId());
+			generalForm.setStringTag1(sa.getStringTag2());
+			generalForm.setOwnerType("EhOrganizations");
+			generalForm.setOwnerId(sa.getOwnerId());
+			this.generalFormProvider.createGeneralForm(generalForm);
+			return generalForm;
+		}
+		return form;
+	}
+
+	private Map<String, GeneralForm> generateFormMap() {
+		Map<String, GeneralForm> map = new HashMap<>();
+		List<RequestTemplates> oldFormTemplateList = userActivityProvider.listCustomRequestTemplates();
+		oldFormTemplateList.forEach(template->{
+			List<FieldDTO> fieldDTOList = analyzefields(template.getFieldsJson());
+			List<GeneralFormFieldDTO> generalFormFieldDTOList = new ArrayList<GeneralFormFieldDTO>();
+			addDefaultFormFieldDTO(generalFormFieldDTOList);
+			generalFormFieldDTOList.addAll(fieldDTOList.stream().map(r->convertFieldToGeneralFormDTO(r)).collect(Collectors.toList()));
+			GeneralForm form = new GeneralForm();
+	        form.setTemplateType(GeneralFormTemplateType.DEFAULT_JSON.getCode());
+	        form.setStatus(GeneralFormStatus.CONFIG.getCode());
+	        form.setNamespaceId(UserContext.getCurrentNamespaceId());
+	        form.setFormVersion(0L);
+	        form.setTemplateText(JSON.toJSONString(generalFormFieldDTOList));
+            form.setDeleteFlag(Byte.valueOf("1"));
+            form.setModifyFlag(Byte.valueOf("1"));
+            form.setFormAttribute(GeneralApprovalAttribute.CUSTOMIZE.getCode());
+            form.setStringTag1(template.getTemplateType());
+            form.setFormName(template.getName());
+//	        this.generalFormProvider.createGeneralForm(form);
+	        map.put(template.getTemplateType(), form);
+		});
+		return map;
+	}
+	
+	//同步接口同步时候才使用,这里就在方法内创建对象
+	private void addDefaultFormFieldDTO(List<GeneralFormFieldDTO> generalFormFieldDTOList) {
+		String defaultfieldstrings="[{\"dataSourceType\":\"USER_NAME\",\"dynamicFlag\":1,\"fieldDisplayName\":\"姓名\",\"fieldExtra\":\"{\\\"limitWord\\\":10}\",\"fieldName\":\"USER_NAME\",\"fieldType\":\"SINGLE_LINE_TEXT\",\"renderType\":\"DEFAULT\",\"validatorType\":\"TEXT_LIMIT\",\"visibleType\":\"HIDDEN\"},{\"dataSourceType\":\"USER_PHONE\",\"dynamicFlag\":1,\"fieldDisplayName\":\"联系电话\",\"fieldExtra\":\"{\\\"limitLength\\\":11}\",\"fieldName\":\"USER_PHONE\",\"fieldType\":\"INTEGER_TEXT\",\"renderType\":\"DEFAULT\",\"validatorType\":\"TEXT_LIMIT\",\"visibleType\":\"HIDDEN\"},{\"dataSourceType\":\"USER_COMPANY\",\"dynamicFlag\":1,\"fieldDisplayName\":\"企业\",\"fieldExtra\":\"{}\",\"fieldName\":\"USER_COMPANY\",\"fieldType\":\"MULTI_LINE_TEXT\",\"renderType\":\"DEFAULT\",\"validatorType\":\"TEXT_LIMIT\",\"visibleType\":\"HIDDEN\"},{\"dataSourceType\":\"USER_ADDRESS\",\"dynamicFlag\":1,\"fieldDisplayName\":\"楼栋门牌\",\"fieldExtra\":\"{}\",\"fieldName\":\"USER_ADDRESS\",\"fieldType\":\"MULTI_LINE_TEXT\",\"renderType\":\"DEFAULT\",\"validatorType\":\"TEXT_LIMIT\",\"visibleType\":\"HIDDEN\"}]";
+		generalFormFieldDTOList.addAll(JSONObject.parseObject(defaultfieldstrings, new TypeReference<List<GeneralFormFieldDTO>>(){}));
+	}
+
+	private GeneralFormFieldDTO convertFieldToGeneralFormDTO(FieldDTO r) {
+		GeneralFormFieldDTO dto = new GeneralFormFieldDTO();
+		dto.setFieldDisplayName(r.getFieldDisplayName());
+		dto.setFieldExtra("{}");
+		dto.setFieldName(r.getFieldDisplayName());
+		dto.setFieldType(convertFieldType(r.getFieldType(),r.getFieldContentType()));
+		dto.setRenderType(GeneralFormRenderType.DEFAULT.getCode());
+		dto.setRequiredFlag(r.getRequiredFlag());
+		dto.setValidatorType(convertVaildatorType(r.getFieldType()));
+		dto.setVisibleType(GeneralFormDataVisibleType.EDITABLE.getCode());
+		dto.setFieldDesc(r.getFieldDesc());
+		return dto;
+	}
+
+	private String convertVaildatorType(String fieldType) {
+		switch (fieldType) {
+		case "string":
+		case "number":
+		case "decimal":
+			return GeneralFormValidatorType.TEXT_LIMIT.getCode();
+		case "blob":
+			return GeneralFormValidatorType.IMAGE_COUNT_SIZE_LIMIT.getCode();
+		}
+		return null;
+	}
+
+	private String convertFieldType(String fieldType, String fieldContentType) {
+		switch (fieldType) {
+		case "string":
+		case "number":
+		case "decimal":
+			return GeneralFormFieldType.SINGLE_LINE_TEXT.getCode();
+		case "blob":
+			if("file".equals(fieldContentType))
+				return GeneralFormFieldType.FILE.getCode();
+			return GeneralFormFieldType.IMAGE.getCode();
+		}
+		return null;
+	}
+
+	private List<FieldDTO> analyzefields(String fieldsJson) {
+		Gson gson = new Gson();
+		FieldTemplateDTO fields = gson.fromJson(fieldsJson, new TypeToken<FieldTemplateDTO>() {}.getType());
+		List<FieldDTO> dto = fields.getFields();
+		return dto;
 	}
 }

@@ -1231,4 +1231,15 @@ public class YellowPageProviderImpl implements YellowPageProvider {
 		.and(Tables.EH_SERVICE_ALLIANCE_CATEGORIES.PARENT_ID.eq(0L))
 		.execute();
 	}
+	
+	@Override
+	public List<ServiceAlliances> findOldFormServiceAlliance() {
+		DSLContext context = this.dbProvider.getDslContext(AccessSpec.readOnlyWith(EhServiceAlliances.class));
+        SelectQuery<EhServiceAlliancesRecord> query = context.selectQuery(Tables.EH_SERVICE_ALLIANCES);
+        query.addConditions(Tables.EH_SERVICE_ALLIANCES.INTEGRAL_TAG1.eq(1L));
+        query.addOrderBy(Tables.EH_SERVICE_ALLIANCES.ID.asc());
+        
+        return query.fetch().map(r->ConvertHelper.convert(r, ServiceAlliances.class));
+	
+	}
 }
