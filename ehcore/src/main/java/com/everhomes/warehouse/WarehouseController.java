@@ -5,14 +5,9 @@ import com.everhomes.constants.ErrorCodes;
 import com.everhomes.controller.ControllerBase;
 import com.everhomes.discover.RestDoc;
 import com.everhomes.discover.RestReturn;
-import com.everhomes.entity.EntityType;
-import com.everhomes.organization.OrganizationMember;
 import com.everhomes.portal.PortalService;
 import com.everhomes.rest.RestResponse;
 import com.everhomes.rest.organization.ImportFileTaskDTO;
-import com.everhomes.rest.organization.OrganizationType;
-import com.everhomes.rest.portal.ListServiceModuleAppsCommand;
-import com.everhomes.rest.portal.ListServiceModuleAppsResponse;
 import com.everhomes.rest.user.UserServiceErrorCode;
 import com.everhomes.rest.warehouse.*;
 import com.everhomes.search.*;
@@ -671,4 +666,44 @@ public class WarehouseController extends ControllerBase {
         res.setErrorDescription("OK");
         return res;
     }
+
+    /**
+     * <b>URL: /warehouse/createOrUpdateWarehouseEntryOrder</b>
+     * <p>库存入库操作，新增或者更新出入库单</p>
+     */
+    @RequestMapping("createOrUpdateWarehouseEntryOrder")
+    @RestReturn(value=String.class)
+    public RestResponse createOrUpdateWarehouseEntryOrder(CreateOrUpdateWarehouseEntryOrderCommand cmd) {
+        RestResponse res = new RestResponse();
+        res.setErrorCode(ErrorCodes.SUCCESS);
+        res.setErrorDescription("OK");
+        return res;
+    }
+
+    /**
+     * <b>URL: /warehouse/listWarehouseStockOrder</b>
+     * <p>获得出入库单的列表</p>
+     */
+    @RequestMapping("listWarehouseStockOrder")
+    @RestReturn(value=ListWarehouseStockOrderResponse.class)
+    public RestResponse listWarehouseStockOrder(ListWarehouseStockOrderCommand cmd) {
+        RestResponse res = new RestResponse();
+        res.setErrorCode(ErrorCodes.SUCCESS);
+        res.setErrorDescription("OK");
+        return res;
+    }
+
+    /**
+     * <b>URL: /warehouse/deleteWarehouseStockOrder</b>
+     * <p>删除一个出入库单</p>
+     */
+    @RequestMapping("deleteWarehouseStockOrder")
+    @RestReturn(value=String.class)
+    public RestResponse deleteWarehouseStockOrder(DeleteWarehouseStockOrderCommand cmd) {
+        RestResponse res = new RestResponse();
+        res.setErrorCode(ErrorCodes.SUCCESS);
+        res.setErrorDescription("OK");
+        return res;
+    }
+
 }
