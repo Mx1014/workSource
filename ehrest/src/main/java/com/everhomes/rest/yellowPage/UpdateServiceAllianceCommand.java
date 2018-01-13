@@ -44,6 +44,16 @@ public class UpdateServiceAllianceCommand {
 	
 	private Byte skipType;
 	
+	private Integer namespaceId;
+	
+	public Integer getNamespaceId() {
+		return namespaceId;
+	}
+
+	public void setNamespaceId(Integer namespaceId) {
+		this.namespaceId = namespaceId;
+	}
+
 	public Byte getDisplayMode() {
 		return displayMode;
 	}

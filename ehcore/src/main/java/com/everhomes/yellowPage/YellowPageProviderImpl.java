@@ -958,7 +958,8 @@ public class YellowPageProviderImpl implements YellowPageProvider {
 	@Override
 	public ServiceAllianceSkipRule getCateorySkipRule(Long categoryId, Integer namespaceId) {
 
-		namespaceId = UserContext.getCurrentNamespaceId(namespaceId);
+		if(namespaceId == null)
+			namespaceId = UserContext.getCurrentNamespaceId();
 		DSLContext context = dbProvider.getDslContext(AccessSpec.readOnly());
 		SelectQuery<EhServiceAllianceSkipRuleRecord> query = context.selectQuery(Tables.EH_SERVICE_ALLIANCE_SKIP_RULE);
 		query.addConditions(Tables.EH_SERVICE_ALLIANCE_SKIP_RULE.SERVICE_ALLIANCE_CATEGORY_ID.in(categoryId,0L));
