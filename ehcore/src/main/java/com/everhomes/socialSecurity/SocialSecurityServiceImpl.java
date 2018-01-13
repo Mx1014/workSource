@@ -2113,7 +2113,7 @@ public class SocialSecurityServiceImpl implements SocialSecurityService {
         params.put("ownerId", cmd.getOwnerId());
         params.put("payMonth", cmd.getPayMonth());
         params.put("reportType", "exportSocialSecurityInoutReports");
-        String fileName = String.format("%s社保部门汇总报表.xlsx", cmd.getPayMonth());
+        String fileName = String.format("%s社保增减表.xlsx", cmd.getPayMonth());
 
         taskService.createTask(fileName, TaskType.FILEDOWNLOAD.getCode(), SocialSecurityReportsTaskHandler.class, params, TaskRepeatFlag.REPEAT.getCode(), new Date());
 
