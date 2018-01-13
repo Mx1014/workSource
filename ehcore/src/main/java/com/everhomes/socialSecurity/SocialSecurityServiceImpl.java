@@ -792,11 +792,16 @@ public class SocialSecurityServiceImpl implements SocialSecurityService {
         });
     }
 
-    private void saveSocialSecurityPayment(SocialSecurityPaymentDetailDTO socialSecurityPayment, Long detailId, Byte afterPay, Byte accumOrSocial) {
+    private String getPayMonth(Long detailId) {
+
         String paymentMonth = socialSecurityPaymentProvider.findPaymentMonthByDetail(detailId);
         if (null == paymentMonth) {
             paymentMonth =  monthSF.get().format(DateHelper.currentGMTTime());
         }
+        return paymentMonth;
+    }
+    private void saveSocialSecurityPayment(SocialSecurityPaymentDetailDTO socialSecurityPayment, Long detailId, Byte afterPay, Byte accumOrSocial) {
+        String paymentMonth = getPayMonth(detailId);
         for (SocialSecurityItemDTO itemDTO : socialSecurityPayment.getItems()) {
             SocialSecurityPayment payment = socialSecurityPaymentProvider.findSocialSecurityPayment(detailId, itemDTO.getPayItem(), accumOrSocial);
             if (null == payment) {
@@ -2792,9 +2797,9 @@ public class SocialSecurityServiceImpl implements SocialSecurityService {
             log.setType(InOutLogType.SOCIAL_SECURITY_IN.getCode());
         }
         Date date = DateHelper.currentGMTTime();
-        String month = monthSF.get().format(date);
         log.setLogDate(new java.sql.Date(date.getTime()));
-        log.setLogMonth(month);
+        String paymentMonth = getPayMonth(detailId);
+        log.setLogMonth(paymentMonth);
         socialSecurityInoutLogProvider.createSocialSecurityInoutLog(log);
     }
 
@@ -2820,9 +2825,9 @@ public class SocialSecurityServiceImpl implements SocialSecurityService {
             log.setType(InOutLogType.SOCIAL_SECURITY_OUT.getCode());
         }
         Date date = DateHelper.currentGMTTime();
-        String month = monthSF.get().format(date);
         log.setLogDate(new java.sql.Date(date.getTime()));
-        log.setLogMonth(month);
+        String paymentMonth = getPayMonth(detailId);
+        log.setLogMonth(paymentMonth);
         socialSecurityInoutLogProvider.createSocialSecurityInoutLog(log);
     }
 
