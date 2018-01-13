@@ -4,18 +4,15 @@ import com.everhomes.util.StringHelper;
 
 /**
  * <ul>
- * <li>ownerId: 场景id</li>
- * <li>ownerType: 场景类型</li>
- * <li>keywords: 搜索关键词
- * <li>pageAnchor: 锚点值</li>
+ * <li>catalogId: 目录Id</li>
+ * <li>keywords: 关键词</li>
+ * <li>pageAnchor: 锚点</li>
  * <li>pageSize: 页面大小</li>
  * </ul>
  */
-public class ListFileCatalogsCommand {
+public class ListFileCatalogScopeCommand {
 
-    private Long ownerId;
-
-    private String ownerType;
+    private Long catalogId;
 
     private String keywords;
 
@@ -23,23 +20,15 @@ public class ListFileCatalogsCommand {
 
     private Integer pageSize;
 
-    public ListFileCatalogsCommand() {
+    public ListFileCatalogScopeCommand() {
     }
 
-    public Long getOwnerId() {
-        return ownerId;
+    public Long getCatalogId() {
+        return catalogId;
     }
 
-    public void setOwnerId(Long ownerId) {
-        this.ownerId = ownerId;
-    }
-
-    public String getOwnerType() {
-        return ownerType;
-    }
-
-    public void setOwnerType(String ownerType) {
-        this.ownerType = ownerType;
+    public void setCatalogId(Long catalogId) {
+        this.catalogId = catalogId;
     }
 
     public String getKeywords() {

@@ -23,7 +23,17 @@ public class FileManagementServiceImpl implements  FileManagementService{
     }
 
     @Override
-    public FileCatalogDTO listFileCatalogs(ListFileCatalogsCommand cmd) {
+    public ListFileCatalogResponse listFileCatalogs(ListFileCatalogsCommand cmd) {
+        return null;
+    }
+
+    @Override
+    public ListFileCatalogResponse listAvailableFileContents(listFileContentCommand cmd) {
+        return null;
+    }
+
+    @Override
+    public ListFileContentResponse enterFileCatalog(FileCatalogIdCommand cmd) {
         return null;
     }
 
@@ -48,7 +58,7 @@ public class FileManagementServiceImpl implements  FileManagementService{
     }
 
     @Override
-    public ListFielCatalogScopeResponse listFileCatalogScopes(FileCatalogIdCommand cmd) {
+    public ListFileCatalogScopeResponse listFileCatalogScopes(ListFileCatalogScopeCommand cmd) {
         return null;
     }
 
@@ -60,5 +70,15 @@ public class FileManagementServiceImpl implements  FileManagementService{
     @Override
     public void deleteFileContents(DeleteFileContentCommand cmd) {
 
+    }
+
+    @Override
+    public FileContentDTO updateFileContentName(UpdateFileContentNameCommand cmd) {
+        return null;
+    }
+
+    @Override
+    public ListFileContentResponse listFileContents(listFileContentCommand cmd) {
+        return null;
     }
 }

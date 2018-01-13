@@ -11,14 +11,14 @@ import java.util.List;
  * <li>scopes: 可见人员 参考{@link com.everhomes.rest.filemanagement.FileCatalogScopeDTO}</li>
  * </ul>
  */
-public class ListFielCatalogScopeResponse {
+public class ListFileCatalogScopeResponse {
 
     private Long nextPageAnchor;
 
     @ItemType(FileCatalogScopeDTO.class)
     private List<FileCatalogScopeDTO> scopes;
 
-    public ListFielCatalogScopeResponse() {
+    public ListFileCatalogScopeResponse() {
     }
 
     public Long getNextPageAnchor() {

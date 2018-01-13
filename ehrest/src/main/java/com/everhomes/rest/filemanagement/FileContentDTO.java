@@ -11,7 +11,7 @@ import java.sql.Timestamp;
  * <li>name: 名称</li>
  * <li>size: 大小</li>
  * <li>parentId: 父级id</li>
- * <li>contentType: 内容类型</li>
+ * <li>contentType: 内容类型，file-文件,folder-文件夹 参考{@link com.everhomes.rest.filemanagement.FileContentType}</li>
  * <li>contentUri: 内容uri</li>
  * <li>contentUrl: 内容url(下载链接)</li>
  * <li>createTime: 创建时间</li>
