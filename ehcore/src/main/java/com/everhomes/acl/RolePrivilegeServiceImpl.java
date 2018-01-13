@@ -1879,7 +1879,8 @@ public class RolePrivilegeServiceImpl implements RolePrivilegeService {
 				organizationSearcher.feedDoc(o);
 			}
 		}
-		if(OrganizationMemberTargetType.fromCode(member.getTargetType()) == OrganizationMemberTargetType.USER){
+		if(OrganizationMemberTargetType.fromCode(member.getTargetType()) == OrganizationMemberTargetType.USER
+				&& member.getTargetId() != null){
 			sendMessageAfterChangeOrganizationAdmin(
 					ConvertHelper.convert(member, OrganizationContactDTO.class),
 					OrganizationNotificationTemplateCode.DELETE_ORGANIZATION_ADMIN_MESSAGE_TO_TARGET_TEMPLATE,
