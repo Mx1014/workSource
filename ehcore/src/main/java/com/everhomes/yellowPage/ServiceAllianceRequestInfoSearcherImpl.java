@@ -64,6 +64,7 @@ import com.everhomes.rest.flow.FlowCaseFileDTO;
 import com.everhomes.rest.flow.FlowCaseFileValue;
 import com.everhomes.rest.flow.FlowCaseSearchType;
 import com.everhomes.rest.flow.FlowCaseStatus;
+import com.everhomes.rest.flow.FlowCaseType;
 import com.everhomes.rest.flow.FlowUserType;
 import com.everhomes.rest.flow.SearchFlowCaseCommand;
 import com.everhomes.rest.general_approval.GeneralFormDataSourceType;
@@ -255,7 +256,12 @@ public class ServiceAllianceRequestInfoSearcherImpl extends AbstractElasticSearc
             request.setCreatorUid(user.getId());
             request.setTemplateType("flowCase");
            
-            request.setWorkflowStatus(flowCase.getStatus());
+            
+            Byte status = flowCase.getStatus();
+    		if(FlowCaseType.fromCode(flowCase.getCaseType()) == FlowCaseType.DUMB){
+    			status = ServiceAllianceWorkFlowStatus.NONE.getCode();
+    		}
+    		request.setWorkflowStatus(status);
             feedDoc(request);
             LOGGER.debug("request = "+request);
         }
