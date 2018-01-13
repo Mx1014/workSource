@@ -1791,12 +1791,11 @@ public class FlowServiceImpl implements FlowService {
                 item.setFlowVersion(flow.getFlowVersion());
             });
             flowEvaluateItemProvider.createFlowEvaluateItem(items);
-
-            //TODO support build for isTrue
         }
 
-        flow.setStartNode(flowGraph.getNodes().get(0).getFlowNode().getId());
-        flow.setEndNode(flowGraph.getNodes().get(flowGraph.getNodes().size() - 1).getFlowNode().getId());
+        flowGraph = getFlowGraph(flow.getFlowMainId(), flow.getFlowVersion());
+        flow.setStartNode(flowGraph.getStartNode().getFlowNode().getId());
+        flow.setEndNode(flowGraph.getEndNode().getFlowNode().getId());
         flowProvider.updateFlow(flow);
     }
 

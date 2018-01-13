@@ -1,5 +1,27 @@
 package com.everhomes.rentalv2;
 
+import java.util.ArrayList;
+import java.util.HashMap;
+import java.util.List;
+import java.util.Map;
+import java.util.stream.Collectors;
+import java.text.SimpleDateFormat;
+import java.util.*;
+
+import com.everhomes.flow.*;
+import com.everhomes.flow.node.FlowGraphNodeEnd;
+import com.everhomes.flow.node.FlowGraphNodeStart;
+import com.everhomes.organization.Organization;
+import com.everhomes.rest.flow.*;
+import com.everhomes.rest.rentalv2.SiteBillStatus;
+import com.everhomes.rest.rentalv2.admin.ResourceTypeStatus;
+import com.everhomes.util.StringHelper;
+import org.elasticsearch.common.lang3.StringUtils;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
+import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.stereotype.Component;
+
 import com.alibaba.fastjson.JSON;
 import com.everhomes.contentserver.ContentServerService;
 import com.everhomes.entity.EntityType;
@@ -110,7 +132,7 @@ public class Rentalv2FlowModuleListener implements FlowModuleListener {
 				if (currentGraphNode instanceof FlowGraphNodeEnd) {
 					return;
 				}
-				if (null != curNodeParam) {
+				if (!StringUtils.isEmpty(curNodeParam)) {
 					Byte status = convertFlowStatus(curNodeParam);
 
 					if (graphNode instanceof FlowGraphNodeStart && SiteBillStatus.APPROVING.getCode() == status) {
@@ -130,6 +152,7 @@ public class Rentalv2FlowModuleListener implements FlowModuleListener {
 
 		}
 	}
+
 
 	/**
 	 * 转换状态，由产品定义

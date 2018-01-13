@@ -68,8 +68,8 @@ public class BizOrderPayCompletePointEventProcessor
                         break;
                     }
                 }
+                return success && super.doLimit(localEvent, rule, pointSystem);
             }
-            return success && super.doLimit(localEvent, rule, pointSystem);
         }
         return super.doLimit(localEvent, rule, pointSystem);
     }
