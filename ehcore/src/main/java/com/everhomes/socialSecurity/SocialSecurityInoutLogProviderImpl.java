@@ -5,6 +5,7 @@ import com.everhomes.db.DaoAction;
 import com.everhomes.db.DaoHelper;
 import com.everhomes.db.DbProvider;
 import com.everhomes.naming.NameMapper;
+import com.everhomes.rest.socialSecurity.InOutLogType;
 import com.everhomes.sequence.SequenceProvider;
 import com.everhomes.server.schema.Tables;
 import com.everhomes.server.schema.tables.daos.EhSocialSecurityInoutLogDao;
@@ -60,6 +61,27 @@ public class SocialSecurityInoutLogProviderImpl implements SocialSecurityInoutLo
             return null;
         });
 
+        return results;
+    }
+
+    @Override
+    public List<Long> listSocialSecurityInoutLogDetailIds(Long ownerId, String month, InOutLogType accumulationFundIn) {
+        List<Long> results = new ArrayList<>();
+
+        DSLContext context = dbProvider.getDslContext(AccessSpec.readOnly());
+        SelectQuery<EhSocialSecurityInoutLogRecord> query = context.selectQuery(Tables.EH_SOCIAL_SECURITY_INOUT_LOG);
+        query.addConditions(Tables.EH_SOCIAL_SECURITY_INOUT_LOG.ORGANIZATION_ID.eq(ownerId));
+        query.addConditions(Tables.EH_SOCIAL_SECURITY_INOUT_LOG.LOG_MONTH.eq(month));
+        query.addConditions(Tables.EH_SOCIAL_SECURITY_INOUT_LOG.TYPE.eq(accumulationFundIn.getCode()));
+
+        query.addOrderBy(Tables.EH_SOCIAL_SECURITY_INOUT_LOG.LOG_DATE.asc());
+        query.fetch().map(r ->{
+            results.add(ConvertHelper.convert(r, SocialSecurityInoutLog.class).getDetailId());
+            return null;
+        });
+        if (results.size() == 0) {
+            return null;
+        }
         return results;
     }
 }

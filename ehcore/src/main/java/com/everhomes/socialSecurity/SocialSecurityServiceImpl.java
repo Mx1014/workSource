@@ -29,7 +29,6 @@ import com.everhomes.server.schema.tables.EhOrganizationMemberDetails;
 import com.everhomes.server.schema.tables.pojos.EhSocialSecurityPaymentLogs;
 import com.everhomes.server.schema.tables.pojos.EhSocialSecurityPayments;
 import com.everhomes.server.schema.tables.pojos.EhSocialSecuritySettings;
-import com.everhomes.sms.DateUtil;
 import com.everhomes.user.UserContext;
 import com.everhomes.util.*;
 import com.everhomes.util.excel.RowResult;
@@ -1412,32 +1411,57 @@ public class SocialSecurityServiceImpl implements SocialSecurityService {
     private void calculateSocialSecurityInoutReports(Long ownerId) {
         //todo 组织架构获取本月增员本月减员的人
         String month = socialSecurityPaymentProvider.findPaymentMonthByDetail(ownerId);
-        List<OrganizationMemberDetails> inDetails = null;
-        List<OrganizationMemberDetails> outDetails = null;
         socialSecurityInoutReportProvider.deleteSocialSecurityInoutReportByMonth(ownerId, month);
+        List<Long> inDetails = socialSecurityInoutLogProvider.listSocialSecurityInoutLogDetailIds(ownerId, month,InOutLogType.SOCIAL_SECURITY_IN);
+        List<Long> outDetails = socialSecurityInoutLogProvider.listSocialSecurityInoutLogDetailIds(ownerId, month, InOutLogType.SOCIAL_SECURITY_OUT);
         if (inDetails != null) {
-            for (OrganizationMemberDetails detail : inDetails) {
-                SocialSecurityInoutReport report = crateInoutReport(detail, month, InOutFlag.INCRE);
+            for (Long detailId : inDetails) {
+                OrganizationMemberDetails detail = organizationProvider.findOrganizationMemberDetailsByDetailId(detailId);
+                SocialSecurityInoutReport report = crateInoutReport(detail, month, InOutFlag.INCRE, AccumOrSocial.SOCAIL);
             }
         }
         if (outDetails != null) {
-            for (OrganizationMemberDetails detail : outDetails) {
-                SocialSecurityInoutReport report = crateInoutReport(detail, month, InOutFlag.DECRE);
+            for (Long detailId : outDetails) {
+                OrganizationMemberDetails detail = organizationProvider.findOrganizationMemberDetailsByDetailId(detailId);
+                SocialSecurityInoutReport report = crateInoutReport(detail, month, InOutFlag.DECRE, AccumOrSocial.SOCAIL);
+            }
+        }
+
+        inDetails = socialSecurityInoutLogProvider.listSocialSecurityInoutLogDetailIds(ownerId, month,InOutLogType.ACCUMULATION_FUND_IN);
+        outDetails = socialSecurityInoutLogProvider.listSocialSecurityInoutLogDetailIds(ownerId, month, InOutLogType.ACCUMULATION_FUND_OUT);
+        if (inDetails != null) {
+            for (Long detailId : inDetails) {
+                OrganizationMemberDetails detail = organizationProvider.findOrganizationMemberDetailsByDetailId(detailId);
+                SocialSecurityInoutReport report = crateInoutReport(detail, month, InOutFlag.INCRE, AccumOrSocial.ACCUM);
+            }
+        }
+        if (outDetails != null) {
+            for (Long detailId : outDetails) {
+                OrganizationMemberDetails detail = organizationProvider.findOrganizationMemberDetailsByDetailId(detailId);
+                SocialSecurityInoutReport report = crateInoutReport(detail, month, InOutFlag.DECRE, AccumOrSocial.ACCUM);
             }
         }
     }
 
-    private SocialSecurityInoutReport crateInoutReport(OrganizationMemberDetails detail, String month, InOutFlag inOutFlag) {
+    private SocialSecurityInoutReport crateInoutReport(OrganizationMemberDetails detail, String month, InOutFlag inOutFlag, AccumOrSocial accumOrSocial) {
         SocialSecurityReport ssReport = socialSecurityReportProvider.findSocialSecurityReportByDetailId(detail.getId(), month);
         SocialSecurityInoutReport report = ConvertHelper.convert(ssReport, SocialSecurityInoutReport.class);
         report.setSocialSecurityAfter(ssReport.getAfterSocialSecurityCompanySum().add(ssReport.getAfterSocialSecurityEmployeeSum()));
         report.setAccumulationFundAfter(ssReport.getAfterAccumulationFundCompanySum().add(ssReport.getAfterAccumulationFundEmployeeSum()));
         if (inOutFlag == InOutFlag.INCRE) {
-            report.setSocialSecurityIncrease(ssReport.getSocialSecuritySum());
-            report.setAccumulationFundIncrease(ssReport.getAccumulationFundSum());
+            if (AccumOrSocial.SOCAIL == accumOrSocial) {
+                report.setSocialSecurityIncrease(ssReport.getSocialSecuritySum());
+            } else {
+                report.setAccumulationFundIncrease(ssReport.getAccumulationFundSum());
+            }
         } else if (inOutFlag == InOutFlag.DECRE) {
-            report.setSocialSecurityDecrease(ssReport.getSocialSecuritySum());
-            report.setAccumulationFundDecrease(ssReport.getAccumulationFundSum());
+
+            if (AccumOrSocial.SOCAIL == accumOrSocial) {
+                report.setSocialSecurityDecrease(ssReport.getSocialSecuritySum());
+//                report.setSocialSecurityDecrease(socialSecuritySettingProvider.sumPayment(detail.getId(),accumOrSocial));
+            } else {
+                report.setAccumulationFundDecrease(ssReport.getAccumulationFundSum());
+            }
         }
         socialSecurityInoutReportProvider.createSocialSecurityInoutReport(report);
         return report;

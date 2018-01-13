@@ -6,6 +6,7 @@ import com.everhomes.rest.socialSecurity.SocialSecurityItemDTO;
 import com.everhomes.rest.socialSecurity.SsorAfPay;
 import com.everhomes.server.schema.tables.pojos.EhSocialSecuritySettings;
 
+import java.math.BigDecimal;
 import java.util.List;
 import java.util.Set;
 
@@ -40,6 +41,8 @@ public interface SocialSecuritySettingProvider {
 	void syncRadixAndRatioToPayments(Long ownerId);
 
 	List<SocialSecuritySetting> listSocialSecuritySettingByOwner(Long ownerId);
+
+//	BigDecimal sumPayment(Long id, AccumOrSocial accumOrSocial);
 
 //	void updateSocialSecuritySettingRadix(Long id, BigDecimal bigDecimal);
 }
