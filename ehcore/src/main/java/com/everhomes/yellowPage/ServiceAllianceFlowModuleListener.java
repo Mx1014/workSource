@@ -112,9 +112,18 @@ public class ServiceAllianceFlowModuleListener extends GeneralApprovalFlowModule
 		List<ServiceAllianceNotifyTargets> emails = yellowPageProvider.listNotifyTargets(category.getNamespaceId(), ContactType.EMAIL.getCode(),
 				category.getId(), locator, Integer.MAX_VALUE);
 	}
-
+	
 	@Override
 	public void onFlowCaseCreating(FlowCase flowCase) {
+		try{
+			sOnFlowCaseCreating(flowCase);
+		}catch (Exception e) {
+			LOGGER.info("sOnFlowCaseCreating : ",e);
+			throw e;
+		}
+	}
+
+	public void sOnFlowCaseCreating(FlowCase flowCase) {
 		//旧表单直接退出
 		if(flowCase.getOwnerType()!=null && !FlowOwnerType.GENERAL_APPROVAL.getCode().equals(flowCase.getOwnerType()))
 			return;
