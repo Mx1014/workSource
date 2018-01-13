@@ -205,7 +205,7 @@ public class PmNotifyServiceImpl implements PmNotifyService, ApplicationListener
                     //过期提醒的notifytime即为任务的截止时间，所以先关掉任务
                     equipmentProvider.closeTask(task);
                 }
-                LOGGER.info("processPmNotifyRecord  smsCode={}",smsCode);
+//                LOGGER.info("processPmNotifyRecord  smsCode={}",smsCode);
             }
 
             if(EntityType.ENERGY_TASK.getCode().equals(record.getOwnerType())) {
@@ -219,9 +219,9 @@ public class PmNotifyServiceImpl implements PmNotifyService, ApplicationListener
                 LOGGER.debug("starting proccess sending message to notifyUsers.size={}",notifyUsers.size());
             }
             for (Long userId : notifyUsers) {
-                if (LOGGER.isDebugEnabled()) {
-                    LOGGER.debug("processPmNotifyRecord, userId={}, recordId={}", userId, record.getId());
-                }
+//                if (LOGGER.isDebugEnabled()) {
+//                    LOGGER.debug("processPmNotifyRecord, userId={}, recordId={}", userId, record.getId());
+//                }
                 PmNotifyLog log = new PmNotifyLog();
                 log.setOwnerType(record.getOwnerType());
                 log.setOwnerId(record.getOwnerId());
@@ -244,9 +244,9 @@ public class PmNotifyServiceImpl implements PmNotifyService, ApplicationListener
                     default:
                         break;
                 }
-                if (LOGGER.isDebugEnabled()) {
-                    LOGGER.debug("createPmNotifyLog log{}",log.toString());
-                }
+//                if (LOGGER.isDebugEnabled()) {
+//                    LOGGER.debug("createPmNotifyLog log{}",log.toString());
+//                }
                 pmNotifyProvider.createPmNotifyLog(log);
             }
         }
