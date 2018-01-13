@@ -441,6 +441,14 @@ public class FieldProviderImpl implements FieldProvider {
     }
 
     @Override
+    public FieldGroup findGroupByGroupDisplayName(String groupDisplayName) {
+        DSLContext context = this.dbProvider.getDslContext(AccessSpec.readOnly());
+        return context.select().from(Tables.EH_VAR_FIELD_GROUPS)
+                .where(Tables.EH_VAR_FIELD_GROUPS.TITLE.eq(groupDisplayName))
+                .fetchAnyInto(FieldGroup.class);
+    }
+
+    @Override
     public List<Field> listFields(List<Long> ids) {
         DSLContext context = this.dbProvider.getDslContext(AccessSpec.readOnly());
 
