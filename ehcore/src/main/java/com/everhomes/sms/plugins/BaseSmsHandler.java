@@ -101,7 +101,7 @@ abstract public class BaseSmsHandler implements SmsHandler {
         return smsLogList;
     }
 
-    private SmsLog getSmsErrorLog(Integer namespaceId, String phoneNumber, String templateScope, int templateId, String templateLocale, String error) {
+    protected SmsLog getSmsErrorLog(Integer namespaceId, String phoneNumber, String templateScope, int templateId, String templateLocale, String error) {
         SmsLog log = new SmsLog();
         log.setCreateTime(new Timestamp(System.currentTimeMillis()));
         log.setNamespaceId(namespaceId);

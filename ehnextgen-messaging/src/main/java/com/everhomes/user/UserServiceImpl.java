@@ -577,7 +577,7 @@ public class UserServiceImpl implements UserService {
 		String templateLocale = UserContext.current().getUser().getLocale();
 		smsProvider.sendSms(namespaceId, phoneNumber, templateScope, templateId, templateLocale, variables);
 
-		//		String smsType = configurationProvider.getValue(namespaceId, VCODE_SEND_TYPE, "");
+		//		String smsType = configurationProvider.getValue(namespaceId, SMS_HANDLER_TYPE, "");
 		//		if(smsType.equalsIgnoreCase("YZX")){
 		//			String templateId = configurationProvider.getValue(namespaceId, YZX_VCODE_TEMPLATE_ID, "");
 		//			smsProvider.sendSms(number, verificationCode,templateId);

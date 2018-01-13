@@ -35,8 +35,12 @@ public class YunPianSmsHandler extends BaseSmsHandler {
 
     @Override
     void initAccount() {
-        apiKey = configurationProvider.getValue(API_KEY_NAME, "");
-        server = configurationProvider.getValue(SERVER_NAME, "https://sms.yunpian.com/v2/sms/batch_send.json");
+        try {
+            apiKey = configurationProvider.getValue(API_KEY_NAME, "a010af7f5e94f889c010ed38a7fc3a05");
+            server = configurationProvider.getValue(SERVER_NAME, "https://sms.yunpian.com/v2/sms/batch_send.json");
+        } catch (Exception e) {
+            //
+        }
     }
 
     @Override
@@ -50,6 +54,9 @@ public class YunPianSmsHandler extends BaseSmsHandler {
         return channel.sendMessage(server, SmsBuilder.HttpMethod.POST.val(), params, null, null);
     }
 
+    /**
+     * {"http_status_code":400,"code":3,"msg":"账户余额不足","detail":"请充值后重试"}
+     */
     @Override
     List<SmsLog> buildSmsLogs(Integer namespaceId, String[] phoneNumbers, String templateScope, int templateId, String templateLocale, String content, RspMessage rspMessage) {
         List<SmsLog> smsLogs = new ArrayList<>();
@@ -61,8 +68,12 @@ public class YunPianSmsHandler extends BaseSmsHandler {
                 result = rspMessage.getMessage();
                 res = (SendResult) StringHelper.fromJsonString(rspMessage.getMessage(), SendResult.class);
             } catch (Exception e) {
-                e.printStackTrace();
+                return error(namespaceId, phoneNumbers, templateScope, templateId, templateLocale, smsLogs, result);
             }
+        }
+
+        if (res.data == null) {
+            return error(namespaceId, phoneNumbers, templateScope, templateId, templateLocale, smsLogs, result);
         }
 
         for (SendData data : res.data) {
@@ -84,6 +95,13 @@ public class YunPianSmsHandler extends BaseSmsHandler {
                 log.setStatus(SmsLogStatus.SEND_FAILED.getCode());
             }
             smsLogs.add(log);
+        }
+        return smsLogs;
+    }
+
+    private List<SmsLog> error(Integer namespaceId, String[] phoneNumbers, String templateScope, int templateId, String templateLocale, List<SmsLog> smsLogs, String result) {
+        for (String phoneNumber : phoneNumbers) {
+            smsLogs.add(getSmsErrorLog(namespaceId, phoneNumber, templateScope, templateId, templateLocale, result));
         }
         return smsLogs;
     }

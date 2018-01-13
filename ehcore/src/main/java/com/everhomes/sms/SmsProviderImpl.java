@@ -10,8 +10,10 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.context.ApplicationEventPublisher;
 import org.springframework.stereotype.Component;
 
-import java.sql.Timestamp;
-import java.util.*;
+import java.util.ArrayList;
+import java.util.HashMap;
+import java.util.List;
+import java.util.Map;
 
 /**
  * TODO To manage throughput and throttling, SMS/email notification service
@@ -27,12 +29,12 @@ import java.util.*;
 public class SmsProviderImpl implements SmsProvider {
     protected final static Logger LOGGER = LoggerFactory.getLogger(SmsProviderImpl.class);
 
-    private static final String VCODE_SEND_TYPE = "sms.handler.type";
+    private static final String SMS_HANDLER_RESOLVER_NAME = "sms.handlerResolverName";
+
+    private Map<String, SmsHandlerResolver> resolvers = new HashMap<>();
 
     @Autowired
     private ConfigurationProvider configurationProvider;
-
-    private Map<String, SmsHandler> handlers = new HashMap<>();
 
     @Autowired
     private ApplicationEventPublisher applicationEventPublisher;
@@ -41,75 +43,8 @@ public class SmsProviderImpl implements SmsProvider {
     private SmsLogProvider smsLogProvider;
 
     @Autowired
-    public void setHandlers(Map<String, SmsHandler> prop) {
-        prop.forEach((name, handler) -> handlers.put(name.toLowerCase(), handler));
-    }
-
-    private Map<SmsHandler, String[]> getHandler(Integer namespaceId, String[] phoneNumbers) {
-        Map<SmsHandler, List<String>> handlerToPhonesMap = new HashMap<>();
-        for (String phoneNumber : phoneNumbers) {
-            SmsHandler handler = getHandler(namespaceId, phoneNumber);
-            List<String> inMapPhones = handlerToPhonesMap.get(handler);
-            if (inMapPhones == null) {
-                List<String> tempList = new ArrayList<>();
-                tempList.add(phoneNumber);
-                handlerToPhonesMap.put(handler, tempList);
-            } else {
-                inMapPhones.add(phoneNumber);
-            }
-        }
-
-        Map<SmsHandler, String[]> handlerToPhonesArrMap = new HashMap<>();
-        handlerToPhonesMap.forEach((k, v) -> handlerToPhonesArrMap.put(k, v.toArray(new String[v.size()])));
-
-        return handlerToPhonesArrMap;
-    }
-
-    private SmsHandler getHandler(Integer namespaceId, String phoneNumber) {
-        String handlerStr = configurationProvider.getValue(namespaceId, VCODE_SEND_TYPE, "YZX");
-        String[] configHandlers = handlerStr.split(",");
-
-        String selectedHandlerName = null;
-
-        Map<String, SmsLog> handlerToSmsLogMap = smsLogProvider.findLastLogByMobile(namespaceId, phoneNumber, configHandlers);
-        if (handlerToSmsLogMap != null) {
-            if (handlerToSmsLogMap.size() < configHandlers.length) {
-                Set<String> sentHandlers = handlerToSmsLogMap.keySet();
-                for (String handler : configHandlers) {
-                    if (!sentHandlers.contains(handler)) {
-                        SmsLog smsLog = new SmsLog();
-                        smsLog.setStatus(SmsLogStatus.UNKNOWN.getCode());
-                        smsLog.setHandler(handler);
-                        smsLog.setCreateTime(new Timestamp(System.currentTimeMillis() - 100 * 60 * 1000));
-                        handlerToSmsLogMap.put(handler, smsLog);
-                    }
-                }
-            }
-            selectedHandlerName = selectHandler(handlerToSmsLogMap.entrySet(), SmsLogStatus.REPORT_SUCCESS);
-        }
-        if (selectedHandlerName == null || SmsLogStatus.fromCode(handlerToSmsLogMap.get(selectedHandlerName).getStatus()) == SmsLogStatus.REPORT_FAILED) {
-            selectedHandlerName = configHandlers[0];
-        }
-        return handlers.get(selectedHandlerName.toLowerCase());
-    }
-
-    private String selectHandler(Set<Map.Entry<String, SmsLog>> entries, SmsLogStatus expectStatus) {
-        String selectedHandlerName = null;
-        for (Map.Entry<String, SmsLog> entry : entries) {
-            SmsLog smsLog = entry.getValue();
-
-            long interval = System.currentTimeMillis() - (smsLog.getCreateTime() != null ? smsLog.getCreateTime().getTime() : 0);
-
-            SmsLogStatus status = SmsLogStatus.fromCode(smsLog.getStatus());
-            if (status == expectStatus && interval > 3 * 60 * 1000) {
-                selectedHandlerName = smsLog.getHandler();
-                break;
-            }
-        }
-        if (selectedHandlerName == null && expectStatus.ordinal() < SmsLogStatus.values().length - 1) {
-            return selectHandler(entries, SmsLogStatus.values()[expectStatus.ordinal() + 1]);
-        }
-        return selectedHandlerName;
+    public void setHandlers(Map<String, SmsHandlerResolver> resolverMap) {
+        resolverMap.forEach((name, resolver) -> resolvers.put(name, resolver));
     }
 
     /*private void doSend(String phoneNumber, String text, String templateId) {
@@ -157,12 +92,7 @@ public class SmsProviderImpl implements SmsProvider {
     private void doSend(String handlerName, Integer namespaceId, String[] phoneNumbers, String templateScope, int templateId, String templateLocale, List<Tuple<String, Object>> variables) {
         Map<SmsHandler, String[]> handlersMap;
 
-        if (handlerName != null) {
-            handlersMap = new HashMap<>();
-            handlersMap.put(handlers.get(handlerName.toLowerCase()), phoneNumbers);
-        } else {
-            handlersMap = this.getHandler(namespaceId, phoneNumbers);
-        }
+        handlersMap = getSmsHandlerMap(handlerName, namespaceId, phoneNumbers);
 
         handlersMap.forEach((handler, phones) -> {
             publishEvent(() -> {
@@ -178,6 +108,21 @@ public class SmsProviderImpl implements SmsProvider {
                     + "], templateScope=" + templateScope + ", templateId=" + templateId + ", templateLocale=" + templateLocale);
         }
 
+    }
+
+    private Map<SmsHandler, String[]> getSmsHandlerMap(String handlerName, Integer namespaceId, String[] phoneNumbers) {
+        String val = configurationProvider.getValue(SMS_HANDLER_RESOLVER_NAME, "SMART");
+
+        SmsHandlerResolver resolver = resolvers.get(SmsHandlerResolver.RESOLVER_NAME_PREFIX + val);
+
+        Map<SmsHandler, String[]> handlersMap;
+        if (handlerName != null && handlerName.length() > 0) {
+            handlersMap = new HashMap<>();
+            handlersMap.put(resolver.getHandlerByName(handlerName), phoneNumbers);
+        } else {
+            handlersMap = resolver.resolveHandler(namespaceId, phoneNumbers);
+        }
+        return handlersMap;
     }
 
     private void saveSmsLog(List<SmsLog> smsLogList) {

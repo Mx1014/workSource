@@ -68,14 +68,16 @@ public class YunZhiXunSmsHandler implements SmsHandler, ApplicationListener<Cont
     }
 
     private void initAccount() {
-        this.accountSid = configurationProvider.getValue(YZX_ACCOUNT_SID, "");
-        this.token = configurationProvider.getValue(YZX_TOKEN, "");
-        this.appId = configurationProvider.getValue(YZX_APP_ID, "");
-        //this.templateId = configurationProvider.getValue(YZX_TEMPLATE_ID, "9547");
-        this.version = configurationProvider.getValue(YZX_VERSION, "2014-06-30");
-        this.server = configurationProvider.getValue(YZX_SERVER, "api.ucpaas.com");
-        // this.ip = configurationProvider.getValue(YZX_SSL_IP, "0");
-        // this.port = configurationProvider.getValue(YZX_SSL_PORT, "0");
+        try {
+            this.accountSid = configurationProvider.getValue(YZX_ACCOUNT_SID, "");
+            this.token = configurationProvider.getValue(YZX_TOKEN, "");
+            this.appId = configurationProvider.getValue(YZX_APP_ID, "");
+            //this.templateId = configurationProvider.getValue(YZX_TEMPLATE_ID, "9547");
+            this.version = configurationProvider.getValue(YZX_VERSION, "2014-06-30");
+            this.server = configurationProvider.getValue(YZX_SERVER, "api.ucpaas.com");
+        } catch (Exception e) {
+            //
+        }
     }
 
     private static RuntimeErrorException errorWrap(String reason) {
@@ -264,7 +266,10 @@ public class YunZhiXunSmsHandler implements SmsHandler, ApplicationListener<Cont
                 result = rspMessage.getMessage();
                 res = (YzxSmsResult) StringHelper.fromJsonString(rspMessage.getMessage(), YzxSmsResult.class);
             } catch (Exception e) {
-                e.printStackTrace();
+                for (String phoneNumber : phoneNumbers) {
+                    smsLogs.add(getSmsErrorLog(namespaceId, phoneNumber, templateScope, templateId, templateLocale, "Exception:"+result));
+                }
+                return smsLogs;
             }
         }
         for (String phoneNumber : phoneNumbers) {
