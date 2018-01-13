@@ -70,6 +70,7 @@ import java.math.BigDecimal;
 import java.sql.Timestamp;
 import java.util.*;
 import java.util.stream.Collectors;
+import java.util.stream.Stream;
 
 @Component
 public class PortalServiceImpl implements PortalService {
@@ -145,6 +146,9 @@ public class PortalServiceImpl implements PortalService {
 
 	@Autowired
 	private PortalVersionProvider portalVersionProvider;
+
+	@Autowired
+	private PortalVersionUserProvider portalVersionUserProvider;
 
 	@Autowired
 	private SequenceProvider sequenceProvider;
@@ -2616,8 +2620,36 @@ public class PortalServiceImpl implements PortalService {
 		return response;
 	}
 
+	@Override
+	public PortalVersionUserDTO createPortalVersionUser(CreatePortalVersionUserCommand cmd) {
+		PortalVersionUser portalVersionUser  = new PortalVersionUser();
+		portalVersionUser.setNamespaceId(cmd.getNamespaceId());
+		portalVersionUser.setUserId(cmd.getUserId());
+		portalVersionUser.setVersionId(cmd.getVersionId());
+		portalVersionUser.setCreateTime(new Timestamp(System.currentTimeMillis()));
 
+		portalVersionUserProvider.createPortalVersionUser(portalVersionUser);
 
+		return ConvertHelper.convert(portalVersionUser, PortalVersionUserDTO.class);
+	}
+
+	@Override
+	public ListPortalVersionUsersResponse listPortalVersionUsers(ListPortalVersionUsersCommand cmd) {
+		List<PortalVersionUser> portalVersionUsers = portalVersionUserProvider.listPortalVersionUsers(cmd.getNamespaceId(), cmd.getVersionId());
+		ListPortalVersionUsersResponse response = new ListPortalVersionUsersResponse();
+		if(portalVersionUsers != null){
+			List<PortalVersionUserDTO> dtos = portalVersionUsers.stream()
+					.map(r -> ConvertHelper.convert(r, PortalVersionUserDTO.class)).collect(Collectors.toList());
+			response.setDtos(dtos);
+		}
+
+		return response;
+	}
+
+	@Override
+	public void deletePortalVersionUser(DeletePortalVersionUserCommand cmd) {
+		portalVersionUserProvider.deletePortalVersionUser(cmd.getId());
+	}
 
 	public static void main(String[] args) {
 //		PortalItemGroupJson[] jsons = (PortalItemGroupJson[])StringHelper.fromJsonString("[{\"label\":\"应用\", \"separatorFlag\":\"1\", \"separatorHeight\":\"12\",\"widget\":\"Navigator\",\"style\":\"Metro\",\"instanceConfig\":{\"margin\":20,\"padding\":16,\"backgroundColor\":\"#ffffff\",\"titleFlag\":0,\"title\":\"标题\",\"titleUri\":\"cs://\"},\"defaultOrder\":0,\"description\":\"描述\"},{\"label\":\"横幅广告\", \"separatorFlag\":\"1\", \"separatorHeight\":\"12\",\"widget\":\"Banners\",\"style\":\"Default\",\"defaultOrder\":0,\"description\":\"描述\"},{\"label\":\"公告\", \"separatorFlag\":\"1\", \"separatorHeight\":\"12\",\"widget\":\"Bulletins\",\"style\":\"Default\",\"defaultOrder\":0,\"description\":\"描述\"},{\"label\":\"运营模块\", \"separatorFlag\":\"1\", \"separatorHeight\":\"12\",\"widget\":\"OPPush\",\"style\":\"Default\",\"instanceConfig\":{\"newsSize\":20,\"titleFlag\":0,\"title\":\"标题\",\"moduleAppId\":1},\"defaultOrder\":0,\"description\":\"描述\"},{\"label\":\"无时间轴\", \"separatorFlag\":\"1\", \"separatorHeight\":\"12\",\"widget\":\"News_Flash\",\"style\":\"Default\",\"instanceConfig\":{\"newsSize\":20,\"moduleAppId\":1},\"defaultOrder\":0,\"description\":\"描述\"},{\"label\":\"时间轴\", \"separatorFlag\":\"1\", \"separatorHeight\":\"12\",\"widget\":\"News\",\"style\":\"Default\",\"instanceConfig\":{\"newsSize\":20,\"timeWidgetStyle\":\"date\",\"moduleAppId\":1},\"defaultOrder\":0,\"description\":\"描述\"},{\"label\":\"分页签\", \"separatorFlag\":\"1\", \"separatorHeight\":\"12\",\"widget\":\"Tabs\",\"style\":\"Pure_text\",\"defaultOrder\":0,\"description\":\"描述\"}]", PortalItemGroupJson[].class);

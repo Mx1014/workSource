@@ -509,4 +509,50 @@ public class PortalController extends ControllerBase {
 		portalService.syncLaunchPadData(cmd);
 		return new RestResponse();
 	}
+
+	/**
+	 * <p>>创建预览版本用户</p>
+	 * <b>URL: /portal/createPortalVersionUser</b>
+	 */
+	@RequestMapping("createPortalVersionUser")
+	@RestReturn(PortalVersionUserDTO.class)
+	public RestResponse createPortalVersionUser(CreatePortalVersionUserCommand cmd){
+		PortalVersionUserDTO portalVersionUser = portalService.createPortalVersionUser(cmd);
+		RestResponse response = new RestResponse(portalVersionUser);
+		response.setErrorCode(ErrorCodes.SUCCESS);
+		response.setErrorDescription("OK");
+		return response;
+	}
+
+
+	/**
+	 * <p>删除预览版本用户</p>
+	 * <b>URL: /portal/deletePortalVersionUser</b>
+	 */
+	@RequestMapping("deletePortalVersionUser")
+	@RestReturn(String.class)
+	public RestResponse deletePortalVersionUser(DeletePortalVersionUserCommand cmd){
+		portalService.deletePortalVersionUser(cmd);
+		RestResponse response = new RestResponse();
+		response.setErrorCode(ErrorCodes.SUCCESS);
+		response.setErrorDescription("OK");
+		return response;
+	}
+
+
+
+	/**
+	 * <p>获取预览版本用户</p>
+	 * <b>URL: /portal/listPortalVersionUsers</b>
+	 */
+	@RequestMapping("listPortalVersionUsers")
+	@RestReturn(ListPortalVersionUsersResponse.class)
+	public RestResponse listPortalVersionUsers(ListPortalVersionUsersCommand cmd){
+		ListPortalVersionUsersResponse res = portalService.listPortalVersionUsers(cmd);
+		RestResponse response = new RestResponse(res);
+		response.setErrorCode(ErrorCodes.SUCCESS);
+		response.setErrorDescription("OK");
+		return response;
+	}
+
 }

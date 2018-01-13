@@ -11,7 +11,7 @@ public interface PortalVersionUserProvider {
 
 	PortalVersionUser findPortalVersionUserById(Long id);
 
-	List<PortalVersionUser> listPortalVersionUsers(Integer namespaceId);
+	List<PortalVersionUser> listPortalVersionUsers(Integer namespaceId, Long versionId);
 
 	PortalVersionUser findPortalVersionUserByUserId(Long userId);
 }

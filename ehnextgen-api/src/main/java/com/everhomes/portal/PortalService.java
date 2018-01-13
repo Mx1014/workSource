@@ -124,4 +124,10 @@ public interface PortalService {
 	void syncLaunchPadData(SyncLaunchPadDataCommand cmd);
 
     ListPortalVersionResponse listPortalVersions(ListPortalVersionCommand cmd);
+
+	PortalVersionUserDTO createPortalVersionUser(CreatePortalVersionUserCommand cmd);
+
+	ListPortalVersionUsersResponse listPortalVersionUsers(ListPortalVersionUsersCommand cmd);
+
+	void deletePortalVersionUser(DeletePortalVersionUserCommand cmd);
 }

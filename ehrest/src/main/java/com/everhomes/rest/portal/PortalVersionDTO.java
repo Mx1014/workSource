@@ -1,6 +1,7 @@
 package com.everhomes.rest.portal;
 
 import com.everhomes.rest.launchpad.PortalVersionStatus;
+import com.everhomes.util.StringHelper;
 
 import java.math.BigDecimal;
 import java.sql.Timestamp;
@@ -8,12 +9,13 @@ import java.sql.Timestamp;
 /**
  * <ul>
  *     <li>id: 版本id</li>
- *     <li>namespaceId: namespaceId</li>
- *     <li>parentId: parentId</li>
- *     <li>syncVersion: syncVersion</li>
- *     <li>publishVersion: publishVersion</li>
- *     <li>syncTime: syncTime</li>
- *     <li>publishTime: publishTime</li>
+ *     <li>namespaceId: 与空间</li>
+ *     <li>parentId: 父版本Id</li>
+ *     <li>bigVersion: 大版本号</li>
+ *     <li>minorVersion: 小版本号</li>
+ *     <li>createTime: 创建时间</li>
+ *     <li>syncTime: 同步时间</li>
+ *     <li>publishTime: 发布时间</li>
  *     <li>status: 参考{@link PortalVersionStatus}</li>
  * </ul>
  */
@@ -22,8 +24,9 @@ public class PortalVersionDTO {
     private Long id;
     private Integer namespaceId;
     private Long parentId;
-    private Integer syncVersion;
-    private Integer publishVersion;
+    private Integer bigVersion;
+    private Integer minorVersion;
+    private Timestamp createTime;
     private Timestamp syncTime;
     private Timestamp publishTime;
     private Byte status;
@@ -52,20 +55,28 @@ public class PortalVersionDTO {
         this.parentId = parentId;
     }
 
-    public Integer getSyncVersion() {
-        return syncVersion;
+    public Integer getBigVersion() {
+        return bigVersion;
     }
 
-    public void setSyncVersion(Integer syncVersion) {
-        this.syncVersion = syncVersion;
+    public void setBigVersion(Integer bigVersion) {
+        this.bigVersion = bigVersion;
     }
 
-    public Integer getPublishVersion() {
-        return publishVersion;
+    public Integer getMinorVersion() {
+        return minorVersion;
     }
 
-    public void setPublishVersion(Integer publishVersion) {
-        this.publishVersion = publishVersion;
+    public void setMinorVersion(Integer minorVersion) {
+        this.minorVersion = minorVersion;
+    }
+
+    public Timestamp getCreateTime() {
+        return createTime;
+    }
+
+    public void setCreateTime(Timestamp createTime) {
+        this.createTime = createTime;
     }
 
     public Timestamp getSyncTime() {
@@ -91,4 +102,7 @@ public class PortalVersionDTO {
     public void setStatus(Byte status) {
         this.status = status;
     }
+
+    @Override
+    public String toString(){return StringHelper.toJsonString(this);}
 }

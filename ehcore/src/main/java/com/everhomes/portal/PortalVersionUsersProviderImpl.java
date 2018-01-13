@@ -63,7 +63,7 @@ public class PortalVersionUsersProviderImpl implements PortalVersionUserProvider
 	}
 
 	@Override
-	public List<PortalVersionUser> listPortalVersionUsers(Integer namespaceId) {
+	public List<PortalVersionUser> listPortalVersionUsers(Integer namespaceId, Long versionId) {
 		DSLContext context = dbProvider.getDslContext(AccessSpec.readOnly());
 		SelectQuery<EhPortalVersionUsersRecord> query = context.selectQuery(Tables.EH_PORTAL_VERSION_USERS);
 		if(namespaceId != null){
