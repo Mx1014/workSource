@@ -30,6 +30,11 @@ public class CustomerDynamicExcelHandler implements DynamicExcelHandler {
 
     @Override
     public void save2Schema(List<Object> sheetClassObjs, Class<?> sheetClass) {
+        if(sheetClassObjs != null && sheetClassObjs.size() > 0) {
+            sheetClassObjs.forEach(obj -> {
+                ConvertHelper.convert(obj, sheetClass);
+            });
+        }
 
     }
 
