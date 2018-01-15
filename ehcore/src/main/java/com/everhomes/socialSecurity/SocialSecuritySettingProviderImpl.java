@@ -10,7 +10,10 @@ import com.everhomes.rest.socialSecurity.AccumOrSocial;
 import com.everhomes.rest.socialSecurity.SocialSecurityItemDTO;
 import com.everhomes.rest.socialSecurity.SsorAfPay;
 import org.jooq.*;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.scheduling.SchedulingTaskExecutor;
 import org.springframework.stereotype.Component;
 
 import com.everhomes.db.AccessSpec;
@@ -204,17 +207,23 @@ public class SocialSecuritySettingProviderImpl implements SocialSecuritySettingP
         return record.map(r -> ConvertHelper.convert(r, SocialSecuritySetting.class));
     }
 
+    private static final Logger LOGGER = LoggerFactory.getLogger(SocialSecuritySettingProviderImpl.class);
+    .class);
+
     @Override
     public BigDecimal sumPayment(Long detailId, AccumOrSocial accumOrSocial) {
-        Result<Record1<BigDecimal>> record = getReadOnlyContext()
+        SelectConditionStep<Record1<BigDecimal>> step = getReadOnlyContext()
                 .select(Tables.EH_SOCIAL_SECURITY_SETTINGS.COMPANY_RADIX.mul(Tables.EH_SOCIAL_SECURITY_SETTINGS.COMPANY_RATIO)
                         .add(Tables.EH_SOCIAL_SECURITY_SETTINGS.EMPLOYEE_RATIO.mul(Tables.EH_SOCIAL_SECURITY_SETTINGS.EMPLOYEE_RATIO))
                         .sum())
                 .from(Tables.EH_SOCIAL_SECURITY_SETTINGS)
                 .where(Tables.EH_SOCIAL_SECURITY_SETTINGS.DETAIL_ID.eq(detailId))
-                .and(Tables.EH_SOCIAL_SECURITY_SETTINGS.ACCUM_OR_SOCAIL.eq(accumOrSocial.getCode()))
-                .orderBy(Tables.EH_SOCIAL_SECURITY_SETTINGS.ID.asc())
-                .fetch();
+                .and(Tables.EH_SOCIAL_SECURITY_SETTINGS.ACCUM_OR_SOCAIL.eq(accumOrSocial.getCode()));
+        LOGGER.debug("SQL " + step);
+        Result<Record1<BigDecimal>> record =
+//                .orderBy(Tables.EH_SOCIAL_SECURITY_SETTINGS.ID.asc())
+                step.fetch();
+
         if (null == record) {
             return new BigDecimal(0);
         }
