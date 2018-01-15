@@ -248,11 +248,13 @@ public class ServiceAllianceFlowModuleListener extends GeneralApprovalFlowModule
 				meta.put(MessageMetaConstant.META_OBJECT, StringHelper.toJsonString(metaObject));
 
 				if(serviceOrg.getContactMemid()!=null && serviceOrg.getContactMemid()!=0) {
-//					OrganizationMember member = organizationProvider.findOrganizationMemberById(serviceOrg.getContactMemid());
+					OrganizationMember member = organizationProvider.findOrganizationMemberById(serviceOrg.getContactMemid());
 
-					MessageDTO messageDto = createMessageDto(body, meta, String.valueOf(serviceOrg.getContactMemid()));
-					messagingService.routeMessage(User.SYSTEM_USER_LOGIN, AppConstants.APPID_MESSAGING, MessageChannelType.USER.getCode(),
-							String.valueOf(serviceOrg.getContactMemid()), messageDto, MessagingConstants.MSG_FLAG_STORED_PUSH.getCode());
+					if(member!=null && member.getTargetId()!=null){
+						MessageDTO messageDto = createMessageDto(body, meta, member.getTargetId().toString());
+						messagingService.routeMessage(User.SYSTEM_USER_LOGIN, AppConstants.APPID_MESSAGING, MessageChannelType.USER.getCode(),
+								member.getTargetId().toString(), messageDto, MessagingConstants.MSG_FLAG_STORED_PUSH.getCode());
+					}
 				}
 
 				if (targets != null && targets.size() > 0) {
