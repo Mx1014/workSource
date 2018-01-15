@@ -212,8 +212,8 @@ public class SocialSecuritySettingProviderImpl implements SocialSecuritySettingP
     @Override
     public BigDecimal sumPayment(Long detailId, AccumOrSocial accumOrSocial) {
         SelectConditionStep<Record1<BigDecimal>> step = getReadOnlyContext()
-                .select(Tables.EH_SOCIAL_SECURITY_SETTINGS.COMPANY_RADIX.mul(Tables.EH_SOCIAL_SECURITY_SETTINGS.COMPANY_RATIO)
-                        .add(Tables.EH_SOCIAL_SECURITY_SETTINGS.EMPLOYEE_RATIO.mul(Tables.EH_SOCIAL_SECURITY_SETTINGS.EMPLOYEE_RATIO))
+                .select(Tables.EH_SOCIAL_SECURITY_SETTINGS.COMPANY_RADIX.mul(Tables.EH_SOCIAL_SECURITY_SETTINGS.COMPANY_RATIO).div(10000)
+                        .add(Tables.EH_SOCIAL_SECURITY_SETTINGS.EMPLOYEE_RATIO.mul(Tables.EH_SOCIAL_SECURITY_SETTINGS.EMPLOYEE_RATIO).div(10000))
                         .sum())
                 .from(Tables.EH_SOCIAL_SECURITY_SETTINGS)
                 .where(Tables.EH_SOCIAL_SECURITY_SETTINGS.DETAIL_ID.eq(detailId))
