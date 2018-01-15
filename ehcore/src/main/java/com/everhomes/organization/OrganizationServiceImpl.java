@@ -7779,6 +7779,11 @@ public class OrganizationServiceImpl implements OrganizationService {
                 deleteOrganizationAllAdmins(org.getId());
                 orgAdminAccounts.put(org.getId(), new ArrayList<>());
             }
+            OrganizationMember member = organizationProvider.findOrganizationPersonnelByPhone(org.getId(), data.getAdminToken());
+            if(member != null && OrganizationMemberGroupType.fromCode(member.getMemberGroup()) == OrganizationMemberGroupType.MANAGER){
+                orgAdminAccounts.get(org.getId()).add(member.getContactToken());
+            }
+
             if (!orgAdminAccounts.get(org.getId()).contains(data.getAdminToken())) {
                 if (!StringUtils.isEmpty(data.getAdminToken())) {
                     CreateOrganizationAdminCommand createOrganizationAdminCommand = new CreateOrganizationAdminCommand();
