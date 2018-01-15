@@ -1412,8 +1412,9 @@ public class SocialSecurityServiceImpl implements SocialSecurityService {
         //todo 组织架构获取本月增员本月减员的人
         String month = socialSecurityPaymentProvider.findPaymentMonthByDetail(ownerId);
         socialSecurityInoutReportProvider.deleteSocialSecurityInoutReportByMonth(ownerId, month);
-        List<Long> inDetails = socialSecurityInoutLogProvider.listSocialSecurityInoutLogDetailIds(ownerId, month,InOutLogType.SOCIAL_SECURITY_IN);
+        List<Long> inDetails = socialSecurityInoutLogProvider.listSocialSecurityInoutLogDetailIds(ownerId, month, InOutLogType.SOCIAL_SECURITY_IN);
         List<Long> outDetails = socialSecurityInoutLogProvider.listSocialSecurityInoutLogDetailIds(ownerId, month, InOutLogType.SOCIAL_SECURITY_OUT);
+        LOGGER.debug("indetails : {} \n out details {}", inDetails, outDetails);
         if (inDetails != null) {
             for (Long detailId : inDetails) {
                 OrganizationMemberDetails detail = organizationProvider.findOrganizationMemberDetailsByDetailId(detailId);
@@ -1427,7 +1428,7 @@ public class SocialSecurityServiceImpl implements SocialSecurityService {
             }
         }
 
-        inDetails = socialSecurityInoutLogProvider.listSocialSecurityInoutLogDetailIds(ownerId, month,InOutLogType.ACCUMULATION_FUND_IN);
+        inDetails = socialSecurityInoutLogProvider.listSocialSecurityInoutLogDetailIds(ownerId, month, InOutLogType.ACCUMULATION_FUND_IN);
         outDetails = socialSecurityInoutLogProvider.listSocialSecurityInoutLogDetailIds(ownerId, month, InOutLogType.ACCUMULATION_FUND_OUT);
         if (inDetails != null) {
             for (Long detailId : inDetails) {
