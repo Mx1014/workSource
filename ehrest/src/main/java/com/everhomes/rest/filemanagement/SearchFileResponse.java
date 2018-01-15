@@ -5,6 +5,13 @@ import com.everhomes.util.StringHelper;
 
 import java.util.List;
 
+/**
+ * <ul>
+ * <li>catalogs: 目录列表 {@link com.everhomes.rest.filemanagement.FileCatalogDTO}</li>
+ * <li>folders: 文件夹列表 {@link com.everhomes.rest.filemanagement.FileContentDTO}</li>
+ * <li>files: 文件列表 {@link com.everhomes.rest.filemanagement.FileContentDTO}</li>
+ * </ul>
+ */
 public class SearchFileResponse {
 
     @ItemType(FileCatalogDTO.class)
