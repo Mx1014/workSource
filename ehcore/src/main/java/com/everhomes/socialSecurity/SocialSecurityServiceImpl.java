@@ -1468,6 +1468,7 @@ public class SocialSecurityServiceImpl implements SocialSecurityService {
 
         for (SocialSecurityInoutLog log : inoutLogs) {
             //通过INOUTLOG的type 和当前用户社保公积金状态比较,确定这个月计算他的增员还是减员
+            LOGGER.debug("log type :{} ,detail status ss {}  af {} ", log.getType(), detail.getSocialSecurityStatus(), detail.getAccumulationFundStatus());
             if (log.getType().equals(InOutLogType.ACCUMULATION_FUND_IN)
                     && (NormalFlag.YES == NormalFlag.fromCode(detail.getAccumulationFundStatus()))) {
                 report.setAccumulationFundIncrease(ssReport.getAccumulationFundSum());
