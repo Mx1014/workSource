@@ -4,11 +4,14 @@ import com.everhomes.util.StringHelper;
 
 /**
  * <ul>
+ * <li>catalogId: 目录id</li>
  * <li>contentId: 内容id</li>
  * <li>keywords: 关键词</li>
  * </ul>
  */
 public class ListFileContentCommand {
+
+    private Long catalogId;
 
     private Long contentId;
 
@@ -19,6 +22,14 @@ public class ListFileContentCommand {
     private Integer pageSize;
 
     public ListFileContentCommand() {
+    }
+
+    public Long getCatalogId() {
+        return catalogId;
+    }
+
+    public void setCatalogId(Long catalogId) {
+        this.catalogId = catalogId;
     }
 
     public Long getContentId() {

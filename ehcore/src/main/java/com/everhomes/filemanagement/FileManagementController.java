@@ -89,14 +89,15 @@ public class FileManagementController extends ControllerBase {
         return response;
     }
 
+
     /**
-     * <b>URL: /fileManagement/enterFileCatalog</b>
-     * <p>1-6.进入文件目录</p>
+     * <b>URL: /fileManagement/searchFiles</b>
+     * <p>1-6.目录全局搜索</p>
      */
-    @RequestMapping("enterFileCatalog")
-    @RestReturn(value = ListFileContentResponse.class)
-    public RestResponse enterFileCatalog(FileCatalogIdCommand cmd) {
-        ListFileContentResponse res = fileManagementService.enterFileCatalog(cmd);
+    @RequestMapping("searchFiles")
+    @RestReturn(value = SearchFileResponse.class)
+    public RestResponse searchFiles(SearchFileCommand cmd) {
+        SearchFileResponse res = fileManagementService.searchFiles(cmd);
         RestResponse response = new RestResponse(res);
         response.setErrorCode(ErrorCodes.SUCCESS);
         response.setErrorDescription("OK");

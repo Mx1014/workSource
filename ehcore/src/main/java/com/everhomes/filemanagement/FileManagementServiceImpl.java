@@ -33,7 +33,7 @@ public class FileManagementServiceImpl implements  FileManagementService{
     }
 
     @Override
-    public ListFileContentResponse enterFileCatalog(FileCatalogIdCommand cmd) {
+    public SearchFileResponse searchFiles(SearchFileCommand cmd) {
         return null;
     }
 

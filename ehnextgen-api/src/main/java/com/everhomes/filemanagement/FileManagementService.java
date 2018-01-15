@@ -16,7 +16,7 @@ public interface FileManagementService {
 
     ListFileCatalogResponse listAvailableFileContents(ListFileCatalogsCommand cmd);
 
-    ListFileContentResponse enterFileCatalog(FileCatalogIdCommand cmd);
+    SearchFileResponse searchFiles(SearchFileCommand cmd);
 
     List<FileCatalogDTO> addFileCatalogScopes(AddFileCatalogScopesCommand cmd);
 
