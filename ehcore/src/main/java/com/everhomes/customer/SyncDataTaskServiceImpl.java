@@ -1,14 +1,29 @@
 package com.everhomes.customer;
 
+import com.everhomes.community.Community;
+import com.everhomes.community.CommunityProvider;
+import com.everhomes.locale.LocaleStringService;
+import com.everhomes.openapi.ZjSyncdataBackup;
+import com.everhomes.openapi.ZjSyncdataBackupProvider;
+import com.everhomes.rest.approval.CommonStatus;
 import com.everhomes.rest.common.SyncDataResponse;
+import com.everhomes.rest.common.SyncDataResultLog;
+import com.everhomes.rest.customer.ListCommunitySyncResultResponse;
+import com.everhomes.rest.customer.SyncDataResult;
 import com.everhomes.rest.customer.SyncDataTaskStatus;
+import com.everhomes.rest.customer.SyncDataTaskType;
+import com.everhomes.rest.openapi.shenzhou.DataType;
 import com.everhomes.user.User;
 import com.everhomes.user.UserContext;
+import com.everhomes.user.UserProvider;
 import com.everhomes.util.ExecutorUtil;
 import com.everhomes.util.StringHelper;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
+
+import java.util.ArrayList;
+import java.util.List;
 
 /**
  * Created by ying.xiong on 2018/1/13.
@@ -18,6 +33,19 @@ public class SyncDataTaskServiceImpl implements SyncDataTaskService {
 
     @Autowired
     private SyncDataTaskProvider syncDataTaskProvider;
+
+    @Autowired
+    private LocaleStringService localeStringService;
+
+    @Autowired
+    private UserProvider userProvider;
+
+    @Autowired
+    private ZjSyncdataBackupProvider zjSyncdataBackupProvider;
+
+    @Autowired
+    private CommunityProvider communityProvider;
+
     @Override
     public SyncDataTask executeTask(ExecuteSyncTaskCallback callback, SyncDataTask task) {
         task.setStatus(SyncDataTaskStatus.CREATED.getCode());
@@ -48,6 +76,87 @@ public class SyncDataTaskServiceImpl implements SyncDataTaskService {
 
     @Override
     public SyncDataResponse getSyncDataResult(Long taskId) {
-        return null;
+        User user = UserContext.current().getUser();
+
+        SyncDataResponse response = new SyncDataResponse();
+
+        SyncDataTask task = syncDataTaskProvider.findSyncDataTaskById(taskId);
+
+        if(null != task){
+            if(SyncDataTaskStatus.FINISH == SyncDataTaskStatus.fromCode(task.getStatus())){
+                response =  (SyncDataResponse)StringHelper.fromJsonString(task.getResult(), SyncDataResponse.class);
+                List<SyncDataResultLog> logs =  response.getLogs();
+                if (logs != null) {
+                    for (SyncDataResultLog log : logs) {
+                        log.setErrorDescription(localeStringService.getLocalizedString(log.getScope(), log.getCode().toString(), user.getLocale(), ""));
+                    }
+                }
+            }
+            response.setSyncStatus(task.getStatus());
+        }
+
+        return response;
+    }
+
+    @Override
+    public ListCommunitySyncResultResponse listCommunitySyncResult(Long communityId, String syncType, Integer pageSize, Long pageAnchor) {
+        Community community = communityProvider.findCommunityById(communityId);
+        if(community == null) {
+            return null;
+        }
+        ListCommunitySyncResultResponse response = new ListCommunitySyncResultResponse();
+        List<SyncDataTask> tasks = syncDataTaskProvider.listCommunitySyncResult(communityId, syncType, pageSize, pageAnchor);
+        if(tasks != null && tasks.size() > 0) {
+            List<SyncDataResult> results = new ArrayList<>();
+            for (SyncDataTask task : tasks) {
+                SyncDataResult result = new SyncDataResult();
+                result.setStartTime(task.getCreateTime());
+                result.setStatus(task.getStatus());
+                if(SyncDataTaskStatus.FINISH.equals(SyncDataTaskStatus.fromCode(task.getStatus()))
+                        || SyncDataTaskStatus.EXCEPTION.equals(SyncDataTaskStatus.fromCode(task.getStatus()))) {
+                    result.setEndTime(task.getUpdateTime());
+                    result.setResult(task.getResult());
+                } else if(SyncDataTaskStatus.EXECUTING.equals(SyncDataTaskStatus.fromCode(task.getStatus()))) {
+                    result.setRateOfProgress(calculateProgress(community, syncType));
+                }
+
+                if(task.getCreatorUid() == 0L) {
+                    result.setManualFlag((byte)0);
+                } else {
+                    result.setManualFlag((byte)1);
+
+                }
+
+            }
+        }
+        return response;
+    }
+
+    private Double calculateProgress(Community community, String syncType) {
+        Byte dataType = (byte) 0;
+        if(SyncDataTaskType.CONTRACT.getCode().equals(syncType)) {
+            dataType = DataType.CONTRACT.getCode();
+        } else if(SyncDataTaskType.CUSTOMER.getCode().equals(syncType)) {
+            dataType = DataType.ENTERPRISE.getCode();
+        } else if(SyncDataTaskType.INDIVIDUAL.getCode().equals(syncType)) {
+            dataType = DataType.INDIVIDUAL.getCode();
+        }
+        List<ZjSyncdataBackup> backups = zjSyncdataBackupProvider.listZjSyncdataBackupByParam(community.getNamespaceId(),
+                community.getNamespaceCommunityToken(), dataType);
+        if(backups != null && backups.size() > 0) {
+            int i = 0;
+            for (ZjSyncdataBackup backup : backups) {
+                if(backup.getStatus() == CommonStatus.INACTIVE.getCode()) {
+                    i++;
+                }
+            }
+            if(i == 0) {
+                return 0.5 - ((double)1 / ((double)backups.size()*2));
+            }
+            return 0.5 + ((double)i / ((double)backups.size()*2));
+        }
+
+        return 1.0;
+
     }
 }

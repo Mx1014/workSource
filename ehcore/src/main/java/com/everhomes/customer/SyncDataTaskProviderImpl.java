@@ -6,13 +6,19 @@ import com.everhomes.db.DaoHelper;
 import com.everhomes.db.DbProvider;
 import com.everhomes.naming.NameMapper;
 import com.everhomes.sequence.SequenceProvider;
+import com.everhomes.server.schema.Tables;
 import com.everhomes.server.schema.tables.daos.EhSyncDataTasksDao;
 import com.everhomes.server.schema.tables.pojos.EhSyncDataTasks;
+import com.everhomes.server.schema.tables.records.EhSyncDataTasksRecord;
+import com.everhomes.util.ConvertHelper;
 import com.everhomes.util.DateHelper;
 import org.jooq.DSLContext;
+import org.jooq.SelectQuery;
 import org.springframework.beans.factory.annotation.Autowired;
 
 import java.sql.Timestamp;
+import java.util.ArrayList;
+import java.util.List;
 
 /**
  * Created by ying.xiong on 2018/1/13.
@@ -43,5 +49,35 @@ public class SyncDataTaskProviderImpl implements SyncDataTaskProvider {
         dao.update();
 
         DaoHelper.publishDaoAction(DaoAction.MODIFY, EhSyncDataTasks.class, task.getId());
+    }
+
+    @Override
+    public SyncDataTask findSyncDataTaskById(Long taskId) {
+        DSLContext context = this.dbProvider.getDslContext(AccessSpec.readOnly());
+        EhSyncDataTasksDao dao = new EhSyncDataTasksDao(context.configuration());
+        return ConvertHelper.convert(dao.findById(taskId), SyncDataTask.class);
+    }
+
+    @Override
+    public List<SyncDataTask> listCommunitySyncResult(Long communityId, String syncType, Integer pageSize, Long pageAnchor) {
+        DSLContext context = dbProvider.getDslContext(AccessSpec.readOnly());
+        SelectQuery<EhSyncDataTasksRecord> query = context.selectQuery(Tables.EH_SYNC_DATA_TASKS);
+        query.addConditions(Tables.EH_SYNC_DATA_TASKS.OWNER_ID.eq(communityId));
+        query.addConditions(Tables.EH_SYNC_DATA_TASKS.TYPE.eq(syncType));
+
+        if(pageAnchor != null) {
+            query.addConditions(Tables.EH_SYNC_DATA_TASKS.ID.lt(pageAnchor));
+        }
+
+        query.addOrderBy(Tables.EH_SYNC_DATA_TASKS.ID.desc());
+        query.addLimit(pageSize);
+
+        List<SyncDataTask> result = new ArrayList<>();
+        query.fetch().map((r) -> {
+            result.add(ConvertHelper.convert(r, SyncDataTask.class));
+            return null;
+        });
+
+        return result;
     }
 }

@@ -1,6 +1,12 @@
 package com.everhomes.rest.customer;
 
 /**
+ * <ul>
+ * <li>CREATED(1): 已创建未执行</li>
+ * <li>EXECUTING(2): 执行中</li>
+ * <li>FINISH(3): 正常完成</li>
+ * <li>EXCEPTION(4): 异常完成</li>
+ * </ul>
  * Created by ying.xiong on 2018/1/13.
  */
 public enum SyncDataTaskStatus {
