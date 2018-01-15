@@ -41,6 +41,7 @@ ADD COLUMN `identify` varchar(64) DEFAULT NULL COMMENT '类型标识';
 
 CREATE TABLE `eh_rentalv2_order_rules` (
   `id` bigint(20) NOT NULL DEFAULT '0',
+  `resource_type` varchar(64) DEFAULT NULL COMMENT '资源类型',
   `owner_type` varchar(255) DEFAULT NULL COMMENT 'default_rule, resource_rule',
   `owner_id` bigint(20) DEFAULT NULL,
   `handle_type` tinyint(4) DEFAULT NULL COMMENT '1: 退款, 2: 加收',
@@ -184,6 +185,42 @@ UPDATE eh_rentalv2_resources set resource_type = 'default';
 UPDATE eh_rentalv2_cells set resource_type = 'default';
 UPDATE eh_rentalv2_orders set resource_type = 'default';
 
+ALTER TABLE `eh_rentalv2_close_dates`
+ADD COLUMN `resource_type` varchar(64) DEFAULT NULL COMMENT '资源类型';
+ALTER TABLE `eh_rentalv2_config_attachments`
+ADD COLUMN `resource_type` varchar(64) DEFAULT NULL COMMENT '资源类型';
+
+ALTER TABLE `eh_rentalv2_items`
+ADD COLUMN `resource_type` varchar(64) DEFAULT NULL COMMENT '资源类型';
+ALTER TABLE `eh_rentalv2_items_orders`
+ADD COLUMN `resource_type` varchar(64) DEFAULT NULL COMMENT '资源类型';
+ALTER TABLE `eh_rentalv2_resource_orders`
+ADD COLUMN `resource_type` varchar(64) DEFAULT NULL COMMENT '资源类型';
+
+ALTER TABLE `eh_rentalv2_order_attachments`
+ADD COLUMN `resource_type` varchar(64) DEFAULT NULL COMMENT '资源类型';
+
+ALTER TABLE `eh_rentalv2_price_packages`
+ADD COLUMN `resource_type` varchar(64) DEFAULT NULL COMMENT '资源类型';
+ALTER TABLE `eh_rentalv2_price_rules`
+ADD COLUMN `resource_type` varchar(64) DEFAULT NULL COMMENT '资源类型';
+ALTER TABLE `eh_rentalv2_time_interval`
+ADD COLUMN `resource_type` varchar(64) DEFAULT NULL COMMENT '资源类型';
+ALTER TABLE `eh_rentalv2_resource_orders`
+ADD COLUMN `resource_type` varchar(64) DEFAULT NULL COMMENT '资源类型';
+
+
+UPDATE eh_rentalv2_close_dates set resource_type = 'default';
+UPDATE eh_rentalv2_config_attachments set resource_type = 'default';
+UPDATE eh_rentalv2_items set resource_type = 'default';
+UPDATE eh_rentalv2_items_orders set resource_type = 'default';
+UPDATE eh_rentalv2_resource_orders set resource_type = 'default';
+UPDATE eh_rentalv2_order_attachments set resource_type = 'default';
+UPDATE eh_rentalv2_price_packages set resource_type = 'default';
+UPDATE eh_rentalv2_price_rules set resource_type = 'default';
+UPDATE eh_rentalv2_time_interval set resource_type = 'default';
+UPDATE eh_rentalv2_resource_orders set resource_type = 'default';
+
 
 INSERT INTO `eh_rentalv2_resource_types` (`id`, `name`, `page_type`, `icon_uri`, `status`, `namespace_id`, `pay_mode`, `unauth_visible`, `menu_type`, `identify`)
 	VALUES ('12500', 'VIP车位预约', '0', NULL, '2', '1000000', '0', '0', '1', 'vip_parking');
@@ -196,6 +233,21 @@ UPDATE eh_rentalv2_price_packages set user_price_type = 1;
 INSERT INTO `eh_locale_templates` (`scope`, `code`, `locale`, `description`, `text`, `namespace_id`)
 	VALUES ('rental.notification', '13', 'zh_CN', '用户取消订单推送消息', '订单取消通知：您的${resourceTypeName}订单已成功取消。', '0');
 
+INSERT INTO `eh_locale_templates` (`scope`, `code`, `locale`, `description`, `text`, `namespace_id`)
+	VALUES ('rental.notification', '14', 'zh_CN', '订单超时取消通知', '由于您未在15分钟内完成支付，您预约的${useDetail}已自动取消，期待下次为您服务。', '0');
+
+INSERT INTO `eh_locale_templates` (`scope`, `code`, `locale`, `description`, `text`, `namespace_id`)
+	VALUES ('rental.notification', '15', 'zh_CN', '订单支付通知', '尊敬的用户，您预约的${useDetail}已成功提交，您可以在预约时间内控制车位锁以使用车位（地址：${spaceAddress}），如需延时，请在预约结束时间前提交申请，否则超时将产生额外费用，感谢您的谅解。', '0');
+
+
+INSERT INTO `eh_locale_templates` (`scope`, `code`, `locale`, `description`, `text`, `namespace_id`)
+	VALUES ('sms.default', '58', 'zh_CN', '订单超时取消通知', '由于您未在15分钟内完成支付，您预约的${useDetail}已自动取消，期待下次为您服务。', '0');
+
+INSERT INTO `eh_locale_templates` (`scope`, `code`, `locale`, `description`, `text`, `namespace_id`)
+	VALUES ('sms.default', '59', 'zh_CN', '订单支付通知', '尊敬的${plateOwnerName}，用户（${userName}：${userPhone}）已为您成功预约${rentalDescription}，请在该时间内前往指定车位（地址：${spaceAddress}），并点击以下链接使用：${orderDetailUrl}谢谢。', '0');
+
+INSERT INTO `eh_configurations` (`name`, `value`, `description`, `namespace_id`, `display_name`)
+	VALUES ('rental.order.detail.url', '/vip-parking/build/index.html#/intro?namespaceId=1000000&resourceType=%s&resourceTypeId=%s&sourceType=%s&sourceId=%s', '', '0', NULL);
 
 
 
