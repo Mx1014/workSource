@@ -8,6 +8,7 @@ import com.everhomes.acl.Role;
 import com.everhomes.address.AddressService;
 import com.everhomes.app.App;
 import com.everhomes.app.AppProvider;
+import com.everhomes.asset.AssetPaymentStrings;
 import com.everhomes.authorization.*;
 import com.everhomes.bigcollection.Accessor;
 import com.everhomes.bigcollection.BigCollectionProvider;
@@ -4702,10 +4703,12 @@ public class UserServiceImpl implements UserService {
 	}
 
 	@Override
-	public TargetDTO findTargetByNameAndAddress(String contractNum, String targetName, Long communityId, String tel,String ownerType,String targetType) {
+	public TargetDTO findTargetByNameAndAddress(String contractNum, String targetName, Long communityId, String tel,String ownerType,String targetType, Integer namespaceId) {
         TargetDTO dto = new TargetDTO();
         if(contractNum!=null) {
-			Integer namespaceId = UserContext.getCurrentNamespaceId();
+        	if(namespaceId == null){
+                namespaceId = UserContext.getCurrentNamespaceId();
+            }
 			String handler = configurationProvider.getValue(namespaceId, "contractService", "");
 			ContractService contractService = PlatformContext.getComponent(ContractService.CONTRACT_PREFIX + handler);
             List<Object> typeIdNameAndTel = contractService.findCustomerByContractNum(contractNum,communityId,ownerType);
@@ -4728,14 +4731,14 @@ public class UserServiceImpl implements UserService {
 //            List<TargetDTO> users = userProvider.findUesrIdByNameAndAddressId(targetName,ids,tel);
 //            //再在eh_organization中找
 //            List<TargetDTO> organizations = organizationProvider.findOrganizationIdByNameAndAddressId(targetName,ids);
-			if(targetType!=null && targetType.equals("eh_user")){
-                dto = userProvider.findUserByTokenAndName(tel,targetName);
+			if(targetType!=null && targetType.equals(AssetPaymentStrings.EH_USER)){
+                dto = userProvider.findUserByToken(tel,namespaceId);
                 return dto;
 			}
-			if(targetType!=null && targetType.equals("eh_organization")){
-                Organization organization = organizationProvider.findOrganizationByName(targetName, UserContext.getCurrentNamespaceId());
+			if(targetType!=null && targetType.equals(AssetPaymentStrings.EH_ORGANIZATION)){
+                Organization organization = organizationProvider.findOrganizationByName(targetName, namespaceId);
                 dto.setTargetName(organization.getName());
-                dto.setTargetType("eh_organization");
+                dto.setTargetType(AssetPaymentStrings.EH_ORGANIZATION);
                 dto.setTargetId(organization.getId());
                 return dto;
             }

@@ -3577,13 +3577,17 @@ public class OrganizationProviderImpl implements OrganizationProvider {
     @Override
     public Organization findOrganizationByName(String name, Integer namespaceId) {
         DSLContext context = this.dbProvider.getDslContext(AccessSpec.readOnly());
-        Record r = context.select().from(Tables.EH_ORGANIZATIONS)
-                .where(Tables.EH_ORGANIZATIONS.NAME.eq(name))
-                .and(Tables.EH_ORGANIZATIONS.PARENT_ID.eq(0L))
-                .and(Tables.EH_ORGANIZATIONS.NAMESPACE_ID.eq(namespaceId))
-				.and(Tables.EH_ORGANIZATIONS.GROUP_TYPE.eq(OrganizationGroupType.ENTERPRISE.getCode()))
-                .and(Tables.EH_ORGANIZATIONS.STATUS.eq(OrganizationStatus.ACTIVE.getCode()))
-                .fetchAny();
+        SelectQuery<Record> query = context.selectQuery();
+        query.addSelect(Tables.EH_ORGANIZATIONS.fields());
+        query.addFrom(Tables.EH_ORGANIZATIONS);
+        query.addConditions(Tables.EH_ORGANIZATIONS.NAME.eq(name));
+        //没有域名，重复率会高
+        query.addConditions(Tables.EH_ORGANIZATIONS.NAMESPACE_ID.eq(namespaceId));
+        query.addConditions(Tables.EH_ORGANIZATIONS.PARENT_ID.eq(0l));
+        query.addConditions(Tables.EH_ORGANIZATIONS.GROUP_TYPE.eq(OrganizationGroupType.ENTERPRISE.getCode()));
+        query.addConditions(Tables.EH_ORGANIZATIONS.STATUS.eq(OrganizationStatus.ACTIVE.getCode()));
+
+        Record r = query.fetchAny();
         if (r != null)
             return ConvertHelper.convert(r, Organization.class);
         return null;
