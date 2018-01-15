@@ -1469,16 +1469,16 @@ public class SocialSecurityServiceImpl implements SocialSecurityService {
         for (SocialSecurityInoutLog log : inoutLogs) {
             //通过INOUTLOG的type 和当前用户社保公积金状态比较,确定这个月计算他的增员还是减员
             LOGGER.debug("log type :{} ,detail status ss {}  af {} ", log.getType(), detail.getSocialSecurityStatus(), detail.getAccumulationFundStatus());
-            if (log.getType().equals(InOutLogType.ACCUMULATION_FUND_IN)
+            if (log.getType().equals(InOutLogType.ACCUMULATION_FUND_IN.getCode())
                     && (NormalFlag.YES == NormalFlag.fromCode(detail.getAccumulationFundStatus()))) {
                 report.setAccumulationFundIncrease(ssReport.getAccumulationFundSum());
-            } else if (log.getType().equals(InOutLogType.SOCIAL_SECURITY_IN)
+            } else if (log.getType().equals(InOutLogType.SOCIAL_SECURITY_IN.getCode())
                     && (NormalFlag.YES == NormalFlag.fromCode(detail.getSocialSecurityStatus()))) {
                 report.setSocialSecurityIncrease(ssReport.getSocialSecuritySum());
-            } else if (log.getType().equals(InOutLogType.SOCIAL_SECURITY_OUT)
+            } else if (log.getType().equals(InOutLogType.SOCIAL_SECURITY_OUT.getCode())
                     && (NormalFlag.NO == NormalFlag.fromCode(detail.getSocialSecurityStatus()))) {
                 report.setSocialSecurityDecrease(socialSecuritySettingProvider.sumPayment(detail.getId(), AccumOrSocial.SOCAIL));
-            } else if (log.getType().equals(InOutLogType.ACCUMULATION_FUND_OUT)
+            } else if (log.getType().equals(InOutLogType.ACCUMULATION_FUND_OUT.getCode())
                     && (NormalFlag.NO == NormalFlag.fromCode(detail.getAccumulationFundStatus()))) {
                 report.setAccumulationFundDecrease(socialSecuritySettingProvider.sumPayment(detail.getId(), AccumOrSocial.ACCUM));
             }
