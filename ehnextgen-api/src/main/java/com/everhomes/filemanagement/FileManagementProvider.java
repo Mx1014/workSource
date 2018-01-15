@@ -13,4 +13,12 @@ public interface FileManagementProvider {
     FileCatalog findFileCatalogByName(Integer namespaceId, Long ownerId, String name);
 
     List<FileCatalog> listFileCatalogs(Integer namespaceId, Long ownerId, Long pageAnchor, Integer pageSize, String keywords);
+
+    void createFileCatalogScope(FileCatalogScope scope);
+
+    void deleteFileCatalogScopeByUserIds(Long catalogId, List<Long> sourceIds);
+
+    void updateFileCatalogScopeDownload(Long catalogId, List<Long> sourceIds, Byte permission);
+
+    List<FileCatalogScope> listFileCatalogScopes(Integer namespaceId, Long catalogId, Long pageAnchor, Integer pageSize, String keywords);
 }

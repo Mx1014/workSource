@@ -1,7 +1,9 @@
 package com.everhomes.filemanagement;
 
 import com.everhomes.rest.filemanagement.*;
+import com.everhomes.user.User;
 import com.everhomes.user.UserContext;
+import com.everhomes.util.ConvertHelper;
 import com.everhomes.util.RuntimeErrorException;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
@@ -104,28 +106,70 @@ public class FileManagementServiceImpl implements  FileManagementService{
     }
 
     @Override
-    public List<FileCatalogDTO> addFileCatalogScopes(AddFileCatalogScopesCommand cmd) {
-        return null;
+    public List<FileCatalogScopeDTO> addFileCatalogScopes(AddFileCatalogScopesCommand cmd) {
+        Integer namespaceId = UserContext.getCurrentNamespaceId();
+        List<FileCatalogScopeDTO> scopes = new ArrayList<>();
+
+        if (cmd.getScopes() != null && cmd.getScopes().size() > 0) {
+            cmd.getScopes().forEach(r ->{
+                FileCatalogScope scope = new FileCatalogScope();
+                FileCatalogScopeDTO dto = new FileCatalogScopeDTO();
+                scope.setNamespaceId(namespaceId);
+                scope.setCatalogId(cmd.getCatalogId());
+                scope.setSourceId(r.getSourceId());
+                scope.setSourceDescription(r.getSourceDescription());
+                fileManagementProvider.createFileCatalogScope(scope);
+                //  return the dto back
+                dto.setCatalogId(cmd.getCatalogId());
+                dto.setSourceId(scope.getSourceId());
+                dto.setSourceDescription(scope.getSourceDescription());
+                dto.setDownloadPermission(FileDownloadPermissionStatus.REFUSE.getCode());
+                scopes.add(dto);
+            });
+        }
+        return scopes;
     }
 
     @Override
     public void deleteFileCatalogScopes(FileCatalogScopesIdCommand cmd) {
-
+        if(cmd.getCatalogId() != null)
+            fileManagementProvider.deleteFileCatalogScopeByUserIds(cmd.getCatalogId(), cmd.getSourceIds());
     }
 
     @Override
     public void enableFileCatalogScopeDownload(FileCatalogScopesIdCommand cmd) {
-
+        if(cmd.getCatalogId() != null)
+            fileManagementProvider.updateFileCatalogScopeDownload(cmd.getCatalogId(), cmd.getSourceIds(),FileDownloadPermissionStatus.ALLOW.getCode());
     }
 
     @Override
     public void disableFileCatalogScopeDownload(FileCatalogScopesIdCommand cmd) {
-
+        if(cmd.getCatalogId() != null)
+            fileManagementProvider.updateFileCatalogScopeDownload(cmd.getCatalogId(), cmd.getSourceIds(),FileDownloadPermissionStatus.REFUSE.getCode());
     }
 
     @Override
     public ListFileCatalogScopeResponse listFileCatalogScopes(ListFileCatalogScopeCommand cmd) {
-        return null;
+        ListFileCatalogScopeResponse response = new ListFileCatalogScopeResponse();
+        List<FileCatalogScopeDTO> scopes = new ArrayList<>();
+        Long nextPageAnchor = null;
+        Integer namespaceId = UserContext.getCurrentNamespaceId();
+        if (cmd.getPageSize() == null)
+            cmd.setPageSize(20);
+
+        List<FileCatalogScope> results = fileManagementProvider.listFileCatalogScopes(namespaceId, cmd.getCatalogId(), cmd.getPageAnchor(), cmd.getPageSize(), cmd.getKeywords());
+        if (results != null && results.size() > 0) {
+            if (results.size() > cmd.getPageSize()) {
+                results.remove(results.size() - 1);
+                nextPageAnchor = results.get(results.size() - 1).getId();
+            }
+            results.forEach(r -> {
+                scopes.add(ConvertHelper.convert(r, FileCatalogScopeDTO.class));
+            });
+        }
+        response.setScopes(scopes);
+        response.setNextPageAnchor(nextPageAnchor);
+        return response;
     }
 
     @Override

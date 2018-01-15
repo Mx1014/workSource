@@ -18,7 +18,7 @@ public interface FileManagementService {
 
     SearchFileResponse searchFiles(SearchFileCommand cmd);
 
-    List<FileCatalogDTO> addFileCatalogScopes(AddFileCatalogScopesCommand cmd);
+    List<FileCatalogScopeDTO> addFileCatalogScopes(AddFileCatalogScopesCommand cmd);
 
     void deleteFileCatalogScopes(FileCatalogScopesIdCommand cmd);
 

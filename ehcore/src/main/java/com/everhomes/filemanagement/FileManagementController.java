@@ -112,7 +112,7 @@ public class FileManagementController extends ControllerBase {
     @RequestMapping("addFileCatalogScopes")
     @RestReturn(value = FileCatalogScopeDTO.class, collection = true)
     public RestResponse addFileCatalogScopes(AddFileCatalogScopesCommand cmd) {
-        List<FileCatalogDTO> res = fileManagementService.addFileCatalogScopes(cmd);
+        List<FileCatalogScopeDTO> res = fileManagementService.addFileCatalogScopes(cmd);
         RestResponse response = new RestResponse(res);
         response.setErrorCode(ErrorCodes.SUCCESS);
         response.setErrorDescription("OK");
