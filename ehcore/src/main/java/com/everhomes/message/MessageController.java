@@ -43,7 +43,7 @@ public class MessageController extends ControllerBase {
 
 	@RequestMapping("signalBlockingEvent")
 	public String signalBlockingEvent(BlockingEventCommand cmd){
-		return messagingService.signalBlockingEvent(cmd.getSubjectId(), cmd.getMessage());
+		return messagingService.signalBlockingEvent(cmd.getSubjectId(), cmd.getMessage(), cmd.getTimeOut());
 	}
 
 }

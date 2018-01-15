@@ -91,6 +91,6 @@ public interface MessagingService {
 
     DeferredResult<BlockingEventResponse> blockingEvent(String subjectId, String type, Integer timeOut);
 
-    String signalBlockingEvent(String uploadId, String message);
+    String signalBlockingEvent(String uploadId, String message, Integer timeOut);
 
 }

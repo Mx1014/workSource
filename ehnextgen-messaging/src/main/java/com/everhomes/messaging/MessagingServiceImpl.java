@@ -1,21 +1,20 @@
 // @formatter:off
 package com.everhomes.messaging;
 
-import com.alibaba.fastjson.JSONObject;
 import com.everhomes.bigcollection.Accessor;
+import com.everhomes.bigcollection.BigCollectionProvider;
 import com.everhomes.bus.*;
 import com.everhomes.configuration.ConfigurationProvider;
 import com.everhomes.msgbox.Message;
 import com.everhomes.msgbox.MessageBoxProvider;
 import com.everhomes.msgbox.MessageLocator;
-import com.everhomes.rest.RestResponse;
 import com.everhomes.rest.app.AppConstants;
-import com.everhomes.rest.contentserver.UploadFileInfoDTO;
 import com.everhomes.rest.messaging.*;
 import com.everhomes.rest.user.FetchMessageCommandResponse;
 import com.everhomes.rest.user.FetchPastToRecentMessageCommand;
 import com.everhomes.rest.user.FetchRecentToPastMessageAdminCommand;
 import com.everhomes.rest.user.FetchRecentToPastMessageCommand;
+import com.everhomes.scheduler.ScheduleProvider;
 import com.everhomes.settings.PaginationConfigHelper;
 import com.everhomes.user.UserContext;
 import com.everhomes.user.UserLogin;
@@ -24,16 +23,15 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.data.redis.core.RedisTemplate;
+import org.springframework.data.redis.serializer.StringRedisSerializer;
+import org.springframework.scheduling.TaskScheduler;
 import org.springframework.stereotype.Component;
 import org.springframework.web.context.request.async.DeferredResult;
 
 import javax.annotation.PostConstruct;
-import java.security.Key;
-import java.util.ArrayList;
-import java.util.Date;
-import java.util.List;
-import java.util.Map;
-import java.util.concurrent.ConcurrentHashMap;
+import java.text.SimpleDateFormat;
+import java.util.*;
+import java.util.concurrent.*;
 import java.util.stream.Collectors;
 
 
@@ -50,6 +48,8 @@ public class MessagingServiceImpl implements MessagingService {
 //    private static BlockingEventStored blockingEventStored = new BlockingEventStored();
 
     private static final ConcurrentHashMap stored = new ConcurrentHashMap();
+
+    private static final boolean REDIS_ENABLE = true;
 
     @Autowired
     private List<MessageRoutingHandler> handlers; //TODO 给企业一个新的消息信道？
@@ -76,6 +76,14 @@ public class MessagingServiceImpl implements MessagingService {
     @Autowired
     private LocalBusTaskScheduler scheduler;
 
+    @Autowired
+    private TaskScheduler taskScheduler;
+
+    @Autowired
+    private BigCollectionProvider bigCollectionProvider;
+
+    private final StringRedisSerializer stringRedisSerializer = new StringRedisSerializer();
+
     static final Integer MAX_TIME_OUT =30*60*1000;
     
     public MessagingServiceImpl() {
@@ -92,6 +100,14 @@ public class MessagingServiceImpl implements MessagingService {
                     LOGGER.error("MessageRoutingHandler " + handler.getClass().getName() + " is not properly annotated with @Name");
                 }
             });
+        }
+
+        if(!REDIS_ENABLE){
+            //启动一个定时器去删stored中的key
+            @SuppressWarnings({ "unchecked", "rawtypes" })
+            Map<String, Object> map = new HashMap<>();
+            map.put("stored",stored);
+            taskScheduler.scheduleWithFixedDelay(()-> { setExpireKey(stored); }, 60*1000);
         }
     }
     
@@ -369,15 +385,35 @@ public class MessagingServiceImpl implements MessagingService {
         DeferredResult deferredResult = new DeferredResult();
         BlockingEventResponse response = BlockingEventResponse.build(stored, subject);
 
+        //信号延迟生效的判断
+        if(!REDIS_ENABLE){
+            if(stored.get(subject + ".expireTime") != null){
+                //如果value时间戳大于服务器时间，说明key未过期
+                if(Long.valueOf((stored.get(subject + ".expireTime").toString())) > System.currentTimeMillis()){
+                    blockingEventOnSignal(response,subject);
+                    deferredResult.setResult(response);
+                    return deferredResult;
+                }
+            }
+        }else{
+            String key = subject+ ".expireKey";
+            Accessor acc = bigCollectionProvider.getMapAccessor(key, "");
+            RedisTemplate redisTemplate = acc.getTemplate(stringRedisSerializer);
+            if(redisTemplate.opsForValue().get(key) != null){
+                blockingEventOnSignal(response,subject);
+                deferredResult.setResult(response);
+                return deferredResult;
+            }
+        }
+
+
+
         switch (type){
             case "ONESHOT":
                 localBusSubscriberBuilder.build(subject, new LocalBusOneshotSubscriber() {
                     @Override
                     public Action onLocalBusMessage(Object sender, String subject, Object dtoResp, String path) {
-                        response.setSubject(subject);
-                        response.setStatus(BlockingEventStatus.CONTINUTE);
-                        response.incrCalledTime();
-                        stored.remove(subject + ".calledTimes");
+                        blockingEventOnSignal(response,subject);
                         deferredResult.setResult(response);
                         return null;
                     }
@@ -385,6 +421,8 @@ public class MessagingServiceImpl implements MessagingService {
                     public void onLocalBusListeningTimeout() {
                         //wait again
                         response.setStatus(BlockingEventStatus.TIMEOUT);
+                        stored.remove(subject + ".calledTimes");
+                        stored.remove(subject+ ".expireTime");
                         deferredResult.setResult(response);
                     }
 
@@ -392,35 +430,10 @@ public class MessagingServiceImpl implements MessagingService {
 
                 break;
             case "ORORDINARY":
-//                LocalBusSubscriber subscriber = null;
-//                if((LocalBusSubscriber)stored.get(subject + "subscriber") != null){
-//                    subscriber = (LocalBusSubscriber)stored.get(subject+"subscriber");
-//                }else{
-//                    subscriber = new LocalBusSubscriber(){
-//                        @Override
-//                        public Action onLocalBusMessage(Object sender, String subject, Object dtoResp, String path) {
-//                            response.setSubject(subject);
-//                            response.setStatus(BlockingEventStatus.CONTINUTE);
-//                            response.incrCalledTime();
-//                            stored.remove(subject + ".calledTimes");
-//                            stored.remove(subject + "subscriber");
-//                            deferredResult.setResult(response);
-//                            return null;
-//                        }
-//                    };
-//
-//                    //把subscriber存起来
-//                    stored.put(subject+"subscriber",subscriber);
-//                }
-
                 this.localBusProvider.subscribe(subject, new LocalBusSubscriber() {
                     @Override
                     public Action onLocalBusMessage(Object sender, String subject, Object dtoResp, String path) {
-                        response.setSubject(subject);
-                        response.setStatus(BlockingEventStatus.CONTINUTE);
-                        response.incrCalledTime();
-                        stored.remove(subject + ".calledTimes");
-                        stored.remove(subject + "subscriber");
+                        blockingEventOnSignal(response,subject);
                         deferredResult.setResult(response);
                         return null;
                     }
@@ -431,7 +444,7 @@ public class MessagingServiceImpl implements MessagingService {
                         public void run() {
                             localBusProvider.unsubscribe(subject, (LocalBusSubscriber)stored.get(subject+"subscriber"));
                             stored.remove(subject + ".calledTimes");
-                            stored.remove(subject);
+                            stored.remove(subject+ ".expireTime");
                             response.setStatus(BlockingEventStatus.TIMEOUT);
                             deferredResult.setResult(response);
                         }
@@ -440,7 +453,6 @@ public class MessagingServiceImpl implements MessagingService {
                 break;
         }
 
-    `
 
         //dto 只有一个线程能成功，如果某一个线程失败，则需要重新请求 uuid
         return deferredResult;
@@ -448,8 +460,7 @@ public class MessagingServiceImpl implements MessagingService {
 
 
 
-    @Override
-    public String signalBlockingEvent(String uploadId, String message) {
+    public String signalBlockingEvent(String uploadId, String message, Integer timeOut) {
         String subject = "blockingEventKey." + uploadId;
 //        UploadFileInfoDTO dto = signalFileDTO(cmd, UserContext.currentUserId());
         ExecutorUtil.submit(new Thread(new Runnable() {
@@ -464,7 +475,16 @@ public class MessagingServiceImpl implements MessagingService {
 
                 try {
                     localBus.publish(null, subject, StringHelper.toJsonString(message));
-                    stored.put(subject,)
+                    if(!REDIS_ENABLE){
+                        stored.remove(subject + ".expireTime");
+                        stored.put(subject + ".expireTime", System.currentTimeMillis() + timeOut);
+                    }else{
+                        String key = subject+ ".expireKey";
+                        Accessor acc = bigCollectionProvider.getMapAccessor(key, "");
+                        RedisTemplate redisTemplate = acc.getTemplate(stringRedisSerializer);
+                        redisTemplate.opsForValue().set(key, "1", timeOut, TimeUnit.MILLISECONDS);
+                    }
+
                 } catch (Exception e) {
                     LOGGER.error("submit localBus failed, subject=" + subject, e);
                 }
@@ -476,9 +496,24 @@ public class MessagingServiceImpl implements MessagingService {
     }
 
 
-    private static void setExpireKey(){
-
+    // 内存key过期方法
+    private void setExpireKey(ConcurrentHashMap stored){
+        Iterator iter = stored.entrySet().iterator();
+        while (iter.hasNext()) {
+            Map.Entry entry = (Map.Entry) iter.next();
+            if(entry.getKey().toString().contains(".expireTime") && Long.valueOf(entry.getValue().toString()) < DateHelper.currentGMTTime().getTime()){
+                iter.remove();
+            }
+        }
     }
 
-
+    // 信号成功接受方法
+    private BlockingEventResponse blockingEventOnSignal(BlockingEventResponse response, String subject){
+        response.setSubject(subject);
+        response.setStatus(BlockingEventStatus.CONTINUTE);
+        response.incrCalledTime();
+        stored.remove(subject + ".calledTimes");
+        stored.remove(subject+ ".expireTime");
+        return response;
+    }
 }
