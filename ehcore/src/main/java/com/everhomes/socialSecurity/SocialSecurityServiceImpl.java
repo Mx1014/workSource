@@ -1872,6 +1872,12 @@ public class SocialSecurityServiceImpl implements SocialSecurityService {
 
     private SocialSecurityReportDTO processSocialSecurityReportDTO(SocialSecurityReport r) {
         SocialSecurityReportDTO dto = ConvertHelper.convert(r, SocialSecurityReportDTO.class);
+        if (null != r.getEntryDate()) {
+            dto.setEntryDate(r.getEntryDate().getTime());
+        }
+        if (null != r.getOutWorkDate()) {
+            dto.setOutWorkDate(r.getOutWorkDate().getTime());
+        }
         return dto;
     }
 
@@ -2316,6 +2322,12 @@ public class SocialSecurityServiceImpl implements SocialSecurityService {
 
     private SocialSecurityInoutReportDTO processSocialSecurityInoutReportDTO(SocialSecurityInoutReport r) {
         SocialSecurityInoutReportDTO dto = ConvertHelper.convert(r, SocialSecurityInoutReportDTO.class);
+        if (null != r.getEntryDate()) {
+            dto.setEntryDate(r.getEntryDate().getTime());
+        }
+        if (null != r.getOutWorkDate()) {
+            dto.setOutWorkDate(r.getOutWorkDate().getTime());
+        }
         return dto;
     }
 
