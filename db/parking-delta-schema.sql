@@ -209,6 +209,13 @@ ADD COLUMN `resource_type` varchar(64) DEFAULT NULL COMMENT '资源类型';
 ALTER TABLE `eh_rentalv2_resource_orders`
 ADD COLUMN `resource_type` varchar(64) DEFAULT NULL COMMENT '资源类型';
 
+ALTER TABLE `eh_rentalv2_resource_numbers`
+ADD COLUMN `resource_type` varchar(64) DEFAULT NULL COMMENT '资源类型';
+ALTER TABLE `eh_rentalv2_resource_pics`
+ADD COLUMN `resource_type` varchar(64) DEFAULT NULL COMMENT '资源类型';
+ALTER TABLE `eh_rentalv2_resource_ranges`
+ADD COLUMN `resource_type` varchar(64) DEFAULT NULL COMMENT '资源类型';
+
 
 UPDATE eh_rentalv2_close_dates set resource_type = 'default';
 UPDATE eh_rentalv2_config_attachments set resource_type = 'default';
