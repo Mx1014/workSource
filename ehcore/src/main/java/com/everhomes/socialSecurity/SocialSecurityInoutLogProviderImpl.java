@@ -16,12 +16,14 @@ import com.everhomes.util.ConvertHelper;
 import com.everhomes.util.DateHelper;
 import org.jooq.DSLContext;
 import org.jooq.SelectQuery;
+import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
 
 import java.sql.Timestamp;
 import java.util.ArrayList;
 import java.util.List;
+import java.util.logging.Logger;
 
 @Component
 public class SocialSecurityInoutLogProviderImpl implements SocialSecurityInoutLogProvider{
@@ -63,6 +65,7 @@ public class SocialSecurityInoutLogProviderImpl implements SocialSecurityInoutLo
 
         return results;
     }
+    private static final org.slf4j.Logger LOGGER = LoggerFactory.getLogger(SocialSecurityInoutLogProviderImpl.class);
 
     @Override
     public List<Long> listSocialSecurityInoutLogDetailIds(Long ownerId, String month, InOutLogType accumulationFundIn) {
@@ -75,6 +78,7 @@ public class SocialSecurityInoutLogProviderImpl implements SocialSecurityInoutLo
         query.addConditions(Tables.EH_SOCIAL_SECURITY_INOUT_LOG.TYPE.eq(accumulationFundIn.getCode()));
 
         query.addOrderBy(Tables.EH_SOCIAL_SECURITY_INOUT_LOG.LOG_DATE.asc());
+        LOGGER.debug("sql : " + query);
         query.fetch().map(r ->{
             if (null != r) {
                 results.add(ConvertHelper.convert(r, SocialSecurityInoutLog.class).getDetailId());
