@@ -16,10 +16,10 @@ import org.apache.commons.lang.StringUtils;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
 
+import java.sql.Timestamp;
 import java.time.LocalDate;
 import java.time.LocalDateTime;
 import java.time.LocalTime;
-import java.time.ZoneOffset;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Map;
@@ -194,7 +194,7 @@ public class GeneralPointEventProcessor implements IGeneralPointEventProcessor {
                 case TIMES_PER_DAY: {
                     LocalDateTime dateTime = LocalDateTime.of(LocalDate.now(), LocalTime.MIN);
                     Integer count = pointLogProvider.countPointLog(
-                            namespaceId, pointSystem.getId(), targetUid, rule.getId(), dateTime.toInstant(ZoneOffset.UTC).toEpochMilli(), null);
+                            namespaceId, pointSystem.getId(), targetUid, rule.getId(), Timestamp.valueOf(dateTime), null);
                     PointRuleLimitDataVO limitData = (PointRuleLimitDataVO) StringHelper.fromJsonString(rule.getLimitData(), PointRuleLimitDataVO.class);
                     if (count >= limitData.getTimes()) {
                         return false;

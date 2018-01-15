@@ -93,7 +93,7 @@ public class CustomerController extends ControllerBase {
     @RequestMapping("deleteEnterpriseCustomer")
     @RestReturn(value = String.class)
     public RestResponse deleteEnterpriseCustomer(@Valid DeleteEnterpriseCustomerCommand cmd) {
-        customerService.deleteEnterpriseCustomer(cmd);
+        customerService.deleteEnterpriseCustomer(cmd, true);
         RestResponse response = new RestResponse();
         response.setErrorCode(ErrorCodes.SUCCESS);
         response.setErrorDescription("OK");

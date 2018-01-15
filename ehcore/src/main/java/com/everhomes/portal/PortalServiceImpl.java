@@ -1405,9 +1405,13 @@ public class PortalServiceImpl implements PortalService {
 				}
 
 			}else if(Widget.fromCode(group.getWidget()) == Widget.BULLETINS){
-				BulletinsInstanceConfig config = new BulletinsInstanceConfig();
+				BulletinsInstanceConfig config = (BulletinsInstanceConfig)StringHelper.fromJsonString(itemGroup.getInstanceConfig(), BulletinsInstanceConfig.class);
 				config.setItemGroup(itemGroup.getName());
-				config.setRowCount(instanceConfig.getRowCount());
+				if(!StringUtils.isEmpty(config.getIconUri())){
+					String url = contentServerService.parserUri(config.getIconUri(), EntityType.USER.getCode(), user.getId());
+					config.setIconUrl(url);
+				}
+
 				group.setInstanceConfig(config);
 			}else if(Widget.fromCode(group.getWidget()) == Widget.OPPUSH){
 				OPPushInstanceConfig config = new OPPushInstanceConfig();
@@ -2133,8 +2137,9 @@ public class PortalServiceImpl implements PortalService {
 
 			// 同步reflectionServiceModule表
 			this.serviceModuleService.getOrCreateReflectionServiceModuleApp(namespaceId, actionData, moduleApp.getInstanceConfig(), itemLabel, serviceModule);
-			serviceModuleAppProvider.createServiceModuleApp(moduleApp);
 		}
+
+		serviceModuleAppProvider.createServiceModuleApp(moduleApp);
 		return moduleApp;
 	}
 
