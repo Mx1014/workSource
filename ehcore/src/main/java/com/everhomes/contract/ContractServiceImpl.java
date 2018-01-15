@@ -1612,6 +1612,8 @@ public class ContractServiceImpl implements ContractService {
 				itemDto.setChargingStandardName(standardName);
 				String lateFeeStandardName = assetProvider.getStandardNameById(itemDto.getLateFeeStandardId());
 				itemDto.setLateFeeStandardName(lateFeeStandardName);
+				String lateFeeformula = assetProvider.findFormulaByChargingStandardId(itemDto.getLateFeeStandardId());
+				itemDto.setLateFeeformula(lateFeeformula);
 				processContractChargingItemAddresses(itemDto);
 
 				return itemDto;

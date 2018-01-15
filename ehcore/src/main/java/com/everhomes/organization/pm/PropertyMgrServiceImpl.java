@@ -6558,7 +6558,10 @@ public class PropertyMgrServiceImpl implements PropertyMgrService {
 		dto.setChargingItemName(itemName);
 		String standardName = assetProvider.getStandardNameById(dto.getChargingStandardId());
 		dto.setChargingStandardName(standardName);
-
+		String lateFeeStandardName = assetProvider.getStandardNameById(dto.getLateFeeStandardId());
+		dto.setLateFeeStandardName(lateFeeStandardName);
+		String lateFeeformula = assetProvider.findFormulaByChargingStandardId(dto.getLateFeeStandardId());
+		dto.setLateFeeformula(lateFeeformula);
 		processDefaultChargingItemAddresses(dto);
 		return dto;
 	}
