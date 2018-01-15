@@ -512,6 +512,12 @@ public class SocialSecurityServiceImpl implements SocialSecurityService {
 
     private SocialSecurityPaymentDTO processSocialSecurityItemDTO(SocialSecurityEmployeeDTO detail) {
         SocialSecurityPaymentDTO dto = new SocialSecurityPaymentDTO();
+        if (null != detail.getCheckInTime()) {
+            dto.setEntryDate(detail.getCheckInTime().getTime());
+        }
+        if (null != detail.getDismissTime()) {
+            dto.setOutDate(detail.getDismissTime().getTime());
+        }
         dto.setDetailId(detail.getDetailId());
 //        OrganizationMemberDetails detail = organizationProvider.findOrganizationMemberDetailsByDetailId(dto.getDetailId());
 //        SocialSecurityEmployeeDTO detail = findSocialSecurityEmployeeDTO(members, detailId);
