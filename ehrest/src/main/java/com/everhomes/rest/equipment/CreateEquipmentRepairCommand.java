@@ -1,10 +1,28 @@
 package com.everhomes.rest.equipment;
 
+import com.everhomes.discover.ItemType;
+import com.everhomes.rest.pmtask.AttachmentDescriptor;
+
+import java.util.List;
+
 /**
+ * <ul>
+ * <li>equipmentId:设备id</li>
+ * <li>taskId:设备id</li>
+ * <li>ownerType:ownerType</li>
+ * <li>ownerId:ownerId</li>
+ * <li>categoryId:子类型id</li>
+ * <li>address:地址</li>
+ * <li>content:内容</li>
+ * <li>organizationId:organizationId</li>
+ * <li>namespaceId:namespaceId</li>
+ * <li>attachments:附件{@link com.everhomes.rest.pmtask.AttachmentDescriptor}</li>
+ * </ul>
  * Created by rui.jia  2018/1/9 14 :50
  */
 
 public class CreateEquipmentRepairCommand {
+
     private Long equipmentId;
     private Long taskId;
     //以下为报修参数
@@ -14,13 +32,9 @@ public class CreateEquipmentRepairCommand {
     private String address;
     private String content;
     private Long organizationId;
-    private String referType;
-    private Long referId;
-    private Long reserveTime;
-    private String requestorName;
-    private String requestorPhone;
-
     private Integer namespaceId;
+    @ItemType(AttachmentDescriptor.class)
+    private List<AttachmentDescriptor> attachments;
 
     public Long getEquipmentId() {
         return equipmentId;
@@ -94,43 +108,11 @@ public class CreateEquipmentRepairCommand {
         this.organizationId = organizationId;
     }
 
-    public String getReferType() {
-        return referType;
+    public List<AttachmentDescriptor> getAttachments() {
+        return attachments;
     }
 
-    public void setReferType(String referType) {
-        this.referType = referType;
-    }
-
-    public Long getReferId() {
-        return referId;
-    }
-
-    public void setReferId(Long referId) {
-        this.referId = referId;
-    }
-
-    public Long getReserveTime() {
-        return reserveTime;
-    }
-
-    public void setReserveTime(Long reserveTime) {
-        this.reserveTime = reserveTime;
-    }
-
-    public String getRequestorName() {
-        return requestorName;
-    }
-
-    public void setRequestorName(String requestorName) {
-        this.requestorName = requestorName;
-    }
-
-    public String getRequestorPhone() {
-        return requestorPhone;
-    }
-
-    public void setRequestorPhone(String requestorPhone) {
-        this.requestorPhone = requestorPhone;
+    public void setAttachments(List<AttachmentDescriptor> attachments) {
+        this.attachments = attachments;
     }
 }
