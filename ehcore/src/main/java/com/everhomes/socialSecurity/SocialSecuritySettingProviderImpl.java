@@ -208,7 +208,6 @@ public class SocialSecuritySettingProviderImpl implements SocialSecuritySettingP
     }
 
     private static final Logger LOGGER = LoggerFactory.getLogger(SocialSecuritySettingProviderImpl.class);
-    .class);
 
     @Override
     public BigDecimal sumPayment(Long detailId, AccumOrSocial accumOrSocial) {

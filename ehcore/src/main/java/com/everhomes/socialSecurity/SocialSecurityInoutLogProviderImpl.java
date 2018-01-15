@@ -14,8 +14,7 @@ import com.everhomes.server.schema.tables.records.EhSocialSecurityInoutLogRecord
 import com.everhomes.user.UserContext;
 import com.everhomes.util.ConvertHelper;
 import com.everhomes.util.DateHelper;
-import org.jooq.DSLContext;
-import org.jooq.SelectQuery;
+import org.jooq.*;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
@@ -23,7 +22,6 @@ import org.springframework.stereotype.Component;
 import java.sql.Timestamp;
 import java.util.ArrayList;
 import java.util.List;
-import java.util.logging.Logger;
 
 @Component
 public class SocialSecurityInoutLogProviderImpl implements SocialSecurityInoutLogProvider{
@@ -49,13 +47,16 @@ public class SocialSecurityInoutLogProviderImpl implements SocialSecurityInoutLo
     }
 
     @Override
-    public List<SocialSecurityInoutLog> listSocialSecurityInoutLogs(Long organizationId, Long detailId){
+    public List<SocialSecurityInoutLog> listSocialSecurityInoutLogs(Long organizationId, Long detailId, String month){
         List<SocialSecurityInoutLog> results = new ArrayList<>();
 
         DSLContext context = dbProvider.getDslContext(AccessSpec.readOnly());
         SelectQuery<EhSocialSecurityInoutLogRecord> query = context.selectQuery(Tables.EH_SOCIAL_SECURITY_INOUT_LOG);
         query.addConditions(Tables.EH_SOCIAL_SECURITY_INOUT_LOG.ORGANIZATION_ID.eq(organizationId));
         query.addConditions(Tables.EH_SOCIAL_SECURITY_INOUT_LOG.DETAIL_ID.eq(detailId));
+        if (null != month) {
+            query.addConditions(Tables.EH_SOCIAL_SECURITY_INOUT_LOG.LOG_MONTH.eq(month));
+        }
 
         query.addOrderBy(Tables.EH_SOCIAL_SECURITY_INOUT_LOG.LOG_DATE.asc());
         query.fetch().map(r ->{
@@ -72,17 +73,20 @@ public class SocialSecurityInoutLogProviderImpl implements SocialSecurityInoutLo
         List<Long> results = new ArrayList<>();
 
         DSLContext context = dbProvider.getDslContext(AccessSpec.readOnly());
-        SelectQuery<EhSocialSecurityInoutLogRecord> query = context.selectQuery(Tables.EH_SOCIAL_SECURITY_INOUT_LOG);
-        query.addConditions(Tables.EH_SOCIAL_SECURITY_INOUT_LOG.ORGANIZATION_ID.eq(ownerId));
-        query.addConditions(Tables.EH_SOCIAL_SECURITY_INOUT_LOG.LOG_MONTH.eq(month));
-        query.addConditions(Tables.EH_SOCIAL_SECURITY_INOUT_LOG.TYPE.eq(accumulationFundIn.getCode()));
-
-        query.addOrderBy(Tables.EH_SOCIAL_SECURITY_INOUT_LOG.LOG_DATE.asc());
+        SelectConditionStep<Record1<Long>> query = context.selectDistinct(Tables.EH_SOCIAL_SECURITY_INOUT_LOG.DETAIL_ID)
+                .where(Tables.EH_SOCIAL_SECURITY_INOUT_LOG.ORGANIZATION_ID.eq(ownerId))
+                .and(Tables.EH_SOCIAL_SECURITY_INOUT_LOG.LOG_MONTH.eq(month));
+        if( null != accumulationFundIn) {
+            query = query.and(Tables.EH_SOCIAL_SECURITY_INOUT_LOG.TYPE.eq(accumulationFundIn.getCode()));
+        }
+        query.orderBy(Tables.EH_SOCIAL_SECURITY_INOUT_LOG.LOG_DATE.asc());
 //        LOGGER.debug("sql : " + query);
-        query.fetch().map(r ->{
-            if (null != r) {
-                results.add(ConvertHelper.convert(r, SocialSecurityInoutLog.class).getDetailId());
-            }
+        Result<Record1<Long>> record = query.fetch();
+        if (null == record) {
+            return null;
+        }
+        record.map(r -> {
+            results.add(r.value1());
             return null;
         });
         if (results.size() == 0) {
@@ -90,4 +94,31 @@ public class SocialSecurityInoutLogProviderImpl implements SocialSecurityInoutLo
         }
         return results;
     }
+
+    @Override
+    public List<Long> listSocialSecurityInoutLogDetailIds(Long ownerId, String month, List<Byte> accumulationFundIns) {
+        List<Long> results = new ArrayList<>();
+
+        DSLContext context = dbProvider.getDslContext(AccessSpec.readOnly());
+        SelectConditionStep<Record1<Long>> query = context.selectDistinct(Tables.EH_SOCIAL_SECURITY_INOUT_LOG.DETAIL_ID)
+                .where(Tables.EH_SOCIAL_SECURITY_INOUT_LOG.ORGANIZATION_ID.eq(ownerId))
+                .and(Tables.EH_SOCIAL_SECURITY_INOUT_LOG.LOG_MONTH.eq(month));
+        query = query.and(Tables.EH_SOCIAL_SECURITY_INOUT_LOG.TYPE.in(accumulationFundIns));
+        query.orderBy(Tables.EH_SOCIAL_SECURITY_INOUT_LOG.LOG_DATE.asc());
+//        LOGGER.debug("sql : " + query);
+        Result<Record1<Long>> record = query.fetch();
+        if (null == record) {
+            return null;
+        }
+        record.map(r -> {
+            results.add(r.value1());
+            return null;
+        });
+        if (results.size() == 0) {
+            return null;
+        }
+        return results;
+    }
+
+
 }

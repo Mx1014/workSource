@@ -8,7 +8,9 @@ public interface SocialSecurityInoutLogProvider {
 
     void createSocialSecurityInoutLog(SocialSecurityInoutLog inoutLog);
 
-    List<SocialSecurityInoutLog> listSocialSecurityInoutLogs(Long organizationId, Long detailId);
+    List<SocialSecurityInoutLog> listSocialSecurityInoutLogs(Long organizationId, Long detailId, String month);
 
     List<Long> listSocialSecurityInoutLogDetailIds(Long ownerId, String month, InOutLogType accumulationFundIn);
+
+    List<Long> listSocialSecurityInoutLogDetailIds(Long ownerId, String month, List<Byte> accumulationFundIns);
 }

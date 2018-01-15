@@ -1412,39 +1412,45 @@ public class SocialSecurityServiceImpl implements SocialSecurityService {
         //todo 组织架构获取本月增员本月减员的人
         String month = socialSecurityPaymentProvider.findPaymentMonthByOwnerId(ownerId);
         socialSecurityInoutReportProvider.deleteSocialSecurityInoutReportByMonth(ownerId, month);
-        List<Long> inDetails = socialSecurityInoutLogProvider.listSocialSecurityInoutLogDetailIds(ownerId, month, InOutLogType.SOCIAL_SECURITY_IN);
-        List<Long> outDetails = socialSecurityInoutLogProvider.listSocialSecurityInoutLogDetailIds(ownerId, month, InOutLogType.SOCIAL_SECURITY_OUT);
-        LOGGER.debug("indetails : {} \n out details {}", inDetails, outDetails);
-        if (inDetails != null) {
-            for (Long detailId : inDetails) {
+        List<Byte> socialInouts = new ArrayList<>();
+        socialInouts.add(InOutLogType.ACCUMULATION_FUND_IN.getCode());
+        socialInouts.add(InOutLogType.ACCUMULATION_FUND_OUT.getCode());
+        socialInouts.add(InOutLogType.SOCIAL_SECURITY_IN.getCode());
+        socialInouts.add(InOutLogType.SOCIAL_SECURITY_OUT.getCode());
+        List<Long> detailIds = socialSecurityInoutLogProvider.listSocialSecurityInoutLogDetailIds(ownerId, month, socialInouts);
+        if (detailIds != null) {
+            for (Long detailId : detailIds) {
                 OrganizationMemberDetails detail = organizationProvider.findOrganizationMemberDetailsByDetailId(detailId);
-                SocialSecurityInoutReport report = crateInoutReport(detail, month, InOutFlag.INCRE, AccumOrSocial.SOCAIL);
-            }
-        }
-        if (outDetails != null) {
-            for (Long detailId : outDetails) {
-                OrganizationMemberDetails detail = organizationProvider.findOrganizationMemberDetailsByDetailId(detailId);
-                SocialSecurityInoutReport report = crateInoutReport(detail, month, InOutFlag.DECRE, AccumOrSocial.SOCAIL);
-            }
-        }
 
-        inDetails = socialSecurityInoutLogProvider.listSocialSecurityInoutLogDetailIds(ownerId, month, InOutLogType.ACCUMULATION_FUND_IN);
-        outDetails = socialSecurityInoutLogProvider.listSocialSecurityInoutLogDetailIds(ownerId, month, InOutLogType.ACCUMULATION_FUND_OUT);
-        if (inDetails != null) {
-            for (Long detailId : inDetails) {
-                OrganizationMemberDetails detail = organizationProvider.findOrganizationMemberDetailsByDetailId(detailId);
-                SocialSecurityInoutReport report = crateInoutReport(detail, month, InOutFlag.INCRE, AccumOrSocial.ACCUM);
+                    SocialSecurityInoutReport report = crateInoutReport(detail, month);
+
+
             }
         }
-        if (outDetails != null) {
-            for (Long detailId : outDetails) {
-                OrganizationMemberDetails detail = organizationProvider.findOrganizationMemberDetailsByDetailId(detailId);
-                SocialSecurityInoutReport report = crateInoutReport(detail, month, InOutFlag.DECRE, AccumOrSocial.ACCUM);
-            }
-        }
+//        if (outDetails != null) {
+//            for (Long detailId : outDetails) {
+//                OrganizationMemberDetails detail = organizationProvider.findOrganizationMemberDetailsByDetailId(detailId);
+//                SocialSecurityInoutReport report = crateInoutReport(detail, month, InOutFlag.DECRE, AccumOrSocial.SOCAIL);
+//            }
+//        }
+//
+//        inDetails = socialSecurityInoutLogProvider.listSocialSecurityInoutLogDetailIds(ownerId, month, InOutLogType.ACCUMULATION_FUND_IN);
+//        outDetails = socialSecurityInoutLogProvider.listSocialSecurityInoutLogDetailIds(ownerId, month, InOutLogType.ACCUMULATION_FUND_OUT);
+//        if (inDetails != null) {
+//            for (Long detailId : inDetails) {
+//                OrganizationMemberDetails detail = organizationProvider.findOrganizationMemberDetailsByDetailId(detailId);
+//                SocialSecurityInoutReport report = crateInoutReport(detail, month, InOutFlag.INCRE, AccumOrSocial.ACCUM);
+//            }
+//        }
+//        if (outDetails != null) {
+//            for (Long detailId : outDetails) {
+//                OrganizationMemberDetails detail = organizationProvider.findOrganizationMemberDetailsByDetailId(detailId);
+//                SocialSecurityInoutReport report = crateInoutReport(detail, month, InOutFlag.DECRE, AccumOrSocial.ACCUM);
+//            }
+//        }
     }
 
-    private SocialSecurityInoutReport crateInoutReport(OrganizationMemberDetails detail, String month, InOutFlag inOutFlag, AccumOrSocial accumOrSocial) {
+    private SocialSecurityInoutReport crateInoutReport(OrganizationMemberDetails detail, String month) {
         SocialSecurityReport ssReport = socialSecurityReportProvider.findSocialSecurityReportByDetailId(detail.getId(), month);
         SocialSecurityInoutReport report = new SocialSecurityInoutReport();
         if (null == ssReport) {
@@ -1457,24 +1463,40 @@ public class SocialSecurityServiceImpl implements SocialSecurityService {
         if (null != ssReport.getAfterSocialSecurityCompanySum()) {
             report.setSocialSecurityAfter(ssReport.getAfterSocialSecurityCompanySum().add(ssReport.getAfterSocialSecurityEmployeeSum()));
         }
-        if(null != ssReport.getAfterAccumulationFundCompanySum()){
+        if (null != ssReport.getAfterAccumulationFundCompanySum()) {
             report.setAccumulationFundAfter(ssReport.getAfterAccumulationFundCompanySum().add(ssReport.getAfterAccumulationFundEmployeeSum()));
         }
-        if (inOutFlag == InOutFlag.INCRE) {
-            if (AccumOrSocial.SOCAIL == accumOrSocial) {
-                report.setSocialSecurityIncrease(ssReport.getSocialSecuritySum());
-            } else {
-                report.setAccumulationFundIncrease(ssReport.getAccumulationFundSum());
-            }
-        } else if (inOutFlag == InOutFlag.DECRE) {
+        List<SocialSecurityInoutLog> inoutLogs = socialSecurityInoutLogProvider.listSocialSecurityInoutLogs(detail.getOrganizationId(),
+                detail.getId(), month);
 
-//            if (AccumOrSocial.SOCAIL == accumOrSocial) {
-//                report.setSocialSecurityDecrease(ssReport.getSocialSecuritySum());
-                report.setSocialSecurityDecrease(socialSecuritySettingProvider.sumPayment(detail.getId(),accumOrSocial));
-//            } else {
-//                report.setAccumulationFundDecrease(ssReport.getAccumulationFundSum());
-//            }
+        for (SocialSecurityInoutLog log : inoutLogs) {
+            //通过INOUTLOG的type 和当前用户社保公积金状态比较,确定这个月计算他的增员还是减员
+            if (log.getType().equals(InOutLogType.ACCUMULATION_FUND_IN)
+                    && (NormalFlag.YES == NormalFlag.fromCode(detail.getAccumulationFundStatus()))) {
+                report.setAccumulationFundIncrease(ssReport.getAccumulationFundSum());
+            } else if (log.getType().equals(InOutLogType.SOCIAL_SECURITY_IN)
+                    && (NormalFlag.YES == NormalFlag.fromCode(detail.getSocialSecurityStatus()))) {
+                report.setSocialSecurityIncrease(ssReport.getSocialSecuritySum());
+            } else if (log.getType().equals(InOutLogType.SOCIAL_SECURITY_OUT)
+                    && (NormalFlag.NO == NormalFlag.fromCode(detail.getSocialSecurityStatus()))) {
+                report.setSocialSecurityDecrease(socialSecuritySettingProvider.sumPayment(detail.getId(), AccumOrSocial.SOCAIL));
+            } else if (log.getType().equals(InOutLogType.ACCUMULATION_FUND_OUT)
+                    && (NormalFlag.NO == NormalFlag.fromCode(detail.getAccumulationFundStatus()))) {
+                report.setAccumulationFundDecrease(socialSecuritySettingProvider.sumPayment(detail.getId(), AccumOrSocial.ACCUM));
+            }
         }
+//        if (inOutFlag == InOutFlag.INCRE) {
+//            if (AccumOrSocial.SOCAIL == accumOrSocial) {
+//            } else {
+//            }
+//        } else if (inOutFlag == InOutFlag.DECRE) {
+//
+////            if (AccumOrSocial.SOCAIL == accumOrSocial) {
+////                report.setSocialSecurityDecrease(ssReport.getSocialSecuritySum());
+////            } else {
+////                report.setAccumulationFundDecrease(ssReport.getAccumulationFundSum());
+////            }
+//        }
         socialSecurityInoutReportProvider.createSocialSecurityInoutReport(report);
         return report;
     }
@@ -2476,7 +2498,7 @@ public class SocialSecurityServiceImpl implements SocialSecurityService {
     @Override
     public ListUserInoutHistoryResponse
     listUserInoutHistory(ListUserInoutHistoryCommand cmd) {
-        List<SocialSecurityInoutLog> logs = socialSecurityInoutLogProvider.listSocialSecurityInoutLogs(cmd.getOwnerId(), cmd.getDetailId());
+        List<SocialSecurityInoutLog> logs = socialSecurityInoutLogProvider.listSocialSecurityInoutLogs(cmd.getOwnerId(), cmd.getDetailId(), null);
 
         List<UserInoutHistoryDTO> history = new ArrayList<>();
 
