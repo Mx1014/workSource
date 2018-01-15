@@ -1,6 +1,12 @@
 package com.everhomes.rest.equipment;
 
+import java.sql.Timestamp;
+import java.util.List;
+
+import javax.validation.constraints.NotNull;
+
 import com.everhomes.discover.ItemType;
+import com.everhomes.rest.forum.AttachmentDTO;
 import com.everhomes.util.StringHelper;
 
 import javax.validation.constraints.NotNull;
