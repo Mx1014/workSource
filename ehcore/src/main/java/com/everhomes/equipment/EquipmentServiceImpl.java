@@ -6016,8 +6016,15 @@ private void checkUserPrivilege(Long orgId, Long privilegeId, Long communityId) 
 		equipmentProvider.createEquipmentInspectionTasksLogs(tasksLog);
 
 		//调用物业报修
+		EquipmentInspectionEquipments equipment = verifyEquipment(cmd.getEquipmentId(), null, null);
 		CreateTaskCommand repairCommand = new CreateTaskCommand();
 		repairCommand = ConvertHelper.convert(cmd, CreateTaskCommand.class);
+		repairCommand.setAddress(equipment.getLocation());
+		List<OrganizationMember> members = organizationProvider.listOrganizationMembersByUId(UserContext.currentUserId());
+		if (members != null && members.size() > 0) {
+			repairCommand.setRequestorName(members.get(0).getContactName());
+			repairCommand.setRequestorPhone(members.get(0).getContactToken());
+		}
 		pmTaskService.createTask(repairCommand);
 	}
 }
