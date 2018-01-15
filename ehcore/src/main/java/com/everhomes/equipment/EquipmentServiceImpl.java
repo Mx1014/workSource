@@ -32,6 +32,7 @@ import com.everhomes.pmNotify.PmNotifyConfigurations;
 import com.everhomes.pmNotify.PmNotifyProvider;
 import com.everhomes.pmNotify.PmNotifyRecord;
 import com.everhomes.pmNotify.PmNotifyService;
+import com.everhomes.pmtask.PmTaskService;
 import com.everhomes.portal.PortalService;
 import com.everhomes.repeat.RepeatProvider;
 import com.everhomes.repeat.RepeatService;
@@ -184,6 +185,7 @@ import com.everhomes.rest.pmNotify.PmNotifyScopeType;
 import com.everhomes.rest.pmNotify.PmNotifyType;
 import com.everhomes.rest.pmNotify.ReceiverName;
 import com.everhomes.rest.pmNotify.SetPmNotifyParamsCommand;
+import com.everhomes.rest.pmtask.CreateTaskCommand;
 import com.everhomes.rest.quality.OwnerType;
 import com.everhomes.rest.quality.ProcessType;
 import com.everhomes.rest.quality.QualityGroupType;
@@ -383,6 +385,9 @@ public class EquipmentServiceImpl implements EquipmentService {
 
 	@Autowired
 	private PortalService portalService;
+
+	@Autowired
+	private PmTaskService pmTaskService;
 
 	@Override
 	public EquipmentStandardsDTO updateEquipmentStandard(UpdateEquipmentStandardCommand cmd) {
@@ -4741,16 +4746,16 @@ private void checkUserPrivilege(Long orgId, Long privilegeId, Long communityId) 
 					task.setTargetName(community.getName());
 				}
 
-				EquipmentInspectionEquipments equipment = equipmentProvider.findEquipmentById(task.getEquipmentId());
-				if(equipment != null) {
-					task.setEquipmentName(equipment.getName());
-				}
-
-				EquipmentInspectionStandards standard = equipmentProvider.findStandardById(task.getStandardId());
-				if(standard != null) {
-					task.setStandardName(standard.getName());
-				}
-				Double maintanceRate =  ((double)(task.getCompleteMaintance() + task.getInMaintance() + task.getNeedMaintance()))/task.getTaskCount();
+//				EquipmentInspectionEquipments equipment = equipmentProvider.findEquipmentById(task.getEquipmentId());
+//				if(equipment != null) {
+//					task.setEquipmentName(equipment.getName());
+//				}
+//
+//				EquipmentInspectionStandards standard = equipmentProvider.findStandardById(task.getStandardId());
+//				if(standard != null) {
+//					task.setStandardName(standard.getName());
+//				}
+				Double maintanceRate =  ((double)(task.getCompleteMaintance() + task.getInMaintance()))/task.getTaskCount();
 				task.setMaintanceRate(maintanceRate);
 
 			}
@@ -4910,13 +4915,15 @@ private void checkUserPrivilege(Long orgId, Long privilegeId, Long communityId) 
 
 		TasksStatData stat = equipmentProvider.statDaysEquipmentTasks(cmd.getTargetId(), cmd.getTargetType(),
 				cmd.getInspectionCategoryId(), getDayBegin(cal, 0), getDayEnd(cal, 0),cmd.getNamespaceId());
+		//增加统计维修中和维修总数
+		equipmentProvider.statInMaintanceTaskCount(stat, getDayBegin(cal, 0), getDayEnd(cal, 0), cmd);
 		ReviewedTaskStat reviewStat = equipmentProvider.statDaysReviewedTasks(cmd.getTargetId(),
 				cmd.getInspectionCategoryId(), getDayBegin(cal, 0), getDayEnd(cal, 0),cmd.getNamespaceId());
 		StatTodayEquipmentTasksResponse response = ConvertHelper.convert(stat, StatTodayEquipmentTasksResponse.class);
 		response.setReviewQualified(reviewStat.getQualifiedTasks());
 		response.setReviewUnqualified(reviewStat.getUnqualifiedTasks());
-		response.setCurrentWaitingForExecuting(response.getWaitingForExecuting() + response.getInMaintance());
-		response.setCurrentWaitingForApproval(response.getCompleteWaitingForApproval() + response.getCompleteMaintanceWaitingForApproval() + response.getNeedMaintanceWaitingForApproval());
+		response.setCurrentWaitingForExecuting(response.getWaitingForExecuting());
+		response.setCurrentWaitingForApproval(response.getCompleteWaitingForApproval());
 		response.setReviewed(response.getReviewQualified() + response.getReviewUnqualified());
 		return response;
 	}
@@ -4934,6 +4941,9 @@ private void checkUserPrivilege(Long orgId, Long privilegeId, Long communityId) 
 		cal.setTime(new Timestamp(DateHelper.currentGMTTime().getTime()));
 		TasksStatData statTasks = equipmentProvider.statDaysEquipmentTasks(cmd.getTargetId(), cmd.getTargetType(),
 				cmd.getInspectionCategoryId(), getDayBegin(cal, -cmd.getLastDays()), getDayEnd(cal, 0),cmd.getNamespaceId());
+		//增加统计维修中和维修总数
+		StatTodayEquipmentTasksCommand command = ConvertHelper.convert(cmd, StatTodayEquipmentTasksCommand.class);
+		equipmentProvider.statInMaintanceTaskCount(statTasks, getDayBegin(cal, 0), getDayEnd(cal, 0), command);
 		ReviewedTaskStat reviewStat = equipmentProvider.statDaysReviewedTasks(cmd.getTargetId(),
 				cmd.getInspectionCategoryId(), getDayBegin(cal, -cmd.getLastDays()), getDayEnd(cal, 0),cmd.getNamespaceId());
 
@@ -4965,7 +4975,9 @@ private void checkUserPrivilege(Long orgId, Long privilegeId, Long communityId) 
 			end = new Timestamp((cmd.getEndTime()));
 		}
 		TasksStatData statTasks = equipmentProvider.statDaysEquipmentTasks(cmd.getTargetId(), cmd.getTargetType(),
-				cmd.getInspectionCategoryId(), begin, end,cmd.getNamespaceId());
+				cmd.getInspectionCategoryId(), begin, end, cmd.getNamespaceId());
+		StatTodayEquipmentTasksCommand command = ConvertHelper.convert(cmd, StatTodayEquipmentTasksCommand.class);
+		equipmentProvider.statInMaintanceTaskCount(statTasks, begin, end, command);
 		ReviewedTaskStat reviewStat = equipmentProvider.statDaysReviewedTasks(cmd.getTargetId(),
 				cmd.getInspectionCategoryId(), begin, end,cmd.getNamespaceId());
 
@@ -5990,6 +6002,7 @@ private void checkUserPrivilege(Long orgId, Long privilegeId, Long communityId) 
 	public void createRepairsTask(CreateEquipmentRepairCommand cmd) {
 
 		EquipmentInspectionTasks tasks = verifyEquipmentTask(cmd.getTaskId(), null, null);
+		//报修后log表中需维修状态保留
 		EquipmentInspectionTasksLogs tasksLog = new EquipmentInspectionTasksLogs();
 		tasksLog.setEquipmentId(cmd.getEquipmentId());
 		tasksLog.setOperatorType(OwnerType.USER.getCode());
@@ -5998,9 +6011,13 @@ private void checkUserPrivilege(Long orgId, Long privilegeId, Long communityId) 
 		tasksLog.setCommunityId(tasks.getTargetId());
 		tasksLog.setNamespaceId(cmd.getNamespaceId());
 		tasksLog.setTaskId(cmd.getTaskId());
-		tasksLog.setProcessResult(EquipmentTaskProcessResult.NEED_MAINTENANCE_OK.getCode());
+		tasksLog.setProcessType(EquipmentTaskProcessType.NEED_MAINTENANCE.getCode());//提交给报修
+		tasksLog.setProcessResult(EquipmentTaskProcessResult.NONE.getCode());
 		equipmentProvider.createEquipmentInspectionTasksLogs(tasksLog);
 
-		//TODO:物业模块生成一条维修记录  log 表中需维修状态保留  调用报修的接口
+		//调用物业报修
+		CreateTaskCommand repairCommand = new CreateTaskCommand();
+		repairCommand = ConvertHelper.convert(cmd, CreateTaskCommand.class);
+		pmTaskService.createTask(repairCommand);
 	}
 }

@@ -709,19 +709,6 @@ public class EquipmentController extends ControllerBase {
         return getRestResponse(resp);
     }
 
-//    /**
-//     * <b>URL: /equipment/listParametersByEquipmentId</b>
-//     * <p>查看设备所需记录的参数</p>
-//     */
-//    @RequestMapping("listParametersByEquipmentId")
-//    @RestReturn(value = EquipmentParameterDTO.class, collection = true)
-//    public RestResponse listParametersByEquipmentId(DeleteEquipmentsCommand cmd) {
-//
-//        List<EquipmentParameterDTO> parameterDTOS = equipmentService.listParametersByEquipmentId(cmd);
-//
-//        return getRestResponse(parameterDTOS);
-//    }
-
     /**
      * <b>URL: /equipment/listAttachmentsByEquipmentId</b>
      * <p>查看设备操作图示或说明书</p>
@@ -957,7 +944,7 @@ public class EquipmentController extends ControllerBase {
 	
 	/**
 	 * <b>URL: /equipment/statEquipmentTasks</b>
-	 * <p>任务数统计</p>
+	 * <p>任务数统计(按照设备标准维度统计 3.0.3无法统计)</p>
 	 */
 	@RequestMapping("statEquipmentTasks")
 	@RestReturn(value = StatEquipmentTasksResponse.class)

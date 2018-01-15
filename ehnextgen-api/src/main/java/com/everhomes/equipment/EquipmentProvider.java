@@ -213,4 +213,10 @@ public interface EquipmentProvider {
     EquipmentInspectionReviewDate getEquipmentInspectiomExpireDays(Long scopeId, Byte scopeType);
 
     void deleteEquipmentPlansMapByEquipmentId(Long equipmentId);
+
+    EquipmentInspectionTasksLogs getMaintanceLogByEquipmentId(Long referId);
+
+	void updateMaintanceInspectionLogsById(Long id);
+
+    void statInMaintanceTaskCount(TasksStatData stat,Timestamp startTime, Timestamp endTime,StatTodayEquipmentTasksCommand cmd);
 }

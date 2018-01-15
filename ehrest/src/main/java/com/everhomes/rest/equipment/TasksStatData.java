@@ -7,7 +7,6 @@ import com.everhomes.util.StringHelper;
  *     <li>totalTasks: 任务总数</li>
  *     <li>delay: 延误任务数</li>
  *     <li>delayInspection: 巡检延误任务</li>
- *     <li>delayMaintance: 整改延误任务</li>
  *     <li>reviewDelayTasks: 审核延误任务数</li>
  *     <li>waitingForExecuting: 待执行任务数</li>
  *     <li>inMaintance: 整改中任务数</li>
@@ -15,9 +14,6 @@ import com.everhomes.util.StringHelper;
  *     <li>completeMaintance: 整改完成任务数</li>
  *     <li>completeInspection: 巡检完成任务数</li>
  *     <li>completeWaitingForApproval: 巡检完成待审核任务数</li>
- *     <li>completeMaintanceWaitingForApproval: 整改完成待审核任务数</li>
- *     <li>needMaintanceWaitingForApproval: 需整改待审核任务数</li>
- *     <li>needMaintanceReviewDelay: 整改审核延误</li>
  *     <li>completeReviewDelay: 巡检核查延误</li>
  * </ul>
  * Created by ying.xiong on 2017/4/20.
