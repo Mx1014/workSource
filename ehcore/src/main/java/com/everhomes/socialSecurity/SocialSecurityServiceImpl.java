@@ -1421,10 +1421,7 @@ public class SocialSecurityServiceImpl implements SocialSecurityService {
         if (detailIds != null) {
             for (Long detailId : detailIds) {
                 OrganizationMemberDetails detail = organizationProvider.findOrganizationMemberDetailsByDetailId(detailId);
-
-                    SocialSecurityInoutReport report = crateInoutReport(detail, month);
-
-
+                SocialSecurityInoutReport report = crateInoutReport(detail, month);
             }
         }
 //        if (outDetails != null) {

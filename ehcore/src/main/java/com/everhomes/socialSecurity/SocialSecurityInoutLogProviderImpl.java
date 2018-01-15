@@ -104,7 +104,6 @@ public class SocialSecurityInoutLogProviderImpl implements SocialSecurityInoutLo
                 .where(Tables.EH_SOCIAL_SECURITY_INOUT_LOG.ORGANIZATION_ID.eq(ownerId))
                 .and(Tables.EH_SOCIAL_SECURITY_INOUT_LOG.LOG_MONTH.eq(month));
         query = query.and(Tables.EH_SOCIAL_SECURITY_INOUT_LOG.TYPE.in(accumulationFundIns));
-        query.orderBy(Tables.EH_SOCIAL_SECURITY_INOUT_LOG.LOG_DATE.asc());
 //        LOGGER.debug("sql : " + query);
         Result<Record1<Long>> record = query.fetch();
         if (null == record) {
