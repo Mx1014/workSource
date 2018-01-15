@@ -1448,7 +1448,7 @@ public class SocialSecurityServiceImpl implements SocialSecurityService {
         SocialSecurityReport ssReport = socialSecurityReportProvider.findSocialSecurityReportByDetailId(detail.getId(), month);
         if (null == ssReport) {
             LOGGER.error("can not find report : detail:{}{},month:{}", detail.getId(), detail.getContactName(), month);
-            return;
+            return null;
         }
         SocialSecurityInoutReport report = ConvertHelper.convert(ssReport, SocialSecurityInoutReport.class);
         report.setSocialSecurityAfter(ssReport.getAfterSocialSecurityCompanySum().add(ssReport.getAfterSocialSecurityEmployeeSum()));
@@ -1504,7 +1504,7 @@ public class SocialSecurityServiceImpl implements SocialSecurityService {
                 }
             }
         }
-        LOGGER.error("开始计算部门-{} 的数据,\n下辖部门id {},\n人员id{}", dpt.getName(), orgIds, detailIds);
+//        LOGGER.error("开始计算部门-{} 的数据,\n下辖部门id {},\n人员id{}", dpt.getName(), orgIds, detailIds);
         SocialSecurityDepartmentSummary summary = processSocialSecurityDepartmentSummary(dpt, detailIds, month);
         socialSecurityDepartmentSummaryProvider.createSocialSecurityDepartmentSummary(summary);
     }
