@@ -1410,7 +1410,7 @@ public class SocialSecurityServiceImpl implements SocialSecurityService {
 
     private void calculateSocialSecurityInoutReports(Long ownerId) {
         //todo 组织架构获取本月增员本月减员的人
-        String month = socialSecurityPaymentProvider.findPaymentMonthByDetail(ownerId);
+        String month = socialSecurityPaymentProvider.findPaymentMonthByOwnerId(ownerId);
         socialSecurityInoutReportProvider.deleteSocialSecurityInoutReportByMonth(ownerId, month);
         List<Long> inDetails = socialSecurityInoutLogProvider.listSocialSecurityInoutLogDetailIds(ownerId, month, InOutLogType.SOCIAL_SECURITY_IN);
         List<Long> outDetails = socialSecurityInoutLogProvider.listSocialSecurityInoutLogDetailIds(ownerId, month, InOutLogType.SOCIAL_SECURITY_OUT);

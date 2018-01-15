@@ -78,7 +78,7 @@ public class SocialSecurityInoutLogProviderImpl implements SocialSecurityInoutLo
         query.addConditions(Tables.EH_SOCIAL_SECURITY_INOUT_LOG.TYPE.eq(accumulationFundIn.getCode()));
 
         query.addOrderBy(Tables.EH_SOCIAL_SECURITY_INOUT_LOG.LOG_DATE.asc());
-        LOGGER.debug("sql : " + query);
+//        LOGGER.debug("sql : " + query);
         query.fetch().map(r ->{
             if (null != r) {
                 results.add(ConvertHelper.convert(r, SocialSecurityInoutLog.class).getDetailId());
