@@ -1446,11 +1446,14 @@ public class SocialSecurityServiceImpl implements SocialSecurityService {
 
     private SocialSecurityInoutReport crateInoutReport(OrganizationMemberDetails detail, String month, InOutFlag inOutFlag, AccumOrSocial accumOrSocial) {
         SocialSecurityReport ssReport = socialSecurityReportProvider.findSocialSecurityReportByDetailId(detail.getId(), month);
+        SocialSecurityInoutReport report = new SocialSecurityInoutReport();
         if (null == ssReport) {
-            LOGGER.error("can not find report : detail:{}{},month:{}", detail.getId(), detail.getContactName(), month);
-            return null;
+//            LOGGER.error("can not find report : detail:{}{},month:{}", detail.getId(), detail.getContactName(), month);
+//            return null;
+            ssReport = newSocialSecurityReport(detail);
+            ssReport.setPayMonth(month);
         }
-        SocialSecurityInoutReport report = ConvertHelper.convert(ssReport, SocialSecurityInoutReport.class);
+        report = ConvertHelper.convert(ssReport, SocialSecurityInoutReport.class);
         if (null != ssReport.getAfterSocialSecurityCompanySum()) {
             report.setSocialSecurityAfter(ssReport.getAfterSocialSecurityCompanySum().add(ssReport.getAfterSocialSecurityEmployeeSum()));
         }
