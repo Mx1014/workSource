@@ -101,6 +101,7 @@ public class SocialSecurityInoutLogProviderImpl implements SocialSecurityInoutLo
 
         DSLContext context = dbProvider.getDslContext(AccessSpec.readOnly());
         SelectConditionStep<Record1<Long>> query = context.selectDistinct(Tables.EH_SOCIAL_SECURITY_INOUT_LOG.DETAIL_ID)
+                .from(Tables.EH_SOCIAL_SECURITY_INOUT_LOG)
                 .where(Tables.EH_SOCIAL_SECURITY_INOUT_LOG.ORGANIZATION_ID.eq(ownerId))
                 .and(Tables.EH_SOCIAL_SECURITY_INOUT_LOG.LOG_MONTH.eq(month));
         query = query.and(Tables.EH_SOCIAL_SECURITY_INOUT_LOG.TYPE.in(accumulationFundIns));
