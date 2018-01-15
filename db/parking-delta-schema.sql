@@ -194,7 +194,7 @@ ALTER TABLE `eh_rentalv2_items`
 ADD COLUMN `resource_type` varchar(64) DEFAULT NULL COMMENT '资源类型';
 ALTER TABLE `eh_rentalv2_items_orders`
 ADD COLUMN `resource_type` varchar(64) DEFAULT NULL COMMENT '资源类型';
-ALTER TABLE `eh_rentalv2_resource_orders`
+ALTER TABLE `eh_rentalv2_refund_orders`
 ADD COLUMN `resource_type` varchar(64) DEFAULT NULL COMMENT '资源类型';
 
 ALTER TABLE `eh_rentalv2_order_attachments`
