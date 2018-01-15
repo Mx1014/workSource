@@ -1465,12 +1465,12 @@ public class SocialSecurityServiceImpl implements SocialSecurityService {
             }
         } else if (inOutFlag == InOutFlag.DECRE) {
 
-            if (AccumOrSocial.SOCAIL == accumOrSocial) {
-                report.setSocialSecurityDecrease(ssReport.getSocialSecuritySum());
-//                report.setSocialSecurityDecrease(socialSecuritySettingProvider.sumPayment(detail.getId(),accumOrSocial));
-            } else {
-                report.setAccumulationFundDecrease(ssReport.getAccumulationFundSum());
-            }
+//            if (AccumOrSocial.SOCAIL == accumOrSocial) {
+//                report.setSocialSecurityDecrease(ssReport.getSocialSecuritySum());
+                report.setSocialSecurityDecrease(socialSecuritySettingProvider.sumPayment(detail.getId(),accumOrSocial));
+//            } else {
+//                report.setAccumulationFundDecrease(ssReport.getAccumulationFundSum());
+//            }
         }
         socialSecurityInoutReportProvider.createSocialSecurityInoutReport(report);
         return report;

@@ -1,6 +1,7 @@
 // @formatter:off
 package com.everhomes.socialSecurity;
 
+import java.math.BigDecimal;
 import java.sql.Timestamp;
 import java.util.List;
 import java.util.Set;
@@ -201,6 +202,23 @@ public class SocialSecuritySettingProviderImpl implements SocialSecuritySettingP
             return null;
         }
         return record.map(r -> ConvertHelper.convert(r, SocialSecuritySetting.class));
+    }
+
+    @Override
+    public BigDecimal sumPayment(Long detailId, AccumOrSocial accumOrSocial) {
+        Result<Record1<BigDecimal>> record = getReadOnlyContext()
+                .select(Tables.EH_SOCIAL_SECURITY_SETTINGS.COMPANY_RADIX.mul(Tables.EH_SOCIAL_SECURITY_SETTINGS.COMPANY_RATIO)
+                        .add(Tables.EH_SOCIAL_SECURITY_SETTINGS.EMPLOYEE_RATIO.mul(Tables.EH_SOCIAL_SECURITY_SETTINGS.EMPLOYEE_RATIO))
+                        .sum())
+                .from(Tables.EH_SOCIAL_SECURITY_SETTINGS)
+                .where(Tables.EH_SOCIAL_SECURITY_SETTINGS.DETAIL_ID.eq(detailId))
+                .and(Tables.EH_SOCIAL_SECURITY_SETTINGS.ACCUM_OR_SOCAIL.eq(accumOrSocial.getCode()))
+                .orderBy(Tables.EH_SOCIAL_SECURITY_SETTINGS.ID.asc())
+                .fetch();
+        if (null == record) {
+            return new BigDecimal(0);
+        }
+        return record.get(0).value1();
     }
 
     private EhSocialSecuritySettingsDao getReadWriteDao() {

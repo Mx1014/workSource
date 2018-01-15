@@ -42,7 +42,7 @@ public interface SocialSecuritySettingProvider {
 
 	List<SocialSecuritySetting> listSocialSecuritySettingByOwner(Long ownerId);
 
-//	BigDecimal sumPayment(Long id, AccumOrSocial accumOrSocial);
+	BigDecimal sumPayment(Long detailId, AccumOrSocial accumOrSocial);
 
 //	void updateSocialSecuritySettingRadix(Long id, BigDecimal bigDecimal);
 }
