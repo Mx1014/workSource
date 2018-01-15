@@ -3731,20 +3731,15 @@ private void checkUserPrivilege(Long orgId, Long privilegeId, Long communityId) 
 
 		Timestamp current = new Timestamp(System.currentTimeMillis());
 		tasks = allTasks.stream().map(r -> {
-			if ((EquipmentTaskStatus.WAITING_FOR_EXECUTING.equals(EquipmentTaskStatus.fromStatus(r.getStatus()))
-					|| EquipmentTaskStatus.IN_MAINTENANCE.equals(EquipmentTaskStatus.fromStatus(r.getStatus())))
-					&& r.getExecutiveExpireTime() != null && current.before(r.getExecutiveExpireTime())) {
+			if ((EquipmentTaskStatus.WAITING_FOR_EXECUTING.equals(EquipmentTaskStatus.fromStatus(r.getStatus())))) {
 				return r;
-			} else if (EquipmentTaskStatus.IN_MAINTENANCE.equals(EquipmentTaskStatus.fromStatus(r.getStatus())) &&
-					r.getProcessExpireTime() != null && current.before(r.getProcessExpireTime())) {
-				return r;
-			} else if (EquipmentTaskStatus.NEED_MAINTENANCE.equals(EquipmentTaskStatus.fromStatus(r.getStatus()))
-					|| EquipmentTaskStatus.CLOSE.equals(EquipmentTaskStatus.fromStatus(r.getStatus()))) {
+			} else if (EquipmentTaskStatus.CLOSE.equals(EquipmentTaskStatus.fromStatus(r.getStatus()))
+					|| (EquipmentTaskStatus.REVIEW_DELAY.equals(EquipmentTaskStatus.fromStatus(r.getStatus())))) {
 				return r;
 			}
-
 			return null;
 		}).filter(Objects::nonNull).collect(Collectors.toList());
+
 		List<EquipmentTaskDTO> dtos = tasks.stream().map((r) ->
 				ConvertHelper.convert(r, EquipmentTaskDTO.class))
 				.collect(Collectors.toList());
