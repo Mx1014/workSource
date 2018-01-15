@@ -1451,8 +1451,12 @@ public class SocialSecurityServiceImpl implements SocialSecurityService {
             return null;
         }
         SocialSecurityInoutReport report = ConvertHelper.convert(ssReport, SocialSecurityInoutReport.class);
-        report.setSocialSecurityAfter(ssReport.getAfterSocialSecurityCompanySum().add(ssReport.getAfterSocialSecurityEmployeeSum()));
-        report.setAccumulationFundAfter(ssReport.getAfterAccumulationFundCompanySum().add(ssReport.getAfterAccumulationFundEmployeeSum()));
+        if (null != ssReport.getAfterSocialSecurityCompanySum()) {
+            report.setSocialSecurityAfter(ssReport.getAfterSocialSecurityCompanySum().add(ssReport.getAfterSocialSecurityEmployeeSum()));
+        }
+        if(null != ssReport.getAfterAccumulationFundCompanySum()){
+            report.setAccumulationFundAfter(ssReport.getAfterAccumulationFundCompanySum().add(ssReport.getAfterAccumulationFundEmployeeSum()));
+        }
         if (inOutFlag == InOutFlag.INCRE) {
             if (AccumOrSocial.SOCAIL == accumOrSocial) {
                 report.setSocialSecurityIncrease(ssReport.getSocialSecuritySum());
