@@ -25,6 +25,12 @@ CREATE TABLE `eh_payment_late_fine`(
   PRIMARY KEY (`id`)
 ) ENGINE = INNODB DEFAULT CHARSET = utf8mb4;
 
+-- 增加项目区分 by st.zheng
+ALTER TABLE `eh_categories`
+ADD COLUMN `owner_type` VARCHAR(32) NULL DEFAULT NULL AFTER `namespace_id`;
+ALTER TABLE `eh_categories`
+ADD COLUMN `owner_id` BIGINT(20) NULL DEFAULT '0' AFTER `owner_type`;
+
 
 --  标准数据增加周期类型及关系表状态start by jiarui 20180105
 UPDATE eh_equipment_inspection_standards
