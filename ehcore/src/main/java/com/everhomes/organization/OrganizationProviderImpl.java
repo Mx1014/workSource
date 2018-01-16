@@ -1,6 +1,7 @@
 // @formatter:off
 package com.everhomes.organization;
 
+import com.everhomes.acl.RolePrivilegeService;
 import com.everhomes.community.Community;
 import com.everhomes.constants.ErrorCodes;
 import com.everhomes.db.AccessSpec;
@@ -19,6 +20,7 @@ import com.everhomes.organization.pm.CommunityAddressMapping;
 import com.everhomes.organization.pm.CommunityPmBill;
 import com.everhomes.organization.pm.CommunityPmOwner;
 import com.everhomes.organization.pmsy.OrganizationMemberRecordMapper;
+import com.everhomes.rest.acl.ListServiceModuleAdministratorsCommand;
 import com.everhomes.rest.approval.TrueOrFalseFlag;
 import com.everhomes.rest.asset.TargetDTO;
 import com.everhomes.rest.enterprise.EnterpriseAddressStatus;
@@ -3575,7 +3577,7 @@ public class OrganizationProviderImpl implements OrganizationProvider {
     }
 
     @Override
-    public Organization findOrganizationByName(String name, Integer namespaceId) {
+    public List<Organization> findOrganizationByName(String name, Integer namespaceId) {
         DSLContext context = this.dbProvider.getDslContext(AccessSpec.readOnly());
         SelectQuery<Record> query = context.selectQuery();
         query.addSelect(Tables.EH_ORGANIZATIONS.fields());
@@ -3587,10 +3589,8 @@ public class OrganizationProviderImpl implements OrganizationProvider {
         query.addConditions(Tables.EH_ORGANIZATIONS.GROUP_TYPE.eq(OrganizationGroupType.ENTERPRISE.getCode()));
         query.addConditions(Tables.EH_ORGANIZATIONS.STATUS.eq(OrganizationStatus.ACTIVE.getCode()));
 
-        Record r = query.fetchAny();
-        if (r != null)
-            return ConvertHelper.convert(r, Organization.class);
-        return null;
+        List<Organization> list = query.fetchInto(Organization.class);
+        return list;
     }
 
     // by Janson

@@ -289,7 +289,7 @@ public interface OrganizationProvider {
 	OrganizationMember getOrganizationMemberByContactToken(Integer currentNamespaceId, String email);
 
 	List<Community> listOrganizationCommunitiesByKeyword(Long orgId, String keyword);
-	Organization findOrganizationByName(String name, Integer namespaceId);
+	List<Organization> findOrganizationByName(String name, Integer namespaceId);
 	Integer getSignupCount(Long organizationId);
 	OrganizationAddress findOrganizationAddress(Long organizationId, Long addressId, Long buildingId);
 	void createOrganizationAddressMapping(CommunityAddressMapping addressMapping);
