@@ -15,6 +15,7 @@ public class BlockingEventResponse {
     private String errorMessage;
     private Integer calledTimes = 0;
     private String subject;
+    private String message;
     private transient static ConcurrentHashMap blockingEventStored;
 
     public BlockingEventStatus getStatus() {
@@ -71,5 +72,13 @@ public class BlockingEventResponse {
 
     public void setSubject(String subject) {
         this.subject = subject;
+    }
+
+    public String getMessage() {
+        return message;
+    }
+
+    public void setMessage(String message) {
+        this.message = message;
     }
 }

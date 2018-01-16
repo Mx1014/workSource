@@ -101,6 +101,8 @@ import com.everhomes.settings.PaginationConfigHelper;
 import com.everhomes.sms.*;
 import com.everhomes.user.admin.SystemUserPrivilegeMgr;
 import com.everhomes.util.*;
+import com.fasterxml.jackson.databind.ser.Serializers;
+import com.google.gson.Gson;
 import org.apache.commons.lang.StringUtils;
 import org.elasticsearch.common.geo.GeoHashUtils;
 import org.jooq.DSLContext;
@@ -116,6 +118,7 @@ import org.springframework.data.redis.serializer.StringRedisSerializer;
 import org.springframework.stereotype.Component;
 import org.springframework.transaction.TransactionStatus;
 import org.springframework.util.CollectionUtils;
+import org.springframework.web.context.request.async.DeferredResult;
 
 import javax.annotation.PostConstruct;
 import javax.servlet.http.Cookie;
@@ -129,6 +132,8 @@ import javax.validation.metadata.ConstraintDescriptor;
 import java.io.UnsupportedEncodingException;
 import java.net.URLEncoder;
 import java.nio.charset.Charset;
+import java.security.InvalidKeyException;
+import java.security.NoSuchAlgorithmException;
 import java.sql.Timestamp;
 import java.text.ParseException;
 import java.text.SimpleDateFormat;
@@ -5435,5 +5440,62 @@ public class UserServiceImpl implements UserService {
         
         return resp;
     }
+
+	// 生成随机key
+    public String querySubjectIdForScan(){
+		String uuid = UUID.randomUUID().toString();
+		String subjectId = "waitScanForLogon" + uuid.replace("-", "");
+		return subjectId;
+	}
+
+	// 登录等待
+	public void waitScanForLogon(String subjectId){
+		DeferredResult<BlockingEventResponse> deferredResult = this.messagingService.blockingEvent(subjectId, "ORORDINARY", 10*1000);
+		BlockingEventResponse response = ConvertHelper.convert(deferredResult.getResult(), BlockingEventResponse.class);
+		if(response.getStatus() != BlockingEventStatus.CONTINUTE){
+			LOGGER.error("waitScanForLogon failure");
+			throw RuntimeErrorException.errorWith(ErrorCodes.SCOPE_GENERAL, ErrorCodes.ERROR_INVALID_PARAMETER, "waitScanForLogon failure");
+		}
+		if(response.getSubject() != subjectId){
+			LOGGER.error("waitScanForLogon failure");
+			throw RuntimeErrorException.errorWith(ErrorCodes.SCOPE_GENERAL, ErrorCodes.ERROR_INVALID_PARAMETER, "waitScanForLogon failure");
+		}
+		if(StringUtils.isEmpty(response.getMessage())){
+			LOGGER.error("waitScanForLogon failure");
+			throw RuntimeErrorException.errorWith(ErrorCodes.SCOPE_GENERAL, ErrorCodes.ERROR_INVALID_PARAMETER, "waitScanForLogon failure");
+		}
+
+		Map params = GsonUtil.fromJson(response.getMessage(), HashMap.class);
+		String token = params.get("token") + "";
+		String[] tokenParam = Base64.getDecoder().decode(token).toString().split("-");
+		Long userId = Long.valueOf(tokenParam[0]);
+		Integer namespaceId = Integer.valueOf(tokenParam[1]);
+		String salt = tokenParam[2];
+		if(salt == SALT){
+			LoginToken logintoken = WebTokenGenerator.getInstance().fromWebToken(params.get("loginToken").toString(), LoginToken.class);
+			logonByToken(logintoken);
+
+		}else{
+			LOGGER.error("waitScanForLogon failure");
+			throw RuntimeErrorException.errorWith(ErrorCodes.SCOPE_GENERAL, ErrorCodes.ERROR_INVALID_PARAMETER, "waitScanForLogon failure");
+		}
+
+
+	}
+
+	private static final String SALT = "this is salt";
+
+	// 获取当前准备登录用户的混淆key
+	public String getSercetKeyForScan() {
+		String plain = UserContext.currentUserId() +"-" + UserContext.getCurrentNamespaceId() + "-" + SALT;
+		String token = Base64.getEncoder().encodeToString(plain.getBytes());
+		return token;
+	}
+
+	// 扫码登录
+	public void logonByScan(String subjectId, String message){
+		this.messagingService.signalBlockingEvent(subjectId, message, 3*1000);
+	}
+
 
 }

@@ -14,7 +14,6 @@ import com.everhomes.rest.user.FetchMessageCommandResponse;
 import com.everhomes.rest.user.FetchPastToRecentMessageCommand;
 import com.everhomes.rest.user.FetchRecentToPastMessageAdminCommand;
 import com.everhomes.rest.user.FetchRecentToPastMessageCommand;
-import com.everhomes.scheduler.ScheduleProvider;
 import com.everhomes.settings.PaginationConfigHelper;
 import com.everhomes.user.UserContext;
 import com.everhomes.user.UserLogin;
@@ -29,7 +28,7 @@ import org.springframework.stereotype.Component;
 import org.springframework.web.context.request.async.DeferredResult;
 
 import javax.annotation.PostConstruct;
-import java.text.SimpleDateFormat;
+import javax.security.auth.Subject;
 import java.util.*;
 import java.util.concurrent.*;
 import java.util.stream.Collectors;
@@ -300,82 +299,6 @@ public class MessagingServiceImpl implements MessagingService {
         return dto;
     }
 
-
-//    @Override
-//    public DeferredResult<BlockingEventResponse> blockingEvent(String subjectId, String type, Integer timeOut) {
-//        if(timeOut == 0 || timeOut > MAX_TIME_OUT){
-//            return null;
-//        }
-//        String subject = "blockingEventKey." + subjectId;
-//        DeferredResult deferredResult = new DeferredResult();
-//        BlockingEventResponse response = BlockingEventResponse.build(blockingEventStored, subject);
-//
-//        switch (type){
-//            case "ONESHOT":
-//                localBusSubscriberBuilder.build(subject, new LocalBusOneshotSubscriber() {
-//                    @Override
-//                    public Action onLocalBusMessage(Object sender, String subject, Object dtoResp, String path) {
-//                        response.setSubject(subject);
-//                        response.setStatus(BlockingEventStatus.CONTINUTE);
-//                        response.incrCalledTime();
-//                        blockingEventStored.remove(subject + ".calledTimes");
-//                        deferredResult.setResult(response);
-//                        return null;
-//                    }
-//                    @Override
-//                    public void onLocalBusListeningTimeout() {
-//                        //wait again
-//                        response.setStatus(BlockingEventStatus.TIMEOUT);
-//                        deferredResult.setResult(response);
-//                    }
-//
-//                }).setTimeout(timeOut).create();
-//
-//                break;
-//            case "ORORDINARY":
-//                LocalBusSubscriber subscriber = null;
-//                if((LocalBusSubscriber)blockingEventStored.get(subject + "subscriber") != null){
-//                    subscriber = (LocalBusSubscriber)blockingEventStored.get(subject+"subscriber");
-//                }else{
-//                    subscriber = new LocalBusSubscriber(){
-//                        @Override
-//                        public Action onLocalBusMessage(Object sender, String subject, Object dtoResp, String path) {
-//                            response.setSubject(subject);
-//                            response.setStatus(BlockingEventStatus.CONTINUTE);
-//                            response.incrCalledTime();
-//                            blockingEventStored.remove(subject + ".calledTimes");
-//                            blockingEventStored.remove(subject + "subscriber");
-//                            deferredResult.setResult(response);
-//                            return null;
-//                        }
-//                    };
-//
-//                    //把subscriber存起来
-//                    blockingEventStored.set(subject+"subscriber",subscriber);
-//                }
-//
-//                this.localBusProvider.subscribe(subject, subscriber);
-//                if (timeOut != null) {
-//                    Date startTime = new Date(DateHelper.currentGMTTime().getTime() + timeOut.longValue());
-//                    this.scheduler.getScheduler().schedule(new Runnable() {
-//                        public void run() {
-//                            localBusProvider.unsubscribe(subject, (LocalBusSubscriber)BlockingEventStored.get(subject+"subscriber"));
-//                            blockingEventStored.remove(subject + ".calledTimes");
-//                            blockingEventStored.remove(subject);
-//                            response.setStatus(BlockingEventStatus.TIMEOUT);
-//                            deferredResult.setResult(response);
-//                        }
-//                    }, startTime);
-//                }
-//                break;
-//        }
-//
-//
-//
-//        //dto 只有一个线程能成功，如果某一个线程失败，则需要重新请求 uuid
-//        return deferredResult;
-//    }
-
     @Override
     public DeferredResult<BlockingEventResponse> blockingEvent(String subjectId, String type, Integer timeOut) {
         if(timeOut == 0 || timeOut > MAX_TIME_OUT){
@@ -390,7 +313,8 @@ public class MessagingServiceImpl implements MessagingService {
             if(stored.get(subject + ".expireTime") != null){
                 //如果value时间戳大于服务器时间，说明key未过期
                 if(Long.valueOf((stored.get(subject + ".expireTime").toString())) > System.currentTimeMillis()){
-                    blockingEventOnSignal(response,subject);
+                    blockingEventOnSignal(response, subject, stored.get(subject + ".message"));
+                    removeEverythingWithKey(subject);
                     deferredResult.setResult(response);
                     return deferredResult;
                 }
@@ -400,20 +324,18 @@ public class MessagingServiceImpl implements MessagingService {
             Accessor acc = bigCollectionProvider.getMapAccessor(key, "");
             RedisTemplate redisTemplate = acc.getTemplate(stringRedisSerializer);
             if(redisTemplate.opsForValue().get(key) != null){
-                blockingEventOnSignal(response,subject);
+                blockingEventOnSignal(response, subject, redisTemplate.opsForValue().get(key));
                 deferredResult.setResult(response);
                 return deferredResult;
             }
         }
-
-
 
         switch (type){
             case "ONESHOT":
                 localBusSubscriberBuilder.build(subject, new LocalBusOneshotSubscriber() {
                     @Override
                     public Action onLocalBusMessage(Object sender, String subject, Object dtoResp, String path) {
-                        blockingEventOnSignal(response,subject);
+                        blockingEventOnSignal(response, subject, dtoResp);
                         deferredResult.setResult(response);
                         return null;
                     }
@@ -421,8 +343,7 @@ public class MessagingServiceImpl implements MessagingService {
                     public void onLocalBusListeningTimeout() {
                         //wait again
                         response.setStatus(BlockingEventStatus.TIMEOUT);
-                        stored.remove(subject + ".calledTimes");
-                        stored.remove(subject+ ".expireTime");
+                        removeEverythingWithKey(subject);
                         deferredResult.setResult(response);
                     }
 
@@ -433,7 +354,7 @@ public class MessagingServiceImpl implements MessagingService {
                 this.localBusProvider.subscribe(subject, new LocalBusSubscriber() {
                     @Override
                     public Action onLocalBusMessage(Object sender, String subject, Object dtoResp, String path) {
-                        blockingEventOnSignal(response,subject);
+                        blockingEventOnSignal(response, subject, dtoResp);
                         deferredResult.setResult(response);
                         return null;
                     }
@@ -443,8 +364,7 @@ public class MessagingServiceImpl implements MessagingService {
                     this.scheduler.getScheduler().schedule(new Runnable() {
                         public void run() {
                             localBusProvider.unsubscribe(subject, (LocalBusSubscriber)stored.get(subject+"subscriber"));
-                            stored.remove(subject + ".calledTimes");
-                            stored.remove(subject+ ".expireTime");
+                            removeEverythingWithKey(subject);
                             response.setStatus(BlockingEventStatus.TIMEOUT);
                             deferredResult.setResult(response);
                         }
@@ -459,7 +379,7 @@ public class MessagingServiceImpl implements MessagingService {
     }
 
 
-
+    @Override
     public String signalBlockingEvent(String uploadId, String message, Integer timeOut) {
         String subject = "blockingEventKey." + uploadId;
 //        UploadFileInfoDTO dto = signalFileDTO(cmd, UserContext.currentUserId());
@@ -476,13 +396,14 @@ public class MessagingServiceImpl implements MessagingService {
                 try {
                     localBus.publish(null, subject, StringHelper.toJsonString(message));
                     if(!REDIS_ENABLE){
-                        stored.remove(subject + ".expireTime");
+                        removeEverythingWithKey(subject);
                         stored.put(subject + ".expireTime", System.currentTimeMillis() + timeOut);
+                        stored.put(subject + ".message", message);
                     }else{
                         String key = subject+ ".expireKey";
                         Accessor acc = bigCollectionProvider.getMapAccessor(key, "");
                         RedisTemplate redisTemplate = acc.getTemplate(stringRedisSerializer);
-                        redisTemplate.opsForValue().set(key, "1", timeOut, TimeUnit.MILLISECONDS);
+                        redisTemplate.opsForValue().set(key, message, timeOut, TimeUnit.MILLISECONDS);
                     }
 
                 } catch (Exception e) {
@@ -508,7 +429,8 @@ public class MessagingServiceImpl implements MessagingService {
     }
 
     // 信号成功接受方法
-    private BlockingEventResponse blockingEventOnSignal(BlockingEventResponse response, String subject){
+    private BlockingEventResponse blockingEventOnSignal(BlockingEventResponse response, String subject, Object dtoResp){
+        response.setMessage(dtoResp.toString());
         response.setSubject(subject);
         response.setStatus(BlockingEventStatus.CONTINUTE);
         response.incrCalledTime();
@@ -516,4 +438,12 @@ public class MessagingServiceImpl implements MessagingService {
         stored.remove(subject+ ".expireTime");
         return response;
     }
+
+    // 移除key相关的内容
+    private static void removeEverythingWithKey(String subject){
+        stored.remove(subject + ".calledTimes");
+        stored.remove(subject+ ".expireTime");
+        stored.remove(subject+ ".message");
+    }
+
 }

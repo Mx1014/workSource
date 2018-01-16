@@ -1093,7 +1093,7 @@ public class UserController extends ControllerBase {
 
 		//TODO use uri parser to do better hear.
 		String uri = cmd.getUri();
-		int i = uri.indexOf("#");
+		int i =  uri.indexOf("#");
 		if(i > 0) {
 			uri = uri.substring(0, i);
 		}
