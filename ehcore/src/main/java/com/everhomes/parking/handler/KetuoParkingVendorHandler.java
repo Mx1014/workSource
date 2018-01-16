@@ -35,6 +35,9 @@ public abstract class KetuoParkingVendorHandler extends DefaultParkingVendorHand
 	private static final String GET_CARd_RULE = "/api/pay/GetCardRule";
 	private static final String GET_TEMP_FEE = "/api/pay/GetParkingPaymentInfo";
 	private static final String PAY_TEMP_FEE = "/api/pay/PayParkingFee";
+
+	protected static final String ADD_NATURAL_MONTH = "ADD_NATURAL_MONTH";//自然月
+	protected static final String ADD_DISTANCE_MONTH = "ADD_DISTANCE_MONTH";//距离月底天数
 	//只显示ruleType = 1时的充值项
 	static final String RULE_TYPE = "1";
 	//月租车 : 2
@@ -254,6 +257,10 @@ public abstract class KetuoParkingVendorHandler extends DefaultParkingVendorHand
     }
 
 	protected boolean rechargeMonthlyCard(ParkingRechargeOrder order) {
+		return rechargeMonthlyCard(order,ADD_NATURAL_MONTH);
+	}
+
+	protected final boolean rechargeMonthlyCard(ParkingRechargeOrder order, String monthCardTimeArithmetic) {
 
 		JSONObject param = new JSONObject();
 		String plateNumber = order.getPlateNumber();
@@ -264,7 +271,12 @@ public abstract class KetuoParkingVendorHandler extends DefaultParkingVendorHand
 		SimpleDateFormat sdf1 = new SimpleDateFormat("yyyy-MM-dd HH:mm:ss");
 
 		Timestamp tempStart = Utils.addSecond(expireTime, 1);
-		Timestamp tempEnd = Utils.getTimestampByAddNatureMonth(expireTime, order.getMonthCount().intValue());
+		Timestamp tempEnd = null;
+		if(ADD_DISTANCE_MONTH.equals(monthCardTimeArithmetic)) {
+			tempEnd = Utils.getTimestampByAddNatureMonth(expireTime, order.getMonthCount().intValue());
+		}else{
+			tempEnd = Utils.getTimestampByAddDistanceMonth(expireTime,order.getMonthCount().intValue());
+		}
 		String validStart = sdf1.format(tempStart);
 		String validEnd = sdf1.format(tempEnd);
 
