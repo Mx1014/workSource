@@ -10,6 +10,7 @@ import com.everhomes.point.processor.GeneralPointEventProcessor;
 import com.everhomes.util.StringHelper;
 import org.springframework.stereotype.Component;
 
+import java.sql.Timestamp;
 import java.time.LocalDate;
 import java.time.LocalDateTime;
 import java.time.LocalTime;
@@ -49,7 +50,7 @@ public class BizOrderPayComplatePointEventProcessor extends GeneralPointEventPro
                 LocalDateTime endTime = dateTime.minusDays(i - 1);
 
                 Integer count = pointLogProvider.countPointLog(
-                        namespaceId, pointSystem.getId(), targetUid, BIZ_CONSUME_RULE_ID, toTimestamp(startTime), toTimestamp(endTime));
+                        namespaceId, pointSystem.getId(), targetUid, BIZ_CONSUME_RULE_ID, Timestamp.valueOf(startTime), Timestamp.valueOf(endTime));
                 if (count == 0) {
                     success = false;
                     break;

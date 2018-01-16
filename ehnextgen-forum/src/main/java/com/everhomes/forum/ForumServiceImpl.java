@@ -461,6 +461,12 @@ public class ForumServiceImpl implements ForumService {
 			setActivitySchedule(post.getEmbeddedId());
 		}
 
+		//公告模块要
+		if(ForumModuleType.fromCode(cmd.getModuleType()) == ForumModuleType.ANNOUNCEMENT){
+
+        }
+
+
         PostDTO postDto = ConvertHelper.convert(post, PostDTO.class);
 
         long endTime = System.currentTimeMillis();
@@ -1298,6 +1304,22 @@ public class ForumServiceImpl implements ForumService {
             if(null != cond){
             	query.addConditions(cond);
             }
+
+            Timestamp timestemp = new Timestamp(System.currentTimeMillis());
+            if(TopicPublishStatus.fromCode(cmd.getPublishStatus()) == TopicPublishStatus.UNPUBLISHED){
+                query.addConditions(Tables.EH_FORUM_POSTS.START_TIME.gt(timestemp));
+            }
+
+            if(TopicPublishStatus.fromCode(cmd.getPublishStatus()) == TopicPublishStatus.PUBLISHED){
+                query.addConditions(Tables.EH_FORUM_POSTS.START_TIME.lt(timestemp));
+                query.addConditions(Tables.EH_FORUM_POSTS.END_TIME.gt(timestemp));
+            }
+
+            if(TopicPublishStatus.fromCode(cmd.getPublishStatus()) == TopicPublishStatus.EXPIRED){
+                query.addConditions(Tables.EH_FORUM_POSTS.END_TIME.lt(timestemp));
+            }
+
+
             return query;
         });
         this.forumProvider.populatePostAttachments(posts);
@@ -6899,4 +6921,13 @@ public class ForumServiceImpl implements ForumService {
         res.setFlag(TrueOrFalseFlag.FALSE.getCode());
         return res;
     }
+
+    private void scheduleAnnouncement(Post post){
+
+
+    }
+
+
+
+
 }

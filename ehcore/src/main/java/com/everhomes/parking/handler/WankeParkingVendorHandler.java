@@ -7,6 +7,7 @@ import java.sql.Timestamp;
 import java.util.ArrayList;
 import java.util.Date;
 import java.util.List;
+import java.util.Map;
 import java.util.stream.Collectors;
 
 import com.everhomes.parking.*;
@@ -278,7 +279,7 @@ public class WankeParkingVendorHandler extends DefaultParkingVendorHandler {
 
 		String url = configProvider.getValue("parking.wanke.url", "");
 
-		String json = Utils.post(url + type, param, null);
+		String json = Utils.post(url + type, param, (Map<String,String>)null);
 
 		return json;
 	}

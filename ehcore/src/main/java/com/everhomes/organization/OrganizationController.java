@@ -23,6 +23,7 @@ import com.everhomes.search.OrganizationSearcher;
 import com.everhomes.user.User;
 import com.everhomes.user.UserContext;
 import com.everhomes.user.admin.SystemUserPrivilegeMgr;
+import com.everhomes.util.FrequencyControl;
 import com.everhomes.util.RequireAuthentication;
 import com.everhomes.util.RuntimeErrorException;
 import org.slf4j.Logger;
@@ -808,6 +809,7 @@ public class OrganizationController extends ControllerBase {
      * <b>URL: /org/applyForEnterpriseContact</b>
      * <p>申请加入企业</p>
      */
+    @FrequencyControl(count = 1 , key={"#cmd.organizationId","#cmd.targetId","cmd.contactToken", "cmd.contactName"})
     @RequestMapping("applyForEnterpriseContact")
     @RestReturn(value = OrganizationDTO.class)
     public RestResponse applyForEnterpriseContact(@Valid CreateOrganizationMemberCommand cmd) {
