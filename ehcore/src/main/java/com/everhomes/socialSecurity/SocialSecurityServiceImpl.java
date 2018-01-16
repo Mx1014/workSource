@@ -1795,7 +1795,7 @@ public class SocialSecurityServiceImpl implements SocialSecurityService {
         report.setDetailId(detail.getId());
         report.setUserId(detail.getTargetId());
         report.setUserName(detail.getContactName());
-        report.setEntryDate(detail.getEndTime());
+        report.setEntryDate(detail.getCheckInTime());
         report.setDeptName(detail.getDepartment());
         List<SocialSecuritySetting> settings = socialSecuritySettingProvider.listSocialSecuritySetting(detail.getId());
         if (null != settings) {
