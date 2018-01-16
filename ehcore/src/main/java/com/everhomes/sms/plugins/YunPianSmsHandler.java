@@ -53,7 +53,6 @@ public class YunPianSmsHandler extends BaseSmsHandler {
         return SmsChannelBuilder.create(true)
                 .setUrl(server)
                 .setBodyMap(params)
-                .setMethod(SmsChannel.HttpMethod.POST)
                 .send();
     }
 

@@ -72,7 +72,7 @@ public class LianXinTongSmsHandler implements SmsHandler, ApplicationListener<Co
         return SmsChannelBuilder.create(true)
                 .setUrl(server)
                 .setBodyStr(StringHelper.toJsonString(message))
-                .setMethod(SmsChannel.HttpMethod.POST)
+                .setMethod(SmsChannelBuilder.HttpMethod.POST)
                 .send();
     }
 

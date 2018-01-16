@@ -76,7 +76,6 @@ public class YouXunTongSmsHandler extends BaseSmsHandler {
         return SmsChannelBuilder.create(false)
                 .setUrl(server)
                 .setBodyMap(params)
-                .setMethod(SmsChannel.HttpMethod.POST)
                 .send();
     }
 

@@ -117,7 +117,6 @@ public class YunZhiXunSmsHandler implements SmsHandler, ApplicationListener<Cont
         return SmsChannelBuilder.create(true)
                 .setUrl(uri)
                 .setBodyStr(entityJsonStr)
-                .setMethod(SmsChannel.HttpMethod.POST)
                 .setHeaders(headers)
                 .send();
     }
