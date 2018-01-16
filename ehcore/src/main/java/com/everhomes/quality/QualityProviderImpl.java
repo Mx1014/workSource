@@ -298,7 +298,8 @@ public class QualityProviderImpl implements QualityProvider {
 	}
 
 	@Override
-	public List<QualityInspectionSamples> listActiveQualityInspectionSamples(ListingLocator locator, int count, String ownerType, Long ownerId, List<Long> sampleIds, Long communityId) {
+	public List<QualityInspectionSamples> listActiveQualityInspectionSamples(ListingLocator locator, int count, String ownerType,
+																			 Long ownerId, List<Long> sampleIds, Long communityId,Timestamp lastUpdateSyncTime) {
 		assert(locator.getEntityId() != 0);
 		Timestamp now = new Timestamp(System.currentTimeMillis());
 		DSLContext context = this.dbProvider.getDslContext(AccessSpec.readOnly());
@@ -325,6 +326,10 @@ public class QualityProviderImpl implements QualityProvider {
 		query.addConditions(Tables.EH_QUALITY_INSPECTION_SAMPLES.END_TIME.ge(now));
 		query.addJoin(Tables.EH_QUALITY_INSPECTION_SAMPLE_COMMUNITY_MAP, Tables.EH_QUALITY_INSPECTION_SAMPLE_COMMUNITY_MAP.SAMPLE_ID.eq(Tables.EH_QUALITY_INSPECTION_SAMPLES.ID));
 		query.addConditions(Tables.EH_QUALITY_INSPECTION_SAMPLE_COMMUNITY_MAP.COMMUNITY_ID.eq(communityId));
+		if(lastUpdateSyncTime!=null){
+			query.addConditions(Tables.EH_QUALITY_INSPECTION_SAMPLES.CREATE_TIME.gt(lastUpdateSyncTime)
+					.or(Tables.EH_QUALITY_INSPECTION_SAMPLES.DELETE_TIME.gt(lastUpdateSyncTime)));
+		}
 		query.addOrderBy(Tables.EH_QUALITY_INSPECTION_SAMPLES.ID.desc());
 		query.addLimit(count);
 
@@ -2796,5 +2801,29 @@ public class QualityProviderImpl implements QualityProvider {
 		});
 
 		return result;
+	}
+
+	@Override
+	public List<QualityInspectionSpecifications> listSpecifitionByParentIds(List<Long> parentIds) {
+		DSLContext context = this.dbProvider.getDslContext(AccessSpec.readOnly());
+		return context.selectFrom(Tables.EH_QUALITY_INSPECTION_SPECIFICATIONS)
+				.where(Tables.EH_QUALITY_INSPECTION_SPECIFICATIONS.NAMESPACE_ID.eq(UserContext.getCurrentNamespaceId()))
+				.and(Tables.EH_QUALITY_INSPECTION_SPECIFICATIONS.PARENT_ID.in(parentIds))
+				.and(Tables.EH_QUALITY_INSPECTION_SPECIFICATIONS.STATUS.eq(QualityStandardStatus.ACTIVE.getCode()))
+				.fetchInto(QualityInspectionSpecifications.class);
+	}
+
+	@Override
+	public List<Long> listDeletedSpecifications(Long communityId, Long ownerId, String ownerType, Timestamp lastUpdateSyncTime) {
+		DSLContext context = this.dbProvider.getDslContext(AccessSpec.readOnly());
+		context.selectFrom(Tables.EH_QUALITY_INSPECTION_SPECIFICATIONS)
+				.where(Tables.EH_QUALITY_INSPECTION_SPECIFICATIONS.NAMESPACE_ID.eq(UserContext.getCurrentNamespaceId()))
+				.and(Tables.EH_QUALITY_INSPECTION_SPECIFICATIONS.SCOPE_CODE.eq(SpecificationScopeCode.COMMUNITY.getCode()))
+				.and(Tables.EH_QUALITY_INSPECTION_SPECIFICATIONS.SCOPE_ID.eq(communityId))
+				.and(Tables.EH_QUALITY_INSPECTION_SPECIFICATIONS.OWNER_ID.eq(ownerId))
+				.and(Tables.EH_QUALITY_INSPECTION_SPECIFICATIONS.OWNER_TYPE.eq(ownerType))
+				.and(Tables.EH_QUALITY_INSPECTION_SPECIFICATIONS.STATUS.eq(QualityStandardStatus.INACTIVE.getCode()))
+				.fetchInto(Long.class);
+		return null;
 	}
 }

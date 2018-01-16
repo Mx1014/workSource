@@ -76,4 +76,6 @@ public interface QualityService {
 	HttpServletResponse exportSampleTaskCommunityScores(CountSampleTaskCommunityScoresCommand cmd, HttpServletResponse httpResponse);
 
     QualityOfflineTaskDetailsResponse getOfflineTaskDetail(ListQualityInspectionTasksCommand cmd);
+
+    OfflineSampleQualityInspectionResponse getOfflineSampleQualityInspection(ListSampleQualityInspectionCommand cmd);
 }

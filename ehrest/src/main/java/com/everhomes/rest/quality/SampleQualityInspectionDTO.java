@@ -9,15 +9,17 @@ import java.util.List;
 
 /**
  * <ul>
- *     <li>id: id</li>
- *     <li>ownerId: 例行检查所属owner id</li>
- *     <li>ownerType: 例行检查所属owner类型例如PM</li>
- *     <li>name: 检查名称</li>
- *     <li>startTime: 开始时间</li>
- *     <li>endTime: 结束时间</li>
- *     <li>creatorName: 创建人姓名</li>
- *     <li>sampleCommunities: 关联小区列表 参考{@link com.everhomes.rest.quality.SampleCommunity}</li>
- *     <li>executeGroupAndPositionList:执行组部门岗位id列表 参考{@link com.everhomes.rest.quality.ExecuteGroupAndPosition}</li>
+ * <li>id: id</li>
+ * <li>ownerId: 例行检查所属owner id</li>
+ * <li>ownerType: 例行检查所属owner类型例如PM</li>
+ * <li>name: 检查名称</li>
+ * <li>startTime: 开始时间</li>
+ * <li>endTime: 结束时间</li>
+ * <li>creatorName: 创建人姓名</li>
+ * <li>sampleCommunities: 关联小区列表 参考{@link com.everhomes.rest.quality.SampleCommunity}</li>
+ * <li>executeGroupAndPositionList:执行组部门岗位id列表 参考{@link com.everhomes.rest.quality.ExecuteGroupAndPosition}</li>
+ * <li>lastSyncTime:上次同步时间</li>
+ * <li>createTime:创建时间</li>
  * </ul>
  * Created by ying.xiong on 2017/6/1.
  */
@@ -42,6 +44,10 @@ public class SampleQualityInspectionDTO {
 
     @ItemType(SampleGroupDTO.class)
     private List<SampleGroupDTO> sampleGroupDTOs;
+
+    private String lastSyncTime;
+
+    private Timestamp createTime;
 
     public Long getId() {
         return id;
@@ -113,6 +119,22 @@ public class SampleQualityInspectionDTO {
 
     public Timestamp getStartTime() {
         return startTime;
+    }
+
+    public String getLastSyncTime() {
+        return lastSyncTime;
+    }
+
+    public void setLastSyncTime(String lastSyncTime) {
+        this.lastSyncTime = lastSyncTime;
+    }
+
+    public Timestamp getCreateTime() {
+        return createTime;
+    }
+
+    public void setCreateTime(Timestamp createTime) {
+        this.createTime = createTime;
     }
 
     @Override

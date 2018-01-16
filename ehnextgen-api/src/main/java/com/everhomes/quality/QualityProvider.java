@@ -142,7 +142,7 @@ public interface QualityProvider {
 	QualityInspectionSampleGroupMap findQualityInspectionSampleGroupMapBySampleAndOrg(Long sampleId, Long organizationId, Long positionId);
 	List<QualityInspectionSampleGroupMap> listQualityInspectionSampleGroupMapByOrgAndPosition(List<ExecuteGroupAndPosition> groupIds);
 
-	List<QualityInspectionSamples> listActiveQualityInspectionSamples(ListingLocator locator, int count, String ownerType, Long ownerId, List<Long> sampleIds, Long communityId);
+	List<QualityInspectionSamples> listActiveQualityInspectionSamples(ListingLocator locator, int count, String ownerType, Long ownerId, List<Long> sampleIds, Long communityId,Timestamp lastUpdateSyncTime);
 
 	List<QualityInspectionSamples> listQualityInspectionSamples(CrossShardListingLocator locator, Integer pageSize);
 	List<QualityInspectionTasks> listQualityInspectionTasks(CrossShardListingLocator locator, Integer pageSize);
@@ -182,4 +182,8 @@ public interface QualityProvider {
 	List<QualityInspectionSpecifications> listAllCommunitiesChildrenSpecifications(String superiorPath, String ownerType, Long ownerId, Byte inspectionType);
 
     void deleteQualityModelCommunityMapByModelId(Long modelId , byte modelType);
+
+	List<QualityInspectionSpecifications>  listSpecifitionByParentIds(List<Long> parentIds);
+
+    List<Long> listDeletedSpecifications(Long communityId, Long ownerId, String ownerType, Timestamp lastUpdateSyncTime);
 }

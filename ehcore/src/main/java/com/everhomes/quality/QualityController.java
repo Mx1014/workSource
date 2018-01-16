@@ -42,6 +42,7 @@ import com.everhomes.rest.quality.ListSampleQualityInspectionCommand;
 import com.everhomes.rest.quality.ListSampleQualityInspectionResponse;
 import com.everhomes.rest.quality.ListSampleQualityInspectionTasksCommand;
 import com.everhomes.rest.quality.ListUserHistoryTasksCommand;
+import com.everhomes.rest.quality.OfflineSampleQualityInspectionResponse;
 import com.everhomes.rest.quality.QualityInspectionSpecificationDTO;
 import com.everhomes.rest.quality.QualityInspectionTaskDTO;
 import com.everhomes.rest.quality.QualityInspectionTaskRecordsDTO;
@@ -921,5 +922,19 @@ public class QualityController extends ControllerBase {
 		res.setErrorCode(ErrorCodes.SUCCESS);
 		res.setErrorDescription("OK");
 		return res;
+	}
+
+	/**
+	 * <b>URL: /quality/listSampleQualityInspection</b>
+	 * <p>列出品质核查绩效考核-app</p>
+	 */
+	@RequestMapping("getOfflineSampleQualityInspection")
+	@RestReturn(value = OfflineSampleQualityInspectionResponse.class)
+	public RestResponse getOfflineSampleQualityInspection(ListSampleQualityInspectionCommand cmd) {
+		OfflineSampleQualityInspectionResponse offlineSampleQualityInspection = qualityService.getOfflineSampleQualityInspection(cmd);
+		RestResponse response = new RestResponse(offlineSampleQualityInspection);
+		response.setErrorCode(ErrorCodes.SUCCESS);
+		response.setErrorDescription("OK");
+		return response;
 	}
 }

@@ -92,6 +92,7 @@ import com.everhomes.rest.quality.ListSampleQualityInspectionResponse;
 import com.everhomes.rest.quality.ListSampleQualityInspectionTasksCommand;
 import com.everhomes.rest.quality.ListUserHistoryTasksCommand;
 import com.everhomes.rest.quality.ListUserQualityInspectionTaskTemplatesCommand;
+import com.everhomes.rest.quality.OfflineSampleQualityInspectionResponse;
 import com.everhomes.rest.quality.OwnerType;
 import com.everhomes.rest.quality.ProcessType;
 import com.everhomes.rest.quality.QualityCategoriesDTO;
@@ -3627,14 +3628,16 @@ public class QualityServiceImpl implements QualityService {
 
 		if(isAdmin) {
 			//管理员查询所有检查
-			samples = qualityProvider.listActiveQualityInspectionSamples(locator, pageSize+1, ownerType, ownerId, null, communityId);
+			samples = qualityProvider.
+					listActiveQualityInspectionSamples(locator, pageSize + 1, ownerType, ownerId, null, communityId, cmd.getLastUpdateSyncTime());
 		} else {
 			List<ExecuteGroupAndPosition> groupDtos = listUserRelateGroups();
 			List<QualityInspectionSampleGroupMap> maps = qualityProvider.listQualityInspectionSampleGroupMapByOrgAndPosition(groupDtos);
 			if(maps != null && maps.size() > 0) {
 				List<Long> sampleIds = maps.stream().map(QualityInspectionSampleGroupMap::getSampleId).collect(Collectors.toList());
 
-				samples = qualityProvider.listActiveQualityInspectionSamples(locator, pageSize+1, ownerType, ownerId, sampleIds, communityId);
+				samples = qualityProvider.
+						listActiveQualityInspectionSamples(locator, pageSize + 1, ownerType, ownerId, sampleIds, communityId, cmd.getLastUpdateSyncTime());
 			}
 		}
 
@@ -4620,7 +4623,9 @@ public class QualityServiceImpl implements QualityService {
 		QualityOfflineTaskDetailsResponse offlineTaskDetailsResponse = new QualityOfflineTaskDetailsResponse();
 
 		offlineTaskDetailsResponse.setTasks(tasksResponse.getTasks());
+		List<QualityInspectionSpecificationDTO> specifications = new ArrayList<>();
 		tasksResponse.getTasks().forEach((task) -> {
+			//处理任务
 			if (task.getExecutiveTime() == null) {
 				task.setLastSyncTime(task.getCreateTime().toLocalDateTime().format(dateSF));
 			} else {
@@ -4630,11 +4635,80 @@ public class QualityServiceImpl implements QualityService {
 					task.setLastSyncTime(task.getProcessTime().toLocalDateTime().format(dateSF));
 				}
 			}
+			//处理规范
+			QualityInspectionSpecifications specification = qualityProvider.getSpecificationById(task.getCategoryId());
+			if (specification != null)
+				specifications.add(ConvertHelper.convert(specification, QualityInspectionSpecificationDTO.class));
 		});
-		return null;
+		offlineTaskDetailsResponse.setSpecifications(specifications);
+		return offlineTaskDetailsResponse;
 	}
 	private Timestamp dateStrToTimestamp(String str) {
 		LocalDate localDate = LocalDate.parse(str,dateSF);
 		return  new Timestamp(Date.valueOf(localDate).getTime());
+	}
+
+	@Override
+	public OfflineSampleQualityInspectionResponse getOfflineSampleQualityInspection(ListSampleQualityInspectionCommand cmd) {
+		OfflineSampleQualityInspectionResponse offlineResponse = new OfflineSampleQualityInspectionResponse();
+		//处理时间戳
+		cmd.setLastUpdateSyncTime(dateStrToTimestamp(cmd.getLastSyncTime()));
+		ListSampleQualityInspectionResponse sampleQualityInspectionResponse = listSampleQualityInspection(cmd);
+		List<SampleQualityInspectionDTO> sampleQualityInspections = new ArrayList<>();
+		if (sampleQualityInspectionResponse != null){
+			sampleQualityInspections = sampleQualityInspectionResponse.getSampleQualityInspectionDTOList();
+		}
+		//绩效任务列表
+		sampleQualityInspections.stream().map((SampleQualityInspectionDTO s) -> {
+			s.setLastSyncTime(s.getCreateTime().toLocalDateTime().format(dateSF));
+			return null;
+		});
+
+		offlineResponse.setSampleQualityInspections(sampleQualityInspections);
+
+        //绩效选择类型及规范缓存
+		ListQualitySpecificationsCommand specificationsCommand = new ListQualitySpecificationsCommand();
+		specificationsCommand.setScopeCode(SpecificationScopeCode.COMMUNITY.getCode());
+		specificationsCommand.setScopeId(cmd.getCommunityId());
+		specificationsCommand.setOwnerId(cmd.getOwnerId());
+		specificationsCommand.setOwnerType(cmd.getOwnerType());
+		specificationsCommand.setInspectionType(SpecificationInspectionType.SPECIFICATION.getCode());
+		ListQualitySpecificationsResponse listQualitySpecificationsResponse = listQualitySpecifications(specificationsCommand);
+		if (listQualitySpecificationsResponse != null)
+		offlineResponse.setSpecifications(listQualitySpecificationsResponse.getSpecifications());
+
+		//拿到所有类型的下面的规范
+		List<Long> parentIds = new ArrayList<>();
+		if (listQualitySpecificationsResponse != null && listQualitySpecificationsResponse.getSpecifications() != null) {
+			listQualitySpecificationsResponse.getSpecifications().forEach((s) -> {
+				parentIds.add(s.getId());
+				if(s.getChildrens()!=null){
+					addIds(parentIds,s.getChildrens());
+				}
+			});
+		}
+		List<QualityInspectionSpecifications> qualityInspectionSpecifications = qualityProvider.listSpecifitionByParentIds(parentIds);
+		List<QualityInspectionSpecificationDTO> specificationsDetail = new ArrayList<>();
+		if (qualityInspectionSpecifications != null && qualityInspectionSpecifications.size() > 0) {
+			qualityInspectionSpecifications.stream().map((QualityInspectionSpecifications q) ->
+					specificationsDetail.add(ConvertHelper.convert(q, QualityInspectionSpecificationDTO.class))
+			);
+		}
+		offlineResponse.setSpecificationsDetail(specificationsDetail);
+
+		//需要单独返回删除的id列表
+		List<Long> deletedSpecifications =
+				qualityProvider.listDeletedSpecifications(cmd.getCommunityId(), cmd.getOwnerId(), cmd.getOwnerType(), cmd.getLastUpdateSyncTime());
+
+		return offlineResponse;
+	}
+
+	private void addIds(List<Long> parentIds, List<QualityInspectionSpecificationDTO> specifications) {
+		specifications.forEach((s) -> {
+			parentIds.add(s.getId());
+			if (s.getChildrens() != null && s.getChildrens().size() > 0) {
+				addIds(parentIds, s.getChildrens());
+			}
+		});
 	}
 }
