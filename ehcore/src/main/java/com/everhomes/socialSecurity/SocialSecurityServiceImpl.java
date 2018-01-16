@@ -2545,6 +2545,7 @@ public class SocialSecurityServiceImpl implements SocialSecurityService {
                     }
                     sb.append(InOutLogType.fromCode(logType).getDescribe());
                 }
+                dto.setLogs(sb.toString());
                 history.add(dto);
             }
         }
