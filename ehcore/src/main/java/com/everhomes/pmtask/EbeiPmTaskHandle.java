@@ -454,6 +454,8 @@ public class EbeiPmTaskHandle extends DefaultPmTaskHandle{
             task.setRequestorPhone(requestorPhone);
             task.setOrganizationName(cmd.getOrganizationName());
             task.setIfUseFeelist((byte)0);
+            task.setReferType(cmd.getReferType());
+            task.setReferId(cmd.getReferId());
             //代发，设置创建者为被代发的人（如果是注册用户）userId
             if (null != cmd.getOrganizationId()) {
                 if (null!=userId)

@@ -9,7 +9,6 @@ import java.util.List;
 import java.util.Map;
 import java.util.Set;
 
-
 public interface EquipmentProvider {
 	
 	void creatEquipmentStandard(EquipmentInspectionStandards standard);
@@ -44,7 +43,7 @@ public interface EquipmentProvider {
 	void updateEquipmentTask(EquipmentInspectionTasks task);
 	
 	void createEquipmentInspectionTasksLogs(EquipmentInspectionTasksLogs log);
-	List<EquipmentInspectionTasksLogs> listLogsByTaskId(ListingLocator locator, int count, Long taskId, List<Byte> processType);
+	List<EquipmentInspectionTasksLogs> listLogsByTaskId(ListingLocator locator, int count, Long taskId, List<Byte> processType,Long equipmentId);
 	void createEquipmentInspectionTasksAttachment(EquipmentInspectionTasksAttachments attachment);
 	List<EquipmentInspectionTasksAttachments> listTaskAttachmentsByLogId(Long logId);
 	
@@ -121,15 +120,17 @@ public interface EquipmentProvider {
 	List<Long> listEquipmentInspectionStandardGroupMapByGroup(List<Long> groupIds, Byte groupType);
 	List<EquipmentInspectionStandardGroupMap> listEquipmentInspectionStandardGroupMapByGroupAndPosition(List<ExecuteGroupAndPosition> reviewGroups, Byte groupType );
 	List<EquipmentInspectionStandardGroupMap> listEquipmentInspectionStandardGroupMapByStandardIdAndGroupType(Long standardId, Byte groupType);
-	void populateStandardsGroups(final List<EquipmentInspectionStandards> standards);
-	void populateStandardGroups(EquipmentInspectionStandards standard);
+//	void populateStandardsGroups(final List<EquipmentInspectionStandards> standards);
+//	void populateStandardGroups(EquipmentInspectionStandards standard);
+	void populatePlansGroups(final List<EquipmentInspectionPlans> plans);
+	void populatePlanGroups(EquipmentInspectionPlans plan);
 
 	List<EquipmentInspectionTasks> listTodayEquipmentInspectionTasks(Long startTime, Long endTime, Byte groupType);
 	EquipmentInspectionTasks findLastestEquipmentInspectionTask(Long startTime);
 
 
 	List<EquipmentInspectionTasks> listEquipmentInspectionTasksUseCache(List<Byte> taskStatus, Long inspectionCategoryId,
-		List<String> targetType, List<Long> targetId, List<Long> executeStandardIds, List<Long> reviewStandardIds, Integer offset, Integer pageSize, String cacheKey, Byte adminFlag);
+		List<String> targetType, List<Long> targetId, List<Long> executeStandardIds, List<Long> reviewStandardIds, Integer offset, Integer pageSize, String cacheKey, Byte adminFlag,Timestamp lastSyncTime);
 
 
 	Map<Long, EquipmentInspectionEquipments> listEquipmentsById(Set<Long> ids);
@@ -137,8 +138,8 @@ public interface EquipmentProvider {
 
 	List<EquipmentInspectionTasks> listTaskByIds(List<Long> ids);
 
-	TasksStatData statDaysEquipmentTasks(Long targetId, String targetType, Long inspectionCategoryId, Timestamp startTime, Timestamp endTime);
-	ReviewedTaskStat statDaysReviewedTasks(Long communityId, Long inspectionCategoryId, Timestamp startTime, Timestamp endTime);
+	TasksStatData statDaysEquipmentTasks(Long targetId, String targetType, Long inspectionCategoryId, Timestamp startTime, Timestamp endTime,Integer namespaceId);
+	ReviewedTaskStat statDaysReviewedTasks(Long communityId, Long inspectionCategoryId, Timestamp startTime, Timestamp endTime,Integer namespaceId);
 	List<ItemResultStat> statItemResults(Long equipmentId, Long standardId, Timestamp startTime, Timestamp endTime);
 
 	List<EquipmentInspectionTasks> listDelayTasks(Long inspectionCategoryId, List<Long> standards, String targetType, Long targetId, Integer offset, Integer pageSize, Byte adminFlag, Timestamp startTime);
@@ -155,4 +156,67 @@ public interface EquipmentProvider {
 
 	void deleteModelCommunityMapByModelId(Long modelId, byte modelType);
 
+
+	//add inactiveEquipmentStandardMap
+    void inActiveEquipmentStandardMap(EquipmentStandardMap equipmentStandardMap);
+
+    void populateEquipments(EquipmentInspectionStandards standard);
+
+	void populateItems(EquipmentInspectionStandards standard);
+
+    EquipmentInspectionPlans createEquipmentInspectionPlans(EquipmentInspectionPlans plan);
+
+    EquipmentInspectionPlans getEquipmmentInspectionPlanById(Long planId);
+
+	void createEquipmentPlanMaps(EquipmentInspectionEquipmentPlanMap map);
+
+	List<EquipmentInspectionEquipmentPlanMap> getEquipmentInspectionPlanMap(Long planId);
+
+    void deleteEquipmentInspectionPlanById(Long planId);
+
+	void deleteEquipmentInspectionPlanMap(Long id);
+
+	List<EquipmentInspectionPlans> ListEquipmentInspectionPlans(ListingLocator locator, int pageSize);
+
+    void updateEquipmentInspectionPlan(EquipmentInspectionPlans plan);
+
+    void deleteEquipmentInspectionStandardMapByStandardId(Long  deleteId);
+
+	void deleteEquipmentPlansMapByStandardId(Long standardId);
+
+    List<EquipmentInspectionPlans> listQualifiedEquipmentInspectionPlans();
+
+	List<EquipmentInspectionEquipmentPlanMap> listPlanMapByEquipmentId(Long equipmentId);
+
+	List<EquipmentInspectionTasks> listTaskByPlanMaps(List<EquipmentInspectionEquipmentPlanMap> planMaps, Timestamp startTime, Timestamp endTime, ListingLocator locator,int pageSize,List<Byte> taskStatus);
+
+    void deleteEquipmentInspectionPlanGroupMapByPlanId(Long id);
+
+	void createEquipmentInspectionPlanGroupMap(EquipmentInspectionPlanGroupMap map);
+
+    List<EquipmentInspectionPlanGroupMap> listEquipmentInspectionPlanGroupMapByPlanIdAndGroupType(Long planId, byte groupType);
+
+    List<EquipmentInspectionPlanGroupMap> listEquipmentInspectionPlanGroupMapByGroupAndPosition(List<ExecuteGroupAndPosition> groupDtos, List<ExecuteGroupAndPosition> reviewGroups);
+
+	List<EquipmentInspectionTasks> listTasksByPlanId(Long planId, CrossShardListingLocator locator, int pageSize);
+
+    List<EquipmentInspectionStandardGroupMap> listEquipmentInspectionStandardGroupMapByStandardId(Long id);
+
+    List<EquipmentStandardMap> listAllActiveEquipmentStandardMap();
+
+    void createReviewExpireDays(EquipmentInspectionReviewDate reviewDate);
+
+	void updateReviewExpireDays(EquipmentInspectionReviewDate reviewDate);
+
+	EquipmentInspectionReviewDate getEquipmentInspectiomExpireDaysById(Long id);
+
+    EquipmentInspectionReviewDate getEquipmentInspectiomExpireDays(Long scopeId, Byte scopeType);
+
+    void deleteEquipmentPlansMapByEquipmentId(Long equipmentId);
+
+    EquipmentInspectionTasksLogs getMaintanceLogByEquipmentId(Long referId);
+
+	void updateMaintanceInspectionLogsById(Long id);
+
+    void statInMaintanceTaskCount(TasksStatData stat,Timestamp startTime, Timestamp endTime,StatTodayEquipmentTasksCommand cmd);
 }

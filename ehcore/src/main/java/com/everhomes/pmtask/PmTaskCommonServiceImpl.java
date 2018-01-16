@@ -228,6 +228,8 @@ class PmTaskCommonServiceImpl {
         task.setRequestorPhone(requestorPhone);
         task.setOrganizationName(cmd.getOrganizationName());
         task.setIfUseFeelist((byte)0);
+        task.setReferType(cmd.getReferType());
+        task.setReferId(cmd.getReferId());
 
         //设置门牌地址,楼栋地址,服务地点
 

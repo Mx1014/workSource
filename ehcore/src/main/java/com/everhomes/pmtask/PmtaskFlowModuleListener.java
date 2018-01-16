@@ -131,14 +131,14 @@ public class PmtaskFlowModuleListener implements FlowModuleListener {
 		//当是下一步时，如果是end节点，直接return，如果是驳回，则不管下一个节点类型，都置任务状态为已取消
 		if(FlowStepType.APPROVE_STEP.getCode().equals(stepType)) {
 
-			if (currentNode instanceof FlowGraphNodeEnd)
+			if (currentNode instanceof FlowGraphNodeEnd) {
+				if (!StringUtils.isBlank(task.getReferType())){
+					PmTaskListener listener = PlatformContext.getComponent(PmTaskListener.PMTASK_PREFIX + task.getReferType());
+					listener.onTaskSuccess(task,task.getReferId());
+				}
 				return;
-//motify by st.zheng 修改为非每个节点都必须配参数值
-//			if(StringUtils.isBlank(params)) {
-//				LOGGER.error("Invalid flowNode param.");
-//				throw RuntimeErrorException.errorWith(ParkingErrorCode.SCOPE, ParkingErrorCode.ERROR_FLOW_NODE_PARAM,
-//						"Invalid flowNode param.");
-//			}
+			}
+
 			String nodeType = "";
 			if (!StringUtils.isBlank(params)) {
 				JSONObject paramJson = JSONObject.parseObject(params);
