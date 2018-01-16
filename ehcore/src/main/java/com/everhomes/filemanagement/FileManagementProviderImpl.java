@@ -5,6 +5,7 @@ import com.everhomes.db.DaoAction;
 import com.everhomes.db.DaoHelper;
 import com.everhomes.db.DbProvider;
 import com.everhomes.naming.NameMapper;
+import com.everhomes.rest.filemanagement.FileCatalogStatus;
 import com.everhomes.sequence.SequenceProvider;
 import com.everhomes.server.schema.Tables;
 import com.everhomes.server.schema.tables.daos.EhFileManagementCatalogScopesDao;
@@ -16,10 +17,7 @@ import com.everhomes.server.schema.tables.records.EhFileManagementCatalogsRecord
 import com.everhomes.user.UserContext;
 import com.everhomes.util.ConvertHelper;
 import com.everhomes.util.DateHelper;
-import org.jooq.DSLContext;
-import org.jooq.DeleteQuery;
-import org.jooq.SelectQuery;
-import org.jooq.UpdateQuery;
+import org.jooq.*;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
 
@@ -78,6 +76,7 @@ public class FileManagementProviderImpl implements FileManagementProvider {
         query.addConditions(Tables.EH_FILE_MANAGEMENT_CATALOGS.NAMESPACE_ID.eq(namespaceId));
         query.addConditions(Tables.EH_FILE_MANAGEMENT_CATALOGS.OWNER_ID.eq(ownerId));
         query.addConditions(Tables.EH_FILE_MANAGEMENT_CATALOGS.NAME.eq(name));
+        query.addConditions(Tables.EH_FILE_MANAGEMENT_CATALOGS.STATUS.eq(FileCatalogStatus.VALID.getCode()));
 
         return query.fetchAnyInto(FileCatalog.class);
     }
@@ -90,6 +89,7 @@ public class FileManagementProviderImpl implements FileManagementProvider {
         SelectQuery<EhFileManagementCatalogsRecord> query = context.selectQuery(Tables.EH_FILE_MANAGEMENT_CATALOGS);
         query.addConditions(Tables.EH_FILE_MANAGEMENT_CATALOGS.NAMESPACE_ID.eq(namespaceId));
         query.addConditions(Tables.EH_FILE_MANAGEMENT_CATALOGS.OWNER_ID.eq(ownerId));
+        query.addConditions(Tables.EH_FILE_MANAGEMENT_CATALOGS.STATUS.eq(FileCatalogStatus.VALID.getCode()));
         if (keywords != null)
             query.addConditions(Tables.EH_FILE_MANAGEMENT_CATALOGS.NAME.like(keywords));
         if (pageAnchor != null)
@@ -98,6 +98,40 @@ public class FileManagementProviderImpl implements FileManagementProvider {
         query.addOrderBy(Tables.EH_FILE_MANAGEMENT_CATALOGS.ID.desc());
         query.fetch().map(r -> {
             results.add(ConvertHelper.convert(r, FileCatalog.class));
+            return null;
+        });
+        if (null != results && 0 != results.size()) {
+            return results;
+        }
+        return null;
+    }
+
+    @Override
+    public List<FileCatalog> listAvailableFileCatalogs(Integer namespaceId, Long ownerId, Long userId) {
+        List<FileCatalog> results = new ArrayList<>();
+
+        DSLContext context = dbProvider.getDslContext(AccessSpec.readOnly());
+        SelectQuery<Record> query = context.selectQuery();
+        query.addFrom(Tables.EH_FILE_MANAGEMENT_CATALOG_SCOPES);
+        query.addJoin(Tables.EH_FILE_MANAGEMENT_CATALOGS, JoinType.JOIN,
+                Tables.EH_FILE_MANAGEMENT_CATALOG_SCOPES.CATALOG_ID.eq(Tables.EH_FILE_MANAGEMENT_CATALOGS.ID));
+
+        query.addConditions(Tables.EH_FILE_MANAGEMENT_CATALOG_SCOPES.SOURCE_ID.eq(userId));
+        query.addConditions(Tables.EH_FILE_MANAGEMENT_CATALOGS.NAMESPACE_ID.eq(namespaceId));
+        query.addConditions(Tables.EH_FILE_MANAGEMENT_CATALOGS.OWNER_ID.eq(ownerId));
+        query.addConditions(Tables.EH_FILE_MANAGEMENT_CATALOGS.STATUS.eq(FileCatalogStatus.VALID.getCode()));
+        query.fetch().map(r -> {
+            FileCatalog catalog = new FileCatalog();
+            catalog.setId(r.getValue(Tables.EH_FILE_MANAGEMENT_CATALOGS.ID));
+            catalog.setNamespaceId(r.getValue(Tables.EH_FILE_MANAGEMENT_CATALOGS.NAMESPACE_ID));
+            catalog.setOwnerId(r.getValue(Tables.EH_FILE_MANAGEMENT_CATALOGS.OWNER_ID));
+            catalog.setOwnerType(r.getValue(Tables.EH_FILE_MANAGEMENT_CATALOGS.OWNER_TYPE));
+            catalog.setName(r.getValue(Tables.EH_FILE_MANAGEMENT_CATALOGS.NAME));
+            catalog.setCreatorUid(r.getValue(Tables.EH_FILE_MANAGEMENT_CATALOGS.CREATOR_UID));
+            catalog.setCreateTime(r.getValue(Tables.EH_FILE_MANAGEMENT_CATALOGS.CREATE_TIME));
+            catalog.setOperatorUid(r.getValue(Tables.EH_FILE_MANAGEMENT_CATALOGS.OPERATOR_UID));
+            catalog.setUpdateTime(r.getValue(Tables.EH_FILE_MANAGEMENT_CATALOGS.UPDATE_TIME));
+            results.add(catalog);
             return null;
         });
         if (null != results && 0 != results.size()) {

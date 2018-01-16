@@ -76,13 +76,13 @@ public class FileManagementController extends ControllerBase {
 
 
     /**
-     * <b>URL: /fileManagement/listAvailableFileContents</b>
+     * <b>URL: /fileManagement/listAvailableFileCatalogs</b>
      * <p>1-5.有效文件目录列表</p>
      */
-    @RequestMapping("listAvailableFileContents")
+    @RequestMapping("listAvailableFileCatalogs")
     @RestReturn(value = ListFileCatalogResponse.class)
-    public RestResponse listAvailableFileContents(ListFileCatalogsCommand cmd) {
-        ListFileCatalogResponse res = fileManagementService.listAvailableFileContents(cmd);
+    public RestResponse listAvailableFileCatalogs(ListFileCatalogsCommand cmd) {
+        ListFileCatalogResponse res = fileManagementService.listAvailableFileCatalogs(cmd);
         RestResponse response = new RestResponse(res);
         response.setErrorCode(ErrorCodes.SUCCESS);
         response.setErrorDescription("OK");

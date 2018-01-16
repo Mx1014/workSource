@@ -1,6 +1,11 @@
 package com.everhomes.filemanagement;
 
+import com.everhomes.module.ServiceModuleService;
+import com.everhomes.portal.PortalService;
 import com.everhomes.rest.filemanagement.*;
+import com.everhomes.rest.module.CheckModuleManageCommand;
+import com.everhomes.rest.portal.ListServiceModuleAppsCommand;
+import com.everhomes.rest.portal.ListServiceModuleAppsResponse;
 import com.everhomes.user.User;
 import com.everhomes.user.UserContext;
 import com.everhomes.util.ConvertHelper;
@@ -16,6 +21,12 @@ public class FileManagementServiceImpl implements  FileManagementService{
 
     @Autowired
     private FileManagementProvider fileManagementProvider;
+
+    @Autowired
+    private ServiceModuleService serviceModuleService;
+
+    @Autowired
+    private PortalService portalService;
 
     @Override
     public FileCatalogDTO addFileCatalog(AddFileCatalogCommand cmd) {
@@ -82,22 +93,68 @@ public class FileManagementServiceImpl implements  FileManagementService{
                 results.remove(results.size() - 1);
                 nextPageAnchor = results.get(results.size() - 1).getId();
             }
-
-            results.forEach(r -> {
-                FileCatalogDTO dto = new FileCatalogDTO();
-                dto.setId(r.getId());
-                dto.setName(r.getName());
-                dto.setCreateTime(r.getCreateTime());
-            });
+            catalogs = convertToCatalogDTO(results);
         }
         response.setCatalogs(catalogs);
         response.setNextPageAnchor(nextPageAnchor);
         return response;
     }
 
+    private List<FileCatalogDTO> convertToCatalogDTO(List<FileCatalog> results){
+        List<FileCatalogDTO> catalogs = new ArrayList<>();
+        results.forEach(r -> {
+            FileCatalogDTO dto = new FileCatalogDTO();
+            dto.setId(r.getId());
+            dto.setName(r.getName());
+            dto.setCreateTime(r.getCreateTime());
+            catalogs.add(dto);
+        });
+        return catalogs;
+    }
+
     @Override
-    public ListFileCatalogResponse listAvailableFileContents(ListFileCatalogsCommand cmd) {
-        return null;
+    public ListFileCatalogResponse listAvailableFileCatalogs(ListFileCatalogsCommand cmd) {
+        ListFileCatalogResponse response = new ListFileCatalogResponse();
+        List<FileCatalogDTO> catalogs = new ArrayList<>();
+        User user = UserContext.current().getUser();
+        //  1.the user is the administrator
+        if(checkFileManagementAdmin(cmd.getOwnerId(), cmd.getOwnerType(), user.getId())){
+            cmd.setPageSize(Integer.MAX_VALUE -1);
+            response = listFileCatalogs(cmd);
+        }else{
+            //  2.normal user
+            List<FileCatalog> results = fileManagementProvider.listAvailableFileCatalogs(user.getNamespaceId(), cmd.getOwnerId(), user.getId());
+            if(results != null && results.size() > 0){
+                catalogs = convertToCatalogDTO(results);
+                response.setCatalogs(catalogs);
+            }
+        }
+        return response;
+    }
+
+    private boolean checkFileManagementAdmin(Long ownerId, String ownerType, Long userId){
+        ListServiceModuleAppsCommand appCommand = new ListServiceModuleAppsCommand();
+        Byte actionType = 69;
+        appCommand.setActionType(actionType);
+        appCommand.setModuleId(55000L);
+        appCommand.setNamespaceId(UserContext.getCurrentNamespaceId());
+        ListServiceModuleAppsResponse apps = portalService.listServiceModuleAppsWithConditon(appCommand);
+        Long appId = null;
+        if(null != apps && apps.getServiceModuleApps().size() > 0){
+            appId = apps.getServiceModuleApps().get(0).getId();
+        }
+        CheckModuleManageCommand moduleCommand = new CheckModuleManageCommand();
+        moduleCommand.setAppId(appId);
+        moduleCommand.setModuleId(55000L);
+        moduleCommand.setOwnerId(ownerId);
+        moduleCommand.setOwnerType(ownerType);
+        moduleCommand.setOrganizationId(ownerId);
+        moduleCommand.setUserId(userId);
+        Byte result = serviceModuleService.checkModuleManage(moduleCommand);
+        if(result == 1)
+            return true;
+        else
+            return false;
     }
 
     @Override

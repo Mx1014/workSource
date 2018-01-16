@@ -14,6 +14,8 @@ public interface FileManagementProvider {
 
     List<FileCatalog> listFileCatalogs(Integer namespaceId, Long ownerId, Long pageAnchor, Integer pageSize, String keywords);
 
+    List<FileCatalog> listAvailableFileCatalogs(Integer namespaceId, Long ownerId, Long userId);
+
     void createFileCatalogScope(FileCatalogScope scope);
 
     void deleteFileCatalogScopeByUserIds(Long catalogId, List<Long> sourceIds);

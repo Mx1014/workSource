@@ -14,7 +14,7 @@ public interface FileManagementService {
 
     ListFileCatalogResponse listFileCatalogs(ListFileCatalogsCommand cmd);
 
-    ListFileCatalogResponse listAvailableFileContents(ListFileCatalogsCommand cmd);
+    ListFileCatalogResponse listAvailableFileCatalogs(ListFileCatalogsCommand cmd);
 
     SearchFileResponse searchFiles(SearchFileCommand cmd);
 
