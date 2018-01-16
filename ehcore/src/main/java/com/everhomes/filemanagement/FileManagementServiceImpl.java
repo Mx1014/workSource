@@ -57,7 +57,7 @@ public class FileManagementServiceImpl implements  FileManagementService{
     public void deleteFileCatalog(FileCatalogIdCommand cmd) {
         FileCatalog catalog = fileManagementProvider.findFileCatalogById(cmd.getCatalogId());
         if(catalog!=null){
-            catalog.setStatus(FileCatalogStatus.INVALID.getCode());
+            catalog.setStatus(FileManagementStatus.INVALID.getCode());
             fileManagementProvider.updateFileCatalog(catalog);
         }
     }
@@ -231,12 +231,41 @@ public class FileManagementServiceImpl implements  FileManagementService{
 
     @Override
     public FileContentDTO addFileContent(AddFileContentCommand cmd) {
-        return null;
+        FileContentDTO dto = new FileContentDTO();
+        FileCatalog catalog = fileManagementProvider.findFileCatalogById(cmd.getCatalogId());
+        if(catalog == null)
+            return dto;
+
+        //  1.whether the name has been used
+        FileContent content = fileManagementProvider.findFileContentByName(catalog.getNamespaceId(),catalog.getOwnerId(),cmd.getContentName());
+        if(content != null){
+            throw RuntimeErrorException.errorWith(FileManagementErrorCode.SCOPE, FileManagementErrorCode.ERROR_NAME_ALREADY_EXISTS,
+                    "the name has been used.");
+        }else{
+            //  2.create it
+            content = new FileContent();
+            content.setNamespaceId(catalog.getNamespaceId());
+            content.setOwnerId(catalog.getOwnerId());
+            content.setOwnerType(catalog.getOwnerType());
+            content.setCatalogId(catalog.getId());
+            content.setName(cmd.getContentName());
+            if(cmd.getContentSize() != null)
+                content.setSize(cmd.getContentSize());
+            if(cmd.getParentId() != null)
+                content.setParentId(cmd.getParentId());
+            content.setContentType(cmd.getContentType());
+            if(cmd.getContentUri() != null)
+                content.setContentUri(cmd.getContentUri());
+            fileManagementProvider.createFileContent(content);
+            //  3.return back the dto
+            dto = ConvertHelper.convert(content, FileContentDTO.class);
+        }
+        return dto;
     }
 
     @Override
     public void deleteFileContents(DeleteFileContentCommand cmd) {
-
+        fileManagementProvider.updateFileContentStatusByIds(cmd.getContendIds(), FileManagementStatus.INVALID.getCode());
     }
 
     @Override

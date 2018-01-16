@@ -23,4 +23,14 @@ public interface FileManagementProvider {
     void updateFileCatalogScopeDownload(Long catalogId, List<Long> sourceIds, Byte permission);
 
     List<FileCatalogScope> listFileCatalogScopes(Integer namespaceId, Long catalogId, Long pageAnchor, Integer pageSize, String keywords);
+
+    void createFileContent(FileContent content);
+
+    void updateFileContentStatusByIds(List<Long> ids, Byte status);
+
+    void updateFileContent(FileContent content);
+
+    FileContent findFileContentById(Long id);
+
+    FileContent findFileContentByName(Integer namespaceId, Long ownerId, String name);
 }

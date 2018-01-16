@@ -6,12 +6,12 @@ package com.everhomes.rest.filemanagement;
  * <li>VALID((byte) 1): 有效的</li>
  * </ul>
  */
-public enum FileCatalogStatus {
+public enum FileManagementStatus {
     INVALID((byte) 0), VALID((byte) 1);
 
     private byte code;
 
-    private FileCatalogStatus(byte code) {
+    private FileManagementStatus(byte code) {
         this.code = code;
     }
 
@@ -19,10 +19,10 @@ public enum FileCatalogStatus {
         return this.code;
     }
 
-    public static FileCatalogStatus fromCode(Byte code) {
+    public static FileManagementStatus fromCode(Byte code) {
         if (code != null) {
-            FileCatalogStatus[] values = FileCatalogStatus.values();
-            for (FileCatalogStatus value : values) {
+            FileManagementStatus[] values = FileManagementStatus.values();
+            for (FileManagementStatus value : values) {
                 if (code.byteValue() == value.code)
                     return value;
             }
