@@ -68,14 +68,15 @@ public class YunZhiXunSmsHandler implements SmsHandler, ApplicationListener<Cont
     }
 
     private void initAccount() {
-        this.accountSid = configurationProvider.getValue(YZX_ACCOUNT_SID, "");
-        this.token = configurationProvider.getValue(YZX_TOKEN, "");
-        this.appId = configurationProvider.getValue(YZX_APP_ID, "");
-        //this.templateId = configurationProvider.getValue(YZX_TEMPLATE_ID, "9547");
-        this.version = configurationProvider.getValue(YZX_VERSION, "2014-06-30");
-        this.server = configurationProvider.getValue(YZX_SERVER, "api.ucpaas.com");
-        // this.ip = configurationProvider.getValue(YZX_SSL_IP, "0");
-        // this.port = configurationProvider.getValue(YZX_SSL_PORT, "0");
+        try {
+            this.accountSid = configurationProvider.getValue(YZX_ACCOUNT_SID, "");
+            this.token = configurationProvider.getValue(YZX_TOKEN, "");
+            this.appId = configurationProvider.getValue(YZX_APP_ID, "");
+            this.version = configurationProvider.getValue(YZX_VERSION, "2014-06-30");
+            this.server = configurationProvider.getValue(YZX_SERVER, "api.ucpaas.com");
+        } catch (Exception e) {
+            //
+        }
     }
 
     private static RuntimeErrorException errorWrap(String reason) {
@@ -232,7 +233,7 @@ public class YunZhiXunSmsHandler implements SmsHandler, ApplicationListener<Cont
             String log = "The yzx template id is empty, namespaceId=" + namespaceId + ", templateScope=" + templateScope
                     + ", templateId=" + templateId + ", templateLocale=" + templateLocale;
             LOGGER.error(log);
-            smsLogList.add(getSmsErrorLog(namespaceId, phoneNumbers[0], templateScope, templateId, templateLocale, "sms template id is empty"));
+            smsLogList.add(getSmsErrorLog(namespaceId, phoneNumbers[0], templateScope, templateId, templateLocale, "The yzx template id is empty."));
             return smsLogList;
         }
     }

@@ -4778,6 +4778,10 @@ public class GroupServiceImpl implements GroupService {
             event.setEventName(SystemEvent.GROUP_GROUP_DELETE.dft());
 
             event.addParam("group", StringHelper.toJsonString(group));
+            GroupMember member = groupProvider.findGroupMemberByMemberInfo(groupId, EhUsers.class.getSimpleName(), user.getId());
+            if (member != null) {
+                event.addParam("member", StringHelper.toJsonString(member));
+            }
         });
     }
 
@@ -5125,6 +5129,20 @@ public class GroupServiceImpl implements GroupService {
 				return null;
 			});
 		}
+
+        // 退出group事件
+        LocalEventBus.publish(event -> {
+            LocalEventContext context = new LocalEventContext();
+            context.setNamespaceId(group.getNamespaceId());
+            context.setUid(gm.getMemberId());
+            event.setContext(context);
+
+            event.setEntityType(EhGroupMembers.class.getSimpleName());
+            event.setEntityId(gm.getId());
+            event.setEventName(SystemEvent.GROUP_GROUP_LEAVE.dft());
+
+            event.addParam("group", StringHelper.toJsonString(group));
+        });
 	}
 
 	private void sendNotificationToOldCreator(GroupMember gm, User user) {
