@@ -202,7 +202,7 @@ public class QualityServiceImpl implements QualityService {
 
 	private static final Logger LOGGER = LoggerFactory.getLogger(QualityServiceImpl.class);
 
-	DateTimeFormatter dateSF = DateTimeFormatter.ofPattern("yyyy/MM/dd");
+	DateTimeFormatter dateSF = DateTimeFormatter.ofPattern("yyyy-MM-dd HH:mm:ss");
 
 	@Autowired
 	private QualityProvider qualityProvider;
