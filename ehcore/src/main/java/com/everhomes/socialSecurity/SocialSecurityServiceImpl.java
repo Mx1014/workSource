@@ -760,7 +760,9 @@ public class SocialSecurityServiceImpl implements SocialSecurityService {
         dbProvider.execute((TransactionStatus status) -> {
             OrganizationMemberDetails detail = organizationProvider.findOrganizationMemberDetailsByDetailId(cmd.getDetailId());
             //社保设置
-            if (NormalFlag.fromCode(cmd.getPayCurrentSocialSecurityFlag()) == NormalFlag.YES) {
+//            if (NormalFlag.fromCode(cmd.getPayCurrentSocialSecurityFlag()) == NormalFlag.YES) {
+            if (null != cmd.getSocialSecurityPayment()) {
+
 
                 // 查询设置的城市户籍档次的数据规则
                 List<SocialSecurityBase> bases = socialSecurityBaseProvider.listSocialSecurityBase(cmd.getSocialSecurityPayment().getCityId(),
@@ -778,7 +780,8 @@ public class SocialSecurityServiceImpl implements SocialSecurityService {
                 }
             }
             //公积金设置
-            if (NormalFlag.fromCode(cmd.getPayCurrentAccumulationFundFlag()) == NormalFlag.YES) {
+//            if (NormalFlag.fromCode(cmd.getPayCurrentAccumulationFundFlag()) == NormalFlag.YES) {
+            if (null != cmd.getAccumulationFundPayment()) {
                 // 查询设置的城市户籍档次的数据规则
                 List<SocialSecurityBase> bases = socialSecurityBaseProvider.listSocialSecurityBase(cmd.getAccumulationFundPayment().getCityId(), AccumOrSocial.ACCUM.getCode());
                 // 校验数据是否合法
