@@ -1896,17 +1896,53 @@ public class AddressServiceImpl implements AddressService, LocalBusSubscriber {
 				continue;
 			}
 			
-			if (StringUtils.isNotEmpty(data.getAreaSize())) {
+			if (StringUtils.isNotEmpty(data.getBuildArea())) {
 				try {
-					Double.parseDouble(data.getAreaSize());
+					Double.parseDouble(data.getBuildArea());
 				} catch (Exception e) {
 					log.setData(data);
-					log.setErrorLog("area size is not number");
-					log.setCode(AddressServiceErrorCode.ERROR_AREA_SIZE_NOT_NUMBER);
+					log.setErrorLog("build area is not number");
+					log.setCode(AddressServiceErrorCode.ERROR_BUILD_AREA_NOT_NUMBER);
 					errorLogs.add(log);
 					continue;
 				}
 			}
+
+            if (StringUtils.isNotEmpty(data.getChargeArea())) {
+                try {
+                    Double.parseDouble(data.getChargeArea());
+                } catch (Exception e) {
+                    log.setData(data);
+                    log.setErrorLog("charge area is not number");
+                    log.setCode(AddressServiceErrorCode.ERROR_CHARGE_AREA_NOT_NUMBER);
+                    errorLogs.add(log);
+                    continue;
+                }
+            }
+
+            if (StringUtils.isNotEmpty(data.getRentArea())) {
+                try {
+                    Double.parseDouble(data.getRentArea());
+                } catch (Exception e) {
+                    log.setData(data);
+                    log.setErrorLog("rent area is not number");
+                    log.setCode(AddressServiceErrorCode.ERROR_RENT_AREA_NOT_NUMBER);
+                    errorLogs.add(log);
+                    continue;
+                }
+            }
+
+            if (StringUtils.isNotEmpty(data.getSharedArea())) {
+                try {
+                    Double.parseDouble(data.getSharedArea());
+                } catch (Exception e) {
+                    log.setData(data);
+                    log.setErrorLog("share area is not number");
+                    log.setCode(AddressServiceErrorCode.ERROR_SHARE_AREA_NOT_NUMBER);
+                    errorLogs.add(log);
+                    continue;
+                }
+            }
 			
 			importApartment(community, data);
 		}
@@ -1934,9 +1970,15 @@ public class AddressServiceImpl implements AddressService, LocalBusSubscriber {
             }
         }
 
-        double areaSize = 0;
+        double buildArea = 0;
+        double chargeArea = 0;
+        double rentArea = 0;
+        double shareArea = 0;
         try {
-            areaSize = Double.parseDouble(data.getAreaSize());
+            buildArea = Double.parseDouble(data.getBuildArea());
+            chargeArea = Double.parseDouble(data.getChargeArea());
+            rentArea = Double.parseDouble(data.getRentArea());
+            shareArea = Double.parseDouble(data.getSharedArea());
         } catch (Exception e) {
         }
 
@@ -1950,7 +1992,10 @@ public class AddressServiceImpl implements AddressService, LocalBusSubscriber {
             address.setAreaName(community.getAreaName());
             address.setBuildingName(building.getName());
             address.setApartmentName(data.getApartmentName());
-            address.setAreaSize(areaSize);
+            address.setBuildArea(buildArea);
+            address.setSharedArea(shareArea);
+            address.setChargeArea(chargeArea);
+            address.setRentArea(rentArea);
             address.setAddress(building.getName() + "-" + data.getApartmentName());
             address.setNamespaceAddressType(data.getNamespaceAddressType());
             address.setNamespaceAddressToken(data.getNamespaceAddressToken());
@@ -1958,7 +2003,10 @@ public class AddressServiceImpl implements AddressService, LocalBusSubscriber {
             address.setNamespaceId(community.getNamespaceId());
         	addressProvider.createAddress(address);
 		}else {
-			address.setAreaSize(areaSize);
+            address.setBuildArea(buildArea);
+            address.setSharedArea(shareArea);
+            address.setChargeArea(chargeArea);
+            address.setRentArea(rentArea);
             address.setNamespaceAddressType(data.getNamespaceAddressType());
             address.setNamespaceAddressToken(data.getNamespaceAddressToken());
             address.setStatus(AddressAdminStatus.ACTIVE.getCode());
@@ -1972,16 +2020,21 @@ public class AddressServiceImpl implements AddressService, LocalBusSubscriber {
 	private List<ImportApartmentDataDTO> handleImportApartmentData(List resultList) {
 		List<ImportApartmentDataDTO> list = new ArrayList<>();
 		for(int i = 1; i < resultList.size(); i++) {
-			RowResult r = (RowResult) resultList.get(i);
+            RowResult r = (RowResult) resultList.get(i);
 			if (StringUtils.isNotBlank(r.getA()) || StringUtils.isNotBlank(r.getB()) || StringUtils.isNotBlank(r.getC()) || StringUtils.isNotBlank(r.getD())) {
 				ImportApartmentDataDTO data = new ImportApartmentDataDTO();
 				data.setBuildingName(trim(r.getA()));
 				data.setApartmentName(trim(r.getB()));
 				data.setStatus(trim(r.getC()));
-				data.setAreaSize(trim(r.getD()));
+
+                //产品变更模板
+                data.setBuildArea(trim(r.getD()));
+                data.setChargeArea(trim(r.getE()));
+                data.setSharedArea(trim(r.getF()));
+                data.setRentArea(trim(r.getG()));
                 //加上来源第三方和在第三方的唯一标识 没有则不填 by xiongying20170814
-                data.setNamespaceAddressType(trim(r.getE()));
-                data.setNamespaceAddressToken(trim(r.getF()));
+                data.setNamespaceAddressType(trim(r.getH()));
+                data.setNamespaceAddressToken(trim(r.getI()));
 				list.add(data);
 			}
 		}

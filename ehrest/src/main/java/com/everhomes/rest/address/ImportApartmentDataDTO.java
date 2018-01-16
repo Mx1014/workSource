@@ -7,7 +7,11 @@ public class ImportApartmentDataDTO {
 	private String buildingName;
 	private String apartmentName;
 	private String status;
-	private String areaSize;
+//	private String areaSize;
+	private String buildArea;
+	private String chargeArea;
+	private String sharedArea;
+	private String rentArea;
 	private String namespaceAddressType;
 	private String namespaceAddressToken;
 
@@ -51,12 +55,36 @@ public class ImportApartmentDataDTO {
 		this.status = status;
 	}
 
-	public String getAreaSize() {
-		return areaSize;
+	public String getBuildArea() {
+		return buildArea;
 	}
 
-	public void setAreaSize(String areaSize) {
-		this.areaSize = areaSize;
+	public void setBuildArea(String buildArea) {
+		this.buildArea = buildArea;
+	}
+
+	public String getChargeArea() {
+		return chargeArea;
+	}
+
+	public void setChargeArea(String chargeArea) {
+		this.chargeArea = chargeArea;
+	}
+
+	public String getRentArea() {
+		return rentArea;
+	}
+
+	public void setRentArea(String rentArea) {
+		this.rentArea = rentArea;
+	}
+
+	public String getSharedArea() {
+		return sharedArea;
+	}
+
+	public void setSharedArea(String sharedArea) {
+		this.sharedArea = sharedArea;
 	}
 
 	@Override

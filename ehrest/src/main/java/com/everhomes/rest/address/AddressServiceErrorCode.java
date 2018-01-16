@@ -15,6 +15,11 @@ public interface AddressServiceErrorCode {
 
     int ERROR_ADDRESS_HAS_CONTRACT = 20006;
 
+    int ERROR_BUILD_AREA_NOT_NUMBER = 20007;
+    int ERROR_SHARE_AREA_NOT_NUMBER = 20008;
+    int ERROR_CHARGE_AREA_NOT_NUMBER = 20009;
+    int ERROR_RENT_AREA_NOT_NUMBER = 20010;
+
 
     
 }
