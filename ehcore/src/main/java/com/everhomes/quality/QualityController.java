@@ -915,7 +915,7 @@ public class QualityController extends ControllerBase {
 	 * @return {QualityOfflineTaskDetailsResponse.class}
 	 */
 	@RequestMapping("getOfflineTaskDetail")
-	@RestReturn(value=CurrentUserInfoDTO.class)
+	@RestReturn(value=QualityOfflineTaskDetailsResponse.class)
 	public RestResponse getOfflineTaskDetail(ListQualityInspectionTasksCommand cmd) {
 		QualityOfflineTaskDetailsResponse offlineTaskDetail = qualityService.getOfflineTaskDetail(cmd);
 		RestResponse res = new RestResponse(offlineTaskDetail);
