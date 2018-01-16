@@ -1,6 +1,8 @@
 package com.everhomes.flow;
 
-public class FlowGraphLane {
+import java.io.Serializable;
+
+public class FlowGraphLane implements Serializable {
 
 	private FlowLane flowLane;
 

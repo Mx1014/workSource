@@ -21,7 +21,7 @@ public class ForumCommentCreatePointEventProcessor extends GeneralPointEventProc
     }
 
     @Override
-    protected String getEventName(LocalEvent localEvent, String subscriptionPath) {
+    protected String getEventName(LocalEvent localEvent) {
         Long appId = null;
 
         String embeddedAppId = localEvent.getStringParam("embeddedAppId");

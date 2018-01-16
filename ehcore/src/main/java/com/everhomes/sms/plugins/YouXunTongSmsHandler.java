@@ -151,7 +151,7 @@ public class YouXunTongSmsHandler implements SmsHandler, ApplicationListener<Con
                 smsLogList.addAll(buildSmsLogs(namespaceId, phonesPart, templateScope, templateId, templateLocale, sign.getText()+content, rspMessage));
             }
         } else {
-            SmsLog log = getSmsErrorLog(namespaceId, phoneNumbers[0], templateScope, templateId, templateLocale, "sms content is empty");
+            SmsLog log = getSmsErrorLog(namespaceId, phoneNumbers[0], templateScope, templateId, templateLocale, "The sms content is empty.");
             smsLogList.add(log);
             LOGGER.error("can not found sms content by YouXunTong handler, namespaceId = {}, templateId = {}", namespaceId, templateId);
         }
@@ -164,7 +164,9 @@ public class YouXunTongSmsHandler implements SmsHandler, ApplicationListener<Con
             this.password = configurationProvider.getValue(YXT_PASSWORD, "");
             this.server = configurationProvider.getValue(YXT_SERVER, "");
             this.token = configurationProvider.getValue(YXT_TOKEN, "");
-        } catch (Exception e) { }
+        } catch (Exception e) {
+            //
+        }
     }
 
     private SmsLog getSmsErrorLog(Integer namespaceId, String phoneNumber, String templateScope, int templateId, String templateLocale, String error) {

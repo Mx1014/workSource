@@ -6,6 +6,7 @@ import java.util.Map;
 import com.everhomes.listing.ListingQueryBuilderCallback;
 import com.everhomes.rest.flow.*;
 import com.everhomes.rest.user.UserInfo;
+import org.springframework.cache.annotation.Cacheable;
 
 public interface FlowService {
 	
@@ -214,7 +215,7 @@ public interface FlowService {
 	 */
 	FlowSubjectDTO postSubject(FlowPostSubjectCommand cmd);
 
-	/**
+    /**
 	 * 触发工作流按钮事件的响应
 	 * @param cmd
 	 * @return

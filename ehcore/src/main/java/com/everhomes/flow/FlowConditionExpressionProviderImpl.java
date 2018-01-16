@@ -63,9 +63,14 @@ public class FlowConditionExpressionProviderImpl implements FlowConditionExpress
     }
 
     @Override
-    public List<FlowConditionExpression> listFlowConditionExpression(Long conditionId) {
+    public List<FlowConditionExpression> listFlowConditionExpression(Long flowMainId, Integer flowVersion, Long conditionId) {
         com.everhomes.server.schema.tables.EhFlowConditionExpressions t = Tables.EH_FLOW_CONDITION_EXPRESSIONS;
-        return context().selectFrom(t).where(t.FLOW_CONDITION_ID.eq(conditionId)).fetchInto(FlowConditionExpression.class);
+        return context()
+                .selectFrom(t)
+                .where(t.FLOW_MAIN_ID.eq(flowMainId))
+                .and(t.FLOW_VERSION.eq(flowVersion))
+                .and(t.FLOW_CONDITION_ID.eq(conditionId))
+                .fetchInto(FlowConditionExpression.class);
     }
 
     @Override
@@ -81,11 +86,11 @@ public class FlowConditionExpressionProviderImpl implements FlowConditionExpress
     }
 
     @Override
-    public List<FlowConditionExpression> listFlowConditionExpressionByFlow(Long flowId, Integer flowVersion) {
+    public List<FlowConditionExpression> listFlowConditionExpressionByFlow(Long flowMainId, Integer flowVersion) {
         com.everhomes.server.schema.tables.EhFlowConditionExpressions t = Tables.EH_FLOW_CONDITION_EXPRESSIONS;
         return context()
                 .selectFrom(t)
-                .where(t.FLOW_MAIN_ID.eq(flowId))
+                .where(t.FLOW_MAIN_ID.eq(flowMainId))
                 .and(t.FLOW_VERSION.eq(flowVersion))
                 .fetchInto(FlowConditionExpression.class);
     }
