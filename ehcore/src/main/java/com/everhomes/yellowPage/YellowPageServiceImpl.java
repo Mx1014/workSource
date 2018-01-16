@@ -547,7 +547,9 @@ public class YellowPageServiceImpl implements YellowPageService {
 	                }
 	            }
 			}
-			setSkipRules(cmd.getSkipType(), category.getId());
+			if(cmd.getSkipType()!=null){
+				setSkipRules(cmd.getSkipType(), category.getId());
+			}
 			return null;
 		});
 	}
@@ -978,7 +980,9 @@ public class YellowPageServiceImpl implements YellowPageService {
 				sa.setPosterUri(cmd.getPosterUri());
 				this.yellowPageProvider.updateServiceAlliances(sa);
 			}
-			setSkipRules(cmd.getSkipType(),sa.getType());
+			if(cmd.getSkipType()!=null){
+				setSkipRules(cmd.getSkipType(),sa.getType());
+			}
 			return null;
 		});
 	}
