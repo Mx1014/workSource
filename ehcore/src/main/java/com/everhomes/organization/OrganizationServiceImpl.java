@@ -10890,6 +10890,14 @@ public class OrganizationServiceImpl implements OrganizationService {
         return organizations.stream().map(r -> ConvertHelper.convert(r, OrganizationDTO.class)).collect(Collectors.toList());
     }
 
+
+    @Override
+    public OrganizationDTO listPmOrganizationsByNamespaceId() {
+        List<Organization> organizations = organizationProvider.listOrganizations(OrganizationType.PM.getCode(), null,
+                0L, null, null);
+        return ConvertHelper.convert(organizations.get(0), OrganizationDTO.class);
+    }
+
     /**
      * 机构树状处理
      *

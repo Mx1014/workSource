@@ -42,9 +42,6 @@ public class SmsChannel {
 
     private static final Logger logger = LoggerFactory.getLogger(SmsChannel.class);
 
-    public enum HttpMethod { GET, POST, PATCH, PUT, DELETE;}
-
-    public static final Charset UTF_8 = Charset.forName("UTF-8");
     public static final String EMPTY = "";
 
     private RequestConfig requestConfig;
@@ -52,7 +49,7 @@ public class SmsChannel {
 
     private Map<String, String> headers;
     private String url;
-    private HttpMethod method;
+    private SmsChannelBuilder.HttpMethod method;
     private Map<String, Object> bodyMap;
     private String bodyStr;
 
@@ -63,8 +60,9 @@ public class SmsChannel {
         this.isSecure = isSecure;
         this.headers = new HashMap<>();
         this.bodyMap = new HashMap<>();
-        this.method = HttpMethod.POST;
-        this.charset = UTF_8;
+        this.method = SmsChannelBuilder.HttpMethod.POST;
+        this.charset = SmsChannelBuilder.UTF_8;
+        this.contentType = ContentType.APPLICATION_FORM_URLENCODED.withCharset(this.charset);
     }
 
     public RspMessage send() {
@@ -187,7 +185,7 @@ public class SmsChannel {
         return this;
     }
 
-    public SmsChannel setMethod(HttpMethod method) {
+    public SmsChannel setMethod(SmsChannelBuilder.HttpMethod method) {
         this.method = method;
         return this;
     }

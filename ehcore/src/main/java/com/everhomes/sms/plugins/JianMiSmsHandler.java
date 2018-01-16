@@ -2,6 +2,7 @@ package com.everhomes.sms.plugins;
 
 import com.everhomes.sms.*;
 import org.apache.commons.lang.StringUtils;
+import org.apache.http.entity.ContentType;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.stereotype.Component;
@@ -58,7 +59,8 @@ public class JianMiSmsHandler extends BaseSmsHandler {
 
         RspMessage message = SmsChannelBuilder.create(isSecure)
                 .setUrl(server)
-                .setMethod(SmsChannel.HttpMethod.POST)
+                .setMethod(SmsChannelBuilder.HttpMethod.POST)
+                .setContentType(ContentType.APPLICATION_FORM_URLENCODED.withCharset(SmsChannelBuilder.GBK))
                 .setBodyMap(params)
                 .setCharset(Charset.forName("GBK"))
                 .send();
