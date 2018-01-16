@@ -639,6 +639,20 @@ public class OrganizationController extends ControllerBase {
 		return res;
 	}
 
+    /**
+     * <b>URL: /org/listPmOrganizationsByNamespaceId</b>
+     * <p>查询 域空间的PM公司</p>
+     */
+    @RequestMapping("listPmOrganizationsByNamespaceId")
+    @RestReturn(value=OrganizationTreeDTO.class)
+    public RestResponse listPmOrganizationsByNamespaceId(){
+        //TODO:加权限校验
+        RestResponse res = new RestResponse(organizationService.listPmOrganizationsByNamespaceId());
+        res.setErrorCode(ErrorCodes.SUCCESS);
+        res.setErrorDescription("OK");
+        return res;
+    }
+
 
     /**
      * <b>URL: /org/setOrgTopicStatus</b>
