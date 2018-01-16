@@ -5342,6 +5342,8 @@ public class OrganizationProviderImpl implements OrganizationProvider {
     private Long getTopOrganizationId(Long organizationId) {
         Organization organization = findOrganizationById(organizationId);
         if (organization != null) {
+            if(organization.getParentId() == null )
+                return organizationId;
             String path = organization.getPath();
             String[] ogs = path.split("/");
             return Long.valueOf(ogs[1]);
