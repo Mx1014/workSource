@@ -2704,6 +2704,11 @@ public class AssetServiceImpl implements AssetService {
         return handler.showBillForClientV2(cmd);
     }
 
+    /**
+     *
+     * @modify 2018/1/16
+     *  @modifyPoint 1 make bill ordered by date desc
+     */
     @Override
     public List<ListAllBillsForClientDTO> listAllBillsForClient(ListAllBillsForClientCommand cmd) {
         //企业用户的话判断是否为企业管理员

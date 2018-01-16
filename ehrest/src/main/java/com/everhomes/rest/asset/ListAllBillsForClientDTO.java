@@ -21,8 +21,17 @@ public class ListAllBillsForClientDTO {
     private String amountReceivable;
     private String amountOwed;
     private Byte chargeStatus;
+    private String dateStr;
 
     private String billId;
+
+    public String getDateStr() {
+        return dateStr;
+    }
+
+    public void setDateStr(String dateStr) {
+        this.dateStr = dateStr;
+    }
 
     public String getBillId() {
         return billId;
@@ -79,4 +88,5 @@ public class ListAllBillsForClientDTO {
     public void setChargeStatus(Byte chargeStatus) {
         this.chargeStatus = chargeStatus;
     }
+
 }
