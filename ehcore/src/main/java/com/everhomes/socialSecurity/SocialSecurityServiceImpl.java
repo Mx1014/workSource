@@ -2501,7 +2501,12 @@ public class SocialSecurityServiceImpl implements SocialSecurityService {
 
     private SocialSecuritySummaryDTO processSocialSecuritySummaryDTO(SocialSecuritySummary r) {
         SocialSecuritySummaryDTO dto = ConvertHelper.convert(r, SocialSecuritySummaryDTO.class);
-
+        if (null != r.getCreateTime()) {
+            dto.setCreateTime(r.getCreateTime().getTime());
+        }
+        if (null != r.getFileTime()) {
+            dto.setFileTime(r.getFileTime().getTime());
+        }
         OrganizationMember detail = organizationProvider.findOrganizationMemberByOrgIdAndUId(r.getCreatorUid(), r.getOrganizationId());
         if (null != detail) {
             dto.setCreatorName(detail.getContactName());
