@@ -10,7 +10,6 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.stereotype.Component;
 
-import java.security.MessageDigest;
 import java.sql.Timestamp;
 import java.util.ArrayList;
 import java.util.HashMap;
@@ -35,6 +34,17 @@ public class YouXunTongSmsHandler extends BaseSmsHandler {
     private String token;
     private String server;
 
+    public void initAccount() {
+        try {
+            this.userName = configurationProvider.getValue(YXT_USER_NAME, "");
+            this.password = configurationProvider.getValue(YXT_PASSWORD, "");
+            this.server = configurationProvider.getValue(YXT_SERVER, "");
+            this.token = configurationProvider.getValue(YXT_TOKEN, "");
+        } catch (Exception e) {
+            //
+        }
+    }
+
     /*
       {
           "account":"8373",
@@ -48,35 +58,26 @@ public class YouXunTongSmsHandler extends BaseSmsHandler {
      */
     @Override
     RspMessage createAndSend(String[] phones, String sign, String content) {
-        SmsChannel channel = SmsBuilder.create(false);
-
         Map<String, String> message = new HashMap<>();
-
         message.put("phones", StringUtils.join(phones, ","));
         message.put("content", content);
         message.put("sign", sign);
         message.put("account", userName);
         message.put("password", MD5Encode(password));
 
-        Map<String, String> params = new HashMap<>();
+        Map<String, Object> params = new HashMap<>();
         String jsonMsg = StringHelper.toJsonString(message);
         params.put("message", jsonMsg);
         params.put("type", "json");
 
         String sid= SHA1Encode((token+"&"+ jsonMsg));
         params.put("sid", sid);
-        return channel.sendMessage(server, SmsBuilder.HttpMethod.POST.val(), params, null, null);
-    }
-
-    public void initAccount() {
-        try {
-            this.userName = configurationProvider.getValue(YXT_USER_NAME, "");
-            this.password = configurationProvider.getValue(YXT_PASSWORD, "");
-            this.server = configurationProvider.getValue(YXT_SERVER, "");
-            this.token = configurationProvider.getValue(YXT_TOKEN, "");
-        } catch (Exception e) {
-            //
-        }
+        // return channel.sendMessage(server, SmsChannelBuilder.HttpMethod.POST.val(), params, null, null);
+        return SmsChannelBuilder.create(false)
+                .setUrl(server)
+                .setBodyMap(params)
+                .setMethod(SmsChannel.HttpMethod.POST)
+                .send();
     }
 
     @Override
@@ -171,40 +172,5 @@ public class YouXunTongSmsHandler extends BaseSmsHandler {
         String result = "";
         // String desc;
         // String blacklist;
-    }
-
-    private static String MD5Encode(String sourceString) {
-        String resultString = null;
-        try {
-            resultString = sourceString;
-            MessageDigest md = MessageDigest.getInstance("MD5");
-            resultString = byte2hexString(md.digest(resultString.getBytes()));
-        } catch (Exception ignored) {
-            //
-        }
-        return resultString;
-    }
-
-    private static String SHA1Encode(String sourceString) {
-        String resultString = null;
-        try {
-            resultString = sourceString;
-            MessageDigest md = MessageDigest.getInstance("SHA-1");
-            resultString = byte2hexString(md.digest(resultString.getBytes("utf-8")));
-        } catch (Exception ignored) {
-            //
-        }
-        return resultString.toUpperCase();
-    }
-
-    private static String byte2hexString(byte[] bytes) {
-        StringBuilder bf = new StringBuilder(bytes.length * 2);
-        for (byte aByte : bytes) {
-            if ((aByte & 0xff) < 0x10) {
-                bf.append("0");
-            }
-            bf.append(Long.toString(aByte & 0xff, 16));
-        }
-        return bf.toString();
     }
 }

@@ -45,13 +45,16 @@ public class YunPianSmsHandler extends BaseSmsHandler {
 
     @Override
     RspMessage createAndSend(String[] phones, String sign, String content) {
-        Map<String, String> params = new HashMap<>();
+        Map<String, Object> params = new HashMap<>();
         params.put("apikey", apiKey);
         params.put("text", sign + content);
         params.put("mobile", StringUtils.join(phones, ","));
 
-        SmsChannel channel = SmsBuilder.create(false);
-        return channel.sendMessage(server, SmsBuilder.HttpMethod.POST.val(), params, null, null);
+        return SmsChannelBuilder.create(true)
+                .setUrl(server)
+                .setBodyMap(params)
+                .setMethod(SmsChannel.HttpMethod.POST)
+                .send();
     }
 
     /**

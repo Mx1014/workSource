@@ -63,13 +63,17 @@ public class LianXinTongSmsHandler implements SmsHandler, ApplicationListener<Co
 
     private RspMessage createAndSend(Map<String, Object> message) {
         initAccount();
-        SmsChannel channel = SmsBuilder.create(false);
         message.put("authCode", authCode);
         message.put("spId", spId);
         message.put("srcId", srcId);
         message.put("reqId", "123456");
         message.put("serviceId", "");
-        return channel.sendMessage(server, SmsBuilder.HttpMethod.POST.val(), null, null, StringHelper.toJsonString(message));
+
+        return SmsChannelBuilder.create(true)
+                .setUrl(server)
+                .setBodyStr(StringHelper.toJsonString(message))
+                .setMethod(SmsChannel.HttpMethod.POST)
+                .send();
     }
 
     @Override

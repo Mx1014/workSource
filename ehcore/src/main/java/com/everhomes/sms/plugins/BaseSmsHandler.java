@@ -5,12 +5,20 @@ import com.everhomes.locale.LocaleTemplate;
 import com.everhomes.locale.LocaleTemplateService;
 import com.everhomes.namespace.Namespace;
 import com.everhomes.rest.sms.SmsTemplateCode;
-import com.everhomes.sms.*;
+import com.everhomes.sms.RspMessage;
+import com.everhomes.sms.SmsHandler;
+import com.everhomes.sms.SmsLog;
+import com.everhomes.sms.SmsLogStatus;
+import com.everhomes.util.StringHelper;
 import com.everhomes.util.Tuple;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 
+import javax.xml.bind.JAXBContext;
+import javax.xml.bind.Unmarshaller;
+import java.io.StringReader;
+import java.security.MessageDigest;
 import java.sql.Timestamp;
 import java.util.ArrayList;
 import java.util.HashMap;
@@ -85,11 +93,6 @@ abstract public class BaseSmsHandler implements SmsHandler {
                 String[] phonesPart = new String[length];
                 System.arraycopy(phoneNumbers, i, phonesPart, 0, length);
 
-                // Map<String, String> message = new HashMap<>();
-                // message.put("phones", StringUtils.join(phonesPart, ","));
-                // message.put("content", content);
-                // message.put("sign", sign.getText());
-
                 RspMessage rspMessage = createAndSend(phonesPart, sign.getText(), content);
                 smsLogList.addAll(buildSmsLogs(namespaceId, phonesPart, templateScope, templateId, templateLocale, sign.getText()+content, rspMessage));
             }
@@ -114,6 +117,60 @@ abstract public class BaseSmsHandler implements SmsHandler {
         log.setText("");
         log.setStatus(SmsLogStatus.SEND_FAILED.getCode());
         return log;
+    }
+
+    protected static String MD5Encode(String sourceString) {
+        String resultString = null;
+        try {
+            resultString = sourceString;
+            MessageDigest md = MessageDigest.getInstance("MD5");
+            resultString = byte2hexString(md.digest(resultString.getBytes()));
+        } catch (Exception ignored) {
+            //
+        }
+        return resultString;
+    }
+
+    protected static String SHA1Encode(String sourceString) {
+        String resultString = null;
+        try {
+            resultString = sourceString;
+            MessageDigest md = MessageDigest.getInstance("SHA-1");
+            resultString = byte2hexString(md.digest(resultString.getBytes("utf-8")));
+        } catch (Exception ignored) {
+            //
+        }
+        return resultString.toUpperCase();
+    }
+
+    protected static String byte2hexString(byte[] bytes) {
+        StringBuilder bf = new StringBuilder(bytes.length * 2);
+        for (byte aByte : bytes) {
+            if ((aByte & 0xff) < 0x10) {
+                bf.append("0");
+            }
+            bf.append(Long.toString(aByte & 0xff, 16));
+        }
+        return bf.toString();
+    }
+
+    protected static <T> T xmlToBean(String xml, Class<T> c) {
+        T t = null;
+        try {
+            JAXBContext context = JAXBContext.newInstance(c);
+            Unmarshaller unmarshaller = context.createUnmarshaller();
+            t = (T) unmarshaller.unmarshal(new StringReader(xml));
+        } catch (Exception e) {
+            e.printStackTrace();
+        }
+        return t;
+    }
+
+    protected static class ToString {
+        @Override
+        public String toString() {
+            return StringHelper.toJsonString(this);
+        }
     }
 
     abstract String getHandlerName();

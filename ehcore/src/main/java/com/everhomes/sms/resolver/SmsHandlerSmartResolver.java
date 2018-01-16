@@ -20,11 +20,6 @@ public class SmsHandlerSmartResolver extends AbstractSmsHandlerResolver {
     @Autowired
     private SmsLogProvider smsLogProvider;
 
-    /*@Autowired
-    public void setHandlers(Map<String, SmsHandler> prop) {
-        prop.forEach((name, handler) -> handlers.put(name.toLowerCase(), handler));
-    }*/
-
     @Override
     public Map<SmsHandler, String[]> resolveHandler(Integer namespaceId, String[] phoneNumbers) {
         Map<SmsHandler, List<String>> handlerToPhonesMap = new HashMap<>();

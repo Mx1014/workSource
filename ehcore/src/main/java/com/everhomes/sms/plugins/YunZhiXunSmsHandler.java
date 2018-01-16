@@ -88,7 +88,6 @@ public class YunZhiXunSmsHandler implements SmsHandler, ApplicationListener<Cont
 
         initAccount();
 
-        SmsChannel channel = SmsBuilder.create(false);
         String timestamp = DateUtil.dateToStr(new Date(),
                 DateUtil.DATE_TIME_NO_SLASH);// 时间戳
         String uri = createUrl(accountSid, token, timestamp);
@@ -113,9 +112,15 @@ public class YunZhiXunSmsHandler implements SmsHandler, ApplicationListener<Cont
         }
         headers.put("Authorization", auth);
 
-        RspMessage result = channel.sendMessage(uri, SmsBuilder.HttpMethod.POST.val(), null, headers, entityJsonStr);
-        LOGGER.info("Send sms, result={}, uri={}, headers={}, phone={}, text={}", result, uri, headers, StringUtils.join(phoneNumbers, ","), text);
-        return result;
+        // RspMessage result = channel.sendMessage(uri, SmsChannelBuilder.HttpMethod.POST.val(), null, headers, entityJsonStr);
+        // LOGGER.info("Send sms, result={}, uri={}, headers={}, phone={}, text={}", result, uri, headers, StringUtils.join(phoneNumbers, ","), text);
+        // return result;
+        return SmsChannelBuilder.create(true)
+                .setUrl(uri)
+                .setBodyStr(entityJsonStr)
+                .setMethod(SmsChannel.HttpMethod.POST)
+                .setHeaders(headers)
+                .send();
     }
 
     private String createUrl(String accountSid, String authToken, String timestamp) {

@@ -10,6 +10,7 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
 
 import java.util.*;
+import java.util.concurrent.ThreadLocalRandom;
 
 /**
  * Created by xq.tian on 2018/1/13.
@@ -17,16 +18,13 @@ import java.util.*;
 @Component(SmsHandlerResolver.RESOLVER_NAME_PREFIX + "ROLL_POLLING")
 public class SmsHandlerRollPollingResolver extends AbstractSmsHandlerResolver {
 
+    private final ThreadLocalRandom random = ThreadLocalRandom.current();
+
     @Autowired
     private ConfigurationProvider configurationProvider;
 
     @Autowired
     private SmsLogProvider smsLogProvider;
-
-    /*@Autowired
-    public void setHandlers(Map<String, SmsHandler> prop) {
-        prop.forEach((name, handler) -> handlers.put(name.toLowerCase(), handler));
-    }*/
 
     @Override
     public Map<SmsHandler, String[]> resolveHandler(Integer namespaceId, String[] phoneNumbers) {
@@ -39,7 +37,7 @@ public class SmsHandlerRollPollingResolver extends AbstractSmsHandlerResolver {
             Map<String, SmsLog> smsLogMap = smsLogProvider.findLastLogByMobile(namespaceId, phoneNumber, configHandlers);
             List<String> unknownHandler = getUnknownHandlers(configHandlers, smsLogMap.keySet());
             if (unknownHandler.size() > 0) {
-                SmsHandler hd = handlers.get(unknownHandler.get(0).toLowerCase());
+                SmsHandler hd = handlers.get(unknownHandler.get(random.nextInt(0, unknownHandler.size())).toLowerCase());
                 putHandlerAndPhone(handlerToPhonesMap, phoneNumber, hd);
             } else {
                 smsLogMap.values().stream().sorted(Comparator.comparing(EhSmsLogs::getCreateTime)).findFirst().ifPresent(r -> {

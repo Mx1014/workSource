@@ -20,6 +20,8 @@ public interface SmsHandler {
     String LIAN_XIN_TONG_HANDLER_NAME = "LianXinTong";
     // 云片
     String YUN_PIAN_HANDLER_NAME = "YunPian";
+    // 茧米
+    String JIAN_MI_HANDLER_NAME = "JianMi";
 
     /**
      * single message
