@@ -65,6 +65,7 @@ public class SmsChannel {
         this.bodyMap = new HashMap<>();
         this.method = HttpMethod.POST;
         this.charset = UTF_8;
+        this.contentType = ContentType.APPLICATION_FORM_URLENCODED.withCharset(UTF_8);
     }
 
     public RspMessage send() {
