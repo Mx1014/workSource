@@ -93,6 +93,25 @@ public class ZjSyncdataBackupProviderImpl implements ZjSyncdataBackupProvider {
     }
 
     @Override
+    public int listZjSyncdataBackupActiveCountByParam(Integer namespaceId, String communityIdentifier, Byte dataType) {
+        DSLContext context = this.dbProvider.getDslContext(AccessSpec.readOnlyWith(EhZjSyncdataBackup.class));
+
+        SelectQuery<EhZjSyncdataBackupRecord> query = context.selectQuery(Tables.EH_ZJ_SYNCDATA_BACKUP);
+
+        query.addConditions(Tables.EH_ZJ_SYNCDATA_BACKUP.NAMESPACE_ID.eq(namespaceId));
+        if(communityIdentifier != null) {
+            query.addConditions(Tables.EH_ZJ_SYNCDATA_BACKUP.UPDATE_COMMUNITY.eq(communityIdentifier));
+        } else {
+            query.addConditions(Tables.EH_ZJ_SYNCDATA_BACKUP.UPDATE_COMMUNITY.isNull());
+        }
+
+        query.addConditions(Tables.EH_ZJ_SYNCDATA_BACKUP.DATA_TYPE.eq(dataType));
+        query.addConditions(Tables.EH_ZJ_SYNCDATA_BACKUP.STATUS.eq(CommonStatus.ACTIVE.getCode()));
+
+        return query.fetchCount();
+    }
+
+    @Override
     public void updateZjSyncdataBackupInactive(List<ZjSyncdataBackup> backupList) {
         backupList.forEach(b->{
             b.setStatus(CommonStatus.INACTIVE.getCode());

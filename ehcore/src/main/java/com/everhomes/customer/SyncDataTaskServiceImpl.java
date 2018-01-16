@@ -21,6 +21,7 @@ import com.everhomes.util.StringHelper;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.stereotype.Component;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -28,6 +29,7 @@ import java.util.List;
 /**
  * Created by ying.xiong on 2018/1/13.
  */
+@Component
 public class SyncDataTaskServiceImpl implements SyncDataTaskService {
     private static final Logger LOGGER = LoggerFactory.getLogger(SyncDataTaskServiceImpl.class);
 
