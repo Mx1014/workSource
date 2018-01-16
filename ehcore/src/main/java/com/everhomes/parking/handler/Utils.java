@@ -302,7 +302,7 @@ public class Utils {
             close(response, httpclient);
         }
 
-        LOGGER.info("Result from third, url={}, result={}", url, result);
+        LOGGER.info("SendResult from third, url={}, result={}", url, result);
 
         return result;
     }
@@ -369,7 +369,7 @@ public class Utils {
         }finally {
             close(response, httpclient);
         }
-        LOGGER.info("Result from third, url={}, result={}", url, result);
+        LOGGER.info("SendResult from third, url={}, result={}", url, result);
 
         return result;
     }

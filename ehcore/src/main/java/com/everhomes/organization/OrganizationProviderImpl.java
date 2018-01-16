@@ -1440,7 +1440,7 @@ public class OrganizationProviderImpl implements OrganizationProvider {
         }
         return result;
 
-//        Result<Record> records = context.select().from(Tables.EH_ORGANIZATION_MEMBERS).where(Tables.EH_ORGANIZATION_MEMBERS.ORGANIZATION_ID.eq(orgId))
+//        SendResult<Record> records = context.select().from(Tables.EH_ORGANIZATION_MEMBERS).where(Tables.EH_ORGANIZATION_MEMBERS.ORGANIZATION_ID.eq(orgId))
 //                .and(Tables.EH_ORGANIZATION_MEMBERS.STATUS.ne(OrganizationMemberStatus.INACTIVE.getCode()))
 //                //added by wh 2016-10-13 把被拒绝的过滤掉
 //                .and(Tables.EH_ORGANIZATION_MEMBERS.STATUS.ne(OrganizationMemberStatus.REJECT.getCode())).fetch();
@@ -3185,7 +3185,7 @@ public class OrganizationProviderImpl implements OrganizationProvider {
         }
         return result;
 //
-//        Result<Record> records = context.select().from(Tables.EH_ORGANIZATION_MEMBERS)
+//        SendResult<Record> records = context.select().from(Tables.EH_ORGANIZATION_MEMBERS)
 //                .where(Tables.EH_ORGANIZATION_MEMBERS.TARGET_ID.eq(uId))
 //                .and(Tables.EH_ORGANIZATION_MEMBERS.STATUS.eq(OrganizationMemberStatus.ACTIVE.getCode())).fetch();
 //
