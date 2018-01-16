@@ -451,7 +451,7 @@ public class QualityController extends ControllerBase {
 	
 	/**
 	 * <b>URL: /quality/createQualityInspectionTask</b>
-	 * <p>主动创建品质核查任务</p>
+	 * <p>主动创建品质核查任务(包含绩效考核)</p>
 	 */
 	@RequestMapping("createQualityInspectionTask")
 	@RestReturn(value = QualityInspectionTaskDTO.class)
@@ -926,7 +926,7 @@ public class QualityController extends ControllerBase {
 
 	/**
 	 * <b>URL: /quality/listSampleQualityInspection</b>
-	 * <p>列出品质核查绩效考核-app</p>
+	 * <p>绩效考核-app离线</p>
 	 */
 	@RequestMapping("getOfflineSampleQualityInspection")
 	@RestReturn(value = OfflineSampleQualityInspectionResponse.class)

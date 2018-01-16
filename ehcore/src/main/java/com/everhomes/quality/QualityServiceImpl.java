@@ -2748,7 +2748,7 @@ public class QualityServiceImpl implements QualityService {
 		task.setManualFlag(1L);
 		if(cmd.getSampleId() != null) {
 			task.setParentId(cmd.getSampleId());
-			task.setManualFlag(2L);
+			task.setManualFlag(2L);//绩效考核创建任务标识
 		}
 
 		this.coordinationProvider.getNamedLock(CoordinationLocks.CREATE_QUALITY_TASK.getCode()).tryEnter(()-> {
@@ -2759,26 +2759,23 @@ public class QualityServiceImpl implements QualityService {
 			qualityProvider.createVerificationTasks(task);
 			taskSearcher.feedDoc(task);
 
-			if(cmd.getTemplateFlag()) {
-				QualityInspectionTaskTemplates template = ConvertHelper.convert(task, QualityInspectionTaskTemplates.class);
-				if(cmd.getTemplateId() != null) {
-					QualityInspectionTaskTemplates exist = qualityProvider.findQualityInspectionTaskTemplateById(cmd.getTemplateId());
-					if(exist != null) {
-						template.setId(cmd.getTemplateId());
-						qualityProvider.updateQualityInspectionTaskTemplates(template);
-					} else {
-						qualityProvider.createQualityInspectionTaskTemplates(template);
-					}
-				} else {
-					qualityProvider.createQualityInspectionTaskTemplates(template);
-				}
-
-
-			}
-
+//			if(cmd.getTemplateFlag()) {
+//				QualityInspectionTaskTemplates template = ConvertHelper.convert(task, QualityInspectionTaskTemplates.class);
+//				if(cmd.getTemplateId() != null) {
+//					QualityInspectionTaskTemplates exist = qualityProvider.findQualityInspectionTaskTemplateById(cmd.getTemplateId());
+//					if(exist != null) {
+//						template.setId(cmd.getTemplateId());
+//						qualityProvider.updateQualityInspectionTaskTemplates(template);
+//					} else {
+//						qualityProvider.createQualityInspectionTaskTemplates(template);
+//					}
+//				} else {
+//					qualityProvider.createQualityInspectionTaskTemplates(template);
+//				}
+//			}
 		});
 
-		List<QualityInspectionTasks> tasks = new ArrayList<QualityInspectionTasks>();
+		List<QualityInspectionTasks> tasks = new ArrayList<>();
 		tasks.add(task);
 		List<QualityInspectionTaskDTO> dtos = convertQualityInspectionTaskToDTO(tasks, user.getId());
 
