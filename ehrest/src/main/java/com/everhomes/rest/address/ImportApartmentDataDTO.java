@@ -7,7 +7,7 @@ public class ImportApartmentDataDTO {
 	private String buildingName;
 	private String apartmentName;
 	private String status;
-//	private String areaSize;
+	private String areaSize;
 	private String buildArea;
 	private String chargeArea;
 	private String sharedArea;
@@ -85,6 +85,14 @@ public class ImportApartmentDataDTO {
 
 	public void setSharedArea(String sharedArea) {
 		this.sharedArea = sharedArea;
+	}
+
+	public String getAreaSize() {
+		return areaSize;
+	}
+
+	public void setAreaSize(String areaSize) {
+		this.areaSize = areaSize;
 	}
 
 	@Override

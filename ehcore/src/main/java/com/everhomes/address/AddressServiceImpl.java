@@ -1896,13 +1896,13 @@ public class AddressServiceImpl implements AddressService, LocalBusSubscriber {
 				continue;
 			}
 			
-			if (StringUtils.isNotEmpty(data.getBuildArea())) {
+			if (StringUtils.isNotEmpty(data.getAreaSize())) {
 				try {
-					Double.parseDouble(data.getBuildArea());
+					Double.parseDouble(data.getAreaSize());
 				} catch (Exception e) {
 					log.setData(data);
-					log.setErrorLog("build area is not number");
-					log.setCode(AddressServiceErrorCode.ERROR_BUILD_AREA_NOT_NUMBER);
+					log.setErrorLog("area size is not number");
+					log.setCode(AddressServiceErrorCode.ERROR_AREA_SIZE_NOT_NUMBER);
 					errorLogs.add(log);
 					continue;
 				}
@@ -1970,12 +1970,12 @@ public class AddressServiceImpl implements AddressService, LocalBusSubscriber {
             }
         }
 
-        double buildArea = 0;
+        double areaSize = 0;
         double chargeArea = 0;
         double rentArea = 0;
         double shareArea = 0;
         try {
-            buildArea = Double.parseDouble(data.getBuildArea());
+            areaSize = Double.parseDouble(data.getAreaSize());
             chargeArea = Double.parseDouble(data.getChargeArea());
             rentArea = Double.parseDouble(data.getRentArea());
             shareArea = Double.parseDouble(data.getSharedArea());
@@ -1992,7 +1992,8 @@ public class AddressServiceImpl implements AddressService, LocalBusSubscriber {
             address.setAreaName(community.getAreaName());
             address.setBuildingName(building.getName());
             address.setApartmentName(data.getApartmentName());
-            address.setBuildArea(buildArea);
+//            address.setBuildArea(buildArea);
+            address.setAreaSize(areaSize);
             address.setSharedArea(shareArea);
             address.setChargeArea(chargeArea);
             address.setRentArea(rentArea);
@@ -2003,7 +2004,8 @@ public class AddressServiceImpl implements AddressService, LocalBusSubscriber {
             address.setNamespaceId(community.getNamespaceId());
         	addressProvider.createAddress(address);
 		}else {
-            address.setBuildArea(buildArea);
+//            address.setBuildArea(buildArea);
+            address.setAreaSize(areaSize);
             address.setSharedArea(shareArea);
             address.setChargeArea(chargeArea);
             address.setRentArea(rentArea);
@@ -2028,7 +2030,8 @@ public class AddressServiceImpl implements AddressService, LocalBusSubscriber {
 				data.setStatus(trim(r.getC()));
 
                 //产品变更模板
-                data.setBuildArea(trim(r.getD()));
+//                data.setBuildArea(trim(r.getD()));
+                data.setAreaSize(trim(r.getD()));
                 data.setChargeArea(trim(r.getE()));
                 data.setSharedArea(trim(r.getF()));
                 data.setRentArea(trim(r.getG()));
