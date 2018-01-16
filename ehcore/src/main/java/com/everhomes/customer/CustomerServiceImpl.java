@@ -257,6 +257,13 @@ public class CustomerServiceImpl implements CustomerService {
     }
 
     @Override
+    public ListCommunitySyncResultResponse listCommunitySyncResult(ListCommunitySyncResultCommand cmd) {
+        int pageSize = PaginationConfigHelper.getPageSize(configurationProvider, cmd.getPageSize());
+        ListCommunitySyncResultResponse response = syncDataTaskService.listCommunitySyncResult(cmd.getCommunityId(), cmd.getSyncType(), pageSize, cmd.getPageAnchor());
+        return response;
+    }
+
+    @Override
     public EnterpriseCustomerDTO createEnterpriseCustomer(CreateEnterpriseCustomerCommand cmd) {
         checkPrivilege(cmd.getNamespaceId());
         checkCustomerAuth(cmd.getNamespaceId(), PrivilegeConstants.ENTERPRISE_CUSTOMER_CREATE, cmd.getOrgId(), cmd.getCommunityId());

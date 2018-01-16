@@ -134,5 +134,6 @@ public interface CustomerService {
 
     SearchEnterpriseCustomerResponse queryEnterpriseCustomers(SearchEnterpriseCustomerCommand cmd);
 
+    ListCommunitySyncResultResponse listCommunitySyncResult(ListCommunitySyncResultCommand cmd);
 
 }

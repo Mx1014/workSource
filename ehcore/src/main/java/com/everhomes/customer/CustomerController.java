@@ -1355,4 +1355,17 @@ public class CustomerController extends ControllerBase {
         response.setErrorDescription("OK");
         return response;
     }
+
+    /**
+     * <b>URL: /customer/listCustomerDepartureInfos</b>
+     * <p>列出同步信息</p>
+     */
+    @RequestMapping("listCustomerDepartureInfos")
+    @RestReturn(value = ListCommunitySyncResultResponse.class)
+    public RestResponse listCommunitySyncResult(ListCommunitySyncResultCommand cmd) {
+        RestResponse response = new RestResponse(customerService.listCommunitySyncResult(cmd));
+        response.setErrorCode(ErrorCodes.SUCCESS);
+        response.setErrorDescription("OK");
+        return response;
+    }
 }

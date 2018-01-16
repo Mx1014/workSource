@@ -63,7 +63,7 @@ public class SyncDataTaskServiceImpl implements SyncDataTaskService {
 //                    SyncDataResponse response = callback.syncData();
                     callback.syncData();
                     task.setStatus(SyncDataTaskStatus.FINISH.getCode());
-                    task.setResult("success");
+                    task.setResult("同步成功");
                 }catch (Exception e){
                     LOGGER.error("executor task error. error: {}", e);
                     task.setStatus(SyncDataTaskStatus.EXCEPTION.getCode());
