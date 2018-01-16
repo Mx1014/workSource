@@ -49,6 +49,10 @@ public class SampleQualityInspectionDTO {
 
     private Timestamp createTime;
 
+    private Timestamp updateTime;
+
+    private Timestamp deleteTime;
+
     public Long getId() {
         return id;
     }
@@ -135,6 +139,22 @@ public class SampleQualityInspectionDTO {
 
     public void setCreateTime(Timestamp createTime) {
         this.createTime = createTime;
+    }
+
+    public Timestamp getUpdateTime() {
+        return updateTime;
+    }
+
+    public void setUpdateTime(Timestamp updateTime) {
+        this.updateTime = updateTime;
+    }
+
+    public Timestamp getDeleteTime() {
+        return deleteTime;
+    }
+
+    public void setDeleteTime(Timestamp deleteTime) {
+        this.deleteTime = deleteTime;
     }
 
     @Override

@@ -12,13 +12,15 @@ import java.util.List;
 public class OfflineSampleQualityInspectionResponse {
 
     @ItemType(SampleQualityInspectionDTO.class)
-    List<SampleQualityInspectionDTO> sampleQualityInspections;
+    private  List<SampleQualityInspectionDTO> sampleQualityInspections;
 
     @ItemType(QualityInspectionSpecificationDTO.class)
     private List<QualityInspectionSpecificationDTO> specifications;
 
     @ItemType(QualityInspectionSpecificationDTO.class)
-    List<QualityInspectionSpecificationDTO> specificationsDetail;
+    private List<QualityInspectionSpecificationDTO> specificationsDetail;
+
+    private OfflineDeleteTablesInfo deletedSpecifications;
 
     public List<SampleQualityInspectionDTO> getSampleQualityInspections() {
         return sampleQualityInspections;
@@ -42,6 +44,14 @@ public class OfflineSampleQualityInspectionResponse {
 
     public void setSpecificationsDetail(List<QualityInspectionSpecificationDTO> specificationsDetail) {
         this.specificationsDetail = specificationsDetail;
+    }
+
+    public OfflineDeleteTablesInfo getDeletedSpecifications() {
+        return deletedSpecifications;
+    }
+
+    public void setDeletedSpecifications(OfflineDeleteTablesInfo deletedSpecifications) {
+        this.deletedSpecifications = deletedSpecifications;
     }
 
     @Override

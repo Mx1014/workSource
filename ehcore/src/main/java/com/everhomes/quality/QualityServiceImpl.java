@@ -92,6 +92,7 @@ import com.everhomes.rest.quality.ListSampleQualityInspectionResponse;
 import com.everhomes.rest.quality.ListSampleQualityInspectionTasksCommand;
 import com.everhomes.rest.quality.ListUserHistoryTasksCommand;
 import com.everhomes.rest.quality.ListUserQualityInspectionTaskTemplatesCommand;
+import com.everhomes.rest.quality.OfflineDeleteTablesInfo;
 import com.everhomes.rest.quality.OfflineSampleQualityInspectionResponse;
 import com.everhomes.rest.quality.OwnerType;
 import com.everhomes.rest.quality.ProcessType;
@@ -2848,20 +2849,8 @@ public class QualityServiceImpl implements QualityService {
 	public void updateQualitySpecification(UpdateQualitySpecificationCommand cmd) {
 		QualityInspectionSpecifications specification = verifiedSpecificationById(cmd.getId(), cmd.getOwnerType(), cmd.getOwnerId());
 		if(SpecificationInspectionType.CATEGORY.equals(SpecificationInspectionType.fromStatus(specification.getInspectionType()))) {
-			/*Long privilegeId = configProvider.getLongValue(QualityConstant.QUALITY_CATEGORY_UPDATE, 0L);
-			if(SpecificationScopeCode.COMMUNITY.equals(SpecificationScopeCode.fromCode(cmd.getScopeCode()))) {
-				userPrivilegeMgr.checkCurrentUserAuthority(EntityType.COMMUNITY.getCode(), cmd.getScopeId(), cmd.getOwnerId(), privilegeId);
-			} else {
-				userPrivilegeMgr.checkCurrentUserAuthority(null, null, cmd.getOwnerId(), privilegeId);
-			}*/
 			checkUserPrivilege(cmd.getOwnerId(),PrivilegeConstants.QUALITY_CATEGORY_UPDATE,cmd.getScopeId());
 		} else {
-			/*Long privilegeId = configProvider.getLongValue(QualityConstant.QUALITY_SPECIFICATION_UPDATE, 0L);
-			if(SpecificationScopeCode.COMMUNITY.equals(SpecificationScopeCode.fromCode(cmd.getScopeCode()))) {
-				userPrivilegeMgr.checkCurrentUserAuthority(EntityType.COMMUNITY.getCode(), cmd.getScopeId(), cmd.getOwnerId(), privilegeId);
-			} else {
-				userPrivilegeMgr.checkCurrentUserAuthority(null, null, cmd.getOwnerId(), privilegeId);
-			}*/
 			checkUserPrivilege(cmd.getOwnerId(),PrivilegeConstants.QUALITY_SPECIFICATION_UPDATE,cmd.getScopeId());
 		}
 
@@ -2871,6 +2860,9 @@ public class QualityServiceImpl implements QualityService {
 			specification.setDescription(cmd.getDescription());
 			specification.setScore(cmd.getScore());
 			specification.setWeight(cmd.getWeight());
+			//quliaty-offline
+			specification.setUpdateTime(new Timestamp(DateHelper.currentGMTTime().getTime()));
+			specification.setUpdateUid(UserContext.currentUserId());
 
 			qualityProvider.updateQualitySpecification(specification);
 		} else {
@@ -2898,27 +2890,19 @@ public class QualityServiceImpl implements QualityService {
 
 	@Override
 	public void deleteQualitySpecification(DeleteQualitySpecificationCommand cmd) {
+
 		QualityInspectionSpecifications specification = verifiedSpecificationById(cmd.getSpecificationId(), cmd.getOwnerType(), cmd.getOwnerId());
 		if(SpecificationInspectionType.CATEGORY.equals(SpecificationInspectionType.fromStatus(specification.getInspectionType()))) {
-//			Long privilegeId = configProvider.getLongValue(QualityConstant.QUALITY_CATEGORY_DELETE, 0L);
-			/*if(SpecificationScopeCode.COMMUNITY.equals(SpecificationScopeCode.fromCode(cmd.getScopeCode()))) {
-				userPrivilegeMgr.checkCurrentUserAuthority(EntityType.COMMUNITY.getCode(), cmd.getScopeId(), cmd.getOwnerId(), privilegeId);
-			} else {
-				userPrivilegeMgr.checkCurrentUserAuthority(null, null, cmd.getOwnerId(), privilegeId);
-			}*/
 			checkUserPrivilege(cmd.getOwnerId(),PrivilegeConstants.QUALITY_CATEGORY_DELETE,cmd.getScopeId());
 		} else {
-			/*Long privilegeId = configProvider.getLongValue(QualityConstant.QUALITY_SPECIFICATION_DELETE, 0L);
-			if(SpecificationScopeCode.COMMUNITY.equals(SpecificationScopeCode.fromCode(cmd.getScopeCode()))) {
-				userPrivilegeMgr.checkCurrentUserAuthority(EntityType.COMMUNITY.getCode(), cmd.getScopeId(), cmd.getOwnerId(), privilegeId);
-			} else {
-				userPrivilegeMgr.checkCurrentUserAuthority(null, null, cmd.getOwnerId(), privilegeId);
-			}*/
 			checkUserPrivilege(cmd.getOwnerId(),PrivilegeConstants.QUALITY_SPECIFICATION_DELETE,cmd.getScopeId());
 		}
+
 		if(SpecificationScopeCode.fromCode(specification.getScopeCode()).equals(SpecificationScopeCode.fromCode(cmd.getScopeCode()))
 				&& specification.getScopeId().equals(cmd.getScopeId())) {
 			specification.setStatus(QualityStandardStatus.INACTIVE.getCode());
+			specification.setDeleteUid(UserContext.currentUserId());
+			specification.setDeleteTime(new Timestamp(DateHelper.currentGMTTime().getTime()));
 			qualityProvider.updateQualitySpecification(specification);
 
 			qualityProvider.inactiveQualityInspectionStandardSpecificationMapBySpecificationId(specification.getId());
@@ -2949,27 +2933,16 @@ public class QualityServiceImpl implements QualityService {
 	public ListQualitySpecificationsResponse listQualitySpecifications(
 			ListQualitySpecificationsCommand cmd) {
 		if(SpecificationInspectionType.SPECIFICATION.equals(SpecificationInspectionType.fromStatus(cmd.getInspectionType()))){
-			/*Long privilegeId = configProvider.getLongValue(QualityConstant.QUALITY_SPECIFICATION_LIST, 0L);
-			if(SpecificationScopeCode.COMMUNITY.equals(SpecificationScopeCode.fromCode(cmd.getScopeCode()))) {
-				userPrivilegeMgr.checkCurrentUserAuthority(EntityType.COMMUNITY.getCode(), cmd.getScopeId(), cmd.getOwnerId(), privilegeId);
-			} else {
-				userPrivilegeMgr.checkCurrentUserAuthority(null, null, cmd.getOwnerId(), privilegeId);
-			}*/
 			checkUserPrivilege(cmd.getOwnerId(),PrivilegeConstants.QUALITY_SPECIFICATION_LIST,cmd.getScopeId());
 		} else {
-			/*Long privilegeId = configProvider.getLongValue(QualityConstant.QUALITY_CATEGORY_LIST, 0L);
-			if(SpecificationScopeCode.COMMUNITY.equals(SpecificationScopeCode.fromCode(cmd.getScopeCode()))) {
-				userPrivilegeMgr.checkCurrentUserAuthority(EntityType.COMMUNITY.getCode(), cmd.getScopeId(), cmd.getOwnerId(), privilegeId);
-			} else {
-				userPrivilegeMgr.checkCurrentUserAuthority(null, null, cmd.getOwnerId(), privilegeId);
-			}*/
 			checkUserPrivilege(cmd.getOwnerId(),PrivilegeConstants.QUALITY_CATEGORY_LIST,cmd.getScopeId());
 		}
+
 		ListQualitySpecificationsResponse response = new ListQualitySpecificationsResponse();
 
 
-		List<QualityInspectionSpecifications> specifications = new ArrayList<QualityInspectionSpecifications>();
-		List<QualityInspectionSpecifications> scopeSpecifications = new ArrayList<QualityInspectionSpecifications>();
+		List<QualityInspectionSpecifications> specifications = new ArrayList<>();
+		List<QualityInspectionSpecifications> scopeSpecifications = new ArrayList<>();
 
 
 		//先查全公司的该节点下的所有子节点,再查该项目下的所有子节点
@@ -3006,6 +2979,12 @@ public class QualityServiceImpl implements QualityService {
 		QualityInspectionSpecificationDTO parentDto = ConvertHelper.convert(parent, QualityInspectionSpecificationDTO.class);
 		parentDto = processQualitySpecificationTree(dtos, parentDto);
 		dtos = parentDto.getChildrens();
+		//offline support
+		if (cmd.getLastSyncTime() != null) {
+			Timestamp syncTime = dateStrToTimestamp(cmd.getLastSyncTime());
+			dtos.removeIf(dto -> dto.getCreateTime().before(syncTime)
+					&& dto.getUpdateTime().before(syncTime) && dto.getDeleteTime().before(syncTime));
+		}
 		//返回数据中添加所属项目
 		processSepcificationScopeName(dtos);
 		response.setSpecifications(dtos);
@@ -4655,9 +4634,17 @@ public class QualityServiceImpl implements QualityService {
 		if (sampleQualityInspectionResponse != null){
 			sampleQualityInspections = sampleQualityInspectionResponse.getSampleQualityInspectionDTOList();
 		}
-		//绩效任务列表
+		//绩效任务列表 offline  Timestamp
 		sampleQualityInspections.stream().map((SampleQualityInspectionDTO s) -> {
-			s.setLastSyncTime(s.getCreateTime().toLocalDateTime().format(dateSF));
+			if (s.getDeleteTime() == null) {
+				if (s.getUpdateTime() == null) {
+					s.setLastSyncTime(s.getCreateTime().toLocalDateTime().format(dateSF));
+				} else {
+					s.setLastSyncTime(s.getUpdateTime().toLocalDateTime().format(dateSF));
+				}
+			} else {
+				s.setLastSyncTime(s.getDeleteTime().toLocalDateTime().format(dateSF));
+			}
 			return null;
 		});
 
@@ -4686,16 +4673,34 @@ public class QualityServiceImpl implements QualityService {
 		}
 		List<QualityInspectionSpecifications> qualityInspectionSpecifications = qualityProvider.listSpecifitionByParentIds(parentIds);
 		List<QualityInspectionSpecificationDTO> specificationsDetail = new ArrayList<>();
+		List<Long> detailsId = new ArrayList<>();
 		if (qualityInspectionSpecifications != null && qualityInspectionSpecifications.size() > 0) {
-			qualityInspectionSpecifications.stream().map((QualityInspectionSpecifications q) ->
-					specificationsDetail.add(ConvertHelper.convert(q, QualityInspectionSpecificationDTO.class))
+			qualityInspectionSpecifications.stream().map((QualityInspectionSpecifications q) -> {
+						specificationsDetail.add(ConvertHelper.convert(q, QualityInspectionSpecificationDTO.class));
+						detailsId.add(q.getId());
+						return null;
+					}
 			);
 		}
-		offlineResponse.setSpecificationsDetail(specificationsDetail);
+		offlineResponse.getSpecifications().addAll(specificationsDetail);
+		List<QualityInspectionSpecificationDTO> qualityInspectionSpecificationDTOS = new ArrayList<>();
+		detailsId.forEach((d)->{
+			GetQualitySpecificationCommand command = new GetQualitySpecificationCommand();
+			command.setSpecificationId(d);
+			qualityInspectionSpecificationDTOS.add(getQualitySpecification(command));
+		});
+		offlineResponse.setSpecificationsDetail(qualityInspectionSpecificationDTOS);
 
-		//需要单独返回删除的id列表
-		List<Long> deletedSpecifications =
+
+		//需要单独返回删除的列表
+		List<QualityInspectionSpecifications> deletedSpecifications =
 				qualityProvider.listDeletedSpecifications(cmd.getCommunityId(), cmd.getOwnerId(), cmd.getOwnerType(), cmd.getLastUpdateSyncTime());
+		OfflineDeleteTablesInfo offlineDeleteTablesInfo = new OfflineDeleteTablesInfo();
+		List<Long> deleteIds = new ArrayList<>();
+		deletedSpecifications.forEach((s)-> deleteIds.add(s.getId()));
+		offlineDeleteTablesInfo.setTableName("Specifications");
+		offlineDeleteTablesInfo.setDeleteIds(deleteIds);
+		offlineResponse.setDeletedSpecifications(offlineDeleteTablesInfo);
 
 		return offlineResponse;
 	}

@@ -2814,16 +2814,18 @@ public class QualityProviderImpl implements QualityProvider {
 	}
 
 	@Override
-	public List<Long> listDeletedSpecifications(Long communityId, Long ownerId, String ownerType, Timestamp lastUpdateSyncTime) {
+	public List<QualityInspectionSpecifications> listDeletedSpecifications(Long communityId, Long ownerId, String ownerType, Timestamp lastUpdateSyncTime) {
 		DSLContext context = this.dbProvider.getDslContext(AccessSpec.readOnly());
-		context.selectFrom(Tables.EH_QUALITY_INSPECTION_SPECIFICATIONS)
-				.where(Tables.EH_QUALITY_INSPECTION_SPECIFICATIONS.NAMESPACE_ID.eq(UserContext.getCurrentNamespaceId()))
-				.and(Tables.EH_QUALITY_INSPECTION_SPECIFICATIONS.SCOPE_CODE.eq(SpecificationScopeCode.COMMUNITY.getCode()))
-				.and(Tables.EH_QUALITY_INSPECTION_SPECIFICATIONS.SCOPE_ID.eq(communityId))
-				.and(Tables.EH_QUALITY_INSPECTION_SPECIFICATIONS.OWNER_ID.eq(ownerId))
-				.and(Tables.EH_QUALITY_INSPECTION_SPECIFICATIONS.OWNER_TYPE.eq(ownerType))
-				.and(Tables.EH_QUALITY_INSPECTION_SPECIFICATIONS.STATUS.eq(QualityStandardStatus.INACTIVE.getCode()))
-				.fetchInto(Long.class);
-		return null;
+		SelectQuery<EhQualityInspectionSpecificationsRecord> query = context.selectQuery(Tables.EH_QUALITY_INSPECTION_SPECIFICATIONS);
+		query.addConditions(Tables.EH_QUALITY_INSPECTION_SPECIFICATIONS.NAMESPACE_ID.eq(UserContext.getCurrentNamespaceId()));
+		query.addConditions(Tables.EH_QUALITY_INSPECTION_SPECIFICATIONS.NAMESPACE_ID.eq(UserContext.getCurrentNamespaceId()));
+		query.addConditions(Tables.EH_QUALITY_INSPECTION_SPECIFICATIONS.SCOPE_CODE.eq(SpecificationScopeCode.COMMUNITY.getCode()));
+		query.addConditions(Tables.EH_QUALITY_INSPECTION_SPECIFICATIONS.SCOPE_ID.eq(communityId));
+		query.addConditions(Tables.EH_QUALITY_INSPECTION_SPECIFICATIONS.OWNER_ID.eq(ownerId));
+		query.addConditions(Tables.EH_QUALITY_INSPECTION_SPECIFICATIONS.OWNER_TYPE.eq(ownerType));
+		query.addConditions(Tables.EH_QUALITY_INSPECTION_SPECIFICATIONS.STATUS.eq(QualityStandardStatus.INACTIVE.getCode()));
+		query.addConditions(Tables.EH_QUALITY_INSPECTION_SPECIFICATIONS.DELETE_TIME.gt(lastUpdateSyncTime));
+
+		return  query.fetchInto(QualityInspectionSpecifications.class);
 	}
 }

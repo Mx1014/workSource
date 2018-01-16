@@ -185,5 +185,5 @@ public interface QualityProvider {
 
 	List<QualityInspectionSpecifications>  listSpecifitionByParentIds(List<Long> parentIds);
 
-    List<Long> listDeletedSpecifications(Long communityId, Long ownerId, String ownerType, Timestamp lastUpdateSyncTime);
+    List<QualityInspectionSpecifications> listDeletedSpecifications(Long communityId, Long ownerId, String ownerType, Timestamp lastUpdateSyncTime);
 }
