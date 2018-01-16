@@ -31,6 +31,11 @@ ADD COLUMN `owner_type` VARCHAR(32) NULL DEFAULT NULL AFTER `namespace_id`;
 ALTER TABLE `eh_categories`
 ADD COLUMN `owner_id` BIGINT(20) NULL DEFAULT '0' AFTER `owner_type`;
 
+-- by st.zheng
+ALTER TABLE `eh_pm_tasks`
+  ADD COLUMN `refer_type` VARCHAR(32) NULL COMMENT '引用类型' AFTER `if_use_feelist`;
+ALTER TABLE `eh_pm_tasks`
+  ADD COLUMN `refer_id` BIGINT(20) NULL COMMENT '引用id' AFTER `refer_type`;
 
 -- 物业巡检V3.1
 -- 设备巡检计划表
