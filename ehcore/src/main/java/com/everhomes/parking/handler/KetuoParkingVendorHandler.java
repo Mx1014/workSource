@@ -36,8 +36,8 @@ public abstract class KetuoParkingVendorHandler extends DefaultParkingVendorHand
 	private static final String GET_TEMP_FEE = "/api/pay/GetParkingPaymentInfo";
 	private static final String PAY_TEMP_FEE = "/api/pay/PayParkingFee";
 
-	protected static final String ADD_NATURAL_MONTH = "ADD_NATURAL_MONTH";//自然月
-	protected static final String ADD_DISTANCE_MONTH = "ADD_DISTANCE_MONTH";//距离月底天数
+	protected static final String ADD_NATURAL_MONTH = "ADD_NATURAL_MONTH";//按照自然月计算
+	protected static final String ADD_DISTANCE_MONTH = "ADD_DISTANCE_MONTH";//用户新有效期=目标月份自然月月底-「1」所得剩余天数。rp6.4
 	//只显示ruleType = 1时的充值项
 	static final String RULE_TYPE = "1";
 	//月租车 : 2
