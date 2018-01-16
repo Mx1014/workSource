@@ -60,9 +60,10 @@ public class SyncDataTaskServiceImpl implements SyncDataTaskService {
                     UserContext.setCurrentUser(user);
                     task.setStatus(SyncDataTaskStatus.EXECUTING.getCode());
                     syncDataTaskProvider.updateSyncDataTask(task);
-                    SyncDataResponse response = callback.syncData();
+//                    SyncDataResponse response = callback.syncData();
+                    callback.syncData();
                     task.setStatus(SyncDataTaskStatus.FINISH.getCode());
-                    task.setResult(StringHelper.toJsonString(response));
+                    task.setResult("success");
                 }catch (Exception e){
                     LOGGER.error("executor task error. error: {}", e);
                     task.setStatus(SyncDataTaskStatus.EXCEPTION.getCode());

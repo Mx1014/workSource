@@ -23,10 +23,7 @@ import com.everhomes.asset.*;
 import com.everhomes.bootstrap.PlatformContext;
 import com.everhomes.constants.ErrorCodes;
 import com.everhomes.contentserver.ContentServerService;
-import com.everhomes.customer.CustomerHandle;
-import com.everhomes.customer.EnterpriseCustomer;
-import com.everhomes.customer.EnterpriseCustomerProvider;
-import com.everhomes.customer.IndividualCustomerProvider;
+import com.everhomes.customer.*;
 import com.everhomes.entity.EntityType;
 import com.everhomes.flow.Flow;
 import com.everhomes.flow.FlowService;
@@ -46,8 +43,10 @@ import com.everhomes.rest.acl.PrivilegeServiceErrorCode;
 import com.everhomes.rest.approval.CommonStatus;
 import com.everhomes.rest.asset.*;
 import com.everhomes.rest.common.ServiceModuleConstants;
+import com.everhomes.rest.common.SyncDataResponse;
 import com.everhomes.rest.contract.*;
 import com.everhomes.rest.customer.CustomerType;
+import com.everhomes.rest.customer.SyncDataTaskType;
 import com.everhomes.rest.flow.CreateFlowCaseCommand;
 import com.everhomes.rest.flow.FlowConstants;
 import com.everhomes.rest.flow.FlowModuleType;
@@ -195,6 +194,9 @@ public class ContractServiceImpl implements ContractService {
 
 	@Autowired
 	private RolePrivilegeService rolePrivilegeService;
+
+	@Autowired
+	private SyncDataTaskService syncDataTaskService;
 
 	private void checkContractAuth(Integer namespaceId, Long privilegeId, Long orgId, Long communityId) {
 		ListServiceModuleAppsCommand cmd = new ListServiceModuleAppsCommand();
@@ -1669,27 +1671,48 @@ public class ContractServiceImpl implements ContractService {
 	@Override
 	public void syncContractsFromThirdPart(SyncContractsFromThirdPartCommand cmd) {
 		checkContractAuth(cmd.getNamespaceId(), PrivilegeConstants.CONTRACT_SYNC, cmd.getOrgId(), cmd.getCommunityId());
-		this.coordinationProvider.getNamedLock(CoordinationLocks.SYNC_CONTRACT.getCode() + cmd.getNamespaceId() + cmd.getCommunityId()).tryEnter(()-> {
-			ExecutorUtil.submit(new Runnable() {
-				@Override
-				public void run() {
-					try{
-						Community community = communityProvider.findCommunityById(cmd.getCommunityId());
-						if(community == null) {
-							return;
-						}
-						String version = contractProvider.findLastContractVersionByCommunity(cmd.getNamespaceId(), community.getId());
-						ThirdPartContractHandler contractHandler = PlatformContext.getComponent(ThirdPartContractHandler.CONTRACT_PREFIX + cmd.getNamespaceId());
-						if(contractHandler != null) {
-							contractHandler.syncContractsFromThirdPart("1", version, community.getNamespaceCommunityToken());
-						}
 
-					}catch (Exception e){
-						LOGGER.error("syncEnterpriseCustomers error.", e);
-					}
-				}
-			});
-		});
+		Community community = communityProvider.findCommunityById(cmd.getCommunityId());
+		if(community == null) {
+			return;
+		}
+		String version = contractProvider.findLastContractVersionByCommunity(cmd.getNamespaceId(), community.getId());
+		ThirdPartContractHandler contractHandler = PlatformContext.getComponent(ThirdPartContractHandler.CONTRACT_PREFIX + cmd.getNamespaceId());
+		if(contractHandler != null) {
+			SyncDataTask task = new SyncDataTask();
+			task.setOwnerType(EntityType.COMMUNITY.getCode());
+			task.setOwnerId(community.getId());
+			task.setType(SyncDataTaskType.CONTRACT.getCode());
+			task.setCreatorUid(UserContext.currentUserId());
+			syncDataTaskService.executeTask(() -> {
+				SyncDataResponse response = new SyncDataResponse();
+				contractHandler.syncContractsFromThirdPart("1", version, community.getNamespaceCommunityToken());
+				return response;
+			}, task);
+
+		}
+
+//		this.coordinationProvider.getNamedLock(CoordinationLocks.SYNC_CONTRACT.getCode() + cmd.getNamespaceId() + cmd.getCommunityId()).tryEnter(()-> {
+//			ExecutorUtil.submit(new Runnable() {
+//				@Override
+//				public void run() {
+//					try{
+//						Community community = communityProvider.findCommunityById(cmd.getCommunityId());
+//						if(community == null) {
+//							return;
+//						}
+//						String version = contractProvider.findLastContractVersionByCommunity(cmd.getNamespaceId(), community.getId());
+//						ThirdPartContractHandler contractHandler = PlatformContext.getComponent(ThirdPartContractHandler.CONTRACT_PREFIX + cmd.getNamespaceId());
+//						if(contractHandler != null) {
+//							contractHandler.syncContractsFromThirdPart("1", version, community.getNamespaceCommunityToken());
+//						}
+//
+//					}catch (Exception e){
+//						LOGGER.error("syncEnterpriseCustomers error.", e);
+//					}
+//				}
+//			});
+//		});
 	}
 
 	@Override
