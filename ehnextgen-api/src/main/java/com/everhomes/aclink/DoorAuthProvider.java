@@ -87,4 +87,6 @@ public interface DoorAuthProvider {
     List<Long> listDoorAuthByBuildingName2(Byte isOpenAuth, Long doorId,
             Long communityId, String buildingName,
             CrossShardListingLocator locator, int pageSize, Integer namespaceId);
+
+    DoorAuth queryValidDoorAuthByVisitorPhone(Long doorId, String phone);
 }

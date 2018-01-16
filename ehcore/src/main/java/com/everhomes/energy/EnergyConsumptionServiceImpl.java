@@ -3710,7 +3710,7 @@ public class EnergyConsumptionServiceImpl implements EnergyConsumptionService {
     public EnergyPlanDTO updateEnergyPlan(UpdateEnergyPlanCommand cmd) {
 //        userPrivilegeMgr.checkCurrentUserAuthority(EntityType.COMMUNITY.getCode(), cmd.getTargetId(), cmd.getOwnerId(), PrivilegeConstants.ENERGY_PLAN_CREATE);
         checkEnergyAuth(cmd.getNamespaceId(), PrivilegeConstants.ENERGY_PLAN_CREATE, cmd.getOwnerId(),  cmd.getTargetId());
-        checkMeterPlanAssigment(cmd.getId(), cmd.getMeters());
+//        checkMeterPlanAssigment(cmd.getId(), cmd.getMeters());
         EnergyPlan plan = ConvertHelper.convert(cmd, EnergyPlan.class);
         RepeatSettings repeat = dealEnergyPlanRepeat(cmd.getRepeat());
         plan.setRepeatSettingId(repeat.getId());

@@ -365,7 +365,7 @@ public class ActivityServiceImpl implements ActivityService {
 
     	// 把锁放在查询语句的外面，update by tt, 20170210
         Tuple<ActivityDTO, Boolean> tuple = this.coordinationProvider.getNamedLock(CoordinationLocks.UPDATE_ACTIVITY.getCode()).enter(() -> {
-            return dbProvider.execute((status) -> {
+            return (ActivityDTO) dbProvider.execute((status) -> {
 
                 LOGGER.warn("------signup start ");
 
@@ -1624,7 +1624,7 @@ public class ActivityServiceImpl implements ActivityService {
 	public void deleteSignupInfo(DeleteSignupInfoCommand cmd) {
         Tuple<ActivityRoster, Boolean> tuple = coordinationProvider.getNamedLock(
                 CoordinationLocks.UPDATE_ACTIVITY_ROSTER.getCode() + cmd.getId()).enter(() -> {
-            return dbProvider.execute((status) -> {
+            return (ActivityRoster) dbProvider.execute((status) -> {
                 ActivityRoster roster = activityProvider.findRosterById(cmd.getId());
                 activityProvider.deleteRoster(roster);
                 updateActivityWhenDeleteRoster(roster);
