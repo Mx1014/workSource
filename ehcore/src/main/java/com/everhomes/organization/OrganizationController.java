@@ -644,7 +644,7 @@ public class OrganizationController extends ControllerBase {
      * <p>查询 域空间的PM公司</p>
      */
     @RequestMapping("listPmOrganizationsByNamespaceId")
-    @RestReturn(value=OrganizationTreeDTO.class, collection = true)
+    @RestReturn(value=OrganizationTreeDTO.class)
     public RestResponse listPmOrganizationsByNamespaceId(){
         //TODO:加权限校验
         RestResponse res = new RestResponse(organizationService.listPmOrganizationsByNamespaceId());
