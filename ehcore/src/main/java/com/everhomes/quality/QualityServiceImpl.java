@@ -2982,7 +2982,7 @@ public class QualityServiceImpl implements QualityService {
 		//offline support
 		if (cmd.getLastSyncTime() != null) {
 			Timestamp syncTime = dateStrToTimestamp(cmd.getLastSyncTime());
-			dtos.removeIf(dto -> dto.getCreateTime().before(syncTime)
+			dtos.removeIf((dto) -> dto.getCreateTime().before(syncTime)
 					&& dto.getUpdateTime().before(syncTime) && dto.getDeleteTime().before(syncTime));
 		}
 		//返回数据中添加所属项目
@@ -4635,7 +4635,7 @@ public class QualityServiceImpl implements QualityService {
 			sampleQualityInspections = sampleQualityInspectionResponse.getSampleQualityInspectionDTOList();
 		}
 		//绩效任务列表 offline  Timestamp
-		sampleQualityInspections.stream().map((SampleQualityInspectionDTO s) -> {
+		sampleQualityInspections.forEach((s) -> {
 			if (s.getDeleteTime() == null) {
 				if (s.getUpdateTime() == null) {
 					s.setLastSyncTime(s.getCreateTime().toLocalDateTime().format(dateSF));
@@ -4645,7 +4645,6 @@ public class QualityServiceImpl implements QualityService {
 			} else {
 				s.setLastSyncTime(s.getDeleteTime().toLocalDateTime().format(dateSF));
 			}
-			return null;
 		});
 
 		offlineResponse.setSampleQualityInspections(sampleQualityInspections);
@@ -4656,12 +4655,13 @@ public class QualityServiceImpl implements QualityService {
 		specificationsCommand.setScopeId(cmd.getCommunityId());
 		specificationsCommand.setOwnerId(cmd.getOwnerId());
 		specificationsCommand.setOwnerType(cmd.getOwnerType());
-		specificationsCommand.setInspectionType(SpecificationInspectionType.SPECIFICATION.getCode());
+		specificationsCommand.setInspectionType(SpecificationInspectionType.CATEGORY.getCode());
+		//这里增加了按syncTime过滤  offline  所有的类型
 		ListQualitySpecificationsResponse listQualitySpecificationsResponse = listQualitySpecifications(specificationsCommand);
 		if (listQualitySpecificationsResponse != null)
 		offlineResponse.setSpecifications(listQualitySpecificationsResponse.getSpecifications());
 
-		//拿到所有类型的下面的规范
+		//拿到所有类型的id  从id拿到下面的规范items
 		List<Long> parentIds = new ArrayList<>();
 		if (listQualitySpecificationsResponse != null && listQualitySpecificationsResponse.getSpecifications() != null) {
 			listQualitySpecificationsResponse.getSpecifications().forEach((s) -> {
@@ -4671,25 +4671,30 @@ public class QualityServiceImpl implements QualityService {
 				}
 			});
 		}
+		//拿所有的规范
 		List<QualityInspectionSpecifications> qualityInspectionSpecifications = qualityProvider.listSpecifitionByParentIds(parentIds);
 		List<QualityInspectionSpecificationDTO> specificationsDetail = new ArrayList<>();
 		List<Long> detailsId = new ArrayList<>();
 		if (qualityInspectionSpecifications != null && qualityInspectionSpecifications.size() > 0) {
-			qualityInspectionSpecifications.stream().map((QualityInspectionSpecifications q) -> {
+			qualityInspectionSpecifications.forEach((q) -> {
 						specificationsDetail.add(ConvertHelper.convert(q, QualityInspectionSpecificationDTO.class));
 						detailsId.add(q.getId());
-						return null;
 					}
 			);
 		}
-		offlineResponse.getSpecifications().addAll(specificationsDetail);
-		List<QualityInspectionSpecificationDTO> qualityInspectionSpecificationDTOS = new ArrayList<>();
+		offlineResponse.getSpecifications().addAll(specificationsDetail);//所有的类型和规范放在一起
+		List<QualityInspectionSpecificationDTO> qualityInspectionSpecificationDTOS = new ArrayList<>();// items
 		detailsId.forEach((d)->{
 			GetQualitySpecificationCommand command = new GetQualitySpecificationCommand();
 			command.setSpecificationId(d);
 			qualityInspectionSpecificationDTOS.add(getQualitySpecification(command));
 		});
-		offlineResponse.setSpecificationsDetail(qualityInspectionSpecificationDTOS);
+
+		//只保留子节点详细内容 子节点为items 父节点为规范
+		List<QualityInspectionSpecificationDTO> details = new ArrayList<>();
+		qualityInspectionSpecificationDTOS.forEach(q->details.addAll(q.getChildrens()));
+		//offlineResponse.setSpecificationsDetail(details);
+		offlineResponse.getSpecifications().addAll(details);
 
 
 		//需要单独返回删除的列表
@@ -4702,7 +4707,24 @@ public class QualityServiceImpl implements QualityService {
 		offlineDeleteTablesInfo.setDeleteIds(deleteIds);
 		offlineResponse.setDeletedSpecifications(offlineDeleteTablesInfo);
 
+		//最终结果处理 lastSyncTime
+		dealLastSyncTime(offlineResponse,cmd.getLastUpdateSyncTime());
+
 		return offlineResponse;
+	}
+
+	private void dealLastSyncTime(OfflineSampleQualityInspectionResponse offlineResponse, Timestamp lastUpdateSyncTime) {
+		List<QualityInspectionSpecificationDTO> specifications = offlineResponse.getSpecifications();
+		List<QualityInspectionSpecificationDTO> effectiveSpecifications = new ArrayList<>();
+		if (specifications != null && specifications.size() > 0) {
+			specifications.forEach((s) -> {
+				if (!(s.getCreateTime().before(lastUpdateSyncTime) &&
+						s.getUpdateTime().before(lastUpdateSyncTime))) {
+					effectiveSpecifications.add(s);
+				}
+			});
+			offlineResponse.setSpecifications(effectiveSpecifications);
+		}
 	}
 
 	private void addIds(List<Long> parentIds, List<QualityInspectionSpecificationDTO> specifications) {

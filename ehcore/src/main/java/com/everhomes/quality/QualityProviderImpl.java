@@ -2809,6 +2809,7 @@ public class QualityProviderImpl implements QualityProvider {
 		return context.selectFrom(Tables.EH_QUALITY_INSPECTION_SPECIFICATIONS)
 				.where(Tables.EH_QUALITY_INSPECTION_SPECIFICATIONS.NAMESPACE_ID.eq(UserContext.getCurrentNamespaceId()))
 				.and(Tables.EH_QUALITY_INSPECTION_SPECIFICATIONS.PARENT_ID.in(parentIds))
+				.and(Tables.EH_QUALITY_INSPECTION_SPECIFICATIONS.INSPECTION_TYPE.eq(SpecificationInspectionType.SPECIFICATION.getCode()))
 				.and(Tables.EH_QUALITY_INSPECTION_SPECIFICATIONS.STATUS.eq(QualityStandardStatus.ACTIVE.getCode()))
 				.fetchInto(QualityInspectionSpecifications.class);
 	}
