@@ -3587,7 +3587,12 @@ public class FlowServiceImpl implements FlowService {
                 if (sel.getSourceIdB() != null) {
                     if (FlowUserSourceType.SOURCE_DUTY_DEPARTMENT.getCode().equals(sel.getSourceTypeB())) {
                         FlowCase flowCase = ctx.getFlowCase();
-                        List<Long> tmp = flowUserSelectionService.findUsersByDudy(parentOrgId, flowCase.getModuleId(), flowCase.getProjectType(), flowCase.getProjectId(), sel.getSourceIdA());
+
+                        String projectType = flowCase.getProjectTypeA() != null ? flowCase.getProjectTypeA() : flowCase.getProjectType();
+                        Long projectId = flowCase.getProjectIdA() != null ? flowCase.getProjectIdA() : flowCase.getProjectId();
+
+                        List<Long> tmp = flowUserSelectionService.findUsersByDudy(
+                                parentOrgId, flowCase.getModuleId(), projectType, projectId, sel.getSourceIdA());
                         users.addAll(tmp);
                         continue;
                     }
@@ -3624,7 +3629,11 @@ public class FlowServiceImpl implements FlowService {
                     List<Long> tmp = flowUserSelectionService.findManagersByDepartmentId(parentOrgId, departmentId, ctx.getFlowGraph().getFlow());
                     users.addAll(tmp);
                 } else if (FlowUserSourceType.SOURCE_DUTY_MANAGER.getCode().equals(sel.getSourceTypeA())) {
-                    List<Long> idList = flowUserSelectionService.findModuleDutyManagers(departmentId, flow.getModuleId(), flow.getProjectType(), flow.getProjectId());
+                    FlowCase flowCase = ctx.getFlowCase();
+                    String projectType = flowCase.getProjectTypeA() != null ? flowCase.getProjectTypeA() : flowCase.getProjectType();
+                    Long projectId = flowCase.getProjectIdA() != null ? flowCase.getProjectIdA() : flowCase.getProjectId();
+
+                    List<Long> idList = flowUserSelectionService.findModuleDutyManagers(departmentId, flow.getModuleId(), projectType, projectId);
                     users.addAll(idList);
                 } else {
                     LOGGER.error("resolvUser selId= " + sel.getId() + " manager parse error!");

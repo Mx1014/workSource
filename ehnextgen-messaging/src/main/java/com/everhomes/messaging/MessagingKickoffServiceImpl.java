@@ -54,6 +54,9 @@ public class MessagingKickoffServiceImpl implements MessagingKickoffService {
     @Override
     public boolean isKickoff(Integer namespaceId, LoginToken loginToken) {
         try {
+            if(loginToken == null) {
+                return false;
+            }
             String key = getKickoffMessageKey(namespaceId, loginToken);
             Accessor acc = this.bigCollectionProvider.getMapAccessor(key, "");
             RedisTemplate redisTemplate = acc.getTemplate(stringRedisSerializer);
@@ -64,7 +67,7 @@ public class MessagingKickoffServiceImpl implements MessagingKickoffService {
             
             return true;            
         } catch(Exception ex) {
-            LOGGER.info("kickoff error, loginToken error? " + ex.getMessage());   
+            LOGGER.info("kickoff error, loginToken error? ", ex);   
         }
 
         return false;
@@ -90,6 +93,9 @@ public class MessagingKickoffServiceImpl implements MessagingKickoffService {
     @Override
     public void remoteKickoffTag(Integer namespaceId, LoginToken loginToken) {
         try {
+            if(loginToken == null) {
+                return;
+            }
             String key = getKickoffMessageKey(namespaceId, loginToken);
             Accessor acc = this.bigCollectionProvider.getMapAccessor(key, "");
             RedisTemplate redisTemplate = acc.getTemplate(stringRedisSerializer);
@@ -98,7 +104,7 @@ public class MessagingKickoffServiceImpl implements MessagingKickoffService {
             LOGGER.debug("object=" + o);
           
         } catch(Exception ex) {
-            LOGGER.info("kickoff error, loginToken error? " + ex.getMessage());   
+            LOGGER.info("kickoff error, loginToken error? ", ex);   
         }    	
     }
 }
