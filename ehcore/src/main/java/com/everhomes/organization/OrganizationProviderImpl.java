@@ -3577,7 +3577,7 @@ public class OrganizationProviderImpl implements OrganizationProvider {
     }
 
     @Override
-    public List<Organization> findOrganizationByName(String name, Integer namespaceId) {
+    public Organization findOrganizationByName(String name, Integer namespaceId) {
         DSLContext context = this.dbProvider.getDslContext(AccessSpec.readOnly());
         SelectQuery<Record> query = context.selectQuery();
         query.addSelect(Tables.EH_ORGANIZATIONS.fields());
@@ -3590,7 +3590,10 @@ public class OrganizationProviderImpl implements OrganizationProvider {
         query.addConditions(Tables.EH_ORGANIZATIONS.STATUS.eq(OrganizationStatus.ACTIVE.getCode()));
 
         List<Organization> list = query.fetchInto(Organization.class);
-        return list;
+        if(list != null && list.size() == 1){
+        	return  list.get(0);
+		}
+        return null;
     }
 
     // by Janson

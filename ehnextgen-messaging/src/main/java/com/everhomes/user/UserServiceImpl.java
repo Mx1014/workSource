@@ -4731,9 +4731,8 @@ public class UserServiceImpl implements UserService {
 				return dto;
 			}
 			if(targetType!=null && targetType.equals(AssetPaymentStrings.EH_ORGANIZATION)){
-				List<Organization> list = organizationProvider.findOrganizationByName(targetName, namespaceId);
-				if(list.size() == 1){
-					Organization org = list.get(0);
+				Organization org = organizationProvider.findOrganizationByName(targetName, namespaceId);
+				if(org != null){
 					dto.setTargetName(org.getName());
 					dto.setTargetType(AssetPaymentStrings.EH_ORGANIZATION);
 					dto.setTargetId(org.getId());
