@@ -88,4 +88,36 @@ public interface EquipmentService {
 	FieldItemDTO findScopeFieldItemByFieldItemId(findScopeFieldItemCommand cmd);
 
 	void distributeTemplates();
+
+    EquipmentInspectionPlanDTO createEquipmentsInspectionPlan(UpdateEquipmentPlanCommand cmd);
+
+	EquipmentInspectionPlanDTO updateEquipmentInspectionPlan(UpdateEquipmentPlanCommand cmd);
+
+	EquipmentInspectionPlanDTO getEquipmmentInspectionPlanById(DeleteEquipmentPlanCommand cmd);
+
+    void deleteEquipmentInspectionPlan(DeleteEquipmentPlanCommand cmd);
+
+    void createEquipmentTaskByPlan(EquipmentInspectionPlans plan);
+
+	void exportInspectionPlans(searchEquipmentInspectionPlansCommand cmd, HttpServletResponse response);
+
+    void reviewEquipmentInspectionplan(ReviewEquipmentPlanCommand cmd);
+
+	void createTaskByPlan(DeleteEquipmentPlanCommand cmd);
+
+    List<EquipmentStandardRelationDTO> listEquipmentStandardRelationsByTaskId(ListTaskByIdCommand cmd);
+
+    void syncStandardToEqiupmentPlan();
+
+    void setReviewExpireDays(SetReviewExpireDaysCommand cmd);
+
+    void deleteReviewExpireDays(SetReviewExpireDaysCommand cmd);
+
+    EquipmentInspectionReviewDateDTO listReviewExpireDays(SetReviewExpireDaysCommand cmd);
+
+	EquipmentTaskOfflineResponse listEquipmentTasksDetails(ListEquipmentTasksCommand cmd);
+
+	OfflineEquipmentTaskReportResponse offlineEquipmentTaskReport(OfflineEquipmentTaskReportCommand cmd);
+
+    void createRepairsTask(CreateEquipmentRepairCommand cmd);
 }
