@@ -87,7 +87,6 @@ public class YunZhiXunSmsHandler implements SmsHandler, ApplicationListener<Cont
 
         initAccount();
 
-        SmsChannel channel = SmsBuilder.create(false);
         String timestamp = DateUtil.dateToStr(new Date(),
                 DateUtil.DATE_TIME_NO_SLASH);// 时间戳
         String uri = createUrl(accountSid, token, timestamp);
@@ -112,9 +111,15 @@ public class YunZhiXunSmsHandler implements SmsHandler, ApplicationListener<Cont
         }
         headers.put("Authorization", auth);
 
-        RspMessage result = channel.sendMessage(uri, SmsBuilder.HttpMethod.POST.val(), null, headers, entityJsonStr);
-        LOGGER.info("Send sms, result={}, uri={}, headers={}, phone={}, text={}", result, uri, headers, StringUtils.join(phoneNumbers, ","), text);
-        return result;
+        // RspMessage result = channel.sendMessage(uri, SmsChannelBuilder.HttpMethod.POST.val(), null, headers, entityJsonStr);
+        // LOGGER.info("Send sms, result={}, uri={}, headers={}, phone={}, text={}", result, uri, headers, StringUtils.join(phoneNumbers, ","), text);
+        // return result;
+        return SmsChannelBuilder.create(true)
+                .setUrl(uri)
+                .setBodyStr(entityJsonStr)
+                .setMethod(SmsChannel.HttpMethod.POST)
+                .setHeaders(headers)
+                .send();
     }
 
     private String createUrl(String accountSid, String authToken, String timestamp) {
@@ -165,7 +170,7 @@ public class YunZhiXunSmsHandler implements SmsHandler, ApplicationListener<Cont
     }*/
 
     @Override
-    public List<SmsReportDTO> report(String reportBody) {
+    public SmsReportResponse report(String reportBody) {
         YzxSmsReport report = xmlToBean(reportBody, YzxSmsReport.class);
         String smsId = report.smsId;
         if (smsId == null) {
@@ -180,9 +185,10 @@ public class YunZhiXunSmsHandler implements SmsHandler, ApplicationListener<Cont
             dto.setStatus(SmsLogStatus.REPORT_FAILED.getCode());
         }
 
-        dto.setResponseContentType("text/xml;charset=utf-8");
-        dto.setResponseBody("<?xml version=\"1.0\" encoding=\"UTF-8\"?>\n<response>\n<retcode>0</retcode>\n</response>");
-        return Collections.singletonList(dto);
+        SmsReportResponse response = new SmsReportResponse(Collections.singletonList(dto));
+        response.setResponseContentType("text/xml;charset=utf-8");
+        response.setResponseBody("<?xml version=\"1.0\" encoding=\"UTF-8\"?>\n<response>\n<retcode>0</retcode>\n</response>");
+        return response;
     }
 
     @Override
@@ -264,7 +270,10 @@ public class YunZhiXunSmsHandler implements SmsHandler, ApplicationListener<Cont
                 result = rspMessage.getMessage();
                 res = (YzxSmsResult) StringHelper.fromJsonString(rspMessage.getMessage(), YzxSmsResult.class);
             } catch (Exception e) {
-                e.printStackTrace();
+                for (String phoneNumber : phoneNumbers) {
+                    smsLogs.add(getSmsErrorLog(namespaceId, phoneNumber, templateScope, templateId, templateLocale, "Exception:"+result));
+                }
+                return smsLogs;
             }
         }
         for (String phoneNumber : phoneNumbers) {
