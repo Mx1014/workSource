@@ -1122,6 +1122,22 @@ public class ParkingProviderImpl implements ParkingProvider {
 	}
 
 	@Override
+	public void createParkingSpaceLog(ParkingSpaceLog log) {
+
+		long id = sequenceProvider.getNextSequence(NameMapper
+				.getSequenceDomainFromTablePojo(EhParkingSpaceLogs.class));
+
+		DSLContext context = this.dbProvider.getDslContext(AccessSpec.readWrite());
+		EhParkingSpaceLogsDao dao = new EhParkingSpaceLogsDao(context.configuration());
+
+		log.setId(id);
+
+		dao.insert(log);
+		DaoHelper.publishDaoAction(DaoAction.CREATE, EhParkingSpaceLogs.class, null);
+
+	}
+
+	@Override
 	public List<ParkingSpace> searchParkingSpaces(Integer namespaceId, String ownerType, Long ownerId, Long parkingLotId,
 												  String keyword, String lockStatus, Long pageAnchor, Integer pageSize) {
 		DSLContext context = this.dbProvider.getDslContext(AccessSpec.readOnlyWith(EhParkingSpaces.class));

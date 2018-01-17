@@ -10,7 +10,7 @@ import java.sql.Timestamp;
  * <li>contactPhone: 操作人手机号</li>
  * <li>contactName: 操作人名称</li>
  * <li>contactEnterpriseName: 操作人公司名称</li>
- * <li>operateType: 操作类型 up: 升起车锁, down: 降下车锁{@link com.everhomes.rest.parking.ParkingSpaceLockOperateType}</li>
+ * <li>operateType: 操作类型 1: 升起车锁, 2: 降下车锁{@link com.everhomes.rest.parking.ParkingSpaceLockOperateType}</li>
  * <li>userType: 用户类型  RESERVE_PERSON(1): 预约人 , PLATE_OWNER(2): 车主{@link com.everhomes.rest.parking.ParkingSpaceLockOperateUserType}</li>
  * <li>operateUid: 操作人id</li>
  * <li>operateTime: 操作时间</li>

@@ -9,6 +9,15 @@ import com.everhomes.util.StringHelper;
  */
 public class DownParkingSpaceLockCommand {
     private String lockId;
+    private Long orderId;
+
+    public Long getOrderId() {
+        return orderId;
+    }
+
+    public void setOrderId(Long orderId) {
+        this.orderId = orderId;
+    }
 
     public String getLockId() {
         return lockId;

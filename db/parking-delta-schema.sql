@@ -24,9 +24,8 @@ CREATE TABLE `eh_parking_space_logs` (
   `contact_phone` varchar(64) DEFAULT NULL,
   `contact_name` varchar(64) DEFAULT NULL,
   `contact_enterprise_name` varchar(128) DEFAULT NULL,
-  `operate_type` tinyint(4) NOT NULL COMMENT '1: up, 2: down',
+  `operate_type` varchar(64) NOT NULL COMMENT '1: up, 2: down',
   `user_type` tinyint(4) NOT NULL COMMENT '1: booking person, 2: plate owner',
-  `operate_uid` bigint(20) NOT NULL DEFAULT '0',
   `operate_time` datetime DEFAULT NULL,
   PRIMARY KEY (`id`)
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4;
@@ -293,6 +292,10 @@ UPDATE eh_parking_lots join eh_communities on eh_communities.id = eh_parking_lot
 
 
 
+INSERT INTO `eh_locale_strings` (`scope`, `code`, `locale`, `text`)
+  VALUES ('parking', '10022', 'zh_CN', '升起车锁失败');
+INSERT INTO `eh_locale_strings` (`scope`, `code`, `locale`, `text`)
+  VALUES ('parking', '10023', 'zh_CN', '降下车锁失败');
 
 
 

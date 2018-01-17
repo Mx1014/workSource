@@ -9,18 +9,18 @@ package com.everhomes.rest.parking;
  * </ul>
  */
 public enum ParkingSpaceLockOperateType {
-    UP("up"), DOWN("down");
+    UP((byte)1), DOWN((byte)2);
 
-    private String code;
-    private ParkingSpaceLockOperateType(String code) {
+    private byte code;
+    private ParkingSpaceLockOperateType(byte code) {
         this.code = code;
     }
     
-    public String getCode() {
+    public byte getCode() {
         return this.code;
     }
     
-    public static ParkingSpaceLockOperateType fromCode(String code) {
+    public static ParkingSpaceLockOperateType fromCode(Byte code) {
         if(code != null) {
             ParkingSpaceLockOperateType[] values = ParkingSpaceLockOperateType.values();
             for(ParkingSpaceLockOperateType value : values) {

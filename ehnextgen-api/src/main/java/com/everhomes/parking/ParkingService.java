@@ -128,4 +128,8 @@ public interface ParkingService {
     void raiseParkingSpaceLock(RaiseParkingSpaceLockCommand cmd);
 
     void downParkingSpaceLock(DownParkingSpaceLockCommand cmd);
+
+    void raiseParkingSpaceLockForWeb(RaiseParkingSpaceLockCommand cmd);
+
+    void downParkingSpaceLockForWeb(DownParkingSpaceLockCommand cmd);
 }

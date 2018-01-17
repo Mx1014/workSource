@@ -22,10 +22,8 @@ import com.everhomes.bus.LocalBusOneshotSubscriberBuilder;
 import com.everhomes.configuration.ConfigConstants;
 import com.everhomes.order.PayService;
 import com.everhomes.parking.handler.DefaultParkingVendorHandler;
-import com.everhomes.rentalv2.RentalCommonServiceImpl;
-import com.everhomes.rentalv2.RentalResourceHandler;
-import com.everhomes.rentalv2.RentalResourceType;
-import com.everhomes.rentalv2.Rentalv2Provider;
+import com.everhomes.parking.vip_parking.DingDingParkingLockHandler;
+import com.everhomes.rentalv2.*;
 import com.everhomes.rentalv2.utils.RentalUtils;
 import com.everhomes.rest.RestResponse;
 import com.everhomes.rest.activity.ActivityRosterPayVersionFlag;
@@ -123,7 +121,8 @@ public class ParkingServiceImpl implements ParkingService {
 	private RentalCommonServiceImpl rentalCommonService;
 	@Autowired
 	private Rentalv2Provider rentalv2Provider;
-
+	@Autowired
+	private DingDingParkingLockHandler dingDingParkingLockHandler;
 
 	@Override
 	public List<ParkingCardDTO> listParkingCards(ListParkingCardsCommand cmd) {
@@ -2482,11 +2481,93 @@ public class ParkingServiceImpl implements ParkingService {
 
 	@Override
 	public void raiseParkingSpaceLock(RaiseParkingSpaceLockCommand cmd) {
+
+		handleParkingSpaceLock(cmd.getOrderId(), cmd.getLockId(), ParkingSpaceLockOperateUserType.RESERVE_PERSON,
+				ParkingSpaceLockOperateType.UP);
+	}
+
+	private void handleParkingSpaceLock(Long orderId, String lockId, ParkingSpaceLockOperateUserType userType,
+										ParkingSpaceLockOperateType operateType) {
+		RentalOrder order = rentalv2Provider.findRentalBillById(orderId);
+
+		if (order.getStatus() != SiteBillStatus.IN_USING.getCode()) {
+			throw RuntimeErrorException.errorWith(ErrorCodes.SCOPE_GENERAL,ErrorCodes.ERROR_INVALID_PARAMETER,
+					"Invalid parameter");
+		}
+
 		//TODO:
+		if (dingDingParkingLockHandler.raiseParkingSpaceLock()) {
+			ParkingSpace space = parkingProvider.findParkingSpaceByLockId(lockId);
+
+			ParkingSpaceLog log;
+			if (userType == ParkingSpaceLockOperateUserType.RESERVE_PERSON) {
+				log = buildParkingSpaceLog(space, order);
+			}else {
+				log = buildParkingSpaceLogForWeb(space, order);
+			}
+			log.setOperateType(operateType.getCode());
+
+			parkingProvider.createParkingSpaceLog(log);
+		}
+
+		if (operateType == ParkingSpaceLockOperateType.UP) {
+			throw RuntimeErrorException.errorWith(ParkingErrorCode.SCOPE,ParkingErrorCode.ERROR_RAISE_PARKING_LOCK,
+					"Raise parking lock failed");
+		}else {
+			throw RuntimeErrorException.errorWith(ParkingErrorCode.SCOPE,ParkingErrorCode.ERROR_DOWN_PARKING_LOCK,
+					"Down parking lock failed");
+		}
+
+	}
+
+	private ParkingSpaceLog buildParkingSpaceLog(ParkingSpace space, RentalOrder order) {
+		ParkingSpaceLog log = new ParkingSpaceLog();
+
+		log.setLockId(space.getLockId());
+		log.setSpaceNo(space.getSpaceNo());
+		log.setContactPhone(order.getUserPhone());
+		log.setContactName(order.getUserName());
+		log.setContactEnterpriseName(order.getUserEnterpriseName());
+		log.setUserType(ParkingSpaceLockOperateUserType.RESERVE_PERSON.getCode());
+		log.setOperateTime(new Timestamp(System.currentTimeMillis()));
+
+		return log;
+	}
+
+	private ParkingSpaceLog buildParkingSpaceLogForWeb(ParkingSpace space, RentalOrder order) {
+		String customJson = order.getCustomObject();
+		VipParkingUseInfoDTO useInfoDTO = JSONObject.parseObject(customJson, VipParkingUseInfoDTO.class);
+
+		ParkingSpaceLog log = new ParkingSpaceLog();
+
+		log.setLockId(space.getLockId());
+		log.setSpaceNo(space.getSpaceNo());
+		log.setContactPhone(useInfoDTO.getPlateOwnerPhone());
+		log.setContactName(useInfoDTO.getPlateOwnerName());
+		log.setContactEnterpriseName(useInfoDTO.getPlateOwnerEnterpriseName());
+		log.setUserType(ParkingSpaceLockOperateUserType.PLATE_OWNER.getCode());
+		log.setOperateTime(new Timestamp(System.currentTimeMillis()));
+
+		return log;
 	}
 
 	@Override
 	public void downParkingSpaceLock(DownParkingSpaceLockCommand cmd) {
-		//TODO:
+
+		handleParkingSpaceLock(cmd.getOrderId(), cmd.getLockId(), ParkingSpaceLockOperateUserType.RESERVE_PERSON,
+				ParkingSpaceLockOperateType.DOWN);
+	}
+
+	@Override
+	public void raiseParkingSpaceLockForWeb(RaiseParkingSpaceLockCommand cmd) {
+
+		handleParkingSpaceLock(cmd.getOrderId(), cmd.getLockId(), ParkingSpaceLockOperateUserType.PLATE_OWNER,
+				ParkingSpaceLockOperateType.UP);
+	}
+
+	@Override
+	public void downParkingSpaceLockForWeb(DownParkingSpaceLockCommand cmd) {
+		handleParkingSpaceLock(cmd.getOrderId(), cmd.getLockId(), ParkingSpaceLockOperateUserType.PLATE_OWNER,
+				ParkingSpaceLockOperateType.DOWN);
 	}
 }
