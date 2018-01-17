@@ -123,6 +123,8 @@ public interface PortalService {
 
 	void syncLaunchPadData(SyncLaunchPadDataCommand cmd);
 
+    PortalVersionDTO findPortalVersionById(Long versionId);
+
     ListPortalVersionResponse listPortalVersions(ListPortalVersionCommand cmd);
 
 	PortalVersionUserDTO createPortalVersionUser(CreatePortalVersionUserCommand cmd);

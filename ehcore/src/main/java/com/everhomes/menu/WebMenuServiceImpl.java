@@ -13,6 +13,7 @@ import com.everhomes.module.ServiceModuleService;
 import com.everhomes.organization.Organization;
 import com.everhomes.organization.OrganizationProvider;
 import com.everhomes.organization.OrganizationService;
+import com.everhomes.portal.PortalService;
 import com.everhomes.portal.ServiceModuleApp;
 import com.everhomes.rest.acl.WebMenuDTO;
 import com.everhomes.rest.acl.WebMenuScopeApplyPolicy;
@@ -22,6 +23,9 @@ import com.everhomes.rest.acl.admin.ListWebMenuResponse;
 import com.everhomes.rest.menu.*;
 import com.everhomes.rest.oauth2.ModuleManagementType;
 import com.everhomes.rest.organization.OrganizationType;
+import com.everhomes.rest.portal.ListServiceModuleAppsCommand;
+import com.everhomes.rest.portal.ListServiceModuleAppsResponse;
+import com.everhomes.rest.portal.PortalVersionDTO;
 import com.everhomes.rest.portal.ServiceModuleAppDTO;
 import com.everhomes.user.UserContext;
 import com.everhomes.user.admin.SystemUserPrivilegeMgr;
@@ -70,6 +74,9 @@ public class WebMenuServiceImpl implements WebMenuService {
 
 	@Autowired
 	private WebMenuPrivilegeProvider webMenuPrivilegeProvider;
+
+	@Autowired
+	private PortalService portalService;
 
 
 	@Override
@@ -559,4 +566,45 @@ public class WebMenuServiceImpl implements WebMenuService {
 
 		return webMenuScopes;
 	}
+
+
+	public void refleshMenuByPortalVersion(Long versionId){
+
+
+		PortalVersionDTO portalVersionDTO = portalService.findPortalVersionById(versionId);
+		ListServiceModuleAppsCommand cmd = new ListServiceModuleAppsCommand();
+		cmd.setNamespaceId(portalVersionDTO.getNamespaceId());
+		cmd.setVersionId(versionId);
+		ListServiceModuleAppsResponse listServiceModuleAppsResponse = portalService.listServiceModuleApps(cmd);
+		List<ServiceModuleAppDTO> serviceModuleApps = listServiceModuleAppsResponse.getServiceModuleApps();
+
+
+		List<WebMenuScope> scopes = new ArrayList<>();
+
+		for(ServiceModuleAppDTO dto: serviceModuleApps){
+			if(dto.getModuleId() != null){
+				List<WebMenu> webMenus = webMenuProvider.listMenuByModuleIdAndType(dto.getModuleId(), WebMenuType.PARK.getCode());
+				if (webMenus != null){
+					for (WebMenu webMenu: webMenus){
+						WebMenuScope scope = new WebMenuScope();
+						scope.set
+					}
+				}
+			}
+		}
+		listMenuByModuleIdAndType()
+
+
+
+		//获取已经配置的菜单
+		List<WebMenuScope> webMenuScopes = webMenuProvider.listWebMenuScopeByOwnerId(EntityType.NAMESPACE.getCode(), Long.valueOf(cmd.getNamespaceId()));
+
+
+
+
+
+
+	}
+
+
 }

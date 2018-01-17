@@ -1353,7 +1353,6 @@ public class PortalServiceImpl implements PortalService {
 	}
 
 
-
 	public PortalPublishLogDTO getPortalPublishLog(GetPortalPublishLogCommand cmd){
 		return ConvertHelper.convert(portalPublishLogProvider.findPortalPublishLogById(cmd.getId()), PortalPublishLogDTO.class);
 	}
@@ -1898,7 +1897,7 @@ public class PortalServiceImpl implements PortalService {
 				LOGGER.info("syncLaunchPadData namespaceId={}  start", dto.getId());
 				dbProvider.execute((status -> {
 					//获取一个版本号
-					PortalVersion portalVersion = cteateBigPortalVersion(dto.getId());
+					PortalVersion portalVersion = createBigPortalVersion(dto.getId());
 
 					for (Tuple<String, String> t: list) {
 						syncLayout(dto.getId(), t.first(), t.second(), portalVersion);
@@ -1919,11 +1918,24 @@ public class PortalServiceImpl implements PortalService {
 	}
 
 	/**
+	 * 查询版本信息
+	 * @param versionId
+	 * @return
+	 */
+
+	@Override
+	public PortalVersionDTO findPortalVersionById(Long versionId){
+
+		PortalVersion version = portalVersionProvider.findPortalVersionById(versionId);
+		return ConvertHelper.convert(version, PortalVersionDTO.class);
+	}
+
+	/**
 	 * 基于已发布的最新的版本产生一个新大的版本号，一般用于同步和发布
 	 * @param namespaceId
 	 * @return
 	 */
-	private PortalVersion cteateBigPortalVersion(Integer namespaceId){
+	private PortalVersion createBigPortalVersion(Integer namespaceId){
 
 		PortalVersion oldVersion = portalVersionProvider.findMaxVersion(namespaceId);
 		PortalVersion newVersion = new PortalVersion();

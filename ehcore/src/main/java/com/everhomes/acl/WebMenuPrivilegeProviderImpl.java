@@ -332,4 +332,15 @@ public class WebMenuPrivilegeProviderImpl implements WebMenuPrivilegeProvider {
 			.and(Tables.EH_WEB_MENU_SCOPES.OWNER_TYPE.eq("EhNamespaces"))
 			.execute();
 	}
+
+	@Override
+	public List<WebMenu> listMenuByModuleIdAndType(Long moduleId, String type) {
+
+		DSLContext context = dbProvider.getDslContext(AccessSpec.readOnlyWith(EhWebMenus.class));
+		SelectQuery<EhWebMenusRecord> query = context.selectQuery(Tables.EH_WEB_MENUS);
+		query.addConditions(Tables.EH_WEB_MENUS.MODULE_ID.eq(moduleId));
+		query.addConditions(Tables.EH_WEB_MENUS.TYPE.eq(type));
+		List<WebMenu> webMenus = query.fetch().map(r -> ConvertHelper.convert(r, WebMenu.class));
+		return webMenus;
+	}
 }
