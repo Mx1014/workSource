@@ -52,6 +52,7 @@ import org.springframework.transaction.TransactionStatus;
 import org.springframework.web.multipart.MultipartFile;
 
 import javax.servlet.http.HttpServletResponse;
+
 import java.io.ByteArrayOutputStream;
 import java.io.IOException;
 import java.io.OutputStream;
@@ -979,9 +980,18 @@ public class SocialSecurityServiceImpl implements SocialSecurityService {
                 response.setTitle(title);
                 //  将 excel 的中的数据读取
                 String fileLog = "";
+                if (resultList.size() > 0) {
+                    //  校验标题，若不合格直接返回错误
+                    fileLog = checkImportSocialSecurityPaymentsTitle(title);
+                    if (!StringUtils.isEmpty(fileLog)) {
+                        response.setFileLog(fileLog);
+                        return response;
+                    } 
+                }
                 batchUpdateSSSettingAndPayments(resultList, cmd.getOwnerId(), fileLog, response);
                 return response;
             }
+
         }, task);
         return ConvertHelper.convert(task, ImportFileTaskDTO.class);
     }
@@ -1003,6 +1013,23 @@ public class SocialSecurityServiceImpl implements SocialSecurityService {
         return null;
     }
 
+	private String checkImportSocialSecurityPaymentsTitle(Map<String, String> map) {
+
+        //  TODO:是否从数据库读取模板
+        List<String> module = new ArrayList<>(Arrays.asList("手机","姓名","参保城市","公积金城市","户籍类型","社保基数","公积金基数",
+        		"公积金企业缴纳比例","公积金个人缴纳比例","养老企业比例","医疗企业比例","生育企业比例","工伤企业比例","失业企业比例","残障金","商业保险"));
+        //  存储字段来进行校验
+        List<String> temp = new ArrayList<String>(map.values()); 
+
+        for (int i = 0; i < module.size(); i++) {
+            if (module.get(i).equals(temp.get(i)))
+                continue;
+            else {
+                return ImportFileErrorType.TITLE_ERROE.getCode();
+            }
+        } 
+		return null;
+	}
     private void batchUpdateSSSettingAndPayments(List list, Long ownerId, String fileLog, ImportFileResponse response) {
         //
         response.setLogs(new ArrayList<>());
