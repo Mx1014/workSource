@@ -1404,14 +1404,10 @@ private void checkUserPrivilege(Long orgId, Long privilegeId, Long communityId) 
 				EquipmentInspectionStandards standard = equipmentProvider.findStandardById(mapdto.getStandardId());
 				if(standard != null) {
 					mapdto.setStandardName(standard.getName());
-//					OrganizationMember member = organizationProvider.findOrganizationMemberByOrgIdAndUId(mapdto.getReviewerUid(),
-//							standard.getOwnerId());
-//					if(null != member) {
-//						mapdto.setReviewerName(member.getContactName());
-//					}
+					mapdto.setStandardType(standard.getStandardType());
+					mapdto.setRepeatType(standard.getRepeatType());
 				}
 				equipmentStandardMap.add(mapdto);
-
 			}
 		}
 
@@ -3985,7 +3981,6 @@ private void checkUserPrivilege(Long orgId, Long privilegeId, Long communityId) 
         List<EquipmentInspectionAccessoryMap> map = equipmentProvider.listAccessoryMapByEquipmentId(dto.getId());
         if(null != map) {
         	for(EquipmentInspectionAccessoryMap acMap : map) {
-
         		EquipmentAccessoryMapDTO mapDto = ConvertHelper.convert(acMap, EquipmentAccessoryMapDTO.class);
         		EquipmentInspectionAccessories accessory = equipmentProvider.findAccessoryById(acMap.getAccessoryId());
         		EquipmentAccessoriesDTO accessoryDto = ConvertHelper.convert(accessory, EquipmentAccessoriesDTO.class);
@@ -3994,7 +3989,6 @@ private void checkUserPrivilege(Long orgId, Long privilegeId, Long communityId) 
         			accessoryDto.setTargetName(target.getName());
         		}
         		mapDto.setEqAccessories(accessoryDto);
-
         		eqAccessoryMap.add(mapDto);
         	}
         }
