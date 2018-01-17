@@ -5,9 +5,11 @@ package com.everhomes.user;
 import com.everhomes.acl.AclProvider;
 import com.everhomes.acl.PortalRoleResolver;
 import com.everhomes.acl.Role;
+import com.everhomes.acl.RolePrivilegeService;
 import com.everhomes.address.AddressService;
 import com.everhomes.app.App;
 import com.everhomes.app.AppProvider;
+import com.everhomes.asset.AssetPaymentStrings;
 import com.everhomes.authorization.*;
 import com.everhomes.bigcollection.Accessor;
 import com.everhomes.bigcollection.BigCollectionProvider;
@@ -65,6 +67,7 @@ import com.everhomes.organization.pm.PropertyMgrService;
 import com.everhomes.point.UserPointService;
 import com.everhomes.region.Region;
 import com.everhomes.region.RegionProvider;
+import com.everhomes.rest.acl.ListServiceModuleAdministratorsCommand;
 import com.everhomes.rest.address.*;
 import com.everhomes.rest.app.AppConstants;
 import com.everhomes.rest.asset.TargetDTO;
@@ -312,6 +315,9 @@ public class UserServiceImpl implements UserService {
 
 	@Autowired
 	private NamespaceResourceService namespaceResourceService;
+
+	@Autowired
+	private RolePrivilegeService rolePrivilegeService;
 
 //
 //    @Autowired
@@ -4702,10 +4708,12 @@ public class UserServiceImpl implements UserService {
 	}
 
 	@Override
-	public TargetDTO findTargetByNameAndAddress(String contractNum, String targetName, Long communityId, String tel,String ownerType,String targetType) {
+	public TargetDTO findTargetByNameAndAddress(String contractNum, String targetName, Long communityId, String tel,String ownerType,String targetType, Integer namespaceId) {
         TargetDTO dto = new TargetDTO();
         if(contractNum!=null) {
-			Integer namespaceId = UserContext.getCurrentNamespaceId();
+        	if(namespaceId == null){
+                namespaceId = UserContext.getCurrentNamespaceId();
+            }
 			String handler = configurationProvider.getValue(namespaceId, "contractService", "");
 			ContractService contractService = PlatformContext.getComponent(ContractService.CONTRACT_PREFIX + handler);
             List<Object> typeIdNameAndTel = contractService.findCustomerByContractNum(contractNum,communityId,ownerType);
@@ -4715,9 +4723,36 @@ public class UserServiceImpl implements UserService {
                 dto.setTargetName((String)typeIdNameAndTel.get(2));
                 dto.setUserIdentifier((String)typeIdNameAndTel.get(3));
                 dto.setContractId((Long)typeIdNameAndTel.get(4));
-                return dto;
             }
-        }else{
+        }
+        if(dto.getTargetId() == null){
+			if(targetType!=null && targetType.equals(AssetPaymentStrings.EH_USER)){
+				dto = userProvider.findUserByToken(tel,namespaceId);
+				return dto;
+			}
+			if(targetType!=null && targetType.equals(AssetPaymentStrings.EH_ORGANIZATION)){
+				Organization org = organizationProvider.findOrganizationByName(targetName, namespaceId);
+				if(org != null){
+					dto.setTargetName(org.getName());
+					dto.setTargetType(AssetPaymentStrings.EH_ORGANIZATION);
+					dto.setTargetId(org.getId());
+					//查企业的管理员
+					ListServiceModuleAdministratorsCommand cmd1 = new ListServiceModuleAdministratorsCommand();
+					cmd1.setOrganizationId(org.getId());
+					cmd1.setActivationFlag((byte)1);
+					cmd1.setOwnerType("EhOrganizations");
+					cmd1.setOwnerId(null);
+					List<OrganizationContactDTO> organizationContactDTOS = rolePrivilegeService
+							.listOrganizationAdministrators(cmd1);
+					if(organizationContactDTOS != null && organizationContactDTOS.size() > 0){
+						Long contactId = organizationContactDTOS.get(0).getTargetId();
+						User enterpriseAdmin = userProvider.findUserById(contactId);
+						dto.setUserIdentifier(enterpriseAdmin.getIdentifierToken());
+					}
+				}
+				return dto;
+			}
+		}
             //确定客户的优先度， 查到合同算查到人，楼栋门牌只是为了填写账单的地址用
 //            List<AddressIdAndName> addressByPossibleName = addressService.findAddressByPossibleName(UserContext.getCurrentNamespaceId(), communityId, buildingName, apartmentName);
 //            List<Long> ids = new ArrayList<>();
@@ -4728,18 +4763,8 @@ public class UserServiceImpl implements UserService {
 //            List<TargetDTO> users = userProvider.findUesrIdByNameAndAddressId(targetName,ids,tel);
 //            //再在eh_organization中找
 //            List<TargetDTO> organizations = organizationProvider.findOrganizationIdByNameAndAddressId(targetName,ids);
-			if(targetType!=null && targetType.equals("eh_user")){
-                dto = userProvider.findUserByTokenAndName(tel,targetName);
-                return dto;
-			}
-			if(targetType!=null && targetType.equals("eh_organization")){
-                Organization organization = organizationProvider.findOrganizationByName(targetName, UserContext.getCurrentNamespaceId());
-                dto.setTargetName(organization.getName());
-                dto.setTargetType("eh_organization");
-                dto.setTargetId(organization.getId());
-                return dto;
-            }
-        }
+
+
         return null;
 	}
 

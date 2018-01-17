@@ -15,6 +15,7 @@ import com.everhomes.util.StringHelper;
  * <li>apartmentName:门牌名称</li>
  * <li>ownerId:园区id</li>
  * <li>ownerType:类型，园区为community</li>
+ * <li>namespaceId:域空间id</li>
  * <li>tel:个人用户电话</li>
  * <li>contractNum:合同编号</li>
  *</ul>
@@ -26,12 +27,21 @@ public class FindTargetByNameAndAddressCommand {
     private String apartmentName;
     private Long ownerId;
     private String ownerType;
+    private Integer namespaceId;
     private String tel;
     private String contractNum;
 
     @Override
     public String toString() {
         return StringHelper.toJsonString(this);
+    }
+
+    public Integer getNamespaceId() {
+        return namespaceId;
+    }
+
+    public void setNamespaceId(Integer namespaceId) {
+        this.namespaceId = namespaceId;
     }
 
     public FindTargetByNameAndAddressCommand() {
