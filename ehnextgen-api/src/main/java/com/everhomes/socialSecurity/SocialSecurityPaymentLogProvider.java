@@ -21,4 +21,6 @@ public interface SocialSecurityPaymentLogProvider {
 	SocialSecurityPaymentLog findAnyOneSocialSecurityPaymentLog(Long ownerId, String paymentMonth);
 
 	void batchCreateSocialSecurityPaymentLog(List<EhSocialSecurityPaymentLogs> logs);
+
+	String findPayMonthByOwnerId(Long ownerId);
 }

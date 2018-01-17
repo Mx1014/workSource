@@ -193,7 +193,7 @@ public class SocialSecurityServiceImpl implements SocialSecurityService {
         }
         addEmployeeNewSocialSecuritySettings(cityId, hTs.get(0).getHouseholdTypeName(), detail);
 
-        String paymentMonth = socialSecurityPaymentProvider.findPaymentMonthByOwnerId(detail.getOrganizationId());
+        String paymentMonth = findPaymentMonth(detail.getOrganizationId());
         if (null == paymentMonth)
             paymentMonth = monthSF.get().format(DateHelper.currentGMTTime());
         if (Integer.valueOf(paymentMonth) >= Integer.valueOf(inMonth)) {
@@ -407,7 +407,7 @@ public class SocialSecurityServiceImpl implements SocialSecurityService {
             ListSocialSecurityPaymentsCommand cmd) {
 
         this.coordinationProvider.getNamedLock(CoordinationLocks.SOCIAL_SECURITY_LIST_PAYMENTS.getCode() + cmd.getOwnerId()).enter(() -> {
-            String month = socialSecurityPaymentProvider.findPaymentMonthByOwnerId(cmd.getOwnerId());
+            String month = findPaymentMonth(cmd.getOwnerId());
             if (null == month) {
                 //如果没有payments数据,增加一个
                 addSocialSecurity(cmd.getOwnerId());
@@ -507,7 +507,7 @@ public class SocialSecurityServiceImpl implements SocialSecurityService {
         }
         response.setNextPageOffset(nextPageOffset);
         response.setSocialSecurityPayments(result.stream().map(this::processSocialSecurityItemDTO).collect(Collectors.toList()));
-        response.setPaymentMonth(socialSecurityPaymentProvider.findPaymentMonthByOwnerId(cmd.getOwnerId()));
+        response.setPaymentMonth(findPaymentMonth(cmd.getOwnerId()));
         return response;
     }
 
@@ -642,7 +642,7 @@ public class SocialSecurityServiceImpl implements SocialSecurityService {
     public GetSocialSecurityPaymentDetailsResponse getSocialSecurityPaymentDetails(
             GetSocialSecurityPaymentDetailsCommand cmd) {
         GetSocialSecurityPaymentDetailsResponse response = new GetSocialSecurityPaymentDetailsResponse();
-        response.setPaymentMonth(socialSecurityPaymentProvider.findPaymentMonthByOwnerId(cmd.getOwnerId()));
+        response.setPaymentMonth(findPaymentMonth(cmd.getOwnerId()));
         OrganizationMemberDetails memberDetail = organizationProvider.findOrganizationMemberDetailsByDetailId(cmd.getDetailId());
         if (null == memberDetail) {
             return response;
@@ -705,6 +705,26 @@ public class SocialSecurityServiceImpl implements SocialSecurityService {
             response.setAfterAccumulationFundPayment(processSocialSecurityPaymentDetailDTO(afSettings));
         }
         return response;
+    }
+
+    private String findPaymentMonth(Long ownerId) {
+        String month = socialSecurityPaymentProvider.findPaymentMonthByOwnerId(ownerId);
+        if (null == month) {
+            month = socialSecurityPaymentLogProvider.findPayMonthByOwnerId(ownerId);
+            if (null == month) {
+                return null;
+            }
+            Calendar monthCalendar = Calendar.getInstance();
+            try {
+                monthCalendar.setTime(monthSF.get().parse(month));
+            } catch (ParseException e) {
+                LOGGER.error("parese month sf error", e);
+            }
+            monthCalendar.add(Calendar.MONTH, 1);
+            month = monthSF.get().format(monthCalendar.getTime());
+
+        }
+        return month;
     }
 
 //	private SocialSecurityPaymentDetailDTO processSocialSecurityPaymentDetailDTO(List<AccumulationFundPayment> r) {
@@ -1051,7 +1071,7 @@ public class SocialSecurityServiceImpl implements SocialSecurityService {
                     if (!StringUtils.isEmpty(fileLog)) {
                         response.setFileLog(fileLog);
                         return response;
-                    } 
+                    }
                 }
                 batchUpdateSSSettingAndPayments(resultList, cmd.getOwnerId(), fileLog, response);
                 return response;
@@ -1078,13 +1098,13 @@ public class SocialSecurityServiceImpl implements SocialSecurityService {
         return null;
     }
 
-	private String checkImportSocialSecurityPaymentsTitle(Map<String, String> map) {
+    private String checkImportSocialSecurityPaymentsTitle(Map<String, String> map) {
 
         //  TODO:是否从数据库读取模板
-        List<String> module = new ArrayList<>(Arrays.asList("手机","姓名","参保城市","公积金城市","户籍类型","社保基数","公积金基数",
-        		"公积金企业缴纳比例","公积金个人缴纳比例","养老企业比例","医疗企业比例","生育企业比例","工伤企业比例","失业企业比例","残障金","商业保险"));
+        List<String> module = new ArrayList<>(Arrays.asList("手机", "姓名", "参保城市", "公积金城市", "户籍类型", "社保基数", "公积金基数",
+                "公积金企业缴纳比例", "公积金个人缴纳比例", "养老企业比例", "医疗企业比例", "生育企业比例", "工伤企业比例", "失业企业比例", "残障金", "商业保险"));
         //  存储字段来进行校验
-        List<String> temp = new ArrayList<String>(map.values()); 
+        List<String> temp = new ArrayList<String>(map.values());
 
         for (int i = 0; i < module.size(); i++) {
             if (module.get(i).equals(temp.get(i)))
@@ -1092,9 +1112,10 @@ public class SocialSecurityServiceImpl implements SocialSecurityService {
             else {
                 return ImportFileErrorType.TITLE_ERROE.getCode();
             }
-        } 
-		return null;
-	}
+        }
+        return null;
+    }
+
     private void batchUpdateSSSettingAndPayments(List list, Long ownerId, String fileLog, ImportFileResponse response) {
         //
         RowResult title = (RowResult) list.get(0);
@@ -1299,7 +1320,7 @@ public class SocialSecurityServiceImpl implements SocialSecurityService {
             if (setting.getId() == null) {
                 //如果没有id ,说明是新建的setting,同时创建一个payment
                 socialSecuritySettingProvider.createSocialSecuritySetting(setting);
-                String payMonth = socialSecurityPaymentProvider.findPaymentMonthByOwnerId(detail.getOrganizationId());
+                String payMonth = findPaymentMonth(detail.getOrganizationId());
                 SocialSecurityPayment payment = processSocialSecurityPayment(setting, payMonth, NormalFlag.NO.getCode());
                 socialSecurityPaymentProvider.createSocialSecurityPayment(payment);
             } else {
@@ -1449,7 +1470,7 @@ public class SocialSecurityServiceImpl implements SocialSecurityService {
 
     private void calculateSocialSecurityInoutReports(Long ownerId) {
         //todo 组织架构获取本月增员本月减员的人
-        String month = socialSecurityPaymentProvider.findPaymentMonthByOwnerId(ownerId);
+        String month = findPaymentMonth(ownerId);
         socialSecurityInoutReportProvider.deleteSocialSecurityInoutReportByMonth(ownerId, month);
         List<Byte> socialInouts = new ArrayList<>();
         socialInouts.add(InOutLogType.ACCUMULATION_FUND_IN.getCode());
@@ -1540,7 +1561,7 @@ public class SocialSecurityServiceImpl implements SocialSecurityService {
 
 
     private void calculateSocialSecurityDptReports(Long ownerId) {
-        String month = socialSecurityPaymentProvider.findPaymentMonthByOwnerId(ownerId);
+        String month = findPaymentMonth(ownerId);
         socialSecurityDepartmentSummaryProvider.deleteSocialSecurityDptReports(ownerId, month);
         List<Organization> orgs = findOrganizationDpts(ownerId);
         for (Organization dpt : orgs) {
