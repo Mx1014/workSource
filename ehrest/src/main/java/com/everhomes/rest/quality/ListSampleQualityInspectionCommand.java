@@ -12,6 +12,7 @@ import java.sql.Timestamp;
  * <li>communityId: 小区id</li>
  * <li>pageAnchor: 锚点</li>
  * <li>pageSize: 页面大小</li>
+ * <li>namespaceId: namespaceId</li>
  * <li>lastSyncTime: 同步时间</li>
  * </ul>
  * Created by ying.xiong on 2017/6/9.
@@ -28,6 +29,8 @@ public class ListSampleQualityInspectionCommand {
     private Long pageAnchor;
 
     private Integer pageSize;
+
+    private Integer namespaceId;
 
     private String lastSyncTime;
 
@@ -87,6 +90,14 @@ public class ListSampleQualityInspectionCommand {
 
     public void setLastUpdateSyncTime(Timestamp lastUpdateSyncTime) {
         this.lastUpdateSyncTime = lastUpdateSyncTime;
+    }
+
+    public Integer getNamespaceId() {
+        return namespaceId;
+    }
+
+    public void setNamespaceId(Integer namespaceId) {
+        this.namespaceId = namespaceId;
     }
 
     @Override

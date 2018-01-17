@@ -1,7 +1,6 @@
 package com.everhomes.quality;
 
 import com.everhomes.acl.AclProvider;
-import com.everhomes.acl.RoleAssignment;
 import com.everhomes.community.Community;
 import com.everhomes.community.CommunityProvider;
 import com.everhomes.configuration.ConfigurationProvider;
@@ -26,7 +25,6 @@ import com.everhomes.rentalv2.Rentalv2ServiceImpl;
 import com.everhomes.repeat.RepeatService;
 import com.everhomes.repeat.RepeatSettings;
 import com.everhomes.rest.acl.PrivilegeConstants;
-import com.everhomes.rest.acl.RoleConstants;
 import com.everhomes.rest.app.AppConstants;
 import com.everhomes.rest.equipment.ReviewResult;
 import com.everhomes.rest.equipment.Status;
@@ -1004,12 +1002,7 @@ public class QualityServiceImpl implements QualityService {
 	@Override
 	public ListQualityInspectionTasksResponse listQualityInspectionTasks(
 			ListQualityInspectionTasksCommand cmd) {
-		/*Long privilegeId = configProvider.getLongValue(QualityConstant.QUALITY_TASK_LIST, 0L);
-		if(cmd.getTargetId() == 0L) {
-			userPrivilegeMgr.checkCurrentUserAuthority(null, null, cmd.getOwnerId(), privilegeId);
-		} else {
-			userPrivilegeMgr.checkCurrentUserAuthority(EntityType.COMMUNITY.getCode(), cmd.getTargetId(), cmd.getOwnerId(), privilegeId);
-		}*/
+
 		checkUserPrivilege(cmd.getOwnerId(),PrivilegeConstants.QUALITY_TASK_LIST,cmd.getTargetId());
 
 		User user = UserContext.current().getUser();
@@ -1044,19 +1037,22 @@ public class QualityServiceImpl implements QualityService {
 //        final Long executeUid = currentUid;
 
 		//是否是管理员
-		boolean isAdmin = false;
-		List<RoleAssignment> resources = aclProvider.getRoleAssignmentByResourceAndTarget(EntityType.ORGANIZATIONS.getCode(), cmd.getOwnerId(), EntityType.USER.getCode(), user.getId());
-		if(null != resources && 0 != resources.size()){
-			for (RoleAssignment resource : resources) {
-				if(resource.getRoleId() == RoleConstants.ENTERPRISE_SUPER_ADMIN
-						|| resource.getRoleId() == RoleConstants.ENTERPRISE_ORDINARY_ADMIN
-						|| resource.getRoleId() == RoleConstants.PM_SUPER_ADMIN
-						|| resource.getRoleId() == RoleConstants.PM_ORDINARY_ADMIN) {
-					isAdmin = true;
-					break;
-				}
-			}
-		}
+		//boolean isAdmin = false;
+//		List<RoleAssignment> resources = aclProvider.getRoleAssignmentByResourceAndTarget(EntityType.ORGANIZATIONS.getCode(), cmd.getOwnerId(), EntityType.USER.getCode(), user.getId());
+//		if(null != resources && 0 != resources.size()){
+//			for (RoleAssignment resource : resources) {
+//				if(resource.getRoleId() == RoleConstants.ENTERPRISE_SUPER_ADMIN
+//						|| resource.getRoleId() == RoleConstants.ENTERPRISE_ORDINARY_ADMIN
+//						|| resource.getRoleId() == RoleConstants.PM_SUPER_ADMIN
+//						|| resource.getRoleId() == RoleConstants.PM_ORDINARY_ADMIN) {
+//					isAdmin = true;
+//					break;
+//				}
+//			}
+//		}
+		//新后台对接权限修改
+		boolean isAdmin = checkAdmin(cmd.getOwnerId(),cmd.getOwnerType(),cmd.getNamespaceId());
+
 
 		List<QualityInspectionTasks> tasks = new ArrayList<QualityInspectionTasks>();
 
@@ -3587,19 +3583,20 @@ public class QualityServiceImpl implements QualityService {
 		locator.setAnchor(cmd.getPageAnchor());
 
 		//是否是管理员
-		boolean isAdmin = false;
-		List<RoleAssignment> resources = aclProvider.getRoleAssignmentByResourceAndTarget(EntityType.ORGANIZATIONS.getCode(), cmd.getOwnerId(), EntityType.USER.getCode(), user.getId());
-		if(null != resources && 0 != resources.size()){
-			for (RoleAssignment resource : resources) {
-				if(resource.getRoleId() == RoleConstants.ENTERPRISE_SUPER_ADMIN
-						|| resource.getRoleId() == RoleConstants.ENTERPRISE_ORDINARY_ADMIN
-						|| resource.getRoleId() == RoleConstants.PM_SUPER_ADMIN
-						|| resource.getRoleId() == RoleConstants.PM_ORDINARY_ADMIN) {
-					isAdmin = true;
-					break;
-				}
-			}
-		}
+//		boolean isAdmin = false;
+//		List<RoleAssignment> resources = aclProvider.getRoleAssignmentByResourceAndTarget(EntityType.ORGANIZATIONS.getCode(), cmd.getOwnerId(), EntityType.USER.getCode(), user.getId());
+//		if(null != resources && 0 != resources.size()){
+//			for (RoleAssignment resource : resources) {
+//				if(resource.getRoleId() == RoleConstants.ENTERPRISE_SUPER_ADMIN
+//						|| resource.getRoleId() == RoleConstants.ENTERPRISE_ORDINARY_ADMIN
+//						|| resource.getRoleId() == RoleConstants.PM_SUPER_ADMIN
+//						|| resource.getRoleId() == RoleConstants.PM_ORDINARY_ADMIN) {
+//					isAdmin = true;
+//					break;
+//				}
+//			}
+//		}
+		boolean isAdmin = checkAdmin(cmd.getOwnerId(), cmd.getOwnerType(), cmd.getNamespaceId());
 		List<QualityInspectionSamples> samples = new ArrayList<>();
 
 		if(isAdmin) {
@@ -4504,6 +4501,22 @@ public class QualityServiceImpl implements QualityService {
 			throw RuntimeErrorException.errorWith(ErrorCodes.SCOPE_GENERAL, ErrorCodes.ERROR_ACCESS_DENIED,
 					"权限不足");
 		}
+	}
+	//用于替换旧的admin验证
+	private Boolean checkAdmin(Long ownerId, String ownerType,Integer namespaceId) {
+		ListServiceModuleAppsCommand listServiceModuleAppsCommand = new ListServiceModuleAppsCommand();
+		listServiceModuleAppsCommand.setNamespaceId(namespaceId);
+		listServiceModuleAppsCommand.setModuleId(QualityConstant.QUALITY_MODULE);
+		ListServiceModuleAppsResponse apps = portalService.listServiceModuleAppsWithConditon(listServiceModuleAppsCommand);
+		CheckModuleManageCommand checkModuleManageCommand = new CheckModuleManageCommand();
+		checkModuleManageCommand.setModuleId(QualityConstant.QUALITY_MODULE);
+		checkModuleManageCommand.setOrganizationId(ownerId);
+		checkModuleManageCommand.setOwnerType(ownerType);
+		checkModuleManageCommand.setUserId(UserContext.currentUserId());
+		if (null != apps && null != apps.getServiceModuleApps() && apps.getServiceModuleApps().size() > 0) {
+			checkModuleManageCommand.setAppId(apps.getServiceModuleApps().get(0).getId());
+		}
+		return serviceModuleService.checkModuleManage(checkModuleManageCommand) != 0;
 	}
 	@Override
 	public HttpServletResponse exportSampleTaskCommunityScores(CountSampleTaskCommunityScoresCommand cmd, HttpServletResponse httpResponse) {
