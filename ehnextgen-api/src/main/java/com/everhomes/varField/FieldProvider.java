@@ -20,6 +20,7 @@ public interface FieldProvider {
     void saveFieldGroups(String customerType, Long customerId, List<Object> objects, String simpleName);
 
     String findClassNameByGroupDisplayName(String groupDisplayName);
+    FieldGroup findGroupByGroupDisplayName(String groupDisplayName);
 
     List<FieldItem> listFieldItems(Long fieldId);
     List<ScopeFieldItem> listScopeFieldItems(Long fieldId, Integer namespaceId, Long communityId);

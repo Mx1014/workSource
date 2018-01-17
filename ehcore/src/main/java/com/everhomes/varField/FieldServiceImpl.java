@@ -118,6 +118,7 @@ public class FieldServiceImpl implements FieldService {
      */
     @Override
     public void exportDynamicExcelTemplate(ListFieldGroupCommand cmd, HttpServletResponse response) {
+        dynamicExcelService.exportDynamicExcel(response, DynamicExcelStrings.CUSTOEMR, )
         //try to call dynamicExcelService.exportDynamicExcel
         //参考代码：管理员校验
         if(ModuleName.ENTERPRISE_CUSTOMER.equals(ModuleName.fromName(cmd.getModuleName()))) {
