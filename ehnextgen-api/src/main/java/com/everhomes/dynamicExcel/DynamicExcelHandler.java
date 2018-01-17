@@ -23,11 +23,11 @@ public interface DynamicExcelHandler {
 //    DynamicField getDynamicFieldFromCell(String headerName,DynamicSheet ds);
 
     /**
-     * 此方法应该用于插入schema等存储处理, 抛出的异常会导致该sheet的处理会被略过
+     * 此方法应该用于插入schema等存储处理, 抛出的异常会导致该sheet的处理会被略过;storage1来自导入方法importMultiSheet
      * @param sheetClassObjs sheet页对应的类的对象的集合
      * @param sheetClass    sheet页对应的类
      */
-    void save2Schema(List<Object> sheetClassObjs, Class<?> sheetClass);
+    void save2Schema(List<Object> sheetClassObjs, Class<?> sheetClass,Object storage1);
     /**
      *
      * @param response 对返回结果进行后处理，不进行处理则只返回下载成功和失败的行数
@@ -35,7 +35,7 @@ public interface DynamicExcelHandler {
     void postProcess(DynamicImportResponse response);
 
     /**
-     *
+     *在dynamicaService 导入方法importMultiSheet中使用，storage用来传递参数
      * @param sheetName sheet的名字
      * @param storage   传递的调用者的参数
      * @Return Dynamic实例对象

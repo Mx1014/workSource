@@ -120,7 +120,7 @@ public class DynamicExcelService {
      * @param storage 传递调用者参数用
      * @return DynamicImportResponse
      */
-    public DynamicImportResponse importMultiSheet(MultipartFile file, String code, Integer headerRow, Object storage) {
+    public DynamicImportResponse importMultiSheet(MultipartFile file, String code, Integer headerRow, Object storage,Object storage1) {
         DynamicImportResponse response = new DynamicImportResponse();
         Workbook workbook = null;
         try{
@@ -189,7 +189,7 @@ public class DynamicExcelService {
                 }
                 //插入
                 try {
-                    h.save2Schema(sheetClassObjs, sheetClass,);
+                    h.save2Schema(sheetClassObjs, sheetClass,storage1);
                     Integer successRowNumber = response.getSuccessRowNumber();
                     successRowNumber += sheetClassObjs.size();
                     response.setSuccessRowNumber(successRowNumber);
