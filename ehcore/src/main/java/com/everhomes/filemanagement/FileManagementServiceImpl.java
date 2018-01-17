@@ -1,5 +1,6 @@
 package com.everhomes.filemanagement;
 
+import com.everhomes.contentserver.ContentServerService;
 import com.everhomes.module.ServiceModuleService;
 import com.everhomes.portal.PortalService;
 import com.everhomes.rest.filemanagement.*;
@@ -15,6 +16,7 @@ import org.springframework.stereotype.Component;
 
 import java.util.ArrayList;
 import java.util.List;
+import java.util.stream.Collectors;
 
 @Component
 public class FileManagementServiceImpl implements  FileManagementService{
@@ -27,6 +29,9 @@ public class FileManagementServiceImpl implements  FileManagementService{
 
     @Autowired
     private PortalService portalService;
+
+    @Autowired
+    private ContentServerService contentServerService;
 
     @Override
     public FileCatalogDTO addFileCatalog(AddFileCatalogCommand cmd) {
@@ -107,6 +112,8 @@ public class FileManagementServiceImpl implements  FileManagementService{
             dto.setId(r.getId());
             dto.setName(r.getName());
             dto.setCreateTime(r.getCreateTime());
+            if(r.getDownloadPermission() != null)
+                dto.setDownloadPermission(r.getDownloadPermission());
             catalogs.add(dto);
         });
         return catalogs;
@@ -237,25 +244,24 @@ public class FileManagementServiceImpl implements  FileManagementService{
             return dto;
 
         //  1.whether the name has been used
-        FileContent content = fileManagementProvider.findFileContentByName(catalog.getNamespaceId(),catalog.getOwnerId(),cmd.getContentName());
-        if(content != null){
+        FileContent content = fileManagementProvider.findFileContentByName(catalog.getNamespaceId(), catalog.getOwnerId(), cmd.getContentName());
+        if (content != null) {
             throw RuntimeErrorException.errorWith(FileManagementErrorCode.SCOPE, FileManagementErrorCode.ERROR_NAME_ALREADY_EXISTS,
                     "the name has been used.");
-        }else{
+        } else {
             //  2.create it
             content = new FileContent();
+            if (cmd.getParentId() == null)
+                cmd.setParentId(cmd.getCatalogId());
             content.setNamespaceId(catalog.getNamespaceId());
             content.setOwnerId(catalog.getOwnerId());
             content.setOwnerType(catalog.getOwnerType());
             content.setCatalogId(catalog.getId());
             content.setName(cmd.getContentName());
-            if(cmd.getContentSize() != null)
-                content.setSize(cmd.getContentSize());
-            if(cmd.getParentId() != null)
-                content.setParentId(cmd.getParentId());
+            content.setSize(cmd.getContentSize());
+            content.setParentId(cmd.getParentId());
             content.setContentType(cmd.getContentType());
-            if(cmd.getContentUri() != null)
-                content.setContentUri(cmd.getContentUri());
+            content.setContentUri(cmd.getContentUri());
             fileManagementProvider.createFileContent(content);
             //  3.return back the dto
             dto = ConvertHelper.convert(content, FileContentDTO.class);
@@ -285,6 +291,36 @@ public class FileManagementServiceImpl implements  FileManagementService{
 
     @Override
     public ListFileContentResponse listFileContents(ListFileContentCommand cmd) {
-        return null;
+        ListFileContentResponse response = new ListFileContentResponse();
+        List<FileContentDTO> folders = new ArrayList<>();
+        List<FileContentDTO> files = new ArrayList<>();
+        Integer namespaceId = UserContext.getCurrentNamespaceId();
+        if(cmd.getContentId() == null)
+            cmd.setContentId(cmd.getCatalogId());
+        FileCatalog catalog = fileManagementProvider.findFileCatalogById(cmd.getCatalogId());
+        if(catalog == null)
+            return response;
+
+        List<FileContent> results = fileManagementProvider.listFileContents(namespaceId,catalog.getOwnerId(),catalog.getId(),cmd.getContentId(),cmd.getKeywords());
+        if(results !=null && results.size() > 0){
+            results.stream().filter(r -> r.getContentType().equals(FileContentType.FOLDER.getCode())).map(r ->{
+                FileContentDTO dto = ConvertHelper.convert(r, FileContentDTO.class);
+                if(dto.getContentUri() != null)
+                    dto.setContentUrl(contentServerService.parserUri(dto.getContentUri()));
+                folders.add(dto);
+                return null;
+            }).collect(Collectors.toList());
+            results.stream().filter(r -> !r.getContentType().equals(FileContentType.FOLDER.getCode())).map(r ->{
+                FileContentDTO dto = ConvertHelper.convert(r, FileContentDTO.class);
+                if(dto.getContentUri() != null)
+                    dto.setContentUrl(contentServerService.parserUri(dto.getContentUri()));
+                files.add(dto);
+                return null;
+            }).collect(Collectors.toList());
+        }
+
+        response.setFolders(folders);
+        response.setFiles(files);
+        return response;
     }
 }

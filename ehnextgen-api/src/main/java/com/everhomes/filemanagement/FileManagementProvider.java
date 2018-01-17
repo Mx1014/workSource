@@ -33,4 +33,6 @@ public interface FileManagementProvider {
     FileContent findFileContentById(Long id);
 
     FileContent findFileContentByName(Integer namespaceId, Long ownerId, String name);
+
+    List<FileContent> listFileContents(Integer namespaceId, Long ownerId, Long catalogId, Long parentId, String keywords);
 }

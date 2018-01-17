@@ -41,6 +41,14 @@ public class FileCatalogDTO {
         this.name = name;
     }
 
+    public Byte getDownloadPermission() {
+        return downloadPermission;
+    }
+
+    public void setDownloadPermission(Byte downloadPermission) {
+        this.downloadPermission = downloadPermission;
+    }
+
     public Timestamp getCreateTime() {
         return createTime;
     }
