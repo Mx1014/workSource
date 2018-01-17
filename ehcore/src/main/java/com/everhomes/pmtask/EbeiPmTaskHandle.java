@@ -517,8 +517,8 @@ public class EbeiPmTaskHandle extends DefaultPmTaskHandle{
                 ResourceCategoryAssignment resourceCategory = communityProvider.findResourceCategoryAssignment(building.getId(),
                         EntityType.BUILDING.getCode(), namespaceId);
                 if (null != resourceCategory) {
-                    createFlowCaseCommand.setProjectId(resourceCategory.getResourceCategryId());
-                    createFlowCaseCommand.setProjectType(EntityType.RESOURCE_CATEGORY.getCode());
+                    createFlowCaseCommand.setProjectIdA(resourceCategory.getResourceCategryId());
+                    createFlowCaseCommand.setProjectTypeA(EntityType.CHILD_PROJECT.getCode());
                 }
             }
         }

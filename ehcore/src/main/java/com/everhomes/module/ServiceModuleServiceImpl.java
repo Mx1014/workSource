@@ -543,7 +543,7 @@ public class ServiceModuleServiceImpl implements ServiceModuleService {
         List<ServiceModuleDTO> unlimitControlList = new ArrayList<>();
         //按控制范围进行区分
         //把二级模块加入list
-        tempList.stream().filter(r->r.getModuleControlType() != "" && r.getLevel() == 2).map(r->{
+        tempList.stream().filter(r->r.getModuleControlType() != "" && r.getModuleControlType() != null && r.getLevel() == 2).map(r->{
             switch (ModuleManagementType.fromCode(r.getModuleControlType())){
                 case COMMUNITY_CONTROL:
                     communityControlList.add(r);

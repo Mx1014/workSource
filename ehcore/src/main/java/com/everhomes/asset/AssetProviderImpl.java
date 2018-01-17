@@ -3694,6 +3694,7 @@ public class AssetProviderImpl implements AssetProvider {
     public List<PaymentBills> findPaidBillsByIds(List<String> billIds) {
         return getReadOnlyContext().selectFrom(Tables.EH_PAYMENT_BILLS)
                 .where(Tables.EH_PAYMENT_BILLS.ID.in(billIds))
+                .and(Tables.EH_PAYMENT_BILLS.STATUS.eq((byte)1))
                 .fetchInto(PaymentBills.class);
     }
 

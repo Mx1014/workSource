@@ -3,6 +3,8 @@ package com.everhomes.controller;
 
 import com.everhomes.app.App;
 import com.everhomes.app.AppProvider;
+import com.everhomes.bigcollection.Accessor;
+import com.everhomes.bigcollection.BigCollectionProvider;
 import com.everhomes.configuration.ConfigurationProvider;
 import com.everhomes.constants.ErrorCodes;
 import com.everhomes.contentserver.ContentServer;
@@ -17,11 +19,20 @@ import com.everhomes.rest.user.*;
 import com.everhomes.rest.version.VersionRealmType;
 import com.everhomes.user.*;
 import com.everhomes.util.*;
+import net.sf.cglib.beans.BeanMap;
+import org.apache.poi.util.StringUtil;
 import org.jooq.tools.StringUtils;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.slf4j.MDC;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.core.LocalVariableTableParameterNameDiscoverer;
+import org.springframework.core.MethodParameter;
+import org.springframework.data.redis.core.RedisTemplate;
+import org.springframework.data.redis.serializer.StringRedisSerializer;
+import org.springframework.expression.ExpressionParser;
+import org.springframework.expression.spel.standard.SpelExpressionParser;
+import org.springframework.expression.spel.support.StandardEvaluationContext;
 import org.springframework.web.method.HandlerMethod;
 import org.springframework.web.servlet.HandlerInterceptor;
 import org.springframework.web.servlet.ModelAndView;
@@ -32,6 +43,7 @@ import javax.servlet.http.HttpServletResponse;
 import java.net.InetAddress;
 import java.util.*;
 import java.util.Map.Entry;
+import java.util.concurrent.TimeUnit;
 
 /**
  * Interceptor that checks REST API signatures
@@ -70,6 +82,11 @@ public class WebRequestInterceptor implements HandlerInterceptor {
 
     @Autowired
     private DomainService domainService;
+
+    @Autowired
+    private BigCollectionProvider bigCollectionProvider;
+
+    private final StringRedisSerializer stringRedisSerializer = new StringRedisSerializer();
 
     public WebRequestInterceptor() {
     }
@@ -135,6 +152,8 @@ public class WebRequestInterceptor implements HandlerInterceptor {
             setupVersionContext(userAgents);
             setupScheme(userAgents);
             setupDomain(request);
+            //加上频率控制
+            frequencyControlHandler(request,handler);
             if (isProtected(handler)) {
                 LoginToken token = userService.getLoginToken(request);
                 // isValid转移到UserServiceImpl，使得其它地方也可以调（如第三方登录WebRequestWeixinInterceptor） by lqs 20160922
@@ -211,7 +230,7 @@ public class WebRequestInterceptor implements HandlerInterceptor {
             }
             return true;
         } finally {
-            if (LOGGER.isDebugEnabled()) {
+             if (LOGGER.isDebugEnabled()) {
 
                 StringBuffer sb = new StringBuffer();
                 sb.append("{");
@@ -728,4 +747,51 @@ public class WebRequestInterceptor implements HandlerInterceptor {
             LOGGER.error("Failed to check the user-agent in http/https header, userAgents={}", userAgents, e);
         }
     }
+
+    private void frequencyControlHandler(HttpServletRequest request, Object handler) throws FrequencyControlException {
+        if (handler instanceof HandlerMethod) {
+            HandlerMethod handlerMethod = (HandlerMethod) handler;
+            FrequencyControl control = handlerMethod.getMethod().getAnnotation(FrequencyControl.class);
+            if (control != null) {
+                String ip = request.getLocalAddr();
+                String url = request.getRequestURL().toString();
+
+                LocalVariableTableParameterNameDiscoverer u = new LocalVariableTableParameterNameDiscoverer();
+                String[] paraNameArr = u.getParameterNames(handlerMethod.getMethod());
+
+                String[] spelKey = control.key();
+
+                Map<String, String[]> parameterMap = request.getParameterMap();
+
+
+                StringBuffer keyBuffer = new StringBuffer();
+                for (String s : spelKey) {
+                    String attribute = s.split(paraNameArr[0]+".")[1];
+                    if(!org.springframework.util.StringUtils.isEmpty(attribute)){
+                        if(parameterMap.get(attribute) != null && parameterMap.get(attribute).length > 0){
+                            keyBuffer.append(parameterMap.get(attribute)[0]);
+                        }
+                    }
+                }
+
+                String key = "req_limit_".concat(url).concat(ip).concat("?") + keyBuffer.toString();
+                LOGGER.debug("current frequencyControl key" + key);
+
+                Accessor acc = this.bigCollectionProvider.getMapAccessor(key, "");
+                RedisTemplate redisTemplate = acc.getTemplate(stringRedisSerializer);
+                Object redisCount = redisTemplate.opsForValue().get(key);
+                if (redisCount == null) {
+                    redisTemplate.opsForValue().set(key, "1", control.time(), TimeUnit.MILLISECONDS);
+                } else {
+                    redisTemplate.opsForValue().increment(key, 1);
+                    if (Integer.valueOf(redisTemplate.opsForValue().get(key).toString()) > control.count()) {
+                        LOGGER.info("user's IP[" + ip + "] post [" + url + "] more than [" + control.count() + "]");
+                        throw new FrequencyControlException("user's IP[\" + ip + \"] post [\" + url + \"] more than [\" + control.count() + \"]");
+                    }
+                }
+            }
+        }
+
+    }
+
 }

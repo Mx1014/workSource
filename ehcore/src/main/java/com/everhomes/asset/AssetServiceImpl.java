@@ -375,20 +375,20 @@ public class AssetServiceImpl implements AssetService {
     }
 
     private void injectSmsVars(NoticeInfo noticeInfo, List<Tuple<String, Object>> variables,Integer namespaceId) {
-        if(namespaceId == 999971){
+//        if(namespaceId == 999971){
             smsProvider.addToTupleList(variables, "targetName", noticeInfo.getTargetName());
             smsProvider.addToTupleList(variables, "dateStr", StringUtils.isBlank(noticeInfo.getDateStr())?"等信息请于应用内查看":noticeInfo.getDateStr());
             smsProvider.addToTupleList(variables, "amount", noticeInfo.getAmountOwed().toString());
             smsProvider.addToTupleList(variables, "appName", noticeInfo.getAppName());
-        }else{
-            smsProvider.addToTupleList(variables, "targetName", noticeInfo.getTargetName());
-            //模板改了，所以这个也要改
-//                smsProvider.addToTupleList(variables, "dateStr", noticeInfo.getDateStr());
-            smsProvider.addToTupleList(variables, "dateStr", StringUtils.isBlank(noticeInfo.getDateStr())?"等信息请于应用内查看":noticeInfo.getDateStr());
-//            smsProvider.addToTupleList(variables,"amount2",noticeInfo.getAmountOwed());
-            smsProvider.addToTupleList(variables, "appName", noticeInfo.getAppName());
-
-        }
+//        }else{
+//            smsProvider.addToTupleList(variables, "targetName", noticeInfo.getTargetName());
+//            //模板改了，所以这个也要改
+////                smsProvider.addToTupleList(variables, "dateStr", noticeInfo.getDateStr());
+//            smsProvider.addToTupleList(variables, "dateStr", StringUtils.isBlank(noticeInfo.getDateStr())?"等信息请于应用内查看":noticeInfo.getDateStr());
+////            smsProvider.addToTupleList(variables,"amount2",noticeInfo.getAmountOwed());
+//            smsProvider.addToTupleList(variables, "appName", noticeInfo.getAppName());
+//
+//        }
     }
 
     private void NoticeWithTextAndMessage(List<Long> billIds, List<NoticeInfo> noticeInfos) {
@@ -2814,7 +2814,7 @@ public class AssetServiceImpl implements AssetService {
         }
         switch (namespaceId){
             case 999971:
-                if(cmd.getOwnerType()!=null && cmd.getOwnerType().equals(AssetPaymentStrings.EH_USER)) hasPay = 1;
+                if(cmd.getOwnerType()!=null && cmd.getOwnerType().equals(AssetPaymentStrings.EH_ORGANIZATION)) hasPay = 0;
                 break;
             case 999983:
                 hasContractView = 0;

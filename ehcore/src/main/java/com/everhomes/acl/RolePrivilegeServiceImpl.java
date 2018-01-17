@@ -1549,7 +1549,9 @@ public class RolePrivilegeServiceImpl implements RolePrivilegeService {
         String organizationName = "NotFound";
         if (organizationDetail == null || organizationDetail.getDisplayName() == null) {
             Organization organization = organizationProvider.findOrganizationById(organizationId);
-            organizationName = defaultIfNull(organization.getName(), organizationName);
+			if(organization != null) {
+				organizationName = defaultIfNull(organization.getName(), organizationName);
+			}
         } else {
             organizationName = organizationDetail.getDisplayName();
         }
@@ -1877,11 +1879,15 @@ public class RolePrivilegeServiceImpl implements RolePrivilegeService {
 				organizationSearcher.feedDoc(o);
 			}
 		}
-        sendMessageAfterChangeOrganizationAdmin(
-                ConvertHelper.convert(member, OrganizationContactDTO.class),
-                OrganizationNotificationTemplateCode.DELETE_ORGANIZATION_ADMIN_MESSAGE_TO_TARGET_TEMPLATE,
-                OrganizationNotificationTemplateCode.DELETE_ORGANIZATION_ADMIN_MESSAGE_TO_OTHER_TEMPLATE
-        );
+		if(OrganizationMemberTargetType.fromCode(member.getTargetType()) == OrganizationMemberTargetType.USER
+				&& member.getTargetId() != null){
+			sendMessageAfterChangeOrganizationAdmin(
+					ConvertHelper.convert(member, OrganizationContactDTO.class),
+					OrganizationNotificationTemplateCode.DELETE_ORGANIZATION_ADMIN_MESSAGE_TO_TARGET_TEMPLATE,
+					OrganizationNotificationTemplateCode.DELETE_ORGANIZATION_ADMIN_MESSAGE_TO_OTHER_TEMPLATE
+			);
+		}
+
 	}
 
 	@Override

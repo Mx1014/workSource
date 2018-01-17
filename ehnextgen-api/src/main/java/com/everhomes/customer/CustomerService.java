@@ -13,7 +13,7 @@ import java.util.List;
 public interface CustomerService {
     EnterpriseCustomerDTO createEnterpriseCustomer(CreateEnterpriseCustomerCommand cmd);
     EnterpriseCustomerDTO updateEnterpriseCustomer(UpdateEnterpriseCustomerCommand cmd);
-    void deleteEnterpriseCustomer(DeleteEnterpriseCustomerCommand cmd);
+    void deleteEnterpriseCustomer(DeleteEnterpriseCustomerCommand cmd, Boolean checkAuth);
     SearchEnterpriseCustomerResponse searchEnterpriseCustomer(SearchEnterpriseCustomerCommand cmd);
     ImportFileTaskDTO importEnterpriseCustomer(ImportEnterpriseCustomerDataCommand cmd, MultipartFile mfile, Long userId);
     EnterpriseCustomerDTO getEnterpriseCustomer(GetEnterpriseCustomerCommand cmd);
