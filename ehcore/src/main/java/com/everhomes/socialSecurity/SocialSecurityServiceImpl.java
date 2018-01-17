@@ -1044,7 +1044,10 @@ public class SocialSecurityServiceImpl implements SocialSecurityService {
                 String fileLog = "";
                 if (resultList.size() > 0) {
                     //  校验标题，若不合格直接返回错误
-                    fileLog = checkImportSocialSecurityPaymentsTitle(title);
+
+                    RowResult title = (RowResult) resultList.get(0);
+                    Map<String, String> titleMap = title.getCells();
+                    fileLog = checkImportSocialSecurityPaymentsTitle(titleMap);
                     if (!StringUtils.isEmpty(fileLog)) {
                         response.setFileLog(fileLog);
                         return response;
