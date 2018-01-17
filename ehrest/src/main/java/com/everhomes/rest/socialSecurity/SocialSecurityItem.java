@@ -2,8 +2,8 @@ package com.everhomes.rest.socialSecurity;
 
 /**
  * <ul>
- * <li>SOCIALSECURITYPAY(1): 社保在缴</li>
- * <li>ACCUMULATIONFUNDPAY(2): 公积金在缴</li>
+ * <li>SOCIALSECURITYUNPAY(1): 社保在缴</li>
+ * <li>ACCUMULATIONFUND_UNPAY(2): 公积金在缴</li>
  * <li>INCREASE(3): 本月增员</li>
  * <li>DECREASE(4): 本月减员</li>
  * <li>INWORK(5):本月入职</li>
@@ -12,8 +12,8 @@ package com.everhomes.rest.socialSecurity;
  */
 public enum SocialSecurityItem {
 
-    SOCIALSECURITYPAY((byte)1,"社保在缴"),
-    ACCUMULATIONFUNDPAY((byte)2,"公积金在缴"),
+    SOCIALSECURITYUNPAY((byte)1,"社保未缴"),
+    ACCUMULATIONFUND_UNPAY((byte)2,"公积金未缴"),
     INCREASE((byte)3,"本月增员"),
     DECREASE((byte)4,"本月减员"),
     INWORK((byte)5,"本月入职"),

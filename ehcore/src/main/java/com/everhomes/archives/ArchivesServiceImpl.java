@@ -813,10 +813,12 @@ public class ArchivesServiceImpl implements ArchivesService {
             }
 
             //  3.增加社保、公积金信息
+/*
             if(cmd.getSocialSecurityStartMonth() != null)
                 addSocialSecurityStartMonth(detailId, memberDetail.getOrganizationId(), ArchivesUtil.socialSecurityMonth(cmd.getSocialSecurityStartMonth()));
             if(cmd.getAccumulationFundStartMonth() != null)
                 addAccumulationFundStartMonth(detailId, memberDetail.getOrganizationId(), ArchivesUtil.socialSecurityMonth(cmd.getAccumulationFundStartMonth()));
+*/
 
             //  4.查询若存在于离职列表则删除
             deleteArchivesDismissEmployees(detailId, cmd.getOrganizationId());
@@ -829,7 +831,7 @@ public class ArchivesServiceImpl implements ArchivesService {
         return dto;
     }
 
-    private void addSocialSecurityStartMonth(Long detailId, Long organizationId, String startMonth) {
+/*    private void addSocialSecurityStartMonth(Long detailId, Long organizationId, String startMonth) {
         AddSocialSecurityInOutTimeCommand command = new AddSocialSecurityInOutTimeCommand();
         command.setDetailId(detailId);
         command.setOrganizationId(organizationId);
@@ -845,7 +847,7 @@ public class ArchivesServiceImpl implements ArchivesService {
         command.setInOutType(InOutTimeType.ACCUMULATION_FUND.getCode());
         command.setStartMonth(startMonth);
         socialSecurityService.addSocialSecurityInOutTime(command);
-    }
+    }*/
 
 
     @Override
@@ -1679,10 +1681,12 @@ public class ArchivesServiceImpl implements ArchivesService {
                 archivesProvider.createArchivesDismissEmployee(dismissEmployee);
 
                 //  2.社保减员月
+/*
                 if(cmd.getSocialSecurityEndMonth() != null)
                     addSocialSecurityEndMonth(detailId, employee.getOrganizationId(), ArchivesUtil.socialSecurityMonth(cmd.getSocialSecurityEndMonth()));
                 if(cmd.getAccumulationFundEndMonth() != null)
                     addAccumulationFundEndMonth(detailId, employee.getOrganizationId(), ArchivesUtil.socialSecurityMonth(cmd.getAccumulationFundEndMonth()));
+*/
 
 
                     //  3.删除员工权限
@@ -1697,7 +1701,7 @@ public class ArchivesServiceImpl implements ArchivesService {
         });
     }
 
-    private void addSocialSecurityEndMonth(Long detailId, Long organizationId, String endMonth){
+/*    private void addSocialSecurityEndMonth(Long detailId, Long organizationId, String endMonth){
         AddSocialSecurityInOutTimeCommand command = new AddSocialSecurityInOutTimeCommand();
         command.setDetailId(detailId);
         command.setOrganizationId(organizationId);
@@ -1713,7 +1717,7 @@ public class ArchivesServiceImpl implements ArchivesService {
         command.setInOutType(InOutTimeType.ACCUMULATION_FUND.getCode());
         command.setEndMonth(endMonth);
         socialSecurityService.addSocialSecurityInOutTime(command);
-    }
+    }*/
 
     /**
      * 删除离职表中的员工
@@ -2478,30 +2482,4 @@ public class ArchivesServiceImpl implements ArchivesService {
     private void sendEmails(List<ArchivesNotifications> notifyLists) {
 
     }
-
-    @Override
-    public List<Long> listSocialSecurityEmployees(Long organizationId, Long departmentId, String keywords, List<Byte> socialSecurityItem) {
-        List<Long> result = new ArrayList<>();
-
-        ListOrganizationContactCommand orgCommand = new ListOrganizationContactCommand();
-        orgCommand.setOrganizationId(organizationId);
-        orgCommand.setKeywords(keywords);
-        if (departmentId != null) {
-            orgCommand.setOrganizationId(departmentId);
-            List<String> groupTypes = new ArrayList<>();
-            groupTypes.add(OrganizationGroupType.DEPARTMENT.getCode());
-            groupTypes.add(OrganizationGroupType.DIRECT_UNDER_ENTERPRISE.getCode());
-            orgCommand.setTargetTypes(groupTypes);
-        }
-        orgCommand.setPageSize(1000000);
-        orgCommand.setFilterScopeTypes(Collections.singletonList(FilterOrganizationContactScopeType.CHILD_ENTERPRISE.getCode()));
-        ListOrganizationMemberCommandResponse members = organizationService.listOrganizationPersonnelsWithDownStream(orgCommand);
-
-        if (members.getMembers() != null && members.getMembers().size() > 0)
-            members.getMembers().forEach(r -> {
-                result.add(r.getDetailId());
-            });
-        return result;
-    }
-
 }

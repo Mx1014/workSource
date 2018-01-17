@@ -79,6 +79,7 @@ public class SocialSecurityPaymentProviderImpl implements SocialSecurityPaymentP
         Record1<String> result = getReadOnlyContext().selectDistinct(Tables.EH_SOCIAL_SECURITY_PAYMENTS.PAY_MONTH)
                 .from(Tables.EH_SOCIAL_SECURITY_PAYMENTS)
                 .where(Tables.EH_SOCIAL_SECURITY_PAYMENTS.ORGANIZATION_ID.eq(ownerId))
+                .and(Tables.EH_SOCIAL_SECURITY_PAYMENTS.PAY_MONTH.isNotNull())
                 .fetchAny();
         if (null == result) {
             return null;
@@ -176,9 +177,9 @@ public class SocialSecurityPaymentProviderImpl implements SocialSecurityPaymentP
                 Tables.EH_SOCIAL_SECURITY_PAYMENTS.FILE_UID,
                 Tables.EH_SOCIAL_SECURITY_PAYMENTS.FILE_TIME,
                 Tables.EH_SOCIAL_SECURITY_PAYMENTS.COMPANY_RADIX.multiply(Tables.EH_SOCIAL_SECURITY_PAYMENTS.COMPANY_RADIX)
-                        .divide(10000).round(2).sum(),
+                        .divide(10000).round(2).sum().round(2),
                 Tables.EH_SOCIAL_SECURITY_PAYMENTS.EMPLOYEE_RADIX.multiply(Tables.EH_SOCIAL_SECURITY_PAYMENTS.EMPLOYEE_RATIO)
-                        .divide(10000).round(2).sum()
+                        .divide(10000).round(2).sum().round(2)
         ).from(Tables.EH_SOCIAL_SECURITY_PAYMENTS)
                 .where(Tables.EH_SOCIAL_SECURITY_PAYMENTS.ORGANIZATION_ID.eq(ownerId))
                 .and(Tables.EH_SOCIAL_SECURITY_PAYMENTS.PAY_MONTH.eq(paymentMonth))

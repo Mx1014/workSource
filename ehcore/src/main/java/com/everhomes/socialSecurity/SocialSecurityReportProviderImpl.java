@@ -168,11 +168,16 @@ public class SocialSecurityReportProviderImpl implements SocialSecurityReportPro
 
     @Override
     public SocialSecurityReport findSocialSecurityReportByDetailId(Long id, String month) {
-        return getReadOnlyContext().select().from(Tables.EH_SOCIAL_SECURITY_REPORT)
+        Record record = getReadOnlyContext().select().from(Tables.EH_SOCIAL_SECURITY_REPORT)
                 .where(Tables.EH_SOCIAL_SECURITY_REPORT.DETAIL_ID.eq(id))
                 .and(Tables.EH_SOCIAL_SECURITY_REPORT.PAY_MONTH.eq(month))
                 .orderBy(Tables.EH_SOCIAL_SECURITY_REPORT.ID.desc())
-                .fetchAny().map(r -> ConvertHelper.convert(r, SocialSecurityReport.class));
+                .fetchAny();
+        if (null == record) {
+            return null;
+        }
+
+        return record.map(r -> ConvertHelper.convert(r, SocialSecurityReport.class));
     }
 
     @Override

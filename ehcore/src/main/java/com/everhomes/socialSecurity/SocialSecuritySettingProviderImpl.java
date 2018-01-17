@@ -1,6 +1,7 @@
 // @formatter:off
 package com.everhomes.socialSecurity;
 
+import java.math.BigDecimal;
 import java.sql.Timestamp;
 import java.util.List;
 import java.util.Set;
@@ -9,7 +10,10 @@ import com.everhomes.rest.socialSecurity.AccumOrSocial;
 import com.everhomes.rest.socialSecurity.SocialSecurityItemDTO;
 import com.everhomes.rest.socialSecurity.SsorAfPay;
 import org.jooq.*;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.scheduling.SchedulingTaskExecutor;
 import org.springframework.stereotype.Component;
 
 import com.everhomes.db.AccessSpec;
@@ -201,6 +205,28 @@ public class SocialSecuritySettingProviderImpl implements SocialSecuritySettingP
             return null;
         }
         return record.map(r -> ConvertHelper.convert(r, SocialSecuritySetting.class));
+    }
+
+    private static final Logger LOGGER = LoggerFactory.getLogger(SocialSecuritySettingProviderImpl.class);
+
+    @Override
+    public BigDecimal sumPayment(Long detailId, AccumOrSocial accumOrSocial) {
+        SelectConditionStep<Record1<BigDecimal>> step = getReadOnlyContext()
+                .select(Tables.EH_SOCIAL_SECURITY_SETTINGS.COMPANY_RADIX.mul(Tables.EH_SOCIAL_SECURITY_SETTINGS.COMPANY_RATIO).div(10000)
+                        .add(Tables.EH_SOCIAL_SECURITY_SETTINGS.EMPLOYEE_RATIO.mul(Tables.EH_SOCIAL_SECURITY_SETTINGS.EMPLOYEE_RATIO).div(10000))
+                        .sum())
+                .from(Tables.EH_SOCIAL_SECURITY_SETTINGS)
+                .where(Tables.EH_SOCIAL_SECURITY_SETTINGS.DETAIL_ID.eq(detailId))
+                .and(Tables.EH_SOCIAL_SECURITY_SETTINGS.ACCUM_OR_SOCAIL.eq(accumOrSocial.getCode()));
+        LOGGER.debug("SQL " + step);
+        Result<Record1<BigDecimal>> record =
+//                .orderBy(Tables.EH_SOCIAL_SECURITY_SETTINGS.ID.asc())
+                step.fetch();
+
+        if (null == record) {
+            return new BigDecimal(0);
+        }
+        return record.get(0).value1();
     }
 
     private EhSocialSecuritySettingsDao getReadWriteDao() {

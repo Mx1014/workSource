@@ -2,7 +2,6 @@
 package com.everhomes.socialSecurity;
 
 import com.alibaba.fastjson.JSONObject;
-import com.everhomes.archives.ArchivesService;
 import com.everhomes.bigcollection.Accessor;
 import com.everhomes.bigcollection.BigCollectionProvider;
 import com.everhomes.community.Community;
@@ -10,6 +9,7 @@ import com.everhomes.community.CommunityProvider;
 import com.everhomes.configuration.ConfigurationProvider;
 import com.everhomes.coordinator.CoordinationLocks;
 import com.everhomes.coordinator.CoordinationProvider;
+import com.everhomes.db.AccessSpec;
 import com.everhomes.db.DbProvider;
 import com.everhomes.filedownload.TaskService;
 import com.everhomes.listing.CrossShardListingLocator;
@@ -18,7 +18,6 @@ import com.everhomes.naming.NameMapper;
 import com.everhomes.organization.*;
 import com.everhomes.region.Region;
 import com.everhomes.region.RegionProvider;
-import com.everhomes.archives.ArchivesUtil;
 import com.everhomes.rest.common.ImportFileResponse;
 import com.everhomes.rest.filedownload.TaskRepeatFlag;
 import com.everhomes.rest.filedownload.TaskType;
@@ -26,10 +25,10 @@ import com.everhomes.rest.organization.*;
 import com.everhomes.rest.socialSecurity.*;
 import com.everhomes.sequence.SequenceProvider;
 import com.everhomes.server.schema.Tables;
+import com.everhomes.server.schema.tables.EhOrganizationMemberDetails;
 import com.everhomes.server.schema.tables.pojos.EhSocialSecurityPaymentLogs;
 import com.everhomes.server.schema.tables.pojos.EhSocialSecurityPayments;
 import com.everhomes.server.schema.tables.pojos.EhSocialSecuritySettings;
-import com.everhomes.sms.DateUtil;
 import com.everhomes.user.UserContext;
 import com.everhomes.util.*;
 import com.everhomes.util.excel.RowResult;
@@ -96,6 +95,8 @@ public class SocialSecurityServiceImpl implements SocialSecurityService {
     @Autowired
     private RegionProvider regionProvider;
     @Autowired
+    private OrganizationService organizationService;
+    @Autowired
     private OrganizationProvider organizationProvider;
     @Autowired
     private CommunityProvider communityProvider;
@@ -103,8 +104,6 @@ public class SocialSecurityServiceImpl implements SocialSecurityService {
     private BigCollectionProvider bigCollectionProvider;
     @Autowired
     private ConfigurationProvider configurationProvider;
-    @Autowired
-    private ArchivesService archivesService;
     @Autowired
     private SequenceProvider sequenceProvider;
     @Autowired
@@ -249,29 +248,22 @@ public class SocialSecurityServiceImpl implements SocialSecurityService {
         cmd.setOwnerId(ownerId);
         cmd.setPageSize(Integer.MAX_VALUE - 1);
         cmd.setAccumulationFundStatus(NormalFlag.YES.getCode());
-        List<Long> result = listSocialSecurityEmployeeDetailIds(cmd);
-//        detailIds.addAll(listSocialSecurityEmployeeDetailIdsByPayMonth(ownerId, paymentMonth));
+        List<SocialSecurityEmployeeDTO> result = listSocialSecurityEmployees(cmd);
         if (null != result) {
-
-//        List<OrganizationMemberDetails> details = organizationProvider.listOrganizationMemberDetails(ownerId);
-//        if (null == details) {
-//            return;
-//        }
-//        detailIds = details.stream().map(r -> r.getId()).collect(Collectors.toSet());
+            for (SocialSecurityEmployeeDTO dto : result) {
+                detailIds.add(dto.getDetailId());
+            }
             createPayments(detailIds, paymentMonth, AccumOrSocial.ACCUM);
         }
 
         cmd.setSocialSecurityStatus(NormalFlag.YES.getCode());
         cmd.setAccumulationFundStatus(null);
-        result = listSocialSecurityEmployeeDetailIds(cmd);
-//        detailIds.addAll(listSocialSecurityEmployeeDetailIdsByPayMonth(ownerId, paymentMonth));
+        result = listSocialSecurityEmployees(cmd);
         if (null != result) {
+            for (SocialSecurityEmployeeDTO dto : result) {
+                detailIds.add(dto.getDetailId());
+            }
 
-//        List<OrganizationMemberDetails> details = organizationProvider.listOrganizationMemberDetails(ownerId);
-//        if (null == details) {
-//            return;
-//        }
-//        detailIds = details.stream().map(r -> r.getId()).collect(Collectors.toSet());
             createPayments(detailIds, paymentMonth, AccumOrSocial.SOCAIL);
         }
     }
@@ -302,14 +294,14 @@ public class SocialSecurityServiceImpl implements SocialSecurityService {
         if (null != afBases) {
             ssBases.addAll(afBases);
         }
-        //TODO:
-        List<Long> detailIds = archivesService.listSocialSecurityEmployees(ownerId, null, null, null);
+        ListSocialSecurityPaymentsCommand command = new ListSocialSecurityPaymentsCommand(ownerId);
+        List<SocialSecurityEmployeeDTO> members = listSocialSecurityEmployees(command);
+//        List<Long> detailIds = archivesService.listSocialSecurityEmployees(ownerId, null, null, null);
 //        List<OrganizationMemberDetails> details = organizationProvider.listOrganizationMemberDetails(ownerId);
         Long id = sequenceProvider.getNextSequence(NameMapper.getSequenceDomainFromTablePojo(EhSocialSecuritySettings.class));
         List<EhSocialSecuritySettings> settings = new ArrayList<>();
-        for (Long detailId : detailIds) {
-            OrganizationMemberDetails detail = organizationProvider.findOrganizationMemberDetailsByDetailId(detailId);
-            id = saveSocialSecuritySettings(ssBases, cityId, ownerId, detail.getTargetId(), detail.getId(), detail.getNamespaceId(), id, settings);
+        for (SocialSecurityEmployeeDTO dto : members) {
+            id = saveSocialSecuritySettings(ssBases, cityId, ownerId, dto.getUserId(), dto.getDetailId(), dto.getNamespaceId(), id, settings);
 //            id = saveSocialSecuritySettings(afBases, cityId, ownerId, detail.getTargetId(), detail.getId(), detail.getNamespaceId(), id, settings);
         }
         sequenceProvider.getNextSequenceBlock(NameMapper.getSequenceDomainFromTablePojo(EhSocialSecuritySettings.class), settings.size());
@@ -383,21 +375,21 @@ public class SocialSecurityServiceImpl implements SocialSecurityService {
         ListFilterItemsResponse response = new ListFilterItemsResponse();
         List<FilterItemDTO> items = new ArrayList<>();
         FilterItemDTO dto = new FilterItemDTO();
-        dto.setId(SocialSecurityItem.SOCIALSECURITYPAY.getCode());
-        dto.setItemName(SocialSecurityItem.SOCIALSECURITYPAY.getDescribe());
+        dto.setId(SocialSecurityItem.SOCIALSECURITYUNPAY.getCode());
+        dto.setItemName(SocialSecurityItem.SOCIALSECURITYUNPAY.getDescribe());
         items.add(dto);
         dto = new FilterItemDTO();
-        dto.setId(SocialSecurityItem.ACCUMULATIONFUNDPAY.getCode());
-        dto.setItemName(SocialSecurityItem.ACCUMULATIONFUNDPAY.getDescribe());
+        dto.setId(SocialSecurityItem.ACCUMULATIONFUND_UNPAY.getCode());
+        dto.setItemName(SocialSecurityItem.ACCUMULATIONFUND_UNPAY.getDescribe());
         items.add(dto);
-        dto = new FilterItemDTO();
-        dto.setId(SocialSecurityItem.INCREASE.getCode());
-        dto.setItemName(SocialSecurityItem.INCREASE.getDescribe());
-        items.add(dto);
-        dto = new FilterItemDTO();
-        dto.setId(SocialSecurityItem.DECREASE.getCode());
-        dto.setItemName(SocialSecurityItem.DECREASE.getDescribe());
-        items.add(dto);
+//        dto = new FilterItemDTO();
+//        dto.setId(SocialSecurityItem.INCREASE.getCode());
+//        dto.setItemName(SocialSecurityItem.INCREASE.getDescribe());
+//        items.add(dto);
+//        dto = new FilterItemDTO();
+//        dto.setId(SocialSecurityItem.DECREASE.getCode());
+//        dto.setItemName(SocialSecurityItem.DECREASE.getDescribe());
+//        items.add(dto);
         dto = new FilterItemDTO();
         dto.setId(SocialSecurityItem.INWORK.getCode());
         dto.setItemName(SocialSecurityItem.INWORK.getDescribe());
@@ -423,7 +415,6 @@ public class SocialSecurityServiceImpl implements SocialSecurityService {
             return null;
 
         });
-        List<Long> detailIds = listSocialSecurityEmployeeDetailIds(cmd);
 
 //        SsorAfPay payFlag = null;
 //        if (null != cmd.getFilterItems()) {
@@ -433,43 +424,53 @@ public class SocialSecurityServiceImpl implements SocialSecurityService {
 //                }
 //                SocialSecurityItem item = SocialSecurityItem.fromCode(filterItem);
 //                switch (item) {
-//                    case SOCIALSECURITYPAY:
-//                        if (payFlag != null && payFlag == SsorAfPay.ACCUMULATIONFUNDPAY) {
+//                    case SOCIALSECURITYUNPAY:
+//                        if (payFlag != null && payFlag == SsorAfPay.ACCUMULATIONFUND_UNPAY) {
 //                            payFlag = SsorAfPay.BOTHPAY;
 //                        } else {
-//                            payFlag = SsorAfPay.SOCIALSECURITYPAY;
+//                            payFlag = SsorAfPay.SOCIALSECURITYUNPAY;
 //                        }
 //                        break;
 //
-//                    case ACCUMULATIONFUNDPAY:
-//                        if (payFlag != null && payFlag == SsorAfPay.SOCIALSECURITYPAY) {
+//                    case ACCUMULATIONFUND_UNPAY:
+//                        if (payFlag != null && payFlag == SsorAfPay.SOCIALSECURITYUNPAY) {
 //                            payFlag = SsorAfPay.BOTHPAY;
 //                        } else {
-//                            payFlag = SsorAfPay.ACCUMULATIONFUNDPAY;
+//                            payFlag = SsorAfPay.ACCUMULATIONFUND_UNPAY;
 //                        }
 //                        break;
 //                }
 //            }
 //        }
-        if (cmd.getPageAnchor() == null)
-            cmd.setPageAnchor(0L);
-        int pageSize = cmd.getPageSize() == null ? 10 : cmd.getPageSize();
-        CrossShardListingLocator locator = new CrossShardListingLocator();
-        locator.setAnchor(cmd.getPageAnchor());
-        if (null != cmd.getSocialSecurityCityId()) {
-            detailIds = socialSecuritySettingProvider.listDetailsByCityId(detailIds, cmd.getSocialSecurityCityId(), AccumOrSocial.SOCAIL.getCode());
-
-        }
-        if (null != cmd.getAccumulationFundCityId()) {
-            detailIds = socialSecuritySettingProvider.listDetailsByCityId(detailIds, cmd.getAccumulationFundCityId(), AccumOrSocial.ACCUM.getCode());
-
-        }
+//        if (cmd.getPageAnchor() == null)
+//            cmd.setPageAnchor(0L);
+        ListSocialSecurityPaymentsResponse response = new ListSocialSecurityPaymentsResponse();
+        int pageSize = cmd.getPageSize() == null ? 20 : cmd.getPageSize();
+        if (cmd.getPageOffset() == null) cmd.setPageOffset(1);
+        List<SocialSecurityEmployeeDTO> result = listSocialSecurityEmployees(cmd);
+        LOGGER.debug("楠哥返回的" + result);
+//        CrossShardListingLocator locator = new CrossShardListingLocator();
+//        locator.setAnchor(cmd.getPageAnchor());
+//        List<Long> detailIds = new ArrayList<>();
+//        if (null != members) {
+//            for (SocialSecurityEmployeeDTO member : members) {
+//                detailIds.add(member.getDetailId());
+//            }
+//        }
+//        if (null != cmd.getSocialSecurityCityId()) {
+//            detailIds = socialSecuritySettingProvider.listDetailsByCityId(detailIds, cmd.getSocialSecurityCityId(), AccumOrSocial.SOCAIL.getCode());
+//
+//        }
+//        if (null != cmd.getAccumulationFundCityId()) {
+//            detailIds = socialSecuritySettingProvider.listDetailsByCityId(detailIds, cmd.getAccumulationFundCityId(), AccumOrSocial.ACCUM.getCode());
+//
+//        }
 //        if (null != payFlag) {
-//            if (SsorAfPay.BOTHPAY == payFlag || SsorAfPay.SOCIALSECURITYPAY == payFlag) {
+//            if (SsorAfPay.BOTHPAY == payFlag || SsorAfPay.SOCIALSECURITYUNPAY == payFlag) {
 //                detailIds = socialSecurityPaymentProvider.listDetailsByPayFlag(detailIds, AccumOrSocial.SOCAIL.getCode());
 //            }
 //
-//            if (SsorAfPay.BOTHPAY == payFlag || SsorAfPay.ACCUMULATIONFUNDPAY == payFlag) {
+//            if (SsorAfPay.BOTHPAY == payFlag || SsorAfPay.ACCUMULATIONFUND_UNPAY == payFlag) {
 //                detailIds = socialSecurityPaymentProvider.listDetailsByPayFlag(detailIds, AccumOrSocial.ACCUM.getCode());
 //            }
 //        }
@@ -477,73 +478,114 @@ public class SocialSecurityServiceImpl implements SocialSecurityService {
 //        List<SocialSecurityPaymentDTO> results = socialSecuritySettingProvider.listSocialSecuritySetting(
 //                         cmd.getDeptId(), cmd.getKeywords(),
 //                        payFlag, detailIds, locator);
-        ListSocialSecurityPaymentsResponse response = new ListSocialSecurityPaymentsResponse();
-        List<SocialSecurityPaymentDTO> results = new ArrayList<>();
-        if (null == detailIds) {
-            return null;
+//        List<SocialSecurityPaymentDTO> results = new ArrayList<>();
+//        if (null == detailIds) {
+//            return null;
+//        }
+//        Long nextPageAnchor = null;
+//        int beginNum = 0;
+//        if (null != cmd.getPageAnchor()) {
+//            for (Long id : detailIds) {
+//                if (id < cmd.getPageAnchor()) {
+//                    beginNum++;
+//                } else {
+//                    break;
+//                }
+//            }
+//        }
+//        if (pageSize + beginNum < detailIds.size()) {
+//            nextPageAnchor = detailIds.get(pageSize);
+//        }
+//        for (int i = beginNum; i < beginNum + pageSize && i < detailIds.size(); i++) {
+//            SocialSecurityPaymentDTO dto = processSocialSecurityItemDTO(detailIds.get(i), members);
+//            results.add(dto);
+//        }
+        Integer nextPageOffset = null;
+        if (result != null && result.size() > pageSize) {
+            result.remove(result.size() - 1);
+            nextPageOffset = cmd.getPageOffset() + 1;
         }
-        Long nextPageAnchor = null;
-        int beginNum = 0;
-        if (null != cmd.getPageAnchor()) {
-            for (Long id : detailIds) {
-                if (id < cmd.getPageAnchor()) {
-                    beginNum++;
-                } else {
-                    break;
-                }
-            }
-        }
-        if (pageSize + beginNum < detailIds.size()) {
-            nextPageAnchor = detailIds.get(pageSize);
-        }
-        for (int i = beginNum; i < beginNum + pageSize && i < detailIds.size(); i++) {
-            SocialSecurityPaymentDTO dto = processSocialSecurityItemDTO(detailIds.get(i));
-            results.add(dto);
-        }
-        response.setNextPageAnchor(nextPageAnchor);
-        response.setSocialSecurityPayments(results);
+        response.setNextPageOffset(nextPageOffset);
+        response.setSocialSecurityPayments(result.stream().map(this::processSocialSecurityItemDTO).collect(Collectors.toList()));
         response.setPaymentMonth(socialSecurityPaymentProvider.findPaymentMonthByOwnerId(cmd.getOwnerId()));
         return response;
     }
 
-    private SocialSecurityPaymentDTO processSocialSecurityItemDTO(Long detailId) {
+    private SocialSecurityPaymentDTO processSocialSecurityItemDTO(SocialSecurityEmployeeDTO detail) {
         SocialSecurityPaymentDTO dto = new SocialSecurityPaymentDTO();
-        dto.setDetailId(detailId);
-        OrganizationMemberDetails detail = organizationProvider.findOrganizationMemberDetailsByDetailId(dto.getDetailId());
-        if (null != detail) {
-            dto.setUserName(detail.getContactName());
-            dto.setDeptName(detail.getDepartment());
-            //// TODO: 2017/12/27  入职离职日期
-//            dto.setEntryDate(detail.get);
-            SocialSecuritySetting accSetting = socialSecuritySettingProvider.findSocialSecuritySettingByDetailIdAndAOS(detailId, AccumOrSocial.ACCUM);
-            SocialSecuritySetting socSetting = socialSecuritySettingProvider.findSocialSecuritySettingByDetailIdAndAOS(detailId, AccumOrSocial.SOCAIL);
-            if (null != socSetting) {
-                dto.setSocialSecurityRadix(socSetting.getRadix());
-                Region city = regionProvider.findRegionById(socSetting.getCityId());
-                if (null != city) dto.setSocialSecurityCity(city.getName());
-            }
-            if (null != accSetting) {
-                dto.setAccumulationFundRadix(accSetting.getRadix());
-                Region city = regionProvider.findRegionById(accSetting.getCityId());
-                if (null != city) dto.setAccumulationFundCity(city.getName());
-            }
-        } else {
-            dto.setUserName("找不到这个人");
+        if (null != detail.getCheckInTime()) {
+            dto.setEntryDate(detail.getCheckInTime().getTime());
         }
+        if (null != detail.getDismissTime()) {
+            dto.setOutDate(detail.getDismissTime().getTime());
+        }
+        dto.setDetailId(detail.getDetailId());
+//        OrganizationMemberDetails detail = organizationProvider.findOrganizationMemberDetailsByDetailId(dto.getDetailId());
+//        SocialSecurityEmployeeDTO detail = findSocialSecurityEmployeeDTO(members, detailId);
+//        if (null != detail) {
+        dto.setUserName(detail.getContactName());
+        dto.setDeptName(detail.getDepartmentName());
+        dto.setAccumulationFundStatus(detail.getAccumulationFundStatus());
+        dto.setSocialSecurityStatus(detail.getSocialSecurityStatus());
+        //// TODO: 2017/12/27  入职离职日期
+//            dto.setEntryDate(detail.get);
+        SocialSecuritySetting accSetting = socialSecuritySettingProvider.findSocialSecuritySettingByDetailIdAndAOS(detail.getDetailId(), AccumOrSocial.ACCUM);
+        SocialSecuritySetting socSetting = socialSecuritySettingProvider.findSocialSecuritySettingByDetailIdAndAOS(detail.getDetailId(), AccumOrSocial.SOCAIL);
+        if (null != socSetting) {
+            dto.setSocialSecurityRadix(socSetting.getRadix());
+            Region city = regionProvider.findRegionById(socSetting.getCityId());
+            if (null != city) dto.setSocialSecurityCity(city.getName());
+        }
+        if (null != accSetting) {
+            dto.setAccumulationFundRadix(accSetting.getRadix());
+            Region city = regionProvider.findRegionById(accSetting.getCityId());
+            if (null != city) dto.setAccumulationFundCity(city.getName());
+        }
+//        } else {
+//            dto.setUserName("找不到这个人");
+//        }
         return dto;
     }
+
+//    private SocialSecurityEmployeeDTO findSocialSecurityEmployeeDTO(List<SocialSecurityEmployeeDTO> members, Long detailId) {
+//        if (null != members) {
+//            for (SocialSecurityEmployeeDTO member : members) {
+//                if (member.getDetailId().equals(detailId)) {
+//                    return member;
+//                }
+//
+//            }
+//        }
+//        return null;
+//    }
 
     @Override
     public ListSocialSecurityEmployeeStatusResponse listSocialSecurityEmployeeStatus(
             ListSocialSecurityEmployeeStatusCommand cmd) {
-        // TODO 这个要人事档案提供一些接口
         ListSocialSecurityEmployeeStatusResponse response = new ListSocialSecurityEmployeeStatusResponse();
+        Calendar cal = Calendar.getInstance();
+        cal.setTime(new Date());
 
-        response.setPaySocialSecurityNumber(2);
-        response.setPayAccumulationFundNumber(3);
-        response.setIncreaseNumber(0);
-        response.setDecreaseNumber(0);
-        response.setInWorkNumber(9);
+        Integer paySocialSecurityNumber = organizationProvider.queryOrganizationPersonnelCounts(new ListingLocator(), cmd.getOwnerId(), ((locator, query) -> {
+            query.addConditions(Tables.EH_ORGANIZATION_MEMBER_DETAILS.SOCIAL_SECURITY_STATUS.eq(SocialSecurityStatus.PENDING.getCode()));
+            return query;
+        }));
+
+        Integer accumulationFundNumber = organizationProvider.queryOrganizationPersonnelCounts(new ListingLocator(), cmd.getOwnerId(), ((locator, query) -> {
+            query.addConditions(Tables.EH_ORGANIZATION_MEMBER_DETAILS.ACCUMULATION_FUND_STATUS.eq(SocialSecurityStatus.PENDING.getCode()));
+            return query;
+        }));
+
+        Integer inWorkNumber = 0;
+        if (cmd.getSocialSecurityMonth() != null)
+            inWorkNumber = organizationProvider.queryOrganizationPersonnelCounts(new ListingLocator(), cmd.getOwnerId(), ((locator, query) -> {
+                query.addConditions(Tables.EH_ORGANIZATION_MEMBER_DETAILS.CHECK_IN_TIME.ge(getTheFirstDate(cmd.getSocialSecurityMonth())));
+                query.addConditions(Tables.EH_ORGANIZATION_MEMBER_DETAILS.CHECK_IN_TIME.le(getTheLastDate(cmd.getSocialSecurityMonth())));
+                return query;
+            }));
+        response.setPaySocialSecurityNumber(paySocialSecurityNumber);
+        response.setPayAccumulationFundNumber(accumulationFundNumber);
+        response.setInWorkNumber(inWorkNumber);
         response.setOutWorkNumber(7);
         return response;
     }
@@ -631,32 +673,36 @@ public class SocialSecurityServiceImpl implements SocialSecurityService {
                 }
             }
         }
+        Set<Long> detailIds = new HashSet<>();
+        detailIds.add(cmd.getDetailId());
+        List<SocialSecuritySetting> ssSettings = socialSecuritySettingProvider.listSocialSecuritySetting(detailIds, AccumOrSocial.SOCAIL);
+        List<SocialSecuritySetting> afSettings = socialSecuritySettingProvider.listSocialSecuritySetting(detailIds, AccumOrSocial.ACCUM);
         if (ssPayments.size() == 0) {
             response.setPayCurrentSocialSecurityFlag(NormalFlag.NO.getCode());
         } else {
             response.setPayCurrentSocialSecurityFlag(NormalFlag.YES.getCode());
-            response.setSocialSecurityPayment(processSocialSecurityPaymentDetailDTO(ssPayments));
         }
+        response.setSocialSecurityPayment(processSocialSecurityPaymentDetailDTO(ssSettings));
         //社保补缴
         if (ssafterPayments.size() == 0) {
             response.setAfterPaySocialSecurityFlag(NormalFlag.NO.getCode());
         } else {
             response.setAfterPaySocialSecurityFlag(NormalFlag.YES.getCode());
-            response.setAfterSocialSecurityPayment(processSocialSecurityPaymentDetailDTO(ssafterPayments));
+            response.setAfterSocialSecurityPayment(processSocialSecurityPaymentDetailDTO(ssSettings));
         }
         //公积金本月缴费
         if (afPayments.size() == 0) {
             response.setPayCurrentAccumulationFundFlag(NormalFlag.NO.getCode());
         } else {
             response.setPayCurrentAccumulationFundFlag(NormalFlag.YES.getCode());
-            response.setAccumulationFundPayment(processSocialSecurityPaymentDetailDTO(afPayments));
         }
+        response.setAccumulationFundPayment(processSocialSecurityPaymentDetailDTO(afSettings));
         //公积金补缴
         if (afafterPayments.size() == 0) {
             response.setAfterPayAccumulationFundFlag(NormalFlag.NO.getCode());
         } else {
             response.setAfterPayAccumulationFundFlag(NormalFlag.YES.getCode());
-            response.setAfterAccumulationFundPayment(processSocialSecurityPaymentDetailDTO(afafterPayments));
+            response.setAfterAccumulationFundPayment(processSocialSecurityPaymentDetailDTO(afSettings));
         }
         return response;
     }
@@ -666,26 +712,30 @@ public class SocialSecurityServiceImpl implements SocialSecurityService {
 //		return dto;
 //	}
 
-    private SocialSecurityPaymentDetailDTO processSocialSecurityPaymentDetailDTO(List<SocialSecurityPayment> payments) {
+    private SocialSecurityPaymentDetailDTO processSocialSecurityPaymentDetailDTO(List<SocialSecuritySetting> settings) {
+        if (null == settings || settings.size() == 0) {
+            return null;
+        }
         SocialSecurityPaymentDetailDTO dto = new SocialSecurityPaymentDetailDTO();
-        dto.setCityId(payments.get(0).getCityId());
+        dto.setCityId(settings.get(0).getCityId());
         Region city = regionProvider.findRegionById(dto.getCityId());
         if (null != city) dto.setCityName(city.getName());
-        dto.setHouseholdType(payments.get(0).getHouseholdType());
-        SocialSecuritySetting setting = socialSecuritySettingProvider.listSocialSecuritySetting(payments.get(0).getDetailId()).get(0);
-        dto.setRadix(setting.getRadix());
-        dto.setItems(payments.stream().map(this::processSocialSecurityItemDTO).collect(Collectors.toList()));
+        dto.setHouseholdType(settings.get(0).getHouseholdType());
+        dto.setRadix(settings.get(0).getRadix());
+        dto.setItems(settings.stream().map(this::processSocialSecurityItemDTO).collect(Collectors.toList()));
         return dto;
     }
 
-    private SocialSecurityItemDTO processSocialSecurityItemDTO(SocialSecurityPayment r) {
-        SocialSecurityItemDTO dto = ConvertHelper.convert(r, SocialSecurityItemDTO.class);
-        SocialSecurityBase base = socialSecurityBaseProvider.findSocialSecurityBaseByCondition(r.getCityId(), r.getHouseholdType(), r.getAccumOrSocail(), r.getPayItem());
+    private SocialSecurityItemDTO processSocialSecurityItemDTO(SocialSecuritySetting setting) {
+        SocialSecurityItemDTO dto = ConvertHelper.convert(setting, SocialSecurityItemDTO.class);
+        SocialSecurityBase base = socialSecurityBaseProvider.findSocialSecurityBaseByCondition(setting.getCityId(), setting.getHouseholdType(),
+                setting.getAccumOrSocail(), setting.getPayItem());
         if (null != base) {
             copyRadixAndRatio(dto, base);
         }
         return dto;
     }
+
 
     /**
      * 把基础规则数据赋值给itemDTO
@@ -711,7 +761,9 @@ public class SocialSecurityServiceImpl implements SocialSecurityService {
         dbProvider.execute((TransactionStatus status) -> {
             OrganizationMemberDetails detail = organizationProvider.findOrganizationMemberDetailsByDetailId(cmd.getDetailId());
             //社保设置
-            if (NormalFlag.fromCode(cmd.getPayCurrentSocialSecurityFlag()) == NormalFlag.YES) {
+//            if (NormalFlag.fromCode(cmd.getPayCurrentSocialSecurityFlag()) == NormalFlag.YES) {
+            if (null != cmd.getSocialSecurityPayment()) {
+
 
                 // 查询设置的城市户籍档次的数据规则
                 List<SocialSecurityBase> bases = socialSecurityBaseProvider.listSocialSecurityBase(cmd.getSocialSecurityPayment().getCityId(),
@@ -729,7 +781,8 @@ public class SocialSecurityServiceImpl implements SocialSecurityService {
                 }
             }
             //公积金设置
-            if (NormalFlag.fromCode(cmd.getPayCurrentAccumulationFundFlag()) == NormalFlag.YES) {
+//            if (NormalFlag.fromCode(cmd.getPayCurrentAccumulationFundFlag()) == NormalFlag.YES) {
+            if (null != cmd.getAccumulationFundPayment()) {
                 // 查询设置的城市户籍档次的数据规则
                 List<SocialSecurityBase> bases = socialSecurityBaseProvider.listSocialSecurityBase(cmd.getAccumulationFundPayment().getCityId(), AccumOrSocial.ACCUM.getCode());
                 // 校验数据是否合法
@@ -748,8 +801,17 @@ public class SocialSecurityServiceImpl implements SocialSecurityService {
         });
     }
 
-    private void saveSocialSecurityPayment(SocialSecurityPaymentDetailDTO socialSecurityPayment, Long detailId, Byte afterPay, Byte accumOrSocial) {
+    private String getPayMonth(Long detailId) {
+
         String paymentMonth = socialSecurityPaymentProvider.findPaymentMonthByDetail(detailId);
+        if (null == paymentMonth) {
+            paymentMonth = monthSF.get().format(DateHelper.currentGMTTime());
+        }
+        return paymentMonth;
+    }
+
+    private void saveSocialSecurityPayment(SocialSecurityPaymentDetailDTO socialSecurityPayment, Long detailId, Byte afterPay, Byte accumOrSocial) {
+        String paymentMonth = getPayMonth(detailId);
         for (SocialSecurityItemDTO itemDTO : socialSecurityPayment.getItems()) {
             SocialSecurityPayment payment = socialSecurityPaymentProvider.findSocialSecurityPayment(detailId, itemDTO.getPayItem(), accumOrSocial);
             if (null == payment) {
@@ -975,9 +1037,9 @@ public class SocialSecurityServiceImpl implements SocialSecurityService {
             @Override
             public ImportFileResponse importFile() {
                 ImportFileResponse response = new ImportFileResponse();
-                Map<String, String> title = new HashedMap();
-                title.put("导入社保设置", "导入社保设置");
-                response.setTitle(title);
+//                Map<String, String> title = new HashedMap();
+//                title.put("导入社保设置", "导入社保设置");
+//                response.setTitle(resultList.get(0));
                 //  将 excel 的中的数据读取
                 String fileLog = "";
                 if (resultList.size() > 0) {
@@ -1032,12 +1094,19 @@ public class SocialSecurityServiceImpl implements SocialSecurityService {
 	}
     private void batchUpdateSSSettingAndPayments(List list, Long ownerId, String fileLog, ImportFileResponse response) {
         //
+        RowResult title = (RowResult) list.get(0);
+        Map<String, String> titleMap = title.getCells();
+        response.setTitle(titleMap);
         response.setLogs(new ArrayList<>());
         for (int i = 1; i < list.size(); i++) {
             RowResult r = (RowResult) list.get(i);
             ImportFileResultLog<Map<String, String>> log = new ImportFileResultLog<>(SocialSecurityConstants.SCOPE);
 //            response.getLogs().add(log);
-            log.setData(r.getCells());
+            Map<String, String> data = new HashMap();
+            for (Map.Entry<String, String> entry : titleMap.entrySet()) {
+                data.put(entry.getKey(), (r.getCells().get(entry.getKey()) == null) ? "" : r.getCells().get(entry.getKey()));
+            }
+            log.setData(data);
             String userContact = r.getA().trim();
             OrganizationMemberDetails detail = organizationProvider.findOrganizationMemberDetailsByOrganizationIdAndContactToken(ownerId, userContact);
             if (null == detail) {
@@ -1045,6 +1114,7 @@ public class SocialSecurityServiceImpl implements SocialSecurityService {
                 LOGGER.error("can not find organization member ,contact token is " + userContact);
                 log.setErrorLog("找不到用户: 手机号" + userContact);
                 log.setCode(SocialSecurityConstants.ERROR_CHECK_CONTACT);
+                log.setErrorDescription(log.getErrorLog());
                 response.getLogs().add(log);
                 continue;
             } else {
@@ -1058,6 +1128,7 @@ public class SocialSecurityServiceImpl implements SocialSecurityService {
                     LOGGER.error("没有这个城市或者户籍档次 " + ssCityName + houseType);
                     log.setErrorLog("没有这个户籍城市或者户籍档次");
                     log.setCode(SocialSecurityConstants.ERROR_CHECK_SOCIAL_CITY);
+                    log.setErrorDescription(log.getErrorLog());
                     response.getLogs().add(log);
                     continue;
                 }
@@ -1066,7 +1137,8 @@ public class SocialSecurityServiceImpl implements SocialSecurityService {
                 if (null == afBases) {
                     LOGGER.error("没有这个公积金城市" + afCityName);
                     log.setErrorLog("没有这个公积金城市");
-                    log.setCode(SocialSecurityConstants.ERROR_CHECK_SOCIAL_CITY);
+                    log.setCode(SocialSecurityConstants.ERROR_CHECK_ACCUM_CITY);
+                    log.setErrorDescription(log.getErrorLog());
                     response.getLogs().add(log);
                     continue;
                 }
@@ -1093,6 +1165,7 @@ public class SocialSecurityServiceImpl implements SocialSecurityService {
                 LOGGER.error(errorString);
                 log.setErrorLog(errorString);
                 log.setCode(SocialSecurityConstants.ERROR_CHECK_SSRADIX);
+                log.setErrorDescription(log.getErrorLog());
                 response.getLogs().add(log);
                 return;
             }
@@ -1109,6 +1182,7 @@ public class SocialSecurityServiceImpl implements SocialSecurityService {
                 LOGGER.error(errorString);
                 log.setErrorLog(errorString);
                 log.setCode(SocialSecurityConstants.ERROR_CHECK_AFRADIX);
+                log.setErrorDescription(log.getErrorLog());
                 response.getLogs().add(log);
                 return;
             }
@@ -1146,7 +1220,8 @@ public class SocialSecurityServiceImpl implements SocialSecurityService {
                 String errorString = "残障金基数必须大于0 现在值: " + czRadixString;
                 LOGGER.error(errorString);
                 log.setErrorLog(errorString);
-                log.setCode(SocialSecurityConstants.ERROR_CHECK_AFRADIX);
+                log.setCode(SocialSecurityConstants.ERROR_CHECK_SSRADIX);
+                log.setErrorDescription(log.getErrorLog());
                 response.getLogs().add(log);
                 return;
             }
@@ -1161,7 +1236,8 @@ public class SocialSecurityServiceImpl implements SocialSecurityService {
                 String errorString = "商业保险基数必须大于0 现在值: " + syRadixString;
                 LOGGER.error(errorString);
                 log.setErrorLog(errorString);
-                log.setCode(SocialSecurityConstants.ERROR_CHECK_AFRADIX);
+                log.setCode(SocialSecurityConstants.ERROR_CHECK_SSRADIX);
+                log.setErrorDescription(log.getErrorLog());
                 response.getLogs().add(log);
                 return;
             }
@@ -1169,6 +1245,13 @@ public class SocialSecurityServiceImpl implements SocialSecurityService {
         addImportItemDTO(dtos, syRadix, "100%", "0%", AccumOrSocial.SOCAIL, "商业保险");
 
         for (SocialSecurityItemDTO item : dtos) {
+            if (item.getAccumOrSocial().equals(AccumOrSocial.ACCUM.getCode())
+                    && NormalFlag.YES != NormalFlag.fromCode(detail.getAccumulationFundStatus())) {
+                increseMemberDetail(detail, AccumOrSocial.ACCUM);
+            } else if (item.getAccumOrSocial().equals(AccumOrSocial.SOCAIL.getCode())
+                    && NormalFlag.YES != NormalFlag.fromCode(detail.getSocialSecurityStatus())) {
+                increseMemberDetail(detail, AccumOrSocial.SOCAIL);
+            }
             SocialSecuritySetting setting = findSetting(item.getAccumOrSocial(), item.getPayItem(), settings);
             List<SocialSecurityBase> bases = (item.getAccumOrSocial().equals(AccumOrSocial.ACCUM.getCode())) ? afBases : ssBases;
             Long cityId = (item.getAccumOrSocial().equals(AccumOrSocial.ACCUM.getCode())) ? afCItyId : ssCityId;
@@ -1363,34 +1446,91 @@ public class SocialSecurityServiceImpl implements SocialSecurityService {
 
     private void calculateSocialSecurityInoutReports(Long ownerId) {
         //todo 组织架构获取本月增员本月减员的人
-        String month = socialSecurityPaymentProvider.findPaymentMonthByDetail(ownerId);
-        List<OrganizationMemberDetails> inDetails = null;
-        List<OrganizationMemberDetails> outDetails = null;
+        String month = socialSecurityPaymentProvider.findPaymentMonthByOwnerId(ownerId);
         socialSecurityInoutReportProvider.deleteSocialSecurityInoutReportByMonth(ownerId, month);
-        if (inDetails != null) {
-            for (OrganizationMemberDetails detail : inDetails) {
-                SocialSecurityInoutReport report = crateInoutReport(detail, month, InOutFlag.INCRE);
+        List<Byte> socialInouts = new ArrayList<>();
+        socialInouts.add(InOutLogType.ACCUMULATION_FUND_IN.getCode());
+        socialInouts.add(InOutLogType.ACCUMULATION_FUND_OUT.getCode());
+        socialInouts.add(InOutLogType.SOCIAL_SECURITY_IN.getCode());
+        socialInouts.add(InOutLogType.SOCIAL_SECURITY_OUT.getCode());
+        List<Long> detailIds = socialSecurityInoutLogProvider.listSocialSecurityInoutLogDetailIds(ownerId, month, socialInouts);
+        if (detailIds != null) {
+            for (Long detailId : detailIds) {
+                OrganizationMemberDetails detail = organizationProvider.findOrganizationMemberDetailsByDetailId(detailId);
+                SocialSecurityInoutReport report = crateInoutReport(detail, month);
             }
         }
-        if (outDetails != null) {
-            for (OrganizationMemberDetails detail : outDetails) {
-                SocialSecurityInoutReport report = crateInoutReport(detail, month, InOutFlag.DECRE);
-            }
-        }
+//        if (outDetails != null) {
+//            for (Long detailId : outDetails) {
+//                OrganizationMemberDetails detail = organizationProvider.findOrganizationMemberDetailsByDetailId(detailId);
+//                SocialSecurityInoutReport report = crateInoutReport(detail, month, InOutFlag.DECRE, AccumOrSocial.SOCAIL);
+//            }
+//        }
+//
+//        inDetails = socialSecurityInoutLogProvider.listSocialSecurityInoutLogDetailIds(ownerId, month, InOutLogType.ACCUMULATION_FUND_IN);
+//        outDetails = socialSecurityInoutLogProvider.listSocialSecurityInoutLogDetailIds(ownerId, month, InOutLogType.ACCUMULATION_FUND_OUT);
+//        if (inDetails != null) {
+//            for (Long detailId : inDetails) {
+//                OrganizationMemberDetails detail = organizationProvider.findOrganizationMemberDetailsByDetailId(detailId);
+//                SocialSecurityInoutReport report = crateInoutReport(detail, month, InOutFlag.INCRE, AccumOrSocial.ACCUM);
+//            }
+//        }
+//        if (outDetails != null) {
+//            for (Long detailId : outDetails) {
+//                OrganizationMemberDetails detail = organizationProvider.findOrganizationMemberDetailsByDetailId(detailId);
+//                SocialSecurityInoutReport report = crateInoutReport(detail, month, InOutFlag.DECRE, AccumOrSocial.ACCUM);
+//            }
+//        }
     }
 
-    private SocialSecurityInoutReport crateInoutReport(OrganizationMemberDetails detail, String month, InOutFlag inOutFlag) {
+    private SocialSecurityInoutReport crateInoutReport(OrganizationMemberDetails detail, String month) {
         SocialSecurityReport ssReport = socialSecurityReportProvider.findSocialSecurityReportByDetailId(detail.getId(), month);
-        SocialSecurityInoutReport report = ConvertHelper.convert(ssReport, SocialSecurityInoutReport.class);
-        report.setSocialSecurityAfter(ssReport.getAfterSocialSecurityCompanySum().add(ssReport.getAfterSocialSecurityEmployeeSum()));
-        report.setAccumulationFundAfter(ssReport.getAfterAccumulationFundCompanySum().add(ssReport.getAfterAccumulationFundEmployeeSum()));
-        if (inOutFlag == InOutFlag.INCRE) {
-            report.setSocialSecurityIncrease(ssReport.getSocialSecuritySum());
-            report.setAccumulationFundIncrease(ssReport.getAccumulationFundSum());
-        } else if (inOutFlag == InOutFlag.DECRE) {
-            report.setSocialSecurityDecrease(ssReport.getSocialSecuritySum());
-            report.setAccumulationFundDecrease(ssReport.getAccumulationFundSum());
+        SocialSecurityInoutReport report = new SocialSecurityInoutReport();
+        if (null == ssReport) {
+//            LOGGER.error("can not find report : detail:{}{},month:{}", detail.getId(), detail.getContactName(), month);
+//            return null;
+            ssReport = newSocialSecurityReport(detail);
+            ssReport.setPayMonth(month);
         }
+        report = ConvertHelper.convert(ssReport, SocialSecurityInoutReport.class);
+        if (null != ssReport.getAfterSocialSecurityCompanySum()) {
+            report.setSocialSecurityAfter(ssReport.getAfterSocialSecurityCompanySum().add(ssReport.getAfterSocialSecurityEmployeeSum()));
+        }
+        if (null != ssReport.getAfterAccumulationFundCompanySum()) {
+            report.setAccumulationFundAfter(ssReport.getAfterAccumulationFundCompanySum().add(ssReport.getAfterAccumulationFundEmployeeSum()));
+        }
+        List<SocialSecurityInoutLog> inoutLogs = socialSecurityInoutLogProvider.listSocialSecurityInoutLogs(detail.getOrganizationId(),
+                detail.getId(), month);
+
+        for (SocialSecurityInoutLog log : inoutLogs) {
+            //通过INOUTLOG的type 和当前用户社保公积金状态比较,确定这个月计算他的增员还是减员
+            LOGGER.debug("log type :{} ,detail status ss {}  af {} ", log.getType(), detail.getSocialSecurityStatus(), detail.getAccumulationFundStatus());
+            if (log.getType().equals(InOutLogType.ACCUMULATION_FUND_IN.getCode())
+                    && (NormalFlag.YES == NormalFlag.fromCode(detail.getAccumulationFundStatus()))) {
+                report.setAccumulationFundIncrease(ssReport.getAccumulationFundSum());
+            } else if (log.getType().equals(InOutLogType.SOCIAL_SECURITY_IN.getCode())
+                    && (NormalFlag.YES == NormalFlag.fromCode(detail.getSocialSecurityStatus()))) {
+                report.setSocialSecurityIncrease(ssReport.getSocialSecuritySum());
+            } else if (log.getType().equals(InOutLogType.SOCIAL_SECURITY_OUT.getCode())
+                    && (NormalFlag.NO == NormalFlag.fromCode(detail.getSocialSecurityStatus()))) {
+                report.setSocialSecurityDecrease(socialSecuritySettingProvider.sumPayment(detail.getId(), AccumOrSocial.SOCAIL));
+            } else if (log.getType().equals(InOutLogType.ACCUMULATION_FUND_OUT.getCode())
+                    && (NormalFlag.NO == NormalFlag.fromCode(detail.getAccumulationFundStatus()))) {
+                report.setAccumulationFundDecrease(socialSecuritySettingProvider.sumPayment(detail.getId(), AccumOrSocial.ACCUM));
+            }
+        }
+//        if (inOutFlag == InOutFlag.INCRE) {
+//            if (AccumOrSocial.SOCAIL == accumOrSocial) {
+//            } else {
+//            }
+//        } else if (inOutFlag == InOutFlag.DECRE) {
+//
+////            if (AccumOrSocial.SOCAIL == accumOrSocial) {
+////                report.setSocialSecurityDecrease(ssReport.getSocialSecuritySum());
+////            } else {
+////                report.setAccumulationFundDecrease(ssReport.getAccumulationFundSum());
+////            }
+//        }
         socialSecurityInoutReportProvider.createSocialSecurityInoutReport(report);
         return report;
     }
@@ -1401,6 +1541,9 @@ public class SocialSecurityServiceImpl implements SocialSecurityService {
         socialSecurityDepartmentSummaryProvider.deleteSocialSecurityDptReports(ownerId, month);
         List<Organization> orgs = findOrganizationDpts(ownerId);
         for (Organization dpt : orgs) {
+            if (null == dpt) {
+                continue;
+            }
             calculateSocialSecurityDptReports(dpt, month);
         }
 
@@ -1424,7 +1567,7 @@ public class SocialSecurityServiceImpl implements SocialSecurityService {
                 }
             }
         }
-        LOGGER.error("开始计算部门-{} 的数据,\n下辖部门id {},\n人员id{}", dpt.getName(), orgIds, detailIds);
+//        LOGGER.error("开始计算部门-{} 的数据,\n下辖部门id {},\n人员id{}", dpt.getName(), orgIds, detailIds);
         SocialSecurityDepartmentSummary summary = processSocialSecurityDepartmentSummary(dpt, detailIds, month);
         socialSecurityDepartmentSummaryProvider.createSocialSecurityDepartmentSummary(summary);
     }
@@ -1433,6 +1576,9 @@ public class SocialSecurityServiceImpl implements SocialSecurityService {
         SocialSecurityDepartmentSummary summary = new SocialSecurityDepartmentSummary();
         if (detailIds != null && detailIds.size() > 0) {
             summary = socialSecurityReportProvider.calculateSocialSecurityDepartmentSummary(detailIds, month);
+        }
+        if (null == summary) {
+            summary = new SocialSecurityDepartmentSummary();
         }
         summary.setNamespaceId(dpt.getNamespaceId());
         summary.setDeptId(dpt.getId());
@@ -1676,7 +1822,7 @@ public class SocialSecurityServiceImpl implements SocialSecurityService {
         report.setDetailId(detail.getId());
         report.setUserId(detail.getTargetId());
         report.setUserName(detail.getContactName());
-        report.setEntryDate(detail.getEndTime());
+        report.setEntryDate(detail.getCheckInTime());
         report.setDeptName(detail.getDepartment());
         List<SocialSecuritySetting> settings = socialSecuritySettingProvider.listSocialSecuritySetting(detail.getId());
         if (null != settings) {
@@ -1762,6 +1908,12 @@ public class SocialSecurityServiceImpl implements SocialSecurityService {
 
     private SocialSecurityReportDTO processSocialSecurityReportDTO(SocialSecurityReport r) {
         SocialSecurityReportDTO dto = ConvertHelper.convert(r, SocialSecurityReportDTO.class);
+        if (null != r.getEntryDate()) {
+            dto.setEntryDate(r.getEntryDate().getTime());
+        }
+        if (null != r.getOutWorkDate()) {
+            dto.setOutWorkDate(r.getOutWorkDate().getTime());
+        }
         return dto;
     }
 
@@ -1780,11 +1932,18 @@ public class SocialSecurityServiceImpl implements SocialSecurityService {
 
     }
 
+    private String checkNullInteger(Integer a) {
+        if (a == null) {
+            return "";
+        }
+        return a.toString();
+    }
+
     private XSSFSheet setNewSocialSecurityReportRow(XSSFSheet sheet, SocialSecurityReport r) {
         Row row = sheet.createRow(sheet.getLastRowNum() + 1);
         int i = -1;
         row.createCell(++i).setCellValue(r.getUserName());
-        row.createCell(++i).setCellValue(dateSF.get().format(r.getEntryDate()));
+        row.createCell(++i).setCellValue(r.getEntryDate() == null ? "" : dateSF.get().format(r.getEntryDate()));
         row.createCell(++i).setCellValue(r.getContactToken());
         row.createCell(++i).setCellValue(r.getIdNumber());
         row.createCell(++i).setCellValue(r.getDegree());
@@ -1793,7 +1952,7 @@ public class SocialSecurityServiceImpl implements SocialSecurityService {
         row.createCell(++i).setCellValue(r.getDeptName());
         row.createCell(++i).setCellValue(r.getSocialSecurityNumber());
         row.createCell(++i).setCellValue(r.getProvidentFundNumber());
-        row.createCell(++i).setCellValue(dateSF.get().format(r.getOutWorkDate()));
+        row.createCell(++i).setCellValue(r.getOutWorkDate() == null ? "" : dateSF.get().format(r.getOutWorkDate()));
         row.createCell(++i).setCellValue(r.getHouseholdType());
         row.createCell(++i).setCellValue(r.getSocialSecurityCityName());
         row.createCell(++i).setCellValue(r.getPayMonth());
@@ -1814,39 +1973,39 @@ public class SocialSecurityServiceImpl implements SocialSecurityService {
         row.createCell(++i).setCellValue("");
         //养老
         row.createCell(++i).setCellValue(checkNullBigDecimal(r.getPensionCompanyRadix()));
-        row.createCell(++i).setCellValue(r.getPensionCompanyRatio());
+        row.createCell(++i).setCellValue(checkNullInteger(r.getPensionCompanyRatio()));
         row.createCell(++i).setCellValue(checkNullBigDecimal(r.getPensionCompanySum()));
         row.createCell(++i).setCellValue(checkNullBigDecimal(r.getPensionEmployeeRadix()));
-        row.createCell(++i).setCellValue(r.getPensionEmployeeRatio());
+        row.createCell(++i).setCellValue(checkNullInteger(r.getPensionEmployeeRatio()));
         row.createCell(++i).setCellValue(checkNullBigDecimal(r.getPensionEmployeeSum()));
         //失业
         row.createCell(++i).setCellValue(checkNullBigDecimal(r.getUnemploymentCompanyRadix()));
-        row.createCell(++i).setCellValue(r.getUnemploymentCompanyRatio());
+        row.createCell(++i).setCellValue(checkNullInteger(r.getUnemploymentCompanyRatio()));
         row.createCell(++i).setCellValue(checkNullBigDecimal(r.getUnemploymentCompanySum()));
         row.createCell(++i).setCellValue(checkNullBigDecimal(r.getUnemploymentEmployeeRadix()));
-        row.createCell(++i).setCellValue(r.getUnemploymentEmployeeRatio());
+        row.createCell(++i).setCellValue(checkNullInteger(r.getUnemploymentEmployeeRatio()));
         row.createCell(++i).setCellValue(checkNullBigDecimal(r.getUnemploymentEmployeeSum()));
         //医疗
         row.createCell(++i).setCellValue(checkNullBigDecimal(r.getMedicalCompanyRadix()));
-        row.createCell(++i).setCellValue(r.getMedicalCompanyRatio());
+        row.createCell(++i).setCellValue(checkNullInteger(r.getMedicalCompanyRatio()));
         row.createCell(++i).setCellValue(checkNullBigDecimal(r.getMedicalCompanySum()));
         row.createCell(++i).setCellValue(checkNullBigDecimal(r.getMedicalEmployeeRadix()));
-        row.createCell(++i).setCellValue(r.getMedicalEmployeeRatio());
+        row.createCell(++i).setCellValue(checkNullInteger(r.getMedicalEmployeeRatio()));
         row.createCell(++i).setCellValue(checkNullBigDecimal(r.getMedicalEmployeeSum()));
         //工伤
         row.createCell(++i).setCellValue(checkNullBigDecimal(r.getInjuryCompanyRadix()));
-        row.createCell(++i).setCellValue(r.getInjuryCompanyRatio());
+        row.createCell(++i).setCellValue(checkNullInteger(r.getInjuryCompanyRatio()));
         row.createCell(++i).setCellValue(checkNullBigDecimal(r.getInjuryCompanySum()));
         //生育
         row.createCell(++i).setCellValue(checkNullBigDecimal(r.getBirthCompanyRadix()));
-        row.createCell(++i).setCellValue(r.getBirthCompanyRatio());
+        row.createCell(++i).setCellValue(checkNullInteger(r.getBirthCompanyRatio()));
         row.createCell(++i).setCellValue(checkNullBigDecimal(r.getBirthCompanySum()));
         //大病
         row.createCell(++i).setCellValue(checkNullBigDecimal(r.getCriticalIllnessCompanyRadix()));
-        row.createCell(++i).setCellValue(r.getCriticalIllnessCompanyRatio());
+        row.createCell(++i).setCellValue(checkNullInteger(r.getCriticalIllnessCompanyRatio()));
         row.createCell(++i).setCellValue(checkNullBigDecimal(r.getCriticalIllnessCompanySum()));
         row.createCell(++i).setCellValue(checkNullBigDecimal(r.getCriticalIllnessEmployeeRadix()));
-        row.createCell(++i).setCellValue(r.getCriticalIllnessEmployeeRatio());
+        row.createCell(++i).setCellValue(checkNullInteger(r.getCriticalIllnessEmployeeRatio()));
         row.createCell(++i).setCellValue(checkNullBigDecimal(r.getCriticalIllnessEmployeeSum()));
 
         //补缴
@@ -1990,7 +2149,7 @@ public class SocialSecurityServiceImpl implements SocialSecurityService {
         params.put("ownerId", cmd.getOwnerId());
         params.put("payMonth", cmd.getPayMonth());
         params.put("reportType", "exportSocialSecurityReports");
-        String fileName = String.format("导出社保报表_%s.xlsx", DateUtil.dateToStr(new Date(), DateUtil.NO_SLASH));
+        String fileName = String.format("%s社保报表.xlsx", cmd.getPayMonth());
 
         taskService.createTask(fileName, TaskType.FILEDOWNLOAD.getCode(), SocialSecurityReportsTaskHandler.class, params, TaskRepeatFlag.REPEAT.getCode(), new Date());
 
@@ -2055,7 +2214,7 @@ public class SocialSecurityServiceImpl implements SocialSecurityService {
         params.put("ownerId", cmd.getOwnerId());
         params.put("payMonth", cmd.getPayMonth());
         params.put("reportType", "exportSocialSecurityInoutReports");
-        String fileName = String.format("导出社保部门汇总报表_%s.xlsx", DateUtil.dateToStr(new Date(), DateUtil.NO_SLASH));
+        String fileName = String.format("%s社保增减表.xlsx", cmd.getPayMonth());
 
         taskService.createTask(fileName, TaskType.FILEDOWNLOAD.getCode(), SocialSecurityReportsTaskHandler.class, params, TaskRepeatFlag.REPEAT.getCode(), new Date());
 
@@ -2071,7 +2230,7 @@ public class SocialSecurityServiceImpl implements SocialSecurityService {
         params.put("ownerId", cmd.getOwnerId());
         params.put("payMonth", cmd.getPayMonth());
         params.put("reportType", "exportSocialSecurityDepartmentSummarys");
-        String fileName = String.format("导出社保部门汇总报表_%s.xlsx", DateUtil.dateToStr(new Date(), DateUtil.NO_SLASH));
+        String fileName = String.format("%s社保部门汇总报表.xlsx", cmd.getPayMonth());
 
         taskService.createTask(fileName, TaskType.FILEDOWNLOAD.getCode(), SocialSecurityReportsTaskHandler.class, params, TaskRepeatFlag.REPEAT.getCode(), new Date());
 
@@ -2199,6 +2358,12 @@ public class SocialSecurityServiceImpl implements SocialSecurityService {
 
     private SocialSecurityInoutReportDTO processSocialSecurityInoutReportDTO(SocialSecurityInoutReport r) {
         SocialSecurityInoutReportDTO dto = ConvertHelper.convert(r, SocialSecurityInoutReportDTO.class);
+        if (null != r.getEntryDate()) {
+            dto.setEntryDate(r.getEntryDate().getTime());
+        }
+        if (null != r.getOutWorkDate()) {
+            dto.setOutWorkDate(r.getOutWorkDate().getTime());
+        }
         return dto;
     }
 
@@ -2220,8 +2385,8 @@ public class SocialSecurityServiceImpl implements SocialSecurityService {
         Row row = sheet.createRow(sheet.getLastRowNum() + 1);
         int i = -1;
         row.createCell(++i).setCellValue(r.getUserName());
-        row.createCell(++i).setCellValue(dateSF.get().format(r.getEntryDate()));
-        row.createCell(++i).setCellValue(dateSF.get().format(r.getOutWorkDate()));
+        row.createCell(++i).setCellValue(r.getEntryDate() == null ? "" : dateSF.get().format(r.getEntryDate()));
+        row.createCell(++i).setCellValue(r.getOutWorkDate() == null ? "" : dateSF.get().format(r.getOutWorkDate()));
         row.createCell(++i).setCellValue(r.getContactToken());
         row.createCell(++i).setCellValue(r.getIdNumber());
         row.createCell(++i).setCellValue(r.getDegree());
@@ -2363,6 +2528,20 @@ public class SocialSecurityServiceImpl implements SocialSecurityService {
 
     private SocialSecuritySummaryDTO processSocialSecuritySummaryDTO(SocialSecuritySummary r) {
         SocialSecuritySummaryDTO dto = ConvertHelper.convert(r, SocialSecuritySummaryDTO.class);
+        if (null != r.getCreateTime()) {
+            dto.setCreateTime(r.getCreateTime().getTime());
+        }
+        if (null != r.getFileTime()) {
+            dto.setFileTime(r.getFileTime().getTime());
+        }
+        OrganizationMember detail = organizationProvider.findOrganizationMemberByOrgIdAndUId(r.getCreatorUid(), r.getOrganizationId());
+        if (null != detail) {
+            dto.setCreatorName(detail.getContactName());
+        }
+        detail = organizationProvider.findOrganizationMemberByOrgIdAndUId(r.getFileUid(), r.getOrganizationId());
+        if (null != detail) {
+            dto.setFileName(detail.getContactName());
+        }
         return dto;
     }
 
@@ -2370,7 +2549,7 @@ public class SocialSecurityServiceImpl implements SocialSecurityService {
     @Override
     public ListUserInoutHistoryResponse
     listUserInoutHistory(ListUserInoutHistoryCommand cmd) {
-        List<SocialSecurityInoutLog> logs = socialSecurityInoutLogProvider.listSocialSecurityInoutLogs(cmd.getOwnerId(), cmd.getDetailId());
+        List<SocialSecurityInoutLog> logs = socialSecurityInoutLogProvider.listSocialSecurityInoutLogs(cmd.getOwnerId(), cmd.getDetailId(), null);
 
         List<UserInoutHistoryDTO> history = new ArrayList<>();
 
@@ -2398,6 +2577,7 @@ public class SocialSecurityServiceImpl implements SocialSecurityService {
                     }
                     sb.append(InOutLogType.fromCode(logType).getDescribe());
                 }
+                dto.setLogs(sb.toString());
                 history.add(dto);
             }
         }
@@ -2473,6 +2653,131 @@ public class SocialSecurityServiceImpl implements SocialSecurityService {
     }
 
     @Override
+    public List<SocialSecurityEmployeeDTO> listSocialSecurityEmployees(ListSocialSecurityPaymentsCommand cmd) {
+        List<SocialSecurityEmployeeDTO> results = new ArrayList<>();
+        EhOrganizationMemberDetails t2 = Tables.EH_ORGANIZATION_MEMBER_DETAILS.as("t2");
+        Integer pageSize;
+        if (cmd.getPageSize() != null)
+            pageSize = cmd.getPageSize();
+        else
+            pageSize = 20;
+        //  set the departmentId
+        Long organizationId = cmd.getOwnerId();
+        if (cmd.getDeptId() != null)
+            organizationId = cmd.getDeptId();
+
+        List<OrganizationMember> records = organizationProvider.queryOrganizationPersonnels(new ListingLocator(), organizationId, (locator, query) -> {
+            if (cmd.getSocialSecurityStatus() != null)
+                query.addConditions(t2.SOCIAL_SECURITY_STATUS.eq(cmd.getSocialSecurityStatus()));
+            if (cmd.getAccumulationFundStatus() != null)
+                query.addConditions(t2.ACCUMULATION_FUND_STATUS.eq(cmd.getAccumulationFundStatus()));
+            if (cmd.getCheckInMonth() != null) {
+                query.addConditions(t2.CHECK_IN_TIME.ge(getTheFirstDate(cmd.getCheckInMonth())).and(t2.CHECK_IN_TIME.le(getTheLastDate(cmd.getCheckInMonth()))));
+            }
+            if (cmd.getKeywords() != null) {
+                query.addConditions(t2.CONTACT_TOKEN.eq(cmd.getKeywords()).or(t2.CONTACT_NAME.like(cmd.getKeywords())));
+            }
+            if (cmd.getAccumulationFundCityId() != null) {
+                query.addConditions(t2.ID.in(dbProvider.getDslContext(AccessSpec.readOnly()).selectDistinct(Tables.EH_SOCIAL_SECURITY_SETTINGS.DETAIL_ID)
+                        .from(Tables.EH_SOCIAL_SECURITY_SETTINGS).where(Tables.EH_SOCIAL_SECURITY_SETTINGS.ORGANIZATION_ID.eq(cmd.getOwnerId()))
+                        .and(Tables.EH_SOCIAL_SECURITY_SETTINGS.CITY_ID.eq(cmd.getAccumulationFundCityId()))
+                        .and(Tables.EH_SOCIAL_SECURITY_SETTINGS.ACCUM_OR_SOCAIL.eq(AccumOrSocial.ACCUM.getCode()))));
+            }
+            if (cmd.getSocialSecurityCityId() != null) {
+                query.addConditions(t2.ID.in(dbProvider.getDslContext(AccessSpec.readOnly()).selectDistinct(Tables.EH_SOCIAL_SECURITY_SETTINGS.DETAIL_ID)
+                        .from(Tables.EH_SOCIAL_SECURITY_SETTINGS).where(Tables.EH_SOCIAL_SECURITY_SETTINGS.ORGANIZATION_ID.eq(cmd.getOwnerId()))
+                        .and(Tables.EH_SOCIAL_SECURITY_SETTINGS.CITY_ID.eq(cmd.getSocialSecurityCityId()))
+                        .and(Tables.EH_SOCIAL_SECURITY_SETTINGS.ACCUM_OR_SOCAIL.eq(AccumOrSocial.SOCAIL.getCode()))));
+            }
+            int offset = ((cmd.getPageOffset() == null ? 1 : cmd.getPageOffset()) - 1) * (pageSize);
+            query.addOrderBy(t2.field("check_in_time").desc());
+            query.addLimit(offset, pageSize + 1);
+            return query;
+        });
+
+        records.forEach(r -> {
+            SocialSecurityEmployeeDTO dto = new SocialSecurityEmployeeDTO();
+            dto.setContactName(r.getContactName());
+            dto.setUserId(r.getTargetId());
+            dto.setDetailId(r.getDetailId());
+            dto.setNamespaceId(r.getNamespaceId());
+            dto.setDepartmentName(getDepartmentName(r.getDetailId()));
+            dto.setCheckInTime(r.getCheckInTime());
+            dto.setSocialSecurityStatus(r.getSocialSecurityStatus());
+            dto.setAccumulationFundStatus(r.getAccumulationFundStatus());
+            results.add(dto);
+        });
+        return results;
+
+    }
+
+    private java.sql.Date getTheFirstDate(String m) {
+        Calendar c = Calendar.getInstance();
+        SimpleDateFormat df = new SimpleDateFormat("yyyyMM");
+        try {
+            Date date = df.parse(m);
+            c.setTime(date);
+            c.add(Calendar.MONTH, 0);
+            c.set(Calendar.DAY_OF_MONTH, 1); //  设置为1号,当前日期既为本月第一天
+            date = c.getTime();
+            java.sql.Date sqlDate = new java.sql.Date(date.getTime());
+            return sqlDate;
+        } catch (ParseException e) {
+            LOGGER.error("transfer format error");
+            return null;
+        }
+    }
+
+    private java.sql.Date getTheLastDate(String m) {
+        Calendar c = Calendar.getInstance();
+        SimpleDateFormat df = new SimpleDateFormat("yyyyMM");
+        try {
+            Date date = df.parse(m);
+            c.setTime(date);
+            c.set(Calendar.DAY_OF_MONTH, c.getActualMaximum(Calendar.DAY_OF_MONTH)); //  获取当前月最后一天
+            date = c.getTime();
+            java.sql.Date sqlDate = new java.sql.Date(date.getTime());
+            return sqlDate;
+        } catch (ParseException e) {
+            LOGGER.error("transfer format error");
+            return null;
+        }
+    }
+
+    private String getDepartmentName(Long detailId) {
+        Long departmentId = organizationService.getDepartmentByDetailId(detailId);
+        Organization department = organizationProvider.findOrganizationById(departmentId);
+        if (department != null)
+            return department.getName();
+        return null;
+    }
+
+    @Override
+    public SocialSecurityEmployeeDTO getSocialSecurityEmployeeInfo(Long detailId) {
+        SocialSecurityEmployeeDTO dto = new SocialSecurityEmployeeDTO();
+
+        OrganizationMemberDetails memberDetail = organizationProvider.findOrganizationMemberDetailsByDetailId(detailId);
+        if (memberDetail != null) {
+            dto.setDetailId(memberDetail.getId());
+            dto.setUserId(memberDetail.getTargetId());
+            dto.setCheckInTime(memberDetail.getCheckInTime());
+            dto.setDismissTime(memberDetail.getDismissTime());
+
+            SocialSecurityInoutTime social = socialSecurityInoutTimeProvider.getSocialSecurityInoutTimeByDetailId(InOutTimeType.SOCIAL_SECURITY.getCode(), detailId);
+            if (social != null) {
+                dto.setSocialSecurityStartMonth(social.getStartMonth());
+                dto.setSocialSecurityEndMonth(social.getEndMonth());
+            }
+        }
+        return dto;
+    }
+
+/*    @Override
+    public List<Long> listSocialSecurityEmployeeDetailIdsByPayMonth(Long ownerId, String payMonth) {
+        List<Long> detailIds = socialSecurityInoutTimeProvider.listSocialSecurityEmployeeDetailIdsByPayMonth(ownerId, payMonth, InOutTimeType.SOCIAL_SECURITY.getCode());
+        return detailIds;
+    }*/
+/*@Override
     public SocialSecurityInoutTimeDTO addSocialSecurityInOutTime(AddSocialSecurityInOutTimeCommand cmd) {
         OrganizationMemberDetails memberDetail = organizationProvider.findOrganizationMemberDetailsByDetailId(cmd.getDetailId());
 
@@ -2551,73 +2856,7 @@ public class SocialSecurityServiceImpl implements SocialSecurityService {
 
         //  return it.
         return log;
-    }
-
-    public List<Long> listSocialSecurityEmployeeDetailIds(ListSocialSecurityPaymentsCommand cmd) {
-        //  1.set the departmentId
-        Long organizationId = cmd.getOwnerId();
-        if (cmd.getDeptId() != null)
-            organizationId = cmd.getDeptId();
-
-        List<Long> results = organizationProvider.queryOrganizationPersonnelDetailIds(new ListingLocator(), Integer.MAX_VALUE - 1, organizationId, (locator, query) -> {
-            if (cmd.getSocialSecurityStatus() != null)
-                query.addConditions(Tables.EH_ORGANIZATION_MEMBER_DETAILS.SOCIAL_SECURITY_STATUS.eq(cmd.getSocialSecurityStatus()));
-            if (cmd.getAccumulationFundStatus() != null)
-                query.addConditions(Tables.EH_ORGANIZATION_MEMBER_DETAILS.ACCUMULATION_FUND_STATUS.eq(cmd.getAccumulationFundStatus()));
-
-            return query;
-        });
-        return results;
-    }
-
-    private java.sql.Date getTheFirstDate(String m) throws ParseException {
-        Calendar c = Calendar.getInstance();
-        SimpleDateFormat df = new SimpleDateFormat("yyyyMM");
-        Date date = df.parse(m);
-        c.setTime(date);
-        c.add(Calendar.MONTH, 0);
-        c.set(Calendar.DAY_OF_MONTH, 1); //  设置为1号,当前日期既为本月第一天
-        date = c.getTime();
-        java.sql.Date sqlDate = new java.sql.Date(date.getTime());
-        return sqlDate;
-    }
-
-    private java.sql.Date getTheLastDate(String m) throws ParseException {
-        Calendar c = Calendar.getInstance();
-        SimpleDateFormat df = new SimpleDateFormat("yyyyMM");
-        Date date = df.parse(m);
-        c.setTime(date);
-        c.set(Calendar.DAY_OF_MONTH, c.getActualMaximum(Calendar.DAY_OF_MONTH)); //  获取当前月最后一天
-        date = c.getTime();
-        java.sql.Date sqlDate = new java.sql.Date(date.getTime());
-        return sqlDate;
-    }
-
-    @Override
-    public SocialSecurityEmployeeDTO getSocialSecurityEmployeeInfo(Long detailId) {
-        SocialSecurityEmployeeDTO dto = new SocialSecurityEmployeeDTO();
-
-        OrganizationMemberDetails memberDetail = organizationProvider.findOrganizationMemberDetailsByDetailId(detailId);
-        if (memberDetail != null) {
-            dto.setDetailId(memberDetail.getId());
-            dto.setUserId(memberDetail.getTargetId());
-            dto.setCheckInTime(memberDetail.getCheckInTime());
-            dto.setDismissTime(memberDetail.getDismissTime());
-
-            SocialSecurityInoutTime social = socialSecurityInoutTimeProvider.getSocialSecurityInoutTimeByDetailId(InOutTimeType.SOCIAL_SECURITY.getCode(), detailId);
-            if (social != null) {
-                dto.setSocialSecurityStartMonth(social.getStartMonth());
-                dto.setSocialSecurityEndMonth(social.getEndMonth());
-            }
-        }
-        return dto;
-    }
-
-    @Override
-    public List<Long> listSocialSecurityEmployeeDetailIdsByPayMonth(Long ownerId, String payMonth) {
-        List<Long> detailIds = socialSecurityInoutTimeProvider.listSocialSecurityEmployeeDetailIdsByPayMonth(ownerId, payMonth, InOutTimeType.SOCIAL_SECURITY.getCode());
-        return detailIds;
-    }
+    }*/
 
     @Override
     public void increseSocialSecurity(IncreseSocialSecurityCommand cmd) {
@@ -2638,25 +2877,29 @@ public class SocialSecurityServiceImpl implements SocialSecurityService {
         //在存储
         if (null != cmd.getDetailIds()) {
             for (Long detailId : cmd.getDetailIds()) {
-                OrganizationMemberDetails detail = organizationProvider.findOrganizationMemberDetailsByDetailId(detailId);
-                if (null != cmd.getAccumulationFundPayment()) {
-                    if (NormalFlag.NO == NormalFlag.fromCode(detail.getAccumulationFundStatus())) {
-                        increseMemberDetail(detail, AccumOrSocial.ACCUM);
+                this.coordinationProvider.getNamedLock(CoordinationLocks.SOCIAL_SECURITY_INCRESE.getCode() + detailId).enter(() -> {
+
+                    OrganizationMemberDetails detail = organizationProvider.findOrganizationMemberDetailsByDetailId(detailId);
+                    if (null != cmd.getAccumulationFundPayment()) {
+                        if (NormalFlag.YES != NormalFlag.fromCode(detail.getAccumulationFundStatus())) {
+                            increseMemberDetail(detail, AccumOrSocial.ACCUM);
+                        }
+                        // 保存setting表数据
+                        saveSocialSecuritySettings(cmd.getAccumulationFundPayment(), detailId, AccumOrSocial.ACCUM.getCode());
+                        // 保存当月payments数据
+                        saveSocialSecurityPayment(cmd.getAccumulationFundPayment(), detailId, NormalFlag.NO.getCode(), AccumOrSocial.ACCUM.getCode());
                     }
-                    // 保存setting表数据
-                    saveSocialSecuritySettings(cmd.getAccumulationFundPayment(), detailId, AccumOrSocial.ACCUM.getCode());
-                    // 保存当月payments数据
-                    saveSocialSecurityPayment(cmd.getAccumulationFundPayment(), detailId, NormalFlag.NO.getCode(), AccumOrSocial.ACCUM.getCode());
-                }
-                if (null != cmd.getSocialSecurityPayment()) {
-                    if (NormalFlag.NO == NormalFlag.fromCode(detail.getSocialSecurityStatus())) {
-                        increseMemberDetail(detail, AccumOrSocial.SOCAIL);
+                    if (null != cmd.getSocialSecurityPayment()) {
+                        if (NormalFlag.YES != NormalFlag.fromCode(detail.getSocialSecurityStatus())) {
+                            increseMemberDetail(detail, AccumOrSocial.SOCAIL);
+                        }
+                        // 保存setting表数据
+                        saveSocialSecuritySettings(cmd.getSocialSecurityPayment(), detailId, AccumOrSocial.SOCAIL.getCode());
+                        // 保存当月payments数据
+                        saveSocialSecurityPayment(cmd.getSocialSecurityPayment(), detailId, NormalFlag.NO.getCode(), AccumOrSocial.SOCAIL.getCode());
                     }
-                    // 保存setting表数据
-                    saveSocialSecuritySettings(cmd.getSocialSecurityPayment(), detailId, AccumOrSocial.SOCAIL.getCode());
-                    // 保存当月payments数据
-                    saveSocialSecurityPayment(cmd.getSocialSecurityPayment(), detailId, NormalFlag.NO.getCode(), AccumOrSocial.SOCAIL.getCode());
-                }
+                    return null;
+                });
             }
         }
     }
@@ -2684,9 +2927,9 @@ public class SocialSecurityServiceImpl implements SocialSecurityService {
             log.setType(InOutLogType.SOCIAL_SECURITY_IN.getCode());
         }
         Date date = DateHelper.currentGMTTime();
-        String month = monthSF.get().format(date);
-        log.setLogDate((java.sql.Date) date);
-        log.setLogMonth(month);
+        log.setLogDate(new java.sql.Date(date.getTime()));
+        String paymentMonth = getPayMonth(detailId);
+        log.setLogMonth(paymentMonth);
         socialSecurityInoutLogProvider.createSocialSecurityInoutLog(log);
     }
 
@@ -2712,9 +2955,9 @@ public class SocialSecurityServiceImpl implements SocialSecurityService {
             log.setType(InOutLogType.SOCIAL_SECURITY_OUT.getCode());
         }
         Date date = DateHelper.currentGMTTime();
-        String month = monthSF.get().format(date);
-        log.setLogDate((java.sql.Date) date);
-        log.setLogMonth(month);
+        log.setLogDate(new java.sql.Date(date.getTime()));
+        String paymentMonth = getPayMonth(detailId);
+        log.setLogMonth(paymentMonth);
         socialSecurityInoutLogProvider.createSocialSecurityInoutLog(log);
     }
 

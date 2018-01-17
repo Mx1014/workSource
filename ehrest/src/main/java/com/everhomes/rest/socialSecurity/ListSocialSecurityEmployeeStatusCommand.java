@@ -4,11 +4,11 @@ package com.everhomes.rest.socialSecurity;
 import com.everhomes.util.StringHelper;
 
 /**
- * 
- * <ul>参数:
+ * <ul>
  * <li>ownerType: 所属类型 organization</li>
  * <li>ownerId: 所属id 公司id</li>
- * <li>detailId: detail id </li>
+ * <li>detailId: detail id</li>
+ * <li>socialSecurityMonth: 社保月份</li>
  * </ul>
  */
 public class ListSocialSecurityEmployeeStatusCommand {
@@ -17,7 +17,9 @@ public class ListSocialSecurityEmployeeStatusCommand {
 
 	private Long ownerId;
 
-	private Long detialId;
+	private Long detailId;
+
+	private String socialSecurityMonth;
 
 	public ListSocialSecurityEmployeeStatusCommand() {
 
@@ -50,11 +52,19 @@ public class ListSocialSecurityEmployeeStatusCommand {
 		return StringHelper.toJsonString(this);
 	}
 
-	public Long getDetialId() {
-		return detialId;
+	public Long getDetailId() {
+		return detailId;
 	}
 
-	public void setDetialId(Long detialId) {
-		this.detialId = detialId;
+	public void setDetailId(Long detailId) {
+		this.detailId = detailId;
+	}
+
+	public String getSocialSecurityMonth() {
+		return socialSecurityMonth;
+	}
+
+	public void setSocialSecurityMonth(String socialSecurityMonth) {
+		this.socialSecurityMonth = socialSecurityMonth;
 	}
 }

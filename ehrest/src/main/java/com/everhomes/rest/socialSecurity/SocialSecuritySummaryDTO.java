@@ -23,10 +23,12 @@ public class SocialSecuritySummaryDTO {
     private String payMonth;
     private BigDecimal companyPayment;
     private BigDecimal employeePayment;
-    private Long creatorUid;
-    private Long createTime;
-    private Long fileUid;
+	private Long creatorUid;
+	private Long createTime;
+	private String creatorName;
+	private Long fileUid;
     private Long fileTime;
+	private String fileName;
 
 	@Override
 	public String toString() {
@@ -112,5 +114,20 @@ public class SocialSecuritySummaryDTO {
 	public void setFileTime(Long fileTime) {
 		this.fileTime = fileTime;
 	}
-	
+
+	public String getCreatorName() {
+		return creatorName;
+	}
+
+	public void setCreatorName(String creatorName) {
+		this.creatorName = creatorName;
+	}
+
+	public String getFileName() {
+		return fileName;
+	}
+
+	public void setFileName(String fileName) {
+		this.fileName = fileName;
+	}
 }

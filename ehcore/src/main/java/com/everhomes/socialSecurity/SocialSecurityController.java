@@ -19,6 +19,7 @@ import com.everhomes.rest.RestResponse;
 import org.springframework.web.multipart.MultipartFile;
 
 import javax.servlet.http.HttpServletResponse;
+import java.util.List;
 
 @RestController
 @RequestMapping("/socialSecurity")
@@ -313,5 +314,12 @@ public class SocialSecurityController extends ControllerBase {
 		socialSecurityService.decreseSocialSecurity(cmd);
 		return new RestResponse();
 	}
+
+    @RequestMapping("testInterface")
+    @RestReturn(value = SocialSecurityEmployeeDTO.class, collection = true)
+    public RestResponse testInterface(ListSocialSecurityPaymentsCommand cmd){
+        List<SocialSecurityEmployeeDTO> res = socialSecurityService.listSocialSecurityEmployees(cmd);
+        return new RestResponse(res);
+    }
 
 }
