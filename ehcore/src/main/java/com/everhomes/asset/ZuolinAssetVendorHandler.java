@@ -747,7 +747,7 @@ public class ZuolinAssetVendorHandler implements AssetVendorHandler {
             cmd.setTargetId(UserContext.currentUserId());
         }
         //获得此用户的所有账单
-        List<PaymentBills> paymentBills = assetProvider.findSettledBillsByCustomer(cmd.getTargetType(),cmd.getTargetId());
+        List<PaymentBills> paymentBills = assetProvider.findSettledBillsByCustomer(cmd.getTargetType(),cmd.getTargetId(),cmd.getOwnerType(),cmd.getOwnerId());
         //进行分类，冗杂代码，用空间换时间， 字符串操作+类型转换  vs  新建对象; 对象隐式指定最大寿命
         List<Map<?,?>> maps = new ArrayList<>();
         tryMakeCategory:{
