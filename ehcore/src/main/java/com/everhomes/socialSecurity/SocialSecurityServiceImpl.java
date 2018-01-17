@@ -1816,11 +1816,13 @@ public class SocialSecurityServiceImpl implements SocialSecurityService {
             } else {
                 switch (PayItem.fromCode(userPayment.getPayItem())) {
                     case DISABLE:
-                        report.setDisabilitySum(calculateAmount(userPayment.getCompanyRadix(), userPayment.getCompanyRatio())
-                                .add(calculateAmount(userPayment.getEmployeeRadix(), userPayment.getEmployeeRatio(), report.getDisabilitySum())));
+                        report.setDisabilitySum(userPayment.getCompanyRadix());
+//                        report.setDisabilitySum(calculateAmount(userPayment.getCompanyRadix(), userPayment.getCompanyRatio())
+//                                .add(calculateAmount(userPayment.getEmployeeRadix(), userPayment.getEmployeeRatio(), report.getDisabilitySum())));
                     case BUSINESS:
-                        report.setCommercialInsurance(calculateAmount(userPayment.getCompanyRadix(), userPayment.getCompanyRatio())
-                                .add(calculateAmount(userPayment.getEmployeeRadix(), userPayment.getEmployeeRatio(), report.getCommercialInsurance())));
+                        report.setCommercialInsurance(userPayment.getCompanyRadix());
+//                        report.setCommercialInsurance(calculateAmount(userPayment.getCompanyRadix(), userPayment.getCompanyRatio())
+//                                .add(calculateAmount(userPayment.getEmployeeRadix(), userPayment.getEmployeeRatio(), report.getCommercialInsurance())));
 
                 }
             }
