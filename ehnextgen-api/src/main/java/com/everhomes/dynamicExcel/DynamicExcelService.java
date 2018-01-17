@@ -42,12 +42,13 @@ public class DynamicExcelService {
     /**
      *
      * @param response 输出流
-     * @param code 业务码
+     * @param code 业务码,bean名称的后缀，前缀参考 {@link com.everhomes.dynamicExcel.DynamicExcelStrings}
      * @param dynamicSheets
      * @param baseInfo 不填,则走默认的
      * @param enumSupport true：会将枚举值放入说明中； false：不会将枚举放入说明
+     * @excelName excel文件名字，没有则默认给一个“客户数据导出+时间戳”
      */
-    public void exportDynamicExcel(HttpServletResponse response, String code, List<DynamicSheet> dynamicSheets, String baseInfo, boolean enumSupport, boolean withData){
+    public void exportDynamicExcel(HttpServletResponse response, String code, List<DynamicSheet> dynamicSheets, String baseInfo, boolean enumSupport, boolean withData,String excelName){
         Workbook workbook = new XSSFWorkbook();
         DynamicExcelHandler h = getHandler(code);
         //遍历筛选过的sheet
