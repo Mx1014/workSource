@@ -1058,6 +1058,11 @@ public class AssetProviderImpl implements AssetProvider {
             com.everhomes.server.schema.tables.pojos.EhPaymentBills newBill = new PaymentBills();
             //  缺少创造者信息，先保存在其他地方，比如持久化日志
             newBill.setAmountOwed(amountOwed);
+            if(amountOwed.compareTo(zero) == 0) {
+                newBill.setStatus((byte)1);
+            }else{
+                newBill.setStatus(billStatus);
+            }
             newBill.setAmountReceivable(amountReceivable);
             newBill.setAmountReceived(zero);
             newBill.setAmountSupplement(amountSupplement);
@@ -1087,7 +1092,7 @@ public class AssetProviderImpl implements AssetProvider {
             newBill.setCreatorId(UserContext.currentUserId());
             newBill.setUpdateTime(new Timestamp(DateHelper.currentGMTTime().getTime()));
             newBill.setNoticeTimes(0);
-            newBill.setStatus(billStatus);
+
             newBill.setSwitch(isSettled);
             newBill.setContractId(contractId);
             newBill.setContractNum(contractNum);
@@ -3622,7 +3627,12 @@ public class AssetProviderImpl implements AssetProvider {
         if(namespaceId!=null){
             query.addConditions(bill.NAMESPACE_ID.eq(namespaceId));
         }
-        query.addConditions(bill.OWNER_ID.eq(ownerId));
+        if(ownerId != null){
+            query.addConditions(bill.OWNER_ID.eq(ownerId));
+        }
+        if(ownerType != null){
+            query.addConditions(bill.OWNER_TYPE.eq(ownerType));
+        }
         query.addConditions(bill.TARGET_TYPE.eq(targetType));
         query.addConditions(bill.TARGET_ID.eq(targetId));
         query.fetch()
@@ -3660,6 +3670,7 @@ public class AssetProviderImpl implements AssetProvider {
                 .where(Tables.EH_PAYMENT_BILLS.TARGET_ID.eq(targetId))
                 .and(Tables.EH_PAYMENT_BILLS.TARGET_TYPE.eq(targetType))
                 .and(Tables.EH_PAYMENT_BILLS.SWITCH.eq((byte)1))
+                .and(Tables.EH_PAYMENT_BILLS.STATUS.eq((byte)0))
                 .fetchInto(PaymentBills.class);
     }
 
