@@ -1,6 +1,11 @@
 package com.everhomes.rest.customer;
 
 /**
+ * <ul>
+ *     <li>CUSTOMER("customer")：同步企业客户</li>
+ *     <li>INDIVIDUAL("individual")：同步个人客户</li>
+ *     <li>CONTRACT("contract"): 同步合同</li>
+ * </ul>
  * Created by ying.xiong on 2018/1/15.
  */
 public enum SyncDataTaskType {

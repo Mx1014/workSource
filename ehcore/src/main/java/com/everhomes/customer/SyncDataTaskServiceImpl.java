@@ -60,9 +60,10 @@ public class SyncDataTaskServiceImpl implements SyncDataTaskService {
                     UserContext.setCurrentUser(user);
                     task.setStatus(SyncDataTaskStatus.EXECUTING.getCode());
                     syncDataTaskProvider.updateSyncDataTask(task);
-                    SyncDataResponse response = callback.syncData();
+//                    SyncDataResponse response = callback.syncData();
+                    callback.syncData();
                     task.setStatus(SyncDataTaskStatus.FINISH.getCode());
-                    task.setResult(StringHelper.toJsonString(response));
+                    task.setResult("同步成功");
                 }catch (Exception e){
                     LOGGER.error("executor task error. error: {}", e);
                     task.setStatus(SyncDataTaskStatus.EXCEPTION.getCode());
@@ -107,7 +108,7 @@ public class SyncDataTaskServiceImpl implements SyncDataTaskService {
             return null;
         }
         ListCommunitySyncResultResponse response = new ListCommunitySyncResultResponse();
-        List<SyncDataTask> tasks = syncDataTaskProvider.listCommunitySyncResult(communityId, syncType, pageSize, pageAnchor);
+        List<SyncDataTask> tasks = syncDataTaskProvider.listCommunitySyncResult(communityId, syncType, pageSize + 1, pageAnchor);
         if(tasks != null && tasks.size() > 0) {
             List<SyncDataResult> results = new ArrayList<>();
             for (SyncDataTask task : tasks) {
@@ -128,8 +129,14 @@ public class SyncDataTaskServiceImpl implements SyncDataTaskService {
                     result.setManualFlag((byte)1);
 
                 }
-
+                results.add(result);
             }
+
+            if(tasks.size() > pageSize) {
+                results.remove(results.size() - 1);
+                response.setNextPageAnchor(tasks.get(tasks.size() - 1).getId());
+            }
+            response.setResults(results);
         }
         return response;
     }

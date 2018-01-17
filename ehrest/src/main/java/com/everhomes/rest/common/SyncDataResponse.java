@@ -10,25 +10,10 @@ import java.util.List;
 public class SyncDataResponse<T> {
     private Byte syncStatus;
 
-    private Long totalCount;
-
-    private Long failCount;
-
     private String syncLog;
 
     @ItemType(SyncDataResultLog.class)
     private List<SyncDataResultLog<T>> logs;
-
-    private T title;
-
-    public Long getFailCount() {
-        return failCount;
-    }
-
-    public void setFailCount(Long failCount) {
-        this.failCount = failCount;
-    }
-
     public List<SyncDataResultLog<T>> getLogs() {
         return logs;
     }
@@ -51,21 +36,5 @@ public class SyncDataResponse<T> {
 
     public void setSyncStatus(Byte syncStatus) {
         this.syncStatus = syncStatus;
-    }
-
-    public T getTitle() {
-        return title;
-    }
-
-    public void setTitle(T title) {
-        this.title = title;
-    }
-
-    public Long getTotalCount() {
-        return totalCount;
-    }
-
-    public void setTotalCount(Long totalCount) {
-        this.totalCount = totalCount;
     }
 }

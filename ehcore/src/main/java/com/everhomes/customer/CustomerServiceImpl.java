@@ -25,6 +25,7 @@ import com.everhomes.portal.PortalService;
 import com.everhomes.rest.acl.PrivilegeConstants;
 import com.everhomes.rest.acl.PrivilegeServiceErrorCode;
 import com.everhomes.rest.common.ServiceModuleConstants;
+import com.everhomes.rest.common.SyncDataResponse;
 import com.everhomes.rest.contract.ContractStatus;
 import com.everhomes.rest.customer.*;
 import com.everhomes.rest.launchpad.ActionType;
@@ -253,6 +254,13 @@ public class CustomerServiceImpl implements CustomerService {
     public SearchEnterpriseCustomerResponse queryEnterpriseCustomers(SearchEnterpriseCustomerCommand cmd) {
         checkCustomerAuth(cmd.getNamespaceId(), PrivilegeConstants.ENTERPRISE_CUSTOMER_LIST, cmd.getOrgId(), cmd.getCommunityId());
         return enterpriseCustomerSearcher.queryEnterpriseCustomers(cmd);
+    }
+
+    @Override
+    public ListCommunitySyncResultResponse listCommunitySyncResult(ListCommunitySyncResultCommand cmd) {
+        int pageSize = PaginationConfigHelper.getPageSize(configurationProvider, cmd.getPageSize());
+        ListCommunitySyncResultResponse response = syncDataTaskService.listCommunitySyncResult(cmd.getCommunityId(), cmd.getSyncType(), pageSize, cmd.getPageAnchor());
+        return response;
     }
 
     @Override
@@ -2291,97 +2299,171 @@ public class CustomerServiceImpl implements CustomerService {
     @Override
     public void syncEnterpriseCustomers(SyncCustomersCommand cmd) {
         checkCustomerAuth(cmd.getNamespaceId(), PrivilegeConstants.ENTERPRISE_CUSTOMER_SYNC, cmd.getOrgId(), cmd.getCommunityId());
-
         if(cmd.getNamespaceId() == 999971) {
-            this.coordinationProvider.getNamedLock(CoordinationLocks.SYNC_ENTERPRISE_CUSTOMER.getCode() + cmd.getNamespaceId() + cmd.getCommunityId()).tryEnter(()-> {
-                ExecutorUtil.submit(new Runnable() {
-                    @Override
-                    public void run() {
-                        try{
-                            if(cmd.getCommunityId() == null) {
-                                int syncCount = zjSyncdataBackupProvider.listZjSyncdataBackupActiveCountByParam(cmd.getNamespaceId(), null, DataType.ENTERPRISE.getCode());
-                                if(syncCount > 0) {
-                                    return ;
-                                }
-                                zjgkOpenService.syncEnterprises("0", null);
-                            } else {
-                                Community community = communityProvider.findCommunityById(cmd.getCommunityId());
-                                if(community != null) {
-                                    int syncCount = zjSyncdataBackupProvider.listZjSyncdataBackupActiveCountByParam(community.getNamespaceId(), community.getNamespaceCommunityToken(), DataType.ENTERPRISE.getCode());
-                                    if(syncCount > 0) {
-                                        return ;
-                                    }
-                                    zjgkOpenService.syncEnterprises("0", community.getNamespaceCommunityToken());
+            Community community = communityProvider.findCommunityById(cmd.getCommunityId());
+            if(community != null) {
+                int syncCount = zjSyncdataBackupProvider.listZjSyncdataBackupActiveCountByParam(community.getNamespaceId(), community.getNamespaceCommunityToken(), DataType.ENTERPRISE.getCode());
+                if(syncCount > 0) {
+                    return ;
+                }
 
-                                }
-
-                            }
-                        }catch (Exception e){
-                            LOGGER.error("syncEnterpriseCustomers error.", e);
-                        }
-                    }
-                });
-            });
+                SyncDataTask task = new SyncDataTask();
+                task.setOwnerType(EntityType.COMMUNITY.getCode());
+                task.setOwnerId(community.getId());
+                task.setType(SyncDataTaskType.CUSTOMER.getCode());
+                task.setCreatorUid(UserContext.currentUserId());
+                syncDataTaskService.executeTask(() -> {
+                    SyncDataResponse response = new SyncDataResponse();
+                    zjgkOpenService.syncEnterprises("0", community.getNamespaceCommunityToken(), task.getId());
+                    return response;
+                }, task);
+            }
         } else {
-            this.coordinationProvider.getNamedLock(CoordinationLocks.SYNC_ENTERPRISE_CUSTOMER.getCode() + cmd.getNamespaceId() + cmd.getCommunityId()).tryEnter(()-> {
-                ExecutorUtil.submit(new Runnable() {
-                    @Override
-                    public void run() {
-                        try{
-                            Community community = communityProvider.findCommunityById(cmd.getCommunityId());
-                            if(community == null) {
-                                return;
-                            }
-                            int syncCount = zjSyncdataBackupProvider.listZjSyncdataBackupActiveCountByParam(community.getNamespaceId(), community.getNamespaceCommunityToken(), DataType.ENTERPRISE.getCode());
-                            if(syncCount > 0) {
-                                return ;
-                            }
-                            String version = enterpriseCustomerProvider.findLastEnterpriseCustomerVersionByCommunity(cmd.getNamespaceId(), community.getId());
-                            CustomerHandle customerHandle = PlatformContext.getComponent(CustomerHandle.CUSTOMER_PREFIX + cmd.getNamespaceId());
-                            if(customerHandle != null) {
-                                customerHandle.syncEnterprises("1", version, community.getNamespaceCommunityToken());
-                            }
-
-                        }catch (Exception e){
-                            LOGGER.error("syncEnterpriseCustomers error.", e);
-                        }
-                    }
-                });
-            });
+            Community community = communityProvider.findCommunityById(cmd.getCommunityId());
+            if(community == null) {
+                return;
+            }
+            int syncCount = zjSyncdataBackupProvider.listZjSyncdataBackupActiveCountByParam(community.getNamespaceId(), community.getNamespaceCommunityToken(), DataType.ENTERPRISE.getCode());
+            if(syncCount > 0) {
+                return ;
+            }
+            String version = enterpriseCustomerProvider.findLastEnterpriseCustomerVersionByCommunity(cmd.getNamespaceId(), community.getId());
+            CustomerHandle customerHandle = PlatformContext.getComponent(CustomerHandle.CUSTOMER_PREFIX + cmd.getNamespaceId());
+            if(customerHandle != null) {
+                SyncDataTask task = new SyncDataTask();
+                task.setOwnerType(EntityType.COMMUNITY.getCode());
+                task.setOwnerId(community.getId());
+                task.setType(SyncDataTaskType.CUSTOMER.getCode());
+                task.setCreatorUid(UserContext.currentUserId());
+                syncDataTaskService.executeTask(() -> {
+                    SyncDataResponse response = new SyncDataResponse();
+                    customerHandle.syncEnterprises("1", version, community.getNamespaceCommunityToken(), task.getId());
+                    return response;
+                }, task);
+            }
         }
+//        if(cmd.getNamespaceId() == 999971) {
+//            this.coordinationProvider.getNamedLock(CoordinationLocks.SYNC_ENTERPRISE_CUSTOMER.getCode() + cmd.getNamespaceId() + cmd.getCommunityId()).tryEnter(()-> {
+//                ExecutorUtil.submit(new Runnable() {
+//                    @Override
+//                    public void run() {
+//                        try{
+//                            if(cmd.getCommunityId() == null) {
+//                                int syncCount = zjSyncdataBackupProvider.listZjSyncdataBackupActiveCountByParam(cmd.getNamespaceId(), null, DataType.ENTERPRISE.getCode());
+//                                if(syncCount > 0) {
+//                                    return ;
+//                                }
+//                                SyncDataTask task = new SyncDataTask();
+//                                task.setType(SyncDataTaskType.CUSTOMER.getCode());
+//                                task.setCreatorUid(UserContext.currentUserId());
+//                                task = syncDataTaskService.executeTask(() -> {
+//                                    SyncDataResponse response = new SyncDataResponse();
+//                                    zjgkOpenService.syncEnterprises("0", null);
+//                                    return response;
+//                                }, task);
+//
+//                            } else {
+//                                Community community = communityProvider.findCommunityById(cmd.getCommunityId());
+//                                if(community != null) {
+//                                    int syncCount = zjSyncdataBackupProvider.listZjSyncdataBackupActiveCountByParam(community.getNamespaceId(), community.getNamespaceCommunityToken(), DataType.ENTERPRISE.getCode());
+//                                    if(syncCount > 0) {
+//                                        return ;
+//                                    }
+//                                    task.setOwnerType(EntityType.COMMUNITY.getCode());
+//                                    task.setOwnerId(community.getId());
+//                                    zjgkOpenService.syncEnterprises("0", community.getNamespaceCommunityToken());
+//
+//                                }
+//
+//                            }
+//                        }catch (Exception e){
+//                            LOGGER.error("syncEnterpriseCustomers error.", e);
+//                        }
+//                    }
+//                });
+//            });
+//        } else {
+//            this.coordinationProvider.getNamedLock(CoordinationLocks.SYNC_ENTERPRISE_CUSTOMER.getCode() + cmd.getNamespaceId() + cmd.getCommunityId()).tryEnter(()-> {
+//                ExecutorUtil.submit(new Runnable() {
+//                    @Override
+//                    public void run() {
+//                        try{
+//                            Community community = communityProvider.findCommunityById(cmd.getCommunityId());
+//                            if(community == null) {
+//                                return;
+//                            }
+//                            int syncCount = zjSyncdataBackupProvider.listZjSyncdataBackupActiveCountByParam(community.getNamespaceId(), community.getNamespaceCommunityToken(), DataType.ENTERPRISE.getCode());
+//                            if(syncCount > 0) {
+//                                return ;
+//                            }
+//                            String version = enterpriseCustomerProvider.findLastEnterpriseCustomerVersionByCommunity(cmd.getNamespaceId(), community.getId());
+//                            CustomerHandle customerHandle = PlatformContext.getComponent(CustomerHandle.CUSTOMER_PREFIX + cmd.getNamespaceId());
+//                            if(customerHandle != null) {
+//                                task.setOwnerType(EntityType.COMMUNITY.getCode());
+//                                task.setOwnerId(community.getId());
+//                                customerHandle.syncEnterprises("1", version, community.getNamespaceCommunityToken());
+//                            }
+//
+//                        }catch (Exception e){
+//                            LOGGER.error("syncEnterpriseCustomers error.", e);
+//                        }
+//                    }
+//                });
+//            });
+//        }
 
     }
 
     @Override
     public void syncIndividualCustomers(SyncCustomersCommand cmd) {
-        if(cmd.getNamespaceId() == 999971) {
-            ExecutorUtil.submit(new Runnable() {
-                @Override
-                public void run() {
-                    try{
-                        if(cmd.getCommunityId() == null) {
-                            int syncCount = zjSyncdataBackupProvider.listZjSyncdataBackupActiveCountByParam(cmd.getNamespaceId(), null, DataType.INDIVIDUAL.getCode());
-                            if(syncCount > 0) {
-                                return ;
-                            }
-                            zjgkOpenService.syncIndividuals("0", null);
-                        } else {
-                            Community community = communityProvider.findCommunityById(cmd.getCommunityId());
-                            if(community != null) {
-                                int syncCount = zjSyncdataBackupProvider.listZjSyncdataBackupActiveCountByParam(community.getNamespaceId(), community.getNamespaceCommunityToken(), DataType.INDIVIDUAL.getCode());
-                                if(syncCount > 0) {
-                                    return ;
-                                }
-                                zjgkOpenService.syncIndividuals("0", community.getNamespaceCommunityToken());
-                            }
-                        }
-                    }catch (Exception e){
-                        LOGGER.error("syncIndividualCustomers error.", e);
-                    }
-                }
-            });
+        Community community = communityProvider.findCommunityById(cmd.getCommunityId());
+        if(community != null) {
+            int syncCount = zjSyncdataBackupProvider.listZjSyncdataBackupActiveCountByParam(community.getNamespaceId(), community.getNamespaceCommunityToken(), DataType.INDIVIDUAL.getCode());
+            if(syncCount > 0) {
+                return ;
+            }
+
+            SyncDataTask task = new SyncDataTask();
+            task.setOwnerType(EntityType.COMMUNITY.getCode());
+            task.setOwnerId(community.getId());
+            task.setType(SyncDataTaskType.INDIVIDUAL.getCode());
+            task.setCreatorUid(UserContext.currentUserId());
+            syncDataTaskService.executeTask(() -> {
+                SyncDataResponse response = new SyncDataResponse();
+                zjgkOpenService.syncIndividuals("0", community.getNamespaceCommunityToken(), task.getId());
+                return response;
+            }, task);
 
         }
+
+//        if(cmd.getNamespaceId() == 999971) {
+//            ExecutorUtil.submit(new Runnable() {
+//                @Override
+//                public void run() {
+//                    try{
+//                        if(cmd.getCommunityId() == null) {
+//                            int syncCount = zjSyncdataBackupProvider.listZjSyncdataBackupActiveCountByParam(cmd.getNamespaceId(), null, DataType.INDIVIDUAL.getCode());
+//                            if(syncCount > 0) {
+//                                return ;
+//                            }
+//                            zjgkOpenService.syncIndividuals("0", null);
+//                        } else {
+//                            Community community = communityProvider.findCommunityById(cmd.getCommunityId());
+//                            if(community != null) {
+//                                int syncCount = zjSyncdataBackupProvider.listZjSyncdataBackupActiveCountByParam(community.getNamespaceId(), community.getNamespaceCommunityToken(), DataType.INDIVIDUAL.getCode());
+//                                if(syncCount > 0) {
+//                                    return ;
+//                                }
+//                                zjgkOpenService.syncIndividuals("0", community.getNamespaceCommunityToken());
+//                            }
+//                        }
+//                    }catch (Exception e){
+//                        LOGGER.error("syncIndividualCustomers error.", e);
+//                    }
+//                }
+//            });
+//
+//        }
     }
 
     
