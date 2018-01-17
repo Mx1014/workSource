@@ -50,7 +50,7 @@ public class SyncDataTaskServiceImpl implements SyncDataTaskService {
 
     @Override
     public SyncDataTask executeTask(ExecuteSyncTaskCallback callback, SyncDataTask task) {
-        task.setStatus(SyncDataTaskStatus.CREATED.getCode());
+        task.setStatus(SyncDataTaskStatus.EXECUTING.getCode());
         syncDataTaskProvider.createSyncDataTask(task);
         User user = UserContext.current().getUser();
         ExecutorUtil.submit(new Runnable() {
@@ -58,8 +58,6 @@ public class SyncDataTaskServiceImpl implements SyncDataTaskService {
             public void run() {
                 try{
                     UserContext.setCurrentUser(user);
-                    task.setStatus(SyncDataTaskStatus.EXECUTING.getCode());
-                    syncDataTaskProvider.updateSyncDataTask(task);
 //                    SyncDataResponse response = callback.syncData();
                     callback.syncData();
                     task.setStatus(SyncDataTaskStatus.FINISH.getCode());

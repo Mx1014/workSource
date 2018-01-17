@@ -182,6 +182,7 @@ public class EbeiThirdPartContractHandler implements ThirdPartContractHandler {
             if(task != null) {
                 task.setStatus(SyncDataTaskStatus.FINISH.getCode());
                 task.setResult("同步成功");
+                task.setUpdateTime(new Timestamp(DateHelper.currentGMTTime().getTime()));
                 syncDataTaskProvider.updateSyncDataTask(task);
             }
         }
