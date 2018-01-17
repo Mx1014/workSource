@@ -1176,8 +1176,6 @@ public class EquipmentServiceImpl implements EquipmentService {
 				EquipmentInspectionStandards standard = equipmentProvider.findStandardById(mapdto.getStandardId());
 				if(standard != null) {
 					mapdto.setStandardName(standard.getName());
-					mapdto.setRepeatType(standard.getRepeatType());
-					mapdto.setStandardType(standard.getStandardType());
 					OrganizationMember member = organizationProvider.findOrganizationMemberByOrgIdAndUId(mapdto.getReviewerUid(),
 							standard.getOwnerId());
 					if(null != member) {
@@ -3716,6 +3714,7 @@ public class EquipmentServiceImpl implements EquipmentService {
         List<EquipmentInspectionAccessoryMap> map = equipmentProvider.listAccessoryMapByEquipmentId(dto.getId());
         if(null != map) {
         	for(EquipmentInspectionAccessoryMap acMap : map) {
+
         		EquipmentAccessoryMapDTO mapDto = ConvertHelper.convert(acMap, EquipmentAccessoryMapDTO.class);
         		EquipmentInspectionAccessories accessory = equipmentProvider.findAccessoryById(acMap.getAccessoryId());
         		EquipmentAccessoriesDTO accessoryDto = ConvertHelper.convert(accessory, EquipmentAccessoriesDTO.class);
@@ -3724,6 +3723,7 @@ public class EquipmentServiceImpl implements EquipmentService {
         			accessoryDto.setTargetName(target.getName());
         		}
         		mapDto.setEqAccessories(accessoryDto);
+
         		eqAccessoryMap.add(mapDto);
         	}
         }
