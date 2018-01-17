@@ -634,10 +634,16 @@ public class AssetProviderImpl implements AssetProvider {
         SelectQuery<Record> query = dslContext.selectQuery();
         query.addFrom(t);
         //必要用户参数
-        query.addConditions(t.OWNER_TYPE.eq(ownerType));
-        query.addConditions(t.OWNER_ID.eq(ownerId));
         query.addConditions(t.TARGET_TYPE.eq(targetType));
         query.addConditions(t.TARGET_ID.eq(targetId));
+        if(ownerType != null){
+            query.addConditions(t.OWNER_TYPE.eq(ownerType));
+        }
+        if(ownerId != null){
+            query.addConditions(t.OWNER_ID.eq(ownerId));
+        }else{
+            LOGGER.error("showBillClient did not send ownerId which is not right, targetId = {},targetType = {}",targetId,targetType);
+        }
         //已出账单，排除了未来账单
         query.addConditions(t.SWITCH.eq((byte)1));
 
