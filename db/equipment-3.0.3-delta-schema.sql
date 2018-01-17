@@ -78,4 +78,11 @@ ADD COLUMN `repeat_type` tinyint(4) NOT NULL COMMENT ' 0: no repeat, 1: by day, 
 ALTER TABLE `eh_equipment_inspection_task_logs`
   ADD COLUMN `equipment_id`  bigint(20) NULL DEFAULT 0 ;
 
+-- by st.zheng
+ALTER TABLE `eh_pm_tasks`
+  ADD COLUMN `refer_type` VARCHAR(32) NULL COMMENT '引用类型' AFTER `if_use_feelist`;
+ALTER TABLE `eh_pm_tasks`
+  ADD COLUMN `refer_id` BIGINT(20) NULL COMMENT '引用id' AFTER `refer_type`;
+
+
 
