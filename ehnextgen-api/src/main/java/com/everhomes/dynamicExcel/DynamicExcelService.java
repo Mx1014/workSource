@@ -47,7 +47,7 @@ public class DynamicExcelService {
      * @param baseInfo 不填,则走默认的
      * @param enumSupport true：会将枚举值放入说明中； false：不会将枚举放入说明
      */
-    public void exporDynamicExcel(HttpServletResponse response, String code, List<DynamicSheet> dynamicSheets, String baseInfo, boolean enumSupport, boolean withData){
+    public void exportDynamicExcel(HttpServletResponse response, String code, List<DynamicSheet> dynamicSheets, String baseInfo, boolean enumSupport, boolean withData){
         Workbook workbook = new XSSFWorkbook();
         DynamicExcelHandler h = getHandler(code);
         //遍历筛选过的sheet
