@@ -2,6 +2,7 @@ package com.everhomes.equipment;
 
 import com.everhomes.pmtask.PmTask;
 import com.everhomes.pmtask.PmTaskListener;
+import com.everhomes.rest.equipment.EquipmentStatus;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
 
@@ -18,7 +19,7 @@ public class EquipmentPmTaskListener implements PmTaskListener {
         EquipmentInspectionTasksLogs log = equipmentProvider.getMaintanceLogByEquipmentId(referId);
         equipmentProvider.updateMaintanceInspectionLogsById(log.getId());
         //设备状态
-        equipmentProvider.updateEquipmentStatus(referId);
+        equipmentProvider.updateEquipmentStatus(referId,EquipmentStatus.IN_USE.getCode());
 
     }
 }
