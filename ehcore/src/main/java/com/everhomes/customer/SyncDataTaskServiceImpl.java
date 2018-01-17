@@ -57,6 +57,7 @@ public class SyncDataTaskServiceImpl implements SyncDataTaskService {
             @Override
             public void run() {
                 try{
+                    LOGGER.debug("SyncDataTask RUN");
                     UserContext.setCurrentUser(user);
 //                    SyncDataResponse response = callback.syncData();
                     callback.syncData();
@@ -67,6 +68,7 @@ public class SyncDataTaskServiceImpl implements SyncDataTaskService {
                     task.setStatus(SyncDataTaskStatus.EXCEPTION.getCode());
                     task.setResult(e.toString());
                 }finally {
+                    LOGGER.debug("SyncDataTask task: {}", task);
                     syncDataTaskProvider.updateSyncDataTask(task);
                 }
 
