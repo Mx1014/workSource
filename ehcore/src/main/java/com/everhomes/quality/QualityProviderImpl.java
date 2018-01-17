@@ -242,9 +242,11 @@ public class QualityProviderImpl implements QualityProvider {
 		}
 		//query.addOrderBy(Tables.EH_QUALITY_INSPECTION_TASKS.ID.desc());
 		//add   syncTime  for offline
-		query.addConditions(Tables.EH_QUALITY_INSPECTION_TASKS.CREATE_TIME.gt(latestUpdateTime)
-				.or(Tables.EH_QUALITY_INSPECTION_TASKS.EXECUTIVE_TIME.gt(latestUpdateTime))
-				.or(Tables.EH_QUALITY_INSPECTION_TASKS.PROCESS_TIME.gt(latestUpdateTime)));
+		if (latestUpdateTime != null) {
+			query.addConditions(Tables.EH_QUALITY_INSPECTION_TASKS.CREATE_TIME.gt(latestUpdateTime)
+					.or(Tables.EH_QUALITY_INSPECTION_TASKS.EXECUTIVE_TIME.gt(latestUpdateTime))
+					.or(Tables.EH_QUALITY_INSPECTION_TASKS.PROCESS_TIME.gt(latestUpdateTime)));
+		}
 		// add desc  11/20
 		query.addOrderBy(Tables.EH_QUALITY_INSPECTION_TASKS.EXECUTIVE_EXPIRE_TIME.desc());
         //query.addLimit(count);
