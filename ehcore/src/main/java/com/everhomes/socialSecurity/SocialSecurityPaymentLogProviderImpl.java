@@ -7,6 +7,7 @@ import java.util.List;
 import com.everhomes.server.schema.tables.pojos.EhSocialSecurityPayments;
 import org.jooq.DSLContext;
 import org.jooq.Record;
+import org.jooq.Record1;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
 
@@ -93,6 +94,17 @@ public class SocialSecurityPaymentLogProviderImpl implements SocialSecurityPayme
         getReadWriteDao().insert(logs);
         DaoHelper.publishDaoAction(DaoAction.CREATE, EhSocialSecurityPaymentLogs.class, null);
 
+    }
+
+    @Override
+    public String findPayMonthByOwnerId(Long ownerId) {
+        Record1<String> record = getReadOnlyContext().select(Tables.EH_SOCIAL_SECURITY_PAYMENT_LOGS.PAY_MONTH.max()).from(Tables.EH_SOCIAL_SECURITY_PAYMENT_LOGS)
+                .where(Tables.EH_SOCIAL_SECURITY_PAYMENT_LOGS.ORGANIZATION_ID.eq(ownerId))
+                .fetchAny();
+        if (null == record) {
+            return null;
+        }
+        return record.value1();
     }
 
     private EhSocialSecurityPaymentLogsDao getReadWriteDao() {
