@@ -189,7 +189,7 @@ public class DynamicExcelService {
                 }
                 //插入
                 try {
-                    h.save2Schema(sheetClassObjs, sheetClass);
+                    h.save2Schema(sheetClassObjs, sheetClass,);
                     Integer successRowNumber = response.getSuccessRowNumber();
                     successRowNumber += sheetClassObjs.size();
                     response.setSuccessRowNumber(successRowNumber);

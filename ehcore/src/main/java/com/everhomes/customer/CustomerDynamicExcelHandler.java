@@ -1,6 +1,9 @@
 package com.everhomes.customer;
 
 import com.everhomes.dynamicExcel.*;
+import com.everhomes.rest.customer.CustomerDynamicSheetClass;
+import com.everhomes.rest.customer.CustomerInfo;
+import com.everhomes.rest.customer.CustomerTaxDTO;
 import com.everhomes.rest.customer.CustomerTrackingTemplateCode;
 import com.everhomes.rest.varField.FieldDTO;
 import com.everhomes.rest.varField.ListFieldCommand;
@@ -28,14 +31,48 @@ public class CustomerDynamicExcelHandler implements DynamicExcelHandler {
     @Autowired
     private FieldService fieldService;
 
-    @Override
-    public void save2Schema(List<Object> sheetClassObjs, Class<?> sheetClass) {
-        if(sheetClassObjs != null && sheetClassObjs.size() > 0) {
-            sheetClassObjs.forEach(obj -> {
-                ConvertHelper.convert(obj, sheetClass);
-            });
-        }
+    @Autowired
+    private CustomerService customerService;
 
+    @Override
+    public void save2Schema(List<Object> sheetClassObjs, Class<?> sheetClass, Object storage1) {
+        CustomerInfo customerInfo = ConvertHelper.convert(storage1, CustomerInfo.class);
+        if(sheetClassObjs != null && sheetClassObjs.size() > 0) {
+            String sheetName = sheetClass.getName();
+            CustomerDynamicSheetClass sheet = CustomerDynamicSheetClass.fromStatus(sheetName);
+            for(Object sheetClassObj : sheetClassObjs) {
+                switch (sheet) {
+                    case CUSTOMER_TAX:
+                        CustomerTaxDTO dto = ConvertHelper.convert(sheetClassObj, CustomerTaxDTO.class);
+
+                            break;
+                    case CUSTOMER_ACCOUNT:
+                        break;
+                    case CUSTOMER_TALENT:
+                        break;
+                    case CUSTOMER_TRADEMARK:
+                        break;
+                    case CUSTOMER_APPLY_PROJECT:
+                        break;
+                    case CUSTOMER_COMMERCIAL:
+                        break;
+                    case CUSTOMER_INVESTMENT:
+                        break;
+                    case CUSTOMER_ECONOMIC_INDICATOR:
+                        break;
+                    case CUSTOMER_PATENT:
+                        break;
+                    case CUSTOMER_CERTIFICATE:
+                        break;
+                    case CUSTOMER_ENTRY_INFO:
+                        break;
+                    case CUSTOMER_DEPARTURE_INFO:
+                        break;
+                }
+
+            }
+
+        }
     }
 
     @Override
@@ -44,7 +81,7 @@ public class CustomerDynamicExcelHandler implements DynamicExcelHandler {
     }
 
     @Override
-    public DynamicSheet getDynamicSheet(String sheetName, Object storage) {
+    public DynamicSheet getDynamicSheet(String sheetName, Object storage,Object storage1) {
         FieldGroup group = fieldProvider.findGroupByGroupDisplayName(sheetName);
         DynamicSheet ds = new DynamicSheet();
         ds.setClassName(group.getName());
