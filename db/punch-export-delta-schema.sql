@@ -7,6 +7,7 @@ CREATE TABLE `eh_punch_operation_logs` (
   `operator_name` VARCHAR(64) COMMENT 'the module type',
   `rule_id` BIGINT COMMENT 'the module id',
   `rule_name` VARCHAR(64) COMMENT 'the module type',
+  `operate_api` VARCHAR(128) ,
   `request_parameter` TEXT ,
   `create_time` DATETIME COMMENT 'record create time',
   PRIMARY KEY (`id`)
