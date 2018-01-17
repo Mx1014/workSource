@@ -38,23 +38,18 @@ public class FileManagementServiceImpl implements  FileManagementService{
         Integer namespaceId = UserContext.getCurrentNamespaceId();
         FileCatalogDTO dto = new FileCatalogDTO();
         //  1.whether the name has been used
-        FileCatalog catalog = fileManagementProvider.findFileCatalogByName(namespaceId,cmd.getOwnerId(),cmd.getCatalogName());
-        if(catalog != null){
-            throw RuntimeErrorException.errorWith(FileManagementErrorCode.SCOPE, FileManagementErrorCode.ERROR_NAME_ALREADY_EXISTS,
-                    "the name has been used.");
-        }else{
+        checkTheCatalogName(namespaceId, cmd.getOwnerId(), cmd.getCatalogName());
         //  2.create it
-            catalog = new FileCatalog();
-            catalog.setNamespaceId(namespaceId);
-            catalog.setOwnerId(cmd.getOwnerId());
-            catalog.setOwnerType(cmd.getOwnerType());
-            catalog.setName(cmd.getCatalogName());
-            fileManagementProvider.createFileCatalog(catalog);
-            //  3.return back the dto
-            dto.setId(catalog.getId());
-            dto.setName(cmd.getCatalogName());
-            dto.setCreateTime(catalog.getCreateTime());
-        }
+        FileCatalog catalog = new FileCatalog();
+        catalog.setNamespaceId(namespaceId);
+        catalog.setOwnerId(cmd.getOwnerId());
+        catalog.setOwnerType(cmd.getOwnerType());
+        catalog.setName(cmd.getCatalogName());
+        fileManagementProvider.createFileCatalog(catalog);
+        //  3.return back the dto
+        dto.setId(catalog.getId());
+        dto.setName(cmd.getCatalogName());
+        dto.setCreateTime(catalog.getCreateTime());
         return dto;
     }
 
@@ -70,17 +65,27 @@ public class FileManagementServiceImpl implements  FileManagementService{
     @Override
     public FileCatalogDTO updateFileCatalogName(UpdateFileCatalogNameCommand cmd) {
         FileCatalog catalog = fileManagementProvider.findFileCatalogById(cmd.getCatalogId());
+        Integer namespaceId = UserContext.getCurrentNamespaceId();
         FileCatalogDTO dto = new FileCatalogDTO();
         if(catalog!=null){
-            //  update the name
+            //  1.whether the name has been used
+            checkTheCatalogName(namespaceId, catalog.getOwnerId(), cmd.getCatalogName());
+            //  2.update the name
             catalog.setName(cmd.getCatalogName());
             fileManagementProvider.updateFileCatalog(catalog);
-            //  return back the dto
+            //  3.return back the dto
             dto.setId(catalog.getId());
             dto.setName(cmd.getCatalogName());
             dto.setCreateTime(catalog.getCreateTime());
         }
         return dto;
+    }
+
+    private void checkTheCatalogName(Integer namespaceId, Long ownerId, String name) {
+        FileCatalog catalog = fileManagementProvider.findFileCatalogByName(namespaceId, ownerId, name);
+        if (catalog != null)
+            throw RuntimeErrorException.errorWith(FileManagementErrorCode.SCOPE, FileManagementErrorCode.ERROR_NAME_ALREADY_EXISTS,
+                    "the name has been used.");
     }
 
     @Override
@@ -174,6 +179,7 @@ public class FileManagementServiceImpl implements  FileManagementService{
         Integer namespaceId = UserContext.getCurrentNamespaceId();
         List<FileCatalogScopeDTO> scopes = new ArrayList<>();
 
+        //  todo:可能需要删除未勾选的
         if (cmd.getScopes() != null && cmd.getScopes().size() > 0) {
             cmd.getScopes().forEach(r ->{
                 FileCatalogScope scope = new FileCatalogScope();
@@ -240,32 +246,30 @@ public class FileManagementServiceImpl implements  FileManagementService{
     public FileContentDTO addFileContent(AddFileContentCommand cmd) {
         FileContentDTO dto = new FileContentDTO();
         FileCatalog catalog = fileManagementProvider.findFileCatalogById(cmd.getCatalogId());
-        if(catalog == null)
+        Integer namespaceId = UserContext.getCurrentNamespaceId();
+        if (catalog == null)
             return dto;
+        if (cmd.getParentId() == null)
+            cmd.setParentId(cmd.getCatalogId());
 
+        //todo：文件类型的判断
         //  1.whether the name has been used
-        FileContent content = fileManagementProvider.findFileContentByName(catalog.getNamespaceId(), catalog.getOwnerId(), cmd.getContentName());
-        if (content != null) {
-            throw RuntimeErrorException.errorWith(FileManagementErrorCode.SCOPE, FileManagementErrorCode.ERROR_NAME_ALREADY_EXISTS,
-                    "the name has been used.");
-        } else {
-            //  2.create it
-            content = new FileContent();
-            if (cmd.getParentId() == null)
-                cmd.setParentId(cmd.getCatalogId());
-            content.setNamespaceId(catalog.getNamespaceId());
-            content.setOwnerId(catalog.getOwnerId());
-            content.setOwnerType(catalog.getOwnerType());
-            content.setCatalogId(catalog.getId());
-            content.setName(cmd.getContentName());
-            content.setSize(cmd.getContentSize());
-            content.setParentId(cmd.getParentId());
-            content.setContentType(cmd.getContentType());
-            content.setContentUri(cmd.getContentUri());
-            fileManagementProvider.createFileContent(content);
-            //  3.return back the dto
-            dto = ConvertHelper.convert(content, FileContentDTO.class);
-        }
+        checkFileContentName(namespaceId, catalog.getOwnerId(), cmd.getParentId(), cmd.getContentName());
+        //  2.create it
+        FileContent content = new FileContent();
+        content.setNamespaceId(catalog.getNamespaceId());
+        content.setOwnerId(catalog.getOwnerId());
+        content.setOwnerType(catalog.getOwnerType());
+        content.setCatalogId(catalog.getId());
+        content.setName(cmd.getContentName());
+        content.setSize(cmd.getContentSize());
+        content.setParentId(cmd.getParentId());
+        content.setContentType(cmd.getContentType());
+        content.setContentUri(cmd.getContentUri());
+        fileManagementProvider.createFileContent(content);
+        //  3.return back the dto
+        dto = ConvertHelper.convert(content, FileContentDTO.class);
+
         return dto;
     }
 
@@ -279,14 +283,23 @@ public class FileManagementServiceImpl implements  FileManagementService{
         FileContentDTO dto = new FileContentDTO();
         FileContent content = fileManagementProvider.findFileContentById(cmd.getContentId());
         if (content != null) {
-            //  update the name
+            //  1.check the name
+            checkFileContentName(content.getNamespaceId(), content.getOwnerId(), content.getParentId(), cmd.getContentName());
+            //  2.update the name
             content.setName(cmd.getContentName());
             fileManagementProvider.updateFileContent(content);
-            //  return back
+            //  3.return back
             dto.setId(content.getId());
             dto.setName(content.getName());
         }
         return dto;
+    }
+
+    private void checkFileContentName(Integer namespaceId, Long ownerId, Long parentId, String name){
+        FileContent content = fileManagementProvider.findFileContentByName(namespaceId, ownerId, parentId, name);
+        if (content != null)
+            throw RuntimeErrorException.errorWith(FileManagementErrorCode.SCOPE, FileManagementErrorCode.ERROR_NAME_ALREADY_EXISTS,
+                    "the name has been used.");
     }
 
     @Override
@@ -310,6 +323,7 @@ public class FileManagementServiceImpl implements  FileManagementService{
                 folders.add(dto);
                 return null;
             }).collect(Collectors.toList());
+            //todo:图标的处理
             results.stream().filter(r -> !r.getContentType().equals(FileContentType.FOLDER.getCode())).map(r ->{
                 FileContentDTO dto = ConvertHelper.convert(r, FileContentDTO.class);
                 if(dto.getContentUri() != null)
