@@ -56,6 +56,7 @@ import java.io.ByteArrayOutputStream;
 import java.io.IOException;
 import java.io.OutputStream;
 import java.math.BigDecimal;
+import java.sql.Timestamp;
 import java.text.ParseException;
 import java.text.SimpleDateFormat;
 import java.util.*;
@@ -219,6 +220,10 @@ public class SocialSecurityServiceImpl implements SocialSecurityService {
             EhSocialSecurityPayments payment = processSocialSecurityPayment(setting, paymentMonth, NormalFlag.NO.getCode());
             payment.setId(id++);
             payments.add(payment);
+            payment.setCreateTime(new Timestamp(DateHelper.currentGMTTime().getTime()));
+            payment.setCreatorUid(UserContext.current().getUser().getId());
+            payment.setUpdateTime(payment.getCreateTime());
+            payment.setOperatorUid(payment.getCreatorUid());
         }
         sequenceProvider.getNextSequenceBlock(NameMapper.getSequenceDomainFromTablePojo(EhSocialSecurityPayments.class), payments.size());
         socialSecurityPaymentProvider.batchCreateSocialSecurityPayment(payments);
