@@ -2692,12 +2692,12 @@ public class EquipmentProviderImpl implements EquipmentProvider {
         query.fetchAny().map((r) -> {
             resp.setCompleteInspection(r.getValue("completeInspection", Long.class));
             //resp.setCompleteMaintance(r.getValue("completeMaintance", Long.class));
-            resp.setComplete(resp.getCompleteInspection() + resp.getCompleteMaintance());
+           // resp.setComplete(resp.getCompleteInspection() + resp.getCompleteMaintance());
             resp.setCompleteWaitingForApproval(r.getValue("completeInspectionWaitingForApproval", Long.class));
            // resp.setInMaintance(r.getValue("inMaintance", Long.class));
             resp.setWaitingForExecuting(r.getValue("waitingForExecuting", Long.class));
             resp.setTotalTasks(r.getValue("total", Long.class));
-            resp.setDelay(r.getValue("delay", Long.class));
+            resp.setDelay(r.getValue("delayTasks", Long.class));
             resp.setReviewDelayTasks(r.getValue("reviewDelay", Long.class));
             return null;
         });
@@ -3057,7 +3057,7 @@ public class EquipmentProviderImpl implements EquipmentProvider {
     @Override
     public void statInMaintanceTaskCount(TasksStatData stat, Timestamp startTime, Timestamp endTime, StatTodayEquipmentTasksCommand cmd) {
         DSLContext context = this.dbProvider.getDslContext(AccessSpec.readOnly());
-        SelectQuery<EhEquipmentInspectionTaskLogsRecord> query = context.selectQuery(Tables.EH_EQUIPMENT_INSPECTION_TASK_LOGS);
+        SelectQuery<Record> query = context.selectQuery();
         Condition inMaintanceCountCondition =
                 Tables.EH_EQUIPMENT_INSPECTION_TASK_LOGS.PROCESS_RESULT.eq(EquipmentTaskProcessResult.NONE.getCode());
         inMaintanceCountCondition = inMaintanceCountCondition.
@@ -3073,6 +3073,7 @@ public class EquipmentProviderImpl implements EquipmentProvider {
 
 
         query.addSelect(fields);
+        query.addFrom(Tables.EH_EQUIPMENT_INSPECTION_TASK_LOGS);
         query.addConditions(Tables.EH_EQUIPMENT_INSPECTION_TASK_LOGS.NAMESPACE_ID.eq(cmd.getNamespaceId()));
 
         if (cmd.getTargetId() != null) {
