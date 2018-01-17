@@ -270,7 +270,17 @@ public class FileManagementServiceImpl implements  FileManagementService{
 
     @Override
     public FileContentDTO updateFileContentName(UpdateFileContentNameCommand cmd) {
-        return null;
+        FileContentDTO dto = new FileContentDTO();
+        FileContent content = fileManagementProvider.findFileContentById(cmd.getContentId());
+        if (content != null) {
+            //  update the name
+            content.setName(cmd.getContentName());
+            fileManagementProvider.updateFileContent(content);
+            //  return back
+            dto.setId(content.getId());
+            dto.setName(content.getName());
+        }
+        return dto;
     }
 
     @Override

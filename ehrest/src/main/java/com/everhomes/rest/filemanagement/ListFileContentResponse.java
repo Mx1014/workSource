@@ -7,7 +7,6 @@ import java.util.List;
 
 /**
  * <ul>
- * <li>downloadPermission: 下载权限 0-拒绝下载 1-允许下载</li>
  * <li>folders: 文件夹列表 {@link com.everhomes.rest.filemanagement.FileContentDTO}</li>
  * <li>files: 文件列表 {@link com.everhomes.rest.filemanagement.FileContentDTO}</li>
  * </ul>
@@ -15,8 +14,6 @@ import java.util.List;
 public class ListFileContentResponse {
 
     private Integer nextPageOffset;
-
-    private Byte downloadPermission;
 
     @ItemType(FileContentDTO.class)
     private List<FileContentDTO> folders;
@@ -34,14 +31,6 @@ public class ListFileContentResponse {
 
     public void setNextPageOffset(Integer nextPageOffset) {
         this.nextPageOffset = nextPageOffset;
-    }
-
-    public Byte getDownloadPermission() {
-        return downloadPermission;
-    }
-
-    public void setDownloadPermission(Byte downloadPermission) {
-        this.downloadPermission = downloadPermission;
     }
 
     public List<FileContentDTO> getFolders() {

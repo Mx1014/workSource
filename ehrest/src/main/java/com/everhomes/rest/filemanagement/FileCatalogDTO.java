@@ -8,6 +8,7 @@ import java.sql.Timestamp;
  * <ul>
  * <li>id: 目录id</li>
  * <li>name: 目录名称</li>
+ * <li>downloadPermission: 下载权限 0-拒绝下载 1-允许下载</li>
  * <li>createTime: 创建时间</li>
  * </ul>
  */
@@ -16,6 +17,8 @@ public class FileCatalogDTO {
     private Long id;
 
     private String name;
+
+    private Byte downloadPermission;
 
     private Timestamp createTime;
 
