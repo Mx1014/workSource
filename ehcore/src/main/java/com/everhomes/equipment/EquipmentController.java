@@ -169,7 +169,6 @@ public class EquipmentController extends ControllerBase {
     public RestResponse deleteEquipmentStandard(DeleteEquipmentStandardCommand cmd) {
 
         equipmentService.deleteEquipmentStandard(cmd);
-
         return getSuccessResponse();
     }
 
@@ -182,7 +181,6 @@ public class EquipmentController extends ControllerBase {
     public RestResponse searchEquipmentStandards(SearchEquipmentStandardsCommand cmd) {
 
         SearchEquipmentStandardsResponse standards = equipmentStandardSearcher.query(cmd);
-
         return getRestResponse(standards);
     }
 

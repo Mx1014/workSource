@@ -219,4 +219,6 @@ public interface EquipmentProvider {
 	void updateMaintanceInspectionLogsById(Long id);
 
     void statInMaintanceTaskCount(TasksStatData stat,Timestamp startTime, Timestamp endTime,StatTodayEquipmentTasksCommand cmd);
+
+    void updateEquipmentStatus(Long referId);
 }

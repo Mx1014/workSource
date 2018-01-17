@@ -3099,4 +3099,13 @@ public class EquipmentProviderImpl implements EquipmentProvider {
             return null;
         });
     }
+
+    @Override
+    public void updateEquipmentStatus(Long referId) {
+        DSLContext context = this.dbProvider.getDslContext(AccessSpec.readWrite());
+        context.update(Tables.EH_EQUIPMENT_INSPECTION_EQUIPMENTS)
+                .set(Tables.EH_EQUIPMENT_INSPECTION_EQUIPMENTS.STATUS, EquipmentStatus.IN_MAINTENANCE.getCode())
+                .where(Tables.EH_EQUIPMENT_INSPECTION_EQUIPMENTS.ID.eq(referId))
+                .execute();
+    }
 }
