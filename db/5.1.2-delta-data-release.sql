@@ -24,3 +24,6 @@ INSERT INTO `eh_configurations` (`id`, `name`, `value`, `description`, `namespac
   VALUES ((@configurations_id := @configurations_id + 1), 'sms.YunPian.apiKey', 'a010af7f5e94f889c010ed38a7fc3a05', '云片ApiKey', 0, NULL);
 INSERT INTO `eh_configurations` (`id`, `name`, `value`, `description`, `namespace_id`, `display_name`)
   VALUES ((@configurations_id := @configurations_id + 1), 'sms.YunPian.server', 'https://sms.yunpian.com/v2/sms/batch_send.json', '云片server', 0, NULL);
+
+-- 智富会的物业缴费改为卡片式
+update eh_launch_pad_items SET `action_data` = '{"url":"http:${url.home}/property-payment/build/index.html?hideNavigationBar=1&ehnavigatorstyle=0&name=1#/home_page#sign_suffix"}' where namespace_id = 999961 and item_label = '物业缴费';
