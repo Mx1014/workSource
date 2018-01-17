@@ -1052,84 +1052,58 @@ public class QualityServiceImpl implements QualityService {
 //		}
 		//新后台对接权限修改
 		boolean isAdmin = checkAdmin(cmd.getOwnerId(),cmd.getOwnerType(),cmd.getNamespaceId());
+		LOGGER.info("listQualityInspectionTasks: checkAdmin:{}"+isAdmin);
 
-
-		List<QualityInspectionTasks> tasks = new ArrayList<QualityInspectionTasks>();
-
+		List<QualityInspectionTasks> tasks = new ArrayList<>();
 		boolean timeCompared = false;
-
 		if(cmd.getExecuteFlag() != null && cmd.getExecuteFlag() == 1) {
 			timeCompared = true;
 		}
 
-		if(isAdmin) {
+		if (isAdmin) {
 			//管理员查询所有任务
 			tasks = qualityProvider.listVerificationTasks(offset, pageSize + 1, ownerId, ownerType, targetId, targetType,
-            		cmd.getTaskType(), null, startDate, endDate, cmd.getExecuteStatus(), cmd.getReviewStatus(),
-					timeCompared, null, cmd.getManualFlag(), null,cmd.getNamespaceId(),cmd.getLatestUpdateTime());
+					cmd.getTaskType(), null, startDate, endDate, cmd.getExecuteStatus(), cmd.getReviewStatus(),
+					timeCompared, null, cmd.getManualFlag(), null, cmd.getNamespaceId(), cmd.getLatestUpdateTime());
 		} else {
 			List<ExecuteGroupAndPosition> groupDtos = listUserRelateGroups();
-//			List<Long> standardIds = qualityProvider.listQualityInspectionStandardGroupMapByGroup(groupDtos, QualityGroupType.REVIEW_GROUP.getCode());
-//			if(cmd.getIsReview() != null && cmd.getIsReview() == 1) {
-//
-//				tasks = qualityProvider.listVerificationTasks(locator, pageSize + 1, ownerId, ownerType, targetId, targetType,
-//						cmd.getTaskType(), user.getId(), startDate, endDate, null,
-//						cmd.getExecuteStatus(), cmd.getReviewStatus(), timeCompared, standardIds, cmd.getManualFlag());
-//
-//			} else {
 			List<QualityInspectionStandardGroupMap> maps = qualityProvider.listQualityInspectionStandardGroupMapByGroupAndPosition(groupDtos);
-			if(maps != null && maps.size() > 0) {
+			if (maps != null && maps.size() > 0) {
 				List<Long> executeStandardIds = new ArrayList<>();
-				List<Long> reviewStandardIds = new ArrayList<>();
-				for(QualityInspectionStandardGroupMap r : maps){
-//					if(QualityGroupType.REVIEW_GROUP.equals(QualityGroupType.fromStatus(r.getGroupType()))) {
-//						reviewStandardIds.add(r.getStandardId());
-//					}
-					if(QualityGroupType.EXECUTIVE_GROUP.equals(QualityGroupType.fromStatus(r.getGroupType()))) {
+//				List<Long> reviewStandardIds = new ArrayList<>();
+				for (QualityInspectionStandardGroupMap r : maps) {
+					if (QualityGroupType.EXECUTIVE_GROUP.equals(QualityGroupType.fromStatus(r.getGroupType()))) {
 						executeStandardIds.add(r.getStandardId());
 					}
-
 				}
 				//增加前台传namespaceId  参数数量以后再重构
 				tasks = qualityProvider.listVerificationTasks(offset, pageSize + 1, ownerId, ownerType, targetId, targetType,
 						cmd.getTaskType(), user.getId(), startDate, endDate, cmd.getExecuteStatus(), cmd.getReviewStatus(),
-						timeCompared, executeStandardIds, cmd.getManualFlag(), groupDtos ,cmd.getNamespaceId(),cmd.getLatestUpdateTime());
+						timeCompared, executeStandardIds, cmd.getManualFlag(), groupDtos, cmd.getNamespaceId(), cmd.getLatestUpdateTime());
 			}
-
-
-//			}
 		}
 
-        Long nextPageAnchor = null;
-//        if(tasks.size() > pageSize) {
-//        	tasks.remove(tasks.size() - 1);
-//            nextPageAnchor = tasks.get(tasks.size() - 1).getId();
-//        }
+		Long nextPageAnchor = null;
 		if (tasks.size() > pageSize) {
 			tasks.remove(tasks.size() - 1);
 			nextPageAnchor = (long) (offset + 1);
 		}
 
-        List<QualityInspectionTaskRecords> records = new ArrayList<QualityInspectionTaskRecords>();
-        for(QualityInspectionTasks task : tasks) {
-        	QualityInspectionTaskRecords record = qualityProvider.listLastRecordByTaskId(task.getId());
-        	if(record != null) {
-        		task.setRecord(record);
-            	records.add(task.getRecord());
-        	}
-        }
+		List<QualityInspectionTaskRecords> records = new ArrayList<QualityInspectionTaskRecords>();
+		for (QualityInspectionTasks task : tasks) {
+			QualityInspectionTaskRecords record = qualityProvider.listLastRecordByTaskId(task.getId());
+			if (record != null) {
+				task.setRecord(record);
+				records.add(task.getRecord());
+			}
+		}
 
 		this.qualityProvider.populateRecordAttachments(records);
 		this.qualityProvider.populateRecordItemResults(records);
 
-		for(QualityInspectionTaskRecords record : records) {
+		for (QualityInspectionTaskRecords record : records) {
 			populateRecordAttachements(record, record.getAttachments());
 		}
-//		records.stream().map((r) -> {
-//			populateRecordAttachements(r, r.getAttachments());
-//			return r;
-//		});
-
 		//查找当日已执行任务数
 		Calendar cal = Calendar.getInstance();
 		cal.setTime(DateHelper.currentGMTTime());
