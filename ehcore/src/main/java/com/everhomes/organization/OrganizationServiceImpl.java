@@ -1588,7 +1588,7 @@ public class OrganizationServiceImpl implements OrganizationService {
                 DeleteEnterpriseCustomerCommand command = new DeleteEnterpriseCustomerCommand();
                 command.setId(customer.getId());
                 command.setCommunityId(customer.getCommunityId());
-                customerService.deleteEnterpriseCustomer(command);
+                customerService.deleteEnterpriseCustomer(command, false);
             }
 
             organization.setStatus(OrganizationStatus.DELETED.getCode());
@@ -7779,6 +7779,11 @@ public class OrganizationServiceImpl implements OrganizationService {
                 deleteOrganizationAllAdmins(org.getId());
                 orgAdminAccounts.put(org.getId(), new ArrayList<>());
             }
+            OrganizationMember member = organizationProvider.findOrganizationPersonnelByPhone(org.getId(), data.getAdminToken());
+            if(member != null && OrganizationMemberGroupType.fromCode(member.getMemberGroup()) == OrganizationMemberGroupType.MANAGER){
+                orgAdminAccounts.get(org.getId()).add(member.getContactToken());
+            }
+
             if (!orgAdminAccounts.get(org.getId()).contains(data.getAdminToken())) {
                 if (!StringUtils.isEmpty(data.getAdminToken())) {
                     CreateOrganizationAdminCommand createOrganizationAdminCommand = new CreateOrganizationAdminCommand();
@@ -11687,23 +11692,8 @@ public class OrganizationServiceImpl implements OrganizationService {
                     return query;
                 }
             });
-            List<OrganizationMember> depart_members = new ArrayList<>();
-            if (organizationIds != null) {
-                for (Long orgId : organizationIds) {
-                    members.stream().map(r -> {
-                        Organization org = this.checkOrganization(orgId);
-                        if (org != null) {
-                            if (this.organizationProvider.checkOneOfOrganizationWithContextToken(org.getPath(), r.getContactToken())) {
-                                depart_members.add(r);
-                            }
-                        }
-                        return null;
-                    }).collect(Collectors.toList());
-                }
-            } else {
-                return members;
-            }
-            return depart_members;
+
+            return members;
         }
 
         return new ArrayList<>();
