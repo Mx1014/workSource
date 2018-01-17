@@ -7,6 +7,8 @@ import com.everhomes.util.StringHelper;
  *  <li>id: id</li>
  *  <li>standardId: 标准id</li>
  *  <li>standardName: 标准名称</li>
+ *  <li>repeatType: 标准周期类别</li>
+ *  <li>standardType: 标准类型</li>
  *  <li>equipmentId: 设备id</li>
  *  <li>reviewStatus: 审批状态 参考{@link com.everhomes.rest.equipment.EquipmentReviewStatus}</li>
  *  <li>reviewResult: 审批结果 参考{@link com.everhomes.rest.equipment.ReviewResult}</li>
@@ -22,6 +24,10 @@ public class EquipmentStandardMapDTO {
 	private Long standardId;
 	
 	private String standardName;
+
+	private Byte repeatType;
+
+	private Byte standardType;
 	
 	private Long equipmentId;
 	
@@ -105,6 +111,22 @@ public class EquipmentStandardMapDTO {
 
 	public void setReviewTime(Long reviewTime) {
 		this.reviewTime = reviewTime;
+	}
+
+	public Byte getRepeatType() {
+		return repeatType;
+	}
+
+	public void setRepeatType(Byte repeatType) {
+		this.repeatType = repeatType;
+	}
+
+	public Byte getStandardType() {
+		return standardType;
+	}
+
+	public void setStandardType(Byte standardType) {
+		this.standardType = standardType;
 	}
 
 	@Override
