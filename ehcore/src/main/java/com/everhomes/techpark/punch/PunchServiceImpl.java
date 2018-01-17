@@ -382,7 +382,7 @@ public class PunchServiceImpl implements PunchService {
 			return "";
 		}
 		LocaleString localeString = localeStringProvider.find( PunchConstants.PUNCH_STATUS_SCOPE, status.toString(),
-				UserContext.current().getUser().getLocale());
+				PunchConstants.locale);
 		if(null == localeString)
 			return "";
 		return localeString.getText();
