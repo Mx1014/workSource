@@ -7,7 +7,9 @@ import com.everhomes.rentalv2.RentalResourceHandler;
 import com.everhomes.rentalv2.RentalResourceType;
 import com.everhomes.rentalv2.Rentalv2Provider;
 import com.everhomes.rest.rentalv2.NormalFlag;
+import com.everhomes.rest.rentalv2.RentalOwnerType;
 import com.everhomes.rest.rentalv2.RentalV2ResourceType;
+import com.everhomes.rest.rentalv2.admin.QueryDefaultRuleAdminCommand;
 import com.everhomes.user.UserContext;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
@@ -31,7 +33,7 @@ public class VipParkingRentalResourceHandler implements RentalResourceHandler {
         Integer count = parkingProvider.countParkingSpace(parkingLot.getNamespaceId(), parkingLot.getOwnerType(),
                 parkingLot.getOwnerId(),parkingLot.getId());
 
-        RentalResourceType type = rentalv2Provider.findRentalResourceTypes(UserContext.getCurrentNamespaceId(),
+        RentalResourceType type = rentalv2Provider.findRentalResourceTypes(parkingLot.getNamespaceId(),
                 RentalV2ResourceType.VIP_PARKING.getCode());
 
         RentalResource resource = new RentalResource();
@@ -42,6 +44,7 @@ public class VipParkingRentalResourceHandler implements RentalResourceHandler {
         resource.setResourceCounts(Double.valueOf(count));
         resource.setAutoAssign(NormalFlag.NONEED.getCode());
         resource.setMultiUnit(NormalFlag.NONEED.getCode());
+        resource.setCommunityId(parkingLot.getOwnerId());
 
         return resource;
     }
@@ -49,5 +52,11 @@ public class VipParkingRentalResourceHandler implements RentalResourceHandler {
     @Override
     public void updateRentalResource(String resourceJson) {
 
+    }
+
+    @Override
+    public void setRuleOwnerTypeByResource(QueryDefaultRuleAdminCommand queryRuleCmd, RentalResource resource) {
+        queryRuleCmd.setOwnerType(RentalOwnerType.COMMUNITY.getCode());
+        queryRuleCmd.setOwnerId(resource.getCommunityId());
     }
 }

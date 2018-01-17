@@ -24,6 +24,8 @@ import com.everhomes.order.PayService;
 import com.everhomes.parking.handler.DefaultParkingVendorHandler;
 import com.everhomes.rentalv2.RentalCommonServiceImpl;
 import com.everhomes.rentalv2.RentalResourceHandler;
+import com.everhomes.rentalv2.RentalResourceType;
+import com.everhomes.rentalv2.Rentalv2Provider;
 import com.everhomes.rentalv2.utils.RentalUtils;
 import com.everhomes.rest.RestResponse;
 import com.everhomes.rest.activity.ActivityRosterPayVersionFlag;
@@ -119,6 +121,9 @@ public class ParkingServiceImpl implements ParkingService {
 	private PayService payService;
 	@Autowired
 	private RentalCommonServiceImpl rentalCommonService;
+	@Autowired
+	private Rentalv2Provider rentalv2Provider;
+
 
 	@Override
 	public List<ParkingCardDTO> listParkingCards(ListParkingCardsCommand cmd) {
@@ -238,9 +243,13 @@ public class ParkingServiceImpl implements ParkingService {
 
 			if (r.getVipParkingFlag() == ParkingConfigFlag.SUPPORT.getCode()) {
 				String homeUrl = configProvider.getValue(ConfigConstants.HOME_URL, "");
-				String detailUrl = configProvider.getValue(ConfigConstants.APPLY_ENTRY_DETAIL_URL, "");
+				String detailUrl = configProvider.getValue(ConfigConstants.RENTAL_ORDER_DETAIL_URL, "");
 
-				detailUrl = String.format(detailUrl, dto.getId());
+				RentalResourceType type = rentalv2Provider.findRentalResourceTypes(UserContext.getCurrentNamespaceId(),
+						RentalV2ResourceType.VIP_PARKING.getCode());
+
+				detailUrl = String.format(detailUrl, RentalV2ResourceType.VIP_PARKING.getCode(), type.getId(),
+						RuleSourceType.RESOURCE.getCode(), dto.getId());
 				dto.setVipParkingUrl(homeUrl + detailUrl);
 			}
 
@@ -2429,6 +2438,9 @@ public class ParkingServiceImpl implements ParkingService {
 		if(size > 0){
 			response.setSpaceDTOS(spaces.stream().map(r -> {
 				ParkingSpaceDTO dto = ConvertHelper.convert(r, ParkingSpaceDTO.class);
+				if (dto.getStatus() == ParkingSpaceStatus.IN_USING.getCode()) {
+					dto.setStatus(ParkingSpaceStatus.OPEN.getCode());
+				}
 				return dto;
 			}).collect(Collectors.toList()));
 

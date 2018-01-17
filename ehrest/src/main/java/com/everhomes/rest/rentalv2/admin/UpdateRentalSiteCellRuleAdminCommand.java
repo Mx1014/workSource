@@ -8,6 +8,7 @@ import java.util.List;
 
 /**
  * <ul>
+ * <li>resourceType: resourceType</li>
  * <li>resourceId: 资源id</li>
  * <li>ruleId: 选取单元格id</li>
  * <li>beginTime: 开始时间对于按小时则是N或者N.5，对于半天则是0早上1下午2晚上</li>
@@ -16,8 +17,6 @@ import java.util.List;
  * <li>originalPrice: 原价-如果打折则有（园区客户）</li>
  * <li>price: 实际价格-打折则为折后价（园区客户）</li>
  * <li>initiatePrice: 园区客户起步后价格</li>
- * <li>halfsitePrice: halfsitePrice</li>
- * <li>halfsiteOriginalPrice: halfsiteOriginalPrice</li>
  * <li>counts: 可预约数量</li>
  * <li>loopType: 循环方式 参考{@link com.everhomes.rest.rentalv2.LoopType}</li>
  * <li>beginDate: 开放日期始</li>

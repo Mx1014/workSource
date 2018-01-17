@@ -56,10 +56,11 @@ public class Rentalv2PriceRuleProviderImpl implements Rentalv2PriceRuleProvider 
 	}
 
 	@Override
-	public void deletePriceRuleByOwnerId(String ownerType, Long ownerId) {
+	public void deletePriceRuleByOwnerId(String resourceType, String ownerType, Long ownerId) {
 		getReadWriteContext().delete(Tables.EH_RENTALV2_PRICE_RULES)
 			.where(Tables.EH_RENTALV2_PRICE_RULES.OWNER_TYPE.eq(ownerType))
 			.and(Tables.EH_RENTALV2_PRICE_RULES.OWNER_ID.eq(ownerId))
+				.and(Tables.EH_RENTALV2_PRICE_RULES.RESOURCE_TYPE.eq(resourceType))
 			.execute();
 	}
 
@@ -70,11 +71,12 @@ public class Rentalv2PriceRuleProviderImpl implements Rentalv2PriceRuleProvider 
 	}
 	
 	@Override
-	public Rentalv2PriceRule findRentalv2PriceRuleByOwner(String ownerType, Long ownerId, Byte rentalType) {
+	public Rentalv2PriceRule findRentalv2PriceRuleByOwner(String resourceType, String ownerType, Long ownerId, Byte rentalType) {
 		Record record = getReadOnlyContext().select().from(Tables.EH_RENTALV2_PRICE_RULES)
 				.where(Tables.EH_RENTALV2_PRICE_RULES.OWNER_TYPE.eq(ownerType))
 				.and(Tables.EH_RENTALV2_PRICE_RULES.OWNER_ID.eq(ownerId))
 				.and(Tables.EH_RENTALV2_PRICE_RULES.RENTAL_TYPE.eq(rentalType))
+				.and(Tables.EH_RENTALV2_PRICE_RULES.RESOURCE_TYPE.eq(resourceType))
 				.fetchOne();
 		return record == null ? null : ConvertHelper.convert(record, Rentalv2PriceRule.class);
 	}
@@ -87,10 +89,11 @@ public class Rentalv2PriceRuleProviderImpl implements Rentalv2PriceRuleProvider 
 	}
 	
 	@Override
-	public List<Rentalv2PriceRule> listPriceRuleByOwner(String ownerType, Long ownerId) {
+	public List<Rentalv2PriceRule> listPriceRuleByOwner(String resourceType, String ownerType, Long ownerId) {
 		return getReadOnlyContext().select().from(Tables.EH_RENTALV2_PRICE_RULES)
 				.where(Tables.EH_RENTALV2_PRICE_RULES.OWNER_TYPE.eq(ownerType))
 				.and(Tables.EH_RENTALV2_PRICE_RULES.OWNER_ID.eq(ownerId))
+				.and(Tables.EH_RENTALV2_PRICE_RULES.RESOURCE_TYPE.eq(resourceType))
 				.orderBy(Tables.EH_RENTALV2_PRICE_RULES.RENTAL_TYPE.asc())
 				.fetch().map(r -> ConvertHelper.convert(r, Rentalv2PriceRule.class));
 	}

@@ -45,8 +45,8 @@ public class UpdateResourceTimeRuleCommand {
     private Long beginDate;
     private Long endDate;
 
-    private Double dayOpenTime;
-    private Double dayCloseTime;
+    @ItemType(RentalOpenTimeDTO.class)
+    private List<RentalOpenTimeDTO> openTimes;
 
     @ItemType(Long.class)
     private List<Long> closeDates;
@@ -63,6 +63,14 @@ public class UpdateResourceTimeRuleCommand {
     @Override
     public String toString() {
         return StringHelper.toJsonString(this);
+    }
+
+    public List<RentalOpenTimeDTO> getOpenTimes() {
+        return openTimes;
+    }
+
+    public void setOpenTimes(List<RentalOpenTimeDTO> openTimes) {
+        this.openTimes = openTimes;
     }
 
     public List<Byte> getRentalTypes() {
@@ -151,22 +159,6 @@ public class UpdateResourceTimeRuleCommand {
 
     public void setEndDate(Long endDate) {
         this.endDate = endDate;
-    }
-
-    public Double getDayOpenTime() {
-        return dayOpenTime;
-    }
-
-    public void setDayOpenTime(Double dayOpenTime) {
-        this.dayOpenTime = dayOpenTime;
-    }
-
-    public Double getDayCloseTime() {
-        return dayCloseTime;
-    }
-
-    public void setDayCloseTime(Double dayCloseTime) {
-        this.dayCloseTime = dayCloseTime;
     }
 
     public List<Long> getCloseDates() {

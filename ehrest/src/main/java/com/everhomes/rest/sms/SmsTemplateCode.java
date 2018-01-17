@@ -124,4 +124,16 @@ public interface SmsTemplateCode {
     int PM_NOTIFY_BEFORE_TASK_DELAY = 56;
     int PM_NOTIFY_AFTER_TASK_DELAY = 57;
 
+    //资源预约： vip车位预约
+    int UNPAID_ORDER_OVER_TIME = 58; //订单超时未付款
+    int PAY_ORDER_SUCCESS = 59; //支付成功 给车主发短信
+    int RENTAL_USER_CANCEL_ORDER = 60; //vip车位预约用户取消订单 给车主发短信
+
+    int RENTAL_PARKING_LOCK_RAISE = 61; //vip车位预约用户车锁升起
+
+    int RENEW_RENTAL_ORDER_SUCCESS = 62; //使用中：延时成功 尊敬的“车主姓名”，用户（“预约人姓名”：“预约人手机号”）已为您将预约的VIP车位（“停车场名称”“车位编号”车位：“开始时间” - “结束时间”）延时到“新结束时间”，请点击以下链接使用：https://core.zuolin.com/evh/aclink/id=1283jh213a，感谢您的使用。
+
+    int RENTAL_ORDER_WILL_END = 63; //使用中：即将超时（结束时间前15分钟提醒）
+
+
 }

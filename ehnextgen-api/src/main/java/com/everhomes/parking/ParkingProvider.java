@@ -144,4 +144,6 @@ public interface ParkingProvider {
     ParkingSpace findParkingSpaceBySpaceNo(String spaceNo);
 
     Integer countParkingSpace(Integer namespaceId, String ownerType, Long ownerId, Long parkingLotId);
+
+    ParkingSpace getAnyParkingSpace(Integer namespaceId, String ownerType, Long ownerId, Long parkingLotId);
 }

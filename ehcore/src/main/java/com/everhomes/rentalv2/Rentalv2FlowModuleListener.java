@@ -285,7 +285,7 @@ public class Rentalv2FlowModuleListener implements FlowModuleListener {
 		entities.add(e);
 
 		List<RentalConfigAttachment> recommendUsers = rentalv2Provider
-				.queryRentalConfigAttachmentByOwner(AttachmentType.ORDER_RECOMMEND_USER.name(), order.getId());
+				.queryRentalConfigAttachmentByOwner(order.getResourceType(), AttachmentType.ORDER_RECOMMEND_USER.name(), order.getId());
 		if (null != recommendUsers && recommendUsers.size() != 0) {
 
 			StringBuilder itemStr = new StringBuilder();
@@ -309,7 +309,7 @@ public class Rentalv2FlowModuleListener implements FlowModuleListener {
 		}
 
 		List<RentalConfigAttachment> goodItems = rentalv2Provider
-				.queryRentalConfigAttachmentByOwner(AttachmentType.ORDER_GOOD_ITEM.name(), order.getId());
+				.queryRentalConfigAttachmentByOwner(order.getResourceType(), AttachmentType.ORDER_GOOD_ITEM.name(), order.getId());
 		if (null != goodItems && goodItems.size() != 0) {
 
 			StringBuilder itemStr = new StringBuilder();
@@ -330,8 +330,7 @@ public class Rentalv2FlowModuleListener implements FlowModuleListener {
 			entities.add(e);
 		}
 
-		List<RentalItemsOrder> ribs = rentalv2Provider.findRentalItemsBillBySiteBillId(order
-				.getId());
+		List<RentalItemsOrder> ribs = rentalv2Provider.findRentalItemsBillBySiteBillId(order.getId(), order.getResourceType());
 		if (null != ribs) { 
 			e = new FlowCaseEntity();
 			e.setEntityType(FlowCaseEntityType.MULTI_LINE.getCode());

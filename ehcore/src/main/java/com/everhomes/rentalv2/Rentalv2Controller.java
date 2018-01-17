@@ -567,4 +567,42 @@ public class Rentalv2Controller extends ControllerBase {
 		return response;
 	}
 
+	/**
+	 * <b>URL: /rental/completeRentalOrder</b>
+	 * <p>完成订单</p>
+	 */
+	@RequestMapping("completeRentalOrder")
+	@RestReturn(value = RentalOrderDTO.class)
+	public RestResponse completeRentalOrder(CompleteRentalOrderCommand cmd) {
+		RestResponse response = new RestResponse(rentalService.completeRentalOrder(cmd));
+		response.setErrorCode(ErrorCodes.SUCCESS);
+		response.setErrorDescription("OK");
+		return response;
+	}
+
+
+	/**
+	 *
+	 * <b>URL: /rental/getResourceRuleV2<b>
+	 * <p>查询资源的规则</p>
+	 */
+	@RequestMapping("getResourceRuleV2")
+	@RestReturn(GetResourceRuleV2Response.class)
+	public RestResponse getResourceRuleV2(GetResourceRuleV2Command cmd) {
+		RestResponse response = new RestResponse(rentalService.getResourceRuleV2(cmd));
+		response.setErrorCode(ErrorCodes.SUCCESS);
+		response.setErrorDescription("OK");
+		return response;
+	}
+
+	/**
+	 *
+	 * <b>URL: /rental/test<b>
+	 * <p>test</p>
+	 */
+	@RequestMapping("test")
+	public void test() {
+		rentalService.test();
+
+	}
 }

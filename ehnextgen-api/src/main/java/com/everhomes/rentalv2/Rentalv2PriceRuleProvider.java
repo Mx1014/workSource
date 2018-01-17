@@ -15,10 +15,10 @@ public interface Rentalv2PriceRuleProvider {
 
 	List<Rentalv2PriceRule> listRentalv2PriceRule();
 
-	List<Rentalv2PriceRule> listPriceRuleByOwner(String ownerType, Long ownerId);
+	List<Rentalv2PriceRule> listPriceRuleByOwner(String resourceType, String ownerType, Long ownerId);
 
-	void deletePriceRuleByOwnerId(String ownerType, Long ownerId);
+	void deletePriceRuleByOwnerId(String resourceType, String ownerType, Long ownerId);
 
-	Rentalv2PriceRule findRentalv2PriceRuleByOwner(String ownerType, Long ownerId, Byte rentalType);
+	Rentalv2PriceRule findRentalv2PriceRuleByOwner(String resourceType, String ownerType, Long ownerId, Byte rentalType);
 
 }

@@ -40,10 +40,11 @@ public class Rentalv2PricePackageProviderImpl implements  Rentalv2PricePackagePr
     private SequenceProvider sequenceProvider;
 
     @Override
-    public void deletePricePackageByOwnerId(String ownerType, Long ownerId) {
+    public void deletePricePackageByOwnerId(String resourceType, String ownerType, Long ownerId) {
         getReadWriteContext().delete(Tables.EH_RENTALV2_PRICE_PACKAGES)
                 .where(Tables.EH_RENTALV2_PRICE_PACKAGES.OWNER_TYPE.eq(ownerType))
                 .and(Tables.EH_RENTALV2_PRICE_PACKAGES.OWNER_ID.eq(ownerId))
+                .and(Tables.EH_RENTALV2_PRICE_PACKAGES.RESOURCE_TYPE.eq(resourceType))
                 .execute();
     }
 
@@ -65,10 +66,12 @@ public class Rentalv2PricePackageProviderImpl implements  Rentalv2PricePackagePr
     }
     @Cacheable(value = "listPricePackageByOwner", key="#ownerId", condition="#ownerType.equals('cell')")
     @Override
-    public List<Rentalv2PricePackage> listPricePackageByOwner(String ownerType, Long ownerId, Byte rentalType,String packageName) {
+    public List<Rentalv2PricePackage> listPricePackageByOwner(String resourceType, String ownerType, Long ownerId,
+                                                              Byte rentalType,String packageName) {
         SelectConditionStep<Record> step = getReadOnlyContext().select().from(Tables.EH_RENTALV2_PRICE_PACKAGES)
                 .where(Tables.EH_RENTALV2_PRICE_PACKAGES.OWNER_TYPE.eq(ownerType))
-                .and(Tables.EH_RENTALV2_PRICE_PACKAGES.OWNER_ID.eq(ownerId));
+                .and(Tables.EH_RENTALV2_PRICE_PACKAGES.OWNER_ID.eq(ownerId))
+                .and(Tables.EH_RENTALV2_PRICE_PACKAGES.RESOURCE_TYPE.eq(resourceType));
         if (rentalType!=null)
             step.and(Tables.EH_RENTALV2_PRICE_PACKAGES.RENTAL_TYPE.eq(rentalType));
         if (packageName!=null)

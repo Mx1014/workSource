@@ -8,9 +8,9 @@ import com.everhomes.rest.rentalv2.MaxMinPrice;
 
 public interface Rentalv2Provider {
 
-	void createRentalSite(RentalResource rentalsite);
+	void createRentalSite(RentalResource rentalSite);
 
-	List<RentalItem> findRentalSiteItems(Long rentalSiteId);
+	List<RentalItem> findRentalSiteItems(Long rentalSiteId, String resourceType);
 
 	void createRentalSiteItem(RentalItem siteItem);
 
@@ -22,21 +22,21 @@ public interface Rentalv2Provider {
 
 	Long createRentalSiteBill(RentalResourceOrder rsb);
 
-	List<RentalResourceOrder> findRentalSiteBillBySiteRuleId(Long siteRuleId);
+	List<RentalResourceOrder> findRentalSiteBillBySiteRuleId(Long siteRuleId, String resourceType);
 
 	RentalResource getRentalSiteById(Long rentalSiteId);
 
-	List<RentalItemsOrder> findRentalItemsBillBySiteBillId(Long rentalBillId);
+	List<RentalItemsOrder> findRentalItemsBillBySiteBillId(Long rentalBillId, String resourceType);
 
 	RentalItem findRentalSiteItemById(Long rentalSiteItemId);
 
-	RentalItemsOrder findRentalItemBill(Long rentalBillId, Long rentalSiteItemId);
+	RentalItemsOrder findRentalItemBill(Long rentalBillId, Long rentalSiteItemId, String resourceType);
 
 	RentalOrder findRentalBillById(Long rentalBillId);
 
 	RentalOrder findRentalBillByOrderNo(String orderNo);
 
-	void updateRentalSite(RentalResource rentalsite);
+	void updateRentalSite(RentalResource rentalSite);
 
 	void deleteRentalSiteItemById(Long rentalSiteItemId);
 
@@ -61,20 +61,19 @@ public interface Rentalv2Provider {
 
 	List<RentalOrder> listSuccessRentalBills();
 	
-	List<RentalResource> findRentalSites(Long  resourceTypeId, String keyword, ListingLocator locator,
+	List<RentalResource> findRentalSites(Long resourceTypeId, String keyword, ListingLocator locator,
 			Integer pageSize, Byte status,List<Long>  siteIds,Long communityId);
 
 	List<RentalOrder> listRentalBills(Long ownerId, String ownerType,
 			String siteType, Long rentalSiteId, Long beginDate, Long endDate);
 
-	List<RentalSiteRange> findRentalSiteOwnersByOwnerTypeAndId(
-			String ownerType, Long ownerId);
+	List<RentalSiteRange> findRentalSiteOwnersByOwnerTypeAndId(String resourceType, String ownerType, Long ownerId);
 
-	List<RentalResourcePic> findRentalSitePicsByOwnerTypeAndId(String ownerType, Long ownerId);
+	List<RentalResourcePic> findRentalSitePicsByOwnerTypeAndId(String resourceType, String ownerType, Long ownerId);
 
 	RentalItem getRentalSiteItemById(Long id);
 
-    void setAuthDoorId(Long rentalId,Long AuthDoorId);
+    void setAuthDoorId(Long orderId,Long AuthDoorId);
 
 	void createRentalDefaultRule(RentalDefaultRule defaultRule);
 
@@ -87,12 +86,12 @@ public interface Rentalv2Provider {
 	RentalDefaultRule getRentalDefaultRule(String ownerType, Long ownerId, String resourceType, Long resourceTypeId,
 										   String sourceType, Long sourceId);
 
-	List<RentalTimeInterval> queryRentalTimeIntervalByOwner(String ownerType,
+	List<RentalTimeInterval> queryRentalTimeIntervalByOwner(String resourceType, String ownerType,
 			Long ownerId);
 
-	List<RentalCloseDate> queryRentalCloseDateByOwner(String ownerType, Long ownerId);
+	List<RentalCloseDate> queryRentalCloseDateByOwner(String resourceType, String ownerType, Long ownerId);
 
-	List<RentalConfigAttachment> queryRentalConfigAttachmentByOwner(String ownerType, Long ownerId);
+	List<RentalConfigAttachment> queryRentalConfigAttachmentByOwner(String resourceType, String ownerType, Long ownerId);
 
 	List<RentalConfigAttachment> queryRentalConfigAttachmentByIds(List<Long> ids);
 
@@ -100,9 +99,9 @@ public interface Rentalv2Provider {
 
 	void createRentalSitePic(RentalResourcePic detailPic);
 
-	void deleteRentalSitePicsBySiteId(Long siteId);
+	void deleteRentalSitePicsBySiteId(String resourceType, Long siteId);
 
-	void deleteRentalSiteOwnersBySiteId(Long siteId);
+	void deleteRentalSiteOwnersBySiteId(String resourceType, Long siteId);
 
 	void updateRentalSiteItem(RentalItem siteItem);
 
@@ -112,13 +111,13 @@ public interface Rentalv2Provider {
 
 	void updateRentalDefaultRule(RentalDefaultRule newDefaultRule);
 
-	Integer deleteTimeIntervalsByOwnerId(String ownerType, Long id);
+	Integer deleteTimeIntervalsByOwnerId(String resourceType, String ownerType, Long id);
 
-	Integer deleteRentalCloseDatesByOwnerId(String ownerType, Long id);
+	Integer deleteRentalCloseDatesByOwnerId(String resourceType, String ownerType, Long id);
 
-	Integer deleteRentalConfigAttachmentsByOwnerId(String ownerType, Long id);
+	Integer deleteRentalConfigAttachmentsByOwnerId(String resourceType, String ownerType, Long id);
 
-	List<RentalSiteRange> findRentalSiteOwnersBySiteId(Long siteId);
+	List<RentalSiteRange> findRentalSiteOwnersBySiteId(String resourceType, Long siteId);
 
 	Integer countRentalSiteItemRentalCount(List<Long> rentalBillIds);
 
@@ -128,13 +127,13 @@ public interface Rentalv2Provider {
 
 	void updateRentalRefundOrder(RentalRefundOrder rentalRefundOrder);
 
-	List<RentalRefundOrder> getRefundOrderList(Long resourceTypeId,
+	List<RentalRefundOrder> getRefundOrderList(String resourceType, Long resourceTypeId,
 			CrossShardListingLocator locator, Byte status, String styleNo,
 			int pageSize, Long startTime, Long endTime);
 
 	RentalRefundOrder getRentalRefundOrderById(Long rentalRefundOrderId);
 
-	RentalRefundOrder getRentalRefundOrderByRefoundNo(String refundOrderNo);
+	RentalRefundOrder getRentalRefundOrderByRefundNo(String refundOrderNo);
 
 	RentalResourceType getRentalResourceTypeById(Long rentalResourceTypeId);
 
@@ -149,10 +148,9 @@ public interface Rentalv2Provider {
 
 	void createRentalResourceNumber(RentalResourceNumber resourceNumber);
 
-	Integer deleteRentalResourceNumbersByOwnerId(String simpleName, Long id);
+	Integer deleteRentalResourceNumbersByOwnerId(String resourceType, String ownerType, Long ownerId);
 
-	List<RentalResourceNumber> queryRentalResourceNumbersByOwner(
-			String simpleName, Long id);
+	List<RentalResourceNumber> queryRentalResourceNumbersByOwner(String resourceType, String ownerType, Long ownerId);
 
 //	void updateRentalOrderPayorderMap(RentalOrderPayorderMap orderMap);
 
@@ -177,15 +175,15 @@ public interface Rentalv2Provider {
 	boolean findOtherModeClosed(RentalResource rentalResource, RentalCell rentalCell,
 			List<Rentalv2PriceRule> priceRules);
 
-	RentalResourceType findRentalResourceTypeById (Long resourceTypeId);
+	RentalResourceType findRentalResourceTypeById(Long resourceTypeId);
 
-	List<Long> listCellPackageId (Long ownerId, Byte rentalType);
+	List<Long> listCellPackageId (String resourceType, Long ownerId, Byte rentalType);
 
 	void createRentalOrderRule(RentalOrderRule rule);
 
-	void deleteRentalOrderRules(String ownerType, Long ownerId, Byte handleType);
+	void deleteRentalOrderRules(String resourceType, String ownerType, Long ownerId, Byte handleType);
 
-	List<RentalOrderRule> listRentalOrderRules(String ownerType, Long ownerId, Byte handleType);
+	List<RentalOrderRule> listRentalOrderRules(String resourceType, String ownerType, Long ownerId, Byte handleType);
 
 	List<RentalOrder> searchRentalOrders(Long resourceTypeId, String resourceType, Long rentalSiteId, Byte billStatus,
 										 Long startTime, Long endTime, String tag1, String tag2, Long pageAnchor ,

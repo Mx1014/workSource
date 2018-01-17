@@ -81,8 +81,7 @@ public class RentalOrderEmbeddedHandler implements OrderEmbeddedHandler {
 
 				if(order.getStatus().equals(SiteBillStatus.PAYINGFINAL.getCode())){
 					//判断支付金额与订单金额是否相同
-					if (order.getPaidMoney().compareTo(new BigDecimal(cmd.getPayAmount())) == 0
-							&& order.getPayTotalMoney().compareTo(order.getPaidMoney()) == 0) {
+					if (order.getPayTotalMoney().compareTo(order.getPaidMoney()) == 0) {
 
 						if (order.getPayMode().equals(PayMode.ONLINE_PAY.getCode())) {
 							//支付成功之后创建工作流
@@ -90,12 +89,10 @@ public class RentalOrderEmbeddedHandler implements OrderEmbeddedHandler {
 							rentalProvider.updateRentalBill(order);
 							rentalService.onOrderSuccess(order);
 							//发短信
-							UserIdentifier userIdentifier = this.userProvider.findClaimedIdentifierByOwnerAndType(order.getCreatorUid(), IdentifierType.MOBILE.getCode()) ;
-							if(null == userIdentifier){
-								LOGGER.error("userIdentifier is null...userId = " + order.getCreatorUid());
-							}else{
-								rentalService.sendRentalSuccessSms(order.getNamespaceId(),userIdentifier.getIdentifierToken(), order);
-							}
+							RentalMessageHandler handler = rentalCommonService.getRentalMessageHandler(order.getResourceType());
+
+							handler.sendRentalSuccessSms(order);
+
 						}else {
 
 //							rentalv2Service.changeRentalOrderStatus(order, SiteBillStatus.SUCCESS.getCode(), true);

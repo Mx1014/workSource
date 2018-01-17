@@ -1,5 +1,7 @@
 package com.everhomes.rentalv2;
 
+import com.everhomes.rest.rentalv2.admin.QueryDefaultRuleAdminCommand;
+
 /**
  * @author sw on 2017/12/25.
  */
@@ -10,4 +12,6 @@ public interface RentalResourceHandler {
     RentalResource getRentalResourceById(Long id);
 
     void updateRentalResource(String resourceJson);
+
+    void setRuleOwnerTypeByResource(QueryDefaultRuleAdminCommand queryRuleCmd, RentalResource resource);
 }

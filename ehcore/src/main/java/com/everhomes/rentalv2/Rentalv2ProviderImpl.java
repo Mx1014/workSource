@@ -93,12 +93,13 @@ public class Rentalv2ProviderImpl implements Rentalv2Provider {
 	}
 
 	@Override
-	public List<RentalItem> findRentalSiteItems(Long rentalSiteId) {
+	public List<RentalItem> findRentalSiteItems(Long rentalSiteId, String resourceType) {
 		DSLContext context = dbProvider.getDslContext(AccessSpec.readOnly());
 		SelectJoinStep<Record> step = context.select().from(
 				Tables.EH_RENTALV2_ITEMS);
 		Condition condition = Tables.EH_RENTALV2_ITEMS.RENTAL_RESOURCE_ID
 				.equal(rentalSiteId);
+		condition = condition.and(Tables.EH_RENTALV2_ITEMS.RESOURCE_TYPE.equal(resourceType));
 		step.where(condition);
 		List<RentalItem> result = step
 				.orderBy(Tables.EH_RENTALV2_ITEMS.DEFAULT_ORDER.asc()).fetch()
@@ -205,7 +206,7 @@ public class Rentalv2ProviderImpl implements Rentalv2Provider {
 	}
 
 	@Override
-	public List<RentalResourceOrder> findRentalSiteBillBySiteRuleId(Long siteRuleId) {
+	public List<RentalResourceOrder> findRentalSiteBillBySiteRuleId(Long siteRuleId, String resourceType) {
 		DSLContext context = dbProvider.getDslContext(AccessSpec.readOnly());
 		SelectJoinStep<Record> step = context
 				.select()
@@ -276,6 +277,7 @@ public class Rentalv2ProviderImpl implements Rentalv2Provider {
 			.join(Tables.EH_RENTALV2_ORDERS)
 			.on(Tables.EH_RENTALV2_ORDERS.ID.eq(Tables.EH_RENTALV2_RESOURCE_ORDERS.RENTAL_ORDER_ID))
 			.and(Tables.EH_RENTALV2_ORDERS.RENTAL_RESOURCE_ID.eq(rentalResource.getId()))
+				.and(Tables.EH_RENTALV2_ORDERS.RESOURCE_TYPE.eq(rentalResource.getResourceType()))
 			.where(Tables.EH_RENTALV2_ORDERS.STATUS.ne(SiteBillStatus.FAIL.getCode()))
 			.and(Tables.EH_RENTALV2_ORDERS.STATUS.ne(SiteBillStatus.REFUNDED.getCode()))
 			.and(Tables.EH_RENTALV2_ORDERS.STATUS.ne(SiteBillStatus.REFUNDING.getCode()))
@@ -549,7 +551,8 @@ public class Rentalv2ProviderImpl implements Rentalv2Provider {
 	}
 
 	private Timestamp[] calculateHalfDayBeginEndTime(RentalResource rentalResource, RentalCell rentalCell) {
-		List<RentalTimeInterval> rentalTimeIntervals = queryRentalTimeIntervalByOwner(RentalTimeIntervalOwnerType.RESOURCE_HALF_DAY.getCode(), rentalResource.getId());
+		List<RentalTimeInterval> rentalTimeIntervals = queryRentalTimeIntervalByOwner(rentalResource.getResourceType(),
+				RentalTimeIntervalOwnerType.RESOURCE_HALF_DAY.getCode(), rentalResource.getId());
 		if (rentalCell.getAmorpm() != null && rentalTimeIntervals.size() > rentalCell.getAmorpm().intValue()) {
 			RentalTimeInterval rentalTimeInterval = rentalTimeIntervals.get(rentalCell.getAmorpm().intValue());
 			Timestamp beginTime = format(rentalCell.getResourceRentalDate(), rentalTimeInterval.getBeginTime());
@@ -572,7 +575,8 @@ public class Rentalv2ProviderImpl implements Rentalv2Provider {
 		if (rentalCell.getBeginTime() == null || rentalCell.getEndTime() == null) {
 			return null;
 		}
-		List<RentalTimeInterval> halfTimeIntervals = queryRentalTimeIntervalByOwner(RentalTimeIntervalOwnerType.RESOURCE_HALF_DAY.getCode(), rentalResource.getId());
+		List<RentalTimeInterval> halfTimeIntervals = queryRentalTimeIntervalByOwner(rentalResource.getResourceType(),
+				RentalTimeIntervalOwnerType.RESOURCE_HALF_DAY.getCode(), rentalResource.getId());
 		if (halfTimeIntervals == null || halfTimeIntervals.isEmpty()) {
 			return null;
 		}
@@ -694,14 +698,16 @@ public class Rentalv2ProviderImpl implements Rentalv2Provider {
 	}
 
 	@Override
-	public List<RentalItemsOrder> findRentalItemsBillBySiteBillId(
-			Long rentalBillId) {
+	public List<RentalItemsOrder> findRentalItemsBillBySiteBillId(Long rentalBillId, String resourceType) {
 
 		DSLContext context = dbProvider.getDslContext(AccessSpec.readOnly());
 		SelectJoinStep<Record> step = context.select().from(
 				Tables.EH_RENTALV2_ITEMS_ORDERS);
 		Condition condition = Tables.EH_RENTALV2_ITEMS_ORDERS.RENTAL_ORDER_ID
 				.equal(rentalBillId);
+
+		condition = condition.and(Tables.EH_RENTALV2_ITEMS_ORDERS.RESOURCE_TYPE.equal(resourceType));
+
 		step.where(condition);
 		List<RentalItemsOrder> result = step
 				.orderBy(Tables.EH_RENTALV2_ITEMS_ORDERS.ID.desc()).fetch()
@@ -738,7 +744,7 @@ public class Rentalv2ProviderImpl implements Rentalv2Provider {
 
 	@Override
 	public RentalItemsOrder findRentalItemBill(Long rentalBillId,
-			Long rentalSiteItemId) {
+			Long rentalSiteItemId, String resourceType) {
 		DSLContext context = dbProvider.getDslContext(AccessSpec.readOnly());
 		SelectJoinStep<Record> step = context.select().from(
 				Tables.EH_RENTALV2_ITEMS_ORDERS);
@@ -747,6 +753,10 @@ public class Rentalv2ProviderImpl implements Rentalv2Provider {
 		condition = condition
 				.and(Tables.EH_RENTALV2_ITEMS_ORDERS.RENTAL_RESOURCE_ITEM_ID
 						.equal(rentalSiteItemId));
+
+		condition = condition
+				.and(Tables.EH_RENTALV2_ITEMS_ORDERS.RESOURCE_TYPE
+						.equal(resourceType));
 
 		step.where(condition);
 		List<RentalItemsOrder> result = step
@@ -1164,7 +1174,7 @@ public class Rentalv2ProviderImpl implements Rentalv2Provider {
 //	}
 
 	@Override
-	public List<RentalSiteRange> findRentalSiteOwnersByOwnerTypeAndId(String ownerType,Long ownerId) {
+	public List<RentalSiteRange> findRentalSiteOwnersByOwnerTypeAndId(String resourceType, String ownerType,Long ownerId) {
 		DSLContext context = dbProvider.getDslContext(AccessSpec.readOnly());
 		SelectJoinStep<Record> step = context.select().from(
 				Tables.EH_RENTALV2_RESOURCE_RANGES);
@@ -1172,6 +1182,8 @@ public class Rentalv2ProviderImpl implements Rentalv2Provider {
 				.equal(ownerId);
 		condition = condition.and(Tables.EH_RENTALV2_RESOURCE_RANGES.OWNER_TYPE
 				.equal(ownerType));
+		condition = condition.and(Tables.EH_RENTALV2_RESOURCE_RANGES.RESOURCE_TYPE
+				.equal(resourceType));
 		step.where(condition);
 		List<RentalSiteRange> result = step
 				.orderBy(Tables.EH_RENTALV2_RESOURCE_RANGES.ID.desc()).fetch()
@@ -1186,7 +1198,7 @@ public class Rentalv2ProviderImpl implements Rentalv2Provider {
 
 
 	@Override
-	public List<RentalResourcePic> findRentalSitePicsByOwnerTypeAndId(String ownerType,Long ownerId) {
+	public List<RentalResourcePic> findRentalSitePicsByOwnerTypeAndId(String resourceType, String ownerType,Long ownerId) {
 		DSLContext context = dbProvider.getDslContext(AccessSpec.readOnly());
 		SelectJoinStep<Record> step = context.select().from(
 				Tables.EH_RENTALV2_RESOURCE_PICS);
@@ -1194,6 +1206,8 @@ public class Rentalv2ProviderImpl implements Rentalv2Provider {
 				.equal(ownerId);
 		condition = condition.and(Tables.EH_RENTALV2_RESOURCE_PICS.OWNER_TYPE
 				.equal(ownerType));
+		condition = condition.and(Tables.EH_RENTALV2_RESOURCE_PICS.RESOURCE_TYPE
+				.equal(resourceType));
 		step.where(condition);
 		List<RentalResourcePic> result = step
 				.orderBy(Tables.EH_RENTALV2_RESOURCE_PICS.ID.desc()).fetch()
@@ -1393,7 +1407,7 @@ public class Rentalv2ProviderImpl implements Rentalv2Provider {
 
 	@Override
 	public List<RentalTimeInterval> queryRentalTimeIntervalByOwner(
-			String ownerType, Long ownerId) {
+			String resourceType, String ownerType, Long ownerId) {
 		DSLContext context = dbProvider.getDslContext(AccessSpec.readOnly());
 		SelectJoinStep<Record> step = context.select().from(
 				Tables.EH_RENTALV2_TIME_INTERVAL);
@@ -1401,9 +1415,11 @@ public class Rentalv2ProviderImpl implements Rentalv2Provider {
 				.equal(ownerId);
 		condition = condition.and(Tables.EH_RENTALV2_TIME_INTERVAL.OWNER_TYPE
 				.equal(ownerType));
+		condition = condition.and(Tables.EH_RENTALV2_TIME_INTERVAL.RESOURCE_TYPE
+				.equal(resourceType));
 		step.where(condition);
 		List<RentalTimeInterval> result = step
-				.orderBy(Tables.EH_RENTALV2_TIME_INTERVAL.ID.asc()).fetch().map((r) -> {
+				.orderBy(Tables.EH_RENTALV2_TIME_INTERVAL.BEGIN_TIME.asc()).fetch().map((r) -> {
 					return ConvertHelper.convert(r, RentalTimeInterval.class);
 				});
 		if (null != result && result.size() > 0)
@@ -1412,7 +1428,7 @@ public class Rentalv2ProviderImpl implements Rentalv2Provider {
 	}
 
 	@Override
-	public List<RentalCloseDate> queryRentalCloseDateByOwner(String ownerType,
+	public List<RentalCloseDate> queryRentalCloseDateByOwner(String resourceType, String ownerType,
 			Long ownerId) {
 		DSLContext context = dbProvider.getDslContext(AccessSpec.readOnly());
 		SelectJoinStep<Record> step = context.select().from(
@@ -1421,6 +1437,8 @@ public class Rentalv2ProviderImpl implements Rentalv2Provider {
 				.equal(ownerId);
 		condition = condition.and(Tables.EH_RENTALV2_CLOSE_DATES.OWNER_TYPE
 				.equal(ownerType));
+		condition = condition.and(Tables.EH_RENTALV2_CLOSE_DATES.RESOURCE_TYPE
+				.equal(resourceType));
 		step.where(condition);
 		List<RentalCloseDate> result = step
 				.orderBy(Tables.EH_RENTALV2_CLOSE_DATES.ID.desc()).fetch().map((r) -> {
@@ -1432,8 +1450,8 @@ public class Rentalv2ProviderImpl implements Rentalv2Provider {
 	}
 
 	@Override
-	public List<RentalConfigAttachment> queryRentalConfigAttachmentByOwner(
-			String ownerType, Long ownerId) {
+	public List<RentalConfigAttachment> queryRentalConfigAttachmentByOwner(String resourceType,
+																		   String ownerType, Long ownerId) {
 		DSLContext context = dbProvider.getDslContext(AccessSpec.readOnly());
 		SelectJoinStep<Record> step = context.select().from(
 				Tables.EH_RENTALV2_CONFIG_ATTACHMENTS);
@@ -1441,6 +1459,9 @@ public class Rentalv2ProviderImpl implements Rentalv2Provider {
 				.equal(ownerId);
 		condition = condition.and(Tables.EH_RENTALV2_CONFIG_ATTACHMENTS.OWNER_TYPE
 				.equal(ownerType));
+
+		condition = condition.and(Tables.EH_RENTALV2_CONFIG_ATTACHMENTS.RESOURCE_TYPE
+				.equal(resourceType));
 		step.where(condition);
 		List<RentalConfigAttachment> result = step
 				.orderBy(Tables.EH_RENTALV2_CONFIG_ATTACHMENTS.ID.desc()).fetch().map((r) -> {
@@ -1499,7 +1520,7 @@ public class Rentalv2ProviderImpl implements Rentalv2Provider {
 	}
 
 	@Override
-	public void deleteRentalSitePicsBySiteId(Long siteId) {
+	public void deleteRentalSitePicsBySiteId(String resourceType, Long siteId) {
 		DSLContext context = dbProvider.getDslContext(AccessSpec.readOnly());
 		DeleteWhereStep<EhRentalv2ResourcePicsRecord> step = context
 				.delete(Tables.EH_RENTALV2_RESOURCE_PICS);
@@ -1507,17 +1528,21 @@ public class Rentalv2ProviderImpl implements Rentalv2Provider {
 				.equal(siteId);
 		condition = condition.and(Tables.EH_RENTALV2_RESOURCE_PICS.OWNER_TYPE
 				.equal(EhRentalv2Resources.class.getSimpleName()));
+		condition = condition.and(Tables.EH_RENTALV2_RESOURCE_PICS.RESOURCE_TYPE
+				.equal(resourceType));
 		step.where(condition);
 		step.execute();
 	}
 
 	@Override
-	public void deleteRentalSiteOwnersBySiteId(Long siteId) { 
+	public void deleteRentalSiteOwnersBySiteId(String resourceType, Long siteId) {
 		DSLContext context = dbProvider.getDslContext(AccessSpec.readOnly());
 		DeleteWhereStep<EhRentalv2ResourceRangesRecord> step = context
 				.delete(Tables.EH_RENTALV2_RESOURCE_RANGES);
 		Condition condition = Tables.EH_RENTALV2_RESOURCE_RANGES.RENTAL_RESOURCE_ID
 				.equal(siteId);
+		condition = condition.and(Tables.EH_RENTALV2_RESOURCE_RANGES.RESOURCE_TYPE
+				.equal(resourceType));
 		step.where(condition);
 		step.execute();
 	}
@@ -1580,13 +1605,14 @@ public class Rentalv2ProviderImpl implements Rentalv2Provider {
 	}
 
 	@Override
-	public Integer deleteTimeIntervalsByOwnerId(String ownerType, Long id) { 
+	public Integer deleteTimeIntervalsByOwnerId(String resourceType, String ownerType, Long id) {
 		DSLContext context = dbProvider.getDslContext(AccessSpec.readOnly());
 		DeleteWhereStep<EhRentalv2TimeIntervalRecord> step = context
 				.delete(Tables.EH_RENTALV2_TIME_INTERVAL);
 		Condition condition = Tables.EH_RENTALV2_TIME_INTERVAL.OWNER_TYPE
 				.equal(ownerType).and(Tables.EH_RENTALV2_TIME_INTERVAL.OWNER_ID
-				.equal(id));
+				.equal(id)).and(Tables.EH_RENTALV2_TIME_INTERVAL.RESOURCE_TYPE
+						.equal(resourceType));
 		 
 		step.where(condition);
 		Integer deleteCount = step.execute();
@@ -1594,13 +1620,14 @@ public class Rentalv2ProviderImpl implements Rentalv2Provider {
 	}
 
 	@Override
-	public Integer deleteRentalCloseDatesByOwnerId(String ownerType, Long id) {
+	public Integer deleteRentalCloseDatesByOwnerId(String resourceType, String ownerType, Long id) {
 		DSLContext context = dbProvider.getDslContext(AccessSpec.readOnly());
 		DeleteWhereStep<EhRentalv2CloseDatesRecord> step = context
 				.delete(Tables.EH_RENTALV2_CLOSE_DATES);
 		Condition condition = Tables.EH_RENTALV2_CLOSE_DATES.OWNER_TYPE
 				.equal(ownerType).and(Tables.EH_RENTALV2_CLOSE_DATES.OWNER_ID
-				.equal(id));
+				.equal(id)).and(Tables.EH_RENTALV2_CLOSE_DATES.RESOURCE_TYPE
+						.equal(resourceType));
 		 
 		step.where(condition);
 		Integer deleteCount = step.execute();
@@ -1609,14 +1636,15 @@ public class Rentalv2ProviderImpl implements Rentalv2Provider {
 	}
 
 	@Override
-	public Integer deleteRentalConfigAttachmentsByOwnerId(String ownerType,
+	public Integer deleteRentalConfigAttachmentsByOwnerId(String resourceType, String ownerType,
 			Long id) {
 		DSLContext context = dbProvider.getDslContext(AccessSpec.readOnly());
 		DeleteWhereStep<EhRentalv2ConfigAttachmentsRecord> step = context
 				.delete(Tables.EH_RENTALV2_CONFIG_ATTACHMENTS);
 		Condition condition = Tables.EH_RENTALV2_CONFIG_ATTACHMENTS.OWNER_TYPE
 				.equal(ownerType).and(Tables.EH_RENTALV2_CONFIG_ATTACHMENTS.OWNER_ID
-				.equal(id));
+				.equal(id)).and(Tables.EH_RENTALV2_CONFIG_ATTACHMENTS.RESOURCE_TYPE
+						.equal(resourceType));
 		 
 		step.where(condition);
 		Integer deleteCount = step.execute();
@@ -1625,7 +1653,7 @@ public class Rentalv2ProviderImpl implements Rentalv2Provider {
 	}
 
 	@Override
-	public List<RentalSiteRange> findRentalSiteOwnersBySiteId(Long siteId) {
+	public List<RentalSiteRange> findRentalSiteOwnersBySiteId(String resourceType, Long siteId) {
 		DSLContext context = dbProvider.getDslContext(AccessSpec.readOnly());
 		SelectJoinStep<Record> step = context.select().from(
 				Tables.EH_RENTALV2_RESOURCE_RANGES);
@@ -1679,13 +1707,15 @@ public class Rentalv2ProviderImpl implements Rentalv2Provider {
 	}
 
 	@Override
-	public List<RentalRefundOrder> getRefundOrderList(Long resourceTypeId,
+	public List<RentalRefundOrder> getRefundOrderList(String resourceType, Long resourceTypeId,
 			CrossShardListingLocator locator, Byte status, String styleNo,
 			int pageSize, Long startTime, Long endTime) {
 		DSLContext context = dbProvider.getDslContext(AccessSpec.readOnly());
 		SelectJoinStep<Record> step = context.select().from(
 				Tables.EH_RENTALV2_REFUND_ORDERS); 
-		Condition condition = Tables.EH_RENTALV2_REFUND_ORDERS.ID.greaterOrEqual(0L); 
+		Condition condition = Tables.EH_RENTALV2_REFUND_ORDERS.ID.greaterOrEqual(0L);
+		condition = condition.and(Tables.EH_RENTALV2_REFUND_ORDERS.RESOURCE_TYPE
+				.equal(resourceType));
 		if (StringUtils.isNotEmpty(styleNo))
 			condition = condition.and(Tables.EH_RENTALV2_REFUND_ORDERS.ONLINE_PAY_STYLE_NO
 					.equal(styleNo));
@@ -1722,7 +1752,7 @@ public class Rentalv2ProviderImpl implements Rentalv2Provider {
 	}
 
 	@Override
-	public RentalRefundOrder getRentalRefundOrderByRefoundNo(
+	public RentalRefundOrder getRentalRefundOrderByRefundNo(
 			String refundOrderNo) {
 		 
 		DSLContext context = dbProvider.getDslContext(AccessSpec.readOnly());
@@ -1882,13 +1912,14 @@ public class Rentalv2ProviderImpl implements Rentalv2Provider {
 	}
 
 	@Override
-	public Integer deleteRentalResourceNumbersByOwnerId(String ownerType, Long id) {
+	public Integer deleteRentalResourceNumbersByOwnerId(String resourceType, String ownerType, Long ownerId) {
 		DSLContext context = dbProvider.getDslContext(AccessSpec.readOnly());
 		DeleteWhereStep<EhRentalv2ResourceNumbersRecord> step = context
 				.delete(Tables.EH_RENTALV2_RESOURCE_NUMBERS);
 		Condition condition = Tables.EH_RENTALV2_RESOURCE_NUMBERS.OWNER_TYPE
 				.equal(ownerType).and(Tables.EH_RENTALV2_RESOURCE_NUMBERS.OWNER_ID
-				.equal(id));
+						.equal(ownerId)).and(Tables.EH_RENTALV2_RESOURCE_NUMBERS.RESOURCE_TYPE
+						.equal(resourceType));
 		 
 		step.where(condition);
 		Integer deleteCount = step.execute();
@@ -1897,7 +1928,7 @@ public class Rentalv2ProviderImpl implements Rentalv2Provider {
 
 	@Override
 	public List<RentalResourceNumber> queryRentalResourceNumbersByOwner(
-			String ownerType, Long ownerId) {
+			String resourceType, String ownerType, Long ownerId) {
 		DSLContext context = dbProvider.getDslContext(AccessSpec.readOnly());
 		SelectJoinStep<Record> step = context.select().from(
 				Tables.EH_RENTALV2_RESOURCE_NUMBERS);
@@ -1905,6 +1936,8 @@ public class Rentalv2ProviderImpl implements Rentalv2Provider {
 				.equal(ownerId);
 		condition = condition.and(Tables.EH_RENTALV2_RESOURCE_NUMBERS.OWNER_TYPE
 				.equal(ownerType));
+		condition = condition.and(Tables.EH_RENTALV2_RESOURCE_NUMBERS.OWNER_TYPE
+				.equal(resourceType));
 		step.where(condition);
 		List<RentalResourceNumber> result = step
 				.orderBy(Tables.EH_RENTALV2_RESOURCE_NUMBERS.ID.asc()).fetch().map((r) -> {
@@ -2007,10 +2040,11 @@ public class Rentalv2ProviderImpl implements Rentalv2Provider {
 	}
 
 	@Override
-	public List<Long> listCellPackageId(Long resourceId, Byte rentalType) {
+	public List<Long> listCellPackageId(String resourceType, Long resourceId, Byte rentalType) {
 		DSLContext context = dbProvider.getDslContext(AccessSpec.readOnly());
 		return context.select(Tables.EH_RENTALV2_CELLS.PRICE_PACKAGE_ID).from(Tables.EH_RENTALV2_CELLS)
 				.where(Tables.EH_RENTALV2_CELLS.RENTAL_RESOURCE_ID.eq(resourceId))
+				.and(Tables.EH_RENTALV2_CELLS.RESOURCE_TYPE.eq(resourceType))
 				.and(Tables.EH_RENTALV2_CELLS.RENTAL_TYPE.eq(rentalType))
 				.and(Tables.EH_RENTALV2_CELLS.STATUS.eq(RentalSiteStatus.NORMAL.getCode()))
 				.and(Tables.EH_RENTALV2_CELLS.RESOURCE_RENTAL_DATE.ge(new Date(new java.util.Date().getTime())))
@@ -2018,10 +2052,10 @@ public class Rentalv2ProviderImpl implements Rentalv2Provider {
 	}
 
 	@Override
-	public void setAuthDoorId(Long rentalId, Long AuthDoorId) {
+	public void setAuthDoorId(Long orderId, Long AuthDoorId) {
 		DSLContext context = dbProvider.getDslContext(AccessSpec.readWrite());
 		context.update(Tables.EH_RENTALV2_ORDERS).set(Tables.EH_RENTALV2_ORDERS.DOOR_AUTH_ID,AuthDoorId).where(
-				Tables.EH_RENTALV2_ORDERS.ID.eq(rentalId)
+				Tables.EH_RENTALV2_ORDERS.ID.eq(orderId)
 		).execute();
 	}
 	private BigDecimal max(BigDecimal ... b) {
@@ -2073,24 +2107,26 @@ public class Rentalv2ProviderImpl implements Rentalv2Provider {
 	}
 
 	@Override
-	public void deleteRentalOrderRules(String ownerType, Long ownerId, Byte handleType) {
+	public void deleteRentalOrderRules(String resourceType, String ownerType, Long ownerId, Byte handleType) {
 		DSLContext context = dbProvider.getDslContext(AccessSpec.readWrite());
 
 		context.delete(Tables.EH_RENTALV2_ORDER_RULES)
 				.where(Tables.EH_RENTALV2_ORDER_RULES.OWNER_TYPE.eq(ownerType))
 				.and(Tables.EH_RENTALV2_ORDER_RULES.OWNER_ID.eq(ownerId))
 				.and(Tables.EH_RENTALV2_ORDER_RULES.HANDLE_TYPE.eq(handleType))
+				.and(Tables.EH_RENTALV2_ORDER_RULES.RESOURCE_TYPE.eq(resourceType))
 				.execute();
 	}
 
 	@Override
-	public List<RentalOrderRule> listRentalOrderRules(String ownerType, Long ownerId, Byte handleType) {
+	public List<RentalOrderRule> listRentalOrderRules(String resourceType, String ownerType, Long ownerId, Byte handleType) {
 		DSLContext context = dbProvider.getDslContext(AccessSpec.readWrite());
 
 		return context.select().from(Tables.EH_RENTALV2_ORDER_RULES)
 				.where(Tables.EH_RENTALV2_ORDER_RULES.OWNER_TYPE.eq(ownerType))
 				.and(Tables.EH_RENTALV2_ORDER_RULES.OWNER_ID.eq(ownerId))
 				.and(Tables.EH_RENTALV2_ORDER_RULES.HANDLE_TYPE.eq(handleType))
+				.and(Tables.EH_RENTALV2_ORDER_RULES.RESOURCE_TYPE.eq(resourceType))
 				.orderBy(Tables.EH_RENTALV2_ORDER_RULES.ID.asc())
 				.fetch().map(r -> ConvertHelper.convert(r, RentalOrderRule.class));
 	}

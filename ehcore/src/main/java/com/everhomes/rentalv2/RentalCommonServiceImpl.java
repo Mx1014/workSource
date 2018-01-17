@@ -7,6 +7,11 @@ import com.everhomes.rest.app.AppConstants;
 import com.everhomes.rest.common.RentalOrderActionData;
 import com.everhomes.rest.common.Router;
 import com.everhomes.rest.messaging.*;
+import com.everhomes.rest.rentalv2.RuleSourceType;
+import com.everhomes.rest.rentalv2.admin.RentalDurationType;
+import com.everhomes.rest.rentalv2.admin.RentalDurationUnit;
+import com.everhomes.rest.rentalv2.admin.RentalOrderHandleType;
+import com.everhomes.rest.rentalv2.admin.RentalOrderStrategy;
 import com.everhomes.rest.user.MessageChannelType;
 import com.everhomes.user.User;
 import com.everhomes.util.RouterBuilder;
@@ -17,8 +22,11 @@ import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
 
+import java.math.BigDecimal;
 import java.util.HashMap;
+import java.util.List;
 import java.util.Map;
+import java.util.stream.Collectors;
 
 /**
  * @author sw on 2018/1/9.
@@ -32,6 +40,8 @@ public class RentalCommonServiceImpl {
     private MessagingService messagingService;
     @Autowired
     private LocaleTemplateService localeTemplateService;
+    @Autowired
+    private Rentalv2Provider rentalv2Provider;
 
     public RentalResourceHandler getRentalResourceHandler(String handlerName) {
         RentalResourceHandler handler = null;
@@ -131,5 +141,59 @@ public class RentalCommonServiceImpl {
 
         String notifyText = localeTemplateService.getLocaleTemplateString(scope, code, locale, map, "");
         sendMessageToUser(uid, notifyText);
+    }
+
+    public BigDecimal calculateOverTimeFee(RentalOrder order, long now) {
+
+        if (order.getRefundStrategy() == RentalOrderStrategy.CUSTOM.getCode()) {
+            RentalDefaultRule rule = this.rentalv2Provider.getRentalDefaultRule(null, null,
+                    order.getResourceType(), order.getResourceTypeId(), RuleSourceType.RESOURCE.getCode(), order.getRentalResourceId());
+
+
+            List<RentalOrderRule> refundRules = rentalv2Provider.listRentalOrderRules(order.getResourceType(), rule.getSourceType(),
+                    rule.getId(), RentalOrderHandleType.REFUND.getCode());
+
+            List<RentalOrderRule> outerRules = refundRules.stream().filter(r -> r.getDurationType() == RentalDurationType.OUTER.getCode())
+                    .collect(Collectors.toList());
+            List<RentalOrderRule> innerRules = refundRules.stream().filter(r -> r.getDurationType() == RentalDurationType.INNER.getCode())
+                    .collect(Collectors.toList());
+
+            RentalOrderRule orderRule = null;
+            Long endUseTime = order.getEndTime().getTime();
+
+            long intervalTime = now - endUseTime;
+
+            //处于时间内，查找最小的时间
+            for (RentalOrderRule r : innerRules) {
+                long duration = 0;
+
+                if (r.getDurationUnit() == RentalDurationUnit.HOUR.getCode()) {
+                    duration = (long) (r.getDuration() * 60 * 60 * 1000);
+                }
+                if (intervalTime < duration) {
+                    if (null == orderRule || r.getDuration() < orderRule.getDuration()) {
+                        orderRule = r;
+                    }
+                }
+            }
+
+            if (orderRule == null) {
+                //处于时间外，查找最大的时间
+                for (RentalOrderRule r : outerRules) {
+                    long duration = 0;
+
+                    if (r.getDurationUnit() == RentalDurationUnit.HOUR.getCode()) {
+                        duration = (long) (r.getDuration() * 60 * 60 * 1000);
+                    }
+                    if (intervalTime > duration) {
+                        if (null == orderRule || r.getDuration() > orderRule.getDuration()) {
+                            orderRule = r;
+                        }
+                    }
+                }
+            }
+            return order.getPaidMoney();
+        }
+        return order.getPaidMoney();
     }
 }

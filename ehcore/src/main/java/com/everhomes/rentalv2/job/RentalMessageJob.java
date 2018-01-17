@@ -1,6 +1,5 @@
-package com.everhomes.rentalv2;
+package com.everhomes.rentalv2.job;
 
-import com.everhomes.flow.action.FlowTimeoutJob;
 import com.everhomes.messaging.MessagingService;
 import com.everhomes.rest.app.AppConstants;
 import com.everhomes.rest.messaging.MessageBodyType;

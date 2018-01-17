@@ -22,4 +22,14 @@ public class DefaultRentalOrderHandler implements RentalOrderHandler {
         return order.getPaidMoney().multiply(new BigDecimal(order.getRefundRatio()))
                 .divide(new BigDecimal(100), RoundingMode.HALF_UP);
     }
+
+    @Override
+    public void updateOrderResourceInfo(RentalOrder order) {
+        //TODO:
+    }
+
+    @Override
+    public void completeRentalOrder(RentalOrder order) {
+
+    }
 }

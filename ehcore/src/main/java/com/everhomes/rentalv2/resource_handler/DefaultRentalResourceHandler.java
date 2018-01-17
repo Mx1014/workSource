@@ -3,6 +3,8 @@ package com.everhomes.rentalv2.resource_handler;
 import com.everhomes.rentalv2.RentalResource;
 import com.everhomes.rentalv2.RentalResourceHandler;
 import com.everhomes.rentalv2.Rentalv2Provider;
+import com.everhomes.rest.rentalv2.RentalOwnerType;
+import com.everhomes.rest.rentalv2.admin.QueryDefaultRuleAdminCommand;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
 
@@ -27,5 +29,11 @@ public class DefaultRentalResourceHandler implements RentalResourceHandler {
     @Override
     public void updateRentalResource(String resourceJson) {
 
+    }
+
+    @Override
+    public void setRuleOwnerTypeByResource(QueryDefaultRuleAdminCommand queryRuleCmd, RentalResource resource) {
+        queryRuleCmd.setOwnerType(RentalOwnerType.ORGANIZATION.getCode());
+        queryRuleCmd.setOwnerId(resource.getOrganizationId());
     }
 }

@@ -2,8 +2,13 @@ package com.everhomes.rentalv2.message_handler;
 
 import com.everhomes.rentalv2.*;
 import com.everhomes.rest.rentalv2.RentalV2ResourceType;
+import com.everhomes.rest.sms.SmsTemplateCode;
+import com.everhomes.rest.user.IdentifierType;
+import com.everhomes.sms.SmsProvider;
 import com.everhomes.user.User;
+import com.everhomes.user.UserIdentifier;
 import com.everhomes.user.UserProvider;
+import com.everhomes.util.Tuple;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -12,6 +17,7 @@ import org.springframework.stereotype.Component;
 import java.math.BigDecimal;
 import java.math.RoundingMode;
 import java.util.HashMap;
+import java.util.List;
 import java.util.Map;
 
 /**
@@ -28,6 +34,8 @@ public class DefaultRentalMessageHandler implements RentalMessageHandler {
     private UserProvider userProvider;
     @Autowired
     private RentalCommonServiceImpl rentalCommonService;
+    @Autowired
+    private SmsProvider smsProvider;
 
     @Override
     public void cancelOrderSendMessage(RentalOrder rentalBill) {
@@ -50,6 +58,7 @@ public class DefaultRentalMessageHandler implements RentalMessageHandler {
             managerContent.append("\n预约数：");
             managerContent.append(rentalBill.getRentalCount());
         }
+        //用户取消订单给 资源负责人发送消息
         rentalCommonService.sendMessageToUser(rs.getChargeUid(), managerContent.toString());
     }
 
@@ -75,5 +84,52 @@ public class DefaultRentalMessageHandler implements RentalMessageHandler {
         }catch(Exception e){
             LOGGER.error("SEND MESSAGE FAILED", e);
         }
+    }
+
+    @Override
+    public void sendOrderOverTimeMessage(RentalOrder rentalBill) {
+
+    }
+
+    @Override
+    public void sendRentalSuccessSms(RentalOrder order){
+
+        UserIdentifier userIdentifier = this.userProvider.findClaimedIdentifierByOwnerAndType(order.getCreatorUid(), IdentifierType.MOBILE.getCode()) ;
+        if(null == userIdentifier){
+            LOGGER.error("userIdentifier is null...userId = " + order.getCreatorUid());
+        }else{
+
+            String templateScope = SmsTemplateCode.SCOPE;
+            List<Tuple<String, Object>> variables = smsProvider.toTupleList("resourceName", order.getResourceName());
+            smsProvider.addToTupleList(variables, "useDetail", order.getUseDetail());
+
+            int templateId = SmsTemplateCode.RENTAL_SUCCESS_EXCLUSIVE_CODE;
+
+            String templateLocale = RentalNotificationTemplateCode.locale;
+
+            smsProvider.sendSms(order.getNamespaceId(), userIdentifier.getIdentifierToken(), templateScope, templateId,
+                    templateLocale, variables);
+
+        }
+    }
+
+    @Override
+    public void renewRentalOrderSendMessage(RentalOrder rentalBill) {
+
+    }
+
+    @Override
+    public void endReminderSendMessage(RentalOrder rentalBill) {
+
+    }
+
+    @Override
+    public void overTimeSendMessage(RentalOrder rentalBill) {
+
+    }
+
+    @Override
+    public void completeOrderSendMessage(RentalOrder rentalBill) {
+
     }
 }

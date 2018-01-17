@@ -60,7 +60,7 @@ public interface Rentalv2Service {
 //			BatchCompleteBillCommand cmd);
 
 	void exportRentalBills(ListRentalBillsCommand cmd,HttpServletResponse response);
-	void mappingRentalBillDTO(RentalBillDTO dto, RentalOrder bill);
+	void mappingRentalBillDTO(RentalBillDTO dto, RentalOrder bill, RentalResource rs);
 	void addRule(AddDefaultRuleAdminCommand cmd);
 	QueryDefaultRuleAdminResponse queryDefaultRule(QueryDefaultRuleAdminCommand cmd);
 	GetResourceListAdminResponse getResourceList(GetResourceListAdminCommand cmd);
@@ -74,7 +74,8 @@ public interface Rentalv2Service {
 	FindAutoAssignRentalSiteDayStatusResponse findAutoAssignRentalSiteDayStatus(
 			FindAutoAssignRentalSiteDayStatusCommand cmd);
 	void updateRentalSiteCellRule(UpdateRentalSiteCellRuleAdminCommand cmd);
-	void validateRentalBill(List<RentalBillRuleDTO> ruleDTOs);
+	void validateRentalBill(List<RentalBillRuleDTO> ruleDTOs, RentalResource rs,
+							RentalDefaultRule rule);
 
 	void updateDefaultRule(UpdateDefaultRuleAdminCommand cmd);
 
@@ -105,10 +106,6 @@ public interface Rentalv2Service {
 
 
 	void deleteResource(DeleteResourceCommand cmd);
-
-	void sendRentalSuccessSms(Integer namespaceId, String phoneNumber,
-			RentalOrder order);
-
 
 	QueryDefaultRuleAdminResponse getResourceRule(
 			GetResourceRuleAdminCommand cmd);
@@ -190,4 +187,10 @@ public interface Rentalv2Service {
 	GetRenewRentalOrderInfoResponse getRenewRentalOrderInfo(GetRenewRentalOrderInfoCommand cmd);
 
 	RentalOrderDTO renewRentalOrder(RenewRentalOrderCommand cmd);
+
+	RentalOrderDTO completeRentalOrder(CompleteRentalOrderCommand cmd);
+
+	GetResourceRuleV2Response getResourceRuleV2(GetResourceRuleV2Command cmd);
+
+	void test();
 }

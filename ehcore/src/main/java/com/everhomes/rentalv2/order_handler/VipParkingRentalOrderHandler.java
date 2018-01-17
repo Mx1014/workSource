@@ -1,9 +1,16 @@
 package com.everhomes.rentalv2.order_handler;
 
+import com.alibaba.fastjson.JSONObject;
+import com.everhomes.parking.ParkingLot;
 import com.everhomes.parking.ParkingProvider;
+import com.everhomes.parking.ParkingSpace;
 import com.everhomes.rentalv2.*;
+import com.everhomes.rest.parking.ParkingSpaceStatus;
+import com.everhomes.rest.rentalv2.PriceRuleType;
 import com.everhomes.rest.rentalv2.RuleSourceType;
+import com.everhomes.rest.rentalv2.VipParkingUseInfoDTO;
 import com.everhomes.rest.rentalv2.admin.*;
+import com.everhomes.rest.ui.user.SceneType;
 import com.everhomes.util.ConvertHelper;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
@@ -23,6 +30,8 @@ public class VipParkingRentalOrderHandler implements RentalOrderHandler {
     private ParkingProvider parkingProvider;
     @Autowired
     private Rentalv2Provider rentalv2Provider;
+    @Autowired
+    private Rentalv2PriceRuleProvider rentalv2PriceRuleProvider;
 
     @Override
     public BigDecimal calculateRefundAmount(RentalOrder order, Long now) {
@@ -32,8 +41,8 @@ public class VipParkingRentalOrderHandler implements RentalOrderHandler {
                 RentalDefaultRule rule = this.rentalv2Provider.getRentalDefaultRule(null, null,
                         order.getResourceType(), order.getResourceTypeId(), RuleSourceType.RESOURCE.getCode(), order.getRentalResourceId());
 
-                List<RentalOrderRule> refundRules = rentalv2Provider.listRentalOrderRules(rule.getSourceType(), rule.getId(),
-                        RentalOrderHandleType.REFUND.getCode());
+                List<RentalOrderRule> refundRules = rentalv2Provider.listRentalOrderRules(order.getResourceType(), rule.getSourceType(),
+                        rule.getId(), RentalOrderHandleType.REFUND.getCode());
 
                 List<RentalOrderRule> outerRules = refundRules.stream().filter(r -> r.getDurationType() == RentalDurationType.OUTER.getCode())
                         .collect(Collectors.toList());
@@ -83,5 +92,55 @@ public class VipParkingRentalOrderHandler implements RentalOrderHandler {
         }
 
         return order.getPaidMoney();
+    }
+
+    @Override
+    public void updateOrderResourceInfo(RentalOrder order) {
+
+        Rentalv2PriceRule priceRule = rentalv2PriceRuleProvider.findRentalv2PriceRuleByOwner(order.getResourceType(),
+                PriceRuleType.RESOURCE.getCode(), order.getRentalResourceId(), order.getRentalType());
+
+        VipParkingUseInfoDTO parkingInfo = JSONObject.parseObject(order.getCustomObject(), VipParkingUseInfoDTO.class);
+        ParkingLot parkingLot = parkingProvider.findParkingLotById(order.getRentalResourceId());
+
+        ParkingSpace parkingSpace = parkingProvider.getAnyParkingSpace(parkingLot.getNamespaceId(), parkingLot.getOwnerType(),
+                parkingLot.getOwnerId(),parkingLot.getId());
+
+        parkingInfo.setSpaceNo(parkingSpace.getSpaceNo());
+        parkingInfo.setSpaceAddress(parkingSpace.getSpaceAddress());
+        parkingInfo.setLockId(parkingSpace.getLockId());
+        parkingInfo.setPriceStr(priceRule.getWorkdayPrice().toString() + "/半小时");
+
+        if (null != order.getScene()) {
+            if (SceneType.PM_ADMIN.getCode().equals(order.getScene())) {
+                parkingInfo.setPriceStr(priceRule.getOrgMemberWorkdayPrice().toString() + "/半小时");
+
+            } else if (!SceneType.ENTERPRISE.getCode().equals(order.getScene())) {
+                parkingInfo.setPriceStr(priceRule.getApprovingUserWorkdayPrice().toString() + "/半小时");
+
+            }else {
+                parkingInfo.setPriceStr(priceRule.getWorkdayPrice().toString() + "/半小时");
+            }
+        }
+
+        order.setCustomObject(JSONObject.toJSONString(parkingInfo));
+        //当是vip车位预约时设置车位编号
+        order.setStringTag1(parkingInfo.getSpaceNo());
+        order.setStringTag2(parkingInfo.getPlateNumber());
+
+        //更新停车位状态
+        parkingSpace.setStatus(ParkingSpaceStatus.IN_USING.getCode());
+        parkingProvider.updateParkingSpace(parkingSpace);
+    }
+
+    @Override
+    public void completeRentalOrder(RentalOrder order) {
+
+        VipParkingUseInfoDTO parkingInfo = JSONObject.parseObject(order.getCustomObject(), VipParkingUseInfoDTO.class);
+
+        ParkingSpace parkingSpace = parkingProvider.findParkingSpaceBySpaceNo(parkingInfo.getSpaceNo());
+        //更新停车位状态
+        parkingSpace.setStatus(ParkingSpaceStatus.OPEN.getCode());
+        parkingProvider.updateParkingSpace(parkingSpace);
     }
 }

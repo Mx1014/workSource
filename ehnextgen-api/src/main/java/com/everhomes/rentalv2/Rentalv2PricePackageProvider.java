@@ -9,11 +9,12 @@ import java.util.List;
  */
 public interface Rentalv2PricePackageProvider {
 
-    void deletePricePackageByOwnerId(String ownerType, Long ownerId);
+    void deletePricePackageByOwnerId(String resourceType, String ownerType, Long ownerId);
 
     Long createRentalv2PricePackage(Rentalv2PricePackage rentalv2PricePackage);
 
-    List<Rentalv2PricePackage> listPricePackageByOwner(String ownerType, Long ownerId, Byte rentalType,String packageName);
+    List<Rentalv2PricePackage> listPricePackageByOwner(String resourceType, String ownerType, Long ownerId,
+                                                       Byte rentalType,String packageName);
 
     Rentalv2PricePackage findPricePackageById(Long id);
 
