@@ -1357,10 +1357,10 @@ public class CustomerController extends ControllerBase {
     }
 
     /**
-     * <b>URL: /customer/listCustomerDepartureInfos</b>
+     * <b>URL: /customer/listCommunitySyncResult</b>
      * <p>列出同步信息</p>
      */
-    @RequestMapping("listCustomerDepartureInfos")
+    @RequestMapping("listCommunitySyncResult")
     @RestReturn(value = ListCommunitySyncResultResponse.class)
     public RestResponse listCommunitySyncResult(ListCommunitySyncResultCommand cmd) {
         RestResponse response = new RestResponse(customerService.listCommunitySyncResult(cmd));
