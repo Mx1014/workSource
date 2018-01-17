@@ -27,3 +27,6 @@ INSERT INTO `eh_configurations` (`id`, `name`, `value`, `description`, `namespac
 
 -- 智富会的物业缴费改为卡片式
 update eh_launch_pad_items SET `action_data` = '{"url":"http:${home.url}/property-payment/build/index.html?hideNavigationBar=1&ehnavigatorstyle=0&name=1#/home_page#sign_suffix"}' where namespace_id = 999961 and item_label = '物业缴费';
+
+-- 更新数据，去掉公告标题中的“#公告#”字样 add by yanjun 20180117
+UPDATE eh_forum_posts set `subject` = replace(`subject`, '#公告#', '');
