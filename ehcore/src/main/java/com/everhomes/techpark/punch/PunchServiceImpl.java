@@ -6955,7 +6955,7 @@ public class PunchServiceImpl implements PunchService {
 	        //打卡地点和wifi
 			Long t8 = System.currentTimeMillis();
 
-			LOGGER.debug("save union group  Time8 "+  t8 + "cost: " +(t8-t7));
+//			LOGGER.debug("save union group  Time8 "+  t8 + "cost: " +(t8-t7));
 	        saveGeopointsAndWifis(punchOrg.getId(),cmd.getPunchGeoPoints(),cmd.getWifis());
 
 	        PunchRule pr = ConvertHelper.convert(cmd, PunchRule.class);
@@ -6975,8 +6975,9 @@ public class PunchServiceImpl implements PunchService {
 	        //打卡时间
 			savePunchTimeRule(ConvertHelper.convert(cmd, PunchGroupDTO.class),pr);
 
-			Long t9 = System.currentTimeMillis();
-			LOGGER.debug("save ptr Time9 "+  t9 + "cost: " +(t9-t8));
+			addOperateLog(pr.getId(),pr.getName(),cmd.toString(),pr.getOwnerId(),"addPunchGroup");
+//			Long t9 = System.currentTimeMillis();
+//			LOGGER.debug("save ptr Time9 "+  t9 + "cost: " +(t9-t8));
 			//发消息
 			//发消息 暂时屏蔽
 //			sendMessageToGroupUser(pr, cmd.getTimeRules());
@@ -7617,7 +7618,7 @@ public class PunchServiceImpl implements PunchService {
 //			}
 //			Long t2 = System.currentTimeMillis();
 //			LOGGER.debug("saveUnion Time2 "+  t2 + "cost: "+ (t2-t1) + "save start");
-			addOperateLog(pr.getId(),pr.getName(),cmd.toString(),pr.getOwnerId());
+			addOperateLog(pr.getId(),pr.getName(),cmd.toString(),pr.getOwnerId(),"updatePunchGroup");
 
 			//添加关联
 			SaveUniongroupConfiguresCommand command = new SaveUniongroupConfiguresCommand();
@@ -7681,7 +7682,7 @@ public class PunchServiceImpl implements PunchService {
 		return  null;
 	}
 
-	private void addOperateLog(Long ruleId, String name, String string, Long orgId) {
+	private void addOperateLog(Long ruleId, String name, String string, Long orgId,String api) {
 		// TODO Auto-generated method stub
 		PunchOperationLog log = new PunchOperationLog();
 		log.setCreateTime(new Timestamp(DateHelper.currentGMTTime().getTime()));
@@ -7690,6 +7691,7 @@ public class PunchServiceImpl implements PunchService {
 		User user = userProvider.findUserById(UserContext.currentUserId());
 		if(null != user)
 			log.setOperatorName(user.getNickName());
+		log.setOperateApi(api);
 		log.setOrganizationId(orgId);
 		log.setRuleId(ruleId);
 		log.setRuleName(name);
