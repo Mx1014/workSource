@@ -23,6 +23,7 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
 
 import java.math.BigDecimal;
+import java.math.RoundingMode;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
@@ -195,5 +196,117 @@ public class RentalCommonServiceImpl {
             return order.getPaidMoney();
         }
         return order.getPaidMoney();
+    }
+
+    public BigDecimal calculateRefundAmount(RentalOrder order, Long now) {
+
+        if (null != order.getRefundStrategy()) {
+            if (order.getRefundStrategy() == RentalOrderStrategy.CUSTOM.getCode()) {
+                RentalDefaultRule rule = this.rentalv2Provider.getRentalDefaultRule(null, null,
+                        order.getResourceType(), order.getResourceTypeId(), RuleSourceType.RESOURCE.getCode(), order.getRentalResourceId());
+
+                List<RentalOrderRule> refundRules = rentalv2Provider.listRentalOrderRules(order.getResourceType(), rule.getSourceType(),
+                        rule.getId(), RentalOrderHandleType.REFUND.getCode());
+
+                List<RentalOrderRule> outerRules = refundRules.stream().filter(r -> r.getDurationType() == RentalDurationType.OUTER.getCode())
+                        .collect(Collectors.toList());
+                List<RentalOrderRule> innerRules = refundRules.stream().filter(r -> r.getDurationType() == RentalDurationType.INNER.getCode())
+                        .collect(Collectors.toList());
+
+                RentalOrderRule orderRule = null;
+
+                Long startUseTime = order.getStartTime().getTime();
+
+                long intervalTime = startUseTime - now;
+
+                //处于时间外，查找最大的时间
+                for (RentalOrderRule r: outerRules) {
+                    long duration = 0;
+
+                    if (r.getDurationUnit() == RentalDurationUnit.HOUR.getCode()) {
+                        duration = (long)(r.getDuration() * 60 * 60 * 1000);
+                    }
+                    if (intervalTime > duration) {
+                        if (null == orderRule || r.getDuration() > orderRule.getDuration()) {
+                            orderRule = r;
+                        }
+                    }
+                }
+                if (orderRule == null) {
+                    //处于时间内，查找最小的时间
+                    for (RentalOrderRule r: innerRules) {
+                        long duration = 0;
+
+                        if (r.getDurationUnit() == RentalDurationUnit.HOUR.getCode()) {
+                            duration = (long)(r.getDuration() * 60 * 60 * 1000);
+                        }
+                        if (intervalTime < duration) {
+                            if (null == orderRule || r.getDuration() < orderRule.getDuration()) {
+                                orderRule = r;
+                            }
+                        }
+                    }
+                }
+
+                BigDecimal amount = order.getPaidMoney().multiply(new BigDecimal(orderRule.getFactor()))
+                        .divide(new BigDecimal(100), RoundingMode.HALF_UP);
+
+                processOrderCustomRefundTip(order, outerRules, innerRules, orderRule, amount);
+
+                return amount;
+            }else if (order.getRefundStrategy() == RentalOrderStrategy.FULL.getCode()) {
+                return order.getPaidMoney();
+            }
+        }
+
+        processOrderNotRefundTip(order);
+
+        return order.getPaidMoney();
+    }
+
+    public void processOrderNotRefundTip(RentalOrder order) {
+        StringBuilder sb = new StringBuilder();
+        sb.append("亲爱的用户，为保障资源使用效益，如在服务开始前取消订单，系统将不予退款，恳请您谅解。");
+        sb.append("\r\n");
+        sb.append("\r\n");
+        sb.append("确认要取消订单吗？");
+    }
+
+    public void processOrderCustomRefundTip(RentalOrder order, List<RentalOrderRule> outerRules, List<RentalOrderRule> innerRules,
+                                        RentalOrderRule orderRule, BigDecimal amount) {
+
+        StringBuilder sb = new StringBuilder();
+        sb.append("亲爱的用户，为保障资源使用效益，如在服务开始前取消订单，将扣除您订单金额的一定比例数额，恳请您谅解。具体规则如下：");
+        sb.append("\r\n");
+        sb.append("\r\n");
+        for (int i = 0, size = outerRules.size(); i < size; i++) {
+            sb.append(i + 1);
+            sb.append("，");
+            sb.append("订单开始前");
+            sb.append(outerRules.get(i).getDuration());
+            sb.append("小时外取消，退还");
+            sb.append(outerRules.get(i).getFactor());
+            sb.append("%订单金额");
+            sb.append("\r\n");
+        }
+
+        for (int i = 0, size = innerRules.size(); i < size; i++) {
+            sb.append(i + 1);
+            sb.append("，");
+            sb.append("订单开始前");
+            sb.append(outerRules.get(i).getDuration());
+            sb.append("小时内取消，退还");
+            sb.append(outerRules.get(i).getFactor());
+            sb.append("%订单金额");
+            sb.append("\r\n");
+        }
+        sb.append("\r\n");
+        sb.append("如果您现在取消订单，将退还");
+        sb.append(amount);
+        sb.append("元（");
+        sb.append(orderRule.getFactor());
+        sb.append("%）。");
+
+        order.setTip(sb.toString());
     }
 }

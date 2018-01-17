@@ -597,6 +597,20 @@ public class Rentalv2Controller extends ControllerBase {
 
 	/**
 	 *
+	 * <b>URL: /rental/getCancelOrderTip<b>
+	 * <p>获取订单取消文本</p>
+	 */
+	@RequestMapping("getCancelOrderTip")
+	@RestReturn(GetCancelOrderTipResponse.class)
+	public RestResponse getCancelOrderTip(GetCancelOrderTipCommand cmd) {
+		RestResponse response = new RestResponse(rentalService.getCancelOrderTip(cmd));
+		response.setErrorCode(ErrorCodes.SUCCESS);
+		response.setErrorDescription("OK");
+		return response;
+	}
+
+	/**
+	 *
 	 * <b>URL: /rental/test<b>
 	 * <p>test</p>
 	 */

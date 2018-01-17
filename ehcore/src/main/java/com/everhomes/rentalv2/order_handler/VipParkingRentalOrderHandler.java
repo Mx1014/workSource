@@ -32,66 +32,15 @@ public class VipParkingRentalOrderHandler implements RentalOrderHandler {
     private Rentalv2Provider rentalv2Provider;
     @Autowired
     private Rentalv2PriceRuleProvider rentalv2PriceRuleProvider;
+    @Autowired
+    private RentalCommonServiceImpl rentalCommonService;
 
     @Override
-    public BigDecimal calculateRefundAmount(RentalOrder order, Long now) {
+    public BigDecimal getRefundAmount(RentalOrder order, Long now) {
 
-        if (null != order.getRefundStrategy()) {
-            if (order.getRefundStrategy() == RentalOrderStrategy.CUSTOM.getCode()) {
-                RentalDefaultRule rule = this.rentalv2Provider.getRentalDefaultRule(null, null,
-                        order.getResourceType(), order.getResourceTypeId(), RuleSourceType.RESOURCE.getCode(), order.getRentalResourceId());
+        BigDecimal refundAmount = rentalCommonService.calculateRefundAmount(order, now);
 
-                List<RentalOrderRule> refundRules = rentalv2Provider.listRentalOrderRules(order.getResourceType(), rule.getSourceType(),
-                        rule.getId(), RentalOrderHandleType.REFUND.getCode());
-
-                List<RentalOrderRule> outerRules = refundRules.stream().filter(r -> r.getDurationType() == RentalDurationType.OUTER.getCode())
-                        .collect(Collectors.toList());
-                List<RentalOrderRule> innerRules = refundRules.stream().filter(r -> r.getDurationType() == RentalDurationType.INNER.getCode())
-                        .collect(Collectors.toList());
-
-                RentalOrderRule orderRule = null;
-
-                Long startUseTime = order.getStartTime().getTime();
-
-                long intervalTime = startUseTime - now;
-
-                //处于时间外，查找最大的时间
-                for (RentalOrderRule r: outerRules) {
-                    long duration = 0;
-
-                    if (r.getDurationUnit() == RentalDurationUnit.HOUR.getCode()) {
-                        duration = (long)(r.getDuration() * 60 * 60 * 1000);
-                    }
-                    if (intervalTime > duration) {
-                        if (null == orderRule || r.getDuration() > orderRule.getDuration()) {
-                            orderRule = r;
-                        }
-                    }
-                }
-                if (orderRule == null) {
-                    //处于时间内，查找最小的时间
-                    for (RentalOrderRule r: innerRules) {
-                        long duration = 0;
-
-                        if (r.getDurationUnit() == RentalDurationUnit.HOUR.getCode()) {
-                            duration = (long)(r.getDuration() * 60 * 60 * 1000);
-                        }
-                        if (intervalTime < duration) {
-                            if (null == orderRule || r.getDuration() < orderRule.getDuration()) {
-                                orderRule = r;
-                            }
-                        }
-                    }
-                }
-
-                return order.getPaidMoney().multiply(new BigDecimal(orderRule.getFactor()))
-                        .divide(new BigDecimal(100), RoundingMode.HALF_UP);
-            }else if (order.getRefundStrategy() == RentalOrderStrategy.FULL.getCode()) {
-                return order.getPaidMoney();
-            }
-        }
-
-        return order.getPaidMoney();
+        return refundAmount;
     }
 
     @Override

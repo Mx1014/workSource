@@ -10,12 +10,12 @@ public interface RentalOrderHandler {
     String DEFAULT = "default";
 
     /**
-     * 计算订单退款价格
+     * 获取订单退款价格
      * @param order
      * @param time
      * @return
      */
-    public BigDecimal calculateRefundAmount(RentalOrder order, Long time);
+    public BigDecimal getRefundAmount(RentalOrder order, Long time);
 
     /**
      * 新增订单时更新订单资源信息

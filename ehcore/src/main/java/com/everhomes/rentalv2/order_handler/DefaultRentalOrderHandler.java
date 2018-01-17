@@ -17,7 +17,7 @@ public class DefaultRentalOrderHandler implements RentalOrderHandler {
     private Rentalv2Provider rentalv2Provider;
 
     @Override
-    public BigDecimal calculateRefundAmount(RentalOrder order, Long time) {
+    public BigDecimal getRefundAmount(RentalOrder order, Long time) {
 
         return order.getPaidMoney().multiply(new BigDecimal(order.getRefundRatio()))
                 .divide(new BigDecimal(100), RoundingMode.HALF_UP);

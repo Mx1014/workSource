@@ -3351,27 +3351,28 @@ public class Rentalv2ServiceImpl implements Rentalv2Service {
 
 		if (order.getStatus().equals(SiteBillStatus.SUCCESS.getCode()) &&
 				timestamp > order.getStartTime().getTime()) {
-			//当成功预约之后要判断是否过了取消时间
-			LOGGER.error("cancel over time");
-			throw RuntimeErrorException.errorWith(RentalServiceErrorCode.SCOPE,
-							RentalServiceErrorCode.ERROR_ORDER_CANCEL_OVERTIME,"cancel bill over time");
-		}else{
+				//当成功预约之后要判断是否过了取消时间
+				LOGGER.error("cancel over time");
+				throw RuntimeErrorException.errorWith(RentalServiceErrorCode.SCOPE,
+						RentalServiceErrorCode.ERROR_ORDER_CANCEL_OVERTIME,"cancel bill over time");
 
-			Long refundOrderNo = this.onlinePayService.createBillId(timestamp);
+		}
 
-			String handlerName = RentalResourceHandler.DEFAULT;
-			if (StringUtils.isNotBlank(order.getResourceType())) {
-				handlerName = order.getResourceType();
-			}
-			RentalOrderHandler handler = rentalCommonService.getRentalOrderHandler(handlerName);
-			dbProvider.execute((TransactionStatus status) -> {
-				//默认是已退款
+		Long refundOrderNo = this.onlinePayService.createBillId(timestamp);
 
+		String handlerName = RentalResourceHandler.DEFAULT;
+		if (StringUtils.isNotBlank(order.getResourceType())) {
+			handlerName = order.getResourceType();
+		}
+		RentalOrderHandler handler = rentalCommonService.getRentalOrderHandler(handlerName);
+		dbProvider.execute((TransactionStatus status) -> {
+			//如果是预约成功，则要判断是否退款，否则将订单置为已取消
+			if (order.getStatus().equals(SiteBillStatus.SUCCESS.getCode())) {
 				if ((order.getRefundFlag().equals(NormalFlag.NEED.getCode())
 						|| (null != order.getRefundStrategy() && order.getRefundStrategy() != RentalOrderStrategy.NONE.getCode()))
 						&& (order.getPaidMoney().compareTo(new BigDecimal(0)) == 1)){
 
-					BigDecimal orderAmount = handler.calculateRefundAmount(order, timestamp);
+					BigDecimal orderAmount = handler.getRefundAmount(order, timestamp);
 
 					if (order.getPaidVersion() == ActivityRosterPayVersionFlag.V2.getCode()) {
 						//新支付退款
@@ -3409,31 +3410,36 @@ public class Rentalv2ServiceImpl implements Rentalv2Service {
 
 					this.rentalv2Provider.createRentalRefundOrder(rentalRefundOrder);
 
-				}else{
-					//如果不需要退款，直接状态为已取消
-					order.setStatus(SiteBillStatus.FAIL.getCode());
+					//更新bill状态
+					order.setStatus(SiteBillStatus.REFUNDED.getCode());
 				}
-				//更新bill状态
-				order.setStatus(SiteBillStatus.REFUNDED.getCode());
-				rentalv2Provider.updateRentalBill(order);
-				//只要退款就给管理员发消息,不管是退款中还是已退款
-				onOrderCancel(order);
-				if (order.getDoorAuthId() != null) //解除门禁授权
-					doorAccessService.deleteDoorAuth(order.getDoorAuthId());
-				rentalv2Provider.setAuthDoorId(order.getId(), null);
-				//用户积分
-				LocalEventBus.publish(event -> {
-					LocalEventContext context = new LocalEventContext();
-					context.setUid(order.getRentalUid());
-					context.setNamespaceId(order.getNamespaceId());
-					event.setContext(context);
-					event.setEntityType(EhRentalv2Orders.class.getSimpleName());
-					event.setEntityId(order.getId());
-					event.setEventName(SystemEvent.RENTAL_RESOURCE_APPLY_CANCEL.dft());
-				});
-				return null;
+			}else if (order.getStatus().equals(SiteBillStatus.PAYINGFINAL.getCode())){
+				//如果不需要退款，直接状态为已取消
+				order.setStatus(SiteBillStatus.FAIL.getCode());
+			}else {
+				throw RuntimeErrorException.errorWith(ErrorCodes.SCOPE_GENERAL,
+						ErrorCodes.ERROR_INVALID_PARAMETER, "Can not cancel order");
+			}
+
+			rentalv2Provider.updateRentalBill(order);
+			//只要退款就给管理员发消息,不管是退款中还是已退款
+			onOrderCancel(order);
+			if (order.getDoorAuthId() != null) //解除门禁授权
+				doorAccessService.deleteDoorAuth(order.getDoorAuthId());
+			rentalv2Provider.setAuthDoorId(order.getId(), null);
+			//用户积分
+			LocalEventBus.publish(event -> {
+				LocalEventContext context = new LocalEventContext();
+				context.setUid(order.getRentalUid());
+				context.setNamespaceId(order.getNamespaceId());
+				event.setContext(context);
+				event.setEntityType(EhRentalv2Orders.class.getSimpleName());
+				event.setEntityId(order.getId());
+				event.setEventName(SystemEvent.RENTAL_RESOURCE_APPLY_CANCEL.dft());
 			});
-		}
+			return null;
+		});
+
 	}
 
 	private void refundParkingOrderV1(RentalOrder order, Long timestamp, Long refundOrderNo, BigDecimal amount) {
@@ -4670,7 +4676,7 @@ public class Rentalv2ServiceImpl implements Rentalv2Service {
 				//根据时间判断来设置status
 				setRentalCellStatus(reserveTime, dto, rsr, rule);
 				//当可预约数量为0时, 或者在后台手动关闭时
-				if (dto.getCounts() == 0 || rsr.getStatus() == SiteRuleStatus.MANUAL_CLOSE.getCode()) {
+				if (dto.getCounts() <= 0 || rsr.getStatus() == SiteRuleStatus.MANUAL_CLOSE.getCode()) {
 					dto.setStatus(SiteRuleStatus.CLOSE.getCode());
 				}
 
@@ -7404,6 +7410,7 @@ public class Rentalv2ServiceImpl implements Rentalv2Service {
 				RentalOrderRule rule = ConvertHelper.convert(r, RentalOrderRule.class);
 				rule.setOwnerId(ownerId);
 				rule.setOwnerType(ownerType);
+				rule.setResourceType(resourceType);
 				rentalv2Provider.createRentalOrderRule(rule);
 			});
 		}
@@ -7936,6 +7943,27 @@ public class Rentalv2ServiceImpl implements Rentalv2Service {
 		response.setRentalType(rentalTypes.get(0));
 		response.setPrice(priceRules.get(0).getWorkdayPrice());
 
+		return response;
+	}
+
+	@Override
+	public GetCancelOrderTipResponse getCancelOrderTip(GetCancelOrderTipCommand cmd) {
+
+		RentalOrder order = this.rentalv2Provider.findRentalBillById(cmd.getOrderId());
+		if(null == order) {
+			throw RuntimeErrorException.errorWith(ErrorCodes.SCOPE_GENERAL,
+					ErrorCodes.ERROR_INVALID_PARAMETER, "RentalOrder not found");
+		}
+
+		GetCancelOrderTipResponse response = new GetCancelOrderTipResponse();
+		if (order.getPayTotalMoney().compareTo(BigDecimal.ZERO) == 0) {
+			return response;
+		}
+		Long now = System.currentTimeMillis();
+
+		BigDecimal refundAmount = rentalCommonService.calculateRefundAmount(order, now);
+
+		response.setTip(order.getTip());
 		return response;
 	}
 }

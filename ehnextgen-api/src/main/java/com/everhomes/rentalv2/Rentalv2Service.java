@@ -192,5 +192,7 @@ public interface Rentalv2Service {
 
 	GetResourceRuleV2Response getResourceRuleV2(GetResourceRuleV2Command cmd);
 
+	GetCancelOrderTipResponse getCancelOrderTip(GetCancelOrderTipCommand cmd);
+
 	void test();
 }
