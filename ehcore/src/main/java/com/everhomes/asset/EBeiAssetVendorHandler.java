@@ -430,6 +430,10 @@ public class EBeiAssetVendorHandler implements AssetVendorHandler {
         return null;
     }
 
+    /**
+     *
+     * @modify 2018/1/16 start to change the filter condition. Present + unpaid -> present only
+     */
     @Override
     public List<ShowBillForClientV2DTO> showBillForClientV2(ShowBillForClientV2Command cmd) {
         List<ShowBillForClientV2DTO> list = new ArrayList<>();
@@ -489,12 +493,12 @@ public class EBeiAssetVendorHandler implements AssetVendorHandler {
 
     @Override
     public List<ListAllBillsForClientDTO> listAllBillsForClient(ListAllBillsForClientCommand cmd) {
-        List<ListAllBillsForClientDTO> list = new ArrayList<>();
+        TreeMap<Date,ListAllBillsForClientDTO> map = new TreeMap<>();
         SimpleDateFormat yyyyMM = new SimpleDateFormat("yyyy-MM");
         String endMonth = yyyyMM.format(new Date());
         GetLeaseContractBillOnFiPropertyRes res = keXingBillService.getAllFiPropertyBills(cmd.getNamespaceId(),cmd.getOwnerId(),cmd.getTargetId(),cmd.getTargetType(),null,null,endMonth);
         List<GetLeaseContractBillOnFiPropertyData> data = res.getData();
-        if(data == null) return list;
+        if(data == null) return null;
         for(int i = 0; i < data.size(); i ++){
             GetLeaseContractBillOnFiPropertyData source = data.get(i);
             ListAllBillsForClientDTO dto = new ListAllBillsForClientDTO();
@@ -507,8 +511,19 @@ public class EBeiAssetVendorHandler implements AssetVendorHandler {
             dto.setAmountOwed(source.getActualMoney());
             dto.setBillId(source.getBillId());
             dto.setChargeStatus(source.getIsPay().equals("已缴纳")?(byte)1:(byte)0);
-            list.add(dto);
+            dto.setDateStr(source.getChargePeriod());
+            String chargePeriod = source.getChargePeriod();
+            try {
+                Date parse = yyyyMM.parse(chargePeriod);
+                map.put(parse,dto);
+            } catch (ParseException e) {
+                LOGGER.error("2.2.4.15 response chargePeriod pattern incorrect, chargePeriod = {},request pattern is yyyyMM",chargePeriod);
+                map.put(null,dto);
+            }
         }
+        //按照时间降序排序
+        List<ListAllBillsForClientDTO> list = new ArrayList<>(map.values());
+        Collections.reverse(list);
         return list;
     }
 
