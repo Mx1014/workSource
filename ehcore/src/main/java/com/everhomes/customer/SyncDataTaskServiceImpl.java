@@ -108,7 +108,7 @@ public class SyncDataTaskServiceImpl implements SyncDataTaskService {
             return null;
         }
         ListCommunitySyncResultResponse response = new ListCommunitySyncResultResponse();
-        List<SyncDataTask> tasks = syncDataTaskProvider.listCommunitySyncResult(communityId, syncType, pageSize, pageAnchor);
+        List<SyncDataTask> tasks = syncDataTaskProvider.listCommunitySyncResult(communityId, syncType, pageSize + 1, pageAnchor);
         if(tasks != null && tasks.size() > 0) {
             List<SyncDataResult> results = new ArrayList<>();
             for (SyncDataTask task : tasks) {
@@ -129,8 +129,14 @@ public class SyncDataTaskServiceImpl implements SyncDataTaskService {
                     result.setManualFlag((byte)1);
 
                 }
-
+                results.add(result);
             }
+
+            if(tasks.size() > pageSize) {
+                results.remove(results.size() - 1);
+                response.setNextPageAnchor(tasks.get(tasks.size() - 1).getId());
+            }
+            response.setResults(results);
         }
         return response;
     }
