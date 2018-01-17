@@ -1686,7 +1686,7 @@ public class ContractServiceImpl implements ContractService {
 			task.setCreatorUid(UserContext.currentUserId());
 			syncDataTaskService.executeTask(() -> {
 				SyncDataResponse response = new SyncDataResponse();
-				contractHandler.syncContractsFromThirdPart("1", version, community.getNamespaceCommunityToken());
+				contractHandler.syncContractsFromThirdPart("1", version, community.getNamespaceCommunityToken(), task.getId());
 				return response;
 			}, task);
 

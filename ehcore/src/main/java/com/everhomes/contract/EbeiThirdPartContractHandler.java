@@ -13,6 +13,8 @@ import com.everhomes.configuration.ConfigurationProvider;
 import com.everhomes.constants.ErrorCodes;
 import com.everhomes.customer.EnterpriseCustomer;
 import com.everhomes.customer.EnterpriseCustomerProvider;
+import com.everhomes.customer.SyncDataTask;
+import com.everhomes.customer.SyncDataTaskProvider;
 import com.everhomes.db.DbProvider;
 import com.everhomes.http.HttpUtils;
 import com.everhomes.openapi.*;
@@ -27,6 +29,7 @@ import com.everhomes.rest.contract.*;
 import com.everhomes.rest.customer.CustomerType;
 import com.everhomes.rest.customer.EbeiJsonEntity;
 import com.everhomes.rest.customer.NamespaceCustomerType;
+import com.everhomes.rest.customer.SyncDataTaskStatus;
 import com.everhomes.rest.openapi.shenzhou.DataType;
 import com.everhomes.rest.openapi.shenzhou.SyncFlag;
 import com.everhomes.rest.organization.OrganizationAddressStatus;
@@ -104,8 +107,11 @@ public class EbeiThirdPartContractHandler implements ThirdPartContractHandler {
     @Autowired
     private BuildingProvider buildingProvider;
 
+    @Autowired
+    private SyncDataTaskProvider syncDataTaskProvider;
+
     @Override
-    public void syncContractsFromThirdPart(String pageOffset, String version, String communityIdentifier) {
+    public void syncContractsFromThirdPart(String pageOffset, String version, String communityIdentifier, Long taskId) {
         Map<String, String> params= new HashMap<String,String>();
         if(communityIdentifier == null) {
             communityIdentifier = "";
@@ -141,19 +147,19 @@ public class EbeiThirdPartContractHandler implements ThirdPartContractHandler {
 
                 //数据有下一页则继续请求
                 if(entity.getHasNextPag() == 1) {
-                    syncContractsFromThirdPart(String.valueOf(entity.getCurrentPage()+1), version, communityIdentifier);
+                    syncContractsFromThirdPart(String.valueOf(entity.getCurrentPage()+1), version, communityIdentifier, taskId);
                 }
             }
 
             //如果到最后一页了，则开始更新到我们数据库中
             if(entity.getHasNextPag() == 0) {
-                syncDataToDb(DataType.CONTRACT.getCode(), communityIdentifier);
+                syncDataToDb(DataType.CONTRACT.getCode(), communityIdentifier, taskId);
             }
         }
 
     }
 
-    private void syncDataToDb(Byte dataType, String communityIdentifier) {
+    private void syncDataToDb(Byte dataType, String communityIdentifier, Long taskId) {
 //        queueThreadPool.execute(()->{
 //        if (LOGGER.isDebugEnabled()) {
 //            LOGGER.debug("dataType {} enter into thread=================", dataType);
@@ -170,6 +176,14 @@ public class EbeiThirdPartContractHandler implements ThirdPartContractHandler {
             updateAllData(dataType, NAMESPACE_ID, communityIdentifier, backupList);
         } finally {
             zjSyncdataBackupProvider.updateZjSyncdataBackupInactive(backupList);
+
+            //万一同步时间太长transaction断掉 在这里也要更新下
+            SyncDataTask task = syncDataTaskProvider.findSyncDataTaskById(taskId);
+            if(task != null) {
+                task.setStatus(SyncDataTaskStatus.FINISH.getCode());
+                task.setResult("同步成功");
+                syncDataTaskProvider.updateSyncDataTask(task);
+            }
         }
 
         if (LOGGER.isDebugEnabled()) {

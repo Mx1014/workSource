@@ -2314,7 +2314,7 @@ public class CustomerServiceImpl implements CustomerService {
                 task.setCreatorUid(UserContext.currentUserId());
                 syncDataTaskService.executeTask(() -> {
                     SyncDataResponse response = new SyncDataResponse();
-                    zjgkOpenService.syncEnterprises("0", community.getNamespaceCommunityToken());
+                    zjgkOpenService.syncEnterprises("0", community.getNamespaceCommunityToken(), task.getId());
                     return response;
                 }, task);
             }
@@ -2337,7 +2337,7 @@ public class CustomerServiceImpl implements CustomerService {
                 task.setCreatorUid(UserContext.currentUserId());
                 syncDataTaskService.executeTask(() -> {
                     SyncDataResponse response = new SyncDataResponse();
-                    customerHandle.syncEnterprises("1", version, community.getNamespaceCommunityToken());
+                    customerHandle.syncEnterprises("1", version, community.getNamespaceCommunityToken(), task.getId());
                     return response;
                 }, task);
             }
@@ -2430,7 +2430,7 @@ public class CustomerServiceImpl implements CustomerService {
             task.setCreatorUid(UserContext.currentUserId());
             syncDataTaskService.executeTask(() -> {
                 SyncDataResponse response = new SyncDataResponse();
-                zjgkOpenService.syncIndividuals("0", community.getNamespaceCommunityToken());
+                zjgkOpenService.syncIndividuals("0", community.getNamespaceCommunityToken(), task.getId());
                 return response;
             }, task);
 

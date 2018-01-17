@@ -21,6 +21,7 @@ import com.everhomes.rest.community.NamespaceCommunityType;
 import com.everhomes.rest.customer.EbeiCustomer;
 import com.everhomes.rest.customer.EbeiJsonEntity;
 import com.everhomes.rest.customer.NamespaceCustomerType;
+import com.everhomes.rest.customer.SyncDataTaskStatus;
 import com.everhomes.rest.openapi.shenzhou.DataType;
 import com.everhomes.rest.openapi.shenzhou.SyncFlag;
 import com.everhomes.rest.organization.*;
@@ -91,8 +92,11 @@ public class EbeiCustomerHandle implements CustomerHandle {
     @Autowired
     private RolePrivilegeService rolePrivilegeService;
 
+    @Autowired
+    private SyncDataTaskProvider syncDataTaskProvider;
+
     @Override
-    public void syncEnterprises(String pageOffset, String version, String communityIdentifier) {
+    public void syncEnterprises(String pageOffset, String version, String communityIdentifier, Long taskId) {
         Map<String, String> params= new HashMap<String,String>();
         if(communityIdentifier == null) {
             communityIdentifier = "";
@@ -128,13 +132,13 @@ public class EbeiCustomerHandle implements CustomerHandle {
 
                 //数据有下一页则继续请求
                 if(entity.getHasNextPag() == 1) {
-                    syncEnterprises(String.valueOf(entity.getCurrentPage()+1), version, communityIdentifier);
+                    syncEnterprises(String.valueOf(entity.getCurrentPage()+1), version, communityIdentifier, taskId);
                 }
             }
 
             //如果到最后一页了，则开始更新到我们数据库中
             if(entity.getHasNextPag() == 0) {
-                syncDataToDb(DataType.ENTERPRISE.getCode(), communityIdentifier);
+                syncDataToDb(DataType.ENTERPRISE.getCode(), communityIdentifier, taskId);
             }
         }
     }
@@ -167,7 +171,7 @@ public class EbeiCustomerHandle implements CustomerHandle {
         zjSyncdataBackupProvider.createZjSyncdataBackup(backup);
     }
 
-    private void syncDataToDb(Byte dataType, String communityIdentifier) {
+    private void syncDataToDb(Byte dataType, String communityIdentifier, Long taskId) {
 //        queueThreadPool.execute(()->{
 //        if (LOGGER.isDebugEnabled()) {
 //            LOGGER.debug("dataType {} enter into thread=================", dataType);
@@ -184,6 +188,14 @@ public class EbeiCustomerHandle implements CustomerHandle {
             updateAllData(dataType, NAMESPACE_ID, communityIdentifier, backupList);
         } finally {
             zjSyncdataBackupProvider.updateZjSyncdataBackupInactive(backupList);
+
+            //万一同步时间太长transaction断掉 在这里也要更新下
+            SyncDataTask task = syncDataTaskProvider.findSyncDataTaskById(taskId);
+            if(task != null) {
+                task.setStatus(SyncDataTaskStatus.FINISH.getCode());
+                task.setResult("同步成功");
+                syncDataTaskProvider.updateSyncDataTask(task);
+            }
         }
 
         if (LOGGER.isDebugEnabled()) {
