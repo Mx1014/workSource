@@ -8,6 +8,7 @@ import com.everhomes.util.StringHelper;
  *  <li>standardId: 标准id</li>
  *  <li>standardName: 标准名称</li>
  *  <li>repeatType: 标准周期类型 0:no repeat 1: by day 2:by week 3: by month 4:year</li>
+ *  <li>standardType: 标准类别</li>
  *  <li>equipmentId: 设备id</li>
  *  <li>equipmentName: 设备名称</li>
  *  <li>sequenceNo: 设备编号</li>
@@ -21,6 +22,10 @@ public class EquipmentStandardMapDTO {
 	private Long standardId;
 	
 	private String standardName;
+
+	private Byte repeatType;
+
+	private Byte standardType;
 	
 	private Long equipmentId;
 
@@ -139,6 +144,22 @@ public class EquipmentStandardMapDTO {
 
 	public void setLocation(String location) {
 		this.location = location;
+	}
+
+	public Byte getRepeatType() {
+		return repeatType;
+	}
+
+	public void setRepeatType(Byte repeatType) {
+		this.repeatType = repeatType;
+	}
+
+	public Byte getStandardType() {
+		return standardType;
+	}
+
+	public void setStandardType(Byte standardType) {
+		this.standardType = standardType;
 	}
 
 	@Override
