@@ -99,7 +99,7 @@ public class FlowUserSelectionServiceImpl implements FlowUserSelectionService {
                     // 具体部门岗位
                     case SOURCE_DEPARTMENT:
                         // 老的数据和新的数据不一样，需要按照时间来区分，以后把这个删掉
-                        if (sel.getCreateTime().toLocalDateTime().isBefore(LocalDateTime.of(LocalDate.of(2018, 1, 19), LocalTime.MIN))) {
+                        if (sel.getCreateTime().toLocalDateTime().isBefore(LocalDateTime.of(LocalDate.of(2018, 1, 18), LocalTime.MIN))) {
                             userIds = listUsersByJobPosition(organizationId, sel.getSourceIdB(), sel.getSourceIdA());
                         } else {
                             userIds = listUsersByDepartmentJobPosition(sel.getNamespaceId(), organizationId, sel.getSourceIdB(), sel.getSourceIdA());
