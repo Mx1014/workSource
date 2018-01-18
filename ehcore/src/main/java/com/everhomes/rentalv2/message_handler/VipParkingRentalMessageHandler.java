@@ -74,7 +74,7 @@ public class VipParkingRentalMessageHandler implements RentalMessageHandler {
             List<Tuple<String, Object>> variables = smsProvider.toTupleList("plateOwnerName", useInfoDTO.getPlateOwnerName());
             smsProvider.addToTupleList(variables, "userName", rentalBill.getUserName());
             smsProvider.addToTupleList(variables, "userPhone", rentalBill.getUserPhone());
-            smsProvider.addToTupleList(variables, "rentalDescription", useDetail);
+            smsProvider.addToTupleList(variables, "useDetail", useDetail);
 
             int templateId = SmsTemplateCode.RENTAL_USER_CANCEL_ORDER;
 
@@ -142,7 +142,7 @@ public class VipParkingRentalMessageHandler implements RentalMessageHandler {
             List<Tuple<String, Object>> variables = smsProvider.toTupleList("plateOwnerName", useInfoDTO.getPlateOwnerName());
             smsProvider.addToTupleList(variables, "userName", order.getUserName());
             smsProvider.addToTupleList(variables, "userPhone", order.getUserPhone());
-            smsProvider.addToTupleList(variables, "rentalDescription", useDetail);
+            smsProvider.addToTupleList(variables, "useDetail", useDetail);
             smsProvider.addToTupleList(variables, "spaceAddress", useInfoDTO.getSpaceAddress());
             smsProvider.addToTupleList(variables, "orderDetailUrl", "https://core.zuolin.com/evh/aclink/id=1283jh213a");
 
@@ -193,7 +193,7 @@ public class VipParkingRentalMessageHandler implements RentalMessageHandler {
         List<Tuple<String, Object>> variables = smsProvider.toTupleList("plateOwnerName", useInfoDTO.getPlateOwnerName());
         smsProvider.addToTupleList(variables, "userName", rentalBill.getUserName());
         smsProvider.addToTupleList(variables, "userPhone", rentalBill.getUserPhone());
-        smsProvider.addToTupleList(variables, "rentalDescription", useDetail);
+        smsProvider.addToTupleList(variables, "useDetail", useDetail);
         smsProvider.addToTupleList(variables, "newEndTime", sdf.format(rentalBill.getEndTime()));
         smsProvider.addToTupleList(variables, "orderDetailUrl", "https://core.zuolin.com/evh/aclink/id=1283jh213a");
 
@@ -214,7 +214,7 @@ public class VipParkingRentalMessageHandler implements RentalMessageHandler {
         String useDetail = getUseDetailStr(rentalBill, useInfoDTO);
 
         String templateScope = SmsTemplateCode.SCOPE;
-        List<Tuple<String, Object>> variables = smsProvider.toTupleList("rentalDescription", useDetail);
+        List<Tuple<String, Object>> variables = smsProvider.toTupleList("useDetail", useDetail);
 
         int templateId = SmsTemplateCode.RENTAL_ORDER_WILL_END;
 

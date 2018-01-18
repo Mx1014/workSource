@@ -2130,4 +2130,21 @@ public class Rentalv2ProviderImpl implements Rentalv2Provider {
 				.orderBy(Tables.EH_RENTALV2_ORDER_RULES.ID.asc())
 				.fetch().map(r -> ConvertHelper.convert(r, RentalOrderRule.class));
 	}
+
+	@Override
+	public List<String> listOverTimeSpaces(Integer namespaceId, Long resourceTypeId, String resourceType,
+											 Long rentalSiteId) {
+		DSLContext context = dbProvider.getDslContext(AccessSpec.readOnly());
+		SelectJoinStep<Record1<String>> query = context.select(Tables.EH_RENTALV2_ORDERS.STRING_TAG1).from(
+				Tables.EH_RENTALV2_ORDERS);
+
+		Condition condition = Tables.EH_RENTALV2_ORDERS.RESOURCE_TYPE.equal(resourceType);
+		condition = condition.and(Tables.EH_RENTALV2_ORDERS.RENTAL_RESOURCE_ID.equal(rentalSiteId));
+		condition = condition.and(Tables.EH_RENTALV2_ORDERS.NAMESPACE_ID.eq(namespaceId));
+		condition = condition.and(Tables.EH_RENTALV2_ORDERS.RESOURCE_TYPE_ID.eq(resourceTypeId));
+		condition = condition.and(Tables.EH_RENTALV2_ORDERS.STATUS.eq(SiteBillStatus.IN_USING.getCode()));
+		condition = condition.and(Tables.EH_RENTALV2_ORDERS.END_TIME.lt(new Timestamp(System.currentTimeMillis())));
+
+		return query.where(condition).fetchInto(String.class);
+	}
 }

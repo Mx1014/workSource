@@ -2,6 +2,7 @@ package com.everhomes.rentalv2.resource_handler;
 
 import com.everhomes.parking.ParkingLot;
 import com.everhomes.parking.ParkingProvider;
+import com.everhomes.parking.ParkingSpace;
 import com.everhomes.rentalv2.RentalResource;
 import com.everhomes.rentalv2.RentalResourceHandler;
 import com.everhomes.rentalv2.RentalResourceType;
@@ -13,6 +14,8 @@ import com.everhomes.rest.rentalv2.admin.QueryDefaultRuleAdminCommand;
 import com.everhomes.user.UserContext;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
+
+import java.util.List;
 
 /**
  * @author sw on 2018/1/5.
@@ -29,12 +32,14 @@ public class VipParkingRentalResourceHandler implements RentalResourceHandler {
     public RentalResource getRentalResourceById(Long id) {
 
         ParkingLot parkingLot = parkingProvider.findParkingLotById(id);
-
-        Integer count = parkingProvider.countParkingSpace(parkingLot.getNamespaceId(), parkingLot.getOwnerType(),
-                parkingLot.getOwnerId(),parkingLot.getId());
-
         RentalResourceType type = rentalv2Provider.findRentalResourceTypes(parkingLot.getNamespaceId(),
                 RentalV2ResourceType.VIP_PARKING.getCode());
+
+        List<String> spaces = rentalv2Provider.listOverTimeSpaces(parkingLot.getNamespaceId(), type.getId(),
+                RentalV2ResourceType.VIP_PARKING.getCode(), parkingLot.getId());
+
+        Integer count = parkingProvider.countParkingSpace(parkingLot.getNamespaceId(), parkingLot.getOwnerType(),
+                parkingLot.getOwnerId(), parkingLot.getId(), spaces);
 
         RentalResource resource = new RentalResource();
         resource.setId(parkingLot.getId());

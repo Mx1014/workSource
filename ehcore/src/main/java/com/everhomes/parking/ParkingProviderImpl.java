@@ -1052,7 +1052,7 @@ public class ParkingProviderImpl implements ParkingProvider {
 	}
 
 	@Override
-	public Integer countParkingSpace(Integer namespaceId, String ownerType, Long ownerId, Long parkingLotId) {
+	public Integer countParkingSpace(Integer namespaceId, String ownerType, Long ownerId, Long parkingLotId, List<String> spaces) {
 		final Integer[] count = new Integer[1];
 		this.dbProvider.mapReduce(AccessSpec.readOnlyWith(EhParkingSpaces.class), null,
 				(DSLContext context, Object reducingContext)-> {
@@ -1064,7 +1064,9 @@ public class ParkingProviderImpl implements ParkingProvider {
 					condition = condition.and(Tables.EH_PARKING_SPACES.OWNER_ID.equal(ownerId));
 					condition = condition.and(Tables.EH_PARKING_SPACES.NAMESPACE_ID.eq(namespaceId));
 					condition = condition.and(Tables.EH_PARKING_SPACES.PARKING_LOT_ID.eq(parkingLotId));
-					condition = condition.and(Tables.EH_PARKING_SPACES.STATUS.eq(ParkingSpaceStatus.OPEN.getCode()));
+					condition = condition.and(Tables.EH_PARKING_SPACES.STATUS.eq(ParkingSpaceStatus.OPEN.getCode())
+												.or(Tables.EH_PARKING_SPACES.STATUS.eq(ParkingSpaceStatus.IN_USING.getCode())));
+					condition = condition.and(Tables.EH_PARKING_SPACES.SPACE_NO.notIn(spaces));
 
 					count[0] = query.where(condition).fetchOneInto(Integer.class);
 					return true;

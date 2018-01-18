@@ -186,7 +186,9 @@ public interface Rentalv2Service {
 
 	GetRenewRentalOrderInfoResponse getRenewRentalOrderInfo(GetRenewRentalOrderInfoCommand cmd);
 
-	RentalOrderDTO renewRentalOrder(RenewRentalOrderCommand cmd);
+	CommonOrderDTO renewRentalOrder(RenewRentalOrderCommand cmd);
+
+	PreOrderDTO renewRentalOrderV2(RenewRentalOrderCommand cmd);
 
 	RentalOrderDTO completeRentalOrder(CompleteRentalOrderCommand cmd);
 

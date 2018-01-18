@@ -24,9 +24,18 @@ public class RenewRentalOrderCommand {
 
     private BigDecimal amount;
 
+    private String clientAppName;
     @Override
     public String toString() {
         return StringHelper.toJsonString(this);
+    }
+
+    public String getClientAppName() {
+        return clientAppName;
+    }
+
+    public void setClientAppName(String clientAppName) {
+        this.clientAppName = clientAppName;
     }
 
     public Double getCellCount() {

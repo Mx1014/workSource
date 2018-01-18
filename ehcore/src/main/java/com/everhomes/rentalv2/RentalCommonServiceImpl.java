@@ -266,7 +266,7 @@ public class RentalCommonServiceImpl {
 
     public void processOrderNotRefundTip(RentalOrder order) {
         StringBuilder sb = new StringBuilder();
-        sb.append("亲爱的用户，为保障资源使用效益，如在服务开始前取消订单，系统将不予退款，恳请您谅解。");
+        sb.append("亲爱的用户，为保障资源使用效益，现在取消订单，系统将不予退款，恳请您谅解。");
         sb.append("\r\n");
         sb.append("\r\n");
         sb.append("确认要取消订单吗？");

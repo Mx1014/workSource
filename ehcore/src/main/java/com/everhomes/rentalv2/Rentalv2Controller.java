@@ -559,9 +559,22 @@ public class Rentalv2Controller extends ControllerBase {
 	 * <p>订单续费</p>
 	 */
 	@RequestMapping("renewRentalOrder")
-	@RestReturn(value = RentalOrderDTO.class)
+	@RestReturn(value = CommonOrderDTO.class)
 	public RestResponse renewRentalOrder(RenewRentalOrderCommand cmd) {
 		RestResponse response = new RestResponse(rentalService.renewRentalOrder(cmd));
+		response.setErrorCode(ErrorCodes.SUCCESS);
+		response.setErrorDescription("OK");
+		return response;
+	}
+
+	/**
+	 * <b>URL: /rental/renewRentalOrder</b>
+	 * <p>订单续费</p>
+	 */
+	@RequestMapping("renewRentalOrder")
+	@RestReturn(value = PreOrderDTO.class)
+	public RestResponse renewRentalOrderV2(RenewRentalOrderCommand cmd) {
+		RestResponse response = new RestResponse(rentalService.renewRentalOrderV2(cmd));
 		response.setErrorCode(ErrorCodes.SUCCESS);
 		response.setErrorDescription("OK");
 		return response;

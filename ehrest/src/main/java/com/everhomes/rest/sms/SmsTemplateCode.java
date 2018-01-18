@@ -135,5 +135,9 @@ public interface SmsTemplateCode {
 
     int RENTAL_ORDER_WILL_END = 63; //使用中：即将超时（结束时间前15分钟提醒）
 
+    int SYSTEM_AUTO_CANCEL_ORDER = 64; ///系统自动取消订单并退款成功：尊敬的用户，您预约的VIP车位（“停车场名称”“车位编号”车位：“开始时间” - “结束时间”）由于前序订单使用超时，且无其他空闲车位可更换，已自动取消并全额退款，为此我们深感抱歉，期待下次为您服务。
 
+    int SYSTEM_AUTO_UPDATE_SPACE_RESERVER = 65; //订单变更通知 给预约人发短信
+
+    int SYSTEM_AUTO_UPDATE_SPACE_PLATE_OWNER = 66; //订单变更通知 给车主发短信
 }

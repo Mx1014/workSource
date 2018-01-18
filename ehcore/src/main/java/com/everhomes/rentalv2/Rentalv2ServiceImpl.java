@@ -2013,6 +2013,11 @@ public class Rentalv2ServiceImpl implements Rentalv2Service {
 					RentalServiceErrorCode.ERROR_ORDER_CANCELED,"Order has been canceled");
 		}
 
+		return buildCommonOrderDTO(bill);
+
+	}
+
+	private CommonOrderDTO buildCommonOrderDTO(RentalOrder bill) {
 		//调用统一处理订单接口，返回统一订单格式
 		CommonOrderCommand orderCmd = new CommonOrderCommand();
 		orderCmd.setBody(OrderType.OrderTypeEnum.RENTALORDER.getMsg());
@@ -2029,8 +2034,26 @@ public class Rentalv2ServiceImpl implements Rentalv2Service {
 			throw RuntimeErrorException.errorWith(ErrorCodes.SCOPE_GENERAL, ErrorCodes.ERROR_GENERAL_EXCEPTION,
 					"convertToCommonOrder is fail.");
 		}
-		return dto;
 
+		return dto;
+	}
+
+	private PreOrderDTO buildPreOrderDTO(RentalOrder order, String clientAppName) {
+		PreOrderCommand preOrderCommand = new PreOrderCommand();
+
+		preOrderCommand.setOrderType(OrderType.OrderTypeEnum.RENTALORDER.getPycode());
+		preOrderCommand.setOrderId(Long.valueOf(order.getOrderNo()));
+		Long amount = payService.changePayAmount(order.getPayTotalMoney().subtract(order.getPaidMoney()));
+		preOrderCommand.setAmount(amount);
+
+		preOrderCommand.setPayerId(order.getRentalUid());
+		preOrderCommand.setNamespaceId(UserContext.getCurrentNamespaceId());
+
+//        preOrderCommand.setExpiration(expiredTime);
+
+		preOrderCommand.setClientAppName(clientAppName);
+
+		return payService.createPreOrder(preOrderCommand);
 	}
 
 	public PreOrderDTO getRentalBillPayInfoV2(GetRentalBillPayInfoCommand cmd) {
@@ -2047,21 +2070,7 @@ public class Rentalv2ServiceImpl implements Rentalv2Service {
 					RentalServiceErrorCode.ERROR_ORDER_CANCELED,"Order has been canceled");
 		}
 
-		PreOrderCommand preOrderCommand = new PreOrderCommand();
-
-		preOrderCommand.setOrderType(OrderType.OrderTypeEnum.RENTALORDER.getPycode());
-		preOrderCommand.setOrderId(Long.valueOf(order.getOrderNo()));
-		Long amount = payService.changePayAmount(order.getPayTotalMoney().subtract(order.getPaidMoney()));
-		preOrderCommand.setAmount(amount);
-
-		preOrderCommand.setPayerId(order.getRentalUid());
-		preOrderCommand.setNamespaceId(UserContext.getCurrentNamespaceId());
-
-//        preOrderCommand.setExpiration(expiredTime);
-
-		preOrderCommand.setClientAppName(cmd.getClientAppName());
-
-		return payService.createPreOrder(preOrderCommand);
+		return buildPreOrderDTO(order, cmd.getClientAppName());
 	}
 
 	@Override
@@ -3412,6 +3421,9 @@ public class Rentalv2ServiceImpl implements Rentalv2Service {
 
 					//更新bill状态
 					order.setStatus(SiteBillStatus.REFUNDED.getCode());
+				}else {
+					//如果不需要退款，直接状态为已取消
+					order.setStatus(SiteBillStatus.FAIL.getCode());
 				}
 			}else if (order.getStatus().equals(SiteBillStatus.PAYINGFINAL.getCode())){
 				//如果不需要退款，直接状态为已取消
@@ -7257,8 +7269,9 @@ public class Rentalv2ServiceImpl implements Rentalv2Service {
 	private void buildPriceRules(List<PriceRuleDTO> priceRuleDTOS) {
 		if (null != priceRuleDTOS && !priceRuleDTOS.isEmpty()) {
 			//统一价格时，将3种价格都设置成一样
-			if (priceRuleDTOS.get(0).getUserPriceType() == RentalUserPriceType.UNIFICATION.getCode()) {
-					priceRuleDTOS.forEach(r -> {
+			priceRuleDTOS.forEach(r -> {
+				if (r.getUserPriceType() == RentalUserPriceType.UNIFICATION.getCode()) {
+
 					r.setOrgMemberInitiatePrice(r.getInitiatePrice());
 					r.setOrgMemberWorkdayPrice(r.getWorkdayPrice());
 					r.setOrgMemberDiscountType(r.getDiscountType());
@@ -7272,16 +7285,17 @@ public class Rentalv2ServiceImpl implements Rentalv2Service {
 					r.setApprovingUserDiscountRatio(r.getDiscountRatio());
 					r.setApprovingUserFullPrice(r.getFullPrice());
 					r.setApprovingUserCutPrice(r.getCutPrice());
-				});
-			}
+				}
+			});
+
 		}
 	}
 
 	private void buildPricePackages(List<PricePackageDTO> pricePackageDTOS) {
 		if (null != pricePackageDTOS && !pricePackageDTOS.isEmpty()) {
 			//统一价格时，将3种价格都设置成一样
-			if (pricePackageDTOS.get(0).getUserPriceType() == RentalUserPriceType.UNIFICATION.getCode()) {
-					pricePackageDTOS.forEach(r -> {
+			pricePackageDTOS.forEach(r -> {
+				if (r.getUserPriceType() == RentalUserPriceType.UNIFICATION.getCode()) {
 					r.setOrgMemberInitiatePrice(r.getInitiatePrice());
 					r.setOrgMemberPrice(r.getPrice());
 					r.setOrgMemberDiscountType(r.getDiscountType());
@@ -7295,8 +7309,8 @@ public class Rentalv2ServiceImpl implements Rentalv2Service {
 					r.setApprovingUserDiscountRatio(r.getDiscountRatio());
 					r.setApprovingUserFullPrice(r.getFullPrice());
 					r.setApprovingUserCutPrice(r.getCutPrice());
-				});
-			}
+				}
+			});
 		}
 	}
 
@@ -7699,8 +7713,21 @@ public class Rentalv2ServiceImpl implements Rentalv2Service {
 	}
 
 	@Override
-	public RentalOrderDTO renewRentalOrder(RenewRentalOrderCommand cmd) {
+	public CommonOrderDTO renewRentalOrder(RenewRentalOrderCommand cmd) {
 
+		RentalOrder bill = actualRenewRentalOrder(cmd);
+
+		return buildCommonOrderDTO(bill);
+	}
+
+	@Override
+	public PreOrderDTO renewRentalOrderV2(RenewRentalOrderCommand cmd) {
+		RentalOrder bill = actualRenewRentalOrder(cmd);
+
+		return buildPreOrderDTO(bill, cmd.getClientAppName());
+	}
+
+	private RentalOrder actualRenewRentalOrder(RenewRentalOrderCommand cmd) {
 		RentalOrder bill = rentalv2Provider.findRentalBillById(cmd.getRentalBillId());
 		//使用中才可以续费
 		if (!bill.getStatus().equals(SiteBillStatus.IN_USING.getCode())) {
@@ -7716,15 +7743,15 @@ public class Rentalv2ServiceImpl implements Rentalv2Service {
 
 		cellList.get().clear();
 
-		RentalOrderDTO dto = ConvertHelper.convert(bill, RentalOrderDTO.class);
-		convertRentalOrderDTO(dto, bill);
+//		RentalOrderDTO dto = ConvertHelper.convert(bill, RentalOrderDTO.class);
+//		convertRentalOrderDTO(dto, bill);
 
 		//发消息
 		RentalMessageHandler handler = rentalCommonService.getRentalMessageHandler(bill.getResourceType());
 
 		handler.renewRentalOrderSendMessage(bill);
 
-		return dto;
+		return bill;
 	}
 
 	private void updateRentalOrder(RentalResource rs, RentalOrder bill, BigDecimal payAmount, Double cellCount) {

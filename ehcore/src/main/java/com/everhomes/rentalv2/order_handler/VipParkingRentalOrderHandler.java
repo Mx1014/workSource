@@ -73,7 +73,7 @@ public class VipParkingRentalOrderHandler implements RentalOrderHandler {
         }
 
         order.setCustomObject(JSONObject.toJSONString(parkingInfo));
-        //当是vip车位预约时设置车位编号
+        //当是vip车位预约时设置车位编号 TODO: 改用 Rentalv2CustomField
         order.setStringTag1(parkingInfo.getSpaceNo());
         order.setStringTag2(parkingInfo.getPlateNumber());
 

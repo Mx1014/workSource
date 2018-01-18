@@ -188,4 +188,7 @@ public interface Rentalv2Provider {
 	List<RentalOrder> searchRentalOrders(Long resourceTypeId, String resourceType, Long rentalSiteId, Byte billStatus,
 										 Long startTime, Long endTime, String tag1, String tag2, Long pageAnchor ,
 										 Integer pageSize);
+
+	List<String> listOverTimeSpaces(Integer namespaceId, Long resourceTypeId, String resourceType,
+									Long rentalSiteId);
 }
