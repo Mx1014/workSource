@@ -3,6 +3,7 @@ package com.everhomes.dynamicExcel;
 
 import com.everhomes.bootstrap.PlatformContext;
 import com.everhomes.util.excel.ExcelUtils;
+import com.sun.xml.internal.ws.api.pipe.FiberContextSwitchInterceptor;
 import org.apache.commons.lang.StringUtils;
 import org.apache.poi.ss.usermodel.Cell;
 import org.apache.poi.ss.usermodel.Row;
@@ -43,13 +44,16 @@ public class DynamicExcelService {
      *
      * @param response 输出流
      * @param code 业务码,bean名称的后缀，前缀参考 {@link com.everhomes.dynamicExcel.DynamicExcelStrings}
+     * @param workbook workbook格式，不传则默认为XSSFWorkbook
      * @param dynamicSheets
      * @param baseInfo 不填,则走默认的
      * @param enumSupport true：会将枚举值放入说明中； false：不会将枚举放入说明
      * @excelName excel文件名字，没有则默认给一个“客户数据导出+时间戳”
      */
-    public void exportDynamicExcel(HttpServletResponse response, String code, List<DynamicSheet> dynamicSheets, String baseInfo, boolean enumSupport, boolean withData,String excelName){
-        Workbook workbook = new XSSFWorkbook();
+    public void exportDynamicExcel(HttpServletResponse response, String code, List<DynamicSheet> dynamicSheets, String baseInfo, boolean enumSupport, boolean withData, String excelName, Workbook workbook){
+        if(workbook == null){
+            workbook = new XSSFWorkbook();
+        }
         DynamicExcelHandler h = getHandler(code);
         //遍历筛选过的sheet
         for( int i = 0; i < dynamicSheets.size(); i++){
@@ -90,12 +94,14 @@ public class DynamicExcelService {
         //写入流
         ServletOutputStream out;
         ByteArrayOutputStream byteArray = new ByteArrayOutputStream();
-        SimpleDateFormat sdf = new SimpleDateFormat("yyyyMMddHHmmss");
-        String fileName = "客户数据导出"+sdf.format(Calendar.getInstance().getTime());
-        fileName = fileName + ".xls";
+        if(excelName == null){
+            SimpleDateFormat sdf = new SimpleDateFormat("yyyyMMddHHmmss");
+            excelName = "客户数据导出"+sdf.format(Calendar.getInstance().getTime());
+            excelName = excelName + ".xls";
+        }
         response.setContentType("application/msexcel");
         try {
-            response.setHeader("Content-Disposition", "attachment; filename=" + URLEncoder.encode(fileName, "UTF-8").replaceAll("\\+", "%20"));
+            response.setHeader("Content-Disposition", "attachment; filename=" + URLEncoder.encode(excelName, "UTF-8").replaceAll("\\+", "%20"));
         } catch (UnsupportedEncodingException e) {
             e.printStackTrace();
         }
@@ -112,11 +118,11 @@ public class DynamicExcelService {
             }
         }
     }
-sheet and sheet context//
+
     /**
      *
      * @param file 有效的excel文件
-     * @param code 业务码
+     * @param code 回调的bean的名称
      * @param headerRow 标题行为第几行，默认为第2行
      * @param storage 传递调用者参数用
      * @return DynamicImportResponse
@@ -124,6 +130,8 @@ sheet and sheet context//
     public DynamicImportResponse importMultiSheet(MultipartFile file, String code, Integer headerRow, Object storage,Object storage1) {
         DynamicImportResponse response = new DynamicImportResponse();
         Workbook workbook = null;
+        //sheet和sheet之间保持联系的上下文
+        Map<Object,Object> context = new HashMap<>();
         try{
             workbook = ExcelUtils.getWorkbook(file.getInputStream(), file.getOriginalFilename());
             if(workbook == null) {int err = 1/0;}
@@ -137,18 +145,20 @@ sheet and sheet context//
         DynamicExcelHandler h = getHandler(code);
         //遍历所有的sheet
         sheet:for(int i = 0; i < workbook.getNumberOfSheets(); i++) {
+            Sheet sheet = null;
             try{
-                Sheet sheet = workbook.getSheetAt(i);
-                DynamicSheet ds = h.getDynamicSheet(sheet.getSheetName(), storage);
-                //获得sheet的容器对象
-                String className = ds.getClassName();
-                Class<?> sheetClass = null;
-                try {
-                    sheetClass = Class.forName(className);
-                } catch (ClassNotFoundException e) {
-                    LOGGER.error("import failed,class not found exception, group name is = {}", sheet.getSheetName());
-                    continue sheet;
-                }
+                  sheet = workbook.getSheetAt(i);
+//                //获得行对象和列对象时，可以不用这一步吗？
+//                DynamicSheet ds = h.getDynamicSheet(sheet.getSheetName(), storage);
+//                //获得sheet的容器对象
+//                String className = ds.getClassName();
+//                Class<?> sheetClass = null;
+//                try {
+//                    sheetClass = Class.forName(className);
+//                } catch (ClassNotFoundException e) {
+//                    LOGGER.error("import failed,class not found exception, group name is = {}", sheet.getSheetName());
+//                    continue sheet;
+//                }
                 List<Object> sheetClassObjs = new ArrayList<>();
                 Row headRow = null;
                 if (headerRow != null) {
@@ -157,59 +167,87 @@ sheet and sheet context//
                     headRow = sheet.getRow(1);
                     headerRow = 1;
                 }
-                List<DynamicField> headers = new ArrayList<>();
+//                List<DynamicField> headers = new ArrayList<>();
+                List<String> headers = new ArrayList<>();
                 //获得了 dynamicField的列表
+//                for (int j = headRow.getFirstCellNum(); j < headRow.getLastCellNum(); j++) {
+//                    Cell cell = headRow.getCell(j);
+//                    String headerDisplay = ExcelUtils.getCellValue(cell);
+//                    headers.add(headerDisplay);
+//                }
                 for (int j = headRow.getFirstCellNum(); j < headRow.getLastCellNum(); j++) {
                     Cell cell = headRow.getCell(j);
                     String headerDisplay = ExcelUtils.getCellValue(cell);
-                    headers.add(ds.getDynamicFields().get(headerDisplay));
+                    headers.add(headerDisplay);
                 }
-                //数据的获得
+//                //数据的获得
+//                for (int j = headerRow + 1; j <= sheet.getLastRowNum(); j++) {
+//                    Row row = sheet.getRow(j);
+//                    //构建sheet的实例
+//                    Object sheetClassInstance = null;
+//                    try {
+//                        sheetClassInstance = sheetClass.newInstance();
+//                    } catch (Exception e) {
+//                        LOGGER.error("sheetClass new Instance failed, sheetClass = {}", sheetClass.getSimpleName());
+//                        continue sheet;
+//                    }
+//                    for (int k = row.getFirstCellNum(); k < row.getLastCellNum(); k++) {
+//                        Cell cell = row.getCell(k);
+//                        String cellValue = ExcelUtils.getCellValue(cell);
+//                        //少了一步,把cellvalue转成可存储的fieldvalue，例如 男-> 1; varfields , thread pool, jindu,
+//                        String fieldValue = h.valueProcess(cellValue,sheetClass,ds);
+//                        DynamicField df = headers.get(k);
+//                        try {
+//                            setToObj(df, sheetClassInstance, cellValue);
+//                        } catch (Exception e) {
+//                            LOGGER.error("set2Obj failed, sheetClass = {},fieldName = {}, cellValue = {}",
+//                                    sheetClass.getSimpleName(), df.getFieldName(), cellValue);
+//                        }
+//                    }
+//                    sheetClassObjs.add(sheetClassInstance);
+//                }
+                List<DynamicRowDTO> rowDatas = new ArrayList<>();
                 for (int j = headerRow + 1; j <= sheet.getLastRowNum(); j++) {
                     Row row = sheet.getRow(j);
-                    //构建sheet的实例
-                    Object sheetClassInstance = null;
-                    try {
-                        sheetClassInstance = sheetClass.newInstance();
-                    } catch (Exception e) {
-                        LOGGER.error("sheetClass new Instance failed, sheetClass = {}", sheetClass.getSimpleName());
-                        continue sheet;
-                    }
+                    DynamicRowDTO rowData = new DynamicRowDTO();
+                    List<DynamicColumnDTO> columns = new ArrayList<>();
                     for (int k = row.getFirstCellNum(); k < row.getLastCellNum(); k++) {
                         Cell cell = row.getCell(k);
                         String cellValue = ExcelUtils.getCellValue(cell);
                         //少了一步,把cellvalue转成可存储的fieldvalue，例如 男-> 1; varfields , thread pool, jindu,
-                        String fieldValue = h.valueProcess(cellValue,sheetClass,ds);
-                        DynamicField df = headers.get(k);
-                        try {
-                            setToObj(df, sheetClassInstance, cellValue);
-                        } catch (Exception e) {
-                            LOGGER.error("set2Obj failed, sheetClass = {},fieldName = {}, cellValue = {}",
-                                    sheetClass.getSimpleName(), df.getFieldName(), cellValue);
-                        }
+                        DynamicColumnDTO dto = new DynamicColumnDTO();
+                        dto.setValue(cellValue);
+                        dto.setHeaderDisplay(headers.get(j));
+                        dto.setColumnNum(k);
+                        columns.add(dto);
                     }
-                    sheetClassObjs.add(sheetClassInstance);
+                    rowData.setColumns(columns);
+                    rowData.setRowNum(j);
+                    rowDatas.add(rowData);
                 }
+                h.importData(sheet.getSheetName(),rowDatas,response);
                 //插入
-                try {
-                    h.save2Schema(sheetClassObjs, sheetClass,storage1);
-                    Integer successRowNumber = response.getSuccessRowNumber();
-                    successRowNumber += sheetClassObjs.size();
-                    response.setSuccessRowNumber(successRowNumber);
-                } catch (Exception e) {
-                    LOGGER.error("save2Schema failed, sheetClass = {},sheeClassObjsNum = {}",
-                            sheetClass.getSimpleName(), sheetClassObjs.size());
-                    Integer failedRowNumber = response.getFailedRowNumber();
-                    failedRowNumber += sheetClassObjs.size();
-                    response.setFailedRowNumber(failedRowNumber);
-                    continue sheet;
-                }
-            }catch(Exception e){}
+//                try {
+//                    h.save2Schema(sheetClassObjs, sheetClass,storage1 , context);
+//                    Integer successRowNumber = response.getSuccessRowNumber();
+//                    successRowNumber += sheetClassObjs.size();
+//                    response.setSuccessRowNumber(successRowNumber);
+//                } catch (Exception e) {
+//                    LOGGER.error("save2Schema failed, sheetClass = {},sheeClassObjsNum = {}",
+//                            sheetClass.getSimpleName(), sheetClassObjs.size());
+//                    Integer failedRowNumber = response.getFailedRowNumber();
+//                    failedRowNumber += sheetClassObjs.size();
+//                    response.setFailedRowNumber(failedRowNumber);
+//                    continue sheet;
+//                }
+            }catch(Exception e){
+                LOGGER.info("sheet = {}, failed to import,error = {}",sheet.getSheetName(),e);
+            }
         }
-        try{
-            //后处理
-            h.postProcess(response);
-        }catch (Exception e){}
+//        try{
+//            //后处理
+//            h.postProcess(response);
+//        }catch (Exception e){}
         return response;
     }
 

@@ -6,6 +6,7 @@ import com.everhomes.dynamicExcel.DynamicImportResponse;
 import com.everhomes.dynamicExcel.DynamicSheet;
 
 import java.util.List;
+import java.util.Map;
 
 /**
  * Created by Wentian on 2018/1/12.
@@ -27,12 +28,12 @@ public interface DynamicExcelHandler {
      * @param sheetClassObjs sheet页对应的类的对象的集合
      * @param sheetClass    sheet页对应的类
      */
-    void save2Schema(List<Object> sheetClassObjs, Class<?> sheetClass,Object storage1);
+//    void save2Schema(List<Object> sheetClassObjs, Class<?> sheetClass, Object storage1, Map<Object,Object> context);
     /**
      *
      * @param response 对返回结果进行后处理，不进行处理则只返回下载成功和失败的行数
      */
-    void postProcess(DynamicImportResponse response);
+//    void postProcess(DynamicImportResponse response);
 
     /**
      *在dynamicaService 导入方法importMultiSheet中使用，storage用来传递参数
@@ -40,7 +41,7 @@ public interface DynamicExcelHandler {
      * @param storage   传递的调用者的参数
      * @Return Dynamic实例对象
      */
-    DynamicSheet getDynamicSheet(String sheetName, Object storage);
+//    DynamicSheet getDynamicSheet(String sheetName, Object storage);
 
     /**
      * 标题行和返回的数据的list的下表必须保持对应
@@ -48,6 +49,15 @@ public interface DynamicExcelHandler {
      * @param sheet 所在的动态sheet对象
      * @return
      */
-    // obj : hanghao, displayvalue,xxxx
     List<List<String>> getExportData(List<DynamicField> fields, DynamicSheet sheet);
+
+//    void importData(String sheetName, List<String> headers, List<DynamicRowDTO> rowDatas, DynamicImportResponse response);
+
+    /**
+     *
+     * @param sheetName sheet页的名字
+     * @param rowDatas  sheet页中的行数据列表
+     * @param response  接口DynamicExcelService.importMultiSheet的返回
+     */
+    void importData(String sheetName, List<DynamicRowDTO> rowDatas, DynamicImportResponse response);
 }
