@@ -1444,9 +1444,9 @@ public class SocialSecurityServiceImpl implements SocialSecurityService {
             Integer companyRatio = null;
             Integer employeeRatio = null;
             if (StringUtils.isNotBlank(companyString))
-                companyRatio = (int) (Double.parseDouble(companyString.replace("%", "")) * 100);
+                companyRatio = (int) (Double.parseDouble(companyString.replace("%", "")) * 100.00);
             if (StringUtils.isNotBlank(emloyeeString))
-                employeeRatio = (int) (Double.parseDouble(emloyeeString.replace("%", "")) * 100);
+                employeeRatio = (int) (Double.parseDouble(emloyeeString.replace("%", "")) * 100.00);
             dto.setCompanyRatio(companyRatio);
             dto.setEmployeeRatio(employeeRatio);
             dto.setCompanyRadix(radix);
