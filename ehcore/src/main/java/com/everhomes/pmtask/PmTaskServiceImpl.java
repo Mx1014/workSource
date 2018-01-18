@@ -47,6 +47,7 @@ import com.everhomes.rest.ui.user.SceneType;
 import com.everhomes.scheduler.RunningFlag;
 import com.everhomes.scheduler.ScheduleProvider;
 import com.everhomes.user.*;
+import com.everhomes.util.DateHelper;
 import com.everhomes.util.DownloadUtils;
 import com.everhomes.util.doc.DocUtil;
 import org.apache.commons.collections.CollectionUtils;
@@ -1895,7 +1896,7 @@ public class PmTaskServiceImpl implements PmTaskService {
 
 	@Override
 	public ListAuthorizationCommunityByUserResponse listAuthorizationCommunityByUser(ListAuthorizationCommunityCommand cmd) {
-
+		Long step1 = System.currentTimeMillis();
 		if (null != cmd.getCheckPrivilegeFlag() && cmd.getCheckPrivilegeFlag() == PmTaskCheckPrivilegeFlag.CHECKED.getCode()) {
 			if(null == cmd.getOrganizationId()) {
 				LOGGER.error("Not privilege", cmd);
@@ -1911,8 +1912,11 @@ public class PmTaskServiceImpl implements PmTaskService {
 		ListUserRelatedProjectByModuleCommand listUserRelatedProjectByModuleCommand = new ListUserRelatedProjectByModuleCommand();
 		listUserRelatedProjectByModuleCommand.setOrganizationId(cmd.getOrganizationId());
 		listUserRelatedProjectByModuleCommand.setModuleId(FlowConstants.PM_TASK_MODULE);
+		Long step2 = System.currentTimeMillis();
 
 		List<CommunityDTO> dtos = serviceModuleService.listUserRelatedCommunityByModuleId(listUserRelatedProjectByModuleCommand);
+
+		Long step3 = System.currentTimeMillis();
 
 		if (null != cmd.getCheckPrivilegeFlag() && cmd.getCheckPrivilegeFlag() == PmTaskCheckPrivilegeFlag.CHECKED.getCode()) {
 
@@ -1931,6 +1935,7 @@ public class PmTaskServiceImpl implements PmTaskService {
 					result.add(r);
 				}
 			});
+
 			if(0 == result.size()) {
 				LOGGER.error("Not privilege", cmd);
 				throw RuntimeErrorException.errorWith(PmTaskErrorCode.SCOPE, PmTaskErrorCode.ERROR_CREATE_TASK_PRIVILEGE,
@@ -1945,11 +1950,15 @@ public class PmTaskServiceImpl implements PmTaskService {
 			}).collect(Collectors.toList()));
 		}
 
+		Long step4 = System.currentTimeMillis();
 		//TODO: LEILV
 //		List<CommunityDTO> dtos = this.communityProvider.listCommunitiesByNamespaceId(UserContext.getCurrentNamespaceId()).stream().map(r->{
 //			return ConvertHelper.convert(r, CommunityDTO.class);
 //		}).collect(Collectors.toList());
 //		response.setCommunities(dtos);
+		LOGGER.debug("step2-step1 = " + (step2-step1));
+		LOGGER.debug("step3-step2 = " + (step3-step2));
+		LOGGER.debug("step4-step3 = " + (step4-step3));
 		return response;
 	}
 
