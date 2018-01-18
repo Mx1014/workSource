@@ -63,4 +63,6 @@ public interface WebMenuPrivilegeProvider {
 	void deleteWebMenuScopesByMenuIdAndNamespace(List<Integer> socpeIds, Integer namespaceId);
 
     List<WebMenu> listMenuByModuleIdAndType(Long moduleId, String type);
+
+    void deleteMenuScopeByOwner(String ownerType, Long ownerId);
 }

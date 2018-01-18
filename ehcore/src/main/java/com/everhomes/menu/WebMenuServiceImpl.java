@@ -567,9 +567,8 @@ public class WebMenuServiceImpl implements WebMenuService {
 		return webMenuScopes;
 	}
 
-
+	@Override
 	public void refleshMenuByPortalVersion(Long versionId){
-
 
 		PortalVersionDTO portalVersionDTO = portalService.findPortalVersionById(versionId);
 		ListServiceModuleAppsCommand cmd = new ListServiceModuleAppsCommand();
@@ -578,31 +577,31 @@ public class WebMenuServiceImpl implements WebMenuService {
 		ListServiceModuleAppsResponse listServiceModuleAppsResponse = portalService.listServiceModuleApps(cmd);
 		List<ServiceModuleAppDTO> serviceModuleApps = listServiceModuleAppsResponse.getServiceModuleApps();
 
-
 		List<WebMenuScope> scopes = new ArrayList<>();
 
 		for(ServiceModuleAppDTO dto: serviceModuleApps){
 			if(dto.getModuleId() != null){
-				List<WebMenu> webMenus = webMenuProvider.listMenuByModuleIdAndType(dto.getModuleId(), WebMenuType.PARK.getCode());
-				if (webMenus != null){
-					for (WebMenu webMenu: webMenus){
-						WebMenuScope scope = new WebMenuScope();
-						scope.set
-					}
+				List<WebMenu> webMenus = new ArrayList<>();
+				List<WebMenu> parkMenus = webMenuProvider.listMenuByModuleIdAndType(dto.getModuleId(), WebMenuType.PARK.getCode());
+				List<WebMenu> orgMenus = webMenuProvider.listMenuByModuleIdAndType(dto.getModuleId(), WebMenuType.ORGANIZATION.getCode());
+				webMenus.addAll(parkMenus);
+				webMenus.addAll(orgMenus);
+				for (WebMenu webMenu: webMenus){
+					WebMenuScope scope = new WebMenuScope();
+					scope.setMenuId(dto.getMenuId());
+					scope.setMenuName(dto.getName());
+					scope.setOwnerType(EntityType.NAMESPACE.getCode());
+					scope.setOwnerId(portalVersionDTO.getNamespaceId().longValue());
+					scope.setAppId(dto.getOriginId());
+					scope.setConfigId(dto.getId());
+					scopes.add(scope);
 				}
 			}
 		}
-		listMenuByModuleIdAndType()
+		webMenuProvider.deleteMenuScopeByOwner(EntityType.NAMESPACE.getCode(), Long.valueOf(cmd.getNamespaceId()));
+		webMenuProvider.deleteMenuScopeByOwner(EntityType.ORGANIZATIONS.getCode(), Long.valueOf(cmd.getNamespaceId()));
 
-
-
-		//获取已经配置的菜单
-		List<WebMenuScope> webMenuScopes = webMenuProvider.listWebMenuScopeByOwnerId(EntityType.NAMESPACE.getCode(), Long.valueOf(cmd.getNamespaceId()));
-
-
-
-
-
+		webMenuProvider.createWebMenuScopes(scopes);
 
 	}
 

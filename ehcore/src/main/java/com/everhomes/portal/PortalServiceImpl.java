@@ -17,6 +17,7 @@ import com.everhomes.launchpad.LaunchPadProvider;
 import com.everhomes.listing.CrossShardListingLocator;
 import com.everhomes.listing.ListingLocator;
 import com.everhomes.listing.ListingQueryBuilderCallback;
+import com.everhomes.menu.WebMenuService;
 import com.everhomes.module.ServiceModule;
 import com.everhomes.module.ServiceModuleProvider;
 import com.everhomes.module.ServiceModuleService;
@@ -152,6 +153,9 @@ public class PortalServiceImpl implements PortalService {
 
 	@Autowired
 	private SequenceProvider sequenceProvider;
+
+	@Autowired
+	private WebMenuService webMenuService;
 
 	@Override
 	public ListServiceModuleAppsResponse listServiceModuleApps(ListServiceModuleAppsCommand cmd) {
@@ -1314,9 +1318,13 @@ public class PortalServiceImpl implements PortalService {
 
 						//清理预览版本服务广场数据
 						removePreviewVersion(namespaceId);
-
+						portalPublishLog.setProcess(10);
+						portalPublishLogProvider.updatePortalPublishLog(portalPublishLog);
 						//发布item分类
 						publishItemCategory(namespaceId, cmd.getVersionId(), cmd.getPublishType());
+
+						portalPublishLog.setProcess(20);
+						portalPublishLogProvider.updatePortalPublishLog(portalPublishLog);
 
 						for (PortalLayout layout: layouts) {
 							//发布layout
@@ -1329,8 +1337,15 @@ public class PortalServiceImpl implements PortalService {
 
 						//正式发布之后将当前版本改成大版本，再在此基础上生成一个小本版
 						if(PortalPublishType.fromCode(cmd.getPublishType()) == PortalPublishType.RELEASE){
+							//更新版本号为新的版本
 							updateVersionAfterPublish(cmd.getVersionId());
+							//复制一个小版本
 							copyPortalToNewVersion(namespaceId, cmd.getVersionId());
+
+							portalPublishLog.setProcess(85);
+							portalPublishLogProvider.updatePortalPublishLog(portalPublishLog);
+							//刷新菜单
+							webMenuService.refleshMenuByPortalVersion(cmd.getVersionId());
 						}
 
 						portalPublishLog.setProcess(100);
@@ -1356,11 +1371,6 @@ public class PortalServiceImpl implements PortalService {
 	public PortalPublishLogDTO getPortalPublishLog(GetPortalPublishLogCommand cmd){
 		return ConvertHelper.convert(portalPublishLogProvider.findPortalPublishLogById(cmd.getId()), PortalPublishLogDTO.class);
 	}
-
-	private void updatePortalPublishLog(Long Id, Integer process, Byte status){
-
-	}
-
 
 	private void removePreviewVersion(Integer namespaceId){
 		launchPadProvider.deletePreviewVersionItems(namespaceId);

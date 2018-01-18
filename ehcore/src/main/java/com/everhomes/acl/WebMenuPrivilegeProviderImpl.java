@@ -21,9 +21,7 @@ import com.everhomes.server.schema.tables.records.EhWebMenusRecord;
 import com.everhomes.sharding.ShardingProvider;
 import com.everhomes.util.ConvertHelper;
 
-import org.jooq.Condition;
-import org.jooq.DSLContext;
-import org.jooq.SelectQuery;
+import org.jooq.*;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -342,5 +340,15 @@ public class WebMenuPrivilegeProviderImpl implements WebMenuPrivilegeProvider {
 		query.addConditions(Tables.EH_WEB_MENUS.TYPE.eq(type));
 		List<WebMenu> webMenus = query.fetch().map(r -> ConvertHelper.convert(r, WebMenu.class));
 		return webMenus;
+	}
+
+
+	@Override
+	public void deleteMenuScopeByOwner(String ownerType, Long ownerId){
+		DSLContext context = dbProvider.getDslContext(AccessSpec.readOnlyWith(EhWebMenuScopes.class));
+		DeleteQuery query = context.deleteQuery(Tables.EH_WEB_MENU_SCOPES);
+		query.addConditions(Tables.EH_WEB_MENU_SCOPES.OWNER_TYPE.eq(ownerType));
+		query.addConditions(Tables.EH_WEB_MENU_SCOPES.OWNER_ID.eq(ownerId));
+		query.execute();
 	}
 }
