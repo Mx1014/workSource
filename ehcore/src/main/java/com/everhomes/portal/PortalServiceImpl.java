@@ -1334,8 +1334,7 @@ public class PortalServiceImpl implements PortalService {
 							//发布layout
 							publishLayout(layout, cmd.getVersionId(), cmd.getPublishType());
 						}
-
-
+						
 						portalPublishLog.setProcess(60);
 						portalPublishLogProvider.updatePortalPublishLog(portalPublishLog);
 

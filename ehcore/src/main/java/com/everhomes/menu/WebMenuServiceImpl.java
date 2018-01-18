@@ -587,7 +587,7 @@ public class WebMenuServiceImpl implements WebMenuService {
 				webMenus.addAll(orgMenus);
 				for (WebMenu webMenu: webMenus){
 					WebMenuScope scope = new WebMenuScope();
-					scope.setMenuId(dto.getMenuId());
+					scope.setMenuId(webMenu.getId());
 					scope.setMenuName(dto.getName());
 					scope.setApplyPolicy(WebMenuScopeApplyPolicy.OVERRIDE.getCode());
 					scope.setOwnerType(EntityType.NAMESPACE.getCode());
@@ -619,6 +619,5 @@ public class WebMenuServiceImpl implements WebMenuService {
 		webMenuProvider.createWebMenuScopes(scopes);
 
 	}
-
 
 }
