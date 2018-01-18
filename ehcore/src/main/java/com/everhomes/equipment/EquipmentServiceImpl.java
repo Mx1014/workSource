@@ -69,6 +69,9 @@ import com.everhomes.rest.equipment.EquipmentInspectionPlanDTO;
 import com.everhomes.rest.equipment.EquipmentInspectionReviewDateDTO;
 import com.everhomes.rest.equipment.EquipmentModelType;
 import com.everhomes.rest.equipment.EquipmentNotificationTemplateCode;
+import com.everhomes.rest.equipment.EquipmentOperateActionType;
+import com.everhomes.rest.equipment.EquipmentOperateLogsDTO;
+import com.everhomes.rest.equipment.EquipmentOperateObjectType;
 import com.everhomes.rest.equipment.EquipmentParameterDTO;
 import com.everhomes.rest.equipment.EquipmentPlanStatus;
 import com.everhomes.rest.equipment.EquipmentReviewStatus;
@@ -1208,8 +1211,15 @@ private void checkUserPrivilege(Long orgId, Long privilegeId, Long communityId) 
 					}
 				}
 			}
-
-
+			//增加设备的操作记录
+			EquipmentInspectionEquipmentLogs operateLog = new EquipmentInspectionEquipmentLogs();
+			operateLog.setNamespaceId(equipment.getNamespaceId());
+			operateLog.setOwnerId(cmd.getOwnerId());
+			operateLog.setOwnerType(cmd.getOwnerType());
+			operateLog.setTargetId(equipment.getId());
+			operateLog.setTargetType(EquipmentOperateObjectType.EQUIPMENT.getOperateObjectType());
+			operateLog.setProcessType(EquipmentOperateActionType.INSERT.getCode());
+			equipmentProvider.createEquipmentOperateLogs(operateLog);
 		} else {
 			EquipmentInspectionEquipments exist = verifyEquipment(cmd.getId(), cmd.getOwnerType(), cmd.getOwnerId());
 			equipment = ConvertHelper.convert(cmd, EquipmentInspectionEquipments.class);
@@ -1361,7 +1371,15 @@ private void checkUserPrivilege(Long orgId, Long privilegeId, Long communityId) 
 					attachments.add(attachment);
 				}
 			}
-
+			//增加设备的操作记录
+			EquipmentInspectionEquipmentLogs operateLog = new EquipmentInspectionEquipmentLogs();
+			operateLog.setNamespaceId(equipment.getNamespaceId());
+			operateLog.setOwnerId(cmd.getOwnerId());
+			operateLog.setOwnerType(cmd.getOwnerType());
+			operateLog.setTargetId(equipment.getId());
+			operateLog.setTargetType(EquipmentOperateObjectType.EQUIPMENT.getOperateObjectType());
+			operateLog.setProcessType(EquipmentOperateActionType.UPDATE.getCode());
+			equipmentProvider.createEquipmentOperateLogs(operateLog);
 		}
 
 //		equipmentSearcher.feedDoc(equipment);
@@ -1496,8 +1514,15 @@ private void checkUserPrivilege(Long orgId, Long privilegeId, Long communityId) 
 		//inactiveTasksByEquipmentId(equipment.getId());
 		//新的模式中直接删除计划中设备的关系表即可
 		equipmentProvider.deleteEquipmentPlansMapByEquipmentId(equipment.getId());
-
-
+		//增加设备的操作记录
+		EquipmentInspectionEquipmentLogs operateLog = new EquipmentInspectionEquipmentLogs();
+		operateLog.setNamespaceId(equipment.getNamespaceId());
+		operateLog.setOwnerId(cmd.getOwnerId());
+		operateLog.setOwnerType(cmd.getOwnerType());
+		operateLog.setTargetId(equipment.getId());
+		operateLog.setTargetType(EquipmentOperateObjectType.EQUIPMENT.getOperateObjectType());
+		operateLog.setProcessType(EquipmentOperateActionType.DELETE.getCode());
+		equipmentProvider.createEquipmentOperateLogs(operateLog);
 	}
 
 	private void inactiveTasksByStandardId(Long standardId) {
@@ -4901,7 +4926,6 @@ private void checkUserPrivilege(Long orgId, Long privilegeId, Long communityId) 
 				cmd.getInspectionCategoryId(), getDayBegin(cal, -cmd.getLastDays()), getDayEnd(cal, 0),cmd.getNamespaceId());
 
 		StatLastDaysEquipmentTasksResponse response = new StatLastDaysEquipmentTasksResponse();
-		response.setComplete(statTasks.getComplete());
 		response.setCompleteInspection(statTasks.getCompleteInspection());
 		response.setCompleteMaintance(statTasks.getCompleteMaintance());
 		response.setReviewUnqualified(reviewStat.getUnqualifiedTasks());
@@ -4937,9 +4961,9 @@ private void checkUserPrivilege(Long orgId, Long privilegeId, Long communityId) 
 		response.setUnReviewedTasks(statTasks.getCompleteWaitingForApproval());
 		response.setReviewTasks(response.getUnReviewedTasks() + response.getReviewedTasks());
 
-		Double maintanceRate = response.getComplete().equals(0L) ? 0.00 : (double)response.getCompleteMaintance()/(double)response.getComplete();
+		Double maintanceRate = response.getCompleteInspection().equals(0L) ? 0.00 : (double)response.getCompleteMaintance()/(double)response.getCompleteInspection();
 		response.setMaintanceRate(maintanceRate);
-		Double delayRate = (response.getComplete()+response.getDelay()) == 0L ? 0.00 : (double)response.getDelay()/(double)(response.getComplete()+response.getDelay());
+		Double delayRate = (response.getCompleteInspection()+response.getDelay()) == 0L ? 0.00 : (double)response.getDelay()/(double)(response.getCompleteInspection()+response.getDelay());
 		response.setDelayRate(delayRate);
 		Double reviewQualifiedRate = response.getReviewedTasks().equals(0L) ? 0.00 : (double)response.getReviewQualified()/(double)response.getReviewedTasks();
 		response.setReviewQualifiedRate(reviewQualifiedRate);
@@ -5964,4 +5988,14 @@ private void checkUserPrivilege(Long orgId, Long privilegeId, Long communityId) 
 		equipmentProvider.updateEquipmentStatus(cmd.getEquipmentId(),EquipmentStatus.IN_MAINTENANCE.getCode());
 	}
 
+
+	@Override
+	public List<EquipmentOperateLogsDTO> listOperateLogs(DeleteEquipmentsCommand cmd) {
+		List<EquipmentInspectionTasksLogs> logs = equipmentProvider.listEquipmentOperateLogsByTargetId(cmd.getEquipmentId());
+		if (logs != null && logs.size() > 0) {
+			return logs.stream().map((r) ->
+					ConvertHelper.convert(r, EquipmentOperateLogsDTO.class)).collect(Collectors.toList());
+		}
+		return null;
+	}
 }

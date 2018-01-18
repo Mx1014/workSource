@@ -20,6 +20,7 @@ import com.everhomes.rest.equipment.EquipmentAttachmentDTO;
 import com.everhomes.rest.equipment.EquipmentInspectionCategoryDTO;
 import com.everhomes.rest.equipment.EquipmentInspectionPlanDTO;
 import com.everhomes.rest.equipment.EquipmentInspectionReviewDateDTO;
+import com.everhomes.rest.equipment.EquipmentOperateLogsDTO;
 import com.everhomes.rest.equipment.EquipmentStandardRelationDTO;
 import com.everhomes.rest.equipment.EquipmentStandardsDTO;
 import com.everhomes.rest.equipment.EquipmentTaskDTO;
@@ -141,7 +142,6 @@ public class EquipmentController extends ControllerBase {
     @RequestMapping("updateEquipmentStandard")
     @RestReturn(value = EquipmentStandardsDTO.class)
     public RestResponse updateEquipmentStandard(UpdateEquipmentStandardCommand cmd) {
-
         EquipmentStandardsDTO standard = equipmentService.updateEquipmentStandard(cmd);
         return getRestResponse(standard);
     }
@@ -153,7 +153,6 @@ public class EquipmentController extends ControllerBase {
     @RequestMapping("findEquipmentStandard")
     @RestReturn(value = EquipmentStandardsDTO.class)
     public RestResponse findEquipmentStandard(DeleteEquipmentStandardCommand cmd) {
-
         EquipmentStandardsDTO standard = equipmentService.findEquipmentStandard(cmd);
         return getRestResponse(standard);
     }
@@ -258,7 +257,6 @@ public class EquipmentController extends ControllerBase {
     public RestResponse updateEquipments(UpdateEquipmentsCommand cmd) {
 
         equipmentService.updateEquipments(cmd);
-
         return getSuccessResponse();
     }
 
@@ -299,6 +297,17 @@ public class EquipmentController extends ControllerBase {
         SearchEquipmentsResponse equipments = equipmentSearcher.queryEquipments(cmd);
 
         return getRestResponse(equipments);
+    }
+
+    /**
+     * <b>URL: /equipment/listOperateLogs</b>
+     * <p>查看巡检对象操作记录</p>
+     */
+    @RequestMapping("listOperateLogs")
+    @RestReturn(value = EquipmentOperateLogsDTO.class, collection = true)
+    public RestResponse listOperateLogs(DeleteEquipmentsCommand cmd) {
+        List<EquipmentOperateLogsDTO> equipmentOperateLogsDTOS = equipmentService.listOperateLogs(cmd);
+        return getRestResponse(equipmentOperateLogsDTOS);
     }
 
     /**

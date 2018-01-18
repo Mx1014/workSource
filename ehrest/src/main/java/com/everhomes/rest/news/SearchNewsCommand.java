@@ -20,6 +20,7 @@ import java.util.List;
  * <li>tagIds: 标签的id</li>
  * <li>pageSize: 每页的数量</li>
  * <li>tagIds: 需要筛选的标签id</li>
+ * <li>status: 状态，参考 {@link NewsStatus}</li>
  * </ul>
  */
 public class SearchNewsCommand {
@@ -33,6 +34,15 @@ public class SearchNewsCommand {
 	private Integer pageSize;
 	@ItemType(Long.class)
 	private List<Long> tagIds;
+	private Byte status;
+	
+	public Byte getStatus() {
+		return status;
+	}
+
+	public void setStatus(Byte status) {
+		this.status = status;
+	}
 
 	public String getOwnerType() {
 		return ownerType;
