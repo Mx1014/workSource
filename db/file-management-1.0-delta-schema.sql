@@ -48,6 +48,16 @@ CREATE TABLE `eh_file_management_contents` (
   PRIMARY KEY (`id`)
 ) ENGINE = INNODB DEFAULT CHARSET = utf8mb4 ;
 
+-- DROP TABLE eh_file_icon;
+CREATE TABLE `eh_file_icon` (
+  `id` BIGINT,
+  `file_type` VARCHAR(64) NOT NULL COMMENT 'the type of the file',
+  `icon_name` VARCHAR(128) COMMENT 'the name of the icon',
+  `icon_uri` VARCHAR(2048) NOT NULL COMMENT 'the uri of the type',
+  `create_time` DATETIME,
+  PRIMARY KEY (`id`)
+) ENGINE = INNODB DEFAULT CHARSET = utf8mb4 ;
+
 -- end by nan.rong
 
 
