@@ -36,7 +36,7 @@ CREATE TABLE `eh_file_management_contents` (
   `owner_type` VARCHAR (64),
   `catalog_id` BIGINT COMMENT 'the id of the catalog',
   `name` VARCHAR(256) NOT NULL COMMENT 'the name of the content',
-  `size` INT NOT NULL COMMENT 'the size of the content',
+  `size` INT NOT NULL DEFAULT 0 COMMENT 'the size of the content',
   `parent_id` BIGINT COMMENT 'the parent id of the folder',
   `content_type` VARCHAR(32) COMMENT 'file, folder',
   `content_uri` VARCHAR(2048) COMMENT 'the uri of the content',
