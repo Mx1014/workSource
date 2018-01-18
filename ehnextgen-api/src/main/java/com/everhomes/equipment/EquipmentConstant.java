@@ -29,6 +29,4 @@ public interface EquipmentConstant {
     Byte EQUIPMENT_ACTION_TYEPEV2 = 14;
     //物业报修监听器后缀
     String EQUIPMENT_REPAIR = "equipment_task";
-
-
 }
