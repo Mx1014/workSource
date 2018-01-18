@@ -43,22 +43,6 @@ public class GeneralApprovalController extends ControllerBase {
     	
     	return response;
     }
-    
-//    /**
-//     * <b>URL: /general_approval/getActiveGeneralFormByOriginId</b>
-//     * <p> 获取不带工作流的表单的信息 </p>
-//     * 
-//     */
-//    @RequestMapping("getActiveGeneralFormByOriginId")
-//    @RestReturn(value=GetActiveGeneralFormByOriginIdResponse.class)
-//    public RestResponse getActiveGeneralFormByOriginId(@Valid GetActiveGeneralFormByOriginIdCommand cmd) {
-//    	GetTemplateByApprovalIdResponse result = generalApprovalService.getActiveGeneralFormByOriginId(cmd);
-//    	RestResponse response = new RestResponse(result);
-//    	response.setErrorCode(ErrorCodes.SUCCESS);
-//    	response.setErrorDescription("OK");
-//    	
-//    	return response;
-//    }
 
     /**
      * <b>URL: /general_approval/listActiveGeneralApproval</b>
@@ -91,21 +75,7 @@ public class GeneralApprovalController extends ControllerBase {
     	
     	return response;
     }
-     
-//    /**
-//     * <b>URL: /general_approval/postForm</b>
-//     * <p> 提交不关联工作流的表单的数据，并获取表单的信息 </p>
-//     */
-//    @RequestMapping("postForm")
-//    @RestReturn(value=PostFormResponse.class)
-//    public RestResponse postForm(@Valid PostFormCommand cmd) {
-//    	GetTemplateByApprovalIdResponse result = generalApprovalService.postForm(cmd);
-//    	RestResponse response = new RestResponse(result);
-//    	response.setErrorCode(ErrorCodes.SUCCESS);
-//    	response.setErrorDescription("OK");
-//    	
-//    	return response;
-//    }
+
 	/**
 	 * <b>URL: /general_approval/verifyApprovalTemplates</b>
 	 * <p> 判断是否需要创建审批模板 </p>
