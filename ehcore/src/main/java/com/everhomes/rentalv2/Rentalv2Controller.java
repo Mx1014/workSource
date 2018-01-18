@@ -568,10 +568,10 @@ public class Rentalv2Controller extends ControllerBase {
 	}
 
 	/**
-	 * <b>URL: /rental/renewRentalOrder</b>
+	 * <b>URL: /rental/renewRentalOrderV2</b>
 	 * <p>订单续费</p>
 	 */
-	@RequestMapping("renewRentalOrder")
+	@RequestMapping("renewRentalOrderV2")
 	@RestReturn(value = PreOrderDTO.class)
 	public RestResponse renewRentalOrderV2(RenewRentalOrderCommand cmd) {
 		RestResponse response = new RestResponse(rentalService.renewRentalOrderV2(cmd));

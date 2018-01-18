@@ -1,17 +1,20 @@
 package com.everhomes.rentalv2.order_handler;
 
 import com.alibaba.fastjson.JSONObject;
+import com.everhomes.constants.ErrorCodes;
 import com.everhomes.parking.ParkingLot;
 import com.everhomes.parking.ParkingProvider;
 import com.everhomes.parking.ParkingSpace;
 import com.everhomes.rentalv2.*;
 import com.everhomes.rest.parking.ParkingSpaceStatus;
 import com.everhomes.rest.rentalv2.PriceRuleType;
+import com.everhomes.rest.rentalv2.RentalV2ResourceType;
 import com.everhomes.rest.rentalv2.RuleSourceType;
 import com.everhomes.rest.rentalv2.VipParkingUseInfoDTO;
 import com.everhomes.rest.rentalv2.admin.*;
 import com.everhomes.rest.ui.user.SceneType;
 import com.everhomes.util.ConvertHelper;
+import com.everhomes.util.RuntimeErrorException;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
 
@@ -52,8 +55,16 @@ public class VipParkingRentalOrderHandler implements RentalOrderHandler {
         VipParkingUseInfoDTO parkingInfo = JSONObject.parseObject(order.getCustomObject(), VipParkingUseInfoDTO.class);
         ParkingLot parkingLot = parkingProvider.findParkingLotById(order.getRentalResourceId());
 
+        List<String> spaces = rentalv2Provider.listOverTimeSpaces(parkingLot.getNamespaceId(), order.getResourceTypeId(),
+                RentalV2ResourceType.VIP_PARKING.getCode(), parkingLot.getId());
+
         ParkingSpace parkingSpace = parkingProvider.getAnyParkingSpace(parkingLot.getNamespaceId(), parkingLot.getOwnerType(),
-                parkingLot.getOwnerId(),parkingLot.getId());
+                parkingLot.getOwnerId(),parkingLot.getId(), spaces);
+
+        if (null == parkingSpace) {
+            throw RuntimeErrorException.errorWith(ErrorCodes.SCOPE_GENERAL, ErrorCodes.ERROR_INVALID_PARAMETER,
+                    "Invalid param rules");
+        }
 
         parkingInfo.setSpaceNo(parkingSpace.getSpaceNo());
         parkingInfo.setSpaceAddress(parkingSpace.getSpaceAddress());

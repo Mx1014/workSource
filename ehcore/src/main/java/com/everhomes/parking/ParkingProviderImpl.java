@@ -1075,7 +1075,7 @@ public class ParkingProviderImpl implements ParkingProvider {
 	}
 
 	@Override
-	public ParkingSpace getAnyParkingSpace(Integer namespaceId, String ownerType, Long ownerId, Long parkingLotId) {
+	public ParkingSpace getAnyParkingSpace(Integer namespaceId, String ownerType, Long ownerId, Long parkingLotId, List<String> spaces) {
 
 		DSLContext context = this.dbProvider.getDslContext(AccessSpec.readOnlyWith(EhParkingSpaces.class));
 		SelectQuery<EhParkingSpacesRecord> query = context.selectQuery(Tables.EH_PARKING_SPACES);
@@ -1084,7 +1084,9 @@ public class ParkingProviderImpl implements ParkingProvider {
 		query.addConditions(Tables.EH_PARKING_SPACES.OWNER_ID.eq(ownerId));
 		query.addConditions(Tables.EH_PARKING_SPACES.OWNER_TYPE.eq(ownerType));
 		query.addConditions(Tables.EH_PARKING_SPACES.PARKING_LOT_ID.eq(parkingLotId));
-		query.addConditions(Tables.EH_PARKING_SPACES.STATUS.eq(ParkingSpaceStatus.OPEN.getCode()));
+		query.addConditions(Tables.EH_PARKING_SPACES.STATUS.eq(ParkingSpaceStatus.OPEN.getCode())
+			.or(Tables.EH_PARKING_SPACES.STATUS.eq(ParkingSpaceStatus.OPEN.getCode())));
+		query.addConditions(Tables.EH_PARKING_SPACES.SPACE_NO.notIn(spaces));
 		query.addLimit(1);
 
 		return ConvertHelper.convert(query.fetchAny(), ParkingSpace.class);
