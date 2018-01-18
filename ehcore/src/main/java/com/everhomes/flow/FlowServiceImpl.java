@@ -1059,30 +1059,34 @@ public class FlowServiceImpl implements FlowService {
     }
 
     @Override
-    public ListFlowUserSelectionResponse createFlowUserSelection(
-            CreateFlowUserSelectionCommand cmd) {
+    public ListFlowUserSelectionResponse createFlowUserSelection(CreateFlowUserSelectionCommand cmd) {
         Flow flow = getFlowByEntity(cmd.getBelongTo(), FlowEntityType.fromCode(cmd.getFlowEntityType()));
         flowMarkUpdated(flow);
 
-        List<FlowSingleUserSelectionCommand> cmds = cmd.getSelections();
-        if (cmds != null && cmds.size() > 0) {
-            for (FlowSingleUserSelectionCommand sCmd : cmds) {
-                FlowUserSelection sel = ConvertHelper.convert(sCmd, FlowUserSelection.class);
-                sel.setBelongEntity(cmd.getFlowEntityType());
-                sel.setBelongTo(cmd.getBelongTo());
-                sel.setBelongType(cmd.getFlowUserType());
-                sel.setFlowMainId(flow.getTopId());
-                sel.setFlowVersion(FlowConstants.FLOW_CONFIG_VER);
-                sel.setSelectType(sCmd.getFlowUserSelectionType());
-                sel.setStatus(FlowStatusType.VALID.getCode());
-                sel.setNamespaceId(UserContext.getCurrentNamespaceId());
-                if (sel.getOrganizationId() == null) {
-                    sel.setOrganizationId(flow.getOrganizationId());
+        dbProvider.execute(status -> {
+            flowUserSelectionProvider.deleteSelectionByBelong(cmd.getBelongTo(), cmd.getFlowEntityType(), cmd.getFlowUserType());
+
+            List<FlowSingleUserSelectionCommand> cmds = cmd.getSelections();
+            if (cmds != null && cmds.size() > 0) {
+                for (FlowSingleUserSelectionCommand sCmd : cmds) {
+                    FlowUserSelection sel = ConvertHelper.convert(sCmd, FlowUserSelection.class);
+                    sel.setBelongEntity(cmd.getFlowEntityType());
+                    sel.setBelongTo(cmd.getBelongTo());
+                    sel.setBelongType(cmd.getFlowUserType());
+                    sel.setFlowMainId(flow.getTopId());
+                    sel.setFlowVersion(FlowConstants.FLOW_CONFIG_VER);
+                    sel.setSelectType(sCmd.getFlowUserSelectionType());
+                    sel.setStatus(FlowStatusType.VALID.getCode());
+                    sel.setNamespaceId(UserContext.getCurrentNamespaceId());
+                    if (sel.getOrganizationId() == null) {
+                        sel.setOrganizationId(flow.getOrganizationId());
+                    }
+                    updateFlowUserName(sel);
+                    flowUserSelectionProvider.createFlowUserSelection(sel);
                 }
-                updateFlowUserName(sel);
-                flowUserSelectionProvider.createFlowUserSelection(sel);
             }
-        }
+            return true;
+        });
 
         ListFlowUserSelectionCommand cmd1 = new ListFlowUserSelectionCommand();
         cmd1.setBelongTo(cmd.getBelongTo());
@@ -1093,8 +1097,7 @@ public class FlowServiceImpl implements FlowService {
     }
 
     @Override
-    public ListFlowUserSelectionResponse listFlowUserSelection(
-            ListFlowUserSelectionCommand cmd) {
+    public ListFlowUserSelectionResponse listFlowUserSelection(ListFlowUserSelectionCommand cmd) {
         ListFlowUserSelectionResponse resp = new ListFlowUserSelectionResponse();
         List<FlowUserSelectionDTO> selections = new ArrayList<>();
         resp.setSelections(selections);

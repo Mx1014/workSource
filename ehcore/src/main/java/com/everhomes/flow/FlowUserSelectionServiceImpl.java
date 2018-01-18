@@ -3,7 +3,6 @@ package com.everhomes.flow;
 
 import com.everhomes.bootstrap.PlatformContext;
 import com.everhomes.enterprise.EnterpriseContactService;
-import com.everhomes.entity.EntityType;
 import com.everhomes.organization.OrganizationMember;
 import com.everhomes.organization.OrganizationService;
 import com.everhomes.rest.flow.FlowEntityType;
@@ -95,8 +94,7 @@ public class FlowUserSelectionServiceImpl implements FlowUserSelectionService {
                     // 业务责任部门岗位
                     case SOURCE_DUTY_DEPARTMENT:// 旧版本数据
                     case SOURCE_BUSINESS_DEPARTMENT:
-                        userIds = listUsersByBusinessDepartment(organizationId, flow.getModuleId(), sel.getSourceIdA(),
-                                EntityType.ORGANIZATIONS.getCode(), organizationId);
+                        userIds = listUsersByBusinessDepartment(organizationId, flow.getModuleId(), sel.getSourceIdA(), projectType, projectId);
                         break;
                     // 具体部门岗位
                     case SOURCE_DEPARTMENT:
