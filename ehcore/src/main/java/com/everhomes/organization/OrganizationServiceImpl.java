@@ -99,8 +99,6 @@ import com.everhomes.rest.organization.*;
 import com.everhomes.rest.organization.CreateOrganizationOwnerCommand;
 import com.everhomes.rest.organization.DeleteOrganizationOwnerCommand;
 import com.everhomes.rest.organization.pm.*;
-import com.everhomes.rest.portal.ListServiceModuleAppsCommand;
-import com.everhomes.rest.portal.ListServiceModuleAppsResponse;
 import com.everhomes.rest.region.RegionScope;
 import com.everhomes.rest.search.GroupQueryResult;
 import com.everhomes.rest.search.OrganizationQueryResult;
@@ -10892,8 +10890,8 @@ public class OrganizationServiceImpl implements OrganizationService {
 
 
     @Override
-    public OrganizationDTO listPmOrganizationsByNamespaceId() {
-        List<Organization> organizations = organizationProvider.listOrganizations(OrganizationType.PM.getCode(), null,
+    public OrganizationDTO listPmOrganizationsByNamespaceId(Integer namespaceId) {
+        List<Organization> organizations = organizationProvider.listOrganizations(OrganizationType.PM.getCode(), namespaceId,
                 0L, null, null);
         return ConvertHelper.convert(organizations.get(0), OrganizationDTO.class);
     }
