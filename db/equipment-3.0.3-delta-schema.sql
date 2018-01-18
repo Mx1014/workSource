@@ -78,6 +78,19 @@ ADD COLUMN `repeat_type` tinyint(4) NOT NULL COMMENT ' 0: no repeat, 1: by day, 
 ALTER TABLE `eh_equipment_inspection_task_logs`
   ADD COLUMN `equipment_id`  bigint(20) NULL DEFAULT 0 ;
 
+CREATE TABLE `eh_equipment_inspection_equipment_logs` (
+  `id` bigint(20) NOT NULL COMMENT 'id',
+  `owner_type` varchar(32) NOT NULL DEFAULT '' COMMENT 'the type of who own the log, enterprise, etc',
+  `owner_id` bigint(20) NOT NULL DEFAULT '0',
+  `target_type` varchar(32) NOT NULL DEFAULT '' COMMENT 'standard, etc',
+  `target_id` bigint(20) NOT NULL DEFAULT '0',
+  `process_type` tinyint(4) NOT NULL DEFAULT '0' COMMENT '0: none, 1: insert, 2: update, 3: delete',
+  `operator_uid` bigint(20) NOT NULL DEFAULT '0' COMMENT 'record operator user id',
+  `create_time` datetime DEFAULT NULL,
+  `namespace_id` int(11) NOT NULL DEFAULT '0',
+  PRIMARY KEY (`id`)
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4;
+
 -- by st.zheng
 ALTER TABLE `eh_pm_tasks`
   ADD COLUMN `refer_type` VARCHAR(32) NULL COMMENT '引用类型' AFTER `if_use_feelist`;

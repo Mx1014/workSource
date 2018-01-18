@@ -220,5 +220,9 @@ public interface EquipmentProvider {
 
     void statInMaintanceTaskCount(TasksStatData stat,Timestamp startTime, Timestamp endTime,StatTodayEquipmentTasksCommand cmd);
 
-    void updateEquipmentStatus(Long equipmentId,Byte status);
+	void updateEquipmentStatus(Long equipmentId, Byte status);
+
+	void createEquipmentOperateLogs(EquipmentInspectionEquipmentLogs log);
+
+	List<EquipmentInspectionTasksLogs> listEquipmentOperateLogsByTargetId(Long equipmentId);
 }
