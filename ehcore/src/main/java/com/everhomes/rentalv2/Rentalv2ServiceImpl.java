@@ -2365,7 +2365,7 @@ public class Rentalv2ServiceImpl implements Rentalv2Service {
 //				throw RuntimeErrorException.errorWith(RentalServiceErrorCode.SCOPE, RentalServiceErrorCode.ERROR_NO_ENOUGH_SITES,
 //										"Not enough sites to rental");
 //			}
-			validateCellStatus(cell, priceRules, rs, rule);
+			validateCellStatus(cell, priceRules, rs, rule, true);
 		}
 
 	}
@@ -4611,13 +4611,16 @@ public class Rentalv2ServiceImpl implements Rentalv2Service {
 		}
 	}
 
-	private void validateCellStatus(RentalCell rsr, List<Rentalv2PriceRule> priceRules, RentalResource rs, RentalDefaultRule rule) {
+	private void validateCellStatus(RentalCell rsr, List<Rentalv2PriceRule> priceRules, RentalResource rs, RentalDefaultRule rule,
+									boolean validateTime) {
 
 		RentalSiteRulesDTO dto = ConvertHelper.convert(rsr, RentalSiteRulesDTO.class);
 		// 支持复选，要换一种方式计算剩余数量
 		calculateAvailableCount(dto, rs, rsr, priceRules);
 		//根据时间判断来设置status
-		setRentalCellStatus(new java.util.Date(), dto, rsr, rule);
+		if (validateTime) {
+			setRentalCellStatus(new java.util.Date(), dto, rsr, rule);
+		}
 		//当可预约数量为0时, 或者在后台手动关闭时
 		if (dto.getCounts() == 0 || rsr.getStatus() == SiteRuleStatus.MANUAL_CLOSE.getCode()) {
 			dto.setStatus(SiteRuleStatus.CLOSE.getCode());
@@ -7599,7 +7602,7 @@ public class Rentalv2ServiceImpl implements Rentalv2Service {
 				lastCell = cell;
 			}
 
-			validateCellStatus(cell, priceRules, rs, rule);
+			validateCellStatus(cell, priceRules, rs, rule, true);
 
 			RentalBillRuleDTO dto = new RentalBillRuleDTO();
 			dto.setRuleId(cell.getId());
@@ -7647,7 +7650,7 @@ public class Rentalv2ServiceImpl implements Rentalv2Service {
 
 		processCells(rs, bill.getRentalType());
 
-		updateRentalOrder(rs, bill, cmd.getAmount(), cmd.getCellCount());
+		updateRentalOrder(rs, bill, cmd.getAmount(), cmd.getCellCount(), true);
 
 		cellList.get().clear();
 
@@ -7662,7 +7665,7 @@ public class Rentalv2ServiceImpl implements Rentalv2Service {
 		return bill;
 	}
 
-	private void updateRentalOrder(RentalResource rs, RentalOrder bill, BigDecimal payAmount, Double cellCount) {
+	private void updateRentalOrder(RentalResource rs, RentalOrder bill, BigDecimal payAmount, Double cellCount, boolean validateTime) {
 		List<RentalResourceOrder> resourceOrders = rentalv2Provider.findRentalResourceOrderByOrderId(bill.getId());
 		//TODO:此处取的是连续单元格后面的id，不适用跨场景延长时间
 		Long ruleId = resourceOrders.stream().mapToLong(RentalResourceOrder::getRentalResourceRuleId).max().getAsLong();
@@ -7683,7 +7686,9 @@ public class Rentalv2ServiceImpl implements Rentalv2Service {
 						"Invalid param rules");
 			}
 
-			validateCellStatus(cell, priceRules, rs, rule);
+
+			validateCellStatus(cell, priceRules, rs, rule, validateTime);
+
 
 			RentalBillRuleDTO dto = new RentalBillRuleDTO();
 			dto.setRuleId(cell.getId());
@@ -7729,7 +7734,7 @@ public class Rentalv2ServiceImpl implements Rentalv2Service {
 								throw RuntimeErrorException.errorWith(ErrorCodes.SCOPE_GENERAL, ErrorCodes.ERROR_INVALID_PARAMETER,
 										"Invalid param rules");
 							}
-							validateCellStatus(cell, priceRules, rs, rule);
+							validateCellStatus(cell, priceRules, rs, rule, validateTime);
 						}
 
 						this.rentalv2Provider.updateRentalBill(bill);
@@ -7801,9 +7806,9 @@ public class Rentalv2ServiceImpl implements Rentalv2Service {
 					double timeStep = rentalTimeInterval.getTimeStep() * 60;
 					double rentalCount = interval / timeStep;
 					if (interval % timeStep != 0) {
-						rentalCount += 1;
+						rentalCount = (int)rentalCount + 1;
 					}
-					updateRentalOrder(rs, order, null, rentalCount);
+					updateRentalOrder(rs, order, null, rentalCount, false);
 
 				}
 //				dto.setTimeIntervals(timeIntervals.stream().map(t -> ConvertHelper.convert(t, TimeIntervalDTO.class))
