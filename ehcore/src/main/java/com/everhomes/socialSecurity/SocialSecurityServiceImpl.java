@@ -1294,7 +1294,6 @@ public class SocialSecurityServiceImpl implements SocialSecurityService {
                 base = findSSBaseWithOutException(bases, item);
                 if (null == base) {
                     setting = ConvertHelper.convert(item, SocialSecuritySetting.class);
-                    setting.setId(null);
                     setting.setCityId(cityId);
                     setting.setOrganizationId(detail.getOrganizationId());
                     setting.setUserId(detail.getTargetId());
@@ -1306,6 +1305,7 @@ public class SocialSecurityServiceImpl implements SocialSecurityService {
                             detail.getTargetId(), detail.getId(), detail.getNamespaceId(), null);
 
                 }
+                setting.setId(null);
             }
             if (null != radix) {
                 setting.setRadix(radix);
