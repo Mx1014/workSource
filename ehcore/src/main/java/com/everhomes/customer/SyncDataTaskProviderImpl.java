@@ -49,7 +49,7 @@ public class SyncDataTaskProviderImpl implements SyncDataTaskProvider {
         DSLContext context = this.dbProvider.getDslContext(AccessSpec.readWriteWith(EhSyncDataTasks.class));
         EhSyncDataTasksDao dao = new EhSyncDataTasksDao(context.configuration());
         task.setUpdateTime(new Timestamp(DateHelper.currentGMTTime().getTime()));
-        dao.update();
+        dao.update(task);
 
         DaoHelper.publishDaoAction(DaoAction.MODIFY, EhSyncDataTasks.class, task.getId());
     }

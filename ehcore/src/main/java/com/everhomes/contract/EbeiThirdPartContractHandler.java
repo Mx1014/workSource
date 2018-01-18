@@ -178,17 +178,17 @@ public class EbeiThirdPartContractHandler implements ThirdPartContractHandler {
 
             //万一同步时间太长transaction断掉 在这里也要更新下
 //            SyncDataTask task = syncDataTaskProvider.findSyncDataTaskById(taskId);
-            Community community = communityProvider.findCommunityByNamespaceToken(NamespaceCommunityType.EBEI.getCode(), communityIdentifier);
-            if(community != null) {
-                SyncDataTask task = syncDataTaskProvider.findExecutingSyncDataTask(community.getId(), SyncDataTaskType.fromName(dataType).getCode());
-
-                if(task != null) {
-                    task.setStatus(SyncDataTaskStatus.FINISH.getCode());
-                    task.setResult("同步成功");
-                    task.setUpdateTime(new Timestamp(DateHelper.currentGMTTime().getTime()));
-                    syncDataTaskProvider.updateSyncDataTask(task);
-                }
-            }
+//            Community community = communityProvider.findCommunityByNamespaceToken(NamespaceCommunityType.EBEI.getCode(), communityIdentifier);
+//            if(community != null) {
+//                SyncDataTask task = syncDataTaskProvider.findExecutingSyncDataTask(community.getId(), SyncDataTaskType.fromName(dataType).getCode());
+//
+//                if(task != null) {
+//                    task.setStatus(SyncDataTaskStatus.FINISH.getCode());
+//                    task.setResult("同步成功");
+//                    task.setUpdateTime(new Timestamp(DateHelper.currentGMTTime().getTime()));
+//                    syncDataTaskProvider.updateSyncDataTask(task);
+//                }
+//            }
 
             //同步完要再调一个接口更新客户的状态 暂时不做
 
