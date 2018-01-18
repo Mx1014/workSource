@@ -644,4 +644,25 @@ public class AddressProviderImpl implements AddressProvider {
 
         DaoHelper.publishDaoAction(DaoAction.MODIFY, EhAddressAttachments.class, attachment.getId());
     }
+
+    @Override
+    public String findLastVersionByNamespace(Integer namespaceId, Long communityId) {
+        DSLContext context = dbProvider.getDslContext(AccessSpec.readOnly());
+        SelectQuery<EhAddressesRecord> query = context.selectQuery(Tables.EH_ADDRESSES);
+        query.addConditions(Tables.EH_ADDRESSES.COMMUNITY_ID.eq(communityId));
+        query.addConditions(Tables.EH_ADDRESSES.NAMESPACE_ID.eq(namespaceId));
+        query.addConditions(Tables.EH_ADDRESSES.STATUS.eq(CommonStatus.ACTIVE.getCode()));
+        query.addOrderBy(Tables.EH_ADDRESSES.VERSION.desc());
+        query.addLimit(1);
+        List<Address> result = new ArrayList<>();
+        query.fetch().map((r) -> {
+            result.add(ConvertHelper.convert(r, Address.class));
+            return null;
+        });
+        if(result == null || result.size() == 0) {
+            return null;
+        }
+
+        return result.get(0).getVersion();
+    }
 }
