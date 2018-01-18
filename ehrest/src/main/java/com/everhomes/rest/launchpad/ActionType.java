@@ -17,16 +17,16 @@ package com.everhomes.rest.launchpad;
  * <li>EXCHANGE_HALL(29): 交流大厅</li>
  * <li>PARKING_RECHARGE(30): 停车充值</li>
  * <li>MAKERZONE(32): 创客空间  </li>
- * <li>SERVICEALLIANCE(33): 服务联盟 </li> 
- * <li>PARKENTERPRISE(34): 园区企业</li> 
+ * <li>SERVICEALLIANCE(33): 服务联盟 </li>
+ * <li>PARKENTERPRISE(34): 园区企业</li>
  * <li>PARKENTERPRISE(36): 俱乐部</li>
  * <li>GUILD(38): 行业协会</li>
- * <li>ORG_TASK_MANAGERMENT(39): 任务管理</li> 
- * <li>NOTICE_MANAGERMENT(43): 公告管理</li> 
- * <li>MANAGER_TASK(39): 任务管理</li> 
- * <li>ACLINK(40): 门禁</li> 
- * <li>NEARBY_ACTIVITIES(41): 周边活动</li> 
- * <li>NEARBY_PUBLIC_CYCLE(42): 周边俱乐部</li> 
+ * <li>ORG_TASK_MANAGERMENT(39): 任务管理</li>
+ * <li>NOTICE_MANAGERMENT(43): 公告管理</li>
+ * <li>MANAGER_TASK(39): 任务管理</li>
+ * <li>ACLINK(40): 门禁</li>
+ * <li>NEARBY_ACTIVITIES(41): 周边活动</li>
+ * <li>NEARBY_PUBLIC_CYCLE(42): 周边俱乐部</li>
  * <li>OFFLINE_WEBAPP(44): 离线web应用</li>
  * <li>SERVICE_HOT_LINE(45): 园区服务热线</li>
  * <li>CONTACTS(46): 通讯录</li>
@@ -51,6 +51,7 @@ package com.everhomes.rest.launchpad;
  * <li>SWITCH_SCENE(66): 切换场景</li>
  * <li>COMMUNITY_MAP((byte)67): 园区地图</li>
  * <li>WORK_REPORT((byte)68): 工作汇报</li>
+ * <li>FILE_MANAGEMENT((byte)69): 文档管理</li>
  * </ul>
  */
 public enum ActionType {
@@ -68,41 +69,41 @@ public enum ActionType {
       NOTICE_MANAGERMENT((byte)43),OFFLINE_WEBAPP((byte)44),SERVICE_HOT_LINE((byte)45),CONTACTS((byte)46),
       WIFI((byte)47),NEWS((byte)48),RENTAL((byte)49),OFFICIAL_ACTIVITY((byte)50),PM_TASK((byte)51),AUTH((byte)52),
       ALL_BUTTON((byte)53),MY_APPROVAL((byte) 54),NEWS_FLASH((byte) 55), FLOW_TASKS( (byte)56 ), PARKING_CLEARANCE((byte) 57), PARKING_CLEARANCE_TASK((byte) 58),
-      CREATE_PMTASK((byte) 59),ROUTER((byte) 60), ACTIVITY((byte)61), POST_LIST((byte)62), ACLINK_REMOTE_OPEN((byte)63), 
+      CREATE_PMTASK((byte) 59),ROUTER((byte) 60), ACTIVITY((byte)61), POST_LIST((byte)62), ACLINK_REMOTE_OPEN((byte)63),
       ACTIVITY_DETAIL((byte)64),GENERAL_APPROVAL((byte)65), ACTIVITY_ENROLL_DETAIL((byte)65),SWITCH_SCENE((byte)66),
-    COMMUNITY_MAP((byte)67),WORK_REPORT((byte)68),;
+    COMMUNITY_MAP((byte)67),WORK_REPORT((byte)68),FILE_MANAGEMENT((byte)69);
 
     private byte code;
     private String url;
-    
+
     private ActionType(byte code) {
         this.code = code;
     }
-    
+
     private ActionType(byte code, String url) {
     	this.code = code;
     	this.url = url;
     }
-    
+
     public byte getCode() {
         return this.code;
     }
-    
+
     public String getUrl() {
 		return this.url;
 	}
-    
+
     public static ActionType fromCode(Byte code) {
         if(code == null)
             return null;
-        
+
         ActionType[] values = ActionType.values();
         for(ActionType value : values) {
             if(value.code == code.byteValue()) {
                 return value;
             }
         }
-        
+
         return null;
     }
 }
