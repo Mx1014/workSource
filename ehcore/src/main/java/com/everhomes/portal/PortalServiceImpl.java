@@ -1342,8 +1342,12 @@ public class PortalServiceImpl implements PortalService {
 						if(PortalPublishType.fromCode(cmd.getPublishType()) == PortalPublishType.RELEASE){
 							//更新版本号为新的版本
 							updateVersionAfterPublish(cmd.getVersionId());
-							//复制一个小版本
+							//新版本复制一个小版本，比如发布3.1版本变成了5.0版本，那5.0要复制一个5.1，3.0也要复制一个新的3.1
 							copyPortalToNewVersion(namespaceId, cmd.getVersionId());
+
+							PortalVersion publishVersion = portalVersionProvider.findPortalVersionById(cmd.getVersionId());
+							//给发布的版本的父辈复制一个小版本，比如发布3.1版本变成了5.0版本，那5.0要复制一个5.1，3.0也要复制一个新的3.1
+							copyPortalToNewVersion(namespaceId, publishVersion.getParentId());
 
 							portalPublishLog.setProcess(85);
 							portalPublishLogProvider.updatePortalPublishLog(portalPublishLog);
