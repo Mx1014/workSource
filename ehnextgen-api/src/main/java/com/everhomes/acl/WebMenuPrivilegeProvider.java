@@ -64,5 +64,7 @@ public interface WebMenuPrivilegeProvider {
 
     List<WebMenu> listMenuByModuleIdAndType(Long moduleId, String type);
 
+    List<WebMenu> listMenuByTypeAndConfigType(String type, Byte configType);
+
     void deleteMenuScopeByOwner(String ownerType, Long ownerId);
 }

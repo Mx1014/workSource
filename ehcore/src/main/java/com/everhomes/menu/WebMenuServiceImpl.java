@@ -15,9 +15,7 @@ import com.everhomes.organization.OrganizationProvider;
 import com.everhomes.organization.OrganizationService;
 import com.everhomes.portal.PortalService;
 import com.everhomes.portal.ServiceModuleApp;
-import com.everhomes.rest.acl.WebMenuDTO;
-import com.everhomes.rest.acl.WebMenuScopeApplyPolicy;
-import com.everhomes.rest.acl.WebMenuSelectedFlag;
+import com.everhomes.rest.acl.*;
 import com.everhomes.rest.acl.WebMenuType;
 import com.everhomes.rest.acl.admin.ListWebMenuResponse;
 import com.everhomes.rest.menu.*;
@@ -591,6 +589,7 @@ public class WebMenuServiceImpl implements WebMenuService {
 					WebMenuScope scope = new WebMenuScope();
 					scope.setMenuId(dto.getMenuId());
 					scope.setMenuName(dto.getName());
+					scope.setApplyPolicy(WebMenuScopeApplyPolicy.OVERRIDE.getCode());
 					scope.setOwnerType(EntityType.NAMESPACE.getCode());
 					scope.setOwnerId(portalVersionDTO.getNamespaceId().longValue());
 					scope.setAppId(dto.getOriginId());
@@ -599,6 +598,21 @@ public class WebMenuServiceImpl implements WebMenuService {
 				}
 			}
 		}
+
+		//固定生成的菜单
+		List<WebMenu> webMenus = new ArrayList<>();
+		List<WebMenu> parkMenus = webMenuProvider.listMenuByTypeAndConfigType(WebMenuType.PARK.getCode(), WebMenuConfigType.NAMESPACE.getCode());
+		List<WebMenu> orgMenus = webMenuProvider.listMenuByTypeAndConfigType(WebMenuType.ORGANIZATION.getCode(), WebMenuConfigType.NAMESPACE.getCode());
+		webMenus.addAll(parkMenus);
+		webMenus.addAll(orgMenus);
+		for (WebMenu webMenu: webMenus) {
+			WebMenuScope scope = new WebMenuScope();
+			scope.setMenuId(webMenu.getId());
+			scope.setApplyPolicy(WebMenuScopeApplyPolicy.REVERT.getCode());
+			scope.setOwnerType(EntityType.NAMESPACE.getCode());
+			scope.setOwnerId(portalVersionDTO.getNamespaceId().longValue());
+		}
+
 		webMenuProvider.deleteMenuScopeByOwner(EntityType.NAMESPACE.getCode(), Long.valueOf(cmd.getNamespaceId()));
 		webMenuProvider.deleteMenuScopeByOwner(EntityType.ORGANIZATIONS.getCode(), Long.valueOf(cmd.getNamespaceId()));
 

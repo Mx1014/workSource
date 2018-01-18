@@ -342,6 +342,16 @@ public class WebMenuPrivilegeProviderImpl implements WebMenuPrivilegeProvider {
 		return webMenus;
 	}
 
+	@Override
+	public List<WebMenu> listMenuByTypeAndConfigType(String type, Byte configType) {
+
+		DSLContext context = dbProvider.getDslContext(AccessSpec.readOnlyWith(EhWebMenus.class));
+		SelectQuery<EhWebMenusRecord> query = context.selectQuery(Tables.EH_WEB_MENUS);
+		query.addConditions(Tables.EH_WEB_MENUS.CONFIG_TYPE.eq(configType));
+		query.addConditions(Tables.EH_WEB_MENUS.TYPE.eq(type));
+		List<WebMenu> webMenus = query.fetch().map(r -> ConvertHelper.convert(r, WebMenu.class));
+		return webMenus;
+	}
 
 	@Override
 	public void deleteMenuScopeByOwner(String ownerType, Long ownerId){
