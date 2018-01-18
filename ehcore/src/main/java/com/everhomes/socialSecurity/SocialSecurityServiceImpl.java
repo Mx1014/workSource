@@ -136,26 +136,29 @@ public class SocialSecurityServiceImpl implements SocialSecurityService {
      * 添加某公司的新一期社保缴费
      */
     private void addSocialSecurity(Long ownerId) {
-        final String paymentMonth = socialSecurityPaymentProvider.findPaymentMonthByOwnerId(ownerId);
-        if (null == paymentMonth) {
-            newSocialSecurityOrg(ownerId);
-        } else {
-            dbProvider.execute((TransactionStatus status) -> {
+        this.coordinationProvider.getNamedLock(CoordinationLocks.SOCIAL_SECURITY_ADD.getCode() + ownerId).enter(() -> {
 
-                try {
-                    Calendar month = Calendar.getInstance();
-                    month.setTime(monthSF.get().parse(paymentMonth));
-                    month.add(Calendar.MONTH, 1);
-                    String newPayMonth = monthSF.get().format(month.getTime());
-                    checkSocialSercurityFiled(ownerId);
-                    deleteOldMonthPayments(ownerId);
-                    addNewMonthPayments(newPayMonth, ownerId);
-                } catch (ParseException e) {
-                    e.printStackTrace();
-                    LOGGER.error("payment month is wrong  " + paymentMonth, e);
-                }
-                return null;
-            });
+            final String paymentMonth = socialSecurityPaymentProvider.findPaymentMonthByOwnerId(ownerId);
+            if (null == paymentMonth) {
+                newSocialSecurityOrg(ownerId);
+            } else {
+                dbProvider.execute((TransactionStatus status) -> {
+
+                    try {
+                        Calendar month = Calendar.getInstance();
+                        month.setTime(monthSF.get().parse(paymentMonth));
+                        month.add(Calendar.MONTH, 1);
+                        String newPayMonth = monthSF.get().format(month.getTime());
+                        checkSocialSercurityFiled(ownerId);
+                        deleteOldMonthPayments(ownerId);
+                        addNewMonthPayments(newPayMonth, ownerId);
+                    } catch (ParseException e) {
+                        e.printStackTrace();
+                        LOGGER.error("payment month is wrong  " + paymentMonth, e);
+                    }
+                    return null;
+                });
+            }
         }
     }
 
