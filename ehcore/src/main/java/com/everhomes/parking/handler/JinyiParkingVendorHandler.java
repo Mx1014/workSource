@@ -341,12 +341,13 @@ public class JinyiParkingVendorHandler extends DefaultParkingVendorHandler {
 	private JSONObject createCouponFreeSendParam(ParkingClearanceLog log) {
 		JSONObject json = new JSONObject();
 		String parkingid = configProvider.getValue("parking.zijing.parkingid", "");
-		String marketid  = configProvider.getValue("parking.zijing.marketid ", "");
+		String marketid  = configProvider.getValue("parking.zijing.marketid", "");
+		String userid  = configProvider.getValue("parking.zijing.userid", "");
 
 		json.put("parkingid", parkingid);
 		json.put("marketid", marketid);
 		json.put("plateno", log.getPlateNumber());
-		json.put("userid", "");
+		json.put("userid", userid);
 		json.put("remark ", log.getRemarks());
 
 		return json;
