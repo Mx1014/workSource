@@ -60,6 +60,7 @@ import com.everhomes.msgbox.MessageBoxProvider;
 import com.everhomes.namespace.*;
 import com.everhomes.naming.NameMapper;
 import com.everhomes.news.NewsService;
+import com.everhomes.openapi.FunctionCardHandler;
 import com.everhomes.organization.*;
 import com.everhomes.organization.pm.PropertyMgrService;
 import com.everhomes.point.UserPointService;
@@ -105,6 +106,7 @@ import org.apache.commons.lang.StringUtils;
 import org.elasticsearch.common.geo.GeoHashUtils;
 import org.jooq.DSLContext;
 import org.jooq.Record;
+import org.jooq.util.derby.sys.Sys;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.BeanUtils;
@@ -313,6 +315,9 @@ public class UserServiceImpl implements UserService {
 
 	@Autowired
 	private NamespaceResourceService namespaceResourceService;
+
+	@Autowired
+	List<FunctionCardHandler> functionCardHandlers;
 
 //
 //    @Autowired
@@ -5509,7 +5514,11 @@ public class UserServiceImpl implements UserService {
 	}
 
 
+	// 获取统一的功能卡片
+	@Override
 	public void listUserRelatedCards(){
-
+		functionCardHandlers.forEach(r->{
+			System.out.print(r);
+		});
 	}
 }
