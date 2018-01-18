@@ -19,6 +19,7 @@ import com.everhomes.server.schema.tables.pojos.EhFileManagementContents;
 import com.everhomes.server.schema.tables.records.EhFileManagementCatalogScopesRecord;
 import com.everhomes.server.schema.tables.records.EhFileManagementCatalogsRecord;
 import com.everhomes.server.schema.tables.records.EhFileManagementContentsRecord;
+import com.everhomes.user.User;
 import com.everhomes.user.UserContext;
 import com.everhomes.util.ConvertHelper;
 import com.everhomes.util.DateHelper;
@@ -43,8 +44,9 @@ public class FileManagementProviderImpl implements FileManagementProvider {
     public void createFileCatalog(FileCatalog catalog) {
         Long id = sequenceProvider.getNextSequence(NameMapper.getSequenceDomainFromTablePojo(EhFileManagementCatalogs.class));
         catalog.setId(id);
+        catalog.setCreatorUid(UserContext.currentUserId());
         catalog.setCreateTime(new Timestamp(DateHelper.currentGMTTime().getTime()));
-        catalog.setOperatorUid(UserContext.currentUserId());
+        catalog.setOperatorUid(catalog.getCreatorUid());
         catalog.setUpdateTime(catalog.getCreateTime());
 
         DSLContext context = dbProvider.getDslContext(AccessSpec.readWrite());
