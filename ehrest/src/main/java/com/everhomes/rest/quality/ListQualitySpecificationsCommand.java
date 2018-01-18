@@ -1,8 +1,8 @@
 package com.everhomes.rest.quality;
 
-import javax.validation.constraints.NotNull;
-
 import com.everhomes.util.StringHelper;
+
+import javax.validation.constraints.NotNull;
 
 /**
  * <ul>
@@ -29,6 +29,8 @@ public class ListQualitySpecificationsCommand {
 	private Long parentId;
 	
 	private Byte inspectionType;
+
+	private String lastSyncTime;//用于离线
 	
 	public Long getOwnerId() {
 		return ownerId;
@@ -76,6 +78,14 @@ public class ListQualitySpecificationsCommand {
 
 	public void setInspectionType(Byte inspectionType) {
 		this.inspectionType = inspectionType;
+	}
+
+	public String getLastSyncTime() {
+		return lastSyncTime;
+	}
+
+	public void setLastSyncTime(String lastSyncTime) {
+		this.lastSyncTime = lastSyncTime;
 	}
 
 	@Override

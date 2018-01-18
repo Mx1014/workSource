@@ -139,7 +139,7 @@ public class PointLogProviderImpl implements PointLogProvider {
     }
 
     @Override
-    public Integer countPointLog(Integer namespaceId, Long systemId, Long uid, Long ruleId, Long startTime, Long endTime) {
+    public Integer countPointLog(Integer namespaceId, Long systemId, Long uid, Long ruleId, Timestamp startTime, Timestamp endTime) {
         com.everhomes.server.schema.tables.EhPointLogs t = Tables.EH_POINT_LOGS;
         SelectQuery<EhPointLogsRecord> query = context().selectFrom(t).getQuery();
         query.addConditions(t.NAMESPACE_ID.eq(namespaceId));
@@ -147,10 +147,10 @@ public class PointLogProviderImpl implements PointLogProvider {
         query.addConditions(t.TARGET_UID.eq(uid));
         query.addConditions(t.RULE_ID.eq(ruleId));
         if (startTime != null) {
-            query.addConditions(t.CREATE_TIME.gt(new Timestamp(startTime)));
+            query.addConditions(t.CREATE_TIME.gt(startTime));
         }
         if (endTime != null) {
-            query.addConditions(t.CREATE_TIME.le(new Timestamp(endTime)));
+            query.addConditions(t.CREATE_TIME.le(endTime));
         }
         return query.fetchCount();
     }

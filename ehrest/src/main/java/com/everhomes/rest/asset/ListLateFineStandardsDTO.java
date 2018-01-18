@@ -1,5 +1,5 @@
 //@formatter:off
-package com.everhomes.asset;
+package com.everhomes.rest.asset;
 
 /**
  * Created by Wentian Wang on 2017/12/18.

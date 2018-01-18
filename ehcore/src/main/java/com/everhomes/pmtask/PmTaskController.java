@@ -288,6 +288,20 @@ public class PmTaskController extends ControllerBase {
 	}
 
     /**
+     * <b>URL: /pmtask/listOrganizationCommunityBySceneToken</b>
+     * <p>获取机构人员 办公地点小区列表</p>
+     */
+    @RequestMapping("listOrganizationCommunityBySceneToken")
+    @RestReturn(value=ListOrganizationCommunityBySceneTokenResponse.class)
+    public RestResponse listOrganizationCommunityBySceneToken(ListOrganizationCommunityBySceneTokenCommand cmd) {
+        ListOrganizationCommunityBySceneTokenResponse resp = pmTaskService.listOrganizationCommunityBySceneToken(cmd);
+        RestResponse response = new RestResponse(resp);
+        response.setErrorCode(ErrorCodes.SUCCESS);
+        response.setErrorDescription("OK");
+        return response;
+    }
+
+    /**
      * <b>URL: /pmtask/listAuthorizationCommunityByUser</b>
      * <p>授权人员 管理小区列表</p>
      */
@@ -386,6 +400,21 @@ public class PmTaskController extends ControllerBase {
         response.setErrorDescription("OK");
         return response;
     }
+
+    /**
+     * <b>URL: /pmtask/getIfHideRepresent</b>
+     * <p>判断是否隐藏代发按钮</p>
+     */
+    @RequestMapping("getIfHideRepresent")
+    @RestReturn(value=GetIfHideRepresentResponse.class)
+    public RestResponse getIfHideRepresent(GetIfHideRepresentCommand cmd) {
+        GetIfHideRepresentResponse dto = pmTaskService.getIfHideRepresent(cmd);
+        RestResponse response = new RestResponse(dto);
+        response.setErrorCode(ErrorCodes.SUCCESS);
+        response.setErrorDescription("OK");
+        return response;
+    }
+
     
     /**
      * <b>URL: /pmtask/exportTasks</b>
@@ -575,6 +604,20 @@ public class PmTaskController extends ControllerBase {
         resp.setErrorCode(ErrorCodes.SUCCESS);
         resp.setErrorDescription("OK");
         return resp;
+    }
+
+    /**
+     * <b>URL: /pmtask/syncCategories</b>
+     * <p>给不同项目拷贝分类(用后删除)</p>
+     */
+    @RequestMapping("syncCategories")
+    @RestReturn(value=String.class)
+    public RestResponse syncCategories() {
+        pmTaskService.syncCategories();
+        RestResponse response = new RestResponse();
+        response.setErrorCode(ErrorCodes.SUCCESS);
+        response.setErrorDescription("OK");
+        return response;
     }
 
     /*---------------------------- start 以下接口是为了给客户端打rest包，已经废弃----------------------------------*/

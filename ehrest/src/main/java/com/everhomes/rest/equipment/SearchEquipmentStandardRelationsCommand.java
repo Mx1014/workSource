@@ -1,8 +1,8 @@
 package com.everhomes.rest.equipment;
 
-import javax.validation.constraints.NotNull;
-
 import com.everhomes.util.StringHelper;
+
+import javax.validation.constraints.NotNull;
 
 /**
  * <ul>
@@ -10,33 +10,46 @@ import com.everhomes.util.StringHelper;
  *  <li>ownerType: 设备-标准关联所属组织类型，参考{@link com.everhomes.rest.quality.OwnerType}</li>
  *  <li>targetType: 设备-标准关联所属管理处类型</li>
  *  <li>targetId: 设备-标准关联所属管理处</li>
- *  <li>reviewStatus: 设备-标准关联状态，参考{@link com.everhomes.rest.equipment.EquipmentReviewStatus}</li>
- *  <li>reviewStatus: 设备-标准关联审批结果，参考{@link com.everhomes.rest.equipment.ReviewResult}</li>
+ *  <li>repeatType: 巡检对象对应标准周期类型</li>
+ *  <li>inspectionCategoryId: 巡检对象类型id</li>
+ *  <li>categoryId: 设备类型id</li>
  *  <li>keyword: 查询关键字</li>
  *  <li>pageAnchor: 锚点</li>
  *  <li>pageSize: 页面大小</li>
+ *  <li>namespaceId: namespaceId</li>
  * </ul>
  */
 public class SearchEquipmentStandardRelationsCommand {
 	@NotNull
 	private Long ownerId;
-	
+
 	@NotNull
 	private String ownerType;
-	
+
 	private Long targetId;
-	
+
 	private String targetType;
-	
+
+	private  Byte repeatType;
+
+	@Deprecated
 	private Byte reviewStatus;
 
+	@Deprecated
 	private Byte reviewResult;
 
 	private String keyword;
-	
+
 	private Long pageAnchor;
-	
+
 	private Integer pageSize;
+
+	//V3.0.2 增加 用于创建计划时候选择设备标准关联
+    private Long inspectionCategoryId;
+
+    private Long categoryId;
+
+	private Integer namespaceId;
 
 	public Long getOwnerId() {
 		return ownerId;
@@ -109,7 +122,39 @@ public class SearchEquipmentStandardRelationsCommand {
 	public void setPageSize(Integer pageSize) {
 		this.pageSize = pageSize;
 	}
-	
+
+	public Byte getRepeatType() {
+		return repeatType;
+	}
+
+	public void setRepeatType(Byte repeatType) {
+		this.repeatType = repeatType;
+	}
+
+    public Long getInspectionCategoryId() {
+        return inspectionCategoryId;
+    }
+
+    public void setInspectionCategoryId(Long inspectionCategoryId) {
+        this.inspectionCategoryId = inspectionCategoryId;
+    }
+
+	public Long getCategoryId() {
+		return categoryId;
+	}
+
+	public void setCategoryId(Long categoryId) {
+		this.categoryId = categoryId;
+	}
+
+	public Integer getNamespaceId() {
+		return namespaceId;
+	}
+
+	public void setNamespaceId(Integer namespaceId) {
+		this.namespaceId = namespaceId;
+	}
+
 	@Override
     public String toString() {
         return StringHelper.toJsonString(this);

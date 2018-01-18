@@ -564,3 +564,11 @@ INSERT INTO `eh_service_alliances` (`id`, `parent_id`, `owner_type`, `owner_id`,
 ((@eh_service_alliances_id:=@eh_service_alliances_id+1), '0', 'community', '240111044332059733', '委托找房', '委托找房', '0', '', NULL, NULL, NULL, '2', @eh_service_alliances_id, NULL, NULL, NULL, '1', '0', NULL, NULL, '', NULL, ' ', NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, '1', NOW(), NULL, NULL, '2', NULL, '2', '1');
 INSERT INTO `eh_service_alliances` (`id`, `parent_id`, `owner_type`, `owner_id`, `name`, `display_name`, `type`, `address`, `contact`, `description`, `poster_uri`, `status`, `default_order`, `longitude`, `latitude`, `geohash`, `discount`, `category_id`, `contact_name`, `contact_mobile`, `service_type`, `service_url`, `discount_desc`, `integral_tag1`, `integral_tag2`, `integral_tag3`, `integral_tag4`, `integral_tag5`, `string_tag1`, `string_tag2`, `string_tag3`, `string_tag4`, `string_tag5`, `creator_uid`, `create_time`, `module_url`, `contact_memid`, `support_type`, `button_title`, `description_height`, `display_flag`) VALUES
 ((@eh_service_alliances_id:=@eh_service_alliances_id+1), '0', 'community', '240111044332059733', '地产服务', '地产服务', '0', '', NULL, NULL, NULL, '2', @eh_service_alliances_id, NULL, NULL, NULL, '1', '0', NULL, NULL, '', NULL, ' ', NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, '1', NOW(), NULL, NULL, '2', NULL, '2', '1');
+
+-- by nan.rong 新增工作汇报菜单及入口，20180106
+update eh_launch_pad_items set action_type = 68, action_data = '{"title":"工作汇报"}' where icon_uri= "cs://1/image/aW1hZ2UvTVRwbE9HUXhNR0ZoWkRCbFlUVXhObUptTmpKaFptUXdZVEF3WWpGa09EWXhOQQ" and namespace_id=999977;
+
+SET @scope_id = (SELECT MAX(id) FROM eh_web_menu_scopes);
+INSERT INTO `eh_web_menu_scopes` (`id`, `menu_id`, `menu_name`, `owner_type`, `owner_id`, `apply_policy`) VALUES (@scope_id := @scope_id + 1, '54000', '', 'EhNamespaces', '999977', '2');
+INSERT INTO `eh_web_menu_scopes` (`id`, `menu_id`, `menu_name`, `owner_type`, `owner_id`, `apply_policy`) VALUES (@scope_id := @scope_id + 1, '54010', '', 'EhNamespaces', '999977', '2');
+INSERT INTO `eh_web_menu_scopes` (`id`, `menu_id`, `menu_name`, `owner_type`, `owner_id`, `apply_policy`) VALUES (@scope_id := @scope_id + 1, '54020', '', 'EhNamespaces', '999977', '2');
