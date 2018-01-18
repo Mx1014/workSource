@@ -1443,10 +1443,14 @@ public class SocialSecurityServiceImpl implements SocialSecurityService {
             dto.setPayItem(payItem);
             Integer companyRatio = null;
             Integer employeeRatio = null;
-            if (StringUtils.isNotBlank(companyString))
-                companyRatio = (int) (Double.parseDouble(companyString.replace("%", "")) * 100.00);
-            if (StringUtils.isNotBlank(emloyeeString))
-                employeeRatio = (int) (Double.parseDouble(emloyeeString.replace("%", "")) * 100.00);
+            if (StringUtils.isNotBlank(companyString)) {
+                LOGGER.debug("companyString is " + companyString);
+                companyRatio = new BigDecimal(companyString.replace("%", "")).multiply(new BigDecimal(100)).intValue();
+            }
+            if (StringUtils.isNotBlank(emloyeeString)) {
+                LOGGER.debug("companyString is " + emloyeeString);
+                employeeRatio = new BigDecimal(emloyeeString.replace("%", "")).multiply(new BigDecimal(100)).intValue();
+            }
             dto.setCompanyRatio(companyRatio);
             dto.setEmployeeRatio(employeeRatio);
             dto.setCompanyRadix(radix);
