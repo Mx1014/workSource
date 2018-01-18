@@ -1,9 +1,7 @@
 package com.everhomes.rentalv2.order_action;
 
-import com.everhomes.rentalv2.RentalCommonServiceImpl;
-import com.everhomes.rentalv2.RentalMessageHandler;
-import com.everhomes.rentalv2.RentalOrder;
-import com.everhomes.rentalv2.Rentalv2Provider;
+import com.everhomes.db.DbProvider;
+import com.everhomes.rentalv2.*;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -11,6 +9,7 @@ import org.springframework.beans.factory.config.ConfigurableBeanFactory;
 import org.springframework.context.annotation.Scope;
 import org.springframework.stereotype.Service;
 import com.everhomes.rest.rentalv2.SiteBillStatus;
+import org.springframework.transaction.TransactionStatus;
 
 @Service
 @Scope(value = ConfigurableBeanFactory.SCOPE_PROTOTYPE)
@@ -24,6 +23,8 @@ public class CancelUnsuccessRentalOrderAction implements Runnable {
 	private Rentalv2Provider rentalProvider;
 	@Autowired
 	private RentalCommonServiceImpl rentalCommonService;
+	@Autowired
+	private DbProvider dbProvider;
 
 	public CancelUnsuccessRentalOrderAction(final String id) { 
 		this.rentalBillId =  Long.valueOf(id) ;
@@ -38,12 +39,19 @@ public class CancelUnsuccessRentalOrderAction implements Runnable {
 		if(null == rentalBill)
 			return ;
 		if (!rentalBill.getStatus().equals(SiteBillStatus.SUCCESS.getCode()) ) {
-			rentalBill.setStatus(SiteBillStatus.FAIL.getCode());
-			rentalProvider.updateRentalBill(rentalBill);
-			//发消息
-			RentalMessageHandler handler = rentalCommonService.getRentalMessageHandler(rentalBill.getResourceType());
 
-			handler.sendOrderOverTimeMessage(rentalBill);
+			dbProvider.execute((TransactionStatus status) -> {
+						rentalBill.setStatus(SiteBillStatus.FAIL.getCode());
+						rentalProvider.updateRentalBill(rentalBill);
+
+						RentalOrderHandler orderHandler = rentalCommonService.getRentalOrderHandler(rentalBill.getResourceType());
+						orderHandler.releaseOrderResourceStatus(rentalBill);
+						return null;
+					});
+			//发消息
+			RentalMessageHandler messageHandler = rentalCommonService.getRentalMessageHandler(rentalBill.getResourceType());
+
+			messageHandler.sendOrderOverTimeMessage(rentalBill);
 		}
 	}
 

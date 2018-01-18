@@ -132,4 +132,14 @@ public class DefaultRentalMessageHandler implements RentalMessageHandler {
     public void completeOrderSendMessage(RentalOrder rentalBill) {
 
     }
+
+    @Override
+    public void autoCancelOrderSendMessage(RentalOrder rentalBill) {
+
+    }
+
+    @Override
+    public void autoUpdateOrderSpaceSendMessage(RentalOrder rentalBill) {
+
+    }
 }

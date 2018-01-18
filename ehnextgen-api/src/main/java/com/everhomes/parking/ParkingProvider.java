@@ -147,6 +147,8 @@ public interface ParkingProvider {
 
     ParkingSpace getAnyParkingSpace(Integer namespaceId, String ownerType, Long ownerId, Long parkingLotId, List<String> spaces);
 
+    ParkingSpace getAnyFreeParkingSpace(Integer namespaceId, String ownerType, Long ownerId, Long parkingLotId);
+
     void createParkingSpaceLog(ParkingSpaceLog log);
 
 }

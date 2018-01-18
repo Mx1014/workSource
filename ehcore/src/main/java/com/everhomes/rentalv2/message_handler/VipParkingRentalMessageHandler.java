@@ -222,7 +222,6 @@ public class VipParkingRentalMessageHandler implements RentalMessageHandler {
 
         smsProvider.sendSms(rentalBill.getNamespaceId(), useInfoDTO.getPlateOwnerPhone(), templateScope, templateId, templateLocale, variables);
 
-
     }
 
     @Override
@@ -257,5 +256,69 @@ public class VipParkingRentalMessageHandler implements RentalMessageHandler {
         //给预约人推送订单完成消息
         rentalCommonService.sendRouterMessageToUser(rentalBill.getRentalUid(), refundContent,
                 rentalBill.getId(), rentalBill.getResourceType());
+    }
+
+    @Override
+    public void autoCancelOrderSendMessage(RentalOrder rentalBill) {
+        String customJson = rentalBill.getCustomObject();
+        VipParkingUseInfoDTO useInfoDTO = JSONObject.parseObject(customJson, VipParkingUseInfoDTO.class);
+
+        String useDetail = getUseDetailStr(rentalBill, useInfoDTO);
+        Map<String, String> map = new HashMap<>();
+        map.put("useDetail", useDetail);
+        String refundContent = localeTemplateService.getLocaleTemplateString(RentalNotificationTemplateCode.SCOPE,
+                RentalNotificationTemplateCode.SYSTEM_AUTO_CANCEL_ORDER, RentalNotificationTemplateCode.locale, map, "");
+        //给预约人推送订单自动取消消息
+        rentalCommonService.sendRouterMessageToUser(rentalBill.getRentalUid(), refundContent,
+                rentalBill.getId(), rentalBill.getResourceType());
+
+        String templateScope = SmsTemplateCode.SCOPE;
+        List<Tuple<String, Object>> variables = smsProvider.toTupleList("useDetail", useDetail);
+
+        int templateId = SmsTemplateCode.SYSTEM_AUTO_CANCEL_ORDER;
+
+        String templateLocale = RentalNotificationTemplateCode.locale;
+
+        smsProvider.sendSms(rentalBill.getNamespaceId(), useInfoDTO.getPlateOwnerPhone(), templateScope, templateId, templateLocale, variables);
+        smsProvider.sendSms(rentalBill.getNamespaceId(), rentalBill.getUserPhone(), templateScope, templateId, templateLocale, variables);
+
+    }
+
+    @Override
+    public void autoUpdateOrderSpaceSendMessage(RentalOrder rentalBill) {
+        String customJson = rentalBill.getCustomObject();
+        VipParkingUseInfoDTO useInfoDTO = JSONObject.parseObject(customJson, VipParkingUseInfoDTO.class);
+
+        String useDetail = getUseDetailStr(rentalBill, useInfoDTO);
+        Map<String, String> map = new HashMap<>();
+        map.put("useDetail", useDetail);
+        map.put("spaceNo", useInfoDTO.getSpaceNo());
+        String refundContent = localeTemplateService.getLocaleTemplateString(RentalNotificationTemplateCode.SCOPE,
+                RentalNotificationTemplateCode.SYSTEM_AUTO_UPDATE_SPACE, RentalNotificationTemplateCode.locale, map, "");
+        //给预约人推送订单自动换车位消息
+        rentalCommonService.sendRouterMessageToUser(rentalBill.getRentalUid(), refundContent,
+                rentalBill.getId(), rentalBill.getResourceType());
+
+        String templateScope = SmsTemplateCode.SCOPE;
+        List<Tuple<String, Object>> variables = smsProvider.toTupleList("useDetail", useDetail);
+        smsProvider.addToTupleList(variables, "spaceNo", useInfoDTO.getSpaceNo());
+
+        int templateId = SmsTemplateCode.SYSTEM_AUTO_UPDATE_SPACE_RESERVER;
+
+        String templateLocale = RentalNotificationTemplateCode.locale;
+
+        smsProvider.sendSms(rentalBill.getNamespaceId(), rentalBill.getUserPhone(), templateScope, templateId, templateLocale, variables);
+
+
+        List<Tuple<String, Object>> variables2 = smsProvider.toTupleList("plateOwnerName", useInfoDTO.getPlateOwnerName());
+        smsProvider.addToTupleList(variables2, "userName", rentalBill.getUserName());
+        smsProvider.addToTupleList(variables2, "userPhone", rentalBill.getUserPhone());
+        smsProvider.addToTupleList(variables2, "useDetail", useDetail);
+        smsProvider.addToTupleList(variables2, "spaceNo", useInfoDTO.getSpaceNo());
+        smsProvider.addToTupleList(variables2, "orderDetailUrl", "https://core.zuolin.com/evh/aclink/id=1283jh213a");
+        int templateId2 = SmsTemplateCode.SYSTEM_AUTO_UPDATE_SPACE_RESERVER;
+
+        smsProvider.sendSms(rentalBill.getNamespaceId(), useInfoDTO.getPlateOwnerPhone(), templateScope, templateId2, templateLocale, variables2);
+
     }
 }

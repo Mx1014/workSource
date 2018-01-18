@@ -1,29 +1,41 @@
 package com.everhomes.rentalv2;
 
+import com.everhomes.app.App;
+import com.everhomes.app.AppProvider;
 import com.everhomes.bootstrap.PlatformContext;
+import com.everhomes.configuration.ConfigurationProvider;
 import com.everhomes.locale.LocaleTemplateService;
 import com.everhomes.messaging.MessagingService;
+import com.everhomes.order.PayService;
+import com.everhomes.rentalv2.utils.RentalUtils;
+import com.everhomes.rest.activity.ActivityRosterPayVersionFlag;
 import com.everhomes.rest.app.AppConstants;
 import com.everhomes.rest.common.RentalOrderActionData;
 import com.everhomes.rest.common.Router;
 import com.everhomes.rest.messaging.*;
-import com.everhomes.rest.rentalv2.RuleSourceType;
+import com.everhomes.rest.order.OrderType;
+import com.everhomes.rest.organization.VendorType;
+import com.everhomes.rest.pay.controller.CreateOrderRestResponse;
+import com.everhomes.rest.rentalv2.*;
 import com.everhomes.rest.rentalv2.admin.RentalDurationType;
 import com.everhomes.rest.rentalv2.admin.RentalDurationUnit;
 import com.everhomes.rest.rentalv2.admin.RentalOrderHandleType;
 import com.everhomes.rest.rentalv2.admin.RentalOrderStrategy;
 import com.everhomes.rest.user.MessageChannelType;
+import com.everhomes.techpark.onlinePay.OnlinePayService;
 import com.everhomes.user.User;
-import com.everhomes.util.RouterBuilder;
-import com.everhomes.util.StringHelper;
+import com.everhomes.user.UserContext;
+import com.everhomes.util.*;
 import org.apache.commons.lang.StringUtils;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.http.HttpStatus;
 import org.springframework.stereotype.Component;
 
 import java.math.BigDecimal;
 import java.math.RoundingMode;
+import java.sql.Timestamp;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
@@ -43,6 +55,14 @@ public class RentalCommonServiceImpl {
     private LocaleTemplateService localeTemplateService;
     @Autowired
     private Rentalv2Provider rentalv2Provider;
+    @Autowired
+    private AppProvider appProvider;
+    @Autowired
+    private ConfigurationProvider configurationProvider;
+    @Autowired
+    private PayService payService;
+    @Autowired
+    private OnlinePayService onlinePayService;
 
     public RentalResourceHandler getRentalResourceHandler(String handlerName) {
         RentalResourceHandler handler = null;
@@ -198,6 +218,83 @@ public class RentalCommonServiceImpl {
         return order.getPaidMoney();
     }
 
+    public void refundOrder(RentalOrder order, long timestamp, BigDecimal orderAmount) {
+
+        Long refundOrderNo = this.onlinePayService.createBillId(timestamp);
+
+        if (order.getPaidVersion() == ActivityRosterPayVersionFlag.V2.getCode()) {
+            //新支付退款
+            Long amount = payService.changePayAmount(orderAmount);
+            CreateOrderRestResponse refundResponse = payService.refund(OrderType.OrderTypeEnum.RENTALORDER.getPycode(),
+                    Long.valueOf(order.getOrderNo()), refundOrderNo, amount);
+
+            if(refundResponse != null || refundResponse.getErrorCode() != null
+                    && refundResponse.getErrorCode().equals(HttpStatus.OK.value())){
+
+            } else{
+                LOGGER.error("Refund failed from vendor, refundOrderNo={}, order={}, response={}", refundOrderNo, order,
+                        refundResponse);
+                throw RuntimeErrorException.errorWith(RentalServiceErrorCode.SCOPE,
+                        RentalServiceErrorCode.ERROR_REFUND_ERROR,
+                        "bill refund error");
+            }
+        } else {
+            refundParkingOrderV1(order, timestamp, refundOrderNo, orderAmount);
+        }
+
+        RentalRefundOrder rentalRefundOrder = new RentalRefundOrder();
+        rentalRefundOrder.setOrderId(order.getId());
+        rentalRefundOrder.setOrderNo(Long.valueOf(order.getOrderNo()));
+        rentalRefundOrder.setRefundOrderNo(refundOrderNo);
+        rentalRefundOrder.setResourceTypeId(order.getResourceTypeId());
+        rentalRefundOrder.setOnlinePayStyleNo(VendorType.fromCode(order.getVendorType()).getStyleNo());
+        rentalRefundOrder.setResourceType(order.getResourceType());
+
+        rentalRefundOrder.setAmount(orderAmount);
+        rentalRefundOrder.setStatus(SiteBillStatus.REFUNDED.getCode());
+        rentalRefundOrder.setCreateTime(new Timestamp(DateHelper.currentGMTTime().getTime()));
+        rentalRefundOrder.setCreatorUid(UserContext.current().getUser().getId());
+        rentalRefundOrder.setOperateTime(new Timestamp(DateHelper.currentGMTTime().getTime()));
+        rentalRefundOrder.setOperatorUid(UserContext.current().getUser().getId());
+
+        this.rentalv2Provider.createRentalRefundOrder(rentalRefundOrder);
+    }
+
+    private void refundParkingOrderV1(RentalOrder order, Long timestamp, Long refundOrderNo, BigDecimal amount) {
+        PayZuolinRefundCommand refundCmd = new PayZuolinRefundCommand();
+        String refundApi = this.configurationProvider.getValue(UserContext.getCurrentNamespaceId(), "pay.zuolin.refound", "POST /EDS_PAY/rest/pay_common/refund/save_refundInfo_record");
+        String appKey = configurationProvider.getValue(UserContext.getCurrentNamespaceId(), "pay.appKey", "");
+
+        Integer randomNum = (int) (Math.random() * 1000);
+
+        refundCmd.setAppKey(appKey);
+        refundCmd.setTimestamp(timestamp);
+        refundCmd.setNonce(randomNum);
+        refundCmd.setRefundOrderNo(String.valueOf(refundOrderNo));
+        refundCmd.setOrderNo(String.valueOf(order.getOrderNo()));
+        refundCmd.setOnlinePayStyleNo(VendorType.fromCode(order.getVendorType()).getStyleNo());
+        refundCmd.setOrderType(OrderType.OrderTypeEnum.RENTALORDER.getPycode());
+        //已付金额乘以退款比例除以100
+        refundCmd.setRefundAmount(amount);
+        refundCmd.setRefundMsg("预订单取消退款");
+        this.setSignatureParam(refundCmd);
+
+        PayZuolinRefundResponse refundResponse = (PayZuolinRefundResponse) this.restCall(refundApi, refundCmd, PayZuolinRefundResponse.class);
+        if (refundResponse != null && refundResponse.getErrorCode().equals(HttpStatus.OK.value())) {
+            //退款成功保存退款单信息，修改bill状态
+        } else {
+            LOGGER.error("Refund failed from vendor, refundCmd={}, response={}", refundCmd, refundResponse);
+            throw RuntimeErrorException.errorWith(RentalServiceErrorCode.SCOPE,
+                    RentalServiceErrorCode.ERROR_REFUND_ERROR,
+                    "bill refund error");
+        }
+    }
+
+    public Object restCall(String api, Object command, Class<?> responseType) {
+        String host = this.configurationProvider.getValue(UserContext.getCurrentNamespaceId(),"pay.zuolin.host", "https://pay.zuolin.com");
+        return RentalUtils.restCall(api, command, responseType, host);
+    }
+
     public BigDecimal calculateRefundAmount(RentalOrder order, Long now) {
 
         if (null != order.getRefundStrategy()) {
@@ -294,9 +391,9 @@ public class RentalCommonServiceImpl {
             sb.append(i + 1);
             sb.append("，");
             sb.append("订单开始前");
-            sb.append(outerRules.get(i).getDuration());
+            sb.append(innerRules.get(i).getDuration());
             sb.append("小时内取消，退还");
-            sb.append(outerRules.get(i).getFactor());
+            sb.append(innerRules.get(i).getFactor());
             sb.append("%订单金额");
             sb.append("\r\n");
         }
@@ -308,5 +405,25 @@ public class RentalCommonServiceImpl {
         sb.append("%）。");
 
         order.setTip(sb.toString());
+    }
+
+    /***给支付相关的参数签名*/
+    public void setSignatureParam(PayZuolinRefundCommand cmd) {
+        App app = appProvider.findAppByKey(cmd.getAppKey());
+
+        Map<String,String> map = new HashMap<>();
+        map.put("appKey",cmd.getAppKey());
+        map.put("timestamp",cmd.getTimestamp()+"");
+        map.put("nonce",cmd.getNonce()+"");
+        map.put("refundOrderNo",cmd.getRefundOrderNo());
+        map.put("orderNo", cmd.getOrderNo());
+        map.put("onlinePayStyleNo",cmd.getOnlinePayStyleNo() );
+        map.put("orderType",cmd.getOrderType() );
+        //modify by wh 2016-10-24 退款使用toString,下订单的时候使用doubleValue,两边用的不一样,为了和电商保持一致,要修改成toString
+//		map.put("refundAmount", cmd.getRefundAmount().doubleValue()+"");
+        map.put("refundAmount", cmd.getRefundAmount().toString());
+        map.put("refundMsg", cmd.getRefundMsg());
+        String signature = SignatureHelper.computeSignature(map, app.getSecretKey());
+        cmd.setSignature(signature);
     }
 }

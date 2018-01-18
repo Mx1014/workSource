@@ -7,10 +7,7 @@ import com.everhomes.parking.ParkingProvider;
 import com.everhomes.parking.ParkingSpace;
 import com.everhomes.rentalv2.*;
 import com.everhomes.rest.parking.ParkingSpaceStatus;
-import com.everhomes.rest.rentalv2.PriceRuleType;
-import com.everhomes.rest.rentalv2.RentalV2ResourceType;
-import com.everhomes.rest.rentalv2.RuleSourceType;
-import com.everhomes.rest.rentalv2.VipParkingUseInfoDTO;
+import com.everhomes.rest.rentalv2.*;
 import com.everhomes.rest.rentalv2.admin.*;
 import com.everhomes.rest.ui.user.SceneType;
 import com.everhomes.util.ConvertHelper;
@@ -49,6 +46,10 @@ public class VipParkingRentalOrderHandler implements RentalOrderHandler {
     @Override
     public void updateOrderResourceInfo(RentalOrder order) {
 
+        updateOrderResourceInfo(order, false);
+    }
+
+    private void updateOrderResourceInfo(RentalOrder order, boolean needFree) {
         Rentalv2PriceRule priceRule = rentalv2PriceRuleProvider.findRentalv2PriceRuleByOwner(order.getResourceType(),
                 PriceRuleType.RESOURCE.getCode(), order.getRentalResourceId(), order.getRentalType());
 
@@ -58,8 +59,15 @@ public class VipParkingRentalOrderHandler implements RentalOrderHandler {
         List<String> spaces = rentalv2Provider.listOverTimeSpaces(parkingLot.getNamespaceId(), order.getResourceTypeId(),
                 RentalV2ResourceType.VIP_PARKING.getCode(), parkingLot.getId());
 
-        ParkingSpace parkingSpace = parkingProvider.getAnyParkingSpace(parkingLot.getNamespaceId(), parkingLot.getOwnerType(),
-                parkingLot.getOwnerId(),parkingLot.getId(), spaces);
+        ParkingSpace parkingSpace;
+        if (needFree) {
+            parkingSpace = parkingProvider.getAnyFreeParkingSpace(parkingLot.getNamespaceId(), parkingLot.getOwnerType(),
+                    parkingLot.getOwnerId(),parkingLot.getId());
+        }else {
+            parkingSpace = parkingProvider.getAnyParkingSpace(parkingLot.getNamespaceId(), parkingLot.getOwnerType(),
+                    parkingLot.getOwnerId(),parkingLot.getId(), spaces);
+        }
+
 
         if (null == parkingSpace) {
             throw RuntimeErrorException.errorWith(ErrorCodes.SCOPE_GENERAL, ErrorCodes.ERROR_INVALID_PARAMETER,
@@ -94,13 +102,60 @@ public class VipParkingRentalOrderHandler implements RentalOrderHandler {
     }
 
     @Override
+    public void lockOrderResourceStatus(RentalOrder order) {
+        ParkingSpace parkingSpace = parkingProvider.findParkingSpaceBySpaceNo(order.getStringTag1());
+        parkingSpace.setStatus(ParkingSpaceStatus.IN_USING.getCode());
+        parkingProvider.updateParkingSpace(parkingSpace);
+    }
+
+    @Override
+    public void releaseOrderResourceStatus(RentalOrder order) {
+        ParkingSpace parkingSpace = parkingProvider.findParkingSpaceBySpaceNo(order.getStringTag1());
+        parkingSpace.setStatus(ParkingSpaceStatus.OPEN.getCode());
+        parkingProvider.updateParkingSpace(parkingSpace);
+    }
+
+    @Override
     public void completeRentalOrder(RentalOrder order) {
 
         VipParkingUseInfoDTO parkingInfo = JSONObject.parseObject(order.getCustomObject(), VipParkingUseInfoDTO.class);
 
         ParkingSpace parkingSpace = parkingProvider.findParkingSpaceBySpaceNo(parkingInfo.getSpaceNo());
+
         //更新停车位状态
         parkingSpace.setStatus(ParkingSpaceStatus.OPEN.getCode());
         parkingProvider.updateParkingSpace(parkingSpace);
+    }
+
+    @Override
+    public void autoUpdateOrder(RentalOrder order) {
+
+        RentalMessageHandler handler = rentalCommonService.getRentalMessageHandler(order.getResourceType());
+
+        ParkingLot parkingLot = parkingProvider.findParkingLotById(order.getRentalResourceId());
+
+        List<RentalOrder> overTimeOrders = rentalv2Provider.listOverTimeRentalOrders(order.getNamespaceId(),
+                order.getResourceTypeId(), order.getResourceType(), order.getRentalResourceId(), order.getStringTag1());
+        if (!overTimeOrders.isEmpty()) {
+            ParkingSpace parkingSpace = parkingProvider.getAnyFreeParkingSpace(parkingLot.getNamespaceId(), parkingLot.getOwnerType(),
+                    parkingLot.getOwnerId(),parkingLot.getId());
+            if (null != parkingSpace) {
+                updateOrderResourceInfo(order, true);
+
+                order.setStatus(SiteBillStatus.IN_USING.getCode());
+                rentalv2Provider.updateRentalBill(order);
+
+                handler.autoUpdateOrderSpaceSendMessage(order);
+            }else {
+                rentalCommonService.refundOrder(order, System.currentTimeMillis(), order.getPaidMoney());
+                order.setStatus(SiteBillStatus.FAIL.getCode());
+                rentalv2Provider.updateRentalBill(order);
+
+                handler.autoCancelOrderSendMessage(order);
+            }
+        }else {
+            order.setStatus(SiteBillStatus.IN_USING.getCode());
+            rentalv2Provider.updateRentalBill(order);
+        }
     }
 }

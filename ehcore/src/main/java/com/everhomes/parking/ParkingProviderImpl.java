@@ -1085,8 +1085,28 @@ public class ParkingProviderImpl implements ParkingProvider {
 		query.addConditions(Tables.EH_PARKING_SPACES.OWNER_TYPE.eq(ownerType));
 		query.addConditions(Tables.EH_PARKING_SPACES.PARKING_LOT_ID.eq(parkingLotId));
 		query.addConditions(Tables.EH_PARKING_SPACES.STATUS.eq(ParkingSpaceStatus.OPEN.getCode())
-			.or(Tables.EH_PARKING_SPACES.STATUS.eq(ParkingSpaceStatus.OPEN.getCode())));
+			.or(Tables.EH_PARKING_SPACES.STATUS.eq(ParkingSpaceStatus.IN_USING.getCode())));
 		query.addConditions(Tables.EH_PARKING_SPACES.SPACE_NO.notIn(spaces));
+		//排序 优先取 空余的车位分配
+		query.addOrderBy(Tables.EH_PARKING_SPACES.STATUS.asc());
+		query.addLimit(1);
+
+		return ConvertHelper.convert(query.fetchAny(), ParkingSpace.class);
+
+	}
+
+	@Override
+	public ParkingSpace getAnyFreeParkingSpace(Integer namespaceId, String ownerType, Long ownerId, Long parkingLotId) {
+
+		DSLContext context = this.dbProvider.getDslContext(AccessSpec.readOnlyWith(EhParkingSpaces.class));
+		SelectQuery<EhParkingSpacesRecord> query = context.selectQuery(Tables.EH_PARKING_SPACES);
+
+		query.addConditions(Tables.EH_PARKING_SPACES.NAMESPACE_ID.eq(namespaceId));
+		query.addConditions(Tables.EH_PARKING_SPACES.OWNER_ID.eq(ownerId));
+		query.addConditions(Tables.EH_PARKING_SPACES.OWNER_TYPE.eq(ownerType));
+		query.addConditions(Tables.EH_PARKING_SPACES.PARKING_LOT_ID.eq(parkingLotId));
+		query.addConditions(Tables.EH_PARKING_SPACES.STATUS.eq(ParkingSpaceStatus.OPEN.getCode()));
+		//排序 优先取 空余的车位分配
 		query.addLimit(1);
 
 		return ConvertHelper.convert(query.fetchAny(), ParkingSpace.class);

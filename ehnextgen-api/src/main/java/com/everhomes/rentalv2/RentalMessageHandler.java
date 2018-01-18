@@ -42,4 +42,8 @@ public interface RentalMessageHandler {
     void overTimeSendMessage(RentalOrder rentalBill);
 
     void completeOrderSendMessage(RentalOrder rentalBill);
+
+    void autoCancelOrderSendMessage(RentalOrder rentalBill);
+
+    void autoUpdateOrderSpaceSendMessage(RentalOrder rentalBill);
 }

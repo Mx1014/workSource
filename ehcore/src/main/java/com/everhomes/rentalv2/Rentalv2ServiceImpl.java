@@ -29,6 +29,7 @@ import com.everhomes.bus.SystemEvent;
 import com.everhomes.configuration.ConfigConstants;
 import com.everhomes.order.OrderUtil;
 import com.everhomes.order.PayService;
+import com.everhomes.parking.ParkingSpace;
 import com.everhomes.pay.order.PaymentType;
 import com.everhomes.rentalv2.job.RentalMessageJob;
 import com.everhomes.rentalv2.job.RentalMessageQuartzJob;
@@ -235,12 +236,6 @@ public class Rentalv2ServiceImpl implements Rentalv2Service {
 		}
 
 	}
-	
-	private Object restCall(String api, Object command, Class<?> responseType) {
-		String host = this.configurationProvider.getValue(UserContext.getCurrentNamespaceId(),"pay.zuolin.host", "https://pay.zuolin.com");
-		return RentalUtils.restCall(api, command, responseType, host);
-	}
-
 
 	@Override
 	public void addRule(AddDefaultRuleAdminCommand cmd){
@@ -2306,8 +2301,8 @@ public class Rentalv2ServiceImpl implements Rentalv2Service {
 				}else if (order.getResourceType().equals(RentalV2ResourceType.VIP_PARKING.getCode())) {
 					//订单开始 置为使用中的状态
 					if (currTime >= order.getStartTime().getTime() && currTime <= order.getEndTime().getTime()) {
-						order.setStatus(SiteBillStatus.IN_USING.getCode());
-						rentalv2Provider.updateRentalBill(order);
+						RentalOrderHandler orderHandler = rentalCommonService.getRentalOrderHandler(order.getResourceType());
+						orderHandler.autoUpdateOrder(order);
 					}
 					Long orderReminderEndTimeLong = order.getReminderEndTime()!=null?order.getReminderEndTime().getTime():0L;
 
@@ -3367,13 +3362,7 @@ public class Rentalv2ServiceImpl implements Rentalv2Service {
 
 		}
 
-		Long refundOrderNo = this.onlinePayService.createBillId(timestamp);
-
-		String handlerName = RentalResourceHandler.DEFAULT;
-		if (StringUtils.isNotBlank(order.getResourceType())) {
-			handlerName = order.getResourceType();
-		}
-		RentalOrderHandler handler = rentalCommonService.getRentalOrderHandler(handlerName);
+		RentalOrderHandler handler = rentalCommonService.getRentalOrderHandler(order.getResourceType());
 		dbProvider.execute((TransactionStatus status) -> {
 			//如果是预约成功，则要判断是否退款，否则将订单置为已取消
 			if (order.getStatus().equals(SiteBillStatus.SUCCESS.getCode())) {
@@ -3383,41 +3372,7 @@ public class Rentalv2ServiceImpl implements Rentalv2Service {
 
 					BigDecimal orderAmount = handler.getRefundAmount(order, timestamp);
 
-					if (order.getPaidVersion() == ActivityRosterPayVersionFlag.V2.getCode()) {
-						//新支付退款
-						Long amount = payService.changePayAmount(orderAmount);
-						CreateOrderRestResponse refundResponse = payService.refund(OrderType.OrderTypeEnum.RENTALORDER.getPycode(),
-								Long.valueOf(order.getOrderNo()), refundOrderNo, amount);
-
-						if(refundResponse != null || refundResponse.getErrorCode() != null
-								&& refundResponse.getErrorCode().equals(HttpStatus.OK.value())){
-
-						} else{
-							LOGGER.error("Refund failed from vendor, cmd={}, response={}", cmd, refundResponse);
-							throw RuntimeErrorException.errorWith(RentalServiceErrorCode.SCOPE,
-									RentalServiceErrorCode.ERROR_REFUND_ERROR,
-									"bill refund error");
-						}
-					} else {
-						refundParkingOrderV1(order, timestamp, refundOrderNo, orderAmount);
-					}
-
-					RentalRefundOrder rentalRefundOrder = new RentalRefundOrder();
-					rentalRefundOrder.setOrderId(order.getId());
-					rentalRefundOrder.setOrderNo(Long.valueOf(order.getOrderNo()));
-					rentalRefundOrder.setRefundOrderNo(refundOrderNo);
-					rentalRefundOrder.setResourceTypeId(order.getResourceTypeId());
-					rentalRefundOrder.setOnlinePayStyleNo(VendorType.fromCode(order.getVendorType()).getStyleNo());
-					rentalRefundOrder.setResourceType(order.getResourceType());
-
-					rentalRefundOrder.setAmount(orderAmount);
-					rentalRefundOrder.setStatus(SiteBillStatus.REFUNDED.getCode());
-					rentalRefundOrder.setCreateTime(new Timestamp(DateHelper.currentGMTTime().getTime()));
-					rentalRefundOrder.setCreatorUid(UserContext.current().getUser().getId());
-					rentalRefundOrder.setOperateTime(new Timestamp(DateHelper.currentGMTTime().getTime()));
-					rentalRefundOrder.setOperatorUid(UserContext.current().getUser().getId());
-
-					this.rentalv2Provider.createRentalRefundOrder(rentalRefundOrder);
+					rentalCommonService.refundOrder(order, timestamp, orderAmount);
 
 					//更新bill状态
 					order.setStatus(SiteBillStatus.REFUNDED.getCode());
@@ -3434,6 +3389,8 @@ public class Rentalv2ServiceImpl implements Rentalv2Service {
 			}
 
 			rentalv2Provider.updateRentalBill(order);
+
+			handler.releaseOrderResourceStatus(order);
 			//只要退款就给管理员发消息,不管是退款中还是已退款
 			onOrderCancel(order);
 			if (order.getDoorAuthId() != null) //解除门禁授权
@@ -3452,56 +3409,6 @@ public class Rentalv2ServiceImpl implements Rentalv2Service {
 			return null;
 		});
 
-	}
-
-	private void refundParkingOrderV1(RentalOrder order, Long timestamp, Long refundOrderNo, BigDecimal amount) {
-		PayZuolinRefundCommand refundCmd = new PayZuolinRefundCommand();
-		String refundApi = this.configurationProvider.getValue(UserContext.getCurrentNamespaceId(), "pay.zuolin.refound", "POST /EDS_PAY/rest/pay_common/refund/save_refundInfo_record");
-		String appKey = configurationProvider.getValue(UserContext.getCurrentNamespaceId(), "pay.appKey", "");
-
-		Integer randomNum = (int) (Math.random() * 1000);
-
-		refundCmd.setAppKey(appKey);
-		refundCmd.setTimestamp(timestamp);
-		refundCmd.setNonce(randomNum);
-		refundCmd.setRefundOrderNo(String.valueOf(refundOrderNo));
-		refundCmd.setOrderNo(String.valueOf(order.getOrderNo()));
-		refundCmd.setOnlinePayStyleNo(VendorType.fromCode(order.getVendorType()).getStyleNo());
-		refundCmd.setOrderType(OrderType.OrderTypeEnum.RENTALORDER.getPycode());
-		//已付金额乘以退款比例除以100
-		refundCmd.setRefundAmount(amount);
-		refundCmd.setRefundMsg("预订单取消退款");
-		this.setSignatureParam(refundCmd);
-
-		PayZuolinRefundResponse refundResponse = (PayZuolinRefundResponse) this.restCall(refundApi, refundCmd, PayZuolinRefundResponse.class);
-		if (refundResponse != null && refundResponse.getErrorCode().equals(HttpStatus.OK.value())) {
-			//退款成功保存退款单信息，修改bill状态
-		} else {
-			LOGGER.error("Refund failed from vendor, refundCmd={}, response={}", refundCmd, refundResponse);
-			throw RuntimeErrorException.errorWith(RentalServiceErrorCode.SCOPE,
-					RentalServiceErrorCode.ERROR_REFUND_ERROR,
-					"bill refund error");
-		}
-	}
-	
-	/***给支付相关的参数签名*/
-	private void setSignatureParam(PayZuolinRefundCommand cmd) {
-		App app = appProvider.findAppByKey(cmd.getAppKey());
-		
-		Map<String,String> map = new HashMap<>();
-		map.put("appKey",cmd.getAppKey());
-		map.put("timestamp",cmd.getTimestamp()+"");
-		map.put("nonce",cmd.getNonce()+"");
-		map.put("refundOrderNo",cmd.getRefundOrderNo());
-		map.put("orderNo", cmd.getOrderNo());
-		map.put("onlinePayStyleNo",cmd.getOnlinePayStyleNo() );
-		map.put("orderType",cmd.getOrderType() );
-		//modify by wh 2016-10-24 退款使用toString,下订单的时候使用doubleValue,两边用的不一样,为了和电商保持一致,要修改成toString
-//		map.put("refundAmount", cmd.getRefundAmount().doubleValue()+"");
-		map.put("refundAmount", cmd.getRefundAmount().toString());
-		map.put("refundMsg", cmd.getRefundMsg()); 
-		String signature = SignatureHelper.computeSignature(map, app.getSecretKey());
-		cmd.setSignature(signature);
 	}
 
 	@Override
@@ -6727,8 +6634,9 @@ public class Rentalv2ServiceImpl implements Rentalv2Service {
 		//已付金额乘以退款比例除以100
 		refundCmd.setRefundAmount( refundOrder.getAmount());
 		refundCmd.setRefundMsg("预订单取消退款");
-		this.setSignatureParam(refundCmd);
-		PayZuolinRefundResponse refundResponse = (PayZuolinRefundResponse) this.restCall(refoundApi, refundCmd, PayZuolinRefundResponse.class);
+		rentalCommonService.setSignatureParam(refundCmd);
+		PayZuolinRefundResponse refundResponse = (PayZuolinRefundResponse) rentalCommonService.restCall(refoundApi,
+				refundCmd, PayZuolinRefundResponse.class);
 		if(refundResponse.getErrorCode().equals(HttpStatus.OK.value())){
 			return refundResponse.getResponse();
 		}
@@ -7913,6 +7821,8 @@ public class Rentalv2ServiceImpl implements Rentalv2Service {
 
 		cellList.get().clear();
 
+		RentalOrderHandler orderHandler = rentalCommonService.getRentalOrderHandler(order.getResourceType());
+		orderHandler.completeRentalOrder(order);
 		//发消息
 		RentalMessageHandler handler = rentalCommonService.getRentalMessageHandler(order.getResourceType());
 

@@ -1,5 +1,6 @@
 package com.everhomes.rentalv2.order_handler;
 
+import com.everhomes.parking.ParkingSpace;
 import com.everhomes.rentalv2.*;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
@@ -30,6 +31,21 @@ public class DefaultRentalOrderHandler implements RentalOrderHandler {
 
     @Override
     public void completeRentalOrder(RentalOrder order) {
+
+    }
+
+    @Override
+    public void lockOrderResourceStatus(RentalOrder order) {
+
+    }
+
+    @Override
+    public void releaseOrderResourceStatus(RentalOrder order) {
+
+    }
+
+    @Override
+    public void autoUpdateOrder(RentalOrder order) {
 
     }
 }

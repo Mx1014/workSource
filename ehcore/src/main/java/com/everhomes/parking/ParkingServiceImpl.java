@@ -2419,6 +2419,12 @@ public class ParkingServiceImpl implements ParkingService {
 					"ParkingSpace not found.");
 		}
 
+		if (parkingSpace.getStatus() == ParkingSpaceStatus.IN_USING.getCode()) {
+			LOGGER.error("ParkingSpace in use, cmd={}", cmd);
+			throw RuntimeErrorException.errorWith(ErrorCodes.SCOPE_GENERAL, ErrorCodes.ERROR_INVALID_PARAMETER,
+					"ParkingSpace in use.");
+		}
+
 		parkingSpace.setStatus(ParkingSpaceStatus.DELETED.getCode());
 		parkingProvider.updateParkingSpace(parkingSpace);
 	}
