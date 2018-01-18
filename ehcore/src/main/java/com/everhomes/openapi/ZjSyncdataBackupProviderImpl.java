@@ -15,6 +15,8 @@ import com.everhomes.util.ConvertHelper;
 import com.everhomes.util.DateHelper;
 import org.jooq.DSLContext;
 import org.jooq.SelectQuery;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
 
@@ -27,7 +29,7 @@ import java.util.List;
  */
 @Component
 public class ZjSyncdataBackupProviderImpl implements ZjSyncdataBackupProvider {
-
+    private static final Logger LOGGER = LoggerFactory.getLogger(ZjSyncdataBackupProviderImpl.class);
     @Autowired
     private DbProvider dbProvider;
 
@@ -108,6 +110,8 @@ public class ZjSyncdataBackupProviderImpl implements ZjSyncdataBackupProvider {
         query.addConditions(Tables.EH_ZJ_SYNCDATA_BACKUP.DATA_TYPE.eq(dataType));
         query.addConditions(Tables.EH_ZJ_SYNCDATA_BACKUP.STATUS.eq(CommonStatus.ACTIVE.getCode()));
 
+        LOGGER.debug("listZjSyncdataBackupActiveCountByParam, sql=" + query.getSQL());
+        LOGGER.debug("listZjSyncdataBackupActiveCountByParam, bindValues=" + query.getBindValues());
         return query.fetchCount();
     }
 
