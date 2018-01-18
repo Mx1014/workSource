@@ -690,10 +690,10 @@ public class SocialSecurityServiceImpl implements SocialSecurityService {
         detailIds.add(cmd.getDetailId());
         List<SocialSecuritySetting> ssSettings = socialSecuritySettingProvider.listSocialSecuritySetting(detailIds, AccumOrSocial.SOCAIL);
         List<SocialSecuritySetting> afSettings = socialSecuritySettingProvider.listSocialSecuritySetting(detailIds, AccumOrSocial.ACCUM);
-        if (ssPayments.size() == 0) {
-            response.setPayCurrentSocialSecurityFlag(NormalFlag.NO.getCode());
-        } else {
+        if (NormalFlag.fromCode(memberDetail.getSocialSecurityStatus()) == NormalFlag.YES) {
             response.setPayCurrentSocialSecurityFlag(NormalFlag.YES.getCode());
+        } else {
+            response.setPayCurrentSocialSecurityFlag(NormalFlag.NO.getCode());
         }
         response.setSocialSecurityPayment(processSocialSecurityPaymentDetailDTO(ssSettings));
         //社保补缴
@@ -704,10 +704,10 @@ public class SocialSecurityServiceImpl implements SocialSecurityService {
             response.setAfterSocialSecurityPayment(processSocialSecurityPaymentDetailDTO(ssSettings));
         }
         //公积金本月缴费
-        if (afPayments.size() == 0) {
-            response.setPayCurrentAccumulationFundFlag(NormalFlag.NO.getCode());
-        } else {
+        if (NormalFlag.fromCode(memberDetail.getAccumulationFundStatus()) == NormalFlag.YES) {
             response.setPayCurrentAccumulationFundFlag(NormalFlag.YES.getCode());
+        } else {
+            response.setPayCurrentAccumulationFundFlag(NormalFlag.NO.getCode());
         }
         response.setAccumulationFundPayment(processSocialSecurityPaymentDetailDTO(afSettings));
         //公积金补缴
