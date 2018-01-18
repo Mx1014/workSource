@@ -16,10 +16,18 @@ public class GetRenewRentalOrderInfoResponse {
     private Long rentalBillId;
     private Byte rentalType;
     private Double timeStep;
-
+    private Double cellCount;
     private Long endTime;
 
     private BigDecimal amount;
+
+    public Double getCellCount() {
+        return cellCount;
+    }
+
+    public void setCellCount(Double cellCount) {
+        this.cellCount = cellCount;
+    }
 
     public Double getTimeStep() {
         return timeStep;
