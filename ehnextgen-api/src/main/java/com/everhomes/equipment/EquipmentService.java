@@ -166,4 +166,6 @@ public interface EquipmentService {
 	OfflineEquipmentTaskReportResponse offlineEquipmentTaskReport(OfflineEquipmentTaskReportCommand cmd);
 
     void createRepairsTask(CreateEquipmentRepairCommand cmd);
+
+    List<EquipmentOperateLogsDTO> listOperateLogs(DeleteEquipmentsCommand cmd);
 }
