@@ -1,5 +1,8 @@
 package com.everhomes.filemanagement;
 
+import com.everhomes.listing.ListingLocator;
+import com.everhomes.listing.ListingQueryBuilderCallback;
+
 import java.util.List;
 
 public interface FileManagementProvider {
@@ -13,6 +16,8 @@ public interface FileManagementProvider {
     FileCatalog findFileCatalogByName(Integer namespaceId, Long ownerId, String name);
 
     List<FileCatalog> listFileCatalogs(Integer namespaceId, Long ownerId, Long pageAnchor, Integer pageSize, String keywords);
+
+    List<FileCatalog> queryFileCatalogs(ListingLocator locator, Integer namespaceId, Long ownerId, ListingQueryBuilderCallback queryBuilderCallback);
 
     List<FileCatalog> listAvailableFileCatalogs(Integer namespaceId, Long ownerId, Long userId);
 

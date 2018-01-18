@@ -1,12 +1,14 @@
 package com.everhomes.filemanagement;
 
 import com.everhomes.contentserver.ContentServerService;
+import com.everhomes.listing.ListingLocator;
 import com.everhomes.module.ServiceModuleService;
 import com.everhomes.portal.PortalService;
 import com.everhomes.rest.filemanagement.*;
 import com.everhomes.rest.module.CheckModuleManageCommand;
 import com.everhomes.rest.portal.ListServiceModuleAppsCommand;
 import com.everhomes.rest.portal.ListServiceModuleAppsResponse;
+import com.everhomes.server.schema.Tables;
 import com.everhomes.user.User;
 import com.everhomes.user.UserContext;
 import com.everhomes.util.ConvertHelper;
@@ -171,6 +173,20 @@ public class FileManagementServiceImpl implements  FileManagementService{
 
     @Override
     public SearchFileResponse searchFiles(SearchFileCommand cmd) {
+        Integer namespaceId = UserContext.getCurrentNamespaceId();
+        SearchFileResponse response = new SearchFileResponse();
+        List<FileCatalogDTO> catalogs = new ArrayList<>();
+        List<FileContentDTO> folders = new ArrayList<>();
+        List<FileContentDTO> files = new ArrayList<>();
+
+        List<FileCatalog> catalogResults = fileManagementProvider.queryFileCatalogs(new ListingLocator(), namespaceId, cmd.getOwnerId(), ((locator, query) -> {
+            if (cmd.getCatalogIds() != null && cmd.getCatalogIds().size() > 0)
+                query.addConditions(Tables.EH_FILE_MANAGEMENT_CATALOGS.ID.in(cmd.getCatalogIds()));
+            if (cmd.getKeywords() != null)
+                query.addConditions(Tables.EH_FILE_MANAGEMENT_CATALOGS.NAME.like(cmd.getKeywords()));
+            return query;
+        }));
+
         return null;
     }
 
@@ -318,8 +334,6 @@ public class FileManagementServiceImpl implements  FileManagementService{
         if(results !=null && results.size() > 0){
             results.stream().filter(r -> r.getContentType().equals(FileContentType.FOLDER.getCode())).map(r ->{
                 FileContentDTO dto = ConvertHelper.convert(r, FileContentDTO.class);
-                if(dto.getContentUri() != null)
-                    dto.setContentUrl(contentServerService.parserUri(dto.getContentUri()));
                 folders.add(dto);
                 return null;
             }).collect(Collectors.toList());

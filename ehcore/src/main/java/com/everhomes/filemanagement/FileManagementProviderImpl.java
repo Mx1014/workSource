@@ -4,8 +4,9 @@ import com.everhomes.db.AccessSpec;
 import com.everhomes.db.DaoAction;
 import com.everhomes.db.DaoHelper;
 import com.everhomes.db.DbProvider;
+import com.everhomes.listing.ListingLocator;
+import com.everhomes.listing.ListingQueryBuilderCallback;
 import com.everhomes.naming.NameMapper;
-import com.everhomes.rest.filemanagement.FileContentType;
 import com.everhomes.rest.filemanagement.FileManagementStatus;
 import com.everhomes.sequence.SequenceProvider;
 import com.everhomes.server.schema.Tables;
@@ -100,6 +101,26 @@ public class FileManagementProviderImpl implements FileManagementProvider {
             query.addConditions(Tables.EH_FILE_MANAGEMENT_CATALOGS.ID.lt(pageAnchor));
         query.addLimit(pageSize + 1);
         query.addOrderBy(Tables.EH_FILE_MANAGEMENT_CATALOGS.ID.desc());
+        query.fetch().map(r -> {
+            results.add(ConvertHelper.convert(r, FileCatalog.class));
+            return null;
+        });
+        if (null != results && 0 != results.size()) {
+            return results;
+        }
+        return null;
+    }
+
+    @Override
+    public List<FileCatalog> queryFileCatalogs(ListingLocator locator, Integer namespaceId, Long ownerId, ListingQueryBuilderCallback queryBuilderCallback) {
+        List<FileCatalog> results = new ArrayList<>();
+        DSLContext context = dbProvider.getDslContext(AccessSpec.readOnly());
+
+        SelectQuery<EhFileManagementCatalogsRecord> query = context.selectQuery(Tables.EH_FILE_MANAGEMENT_CATALOGS);
+        queryBuilderCallback.buildCondition(locator,query);
+        query.addConditions(Tables.EH_FILE_MANAGEMENT_CATALOGS.NAMESPACE_ID.eq(namespaceId));
+        query.addConditions(Tables.EH_FILE_MANAGEMENT_CATALOGS.OWNER_ID.eq(ownerId));
+        query.addConditions(Tables.EH_FILE_MANAGEMENT_CATALOGS.STATUS.eq(FileManagementStatus.VALID.getCode()));
         query.fetch().map(r -> {
             results.add(ConvertHelper.convert(r, FileCatalog.class));
             return null;
