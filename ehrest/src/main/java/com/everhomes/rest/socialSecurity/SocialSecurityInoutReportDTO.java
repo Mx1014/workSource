@@ -58,14 +58,14 @@ public class SocialSecurityInoutReportDTO {
     private String socialSecurityCityName;
     private String payMonth;
     private BigDecimal socialSecurityRadix;
-    private BigDecimal socialSecurityIncrease;
-    private BigDecimal socialSecurityDecrease;
+    private String socialSecurityIncrease;
+    private String socialSecurityDecrease;
     private BigDecimal socialSecurityAfter;
     private Long accumulationFundCityId;
     private String accumulationFundCityName;
     private BigDecimal accumulationFundRadix;
-    private BigDecimal accumulationFundIncrease;
-    private BigDecimal accumulationFundDecrease;
+    private String accumulationFundIncrease;
+    private String accumulationFundDecrease;
     private BigDecimal accumulationFundAfter;
     private Long fileUid;
     private Long fileTime;
@@ -195,18 +195,6 @@ public class SocialSecurityInoutReportDTO {
 	public void setSocialSecurityRadix(BigDecimal socialSecurityRadix) {
 		this.socialSecurityRadix = socialSecurityRadix;
 	}
-	public BigDecimal getSocialSecurityIncrease() {
-		return socialSecurityIncrease;
-	}
-	public void setSocialSecurityIncrease(BigDecimal socialSecurityIncrease) {
-		this.socialSecurityIncrease = socialSecurityIncrease;
-	}
-	public BigDecimal getSocialSecurityDecrease() {
-		return socialSecurityDecrease;
-	}
-	public void setSocialSecurityDecrease(BigDecimal socialSecurityDecrease) {
-		this.socialSecurityDecrease = socialSecurityDecrease;
-	}
 	public BigDecimal getSocialSecurityAfter() {
 		return socialSecurityAfter;
 	}
@@ -231,18 +219,6 @@ public class SocialSecurityInoutReportDTO {
 	public void setAccumulationFundRadix(BigDecimal accumulationFundRadix) {
 		this.accumulationFundRadix = accumulationFundRadix;
 	}
-	public BigDecimal getAccumulationFundIncrease() {
-		return accumulationFundIncrease;
-	}
-	public void setAccumulationFundIncrease(BigDecimal accumulationFundIncrease) {
-		this.accumulationFundIncrease = accumulationFundIncrease;
-	}
-	public BigDecimal getAccumulationFundDecrease() {
-		return accumulationFundDecrease;
-	}
-	public void setAccumulationFundDecrease(BigDecimal accumulationFundDecrease) {
-		this.accumulationFundDecrease = accumulationFundDecrease;
-	}
 	public BigDecimal getAccumulationFundAfter() {
 		return accumulationFundAfter;
 	}
@@ -265,5 +241,37 @@ public class SocialSecurityInoutReportDTO {
 	@Override
 	public String toString() {
 		return StringHelper.toJsonString(this);
-	} 
+	}
+
+	public String getSocialSecurityIncrease() {
+		return socialSecurityIncrease;
+	}
+
+	public void setSocialSecurityIncrease(String socialSecurityIncrease) {
+		this.socialSecurityIncrease = socialSecurityIncrease;
+	}
+
+	public String getSocialSecurityDecrease() {
+		return socialSecurityDecrease;
+	}
+
+	public void setSocialSecurityDecrease(String socialSecurityDecrease) {
+		this.socialSecurityDecrease = socialSecurityDecrease;
+	}
+
+	public String getAccumulationFundIncrease() {
+		return accumulationFundIncrease;
+	}
+
+	public void setAccumulationFundIncrease(String accumulationFundIncrease) {
+		this.accumulationFundIncrease = accumulationFundIncrease;
+	}
+
+	public String getAccumulationFundDecrease() {
+		return accumulationFundDecrease;
+	}
+
+	public void setAccumulationFundDecrease(String accumulationFundDecrease) {
+		this.accumulationFundDecrease = accumulationFundDecrease;
+	}
 }

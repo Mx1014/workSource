@@ -1541,16 +1541,16 @@ public class SocialSecurityServiceImpl implements SocialSecurityService {
             LOGGER.debug("log type :{} ,detail status ss {}  af {} ", log.getType(), detail.getSocialSecurityStatus(), detail.getAccumulationFundStatus());
             if (log.getType().equals(InOutLogType.ACCUMULATION_FUND_IN.getCode())
                     && (NormalFlag.YES == NormalFlag.fromCode(detail.getAccumulationFundStatus()))) {
-                report.setAccumulationFundIncrease(ssReport.getAccumulationFundSum());
+                report.setAccumulationFundIncrease(month);
             } else if (log.getType().equals(InOutLogType.SOCIAL_SECURITY_IN.getCode())
                     && (NormalFlag.YES == NormalFlag.fromCode(detail.getSocialSecurityStatus()))) {
-                report.setSocialSecurityIncrease(ssReport.getSocialSecuritySum());
+                report.setSocialSecurityIncrease(month);
             } else if (log.getType().equals(InOutLogType.SOCIAL_SECURITY_OUT.getCode())
                     && (NormalFlag.NO == NormalFlag.fromCode(detail.getSocialSecurityStatus()))) {
-                report.setSocialSecurityDecrease(socialSecuritySettingProvider.sumPayment(detail.getId(), AccumOrSocial.SOCAIL));
+                report.setSocialSecurityDecrease(month);
             } else if (log.getType().equals(InOutLogType.ACCUMULATION_FUND_OUT.getCode())
                     && (NormalFlag.NO == NormalFlag.fromCode(detail.getAccumulationFundStatus()))) {
-                report.setAccumulationFundDecrease(socialSecuritySettingProvider.sumPayment(detail.getId(), AccumOrSocial.ACCUM));
+                report.setAccumulationFundDecrease(month);
             }
         }
 //        if (inOutFlag == InOutFlag.INCRE) {
@@ -2434,13 +2434,13 @@ public class SocialSecurityServiceImpl implements SocialSecurityService {
         row.createCell(++i).setCellValue(r.getHouseholdType());
         row.createCell(++i).setCellValue(checkNullBigDecimal(r.getSocialSecurityRadix()));
         row.createCell(++i).setCellValue(r.getSocialSecurityCityName());
-        row.createCell(++i).setCellValue(checkNullBigDecimal(r.getSocialSecurityIncrease()));
-        row.createCell(++i).setCellValue(checkNullBigDecimal(r.getSocialSecurityDecrease()));
+        row.createCell(++i).setCellValue(r.getSocialSecurityIncrease());
+        row.createCell(++i).setCellValue(r.getSocialSecurityDecrease());
         row.createCell(++i).setCellValue(checkNullBigDecimal(r.getSocialSecurityAfter()));
         row.createCell(++i).setCellValue(checkNullBigDecimal(r.getAccumulationFundRadix()));
         row.createCell(++i).setCellValue(r.getAccumulationFundCityName());
-        row.createCell(++i).setCellValue(checkNullBigDecimal(r.getAccumulationFundIncrease()));
-        row.createCell(++i).setCellValue(checkNullBigDecimal(r.getAccumulationFundDecrease()));
+        row.createCell(++i).setCellValue(r.getAccumulationFundIncrease());
+        row.createCell(++i).setCellValue(r.getAccumulationFundDecrease());
         row.createCell(++i).setCellValue(checkNullBigDecimal(r.getAccumulationFundAfter()));
         return sheet;
     }
