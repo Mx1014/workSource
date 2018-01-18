@@ -30,7 +30,7 @@ import com.everhomes.flow.FlowService;
 import com.everhomes.locale.LocaleStringService;
 import com.everhomes.namespace.Namespace;
 import com.everhomes.namespace.NamespaceResource;
-import com.everhomes.openapi.ContractBuildingMapping;
+import com.everhomes.openapi.*;
 import com.everhomes.organization.*;
 import com.everhomes.organization.pm.CommunityAddressMapping;
 import com.everhomes.organization.pm.PropertyMgrProvider;
@@ -53,6 +53,7 @@ import com.everhomes.rest.flow.FlowModuleType;
 import com.everhomes.rest.flow.FlowOwnerType;
 import com.everhomes.rest.launchpad.ActionType;
 import com.everhomes.rest.namespace.NamespaceCommunityType;
+import com.everhomes.rest.openapi.shenzhou.DataType;
 import com.everhomes.rest.organization.OrganizationContactDTO;
 import com.everhomes.rest.organization.pm.AddOrganizationOwnerAddressCommand;
 import com.everhomes.rest.organization.pm.AddressMappingStatus;
@@ -83,9 +84,6 @@ import com.everhomes.configuration.ConfigurationProvider;
 import com.everhomes.coordinator.CoordinationLocks;
 import com.everhomes.coordinator.CoordinationProvider;
 import com.everhomes.coordinator.NamedLock;
-import com.everhomes.openapi.Contract;
-import com.everhomes.openapi.ContractBuildingMappingProvider;
-import com.everhomes.openapi.ContractProvider;
 import com.everhomes.rest.appurl.AppUrlDTO;
 import com.everhomes.rest.appurl.GetAppInfoCommand;
 import com.everhomes.rest.organization.OrganizationServiceUser;
@@ -197,6 +195,9 @@ public class ContractServiceImpl implements ContractService {
 
 	@Autowired
 	private SyncDataTaskService syncDataTaskService;
+
+	@Autowired
+	private ZjSyncdataBackupProvider zjSyncdataBackupProvider;
 
 	private void checkContractAuth(Integer namespaceId, Long privilegeId, Long orgId, Long communityId) {
 		ListServiceModuleAppsCommand cmd = new ListServiceModuleAppsCommand();
@@ -1669,13 +1670,18 @@ public class ContractServiceImpl implements ContractService {
 	}
 
 	@Override
-	public void syncContractsFromThirdPart(SyncContractsFromThirdPartCommand cmd) {
+	public String syncContractsFromThirdPart(SyncContractsFromThirdPartCommand cmd) {
 		checkContractAuth(cmd.getNamespaceId(), PrivilegeConstants.CONTRACT_SYNC, cmd.getOrgId(), cmd.getCommunityId());
 
 		Community community = communityProvider.findCommunityById(cmd.getCommunityId());
 		if(community == null) {
-			return;
+			return "0";
 		}
+		int syncCount = zjSyncdataBackupProvider.listZjSyncdataBackupActiveCountByParam(community.getNamespaceId(), community.getNamespaceCommunityToken(), DataType.CONTRACT.getCode());
+		if(syncCount > 0) {
+			return "1";
+		}
+
 		String version = contractProvider.findLastContractVersionByCommunity(cmd.getNamespaceId(), community.getId());
 		ThirdPartContractHandler contractHandler = PlatformContext.getComponent(ThirdPartContractHandler.CONTRACT_PREFIX + cmd.getNamespaceId());
 		if(contractHandler != null) {
@@ -1692,6 +1698,7 @@ public class ContractServiceImpl implements ContractService {
 
 		}
 
+		return "0";
 //		this.coordinationProvider.getNamedLock(CoordinationLocks.SYNC_CONTRACT.getCode() + cmd.getNamespaceId() + cmd.getCommunityId()).tryEnter(()-> {
 //			ExecutorUtil.submit(new Runnable() {
 //				@Override

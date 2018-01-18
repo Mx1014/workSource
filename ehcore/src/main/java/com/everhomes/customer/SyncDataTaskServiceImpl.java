@@ -68,7 +68,7 @@ public class SyncDataTaskServiceImpl implements SyncDataTaskService {
                     task.setStatus(SyncDataTaskStatus.EXCEPTION.getCode());
                     task.setResult(e.toString());
                 }finally {
-                    LOGGER.debug("SyncDataTask task: {}", task);
+                    LOGGER.debug("SyncDataTask task: {}", StringHelper.toJsonString(task));
                     syncDataTaskProvider.updateSyncDataTask(task);
                 }
 

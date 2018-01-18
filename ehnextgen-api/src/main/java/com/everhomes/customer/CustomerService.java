@@ -90,8 +90,8 @@ public interface CustomerService {
     ListCustomerAnnualStatisticsResponse listCustomerAnnualStatistics(ListCustomerAnnualStatisticsCommand cmd);
     ListCustomerAnnualDetailsResponse listCustomerAnnualDetails(ListCustomerAnnualDetailsCommand cmd);
 
-    void syncEnterpriseCustomers(SyncCustomersCommand cmd);
-    void syncIndividualCustomers(SyncCustomersCommand cmd);
+    String syncEnterpriseCustomers(SyncCustomersCommand cmd);
+    String syncIndividualCustomers(SyncCustomersCommand cmd);
     
     
     List<CustomerTrackingDTO> listCustomerTrackings(ListCustomerTrackingsCommand cmd);

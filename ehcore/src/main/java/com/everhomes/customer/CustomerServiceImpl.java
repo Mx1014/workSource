@@ -2297,14 +2297,14 @@ public class CustomerServiceImpl implements CustomerService {
     }
 
     @Override
-    public void syncEnterpriseCustomers(SyncCustomersCommand cmd) {
+    public String syncEnterpriseCustomers(SyncCustomersCommand cmd) {
         checkCustomerAuth(cmd.getNamespaceId(), PrivilegeConstants.ENTERPRISE_CUSTOMER_SYNC, cmd.getOrgId(), cmd.getCommunityId());
         if(cmd.getNamespaceId() == 999971) {
             Community community = communityProvider.findCommunityById(cmd.getCommunityId());
             if(community != null) {
                 int syncCount = zjSyncdataBackupProvider.listZjSyncdataBackupActiveCountByParam(community.getNamespaceId(), community.getNamespaceCommunityToken(), DataType.ENTERPRISE.getCode());
                 if(syncCount > 0) {
-                    return ;
+                    return "1";
                 }
 
                 SyncDataTask task = new SyncDataTask();
@@ -2321,11 +2321,11 @@ public class CustomerServiceImpl implements CustomerService {
         } else {
             Community community = communityProvider.findCommunityById(cmd.getCommunityId());
             if(community == null) {
-                return;
+                return "0";
             }
             int syncCount = zjSyncdataBackupProvider.listZjSyncdataBackupActiveCountByParam(community.getNamespaceId(), community.getNamespaceCommunityToken(), DataType.ENTERPRISE.getCode());
             if(syncCount > 0) {
-                return ;
+                return "1";
             }
             String version = enterpriseCustomerProvider.findLastEnterpriseCustomerVersionByCommunity(cmd.getNamespaceId(), community.getId());
             CustomerHandle customerHandle = PlatformContext.getComponent(CustomerHandle.CUSTOMER_PREFIX + cmd.getNamespaceId());
@@ -2342,6 +2342,7 @@ public class CustomerServiceImpl implements CustomerService {
                 }, task);
             }
         }
+        return "0";
 //        if(cmd.getNamespaceId() == 999971) {
 //            this.coordinationProvider.getNamedLock(CoordinationLocks.SYNC_ENTERPRISE_CUSTOMER.getCode() + cmd.getNamespaceId() + cmd.getCommunityId()).tryEnter(()-> {
 //                ExecutorUtil.submit(new Runnable() {
@@ -2415,12 +2416,12 @@ public class CustomerServiceImpl implements CustomerService {
     }
 
     @Override
-    public void syncIndividualCustomers(SyncCustomersCommand cmd) {
+    public String syncIndividualCustomers(SyncCustomersCommand cmd) {
         Community community = communityProvider.findCommunityById(cmd.getCommunityId());
         if(community != null) {
             int syncCount = zjSyncdataBackupProvider.listZjSyncdataBackupActiveCountByParam(community.getNamespaceId(), community.getNamespaceCommunityToken(), DataType.INDIVIDUAL.getCode());
             if(syncCount > 0) {
-                return ;
+                return "1";
             }
 
             SyncDataTask task = new SyncDataTask();
@@ -2435,6 +2436,8 @@ public class CustomerServiceImpl implements CustomerService {
             }, task);
 
         }
+
+        return "0";
 
 //        if(cmd.getNamespaceId() == 999971) {
 //            ExecutorUtil.submit(new Runnable() {
