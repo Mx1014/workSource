@@ -1292,7 +1292,7 @@ public class SocialSecurityServiceImpl implements SocialSecurityService {
             if (null == setting) {
                 if (item.getCompanyRadix() == null || item.getCompanyRatio() == null) {
 
-                    String errorString = "增员的人员基数和比例不能为0 ";
+                    String errorString = "增员的人员基数和比例不能为空";
                     LOGGER.error(errorString);
                     log.setErrorLog(errorString);
                     log.setCode(SocialSecurityConstants.ERROR_CHECK_SSRADIX);
