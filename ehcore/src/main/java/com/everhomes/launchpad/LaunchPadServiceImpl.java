@@ -314,8 +314,10 @@ public class LaunchPadServiceImpl implements LaunchPadService {
 			cmd.setCategryId(categry.getId());
 			cmd.setCategryName(categry.getName());
 			List<LaunchPadItemDTO> result = getItemsByOrg(cmd, request, null);
-			categryItemDTO.setLaunchPadItems(result);
-			categryItemDTOs.add(categryItemDTO);
+			if(result != null && result.size() > 0) {
+				categryItemDTO.setLaunchPadItems(result);
+				categryItemDTOs.add(categryItemDTO);
+			}
 		}
 		long endTime = System.currentTimeMillis();
 		LOGGER.info("Query launch pad complete, cmd=" + cmd + ",esplse=" + (endTime - startTime));
