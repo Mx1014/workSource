@@ -8,6 +8,7 @@ import com.everhomes.discover.RestDoc;
 import com.everhomes.discover.RestReturn;
 import com.everhomes.module.ServiceModuleService;
 import com.everhomes.rest.RestResponse;
+import com.everhomes.rest.quality.BatchUpdateQualitySpecificationsCommand;
 import com.everhomes.rest.quality.CountSampleTaskCommunityScoresCommand;
 import com.everhomes.rest.quality.CountSampleTaskScoresCommand;
 import com.everhomes.rest.quality.CountSampleTaskScoresResponse;
@@ -552,9 +553,21 @@ public class QualityController extends ControllerBase {
 	@RequestMapping("getQualitySpecification")
 	@RestReturn(value = QualityInspectionSpecificationDTO.class)
 	public RestResponse getQualitySpecification(GetQualitySpecificationCommand cmd) {
-		
 		QualityInspectionSpecificationDTO specification = qualityService.getQualitySpecification(cmd);
-		
+		RestResponse response = new RestResponse(specification);
+		response.setErrorCode(ErrorCodes.SUCCESS);
+		response.setErrorDescription("OK");
+		return response;
+	}
+
+	/**
+	 * <b>URL: /quality/batchUpdateQualitySpecification</b>
+	 * <p>批量修改特定规范下事项</p>
+	 */
+	@RequestMapping("batchUpdateQualitySpecification")
+	@RestReturn(value = QualityInspectionSpecificationDTO.class, collection = true)
+	public RestResponse batchUpdateQualitySpecification(BatchUpdateQualitySpecificationsCommand cmd) {
+		List<QualityInspectionSpecificationDTO> specification = qualityService.batchUpdateQualitySpecification(cmd);
 		RestResponse response = new RestResponse(specification);
 		response.setErrorCode(ErrorCodes.SUCCESS);
 		response.setErrorDescription("OK");

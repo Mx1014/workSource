@@ -19,7 +19,6 @@ import java.util.List;
  *  <li>description: 规范内容</li>
  *  <li>scopeType: specification可见范围类型 0: all, 1: community</li>
  *  <li>scopeId: 看见范围具体Id，全部为0</li>
- *  <li>communities: 全部中应用的项目id列表</li>
  *  <li>namespaceId: namespaceId</li>
  * </ul>
  */
