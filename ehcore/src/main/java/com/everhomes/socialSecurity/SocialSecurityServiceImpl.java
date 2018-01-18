@@ -159,7 +159,8 @@ public class SocialSecurityServiceImpl implements SocialSecurityService {
                     return null;
                 });
             }
-        }
+            return null;
+        });
     }
 
     private void deleteOldMonthPayments(Long ownerId) {
