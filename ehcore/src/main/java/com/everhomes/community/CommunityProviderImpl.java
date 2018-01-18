@@ -767,6 +767,52 @@ public class CommunityProviderImpl implements CommunityProvider {
 	}
 
     @Override
+    public List<Building> ListBuildingsByCommunityId(ListingLocator locator, int count, Long communityId, Integer namespaceId, String keyword, Timestamp lastUpdateTime) {
+        DSLContext context = this.dbProvider.getDslContext(AccessSpec.readOnlyWith(EhCommunities.class, locator.getEntityId()));
+        List<Building> buildings = new ArrayList<Building>();
+        SelectQuery<EhBuildingsRecord> query = context.selectQuery(Tables.EH_BUILDINGS);
+
+        if(locator.getAnchor() != null) {
+            query.addConditions(Tables.EH_BUILDINGS.DEFAULT_ORDER.lt(locator.getAnchor()));
+        }
+
+        if (null != communityId) {
+            query.addConditions(Tables.EH_BUILDINGS.COMMUNITY_ID.eq(communityId));
+        }
+        if (!StringUtils.isBlank(keyword)) {
+            query.addConditions(Tables.EH_BUILDINGS.NAME.like("%" + keyword + "%"));
+        }
+        if (null != namespaceId) {
+            query.addConditions(Tables.EH_BUILDINGS.NAMESPACE_ID.eq(namespaceId));
+        }
+
+        if(lastUpdateTime != null) {
+            query.addConditions(Tables.EH_BUILDINGS.CREATE_TIME.gt(lastUpdateTime)
+                    .or(Tables.EH_BUILDINGS.OPERATE_TIME.gt(lastUpdateTime)));
+        }
+
+        query.addConditions(Tables.EH_BUILDINGS.STATUS.eq(CommunityAdminStatus.ACTIVE.getCode()));
+        query.addOrderBy(Tables.EH_BUILDINGS.DEFAULT_ORDER.desc());
+        query.addLimit(count);
+
+        if(LOGGER.isDebugEnabled()) {
+            LOGGER.debug("Query buildings by count, sql=" + query.getSQL());
+            LOGGER.debug("Query buildings by count, bindValues=" + query.getBindValues());
+        }
+
+        query.fetch().map((EhBuildingsRecord record) -> {
+            buildings.add(ConvertHelper.convert(record, Building.class));
+            return null;
+        });
+
+        if(buildings.size() > 0) {
+            locator.setAnchor(buildings.get(buildings.size() -1).getDefaultOrder());
+        }
+
+        return buildings;
+    }
+
+    @Override
     public List<Building> ListBuildingsBykeywordAndNameSpace(Integer namespaceId, String keyword) {
 
         DSLContext context = this.dbProvider.getDslContext(AccessSpec.readOnlyWith(EhBuildings.class));
