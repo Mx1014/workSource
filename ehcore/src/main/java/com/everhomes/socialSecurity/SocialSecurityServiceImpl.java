@@ -630,6 +630,9 @@ public class SocialSecurityServiceImpl implements SocialSecurityService {
     }
 
     private SocialSecuritySetting findSetting(Byte accumOrSocail, String payItem, List<SocialSecuritySetting> finalSettings) {
+        if (null == finalSettings) {
+            return null;
+        }
         for (SocialSecuritySetting setting : finalSettings) {
             if (AccumOrSocial.ACCUM == AccumOrSocial.fromCode(accumOrSocail) &&
                     AccumOrSocial.ACCUM == AccumOrSocial.fromCode(setting.getAccumOrSocail())) {
@@ -1184,6 +1187,7 @@ public class SocialSecurityServiceImpl implements SocialSecurityService {
     private void importUpdateSetting(OrganizationMemberDetails detail, List<SocialSecurityBase> ssBases,
                                      List<SocialSecurityBase> afBases, RowResult r, ImportFileResultLog<Map<String, String>> log, Long ssCityId, Long afCItyId, ImportFileResponse response) {
         List<SocialSecuritySetting> settings = socialSecuritySettingProvider.listSocialSecuritySetting(detail.getId());
+
         // 社保
         String ssRadixString = r.getF();
         BigDecimal ssRadix = null;
