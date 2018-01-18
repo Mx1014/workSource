@@ -579,6 +579,7 @@ public class WebMenuServiceImpl implements WebMenuService {
 
 		List<WebMenuScope> scopes = new ArrayList<>();
 
+		//应用生成的菜单
 		for(ServiceModuleAppDTO dto: serviceModuleApps){
 			if(dto.getModuleId() != null){
 				List<WebMenu> webMenus = new ArrayList<>();

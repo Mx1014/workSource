@@ -226,6 +226,7 @@ public class PortalServiceImpl implements PortalService {
 			moduleApp.setOperatorUid(moduleApp.getCreatorUid());
 			moduleApp.setActionType(serviceModule.getActionType());
 			moduleApp.setNamespaceId(namespaceId);
+			moduleApp.setVersionId(cmd.getVersionId());
 			//todo
 			moduleApp.setCustomTag(createModuleApp.getCustomTag());
 			moduleApp.setCustomPath(createModuleApp.getCustomPath());
@@ -443,6 +444,7 @@ public class PortalServiceImpl implements PortalService {
 		portalItemGroup.setStatus(PortalItemGroupStatus.ACTIVE.getCode());
 		portalItemGroup.setCreatorUid(user.getId());
 		portalItemGroup.setOperatorUid(user.getId());
+		portalItemGroup.setVersionId(portalLayout.getVersionId());
 		portalItemGroupProvider.createPortalItemGroup(portalItemGroup);
 		return processPortalItemGroupDTO(portalItemGroup);
 	}
@@ -582,6 +584,7 @@ public class PortalServiceImpl implements PortalService {
 
 		portalItem.setGroupName(portalItemGroup.getName());
 		portalItem.setItemLocation(portalLayout.getLocation());
+		portalItem.setVersionId(portalItemGroup.getVersionId());
 		this.dbProvider.execute((status) -> {
 			portalItemProvider.createPortalItem(portalItem);
 			if(null != cmd.getScopes() && cmd.getScopes().size() > 0){
@@ -890,7 +893,7 @@ public class PortalServiceImpl implements PortalService {
 	public PortalItemCategoryDTO createPortalItemCategory(CreatePortalItemCategoryCommand cmd) {
 		User user = UserContext.current().getUser();
 		Integer namespaceId = UserContext.getCurrentNamespaceId(cmd.getNamespaceId());
-		checkPortalItemGroup(cmd.getItemGroupId());
+		PortalItemGroup itemGroup = checkPortalItemGroup(cmd.getItemGroupId());
 		PortalItemCategory portalItemCategory = ConvertHelper.convert(cmd, PortalItemCategory.class);
 		portalItemCategory.setStatus(PortalItemCategoryStatus.ACTIVE.getCode());
 		portalItemCategory.setLabel(cmd.getName());
@@ -899,6 +902,7 @@ public class PortalServiceImpl implements PortalService {
 		portalItemCategory.setCreatorUid(user.getId());
 		portalItemCategory.setNamespaceId(namespaceId);
 		portalItemCategory.setItemGroupId(cmd.getItemGroupId());
+		portalItemCategory.setVersionId(itemGroup.getVersionId());
 		this.dbProvider.execute((status) -> {
 			portalItemCategoryProvider.createPortalItemCategory(portalItemCategory);
 			if(null != cmd.getScopes() && cmd.getScopes().size() > 0){

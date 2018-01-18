@@ -68,6 +68,11 @@ public class ServiceModuleAppProviderImpl implements ServiceModuleAppProvider {
 				id ++;
 				moduleApp.setId(id);
 			}
+
+			if(moduleApp.getOriginId() == null){
+				moduleApp.setOriginId(id);
+			}
+
 			moduleApp.setCreateTime(new Timestamp(DateHelper.currentGMTTime().getTime()));
 			moduleApp.setUpdateTime(moduleApp.getCreateTime());
 			moduleApps.add(ConvertHelper.convert(moduleApp, EhServiceModuleApps.class));
