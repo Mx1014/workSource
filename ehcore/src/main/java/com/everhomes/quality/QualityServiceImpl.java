@@ -41,6 +41,7 @@ import com.everhomes.rest.organization.OrganizationGroupType;
 import com.everhomes.rest.organization.OrganizationMemberTargetType;
 import com.everhomes.rest.portal.ListServiceModuleAppsCommand;
 import com.everhomes.rest.portal.ListServiceModuleAppsResponse;
+import com.everhomes.rest.quality.BatchUpdateQualitySpecificationsCommand;
 import com.everhomes.rest.quality.CountSampleTaskCommunityScoresCommand;
 import com.everhomes.rest.quality.CountSampleTaskScoresCommand;
 import com.everhomes.rest.quality.CountSampleTaskScoresResponse;
@@ -2781,20 +2782,8 @@ public class QualityServiceImpl implements QualityService {
 	public void createQualitySpecification(CreateQualitySpecificationCommand cmd) {
 		//ScopeCode： 0 表示全部  1表示项目
 		if(SpecificationInspectionType.CATEGORY.equals(SpecificationInspectionType.fromStatus(cmd.getInspectionType()))) {
-			/*Long privilegeId = configProvider.getLongValue(QualityConstant.QUALITY_CATEGORY_CREATE, 0L);
-			if(SpecificationScopeCode.COMMUNITY.equals(SpecificationScopeCode.fromCode(cmd.getScopeCode()))) {
-				userPrivilegeMgr.checkCurrentUserAuthority(EntityType.COMMUNITY.getCode(), cmd.getScopeId(), cmd.getOwnerId(), privilegeId);
-			} else {
-				userPrivilegeMgr.checkCurrentUserAuthority(null, null, cmd.getOwnerId(), privilegeId);
-			}*/
 			checkUserPrivilege(cmd.getOwnerId(), PrivilegeConstants.QUALITY_CATEGORY_CREATE, cmd.getScopeId());
 		} else {
-			/*Long privilegeId = configProvider.getLongValue(QualityConstant.QUALITY_SPECIFICATION_CREATE, 0L);
-			if(SpecificationScopeCode.COMMUNITY.equals(SpecificationScopeCode.fromCode(cmd.getScopeCode()))) {
-				userPrivilegeMgr.checkCurrentUserAuthority(EntityType.COMMUNITY.getCode(), cmd.getScopeId(), cmd.getOwnerId(), privilegeId);
-			} else {
-				userPrivilegeMgr.checkCurrentUserAuthority(null, null, cmd.getOwnerId(), privilegeId);
-			}*/
 			checkUserPrivilege(cmd.getOwnerId(), PrivilegeConstants.QUALITY_SPECIFICATION_CREATE, cmd.getScopeId());
 		}
 
@@ -2892,6 +2881,8 @@ public class QualityServiceImpl implements QualityService {
 				qualityProvider.inactiveQualityInspectionStandardSpecificationMapBySpecificationId(specification.getId());
 			}else{
 				specification.setStatus(QualityStandardStatus.INACTIVE.getCode());
+				specification.setDeleteUid(UserContext.currentUserId());
+				specification.setDeleteTime(new Timestamp(DateHelper.currentGMTTime().getTime()));
 				qualityProvider.updateQualitySpecification(specification);
 
 				qualityProvider.inactiveQualityInspectionStandardSpecificationMapBySpecificationId(specification.getId());
@@ -4721,5 +4712,30 @@ public class QualityServiceImpl implements QualityService {
 				addIds(parentIds, s.getChildrens());
 			}
 		});
+	}
+
+	@Override
+	public List<QualityInspectionSpecificationDTO> batchUpdateQualitySpecification(BatchUpdateQualitySpecificationsCommand cmd) {
+		GetQualitySpecificationCommand getQualitySpecificationCommand = new GetQualitySpecificationCommand();
+		getQualitySpecificationCommand.setSpecificationId(cmd.getParentId());
+		List<QualityInspectionSpecificationDTO> specifications = null;
+		QualityInspectionSpecificationDTO qualityInspectionSpecificationDTO = getQualitySpecification(getQualitySpecificationCommand);
+		if (qualityInspectionSpecificationDTO != null && qualityInspectionSpecificationDTO.getChildrens() != null) {
+			specifications = qualityInspectionSpecificationDTO.getChildrens();
+		}
+		if (specifications != null && specifications.size() > 0){
+			specifications.forEach((s) -> {
+				//支持离线 置状态删除
+				QualityInspectionSpecifications specification = qualityProvider.findSpecificationById(s.getId(), null, null);
+				specification.setStatus(QualityStandardStatus.INACTIVE.getCode());
+				specification.setDeleteUid(UserContext.currentUserId());
+				specification.setDeleteTime(new Timestamp(DateHelper.currentGMTTime().getTime()));
+				qualityProvider.updateQualitySpecification(specification);
+			});
+		}
+		if (cmd.getSpecifications() != null && cmd.getSpecifications().size() > 0) {
+			cmd.getSpecifications().forEach(this::createQualitySpecification);
+		}
+		return null;
 	}
 }
