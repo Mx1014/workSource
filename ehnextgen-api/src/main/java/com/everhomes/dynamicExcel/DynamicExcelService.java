@@ -112,7 +112,7 @@ public class DynamicExcelService {
             }
         }
     }
-
+sheet and sheet context//
     /**
      *
      * @param file 有效的excel文件
@@ -178,6 +178,8 @@ public class DynamicExcelService {
                     for (int k = row.getFirstCellNum(); k < row.getLastCellNum(); k++) {
                         Cell cell = row.getCell(k);
                         String cellValue = ExcelUtils.getCellValue(cell);
+                        //少了一步,把cellvalue转成可存储的fieldvalue，例如 男-> 1; varfields , thread pool, jindu,
+                        String fieldValue = h.valueProcess(cellValue,sheetClass,ds);
                         DynamicField df = headers.get(k);
                         try {
                             setToObj(df, sheetClassInstance, cellValue);

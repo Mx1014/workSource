@@ -48,5 +48,6 @@ public interface DynamicExcelHandler {
      * @param sheet 所在的动态sheet对象
      * @return
      */
+    // obj : hanghao, displayvalue,xxxx
     List<List<String>> getExportData(List<DynamicField> fields, DynamicSheet sheet);
 }
