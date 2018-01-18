@@ -5,6 +5,7 @@ import com.everhomes.db.DaoAction;
 import com.everhomes.db.DaoHelper;
 import com.everhomes.db.DbProvider;
 import com.everhomes.naming.NameMapper;
+import com.everhomes.rest.customer.SyncDataTaskStatus;
 import com.everhomes.sequence.SequenceProvider;
 import com.everhomes.server.schema.Tables;
 import com.everhomes.server.schema.tables.daos.EhSyncDataTasksDao;
@@ -58,6 +59,17 @@ public class SyncDataTaskProviderImpl implements SyncDataTaskProvider {
         DSLContext context = this.dbProvider.getDslContext(AccessSpec.readOnly());
         EhSyncDataTasksDao dao = new EhSyncDataTasksDao(context.configuration());
         return ConvertHelper.convert(dao.findById(taskId), SyncDataTask.class);
+    }
+
+    @Override
+    public SyncDataTask findExecutingSyncDataTask(Long communityId, String syncType) {
+        DSLContext context = dbProvider.getDslContext(AccessSpec.readOnly());
+        SelectQuery<EhSyncDataTasksRecord> query = context.selectQuery(Tables.EH_SYNC_DATA_TASKS);
+        query.addConditions(Tables.EH_SYNC_DATA_TASKS.OWNER_ID.eq(communityId));
+        query.addConditions(Tables.EH_SYNC_DATA_TASKS.TYPE.eq(syncType));
+        query.addConditions(Tables.EH_SYNC_DATA_TASKS.STATUS.eq(SyncDataTaskStatus.EXECUTING.getCode()));
+
+        return query.fetchAnyInto(SyncDataTask.class);
     }
 
     @Override

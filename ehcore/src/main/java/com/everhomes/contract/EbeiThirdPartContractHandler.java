@@ -26,10 +26,7 @@ import com.everhomes.rest.address.NamespaceAddressType;
 import com.everhomes.rest.approval.CommonStatus;
 import com.everhomes.rest.community.NamespaceCommunityType;
 import com.everhomes.rest.contract.*;
-import com.everhomes.rest.customer.CustomerType;
-import com.everhomes.rest.customer.EbeiJsonEntity;
-import com.everhomes.rest.customer.NamespaceCustomerType;
-import com.everhomes.rest.customer.SyncDataTaskStatus;
+import com.everhomes.rest.customer.*;
 import com.everhomes.rest.openapi.shenzhou.DataType;
 import com.everhomes.rest.openapi.shenzhou.SyncFlag;
 import com.everhomes.rest.organization.OrganizationAddressStatus;
@@ -178,13 +175,19 @@ public class EbeiThirdPartContractHandler implements ThirdPartContractHandler {
             zjSyncdataBackupProvider.updateZjSyncdataBackupInactive(backupList);
 
             //万一同步时间太长transaction断掉 在这里也要更新下
-            SyncDataTask task = syncDataTaskProvider.findSyncDataTaskById(taskId);
-            if(task != null) {
-                task.setStatus(SyncDataTaskStatus.FINISH.getCode());
-                task.setResult("同步成功");
-                task.setUpdateTime(new Timestamp(DateHelper.currentGMTTime().getTime()));
-                syncDataTaskProvider.updateSyncDataTask(task);
+//            SyncDataTask task = syncDataTaskProvider.findSyncDataTaskById(taskId);
+            Community community = communityProvider.findCommunityByNamespaceToken(NamespaceCommunityType.EBEI.getCode(), communityIdentifier);
+            if(community != null) {
+                SyncDataTask task = syncDataTaskProvider.findExecutingSyncDataTask(community.getId(), SyncDataTaskType.fromName(dataType).getCode());
+
+                if(task != null) {
+                    task.setStatus(SyncDataTaskStatus.FINISH.getCode());
+                    task.setResult("同步成功");
+                    task.setUpdateTime(new Timestamp(DateHelper.currentGMTTime().getTime()));
+                    syncDataTaskProvider.updateSyncDataTask(task);
+                }
             }
+
         }
 
         if (LOGGER.isDebugEnabled()) {
