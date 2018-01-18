@@ -1107,7 +1107,7 @@ public class YellowPageServiceImpl implements YellowPageService {
 					long approvalId = Long.valueOf(matcher.group(1));
 					if(approvalId==-1L){
 						approval.setNamespaceId(UserContext.getCurrentNamespaceId());
-						approval.setOwnerId(serviceAlliance.getOwnerId());
+						approval.setOwnerId(serviceAlliance.getOwnerId()==null?-1:serviceAlliance.getOwnerId());
 						approval.setOwnerType(serviceAlliance.getOwnerType());
 						approval.setModuleId(40500L);
 						approval.setModuleType(FlowModuleType.SERVICE_ALLIANCE.getCode());
