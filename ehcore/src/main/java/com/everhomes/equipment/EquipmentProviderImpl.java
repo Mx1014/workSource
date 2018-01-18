@@ -2641,40 +2641,23 @@ public class EquipmentProviderImpl implements EquipmentProvider {
 
         Condition completeInspectionCondition = Tables.EH_EQUIPMENT_INSPECTION_TASKS.RESULT
                 .eq(EquipmentTaskStatus.QUALIFIED.getCode());
-
-        if (startTime != null && endTime != null) {
-            completeInspectionCondition = completeInspectionCondition
-                    .and(Tables.EH_EQUIPMENT_INSPECTION_TASKS.EXECUTIVE_TIME.between(startTime, endTime));
-        } else if (startTime == null && endTime != null) {
-            completeInspectionCondition = completeInspectionCondition
-                    .and(Tables.EH_EQUIPMENT_INSPECTION_TASKS.EXECUTIVE_TIME.le(endTime));
-        } else if (startTime != null) {
-            completeInspectionCondition = completeInspectionCondition
-                    .and(Tables.EH_EQUIPMENT_INSPECTION_TASKS.EXECUTIVE_TIME.ge(startTime));
-        }
-
         final Field<Byte> completeInspection = DSL.decode().when(completeInspectionCondition, EquipmentTaskStatus.QUALIFIED.getCode());
 
-        Condition completeWaitingForApprovalCondition = Tables.EH_EQUIPMENT_INSPECTION_TASKS.RESULT
+        Condition completeWaitingForApprovalCondition = Tables.EH_EQUIPMENT_INSPECTION_TASKS.STATUS
                 .eq(EquipmentTaskStatus.CLOSE.getCode());
-
         final Field<Byte> completeInspectionWaitingForApproval = DSL.decode()
                 .when(completeWaitingForApprovalCondition, EquipmentTaskStatus.CLOSE.getCode());
 
         final Field<?>[] fields = {DSL.count().as("total"),
                 DSL.count(waitingForExecuting).as("waitingForExecuting"),
-                // DSL.count(inMaintance).as("inMaintance"),
                 DSL.count(completeInspection).as("completeInspection"),
-                //  DSL.count(completeMaintance).as("completeMaintance"),
                 DSL.count(completeInspectionWaitingForApproval).as("completeInspectionWaitingForApproval"),
-
                 DSL.count(delayTasks).as("delayTasks"),
                 DSL.count(reviewDelay).as("reviewDelay")};
 
         final SelectQuery<Record> query = context.selectQuery();
         query.addSelect(fields);
         query.addFrom(Tables.EH_EQUIPMENT_INSPECTION_TASKS);
-      //  query.addConditions(Tables.EH_EQUIPMENT_INSPECTION_TASKS.NAMESPACE_ID.eq(UserContext.getCurrentNamespaceId()));
         query.addConditions(Tables.EH_EQUIPMENT_INSPECTION_TASKS.NAMESPACE_ID.eq(namespaceId));
 
         if (targetId != null) {
@@ -2687,6 +2670,13 @@ public class EquipmentProviderImpl implements EquipmentProvider {
         if (inspectionCategoryId != null && inspectionCategoryId != 0L) {
             query.addConditions(Tables.EH_EQUIPMENT_INSPECTION_TASKS.INSPECTION_CATEGORY_ID.eq(inspectionCategoryId));
         }
+        if (startTime != null && endTime != null) {
+            query.addConditions(Tables.EH_EQUIPMENT_INSPECTION_TASKS.EXECUTIVE_TIME.between(startTime, endTime));
+        } else if (startTime == null && endTime != null) {
+            query.addConditions(Tables.EH_EQUIPMENT_INSPECTION_TASKS.EXECUTIVE_TIME.le(endTime));
+        } else if (startTime != null) {
+            query.addConditions(Tables.EH_EQUIPMENT_INSPECTION_TASKS.EXECUTIVE_TIME.ge(startTime));
+        }
 
         if (LOGGER.isDebugEnabled()) {
             LOGGER.debug("countTasks, sql=" + query.getSQL());
@@ -2694,10 +2684,7 @@ public class EquipmentProviderImpl implements EquipmentProvider {
         }
         query.fetchAny().map((r) -> {
             resp.setCompleteInspection(r.getValue("completeInspection", Long.class));
-            //resp.setCompleteMaintance(r.getValue("completeMaintance", Long.class));
-           // resp.setComplete(resp.getCompleteInspection() + resp.getCompleteMaintance());
             resp.setCompleteWaitingForApproval(r.getValue("completeInspectionWaitingForApproval", Long.class));
-           // resp.setInMaintance(r.getValue("inMaintance", Long.class));
             resp.setWaitingForExecuting(r.getValue("waitingForExecuting", Long.class));
             resp.setTotalTasks(r.getValue("total", Long.class));
             resp.setDelay(r.getValue("delayTasks", Long.class));
