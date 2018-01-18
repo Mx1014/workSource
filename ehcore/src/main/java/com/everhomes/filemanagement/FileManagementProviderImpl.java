@@ -317,4 +317,24 @@ public class FileManagementProviderImpl implements FileManagementProvider {
         }
         return null;
     }
+
+    @Override
+    public List<FileContent> queryFileContents(ListingLocator locator, Integer namespaceId, Long ownerId, ListingQueryBuilderCallback queryBuilderCallback){
+        List<FileContent> results = new ArrayList<>();
+        DSLContext context = dbProvider.getDslContext(AccessSpec.readOnly());
+
+        SelectQuery<EhFileManagementContentsRecord> query = context.selectQuery(Tables.EH_FILE_MANAGEMENT_CONTENTS);
+        queryBuilderCallback.buildCondition(locator,query);
+        query.addConditions(Tables.EH_FILE_MANAGEMENT_CONTENTS.NAMESPACE_ID.eq(namespaceId));
+        query.addConditions(Tables.EH_FILE_MANAGEMENT_CONTENTS.OWNER_ID.eq(ownerId));
+        query.addConditions(Tables.EH_FILE_MANAGEMENT_CONTENTS.STATUS.eq(FileManagementStatus.VALID.getCode()));
+        query.fetch().map(r -> {
+            results.add(ConvertHelper.convert(r, FileContent.class));
+            return null;
+        });
+        if (null != results && 0 != results.size()) {
+            return results;
+        }
+        return null;
+    }
 }

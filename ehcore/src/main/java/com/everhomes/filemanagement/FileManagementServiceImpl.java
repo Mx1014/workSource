@@ -129,7 +129,7 @@ public class FileManagementServiceImpl implements  FileManagementService{
     @Override
     public ListFileCatalogResponse listAvailableFileCatalogs(ListFileCatalogsCommand cmd) {
         ListFileCatalogResponse response = new ListFileCatalogResponse();
-        List<FileCatalogDTO> catalogs = new ArrayList<>();
+        List<FileCatalogDTO> catalogs;
         User user = UserContext.current().getUser();
         //  1.the user is the administrator
         if(checkFileManagementAdmin(cmd.getOwnerId(), cmd.getOwnerType(), user.getId())){
@@ -179,15 +179,53 @@ public class FileManagementServiceImpl implements  FileManagementService{
         List<FileContentDTO> folders = new ArrayList<>();
         List<FileContentDTO> files = new ArrayList<>();
 
-        List<FileCatalog> catalogResults = fileManagementProvider.queryFileCatalogs(new ListingLocator(), namespaceId, cmd.getOwnerId(), ((locator, query) -> {
+        List<FileCatalog> catalogResults = fileManagementProvider.queryFileCatalogs(new ListingLocator(), namespaceId, cmd.getOwnerId(), (locator, query) -> {
             if (cmd.getCatalogIds() != null && cmd.getCatalogIds().size() > 0)
                 query.addConditions(Tables.EH_FILE_MANAGEMENT_CATALOGS.ID.in(cmd.getCatalogIds()));
             if (cmd.getKeywords() != null)
                 query.addConditions(Tables.EH_FILE_MANAGEMENT_CATALOGS.NAME.like(cmd.getKeywords()));
             return query;
-        }));
+        });
 
-        return null;
+        List<FileContent> folderResults = fileManagementProvider.queryFileContents(new ListingLocator(), namespaceId, cmd.getOwnerId(), (locator, query) -> {
+            query.addConditions(Tables.EH_FILE_MANAGEMENT_CONTENTS.CONTENT_TYPE.eq(FileContentType.FOLDER.getCode()));
+            if (cmd.getCatalogIds() != null && cmd.getCatalogIds().size() > 0)
+                query.addConditions(Tables.EH_FILE_MANAGEMENT_CONTENTS.CATALOG_ID.in(cmd.getCatalogIds()));
+            if (cmd.getKeywords() != null)
+                query.addConditions(Tables.EH_FILE_MANAGEMENT_CONTENTS.NAME.like(cmd.getKeywords()));
+            return query;
+        });
+
+        List<FileContent> contentResults = fileManagementProvider.queryFileContents(new ListingLocator(), namespaceId, cmd.getOwnerId(), (locator, query) -> {
+            query.addConditions(Tables.EH_FILE_MANAGEMENT_CONTENTS.CONTENT_TYPE.ne(FileContentType.FOLDER.getCode()));
+            if (cmd.getCatalogIds() != null && cmd.getCatalogIds().size() > 0)
+                query.addConditions(Tables.EH_FILE_MANAGEMENT_CONTENTS.CATALOG_ID.in(cmd.getCatalogIds()));
+            if (cmd.getKeywords() != null)
+                query.addConditions(Tables.EH_FILE_MANAGEMENT_CONTENTS.NAME.like(cmd.getKeywords()));
+            return query;
+        });
+
+        if (catalogResults != null && catalogResults.size() > 0)
+            catalogs = convertToCatalogDTO(catalogResults);
+
+        if (folderResults != null && folderResults.size() > 0) {
+            folderResults.forEach(r -> {
+                folders.add(ConvertHelper.convert(r, FileContentDTO.class));
+            });
+        }
+        if (contentResults != null && contentResults.size() > 0) {
+            contentResults.forEach(r -> {
+                FileContentDTO dto = ConvertHelper.convert(r, FileContentDTO.class);
+                if(dto.getContentUri() != null)
+                    dto.setContentUrl(contentServerService.parserUri(dto.getContentUri()));
+                files.add(dto);
+            });
+        }
+
+        response.setCatalogs(catalogs);
+        response.setFolders(folders);
+        response.setFiles(files);
+        return response;
     }
 
     @Override
