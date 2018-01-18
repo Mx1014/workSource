@@ -98,7 +98,7 @@ public class FileManagementProviderImpl implements FileManagementProvider {
         query.addConditions(Tables.EH_FILE_MANAGEMENT_CATALOGS.OWNER_ID.eq(ownerId));
         query.addConditions(Tables.EH_FILE_MANAGEMENT_CATALOGS.STATUS.eq(FileManagementStatus.VALID.getCode()));
         if (keywords != null)
-            query.addConditions(Tables.EH_FILE_MANAGEMENT_CATALOGS.NAME.like(keywords));
+            query.addConditions(Tables.EH_FILE_MANAGEMENT_CATALOGS.NAME.like("%" + keywords + "%"));
         if (pageAnchor != null)
             query.addConditions(Tables.EH_FILE_MANAGEMENT_CATALOGS.ID.lt(pageAnchor));
         query.addLimit(pageSize + 1);
@@ -212,7 +212,7 @@ public class FileManagementProviderImpl implements FileManagementProvider {
         query.addConditions(Tables.EH_FILE_MANAGEMENT_CATALOG_SCOPES.NAMESPACE_ID.eq(namespaceId));
         query.addConditions(Tables.EH_FILE_MANAGEMENT_CATALOG_SCOPES.CATALOG_ID.eq(catalogId));
         if (keywords != null)
-            query.addConditions(Tables.EH_FILE_MANAGEMENT_CATALOG_SCOPES.SOURCE_DESCRIPTION.like(keywords));
+            query.addConditions(Tables.EH_FILE_MANAGEMENT_CATALOG_SCOPES.SOURCE_DESCRIPTION.like("%" + keywords + "%"));
         if (pageAnchor != null)
             query.addConditions(Tables.EH_FILE_MANAGEMENT_CATALOG_SCOPES.ID.lt(pageAnchor));
         query.addLimit(pageSize + 1);
@@ -297,7 +297,7 @@ public class FileManagementProviderImpl implements FileManagementProvider {
         query.addConditions(Tables.EH_FILE_MANAGEMENT_CONTENTS.STATUS.eq(FileManagementStatus.VALID.getCode()));
         query.addConditions(Tables.EH_FILE_MANAGEMENT_CONTENTS.CATALOG_ID.eq(catalogId));
         if (keywords != null) {
-            query.addConditions(Tables.EH_FILE_MANAGEMENT_CONTENTS.NAME.like(keywords));
+            query.addConditions(Tables.EH_FILE_MANAGEMENT_CONTENTS.NAME.like("%" + keywords + "%"));
         }else {
             query.addConditions(Tables.EH_FILE_MANAGEMENT_CONTENTS.PARENT_ID.eq(parentId));
         }
