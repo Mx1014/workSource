@@ -28,7 +28,6 @@ import org.springframework.stereotype.Component;
 import org.springframework.web.context.request.async.DeferredResult;
 
 import javax.annotation.PostConstruct;
-import javax.security.auth.Subject;
 import java.util.*;
 import java.util.concurrent.*;
 import java.util.stream.Collectors;
@@ -300,12 +299,13 @@ public class MessagingServiceImpl implements MessagingService {
     }
 
     @Override
-    public DeferredResult<BlockingEventResponse> blockingEvent(String subjectId, String type, Integer timeOut) {
+    public DeferredResult<Object> blockingEvent(String subjectId, String type, Integer timeOut, Runnable callback) {
         if(timeOut == 0 || timeOut > MAX_TIME_OUT){
             return null;
         }
         String subject = "blockingEventKey." + subjectId;
         DeferredResult deferredResult = new DeferredResult();
+        deferredResult.onCompletion(callback);
         BlockingEventResponse response = BlockingEventResponse.build(stored, subject);
 
         //信号延迟生效的判断

@@ -37,8 +37,8 @@ public class MessageController extends ControllerBase {
 
 
 	@RequestMapping("blockingEvent")
-	public DeferredResult<BlockingEventResponse> blockingEvent(BlockingEventCommand cmd){
-		return messagingService.blockingEvent(cmd.getSubjectId(), cmd.getType(), cmd.getTimeOut());
+	public DeferredResult<Object> blockingEvent(BlockingEventCommand cmd){
+		return messagingService.blockingEvent(cmd.getSubjectId(), cmd.getType(), cmd.getTimeOut(), null);
 	}
 
 	@RequestMapping("signalBlockingEvent")
