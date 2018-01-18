@@ -1419,14 +1419,14 @@ public class CommunityProviderImpl implements CommunityProvider {
     }
 
 	@Override
-	public List<Community> listCommunitiesByCategory(Long cityId, Long areaId, Long categoryId, String keyword, Long pageAnchor,
+	public List<Community> listCommunitiesByCategory(Integer namespaceId, Long cityId, Long areaId, Long categoryId, String keyword, Long pageAnchor,
 			Integer pageSize) {
-		int namespaceId =UserContext.getCurrentNamespaceId(null);
+//		int namespaceId =UserContext.getCurrentNamespaceId(null);
 
         DSLContext context = this.dbProvider.getDslContext(AccessSpec.readWriteWith(EhCommunities.class));
 
         SelectJoinStep<Record> query = context.select(Tables.EH_COMMUNITIES.fields()).from(Tables.EH_COMMUNITIES);
-		Condition cond = Tables.EH_COMMUNITIES.NAMESPACE_ID.eq(namespaceId);
+		Condition cond = Tables.EH_COMMUNITIES.NAMESPACE_ID.eq(UserContext.getCurrentNamespaceId(namespaceId));
 		cond = cond.and(Tables.EH_COMMUNITIES.STATUS.eq(CommunityAdminStatus.ACTIVE.getCode()));
 		if(null != pageAnchor && pageAnchor != 0){
 			cond = cond.and(Tables.EH_COMMUNITIES.ID.gt(pageAnchor));

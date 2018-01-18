@@ -1,8 +1,8 @@
 package com.everhomes.rest.equipment;
 
-import javax.validation.constraints.NotNull;
-
 import com.everhomes.util.StringHelper;
+
+import javax.validation.constraints.NotNull;
 
 /**
  * <ul>
@@ -19,6 +19,8 @@ import com.everhomes.util.StringHelper;
  *  <li>pageAnchor: 锚点</li>
  *  <li>pageSize: 页面大小</li>
  *  <li>inspectionCategoryId: 巡检对象类型id</li>
+ *  <li>inspectionCategoryId: 巡检对象类型id</li>
+ *  <li>namespaceId: namespaceId</li>
  * </ul>
  */
 public class SearchEquipmentTasksCommand {
@@ -49,6 +51,8 @@ public class SearchEquipmentTasksCommand {
 	private Integer pageSize;
 	
 	private Long inspectionCategoryId;
+
+	private Integer namespaceId;
 	
 	public Long getInspectionCategoryId() {
 		return inspectionCategoryId;
@@ -152,6 +156,14 @@ public class SearchEquipmentTasksCommand {
 
 	public void setPageSize(Integer pageSize) {
 		this.pageSize = pageSize;
+	}
+
+	public Integer getNamespaceId() {
+		return namespaceId;
+	}
+
+	public void setNamespaceId(Integer namespaceId) {
+		this.namespaceId = namespaceId;
 	}
 
 	@Override

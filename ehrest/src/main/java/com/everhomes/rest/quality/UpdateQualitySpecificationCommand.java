@@ -20,6 +20,7 @@ import java.util.List;
  *  <li>scopeType: specification可见范围类型 0: all, 1: community</li>
  *  <li>scopeId: 看见范围具体Id，全部为0</li>
  *  <li>communities: 全部中应用的项目id列表</li>
+ *  <li>namespaceId: namespaceId</li>
  * </ul>
  */
 public class UpdateQualitySpecificationCommand {
@@ -49,6 +50,8 @@ public class UpdateQualitySpecificationCommand {
 
 	@ItemType(Long.class)
 	private List<Long> communities;
+
+	private Integer namespaceId;
 
 	public Long getId() {
 		return id;
@@ -144,6 +147,14 @@ public class UpdateQualitySpecificationCommand {
 
 	public void setCommunities(List<Long> communities) {
 		this.communities = communities;
+	}
+
+	public Integer getNamespaceId() {
+		return namespaceId;
+	}
+
+	public void setNamespaceId(Integer namespaceId) {
+		this.namespaceId = namespaceId;
 	}
 
 	@Override

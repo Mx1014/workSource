@@ -366,12 +366,16 @@ public class CategoryProviderImpl implements CategoryProvider {
     
 //    @Cacheable(value = "listTaskCategories", unless="#result.size() == 0")
 	@Override
-	public List<Category> listTaskCategories(Integer namespaceId, Long parentId, String keyword, 
-			Long pageAnchor, Integer pageSize){
+    public List<Category> listTaskCategories(Integer namespaceId, String ownerType, Long ownerId, Long parentId,
+                                             String keyword, Long pageAnchor, Integer pageSize) {
         DSLContext context = this.dbProvider.getDslContext(AccessSpec.readOnlyWith(EhCategories.class));
         SelectQuery<EhCategoriesRecord> query = context.selectQuery(Tables.EH_CATEGORIES);
         if(null != namespaceId) 
         	query.addConditions(Tables.EH_CATEGORIES.NAMESPACE_ID.eq(namespaceId));
+        if (null!=ownerType)
+            query.addConditions(Tables.EH_CATEGORIES.OWNER_TYPE.eq(ownerType));
+        if (null!=ownerId)
+            query.addConditions(Tables.EH_CATEGORIES.OWNER_ID.eq(ownerId));
         if(null != parentId)
         	query.addConditions(Tables.EH_CATEGORIES.PARENT_ID.eq(parentId));
         if(StringUtils.isNotBlank(keyword))
@@ -387,8 +391,9 @@ public class CategoryProviderImpl implements CategoryProvider {
         
         return result;
 	}
-    
-	@Override
+
+
+    @Override
 	public Category findCategoryByNamespaceAndName(Long parentId, Integer namespaceId, String categoryName) {
 		DSLContext context = this.dbProvider.getDslContext(AccessSpec.readOnlyWith(EhCategories.class));
 		

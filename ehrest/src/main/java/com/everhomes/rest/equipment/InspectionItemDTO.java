@@ -1,8 +1,8 @@
 package com.everhomes.rest.equipment;
 
-import javax.validation.constraints.NotNull;
-
 import com.everhomes.util.StringHelper;
+
+import javax.validation.constraints.NotNull;
 
 /**
  * <ul>
@@ -24,7 +24,7 @@ public class InspectionItemDTO {
 	
 	@NotNull
 	private String ownerType;
-	
+
 	private String name;
 	
 	private Byte valueType;
@@ -32,6 +32,9 @@ public class InspectionItemDTO {
 	private String unit;
 	
 	private String valueJason;
+
+	//add for offline
+	private  Long standardId;
 
 	public Long getId() {
 		return id;
@@ -87,6 +90,14 @@ public class InspectionItemDTO {
 
 	public void setValueJason(String valueJason) {
 		this.valueJason = valueJason;
+	}
+
+	public Long getStandardId() {
+		return standardId;
+	}
+
+	public void setStandardId(Long standardId) {
+		this.standardId = standardId;
 	}
 
 	@Override

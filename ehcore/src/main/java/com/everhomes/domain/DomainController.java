@@ -47,4 +47,21 @@ public class DomainController extends ControllerBase {
         return response;
     }
 
+
+    /**
+     * <b>URL: /domain/listAllDomains</b>
+     * <p>
+     * 获取域名配置信息列表，现用于测试
+     * </p>
+     */
+    @RequestMapping("listAllDomains")
+    @RequireAuthentication(false)
+    @RestReturn(value = DomainDTO.class, collection = true)
+    public RestResponse listAllDomains() {
+        RestResponse response = new RestResponse(domainService.listAllDomains());
+        response.setErrorCode(ErrorCodes.SUCCESS);
+        response.setErrorDescription("OK");
+        return response;
+    }
+
 }

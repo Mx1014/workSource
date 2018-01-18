@@ -1,5 +1,7 @@
 package com.everhomes.equipment;
 
+import java.util.List;
+
 import com.everhomes.discover.ItemType;
 import com.everhomes.repeat.RepeatSettings;
 import com.everhomes.server.schema.tables.pojos.EhEquipmentInspectionStandards;
@@ -10,7 +12,8 @@ import java.util.List;
 public class EquipmentInspectionStandards extends EhEquipmentInspectionStandards{
 	
 	private static final long serialVersionUID = -1192073373709883176L;
-	
+
+	@Deprecated
 	@ItemType(RepeatSettings.class)
 	private RepeatSettings repeat;
 	
@@ -20,10 +23,21 @@ public class EquipmentInspectionStandards extends EhEquipmentInspectionStandards
 	private List<Long> communities;
 
 	private  String  targetName;
-	
+
+
+	//add in PM.V3.2
+	@ItemType(EquipmentInspectionEquipments.class)
+	private  List<EquipmentInspectionEquipments> equipments;
+
+	//add in PM.V3.2
+	@ItemType(EquipmentInspectionItems.class)
+	private  List<EquipmentInspectionItems> items;
+
+	@Deprecated
 	@ItemType(EquipmentInspectionStandardGroupMap.class)
 	private List<EquipmentInspectionStandardGroupMap> executiveGroup;
 
+	@Deprecated
 	@ItemType(EquipmentInspectionStandardGroupMap.class)
 	private List<EquipmentInspectionStandardGroupMap> reviewGroup;
 	
@@ -58,6 +72,24 @@ public class EquipmentInspectionStandards extends EhEquipmentInspectionStandards
 
 	public void setReviewGroup(List<EquipmentInspectionStandardGroupMap> reviewGroup) {
 		this.reviewGroup = reviewGroup;
+	}
+
+
+
+	public List<EquipmentInspectionItems> getItems() {
+		return items;
+	}
+
+	public void setItems(List<EquipmentInspectionItems> items) {
+		this.items = items;
+	}
+
+	public List<EquipmentInspectionEquipments> getEquipments() {
+		return equipments;
+	}
+
+	public void setEquipments(List<EquipmentInspectionEquipments> equipments) {
+		this.equipments = equipments;
 	}
 
 	public List<Long> getCommunities() {
