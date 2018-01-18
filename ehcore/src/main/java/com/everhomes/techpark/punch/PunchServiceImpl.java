@@ -3165,9 +3165,7 @@ public class PunchServiceImpl implements PunchService {
 
 	public Workbook createPunchStatisticsBook(List<PunchCountDTO> results, ListPunchCountCommand cmd) {
 		
-		XSSFWorkbook wb = new XSSFWorkbook();
-		if (null == results || results.size() == 0)
-			return wb;
+		XSSFWorkbook wb = new XSSFWorkbook(); 
 		int columnNo = 13;
 
 		if (null != results && results.size() > 0) {
@@ -3210,6 +3208,9 @@ public class PunchServiceImpl implements PunchService {
 				+dateSF.get().format(new Date(cmd.getEndDay())));
 		rowReminder.setRowStyle(titleStyle1);
 		this.createPunchStatisticsBookSheetHead(sheet,results );
+
+		if (null == results || results.size() == 0)
+			return wb;
 		for (PunchCountDTO statistic : results )
 			this.setNewPunchStatisticsBookRow(sheet, statistic);
 		return wb;
@@ -4854,8 +4855,7 @@ public class PunchServiceImpl implements PunchService {
 	    }
 	
     private Workbook createPunchDetailsBook(List<PunchDayDetailDTO> dtos, ListPunchDetailsCommand cmd) {
-    	if (null == dtos || dtos.size() == 0)
-			return new XSSFWorkbook();
+    	
 		XSSFWorkbook wb = new XSSFWorkbook();
 		XSSFSheet sheet = wb.createSheet("punchDetails");
 
@@ -4894,6 +4894,8 @@ public class PunchServiceImpl implements PunchService {
 		rowReminder.setRowStyle(titleStyle1);
 
 		this.createPunchDetailsBookSheetHead(sheet );
+		if (null == dtos || dtos.size() == 0)
+			return wb;
 		for (PunchDayDetailDTO dto : dtos )
 			this.setNewPunchDetailsBookRow(sheet, dto);
 		return wb;
