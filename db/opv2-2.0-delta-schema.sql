@@ -195,8 +195,8 @@ CREATE TABLE `eh_file_management_contents` (
   PRIMARY KEY (`id`)
 ) ENGINE = INNODB DEFAULT CHARSET = utf8mb4 ;
 
--- DROP TABLE eh_file_icon;
-CREATE TABLE `eh_file_icon` (
+-- DROP TABLE eh_file_icons;
+CREATE TABLE `eh_file_icons` (
   `id` BIGINT,
   `file_type` VARCHAR(64) NOT NULL COMMENT 'the type of the file',
   `icon_name` VARCHAR(128) COMMENT 'the name of the icon',
