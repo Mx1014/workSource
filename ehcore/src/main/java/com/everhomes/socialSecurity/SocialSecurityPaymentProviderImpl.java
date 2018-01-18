@@ -42,6 +42,7 @@ public class SocialSecurityPaymentProviderImpl implements SocialSecurityPaymentP
     public void createSocialSecurityPayment(SocialSecurityPayment socialSecurityPayment) {
         Long id = sequenceProvider.getNextSequence(NameMapper.getSequenceDomainFromTablePojo(EhSocialSecurityPayments.class));
         socialSecurityPayment.setId(id);
+        socialSecurityPayment.setIsFiled(NormalFlag.NO.getCode());
         socialSecurityPayment.setCreateTime(new Timestamp(DateHelper.currentGMTTime().getTime()));
         socialSecurityPayment.setCreatorUid(UserContext.current().getUser().getId());
         socialSecurityPayment.setUpdateTime(socialSecurityPayment.getCreateTime());

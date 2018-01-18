@@ -228,6 +228,7 @@ public class SocialSecurityServiceImpl implements SocialSecurityService {
             payment.setCreatorUid(UserContext.current().getUser().getId());
             payment.setUpdateTime(payment.getCreateTime());
             payment.setOperatorUid(payment.getCreatorUid());
+            payment.setIsFiled(NormalFlag.NO.getCode());
         }
         sequenceProvider.getNextSequenceBlock(NameMapper.getSequenceDomainFromTablePojo(EhSocialSecurityPayments.class), payments.size());
         socialSecurityPaymentProvider.batchCreateSocialSecurityPayment(payments);
@@ -866,6 +867,7 @@ public class SocialSecurityServiceImpl implements SocialSecurityService {
         payment.setUserId(detail.getTargetId());
         payment.setAccumOrSocail(accumOrSocial);
         copyRadixAndRatio(payment, itemDTO);
+        payment.setIsFiled(NormalFlag.NO.getCode());
         socialSecurityPaymentProvider.createSocialSecurityPayment(payment);
 
     }
