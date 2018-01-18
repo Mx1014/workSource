@@ -1284,19 +1284,22 @@ public class SocialSecurityServiceImpl implements SocialSecurityService {
         addImportItemDTO(dtos, syRadix, "100%", "0%", AccumOrSocial.SOCAIL, "商业保险");
 
         for (SocialSecurityItemDTO item : dtos) {
-            if (item.getAccumOrSocial().equals(AccumOrSocial.ACCUM.getCode())
-                    && NormalFlag.YES != NormalFlag.fromCode(detail.getAccumulationFundStatus())) {
-                increseMemberDetail(detail, AccumOrSocial.ACCUM);
-            } else if (item.getAccumOrSocial().equals(AccumOrSocial.SOCAIL.getCode())
-                    && NormalFlag.YES != NormalFlag.fromCode(detail.getSocialSecurityStatus())) {
-                increseMemberDetail(detail, AccumOrSocial.SOCAIL);
-            }
             SocialSecuritySetting setting = findSetting(item.getAccumOrSocial(), item.getPayItem(), settings);
             List<SocialSecurityBase> bases = (item.getAccumOrSocial().equals(AccumOrSocial.ACCUM.getCode())) ? afBases : ssBases;
             Long cityId = (item.getAccumOrSocial().equals(AccumOrSocial.ACCUM.getCode())) ? afCItyId : ssCityId;
             BigDecimal radix = (item.getAccumOrSocial().equals(AccumOrSocial.ACCUM.getCode())) ? afRadix : ssRadix;
             SocialSecurityBase base = null;
             if (null == setting) {
+                if (item.getCompanyRadix() == null || item.getCompanyRatio() == null) {
+
+                    String errorString = "增员的人员基数和比例不能为0 ";
+                    LOGGER.error(errorString);
+                    log.setErrorLog(errorString);
+                    log.setCode(SocialSecurityConstants.ERROR_CHECK_SSRADIX);
+                    log.setErrorDescription(log.getErrorLog());
+                    response.getLogs().add(log);
+                    return;
+                }
                 base = findSSBaseWithOutException(bases, item);
                 if (null == base) {
                     setting = ConvertHelper.convert(item, SocialSecuritySetting.class);
@@ -1333,6 +1336,15 @@ public class SocialSecurityServiceImpl implements SocialSecurityService {
                 return;
             }
             LOGGER.debug("dto是{} 要更新的setting是{}", item, StringHelper.toJsonString(setting));
+
+            //增员
+            if (item.getAccumOrSocial().equals(AccumOrSocial.ACCUM.getCode())
+                    && NormalFlag.YES != NormalFlag.fromCode(detail.getAccumulationFundStatus())) {
+                increseMemberDetail(detail, AccumOrSocial.ACCUM);
+            } else if (item.getAccumOrSocial().equals(AccumOrSocial.SOCAIL.getCode())
+                    && NormalFlag.YES != NormalFlag.fromCode(detail.getSocialSecurityStatus())) {
+                increseMemberDetail(detail, AccumOrSocial.SOCAIL);
+            }
             if (setting.getId() == null) {
                 //如果没有id ,说明是新建的setting,同时创建一个payment
                 socialSecuritySettingProvider.createSocialSecuritySetting(setting);
