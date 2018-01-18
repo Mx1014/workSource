@@ -15,6 +15,9 @@ import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
 
+import java.time.LocalDate;
+import java.time.LocalDateTime;
+import java.time.LocalTime;
 import java.util.*;
 import java.util.stream.Collectors;
 
@@ -55,6 +58,10 @@ public class FlowUserSelectionServiceImpl implements FlowUserSelectionService {
         Flow flow = ctx.getFlowGraph().getFlow();
         Long orgId = flow.getOrganizationId();
 
+        FlowCase flowCase = ctx.getFlowCase();
+        String projectType = flowCase.getProjectTypeA() != null ? flowCase.getProjectTypeA() : flowCase.getProjectType();
+        Long projectId = flowCase.getProjectIdA() != null ? flowCase.getProjectIdA() : flowCase.getProjectId();
+
         for (FlowUserSelection sel : selections) {
             if (users.size() >= maxCount) {
                 //为了加快处理的速度，有的情况不需要拿太多用户
@@ -83,20 +90,30 @@ public class FlowUserSelectionServiceImpl implements FlowUserSelectionService {
                 }
 
                 List<Long> userIds = null;
-                FlowUserSourceType sourceType = FlowUserSourceType.fromCode(sel.getSourceTypeB());
-                switch (sourceType) {
+                FlowUserSourceType sourceTypeB = FlowUserSourceType.fromCode(sel.getSourceTypeB());
+                switch (sourceTypeB) {
+                    // 业务责任部门岗位
+                    case SOURCE_DUTY_DEPARTMENT:// 旧版本数据
+                    case SOURCE_BUSINESS_DEPARTMENT:
+                        userIds = listUsersByBusinessDepartment(organizationId, flow.getModuleId(), sel.getSourceIdA(),
+                                EntityType.ORGANIZATIONS.getCode(), organizationId);
+                        break;
+                    // 具体部门岗位
+                    case SOURCE_DEPARTMENT:
+                        // 老的数据和新的数据不一样，需要按照时间来区分，以后把这个删掉
+                        if (sel.getCreateTime().toLocalDateTime().isBefore(LocalDateTime.of(LocalDate.of(2018, 1, 19), LocalTime.MIN))) {
+                            userIds = listUsersByJobPosition(organizationId, sel.getSourceIdB(), sel.getSourceIdA());
+                        } else {
+                            userIds = listUsersByDepartmentJobPosition(sel.getNamespaceId(), organizationId, sel.getSourceIdB(), sel.getSourceIdA());
+                        }
+                        break;
                     // 不限部门岗位
                     case SOURCE_UNLIMITED_DEPARTMENT:
                         userIds = listUsersByJobPosition(organizationId, organizationId, sel.getSourceIdA());
                         break;
-                    // 业务责任部门岗位
-                    case SOURCE_BUSINESS_DEPARTMENT:
-                        userIds = listUsersByBusinessDepartment(organizationId, flow.getModuleId(),
-                                sel.getSourceIdA(), EntityType.ORGANIZATIONS.getCode(), organizationId);
-                        break;
-                    // 具体部门岗位
+                    // 旧版本的不限部门没有sourceTypeB
                     default:
-                        userIds = listUsersByDepartmentJobPosition(sel.getNamespaceId(), organizationId, sel.getSourceIdB(), sel.getSourceIdA());
+                        userIds = listUsersByJobPosition(organizationId, organizationId, sel.getSourceIdA());
                         break;
                 }
 
@@ -137,20 +154,26 @@ public class FlowUserSelectionServiceImpl implements FlowUserSelectionService {
                 }
 
                 List<Long> userIds = null;
-                FlowUserSourceType sourceType = FlowUserSourceType.fromCode(sel.getSourceTypeA());
-                switch (sourceType) {
+                FlowUserSourceType sourceTypeA = FlowUserSourceType.fromCode(sel.getSourceTypeA());
+                switch (sourceTypeA) {
+                    // 业务责任部门经理
+                    case SOURCE_DUTY_MANAGER:// 旧版本数据
+                    case SOURCE_BUSINESS_DEPARTMENT:
+                        userIds = listModuleBusinessManagers(organizationId, flow.getModuleId(), projectType, projectId);
+                        break;
+                    // 具体部门经理
+                    case SOURCE_DEPARTMENT:
+                        userIds = listManagersByDepartment(organizationId, sel.getSourceIdA());
+                        break;
                     // 不限部门经理
                     case SOURCE_UNLIMITED_DEPARTMENT:
                         userIds = listManagersByDepartment(organizationId, organizationId);
                         break;
-                    // 业务责任部门经理
-                    case SOURCE_BUSINESS_DEPARTMENT:
-                        userIds = listModuleBusinessManagers(organizationId, flow.getModuleId(), flow.getProjectType(), flow.getProjectId());
-                        break;
-                    // 具体部门经理
+                    // 旧版本的不限部门没有sourceTypeA
                     default:
-                        userIds = listManagersByDepartment(organizationId, sel.getSourceIdA());
+                        userIds = listManagersByDepartment(organizationId, organizationId);
                         break;
+                        // LOGGER.warn("Flow user selection manager sourceTypeA '{}' not found.", sel.getSourceTypeA());
                 }
 
                 if (userIds != null) {
