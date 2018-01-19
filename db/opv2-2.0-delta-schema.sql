@@ -186,6 +186,7 @@ CREATE TABLE `eh_file_management_contents` (
   `size` INT NOT NULL DEFAULT 0 COMMENT 'the size of the content',
   `parent_id` BIGINT COMMENT 'the parent id of the folder',
   `content_type` VARCHAR(32) COMMENT 'file, folder',
+  `content_suffix` VARCHAR(64) COMMENT 'the suffix of the file',
   `content_uri` VARCHAR(2048) COMMENT 'the uri of the content',
   `status` TINYINT NOT NULL DEFAULT 1 COMMENT '0-invalid, 1-valid',
   `creator_uid` BIGINT DEFAULT 0,
