@@ -7800,7 +7800,7 @@ public class Rentalv2ServiceImpl implements Rentalv2Service {
 
 		VipParkingUseInfoDTO parkingInfo = JSONObject.parseObject(order.getCustomObject(), VipParkingUseInfoDTO.class);
 		ParkingSpaceDTO spaceDTO = dingDingParkingLockHandler.getParkingSpaceLock(parkingInfo.getLockId());
-		if (spaceDTO.getLockStatus().equals(ParkingSpaceLockStatus.DOWN.getCode())) {
+		if (null != spaceDTO && spaceDTO.getLockStatus().equals(ParkingSpaceLockStatus.DOWN.getCode())) {
 			LOGGER.error("Parking lock not raise");
 			throw RuntimeErrorException.errorWith(RentalServiceErrorCode.SCOPE,
 					RentalServiceErrorCode.ERROR_DOWN_PARKING_LOCK,"Parking lock not raise");
