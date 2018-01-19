@@ -223,4 +223,10 @@ CREATE TABLE `eh_sync_offline_tasks` (
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4;
 -- end by xiongying
 
-
+-- 在domain中增加一些icon
+ALTER TABLE `eh_domains`
+CHANGE COLUMN `icon_uri` `favicon_uri`  varchar(255) CHARACTER SET utf8mb4 COLLATE utf8mb4_general_ci NULL DEFAULT NULL AFTER `create_time`,
+ADD COLUMN `login_bg_uri`  varchar(255) NULL AFTER `favicon_uri`,
+ADD COLUMN `login_logo_uri`  varchar(255) NULL AFTER `login_bg_uri`,
+ADD COLUMN `menu_logo_uri`  varchar(255) NULL AFTER `login_logo_uri`,
+ADD COLUMN `menu_logo_collapsed_uri`  varchar(255) NULL AFTER `menu_logo_uri`;
