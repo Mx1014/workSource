@@ -353,7 +353,13 @@ public class YunZhiXunSmsHandler implements SmsHandler, ApplicationListener<Cont
         // Byte type;
         @XmlElement(name = "smsid")
         String smsId;
+        @XmlElement
         String status;
         // String desc;
+
+        @Override
+        public String toString() {
+            return StringHelper.toJsonString(this);
+        }
     }
 }

@@ -30,3 +30,6 @@ update eh_launch_pad_items SET `action_data` = '{"url":"${home.url}/property-pay
 
 -- 更新数据，去掉公告标题中的“#公告#”字样 add by yanjun 20180117
 UPDATE eh_forum_posts set `subject` = replace(`subject`, '#公告#', '');
+
+-- 短信运营商  add by xq.tian  2018/01/19
+update eh_configurations set value='YouXunTong,YunPian,JianMi,YZX' where name='sms.handler.type' and namespace_id=0;
