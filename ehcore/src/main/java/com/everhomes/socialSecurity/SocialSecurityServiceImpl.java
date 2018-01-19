@@ -1444,11 +1444,11 @@ public class SocialSecurityServiceImpl implements SocialSecurityService {
             Integer companyRatio = null;
             Integer employeeRatio = null;
             if (StringUtils.isNotBlank(companyString)) {
-                LOGGER.debug("companyString is " + companyString);
+//                LOGGER.debug("companyString is " + companyString);
                 companyRatio = new BigDecimal(companyString.replace("%", "")).multiply(new BigDecimal(100)).intValue();
             }
             if (StringUtils.isNotBlank(emloyeeString)) {
-                LOGGER.debug("companyString is " + emloyeeString);
+//                LOGGER.debug("companyString is " + emloyeeString);
                 employeeRatio = new BigDecimal(emloyeeString.replace("%", "")).multiply(new BigDecimal(100)).intValue();
             }
             dto.setCompanyRatio(companyRatio);
@@ -2571,7 +2571,7 @@ public class SocialSecurityServiceImpl implements SocialSecurityService {
         CrossShardListingLocator locator = new CrossShardListingLocator();
         locator.setAnchor(cmd.getPageAnchor());
         List<SocialSecuritySummary> result = socialSecuritySummaryProvider.listSocialSecuritySummary(cmd.getOwnerId(),
-                cmd.getPaymentMonth(), locator, pageSize + 1);
+                cmd.getPayMonth(), locator, pageSize + 1);
         if (null == result)
             return response;
         Long nextPageAnchor = null;

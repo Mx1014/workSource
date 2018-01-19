@@ -8,7 +8,7 @@ import com.everhomes.util.StringHelper;
  * <ul>参数:
  * <li>ownerType: 所属类型 organization</li>
  * <li>ownerId: 所属id 公司id</li>
- * <li>paymentMonth: 月份如201702</li>
+ * <li>payMonth: 月份如201702</li>
  * <li>pageAnchor: 锚点</li>
  * <li>pageSize: 每页大小</li>
  * </ul>
@@ -19,7 +19,7 @@ public class ListSocialSecurityHistoryFilesCommand {
 
 	private Long ownerId;
 
-	private String paymentMonth;
+	private String payMonth;
 
 	private Long pageAnchor;
 
@@ -56,13 +56,6 @@ public class ListSocialSecurityHistoryFilesCommand {
 		return StringHelper.toJsonString(this);
 	}
 
-	public String getPaymentMonth() {
-		return paymentMonth;
-	}
-
-	public void setPaymentMonth(String paymentMonth) {
-		this.paymentMonth = paymentMonth;
-	}
 
 	public Long getPageAnchor() {
 		return pageAnchor;
@@ -78,5 +71,13 @@ public class ListSocialSecurityHistoryFilesCommand {
 
 	public void setPageSize(Integer pageSize) {
 		this.pageSize = pageSize;
+	}
+
+	public String getPayMonth() {
+		return payMonth;
+	}
+
+	public void setPayMonth(String payMonth) {
+		this.payMonth = payMonth;
 	}
 }
