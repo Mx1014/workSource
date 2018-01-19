@@ -202,7 +202,7 @@ public class FileManagementServiceImpl implements  FileManagementService{
             if (cmd.getCatalogIds() != null && cmd.getCatalogIds().size() > 0)
                 query.addConditions(Tables.EH_FILE_MANAGEMENT_CONTENTS.CATALOG_ID.in(cmd.getCatalogIds()));
             if (cmd.getKeywords() != null)
-                query.addConditions(Tables.EH_FILE_MANAGEMENT_CONTENTS.NAME.like("%" + cmd.getKeywords() + "%"));
+                query.addConditions(Tables.EH_FILE_MANAGEMENT_CONTENTS.CONTENT_NAME.like("%" + cmd.getKeywords() + "%"));
             return query;
         });
 
@@ -211,7 +211,7 @@ public class FileManagementServiceImpl implements  FileManagementService{
             if (cmd.getCatalogIds() != null && cmd.getCatalogIds().size() > 0)
                 query.addConditions(Tables.EH_FILE_MANAGEMENT_CONTENTS.CATALOG_ID.in(cmd.getCatalogIds()));
             if (cmd.getKeywords() != null)
-                query.addConditions(Tables.EH_FILE_MANAGEMENT_CONTENTS.NAME.like("%" + cmd.getKeywords() + "%"));
+                query.addConditions(Tables.EH_FILE_MANAGEMENT_CONTENTS.CONTENT_NAME.like("%" + cmd.getKeywords() + "%"));
             return query;
         });
 
@@ -315,20 +315,26 @@ public class FileManagementServiceImpl implements  FileManagementService{
         if (cmd.getParentId() == null)
             cmd.setParentId(cmd.getCatalogId());
 
-        //todo：文件类型的判断
         //  1.whether the name has been used
         checkFileContentName(namespaceId, catalog.getOwnerId(), cmd.getParentId(), cmd.getContentName());
-        //  2.create it
+        //  2.check the suffix
+        if (cmd.getContentSuffix() == null)
+            throw RuntimeErrorException.errorWith(FileManagementErrorCode.SCOPE, FileManagementErrorCode.ERROR_SUFFIX_NULL,
+                    "the suffix can not be null.");
+        //  3.create it
         FileContent content = new FileContent();
         content.setNamespaceId(catalog.getNamespaceId());
         content.setOwnerId(catalog.getOwnerId());
         content.setOwnerType(catalog.getOwnerType());
         content.setCatalogId(catalog.getId());
-        content.setName(cmd.getContentName());
-        content.setSize(cmd.getContentSize());
         content.setParentId(cmd.getParentId());
         content.setContentType(cmd.getContentType());
-        content.setContentUri(cmd.getContentUri());
+        content.setContentName(cmd.getContentName());
+        if (content.getContentType().equals(FileContentType.FOLDER.getCode())) {
+            content.setContentSuffix(cmd.getContentSuffix());
+            content.setSize(cmd.getContentSize());
+            content.setContentUri(cmd.getContentUri());
+        }
         fileManagementProvider.createFileContent(content);
         //  3.return back the dto
         dto = ConvertHelper.convert(content, FileContentDTO.class);
@@ -349,11 +355,10 @@ public class FileManagementServiceImpl implements  FileManagementService{
             //  1.check the name
             checkFileContentName(content.getNamespaceId(), content.getOwnerId(), content.getParentId(), cmd.getContentName());
             //  2.update the name
-            content.setName(cmd.getContentName());
+            content.setContentName(cmd.getContentName());
             fileManagementProvider.updateFileContent(content);
             //  3.return back
-            dto.setId(content.getId());
-            dto.setName(content.getName());
+            dto = ConvertHelper.convert(content, FileContentDTO.class);
         }
         return dto;
     }
@@ -397,15 +402,20 @@ public class FileManagementServiceImpl implements  FileManagementService{
         return response;
     }
 
-    private FileContentDTO convertToFileContentDTO(FileContent content, Map<String, String> fileIcons){
+    private FileContentDTO convertToFileContentDTO(FileContent content, Map<String, String> fileIcons) {
         FileContentDTO dto = ConvertHelper.convert(content, FileContentDTO.class);
 
-        if(dto.getContentUri() != null)
+        if (content.getContentType().equals(FileContentType.FOLDER.getCode())){
+            dto = ConvertHelper.convert(content, FileContentDTO.class);
+            dto.setName(content.getContentName());
+        }
+        else {
+            dto.setName(content.getContentName() + "." + content.getContentSuffix());
             dto.setContentUrl(contentServerService.parserUri(dto.getContentUri()));
-        dto.setIconUrl(fileIcons.get(content.getContentType()));
-        if(dto.getIconUrl() == null)
-            dto.setIconUrl(fileIcons.get(FileContentType.OTHER.getCode()));
-
+            dto.setIconUrl(fileIcons.get(content.getContentSuffix()));
+            if (dto.getIconUrl() == null)
+                dto.setIconUrl(fileIcons.get("other"));
+        }
         return dto;
     }
 }

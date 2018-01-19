@@ -8,8 +8,9 @@ import com.everhomes.util.StringHelper;
  * <li>parentId: 文件夹id(若在文件夹内新增文件或文件夹时传递，在目录中新建不用传递该参数)</li>
  * <li>contentType: 内容类型：file-文件, folder-文件夹 参考{@link com.everhomes.rest.filemanagement.FileContentType}</li>
  * <li>contentName: 内容名称</li>
- * <li>contentSize: 内容大小</li>
- * <li>contentUri: 内容uri</li>
+ * <li>contentSuffix: 后缀名称(文件夹忽略)</li>
+ * <li>contentSize: 内容大小(文件夹忽略)</li>
+ * <li>contentUri: 内容uri(文件夹忽略)</li>
  * </ul>
  */
 public class AddFileContentCommand {
@@ -21,6 +22,8 @@ public class AddFileContentCommand {
     private String contentType;
 
     private String contentName;
+
+    private String contentSuffix;
 
     private Integer contentSize;
 
@@ -59,6 +62,14 @@ public class AddFileContentCommand {
 
     public void setContentName(String contentName) {
         this.contentName = contentName;
+    }
+
+    public String getContentSuffix() {
+        return contentSuffix;
+    }
+
+    public void setContentSuffix(String contentSuffix) {
+        this.contentSuffix = contentSuffix;
     }
 
     public Integer getContentSize() {

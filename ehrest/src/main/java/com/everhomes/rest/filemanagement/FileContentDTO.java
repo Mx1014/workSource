@@ -8,10 +8,12 @@ import java.sql.Timestamp;
  * <ul>
  * <li>id: 内容id</li>
  * <li>catalogId: 所属目录id</li>
- * <li>name: 名称</li>
+ * <li>name: 内容全称</li>
  * <li>size: 大小</li>
  * <li>parentId: 父级id</li>
  * <li>contentType: 内容类型，file-文件,folder-文件夹 参考{@link com.everhomes.rest.filemanagement.FileContentType}</li>
+ * <li>contentName: 内容名称</li>
+ * <li>contentSuffix: 后缀名称</li>
  * <li>contentUri: 内容uri</li>
  * <li>contentUrl: 内容url(下载链接)</li>
  * <li>iconUrl: 图标url</li>
@@ -31,6 +33,10 @@ public class FileContentDTO {
     private Long parentId;
 
     private String contentType;
+
+    private String contentName;
+
+    private String contentSuffix;
 
     private String contentUri;
 
@@ -89,6 +95,22 @@ public class FileContentDTO {
 
     public void setContentType(String contentType) {
         this.contentType = contentType;
+    }
+
+    public String getContentName() {
+        return contentName;
+    }
+
+    public void setContentName(String contentName) {
+        this.contentName = contentName;
+    }
+
+    public String getContentSuffix() {
+        return contentSuffix;
+    }
+
+    public void setContentSuffix(String contentSuffix) {
+        this.contentSuffix = contentSuffix;
     }
 
     public String getContentUri() {

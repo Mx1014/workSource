@@ -1131,7 +1131,7 @@ public class AddressServiceImpl implements AddressService, LocalBusSubscriber {
 
     private void checkUserPrivilege(long userId, long communityId) {
         boolean flag = false;
-        if (userId == 0) //超级管理员
+        if (userId == 1) //超级管理员
             return;
         List<FamilyDTO> familydtos = this.familyProvider.getUserFamiliesByUserId(userId);
         if (familydtos == null) {
