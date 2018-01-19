@@ -1,5 +1,6 @@
 package com.everhomes.domain;
 
+import com.everhomes.bootstrap.PlatformContext;
 import com.everhomes.constants.ErrorCodes;
 import com.everhomes.controller.ControllerBase;
 import com.everhomes.discover.RestDoc;
@@ -13,7 +14,10 @@ import com.everhomes.rest.acl.ServiceModuleAssignmentRelationDTO;
 import com.everhomes.rest.acl.ServiceModuleDTO;
 import com.everhomes.rest.domain.DomainDTO;
 import com.everhomes.rest.domain.GetDomainInfoCommand;
+import com.everhomes.rest.domain.UpdateDomainInfoCommand;
 import com.everhomes.rest.module.*;
+import com.everhomes.user.UserContext;
+import com.everhomes.user.admin.SystemUserPrivilegeMgr;
 import com.everhomes.util.RequireAuthentication;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.web.bind.annotation.RequestMapping;
@@ -59,6 +63,25 @@ public class DomainController extends ControllerBase {
     @RestReturn(value = DomainDTO.class, collection = true)
     public RestResponse listAllDomains() {
         RestResponse response = new RestResponse(domainService.listAllDomains());
+        response.setErrorCode(ErrorCodes.SUCCESS);
+        response.setErrorDescription("OK");
+        return response;
+    }
+
+    /**
+     * <b>URL: /domain/updateDomainInfo</b>
+     * <p>
+     * 更新域名配置细节信息（图标等）。请勿扩展，domain、namespaceId等涉及业务的数据不允许代码更新
+     * </p>
+     */
+    @RequestMapping("updateDomainInfo")
+    @RestReturn(value = DomainDTO.class)
+    public RestResponse updateDomainInfo(UpdateDomainInfoCommand cmd) {
+
+        SystemUserPrivilegeMgr resolver = PlatformContext.getComponent("SystemUser");
+        resolver.checkUserPrivilege(UserContext.current().getUser().getId(), 0);
+
+        RestResponse response = new RestResponse(domainService.updateDomain(cmd));
         response.setErrorCode(ErrorCodes.SUCCESS);
         response.setErrorDescription("OK");
         return response;
