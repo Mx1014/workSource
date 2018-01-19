@@ -1321,6 +1321,9 @@ public class SocialSecurityServiceImpl implements SocialSecurityService {
             if (null != radix) {
                 setting.setRadix(radix);
             }
+            //城市和户籍
+            setting.setCityId(base.getCityId());
+            setting.setHouseholdType(base.getHouseholdType());
             importCalculateRadix(radix, base, item, setting);
             String errorString = null;
             if (null != item.getCompanyRatio()) {
