@@ -1127,6 +1127,8 @@ public class AddressServiceImpl implements AddressService, LocalBusSubscriber {
 
     private void checkUserPrivilege(long userId, long communityId) {
         boolean flag = false;
+        if (userId == 0) //超级管理员
+            return;
         List<FamilyDTO> familydtos = this.familyProvider.getUserFamiliesByUserId(userId);
         if (familydtos == null) {
             throw RuntimeErrorException.errorWith(ErrorCodes.SCOPE_GENERAL, ErrorCodes.ERROR_ACCESS_DENIED,

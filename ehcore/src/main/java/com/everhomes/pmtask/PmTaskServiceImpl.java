@@ -1913,7 +1913,8 @@ public class PmTaskServiceImpl implements PmTaskService {
 			response.setCommunities(result);
 
 		}else{
-			response.setCommunities(communityProvider.listCommunitiesByNamespaceId(UserContext.getCurrentNamespaceId()).
+			Integer namespaceId = UserContext.getCurrentNamespaceId(cmd.getNamespaceId());
+			response.setCommunities(communityProvider.listCommunitiesByNamespaceId(namespaceId).
 			stream().map(r->{
 				return ConvertHelper.convert(r,CommunityDTO.class);
 			}).collect(Collectors.toList()));
