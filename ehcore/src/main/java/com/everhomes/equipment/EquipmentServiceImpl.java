@@ -4961,9 +4961,9 @@ private void checkUserPrivilege(Long orgId, Long privilegeId, Long communityId) 
 		response.setUnReviewedTasks(statTasks.getCompleteWaitingForApproval());
 		response.setReviewTasks(response.getUnReviewedTasks() + response.getReviewedTasks());
 
-		Double maintanceRate = response.getCompleteInspection().equals(0L) ? 0.00 : (double)response.getCompleteMaintance()/(double)response.getCompleteInspection();
+		Double maintanceRate = response.getComplete().equals(0L) ? 0.00 : (double)response.getCompleteMaintance()/(double)response.getComplete();
 		response.setMaintanceRate(maintanceRate);
-		Double delayRate = (response.getCompleteInspection()+response.getDelay()) == 0L ? 0.00 : (double)response.getDelay()/(double)(response.getCompleteInspection()+response.getDelay());
+		Double delayRate = (response.getComplete()+response.getDelay()) == 0L ? 0.00 : (double)response.getDelay()/(double)(response.getComplete()+response.getDelay());
 		response.setDelayRate(delayRate);
 		Double reviewQualifiedRate = response.getReviewedTasks().equals(0L) ? 0.00 : (double)response.getReviewQualified()/(double)response.getReviewedTasks();
 		response.setReviewQualifiedRate(reviewQualifiedRate);

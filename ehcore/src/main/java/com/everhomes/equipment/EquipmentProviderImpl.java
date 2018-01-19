@@ -2686,6 +2686,7 @@ public class EquipmentProviderImpl implements EquipmentProvider {
             resp.setCompleteInspection(r.getValue("completeInspection", Long.class));
             resp.setCompleteWaitingForApproval(r.getValue("completeInspectionWaitingForApproval", Long.class));
             resp.setWaitingForExecuting(r.getValue("waitingForExecuting", Long.class));
+            resp.setComplete(resp.getCompleteInspection()+resp.getWaitingForExecuting());
             resp.setTotalTasks(r.getValue("total", Long.class));
             resp.setDelay(r.getValue("delayTasks", Long.class));
             resp.setReviewDelayTasks(r.getValue("reviewDelay", Long.class));
