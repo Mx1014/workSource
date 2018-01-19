@@ -16,11 +16,14 @@ import javax.validation.constraints.NotNull;
  *     <li>referType: 业务对象类型, 各业务唯一, 推荐使用{@link com.everhomes.rest.common.EntityType}</li>
  *     <li>projectId: 小区id</li>
  *     <li>projectType: 小区类型 {@link com.everhomes.rest.common.EntityType#COMMUNITY}</li>
+ *     <li>projectIdA: 拓展项目类型 id</li>
+ *     <li>projectTypeA: 拓展项目类型 type</li>
  *     <li>content: 列表展示内容</li>
  *     <li>title: 标题</li>
  *     <li>currentOrganizationId: 用户当前场景下的公司id,推荐传这个值，要不然就无法设置工作流的某些功能</li>
  *     <li>serviceType: 业务类型</li>
  *     <li>routeUri: 路由</li>
+ *     <li>additionalFieldDTO: additionalFieldDTO {@link com.everhomes.rest.flow.FlowCaseAdditionalFieldDTO}</li>
  * </ul>
  */
 public class CreateFlowCaseCommand {
@@ -33,6 +36,8 @@ public class CreateFlowCaseCommand {
     private String referType;
     private Long projectId;
     private String projectType;
+    private Long projectIdA;
+    private String projectTypeA;
     private String content;
     private String title;
     @NotNull
@@ -138,6 +143,22 @@ public class CreateFlowCaseCommand {
 
     public void setAdditionalFieldDTO(FlowCaseAdditionalFieldDTO additionalFieldDTO) {
         this.additionalFieldDTO = additionalFieldDTO;
+    }
+
+    public Long getProjectIdA() {
+        return projectIdA;
+    }
+
+    public void setProjectIdA(Long projectIdA) {
+        this.projectIdA = projectIdA;
+    }
+
+    public String getProjectTypeA() {
+        return projectTypeA;
+    }
+
+    public void setProjectTypeA(String projectTypeA) {
+        this.projectTypeA = projectTypeA;
     }
 
     public String getRouteUri() {

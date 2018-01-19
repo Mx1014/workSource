@@ -1,7 +1,5 @@
 package com.everhomes.rest.sms;
 
-import java.sql.Timestamp;
-
 /**
  * Created by Administrator on 2017/3/27.
  */
@@ -22,7 +20,7 @@ public class SmsLogDTO {
     private Byte status;
     private Integer httpStatusCode;
     private String reportText;
-    private Timestamp reportTime;
+    private String reportTime;
 
     public Long getId() {
         return id;
@@ -144,11 +142,11 @@ public class SmsLogDTO {
         this.reportText = reportText;
     }
 
-    public Timestamp getReportTime() {
+    public String getReportTime() {
         return reportTime;
     }
 
-    public void setReportTime(Timestamp reportTime) {
+    public void setReportTime(String reportTime) {
         this.reportTime = reportTime;
     }
 }

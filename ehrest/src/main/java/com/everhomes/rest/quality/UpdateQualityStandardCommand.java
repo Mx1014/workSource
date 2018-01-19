@@ -19,6 +19,7 @@ import java.util.List;
  *  <li>specificationIds: eh_quality_inspection_specifications表的id</li>
  *  <li>group: 业务组信息 com.everhomes.rest.quality.StandardGroupDTO</li>
  *  <li>communities: 应用到的项目id列表</li>
+ *  <li>namespaceId: namespaceId</li>
  * </ul>
  */
 public class UpdateQualityStandardCommand {
@@ -49,6 +50,8 @@ public class UpdateQualityStandardCommand {
 
 	@ItemType(Long.class)
 	private List<Long> communities;
+
+	private Integer namespaceId;
 
 	public Long getId() {
 		return id;
@@ -136,6 +139,14 @@ public class UpdateQualityStandardCommand {
 
 	public void setCommunities(List<Long> communities) {
 		this.communities = communities;
+	}
+
+	public Integer getNamespaceId() {
+		return namespaceId;
+	}
+
+	public void setNamespaceId(Integer namespaceId) {
+		this.namespaceId = namespaceId;
 	}
 
 	@Override

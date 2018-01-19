@@ -8,7 +8,6 @@ import com.everhomes.portal.PortalService;
 import com.everhomes.rest.acl.PrivilegeConstants;
 import com.everhomes.rest.equipment.EquipmentTaskDTO;
 import com.everhomes.rest.equipment.ListEquipmentTasksResponse;
-import com.everhomes.rest.equipment.ReviewResult;
 import com.everhomes.rest.equipment.SearchEquipmentTasksCommand;
 import com.everhomes.rest.quality.OwnerType;
 import com.everhomes.search.AbstractElasticSearch;
@@ -26,7 +25,11 @@ import org.elasticsearch.action.search.SearchType;
 import org.elasticsearch.client.Requests;
 import org.elasticsearch.common.xcontent.XContentBuilder;
 import org.elasticsearch.common.xcontent.XContentFactory;
-import org.elasticsearch.index.query.*;
+import org.elasticsearch.index.query.FilterBuilder;
+import org.elasticsearch.index.query.FilterBuilders;
+import org.elasticsearch.index.query.QueryBuilder;
+import org.elasticsearch.index.query.QueryBuilders;
+import org.elasticsearch.index.query.RangeFilterBuilder;
 import org.elasticsearch.search.sort.SortBuilders;
 import org.elasticsearch.search.sort.SortOrder;
 import org.slf4j.Logger;
@@ -141,7 +144,7 @@ public class EquipmentTasksSearcherImpl extends AbstractElasticSearch implements
 //        FilterBuilder fb = FilterBuilders.notFilter(nfb);
 //产品要求把已失效的任务也显示出来 add by xiongying20170217
         //改用namespaceId add by xiongying 20170328
-        FilterBuilder fb = FilterBuilders.termFilter("namespaceId", UserContext.getCurrentNamespaceId());
+        FilterBuilder fb = FilterBuilders.termFilter("namespaceId", cmd.getNamespaceId());
 //        FilterBuilder fb = FilterBuilders.termFilter("ownerId", cmd.getOwnerId());
 ////        fb = FilterBuilders.andFilter(fb, FilterBuilders.termFilter("ownerId", cmd.getOwnerId()));
 //        fb = FilterBuilders.andFilter(fb, FilterBuilders.termFilter("ownerType", OwnerType.fromCode(cmd.getOwnerType()).getCode()));
@@ -169,8 +172,8 @@ public class EquipmentTasksSearcherImpl extends AbstractElasticSearch implements
         if(cmd.getStatus() != null)
         	fb = FilterBuilders.andFilter(fb, FilterBuilders.termFilter("status", cmd.getStatus()));
 
-        if(cmd.getReviewStatus() != null)
-        	fb = FilterBuilders.andFilter(fb, FilterBuilders.termFilter("reviewStatus", cmd.getReviewStatus()));
+//        if(cmd.getReviewStatus() != null)
+//        	fb = FilterBuilders.andFilter(fb, FilterBuilders.termFilter("reviewStatus", cmd.getReviewStatus()));
 
         if(cmd.getTaskType() != null)
         	fb = FilterBuilders.andFilter(fb, FilterBuilders.termFilter("taskType", cmd.getTaskType()));
@@ -179,7 +182,7 @@ public class EquipmentTasksSearcherImpl extends AbstractElasticSearch implements
         	fb = FilterBuilders.andFilter(fb, FilterBuilders.termFilter("inspectionCategoryId", cmd.getInspectionCategoryId()));
 
         int pageSize = PaginationConfigHelper.getPageSize(configProvider, cmd.getPageSize());
-        Long anchor = 0l;
+        Long anchor = 0L;
         if(cmd.getPageAnchor() != null) {
             anchor = cmd.getPageAnchor();
         }
@@ -288,14 +291,14 @@ public class EquipmentTasksSearcherImpl extends AbstractElasticSearch implements
             b.field("taskName", task.getTaskName());
             b.field("inspectionCategoryId", task.getInspectionCategoryId());
 
-            // reviewStatus: 任务审核状态 0: UNREVIEWED 1: REVIEWED
-            if (ReviewResult.fromStatus(task.getReviewResult()) == ReviewResult.NONE) {
-                b.field("reviewStatus", 0);
-            } else if (ReviewResult.fromStatus(task.getReviewResult()) == ReviewResult.QUALIFIED) {
-                b.field("reviewStatus", 1);
-            } else if (ReviewResult.fromStatus(task.getReviewResult()) == ReviewResult.REVIEW_DELAY) {
-                b.field("reviewStatus", 4);
-            }
+//            // reviewStatus: 任务审核状态 0: UNREVIEWED 1: REVIEWED
+//            if (ReviewResult.fromStatus(task.getReviewResult()) == ReviewResult.NONE) {
+//                b.field("reviewStatus", 0);
+//            } else if (ReviewResult.fromStatus(task.getReviewResult()) == ReviewResult.QUALIFIED) {
+//                b.field("reviewStatus", 1);
+//            } else if (ReviewResult.fromStatus(task.getReviewResult()) == ReviewResult.REVIEW_DELAY) {
+//                b.field("reviewStatus", 4);
+//            }
 
             EquipmentInspectionStandards standard = equipmentProvider.findStandardById(task.getStandardId());
             if(null != standard) {

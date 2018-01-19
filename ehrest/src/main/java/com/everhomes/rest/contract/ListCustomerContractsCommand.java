@@ -22,6 +22,26 @@ public class ListCustomerContractsCommand {
 
     private Integer namespaceId;
 
+    private Byte status;
+
+    private Byte adminFlag = 0;
+
+    public Byte getAdminFlag() {
+        return adminFlag;
+    }
+
+    public void setAdminFlag(Byte adminFlag) {
+        this.adminFlag = adminFlag;
+    }
+
+    public Byte getStatus() {
+        return status;
+    }
+
+    public void setStatus(Byte status) {
+        this.status = status;
+    }
+
     public Long getTargetId() {
         return targetId;
     }

@@ -23,6 +23,7 @@ import com.everhomes.search.OrganizationSearcher;
 import com.everhomes.user.User;
 import com.everhomes.user.UserContext;
 import com.everhomes.user.admin.SystemUserPrivilegeMgr;
+import com.everhomes.util.FrequencyControl;
 import com.everhomes.util.RequireAuthentication;
 import com.everhomes.util.RuntimeErrorException;
 import org.slf4j.Logger;
@@ -808,6 +809,7 @@ public class OrganizationController extends ControllerBase {
      * <b>URL: /org/applyForEnterpriseContact</b>
      * <p>申请加入企业</p>
      */
+    @FrequencyControl(count = 1 , key={"#cmd.organizationId","#cmd.targetId","cmd.contactToken", "cmd.contactName"})
     @RequestMapping("applyForEnterpriseContact")
     @RestReturn(value = OrganizationDTO.class)
     public RestResponse applyForEnterpriseContact(@Valid CreateOrganizationMemberCommand cmd) {
@@ -1915,6 +1917,19 @@ public class OrganizationController extends ControllerBase {
     @RestReturn(value = Byte.class)
     public RestResponse getOrganizationDetailFlag(@Valid GetOrganizationDetailFlagCommand cmd) {
         RestResponse response = new RestResponse(organizationService.getOrganizationDetailFlag(cmd));
+        response.setErrorCode(ErrorCodes.SUCCESS);
+        response.setErrorDescription("OK");
+        return response;
+    }
+
+    /**
+     * <b>URL: /org/listPMOrganizations</b>
+     * <p>查询管理公司列表</p>
+     */
+    @RequestMapping("listPMOrganizations")
+    @RestReturn(value = ListPMOrganizationsResponse.class)
+    public RestResponse listPMOrganizations(@Valid ListPMOrganizationsCommand cmd) {
+        RestResponse response = new RestResponse(organizationService.listPMOrganizations(cmd));
         response.setErrorCode(ErrorCodes.SUCCESS);
         response.setErrorDescription("OK");
         return response;

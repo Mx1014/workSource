@@ -5,6 +5,7 @@ import com.everhomes.listing.ListingQueryBuilderCallback;
 
 import java.sql.Timestamp;
 import java.util.List;
+import java.util.Set;
 
 public interface EnergyMeterReadingLogProvider {
 
@@ -31,6 +32,7 @@ public interface EnergyMeterReadingLogProvider {
      * 获取表记的所有读表记录
      */
     List<EnergyMeterReadingLog> listMeterReadingLogsByMeterId(Integer namespaceId, Long meterId);
+    List<EnergyMeterReadingLog> listMeterReadingLogsByMeterIds(Integer namespaceId, Set<Long> meterIds);
 
     void deleteMeterReadingLogsByMeterId(Integer namespaceId, Long meterId);
 

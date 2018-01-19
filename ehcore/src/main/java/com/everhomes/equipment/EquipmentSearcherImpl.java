@@ -141,7 +141,7 @@ public class EquipmentSearcherImpl extends AbstractElasticSearch implements Equi
         FilterBuilder nfb = FilterBuilders.termFilter("status", EquipmentStatus.INACTIVE.getCode());
     	fb = FilterBuilders.notFilter(nfb);
         //分公司和总公司的问题，改为用namespaceId来弄 by xiongying20170328
-        fb = FilterBuilders.andFilter(fb, FilterBuilders.termFilter("namespaceId", UserContext.getCurrentNamespaceId()));
+        fb = FilterBuilders.andFilter(fb, FilterBuilders.termFilter("namespaceId",cmd.getNamespaceId()));
 //        fb = FilterBuilders.andFilter(fb, FilterBuilders.termFilter("ownerId", cmd.getOwnerId()));
 //        fb = FilterBuilders.andFilter(fb, FilterBuilders.termFilter("ownerType", OwnerType.fromCode(cmd.getOwnerType()).getCode()));
         if(cmd.getTargetId() != null)

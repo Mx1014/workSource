@@ -1,0 +1,37 @@
+package com.everhomes.rest.workReport;
+
+import com.everhomes.util.StringHelper;
+
+/**
+ * <ul>
+ * <li>reportId: 工作汇报id</li>
+ * <li>reportValId: 工作汇报单id</li>
+ * </ul>
+ */
+public class WorkReportDetailsActionData {
+    private Long reportId;
+
+    private Long reportValId;
+
+    public Long getReportId() {
+        return reportId;
+    }
+
+    public void setReportId(Long reportId) {
+        this.reportId = reportId;
+    }
+
+    public Long getReportValId() {
+        return reportValId;
+    }
+
+    public void setReportValId(Long reportValId) {
+        this.reportValId = reportValId;
+    }
+
+    @Override
+    public String toString() {
+        return StringHelper.toJsonString(this);
+    }
+}
+

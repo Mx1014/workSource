@@ -1,18 +1,22 @@
 package com.everhomes.rest.domain;
 
-/**
- * <p>
- * 域名配置信息
- * </p>
- * <ul>
- * <li>namespaceId: 域空间</li>
- * <li>portalType: 门户类型，左邻域类型：zuolin，物业公司:pm 和企业：enterprise</li>
- * <li>portalId: 配置类型，左邻域类型填0，物业公司和企业填具体id</li>
- * <li>domain: 域名</li>
- * <ul>
- */
+import com.everhomes.util.StringHelper;
 
+/**
+ * <ul>
+ *     <li>Id: Id</li>
+ *     <li>namespaceId: 域空间</li>
+ *     <li>portalType: 门户类型，左邻域类型：zuolin，物业公司:pm 和企业：enterprise</li>
+ *     <li>portalId: 配置类型，左邻域类型填0，物业公司和企业填具体id</li>
+ *     <li>domain: 域名</li>
+ *     <li>iconUri: iconUri</li>
+ *     <li>iconUrl: iconUrl</li>
+ *     <li>name: name</li>
+ * </ul>
+ */
 public class DomainDTO {
+
+	private Long Id;
 
 	private Integer namespaceId;
 
@@ -21,6 +25,20 @@ public class DomainDTO {
 	private Long portalId;
 
 	private String domain;
+
+	private String iconUri;
+
+	private String iconUrl;
+
+	private String name;
+
+	public Long getId() {
+		return Id;
+	}
+
+	public void setId(Long id) {
+		Id = id;
+	}
 
 	public Integer getNamespaceId() {
 		return namespaceId;
@@ -52,5 +70,34 @@ public class DomainDTO {
 
 	public void setDomain(String domain) {
 		this.domain = domain;
+	}
+
+	public String getIconUri() {
+		return iconUri;
+	}
+
+	public void setIconUri(String iconUri) {
+		this.iconUri = iconUri;
+	}
+
+	public String getIconUrl() {
+		return iconUrl;
+	}
+
+	public void setIconUrl(String iconUrl) {
+		this.iconUrl = iconUrl;
+	}
+
+	public String getName() {
+		return name;
+	}
+
+	public void setName(String name) {
+		this.name = name;
+	}
+
+	@Override
+	public String toString() {
+		return StringHelper.toJsonString(this);
 	}
 }

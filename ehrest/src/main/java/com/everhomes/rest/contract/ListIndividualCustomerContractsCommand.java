@@ -17,6 +17,15 @@ public class ListIndividualCustomerContractsCommand {
     private Long communityId;
 
     private Integer namespaceId;
+    private Byte status;
+
+    public Byte getStatus() {
+        return status;
+    }
+
+    public void setStatus(Byte status) {
+        this.status = status;
+    }
 
     public String getContactToken() {
         return contactToken;

@@ -8,10 +8,12 @@ import com.everhomes.openapi.ContractBuildingMappingProvider;
 import com.everhomes.openapi.ContractProvider;
 import com.everhomes.organization.pm.CommunityAddressMapping;
 import com.everhomes.organization.pm.PropertyMgrProvider;
+import com.everhomes.organization.pm.PropertyMgrService;
 import com.everhomes.rest.contract.ContractParamDTO;
 import com.everhomes.rest.contract.ContractStatus;
 import com.everhomes.rest.contract.GetContractParamCommand;
 import com.everhomes.rest.contract.PeriodUnit;
+import com.everhomes.rest.customer.CustomerType;
 import com.everhomes.rest.organization.pm.AddressMappingStatus;
 import com.everhomes.scheduler.ScheduleProvider;
 import com.everhomes.search.ContractSearcher;
@@ -57,6 +59,8 @@ public class ContractScheduleJob extends QuartzJobBean {
 
     @Autowired
     private PropertyMgrProvider propertyMgrProvider;
+    @Autowired
+    private PropertyMgrService propertyMgrService;
 
     @Autowired
     private CommunityProvider communityProvider;
@@ -64,6 +68,9 @@ public class ContractScheduleJob extends QuartzJobBean {
     @Override
     protected void executeInternal(JobExecutionContext context) throws JobExecutionException {
         Timestamp now = new Timestamp(DateHelper.currentGMTTime().getTime());
+        if(LOGGER.isInfoEnabled()) {
+            LOGGER.info("ContractScheduleJob" + now);
+        }
         Map<Long, List<Contract>> contracts = contractProvider.listContractGroupByCommunity();
         if(contracts != null && contracts.size() > 0) {
             contracts.forEach((communityId, contractList) -> {
@@ -77,40 +84,42 @@ public class ContractScheduleJob extends QuartzJobBean {
                     communityExist = contractProvider.findContractParamByCommunityId(community.getNamespaceId(), null);
                 }
                 ContractParam param = communityExist;
-                if(param != null) {
-                    if(contractList != null) {
-                        contractList.forEach(contract -> {
-                            //当前时间在合同到期时间之后 直接过期
-                            if(now.after(contract.getContractEndDate())) {
-                                contract.setStatus(ContractStatus.EXPIRED.getCode());
-                                contractProvider.updateContract(contract);
-                                contractSearcher.feedDoc(contract);
-                                dealAddressLivingStatus(contract, AddressMappingStatus.FREE.getCode());
-                            } else {
-                                if(ContractStatus.ACTIVE.equals(ContractStatus.fromStatus(contract.getStatus()))) {
-                                    //正常合同转即将过期
-                                    Timestamp time = addPeriod(now, param.getExpiringPeriod(), param.getExpiringUnit());
-                                    if(time.after(contract.getContractEndDate())) {
-                                        contract.setStatus(ContractStatus.EXPIRING.getCode());
+
+                if(contractList != null) {
+                    contractList.forEach(contract -> {
+                        LOGGER.debug("ContractScheduleJob contract id: {}, number: {}, expiredDate: {}", contract.getId(),
+                                contract.getContractNumber(), contract.getContractEndDate());
+                        //当前时间在合同到期时间之后 直接过期
+                        if(now.after(contract.getContractEndDate())) {
+                            contract.setStatus(ContractStatus.EXPIRED.getCode());
+                            contractProvider.updateContract(contract);
+                            contractSearcher.feedDoc(contract);
+                            dealAddressLivingStatus(contract, AddressMappingStatus.FREE.getCode());
+                        }
+                        else if(param != null) {
+                            if(ContractStatus.ACTIVE.equals(ContractStatus.fromStatus(contract.getStatus()))) {
+                                //正常合同转即将过期
+                                Timestamp time = addPeriod(now, param.getExpiringPeriod(), param.getExpiringUnit());
+                                if(time.after(contract.getContractEndDate())) {
+                                    contract.setStatus(ContractStatus.EXPIRING.getCode());
+                                    contractProvider.updateContract(contract);
+                                    contractSearcher.feedDoc(contract);
+                                }
+
+                            } else if(ContractStatus.APPROVE_QUALITIED.equals(ContractStatus.fromStatus(contract.getStatus()))) {
+                                //审批通过没有转为正常合同 过期
+                                if(contract.getReviewTime() != null) {
+                                    Timestamp time = addPeriod(contract.getReviewTime(), param.getExpiredPeriod(), param.getExpiredUnit());
+                                    if(time.before(now)) {
+                                        contract.setStatus(ContractStatus.EXPIRED.getCode());
                                         contractProvider.updateContract(contract);
                                         contractSearcher.feedDoc(contract);
-                                    }
-
-                                } else if(ContractStatus.APPROVE_QUALITIED.equals(ContractStatus.fromStatus(contract.getStatus()))) {
-                                    //审批通过没有转为正常合同 过期
-                                    if(contract.getReviewTime() != null) {
-                                        Timestamp time = addPeriod(contract.getReviewTime(), param.getExpiredPeriod(), param.getExpiredUnit());
-                                        if(time.before(now)) {
-                                            contract.setStatus(ContractStatus.EXPIRED.getCode());
-                                            contractProvider.updateContract(contract);
-                                            contractSearcher.feedDoc(contract);
-                                            dealAddressLivingStatus(contract, AddressMappingStatus.FREE.getCode());
-                                        }
+                                        dealAddressLivingStatus(contract, AddressMappingStatus.FREE.getCode());
                                     }
                                 }
                             }
-                        });
-                    }
+                        }
+                    });
                 }
             });
         }
@@ -118,10 +127,15 @@ public class ContractScheduleJob extends QuartzJobBean {
 
     private void dealAddressLivingStatus(Contract contract, byte livingStatus) {
         List<ContractBuildingMapping> mappings = contractBuildingMappingProvider.listByContract(contract.getId());
+        boolean individualFlag = CustomerType.INDIVIDUAL.equals(CustomerType.fromStatus(contract.getCustomerType())) ? true : false;
         mappings.forEach(mapping -> {
             CommunityAddressMapping addressMapping = propertyMgrProvider.findAddressMappingByAddressId(mapping.getAddressId());
             addressMapping.setLivingStatus(livingStatus);
             propertyMgrProvider.updateOrganizationAddressMapping(addressMapping);
+
+            if(individualFlag) {
+                propertyMgrService.addAddressToOrganizationOwner(contract.getNamespaceId(), mapping.getAddressId(), contract.getCustomerId());
+            }
         });
     }
 

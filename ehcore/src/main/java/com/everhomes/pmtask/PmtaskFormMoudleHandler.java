@@ -1,7 +1,6 @@
 package com.everhomes.pmtask;
 
 import com.alibaba.fastjson.JSON;
-import com.alibaba.fastjson.JSONArray;
 import com.alibaba.fastjson.JSONObject;
 import com.everhomes.entity.EntityType;
 import com.everhomes.flow.*;
@@ -13,11 +12,8 @@ import com.everhomes.rest.general_approval.*;
 import com.everhomes.server.schema.Tables;
 import com.everhomes.user.UserContext;
 import com.everhomes.util.ConvertHelper;
-import com.everhomes.util.StringHelper;
 import com.google.gson.Gson;
-import com.google.gson.reflect.TypeToken;
 import org.apache.commons.lang.StringUtils;
-import org.apache.poi.util.StringUtil;
 import org.jooq.Record;
 import org.jooq.SelectQuery;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -49,7 +45,7 @@ public class PmtaskFormMoudleHandler implements GeneralFormModuleHandler {
 
     private Long moduleId = FlowConstants.PM_TASK_MODULE;
     @Override
-    public PostGeneralFormDTO postGeneralForm(PostGeneralFormCommand cmd) {
+    public PostGeneralFormDTO postGeneralFormVal(PostGeneralFormValCommand cmd) {
         if (cmd.getOwnerType()==null)
             cmd.setOwnerType("PMTASK");
         GetTemplateBySourceIdCommand cmd2 = ConvertHelper.convert(cmd,GetTemplateBySourceIdCommand.class);
@@ -210,5 +206,10 @@ public class PmtaskFormMoudleHandler implements GeneralFormModuleHandler {
         List<GeneralFormFieldDTO> fieldDTOs = JSONObject.parseArray(form.getTemplateText(), GeneralFormFieldDTO.class);
         dto.setFormFields(fieldDTOs);
         return dto;
+    }
+
+    @Override
+    public PostGeneralFormDTO updateGeneralFormVal(PostGeneralFormValCommand cmd) {
+        return null;
     }
 }

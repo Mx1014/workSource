@@ -1,8 +1,9 @@
 package com.everhomes.rest.quality;
 
-import javax.validation.constraints.NotNull;
-
 import com.everhomes.util.StringHelper;
+
+import javax.validation.constraints.NotNull;
+import java.sql.Timestamp;
 
 /**
  * <ul>
@@ -20,7 +21,9 @@ import com.everhomes.util.StringHelper;
  *  <li>reviewStatus: 审阅状态</li>
  *  <li>pageAnchor: 锚点</li>
  *  <li>pageSize: 页面大小</li>
- *  <li>manualFlag: 是否手动添加 0：自动生成，1：手动添加, 2: 核查生成</li>
+ *  <li>manualFlag: 是否手动添加 0：自动创建， 2: 绩效考核</li>
+ *  <li>namespaceId: namespaceId </li>
+ *  <li>lastSyncTime: 用于离线 上次同步时间 </li>
  * </ul>
  */
 public class ListQualityInspectionTasksCommand {
@@ -57,6 +60,12 @@ public class ListQualityInspectionTasksCommand {
 	private Long pageAnchor;
 	
 	private Integer pageSize;
+
+	private Integer namespaceId;
+
+	private String lastSyncTime;
+
+	private Timestamp latestUpdateTime;
 	
 	public Long getOwnerId() {
 		return ownerId;
@@ -176,6 +185,30 @@ public class ListQualityInspectionTasksCommand {
 
 	public void setPageSize(Integer pageSize) {
 		this.pageSize = pageSize;
+	}
+
+	public Integer getNamespaceId() {
+		return namespaceId;
+	}
+
+	public void setNamespaceId(Integer namespaceId) {
+		this.namespaceId = namespaceId;
+	}
+
+	public String getLastSyncTime() {
+		return lastSyncTime;
+	}
+
+	public void setLastSyncTime(String lastSyncTime) {
+		this.lastSyncTime = lastSyncTime;
+	}
+
+	public Timestamp getLatestUpdateTime() {
+		return latestUpdateTime;
+	}
+
+	public void setLatestUpdateTime(Timestamp latestUpdateTime) {
+		this.latestUpdateTime = latestUpdateTime;
 	}
 
 	@Override

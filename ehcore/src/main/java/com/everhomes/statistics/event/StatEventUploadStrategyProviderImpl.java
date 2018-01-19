@@ -14,6 +14,8 @@ import com.everhomes.util.ConvertHelper;
 import com.everhomes.util.DateUtils;
 import org.jooq.DSLContext;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.cache.annotation.CacheEvict;
+import org.springframework.cache.annotation.Cacheable;
 import org.springframework.stereotype.Repository;
 
 import java.util.List;
@@ -27,6 +29,7 @@ public class StatEventUploadStrategyProviderImpl implements StatEventUploadStrat
 	@Autowired
 	private SequenceProvider sequenceProvider;
 
+    @CacheEvict(value = "StatEventUploadStrategy", allEntries = true)
 	@Override
 	public void createStatEventUploadStrategy(StatEventUploadStrategy statEventUploadStrategy) {
 		Long id = sequenceProvider.getNextSequence(NameMapper.getSequenceDomainFromTablePojo(EhStatEventUploadStrategies.class));
@@ -37,6 +40,7 @@ public class StatEventUploadStrategyProviderImpl implements StatEventUploadStrat
 		DaoHelper.publishDaoAction(DaoAction.CREATE, EhStatEventUploadStrategies.class, id);
 	}
 
+	@CacheEvict(value = "StatEventUploadStrategy", allEntries = true)
 	@Override
 	public void updateStatEventUploadStrategy(StatEventUploadStrategy statEventUploadStrategy) {
 		// statEventUploadStrategy.setUpdateTime(DateUtils.currentTimestamp());
@@ -45,11 +49,13 @@ public class StatEventUploadStrategyProviderImpl implements StatEventUploadStrat
 		DaoHelper.publishDaoAction(DaoAction.MODIFY, EhStatEventUploadStrategies.class, statEventUploadStrategy.getId());
 	}
 
+    @Cacheable(value = "StatEventUploadStrategy", key = "{#root.methodName, #root.args}")
 	@Override
 	public StatEventUploadStrategy findStatEventUploadStrategyById(Long id) {
 		return ConvertHelper.convert(dao().findById(id), StatEventUploadStrategy.class);
 	}
 
+    @Cacheable(value = "StatEventUploadStrategy", key = "{#root.methodName, #root.args}")
     @Override
     public List<StatEventUploadStrategy> listUploadStrategyByOwner(String ownerType, Long ownerId) {
         return context().selectFrom(Tables.EH_STAT_EVENT_UPLOAD_STRATEGIES)
@@ -58,6 +64,7 @@ public class StatEventUploadStrategyProviderImpl implements StatEventUploadStrat
                 .fetchInto(StatEventUploadStrategy.class);
     }
 
+    @Cacheable(value = "StatEventUploadStrategy", key = "{#root.methodName, #root.args}")
     @Override
     public List<StatEventUploadStrategy> listUploadStrategyByNamespace(Integer namespaceId) {
         return context().selectFrom(Tables.EH_STAT_EVENT_UPLOAD_STRATEGIES)

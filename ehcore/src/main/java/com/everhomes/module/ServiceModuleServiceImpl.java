@@ -33,6 +33,7 @@ import com.everhomes.rest.portal.ServiceModuleAppStatus;
 import com.everhomes.rest.portal.TreeServiceModuleAppsResponse;
 import com.everhomes.sequence.SequenceProvider;
 import com.everhomes.server.schema.Tables;
+import com.everhomes.server.schema.tables.pojos.EhUsers;
 import com.everhomes.settings.PaginationConfigHelper;
 import com.everhomes.user.User;
 import com.everhomes.user.UserContext;
@@ -105,6 +106,9 @@ public class ServiceModuleServiceImpl implements ServiceModuleService {
 
     @Autowired
     private UserPrivilegeMgr userPrivilegeMgr;
+
+    @Autowired
+    private AclProvider aclProvider;
 
 
     @Override
@@ -539,7 +543,7 @@ public class ServiceModuleServiceImpl implements ServiceModuleService {
         List<ServiceModuleDTO> unlimitControlList = new ArrayList<>();
         //按控制范围进行区分
         //把二级模块加入list
-        tempList.stream().filter(r->r.getModuleControlType() != "" && r.getLevel() == 2).map(r->{
+        tempList.stream().filter(r->r.getModuleControlType() != "" && r.getModuleControlType() != null && r.getLevel() == 2).map(r->{
             switch (ModuleManagementType.fromCode(r.getModuleControlType())){
                 case COMMUNITY_CONTROL:
                     communityControlList.add(r);
@@ -647,6 +651,7 @@ public class ServiceModuleServiceImpl implements ServiceModuleService {
         User user = UserContext.current().getUser();
         List<CommunityDTO> dtos = new ArrayList<>();
         List<ProjectDTO> projects = getUserProjectsByModuleId(user.getId(), cmd.getOrganizationId(), cmd.getModuleId());
+        LOGGER.debug("listAuthorizationCommunityByUser step3"+ DateHelper.currentGMTTime());
         for (ProjectDTO project: projects) {
             if(EntityType.fromCode(project.getProjectType()) == EntityType.COMMUNITY){
                 Community community = communityProvider.findCommunityById(project.getProjectId());
@@ -721,6 +726,13 @@ public class ServiceModuleServiceImpl implements ServiceModuleService {
 
     private boolean checkModuleManage(Long userId, Long organizationId, Long moduleId) {
         SystemUserPrivilegeMgr resolver = PlatformContext.getComponent("SystemUser");
+
+        //TODO add by yanjun, check by lv
+        if(aclProvider.checkAccess("system", null, EhUsers.class.getSimpleName(),
+                UserContext.current().getUser().getId(), Privilege.Write, null)) {
+            return true;
+        }
+
         if (resolver.checkSuperAdmin(userId, organizationId) || resolver.checkModuleAdmin(EntityType.ORGANIZATIONS.getCode(), organizationId, userId, moduleId)) {
             return true;
         }

@@ -9,16 +9,16 @@ import com.everhomes.util.StringHelper;
  */
 public class VerifyApprovalTemplatesResponse {
 
-    private Long result;
+    private Byte result;
 
     public VerifyApprovalTemplatesResponse() {
     }
 
-    public Long getResult() {
+    public Byte getResult() {
         return result;
     }
 
-    public void setResult(Long result) {
+    public void setResult(Byte result) {
         this.result = result;
     }
 

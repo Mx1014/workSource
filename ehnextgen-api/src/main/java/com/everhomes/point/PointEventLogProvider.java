@@ -20,7 +20,7 @@ public interface PointEventLogProvider {
 
     PointEventLog findById(Long id);
 
-    List<PointEventLog> listEventLog(Long categoryId, Byte status, int pageSize, ListingLocator locator);
+    List<PointEventLog> listEventLog(Integer namespaceId, Long categoryId, Byte status, int pageSize, ListingLocator locator);
 
     void updatePointEventLogStatus(List<Long> idList, Byte status);
 }

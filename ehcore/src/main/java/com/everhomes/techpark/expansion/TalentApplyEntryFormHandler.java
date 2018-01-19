@@ -1,7 +1,6 @@
 package com.everhomes.techpark.expansion;
 
 import java.util.ArrayList;
-import java.util.Collection;
 import java.util.Collections;
 import java.util.HashMap;
 import java.util.List;
@@ -13,12 +12,10 @@ import org.springframework.stereotype.Component;
 
 import com.alibaba.fastjson.JSON;
 import com.alibaba.fastjson.JSONObject;
-import com.everhomes.bootstrap.PlatformContext;
 import com.everhomes.db.DbProvider;
 import com.everhomes.entity.EntityType;
 import com.everhomes.flow.FlowCase;
 import com.everhomes.flow.FlowService;
-import com.everhomes.general_form.GeneralForm;
 import com.everhomes.general_form.GeneralFormModuleHandler;
 import com.everhomes.general_form.GeneralFormService;
 import com.everhomes.locale.LocaleTemplateService;
@@ -33,16 +30,14 @@ import com.everhomes.rest.flow.FlowUserType;
 import com.everhomes.rest.flow.GeneralModuleInfo;
 import com.everhomes.rest.general_approval.GeneralFormDTO;
 import com.everhomes.rest.general_approval.GeneralFormDataSourceType;
-import com.everhomes.rest.general_approval.GeneralFormFieldDTO;
 import com.everhomes.rest.general_approval.GeneralFormFieldType;
 import com.everhomes.rest.general_approval.GetTemplateByFormIdCommand;
 import com.everhomes.rest.general_approval.GetTemplateBySourceIdCommand;
 import com.everhomes.rest.general_approval.PostApprovalFormItem;
 import com.everhomes.rest.general_approval.PostApprovalFormTextValue;
-import com.everhomes.rest.general_approval.PostGeneralFormCommand;
+import com.everhomes.rest.general_approval.PostGeneralFormValCommand;
 import com.everhomes.rest.general_approval.PostGeneralFormDTO;
 import com.everhomes.rest.general_approval.addGeneralFormValuesCommand;
-import com.everhomes.rest.group.GroupNotificationTemplateCode;
 import com.everhomes.rest.messaging.ChannelType;
 import com.everhomes.rest.messaging.MessageBodyType;
 import com.everhomes.rest.messaging.MessageChannel;
@@ -92,7 +87,7 @@ public class TalentApplyEntryFormHandler implements GeneralFormModuleHandler {
     private LocaleTemplateService localeTemplateService;
 
     @Override
-    public PostGeneralFormDTO postGeneralForm(PostGeneralFormCommand cmd) {
+    public PostGeneralFormDTO postGeneralFormVal(PostGeneralFormValCommand cmd) {
 
         List<PostApprovalFormItem> values = cmd.getValues();
 
@@ -248,7 +243,7 @@ public class TalentApplyEntryFormHandler implements GeneralFormModuleHandler {
 		generalFormService.addGeneralFormValues(cmd);
 	}
 
-	private TalentRequest createTalentRequest(PostGeneralFormCommand cmd, String applyUserName, String contactPhone, String enterpriseName, Long formId) {
+	private TalentRequest createTalentRequest(PostGeneralFormValCommand cmd, String applyUserName, String contactPhone, String enterpriseName, Long formId) {
 		Talent talent = talentProvider.findTalentById(cmd.getSourceId());
 		TalentRequest talentRequest = new TalentRequest();
     	talentRequest.setNamespaceId(namespaceId());
@@ -272,6 +267,11 @@ public class TalentApplyEntryFormHandler implements GeneralFormModuleHandler {
     @Override
     public GeneralFormDTO getTemplateBySourceId(GetTemplateBySourceIdCommand cmd) {
         return generalFormService.getTemplateByFormId(new GetTemplateByFormIdCommand(talentService.findRequestSetting().getFormId()));
+    }
+
+    @Override
+    public PostGeneralFormDTO updateGeneralFormVal(PostGeneralFormValCommand cmd) {
+        return null;
     }
 
 }

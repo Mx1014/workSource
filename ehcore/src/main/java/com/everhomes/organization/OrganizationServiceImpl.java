@@ -159,6 +159,7 @@ import java.util.*;
 import java.util.concurrent.ExecutorService;
 import java.util.concurrent.Executors;
 import java.util.stream.Collectors;
+import java.util.stream.Stream;
 
 import static com.everhomes.util.RuntimeErrorException.errorWith;
 
@@ -1588,7 +1589,7 @@ public class OrganizationServiceImpl implements OrganizationService {
                 DeleteEnterpriseCustomerCommand command = new DeleteEnterpriseCustomerCommand();
                 command.setId(customer.getId());
                 command.setCommunityId(customer.getCommunityId());
-                customerService.deleteEnterpriseCustomer(command);
+                customerService.deleteEnterpriseCustomer(command, false);
             }
 
             organization.setStatus(OrganizationStatus.DELETED.getCode());
@@ -7779,6 +7780,11 @@ public class OrganizationServiceImpl implements OrganizationService {
                 deleteOrganizationAllAdmins(org.getId());
                 orgAdminAccounts.put(org.getId(), new ArrayList<>());
             }
+            OrganizationMember member = organizationProvider.findOrganizationPersonnelByPhone(org.getId(), data.getAdminToken());
+            if(member != null && OrganizationMemberGroupType.fromCode(member.getMemberGroup()) == OrganizationMemberGroupType.MANAGER){
+                orgAdminAccounts.get(org.getId()).add(member.getContactToken());
+            }
+
             if (!orgAdminAccounts.get(org.getId()).contains(data.getAdminToken())) {
                 if (!StringUtils.isEmpty(data.getAdminToken())) {
                     CreateOrganizationAdminCommand createOrganizationAdminCommand = new CreateOrganizationAdminCommand();
@@ -10894,6 +10900,7 @@ public class OrganizationServiceImpl implements OrganizationService {
         List<OrganizationTreeDTO> trees = new ArrayList<OrganizationTreeDTO>();
         OrganizationTreeDTO allTreeDTO = ConvertHelper.convert(dto, OrganizationTreeDTO.class);
         allTreeDTO.setOrganizationName("全部");
+        allTreeDTO.setOrder(Integer.valueOf(-1));
         trees.add(allTreeDTO);
         for (OrganizationTreeDTO orgTreeDTO : dtos) {
             if (orgTreeDTO.getParentId().equals(dto.getOrganizationId())) {
@@ -11686,23 +11693,8 @@ public class OrganizationServiceImpl implements OrganizationService {
                     return query;
                 }
             });
-            List<OrganizationMember> depart_members = new ArrayList<>();
-            if (organizationIds != null) {
-                for (Long orgId : organizationIds) {
-                    members.stream().map(r -> {
-                        Organization org = this.checkOrganization(orgId);
-                        if (org != null) {
-                            if (this.organizationProvider.checkOneOfOrganizationWithContextToken(org.getPath(), r.getContactToken())) {
-                                depart_members.add(r);
-                            }
-                        }
-                        return null;
-                    }).collect(Collectors.toList());
-                }
-            } else {
-                return members;
-            }
-            return depart_members;
+
+            return members;
         }
 
         return new ArrayList<>();
@@ -14261,5 +14253,19 @@ public class OrganizationServiceImpl implements OrganizationService {
         }
         return null;
     }
+
+    @Override
+    public ListPMOrganizationsResponse listPMOrganizations(ListPMOrganizationsCommand cmd){
+        List<Organization> organizations = organizationProvider.listPMOrganizations(cmd.getNamespaceId());
+        ListPMOrganizationsResponse response = new ListPMOrganizationsResponse();
+        if(organizations != null){
+            List<OrganizationDTO> collect = organizations.stream().map(r -> ConvertHelper.convert(r, OrganizationDTO.class)).collect(Collectors.toList());
+            response.setDtos(collect);
+        }
+        return response;
+    }
+
+
+
 }
 
