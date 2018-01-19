@@ -319,7 +319,7 @@ INSERT INTO `eh_locale_strings` (`scope`, `code`, `locale`, `text`)
 INSERT INTO `ehcore`.`eh_configurations`(`name`, `value`, `description`, `namespace_id`, `display_name`)
   VALUES ('parking.dingding.url', 'https://public.dingdingtingche.com', NULL, 0, NULL);
 INSERT INTO `ehcore`.`eh_configurations`(`name`, `value`, `description`, `namespace_id`, `display_name`)
-  VALUES ('parking.dingding.hubMac', 'https://public.dingdingtingche.com', NULL, 0, NULL);
+  VALUES ('parking.dingding.hubMac', 'CC:1B:E0:E0:09:F8', NULL, 0, NULL);
 
 
 
