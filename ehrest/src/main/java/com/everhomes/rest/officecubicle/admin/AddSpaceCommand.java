@@ -5,11 +5,15 @@ import java.util.List;
 import com.everhomes.discover.ItemType;
 import com.everhomes.rest.officecubicle.OfficeAttachmentDTO;
 import com.everhomes.rest.officecubicle.OfficeCategoryDTO;
+import com.everhomes.rest.officecubicle.OfficeRanges;
 import com.everhomes.util.StringHelper;
 
 /**
  * <ul>
  * add工位预定的空间 
+ * <li>namespaceId : namespaceId</li>
+ * <li>ownerType : EhCommunities 工位发布的范围</li>
+ * <li>ownerId : communityId 范围的id</li>
  *<li> name: 工位空间名称	</li>
 *<li> provinceId : 省份id	</li>
 *<li> provinceName : 省份名称	</li>
@@ -24,9 +28,13 @@ import com.everhomes.util.StringHelper;
 *<li> coverUri : 封面图片uri</li>
  * <li>attachments: banner图的urls{@link com.everhomes.rest.officecubicle.OfficeAttachmentDTO} </li> 
  * <li>categories: 工位空间list{@link com.everhomes.rest.officecubicle.OfficeCategoryDTO}</li> 
+ * <li>ranges: 空间可见范围{@link com.everhomes.rest.officecubicle.OfficeRanges}</li> 
  * </ul>
  */
 public class AddSpaceCommand { 
+	private Integer namespaceId;
+	private String ownerType;
+	private Long ownerId;
 	private String name;
 	private Long provinceId;
 	private String provinceName;
@@ -43,6 +51,15 @@ public class AddSpaceCommand {
 	private List<OfficeAttachmentDTO> attachments;
 	@ItemType(OfficeCategoryDTO.class)
 	private List<OfficeCategoryDTO> categories;
+	@ItemType(OfficeRanges.class)
+	private List<OfficeRanges> ranges;
+	
+	public Integer getNamespaceId() {
+		return namespaceId;
+	}
+	public void setNamespaceId(Integer namespaceId) {
+		this.namespaceId = namespaceId;
+	}
 	@Override
     public String toString() {
         return StringHelper.toJsonString(this);
@@ -130,6 +147,24 @@ public class AddSpaceCommand {
 	}
 	public void setCategories(List<OfficeCategoryDTO> categories) {
 		this.categories = categories;
+	}
+	public String getOwnerType() {
+		return ownerType;
+	}
+	public void setOwnerType(String ownerType) {
+		this.ownerType = ownerType;
+	}
+	public Long getOwnerId() {
+		return ownerId;
+	}
+	public void setOwnerId(Long ownerId) {
+		this.ownerId = ownerId;
+	}
+	public List<OfficeRanges> getRanges() {
+		return ranges;
+	}
+	public void setRanges(List<OfficeRanges> ranges) {
+		this.ranges = ranges;
 	} 
   
 

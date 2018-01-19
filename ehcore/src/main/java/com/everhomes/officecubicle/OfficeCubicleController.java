@@ -14,9 +14,11 @@ import com.everhomes.discover.RestDoc;
 import com.everhomes.discover.RestReturn;
 import com.everhomes.rest.RestResponse;
 import com.everhomes.rest.officecubicle.AddSpaceOrderCommand;
+import com.everhomes.rest.officecubicle.AddSpaceOrderResponse;
 import com.everhomes.rest.officecubicle.CityDTO;
 import com.everhomes.rest.officecubicle.DeleteUserSpaceOrderCommand;
 import com.everhomes.rest.officecubicle.GetSpaceDetailCommand;
+import com.everhomes.rest.officecubicle.GetUserOrdersCommand;
 import com.everhomes.rest.officecubicle.OfficeOrderDTO;
 import com.everhomes.rest.officecubicle.OfficeSpaceDTO;
 import com.everhomes.rest.officecubicle.QuerySpacesCommand;
@@ -94,7 +96,7 @@ public class OfficeCubicleController extends ControllerBase {
      * <p>工位预定-添加预定</p>
      */
     @RequestMapping("addSpaceOrder")
-    @RestReturn(value=String.class )
+    @RestReturn(value=AddSpaceOrderResponse.class )
     public RestResponse addSpaceOrder(AddSpaceOrderCommand cmd) {
     	this.officeCubicleService.addSpaceOrder(cmd);
     	
@@ -111,7 +113,7 @@ public class OfficeCubicleController extends ControllerBase {
      */
     @RequestMapping("getUserOrders")
     @RestReturn(value=OfficeOrderDTO.class ,collection = true)
-    public RestResponse getUserOrders() {
+    public RestResponse getUserOrders(GetUserOrdersCommand cmd) {
     	List<OfficeOrderDTO> resp = this.officeCubicleService.getUserOrders();
     	
         RestResponse response = new RestResponse(resp);

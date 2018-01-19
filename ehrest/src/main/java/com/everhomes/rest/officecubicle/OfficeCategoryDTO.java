@@ -6,17 +6,28 @@ import com.everhomes.util.StringHelper;
  * <ul> 
  * <li>id: siteid</li>
  * <li>spaceId: 空间id</li>
- * <li>rentType: 租赁类别:1-开放式（默认space_type 1）,2-办公室</li>  
- * <li>spaceType: 空间类别:1-工位,2-面积 </li>  
- * <li>size: 场所大小 - 对于工位是个数，对于面积是平米</li> 
+ * <li>rentType: 租赁类别:1-开放式（默认space_type 1）,2-办公室 {@link com.everhomes.rest.officecubicle.OfficeRentType}</li>  
+ * <li>positionNums: 工位数量</li> 
+ * <li>size: 场所大小，rentType=2-办公室 来说面积是平米</li> 
  * </ul>
  */
 public class OfficeCategoryDTO {
 	private Long id;
 	private Long spaceId;
     private Byte rentType;
+    @Deprecated
     private Byte spaceType;
+    
+    private Integer positionNums;
 	private Integer size;
+	
+	public Integer getPositionNums() {
+		return positionNums;
+	}
+
+	public void setPositionNums(Integer positionNums) {
+		this.positionNums = positionNums;
+	}
 
 	@Override
     public String toString() {
@@ -46,11 +57,11 @@ public class OfficeCategoryDTO {
 	public void setRentType(Byte rentType) {
 		this.rentType = rentType;
 	}
-
+    @Deprecated
 	public Byte getSpaceType() {
 		return spaceType;
 	}
-
+    @Deprecated
 	public void setSpaceType(Byte spaceType) {
 		this.spaceType = spaceType;
 	}

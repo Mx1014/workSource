@@ -7,9 +7,9 @@ import com.everhomes.util.StringHelper;
  *空间订单
  *<li> siteId: office site id	</li> 
  * <li>orderType: 预定类别：1-参观 2-预定 </li>  
- * <li>rentType: 租赁类别:1-开放式（默认space_type 1）,2-办公室</li>  
- * <li>spaceType: 空间类别:1-工位,2-面积 </li>  
+ * <li>rentType: 租赁类别:1-开放式（默认space_type 1）,2-办公室 {@link com.everhomes.rest.officecubicle.OfficeRentType}</li>  
  * <li>size: 预定空间大小</li>  
+ * <li>positionNums: 工位数量</li>  
  * <li>reserverName: 预订人姓名 </li> 
  * <li>reserveContactToken:  预订人联系方式</li> 
  * <li>reserveEnterprise: 预订人公司</li> 
@@ -20,7 +20,10 @@ public class AddSpaceOrderCommand {
 	private Long spaceId;
     private Byte orderType;
     private Byte rentType;
+    @Deprecated
     private Byte spaceType;
+    
+    private Integer positionNums;
     private Integer size;
     private String reserverName;
     private String reserveEnterprise;
@@ -30,8 +33,17 @@ public class AddSpaceOrderCommand {
     public String toString() {
         return StringHelper.toJsonString(this);
     }
-	
 	  
+	public Integer getPositionNums() {
+		return positionNums;
+	}
+
+
+	public void setPositionNums(Integer positionNums) {
+		this.positionNums = positionNums;
+	}
+
+
 	public Byte getRentType() {
 		return rentType;
 	}
