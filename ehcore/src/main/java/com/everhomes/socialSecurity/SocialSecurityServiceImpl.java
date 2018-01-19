@@ -1291,14 +1291,15 @@ public class SocialSecurityServiceImpl implements SocialSecurityService {
             SocialSecurityBase base = null;
             if (null == setting) {
                 if (item.getCompanyRadix() == null || item.getCompanyRatio() == null) {
-
-                    String errorString = "增员的人员基数和比例不能为空";
-                    LOGGER.error(errorString);
-                    log.setErrorLog(errorString);
-                    log.setCode(SocialSecurityConstants.ERROR_CHECK_SSRADIX);
-                    log.setErrorDescription(log.getErrorLog());
-                    response.getLogs().add(log);
-                    return;
+                    if(!item.getPayItem().equals("商业保险") && !item.getPayItem().equals("残障金")){
+                        String errorString = "增员的人员基数和比例不能为空";
+                        LOGGER.error(errorString);
+                        log.setErrorLog(errorString);
+                        log.setCode(SocialSecurityConstants.ERROR_CHECK_SSRADIX);
+                        log.setErrorDescription(log.getErrorLog());
+                        response.getLogs().add(log);
+                        return;
+                    }
                 }
                 base = findSSBaseWithOutException(bases, item);
                 if (null == base) {
