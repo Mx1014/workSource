@@ -2032,9 +2032,9 @@ public class SocialSecurityServiceImpl implements SocialSecurityService {
         row.createCell(++i).setCellValue(r.getPayMonth());
         row.createCell(++i).setCellValue(checkNullBigDecimal(r.getAccumulationFundRadix()));
         row.createCell(++i).setCellValue(checkNullBigDecimal(r.getAccumulationFundCompanyRadix()));
-        row.createCell(++i).setCellValue(r.getAccumulationFundCompanyRatio());
+        row.createCell(++i).setCellValue(checkNull(r.getAccumulationFundCompanyRatio() ));
         row.createCell(++i).setCellValue(checkNullBigDecimal(r.getAccumulationFundEmployeeRadix()));
-        row.createCell(++i).setCellValue(r.getAccumulationFundEmployeeRatio());
+        row.createCell(++i).setCellValue(checkNull(r.getAccumulationFundEmployeeRatio());
         row.createCell(++i).setCellValue(checkNullBigDecimal(r.getAccumulationFundSum()));
         row.createCell(++i).setCellValue(checkNullBigDecimal(r.getAccumulationFundCompanySum()));
         row.createCell(++i).setCellValue(checkNullBigDecimal(r.getAccumulationFundEmployeeSum()));
@@ -2095,6 +2095,13 @@ public class SocialSecurityServiceImpl implements SocialSecurityService {
         row.createCell(++i).setCellValue(checkNullBigDecimal(r.getDisabilitySum()));
         row.createCell(++i).setCellValue(checkNullBigDecimal(r.getCommercialInsurance()));
         return sheet;
+    }
+
+    private String checkNull(Object o) {
+        if (o == null) {
+            return "";
+        }
+        return o.toString();
     }
 
     private XSSFSheet createSocialSecurityReportWBHead(XSSFSheet sheet) {
