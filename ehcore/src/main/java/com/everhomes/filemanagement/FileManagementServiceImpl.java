@@ -18,6 +18,7 @@ import org.springframework.stereotype.Component;
 
 import java.util.ArrayList;
 import java.util.List;
+import java.util.Map;
 import java.util.stream.Collectors;
 
 @Component
@@ -34,6 +35,9 @@ public class FileManagementServiceImpl implements  FileManagementService{
 
     @Autowired
     private ContentServerService contentServerService;
+
+    @Autowired
+    private FileService fileService;
 
     @Override
     public FileCatalogDTO addFileCatalog(AddFileCatalogCommand cmd) {
@@ -105,22 +109,26 @@ public class FileManagementServiceImpl implements  FileManagementService{
                 results.remove(results.size() - 1);
                 nextPageAnchor = results.get(results.size() - 1).getId();
             }
-            catalogs = convertToCatalogDTO(results);
+            catalogs = convertToCatalogDTO(results, true);
         }
         response.setCatalogs(catalogs);
         response.setNextPageAnchor(nextPageAnchor);
         return response;
     }
 
-    private List<FileCatalogDTO> convertToCatalogDTO(List<FileCatalog> results){
+    private List<FileCatalogDTO> convertToCatalogDTO(List<FileCatalog> results, boolean isAdmin){
+        Map<String,String> fileIcons = fileService.getFileIconUrl();
         List<FileCatalogDTO> catalogs = new ArrayList<>();
         results.forEach(r -> {
             FileCatalogDTO dto = new FileCatalogDTO();
             dto.setId(r.getId());
             dto.setName(r.getName());
-            dto.setCreateTime(r.getCreateTime());
-            if(r.getDownloadPermission() != null)
+            if (isAdmin)
+                dto.setDownloadPermission(FileDownloadPermissionStatus.ALLOW.getCode());
+            else
                 dto.setDownloadPermission(r.getDownloadPermission());
+            dto.setIconUrl(fileIcons.get(FileContentType.CATEGORY.getCode()));
+            dto.setCreateTime(r.getCreateTime());
             catalogs.add(dto);
         });
         return catalogs;
@@ -139,7 +147,7 @@ public class FileManagementServiceImpl implements  FileManagementService{
             //  2.normal user
             List<FileCatalog> results = fileManagementProvider.listAvailableFileCatalogs(user.getNamespaceId(), cmd.getOwnerId(), user.getId());
             if(results != null && results.size() > 0){
-                catalogs = convertToCatalogDTO(results);
+                catalogs = convertToCatalogDTO(results, false);
                 response.setCatalogs(catalogs);
             }
         }
@@ -206,7 +214,7 @@ public class FileManagementServiceImpl implements  FileManagementService{
         });
 
         if (catalogResults != null && catalogResults.size() > 0)
-            catalogs = convertToCatalogDTO(catalogResults);
+            catalogs = convertToCatalogDTO(catalogResults, false);
 
         if (folderResults != null && folderResults.size() > 0) {
             folderResults.forEach(r -> {

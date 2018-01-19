@@ -14,6 +14,7 @@ import java.sql.Timestamp;
  * <li>contentType: 内容类型，file-文件,folder-文件夹 参考{@link com.everhomes.rest.filemanagement.FileContentType}</li>
  * <li>contentUri: 内容uri</li>
  * <li>contentUrl: 内容url(下载链接)</li>
+ * <li>iconUrl: 图标url</li>
  * <li>createTime: 创建时间</li>
  * </ul>
  */
@@ -34,6 +35,8 @@ public class FileContentDTO {
     private String contentUri;
 
     private String contentUrl;
+
+    private String iconUrl;
 
     private Timestamp createTime;
 
@@ -102,6 +105,14 @@ public class FileContentDTO {
 
     public void setContentUrl(String contentUrl) {
         this.contentUrl = contentUrl;
+    }
+
+    public String getIconUrl() {
+        return iconUrl;
+    }
+
+    public void setIconUrl(String iconUrl) {
+        this.iconUrl = iconUrl;
     }
 
     public Timestamp getCreateTime() {
