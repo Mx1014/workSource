@@ -223,7 +223,7 @@ public class EquipmentPlanSearcherImpl extends AbstractElasticSearch implements 
             b.field("ownerType", plan.getOwnerType());
             b.field("targetId", plan.getTargetId());
             b.field("targetType", plan.getTargetType());
-            b.field("name", plan.getName());
+            b.field("name", plan.getName()).field("index", "not_analyzed");
             b.field("planNumber", plan.getPlanNumber());
             b.field("planType", plan.getPlanType());
             b.field("status", plan.getStatus());

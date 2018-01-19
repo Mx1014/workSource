@@ -280,7 +280,7 @@ public class FileManagementProviderImpl implements FileManagementProvider {
         query.addConditions(Tables.EH_FILE_MANAGEMENT_CONTENTS.NAMESPACE_ID.eq(namespaceId));
         query.addConditions(Tables.EH_FILE_MANAGEMENT_CONTENTS.OWNER_ID.eq(ownerId));
         query.addConditions(Tables.EH_FILE_MANAGEMENT_CONTENTS.PARENT_ID.eq(parentId));
-        query.addConditions(Tables.EH_FILE_MANAGEMENT_CONTENTS.NAME.eq(name));
+        query.addConditions(Tables.EH_FILE_MANAGEMENT_CONTENTS.CONTENT_NAME.eq(name));
         query.addConditions(Tables.EH_FILE_MANAGEMENT_CONTENTS.STATUS.eq(FileManagementStatus.VALID.getCode()));
 
         return query.fetchAnyInto(FileContent.class);
@@ -298,7 +298,7 @@ public class FileManagementProviderImpl implements FileManagementProvider {
         query.addConditions(Tables.EH_FILE_MANAGEMENT_CONTENTS.STATUS.eq(FileManagementStatus.VALID.getCode()));
         query.addConditions(Tables.EH_FILE_MANAGEMENT_CONTENTS.CATALOG_ID.eq(catalogId));
         if (keywords != null) {
-            query.addConditions(Tables.EH_FILE_MANAGEMENT_CONTENTS.NAME.like("%" + keywords + "%"));
+            query.addConditions(Tables.EH_FILE_MANAGEMENT_CONTENTS.CONTENT_NAME.like("%" + keywords + "%"));
         }else {
             query.addConditions(Tables.EH_FILE_MANAGEMENT_CONTENTS.PARENT_ID.eq(parentId));
         }

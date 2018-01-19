@@ -202,7 +202,7 @@ public class FileManagementServiceImpl implements  FileManagementService{
             if (cmd.getCatalogIds() != null && cmd.getCatalogIds().size() > 0)
                 query.addConditions(Tables.EH_FILE_MANAGEMENT_CONTENTS.CATALOG_ID.in(cmd.getCatalogIds()));
             if (cmd.getKeywords() != null)
-                query.addConditions(Tables.EH_FILE_MANAGEMENT_CONTENTS.NAME.like("%" + cmd.getKeywords() + "%"));
+                query.addConditions(Tables.EH_FILE_MANAGEMENT_CONTENTS.CONTENT_NAME.like("%" + cmd.getKeywords() + "%"));
             return query;
         });
 
@@ -211,7 +211,7 @@ public class FileManagementServiceImpl implements  FileManagementService{
             if (cmd.getCatalogIds() != null && cmd.getCatalogIds().size() > 0)
                 query.addConditions(Tables.EH_FILE_MANAGEMENT_CONTENTS.CATALOG_ID.in(cmd.getCatalogIds()));
             if (cmd.getKeywords() != null)
-                query.addConditions(Tables.EH_FILE_MANAGEMENT_CONTENTS.NAME.like("%" + cmd.getKeywords() + "%"));
+                query.addConditions(Tables.EH_FILE_MANAGEMENT_CONTENTS.CONTENT_NAME.like("%" + cmd.getKeywords() + "%"));
             return query;
         });
 
@@ -329,8 +329,8 @@ public class FileManagementServiceImpl implements  FileManagementService{
         content.setCatalogId(catalog.getId());
         content.setParentId(cmd.getParentId());
         content.setContentType(cmd.getContentType());
-        content.setName(cmd.getContentName());
-        if (content.getContentType().equals(FileContentType.FOLDER.getCode())) {
+        content.setContentName(cmd.getContentName());
+        if (!content.getContentType().equals(FileContentType.FOLDER.getCode())) {
             content.setContentSuffix(cmd.getContentSuffix());
             content.setSize(cmd.getContentSize());
             content.setContentUri(cmd.getContentUri());
@@ -354,17 +354,11 @@ public class FileManagementServiceImpl implements  FileManagementService{
         if (content != null) {
             //  1.check the name
             checkFileContentName(content.getNamespaceId(), content.getOwnerId(), content.getParentId(), cmd.getContentName());
-            //  2.check the suffix
-            if(cmd.getContentSuffix() == null)
-                throw RuntimeErrorException.errorWith(FileManagementErrorCode.SCOPE, FileManagementErrorCode.ERROR_SUFFIX_NULL,
-                        "the suffix can not be null.");
-            //  3.update the name
-            content.setName(cmd.getContentName());
-            content.setContentSuffix(cmd.getContentSuffix());
+            //  2.update the name
+            content.setContentName(cmd.getContentName());
             fileManagementProvider.updateFileContent(content);
-            //  4.return back
-            dto.setId(content.getId());
-            dto.setName(content.getName());
+            //  3.return back
+            dto = ConvertHelper.convert(content, FileContentDTO.class);
         }
         return dto;
     }
@@ -411,9 +405,12 @@ public class FileManagementServiceImpl implements  FileManagementService{
     private FileContentDTO convertToFileContentDTO(FileContent content, Map<String, String> fileIcons) {
         FileContentDTO dto = ConvertHelper.convert(content, FileContentDTO.class);
 
-        if (content.getContentType().equals(FileContentType.FOLDER.getCode()))
-            dto.setIconUrl(fileIcons.get(FileContentType.FOLDER.getCode()));
+        if (content.getContentType().equals(FileContentType.FOLDER.getCode())){
+            dto = ConvertHelper.convert(content, FileContentDTO.class);
+            dto.setName(content.getContentName());
+        }
         else {
+            dto.setName(content.getContentName() + "." + content.getContentSuffix());
             dto.setContentUrl(contentServerService.parserUri(dto.getContentUri()));
             dto.setIconUrl(fileIcons.get(content.getContentSuffix()));
             if (dto.getIconUrl() == null)

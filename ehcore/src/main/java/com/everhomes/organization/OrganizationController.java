@@ -1827,6 +1827,20 @@ public class OrganizationController extends ControllerBase {
     }
 
     /**
+     * <b>URL: /org/listOrganizationPersonnelsWithDownStream</b>
+     * <p>组织架构查询人员接口/p>
+     */
+    @RequestMapping("listOrganizationPersonnelsWithDownStream")
+    @RestReturn(value = FindOrgPersonelCommandResponse.class)
+    public RestResponse listOrganizationPersonnelsWithDownStream(ListOrganizationContactCommand cmd) {
+        ListOrganizationMemberCommandResponse res = this.organizationService.listOrganizationPersonnelsWithDownStream(cmd);
+        RestResponse response = new RestResponse(res);
+        response.setErrorCode(ErrorCodes.SUCCESS);
+        response.setErrorDescription("OK");
+        return response;
+    }
+
+    /**
      * <b>URL: /org/findOrgByName</b>
      * <p>根据名字查部门</p>
      */
