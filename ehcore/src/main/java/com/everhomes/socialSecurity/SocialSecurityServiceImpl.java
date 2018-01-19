@@ -1181,7 +1181,7 @@ public class SocialSecurityServiceImpl implements SocialSecurityService {
                     response.getLogs().add(log);
                     continue;
                 }
-                importUpdateSetting(detail, ssBases, afBases, r, log, ssCityId, afCItyId, response);
+                importUpdateSetting(detail, ssBases, afBases, r, log, ssCityId, afCItyId, response,houseType);
             }
         }
         response.setTotalCount((long) list.size() - 1);
@@ -1192,7 +1192,7 @@ public class SocialSecurityServiceImpl implements SocialSecurityService {
     }
 
     private void importUpdateSetting(OrganizationMemberDetails detail, List<SocialSecurityBase> ssBases,
-                                     List<SocialSecurityBase> afBases, RowResult r, ImportFileResultLog<Map<String, String>> log, Long ssCityId, Long afCItyId, ImportFileResponse response) {
+                                     List<SocialSecurityBase> afBases, RowResult r, ImportFileResultLog<Map<String, String>> log, Long ssCityId, Long afCItyId, ImportFileResponse response, String houseType) {
         List<SocialSecuritySetting> settings = socialSecuritySettingProvider.listSocialSecuritySetting(detail.getId());
 
         // 社保
@@ -1322,8 +1322,9 @@ public class SocialSecurityServiceImpl implements SocialSecurityService {
                 setting.setRadix(radix);
             }
             //城市和户籍
-            setting.setCityId(base.getCityId());
-            setting.setHouseholdType(base.getHouseholdType());
+            if (!item.getAccumOrSocial().equals(AccumOrSocial.ACCUM.getCode())) {
+                setting.setHouseholdType(houseType);
+            }
             importCalculateRadix(radix, base, item, setting);
             String errorString = null;
             if (null != item.getCompanyRatio()) {
