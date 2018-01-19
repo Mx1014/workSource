@@ -1694,6 +1694,10 @@ public class SocialSecurityServiceImpl implements SocialSecurityService {
         socialSecurityReportProvider.deleteSocialSecurityReports(ownerId, payments.get(0).getPayMonth());
         List<OrganizationMemberDetails> details = organizationProvider.listOrganizationMemberDetails(ownerId);
         for (OrganizationMemberDetails detail : details) {
+            if (NormalFlag.YES != NormalFlag.fromCode(detail.getAccumulationFundStatus()) &&
+                    NormalFlag.YES != NormalFlag.fromCode(detail.getSocialSecurityStatus())) {
+                continue;
+            }
             SocialSecurityReport report = calculateUserSocialSecurityReport(detail, payments);
             if (null != report) {
                 socialSecurityReportProvider.createSocialSecurityReport(report);
