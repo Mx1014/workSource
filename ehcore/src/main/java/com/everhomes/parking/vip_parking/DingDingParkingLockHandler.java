@@ -1,6 +1,7 @@
 package com.everhomes.parking.vip_parking;
 
 import com.alibaba.fastjson.JSONObject;
+import com.everhomes.configuration.ConfigurationProvider;
 import com.everhomes.parking.ParkingProvider;
 import com.everhomes.parking.ParkingSpace;
 import com.everhomes.parking.handler.Utils;
@@ -16,21 +17,25 @@ import org.springframework.stereotype.Component;
 @Component
 public class DingDingParkingLockHandler {
 
-    private static final String CONN_LOCK = "/ddtcDingHub/operNUSLock/%s/conn";
-    private static final String GET_LOCK_INFO = "/ddtcDingHub/operNUSLock/%s/read";
-    private static final String RAISE_LOCK = "/ddtcDingHub/operNUSLock/%s/rise";
-    private static final String DOWN_LOCK = "/ddtcDingHub/operNUSLock/%s/drop";
+    private static final String CONN_LOCK = "/ddtcDingHub/operNUSLock/%s/%s/conn";
+    private static final String GET_LOCK_INFO = "/ddtcDingHub/operNUSLock/%s/%s/read";
+    private static final String RAISE_LOCK = "/ddtcDingHub/operNUSLock/%s/%s/rise";
+    private static final String DOWN_LOCK = "/ddtcDingHub/operNUSLock/%s/%s/drop";
 
-    String url = "https://public.dingdingtingche.com";
     String hubMac = "CC:1B:E0:E0:09:F8";
     String lockMac = "C2:10:81:61:5B:5F";
 
     @Autowired
     private ParkingProvider parkingProvider;
+    @Autowired
+    private ConfigurationProvider configProvider;
 
     public boolean raiseParkingSpaceLock(String lockId) {
 
-        String json = Utils.get(String.format(url + RAISE_LOCK, lockId), null);
+        String url = configProvider.getValue("parking.dingding.url", "");
+        String hubMac = configProvider.getValue("parking.dingding.hubMac", "");
+
+        String json = Utils.get(String.format(url + RAISE_LOCK, hubMac, lockId), null);
 
         DingDingResponseEntity entity = JSONObject.parseObject(json, DingDingResponseEntity.class);
 
@@ -43,7 +48,10 @@ public class DingDingParkingLockHandler {
 
     public boolean downParkingSpaceLock(String lockId) {
 
-        String json = Utils.get(String.format(url + DOWN_LOCK, lockId), null);
+        String url = configProvider.getValue("parking.dingding.url", "");
+        String hubMac = configProvider.getValue("parking.dingding.hubMac", "");
+
+        String json = Utils.get(String.format(url + DOWN_LOCK, hubMac, lockId), null);
 
         DingDingResponseEntity entity = JSONObject.parseObject(json, DingDingResponseEntity.class);
 
@@ -57,7 +65,10 @@ public class DingDingParkingLockHandler {
 
         ParkingSpace space = parkingProvider.findParkingSpaceByLockId(lockId);
 
-        String json = Utils.get(String.format(url + GET_LOCK_INFO, lockId), null);
+        String url = configProvider.getValue("parking.dingding.url", "");
+        String hubMac = configProvider.getValue("parking.dingding.hubMac", "");
+
+        String json = Utils.get(String.format(url + GET_LOCK_INFO, hubMac, lockId), null);
 
         DingDingResponseEntity entity = JSONObject.parseObject(json, DingDingResponseEntity.class);
 

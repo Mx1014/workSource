@@ -7472,6 +7472,14 @@ public class Rentalv2ServiceImpl implements Rentalv2Service {
 					ErrorCodes.ERROR_INVALID_PARAMETER, "Invalid parameter : bill id can not find bill");
 		}
 
+		long currTime = System.currentTimeMillis();
+		//订单开始 置为使用中的状态,防止定时器没有更新到订单状态
+		if (bill.getStatus() == SiteBillStatus.SUCCESS.getCode() &&
+				currTime >= bill.getStartTime().getTime() && currTime <= bill.getEndTime().getTime()) {
+			bill.setStatus(SiteBillStatus.IN_USING.getCode());
+			rentalv2Provider.updateRentalBill(bill);
+		}
+
 		RentalOrderDTO dto = ConvertHelper.convert(bill, RentalOrderDTO.class);
 		convertRentalOrderDTO(dto, bill);
 
