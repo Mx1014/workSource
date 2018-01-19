@@ -1339,14 +1339,14 @@ public class SocialSecurityServiceImpl implements SocialSecurityService {
             }
             LOGGER.debug("dto是{} 要更新的setting是{}", item, StringHelper.toJsonString(setting));
 
-            //增员
-            if (item.getAccumOrSocial().equals(AccumOrSocial.ACCUM.getCode())
-                    && NormalFlag.YES != NormalFlag.fromCode(detail.getAccumulationFundStatus())) {
-                increseMemberDetail(detail, AccumOrSocial.ACCUM);
-            } else if (item.getAccumOrSocial().equals(AccumOrSocial.SOCAIL.getCode())
-                    && NormalFlag.YES != NormalFlag.fromCode(detail.getSocialSecurityStatus())) {
-                increseMemberDetail(detail, AccumOrSocial.SOCAIL);
-            }
+//            //增员 目前不改变状态只填充数据
+//            if (item.getAccumOrSocial().equals(AccumOrSocial.ACCUM.getCode())
+//                    && NormalFlag.YES != NormalFlag.fromCode(detail.getAccumulationFundStatus())) {
+//                increseMemberDetail(detail, AccumOrSocial.ACCUM);
+//            } else if (item.getAccumOrSocial().equals(AccumOrSocial.SOCAIL.getCode())
+//                    && NormalFlag.YES != NormalFlag.fromCode(detail.getSocialSecurityStatus())) {
+//                increseMemberDetail(detail, AccumOrSocial.SOCAIL);
+//            }
             if (setting.getId() == null) {
                 //如果没有id ,说明是新建的setting,同时创建一个payment
                 socialSecuritySettingProvider.createSocialSecuritySetting(setting);
