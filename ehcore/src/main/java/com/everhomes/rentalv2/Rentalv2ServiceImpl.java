@@ -2526,7 +2526,7 @@ public class Rentalv2ServiceImpl implements Rentalv2Service {
 			ruleDto.setId(rsb.getId());
 			ruleDto.setRentalSiteId(rsb.getRentalResourceRuleId());
 			ruleDto.setRentalType(rsb.getRentalType());
-			ruleDto.setRentalStep(rsb.getRentalStep()); 
+			ruleDto.setRentalStep(1);
 			if (ruleDto.getRentalType().equals(RentalType.HOUR.getCode())) { 
 				ruleDto.setBeginTime(rsb.getBeginTime().getTime());
 				ruleDto.setEndTime(rsb.getEndTime().getTime());
@@ -7743,7 +7743,8 @@ public class Rentalv2ServiceImpl implements Rentalv2Service {
 		totalRules.addAll(rules);
 		//设置只用详情
 		setUseDetailStr(totalRules, rs, bill);
-		//设置订单提醒时间
+		//设置订单提醒时间,设置之前先把老时间存起来
+		bill.setOldEndTime(bill.getEndTime());
 		setRentalOrderReminderTime(totalRules, rs, bill);
 		//设置预约单元格数量
 		bill.setRentalCount(totalRules.stream().filter(r -> null != r.getRentalCount())
@@ -7797,7 +7798,8 @@ public class Rentalv2ServiceImpl implements Rentalv2Service {
 					RentalServiceErrorCode.ERROR_ORDER_CANCELED,"Order not in using");
 		}
 
-		ParkingSpaceDTO spaceDTO = dingDingParkingLockHandler.getParkingSpaceLock(order.getStringTag1());
+		VipParkingUseInfoDTO parkingInfo = JSONObject.parseObject(order.getCustomObject(), VipParkingUseInfoDTO.class);
+		ParkingSpaceDTO spaceDTO = dingDingParkingLockHandler.getParkingSpaceLock(parkingInfo.getLockId());
 		if (spaceDTO.getLockStatus().equals(ParkingSpaceLockStatus.DOWN.getCode())) {
 			LOGGER.error("Parking lock not raise");
 			throw RuntimeErrorException.errorWith(RentalServiceErrorCode.SCOPE,
