@@ -2034,7 +2034,7 @@ public class SocialSecurityServiceImpl implements SocialSecurityService {
         row.createCell(++i).setCellValue(checkNullBigDecimal(r.getAccumulationFundCompanyRadix()));
         row.createCell(++i).setCellValue(checkNull(r.getAccumulationFundCompanyRatio() ));
         row.createCell(++i).setCellValue(checkNullBigDecimal(r.getAccumulationFundEmployeeRadix()));
-        row.createCell(++i).setCellValue(checkNull(r.getAccumulationFundEmployeeRatio());
+        row.createCell(++i).setCellValue(checkNull(r.getAccumulationFundEmployeeRatio()));
         row.createCell(++i).setCellValue(checkNullBigDecimal(r.getAccumulationFundSum()));
         row.createCell(++i).setCellValue(checkNullBigDecimal(r.getAccumulationFundCompanySum()));
         row.createCell(++i).setCellValue(checkNullBigDecimal(r.getAccumulationFundEmployeeSum()));
