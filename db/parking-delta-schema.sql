@@ -170,7 +170,9 @@ ADD COLUMN `string_tag1` varchar(128) DEFAULT NULL,
 ADD COLUMN `string_tag2` varchar(128) DEFAULT NULL,
 ADD COLUMN `scene` varchar(64) DEFAULT NULL COMMENT '下单时场景信息，用来计算价格',
 ADD COLUMN `refund_strategy` tinyint(4) DEFAULT NULL COMMENT '1-custom, 2-full',
-ADD COLUMN `overtime_strategy` tinyint(4) DEFAULT NULL COMMENT '1-custom, 2-full';
+ADD COLUMN `overtime_strategy` tinyint(4) DEFAULT NULL COMMENT '1-custom, 2-full',
+ADD COLUMN `old_end_time` datetime DEFAULT NULL COMMENT '延长订单时，存老的使用结束时间';
+
 
 ALTER TABLE `eh_rentalv2_orders`
 drop column reserve_money,
