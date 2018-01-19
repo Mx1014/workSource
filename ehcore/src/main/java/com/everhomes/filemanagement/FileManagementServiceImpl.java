@@ -315,20 +315,26 @@ public class FileManagementServiceImpl implements  FileManagementService{
         if (cmd.getParentId() == null)
             cmd.setParentId(cmd.getCatalogId());
 
-        //todo：文件类型的判断
         //  1.whether the name has been used
         checkFileContentName(namespaceId, catalog.getOwnerId(), cmd.getParentId(), cmd.getContentName());
-        //  2.create it
+        //  2.check the suffix
+        if (cmd.getContentSuffix() == null)
+            throw RuntimeErrorException.errorWith(FileManagementErrorCode.SCOPE, FileManagementErrorCode.ERROR_SUFFIX_NULL,
+                    "the suffix can not be null.");
+        //  3.create it
         FileContent content = new FileContent();
         content.setNamespaceId(catalog.getNamespaceId());
         content.setOwnerId(catalog.getOwnerId());
         content.setOwnerType(catalog.getOwnerType());
         content.setCatalogId(catalog.getId());
-        content.setName(cmd.getContentName());
-        content.setSize(cmd.getContentSize());
         content.setParentId(cmd.getParentId());
         content.setContentType(cmd.getContentType());
-        content.setContentUri(cmd.getContentUri());
+        content.setName(cmd.getContentName());
+        if (content.getContentType().equals(FileContentType.FOLDER.getCode())) {
+            content.setContentSuffix(cmd.getContentSuffix());
+            content.setSize(cmd.getContentSize());
+            content.setContentUri(cmd.getContentUri());
+        }
         fileManagementProvider.createFileContent(content);
         //  3.return back the dto
         dto = ConvertHelper.convert(content, FileContentDTO.class);
@@ -348,10 +354,15 @@ public class FileManagementServiceImpl implements  FileManagementService{
         if (content != null) {
             //  1.check the name
             checkFileContentName(content.getNamespaceId(), content.getOwnerId(), content.getParentId(), cmd.getContentName());
-            //  2.update the name
+            //  2.check the suffix
+            if(cmd.getContentSuffix() == null)
+                throw RuntimeErrorException.errorWith(FileManagementErrorCode.SCOPE, FileManagementErrorCode.ERROR_SUFFIX_NULL,
+                        "the suffix can not be null.");
+            //  3.update the name
             content.setName(cmd.getContentName());
+            content.setContentSuffix(cmd.getContentSuffix());
             fileManagementProvider.updateFileContent(content);
-            //  3.return back
+            //  4.return back
             dto.setId(content.getId());
             dto.setName(content.getName());
         }
@@ -397,15 +408,17 @@ public class FileManagementServiceImpl implements  FileManagementService{
         return response;
     }
 
-    private FileContentDTO convertToFileContentDTO(FileContent content, Map<String, String> fileIcons){
+    private FileContentDTO convertToFileContentDTO(FileContent content, Map<String, String> fileIcons) {
         FileContentDTO dto = ConvertHelper.convert(content, FileContentDTO.class);
 
-        if(dto.getContentUri() != null)
+        if (content.getContentType().equals(FileContentType.FOLDER.getCode()))
+            dto.setIconUrl(fileIcons.get(FileContentType.FOLDER.getCode()));
+        else {
             dto.setContentUrl(contentServerService.parserUri(dto.getContentUri()));
-        dto.setIconUrl(fileIcons.get(content.getContentType()));
-        if(dto.getIconUrl() == null)
-            dto.setIconUrl(fileIcons.get(FileContentType.OTHER.getCode()));
-
+            dto.setIconUrl(fileIcons.get(content.getContentSuffix()));
+            if (dto.getIconUrl() == null)
+                dto.setIconUrl(fileIcons.get("other"));
+        }
         return dto;
     }
 }

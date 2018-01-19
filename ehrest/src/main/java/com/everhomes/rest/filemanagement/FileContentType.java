@@ -4,11 +4,11 @@ package com.everhomes.rest.filemanagement;
  * <ul>
  * <li>CATEGORY("category"): 目录</li>
  * <li>FOLDER("folder"): 文件夹</li>
- * <li>OTHER("other"): 其它</li>
+ * <li>FILE("file"): 文件</li>
  * </ul>
  */
 public enum FileContentType {
-    CATEGORY("category"), FOLDER("folder"), OTHER("other");
+    CATEGORY("category"), FOLDER("folder"), FILE("file");
 
     private String code;
 

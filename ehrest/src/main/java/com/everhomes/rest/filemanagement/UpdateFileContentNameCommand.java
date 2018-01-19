@@ -6,6 +6,7 @@ import com.everhomes.util.StringHelper;
  * <ul>
  * <li>contentId: 内容id</li>
  * <li>contentName: 内容名称</li>
+ * <li>contentSuffix: 后缀名称</li>
  * </ul>
  */
 public class UpdateFileContentNameCommand {
@@ -13,6 +14,8 @@ public class UpdateFileContentNameCommand {
     private Long contentId;
 
     private String contentName;
+
+    private String contentSuffix;
 
     public UpdateFileContentNameCommand() {
     }
@@ -31,6 +34,14 @@ public class UpdateFileContentNameCommand {
 
     public void setContentName(String contentName) {
         this.contentName = contentName;
+    }
+
+    public String getContentSuffix() {
+        return contentSuffix;
+    }
+
+    public void setContentSuffix(String contentSuffix) {
+        this.contentSuffix = contentSuffix;
     }
 
     @Override
