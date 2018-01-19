@@ -30,6 +30,7 @@ import com.everhomes.configuration.ConfigConstants;
 import com.everhomes.order.OrderUtil;
 import com.everhomes.order.PayService;
 import com.everhomes.parking.ParkingSpace;
+import com.everhomes.parking.vip_parking.DingDingParkingLockHandler;
 import com.everhomes.pay.order.PaymentType;
 import com.everhomes.rentalv2.job.RentalMessageJob;
 import com.everhomes.rentalv2.job.RentalMessageQuartzJob;
@@ -40,6 +41,8 @@ import com.everhomes.rest.aclink.DoorAuthDTO;
 import com.everhomes.rest.activity.ActivityRosterPayVersionFlag;
 import com.everhomes.rest.flow.*;
 import com.everhomes.rest.order.*;
+import com.everhomes.rest.parking.ParkingSpaceDTO;
+import com.everhomes.rest.parking.ParkingSpaceLockStatus;
 import com.everhomes.rest.pay.controller.CreateOrderRestResponse;
 import com.everhomes.rest.rentalv2.*;
 import com.everhomes.rest.rentalv2.admin.*;
@@ -196,6 +199,8 @@ public class Rentalv2ServiceImpl implements Rentalv2Service {
 	private AddressProvider addressProvider;
 	@Autowired
 	private RentalCommonServiceImpl rentalCommonService;
+	@Autowired
+	private DingDingParkingLockHandler dingDingParkingLockHandler;
 
 	private ExecutorService executorPool =  Executors.newFixedThreadPool(5);
 	private Time convertTime(Long TimeLong) {
@@ -2868,20 +2873,25 @@ public class Rentalv2ServiceImpl implements Rentalv2Service {
 	private List<PriceRuleDTO> buildDefaultPriceRule(List<Byte> rentalTypes) {
 		List<PriceRuleDTO> priceRules = new ArrayList<>();
 		rentalTypes.forEach(r -> {
-			PriceRuleDTO rule = new PriceRuleDTO();
-			rule.setRentalType(r);
-			rule.setPriceType(RentalPriceType.LINEARITY.getCode());
-			rule.setUserPriceType(RentalUserPriceType.UNIFICATION.getCode());
-			rule.setInitiatePrice(new BigDecimal(0));
-			rule.setWorkdayPrice(new BigDecimal(0));
-			rule.setApprovingUserWorkdayPrice(new BigDecimal(0));
-			rule.setApprovingUserInitiatePrice(new BigDecimal(0));
-			rule.setOrgMemberWorkdayPrice(new BigDecimal(0));
-			rule.setOrgMemberInitiatePrice(new BigDecimal(0));
-			priceRules.add(rule);
+			priceRules.add(createInitPriceRuleDTO(r));
 		});
 
 		return priceRules;
+	}
+
+	private PriceRuleDTO createInitPriceRuleDTO(Byte rentalType) {
+		PriceRuleDTO rule = new PriceRuleDTO();
+		rule.setRentalType(rentalType);
+		rule.setPriceType(RentalPriceType.LINEARITY.getCode());
+		rule.setUserPriceType(RentalUserPriceType.UNIFICATION.getCode());
+		rule.setInitiatePrice(new BigDecimal(0));
+		rule.setWorkdayPrice(new BigDecimal(0));
+		rule.setApprovingUserWorkdayPrice(new BigDecimal(0));
+		rule.setApprovingUserInitiatePrice(new BigDecimal(0));
+		rule.setOrgMemberWorkdayPrice(new BigDecimal(0));
+		rule.setOrgMemberInitiatePrice(new BigDecimal(0));
+
+		return rule;
 	}
 
 	/**
@@ -6984,8 +6994,6 @@ public class Rentalv2ServiceImpl implements Rentalv2Service {
 
 		BeanUtils.copyProperties(cmd, rule);
 
-		List<PriceRuleDTO> priceRules = buildDefaultPriceRule(cmd.getRentalTypes());
-
 		this.dbProvider.execute((TransactionStatus status) -> {
 
 			this.rentalv2Provider.updateRentalDefaultRule(rule);
@@ -7021,8 +7029,28 @@ public class Rentalv2ServiceImpl implements Rentalv2Service {
 			setRentalRuleCloseDates(cmd.getCloseDates(), id, ownerType, rule.getResourceType());
 
 			//先删除后添加
-			rentalv2PriceRuleProvider.deletePriceRuleByOwnerId(rule.getResourceType(), priceRuleType, id);
-			createPriceRules(rule.getResourceType(), PriceRuleType.fromCode(priceRuleType), id, priceRules);
+			List<Rentalv2PriceRule> prices = rentalv2PriceRuleProvider.listPriceRuleByOwner(rule.getResourceType(), priceRuleType, id);
+			if (prices.isEmpty()) {
+				List<PriceRuleDTO> priceRules = buildDefaultPriceRule(cmd.getRentalTypes());
+				rentalv2PriceRuleProvider.deletePriceRuleByOwnerId(rule.getResourceType(), priceRuleType, id);
+				createPriceRules(rule.getResourceType(), PriceRuleType.fromCode(priceRuleType), id, priceRules);
+			}else {
+				//当价格已经设置过之后，在设置时间界面的 预约类型，注意要同步价格和套餐 预约类型
+				List<PriceRuleDTO> priceRules = new ArrayList<>();
+				cmd.getRentalTypes().forEach(r -> {
+					Optional<Rentalv2PriceRule> optional = prices.stream().filter(p -> p.getRentalType().equals(r)).findFirst();
+					if (optional.isPresent()) {
+						Rentalv2PriceRule temp = optional.get();
+						priceRules.add(ConvertHelper.convert(temp, PriceRuleDTO.class));
+					}else {
+						priceRules.add(createInitPriceRuleDTO(r));
+					}
+				});
+				rentalv2PriceRuleProvider.deletePriceRuleByOwnerId(rule.getResourceType(), priceRuleType, id);
+				createPriceRules(rule.getResourceType(), PriceRuleType.fromCode(priceRuleType), id, priceRules);
+
+				rentalv2PricePackageProvider.deletePricePackageByRentalTypes(rule.getResourceType(), priceRuleType, id, cmd.getRentalTypes());
+			}
 
 			updateResourceRule(rs, true);
 			return null;
@@ -7762,15 +7790,24 @@ public class Rentalv2ServiceImpl implements Rentalv2Service {
 			throw RuntimeErrorException.errorWith(ErrorCodes.SCOPE_GENERAL,
 					ErrorCodes.ERROR_INVALID_PARAMETER, "RentalOrder not found");
 		}
-		RentalResource rs = rentalCommonService.getRentalResource(order.getResourceType(), order.getRentalResourceId());
-
-		processCells(rs, order.getRentalType());
 		//只有使用中的订单可以结束使用
 		if (order.getStatus() != SiteBillStatus.IN_USING.getCode()) {
 			LOGGER.error("Order not in using");
 			throw RuntimeErrorException.errorWith(RentalServiceErrorCode.SCOPE,
 					RentalServiceErrorCode.ERROR_ORDER_CANCELED,"Order not in using");
 		}
+
+		ParkingSpaceDTO spaceDTO = dingDingParkingLockHandler.getParkingSpaceLock(order.getStringTag1());
+		if (spaceDTO.getLockStatus().equals(ParkingSpaceLockStatus.DOWN.getCode())) {
+			LOGGER.error("Parking lock not raise");
+			throw RuntimeErrorException.errorWith(RentalServiceErrorCode.SCOPE,
+					RentalServiceErrorCode.ERROR_DOWN_PARKING_LOCK,"Parking lock not raise");
+		}
+
+		RentalResource rs = rentalCommonService.getRentalResource(order.getResourceType(), order.getRentalResourceId());
+		RentalOrderHandler orderHandler = rentalCommonService.getRentalOrderHandler(order.getResourceType());
+		processCells(rs, order.getRentalType());
+
 
 		if (now > order.getEndTime().getTime()) {
 
@@ -7817,6 +7854,10 @@ public class Rentalv2ServiceImpl implements Rentalv2Service {
 
 			//当前时间超时了，设置成欠费
 			order.setStatus(SiteBillStatus.OWING_FEE.getCode());
+			//欠费0元  置为已完成
+			if ((order.getPayTotalMoney().subtract(order.getPaidMoney())).compareTo(BigDecimal.ZERO) == 0) {
+				order.setStatus(SiteBillStatus.COMPLETE.getCode());
+			}
 //			order.setPayTotalMoney();
 		}else {
 			order.setStatus(SiteBillStatus.COMPLETE.getCode());
@@ -7826,7 +7867,6 @@ public class Rentalv2ServiceImpl implements Rentalv2Service {
 
 		cellList.get().clear();
 
-		RentalOrderHandler orderHandler = rentalCommonService.getRentalOrderHandler(order.getResourceType());
 		orderHandler.completeRentalOrder(order);
 		//发消息
 		RentalMessageHandler handler = rentalCommonService.getRentalMessageHandler(order.getResourceType());

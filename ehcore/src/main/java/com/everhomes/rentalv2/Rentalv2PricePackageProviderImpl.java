@@ -49,6 +49,16 @@ public class Rentalv2PricePackageProviderImpl implements  Rentalv2PricePackagePr
     }
 
     @Override
+    public void deletePricePackageByRentalTypes(String resourceType, String ownerType, Long ownerId, List<Byte> rentalTypes) {
+        getReadWriteContext().delete(Tables.EH_RENTALV2_PRICE_PACKAGES)
+                .where(Tables.EH_RENTALV2_PRICE_PACKAGES.OWNER_TYPE.eq(ownerType))
+                .and(Tables.EH_RENTALV2_PRICE_PACKAGES.OWNER_ID.eq(ownerId))
+                .and(Tables.EH_RENTALV2_PRICE_PACKAGES.RESOURCE_TYPE.eq(resourceType))
+                .and(Tables.EH_RENTALV2_PRICE_PACKAGES.RENTAL_TYPE.notIn(rentalTypes))
+                .execute();
+    }
+
+    @Override
     public Long createRentalv2PricePackage(Rentalv2PricePackage rentalv2PricePackage) {
         Long id = sequenceProvider.getNextSequence(NameMapper.getSequenceDomainFromTablePojo(EhRentalv2PricePackages.class));
         rentalv2PricePackage.setId(id);

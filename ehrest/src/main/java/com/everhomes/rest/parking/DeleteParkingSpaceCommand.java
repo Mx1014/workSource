@@ -1,4 +1,4 @@
-package com.everhomes.rest.rentalv2;
+package com.everhomes.rest.parking;
 
 /**
  * @author sw on 2018/1/8.

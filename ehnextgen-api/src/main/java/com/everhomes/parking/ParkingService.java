@@ -10,7 +10,6 @@ import com.everhomes.rest.order.CommonOrderDTO;
 import com.everhomes.rest.order.PayCallbackCommand;
 import com.everhomes.rest.order.PreOrderDTO;
 import com.everhomes.rest.parking.*;
-import com.everhomes.rest.rentalv2.DeleteParkingSpaceCommand;
 import org.springframework.web.context.request.async.DeferredResult;
 
 public interface ParkingService {

@@ -2501,8 +2501,16 @@ public class ParkingServiceImpl implements ParkingService {
 					"Invalid parameter");
 		}
 
+		boolean flag;
+
+		if (operateType == ParkingSpaceLockOperateType.UP) {
+			flag = dingDingParkingLockHandler.raiseParkingSpaceLock(lockId);
+		}else {
+			flag = dingDingParkingLockHandler.downParkingSpaceLock(lockId);
+		}
+
 		//TODO:
-		if (dingDingParkingLockHandler.raiseParkingSpaceLock()) {
+		if (flag) {
 			ParkingSpace space = parkingProvider.findParkingSpaceByLockId(lockId);
 
 			ParkingSpaceLog log;
@@ -2514,16 +2522,15 @@ public class ParkingServiceImpl implements ParkingService {
 			log.setOperateType(operateType.getCode());
 
 			parkingProvider.createParkingSpaceLog(log);
-		}
-
-		if (operateType == ParkingSpaceLockOperateType.UP) {
-			throw RuntimeErrorException.errorWith(ParkingErrorCode.SCOPE,ParkingErrorCode.ERROR_RAISE_PARKING_LOCK,
-					"Raise parking lock failed");
 		}else {
-			throw RuntimeErrorException.errorWith(ParkingErrorCode.SCOPE,ParkingErrorCode.ERROR_DOWN_PARKING_LOCK,
-					"Down parking lock failed");
+			if (operateType == ParkingSpaceLockOperateType.UP) {
+				throw RuntimeErrorException.errorWith(ParkingErrorCode.SCOPE,ParkingErrorCode.ERROR_RAISE_PARKING_LOCK,
+						"Raise parking lock failed");
+			}else {
+				throw RuntimeErrorException.errorWith(ParkingErrorCode.SCOPE,ParkingErrorCode.ERROR_DOWN_PARKING_LOCK,
+						"Down parking lock failed");
+			}
 		}
-
 	}
 
 	private ParkingSpaceLog buildParkingSpaceLog(ParkingSpace space, RentalOrder order) {

@@ -32,6 +32,6 @@ public interface RentalServiceErrorCode {
 	int ERROR_TIME_STEP = 10050; // 开始时间不能大于等于结束时间！
 
 	int ERROR_ORDER_CANCELED = 10051; // 订单已取消
-	int ERROR_ORDER_CANCEL_OVERTIME = 10051; //已经进入预约使用时间，无法取消订单
-
+	int ERROR_ORDER_CANCEL_OVERTIME = 10052; //已经进入预约使用时间，无法取消订单
+	int ERROR_DOWN_PARKING_LOCK = 10053; //无法结束使用，车锁未升起
 }

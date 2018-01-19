@@ -48,4 +48,9 @@ public class DefaultRentalOrderHandler implements RentalOrderHandler {
     public void autoUpdateOrder(RentalOrder order) {
 
     }
+
+    @Override
+    public void checkOrderResourceStatus(RentalOrder order) {
+
+    }
 }

@@ -42,4 +42,6 @@ public interface RentalOrderHandler {
     public void completeRentalOrder(RentalOrder order);
 
     public void autoUpdateOrder(RentalOrder order);
+
+    public void checkOrderResourceStatus(RentalOrder order);
 }

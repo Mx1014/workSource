@@ -158,4 +158,9 @@ public class VipParkingRentalOrderHandler implements RentalOrderHandler {
             rentalv2Provider.updateRentalBill(order);
         }
     }
+
+    @Override
+    public void checkOrderResourceStatus(RentalOrder order) {
+
+    }
 }

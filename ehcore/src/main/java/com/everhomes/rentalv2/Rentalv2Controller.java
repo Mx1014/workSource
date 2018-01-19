@@ -534,6 +534,7 @@ public class Rentalv2Controller extends ControllerBase {
 	 */
 	@RequestMapping("getRentalOrderDetail")
 	@RestReturn(value = RentalOrderDTO.class)
+	@RequireAuthentication(false)
 	public RestResponse getRentalOrderDetail(GetRentalOrderDetailCommand cmd) {
 		RestResponse response = new RestResponse(rentalService.getRentalOrderDetail(cmd));
 		response.setErrorCode(ErrorCodes.SUCCESS);
@@ -601,6 +602,7 @@ public class Rentalv2Controller extends ControllerBase {
 	 */
 	@RequestMapping("getResourceRuleV2")
 	@RestReturn(GetResourceRuleV2Response.class)
+	@RequireAuthentication(false)
 	public RestResponse getResourceRuleV2(GetResourceRuleV2Command cmd) {
 		RestResponse response = new RestResponse(rentalService.getResourceRuleV2(cmd));
 		response.setErrorCode(ErrorCodes.SUCCESS);
