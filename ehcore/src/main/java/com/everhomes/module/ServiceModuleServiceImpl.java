@@ -651,6 +651,7 @@ public class ServiceModuleServiceImpl implements ServiceModuleService {
         User user = UserContext.current().getUser();
         List<CommunityDTO> dtos = new ArrayList<>();
         List<ProjectDTO> projects = getUserProjectsByModuleId(user.getId(), cmd.getOrganizationId(), cmd.getModuleId());
+        LOGGER.debug("listAuthorizationCommunityByUser step3"+ DateHelper.currentGMTTime());
         for (ProjectDTO project: projects) {
             if(EntityType.fromCode(project.getProjectType()) == EntityType.COMMUNITY){
                 Community community = communityProvider.findCommunityById(project.getProjectId());

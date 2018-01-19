@@ -10,10 +10,12 @@ import java.util.Map;
 import java.util.UUID;
 import java.util.stream.Collectors;
 
+import com.everhomes.constants.ErrorCodes;
 import com.everhomes.rest.approval.CommonStatus;
 import com.everhomes.server.schema.tables.records.*;
 import com.everhomes.util.*;
 import org.apache.lucene.spatial.geohash.GeoHashUtils;
+import org.eclipse.jdt.internal.compiler.ast.ThrowStatement;
 import org.jooq.Condition;
 import org.jooq.DSLContext;
 import org.jooq.Record;
@@ -84,6 +86,7 @@ import org.springframework.cache.annotation.Cacheable;
 import org.springframework.cache.annotation.Caching;
 import org.springframework.stereotype.Component;
 
+import javax.naming.NamingEnumeration;
 import java.sql.Timestamp;
 import java.util.*;
 import java.util.stream.Collectors;
@@ -1169,6 +1172,10 @@ public class CommunityProviderImpl implements CommunityProvider {
 
 	@Override
 	public List<Community> listCommunitiesByNamespaceId(Integer namespaceId) {
+        if(namespaceId == null || namespaceId.equals(0) || namespaceId == 0){
+            throw RuntimeErrorException.errorWith(ErrorCodes.SCOPE_GENERAL, ErrorCodes.ERROR_GENERAL_EXCEPTION,
+                    "stupid namespaceId = 0");
+        }
 		DSLContext context = dbProvider.getDslContext(AccessSpec.readOnly());
         context.select().from(Tables.EH_COMMUNITIES);
         List<Community> list = context.select().from(Tables.EH_COMMUNITIES)

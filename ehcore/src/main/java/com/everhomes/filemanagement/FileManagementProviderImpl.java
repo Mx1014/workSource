@@ -231,8 +231,9 @@ public class FileManagementProviderImpl implements FileManagementProvider {
     public void createFileContent(FileContent content) {
         Long id = sequenceProvider.getNextSequence(NameMapper.getSequenceDomainFromTablePojo(EhFileManagementContents.class));
         content.setId(id);
+        content.setCreatorUid(UserContext.currentUserId());
         content.setCreateTime(new Timestamp(DateHelper.currentGMTTime().getTime()));
-        content.setOperatorUid(UserContext.currentUserId());
+        content.setOperatorUid(content.getCreatorUid());
         content.setUpdateTime(content.getCreateTime());
 
         DSLContext context = dbProvider.getDslContext(AccessSpec.readWrite());

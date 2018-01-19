@@ -36,7 +36,7 @@ CREATE TABLE `eh_file_management_contents` (
   `owner_type` VARCHAR (64),
   `catalog_id` BIGINT COMMENT 'the id of the catalog',
   `name` VARCHAR(256) NOT NULL COMMENT 'the name of the content',
-  `size` INT NOT NULL COMMENT 'the size of the content',
+  `size` INT NOT NULL DEFAULT 0 COMMENT 'the size of the content',
   `parent_id` BIGINT COMMENT 'the parent id of the folder',
   `content_type` VARCHAR(32) COMMENT 'file, folder',
   `content_uri` VARCHAR(2048) COMMENT 'the uri of the content',
@@ -45,6 +45,16 @@ CREATE TABLE `eh_file_management_contents` (
   `create_time` DATETIME,
   `operator_uid` BIGINT,
   `update_time` DATETIME,
+  PRIMARY KEY (`id`)
+) ENGINE = INNODB DEFAULT CHARSET = utf8mb4 ;
+
+-- DROP TABLE eh_file_icon;
+CREATE TABLE `eh_file_icon` (
+  `id` BIGINT,
+  `file_type` VARCHAR(64) NOT NULL COMMENT 'the type of the file',
+  `icon_name` VARCHAR(128) COMMENT 'the name of the icon',
+  `icon_uri` VARCHAR(2048) NOT NULL COMMENT 'the uri of the type',
+  `create_time` DATETIME,
   PRIMARY KEY (`id`)
 ) ENGINE = INNODB DEFAULT CHARSET = utf8mb4 ;
 
