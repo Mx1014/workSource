@@ -2,12 +2,13 @@ package com.everhomes.rest.filemanagement;
 
 /**
  * <ul>
- * <li>CATEGORY("category"): CATEGORY</li>
- * <li>FOLDER("folder"): 文件夹 </li>
+ * <li>CATEGORY("category"): 目录</li>
+ * <li>FOLDER("folder"): 文件夹</li>
+ * <li>FILE("file"): 文件</li>
  * </ul>
  */
 public enum FileContentType {
-    CATEGORY("category"), FOLDER("folder");
+    CATEGORY("category"), FOLDER("folder"), FILE("file");
 
     private String code;
 
