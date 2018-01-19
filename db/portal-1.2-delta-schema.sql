@@ -33,10 +33,7 @@ ALTER TABLE `eh_service_module_apps` ADD COLUMN `origin_id`  bigint(20) NULL AFT
 ALTER TABLE `eh_portal_publish_logs` ADD COLUMN `version_id`  bigint(20) NULL AFTER `namespace_id`;
 ALTER TABLE `eh_portal_publish_logs` ADD COLUMN `process`  int(11) NULL AFTER `version_id`;
 
-
-ALTER TABLE `eh_web_menu_scopes` ADD COLUMN `app_id`  bigint(20) NULL COMMENT 'eh_service_module_app id';
 ALTER TABLE `eh_web_menu_scopes` ADD COLUMN `config_id`  bigint(20) NULL COMMENT 'get config, eg multiple application.';
-ALTER TABLE `eh_web_menu_scopes` DROP INDEX `u_menu_scope_owner` , ADD UNIQUE INDEX `u_menu_scope_owner` (`menu_id`, `owner_type`, `owner_id`, `app_id`) USING BTREE ;
 
 ALTER TABLE `eh_launch_pad_layouts` ADD COLUMN `preview_portal_version_id`  bigint(20) NULL COMMENT '预览版本的id，正式版本数据不要配置该数据';
 ALTER TABLE `eh_launch_pad_items` ADD COLUMN `preview_portal_version_id`  bigint(20) NULL COMMENT '预览版本的id，正式版本数据不要配置该数据';
