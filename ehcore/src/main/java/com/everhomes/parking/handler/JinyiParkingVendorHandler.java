@@ -325,17 +325,20 @@ public class JinyiParkingVendorHandler extends DefaultParkingVendorHandler {
 
 		if(jsonEntity.isSuccess()) {
 			return jsonEntity.getData();
-		}else{
-			LOGGER.info("APPLY_TEMP_CARD failed, try COUPON_FREE_SEND! log id = {}, plateno = {}",log.getId(),log.getPlateNumber());
+		}else{//失败的情况是车辆在场了，这时候发全免券
+			LOGGER.error("APPLY_TEMP_CARD failed, try COUPON_FREE_SEND! log id = {}, plateno = {}",log.getId(),log.getPlateNumber());
 			params = createGeneralParam(COUPON_FREE_SEND,createCouponFreeSendParam(log));
 			responseJson = Utils.post(url, params);
 			jsonEntity = JSONObject.parseObject(responseJson, new TypeReference<JinyiJsonEntity<String>>(){});
 			if(jsonEntity.isSuccess()){
 				return jsonEntity.getData();
 			}
+			//这里失败，表示在场车辆已经有发全免券了。
+			return jsonEntity.getMessage();
+
 		}
 
-		return null;
+//		return null;
 	}
 
 	private JSONObject createCouponFreeSendParam(ParkingClearanceLog log) {
