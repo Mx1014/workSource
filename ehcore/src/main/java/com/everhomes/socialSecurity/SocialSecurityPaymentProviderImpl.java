@@ -127,16 +127,16 @@ public class SocialSecurityPaymentProviderImpl implements SocialSecurityPaymentP
     }
 
 
-    @Override
-    public String findPaymentMonthByDetail(Long detailId) {
-        Record1<String> record = getReadOnlyContext().selectDistinct(Tables.EH_SOCIAL_SECURITY_PAYMENTS.PAY_MONTH).from(Tables.EH_SOCIAL_SECURITY_PAYMENTS)
-                .where(Tables.EH_SOCIAL_SECURITY_PAYMENTS.DETAIL_ID.eq(detailId))
-                .fetchAny();
-        if (null == record) {
-            return null;
-        }
-        return record.value1();
-    }
+//    @Override
+//    public String findPaymentMonthByDetail(Long detailId) {
+//        Record1<String> record = getReadOnlyContext().selectDistinct(Tables.EH_SOCIAL_SECURITY_PAYMENTS.PAY_MONTH).from(Tables.EH_SOCIAL_SECURITY_PAYMENTS)
+//                .where(Tables.EH_SOCIAL_SECURITY_PAYMENTS.DETAIL_ID.eq(detailId))
+//                .fetchAny();
+//        if (null == record) {
+//            return null;
+//        }
+//        return record.value1();
+//    }
 
     @Override
     public Integer countUnFieldUsers(Long ownerId) {

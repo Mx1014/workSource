@@ -25,7 +25,7 @@ public interface SocialSecurityPaymentProvider {
 
 	SocialSecurityPayment findSocialSecurityPayment(Long detailId, String payItem, Byte accumOrSocial);
 
-	String findPaymentMonthByDetail(Long detailId);
+//	String findPaymentMonthByDetail(Long detailId);
 
 	Integer countUnFieldUsers(Long ownerId);
 
