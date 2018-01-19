@@ -24,7 +24,7 @@ CREATE TABLE `eh_parking_space_logs` (
   `contact_phone` varchar(64) DEFAULT NULL,
   `contact_name` varchar(64) DEFAULT NULL,
   `contact_enterprise_name` varchar(128) DEFAULT NULL,
-  `operate_type` varchar(64) NOT NULL COMMENT '1: up, 2: down',
+  `operate_type` tinyint(4) NOT NULL COMMENT '1: up, 2: down',
   `user_type` tinyint(4) NOT NULL COMMENT '1: booking person, 2: plate owner',
   `operate_time` datetime DEFAULT NULL,
   PRIMARY KEY (`id`)
