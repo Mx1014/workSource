@@ -145,6 +145,7 @@ import com.everhomes.rest.repeat.TimeRangeDTO;
 import com.everhomes.rest.user.MessageChannelType;
 import com.everhomes.search.QualityInspectionSampleSearcher;
 import com.everhomes.search.QualityTaskSearcher;
+import com.everhomes.server.schema.Tables;
 import com.everhomes.settings.PaginationConfigHelper;
 import com.everhomes.user.User;
 import com.everhomes.user.UserContext;
@@ -158,6 +159,8 @@ import org.apache.poi.ss.usermodel.Row;
 import org.apache.poi.ss.usermodel.Sheet;
 import org.apache.poi.ss.usermodel.Workbook;
 import org.apache.poi.xssf.usermodel.XSSFWorkbook;
+import org.jooq.Record;
+import org.jooq.SelectQuery;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -977,18 +980,11 @@ public class QualityServiceImpl implements QualityService {
 
 	@Override
 	public QualityInspectionTaskDTO findQualityInspectionTask(FindQualityInspectionTaskCommand cmd) {
-		/*Long privilegeId = configProvider.getLongValue(QualityConstant.QUALITY_TASK_LIST, 0L);
-		if(cmd.getTargetId() == 0L) {
-			userPrivilegeMgr.checkCurrentUserAuthority(null, null, cmd.getOwnerId(), privilegeId);
-		} else {
-			userPrivilegeMgr.checkCurrentUserAuthority(EntityType.COMMUNITY.getCode(), cmd.getTargetId(), cmd.getOwnerId(), privilegeId);
-		}*/
-		checkUserPrivilege(cmd.getOwnerId(),PrivilegeConstants.QUALITY_TASK_LIST,cmd.getTargetId());
 
+		checkUserPrivilege(cmd.getOwnerId(),PrivilegeConstants.QUALITY_TASK_LIST,cmd.getTargetId());
 		QualityInspectionTasks task = qualityProvider.findVerificationTaskById(cmd.getTaskId());
 		if(task != null)
 			return ConvertHelper.convert(task, QualityInspectionTaskDTO.class);
-
 		return null;
 	}
 
@@ -1007,13 +1003,9 @@ public class QualityServiceImpl implements QualityService {
 		checkUserPrivilege(cmd.getOwnerId(),PrivilegeConstants.QUALITY_TASK_LIST,cmd.getTargetId());
 
 		User user = UserContext.current().getUser();
-		Long ownerId = cmd.getOwnerId();
-		String ownerType = cmd.getOwnerType();
 		Long targetId = cmd.getTargetId();
-		String targetType = cmd.getTargetType();
 		int pageSize = PaginationConfigHelper.getPageSize(configurationProvider, cmd.getPageSize());
-//        CrossShardListingLocator locator = new CrossShardListingLocator();
-//        locator.setAnchor(cmd.getPageAnchor());
+
 		if(null == cmd.getPageAnchor()) {
 			cmd.setPageAnchor(0L);
 		}
@@ -1027,63 +1019,36 @@ public class QualityServiceImpl implements QualityService {
         	endDate = new Timestamp(cmd.getEndDate());
         }
 
-//        Long currentUid = null;
-//        boolean timeCompared = false;
-//        if(cmd.getExecuteFlag() != null) {
-//        	timeCompared = true;
-//        	if(cmd.getExecuteFlag() == 1) {
-//	        	currentUid = user.getId();
-//        	}
-//        }
-//        final Long executeUid = currentUid;
-
-		//是否是管理员
-		//boolean isAdmin = false;
-//		List<RoleAssignment> resources = aclProvider.getRoleAssignmentByResourceAndTarget(EntityType.ORGANIZATIONS.getCode(), cmd.getOwnerId(), EntityType.USER.getCode(), user.getId());
-//		if(null != resources && 0 != resources.size()){
-//			for (RoleAssignment resource : resources) {
-//				if(resource.getRoleId() == RoleConstants.ENTERPRISE_SUPER_ADMIN
-//						|| resource.getRoleId() == RoleConstants.ENTERPRISE_ORDINARY_ADMIN
-//						|| resource.getRoleId() == RoleConstants.PM_SUPER_ADMIN
-//						|| resource.getRoleId() == RoleConstants.PM_ORDINARY_ADMIN) {
-//					isAdmin = true;
-//					break;
-//				}
-//			}
-//		}
 		//新后台对接权限修改
 		boolean isAdmin = checkAdmin(cmd.getOwnerId(),cmd.getOwnerType(),cmd.getNamespaceId());
 		LOGGER.info("listQualityInspectionTasks: checkAdmin:{}"+isAdmin);
 
 		List<QualityInspectionTasks> tasks = new ArrayList<>();
-		boolean timeCompared = false;
-		if(cmd.getExecuteFlag() != null && cmd.getExecuteFlag() == 1) {
-			timeCompared = true;
-		}
-
 		if (isAdmin) {
-			//管理员查询所有任务
-			tasks = qualityProvider.listVerificationTasks(offset, pageSize + 1, ownerId, ownerType, targetId, targetType,
-					cmd.getTaskType(), null, startDate, endDate, cmd.getExecuteStatus(), cmd.getReviewStatus(),
-					timeCompared, null, cmd.getManualFlag(), null, cmd.getNamespaceId(),cmd.getTaskName(), cmd.getLatestUpdateTime());
+			//管理员查询所有任务 减少了下参数数量
+			tasks = qualityProvider.listVerificationTasksRefactor(offset, pageSize, startDate, endDate, null, null, (loc, query) -> {
+				listTasksQueryBuilder(cmd, query);
+				return null;
+			});
 		} else {
 			List<ExecuteGroupAndPosition> groupDtos = listUserRelateGroups();
 			List<QualityInspectionStandardGroupMap> maps = qualityProvider.listQualityInspectionStandardGroupMapByGroupAndPosition(groupDtos);
 			if (maps != null && maps.size() > 0) {
 				List<Long> executeStandardIds = new ArrayList<>();
-//				List<Long> reviewStandardIds = new ArrayList<>();
 				for (QualityInspectionStandardGroupMap r : maps) {
 					if (QualityGroupType.EXECUTIVE_GROUP.equals(QualityGroupType.fromStatus(r.getGroupType()))) {
 						executeStandardIds.add(r.getStandardId());
 					}
 				}
-				//增加前台传namespaceId  参数数量以后再重构
-				tasks = qualityProvider.listVerificationTasks(offset, pageSize + 1, ownerId, ownerType, targetId, targetType,
-						cmd.getTaskType(), user.getId(), startDate, endDate, cmd.getExecuteStatus(), cmd.getReviewStatus(),
-						timeCompared, executeStandardIds, cmd.getManualFlag(), groupDtos, cmd.getNamespaceId(),cmd.getTaskName(), cmd.getLatestUpdateTime());
+				tasks = qualityProvider.listVerificationTasksRefactor(offset, pageSize, startDate, endDate, executeStandardIds, groupDtos, (loc, query) -> {
+					listTasksQueryBuilder(cmd, query);
+					return null;
+				});
+//				tasks = qualityProvider.listVerificationTasks(offset, pageSize + 1, ownerId, ownerType, targetId, targetType,
+//						cmd.getTaskType(), user.getId(), startDate, endDate, cmd.getExecuteStatus(), cmd.getReviewStatus(),
+//						timeCompared, executeStandardIds, cmd.getManualFlag(), groupDtos, cmd.getNamespaceId(),cmd.getTaskName(), cmd.getLatestUpdateTime());
 			}
 		}
-
 		Long nextPageAnchor = null;
 		if (tasks.size() > pageSize) {
 			tasks.remove(tasks.size() - 1);
@@ -1098,7 +1063,6 @@ public class QualityServiceImpl implements QualityService {
 				records.add(task.getRecord());
 			}
 		}
-
 		this.qualityProvider.populateRecordAttachments(records);
 		this.qualityProvider.populateRecordItemResults(records);
 
@@ -1117,8 +1081,39 @@ public class QualityServiceImpl implements QualityService {
 		if(taskIds != null) {
 			response.setTodayExecutedCount(taskIds.size());
 		}
-
         return response;
+	}
+
+	private void listTasksQueryBuilder(ListQualityInspectionTasksCommand cmd, SelectQuery<? extends Record> query) {
+		if (cmd.getOwnerId()!= null)
+            query.addConditions(Tables.EH_QUALITY_INSPECTION_TASKS.OWNER_ID.eq(cmd.getOwnerId()));
+		if (cmd.getOwnerType() != null)
+            query.addConditions(Tables.EH_QUALITY_INSPECTION_TASKS.OWNER_TYPE.eq(cmd.getOwnerType()));
+		if (cmd.getTargetId() != null && cmd.getTargetId() != 0L)
+			query.addConditions(Tables.EH_QUALITY_INSPECTION_TASKS.TARGET_ID.eq(cmd.getTargetId()));
+		if (!StringUtils.isNullOrEmpty(cmd.getTargetType()))
+            query.addConditions(Tables.EH_QUALITY_INSPECTION_TASKS.TARGET_TYPE.eq(cmd.getTargetType()));
+		if (cmd.getTaskType() != null)
+            query.addConditions(Tables.EH_QUALITY_INSPECTION_TASKS.TASK_TYPE.eq(cmd.getTaskType()));
+		if (cmd.getExecuteStatus() != null)
+            query.addConditions(Tables.EH_QUALITY_INSPECTION_TASKS.STATUS.eq(cmd.getExecuteStatus()));
+		if (cmd.getManualFlag() != null)
+            query.addConditions(Tables.EH_QUALITY_INSPECTION_TASKS.MANUAL_FLAG.eq(Long.valueOf(cmd.getManualFlag())));
+		if (cmd.getNamespaceId() != null)
+            query.addConditions(Tables.EH_QUALITY_INSPECTION_TASKS.NAMESPACE_ID.eq(cmd.getNamespaceId()));
+		if (!StringUtils.isNullOrEmpty(cmd.getTaskName()))
+            query.addConditions(Tables.EH_QUALITY_INSPECTION_TASKS.TASK_NAME.eq(cmd.getTaskName()));
+
+		if (cmd.getExecuteFlag() == 1) {
+			query.addConditions(Tables.EH_QUALITY_INSPECTION_TASKS.EXECUTIVE_EXPIRE_TIME.ge(new Timestamp(DateHelper.currentGMTTime().getTime()))
+					.or(Tables.EH_QUALITY_INSPECTION_TASKS.EXECUTIVE_EXPIRE_TIME.isNull())
+					.or(Tables.EH_QUALITY_INSPECTION_TASKS.PROCESS_EXPIRE_TIME.ge(new Timestamp(DateHelper.currentGMTTime().getTime()))));
+			query.addConditions(Tables.EH_QUALITY_INSPECTION_TASKS.STATUS.eq(QualityInspectionTaskStatus.WAITING_FOR_EXECUTING.getCode()));
+		}
+		if (cmd.getLatestUpdateTime() != null)
+            query.addConditions(Tables.EH_QUALITY_INSPECTION_TASKS.CREATE_TIME.gt(cmd.getLatestUpdateTime())
+                    .or(Tables.EH_QUALITY_INSPECTION_TASKS.EXECUTIVE_TIME.gt(cmd.getLatestUpdateTime()))
+                    .or(Tables.EH_QUALITY_INSPECTION_TASKS.PROCESS_TIME.gt(cmd.getLatestUpdateTime())));
 	}
 
 	private Timestamp getDayBegin(Calendar cal) {
@@ -1135,10 +1130,10 @@ public class QualityServiceImpl implements QualityService {
 
 		List<OrganizationMember> members = organizationProvider.listOrganizationMembersByUId(user.getId());
 		if(members == null || members.size() == 0) {
-			return new ArrayList<ExecuteGroupAndPosition>();
+			return new ArrayList<>();
 		}
 
-		List<ExecuteGroupAndPosition> groupDtos = new ArrayList<ExecuteGroupAndPosition>();
+		List<ExecuteGroupAndPosition> groupDtos = new ArrayList<>();
 		for(OrganizationMember member : members) {
 			Organization organization = organizationProvider.findOrganizationById(member.getOrganizationId());
 

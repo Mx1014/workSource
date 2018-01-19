@@ -186,6 +186,7 @@ CREATE TABLE `eh_file_management_contents` (
   `size` INT NOT NULL DEFAULT 0 COMMENT 'the size of the content',
   `parent_id` BIGINT COMMENT 'the parent id of the folder',
   `content_type` VARCHAR(32) COMMENT 'file, folder',
+  `content_suffix` VARCHAR(64) COMMENT 'the suffix of the file',
   `content_uri` VARCHAR(2048) COMMENT 'the uri of the content',
   `status` TINYINT NOT NULL DEFAULT 1 COMMENT '0-invalid, 1-valid',
   `creator_uid` BIGINT DEFAULT 0,
@@ -222,4 +223,10 @@ CREATE TABLE `eh_sync_offline_tasks` (
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4;
 -- end by xiongying
 
-
+-- 在domain中增加一些icon
+ALTER TABLE `eh_domains`
+CHANGE COLUMN `icon_uri` `favicon_uri`  varchar(255) CHARACTER SET utf8mb4 COLLATE utf8mb4_general_ci NULL DEFAULT NULL AFTER `create_time`,
+ADD COLUMN `login_bg_uri`  varchar(255) NULL AFTER `favicon_uri`,
+ADD COLUMN `login_logo_uri`  varchar(255) NULL AFTER `login_bg_uri`,
+ADD COLUMN `menu_logo_uri`  varchar(255) NULL AFTER `login_logo_uri`,
+ADD COLUMN `menu_logo_collapsed_uri`  varchar(255) NULL AFTER `menu_logo_uri`;
