@@ -19,6 +19,7 @@ import java.sql.Timestamp;
  *  <li>groupId: 执行任务组id</li>
  *  <li>executeStatus: 执行状态</li>
  *  <li>reviewStatus: 审阅状态</li>
+ *  <li>taskName: 任务名称</li>
  *  <li>pageAnchor: 锚点</li>
  *  <li>pageSize: 页面大小</li>
  *  <li>manualFlag: 是否手动添加 0：自动创建， 2: 绩效考核</li>
@@ -54,6 +55,8 @@ public class ListQualityInspectionTasksCommand {
 	private Byte executeStatus;
 	
 	private Byte reviewStatus;
+
+	private String taskName;
 	
 	private Byte manualFlag;
 	
@@ -209,6 +212,14 @@ public class ListQualityInspectionTasksCommand {
 
 	public void setLatestUpdateTime(Timestamp latestUpdateTime) {
 		this.latestUpdateTime = latestUpdateTime;
+	}
+
+	public String getTaskName() {
+		return taskName;
+	}
+
+	public void setTaskName(String taskName) {
+		this.taskName = taskName;
 	}
 
 	@Override

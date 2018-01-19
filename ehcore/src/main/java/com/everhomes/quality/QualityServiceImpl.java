@@ -1065,7 +1065,7 @@ public class QualityServiceImpl implements QualityService {
 			//管理员查询所有任务
 			tasks = qualityProvider.listVerificationTasks(offset, pageSize + 1, ownerId, ownerType, targetId, targetType,
 					cmd.getTaskType(), null, startDate, endDate, cmd.getExecuteStatus(), cmd.getReviewStatus(),
-					timeCompared, null, cmd.getManualFlag(), null, cmd.getNamespaceId(), cmd.getLatestUpdateTime());
+					timeCompared, null, cmd.getManualFlag(), null, cmd.getNamespaceId(),cmd.getTaskName(), cmd.getLatestUpdateTime());
 		} else {
 			List<ExecuteGroupAndPosition> groupDtos = listUserRelateGroups();
 			List<QualityInspectionStandardGroupMap> maps = qualityProvider.listQualityInspectionStandardGroupMapByGroupAndPosition(groupDtos);
@@ -1080,7 +1080,7 @@ public class QualityServiceImpl implements QualityService {
 				//增加前台传namespaceId  参数数量以后再重构
 				tasks = qualityProvider.listVerificationTasks(offset, pageSize + 1, ownerId, ownerType, targetId, targetType,
 						cmd.getTaskType(), user.getId(), startDate, endDate, cmd.getExecuteStatus(), cmd.getReviewStatus(),
-						timeCompared, executeStandardIds, cmd.getManualFlag(), groupDtos, cmd.getNamespaceId(), cmd.getLatestUpdateTime());
+						timeCompared, executeStandardIds, cmd.getManualFlag(), groupDtos, cmd.getNamespaceId(),cmd.getTaskName(), cmd.getLatestUpdateTime());
 			}
 		}
 
