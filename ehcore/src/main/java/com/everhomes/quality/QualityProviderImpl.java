@@ -10,6 +10,7 @@ import com.everhomes.db.DaoHelper;
 import com.everhomes.db.DbProvider;
 import com.everhomes.listing.CrossShardListingLocator;
 import com.everhomes.listing.ListingLocator;
+import com.everhomes.listing.ListingQueryBuilderCallback;
 import com.everhomes.naming.NameMapper;
 import com.everhomes.rest.equipment.ReviewResult;
 import com.everhomes.rest.equipment.Status;
@@ -2827,5 +2828,68 @@ public class QualityProviderImpl implements QualityProvider {
 		query.addConditions(Tables.EH_QUALITY_INSPECTION_SPECIFICATIONS.DELETE_TIME.gt(lastUpdateSyncTime));
 
 		return  query.fetchInto(QualityInspectionSpecifications.class);
+	}
+
+	@Override
+	public List<QualityInspectionTasks> listVerificationTasksRefactor(Integer offset, int pageSize, Timestamp startDate,
+																	  Timestamp endDate, List<Long> standardIds,
+																	  List<ExecuteGroupAndPosition> groupDtos,
+																	  ListingQueryBuilderCallback builderCallback) {
+		DSLContext context = this.dbProvider.getDslContext(AccessSpec.readOnlyWith(EhQualityInspectionTasks.class));
+		List<QualityInspectionTasks> tasks = new ArrayList<QualityInspectionTasks>();
+		SelectQuery<EhQualityInspectionTasksRecord> query = context.selectQuery(Tables.EH_QUALITY_INSPECTION_TASKS);
+
+
+		if (startDate != null) {
+			query.addConditions(Tables.EH_QUALITY_INSPECTION_TASKS.CREATE_TIME.ge(startDate));
+		}
+		if (endDate != null) {
+			query.addConditions(Tables.EH_QUALITY_INSPECTION_TASKS.CREATE_TIME.le(endDate));
+		}
+
+		Long executeUid = UserContext.currentUserId();
+		if (executeUid != null && executeUid != 0) {
+			Condition con = Tables.EH_QUALITY_INSPECTION_TASKS.EXECUTOR_ID.eq(executeUid);
+			con = con.and(Tables.EH_QUALITY_INSPECTION_TASKS.RESULT.eq(QualityInspectionTaskResult.CORRECT.getCode()));
+
+			if (standardIds != null) {
+				Condition con1 = Tables.EH_QUALITY_INSPECTION_TASKS.STANDARD_ID.in(standardIds);
+				con = con.or(con1);
+			}
+			if (groupDtos != null) {
+				Condition con2 = Tables.EH_QUALITY_INSPECTION_TASKS.STANDARD_ID.eq(0L);
+				Condition con3 = null;
+				for (ExecuteGroupAndPosition group : groupDtos) {
+					Condition con4 = Tables.EH_QUALITY_INSPECTION_TASKS.EXECUTIVE_GROUP_ID.eq(group.getGroupId());
+					con4 = con4.and(Tables.EH_QUALITY_INSPECTION_TASKS.EXECUTIVE_POSITION_ID.eq(group.getPositionId()));
+					if (con3 == null) {
+						con3 = con4;
+					} else {
+						con3 = con3.or(con4);
+					}
+				}
+				if (con3 != null) {
+					con2 = con2.and(con3);
+				}
+				con2 = con2.and(Tables.EH_QUALITY_INSPECTION_TASKS.RESULT.eq(QualityInspectionTaskStatus.NONE.getCode()));
+				con = con.or(con2);
+			}
+			query.addConditions(con);
+		}
+		builderCallback.buildCondition(null, query);
+
+		query.addOrderBy(Tables.EH_QUALITY_INSPECTION_TASKS.EXECUTIVE_EXPIRE_TIME.desc());
+		query.addLimit(offset * (pageSize), pageSize + 1);
+		if (LOGGER.isDebugEnabled()) {
+			LOGGER.debug("Query tasks by count, sql=" + query.getSQL());
+			LOGGER.debug("Query tasks by count, bindValues=" + query.getBindValues());
+		}
+
+		query.fetch().map((EhQualityInspectionTasksRecord record) -> {
+			tasks.add(ConvertHelper.convert(record, QualityInspectionTasks.class));
+			return null;
+		});
+
+		return tasks;
 	}
 }
