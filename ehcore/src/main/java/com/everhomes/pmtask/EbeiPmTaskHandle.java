@@ -421,7 +421,7 @@ public class EbeiPmTaskHandle extends DefaultPmTaskHandle{
         dbProvider.execute((TransactionStatus status) -> {
 
             User user = UserContext.current().getUser();
-            Integer namespaceId = user.getNamespaceId();
+            Integer namespaceId = UserContext.getCurrentNamespaceId(cmd.getNamespaceId());
             String ownerType = cmd.getOwnerType();
             Long ownerId = cmd.getOwnerId();
             Long taskCategoryId = cmd.getTaskCategoryId();
