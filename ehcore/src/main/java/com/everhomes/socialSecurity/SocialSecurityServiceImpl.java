@@ -1422,8 +1422,10 @@ public class SocialSecurityServiceImpl implements SocialSecurityService {
         if (null != base && compayRadix.intValue() != 0) {
             if (compayRadix.compareTo(base.getCompanyRadixMin()) < 0) {
                 setting.setCompanyRadix(base.getCompanyRadixMin());
+                setting.setRadix(setting.getCompanyRadix());
             } else if (compayRadix.compareTo(base.getCompanyRadixMax()) > 0) {
                 setting.setCompanyRadix(base.getCompanyRadixMax());
+                setting.setRadix(setting.getCompanyRadix());
             } else {
                 setting.setCompanyRadix(compayRadix);
             }
