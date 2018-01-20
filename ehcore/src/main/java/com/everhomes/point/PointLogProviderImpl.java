@@ -183,6 +183,30 @@ public class PointLogProviderImpl implements PointLogProvider {
         return null;
     }
 
+    @Override
+    public boolean isExist(Integer namespaceId, Long systemId, Long targetUid, Long ruleId, String entityType, Long entityId) {
+        com.everhomes.server.schema.tables.EhPointLogs t = Tables.EH_POINT_LOGS;
+
+        SelectQuery<EhPointLogsRecord> query = context().selectQuery(t);
+        if (namespaceId != null) {
+            query.addConditions(t.NAMESPACE_ID.eq(namespaceId));
+        }
+        if (systemId != null) {
+            query.addConditions(t.SYSTEM_ID.eq(systemId));
+        }
+        if (targetUid != null) {
+            query.addConditions(t.TARGET_UID.eq(targetUid));
+        }
+        if (ruleId != null) {
+            query.addConditions(t.RULE_ID.eq(ruleId));
+        }
+        if (entityType != null && entityId != null) {
+            query.addConditions(t.ENTITY_TYPE.eq(entityType));
+            query.addConditions(t.ENTITY_ID.eq(entityId));
+        }
+        return query.fetchCount() > 0;
+    }
+
     private EhPointLogsDao rwDao() {
         DSLContext context = dbProvider.getDslContext(AccessSpec.readWrite());
         return new EhPointLogsDao(context.configuration());

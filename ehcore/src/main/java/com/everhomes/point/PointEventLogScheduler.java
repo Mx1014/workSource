@@ -274,7 +274,12 @@ public class PointEventLogScheduler implements ApplicationListener<ContextRefres
                                     }
                                     return score;
                                 });
-                                pointLogProvider.createPointLog(result.getLog());
+
+                                PointLog pl = result.getLog();
+                                if (!pointLogProvider.isExist(pl.getNamespaceId(), pl.getSystemId(), pl.getTargetUid(),
+                                        pl.getRuleId(), pl.getEntityType(), pl.getEntityId())) {
+                                    pointLogProvider.createPointLog(pl);
+                                }
                             }
                         }
 

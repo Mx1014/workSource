@@ -25,4 +25,6 @@ public interface PointLogProvider {
     Integer countPointLog(Integer namespaceId, Long systemId, Long uid, Long ruleId, Timestamp startTime, Timestamp endTime);
 
     PointLog findByRuleIdAndEntity(Integer namespaceId, Long systemId, Long targetUid, Long ruleId, String entityType, Long entityId);
+
+    boolean isExist(Integer namespaceId, Long systemId, Long targetUid, Long ruleId, String entityType, Long entityId);
 }
