@@ -6,6 +6,8 @@ ALTER TABLE `eh_office_cubicle_categories` ADD COLUMN `position_nums` INTEGER;
 
 ALTER TABLE `eh_office_cubicle_orders` ADD COLUMN `flow_case_Id` BIGINT;
 ALTER TABLE `eh_office_cubicle_orders` ADD COLUMN `work_flow_status` TINYINT;
+ALTER TABLE `eh_office_cubicle_orders` ADD COLUMN `owner_type` VARCHAR(128);
+ALTER TABLE `eh_office_cubicle_orders` ADD COLUMN `owner_id` BIGINT;
 
 
 CREATE TABLE `eh_office_cubicle_ranges` (
