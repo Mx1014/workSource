@@ -84,6 +84,7 @@ import com.everhomes.rest.launchpad.LaunchPadItemDTO;
 import com.everhomes.rest.link.RichLinkDTO;
 import com.everhomes.rest.messaging.*;
 import com.everhomes.rest.namespace.*;
+import com.everhomes.rest.openapi.FunctionCardDto;
 import com.everhomes.rest.organization.*;
 import com.everhomes.rest.point.AddUserPointCommand;
 import com.everhomes.rest.point.GetUserTreasureCommand;
@@ -5523,9 +5524,10 @@ public class UserServiceImpl implements UserService {
 
 	// 获取统一的功能卡片
 	@Override
-	public void listUserRelatedCards(){
+	public List<FunctionCardDto> listUserRelatedCards(){
 		functionCardHandlers.forEach(r->{
 			System.out.print(r);
 		});
+		return null;
 	}
 }

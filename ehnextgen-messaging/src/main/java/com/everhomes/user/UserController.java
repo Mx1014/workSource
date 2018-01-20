@@ -1487,8 +1487,7 @@ public class UserController extends ControllerBase {
 	@RequestMapping("listUserRelatedCards")
 	@RestReturn(String.class)
 	public RestResponse listUserRelatedCards() {
-		userService.listUserRelatedCards();
-		RestResponse resp = new RestResponse();
+		RestResponse resp = new RestResponse(userService.listUserRelatedCards());
 		resp.setErrorCode(ErrorCodes.SUCCESS);
 		resp.setErrorDescription("OK");
 		return resp;

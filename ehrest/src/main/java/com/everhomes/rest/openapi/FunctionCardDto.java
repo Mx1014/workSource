@@ -1,8 +1,15 @@
 package com.everhomes.rest.openapi;
 
-import java.sql.Timestamp;
 import java.util.List;
-import java.util.Locale;
+
+
+/**
+ *
+ * <ul>
+ * <li>FunctionCategory: 功能卡片的分类</li>
+ * <li>jsonData: 业务返回的json数据</li>
+ * </ul>
+ */
 
 public class FunctionCardDto {
     private FunctionCategory categoryName;

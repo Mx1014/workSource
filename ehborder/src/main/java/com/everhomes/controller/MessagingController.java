@@ -37,8 +37,8 @@ public class MessagingController {
     @Autowired
     private ApplicationContext applicationContext;
 
-    @Autowired
-    private BlockingEventHandler blockingEventHandler;
+//    @Autowired
+//    private BlockingEventHandler blockingEventHandler;
 
     @Value("${admin.auth:@$##fyhbuRR45678}")
     private String auth;
