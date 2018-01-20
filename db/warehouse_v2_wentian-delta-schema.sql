@@ -1,6 +1,6 @@
 -- 供应商
-DROP TABLE IF EXISTS `eh_warehouse_supplier`;
-CREATE TABLE `eh_warehouse_supplier`(
+DROP TABLE IF EXISTS `eh_warehouse_suppliers`;
+CREATE TABLE `eh_warehouse_suppliers`(
   `id` BIGINT NOT NULL,
   `owner_type` VARCHAR(32) DEFAULT NULL,
   `owner_id` BIGINT DEFAULT NULL ,
@@ -31,8 +31,8 @@ CREATE TABLE `eh_warehouse_supplier`(
 
 -- 采购管理schemas
 -- 采购单
-DROP TABLE IF EXISTS `eh_warehouse_purchase_order`;
-CREATE TABLE `eh_warehouse_purchase_order`(
+DROP TABLE IF EXISTS `eh_warehouse_purchase_orders`;
+CREATE TABLE `eh_warehouse_purchase_orders`(
   `id` BIGINT NOT NULL,
   `owner_type` VARCHAR(32) DEFAULT NULL,
   `owner_id` BIGINT DEFAULT NULL ,
@@ -76,9 +76,9 @@ CREATE TABLE `eh_warehouse_purchase_items`(
 -- 为物品增加供应商字段
 ALTER TABLE `eh_warehouse_materials` ADD COLUMN `supplier_id` BIGINT DEFAULT NULL COMMENT '物品的供应商的主键id';
 
-DROP TABLE IF EXISTS `eh_warehouse_order`;
+DROP TABLE IF EXISTS `eh_warehouse_orders`;
 -- 出入库单 模型
-CREATE TABLE `eh_warehouse_order`(
+CREATE TABLE `eh_warehouse_orders`(
   `id` BIGINT NOT NULL,
   `owner_type` VARCHAR(32) DEFAULT NULL,
   `owner_id` BIGINT DEFAULT NULL ,
@@ -100,8 +100,8 @@ CREATE TABLE `eh_warehouse_order`(
 ALTER TABLE `eh_warehouse_stock_logs` ADD COLUMN `warehouse_sheet_id` BIGINT DEFAULT NULL COMMENT '关联的出入库单的id';
 
 -- 请示单
-DROP TABLE IF EXISTS `eh_requisition`;
-CREATE TABLE `eh_requisition`(
+DROP TABLE IF EXISTS `eh_requisitions`;
+CREATE TABLE `eh_requisitions`(
   `id` BIGINT NOT NULL,
   `owner_type` VARCHAR(32) DEFAULT NULL,
   `owner_id` BIGINT DEFAULT NULL ,
@@ -123,8 +123,8 @@ CREATE TABLE `eh_requisition`(
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4;
 
 -- 请示单类型
-DROP TABLE IF EXISTS `eh_requisition_type`;
-CREATE TABLE `eh_requisition_type`(
+DROP TABLE IF EXISTS `eh_requisition_types`;
+CREATE TABLE `eh_requisition_types`(
   `id` BIGINT NOT NULL,
   `owner_type` VARCHAR(32) DEFAULT NULL,
   `owner_id` BIGINT DEFAULT NULL ,

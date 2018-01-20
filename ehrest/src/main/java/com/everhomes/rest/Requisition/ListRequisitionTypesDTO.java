@@ -1,0 +1,39 @@
+//@formatter:off
+package com.everhomes.rest.Requisition;
+
+import com.everhomes.util.StringHelper;
+
+/**
+ * Created by Wentian Wang on 2018/1/20.
+ */
+/**
+ *<ul>
+ * <li>id:请示类型id</li>
+ * <li>name:请示类型名称</li>
+ *</ul>
+ */
+public class ListRequisitionTypesDTO {
+    private Long id;
+    private Long name;
+
+    public Long getId() {
+        return id;
+    }
+
+    public void setId(Long id) {
+        this.id = id;
+    }
+
+    public Long getName() {
+        return name;
+    }
+
+    public void setName(Long name) {
+        this.name = name;
+    }
+
+    @Override
+    public String toString() {
+        return StringHelper.toJsonString(this);
+    }
+}
