@@ -299,9 +299,9 @@ public class EquipmentTasksSearcherImpl extends AbstractElasticSearch implements
 //                b.field("reviewStatus", 4);
 //            }
 
-            EquipmentInspectionStandards standard = equipmentProvider.findStandardById(task.getStandardId());
-            if(null != standard) {
-            	b.field("taskType", standard.getStandardType());
+            EquipmentInspectionPlans plan = equipmentProvider.getEquipmmentInspectionPlanById(task.getPlanId());
+            if(null != plan) {
+            	b.field("taskType", plan.getPlanType());
             } else {
             	b.field("taskType", "");
             }
