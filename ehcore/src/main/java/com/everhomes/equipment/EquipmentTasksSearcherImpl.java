@@ -2,12 +2,12 @@ package com.everhomes.equipment;
 
 import com.everhomes.configuration.ConfigurationProvider;
 import com.everhomes.listing.CrossShardListingLocator;
-import com.everhomes.organization.OrganizationMember;
 import com.everhomes.organization.OrganizationProvider;
 import com.everhomes.portal.PortalService;
 import com.everhomes.rest.acl.PrivilegeConstants;
 import com.everhomes.rest.equipment.DeleteEquipmentPlanCommand;
 import com.everhomes.rest.equipment.EquipmentInspectionPlanDTO;
+import com.everhomes.rest.equipment.EquipmentStandardRelationDTO;
 import com.everhomes.rest.equipment.EquipmentTaskDTO;
 import com.everhomes.rest.equipment.ListEquipmentTasksResponse;
 import com.everhomes.rest.equipment.SearchEquipmentTasksCommand;
@@ -210,7 +210,7 @@ public class EquipmentTasksSearcherImpl extends AbstractElasticSearch implements
         	 response.setNextPageAnchor(null);
             }
 
-        List<EquipmentTaskDTO> tasks = new ArrayList<EquipmentTaskDTO>();
+        List<EquipmentTaskDTO> tasks = new ArrayList<>();
         for (Long id : ids) {
             EquipmentInspectionTasks task = equipmentProvider.findEquipmentTaskById(id);
             EquipmentTaskDTO dto = ConvertHelper.convert(task, EquipmentTaskDTO.class);
@@ -219,30 +219,31 @@ public class EquipmentTasksSearcherImpl extends AbstractElasticSearch implements
             command.setOwnerId(cmd.getOwnerId());
             command.setOwnerType(cmd.getOwnerType());
             command.setId(task.getPlanId());
-            EquipmentInspectionPlanDTO plansDTO = equipmentService.getEquipmmentInspectionPlanById(command);
-            if (null != plansDTO) {
-                dto.setPlanDescription(plansDTO.getRemarks());
-                dto.setTaskType(plansDTO.getPlanType());
-                dto.setEquipments(plansDTO.getEquipmentStandardRelations());
+            if (task.getPlanId() == null || task.getPlanId() == 0L) {
+                EquipmentInspectionPlanDTO plansDTO = equipmentService.getEquipmmentInspectionPlanById(command);
+                if (null != plansDTO) {
+                    dto.setPlanDescription(plansDTO.getRemarks());
+                    dto.setTaskType(plansDTO.getPlanType());
+                    dto.setEquipments(plansDTO.getEquipmentStandardRelations());
+                }
+            } else {
+                //兼容之前的task
+                EquipmentStandardRelationDTO equipmentStandardRelation = new EquipmentStandardRelationDTO();
+                EquipmentInspectionStandards standard = equipmentProvider.findStandardById(task.getStandardId());
+                if (null != standard) {
+                    dto.setPlanDescription(standard.getDescription());
+                    dto.setTaskType(standard.getStandardType());
+                    equipmentStandardRelation.setStandardId(standard.getId());
+                    equipmentStandardRelation.setStandardName(standard.getName());
+                }
+
+                EquipmentInspectionEquipments equipment = equipmentProvider.findEquipmentById(task.getEquipmentId());
+                if (null != equipment) {
+                    equipmentStandardRelation.setEquipmentId(equipment.getId());
+                    equipmentStandardRelation.setEquipmentName(equipment.getName());
+                    equipmentStandardRelation.setLocation(equipment.getLocation());
+                }
             }
-
-            if(task.getExecutorId() != null && task.getExecutorId() != 0) {
-                //总公司分公司 by xiongying20170328
-                List<OrganizationMember> executors = organizationProvider.listOrganizationMembersByUId(task.getExecutorId());
-//            	OrganizationMember executor = organizationProvider.findOrganizationMemberByOrgIdAndUId(task.getExecutorId(), task.getOwnerId());
-            	if(executors != null && executors.size() > 0) {
-            		dto.setExecutorName(executors.get(0).getContactName());
-            	}
-        	}
-
-        	if(task.getOperatorId() != null && task.getOperatorId() != 0) {
-                List<OrganizationMember> operators = organizationProvider.listOrganizationMembersByUId(task.getOperatorId());
-            	if(operators != null && operators.size() > 0) {
-            		dto.setOperatorName(operators.get(0).getContactName());
-            	}
-        	}
-
-        	tasks.add(dto);
         }
         response.setTasks(tasks);
 
