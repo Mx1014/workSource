@@ -1289,7 +1289,7 @@ public class SocialSecurityServiceImpl implements SocialSecurityService {
             List<SocialSecurityBase> bases = (item.getAccumOrSocial().equals(AccumOrSocial.ACCUM.getCode())) ? afBases : ssBases;
             Long cityId = (item.getAccumOrSocial().equals(AccumOrSocial.ACCUM.getCode())) ? afCItyId : ssCityId;
             BigDecimal radix = (item.getAccumOrSocial().equals(AccumOrSocial.ACCUM.getCode())) ? afRadix : ssRadix;
-            SocialSecurityBase base = null;
+            SocialSecurityBase base = findSSBaseWithOutException(bases, item);
             if (null == setting) {
                 if (item.getCompanyRadix() == null || item.getCompanyRatio() == null) {
                     if(!item.getPayItem().equals("商业保险") && !item.getPayItem().equals("残障金")){
@@ -1302,7 +1302,6 @@ public class SocialSecurityServiceImpl implements SocialSecurityService {
                         return;
                     }
                 }
-                base = findSSBaseWithOutException(bases, item);
                 if (null == base) {
                     setting = ConvertHelper.convert(item, SocialSecuritySetting.class);
                     setting.setCityId(cityId);
@@ -1391,8 +1390,8 @@ public class SocialSecurityServiceImpl implements SocialSecurityService {
     }
 
     private String importCalculateCompanyRatio(Integer companyRatio, SocialSecurityBase base, SocialSecurityItemDTO itemDTO, SocialSecuritySetting setting) {
+        LOGGER.debug("base : " + StringHelper.toJsonString(base) + " ratio " + companyRatio);
         if (null != base) {
-            LOGGER.debug("base : " + StringHelper.toJsonString(base) + " ratio " + companyRatio);
             if (companyRatio.compareTo(base.getCompanyRatioMin()) < 0) {
                 setting.setCompanyRatio(base.getCompanyRatioMin());
             } else if (companyRatio.compareTo(base.getCompanyRatioMax()) > 0) {
