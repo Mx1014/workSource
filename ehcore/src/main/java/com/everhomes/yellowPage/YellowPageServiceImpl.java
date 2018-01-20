@@ -1089,6 +1089,10 @@ public class YellowPageServiceImpl implements YellowPageService {
 			serviceAlliance.setDisplayFlag(sa.getDisplayFlag());
 			
 			//替换moduleUrl,替换格式如此 	zl://approval/create?approvalId=-1&sourceId=6&formId=1
+			if(serviceAlliance.getModuleUrl() != null && serviceAlliance.getModuleUrl().contains("{id}")) {
+				String moduleUrl = serviceAlliance.getModuleUrl().replace("{id}", serviceAlliance.getId().toString());
+				serviceAlliance.setModuleUrl(moduleUrl);
+			}
 			replaceModuleUrl(serviceAlliance);
 			this.yellowPageProvider.updateServiceAlliances(serviceAlliance);
 			this.yellowPageProvider.deleteServiceAllianceAttachmentsByOwnerId(serviceAlliance.getId());
