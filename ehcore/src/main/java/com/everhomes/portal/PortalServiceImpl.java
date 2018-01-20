@@ -2552,8 +2552,9 @@ public class PortalServiceImpl implements PortalService {
 				}
 			}
 
-			serviceModuleAppProvider.createServiceModuleApp(moduleApp);
 		}
+
+		serviceModuleAppProvider.createServiceModuleApp(moduleApp);
 		return moduleApp;
 	}
 

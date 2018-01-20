@@ -66,7 +66,11 @@ public class PortalItemGroupProviderImpl implements PortalItemGroupProvider {
 				id ++;
 				group.setId(id);
 			}
-			group.setName(EhPortalItemGroups.class.getSimpleName() + id);
+
+			if(group.getName() == null){
+				group.setName(EhPortalItemGroups.class.getSimpleName() + group.getId());
+			}
+
 			group.setCreateTime(new Timestamp(DateHelper.currentGMTTime().getTime()));
 			group.setUpdateTime(group.getCreateTime());
 			groups.add(ConvertHelper.convert(group, EhPortalItemGroups.class));
