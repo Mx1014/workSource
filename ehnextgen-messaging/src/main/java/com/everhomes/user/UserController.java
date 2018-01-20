@@ -1478,4 +1478,19 @@ public class UserController extends ControllerBase {
 	}
 
 
+	/**
+	 * <b>URL: /user/listUserRelatedCards</b>
+	 * <p>test</p>
+	 * @return
+	 */
+	@RequestMapping("listUserRelatedCards")
+	@RestReturn(String.class)
+	public RestResponse listUserRelatedCards() {
+		userService.listUserRelatedCards();
+		RestResponse resp = new RestResponse();
+		resp.setErrorCode(ErrorCodes.SUCCESS);
+		resp.setErrorDescription("OK");
+		return resp;
+	}
+
 }

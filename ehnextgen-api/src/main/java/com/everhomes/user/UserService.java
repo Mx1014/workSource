@@ -294,4 +294,6 @@ public interface UserService {
     String getSercetKeyForScan(HttpServletRequest request, HttpServletResponse response);
 
     void logonByScan(String subjectId, String message);
+
+    void listUserRelatedCards();
 }
