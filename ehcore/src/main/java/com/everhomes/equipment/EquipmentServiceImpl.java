@@ -2955,18 +2955,6 @@ private void checkUserPrivilege(Long orgId, Long privilegeId, Long communityId) 
 					dto.setTargetName(targets.get(0).getContactName());
 				}
 			}
-//        	if(r.getOperatorId() != null && r.getOperatorId() != 0) {
-//        		OrganizationMember operator = organizationProvider.findOrganizationMemberByOrgIdAndUId(r.getOperatorId(), task.getOwnerId());
-//            	if(operator != null) {
-//            		dto.setOperatorName(operator.getContactName());
-//            	}
-//        	}
-//        	if(r.getTargetId() != null && r.getTargetId() != 0) {
-//        		OrganizationMember target = organizationProvider.findOrganizationMemberByOrgIdAndUId(r.getTargetId(), task.getExecutiveGroupId());
-//            	if(target != null) {
-//            		dto.setTargetName(target.getContactName());
-//            	}
-//        	}
 
         	List<EquipmentInspectionTasksAttachments> attachmentLists = equipmentProvider.listTaskAttachmentsByLogId(dto.getId());
         	if(attachmentLists != null && attachmentLists.size() > 0) {

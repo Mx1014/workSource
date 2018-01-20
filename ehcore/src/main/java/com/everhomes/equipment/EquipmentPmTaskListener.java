@@ -17,9 +17,9 @@ public class EquipmentPmTaskListener implements PmTaskListener {
     public void onTaskSuccess(PmTask pmTask, Long referId) {
         //更新巡检log状态referId为设备id
         EquipmentInspectionTasksLogs log = equipmentProvider.getMaintanceLogByEquipmentId(referId);
-        equipmentProvider.updateMaintanceInspectionLogsById(log.getId());
+        equipmentProvider.updateMaintanceInspectionLogsById(log.getId(),pmTask.getFlowCaseId());
         //设备状态
-        equipmentProvider.updateEquipmentStatus(referId,EquipmentStatus.IN_USE.getCode());
+        equipmentProvider.updateEquipmentStatus(referId, EquipmentStatus.IN_USE.getCode());
 
     }
 }

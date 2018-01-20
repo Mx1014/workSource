@@ -3037,11 +3037,13 @@ public class EquipmentProviderImpl implements EquipmentProvider {
     }
 
     @Override
-    public void updateMaintanceInspectionLogsById(Long id) {
+    public void updateMaintanceInspectionLogsById(Long taskLogId, Long flowCaseId) {
         DSLContext context = this.dbProvider.getDslContext(AccessSpec.readOnly());
         context.update(Tables.EH_EQUIPMENT_INSPECTION_TASK_LOGS)
                 .set(Tables.EH_EQUIPMENT_INSPECTION_TASK_LOGS.PROCESS_RESULT, (EquipmentTaskProcessResult.NEED_MAINTENANCE_DELAY_COMPLETE_OK.getCode()))
                 .set(Tables.EH_EQUIPMENT_INSPECTION_TASK_LOGS.PROCESS_TYPE, EquipmentTaskProcessType.COMPLETE_MAINTENANCE.getCode())
+                .set(Tables.EH_EQUIPMENT_INSPECTION_TASK_LOGS.FLOW_CASE_ID, flowCaseId)
+                .where(Tables.EH_EQUIPMENT_INSPECTION_TASK_LOGS.ID.eq(taskLogId))
                 .execute();
     }
 

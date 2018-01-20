@@ -29,6 +29,7 @@ import com.everhomes.rest.sms.SmsTemplateCode;
 import com.everhomes.rest.user.IdentifierType;
 import com.everhomes.rest.user.MessageChannelType;
 import com.everhomes.scheduler.ScheduleProvider;
+import com.everhomes.search.EquipmentTasksSearcher;
 import com.everhomes.sms.SmsProvider;
 import com.everhomes.user.User;
 import com.everhomes.user.UserIdentifier;
@@ -96,6 +97,9 @@ public class PmNotifyServiceImpl implements PmNotifyService, ApplicationListener
 
     @Autowired
     private EnergyMeterProvider energyMeterProvider;
+
+    @Autowired
+    private EquipmentTasksSearcher equipmentTaskSearchser;
 
     private String queueDelay = "pmtaskdelays";
     private String queueNoDelay = "pmtasknodelays";
@@ -204,6 +208,7 @@ public class PmNotifyServiceImpl implements PmNotifyService, ApplicationListener
                     smsCode = SmsTemplateCode.PM_NOTIFY_AFTER_TASK_DELAY;
                     //过期提醒的notifytime即为任务的截止时间，所以先关掉任务
                     equipmentProvider.closeTask(task);
+                    equipmentTaskSearchser.feedDoc(task);
                 }
 //                LOGGER.info("processPmNotifyRecord  smsCode={}",smsCode);
             }
