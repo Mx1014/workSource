@@ -1,7 +1,7 @@
  
 
 -- 薪酬设置可以用的基础字段项(可以被公司继承,不可删除)
-DROP TABLE eh_salary_default_entities;
+DROP TABLE IF EXISTS eh_salary_default_entities;
 CREATE TABLE `eh_salary_default_entities` (
   `id` BIGINT COMMENT 'id of the record', 
   `editable_flag` TINYINT COMMENT '是否可编辑:-1 数值也不能编辑 0-否   1-是',
@@ -19,13 +19,13 @@ CREATE TABLE `eh_salary_default_entities` (
   `creator_uid` BIGINT,
   `create_time` DATETIME, 
   `status` TINYINT COMMENT '默认是否开启0不开启 2-开启',
-  PRIMARY KEY (`i0d`)
+  PRIMARY KEY (`id`)
 ) ENGINE=INNODB DEFAULT CHARSET=utf8mb4 ;
 
 
 
 -- 薪酬批次可用的选项的标签类型 基础数据
-DROP TABLE eh_salary_entity_categories;
+DROP TABLE IF EXISTS eh_salary_entity_categories;
 CREATE TABLE `eh_salary_entity_categories` (
   `id` BIGINT,
   `owner_type` VARCHAR(32) COMMENT 'organization',
@@ -45,7 +45,7 @@ CREATE TABLE `eh_salary_entity_categories` (
 
 
 -- 薪酬批次包含的选项
-DROP TABLE eh_salary_group_entities;
+DROP TABLE IF EXISTS eh_salary_group_entities;
 CREATE TABLE `eh_salary_group_entities` (
   `id` BIGINT COMMENT 'id of the record', 
   `owner_type` VARCHAR(32) COMMENT 'organization',
@@ -66,13 +66,15 @@ CREATE TABLE `eh_salary_group_entities` (
   `description` TEXT COMMENT '说明文字',
   `creator_uid` BIGINT,
   `create_time` DATETIME, 
+  `operator_uid` BIGINT,
+  `update_time` DATETIME, 
   `status` TINYINT ,
   PRIMARY KEY (`id`)
 ) ENGINE=INNODB DEFAULT CHARSET=utf8mb4 ;
 
 
 -- 某个人的薪酬设定
-DROP TABLE eh_salary_employee_origin_vals;
+DROP TABLE IF EXISTS eh_salary_employee_origin_vals;
 CREATE TABLE `eh_salary_employee_origin_vals` (
   `id` BIGINT COMMENT 'id of the record', 
   `owner_type` VARCHAR(32) COMMENT 'organization',
@@ -96,11 +98,11 @@ CREATE TABLE `eh_salary_employee_origin_vals` (
   PRIMARY KEY (`id`)
 ) ENGINE=INNODB DEFAULT CHARSET=utf8mb4 ;
 
-DROP TABLE eh_salary_groups;
+DROP TABLE IF EXISTS eh_salary_groups;
 -- 薪酬批次每期的数据 
 
 -- 薪酬批次每个人的每期数据
-DROP TABLE eh_salary_employees;
+DROP TABLE IF EXISTS eh_salary_employees;
 CREATE TABLE `eh_salary_employees` (
   `id` BIGINT COMMENT 'id of the record', 
   `owner_type` VARCHAR(32) COMMENT 'organization',
@@ -121,7 +123,7 @@ CREATE TABLE `eh_salary_employees` (
 
 
 -- 薪酬薪酬人员每期的实际值
-DROP TABLE eh_salary_employee_period_vals;
+DROP TABLE IF EXISTS eh_salary_employee_period_vals;
 CREATE TABLE `eh_salary_employee_period_vals` (
   `id` BIGINT COMMENT 'id of the record', 
   `owner_type` VARCHAR(32) COMMENT 'organization',
