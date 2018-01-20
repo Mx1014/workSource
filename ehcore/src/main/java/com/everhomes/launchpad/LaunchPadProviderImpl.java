@@ -640,8 +640,8 @@ public class LaunchPadProviderImpl implements LaunchPadProvider {
 		DaoHelper.publishDaoAction(DaoAction.MODIFY, EhUserLaunchPadItems.class, null);
 	}
 
-	public List<ItemServiceCategry> listItemServiceCategries(Integer namespaceId){
-		return listItemServiceCategries(namespaceId, null, null, new ListingQueryBuilderCallback() {
+	public List<ItemServiceCategry> listItemServiceCategries(Integer namespaceId, String itemLocation, String itemGroup){
+		return listItemServiceCategries(namespaceId, itemLocation, itemGroup, new ListingQueryBuilderCallback() {
 			@Override
 			public SelectQuery<? extends Record> buildCondition(ListingLocator locator, SelectQuery<? extends Record> query) {
 				query.addGroupBy(Tables.EH_ITEM_SERVICE_CATEGRIES.NAME);

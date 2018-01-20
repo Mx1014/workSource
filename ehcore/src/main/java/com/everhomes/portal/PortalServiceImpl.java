@@ -2281,7 +2281,7 @@ public class PortalServiceImpl implements PortalService {
 						itemGroup.setInstanceConfig(StringHelper.toJsonString(config));
 						portalItemGroupProvider.createPortalItemGroup(itemGroup);
 						if(name.equals("ServiceMarketLayout"))
-							syncItemCategory(itemGroup.getNamespaceId(),itemGroup.getId(), newVersion.getId());
+							syncItemCategory(itemGroup.getNamespaceId(),itemGroup.getId(), itemGroup.getName(), newVersion.getId());
 						syncItem(itemGroup.getNamespaceId(), location, itemGroup.getName(), itemGroup.getId(), newVersion);
 					}else if(Widget.fromCode(padLayoutGroup.getWidget()) == Widget.BANNERS){
 						BannersInstanceConfig instanceConfig = (BannersInstanceConfig)StringHelper.fromJsonString(StringHelper.toJsonString(padLayoutGroup.getInstanceConfig()), BannersInstanceConfig.class);
@@ -2385,9 +2385,9 @@ public class PortalServiceImpl implements PortalService {
 		return layout;
 	}
 
-	private void syncItemCategory(Integer namespaceId, Long itemGroupId, Long versionId){
+	private void syncItemCategory(Integer namespaceId, Long itemGroupId, String itemName, Long versionId){
 		User user = UserContext.current().getUser();
-		List<ItemServiceCategry> categories = launchPadProvider.listItemServiceCategries(namespaceId);
+		List<ItemServiceCategry> categories = launchPadProvider.listItemServiceCategries(namespaceId, null, itemName);
 		for (ItemServiceCategry category: categories) {
 			PortalItemCategory portalItemCategory = portalItemCategoryProvider.getPortalItemCategoryByName(namespaceId, itemGroupId, category.getName());
 			if(null == portalItemCategory){
