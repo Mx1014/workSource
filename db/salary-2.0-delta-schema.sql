@@ -19,7 +19,7 @@ CREATE TABLE `eh_salary_default_entities` (
   `creator_uid` BIGINT,
   `create_time` DATETIME, 
   `status` TINYINT COMMENT '默认是否开启0不开启 2-开启',
-  PRIMARY KEY (`i0d`)
+  PRIMARY KEY (`id`)
 ) ENGINE=INNODB DEFAULT CHARSET=utf8mb4 ;
 
 
