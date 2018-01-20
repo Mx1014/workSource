@@ -2626,6 +2626,11 @@ public class EquipmentProviderImpl implements EquipmentProvider {
         TasksStatData resp = new TasksStatData();
 
         final Field<Byte> delayTasks = DSL.decode().when(Tables.EH_EQUIPMENT_INSPECTION_TASKS.STATUS
+                        .eq(EquipmentTaskStatus.DELAY.getCode()).
+                                or(Tables.EH_EQUIPMENT_INSPECTION_TASKS.STATUS.eq(EquipmentTaskStatus.REVIEW_DELAY.getCode())),
+                EquipmentTaskStatus.DELAY.getCode());
+
+        final Field<Byte> delayInpsectionTasks = DSL.decode().when(Tables.EH_EQUIPMENT_INSPECTION_TASKS.STATUS
                 .eq(EquipmentTaskStatus.DELAY.getCode()), EquipmentTaskStatus.DELAY.getCode());
 
 
@@ -2651,6 +2656,7 @@ public class EquipmentProviderImpl implements EquipmentProvider {
                 DSL.count(completeInspection).as("completeInspection"),
                 DSL.count(completeInspectionWaitingForApproval).as("completeInspectionWaitingForApproval"),
                 DSL.count(delayTasks).as("delayTasks"),
+                DSL.count(delayInpsectionTasks).as("delayInpsectionTasks"),
                 DSL.count(reviewDelay).as("reviewDelay")};
 
         final SelectQuery<Record> query = context.selectQuery();
@@ -2687,6 +2693,7 @@ public class EquipmentProviderImpl implements EquipmentProvider {
             resp.setComplete(resp.getCompleteInspection()+resp.getWaitingForExecuting());
             resp.setTotalTasks(r.getValue("total", Long.class));
             resp.setDelay(r.getValue("delayTasks", Long.class));
+            resp.setDelayInspection(r.getValue("delayInpsectionTasks", Long.class));
             resp.setReviewDelayTasks(r.getValue("reviewDelay", Long.class));
             return null;
         });

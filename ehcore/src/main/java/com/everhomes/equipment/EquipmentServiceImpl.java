@@ -76,6 +76,7 @@ import com.everhomes.rest.equipment.EquipmentParameterDTO;
 import com.everhomes.rest.equipment.EquipmentPlanStatus;
 import com.everhomes.rest.equipment.EquipmentReviewStatus;
 import com.everhomes.rest.equipment.EquipmentServiceErrorCode;
+import com.everhomes.rest.equipment.EquipmentStandardCommunity;
 import com.everhomes.rest.equipment.EquipmentStandardMapDTO;
 import com.everhomes.rest.equipment.EquipmentStandardRelationDTO;
 import com.everhomes.rest.equipment.EquipmentStandardStatus;
@@ -883,10 +884,21 @@ private void checkUserPrivilege(Long orgId, Long privilegeId, Long communityId) 
 		equipmentProvider.populateItems(standard);
 		//equipmentProvider.populateStandardGroups(standard);
 
-		EquipmentStandardsDTO dto = converStandardToDto(standard);
-
-		if(standard.getTargetId()==0L){
-			dto.setCommunities(equipmentProvider.listModelCommunityMapByModelId(standard.getId(),EquipmentModelType.STANDARD.getCode()));
+		if (standard.getTargetId() == 0L) {
+			List<Long> communityIds = equipmentProvider.listModelCommunityMapByModelId(standard.getId(), EquipmentModelType.STANDARD.getCode());
+			List<EquipmentStandardCommunity> communities = new ArrayList<>();
+			EquipmentStandardCommunity standardCommunity = new EquipmentStandardCommunity();
+			if (communityIds != null && communityIds.size() > 0) {
+				communityIds.forEach((c) -> {
+					Community community = communityProvider.findCommunityById(standard.getTargetId());
+					if (community != null) {
+						standardCommunity.setCommunityId(community.getId());
+						standardCommunity.setCommunityName(community.getName());
+					}
+					communities.add(standardCommunity);
+				});
+			}
+			standard.setCommunities(communities);
 		}
 		return converStandardToDto(standard);
 	}
