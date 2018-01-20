@@ -1249,7 +1249,7 @@ public class YellowPageServiceImpl implements YellowPageService {
 	@Override
 	public void deleteNotifyTarget(DeleteNotifyTargetCommand cmd) {
 
-		ServiceAllianceNotifyTargets target = verifyNotifyTarget(cmd.getOwnerType(), cmd.getOwnerId(), cmd.getId());
+//		ServiceAllianceNotifyTargets target = verifyNotifyTarget(cmd.getOwnerType(), cmd.getOwnerId(), cmd.getId());
 		this.yellowPageProvider.deleteNotifyTarget(cmd.getId());
 	}
 
