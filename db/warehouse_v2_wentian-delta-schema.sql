@@ -80,21 +80,60 @@ DROP TABLE IF EXISTS `eh_warehouse_order`;
 -- 出入库单 模型
 CREATE TABLE `eh_warehouse_order`(
   `id` BIGINT NOT NULL,
-  `identity` VARCHAR(128) NOT NULL COMMENT '出入库单号',
-  `executor_id` BIGINT DEFAULT NULL COMMENT '执行人id',
-  `executor_time` DATETIME DEFAULT now() COMMENT '执行时间',
-  `service_type` VARCHAR(64) DEFAULT NULL COMMENT '服务类型，这里默认为出入库类型，普通入库，领用出库，采购入库',
   `owner_type` VARCHAR(32) DEFAULT NULL,
   `owner_id` BIGINT DEFAULT NULL ,
   `namespace_id` INTEGER DEFAULT NULL ,
+  `identity` VARCHAR(128) NOT NULL COMMENT '出入库单号',
+  `executor_id` BIGINT DEFAULT NULL COMMENT '执行人id',
+  `executor_time` DATETIME DEFAULT now() COMMENT '执行时间',
+  `service_type` TINYINT DEFAULT NULL COMMENT '服务类型，1. 普通入库,2.领用出库，3.采购入库',
   `create_time` DATETIME DEFAULT NOW(),
   `create_uid` DATETIME DEFAULT NULL,
   `update_time` DATETIME DEFAULT NOW(),
   `update_uid` DATETIME DEFAULT NULL,
   `default_order` INTEGER DEFAULT 0,
-  INDEX `for_service_type_search` (`service_type`) COMMENT '出入库状态得索引，用来搜索, 走不走es？',
+  KEY `i_service_type` (`service_type`) COMMENT '出入库状态得索引，用于搜索',
   PRIMARY KEY (`id`)
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4;
 
 -- 增加出入库记录关联出入库单的字段
 ALTER TABLE `eh_warehouse_stock_logs` ADD COLUMN `warehouse_sheet_id` BIGINT DEFAULT NULL COMMENT '关联的出入库单的id';
+
+-- 请示单
+DROP TABLE IF EXISTS `eh_requisition`;
+CREATE TABLE `eh_requisition`(
+  `id` BIGINT NOT NULL,
+  `owner_type` VARCHAR(32) DEFAULT NULL,
+  `owner_id` BIGINT DEFAULT NULL ,
+  `namespace_id` INTEGER DEFAULT NULL ,
+  `identity` VARCHAR(32) NOT NULL COMMENT '请示单号',
+  `theme` VARCHAR(32) NOT NULL COMMENT '请示主题',
+  `type` BIGINT DEFAULT NULL COMMENT '请示类型,参考eh_requisition_type表',
+  `applicant_name` BIGINT NOT NULL COMMENT '请示人id',
+  `applicant_department` BIGINT DEFAULT NULL COMMENT '请示人部门',
+  `amount` DECIMAL (20,2) DEFAULT 0.00 COMMENT '申请金额',
+  `description` TEXT DEFAULT NULL COMMENT '申请说明',
+  `attachment_url` VARCHAR(256) DEFAULT NULL COMMENT '附件地址',
+  `create_time` DATETIME DEFAULT NOW(),
+  `create_uid` DATETIME DEFAULT NULL,
+  `update_time` DATETIME DEFAULT NOW(),
+  `update_uid` DATETIME DEFAULT NULL,
+  `default_order` INTEGER DEFAULT 0,
+  PRIMARY KEY (`id`)
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4;
+
+-- 请示单类型
+DROP TABLE IF EXISTS `eh_requisition_type`;
+CREATE TABLE `eh_requisition_type`(
+  `id` BIGINT NOT NULL,
+  `owner_type` VARCHAR(32) DEFAULT NULL,
+  `owner_id` BIGINT DEFAULT NULL ,
+  `namespace_id` INTEGER DEFAULT NULL ,
+  `name` VARCHAR(32) NOT NULL COMMENT '类型名字',
+  `create_time` DATETIME DEFAULT NOW(),
+  `create_uid` DATETIME DEFAULT NULL,
+  `update_time` DATETIME DEFAULT NOW(),
+  `update_uid` DATETIME DEFAULT NULL,
+  `default_order` INTEGER DEFAULT 0,
+  PRIMARY KEY (`id`)
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4;
