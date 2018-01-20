@@ -66,6 +66,8 @@ CREATE TABLE `eh_salary_group_entities` (
   `description` TEXT COMMENT '说明文字',
   `creator_uid` BIGINT,
   `create_time` DATETIME, 
+  `operator_uid` BIGINT,
+  `update_time` DATETIME, 
   `status` TINYINT ,
   PRIMARY KEY (`id`)
 ) ENGINE=INNODB DEFAULT CHARSET=utf8mb4 ;
