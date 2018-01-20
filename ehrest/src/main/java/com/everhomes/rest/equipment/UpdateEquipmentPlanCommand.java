@@ -20,6 +20,7 @@ import java.util.List;
  *  <li>planType: 计划类别  参考{@link com.everhomes.rest.equipment.StandardType}</li>
  *  <li>name: 计划名称</li>
  *  <li>status: 计划状态 参考{@link com.everhomes.rest.equipment.EquipmentPlanStatus}</li>
+ *  <li>repeatType: 周期类型 参考{@link com.everhomes.rest.equipment.EquipmentPlanStatus}</li>
  *  <li>remarks: 计划备注内容</li>
  *  <li>inspectionCategoryId: 巡检对象类型id</li>
  *  <li>repeatSettings: 执行周期 参考{@link com.everhomes.rest.repeat.RepeatSettingsDTO}</li>
