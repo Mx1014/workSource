@@ -1104,7 +1104,7 @@ public class QualityServiceImpl implements QualityService {
 		if (!StringUtils.isNullOrEmpty(cmd.getTaskName()))
             query.addConditions(Tables.EH_QUALITY_INSPECTION_TASKS.TASK_NAME.eq(cmd.getTaskName()));
 
-		if (cmd.getExecuteFlag() == 1) {
+		if (cmd.getExecuteFlag()!=null && cmd.getExecuteFlag() == 1) {
 			query.addConditions(Tables.EH_QUALITY_INSPECTION_TASKS.EXECUTIVE_EXPIRE_TIME.ge(new Timestamp(DateHelper.currentGMTTime().getTime()))
 					.or(Tables.EH_QUALITY_INSPECTION_TASKS.EXECUTIVE_EXPIRE_TIME.isNull())
 					.or(Tables.EH_QUALITY_INSPECTION_TASKS.PROCESS_EXPIRE_TIME.ge(new Timestamp(DateHelper.currentGMTTime().getTime()))));
