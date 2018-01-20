@@ -227,6 +227,7 @@ public class EquipmentPlanSearcherImpl extends AbstractElasticSearch implements 
             b.field("planNumber", plan.getPlanNumber());
             b.field("planType", plan.getPlanType());
             b.field("status", plan.getStatus());
+            b.field("inspectionCategoryId", plan.getInspectionCategoryId());
 
             //关联计划的周期类型
             RepeatSettings repeat = repeatProvider.findRepeatSettingById(plan.getRepeatSettingId());

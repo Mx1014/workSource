@@ -16,6 +16,7 @@ import javax.validation.constraints.NotNull;
  *  <li>keyword: 查询关键字</li>
  *  <li>pageAnchor: 锚点</li>
  *  <li>pageSize: 页面大小</li>
+ *  <li>inspectionCategoryId: 类型</li>
  *  <li>namespaceId: namespaceId</li>
  * </ul>
  */
