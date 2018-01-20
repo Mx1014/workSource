@@ -129,6 +129,8 @@ ALTER TABLE `eh_equipment_inspection_standards`
 -- 操作记录表增加设备id表
 ALTER TABLE `eh_equipment_inspection_task_logs`
   ADD COLUMN `equipment_id`  bigint(20) NULL DEFAULT 0 ;
+ALTER TABLE `eh_equipment_inspection_task_logs`
+  ADD COLUMN `flow_case_id`  bigint(20) NULL AFTER `equipment_id`;
 
 -- 离线支持  jiarui
 ALTER TABLE `eh_quality_inspection_specifications`
