@@ -513,6 +513,8 @@ public class EquipmentServiceImpl implements EquipmentService {
 		if (itemDTOS != null && itemDTOS.size() > 0) {
 			for (InspectionItemDTO itemDTO : itemDTOS) {
 				EquipmentInspectionItems item = ConvertHelper.convert(itemDTO, EquipmentInspectionItems.class);
+				item.setOwnerId(cmd.getOwnerId());
+				item.setOwnerType(cmd.getOwnerType());
 				Long itemId = equipmentProvider.createEquipmentInspectionItems(item);
 				items.add(item);
 				// create item template map

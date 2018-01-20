@@ -110,6 +110,7 @@ public class EquipmentTaskDTO {
 	private String reviewerName;
 	@Deprecated
 	private String standardDescription;
+	private String planDescription;
 	@Deprecated
 	private Byte qrCodeFlag;
 	@Deprecated
@@ -476,6 +477,14 @@ public class EquipmentTaskDTO {
 
 	public void setReviewTime(Timestamp reviewTime) {
 		this.reviewTime = reviewTime;
+	}
+
+	public String getPlanDescription() {
+		return planDescription;
+	}
+
+	public void setPlanDescription(String planDescription) {
+		this.planDescription = planDescription;
 	}
 
 	@Override
