@@ -1392,6 +1392,7 @@ public class SocialSecurityServiceImpl implements SocialSecurityService {
 
     private String importCalculateCompanyRatio(Integer companyRatio, SocialSecurityBase base, SocialSecurityItemDTO itemDTO, SocialSecuritySetting setting) {
         if (null != base) {
+            LOGGER.debug("base : " + StringHelper.toJsonString(base) + " ratio " + companyRatio);
             if (companyRatio.compareTo(base.getCompanyRatioMin()) < 0) {
                 setting.setCompanyRatio(base.getCompanyRatioMin());
             } else if (companyRatio.compareTo(base.getCompanyRatioMax()) > 0) {
