@@ -64,6 +64,7 @@ import com.everhomes.openapi.FunctionCardHandler;
 import com.everhomes.organization.*;
 import com.everhomes.organization.pm.PropertyMgrService;
 import com.everhomes.point.UserPointService;
+import com.everhomes.qrcode.QRCodeService;
 import com.everhomes.region.Region;
 import com.everhomes.region.RegionProvider;
 import com.everhomes.rest.address.*;
@@ -88,6 +89,8 @@ import com.everhomes.rest.point.AddUserPointCommand;
 import com.everhomes.rest.point.GetUserTreasureCommand;
 import com.everhomes.rest.point.GetUserTreasureResponse;
 import com.everhomes.rest.point.PointType;
+import com.everhomes.rest.qrcode.NewQRCodeCommand;
+import com.everhomes.rest.qrcode.QRCodeDTO;
 import com.everhomes.rest.search.SearchContentType;
 import com.everhomes.rest.sms.SmsTemplateCode;
 import com.everhomes.rest.ui.organization.SetCurrentCommunityForSceneCommand;
@@ -106,7 +109,6 @@ import org.apache.commons.lang.StringUtils;
 import org.elasticsearch.common.geo.GeoHashUtils;
 import org.jooq.DSLContext;
 import org.jooq.Record;
-import org.jooq.util.derby.sys.Sys;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.BeanUtils;
@@ -318,6 +320,9 @@ public class UserServiceImpl implements UserService {
 
 	@Autowired
 	List<FunctionCardHandler> functionCardHandlers;
+
+	@Autowired
+	private QRCodeService qrCodeService;
 
 //
 //    @Autowired
@@ -5444,10 +5449,12 @@ public class UserServiceImpl implements UserService {
 
 	// 生成随机key
 	@Override
-    public String querySubjectIdForScan(){
+    public QRCodeDTO querySubjectIdForScan(){
 		String uuid = UUID.randomUUID().toString();
 		String subjectId = "waitScanForLogon" + uuid.replace("-", "");
-		return subjectId;
+		NewQRCodeCommand cmd = new NewQRCodeCommand();
+		cmd.setActionData(subjectId);
+		return qrCodeService.createQRCode(cmd);
 	}
 
 	// 登录等待

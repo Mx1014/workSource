@@ -7,6 +7,7 @@ import com.everhomes.rest.asset.TargetDTO;
 import com.everhomes.rest.family.FamilyDTO;
 import com.everhomes.rest.link.RichLinkDTO;
 import com.everhomes.rest.organization.OrganizationDTO;
+import com.everhomes.rest.qrcode.QRCodeDTO;
 import com.everhomes.rest.ui.organization.SetCurrentCommunityForSceneCommand;
 import com.everhomes.rest.ui.user.*;
 import com.everhomes.rest.user.*;
@@ -287,7 +288,7 @@ public interface UserService {
     SystemInfoResponse updateUserBySystemInfo(SystemInfoCommand cmd,
             HttpServletRequest request, HttpServletResponse response);
 
-    String querySubjectIdForScan();
+    QRCodeDTO querySubjectIdForScan();
 
     DeferredResult<Object> waitScanForLogon(String subjectId);
 

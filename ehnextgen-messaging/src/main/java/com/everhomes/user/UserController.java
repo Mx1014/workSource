@@ -30,6 +30,7 @@ import com.everhomes.rest.messaging.MessageChannel;
 import com.everhomes.rest.messaging.MessageDTO;
 import com.everhomes.rest.oauth2.AuthorizationCommand;
 import com.everhomes.rest.oauth2.OAuth2ServiceErrorCode;
+import com.everhomes.rest.qrcode.QRCodeDTO;
 import com.everhomes.rest.scene.SceneTypeInfoDTO;
 import com.everhomes.rest.ui.user.*;
 import com.everhomes.rest.user.*;
@@ -1428,7 +1429,7 @@ public class UserController extends ControllerBase {
 	 * @return
 	 */
 	@RequestMapping("querySubjectIdForScan")
-	@RestReturn(String.class)
+	@RestReturn(QRCodeDTO.class)
 	public RestResponse querySubjectIdForScan() {
 		RestResponse resp = new RestResponse(userService.querySubjectIdForScan());
 		resp.setErrorCode(ErrorCodes.SUCCESS);
