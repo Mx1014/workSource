@@ -1489,7 +1489,7 @@ public class EquipmentProviderImpl implements EquipmentProvider {
     public void populateItems(EquipmentInspectionStandards standard) {
         DSLContext context = this.dbProvider.getDslContext(AccessSpec.readOnly());
         SelectQuery<EhEquipmentInspectionTemplateItemMapRecord> query = context.selectQuery(Tables.EH_EQUIPMENT_INSPECTION_TEMPLATE_ITEM_MAP);
-        query.addConditions(Tables.EH_EQUIPMENT_INSPECTION_TEMPLATE_ITEM_MAP.ID.eq(standard.getTemplateId()));
+        query.addConditions(Tables.EH_EQUIPMENT_INSPECTION_TEMPLATE_ITEM_MAP.TEMPLATE_ID.eq(standard.getTemplateId()));
         List<EquipmentInspectionItems> items = new ArrayList<>();
         query.fetch().map((r)->{
             items.add(findEquipmentInspectionItem(r.getItemId()));
