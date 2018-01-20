@@ -1,7 +1,7 @@
  
 
 -- 薪酬设置可以用的基础字段项(可以被公司继承,不可删除)
-DROP TABLE eh_salary_default_entities;
+DROP TABLE IF EXISTS eh_salary_default_entities;
 CREATE TABLE `eh_salary_default_entities` (
   `id` BIGINT COMMENT 'id of the record', 
   `editable_flag` TINYINT COMMENT '是否可编辑:-1 数值也不能编辑 0-否   1-是',
