@@ -40,3 +40,5 @@ ALTER TABLE eh_flow_buttons ADD INDEX i_eh_flow_node_id(flow_node_id);
 ALTER TABLE eh_flow_buttons DROP INDEX i_eh_flow_node_id_ver_type;
 ALTER TABLE eh_flow_buttons DROP INDEX i_eh_flow_node_status;
 
+ALTER TABLE `eh_app_urls`
+CHANGE COLUMN `download_url` `download_url` VARCHAR(256) NULL DEFAULT NULL ;
