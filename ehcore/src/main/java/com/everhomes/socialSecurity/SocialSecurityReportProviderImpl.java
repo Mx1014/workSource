@@ -112,7 +112,7 @@ public class SocialSecurityReportProviderImpl implements SocialSecurityReportPro
 //                        Tables.EH_SOCIAL_SECURITY_REPORT.FILE_UID,
 //                        Tables.EH_SOCIAL_SECURITY_REPORT.FILE_TIME,
                         Tables.EH_SOCIAL_SECURITY_REPORT.ORGANIZATION_ID);
-		LOGGER.debug("计算公司汇总表的 sql is " + step.toString());
+//		LOGGER.debug("计算公司汇总表的 sql is " + step.toString());
         Record result = step.fetchAny();
         if (null == result) {
             return null;
