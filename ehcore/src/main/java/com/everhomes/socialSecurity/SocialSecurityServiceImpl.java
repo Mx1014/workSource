@@ -1416,6 +1416,7 @@ public class SocialSecurityServiceImpl implements SocialSecurityService {
     }
 
     private void importCalculateRadix(BigDecimal afRadix, SocialSecurityBase base, SocialSecurityItemDTO item, SocialSecuritySetting setting) {
+        LOGGER.debug("base : " + StringHelper.toJsonString(base) + " item" + item);
         BigDecimal compayRadix = item.getCompanyRadix();
         BigDecimal employeeRadix = item.getEmployeeRadix();
         if (null != base && compayRadix.intValue() != 0) {
