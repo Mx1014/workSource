@@ -125,7 +125,7 @@ public class OfficeCubicleAdminController extends ControllerBase {
 	@RequestMapping("exprotSpaceOrders")
 	public String exprotSpaceOrders(@Valid SearchSpaceOrdersCommand cmd,HttpServletResponse response) {
 //		HttpServletResponse commandResponse = rentalService.exportRentalBills(cmd, response );
-		HttpServletResponse commandResponse = this.officeCubicleService.exprotSpaceOrders(cmd,response);
+		HttpServletResponse commandResponse = this.officeCubicleService.exportSpaceOrders(cmd,response);
 		return null;
 	}
     

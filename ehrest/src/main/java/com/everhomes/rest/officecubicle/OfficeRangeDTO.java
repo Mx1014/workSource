@@ -13,7 +13,7 @@ import com.everhomes.util.StringHelper;
  *
  *  @author:dengs 2018年1月19日
  */
-public class OfficeRanges {
+public class OfficeRangeDTO {
 	private Long id;
 	private Long spaceId;
 	private String ownerType;

@@ -17,9 +17,11 @@ import java.util.Comparator;
 import java.util.HashSet;
 import java.util.List;
 import java.util.Set;
+import java.util.stream.Collectors;
 
 import javax.servlet.http.HttpServletResponse;
 
+import com.everhomes.rest.officecubicle.*;
 import org.apache.lucene.spatial.geohash.GeoHashUtils;
 import org.apache.poi.ss.usermodel.Row;
 import org.apache.poi.ss.usermodel.Sheet;
@@ -45,22 +47,6 @@ import com.everhomes.rest.messaging.MessageBodyType;
 import com.everhomes.rest.messaging.MessageChannel;
 import com.everhomes.rest.messaging.MessageDTO;
 import com.everhomes.rest.messaging.MessagingConstants;
-import com.everhomes.rest.officecubicle.AddSpaceOrderCommand;
-import com.everhomes.rest.officecubicle.CityDTO;
-import com.everhomes.rest.officecubicle.DeleteSpaceCommand;
-import com.everhomes.rest.officecubicle.DeleteUserSpaceOrderCommand;
-import com.everhomes.rest.officecubicle.GetSpaceDetailCommand;
-import com.everhomes.rest.officecubicle.OfficeAttachmentDTO;
-import com.everhomes.rest.officecubicle.OfficeCategoryDTO;
-import com.everhomes.rest.officecubicle.OfficeOrderDTO;
-import com.everhomes.rest.officecubicle.OfficeOrderStatus;
-import com.everhomes.rest.officecubicle.OfficeOrderType;
-import com.everhomes.rest.officecubicle.OfficeRentType;
-import com.everhomes.rest.officecubicle.OfficeSpaceDTO;
-import com.everhomes.rest.officecubicle.OfficeSpaceType;
-import com.everhomes.rest.officecubicle.OfficeStatus;
-import com.everhomes.rest.officecubicle.QuerySpacesCommand;
-import com.everhomes.rest.officecubicle.QuerySpacesResponse;
 import com.everhomes.rest.officecubicle.admin.AddSpaceCommand;
 import com.everhomes.rest.officecubicle.admin.SearchSpaceOrdersCommand;
 import com.everhomes.rest.officecubicle.admin.SearchSpaceOrdersResponse;
@@ -79,6 +65,7 @@ import com.everhomes.user.UserProvider;
 import com.everhomes.util.ConvertHelper;
 import com.everhomes.util.DateHelper;
 import com.everhomes.util.RuntimeErrorException;
+import scala.Int;
 
 /**
  * 工位预定service实现
@@ -108,6 +95,15 @@ public class OfficeCubicleServiceImpl implements OfficeCubicleService {
 	private AttachmentProvider attachmentProvider;
 	@Autowired
 	private UserProvider userProvider;
+	@Autowired
+	private OfficeCubicleRangeProvider officeCubicleRangeProvider;
+
+	private Integer getNamespaceId(Integer namespaceId){
+		if(namespaceId!=null){
+			return namespaceId;
+		}
+		return UserContext.getCurrentNamespaceId();
+	}
 
 	@Override
 	public SearchSpacesAdminResponse searchSpaces(SearchSpacesAdminCommand cmd) {
@@ -118,8 +114,8 @@ public class OfficeCubicleServiceImpl implements OfficeCubicleService {
 		CrossShardListingLocator locator = new CrossShardListingLocator();
 		locator.setAnchor(cmd.getPageAnchor());
 
-		List<OfficeCubicleSpace> spaces = this.officeCubicleProvider.searchSpaces(cmd.getKeyWords(), locator, pageSize + 1,
-				UserContext.getCurrentNamespaceId());
+		List<OfficeCubicleSpace> spaces = this.officeCubicleProvider.searchSpaces(cmd.getOwnerType(),cmd.getOwnerId(),cmd.getKeyWords(), locator, pageSize + 1,
+				getNamespaceId(cmd.getNamespaceId()));
 		if (null == spaces)
 			return response;
 		Long nextPageAnchor = null;
@@ -185,6 +181,9 @@ public class OfficeCubicleServiceImpl implements OfficeCubicleService {
 	            }
 			});	
 		}
+
+		List<OfficeCubicleRange> ranges = officeCubicleRangeProvider.listRangesBySpaceId(dto.getId());
+		dto.setRanges(ranges.stream().map(r->ConvertHelper.convert(r,OfficeRangeDTO.class)).collect(Collectors.toList()));
 		return dto;
 	}
 
@@ -201,7 +200,7 @@ public class OfficeCubicleServiceImpl implements OfficeCubicleService {
 					"Invalid paramter of city error: null id or name");
 		this.dbProvider.execute((TransactionStatus status) -> {
 			OfficeCubicleSpace space = ConvertHelper.convert(cmd, OfficeCubicleSpace.class);
-			space.setNamespaceId(UserContext.getCurrentNamespaceId());
+			space.setNamespaceId(getNamespaceId(cmd.getNamespaceId()));
 			space.setGeohash(GeoHashUtils.encode(space.getLatitude(), space.getLongitude()));
 			space.setStatus(OfficeStatus.NORMAL.getCode());
 			space.setCreateTime(new Timestamp(DateHelper.currentGMTTime().getTime()));
@@ -212,12 +211,20 @@ public class OfficeCubicleServiceImpl implements OfficeCubicleService {
 					this.saveAttachment(dto, space.getId());
 				});
 			cmd.getCategories().forEach((dto) -> {
-				this.saveCategory(dto, space.getId());
+				this.saveCategory(dto, space.getId(),getNamespaceId(cmd.getNamespaceId()));
 
 			});
 
+			cmd.getRanges().forEach(dto->saveRanges(dto,space.getId(),getNamespaceId(cmd.getNamespaceId())));
+
 			return null;
 		});
+	}
+
+	private void saveRanges(OfficeRangeDTO dto, Long id, Integer namespaceId) {
+		OfficeCubicleRange range = ConvertHelper.convert(dto,OfficeCubicleRange.class);
+		range.setNamespaceId(namespaceId);
+		officeCubicleRangeProvider.createOfficeCubicleRange(range);
 	}
 
 	@Override
@@ -247,19 +254,27 @@ public class OfficeCubicleServiceImpl implements OfficeCubicleService {
 			space.setOperatorUid(UserContext.current().getUser().getId());
 			this.officeCubicleProvider.updateSpace(space);
 			// TODO:删除附件唐彤没有提供
-				this.officeCubicleProvider.deleteAttachmentsBySpaceId(space.getId());
-				if (null != cmd.getAttachments())
-					cmd.getAttachments().forEach((dto) -> {
-						this.saveAttachment(dto, space.getId());
-					});
-				this.officeCubicleProvider.deleteCategoriesBySpaceId(space.getId());
-				if (null != cmd.getCategories())
-					cmd.getCategories().forEach((dto) -> {
-						this.saveCategory(dto, space.getId());
-					});
+			this.officeCubicleProvider.deleteAttachmentsBySpaceId(space.getId());
+			if (null != cmd.getAttachments()) {
+				cmd.getAttachments().forEach((dto) -> {
+					this.saveAttachment(dto, space.getId());
+				});
+			}
+			this.officeCubicleProvider.deleteCategoriesBySpaceId(space.getId());
+			if (null != cmd.getCategories()) {
+				cmd.getCategories().forEach((dto) -> {
+					this.saveCategory(dto, space.getId(), getNamespaceId(cmd.getNamespaceId()));
+				});
+			}
 
-				return null;
-			});
+			this.officeCubicleRangeProvider.deleteRangesBySpaceId(space.getId());
+			if (null != cmd.getCategories()) {
+				cmd.getRanges().forEach((dto) -> {
+					this.saveRanges(dto, space.getId(), getNamespaceId(cmd.getNamespaceId()));
+				});
+			}
+			return null;
+		});
 	}
 
 	public void saveAttachment(OfficeAttachmentDTO dto, Long spaceId) {
@@ -271,15 +286,16 @@ public class OfficeCubicleServiceImpl implements OfficeCubicleService {
 		this.attachmentProvider.createAttachment(EhOfficeCubicleAttachments.class, attachment);
 	}
 
-	public void saveCategory(OfficeCategoryDTO dto, Long spaceId) {
+	public void saveCategory(OfficeCategoryDTO dto, Long spaceId, Integer namespaceId) {
 		if (null == dto.getSize())
 			return;
 		OfficeCubicleCategory category = ConvertHelper.convert(dto, OfficeCubicleCategory.class);
 		category.setSpaceSize(dto.getSize());
 		category.setSpaceId(spaceId);
-		category.setNamespaceId(UserContext.getCurrentNamespaceId());
+		category.setNamespaceId(namespaceId);
 		category.setCreateTime(new Timestamp(DateHelper.currentGMTTime().getTime()));
 		category.setCreatorUid(UserContext.current().getUser().getId());
+		category.setPositionNums(dto.getPositionNums());
 		this.officeCubicleProvider.createCategory(category);
 
 	}
@@ -303,8 +319,8 @@ public class OfficeCubicleServiceImpl implements OfficeCubicleService {
 		CrossShardListingLocator locator = new CrossShardListingLocator();
 		locator.setAnchor(cmd.getPageAnchor());
 
-		List<OfficeCubicleOrder> orders = this.officeCubicleProvider.searchOrders(cmd.getBeginDate(), cmd.getEndDate(),
-				cmd.getReserveKeyword(), cmd.getSpaceName(), locator, pageSize + 1, UserContext.getCurrentNamespaceId());
+		List<OfficeCubicleOrder> orders = this.officeCubicleProvider.searchOrders(cmd.getOwnerType(),cmd.getOwnerId(),cmd.getBeginDate(), cmd.getEndDate(),
+				cmd.getReserveKeyword(), cmd.getSpaceName(), locator, pageSize + 1, getNamespaceId(cmd.getNamespaceId()), cmd.getWorkFlowStatus());
 		if (null == orders)
 			return response;
 		Long nextPageAnchor = null;
@@ -323,11 +339,12 @@ public class OfficeCubicleServiceImpl implements OfficeCubicleService {
 	}
 
 	@Override
-	public HttpServletResponse exprotSpaceOrders(SearchSpaceOrdersCommand cmd, HttpServletResponse response) {
+	public HttpServletResponse exportSpaceOrders(SearchSpaceOrdersCommand cmd, HttpServletResponse response) {
 		Integer pageSize = Integer.MAX_VALUE;
-		List<OfficeCubicleOrder> orders = this.officeCubicleProvider.searchOrders(cmd.getBeginDate(), cmd.getEndDate(),
+		List<OfficeCubicleOrder> orders = this.officeCubicleProvider.searchOrders(cmd.getOwnerType(),cmd.getOwnerId(),cmd.getBeginDate(), cmd.getEndDate(),
 				cmd.getReserveKeyword(), cmd.getSpaceName(), new CrossShardListingLocator(), pageSize,
-				UserContext.getCurrentNamespaceId());
+				getNamespaceId(cmd.getNamespaceId()), cmd.getWorkFlowStatus());
+
 		if (null == orders) {
 			return null;
 		}
@@ -459,15 +476,15 @@ public class OfficeCubicleServiceImpl implements OfficeCubicleService {
 	}
 
 	@Override
-	public List<CityDTO> queryCities() {
+	public List<CityDTO> queryCities(QueryCitiesCommand cmd) {
 		List<CityDTO> resp = new ArrayList<CityDTO>();
 		CityDTO dto = new CityDTO();
 		dto.setCityId(0L);
 		dto.setCityName("全国");
 		resp.add(dto);
 		Set<Long> cityIds = new HashSet<Long>();
-		List<OfficeCubicleSpace> spaces = this.officeCubicleProvider.searchSpaces(null, new CrossShardListingLocator(),
-				Integer.MAX_VALUE, UserContext.getCurrentNamespaceId());
+		List<OfficeCubicleSpace> spaces = this.officeCubicleProvider.searchSpaces(cmd.getOwnerType(),cmd.getOwnerId(),null, new CrossShardListingLocator(),
+				Integer.MAX_VALUE, getNamespaceId(cmd.getNamespaceId()));
 		if (null != spaces) {
 			spaces.forEach((space) -> {
 				if (!cityIds.contains(space.getCityId())) {
@@ -599,8 +616,8 @@ public class OfficeCubicleServiceImpl implements OfficeCubicleService {
 		locator.setAnchor(cmd.getPageAnchor());
 		if (cmd.getCityId() == null || cmd.getCityId().equals(0L))
 			cmd.setCityId(null);
-		List<OfficeCubicleSpace> spaces = this.officeCubicleProvider.querySpacesByCityId(cmd.getCityId(), locator, pageSize + 1,
-				UserContext.getCurrentNamespaceId());
+		List<OfficeCubicleSpace> spaces = this.officeCubicleProvider.querySpacesByCityId(cmd.getOwnerType(),cmd.getOwnerId(),cmd.getCityId(), locator, pageSize + 1,
+				getNamespaceId(UserContext.getCurrentNamespaceId()));
 		if (null == spaces)
 			return response;
 		Long nextPageAnchor = null;

@@ -5,7 +5,7 @@ import java.util.List;
 import com.everhomes.discover.ItemType;
 import com.everhomes.rest.officecubicle.OfficeAttachmentDTO;
 import com.everhomes.rest.officecubicle.OfficeCategoryDTO;
-import com.everhomes.rest.officecubicle.OfficeRanges;
+import com.everhomes.rest.officecubicle.OfficeRangeDTO;
 import com.everhomes.util.StringHelper;
 
 /**
@@ -28,7 +28,7 @@ import com.everhomes.util.StringHelper;
 *<li> coverUri : 封面图片uri</li>
  * <li>attachments: banner图的urls{@link com.everhomes.rest.officecubicle.OfficeAttachmentDTO} </li> 
  * <li>categories: 工位空间list{@link com.everhomes.rest.officecubicle.OfficeCategoryDTO}</li> 
- * <li>ranges: 空间可见范围{@link com.everhomes.rest.officecubicle.OfficeRanges}</li> 
+ * <li>ranges: 空间可见范围{@link OfficeRangeDTO}</li>
  * </ul>
  */
 public class AddSpaceCommand { 
@@ -51,8 +51,8 @@ public class AddSpaceCommand {
 	private List<OfficeAttachmentDTO> attachments;
 	@ItemType(OfficeCategoryDTO.class)
 	private List<OfficeCategoryDTO> categories;
-	@ItemType(OfficeRanges.class)
-	private List<OfficeRanges> ranges;
+	@ItemType(OfficeRangeDTO.class)
+	private List<OfficeRangeDTO> ranges;
 	
 	public Integer getNamespaceId() {
 		return namespaceId;
@@ -160,10 +160,10 @@ public class AddSpaceCommand {
 	public void setOwnerId(Long ownerId) {
 		this.ownerId = ownerId;
 	}
-	public List<OfficeRanges> getRanges() {
+	public List<OfficeRangeDTO> getRanges() {
 		return ranges;
 	}
-	public void setRanges(List<OfficeRanges> ranges) {
+	public void setRanges(List<OfficeRangeDTO> ranges) {
 		this.ranges = ranges;
 	} 
   

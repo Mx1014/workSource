@@ -36,17 +36,19 @@ public class OfficeCubicleRangeProviderImpl implements OfficeCubicleRangeProvide
 		officeCubicleRange.setId(id);
 		officeCubicleRange.setCreateTime(new Timestamp(DateHelper.currentGMTTime().getTime()));
 		officeCubicleRange.setCreatorUid(UserContext.current().getUser().getId());
-		officeCubicleRange.setUpdateTime(officeCubicleRange.getCreateTime());
-		officeCubicleRange.setOperatorUid(officeCubicleRange.getCreatorUid());
 		getReadWriteDao().insert(officeCubicleRange);
 		DaoHelper.publishDaoAction(DaoAction.CREATE, EhOfficeCubicleRanges.class, null);
 	}
 
 	@Override
+	public void deleteRangesBySpaceId(Long rangeId) {
+		dbProvider.getDslContext(AccessSpec.readOnly()).delete(Tables.EH_OFFICE_CUBICLE_RANGES)
+				.where(Tables.EH_OFFICE_CUBICLE_RANGES.SPACE_ID.equal(rangeId)).execute();
+	}
+
+	@Override
 	public void updateOfficeCubicleRange(OfficeCubicleRange officeCubicleRange) {
 		assert (officeCubicleRange.getId() != null);
-		officeCubicleRange.setUpdateTime(new Timestamp(DateHelper.currentGMTTime().getTime()));
-		officeCubicleRange.setOperatorUid(UserContext.current().getUser().getId());
 		getReadWriteDao().update(officeCubicleRange);
 		DaoHelper.publishDaoAction(DaoAction.MODIFY, EhOfficeCubicleRanges.class, officeCubicleRange.getId());
 	}
@@ -63,7 +65,15 @@ public class OfficeCubicleRangeProviderImpl implements OfficeCubicleRangeProvide
 				.orderBy(Tables.EH_OFFICE_CUBICLE_RANGES.ID.asc())
 				.fetch().map(r -> ConvertHelper.convert(r, OfficeCubicleRange.class));
 	}
-	
+
+	@Override
+	public List<OfficeCubicleRange> listRangesBySpaceId(Long spaceId) {
+		return getReadOnlyContext().select().from(Tables.EH_OFFICE_CUBICLE_RANGES)
+				.where(Tables.EH_OFFICE_CUBICLE_RANGES.SPACE_ID.eq(spaceId))
+				.orderBy(Tables.EH_OFFICE_CUBICLE_RANGES.ID.asc())
+				.fetch().map(r -> ConvertHelper.convert(r, OfficeCubicleRange.class));
+	}
+
 	private EhOfficeCubicleRangesDao getReadWriteDao() {
 		return getDao(getReadWriteContext());
 	}

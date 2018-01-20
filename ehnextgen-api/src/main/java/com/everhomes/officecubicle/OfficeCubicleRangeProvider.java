@@ -9,8 +9,11 @@ public interface OfficeCubicleRangeProvider {
 
 	void updateOfficeCubicleRange(OfficeCubicleRange officeCubicleRange);
 
-	OfficeCubicleRange findOfficeCubicleRangeById(Long id);
+	OfficeCubicleRange findOfficeCubicleRangeById(Long rangeId);
 
 	List<OfficeCubicleRange> listOfficeCubicleRange();
 
+    List<OfficeCubicleRange> listRangesBySpaceId(Long id);
+
+	void deleteRangesBySpaceId(Long rangeId);
 }

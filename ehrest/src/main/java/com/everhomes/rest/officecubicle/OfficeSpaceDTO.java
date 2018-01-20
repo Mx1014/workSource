@@ -30,7 +30,7 @@ import com.everhomes.util.StringHelper;
 *<li> status : space 状态 2-普通 0-删除</li> 
  * <li>attachments: banner图的urls{@link com.everhomes.rest.officecubicle.OfficeAttachmentDTO} </li> 
  * <li>categories: 工位空间list{@link com.everhomes.rest.officecubicle.OfficeCategoryDTO}</li> 
- * <li>ranges: 空间可见范围{@link com.everhomes.rest.officecubicle.OfficeRanges}</li> 
+ * <li>ranges: 空间可见范围{@link OfficeRangeDTO}</li>
  * </ul>
  */
 public class OfficeSpaceDTO {
@@ -59,8 +59,8 @@ public class OfficeSpaceDTO {
 	private List<OfficeCategoryDTO> categories;
 	private Byte status;
 	
-	@ItemType(OfficeRanges.class)
-	private List<OfficeRanges> ranges;
+	@ItemType(OfficeRangeDTO.class)
+	private List<OfficeRangeDTO> ranges;
 	
 	public Integer getNamespaceId() {
 		return namespaceId;
@@ -86,11 +86,11 @@ public class OfficeSpaceDTO {
 		this.ownerId = ownerId;
 	}
 
-	public List<OfficeRanges> getRanges() {
+	public List<OfficeRangeDTO> getRanges() {
 		return ranges;
 	}
 
-	public void setRanges(List<OfficeRanges> ranges) {
+	public void setRanges(List<OfficeRangeDTO> ranges) {
 		this.ranges = ranges;
 	}
 

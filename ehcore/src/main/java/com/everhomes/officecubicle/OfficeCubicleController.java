@@ -2,6 +2,7 @@ package com.everhomes.officecubicle;
 
 import java.util.List;
 
+import com.everhomes.rest.officecubicle.*;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -13,16 +14,6 @@ import com.everhomes.controller.ControllerBase;
 import com.everhomes.discover.RestDoc;
 import com.everhomes.discover.RestReturn;
 import com.everhomes.rest.RestResponse;
-import com.everhomes.rest.officecubicle.AddSpaceOrderCommand;
-import com.everhomes.rest.officecubicle.AddSpaceOrderResponse;
-import com.everhomes.rest.officecubicle.CityDTO;
-import com.everhomes.rest.officecubicle.DeleteUserSpaceOrderCommand;
-import com.everhomes.rest.officecubicle.GetSpaceDetailCommand;
-import com.everhomes.rest.officecubicle.GetUserOrdersCommand;
-import com.everhomes.rest.officecubicle.OfficeOrderDTO;
-import com.everhomes.rest.officecubicle.OfficeSpaceDTO;
-import com.everhomes.rest.officecubicle.QuerySpacesCommand;
-import com.everhomes.rest.officecubicle.QuerySpacesResponse;
 import com.everhomes.rest.officecubicle.admin.SearchSpacesAdminResponse;
 
 /**
@@ -45,8 +36,8 @@ public class OfficeCubicleController extends ControllerBase {
      */
     @RequestMapping("queryCities")
     @RestReturn(value=CityDTO.class ,collection=true)
-    public RestResponse queryCities() {
-    	List<CityDTO> resp = this.officeCubicleService.queryCities();
+    public RestResponse queryCities(QueryCitiesCommand cmd) {
+    	List<CityDTO> resp = this.officeCubicleService.queryCities(cmd);
     	
         RestResponse response = new RestResponse(resp);
         response.setErrorCode(ErrorCodes.SUCCESS);
