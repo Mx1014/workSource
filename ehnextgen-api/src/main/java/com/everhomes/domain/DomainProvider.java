@@ -1,6 +1,8 @@
 package com.everhomes.domain;
 
+import org.springframework.cache.annotation.CacheEvict;
 import org.springframework.cache.annotation.Cacheable;
+import org.springframework.cache.annotation.Caching;
 
 import java.util.List;
 
@@ -10,6 +12,10 @@ import java.util.List;
 public interface DomainProvider {
 
     Domain findDomainByDomain(String domain);
+
+    void updateDomain(Domain domain);
+
+    Domain findDomainById(Long id);
 
     Domain findDomainByNamespaceId(Integer namespaceId);
 

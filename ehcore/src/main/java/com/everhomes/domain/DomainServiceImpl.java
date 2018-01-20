@@ -5,6 +5,7 @@ import com.everhomes.db.DbProvider;
 import com.everhomes.entity.EntityType;
 import com.everhomes.rest.domain.DomainDTO;
 import com.everhomes.rest.domain.GetDomainInfoCommand;
+import com.everhomes.rest.domain.UpdateDomainInfoCommand;
 import com.everhomes.util.ConvertHelper;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -41,10 +42,7 @@ public class DomainServiceImpl implements DomainService {
         Domain domainInfo = domainProvider.findDomainByDomain(domain);
 
         DomainDTO dto = ConvertHelper.convert(domainInfo, DomainDTO.class);
-        if(dto != null && dto.getIconUri() != null){
-            String url = contentServerService.parserUri(dto.getIconUri(), EntityType.DOMAIN.getCode(), domainInfo.getId());
-            dto.setIconUrl(url);
-        }
+        populateUrl(dto);
 
         return dto;
     }
@@ -66,14 +64,57 @@ public class DomainServiceImpl implements DomainService {
 
         List<DomainDTO> list = domains.stream().map(r -> {
             DomainDTO dto = ConvertHelper.convert(r, DomainDTO.class);
-            if (dto.getIconUri() != null) {
-                String url = contentServerService.parserUri(dto.getIconUri(), EntityType.DOMAIN.getCode(), dto.getId());
-                dto.setIconUrl(url);
-            }
+            populateUrl(dto);
             return dto;
         }).collect(Collectors.toList());
 
         return list;
+    }
+
+    private void populateUrl(DomainDTO dto){
+
+        if(dto == null){
+            return;
+        }
+
+        if (dto.getFaviconUri() != null) {
+            dto.setFaviconUrl(contentServerService.parserUri(dto.getFaviconUri(), EntityType.DOMAIN.getCode(), dto.getId()));
+        }
+
+        if (dto.getLoginBgUri() != null) {
+            dto.setLoginBgUrl(contentServerService.parserUri(dto.getLoginBgUri(), EntityType.DOMAIN.getCode(), dto.getId()));
+        }
+
+        if (dto.getLoginLogoUri() != null) {
+            dto.setLoginLogoUrl(contentServerService.parserUri(dto.getLoginLogoUri(), EntityType.DOMAIN.getCode(), dto.getId()));
+        }
+
+        if (dto.getMenuLogoUri() != null) {
+            dto.setMenuLogoUrl(contentServerService.parserUri(dto.getMenuLogoUri(), EntityType.DOMAIN.getCode(), dto.getId()));
+        }
+
+        if (dto.getMenuLogoCollapsedUri() != null) {
+            dto.setMenuLogoCollapsedUrl(contentServerService.parserUri(dto.getMenuLogoCollapsedUri(), EntityType.DOMAIN.getCode(), dto.getId()));
+        }
+    }
+
+    @Override
+    public DomainDTO updateDomain(UpdateDomainInfoCommand cmd){
+        Domain domain = domainProvider.findDomainById(cmd.getId());
+
+        domain.setFaviconUri(cmd.getFaviconUri());
+        domain.setLoginBgUri(cmd.getLoginBgUri());
+        domain.setLoginLogoUri(cmd.getLoginLogoUri());
+        domain.setMenuLogoUri(cmd.getMenuLogoUri());
+        domain.setMenuLogoCollapsedUri(cmd.getMenuLogoCollapsedUri());
+
+        domainProvider.updateDomain(domain);
+
+        DomainDTO dto = ConvertHelper.convert(domain, DomainDTO.class);
+        populateUrl(dto);
+
+        return dto;
+
     }
 
 }

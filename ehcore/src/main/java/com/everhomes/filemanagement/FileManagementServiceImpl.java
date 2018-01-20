@@ -330,7 +330,7 @@ public class FileManagementServiceImpl implements  FileManagementService{
         content.setParentId(cmd.getParentId());
         content.setContentType(cmd.getContentType());
         content.setContentName(cmd.getContentName());
-        if (content.getContentType().equals(FileContentType.FOLDER.getCode())) {
+        if (!content.getContentType().equals(FileContentType.FOLDER.getCode())) {
             content.setContentSuffix(cmd.getContentSuffix());
             content.setSize(cmd.getContentSize());
             content.setContentUri(cmd.getContentUri());
