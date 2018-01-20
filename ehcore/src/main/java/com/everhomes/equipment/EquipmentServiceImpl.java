@@ -663,12 +663,6 @@ private void checkUserPrivilege(Long orgId, Long privilegeId, Long communityId) 
 
 	@Override
 	public void deleteEquipmentStandard(DeleteEquipmentStandardCommand cmd) {
-		/*Long privilegeId = configProvider.getLongValue(EquipmentConstant.EQUIPMENT_STANDARD_DELETE, 0L);
-		if(cmd.getTargetId() != null) {
-			userPrivilegeMgr.checkCurrentUserAuthority(EntityType.COMMUNITY.getCode(), cmd.getTargetId(), cmd.getOwnerId(), privilegeId);
-		} else {
-			userPrivilegeMgr.checkCurrentUserAuthority(null, null, cmd.getOwnerId(), privilegeId);
-		}*/
 		checkUserPrivilege(cmd.getOwnerId(), PrivilegeConstants.EQUIPMENT_STANDARD_DELETE, cmd.getTargetId());
 
 		User user = UserContext.current().getUser();
@@ -699,7 +693,7 @@ private void checkUserPrivilege(Long orgId, Long privilegeId, Long communityId) 
 			standard.setStatus(EquipmentStandardStatus.INACTIVE.getCode());
 			equipmentProvider.updateEquipmentStandard(standard);
 			equipmentStandardSearcher.feedDoc(standard);
-			if (cmd.getTargetId() == null && standard.getTargetId() == 0L) {
+			if ((cmd.getTargetId() == null|| cmd.getTargetId() == 0) && standard.getTargetId() == 0L) {
 				equipmentProvider.deleteModelCommunityMapByModelId(standard.getId(), EquipmentModelType.STANDARD.getCode());
 			}
 
@@ -3706,44 +3700,35 @@ private void checkUserPrivilege(Long orgId, Long privilegeId, Long communityId) 
 
 		}
 		if(!isAdmin) {
-			List<Long> executeStandardIds = new ArrayList<>();
-			List<Long> reviewStandardIds = new ArrayList<>();
+			List<Long> executePlanIds = new ArrayList<>();
+			List<Long> reviewPlanIds = new ArrayList<>();
 			List<ExecuteGroupAndPosition> groupDtos = listUserRelateGroups();
 			//List<EquipmentInspectionStandardGroupMap> maps = equipmentProvider.listEquipmentInspectionStandardGroupMapByGroupAndPosition(groupDtos, null);
 			//这里换成从计划表中拿执行组和审批组人员
 			List<EquipmentInspectionPlanGroupMap> maps = equipmentProvider.listEquipmentInspectionPlanGroupMapByGroupAndPosition(groupDtos, null);
 			if (maps != null && maps.size() > 0) {
-
 				for (EquipmentInspectionPlanGroupMap r : maps) {
 					if (QualityGroupType.REVIEW_GROUP.equals(QualityGroupType.fromStatus(r.getGroupType()))) {
-						reviewStandardIds.add(r.getPlanId());
+						reviewPlanIds.add(r.getPlanId());
 					}
 					if (QualityGroupType.EXECUTIVE_GROUP.equals(QualityGroupType.fromStatus(r.getGroupType()))) {
-						executeStandardIds.add(r.getPlanId());
+						executePlanIds.add(r.getPlanId());
 					}
 				}
 			}
 
-
-
 			String cacheKey = convertListEquipmentInspectionTasksCache(cmd.getTaskStatus(), cmd.getInspectionCategoryId(), targetTypes, targetIds,
-					executeStandardIds, reviewStandardIds, offset, userId);
-
-
+					executePlanIds, reviewPlanIds, offset, userId);
+			LOGGER.info("listEquipmentInspectionTasks  cacheKey = {}" + cacheKey);
 			allTasks = equipmentProvider.listEquipmentInspectionTasksUseCache(cmd.getTaskStatus(), cmd.getInspectionCategoryId(),
-					targetTypes, targetIds, executeStandardIds, reviewStandardIds, offset, pageSize + 1, cacheKey, AdminFlag.NO.getCode(),lastSyncTime);
-
-
+					targetTypes, targetIds, executePlanIds, reviewPlanIds, offset, pageSize + 1, cacheKey, AdminFlag.NO.getCode(),lastSyncTime);
 		}
-
 
 		if (allTasks.size() > pageSize) {
 			allTasks.remove(allTasks.size() - 1);
 			response.setNextPageAnchor((long) (offset + 1));
 		}
 
-
-		Timestamp current = new Timestamp(System.currentTimeMillis());
 		tasks = allTasks.stream().map(r -> {
 			if ((EquipmentTaskStatus.WAITING_FOR_EXECUTING.equals(EquipmentTaskStatus.fromStatus(r.getStatus())))) {
 				return r;

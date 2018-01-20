@@ -2245,15 +2245,13 @@ public class EquipmentProviderImpl implements EquipmentProvider {
             query.addConditions(Tables.EH_EQUIPMENT_INSPECTION_PLAN_GROUP_MAP.PLAN_ID.in(planIds));
             query.fetch().map((EhEquipmentInspectionPlanGroupMapRecord record) -> {
                 EquipmentInspectionPlans plan = mapPlans.get(record.getPlanId());
-
                 assert (plan != null);
-                if (QualityGroupType.EXECUTIVE_GROUP.getCode() == record.getGroupType()) {
+                if (QualityGroupType.EXECUTIVE_GROUP.equals(QualityGroupType.fromStatus(record.getGroupType()))) {
                     plan.getExecutiveGroup().add(ConvertHelper.convert(record, EquipmentInspectionPlanGroupMap.class));
                 }
-                if (record.getGroupType() == QualityGroupType.REVIEW_GROUP.getCode()) {
+                if (QualityGroupType.REVIEW_GROUP.equals(QualityGroupType.fromStatus(record.getGroupType()))) {
                     plan.getReviewGroup().add(ConvertHelper.convert(record, EquipmentInspectionPlanGroupMap.class));
                 }
-
                 return null;
             });
             return true;
@@ -2898,7 +2896,7 @@ public class EquipmentProviderImpl implements EquipmentProvider {
 
     @Override
     public List<EquipmentInspectionPlanGroupMap> listEquipmentInspectionPlanGroupMapByGroupAndPosition(
-            List<ExecuteGroupAndPosition> groupDtos, List<ExecuteGroupAndPosition> reviewGroups) {
+            List<ExecuteGroupAndPosition> groupDtos, Byte groupType) {
         long startTime = System.currentTimeMillis();
         final List<EquipmentInspectionPlanGroupMap> maps = new ArrayList<>();
         DSLContext context = this.dbProvider.getDslContext(AccessSpec.readOnly());
@@ -2907,9 +2905,9 @@ public class EquipmentProviderImpl implements EquipmentProvider {
                 .selectQuery(Tables.EH_EQUIPMENT_INSPECTION_PLAN_GROUP_MAP);
 
         Condition con = null;
-        if (reviewGroups != null) {
+        if (groupDtos != null) {
             Condition con5 = null;
-            for (ExecuteGroupAndPosition executiveGroup : reviewGroups) {
+            for (ExecuteGroupAndPosition executiveGroup : groupDtos) {
                 Condition con4 = null;
                 con4 = Tables.EH_EQUIPMENT_INSPECTION_PLAN_GROUP_MAP.GROUP_ID.eq(executiveGroup.getGroupId());
                 con4 = con4.and(Tables.EH_EQUIPMENT_INSPECTION_PLAN_GROUP_MAP.POSITION_ID.eq(executiveGroup.getPositionId()));
