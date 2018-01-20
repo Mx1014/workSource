@@ -317,11 +317,8 @@ public class FileManagementServiceImpl implements  FileManagementService{
 
         //  1.whether the name has been used
         checkFileContentName(namespaceId, catalog.getOwnerId(), cmd.getParentId(), cmd.getContentName());
-        //  2.check the suffix
-        if (cmd.getContentSuffix() == null)
-            throw RuntimeErrorException.errorWith(FileManagementErrorCode.SCOPE, FileManagementErrorCode.ERROR_SUFFIX_NULL,
-                    "the suffix can not be null.");
-        //  3.create it
+
+        //  2.create it
         FileContent content = new FileContent();
         content.setNamespaceId(catalog.getNamespaceId());
         content.setOwnerId(catalog.getOwnerId());
@@ -331,6 +328,10 @@ public class FileManagementServiceImpl implements  FileManagementService{
         content.setContentType(cmd.getContentType());
         content.setContentName(cmd.getContentName());
         if (!content.getContentType().equals(FileContentType.FOLDER.getCode())) {
+            //  3.check the suffix
+            if (cmd.getContentSuffix() == null)
+                throw RuntimeErrorException.errorWith(FileManagementErrorCode.SCOPE, FileManagementErrorCode.ERROR_SUFFIX_NULL,
+                        "the suffix can not be null.");
             content.setContentSuffix(cmd.getContentSuffix());
             content.setSize(cmd.getContentSize());
             content.setContentUri(cmd.getContentUri());
