@@ -624,6 +624,7 @@ public class WebMenuServiceImpl implements WebMenuService {
 			scope.setApplyPolicy(WebMenuScopeApplyPolicy.REVERT.getCode());
 			scope.setOwnerType(EntityType.NAMESPACE.getCode());
 			scope.setOwnerId(portalVersionDTO.getNamespaceId().longValue());
+			scopes.add(scope);
 		}
 
 		webMenuProvider.deleteMenuScopeByOwner(EntityType.NAMESPACE.getCode(), Long.valueOf(cmd.getNamespaceId()));
