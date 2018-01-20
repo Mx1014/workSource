@@ -13,6 +13,7 @@ CREATE TABLE `eh_equipment_inspection_plans` (
   `reviewer_uid` bigint(20) NOT NULL DEFAULT '0',
   `review_time` datetime DEFAULT NULL,
   `repeat_setting_id` bigint(20) NOT NULL DEFAULT '0' COMMENT 'refers to eh_repeatsetting ',
+  `repeat_type` tinyint(4) NOT NULL COMMENT ' 0: no repeat, 1: by day, 2: by week, 3: by month, 4: by year',
   `remarks` text,
   `creator_uid` bigint(20) NOT NULL DEFAULT '0',
   `create_time` datetime DEFAULT NULL,
