@@ -33,7 +33,7 @@ public class PurchaseController extends ControllerBase{
      * <b>URL: /purchase/searchPurchases</b>
      * <p>采购管理列表</p>
      */
-    @RequestMapping(value = "searchPurchases")
+    @RequestMapping("searchPurchases")
     @RestReturn(value = SearchPurchasesResponse.class)
     private RestResponse searchPurchases(SearchPurchasesCommand cmd){
         RestResponse restResponse = new RestResponse();
@@ -46,7 +46,7 @@ public class PurchaseController extends ControllerBase{
      * <b>URL: /purchase/makeWarehouseEntry</b>
      * <p>采购物品入库</p>
      */
-    @RequestMapping(value = "makeWarehouseEntry")
+    @RequestMapping("makeWarehouseEntry")
     @RestReturn(value = String.class)
     private RestResponse makeWarehouseEntry(MakeWarehouseEntryCommand cmd){
         RestResponse restResponse = new RestResponse();
@@ -59,7 +59,7 @@ public class PurchaseController extends ControllerBase{
      * <b>URL: /purchase/createOrUpdatePurchaseOrder</b>
      * <p>新增或者修改一个采购单</p>
      */
-    @RequestMapping(value = "createOrUpdatePurchaseOrder")
+    @RequestMapping("createOrUpdatePurchaseOrder")
     @RestReturn(value = String.class)
     private RestResponse createOrUpdatePurchaseOrder(CreateOrUpdatePurchaseOrderCommand cmd){
         RestResponse restResponse = new RestResponse();
@@ -72,7 +72,7 @@ public class PurchaseController extends ControllerBase{
      * <b>URL: /purchase/selectPurchaseOrder</b>
      * <p>获得一个采购单的详情</p>
      */
-    @RequestMapping(value = "selectPurchaseOrder")
+    @RequestMapping("selectPurchaseOrder")
     @RestReturn(value = SelectPurchaseOrderDTO.class)
     private RestResponse selectPurchaseOrder(SelectPurchaseOrderCommand cmd){
         RestResponse restResponse = new RestResponse();
@@ -85,7 +85,7 @@ public class PurchaseController extends ControllerBase{
      * <b>URL: /purchase/deletePurchaseOrder</b>
      * <p>删除一个采购单</p>
      */
-    @RequestMapping(value = "deletePurchaseOrder")
+    @RequestMapping("deletePurchaseOrder")
     @RestReturn(value = String.class)
     private RestResponse deletePurchaseOrder(DeletePurchaseOrderCommand cmd){
         RestResponse restResponse = new RestResponse();

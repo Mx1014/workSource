@@ -27,7 +27,7 @@ public class SupplierController extends ControllerBase {
      * <b>URL: /supplier/createOrUpdateOneSupplier</b>
      * <p>创建或者更新一个供应商</p>
      */
-    @RequestMapping(value = "createOrUpdateOneSupplier",method = RequestMethod.POST)
+    @RequestMapping("createOrUpdateOneSupplier")
     @RestReturn(value = String.class)
     private RestResponse createOrUpdateOneSupplier(CreateOrUpdateOneSupplierCommand cmd, @RequestParam(value = "attachment") MultipartFile file){
         RestResponse restResponse = new RestResponse();
@@ -40,7 +40,7 @@ public class SupplierController extends ControllerBase {
      * <b>URL: /supplier/deleteOneSupplier</b>
      * <p>删除一个供应商</p>
      */
-    @RequestMapping(value = "deleteOneSupplier",method = RequestMethod.POST)
+    @RequestMapping("deleteOneSupplier")
     @RestReturn(value = String.class)
     private RestResponse deleteOneSupplier(DeleteOneSupplierCommand cmd){
         RestResponse restResponse = new RestResponse();
@@ -53,7 +53,7 @@ public class SupplierController extends ControllerBase {
      * <b>URL: /supplier/listSuppliers</b>
      * <p>展示供应商的列表</p>
      */
-    @RequestMapping(value = "listSuppliers")
+    @RequestMapping("listSuppliers")
     @RestReturn(value = ListSuppliersResponse.class)
     private RestResponse listSuppliers(ListSuppliersCommand cmd){
         RestResponse restResponse = new RestResponse();
@@ -66,7 +66,7 @@ public class SupplierController extends ControllerBase {
      * <b>URL: /supplier/findSupplierDetail</b>
      * <p>获得一个供应商的信息</p>
      */
-    @RequestMapping(value = "findSupplierDetail")
+    @RequestMapping("findSupplierDetail")
     @RestReturn(value = FindSupplierDetailDTO.class)
     private RestResponse findSupplierDetail(FindSupplierDetailCommand cmd){
         RestResponse restResponse = new RestResponse();
@@ -79,7 +79,7 @@ public class SupplierController extends ControllerBase {
      * <b>URL: /supplier/searchSuppliers</b>
      * <p>模糊搜索供应商</p>
      */
-    @RequestMapping(value = "searchSuppliers")
+    @RequestMapping("searchSuppliers")
     @RestReturn(value = SearchSuppliersDTO.class,collection = true)
     private RestResponse searchSuppliers(SearchSuppliersCommand cmd){
         RestResponse restResponse = new RestResponse();
