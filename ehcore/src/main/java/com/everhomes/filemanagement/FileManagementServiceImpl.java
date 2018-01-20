@@ -332,7 +332,7 @@ public class FileManagementServiceImpl implements  FileManagementService{
             if (cmd.getContentSuffix() == null)
                 throw RuntimeErrorException.errorWith(FileManagementErrorCode.SCOPE, FileManagementErrorCode.ERROR_SUFFIX_NULL,
                         "the suffix can not be null.");
-            content.setContentSuffix(cmd.getContentSuffix());
+            content.setContentSuffix(cmd.getContentSuffix().toLowerCase());
             content.setSize(cmd.getContentSize());
             content.setContentUri(cmd.getContentUri());
         }
