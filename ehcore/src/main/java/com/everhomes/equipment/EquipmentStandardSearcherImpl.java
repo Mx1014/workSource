@@ -8,6 +8,7 @@ import com.everhomes.portal.PortalService;
 import com.everhomes.repeat.RepeatService;
 import com.everhomes.rest.acl.PrivilegeConstants;
 import com.everhomes.rest.equipment.EquipmentModelType;
+import com.everhomes.rest.equipment.EquipmentStandardCommunity;
 import com.everhomes.rest.equipment.EquipmentStandardStatus;
 import com.everhomes.rest.equipment.EquipmentStandardsDTO;
 import com.everhomes.rest.equipment.SearchEquipmentStandardsCommand;
@@ -213,8 +214,22 @@ public class EquipmentStandardSearcherImpl extends AbstractElasticSearch impleme
             } else {
                 //全部里面
                 if (standard != null) {
-                    if(standard.getTargetId() == 0L)
-                    standard.setCommunities(equipmentProvider.listModelCommunityMapByModelId(standard.getId(),EquipmentModelType.STANDARD.getCode()));
+                    if(standard.getTargetId() == 0L){
+                        List<Long> communityIds = equipmentProvider.listModelCommunityMapByModelId(standard.getId(), EquipmentModelType.STANDARD.getCode());
+                        List<EquipmentStandardCommunity> communities = new ArrayList<>();
+                        EquipmentStandardCommunity standardCommunity = new EquipmentStandardCommunity();
+                        if(communityIds!=null && communityIds.size()>0){
+                            communityIds.forEach((c)->{
+                                Community community = communityProvider.findCommunityById(standard.getTargetId());
+                                if (community != null) {
+                                    standardCommunity.setCommunityId(community.getId());
+                                    standardCommunity.setCommunityName(community.getName());
+                                }
+                                communities.add(standardCommunity);
+                            });
+                        }
+                        standard.setCommunities(communities);
+                    }
                     Community community = communityProvider.findCommunityById(standard.getTargetId());
                     if(community!=null)
                     standard.setTargetName(community.getName());
