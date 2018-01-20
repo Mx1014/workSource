@@ -77,6 +77,8 @@ ADD COLUMN `repeat_type` tinyint(4) NOT NULL COMMENT ' 0: no repeat, 1: by day, 
 -- 操作记录表增加设备id表
 ALTER TABLE `eh_equipment_inspection_task_logs`
   ADD COLUMN `equipment_id`  bigint(20) NULL DEFAULT 0 ;
+ALTER TABLE `eh_equipment_inspection_task_logs`
+  ADD COLUMN `flow_case_id`  bigint(20) NULL AFTER `equipment_id`;
 
 CREATE TABLE `eh_equipment_inspection_equipment_logs` (
   `id` bigint(20) NOT NULL COMMENT 'id',
