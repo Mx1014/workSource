@@ -6,6 +6,8 @@ import com.everhomes.organization.OrganizationMember;
 import com.everhomes.organization.OrganizationProvider;
 import com.everhomes.portal.PortalService;
 import com.everhomes.rest.acl.PrivilegeConstants;
+import com.everhomes.rest.equipment.DeleteEquipmentPlanCommand;
+import com.everhomes.rest.equipment.EquipmentInspectionPlanDTO;
 import com.everhomes.rest.equipment.EquipmentTaskDTO;
 import com.everhomes.rest.equipment.ListEquipmentTasksResponse;
 import com.everhomes.rest.equipment.SearchEquipmentTasksCommand;
@@ -49,7 +51,11 @@ public class EquipmentTasksSearcherImpl extends AbstractElasticSearch implements
 	@Autowired
 	private EquipmentProvider equipmentProvider;
 
-	@Autowired
+    @Autowired
+    private EquipmentService equipmentService;
+
+
+    @Autowired
 	private ConfigurationProvider configProvider;
 
 	@Autowired
@@ -205,27 +211,19 @@ public class EquipmentTasksSearcherImpl extends AbstractElasticSearch implements
             }
 
         List<EquipmentTaskDTO> tasks = new ArrayList<EquipmentTaskDTO>();
-        for(Long id : ids) {
-        	EquipmentInspectionTasks task = equipmentProvider.findEquipmentTaskById(id);
-        	EquipmentTaskDTO dto = ConvertHelper.convert(task, EquipmentTaskDTO.class);
+        for (Long id : ids) {
+            EquipmentInspectionTasks task = equipmentProvider.findEquipmentTaskById(id);
+            EquipmentTaskDTO dto = ConvertHelper.convert(task, EquipmentTaskDTO.class);
 
-        	EquipmentInspectionStandards standard = equipmentProvider.findStandardById(task.getStandardId());
-            if(null != standard) {
-            	dto.setStandardDescription(standard.getDescription());
-    			dto.setStandardName(standard.getName());
-            	dto.setTaskType(standard.getStandardType());
-            	EquipmentInspectionTemplates template = equipmentProvider.findEquipmentInspectionTemplate(standard.getTemplateId(), standard.getOwnerId(), standard.getOwnerType());
-        		if(template != null) {
-        			dto.setTemplateId(template.getId());
-        			dto.setTemplateName(template.getName());
-        		}
-            }
-
-            EquipmentInspectionEquipments equipment = equipmentProvider.findEquipmentById(task.getEquipmentId());
-            if(null != equipment) {
-            	dto.setEquipmentName(equipment.getName());
-            	dto.setEquipmentLocation(equipment.getLocation());
-            	dto.setQrCodeFlag(equipment.getQrCodeFlag());
+            DeleteEquipmentPlanCommand command = new DeleteEquipmentPlanCommand();
+            command.setOwnerId(cmd.getOwnerId());
+            command.setOwnerType(cmd.getOwnerType());
+            command.setId(task.getPlanId());
+            EquipmentInspectionPlanDTO plansDTO = equipmentService.getEquipmmentInspectionPlanById(command);
+            if (null != plansDTO) {
+                dto.setPlanDescription(plansDTO.getRemarks());
+                dto.setTaskType(plansDTO.getPlanType());
+                dto.setEquipments(plansDTO.getEquipmentStandardRelations());
             }
 
             if(task.getExecutorId() != null && task.getExecutorId() != 0) {
