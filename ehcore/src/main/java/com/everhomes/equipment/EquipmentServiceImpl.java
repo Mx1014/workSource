@@ -663,12 +663,6 @@ private void checkUserPrivilege(Long orgId, Long privilegeId, Long communityId) 
 
 	@Override
 	public void deleteEquipmentStandard(DeleteEquipmentStandardCommand cmd) {
-		/*Long privilegeId = configProvider.getLongValue(EquipmentConstant.EQUIPMENT_STANDARD_DELETE, 0L);
-		if(cmd.getTargetId() != null) {
-			userPrivilegeMgr.checkCurrentUserAuthority(EntityType.COMMUNITY.getCode(), cmd.getTargetId(), cmd.getOwnerId(), privilegeId);
-		} else {
-			userPrivilegeMgr.checkCurrentUserAuthority(null, null, cmd.getOwnerId(), privilegeId);
-		}*/
 		checkUserPrivilege(cmd.getOwnerId(), PrivilegeConstants.EQUIPMENT_STANDARD_DELETE, cmd.getTargetId());
 
 		User user = UserContext.current().getUser();
@@ -699,7 +693,7 @@ private void checkUserPrivilege(Long orgId, Long privilegeId, Long communityId) 
 			standard.setStatus(EquipmentStandardStatus.INACTIVE.getCode());
 			equipmentProvider.updateEquipmentStandard(standard);
 			equipmentStandardSearcher.feedDoc(standard);
-			if (cmd.getTargetId() == null && standard.getTargetId() == 0L) {
+			if ((cmd.getTargetId() == null|| cmd.getTargetId() == 0) && standard.getTargetId() == 0L) {
 				equipmentProvider.deleteModelCommunityMapByModelId(standard.getId(), EquipmentModelType.STANDARD.getCode());
 			}
 

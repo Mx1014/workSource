@@ -120,17 +120,9 @@ public class EquipmentStandardSearcherImpl extends AbstractElasticSearch impleme
 	}
 
 	@Override
-	public SearchEquipmentStandardsResponse query(
-			SearchEquipmentStandardsCommand cmd) {
+	public SearchEquipmentStandardsResponse query(SearchEquipmentStandardsCommand cmd) {
 
-        /*Long privilegeId = configProvider.getLongValue(EquipmentConstant.EQUIPMENT_STANDARD_LIST, 0L);
-        if(cmd.getTargetId() != null) {
-            userPrivilegeMgr.checkCurrentUserAuthority(EntityType.COMMUNITY.getCode(), cmd.getTargetId(), cmd.getOwnerId(), privilegeId);
-        } else {
-            userPrivilegeMgr.checkCurrentUserAuthority(null, null, cmd.getOwnerId(), privilegeId);
-        }*/
         checkUserPrivilege(cmd.getOwnerId(), PrivilegeConstants.EQUIPMENT_STANDARD_LIST,cmd.getTargetId());
-
 
         SearchRequestBuilder builder = getClient().prepareSearch(getIndexName()).setTypes(getIndexType());
         QueryBuilder qb = null;
@@ -208,11 +200,11 @@ public class EquipmentStandardSearcherImpl extends AbstractElasticSearch impleme
             nextPageAnchor = null;
         }
         
-        List<EquipmentStandardsDTO> eqStandards = new ArrayList<EquipmentStandardsDTO>();
+        List<EquipmentStandardsDTO> eqStandards = new ArrayList<>();
         List <EquipmentModelCommunityMap> maps = equipmentProvider.listModelCommunityMapByCommunityId(cmd.getTargetId(),EquipmentModelType.STANDARD.getCode());
         for(Long id : ids) {
             EquipmentInspectionStandards standard = equipmentProvider.findStandardById(id);
-            if (cmd.getTargetId() != null) {
+            if (cmd.getTargetId() != null && cmd.getTargetId() != 0) {
                 //权限细化增加   项目的增加上公共标准  过滤已经修改过的模板
                 if (standard.getReferId() != null && standard.getReferId() != 0L) {
                     if (maps != null && maps.size() > 0)
@@ -245,16 +237,36 @@ public class EquipmentStandardSearcherImpl extends AbstractElasticSearch impleme
         if (maps != null && maps.size() > 0) {
             for (EquipmentModelCommunityMap map : maps) {
                 EquipmentInspectionStandards standard = equipmentProvider.findStandardById(map.getModelId());
-                if (standard != null) {
-                   // processRepeatSetting(standard);
-                    EquipmentStandardsDTO dto = ConvertHelper.convert(standard, EquipmentStandardsDTO.class);
-                    dto.setDescription("");
-                    if (null != standard.getRepeat()) {
-                        RepeatSettingsDTO rs = ConvertHelper.convert(standard.getRepeat(), RepeatSettingsDTO.class);
-                        dto.setRepeat(rs);
+                if (standard != null && EquipmentStandardStatus.ACTIVE.equals(EquipmentStandardStatus.fromStatus(standard.getStatus()))) {
+                    //有效的才加  fix bug
+                    if (cmd.getStatus() != null) {
+                        if (!Objects.equals(standard.getStatus(), cmd.getStatus())) {
+                            continue;
+                        }
                     }
-                    eqStandards.add(dto);
-
+                    if (cmd.getStandardType() != null) {
+                        if (!Objects.equals(standard.getStatus(), cmd.getStandardType())) {
+                            continue;
+                        }
+                    }
+                    if (cmd.getRepeatType() != null) {
+                        if (!Objects.equals(standard.getRepeatType(), cmd.getRepeatType())) {
+                            continue;
+                        }
+                    }
+                    if (cmd.getInspectionCategoryId() != null) {
+                        if (!Objects.equals(standard.getInspectionCategoryId(), cmd.getInspectionCategoryId())) {
+                            continue;
+                        }
+                    }
+                        // processRepeatSetting(standard);
+                        EquipmentStandardsDTO dto = ConvertHelper.convert(standard, EquipmentStandardsDTO.class);
+                        dto.setDescription("");
+                        if (null != standard.getRepeat()) {
+                            RepeatSettingsDTO rs = ConvertHelper.convert(standard.getRepeat(), RepeatSettingsDTO.class);
+                            dto.setRepeat(rs);
+                        }
+                        eqStandards.add(dto);
                 }
             }
         }
