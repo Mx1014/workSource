@@ -243,6 +243,9 @@ public class EquipmentTasksSearcherImpl extends AbstractElasticSearch implements
                     equipmentStandardRelation.setEquipmentName(equipment.getName());
                     equipmentStandardRelation.setLocation(equipment.getLocation());
                 }
+                List<EquipmentStandardRelationDTO> equipments = new ArrayList<>();
+                equipments.add(equipmentStandardRelation);
+                dto.setEquipments(equipments);
             }
         }
         response.setTasks(tasks);
