@@ -607,7 +607,7 @@ public class PmtaskFlowModuleListener implements FlowModuleListener {
 		dto.setFieldType(GeneralFormFieldType.SINGLE_LINE_TEXT.getCode());
 		dto.setOperators(new ArrayList<>());
 		dto.getOperators().add(FlowConditionRelationalOperatorType.EQUAL.getCode());
-		Integer namespaceId = UserContext.getCurrentNamespaceId();
+		Integer namespaceId = UserContext.getCurrentNamespaceId(flow.getNamespaceId());
 		ListTaskCategoriesCommand cmd = new ListTaskCategoriesCommand();
 		cmd.setNamespaceId(namespaceId);
 		if (flow.getModuleType().equals(FlowModuleType.NO_MODULE.getCode()))
