@@ -10,9 +10,7 @@ import com.everhomes.util.StringHelper;
  * 
  * <ul>返回值:
  * <li>salaryEmployeeDTO: 基础字段参考{@link com.everhomes.rest.salary.SalaryEmployeeDTO}</li>
- * <li>exceptionCount: 异常人数</li>
- * <li>nextPageOffset：下一页的页码（如果没有则为空）</li>
- * <li>nextPageAnchro</li>
+ * <li>nextPageAnchor</li>
  * </ul>
  */
 public class ListSalaryEmployeesResponse {

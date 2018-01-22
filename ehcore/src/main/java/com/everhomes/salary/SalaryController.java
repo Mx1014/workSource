@@ -59,7 +59,7 @@ public class SalaryController extends ControllerBase {
 	}
 
 	/**
-	 * <p>1.更新薪酬选项</p>
+	 * <p>2.更新薪酬选项</p>
 	 * <b>URL: /salary/updateGroupEntities</b>
 	 */
 	@RequestMapping("updateGroupEntities")
@@ -72,6 +72,31 @@ public class SalaryController extends ControllerBase {
 		return response;
 	}
 
+	/**
+	 * <p>3.查询子公司的人员</p>
+	 * <b>URL: /salary/listSalaryEmployees</b>
+	 */
+	@RequestMapping("listSalaryEmployees")
+	@RestReturn(ListSalaryEmployeesResponse.class)
+	public RestResponse listSalaryEmployees(ListSalaryEmployeesCommand cmd ){
+		ListSalaryEmployeesResponse resp = this.salaryService.listSalaryEmployees(cmd);
+		RestResponse response = new RestResponse(resp);
+		response.setErrorCode(ErrorCodes.SUCCESS);
+		response.setErrorDescription("OK");
+		return response;
+	}
+
+
+	/**
+	 * <p>4.导出导入工资表模板</p>
+	 * <b>URL: /salary/exportEmployeeSalaryTemplate</b>
+	 */
+	@RequestMapping("exportEmployeeSalaryTemplate")
+	public HttpServletResponse exportEmployeeSalaryTemplate(ExportEmployeeSalaryTemplateCommand cmd ,
+													 HttpServletResponse response ){
+		HttpServletResponse resp = salaryService.exportEmployeeSalaryTemplate(cmd,response);
+		return resp;
+	}
 //
 //	/**
 //	 * <p>2-1.新增、更改 薪酬组(包含的选项 + 更改组名)</p>

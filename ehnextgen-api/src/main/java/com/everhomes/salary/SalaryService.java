@@ -1,14 +1,9 @@
 // @formatter:off
 package com.everhomes.salary;
 
-import com.everhomes.rest.common.ImportFileResponse;
-import com.everhomes.rest.organization.ImportFileTaskDTO;
-import com.everhomes.rest.organization.ListOrganizationContactCommand;
 import com.everhomes.rest.salary.*;
-import org.springframework.web.multipart.MultipartFile;
 
 import javax.servlet.http.HttpServletResponse;
-import java.util.List;
 
 public interface SalaryService {
 
@@ -125,4 +120,9 @@ public interface SalaryService {
     ListGroupEntitiesResponse listGroupEntities(ListGroupEntitiesCommand cmd);
 
     void updateGroupEntities(UpdateGroupEntitiesCommand cmd);
+
+    ListSalaryEmployeesResponse listSalaryEmployees(ListSalaryEmployeesCommand cmd);
+
+    HttpServletResponse exportEmployeeSalaryTemplate(ExportEmployeeSalaryTemplateCommand cmd,
+                                                     HttpServletResponse response);
 }

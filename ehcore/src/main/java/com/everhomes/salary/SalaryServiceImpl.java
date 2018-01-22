@@ -1,59 +1,39 @@
 // @formatter:off
 package com.everhomes.salary;
 
-import com.everhomes.bootstrap.PlatformContext;
 import com.everhomes.configuration.ConfigurationProvider;
-import com.everhomes.coordinator.CoordinationLocks;
 import com.everhomes.coordinator.CoordinationProvider;
 import com.everhomes.db.DbProvider;
 import com.everhomes.listing.CrossShardListingLocator;
 import com.everhomes.locale.LocaleTemplateService;
-import com.everhomes.mail.MailHandler;
 import com.everhomes.organization.*;
-import com.everhomes.payment.util.DownloadUtil;
-import com.everhomes.rest.common.ImportFileResponse;
 import com.everhomes.rest.organization.*;
 import com.everhomes.rest.salary.*;
-import com.everhomes.rest.salary.GetImportFileResultCommand;
 import com.everhomes.rest.salary.ListEnterprisesCommand;
 import com.everhomes.rest.techpark.punch.NormalFlag;
-import com.everhomes.rest.uniongroup.*;
+import com.everhomes.rest.techpark.punch.PunchServiceErrorCode;
 import com.everhomes.settings.PaginationConfigHelper;
 import com.everhomes.techpark.punch.PunchService;
-import com.everhomes.uniongroup.ListUniongroupMemberDetailResponse;
-import com.everhomes.uniongroup.UniongroupMemberDetail;
 import com.everhomes.uniongroup.UniongroupService;
-import com.everhomes.user.UserContext;
 import com.everhomes.util.ConvertHelper;
-import com.everhomes.util.DateHelper;
 import com.everhomes.util.RuntimeErrorException;
-import com.everhomes.util.StringHelper;
-import com.everhomes.util.excel.RowResult;
-import com.everhomes.util.excel.handler.PropMrgOwnerHandler;
 import freemarker.cache.StringTemplateLoader;
 import freemarker.template.Configuration;
-import freemarker.template.Template;
-import org.apache.poi.ss.usermodel.Font;
-import org.apache.poi.ss.usermodel.Row;
-import org.apache.poi.ss.util.CellRangeAddress;
-import org.apache.poi.xssf.usermodel.*;
+import org.apache.poi.ss.usermodel.*;
+import org.apache.poi.xssf.usermodel.XSSFComment;
+import org.apache.poi.xssf.usermodel.XSSFDrawing;
+import org.apache.poi.xssf.usermodel.XSSFSheet;
+import org.apache.poi.xssf.usermodel.XSSFWorkbook;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.scheduling.annotation.Scheduled;
 import org.springframework.stereotype.Component;
-import org.springframework.transaction.TransactionStatus;
-import org.springframework.ui.freemarker.FreeMarkerTemplateUtils;
-import org.springframework.util.StringUtils;
-import org.springframework.web.multipart.MultipartFile;
 
-import javax.script.ScriptEngine;
-import javax.script.ScriptEngineManager;
 import javax.servlet.http.HttpServletResponse;
+import java.io.BufferedOutputStream;
 import java.io.ByteArrayOutputStream;
 import java.io.IOException;
-import java.math.BigDecimal;
-import java.sql.Timestamp;
+import java.io.OutputStream;
 import java.text.SimpleDateFormat;
 import java.util.*;
 import java.util.stream.Collectors;
@@ -2284,7 +2264,7 @@ public class SalaryServiceImpl implements SalaryService {
     @Override
     public void updateGroupEntities(UpdateGroupEntitiesCommand cmd) {
         //新增
-        addNewGroupEntities(cmd.getOrganizationId(),cmd.getEntities());
+        addNewGroupEntities(cmd.getOrganizationId(), cmd.getEntities());
         //更新和删除
         List<SalaryGroupEntity> entities = salaryGroupEntityProvider.listSalaryGroupEntityByOrgId(cmd.getOrganizationId());
         for (SalaryGroupEntity entity : entities) {
@@ -2300,7 +2280,7 @@ public class SalaryServiceImpl implements SalaryService {
                     continue;
                 }
                 salaryGroupEntityProvider.deleteSalaryGroupEntity(entity);
-            }else{
+            } else {
                 //不可编辑的跳过
                 if (NormalFlag.NO == NormalFlag.fromCode(entity.getEditableFlag())) {
                     continue;
@@ -2323,6 +2303,154 @@ public class SalaryServiceImpl implements SalaryService {
         }
     }
 
+    @Override
+    public ListSalaryEmployeesResponse listSalaryEmployees(ListSalaryEmployeesCommand cmd) {
+        // TODO: 2018/1/22 磊哥和楠哥总要给我一个过滤后的detailIds
+        List<Long> detailIds = new ArrayList<>();
+        ListSalaryEmployeesResponse response = new ListSalaryEmployeesResponse();
+
+        CrossShardListingLocator locator = new CrossShardListingLocator();
+        locator.setAnchor(cmd.getPageAnchor());
+        int pageSize = PaginationConfigHelper.getPageSize(configurationProvider, cmd.getPageSize());
+        List<SalaryEmployee> salaryEmployees = salaryEmployeeProvider.listSalaryEmployee(cmd.getOwnerId(), cmd.getSalaryStatus(), detailIds
+                , locator, pageSize + 1);
+        if (null == salaryEmployees)
+            return response;
+        Long nextPageAnchor = null;
+        if (salaryEmployees != null && salaryEmployees.size() > pageSize) {
+            salaryEmployees.remove(salaryEmployees.size() - 1);
+            nextPageAnchor = salaryEmployees.get(salaryEmployees.size() - 1).getId();
+        }
+        response.setNextPageAnchor(nextPageAnchor);
+        response.setSalaryEmployeeDTO(salaryEmployees.stream().map(this::processEmployeeDTO).collect(Collectors.toList()));
+        return response;
+    }
+
+    private SalaryEmployeeDTO processEmployeeDTO(SalaryEmployee r) {
+        SalaryEmployeeDTO dto = ConvertHelper.convert(r, SalaryEmployeeDTO.class);
+        OrganizationMemberDetails detail = organizationProvider.findOrganizationMemberDetailsByDetailId(r.getUserDetailId());
+        if (null != detail) {
+            dto.setContactName(detail.getContactName());
+            if (null != detail.getDismissTime()) {
+                dto.setDismissTime(detail.getDismissTime().getTime());
+            }
+            if (null != detail.getCheckInTime()) {
+                dto.setCheckInTime(detail.getCheckInTime().getTime());
+            }
+        }
+        return dto;
+    }
+
+    @Override
+    public HttpServletResponse exportEmployeeSalaryTemplate(ExportEmployeeSalaryTemplateCommand cmd,
+                                                            HttpServletResponse response) {
+        String filePath = "导入工资表" + ".xlsx";
+        //新建了一个文件
+
+        Workbook wb = createEmployeeSalaryHeadWB(cmd.getOwnerId());
+
+        return download(wb, filePath, response);
+    }
+
+    private Workbook createEmployeeSalaryHeadWB(Long ownerId) {
+        List<SalaryGroupEntity> groupEntities = salaryGroupEntityProvider.listSalaryGroupEntityByOrgId(ownerId);
+
+        XSSFWorkbook wb = new XSSFWorkbook();
+        XSSFSheet sheet = wb.createSheet("sheet1");
+        String sheetName ="sheet1";
+        createEmployeeSalaryHead(wb,sheet, groupEntities);
+        return wb;
+    }
+
+    private void createEmployeeSalaryHead(XSSFWorkbook wb, XSSFSheet sheet, List<SalaryGroupEntity> groupEntities) {
+        Row row = sheet.createRow(sheet.getLastRowNum() + 1);
+        CreationHelper factory = wb.getCreationHelper();
+        XSSFDrawing drawing = sheet.createDrawingPatriarch();
+        ClientAnchor anchor = factory.createClientAnchor();
+        int i =-1 ;
+        Cell cell = row.createCell(++i);
+        cell.setCellValue("手机");
+        XSSFComment commentA = drawing.createCellComment(anchor);
+        RichTextString strA = factory.createRichTextString("必填项：员工手机,o0ub号，用于匹配系统用户");
+                          commentA.setString(strA);
+        commentA.setAuthor("zuolin");
+        cell.setCellComment(commentA);
+
+
+        cell = row.createCell(++i);
+        cell.setCellValue("姓名");
+        XSSFComment commentB = drawing.createCellComment(anchor);
+        RichTextString strB = factory.createRichTextString("员工姓名仅作为提示作用，编辑将不会生效");
+        commentB.setString(strB);
+        commentB.setAuthor("zuolin");
+        cell.setCellComment(commentB);
+
+        for (SalaryGroupEntity entity : groupEntities) {
+            cell = row.createCell(++i);
+            cell.setCellValue(entity.getName());
+            if(SalaryEntityType.REDUN != SalaryEntityType.fromCode(entity.getType())){
+                XSSFComment comment = drawing.createCellComment(anchor);
+                StringBuilder sb = new StringBuilder();
+                sb.append("金额大于0");
+                sb.append("\n");
+                sb.append("类型：");
+                sb.append(SalaryEntityType.fromCode(entity.getType()).getDescri());
+                sb.append("\n");
+                sb.append("数据策略：");
+                if (NormalFlag.YES == NormalFlag.fromCode(entity.getDataPolicy())) {
+                    sb.append("次月清空");
+                } else {
+                    sb.append("次月沿用");
+                }
+                sb.append("\n");
+                sb.append("发放规则：");
+                if (NormalFlag.YES == NormalFlag.fromCode(entity.getGrantPolicy())) {
+                    sb.append("税后发放");
+                } else {
+                    sb.append("税前发放");
+                }
+                sb.append("\n");
+                sb.append("计税方式：");
+                if (NormalFlag.YES == NormalFlag.fromCode(entity.getTaxPolicy())) {
+                    sb.append("年终奖");
+                } else {
+                    sb.append("工资");
+                }
+
+                RichTextString str = factory.createRichTextString(sb.toString());
+                comment.setString(str);
+                comment.setAuthor("zuolin");
+                cell.setCellComment(comment);
+            }
+        }
+    }
+
+    public HttpServletResponse download(Workbook workbook, String fileName, HttpServletResponse response) {
+        try {
+            ByteArrayOutputStream out = new ByteArrayOutputStream();
+            workbook.write(out);
+            response.reset();
+            // 设置response的Header
+            response.addHeader("Content-Disposition", "attachment;filename=" + new String(fileName.getBytes()));
+            OutputStream toClient = new BufferedOutputStream(response.getOutputStream());
+            response.setContentType("application/msexcel");
+            toClient.write(out.toByteArray());
+            toClient.flush();
+            toClient.close();
+
+//            // 读取完成删除文件
+//            if (file.isFile() && file.exists()) {
+//                file.delete();
+//            }
+        } catch (IOException ex) {
+            LOGGER.error(ex.getMessage());
+            throw RuntimeErrorException.errorWith(PunchServiceErrorCode.SCOPE,
+                    PunchServiceErrorCode.ERROR_PUNCH_ADD_DAYLOG,
+                    ex.getLocalizedMessage());
+
+        }
+        return response;
+    }
     private void addNewGroupEntities(Long organizationId, List<SalaryGroupEntityDTO> entities) {
         for (SalaryGroupEntityDTO dto : entities) {
             if (dto.getId() == null) {

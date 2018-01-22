@@ -15,6 +15,8 @@ public interface SalaryEmployeeProvider {
 
 	List<SalaryEmployee> listSalaryEmployee();
 
+	List<SalaryEmployee> listSalaryEmployee(Long ownerId, Byte salaryStatus, List<Long> detailIds, CrossShardListingLocator locator, int i);
+
 //	List<SalaryEmployee> listSalaryEmployeeByPeriodGroupId(Long salaryPeriodGroupId);
 //
 //	int countUnCheckEmployee(Long salaryPeriodGroupId);

@@ -9,7 +9,7 @@ import java.util.List;
  *
  * <ul>
  * <li>organizationId: 总公司id</li>
- * <li>entities: 字段项 {@link SalaryGroupEntityDTO}</li>
+ * <li>entities: 字段项 {@link com.everhomes.rest.salary.SalaryGroupEntityDTO}</li>
  * </ul>
  */
 public class UpdateGroupEntitiesCommand {
