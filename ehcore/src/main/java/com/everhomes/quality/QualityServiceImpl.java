@@ -310,8 +310,8 @@ public class QualityServiceImpl implements QualityService {
 			return dto;
 		} else {
 			//List<CommunityDTO> communities = organizationService.listAllChildrenOrganizationCoummunities(cmd.getOwnerId());
-			QualityStandardsDTO dto = new QualityStandardsDTO();
-			qualityProvider.createQualityInspectionStandards(standard);
+			//QualityStandardsDTO dto = new QualityStandardsDTO();
+			/*qualityProvider.createQualityInspectionStandards(standard);
 			if (cmd.getCommunities() != null && cmd.getCommunities().size() > 0) {
 				for (Long communityId : cmd.getCommunities()) {
 					//standard.setTargetId(communityId);
@@ -337,8 +337,8 @@ public class QualityServiceImpl implements QualityService {
 
 			dto = ConvertHelper.convert(standard, QualityStandardsDTO.class);
 			convertSpecificationToDTO(standard, dto);
-
-			return dto;
+*/
+			return null;
 		}
 	}
 
@@ -387,7 +387,7 @@ public class QualityServiceImpl implements QualityService {
 			if (cmd.getCommunities() != null && cmd.getCommunities().size() > 0 && cmd.getTargetId() == null) {
 				//在全部中修改 公共标准
 				qualityProvider.deleteQualityModelCommunityMapByModelId(standard.getId(), QualityModelType.STANDARD.getCode());
-				for (Long communityId : cmd.getCommunities()) {
+				/*for (Long communityId : cmd.getCommunities()) {
 					//standard.setTargetId(communityId);
 					//standard.setTargetType(OwnerType.COMMUNITY.getCode());
 					//qualityProvider.createQualityInspectionStandards(standard);
@@ -399,8 +399,7 @@ public class QualityServiceImpl implements QualityService {
 					map.setModelId(standard.getId());
 					//创建标准项目关联表
 					qualityProvider.createQualityModelCommunityMap(map);
-				}
-
+				}*/
 			}
 		}
 
