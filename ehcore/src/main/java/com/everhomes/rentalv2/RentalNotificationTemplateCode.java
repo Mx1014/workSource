@@ -40,5 +40,5 @@ public interface RentalNotificationTemplateCode {
     //local string table
     int RENTAL_TEXT_REMARK = 10; // 资源提交信息   请输入备注
     int RENTAL_SHOW_CONTENT = 11; // 资源提交信息  请输入显示内容
-
+    int RENTAL_ORDER_NOT_REFUND_TIP = 12; // 不支持退款的提示信息
 }
