@@ -399,7 +399,7 @@ public class WebMenuServiceImpl implements WebMenuService {
 					}
 					filterMenu.setAppId(scope.getAppId());
 					filterMenu.setConfigId(scope.getConfigId());
-					filterMenus.add(menu);
+					filterMenus.add(filterMenu);
 				}
 			}
 		}
