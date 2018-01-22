@@ -190,6 +190,7 @@ import com.everhomes.rest.pmNotify.PmNotifyType;
 import com.everhomes.rest.pmNotify.ReceiverName;
 import com.everhomes.rest.pmNotify.SetPmNotifyParamsCommand;
 import com.everhomes.rest.pmtask.CreateTaskCommand;
+import com.everhomes.rest.pmtask.PmTaskAddressType;
 import com.everhomes.rest.quality.OwnerType;
 import com.everhomes.rest.quality.ProcessType;
 import com.everhomes.rest.quality.QualityGroupType;
@@ -5786,6 +5787,7 @@ private void checkUserPrivilege(Long orgId, Long privilegeId, Long communityId) 
 		CreateTaskCommand repairCommand = new CreateTaskCommand();
 		repairCommand = ConvertHelper.convert(cmd, CreateTaskCommand.class);
 		repairCommand.setAddress(equipment.getLocation());
+		repairCommand.setAddressType(PmTaskAddressType.ORGANIZATION.getCode());
 		List<OrganizationMember> members = organizationProvider.listOrganizationMembersByUId(UserContext.currentUserId());
 		if (members != null && members.size() > 0) {
 			repairCommand.setRequestorName(members.get(0).getContactName());
