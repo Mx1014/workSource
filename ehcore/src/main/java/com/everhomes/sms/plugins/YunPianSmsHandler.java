@@ -60,7 +60,9 @@ public class YunPianSmsHandler extends BaseSmsHandler {
      * {"http_status_code":400,"code":3,"msg":"账户余额不足","detail":"请充值后重试"}
      */
     @Override
-    List<SmsLog> buildSmsLogs(Integer namespaceId, String[] phoneNumbers, String templateScope, int templateId, String templateLocale, String content, RspMessage rspMessage) {
+    List<SmsLog> buildSmsLogs(
+            Integer namespaceId, String[] phoneNumbers, String templateScope, int templateId,
+                              String templateLocale, String content, RspMessage rspMessage) {
         List<SmsLog> smsLogs = new ArrayList<>();
         SendResult res = new SendResult();
         String result = "failed";
@@ -101,7 +103,8 @@ public class YunPianSmsHandler extends BaseSmsHandler {
         return smsLogs;
     }
 
-    private List<SmsLog> error(Integer namespaceId, String[] phoneNumbers, String templateScope, int templateId, String templateLocale, List<SmsLog> smsLogs, String result) {
+    private List<SmsLog> error(Integer namespaceId, String[] phoneNumbers, String templateScope, int templateId,
+                               String templateLocale, List<SmsLog> smsLogs, String result) {
         for (String phoneNumber : phoneNumbers) {
             smsLogs.add(getSmsErrorLog(namespaceId, phoneNumber, templateScope, templateId, templateLocale, result));
         }
@@ -155,7 +158,8 @@ public class YunPianSmsHandler extends BaseSmsHandler {
         Gson gson = new GsonBuilder().disableHtmlEscaping().create();
         List<ReportResult> reportList = null;
         try {
-            reportList = gson.fromJson(URLDecoder.decode(split[1], "UTF-8"), new TypeToken<List<ReportResult>>(){}.getType());
+            reportList = gson.fromJson(
+                    URLDecoder.decode(split[1], "UTF-8"), new TypeToken<List<ReportResult>>(){}.getType());
         } catch (Exception e) {
             e.printStackTrace();
         }

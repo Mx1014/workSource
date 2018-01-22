@@ -6,6 +6,9 @@ import com.everhomes.configuration.ConfigurationProvider;
 import com.everhomes.constants.ErrorCodes;
 import com.everhomes.controller.WebRequestInterceptor;
 import com.everhomes.locale.LocaleStringService;
+import com.everhomes.namespace.Namespace;
+import com.everhomes.openapi.AppNamespaceMapping;
+import com.everhomes.openapi.AppNamespaceMappingProvider;
 import com.everhomes.rest.oauth2.AuthorizationCommand;
 import com.everhomes.rest.oauth2.CommonRestResponse;
 import com.everhomes.rest.oauth2.OAuth2AccessTokenResponse;
@@ -60,6 +63,9 @@ public class AuthorizationEndpointController extends OAuth2ControllerBase {
 	@Autowired
 	private UserService userService;
 
+    @Autowired
+    private AppNamespaceMappingProvider appNamespaceMappingProvider;
+
 	@RequestMapping("authorize")
 	public Object authorize(
 			@RequestParam(value="response_type", required = true) String responseType,
@@ -108,7 +114,7 @@ public class AuthorizationEndpointController extends OAuth2ControllerBase {
 				HttpHeaders httpHeaders = new HttpHeaders();
 				httpHeaders.setLocation(uri);
 				return new ResponseEntity<>(httpHeaders, HttpStatus.SEE_OTHER);
-			} 
+			}
 		}
 		//no logon
 		model.addAttribute("viewState", WebTokenGenerator.getInstance().toWebToken(cmd));
@@ -124,37 +130,41 @@ public class AuthorizationEndpointController extends OAuth2ControllerBase {
 
 		AuthorizationCommand cmd = WebTokenGenerator.getInstance().fromWebToken(viewState, AuthorizationCommand.class);
 
-		// double check in confirmation api to protect against tampering in confirmation callback
-		App app = this.appProvider.findAppByKey(cmd.getclient_id());
-		if(app == null) {
-			model.addAttribute("errorDescription", this.localeStringService.getLocalizedString(
+        // double check in confirmation api to protect against tampering in confirmation callback
+        App app = this.appProvider.findAppByKey(cmd.getclient_id());
+        if(app == null) {
+            model.addAttribute("errorDescription", this.localeStringService.getLocalizedString(
 					OAuth2ServiceErrorCode.SCOPE,
 					String.valueOf(OAuth2ServiceErrorCode.ERROR_INVALID_REQUEST),
 					httpRequest.getLocale().toLanguageTag(),
 					"Invalid request client_id or unregistered redirect URI"));
 
-			return "oauth2-error-response";
-		}
+            return "oauth2-error-response";
+        }
 
-		String redirectUri = cmd.getredirect_uri();
-		if(redirectUri == null || redirectUri.isEmpty()) {
-			redirectUri = this.oAuth2Service.getDefaultRedirectUri(app.getId());
-		}
+        String redirectUri = cmd.getredirect_uri();
+        if(redirectUri == null || redirectUri.isEmpty()) {
+            redirectUri = this.oAuth2Service.getDefaultRedirectUri(app.getId());
+        }
 
-		if(!this.oAuth2Service.validateRedirectUri(app.getId(), redirectUri)) {
-			model.addAttribute("errorDescription", this.localeStringService.getLocalizedString(
+        if(!this.oAuth2Service.validateRedirectUri(app.getId(), redirectUri)) {
+            model.addAttribute("errorDescription", this.localeStringService.getLocalizedString(
 					OAuth2ServiceErrorCode.SCOPE,
 					String.valueOf(OAuth2ServiceErrorCode.ERROR_INVALID_REQUEST),
 					httpRequest.getLocale().toLanguageTag(),
 					"Invalid request client_id or unregistered redirect URI"));
 
-			return "oauth2-error-response";
-		}
+            return "oauth2-error-response";
+        }
 
-		LOGGER.info("Confirm OAuth2 authorization: {}", cmd);
+        Integer namespaceId = Namespace.DEFAULT_NAMESPACE;
+        AppNamespaceMapping namespaceMapping = appNamespaceMappingProvider.findAppNamespaceMappingByAppKey(app.getAppKey());
+        if (namespaceMapping != null) {
+            namespaceId = namespaceMapping.getNamespaceId();
+        }
 
-		try {
-            Integer namespaceId = /*app.getNamespaceId()*/ 0;
+        LOGGER.info("Confirm OAuth2 authorization: {}", cmd);
+        try {
             ConfirmAuthorizationVO confirmAuthorization = oAuth2Service.confirmAuthorization(namespaceId, identifier, password, cmd);
             if (confirmAuthorization != null) {
 				HttpHeaders httpHeaders = new HttpHeaders();
