@@ -31,6 +31,7 @@ import java.sql.Timestamp;
  * <li>contact: 停车场配置客服联系方式，用在app订单异常界面，客户可以拨打联系客服</li>
  * <li>invoiceFlag: 是否支持发票 {@link ParkingConfigFlag} 0：不支持，1：支持</li>
  * <li>businessLicenseFlag: 申请月卡 是否需要 营业执照 0：不需要， 1：需要{@link ParkingConfigFlag}</li>
+ * <li>identityCardFlag: 是否支持填写身份证号码 0：不支持，1：支持 {@link ParkingConfigFlag}</li>
  * </ul>
  */
 public class ParkingLotDTO {
@@ -74,6 +75,16 @@ public class ParkingLotDTO {
     private Byte invoiceFlag;
 
     private byte businessLicenseFlag;
+
+    private Byte identityCardFlag;
+
+    public Byte getIdentityCardFlag() {
+        return identityCardFlag;
+    }
+
+    public void setIdentityCardFlag(Byte identityCardFlag) {
+        this.identityCardFlag = identityCardFlag;
+    }
 
     public byte getBusinessLicenseFlag() {
         return businessLicenseFlag;

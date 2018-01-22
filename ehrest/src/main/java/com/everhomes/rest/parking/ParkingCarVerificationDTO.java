@@ -23,6 +23,7 @@ import java.util.List;
  * <li>creatorUid: creatorUid</li>
  * <li>createTime: 订单创建时间</li>
  * <li>flowCaseId: flowCaseId</li>
+ * <li>identityCard: identityCard</li>
  * <li>attachments: 申请资料 {@link com.everhomes.rest.parking.ParkingAttachmentDTO}</li>
  * </ul>
  */
@@ -44,7 +45,15 @@ public class ParkingCarVerificationDTO {
     private Long flowCaseId;
     @ItemType(ParkingAttachmentDTO.class)
     private List<ParkingAttachmentDTO> attachments;
+    private String identityCard;
 
+    public String getIdentityCard() {
+        return identityCard;
+    }
+
+    public void setIdentityCard(String identityCard) {
+        this.identityCard = identityCard;
+    }
     public Long getId() {
         return id;
     }
