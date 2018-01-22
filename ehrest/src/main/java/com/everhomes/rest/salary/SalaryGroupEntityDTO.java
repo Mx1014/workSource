@@ -146,4 +146,12 @@ public class SalaryGroupEntityDTO {
 	public void setType(Byte type) {
 		this.type = type;
 	}
+
+	public Byte getStatus() {
+		return status;
+	}
+
+	public void setStatus(Byte status) {
+		this.status = status;
+	}
 }
