@@ -13,7 +13,7 @@ import com.everhomes.util.StringHelper;
  * <li>dataPolicy: 数据策略:0-次月沿用 1-次月清空</li>
  * <li>grantPolicy: 发放策略 0-税前 1-税后</li>
  * <li>taxPolicy: 纳税策略 0-工资 1-年终</li>
- * <li>defaultFlag: 是否为缺省参数:0-否 1-是</li>
+ * <li>status: 状态:0-不开启 2-开启</li>
  * <li>type: 字段的类型 0-发放项 1-扣款项 2-成本项 3-冗余项</li>
  * <li>name: 项目字段名称</li>
  * <li>description: 批注描述</li>
@@ -35,6 +35,8 @@ public class SalaryGroupEntityDTO {
 	private String categoryName;
 	private String name;
 	private String description;
+	private Byte status;
+
 
 	@Override
 	public String toString() {

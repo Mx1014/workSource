@@ -68,7 +68,12 @@ public class SalaryEmployeeProviderImpl implements SalaryEmployeeProvider {
 				.orderBy(Tables.EH_SALARY_EMPLOYEES.ID.asc())
 				.fetch().map(r -> ConvertHelper.convert(r, SalaryEmployee.class));
 	}
-	
+
+	@Override
+	public List<SalaryEmployee> listSalaryEmployee(Long ownerId, Byte salaryStatus, List<Long> detailIds, CrossShardListingLocator locator, int pageSize) {
+		return null;
+	}
+
 	private EhSalaryEmployeesDao getReadWriteDao() {
 		return getDao(getReadWriteContext());
 	}
