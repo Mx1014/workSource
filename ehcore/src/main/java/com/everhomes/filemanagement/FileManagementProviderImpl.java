@@ -183,6 +183,16 @@ public class FileManagementProviderImpl implements FileManagementProvider {
     }
 
     @Override
+    public void deleteFileCatalogScopeNotInUserIds(Integer namespaceId, Long catalogId, List<Long> sourceIds){
+        DSLContext context = dbProvider.getDslContext(AccessSpec.readWrite());
+        DeleteQuery<EhFileManagementCatalogScopesRecord> query = context.deleteQuery(Tables.EH_FILE_MANAGEMENT_CATALOG_SCOPES);
+        query.addConditions(Tables.EH_FILE_MANAGEMENT_CATALOG_SCOPES.NAMESPACE_ID.eq(namespaceId));
+        query.addConditions(Tables.EH_FILE_MANAGEMENT_CATALOG_SCOPES.CATALOG_ID.eq(catalogId));
+        query.addConditions(Tables.EH_FILE_MANAGEMENT_CATALOG_SCOPES.SOURCE_ID.notIn(sourceIds));
+        query.execute();
+    }
+
+    @Override
     public void deleteFileCatalogScopeByUserIds(Long catalogId, List<Long> sourceIds) {
         DSLContext context = dbProvider.getDslContext(AccessSpec.readWrite());
 
@@ -201,6 +211,27 @@ public class FileManagementProviderImpl implements FileManagementProvider {
         query.addConditions(Tables.EH_FILE_MANAGEMENT_CATALOG_SCOPES.SOURCE_ID.in(sourceIds));
         query.addValue(Tables.EH_FILE_MANAGEMENT_CATALOG_SCOPES.DOWNLOAD_PERMISSION, permission);
         query.execute();
+    }
+
+    @Override
+    public void updateFileCatalogScope(FileCatalogScope scope){
+        scope.setOperatorUid(UserContext.currentUserId());
+
+        DSLContext context = dbProvider.getDslContext(AccessSpec.readWrite());
+        EhFileManagementCatalogScopesDao dao = new EhFileManagementCatalogScopesDao(context.configuration());
+        dao.update(scope);
+
+        DaoHelper.publishDaoAction(DaoAction.MODIFY, EhFileManagementCatalogScopes.class, scope.getId());
+    }
+
+    @Override
+    public FileCatalogScope findFileCatalogScopeBySourceId(Long catalogId, Long sourceId){
+        DSLContext context = dbProvider.getDslContext(AccessSpec.readOnly());
+
+        SelectQuery<EhFileManagementCatalogScopesRecord> query = context.selectQuery(Tables.EH_FILE_MANAGEMENT_CATALOG_SCOPES);
+        query.addConditions(Tables.EH_FILE_MANAGEMENT_CATALOG_SCOPES.CATALOG_ID.eq(catalogId));
+        query.addConditions(Tables.EH_FILE_MANAGEMENT_CATALOG_SCOPES.SOURCE_ID.eq(sourceId));
+        return query.fetchAnyInto(FileCatalogScope.class);
     }
 
     @Override
