@@ -16,6 +16,7 @@ import com.everhomes.rest.rpc.client.StoredMessageIndicationPdu;
 import com.everhomes.rest.rpc.server.ClientForwardPdu;
 import com.everhomes.rest.user.DeviceIdentifierType;
 import com.everhomes.rest.user.UserMuteNotificationFlag;
+import com.everhomes.statistics.transaction.StatTransactionConstant;
 import com.everhomes.user.*;
 import com.everhomes.util.DateHelper;
 import com.everhomes.util.Name;
@@ -23,11 +24,14 @@ import com.everhomes.util.WebTokenGenerator;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.scheduling.TaskScheduler;
 import org.springframework.stereotype.Component;
 
+import javax.annotation.PostConstruct;
 import java.io.IOException;
 import java.util.HashMap;
 import java.util.List;
+import java.util.concurrent.ConcurrentLinkedQueue;
 
 /**
  * 
@@ -55,6 +59,31 @@ public class UserMessageRoutingHandler implements MessageRoutingHandler {
     
     @Autowired
     private PusherService pusherService;
+
+    @Autowired
+    private TaskScheduler taskScheduler;
+
+    @Autowired
+    private MessagePersistWorker messagePersistWorker;
+
+    private ConcurrentLinkedQueue<MessageDTO> queue;
+
+    @PostConstruct
+    public void setup(){
+//        String triggerName = StatTransactionScheduleJob.SCHEDELE_NAME + System.currentTimeMillis();
+//        String jobName = triggerName;
+//        String cronExpression = configurationProvider.getValue(StatTransactionConstant.STAT_CRON_EXPRESSION, StatTransactionScheduleJob.CRON_EXPRESSION);
+//        //启动定时任务
+//        scheduleProvider.scheduleCronJob(triggerName, jobName, cronExpression, StatTransactionScheduleJob.class, null);
+
+        taskScheduler.scheduleAtFixedRate(()-> {
+            while (!queue.isEmpty()){
+                MessageDTO messageDto = queue.poll();
+                this.messagePersistWorker.handleMessagePersist(messageDto);
+            }
+        }, 5*1000);
+    }
+
     
     @Override
     public boolean allowToRoute(UserLogin senderLogin, long appId, String dstChannelType, String dstChannelToken,
@@ -68,7 +97,8 @@ public class UserMessageRoutingHandler implements MessageRoutingHandler {
     public void routeMessage(MessageRoutingContext context, UserLogin senderLogin, long appId, String dstChannelType, String dstChannelToken,
             MessageDTO message, int deliveryOption) {
 
-
+        //把消息添加到队列里
+        queue.offer(message);
 
         long uid = Long.parseLong(dstChannelToken);
         
