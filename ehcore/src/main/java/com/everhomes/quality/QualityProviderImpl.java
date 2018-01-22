@@ -819,8 +819,8 @@ public class QualityProviderImpl implements QualityProvider {
         
         for(QualityInspectionStandards standard: standards) {
         	standardIds.add(standard.getId());
-        	standard.setExecutiveGroup(new ArrayList<QualityInspectionStandardGroupMap>());
-        	standard.setReviewGroup(new ArrayList<QualityInspectionStandardGroupMap>());
+        	standard.setExecutiveGroup(new ArrayList<>());
+        	standard.setReviewGroup(new ArrayList<>());
         	mapStandards.put(standard.getId(), standard);
         }
         
@@ -838,12 +838,10 @@ public class QualityProviderImpl implements QualityProvider {
 				 if(QualityGroupType.REVIEW_GROUP.equals(QualityGroupType.fromStatus(record.getGroupType()))) {
 					 standard.getReviewGroup().add(ConvertHelper.convert(record, QualityInspectionStandardGroupMap.class));
 				 }
-				 
                 return null;
             });
             return true;
         });
-		
 	}
 
 	@Override
