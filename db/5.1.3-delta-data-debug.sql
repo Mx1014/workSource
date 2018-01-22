@@ -4,8 +4,9 @@ UPDATE `eh_configurations` SET `value`='201706221000' WHERE `name` = 'parking.zi
 UPDATE `eh_configurations` SET `value`='qyruirxn20145601739' WHERE `name` = 'parking.zijing.appkey';
 UPDATE `eh_configurations` SET `value`='20170104000000000002' WHERE `name` = 'parking.zijing.parkingid';
 
-INSERT INTO `eh_configurations` (`name`, `value`, `description`, `namespace_id`, `display_name`) VALUES ('parking.zijing.marketid', '076900012201712120001', '紫荆车辆放行markid', 0, NULL);
-INSERT INTO `eh_configurations` (`name`, `value`, `description`, `namespace_id`, `display_name`) VALUES ('parking.zijing.userid', '0769000120171212000000000001', '紫荆车辆放行userid', 0, NULL);
+UPDATE `eh_configurations` SET `value`='076900012201712120001' WHERE `name` = 'parking.zijing.marketid';
+UPDATE `eh_configurations` SET `value`='0769000120171212000000000001' WHERE `name` = 'parking.zijing.userid';
+
 
 -- 正中会申请月卡车测试参数 by dengs,20180118
 UPDATE `eh_configurations` SET `value`='http://220.160.111.118:9095/' WHERE `name` = 'parking.kexing.url';
