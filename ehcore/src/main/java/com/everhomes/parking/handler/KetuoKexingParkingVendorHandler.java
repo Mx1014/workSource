@@ -541,6 +541,8 @@ public class KetuoKexingParkingVendorHandler extends KetuoParkingVendorHandler {
 			}else {
 				param.put("invType", "-1");
 			}
+
+			param.put("cardId",request.getIdentityCard());
 		}
 
 		String json = post(param, ADD_MONTH_CARD);
