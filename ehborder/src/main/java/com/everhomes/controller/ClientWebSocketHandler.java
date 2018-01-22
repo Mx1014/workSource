@@ -42,7 +42,6 @@ import com.everhomes.util.StringHelper;
 import com.google.gson.Gson;
 import com.google.gson.JsonElement;
 import com.google.gson.JsonParser;
-import sun.plugin2.message.Message;
 
 /**
  * 
