@@ -453,7 +453,7 @@ public class EquipmentServiceImpl implements EquipmentService {
 				equipmentStandardSearcher.feedDoc(standard);
 
 			} else {
-				if (cmd.getTargetId() == null && exist.getTargetId() == 0L) {//全部中修改公共标准
+				if ((cmd.getTargetId() == null || cmd.getTargetId() == 0L) && exist.getTargetId() == 0L) {//全部中修改公共标准
 					equipmentProvider.deleteModelCommunityMapByModelId(standard.getId(), EquipmentModelType.STANDARD.getCode());
 					if (cmd.getCommunities() != null && cmd.getCommunities().size() > 0) {
 						for (Long communityId : cmd.getCommunities()) {
@@ -3502,8 +3502,6 @@ private void checkUserPrivilege(Long orgId, Long privilegeId, Long communityId) 
 
 		int pageSize = cmd.getPageSize() == null ? Integer.MAX_VALUE - 1 : cmd.getPageSize();
 
-//        CrossShardListingLocator locator = new CrossShardListingLocator();
-//        locator.setAnchor(cmd.getPageAnchor());
 		if(null == cmd.getPageAnchor()) {
 			cmd.setPageAnchor(0L);
 		}
