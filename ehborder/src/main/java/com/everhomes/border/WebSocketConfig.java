@@ -1,6 +1,7 @@
 // @formatter:off
 package com.everhomes.border;
 
+import com.everhomes.controller.*;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
 import org.springframework.web.socket.WebSocketHandler;
@@ -12,11 +13,6 @@ import org.springframework.web.socket.server.standard.ServletServerContainerFact
 import com.everhomes.bus.LocalBus;
 import com.everhomes.bus.LocalBusMessageClassRegistry;
 import com.everhomes.bus.LocalBusProvider;
-import com.everhomes.controller.AclinkHandshakeInterceptor;
-import com.everhomes.controller.AclinkWebSocketHandler;
-import com.everhomes.controller.ClientWebSocketHandler;
-import com.everhomes.controller.PusherWebSocketHandler;
-import com.everhomes.controller.ServerWebSocketHandler;
 
 @Configuration
 public class WebSocketConfig implements WebSocketConfigurer {
@@ -32,10 +28,10 @@ public class WebSocketConfig implements WebSocketConfigurer {
     
     @Override
     public void registerWebSocketHandlers(WebSocketHandlerRegistry registry) {
-        registry.addHandler(clientHandler(), "/client");
-        registry.addHandler(pusherHandler(), "/pusher");
-        registry.addHandler(interServerHandler(), "/interserver");
-        registry.addHandler(aclinkHandler(), "/aclink/**").addInterceptors(aclinkInterceptors());
+        registry.addHandler(clientHandler(), "/client").addInterceptors(new CommonHandshakeInterceptor());
+        registry.addHandler(pusherHandler(), "/pusher").addInterceptors(new CommonHandshakeInterceptor());
+        registry.addHandler(interServerHandler(), "/interserver").addInterceptors(new CommonHandshakeInterceptor());;
+        registry.addHandler(aclinkHandler(), "/aclink/**").addInterceptors(aclinkInterceptors()).addInterceptors(new CommonHandshakeInterceptor());;
     }
 
     @Bean
