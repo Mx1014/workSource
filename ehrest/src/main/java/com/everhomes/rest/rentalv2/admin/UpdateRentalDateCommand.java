@@ -20,7 +20,8 @@ import com.everhomes.util.StringHelper;
  */
 public class UpdateRentalDateCommand {
 	@NotNull
-	private Long rentalSiteId; 
+	private Long rentalSiteId;
+	private String resourceType;
 	private Long beginDate;
 	private Long endDate;
 
@@ -32,6 +33,15 @@ public class UpdateRentalDateCommand {
     public String toString() {
         return StringHelper.toJsonString(this);
     }
+
+	public String getResourceType() {
+		return resourceType;
+	}
+
+	public void setResourceType(String resourceType) {
+		this.resourceType = resourceType;
+	}
+
 	public Long getRentalSiteId() {
 		return rentalSiteId;
 	}

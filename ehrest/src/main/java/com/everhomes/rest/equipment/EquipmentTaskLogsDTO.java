@@ -26,6 +26,7 @@ import java.util.List;
  *  <li>attachments: 附件， 参考{@link com.everhomes.rest.equipment.EquipmentTaskAttachmentDTO}</li>
  *  <li>reviewResult: 对巡检完成、维修完成、需维修三种需要审阅的记录补充审阅记录 参考{@link com.everhomes.rest.equipment.ReviewResult}</li>
  *  <li>equipmentName: 设备名称</li>
+ *  <li>flowCaseId: 维修工作流flowCaseId</li>
  * </ul>
  */
 public class EquipmentTaskLogsDTO {
@@ -62,6 +63,8 @@ public class EquipmentTaskLogsDTO {
 	private String templateName;
 
 	private String 	equipmentName;
+
+	private Long  flowCaseId;
 
 	@ItemType(InspectionItemResult.class)
     private List<InspectionItemResult> itemResults; 
@@ -231,6 +234,14 @@ public class EquipmentTaskLogsDTO {
 
 	public void setEquipmentName(String equipmentName) {
 		this.equipmentName = equipmentName;
+	}
+
+	public Long getFlowCaseId() {
+		return flowCaseId;
+	}
+
+	public void setFlowCaseId(Long flowCaseId) {
+		this.flowCaseId = flowCaseId;
 	}
 
 	@Override

@@ -107,8 +107,8 @@ public class EquipmentStandardsDTO {
 	@ItemType(StandardGroupDTO.class)
 	private List<StandardGroupDTO> reviewGroup;
 
-	@ItemType(Long.class)
-	private  List<Long> communities;
+	@ItemType(EquipmentStandardCommunity.class)
+	private  List<EquipmentStandardCommunity> communities;
 
 	public Long getId() {
 		return id;
@@ -334,11 +334,11 @@ public class EquipmentStandardsDTO {
 		this.targetId = targetId;
 	}
 
-	public List<Long> getCommunities() {
+	public List<EquipmentStandardCommunity> getCommunities() {
 		return communities;
 	}
 
-	public void setCommunities(List<Long> communities) {
+	public void setCommunities(List<EquipmentStandardCommunity> communities) {
 		this.communities = communities;
 	}
 

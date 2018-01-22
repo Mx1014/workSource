@@ -76,6 +76,7 @@ import com.everhomes.rest.equipment.EquipmentParameterDTO;
 import com.everhomes.rest.equipment.EquipmentPlanStatus;
 import com.everhomes.rest.equipment.EquipmentReviewStatus;
 import com.everhomes.rest.equipment.EquipmentServiceErrorCode;
+import com.everhomes.rest.equipment.EquipmentStandardCommunity;
 import com.everhomes.rest.equipment.EquipmentStandardMapDTO;
 import com.everhomes.rest.equipment.EquipmentStandardRelationDTO;
 import com.everhomes.rest.equipment.EquipmentStandardStatus;
@@ -512,6 +513,8 @@ public class EquipmentServiceImpl implements EquipmentService {
 		if (itemDTOS != null && itemDTOS.size() > 0) {
 			for (InspectionItemDTO itemDTO : itemDTOS) {
 				EquipmentInspectionItems item = ConvertHelper.convert(itemDTO, EquipmentInspectionItems.class);
+				item.setOwnerId(cmd.getOwnerId());
+				item.setOwnerType(cmd.getOwnerType());
 				Long itemId = equipmentProvider.createEquipmentInspectionItems(item);
 				items.add(item);
 				// create item template map
@@ -663,12 +666,6 @@ private void checkUserPrivilege(Long orgId, Long privilegeId, Long communityId) 
 
 	@Override
 	public void deleteEquipmentStandard(DeleteEquipmentStandardCommand cmd) {
-		/*Long privilegeId = configProvider.getLongValue(EquipmentConstant.EQUIPMENT_STANDARD_DELETE, 0L);
-		if(cmd.getTargetId() != null) {
-			userPrivilegeMgr.checkCurrentUserAuthority(EntityType.COMMUNITY.getCode(), cmd.getTargetId(), cmd.getOwnerId(), privilegeId);
-		} else {
-			userPrivilegeMgr.checkCurrentUserAuthority(null, null, cmd.getOwnerId(), privilegeId);
-		}*/
 		checkUserPrivilege(cmd.getOwnerId(), PrivilegeConstants.EQUIPMENT_STANDARD_DELETE, cmd.getTargetId());
 
 		User user = UserContext.current().getUser();
@@ -699,7 +696,7 @@ private void checkUserPrivilege(Long orgId, Long privilegeId, Long communityId) 
 			standard.setStatus(EquipmentStandardStatus.INACTIVE.getCode());
 			equipmentProvider.updateEquipmentStandard(standard);
 			equipmentStandardSearcher.feedDoc(standard);
-			if (cmd.getTargetId() == null && standard.getTargetId() == 0L) {
+			if ((cmd.getTargetId() == null|| cmd.getTargetId() == 0) && standard.getTargetId() == 0L) {
 				equipmentProvider.deleteModelCommunityMapByModelId(standard.getId(), EquipmentModelType.STANDARD.getCode());
 			}
 
@@ -889,10 +886,21 @@ private void checkUserPrivilege(Long orgId, Long privilegeId, Long communityId) 
 		equipmentProvider.populateItems(standard);
 		//equipmentProvider.populateStandardGroups(standard);
 
-		EquipmentStandardsDTO dto = converStandardToDto(standard);
-
-		if(standard.getTargetId()==0L){
-			dto.setCommunities(equipmentProvider.listModelCommunityMapByModelId(standard.getId(),EquipmentModelType.STANDARD.getCode()));
+		if (standard.getTargetId() == 0L) {
+			List<Long> communityIds = equipmentProvider.listModelCommunityMapByModelId(standard.getId(), EquipmentModelType.STANDARD.getCode());
+			List<EquipmentStandardCommunity> communities = new ArrayList<>();
+			EquipmentStandardCommunity standardCommunity = new EquipmentStandardCommunity();
+			if (communityIds != null && communityIds.size() > 0) {
+				communityIds.forEach((c) -> {
+					Community community = communityProvider.findCommunityById(standard.getTargetId());
+					if (community != null) {
+						standardCommunity.setCommunityId(community.getId());
+						standardCommunity.setCommunityName(community.getName());
+					}
+					communities.add(standardCommunity);
+				});
+			}
+			standard.setCommunities(communities);
 		}
 		return converStandardToDto(standard);
 	}
@@ -2955,18 +2963,6 @@ private void checkUserPrivilege(Long orgId, Long privilegeId, Long communityId) 
 					dto.setTargetName(targets.get(0).getContactName());
 				}
 			}
-//        	if(r.getOperatorId() != null && r.getOperatorId() != 0) {
-//        		OrganizationMember operator = organizationProvider.findOrganizationMemberByOrgIdAndUId(r.getOperatorId(), task.getOwnerId());
-//            	if(operator != null) {
-//            		dto.setOperatorName(operator.getContactName());
-//            	}
-//        	}
-//        	if(r.getTargetId() != null && r.getTargetId() != 0) {
-//        		OrganizationMember target = organizationProvider.findOrganizationMemberByOrgIdAndUId(r.getTargetId(), task.getExecutiveGroupId());
-//            	if(target != null) {
-//            		dto.setTargetName(target.getContactName());
-//            	}
-//        	}
 
         	List<EquipmentInspectionTasksAttachments> attachmentLists = equipmentProvider.listTaskAttachmentsByLogId(dto.getId());
         	if(attachmentLists != null && attachmentLists.size() > 0) {
@@ -3718,44 +3714,35 @@ private void checkUserPrivilege(Long orgId, Long privilegeId, Long communityId) 
 
 		}
 		if(!isAdmin) {
-			List<Long> executeStandardIds = new ArrayList<>();
-			List<Long> reviewStandardIds = new ArrayList<>();
+			List<Long> executePlanIds = new ArrayList<>();
+			List<Long> reviewPlanIds = new ArrayList<>();
 			List<ExecuteGroupAndPosition> groupDtos = listUserRelateGroups();
 			//List<EquipmentInspectionStandardGroupMap> maps = equipmentProvider.listEquipmentInspectionStandardGroupMapByGroupAndPosition(groupDtos, null);
 			//这里换成从计划表中拿执行组和审批组人员
 			List<EquipmentInspectionPlanGroupMap> maps = equipmentProvider.listEquipmentInspectionPlanGroupMapByGroupAndPosition(groupDtos, null);
 			if (maps != null && maps.size() > 0) {
-
 				for (EquipmentInspectionPlanGroupMap r : maps) {
 					if (QualityGroupType.REVIEW_GROUP.equals(QualityGroupType.fromStatus(r.getGroupType()))) {
-						reviewStandardIds.add(r.getPlanId());
+						reviewPlanIds.add(r.getPlanId());
 					}
 					if (QualityGroupType.EXECUTIVE_GROUP.equals(QualityGroupType.fromStatus(r.getGroupType()))) {
-						executeStandardIds.add(r.getPlanId());
+						executePlanIds.add(r.getPlanId());
 					}
 				}
 			}
 
-
-
 			String cacheKey = convertListEquipmentInspectionTasksCache(cmd.getTaskStatus(), cmd.getInspectionCategoryId(), targetTypes, targetIds,
-					executeStandardIds, reviewStandardIds, offset, userId);
-
-
+					executePlanIds, reviewPlanIds, offset, userId);
+			LOGGER.info("listEquipmentInspectionTasks  cacheKey = {}" + cacheKey);
 			allTasks = equipmentProvider.listEquipmentInspectionTasksUseCache(cmd.getTaskStatus(), cmd.getInspectionCategoryId(),
-					targetTypes, targetIds, executeStandardIds, reviewStandardIds, offset, pageSize + 1, cacheKey, AdminFlag.NO.getCode(),lastSyncTime);
-
-
+					targetTypes, targetIds, executePlanIds, reviewPlanIds, offset, pageSize + 1, cacheKey, AdminFlag.NO.getCode(),lastSyncTime);
 		}
-
 
 		if (allTasks.size() > pageSize) {
 			allTasks.remove(allTasks.size() - 1);
 			response.setNextPageAnchor((long) (offset + 1));
 		}
 
-
-		Timestamp current = new Timestamp(System.currentTimeMillis());
 		tasks = allTasks.stream().map(r -> {
 			if ((EquipmentTaskStatus.WAITING_FOR_EXECUTING.equals(EquipmentTaskStatus.fromStatus(r.getStatus())))) {
 				return r;
@@ -4961,9 +4948,9 @@ private void checkUserPrivilege(Long orgId, Long privilegeId, Long communityId) 
 		response.setUnReviewedTasks(statTasks.getCompleteWaitingForApproval());
 		response.setReviewTasks(response.getUnReviewedTasks() + response.getReviewedTasks());
 
-		Double maintanceRate = response.getCompleteInspection().equals(0L) ? 0.00 : (double)response.getCompleteMaintance()/(double)response.getCompleteInspection();
+		Double maintanceRate = response.getComplete().equals(0L) ? 0.00 : (double)response.getCompleteMaintance()/(double)response.getComplete();
 		response.setMaintanceRate(maintanceRate);
-		Double delayRate = (response.getCompleteInspection()+response.getDelay()) == 0L ? 0.00 : (double)response.getDelay()/(double)(response.getCompleteInspection()+response.getDelay());
+		Double delayRate = (response.getComplete()+response.getDelay()) == 0L ? 0.00 : (double)response.getDelay()/(double)(response.getComplete()+response.getDelay());
 		response.setDelayRate(delayRate);
 		Double reviewQualifiedRate = response.getReviewedTasks().equals(0L) ? 0.00 : (double)response.getReviewQualified()/(double)response.getReviewedTasks();
 		response.setReviewQualifiedRate(reviewQualifiedRate);

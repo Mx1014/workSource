@@ -196,7 +196,7 @@ public interface EquipmentProvider {
 
     List<EquipmentInspectionPlanGroupMap> listEquipmentInspectionPlanGroupMapByPlanIdAndGroupType(Long planId, byte groupType);
 
-    List<EquipmentInspectionPlanGroupMap> listEquipmentInspectionPlanGroupMapByGroupAndPosition(List<ExecuteGroupAndPosition> groupDtos, List<ExecuteGroupAndPosition> reviewGroups);
+    List<EquipmentInspectionPlanGroupMap> listEquipmentInspectionPlanGroupMapByGroupAndPosition(List<ExecuteGroupAndPosition> groupDtos, Byte groupType);
 
 	List<EquipmentInspectionTasks> listTasksByPlanId(Long planId, CrossShardListingLocator locator, int pageSize);
 
@@ -216,7 +216,7 @@ public interface EquipmentProvider {
 
     EquipmentInspectionTasksLogs getMaintanceLogByEquipmentId(Long referId);
 
-	void updateMaintanceInspectionLogsById(Long id);
+	void updateMaintanceInspectionLogsById(Long taskLogId ,Long flowCaseId);
 
     void statInMaintanceTaskCount(TasksStatData stat,Timestamp startTime, Timestamp endTime,StatTodayEquipmentTasksCommand cmd);
 

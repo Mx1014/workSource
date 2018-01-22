@@ -1489,7 +1489,7 @@ public class EquipmentProviderImpl implements EquipmentProvider {
     public void populateItems(EquipmentInspectionStandards standard) {
         DSLContext context = this.dbProvider.getDslContext(AccessSpec.readOnly());
         SelectQuery<EhEquipmentInspectionTemplateItemMapRecord> query = context.selectQuery(Tables.EH_EQUIPMENT_INSPECTION_TEMPLATE_ITEM_MAP);
-        query.addConditions(Tables.EH_EQUIPMENT_INSPECTION_TEMPLATE_ITEM_MAP.ID.eq(standard.getTemplateId()));
+        query.addConditions(Tables.EH_EQUIPMENT_INSPECTION_TEMPLATE_ITEM_MAP.TEMPLATE_ID.eq(standard.getTemplateId()));
         List<EquipmentInspectionItems> items = new ArrayList<>();
         query.fetch().map((r)->{
             items.add(findEquipmentInspectionItem(r.getItemId()));
@@ -2245,15 +2245,13 @@ public class EquipmentProviderImpl implements EquipmentProvider {
             query.addConditions(Tables.EH_EQUIPMENT_INSPECTION_PLAN_GROUP_MAP.PLAN_ID.in(planIds));
             query.fetch().map((EhEquipmentInspectionPlanGroupMapRecord record) -> {
                 EquipmentInspectionPlans plan = mapPlans.get(record.getPlanId());
-
                 assert (plan != null);
-                if (QualityGroupType.EXECUTIVE_GROUP.getCode() == record.getGroupType()) {
+                if (QualityGroupType.EXECUTIVE_GROUP.equals(QualityGroupType.fromStatus(record.getGroupType()))) {
                     plan.getExecutiveGroup().add(ConvertHelper.convert(record, EquipmentInspectionPlanGroupMap.class));
                 }
-                if (record.getGroupType() == QualityGroupType.REVIEW_GROUP.getCode()) {
+                if (QualityGroupType.REVIEW_GROUP.equals(QualityGroupType.fromStatus(record.getGroupType()))) {
                     plan.getReviewGroup().add(ConvertHelper.convert(record, EquipmentInspectionPlanGroupMap.class));
                 }
-
                 return null;
             });
             return true;
@@ -2628,6 +2626,11 @@ public class EquipmentProviderImpl implements EquipmentProvider {
         TasksStatData resp = new TasksStatData();
 
         final Field<Byte> delayTasks = DSL.decode().when(Tables.EH_EQUIPMENT_INSPECTION_TASKS.STATUS
+                        .eq(EquipmentTaskStatus.DELAY.getCode()).
+                                or(Tables.EH_EQUIPMENT_INSPECTION_TASKS.STATUS.eq(EquipmentTaskStatus.REVIEW_DELAY.getCode())),
+                EquipmentTaskStatus.DELAY.getCode());
+
+        final Field<Byte> delayInpsectionTasks = DSL.decode().when(Tables.EH_EQUIPMENT_INSPECTION_TASKS.STATUS
                 .eq(EquipmentTaskStatus.DELAY.getCode()), EquipmentTaskStatus.DELAY.getCode());
 
 
@@ -2653,6 +2656,7 @@ public class EquipmentProviderImpl implements EquipmentProvider {
                 DSL.count(completeInspection).as("completeInspection"),
                 DSL.count(completeInspectionWaitingForApproval).as("completeInspectionWaitingForApproval"),
                 DSL.count(delayTasks).as("delayTasks"),
+                DSL.count(delayInpsectionTasks).as("delayInpsectionTasks"),
                 DSL.count(reviewDelay).as("reviewDelay")};
 
         final SelectQuery<Record> query = context.selectQuery();
@@ -2686,8 +2690,10 @@ public class EquipmentProviderImpl implements EquipmentProvider {
             resp.setCompleteInspection(r.getValue("completeInspection", Long.class));
             resp.setCompleteWaitingForApproval(r.getValue("completeInspectionWaitingForApproval", Long.class));
             resp.setWaitingForExecuting(r.getValue("waitingForExecuting", Long.class));
+            resp.setComplete(resp.getCompleteInspection()+resp.getWaitingForExecuting());
             resp.setTotalTasks(r.getValue("total", Long.class));
             resp.setDelay(r.getValue("delayTasks", Long.class));
+            resp.setDelayInspection(r.getValue("delayInpsectionTasks", Long.class));
             resp.setReviewDelayTasks(r.getValue("reviewDelay", Long.class));
             return null;
         });
@@ -2897,7 +2903,7 @@ public class EquipmentProviderImpl implements EquipmentProvider {
 
     @Override
     public List<EquipmentInspectionPlanGroupMap> listEquipmentInspectionPlanGroupMapByGroupAndPosition(
-            List<ExecuteGroupAndPosition> groupDtos, List<ExecuteGroupAndPosition> reviewGroups) {
+            List<ExecuteGroupAndPosition> groupDtos, Byte groupType) {
         long startTime = System.currentTimeMillis();
         final List<EquipmentInspectionPlanGroupMap> maps = new ArrayList<>();
         DSLContext context = this.dbProvider.getDslContext(AccessSpec.readOnly());
@@ -2906,9 +2912,9 @@ public class EquipmentProviderImpl implements EquipmentProvider {
                 .selectQuery(Tables.EH_EQUIPMENT_INSPECTION_PLAN_GROUP_MAP);
 
         Condition con = null;
-        if (reviewGroups != null) {
+        if (groupDtos != null) {
             Condition con5 = null;
-            for (ExecuteGroupAndPosition executiveGroup : reviewGroups) {
+            for (ExecuteGroupAndPosition executiveGroup : groupDtos) {
                 Condition con4 = null;
                 con4 = Tables.EH_EQUIPMENT_INSPECTION_PLAN_GROUP_MAP.GROUP_ID.eq(executiveGroup.getGroupId());
                 con4 = con4.and(Tables.EH_EQUIPMENT_INSPECTION_PLAN_GROUP_MAP.POSITION_ID.eq(executiveGroup.getPositionId()));
@@ -3036,11 +3042,13 @@ public class EquipmentProviderImpl implements EquipmentProvider {
     }
 
     @Override
-    public void updateMaintanceInspectionLogsById(Long id) {
+    public void updateMaintanceInspectionLogsById(Long taskLogId, Long flowCaseId) {
         DSLContext context = this.dbProvider.getDslContext(AccessSpec.readOnly());
         context.update(Tables.EH_EQUIPMENT_INSPECTION_TASK_LOGS)
                 .set(Tables.EH_EQUIPMENT_INSPECTION_TASK_LOGS.PROCESS_RESULT, (EquipmentTaskProcessResult.NEED_MAINTENANCE_DELAY_COMPLETE_OK.getCode()))
                 .set(Tables.EH_EQUIPMENT_INSPECTION_TASK_LOGS.PROCESS_TYPE, EquipmentTaskProcessType.COMPLETE_MAINTENANCE.getCode())
+                .set(Tables.EH_EQUIPMENT_INSPECTION_TASK_LOGS.FLOW_CASE_ID, flowCaseId)
+                .where(Tables.EH_EQUIPMENT_INSPECTION_TASK_LOGS.ID.eq(taskLogId))
                 .execute();
     }
 
