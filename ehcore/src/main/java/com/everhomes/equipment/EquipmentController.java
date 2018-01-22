@@ -62,8 +62,6 @@ import com.everhomes.rest.equipment.StatEquipmentTasksCommand;
 import com.everhomes.rest.equipment.StatEquipmentTasksResponse;
 import com.everhomes.rest.equipment.StatIntervalAllEquipmentTasksCommand;
 import com.everhomes.rest.equipment.StatIntervalAllEquipmentTasksResponse;
-import com.everhomes.rest.equipment.StatItemResultsInEquipmentTasksCommand;
-import com.everhomes.rest.equipment.StatItemResultsInEquipmentTasksResponse;
 import com.everhomes.rest.equipment.StatLastDaysEquipmentTasksCommand;
 import com.everhomes.rest.equipment.StatLastDaysEquipmentTasksResponse;
 import com.everhomes.rest.equipment.StatTodayEquipmentTasksCommand;
@@ -209,45 +207,6 @@ public class EquipmentController extends ControllerBase {
         return getRestResponse(importDataResponse);
     }
 
-//    /**
-//     * <b>URL: /equipment/searchEquipmentStandardRelations</b>
-//     * <p>查看设备-标准关联</p>
-//     */
-//    @RequestMapping("searchEquipmentStandardRelations")
-//    @RestReturn(value = SearchEquipmentStandardRelationsResponse.class)
-//    public RestResponse searchEquipmentStandardRelations(SearchEquipmentStandardRelationsCommand cmd) {
-//
-//        SearchEquipmentStandardRelationsResponse relations = equipmentStandardMapSearcher.query(cmd);
-//
-//        return getRestResponse(relations);
-//    }
-//
-//    /**
-//     * <b>URL: /equipment/reviewEquipmentStandardRelations</b>
-//     * <p>审批设备-标准关联</p>
-//     */
-//    @RequestMapping("reviewEquipmentStandardRelations")
-//    @RestReturn(value = String.class)
-//    public RestResponse reviewEquipmentStandardRelations(ReviewEquipmentStandardRelationsCommand cmd) {
-//
-//        equipmentService.reviewEquipmentStandardRelations(cmd);
-//
-//        return getSuccessResponse();
-//    }
-//
-//    /**
-//     * <b>URL: /equipment/deleteEquipmentStandardRelations</b>
-//     * <p>删除失效的设备-标准关联</p>
-//     */
-//    @RequestMapping("deleteEquipmentStandardRelations")
-//    @RestReturn(value = String.class)
-//    public RestResponse deleteEquipmentStandardRelations(DeleteEquipmentStandardRelationsCommand cmd) {
-//
-//        equipmentService.deleteEquipmentStandardRelations(cmd);
-//
-//        return getSuccessResponse();
-//    }
-
     /**
      * <b>URL: /equipment/updateEquipments</b>
      * <p>创建或修改设备</p>
@@ -288,7 +247,7 @@ public class EquipmentController extends ControllerBase {
 
     /**
      * <b>URL: /equipment/searchEquipments</b>
-     * <p>查看设备列表</p>
+     * <p>列出设备列表</p>
      */
     @RequestMapping("searchEquipments")
     @RestReturn(value = SearchEquipmentsResponse.class)
@@ -381,9 +340,9 @@ public class EquipmentController extends ControllerBase {
 	@RequestMapping("deleteEquipmentAccessories")
 	@RestReturn(value = String.class)
 	public RestResponse deleteEquipmentAccessories(DeleteEquipmentAccessoriesCommand cmd) {
-		
+
 		equipmentService.deleteEquipmentAccessories(cmd);
-		
+
 		RestResponse response = new RestResponse();
 		response.setErrorCode(ErrorCodes.SUCCESS);
 		response.setErrorDescription("OK");
@@ -620,7 +579,7 @@ public class EquipmentController extends ControllerBase {
     /**
      * <b>URL: /equipment/statItemResultsInEquipmentTasks</b>
      * <p>按设备-标准统计任务的细项</p>
-     */
+     *//*
     @RequestMapping("statItemResultsInEquipmentTasks")
     @RestReturn(value = StatItemResultsInEquipmentTasksResponse.class)
     public RestResponse statItemResultsInEquipmentTasks(StatItemResultsInEquipmentTasksCommand cmd) {
@@ -629,7 +588,7 @@ public class EquipmentController extends ControllerBase {
         response.setErrorCode(ErrorCodes.SUCCESS);
         response.setErrorDescription("OK");
         return response;
-    }
+    }*/
 
     /**
      * <b>URL: /equipment/reportEquipmentTask</b>
@@ -717,19 +676,6 @@ public class EquipmentController extends ControllerBase {
 
         return getRestResponse(equipmentAttachments);
     }
-
-//    /**
-//     * <b>URL: /equipment/listRelatedOrgGroups</b>
-//     * <p>查看管理处</p>
-//     */
-//    @RequestMapping("listRelatedOrgGroups")
-//    @RestReturn(value = OrganizationDTO.class, collection = true)
-//    public RestResponse listRelatedOrgGroups(ListRelatedOrgGroupsCommand cmd) {
-//
-//        List<OrganizationDTO> organizationGroups = equipmentService.listRelatedOrgGroups(cmd);
-//
-//        return getRestResponse(organizationGroups);
-//    }
 
     /**
      * <b>URL: /equipment/syncEquipmentStandardIndex</b>

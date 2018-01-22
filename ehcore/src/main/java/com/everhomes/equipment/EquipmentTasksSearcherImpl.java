@@ -5,7 +5,6 @@ import com.everhomes.listing.CrossShardListingLocator;
 import com.everhomes.organization.OrganizationProvider;
 import com.everhomes.portal.PortalService;
 import com.everhomes.rest.acl.PrivilegeConstants;
-import com.everhomes.rest.equipment.DeleteEquipmentPlanCommand;
 import com.everhomes.rest.equipment.EquipmentInspectionPlanDTO;
 import com.everhomes.rest.equipment.EquipmentStandardRelationDTO;
 import com.everhomes.rest.equipment.EquipmentTaskDTO;
@@ -15,6 +14,7 @@ import com.everhomes.rest.quality.OwnerType;
 import com.everhomes.search.AbstractElasticSearch;
 import com.everhomes.search.EquipmentTasksSearcher;
 import com.everhomes.search.SearchUtils;
+import com.everhomes.server.schema.tables.pojos.EhEquipmentInspectionEquipmentPlanMap;
 import com.everhomes.settings.PaginationConfigHelper;
 import com.everhomes.user.UserContext;
 import com.everhomes.user.UserPrivilegeMgr;
@@ -41,6 +41,7 @@ import org.springframework.stereotype.Component;
 
 import java.io.IOException;
 import java.util.ArrayList;
+import java.util.Comparator;
 import java.util.List;
 
 @Component
@@ -123,12 +124,7 @@ public class EquipmentTasksSearcherImpl extends AbstractElasticSearch implements
 
 	@Override
 	public ListEquipmentTasksResponse query(SearchEquipmentTasksCommand cmd) {
-        /*Long privilegeId = configProvider.getLongValue(EquipmentConstant.EQUIPMENT_TASK_LIST, 0L);
-        if(cmd.getTargetId() == null) {
-            userPrivilegeMgr.checkCurrentUserAuthority(null, null, cmd.getOwnerId(), privilegeId);
-        } else {
-            userPrivilegeMgr.checkCurrentUserAuthority(EntityType.COMMUNITY.getCode(), cmd.getTargetId(), cmd.getOwnerId(), privilegeId);
-        }*/
+
         checkUserPrivilege(cmd.getOwnerId(), PrivilegeConstants.EQUIPMENT_TASK_LIST,cmd.getTargetId());
 
 		SearchRequestBuilder builder = getClient().prepareSearch(getIndexName()).setTypes(getIndexType());
@@ -148,13 +144,8 @@ public class EquipmentTasksSearcherImpl extends AbstractElasticSearch implements
 //
 //        FilterBuilder nfb = FilterBuilders.termFilter("status", EquipmentTaskStatus.NONE.getCode());
 //        FilterBuilder fb = FilterBuilders.notFilter(nfb);
-//产品要求把已失效的任务也显示出来 add by xiongying20170217
-        //改用namespaceId add by xiongying 20170328
+//产品要求把已失效的任务也显示出来 add by xiongying20170217 改用namespaceId add by xiongying 20170328
         FilterBuilder fb = FilterBuilders.termFilter("namespaceId", cmd.getNamespaceId());
-//        FilterBuilder fb = FilterBuilders.termFilter("ownerId", cmd.getOwnerId());
-////        fb = FilterBuilders.andFilter(fb, FilterBuilders.termFilter("ownerId", cmd.getOwnerId()));
-//        fb = FilterBuilders.andFilter(fb, FilterBuilders.termFilter("ownerType", OwnerType.fromCode(cmd.getOwnerType()).getCode()));
-
         if(cmd.getTargetId() != null)
         	fb = FilterBuilders.andFilter(fb, FilterBuilders.termFilter("targetId", cmd.getTargetId()));
 
@@ -167,13 +158,11 @@ public class EquipmentTasksSearcherImpl extends AbstractElasticSearch implements
         	rf.gt(cmd.getStartTime());
         	fb = FilterBuilders.andFilter(fb, rf);
         }
-
         if(cmd.getEndTime() != null) {
         	RangeFilterBuilder rf = new RangeFilterBuilder("endTime");
         	rf.lt(cmd.getEndTime());
         	fb = FilterBuilders.andFilter(fb, rf);
         }
-
         if(cmd.getTaskType() != null)
         	fb = FilterBuilders.andFilter(fb, FilterBuilders.termFilter("taskType", cmd.getTaskType()));
 
@@ -184,8 +173,6 @@ public class EquipmentTasksSearcherImpl extends AbstractElasticSearch implements
         if (cmd.getStatus() != null && cmd.getStatus().size() > 0) {
                 fb = FilterBuilders.andFilter(fb, FilterBuilders.termsFilter("status", cmd.getStatus()));
         }
-        //	fb = FilterBuilders.andFilter(fb, FilterBuilders.termFilter("status", cmd.getStatus()));
-
         int pageSize = PaginationConfigHelper.getPageSize(configProvider, cmd.getPageSize());
         Long anchor = 0L;
         if(cmd.getPageAnchor() != null) {
@@ -215,12 +202,9 @@ public class EquipmentTasksSearcherImpl extends AbstractElasticSearch implements
             EquipmentInspectionTasks task = equipmentProvider.findEquipmentTaskById(id);
             EquipmentTaskDTO dto = ConvertHelper.convert(task, EquipmentTaskDTO.class);
 
-            DeleteEquipmentPlanCommand command = new DeleteEquipmentPlanCommand();
-            command.setOwnerId(cmd.getOwnerId());
-            command.setOwnerType(cmd.getOwnerType());
-            command.setId(task.getPlanId());
             if (task.getPlanId() == null || task.getPlanId() == 0L) {
-                EquipmentInspectionPlanDTO plansDTO = equipmentService.getEquipmmentInspectionPlanById(command);
+                EquipmentInspectionPlanDTO plansDTO = processEquipmentInspectionObjectsByPlanId(
+                        ConvertHelper.convert(equipmentProvider.getEquipmmentInspectionPlanById(id),EquipmentInspectionPlanDTO.class));
                 if (null != plansDTO) {
                     dto.setPlanDescription(plansDTO.getRemarks());
                     dto.setTaskType(plansDTO.getPlanType());
@@ -252,25 +236,9 @@ public class EquipmentTasksSearcherImpl extends AbstractElasticSearch implements
 
         return response;
 	}
+
     private void checkUserPrivilege(Long orgId, Long privilegeId, Long communityId) {
-        /*ListServiceModuleAppsCommand listServiceModuleAppsCommand = new ListServiceModuleAppsCommand();
-        listServiceModuleAppsCommand.setNamespaceId(UserContext.getCurrentNamespaceId());
-        listServiceModuleAppsCommand.setModuleId(EquipmentConstant.EQUIPMENT_MODULE);
-        ListServiceModuleAppsResponse apps = portalService.listServiceModuleAppsWithConditon(listServiceModuleAppsCommand);
-        boolean flag = false;
-        if (null != apps && null != apps.getServiceModuleApps() && apps.getServiceModuleApps().size() > 0) {
-            flag = userPrivilegeMgr.checkUserPrivilege(UserContext.currentUserId(), EntityType.ORGANIZATIONS.getCode(),
-                    orgId, orgId, privilegeId, apps.getServiceModuleApps().get(0).getId(), null, communityId);
-            if (!flag) {
-                LOGGER.error("Permission is denied, namespaceId={}, orgId={}, communityId={}," +
-                        " privilege={}", UserContext.getCurrentNamespaceId(), orgId, communityId, privilegeId);
-                throw RuntimeErrorException.errorWith(ErrorCodes.SCOPE_GENERAL, ErrorCodes.ERROR_ACCESS_DENIED,
-                        "Insufficient privilege");
-            }
-        }*/
         userPrivilegeMgr.checkUserPrivilege(UserContext.currentUserId(), orgId, privilegeId, EquipmentConstant.EQUIPMENT_MODULE, null, null, null,communityId);
-
-
     }
 
 	@Override
@@ -316,4 +284,34 @@ public class EquipmentTasksSearcherImpl extends AbstractElasticSearch implements
         }
     }
 
+    private EquipmentInspectionPlanDTO processEquipmentInspectionObjectsByPlanId(EquipmentInspectionPlanDTO planDTO) {
+
+        List<EquipmentInspectionEquipmentPlanMap> planMaps = equipmentProvider.getEquipmentInspectionPlanMap(planDTO.getId());
+        List<EquipmentStandardRelationDTO> relationDTOS = new ArrayList<>();
+        if (planMaps != null && planMaps.size() > 0) {
+            for (EhEquipmentInspectionEquipmentPlanMap map : planMaps) {
+                EquipmentInspectionEquipments equipment = equipmentProvider.findEquipmentById(map.getEquimentId());
+                EquipmentInspectionStandards standard = equipmentProvider.findStandardById(map.getStandardId());
+
+                EquipmentStandardRelationDTO relations = new EquipmentStandardRelationDTO();
+                if (equipment != null) {
+                    relations.setEquipmentName(equipment.getName());
+                    relations.setEquipmentId(equipment.getId());
+                    relations.setLocation(equipment.getLocation());
+                }
+                if (standard != null) {
+                    relations.setStandardName(standard.getName());
+                    relations.setStandardId(standard.getId());
+                    relations.setRepeatType(standard.getRepeatType());
+                }
+                relations.setOrder(map.getDefaultOrder());
+                relations.setPlanId(planDTO.getId());
+
+                relationDTOS.add(relations);
+            }
+            relationDTOS.sort(Comparator.comparingLong(EquipmentStandardRelationDTO::getOrder));
+        }
+        planDTO.setEquipmentStandardRelations(relationDTOS);
+        return planDTO;
+    }
 }

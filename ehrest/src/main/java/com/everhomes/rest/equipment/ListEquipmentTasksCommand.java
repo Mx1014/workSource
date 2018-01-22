@@ -15,7 +15,6 @@ import java.util.List;
  *  <li>pageAnchor: 锚点</li>
  *  <li>pageSize: 页面大小</li>
  *  <li>inspectionCategoryId: 巡检对象类型id</li>
- *  <li>isReview: 是否查审阅任务 0：执行任务；1：审核任务</li>
  *  <li>taskStatus: 任务状态列表 参考 {@link com.everhomes.rest.equipment.EquipmentTaskStatus}</li>
  *  <li>lastSyncTime: 离线同步数据时使用</li>
  * </ul>
