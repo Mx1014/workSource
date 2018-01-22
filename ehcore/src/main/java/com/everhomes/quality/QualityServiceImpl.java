@@ -4705,4 +4705,26 @@ public class QualityServiceImpl implements QualityService {
 		}
 		return null;
 	}
+
+	@Override
+	public QualityStandardsDTO getQualityStandards(DeleteQualityStandardCommand cmd) {
+		QualityInspectionStandards standard = qualityProvider.findStandardById(cmd.getStandardId());
+		if(standard == null || standard.getStatus() == null) {
+			LOGGER.error("the standard which id="+cmd.getStandardId()+" don't exist!");
+			throw RuntimeErrorException
+					.errorWith(
+							QualityServiceErrorCode.SCOPE,
+							QualityServiceErrorCode.ERROR_STANDARD_NOT_EXIST,
+							localeStringService.getLocalizedString(
+									String.valueOf(QualityServiceErrorCode.SCOPE),
+									String.valueOf(QualityServiceErrorCode.ERROR_STANDARD_NOT_EXIST),
+									UserContext.current().getUser().getLocale(),
+									"the standard don't exist!"));
+		}
+		List<QualityInspectionStandards> standards = new ArrayList<>();
+		standards.add(standard);
+		this.qualityProvider.populateStandardsGroups(standards);
+		this.qualityProvider.populateStandardsSpecifications(standards);
+		return  converStandardToDto(standard);
+	}
 }
