@@ -6,9 +6,8 @@ import java.math.BigDecimal;
 import com.everhomes.util.StringHelper;
 
 /**
- * 
- * 
  * <ul>
+ * <li>id: id</li>
  * <li>rentalType: 0按小时，1按半天，2按天，3按半天带晚上，4按月，参考{@link com.everhomes.rest.rentalv2.RentalType}</li>
  * <li>priceType: 0 按时长定价 1 起步价模式</li>
  * <li>workdayPrice: 园区客户工作日价</li>
@@ -29,6 +28,9 @@ import com.everhomes.util.StringHelper;
  * <li>approvingUserFullPrice: 外部客户满</li>
  * <li>approvingUserCutPrice: 外部客户减</li>
  * <li>approvingUserDiscountRatio: 外部客户折扣比例</li>
+ * <li>cellBeginId: cellBeginId</li>
+ * <li>cellEndId: cellEndId</li>
+ * <li>userPriceType: userPriceType</li>
  * </ul>
  */
 public class PriceRuleDTO {
@@ -45,17 +47,26 @@ public class PriceRuleDTO {
 	private BigDecimal fullPrice;
 	private BigDecimal cutPrice;
 	private Double discountRatio;
-	private Byte  orgMemberDiscountType;
-	private BigDecimal  orgMemberFullPrice;
-	private BigDecimal  orgMemberCutPrice;
-	private Double  orgMemberDiscountRatio;
+	private Byte orgMemberDiscountType;
+	private BigDecimal orgMemberFullPrice;
+	private BigDecimal orgMemberCutPrice;
+	private Double orgMemberDiscountRatio;
 	private Byte approvingUserDiscountType;
 	private BigDecimal approvingUserFullPrice;
 	private BigDecimal approvingUserCutPrice;
 	private Double approvingUserDiscountRatio;
 	private Long cellBeginId;
 	private Long cellEndId;
-	
+	private Byte userPriceType;
+
+	public Byte getUserPriceType() {
+		return userPriceType;
+	}
+
+	public void setUserPriceType(Byte userPriceType) {
+		this.userPriceType = userPriceType;
+	}
+
 	public Long getId() {
 		return id;
 	}
@@ -104,7 +115,6 @@ public class PriceRuleDTO {
 		this.workdayPrice = workdayPrice;
 	}
 
-
 	public BigDecimal getOrgMemberWorkdayPrice() {
 		return orgMemberWorkdayPrice;
 	}
@@ -112,7 +122,6 @@ public class PriceRuleDTO {
 	public void setOrgMemberWorkdayPrice(BigDecimal orgMemberWorkdayPrice) {
 		this.orgMemberWorkdayPrice = orgMemberWorkdayPrice;
 	}
-
 
 	public BigDecimal getApprovingUserWorkdayPrice() {
 		return approvingUserWorkdayPrice;
@@ -246,4 +255,5 @@ public class PriceRuleDTO {
 	public void setApprovingUserDiscountRatio(Double approvingUserDiscountRatio) {
 		this.approvingUserDiscountRatio = approvingUserDiscountRatio;
 	}
+
 }

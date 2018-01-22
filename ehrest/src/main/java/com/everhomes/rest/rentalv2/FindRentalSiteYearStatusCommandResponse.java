@@ -48,12 +48,12 @@ public class FindRentalSiteYearStatusCommandResponse {
 	private java.math.BigDecimal cutPrice;
 	private java.lang.Double     discountRatio;
 	private java.lang.Byte       rentalType;
-	private java.lang.Integer    rentalStep;
-	private java.lang.Byte       exclusiveFlag;
+//	private java.lang.Integer    rentalStep;
+//	private java.lang.Byte       exclusiveFlag;
 	private java.lang.Byte       autoAssign;
 	private java.lang.Byte       multiUnit;
 	private java.lang.Byte       multiTimeInterval;
-	private java.lang.Byte       cancelFlag;
+//	private java.lang.Byte       cancelFlag;
 	private java.lang.Byte       needPay;
 	private Long anchorTime;
 	@ItemType(RentalSiteDayRulesDTO.class)
@@ -191,27 +191,6 @@ public class FindRentalSiteYearStatusCommandResponse {
 		this.rentalType = rentalType;
 	}
 
-
-	public java.lang.Integer getRentalStep() {
-		return rentalStep;
-	}
-
-
-	public void setRentalStep(java.lang.Integer rentalStep) {
-		this.rentalStep = rentalStep;
-	}
-
-
-	public java.lang.Byte getExclusiveFlag() {
-		return exclusiveFlag;
-	}
-
-
-	public void setExclusiveFlag(java.lang.Byte exclusiveFlag) {
-		this.exclusiveFlag = exclusiveFlag;
-	}
-
-
 	public java.lang.Byte getAutoAssign() {
 		return autoAssign;
 	}
@@ -240,17 +219,6 @@ public class FindRentalSiteYearStatusCommandResponse {
 	public void setMultiTimeInterval(java.lang.Byte multiTimeInterval) {
 		this.multiTimeInterval = multiTimeInterval;
 	}
-
-
-	public java.lang.Byte getCancelFlag() {
-		return cancelFlag;
-	}
-
-
-	public void setCancelFlag(java.lang.Byte cancelFlag) {
-		this.cancelFlag = cancelFlag;
-	}
-
 
 	public java.lang.Byte getNeedPay() {
 		return needPay;

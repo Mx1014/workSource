@@ -1,4 +1,4 @@
-package com.everhomes.rentalv2;
+package com.everhomes.rentalv2.utils;
 
 import com.everhomes.util.StringHelper;
 import org.slf4j.Logger;

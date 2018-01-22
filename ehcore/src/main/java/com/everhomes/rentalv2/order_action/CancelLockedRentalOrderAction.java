@@ -1,6 +1,4 @@
-package com.everhomes.rentalv2;
-
-import java.text.SimpleDateFormat;
+package com.everhomes.rentalv2.order_action;
 
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -12,35 +10,35 @@ import org.springframework.stereotype.Service;
 import com.everhomes.messaging.MessagingService;
 import com.everhomes.rentalv2.RentalOrder;
 import com.everhomes.rentalv2.Rentalv2Provider;
-import com.everhomes.rentalv2.RentalResource;
 import com.everhomes.rest.app.AppConstants;
 import com.everhomes.rest.messaging.MessageBodyType;
 import com.everhomes.rest.messaging.MessageChannel;
 import com.everhomes.rest.messaging.MessageDTO;
 import com.everhomes.rest.messaging.MessagingConstants;
-import com.everhomes.rest.rentalv2.RentalType;
 import com.everhomes.rest.rentalv2.SiteBillStatus;
+import com.everhomes.rest.rentalv2.VisibleFlag;
 import com.everhomes.rest.user.MessageChannelType;
 import com.everhomes.user.User;
-import com.everhomes.user.UserContext;
 
 @Service
 @Scope(value = ConfigurableBeanFactory.SCOPE_PROTOTYPE)
-public class UpdateRentalOrderStatusToPayingFinalAction implements Runnable {
+public class CancelLockedRentalOrderAction implements Runnable {
 
 	private static final Logger LOGGER = LoggerFactory
-			.getLogger(UpdateRentalOrderStatusToPayingFinalAction.class);
+			.getLogger(CancelLockedRentalOrderAction.class);
 	private   Long  rentalBillId;
 	@Autowired
-	Rentalv2Provider rentalProvider;
+	private Rentalv2Provider rentalProvider;
 
-	public UpdateRentalOrderStatusToPayingFinalAction(final String id) {
-		this.rentalBillId =  Long.valueOf(id) ;
-	}
-	
+
 	@Autowired
 	private MessagingService messagingService;
+    
 
+	public CancelLockedRentalOrderAction(final String id) { 
+		this.rentalBillId =  Long.valueOf(id) ;
+		
+	}
 	private void sendMessageToUser(Long userId, String content) {
 //		User user = UserContext.current().getUser();
 		MessageDTO messageDto = new MessageDTO();
@@ -57,14 +55,14 @@ public class UpdateRentalOrderStatusToPayingFinalAction implements Runnable {
 	}
 	@Override
 	public void run() {
-		// 变成可支付全款
+		// 取消订单
 		RentalOrder rentalBill = rentalProvider.findRentalBillById(Long.valueOf(rentalBillId));
-		if ((!rentalBill.getStatus().equals(SiteBillStatus.PAYINGFINAL.getCode())) && 
-				(!rentalBill.getStatus().equals(SiteBillStatus.SUCCESS.getCode()))) {
-			rentalBill.setStatus(SiteBillStatus.PAYINGFINAL.getCode());
-			rentalProvider.updateRentalBill(rentalBill);
-			//TODO: 发通知
-			RentalResource site = this.rentalProvider.getRentalSiteById(rentalBill.getRentalResourceId());
+//		if (rentalBill.getStatus().equals(SiteBillStatus.LOCKED.getCode())) {
+//			rentalBill.setStatus(SiteBillStatus.FAIL.getCode());
+//			rentalBill.setVisibleFlag(VisibleFlag.UNVISIBLE.getCode());
+//			rentalProvider.updateRentalBill(rentalBill);
+//			rentalProvider.deleteRentalBillById(rentalBill.getId());
+//			RentalResource site = this.rentalProvider.getRentalSiteById(rentalBill.getRentalResourceId());
 //			RentalRule rule = this.rentalProvider.getRentalRule(site.getOwnerId(), site.getOwnerType(), site.getSiteType());
 //			StringBuffer sb = new StringBuffer();
 //			sb.append("您预定的："); 
@@ -78,9 +76,10 @@ public class UpdateRentalOrderStatusToPayingFinalAction implements Runnable {
 //				sb.append(dateSF.format(rentalBill.getRentalDate()));
 //			}
 //			sb.append(")");
-//			sb.append("需要支付全款了！请速速支付，小心超期被取消哦^ ^"); 
+//			sb.append("由于超期被取消了 > <,请重新预订");
 //			sendMessageToUser(rentalBill.getRentalUid(),sb.toString());
-		}
+//		}
+		
 	}
 
 }

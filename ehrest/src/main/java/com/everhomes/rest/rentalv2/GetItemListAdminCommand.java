@@ -1,8 +1,5 @@
 package com.everhomes.rest.rentalv2;
 
-import java.util.List;
-
-import com.everhomes.discover.ItemType;
 import com.everhomes.util.StringHelper;
 
 /**
@@ -16,16 +13,25 @@ public class GetItemListAdminCommand {
 
 	private Long rentalSiteId;
 
+	private String resourceType;
+
 	private Long pageAnchor;
     
 	private Integer pageSize;
-	
-	
+
 	@Override
     public String toString() {
         return StringHelper.toJsonString(this);
     }
- 
+
+	public String getResourceType() {
+		return resourceType;
+	}
+
+	public void setResourceType(String resourceType) {
+		this.resourceType = resourceType;
+	}
+
 	public Long getRentalSiteId() {
 		return rentalSiteId;
 	}

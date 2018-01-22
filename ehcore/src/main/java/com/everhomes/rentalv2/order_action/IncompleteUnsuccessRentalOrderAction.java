@@ -1,6 +1,4 @@
-package com.everhomes.rentalv2;
-
-import java.text.SimpleDateFormat;
+package com.everhomes.rentalv2.order_action;
 
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -10,7 +8,6 @@ import org.springframework.context.annotation.Scope;
 import org.springframework.stereotype.Service;
 
 import com.everhomes.messaging.MessagingService;
-import com.everhomes.pushmessage.PushMessageProvider;
 import com.everhomes.rentalv2.RentalOrder;
 import com.everhomes.rentalv2.Rentalv2Provider;
 import com.everhomes.rest.app.AppConstants;
@@ -21,7 +18,7 @@ import com.everhomes.rest.messaging.MessagingConstants;
 import com.everhomes.rest.rentalv2.SiteBillStatus;
 import com.everhomes.rest.user.MessageChannelType;
 import com.everhomes.user.User;
-import com.everhomes.user.UserContext;
+
 @Service
 @Scope(value = ConfigurableBeanFactory.SCOPE_PROTOTYPE)
 public class IncompleteUnsuccessRentalOrderAction implements Runnable {
