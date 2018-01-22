@@ -664,7 +664,7 @@ public class PmTaskServiceImpl implements PmTaskService {
 				throw RuntimeErrorException.errorWith(ErrorCodes.SCOPE_GENERAL, ErrorCodes.ERROR_INVALID_PARAMETER,
 						"RequestorName cannot be null.");
 			}
-			UserIdentifier userIdentifier = userProvider.findClaimedIdentifierByToken(user.getNamespaceId(), requestorPhone);
+			UserIdentifier userIdentifier = userProvider.findClaimedIdentifierByToken(namespaceId, requestorPhone);
 			Long requestorUid = null;
 			if (null != userIdentifier) {
 				requestorUid = userIdentifier.getOwnerUid();
@@ -779,8 +779,12 @@ public class PmTaskServiceImpl implements PmTaskService {
 		}
 
 		PmTaskHandle handler = PlatformContext.getComponent(PmTaskHandle.PMTASK_PREFIX + handle);
-		
-		return handler.createTask(cmd, null, requestorName, requestorPhone);
+		UserIdentifier userIdentifier = userProvider.findClaimedIdentifierByToken(namespaceId, requestorPhone);
+		Long requestorUid = null;
+		if (null != userIdentifier) {
+			requestorUid = userIdentifier.getOwnerUid();
+		}
+		return handler.createTask(cmd, requestorUid, requestorName, requestorPhone);
 	}
 	
 	@Override
