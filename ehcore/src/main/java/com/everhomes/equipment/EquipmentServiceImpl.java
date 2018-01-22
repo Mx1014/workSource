@@ -5795,6 +5795,8 @@ private void checkUserPrivilege(Long orgId, Long privilegeId, Long communityId) 
 			repairCommand = ConvertHelper.convert(cmd, CreateTaskCommand.class);
 			repairCommand.setAddress(equipment.getLocation());
 			repairCommand.setAddressType(PmTaskAddressType.ORGANIZATION.getCode());
+			repairCommand.setReferId(cmd.getEquipmentId());
+			repairCommand.setReferType(EquipmentConstant.EQUIPMENT_REPAIR);
 			List<OrganizationMember> members = organizationProvider.listOrganizationMembersByUId(UserContext.currentUserId());
 			if (members != null && members.size() > 0) {
 				repairCommand.setRequestorName(members.get(0).getContactName());
