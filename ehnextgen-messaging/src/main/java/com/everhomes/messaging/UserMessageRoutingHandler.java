@@ -67,6 +67,9 @@ public class UserMessageRoutingHandler implements MessageRoutingHandler {
     @Override
     public void routeMessage(MessageRoutingContext context, UserLogin senderLogin, long appId, String dstChannelType, String dstChannelToken,
             MessageDTO message, int deliveryOption) {
+
+
+
         long uid = Long.parseLong(dstChannelToken);
         
         if(uid == 0) {
