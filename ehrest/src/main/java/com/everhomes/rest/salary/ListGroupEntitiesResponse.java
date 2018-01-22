@@ -8,7 +8,7 @@ import java.util.List;
 /**
  *
  * <ul>
- * <li>categories: 薪酬结构分类</li>
+ * <li>categories: 薪酬结构分类 {@link CategoryDTO}</li>
  * <li>operatorName: 最后操作人</li>
  * <li>updateTime: 最后操作时间</li>
  * </ul>

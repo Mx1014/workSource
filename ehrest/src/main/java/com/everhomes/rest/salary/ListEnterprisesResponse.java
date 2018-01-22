@@ -9,7 +9,7 @@ import java.util.List;
 /**
  *
  * <ul>
- * <li>organizationId: 总公司id</li>
+ * <li>enterprises: 子公司列表 {@link com.everhomes.rest.organization.OrganizationDTO}</li>
  * </ul>
  */
 public class ListEnterprisesResponse {
