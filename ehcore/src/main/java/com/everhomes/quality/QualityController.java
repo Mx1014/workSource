@@ -144,7 +144,7 @@ public class QualityController extends ControllerBase {
 
 	/**
 	 * <b>URL: /quality/getQualityStandards</b>
-	 * <p>列出品质核查标准(概念变成计划)</p>
+	 * <p>根据id查看品质核查标准(概念变成计划)</p>
 	 */
 	@RequestMapping("getQualityStandards")
 	@RestReturn(value = QualityStandardsDTO.class)
