@@ -6,17 +6,18 @@ import com.everhomes.util.StringHelper;
 /**
  * <ul>
  *     <li>namespaceId: 域空间</li>
+ *     <li>userId: userId</li>
  *     <li>versionId: versionId</li>
  * </ul>
  */
-public class ListPortalNavigationBarsCommand {
+public class CreatePortalVersionUserCommand {
+
 
 	private Integer namespaceId;
+
+	private Long userId;
+
 	private Long versionId;
-
-	public ListPortalNavigationBarsCommand() {
-
-	}
 
 	public Integer getNamespaceId() {
 		return namespaceId;
@@ -24,6 +25,14 @@ public class ListPortalNavigationBarsCommand {
 
 	public void setNamespaceId(Integer namespaceId) {
 		this.namespaceId = namespaceId;
+	}
+
+	public Long getUserId() {
+		return userId;
+	}
+
+	public void setUserId(Long userId) {
+		this.userId = userId;
 	}
 
 	public Long getVersionId() {
