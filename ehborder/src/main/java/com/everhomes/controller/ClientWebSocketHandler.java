@@ -8,6 +8,7 @@ import java.util.List;
 import java.util.Map;
 import java.util.concurrent.ConcurrentHashMap;
 
+import com.everhomes.rest.messaging.MessageDTO;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -40,6 +41,7 @@ import com.everhomes.util.StringHelper;
 import com.google.gson.Gson;
 import com.google.gson.JsonElement;
 import com.google.gson.JsonParser;
+import sun.plugin2.message.Message;
 
 /**
  * 
@@ -462,4 +464,52 @@ public class ClientWebSocketHandler implements WebSocketHandler {
     private void handlePongMessage(WebSocketSession session, PongMessage message) throws Exception {
         LOGGER.info("Got pong message from " + session.getId());
     }
+
+
+    @NamedHandler(value="", byClass=RegisterConnectionRequestPdu.class)
+    private void handleMessagePersist(final WebSocketSession session, MessageDTO dto) {
+
+        httpRestCallProvider.restCall("/aclink/syncWebsocketMessages", params, new ListenableFutureCallback<ResponseEntity<String>> () {
+
+            @Override
+            public void onSuccess(ResponseEntity<String> result) {
+//                if(result.getStatusCode() == HttpStatus.OK) {
+//                    SyncWebsocketMessagesRestResponse resp = (SyncWebsocketMessagesRestResponse)StringHelper.fromJsonString(result.getBody()
+//                            , SyncWebsocketMessagesRestResponse.class);
+//                    if(resp.getErrorCode().equals(200) && resp.getResponse() != null) {
+//
+//                        AclinkWebSocketMessage respCmd = resp.getResponse();
+//                        state.onServerMessage(resp.getResponse(), session, handler);
+//
+//                        byte[] bPayload = Base64.decodeBase64(respCmd.getPayload());
+//                        byte[] bSeq = DataUtil.intToByteArray(respCmd.getSeq().intValue());
+//                        byte[] bLen = DataUtil.intToByteArray(bPayload.length + 6);
+//                        byte[] mBuf = new byte[bPayload.length + 10];
+//
+//                        System.arraycopy(bLen, 0, mBuf, 0, bLen.length);
+//                        System.arraycopy(bSeq, 0, mBuf, 6, bSeq.length);
+//                        System.arraycopy(bPayload, 0, mBuf, 10, bPayload.length);
+//
+//                        BinaryMessage wsMessage = new BinaryMessage(mBuf);
+//                        try {
+//                            synchronized(session) {
+//                                session.sendMessage(wsMessage);
+//                            }
+//
+//                        } catch (IOException e) {
+//                            LOGGER.error("sendMessage error", e);
+//                        }
+//                    }
+//
+//                }
+
+            }
+
+            @Override
+            public void onFailure(Throwable ex) {
+                LOGGER.error("call core server error=", ex);
+            }
+        });
+    }
+
 }

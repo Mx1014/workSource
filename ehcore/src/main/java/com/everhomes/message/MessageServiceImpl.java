@@ -6,6 +6,8 @@ import java.util.HashSet;
 import java.util.List;
 import java.util.Set;
 
+import com.everhomes.rest.message.PersistMessageCommand;
+import com.everhomes.util.ConvertHelper;
 import org.apache.commons.lang.StringUtils;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -17,14 +19,10 @@ import com.everhomes.community.Community;
 import com.everhomes.community.CommunityProvider;
 import com.everhomes.constants.ErrorCodes;
 import com.everhomes.organization.OrganizationCommunityRequest;
-import com.everhomes.organization.OrganizationDetail;
 import com.everhomes.organization.OrganizationProvider;
 import com.everhomes.organization.OrganizationService;
 import com.everhomes.rest.approval.TrueOrFalseFlag;
 import com.everhomes.rest.message.PushMessageToAdminAndBusinessContactsCommand;
-import com.everhomes.rest.organization.ListOrganizationAdministratorCommand;
-import com.everhomes.rest.organization.ListOrganizationMemberCommandResponse;
-import com.everhomes.rest.organization.OrganizationMemberDTO;
 import com.everhomes.rest.sms.SmsTemplateCode;
 import com.everhomes.sms.SmsProvider;
 import com.everhomes.user.UserContext;
@@ -49,6 +47,9 @@ public class MessageServiceImpl implements MessageService {
 	
 	@Autowired
 	private OrganizationService organizationService;
+
+	@Autowired
+	private MessageProvider messageProvider;
 	
 	@Override
 	public void pushMessageToAdminAndBusinessContacts(PushMessageToAdminAndBusinessContactsCommand cmd) {
@@ -111,6 +112,12 @@ public class MessageServiceImpl implements MessageService {
 		
 		smsProvider.sendSms(namespaceId, phoneNumbers, templateScope, templateId, templateLocale, null);
 
+	}
+
+	@Override
+	public void persistMessage(PersistMessageCommand cmd) {
+		this.messageProvider.createMessage(ConvertHelper.convert(cmd, Message.class));
+		System.out.print("persitstMessage finished");
 	}
 
 }

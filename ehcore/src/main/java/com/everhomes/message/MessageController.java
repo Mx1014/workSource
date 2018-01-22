@@ -1,6 +1,7 @@
 // @formatter:off
 package com.everhomes.message;
 
+import com.everhomes.rest.message.PersistMessageCommand;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RestController;
@@ -25,6 +26,17 @@ public class MessageController extends ControllerBase {
 	@RestReturn(String.class)
 	public RestResponse pushMessageToAdminAndBusinessContacts(PushMessageToAdminAndBusinessContactsCommand cmd){
 		messageService.pushMessageToAdminAndBusinessContacts(cmd);
+		return new RestResponse();
+	}
+
+	/**
+	 * <p>消息持久化</p>
+	 * <b>URL: /message/persistMessage</b>
+	 */
+	@RequestMapping("persistMessage")
+	@RestReturn(String.class)
+	public RestResponse pushMessageToAdminAndBusinessContacts(PersistMessageCommand cmd){
+		messageService.persistMessage(cmd);
 		return new RestResponse();
 	}
 
