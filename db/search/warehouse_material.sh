@@ -12,7 +12,8 @@ curl -XPUT "http://$ELASTIC/$INDEX/_mapping/warehouseMaterial" -d '
             "ownerId":{"type":"long"},
             "ownerType":{"type":"string", "index":"not_analyzed"},
             "updateTime":{"type":"date"},
-            "categoryId":{"type":"long"}
+            "categoryId":{"type":"long"},
+            "communityId":{"type":"long"}
         }
     }
 }
