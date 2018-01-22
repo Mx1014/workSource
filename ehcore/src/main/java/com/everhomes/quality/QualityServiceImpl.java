@@ -340,9 +340,6 @@ public class QualityServiceImpl implements QualityService {
 
 			return dto;
 		}
-
-
-
 	}
 
 	private void createQualityInspectionStandardLogs(QualityInspectionStandards standard, Byte processType, Long userId) {
@@ -547,15 +544,8 @@ public class QualityServiceImpl implements QualityService {
 
 	@Override
 	public ListQualityStandardsResponse listQualityStandards(ListQualityStandardsCommand cmd) {
-		//Long privilegeId = configProvider.getLongValue(QualityConstant.QUALITY_STANDARD_LIST, 0L);
-		/*if(0L == cmd.getTargetId()) {
-			userPrivilegeMgr.checkCurrentUserAuthority(null, null, cmd.getOwnerId(), privilegeId);
-		} else {
-			userPrivilegeMgr.checkCurrentUserAuthority(EntityType.COMMUNITY.getCode(), cmd.getTargetId(), cmd.getOwnerId(), privilegeId);
-		}*/
+
 		checkUserPrivilege(cmd.getOwnerId(), PrivilegeConstants.QUALITY_STANDARD_LIST, cmd.getTargetId());
-
-
 		Long ownerId = cmd.getOwnerId();
 		String ownerType = cmd.getOwnerType();
 		int pageSize = PaginationConfigHelper.getPageSize(configurationProvider, cmd.getPageSize());
@@ -564,16 +554,16 @@ public class QualityServiceImpl implements QualityService {
 
 		List<QualityInspectionStandards> standards = new ArrayList<>();
 		if (cmd.getTargetId() != null && cmd.getTargetId() != 0L) {
-			//首先查出标准和项目之间关联表
+			/*//首先查出标准和项目之间关联表
 			List<QualityInspectionModelCommunityMap> modleCommunityMaps = qualityProvider.
 					listQualityModelCommunityMapByTargetId(cmd.getTargetId(),QualityModelType.STANDARD.getCode());
 			List<Long> containIds = new ArrayList<>();
 			if (modleCommunityMaps != null && modleCommunityMaps.size() > 0)
-				modleCommunityMaps.forEach(m -> containIds.add(m.getModelId()));
+				modleCommunityMaps.forEach(m -> containIds.add(m.getModelId()));*/
 
 			standards = qualityProvider.listQualityInspectionStandards(locator, pageSize + 1,
 					ownerId, ownerType, cmd.getTargetType(), cmd.getTargetId(), cmd.getReviewResult());
-			standards.forEach((s) -> {
+			/*standards.forEach((s) -> {
 				if (s.getReferId() != null && s.getReferId() != 0) {
 					containIds.remove(s.getReferId());
 				}
@@ -581,26 +571,22 @@ public class QualityServiceImpl implements QualityService {
 			for (Long standardId : containIds) {
 				//将referid的过滤 剩下的加到结果集中
 				standards.add(qualityProvider.findStandardById(standardId));
-			}
+			}*/
 		} else {
 			//如果在全部中查看标准则显示全部
 			standards = qualityProvider.listQualityInspectionStandards(locator, pageSize + 1,
-					ownerId, ownerType, cmd.getTargetType(), null, cmd.getReviewResult());
+					ownerId, ownerType, null, null, cmd.getReviewResult());
 		}
 
 
 		this.qualityProvider.populateStandardsGroups(standards);
 		this.qualityProvider.populateStandardsSpecifications(standards);
-//		for(QualityInspectionStandards standard : standards) {
-//			processRepeatSetting(standard);
-//		}
 
         Long nextPageAnchor = null;
         if(standards.size() > pageSize) {
         	standards.remove(standards.size() - 1);
             nextPageAnchor = standards.get(standards.size() - 1).getId();
         }
-
 
         List<QualityStandardsDTO> qaStandards = standards.stream().map((r) -> {
 
