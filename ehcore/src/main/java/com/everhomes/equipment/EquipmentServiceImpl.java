@@ -5786,22 +5786,26 @@ private void checkUserPrivilege(Long orgId, Long privilegeId, Long communityId) 
 		tasksLog.setTaskId(cmd.getTaskId());
 		tasksLog.setProcessType(EquipmentTaskProcessType.NEED_MAINTENANCE.getCode());//提交给报修
 		tasksLog.setProcessResult(EquipmentTaskProcessResult.NONE.getCode());
-		equipmentProvider.createEquipmentInspectionTasksLogs(tasksLog);
 
-		//调用物业报修
-		EquipmentInspectionEquipments equipment = verifyEquipment(cmd.getEquipmentId(), null, null);
-		CreateTaskCommand repairCommand = new CreateTaskCommand();
-		repairCommand = ConvertHelper.convert(cmd, CreateTaskCommand.class);
-		repairCommand.setAddress(equipment.getLocation());
-		repairCommand.setAddressType(PmTaskAddressType.ORGANIZATION.getCode());
-		List<OrganizationMember> members = organizationProvider.listOrganizationMembersByUId(UserContext.currentUserId());
-		if (members != null && members.size() > 0) {
-			repairCommand.setRequestorName(members.get(0).getContactName());
-			repairCommand.setRequestorPhone(members.get(0).getContactToken());
-		}
-		pmTaskService.createTask(repairCommand);
-		//设备状态变为维修中
-		equipmentProvider.updateEquipmentStatus(cmd.getEquipmentId(),EquipmentStatus.IN_MAINTENANCE.getCode());
+		dbProvider.execute((TransactionStatus status) -> {
+			equipmentProvider.createEquipmentInspectionTasksLogs(tasksLog);
+			//调用物业报修
+			EquipmentInspectionEquipments equipment = verifyEquipment(cmd.getEquipmentId(), null, null);
+			CreateTaskCommand repairCommand = new CreateTaskCommand();
+			repairCommand = ConvertHelper.convert(cmd, CreateTaskCommand.class);
+			repairCommand.setAddress(equipment.getLocation());
+			repairCommand.setAddressType(PmTaskAddressType.ORGANIZATION.getCode());
+			List<OrganizationMember> members = organizationProvider.listOrganizationMembersByUId(UserContext.currentUserId());
+			if (members != null && members.size() > 0) {
+				repairCommand.setRequestorName(members.get(0).getContactName());
+				repairCommand.setRequestorPhone(members.get(0).getContactToken());
+			}
+			pmTaskService.createTask(repairCommand);
+			//设备状态变为维修中
+			equipmentProvider.updateEquipmentStatus(cmd.getEquipmentId(), EquipmentStatus.IN_MAINTENANCE.getCode());
+			return null;
+		});
+
 	}
 
 
