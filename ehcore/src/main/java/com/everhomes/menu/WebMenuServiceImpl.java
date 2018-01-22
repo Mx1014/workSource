@@ -364,27 +364,46 @@ public class WebMenuServiceImpl implements WebMenuService {
 	/**
 	 * 过滤菜单
 	 * @param menus
-	 * @param filterMap
+	 * @param scopes
      * @return
      */
-	private List<WebMenu> filterMenus(List<WebMenu> menus, Map<Long, WebMenuScope> filterMap){
+	private List<WebMenu> filterMenus(List<WebMenu> menus, List<WebMenuScope> scopes){
 		List<WebMenu> filterMenus = new ArrayList<>();
-		for (WebMenu menu: menus) {
-			WebMenuScope scope = filterMap.get(menu.getId());
-			LOGGER.debug("listEnterpriseWebMenu filterMenus scope: {}", scope);
-			if(null != scope){
-				if(WebMenuScopeApplyPolicy.fromCode(scope.getApplyPolicy()) == WebMenuScopeApplyPolicy.OVERRIDE){
-					//override menu
-					menu.setName(scope.getMenuName());
-					filterMenus.add(menu);
-				}else if(WebMenuScopeApplyPolicy.fromCode(scope.getApplyPolicy()) == WebMenuScopeApplyPolicy.REVERT){
+//		for (WebMenu menu: menus) {
+//			WebMenuScope scope = filterMap.get(menu.getId());
+//			LOGGER.debug("listEnterpriseWebMenu filterMenus scope: {}", scope);
+//			if(null != scope){
+//				if(WebMenuScopeApplyPolicy.fromCode(scope.getApplyPolicy()) == WebMenuScopeApplyPolicy.OVERRIDE){
+//					//override menu
+//					menu.setName(scope.getMenuName());
+//					filterMenus.add(menu);
+//				}else if(WebMenuScopeApplyPolicy.fromCode(scope.getApplyPolicy()) == WebMenuScopeApplyPolicy.REVERT){
+//					filterMenus.add(menu);
+//				}
+//				menu.setAppId(scope.getAppId());
+//				menu.setConfigId(scope.getConfigId());
+//
+//			}
+//		}
+
+		if(scopes == null){
+			return filterMenus;
+		}
+
+		for (WebMenuScope scope: scopes){
+			for (WebMenu menu: menus){
+				if(scope.getMenuId().equals(menu.getId())){
+					WebMenu filterMenu = ConvertHelper.convert(menu, WebMenu.class);
+					if(WebMenuScopeApplyPolicy.fromCode(scope.getApplyPolicy()) == WebMenuScopeApplyPolicy.OVERRIDE) {
+						filterMenu.setName(scope.getMenuName());
+					}
+					filterMenu.setAppId(scope.getAppId());
+					filterMenu.setConfigId(scope.getConfigId());
 					filterMenus.add(menu);
 				}
-				menu.setAppId(scope.getAppId());
-				menu.setConfigId(scope.getConfigId());
-
 			}
 		}
+
 		filterMenus.sort((o1, o2) -> o1.getSortNum() - o2.getSortNum());
 		LOGGER.debug("listEnterpriseWebMenu filterMenus: {}", filterMenus);
 		return filterMenus;
@@ -397,11 +416,11 @@ public class WebMenuServiceImpl implements WebMenuService {
      * @return
      */
 	private List<WebMenu> filterMenus(List<WebMenu> menus, Long organizationId){
-		Map<Long, WebMenuScope> filterMap = webMenuProvider.getWebMenuScopeMapByOwnerId(EntityType.ORGANIZATIONS.getCode(), organizationId);
-		if(filterMap.size() == 0 ){
-			filterMap = webMenuProvider.getWebMenuScopeMapByOwnerId(EntityType.NAMESPACE.getCode(), Long.valueOf(UserContext.getCurrentNamespaceId()));
+		List<WebMenuScope> scopes = webMenuProvider.getWebMenuScopeMapByOwnerId(EntityType.ORGANIZATIONS.getCode(), organizationId);
+		if(scopes.size() == 0 ){
+			scopes = webMenuProvider.getWebMenuScopeMapByOwnerId(EntityType.NAMESPACE.getCode(), Long.valueOf(UserContext.getCurrentNamespaceId()));
 		}
-		return filterMenus(menus, filterMap);
+		return filterMenus(menus, scopes);
 	}
 	
     /**

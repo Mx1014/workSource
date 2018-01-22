@@ -134,8 +134,8 @@ public class WebMenuPrivilegeProviderImpl implements WebMenuPrivilegeProvider {
 
 	@Override
 	//@Caching(evict = {@CacheEvict(value="listWebMenuByType", key="'webMenuByMenuIds'")})
-	public Map<Long, WebMenuScope> getWebMenuScopeMapByOwnerId(String ownerType, Long ownerId) {
-		Map<Long, WebMenuScope> map = new HashMap<>();
+	public List<WebMenuScope> getWebMenuScopeMapByOwnerId(String ownerType, Long ownerId) {
+		//Map<Long, WebMenuScope> map = new HashMap<>();
 		DSLContext context = dbProvider.getDslContext(AccessSpec.readOnly());
 		SelectQuery<EhWebMenuScopesRecord> query = context.selectQuery(Tables.EH_WEB_MENU_SCOPES);
 		Condition cond = Tables.EH_WEB_MENU_SCOPES.OWNER_TYPE.eq(ownerType);
@@ -146,11 +146,11 @@ public class WebMenuPrivilegeProviderImpl implements WebMenuPrivilegeProvider {
 			LOGGER.debug("getWebMenuScopeMapByOwnerId, sql=" + query.getSQL());
 			LOGGER.debug("getWebMenuScopeMapByOwnerId, bindValues=" + query.getBindValues());
 		}
-		query.fetch().map((r) -> {
-			map.put(r.getMenuId(), ConvertHelper.convert(r, WebMenuScope.class));
-			return null;
+		List<WebMenuScope> scopes = query.fetch().map((r) -> {
+			//map.put(r.getMenuId(), ConvertHelper.convert(r, WebMenuScope.class));
+			return ConvertHelper.convert(r, WebMenuScope.class);
 		});
-		return map;
+		return scopes;
 	}
 
 	@Override
