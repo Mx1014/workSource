@@ -16,6 +16,8 @@ public class UserContext {
     private String versionRealm;
     private String scheme;
     private Domain domain;
+    //预览版本标志
+    private Long previewPortalVersionId;
 
     public UserContext() {
     }
@@ -140,5 +142,13 @@ public class UserContext {
 
     public void setDomain(Domain domain) {
         this.domain = domain;
+    }
+
+    public Long getPreviewPortalVersionId() {
+        return previewPortalVersionId;
+    }
+
+    public void setPreviewPortalVersionId(Long previewPortalVersionId) {
+        this.previewPortalVersionId = previewPortalVersionId;
     }
 }

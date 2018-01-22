@@ -6,17 +6,13 @@ import com.everhomes.util.StringHelper;
 /**
  * <ul>
  *     <li>namespaceId: 域空间</li>
- *     <li>versionId: versionId</li>
+ *     <li>status:  {@link com.everhomes.rest.portal.PortalVersionDTO}</li>
  * </ul>
  */
-public class ListPortalNavigationBarsCommand {
+public class ListPortalVersionCommand {
 
 	private Integer namespaceId;
-	private Long versionId;
-
-	public ListPortalNavigationBarsCommand() {
-
-	}
+	private Byte status;
 
 	public Integer getNamespaceId() {
 		return namespaceId;
@@ -26,17 +22,16 @@ public class ListPortalNavigationBarsCommand {
 		this.namespaceId = namespaceId;
 	}
 
-	public Long getVersionId() {
-		return versionId;
+	public Byte getStatus() {
+		return status;
 	}
 
-	public void setVersionId(Long versionId) {
-		this.versionId = versionId;
+	public void setStatus(Byte status) {
+		this.status = status;
 	}
 
 	@Override
 	public String toString() {
 		return StringHelper.toJsonString(this);
 	}
-
 }

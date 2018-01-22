@@ -7,7 +7,9 @@ public interface PortalLaunchPadMappingProvider {
 
 	void createPortalLaunchPadMapping(PortalLaunchPadMapping portalLaunchPadMapping);
 
-	void updatePortalLaunchPadMapping(PortalLaunchPadMapping portalLaunchPadMapping);
+    void createPortalLaunchPadMappings(List<PortalLaunchPadMapping> portalLaunchPadMappings);
+
+    void updatePortalLaunchPadMapping(PortalLaunchPadMapping portalLaunchPadMapping);
 
 	PortalLaunchPadMapping findPortalLaunchPadMappingById(Long id);
 

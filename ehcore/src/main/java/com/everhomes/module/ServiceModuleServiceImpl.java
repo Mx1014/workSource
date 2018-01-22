@@ -18,6 +18,7 @@ import com.everhomes.organization.OrganizationProvider;
 import com.everhomes.organization.OrganizationService;
 import com.everhomes.organization.pm.pay.GsonUtil;
 import com.everhomes.portal.PortalPublishHandler;
+import com.everhomes.portal.ServiceModuleApp;
 import com.everhomes.portal.ServiceModuleAppProvider;
 import com.everhomes.rest.acl.*;
 import com.everhomes.rest.address.CommunityDTO;
@@ -1157,6 +1158,13 @@ public class ServiceModuleServiceImpl implements ServiceModuleService {
         }
 
         return AllFlag.NOT_ALL.getCode();
+    }
+
+    @Override
+    public ServiceModuleAppDTO findServiceModuleAppById(Long id){
+        ServiceModuleApp serviceModuleApp = serviceModuleAppProvider.findServiceModuleAppById(id);
+        return ConvertHelper.convert(serviceModuleApp, ServiceModuleAppDTO.class);
+
     }
 
 }
