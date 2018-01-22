@@ -4,6 +4,7 @@ import com.everhomes.app.App;
 import com.everhomes.app.AppProvider;
 import com.everhomes.configuration.ConfigurationProvider;
 import com.everhomes.constants.ErrorCodes;
+import com.everhomes.controller.WebRequestInterceptor;
 import com.everhomes.locale.LocaleStringService;
 import com.everhomes.rest.oauth2.AuthorizationCommand;
 import com.everhomes.rest.oauth2.CommonRestResponse;
@@ -31,16 +32,13 @@ import org.springframework.ui.Model;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RequestParam;
 
-import javax.servlet.http.Cookie;
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
 import javax.servlet.http.HttpSession;
 import java.net.URI;
 import java.net.URISyntaxException;
 import java.net.URLEncoder;
-import java.util.ArrayList;
 import java.util.HashMap;
-import java.util.List;
 import java.util.Map;
 
 @RequireOAuth2Authentication(OAuth2AuthenticationType.NO_AUTHENTICATION)
@@ -156,10 +154,19 @@ public class AuthorizationEndpointController extends OAuth2ControllerBase {
 		LOGGER.info("Confirm OAuth2 authorization: {}", cmd);
 
 		try {
-			URI uri = oAuth2Service.confirmAuthorization(app., identifier, password, cmd);
-			if (uri != null) {
+            Integer namespaceId = /*app.getNamespaceId()*/ 0;
+            ConfirmAuthorizationVO confirmAuthorization = oAuth2Service.confirmAuthorization(namespaceId, identifier, password, cmd);
+            if (confirmAuthorization != null) {
 				HttpHeaders httpHeaders = new HttpHeaders();
-				httpHeaders.setLocation(uri);
+				httpHeaders.setLocation(confirmAuthorization.getUri());
+
+                UserLogin login = confirmAuthorization.getUserLogin();
+                LoginToken token = new LoginToken(login.getUserId(), login.getLoginId(), login.getLoginInstanceNumber(), login.getImpersonationId());
+                String tokenString = WebTokenGenerator.getInstance().toWebToken(token);
+
+                WebRequestInterceptor.setCookieInResponse("token", tokenString, httpRequest, httpResponse);
+                WebRequestInterceptor.setCookieInResponse("namespace_id", String.valueOf(namespaceId), httpRequest, httpResponse);
+
 				return new ResponseEntity<>(httpHeaders, HttpStatus.SEE_OTHER);
 			} else {
                 if (LOGGER.isDebugEnabled()) {
@@ -226,7 +233,7 @@ public class AuthorizationEndpointController extends OAuth2ControllerBase {
 			UserLogin login = this.userService.innerLogin(userInfo.getNamespaceId(), userInfo.getId(), deviceIdentifier, pusherIdentify);
 			LoginToken logintoken = new LoginToken(login.getUserId(), login.getLoginId(), login.getLoginInstanceNumber(), null);
 			String tokenString = WebTokenGenerator.getInstance().toWebToken(logintoken);
-			setCookieInResponse("token", tokenString, httpRequest, httpResponse);
+            WebRequestInterceptor.setCookieInResponse("token", tokenString, httpRequest, httpResponse);
 		}
 		HttpHeaders httpHeaders = new HttpHeaders();
 		httpHeaders.setLocation(new URI(sourceUrl));
@@ -303,7 +310,7 @@ public class AuthorizationEndpointController extends OAuth2ControllerBase {
 		UserLogin login = this.userService.innerLogin(userInfo.getNamespaceId(), userInfo.getId(), deviceIdentifier, pusherIdentify);
 		LoginToken logintoken = new LoginToken(login.getUserId(), login.getLoginId(), login.getLoginInstanceNumber(), null);
 		String tokenString = WebTokenGenerator.getInstance().toWebToken(logintoken);
-		setCookieInResponse("token", tokenString, httpRequest, httpResponse);
+        WebRequestInterceptor.setCookieInResponse("token", tokenString, httpRequest, httpResponse);
 		//返回sourceUrl
 		HttpSession session = httpRequest.getSession();
 		String sourceUrl = (String) session.getAttribute("sourceUrl");
@@ -353,39 +360,5 @@ public class AuthorizationEndpointController extends OAuth2ControllerBase {
 			LOGGER.error("getUserInfo method error.e="+e.getMessage());
 			return null;
 		}
-	}
-
-	private static void setCookieInResponse(String name, String value, HttpServletRequest request,
-			HttpServletResponse response) {
-
-		Cookie cookie = findCookieInRequest(name, request);
-		if(cookie == null)
-			cookie = new Cookie(name, value);
-		else
-			cookie.setValue(value);
-		cookie.setPath("/");
-		if(value == null || value.isEmpty())
-			cookie.setMaxAge(0);
-
-		response.addCookie(cookie);
-	}
-
-	private static Cookie findCookieInRequest(String name, HttpServletRequest request) {
-		List<Cookie> matchedCookies = new ArrayList<>();
-
-		Cookie[] cookies = request.getCookies();
-		if(cookies != null) {
-			for(Cookie cookie : cookies) {
-				if(cookie.getName().equals(name)) {
-					LOGGER.debug("Found matched cookie with name {} at value: {}, path: {}, version: {}", name,
-							cookie.getValue(), cookie.getPath(), cookie.getVersion());
-					matchedCookies.add(cookie);
-				}
-			}
-		}
-
-		if(matchedCookies.size() > 0)
-			return matchedCookies.get(matchedCookies.size() - 1);
-		return null;
 	}
 }

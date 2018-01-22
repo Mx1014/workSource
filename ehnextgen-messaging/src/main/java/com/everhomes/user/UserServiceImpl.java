@@ -105,7 +105,6 @@ import com.everhomes.sms.*;
 import com.everhomes.user.admin.SystemUserPrivilegeMgr;
 import com.everhomes.util.*;
 import org.apache.commons.lang.StringUtils;
-import org.elasticsearch.common.geo.GeoHashUtils;
 import org.jooq.DSLContext;
 import org.jooq.Record;
 import org.slf4j.Logger;
@@ -898,9 +897,8 @@ public class UserServiceImpl implements UserService {
 	}
 
 	@Override
-	public User logonDryrun(Integer namespaceId, String userIdentifierToken, String password) {
-		User user;
-		user = this.userProvider.findUserByAccountName(userIdentifierToken);
+	public UserLogin logonDryrun(Integer namespaceId, String userIdentifierToken, String password) {
+		User user = this.userProvider.findUserByAccountName(userIdentifierToken);
 		if(user == null) {
             if (LOGGER.isDebugEnabled()) {
                 LOGGER.debug("findUserByAccountName user is null");
@@ -914,18 +912,12 @@ public class UserServiceImpl implements UserService {
 			}
 		}
 
-        if (user != null) {
-            if (!EncryptionUtils.validateHashPassword(EncryptionUtils.hashPassword(password), user.getSalt(), user.getPasswordHash())) {
-                if (LOGGER.isDebugEnabled()) {
-                    LOGGER.debug("logonDryrun validateHashPassword failure");
-                }
-                return null;
-            }
-            if (UserStatus.fromCode(user.getStatus()) != UserStatus.ACTIVE) {
-                return null;
-            }
+        if (user != null // 存在用户
+                && UserStatus.fromCode(user.getStatus()) == UserStatus.ACTIVE // 正常状态
+                && EncryptionUtils.validateHashPassword(EncryptionUtils.hashPassword(password), user.getSalt(), user.getPasswordHash()) /*密码正确*/) {
+            return createLogin(user.getNamespaceId(), user, null, null);
         }
-		return user;
+		return null;
 	}
 
 	@Override
@@ -2985,9 +2977,9 @@ public class UserServiceImpl implements UserService {
 		}
 	}
 
-    public static void main(String[] args) {
+    /*public static void main(String[] args) {
         System.out.println(GeoHashUtils.encode(121.643166, 31.223298));
-    }
+    }*/
 
 	@Override
 	public SceneDTO toOrganizationSceneDTO(Integer namespaceId, Long userId, OrganizationDTO organizationDto, SceneType sceneType) {

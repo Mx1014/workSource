@@ -6,6 +6,8 @@ import com.everhomes.configuration.ConfigurationProvider;
 import com.everhomes.rest.oauth2.AuthorizationCommand;
 import com.everhomes.rest.oauth2.OAuth2ServiceErrorCode;
 import com.everhomes.user.User;
+import com.everhomes.user.UserLogin;
+import com.everhomes.user.UserProvider;
 import com.everhomes.user.UserService;
 import com.everhomes.util.DateHelper;
 import com.everhomes.util.RuntimeErrorException;
@@ -34,15 +36,20 @@ public class OAuth2ServiceImpl implements OAuth2Service {
     private AppProvider appProvider;
 
     @Autowired
+    private UserProvider userProvider;
+
+    @Autowired
     private ConfigurationProvider configurationProvider;
 
     @Override
-    public URI confirmAuthorization(Integer namespaceId, String identifier, String password, AuthorizationCommand cmd) {
-        User user = userService.logonDryrun(namespaceId, identifier, password);
-        if(user == null)
+    public ConfirmAuthorizationVO confirmAuthorization(Integer namespaceId, String identifier, String password, AuthorizationCommand cmd) {
+        UserLogin login = userService.logonDryrun(namespaceId, identifier, password);
+        if (login == null) {
             return null;
-
-        return confirmAuthorization(user, cmd);
+        }
+        User user = userProvider.findUserById(login.getUserId());
+        URI uri = confirmAuthorization(user, cmd);
+        return new ConfirmAuthorizationVO(uri, login);
     }
    
     @Override

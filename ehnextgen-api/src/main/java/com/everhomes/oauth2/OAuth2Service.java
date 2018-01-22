@@ -1,9 +1,9 @@
 package com.everhomes.oauth2;
 
-import java.net.URI;
-
 import com.everhomes.rest.oauth2.AuthorizationCommand;
 import com.everhomes.user.User;
+
+import java.net.URI;
 
 public interface OAuth2Service {
 
@@ -19,7 +19,7 @@ public interface OAuth2Service {
     //
     // Service methods
     //
-    URI confirmAuthorization(Integer namespaceId, String identifier, String password, AuthorizationCommand cmd);
+    ConfirmAuthorizationVO confirmAuthorization(Integer namespaceId, String identifier, String password, AuthorizationCommand cmd);
     URI confirmAuthorization(User user, AuthorizationCommand cmd);
     AccessToken grantAccessTokenFromAuthorizationCode(String code, String redirectUri, String clientId);
 }
