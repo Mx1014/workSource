@@ -1,9 +1,9 @@
 -- domain 增加name, icon
 ALTER TABLE `eh_domains` ADD COLUMN `favicon_uri`  varchar(255) NULL;
 ALTER TABLE `eh_domains` ADD COLUMN `name`  varchar(255) NULL AFTER `namespace_id`;
-ALTER TABLE `eh_domains` ADD COLUMN `login_bg_uri`  varchar(255) NULL,
-ALTER TABLE `eh_domains` ADD COLUMN `login_logo_uri`  varchar(255) NULL,
-ALTER TABLE `eh_domains` ADD COLUMN `menu_logo_uri`  varchar(255) NULL,
+ALTER TABLE `eh_domains` ADD COLUMN `login_bg_uri`  varchar(255) NULL;
+ALTER TABLE `eh_domains` ADD COLUMN `login_logo_uri`  varchar(255) NULL;
+ALTER TABLE `eh_domains` ADD COLUMN `menu_logo_uri`  varchar(255) NULL;
 ALTER TABLE `eh_domains` ADD COLUMN `menu_logo_collapsed_uri`  varchar(255) NULL;
 
 ALTER TABLE `eh_web_menu_scopes` ADD COLUMN `app_id`  bigint(20) NULL COMMENT ''eh_service_module_app id'';
