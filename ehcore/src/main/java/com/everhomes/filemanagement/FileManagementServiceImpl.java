@@ -265,7 +265,7 @@ public class FileManagementServiceImpl implements  FileManagementService{
                 //  3.save the data which is returning back
                 scopes.add(dto);
             });
-            //  4.delete supernumerary data
+            //  4.delete redundant data
             fileManagementProvider.deleteFileCatalogScopeNotInUserIds(namespaceId, cmd.getCatalogId(), sourceIds);
             return null;
         });
