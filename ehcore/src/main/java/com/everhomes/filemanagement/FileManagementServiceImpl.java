@@ -436,6 +436,7 @@ public class FileManagementServiceImpl implements  FileManagementService{
         if (content.getContentType().equals(FileContentType.FOLDER.getCode())){
             dto = ConvertHelper.convert(content, FileContentDTO.class);
             dto.setName(content.getContentName());
+            dto.setIconUrl(fileIcons.get(FileContentType.FOLDER.getCode()));
         }
         else {
             dto.setName(content.getContentName() + "." + content.getContentSuffix());
