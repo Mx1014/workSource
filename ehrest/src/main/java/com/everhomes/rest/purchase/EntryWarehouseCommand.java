@@ -11,7 +11,7 @@ import com.everhomes.util.StringHelper;
  * <li>purchaseRequestId:采购单id</li>
  *</ul>
  */
-public class MakeWarehouseEntryCommand {
+public class EntryWarehouseCommand {
     private Long purchaseRequestId;
 
     @Override

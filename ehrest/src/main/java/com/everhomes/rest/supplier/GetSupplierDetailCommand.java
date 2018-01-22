@@ -12,7 +12,7 @@ import com.everhomes.util.StringHelper;
  * <li>supplierId:供应商id</li>
  *</ul>
  */
-public class FindSupplierDetailCommand {
+public class GetSupplierDetailCommand {
     private String supplierId;
 
     @Override

@@ -21,7 +21,7 @@ import java.util.List;
  * <li>dtos:采购物品列表，参考{@link com.everhomes.rest.purchase.PurchaseMaterialDetailDTO}</li>
  *</ul>
  */
-public class SelectPurchaseOrderDTO {
+public class GetPurchaseOrderDTO {
     private Long purchaseRequestId;
     private Long supplierId;
     private String supplierName;

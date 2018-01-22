@@ -14,7 +14,7 @@ import java.util.List;
  * <li>dtos:供货记录数据列表，参考{@link com.everhomes.rest.warehouse.WarehouseLogDTO}</li>
  *</ul>
  */
-public class FindMaterialLogsBySupplierResponse {
+public class ListMaterialLogsBySupplierResponse {
     private Long nextPageAnchor;
     private List<WarehouseLogDTO> dtos;
 

@@ -5,10 +5,8 @@ import com.everhomes.controller.ControllerBase;
 import com.everhomes.discover.RestReturn;
 import com.everhomes.rest.RestResponse;
 import com.everhomes.rest.supplier.*;
-import com.everhomes.util.RequireAuthentication;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.web.bind.annotation.RequestMapping;
-import org.springframework.web.bind.annotation.RequestMethod;
 import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.RestController;
 import org.springframework.web.multipart.MultipartFile;
@@ -29,7 +27,7 @@ public class SupplierController extends ControllerBase {
      */
     @RequestMapping("createOrUpdateOneSupplier")
     @RestReturn(value = String.class)
-    private RestResponse createOrUpdateOneSupplier(CreateOrUpdateOneSupplierCommand cmd, @RequestParam(value = "attachment") MultipartFile file){
+    private RestResponse createOrUpdateOneSupplier(CreateOrUpdateOneSupplierCommand cmd){
         RestResponse restResponse = new RestResponse();
         restResponse.setErrorCode(200);
         restResponse.setErrorDescription("OK");
@@ -37,12 +35,12 @@ public class SupplierController extends ControllerBase {
     }
 
     /**
-     * <b>URL: /supplier/deleteOneSupplier</b>
+     * <b>URL: /supplier/deleteSupplier</b>
      * <p>删除一个供应商</p>
      */
-    @RequestMapping("deleteOneSupplier")
+    @RequestMapping("deleteSupplier")
     @RestReturn(value = String.class)
-    private RestResponse deleteOneSupplier(DeleteOneSupplierCommand cmd){
+    private RestResponse deleteSupplier(DeleteOneSupplierCommand cmd){
         RestResponse restResponse = new RestResponse();
         restResponse.setErrorCode(200);
         restResponse.setErrorDescription("OK");
@@ -63,12 +61,12 @@ public class SupplierController extends ControllerBase {
     }
 
     /**
-     * <b>URL: /supplier/findSupplierDetail</b>
+     * <b>URL: /supplier/getSupplierDetail</b>
      * <p>获得一个供应商的信息</p>
      */
-    @RequestMapping("findSupplierDetail")
-    @RestReturn(value = FindSupplierDetailDTO.class)
-    private RestResponse findSupplierDetail(FindSupplierDetailCommand cmd){
+    @RequestMapping("getSupplierDetail")
+    @RestReturn(value = GetSupplierDetailDTO.class)
+    private RestResponse getSupplierDetail(GetSupplierDetailCommand cmd){
         RestResponse restResponse = new RestResponse();
         restResponse.setErrorCode(200);
         restResponse.setErrorDescription("OK");

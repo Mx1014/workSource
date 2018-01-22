@@ -9,7 +9,7 @@ package com.everhomes.rest.purchase;
  * <li>purchaseRequestId:采购申请单的id</li>
  *</ul>
  */
-public class SelectPurchaseOrderCommand {
+public class GetPurchaseOrderCommand {
     private Long purchaseRequestId;
 
     public Long getPurchaseRequestId() {

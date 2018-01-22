@@ -14,7 +14,7 @@ import java.util.List;
  * <li>dtos:出入库列表数据，参考{@link com.everhomes.rest.warehouse.WarehouseStockOrderDTO}</li>
  *</ul>
  */
-public class ListWarehouseStockOrderResponse {
+public class ListWarehouseStockOrdersResponse {
     private Long nextPageAnchor;
     private List<WarehouseStockOrderDTO> dtos;
 

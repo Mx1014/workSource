@@ -16,18 +16,6 @@ import org.springframework.web.bind.annotation.RestController;
 @RequestMapping("/purchase")
 public class PurchaseController extends ControllerBase{
 
-    /**
-     * <b>URL: /purchase/</b>
-     * <p></p>
-     */
-    @RequestMapping(value = "")
-    @RestReturn(value = String.class)
-    private RestResponse xxxxx(){
-        RestResponse restResponse = new RestResponse();
-        restResponse.setErrorCode(200);
-        restResponse.setErrorDescription("OK");
-        return restResponse;
-    }
 
     /**
      * <b>URL: /purchase/searchPurchases</b>
@@ -43,12 +31,12 @@ public class PurchaseController extends ControllerBase{
     }
 
     /**
-     * <b>URL: /purchase/makeWarehouseEntry</b>
+     * <b>URL: /purchase/entryWarehouse</b>
      * <p>采购物品入库</p>
      */
-    @RequestMapping("makeWarehouseEntry")
+    @RequestMapping("entryWarehouse")
     @RestReturn(value = String.class)
-    private RestResponse makeWarehouseEntry(MakeWarehouseEntryCommand cmd){
+    private RestResponse entryWarehouse(EntryWarehouseCommand cmd){
         RestResponse restResponse = new RestResponse();
         restResponse.setErrorCode(200);
         restResponse.setErrorDescription("OK");
@@ -69,12 +57,12 @@ public class PurchaseController extends ControllerBase{
     }
 
     /**
-     * <b>URL: /purchase/selectPurchaseOrder</b>
+     * <b>URL: /purchase/getPurchaseOrder</b>
      * <p>获得一个采购单的详情</p>
      */
-    @RequestMapping("selectPurchaseOrder")
-    @RestReturn(value = SelectPurchaseOrderDTO.class)
-    private RestResponse selectPurchaseOrder(SelectPurchaseOrderCommand cmd){
+    @RequestMapping("getPurchaseOrder")
+    @RestReturn(value = GetPurchaseOrderDTO.class)
+    private RestResponse getPurchaseOrder(GetPurchaseOrderCommand cmd){
         RestResponse restResponse = new RestResponse();
         restResponse.setErrorCode(200);
         restResponse.setErrorDescription("OK");

@@ -15,7 +15,7 @@ package com.everhomes.rest.Requisition;
  * <li>amount: 金额</li>
  * </ul>
  */
-public class ShowRequisitionsResponse {
+public class GetRequisitionDetailResponse {
     private String theme;
     private String applicantName;
     private String applicantDepartment;

@@ -28,7 +28,7 @@ import com.everhomes.util.StringHelper;
  * <li>attachmentUrl:附件下载链接</li>
  *</ul>
  */
-public class FindSupplierDetailDTO {
+public class GetSupplierDetailDTO {
     private Long id;
     private String name;
     private String bizLicense;

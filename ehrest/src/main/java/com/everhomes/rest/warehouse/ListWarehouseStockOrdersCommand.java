@@ -15,7 +15,7 @@ package com.everhomes.rest.warehouse;
  * <li>pageSize:页大小</li>
  *</ul>
  */
-public class ListWarehouseStockOrderCommand {
+public class ListWarehouseStockOrdersCommand {
     private String ownerType;
     private Long ownerId;
     private Integer namespaceId;

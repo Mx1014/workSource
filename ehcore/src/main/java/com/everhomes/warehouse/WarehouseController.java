@@ -655,12 +655,12 @@ public class WarehouseController extends ControllerBase {
     }
 
     /**
-     * <b>URL: /warehouse/findMaterialLogsBySupplier</b>
+     * <b>URL: /warehouse/listMaterialLogsBySupplier</b>
      * <p>查询供应商的供货记录</p>
      */
-    @RequestMapping("findMaterialLogsBySupplier")
-    @RestReturn(value=FindMaterialLogsBySupplierResponse.class)
-    public RestResponse findMaterialLogsBySupplier(FindMaterialLogsBySupplierCommand cmd) {
+    @RequestMapping("listMaterialLogsBySupplier")
+    @RestReturn(value=ListMaterialLogsBySupplierResponse.class)
+    public RestResponse listMaterialLogsBySupplier(ListMaterialLogsBySupplierCommand cmd) {
         RestResponse res = new RestResponse();
         res.setErrorCode(ErrorCodes.SUCCESS);
         res.setErrorDescription("OK");
@@ -681,12 +681,12 @@ public class WarehouseController extends ControllerBase {
     }
 
     /**
-     * <b>URL: /warehouse/listWarehouseStockOrder</b>
+     * <b>URL: /warehouse/listWarehouseStockOrders</b>
      * <p>获得出入库单的列表</p>
      */
-    @RequestMapping("listWarehouseStockOrder")
-    @RestReturn(value=ListWarehouseStockOrderResponse.class)
-    public RestResponse listWarehouseStockOrder(ListWarehouseStockOrderCommand cmd) {
+    @RequestMapping("listWarehouseStockOrders")
+    @RestReturn(value=ListWarehouseStockOrdersResponse.class)
+    public RestResponse listWarehouseStockOrders(ListWarehouseStockOrdersCommand cmd) {
         RestResponse res = new RestResponse();
         res.setErrorCode(ErrorCodes.SUCCESS);
         res.setErrorDescription("OK");

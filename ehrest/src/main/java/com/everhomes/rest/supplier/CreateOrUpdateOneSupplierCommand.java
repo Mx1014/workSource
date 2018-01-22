@@ -26,7 +26,7 @@ import java.sql.Timestamp;
  * <li>categoryOfEvaluation:评定类别</li>
  * <li>evaluationLeval:供应商等级</li>
  * <li>mainBizScope:主要经营范围</li>
- * <li>attachment:附件</li>
+ * <li>attachmentUrl:附件地址</li>
  * <li>namespaceId:域空间id</li>
  * <li>ownerType:所属者类型，园区：EhCommunities</li>
  * <li>ownerId:所属者id</li>
@@ -52,10 +52,19 @@ public class CreateOrUpdateOneSupplierCommand {
     private Integer namespaceId;
     private String ownerType;
     private Long ownerId;
+    private String attachmentUrl;
 
     @Override
     public String toString() {
         return StringHelper.toJsonString(this);
+    }
+
+    public String getAttachmentUrl() {
+        return attachmentUrl;
+    }
+
+    public void setAttachmentUrl(String attachmentUrl) {
+        this.attachmentUrl = attachmentUrl;
     }
 
     public Long getId() {

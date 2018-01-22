@@ -8,7 +8,6 @@ import com.everhomes.rest.RestResponse;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RestController;
-import org.springframework.web.multipart.MultipartFile;
 
 /**
  * Created by Wentian Wang on 2018/1/20.
@@ -46,12 +45,12 @@ public class RequisitionController extends ControllerBase {
     }
 
     /**
-     * <b>URL: /requisition/showRequisitions</b>
+     * <b>URL: /requisition/getRequisitionDetail</b>
      * <p>查看请示单</p>
      */
-    @RequestMapping("showRequisitions")
-    @RestReturn(value = ShowRequisitionsResponse.class)
-    public RestResponse showRequisitions(ShowRequisitionsCommand cmd){
+    @RequestMapping("getRequisitionDetail")
+    @RestReturn(value = GetRequisitionDetailResponse.class)
+    public RestResponse getRequisitionDetail(GetRequisitionDetailCommand cmd){
         RestResponse restResponse = new RestResponse();
         restResponse.setErrorCode(200);
         restResponse.setErrorDescription("OK");

@@ -9,7 +9,7 @@ package com.everhomes.rest.Requisition;
  * <li>requisitionId:请示单id</li>
  *</ul>
  */
-public class ShowRequisitionsCommand {
+public class GetRequisitionDetailCommand {
     private Long requisitionId;
 
     public Long getRequisitionId() {
