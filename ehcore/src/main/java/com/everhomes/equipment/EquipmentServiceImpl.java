@@ -3538,6 +3538,9 @@ private void checkUserPrivilege(Long orgId, Long privilegeId, Long communityId) 
 					targetTypes, targetIds, null, null, offset, userId);
 			allTasks = equipmentProvider.listEquipmentInspectionTasksUseCache(cmd.getTaskStatus(), cmd.getInspectionCategoryId(),
 					targetTypes, targetIds, null, null, offset, pageSize + 1, cacheKey, AdminFlag.YES.getCode(),lastSyncTime);
+
+			equipmentProvider.populateTaskStatusCount(cmd.getInspectionCategoryId(),
+					targetTypes, targetIds, null, null, AdminFlag.NO.getCode(), response);
 		}
 		if(!isAdmin) {
 			List<Long> executePlanIds = new ArrayList<>();
@@ -3562,6 +3565,9 @@ private void checkUserPrivilege(Long orgId, Long privilegeId, Long communityId) 
 			LOGGER.info("listEquipmentInspectionTasks  cacheKey = {}" + cacheKey);
 			allTasks = equipmentProvider.listEquipmentInspectionTasksUseCache(cmd.getTaskStatus(), cmd.getInspectionCategoryId(),
 					targetTypes, targetIds, executePlanIds, reviewPlanIds, offset, pageSize + 1, cacheKey, AdminFlag.NO.getCode(),lastSyncTime);
+
+			equipmentProvider.populateTaskStatusCount(cmd.getInspectionCategoryId(),
+					targetTypes, targetIds, executePlanIds, reviewPlanIds, AdminFlag.NO.getCode(), response);
 		}
 
 		if (allTasks.size() > pageSize) {
