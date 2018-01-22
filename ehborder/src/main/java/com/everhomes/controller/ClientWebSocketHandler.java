@@ -57,7 +57,7 @@ public class ClientWebSocketHandler implements WebSocketHandler {
     private int borderId;
     
     @Value("${core.service.uri}")
-    private String coreServiceUri;
+    private String coreServiceUri
     
     @Value("${heartbeat.interval}")
     private long heartbeatInterval;
