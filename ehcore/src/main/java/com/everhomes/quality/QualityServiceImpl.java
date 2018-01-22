@@ -294,8 +294,7 @@ public class QualityServiceImpl implements QualityService {
 		} else {
 			standard.setRepeatSettingId(repeat.getId());
 		}
-
-		if(cmd.getTargetId() != null && cmd.getTargetType() != null) {
+//		if(cmd.getTargetId() != null && cmd.getTargetType() != null) {
 			standard.setTargetId(cmd.getTargetId());
 			standard.setTargetType(cmd.getTargetType());
 
@@ -311,30 +310,6 @@ public class QualityServiceImpl implements QualityService {
 			QualityStandardsDTO dto = ConvertHelper.convert(standard, QualityStandardsDTO.class);
 			convertSpecificationToDTO(standard, dto);
 			return dto;
-		} else {
-			//List<CommunityDTO> communities = organizationService.listAllChildrenOrganizationCoummunities(cmd.getOwnerId());
-			QualityStandardsDTO dto = new QualityStandardsDTO();
-			/*if(communities != null && communities.size() > 0) {
-				for(CommunityDTO community : communities) {
-					standard.setTargetId(community.getId());
-					standard.setTargetType(OwnerType.COMMUNITY.getCode());
-
-					qualityProvider.createQualityInspectionStandards(standard);
-					createQualityInspectionStandardLogs(standard, QualityInspectionLogProcessType.INSERT.getCode(), user.getId(),cmd.getNamespaceId());
-
-					List<StandardGroupDTO> groupList = cmd.getGroup();
-					processStandardGroups(groupList, standard);
-					processRepeatSetting(standard);
-					processStandardSpecification(standard, cmd.getSpecificationIds(),cmd.getNamespaceId());
-
-					dto = ConvertHelper.convert(standard, QualityStandardsDTO.class);
-					convertSpecificationToDTO(standard, dto);
-
-				}
-			}*/
-			return dto;
-		}
-
 	}
 
 	private void createQualityInspectionStandardLogs(QualityInspectionStandards standard, Byte processType,
@@ -374,39 +349,15 @@ public class QualityServiceImpl implements QualityService {
 		standard.setStandardNumber(cmd.getStandardNumber());
 		standard.setDescription(cmd.getDescription());
 		standard.setOperatorUid(user.getId());
-		/*if (cmd.getTargetId() != null && standard.getTargetId() == 0L) {
-			//在项目中修改公共标准的情况  创建新的副本 加上refer_id
-			standard.setReferId(cmd.getId());
-			qualityProvider.createQualityInspectionStandards(standard);
-		}else {*/
-			qualityProvider.updateQualityInspectionStandards(standard);
-			/*if (cmd.getCommunities() != null && cmd.getCommunities().size() > 0 && cmd.getTargetId() == null) {
-				//在全部中修改 公共标准
-				qualityProvider.deleteQualityModelCommunityMapByModelId(standard.getId(), QualityModelType.STANDARD.getCode());
-				for (Long communityId : cmd.getCommunities()) {
-					//standard.setTargetId(communityId);
-					//standard.setTargetType(OwnerType.COMMUNITY.getCode());
-					//qualityProvider.createQualityInspectionStandards(standard);
-					//上一版是在全部中创建的标准  全部在所有项目中创建一遍  现在改成关系表的方式
-					QualityInspectionModelCommunityMap map = new QualityInspectionModelCommunityMap();
-					map.setModelType(QualityModelType.STANDARD.getCode());
-					map.setTargetId(communityId);
-					map.setTargetType(cmd.getTargetType());
-					map.setModelId(standard.getId());
-					//创建标准项目关联表
-					qualityProvider.createQualityModelCommunityMap(map);
-				}
-
-			}
-		}*/
+		qualityProvider.updateQualityInspectionStandards(standard);
 
 		createQualityInspectionStandardLogs(standard, QualityInspectionLogProcessType.UPDATE.getCode(),
-				user.getId(),cmd.getNamespaceId());
+				user.getId(), cmd.getNamespaceId());
 
 		List<StandardGroupDTO> groupList = cmd.getGroup();
 		processStandardGroups(groupList, standard);
 		processRepeatSetting(standard);
-		processStandardSpecification(standard, cmd.getSpecificationIds(),cmd.getNamespaceId());
+		processStandardSpecification(standard, cmd.getSpecificationIds(), cmd.getNamespaceId());
 		QualityStandardsDTO dto = ConvertHelper.convert(standard, QualityStandardsDTO.class);
 		convertSpecificationToDTO(standard, dto);
 		return dto;
@@ -520,21 +471,11 @@ public class QualityServiceImpl implements QualityService {
 		standard.setOperatorUid(user.getId());
 		standard.setDeleterUid(user.getId());
 		standard.setDeleteTime(new Timestamp(DateHelper.currentGMTTime().getTime()));
-		/*if (standard.getTargetId() == 0L && cmd.getTargetId() != null) {
-			//这里是在项目中删除公共标准的情况 删除关联表即可
-			qualityProvider.deleteQualityModelCommunityMapByCommunityIdAndModelId(standard.getId(), cmd.getTargetId(),
-					QualityModelType.STANDARD.getCode());
 
-		}else {
-			//其他情况按照正常删除方法*/
-			qualityProvider.updateQualityInspectionStandards(standard);
-			/*if(cmd.getTargetId() == null){
-				qualityProvider.deleteQualityModelCommunityMapByModelId(standard.getId(), QualityModelType.STANDARD.getCode());
-			}
-		}*/
+		qualityProvider.updateQualityInspectionStandards(standard);
 
 		createQualityInspectionStandardLogs(standard, QualityInspectionLogProcessType.DELETE.getCode(),
-				user.getId(),cmd.getNamespaceId());
+				user.getId(), cmd.getNamespaceId());
 
 	}
 
@@ -545,46 +486,24 @@ public class QualityServiceImpl implements QualityService {
 		Long ownerId = cmd.getOwnerId();
 		String ownerType = cmd.getOwnerType();
 		int pageSize = PaginationConfigHelper.getPageSize(configurationProvider, cmd.getPageSize());
-        CrossShardListingLocator locator = new CrossShardListingLocator();
-        locator.setAnchor(cmd.getPageAnchor());
+		CrossShardListingLocator locator = new CrossShardListingLocator();
+		locator.setAnchor(cmd.getPageAnchor());
 
 		List<QualityInspectionStandards> standards = new ArrayList<>();
 		if (cmd.getTargetId() != null && cmd.getTargetId() != 0L) {
-//			//首先查出标准和项目之间关联表
-//			List<QualityInspectionModelCommunityMap> modleCommunityMaps = qualityProvider.
-//					listQualityModelCommunityMapByTargetId(cmd.getTargetId(),QualityModelType.STANDARD.getCode());
-//			List<Long> containIds = new ArrayList<>();
-//			if (modleCommunityMaps != null && modleCommunityMaps.size() > 0)
-//				modleCommunityMaps.forEach(m -> containIds.add(m.getModelId()));
-
 			standards = qualityProvider.listQualityInspectionStandards(locator, pageSize + 1,
 					ownerId, ownerType, cmd.getTargetType(), cmd.getTargetId(), cmd.getReviewResult());
-//			standards.forEach((s) -> {
-//				if (s.getReferId() != null && s.getReferId() != 0) {
-//					containIds.remove(s.getReferId());
-//				}
-//			});
-//			for (Long standardId : containIds) {
-//				//将referid的过滤 剩下的加到结果集中
-//				standards.add(qualityProvider.findStandardById(standardId));
-//			}
 		} else {
-			//如果在全部中查看标准则显示全部
 			standards = qualityProvider.listQualityInspectionStandards(locator, pageSize + 1,
 					ownerId, ownerType, null, null, cmd.getReviewResult());
 		}
 
-
 		this.qualityProvider.populateStandardsGroups(standards);
 		this.qualityProvider.populateStandardsSpecifications(standards);
-//		for(QualityInspectionStandards standard : standards) {
-//			processRepeatSetting(standard);
-//		}
-
-        Long nextPageAnchor = null;
-        if(standards.size() > pageSize) {
-        	standards.remove(standards.size() - 1);
-            nextPageAnchor = standards.get(standards.size() - 1).getId();
+		Long nextPageAnchor = null;
+		if (standards.size() > pageSize) {
+			standards.remove(standards.size() - 1);
+			nextPageAnchor = standards.get(standards.size() - 1).getId();
         }
 
 
@@ -4704,5 +4623,27 @@ public class QualityServiceImpl implements QualityService {
 			cmd.getSpecifications().forEach(this::createQualitySpecification);
 		}
 		return null;
+	}
+
+	@Override
+	public QualityStandardsDTO getQualityStandards(DeleteQualityStandardCommand cmd) {
+		QualityInspectionStandards standard = qualityProvider.findStandardById(cmd.getStandardId());
+		if(standard == null || standard.getStatus() == null) {
+			LOGGER.error("the standard which id="+cmd.getStandardId()+" don't exist!");
+			throw RuntimeErrorException
+					.errorWith(
+							QualityServiceErrorCode.SCOPE,
+							QualityServiceErrorCode.ERROR_STANDARD_NOT_EXIST,
+							localeStringService.getLocalizedString(
+									String.valueOf(QualityServiceErrorCode.SCOPE),
+									String.valueOf(QualityServiceErrorCode.ERROR_STANDARD_NOT_EXIST),
+									UserContext.current().getUser().getLocale(),
+									"the standard don't exist!"));
+		}
+		List<QualityInspectionStandards> standards = new ArrayList<>();
+		standards.add(standard);
+		this.qualityProvider.populateStandardsGroups(standards);
+		this.qualityProvider.populateStandardsSpecifications(standards);
+		return  converStandardToDto(standard);
 	}
 }

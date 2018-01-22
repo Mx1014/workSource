@@ -2,6 +2,7 @@ package com.everhomes.rest.equipment;
 
 import com.everhomes.discover.ItemType;
 import com.everhomes.rest.pmtask.AttachmentDescriptor;
+import com.everhomes.util.StringHelper;
 
 import java.util.List;
 
@@ -12,9 +13,9 @@ import java.util.List;
  * <li>ownerType:ownerType</li>
  * <li>ownerId:ownerId</li>
  * <li>categoryId:子类型id</li>
+ * <li>taskCategoryId:任务类型</li>
  * <li>address:地址</li>
  * <li>content:内容</li>
- * <li>organizationId:organizationId</li>
  * <li>namespaceId:namespaceId</li>
  * <li>attachments:附件{@link com.everhomes.rest.pmtask.AttachmentDescriptor}</li>
  * </ul>
@@ -33,6 +34,7 @@ public class CreateEquipmentRepairCommand {
     private String content;
     private Long organizationId;
     private Integer namespaceId;
+    private Long taskCategoryId;
     @ItemType(AttachmentDescriptor.class)
     private List<AttachmentDescriptor> attachments;
 
@@ -114,5 +116,18 @@ public class CreateEquipmentRepairCommand {
 
     public void setAttachments(List<AttachmentDescriptor> attachments) {
         this.attachments = attachments;
+    }
+
+    public Long getTaskCategoryId() {
+        return taskCategoryId;
+    }
+
+    public void setTaskCategoryId(Long taskCategoryId) {
+        this.taskCategoryId = taskCategoryId;
+    }
+
+    @Override
+    public String toString() {
+        return StringHelper.toJsonString(this);
     }
 }

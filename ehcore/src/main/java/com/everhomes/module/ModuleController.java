@@ -7,6 +7,7 @@ import javax.validation.Valid;
 import com.everhomes.bootstrap.PlatformContext;
 import com.everhomes.rest.acl.*;
 import com.everhomes.rest.module.*;
+import com.everhomes.rest.portal.ServiceModuleAppDTO;
 import com.everhomes.rest.portal.TreeServiceModuleAppsResponse;
 import com.everhomes.user.admin.SystemUserPrivilegeMgr;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -274,4 +275,20 @@ public class ModuleController extends ControllerBase {
     public RestResponse listUserServiceModulefunctions(@Valid ListServiceModulefunctionsCommand cmd) {
         return new RestResponse(serviceModuleService.listServiceModulefunctions(cmd));
     }
+
+    /**
+     * <b>URL: /module/finServiceModuleApp</b>
+     * 查询应用信息
+     */
+    @RequestMapping("finServiceModuleApp")
+    @RestReturn(value = ServiceModuleAppDTO.class)
+    public RestResponse finServiceModuleApp(@Valid FindServiceModuleAppCommand cmd) {
+        RestResponse response =  new RestResponse();
+        response.setResponseObject(serviceModuleService.findServiceModuleAppById(cmd.getId()));
+        response.setErrorCode(ErrorCodes.SUCCESS);
+        response.setErrorDescription("OK");
+        return response;
+    }
+
+
 }

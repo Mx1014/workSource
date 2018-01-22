@@ -23,9 +23,15 @@ public interface FileManagementProvider {
 
     void createFileCatalogScope(FileCatalogScope scope);
 
+    void deleteFileCatalogScopeNotInSourceIds(Integer namespaceId, Long catalogId, List<Long> sourceIds);
+
     void deleteFileCatalogScopeByUserIds(Long catalogId, List<Long> sourceIds);
 
+    void updateFileCatalogScope(FileCatalogScope scope);
+
     void updateFileCatalogScopeDownload(Long catalogId, List<Long> sourceIds, Byte permission);
+
+    FileCatalogScope findFileCatalogScopeBySourceId(Long catalogId, Long sourceId);
 
     List<FileCatalogScope> listFileCatalogScopes(Integer namespaceId, Long catalogId, Long pageAnchor, Integer pageSize, String keywords);
 

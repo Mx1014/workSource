@@ -1,6 +1,7 @@
 package com.everhomes.filemanagement;
 
 import com.everhomes.contentserver.ContentServerService;
+import com.everhomes.db.DbProvider;
 import com.everhomes.listing.ListingLocator;
 import com.everhomes.module.ServiceModuleService;
 import com.everhomes.portal.PortalService;
@@ -15,6 +16,7 @@ import com.everhomes.util.ConvertHelper;
 import com.everhomes.util.RuntimeErrorException;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
+import org.springframework.transaction.TransactionStatus;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -38,6 +40,9 @@ public class FileManagementServiceImpl implements  FileManagementService{
 
     @Autowired
     private FileService fileService;
+
+    @Autowired
+    private DbProvider dbProvider;
 
     @Override
     public FileCatalogDTO addFileCatalog(AddFileCatalogCommand cmd) {
@@ -242,25 +247,47 @@ public class FileManagementServiceImpl implements  FileManagementService{
         Integer namespaceId = UserContext.getCurrentNamespaceId();
         List<FileCatalogScopeDTO> scopes = new ArrayList<>();
 
-        //  todo:可能需要删除未勾选的
-        if (cmd.getScopes() != null && cmd.getScopes().size() > 0) {
-            cmd.getScopes().forEach(r ->{
-                FileCatalogScope scope = new FileCatalogScope();
-                FileCatalogScopeDTO dto = new FileCatalogScopeDTO();
-                scope.setNamespaceId(namespaceId);
-                scope.setCatalogId(cmd.getCatalogId());
-                scope.setSourceId(r.getSourceId());
-                scope.setSourceDescription(r.getSourceDescription());
-                fileManagementProvider.createFileCatalogScope(scope);
-                //  return the dto back
-                dto.setCatalogId(cmd.getCatalogId());
-                dto.setSourceId(scope.getSourceId());
-                dto.setSourceDescription(scope.getSourceDescription());
-                dto.setDownloadPermission(FileDownloadPermissionStatus.REFUSE.getCode());
+        if (cmd.getScopes() == null || cmd.getScopes().size() <= 0)
+            return scopes;
+
+        dbProvider.execute((TransactionStatus status) -> {
+            List<Long> sourceIds = new ArrayList<>();
+            cmd.getScopes().forEach(r -> {
+                //  1.save sourceIds
+                sourceIds.add(r.getSourceId());
+                //  2.create or update the scope
+                FileCatalogScopeDTO dto = createFileCatalogScope(namespaceId, cmd.getCatalogId(), r);
+                //  3.save the data which is returning back
                 scopes.add(dto);
             });
-        }
+            //  4.delete redundant data
+            fileManagementProvider.deleteFileCatalogScopeNotInSourceIds(namespaceId, cmd.getCatalogId(), sourceIds);
+            return null;
+        });
         return scopes;
+    }
+
+    private FileCatalogScopeDTO createFileCatalogScope(Integer namespaceId, Long catalogId,  FileCatalogScopeDTO dto){
+        FileCatalogScope scope = fileManagementProvider.findFileCatalogScopeBySourceId(catalogId, dto.getSourceId());
+        FileCatalogScopeDTO result = new FileCatalogScopeDTO();
+
+        if(scope != null){
+            scope.setSourceDescription(dto.getSourceDescription());
+            fileManagementProvider.updateFileCatalogScope(scope);
+        }else{
+            scope = new FileCatalogScope();
+            scope.setNamespaceId(namespaceId);
+            scope.setCatalogId(catalogId);
+            scope.setSourceId(dto.getSourceId());
+            scope.setSourceDescription(dto.getSourceDescription());
+            fileManagementProvider.createFileCatalogScope(scope);
+        }
+        //  return the dto back
+        result.setCatalogId(catalogId);
+        result.setSourceId(scope.getSourceId());
+        result.setSourceDescription(scope.getSourceDescription());
+        result.setDownloadPermission(FileDownloadPermissionStatus.REFUSE.getCode());
+        return result;
     }
 
     @Override
@@ -405,6 +432,7 @@ public class FileManagementServiceImpl implements  FileManagementService{
         if (content.getContentType().equals(FileContentType.FOLDER.getCode())){
             dto = ConvertHelper.convert(content, FileContentDTO.class);
             dto.setName(content.getContentName());
+            dto.setIconUrl(fileIcons.get(FileContentType.FOLDER.getCode()));
         }
         else {
             dto.setName(content.getContentName() + "." + content.getContentSuffix());

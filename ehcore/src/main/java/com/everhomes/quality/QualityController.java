@@ -8,6 +8,9 @@ import com.everhomes.discover.RestDoc;
 import com.everhomes.discover.RestReturn;
 import com.everhomes.module.ServiceModuleService;
 import com.everhomes.rest.RestResponse;
+import com.everhomes.rest.acl.ListUserRelatedProjectByModuleIdCommand;
+import com.everhomes.rest.address.CommunityDTO;
+import com.everhomes.rest.module.ListUserRelatedProjectByModuleCommand;
 import com.everhomes.rest.quality.BatchUpdateQualitySpecificationsCommand;
 import com.everhomes.rest.quality.CountSampleTaskCommunityScoresCommand;
 import com.everhomes.rest.quality.CountSampleTaskScoresCommand;
@@ -62,6 +65,7 @@ import com.everhomes.search.QualityInspectionSampleSearcher;
 import com.everhomes.search.QualityTaskSearcher;
 import com.everhomes.user.UserContext;
 import com.everhomes.user.UserPrivilegeMgr;
+import com.everhomes.util.ConvertHelper;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RestController;
@@ -137,10 +141,26 @@ public class QualityController extends ControllerBase {
 		response.setErrorDescription("OK");
 		return response;
 	}
+
+	/**
+	 * <b>URL: /quality/getQualityStandards</b>
+	 * <p>根据id查看品质核查标准(概念变成计划)</p>
+	 */
+	@RequestMapping("getQualityStandards")
+	@RestReturn(value = QualityStandardsDTO.class)
+	public RestResponse getQualityStandards(DeleteQualityStandardCommand cmd) {
+
+		QualityStandardsDTO standards = qualityService.getQualityStandards(cmd);
+
+		RestResponse response = new RestResponse(standards);
+		response.setErrorCode(ErrorCodes.SUCCESS);
+		response.setErrorDescription("OK");
+		return response;
+	}
 	
 	/**
 	 * <b>URL: /quality/listQualityStandards</b>
-	 * <p>查看品质核查标准(概念变成计划)</p>
+	 * <p>列出品质核查标准(概念变成计划)</p>
 	 */
 	@RequestMapping("listQualityStandards")
 	@RestReturn(value = ListQualityStandardsResponse.class)
@@ -653,21 +673,21 @@ public class QualityController extends ControllerBase {
 //		return response;
 //	}
 //
-//	/**
-//	 * <b>URL: /quality/listUserRelatedProjectByModuleId</b>
-//	 * <p>用户关联项目</p>
-//	 */
-//	@RequestMapping("listUserRelatedProjectByModuleId")
-//	@RestReturn(value = CommunityDTO.class, collection = true)
-//	public RestResponse listUserRelatedProjectByModuleId(ListUserRelatedProjectByModuleIdCommand cmd) {
-//
-//		List<CommunityDTO> dtos = serviceModuleService.listUserRelatedCommunityByModuleId(ConvertHelper.convert(cmd, ListUserRelatedProjectByModuleCommand.class));
-//
-//		RestResponse response = new RestResponse(dtos);
-//		response.setErrorCode(ErrorCodes.SUCCESS);
-//		response.setErrorDescription("OK");
-//		return response;
-//	}
+	/**
+	 * <b>URL: /quality/listUserRelatedProjectByModuleId</b>
+	 * <p>用户关联项目</p>
+	 */
+	@RequestMapping("listUserRelatedProjectByModuleId")
+	@RestReturn(value = CommunityDTO.class, collection = true)
+	public RestResponse listUserRelatedProjectByModuleId(ListUserRelatedProjectByModuleIdCommand cmd) {
+
+		List<CommunityDTO> dtos = serviceModuleService.listUserRelatedCommunityByModuleId(ConvertHelper.convert(cmd, ListUserRelatedProjectByModuleCommand.class));
+
+		RestResponse response = new RestResponse(dtos);
+		response.setErrorCode(ErrorCodes.SUCCESS);
+		response.setErrorDescription("OK");
+		return response;
+	}
 
 	/**
 	 * <b>URL: /quality/createSampleQualityInspection</b>
