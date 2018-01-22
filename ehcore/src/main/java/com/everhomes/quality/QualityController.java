@@ -141,10 +141,26 @@ public class QualityController extends ControllerBase {
 		response.setErrorDescription("OK");
 		return response;
 	}
+
+	/**
+	 * <b>URL: /quality/getQualityStandards</b>
+	 * <p>列出品质核查标准(概念变成计划)</p>
+	 */
+	@RequestMapping("getQualityStandards")
+	@RestReturn(value = QualityStandardsDTO.class)
+	public RestResponse getQualityStandards(DeleteQualityStandardCommand cmd) {
+
+		QualityStandardsDTO standards = qualityService.getQualityStandards(cmd);
+
+		RestResponse response = new RestResponse(standards);
+		response.setErrorCode(ErrorCodes.SUCCESS);
+		response.setErrorDescription("OK");
+		return response;
+	}
 	
 	/**
 	 * <b>URL: /quality/listQualityStandards</b>
-	 * <p>查看品质核查标准(概念变成计划)</p>
+	 * <p>列出品质核查标准(概念变成计划)</p>
 	 */
 	@RequestMapping("listQualityStandards")
 	@RestReturn(value = ListQualityStandardsResponse.class)

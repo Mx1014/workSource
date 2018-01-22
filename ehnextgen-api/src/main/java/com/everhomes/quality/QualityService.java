@@ -80,4 +80,6 @@ public interface QualityService {
     OfflineSampleQualityInspectionResponse getOfflineSampleQualityInspection(ListSampleQualityInspectionCommand cmd);
 
     List<QualityInspectionSpecificationDTO> batchUpdateQualitySpecification(BatchUpdateQualitySpecificationsCommand cmd);
+
+    QualityStandardsDTO getQualityStandards(DeleteQualityStandardCommand cmd);
 }
