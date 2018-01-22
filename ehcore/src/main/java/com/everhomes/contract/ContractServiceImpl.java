@@ -14,19 +14,18 @@ import java.util.Map;
 import java.util.Set;
 import java.util.stream.Collectors;
 
+import com.everhomes.acl.RolePrivilegeService;
 import com.everhomes.address.Address;
 import com.everhomes.address.AddressProvider;
 
-import com.everhomes.asset.AssetPaymentStrings;
+
+import com.everhomes.asset.AssetPaymentConstants;
 import com.everhomes.asset.AssetProvider;
 import com.everhomes.asset.AssetService;
-import com.everhomes.asset.AssetVendor;
-import com.everhomes.asset.AssetVendorHandler;
+
 
 import com.everhomes.bootstrap.PlatformContext;
-import com.everhomes.constants.ErrorCodes;
 import com.everhomes.contentserver.ContentServerService;
-import com.everhomes.customer.CustomerHandle;
 import com.everhomes.customer.EnterpriseCustomer;
 import com.everhomes.customer.EnterpriseCustomerProvider;
 import com.everhomes.customer.IndividualCustomerProvider;
@@ -34,13 +33,14 @@ import com.everhomes.entity.EntityType;
 import com.everhomes.flow.Flow;
 import com.everhomes.flow.FlowService;
 import com.everhomes.locale.LocaleStringService;
-import com.everhomes.namespace.Namespace;
-import com.everhomes.namespace.NamespaceResource;
 import com.everhomes.openapi.ContractBuildingMapping;
 import com.everhomes.organization.*;
 import com.everhomes.organization.pm.CommunityAddressMapping;
 import com.everhomes.organization.pm.PropertyMgrProvider;
+import com.everhomes.organization.pm.PropertyMgrService;
+import com.everhomes.rest.address.AddressLivingStatus;
 import com.everhomes.portal.PortalService;
+import com.everhomes.rest.acl.ListServiceModuleAdministratorsCommand;
 import com.everhomes.rest.acl.PrivilegeConstants;
 import com.everhomes.rest.acl.PrivilegeServiceErrorCode;
 import com.everhomes.rest.approval.CommonStatus;
@@ -52,13 +52,18 @@ import com.everhomes.rest.flow.CreateFlowCaseCommand;
 import com.everhomes.rest.flow.FlowConstants;
 import com.everhomes.rest.flow.FlowModuleType;
 import com.everhomes.rest.flow.FlowOwnerType;
+
 import com.everhomes.rest.launchpad.ActionType;
 import com.everhomes.rest.namespace.NamespaceCommunityType;
+import com.everhomes.rest.organization.OrganizationContactDTO;
+import com.everhomes.rest.organization.pm.AddOrganizationOwnerAddressCommand;
 import com.everhomes.rest.organization.pm.AddressMappingStatus;
+import com.everhomes.rest.organization.pm.OrganizationOwnerAddressDTO;
 import com.everhomes.rest.portal.ListServiceModuleAppsCommand;
 import com.everhomes.rest.portal.ListServiceModuleAppsResponse;
 import com.everhomes.rest.repeat.RangeDTO;
 import com.everhomes.rest.repeat.TimeRangeDTO;
+
 import com.everhomes.search.ContractSearcher;
 import com.everhomes.user.*;
 import com.everhomes.util.*;
@@ -80,7 +85,6 @@ import com.everhomes.community.CommunityProvider;
 import com.everhomes.configuration.ConfigurationProvider;
 import com.everhomes.coordinator.CoordinationLocks;
 import com.everhomes.coordinator.CoordinationProvider;
-import com.everhomes.coordinator.NamedLock;
 import com.everhomes.openapi.Contract;
 import com.everhomes.openapi.ContractBuildingMappingProvider;
 import com.everhomes.openapi.ContractProvider;
@@ -94,7 +98,6 @@ import com.everhomes.settings.PaginationConfigHelper;
 import com.everhomes.sms.SmsProvider;
 
 import javax.annotation.PostConstruct;
-import javax.servlet.http.HttpServletResponse;
 
 @Component(ContractService.CONTRACT_PREFIX + "")
 public class ContractServiceImpl implements ContractService {
@@ -182,10 +185,16 @@ public class ContractServiceImpl implements ContractService {
 	private ContractChargingChangeAddressProvider contractChargingChangeAddressProvider;
 
 	@Autowired
+	private PropertyMgrService propertyMgrService;
+
+	@Autowired
 	private PortalService portalService;
 
 	@Autowired
 	private UserPrivilegeMgr userPrivilegeMgr;
+
+	@Autowired
+	private RolePrivilegeService rolePrivilegeService;
 
 	private void checkContractAuth(Integer namespaceId, Long privilegeId, Long orgId, Long communityId) {
 		ListServiceModuleAppsCommand cmd = new ListServiceModuleAppsCommand();
@@ -595,7 +604,7 @@ public class ContractServiceImpl implements ContractService {
 	}
 
 	private void generatePaymentExpectancies(Contract contract, List<ContractChargingItemDTO> chargingItems, List<ContractChargingChangeDTO> adjusts, List<ContractChargingChangeDTO> frees) {
-		assetService.upodateBillStatusOnContractStatusChange(contract.getId(), AssetPaymentStrings.CONTRACT_CANCEL);
+		assetService.upodateBillStatusOnContractStatusChange(contract.getId(), AssetPaymentConstants.CONTRACT_CANCEL);
 
 		if((chargingItems == null || chargingItems.size() == 0)
 				&& (adjusts == null || adjusts.size() == 0) && (frees == null || frees.size() == 0)) {
@@ -715,6 +724,7 @@ public class ContractServiceImpl implements ContractService {
 			FeeRules feeRule = new FeeRules();
 			feeRule.setChargingItemId(chargingItem.getChargingItemId());
 			feeRule.setChargingStandardId(chargingItem.getChargingStandardId());
+			feeRule.setLateFeeStandardId(chargingItem.getLateFeeStandardId());
 			if(chargingItem.getChargingStartTime() != null){
 				feeRule.setDateStrBegin(new Date(chargingItem.getChargingStartTime()));
 			}
@@ -1028,7 +1038,7 @@ public class ContractServiceImpl implements ContractService {
 
 	@Override
 	public ContractDetailDTO updateContract(UpdateContractCommand cmd) {
-		checkContractAuth(cmd.getNamespaceId(), PrivilegeConstants.CONTRACT_UPDATE, cmd.getOrgId(), cmd.getCommunityId());
+		checkContractAuth(cmd.getNamespaceId(), PrivilegeConstants.CONTRACT_CREATE, cmd.getOrgId(), cmd.getCommunityId());
 		Contract exist = checkContract(cmd.getId());
 		Contract contract = ConvertHelper.convert(cmd, Contract.class);
 		Contract existContract = contractProvider.findActiveContractByContractNumber(cmd.getNamespaceId(), cmd.getContractNumber());
@@ -1119,10 +1129,15 @@ public class ContractServiceImpl implements ContractService {
 			//作废合同关联资产释放
 			List<ContractBuildingMapping> contractApartments = contractBuildingMappingProvider.listByContract(contract.getId());
 			if(contractApartments != null && contractApartments.size() > 0) {
+				boolean individualFlag = CustomerType.INDIVIDUAL.equals(CustomerType.fromStatus(contract.getCustomerType())) ? true : false;
 				contractApartments.forEach(contractApartment -> {
 					CommunityAddressMapping addressMapping = propertyMgrProvider.findAddressMappingByAddressId(contractApartment.getAddressId());
 					addressMapping.setLivingStatus(AddressMappingStatus.FREE.getCode());
 					propertyMgrProvider.updateOrganizationAddressMapping(addressMapping);
+
+					if(individualFlag) {
+						propertyMgrService.deleteAddressToOrgOwner(contract.getNamespaceId(), contractApartment.getAddressId(), contract.getCustomerId());
+					}
 				});
 			}
 
@@ -1198,17 +1213,22 @@ public class ContractServiceImpl implements ContractService {
 		List<ContractBuildingMapping> contractApartments = contractBuildingMappingProvider.listByContract(contract.getId());
 		List<Long> contractAddressIds = new ArrayList<>();
 		if(contractApartments != null && contractApartments.size() > 0) {
+			boolean individualFlag = CustomerType.INDIVIDUAL.equals(CustomerType.fromStatus(contract.getCustomerType())) ? true : false;
 			contractAddressIds = contractApartments.stream().map(contractApartment -> contractApartment.getAddressId()).collect(Collectors.toList());
 			List<CommunityAddressMapping> mappings = propertyMgrProvider.listCommunityAddressMappingByAddressIds(contractAddressIds);
 			if(mappings != null && mappings.size() > 0) {
 				mappings.forEach(mapping -> {
 					mapping.setLivingStatus(AddressMappingStatus.RENT.getCode());
 					propertyMgrProvider.updateOrganizationAddressMapping(mapping);
+
+					if(individualFlag) {
+						propertyMgrService.addAddressToOrganizationOwner(contract.getNamespaceId(), mapping.getAddressId(), contract.getCustomerId());
+					}
 				});
 			}
 		}
 
-		assetService.upodateBillStatusOnContractStatusChange(contract.getId(), AssetPaymentStrings.CONTRACT_SAVE);
+		assetService.upodateBillStatusOnContractStatusChange(contract.getId(), AssetPaymentConstants.CONTRACT_SAVE);
 		if(contract.getParentId() != null) {
 			Contract parentContract = contractProvider.findContractById(contract.getParentId());
 			if(parentContract != null) {
@@ -1225,9 +1245,14 @@ public class ContractServiceImpl implements ContractService {
 					});
 					List<CommunityAddressMapping> mappings = propertyMgrProvider.listCommunityAddressMappingByAddressIds(addressIds);
 					if(mappings != null && mappings.size() > 0) {
+						boolean individualFlag = CustomerType.INDIVIDUAL.equals(CustomerType.fromStatus(parentContract.getCustomerType())) ? true : false;
 						mappings.forEach(mapping -> {
 							mapping.setLivingStatus(AddressMappingStatus.FREE.getCode());
 							propertyMgrProvider.updateOrganizationAddressMapping(mapping);
+
+							if(individualFlag) {
+								propertyMgrService.deleteAddressToOrgOwner(parentContract.getNamespaceId(), mapping.getAddressId(), parentContract.getCustomerId());
+							}
 						});
 					}
 				}
@@ -1288,11 +1313,16 @@ public class ContractServiceImpl implements ContractService {
 		if(flag) {
 			List<ContractBuildingMapping> contractApartments = contractBuildingMappingProvider.listByContract(contract.getId());
 			if(contractApartments != null && contractApartments.size() > 0) {
+				boolean individualFlag = CustomerType.INDIVIDUAL.equals(CustomerType.fromStatus(contract.getCustomerType())) ? true : false;
 				contractApartments.forEach(contractApartment -> {
 					CommunityAddressMapping addressMapping = propertyMgrProvider.findAddressMappingByAddressId(contractApartment.getAddressId());
 					if(addressMapping != null) {
 						addressMapping.setLivingStatus(AddressMappingStatus.FREE.getCode());
 						propertyMgrProvider.updateOrganizationAddressMapping(addressMapping);
+
+						if(individualFlag) {
+							propertyMgrService.addAddressToOrganizationOwner(contract.getNamespaceId(), contractApartment.getAddressId(), contract.getCustomerId());
+						}
 					}
 				});
 			}
@@ -1376,13 +1406,21 @@ public class ContractServiceImpl implements ContractService {
 	@Override
 	public List<ContractDTO> listCustomerContracts(ListCustomerContractsCommand cmd) {
 		if(CustomerType.ENTERPRISE.equals(CustomerType.fromStatus(cmd.getTargetType()))) {
-			EnterpriseCustomer customer = enterpriseCustomerProvider.findByOrganizationId(cmd.getTargetId());
-			if(customer != null) {
-				ListEnterpriseCustomerContractsCommand command = new ListEnterpriseCustomerContractsCommand();
-				command.setNamespaceId(cmd.getNamespaceId());
-				command.setCommunityId(cmd.getCommunityId());
-				command.setEnterpriseCustomerId(customer.getId());
-				return listEnterpriseCustomerContracts(command);
+			if(cmd.getAdminFlag() == 1) {
+				CheckAdminCommand cmd1 = new CheckAdminCommand();
+				cmd1.setNamespaceId(cmd.getNamespaceId());
+				cmd1.setOrganizationId(cmd.getTargetId());
+				if(checkAdmin(cmd1)) {
+					EnterpriseCustomer customer = enterpriseCustomerProvider.findByOrganizationId(cmd.getTargetId());
+					if(customer != null) {
+						ListEnterpriseCustomerContractsCommand command = new ListEnterpriseCustomerContractsCommand();
+						command.setNamespaceId(cmd.getNamespaceId());
+						command.setCommunityId(cmd.getCommunityId());
+						command.setStatus(cmd.getStatus());
+						command.setEnterpriseCustomerId(customer.getId());
+						return listEnterpriseCustomerContracts(command);
+					}
+				}
 			}
 
 		} else if(CustomerType.INDIVIDUAL.equals(CustomerType.fromStatus(cmd.getTargetType()))) {
@@ -1405,6 +1443,7 @@ public class ContractServiceImpl implements ContractService {
 						ListIndividualCustomerContractsCommand command = new ListIndividualCustomerContractsCommand();
 						command.setNamespaceId(cmd.getNamespaceId());
 						command.setCommunityId(cmd.getCommunityId());
+						command.setStatus(cmd.getStatus());
 						command.setIndividualCustomerId(owner.getId());
 						List<ContractDTO> dtos = listIndividualCustomerContracts(command);
 						if(dtos != null && dtos.size() > 0) {
@@ -1455,7 +1494,7 @@ public class ContractServiceImpl implements ContractService {
 //			return response;
 //		}
 
-		List<Contract> contracts = contractProvider.listContractByCustomerId(cmd.getCommunityId(), cmd.getIndividualCustomerId(), CustomerType.INDIVIDUAL.getCode());
+		List<Contract> contracts = contractProvider.listContractByCustomerId(cmd.getCommunityId(), cmd.getIndividualCustomerId(), CustomerType.INDIVIDUAL.getCode(), cmd.getStatus());
 		if(contracts != null && contracts.size() > 0) {
 			return contracts.stream().map(contract -> ConvertHelper.convert(contract, ContractDTO.class)).collect(Collectors.toList());
 		}
@@ -1571,6 +1610,10 @@ public class ContractServiceImpl implements ContractService {
 				itemDto.setChargingItemName(itemName);
 				String standardName = assetProvider.getStandardNameById(itemDto.getChargingStandardId());
 				itemDto.setChargingStandardName(standardName);
+				String lateFeeStandardName = assetProvider.getStandardNameById(itemDto.getLateFeeStandardId());
+				itemDto.setLateFeeStandardName(lateFeeStandardName);
+				String lateFeeformula = assetProvider.findFormulaByChargingStandardId(itemDto.getLateFeeStandardId());
+				itemDto.setLateFeeformula(lateFeeformula);
 				processContractChargingItemAddresses(itemDto);
 
 				return itemDto;
@@ -1652,5 +1695,39 @@ public class ContractServiceImpl implements ContractService {
 				}
 			});
 		});
+	}
+
+	@Override
+	public ContractDetailDTO findContractForApp(FindContractCommand cmd) {
+		CheckAdminCommand cmd1 = new CheckAdminCommand();
+		cmd1.setNamespaceId(cmd.getNamespaceId());
+		cmd1.setOrganizationId(cmd.getOrganizationId());
+		return findContract(cmd);
+//		if(checkAdmin(cmd1)) {
+//			return findContract(cmd);
+//		}
+//
+//		return null;
+	}
+
+	@Override
+	public Boolean checkAdmin(CheckAdminCommand cmd) {
+		Long userId = UserContext.currentUserId();
+		ListServiceModuleAdministratorsCommand cmd1 = new ListServiceModuleAdministratorsCommand();
+		cmd1.setOrganizationId(cmd.getOrganizationId());
+		cmd1.setActivationFlag((byte) 1);
+		cmd1.setOwnerType("EhOrganizations");
+		cmd1.setOwnerId(null);
+		LOGGER.info("organization manager check for bill display, cmd = " + cmd1.toString());
+		List<OrganizationContactDTO> organizationContactDTOS = rolePrivilegeService.listOrganizationAdministrators(cmd1);
+		LOGGER.info("organization manager check for bill display, orgContactsDTOs are = " + organizationContactDTOS.toString());
+		LOGGER.info("organization manager check for bill display, userId = " + userId);
+		for (OrganizationContactDTO dto : organizationContactDTOS) {
+			Long targetId = dto.getTargetId();
+			if (targetId.longValue() == userId.longValue()) {
+				return true;
+			}
+		}
+		return false;
 	}
 }

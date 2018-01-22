@@ -13,8 +13,6 @@ import com.everhomes.util.StringHelper;
  *     <li>completeMaintance: 整改完成</li>
  *     <li>completeInspection: 巡检完成</li>
  *     <li>completeWaitingForApproval: 巡检完成待审核任务数</li>
- *     <li>completeMaintanceWaitingForApproval;: 整改完成待审核任务数</li>
- *     <li>needMaintanceWaitingForApproval: 需整改待审核</li>
  *     <li>reviewQualified: 审核通过</li>
  *     <li>reviewUnqualified: 审核不通过</li>
  * </ul>
@@ -40,8 +38,10 @@ public class StatTodayEquipmentTasksResponse {
 
     private Long completeWaitingForApproval;
 
+    @Deprecated
     private Long completeMaintanceWaitingForApproval;
 
+    @Deprecated
     private Long needMaintanceWaitingForApproval;
 
     private Long reviewQualified;

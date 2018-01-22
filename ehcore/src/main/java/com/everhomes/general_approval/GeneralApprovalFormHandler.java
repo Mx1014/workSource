@@ -1,7 +1,6 @@
 package com.everhomes.general_approval;
 
 import com.alibaba.fastjson.JSONObject;
-import com.everhomes.bootstrap.PlatformContext;
 import com.everhomes.general_form.GeneralForm;
 import com.everhomes.general_form.GeneralFormModuleHandler;
 import com.everhomes.general_form.GeneralFormProvider;
@@ -26,7 +25,7 @@ public class GeneralApprovalFormHandler implements GeneralFormModuleHandler {
     @Autowired
     private GeneralApprovalProvider generalApprovalProvider;
     @Override
-    public PostGeneralFormDTO postGeneralForm(PostGeneralFormCommand cmd) {
+    public PostGeneralFormDTO postGeneralFormVal(PostGeneralFormValCommand cmd) {
 
         PostApprovalFormCommand cmd2 = new PostApprovalFormCommand();
         cmd2.setApprovalId(cmd.getSourceId());
@@ -97,5 +96,10 @@ public class GeneralApprovalFormHandler implements GeneralFormModuleHandler {
         GeneralFormDTO dto = ConvertHelper.convert(form, GeneralFormDTO.class);
         dto.setFormFields(fieldDTOs);
         return dto;
+    }
+
+    @Override
+    public PostGeneralFormDTO updateGeneralFormVal(PostGeneralFormValCommand cmd) {
+        return null;
     }
 }

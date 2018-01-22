@@ -1,6 +1,6 @@
 package com.everhomes.authorization;
 
-import com.everhomes.rest.general_approval.PostGeneralFormCommand;
+import com.everhomes.rest.general_approval.PostGeneralFormValCommand;
 import com.everhomes.rest.general_approval.PostGeneralFormDTO;
 
 /**
@@ -13,8 +13,8 @@ public interface AuthorizationModuleHandler {
     String PERSONAL_AUTHORIZATION = "1";
     String ORGANIZATION_AUTHORIZATION = "2";
     
-    PostGeneralFormDTO personalAuthorization(PostGeneralFormCommand cmd);
+    PostGeneralFormDTO personalAuthorization(PostGeneralFormValCommand cmd);
     
-    PostGeneralFormDTO organiztionAuthorization(PostGeneralFormCommand cmd);
+    PostGeneralFormDTO organiztionAuthorization(PostGeneralFormValCommand cmd);
   
 }

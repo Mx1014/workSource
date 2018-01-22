@@ -58,7 +58,7 @@ public class ArchivesProviderImpl implements ArchivesProvider {
         EhArchivesStickyContactsDao dao = new EhArchivesStickyContactsDao(context.configuration());
         dao.update(stickyContact);
 
-        DaoHelper.publishDaoAction(DaoAction.CREATE, EhArchivesStickyContacts.class, stickyContact.getId());
+        DaoHelper.publishDaoAction(DaoAction.MODIFY, EhArchivesStickyContacts.class, stickyContact.getId());
     }
 
     @Override
@@ -184,7 +184,7 @@ public class ArchivesProviderImpl implements ArchivesProvider {
         DSLContext context = dbProvider.getDslContext(AccessSpec.readWrite());
         EhArchivesFormsDao dao = new EhArchivesFormsDao(context.configuration());
         dao.update(form);
-        DaoHelper.publishDaoAction(DaoAction.CREATE, EhArchivesForms.class, form.getId());
+        DaoHelper.publishDaoAction(DaoAction.MODIFY, EhArchivesForms.class, form.getId());
 
     }
 
@@ -220,7 +220,7 @@ public class ArchivesProviderImpl implements ArchivesProvider {
         EhArchivesConfigurationsDao dao = new EhArchivesConfigurationsDao(context.configuration());
         dao.update(configuration);
 
-        DaoHelper.publishDaoAction(DaoAction.CREATE, EhArchivesConfigurations.class, configuration.getId());
+        DaoHelper.publishDaoAction(DaoAction.MODIFY, EhArchivesConfigurations.class, configuration.getId());
     }
 
     @Override
@@ -305,7 +305,7 @@ public class ArchivesProviderImpl implements ArchivesProvider {
         EhArchivesNotificationsDao dao = new EhArchivesNotificationsDao(context.configuration());
         dao.update(notification);
 
-        DaoHelper.publishDaoAction(DaoAction.CREATE, EhArchivesNotifications.class, notification.getId());
+        DaoHelper.publishDaoAction(DaoAction.MODIFY, EhArchivesNotifications.class, notification.getId());
     }
 
     @Override

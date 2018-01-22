@@ -3,7 +3,12 @@ package com.everhomes.rest.parking;
 import com.everhomes.util.StringHelper;
 
 /**
- * @author sw on 2017/10/24.
+ * <ul>
+ * <li>ownerType: 归属的类型，{@link com.everhomes.rest.parking.ParkingOwnerType}</li>
+ * <li>ownerId: 归属的ID，如小区ID</li>
+ * <li>parkingLotId: 停车场ID</li>
+ * <li>plateNumber: 车牌号</li>
+ * </ul>
  */
 public class GetExpiredRechargeInfoCommand {
     private String ownerType;

@@ -495,4 +495,6 @@ public interface PropertyMgrProvider {
 	public OrganizationOwner findOrganizationOwnerById(Long organizationOwnerId);
 
 	List<CommunityAddressMapping> listCommunityAddressMappingByAddressIds(List<Long> addressIds);
+
+	List<OrganizationOwnerAddress> listOrganizationOwnerAuthAddressByAddressId(Integer namespaceId, Long addressId);
 }

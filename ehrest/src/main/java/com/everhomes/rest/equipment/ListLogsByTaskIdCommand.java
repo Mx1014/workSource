@@ -1,15 +1,15 @@
 package com.everhomes.rest.equipment;
 
-import java.util.List;
-
-import javax.validation.constraints.NotNull;
-
 import com.everhomes.discover.ItemType;
 import com.everhomes.util.StringHelper;
+
+import javax.validation.constraints.NotNull;
+import java.util.List;
 
 /**
  * <ul>
  *  <li>taskId: 任务id</li>
+ *  <li>equipmentId: 设备id</li>
  *  <li>ownerId: 设备所属的主体id</li>
  *  <li>ownerType: 设备所属的主体，参考{@link com.everhomes.rest.quality.OwnerType}</li>
  *  <li>processType: 操作类型 参考{@link com.everhomes.rest.equipment.EquipmentTaskProcessType}</li>
@@ -27,7 +27,9 @@ public class ListLogsByTaskIdCommand {
 	private String ownerType;
 	@ItemType(Byte.class)
 	private List<Byte> processType;
-	
+
+	private Long equipmentId;
+
 	private Long pageAnchor;
 	
 	private Integer pageSize;
@@ -78,6 +80,14 @@ public class ListLogsByTaskIdCommand {
 
 	public void setProcessType(List<Byte> processType) {
 		this.processType = processType;
+	}
+
+	public Long getEquipmentId() {
+		return equipmentId;
+	}
+
+	public void setEquipmentId(Long equipmentId) {
+		this.equipmentId = equipmentId;
 	}
 
 	@Override

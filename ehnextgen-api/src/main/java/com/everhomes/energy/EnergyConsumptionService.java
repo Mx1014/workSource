@@ -259,6 +259,7 @@ public interface EnergyConsumptionService {
     ListEnergyPlanMetersResponse setEnergyPlanMeterOrder(SetEnergyPlanMeterOrderCommand cmd);
     ListUserEnergyPlanTasksResponse listUserEnergyPlanTasks(ListUserEnergyPlanTasksCommand cmd);
     void readTaskMeter(ReadTaskMeterCommand cmd);
+    ReadTaskMeterOfflineResponse readTaskMeterOffline(ReadTaskMeterOfflineCommand cmd);
 
     void createTask(CreateEnergyTaskCommand cmd);
     void creatMeterTask(EnergyPlanMeterMap map, EnergyPlan plan);
@@ -269,4 +270,6 @@ public interface EnergyConsumptionService {
 
     HttpServletResponse exportTasksByEnergyPlan(SearchTasksByEnergyPlanCommand cmd, HttpServletResponse response);
     ImportFileTaskDTO importTasksByEnergyPlan(ImportTasksByEnergyPlanCommand cmd, MultipartFile mfile, Long userId);
+
+    SyncOfflineDataResponse syncOfflineData(SyncOfflineDataCommand cmd);
 }

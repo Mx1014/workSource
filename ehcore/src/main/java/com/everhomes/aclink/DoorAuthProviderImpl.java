@@ -329,6 +329,9 @@ public class DoorAuthProviderImpl implements DoorAuthProvider {
         return auths.get(0);
     }
 
+    /**
+     * 返回所有非 Forever 的授权记录
+     */
     @Override
     public List<DoorAuth> queryDoorAuthByApproveId(ListingLocator locator, Long approveId, int count) {
 
@@ -338,7 +341,7 @@ public class DoorAuthProviderImpl implements DoorAuthProvider {
             public SelectQuery<? extends Record> buildCondition(ListingLocator locator,
                     SelectQuery<? extends Record> query) {
                 query.addConditions(Tables.EH_DOOR_AUTH.APPROVE_USER_ID.eq(approveId));
-                query.addConditions(Tables.EH_DOOR_AUTH.AUTH_TYPE.eq(DoorAuthType.TEMPERATE.getCode()));
+                query.addConditions(Tables.EH_DOOR_AUTH.AUTH_TYPE.ne(DoorAuthType.FOREVER.getCode()));
                 return query;
             }
 
@@ -506,7 +509,10 @@ public class DoorAuthProviderImpl implements DoorAuthProvider {
         resp.setTotal(new Long((Integer)rlt.get(0).getValue("c")));
 
         rlt = context.select(Tables.EH_DOOR_AUTH.ID.count().as("c")).from(Tables.EH_DOOR_AUTH)
-                .where(condition.and(Tables.EH_DOOR_AUTH.STATUS.eq(DoorAuthStatus.INVALID.getCode()))).fetch();
+                .where(condition.and(
+                        Tables.EH_DOOR_AUTH.STATUS.eq(DoorAuthStatus.INVALID.getCode())
+                        .or(Tables.EH_DOOR_AUTH.VALID_END_MS.lt(DateHelper.currentGMTTime().getTime()))
+                        )).fetch();
 
         resp.setInvalidCount(new Long((Integer)rlt.get(0).getValue("c")));
 
@@ -953,6 +959,33 @@ public class DoorAuthProviderImpl implements DoorAuthProvider {
         }
         
         return users;
+    }
+    
+    @Override
+    public DoorAuth queryValidDoorAuthByVisitorPhone(Long doorId, String phone) {
+        ListingLocator locator = new ListingLocator();
+        long now = DateHelper.currentGMTTime().getTime();
+
+        List<DoorAuth> auths = queryDoorAuthByTime(locator, 1, new ListingQueryBuilderCallback() {
+
+            @Override
+            public SelectQuery<? extends Record> buildCondition(ListingLocator locator,
+                    SelectQuery<? extends Record> query) {
+                Condition c1 = Tables.EH_DOOR_AUTH.AUTH_TYPE.ne(DoorAuthType.FOREVER.getCode()).
+                        and(Tables.EH_DOOR_AUTH.VALID_FROM_MS.le(now).
+                        and(Tables.EH_DOOR_AUTH.VALID_END_MS.ge(now)));
+                query.addConditions(Tables.EH_DOOR_AUTH.PHONE.eq(phone));
+                query.addConditions(Tables.EH_DOOR_AUTH.DOOR_ID.eq(doorId));
+                query.addConditions(Tables.EH_DOOR_AUTH.STATUS.eq(DoorAuthStatus.VALID.getCode()));
+                query.addConditions(c1);
+                return query;
+            }
+        });
+
+        if(auths == null || auths.size() == 0) {
+            return null;
+        }
+        return auths.get(0);
     }
 
 }

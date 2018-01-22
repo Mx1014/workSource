@@ -1,24 +1,20 @@
 package com.everhomes.locale;
 
-import java.io.IOException;
-
-import javax.validation.constraints.Null;
-
+import com.everhomes.constants.ErrorCodes;
+import com.everhomes.namespace.Namespace;
+import com.everhomes.user.User;
+import com.everhomes.user.UserContext;
+import com.everhomes.util.RuntimeErrorException;
+import freemarker.cache.StringTemplateLoader;
+import freemarker.template.Configuration;
+import freemarker.template.Template;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
 import org.springframework.ui.freemarker.FreeMarkerTemplateUtils;
 
-import com.everhomes.constants.ErrorCodes;
-import com.everhomes.namespace.Namespace;
-import com.everhomes.user.User;
-import com.everhomes.user.UserContext;
-import com.everhomes.util.RuntimeErrorException;
-
-import freemarker.cache.StringTemplateLoader;
-import freemarker.template.Configuration;
-import freemarker.template.Template;
+import java.io.IOException;
 
 @Component
 public class LocaleTemplateServiceImpl implements LocaleTemplateService {
@@ -56,21 +52,12 @@ public class LocaleTemplateServiceImpl implements LocaleTemplateService {
         String templateKey = getTemplateKey(scope, code, locale);
         try {
             Template freeMarkerTemplate = null;
-            try {
-                templateConfig.getTemplate(templateKey, "UTF8");
-            }catch(Exception e) {
-
+            LocaleTemplate template = getLocalizedTemplate(namespaceId, scope, code, locale);
+            if (template != null) {
+                String templateText = template.getText();
+                freeMarkerTemplate = new Template(templateKey, templateText, templateConfig);
             }
-            if(freeMarkerTemplate == null) {
-                LocaleTemplate template = getLocalizedTemplate(namespaceId, scope, code, locale);
-                if(template != null) {
-                    String templateText = template.getText();
-                    templateLoader.putTemplate(templateKey, templateText);
-                    freeMarkerTemplate = templateConfig.getTemplate(templateKey, "UTF8");
-                } 
-            }
-            
-            if(freeMarkerTemplate != null) {
+            if (freeMarkerTemplate != null) {
                 return FreeMarkerTemplateUtils.processTemplateIntoString(freeMarkerTemplate, model);
             }
         } catch(Exception e) {
@@ -78,7 +65,6 @@ public class LocaleTemplateServiceImpl implements LocaleTemplateService {
                 LOGGER.error("Invalid locale template, scope=" + scope + ", code=" + code + ", locale=" + locale, e);
             }
         }
-        
         return defaultValue;
     }
     
@@ -141,7 +127,6 @@ public class LocaleTemplateServiceImpl implements LocaleTemplateService {
         strBuilder.append(locale);
         strBuilder.append(".");
         strBuilder.append(code);
-        
         return strBuilder.toString();
     }
 

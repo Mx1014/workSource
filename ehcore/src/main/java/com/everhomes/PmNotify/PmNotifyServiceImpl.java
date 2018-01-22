@@ -29,6 +29,7 @@ import com.everhomes.rest.sms.SmsTemplateCode;
 import com.everhomes.rest.user.IdentifierType;
 import com.everhomes.rest.user.MessageChannelType;
 import com.everhomes.scheduler.ScheduleProvider;
+import com.everhomes.search.EquipmentTasksSearcher;
 import com.everhomes.sms.SmsProvider;
 import com.everhomes.user.User;
 import com.everhomes.user.UserIdentifier;
@@ -96,6 +97,9 @@ public class PmNotifyServiceImpl implements PmNotifyService, ApplicationListener
 
     @Autowired
     private EnergyMeterProvider energyMeterProvider;
+
+    @Autowired
+    private EquipmentTasksSearcher equipmentTaskSearchser;
 
     private String queueDelay = "pmtaskdelays";
     private String queueNoDelay = "pmtasknodelays";
@@ -167,6 +171,7 @@ public class PmNotifyServiceImpl implements PmNotifyService, ApplicationListener
         PmNotifyReceiverList receiverList = (PmNotifyReceiverList) StringHelper.fromJsonString(record.getReceiverJson(), PmNotifyReceiverList.class);
         LOGGER.info("processPmNotifyRecord receiverList:{}", receiverList);
         if(receiverList != null) {
+
             Set<Long> notifyUsers = resolveUserSelection(receiverList.getReceivers(), record.getOwnerType(), record.getOwnerId());
             String taskName = "";
             Timestamp time = null;
@@ -203,7 +208,9 @@ public class PmNotifyServiceImpl implements PmNotifyService, ApplicationListener
                     smsCode = SmsTemplateCode.PM_NOTIFY_AFTER_TASK_DELAY;
                     //过期提醒的notifytime即为任务的截止时间，所以先关掉任务
                     equipmentProvider.closeTask(task);
+                    equipmentTaskSearchser.feedDoc(task);
                 }
+//                LOGGER.info("processPmNotifyRecord  smsCode={}",smsCode);
             }
 
             if(EntityType.ENERGY_TASK.getCode().equals(record.getOwnerType())) {
@@ -212,6 +219,9 @@ public class PmNotifyServiceImpl implements PmNotifyService, ApplicationListener
                 EnergyMeter meter = energyMeterProvider.findById(task.getNamespaceId(), task.getMeterId());
                 taskName = meter.getName();
                 code = EnergyNotificationTemplateCode.ENERGY_TASK_BEFORE_DELAY;
+            }
+            if (LOGGER.isDebugEnabled()) {
+                LOGGER.debug("starting proccess sending message to notifyUsers.size={}",notifyUsers.size());
             }
             for (Long userId : notifyUsers) {
 //                if (LOGGER.isDebugEnabled()) {
@@ -239,6 +249,9 @@ public class PmNotifyServiceImpl implements PmNotifyService, ApplicationListener
                     default:
                         break;
                 }
+//                if (LOGGER.isDebugEnabled()) {
+//                    LOGGER.debug("createPmNotifyLog log{}",log.toString());
+//                }
                 pmNotifyProvider.createPmNotifyLog(log);
             }
         }

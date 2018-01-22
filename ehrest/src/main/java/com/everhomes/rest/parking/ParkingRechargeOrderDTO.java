@@ -9,6 +9,7 @@ import com.everhomes.util.StringHelper;
 /**
  * <ul>
  * <li>id: 订单ID</li>
+ * <li>orderNo: orderNo</li>
  * <li>ownerType: 归属的类型，{@link com.everhomes.rest.parking.ParkingOwnerType}</li>
  * <li>ownerId: 归属的ID，如小区ID</li>
  * <li>parkingLotId: 停车场ID</li>
@@ -19,7 +20,7 @@ import com.everhomes.util.StringHelper;
  * <li>payerUid: 付款人用户ID</li>
  * <li>payerName: 付款人名称</li>
  * <li>payerPhone: 付款人手机</li>
- * <li>paidType: 支付方式,10001-支付宝，10002-微信</li>
+ * <li>paidType: 支付方式,10001-支付宝，10002-微信 {@link com.everhomes.rest.organization.VendorType}</li>
  * <li>paidTime: 付款时间</li>
  * <li>vendorName: 厂商名称（用于作逻辑，不用于显示），{@link com.everhomes.rest.parking.ParkingLotVendor}</li>
  * <li>cardNumber: 卡号</li>
@@ -32,6 +33,16 @@ import com.everhomes.util.StringHelper;
  * <li>rechargeTime: 充值时间</li>
  * <li>createTime: 订单创建时间</li>
  * <li>rechargeType: 订单类型， {@link com.everhomes.rest.parking.ParkingRechargeType}}</li>
+ * <li>parkingLotName: 停车场名称</li>
+ * <li>startPeriod: 充值开始时间</li>
+ * <li>endPeriod: 充值结束时间</li>
+ * <li>parkingTime: 临时车停车时间</li>
+ * <li>errorDescription: 异常记录</li>
+ * <li>contact: 客服联系方式，来自停车场配置参数</li>
+ * <li>refundTime: 退款时间</li>
+ * <li>delayTime: 剩余免费总时间</li>
+ * <li>originalPrice: 原价</li>
+ * <li>invoiceName: 发票名称</li>
  * </ul>
  */
 public class ParkingRechargeOrderDTO {
@@ -292,14 +303,14 @@ public class ParkingRechargeOrderDTO {
     }
 
     public BigDecimal getMonthCount() {
-		return monthCount;
-	}
+        return monthCount;
+    }
 
-	public void setMonthCount(BigDecimal monthCount) {
-		this.monthCount = monthCount;
-	}
+    public void setMonthCount(BigDecimal monthCount) {
+        this.monthCount = monthCount;
+    }
 
-	public BigDecimal getPrice() {
+    public BigDecimal getPrice() {
         return price;
     }
 
@@ -344,19 +355,19 @@ public class ParkingRechargeOrderDTO {
         return StringHelper.toJsonString(this);
     }
 
-	public String getPaidType() {
-		return paidType;
-	}
+    public String getPaidType() {
+        return paidType;
+    }
 
-	public void setPaidType(String paidType) {
-		this.paidType = paidType;
-	}
+    public void setPaidType(String paidType) {
+        this.paidType = paidType;
+    }
 
-	public Byte getRechargeType() {
-		return rechargeType;
-	}
+    public Byte getRechargeType() {
+        return rechargeType;
+    }
 
-	public void setRechargeType(Byte rechargeType) {
-		this.rechargeType = rechargeType;
-	}
+    public void setRechargeType(Byte rechargeType) {
+        this.rechargeType = rechargeType;
+    }
 }

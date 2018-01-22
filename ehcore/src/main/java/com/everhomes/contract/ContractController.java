@@ -158,6 +158,19 @@ public class ContractController extends ControllerBase {
 	}
 
 	/**
+	 * <p>查看合同详情</p>
+	 * <b>URL: /contract/findContractForApp</b>
+	 */
+	@RequestMapping("findContractForApp")
+	@RestReturn(ContractDetailDTO.class)
+	public RestResponse findContractForApp(FindContractCommand cmd){
+		Integer namespaceId = cmd.getNamespaceId()==null? UserContext.getCurrentNamespaceId():cmd.getNamespaceId();
+		ContractService contractService = getContractService(namespaceId);
+		ContractDetailDTO detail = contractService.findContractForApp(cmd);
+		return new RestResponse(detail);
+	}
+
+	/**
 	 * <p>查看客户合同</p>
 	 * <b>URL: /contract/listCustomerContracts</b>
 	 */
@@ -254,6 +267,17 @@ public class ContractController extends ControllerBase {
 		ContractService contractService = getContractService(cmd.getNamespaceId());
 		contractService.entryContract(cmd);
 		return new RestResponse();
+	}
+
+	/**
+	 * <p>判断是否是管理员</p>
+	 * <b>URL: /contract/checkAdmin</b>
+	 */
+	@RequestMapping("checkAdmin")
+	@RestReturn(Boolean.class)
+	public RestResponse checkAdmin(CheckAdminCommand cmd){
+		ContractService contractService = getContractService(cmd.getNamespaceId());
+		return new RestResponse(contractService.checkAdmin(cmd));
 	}
 
 	/**

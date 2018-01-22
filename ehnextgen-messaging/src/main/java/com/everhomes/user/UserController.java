@@ -35,6 +35,7 @@ import com.everhomes.rest.user.*;
 import com.everhomes.scene.SceneService;
 import com.everhomes.user.admin.SystemUserPrivilegeMgr;
 import com.everhomes.util.*;
+
 import org.apache.commons.codec.digest.DigestUtils;
 import org.apache.commons.lang.StringUtils;
 import org.apache.commons.lang.math.NumberUtils;
@@ -48,6 +49,7 @@ import javax.servlet.http.Cookie;
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
 import javax.validation.Valid;
+
 import java.io.UnsupportedEncodingException;
 import java.net.URI;
 import java.net.URISyntaxException;
@@ -58,6 +60,7 @@ import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
+import java.util.UUID;
 import java.util.stream.Collectors;
 
 /**
@@ -925,6 +928,11 @@ public class UserController extends ControllerBase {
 	public RestResponse oauth2Authorize(@Valid AuthorizationCommand cmd) throws URISyntaxException {
 		User user = UserContext.current().getUser();
 
+		if(cmd.getclient_id() == null) {
+            throw RuntimeErrorException.errorWith(OAuth2ServiceErrorCode.SCOPE,
+                    OAuth2ServiceErrorCode.ERROR_INVALID_REQUEST, "OAuth2 client id is null");		    
+		}
+		
 		// double check in confirmation call to protect against tampering in confirmation callback
 		App app = this.appProvider.findAppByKey(cmd.getclient_id());
 		if(app == null) {
@@ -1392,6 +1400,21 @@ public class UserController extends ControllerBase {
     public RestResponse systemInfo(@Valid SystemInfoCommand cmd, HttpServletRequest request, HttpServletResponse response) {
         SystemInfoResponse obj = userService.updateUserBySystemInfo(cmd, request, response);
         RestResponse resp = new RestResponse(obj);
+        resp.setErrorCode(ErrorCodes.SUCCESS);
+        resp.setErrorDescription("OK");
+        return resp; 
+    }
+    
+    /**
+     * <b>URL: /user/genAppKey</b>
+     * <p>test</p>
+     * @return
+     */
+    @RequestMapping("genAppKey")
+    @RestReturn(String.class)
+    public RestResponse genAppKey() {
+        String s = UUID.randomUUID().toString() + " " + SignatureHelper.generateSecretKey();
+        RestResponse resp = new RestResponse(s);
         resp.setErrorCode(ErrorCodes.SUCCESS);
         resp.setErrorDescription("OK");
         return resp; 

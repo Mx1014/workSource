@@ -1,4 +1,4 @@
-// @formatter:off
+ // @formatter:off
 package com.everhomes.configuration;
 
 public interface ConfigConstants {
@@ -12,6 +12,7 @@ public interface ConfigConstants {
     public static final String MANAGE_SHOP_URL = "manage.shop.url";
     public static final String POST_SHARE_URL = "post.share.url";
     public static final String ACTIVITY_SHARE_URL = "activity.share.url";
+    public static final String POLL_SHARE_URL = "poll.share.url";
     public static final String USER_COUPON_URL = "user.coupon.url";
     public static final String APP_AGREEMENTS_URL = "app.agreements.url";
     public static final String PREFIX_URL = "prefix.url";
@@ -147,5 +148,6 @@ public interface ConfigConstants {
 	public static final String MY_PUBLISH_FLAG = "my.publish.flag";
 
     String RENTAL_ORDER_DETAIL_URL = "rental.order.detail.url";
+	String WORK_REPORT_VAL_DETAIL_URL = "work.report.val.detail.url";
 
 }

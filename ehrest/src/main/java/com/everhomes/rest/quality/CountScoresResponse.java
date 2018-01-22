@@ -1,14 +1,15 @@
 package com.everhomes.rest.quality;
 
-import java.util.List;
-
 import com.everhomes.discover.ItemType;
 import com.everhomes.util.StringHelper;
+
+import java.util.List;
 
 /**
  * <ul>
  *  <li>scores: 参考 {@link com.everhomes.rest.quality.ScoreGroupByTargetDTO}</li>
  *  <li>specifications: 列名称列表 参考 {@link com.everhomes.rest.quality.CountScoresSpecificationDTO}</li>
+ *  <li>averageScore: 平均分</li>
  * </ul>
  */
 public class CountScoresResponse {
@@ -18,6 +19,8 @@ public class CountScoresResponse {
 
 	@ItemType(ScoreGroupByTargetDTO.class)
 	private List<ScoreGroupByTargetDTO> scores;
+
+	private Double averageScore;
 
 	public List<CountScoresSpecificationDTO> getSpecifications() {
 		return specifications;
@@ -33,6 +36,14 @@ public class CountScoresResponse {
 
 	public void setScores(List<ScoreGroupByTargetDTO> scores) {
 		this.scores = scores;
+	}
+
+	public Double getAverageScore() {
+		return averageScore;
+	}
+
+	public void setAverageScore(Double averageScore) {
+		this.averageScore = averageScore;
 	}
 
 	@Override

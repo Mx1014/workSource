@@ -2,13 +2,14 @@ package com.everhomes.equipment;
 
 import com.everhomes.configuration.ConfigurationProvider;
 import com.everhomes.listing.CrossShardListingLocator;
-import com.everhomes.organization.OrganizationMember;
 import com.everhomes.organization.OrganizationProvider;
 import com.everhomes.portal.PortalService;
 import com.everhomes.rest.acl.PrivilegeConstants;
+import com.everhomes.rest.equipment.DeleteEquipmentPlanCommand;
+import com.everhomes.rest.equipment.EquipmentInspectionPlanDTO;
+import com.everhomes.rest.equipment.EquipmentStandardRelationDTO;
 import com.everhomes.rest.equipment.EquipmentTaskDTO;
 import com.everhomes.rest.equipment.ListEquipmentTasksResponse;
-import com.everhomes.rest.equipment.ReviewResult;
 import com.everhomes.rest.equipment.SearchEquipmentTasksCommand;
 import com.everhomes.rest.quality.OwnerType;
 import com.everhomes.search.AbstractElasticSearch;
@@ -26,7 +27,11 @@ import org.elasticsearch.action.search.SearchType;
 import org.elasticsearch.client.Requests;
 import org.elasticsearch.common.xcontent.XContentBuilder;
 import org.elasticsearch.common.xcontent.XContentFactory;
-import org.elasticsearch.index.query.*;
+import org.elasticsearch.index.query.FilterBuilder;
+import org.elasticsearch.index.query.FilterBuilders;
+import org.elasticsearch.index.query.QueryBuilder;
+import org.elasticsearch.index.query.QueryBuilders;
+import org.elasticsearch.index.query.RangeFilterBuilder;
 import org.elasticsearch.search.sort.SortBuilders;
 import org.elasticsearch.search.sort.SortOrder;
 import org.slf4j.Logger;
@@ -46,7 +51,11 @@ public class EquipmentTasksSearcherImpl extends AbstractElasticSearch implements
 	@Autowired
 	private EquipmentProvider equipmentProvider;
 
-	@Autowired
+    @Autowired
+    private EquipmentService equipmentService;
+
+
+    @Autowired
 	private ConfigurationProvider configProvider;
 
 	@Autowired
@@ -141,7 +150,7 @@ public class EquipmentTasksSearcherImpl extends AbstractElasticSearch implements
 //        FilterBuilder fb = FilterBuilders.notFilter(nfb);
 //产品要求把已失效的任务也显示出来 add by xiongying20170217
         //改用namespaceId add by xiongying 20170328
-        FilterBuilder fb = FilterBuilders.termFilter("namespaceId", UserContext.getCurrentNamespaceId());
+        FilterBuilder fb = FilterBuilders.termFilter("namespaceId", cmd.getNamespaceId());
 //        FilterBuilder fb = FilterBuilders.termFilter("ownerId", cmd.getOwnerId());
 ////        fb = FilterBuilders.andFilter(fb, FilterBuilders.termFilter("ownerId", cmd.getOwnerId()));
 //        fb = FilterBuilders.andFilter(fb, FilterBuilders.termFilter("ownerType", OwnerType.fromCode(cmd.getOwnerType()).getCode()));
@@ -165,21 +174,20 @@ public class EquipmentTasksSearcherImpl extends AbstractElasticSearch implements
         	fb = FilterBuilders.andFilter(fb, rf);
         }
 
-
-        if(cmd.getStatus() != null)
-        	fb = FilterBuilders.andFilter(fb, FilterBuilders.termFilter("status", cmd.getStatus()));
-
-        if(cmd.getReviewStatus() != null)
-        	fb = FilterBuilders.andFilter(fb, FilterBuilders.termFilter("reviewStatus", cmd.getReviewStatus()));
-
         if(cmd.getTaskType() != null)
         	fb = FilterBuilders.andFilter(fb, FilterBuilders.termFilter("taskType", cmd.getTaskType()));
 
         if(cmd.getInspectionCategoryId() != null)
         	fb = FilterBuilders.andFilter(fb, FilterBuilders.termFilter("inspectionCategoryId", cmd.getInspectionCategoryId()));
 
+        //3.0.3需要改成多状态匹配
+        if (cmd.getStatus() != null && cmd.getStatus().size() > 0) {
+                fb = FilterBuilders.andFilter(fb, FilterBuilders.termsFilter("status", cmd.getStatus()));
+        }
+        //	fb = FilterBuilders.andFilter(fb, FilterBuilders.termFilter("status", cmd.getStatus()));
+
         int pageSize = PaginationConfigHelper.getPageSize(configProvider, cmd.getPageSize());
-        Long anchor = 0l;
+        Long anchor = 0L;
         if(cmd.getPageAnchor() != null) {
             anchor = cmd.getPageAnchor();
         }
@@ -202,47 +210,43 @@ public class EquipmentTasksSearcherImpl extends AbstractElasticSearch implements
         	 response.setNextPageAnchor(null);
             }
 
-        List<EquipmentTaskDTO> tasks = new ArrayList<EquipmentTaskDTO>();
-        for(Long id : ids) {
-        	EquipmentInspectionTasks task = equipmentProvider.findEquipmentTaskById(id);
-        	EquipmentTaskDTO dto = ConvertHelper.convert(task, EquipmentTaskDTO.class);
+        List<EquipmentTaskDTO> tasks = new ArrayList<>();
+        for (Long id : ids) {
+            EquipmentInspectionTasks task = equipmentProvider.findEquipmentTaskById(id);
+            EquipmentTaskDTO dto = ConvertHelper.convert(task, EquipmentTaskDTO.class);
 
-        	EquipmentInspectionStandards standard = equipmentProvider.findStandardById(task.getStandardId());
-            if(null != standard) {
-            	dto.setStandardDescription(standard.getDescription());
-    			dto.setStandardName(standard.getName());
-            	dto.setTaskType(standard.getStandardType());
-            	EquipmentInspectionTemplates template = equipmentProvider.findEquipmentInspectionTemplate(standard.getTemplateId(), standard.getOwnerId(), standard.getOwnerType());
-        		if(template != null) {
-        			dto.setTemplateId(template.getId());
-        			dto.setTemplateName(template.getName());
-        		}
+            DeleteEquipmentPlanCommand command = new DeleteEquipmentPlanCommand();
+            command.setOwnerId(cmd.getOwnerId());
+            command.setOwnerType(cmd.getOwnerType());
+            command.setId(task.getPlanId());
+            if (task.getPlanId() == null || task.getPlanId() == 0L) {
+                EquipmentInspectionPlanDTO plansDTO = equipmentService.getEquipmmentInspectionPlanById(command);
+                if (null != plansDTO) {
+                    dto.setPlanDescription(plansDTO.getRemarks());
+                    dto.setTaskType(plansDTO.getPlanType());
+                    dto.setEquipments(plansDTO.getEquipmentStandardRelations());
+                }
+            } else {
+                //兼容之前的task
+                EquipmentStandardRelationDTO equipmentStandardRelation = new EquipmentStandardRelationDTO();
+                EquipmentInspectionStandards standard = equipmentProvider.findStandardById(task.getStandardId());
+                if (null != standard) {
+                    dto.setPlanDescription(standard.getDescription());
+                    dto.setTaskType(standard.getStandardType());
+                    equipmentStandardRelation.setStandardId(standard.getId());
+                    equipmentStandardRelation.setStandardName(standard.getName());
+                }
+
+                EquipmentInspectionEquipments equipment = equipmentProvider.findEquipmentById(task.getEquipmentId());
+                if (null != equipment) {
+                    equipmentStandardRelation.setEquipmentId(equipment.getId());
+                    equipmentStandardRelation.setEquipmentName(equipment.getName());
+                    equipmentStandardRelation.setLocation(equipment.getLocation());
+                }
+                List<EquipmentStandardRelationDTO> equipments = new ArrayList<>();
+                equipments.add(equipmentStandardRelation);
+                dto.setEquipments(equipments);
             }
-
-            EquipmentInspectionEquipments equipment = equipmentProvider.findEquipmentById(task.getEquipmentId());
-            if(null != equipment) {
-            	dto.setEquipmentName(equipment.getName());
-            	dto.setEquipmentLocation(equipment.getLocation());
-            	dto.setQrCodeFlag(equipment.getQrCodeFlag());
-            }
-
-            if(task.getExecutorId() != null && task.getExecutorId() != 0) {
-                //总公司分公司 by xiongying20170328
-                List<OrganizationMember> executors = organizationProvider.listOrganizationMembersByUId(task.getExecutorId());
-//            	OrganizationMember executor = organizationProvider.findOrganizationMemberByOrgIdAndUId(task.getExecutorId(), task.getOwnerId());
-            	if(executors != null && executors.size() > 0) {
-            		dto.setExecutorName(executors.get(0).getContactName());
-            	}
-        	}
-
-        	if(task.getOperatorId() != null && task.getOperatorId() != 0) {
-                List<OrganizationMember> operators = organizationProvider.listOrganizationMembersByUId(task.getOperatorId());
-            	if(operators != null && operators.size() > 0) {
-            		dto.setOperatorName(operators.get(0).getContactName());
-            	}
-        	}
-
-        	tasks.add(dto);
         }
         response.setTasks(tasks);
 
@@ -288,18 +292,18 @@ public class EquipmentTasksSearcherImpl extends AbstractElasticSearch implements
             b.field("taskName", task.getTaskName());
             b.field("inspectionCategoryId", task.getInspectionCategoryId());
 
-            // reviewStatus: 任务审核状态 0: UNREVIEWED 1: REVIEWED
-            if (ReviewResult.fromStatus(task.getReviewResult()) == ReviewResult.NONE) {
-                b.field("reviewStatus", 0);
-            } else if (ReviewResult.fromStatus(task.getReviewResult()) == ReviewResult.QUALIFIED) {
-                b.field("reviewStatus", 1);
-            } else if (ReviewResult.fromStatus(task.getReviewResult()) == ReviewResult.REVIEW_DELAY) {
-                b.field("reviewStatus", 4);
-            }
+//            // reviewStatus: 任务审核状态 0: UNREVIEWED 1: REVIEWED
+//            if (ReviewResult.fromStatus(task.getReviewResult()) == ReviewResult.NONE) {
+//                b.field("reviewStatus", 0);
+//            } else if (ReviewResult.fromStatus(task.getReviewResult()) == ReviewResult.QUALIFIED) {
+//                b.field("reviewStatus", 1);
+//            } else if (ReviewResult.fromStatus(task.getReviewResult()) == ReviewResult.REVIEW_DELAY) {
+//                b.field("reviewStatus", 4);
+//            }
 
-            EquipmentInspectionStandards standard = equipmentProvider.findStandardById(task.getStandardId());
-            if(null != standard) {
-            	b.field("taskType", standard.getStandardType());
+            EquipmentInspectionPlans plan = equipmentProvider.getEquipmmentInspectionPlanById(task.getPlanId());
+            if(null != plan) {
+            	b.field("taskType", plan.getPlanType());
             } else {
             	b.field("taskType", "");
             }

@@ -2213,74 +2213,95 @@ public class PropertyMgrServiceImpl implements PropertyMgrService {
 			CommunityAddressMapping communityAddressMapping = organizationProvider.findOrganizationAddressMapping(organizationId, address.getCommunityId(), address.getId());
 			communityAddressMapping.setLivingStatus(cmd.getStatus());
 			organizationProvider.updateOrganizationAddressMapping(communityAddressMapping);
-		}else {
-			if (!StringUtils.isEmpty(cmd.getApartmentName())) {
-				Address other = addressProvider.findAddressByBuildingApartmentName(address.getNamespaceId(), address.getCommunityId(), address.getBuildingName(), cmd.getApartmentName());
-				if (other != null && other.getId() != cmd.getId()) {
-					throw RuntimeErrorException.errorWith(AddressServiceErrorCode.SCOPE, AddressServiceErrorCode.ERROR_EXISTS_APARTMENT_NAME, "exists apartment name");
-				}
-				address.setApartmentName(cmd.getApartmentName());
-				address.setAddress(address.getBuildingName() + "-" + cmd.getApartmentName());
-			}else if (cmd.getAreaSize() != null) {
-				address.setAreaSize(cmd.getAreaSize());
-			}else if (cmd.getSharedArea() != null) {
-				Double buildingSharedArea = building.getSharedArea() == null ? 0.0 : building.getSharedArea();
-				Double oldAddressSharedArea = address.getSharedArea() == null ? 0.0 : address.getSharedArea();
-				building.setSharedArea(buildingSharedArea - oldAddressSharedArea + cmd.getSharedArea());
-				Double communitySharedArea = community.getSharedArea() == null ? 0.0 : community.getSharedArea();
-				community.setSharedArea(communitySharedArea - oldAddressSharedArea + cmd.getSharedArea());
-
-				address.setSharedArea(cmd.getSharedArea());
-			}else if (cmd.getBuildArea() != null) {
-				Double buildingBuildArea = building.getBuildArea() == null ? 0.0 : building.getBuildArea();
-				Double oldAddressBuildArea = address.getBuildArea() == null ? 0.0 : address.getBuildArea();
-				building.setBuildArea(buildingBuildArea - oldAddressBuildArea + cmd.getBuildArea());
-				Double communityBuildArea = community.getBuildArea() == null ? 0.0 : community.getBuildArea();
-				community.setBuildArea(communityBuildArea - oldAddressBuildArea + cmd.getBuildArea());
-
-				address.setBuildArea(cmd.getBuildArea());
-			}else if (cmd.getRentArea() != null) {
-				Double buildingRentArea = building.getRentArea() == null ? 0.0 : building.getRentArea();
-				Double oldAddressRentArea = address.getRentArea() == null ? 0.0 : address.getRentArea();
-				building.setRentArea(buildingRentArea - oldAddressRentArea + cmd.getRentArea());
-				Double communityRentArea = community.getRentArea() == null ? 0.0 : community.getRentArea();
-				community.setRentArea(communityRentArea - oldAddressRentArea + cmd.getRentArea());
-
-				address.setRentArea(cmd.getRentArea());
-			}else if (cmd.getChargeArea() != null) {
-				Double buildingChargeArea = building.getChargeArea() == null ? 0.0 : building.getChargeArea();
-				Double oldAddressChargeArea = address.getChargeArea() == null ? 0.0 : address.getChargeArea();
-				building.setChargeArea(buildingChargeArea - oldAddressChargeArea + cmd.getChargeArea());
-				Double communityChargeArea = community.getChargeArea() == null ? 0.0 : community.getChargeArea();
-				community.setChargeArea(communityChargeArea - oldAddressChargeArea + cmd.getChargeArea());
-
-				address.setChargeArea(cmd.getChargeArea());
-			}else if (cmd.getCategoryItemId() != null) {
-				address.setCategoryItemId(cmd.getCategoryItemId());
-//				ScopeFieldItem item = fieldProvider.findScopeFieldItemByFieldItemId(address.getNamespaceId(), cmd.getCategoryItemId());
-				ScopeFieldItem item = fieldService.findScopeFieldItemByFieldItemId(address.getNamespaceId(), address.getCommunityId(), cmd.getCategoryItemId());
-				if(item != null) {
-					address.setCategoryItemName(item.getItemDisplayName());
-				}
-			}else if (cmd.getSourceItemId() != null) {
-				address.setSourceItemId(cmd.getSourceItemId());
-//				ScopeFieldItem item = fieldProvider.findScopeFieldItemByFieldItemId(address.getNamespaceId(), cmd.getSourceItemId());
-				ScopeFieldItem item = fieldService.findScopeFieldItemByFieldItemId(address.getNamespaceId(), address.getCommunityId(), cmd.getSourceItemId());
-				if(item != null) {
-					address.setSourceItemName(item.getItemDisplayName());
-				}
-			}else if (cmd.getDecorateStatus() != null) {
-				address.setDecorateStatus(cmd.getDecorateStatus());
-			}else if (cmd.getOrientation() != null) {
-				address.setOrientation(cmd.getOrientation());
-			}else if (cmd.getApartmentFloor() != null) {
-				address.setApartmentFloor(cmd.getApartmentFloor());
-			}
-			addressProvider.updateAddress(address);
-
-			communityProvider.updateBuilding(building);
-			communityProvider.updateCommunity(community);
 		}
+
+		if (!StringUtils.isEmpty(cmd.getApartmentName())) {
+			Address other = addressProvider.findAddressByBuildingApartmentName(address.getNamespaceId(), address.getCommunityId(), address.getBuildingName(), cmd.getApartmentName());
+			if (other != null && !other.getId().equals(cmd.getId())) {
+				throw RuntimeErrorException.errorWith(AddressServiceErrorCode.SCOPE, AddressServiceErrorCode.ERROR_EXISTS_APARTMENT_NAME, "exists apartment name");
+			}
+			address.setApartmentName(cmd.getApartmentName());
+			address.setAddress(address.getBuildingName() + "-" + cmd.getApartmentName());
+		}
+
+		if (cmd.getAreaSize() != null) {
+			address.setAreaSize(cmd.getAreaSize());
+		}
+
+		if (cmd.getSharedArea() != null) {
+			Double buildingSharedArea = building.getSharedArea() == null ? 0.0 : building.getSharedArea();
+			Double oldAddressSharedArea = address.getSharedArea() == null ? 0.0 : address.getSharedArea();
+			building.setSharedArea(buildingSharedArea - oldAddressSharedArea + cmd.getSharedArea());
+			Double communitySharedArea = community.getSharedArea() == null ? 0.0 : community.getSharedArea();
+			community.setSharedArea(communitySharedArea - oldAddressSharedArea + cmd.getSharedArea());
+
+			address.setSharedArea(cmd.getSharedArea());
+		}
+
+		if (cmd.getBuildArea() != null) {
+			Double buildingBuildArea = building.getBuildArea() == null ? 0.0 : building.getBuildArea();
+			Double oldAddressBuildArea = address.getBuildArea() == null ? 0.0 : address.getBuildArea();
+			building.setBuildArea(buildingBuildArea - oldAddressBuildArea + cmd.getBuildArea());
+			Double communityBuildArea = community.getBuildArea() == null ? 0.0 : community.getBuildArea();
+			community.setBuildArea(communityBuildArea - oldAddressBuildArea + cmd.getBuildArea());
+
+			address.setBuildArea(cmd.getBuildArea());
+		}
+
+		if (cmd.getRentArea() != null) {
+			Double buildingRentArea = building.getRentArea() == null ? 0.0 : building.getRentArea();
+			Double oldAddressRentArea = address.getRentArea() == null ? 0.0 : address.getRentArea();
+			building.setRentArea(buildingRentArea - oldAddressRentArea + cmd.getRentArea());
+			Double communityRentArea = community.getRentArea() == null ? 0.0 : community.getRentArea();
+			community.setRentArea(communityRentArea - oldAddressRentArea + cmd.getRentArea());
+
+			address.setRentArea(cmd.getRentArea());
+		}
+
+		if (cmd.getChargeArea() != null) {
+			Double buildingChargeArea = building.getChargeArea() == null ? 0.0 : building.getChargeArea();
+			Double oldAddressChargeArea = address.getChargeArea() == null ? 0.0 : address.getChargeArea();
+			building.setChargeArea(buildingChargeArea - oldAddressChargeArea + cmd.getChargeArea());
+			Double communityChargeArea = community.getChargeArea() == null ? 0.0 : community.getChargeArea();
+			community.setChargeArea(communityChargeArea - oldAddressChargeArea + cmd.getChargeArea());
+
+			address.setChargeArea(cmd.getChargeArea());
+		}
+
+		if (cmd.getCategoryItemId() != null) {
+			address.setCategoryItemId(cmd.getCategoryItemId());
+//				ScopeFieldItem item = fieldProvider.findScopeFieldItemByFieldItemId(address.getNamespaceId(), cmd.getCategoryItemId());
+			ScopeFieldItem item = fieldService.findScopeFieldItemByFieldItemId(address.getNamespaceId(), address.getCommunityId(), cmd.getCategoryItemId());
+			if(item != null) {
+				address.setCategoryItemName(item.getItemDisplayName());
+			}
+		}
+
+		if (cmd.getSourceItemId() != null) {
+			address.setSourceItemId(cmd.getSourceItemId());
+//				ScopeFieldItem item = fieldProvider.findScopeFieldItemByFieldItemId(address.getNamespaceId(), cmd.getSourceItemId());
+			ScopeFieldItem item = fieldService.findScopeFieldItemByFieldItemId(address.getNamespaceId(), address.getCommunityId(), cmd.getSourceItemId());
+			if(item != null) {
+				address.setSourceItemName(item.getItemDisplayName());
+			}
+		}
+
+		if (cmd.getDecorateStatus() != null) {
+			address.setDecorateStatus(cmd.getDecorateStatus());
+		}
+
+		if (cmd.getOrientation() != null) {
+			address.setOrientation(cmd.getOrientation());
+		}
+
+		if (cmd.getApartmentFloor() != null) {
+			address.setApartmentFloor(cmd.getApartmentFloor());
+		}
+		addressProvider.updateAddress(address);
+
+		communityProvider.updateBuilding(building);
+		communityProvider.updateCommunity(community);
+
 	}
 
 	@Override
@@ -2472,7 +2493,7 @@ public class PropertyMgrServiceImpl implements PropertyMgrService {
 		Map<Long, Family> familyMap = familyProvider.mapFamilyByAddressIds(aptIdList);
 		
 		//处理每个门牌入住的人数
-		Map<Long, Integer> ownerCountMap = propertyMgrProvider.mapOrganizationOwnerCountByAddressIds(UserContext.getCurrentNamespaceId(), aptIdList);
+		Map<Long, Integer> ownerCountMap = propertyMgrProvider.mapOrganizationOwnerCountByAddressIds(UserContext.getCurrentNamespaceId(cmd.getNamespaceId()), aptIdList);
 		
 		//处理小区地址关联表
 		Map<Long, CommunityAddressMapping> communityAddressMappingMap = propertyMgrProvider.mapAddressMappingByAddressIds(aptIdList);
@@ -2534,6 +2555,7 @@ public class PropertyMgrServiceImpl implements PropertyMgrService {
 		dto.setAddressId(addressId);
 		dto.setAreaSize(apartmentDTO.getAreaSize());
 		dto.setEnterpriseName(apartmentDTO.getEnterpriseName());
+		dto.setApartmentFloor(apartmentDTO.getApartmentFloor());
 		
 		//设置家庭信息
 		setFamilyInfo(dto, familyMap);
@@ -4710,7 +4732,7 @@ public class PropertyMgrServiceImpl implements PropertyMgrService {
         newPmOwner.setCreateTime(new Timestamp(DateHelper.currentGMTTime().getTime()));
         newPmOwner.setStatus(OrganizationOwnerStatus.NORMAL.getCode());
         newPmOwner.setAvatar(memberUser.getAvatar());
-        newPmOwner.setOrgOwnerTypeId(8L);// 没想到怎么做比较好, 先写死, 归类为"无"
+        newPmOwner.setOrgOwnerTypeId(7L);// 先写死, 归类为"其他"
         newPmOwner.setGender(memberUser.getGender());
         newPmOwner.setCommunityId(memberUser.getCommunityId() == null ? null : memberUser.getCommunityId().toString());
         newPmOwner.setContactType(ContactType.MOBILE.getCode());
@@ -4772,14 +4794,15 @@ public class PropertyMgrServiceImpl implements PropertyMgrService {
                     ownerAddress.setNamespaceId(currentUser.getNamespaceId());
                     ownerAddress.setOrganizationOwnerId(ownerId);
                     ownerAddress.setLivingStatus(addressCmd.getLivingStatus());
-					ownerAddress.setAuthType(OrganizationOwnerAddressAuthType.INACTIVE.getCode());
+					ownerAddress.setAuthType(OrganizationOwnerAddressAuthType.ACTIVE.getCode());
                     if (addressCmd.getCheckInDate() != null) {
                         createOrganizationOwnerBehavior(ownerId, address.getId(), addressCmd.getCheckInDate(), OrganizationOwnerBehaviorType.IMMIGRATION);
                     }
                     // 如果小区里有该手机号的用户, 则自动审核当前客户
-                    autoApprovalOrganizationOwnerAddress(cmd.getCommunityId(), cmd.getContactToken(), ownerAddress);
+					//只有在申请了才会自动通过，现要改为只要是注册用户不管申没申请都自动同步给客户 19558 by xiongying20171219
+//                    autoApprovalOrganizationOwnerAddress(cmd.getCommunityId(), cmd.getContactToken(), ownerAddress);
                     propertyMgrProvider.createOrganizationOwnerAddress(ownerAddress);
-                    // getIntoFamily(address, cmd.getContactToken(), currentUser.getNamespaceId());
+					getIntoFamily(address, cmd.getContactToken(), currentUser.getNamespaceId());
                 } else {
                     LOGGER.error("CreateOrganizationOwner: address id is wrong! addressId = {}", addressCmd.getAddressId());
                 }
@@ -4989,11 +5012,21 @@ public class PropertyMgrServiceImpl implements PropertyMgrService {
 		// TODO Auto-generated method stub
 		List<CommunityPmOwner> owners = propertyMgrProvider.listCommunityPmOwnersByToken(
 				identifier.getNamespaceId(), identifier.getIdentifierToken());
+		LOGGER.debug("processUserForOwner: user identifier: {}, owners: {}", identifier.getIdentifierToken(), StringHelper.toJsonString(owners));
 		if(null != owners && owners.size() > 0) {
 			for(CommunityPmOwner owner : owners) {
-				Address address = addressProvider.findAddressById(owner.getAddressId());
-				//jiarujiating
-				getIntoFamily(address, identifier.getIdentifierToken(), identifier.getNamespaceId());
+				List<OrganizationOwnerAddress> ownerAddressList = propertyMgrProvider.listOrganizationOwnerAddressByOwnerId(identifier.getNamespaceId(), owner.getId());
+//				Address address = addressProvider.findAddressById(owner.getAddressId());
+				if(ownerAddressList != null && ownerAddressList.size() > 0) {
+					for(OrganizationOwnerAddress ownerAddress : ownerAddressList) {
+						Address address = addressProvider.findAddressById(ownerAddress.getAddressId());
+						if(address != null) {
+							//jiarujiating
+							getIntoFamily(address, identifier.getIdentifierToken(), identifier.getNamespaceId());
+						}
+					}
+				}
+
 			}
 		}
 	}
@@ -5205,6 +5238,20 @@ public class PropertyMgrServiceImpl implements PropertyMgrService {
 				dto.setAddress(address.getAddress());
 				dto.setAddressId(address.getId());
 				dto.setApartment(address.getApartmentName());
+				dto.setChargeArea(address.getChargeArea());
+				dto.setOrientation(address.getOrientation());
+				if (address.getLivingStatus() == null) {
+					CommunityAddressMapping mapping =  propertyMgrProvider.findAddressMappingByAddressId(address.getId());
+					if(mapping != null){
+						address.setLivingStatus(mapping.getLivingStatus());
+					}
+					else{
+						address.setLivingStatus(AddressMappingStatus.LIVING.getCode());
+					}
+				}
+				dto.setApartmentLivingStatus(address.getLivingStatus());
+
+
 			}
 
             LocaleString addressStatusLocale = localeStringProvider.find(OrganizationOwnerLocaleStringScope.AUTH_TYPE_SCOPE,
@@ -5626,14 +5673,38 @@ public class PropertyMgrServiceImpl implements PropertyMgrService {
                     "The organization owner %s already in address %s.", cmd.getOrgOwnerId(), cmd.getAddressId());
         }
         ownerAddress = createOrganizationOwnerAddress(address.getId(), cmd.getLivingStatus(), currentNamespaceId(),
-                cmd.getOrgOwnerId(), OrganizationOwnerAddressAuthType.INACTIVE);
+                cmd.getOrgOwnerId(), OrganizationOwnerAddressAuthType.ACTIVE);
         // 自动审核用户与客户
+		//只有在申请了才会自动通过，现要改为只要是注册用户不管申没申请都自动同步给客户 19558 by xiongying20171219
         CommunityPmOwner pmOwner = propertyMgrProvider.findPropOwnerById(cmd.getOrgOwnerId());
         if (pmOwner != null) {
-            autoApprovalOrganizationOwnerAddress(address.getCommunityId(), pmOwner.getContactToken(), ownerAddress);
+			getIntoFamily(address, pmOwner.getContactToken(), pmOwner.getNamespaceId());
+//            autoApprovalOrganizationOwnerAddress(address.getCommunityId(), pmOwner.getContactToken(), ownerAddress);
         }
         return buildOrganizationOwnerAddressDTO(cmd, address, ownerAddress);
     }
+
+	@Override
+	public void addAddressToOrganizationOwner(Integer namespaceId, Long addressId, Long orgOwnerId) {
+		Address address = addressProvider.findAddressById(addressId);
+		if (address == null) {
+			LOGGER.error("The address is not exist, addressId = {}.", addressId);
+			return ;
+		}
+		OrganizationOwnerAddress ownerAddress = propertyMgrProvider.findOrganizationOwnerAddressByOwnerAndAddress(
+				namespaceId, orgOwnerId, addressId);
+		if (ownerAddress != null) {
+			LOGGER.error("The organization owner {} already in address {}.", orgOwnerId, addressId);
+			return ;
+		}
+		createOrganizationOwnerAddress(address.getId(), AddressLivingStatus.ACTIVE.getCode(), namespaceId,
+				orgOwnerId, OrganizationOwnerAddressAuthType.ACTIVE);
+
+		CommunityPmOwner pmOwner = propertyMgrProvider.findPropOwnerById(orgOwnerId);
+		if (pmOwner != null) {
+			getIntoFamily(address, pmOwner.getContactToken(), pmOwner.getNamespaceId());
+		}
+	}
 
     @Override
     public OrganizationOwnerAddress createOrganizationOwnerAddress(Long addressId, Byte livingStatus, Integer namespaceId,
@@ -5679,6 +5750,33 @@ public class PropertyMgrServiceImpl implements PropertyMgrService {
 
         createAuditLog(ownerAddress.getId(), ownerAddress.getClass());
     }
+
+	@Override
+	public void deleteAddressToOrgOwner(Integer namespaceId, Long addressId, Long orgOwnerId) {
+		Address address = addressProvider.findAddressById(addressId);
+		if (address == null) {
+			LOGGER.error("The address is not exist, addressId = {}.", addressId);
+			return ;
+		}
+		OrganizationOwnerAddress ownerAddress = propertyMgrProvider.findOrganizationOwnerAddressByOwnerAndAddress(
+				namespaceId, orgOwnerId, address.getId());
+		if (ownerAddress == null) {
+			LOGGER.error("The ownerAddress is not exist.");
+			return ;
+		}
+		propertyMgrProvider.deleteOrganizationOwnerAddress(ownerAddress);
+		// 创建删除行为记录
+		createOrganizationOwnerBehavior(ownerAddress.getOrganizationOwnerId(), ownerAddress.getAddressId(),
+				System.currentTimeMillis(), OrganizationOwnerBehaviorType.DELETE);
+
+		// 如果当前用户在该地址下认证过,则移除认证状态
+		Family family = this.familyProvider.findFamilyByAddressId(addressId);
+		if (family != null) {
+			leaveFamilyByOwnerId(orgOwnerId, family.getId());
+		}
+
+		createAuditLog(ownerAddress.getId(), ownerAddress.getClass());
+	}
 
     private void createAuditLog(Long resourceId, Class<?> resourceType){
         AuditLog log = new AuditLog();
@@ -5779,7 +5877,7 @@ public class PropertyMgrServiceImpl implements PropertyMgrService {
             throw errorWith(AddressServiceErrorCode.SCOPE, AddressServiceErrorCode.ERROR_ADDRESS_NOT_EXIST,
                     "The address %s is not exist.", cmd.getAddressId());
         }
-        Integer namespaceId = currentNamespaceId();
+        Integer namespaceId = cmd.getNamespaceId();
         List<OrganizationOwnerAddress> ownerAddressList = propertyMgrProvider.listOrganizationOwnerAddressByAddressId(
                 namespaceId, address.getId());
 
@@ -5934,7 +6032,7 @@ public class PropertyMgrServiceImpl implements PropertyMgrService {
 			dto.setOrgOwnerType(ownerType != null ? ownerType.getDisplayName() : null);
 			return dto;
 		};
-		return propertyMgrProvider.listOrganizationOwnersByAddressId(user.getNamespaceId(), address.getId(), mapper);
+		return propertyMgrProvider.listOrganizationOwnersByAddressId(address.getNamespaceId(), address.getId(), mapper);
 	}
 
     @Override
@@ -6481,7 +6579,10 @@ public class PropertyMgrServiceImpl implements PropertyMgrService {
 		dto.setChargingItemName(itemName);
 		String standardName = assetProvider.getStandardNameById(dto.getChargingStandardId());
 		dto.setChargingStandardName(standardName);
-
+		String lateFeeStandardName = assetProvider.getStandardNameById(dto.getLateFeeStandardId());
+		dto.setLateFeeStandardName(lateFeeStandardName);
+		String lateFeeformula = assetProvider.findFormulaByChargingStandardId(dto.getLateFeeStandardId());
+		dto.setLateFeeformula(lateFeeformula);
 		processDefaultChargingItemAddresses(dto);
 		return dto;
 	}

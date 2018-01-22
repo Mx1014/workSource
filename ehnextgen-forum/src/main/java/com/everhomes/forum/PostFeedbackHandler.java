@@ -3,14 +3,12 @@ package com.everhomes.forum;
 import com.everhomes.bus.LocalEventBus;
 import com.everhomes.bus.LocalEventContext;
 import com.everhomes.bus.SystemEvent;
-import com.everhomes.entity.EntityType;
-import com.everhomes.rest.category.CategoryConstants;
-import com.everhomes.rest.forum.*;
-import com.everhomes.rest.search.SearchContentConstants;
-import com.everhomes.rest.ui.user.ContentBriefDTO;
-import com.everhomes.rest.ui.user.TopicFootnote;
-import com.everhomes.rest.user.*;
-import com.everhomes.rest.visibility.VisibleRegionType;
+import com.everhomes.rest.forum.ForumServiceErrorCode;
+import com.everhomes.rest.forum.PostStatus;
+import com.everhomes.rest.user.FeedbackCommand;
+import com.everhomes.rest.user.FeedbackDTO;
+import com.everhomes.rest.user.FeedbackHandleType;
+import com.everhomes.rest.user.UpdateFeedbackCommand;
 import com.everhomes.server.schema.tables.pojos.EhForumPosts;
 import com.everhomes.user.Feedback;
 import com.everhomes.user.FeedbackHandler;
@@ -22,9 +20,6 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
-
-import java.sql.Timestamp;
-import java.text.SimpleDateFormat;
 
 @Component(FeedbackHandler.FEEDBACKHANDLER + FeedbackHandler.POST)
 public class PostFeedbackHandler implements FeedbackHandler {
@@ -48,22 +43,22 @@ public class PostFeedbackHandler implements FeedbackHandler {
 
 	@Override
 	public void afterAddFeedback(Feedback feedback) {
-		NewTopicCommand ntc = new NewTopicCommand();
-		ntc.setForumId(ForumConstants.FEEDBACK_FORUM);
-		ntc.setCreatorTag(EntityType.USER.getCode());
-		ntc.setTargetTag(EntityType.USER.getCode());
-		ntc.setContentCategory(CategoryConstants.CATEGORY_ID_TOPIC_COMMON);
-		ntc.setSubject(feedback.getSubject());
-		if(feedback.getProofResourceUri() == null || "".equals(feedback.getProofResourceUri()))
-			ntc.setContentType(PostContentType.TEXT.getCode());
-		else{
-			ntc.setContentType(PostContentType.IMAGE.getCode());
-		}
-		ntc.setContent(feedback.getContent());
-		ntc.setVisibleRegionType(VisibleRegionType.COMMUNITY.getCode());
-		ntc.setVisibleRegionId(0L);
-
-		forumService.createTopic(ntc);
+//		NewTopicCommand ntc = new NewTopicCommand();
+//		ntc.setForumId(ForumConstants.FEEDBACK_FORUM);
+//		ntc.setCreatorTag(EntityType.USER.getCode());
+//		ntc.setTargetTag(EntityType.USER.getCode());
+//		ntc.setContentCategory(CategoryConstants.CATEGORY_ID_TOPIC_COMMON);
+//		ntc.setSubject(feedback.getSubject());
+//		if(feedback.getProofResourceUri() == null || "".equals(feedback.getProofResourceUri()))
+//			ntc.setContentType(PostContentType.TEXT.getCode());
+//		else{
+//			ntc.setContentType(PostContentType.IMAGE.getCode());
+//		}
+//		ntc.setContent(feedback.getContent());
+//		ntc.setVisibleRegionType(VisibleRegionType.COMMUNITY.getCode());
+//		ntc.setVisibleRegionId(0L);
+//
+//		forumService.createTopic(ntc);
 	}
 
 	@Override
@@ -95,26 +90,35 @@ public class PostFeedbackHandler implements FeedbackHandler {
 
 	@Override
 	public void feedbackEvent(Feedback feedback) {
-		if (FeedbackVerifyType.fromStatus(feedback.getVerifyType()) == FeedbackVerifyType.FALSE) {
-			return;
-		}
-		Post post = forumProvider.findPostById(feedback.getTargetId());
-		if(post == null){
-			return;
-		}
+        Post post = forumProvider.findPostById(feedback.getTargetId());
+        if(post == null) {
+            return;
+        }
+        Post parentPost = null;
+        if (post.getParentPostId() != null && post.getParentPostId() != 0) {
+            parentPost = forumProvider.findPostById(post.getParentPostId());
+        }
+        Integer namespaceId = UserContext.getCurrentNamespaceId();
 
-		Integer namespaceId = UserContext.getCurrentNamespaceId();
+        Post tempParentPost = parentPost;
+        LocalEventBus.publish(event -> {
+            LocalEventContext context = new LocalEventContext();
+            context.setUid(post.getCreatorUid());
+            context.setNamespaceId(namespaceId);
+            event.setContext(context);
 
-		LocalEventBus.publish(event -> {
-			LocalEventContext context = new LocalEventContext();
-			context.setUid(post.getCreatorUid());
-			context.setNamespaceId(namespaceId);
-			event.setContext(context);
+            event.setEntityType(EhForumPosts.class.getSimpleName());
+            event.setEntityId(post.getId());
+            Long embeddedAppId = post.getEmbeddedAppId() != null ? post.getEmbeddedAppId() : 0;
+            event.setEventName(SystemEvent.FORUM_POST_REPORT.suffix(
+                    post.getModuleType(), post.getModuleCategoryId(), embeddedAppId));
 
-			event.setEntityType(EhForumPosts.class.getSimpleName());
-			event.setEntityId(post.getId());
-			event.setEventName(SystemEvent.FORUM_POST_REPORT.suffix(
-					post.getContentCategory(), post.getModuleType(), post.getModuleCategoryId()));
-		});
+            event.addParam("embeddedAppId", String.valueOf(embeddedAppId));
+            event.addParam("feedback", StringHelper.toJsonString(feedback));
+            event.addParam("post", StringHelper.toJsonString(post));
+            if (tempParentPost != null) {
+                event.addParam("parentPost", StringHelper.toJsonString(tempParentPost));
+            }
+        });
 	}
 }

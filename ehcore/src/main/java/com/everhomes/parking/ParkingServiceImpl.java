@@ -1339,7 +1339,7 @@ public class ParkingServiceImpl implements ParkingService {
 			tempRow.createCell(1).setCellValue(order.getPlateNumber());
 			tempRow.createCell(2).setCellValue(order.getPlateOwnerName());
 			tempRow.createCell(3).setCellValue(order.getPayerPhone());
-			tempRow.createCell(4).setCellValue(order.getRechargeTime()==null?"":datetimeSF.format(order.getRechargeTime()));
+			tempRow.createCell(4).setCellValue(datetimeSF.format(order.getCreateTime()));
 			tempRow.createCell(5).setCellValue(null == order.getMonthCount()?"":order.getMonthCount().toString());
 			tempRow.createCell(6).setCellValue(order.getPrice().doubleValue());
 			VendorType type = VendorType.fromCode(order.getPaidType());
@@ -1865,7 +1865,7 @@ public class ParkingServiceImpl implements ParkingService {
 	}
 
 	@Override
-	public void refundParkingOrder(UpdateParkingOrderCommand cmd){
+	public void refundParkingOrder(RefundParkingOrderCommand cmd){
 		ParkingLot parkingLot = checkParkingLot(cmd.getOwnerType(), cmd.getOwnerId(), cmd.getParkingLotId());
 
 		long startTime = System.currentTimeMillis();
@@ -1886,7 +1886,7 @@ public class ParkingServiceImpl implements ParkingService {
 		parkingProvider.updateParkingRechargeOrder(order);
 	}
 
-	private void refundParkingOrderV2 (UpdateParkingOrderCommand cmd, ParkingRechargeOrder order) {
+	private void refundParkingOrderV2 (RefundParkingOrderCommand cmd, ParkingRechargeOrder order) {
 
 		Long refoundOrderNo = createOrderNo(System.currentTimeMillis());
 
@@ -1907,7 +1907,7 @@ public class ParkingServiceImpl implements ParkingService {
 		}
 	}
 
-	private void refundParkingOrderV1 (UpdateParkingOrderCommand cmd, ParkingRechargeOrder order) {
+	private void refundParkingOrderV1 (RefundParkingOrderCommand cmd, ParkingRechargeOrder order) {
 		PayZuolinRefundCommand refundCmd = new PayZuolinRefundCommand();
 		String refundApi =  configProvider.getValue(UserContext.getCurrentNamespaceId(),"pay.zuolin.refound", "POST /EDS_PAY/rest/pay_common/refund/save_refundInfo_record");
 		String appKey = configProvider.getValue(UserContext.getCurrentNamespaceId(),"pay.appKey", "");
@@ -2011,7 +2011,8 @@ public class ParkingServiceImpl implements ParkingService {
 
 				String respStr = (String) pingResponse;
 
-				ParkingRechargeOrderDTO dto = ConvertHelper.convert(respStr, ParkingRechargeOrderDTO.class);
+//				ParkingRechargeOrderDTO dto = ConvertHelper.convert(respStr, ParkingRechargeOrderDTO.class);
+				ParkingRechargeOrderDTO dto = JSONObject.parseObject(respStr, ParkingRechargeOrderDTO.class);
 				ParkingLot parkingLot = checkParkingLot(order.getOwnerType(), order.getOwnerId(), order.getParkingLotId());
 				dto.setParkingLotName(parkingLot.getName());
 				dto.setContact(parkingLot.getContact());

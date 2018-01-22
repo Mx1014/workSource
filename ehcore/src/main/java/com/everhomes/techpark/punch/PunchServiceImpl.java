@@ -7004,6 +7004,8 @@ public class PunchServiceImpl implements PunchService {
 			List<PunchScheduling> schedulings = new ArrayList<>();
             Long monthLong = 0L;
 			for (PunchSchedulingDTO monthScheduling : punchGroupDTO.getSchedulings()) {
+				if(monthScheduling.getMonth() == null)
+					continue;
                 if(monthLong.compareTo(monthScheduling.getMonth()) <0 ) {
                     monthLong = monthScheduling.getMonth();
                 }

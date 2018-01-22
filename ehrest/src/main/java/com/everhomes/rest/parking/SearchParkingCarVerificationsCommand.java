@@ -5,7 +5,20 @@ import com.everhomes.util.StringHelper;
 import javax.validation.constraints.NotNull;
 
 /**
- * @author sw on 2017/10/31.
+ * <ul>
+ * <li>ownerType : 目前是community 参考 {@link ParkingOwnerType}</li>
+ * <li>ownerId : 目前是小区/园区ID</li>
+ * <li>parkingLotId : 停车场id</li>
+ * <li>plateNumber: 车牌</li>
+ * <li>plateOwnerName: 车主名称</li>
+ * <li>plateOwnerPhone: 车数手机号</li>
+ * <li>requestorEnterpriseName: 申请人公司名称</li>
+ * <li>startTime: 开始时间</li>
+ * <li>endTime: 结束时间</li>
+ * <li>status: status {@link ParkingCarVerificationStatus}</li>
+ * <li>pageAnchor: pageAnchor</li>
+ * <li>pageSize: pageSize</li>
+ * </ul>
  */
 public class SearchParkingCarVerificationsCommand {
 

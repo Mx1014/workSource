@@ -86,7 +86,7 @@ public interface ParkingService {
 
     ParkingRechargeOrderDTO updateParkingOrder(UpdateParkingOrderCommand cmd);
 
-    void refundParkingOrder(UpdateParkingOrderCommand cmd);
+    void refundParkingOrder(RefundParkingOrderCommand cmd);
 
     DeferredResult getRechargeOrderResult(GetRechargeResultCommand cmd);
 

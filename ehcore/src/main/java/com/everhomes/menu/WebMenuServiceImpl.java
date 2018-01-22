@@ -7,6 +7,7 @@ import com.everhomes.acl.WebMenuScope;
 import com.everhomes.bootstrap.PlatformContext;
 import com.everhomes.db.DbProvider;
 import com.everhomes.domain.Domain;
+import com.everhomes.domain.DomainService;
 import com.everhomes.entity.EntityType;
 import com.everhomes.module.ServiceModuleProvider;
 import com.everhomes.module.ServiceModuleService;
@@ -71,6 +72,8 @@ public class WebMenuServiceImpl implements WebMenuService {
 	@Autowired
 	private WebMenuPrivilegeProvider webMenuPrivilegeProvider;
 
+	@Autowired
+	private DomainService domainService;
 
 	@Override
 	public List<WebMenuDTO> listUserRelatedWebMenus(ListUserRelatedWebMenusCommand cmd){
@@ -87,8 +90,16 @@ public class WebMenuServiceImpl implements WebMenuService {
 			menu = webMenuProvider.getWebMenuById(cmd.getMenuId());
 			categories.add(WebMenuCategory.PAGE.getCode());
 		}
-		Domain domain = UserContext.current().getDomain();
-		Long currentOrgId = cmd.getCurrentOrgId();
+
+		Domain domain = null;
+
+		if(UserContext.getCurrentNamespaceId() != null){
+			domain = domainService.findDomainByNamespaceId(UserContext.getCurrentNamespaceId());
+		}
+		if(domain == null){
+			domain = UserContext.current().getDomain();
+		}
+
 		if(null == domain){
 			LOGGER.error("domain not configured, userId = {}", userId);
 			domain = new Domain();
@@ -96,7 +107,9 @@ public class WebMenuServiceImpl implements WebMenuService {
 //			throw RuntimeErrorException.errorWith(UserServiceErrorCode.SCOPE, UserServiceErrorCode.DOMAIN_NOT_CONFIGURED,
 //					"domain not configured");
 		}
-		if(null == cmd.getCurrentOrgId()){
+
+		Long currentOrgId = cmd.getCurrentOrgId();
+		if(currentOrgId == null){
 			currentOrgId = domain.getPortalId();
 		}
 		if(EntityType.fromCode(domain.getPortalType()) == EntityType.ORGANIZATIONS){

@@ -3,7 +3,13 @@ package com.everhomes.rest.parking;
 import com.everhomes.util.StringHelper;
 
 /**
- * @author sw on 2017/10/31.
+ * <ul>
+ * <li>ownerType: 目前是community 参考 {@link ParkingOwnerType}</li>
+ * <li>ownerId: 目前是小区/园区ID</li>
+ * <li>parkingLotId: 停车场id</li>
+ * <li>pageAnchor: id</li>
+ * <li>pageSize: pageSize</li>
+ * </ul>
  */
 public class ListParkingCarVerificationsCommand {
 

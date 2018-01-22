@@ -1,24 +1,15 @@
 package com.everhomes.asset;
 
-import com.everhomes.bootstrap.PlatformContext;
 import com.everhomes.configuration.ConfigurationProvider;
 import com.everhomes.constants.ErrorCodes;
 import com.everhomes.controller.ControllerBase;
 import com.everhomes.discover.RestDoc;
 import com.everhomes.discover.RestReturn;
-import com.everhomes.entity.EntityType;
 import com.everhomes.portal.PortalService;
 import com.everhomes.rest.RestResponse;
-import com.everhomes.rest.RestResponseBase;
-import com.everhomes.rest.acl.PrivilegeConstants;
-import com.everhomes.rest.acl.PrivilegeServiceErrorCode;
 import com.everhomes.rest.asset.*;
-import com.everhomes.rest.contract.FindContractCommand;
 import com.everhomes.rest.order.PreOrderDTO;
 import com.everhomes.rest.pmkexing.ListOrganizationsByPmAdminDTO;
-import com.everhomes.rest.portal.ListServiceModuleAppsCommand;
-import com.everhomes.rest.portal.ListServiceModuleAppsResponse;
-import com.everhomes.rest.user.UserInfo;
 import com.everhomes.rest.user.UserServiceErrorCode;
 import com.everhomes.rest.user.admin.ImportDataResponse;
 import com.everhomes.user.User;
@@ -35,7 +26,6 @@ import org.springframework.web.multipart.MultipartFile;
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
 import javax.validation.Valid;
-import java.math.BigDecimal;
 import java.util.List;
 
 /**
@@ -363,6 +353,21 @@ public class AssetController extends ControllerBase {
     @RestReturn(value = ListChargingItemsDTO.class, collection = true)
     public RestResponse listChargingItems(OwnerIdentityCommand cmd) {
         List<ListChargingItemsDTO> list = assetService.listAvailableChargingItems(cmd);
+        RestResponse response = new RestResponse(list);
+        response.setErrorDescription("OK");
+        response.setErrorCode(ErrorCodes.SUCCESS);
+        return response;
+    }
+
+    // this is for 获取园区下的所有滞纳金标准   4
+    /**
+     * <p>获取园区下的所有滞纳金标准</p>
+     * <b>URL: /asset/listLateFineStandards</b>
+     */
+    @RequestMapping("listLateFineStandards")
+    @RestReturn(value = ListLateFineStandardsDTO.class, collection = true)
+    public RestResponse listLateFineStandards(OwnerIdentityCommand cmd) {
+        List<ListLateFineStandardsDTO> list = assetService.listLateFineStandards(cmd);
         RestResponse response = new RestResponse(list);
         response.setErrorDescription("OK");
         response.setErrorCode(ErrorCodes.SUCCESS);
@@ -1153,19 +1158,6 @@ public class AssetController extends ControllerBase {
     }
 
     /**
-     * <b>URL: /asset/activeAutoBillNotice</b>
-     * <p>主动调用定期催缴的功能</p>
-     */
-    @RequestMapping("activeAutoBillNotice")
-    @RestReturn(String.class)
-    public RestResponse listAutoNoticeConfig(){
-        assetService.activeAutoBillNotice();
-        RestResponse restResponse = new RestResponse();
-        restResponse.setErrorCode(ErrorCodes.SUCCESS);
-        restResponse.setErrorDescription("OK");
-        return restResponse;
-    }
-    /**
      * <b>URL: /asset/checkEnterpriseHasArrearage</b>
      * <p>检查企业是否有欠费的账单</p>
      */
@@ -1176,6 +1168,19 @@ public class AssetController extends ControllerBase {
         RestResponse restResponse = new RestResponse(res);
         restResponse.setErrorDescription("OK");
         restResponse.setErrorCode(ErrorCodes.SUCCESS);
+        return restResponse;
+    }
+    /**
+     * <b>URL: /asset/activeLateFine</b>
+     * <p>主动调用定期催缴的功能</p>
+     */
+    @RequestMapping("activeLateFine")
+    @RestReturn(String.class)
+    public RestResponse activeLateFine(){
+        assetService.activeLateFine();
+        RestResponse restResponse = new RestResponse();
+        restResponse.setErrorCode(ErrorCodes.SUCCESS);
+        restResponse.setErrorDescription("OK");
         return restResponse;
     }
 
@@ -1206,5 +1211,4 @@ public class AssetController extends ControllerBase {
         restResponse.setErrorDescription("OK");
         return restResponse;
     }
-
 }

@@ -93,7 +93,7 @@ public class CustomerController extends ControllerBase {
     @RequestMapping("deleteEnterpriseCustomer")
     @RestReturn(value = String.class)
     public RestResponse deleteEnterpriseCustomer(@Valid DeleteEnterpriseCustomerCommand cmd) {
-        customerService.deleteEnterpriseCustomer(cmd);
+        customerService.deleteEnterpriseCustomer(cmd, true);
         RestResponse response = new RestResponse();
         response.setErrorCode(ErrorCodes.SUCCESS);
         response.setErrorDescription("OK");
@@ -1269,6 +1269,19 @@ public class CustomerController extends ControllerBase {
     @RestReturn(value = CustomerEntryInfoDTO.class, collection = true)
     public RestResponse listCustomerEntryInfos(@Valid ListCustomerEntryInfosCommand cmd) {
         RestResponse response = new RestResponse(customerService.listCustomerEntryInfos(cmd));
+        response.setErrorCode(ErrorCodes.SUCCESS);
+        response.setErrorDescription("OK");
+        return response;
+    }
+
+    /**
+     * <b>URL: /customer/listCustomerEntryInfosWithoutAuth</b>
+     * <p>列出入驻信息(无权限)</p>
+     */
+    @RequestMapping("listCustomerEntryInfosWithoutAuth")
+    @RestReturn(value = CustomerEntryInfoDTO.class, collection = true)
+    public RestResponse listCustomerEntryInfosWithoutAuth(@Valid ListCustomerEntryInfosCommand cmd) {
+        RestResponse response = new RestResponse(customerService.listCustomerEntryInfosWithoutAuth(cmd));
         response.setErrorCode(ErrorCodes.SUCCESS);
         response.setErrorDescription("OK");
         return response;

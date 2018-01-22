@@ -50,6 +50,7 @@ import com.everhomes.user.admin.SystemUserPrivilegeMgr;
 import com.everhomes.util.*;
 import com.everhomes.util.excel.RowResult;
 import com.everhomes.util.excel.handler.PropMrgOwnerHandler;
+import com.itextpdf.text.PageSize;
 import org.apache.poi.xssf.usermodel.XSSFWorkbook;
 import org.jooq.Condition;
 import org.jooq.Record;
@@ -1548,7 +1549,9 @@ public class RolePrivilegeServiceImpl implements RolePrivilegeService {
         String organizationName = "NotFound";
         if (organizationDetail == null || organizationDetail.getDisplayName() == null) {
             Organization organization = organizationProvider.findOrganizationById(organizationId);
-            organizationName = defaultIfNull(organization.getName(), organizationName);
+			if(organization != null) {
+				organizationName = defaultIfNull(organization.getName(), organizationName);
+			}
         } else {
             organizationName = organizationDetail.getDisplayName();
         }
@@ -1663,6 +1666,19 @@ public class RolePrivilegeServiceImpl implements RolePrivilegeService {
 			}
 		}else{
 			moduleIds.add(moduleId);
+
+			//把子模块的权限加入
+			ListServiceModulesCommand cmd = new ListServiceModulesCommand();
+			cmd.setParentId(moduleId);
+			cmd.setPageAnchor(null);
+			cmd.setPageSize(1000);
+			ListServiceModulesResponse res = serviceModuleService.listAllServiceModules(cmd);
+			if(res.getDtos() != null && res.getDtos().size() > 0){
+				res.getDtos().forEach(r->{
+					moduleIds.add(r.getId());
+					LOGGER.debug("ListServiceModulesResponse.childModuleId = {}", r.getId());
+				});
+			}
 		}
 		this.assignmentModulePrivileges(ownerType, ownerId, targetType, targetId, scope, moduleIds, privilegeType, tag);
 	}
@@ -1863,11 +1879,15 @@ public class RolePrivilegeServiceImpl implements RolePrivilegeService {
 				organizationSearcher.feedDoc(o);
 			}
 		}
-        sendMessageAfterChangeOrganizationAdmin(
-                ConvertHelper.convert(member, OrganizationContactDTO.class),
-                OrganizationNotificationTemplateCode.DELETE_ORGANIZATION_ADMIN_MESSAGE_TO_TARGET_TEMPLATE,
-                OrganizationNotificationTemplateCode.DELETE_ORGANIZATION_ADMIN_MESSAGE_TO_OTHER_TEMPLATE
-        );
+		if(OrganizationMemberTargetType.fromCode(member.getTargetType()) == OrganizationMemberTargetType.USER
+				&& member.getTargetId() != null){
+			sendMessageAfterChangeOrganizationAdmin(
+					ConvertHelper.convert(member, OrganizationContactDTO.class),
+					OrganizationNotificationTemplateCode.DELETE_ORGANIZATION_ADMIN_MESSAGE_TO_TARGET_TEMPLATE,
+					OrganizationNotificationTemplateCode.DELETE_ORGANIZATION_ADMIN_MESSAGE_TO_OTHER_TEMPLATE
+			);
+		}
+
 	}
 
 	@Override
@@ -2360,6 +2380,18 @@ public class RolePrivilegeServiceImpl implements RolePrivilegeService {
 		List<Long> categoryIds = new ArrayList<>();
 		List<Long> projectIds = new ArrayList<>();
 
+		if(LOGGER.isDebugEnabled()) {
+		    StringBuilder strBuilder = new StringBuilder("[");
+		    for(ProjectDTO dto : projects) {
+		        if(strBuilder.length() > 1) {
+		            strBuilder.append(",");
+		        }
+		        strBuilder.append(dto.getProjectId());
+		    }
+		    strBuilder.append("]");
+		    LOGGER.debug("Query tree project categories, namespaceId={}, projects={}", namespaceId, strBuilder);
+		}
+		long cmntyStartTime = System.currentTimeMillis();
 		if(0 != projects.size()){
 			for (ProjectDTO project: projects) {
 				// 获得关联了project(域空间下所有项目)的assignment
@@ -2383,6 +2415,12 @@ public class RolePrivilegeServiceImpl implements RolePrivilegeService {
 				projectIds.add(project.getProjectId());
 			}
 		}
+		long cmntyEndTime = System.currentTimeMillis();
+		if(LOGGER.isDebugEnabled()) {
+		    LOGGER.debug("Query tree project categories(filter projectId), elapse={}, projectIds={}", (cmntyEndTime - cmntyStartTime), projectIds);
+		}
+		
+		long treeStartTime = System.currentTimeMillis();
 		List<ProjectDTO> projectTrees = new ArrayList<>();
 		// 存在项目分类时的解析
 		if(0 != categoryIds.size()){
@@ -2405,6 +2443,10 @@ public class RolePrivilegeServiceImpl implements RolePrivilegeService {
 			}
 			setResourceDTOs(projectTrees, projectIds, namespaceId);
 		}
+		long treeEndTime = System.currentTimeMillis();
+		if(LOGGER.isDebugEnabled()) {
+            LOGGER.debug("Query tree project categories(construct tree), elapse={}, categoryIds={}", (treeEndTime - treeStartTime), categoryIds);
+        }
 
 		// 不存在项目分类时的解析
 		//添加子项目
@@ -3337,7 +3379,9 @@ public class RolePrivilegeServiceImpl implements RolePrivilegeService {
 
 		if(AllFlagType.fromCode(allFlag) == AllFlagType.YES){
 			//给对象分配模块的全部权限
-			assignmentPrivileges(ownerType, ownerId, targetType, targetId, EntityType.SERVICE_MODULE.getCode() + moduleId, moduleId, ServiceModulePrivilegeType.ORDINARY_ALL, tag);
+			//这里用的是EntityType.SERVICE_MODULE，但是relation那边用的是EntityType.SERVICE_MODULE_APP,这是一个坑
+			assignmentPrivileges(ownerType, ownerId, targetType, targetId, EntityType.SERVICE_MODULE.getCode() + moduleId, moduleId, null, tag);
+//			assignmentPrivileges(ownerType, ownerId, targetType, targetId, EntityType.SERVICE_MODULE.getCode() + moduleId, privilegeIds, tag);
 		}else{
 			assignmentPrivileges(ownerType, ownerId, targetType, targetId, EntityType.SERVICE_MODULE.getCode() + moduleId, privilegeIds, tag);
 		}

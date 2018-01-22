@@ -15,6 +15,7 @@ import com.everhomes.organization.Organization;
 import com.everhomes.rest.flow.*;
 import com.everhomes.rest.rentalv2.SiteBillStatus;
 import com.everhomes.rest.rentalv2.admin.ResourceTypeStatus;
+import com.everhomes.util.StringHelper;
 import org.elasticsearch.common.lang3.StringUtils;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -115,7 +116,7 @@ public class Rentalv2FlowModuleListener implements FlowModuleListener {
 				if (currentGraphNode instanceof FlowGraphNodeEnd) {
 					return;
 				}
-				if (null != curNodeParam) {
+				if (!StringUtils.isEmpty(curNodeParam)) {
 					Byte status = convertFlowStatus(curNodeParam);
 
 					if (graphNode instanceof FlowGraphNodeStart && SiteBillStatus.APPROVING.getCode() == status) {
@@ -135,6 +136,7 @@ public class Rentalv2FlowModuleListener implements FlowModuleListener {
 
 		}
 	}
+
 
 	/**
 	 * 转换状态，由产品定义

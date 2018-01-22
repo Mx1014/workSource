@@ -18,6 +18,8 @@ import com.everhomes.address.AddressProvider;
 import com.everhomes.bootstrap.PlatformContext;
 import com.everhomes.contract.ContractService;
 import com.everhomes.organization.*;
+import com.everhomes.organization.pm.CommunityAddressMapping;
+import com.everhomes.organization.pm.PropertyMgrProvider;
 import com.everhomes.portal.PortalService;
 import com.everhomes.rest.acl.PrivilegeConstants;
 import com.everhomes.rest.acl.PrivilegeServiceErrorCode;
@@ -26,7 +28,7 @@ import com.everhomes.rest.contract.ContractStatus;
 import com.everhomes.rest.customer.*;
 import com.everhomes.rest.launchpad.ActionType;
 import com.everhomes.rest.organization.*;
-
+import com.everhomes.rest.organization.pm.AddressMappingStatus;
 import com.everhomes.rest.portal.ListServiceModuleAppsCommand;
 import com.everhomes.rest.portal.ListServiceModuleAppsResponse;
 import com.everhomes.user.UserPrivilegeMgr;
@@ -167,6 +169,9 @@ public class CustomerServiceImpl implements CustomerService {
 
     @Autowired
     private UserProvider userProvider;
+
+    @Autowired
+    private PropertyMgrProvider propertyMgrProvider;
 
     @Autowired
     private PortalService portalService;
@@ -511,8 +516,11 @@ public class CustomerServiceImpl implements CustomerService {
     }
 
     @Override
-    public void deleteEnterpriseCustomer(DeleteEnterpriseCustomerCommand cmd) {
-        checkCustomerAuth(cmd.getNamespaceId(), PrivilegeConstants.ENTERPRISE_CUSTOMER_DELETE, cmd.getOrgId(), cmd.getCommunityId());
+    public void deleteEnterpriseCustomer(DeleteEnterpriseCustomerCommand cmd, Boolean checkAuth) {
+        if(checkAuth) {
+            checkCustomerAuth(cmd.getNamespaceId(), PrivilegeConstants.ENTERPRISE_CUSTOMER_DELETE, cmd.getOrgId(), cmd.getCommunityId());
+        }
+
         EnterpriseCustomer customer = checkEnterpriseCustomer(cmd.getId());
         checkPrivilege(customer.getNamespaceId());
         //产品功能 #20796 同步过来的不能删
@@ -1882,6 +1890,21 @@ public class CustomerServiceImpl implements CustomerService {
             Address address = addressProvider.findAddressById(dto.getAddressId());
             if(address != null) {
                 dto.setAddressName(address.getAddress());
+                dto.setBuilding(address.getBuildingName());
+                dto.setAddressId(address.getId());
+                dto.setApartment(address.getApartmentName());
+                dto.setChargeArea(address.getChargeArea());
+                dto.setOrientation(address.getOrientation());
+                if (address.getLivingStatus() == null) {
+                    CommunityAddressMapping mapping =  propertyMgrProvider.findAddressMappingByAddressId(address.getId());
+                    if(mapping != null){
+                        address.setLivingStatus(mapping.getLivingStatus());
+                    }
+                    else{
+                        address.setLivingStatus(AddressMappingStatus.LIVING.getCode());
+                    }
+                }
+                dto.setApartmentLivingStatus(address.getLivingStatus());
             }
         }
 
@@ -1891,6 +1914,17 @@ public class CustomerServiceImpl implements CustomerService {
     @Override
     public List<CustomerEntryInfoDTO> listCustomerEntryInfos(ListCustomerEntryInfosCommand cmd) {
         checkCustomerAuth(cmd.getNamespaceId(), PrivilegeConstants.ENTERPRISE_CUSTOMER_MANAGE_LIST, cmd.getOrgId(), cmd.getCommunityId());
+        List<CustomerEntryInfo> entryInfos = enterpriseCustomerProvider.listCustomerEntryInfos(cmd.getCustomerId());
+        if(entryInfos != null && entryInfos.size() > 0) {
+            return entryInfos.stream().map(entryInfo -> {
+                return convertCustomerEntryInfoDTO(entryInfo);
+            }).collect(Collectors.toList());
+        }
+        return null;
+    }
+
+    @Override
+    public List<CustomerEntryInfoDTO> listCustomerEntryInfosWithoutAuth(ListCustomerEntryInfosCommand cmd) {
         List<CustomerEntryInfo> entryInfos = enterpriseCustomerProvider.listCustomerEntryInfos(cmd.getCustomerId());
         if(entryInfos != null && entryInfos.size() > 0) {
             return entryInfos.stream().map(entryInfo -> {
@@ -2262,6 +2296,7 @@ public class CustomerServiceImpl implements CustomerService {
                                 zjgkOpenService.syncEnterprises("0", null);
                             } else {
                                 Community community = communityProvider.findCommunityById(cmd.getCommunityId());
+//                                LOGGER.debug("syncEnterpriseCustomers community: {}", StringHelper.toJsonString(community));
                                 if(community != null) {
                                     zjgkOpenService.syncEnterprises("0", community.getNamespaceCommunityToken());
                                 }

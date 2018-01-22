@@ -4,6 +4,9 @@ package com.everhomes.rest.asset;
 /**
  * Created by Wentian Wang on 2017/11/15.
  */
+
+import com.everhomes.util.StringHelper;
+
 /**
  *<ul>
  * <li>ownerType:所属者类型</li>
@@ -30,8 +33,10 @@ public class ShowBillForClientV2Command {
         this.isPendingPayment = isPendingPayment;
     }
 
-
-
+    @Override
+    public String toString() {
+        return StringHelper.toJsonString(this);
+    }
 
     public Integer getNamespaceId() {
         return namespaceId;

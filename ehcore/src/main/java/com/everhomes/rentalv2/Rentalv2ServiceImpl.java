@@ -23,6 +23,12 @@ import com.everhomes.aclink.DoorAccessProvider;
 import com.everhomes.aclink.DoorAccessService;
 import com.everhomes.address.Address;
 import com.everhomes.address.AddressProvider;
+import com.alibaba.fastjson.JSON;
+import com.everhomes.acl.RolePrivilegeService;
+import com.everhomes.aclink.DoorAccessProvider;
+import com.everhomes.aclink.DoorAccessService;
+import com.everhomes.app.App;
+import com.everhomes.app.AppProvider;
 import com.everhomes.bus.LocalEventBus;
 import com.everhomes.bus.LocalEventContext;
 import com.everhomes.bus.SystemEvent;
@@ -71,6 +77,7 @@ import com.everhomes.app.App;
 import com.everhomes.app.AppProvider;
 import com.everhomes.community.Community;
 import com.everhomes.community.CommunityProvider;
+import com.everhomes.configuration.ConfigConstants;
 import com.everhomes.configuration.ConfigurationProvider;
 import com.everhomes.constants.ErrorCodes;
 import com.everhomes.contentserver.ContentServerResource;
@@ -79,17 +86,17 @@ import com.everhomes.coordinator.CoordinationLocks;
 import com.everhomes.coordinator.CoordinationProvider;
 import com.everhomes.db.DbProvider;
 import com.everhomes.entity.EntityType;
-import com.everhomes.flow.Flow;
-import com.everhomes.flow.FlowCase;
-import com.everhomes.flow.FlowCaseProvider;
-import com.everhomes.flow.FlowService;
+import com.everhomes.flow.*;
 import com.everhomes.listing.CrossShardListingLocator;
 import com.everhomes.listing.ListingLocator;
 import com.everhomes.locale.LocaleStringService;
 import com.everhomes.locale.LocaleTemplateService;
 import com.everhomes.naming.NameMapper;
+import com.everhomes.order.OrderUtil;
+import com.everhomes.order.PayService;
 import com.everhomes.organization.OrganizationMember;
 import com.everhomes.organization.OrganizationProvider;
+import com.everhomes.pay.order.PaymentType;
 import com.everhomes.queue.taskqueue.JesqueClientFactory;
 import com.everhomes.queue.taskqueue.WorkerPoolFactory;
 import com.everhomes.rest.approval.TrueOrFalseFlag;
@@ -100,12 +107,31 @@ import com.everhomes.rest.flow.FlowOwnerType;
 import com.everhomes.rest.flow.FlowReferType;
 import com.everhomes.rest.flow.FlowStepType;
 import com.everhomes.rest.flow.FlowUserType;
+import com.everhomes.rest.acl.PrivilegeConstants;
+import com.everhomes.rest.aclink.CreateDoorAuthCommand;
+import com.everhomes.rest.aclink.DoorAuthDTO;
+import com.everhomes.rest.activity.ActivityRosterPayVersionFlag;
+import com.everhomes.rest.app.AppConstants;
+import com.everhomes.rest.approval.TrueOrFalseFlag;
+import com.everhomes.rest.flow.*;
+import com.everhomes.rest.messaging.MessageBodyType;
+import com.everhomes.rest.messaging.MessageChannel;
+import com.everhomes.rest.messaging.MessageDTO;
+import com.everhomes.rest.messaging.MessagingConstants;
+import com.everhomes.rest.order.*;
 import com.everhomes.rest.organization.VendorType;
+import com.everhomes.rest.pay.controller.CreateOrderRestResponse;
+import com.everhomes.rest.rentalv2.*;
+import com.everhomes.rest.rentalv2.admin.*;
+import com.everhomes.rest.rentalv2.admin.AttachmentType;
 import com.everhomes.rest.sms.SmsTemplateCode;
+import com.everhomes.rest.ui.user.SceneTokenDTO;
+import com.everhomes.rest.ui.user.SceneType;
 import com.everhomes.rest.user.IdentifierType;
 import com.everhomes.scheduler.RunningFlag;
 import com.everhomes.scheduler.ScheduleProvider;
 import com.everhomes.sequence.SequenceProvider;
+import com.everhomes.server.schema.tables.EhRentalv2Orders;
 import com.everhomes.server.schema.tables.pojos.EhRentalv2Cells;
 import com.everhomes.server.schema.tables.pojos.EhRentalv2DefaultRules;
 import com.everhomes.server.schema.tables.pojos.EhRentalv2Resources;
@@ -113,6 +139,37 @@ import com.everhomes.settings.PaginationConfigHelper;
 import com.everhomes.sms.SmsProvider;
 import com.everhomes.techpark.onlinePay.OnlinePayService;
 import com.everhomes.techpark.rental.IncompleteUnsuccessRentalBillAction;
+import com.everhomes.user.*;
+import com.everhomes.util.*;
+import net.greghaines.jesque.Job;
+import org.apache.commons.lang.StringUtils;
+import org.apache.poi.ss.usermodel.Row;
+import org.apache.poi.ss.usermodel.Sheet;
+import org.apache.poi.ss.usermodel.Workbook;
+import org.apache.poi.xssf.usermodel.XSSFWorkbook;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
+import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.http.HttpStatus;
+import org.springframework.scheduling.annotation.Scheduled;
+import org.springframework.stereotype.Component;
+import org.springframework.transaction.TransactionStatus;
+
+import javax.annotation.PostConstruct;
+import javax.servlet.http.HttpServletResponse;
+import java.io.*;
+import java.math.BigDecimal;
+import java.math.RoundingMode;
+import java.net.URL;
+import java.net.URLEncoder;
+import java.sql.Date;
+import java.sql.Time;
+import java.sql.Timestamp;
+import java.text.SimpleDateFormat;
+import java.util.*;
+import java.util.concurrent.ExecutorService;
+import java.util.concurrent.Executors;
+import java.util.stream.Collectors;
 
 @Component
 public class Rentalv2ServiceImpl implements Rentalv2Service {
@@ -334,6 +391,9 @@ public class Rentalv2ServiceImpl implements Rentalv2Service {
 		rentalv2PriceRule.setOwnerType(priceRuleType.getCode());
 		rentalv2PriceRule.setOwnerId(ruleId);
 		rentalv2PriceRule.setResourceType(resourceType);
+		//默认按时长收费
+		if (rentalv2PriceRule.getPriceType()==null)
+			rentalv2PriceRule.setPriceType(RentalPriceType.LINEARITY.getCode());
 		rentalv2PriceRuleProvider.createRentalv2PriceRule(rentalv2PriceRule);
 	}
 
@@ -341,7 +401,12 @@ public class Rentalv2ServiceImpl implements Rentalv2Service {
 		Rentalv2PricePackage rentalv2PricePackage = ConvertHelper.convert(pricePackage,Rentalv2PricePackage.class);
 		rentalv2PricePackage.setOwnerType(priceRuleType.getCode());
 		rentalv2PricePackage.setOwnerId(ruleId);
+
 		rentalv2PricePackage.setResourceType(resourceType);
+
+		//默认按时长收费
+		if (rentalv2PricePackage.getPriceType()==null)
+			rentalv2PricePackage.setPriceType(RentalPriceType.LINEARITY.getCode());
 		rentalv2PricePackageProvider.createRentalv2PricePackage(rentalv2PricePackage);
 	}
 
@@ -779,6 +844,9 @@ public class Rentalv2ServiceImpl implements Rentalv2Service {
 
 		if (null == cmd.getRentalStartTimeFlag()) {
 			cmd.setRentalStartTimeFlag(NormalFlag.NONEED.getCode());
+		}
+		if (NormalFlag.NONEED.getCode() == cmd.getNeedPay()) {
+			cmd.setPriceRules(buildDefaultPriceRule(cmd.getRentalTypes()));
 		}
 
 		//用来记录rentalTypes
@@ -1383,7 +1451,7 @@ public class Rentalv2ServiceImpl implements Rentalv2Service {
 		SitePriceRuleDTO sitePriceRuleDTO = new SitePriceRuleDTO();
 		sitePriceRuleDTO.setRentalType(priceRule.getRentalType());
 		sitePriceRuleDTO.setPriceType(priceRule.getPriceType());
-		
+
 		MaxMinPrice maxMinPrice = rentalv2Provider.findMaxMinPrice(priceRule.getOwnerId(), priceRule.getRentalType());
 
 		BigDecimal maxPrice;
@@ -3830,6 +3898,17 @@ public class Rentalv2ServiceImpl implements Rentalv2Service {
 				order.setDoorAuthId(doorAuthId);
 			}
 
+            //用户积分
+            LocalEventBus.publish(event -> {
+                LocalEventContext context = new LocalEventContext();
+                context.setUid(order.getRentalUid());
+                context.setNamespaceId(order.getNamespaceId());
+                event.setContext(context);
+                event.setEntityType(EhRentalv2Orders.class.getSimpleName());
+                event.setEntityId(order.getId());
+                event.setEventName(SystemEvent.RENTAL_RESOURCE_APPLY.dft());
+            });
+
 			//创建哑工作流
 			GeneralModuleInfo gm = new GeneralModuleInfo();
 			gm.setModuleId(Rentalv2Controller.moduleId);
@@ -5574,7 +5653,7 @@ public class Rentalv2ServiceImpl implements Rentalv2Service {
 			// 如果超过一种规则，则需要计算其它规则下是否已经占用了此资源（前方高能，即将进入一个极其复杂的方法）
 			rentedCount = rentalv2Provider.countRentalSiteBillOfAllScene(rs, rentalCell, priceRules);
 		}
-		dto.setCounts(rentalCell.getCounts() - rentedCount);
+		dto.setCounts(rentalCell.getCounts() - rentedCount<0?0:rentalCell.getCounts() - rentedCount);
 	}
 
 	private void setRentalCellStatus(java.util.Date reserveTime, RentalSiteRulesDTO dto, RentalCell rsr, RentalDefaultRule rule) {

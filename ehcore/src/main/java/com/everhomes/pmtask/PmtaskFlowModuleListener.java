@@ -13,6 +13,7 @@ import com.everhomes.flow.conditionvariable.FlowConditionStringVariable;
 import com.everhomes.flow.node.FlowGraphNodeEnd;
 import com.everhomes.general_form.GeneralFormVal;
 import com.everhomes.general_form.GeneralFormValProvider;
+import com.everhomes.portal.PortalService;
 import com.everhomes.rest.category.CategoryDTO;
 import com.everhomes.rest.flow.*;
 import com.everhomes.rest.general_approval.GeneralFormFieldType;
@@ -21,6 +22,9 @@ import com.everhomes.rest.general_approval.PostApprovalFormSubformItemValue;
 import com.everhomes.rest.general_approval.PostApprovalFormSubformValue;
 import com.everhomes.rest.parking.ParkingErrorCode;
 import com.everhomes.rest.pmtask.*;
+import com.everhomes.rest.portal.ListServiceModuleAppsCommand;
+import com.everhomes.rest.portal.ListServiceModuleAppsResponse;
+import com.everhomes.rest.portal.ServiceModuleAppDTO;
 import com.everhomes.rest.sms.SmsTemplateCode;
 import com.everhomes.rest.user.IdentifierType;
 import com.everhomes.sms.SmsProvider;
@@ -75,6 +79,8 @@ public class PmtaskFlowModuleListener implements FlowModuleListener {
 	private GeneralFormValProvider generalFormValProvider;
 	@Autowired
 	FlowEventLogProvider flowEventLogProvider;
+	@Autowired
+	PortalService portalService;
 
 	private Long moduleId = FlowConstants.PM_TASK_MODULE;
 
@@ -125,14 +131,14 @@ public class PmtaskFlowModuleListener implements FlowModuleListener {
 		//当是下一步时，如果是end节点，直接return，如果是驳回，则不管下一个节点类型，都置任务状态为已取消
 		if(FlowStepType.APPROVE_STEP.getCode().equals(stepType)) {
 
-			if (currentNode instanceof FlowGraphNodeEnd)
+			if (currentNode instanceof FlowGraphNodeEnd) {
+				if (!StringUtils.isBlank(task.getReferType())){
+					PmTaskListener listener = PlatformContext.getComponent(PmTaskListener.PMTASK_PREFIX + task.getReferType());
+					listener.onTaskSuccess(task,task.getReferId());
+				}
 				return;
-//motify by st.zheng 修改为非每个节点都必须配参数值
-//			if(StringUtils.isBlank(params)) {
-//				LOGGER.error("Invalid flowNode param.");
-//				throw RuntimeErrorException.errorWith(ParkingErrorCode.SCOPE, ParkingErrorCode.ERROR_FLOW_NODE_PARAM,
-//						"Invalid flowNode param.");
-//			}
+			}
+
 			String nodeType = "";
 			if (!StringUtils.isBlank(params)) {
 				JSONObject paramJson = JSONObject.parseObject(params);
@@ -573,20 +579,17 @@ public class PmtaskFlowModuleListener implements FlowModuleListener {
 	@Override
 	public List<FlowServiceTypeDTO> listServiceTypes(Integer namespaceId, String ownerType, Long ownerId) {
 
-		List<Category> categories = new ArrayList<>();
+		List<ServiceModuleAppDTO> apps = new ArrayList<>();
 		for (Long id: PmTaskAppType.TYPES) {
-			categories.addAll(categoryProvider.listTaskCategories(namespaceId, id, null,
-					null, null));
+			ListServiceModuleAppsCommand listServiceModuleAppsCommand = new ListServiceModuleAppsCommand();
+			listServiceModuleAppsCommand.setNamespaceId(namespaceId);
+			listServiceModuleAppsCommand.setModuleId(FlowConstants.PM_TASK_MODULE);
+			listServiceModuleAppsCommand.setCustomTag(String.valueOf(id));
+			ListServiceModuleAppsResponse app = portalService.listServiceModuleAppsWithConditon(listServiceModuleAppsCommand);
+			if (app!=null && app.getServiceModuleApps().size()>0)
+				apps.addAll(app.getServiceModuleApps());
 		}
-
-		if(namespaceId == 999983) {
-			EbeiPmTaskHandle handler = PlatformContext.getComponent(PmTaskHandle.PMTASK_PREFIX + PmTaskHandle.EBEI);
-			CategoryDTO dto = handler.createCategoryDTO();
-			Category category = ConvertHelper.convert(dto, Category.class);
-			categories.add(category);
-		}
-
-		return categories.stream().map(c -> {
+		return apps.stream().map(c -> {
 			FlowServiceTypeDTO dto = new FlowServiceTypeDTO();
 			dto.setId(c.getId());
 			dto.setNamespaceId(namespaceId);
@@ -604,7 +607,7 @@ public class PmtaskFlowModuleListener implements FlowModuleListener {
 		dto.setFieldType(GeneralFormFieldType.SINGLE_LINE_TEXT.getCode());
 		dto.setOperators(new ArrayList<>());
 		dto.getOperators().add(FlowConditionRelationalOperatorType.EQUAL.getCode());
-		Integer namespaceId = UserContext.getCurrentNamespaceId();
+		Integer namespaceId = UserContext.getCurrentNamespaceId(flow.getNamespaceId());
 		ListTaskCategoriesCommand cmd = new ListTaskCategoriesCommand();
 		cmd.setNamespaceId(namespaceId);
 		if (flow.getModuleType().equals(FlowModuleType.NO_MODULE.getCode()))

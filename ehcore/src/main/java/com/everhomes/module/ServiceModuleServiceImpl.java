@@ -33,6 +33,7 @@ import com.everhomes.rest.portal.ServiceModuleAppStatus;
 import com.everhomes.rest.portal.TreeServiceModuleAppsResponse;
 import com.everhomes.sequence.SequenceProvider;
 import com.everhomes.server.schema.Tables;
+import com.everhomes.server.schema.tables.pojos.EhUsers;
 import com.everhomes.settings.PaginationConfigHelper;
 import com.everhomes.user.User;
 import com.everhomes.user.UserContext;
@@ -105,6 +106,9 @@ public class ServiceModuleServiceImpl implements ServiceModuleService {
 
     @Autowired
     private UserPrivilegeMgr userPrivilegeMgr;
+
+    @Autowired
+    private AclProvider aclProvider;
 
 
     @Override
@@ -539,7 +543,7 @@ public class ServiceModuleServiceImpl implements ServiceModuleService {
         List<ServiceModuleDTO> unlimitControlList = new ArrayList<>();
         //按控制范围进行区分
         //把二级模块加入list
-        tempList.stream().filter(r->r.getModuleControlType() != "" && r.getLevel() == 2).map(r->{
+        tempList.stream().filter(r->r.getModuleControlType() != "" && r.getModuleControlType() != null && r.getLevel() == 2).map(r->{
             switch (ModuleManagementType.fromCode(r.getModuleControlType())){
                 case COMMUNITY_CONTROL:
                     communityControlList.add(r);
@@ -647,6 +651,7 @@ public class ServiceModuleServiceImpl implements ServiceModuleService {
         User user = UserContext.current().getUser();
         List<CommunityDTO> dtos = new ArrayList<>();
         List<ProjectDTO> projects = getUserProjectsByModuleId(user.getId(), cmd.getOrganizationId(), cmd.getModuleId());
+        LOGGER.debug("listAuthorizationCommunityByUser step3"+ DateHelper.currentGMTTime());
         for (ProjectDTO project: projects) {
             if(EntityType.fromCode(project.getProjectType()) == EntityType.COMMUNITY){
                 Community community = communityProvider.findCommunityById(project.getProjectId());
@@ -721,6 +726,13 @@ public class ServiceModuleServiceImpl implements ServiceModuleService {
 
     private boolean checkModuleManage(Long userId, Long organizationId, Long moduleId) {
         SystemUserPrivilegeMgr resolver = PlatformContext.getComponent("SystemUser");
+
+        //TODO add by yanjun, check by lv
+        if(aclProvider.checkAccess("system", null, EhUsers.class.getSimpleName(),
+                UserContext.current().getUser().getId(), Privilege.Write, null)) {
+            return true;
+        }
+
         if (resolver.checkSuperAdmin(userId, organizationId) || resolver.checkModuleAdmin(EntityType.ORGANIZATIONS.getCode(), organizationId, userId, moduleId)) {
             return true;
         }
@@ -806,6 +818,7 @@ public class ServiceModuleServiceImpl implements ServiceModuleService {
                 dto.setProjectId(community.getId());
                 dto.setProjectName(community.getName());
                 dto.setProjectType(com.everhomes.entity.EntityType.COMMUNITY.getCode());
+                dto.setCommunityType(community.getCommunityType());
                 dtos.add(dto);
             }
         }
@@ -834,6 +847,7 @@ public class ServiceModuleServiceImpl implements ServiceModuleService {
             }
             project.setProjectType(EntityType.COMMUNITY.getCode());
             project.setProjectName(community.getName());
+            project.setCommunityType(community.getCommunityType());
         } else if (EntityType.fromCode(project.getProjectType()) == EntityType.CHILD_PROJECT) {// 判断子项目
             ResourceCategory resourceCategory = this.communityProvider.findResourceCategoryById(project.getProjectId());
             if (resourceCategory == null) {
@@ -1067,9 +1081,23 @@ public class ServiceModuleServiceImpl implements ServiceModuleService {
     @Override
     public List<Long> listServiceModulefunctions(ListServiceModulefunctionsCommand cmd) {
         List<Long> functionIds = new ArrayList<>();
-        List<Long> privilegeIds = rolePrivilegeService.listUserPrivilegeByModuleId(cmd.getNamespaceId(), EntityType.COMMUNITY.getCode(), cmd.getCommunityId(), cmd.getOrganizationId(), UserContext.currentUserId(), cmd.getModuleId());
-        privilegeIds.add(0L);
-        List<ServiceModuleFunction> moduleFunctions = serviceModuleProvider.listFunctions(cmd.getModuleId(), privilegeIds);
+//        List<Long> privilegeIds = rolePrivilegeService.listUserPrivilegeByModuleId(cmd.getNamespaceId(), EntityType.COMMUNITY.getCode(), cmd.getCommunityId(), cmd.getOrganizationId(), UserContext.currentUserId(), cmd.getModuleId());
+//        privilegeIds.add(0L);
+//        List<ServiceModuleFunction> moduleFunctions = serviceModuleProvider.listFunctions(cmd.getModuleId(), privilegeIds);
+//        if(moduleFunctions != null && moduleFunctions.size() > 0) {
+//            moduleFunctions.forEach(moduleFunction -> {
+//                functionIds.add(moduleFunction.getId());
+//            });
+//        }
+//        List<ServiceModuleExcludeFunction> excludeFunctions = serviceModuleProvider.listExcludeFunctions(cmd.getNamespaceId(), cmd.getCommunityId(), cmd.getModuleId());
+//        if (excludeFunctions != null && excludeFunctions.size() > 0) {
+//            excludeFunctions.forEach(excludeFunction -> {
+//                functionIds.remove(excludeFunction.getFunctionId());
+//            });
+//        }
+
+        //不根据权限
+        List<ServiceModuleFunction> moduleFunctions = serviceModuleProvider.listFunctions(cmd.getModuleId(), null);
         if(moduleFunctions != null && moduleFunctions.size() > 0) {
             moduleFunctions.forEach(moduleFunction -> {
                 functionIds.add(moduleFunction.getId());

@@ -85,6 +85,32 @@ public class EnergyMeterCategoryProviderImpl implements EnergyMeterCategoryProvi
     }
 
     @Override
+    public List<EnergyMeterCategory> listMeterCategories(Integer namespaceId, Byte categoryType, Long ownerId, String ownerType, Long communityId, Timestamp lastUpdateTime) {
+        List<EnergyMeterCategory> categories = new ArrayList<>();
+        DSLContext context = this.dbProvider.getDslContext(AccessSpec.readOnly());
+
+        SelectQuery<EhEnergyMeterCategoriesRecord> query = context.selectQuery(EH_ENERGY_METER_CATEGORIES);
+        query.addConditions(EH_ENERGY_METER_CATEGORIES.NAMESPACE_ID.eq(namespaceId));
+        query.addConditions(EH_ENERGY_METER_CATEGORIES.CATEGORY_TYPE.eq(categoryType));
+        query.addConditions(EH_ENERGY_METER_CATEGORIES.STATUS.eq(EnergyCommonStatus.ACTIVE.getCode()));
+
+        if(communityId != null) {
+            query.addConditions(EH_ENERGY_METER_CATEGORIES.COMMUNITY_ID.eq(communityId));
+        }
+
+        if(lastUpdateTime != null) {
+            query.addConditions(EH_ENERGY_METER_CATEGORIES.CREATE_TIME.gt(lastUpdateTime)
+            .or(EH_ENERGY_METER_CATEGORIES.UPDATE_TIME.gt(lastUpdateTime)));
+        }
+        query.fetch().map((r) -> {
+            categories.add(ConvertHelper.convert(r, EnergyMeterCategory.class));
+            return null;
+        });
+
+        return categories;
+    }
+
+    @Override
     public List<EnergyMeterCategory> listMeterCategories(List<Long> categoryIds, Byte categoryType) {
         return context().selectFrom(EH_ENERGY_METER_CATEGORIES)
                 .where(EH_ENERGY_METER_CATEGORIES.ID.in(categoryIds))

@@ -275,7 +275,9 @@ public class AddressServiceImpl implements AddressService, LocalBusSubscriber {
                     "Invalid parameter, latitude and longitude have to be both specified or neigher");
 
         // TODO, return all communities only to test our REST response for now
-
+//        CommunityDTO testDto = ConvertHelper.convert(communityProvider.findCommunityById(240111044331051304l), CommunityDTO.class);
+//        results.add(testDto);
+        
         List<CommunityGeoPoint> pointList = this.communityProvider.findCommunityGeoPointByGeoHash(cmd.getLatigtue(), cmd.getLongitude(), 6);
         List<Long> communityIds = getAllCommunityIds(pointList);
 
@@ -1129,6 +1131,8 @@ public class AddressServiceImpl implements AddressService, LocalBusSubscriber {
 
     private void checkUserPrivilege(long userId, long communityId) {
         boolean flag = false;
+        if (userId == 1) //超级管理员
+            return;
         List<FamilyDTO> familydtos = this.familyProvider.getUserFamiliesByUserId(userId);
         if (familydtos == null) {
             throw RuntimeErrorException.errorWith(ErrorCodes.SCOPE_GENERAL, ErrorCodes.ERROR_ACCESS_DENIED,

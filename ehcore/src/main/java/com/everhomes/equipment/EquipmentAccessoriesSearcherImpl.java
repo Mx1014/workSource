@@ -1,32 +1,9 @@
 package com.everhomes.equipment;
 
-import java.io.IOException;
-import java.util.ArrayList;
-import java.util.List;
-
 import com.everhomes.community.Community;
 import com.everhomes.community.CommunityProvider;
-import com.everhomes.user.UserContext;
-import org.elasticsearch.action.bulk.BulkRequestBuilder;
-import org.elasticsearch.action.search.SearchRequestBuilder;
-import org.elasticsearch.action.search.SearchResponse;
-import org.elasticsearch.action.search.SearchType;
-import org.elasticsearch.client.Requests;
-import org.elasticsearch.common.recycler.Recycler;
-import org.elasticsearch.common.xcontent.XContentBuilder;
-import org.elasticsearch.common.xcontent.XContentFactory;
-import org.elasticsearch.index.query.FilterBuilder;
-import org.elasticsearch.index.query.FilterBuilders;
-import org.elasticsearch.index.query.QueryBuilder;
-import org.elasticsearch.index.query.QueryBuilders;
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
-import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.stereotype.Component;
-
 import com.everhomes.configuration.ConfigurationProvider;
 import com.everhomes.listing.CrossShardListingLocator;
-import com.everhomes.organization.Organization;
 import com.everhomes.organization.OrganizationProvider;
 import com.everhomes.rest.equipment.EquipmentAccessoriesDTO;
 import com.everhomes.rest.equipment.SearchEquipmentAccessoriesCommand;
@@ -38,6 +15,25 @@ import com.everhomes.search.SearchUtils;
 import com.everhomes.settings.PaginationConfigHelper;
 import com.everhomes.util.ConvertHelper;
 import com.mysql.jdbc.StringUtils;
+import org.elasticsearch.action.bulk.BulkRequestBuilder;
+import org.elasticsearch.action.search.SearchRequestBuilder;
+import org.elasticsearch.action.search.SearchResponse;
+import org.elasticsearch.action.search.SearchType;
+import org.elasticsearch.client.Requests;
+import org.elasticsearch.common.xcontent.XContentBuilder;
+import org.elasticsearch.common.xcontent.XContentFactory;
+import org.elasticsearch.index.query.FilterBuilder;
+import org.elasticsearch.index.query.FilterBuilders;
+import org.elasticsearch.index.query.QueryBuilder;
+import org.elasticsearch.index.query.QueryBuilders;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
+import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.stereotype.Component;
+
+import java.io.IOException;
+import java.util.ArrayList;
+import java.util.List;
 
 @Component
 public class EquipmentAccessoriesSearcherImpl extends AbstractElasticSearch implements
@@ -130,7 +126,7 @@ public class EquipmentAccessoriesSearcherImpl extends AbstractElasticSearch impl
         }
 
         //改用namespaceId by xiongying20170328
-        FilterBuilder fb = FilterBuilders.termFilter("namespaceId", UserContext.getCurrentNamespaceId());
+        FilterBuilder fb = FilterBuilders.termFilter("namespaceId", cmd.getNamespaceId());
 //        FilterBuilder fb = FilterBuilders.termFilter("ownerId", cmd.getOwnerId());
 //        fb = FilterBuilders.andFilter(fb, FilterBuilders.termFilter("ownerType", OwnerType.fromCode(cmd.getOwnerType()).getCode()));
         if(cmd.getTargetId() != null)
