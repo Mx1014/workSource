@@ -156,7 +156,7 @@ public class AuthorizationEndpointController extends OAuth2ControllerBase {
 		LOGGER.info("Confirm OAuth2 authorization: {}", cmd);
 
 		try {
-			URI uri = oAuth2Service.confirmAuthorization(identifier, password, cmd);
+			URI uri = oAuth2Service.confirmAuthorization(app., identifier, password, cmd);
 			if (uri != null) {
 				HttpHeaders httpHeaders = new HttpHeaders();
 				httpHeaders.setLocation(uri);

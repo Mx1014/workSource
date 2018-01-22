@@ -37,8 +37,8 @@ public class OAuth2ServiceImpl implements OAuth2Service {
     private ConfigurationProvider configurationProvider;
 
     @Override
-    public URI confirmAuthorization(String identifier, String password, AuthorizationCommand cmd) {
-        User user = userService.logonDryrun(identifier, password);
+    public URI confirmAuthorization(Integer namespaceId, String identifier, String password, AuthorizationCommand cmd) {
+        User user = userService.logonDryrun(namespaceId, identifier, password);
         if(user == null)
             return null;
 

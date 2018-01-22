@@ -19,7 +19,7 @@ public interface OAuth2Service {
     //
     // Service methods
     //
-    URI confirmAuthorization(String identifier, String password, AuthorizationCommand cmd);
+    URI confirmAuthorization(Integer namespaceId, String identifier, String password, AuthorizationCommand cmd);
     URI confirmAuthorization(User user, AuthorizationCommand cmd);
     AccessToken grantAccessTokenFromAuthorizationCode(String code, String redirectUri, String clientId);
 }
