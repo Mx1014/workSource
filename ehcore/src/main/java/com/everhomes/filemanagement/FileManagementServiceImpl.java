@@ -1,7 +1,6 @@
 package com.everhomes.filemanagement;
 
 import com.everhomes.contentserver.ContentServerService;
-import com.everhomes.db.AccessSpec;
 import com.everhomes.db.DbProvider;
 import com.everhomes.listing.ListingLocator;
 import com.everhomes.module.ServiceModuleService;
@@ -11,14 +10,10 @@ import com.everhomes.rest.module.CheckModuleManageCommand;
 import com.everhomes.rest.portal.ListServiceModuleAppsCommand;
 import com.everhomes.rest.portal.ListServiceModuleAppsResponse;
 import com.everhomes.server.schema.Tables;
-import com.everhomes.server.schema.tables.records.EhFileManagementCatalogScopesRecord;
 import com.everhomes.user.User;
 import com.everhomes.user.UserContext;
 import com.everhomes.util.ConvertHelper;
 import com.everhomes.util.RuntimeErrorException;
-import org.jooq.DSLContext;
-import org.jooq.DeleteQuery;
-import org.jooq.Transaction;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
 import org.springframework.transaction.TransactionStatus;
@@ -259,14 +254,14 @@ public class FileManagementServiceImpl implements  FileManagementService{
             List<Long> sourceIds = new ArrayList<>();
             cmd.getScopes().forEach(r -> {
                 //  1.save sourceIds
-                sourceIds.add(r.getCatalogId());
+                sourceIds.add(r.getSourceId());
                 //  2.create or update the scope
                 FileCatalogScopeDTO dto = createFileCatalogScope(namespaceId, cmd.getCatalogId(), r);
                 //  3.save the data which is returning back
                 scopes.add(dto);
             });
             //  4.delete redundant data
-            fileManagementProvider.deleteFileCatalogScopeNotInUserIds(namespaceId, cmd.getCatalogId(), sourceIds);
+            fileManagementProvider.deleteFileCatalogScopeNotInSourceIds(namespaceId, cmd.getCatalogId(), sourceIds);
             return null;
         });
         return scopes;

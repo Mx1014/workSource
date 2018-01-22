@@ -183,13 +183,14 @@ public class FileManagementProviderImpl implements FileManagementProvider {
     }
 
     @Override
-    public void deleteFileCatalogScopeNotInUserIds(Integer namespaceId, Long catalogId, List<Long> sourceIds){
+    public void deleteFileCatalogScopeNotInSourceIds(Integer namespaceId, Long catalogId, List<Long> sourceIds){
         DSLContext context = dbProvider.getDslContext(AccessSpec.readWrite());
         DeleteQuery<EhFileManagementCatalogScopesRecord> query = context.deleteQuery(Tables.EH_FILE_MANAGEMENT_CATALOG_SCOPES);
         query.addConditions(Tables.EH_FILE_MANAGEMENT_CATALOG_SCOPES.NAMESPACE_ID.eq(namespaceId));
         query.addConditions(Tables.EH_FILE_MANAGEMENT_CATALOG_SCOPES.CATALOG_ID.eq(catalogId));
         query.addConditions(Tables.EH_FILE_MANAGEMENT_CATALOG_SCOPES.SOURCE_ID.notIn(sourceIds));
         query.execute();
+        DaoHelper.publishDaoAction(DaoAction.MODIFY, EhFileManagementCatalogScopes.class, null);
     }
 
     @Override
