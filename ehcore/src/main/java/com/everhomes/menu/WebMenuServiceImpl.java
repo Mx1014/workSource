@@ -380,6 +380,8 @@ public class WebMenuServiceImpl implements WebMenuService {
 				}else if(WebMenuScopeApplyPolicy.fromCode(scope.getApplyPolicy()) == WebMenuScopeApplyPolicy.REVERT){
 					filterMenus.add(menu);
 				}
+				menu.setAppId(scope.getAppId());
+				menu.setConfigId(scope.getConfigId());
 
 			}
 		}
