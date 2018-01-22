@@ -10,13 +10,11 @@ public class Flow extends EhFlows {
 	
 	/**
 	 * 总是获取最开始版本的 ID
-	 * @return
 	 */
 	public Long getTopId() {
-		if(this.getFlowMainId() == null || this.getFlowMainId().equals(0l)) {
+		if(this.getFlowMainId() == null || this.getFlowMainId().equals(0L)) {
 			return this.getId();
 		}
-		
 		return this.getFlowMainId();
 	}
 	

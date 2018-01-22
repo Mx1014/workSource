@@ -116,8 +116,8 @@ public class FlowActionProviderImpl implements FlowActionProvider {
             @Override
             public SelectQuery<? extends Record> buildCondition(
                     ListingLocator locator, SelectQuery<? extends Record> query) {
-                query.addConditions(Tables.EH_FLOW_ACTIONS.BELONG_TO.eq(belong));
                 query.addConditions(Tables.EH_FLOW_ACTIONS.BELONG_ENTITY.eq(entityType));
+                query.addConditions(Tables.EH_FLOW_ACTIONS.BELONG_TO.eq(belong));
                 query.addConditions(Tables.EH_FLOW_ACTIONS.ACTION_TYPE.eq(actionType));
                 query.addConditions(Tables.EH_FLOW_ACTIONS.ACTION_STEP_TYPE.eq(actionStepType));
                 if (flowStepType != null) {
@@ -143,8 +143,8 @@ public class FlowActionProviderImpl implements FlowActionProvider {
             @Override
             public SelectQuery<? extends Record> buildCondition(
                     ListingLocator locator, SelectQuery<? extends Record> query) {
-                query.addConditions(Tables.EH_FLOW_ACTIONS.BELONG_TO.eq(belong));
                 query.addConditions(Tables.EH_FLOW_ACTIONS.BELONG_ENTITY.eq(entityType));
+                query.addConditions(Tables.EH_FLOW_ACTIONS.BELONG_TO.eq(belong));
                 query.addConditions(Tables.EH_FLOW_ACTIONS.ACTION_TYPE.eq(actionType));
                 query.addConditions(Tables.EH_FLOW_ACTIONS.ACTION_STEP_TYPE.eq(actionStepType));
                 if (flowStepType != null) {

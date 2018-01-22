@@ -388,7 +388,9 @@ public class AddressProviderImpl implements AddressProvider {
 			.and(Tables.EH_ADDRESSES.BUILDING_NAME.eq(buildingName));
 		
 	    Record record = step.fetchAny();
-	    
+
+        LOGGER.debug("findAddressByBuildingApartmentName, sql=" + step.getSQL());
+        LOGGER.debug("findAddressByBuildingApartmentName, bindValues=" + step.getBindValues());
 		if (record != null) {
 			return ConvertHelper.convert(record, Address.class);
 		}
