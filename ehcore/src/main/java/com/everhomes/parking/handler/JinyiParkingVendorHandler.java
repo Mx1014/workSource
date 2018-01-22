@@ -39,8 +39,6 @@ public class JinyiParkingVendorHandler extends DefaultParkingVendorHandler {
 	private static final String APPLY_TEMP_CARD = "parkingjet.open.s2s.shorttermcard.apply.order";
 	//获取短期证车辆的通行纪录
 	private static final String GET_TEMP_CARD_LOGS = "parkingjet.open.s2s.shorttermcard.apply.order.parkingrecord";
-	//赠送全免券
-	private static final String COUPON_FREE_SEND = "parkingjet.open.s2s.coupon.free.send";
 
 	//金溢初始一个月
 	private static final int MONTH_COUNT = 1;
@@ -325,35 +323,9 @@ public class JinyiParkingVendorHandler extends DefaultParkingVendorHandler {
 
 		if(jsonEntity.isSuccess()) {
 			return jsonEntity.getData();
-		}else{//失败的情况是车辆在场了，这时候发全免券
-			LOGGER.error("APPLY_TEMP_CARD failed, try COUPON_FREE_SEND! log id = {}, plateno = {}",log.getId(),log.getPlateNumber());
-			params = createGeneralParam(COUPON_FREE_SEND,createCouponFreeSendParam(log));
-			responseJson = Utils.post(url, params);
-			jsonEntity = JSONObject.parseObject(responseJson, new TypeReference<JinyiJsonEntity<String>>(){});
-			if(jsonEntity.isSuccess()){
-				return jsonEntity.getData();
-			}
-			//这里失败，表示在场车辆已经有发全免券了。
-			return jsonEntity.getMessage();
-
 		}
 
-//		return null;
-	}
-
-	private JSONObject createCouponFreeSendParam(ParkingClearanceLog log) {
-		JSONObject json = new JSONObject();
-		String parkingid = configProvider.getValue("parking.zijing.parkingid", "");
-		String marketid  = configProvider.getValue("parking.zijing.marketid", "");
-		String userid  = configProvider.getValue("parking.zijing.userid", "");
-
-		json.put("parkingid", parkingid);
-		json.put("marketid", marketid);
-		json.put("plateno", log.getPlateNumber());
-		json.put("userid", userid);
-		json.put("remark ", log.getRemarks());
-
-		return json;
+		return null;
 	}
 
 	public List<JinyiClearance> getTempCardLogs(ParkingClearanceLog log) {

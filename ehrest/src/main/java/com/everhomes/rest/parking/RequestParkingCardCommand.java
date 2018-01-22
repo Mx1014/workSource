@@ -26,7 +26,6 @@ import com.everhomes.util.StringHelper;
  * <li>cardTypeId: 卡类型id</li>
  * <li>addressId: 门牌id</li>
  * <li>invoiceType: 发票类型id</li>
- * <li>identityCard: 身份证号码</li>
  * </ul>
  */
 public class RequestParkingCardCommand {
@@ -54,16 +53,6 @@ public class RequestParkingCardCommand {
     private String cardTypeId;
     private Long addressId;
     private Long invoiceType;
-
-    private String identityCard;
-
-    public String getIdentityCard() {
-        return identityCard;
-    }
-
-    public void setIdentityCard(String identityCard) {
-        this.identityCard = identityCard;
-    }
 
     public String getCardTypeId() {
         return cardTypeId;

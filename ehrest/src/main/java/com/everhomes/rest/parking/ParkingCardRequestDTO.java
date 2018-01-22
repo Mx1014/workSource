@@ -41,7 +41,6 @@ import com.everhomes.util.StringHelper;
  * <li>cardTypeName: 卡类型名称</li>
  * <li>apartmentName: 门牌号</li>
  * <li>invoiceName: 发票名称</li>
- * <li>identityCard: 身份证号码</li>
  * </ul>
  */
 public class ParkingCardRequestDTO {
@@ -80,15 +79,7 @@ public class ParkingCardRequestDTO {
     private String cardTypeName;
     private String apartmentName;
     private String invoiceName;
-    private String identityCard;
 
-    public String getIdentityCard() {
-        return identityCard;
-    }
-
-    public void setIdentityCard(String identityCard) {
-        this.identityCard = identityCard;
-    }
     public String getApartmentName() {
         return apartmentName;
     }

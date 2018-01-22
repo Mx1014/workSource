@@ -60,11 +60,6 @@ public class KetuoMybayParkingVendorHandler extends KetuoParkingVendorHandler {
 		}
 	}
 
-	@Override
-	protected boolean rechargeMonthlyCard(ParkingRechargeOrder order) {
-		return rechargeMonthlyCard(order,KetuoParkingVendorHandler.ADD_DISTANCE_MONTH);
-	}
-
 	private boolean addMonthCard(ParkingRechargeOrder order){
 
 		//开通月卡走工作流 流程，为了兼容以前老版本app，这里查询做了判断，现根据订单CardRequestId来查询申请记录，
