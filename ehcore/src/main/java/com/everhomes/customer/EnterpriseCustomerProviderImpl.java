@@ -3,12 +3,7 @@ package com.everhomes.customer;
 import java.lang.reflect.Method;
 import java.math.BigDecimal;
 import java.sql.Timestamp;
-import java.util.ArrayList;
-import java.util.Calendar;
-import java.util.Date;
-import java.util.HashMap;
-import java.util.List;
-import java.util.Map;
+import java.util.*;
 
 import com.everhomes.organization.OrganizationMember;
 import com.everhomes.rest.customer.*;
@@ -253,6 +248,22 @@ public class EnterpriseCustomerProviderImpl implements EnterpriseCustomerProvide
         Map<Long, EnterpriseCustomer> result = new HashMap<>();
         query.fetch().map((r) -> {
             result.put(r.getId(),ConvertHelper.convert(r, EnterpriseCustomer.class));
+            return null;
+        });
+
+        return result;
+    }
+
+    @Override
+    public List<EnterpriseCustomer> listEnterpriseCustomers(Set<Long> customerIds) {
+        DSLContext context = dbProvider.getDslContext(AccessSpec.readOnly());
+        SelectQuery<EhEnterpriseCustomersRecord> query = context.selectQuery(Tables.EH_ENTERPRISE_CUSTOMERS);
+        query.addConditions(Tables.EH_ENTERPRISE_CUSTOMERS.ID.in(customerIds));
+        query.addConditions(Tables.EH_ENTERPRISE_CUSTOMERS.STATUS.eq(CommonStatus.ACTIVE.getCode()));
+
+        List<EnterpriseCustomer> result = new ArrayList<>();
+        query.fetch().map((r) -> {
+            result.add(ConvertHelper.convert(r, EnterpriseCustomer.class));
             return null;
         });
 
@@ -711,6 +722,22 @@ public class EnterpriseCustomerProviderImpl implements EnterpriseCustomerProvide
         DSLContext context = dbProvider.getDslContext(AccessSpec.readOnly());
         SelectQuery<EhCustomerEntryInfosRecord> query = context.selectQuery(Tables.EH_CUSTOMER_ENTRY_INFOS);
         query.addConditions(Tables.EH_CUSTOMER_ENTRY_INFOS.CUSTOMER_ID.eq(customerId));
+        query.addConditions(Tables.EH_CUSTOMER_ENTRY_INFOS.STATUS.eq(CommonStatus.ACTIVE.getCode()));
+
+        List<CustomerEntryInfo> result = new ArrayList<>();
+        query.fetch().map((r) -> {
+            result.add(ConvertHelper.convert(r, CustomerEntryInfo.class));
+            return null;
+        });
+
+        return result;
+    }
+
+    @Override
+    public List<CustomerEntryInfo> listAddressEntryInfos(Long addressId) {
+        DSLContext context = dbProvider.getDslContext(AccessSpec.readOnly());
+        SelectQuery<EhCustomerEntryInfosRecord> query = context.selectQuery(Tables.EH_CUSTOMER_ENTRY_INFOS);
+        query.addConditions(Tables.EH_CUSTOMER_ENTRY_INFOS.ADDRESS_ID.eq(addressId));
         query.addConditions(Tables.EH_CUSTOMER_ENTRY_INFOS.STATUS.eq(CommonStatus.ACTIVE.getCode()));
 
         List<CustomerEntryInfo> result = new ArrayList<>();
