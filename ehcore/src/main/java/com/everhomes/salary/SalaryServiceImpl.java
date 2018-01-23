@@ -2260,6 +2260,9 @@ public class SalaryServiceImpl implements SalaryService {
             SalaryGroupEntity entity = ConvertHelper.convert(de, SalaryGroupEntity.class);
             entity.setOrganizationId(organizationId);
             entity.setId(null);
+            if (entity.getStatus() == null) {
+                entity.setStatus((byte) 1);
+            }
             salaryGroupEntityProvider.createSalaryGroupEntity(entity);
             entities.add(entity);
         }
