@@ -30,7 +30,7 @@ public interface QualityProvider {
 	void updateQualityInspectionStandards(QualityInspectionStandards standard);
 	QualityInspectionStandards findStandardById(Long id);
 	List<QualityInspectionStandards> findStandardsByCategoryId(Long categoryId);
-	List<QualityInspectionStandards> listQualityInspectionStandards(ListingLocator locator, int count, Long ownerId, String ownerType, String targetType, Long targetId, Byte reviewResult);
+	List<QualityInspectionStandards> listQualityInspectionStandards(ListingLocator locator, int count, Long ownerId, String ownerType, String targetType, Long targetId, Byte reviewResult,String planCondition);
 	
 	void createQualityInspectionEvaluationFactors(QualityInspectionEvaluationFactors factor);
 	void updateQualityInspectionEvaluationFactors(QualityInspectionEvaluationFactors factor);
@@ -89,7 +89,7 @@ public interface QualityProvider {
 	void deleteQualityInspectionStandardSpecificationMap(Long standardSpecificationId);
 	QualityInspectionStandardSpecificationMap createQualityInspectionStandardSpecificationMap(QualityInspectionStandardSpecificationMap map);
 	void updateQualityInspectionStandardSpecificationMap(QualityInspectionStandardSpecificationMap map);
-	QualityInspectionSpecifications findSpecificationById(Long id, String ownerType, Long ownerId);
+	QualityInspectionSpecifications findSpecificationById(Long id, String ownerType, Long ownerId,Integer namespaceId);
 	QualityInspectionSpecifications getSpecificationById(Long id);
 	
 	void populateStandardsSpecifications(final List<QualityInspectionStandards> standards);
