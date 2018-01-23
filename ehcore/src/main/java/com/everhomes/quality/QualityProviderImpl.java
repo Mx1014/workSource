@@ -1484,12 +1484,13 @@ public class QualityProviderImpl implements QualityProvider {
 
 	@Override
 	public QualityInspectionSpecifications findSpecificationById(Long id,
-			String ownerType, Long ownerId) {
+			String ownerType, Long ownerId,Integer namespaceId) {
 		DSLContext context = dbProvider.getDslContext(AccessSpec.readOnly());
 		SelectQuery<EhQualityInspectionSpecificationsRecord> query = context.selectQuery(Tables.EH_QUALITY_INSPECTION_SPECIFICATIONS);
 		query.addConditions(Tables.EH_QUALITY_INSPECTION_SPECIFICATIONS.ID.eq(id));
 		//总公司 分公司 改用namespaceId by xiongying20170329
-		query.addConditions(Tables.EH_QUALITY_INSPECTION_SPECIFICATIONS.NAMESPACE_ID.eq(UserContext.getCurrentNamespaceId()));
+		if(namespaceId!=null)
+		query.addConditions(Tables.EH_QUALITY_INSPECTION_SPECIFICATIONS.NAMESPACE_ID.eq(namespaceId));
 //		query.addConditions(Tables.EH_QUALITY_INSPECTION_SPECIFICATIONS.OWNER_TYPE.eq(ownerType));
 //		query.addConditions(Tables.EH_QUALITY_INSPECTION_SPECIFICATIONS.OWNER_ID.eq(ownerId));
 		query.addConditions(Tables.EH_QUALITY_INSPECTION_SPECIFICATIONS.STATUS.eq(QualityStandardStatus.ACTIVE.getCode()));
@@ -1555,7 +1556,8 @@ public class QualityProviderImpl implements QualityProvider {
             query.fetch().map((EhQualityInspectionStandardSpecificationMapRecord record) -> {
             	QualityInspectionStandards standard = mapStandards.get(record.getStandardId());
                 assert(standard != null);
-                QualityInspectionSpecifications specification = findSpecificationById(record.getSpecificationId(), standard.getOwnerType(), standard.getOwnerId());
+                QualityInspectionSpecifications specification =
+						findSpecificationById(record.getSpecificationId(), standard.getOwnerType(), standard.getOwnerId(),standard.getNamespaceId());
             
                 if(standard.getSpecifications() == null) {
                 	standard.setSpecifications(new ArrayList<QualityInspectionSpecifications>());

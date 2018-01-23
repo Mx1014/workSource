@@ -89,7 +89,7 @@ public interface QualityProvider {
 	void deleteQualityInspectionStandardSpecificationMap(Long standardSpecificationId);
 	QualityInspectionStandardSpecificationMap createQualityInspectionStandardSpecificationMap(QualityInspectionStandardSpecificationMap map);
 	void updateQualityInspectionStandardSpecificationMap(QualityInspectionStandardSpecificationMap map);
-	QualityInspectionSpecifications findSpecificationById(Long id, String ownerType, Long ownerId);
+	QualityInspectionSpecifications findSpecificationById(Long id, String ownerType, Long ownerId,Integer namespaceId);
 	QualityInspectionSpecifications getSpecificationById(Long id);
 	
 	void populateStandardsSpecifications(final List<QualityInspectionStandards> standards);
