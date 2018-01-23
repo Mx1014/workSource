@@ -16,6 +16,7 @@ import com.everhomes.settings.PaginationConfigHelper;
 import com.everhomes.techpark.punch.PunchService;
 import com.everhomes.uniongroup.UniongroupService;
 import com.everhomes.util.ConvertHelper;
+import com.everhomes.util.DateHelper;
 import com.everhomes.util.RuntimeErrorException;
 import freemarker.cache.StringTemplateLoader;
 import freemarker.template.Configuration;
@@ -34,6 +35,7 @@ import java.io.BufferedOutputStream;
 import java.io.ByteArrayOutputStream;
 import java.io.IOException;
 import java.io.OutputStream;
+import java.math.BigDecimal;
 import java.text.SimpleDateFormat;
 import java.util.*;
 import java.util.stream.Collectors;
@@ -2269,11 +2271,13 @@ public class SalaryServiceImpl implements SalaryService {
         //更新和删除
         List<SalaryGroupEntity> entities = salaryGroupEntityProvider.listSalaryGroupEntityByOrgId(cmd.getOrganizationId());
         for (SalaryGroupEntity entity : entities) {
-            //不可编辑不可删除直接跳过
-            if (NormalFlag.NO == NormalFlag.fromCode(entity.getDeleteFlag()) &&
-                    NormalFlag.NO == NormalFlag.fromCode(entity.getEditableFlag())) {
-                continue;
-            }
+
+//            //不可编辑不可删除直接跳过
+//            if (NormalFlag.NO == NormalFlag.fromCode(entity.getDeleteFlag()) &&
+//                    NormalFlag.NO == NormalFlag.fromCode(entity.getEditableFlag())) {
+//                salaryGroupEntityProvider.updateSalaryGroupEntity(entity);
+//                continue;
+//            }
             SalaryGroupEntityDTO dto = findSalaryGroupEntityDTOById(cmd.getEntities(), entity.getId());
             if (null == dto) {
                 //不可删除的跳过
@@ -2282,7 +2286,9 @@ public class SalaryServiceImpl implements SalaryService {
                 }
                 salaryGroupEntityProvider.deleteSalaryGroupEntity(entity);
             } else {
-                entity.setStatus(dto.getStatus());
+                if (entity.getStatus() != (byte) 2) {
+                    entity.setStatus(dto.getStatus());
+                }
                 //不可编辑的跳过
                 if (NormalFlag.NO == NormalFlag.fromCode(entity.getEditableFlag())) {
                     salaryGroupEntityProvider.updateSalaryGroupEntity(entity);
@@ -2311,25 +2317,77 @@ public class SalaryServiceImpl implements SalaryService {
 
     @Override
     public ListSalaryEmployeesResponse listSalaryEmployees(ListSalaryEmployeesCommand cmd) {
+        ListSalaryEmployeesResponse response = new ListSalaryEmployeesResponse();
+        String month = findSalaryMonth(cmd.getOwnerId());
+        response.setMonth(month);
         // TODO: 2018/1/22 磊哥和楠哥总要给我一个过滤后的detailIds
         List<Long> detailIds = new ArrayList<>();
-        ListSalaryEmployeesResponse response = new ListSalaryEmployeesResponse();
+        if (null == detailIds) {
+            return response;
+        }
+        response.setSalaryEmployeeDTO(new ArrayList<>());
+        for (Long detailId : detailIds) {
+            SalaryEmployee employee = salaryEmployeeProvider.findSalaryEmployeeByDetailId(cmd.getOwnerId(), detailId);
+            if (null == employee) {
+                employee = createSalaryEmployee(cmd.getOwnerId(), detailId, month);
+            }
+            response.getSalaryEmployeeDTO().add(processEmployeeDTO(employee));
+        }
 
         CrossShardListingLocator locator = new CrossShardListingLocator();
         locator.setAnchor(cmd.getPageAnchor());
         int pageSize = PaginationConfigHelper.getPageSize(configurationProvider, cmd.getPageSize());
-        List<SalaryEmployee> salaryEmployees = salaryEmployeeProvider.listSalaryEmployee(cmd.getOwnerId(), cmd.getSalaryStatus(), detailIds
-                , locator, pageSize + 1);
-        if (null == salaryEmployees)
-            return response;
+//        List<SalaryEmployee> salaryEmployees = salaryEmployeeProvider.listSalaryEmployee(cmd.getOwnerId(), cmd.getSalaryStatus(), detailIds
+//                , locator, pageSize + 1);
         Long nextPageAnchor = null;
-        if (salaryEmployees != null && salaryEmployees.size() > pageSize) {
-            salaryEmployees.remove(salaryEmployees.size() - 1);
-            nextPageAnchor = salaryEmployees.get(salaryEmployees.size() - 1).getId();
-        }
+//        if (salaryEmployees != null && salaryEmployees.size() > pageSize) {
+//            salaryEmployees.remove(salaryEmployees.size() - 1);
+//            nextPageAnchor = salaryEmployees.get(salaryEmployees.size() - 1).getId();
+//        }
         response.setNextPageAnchor(nextPageAnchor);
-        response.setSalaryEmployeeDTO(salaryEmployees.stream().map(this::processEmployeeDTO).collect(Collectors.toList()));
+//        response.setSalaryEmployeeDTO(salaryEmployees.stream().map(this::processEmployeeDTO).collect(Collectors.toList()));
         return response;
+    }
+
+    private SalaryEmployee createSalaryEmployee(Long ownerId, Long detailId, String month) {
+        OrganizationMemberDetails detail = organizationProvider.findOrganizationMemberDetailsByDetailId(detailId);
+        SalaryEmployee employee = newSalaryEmployee(detail,month,ownerId);
+        salaryEmployeeProvider.createSalaryEmployee(employee);
+        return employee;
+    }
+
+    private SalaryEmployee newSalaryEmployee(OrganizationMemberDetails detail, String month, Long ownerId) {
+        SalaryEmployee employee = new SalaryEmployee();
+        employee.setStatus(SalaryEmployeeStatus.UN_SET.getCode());
+        employee.setOwnerType("organization");
+        employee.setOwnerId(ownerId);
+        employee.setOrganizationId(detail.getOrganizationId());
+        employee.setUserId(detail.getTargetId());
+        employee.setUserDetailId(detail.getId());
+        employee.setSalaryPeriod(month);
+        employee.setRegularSalary(new BigDecimal(0));
+        employee.setRealPaySalary(new BigDecimal(0));
+        employee.setShouldPaySalary(new BigDecimal(0));
+        employee.setNamespaceId(detail.getNamespaceId());
+        return employee;
+    }
+
+    private String findSalaryMonth(Long ownerId) {
+        String month = salaryEmployeeProvider.getMonthByOwnerId(ownerId);
+        if (null != month) {
+            return month;
+        }
+        month = monthSF.get().format(DateHelper.currentGMTTime());
+        batchCreateMonthSalaryEmployees(ownerId, month);
+        return month;
+    }
+
+    private void batchCreateMonthSalaryEmployees(Long ownerId, String month) {
+        //// TODO: 2018/1/23 获取owner下面的details
+        List<OrganizationMemberDetails> details = new ArrayList<>();
+        for (OrganizationMemberDetails detail : details) {
+            createSalaryEmployee(ownerId, detail.getId(), month);
+        }
     }
 
     private SalaryEmployeeDTO processEmployeeDTO(SalaryEmployee r) {
