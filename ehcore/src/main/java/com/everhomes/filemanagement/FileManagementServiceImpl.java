@@ -380,7 +380,6 @@ public class FileManagementServiceImpl implements  FileManagementService{
 
     @Override
     public FileContentDTO updateFileContentName(UpdateFileContentNameCommand cmd) {
-        FileContentDTO dto = new FileContentDTO();
         FileContent content = fileManagementProvider.findFileContentById(cmd.getContentId());
         if (content == null)
             throw RuntimeErrorException.errorWith(FileManagementErrorCode.SCOPE, FileManagementErrorCode.ERROR_FILE_CONTENT_NOT_FOUND,
@@ -392,7 +391,7 @@ public class FileManagementServiceImpl implements  FileManagementService{
         content.setContentName(cmd.getContentName());
         fileManagementProvider.updateFileContent(content);
         //  3.return back
-        dto = ConvertHelper.convert(content, FileContentDTO.class);
+        FileContentDTO dto = ConvertHelper.convert(content, FileContentDTO.class);
         return dto;
     }
 
