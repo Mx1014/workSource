@@ -11,6 +11,6 @@ public interface MessageService {
 	public void pushMessageToAdminAndBusinessContacts(PushMessageToAdminAndBusinessContactsCommand cmd);
 
 
-	void persistMessage(PersistMessageCommand cmd);
+	void persistMessage(MessageDTO dto);
 
 }

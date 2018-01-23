@@ -20,14 +20,14 @@ import java.util.concurrent.ConcurrentLinkedQueue;
 public class MessagePersistWorker implements Runnable {
     private static final Logger LOGGER = LoggerFactory.getLogger(MessagePersistWorker.class);
 
-    @Value("${core.service.uri}")
-    private String coreServiceUri;
+//    @Value("${core.service.uri}")
+    private String coreServiceUri = "http://10.1.133.110:8080/evh";
 
-    @Value("${border.app.key}")
-    private String appKey;
+//    @Value("${border.app.key}")
+    private String appKey = "b86ddb3b-ac77-4a65-ae03-7e8482a3db70";
 
-    @Value("${border.app.secret}")
-    private String secretKey;
+//    @Value("${border.app.secret}")
+    private String secretKey = "2-0cDFNOq-zPzYGtdS8xxqnkR8PRgNhpHcWoku6Ob49NdBw8D9-Q72MLsCidI43IKhP1D_43ujSFbatGPWuVBQ";
 
 
     private ConcurrentLinkedQueue<MessageDTO> queue;

@@ -66,16 +66,10 @@ public class UserMessageRoutingHandler implements MessageRoutingHandler {
     @Autowired
     private MessagePersistWorker messagePersistWorker;
 
-    private ConcurrentLinkedQueue<MessageDTO> queue;
+    private ConcurrentLinkedQueue<MessageDTO> queue = new ConcurrentLinkedQueue<>();
 
     @PostConstruct
     public void setup(){
-//        String triggerName = StatTransactionScheduleJob.SCHEDELE_NAME + System.currentTimeMillis();
-//        String jobName = triggerName;
-//        String cronExpression = configurationProvider.getValue(StatTransactionConstant.STAT_CRON_EXPRESSION, StatTransactionScheduleJob.CRON_EXPRESSION);
-//        //启动定时任务
-//        scheduleProvider.scheduleCronJob(triggerName, jobName, cronExpression, StatTransactionScheduleJob.class, null);
-
         taskScheduler.scheduleAtFixedRate(()-> {
             while (!queue.isEmpty()){
                 MessageDTO messageDto = queue.poll();
@@ -98,7 +92,13 @@ public class UserMessageRoutingHandler implements MessageRoutingHandler {
             MessageDTO message, int deliveryOption) {
 
         //把消息添加到队列里
-        queue.offer(message);
+        MessageDTO dto = new MessageDTO();
+        dto.setBody(message.getBody());
+        dto.setBodyType(message.getBodyType());
+        dto.setMetaAppId(appId);
+        dto.setSenderUid(senderLogin.getUserId());
+        dto.setStoreSequence(0l);
+        queue.offer(dto);
 
 
         long uid = Long.parseLong(dstChannelToken);

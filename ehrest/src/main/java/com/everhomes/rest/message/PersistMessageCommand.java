@@ -1,6 +1,14 @@
 package com.everhomes.rest.message;
 
-import com.everhomes.rest.messaging.MessageDTO;
 
-public class PersistMessageCommand extends MessageDTO{
+public class PersistMessageCommand {
+    private String messageDto;
+
+    public String getMessageDto() {
+        return messageDto;
+    }
+
+    public void setMessageDto(String messageDto) {
+        this.messageDto = messageDto;
+    }
 }
