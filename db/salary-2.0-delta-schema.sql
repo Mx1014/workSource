@@ -117,7 +117,7 @@ CREATE TABLE `eh_salary_employees` (
   `real_pay_salary` DECIMAL (10, 2) COMMENT '实发工资合计',
   `creator_uid` BIGINT COMMENT'人员id',
   `create_time` DATETIME, 
-  `status` TINYINT COMMENT '状态0-未核算 1-已核算  3-定时发放等待中 4-已发放',
+  `status` TINYINT COMMENT '状态0-正常 1-实发合计为负  2-未定薪',
   PRIMARY KEY (`id`)
 ) ENGINE=INNODB DEFAULT CHARSET=utf8mb4 ;
 
