@@ -12,7 +12,7 @@ import com.everhomes.util.StringHelper;
  * <ul>
  * add工位预定的空间 
  * <li>namespaceId : namespaceId</li>
- * <li>ownerType : EhCommunities 工位发布的范围</li>
+ * <li>ownerType : community 工位发布的范围</li>
  * <li>ownerId : communityId 范围的id</li>
  *<li> name: 工位空间名称	</li>
 *<li> provinceId : 省份id	</li>

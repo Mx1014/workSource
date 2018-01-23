@@ -5,7 +5,7 @@ import com.everhomes.util.StringHelper;
 /**
  * <ul>
  * 列出工位预定空间的请求参数
- * <li>ownerType : EhCommunities </li>
+ * <li>ownerType : community </li>
  * <li>ownerId : communityId 园区id</li>
  * <li>cityId: 城市id</li>
  * <li>pageAnchor: 锚点</li>

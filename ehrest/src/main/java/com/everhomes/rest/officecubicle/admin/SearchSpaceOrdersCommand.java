@@ -6,7 +6,7 @@ import com.everhomes.util.StringHelper;
  * <ul>
  * 列出工位预定空间的请求参数
   * <li>namespaceId : namespaceId </li>
-  * <li>ownerType : EhCommunities 工位发布的范围</li>
+  * <li>ownerType : community 工位发布的范围</li>
  * <li>ownerId : communityId 范围的id</li>
  * <li>beginDate: 查询开始时间</li>
  * <li>endDate: 查询结束时间</li>
