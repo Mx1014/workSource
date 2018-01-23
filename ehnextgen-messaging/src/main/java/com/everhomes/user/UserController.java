@@ -1444,6 +1444,7 @@ public class UserController extends ControllerBase {
 	 * @return
 	 */
 	@RequestMapping("waitScanForLogon")
+	@RequireAuthentication(false)
 	@RestReturn(String.class)
 	public DeferredResult waitScanForLogon(BlockingEventCommand cmd) {
 		return userService.waitScanForLogon(cmd.getSubjectId());
