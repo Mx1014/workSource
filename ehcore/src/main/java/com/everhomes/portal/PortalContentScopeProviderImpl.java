@@ -52,11 +52,16 @@ public class PortalContentScopeProviderImpl implements PortalContentScopeProvide
 		if(portalContentScopes.size() == 0){
 			return;
 		}
-		Long id = sequenceProvider.getNextSequenceBlock(NameMapper.getSequenceDomainFromTablePojo(EhPortalContentScopes.class), (long)portalContentScopes.size());
+		/**
+		 * 有id使用原来的id，没有则生成新的
+		 */
+		Long id = sequenceProvider.getNextSequenceBlock(NameMapper.getSequenceDomainFromTablePojo(EhPortalContentScopes.class), (long)portalContentScopes.size() + 1);
 		List<EhPortalContentScopes> scopes = new ArrayList<>();
 		for (PortalContentScope scope: portalContentScopes) {
-			id ++;
-			scope.setId(id);
+			if(scope.getId() == null){
+				id ++;
+				scope.setId(id);
+			}
 			scope.setCreateTime(new Timestamp(DateHelper.currentGMTTime().getTime()));
 			scope.setUpdateTime(scope.getCreateTime());
 			scopes.add(ConvertHelper.convert(scope, EhPortalContentScopes.class));

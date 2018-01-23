@@ -18,6 +18,7 @@ import com.everhomes.organization.OrganizationProvider;
 import com.everhomes.organization.OrganizationService;
 import com.everhomes.organization.pm.pay.GsonUtil;
 import com.everhomes.portal.PortalPublishHandler;
+import com.everhomes.portal.ServiceModuleApp;
 import com.everhomes.portal.ServiceModuleAppProvider;
 import com.everhomes.rest.acl.*;
 import com.everhomes.rest.address.CommunityDTO;
@@ -33,6 +34,7 @@ import com.everhomes.rest.portal.ServiceModuleAppStatus;
 import com.everhomes.rest.portal.TreeServiceModuleAppsResponse;
 import com.everhomes.sequence.SequenceProvider;
 import com.everhomes.server.schema.Tables;
+import com.everhomes.server.schema.tables.pojos.EhUsers;
 import com.everhomes.settings.PaginationConfigHelper;
 import com.everhomes.user.User;
 import com.everhomes.user.UserContext;
@@ -105,6 +107,9 @@ public class ServiceModuleServiceImpl implements ServiceModuleService {
 
     @Autowired
     private UserPrivilegeMgr userPrivilegeMgr;
+
+    @Autowired
+    private AclProvider aclProvider;
 
 
     @Override
@@ -647,6 +652,7 @@ public class ServiceModuleServiceImpl implements ServiceModuleService {
         User user = UserContext.current().getUser();
         List<CommunityDTO> dtos = new ArrayList<>();
         List<ProjectDTO> projects = getUserProjectsByModuleId(user.getId(), cmd.getOrganizationId(), cmd.getModuleId());
+        LOGGER.debug("listAuthorizationCommunityByUser step3"+ DateHelper.currentGMTTime());
         for (ProjectDTO project: projects) {
             if(EntityType.fromCode(project.getProjectType()) == EntityType.COMMUNITY){
                 Community community = communityProvider.findCommunityById(project.getProjectId());
@@ -721,6 +727,13 @@ public class ServiceModuleServiceImpl implements ServiceModuleService {
 
     private boolean checkModuleManage(Long userId, Long organizationId, Long moduleId) {
         SystemUserPrivilegeMgr resolver = PlatformContext.getComponent("SystemUser");
+
+        //TODO add by yanjun, check by lv
+        if(aclProvider.checkAccess("system", null, EhUsers.class.getSimpleName(),
+                UserContext.current().getUser().getId(), Privilege.Write, null)) {
+            return true;
+        }
+
         if (resolver.checkSuperAdmin(userId, organizationId) || resolver.checkModuleAdmin(EntityType.ORGANIZATIONS.getCode(), organizationId, userId, moduleId)) {
             return true;
         }
@@ -1145,6 +1158,13 @@ public class ServiceModuleServiceImpl implements ServiceModuleService {
         }
 
         return AllFlag.NOT_ALL.getCode();
+    }
+
+    @Override
+    public ServiceModuleAppDTO findServiceModuleAppById(Long id){
+        ServiceModuleApp serviceModuleApp = serviceModuleAppProvider.findServiceModuleAppById(id);
+        return ConvertHelper.convert(serviceModuleApp, ServiceModuleAppDTO.class);
+
     }
 
 }

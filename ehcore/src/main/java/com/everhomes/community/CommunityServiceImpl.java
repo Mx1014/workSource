@@ -3430,7 +3430,7 @@ public class CommunityServiceImpl implements CommunityService {
 			cmd.setType(ResourceCategoryType.CATEGORY.getCode());
 		}
 
-		Integer namespaceId = UserContext.current().getUser().getNamespaceId();
+		Integer namespaceId = UserContext.getCurrentNamespaceId(cmd.getNamespaceId());
 		Long parentId = cmd.getParentId();
 		ResourceCategory category = null;
 		ResourceCategory parentCategory = null;
@@ -3614,9 +3614,9 @@ public class CommunityServiceImpl implements CommunityService {
 	@Override
 	public ListCommunitiesByKeywordCommandResponse listCommunitiesByCategory(ListCommunitiesByCategoryCommand cmd) {
 		int pageSize = PaginationConfigHelper.getPageSize(configurationProvider, cmd.getPageSize());
-		int namespaceId =UserContext.getCurrentNamespaceId(null);
+		int namespaceId =UserContext.getCurrentNamespaceId(cmd.getNamespaceId());
 
-		List<Community> list = communityProvider.listCommunitiesByCategory(cmd.getCityId(), cmd.getAreaId(), 
+		List<Community> list = communityProvider.listCommunitiesByCategory(cmd.getNamespaceId(), cmd.getCityId(), cmd.getAreaId(),
 				cmd.getCategoryId(), cmd.getKeywords(), cmd.getPageAnchor(), pageSize);
 
 		ListCommunitiesByKeywordCommandResponse response = new ListCommunitiesByKeywordCommandResponse();
@@ -3863,6 +3863,12 @@ public class CommunityServiceImpl implements CommunityService {
 	@Override
 	public List<ProjectDTO> getTreeProjectCategories(GetTreeProjectCategoriesCommand cmd){
 		Integer namespaceId = UserContext.getCurrentNamespaceId();
+	    if(cmd.getOwnerId() != null) {
+	        Organization org = organizationProvider.findOrganizationById(cmd.getOwnerId());
+	        if(org != null && org.getNamespaceId() != null) {
+	            namespaceId = org.getNamespaceId();
+	        }
+	    }
 		List<Community> communities = communityProvider.listCommunitiesByNamespaceId(namespaceId);
 		List<ProjectDTO> projects = new ArrayList<>();
 		for (Community community: communities) {

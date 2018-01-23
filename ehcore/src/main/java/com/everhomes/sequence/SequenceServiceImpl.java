@@ -1,6 +1,8 @@
 // @formatter:off
 package com.everhomes.sequence;
 
+import java.util.List;
+
 import com.everhomes.acl.AuthorizationProvider;
 import com.everhomes.db.AccessSpec;
 import com.everhomes.db.DbProvider;
@@ -24,7 +26,6 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
 
 import java.util.HashSet;
-import java.util.List;
 import java.util.Set;
 
 @Component
@@ -828,6 +829,15 @@ public class SequenceServiceImpl implements SequenceService {
         });
         syncTableSequence(null, EhCategories.class, Tables.EH_CATEGORIES.getName(), (dbContext) -> {
             return dbContext.select(Tables.EH_CATEGORIES.ID.max()).from(Tables.EH_CATEGORIES).fetchOne().value1();
+        });
+        syncTableSequence(null, EhEquipmentInspectionPlans.class, Tables.EH_EQUIPMENT_INSPECTION_PLANS.getName(), (dbContext) -> {
+            return dbContext.select(Tables.EH_EQUIPMENT_INSPECTION_PLANS.ID.max()).from(Tables.EH_EQUIPMENT_INSPECTION_PLANS).fetchOne().value1();
+        });
+        syncTableSequence(null, EhEquipmentInspectionEquipmentPlanMap.class, Tables.EH_EQUIPMENT_INSPECTION_EQUIPMENT_PLAN_MAP.getName(), (dbContext) -> {
+            return dbContext.select(Tables.EH_EQUIPMENT_INSPECTION_EQUIPMENT_PLAN_MAP.ID.max()).from(Tables.EH_EQUIPMENT_INSPECTION_EQUIPMENT_PLAN_MAP).fetchOne().value1();
+        });
+        syncTableSequence(null, EhEquipmentInspectionReviewDate.class, Tables.EH_EQUIPMENT_INSPECTION_REVIEW_DATE.getName(), (dbContext) -> {
+            return dbContext.select(Tables.EH_EQUIPMENT_INSPECTION_REVIEW_DATE.ID.max()).from(Tables.EH_EQUIPMENT_INSPECTION_REVIEW_DATE).fetchOne().value1();
         });
         syncTableSequence(null, EhEquipmentInspectionTasks.class, Tables.EH_EQUIPMENT_INSPECTION_TASKS.getName(), (dbContext) -> {
             return dbContext.select(Tables.EH_EQUIPMENT_INSPECTION_TASKS.ID.max()).from(Tables.EH_EQUIPMENT_INSPECTION_TASKS).fetchOne().value1();

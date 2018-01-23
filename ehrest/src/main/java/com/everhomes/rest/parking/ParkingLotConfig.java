@@ -6,27 +6,36 @@ package com.everhomes.rest.parking;
 public class ParkingLotConfig {
 
     //是否支持临时车缴费
-    private Byte tempfeeFlag;
+    private Byte tempfeeFlag = 0;
     //是否支持添加/删除费率
-    private Byte rateFlag;
+    private Byte rateFlag = 0;
     //是否支持锁车
-    private Byte lockCarFlag;
+    private Byte lockCarFlag = 0;
     //是否支持寻车
-    private Byte searchCarFlag;
+    private Byte searchCarFlag = 0;
     //显示当前在场车/当前剩余车位
-    private Byte currentInfoType;
+    private Byte currentInfoType = 0;
     //停车场客服联系方式
     private String contact;
 
-    private Byte invoiceFlag;
+    private Byte invoiceFlag = 0;
 
-    private byte businessLicenseFlag;
+    private Byte businessLicenseFlag = 0;
+    private Byte vipParkingFlag = 0;
 
-    public byte getBusinessLicenseFlag() {
+    public Byte getVipParkingFlag() {
+        return vipParkingFlag;
+    }
+
+    public void setVipParkingFlag(Byte vipParkingFlag) {
+        this.vipParkingFlag = vipParkingFlag;
+    }
+
+    public Byte getBusinessLicenseFlag() {
         return businessLicenseFlag;
     }
 
-    public void setBusinessLicenseFlag(byte businessLicenseFlag) {
+    public void setBusinessLicenseFlag(Byte businessLicenseFlag) {
         this.businessLicenseFlag = businessLicenseFlag;
     }
 

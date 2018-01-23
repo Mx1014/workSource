@@ -1,15 +1,10 @@
 package com.everhomes.rest.quality;
 
-import java.sql.Timestamp;
-import java.util.List;
-
-
-
-
-
-
 import com.everhomes.discover.ItemType;
 import com.everhomes.util.StringHelper;
+
+import java.sql.Timestamp;
+import java.util.List;
 
 /**
  * <ul>
@@ -51,6 +46,9 @@ import com.everhomes.util.StringHelper;
  *  <li>creatorUid : 创建者uid</li>
  *  <li>creatorName : 创建者姓名</li>
  *  <li>createTime : 创建时间</li>
+ *  <li>executiveTime : 创建时间</li>
+ *  <li>processTime : 创建时间</li>
+ *  <li>lastSyncTime : 上次最大同步时间</li>
  * </ul>
  */
 public class QualityInspectionTaskDTO {
@@ -134,6 +132,12 @@ public class QualityInspectionTaskDTO {
 	private String categoryDescription;
 	
 	private Timestamp createTime;
+
+	private Timestamp executiveTime;
+
+	private Timestamp processTime;
+
+	private String lastSyncTime;
 
 	public Long getId() {
 		return id;
@@ -445,6 +449,30 @@ public class QualityInspectionTaskDTO {
 
 	public void setExecutiveGroupName(String executiveGroupName) {
 		this.executiveGroupName = executiveGroupName;
+	}
+
+	public Timestamp getExecutiveTime() {
+		return executiveTime;
+	}
+
+	public void setExecutiveTime(Timestamp executiveTime) {
+		this.executiveTime = executiveTime;
+	}
+
+	public Timestamp getProcessTime() {
+		return processTime;
+	}
+
+	public void setProcessTime(Timestamp processTime) {
+		this.processTime = processTime;
+	}
+
+	public String getLastSyncTime() {
+		return lastSyncTime;
+	}
+
+	public void setLastSyncTime(String lastSyncTime) {
+		this.lastSyncTime = lastSyncTime;
 	}
 
 	@Override

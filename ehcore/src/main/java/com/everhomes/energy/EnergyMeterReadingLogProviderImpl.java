@@ -24,6 +24,7 @@ import org.springframework.stereotype.Component;
 
 import java.sql.Timestamp;
 import java.util.List;
+import java.util.Set;
 
 @Component
 public class EnergyMeterReadingLogProviderImpl implements EnergyMeterReadingLogProvider {
@@ -177,6 +178,16 @@ public class EnergyMeterReadingLogProviderImpl implements EnergyMeterReadingLogP
         return context.selectFrom(Tables.EH_ENERGY_METER_READING_LOGS)
                 .where(Tables.EH_ENERGY_METER_READING_LOGS.NAMESPACE_ID.eq(namespaceId))
                 .and(Tables.EH_ENERGY_METER_READING_LOGS.METER_ID.eq(meterId))
+                .and(Tables.EH_ENERGY_METER_READING_LOGS.STATUS.eq(EnergyCommonStatus.ACTIVE.getCode()))
+                .fetchInto(EnergyMeterReadingLog.class);
+    }
+
+    @Override
+    public List<EnergyMeterReadingLog> listMeterReadingLogsByMeterIds(Integer namespaceId, Set<Long> meterIds) {
+        DSLContext context = this.dbProvider.getDslContext(AccessSpec.readOnly());
+        return context.selectFrom(Tables.EH_ENERGY_METER_READING_LOGS)
+                .where(Tables.EH_ENERGY_METER_READING_LOGS.NAMESPACE_ID.eq(namespaceId))
+                .and(Tables.EH_ENERGY_METER_READING_LOGS.METER_ID.in(meterIds))
                 .and(Tables.EH_ENERGY_METER_READING_LOGS.STATUS.eq(EnergyCommonStatus.ACTIVE.getCode()))
                 .fetchInto(EnergyMeterReadingLog.class);
     }

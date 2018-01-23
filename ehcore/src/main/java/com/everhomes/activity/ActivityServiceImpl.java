@@ -4348,6 +4348,13 @@ public class ActivityServiceImpl implements ActivityService {
 		//获取园区id和论坛Id,并返回orgId，因为当查询域空间时需要orgid来查发送到“全部”的帖子 edit by yanjun 20170830
 		organizationId = forumService.populateCommunityIdAndForumId(communityId, organizationId, namespaceId, communityIdList, forumIds);
 
+        //重复了，去重
+        Set forumIdset = new HashSet();
+        forumIdset.addAll(forumIds);
+        forumIdset.remove(null);
+        forumIds = new ArrayList<Long>();
+        forumIds.addAll(forumIdset);
+
         // 当论坛list为空时，JOOQ的IN语句会变成1=0，导致条件永远不成立，也就查不到东西
         if(forumIds.size() == 0) {
             LOGGER.error("Forum not found for offical activities, cmd={}", cmd);

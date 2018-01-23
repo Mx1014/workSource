@@ -17,5 +17,4 @@ public class AssetErrorCodes {
     static final int HTTP_EBEI_ERROR = 10006;
     static final int HAS_PAID_BILLS = 10007;
     static final int NOT_CORP_MANAGER = 10008;
-
 }

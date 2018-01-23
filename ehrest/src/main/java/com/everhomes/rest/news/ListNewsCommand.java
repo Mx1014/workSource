@@ -19,6 +19,7 @@ import com.everhomes.util.StringHelper;
  * <li>pageSize: 每页的数量</li>
  * <li>keyword: 搜索关键字</li>
  * <li>tagIds: 需要筛选的标签id</li>
+ * <li>status: 状态，参考 {@link NewsStatus}</li>
  * </ul>
  */
 public class ListNewsCommand {
@@ -31,8 +32,17 @@ public class ListNewsCommand {
 	private Integer pageSize;
 	private String keyword;
 	@ItemType(Long.class)
-	private List<Long> tagIds;
+	private List<Long> tagIds;	
+	private Byte status;
 	
+	public Byte getStatus() {
+		return status;
+	}
+
+	public void setStatus(Byte status) {
+		this.status = status;
+	}
+
 	public String getOwnerType() {
 		return ownerType;
 	}

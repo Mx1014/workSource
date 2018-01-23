@@ -252,6 +252,8 @@ public enum Router {
     VIDEO_CONFERENCE_MAIN(ActionType.VIDEO_MEETING,
             "zl://video-conference/main", NoParamActionData.class),
 
+    RENTAL_ORDER_DETAIL(ActionType.RENTAL,
+            "zl://resource-reservation/detail", RentalOrderActionData.class),
     /**
      * video-conference
      */

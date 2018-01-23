@@ -1,10 +1,10 @@
 package com.everhomes.user.admin;
 
+import java.util.ArrayList;
+import java.util.List;
+
 import com.everhomes.acl.*;
-import com.everhomes.bootstrap.PlatformContext;
-import com.everhomes.constants.ErrorCodes;
 import com.everhomes.domain.Domain;
-import com.everhomes.entity.EntityType;
 import com.everhomes.module.ServiceModule;
 import com.everhomes.module.ServiceModulePrivilege;
 import com.everhomes.module.ServiceModulePrivilegeType;
@@ -29,18 +29,20 @@ import com.everhomes.rest.order.OwnerType;
 import com.everhomes.rest.organization.OrganizationType;
 import com.everhomes.rest.portal.ListServiceModuleAppsCommand;
 import com.everhomes.rest.portal.ListServiceModuleAppsResponse;
-import com.everhomes.user.UserContext;
-import com.everhomes.user.UserPrivilegeMgr;
-import com.everhomes.user.UserProvider;
-import com.everhomes.util.RuntimeErrorException;
+import com.everhomes.user.*;
+
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
-import org.springframework.util.StringUtils;
 
-import java.util.ArrayList;
-import java.util.List;
+
+
+import com.everhomes.bootstrap.PlatformContext;
+import com.everhomes.constants.ErrorCodes;
+import com.everhomes.entity.EntityType;
+import com.everhomes.util.RuntimeErrorException;
+import org.springframework.util.StringUtils;
 
 @Component("SystemUser")
 public class SystemUserPrivilegeMgr implements UserPrivilegeMgr {
@@ -446,6 +448,7 @@ public boolean checkUserPrivilege(Long userId, String ownerType, Long ownerId, L
                             LOGGER.debug("check root privilege success.userId={}, ownerType={}, ownerId={}, organizationId={}, privilegeId={}", userId, ownerType, ownerId, currentOrgId, privilegeId);
                             return true;
                         }
+
                         if(checkSuperAdmin(userId, currentOrgId)){
                             LOGGER.debug("check super admin privilege success.userId={}, ownerType={}, ownerId={}, organizationId={}, privilegeId={}" , userId, ownerType, ownerId, currentOrgId, privilegeId);
                             return true;

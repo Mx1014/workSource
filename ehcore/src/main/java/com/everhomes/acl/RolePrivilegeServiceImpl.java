@@ -2380,6 +2380,18 @@ public class RolePrivilegeServiceImpl implements RolePrivilegeService {
 		List<Long> categoryIds = new ArrayList<>();
 		List<Long> projectIds = new ArrayList<>();
 
+		if(LOGGER.isDebugEnabled()) {
+		    StringBuilder strBuilder = new StringBuilder("[");
+		    for(ProjectDTO dto : projects) {
+		        if(strBuilder.length() > 1) {
+		            strBuilder.append(",");
+		        }
+		        strBuilder.append(dto.getProjectId());
+		    }
+		    strBuilder.append("]");
+		    LOGGER.debug("Query tree project categories, namespaceId={}, projects={}", namespaceId, strBuilder);
+		}
+		long cmntyStartTime = System.currentTimeMillis();
 		if(0 != projects.size()){
 			for (ProjectDTO project: projects) {
 				// 获得关联了project(域空间下所有项目)的assignment
@@ -2403,6 +2415,12 @@ public class RolePrivilegeServiceImpl implements RolePrivilegeService {
 				projectIds.add(project.getProjectId());
 			}
 		}
+		long cmntyEndTime = System.currentTimeMillis();
+		if(LOGGER.isDebugEnabled()) {
+		    LOGGER.debug("Query tree project categories(filter projectId), elapse={}, projectIds={}", (cmntyEndTime - cmntyStartTime), projectIds);
+		}
+		
+		long treeStartTime = System.currentTimeMillis();
 		List<ProjectDTO> projectTrees = new ArrayList<>();
 		// 存在项目分类时的解析
 		if(0 != categoryIds.size()){
@@ -2425,6 +2443,10 @@ public class RolePrivilegeServiceImpl implements RolePrivilegeService {
 			}
 			setResourceDTOs(projectTrees, projectIds, namespaceId);
 		}
+		long treeEndTime = System.currentTimeMillis();
+		if(LOGGER.isDebugEnabled()) {
+            LOGGER.debug("Query tree project categories(construct tree), elapse={}, categoryIds={}", (treeEndTime - treeStartTime), categoryIds);
+        }
 
 		// 不存在项目分类时的解析
 		//添加子项目

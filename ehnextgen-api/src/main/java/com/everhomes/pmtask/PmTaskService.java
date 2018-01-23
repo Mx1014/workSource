@@ -74,6 +74,8 @@ public interface PmTaskService {
 
 	NamespaceHandlerDTO getNamespaceHandler(GetNamespaceHandlerCommand cmd);
 
+	GetIfHideRepresentResponse getIfHideRepresent(GetIfHideRepresentCommand cmd);
+
 //	void synchronizedData(SearchTasksCommand cmd);
 
 	void deleteTaskHistoryAddress(DeleteTaskHistoryAddressCommand cmd);
@@ -88,5 +90,9 @@ public interface PmTaskService {
 
 	ListAuthorizationCommunityByUserResponse listOrganizationCommunityByUser(ListOrganizationCommunityByUserCommand cmd);
 
+	ListOrganizationCommunityBySceneTokenResponse listOrganizationCommunityBySceneToken(ListOrganizationCommunityBySceneTokenCommand cmd);
+
 	void syncTaskStatistics(HttpServletResponse resp);
+
+	void syncCategories();
 }
