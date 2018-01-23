@@ -50,7 +50,7 @@ public interface DynamicExcelHandler {
      * @param context 上下文，遍历sheet时记录sheets之间的关系
      * @return
      */
-    List<List<String>> getExportData(List<DynamicField> fields, DynamicSheet sheet, Map<Object,Object> context);
+    List<List<String>> getExportData(DynamicSheet sheet, Map<Object,Object> context);
 
 //    void importData(String sheetName, List<String> headers, List<DynamicRowDTO> rowDatas, DynamicImportResponse response);
 
