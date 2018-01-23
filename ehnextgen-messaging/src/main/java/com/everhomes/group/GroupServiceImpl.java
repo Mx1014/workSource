@@ -5571,7 +5571,7 @@ public class GroupServiceImpl implements GroupService {
         if(ClubType.fromCode(cmd.getClubType()) == ClubType.GUILD){
             forumModuleType = ForumModuleType.GUILD.getCode();
         }
-        forumService.saveInteractSetting(cmd.getNamespaceId(), forumModuleType, null, cmd.getMemberCommentFlag());
+        forumService.saveInteractSetting(cmd.getNamespaceId(), forumModuleType, 0L, cmd.getMemberCommentFlag());
 		
 		return ConvertHelper.convert(groupSetting, GroupParametersResponse.class);
 	}
