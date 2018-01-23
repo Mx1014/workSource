@@ -91,69 +91,69 @@ public class SalaryEmployeePeriodValProviderImpl implements SalaryEmployeePeriod
 	private DSLContext getContext(AccessSpec accessSpec) {
 		return dbProvider.getDslContext(accessSpec);
 	}
-
-	@Override
-	public Integer countNullSalaryEmployeePeriodsByPeriodAndEntity(String ownerType, Long ownerId,
-																   String period, Long entityIdShifa) {
-		SelectConditionStep<Record1<Integer>> step = getReadOnlyContext().selectCount().from(Tables.EH_SALARY_EMPLOYEE_PERIOD_VALS).join(Tables.EH_SALARY_EMPLOYEES)
-				.on(Tables.EH_SALARY_EMPLOYEE_PERIOD_VALS.SALARY_EMPLOYEE_ID.eq(Tables.EH_SALARY_EMPLOYEES.ID))
-				.where(Tables.EH_SALARY_EMPLOYEE_PERIOD_VALS.OWNER_TYPE.eq(ownerType))
-				.and(Tables.EH_SALARY_EMPLOYEE_PERIOD_VALS.OWNER_ID.eq(ownerId))
-				.and(Tables.EH_SALARY_EMPLOYEE_PERIOD_VALS.ORIGIN_ENTITY_ID.eq(entityIdShifa))
-				.and(Tables.EH_SALARY_EMPLOYEE_PERIOD_VALS.SALARY_VALUE.isNull())
-				.and(Tables.EH_SALARY_EMPLOYEES.SALARY_PERIOD.eq(period));
-		return	step.fetchOne().value1();
-//				.fetch().map(r -> ConvertHelper.convert(r, SalaryEmployeePeriodVal.class)); 
-	}
-
-	@Override
-	public List<SalaryEmployeePeriodVal> listSalaryEmployeePeriodVals(Long salaryEmployeeId) {
-		return getReadOnlyContext().select().from(Tables.EH_SALARY_EMPLOYEE_PERIOD_VALS)
-				.where(Tables.EH_SALARY_EMPLOYEE_PERIOD_VALS.SALARY_EMPLOYEE_ID.eq(salaryEmployeeId))
-				.orderBy(Tables.EH_SALARY_EMPLOYEE_PERIOD_VALS.ID.asc())
-				.fetch().map(r -> ConvertHelper.convert(r, SalaryEmployeePeriodVal.class));
-	}
-
-	@Override
-	public void updateSalaryEmployeePeriodVal(Long salaryEmployeeId, Long groupEntryId,
-			String salaryValue) { 
-		getReadWriteContext().update(Tables.EH_SALARY_EMPLOYEE_PERIOD_VALS).set(Tables.EH_SALARY_EMPLOYEE_PERIOD_VALS.SALARY_VALUE,salaryValue)
-		.where(Tables.EH_SALARY_EMPLOYEE_PERIOD_VALS.SALARY_EMPLOYEE_ID.eq(salaryEmployeeId))
-		.and(Tables.EH_SALARY_EMPLOYEE_PERIOD_VALS.GROUP_ENTITY_ID.eq(groupEntryId)).execute();
-		
-	}
-
-	@Override
-	public void deletePeriodVals(Long employeeId) {
-		getReadWriteContext().delete(Tables.EH_SALARY_EMPLOYEE_PERIOD_VALS)
-				.where(Tables.EH_SALARY_EMPLOYEE_PERIOD_VALS.SALARY_EMPLOYEE_ID.eq(employeeId)).execute();
-	}
-
-	@Override
-	public void createSalaryEmployeePeriodVals(List<SalaryEmployeePeriodVal> salaryEmployeePeriodVals) {
-		for (SalaryEmployeePeriodVal r : salaryEmployeePeriodVals) {
-			createSalaryEmployeePeriodVal(r);
-		}
-	}
-
-	@Override
-	public int countEntityIsNull(List<Long> salaryEmployeeIds, Long entityIdShifa) {
-		SelectConditionStep<Record1<Integer>> step = getReadOnlyContext().selectCount().
-				from(Tables.EH_SALARY_EMPLOYEE_PERIOD_VALS)
-				.where(Tables.EH_SALARY_EMPLOYEE_PERIOD_VALS.SALARY_EMPLOYEE_ID.in(salaryEmployeeIds))
-				.and(Tables.EH_SALARY_EMPLOYEE_PERIOD_VALS.ORIGIN_ENTITY_ID.eq(entityIdShifa))
-				.and(Tables.EH_SALARY_EMPLOYEE_PERIOD_VALS.SALARY_VALUE.isNull());
-		return	step.fetchOne().value1();
-	}
-
-	@Override
-	public int countNumberEntityIsNull(List<Long> salaryEmployeeIds) {
-		SelectConditionStep<Record1<Integer>> step = getReadOnlyContext().selectCount().
-				from(Tables.EH_SALARY_EMPLOYEE_PERIOD_VALS).join(Tables.EH_SALARY_DEFAULT_ENTITIES)
-				.on(Tables.EH_SALARY_EMPLOYEE_PERIOD_VALS.ORIGIN_ENTITY_ID.eq(Tables.EH_SALARY_DEFAULT_ENTITIES.ID))
-				.where(Tables.EH_SALARY_EMPLOYEE_PERIOD_VALS.SALARY_EMPLOYEE_ID.in(salaryEmployeeIds))
-				.and(Tables.EH_SALARY_DEFAULT_ENTITIES.TYPE.eq(SalaryEntityType.NUMBER.getCode()))
-				.and(Tables.EH_SALARY_EMPLOYEE_PERIOD_VALS.SALARY_VALUE.isNull());
-		return	step.fetchOne().value1();
-	}
+//
+//	@Override
+//	public Integer countNullSalaryEmployeePeriodsByPeriodAndEntity(String ownerType, Long ownerId,
+//																   String period, Long entityIdShifa) {
+//		SelectConditionStep<Record1<Integer>> step = getReadOnlyContext().selectCount().from(Tables.EH_SALARY_EMPLOYEE_PERIOD_VALS).join(Tables.EH_SALARY_EMPLOYEES)
+//				.on(Tables.EH_SALARY_EMPLOYEE_PERIOD_VALS.SALARY_EMPLOYEE_ID.eq(Tables.EH_SALARY_EMPLOYEES.ID))
+//				.where(Tables.EH_SALARY_EMPLOYEE_PERIOD_VALS.OWNER_TYPE.eq(ownerType))
+//				.and(Tables.EH_SALARY_EMPLOYEE_PERIOD_VALS.OWNER_ID.eq(ownerId))
+//				.and(Tables.EH_SALARY_EMPLOYEE_PERIOD_VALS.ORIGIN_ENTITY_ID.eq(entityIdShifa))
+//				.and(Tables.EH_SALARY_EMPLOYEE_PERIOD_VALS.SALARY_VALUE.isNull())
+//				.and(Tables.EH_SALARY_EMPLOYEES.SALARY_PERIOD.eq(period));
+//		return	step.fetchOne().value1();
+////				.fetch().map(r -> ConvertHelper.convert(r, SalaryEmployeePeriodVal.class));
+//	}
+//
+//	@Override
+//	public List<SalaryEmployeePeriodVal> listSalaryEmployeePeriodVals(Long salaryEmployeeId) {
+//		return getReadOnlyContext().select().from(Tables.EH_SALARY_EMPLOYEE_PERIOD_VALS)
+//				.where(Tables.EH_SALARY_EMPLOYEE_PERIOD_VALS.SALARY_EMPLOYEE_ID.eq(salaryEmployeeId))
+//				.orderBy(Tables.EH_SALARY_EMPLOYEE_PERIOD_VALS.ID.asc())
+//				.fetch().map(r -> ConvertHelper.convert(r, SalaryEmployeePeriodVal.class));
+//	}
+//
+//	@Override
+//	public void updateSalaryEmployeePeriodVal(Long salaryEmployeeId, Long groupEntryId,
+//			String salaryValue) {
+//		getReadWriteContext().update(Tables.EH_SALARY_EMPLOYEE_PERIOD_VALS).set(Tables.EH_SALARY_EMPLOYEE_PERIOD_VALS.SALARY_VALUE,salaryValue)
+//		.where(Tables.EH_SALARY_EMPLOYEE_PERIOD_VALS.SALARY_EMPLOYEE_ID.eq(salaryEmployeeId))
+//		.and(Tables.EH_SALARY_EMPLOYEE_PERIOD_VALS.GROUP_ENTITY_ID.eq(groupEntryId)).execute();
+//
+//	}
+//
+//	@Override
+//	public void deletePeriodVals(Long employeeId) {
+//		getReadWriteContext().delete(Tables.EH_SALARY_EMPLOYEE_PERIOD_VALS)
+//				.where(Tables.EH_SALARY_EMPLOYEE_PERIOD_VALS.SALARY_EMPLOYEE_ID.eq(employeeId)).execute();
+//	}
+//
+//	@Override
+//	public void createSalaryEmployeePeriodVals(List<SalaryEmployeePeriodVal> salaryEmployeePeriodVals) {
+//		for (SalaryEmployeePeriodVal r : salaryEmployeePeriodVals) {
+//			createSalaryEmployeePeriodVal(r);
+//		}
+//	}
+//
+//	@Override
+//	public int countEntityIsNull(List<Long> salaryEmployeeIds, Long entityIdShifa) {
+//		SelectConditionStep<Record1<Integer>> step = getReadOnlyContext().selectCount().
+//				from(Tables.EH_SALARY_EMPLOYEE_PERIOD_VALS)
+//				.where(Tables.EH_SALARY_EMPLOYEE_PERIOD_VALS.SALARY_EMPLOYEE_ID.in(salaryEmployeeIds))
+//				.and(Tables.EH_SALARY_EMPLOYEE_PERIOD_VALS.ORIGIN_ENTITY_ID.eq(entityIdShifa))
+//				.and(Tables.EH_SALARY_EMPLOYEE_PERIOD_VALS.SALARY_VALUE.isNull());
+//		return	step.fetchOne().value1();
+//	}
+//
+//	@Override
+//	public int countNumberEntityIsNull(List<Long> salaryEmployeeIds) {
+//		SelectConditionStep<Record1<Integer>> step = getReadOnlyContext().selectCount().
+//				from(Tables.EH_SALARY_EMPLOYEE_PERIOD_VALS).join(Tables.EH_SALARY_DEFAULT_ENTITIES)
+//				.on(Tables.EH_SALARY_EMPLOYEE_PERIOD_VALS.ORIGIN_ENTITY_ID.eq(Tables.EH_SALARY_DEFAULT_ENTITIES.ID))
+//				.where(Tables.EH_SALARY_EMPLOYEE_PERIOD_VALS.SALARY_EMPLOYEE_ID.in(salaryEmployeeIds))
+//				.and(Tables.EH_SALARY_DEFAULT_ENTITIES.TYPE.eq(SalaryEntityType.NUMBER.getCode()))
+//				.and(Tables.EH_SALARY_EMPLOYEE_PERIOD_VALS.SALARY_VALUE.isNull());
+//		return	step.fetchOne().value1();
+//	}
 }

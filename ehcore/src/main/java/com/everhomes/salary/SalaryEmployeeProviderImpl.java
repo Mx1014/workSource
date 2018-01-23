@@ -5,7 +5,9 @@ import java.sql.Timestamp;
 import java.util.List;
 
 import com.everhomes.listing.CrossShardListingLocator;
+import com.everhomes.rest.salary.SalaryEmployeeStatus;
 import com.everhomes.rest.salary.SalaryGroupStatus;
+import com.everhomes.rest.techpark.punch.NormalFlag;
 import org.jooq.DSLContext;
 import org.jooq.Record;
 import org.jooq.Record1;
@@ -68,7 +70,28 @@ public class SalaryEmployeeProviderImpl implements SalaryEmployeeProvider {
 				.orderBy(Tables.EH_SALARY_EMPLOYEES.ID.asc())
 				.fetch().map(r -> ConvertHelper.convert(r, SalaryEmployee.class));
 	}
-	
+
+	@Override
+	public List<SalaryEmployee> listSalaryEmployee(Long ownerId, Byte salaryStatus, List<Long> detailIds, CrossShardListingLocator locator, int pageSize) {
+		SelectConditionStep<Record> step = getReadOnlyContext().select().from(Tables.EH_SALARY_EMPLOYEES)
+				.where(Tables.EH_SALARY_EMPLOYEES.OWNER_ID.eq(ownerId));
+		if (null != salaryStatus) {
+			if (NormalFlag.NO == NormalFlag.fromCode(salaryStatus)) {
+				step = step.and(Tables.EH_SALARY_EMPLOYEES.STATUS.ne(SalaryEmployeeStatus.NORMAL.getCode()));
+			}else{
+				step = step.and(Tables.EH_SALARY_EMPLOYEES.STATUS.eq(SalaryEmployeeStatus.NORMAL.getCode()));
+			}
+		}
+		if (null != detailIds) {
+			step = step.and(Tables.EH_SALARY_EMPLOYEES.USER_DETAIL_ID.in(detailIds));
+		}
+		if (null != locator && locator.getAnchor() != null) {
+			step = step.and(Tables.EH_SALARY_EMPLOYEES.ID.gt(locator.getAnchor()));
+		}
+		step.limit(pageSize);
+		return step.orderBy(Tables.EH_SALARY_EMPLOYEES.ID.asc()).fetch().map(r -> ConvertHelper.convert(r, SalaryEmployee.class));
+	}
+
 	private EhSalaryEmployeesDao getReadWriteDao() {
 		return getDao(getReadWriteContext());
 	}
@@ -93,108 +116,108 @@ public class SalaryEmployeeProviderImpl implements SalaryEmployeeProvider {
 		return dbProvider.getDslContext(accessSpec);
 	}
 
-	@Override
-	public List<SalaryEmployee> listSalaryEmployeeByPeriodGroupId(Long salaryPeriodGroupId) {
-		return getReadOnlyContext().select().from(Tables.EH_SALARY_EMPLOYEES)
-				.where(Tables.EH_SALARY_EMPLOYEES.SALARY_GROUP_ID.eq(salaryPeriodGroupId))
-				.orderBy(Tables.EH_SALARY_EMPLOYEES.ID.asc())
-				.fetch().map(r -> ConvertHelper.convert(r, SalaryEmployee.class));
-	}
-
-	@Override
-	public int countUnCheckEmployee(Long salaryPeriodGroupId) { 
-		return getReadOnlyContext().selectCount().from(Tables.EH_SALARY_EMPLOYEES)
-				.where(Tables.EH_SALARY_EMPLOYEES.SALARY_GROUP_ID.eq(salaryPeriodGroupId)).execute();
-	}
-
-	@Override
-	public List<SalaryEmployee> listSalaryEmployees(List<Long> detailIds, List<String> periods) {
-		return getReadOnlyContext().select().from(Tables.EH_SALARY_EMPLOYEES)
-				.where(Tables.EH_SALARY_EMPLOYEES.USER_DETAIL_ID.in(detailIds))
-				.and(Tables.EH_SALARY_EMPLOYEES.SALARY_PERIOD.in(periods))
-				.and(Tables.EH_SALARY_EMPLOYEES.STATUS.eq(SalaryGroupStatus.SENDED.getCode()))
-				.orderBy(Tables.EH_SALARY_EMPLOYEES.ID.asc())
-				.fetch().map(r -> ConvertHelper.convert(r, SalaryEmployee.class));
-	}
-
-	@Override
-	public void updateSalaryEmployeeCheckFlag(List<Long> salaryEmployeeIds, Byte checkFlag) {
-		getReadWriteContext().update(Tables.EH_SALARY_EMPLOYEES).set(Tables.EH_SALARY_EMPLOYEES.STATUS, checkFlag)
-				.where(Tables.EH_SALARY_EMPLOYEES.ID.in(salaryEmployeeIds)).execute();
-	}
-
-	@Override
-	public List<SalaryEmployee> listSalaryEmployees(Long salaryPeriodGroupId, List<Long> detailIds, Byte checkFlag, CrossShardListingLocator locator, int pageSize) {
-		SelectConditionStep<Record> step = getReadOnlyContext().select().from(Tables.EH_SALARY_EMPLOYEES)
-				.where(Tables.EH_SALARY_EMPLOYEES.USER_DETAIL_ID.in(detailIds));
-		step.and(Tables.EH_SALARY_EMPLOYEES.SALARY_GROUP_ID.eq(salaryPeriodGroupId));
-		if(null != checkFlag)
-			step.and(Tables.EH_SALARY_EMPLOYEES.STATUS.eq(checkFlag));
-		if (null != locator && locator.getAnchor() != null) {
-			step.and(Tables.EH_SALARY_EMPLOYEES.ID.gt(locator.getAnchor()));
-		}
-		step.limit(pageSize);
-		return step.orderBy(Tables.EH_SALARY_EMPLOYEES.ID.asc())
-				.fetch().map(r -> ConvertHelper.convert(r, SalaryEmployee.class));
-	}
-
-	@Override
-	public void deleteSalaryEmployee(Long ownerId, Long detail_id, Long salaryGroupId) {
-		getReadWriteContext().delete(Tables.EH_SALARY_EMPLOYEES)
-				.where(Tables.EH_SALARY_EMPLOYEES.USER_DETAIL_ID.eq(detail_id))
-				.and(Tables.EH_SALARY_EMPLOYEES.SALARY_GROUP_ID.eq(salaryGroupId))
-				.and(Tables.EH_SALARY_EMPLOYEES.OWNER_ID.eq(ownerId)).execute();
-
-	}
-
-	@Override
-	public void deleteSalaryEmployee(SalaryEmployee employee) {
-		getReadWriteDao().delete(employee);
-	}
-
-	@Override
-	public Integer countSalaryEmployeesByStatus(Long salaryPeriodGroupId, Byte checkFlag) {
-
-		SelectConditionStep<Record1<Integer>> step = getReadOnlyContext().selectCount().from(Tables.EH_SALARY_EMPLOYEES)
-				.where(Tables.EH_SALARY_EMPLOYEES.SALARY_GROUP_ID.eq(salaryPeriodGroupId));
-		if(null != checkFlag)
-			step.and(Tables.EH_SALARY_EMPLOYEES.STATUS.eq(checkFlag));
-		return step.fetchOne().value1();
-	}
-
-	@Override
-	public SalaryEmployee findSalaryEmployeeBySalaryGroupIdAndDetailId(Long salaryGroupId, Long detailId) {
-		List<SalaryEmployee> result = getReadOnlyContext().select().from(Tables.EH_SALARY_EMPLOYEES)
-				.where(Tables.EH_SALARY_EMPLOYEES.SALARY_GROUP_ID.eq(salaryGroupId))
-				.and(Tables.EH_SALARY_EMPLOYEES.USER_DETAIL_ID.eq(detailId))
-				.orderBy(Tables.EH_SALARY_EMPLOYEES.ID.asc())
-				.fetch().map(r -> ConvertHelper.convert(r, SalaryEmployee.class));
-		if (null == result || result.size() == 0) {
-			return null;
-		}
-		return result.get(0);
-	}
-
-	@Override
-	public SalaryEmployee findSalaryEmployee(Long ownerId, Long detailId, Long salaryGroupId) {
-		List<SalaryEmployee> result = getReadOnlyContext().select().from(Tables.EH_SALARY_EMPLOYEES)
-				.where(Tables.EH_SALARY_EMPLOYEES.USER_DETAIL_ID.eq(detailId))
-				.and(Tables.EH_SALARY_EMPLOYEES.SALARY_GROUP_ID.eq(salaryGroupId))
-				.and(Tables.EH_SALARY_EMPLOYEES.OWNER_ID.eq(ownerId))
-				.orderBy(Tables.EH_SALARY_EMPLOYEES.ID.asc())
-				.fetch().map(r -> ConvertHelper.convert(r, SalaryEmployee.class));
-		if (null == result || result.size() == 0) {
-			return null;
-		}
-		return result.get(0);
-	}
-
-	@Override
-	public List<SalaryEmployee> listSalaryEmployeeByPeriodGroupIdNotInDetailIDS(Long salaryPeriodGroupId, List<Long> detailIds) {
-		return getReadOnlyContext().select().from(Tables.EH_SALARY_EMPLOYEES)
-				.where(Tables.EH_SALARY_EMPLOYEES.SALARY_GROUP_ID.eq(salaryPeriodGroupId))
-				.and(Tables.EH_SALARY_EMPLOYEES.USER_DETAIL_ID.notIn(detailIds))
-				.orderBy(Tables.EH_SALARY_EMPLOYEES.ID.asc())
-				.fetch().map(r -> ConvertHelper.convert(r, SalaryEmployee.class));
-	}
+//	@Override
+//	public List<SalaryEmployee> listSalaryEmployeeByPeriodGroupId(Long salaryPeriodGroupId) {
+//		return getReadOnlyContext().select().from(Tables.EH_SALARY_EMPLOYEES)
+//				.where(Tables.EH_SALARY_EMPLOYEES.SALARY_GROUP_ID.eq(salaryPeriodGroupId))
+//				.orderBy(Tables.EH_SALARY_EMPLOYEES.ID.asc())
+//				.fetch().map(r -> ConvertHelper.convert(r, SalaryEmployee.class));
+//	}
+//
+//	@Override
+//	public int countUnCheckEmployee(Long salaryPeriodGroupId) {
+//		return getReadOnlyContext().selectCount().from(Tables.EH_SALARY_EMPLOYEES)
+//				.where(Tables.EH_SALARY_EMPLOYEES.SALARY_GROUP_ID.eq(salaryPeriodGroupId)).execute();
+//	}
+//
+//	@Override
+//	public List<SalaryEmployee> listSalaryEmployees(List<Long> detailIds, List<String> periods) {
+//		return getReadOnlyContext().select().from(Tables.EH_SALARY_EMPLOYEES)
+//				.where(Tables.EH_SALARY_EMPLOYEES.USER_DETAIL_ID.in(detailIds))
+//				.and(Tables.EH_SALARY_EMPLOYEES.SALARY_PERIOD.in(periods))
+//				.and(Tables.EH_SALARY_EMPLOYEES.STATUS.eq(SalaryGroupStatus.SENDED.getCode()))
+//				.orderBy(Tables.EH_SALARY_EMPLOYEES.ID.asc())
+//				.fetch().map(r -> ConvertHelper.convert(r, SalaryEmployee.class));
+//	}
+//
+//	@Override
+//	public void updateSalaryEmployeeCheckFlag(List<Long> salaryEmployeeIds, Byte checkFlag) {
+//		getReadWriteContext().update(Tables.EH_SALARY_EMPLOYEES).set(Tables.EH_SALARY_EMPLOYEES.STATUS, checkFlag)
+//				.where(Tables.EH_SALARY_EMPLOYEES.ID.in(salaryEmployeeIds)).execute();
+//	}
+//
+//	@Override
+//	public List<SalaryEmployee> listSalaryEmployees(Long salaryPeriodGroupId, List<Long> detailIds, Byte checkFlag, CrossShardListingLocator locator, int pageSize) {
+//		SelectConditionStep<Record> step = getReadOnlyContext().select().from(Tables.EH_SALARY_EMPLOYEES)
+//				.where(Tables.EH_SALARY_EMPLOYEES.USER_DETAIL_ID.in(detailIds));
+//		step.and(Tables.EH_SALARY_EMPLOYEES.SALARY_GROUP_ID.eq(salaryPeriodGroupId));
+//		if(null != checkFlag)
+//			step.and(Tables.EH_SALARY_EMPLOYEES.STATUS.eq(checkFlag));
+//		if (null != locator && locator.getAnchor() != null) {
+//			step.and(Tables.EH_SALARY_EMPLOYEES.ID.gt(locator.getAnchor()));
+//		}
+//		step.limit(pageSize);
+//		return step.orderBy(Tables.EH_SALARY_EMPLOYEES.ID.asc())
+//				.fetch().map(r -> ConvertHelper.convert(r, SalaryEmployee.class));
+//	}
+//
+//	@Override
+//	public void deleteSalaryEmployee(Long ownerId, Long detail_id, Long salaryGroupId) {
+//		getReadWriteContext().delete(Tables.EH_SALARY_EMPLOYEES)
+//				.where(Tables.EH_SALARY_EMPLOYEES.USER_DETAIL_ID.eq(detail_id))
+//				.and(Tables.EH_SALARY_EMPLOYEES.SALARY_GROUP_ID.eq(salaryGroupId))
+//				.and(Tables.EH_SALARY_EMPLOYEES.OWNER_ID.eq(ownerId)).execute();
+//
+//	}
+//
+//	@Override
+//	public void deleteSalaryEmployee(SalaryEmployee employee) {
+//		getReadWriteDao().delete(employee);
+//	}
+//
+//	@Override
+//	public Integer countSalaryEmployeesByStatus(Long salaryPeriodGroupId, Byte checkFlag) {
+//
+//		SelectConditionStep<Record1<Integer>> step = getReadOnlyContext().selectCount().from(Tables.EH_SALARY_EMPLOYEES)
+//				.where(Tables.EH_SALARY_EMPLOYEES.SALARY_GROUP_ID.eq(salaryPeriodGroupId));
+//		if(null != checkFlag)
+//			step.and(Tables.EH_SALARY_EMPLOYEES.STATUS.eq(checkFlag));
+//		return step.fetchOne().value1();
+//	}
+//
+//	@Override
+//	public SalaryEmployee findSalaryEmployeeBySalaryGroupIdAndDetailId(Long salaryGroupId, Long detailId) {
+//		List<SalaryEmployee> result = getReadOnlyContext().select().from(Tables.EH_SALARY_EMPLOYEES)
+//				.where(Tables.EH_SALARY_EMPLOYEES.SALARY_GROUP_ID.eq(salaryGroupId))
+//				.and(Tables.EH_SALARY_EMPLOYEES.USER_DETAIL_ID.eq(detailId))
+//				.orderBy(Tables.EH_SALARY_EMPLOYEES.ID.asc())
+//				.fetch().map(r -> ConvertHelper.convert(r, SalaryEmployee.class));
+//		if (null == result || result.size() == 0) {
+//			return null;
+//		}
+//		return result.get(0);
+//	}
+//
+//	@Override
+//	public SalaryEmployee findSalaryEmployee(Long ownerId, Long detailId, Long salaryGroupId) {
+//		List<SalaryEmployee> result = getReadOnlyContext().select().from(Tables.EH_SALARY_EMPLOYEES)
+//				.where(Tables.EH_SALARY_EMPLOYEES.USER_DETAIL_ID.eq(detailId))
+//				.and(Tables.EH_SALARY_EMPLOYEES.SALARY_GROUP_ID.eq(salaryGroupId))
+//				.and(Tables.EH_SALARY_EMPLOYEES.OWNER_ID.eq(ownerId))
+//				.orderBy(Tables.EH_SALARY_EMPLOYEES.ID.asc())
+//				.fetch().map(r -> ConvertHelper.convert(r, SalaryEmployee.class));
+//		if (null == result || result.size() == 0) {
+//			return null;
+//		}
+//		return result.get(0);
+//	}
+//
+//	@Override
+//	public List<SalaryEmployee> listSalaryEmployeeByPeriodGroupIdNotInDetailIDS(Long salaryPeriodGroupId, List<Long> detailIds) {
+//		return getReadOnlyContext().select().from(Tables.EH_SALARY_EMPLOYEES)
+//				.where(Tables.EH_SALARY_EMPLOYEES.SALARY_GROUP_ID.eq(salaryPeriodGroupId))
+//				.and(Tables.EH_SALARY_EMPLOYEES.USER_DETAIL_ID.notIn(detailIds))
+//				.orderBy(Tables.EH_SALARY_EMPLOYEES.ID.asc())
+//				.fetch().map(r -> ConvertHelper.convert(r, SalaryEmployee.class));
+//	}
 }
