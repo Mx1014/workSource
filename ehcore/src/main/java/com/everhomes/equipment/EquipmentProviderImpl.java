@@ -2513,7 +2513,7 @@ public class EquipmentProviderImpl implements EquipmentProvider {
 
         if(lastSyncTime!=null){
             query.addConditions(Tables.EH_EQUIPMENT_INSPECTION_TASKS.CREATE_TIME.gt(lastSyncTime).
-                    or(Tables.EH_EQUIPMENT_INSPECTION_TASKS.PROCESS_TIME.gt(lastSyncTime))
+                    or(Tables.EH_EQUIPMENT_INSPECTION_TASKS.EXECUTIVE_TIME.gt(lastSyncTime))
                     .or(Tables.EH_EQUIPMENT_INSPECTION_TASKS.REVIEW_TIME.gt(lastSyncTime)));
         }
         query.addOrderBy(Tables.EH_EQUIPMENT_INSPECTION_TASKS.EXECUTIVE_EXPIRE_TIME);
