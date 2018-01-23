@@ -2348,7 +2348,7 @@ public class OrganizationProviderImpl implements OrganizationProvider {
 
         query.addConditions(Tables.EH_ORGANIZATIONS.STATUS.eq(OrganizationStatus.ACTIVE.getCode()));
 
-        query.addOrderBy(Tables.EH_ORGANIZATIONS.ID.desc());
+        query.addOrderBy(Tables.EH_ORGANIZATIONS.LEVEL.asc(),Tables.EH_ORGANIZATIONS.ID.desc());
 
         query.fetch().map((r) -> {
             result.add(ConvertHelper.convert(r, Organization.class));
