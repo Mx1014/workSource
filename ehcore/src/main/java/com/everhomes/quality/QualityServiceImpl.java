@@ -176,6 +176,7 @@ import java.io.IOException;
 import java.io.InputStream;
 import java.io.OutputStream;
 import java.net.URL;
+import java.sql.Array;
 import java.sql.Date;
 import java.sql.Timestamp;
 import java.text.ParseException;
@@ -2841,7 +2842,13 @@ public class QualityServiceImpl implements QualityService {
 		}
 		//返回数据中添加所属项目
 		processSepcificationScopeName(dtos);
-		response.setSpecifications(dtos);
+		List<QualityInspectionSpecificationDTO> result = null;
+		if (dtos != null && dtos.size() > 0) {
+			result = dtos.stream().sorted(Comparator.comparing(QualityInspectionSpecificationDTO::getId))
+							.collect(Collectors.toList());
+		}
+
+		response.setSpecifications(result);
 		return response;
 	}
 
