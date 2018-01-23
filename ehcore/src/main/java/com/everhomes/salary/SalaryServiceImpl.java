@@ -2284,8 +2284,10 @@ public class SalaryServiceImpl implements SalaryService {
                 }
                 salaryGroupEntityProvider.deleteSalaryGroupEntity(entity);
             } else {
+                entity.setStatus(dto.getStatus());
                 //不可编辑的跳过
                 if (NormalFlag.NO == NormalFlag.fromCode(entity.getEditableFlag())) {
+                    salaryGroupEntityProvider.updateSalaryGroupEntity(entity);
                     continue;
                 }
                 if (null != dto.getDataPolicy()) {
@@ -2457,6 +2459,7 @@ public class SalaryServiceImpl implements SalaryService {
     private void addNewGroupEntities(Long organizationId, List<SalaryGroupEntityDTO> entities) {
         for (SalaryGroupEntityDTO dto : entities) {
             if (dto.getId() == null) {
+                LOGGER.debug("新增" + dto);
                 //id为null的新增
                 SalaryGroupEntity entity = ConvertHelper.convert(dto, SalaryGroupEntity.class);
                 entity.setDefaultFlag(NormalFlag.NO.getCode());
