@@ -288,11 +288,11 @@ public class PmKeXingBillServiceImpl implements PmKeXingBillService {
         String api = getBillAPI(ConfigConstants.ASSET_PAYMENT_ZJH_API_15);
         String projectId = communityProvider.getCommunityToken("ebei", ownerId);
         Integer currentPage = 1;
-        //显示本月账单，不再care是否是已缴纳
-//        String isPayStr = null;
-//        if(isPay!=null && StringUtils.isNotBlank(isPay.toString())){
-//            isPayStr = String.valueOf(isPay);
-//        }
+
+        String isPayStr = null;
+        if(isPay!=null && StringUtils.isNotBlank(isPay.toString())){
+            isPayStr = String.valueOf(isPay);
+        }
         //组装参数，判断非空
         Map<String,String> params = new HashMap<>();
         params.put("projectId",projectId);
@@ -300,9 +300,11 @@ public class PmKeXingBillServiceImpl implements PmKeXingBillService {
         params.put("currentPage",String.valueOf(currentPage));
         if(beginMonth!=null) params.put("beginMonth",beginMonth);
         if(endMonth != null) params.put("endMonth",endMonth);
-//        if(isPayStr!=null){
-//            params.put("isPay",isPayStr);
-//        }
+        if(isPayStr!=null){
+            params.put("isPay",isPayStr);
+        }else{
+            params.put("isPay","");
+        }
         for(int i = 0; i < contracts.size(); i ++){
             ContractDTO contract = contracts.get(i);
             if(!contract.getNamespaceContractType().equals(NamespaceContractType.EBEI.getCode())){
