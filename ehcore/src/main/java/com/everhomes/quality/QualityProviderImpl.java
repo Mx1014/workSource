@@ -473,8 +473,8 @@ public class QualityProviderImpl implements QualityProvider {
 
 		}
 		if (planCondition != null && !StringUtils.isNullOrEmpty(planCondition)) {
-			query.addConditions(Tables.EH_QUALITY_INSPECTION_STANDARDS.STANDARD_NUMBER.like(planCondition)
-					.or(Tables.EH_QUALITY_INSPECTION_STANDARDS.NAME.like(planCondition)));
+			query.addConditions(Tables.EH_QUALITY_INSPECTION_STANDARDS.STANDARD_NUMBER.like("%"+planCondition+"%")
+					.or(Tables.EH_QUALITY_INSPECTION_STANDARDS.NAME.like("%"+planCondition+"%")));
 		}
 		
 		query.addConditions(Tables.EH_QUALITY_INSPECTION_STANDARDS.DELETER_UID.eq(0L));
@@ -1488,13 +1488,12 @@ public class QualityProviderImpl implements QualityProvider {
 
 	@Override
 	public QualityInspectionSpecifications findSpecificationById(Long id,
-			String ownerType, Long ownerId,Integer namespaceId) {
+			String ownerType, Long ownerId) {
 		DSLContext context = dbProvider.getDslContext(AccessSpec.readOnly());
 		SelectQuery<EhQualityInspectionSpecificationsRecord> query = context.selectQuery(Tables.EH_QUALITY_INSPECTION_SPECIFICATIONS);
 		query.addConditions(Tables.EH_QUALITY_INSPECTION_SPECIFICATIONS.ID.eq(id));
 		//总公司 分公司 改用namespaceId by xiongying20170329
-		if(namespaceId!=null)
-		query.addConditions(Tables.EH_QUALITY_INSPECTION_SPECIFICATIONS.NAMESPACE_ID.eq(namespaceId));
+		query.addConditions(Tables.EH_QUALITY_INSPECTION_SPECIFICATIONS.NAMESPACE_ID.eq(UserContext.getCurrentNamespaceId()));
 //		query.addConditions(Tables.EH_QUALITY_INSPECTION_SPECIFICATIONS.OWNER_TYPE.eq(ownerType));
 //		query.addConditions(Tables.EH_QUALITY_INSPECTION_SPECIFICATIONS.OWNER_ID.eq(ownerId));
 		query.addConditions(Tables.EH_QUALITY_INSPECTION_SPECIFICATIONS.STATUS.eq(QualityStandardStatus.ACTIVE.getCode()));
@@ -1561,7 +1560,7 @@ public class QualityProviderImpl implements QualityProvider {
             	QualityInspectionStandards standard = mapStandards.get(record.getStandardId());
                 assert(standard != null);
                 QualityInspectionSpecifications specification =
-						findSpecificationById(record.getSpecificationId(), standard.getOwnerType(), standard.getOwnerId(),standard.getNamespaceId());
+						findSpecificationById(record.getSpecificationId(), standard.getOwnerType(), standard.getOwnerId());
             
                 if(standard.getSpecifications() == null) {
                 	standard.setSpecifications(new ArrayList<QualityInspectionSpecifications>());
