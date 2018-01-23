@@ -159,16 +159,15 @@ public class EquipmentAccessoriesSearcherImpl extends AbstractElasticSearch impl
             }
         
         List<EquipmentAccessoriesDTO> accessories = new ArrayList<EquipmentAccessoriesDTO>();
-        for(Long id : ids) {
-        	EquipmentInspectionAccessories accessory = equipmentProvider.findAccessoryById(id);
-        	EquipmentAccessoriesDTO dto = ConvertHelper.convert(accessory, EquipmentAccessoriesDTO.class);
-//        	Organization group = organizationProvider.findOrganizationById(dto.getTargetId());
-//    		if(group != null)
-//    			dto.setTargetName(group.getName());
-            Community community = communityProvider.findCommunityById(dto.getTargetId());
-            if(community != null)
-                dto.setTargetName(community.getName());
-        	accessories.add(dto);
+        for (Long id : ids) {
+            EquipmentInspectionAccessories accessory = equipmentProvider.findAccessoryById(id);
+            if (accessory != null) {
+                EquipmentAccessoriesDTO dto = ConvertHelper.convert(accessory, EquipmentAccessoriesDTO.class);
+                Community community = communityProvider.findCommunityById(dto.getTargetId());
+                if (community != null)
+                    dto.setTargetName(community.getName());
+                accessories.add(dto);
+            }
         }
         response.setAccessories(accessories);
         

@@ -2465,6 +2465,11 @@ public class EquipmentProviderImpl implements EquipmentProvider {
                                                                                Integer offset, Integer pageSize, String cacheKey, Byte adminFlag,Timestamp lastSyncTime) {
         long startTime = System.currentTimeMillis();
         List<EquipmentInspectionTasks> result = new ArrayList<EquipmentInspectionTasks>();
+        if (AdminFlag.NO.equals(AdminFlag.fromStatus(adminFlag))
+                && (executeStandardIds == null || executeStandardIds.size() == 0)
+                && (reviewStandardIds == null || reviewStandardIds.size() == 0)) {
+            return result;
+        }
 
         DSLContext context = dbProvider.getDslContext(AccessSpec.readOnly());
         SelectQuery<EhEquipmentInspectionTasksRecord> query = context.selectQuery(Tables.EH_EQUIPMENT_INSPECTION_TASKS);
@@ -2487,14 +2492,14 @@ public class EquipmentProviderImpl implements EquipmentProvider {
         }
 
         Condition con = null;
-        if (AdminFlag.NO.equals(AdminFlag.fromStatus(adminFlag))) {
+        if (AdminFlag.NO.equals(AdminFlag.fromStatus(adminFlag)) && executeStandardIds != null && executeStandardIds.size() > 0) {
             Condition con4 = Tables.EH_EQUIPMENT_INSPECTION_TASKS.PLAN_ID.in(executeStandardIds);
             con4 = con4.and(Tables.EH_EQUIPMENT_INSPECTION_TASKS.STATUS.in(EquipmentTaskStatus.WAITING_FOR_EXECUTING.getCode(),
                     EquipmentTaskStatus.DELAY.getCode()));
             con = con4;
         }
 
-        if (AdminFlag.NO.equals(AdminFlag.fromStatus(adminFlag))) {
+        if (AdminFlag.NO.equals(AdminFlag.fromStatus(adminFlag)) && reviewStandardIds != null && reviewStandardIds.size() > 0) {
             Condition con3 = Tables.EH_EQUIPMENT_INSPECTION_TASKS.PLAN_ID.in(reviewStandardIds);
             //巡检完成关闭的任务
             Condition con1 = Tables.EH_EQUIPMENT_INSPECTION_TASKS.STATUS.in(EquipmentTaskStatus.CLOSE.getCode(),
@@ -3116,11 +3121,16 @@ public class EquipmentProviderImpl implements EquipmentProvider {
         }
 
         Condition con = null;
-        if (AdminFlag.NO.equals(AdminFlag.fromStatus(adminFlag))) {
+        if (AdminFlag.NO.equals(AdminFlag.fromStatus(adminFlag)) && executePlanIds!=null &&  executePlanIds.size()>0) {
             Condition con4 = Tables.EH_EQUIPMENT_INSPECTION_TASKS.PLAN_ID.in(executePlanIds);
             con4 = con4.and(Tables.EH_EQUIPMENT_INSPECTION_TASKS.STATUS.in(EquipmentTaskStatus.WAITING_FOR_EXECUTING.getCode(),
                     EquipmentTaskStatus.DELAY.getCode()));
             con = con4;
+        }
+        if (AdminFlag.NO.equals(AdminFlag.fromStatus(adminFlag)) && (executePlanIds == null || executePlanIds.size() == 0)) {
+            response.setTotayTasksCount(0L);
+            response.setTodayCompleteCount(0L);;
+            return;
         }
 
         if (con != null) {
@@ -3144,7 +3154,5 @@ public class EquipmentProviderImpl implements EquipmentProvider {
             response.setTotayTasksCount(r.getValue("totayTasksCount",Long.class));
             return null;
         });
-
-
     }
 }
