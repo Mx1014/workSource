@@ -1,12 +1,6 @@
 package com.everhomes.rest.equipment;
 
-import java.sql.Timestamp;
-import java.util.List;
-
-import javax.validation.constraints.NotNull;
-
 import com.everhomes.discover.ItemType;
-import com.everhomes.rest.forum.AttachmentDTO;
 import com.everhomes.util.StringHelper;
 
 import javax.validation.constraints.NotNull;
@@ -57,6 +51,7 @@ import java.util.List;
  *  <li>price: 购买价格</li>
  *  <li>buyTime: 购买日期</li>
  *  <li>depreciationYears: 折旧年限</li>
+ *  <li>inspectionCategoryId: 巡检类型</li>
  * </ul>
  */
 public class EquipmentsDTO {
@@ -117,8 +112,10 @@ public class EquipmentsDTO {
     private String versionNo;
     
     private String manager;
-    
-    @ItemType(EquipmentAttachmentDTO.class)
+
+	private Long  inspectionCategoryId;
+
+	@ItemType(EquipmentAttachmentDTO.class)
     private List<EquipmentAttachmentDTO> attachments;
     @ItemType(EquipmentAccessoryMapDTO.class)
     private List<EquipmentAccessoryMapDTO> eqAccessoryMap;
@@ -484,6 +481,14 @@ public class EquipmentsDTO {
 
 	public void setDepreciationYear(Long depreciationYear) {
 		this.depreciationYear = depreciationYear;
+	}
+
+	public Long getInspectionCategoryId() {
+		return inspectionCategoryId;
+	}
+
+	public void setInspectionCategoryId(Long inspectionCategoryId) {
+		this.inspectionCategoryId = inspectionCategoryId;
 	}
 
 	@Override
