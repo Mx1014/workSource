@@ -199,6 +199,7 @@ public class FileManagementServiceImpl implements  FileManagementService{
                 query.addConditions(Tables.EH_FILE_MANAGEMENT_CATALOGS.ID.in(cmd.getCatalogIds()));
             if (cmd.getKeywords() != null)
                 query.addConditions(Tables.EH_FILE_MANAGEMENT_CATALOGS.NAME.like("%" + cmd.getKeywords() + "%"));
+            query.addOrderBy(Tables.EH_FILE_MANAGEMENT_CATALOGS.CREATE_TIME.desc());
             return query;
         });
 
@@ -208,6 +209,7 @@ public class FileManagementServiceImpl implements  FileManagementService{
                 query.addConditions(Tables.EH_FILE_MANAGEMENT_CONTENTS.CATALOG_ID.in(cmd.getCatalogIds()));
             if (cmd.getKeywords() != null)
                 query.addConditions(Tables.EH_FILE_MANAGEMENT_CONTENTS.CONTENT_NAME.like("%" + cmd.getKeywords() + "%"));
+            query.addOrderBy(Tables.EH_FILE_MANAGEMENT_CONTENTS.CREATE_TIME.desc());
             return query;
         });
 
@@ -217,6 +219,7 @@ public class FileManagementServiceImpl implements  FileManagementService{
                 query.addConditions(Tables.EH_FILE_MANAGEMENT_CONTENTS.CATALOG_ID.in(cmd.getCatalogIds()));
             if (cmd.getKeywords() != null)
                 query.addConditions(Tables.EH_FILE_MANAGEMENT_CONTENTS.CONTENT_NAME.like("%" + cmd.getKeywords() + "%"));
+            query.addOrderBy(Tables.EH_FILE_MANAGEMENT_CONTENTS.CREATE_TIME.desc());
             return query;
         });
 
