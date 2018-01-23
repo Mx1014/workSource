@@ -2902,9 +2902,14 @@ public class FlowServiceImpl implements FlowService {
 
     @Override
     public List<UserInfo> getSupervisor(FlowCase flowCase) {
-        List<FlowUserSelection> selections = flowUserSelectionProvider.findSelectionByBelong(flowCase.getFlowMainId()
-                , FlowEntityType.FLOW.getCode(), FlowUserType.SUPERVISOR.getCode(), flowCase.getFlowVersion());
-        return resolveSelectionUsers(flowCase.getFlowMainId(), selections);
+        List<FlowEventLog> logList = flowEventLogProvider.findFlowCaseSupervisors(flowCase);
+        List<UserInfo> userInfos = new ArrayList<>();
+        for (FlowEventLog eventLog : logList) {
+            UserInfo userInfo = userService.getUserInfo(eventLog.getFlowUserId());
+            fixupUserInfo(flowCase.getOrganizationId(), userInfo);
+            userInfos.add(userInfo);
+        }
+        return userInfos;
     }
 
     @Override
