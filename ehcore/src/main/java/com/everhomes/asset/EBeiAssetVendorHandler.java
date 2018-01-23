@@ -304,7 +304,9 @@ public class EBeiAssetVendorHandler implements AssetVendorHandler {
         if(list.size()>0){
             response.setDatestr(list.get(0).getDateStr());
         }
-        response.setAmountOwed(amountOwed);
+        //改成receivable,来自正中会需求 2018/1/23
+//        response.setAmountOwed(amountOwed);
+        response.setAmountOwed(amountReceivable);
         return response;
     }
 
