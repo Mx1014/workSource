@@ -5630,15 +5630,31 @@ private void checkUserPrivilege(Long orgId, Long privilegeId, Long communityId) 
 
 	@Override
 	public List<EquipmentStandardRelationDTO> listEquipmentStandardRelationsByTaskId(ListTaskByIdCommand cmd) {
-		EquipmentInspectionTasks task  = equipmentProvider.findEquipmentTaskById(cmd.getTaskId());
+		EquipmentInspectionTasks task = equipmentProvider.findEquipmentTaskById(cmd.getTaskId());
 		if (task != null) {
-			DeleteEquipmentPlanCommand delcmd = new DeleteEquipmentPlanCommand();
-			delcmd.setOwnerType(cmd.getOwnerType());
-			delcmd.setId(task.getPlanId());
-			delcmd.setOwnerId(cmd.getOwnerId());
-			EquipmentInspectionPlanDTO planDTO = getEquipmmentInspectionPlanById(delcmd);
-			if (planDTO != null)
-				return planDTO.getEquipmentStandardRelations();
+			if (task.getPlanId() != null && task.getPlanId() != 0L) {
+				DeleteEquipmentPlanCommand delcmd = new DeleteEquipmentPlanCommand();
+				delcmd.setOwnerType(cmd.getOwnerType());
+				delcmd.setId(task.getPlanId());
+				delcmd.setOwnerId(cmd.getOwnerId());
+				EquipmentInspectionPlanDTO planDTO = getEquipmmentInspectionPlanById(delcmd);
+				if (planDTO != null)
+					return planDTO.getEquipmentStandardRelations();
+			} else {
+				//兼容旧任务
+				List<EquipmentStandardRelationDTO> equipmentRelations = new ArrayList<>();
+				EquipmentInspectionEquipments equipment = equipmentProvider.findEquipmentById(task.getEquipmentId());
+				EquipmentInspectionStandards standard = equipmentProvider.findStandardById(task.getStandardId());
+				EquipmentStandardRelationDTO relationDTO = new EquipmentStandardRelationDTO();
+				if (equipment != null && standard != null) {
+					relationDTO.setQrCodeFlag(equipment.getQrCodeFlag());
+					relationDTO.setLocation(equipment.getLocation());
+					relationDTO.setEquipmentName(equipment.getName());
+					relationDTO.setStandardId(standard.getId());
+				}
+				equipmentRelations.add(relationDTO);
+				return equipmentRelations;
+			}
 		}
 		return null;
 	}
