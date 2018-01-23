@@ -12,6 +12,7 @@ import org.jooq.InsertQuery;
 import org.jooq.Record;
 import org.jooq.Result;
 import org.jooq.SelectJoinStep;
+import org.jooq.impl.DefaultRecordMapper;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -123,8 +124,12 @@ public class OfficeCubicleProviderImpl implements OfficeCubicleProvider {
 		DSLContext context = dbProvider.getDslContext(AccessSpec.readOnly());
 		SelectJoinStep<Record> step = context.select().from(Tables.EH_OFFICE_CUBICLE_ORDERS);
 		Condition condition = Tables.EH_OFFICE_CUBICLE_ORDERS.NAMESPACE_ID.eq(currentNamespaceId);
-		condition = condition.and(Tables.EH_OFFICE_CUBICLE_ORDERS.OWNER_TYPE.eq(ownerType));
-		condition = condition.and(Tables.EH_OFFICE_CUBICLE_ORDERS.OWNER_ID.eq(ownerId));
+		if(ownerType!=null) {
+			condition = condition.and(Tables.EH_OFFICE_CUBICLE_ORDERS.OWNER_TYPE.eq(ownerType));
+		}
+		if(ownerId!=null) {
+			condition = condition.and(Tables.EH_OFFICE_CUBICLE_ORDERS.OWNER_ID.eq(ownerId));
+		}
 		if(workFlowStatus !=null){
 			condition = condition.and(Tables.EH_OFFICE_CUBICLE_ORDERS.WORK_FLOW_STATUS.eq(workFlowStatus));
 		}
@@ -164,10 +169,10 @@ public class OfficeCubicleProviderImpl implements OfficeCubicleProvider {
 		SelectJoinStep<Record> step = context.select(Tables.EH_OFFICE_CUBICLE_SPACES.fields()).from(Tables.EH_OFFICE_CUBICLE_SPACES);
 		Condition condition = Tables.EH_OFFICE_CUBICLE_SPACES.NAMESPACE_ID.eq(currentNamespaceId) ;
 		condition = condition.and(Tables.EH_OFFICE_CUBICLE_SPACES.STATUS.eq(OfficeStatus.NORMAL.getCode()));
-		if(ownerType!=null) {
+		if(ownerId!=null) {
 			condition = condition.and(Tables.EH_OFFICE_CUBICLE_SPACES.OWNER_ID.eq(ownerId));
 		}
-		if(ownerId!=null) {
+		if(ownerType!=null) {
 			condition = condition.and(Tables.EH_OFFICE_CUBICLE_SPACES.OWNER_TYPE.eq(ownerType));
 		}
 		if (StringUtils.isNotBlank(keyWords)) {
@@ -226,12 +231,12 @@ public class OfficeCubicleProviderImpl implements OfficeCubicleProvider {
 	public List<OfficeCubicleSpace> querySpacesByCityId(String ownerType,Long ownerId,Long cityId, CrossShardListingLocator locator, int pageSize,
 			Integer currentNamespaceId) {
 		DSLContext context = dbProvider.getDslContext(AccessSpec.readOnly());
-		SelectJoinStep<Record> step = context.select().from(Tables.EH_OFFICE_CUBICLE_RANGES,Tables.EH_OFFICE_CUBICLE_SPACES);
+		SelectJoinStep<Record> step = context.select(Tables.EH_OFFICE_CUBICLE_SPACES.fields()).from(Tables.EH_OFFICE_CUBICLE_RANGES,Tables.EH_OFFICE_CUBICLE_SPACES);
 		Condition condition = Tables.EH_OFFICE_CUBICLE_RANGES.OWNER_TYPE.eq(ownerType);
-		condition = Tables.EH_OFFICE_CUBICLE_RANGES.OWNER_ID.eq(ownerId);
-		condition =  Tables.EH_OFFICE_CUBICLE_RANGES.SPACE_ID.eq(Tables.EH_OFFICE_CUBICLE_SPACES.ID);
+		condition = condition.and(Tables.EH_OFFICE_CUBICLE_RANGES.OWNER_ID.eq(ownerId));
+		condition =  condition.and(Tables.EH_OFFICE_CUBICLE_RANGES.SPACE_ID.eq(Tables.EH_OFFICE_CUBICLE_SPACES.ID));
 
-		condition = Tables.EH_OFFICE_CUBICLE_SPACES.NAMESPACE_ID.eq(currentNamespaceId);
+		condition = condition.and(Tables.EH_OFFICE_CUBICLE_SPACES.NAMESPACE_ID.eq(currentNamespaceId));
 		condition = condition.and(Tables.EH_OFFICE_CUBICLE_SPACES.STATUS.eq(OfficeStatus.NORMAL.getCode()));
 		if (null != cityId)
 			condition = condition.and(Tables.EH_OFFICE_CUBICLE_SPACES.CITY_ID.eq(cityId));
@@ -239,9 +244,7 @@ public class OfficeCubicleProviderImpl implements OfficeCubicleProvider {
 			condition = condition.and(Tables.EH_OFFICE_CUBICLE_SPACES.ID.lt(locator.getAnchor()));
 		step.limit(pageSize);
 		step.where(condition);
-		List<OfficeCubicleSpace> result = step.orderBy(Tables.EH_OFFICE_CUBICLE_SPACES.ID.desc()).fetch().map((r) -> {
-			return ConvertHelper.convert(r, OfficeCubicleSpace.class);
-		});
+		List<OfficeCubicleSpace> result = step.orderBy(Tables.EH_OFFICE_CUBICLE_SPACES.ID.desc()).fetch().map(new DefaultRecordMapper(Tables.EH_OFFICE_CUBICLE_SPACES.recordType(), OfficeCubicleSpace.class));
 		if (null != result && result.size() > 0)
 			return result;
 		return null;
@@ -303,4 +306,30 @@ public class OfficeCubicleProviderImpl implements OfficeCubicleProvider {
 		return new ArrayList<OfficeCubicleOrder>();
 	}
 
+	@Override
+	public List<OfficeCubicleSpace> listEmptyOwnerSpace() {
+		DSLContext context = dbProvider.getDslContext(AccessSpec.readOnly());
+		SelectJoinStep<Record> step = context.select().from(Tables.EH_OFFICE_CUBICLE_SPACES);
+		Condition condition = Tables.EH_OFFICE_CUBICLE_SPACES.OWNER_TYPE.isNull();
+		condition = condition.and(Tables.EH_OFFICE_CUBICLE_SPACES.OWNER_ID.isNull());
+
+		step.where(condition);
+		List<OfficeCubicleSpace> result = step.fetch().map((r) -> {
+			return ConvertHelper.convert(r, OfficeCubicleSpace.class);
+		});
+		return result;
+	}
+
+	@Override
+	public List<OfficeCubicleOrder> listEmptyOwnerOrders() {
+		DSLContext context = dbProvider.getDslContext(AccessSpec.readOnly());
+		SelectJoinStep<Record> step = context.select().from(Tables.EH_OFFICE_CUBICLE_ORDERS);
+		Condition condition = Tables.EH_OFFICE_CUBICLE_ORDERS.OWNER_TYPE.isNull();
+		condition = condition.and(Tables.EH_OFFICE_CUBICLE_ORDERS.OWNER_ID.isNull());
+		step.where(condition);
+		List<OfficeCubicleOrder> result = step.fetch().map((r) -> {
+			return ConvertHelper.convert(r, OfficeCubicleOrder.class);
+		});
+		return result;
+	}
 }

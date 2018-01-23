@@ -31,7 +31,7 @@ public interface OfficeCubicleService {
 
 	OfficeSpaceDTO getSpaceDetail(GetSpaceDetailCommand cmd);
 
-	void addSpaceOrder(AddSpaceOrderCommand cmd);
+	AddSpaceOrderResponse addSpaceOrder(AddSpaceOrderCommand cmd);
 
 	List<OfficeOrderDTO> getUserOrders();
 
@@ -39,4 +39,5 @@ public interface OfficeCubicleService {
 
 	QuerySpacesResponse querySpaces(QuerySpacesCommand cmd);
 
+    void dataMigration();
 }

@@ -17,7 +17,7 @@ public class OfficeRangeDTO {
 	private Long id;
 	private Long spaceId;
 	private String ownerType;
-	private String ownerId;
+	private Long ownerId;
 	public Long getId() {
 		return id;
 	}
@@ -36,10 +36,10 @@ public class OfficeRangeDTO {
 	public void setOwnerType(String ownerType) {
 		this.ownerType = ownerType;
 	}
-	public String getOwnerId() {
+	public Long getOwnerId() {
 		return ownerId;
 	}
-	public void setOwnerId(String ownerId) {
+	public void setOwnerId(Long ownerId) {
 		this.ownerId = ownerId;
 	}
 

@@ -9,7 +9,14 @@ import com.everhomes.util.StringHelper;
  */
 public class AddSpaceOrderResponse {	
 	private Long flowCaseId;
-	
+
+	public AddSpaceOrderResponse(Long flowCaseId) {
+		this.flowCaseId = flowCaseId;
+	}
+
+	public AddSpaceOrderResponse() {
+	}
+
 	public Long getFlowCaseId() {
 		return flowCaseId;
 	}

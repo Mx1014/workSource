@@ -39,6 +39,10 @@ public interface OfficeCubicleProvider {
 	List<OfficeCubicleOrder> listStationByUpdateTimeAndAnchor(Integer namespaceId, Long timestamp, Long pageAnchor,
 			int pageSize);
 
-	List<OfficeCubicleOrder> listStationByUpdateTime(Integer namespaceId, Long timestamp, int pageSize); 
+	List<OfficeCubicleOrder> listStationByUpdateTime(Integer namespaceId, Long timestamp, int pageSize);
 
+
+	List<OfficeCubicleSpace> listEmptyOwnerSpace();
+
+    List<OfficeCubicleOrder> listEmptyOwnerOrders();
 }

@@ -109,7 +109,7 @@ public class OfficeCubicleAdminController extends ControllerBase {
     @RestReturn(value=SearchSpaceOrdersResponse.class )
     public RestResponse searchSpaceOrders(SearchSpaceOrdersCommand cmd) {
 
-    	SearchSpaceOrdersResponse resp = this.officeCubicleService.searchSpaceOrders(cmd);
+        SearchSpaceOrdersResponse resp = this.officeCubicleService.searchSpaceOrders(cmd);
         RestResponse response = new RestResponse(resp);
         response.setErrorCode(ErrorCodes.SUCCESS);
         response.setErrorDescription("OK");
@@ -128,5 +128,21 @@ public class OfficeCubicleAdminController extends ControllerBase {
 		HttpServletResponse commandResponse = this.officeCubicleService.exportSpaceOrders(cmd,response);
 		return null;
 	}
+
+    /**
+     * <b>URL: /officecubicle/dataMigration</b>
+     * <p>
+     * 数据迁移
+     * </p>
+     */
+    @RequestMapping("dataMigration")
+    public RestResponse exprotSpaceOrders() {
+        this.officeCubicleService.dataMigration();
+        RestResponse response = new RestResponse();
+        response.setErrorCode(ErrorCodes.SUCCESS);
+        response.setErrorDescription("OK");
+        return response;
+    }
+
     
 }

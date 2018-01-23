@@ -89,9 +89,7 @@ public class OfficeCubicleController extends ControllerBase {
     @RequestMapping("addSpaceOrder")
     @RestReturn(value=AddSpaceOrderResponse.class )
     public RestResponse addSpaceOrder(AddSpaceOrderCommand cmd) {
-    	this.officeCubicleService.addSpaceOrder(cmd);
-    	
-        RestResponse response = new RestResponse();
+        RestResponse response = new RestResponse(officeCubicleService.addSpaceOrder(cmd));
         response.setErrorCode(ErrorCodes.SUCCESS);
         response.setErrorDescription("OK");
         return response;
