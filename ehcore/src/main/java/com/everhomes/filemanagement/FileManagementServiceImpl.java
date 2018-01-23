@@ -251,17 +251,17 @@ public class FileManagementServiceImpl implements  FileManagementService{
             return scopes;
 
         dbProvider.execute((TransactionStatus status) -> {
-            List<Long> sourceIds = new ArrayList<>();
+//            List<Long> sourceIds = new ArrayList<>();
             cmd.getScopes().forEach(r -> {
-                //  1.save sourceIds
-                sourceIds.add(r.getSourceId());
+/*                //  1.save sourceIds
+                sourceIds.add(r.getSourceId());*/
                 //  2.create or update the scope
                 FileCatalogScopeDTO dto = createFileCatalogScope(namespaceId, cmd.getCatalogId(), r);
                 //  3.save the data which is returning back
                 scopes.add(dto);
             });
-            //  4.delete redundant data
-            fileManagementProvider.deleteFileCatalogScopeNotInSourceIds(namespaceId, cmd.getCatalogId(), sourceIds);
+            /*//  4.delete redundant data
+            fileManagementProvider.deleteFileCatalogScopeNotInSourceIds(namespaceId, cmd.getCatalogId(), sourceIds);*/
             return null;
         });
         return scopes;
@@ -341,7 +341,7 @@ public class FileManagementServiceImpl implements  FileManagementService{
             return dto;
 
         //  1.whether the name has been used
-        checkFileContentName(namespaceId, catalog.getOwnerId(), cmd.getParentId(), cmd.getContentName());
+        checkFileContentName(namespaceId, catalog.getOwnerId(), catalog.getId(), cmd.getParentId(), cmd.getContentName());
 
         //  2.create it
         FileContent content = new FileContent();
@@ -379,7 +379,7 @@ public class FileManagementServiceImpl implements  FileManagementService{
         FileContent content = fileManagementProvider.findFileContentById(cmd.getContentId());
         if (content != null) {
             //  1.check the name
-            checkFileContentName(content.getNamespaceId(), content.getOwnerId(), content.getParentId(), cmd.getContentName());
+            checkFileContentName(content.getNamespaceId(), content.getOwnerId(), content.getCatalogId(), content.getParentId(), cmd.getContentName());
             //  2.update the name
             content.setContentName(cmd.getContentName());
             fileManagementProvider.updateFileContent(content);
@@ -389,8 +389,8 @@ public class FileManagementServiceImpl implements  FileManagementService{
         return dto;
     }
 
-    private void checkFileContentName(Integer namespaceId, Long ownerId, Long parentId, String name){
-        FileContent content = fileManagementProvider.findFileContentByName(namespaceId, ownerId, parentId, name);
+    private void checkFileContentName(Integer namespaceId, Long ownerId, Long catalogId, Long parentId, String name){
+        FileContent content = fileManagementProvider.findFileContentByName(namespaceId, ownerId, catalogId, parentId, name);
         if (content != null)
             throw RuntimeErrorException.errorWith(FileManagementErrorCode.SCOPE, FileManagementErrorCode.ERROR_NAME_ALREADY_EXISTS,
                     "the name has been used.");

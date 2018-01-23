@@ -652,6 +652,8 @@ public class Rentalv2FlowModuleListener implements FlowModuleListener {
 	@Override
 	public List<FlowServiceTypeDTO> listServiceTypes(Integer namespaceId, String ownerType, Long ownerId) {
 		List<RentalResourceType> resourceTypes =  this.rentalv2Provider.findRentalResourceTypes(namespaceId, ResourceTypeStatus.NORMAL.getCode(), null, null);
+		if (resourceTypes==null || resourceTypes.size()==0)
+			return null;
 		List<FlowServiceTypeDTO> dtos = resourceTypes.stream().map(r->{
 			FlowServiceTypeDTO dto =new FlowServiceTypeDTO();
 			dto.setId(r.getId());

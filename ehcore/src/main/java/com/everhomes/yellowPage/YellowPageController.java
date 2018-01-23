@@ -467,7 +467,7 @@ public class YellowPageController  extends ControllerBase {
    	 */
    	@RequestMapping("getCategoryIdByEntryId")
    	@RestReturn(value = GetCategoryIdByEntryIdResponse.class)
-   	public RestResponse listServiceAllianceCategories(GetCategoryIdByEntryIdCommand cmd) {
+   	public RestResponse getCategoryIdByEntryId(GetCategoryIdByEntryIdCommand cmd) {
    		return new RestResponse(yellowPageService.getCategoryIdByEntryId(cmd));
    	}
 
@@ -486,5 +486,22 @@ public class YellowPageController  extends ControllerBase {
        	response.setErrorDescription("OK");
        	return response;
        }
+
+       
+   /**
+  	 * <b>URL: /yellowPage/syncOldForm</b>
+  	 * <p> 同步旧表单到自定义表单信息</p>
+  	 */
+      @RequestMapping("syncOldForm")
+      @RestReturn(value = String.class)
+      public RestResponse syncOldForm() {
+      	
+      	this.yellowPageService.syncOldForm();
+      	 
+      	RestResponse response = new RestResponse();
+      	response.setErrorCode(ErrorCodes.SUCCESS);
+      	response.setErrorDescription("OK");
+      	return response;
+      }
 
 }
