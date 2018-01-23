@@ -7,6 +7,7 @@ import java.util.List;
 
 /**
  * <ul>
+ * <li>id:id</li>
  * <li>categoryName: 类型名</li>
  * <li>description: 提示批注(有就有没有就不展示)</li>
  * <li>customFlag: 是否可以添加自定义字段 1-是 0-否</li>
