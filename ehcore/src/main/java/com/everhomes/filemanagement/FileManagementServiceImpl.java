@@ -339,8 +339,6 @@ public class FileManagementServiceImpl implements  FileManagementService{
         Integer namespaceId = UserContext.getCurrentNamespaceId();
         if (catalog == null)
             return dto;
-        if (cmd.getParentId() == null)
-            cmd.setParentId(cmd.getCatalogId());
 
         //  1.whether the name has been used
         checkFileContentName(namespaceId, catalog.getOwnerId(), cmd.getParentId(), cmd.getContentName());
@@ -405,8 +403,6 @@ public class FileManagementServiceImpl implements  FileManagementService{
         List<FileContentDTO> files = new ArrayList<>();
         Map<String, String> fileIcons = fileService.getFileIconUrl();
         Integer namespaceId = UserContext.getCurrentNamespaceId();
-        if(cmd.getContentId() == null)
-            cmd.setContentId(cmd.getCatalogId());
         FileCatalog catalog = fileManagementProvider.findFileCatalogById(cmd.getCatalogId());
         if(catalog == null)
             return response;
