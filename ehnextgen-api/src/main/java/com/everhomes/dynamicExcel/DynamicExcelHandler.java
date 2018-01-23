@@ -27,7 +27,7 @@ public interface DynamicExcelHandler {
      * @param sheetClassObjs sheet页对应的类的对象的集合
      * @param sheetClass    sheet页对应的类
      */
-    void save2Schema(List<Object> sheetClassObjs, Class<?> sheetClass);
+    void save2Schema(List<Object> sheetClassObjs, Class<?> sheetClass, Object storage);
     /**
      *
      * @param response 对返回结果进行后处理，不进行处理则只返回下载成功和失败的行数
