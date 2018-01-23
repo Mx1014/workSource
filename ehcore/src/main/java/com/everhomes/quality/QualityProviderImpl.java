@@ -434,7 +434,7 @@ public class QualityProviderImpl implements QualityProvider {
 
 	@Override
 	public List<QualityInspectionStandards> listQualityInspectionStandards(ListingLocator locator, int count, 
-			Long ownerId, String ownerType, String targetType, Long targetId, Byte reviewResult) {
+			Long ownerId, String ownerType, String targetType, Long targetId, Byte reviewResult, String planCondition) {
 		assert(locator.getEntityId() != 0);
 		DSLContext context = this.dbProvider.getDslContext(AccessSpec.readOnlyWith(EhQualityInspectionStandards.class, locator.getEntityId()));
 		List<QualityInspectionStandards> standards = new ArrayList<QualityInspectionStandards>();
@@ -471,6 +471,10 @@ public class QualityProviderImpl implements QualityProvider {
 				query.addConditions(Tables.EH_QUALITY_INSPECTION_STANDARDS.STATUS.eq(QualityStandardStatus.WAITING.getCode()));
 			}
 
+		}
+		if (planCondition != null && !StringUtils.isNullOrEmpty(planCondition)) {
+			query.addConditions(Tables.EH_QUALITY_INSPECTION_STANDARDS.STANDARD_NUMBER.like(planCondition)
+					.or(Tables.EH_QUALITY_INSPECTION_STANDARDS.NAME.like(planCondition)));
 		}
 		
 		query.addConditions(Tables.EH_QUALITY_INSPECTION_STANDARDS.DELETER_UID.eq(0L));

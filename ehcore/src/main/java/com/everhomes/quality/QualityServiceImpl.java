@@ -493,10 +493,10 @@ public class QualityServiceImpl implements QualityService {
 		List<QualityInspectionStandards> standards = new ArrayList<>();
 		if (cmd.getTargetId() != null && cmd.getTargetId() != 0L) {
 			standards = qualityProvider.listQualityInspectionStandards(locator, pageSize + 1,
-					ownerId, ownerType, cmd.getTargetType(), cmd.getTargetId(), cmd.getReviewResult());
+					ownerId, ownerType, cmd.getTargetType(), cmd.getTargetId(), cmd.getReviewResult(),cmd.getPlanCondition());
 		} else {
 			standards = qualityProvider.listQualityInspectionStandards(locator, pageSize + 1,
-					ownerId, ownerType, null, null, cmd.getReviewResult());
+					ownerId, ownerType, null, null, cmd.getReviewResult(),cmd.getPlanCondition());
 		}
 
 		this.qualityProvider.populateStandardsGroups(standards);
