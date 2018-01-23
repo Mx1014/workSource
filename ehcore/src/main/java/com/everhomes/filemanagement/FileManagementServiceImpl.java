@@ -251,17 +251,17 @@ public class FileManagementServiceImpl implements  FileManagementService{
             return scopes;
 
         dbProvider.execute((TransactionStatus status) -> {
-            List<Long> sourceIds = new ArrayList<>();
+//            List<Long> sourceIds = new ArrayList<>();
             cmd.getScopes().forEach(r -> {
-                //  1.save sourceIds
-                sourceIds.add(r.getSourceId());
+/*                //  1.save sourceIds
+                sourceIds.add(r.getSourceId());*/
                 //  2.create or update the scope
                 FileCatalogScopeDTO dto = createFileCatalogScope(namespaceId, cmd.getCatalogId(), r);
                 //  3.save the data which is returning back
                 scopes.add(dto);
             });
-            //  4.delete redundant data
-            fileManagementProvider.deleteFileCatalogScopeNotInSourceIds(namespaceId, cmd.getCatalogId(), sourceIds);
+            /*//  4.delete redundant data
+            fileManagementProvider.deleteFileCatalogScopeNotInSourceIds(namespaceId, cmd.getCatalogId(), sourceIds);*/
             return null;
         });
         return scopes;
