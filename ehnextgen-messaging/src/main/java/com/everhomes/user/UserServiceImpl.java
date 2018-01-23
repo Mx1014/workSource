@@ -5525,9 +5525,10 @@ public class UserServiceImpl implements UserService {
 	// 获取统一的功能卡片
 	@Override
 	public List<FunctionCardDto> listUserRelatedCards(){
+		List<FunctionCardDto> cardDtos = new ArrayList<>();
 		functionCardHandlers.forEach(r->{
-			System.out.print(r);
+			cardDtos.add(r.listCards(1000000, 1L));
 		});
-		return null;
+		return cardDtos;
 	}
 }

@@ -714,6 +714,31 @@ public class GroupServiceImpl implements GroupService {
          
          return cmdResponse;
     }
+
+    @Override
+    public List<GroupDTO> listOwnerGroupsByType(Byte clubType){
+
+        Long userId = UserContext.current().getUser().getId();
+        Integer namespaceId = UserContext.getCurrentNamespaceId();
+        int pageSize = 100000;
+        CrossShardListingLocator locator = new CrossShardListingLocator();
+        List<Group> groups = this.groupProvider.queryGroups(locator, pageSize + 1, (loc, query)-> {
+            query.addConditions(Tables.EH_GROUPS.NAMESPACE_ID.eq(namespaceId));
+            query.addConditions(Tables.EH_GROUPS.STATUS.eq(GroupAdminStatus.ACTIVE.getCode()));
+            query.addConditions(Tables.EH_GROUPS.DISCRIMINATOR.eq(GroupDiscriminator.GROUP.getCode()));
+            query.addConditions(Tables.EH_GROUPS.PRIVATE_FLAG.eq(GroupPrivacy.PUBLIC.getCode()));
+            query.addConditions(Tables.EH_GROUPS.CLUB_TYPE.eq(clubType));
+            query.addConditions(Tables.EH_GROUPS.CREATOR_UID.eq(userId));
+            return query;
+        });
+
+        List<GroupDTO> dtos = new ArrayList<>();
+        if(groups != null){
+            dtos = groups.stream().map(group -> toGroupDTO(userId, group)).collect(Collectors.toList());
+        }
+
+        return dtos;
+    }
     
     @Override
     public List<GroupDTO> listUserRelatedGroups() {
