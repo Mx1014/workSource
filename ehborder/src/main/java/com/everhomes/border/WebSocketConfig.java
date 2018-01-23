@@ -28,10 +28,10 @@ public class WebSocketConfig implements WebSocketConfigurer {
     
     @Override
     public void registerWebSocketHandlers(WebSocketHandlerRegistry registry) {
-        registry.addHandler(clientHandler(), "/client").addInterceptors(new CommonHandshakeInterceptor());
-        registry.addHandler(pusherHandler(), "/pusher").addInterceptors(new CommonHandshakeInterceptor());
-        registry.addHandler(interServerHandler(), "/interserver").addInterceptors(new CommonHandshakeInterceptor());;
-        registry.addHandler(aclinkHandler(), "/aclink/**").addInterceptors(aclinkInterceptors()).addInterceptors(new CommonHandshakeInterceptor());;
+        registry.addHandler(clientHandler(), "/client");
+        registry.addHandler(pusherHandler(), "/pusher");
+        registry.addHandler(interServerHandler(), "/interserver");;
+        registry.addHandler(aclinkHandler(), "/aclink/**").addInterceptors(aclinkInterceptors());
     }
 
     @Bean

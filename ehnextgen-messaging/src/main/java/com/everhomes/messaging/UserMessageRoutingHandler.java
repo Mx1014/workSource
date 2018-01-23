@@ -63,26 +63,26 @@ public class UserMessageRoutingHandler implements MessageRoutingHandler {
     @Autowired
     private TaskScheduler taskScheduler;
 
-//    @Autowired
-//    private MessagePersistWorker messagePersistWorker;
-//
-//    private ConcurrentLinkedQueue<MessageDTO> queue;
-//
-//    @PostConstruct
-//    public void setup(){
-////        String triggerName = StatTransactionScheduleJob.SCHEDELE_NAME + System.currentTimeMillis();
-////        String jobName = triggerName;
-////        String cronExpression = configurationProvider.getValue(StatTransactionConstant.STAT_CRON_EXPRESSION, StatTransactionScheduleJob.CRON_EXPRESSION);
-////        //启动定时任务
-////        scheduleProvider.scheduleCronJob(triggerName, jobName, cronExpression, StatTransactionScheduleJob.class, null);
-//
-//        taskScheduler.scheduleAtFixedRate(()-> {
-//            while (!queue.isEmpty()){
-//                MessageDTO messageDto = queue.poll();
-//                this.messagePersistWorker.handleMessagePersist(messageDto);
-//            }
-//        }, 5*1000);
-//    }
+    @Autowired
+    private MessagePersistWorker messagePersistWorker;
+
+    private ConcurrentLinkedQueue<MessageDTO> queue;
+
+    @PostConstruct
+    public void setup(){
+//        String triggerName = StatTransactionScheduleJob.SCHEDELE_NAME + System.currentTimeMillis();
+//        String jobName = triggerName;
+//        String cronExpression = configurationProvider.getValue(StatTransactionConstant.STAT_CRON_EXPRESSION, StatTransactionScheduleJob.CRON_EXPRESSION);
+//        //启动定时任务
+//        scheduleProvider.scheduleCronJob(triggerName, jobName, cronExpression, StatTransactionScheduleJob.class, null);
+
+        taskScheduler.scheduleAtFixedRate(()-> {
+            while (!queue.isEmpty()){
+                MessageDTO messageDto = queue.poll();
+                this.messagePersistWorker.handleMessagePersist(messageDto);
+            }
+        }, 5*1000);
+    }
 
     
     @Override
@@ -97,8 +97,8 @@ public class UserMessageRoutingHandler implements MessageRoutingHandler {
     public void routeMessage(MessageRoutingContext context, UserLogin senderLogin, long appId, String dstChannelType, String dstChannelToken,
             MessageDTO message, int deliveryOption) {
 
-//        //把消息添加到队列里
-//        queue.offer(message)
+        //把消息添加到队列里
+        queue.offer(message);
 
 
         long uid = Long.parseLong(dstChannelToken);
