@@ -4791,7 +4791,7 @@ public class PropertyMgrServiceImpl implements PropertyMgrService {
                 if(address != null) {
                     OrganizationOwnerAddress ownerAddress = new OrganizationOwnerAddress();
                     ownerAddress.setAddressId(address.getId());
-                    ownerAddress.setNamespaceId(currentUser.getNamespaceId());
+                    ownerAddress.setNamespaceId(addressCmd.getNamespaceId());
                     ownerAddress.setOrganizationOwnerId(ownerId);
                     ownerAddress.setLivingStatus(addressCmd.getLivingStatus());
 					ownerAddress.setAuthType(OrganizationOwnerAddressAuthType.ACTIVE.getCode());
@@ -5226,8 +5226,8 @@ public class PropertyMgrServiceImpl implements PropertyMgrService {
         validate(cmd);
         checkCurrentUserNotInOrg(cmd.getOrganizationId());
 
-        Integer namespaceId = currentNamespaceId();
-        List<OrganizationOwnerAddress> ownerAddressList = propertyMgrProvider.listOrganizationOwnerAddressByOwnerId(namespaceId, cmd.getOrgOwnerId());
+//        Integer namespaceId = currentNamespaceId();
+        List<OrganizationOwnerAddress> ownerAddressList = propertyMgrProvider.listOrganizationOwnerAddressByOwnerId(cmd.getNamespaceId(), cmd.getOrgOwnerId());
 
         return ownerAddressList.stream().map(r -> {
             Address address = addressProvider.findAddressById(r.getAddressId());
@@ -5672,7 +5672,7 @@ public class PropertyMgrServiceImpl implements PropertyMgrService {
             throw errorWith(PropertyServiceErrorCode.SCOPE, PropertyServiceErrorCode.ERROR_OWNER_ADDRESS_EXIST,
                     "The organization owner %s already in address %s.", cmd.getOrgOwnerId(), cmd.getAddressId());
         }
-        ownerAddress = createOrganizationOwnerAddress(address.getId(), cmd.getLivingStatus(), currentNamespaceId(),
+        ownerAddress = createOrganizationOwnerAddress(address.getId(), cmd.getLivingStatus(), cmd.getNamespaceId(),
                 cmd.getOrgOwnerId(), OrganizationOwnerAddressAuthType.ACTIVE);
         // 自动审核用户与客户
 		//只有在申请了才会自动通过，现要改为只要是注册用户不管申没申请都自动同步给客户 19558 by xiongying20171219
