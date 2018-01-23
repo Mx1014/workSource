@@ -1429,6 +1429,7 @@ public class UserController extends ControllerBase {
 	 * @return
 	 */
 	@RequestMapping("querySubjectIdForScan")
+	@RequireAuthentication(false)
 	@RestReturn(QRCodeDTO.class)
 	public RestResponse querySubjectIdForScan() {
 		RestResponse resp = new RestResponse(userService.querySubjectIdForScan());
