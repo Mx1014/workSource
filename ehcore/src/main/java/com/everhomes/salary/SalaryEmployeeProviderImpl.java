@@ -5,7 +5,9 @@ import java.sql.Timestamp;
 import java.util.List;
 
 import com.everhomes.listing.CrossShardListingLocator;
+import com.everhomes.rest.salary.SalaryEmployeeStatus;
 import com.everhomes.rest.salary.SalaryGroupStatus;
+import com.everhomes.rest.techpark.punch.NormalFlag;
 import org.jooq.DSLContext;
 import org.jooq.Record;
 import org.jooq.Record1;
@@ -71,7 +73,23 @@ public class SalaryEmployeeProviderImpl implements SalaryEmployeeProvider {
 
 	@Override
 	public List<SalaryEmployee> listSalaryEmployee(Long ownerId, Byte salaryStatus, List<Long> detailIds, CrossShardListingLocator locator, int pageSize) {
-		return null;
+		SelectConditionStep<Record> step = getReadOnlyContext().select().from(Tables.EH_SALARY_EMPLOYEES)
+				.where(Tables.EH_SALARY_EMPLOYEES.OWNER_ID.eq(ownerId));
+		if (null != salaryStatus) {
+			if (NormalFlag.NO == NormalFlag.fromCode(salaryStatus)) {
+				step = step.and(Tables.EH_SALARY_EMPLOYEES.STATUS.ne(SalaryEmployeeStatus.NORMAL.getCode()));
+			}else{
+				step = step.and(Tables.EH_SALARY_EMPLOYEES.STATUS.eq(SalaryEmployeeStatus.NORMAL.getCode()));
+			}
+		}
+		if (null != detailIds) {
+			step = step.and(Tables.EH_SALARY_EMPLOYEES.USER_DETAIL_ID.in(detailIds));
+		}
+		if (null != locator && locator.getAnchor() != null) {
+			step = step.and(Tables.EH_SALARY_EMPLOYEES.ID.gt(locator.getAnchor()));
+		}
+		step.limit(pageSize);
+		return step.orderBy(Tables.EH_SALARY_EMPLOYEES.ID.asc()).fetch().map(r -> ConvertHelper.convert(r, SalaryEmployee.class));
 	}
 
 	private EhSalaryEmployeesDao getReadWriteDao() {

@@ -10,6 +10,7 @@ import com.everhomes.util.StringHelper;
  * 
  * <ul>返回值:
  * <li>salaryEmployeeDTO: 基础字段参考{@link com.everhomes.rest.salary.SalaryEmployeeDTO}</li>
+ * <li>month: 月份 YYYYMM</li>
  * <li>nextPageAnchor</li>
  * </ul>
  */
@@ -18,7 +19,7 @@ public class ListSalaryEmployeesResponse {
 	@ItemType(SalaryEmployeeDTO.class)
 	private List<SalaryEmployeeDTO> salaryEmployeeDTO;
 
-	private Integer exceptionCount;
+	private String month;
 
 	private Integer nextPageOffset;
 
@@ -39,14 +40,6 @@ public class ListSalaryEmployeesResponse {
 
 	public void setSalaryEmployeeDTO(List<SalaryEmployeeDTO> salaryEmployeeDTO) {
 		this.salaryEmployeeDTO = salaryEmployeeDTO;
-	}
-
-	public Integer getExceptionCount() {
-		return exceptionCount;
-	}
-
-	public void setExceptionCount(Integer exceptionCount) {
-		this.exceptionCount = exceptionCount;
 	}
 
 	public Integer getNextPageOffset() {
@@ -70,4 +63,11 @@ public class ListSalaryEmployeesResponse {
 		return StringHelper.toJsonString(this);
 	}
 
+	public String getMonth() {
+		return month;
+	}
+
+	public void setMonth(String month) {
+		this.month = month;
+	}
 }

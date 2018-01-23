@@ -2372,7 +2372,7 @@ public class SalaryServiceImpl implements SalaryService {
         cell.setCellValue("手机");
         XSSFComment commentA = drawing.createCellComment(anchor);
         RichTextString strA = factory.createRichTextString("必填项：员工手机,o0ub号，用于匹配系统用户");
-                          commentA.setString(strA);
+        commentA.setString(strA);
         commentA.setAuthor("zuolin");
         cell.setCellComment(commentA);
 
