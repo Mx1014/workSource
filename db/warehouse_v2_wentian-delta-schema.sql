@@ -9,7 +9,8 @@ CREATE TABLE `eh_warehouse_suppliers`(
   `name` VARCHAR(128) NOT NULL COMMENT '供应商名称',
   `enterprise_business_licence` VARCHAR(32) DEFAULT NULL COMMENT '企业营业执照注册号',
   `legal_person_name` VARCHAR(32) DEFAULT NULL COMMENT '法人的名字',
-  `contacts` VARCHAR(1028) DEFAULT NULL COMMENT '联系人$电话,用逗号连接',
+  `contactName` VARCHAR(32) DEFAULT NULL COMMENT '联系人',
+  `contactTel` VARCHAR(64) DEFAULT NULL COMMENT '联系电话',
   `enterprise_register_address` VARCHAR(256) DEFAULT NULL COMMENT '注册地址',
   `email` VARCHAR(128) DEFAULT NULL COMMENT '邮箱',
   `corp_address` VARCHAR(256) DEFAULT NULL COMMENT '公司地址',
@@ -22,9 +23,9 @@ CREATE TABLE `eh_warehouse_suppliers`(
   `main_biz_scope` VARCHAR(1024) DEFAULT NULL COMMENT '主要经营范围',
   `attachment_url` VARCHAR(256) DEFAULT NULL COMMENT '附件地址',
   `create_time` DATETIME DEFAULT NOW(),
-  `create_uid` DATETIME DEFAULT NULL,
+  `create_uid` BIGINT DEFAULT NULL,
   `update_time` DATETIME DEFAULT now(),
-  `update_uid` DATETIME DEFAULT NULL,
+  `update_uid` BIGINT DEFAULT NULL,
   `default_order` INTEGER DEFAULT 0,
   PRIMARY KEY (`id`)
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4;
@@ -47,9 +48,9 @@ CREATE TABLE `eh_warehouse_purchase_orders`(
   `remark` VARCHAR(2048) DEFAULT NULL COMMENT '备注',
   `approval_order_id` BIGINT DEFAULT NULL COMMENT '关联的审批单的id',
   `create_time` DATETIME DEFAULT NOW(),
-  `create_uid` DATETIME DEFAULT NULL,
+  `create_uid` BIGINT DEFAULT NULL,
   `update_time` DATETIME DEFAULT now(),
-  `update_uid` DATETIME DEFAULT NULL,
+  `update_uid` BIGINT DEFAULT NULL,
   `default_order` INTEGER DEFAULT 0,
   PRIMARY KEY (`id`)
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4;
@@ -66,9 +67,9 @@ CREATE TABLE `eh_warehouse_purchase_items`(
   `purchase_quantity` BIGINT DEFAULT 0 COMMENT '采购数量',
   `unit_price` DECIMAL(20,2) DEFAULT 0.00 COMMENT '单价',
   `create_time` DATETIME DEFAULT NOW(),
-  `create_uid` DATETIME DEFAULT NULL,
+  `create_uid` BIGINT DEFAULT NULL,
   `update_time` DATETIME DEFAULT now(),
-  `update_uid` DATETIME DEFAULT NULL,
+  `update_uid` BIGINT DEFAULT NULL,
   `default_order` INTEGER DEFAULT 0,
   PRIMARY KEY (`id`)
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4;
@@ -88,9 +89,9 @@ CREATE TABLE `eh_warehouse_orders`(
   `executor_time` DATETIME DEFAULT now() COMMENT '执行时间',
   `service_type` TINYINT DEFAULT NULL COMMENT '服务类型，1. 普通入库,2.领用出库，3.采购入库',
   `create_time` DATETIME DEFAULT NOW(),
-  `create_uid` DATETIME DEFAULT NULL,
+  `create_uid` BIGINT DEFAULT NULL,
   `update_time` DATETIME DEFAULT NOW(),
-  `update_uid` DATETIME DEFAULT NULL,
+  `update_uid` BIGINT DEFAULT NULL,
   `default_order` INTEGER DEFAULT 0,
   PRIMARY KEY (`id`),
   KEY `i_service_type` (`service_type`) COMMENT '出入库状态得索引，用于搜索'
@@ -115,9 +116,9 @@ CREATE TABLE `eh_requisitions`(
   `description` TEXT DEFAULT NULL COMMENT '申请说明',
   `attachment_url` VARCHAR(256) DEFAULT NULL COMMENT '附件地址',
   `create_time` DATETIME DEFAULT NOW(),
-  `create_uid` DATETIME DEFAULT NULL,
+  `create_uid` BIGINT DEFAULT NULL,
   `update_time` DATETIME DEFAULT NOW(),
-  `update_uid` DATETIME DEFAULT NULL,
+  `update_uid` BIGINT DEFAULT NULL,
   `default_order` INTEGER DEFAULT 0,
   PRIMARY KEY (`id`)
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4;
@@ -131,9 +132,9 @@ CREATE TABLE `eh_requisition_types`(
   `owner_id` BIGINT DEFAULT NULL ,
   `name` VARCHAR(32) NOT NULL COMMENT '类型名字',
   `create_time` DATETIME DEFAULT NOW(),
-  `create_uid` DATETIME DEFAULT NULL,
+  `create_uid` BIGINT DEFAULT NULL,
   `update_time` DATETIME DEFAULT NOW(),
-  `update_uid` DATETIME DEFAULT NULL,
+  `update_uid` BIGINT DEFAULT NULL,
   `default_order` INTEGER DEFAULT 0,
   PRIMARY KEY (`id`)
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4;

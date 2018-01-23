@@ -6,6 +6,7 @@ package com.everhomes.rest.supplier;
  */
 /**
  *<ul>
+ * <li>id:供应商id</li>
  * <li>identity:供应商编号</li>
  * <li>name:供应商名字</li>
  * <li>legalRepresentative:供应商法人代表</li>
@@ -15,12 +16,21 @@ package com.everhomes.rest.supplier;
  *</ul>
  */
 public class ListSuppliersDTO {
+    private Long id;
     private String identity;
     private String name;
     private String legalRepresentative;
     private String bizLicense;
     private String contactName;
     private String contactTel;
+
+    public Long getId() {
+        return id;
+    }
+
+    public void setId(Long id) {
+        this.id = id;
+    }
 
     public String getIdentity() {
         return identity;

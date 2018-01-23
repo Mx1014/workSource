@@ -13,18 +13,18 @@ import com.everhomes.util.StringHelper;
  *</ul>
  */
 public class GetSupplierDetailCommand {
-    private String supplierId;
+    private Long supplierId;
 
     @Override
     public String toString() {
         return StringHelper.toJsonString(this);
     }
 
-    public String getSupplierId() {
+    public Long getSupplierId() {
         return supplierId;
     }
 
-    public void setSupplierId(String supplierId) {
+    public void setSupplierId(Long supplierId) {
         this.supplierId = supplierId;
     }
 }

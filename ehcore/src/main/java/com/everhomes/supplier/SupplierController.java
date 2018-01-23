@@ -19,7 +19,7 @@ import org.springframework.web.multipart.MultipartFile;
 @RequestMapping("/supplier")
 public class SupplierController extends ControllerBase {
     @Autowired
-    private SupplierServiceImpl supplierService;
+    private SupplierService supplierService;
 
     /**
      * <b>URL: /supplier/createOrUpdateOneSupplier</b>
@@ -28,6 +28,7 @@ public class SupplierController extends ControllerBase {
     @RequestMapping("createOrUpdateOneSupplier")
     @RestReturn(value = String.class)
     private RestResponse createOrUpdateOneSupplier(CreateOrUpdateOneSupplierCommand cmd){
+        supplierService.createOrUpdateOneSupplier(cmd);
         RestResponse restResponse = new RestResponse();
         restResponse.setErrorCode(200);
         restResponse.setErrorDescription("OK");
@@ -41,6 +42,7 @@ public class SupplierController extends ControllerBase {
     @RequestMapping("deleteSupplier")
     @RestReturn(value = String.class)
     private RestResponse deleteSupplier(DeleteOneSupplierCommand cmd){
+        supplierService.deleteSupplier(cmd);
         RestResponse restResponse = new RestResponse();
         restResponse.setErrorCode(200);
         restResponse.setErrorDescription("OK");
@@ -54,7 +56,8 @@ public class SupplierController extends ControllerBase {
     @RequestMapping("listSuppliers")
     @RestReturn(value = ListSuppliersResponse.class)
     private RestResponse listSuppliers(ListSuppliersCommand cmd){
-        RestResponse restResponse = new RestResponse();
+        ListSuppliersResponse response = supplierService.listSuppliers(cmd);
+        RestResponse restResponse = new RestResponse(response);
         restResponse.setErrorCode(200);
         restResponse.setErrorDescription("OK");
         return restResponse;
@@ -67,7 +70,8 @@ public class SupplierController extends ControllerBase {
     @RequestMapping("getSupplierDetail")
     @RestReturn(value = GetSupplierDetailDTO.class)
     private RestResponse getSupplierDetail(GetSupplierDetailCommand cmd){
-        RestResponse restResponse = new RestResponse();
+        GetSupplierDetailDTO dto = supplierService.getSupplierDetail(cmd);
+        RestResponse restResponse = new RestResponse(dto);
         restResponse.setErrorCode(200);
         restResponse.setErrorDescription("OK");
         return restResponse;
