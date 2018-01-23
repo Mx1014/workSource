@@ -21,9 +21,7 @@ import com.everhomes.server.schema.tables.records.EhWebMenusRecord;
 import com.everhomes.sharding.ShardingProvider;
 import com.everhomes.util.ConvertHelper;
 
-import org.jooq.Condition;
-import org.jooq.DSLContext;
-import org.jooq.SelectQuery;
+import org.jooq.*;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -136,8 +134,8 @@ public class WebMenuPrivilegeProviderImpl implements WebMenuPrivilegeProvider {
 
 	@Override
 	//@Caching(evict = {@CacheEvict(value="listWebMenuByType", key="'webMenuByMenuIds'")})
-	public Map<Long, WebMenuScope> getWebMenuScopeMapByOwnerId(String ownerType, Long ownerId) {
-		Map<Long, WebMenuScope> map = new HashMap<>();
+	public List<WebMenuScope> getWebMenuScopeMapByOwnerId(String ownerType, Long ownerId) {
+		//Map<Long, WebMenuScope> map = new HashMap<>();
 		DSLContext context = dbProvider.getDslContext(AccessSpec.readOnly());
 		SelectQuery<EhWebMenuScopesRecord> query = context.selectQuery(Tables.EH_WEB_MENU_SCOPES);
 		Condition cond = Tables.EH_WEB_MENU_SCOPES.OWNER_TYPE.eq(ownerType);
@@ -148,11 +146,11 @@ public class WebMenuPrivilegeProviderImpl implements WebMenuPrivilegeProvider {
 			LOGGER.debug("getWebMenuScopeMapByOwnerId, sql=" + query.getSQL());
 			LOGGER.debug("getWebMenuScopeMapByOwnerId, bindValues=" + query.getBindValues());
 		}
-		query.fetch().map((r) -> {
-			map.put(r.getMenuId(), ConvertHelper.convert(r, WebMenuScope.class));
-			return null;
+		List<WebMenuScope> scopes = query.fetch().map((r) -> {
+			//map.put(r.getMenuId(), ConvertHelper.convert(r, WebMenuScope.class));
+			return ConvertHelper.convert(r, WebMenuScope.class);
 		});
-		return map;
+		return scopes;
 	}
 
 	@Override
@@ -331,5 +329,36 @@ public class WebMenuPrivilegeProviderImpl implements WebMenuPrivilegeProvider {
 			.and(Tables.EH_WEB_MENU_SCOPES.OWNER_ID.eq(Long.valueOf(namespaceId)))
 			.and(Tables.EH_WEB_MENU_SCOPES.OWNER_TYPE.eq("EhNamespaces"))
 			.execute();
+	}
+
+	@Override
+	public List<WebMenu> listMenuByModuleIdAndType(Long moduleId, String type) {
+
+		DSLContext context = dbProvider.getDslContext(AccessSpec.readOnlyWith(EhWebMenus.class));
+		SelectQuery<EhWebMenusRecord> query = context.selectQuery(Tables.EH_WEB_MENUS);
+		query.addConditions(Tables.EH_WEB_MENUS.MODULE_ID.eq(moduleId));
+		query.addConditions(Tables.EH_WEB_MENUS.TYPE.eq(type));
+		List<WebMenu> webMenus = query.fetch().map(r -> ConvertHelper.convert(r, WebMenu.class));
+		return webMenus;
+	}
+
+	@Override
+	public List<WebMenu> listMenuByTypeAndConfigType(String type, Byte configType) {
+
+		DSLContext context = dbProvider.getDslContext(AccessSpec.readOnlyWith(EhWebMenus.class));
+		SelectQuery<EhWebMenusRecord> query = context.selectQuery(Tables.EH_WEB_MENUS);
+		query.addConditions(Tables.EH_WEB_MENUS.CONFIG_TYPE.eq(configType));
+		query.addConditions(Tables.EH_WEB_MENUS.TYPE.eq(type));
+		List<WebMenu> webMenus = query.fetch().map(r -> ConvertHelper.convert(r, WebMenu.class));
+		return webMenus;
+	}
+
+	@Override
+	public void deleteMenuScopeByOwner(String ownerType, Long ownerId){
+		DSLContext context = dbProvider.getDslContext(AccessSpec.readOnlyWith(EhWebMenuScopes.class));
+		DeleteQuery query = context.deleteQuery(Tables.EH_WEB_MENU_SCOPES);
+		query.addConditions(Tables.EH_WEB_MENU_SCOPES.OWNER_TYPE.eq(ownerType));
+		query.addConditions(Tables.EH_WEB_MENU_SCOPES.OWNER_ID.eq(ownerId));
+		query.execute();
 	}
 }

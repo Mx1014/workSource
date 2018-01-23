@@ -122,4 +122,14 @@ public interface PortalService {
 	PortalItemDTO getAllOrMoreItem(GetItemAllOrMoreCommand cmd);
 
 	void syncLaunchPadData(SyncLaunchPadDataCommand cmd);
+
+    PortalVersionDTO findPortalVersionById(Long versionId);
+
+    ListPortalVersionResponse listPortalVersions(ListPortalVersionCommand cmd);
+
+	PortalVersionUserDTO createPortalVersionUser(CreatePortalVersionUserCommand cmd);
+
+	ListPortalVersionUsersResponse listPortalVersionUsers(ListPortalVersionUsersCommand cmd);
+
+	void deletePortalVersionUser(DeletePortalVersionUserCommand cmd);
 }

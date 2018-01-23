@@ -12,7 +12,6 @@ import com.everhomes.util.StringHelper;
  *     <li>completeMaintance: 整改完成任务</li>
  *     <li>delay: 已延误任务</li>
  *     <li>delayInspection: 巡检延误任务</li>
- *     <li>delayMaintance: 整改延误任务</li>
  *     <li>reviewTasks: 审核任务总数</li>
  *     <li>unReviewedTasks: 待审核任务</li>
  *     <li>reviewedTasks: 已审核任务</li>
@@ -23,7 +22,6 @@ import com.everhomes.util.StringHelper;
  *     <li>delayRate: 延误率</li>
  *     <li>reviewQualifiedRate: 审核通过率</li>
  *     <li>reviewDalayRate: 审核延误率</li>
- *     <li>needMaintanceReviewDelay: 整改审核延误</li>
  *     <li>completeReviewDelay: 巡检核查延误</li>
  * </ul>
  * Created by ying.xiong on 2017/4/19.

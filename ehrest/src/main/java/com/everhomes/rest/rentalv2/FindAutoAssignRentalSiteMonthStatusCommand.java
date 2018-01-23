@@ -15,76 +15,80 @@ import com.everhomes.util.StringHelper;
  * </ul>
  */
 public class FindAutoAssignRentalSiteMonthStatusCommand {
-	  
-	@NotNull
-	private Long siteId;
-	@NotNull
-	private Long ruleDate;
 
-	private Byte rentalType;
-	private Byte priceType;
-	private String packageName;
-	private String sceneToken;
+    private String resourceType;
+    @NotNull
+    private Long siteId;
+    @NotNull
+    private Long ruleDate;
 
-	public Byte getRentalType() {
-		return rentalType;
-	}
+    private Byte rentalType;
+    private Byte priceType;
+    private String packageName;
+    private String sceneToken;
 
-	public void setRentalType(Byte rentalType) {
-		this.rentalType = rentalType;
-	}
+    public String getResourceType() {
+        return resourceType;
+    }
 
-	public String getSceneToken() {
-		return sceneToken;
-	}
+    public void setResourceType(String resourceType) {
+        this.resourceType = resourceType;
+    }
 
-	public void setSceneToken(String sceneToken) {
-		this.sceneToken = sceneToken;
-	}
+    public Byte getRentalType() {
+        return rentalType;
+    }
 
-	@Override
+    public void setRentalType(Byte rentalType) {
+        this.rentalType = rentalType;
+    }
+
+    public String getSceneToken() {
+        return sceneToken;
+    }
+
+    public void setSceneToken(String sceneToken) {
+        this.sceneToken = sceneToken;
+    }
+
+    @Override
     public String toString() {
-
-		
         return StringHelper.toJsonString(this);
     }
 
-	public String getPackageName() {
-		return packageName;
-	}
+    public String getPackageName() {
+        return packageName;
+    }
 
-	public void setPackageName(String packageName) {
-		this.packageName = packageName;
-	}
+    public void setPackageName(String packageName) {
+        this.packageName = packageName;
+    }
 
-	public Long getRuleDate() {
-		return ruleDate;
-	}
-
-
-
-	public void setRuleDate(Long ruleDate) {
-		this.ruleDate = ruleDate;
-	}
-
- 
- 
-
-	public Long getSiteId() {
-		return siteId;
-	}
+    public Long getRuleDate() {
+        return ruleDate;
+    }
 
 
-	public void setSiteId(Long siteId) {
-		this.siteId = siteId;
-	}
+    public void setRuleDate(Long ruleDate) {
+        this.ruleDate = ruleDate;
+    }
 
-	public Byte getPriceType() {
-		return priceType;
-	}
 
-	public void setPriceType(Byte priceType) {
-		this.priceType = priceType;
-	}
- 
+    public Long getSiteId() {
+        return siteId;
+    }
+
+
+    public void setSiteId(Long siteId) {
+        this.siteId = siteId;
+    }
+
+    public Byte getPriceType() {
+        return priceType;
+    }
+
+    public void setPriceType(Byte priceType) {
+        this.priceType = priceType;
+    }
+
 }

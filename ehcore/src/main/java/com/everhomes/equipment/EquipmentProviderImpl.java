@@ -11,6 +11,7 @@ import com.everhomes.listing.CrossShardListingLocator;
 import com.everhomes.listing.ListingLocator;
 import com.everhomes.naming.NameMapper;
 import com.everhomes.rest.equipment.AdminFlag;
+import com.everhomes.rest.equipment.EquipmentOperateObjectType;
 import com.everhomes.rest.equipment.EquipmentPlanStatus;
 import com.everhomes.rest.equipment.EquipmentReviewStatus;
 import com.everhomes.rest.equipment.EquipmentStatus;
@@ -22,6 +23,7 @@ import com.everhomes.rest.equipment.ExecuteGroupAndPosition;
 import com.everhomes.rest.equipment.ItemResultNormalFlag;
 import com.everhomes.rest.equipment.ItemResultStat;
 import com.everhomes.rest.equipment.ItemValueType;
+import com.everhomes.rest.equipment.ListEquipmentTasksResponse;
 import com.everhomes.rest.equipment.ReviewResult;
 import com.everhomes.rest.equipment.ReviewedTaskStat;
 import com.everhomes.rest.equipment.StandardAndStatus;
@@ -39,6 +41,7 @@ import com.everhomes.server.schema.Tables;
 import com.everhomes.server.schema.tables.daos.EhEquipmentInspectionAccessoriesDao;
 import com.everhomes.server.schema.tables.daos.EhEquipmentInspectionAccessoryMapDao;
 import com.everhomes.server.schema.tables.daos.EhEquipmentInspectionEquipmentAttachmentsDao;
+import com.everhomes.server.schema.tables.daos.EhEquipmentInspectionEquipmentLogsDao;
 import com.everhomes.server.schema.tables.daos.EhEquipmentInspectionEquipmentParametersDao;
 import com.everhomes.server.schema.tables.daos.EhEquipmentInspectionEquipmentPlanMapDao;
 import com.everhomes.server.schema.tables.daos.EhEquipmentInspectionEquipmentStandardMapDao;
@@ -59,6 +62,7 @@ import com.everhomes.server.schema.tables.daos.EhEquipmentModelCommunityMapDao;
 import com.everhomes.server.schema.tables.pojos.EhEquipmentInspectionAccessories;
 import com.everhomes.server.schema.tables.pojos.EhEquipmentInspectionAccessoryMap;
 import com.everhomes.server.schema.tables.pojos.EhEquipmentInspectionEquipmentAttachments;
+import com.everhomes.server.schema.tables.pojos.EhEquipmentInspectionEquipmentLogs;
 import com.everhomes.server.schema.tables.pojos.EhEquipmentInspectionEquipmentParameters;
 import com.everhomes.server.schema.tables.pojos.EhEquipmentInspectionEquipmentPlanMap;
 import com.everhomes.server.schema.tables.pojos.EhEquipmentInspectionEquipmentStandardMap;
@@ -1486,7 +1490,7 @@ public class EquipmentProviderImpl implements EquipmentProvider {
     public void populateItems(EquipmentInspectionStandards standard) {
         DSLContext context = this.dbProvider.getDslContext(AccessSpec.readOnly());
         SelectQuery<EhEquipmentInspectionTemplateItemMapRecord> query = context.selectQuery(Tables.EH_EQUIPMENT_INSPECTION_TEMPLATE_ITEM_MAP);
-        query.addConditions(Tables.EH_EQUIPMENT_INSPECTION_TEMPLATE_ITEM_MAP.ID.eq(standard.getTemplateId()));
+        query.addConditions(Tables.EH_EQUIPMENT_INSPECTION_TEMPLATE_ITEM_MAP.TEMPLATE_ID.eq(standard.getTemplateId()));
         List<EquipmentInspectionItems> items = new ArrayList<>();
         query.fetch().map((r)->{
             items.add(findEquipmentInspectionItem(r.getItemId()));
@@ -2242,15 +2246,13 @@ public class EquipmentProviderImpl implements EquipmentProvider {
             query.addConditions(Tables.EH_EQUIPMENT_INSPECTION_PLAN_GROUP_MAP.PLAN_ID.in(planIds));
             query.fetch().map((EhEquipmentInspectionPlanGroupMapRecord record) -> {
                 EquipmentInspectionPlans plan = mapPlans.get(record.getPlanId());
-
                 assert (plan != null);
-                if (QualityGroupType.EXECUTIVE_GROUP.getCode() == record.getGroupType()) {
+                if (QualityGroupType.EXECUTIVE_GROUP.equals(QualityGroupType.fromStatus(record.getGroupType()))) {
                     plan.getExecutiveGroup().add(ConvertHelper.convert(record, EquipmentInspectionPlanGroupMap.class));
                 }
-                if (record.getGroupType() == QualityGroupType.REVIEW_GROUP.getCode()) {
+                if (QualityGroupType.REVIEW_GROUP.equals(QualityGroupType.fromStatus(record.getGroupType()))) {
                     plan.getReviewGroup().add(ConvertHelper.convert(record, EquipmentInspectionPlanGroupMap.class));
                 }
-
                 return null;
             });
             return true;
@@ -2466,15 +2468,7 @@ public class EquipmentProviderImpl implements EquipmentProvider {
 
         DSLContext context = dbProvider.getDslContext(AccessSpec.readOnly());
         SelectQuery<EhEquipmentInspectionTasksRecord> query = context.selectQuery(Tables.EH_EQUIPMENT_INSPECTION_TASKS);
-//		if(locator.getAnchor() != null) {
-//            query.addConditions(Tables.EH_QUALITY_INSPECTION_TASKS.ID.lt(locator.getAnchor()));
-//        }
-//
-        //关于ownerId的校验在第一步拿项目列表的时候已经做过了 所以此处不必再根据其来捞东西 by xiongying20170324
-//		query.addConditions(Tables.EH_EQUIPMENT_INSPECTION_TASKS.OWNER_TYPE.eq(ownerType));
-//		query.addConditions(Tables.EH_EQUIPMENT_INSPECTION_TASKS.OWNER_ID.in(ownerIds));
-//		query.addConditions(Tables.EH_EQUIPMENT_INSPECTION_TASKS.STATUS.ne(EquipmentTaskStatus.NONE.getCode()));
-//		query.addConditions(Tables.EH_EQUIPMENT_INSPECTION_TASKS.STATUS.ne(EquipmentTaskStatus.DELAY.getCode()));
+
         query.addConditions(Tables.EH_EQUIPMENT_INSPECTION_TASKS.STATUS.in(taskStatus));
         if (targetType != null && targetType.size() > 0)
             query.addConditions(Tables.EH_EQUIPMENT_INSPECTION_TASKS.TARGET_TYPE.in(targetType));
@@ -2487,48 +2481,24 @@ public class EquipmentProviderImpl implements EquipmentProvider {
         }
 
 
-//		if(executeStandardIds == null && reviewStandardIds == null) {
         if (AdminFlag.YES.equals(AdminFlag.fromStatus(adminFlag))) {
-            Condition con1 = Tables.EH_EQUIPMENT_INSPECTION_TASKS.STATUS.in(EquipmentTaskStatus.CLOSE.getCode(), EquipmentTaskStatus.DELAY.getCode());
-            // 3.0.3 con1 = con1.and(Tables.EH_EQUIPMENT_INSPECTION_TASKS.REVIEW_RESULT.eq(ReviewResult.NONE.getCode()));
-
-            Condition con2 = Tables.EH_EQUIPMENT_INSPECTION_TASKS.STATUS.ne(EquipmentTaskStatus.CLOSE.getCode());
-//			Condition con3 = Tables.EH_EQUIPMENT_INSPECTION_TASKS.EXECUTIVE_EXPIRE_TIME.ge(new Timestamp(DateHelper.currentGMTTime().getTime()));
-//			con3 = con3.or(Tables.EH_EQUIPMENT_INSPECTION_TASKS.PROCESS_EXPIRE_TIME.ge(new Timestamp(DateHelper.currentGMTTime().getTime())));
-//			con2 = con2.and(con3);
-
-            Condition con = con1.or(con2);
-            query.addConditions(con);
+            Condition con2 = Tables.EH_EQUIPMENT_INSPECTION_TASKS.STATUS.ne(EquipmentTaskStatus.NONE.getCode());
+            query.addConditions(con2);
         }
 
-
         Condition con = null;
-//		if(executeStandardIds != null && executeStandardIds.size() > 0) {
         if (AdminFlag.NO.equals(AdminFlag.fromStatus(adminFlag))) {
-           // Condition con4 = Tables.EH_EQUIPMENT_INSPECTION_TASKS.STANDARD_ID.in(executeStandardIds);  3.0.3
             Condition con4 = Tables.EH_EQUIPMENT_INSPECTION_TASKS.PLAN_ID.in(executeStandardIds);
-            con4 = con4.and(Tables.EH_EQUIPMENT_INSPECTION_TASKS.STATUS.eq(EquipmentTaskStatus.WAITING_FOR_EXECUTING.getCode()));
-
-            //3.0.3去掉维修的
-//            Condition con5 = Tables.EH_EQUIPMENT_INSPECTION_TASKS.OPERATOR_ID.eq(UserContext.current().getUser().getId());
-//            con5 = con5.and(Tables.EH_EQUIPMENT_INSPECTION_TASKS.STATUS.eq(EquipmentTaskStatus.IN_MAINTENANCE.getCode()));
-//
-//            con4 = con4.or(con5);
+            con4 = con4.and(Tables.EH_EQUIPMENT_INSPECTION_TASKS.STATUS.in(EquipmentTaskStatus.WAITING_FOR_EXECUTING.getCode(),
+                    EquipmentTaskStatus.DELAY.getCode()));
             con = con4;
         }
 
-//		if(reviewStandardIds != null && reviewStandardIds.size() > 0) {
         if (AdminFlag.NO.equals(AdminFlag.fromStatus(adminFlag))) {
-//            Condition con3 = Tables.EH_EQUIPMENT_INSPECTION_TASKS.STANDARD_ID.in(reviewStandardIds);  3.0.3
             Condition con3 = Tables.EH_EQUIPMENT_INSPECTION_TASKS.PLAN_ID.in(reviewStandardIds);
-
             //巡检完成关闭的任务
-            Condition con1 = Tables.EH_EQUIPMENT_INSPECTION_TASKS.STATUS.in(EquipmentTaskStatus.CLOSE.getCode(), EquipmentTaskStatus.DELAY.getCode());
-            //con1 = con1.and(Tables.EH_EQUIPMENT_INSPECTION_TASKS.REVIEW_RESULT.eq(ReviewResult.NONE.getCode()));
-            //需维修待审核的任务
-//            Condition con2 = Tables.EH_EQUIPMENT_INSPECTION_TASKS.STATUS.eq(EquipmentTaskStatus.NEED_MAINTENANCE.getCode());
-//
-//            con1 = con1.or(con2);  3.0.3
+            Condition con1 = Tables.EH_EQUIPMENT_INSPECTION_TASKS.STATUS.in(EquipmentTaskStatus.CLOSE.getCode(),
+                     EquipmentTaskStatus.REVIEW_DELAY.getCode());
             con3 = con3.and(con1);
             if (con == null) {
                 con = con3;
@@ -2543,22 +2513,16 @@ public class EquipmentProviderImpl implements EquipmentProvider {
 
         if(lastSyncTime!=null){
             query.addConditions(Tables.EH_EQUIPMENT_INSPECTION_TASKS.CREATE_TIME.gt(lastSyncTime).
-                    or(Tables.EH_EQUIPMENT_INSPECTION_TASKS.PROCESS_TIME.gt(lastSyncTime))
+                    or(Tables.EH_EQUIPMENT_INSPECTION_TASKS.EXECUTIVE_TIME.gt(lastSyncTime))
                     .or(Tables.EH_EQUIPMENT_INSPECTION_TASKS.REVIEW_TIME.gt(lastSyncTime)));
         }
-
-
-       // query.addOrderBy(Tables.EH_EQUIPMENT_INSPECTION_TASKS.PROCESS_EXPIRE_TIME, Tables.EH_EQUIPMENT_INSPECTION_TASKS.EXECUTIVE_EXPIRE_TIME);
         query.addOrderBy(Tables.EH_EQUIPMENT_INSPECTION_TASKS.EXECUTIVE_EXPIRE_TIME);
-//        query.addLimit(pageSize);
-        //由于app端没做分页 去掉limit条件 add by xiongying0170324
-//		query.addLimit(offset * (pageSize-1), pageSize);
+        query.addLimit(offset * (pageSize-1), pageSize);
 
         if (LOGGER.isDebugEnabled()) {
             LOGGER.debug("Query tasks by count, sql=" + query.getSQL());
             LOGGER.debug("Query tasks by count, bindValues=" + query.getBindValues());
         }
-
         query.fetch().map((EhEquipmentInspectionTasksRecord record) -> {
             result.add(ConvertHelper.convert(record, EquipmentInspectionTasks.class));
             return null;
@@ -2625,6 +2589,11 @@ public class EquipmentProviderImpl implements EquipmentProvider {
         TasksStatData resp = new TasksStatData();
 
         final Field<Byte> delayTasks = DSL.decode().when(Tables.EH_EQUIPMENT_INSPECTION_TASKS.STATUS
+                        .eq(EquipmentTaskStatus.DELAY.getCode()).
+                                or(Tables.EH_EQUIPMENT_INSPECTION_TASKS.STATUS.eq(EquipmentTaskStatus.REVIEW_DELAY.getCode())),
+                EquipmentTaskStatus.DELAY.getCode());
+
+        final Field<Byte> delayInpsectionTasks = DSL.decode().when(Tables.EH_EQUIPMENT_INSPECTION_TASKS.STATUS
                 .eq(EquipmentTaskStatus.DELAY.getCode()), EquipmentTaskStatus.DELAY.getCode());
 
 
@@ -2638,40 +2607,24 @@ public class EquipmentProviderImpl implements EquipmentProvider {
 
         Condition completeInspectionCondition = Tables.EH_EQUIPMENT_INSPECTION_TASKS.RESULT
                 .eq(EquipmentTaskStatus.QUALIFIED.getCode());
-
-        if (startTime != null && endTime != null) {
-            completeInspectionCondition = completeInspectionCondition
-                    .and(Tables.EH_EQUIPMENT_INSPECTION_TASKS.EXECUTIVE_TIME.between(startTime, endTime));
-        } else if (startTime == null && endTime != null) {
-            completeInspectionCondition = completeInspectionCondition
-                    .and(Tables.EH_EQUIPMENT_INSPECTION_TASKS.EXECUTIVE_TIME.le(endTime));
-        } else if (startTime != null) {
-            completeInspectionCondition = completeInspectionCondition
-                    .and(Tables.EH_EQUIPMENT_INSPECTION_TASKS.EXECUTIVE_TIME.ge(startTime));
-        }
-
         final Field<Byte> completeInspection = DSL.decode().when(completeInspectionCondition, EquipmentTaskStatus.QUALIFIED.getCode());
 
-        Condition completeWaitingForApprovalCondition = Tables.EH_EQUIPMENT_INSPECTION_TASKS.RESULT
+        Condition completeWaitingForApprovalCondition = Tables.EH_EQUIPMENT_INSPECTION_TASKS.STATUS
                 .eq(EquipmentTaskStatus.CLOSE.getCode());
-
         final Field<Byte> completeInspectionWaitingForApproval = DSL.decode()
                 .when(completeWaitingForApprovalCondition, EquipmentTaskStatus.CLOSE.getCode());
 
         final Field<?>[] fields = {DSL.count().as("total"),
                 DSL.count(waitingForExecuting).as("waitingForExecuting"),
-                // DSL.count(inMaintance).as("inMaintance"),
                 DSL.count(completeInspection).as("completeInspection"),
-                //  DSL.count(completeMaintance).as("completeMaintance"),
                 DSL.count(completeInspectionWaitingForApproval).as("completeInspectionWaitingForApproval"),
-
                 DSL.count(delayTasks).as("delayTasks"),
+                DSL.count(delayInpsectionTasks).as("delayInpsectionTasks"),
                 DSL.count(reviewDelay).as("reviewDelay")};
 
         final SelectQuery<Record> query = context.selectQuery();
         query.addSelect(fields);
         query.addFrom(Tables.EH_EQUIPMENT_INSPECTION_TASKS);
-      //  query.addConditions(Tables.EH_EQUIPMENT_INSPECTION_TASKS.NAMESPACE_ID.eq(UserContext.getCurrentNamespaceId()));
         query.addConditions(Tables.EH_EQUIPMENT_INSPECTION_TASKS.NAMESPACE_ID.eq(namespaceId));
 
         if (targetId != null) {
@@ -2684,6 +2637,13 @@ public class EquipmentProviderImpl implements EquipmentProvider {
         if (inspectionCategoryId != null && inspectionCategoryId != 0L) {
             query.addConditions(Tables.EH_EQUIPMENT_INSPECTION_TASKS.INSPECTION_CATEGORY_ID.eq(inspectionCategoryId));
         }
+        if (startTime != null && endTime != null) {
+            query.addConditions(Tables.EH_EQUIPMENT_INSPECTION_TASKS.EXECUTIVE_TIME.between(startTime, endTime));
+        } else if (startTime == null && endTime != null) {
+            query.addConditions(Tables.EH_EQUIPMENT_INSPECTION_TASKS.EXECUTIVE_TIME.le(endTime));
+        } else if (startTime != null) {
+            query.addConditions(Tables.EH_EQUIPMENT_INSPECTION_TASKS.EXECUTIVE_TIME.ge(startTime));
+        }
 
         if (LOGGER.isDebugEnabled()) {
             LOGGER.debug("countTasks, sql=" + query.getSQL());
@@ -2691,13 +2651,12 @@ public class EquipmentProviderImpl implements EquipmentProvider {
         }
         query.fetchAny().map((r) -> {
             resp.setCompleteInspection(r.getValue("completeInspection", Long.class));
-            //resp.setCompleteMaintance(r.getValue("completeMaintance", Long.class));
-           // resp.setComplete(resp.getCompleteInspection() + resp.getCompleteMaintance());
             resp.setCompleteWaitingForApproval(r.getValue("completeInspectionWaitingForApproval", Long.class));
-           // resp.setInMaintance(r.getValue("inMaintance", Long.class));
             resp.setWaitingForExecuting(r.getValue("waitingForExecuting", Long.class));
+            resp.setComplete(resp.getCompleteInspection()+resp.getWaitingForExecuting());
             resp.setTotalTasks(r.getValue("total", Long.class));
             resp.setDelay(r.getValue("delayTasks", Long.class));
+            resp.setDelayInspection(r.getValue("delayInpsectionTasks", Long.class));
             resp.setReviewDelayTasks(r.getValue("reviewDelay", Long.class));
             return null;
         });
@@ -2907,7 +2866,7 @@ public class EquipmentProviderImpl implements EquipmentProvider {
 
     @Override
     public List<EquipmentInspectionPlanGroupMap> listEquipmentInspectionPlanGroupMapByGroupAndPosition(
-            List<ExecuteGroupAndPosition> groupDtos, List<ExecuteGroupAndPosition> reviewGroups) {
+            List<ExecuteGroupAndPosition> groupDtos, Byte groupType) {
         long startTime = System.currentTimeMillis();
         final List<EquipmentInspectionPlanGroupMap> maps = new ArrayList<>();
         DSLContext context = this.dbProvider.getDslContext(AccessSpec.readOnly());
@@ -2916,9 +2875,9 @@ public class EquipmentProviderImpl implements EquipmentProvider {
                 .selectQuery(Tables.EH_EQUIPMENT_INSPECTION_PLAN_GROUP_MAP);
 
         Condition con = null;
-        if (reviewGroups != null) {
+        if (groupDtos != null) {
             Condition con5 = null;
-            for (ExecuteGroupAndPosition executiveGroup : reviewGroups) {
+            for (ExecuteGroupAndPosition executiveGroup : groupDtos) {
                 Condition con4 = null;
                 con4 = Tables.EH_EQUIPMENT_INSPECTION_PLAN_GROUP_MAP.GROUP_ID.eq(executiveGroup.getGroupId());
                 con4 = con4.and(Tables.EH_EQUIPMENT_INSPECTION_PLAN_GROUP_MAP.POSITION_ID.eq(executiveGroup.getPositionId()));
@@ -3046,11 +3005,13 @@ public class EquipmentProviderImpl implements EquipmentProvider {
     }
 
     @Override
-    public void updateMaintanceInspectionLogsById(Long id) {
+    public void updateMaintanceInspectionLogsById(Long taskLogId, Long flowCaseId) {
         DSLContext context = this.dbProvider.getDslContext(AccessSpec.readOnly());
         context.update(Tables.EH_EQUIPMENT_INSPECTION_TASK_LOGS)
                 .set(Tables.EH_EQUIPMENT_INSPECTION_TASK_LOGS.PROCESS_RESULT, (EquipmentTaskProcessResult.NEED_MAINTENANCE_DELAY_COMPLETE_OK.getCode()))
                 .set(Tables.EH_EQUIPMENT_INSPECTION_TASK_LOGS.PROCESS_TYPE, EquipmentTaskProcessType.COMPLETE_MAINTENANCE.getCode())
+                .set(Tables.EH_EQUIPMENT_INSPECTION_TASK_LOGS.FLOW_CASE_ID, flowCaseId)
+                .where(Tables.EH_EQUIPMENT_INSPECTION_TASK_LOGS.ID.eq(taskLogId))
                 .execute();
     }
 
@@ -3107,5 +3068,83 @@ public class EquipmentProviderImpl implements EquipmentProvider {
                 .set(Tables.EH_EQUIPMENT_INSPECTION_EQUIPMENTS.STATUS, status)
                 .where(Tables.EH_EQUIPMENT_INSPECTION_EQUIPMENTS.ID.eq(equipmentId))
                 .execute();
+    }
+
+    @Override
+    public void createEquipmentOperateLogs(EquipmentInspectionEquipmentLogs log) {
+        DSLContext context = this.dbProvider.getDslContext(AccessSpec.readWrite());
+        Long id = sequenceProvider.getNextSequence(NameMapper.getSequenceDomainFromTablePojo(EhEquipmentInspectionEquipmentLogs.class));
+        EhEquipmentInspectionEquipmentLogsDao dao = new EhEquipmentInspectionEquipmentLogsDao(context.configuration());
+        log.setId(id);
+        log.setOperatorUid(UserContext.currentUserId());
+        log.setCreateTime(new Timestamp(DateHelper.currentGMTTime().getTime()));
+        dao.insert(log);
+    }
+
+    @Override
+    public List<EquipmentInspectionTasksLogs> listEquipmentOperateLogsByTargetId(Long equipmentId) {
+        DSLContext context = this.dbProvider.getDslContext(AccessSpec.readOnly());
+        context.selectFrom(Tables.EH_EQUIPMENT_INSPECTION_EQUIPMENT_LOGS)
+                .where(Tables.EH_EQUIPMENT_INSPECTION_EQUIPMENT_LOGS.TARGET_ID.eq(equipmentId))
+                .and(Tables.EH_EQUIPMENT_INSPECTION_EQUIPMENT_LOGS.TARGET_TYPE.
+                        eq(EquipmentOperateObjectType.EQUIPMENT.getOperateObjectType()))
+                .fetchInto(EquipmentInspectionTasksLogs.class);
+        return null;
+    }
+
+    @Override
+    public void populateTaskStatusCount(Long inspectionCategoryId, List<String> targetType, List<Long> targetId,
+                                        List<Long> executePlanIds, List<Long> reviewPlanIds, Byte adminFlag,
+                                        ListEquipmentTasksResponse response) {
+
+        DSLContext context = dbProvider.getDslContext(AccessSpec.readOnly());
+        SelectQuery<Record> query = context.selectQuery();
+        if (targetType != null && targetType.size() > 0)
+            query.addConditions(Tables.EH_EQUIPMENT_INSPECTION_TASKS.TARGET_TYPE.in(targetType));
+
+        if (targetId != null && targetId.size() > 0)
+            query.addConditions(Tables.EH_EQUIPMENT_INSPECTION_TASKS.TARGET_ID.in(targetId));
+
+        if (inspectionCategoryId != null) {
+            query.addConditions(Tables.EH_EQUIPMENT_INSPECTION_TASKS.INSPECTION_CATEGORY_ID.eq(inspectionCategoryId));
+        }
+
+
+        if (AdminFlag.YES.equals(AdminFlag.fromStatus(adminFlag))) {
+            Condition con = Tables.EH_EQUIPMENT_INSPECTION_TASKS.STATUS.ne(EquipmentTaskStatus.NONE.getCode());
+            query.addConditions(con);
+        }
+
+        Condition con = null;
+        if (AdminFlag.NO.equals(AdminFlag.fromStatus(adminFlag))) {
+            Condition con4 = Tables.EH_EQUIPMENT_INSPECTION_TASKS.PLAN_ID.in(executePlanIds);
+            con4 = con4.and(Tables.EH_EQUIPMENT_INSPECTION_TASKS.STATUS.in(EquipmentTaskStatus.WAITING_FOR_EXECUTING.getCode(),
+                    EquipmentTaskStatus.DELAY.getCode()));
+            con = con4;
+        }
+
+        if (con != null) {
+            query.addConditions(con);
+        }
+        final Field<?> totayTasksCount = DSL.decode().when(Tables.EH_EQUIPMENT_INSPECTION_TASKS.STATUS.in(
+                EquipmentTaskStatus.CLOSE.getCode(), EquipmentTaskStatus.QUALIFIED.getCode()),
+                EquipmentTaskStatus.WAITING_FOR_EXECUTING.getCode());
+        final Field<?> todayCompleteCount = DSL.decode().when(Tables.EH_EQUIPMENT_INSPECTION_TASKS.STATUS.eq(EquipmentTaskStatus.WAITING_FOR_EXECUTING.getCode()),
+                EquipmentTaskStatus.WAITING_FOR_EXECUTING.getCode());
+        final Field<?>[] fields = {DSL.count(totayTasksCount).as("totayTasksCount"),
+                DSL.count(todayCompleteCount).as("todayCompleteCount")};
+        query.addSelect(fields);
+        query.addFrom(Tables.EH_EQUIPMENT_INSPECTION_TASKS);
+        if (LOGGER.isDebugEnabled()) {
+            LOGGER.debug("Query tasks by count, sql=" + query.getSQL());
+            LOGGER.debug("Query tasks by count, bindValues=" + query.getBindValues());
+        }
+        query.fetch().map((r)->{
+            response.setTodayCompleteCount(r.getValue("todayCompleteCount",Long.class));
+            response.setTotayTasksCount(r.getValue("totayTasksCount",Long.class));
+            return null;
+        });
+
+
     }
 }

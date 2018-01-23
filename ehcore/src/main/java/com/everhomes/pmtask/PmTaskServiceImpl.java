@@ -47,6 +47,7 @@ import com.everhomes.rest.ui.user.SceneType;
 import com.everhomes.scheduler.RunningFlag;
 import com.everhomes.scheduler.ScheduleProvider;
 import com.everhomes.user.*;
+import com.everhomes.util.DateHelper;
 import com.everhomes.util.DownloadUtils;
 import com.everhomes.util.doc.DocUtil;
 import org.apache.commons.collections.CollectionUtils;
@@ -663,7 +664,7 @@ public class PmTaskServiceImpl implements PmTaskService {
 				throw RuntimeErrorException.errorWith(ErrorCodes.SCOPE_GENERAL, ErrorCodes.ERROR_INVALID_PARAMETER,
 						"RequestorName cannot be null.");
 			}
-			UserIdentifier userIdentifier = userProvider.findClaimedIdentifierByToken(user.getNamespaceId(), requestorPhone);
+			UserIdentifier userIdentifier = userProvider.findClaimedIdentifierByToken(namespaceId, requestorPhone);
 			Long requestorUid = null;
 			if (null != userIdentifier) {
 				requestorUid = userIdentifier.getOwnerUid();
@@ -778,8 +779,12 @@ public class PmTaskServiceImpl implements PmTaskService {
 		}
 
 		PmTaskHandle handler = PlatformContext.getComponent(PmTaskHandle.PMTASK_PREFIX + handle);
-		
-		return handler.createTask(cmd, null, requestorName, requestorPhone);
+		UserIdentifier userIdentifier = userProvider.findClaimedIdentifierByToken(namespaceId, requestorPhone);
+		Long requestorUid = null;
+		if (null != userIdentifier) {
+			requestorUid = userIdentifier.getOwnerUid();
+		}
+		return handler.createTask(cmd, requestorUid, requestorName, requestorPhone);
 	}
 	
 	@Override
@@ -1895,7 +1900,7 @@ public class PmTaskServiceImpl implements PmTaskService {
 
 	@Override
 	public ListAuthorizationCommunityByUserResponse listAuthorizationCommunityByUser(ListAuthorizationCommunityCommand cmd) {
-
+		Long step1 = System.currentTimeMillis();
 		if (null != cmd.getCheckPrivilegeFlag() && cmd.getCheckPrivilegeFlag() == PmTaskCheckPrivilegeFlag.CHECKED.getCode()) {
 			if(null == cmd.getOrganizationId()) {
 				LOGGER.error("Not privilege", cmd);
@@ -1911,8 +1916,11 @@ public class PmTaskServiceImpl implements PmTaskService {
 		ListUserRelatedProjectByModuleCommand listUserRelatedProjectByModuleCommand = new ListUserRelatedProjectByModuleCommand();
 		listUserRelatedProjectByModuleCommand.setOrganizationId(cmd.getOrganizationId());
 		listUserRelatedProjectByModuleCommand.setModuleId(FlowConstants.PM_TASK_MODULE);
+		Long step2 = System.currentTimeMillis();
 
 		List<CommunityDTO> dtos = serviceModuleService.listUserRelatedCommunityByModuleId(listUserRelatedProjectByModuleCommand);
+
+		Long step3 = System.currentTimeMillis();
 
 		if (null != cmd.getCheckPrivilegeFlag() && cmd.getCheckPrivilegeFlag() == PmTaskCheckPrivilegeFlag.CHECKED.getCode()) {
 
@@ -1931,6 +1939,7 @@ public class PmTaskServiceImpl implements PmTaskService {
 					result.add(r);
 				}
 			});
+
 			if(0 == result.size()) {
 				LOGGER.error("Not privilege", cmd);
 				throw RuntimeErrorException.errorWith(PmTaskErrorCode.SCOPE, PmTaskErrorCode.ERROR_CREATE_TASK_PRIVILEGE,
@@ -1939,17 +1948,22 @@ public class PmTaskServiceImpl implements PmTaskService {
 			response.setCommunities(result);
 
 		}else{
-			response.setCommunities(communityProvider.listCommunitiesByNamespaceId(UserContext.getCurrentNamespaceId()).
+			Integer namespaceId = UserContext.getCurrentNamespaceId(cmd.getNamespaceId());
+			response.setCommunities(communityProvider.listCommunitiesByNamespaceId(namespaceId).
 			stream().map(r->{
 				return ConvertHelper.convert(r,CommunityDTO.class);
 			}).collect(Collectors.toList()));
 		}
 
+		Long step4 = System.currentTimeMillis();
 		//TODO: LEILV
 //		List<CommunityDTO> dtos = this.communityProvider.listCommunitiesByNamespaceId(UserContext.getCurrentNamespaceId()).stream().map(r->{
 //			return ConvertHelper.convert(r, CommunityDTO.class);
 //		}).collect(Collectors.toList());
 //		response.setCommunities(dtos);
+		LOGGER.debug("step2-step1 = " + (step2-step1));
+		LOGGER.debug("step3-step2 = " + (step3-step2));
+		LOGGER.debug("step4-step3 = " + (step4-step3));
 		return response;
 	}
 
@@ -2065,11 +2079,11 @@ public class PmTaskServiceImpl implements PmTaskService {
 		GetUserRelatedAddressByCommunityResponse response = new GetUserRelatedAddressByCommunityResponse();
 
 		User user = UserContext.current().getUser();
-		Integer namespaceId = UserContext.getCurrentNamespaceId();
+		Integer namespaceId = UserContext.getCurrentNamespaceId(cmd.getNamespaceId());
 
 		if (StringUtils.isNotBlank(cmd.getKeyword())) {
 			LOGGER.info("findClaimedIdentifierByToken: {}", cmd.getKeyword());
-			UserIdentifier userIdentifier = userProvider.findClaimedIdentifierByToken(user.getNamespaceId(), cmd.getKeyword());
+			UserIdentifier userIdentifier = userProvider.findClaimedIdentifierByToken(namespaceId, cmd.getKeyword());
 			if (null == userIdentifier) {
 				return response;
 			}

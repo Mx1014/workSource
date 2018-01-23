@@ -1,6 +1,7 @@
 package com.everhomes.filemanagement;
 
 import com.everhomes.contentserver.ContentServerService;
+import com.everhomes.db.DbProvider;
 import com.everhomes.listing.ListingLocator;
 import com.everhomes.module.ServiceModuleService;
 import com.everhomes.portal.PortalService;
@@ -15,9 +16,11 @@ import com.everhomes.util.ConvertHelper;
 import com.everhomes.util.RuntimeErrorException;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
+import org.springframework.transaction.TransactionStatus;
 
 import java.util.ArrayList;
 import java.util.List;
+import java.util.Map;
 import java.util.stream.Collectors;
 
 @Component
@@ -34,6 +37,12 @@ public class FileManagementServiceImpl implements  FileManagementService{
 
     @Autowired
     private ContentServerService contentServerService;
+
+    @Autowired
+    private FileService fileService;
+
+    @Autowired
+    private DbProvider dbProvider;
 
     @Override
     public FileCatalogDTO addFileCatalog(AddFileCatalogCommand cmd) {
@@ -69,17 +78,19 @@ public class FileManagementServiceImpl implements  FileManagementService{
         FileCatalog catalog = fileManagementProvider.findFileCatalogById(cmd.getCatalogId());
         Integer namespaceId = UserContext.getCurrentNamespaceId();
         FileCatalogDTO dto = new FileCatalogDTO();
-        if(catalog!=null){
-            //  1.whether the name has been used
-            checkTheCatalogName(namespaceId, catalog.getOwnerId(), cmd.getCatalogName());
-            //  2.update the name
-            catalog.setName(cmd.getCatalogName());
-            fileManagementProvider.updateFileCatalog(catalog);
-            //  3.return back the dto
-            dto.setId(catalog.getId());
-            dto.setName(cmd.getCatalogName());
-            dto.setCreateTime(catalog.getCreateTime());
-        }
+        if (catalog == null)
+            throw RuntimeErrorException.errorWith(FileManagementErrorCode.SCOPE, FileManagementErrorCode.ERROR_FILE_CATALOG_NOT_FOUND,
+                    "the file catalog not found.");
+
+        //  1.whether the name has been used
+        checkTheCatalogName(namespaceId, catalog.getOwnerId(), cmd.getCatalogName());
+        //  2.update the name
+        catalog.setName(cmd.getCatalogName());
+        fileManagementProvider.updateFileCatalog(catalog);
+        //  3.return back the dto
+        dto.setId(catalog.getId());
+        dto.setName(cmd.getCatalogName());
+        dto.setCreateTime(catalog.getCreateTime());
         return dto;
     }
 
@@ -95,6 +106,7 @@ public class FileManagementServiceImpl implements  FileManagementService{
         ListFileCatalogResponse response = new ListFileCatalogResponse();
         List<FileCatalogDTO> catalogs = new ArrayList<>();
         Integer namespaceId = UserContext.getCurrentNamespaceId();
+        Map<String, String> fileIcons = fileService.getFileIconUrl();
         Long nextPageAnchor = null;
         if (cmd.getPageSize() == null)
             cmd.setPageSize(55);
@@ -105,43 +117,47 @@ public class FileManagementServiceImpl implements  FileManagementService{
                 results.remove(results.size() - 1);
                 nextPageAnchor = results.get(results.size() - 1).getId();
             }
-            catalogs = convertToCatalogDTO(results);
+            results.forEach(r ->{
+                catalogs.add(convertToCatalogDTO(r, true, fileIcons));
+            });
         }
         response.setCatalogs(catalogs);
         response.setNextPageAnchor(nextPageAnchor);
         return response;
     }
 
-    private List<FileCatalogDTO> convertToCatalogDTO(List<FileCatalog> results){
-        List<FileCatalogDTO> catalogs = new ArrayList<>();
-        results.forEach(r -> {
+    private FileCatalogDTO convertToCatalogDTO(FileCatalog catalog, boolean isAdmin, Map<String, String> fileIcons){
             FileCatalogDTO dto = new FileCatalogDTO();
-            dto.setId(r.getId());
-            dto.setName(r.getName());
-            dto.setCreateTime(r.getCreateTime());
-            if(r.getDownloadPermission() != null)
-                dto.setDownloadPermission(r.getDownloadPermission());
-            catalogs.add(dto);
-        });
-        return catalogs;
+            dto.setId(catalog.getId());
+            dto.setName(catalog.getName());
+            if (isAdmin)
+                dto.setDownloadPermission(FileDownloadPermissionStatus.ALLOW.getCode());
+            else
+                dto.setDownloadPermission(catalog.getDownloadPermission());
+            dto.setIconUrl(fileIcons.get(FileContentType.CATEGORY.getCode()));
+            dto.setCreateTime(catalog.getCreateTime());
+        return dto;
     }
 
     @Override
     public ListFileCatalogResponse listAvailableFileCatalogs(ListFileCatalogsCommand cmd) {
         ListFileCatalogResponse response = new ListFileCatalogResponse();
-        List<FileCatalogDTO> catalogs;
+        Map<String, String> fileIcons = fileService.getFileIconUrl();
+        List<FileCatalogDTO> catalogs = new ArrayList<>();
         User user = UserContext.current().getUser();
         //  1.the user is the administrator
-        if(checkFileManagementAdmin(cmd.getOwnerId(), cmd.getOwnerType(), user.getId())){
-            cmd.setPageSize(Integer.MAX_VALUE -1);
+        if (checkFileManagementAdmin(cmd.getOwnerId(), cmd.getOwnerType(), user.getId())) {
+            cmd.setPageSize(Integer.MAX_VALUE - 1);
             response = listFileCatalogs(cmd);
-        }else{
+        } else {
             //  2.normal user
             List<FileCatalog> results = fileManagementProvider.listAvailableFileCatalogs(user.getNamespaceId(), cmd.getOwnerId(), user.getId());
-            if(results != null && results.size() > 0){
-                catalogs = convertToCatalogDTO(results);
-                response.setCatalogs(catalogs);
+            if (results != null && results.size() > 0) {
+                results.forEach(r -> {
+                    catalogs.add(convertToCatalogDTO(r, false, fileIcons));
+                });
             }
+            response.setCatalogs(catalogs);
         }
         return response;
     }
@@ -178,12 +194,14 @@ public class FileManagementServiceImpl implements  FileManagementService{
         List<FileCatalogDTO> catalogs = new ArrayList<>();
         List<FileContentDTO> folders = new ArrayList<>();
         List<FileContentDTO> files = new ArrayList<>();
+        Map<String, String> fileIcons = fileService.getFileIconUrl();
 
         List<FileCatalog> catalogResults = fileManagementProvider.queryFileCatalogs(new ListingLocator(), namespaceId, cmd.getOwnerId(), (locator, query) -> {
             if (cmd.getCatalogIds() != null && cmd.getCatalogIds().size() > 0)
                 query.addConditions(Tables.EH_FILE_MANAGEMENT_CATALOGS.ID.in(cmd.getCatalogIds()));
             if (cmd.getKeywords() != null)
-                query.addConditions(Tables.EH_FILE_MANAGEMENT_CATALOGS.NAME.like(cmd.getKeywords()));
+                query.addConditions(Tables.EH_FILE_MANAGEMENT_CATALOGS.NAME.like("%" + cmd.getKeywords() + "%"));
+            query.addOrderBy(Tables.EH_FILE_MANAGEMENT_CATALOGS.CREATE_TIME.desc());
             return query;
         });
 
@@ -192,7 +210,8 @@ public class FileManagementServiceImpl implements  FileManagementService{
             if (cmd.getCatalogIds() != null && cmd.getCatalogIds().size() > 0)
                 query.addConditions(Tables.EH_FILE_MANAGEMENT_CONTENTS.CATALOG_ID.in(cmd.getCatalogIds()));
             if (cmd.getKeywords() != null)
-                query.addConditions(Tables.EH_FILE_MANAGEMENT_CONTENTS.NAME.like(cmd.getKeywords()));
+                query.addConditions(Tables.EH_FILE_MANAGEMENT_CONTENTS.CONTENT_NAME.like("%" + cmd.getKeywords() + "%"));
+            query.addOrderBy(Tables.EH_FILE_MANAGEMENT_CONTENTS.CREATE_TIME.desc());
             return query;
         });
 
@@ -201,24 +220,24 @@ public class FileManagementServiceImpl implements  FileManagementService{
             if (cmd.getCatalogIds() != null && cmd.getCatalogIds().size() > 0)
                 query.addConditions(Tables.EH_FILE_MANAGEMENT_CONTENTS.CATALOG_ID.in(cmd.getCatalogIds()));
             if (cmd.getKeywords() != null)
-                query.addConditions(Tables.EH_FILE_MANAGEMENT_CONTENTS.NAME.like(cmd.getKeywords()));
+                query.addConditions(Tables.EH_FILE_MANAGEMENT_CONTENTS.CONTENT_NAME.like("%" + cmd.getKeywords() + "%"));
+            query.addOrderBy(Tables.EH_FILE_MANAGEMENT_CONTENTS.CREATE_TIME.desc());
             return query;
         });
 
         if (catalogResults != null && catalogResults.size() > 0)
-            catalogs = convertToCatalogDTO(catalogResults);
+            catalogResults.forEach(r ->{
+                catalogs.add(convertToCatalogDTO(r, false, fileIcons));
+            });
 
         if (folderResults != null && folderResults.size() > 0) {
             folderResults.forEach(r -> {
-                folders.add(ConvertHelper.convert(r, FileContentDTO.class));
+                folders.add(convertToFileContentDTO(r, fileIcons));
             });
         }
         if (contentResults != null && contentResults.size() > 0) {
             contentResults.forEach(r -> {
-                FileContentDTO dto = ConvertHelper.convert(r, FileContentDTO.class);
-                if(dto.getContentUri() != null)
-                    dto.setContentUrl(contentServerService.parserUri(dto.getContentUri()));
-                files.add(dto);
+                files.add(convertToFileContentDTO(r, fileIcons));
             });
         }
 
@@ -233,25 +252,47 @@ public class FileManagementServiceImpl implements  FileManagementService{
         Integer namespaceId = UserContext.getCurrentNamespaceId();
         List<FileCatalogScopeDTO> scopes = new ArrayList<>();
 
-        //  todo:可能需要删除未勾选的
-        if (cmd.getScopes() != null && cmd.getScopes().size() > 0) {
-            cmd.getScopes().forEach(r ->{
-                FileCatalogScope scope = new FileCatalogScope();
-                FileCatalogScopeDTO dto = new FileCatalogScopeDTO();
-                scope.setNamespaceId(namespaceId);
-                scope.setCatalogId(cmd.getCatalogId());
-                scope.setSourceId(r.getSourceId());
-                scope.setSourceDescription(r.getSourceDescription());
-                fileManagementProvider.createFileCatalogScope(scope);
-                //  return the dto back
-                dto.setCatalogId(cmd.getCatalogId());
-                dto.setSourceId(scope.getSourceId());
-                dto.setSourceDescription(scope.getSourceDescription());
-                dto.setDownloadPermission(FileDownloadPermissionStatus.REFUSE.getCode());
+        if (cmd.getScopes() == null || cmd.getScopes().size() <= 0)
+            return scopes;
+
+        dbProvider.execute((TransactionStatus status) -> {
+//            List<Long> sourceIds = new ArrayList<>();
+            cmd.getScopes().forEach(r -> {
+/*                //  1.save sourceIds
+                sourceIds.add(r.getSourceId());*/
+                //  2.create or update the scope
+                FileCatalogScopeDTO dto = createFileCatalogScope(namespaceId, cmd.getCatalogId(), r);
+                //  3.save the data which is returning back
                 scopes.add(dto);
             });
-        }
+            /*//  4.delete redundant data
+            fileManagementProvider.deleteFileCatalogScopeNotInSourceIds(namespaceId, cmd.getCatalogId(), sourceIds);*/
+            return null;
+        });
         return scopes;
+    }
+
+    private FileCatalogScopeDTO createFileCatalogScope(Integer namespaceId, Long catalogId,  FileCatalogScopeDTO dto){
+        FileCatalogScope scope = fileManagementProvider.findFileCatalogScopeBySourceId(catalogId, dto.getSourceId());
+        FileCatalogScopeDTO result = new FileCatalogScopeDTO();
+
+        if(scope != null){
+            scope.setSourceDescription(dto.getSourceDescription());
+            fileManagementProvider.updateFileCatalogScope(scope);
+        }else{
+            scope = new FileCatalogScope();
+            scope.setNamespaceId(namespaceId);
+            scope.setCatalogId(catalogId);
+            scope.setSourceId(dto.getSourceId());
+            scope.setSourceDescription(dto.getSourceDescription());
+            fileManagementProvider.createFileCatalogScope(scope);
+        }
+        //  return the dto back
+        result.setCatalogId(catalogId);
+        result.setSourceId(scope.getSourceId());
+        result.setSourceDescription(scope.getSourceDescription());
+        result.setDownloadPermission(FileDownloadPermissionStatus.REFUSE.getCode());
+        return result;
     }
 
     @Override
@@ -303,23 +344,28 @@ public class FileManagementServiceImpl implements  FileManagementService{
         Integer namespaceId = UserContext.getCurrentNamespaceId();
         if (catalog == null)
             return dto;
-        if (cmd.getParentId() == null)
-            cmd.setParentId(cmd.getCatalogId());
 
-        //todo：文件类型的判断
         //  1.whether the name has been used
-        checkFileContentName(namespaceId, catalog.getOwnerId(), cmd.getParentId(), cmd.getContentName());
+        checkFileContentName(namespaceId, catalog.getOwnerId(), catalog.getId(), cmd.getParentId(), cmd.getContentName());
+
         //  2.create it
         FileContent content = new FileContent();
         content.setNamespaceId(catalog.getNamespaceId());
         content.setOwnerId(catalog.getOwnerId());
         content.setOwnerType(catalog.getOwnerType());
         content.setCatalogId(catalog.getId());
-        content.setName(cmd.getContentName());
-        content.setSize(cmd.getContentSize());
         content.setParentId(cmd.getParentId());
         content.setContentType(cmd.getContentType());
-        content.setContentUri(cmd.getContentUri());
+        content.setContentName(cmd.getContentName());
+        if (!content.getContentType().equals(FileContentType.FOLDER.getCode())) {
+            //  3.check the suffix
+            if (cmd.getContentSuffix() == null)
+                throw RuntimeErrorException.errorWith(FileManagementErrorCode.SCOPE, FileManagementErrorCode.ERROR_SUFFIX_NULL,
+                        "the suffix can not be null.");
+            content.setContentSuffix(cmd.getContentSuffix().toLowerCase());
+            content.setSize(cmd.getContentSize());
+            content.setContentUri(cmd.getContentUri());
+        }
         fileManagementProvider.createFileContent(content);
         //  3.return back the dto
         dto = ConvertHelper.convert(content, FileContentDTO.class);
@@ -334,23 +380,23 @@ public class FileManagementServiceImpl implements  FileManagementService{
 
     @Override
     public FileContentDTO updateFileContentName(UpdateFileContentNameCommand cmd) {
-        FileContentDTO dto = new FileContentDTO();
         FileContent content = fileManagementProvider.findFileContentById(cmd.getContentId());
-        if (content != null) {
-            //  1.check the name
-            checkFileContentName(content.getNamespaceId(), content.getOwnerId(), content.getParentId(), cmd.getContentName());
-            //  2.update the name
-            content.setName(cmd.getContentName());
-            fileManagementProvider.updateFileContent(content);
-            //  3.return back
-            dto.setId(content.getId());
-            dto.setName(content.getName());
-        }
+        if (content == null)
+            throw RuntimeErrorException.errorWith(FileManagementErrorCode.SCOPE, FileManagementErrorCode.ERROR_FILE_CONTENT_NOT_FOUND,
+                    "the file content not found.");
+
+        //  1.check the name
+        checkFileContentName(content.getNamespaceId(), content.getOwnerId(), content.getCatalogId(), content.getParentId(), cmd.getContentName());
+        //  2.update the name
+        content.setContentName(cmd.getContentName());
+        fileManagementProvider.updateFileContent(content);
+        //  3.return back
+        FileContentDTO dto = ConvertHelper.convert(content, FileContentDTO.class);
         return dto;
     }
 
-    private void checkFileContentName(Integer namespaceId, Long ownerId, Long parentId, String name){
-        FileContent content = fileManagementProvider.findFileContentByName(namespaceId, ownerId, parentId, name);
+    private void checkFileContentName(Integer namespaceId, Long ownerId, Long catalogId, Long parentId, String name){
+        FileContent content = fileManagementProvider.findFileContentByName(namespaceId, ownerId, catalogId, parentId, name);
         if (content != null)
             throw RuntimeErrorException.errorWith(FileManagementErrorCode.SCOPE, FileManagementErrorCode.ERROR_NAME_ALREADY_EXISTS,
                     "the name has been used.");
@@ -361,9 +407,8 @@ public class FileManagementServiceImpl implements  FileManagementService{
         ListFileContentResponse response = new ListFileContentResponse();
         List<FileContentDTO> folders = new ArrayList<>();
         List<FileContentDTO> files = new ArrayList<>();
+        Map<String, String> fileIcons = fileService.getFileIconUrl();
         Integer namespaceId = UserContext.getCurrentNamespaceId();
-        if(cmd.getContentId() == null)
-            cmd.setContentId(cmd.getCatalogId());
         FileCatalog catalog = fileManagementProvider.findFileCatalogById(cmd.getCatalogId());
         if(catalog == null)
             return response;
@@ -371,15 +416,12 @@ public class FileManagementServiceImpl implements  FileManagementService{
         List<FileContent> results = fileManagementProvider.listFileContents(namespaceId,catalog.getOwnerId(),catalog.getId(),cmd.getContentId(),cmd.getKeywords());
         if(results !=null && results.size() > 0){
             results.stream().filter(r -> r.getContentType().equals(FileContentType.FOLDER.getCode())).map(r ->{
-                FileContentDTO dto = ConvertHelper.convert(r, FileContentDTO.class);
+                FileContentDTO dto = convertToFileContentDTO(r,fileIcons);
                 folders.add(dto);
                 return null;
             }).collect(Collectors.toList());
-            //todo:图标的处理
             results.stream().filter(r -> !r.getContentType().equals(FileContentType.FOLDER.getCode())).map(r ->{
-                FileContentDTO dto = ConvertHelper.convert(r, FileContentDTO.class);
-                if(dto.getContentUri() != null)
-                    dto.setContentUrl(contentServerService.parserUri(dto.getContentUri()));
+                FileContentDTO dto = convertToFileContentDTO(r,fileIcons);
                 files.add(dto);
                 return null;
             }).collect(Collectors.toList());
@@ -388,5 +430,23 @@ public class FileManagementServiceImpl implements  FileManagementService{
         response.setFolders(folders);
         response.setFiles(files);
         return response;
+    }
+
+    private FileContentDTO convertToFileContentDTO(FileContent content, Map<String, String> fileIcons) {
+        FileContentDTO dto = ConvertHelper.convert(content, FileContentDTO.class);
+
+        if (content.getContentType().equals(FileContentType.FOLDER.getCode())){
+            dto = ConvertHelper.convert(content, FileContentDTO.class);
+            dto.setName(content.getContentName());
+            dto.setIconUrl(fileIcons.get(FileContentType.FOLDER.getCode()));
+        }
+        else {
+            dto.setName(content.getContentName() + "." + content.getContentSuffix());
+            dto.setContentUrl(contentServerService.parserUri(dto.getContentUri()));
+            dto.setIconUrl(fileIcons.get(content.getContentSuffix()));
+            if (dto.getIconUrl() == null)
+                dto.setIconUrl(fileIcons.get("other"));
+        }
+        return dto;
     }
 }

@@ -18,6 +18,7 @@ import com.everhomes.organization.OrganizationProvider;
 import com.everhomes.organization.OrganizationService;
 import com.everhomes.organization.pm.pay.GsonUtil;
 import com.everhomes.portal.PortalPublishHandler;
+import com.everhomes.portal.ServiceModuleApp;
 import com.everhomes.portal.ServiceModuleAppProvider;
 import com.everhomes.rest.acl.*;
 import com.everhomes.rest.address.CommunityDTO;
@@ -651,6 +652,7 @@ public class ServiceModuleServiceImpl implements ServiceModuleService {
         User user = UserContext.current().getUser();
         List<CommunityDTO> dtos = new ArrayList<>();
         List<ProjectDTO> projects = getUserProjectsByModuleId(user.getId(), cmd.getOrganizationId(), cmd.getModuleId());
+        LOGGER.debug("listAuthorizationCommunityByUser step3"+ DateHelper.currentGMTTime());
         for (ProjectDTO project: projects) {
             if(EntityType.fromCode(project.getProjectType()) == EntityType.COMMUNITY){
                 Community community = communityProvider.findCommunityById(project.getProjectId());
@@ -1156,6 +1158,13 @@ public class ServiceModuleServiceImpl implements ServiceModuleService {
         }
 
         return AllFlag.NOT_ALL.getCode();
+    }
+
+    @Override
+    public ServiceModuleAppDTO findServiceModuleAppById(Long id){
+        ServiceModuleApp serviceModuleApp = serviceModuleAppProvider.findServiceModuleAppById(id);
+        return ConvertHelper.convert(serviceModuleApp, ServiceModuleAppDTO.class);
+
     }
 
 }

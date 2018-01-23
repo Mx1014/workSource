@@ -2,6 +2,7 @@ package com.everhomes.quality;
 
 import com.everhomes.listing.CrossShardListingLocator;
 import com.everhomes.listing.ListingLocator;
+import com.everhomes.listing.ListingQueryBuilderCallback;
 import com.everhomes.rest.quality.ExecuteGroupAndPosition;
 import com.everhomes.rest.quality.ScoreDTO;
 import com.everhomes.rest.quality.TaskCountDTO;
@@ -20,7 +21,7 @@ public interface QualityProvider {
 	QualityInspectionTasks findVerificationTaskById(Long taskId);
 	List<QualityInspectionTasks> listVerificationTasks(Integer offset, int count, Long ownerId, String ownerType, Long targetId, String targetType,
     		Byte taskType, Long executeUid, Timestamp startDate, Timestamp endDate, Byte executeStatus, Byte reviewStatus, boolean timeCompared,
-			List<Long> standardIds, Byte manualFlag, List<ExecuteGroupAndPosition> groupDtos,Integer namespaceId,Timestamp latestUpdateTime);
+			List<Long> standardIds, Byte manualFlag, List<ExecuteGroupAndPosition> groupDtos,Integer namespaceId,String taskName,Timestamp latestUpdateTime);
 	int countVerificationTasks(Long ownerId, String ownerType, Byte taskType, Long executeUid, 
 			Timestamp startDate, Timestamp endDate, Long groupId, Byte executeStatus, Byte reviewStatus);
 
@@ -29,7 +30,7 @@ public interface QualityProvider {
 	void updateQualityInspectionStandards(QualityInspectionStandards standard);
 	QualityInspectionStandards findStandardById(Long id);
 	List<QualityInspectionStandards> findStandardsByCategoryId(Long categoryId);
-	List<QualityInspectionStandards> listQualityInspectionStandards(ListingLocator locator, int count, Long ownerId, String ownerType, String targetType, Long targetId, Byte reviewResult);
+	List<QualityInspectionStandards> listQualityInspectionStandards(ListingLocator locator, int count, Long ownerId, String ownerType, String targetType, Long targetId, Byte reviewResult,String planCondition);
 	
 	void createQualityInspectionEvaluationFactors(QualityInspectionEvaluationFactors factor);
 	void updateQualityInspectionEvaluationFactors(QualityInspectionEvaluationFactors factor);
@@ -88,7 +89,7 @@ public interface QualityProvider {
 	void deleteQualityInspectionStandardSpecificationMap(Long standardSpecificationId);
 	QualityInspectionStandardSpecificationMap createQualityInspectionStandardSpecificationMap(QualityInspectionStandardSpecificationMap map);
 	void updateQualityInspectionStandardSpecificationMap(QualityInspectionStandardSpecificationMap map);
-	QualityInspectionSpecifications findSpecificationById(Long id, String ownerType, Long ownerId);
+	QualityInspectionSpecifications findSpecificationById(Long id, String ownerType, Long ownerId,Integer namespaceId);
 	QualityInspectionSpecifications getSpecificationById(Long id);
 	
 	void populateStandardsSpecifications(final List<QualityInspectionStandards> standards);
@@ -186,4 +187,8 @@ public interface QualityProvider {
 	List<QualityInspectionSpecifications>  listSpecifitionByParentIds(List<Long> parentIds);
 
     List<QualityInspectionSpecifications> listDeletedSpecifications(Long communityId, Long ownerId, String ownerType, Timestamp lastUpdateSyncTime);
+
+    List<QualityInspectionTasks> listVerificationTasksRefactor(Integer offset, int pageSize,
+															   Timestamp startDate, Timestamp endDate,
+															   List<Long> standardIds, List<ExecuteGroupAndPosition> groupDtos, ListingQueryBuilderCallback builderCallback);
 }

@@ -4,11 +4,11 @@ package com.everhomes.rest.portal;
 import com.everhomes.util.StringHelper;
 
 /**
- * 
- * <ul>参数:
- * <li>namespaceId: 域空间</li>
- * <li>itemGroupId: item group id</li>
- * <li>moreOrAllType: 更多或者全部类型： all(全部),more(更多)</li>
+ * <ul>
+ *     <li>itemGroupId: item group id</li>
+ *     <li>namespaceId: 域空间</li>
+ *     <li>moreOrAllType: 更多或者全部类型： all(全部),more(更多)</li>
+ *     <li>versionId: 与itemGroupId二者必须要有一个</li>
  * </ul>
  */
 public class GetItemAllOrMoreCommand {
@@ -18,6 +18,8 @@ public class GetItemAllOrMoreCommand {
 	private Integer namespaceId;
 
 	private String moreOrAllType;
+
+	private Long versionId;
 
 	public GetItemAllOrMoreCommand() {
 
@@ -45,6 +47,14 @@ public class GetItemAllOrMoreCommand {
 
 	public void setItemGroupId(Long itemGroupId) {
 		this.itemGroupId = itemGroupId;
+	}
+
+	public Long getVersionId() {
+		return versionId;
+	}
+
+	public void setVersionId(Long versionId) {
+		this.versionId = versionId;
 	}
 
 	@Override

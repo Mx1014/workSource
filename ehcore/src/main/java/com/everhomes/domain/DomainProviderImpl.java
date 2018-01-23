@@ -2,9 +2,13 @@
 package com.everhomes.domain;
 
 import com.everhomes.db.AccessSpec;
+import com.everhomes.db.DaoAction;
+import com.everhomes.db.DaoHelper;
 import com.everhomes.db.DbProvider;
 import com.everhomes.sequence.SequenceProvider;
 import com.everhomes.server.schema.Tables;
+import com.everhomes.server.schema.tables.daos.EhDomainsDao;
+import com.everhomes.server.schema.tables.pojos.EhDomains;
 import com.everhomes.server.schema.tables.records.*;
 import com.everhomes.util.ConvertHelper;
 import org.jooq.Condition;
@@ -13,7 +17,9 @@ import org.jooq.SelectQuery;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.cache.annotation.CacheEvict;
 import org.springframework.cache.annotation.Cacheable;
+import org.springframework.cache.annotation.Caching;
 import org.springframework.stereotype.Component;
 
 import java.util.ArrayList;
@@ -49,6 +55,23 @@ public class DomainProviderImpl implements DomainProvider {
         return null;
     }
 
+    @Caching(evict = {@CacheEvict(value = "DomainInfo-domain", key = "#domain.domain"),
+                        @CacheEvict(value = "DomainInfo-namespaceId", key = "#domain.namespaceId")})
+    @Override
+    public void updateDomain(Domain domain) {
+        DSLContext context = dbProvider.getDslContext(AccessSpec.readOnlyWith(EhDomains.class, domain.getId()));
+        EhDomainsDao dao = new EhDomainsDao(context.configuration());
+        dao.update(domain);
+        DaoHelper.publishDaoAction(DaoAction.MODIFY, EhDomains.class, domain.getId());
+    }
+
+    @Override
+    public Domain findDomainById(Long id) {
+        DSLContext context = dbProvider.getDslContext(AccessSpec.readOnlyWith(EhDomains.class, id));
+        EhDomainsDao dao = new EhDomainsDao(context.configuration());
+        EhDomains domain = dao.findById(id);
+        return ConvertHelper.convert(domain, Domain.class);
+    }
 
     @Cacheable(value = "DomainInfo-namespaceId", key="#namespaceId", unless="#result == null")
     @Override

@@ -39,7 +39,7 @@ import com.everhomes.util.StringHelper;
  * <li>flowCaseId: 工作流flowCaseId</li>
  * <li>remarkSource: 处理意见来源</li>
  * <li>remark: 处理意见</li>
- * <li>OrganizationUid: 代发人ID</li>
+ * <li>organizationUid: 代发人ID</li>
  * <li>attachments: 附件，参考{@link com.everhomes.rest.pmtask.AttachmentDescriptor}</li>
  * <li>organizationName: 公司名称</li>
  * </ul>
@@ -73,7 +73,7 @@ public class PmTaskDTO {
 	private Long addressId;
 	private String revisitContent;
 	private Timestamp revisitTime;
-	private Long OrganizationUid;
+	private Long organizationUid;
 	
 	private Byte operatorStar;
 	
@@ -247,12 +247,15 @@ public class PmTaskDTO {
 	public void setSourceType(String sourceType) {
 		this.sourceType = sourceType;
 	}
+
 	public Long getOrganizationId() {
 		return organizationId;
 	}
+
 	public void setOrganizationId(Long organizationId) {
 		this.organizationId = organizationId;
 	}
+
 	public Long getAddressId() {
 		return addressId;
 	}
@@ -279,11 +282,11 @@ public class PmTaskDTO {
 	}
 
 	public Long getOrganizationUid() {
-		return OrganizationUid;
+		return organizationUid;
 	}
 
 	public void setOrganizationUid(Long organizationUid) {
-		OrganizationUid = organizationUid;
+		organizationUid = organizationUid;
 	}
 
 	public String getRemark() {

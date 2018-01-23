@@ -15,10 +15,20 @@ public class AddRentalBillItemV2Response {
 
 	private PreOrderDTO preOrderDTO;
 
+	private Long billId;
+
 	@Override
     public String toString() {
         return StringHelper.toJsonString(this);
     }
+
+	public Long getBillId() {
+		return billId;
+	}
+
+	public void setBillId(Long billId) {
+		this.billId = billId;
+	}
 
 	public String getFlowCaseUrl() {
 		return flowCaseUrl;

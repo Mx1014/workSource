@@ -13,6 +13,8 @@ import com.everhomes.flow.conditionvariable.FlowConditionStringVariable;
 import com.everhomes.flow.node.FlowGraphNodeEnd;
 import com.everhomes.general_form.GeneralFormVal;
 import com.everhomes.general_form.GeneralFormValProvider;
+import com.everhomes.organization.OrganizationMember;
+import com.everhomes.organization.OrganizationProvider;
 import com.everhomes.portal.PortalService;
 import com.everhomes.rest.category.CategoryDTO;
 import com.everhomes.rest.flow.*;
@@ -80,7 +82,9 @@ public class PmtaskFlowModuleListener implements FlowModuleListener {
 	@Autowired
 	FlowEventLogProvider flowEventLogProvider;
 	@Autowired
-	PortalService portalService;
+	private PortalService portalService;
+	@Autowired
+	private OrganizationProvider organizationProvider;
 
 	private Long moduleId = FlowConstants.PM_TASK_MODULE;
 
@@ -291,18 +295,36 @@ public class PmtaskFlowModuleListener implements FlowModuleListener {
 			e.setValue(dto.getCategoryName());
 			entities.add(e);
 		}
+		String name = dto.getRequestorName();
+		String phone = dto.getRequestorPhone();
+		//代发时填写代发人信息
+		if (task.getOrganizationUid() != null) {
+			UserIdentifier userIdentifier = userProvider.findClaimedIdentifierByOwnerAndType(task.getOrganizationUid(), IdentifierType.MOBILE.getCode());
+			OrganizationMember member = null;
+			if (task.getOrganizationId() != null) {
+				member = organizationProvider.findOrganizationMemberByOrgIdAndToken(userIdentifier.getIdentifierToken(), task.getOrganizationId());
+			}
+			if (member!=null){
+				name = member.getContactName();
+				phone = userIdentifier.getIdentifierToken();
+			}else{
+				phone = userIdentifier.getIdentifierToken();
+				name = userProvider.findUserById(task.getOrganizationUid()).getNickName();
+			}
 
+		}
 		e = new FlowCaseEntity();
 		e.setEntityType(FlowCaseEntityType.LIST.getCode());
 		e.setKey("发起人");
-		e.setValue(dto.getRequestorName());
+		e.setValue(name);
 		entities.add(e);
 
 		e = new FlowCaseEntity();
 		e.setEntityType(FlowCaseEntityType.LIST.getCode());
-		e.setKey("联系电话");
-		e.setValue(dto.getRequestorPhone());
+		e.setKey("发起人电话");
+		e.setValue(phone);
 		entities.add(e);
+
 
 		//TODO:为科兴与一碑对接
 		if(dto.getNamespaceId() == 999983 &&
@@ -607,7 +629,7 @@ public class PmtaskFlowModuleListener implements FlowModuleListener {
 		dto.setFieldType(GeneralFormFieldType.SINGLE_LINE_TEXT.getCode());
 		dto.setOperators(new ArrayList<>());
 		dto.getOperators().add(FlowConditionRelationalOperatorType.EQUAL.getCode());
-		Integer namespaceId = UserContext.getCurrentNamespaceId();
+		Integer namespaceId = UserContext.getCurrentNamespaceId(flow.getNamespaceId());
 		ListTaskCategoriesCommand cmd = new ListTaskCategoriesCommand();
 		cmd.setNamespaceId(namespaceId);
 		if (flow.getModuleType().equals(FlowModuleType.NO_MODULE.getCode()))
