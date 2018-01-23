@@ -174,8 +174,9 @@ public class AuthorizationEndpointController extends OAuth2ControllerBase {
                 LoginToken token = new LoginToken(login.getUserId(), login.getLoginId(), login.getLoginInstanceNumber(), login.getImpersonationId());
                 String tokenString = WebTokenGenerator.getInstance().toWebToken(token);
 
-                WebRequestInterceptor.setCookieInResponse("token", tokenString, httpRequest, httpResponse);
-                WebRequestInterceptor.setCookieInResponse("namespace_id", String.valueOf(namespaceId), httpRequest, httpResponse);
+                int age = 7 * 24 * 60 * 60; // 一周的有效时间
+                WebRequestInterceptor.setCookieInResponse("token", tokenString, httpRequest, httpResponse, age);
+                WebRequestInterceptor.setCookieInResponse("namespace_id", String.valueOf(namespaceId), httpRequest, httpResponse, age);
 
 				return new ResponseEntity<>(httpHeaders, HttpStatus.SEE_OTHER);
 			} else {
