@@ -3540,7 +3540,7 @@ private void checkUserPrivilege(Long orgId, Long privilegeId, Long communityId) 
 					targetTypes, targetIds, null, null, offset, pageSize + 1, cacheKey, AdminFlag.YES.getCode(),lastSyncTime);
 
 			equipmentProvider.populateTaskStatusCount(cmd.getInspectionCategoryId(),
-					targetTypes, targetIds, null, null, AdminFlag.NO.getCode(), response);
+					targetTypes, targetIds, null, null, AdminFlag.YES.getCode(), response);
 		}
 		if(!isAdmin) {
 			List<Long> executePlanIds = new ArrayList<>();

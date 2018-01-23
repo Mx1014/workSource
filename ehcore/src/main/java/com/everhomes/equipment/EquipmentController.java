@@ -1047,7 +1047,7 @@ public class EquipmentController extends ControllerBase {
     }
 
     /**
-     * <b>URL: /equipment/syscStandardToEqiupmentPlan</b>
+     * <b>URL: /equipment/syncStandardToEqiupmentPlan</b>
      * <p>同步所有的标准-设备关联表到计划中</p>
      */
     @RequestMapping("syncStandardToEqiupmentPlan")
