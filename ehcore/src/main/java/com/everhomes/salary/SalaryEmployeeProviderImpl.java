@@ -92,6 +92,16 @@ public class SalaryEmployeeProviderImpl implements SalaryEmployeeProvider {
 		return step.orderBy(Tables.EH_SALARY_EMPLOYEES.ID.asc()).fetch().map(r -> ConvertHelper.convert(r, SalaryEmployee.class));
 	}
 
+	@Override
+	public SalaryEmployee findSalaryEmployeeByDetailId(Long ownerId, Long detailId) {
+		return null;
+	}
+
+	@Override
+	public String getMonthByOwnerId(Long ownerId) {
+		return null;
+	}
+
 	private EhSalaryEmployeesDao getReadWriteDao() {
 		return getDao(getReadWriteContext());
 	}
