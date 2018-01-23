@@ -78,17 +78,19 @@ public class FileManagementServiceImpl implements  FileManagementService{
         FileCatalog catalog = fileManagementProvider.findFileCatalogById(cmd.getCatalogId());
         Integer namespaceId = UserContext.getCurrentNamespaceId();
         FileCatalogDTO dto = new FileCatalogDTO();
-        if(catalog!=null){
-            //  1.whether the name has been used
-            checkTheCatalogName(namespaceId, catalog.getOwnerId(), cmd.getCatalogName());
-            //  2.update the name
-            catalog.setName(cmd.getCatalogName());
-            fileManagementProvider.updateFileCatalog(catalog);
-            //  3.return back the dto
-            dto.setId(catalog.getId());
-            dto.setName(cmd.getCatalogName());
-            dto.setCreateTime(catalog.getCreateTime());
-        }
+        if (catalog == null)
+            throw RuntimeErrorException.errorWith(FileManagementErrorCode.SCOPE, FileManagementErrorCode.ERROR_FILE_CATALOG_NOT_FOUND,
+                    "the file catalog not found.");
+
+        //  1.whether the name has been used
+        checkTheCatalogName(namespaceId, catalog.getOwnerId(), cmd.getCatalogName());
+        //  2.update the name
+        catalog.setName(cmd.getCatalogName());
+        fileManagementProvider.updateFileCatalog(catalog);
+        //  3.return back the dto
+        dto.setId(catalog.getId());
+        dto.setName(cmd.getCatalogName());
+        dto.setCreateTime(catalog.getCreateTime());
         return dto;
     }
 
@@ -380,15 +382,17 @@ public class FileManagementServiceImpl implements  FileManagementService{
     public FileContentDTO updateFileContentName(UpdateFileContentNameCommand cmd) {
         FileContentDTO dto = new FileContentDTO();
         FileContent content = fileManagementProvider.findFileContentById(cmd.getContentId());
-        if (content != null) {
-            //  1.check the name
-            checkFileContentName(content.getNamespaceId(), content.getOwnerId(), content.getCatalogId(), content.getParentId(), cmd.getContentName());
-            //  2.update the name
-            content.setContentName(cmd.getContentName());
-            fileManagementProvider.updateFileContent(content);
-            //  3.return back
-            dto = ConvertHelper.convert(content, FileContentDTO.class);
-        }
+        if (content == null)
+            throw RuntimeErrorException.errorWith(FileManagementErrorCode.SCOPE, FileManagementErrorCode.ERROR_FILE_CONTENT_NOT_FOUND,
+                    "the file content not found.");
+
+        //  1.check the name
+        checkFileContentName(content.getNamespaceId(), content.getOwnerId(), content.getCatalogId(), content.getParentId(), cmd.getContentName());
+        //  2.update the name
+        content.setContentName(cmd.getContentName());
+        fileManagementProvider.updateFileContent(content);
+        //  3.return back
+        dto = ConvertHelper.convert(content, FileContentDTO.class);
         return dto;
     }
 
