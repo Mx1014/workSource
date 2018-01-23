@@ -509,7 +509,8 @@ ALTER TABLE `eh_web_menus` ADD COLUMN `config_type`  tinyint(4) NULL COMMENT 'nu
 
 -- add by yanjun  end
 
-
+-- 在版本号中加入日期 add by yanjun 201801231805
+ALTER TABLE `eh_portal_versions` ADD COLUMN `date_version`  int(11) NULL AFTER `parent_id`;
 
 
 
