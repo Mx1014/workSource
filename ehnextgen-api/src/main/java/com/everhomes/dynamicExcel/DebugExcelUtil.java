@@ -80,9 +80,13 @@ public class DebugExcelUtil {
             for (List<String> rowContent : data) {
                 row = sheet.createRow(index+1);
                 int cellIndex = 0;
-                for (String cellContent : rowContent) {
+                for (int i = 0; i < fields.size(); i++) {
+                    String cellContent = rowContent.get(i);
                     Cell cell = row.createCell((short) cellIndex);
                     cell.setCellStyle(style_content);
+                    if(cellContent==null){
+                        cellContent = fields.get(i).getDefaultValue();
+                    }
                     cell.setCellValue(cellContent.toString());
                     cellIndex++;
                 }

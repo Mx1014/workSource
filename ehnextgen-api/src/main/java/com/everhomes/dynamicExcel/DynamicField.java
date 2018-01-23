@@ -11,15 +11,10 @@ import java.util.List;
 public class DynamicField {
     @NotNull
     /**
-     * fieldName:字段名
-     */
-    private String fieldName;
-    @NotNull
-    /**
      * displayName: 字段在excel上展示的名字
      */
     private String displayName;
-    private String defaultValue;
+    private String defaultValue = "";
     private boolean isMandatory = false;
     private List<String> allowedValued;
     //字段的日期格式
@@ -39,14 +34,6 @@ public class DynamicField {
 
     public void setDateFormat(String dateFormat) {
         this.dateFormat = dateFormat;
-    }
-
-    public String getFieldName() {
-        return fieldName;
-    }
-
-    public void setFieldName(String fieldName) {
-        this.fieldName = fieldName;
     }
 
     public String getDefaultValue() {
