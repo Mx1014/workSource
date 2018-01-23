@@ -202,36 +202,38 @@ public class EquipmentTasksSearcherImpl extends AbstractElasticSearch implements
         for (Long id : ids) {
             EquipmentInspectionTasks task = equipmentProvider.findEquipmentTaskById(id);
             EquipmentTaskDTO dto = ConvertHelper.convert(task, EquipmentTaskDTO.class);
+            if(task!=null){
+                if (task.getPlanId() == null || task.getPlanId() == 0L) {
+                    if (null != plan) {
+                        plan = equipmentProvider.getEquipmmentInspectionPlanById(task.getPlanId());
+                        EquipmentInspectionPlanDTO plansDTO = processEquipmentInspectionObjectsByPlanId(
+                                ConvertHelper.convert(plan, EquipmentInspectionPlanDTO.class));
+                        dto.setPlanDescription(plansDTO.getRemarks());
+                        dto.setTaskType(plansDTO.getPlanType());
+                        dto.setEquipments(plansDTO.getEquipmentStandardRelations());
+                    }
+                } else {
+                    //兼容之前的task
+                    EquipmentStandardRelationDTO equipmentStandardRelation = new EquipmentStandardRelationDTO();
+                    EquipmentInspectionStandards standard = equipmentProvider.findStandardById(task.getStandardId());
+                    if (null != standard) {
+                        dto.setPlanDescription(standard.getDescription());
+                        dto.setTaskType(standard.getStandardType());
+                        equipmentStandardRelation.setStandardId(standard.getId());
+                        equipmentStandardRelation.setStandardName(standard.getName());
+                    }
 
-            if (task.getPlanId() == null || task.getPlanId() == 0L) {
-                if (null != plan) {
-                    plan = equipmentProvider.getEquipmmentInspectionPlanById(task.getPlanId());
-                    EquipmentInspectionPlanDTO plansDTO = processEquipmentInspectionObjectsByPlanId(
-                            ConvertHelper.convert(plan, EquipmentInspectionPlanDTO.class));
-                    dto.setPlanDescription(plansDTO.getRemarks());
-                    dto.setTaskType(plansDTO.getPlanType());
-                    dto.setEquipments(plansDTO.getEquipmentStandardRelations());
+                    EquipmentInspectionEquipments equipment = equipmentProvider.findEquipmentById(task.getEquipmentId());
+                    if (null != equipment) {
+                        equipmentStandardRelation.setEquipmentId(equipment.getId());
+                        equipmentStandardRelation.setEquipmentName(equipment.getName());
+                        equipmentStandardRelation.setLocation(equipment.getLocation());
+                    }
+                    List<EquipmentStandardRelationDTO> equipments = new ArrayList<>();
+                    equipments.add(equipmentStandardRelation);
+                    dto.setEquipments(equipments);
                 }
-            } else {
-                //兼容之前的task
-                EquipmentStandardRelationDTO equipmentStandardRelation = new EquipmentStandardRelationDTO();
-                EquipmentInspectionStandards standard = equipmentProvider.findStandardById(task.getStandardId());
-                if (null != standard) {
-                    dto.setPlanDescription(standard.getDescription());
-                    dto.setTaskType(standard.getStandardType());
-                    equipmentStandardRelation.setStandardId(standard.getId());
-                    equipmentStandardRelation.setStandardName(standard.getName());
-                }
-
-                EquipmentInspectionEquipments equipment = equipmentProvider.findEquipmentById(task.getEquipmentId());
-                if (null != equipment) {
-                    equipmentStandardRelation.setEquipmentId(equipment.getId());
-                    equipmentStandardRelation.setEquipmentName(equipment.getName());
-                    equipmentStandardRelation.setLocation(equipment.getLocation());
-                }
-                List<EquipmentStandardRelationDTO> equipments = new ArrayList<>();
-                equipments.add(equipmentStandardRelation);
-                dto.setEquipments(equipments);
+                tasks.add(dto);
             }
         }
         response.setTasks(tasks);
