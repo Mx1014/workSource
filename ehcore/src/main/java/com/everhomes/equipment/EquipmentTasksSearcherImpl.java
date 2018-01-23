@@ -198,14 +198,16 @@ public class EquipmentTasksSearcherImpl extends AbstractElasticSearch implements
             }
 
         List<EquipmentTaskDTO> tasks = new ArrayList<>();
+        EquipmentInspectionPlans plan = new EquipmentInspectionPlans();
         for (Long id : ids) {
             EquipmentInspectionTasks task = equipmentProvider.findEquipmentTaskById(id);
             EquipmentTaskDTO dto = ConvertHelper.convert(task, EquipmentTaskDTO.class);
 
             if (task.getPlanId() == null || task.getPlanId() == 0L) {
-                EquipmentInspectionPlanDTO plansDTO = processEquipmentInspectionObjectsByPlanId(
-                        ConvertHelper.convert(equipmentProvider.getEquipmmentInspectionPlanById(id),EquipmentInspectionPlanDTO.class));
-                if (null != plansDTO) {
+                if (null != plan) {
+                    plan = equipmentProvider.getEquipmmentInspectionPlanById(task.getPlanId());
+                    EquipmentInspectionPlanDTO plansDTO = processEquipmentInspectionObjectsByPlanId(
+                            ConvertHelper.convert(plan, EquipmentInspectionPlanDTO.class));
                     dto.setPlanDescription(plansDTO.getRemarks());
                     dto.setTaskType(plansDTO.getPlanType());
                     dto.setEquipments(plansDTO.getEquipmentStandardRelations());

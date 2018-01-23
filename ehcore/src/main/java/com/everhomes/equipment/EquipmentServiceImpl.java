@@ -3415,6 +3415,13 @@ private void checkUserPrivilege(Long orgId, Long privilegeId, Long communityId) 
 		return time;
 	}
 
+	private Timestamp addWeek(Timestamp now, int days) {
+		Calendar calendar = Calendar.getInstance();
+		calendar.setTime(now);
+		calendar.add(Calendar.DATE, days);
+		return new Timestamp(calendar.getTimeInMillis());
+	}
+
 	private ListEquipmentTasksResponse listDelayTasks(ListEquipmentTasksCommand cmd) {
 		ListEquipmentTasksResponse response = new ListEquipmentTasksResponse();
 		int pageSize = cmd.getPageSize() == null ? Integer.MAX_VALUE - 1 : cmd.getPageSize();
@@ -3439,8 +3446,9 @@ private void checkUserPrivilege(Long orgId, Long privilegeId, Long communityId) 
 				}
 			}
 		}
-		//只展示近一个月的
-		Timestamp startTime = addMonths(new Timestamp(System.currentTimeMillis()), -1);
+		//只展示近一周
+		//Timestamp startTime = addMonths(new Timestamp(System.currentTimeMillis()), -1);
+		Timestamp startTime = addWeek(new Timestamp(System.currentTimeMillis()), -7);
 		List<EquipmentInspectionTasks> tasks = null;
 		if(isAdmin) {
 			tasks = equipmentProvider.listDelayTasks(cmd.getInspectionCategoryId(), null, cmd.getTargetType(),
@@ -3576,7 +3584,8 @@ private void checkUserPrivilege(Long orgId, Long privilegeId, Long communityId) 
 		}
 
 		tasks = allTasks.stream().map(r -> {
-			if ((EquipmentTaskStatus.WAITING_FOR_EXECUTING.equals(EquipmentTaskStatus.fromStatus(r.getStatus())))) {
+			if ((EquipmentTaskStatus.WAITING_FOR_EXECUTING.equals(EquipmentTaskStatus.fromStatus(r.getStatus())))
+					|| EquipmentTaskStatus.DELAY.equals(EquipmentTaskStatus.fromStatus(r.getStatus()))) {
 				return r;
 			} else if (EquipmentTaskStatus.CLOSE.equals(EquipmentTaskStatus.fromStatus(r.getStatus()))
 					|| (EquipmentTaskStatus.REVIEW_DELAY.equals(EquipmentTaskStatus.fromStatus(r.getStatus())))) {
@@ -5676,6 +5685,7 @@ private void checkUserPrivilege(Long orgId, Long privilegeId, Long communityId) 
 				plan.setName(equipment.getName());
 				plan.setTargetId(equipment.getTargetId());
 				plan.setTargetType(equipment.getTargetType());
+				plan.setPlanNumber(equipment.getCustomNumber());
 			}
 			if (standards != null) {
 				if (EquipmentReviewStatus.REVIEWED.equals(EquipmentReviewStatus.fromStatus(map.getReviewStatus()))
@@ -5689,7 +5699,6 @@ private void checkUserPrivilege(Long orgId, Long privilegeId, Long communityId) 
 				plan.setInspectionCategoryId(standards.getInspectionCategoryId());
 				plan.setOwnerType(standards.getOwnerType());
 				plan.setOwnerId(standards.getOwnerId());
-				plan.setPlanNumber(equipment.getCustomNumber());
 			}
 			equipmentProvider.createEquipmentInspectionPlans(plan);
 			EquipmentInspectionEquipmentPlanMap planMap = new EquipmentInspectionEquipmentPlanMap();
