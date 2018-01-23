@@ -2266,8 +2266,6 @@ public class SalaryServiceImpl implements SalaryService {
 
     @Override
     public void updateGroupEntities(UpdateGroupEntitiesCommand cmd) {
-        //新增
-        addNewGroupEntities(cmd.getOrganizationId(), cmd.getEntities());
         //更新和删除
         List<SalaryGroupEntity> entities = salaryGroupEntityProvider.listSalaryGroupEntityByOrgId(cmd.getOrganizationId());
         for (SalaryGroupEntity entity : entities) {
@@ -2306,6 +2304,9 @@ public class SalaryServiceImpl implements SalaryService {
                 salaryGroupEntityProvider.updateSalaryGroupEntity(entity);
             }
         }
+        //新增
+        addNewGroupEntities(cmd.getOrganizationId(), cmd.getEntities());
+
     }
 
     @Override
@@ -2459,7 +2460,7 @@ public class SalaryServiceImpl implements SalaryService {
     private void addNewGroupEntities(Long organizationId, List<SalaryGroupEntityDTO> entities) {
         for (SalaryGroupEntityDTO dto : entities) {
             if (dto.getId() == null) {
-                LOGGER.debug("新增" + dto);
+//                LOGGER.debug("新增" + dto);
                 //id为null的新增
                 SalaryGroupEntity entity = ConvertHelper.convert(dto, SalaryGroupEntity.class);
                 entity.setDefaultFlag(NormalFlag.NO.getCode());
