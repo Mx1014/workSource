@@ -2210,6 +2210,9 @@ public class SalaryServiceImpl implements SalaryService {
         List<String> groupTypeList = new ArrayList<String>();
         groupTypeList.add(OrganizationGroupType.ENTERPRISE.getCode());
         Organization org = organizationProvider.findOrganizationById(cmd.getOrganizationId());
+        if (null == org) {
+            return null;             
+        }
         List<Organization> orgs = organizationProvider.listOrganizationByGroupTypes(org.getPath() + "%", groupTypeList);
         ListEnterprisesResponse resp = new ListEnterprisesResponse();
         resp.setEnterprises(orgs.stream().map(r -> {
