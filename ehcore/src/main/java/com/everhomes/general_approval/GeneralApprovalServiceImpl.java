@@ -297,7 +297,10 @@ public class GeneralApprovalServiceImpl implements GeneralApprovalService {
                 GeneralModuleInfo gm = ConvertHelper.convert(ga, GeneralModuleInfo.class);
                 gm.setOwnerId(ga.getId());
                 gm.setOwnerType(FlowOwnerType.GENERAL_APPROVAL.getCode());
+                cmd21.setFlowCaseId(flowCaseId);
                 flowCase = flowService.createDumpFlowCase(gm, cmd21);
+                flowCase.setStatus(FlowCaseStatus.FINISHED.getCode());
+                flowCaseProvider.updateFlowCase(flowCase);
             } else {
                 cmd21.setFlowMainId(flow.getFlowMainId());
                 cmd21.setFlowVersion(flow.getFlowVersion());

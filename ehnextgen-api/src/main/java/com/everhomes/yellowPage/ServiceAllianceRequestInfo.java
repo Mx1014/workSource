@@ -20,8 +20,36 @@ public class ServiceAllianceRequestInfo {
     private Long creatorUid;
     private Long flowCaseId;
     private Timestamp createTime;
+	private Long secondCategoryId;
+	private String secondCategoryName;
+	private Byte workflowStatus;
+	
 
-    public Long getId() {
+    public Long getSecondCategoryId() {
+		return secondCategoryId;
+	}
+
+	public void setSecondCategoryId(Long secondCategoryId) {
+		this.secondCategoryId = secondCategoryId;
+	}
+
+	public String getSecondCategoryName() {
+		return secondCategoryName;
+	}
+
+	public void setSecondCategoryName(String secondCategoryName) {
+		this.secondCategoryName = secondCategoryName;
+	}
+
+	public Byte getWorkflowStatus() {
+		return workflowStatus;
+	}
+
+	public void setWorkflowStatus(Byte workflowStatus) {
+		this.workflowStatus = workflowStatus;
+	}
+
+	public Long getId() {
         return id;
     }
 
