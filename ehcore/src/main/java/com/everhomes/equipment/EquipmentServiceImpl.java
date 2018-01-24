@@ -5831,7 +5831,7 @@ private void checkUserPrivilege(Long orgId, Long privilegeId, Long communityId) 
 			repairCommand.setTaskCategoryId(6L);
 			ListTaskCategoriesCommand categoriesCommand = new ListTaskCategoriesCommand();
 			categoriesCommand.setPageSize(Integer.MAX_VALUE -1);
-			ListTaskCategoriesResponse categories = pmTaskService.listTaskCategories(categoriesCommand);
+			/*ListTaskCategoriesResponse categories = pmTaskService.listTaskCategories(categoriesCommand);
 
 			if (categories != null && categories.getRequests().size() > 0) {
 				List<Long> categodyIds = categories.getRequests().stream().map((r) -> {
@@ -5844,7 +5844,7 @@ private void checkUserPrivilege(Long orgId, Long privilegeId, Long communityId) 
 			} else {
 				throw RuntimeErrorException.errorWith(EquipmentServiceErrorCode.SCOPE,
 						EquipmentServiceErrorCode.ERROR_EQUIPMENT_REPAIR_CATEGORY_NOT_EXIST, "equipment repair category id not exist!");
-			}
+			}*/
 
 			List<OrganizationMember> members = organizationProvider.listOrganizationMembersByUId(UserContext.currentUserId());
 			if (members != null && members.size() > 0) {
