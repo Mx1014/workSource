@@ -1391,7 +1391,7 @@ public class PortalServiceImpl implements PortalService {
 	 */
 	private void updateVersionAfterPublish(Long versionId){
 		PortalVersion publishVersion = portalVersionProvider.findPortalVersionById(versionId);
-		PortalVersion maxVersion = portalVersionProvider.findMaxVersion(publishVersion.getNamespaceId());
+		PortalVersion maxVersion = portalVersionProvider.findMaxBigVersion(publishVersion.getNamespaceId());
 
 		publishVersion.setBigVersion(maxVersion.getBigVersion() + 1);
 		publishVersion.setMinorVersion(0);

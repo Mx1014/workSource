@@ -264,23 +264,20 @@ public class EquipmentTasksSearcherImpl extends AbstractElasticSearch implements
             b.field("taskName", task.getTaskName());
             b.field("inspectionCategoryId", task.getInspectionCategoryId());
 
-//            // reviewStatus: 任务审核状态 0: UNREVIEWED 1: REVIEWED
-//            if (ReviewResult.fromStatus(task.getReviewResult()) == ReviewResult.NONE) {
-//                b.field("reviewStatus", 0);
-//            } else if (ReviewResult.fromStatus(task.getReviewResult()) == ReviewResult.QUALIFIED) {
-//                b.field("reviewStatus", 1);
-//            } else if (ReviewResult.fromStatus(task.getReviewResult()) == ReviewResult.REVIEW_DELAY) {
-//                b.field("reviewStatus", 4);
-//            }
-
             EquipmentInspectionPlans plan = equipmentProvider.getEquipmmentInspectionPlanById(task.getPlanId());
-            if(null != plan) {
-            	b.field("taskType", plan.getPlanType());
+            if (null != plan) {
+                b.field("taskType", plan.getPlanType());
             } else {
-            	b.field("taskType", "");
+                //兼容旧数据
+                EquipmentInspectionStandards standard = equipmentProvider.findStandardById(task.getStandardId());
+                if (standard != null) {
+                    b.field("taskType", standard.getStandardType());
+                }else {
+                    b.field("taskType", "");
+                }
             }
-
             b.endObject();
+
             return b;
         } catch (IOException ex) {
             LOGGER.error("Create equipment task " + task.getId() + " error");
