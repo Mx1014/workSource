@@ -3,7 +3,16 @@ package com.everhomes.rest.parking;
 import java.math.BigDecimal;
 
 /**
- * @author sw on 2017/9/18.
+ * <ul>
+ * <li>namespaceId: namespaceId</li>
+ * <li>ownerType : 目前是community 参考 {@link ParkingOwnerType}</li>
+ * <li>ownerId : 目前是小区/园区ID</li>
+ * <li>parkingLotId : 停车场id</li>
+ * <li>cardTypeId: 卡类型id</li>
+ * <li>cardTypeName: 卡类型名称</li>
+ * <li>status: status {@link ParkingCommonStatus}</li>
+ * <li>price: 金额（单个月的费率）0</li>
+ * </ul>
  */
 public class ParkingCardRequestTypeDTO {
 

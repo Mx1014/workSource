@@ -27,6 +27,7 @@ import com.everhomes.util.StringHelper;
  * <li>phone: 联系方式</li>
  * <li>communityIds: 可见范围</li>
  * <li>newsTagVals: 标签</li>
+ * <li>status: 新闻状态,参考{@link com.everhomes.rest.news.NewsStatus}</li>
  * </ul>
  */
 public class UpdateNewsCommand {
@@ -52,7 +53,7 @@ public class UpdateNewsCommand {
     @ItemType(NewsTagValsDTO.class)
     private List<NewsTagValsDTO> newsTagVals;
     private String visibleType;
-
+	private byte status;
     public String getVisibleType() {
         return visibleType;
     }
@@ -185,4 +186,12 @@ public class UpdateNewsCommand {
     public void setId(Long id) {
         this.id = id;
     }
+
+	public byte getStatus() {
+		return status;
+	}
+
+	public void setStatus(byte status) {
+		this.status = status;
+	}
 }

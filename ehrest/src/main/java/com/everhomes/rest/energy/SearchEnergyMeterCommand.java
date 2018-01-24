@@ -21,6 +21,7 @@ import javax.validation.constraints.NotNull;
  *     <li>pageAnchor: 下页锚点</li>
  *     <li>pageSize: 每页数量</li>
  *     <li>planName: 计划名称 完全匹配</li>
+ *     <li>operatorName: 最近一次抄表人，完全匹配</li>
  *     <li>assignFlag: 是否关联计划 0 未关联计划； 1 已关联</li>
  * </ul>
  */
@@ -42,6 +43,15 @@ public class SearchEnergyMeterCommand {
     private Integer namespaceId;
     private Byte assignFlag;
     private String planName;
+    private String operatorName;
+
+    public String getOperatorName() {
+        return operatorName;
+    }
+
+    public void setOperatorName(String operatorName) {
+        this.operatorName = operatorName;
+    }
 
     public String getPlanName() {
         return planName;

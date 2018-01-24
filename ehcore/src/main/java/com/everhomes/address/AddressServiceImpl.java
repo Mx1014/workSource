@@ -275,7 +275,9 @@ public class AddressServiceImpl implements AddressService, LocalBusSubscriber {
                     "Invalid parameter, latitude and longitude have to be both specified or neigher");
 
         // TODO, return all communities only to test our REST response for now
-
+//        CommunityDTO testDto = ConvertHelper.convert(communityProvider.findCommunityById(240111044331051304l), CommunityDTO.class);
+//        results.add(testDto);
+        
         List<CommunityGeoPoint> pointList = this.communityProvider.findCommunityGeoPointByGeoHash(cmd.getLatigtue(), cmd.getLongitude(), 6);
         List<Long> communityIds = getAllCommunityIds(pointList);
 
@@ -695,6 +697,8 @@ public class AddressServiceImpl implements AddressService, LocalBusSubscriber {
                         selectSql = selectSql.and(Tables.EH_ADDRESSES.APARTMENT_FLOOR.eq(cmd.getApartmentFloor()));
                     }
 
+                    LOGGER.debug("listApartmentsByKeywordForBusiness sql = :",selectSql.getSQL());
+                    LOGGER.debug("listApartmentsByKeywordForBusiness bindValues = :",selectSql.getBindValues());
                     selectSql.fetch().map((r) -> {
                         ApartmentDTO apartment = new ApartmentDTO();
                         apartment.setAddressId(r.getValue(Tables.EH_ADDRESSES.ID));
@@ -1905,6 +1909,42 @@ public class AddressServiceImpl implements AddressService, LocalBusSubscriber {
 					continue;
 				}
 			}
+
+            if (StringUtils.isNotEmpty(data.getChargeArea())) {
+                try {
+                    Double.parseDouble(data.getChargeArea());
+                } catch (Exception e) {
+                    log.setData(data);
+                    log.setErrorLog("charge area is not number");
+                    log.setCode(AddressServiceErrorCode.ERROR_CHARGE_AREA_NOT_NUMBER);
+                    errorLogs.add(log);
+                    continue;
+                }
+            }
+
+            if (StringUtils.isNotEmpty(data.getRentArea())) {
+                try {
+                    Double.parseDouble(data.getRentArea());
+                } catch (Exception e) {
+                    log.setData(data);
+                    log.setErrorLog("rent area is not number");
+                    log.setCode(AddressServiceErrorCode.ERROR_RENT_AREA_NOT_NUMBER);
+                    errorLogs.add(log);
+                    continue;
+                }
+            }
+
+            if (StringUtils.isNotEmpty(data.getSharedArea())) {
+                try {
+                    Double.parseDouble(data.getSharedArea());
+                } catch (Exception e) {
+                    log.setData(data);
+                    log.setErrorLog("share area is not number");
+                    log.setCode(AddressServiceErrorCode.ERROR_SHARE_AREA_NOT_NUMBER);
+                    errorLogs.add(log);
+                    continue;
+                }
+            }
 			
 			importApartment(community, data);
 		}
@@ -1933,8 +1973,14 @@ public class AddressServiceImpl implements AddressService, LocalBusSubscriber {
         }
 
         double areaSize = 0;
+        double chargeArea = 0;
+        double rentArea = 0;
+        double shareArea = 0;
         try {
             areaSize = Double.parseDouble(data.getAreaSize());
+            chargeArea = Double.parseDouble(data.getChargeArea());
+            rentArea = Double.parseDouble(data.getRentArea());
+            shareArea = Double.parseDouble(data.getSharedArea());
         } catch (Exception e) {
         }
 
@@ -1948,7 +1994,11 @@ public class AddressServiceImpl implements AddressService, LocalBusSubscriber {
             address.setAreaName(community.getAreaName());
             address.setBuildingName(building.getName());
             address.setApartmentName(data.getApartmentName());
+//            address.setBuildArea(buildArea);
             address.setAreaSize(areaSize);
+            address.setSharedArea(shareArea);
+            address.setChargeArea(chargeArea);
+            address.setRentArea(rentArea);
             address.setAddress(building.getName() + "-" + data.getApartmentName());
             address.setNamespaceAddressType(data.getNamespaceAddressType());
             address.setNamespaceAddressToken(data.getNamespaceAddressToken());
@@ -1956,7 +2006,11 @@ public class AddressServiceImpl implements AddressService, LocalBusSubscriber {
             address.setNamespaceId(community.getNamespaceId());
         	addressProvider.createAddress(address);
 		}else {
-			address.setAreaSize(areaSize);
+//            address.setBuildArea(buildArea);
+            address.setAreaSize(areaSize);
+            address.setSharedArea(shareArea);
+            address.setChargeArea(chargeArea);
+            address.setRentArea(rentArea);
             address.setNamespaceAddressType(data.getNamespaceAddressType());
             address.setNamespaceAddressToken(data.getNamespaceAddressToken());
             address.setStatus(AddressAdminStatus.ACTIVE.getCode());
@@ -1970,16 +2024,22 @@ public class AddressServiceImpl implements AddressService, LocalBusSubscriber {
 	private List<ImportApartmentDataDTO> handleImportApartmentData(List resultList) {
 		List<ImportApartmentDataDTO> list = new ArrayList<>();
 		for(int i = 1; i < resultList.size(); i++) {
-			RowResult r = (RowResult) resultList.get(i);
+            RowResult r = (RowResult) resultList.get(i);
 			if (StringUtils.isNotBlank(r.getA()) || StringUtils.isNotBlank(r.getB()) || StringUtils.isNotBlank(r.getC()) || StringUtils.isNotBlank(r.getD())) {
 				ImportApartmentDataDTO data = new ImportApartmentDataDTO();
 				data.setBuildingName(trim(r.getA()));
 				data.setApartmentName(trim(r.getB()));
 				data.setStatus(trim(r.getC()));
-				data.setAreaSize(trim(r.getD()));
+
+                //产品变更模板
+//                data.setBuildArea(trim(r.getD()));
+                data.setAreaSize(trim(r.getD()));
+                data.setChargeArea(trim(r.getE()));
+                data.setSharedArea(trim(r.getF()));
+                data.setRentArea(trim(r.getG()));
                 //加上来源第三方和在第三方的唯一标识 没有则不填 by xiongying20170814
-                data.setNamespaceAddressType(trim(r.getE()));
-                data.setNamespaceAddressToken(trim(r.getF()));
+                data.setNamespaceAddressType(trim(r.getH()));
+                data.setNamespaceAddressToken(trim(r.getI()));
 				list.add(data);
 			}
 		}

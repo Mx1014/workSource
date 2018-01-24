@@ -5,6 +5,7 @@ import com.everhomes.util.StringHelper;
 /**
  * <ul>
  *     <li>id: id</li>
+ *     <li>moduleId: moduleId</li>
  *     <li>namespaceId: namespaceId</li>
  *     <li>serviceName: serviceName</li>
  * </ul>
@@ -12,6 +13,7 @@ import com.everhomes.util.StringHelper;
 public class FlowServiceTypeDTO {
 
     private Long id;
+    private Long moduleId;
     private Integer namespaceId;
     private String serviceName;
 
@@ -37,6 +39,14 @@ public class FlowServiceTypeDTO {
 
     public void setServiceName(String serviceName) {
         this.serviceName = serviceName;
+    }
+
+    public Long getModuleId() {
+        return moduleId;
+    }
+
+    public void setModuleId(Long moduleId) {
+        this.moduleId = moduleId;
     }
 
     @Override

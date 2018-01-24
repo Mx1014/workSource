@@ -22,20 +22,22 @@ import com.everhomes.util.StringHelper;
  * <li>monthCount: 充值月数，不一定每个厂商都有</li>
  * <li>price: 价格</li>
  * <li>orderType: 订单类型</li>
+ * <li>invoiceType: 发票类型ID</li>
+ * <li>clientAppName: 新支付clientAppName</li>
  * </ul>
  */
 public class CreateParkingRechargeOrderCommand {
-	@NotNull
+    @NotNull
     private String ownerType;
-	@NotNull
+    @NotNull
     private Long ownerId;
-	@NotNull
+    @NotNull
     private Long parkingLotId;
-	@NotNull
+    @NotNull
     private String plateNumber;
     private String plateOwnerName;
     private String plateOwnerPhone;
-	@NotNull
+    @NotNull
     private Long payerEnterpriseId;
 
     private String cardNumber;
@@ -50,7 +52,7 @@ public class CreateParkingRechargeOrderCommand {
 
     private String clientAppName;
 
-	public CreateParkingRechargeOrderCommand() {
+    public CreateParkingRechargeOrderCommand() {
     }
 
     public String getClientAppName() {

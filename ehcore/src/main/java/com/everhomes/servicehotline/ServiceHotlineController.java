@@ -2,6 +2,9 @@ package com.everhomes.servicehotline;
 
 import javax.validation.Valid;
 
+import com.everhomes.rest.servicehotline.*;
+import com.everhomes.rest.user.UserInfo;
+import com.everhomes.user.UserService;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -12,15 +15,6 @@ import com.everhomes.constants.ErrorCodes;
 import com.everhomes.controller.ControllerBase;
 import com.everhomes.discover.RestReturn;
 import com.everhomes.rest.RestResponse;
-import com.everhomes.rest.servicehotline.AddHotlineCommand;
-import com.everhomes.rest.servicehotline.DeleteHotlineCommand;
-import com.everhomes.rest.servicehotline.GetHotlineListCommand;
-import com.everhomes.rest.servicehotline.GetHotlineListResponse;
-import com.everhomes.rest.servicehotline.GetHotlineSubjectCommand;
-import com.everhomes.rest.servicehotline.GetHotlineSubjectResponse;
-import com.everhomes.rest.servicehotline.SetHotlineSubjectCommand;
-import com.everhomes.rest.servicehotline.UpdateHotlineCommand;
-import com.everhomes.rest.servicehotline.UpdateHotlinesCommand;
 import com.everhomes.techpark.servicehotline.HotlineService;
 import com.everhomes.util.RequireAuthentication;
 
@@ -34,6 +28,8 @@ public class ServiceHotlineController extends ControllerBase {
 
 	@Autowired
 	private HotlineService hotlineService;
+	@Autowired
+	private UserService userService;
  
 
 	/**
@@ -161,6 +157,16 @@ public class ServiceHotlineController extends ControllerBase {
 	public RestResponse setHotlineSubject(@Valid SetHotlineSubjectCommand cmd) {
 		this.hotlineService.setHotlineSubject(cmd);
 		RestResponse response = new RestResponse();
+		response.setErrorCode(ErrorCodes.SUCCESS);
+		response.setErrorDescription("OK");
+		return response;
+	}
+
+	@RequestMapping("getUserInfoById")
+	@RestReturn(value=GetUserInfoByIdResponse.class)
+	public RestResponse getUserInfoById(@Valid GetUserInfoByIdCommand cmd) {
+		GetUserInfoByIdResponse user = this.hotlineService.getUserInfoById(cmd);
+		RestResponse response =  new RestResponse(user);
 		response.setErrorCode(ErrorCodes.SUCCESS);
 		response.setErrorDescription("OK");
 		return response;

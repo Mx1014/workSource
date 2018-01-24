@@ -13,7 +13,7 @@ import java.util.stream.Collectors;
 
 public class FlowGraphNodeCondition extends FlowGraphNode {
 
-    private FlowEventLogProvider flowEventLogProvider;
+    transient private FlowEventLogProvider flowEventLogProvider;
 
     public FlowGraphNodeCondition() {
         flowEventLogProvider = PlatformContext.getComponent(FlowEventLogProvider.class);
@@ -23,7 +23,7 @@ public class FlowGraphNodeCondition extends FlowGraphNode {
     public void stepEnter(FlowCaseState ctx, FlowGraphNode from) throws FlowStepErrorException {
         ctx.getFlowCase().setCurrentNodeId(this.getFlowNode().getId());
         ctx.getFlowCase().setCurrentLaneId(this.getFlowNode().getFlowLaneId());
-        ctx.getFlowCase().setStepCount(ctx.getFlowCase().getStepCount() + 1);
+        ctx.getFlowCase().incrStepCount();
 
         FlowGraph flowGraph = ctx.getFlowGraph();
         FlowGraphBranch branch = flowGraph.getBranchByOriginalNode(this.getFlowNode().getId());

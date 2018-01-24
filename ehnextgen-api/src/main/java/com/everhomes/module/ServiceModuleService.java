@@ -46,4 +46,7 @@ public interface ServiceModuleService {
 	ReflectionServiceModuleApp getOrCreateReflectionServiceModuleApp(Integer namespaceId, String actionData, String instanceConfig, String itemLabel, ServiceModule serviceModule);
 
 	List<Long> listServiceModulefunctions(ListServiceModulefunctionsCommand cmd);
+
+	Byte checkUserRelatedProjectAllFlag(ListUserRelatedProjectByModuleCommand cmd);
+
 }

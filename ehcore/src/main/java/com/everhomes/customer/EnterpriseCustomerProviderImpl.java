@@ -10,6 +10,7 @@ import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 
+import com.everhomes.organization.OrganizationMember;
 import com.everhomes.rest.customer.*;
 import com.everhomes.server.schema.tables.daos.*;
 import com.everhomes.server.schema.tables.pojos.*;
@@ -1464,7 +1465,7 @@ public class EnterpriseCustomerProviderImpl implements EnterpriseCustomerProvide
 	private String compareEnterpriseCustomer(EnterpriseCustomer customer, EnterpriseCustomer exist) {
 		//查出模板配置的参数
 		ListFieldCommand command = new ListFieldCommand();
-		command.setNamespaceId(CustomerTrackingTemplateCode.NAMESPACE);
+		command.setNamespaceId(customer.getNamespaceId());
 		command.setModuleName(CustomerTrackingTemplateCode.MODULE_NAME);
 		command.setGroupPath(CustomerTrackingTemplateCode.GROUP_PATH);
 		command.setCommunityId(customer.getCommunityId());
@@ -1490,8 +1491,8 @@ public class EnterpriseCustomerProviderImpl implements EnterpriseCustomerProvide
 				if(null != objNew || null != objOld){
 					if(!(objNew == null ? "" : objNew).equals((objOld == null ? "" : objOld))){
 						String  content = "";
-						String  newData = objNew == null ? "\" \"" : objNew.toString();
-						String  oldData = objOld == null ? "\" \"" : objOld.toString();
+						String  newData = objNew == null ? "空" : objNew.toString();
+						String  oldData = objOld == null ? "空" : objOld.toString();
                         LOGGER.debug("compareEnterpriseCustomer FieldName: {}; newData: {}; oldData: {}",
                                 field.getFieldName(), newData, oldData);
 						if(field.getFieldName().lastIndexOf("ItemId") > -1){
@@ -1514,6 +1515,20 @@ public class EnterpriseCustomerProviderImpl implements EnterpriseCustomerProvide
 					        	oldData = levelItemOld.getItemDisplayName();
 					        }
 						}
+                        if("trackingUid".equals(field.getFieldName())) {
+                            if("-1".equals(oldData)) {
+                                oldData = "空";
+                            } else {
+                                oldData = exist.getTrackingName();
+                            }
+
+                            if("-1".equals(newData)) {
+                                newData = "空";
+                            } else {
+                                newData = customer.getTrackingName();
+                            }
+
+                        }
 						Map<String,Object> map = new HashMap<String,Object>();
 						map.put("display", field.getFieldDisplayName());
 						map.put("oldData", oldData);

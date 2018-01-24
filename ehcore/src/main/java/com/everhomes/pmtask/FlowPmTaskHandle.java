@@ -1,21 +1,20 @@
 package com.everhomes.pmtask;
 
-import java.util.List;
-
-import com.alibaba.fastjson.JSONObject;
 import com.everhomes.building.Building;
 import com.everhomes.building.BuildingProvider;
 import com.everhomes.category.Category;
-import com.everhomes.category.CategoryProvider;
 import com.everhomes.community.CommunityProvider;
 import com.everhomes.community.ResourceCategoryAssignment;
+import com.everhomes.entity.EntityType;
 import com.everhomes.flow.*;
 import com.everhomes.portal.PortalService;
 import com.everhomes.rest.flow.*;
-import com.everhomes.rest.parking.ParkingErrorCode;
 import com.everhomes.rest.pmtask.*;
 import com.everhomes.rest.portal.ListServiceModuleAppsCommand;
 import com.everhomes.rest.portal.ListServiceModuleAppsResponse;
+import com.everhomes.user.UserContext;
+import com.everhomes.util.ConvertHelper;
+import com.everhomes.util.RuntimeErrorException;
 import org.apache.commons.lang.StringUtils;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -23,13 +22,7 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
 import org.springframework.transaction.TransactionStatus;
 
-import com.everhomes.bootstrap.PlatformContext;
-import com.everhomes.db.DbProvider;
-import com.everhomes.entity.EntityType;
-import com.everhomes.rest.category.CategoryDTO;
-import com.everhomes.user.UserContext;
-import com.everhomes.util.ConvertHelper;
-import com.everhomes.util.RuntimeErrorException;
+import java.util.List;
 
 @Component(PmTaskHandle.PMTASK_PREFIX + PmTaskHandle.FLOW)
 class FlowPmTaskHandle extends DefaultPmTaskHandle {
@@ -107,8 +100,8 @@ class FlowPmTaskHandle extends DefaultPmTaskHandle {
 					ResourceCategoryAssignment resourceCategory = communityProvider.findResourceCategoryAssignment(building.getId(),
 							EntityType.BUILDING.getCode(), namespaceId);
 					if (null != resourceCategory) {
-						createFlowCaseCommand.setProjectId(resourceCategory.getResourceCategryId());
-						createFlowCaseCommand.setProjectType(EntityType.RESOURCE_CATEGORY.getCode());
+						createFlowCaseCommand.setProjectIdA(resourceCategory.getResourceCategryId());
+						createFlowCaseCommand.setProjectTypeA(EntityType.CHILD_PROJECT.getCode());
 					}
 				}
 			}
@@ -241,7 +234,7 @@ class FlowPmTaskHandle extends DefaultPmTaskHandle {
 //		stepDTO.setStepCount(flowCase.getStepCount());
 //		flowService.processAutoStep(stepDTO);
 
-		List<FlowButton> buttons = flowButtonProvider.findFlowButtonsByUserType(flowCase.getCurrentNodeId(),
+		List<FlowButton> buttons = flowButtonProvider.findFlowButtonsByUserType(flowCase.getFlowMainId(), flowCase.getCurrentNodeId(),
 				flowCase.getFlowVersion(), FlowUserType.PROCESSOR.getCode());
 
 		FlowButton button = null;

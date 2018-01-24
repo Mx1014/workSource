@@ -18,7 +18,7 @@ public class AddOrganizationOwnerAddressCommand {
 
     @NotNull private Long orgOwnerId;
     @NotNull private Long addressId;
-    @NotNull private Long organizationId;
+    private Long organizationId;
     @NotNull private Byte livingStatus;
 
     private String ownerType;

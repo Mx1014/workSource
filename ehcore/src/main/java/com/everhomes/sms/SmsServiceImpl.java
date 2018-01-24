@@ -9,12 +9,7 @@ import com.everhomes.rest.sms.*;
 import com.everhomes.server.schema.tables.pojos.EhUsers;
 import com.everhomes.settings.PaginationConfigHelper;
 import com.everhomes.user.UserContext;
-import com.everhomes.util.ConvertHelper;
-import com.everhomes.util.DateUtils;
-import com.everhomes.util.RuntimeErrorException;
-import com.everhomes.util.StringHelper;
-import com.everhomes.util.Tuple;
-
+import com.everhomes.util.*;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -22,8 +17,8 @@ import org.springframework.stereotype.Service;
 
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
-
 import java.io.BufferedReader;
+import java.io.PrintWriter;
 import java.util.*;
 import java.util.stream.Collectors;
 
@@ -59,33 +54,24 @@ public class SmsServiceImpl implements SmsService {
     @Override
     public void smsReport(String handlerName, HttpServletRequest request, HttpServletResponse response) {
         SmsHandler handler = handlers.get(handlerName);
-        try (BufferedReader reader = request.getReader()) {
+        try (BufferedReader reader = request.getReader();
+             PrintWriter writer = response.getWriter()) {
+
             String line;
-            String body = "";
+            StringBuilder body = new StringBuilder();
             while ((line = reader.readLine()) != null) {
-                body = body + line;
+                body.append(line);
             }
-            List<SmsReportDTO> dtoList = handler.report(body);
-            if (dtoList != null) {
-                for (SmsReportDTO dto : dtoList) {
-                    if (dto.getSmsId() == null) {
-                        LOGGER.warn("sms report smsId are empty, handlerName = {}, reportBody = {}", handlerName, body);
-                        continue;
-                    }
-                    List<SmsLog> smsLogs = smsLogProvider.findSmsLog(handlerName, dto.getMobile(), dto.getSmsId());
-                    if (smsLogs != null && smsLogs.size() > 0) {
-                        for (SmsLog smsLog : smsLogs) {
-                            smsLog.setStatus(dto.getStatus());
-                            smsLog.setReportTime(DateUtils.currentTimestamp());
-                            smsLog.setReportText(body);
-                            smsLogProvider.updateSmsLog(smsLog);
-                        }
-                    } else {
-                        LOGGER.warn("sms report not found, smsLog by handlerName = {}, smsId = {}, reportBody = {}", handlerName, dto.getSmsId(), body);
-                    }
+            SmsReportResponse report = handler.report(body.toString());
+            if (report != null) {
+                if (report.getReports() != null) {
+                    doReportDTO(handlerName, body, report);
+                }
+                if (report.getResponseBody() != null) {
+                    writer.write(report.getResponseBody());
                 }
             } else {
-                LOGGER.warn("sms report parse error handlerName = {}, reportBody = {}", handlerName, body);
+                LOGGER.warn("sms report parse error handlerName = {}, reportBody = {}", handlerName, body.toString());
             }
         } catch (Exception e) {
             LOGGER.error("sms report error handlerName = {}", handlerName);
@@ -93,13 +79,32 @@ public class SmsServiceImpl implements SmsService {
         }
     }
 
+    private void doReportDTO(String handlerName, StringBuilder body, SmsReportResponse report) {
+        for (SmsReportDTO dto : report.getReports()) {
+            if (dto.getSmsId() == null) {
+                LOGGER.warn("sms report smsId are empty, handlerName = {}, reportBody = {}", handlerName, body.toString());
+                continue;
+            }
+            List<SmsLog> smsLogs = smsLogProvider.findSmsLog(handlerName, dto.getMobile(), dto.getSmsId());
+            if (smsLogs != null && smsLogs.size() > 0) {
+                for (SmsLog smsLog : smsLogs) {
+                    smsLog.setStatus(dto.getStatus());
+                    smsLog.setReportTime(DateUtils.currentTimestamp());
+                    smsLog.setReportText(body.toString());
+                    smsLogProvider.updateSmsLog(smsLog);
+                }
+            } else {
+                LOGGER.warn("sms report not found, smsLog by handlerName = {}, smsId = {}, reportBody = {}", handlerName, dto.getSmsId(), body.toString());
+            }
+        }
+    }
+
     @Override
     public ListSmsLogsResponse listReportLogs(ListReportLogCommand cmd) {
         if(!this.aclProvider.checkAccess("system", null, EhUsers.class.getSimpleName(), 
-                UserContext.current().getUser().getId(), Privilege.Write, null)) {
-            
-                throw RuntimeErrorException.errorWith(ErrorCodes.SCOPE_GENERAL, ErrorCodes.ERROR_ACCESS_DENIED, "Access denied");
-            }
+            UserContext.current().getUser().getId(), Privilege.Write, null)) {
+            throw RuntimeErrorException.errorWith(ErrorCodes.SCOPE_GENERAL, ErrorCodes.ERROR_ACCESS_DENIED, "Access denied");
+        }
         
         ListingLocator locator = new ListingLocator();
         locator.setAnchor(cmd.getPageAnchor());
@@ -146,6 +151,11 @@ public class SmsServiceImpl implements SmsService {
     private SmsLogDTO toSmsLogDTO(SmsLog smsLog) {
         SmsLogDTO dto = ConvertHelper.convert(smsLog, SmsLogDTO.class);
         dto.setCreateTime(smsLog.getCreateTime().toLocalDateTime().toString());
+        if (smsLog.getReportTime() != null) {
+            dto.setReportTime(smsLog.getReportTime().toLocalDateTime().toString());
+        } else {
+            dto.setReportTime("");
+        }
         return dto;
     }
 }

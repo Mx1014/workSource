@@ -33,7 +33,7 @@ public class ProjectApplyEntryFormHandler implements GeneralFormModuleHandler {
     private GeneralFormProvider generalFormProvider;
 
     @Override
-    public PostGeneralFormDTO postGeneralForm(PostGeneralFormCommand cmd) {
+    public PostGeneralFormDTO postGeneralFormVal(PostGeneralFormValCommand cmd) {
 
         if (null == cmd.getSourceId()) {
             cmd.setSourceId(EnterpriseApplyEntryServiceImpl.DEFAULT_CATEGORY_ID);
@@ -165,6 +165,11 @@ public class ProjectApplyEntryFormHandler implements GeneralFormModuleHandler {
 //        dto.setFormFields(fieldDTOs);
 
 //        return dto;
+    }
+
+    @Override
+    public PostGeneralFormDTO updateGeneralFormVal(PostGeneralFormValCommand cmd) {
+        return null;
     }
 
 }

@@ -1,7 +1,15 @@
 package com.everhomes.rest.parking;
 
 /**
- * @author sw on 2017/9/18.
+ * <ul>
+ * <li>id: id</li>
+ * <li>namespaceId: namespaceId</li>
+ * <li>ownerType : 目前是community 参考 {@link ParkingOwnerType}</li>
+ * <li>ownerId : 目前是小区/园区ID</li>
+ * <li>parkingLotId : 停车场id</li>
+ * <li>name: 发票类型名称</li>
+ * <li>status: {@link ParkingCommonStatus}</li>
+ * </ul>
  */
 public class ParkingInvoiceTypeDTO {
 

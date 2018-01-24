@@ -109,4 +109,17 @@ public class GeneralFormValProviderImpl implements GeneralFormValProvider {
         query.addOrderBy(Tables.EH_GENERAL_FORM_VALS.ID.desc());
         return query.fetchAnyInto(GeneralFormVal.class);
     }
+
+    @Override
+    public void deleteGeneralFormValNotInFieldNameScope(Long sourceId, String sourceType, List<String> fieldNameScope){
+        DSLContext context = this.dbProvider.getDslContext(AccessSpec.readWrite());
+
+        DeleteQuery<EhGeneralFormValsRecord> query = context.deleteQuery(Tables.EH_GENERAL_FORM_VALS);
+        query.addConditions(Tables.EH_GENERAL_FORM_VALS.SOURCE_ID.eq(sourceId));
+        query.addConditions(Tables.EH_GENERAL_FORM_VALS.SOURCE_TYPE.eq(sourceType));
+        query.addConditions(Tables.EH_GENERAL_FORM_VALS.FIELD_NAME.notIn(fieldNameScope));
+
+        query.execute();
+
+    }
 }

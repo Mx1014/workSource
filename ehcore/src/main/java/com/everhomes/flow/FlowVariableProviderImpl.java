@@ -2,32 +2,24 @@ package com.everhomes.flow;
 
 import com.everhomes.db.AccessSpec;
 import com.everhomes.db.DbProvider;
-import com.everhomes.naming.NameMapper;
-import com.everhomes.listing.CrossShardListingLocator;
 import com.everhomes.listing.ListingLocator;
 import com.everhomes.listing.ListingQueryBuilderCallback;
-
-import java.sql.Timestamp;
-import java.util.ArrayList;
-import java.util.List;
-import java.util.stream.Collectors;
-
+import com.everhomes.naming.NameMapper;
+import com.everhomes.rest.flow.FlowStatusType;
+import com.everhomes.sequence.SequenceProvider;
+import com.everhomes.server.schema.Tables;
+import com.everhomes.server.schema.tables.daos.EhFlowVariablesDao;
+import com.everhomes.server.schema.tables.pojos.EhFlowVariables;
+import com.everhomes.server.schema.tables.records.EhFlowVariablesRecord;
+import com.everhomes.sharding.ShardingProvider;
+import com.everhomes.util.ConvertHelper;
 import org.jooq.DSLContext;
 import org.jooq.Record;
 import org.jooq.SelectQuery;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
 
-import com.everhomes.rest.flow.FlowStatusType;
-import com.everhomes.server.schema.Tables;
-import com.everhomes.sequence.SequenceProvider;
-import com.everhomes.server.schema.tables.daos.EhFlowVariablesDao;
-import com.everhomes.server.schema.tables.pojos.EhFlowVariables;
-import com.everhomes.server.schema.tables.records.EhFlowVariablesRecord;
-import com.everhomes.sharding.ShardIterator;
-import com.everhomes.sharding.ShardingProvider;
-import com.everhomes.util.ConvertHelper;
-import com.everhomes.util.IterationMapReduceCallback.AfterAction;
+import java.util.List;
 
 @Component
 public class FlowVariableProviderImpl implements FlowVariableProvider {
@@ -115,8 +107,8 @@ public class FlowVariableProviderImpl implements FlowVariableProvider {
     
     @Override
     public List<FlowVariable> findVariables(Integer namespaceId, Long ownerId
-    		, String ownerType, Long moduleId
-    		, String moduleType, String name, String varType) {
+            , String ownerType, Long moduleId
+            , String moduleType, String name, String varType, String keyword) {
     	return queryFlowVariables(new ListingLocator(), 50, new ListingQueryBuilderCallback() {
 			@Override
 			public SelectQuery<? extends Record> buildCondition(
@@ -138,8 +130,11 @@ public class FlowVariableProviderImpl implements FlowVariableProvider {
 				if(name != null) {
 					query.addConditions(Tables.EH_FLOW_VARIABLES.NAME.eq(name));	
 				}
-				
-				query.addConditions(Tables.EH_FLOW_VARIABLES.STATUS.eq(FlowStatusType.VALID.getCode()));
+                if (keyword != null && keyword.trim().length() > 0) {
+                    query.addConditions(Tables.EH_FLOW_VARIABLES.LABEL.like(keyword+"%"));
+                }
+
+                query.addConditions(Tables.EH_FLOW_VARIABLES.STATUS.eq(FlowStatusType.VALID.getCode()));
 				
 				return query;
 			}

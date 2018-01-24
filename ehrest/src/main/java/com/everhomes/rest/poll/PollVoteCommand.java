@@ -9,14 +9,21 @@ import javax.validation.constraints.NotNull;
 import com.everhomes.discover.ItemType;
 import com.everhomes.util.StringHelper;
 
+/**
+ * <ul>
+ *     <li>pollId: pollId</li>
+ *     <li>uuid: uuid</li>
+ *     <li>itemIds: itemIds</li>
+ * </ul>
+ */
 public class PollVoteCommand {
     @NotNull
     private Long pollId;
     private String uuid;
-    
+
     @ItemType(Long.class)
     private List<Long> itemIds;
-    
+
     public PollVoteCommand() {
     }
 
@@ -28,10 +35,10 @@ public class PollVoteCommand {
         this.pollId = pollId;
     }
 
-    
+
     public List<Long> getItemIds() {
-        if(itemIds==null){
-            itemIds=new ArrayList<Long>();
+        if (itemIds == null) {
+            itemIds = new ArrayList<Long>();
         }
         return itemIds;
     }
@@ -39,7 +46,7 @@ public class PollVoteCommand {
     public void setItemIds(List<Long> itemIds) {
         this.itemIds = itemIds;
     }
-    
+
 
     public String getUuid() {
         return uuid;

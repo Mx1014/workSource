@@ -12,7 +12,8 @@ import com.everhomes.rest.pmtask.*;
 
 public interface PmTaskService {
 	SearchTasksResponse searchTasks(SearchTasksCommand cmd);
-	
+	SearchTasksResponse searchTasksWithoutAuth(SearchTasksCommand cmd);
+
 	ListUserTasksResponse listUserTasks(ListUserTasksCommand cmd);
 	
 //	void evaluateTask(EvaluateTaskCommand cmd);

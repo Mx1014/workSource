@@ -6,6 +6,7 @@ import java.util.Map;
 import com.everhomes.listing.ListingQueryBuilderCallback;
 import com.everhomes.rest.flow.*;
 import com.everhomes.rest.user.UserInfo;
+import org.springframework.cache.annotation.Cacheable;
 
 public interface FlowService {
 	
@@ -214,7 +215,7 @@ public interface FlowService {
 	 */
 	FlowSubjectDTO postSubject(FlowPostSubjectCommand cmd);
 
-	/**
+    /**
 	 * 触发工作流按钮事件的响应
 	 * @param cmd
 	 * @return
@@ -461,6 +462,13 @@ public interface FlowService {
     ListNextBranchesResponse listNextBranches(ListNextBranchesCommand cmd);
 
     SearchFlowOperateLogResponse searchFlowOperateLogs(SearchFlowOperateLogsCommand cmd);
+
+    /**
+     * 获取正在执行的任务列表（子任务 or 父任务）
+     * @param flowCaseId  子任务id或者父任务id
+     * @return  正在执行的任务列表
+     */
+    List<FlowCase> getProcessingFlowCasesByAnyFlowCaseId(Long flowCaseId);
 
     FlowEvaluateItemDTO createFlowEvaluateItem(CreateFlowEvaluateItemCommand cmd);
 

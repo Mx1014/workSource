@@ -459,7 +459,7 @@ public class TechparkOpenServiceImpl implements TechparkOpenService{
 		address.setBusinessApartmentName(businessBuildingApartmentNames[1]);
 		
 		addressProvider.createAddress(address);
-		insertOrUpdateLeasePromotion(customerApartment.getLivingStatus(), address.getNamespaceId(), address.getCommunityId(), address.getRentArea(), address.getBuildingName(), address.getApartmentName());
+		insertOrUpdateLeasePromotion(customerApartment.getLivingStatus(), address.getNamespaceId(), address.getCommunityId(), address.getRentArea(), address.getBuildingName(), address.getApartmentName(), address.getId());
 	}
 	
 	private String getRulePrefix(String apartmentName) {
@@ -564,7 +564,8 @@ public class TechparkOpenServiceImpl implements TechparkOpenService{
 	}
 
 	// 插入或更新招租管理
-	private void insertOrUpdateLeasePromotion(Byte theirLivingStatus, Integer namespaceId, Long communityId, Double rentArea, String buildingName, String apartmentName){
+	//fix 22117 增加addressId和apartmentname在招租管理 by xiongying20180103
+	private void insertOrUpdateLeasePromotion(Byte theirLivingStatus, Integer namespaceId, Long communityId, Double rentArea, String buildingName, String apartmentName, Long addressId){
 		CustomerLivingStatus livingStatus = CustomerLivingStatus.fromCode(theirLivingStatus);
 		if (livingStatus == null) {
 			return;
@@ -592,6 +593,8 @@ public class TechparkOpenServiceImpl implements TechparkOpenService{
 				}else {
 					leasePromotion.setBuildingId(0L);
 				}
+				leasePromotion.setApartmentName(apartmentName);
+				leasePromotion.setAddressId(addressId);
 				leasePromotion.setEnterTime(leasePromotion.getCreateTime());
 				leasePromotion.setNamespaceType(namespaceType);
 				leasePromotion.setNamespaceToken(namespaceToken);
@@ -645,7 +648,7 @@ public class TechparkOpenServiceImpl implements TechparkOpenService{
 		address.setBusinessApartmentName(businessBuildingApartmentNames[1]);
 		
 		addressProvider.updateAddress(address);
-		insertOrUpdateLeasePromotion(customerApartment.getLivingStatus(), address.getNamespaceId(), address.getCommunityId(), address.getRentArea(), address.getBuildingName(), address.getApartmentName());
+		insertOrUpdateLeasePromotion(customerApartment.getLivingStatus(), address.getNamespaceId(), address.getCommunityId(), address.getRentArea(), address.getBuildingName(), address.getApartmentName(), address.getId());
 	}
 
 	private CustomerApartment findFromTheirApartmentList(Address myApartment,

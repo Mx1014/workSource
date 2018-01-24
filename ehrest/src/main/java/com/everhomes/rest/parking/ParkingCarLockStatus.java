@@ -1,6 +1,5 @@
 package com.everhomes.rest.parking;
 
-import com.everhomes.rest.energy.EnergyMeterStatus;
 
 /**
  * <ul>

@@ -6,7 +6,18 @@ import com.everhomes.util.StringHelper;
 import java.util.List;
 
 /**
- * @author sw on 2017/10/31.
+ * <ul>
+ * <li>ownerType : 目前是community 参考 {@link ParkingOwnerType}</li>
+ * <li>ownerId : 目前是小区/园区ID</li>
+ * <li>parkingLotId : 停车场id</li>
+ * <li>requestorEnterpriseId: 申请人公司id</li>
+ * <li>requestorEnterpriseName: 申请人公司名称</li>
+ * <li>plateNumber: 车牌</li>
+ * <li>plateOwnerName: 车主姓名</li>
+ * <li>plateOwnerPhone: 车数手机号</li>
+ * <li>requestType: 申请类型 {@link ParkingCarVerificationType}</li>
+ * <li>attachments: attachments {@link com.everhomes.rest.parking.AttachmentDescriptor}</li>
+ * </ul>
  */
 public class RequestCarVerificationCommand {
     private String ownerType;

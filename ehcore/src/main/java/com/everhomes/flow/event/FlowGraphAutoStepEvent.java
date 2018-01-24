@@ -2,6 +2,7 @@ package com.everhomes.flow.event;
 
 import com.everhomes.bootstrap.PlatformContext;
 import com.everhomes.flow.*;
+import com.everhomes.rest.approval.TrueOrFalseFlag;
 import com.everhomes.rest.flow.*;
 import com.everhomes.rest.user.UserInfo;
 import com.everhomes.user.User;
@@ -32,6 +33,7 @@ public class FlowGraphAutoStepEvent extends AbstractFlowGraphEvent {
 		flowService = PlatformContext.getComponent(FlowService.class);
         flowStateProcessor = PlatformContext.getComponent(FlowStateProcessor.class);
 	}
+
 	@Override
 	public FlowUserType getUserType() {
 		return FlowUserType.PROCESSOR;
@@ -122,7 +124,7 @@ public class FlowGraphAutoStepEvent extends AbstractFlowGraphEvent {
                 }
 
                 // 再判断是否有其他的分支,这里的分支包含上面的当前分支
-                List<FlowGraphBranch> branches = flowGraph.getBranchByConvergenceNode(next.getFlowNode().getId());
+                List<FlowGraphBranch> branches = flowGraph.getBranchByConvNode(next.getFlowNode().getId());
                 if (branches != null && branches.size() > 0 && ctx.getParentState() != null) {
                     // 再判断其他所有分支是否都已经完成
                     int finishedBranch = 0;
@@ -141,7 +143,7 @@ public class FlowGraphAutoStepEvent extends AbstractFlowGraphEvent {
                     if (finishedBranch < branches.size()) {
                         log = flowEventLogProvider.getValidEnterStep(ctx.getOperator().getId(), ctx.getFlowCase());
                         if (null != log) {
-                            log.setStepCount(-1L); // mark as invalid
+                            log.setEnterLogCompleteFlag(TrueOrFalseFlag.TRUE.getCode());
                             ctx.getUpdateLogs().add(log);
                             log = null;
                         }
@@ -160,13 +162,13 @@ public class FlowGraphAutoStepEvent extends AbstractFlowGraphEvent {
                     // 下个节点不是分支汇总节点，正常进入
                     ctx.setNextNode(next);
                 }
+                flowCase.incrStepCount();
             }
 
             if (next.getExpectStatus() == FlowCaseStatus.FINISHED && subject == null) {
                 //显示任务跟踪语句
                 subject = new FlowSubject();
             }
-            flowCase.incrStepCount();
 
 			tracker = new FlowEventLog();
 			tracker.setLogContent(flowService.getStepMessageTemplate(stepType, next.getExpectStatus(), ctx.getCurrentEvent(), templateMap));
@@ -175,8 +177,6 @@ public class FlowGraphAutoStepEvent extends AbstractFlowGraphEvent {
 				//显示任务跟踪语句
 				subject = new FlowSubject();
 			}
-			
-			// flowCase.setStepCount(flowCase.getStepCount() + 1L);
 			break;
 		case REJECT_STEP:
 			if(currentNode.getFlowNode().getNodeLevel() < 1) {

@@ -40,4 +40,7 @@ public interface ContractService {
 
 	String generateContractNumber();
 	void syncContractsFromThirdPart(SyncContractsFromThirdPartCommand cmd);
+
+	Boolean checkAdmin(CheckAdminCommand cmd);
+	ContractDetailDTO findContractForApp(FindContractCommand cmd);
 }

@@ -9,9 +9,11 @@ import com.alipay.api.internal.util.AlipayLogger;
 import com.alipay.api.request.AlipayOpenAuthTokenAppQueryRequest;
 import com.alipay.api.request.AlipayOpenAuthTokenAppRequest;
 import com.alipay.api.request.AlipaySystemOauthTokenRequest;
+import com.alipay.api.request.AlipayUserInfoShareRequest;
 import com.alipay.api.response.AlipayOpenAuthTokenAppQueryResponse;
 import com.alipay.api.response.AlipayOpenAuthTokenAppResponse;
 import com.alipay.api.response.AlipaySystemOauthTokenResponse;
+import com.alipay.api.response.AlipayUserInfoShareResponse;
 import com.atomikos.util.FastDateFormat;
 import com.everhomes.acl.RolePrivilegeService;
 import com.everhomes.aclink.huarun.*;
@@ -107,6 +109,8 @@ import javax.servlet.http.HttpServletResponse;
 
 import java.io.ByteArrayOutputStream;
 import java.io.IOException;
+import java.io.UnsupportedEncodingException;
+import java.net.URLEncoder;
 import java.security.Security;
 import java.text.Format;
 import java.util.*;
@@ -256,16 +260,32 @@ public class DoorAccessServiceImpl implements DoorAccessService, LocalBusSubscri
         Security.addProvider(new BouncyCastleProvider());
         String subcribeKey = DaoHelper.getDaoActionPublishSubject(DaoAction.MODIFY, EhUserIdentifiers.class, null);
         localBus.subscribe(subcribeKey, this);
+    }
+    
+    private AlipayClient getAlipayClient() {
+        if(alipayClient == null) {
+            synchronized(this) {
+                if(alipayClient == null) {
+                    //String APP_ID = "2017072507886723";
+                    //String APP_PRIVATE_KEY = "MIIEvAIBADANBgkqhkiG9w0BAQEFAASCBKYwggSiAgEAAoIBAQCPhrLtvxkqtQ+30XXwp/7U3xhJJRJJjwGbFRQC2W0UDOVoKqi6bPaL34AP9L2NPhGgq5K5YIMAzt1BBc4OAvml0v8/RLKqUmlTf3iYDnVdua98gLy4tztHco7A8tjy1hqkdQ8kAbFnxsW6pHNL1XByA8itmICHzhMBdNk2/Z87r+n2otr11ebKOYTSfNO9SSsBvZQz0wxDpgoLgbosNWaLxaOPbFtDHAKsNOVttuQfWUMSuGvX9xxu0wi7WxFXvKb8z31szmd3WcXbtCTpPPCx5euI0IuOKGKF4P6NX0iy0TokIrzmt4jvn5xG/Bq5/VvJJS686Kc/bxqXdjtFH0dRAgMBAAECggEAKePupWV5OvXNuKDyA2OFBSx4MiEXzVBn75OfW5WKOKfq7RRGWuMisoBxKDcOfAL5siNhl6mLktjNywSet4g2xSdoSFcMrpmPFEfIMtlFeC2SAoywiFkyfA/7imVW3MmQzR89ZAz6coeZfngxDpklUKG6GLDCEuEauvoXy+0KZKjpkCNywKbwvWnUZaPiLIE9Px8kqy9ZyPMUu79r8DZf080Yg6nQRzxsSjFuik9c5eCD2UuFLV4mIW0e50mwnFtZnOxK++SCydL9KLd5HeA1IN82AObvevG+5LEwCWmDFpIncVBZfVulH1+yxZCePQNN56m871Ba/4uQISbnhZHlYQKBgQDm/EKjog64fPt3xb5abBPJ0w0BoHhKoLof1Qa3AumvDcAyZwtmeWlKWr4WrZ9WeZyz10So7gIoDpmzGIhdIjV/xkb34Sd9m+M41xDTZIPNpUe6h9XoZGAE7o+nY5scWq91nPFW4grPqcRdn1tyP2dOljFEIhD6dX6iJAihiI/aYwKBgQCfEcG3btf40QJIX2WcG/MwI+yWSrVgahw70H76Yvl85ZjsmOBQiACeUbVuxGcdlX8vtAT3XYvETtXdIBW635szvIDrywsKNtJtz8qWgX5Q95MSRhQ4tljGpVezhzdRfu1wHKm0oxEe1xVaot8HKKiJCYWuhokpvRxECA06692LuwKBgE3U5JOEsNcjbgyeuhR35HcWQYSx0La8z9qYCmoydhGBXajeJe5CrOLcDr9Pg6g81DuZJs6RXHKo8MtzUceoFkTWx+UQniDqHTdy6H2CmhL6RWAqEz76S4x94jPyETsNp5/G4V94TVJKDxvI7aRijunhG/qsS/JJEwGJiMr9XBOnAoGADFDBoMQSMI9uD9Bi+40mbOm7HX+3Pzm36eGgkx4qlsLn7hl/9HwzIA7Pbz4BhcbXTAgyAjzZ318DK9WaGRfK2lyT1q2nsyi/bgUSeEiaUQZ5+oY2dpWXlfmjKqEjZUngdDej4/pkDvE0FApcHh/FvKZiFTsRT4v2rkW5UICGbJUCgYAaBHuMw1X4A1Zi0EtVzO7f58lZ8lfwapNbVqdwZsTCzjVMEPK6HefHDmxN1ylRNOJh8wVcpOTYuGNtySHBN5ZDC3KaUnbmwyDfJZoe+esGxbkDhvzEJ4fB/FiE+P6k9sado0Dh2ry2rsKPpf88drscUZhmvPUTaFYN8msjlJF69A==";
+                    //String ALIPAY_PUBLIC_KEY = "MIIBIjANBgkqhkiG9w0BAQEFAAOCAQ8AMIIBCgKCAQEAphmpO+yCACAtcE724TRl9n1WGKSeXN3iaXGR5s1L72MSS0hZdS6yQaM3ZCYCEUZT0d6awCnovXrNzudzOAZ7pFW+n1WU7tgIg/1n8lv99rgFCzjm8R2qOxeI6j7k3UsS8cUHLsRnj37dr+lQyTHMLGlOS0VBe4EqwfRgq7UQS++zINcwQI05orUuv38mKwR6Eth6BOL4E+1YiAmIS35YX2KawLmeYfnOVWZ9q2l6KKQ9faIVDTdw0C8uX6yYn9ltdiB9sZJJ2Ir/Uxf8q4mk74yRjNc32k+iOg7tBwpqJdvd0ktbdKjKxoNvXKwbZiNQaKw7NuH9ql9d9Kr2gXVYFQIDAQAB";
+                    
+                    String URL = "https://openapi.alipay.com/gateway.do";
+                    String APP_ID = AclinkConstant.ALI_APP_ID;
+
+                    //TODO better for constant
+                    String APP_PRIVATE_KEY = AclinkConstant.ALI_APP_PRIVATE_KEY;
+                    String FORMAT = "json";
+                    String CHARSET = "UTF-8";
+                    String ALIPAY_PUBLIC_KEY = AclinkConstant.ALI_APP_PUBLIC_KEY;
+                    String SIGN_TYPE = "RSA2";
+                    AlipayLogger.setNeedEnableLogger(true);
+                    alipayClient = new DefaultAlipayClient(URL, APP_ID, APP_PRIVATE_KEY, FORMAT, CHARSET, ALIPAY_PUBLIC_KEY, SIGN_TYPE);    
+                }               
+            }
+        }
         
-        String URL = "https://openapi.alipay.com/gateway.do";
-        String APP_ID = "2017072507886723";
-        String APP_PRIVATE_KEY = "MIIEvAIBADANBgkqhkiG9w0BAQEFAASCBKYwggSiAgEAAoIBAQCPhrLtvxkqtQ+30XXwp/7U3xhJJRJJjwGbFRQC2W0UDOVoKqi6bPaL34AP9L2NPhGgq5K5YIMAzt1BBc4OAvml0v8/RLKqUmlTf3iYDnVdua98gLy4tztHco7A8tjy1hqkdQ8kAbFnxsW6pHNL1XByA8itmICHzhMBdNk2/Z87r+n2otr11ebKOYTSfNO9SSsBvZQz0wxDpgoLgbosNWaLxaOPbFtDHAKsNOVttuQfWUMSuGvX9xxu0wi7WxFXvKb8z31szmd3WcXbtCTpPPCx5euI0IuOKGKF4P6NX0iy0TokIrzmt4jvn5xG/Bq5/VvJJS686Kc/bxqXdjtFH0dRAgMBAAECggEAKePupWV5OvXNuKDyA2OFBSx4MiEXzVBn75OfW5WKOKfq7RRGWuMisoBxKDcOfAL5siNhl6mLktjNywSet4g2xSdoSFcMrpmPFEfIMtlFeC2SAoywiFkyfA/7imVW3MmQzR89ZAz6coeZfngxDpklUKG6GLDCEuEauvoXy+0KZKjpkCNywKbwvWnUZaPiLIE9Px8kqy9ZyPMUu79r8DZf080Yg6nQRzxsSjFuik9c5eCD2UuFLV4mIW0e50mwnFtZnOxK++SCydL9KLd5HeA1IN82AObvevG+5LEwCWmDFpIncVBZfVulH1+yxZCePQNN56m871Ba/4uQISbnhZHlYQKBgQDm/EKjog64fPt3xb5abBPJ0w0BoHhKoLof1Qa3AumvDcAyZwtmeWlKWr4WrZ9WeZyz10So7gIoDpmzGIhdIjV/xkb34Sd9m+M41xDTZIPNpUe6h9XoZGAE7o+nY5scWq91nPFW4grPqcRdn1tyP2dOljFEIhD6dX6iJAihiI/aYwKBgQCfEcG3btf40QJIX2WcG/MwI+yWSrVgahw70H76Yvl85ZjsmOBQiACeUbVuxGcdlX8vtAT3XYvETtXdIBW635szvIDrywsKNtJtz8qWgX5Q95MSRhQ4tljGpVezhzdRfu1wHKm0oxEe1xVaot8HKKiJCYWuhokpvRxECA06692LuwKBgE3U5JOEsNcjbgyeuhR35HcWQYSx0La8z9qYCmoydhGBXajeJe5CrOLcDr9Pg6g81DuZJs6RXHKo8MtzUceoFkTWx+UQniDqHTdy6H2CmhL6RWAqEz76S4x94jPyETsNp5/G4V94TVJKDxvI7aRijunhG/qsS/JJEwGJiMr9XBOnAoGADFDBoMQSMI9uD9Bi+40mbOm7HX+3Pzm36eGgkx4qlsLn7hl/9HwzIA7Pbz4BhcbXTAgyAjzZ318DK9WaGRfK2lyT1q2nsyi/bgUSeEiaUQZ5+oY2dpWXlfmjKqEjZUngdDej4/pkDvE0FApcHh/FvKZiFTsRT4v2rkW5UICGbJUCgYAaBHuMw1X4A1Zi0EtVzO7f58lZ8lfwapNbVqdwZsTCzjVMEPK6HefHDmxN1ylRNOJh8wVcpOTYuGNtySHBN5ZDC3KaUnbmwyDfJZoe+esGxbkDhvzEJ4fB/FiE+P6k9sado0Dh2ry2rsKPpf88drscUZhmvPUTaFYN8msjlJF69A==";
-        String FORMAT = "json";
-        String CHARSET = "UTF-8";
-        String ALIPAY_PUBLIC_KEY = "MIIBIjANBgkqhkiG9w0BAQEFAAOCAQ8AMIIBCgKCAQEAphmpO+yCACAtcE724TRl9n1WGKSeXN3iaXGR5s1L72MSS0hZdS6yQaM3ZCYCEUZT0d6awCnovXrNzudzOAZ7pFW+n1WU7tgIg/1n8lv99rgFCzjm8R2qOxeI6j7k3UsS8cUHLsRnj37dr+lQyTHMLGlOS0VBe4EqwfRgq7UQS++zINcwQI05orUuv38mKwR6Eth6BOL4E+1YiAmIS35YX2KawLmeYfnOVWZ9q2l6KKQ9faIVDTdw0C8uX6yYn9ltdiB9sZJJ2Ir/Uxf8q4mk74yRjNc32k+iOg7tBwpqJdvd0ktbdKjKxoNvXKwbZiNQaKw7NuH9ql9d9Kr2gXVYFQIDAQAB";
-        String SIGN_TYPE = "RSA2";
-        AlipayLogger.setNeedEnableLogger(true);
-        alipayClient = new DefaultAlipayClient(URL, APP_ID, APP_PRIVATE_KEY, FORMAT, CHARSET, ALIPAY_PUBLIC_KEY, SIGN_TYPE);
+        return alipayClient;
     }
     
     private void sendMessageToUser(Long uid, String content, Map<String, String> meta) {
@@ -406,7 +426,7 @@ public class DoorAccessServiceImpl implements DoorAccessService, LocalBusSubscri
                 DoorAccess group = doorAccessProvider.getDoorAccessById(da.getGroupid());
                 if(group != null) {
                     dto.setGroupId(group.getId());
-                    dto.setGroupName(group.getName());
+                    dto.setGroupName(group.getDisplayNameNotEmpty());
                 }
             }
             
@@ -468,7 +488,10 @@ public class DoorAccessServiceImpl implements DoorAccessService, LocalBusSubscri
                 dto.setUserName(organization.getContactName());
                 dto.setCompany(organization.getName());
                 dto.setCompanyId(organization.getId());
-                dto.setPhone(organization.getContactToken());
+                UserIdentifier identifier = userProvider.findClaimedIdentifierByOwnerAndType(user.getId(), IdentifierType.MOBILE.getCode());
+                if(null != identifier){
+                    dto.setPhone(identifier.getIdentifierToken());
+                }
                 dto.setIsAuth((byte)1);
             }else{
                 UserIdentifier identifier = userProvider.findClaimedIdentifierByOwnerAndType(user.getId(), IdentifierType.MOBILE.getCode());
@@ -764,7 +787,7 @@ public class DoorAccessServiceImpl implements DoorAccessService, LocalBusSubscri
                     }
                 });
             rlt = ConvertHelper.convert(doorAuthResult, DoorAuthDTO.class);
-            rlt.setDoorName(doorAcc.getName());
+            rlt.setDoorName(doorAcc.getDisplayNameNotEmpty());
         } else {
             if(cmd.getValidEndMs() == null || cmd.getValidFromMs() == null) {
                 throw RuntimeErrorException.errorWith(AclinkServiceErrorCode.SCOPE, AclinkServiceErrorCode.ERROR_ACLINK_PARAM_ERROR, "Invalid param error");        
@@ -797,7 +820,7 @@ public class DoorAccessServiceImpl implements DoorAccessService, LocalBusSubscri
             
             doorAuthProvider.createDoorAuth(doorAuth);
             rlt = ConvertHelper.convert(doorAuth, DoorAuthDTO.class);
-            rlt.setDoorName(doorAcc.getName());
+            rlt.setDoorName(doorAcc.getDisplayNameNotEmpty());
             rlt.setHardwareId(doorAcc.getHardwareId());
         }
         
@@ -1223,7 +1246,7 @@ public class DoorAccessServiceImpl implements DoorAccessService, LocalBusSubscri
                     doorAuth.setApproveUserId(user.getId());
                     doorAuth.setAuthType(DoorAuthType.TEMPERATE.getCode());
                     doorAuth.setDoorId(cmd.getDoorId());
-                    doorAuth.setDescription("auto generate");
+                    doorAuth.setDescription("");
                     doorAuth.setNickname(user.getNickName());
                     doorAuth.setOwnerId(doorAccess.getOwnerId());
                     doorAuth.setOwnerType(doorAccess.getOwnerType());
@@ -1304,8 +1327,16 @@ public class DoorAccessServiceImpl implements DoorAccessService, LocalBusSubscri
             throw RuntimeErrorException.errorWith(AclinkServiceErrorCode.SCOPE, AclinkServiceErrorCode.ERROR_ACLINK_DOOR_NOT_FOUND, "DoorAccess not found");
         }
         
+        if(cmd.getName() != null) {
+            //不再可以修改门禁名称
+            if(cmd.getDisplayName() == null) {
+                cmd.setDisplayName(cmd.getName());
+            }
+            cmd.setName(null);
+        }
+        
         DoorCommand doorCommand = null;
-        if(cmd.getName() != null || (!cmd.getName().equals(doorAccess.getName()))) {
+        if(cmd.getName() != null && (!cmd.getName().equals(doorAccess.getName()))) {
             doorAccess.setName(cmd.getName());
             
             //create device name command
@@ -1413,7 +1444,7 @@ public class DoorAccessServiceImpl implements DoorAccessService, LocalBusSubscri
             DoorAccess doorAccess = doorAccessProvider.getDoorAccessById(dto.getDoorId());
             if(doorAccess != null) {
                 dto.setHardwareId(doorAccess.getHardwareId());
-                dto.setDoorName(doorAccess.getName());
+                dto.setDoorName(doorAccess.getDisplayNameNotEmpty());
                 dtos.add(dto);    
             }
         }
@@ -1436,7 +1467,7 @@ public class DoorAccessServiceImpl implements DoorAccessService, LocalBusSubscri
             DoorAccess doorAccess = doorAccessProvider.getDoorAccessById(dto.getDoorId());
             if(doorAccess != null && (!doorAccess.getStatus().equals(DoorAccessStatus.INVALID.getCode()))) {
                 dto.setHardwareId(doorAccess.getHardwareId());
-                dto.setDoorName(doorAccess.getName());
+                dto.setDoorName(doorAccess.getDisplayNameNotEmpty());
                 dtos.add(dto);    
             }
         }
@@ -1486,7 +1517,7 @@ public class DoorAccessServiceImpl implements DoorAccessService, LocalBusSubscri
             DoorAccess doorAccess = doorAccessProvider.getDoorAccessById(dto.getDoorId());
             if(doorAccess != null && (!doorAccess.getStatus().equals(DoorAccessStatus.INVALID.getCode()))) {
                 dto.setHardwareId(doorAccess.getHardwareId());
-                dto.setDoorName(doorAccess.getName());
+                dto.setDoorName(doorAccess.getDisplayNameNotEmpty());
                 dtos.add(dto);    
             }
         }
@@ -1687,7 +1718,7 @@ public class DoorAccessServiceImpl implements DoorAccessService, LocalBusSubscri
             DoorAccess doorAccess = doorAccessProvider.getDoorAccessById(auth.getDoorId());
             DoorAuthDTO dto = ConvertHelper.convert(auth, DoorAuthDTO.class);
             dto.setHardwareId(doorAccess.getHardwareId());
-            dto.setDoorName(doorAccess.getName());
+            dto.setDoorName(doorAccess.getDisplayNameNotEmpty());
 //            User u = userProvider.findUserById(auth.getUserId());
 //            if(u != null) {
 //                if(u.getNickName() != null) {
@@ -1717,7 +1748,7 @@ public class DoorAccessServiceImpl implements DoorAccessService, LocalBusSubscri
             DoorAccess doorAccess = doorAccessProvider.getDoorAccessById(auth.getDoorId());
             DoorAuthDTO dto = ConvertHelper.convert(auth, DoorAuthDTO.class);
             dto.setHardwareId(doorAccess.getHardwareId());
-            dto.setDoorName(doorAccess.getName());
+            dto.setDoorName(doorAccess.getDisplayNameNotEmpty());
             User u = userProvider.findUserById(auth.getApproveUserId());
             if(u != null) {
                 dto.setApproveUserName(getRealName(u));
@@ -1745,7 +1776,7 @@ public class DoorAccessServiceImpl implements DoorAccessService, LocalBusSubscri
             DoorAuthDTO dto = ConvertHelper.convert(auth, DoorAuthDTO.class);
             dto.setGoFloor(auth.getCurrStorey());
             dto.setHardwareId(doorAccess.getHardwareId());
-            dto.setDoorName(doorAccess.getName());
+            dto.setDoorName(doorAccess.getDisplayNameNotEmpty());
             dto.setPhone(auth.getPhone());
             dto.setOrganization(auth.getOrganization());
             User u = userProvider.findUserById(auth.getApproveUserId());
@@ -1805,6 +1836,27 @@ public class DoorAccessServiceImpl implements DoorAccessService, LocalBusSubscri
         
         redisTemplate.opsForValue().set(key, String.valueOf(System.currentTimeMillis()));
         return rv;
+    }
+    
+    private void cacheTimeout(String keyIn, String value, int seconds) {
+        String key = "doorcache:" + keyIn;
+        Accessor acc = this.bigCollectionProvider.getMapAccessor(key, "");
+        
+        RedisTemplate redisTemplate = acc.getTemplate(stringRedisSerializer);
+        redisTemplate.opsForValue().set(key, value, seconds, TimeUnit.SECONDS);
+    }
+    
+    private String getCache(String keyIn) {
+        String key = "doorcache:" + keyIn;
+        Accessor acc = this.bigCollectionProvider.getMapAccessor(key, "");
+        
+        RedisTemplate redisTemplate = acc.getTemplate(stringRedisSerializer);
+        Object o = redisTemplate.opsForValue().get(key);
+        if(o == null) {
+            return null;
+        }
+        
+        return (String)o;
     }
     
     @Override
@@ -2073,7 +2125,7 @@ public class DoorAccessServiceImpl implements DoorAccessService, LocalBusSubscri
         qr.setCreateTimeMs(System.currentTimeMillis());
         qr.setCreatorUid(user.getId());
         qr.setDoorGroupId(doorAccess.getId());
-        qr.setDoorName(doorAccess.getName());
+        qr.setDoorName(doorAccess.getDisplayNameNotEmpty());
         qr.setExpireTimeMs(validTime-1000*10); //for safe to open door
         
         qr.setHardwares(hardwares);
@@ -2678,7 +2730,7 @@ public class DoorAccessServiceImpl implements DoorAccessService, LocalBusSubscri
         String nickName = getRealName(user);
         String homeUrl = configProvider.getValue(AclinkConstant.HOME_URL, "");
         List<Tuple<String, Object>> variables = smsProvider.toTupleList(AclinkConstant.SMS_VISITOR_USER, nickName);
-        smsProvider.addToTupleList(variables, AclinkConstant.SMS_VISITOR_DOOR, doorAccess.getName());
+        smsProvider.addToTupleList(variables, AclinkConstant.SMS_VISITOR_DOOR, doorAccess.getDisplayNameNotEmpty());
         
         LocaleTemplate lt = localeTemplateProvider.findLocaleTemplateByScope(UserContext.getCurrentNamespaceId(cmd.getNamespaceId()), SmsTemplateCode.SCOPE,
         		SmsTemplateCode.ACLINK_VISITOR_MSG_CODE, user.getLocale());
@@ -2748,7 +2800,7 @@ public class DoorAccessServiceImpl implements DoorAccessService, LocalBusSubscri
         String nickName = getRealName(user);
         String homeUrl = configProvider.getValue(AclinkConstant.HOME_URL, "");
         List<Tuple<String, Object>> variables = smsProvider.toTupleList(AclinkConstant.SMS_VISITOR_USER, nickName);
-        smsProvider.addToTupleList(variables, AclinkConstant.SMS_VISITOR_DOOR, doorAccess.getName());
+        smsProvider.addToTupleList(variables, AclinkConstant.SMS_VISITOR_DOOR, doorAccess.getDisplayNameNotEmpty());
         
         LocaleTemplate lt = localeTemplateProvider.findLocaleTemplateByScope(UserContext.getCurrentNamespaceId(cmd.getNamespaceId()), SmsTemplateCode.SCOPE,
                 SmsTemplateCode.ACLINK_VISITOR_MSG_CODE, user.getLocale());
@@ -2838,7 +2890,7 @@ public class DoorAccessServiceImpl implements DoorAccessService, LocalBusSubscri
         String nickName = getRealName(user);
         String homeUrl = configProvider.getValue(AclinkConstant.HOME_URL, "");
         List<Tuple<String, Object>> variables = smsProvider.toTupleList(AclinkConstant.SMS_VISITOR_USER, nickName);
-        smsProvider.addToTupleList(variables, AclinkConstant.SMS_VISITOR_DOOR, doorAccess.getName());
+        smsProvider.addToTupleList(variables, AclinkConstant.SMS_VISITOR_DOOR, doorAccess.getDisplayNameNotEmpty());
         
         //smsProvider.addToTupleList(variables, AclinkConstant.SMS_VISITOR_LINK, homeUrl+"/evh");
         LocaleTemplate lt = localeTemplateProvider.findLocaleTemplateByScope(UserContext.getCurrentNamespaceId(cmd.getNamespaceId()), SmsTemplateCode.SCOPE,
@@ -2991,7 +3043,7 @@ public class DoorAccessServiceImpl implements DoorAccessService, LocalBusSubscri
         
         String homeUrl = configProvider.getValue(AclinkConstant.HOME_URL, "");
         List<Tuple<String, Object>> variables = smsProvider.toTupleList(AclinkConstant.SMS_VISITOR_USER, nickName);
-        smsProvider.addToTupleList(variables, AclinkConstant.SMS_VISITOR_DOOR, doorAccess.getName());
+        smsProvider.addToTupleList(variables, AclinkConstant.SMS_VISITOR_DOOR, doorAccess.getDisplayNameNotEmpty());
         smsProvider.addToTupleList(variables, AclinkConstant.SMS_VISITOR_LINK, homeUrl+"/evh");
         smsProvider.addToTupleList(variables, AclinkConstant.SMS_VISITOR_ID, auth.getLinglingUuid());
         String templateLocale = user.getLocale();
@@ -3033,18 +3085,13 @@ public class DoorAccessServiceImpl implements DoorAccessService, LocalBusSubscri
         return null;
     }
     
-    @Override
-    public GetVisitorResponse getVisitor(GetVisitorCommand cmd) {
-        //TODOTEST
+    private GetVisitorResponse getVisitorByAuth(DoorAuth auth) {
+        //获取访客的二维码信息
         GetVisitorResponse resp = new GetVisitorResponse();
-        DoorAuth auth = doorAuthProvider.getLinglingDoorAuthByUuid(cmd.getId());
-        if(auth == null) {
-            throw RuntimeErrorException.errorWith(AclinkServiceErrorCode.SCOPE, AclinkServiceErrorCode.ERROR_ACLINK_USER_AUTH_ERROR, "auth not found");
-        }
         
         DoorAccess doorAccess = doorAccessProvider.getDoorAccessById(auth.getDoorId());
         if(doorAccess != null) {
-            resp.setDoorName(doorAccess.getName());
+            resp.setDoorName(doorAccess.getDisplayNameNotEmpty());
         }
         
         resp.setPhone(auth.getPhone());
@@ -3120,6 +3167,16 @@ public class DoorAccessServiceImpl implements DoorAccessService, LocalBusSubscri
     }
     
     @Override
+    public GetVisitorResponse getVisitor(GetVisitorCommand cmd) {
+        DoorAuth auth = doorAuthProvider.getLinglingDoorAuthByUuid(cmd.getId());
+        if(auth == null) {
+            throw RuntimeErrorException.errorWith(AclinkServiceErrorCode.SCOPE, AclinkServiceErrorCode.ERROR_ACLINK_USER_AUTH_ERROR, "auth not found");
+        }
+        
+        return getVisitorByAuth(auth);
+    }
+    
+    @Override
     public GetVisitorResponse getVisitorPhone(GetVisitorCommand cmd) {
         GetVisitorResponse resp = new GetVisitorResponse();
         DoorAuth auth = doorAuthProvider.getLinglingDoorAuthByUuid(cmd.getId());
@@ -3129,7 +3186,7 @@ public class DoorAccessServiceImpl implements DoorAccessService, LocalBusSubscri
         
         DoorAccess doorAccess = doorAccessProvider.getDoorAccessById(auth.getDoorId());
         if(doorAccess != null) {
-            resp.setDoorName(doorAccess.getName());
+            resp.setDoorName(doorAccess.getDisplayNameNotEmpty());
         }
         
         resp.setPhone(auth.getPhone());
@@ -3218,7 +3275,7 @@ public class DoorAccessServiceImpl implements DoorAccessService, LocalBusSubscri
         
         DoorAccess doorAccess = doorAccessProvider.getDoorAccessById(auth.getDoorId());
         if(doorAccess != null) {
-            resp.setDoorName(doorAccess.getName());
+            resp.setDoorName(doorAccess.getDisplayNameNotEmpty());
         }
         
         resp.setPhone(auth.getPhone());
@@ -3558,12 +3615,7 @@ public class DoorAccessServiceImpl implements DoorAccessService, LocalBusSubscri
                 
                 DoorAccess door = doorAccessProvider.getDoorAccessById(doorAuth.getDoorId());
                 
-                if(door.getDisplayName() != null) {
-                    aclinkLog.setDoorName(door.getDisplayName());
-                } else {
-                    aclinkLog.setDoorName(door.getName());    
-                }
-                
+                aclinkLog.setDoorName(door.getDisplayNameNotEmpty());
                 
                 aclinkLog.setHardwareId(door.getHardwareId());
                 aclinkLog.setOwnerId(door.getOwnerId());
@@ -4047,23 +4099,88 @@ public class DoorAccessServiceImpl implements DoorAccessService, LocalBusSubscri
         excelUtils.writeExcel(propertyNames, titleNames, columnSizes, voList);
     }
     
-    public void aliTest(HttpServletRequest r) {
+    @Override
+    public void doAlipayRedirect(HttpServletRequest request, HttpServletResponse response) {
+        String redirectUrl = "https://openauth.alipay.com/oauth2/publicAppAuthorize.htm?app_id="+AclinkConstant.ALI_APP_ID+"&scope=auth_user&state="+request.getParameter("state")+"&redirect_uri=";
+        String homeUrl = configProvider.getValue(AclinkConstant.HOME_URL, "");
+        try {
+            redirectUrl += URLEncoder.encode(homeUrl + "/mobile/static/qr_access/qrAliCode.html?", "utf-8");
+        } catch (UnsupportedEncodingException e) {
+        }
+        try {
+            response.sendRedirect(redirectUrl);
+        } catch (IOException e) {
+        }
         
     }
     
+    @Override
+    public GetVisitorResponse getAlipayQR(HttpServletRequest r) {
+        String auth_code = r.getParameter("auth_code");
+        String state = r.getParameter("state");
+        String mac = state;
+        String keyIn = "alipay:" + auth_code + ":" + state;
+        String phone = getCache(keyIn);
+//        phone = "15889660710";
+        if(phone == null) {
+            AlipaySystemOauthTokenRequest request = new AlipaySystemOauthTokenRequest();
+            request.setCode(auth_code);
+            request.setGrantType("authorization_code");
+            try {
+                AlipaySystemOauthTokenResponse oauthTokenResponse = getAlipayClient().execute(request);
+                LOGGER.info("accessToken=" + oauthTokenResponse.getAccessToken() + " userId=" + oauthTokenResponse.getAlipayUserId() + " body=" + oauthTokenResponse.getBody());
+                
+                AlipayUserInfoShareRequest requestUser = new AlipayUserInfoShareRequest();
+                AlipayUserInfoShareResponse responseUser = getAlipayClient().execute(requestUser, oauthTokenResponse.getAccessToken());
+                
+                phone = responseUser.getMobile();
+                if(phone == null || phone.isEmpty()) {
+                    throw RuntimeErrorException.errorWith(AclinkServiceErrorCode.SCOPE, AclinkServiceErrorCode.ERROR_ACLINK_STATE_ERROR, "Phone not found from alipay");
+                    }
+             } catch (AlipayApiException e) {
+                    LOGGER.info("alipay request error", e);
+                    throw RuntimeErrorException.errorWith(AclinkServiceErrorCode.SCOPE, AclinkServiceErrorCode.ERROR_ACLINK_STATE_ERROR, "Alipay request error");
+                  }
+             cacheTimeout(keyIn, phone, 600);
+            }
+        
+            DoorAccess doorAccess = doorAccessProvider.queryDoorAccessByHardwareId(mac.toUpperCase());
+            if(doorAccess == null) {
+                throw RuntimeErrorException.errorWith(AclinkServiceErrorCode.SCOPE, AclinkServiceErrorCode.ERROR_ACLINK_DOOR_NOT_FOUND, "Door not found");
+            }
+            DoorAuth auth = doorAuthProvider.queryValidDoorAuthByVisitorPhone(doorAccess.getId(), phone);
+            if(auth == null) {
+                throw RuntimeErrorException.errorWith(AclinkServiceErrorCode.SCOPE, AclinkServiceErrorCode.ERROR_ACLINK_USER_AUTH_ERROR, "auth not found");
+            }
+
+            return getVisitorByAuth(auth);
+            
+    }
+    
+    //https://docs.open.alipay.com/284/106001/
     public String aliTest2(HttpServletRequest r) {
+        return aliTest002(r);
+    }
+    
+    private String aliTest002(HttpServletRequest r) {
         LOGGER.info("" + r.getParameterMap());
-        LOGGER.info("auth_code=" + r.getParameter("auth_code"));  
+        LOGGER.info("auth_code=" + r.getParameter("auth_code"));
+        
+        String auth_code = r.getParameter("auth_code");
+        String state = r.getParameter("state");
         
         AlipaySystemOauthTokenRequest request = new AlipaySystemOauthTokenRequest();
-        request.setCode(r.getParameter("auth_code"));
+        request.setCode(auth_code);
         request.setGrantType("authorization_code");
         try {
-            AlipaySystemOauthTokenResponse oauthTokenResponse = alipayClient.execute(request);
+            AlipaySystemOauthTokenResponse oauthTokenResponse = getAlipayClient().execute(request);
             LOGGER.info("accessToken=" + oauthTokenResponse.getAccessToken() + " userId=" + oauthTokenResponse.getAlipayUserId() + " body=" + oauthTokenResponse.getBody());
             
-            String doorMAC = "EC:14:CD:C6:9A:EB";
-            String phone = "15889660710";
+            AlipayUserInfoShareRequest requestUser = new AlipayUserInfoShareRequest();
+            AlipayUserInfoShareResponse responseUser = getAlipayClient().execute(requestUser, oauthTokenResponse.getAccessToken());
+            
+            String doorMAC = state;
+            String phone = responseUser.getMobile();
             User user = userService.findUserByIndentifier(1000000, phone);
             
             DoorAccess doorAccess = doorAccessProvider.queryDoorAccessByHardwareId(doorMAC.toUpperCase());
@@ -4078,7 +4195,7 @@ public class DoorAccessServiceImpl implements DoorAccessService, LocalBusSubscri
             
             remoteOpenDoor(doorAuth.getId());
             
-            return "door " + doorMAC + " open, userId=" + oauthTokenResponse.getAlipayUserId(); 
+            return "door " + doorMAC + " open, userId=" + oauthTokenResponse.getAlipayUserId() + ", userInfo=" + responseUser.getMobile(); 
         } catch (AlipayApiException e) {
             //处理异常
             e.printStackTrace();
@@ -4087,28 +4204,35 @@ public class DoorAccessServiceImpl implements DoorAccessService, LocalBusSubscri
         return "failed!";
     }
     
-    private void aliTest001(HttpServletRequest r) {
+    private String aliTest001(HttpServletRequest r) {
         LOGGER.info("" + r.getParameterMap());
         LOGGER.info("app_auth_code=" + r.getParameter("app_auth_code"));
         AlipayOpenAuthTokenAppRequest request = new AlipayOpenAuthTokenAppRequest();
         request.setBizContent(String.format("{\"grant_type\":\"authorization_code\",\"code\":\"%s\"}", r.getParameter("app_auth_code")));
         try {
-            AlipayOpenAuthTokenAppResponse openAuthResponse = alipayClient.execute(request);
+            AlipayOpenAuthTokenAppResponse openAuthResponse = getAlipayClient().execute(request);
             LOGGER.info("accessToken=" + openAuthResponse.getAppAuthToken() + "refreshToken" + openAuthResponse.getAppRefreshToken());
             
             //request.putOtherTextParam("app_auth_token", "201611BB888ae9acd6e44fec9940d09201abfE16");
-            AlipayOpenAuthTokenAppQueryRequest request2 = new AlipayOpenAuthTokenAppQueryRequest();
-            request2.setBizContent("{" +
-            "    \"app_auth_token\":\""+openAuthResponse.getAppAuthToken()+"\"" +
-            "  }");
-            AlipayOpenAuthTokenAppQueryResponse apiListResponse = alipayClient.execute(request2);
-            LOGGER.info("apiListResponse=" + apiListResponse.getBody());
+//            AlipayOpenAuthTokenAppQueryRequest request2 = new AlipayOpenAuthTokenAppQueryRequest();
+//            request2.setBizContent("{" +
+//            "    \"app_auth_token\":\""+openAuthResponse.getAppAuthToken()+"\"" +
+//            "  }");
+//            AlipayOpenAuthTokenAppQueryResponse apiListResponse = alipayClient.execute(request2);
+//            LOGGER.info("apiListResponse=" + apiListResponse.getBody());
+            
+            AlipayUserInfoShareRequest requestUser = new AlipayUserInfoShareRequest();
+            requestUser.putOtherTextParam("app_auth_token", openAuthResponse.getAppAuthToken());
+            AlipayUserInfoShareResponse responseUser = getAlipayClient().execute(requestUser, null, openAuthResponse.getAppAuthToken());
 
+            return responseUser.getBody();
             
         } catch (AlipayApiException e) {
             //处理异常
             e.printStackTrace();
         }
+        
+        return "failed";
     }
     
     @Override

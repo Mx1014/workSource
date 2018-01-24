@@ -10,7 +10,9 @@ import com.everhomes.search.AbstractElasticSearch;
 import com.everhomes.search.EnergyMeterSearcher;
 import com.everhomes.search.SearchUtils;
 import com.everhomes.settings.PaginationConfigHelper;
+import com.everhomes.user.User;
 import com.everhomes.user.UserContext;
+import com.everhomes.user.UserProvider;
 import com.everhomes.util.ConvertHelper;
 import com.mysql.jdbc.StringUtils;
 import org.elasticsearch.action.bulk.BulkRequestBuilder;
@@ -64,6 +66,12 @@ public class EnergyMeterSearcherImpl extends AbstractElasticSearch implements En
     @Autowired
     private RepeatService repeatService;
 
+    @Autowired
+    private EnergyMeterReadingLogProvider meterReadingLogProvider;
+
+    @Autowired
+    private UserProvider userProvider;
+
     @Override
     public void deleteById(Long id) {
         deleteById(id.toString());
@@ -109,6 +117,13 @@ public class EnergyMeterSearcherImpl extends AbstractElasticSearch implements En
                 builder.field("addressId", existAddress.get(0).getAddressId());
             }
 
+            EnergyMeterReadingLog lastReading = meterReadingLogProvider.findLastReadingLogByMeterId(meter.getNamespaceId(), meter.getId());
+            if(lastReading != null) {
+                User operator = userProvider.findUserById(lastReading.getOperatorId());
+                if(operator != null) {
+                    builder.field("operatorName", operator.getNickName());
+                }
+            }
             List<PlanMeter> maps = energyPlanProvider.listByEnergyMeter(meter.getId());
             Boolean assignFlag = false;
             if(maps != null && maps.size() > 0) {
@@ -231,6 +246,11 @@ public class EnergyMeterSearcherImpl extends AbstractElasticSearch implements En
         if(cmd.getPlanName() != null) {
             FilterBuilder planFilter = FilterBuilders.termFilter("assignPlan", cmd.getPlanName());
             filterBuilders.add(planFilter);
+        }
+
+        if (org.apache.commons.lang.StringUtils.isNotEmpty(cmd.getOperatorName())) {
+            FilterBuilder operatorNameFilter = FilterBuilders.termFilter("operatorName", cmd.getOperatorName());
+            filterBuilders.add(operatorNameFilter);
         }
 
         int pageSize = PaginationConfigHelper.getPageSize(configProvider, cmd.getPageSize());

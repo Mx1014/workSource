@@ -26,8 +26,6 @@ public interface PointService {
 
     ListPointTutorialDetailResponse listPointTutorialDetail(ListPointTutorialDetailCommand cmd);
 
-    ListPointMallBannersResponse listPointMallBanners(ListPointMallBannersCommand cmd);
-
     ListPointLogsResponse listPointLogsForMall(ListPointLogsForMallCommand cmd);
 
     PointSystemDTO createPointSystem(CreatePointSystemCommand cmd);
@@ -39,6 +37,12 @@ public interface PointService {
     PointLogDTO createPointLog(CreatePointLogCommand cmd);
 
     ListPointRulesResponse listPointRules(ListPointRulesCommand cmd);
+
+    void everyYearEndSendMessageSchedule();
+
+    void everyYearEndClearPointSchedule();
+
+    PointGeneralTemplate getGeneralTemplate();
 
     void exportPointLog(ExportPointLogsCommand cmd, HttpServletResponse response);
 
@@ -62,7 +66,7 @@ public interface PointService {
 
     void restartEventLogScheduler();
 
-    void processUserPoint(UserTreasureDTO point);
+    UserTreasureDTO getPointTreasure();
 
     PointRuleDTO updatePointRule(UpdatePointRuleCommand cmd);
 
@@ -71,4 +75,26 @@ public interface PointService {
     PointRuleDTO createPointRule(CreatePointRuleCommand cmd);
 
     void createPointRuleToEventMapping(CreatePointRuleToEventMappingCommand cmd);
+
+    ListPointLogsResponse listManuallyPointLogs(ListPointLogsCommand cmd);
+
+    PointBannerDTO createPointBanner(CreatePointBannerCommand cmd);
+
+    PointBannerDTO updatePointBanner(UpdatePointBannerCommand cmd);
+
+    ListPointBannersResponse listPointBanners(ListPointBannersCommand cmd);
+
+    void deletePointBanner(DeletePointBannerCommand cmd);
+
+    void reorderPointBanners(ReorderPointBannersCommand cmd);
+
+    PointBannerDTO updatePointBannerStatus(UpdatePointBannerStatusCommand cmd);
+
+    PublishEventResultDTO publishEvent(PublishEventCommand cmd);
+
+    ListPointGoodsResponse listEnabledPointGoods(ListPointGoodsCommand cmd);
+
+    CheckUserInfoResponse checkUserInfo(CheckUserInfoCommand cmd);
+
+    PointScoreDTO getUserPointForOpenAPI(GetUserPointCommand cmd);
 }

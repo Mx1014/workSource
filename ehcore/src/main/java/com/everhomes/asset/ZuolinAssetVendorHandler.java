@@ -722,7 +722,7 @@ public class ZuolinAssetVendorHandler implements AssetVendorHandler {
 
 
     /**
-     * @deprecated method implementation:
+     * method implementation:
      * in this method, contracts will be found for the customer. And divided into groups by contractId and billGroupId
      * being the key , while having the bills to be values.
      *
@@ -743,8 +743,11 @@ public class ZuolinAssetVendorHandler implements AssetVendorHandler {
 //        contracts.stream().forEach(r -> contractMap.put(r.getId(),r));
 //        contracts.stream().forEach(r -> contractIds.add(r.getId()));
 //        List<PaymentBills> bills = assetProvider.findSettledBillsByContractIds(contractIds);
+        if(cmd.getTargetType().equals(AssetPaymentStrings.EH_USER)){
+            cmd.setTargetId(UserContext.currentUserId());
+        }
         //获得此用户的所有账单
-        List<PaymentBills> paymentBills = assetProvider.findSettledBillsByCustomer(cmd.getTargetType(),cmd.getTargetId());
+        List<PaymentBills> paymentBills = assetProvider.findSettledBillsByCustomer(cmd.getTargetType(),cmd.getTargetId(),cmd.getOwnerType(),cmd.getOwnerId());
         //进行分类，冗杂代码，用空间换时间， 字符串操作+类型转换  vs  新建对象; 对象隐式指定最大寿命
         List<Map<?,?>> maps = new ArrayList<>();
         tryMakeCategory:{
@@ -921,6 +924,8 @@ public class ZuolinAssetVendorHandler implements AssetVendorHandler {
             cmd.setTargetType(CustomerType.INDIVIDUAL.getCode());
             cmd.setTargetId(UserContext.currentUserId());
         }
+        //合同方面新增了cmd的默认参数
+        cmd.setAdminFlag((byte)1);
         cmd.setNamespaceId(namespaceId);
         cmd.setCommunityId(communityId);
         return contractService.listCustomerContracts(cmd);

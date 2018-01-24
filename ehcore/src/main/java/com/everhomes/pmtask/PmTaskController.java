@@ -372,6 +372,20 @@ public class PmTaskController extends ControllerBase {
         response.setErrorDescription("OK");
         return response;
     }
+
+    /**
+     * <b>URL: /pmtask/searchTasksWithoutAuth</b>
+     * <p>搜索任务(无权限校验)</p>
+     */
+    @RequestMapping("searchTasksWithoutAuth")
+    @RestReturn(value=SearchTasksResponse.class)
+    public RestResponse searchTasksWithoutAuth(SearchTasksCommand cmd) {
+        SearchTasksResponse res = pmTaskService.searchTasksWithoutAuth(cmd);
+        RestResponse response = new RestResponse(res);
+        response.setErrorCode(ErrorCodes.SUCCESS);
+        response.setErrorDescription("OK");
+        return response;
+    }
     
     /**
      * <b>URL: /pmtask/getNamespaceHandler</b>

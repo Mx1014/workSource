@@ -3,7 +3,6 @@ package com.everhomes.pmkexing;
 
 import com.everhomes.constants.ErrorCodes;
 import com.everhomes.controller.ControllerBase;
-import com.everhomes.discover.RestDoc;
 import com.everhomes.discover.RestReturn;
 import com.everhomes.rest.RestResponse;
 import com.everhomes.rest.pmkexing.*;
@@ -12,10 +11,8 @@ import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RestController;
 
 /**
- * Property manage KeXing bill
  * Created by xq.tian on 2016/12/26.
  */
-@RestDoc(value = "Property manage pmkexing bill")
 @RequestMapping("/pmkexing")
 @RestController
 public class PmKeXingBillController extends ControllerBase {

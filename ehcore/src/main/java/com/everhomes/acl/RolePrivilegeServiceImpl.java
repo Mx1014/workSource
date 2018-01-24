@@ -4,6 +4,8 @@ import com.everhomes.community.*;
 import com.everhomes.configuration.ConfigurationProvider;
 import com.everhomes.constants.ErrorCodes;
 import com.everhomes.contentserver.ContentServerService;
+import com.everhomes.coordinator.CoordinationLocks;
+import com.everhomes.coordinator.CoordinationProvider;
 import com.everhomes.db.DbProvider;
 import com.everhomes.db.QueryBuilder;
 import com.everhomes.entity.EntityType;
@@ -48,6 +50,7 @@ import com.everhomes.user.admin.SystemUserPrivilegeMgr;
 import com.everhomes.util.*;
 import com.everhomes.util.excel.RowResult;
 import com.everhomes.util.excel.handler.PropMrgOwnerHandler;
+import com.itextpdf.text.PageSize;
 import org.apache.poi.xssf.usermodel.XSSFWorkbook;
 import org.jooq.Condition;
 import org.jooq.Record;
@@ -131,6 +134,9 @@ public class RolePrivilegeServiceImpl implements RolePrivilegeService {
 
 	@Autowired
 	private OrganizationSearcher organizationSearcher;
+
+	@Autowired
+	private CoordinationProvider coordinationProvider;
 
 	@Override
 	public ListWebMenuResponse listWebMenu(ListWebMenuCommand cmd) {
@@ -1543,7 +1549,9 @@ public class RolePrivilegeServiceImpl implements RolePrivilegeService {
         String organizationName = "NotFound";
         if (organizationDetail == null || organizationDetail.getDisplayName() == null) {
             Organization organization = organizationProvider.findOrganizationById(organizationId);
-            organizationName = defaultIfNull(organization.getName(), organizationName);
+			if(organization != null) {
+				organizationName = defaultIfNull(organization.getName(), organizationName);
+			}
         } else {
             organizationName = organizationDetail.getDisplayName();
         }
@@ -1658,6 +1666,19 @@ public class RolePrivilegeServiceImpl implements RolePrivilegeService {
 			}
 		}else{
 			moduleIds.add(moduleId);
+
+			//把子模块的权限加入
+			ListServiceModulesCommand cmd = new ListServiceModulesCommand();
+			cmd.setParentId(moduleId);
+			cmd.setPageAnchor(null);
+			cmd.setPageSize(1000);
+			ListServiceModulesResponse res = serviceModuleService.listAllServiceModules(cmd);
+			if(res.getDtos() != null && res.getDtos().size() > 0){
+				res.getDtos().forEach(r->{
+					moduleIds.add(r.getId());
+					LOGGER.debug("ListServiceModulesResponse.childModuleId = {}", r.getId());
+				});
+			}
 		}
 		this.assignmentModulePrivileges(ownerType, ownerId, targetType, targetId, scope, moduleIds, privilegeType, tag);
 	}
@@ -1858,11 +1879,15 @@ public class RolePrivilegeServiceImpl implements RolePrivilegeService {
 				organizationSearcher.feedDoc(o);
 			}
 		}
-        sendMessageAfterChangeOrganizationAdmin(
-                ConvertHelper.convert(member, OrganizationContactDTO.class),
-                OrganizationNotificationTemplateCode.DELETE_ORGANIZATION_ADMIN_MESSAGE_TO_TARGET_TEMPLATE,
-                OrganizationNotificationTemplateCode.DELETE_ORGANIZATION_ADMIN_MESSAGE_TO_OTHER_TEMPLATE
-        );
+		if(OrganizationMemberTargetType.fromCode(member.getTargetType()) == OrganizationMemberTargetType.USER
+				&& member.getTargetId() != null){
+			sendMessageAfterChangeOrganizationAdmin(
+					ConvertHelper.convert(member, OrganizationContactDTO.class),
+					OrganizationNotificationTemplateCode.DELETE_ORGANIZATION_ADMIN_MESSAGE_TO_TARGET_TEMPLATE,
+					OrganizationNotificationTemplateCode.DELETE_ORGANIZATION_ADMIN_MESSAGE_TO_OTHER_TEMPLATE
+			);
+		}
+
 	}
 
 	@Override
@@ -1874,6 +1899,9 @@ public class RolePrivilegeServiceImpl implements RolePrivilegeService {
 					"params ownerType error.");
 		}
 		deleteOrganizationAdmin(cmd.getOrganizationId(), cmd.getContactToken(), PrivilegeConstants.ORGANIZATION_ADMIN);
+		//权限改版，要求同时清除掉超级管理员，有问题就找何智辉和徐诗诗
+		deleteOrganizationAdmin(cmd.getOrganizationId(), cmd.getContactToken(), PrivilegeConstants.ORGANIZATION_SUPER_ADMIN);
+
 		OrganizationMemberDetails detail = this.organizationProvider.findOrganizationMemberDetailsByOrganizationIdAndContactToken(cmd.getOrganizationId(), cmd.getContactToken());
 		List<Long> roleIds = Collections.singletonList(RoleConstants.ENTERPRISE_SUPER_ADMIN);
 		if(detail != null){
@@ -3036,77 +3064,80 @@ public class RolePrivilegeServiceImpl implements RolePrivilegeService {
 
 	@Override
 	public void createAuthorizationRelation(CreateAuthorizationRelationCommand cmd) {
-		checkOwner(cmd.getOwnerType(),cmd.getOwnerId());
-		CheckModuleManageCommand manageCommand = new CheckModuleManageCommand();
-		manageCommand.setAppId(cmd.getAppId());
-		manageCommand.setModuleId(cmd.getModuleId());
-		manageCommand.setOrganizationId(cmd.getOwnerId());
-		manageCommand.setOwnerType(cmd.getOwnerType());
-		manageCommand.setUserId(UserContext.currentUserId());
-		Byte manageFlag = serviceModuleService.checkModuleManage(manageCommand);
-		if(manageFlag == 0 || manageFlag.equals(0)){
-			throw RuntimeErrorException.errorWith(PrivilegeServiceErrorCode.SCOPE, PrivilegeServiceErrorCode.ERROR_CHECK_APP_PRIVILEGE,
-					"check privilege error");
-		}
-
-		if(null == cmd.getTargets() || cmd.getTargets().size() == 0){
-			LOGGER.error("params targets is null");
-			throw RuntimeErrorException.errorWith(PrivilegeServiceErrorCode.SCOPE, PrivilegeServiceErrorCode.ERROR_INVALID_PARAMETER,
-					"params targets is null.");
-		}
-
-		if(null == cmd.getAppId()){
-			LOGGER.error("params appId is null");
-			throw RuntimeErrorException.errorWith(PrivilegeServiceErrorCode.SCOPE, PrivilegeServiceErrorCode.ERROR_INVALID_PARAMETER,
-					"appId targets is null.");
-		}
-
-		if(null == AllFlagType.fromCode(cmd.getAllProjectFlag())){
-			LOGGER.error("params allProjectFlag is null");
-			throw RuntimeErrorException.errorWith(PrivilegeServiceErrorCode.SCOPE, PrivilegeServiceErrorCode.ERROR_INVALID_PARAMETER,
-					"params allProjectFlag is null.");
-		}
-
-		if(AllFlagType.NO == AllFlagType.fromCode(cmd.getAllProjectFlag()) && (null == cmd.getProjects() || cmd.getProjects().size() == 0)){
-			LOGGER.error("params projects is null");
-			throw RuntimeErrorException.errorWith(PrivilegeServiceErrorCode.SCOPE, PrivilegeServiceErrorCode.ERROR_INVALID_PARAMETER,
-					"params projects is null.");
-		}
-
-		if(null == AllFlagType.fromCode(cmd.getAllFlag())){
-			LOGGER.error("params allFlag is null");
-			throw RuntimeErrorException.errorWith(PrivilegeServiceErrorCode.SCOPE, PrivilegeServiceErrorCode.ERROR_INVALID_PARAMETER,
-					"params allFlag is null.");
-		}
-
-		if(AllFlagType.NO == AllFlagType.fromCode(cmd.getAllFlag()) && (null == cmd.getPrivilegeIds() || cmd.getPrivilegeIds().size() == 0)){
-			LOGGER.error("params privilegeIds is null");
-			throw RuntimeErrorException.errorWith(PrivilegeServiceErrorCode.SCOPE, PrivilegeServiceErrorCode.ERROR_INVALID_PARAMETER,
-					"params privilegeIds is null.");
-		}
-
-		User user = UserContext.current().getUser();
-		Integer namespaceId = UserContext.getCurrentNamespaceId();
-		dbProvider.execute((TransactionStatus status) -> {
-			AuthorizationRelation authorizationRelation = ConvertHelper.convert(cmd, AuthorizationRelation.class);
-			authorizationRelation.setCreatorUid(user.getId());
-			authorizationRelation.setOperatorUid(user.getId());
-			authorizationRelation.setNamespaceId(namespaceId);
-			authorizationRelation.setAppId(cmd.getAppId());
-			if(AllFlagType.NO == AllFlagType.fromCode(cmd.getAllProjectFlag())){
-				authorizationRelation.setProjectJson(StringHelper.toJsonString(cmd.getProjects()));
-			}
-			authorizationRelation.setTargetJson(StringHelper.toJsonString(cmd.getTargets()));
-			if(AllFlagType.NO == AllFlagType.fromCode(cmd.getAllFlag())){
-				authorizationRelation.setPrivilegeJson(StringHelper.toJsonString(cmd.getPrivilegeIds()));
+		this.coordinationProvider.getNamedLock(CoordinationLocks.AUTH_RELATION.getCode()).enter(() -> {
+			checkOwner(cmd.getOwnerType(), cmd.getOwnerId());
+			CheckModuleManageCommand manageCommand = new CheckModuleManageCommand();
+			manageCommand.setAppId(cmd.getAppId());
+			manageCommand.setModuleId(cmd.getModuleId());
+			manageCommand.setOrganizationId(cmd.getOwnerId());
+			manageCommand.setOwnerType(cmd.getOwnerType());
+			manageCommand.setUserId(UserContext.currentUserId());
+			Byte manageFlag = serviceModuleService.checkModuleManage(manageCommand);
+			if (manageFlag == 0 || manageFlag.equals(0)) {
+				throw RuntimeErrorException.errorWith(PrivilegeServiceErrorCode.SCOPE, PrivilegeServiceErrorCode.ERROR_CHECK_APP_PRIVILEGE,
+						"check privilege error");
 			}
 
-			//创建授权关系记录
-			authorizationProvider.createAuthorizationRelation(authorizationRelation);
+			if (null == cmd.getTargets() || cmd.getTargets().size() == 0) {
+				LOGGER.error("params targets is null");
+				throw RuntimeErrorException.errorWith(PrivilegeServiceErrorCode.SCOPE, PrivilegeServiceErrorCode.ERROR_INVALID_PARAMETER,
+						"params targets is null.");
+			}
 
-			//创建授权信息和权限
-			createAuthorizationsOrAclsByRelation(user, authorizationRelation, cmd.getTargets(), cmd.getProjects(), cmd.getPrivilegeIds());
+			if (null == cmd.getAppId()) {
+				LOGGER.error("params appId is null");
+				throw RuntimeErrorException.errorWith(PrivilegeServiceErrorCode.SCOPE, PrivilegeServiceErrorCode.ERROR_INVALID_PARAMETER,
+						"appId targets is null.");
+			}
 
+			if (null == AllFlagType.fromCode(cmd.getAllProjectFlag())) {
+				LOGGER.error("params allProjectFlag is null");
+				throw RuntimeErrorException.errorWith(PrivilegeServiceErrorCode.SCOPE, PrivilegeServiceErrorCode.ERROR_INVALID_PARAMETER,
+						"params allProjectFlag is null.");
+			}
+
+			if (AllFlagType.NO == AllFlagType.fromCode(cmd.getAllProjectFlag()) && (null == cmd.getProjects() || cmd.getProjects().size() == 0)) {
+				LOGGER.error("params projects is null");
+				throw RuntimeErrorException.errorWith(PrivilegeServiceErrorCode.SCOPE, PrivilegeServiceErrorCode.ERROR_INVALID_PARAMETER,
+						"params projects is null.");
+			}
+
+			if (null == AllFlagType.fromCode(cmd.getAllFlag())) {
+				LOGGER.error("params allFlag is null");
+				throw RuntimeErrorException.errorWith(PrivilegeServiceErrorCode.SCOPE, PrivilegeServiceErrorCode.ERROR_INVALID_PARAMETER,
+						"params allFlag is null.");
+			}
+
+			if (AllFlagType.NO == AllFlagType.fromCode(cmd.getAllFlag()) && (null == cmd.getPrivilegeIds() || cmd.getPrivilegeIds().size() == 0)) {
+				LOGGER.error("params privilegeIds is null");
+				throw RuntimeErrorException.errorWith(PrivilegeServiceErrorCode.SCOPE, PrivilegeServiceErrorCode.ERROR_INVALID_PARAMETER,
+						"params privilegeIds is null.");
+			}
+
+			User user = UserContext.current().getUser();
+			Integer namespaceId = UserContext.getCurrentNamespaceId();
+			dbProvider.execute((TransactionStatus status) -> {
+				AuthorizationRelation authorizationRelation = ConvertHelper.convert(cmd, AuthorizationRelation.class);
+				authorizationRelation.setCreatorUid(user.getId());
+				authorizationRelation.setOperatorUid(user.getId());
+				authorizationRelation.setNamespaceId(namespaceId);
+				authorizationRelation.setAppId(cmd.getAppId());
+				if (AllFlagType.NO == AllFlagType.fromCode(cmd.getAllProjectFlag())) {
+					authorizationRelation.setProjectJson(StringHelper.toJsonString(cmd.getProjects()));
+				}
+				authorizationRelation.setTargetJson(StringHelper.toJsonString(cmd.getTargets()));
+				if (AllFlagType.NO == AllFlagType.fromCode(cmd.getAllFlag())) {
+					authorizationRelation.setPrivilegeJson(StringHelper.toJsonString(cmd.getPrivilegeIds()));
+				}
+
+				//创建授权关系记录
+				authorizationProvider.createAuthorizationRelation(authorizationRelation);
+
+				//创建授权信息和权限
+				createAuthorizationsOrAclsByRelation(user, authorizationRelation, cmd.getTargets(), cmd.getProjects(), cmd.getPrivilegeIds());
+
+				return null;
+			});
 			return null;
 		});
 
@@ -3326,7 +3357,9 @@ public class RolePrivilegeServiceImpl implements RolePrivilegeService {
 
 		if(AllFlagType.fromCode(allFlag) == AllFlagType.YES){
 			//给对象分配模块的全部权限
-			assignmentPrivileges(ownerType, ownerId, targetType, targetId, EntityType.SERVICE_MODULE.getCode() + moduleId, moduleId, ServiceModulePrivilegeType.ORDINARY_ALL, tag);
+			//这里用的是EntityType.SERVICE_MODULE，但是relation那边用的是EntityType.SERVICE_MODULE_APP,这是一个坑
+			assignmentPrivileges(ownerType, ownerId, targetType, targetId, EntityType.SERVICE_MODULE.getCode() + moduleId, moduleId, null, tag);
+//			assignmentPrivileges(ownerType, ownerId, targetType, targetId, EntityType.SERVICE_MODULE.getCode() + moduleId, privilegeIds, tag);
 		}else{
 			assignmentPrivileges(ownerType, ownerId, targetType, targetId, EntityType.SERVICE_MODULE.getCode() + moduleId, privilegeIds, tag);
 		}

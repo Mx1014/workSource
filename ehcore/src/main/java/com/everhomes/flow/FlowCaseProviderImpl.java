@@ -362,10 +362,6 @@ public class FlowCaseProviderImpl implements FlowCaseProvider {
 
             List<FlowCaseDetail> objs = query.fetchInto(FlowCaseDetail.class);
     		
-    		/*List<FlowCaseDetail> objs = records.stream().map((r) -> {
-    			return ConvertHelper.convert(r, FlowCaseDetail.class);
-    		}).collect(Collectors.toList());*/
-    		
             if(objs.size() >= count) {
                 locator.setAnchor(objs.get(objs.size() - 1).getId());
             } else {
