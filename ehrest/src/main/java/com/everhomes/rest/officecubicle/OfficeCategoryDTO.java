@@ -8,7 +8,8 @@ import com.everhomes.util.StringHelper;
  * <li>spaceId: 空间id</li>
  * <li>rentType: 租赁类别:1-开放式（默认space_type 1）,2-办公室 {@link com.everhomes.rest.officecubicle.OfficeRentType}</li>  
  * <li>positionNums: 工位数量</li> 
- * <li>size: 场所大小，rentType=2-办公室 来说面积是平米</li> 
+ * <li>name: 空间名称</li>
+ * <li>size: 场所大小，rentType=2-办公室 来说面积是平米</li>
  * </ul>
  */
 public class OfficeCategoryDTO {
@@ -17,7 +18,8 @@ public class OfficeCategoryDTO {
     private Byte rentType;
     @Deprecated
     private Byte spaceType;
-    
+    private String name;
+
     private Integer positionNums;
 	private Integer size;
 	
@@ -27,6 +29,14 @@ public class OfficeCategoryDTO {
 
 	public void setPositionNums(Integer positionNums) {
 		this.positionNums = positionNums;
+	}
+
+	public String getName() {
+		return name;
+	}
+
+	public void setName(String name) {
+		this.name = name;
 	}
 
 	@Override
