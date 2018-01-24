@@ -17,7 +17,6 @@ import com.everhomes.coordinator.CoordinationProvider;
 import com.everhomes.db.DbProvider;
 import com.everhomes.entity.EntityType;
 import com.everhomes.listing.CrossShardListingLocator;
-import com.everhomes.listing.ListingLocator;
 import com.everhomes.locale.LocaleStringService;
 import com.everhomes.locale.LocaleTemplateService;
 import com.everhomes.messaging.MessagingService;
@@ -3974,13 +3973,8 @@ private void checkUserPrivilege(Long orgId, Long privilegeId, Long communityId) 
 		ListEquipmentTasksResponse response = new ListEquipmentTasksResponse();
 
 		int pageSize = PaginationConfigHelper.getPageSize(configurationProvider, cmd.getPageSize());
-		ListingLocator locator = new ListingLocator();
+		CrossShardListingLocator locator = new CrossShardListingLocator();
 		locator.setAnchor(cmd.getPageAnchor());
-
-		/*List<Long> standardIds = null;
-		if (cmd.getTaskType() != null) {
-			standardIds = equipmentProvider.listStandardIdsByType(cmd.getTaskType());
-		}*/
 
 		Timestamp startTime = null;
 		Timestamp endTime = null;
@@ -3995,7 +3989,17 @@ private void checkUserPrivilege(Long orgId, Long privilegeId, Long communityId) 
 		// standardIds, startTime, endTime, locator, pageSize+1, null);
 		//之前任务表中有设备id  V3.0.2中改为根据planId关联任务的巡检对象
 		List<EquipmentInspectionEquipmentPlanMap> planMaps = equipmentProvider.listPlanMapByEquipmentId(cmd.getEquipmentId());
-		List<EquipmentInspectionTasks> tasks = equipmentProvider.listTaskByPlanMaps(planMaps, startTime, endTime, locator, pageSize + 1,null);
+		List<EquipmentInspectionTasks> tasks = new ArrayList<>();
+		if (planMaps != null && planMaps.size() > 0) {
+			tasks = equipmentProvider.listTaskByPlanMaps(planMaps, startTime, endTime, locator, pageSize + 1, null);
+		} else {
+			List<Long> standardIds = null;
+//			if (cmd.getTaskType() != null) {
+//				standardIds = equipmentProvider.listStandardIdsByType(cmd.getTaskType());
+//			}
+			tasks = equipmentProvider.listTasksByEquipmentId(cmd.getEquipmentId(),
+					standardIds, startTime, endTime, locator, pageSize + 1, null);
+		}
 		if (tasks.size() > pageSize) {
 			tasks.remove(tasks.size() - 1);
 			response.setNextPageAnchor(tasks.get(tasks.size() - 1).getId());
