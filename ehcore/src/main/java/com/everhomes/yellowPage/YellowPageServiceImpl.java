@@ -825,21 +825,23 @@ public class YellowPageServiceImpl implements YellowPageService {
 				boolean matches = Pattern.matches("^(.*)formId=.*$", dto.getModuleUrl());
 				if(matches){
 					dto.setModuleUrl(dto.getModuleUrl().substring(0,dto.getModuleUrl().lastIndexOf('&')));
-				}
-				int start = dto.getModuleUrl().indexOf('?');
-				String s[] = dto.getModuleUrl().substring(start).split("&");
-				s = s[0].split("=");
-				if(s.length>1){
-					try {
-						Long approveId = Long.valueOf(s[1]);
-						GeneralApproval approval = generalApprovalProvider.getGeneralApprovalById(approveId);
-						if(CommonStatus.ACTIVE.getCode() != approval.getStatus().intValue()){
-							dto.setButtonTitle(null);
-							dto.setJumpType(JumpType.NONE.getCode());
-							dto.setModuleUrl(null);
-						}
+				}else {
+					int start = dto.getModuleUrl().indexOf('?');
+					String s[] = dto.getModuleUrl().substring(start).split("&");
+					s = s[0].split("=");
+					if (s.length > 1) {
+						try {
+							Long approveId = Long.valueOf(s[1]);
+							GeneralApproval approval = generalApprovalProvider.getGeneralApprovalById(approveId);
+							if (CommonStatus.ACTIVE.getCode() != approval.getStatus().intValue()) {
+								dto.setButtonTitle(null);
+								dto.setJumpType(JumpType.NONE.getCode());
+								dto.setModuleUrl(null);
+							}
 
-					}catch (Exception e){}
+						} catch (Exception e) {
+						}
+					}
 				}
 
 			}
