@@ -121,6 +121,27 @@ public class ContractDetailDTO {
     private String settled;
     private Byte status;
 
+    private BigDecimal remainingAmount;
+    private Long bidItemId;
+    private Long createOrgId;
+    private Long createPositionId;
+    private String ourLegalRepresentative;
+    private String taxpayerIdentificationCode;
+    private String registeredAddress;
+    private String registeredPhone;
+    private String payee;
+    private String payer;
+    private String dueBank;
+    private String bankAccount;
+    private BigDecimal exchangeRate;
+    private Integer ageLimit;
+    private Long applicationId;
+    private Long paymentModeItemId;
+    private Timestamp paidTime;
+    private BigDecimal lumpSumPayment;
+    private String treatyParticulars;
+    private Byte paymentFlag;
+
     @ItemType(ContractChargingChangeDTO.class)
     private List<ContractChargingChangeDTO> adjusts;
     @ItemType(ContractChargingChangeDTO.class)
@@ -616,5 +637,165 @@ public class ContractDetailDTO {
 
     public void setSignedTime(Timestamp signedTime) {
         this.signedTime = signedTime;
+    }
+
+    public Integer getAgeLimit() {
+        return ageLimit;
+    }
+
+    public void setAgeLimit(Integer ageLimit) {
+        this.ageLimit = ageLimit;
+    }
+
+    public Long getApplicationId() {
+        return applicationId;
+    }
+
+    public void setApplicationId(Long applicationId) {
+        this.applicationId = applicationId;
+    }
+
+    public String getBankAccount() {
+        return bankAccount;
+    }
+
+    public void setBankAccount(String bankAccount) {
+        this.bankAccount = bankAccount;
+    }
+
+    public Long getBidItemId() {
+        return bidItemId;
+    }
+
+    public void setBidItemId(Long bidItemId) {
+        this.bidItemId = bidItemId;
+    }
+
+    public Long getCreateOrgId() {
+        return createOrgId;
+    }
+
+    public void setCreateOrgId(Long createOrgId) {
+        this.createOrgId = createOrgId;
+    }
+
+    public Long getCreatePositionId() {
+        return createPositionId;
+    }
+
+    public void setCreatePositionId(Long createPositionId) {
+        this.createPositionId = createPositionId;
+    }
+
+    public String getDueBank() {
+        return dueBank;
+    }
+
+    public void setDueBank(String dueBank) {
+        this.dueBank = dueBank;
+    }
+
+    public BigDecimal getExchangeRate() {
+        return exchangeRate;
+    }
+
+    public void setExchangeRate(BigDecimal exchangeRate) {
+        this.exchangeRate = exchangeRate;
+    }
+
+    public BigDecimal getLumpSumPayment() {
+        return lumpSumPayment;
+    }
+
+    public void setLumpSumPayment(BigDecimal lumpSumPayment) {
+        this.lumpSumPayment = lumpSumPayment;
+    }
+
+    public String getOurLegalRepresentative() {
+        return ourLegalRepresentative;
+    }
+
+    public void setOurLegalRepresentative(String ourLegalRepresentative) {
+        this.ourLegalRepresentative = ourLegalRepresentative;
+    }
+
+    public Timestamp getPaidTime() {
+        return paidTime;
+    }
+
+    public void setPaidTime(Timestamp paidTime) {
+        this.paidTime = paidTime;
+    }
+
+    public String getPayee() {
+        return payee;
+    }
+
+    public void setPayee(String payee) {
+        this.payee = payee;
+    }
+
+    public String getPayer() {
+        return payer;
+    }
+
+    public void setPayer(String payer) {
+        this.payer = payer;
+    }
+
+    public Byte getPaymentFlag() {
+        return paymentFlag;
+    }
+
+    public void setPaymentFlag(Byte paymentFlag) {
+        this.paymentFlag = paymentFlag;
+    }
+
+    public Long getPaymentModeItemId() {
+        return paymentModeItemId;
+    }
+
+    public void setPaymentModeItemId(Long paymentModeItemId) {
+        this.paymentModeItemId = paymentModeItemId;
+    }
+
+    public String getRegisteredAddress() {
+        return registeredAddress;
+    }
+
+    public void setRegisteredAddress(String registeredAddress) {
+        this.registeredAddress = registeredAddress;
+    }
+
+    public String getRegisteredPhone() {
+        return registeredPhone;
+    }
+
+    public void setRegisteredPhone(String registeredPhone) {
+        this.registeredPhone = registeredPhone;
+    }
+
+    public BigDecimal getRemainingAmount() {
+        return remainingAmount;
+    }
+
+    public void setRemainingAmount(BigDecimal remainingAmount) {
+        this.remainingAmount = remainingAmount;
+    }
+
+    public String getTaxpayerIdentificationCode() {
+        return taxpayerIdentificationCode;
+    }
+
+    public void setTaxpayerIdentificationCode(String taxpayerIdentificationCode) {
+        this.taxpayerIdentificationCode = taxpayerIdentificationCode;
+    }
+
+    public String getTreatyParticulars() {
+        return treatyParticulars;
+    }
+
+    public void setTreatyParticulars(String treatyParticulars) {
+        this.treatyParticulars = treatyParticulars;
     }
 }
