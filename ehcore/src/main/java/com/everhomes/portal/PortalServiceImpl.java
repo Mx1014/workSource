@@ -1986,7 +1986,7 @@ public class PortalServiceImpl implements PortalService {
 		//如果不存在旧版本则设置大版本为1，旧版本存在并且日期和当期前日期不一致则大版本往上加，否则是新日期设置大版本为1
 		if (oldMaxBigVersion == null){
 			newVersion.setBigVersion(1);
-		} if(oldMaxBigVersion.getDateVersion().intValue() == nowDateVersion.intValue()){
+		} else if(oldMaxBigVersion.getDateVersion().intValue() == nowDateVersion.intValue()){
 			newVersion.setBigVersion(oldMaxBigVersion.getBigVersion() + 1);
 			newVersion.setParentId(oldMaxBigVersion.getId());
 		}else {
