@@ -43,4 +43,8 @@ public interface ContractService {
 
 	Boolean checkAdmin(CheckAdminCommand cmd);
 	ContractDetailDTO findContractForApp(FindContractCommand cmd);
+
+	ContractDetailDTO updatePaymentContract(UpdatePaymentContractCommand cmd);
+	ContractDetailDTO createPaymentContract(CreatePaymentContractCommand cmd);
+
 }

@@ -1,6 +1,8 @@
 //@formatter:off
 package com.everhomes.rest.contract;
 
+import com.everhomes.discover.ItemType;
+
 import java.util.List;
 
 /**
@@ -14,6 +16,7 @@ import java.util.List;
  */
 public class ListContractsBySupplierResponse {
     private Long nextPageAnchor;
+    @ItemType(ContractLogDTO.class)
     private List<ContractLogDTO> dtos;
 
     public Long getNextPageAnchor() {
