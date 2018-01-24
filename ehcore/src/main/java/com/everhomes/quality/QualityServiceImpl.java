@@ -176,7 +176,6 @@ import java.io.IOException;
 import java.io.InputStream;
 import java.io.OutputStream;
 import java.net.URL;
-import java.sql.Array;
 import java.sql.Date;
 import java.sql.Timestamp;
 import java.text.ParseException;
@@ -890,8 +889,7 @@ public class QualityServiceImpl implements QualityService {
 	}
 
 	@Override
-	public ListQualityInspectionTasksResponse listQualityInspectionTasks(
-			ListQualityInspectionTasksCommand cmd) {
+	public ListQualityInspectionTasksResponse listQualityInspectionTasks(ListQualityInspectionTasksCommand cmd) {
 
 		checkUserPrivilege(cmd.getOwnerId(),PrivilegeConstants.QUALITY_TASK_LIST,cmd.getTargetId());
 
@@ -2785,8 +2783,7 @@ public class QualityServiceImpl implements QualityService {
 	}
 
 	@Override
-	public ListQualitySpecificationsResponse listQualitySpecifications(
-			ListQualitySpecificationsCommand cmd) {
+	public ListQualitySpecificationsResponse listQualitySpecifications(ListQualitySpecificationsCommand cmd) {
 		if(SpecificationInspectionType.SPECIFICATION.equals(SpecificationInspectionType.fromStatus(cmd.getInspectionType()))){
 			checkUserPrivilege(cmd.getOwnerId(),PrivilegeConstants.QUALITY_SPECIFICATION_LIST,cmd.getScopeId());
 		} else {
@@ -2794,8 +2791,6 @@ public class QualityServiceImpl implements QualityService {
 		}
 
 		ListQualitySpecificationsResponse response = new ListQualitySpecificationsResponse();
-
-
 		List<QualityInspectionSpecifications> specifications = new ArrayList<>();
 		List<QualityInspectionSpecifications> scopeSpecifications = new ArrayList<>();
 
@@ -2840,6 +2835,16 @@ public class QualityServiceImpl implements QualityService {
 			dtos.removeIf((dto) -> dto.getCreateTime().before(syncTime)
 					&& dto.getUpdateTime().before(syncTime) && dto.getDeleteTime().before(syncTime));
 		}
+		//非真实分页
+		if (cmd.getPageAnchor() == 0L && cmd.getPageAnchor() == null) {
+			int pageSize = PaginationConfigHelper.getPageSize(configurationProvider, cmd.getPageSize());
+			if (pageSize < dtos.size()) {
+				dtos.subList(cmd.getPageAnchor().intValue() * pageSize, cmd.getPageAnchor().intValue() * pageSize + pageSize);
+				response.setNextPageAnchor(cmd.getPageAnchor() + 1);
+			} else {
+				response.setNextPageAnchor(null);
+			}
+		}
 		//返回数据中添加所属项目
 		processSepcificationScopeName(dtos);
 		List<QualityInspectionSpecificationDTO> result = null;
@@ -2864,7 +2869,7 @@ public class QualityServiceImpl implements QualityService {
 
 	private List<QualityInspectionSpecificationDTO> dealWithScopeSpecifications(List<QualityInspectionSpecifications> specifications, List<QualityInspectionSpecifications> scopeSpecifications) {
 
-		List<QualityInspectionSpecificationDTO> dtos = new ArrayList<QualityInspectionSpecificationDTO>();
+		List<QualityInspectionSpecificationDTO> dtos = new ArrayList<>();
 
 		List<Long> scopeDeleteSpecifications = new ArrayList<Long>();
 		Map<Long, QualityInspectionSpecificationDTO> scopeModifySpecifications = new HashMap<Long, QualityInspectionSpecificationDTO>();
