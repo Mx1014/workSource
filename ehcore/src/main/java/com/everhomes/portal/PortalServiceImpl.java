@@ -1920,12 +1920,21 @@ public class PortalServiceImpl implements PortalService {
 					//获取一个版本号
 					PortalVersion portalVersion = createBigPortalVersion(dto.getId());
 
+					//同步是基于上个版本的，先copy一份moduleApp，同步item的时候增量方式
+					if(portalVersion.getParentId() != null){
+						copyServiceModuleAppToNewVersion(dto.getId(), portalVersion.getParentId(), portalVersion.getId());
+					}
+
 					for (Tuple<String, String> t: list) {
 						syncLayout(dto.getId(), t.first(), t.second(), portalVersion);
 					}
 
+
 					//同步完之后fork一个小版本，用于编辑
 					copyPortalToNewVersion(dto.getId(), portalVersion.getId());
+
+					//刷新菜单
+					webMenuService.refleshMenuByPortalVersion(portalVersion.getId());
 
 					return null;
 				}));
@@ -1972,11 +1981,15 @@ public class PortalServiceImpl implements PortalService {
 		Integer nowDateVersion = calendar.get(Calendar.YEAR) * 10000 + calendar.get(Calendar.MONTH) * 100 + calendar.get(Calendar.DATE);
 		newVersion.setDateVersion(nowDateVersion);
 
-		//如果不存在版本或者版本日期和当期前日期不一致，则生成一个新日期的01版本，否则版本号往后加
-		if (oldMaxBigVersion == null || oldMaxBigVersion.getDateVersion().intValue() != nowDateVersion.intValue()){
+		//如果不存在旧版本则设置大版本为1，旧版本存在并且日期和当期前日期不一致则大版本往上加，否则是新日期设置大版本为1
+		if (oldMaxBigVersion == null){
 			newVersion.setBigVersion(1);
-		}else {
+		} if(oldMaxBigVersion.getDateVersion().intValue() == nowDateVersion.intValue()){
 			newVersion.setBigVersion(oldMaxBigVersion.getBigVersion() + 1);
+			newVersion.setParentId(oldMaxBigVersion.getId());
+		}else {
+			newVersion.setBigVersion(1);
+			newVersion.setParentId(oldMaxBigVersion.getId());
 		}
 
 		portalVersionProvider.createPortalVersion(newVersion);
@@ -2533,6 +2546,8 @@ public class PortalServiceImpl implements PortalService {
 			}
 		}
 
+		ServiceModuleApp existServiceModuleApp = null;
+
 		if(serviceModule != null){
 			moduleApp.setModuleId(serviceModule.getId());
 			if(StringUtils.isEmpty(itemLabel)){
@@ -2550,20 +2565,20 @@ public class PortalServiceImpl implements PortalService {
 			this.serviceModuleService.getOrCreateReflectionServiceModuleApp(namespaceId, actionData, moduleApp.getInstanceConfig(), itemLabel, serviceModule);
 
 			//设置OriginId为父辈的OriginId，如果父辈不存在则在createServiceModuleApp中将OriginId设置为自己的id
-			if(newVersion.getParentId() != null){
-				ServiceModuleApp parentServiceModuleApp = getParentServiceModuleApp(namespaceId, newVersion, actionData, moduleApp.getInstanceConfig(), serviceModule);
-				if(parentServiceModuleApp != null){
-					moduleApp.setOriginId(parentServiceModuleApp.getOriginId());
-				}
-			}
-
+			existServiceModuleApp = getServiceModuleApp(namespaceId, newVersion, actionData, moduleApp.getInstanceConfig(), serviceModule);
 		}
 
-		serviceModuleAppProvider.createServiceModuleApp(moduleApp);
+		//如果没有则创建，有则返回已存在的
+		if(existServiceModuleApp == null){
+			serviceModuleAppProvider.createServiceModuleApp(moduleApp);
+		}else {
+			moduleApp = existServiceModuleApp;
+		}
+
 		return moduleApp;
 	}
 
-	private ServiceModuleApp getParentServiceModuleApp(Integer namespaceId, PortalVersion newVersion, String actionData, String instanceConfig, ServiceModule serviceModule){
+	private ServiceModuleApp getServiceModuleApp(Integer namespaceId, PortalVersion version, String actionData, String instanceConfig, ServiceModule serviceModule){
 
 		String customTag = null;
 		String handlerPrefix = PortalPublishHandler.PORTAL_PUBLISH_OBJECT_PREFIX;
@@ -2573,7 +2588,7 @@ public class PortalServiceImpl implements PortalService {
 			LOGGER.debug("get customTag from handler = {}, customTag =s {}",handler,customTag);
 		}
 		//找上一版本的serviceModuleApp
-		ServiceModuleApp parentServiceModuleApp = serviceModuleAppProvider.findServiceModuleApp(namespaceId, newVersion.getParentId(), serviceModule.getId(), customTag);
+		ServiceModuleApp parentServiceModuleApp = serviceModuleAppProvider.findServiceModuleApp(namespaceId, version.getId(), serviceModule.getId(), customTag);
 		return parentServiceModuleApp;
 	}
 
