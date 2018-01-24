@@ -2905,9 +2905,11 @@ public class FlowServiceImpl implements FlowService {
         List<FlowEventLog> logList = flowEventLogProvider.findFlowCaseSupervisors(flowCase);
         List<UserInfo> userInfos = new ArrayList<>();
         for (FlowEventLog eventLog : logList) {
-            UserInfo userInfo = userService.getUserInfo(eventLog.getFlowUserId());
-            fixupUserInfo(flowCase.getOrganizationId(), userInfo);
-            userInfos.add(userInfo);
+            UserInfo userInfo = userService.getUserSnapshotInfo(eventLog.getFlowUserId());
+            if (userInfo != null) {
+                fixupUserInfo(flowCase.getOrganizationId(), userInfo);
+                userInfos.add(userInfo);
+            }
         }
         return userInfos;
     }
