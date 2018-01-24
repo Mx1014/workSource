@@ -6,8 +6,10 @@ import com.everhomes.rest.messaging.MessageDTO;
 import com.everhomes.util.SignatureHelper;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
+import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.http.*;
+import org.springframework.scheduling.TaskScheduler;
 import org.springframework.stereotype.Component;
 import org.springframework.util.LinkedMultiValueMap;
 import org.springframework.util.MultiValueMap;
@@ -15,12 +17,13 @@ import org.springframework.util.concurrent.ListenableFuture;
 import org.springframework.util.concurrent.ListenableFutureCallback;
 import org.springframework.web.client.AsyncRestTemplate;
 
+import javax.annotation.PostConstruct;
 import java.util.HashMap;
 import java.util.Map;
 import java.util.concurrent.ConcurrentLinkedQueue;
 
 @Component
-public class MessagePersistWorker implements Runnable {
+public class MessagePersistWorker {
     private static final Logger LOGGER = LoggerFactory.getLogger(MessagePersistWorker.class);
 
     //    @Value("${core.service.uri}")
@@ -33,15 +36,33 @@ public class MessagePersistWorker implements Runnable {
     private String secretKey = "2-0cDFNOq-zPzYGtdS8xxqnkR8PRgNhpHcWoku6Ob49NdBw8D9-Q72MLsCidI43IKhP1D_43ujSFbatGPWuVBQ";
 
 
-    private ConcurrentLinkedQueue<MessageRecordDto> queue;
+    private static ConcurrentLinkedQueue<MessageRecordDto> queue =  new ConcurrentLinkedQueue<>();
 
-    @Override
-    public void run() {
-        while (true) {
-            MessageRecordDto record = queue.poll();
-            this.handleMessagePersist(record);
-        }
+    static ConcurrentLinkedQueue<MessageRecordDto> getQueue(){
+        return queue;
     }
+
+    @Autowired
+    private TaskScheduler taskScheduler;
+
+    @PostConstruct
+    public void setup(){
+        taskScheduler.scheduleAtFixedRate(()-> {
+            while (!queue.isEmpty()){
+                MessageRecordDto record = queue.poll();
+                this.handleMessagePersist(record);
+            }
+        }, 5*1000);
+    }
+
+
+//    @Override
+//    public void run() {
+//        while (true) {
+//            MessageRecordDto record = queue.poll();
+//            this.handleMessagePersist(record);
+//        }
+//    }
 
     //消息持久化
     public void handleMessagePersist(MessageRecordDto record) {
