@@ -3,9 +3,12 @@ package com.everhomes.messaging;
 
 import com.everhomes.border.BorderConnection;
 import com.everhomes.border.BorderConnectionProvider;
+import com.everhomes.message.MessageRecord;
 import com.everhomes.msgbox.Message;
 import com.everhomes.msgbox.MessageBoxProvider;
 import com.everhomes.rest.common.EntityType;
+import com.everhomes.rest.message.MessageRecordDto;
+import com.everhomes.rest.message.MessageRecordStatus;
 import com.everhomes.rest.messaging.ChannelType;
 import com.everhomes.rest.messaging.MessageChannel;
 import com.everhomes.rest.messaging.MessageDTO;
@@ -66,14 +69,14 @@ public class UserMessageRoutingHandler implements MessageRoutingHandler {
     @Autowired
     private MessagePersistWorker messagePersistWorker;
 
-    private ConcurrentLinkedQueue<MessageDTO> queue = new ConcurrentLinkedQueue<>();
+    private ConcurrentLinkedQueue<MessageRecordDto> queue = new ConcurrentLinkedQueue<>();
 
     @PostConstruct
     public void setup(){
         taskScheduler.scheduleAtFixedRate(()-> {
             while (!queue.isEmpty()){
-                MessageDTO messageDto = queue.poll();
-                this.messagePersistWorker.handleMessagePersist(messageDto);
+                MessageRecordDto record = queue.poll();
+                this.messagePersistWorker.handleMessagePersist(record);
             }
         }, 5*1000);
     }
@@ -92,13 +95,20 @@ public class UserMessageRoutingHandler implements MessageRoutingHandler {
             MessageDTO message, int deliveryOption) {
 
         //把消息添加到队列里
-        MessageDTO dto = new MessageDTO();
-        dto.setBody(message.getBody());
-        dto.setBodyType(message.getBodyType());
-        dto.setMetaAppId(appId);
-        dto.setSenderUid(senderLogin.getUserId());
-        dto.setStoreSequence(0l);
-        queue.offer(dto);
+        MessageRecordDto record = new MessageRecordDto();
+        record.setAppId(appId);
+        record.setNamespaceId(UserContext.getCurrentNamespaceId());
+        record.setMessageSeq(0L);
+        record.setSenderUid(senderLogin.getUserId());
+        record.setSenderTag("");
+        record.setDstChannelType(dstChannelType);
+        record.setDstChannelToken(dstChannelToken);
+        record.setChannelsInfo(message.getChannels().toString());
+        record.setBodyType(message.getBodyType());
+        record.setBody(message.getBody());
+        record.setDeliveryoption(deliveryOption);
+        record.setStatus(MessageRecordStatus.CORE_HANDLE.getCode());
+        queue.offer(record);
 
 
         long uid = Long.parseLong(dstChannelToken);
@@ -241,6 +251,22 @@ public class UserMessageRoutingHandler implements MessageRoutingHandler {
                 StoredMessageIndicationPdu clientPdu = new StoredMessageIndicationPdu();
                 ClientForwardPdu forwardPdu = buildForwardPdu(destLogin, appId, clientPdu);
                 try {
+                    //把消息添加到队列里
+                    MessageRecordDto record = new MessageRecordDto();
+                    record.setAppId(appId);
+                    record.setNamespaceId(UserContext.getCurrentNamespaceId());
+                    record.setMessageSeq(0L);
+                    record.setSenderUid(senderLogin.getUserId());
+                    record.setSenderTag("");
+                    record.setDstChannelType(destChannelType);
+                    record.setDstChannelToken(destChannelToken);
+                    record.setChannelsInfo(message.getChannels().toString());
+                    record.setBodyType(message.getBodyType());
+                    record.setBody(message.getBody());
+                    record.setDeliveryoption(deliveryOption);
+                    record.setStatus(MessageRecordStatus.CORE_ROUTE.getCode());
+                    queue.offer(record);
+
                     borderConnection.sendMessage(null, forwardPdu);
                     onlineDelivered = true;
                 } catch(IOException e) {
@@ -283,6 +309,22 @@ public class UserMessageRoutingHandler implements MessageRoutingHandler {
                 
                 ClientForwardPdu forwardPdu = buildForwardPdu(destLogin, appId, clientPdu);
                 try {
+                    //把消息添加到队列里
+                    MessageRecordDto record = new MessageRecordDto();
+                    record.setAppId(appId);
+                    record.setNamespaceId(UserContext.getCurrentNamespaceId());
+                    record.setMessageSeq(0L);
+                    record.setSenderUid(senderLogin.getUserId());
+                    record.setSenderTag("");
+                    record.setDstChannelType(destChannelType);
+                    record.setDstChannelToken(destChannelToken);
+                    record.setChannelsInfo(message.getChannels().toString());
+                    record.setBodyType(message.getBodyType());
+                    record.setBody(message.getBody());
+                    record.setDeliveryoption(deliveryOption);
+                    record.setStatus(MessageRecordStatus.CORE_ROUTE.getCode());
+                    queue.offer(record);
+
                     borderConnection.sendMessage(null, forwardPdu);
                 } catch(IOException e) {
                     LOGGER.warn("Failed to deliver message to border", e);

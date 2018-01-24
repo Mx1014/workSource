@@ -11,7 +11,7 @@ CREATE TABLE `eh_message_records` (
   `sender_tag` varchar(32) DEFAULT NULL COMMENT 'sender generated tag',
   `dst_channel_type` varchar(32) DEFAULT NULL,
   `dst_channel_token` varchar(32) DEFAULT NULL,
-  `channels_info` varchar(32) DEFAULT NULL,
+  `channels_info` varchar(512) DEFAULT NULL,
   `body_type`varchar(32),
   `body` varchar(128),
   `deliveryOption` int(2) DEFAULT '0',

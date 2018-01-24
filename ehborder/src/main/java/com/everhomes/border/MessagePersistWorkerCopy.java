@@ -1,12 +1,9 @@
-package com.everhomes.messaging;
+package com.everhomes.border;
 
-import com.everhomes.message.MessageRecord;
 import com.everhomes.rest.message.MessageRecordDto;
-import com.everhomes.rest.messaging.MessageDTO;
 import com.everhomes.util.SignatureHelper;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
-import org.springframework.beans.factory.annotation.Value;
 import org.springframework.http.*;
 import org.springframework.stereotype.Component;
 import org.springframework.util.LinkedMultiValueMap;
@@ -20,8 +17,8 @@ import java.util.Map;
 import java.util.concurrent.ConcurrentLinkedQueue;
 
 @Component
-public class MessagePersistWorker implements Runnable {
-    private static final Logger LOGGER = LoggerFactory.getLogger(MessagePersistWorker.class);
+public class MessagePersistWorkerCopy implements Runnable {
+    private static final Logger LOGGER = LoggerFactory.getLogger(MessagePersistWorkerCopy.class);
 
     //    @Value("${core.service.uri}")
     private String coreServiceUri = "http://10.1.133.110:8080/evh";

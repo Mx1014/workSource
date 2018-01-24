@@ -8,9 +8,15 @@ import java.util.List;
 import java.util.Map;
 import java.util.concurrent.ConcurrentHashMap;
 
+import com.everhomes.border.WebSocketSessionProxy;
 import com.everhomes.rest.messaging.MessageDTO;
+import org.aopalliance.intercept.Interceptor;
+import org.aopalliance.intercept.MethodInterceptor;
+import org.aopalliance.intercept.MethodInvocation;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
+import org.springframework.aop.framework.ProxyFactory;
+import org.springframework.aop.framework.ProxyFactoryBean;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.http.HttpStatus;
@@ -185,17 +191,18 @@ public class ClientWebSocketHandler implements WebSocketHandler {
        String frameJson = pdu.getEncodedFrame();
        if(session != null) {
            TextMessage msg = new TextMessage(frameJson);
-           try {
-               synchronized(session) {
-                   session.sendMessage(msg);
-               }
-               if(LOGGER.isDebugEnabled()) {
-                   LOGGER.debug("Forward message, session=" + session.getId() + ", token=" + token + ", json=" + frameJson);
-               }
-               this.updateSessionSendTick(session);
-           } catch(IOException e) {
-               LOGGER.warn("Unable to send message to client, session=" + session.getId() + ", json=" + frameJson, e);
-           }
+//           try {
+//               synchronized(session) {
+//                   session.sendMessage(msg);
+//               }
+//               if(LOGGER.isDebugEnabled()) {
+//                   LOGGER.debug("Forward message, session=" + session.getId() + ", token=" + token + ", json=" + frameJson);
+//               }
+//               this.updateSessionSendTick(session);
+//           } catch(IOException e) {
+//               LOGGER.warn("Unable to send message to client, session=" + session.getId() + ", json=" + frameJson, e);
+//           }
+           WebSocketSessionProxy.sendMessage(session,msg);
        } else {
            LOGGER.warn("Session is null, loginToken=" + token + ", json=" + frameJson);
        }
@@ -316,15 +323,18 @@ public class ClientWebSocketHandler implements WebSocketHandler {
                     PduFrame pdu = new PduFrame();
                     RegistedOkResponse respPdu = new RegistedOkResponse();
                     pdu.setPayload(respPdu);
+
+                    WebSocketSessionProxy.sendMessage(session, new TextMessage(pdu.toJson()));
+                    tearDown = false;
                     
-                    try {
-                        synchronized(session) {
-                            session.sendMessage(new TextMessage(pdu.toJson()));
-                            tearDown = false;
-                        }
-                    } catch (IOException e) {
-                        LOGGER.error("Send registedOk message error, session=" + session.getId());
-                    }
+//                    try {
+//                        synchronized(session) {
+//                            session.sendMessage(new TextMessage(pdu.toJson()));
+//                            tearDown = false;
+//                        }
+//                    } catch (IOException e) {
+//                        LOGGER.error("Send registedOk message error, session=" + session.getId());
+//                    }
                     
                 } else {
                     LOGGER.error("Invalid REST call response, session=" + session.getId());

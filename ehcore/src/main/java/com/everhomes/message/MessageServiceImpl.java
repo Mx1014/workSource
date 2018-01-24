@@ -6,9 +6,6 @@ import java.util.HashSet;
 import java.util.List;
 import java.util.Set;
 
-import com.everhomes.rest.message.PersistMessageCommand;
-import com.everhomes.rest.messaging.MessageDTO;
-import com.everhomes.util.ConvertHelper;
 import org.apache.commons.lang.StringUtils;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -116,8 +113,8 @@ public class MessageServiceImpl implements MessageService {
 	}
 
 	@Override
-	public void persistMessage(MessageDTO dto) {
-		this.messageProvider.createMessage(ConvertHelper.convert(dto, Message.class));
+	public void persistMessage(MessageRecord record) {
+		this.messageProvider.createMessageRecord(record);
 		System.out.print("persitstMessage finished");
 	}
 

@@ -1,8 +1,6 @@
 // @formatter:off
 package com.everhomes.message;
 
-import com.everhomes.rest.message.PersistMessageCommand;
-import com.everhomes.rest.messaging.MessageDTO;
 import com.everhomes.util.StringHelper;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.web.bind.annotation.RequestMapping;
@@ -37,8 +35,8 @@ public class MessageController extends ControllerBase {
 	 */
 	@RequestMapping("persistMessage")
 	@RestReturn(String.class)
-	public RestResponse pushMessageToAdminAndBusinessContacts(PersistMessageCommand cmd){
-		messageService.persistMessage((MessageDTO)StringHelper.fromJsonString(cmd.getMessageDto(), MessageDTO.class));
+	public RestResponse pushMessageToAdminAndBusinessContacts(String record){
+		messageService.persistMessage((MessageRecord)StringHelper.fromJsonString(record, MessageRecord.class));
 		return new RestResponse();
 	}
 

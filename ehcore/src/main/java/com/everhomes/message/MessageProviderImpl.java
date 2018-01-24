@@ -5,10 +5,10 @@ import com.everhomes.db.DaoAction;
 import com.everhomes.db.DaoHelper;
 import com.everhomes.db.DbProvider;
 import com.everhomes.naming.NameMapper;
-import com.everhomes.organization.Organization;
-import com.everhomes.schema.tables.daos.EhMessagesDao;
 import com.everhomes.schema.tables.pojos.EhMessages;
 import com.everhomes.sequence.SequenceProvider;
+import com.everhomes.server.schema.tables.daos.EhMessageRecordsDao;
+import com.everhomes.server.schema.tables.pojos.EhMessageRecords;
 import com.everhomes.util.DateHelper;
 import org.jooq.DSLContext;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -27,35 +27,35 @@ public class MessageProviderImpl implements MessageProvider {
     private SequenceProvider sequenceProvider;
 
     @Override
-    public void createMessage(Message message) {
-        message.setCreateTime(new Timestamp(DateHelper.currentGMTTime().getTime()));
+    public void createMessageRecord(MessageRecord messageRecord) {
+        messageRecord.setCreateTime(new Timestamp(DateHelper.currentGMTTime().getTime()));
         DSLContext context = dbProvider.getDslContext(AccessSpec.readWrite());
-        long id = this.sequenceProvider.getNextSequence(NameMapper.getSequenceDomainFromTablePojo(EhMessages.class));
-        message.setId(id);
-        EhMessagesDao dao = new EhMessagesDao(context.configuration());
-        dao.insert(message);
-        DaoHelper.publishDaoAction(DaoAction.CREATE, EhMessages.class, message.getId());
+        long id = this.sequenceProvider.getNextSequence(NameMapper.getSequenceDomainFromTablePojo(EhMessageRecords.class));
+        messageRecord.setId(id);
+        EhMessageRecordsDao dao = new EhMessageRecordsDao(context.configuration());
+        dao.insert(messageRecord);
+        DaoHelper.publishDaoAction(DaoAction.CREATE, EhMessageRecords.class, messageRecord.getId());
     }
 
     @Override
-    public void updateMessage(Message message) {
-        assert (message.getId() == null);
+    public void updateMessageRecord(MessageRecord messageRecord) {
+        assert (messageRecord.getId() == null);
         DSLContext context = dbProvider.getDslContext(AccessSpec.readWrite());
-        EhMessagesDao dao = new EhMessagesDao(context.configuration());
-        dao.update(message);
-        DaoHelper.publishDaoAction(DaoAction.MODIFY, EhMessages.class, message.getId());
+        EhMessageRecordsDao dao = new EhMessageRecordsDao(context.configuration());
+        dao.update(messageRecord);
+        DaoHelper.publishDaoAction(DaoAction.MODIFY, EhMessageRecords.class, messageRecord.getId());
     }
 
     @Override
-    public void deleteMessageById(Long id) {
+    public void deleteMessageRecordById(Long id) {
         DSLContext context = dbProvider.getDslContext(AccessSpec.readWrite());
-        EhMessagesDao dao = new EhMessagesDao(context.configuration());
+        EhMessageRecordsDao dao = new EhMessageRecordsDao(context.configuration());
         dao.deleteById(id);
-        DaoHelper.publishDaoAction(DaoAction.MODIFY, EhMessages.class, id);
+        DaoHelper.publishDaoAction(DaoAction.MODIFY, EhMessageRecords.class, id);
     }
 
     @Override
-    public List<Organization> listMessage(Integer namespaceId) {
+    public List<MessageRecord> listMessageRecords(Integer namespaceId) {
         return null;
     }
 }
