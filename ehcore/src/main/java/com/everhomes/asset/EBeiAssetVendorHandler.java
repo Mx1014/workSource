@@ -304,7 +304,9 @@ public class EBeiAssetVendorHandler implements AssetVendorHandler {
         if(list.size()>0){
             response.setDatestr(list.get(0).getDateStr());
         }
-        response.setAmountOwed(amountOwed);
+        //改成receivable,来自正中会需求 2018/1/23
+//        response.setAmountOwed(amountOwed);
+        response.setAmountOwed(amountReceivable);
         return response;
     }
 
@@ -438,11 +440,17 @@ public class EBeiAssetVendorHandler implements AssetVendorHandler {
     public List<ShowBillForClientV2DTO> showBillForClientV2(ShowBillForClientV2Command cmd) {
         List<ShowBillForClientV2DTO> list = new ArrayList<>();
         SimpleDateFormat yyyyMM = new SimpleDateFormat("yyyy-MM");
-        String beginMonth = yyyyMM.format(new Date());
-        String endMonth = beginMonth;
+        String endMonth = yyyyMM.format(new Date());
+        String beginMonth = null;
+        //非未来+未缴纳
         GetLeaseContractBillOnFiPropertyRes res = keXingBillService.getAllFiPropertyBills(cmd.getNamespaceId(),cmd.getOwnerId(),cmd.getTargetId(),cmd.getTargetType(),(byte)0,beginMonth,endMonth);
-        //处理数据
         List<GetLeaseContractBillOnFiPropertyData> data = res.getData();
+        //没查到，则改为本月已经缴纳的
+        if(data == null ||data.size() < 1){
+            beginMonth = endMonth;
+            res = keXingBillService.getAllFiPropertyBills(cmd.getNamespaceId(),cmd.getOwnerId(),cmd.getTargetId(),cmd.getTargetType(),(byte)1,beginMonth,endMonth);
+        }
+        data = res.getData();
         Map<String,List<GetLeaseContractBillOnFiPropertyData>> tabs = new HashMap<>();
         if(data == null) return list;
         for(int i = 0; i < data.size(); i++){
@@ -498,7 +506,7 @@ public class EBeiAssetVendorHandler implements AssetVendorHandler {
         String endMonth = yyyyMM.format(new Date());
         GetLeaseContractBillOnFiPropertyRes res = keXingBillService.getAllFiPropertyBills(cmd.getNamespaceId(),cmd.getOwnerId(),cmd.getTargetId(),cmd.getTargetType(),null,null,endMonth);
         List<GetLeaseContractBillOnFiPropertyData> data = res.getData();
-        if(data == null) return null;
+        if(data == null) return new ArrayList<>();
         for(int i = 0; i < data.size(); i ++){
             GetLeaseContractBillOnFiPropertyData source = data.get(i);
             ListAllBillsForClientDTO dto = new ListAllBillsForClientDTO();
@@ -522,6 +530,7 @@ public class EBeiAssetVendorHandler implements AssetVendorHandler {
             }
         }
         //按照时间降序排序
+
         List<ListAllBillsForClientDTO> list = new ArrayList<>(map.values());
         Collections.reverse(list);
         return list;
