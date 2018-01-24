@@ -6,6 +6,7 @@ package com.everhomes.dynamicExcel;
  */
 
 import javax.validation.constraints.NotNull;
+import java.util.List;
 import java.util.Map;
 
 
@@ -15,21 +16,19 @@ public class DynamicSheet {
      */
     @NotNull
     private String className;
-
-    private Object storage;
     /**
      * displayName : sheet在excel上的展示名称
      */
     @NotNull
     private String displayName;
 
-    private Map<String, DynamicField> dynamicFields;
+    private List<DynamicField> dynamicFields;
 
-    public Map<String, DynamicField> getDynamicFields() {
+    public List<DynamicField> getDynamicFields() {
         return dynamicFields;
     }
 
-    public void setDynamicFields(Map<String, DynamicField> dynamicFields) {
+    public void setDynamicFields(List<DynamicField> dynamicFields) {
         this.dynamicFields = dynamicFields;
     }
 
@@ -39,14 +38,6 @@ public class DynamicSheet {
 
     public void setClassName(String className) {
         this.className = className;
-    }
-
-    public Object getStorage() {
-        return storage;
-    }
-
-    public void setStorage(Object storage) {
-        this.storage = storage;
     }
 
     public String getDisplayName() {

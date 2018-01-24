@@ -3,6 +3,7 @@ package com.everhomes.dynamicExcel;
 
 import com.everhomes.bootstrap.PlatformContext;
 import com.everhomes.util.excel.ExcelUtils;
+import com.sun.xml.internal.ws.api.pipe.FiberContextSwitchInterceptor;
 import org.apache.commons.lang.StringUtils;
 import org.apache.poi.ss.usermodel.Cell;
 import org.apache.poi.ss.usermodel.Row;
@@ -31,95 +32,30 @@ import java.util.*;
  * Created by Wentian Wang on 2018/1/12.
  */
 @Service
-public class DynamicExcelService {
-    private static final org.slf4j.Logger LOGGER = LoggerFactory.getLogger(DynamicExcelService.class);
-    private static ThreadLocal<Integer> dynamicSheetNum = new ThreadLocal<Integer>() {
-        @Override
-        protected Integer initialValue() {
-            return 0;
-        }
-    };
+public interface DynamicExcelService {
+
     /**
      *
      * @param response 输出流
-     * @param code 业务码
-     * @param dynamicSheets
+     * @param code 业务码,bean名称的后缀，前缀参考 {@link com.everhomes.dynamicExcel.DynamicExcelStrings}
+     * @param sheetNames 业务需要导出的sheet的名字集合
+     * @param params 业务参数，可以再handler中的getDynamicSheet中使用
      * @param baseInfo 不填,则走默认的
      * @param enumSupport true：会将枚举值放入说明中； false：不会将枚举放入说明
+     * @param excelName excel文件名字，没有则默认给一个“客户数据导出+时间戳”
      */
-    public void exportDynamicExcel(HttpServletResponse response, String code, List<DynamicSheet> dynamicSheets, String baseInfo, boolean enumSupport, boolean withData){
-        Workbook workbook = new XSSFWorkbook();
-        DynamicExcelHandler h = getHandler(code);
-        //遍历筛选过的sheet
-        for( int i = 0; i < dynamicSheets.size(); i++){
-            DynamicSheet sheet = dynamicSheets.get(i);
-            Map<String, DynamicField> fieldMap = sheet.getDynamicFields();
-            List<DynamicField> fields = new ArrayList<>(fieldMap.values());
-            List<List<String>> data = null;
-            String intro = baseInfo;
-            if(withData){
-                //获取数据
-                data = h.getExportData(fields,sheet);
-            }
-
-            if(StringUtils.isEmpty(baseInfo)){
-                intro = DynamicExcelStrings.baseIntro;
-            }
-            if(enumSupport){
-                intro += DynamicExcelStrings.enumNotice;
-                for(DynamicField df : fields){
-                    if(df.isMandatory()){
-                        String enumItem = df.getDisplayName() + ":";
-                        for(String enumStr : df.getAllowedValued()){
-                            enumItem += enumStr + "  ";
-                        }
-                        enumItem += "\n";
-                        intro += enumItem;
-                    }
-                }
-            }
-            try {
-                DebugExcelUtil.exportExcel(workbook,dynamicSheetNum.get(),sheet.getDisplayName(),intro,fields,data);
-                dynamicSheetNum.set(dynamicSheetNum.get()+1);
-            } catch (Exception e) {
-                LOGGER.info("one sheet export failed, sheet name = {}",sheet.getDisplayName());
-            }
-        }
-        dynamicSheetNum.remove();
-        //写入流
-        ServletOutputStream out;
-        ByteArrayOutputStream byteArray = new ByteArrayOutputStream();
-        SimpleDateFormat sdf = new SimpleDateFormat("yyyyMMddHHmmss");
-        String fileName = "客户数据导出"+sdf.format(Calendar.getInstance().getTime());
-        fileName = fileName + ".xls";
-        response.setContentType("application/msexcel");
-        try {
-            response.setHeader("Content-Disposition", "attachment; filename=" + URLEncoder.encode(fileName, "UTF-8").replaceAll("\\+", "%20"));
-        } catch (UnsupportedEncodingException e) {
-            e.printStackTrace();
-        }
-        try {
-            out = response.getOutputStream();
-            workbook.write(byteArray);
-            out.write(byteArray.toByteArray());
-            out.flush();
-        } catch (IOException e) {
-            e.printStackTrace();
-        } finally {
-            if(byteArray!=null){
-                byteArray = null;
-            }
-        }
-    }
+    public void exportDynamicExcel(HttpServletResponse response, String code, String baseInfo,List<String> sheetNames,
+                                   Object params, boolean enumSupport, boolean withData, String excelName);
 
     /**
      *
      * @param file 有效的excel文件
-     * @param code 业务码
+     * @param code 回调的bean的名称
      * @param headerRow 标题行为第几行，默认为第2行
-     * @param storage 传递调用者参数用
+     * @param params 业务参数，在handler中的importData方法中使用
      * @return DynamicImportResponse
      */
+<<<<<<< HEAD
     public DynamicImportResponse importMultiSheet(MultipartFile file, String code, Integer headerRow, Object storage) {
         DynamicImportResponse response = new DynamicImportResponse();
         Workbook workbook = null;
@@ -256,8 +192,8 @@ public class DynamicExcelService {
         Method writeMethod = pd.getWriteMethod();
         writeMethod.invoke(dto,val);
     }
+=======
+    public DynamicImportResponse importMultiSheet(MultipartFile file, String code, Integer headerRow,Object params);
+>>>>>>> 823279edce8e9b94718477a4fe10439567769790
 
-    private DynamicExcelHandler getHandler(String code) {
-        return PlatformContext.getComponent(DynamicExcelStrings.DYNAMIC_EXCEL_HANDLER + code);
-    }
 }

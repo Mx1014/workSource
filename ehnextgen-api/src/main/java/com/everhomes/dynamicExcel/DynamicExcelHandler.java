@@ -6,6 +6,7 @@ import com.everhomes.dynamicExcel.DynamicImportResponse;
 import com.everhomes.dynamicExcel.DynamicSheet;
 
 import java.util.List;
+import java.util.Map;
 
 /**
  * Created by Wentian on 2018/1/12.
@@ -23,30 +24,44 @@ public interface DynamicExcelHandler {
 //    DynamicField getDynamicFieldFromCell(String headerName,DynamicSheet ds);
 
     /**
-     * 此方法应该用于插入schema等存储处理, 抛出的异常会导致该sheet的处理会被略过
+     * 此方法应该用于插入schema等存储处理, 抛出的异常会导致该sheet的处理会被略过;storage1来自导入方法importMultiSheet
      * @param sheetClassObjs sheet页对应的类的对象的集合
      * @param sheetClass    sheet页对应的类
      */
-    void save2Schema(List<Object> sheetClassObjs, Class<?> sheetClass, Object storage);
+
+//    void save2Schema(List<Object> sheetClassObjs, Class<?> sheetClass, Object storage1, Map<Object,Object> context);
     /**
      *
      * @param response 对返回结果进行后处理，不进行处理则只返回下载成功和失败的行数
      */
-    void postProcess(DynamicImportResponse response);
+//    void postProcess(DynamicImportResponse response);
 
     /**
-     *
+     * 在dynamicaService 导入方法exportDynamicExcel中使用
      * @param sheetName sheet的名字
-     * @param storage   传递的调用者的参数
-     * @Return Dynamic实例对象
+     * @param params 在dynamicaService.exportDynamicExcel() 传递的调用者的参数
+     * @Return Dynamic实例对象集合
      */
-    DynamicSheet getDynamicSheet(String sheetName, Object storage);
+    List<DynamicSheet> getDynamicSheet(String sheetName, Object params);
 
     /**
      * 标题行和返回的数据的list的下表必须保持对应
      * @param fields 标题行
      * @param sheet 所在的动态sheet对象
+     * @param context 上下文，遍历sheet时记录sheets之间的关系
      * @return
      */
-    List<List<String>> getExportData(List<DynamicField> fields, DynamicSheet sheet);
+    List<List<String>> getExportData(DynamicSheet sheet, Map<Object,Object> context);
+
+//    void importData(String sheetName, List<String> headers, List<DynamicRowDTO> rowDatas, DynamicImportResponse response);
+
+    /**
+     * 导入数据，提供sheet的名字和行数据的集合，导入的结果应该置入response中
+     * @param sheetName sheet页的名字
+     * @param rowDatas  sheet页中的行数据列表
+     * @param context  上下文，遍历sheet导入时记录sheets之间的关系
+     * @param params  在dynamicaService.importMultiSheet() 传递的调用者的参数
+     * @param response  方法DynamicExcelService.importMultiSheet的返回，对于每一个sheet的导入结果都应该放入此返回中
+     */
+    void importData(String sheetName, List<DynamicRowDTO> rowDatas, Object params,Map<Object,Object> context,DynamicImportResponse response);
 }

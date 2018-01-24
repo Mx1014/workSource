@@ -611,7 +611,7 @@ public class ExcelUtils {
      */
     public static Workbook getWorkbook(InputStream inStr,String fileName) throws Exception{
         Workbook wb = null;
-        String fileType = fileName.substring(fileName.lastIndexOf("."));
+//        String fileType = fileName.substring(fileName.lastIndexOf("."));
         //现在导出的模板都是xssf了
 //        if(".xls".equals(fileType)){
 //            wb = new HSSFWorkbook(inStr);  //2003-
@@ -620,7 +620,15 @@ public class ExcelUtils {
 //        }else{
 //            throw new Exception("解析的文件格式有误！");
 //        }
-        wb = new XSSFWorkbook(inStr);
+        try{
+            wb = new XSSFWorkbook(inStr);
+        }catch (Exception e){
+            try{
+                wb = new HSSFWorkbook(inStr);
+            }catch (Exception e1){
+                throw e1;
+            }
+        }
         return wb;
     }
 

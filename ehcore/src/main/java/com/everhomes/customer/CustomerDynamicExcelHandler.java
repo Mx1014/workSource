@@ -11,6 +11,7 @@ import com.everhomes.varField.FieldService;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
 
+import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
@@ -35,17 +36,47 @@ public class CustomerDynamicExcelHandler implements DynamicExcelHandler {
     private EnterpriseCustomerProvider customerProvider;
 
     @Override
-    public void save2Schema(List<Object> sheetClassObjs, Class<?> sheetClass, Object storage) {
-        CustomerInfo customerInfo = ConvertHelper.convert(storage, CustomerInfo.class);
-        if(sheetClassObjs != null && sheetClassObjs.size() > 0) {
-            String sheetName = sheetClass.getName();
+    public List<DynamicSheet> getDynamicSheet(String sheetName, Object storage) {
+        FieldGroup group = fieldProvider.findGroupByGroupDisplayName(sheetName);
+        DynamicSheet ds = new DynamicSheet();
+        ds.setClassName(group.getName());
+        ds.setDisplayName(group.getTitle());
+
+        List<DynamicField> dynamicFields = new ArrayList<>();
+        ListFieldCommand command = ConvertHelper.convert(storage, ListFieldCommand.class);
+        List<FieldDTO> fields = fieldService.listFields(command);
+        if(fields != null && fields.size() > 0) {
+            fields.forEach(fieldDTO -> {
+                DynamicField df = ConvertHelper.convert(fieldDTO, DynamicField.class);
+                df.setDisplayName(fieldDTO.getFieldDisplayName());
+                if(fieldDTO.getItems() != null && fieldDTO.getItems().size() > 0) {
+                    List<String> allowedValued = fieldDTO.getItems().stream().map(item -> {
+                        return item.getItemDisplayName();
+                    }).collect(Collectors.toList());
+                    df.setAllowedValued(allowedValued);
+                }
+                dynamicFields.add(df);
+            });
+        }
+
+        ds.setDynamicFields(dynamicFields);
+        List<DynamicSheet> sheets = new ArrayList<>();
+        sheets.add(ds);
+        return sheets;
+    }
+
+    @Override
+    public void importData(String sheetName, List<DynamicRowDTO> rowDatas, Object params, Map<Object, Object> context, DynamicImportResponse response) {
+//        CustomerInfo customerInfo = ConvertHelper.convert(storage, CustomerInfo.class);
+        if(rowDatas != null && rowDatas.size() > 0) {
             CustomerDynamicSheetClass sheet = CustomerDynamicSheetClass.fromStatus(sheetName);
-            for(Object sheetClassObj : sheetClassObjs) {
+            for(DynamicRowDTO rowData : rowDatas) {
+                List<DynamicColumnDTO> columns = rowData.getColumns();
                 switch (sheet) {
                     case CUSTOMER_TAX:
                         CustomerTax tax = ConvertHelper.convert(sheetClassObj, CustomerTax.class);
-                        tax.setCustomerId(customerInfo.getCustomerId());
-                        tax.setCustomerType(customerInfo.getCustomerType());
+                        tax.setCustomerId(Long.valueOf(context.get("customerId").toString()));
+                        tax.setCustomerType(Byte.valueOf(context.get("customerType").toString()));
                         sheetClass.getClass().getFields();
                         if("taxPayerTypeId".equals())
                         customerProvider.createCustomerTax(tax);
@@ -124,40 +155,7 @@ public class CustomerDynamicExcelHandler implements DynamicExcelHandler {
     }
 
     @Override
-    public void postProcess(DynamicImportResponse response) {
-
-    }
-
-    @Override
-    public DynamicSheet getDynamicSheet(String sheetName, Object storage) {
-        FieldGroup group = fieldProvider.findGroupByGroupDisplayName(sheetName);
-        DynamicSheet ds = new DynamicSheet();
-        ds.setClassName(group.getName());
-        ds.setDisplayName(group.getTitle());
-
-        Map<String, DynamicField> dynamicFields = new HashMap<>();
-        ListFieldCommand command = ConvertHelper.convert(storage, ListFieldCommand.class);
-        List<FieldDTO> fields = fieldService.listFields(command);
-        if(fields != null && fields.size() > 0) {
-            fields.forEach(fieldDTO -> {
-                DynamicField df = ConvertHelper.convert(fieldDTO, DynamicField.class);
-                df.setDisplayName(fieldDTO.getFieldDisplayName());
-                if(fieldDTO.getItems() != null && fieldDTO.getItems().size() > 0) {
-                    List<String> allowedValued = fieldDTO.getItems().stream().map(item -> {
-                        return item.getItemDisplayName();
-                    }).collect(Collectors.toList());
-                    df.setAllowedValued(allowedValued);
-                }
-                dynamicFields.put(df.getDisplayName(), df);
-            });
-        }
-
-        ds.setDynamicFields(dynamicFields);
-        return ds;
-    }
-
-    @Override
-    public List<List<String>> getExportData(List<DynamicField> fields, DynamicSheet sheet) {
+    public List<List<String>> getExportData(DynamicSheet sheet, Map<Object,Object> context) {
         return null;
     }
 }
