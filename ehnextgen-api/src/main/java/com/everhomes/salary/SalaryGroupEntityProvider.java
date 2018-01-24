@@ -11,21 +11,25 @@ public interface SalaryGroupEntityProvider {
 
 	SalaryGroupEntity findSalaryGroupEntityById(Long id);
 
-	List<SalaryGroupEntity> listSalaryGroupEntityByGroupId(Long salaryGroupId);
+//	List<SalaryGroupEntity> listSalaryGroupEntityByGroupId(Long salaryGroupId);
+//
+//	List<SalaryGroupEntity> listSalaryGroupWithExportRegular(Long salaryGroupId);
+//
+//	List<SalaryGroupEntity> listPeriodSalaryWithExportRegular(Long salaryGroupId);
+//
+//	List<SalaryGroupEntity> listSalaryGroupEntity();
+//
+//	void updateSalaryGroupEntityVisible(Long id, Byte visibleFlag);
+////	void deleteSalaryGroupEntity(SalaryGroupEntity entity);
+//	void deleteSalaryGroupEntityByGroupId(Long groupId);
+//
+//	List<SalaryGroupEntity> listSalaryGroupEntityByGroupId(Long organizationGroupId, Byte code);
+//
+//	SalaryGroupEntity findSalaryGroupEntityByGroupAndOriginId(Long groupId, Long originEntityId);
+//
+//	void deleteSalaryGroupEntityByGroupIdNotInOriginIds(Long salaryGroupId, List<Long> entityIds);
 
-	List<SalaryGroupEntity> listSalaryGroupWithExportRegular(Long salaryGroupId);
+	List<SalaryGroupEntity> listSalaryGroupEntityByOrgId(Long organizationId);
 
-	List<SalaryGroupEntity> listPeriodSalaryWithExportRegular(Long salaryGroupId);
-
-	List<SalaryGroupEntity> listSalaryGroupEntity();
-
-	void updateSalaryGroupEntityVisible(Long id, Byte visibleFlag);
-//	void deleteSalaryGroupEntity(SalaryGroupEntity entity);
-	void deleteSalaryGroupEntityByGroupId(Long groupId);
-
-	List<SalaryGroupEntity> listSalaryGroupEntityByGroupId(Long organizationGroupId, Byte code);
-
-	SalaryGroupEntity findSalaryGroupEntityByGroupAndOriginId(Long groupId, Long originEntityId);
-
-	void deleteSalaryGroupEntityByGroupIdNotInOriginIds(Long salaryGroupId, List<Long> entityIds);
+	void deleteSalaryGroupEntity(SalaryGroupEntity entity);
 }

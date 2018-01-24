@@ -7,11 +7,11 @@ import com.everhomes.util.StringHelper;
  * 
  * <ul>参数:
  * <li>keywords: 搜索关键词</li>
- * <li>departmentId: 部门id</li>
- * <li>salaryGroupId: 薪酬批次id</li>
- * <li>isException: 是否筛选异常员工: 0-否 1-是</li>
+ * <li>checkInMonth: 入职月份</li>
+ * <li>dismissMonth: 离职月份</li>
  * <li>ownerType: 'organization'</li>
- * <li>ownerId: 公司organizationId</li>
+ * <li>ownerId: 子公司organizationId</li>
+ * <li>salaryStatus: 0-正常 -1 异常</li>
  * <li>pageAnchor: </li>
  * <li>pageSize: 页面大小</li>
  * </ul>
@@ -20,15 +20,15 @@ public class ListSalaryEmployeesCommand {
 
 	private String keywords;
 
-	private Long departmentId;
-
-	private Long salaryGroupId;
-
-	private Byte isException;
-
 	private String ownerType;
 
 	private Long ownerId;
+
+	private String checkInMonth;
+
+	private String dismissMonth;
+
+	private Byte salaryStatus;
 
 	private Long pageAnchor;
 
@@ -38,12 +38,20 @@ public class ListSalaryEmployeesCommand {
 
 	}
 
-	public ListSalaryEmployeesCommand(String keywords, Long departmentId, Long salaryGroupId, Byte isException) {
-		super();
-		this.keywords = keywords;
-		this.departmentId = departmentId;
-		this.salaryGroupId = salaryGroupId;
-		this.isException = isException;
+	public String getCheckInMonth() {
+		return checkInMonth;
+	}
+
+	public void setCheckInMonth(String checkInMonth) {
+		this.checkInMonth = checkInMonth;
+	}
+
+	public String getDismissMonth() {
+		return dismissMonth;
+	}
+
+	public void setDismissMonth(String dismissMonth) {
+		this.dismissMonth = dismissMonth;
 	}
 
 	public String getKeywords() {
@@ -54,28 +62,12 @@ public class ListSalaryEmployeesCommand {
 		this.keywords = keywords;
 	}
 
-	public Long getDepartmentId() {
-		return departmentId;
+	public Long getOwnerId() {
+		return ownerId;
 	}
 
-	public void setDepartmentId(Long departmentId) {
-		this.departmentId = departmentId;
-	}
-
-	public Long getSalaryGroupId() {
-		return salaryGroupId;
-	}
-
-	public void setSalaryGroupId(Long salaryGroupId) {
-		this.salaryGroupId = salaryGroupId;
-	}
-
-	public Byte getIsException() {
-		return isException;
-	}
-
-	public void setIsException(Byte isException) {
-		this.isException = isException;
+	public void setOwnerId(Long ownerId) {
+		this.ownerId = ownerId;
 	}
 
 	public String getOwnerType() {
@@ -84,14 +76,6 @@ public class ListSalaryEmployeesCommand {
 
 	public void setOwnerType(String ownerType) {
 		this.ownerType = ownerType;
-	}
-
-	public Long getOwnerId() {
-		return ownerId;
-	}
-
-	public void setOwnerId(Long ownerId) {
-		this.ownerId = ownerId;
 	}
 
 	public Long getPageAnchor() {
@@ -115,4 +99,11 @@ public class ListSalaryEmployeesCommand {
 		return StringHelper.toJsonString(this);
 	}
 
+	public Byte getSalaryStatus() {
+		return salaryStatus;
+	}
+
+	public void setSalaryStatus(Byte salaryStatus) {
+		this.salaryStatus = salaryStatus;
+	}
 }

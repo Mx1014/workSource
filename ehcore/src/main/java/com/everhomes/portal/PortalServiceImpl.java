@@ -1391,7 +1391,7 @@ public class PortalServiceImpl implements PortalService {
 	 */
 	private void updateVersionAfterPublish(Long versionId){
 		PortalVersion publishVersion = portalVersionProvider.findPortalVersionById(versionId);
-		PortalVersion maxVersion = portalVersionProvider.findMaxVersion(publishVersion.getNamespaceId());
+		PortalVersion maxVersion = portalVersionProvider.findMaxBigVersion(publishVersion.getNamespaceId());
 
 		publishVersion.setBigVersion(maxVersion.getBigVersion() + 1);
 		publishVersion.setMinorVersion(0);
@@ -1958,7 +1958,7 @@ public class PortalServiceImpl implements PortalService {
 	 */
 	private PortalVersion createBigPortalVersion(Integer namespaceId){
 
-		PortalVersion oldVersion = portalVersionProvider.findMaxVersion(namespaceId);
+		PortalVersion oldMaxBigVersion = portalVersionProvider.findMaxBigVersion(namespaceId);
 		PortalVersion newVersion = new PortalVersion();
 		newVersion.setNamespaceId(namespaceId);
 
@@ -1967,11 +1967,16 @@ public class PortalServiceImpl implements PortalService {
 		newVersion.setCreateTime(new Timestamp(System.currentTimeMillis()));
 		newVersion.setSyncTime(new Timestamp(System.currentTimeMillis()));
 
-		if(oldVersion != null){
-			newVersion.setBigVersion(oldVersion.getBigVersion() + 1);
-			newVersion.setParentId(oldVersion.getId());
-		}else {
+
+		Calendar calendar = Calendar.getInstance();
+		Integer nowDateVersion = calendar.get(Calendar.YEAR) * 10000 + calendar.get(Calendar.MONTH) * 100 + calendar.get(Calendar.DATE);
+		newVersion.setDateVersion(nowDateVersion);
+
+		//如果不存在版本或者版本日期和当期前日期不一致，则生成一个新日期的01版本，否则版本号往后加
+		if (oldMaxBigVersion == null || oldMaxBigVersion.getDateVersion().intValue() != nowDateVersion.intValue()){
 			newVersion.setBigVersion(1);
+		}else {
+			newVersion.setBigVersion(oldMaxBigVersion.getBigVersion() + 1);
 		}
 
 		portalVersionProvider.createPortalVersion(newVersion);

@@ -301,4 +301,19 @@ public class ContractController extends ControllerBase {
 		return PlatformContext.getComponent(ContractService.CONTRACT_PREFIX + handler);
 	}
 
+	//通过供应商查看合同 -- by wentian
+	/**
+	 * <b>URL: /contract/listContractsBySupplier</b>
+	 * <p>通过供应商查看合同列表</p>
+	 */
+	@RequestMapping("listContractsBySupplier")
+	@RestReturn(value = ListContractsBySupplierResponse.class)
+	public RestResponse listContractsBySupplier(ListContractsBySupplierCommand cmd) {
+		ContractService contractService = getContractService(UserContext.getCurrentNamespaceId(0));
+		RestResponse response = new RestResponse();
+		response.setErrorCode(ErrorCodes.SUCCESS);
+		response.setErrorDescription("OK");
+		return response;
+	}
+
 }

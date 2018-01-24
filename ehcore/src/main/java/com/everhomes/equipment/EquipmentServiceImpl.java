@@ -17,7 +17,6 @@ import com.everhomes.coordinator.CoordinationProvider;
 import com.everhomes.db.DbProvider;
 import com.everhomes.entity.EntityType;
 import com.everhomes.listing.CrossShardListingLocator;
-import com.everhomes.listing.ListingLocator;
 import com.everhomes.locale.LocaleStringService;
 import com.everhomes.locale.LocaleTemplateService;
 import com.everhomes.messaging.MessagingService;
@@ -190,6 +189,8 @@ import com.everhomes.rest.pmNotify.PmNotifyType;
 import com.everhomes.rest.pmNotify.ReceiverName;
 import com.everhomes.rest.pmNotify.SetPmNotifyParamsCommand;
 import com.everhomes.rest.pmtask.CreateTaskCommand;
+import com.everhomes.rest.pmtask.ListTaskCategoriesCommand;
+import com.everhomes.rest.pmtask.ListTaskCategoriesResponse;
 import com.everhomes.rest.pmtask.PmTaskAddressType;
 import com.everhomes.rest.quality.OwnerType;
 import com.everhomes.rest.quality.ProcessType;
@@ -3415,6 +3416,13 @@ private void checkUserPrivilege(Long orgId, Long privilegeId, Long communityId) 
 		return time;
 	}
 
+	private Timestamp addWeek(Timestamp now, int days) {
+		Calendar calendar = Calendar.getInstance();
+		calendar.setTime(now);
+		calendar.add(Calendar.DATE, days);
+		return new Timestamp(calendar.getTimeInMillis());
+	}
+
 	private ListEquipmentTasksResponse listDelayTasks(ListEquipmentTasksCommand cmd) {
 		ListEquipmentTasksResponse response = new ListEquipmentTasksResponse();
 		int pageSize = cmd.getPageSize() == null ? Integer.MAX_VALUE - 1 : cmd.getPageSize();
@@ -3439,8 +3447,9 @@ private void checkUserPrivilege(Long orgId, Long privilegeId, Long communityId) 
 				}
 			}
 		}
-		//只展示近一个月的
-		Timestamp startTime = addMonths(new Timestamp(System.currentTimeMillis()), -1);
+		//只展示近一周
+		//Timestamp startTime = addMonths(new Timestamp(System.currentTimeMillis()), -1);
+		Timestamp startTime = addWeek(new Timestamp(System.currentTimeMillis()), -7);
 		List<EquipmentInspectionTasks> tasks = null;
 		if(isAdmin) {
 			tasks = equipmentProvider.listDelayTasks(cmd.getInspectionCategoryId(), null, cmd.getTargetType(),
@@ -3576,7 +3585,8 @@ private void checkUserPrivilege(Long orgId, Long privilegeId, Long communityId) 
 		}
 
 		tasks = allTasks.stream().map(r -> {
-			if ((EquipmentTaskStatus.WAITING_FOR_EXECUTING.equals(EquipmentTaskStatus.fromStatus(r.getStatus())))) {
+			if ((EquipmentTaskStatus.WAITING_FOR_EXECUTING.equals(EquipmentTaskStatus.fromStatus(r.getStatus())))
+					|| EquipmentTaskStatus.DELAY.equals(EquipmentTaskStatus.fromStatus(r.getStatus()))) {
 				return r;
 			} else if (EquipmentTaskStatus.CLOSE.equals(EquipmentTaskStatus.fromStatus(r.getStatus()))
 					|| (EquipmentTaskStatus.REVIEW_DELAY.equals(EquipmentTaskStatus.fromStatus(r.getStatus())))) {
@@ -3965,13 +3975,8 @@ private void checkUserPrivilege(Long orgId, Long privilegeId, Long communityId) 
 		ListEquipmentTasksResponse response = new ListEquipmentTasksResponse();
 
 		int pageSize = PaginationConfigHelper.getPageSize(configurationProvider, cmd.getPageSize());
-		ListingLocator locator = new ListingLocator();
+		CrossShardListingLocator locator = new CrossShardListingLocator();
 		locator.setAnchor(cmd.getPageAnchor());
-
-		/*List<Long> standardIds = null;
-		if (cmd.getTaskType() != null) {
-			standardIds = equipmentProvider.listStandardIdsByType(cmd.getTaskType());
-		}*/
 
 		Timestamp startTime = null;
 		Timestamp endTime = null;
@@ -3986,7 +3991,17 @@ private void checkUserPrivilege(Long orgId, Long privilegeId, Long communityId) 
 		// standardIds, startTime, endTime, locator, pageSize+1, null);
 		//之前任务表中有设备id  V3.0.2中改为根据planId关联任务的巡检对象
 		List<EquipmentInspectionEquipmentPlanMap> planMaps = equipmentProvider.listPlanMapByEquipmentId(cmd.getEquipmentId());
-		List<EquipmentInspectionTasks> tasks = equipmentProvider.listTaskByPlanMaps(planMaps, startTime, endTime, locator, pageSize + 1,null);
+		List<EquipmentInspectionTasks> tasks = new ArrayList<>();
+		if (planMaps != null && planMaps.size() > 0) {
+			tasks = equipmentProvider.listTaskByPlanMaps(planMaps, startTime, endTime, locator, pageSize + 1, null);
+		} else {
+			List<Long> standardIds = null;
+//			if (cmd.getTaskType() != null) {
+//				standardIds = equipmentProvider.listStandardIdsByType(cmd.getTaskType());
+//			}
+			tasks = equipmentProvider.listTasksByEquipmentId(cmd.getEquipmentId(),
+					standardIds, startTime, endTime, locator, pageSize + 1, null);
+		}
 		if (tasks.size() > pageSize) {
 			tasks.remove(tasks.size() - 1);
 			response.setNextPageAnchor(tasks.get(tasks.size() - 1).getId());
@@ -5676,6 +5691,7 @@ private void checkUserPrivilege(Long orgId, Long privilegeId, Long communityId) 
 				plan.setName(equipment.getName());
 				plan.setTargetId(equipment.getTargetId());
 				plan.setTargetType(equipment.getTargetType());
+				plan.setPlanNumber(equipment.getCustomNumber());
 			}
 			if (standards != null) {
 				if (EquipmentReviewStatus.REVIEWED.equals(EquipmentReviewStatus.fromStatus(map.getReviewStatus()))
@@ -5689,7 +5705,6 @@ private void checkUserPrivilege(Long orgId, Long privilegeId, Long communityId) 
 				plan.setInspectionCategoryId(standards.getInspectionCategoryId());
 				plan.setOwnerType(standards.getOwnerType());
 				plan.setOwnerId(standards.getOwnerId());
-				plan.setPlanNumber(equipment.getCustomNumber());
 			}
 			equipmentProvider.createEquipmentInspectionPlans(plan);
 			EquipmentInspectionEquipmentPlanMap planMap = new EquipmentInspectionEquipmentPlanMap();
@@ -5813,6 +5828,24 @@ private void checkUserPrivilege(Long orgId, Long privilegeId, Long communityId) 
 			repairCommand.setAddressType(PmTaskAddressType.ORGANIZATION.getCode());
 			repairCommand.setReferId(cmd.getEquipmentId());
 			repairCommand.setReferType(EquipmentConstant.EQUIPMENT_REPAIR);
+			repairCommand.setTaskCategoryId(6L);
+			ListTaskCategoriesCommand categoriesCommand = new ListTaskCategoriesCommand();
+			categoriesCommand.setPageSize(Integer.MAX_VALUE -1);
+			ListTaskCategoriesResponse categories = pmTaskService.listTaskCategories(categoriesCommand);
+
+			if (categories != null && categories.getRequests().size() > 0) {
+				List<Long> categodyIds = categories.getRequests().stream().map((r) -> {
+					if (r.getName().contains("物业报修")) {
+						return r.getId();
+					}
+					return null;
+				}).collect(Collectors.toList());
+				repairCommand.setCategoryId(categodyIds.get(0));
+			} else {
+				throw RuntimeErrorException.errorWith(EquipmentServiceErrorCode.SCOPE,
+						EquipmentServiceErrorCode.ERROR_EQUIPMENT_REPAIR_CATEGORY_NOT_EXIST, "equipment repair category id not exist!");
+			}
+
 			List<OrganizationMember> members = organizationProvider.listOrganizationMembersByUId(UserContext.currentUserId());
 			if (members != null && members.size() > 0) {
 				repairCommand.setRequestorName(members.get(0).getContactName());

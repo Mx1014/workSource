@@ -176,6 +176,7 @@ import java.io.IOException;
 import java.io.InputStream;
 import java.io.OutputStream;
 import java.net.URL;
+import java.sql.Array;
 import java.sql.Date;
 import java.sql.Timestamp;
 import java.text.ParseException;
@@ -396,7 +397,7 @@ public class QualityServiceImpl implements QualityService {
 				  qualityProvider.createQualityInspectionStandardSpecificationMap(map);
 
 				  QualityInspectionSpecifications specification =
-						  qualityProvider.findSpecificationById(specificationId, standard.getOwnerType(), standard.getOwnerId(),namespaceId);
+						  qualityProvider.findSpecificationById(specificationId, standard.getOwnerType(), standard.getOwnerId());
 				  specifications.add(specification);
 			 }
 
@@ -1128,7 +1129,7 @@ public class QualityServiceImpl implements QualityService {
 			//QualityInspectionCategories category = verifiedCategoryById(r.getCategoryId());
 
 		    QualityInspectionSpecifications category =
-					qualityProvider.findSpecificationById(r.getCategoryId(), r.getOwnerType(), r.getOwnerId(),r.getNamespaceId());
+					qualityProvider.findSpecificationById(r.getCategoryId(), r.getOwnerType(), r.getOwnerId());
 		    if(category != null) {
 		        r.setCategoryName(getSpecificationNamePath(category.getPath(), category.getOwnerType(), category.getOwnerId()));
 		    }
@@ -2529,7 +2530,7 @@ public class QualityServiceImpl implements QualityService {
 	}
 
 	private QualityInspectionSpecifications verifiedSpecificationById(Long specificationId, String ownerType, Long ownerId,Integer namespaceId) {
-		QualityInspectionSpecifications specification = qualityProvider.findSpecificationById(specificationId, ownerType, ownerId, namespaceId);
+		QualityInspectionSpecifications specification = qualityProvider.findSpecificationById(specificationId, ownerType, ownerId);
 		if(specification == null) {
 			LOGGER.error("the specification which id="+specificationId+" don't exist!");
 			throw RuntimeErrorException
@@ -2841,7 +2842,13 @@ public class QualityServiceImpl implements QualityService {
 		}
 		//返回数据中添加所属项目
 		processSepcificationScopeName(dtos);
-		response.setSpecifications(dtos);
+		List<QualityInspectionSpecificationDTO> result = null;
+		if (dtos != null && dtos.size() > 0) {
+			result = dtos.stream().sorted(Comparator.comparing(QualityInspectionSpecificationDTO::getId))
+							.collect(Collectors.toList());
+		}
+
+		response.setSpecifications(result);
 		return response;
 	}
 
@@ -4298,7 +4305,7 @@ public class QualityServiceImpl implements QualityService {
 			specificationScore.entrySet().forEach(map -> {
 				Long specificationId = map.getKey();
 				Double deductedScore = map.getValue();
-				QualityInspectionSpecifications specification = qualityProvider.findSpecificationById(specificationId, cmd.getOwnerType(), cmd.getOwnerId(),null);
+				QualityInspectionSpecifications specification = qualityProvider.findSpecificationById(specificationId, cmd.getOwnerType(), cmd.getOwnerId());
 				SpecificationItemScores score = new SpecificationItemScores();
 				score.setSpecificationId(specificationId);
 				score.setSpecificationDeducted(deductedScore);
@@ -4619,7 +4626,7 @@ public class QualityServiceImpl implements QualityService {
 		if (specifications != null && specifications.size() > 0){
 			specifications.forEach((s) -> {
 				//支持离线 置状态删除
-				QualityInspectionSpecifications specification = qualityProvider.findSpecificationById(s.getId(), null, null,null);
+				QualityInspectionSpecifications specification = qualityProvider.findSpecificationById(s.getId(), null, null);
 				specification.setStatus(QualityStandardStatus.INACTIVE.getCode());
 				specification.setDeleteUid(UserContext.currentUserId());
 				specification.setDeleteTime(new Timestamp(DateHelper.currentGMTTime().getTime()));

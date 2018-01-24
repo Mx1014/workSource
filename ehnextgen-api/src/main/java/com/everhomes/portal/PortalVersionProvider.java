@@ -11,7 +11,7 @@ public interface PortalVersionProvider {
 
 	PortalVersion findPortalVersionById(Long id);
 
-	PortalVersion findMaxVersion(Integer namespaceId);
+	PortalVersion findMaxBigVersion(Integer namespaceId);
 
 	List<PortalVersion> listPortalVersion(Integer namespaceId, Byte status);
 
