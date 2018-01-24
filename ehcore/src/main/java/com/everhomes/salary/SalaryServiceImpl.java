@@ -2414,13 +2414,13 @@ public class SalaryServiceImpl implements SalaryService {
         String filePath = "ImportTemplate" + ".xlsx";
         //新建了一个文件
 
-        Workbook wb = createEmployeeSalaryHeadWB(cmd.getOwnerId());
+        Workbook wb = createEmployeeSalaryHeadWB(cmd.getOrganizationId());
 
         return download(wb, filePath, response);
     }
 
-    private Workbook createEmployeeSalaryHeadWB(Long ownerId) {
-        List<SalaryGroupEntity> groupEntities = salaryGroupEntityProvider.listSalaryGroupEntityByOrgId(ownerId);
+    private Workbook createEmployeeSalaryHeadWB(Long orgId) {
+        List<SalaryGroupEntity> groupEntities = salaryGroupEntityProvider.listSalaryGroupEntityByOrgId(orgId);
 
         XSSFWorkbook wb = new XSSFWorkbook();
         XSSFSheet sheet = wb.createSheet("sheet1");
