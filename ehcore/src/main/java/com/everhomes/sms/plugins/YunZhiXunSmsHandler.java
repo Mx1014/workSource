@@ -169,11 +169,11 @@ public class YunZhiXunSmsHandler implements SmsHandler, ApplicationListener<Cont
     }*/
 
     @Override
-    public SmsReportResponse report(String reportBody) {
-        YzxSmsReport report = xmlToBean(reportBody, YzxSmsReport.class);
+    public SmsReportResponse report(SmsReportRequest reportRequest) {
+        YzxSmsReport report = xmlToBean(reportRequest.getRequestBody(), YzxSmsReport.class);
         String smsId = report.smsId;
         if (smsId == null) {
-            LOGGER.error("YZX sms report smsId is null, reportBody = {}", reportBody);
+            LOGGER.error("YZX sms report smsId is null, reportBody = {}", reportRequest);
             return null;
         }
         SmsReportDTO dto = new SmsReportDTO();

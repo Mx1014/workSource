@@ -62,10 +62,17 @@ public class SmsServiceImpl implements SmsService {
             while ((line = reader.readLine()) != null) {
                 body.append(line);
             }
-            SmsReportResponse report = handler.report(body.toString());
+
+            SmsReportRequest reportRequest = new SmsReportRequest();
+            reportRequest.setRequestBody(body.toString());
+            reportRequest.setUri(request.getRequestURI());
+            reportRequest.setRequestContentType(request.getContentType());
+            reportRequest.setParameterMap(request.getParameterMap());
+
+            SmsReportResponse report = handler.report(reportRequest);
             if (report != null) {
                 if (report.getReports() != null) {
-                    doReportDTO(handlerName, body, report);
+                    doReportDTO(handlerName, body.toString(), report);
                 }
                 if (report.getResponseBody() != null) {
                     writer.write(report.getResponseBody());
@@ -79,10 +86,10 @@ public class SmsServiceImpl implements SmsService {
         }
     }
 
-    private void doReportDTO(String handlerName, StringBuilder body, SmsReportResponse report) {
+    private void doReportDTO(String handlerName, String body, SmsReportResponse report) {
         for (SmsReportDTO dto : report.getReports()) {
             if (dto.getSmsId() == null) {
-                LOGGER.warn("sms report smsId are empty, handlerName = {}, reportBody = {}", handlerName, body.toString());
+                LOGGER.warn("sms report smsId are empty, handlerName = {}, reportBody = {}", handlerName, body);
                 continue;
             }
             List<SmsLog> smsLogs = smsLogProvider.findSmsLog(handlerName, dto.getMobile(), dto.getSmsId());
@@ -90,11 +97,11 @@ public class SmsServiceImpl implements SmsService {
                 for (SmsLog smsLog : smsLogs) {
                     smsLog.setStatus(dto.getStatus());
                     smsLog.setReportTime(DateUtils.currentTimestamp());
-                    smsLog.setReportText(body.toString());
+                    smsLog.setReportText(body);
                     smsLogProvider.updateSmsLog(smsLog);
                 }
             } else {
-                LOGGER.warn("sms report not found, smsLog by handlerName = {}, smsId = {}, reportBody = {}", handlerName, dto.getSmsId(), body.toString());
+                LOGGER.warn("sms report not found, smsLog by handlerName = {}, smsId = {}, reportBody = {}", handlerName, dto.getSmsId(), body);
             }
         }
     }

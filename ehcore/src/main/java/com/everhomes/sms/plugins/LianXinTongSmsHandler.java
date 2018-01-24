@@ -243,8 +243,8 @@ public class LianXinTongSmsHandler implements SmsHandler, ApplicationListener<Co
         {"destId":"12306123","mobile":"18211111111","msgId":"1234567890001","reqId":"","status":"DELIVERD"}
     */
     @Override
-    public SmsReportResponse report(String reportBody) {
-        Report report = (Report) StringHelper.fromJsonString(reportBody, Report.class);
+    public SmsReportResponse report(SmsReportRequest reportRequest) {
+        Report report = (Report) StringHelper.fromJsonString(reportRequest.getRequestBody(), Report.class);
         if (report == null) {
             return null;
         }
