@@ -63,10 +63,12 @@ public class PortalVersionProviderImpl implements PortalVersionProvider {
 	}
 
 	@Override
-	public PortalVersion findMaxVersion(Integer namespaceId) {
+	public PortalVersion findMaxBigVersion(Integer namespaceId) {
 		DSLContext context = dbProvider.getDslContext(AccessSpec.readOnly());
 		SelectQuery<EhPortalVersionsRecord> query = context.selectQuery(Tables.EH_PORTAL_VERSIONS);
 		query.addConditions(Tables.EH_PORTAL_VERSIONS.NAMESPACE_ID.eq(namespaceId));
+		query.addConditions(Tables.EH_PORTAL_VERSIONS.MINOR_VERSION.eq(0));
+		query.addOrderBy(Tables.EH_PORTAL_VERSIONS.DATE_VERSION.desc());
 		query.addOrderBy(Tables.EH_PORTAL_VERSIONS.BIG_VERSION.desc());
 		query.addLimit(1);
 		return query.fetchAnyInto(PortalVersion.class);
