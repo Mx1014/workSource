@@ -2835,7 +2835,7 @@ public class QualityProviderImpl implements QualityProvider {
 
 	@Override
 	public List<QualityInspectionTasks> listVerificationTasksRefactor(Integer offset, int pageSize, Timestamp startDate,
-																	  Timestamp endDate, List<Long> executeStandardIds,List<Long> reviewStandardIds,
+																	  Timestamp endDate, List<Long> executeStandardIds, List<Long> reviewStandardIds,
 																	  List<ExecuteGroupAndPosition> groupDtos,
 																	  ListingQueryBuilderCallback builderCallback) {
 		DSLContext context = this.dbProvider.getDslContext(AccessSpec.readOnlyWith(EhQualityInspectionTasks.class));
@@ -2861,7 +2861,7 @@ public class QualityProviderImpl implements QualityProvider {
 				con = con.or(con1);
 			}
 
-			if(reviewStandardIds!=null){
+			if (reviewStandardIds != null) {
 				Condition con2 = Tables.EH_QUALITY_INSPECTION_TASKS.STANDARD_ID.in(reviewStandardIds)
 						.and(Tables.EH_EQUIPMENT_INSPECTION_TASKS.STATUS.eq(QualityInspectionTaskStatus.EXECUTED.getCode()))
 						.and(Tables.EH_EQUIPMENT_INSPECTION_TASKS.REVIEW_RESULT.eq(QualityInspectionTaskReviewResult.NONE.getCode()));
@@ -2872,7 +2872,7 @@ public class QualityProviderImpl implements QualityProvider {
 		}
 		builderCallback.buildCondition(null, query);
 
-		query.addOrderBy(Tables.EH_QUALITY_INSPECTION_TASKS.EXECUTIVE_EXPIRE_TIME.desc());
+		query.addOrderBy(Tables.EH_QUALITY_INSPECTION_TASKS.EXECUTIVE_EXPIRE_TIME);
 		query.addLimit(offset * (pageSize), pageSize + 1);
 		if (LOGGER.isDebugEnabled()) {
 			LOGGER.debug("Query tasks by count, sql=" + query.getSQL());

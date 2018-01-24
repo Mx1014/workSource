@@ -25,6 +25,7 @@ import com.everhomes.rentalv2.Rentalv2ServiceImpl;
 import com.everhomes.repeat.RepeatService;
 import com.everhomes.repeat.RepeatSettings;
 import com.everhomes.rest.acl.PrivilegeConstants;
+import com.everhomes.rest.address.CommunityDTO;
 import com.everhomes.rest.app.AppConstants;
 import com.everhomes.rest.equipment.ReviewResult;
 import com.everhomes.rest.equipment.Status;
@@ -995,7 +996,7 @@ public class QualityServiceImpl implements QualityService {
 		if (cmd.getNamespaceId() != null)
             query.addConditions(Tables.EH_QUALITY_INSPECTION_TASKS.NAMESPACE_ID.eq(cmd.getNamespaceId()));
 		if (!StringUtils.isNullOrEmpty(cmd.getTaskName()))
-            query.addConditions(Tables.EH_QUALITY_INSPECTION_TASKS.TASK_NAME.eq(cmd.getTaskName()));
+            query.addConditions(Tables.EH_QUALITY_INSPECTION_TASKS.TASK_NAME.like("%"+cmd.getTaskName()+"%"));
 
 		if (cmd.getExecuteFlag()!=null && cmd.getExecuteFlag() == 1) {
 			query.addConditions(Tables.EH_QUALITY_INSPECTION_TASKS.EXECUTIVE_EXPIRE_TIME.ge(new Timestamp(DateHelper.currentGMTTime().getTime()))
@@ -2991,14 +2992,18 @@ public class QualityServiceImpl implements QualityService {
 
 	@Override
 	public CountScoresResponse countScores(CountScoresCommand cmd) {
-		/*Long privilegeId = configProvider.getLongValue(QualityConstant.QUALITY_STAT_SCORE, 0L);
-		if(cmd.getTargetIds() != null && cmd.getTargetIds().size() == 1) {
-			userPrivilegeMgr.checkCurrentUserAuthority(EntityType.COMMUNITY.getCode(), cmd.getTargetIds().get(0), cmd.getOwnerId(), privilegeId);
-		} else {
-			userPrivilegeMgr.checkCurrentUserAuthority(null, null, cmd.getOwnerId(), privilegeId);
-		}*/
 
 		Long targetId = null;
+		//add for new backend  20180124
+		if (cmd.getAllFlag() != null && cmd.getAllFlag() == 1) {
+			List<Long> targetIds = null;
+			List<CommunityDTO> communities = organizationService.listAllChildrenOrganizationCoummunities(cmd.getOwnerId());
+			if (communities != null && communities.size() > 0) {
+				targetIds = communities.stream().map(CommunityDTO::getId)
+						.collect(Collectors.toList());
+			}
+			cmd.setTargetIds(targetIds);
+		}
 		if (cmd.getTargetIds() != null && cmd.getTargetIds().size() > 0)
 			targetId = cmd.getTargetIds().get(0);
 
