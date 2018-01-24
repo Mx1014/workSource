@@ -613,6 +613,7 @@ public class AssetProviderImpl implements AssetProvider {
             info.setTargetId(r.getValue(Tables.EH_PAYMENT_BILLS.TARGET_ID));
             info.setTargetType(r.getValue(Tables.EH_PAYMENT_BILLS.TARGET_TYPE));
             info.setTargetName(r.getValue(Tables.EH_PAYMENT_BILLS.TARGET_NAME));
+            info.setDateStr(r.getValue(Tables.EH_PAYMENT_BILLS.DATE_STR));
             list.add(info);
             return null;});
         List<String> fetch = dslContext.select(Tables.EH_APP_URLS.NAME)

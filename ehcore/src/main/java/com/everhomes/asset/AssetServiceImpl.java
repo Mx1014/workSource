@@ -618,9 +618,9 @@ public class AssetServiceImpl implements AssetService {
             }
             requestCmd.setBillIdAndTypes(billIdAndTypes);
             String appName = assetProvider.findAppName(UserContext.getCurrentNamespaceId());
-            if(appName==null || appName.trim().length()<1){
-                appName="张江高科推荐";
-            }
+//            if(appName==null || appName.trim().length()<1){
+//                appName="张江高科推荐";
+//            }
             if(UserContext.getCurrentNamespaceId()==999971){
                 List<NoticeInfo> list = new ArrayList<>();
                 List<ListBillsDTO> listBillsDTOS1 = convertedResponse.getListBillsDTOS();
@@ -639,6 +639,7 @@ public class AssetServiceImpl implements AssetService {
                     info.setPhoneNums(dto.getNoticeTel());
                     info.setAmountRecevable(dto.getAmountReceivable());
                     info.setAmountOwed(dto.getAmountOwed());
+                    info.setDateStr(dto.getDateStr());
                     Long tid = 0l;
                     String targeType=null;
                     Long uid  = assetProvider.findTargetIdByIdentifier(dto.getTargetId());
