@@ -2443,24 +2443,21 @@ public class SalaryServiceImpl implements SalaryService {
         commentA.setAuthor("zuolin");
         cell.setCellComment(commentA);
 
-        XSSFDrawing drawing2 = sheet.createDrawingPatriarch();
-        ClientAnchor anchor2 = factory.createClientAnchor();
         cell = row.createCell(++i);
         cell.setCellValue("姓名");
-        XSSFComment commentB = drawing2.createCellComment(anchor2);
+        anchor.setCol1(cell.getColumnIndex());
+        XSSFComment commentB = drawing.createCellComment(anchor);
         RichTextString strB = factory.createRichTextString("员工姓名仅作为提示作用，编辑将不会生效");
         commentB.setString(strB);
         commentB.setAuthor("zuolin");
         cell.setCellComment(commentB);
 
         for (SalaryGroupEntity entity : groupEntities) {
-
-            XSSFDrawing drawing3 = sheet.createDrawingPatriarch();
-            ClientAnchor anchor3 = factory.createClientAnchor();
             cell = row.createCell(++i);
             cell.setCellValue(entity.getName());
+            anchor.setCol1(cell.getColumnIndex());
             if(SalaryEntityType.REDUN != SalaryEntityType.fromCode(entity.getType())){
-                XSSFComment comment = drawing3.createCellComment(anchor3);
+                XSSFComment comment = drawing.createCellComment(anchor);
                 StringBuilder sb = new StringBuilder();
                 sb.append("金额大于0");
                 sb.append("\n");
