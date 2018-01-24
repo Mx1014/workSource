@@ -27,6 +27,8 @@ import java.util.List;
  *  <li>reviewResult: 对巡检完成、维修完成、需维修三种需要审阅的记录补充审阅记录 参考{@link com.everhomes.rest.equipment.ReviewResult}</li>
  *  <li>equipmentName: 设备名称</li>
  *  <li>equipmentLocation: 设备位置</li>
+ *  <li>normalCount: 正常item数</li>
+ *  <li>abnormalCount: 异常item数</li>
  *  <li>flowCaseId: 维修工作流flowCaseId</li>
  * </ul>
  */
@@ -66,6 +68,10 @@ public class EquipmentTaskLogsDTO {
 	private String 	equipmentName;
 
 	private String equipmentLocation;
+
+	private Integer normalCount;
+
+	private Integer abnormalCount;
 
 	private Long  flowCaseId;
 
@@ -245,6 +251,22 @@ public class EquipmentTaskLogsDTO {
 
 	public void setEquipmentLocation(String equipmentLocation) {
 		this.equipmentLocation = equipmentLocation;
+	}
+
+	public Integer getNormalCount() {
+		return normalCount;
+	}
+
+	public void setNormalCount(Integer normalCount) {
+		this.normalCount = normalCount;
+	}
+
+	public Integer getAbnormalCount() {
+		return abnormalCount;
+	}
+
+	public void setAbnormalCount(Integer abnormalCount) {
+		this.abnormalCount = abnormalCount;
 	}
 
 	public Long getFlowCaseId() {
