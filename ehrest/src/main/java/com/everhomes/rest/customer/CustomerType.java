@@ -4,12 +4,12 @@ import com.everhomes.util.StringHelper;
 
 /**
  * <ul>
- *     <li>'0: enterprise; 1: individual</li>
+ *     <li>'0: enterprise; 1: individual; 3: 供应商supplier</li>
  * </ul>
  * Created by ying.xiong on 2017/8/5.
  */
 public enum CustomerType {
-    ENTERPRISE((byte)0), INDIVIDUAL((byte)1), ORGANIZATION((byte)2);
+    ENTERPRISE((byte)0), INDIVIDUAL((byte)1), ORGANIZATION((byte)2), SUPPLIER((byte)3);
 
     private byte code;
 
