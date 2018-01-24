@@ -63,23 +63,23 @@ public class UserMessageRoutingHandler implements MessageRoutingHandler {
     @Autowired
     private PusherService pusherService;
 
-    @Autowired
-    private TaskScheduler taskScheduler;
+//    @Autowired
+//    private TaskScheduler taskScheduler;
+//
+//    @Autowired
+//    private MessagePersistWorker messagePersistWorker;
 
-    @Autowired
-    private MessagePersistWorker messagePersistWorker;
+//    private ConcurrentLinkedQueue<MessageRecordDto> queue = new ConcurrentLinkedQueue<>();
 
-    private ConcurrentLinkedQueue<MessageRecordDto> queue = new ConcurrentLinkedQueue<>();
-
-    @PostConstruct
-    public void setup(){
-        taskScheduler.scheduleAtFixedRate(()-> {
-            while (!queue.isEmpty()){
-                MessageRecordDto record = queue.poll();
-                this.messagePersistWorker.handleMessagePersist(record);
-            }
-        }, 5*1000);
-    }
+//    @PostConstruct
+//    public void setup(){
+//        taskScheduler.scheduleAtFixedRate(()-> {
+//            while (!queue.isEmpty()){
+//                MessageRecordDto record = queue.poll();
+//                this.messagePersistWorker.handleMessagePersist(record);
+//            }
+//        }, 5*1000);
+//    }
 
     
     @Override
@@ -108,8 +108,7 @@ public class UserMessageRoutingHandler implements MessageRoutingHandler {
         record.setBody(message.getBody());
         record.setDeliveryoption(deliveryOption);
         record.setStatus(MessageRecordStatus.CORE_HANDLE.getCode());
-        queue.offer(record);
-
+        MessagePersistWorker.getQueue().offer(record);
 
         long uid = Long.parseLong(dstChannelToken);
         
@@ -265,7 +264,7 @@ public class UserMessageRoutingHandler implements MessageRoutingHandler {
                     record.setBody(message.getBody());
                     record.setDeliveryoption(deliveryOption);
                     record.setStatus(MessageRecordStatus.CORE_ROUTE.getCode());
-                    queue.offer(record);
+                    MessagePersistWorker.getQueue().offer(record);
 
                     borderConnection.sendMessage(null, forwardPdu);
                     onlineDelivered = true;
@@ -323,7 +322,7 @@ public class UserMessageRoutingHandler implements MessageRoutingHandler {
                     record.setBody(message.getBody());
                     record.setDeliveryoption(deliveryOption);
                     record.setStatus(MessageRecordStatus.CORE_ROUTE.getCode());
-                    queue.offer(record);
+                    MessagePersistWorker.getQueue().offer(record);
 
                     borderConnection.sendMessage(null, forwardPdu);
                 } catch(IOException e) {
