@@ -1,9 +1,7 @@
 // @formatter:off
 package com.everhomes.message;
 
-import com.everhomes.rest.message.PersistMessageCommand;
 import com.everhomes.rest.message.PushMessageToAdminAndBusinessContactsCommand;
-import com.everhomes.rest.messaging.MessageDTO;
 
 public interface MessageService {
 
