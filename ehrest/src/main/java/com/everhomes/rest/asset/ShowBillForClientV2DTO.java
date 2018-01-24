@@ -16,6 +16,7 @@ import java.util.List;
  * <li>overAllAmountOwed:待缴金额总计</li>
  * <li>addressStr:包含的地址</li>
  * <li>contractId:合同id</li>
+ * <li>contractNum:合同编号</li>
  *</ul>
  */
 public class ShowBillForClientV2DTO {
@@ -26,6 +27,7 @@ public class ShowBillForClientV2DTO {
     private String contractId;
     @ItemType(BillForClientV2.class)
     List<BillForClientV2> bills;
+    private String contractNum;
 
     public ShowBillForClientV2DTO() {
     }
@@ -35,8 +37,15 @@ public class ShowBillForClientV2DTO {
         this.contractId = contractId;
     }
 
+    public String getContractNum() {
+        return contractNum;
+    }
 
-    public ShowBillForClientV2DTO(String billGroupName,String contractId) {
+    public void setContractNum(String contractNum) {
+        this.contractNum = contractNum;
+    }
+
+    public ShowBillForClientV2DTO(String billGroupName, String contractId) {
         this.billGroupName = billGroupName;
         this.contractId = contractId;
     }
