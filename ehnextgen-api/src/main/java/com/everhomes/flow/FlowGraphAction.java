@@ -1,6 +1,8 @@
 package com.everhomes.flow;
 
-public abstract class FlowGraphAction {
+import java.io.Serializable;
+
+public abstract class FlowGraphAction implements Serializable {
 
 	private FlowAction flowAction;
 

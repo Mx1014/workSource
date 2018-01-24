@@ -194,12 +194,14 @@ CREATE TABLE `eh_file_management_contents` (
   `content_type` VARCHAR(32) COMMENT 'file, folder',
   `content_suffix` VARCHAR(64) COMMENT 'the suffix of the file',
   `content_uri` VARCHAR(2048) COMMENT 'the uri of the content',
+  `path` VARCHAR(128) NOT NULL COMMENT 'the path of the content',
   `status` TINYINT NOT NULL DEFAULT 1 COMMENT '0-invalid, 1-valid',
   `creator_uid` BIGINT DEFAULT 0,
   `create_time` DATETIME,
   `operator_uid` BIGINT,
   `update_time` DATETIME,
-  PRIMARY KEY (`id`)
+  PRIMARY KEY (`id`),
+  KEY `file_management_contents_path` (`path`)
 ) ENGINE = INNODB DEFAULT CHARSET = utf8mb4 ;
 
 -- DROP TABLE eh_file_icons;

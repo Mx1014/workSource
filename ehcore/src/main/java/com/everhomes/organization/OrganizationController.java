@@ -7,6 +7,7 @@ import com.everhomes.constants.ErrorCodes;
 import com.everhomes.controller.ControllerBase;
 import com.everhomes.discover.RestReturn;
 import com.everhomes.rest.RestResponse;
+import com.everhomes.rest.address.ListBuildingsByKeywordAndNameSpaceCommand;
 import com.everhomes.rest.archives.UpdateArchivesEmployeeCommand;
 import com.everhomes.rest.community.CreateResourceCategoryCommand;
 import com.everhomes.rest.enterprise.LeaveEnterpriseCommand;
@@ -638,6 +639,20 @@ public class OrganizationController extends ControllerBase {
 		res.setErrorDescription("OK");
 		return res;
 	}
+
+    /**
+     * <b>URL: /org/listPmOrganizationsByNamespaceId</b>
+     * <p>查询 域空间的PM公司</p>
+     */
+    @RequestMapping("listPmOrganizationsByNamespaceId")
+    @RestReturn(value=OrganizationTreeDTO.class)
+    public RestResponse listPmOrganizationsByNamespaceId(ListBuildingsByKeywordAndNameSpaceCommand cmd){
+        //TODO:加权限校验
+        RestResponse res = new RestResponse(organizationService.listPmOrganizationsByNamespaceId(cmd.getNamespaceId()));
+        res.setErrorCode(ErrorCodes.SUCCESS);
+        res.setErrorDescription("OK");
+        return res;
+    }
 
 
     /**

@@ -2,6 +2,7 @@ package com.everhomes.flow;
 
 import com.everhomes.rest.flow.FlowActionStatus;
 
+import java.io.Serializable;
 import java.util.ArrayList;
 import java.util.List;
 
@@ -14,7 +15,7 @@ import java.util.List;
  *     <li>scripts: scripts</li>
  * </ul>
  */
-public class FlowGraphButton {
+public class FlowGraphButton implements Serializable {
 
     private FlowButton flowButton;
     private FlowGraphAction remindMsg;
