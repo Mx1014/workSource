@@ -911,13 +911,14 @@ public class QualityServiceImpl implements QualityService {
         }
 
 		//新后台对接权限修改
-		boolean isAdmin = checkAdmin(cmd.getOwnerId(),cmd.getOwnerType(),cmd.getNamespaceId());
-		LOGGER.info("listQualityInspectionTasks: checkAdmin:{}"+isAdmin);
+		boolean isAdmin = checkAdmin(cmd.getOwnerId(), cmd.getOwnerType(), cmd.getNamespaceId());
+		LOGGER.info("listQualityInspectionTasks: checkAdmin:{}" + isAdmin);
 
 		List<QualityInspectionTasks> tasks = new ArrayList<>();
 		if (isAdmin) {
 			//管理员查询所有任务 减少了下参数数量
-			tasks = qualityProvider.listVerificationTasksRefactor(offset, pageSize, startDate, endDate, null, null, (loc, query) -> {
+			tasks = qualityProvider.listVerificationTasksRefactor(offset, pageSize, startDate, endDate,
+					null, null, null, (loc, query) -> {
 				listTasksQueryBuilder(cmd, query);
 				return null;
 			});
@@ -926,18 +927,19 @@ public class QualityServiceImpl implements QualityService {
 			List<QualityInspectionStandardGroupMap> maps = qualityProvider.listQualityInspectionStandardGroupMapByGroupAndPosition(groupDtos);
 			if (maps != null && maps.size() > 0) {
 				List<Long> executeStandardIds = new ArrayList<>();
+				List<Long> reviewStandardIds = new ArrayList<>();
 				for (QualityInspectionStandardGroupMap r : maps) {
 					if (QualityGroupType.EXECUTIVE_GROUP.equals(QualityGroupType.fromStatus(r.getGroupType()))) {
 						executeStandardIds.add(r.getStandardId());
+					} else if (QualityGroupType.REVIEW_GROUP.equals(QualityGroupType.fromStatus(r.getGroupType()))) {
+						reviewStandardIds.add(r.getStandardId());
 					}
 				}
-				tasks = qualityProvider.listVerificationTasksRefactor(offset, pageSize, startDate, endDate, executeStandardIds, groupDtos, (loc, query) -> {
+				tasks = qualityProvider.listVerificationTasksRefactor(offset, pageSize, startDate, endDate,
+						executeStandardIds, reviewStandardIds, groupDtos, (loc, query) -> {
 					listTasksQueryBuilder(cmd, query);
 					return null;
 				});
-//				tasks = qualityProvider.listVerificationTasks(offset, pageSize + 1, ownerId, ownerType, targetId, targetType,
-//						cmd.getTaskType(), user.getId(), startDate, endDate, cmd.getExecuteStatus(), cmd.getReviewStatus(),
-//						timeCompared, executeStandardIds, cmd.getManualFlag(), groupDtos, cmd.getNamespaceId(),cmd.getTaskName(), cmd.getLatestUpdateTime());
 			}
 		}
 		Long nextPageAnchor = null;
