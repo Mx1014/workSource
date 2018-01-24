@@ -14,12 +14,6 @@ import com.everhomes.discover.RestDoc;
 import com.everhomes.discover.RestReturn;
 import com.everhomes.rest.RestResponse;
 
-import java.util.List;
-//import com.everhomes.rest.general_approval.GetActiveGeneralFormByOriginIdCommand;
-//import com.everhomes.rest.general_approval.GetActiveGeneralFormByOriginIdResponse;
-
-//import com.everhomes.rest.general_approval.PostFormCommand;
-//import com.everhomes.rest.general_approval.PostFormResponse;
 
 @RestDoc(value="General approval controller", site="core")
 @RestController

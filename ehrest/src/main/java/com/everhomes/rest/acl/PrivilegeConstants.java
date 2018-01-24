@@ -229,7 +229,6 @@ public interface PrivilegeConstants {
     long PUNCH_STATISTIC_QUERY = 42005L;//    查看打卡记录 （细化权限，下同）
     long PUNCH_STATISTIC_EXPORT = 42006L;//    导出打卡记录
 
-
     //设备巡检权限
     long EQUIPMENT_STANDARD_UPDATE = 30067L;  //	设备巡检 标准新增修改权限
     long EQUIPMENT_STANDARD_LIST = 30068L;   //设备巡检 标准查看权限
@@ -281,6 +280,20 @@ public interface PrivilegeConstants {
     long CONTRACT_SYNC = 21213L;//从第三方同步合同
     long CONTRACT_DENUNCIATION = 21214L;//退约
 
+
+    long PAYMENT_CONTRACT_CREATE = 21215L;//新增付款合同
+    long PAYMENT_CONTRACT_LAUNCH = 21216L;//签约 发起 付款审批
+    long PAYMENT_CONTRACT_UPDATE = 21217L;//修改 付款
+    long PAYMENT_CONTRACT_DELETE = 21218L;//删除 付款
+    long PAYMENT_CONTRACT_INVALID = 21219L;//作废 付款
+    long PAYMENT_CONTRACT_LIST = 21220L;//查看 付款
+    long PAYMENT_CONTRACT_RENEW = 21221L;//续约 付款
+    long PAYMENT_CONTRACT_CHANGE = 21222L;//变更 付款
+    long PAYMENT_CONTRACT_DENUNCIATION = 21223L;//退约 付款
+
+//    -------- 付款申请单 --------
+    long PAYMENT_APPLICATION_CREATE = 21301L;//创建
+    long PAYMENT_APPLICATION_LIST = 21302L;//查看
 
 //    ----------品质核查----------
     long QUALITY_CATEGORY_LIST = 30044L;//品质核查 类型管理查看权限

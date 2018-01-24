@@ -135,6 +135,9 @@ public class ContractServiceImpl implements ContractService {
 	private ScheduleProvider scheduleProvider;
 
 	@Autowired
+	private ContractPaymentPlanProvider contractPaymentPlanProvider;
+
+	@Autowired
 	private ContractAttachmentProvider contractAttachmentProvider;
 
 	@Autowired
@@ -195,6 +198,10 @@ public class ContractServiceImpl implements ContractService {
 
 	@Autowired
 	private RolePrivilegeService rolePrivilegeService;
+
+	private String flowcaseContractOwnerType = FlowOwnerType.CONTRACT.getCode();
+	private String flowcasePaymentContractOwnerType = FlowOwnerType.PAYMENT_CONTRACT.getCode();
+
 
 	private void checkContractAuth(Integer namespaceId, Long privilegeId, Long orgId, Long communityId) {
 		ListServiceModuleAppsCommand cmd = new ListServiceModuleAppsCommand();
@@ -603,6 +610,86 @@ public class ContractServiceImpl implements ContractService {
 		return contractDetailDTO;
 	}
 
+	@Override
+	public ContractDetailDTO createPaymentContract(CreatePaymentContractCommand cmd) {
+		if(ContractType.NEW.equals(ContractType.fromStatus(cmd.getContractType()))) {
+			checkContractAuth(cmd.getNamespaceId(), PrivilegeConstants.PAYMENT_CONTRACT_CREATE, cmd.getOrganizationId(), cmd.getCommunityId());
+		} else if(ContractType.RENEW.equals(ContractType.fromStatus(cmd.getContractType()))) {
+			checkContractAuth(cmd.getNamespaceId(), PrivilegeConstants.PAYMENT_CONTRACT_RENEW, cmd.getOrganizationId(), cmd.getCommunityId());
+		} else if(ContractType.CHANGE.equals(ContractType.fromStatus(cmd.getContractType()))) {
+			checkContractAuth(cmd.getNamespaceId(), PrivilegeConstants.PAYMENT_CONTRACT_CHANGE, cmd.getOrganizationId(), cmd.getCommunityId());
+		}
+
+		Contract contract = ConvertHelper.convert(cmd, Contract.class);
+		if(cmd.getContractNumber() != null) {
+			checkContractNumberUnique(cmd.getNamespaceId(), cmd.getContractNumber());
+		} else {
+			contract.setContractNumber(generateContractNumber());
+		}
+
+		if(cmd.getContractStartDate() != null) {
+			contract.setContractStartDate(new Timestamp(cmd.getContractStartDate()));
+		}
+		if(cmd.getContractEndDate() != null) {
+			contract.setContractEndDate(new Timestamp(cmd.getContractEndDate()));
+		}
+		if(cmd.getSignedTime() != null) {
+			contract.setSignedTime(new Timestamp(cmd.getSignedTime()));
+		}
+		contract.setCreateUid(UserContext.currentUserId());
+		contract.setCreateTime(new Timestamp(DateHelper.currentGMTTime().getTime()));
+		contract.setPaymentFlag((byte)1);
+		contractProvider.createContract(contract);
+
+		dealContractAttachments(contract.getId(), cmd.getAttachments());
+		dealContractPlans(contract.getId(), cmd.getPlans());
+
+		if(ContractStatus.WAITING_FOR_APPROVAL.equals(ContractStatus.fromStatus(contract.getStatus()))) {
+			addToFlowCase(contract, flowcasePaymentContractOwnerType);
+		}
+		contractProvider.updateContract(contract);
+		contractSearcher.feedDoc(contract);
+
+		FindContractCommand command = new FindContractCommand();
+		command.setId(contract.getId());
+		command.setPartyAId(contract.getPartyAId());
+		ContractDetailDTO contractDetailDTO = findContract(command);
+		return contractDetailDTO;
+	}
+
+	@Override
+	public ContractDetailDTO updatePaymentContract(UpdatePaymentContractCommand cmd) {
+		checkContractAuth(cmd.getNamespaceId(), PrivilegeConstants.PAYMENT_CONTRACT_CREATE, cmd.getOrganizationId(), cmd.getCommunityId());
+		Contract exist = checkContract(cmd.getId());
+		Contract contract = ConvertHelper.convert(cmd, Contract.class);
+		Contract existContract = contractProvider.findActiveContractByContractNumber(cmd.getNamespaceId(), cmd.getContractNumber());
+		if(existContract != null && !existContract.getId().equals(contract.getId())) {
+			LOGGER.error("contractNumber {} in namespace {} already exist!", cmd.getContractNumber(), cmd.getNamespaceId());
+			throw RuntimeErrorException.errorWith(ContractErrorCode.SCOPE, ContractErrorCode.ERROR_CONTRACTNUMBER_EXIST,
+					"contractNumber is already exist");
+		}
+		if(cmd.getContractStartDate() != null) {
+			contract.setContractStartDate(new Timestamp(cmd.getContractStartDate()));
+		}
+		if(cmd.getContractEndDate() != null) {
+			contract.setContractEndDate(new Timestamp(cmd.getContractEndDate()));
+		}
+		if(cmd.getSignedTime() != null) {
+			contract.setSignedTime(new Timestamp(cmd.getSignedTime()));
+		}
+		contract.setCreateTime(exist.getCreateTime());
+		contractProvider.updateContract(contract);
+
+		dealContractAttachments(contract.getId(), cmd.getAttachments());
+		dealContractPlans(contract.getId(), cmd.getPlans());
+		if(ContractStatus.WAITING_FOR_APPROVAL.equals(ContractStatus.fromStatus(contract.getStatus()))) {
+			addToFlowCase(contract, flowcasePaymentContractOwnerType);
+		}
+		contractSearcher.feedDoc(contract);
+
+		return ConvertHelper.convert(contract, ContractDetailDTO.class);
+	}
+
 	private void generatePaymentExpectancies(Contract contract, List<ContractChargingItemDTO> chargingItems, List<ContractChargingChangeDTO> adjusts, List<ContractChargingChangeDTO> frees) {
 		assetService.upodateBillStatusOnContractStatusChange(contract.getId(), AssetPaymentConstants.CONTRACT_CANCEL);
 
@@ -765,9 +852,11 @@ public class ContractServiceImpl implements ContractService {
 	}
 
 
-	private void addToFlowCase(Contract contract) {
-		Flow flow = flowService.getEnabledFlow(contract.getNamespaceId(), FlowConstants.CONTRACT_MODULE,
-				FlowModuleType.NO_MODULE.getCode(), contract.getCommunityId(), FlowOwnerType.CONTRACT.getCode());
+	private void addToFlowCase(Contract contract, String flowcaseOwnerType) {
+//		Flow flow = flowService.getEnabledFlow(contract.getNamespaceId(), FlowConstants.CONTRACT_MODULE,
+//				FlowModuleType.NO_MODULE.getCode(), contract.getCommunityId(), FlowOwnerType.CONTRACT.getCode());
+		Flow flow = flowService.getEnabledFlow(contract.getNamespaceId(),EntityType.COMMUNITY.getCode(),contract.getCommunityId(),
+				FlowConstants.CONTRACT_MODULE, FlowModuleType.NO_MODULE.getCode(), contract.getCommunityId(), flowcaseOwnerType);
 		if(null == flow) {
 			LOGGER.error("Enable request flow not found, moduleId={}", FlowConstants.CONTRACT_MODULE);
 			throw RuntimeErrorException.errorWith(ContractErrorCode.SCOPE, ContractErrorCode.ERROR_ENABLE_FLOW,
@@ -1036,6 +1125,33 @@ public class ContractServiceImpl implements ContractService {
 		}
 	}
 
+	private void dealContractPlans(Long contractId, List<ContractPaymentPlanDTO> plans) {
+		List<ContractPaymentPlan> existPlans = contractPaymentPlanProvider.listByContractId(contractId);
+		Map<Long, ContractPaymentPlan> map = new HashMap<>();
+		if(existPlans != null && existPlans.size() > 0) {
+			existPlans.forEach(plan -> {
+				map.put(plan.getId(), plan);
+			});
+		}
+
+		if(plans != null && plans.size() > 0) {
+			plans.forEach(plan -> {
+				if(plan.getId() == null) {
+					ContractPaymentPlan contractPaymentPlan = ConvertHelper.convert(plan, ContractPaymentPlan.class);
+					contractPaymentPlan.setContractId(contractId);
+					contractPaymentPlanProvider.createContractPaymentPlan(contractPaymentPlan);
+				} else {
+					map.remove(plan.getId());
+				}
+			});
+		}
+		if(map.size() > 0) {
+			map.forEach((id, plan) -> {
+				contractPaymentPlanProvider.deleteContractPaymentPlan(plan);
+			});
+		}
+	}
+
 	@Override
 	public ContractDetailDTO updateContract(UpdateContractCommand cmd) {
 		checkContractAuth(cmd.getNamespaceId(), PrivilegeConstants.CONTRACT_CREATE, cmd.getOrgId(), cmd.getCommunityId());
@@ -1081,7 +1197,7 @@ public class ContractServiceImpl implements ContractService {
 //		contractSearcher.feedDoc(contract);
 		dealContractChargingChanges(contract, cmd.getAdjusts(), cmd.getFrees());
 		if(ContractStatus.WAITING_FOR_APPROVAL.equals(ContractStatus.fromStatus(contract.getStatus()))) {
-			addToFlowCase(contract);
+			addToFlowCase(contract, flowcaseContractOwnerType);
 		}
 		contractSearcher.feedDoc(contract);
 		ExecutorUtil.submit(new Runnable() {
@@ -1096,7 +1212,11 @@ public class ContractServiceImpl implements ContractService {
 
 	@Override
 	public void denunciationContract(DenunciationContractCommand cmd) {
-		checkContractAuth(cmd.getNamespaceId(), PrivilegeConstants.CONTRACT_DENUNCIATION, cmd.getOrgId(), cmd.getCommunityId());
+		if(cmd.getPaymentFlag() == 1) {
+			checkContractAuth(cmd.getNamespaceId(), PrivilegeConstants.PAYMENT_CONTRACT_DENUNCIATION, cmd.getOrgId(), cmd.getCommunityId());
+		} else {
+			checkContractAuth(cmd.getNamespaceId(), PrivilegeConstants.CONTRACT_DENUNCIATION, cmd.getOrgId(), cmd.getCommunityId());
+		}
 		Contract contract = checkContract(cmd.getId());
 		contract.setStatus(ContractStatus.DENUNCIATION.getCode());
 		contract.setDenunciationReason(cmd.getDenunciationReason());
@@ -1104,8 +1224,11 @@ public class ContractServiceImpl implements ContractService {
 		contract.setDenunciationTime(new Timestamp(DateHelper.currentGMTTime().getTime()));
 		contractProvider.updateContract(contract);
 		contractSearcher.feedDoc(contract);
-
-		addToFlowCase(contract);
+		if(cmd.getPaymentFlag() == 1) {
+			addToFlowCase(contract, flowcasePaymentContractOwnerType);
+		}else {
+			addToFlowCase(contract, flowcaseContractOwnerType);
+		}
 
 	}
 
@@ -1119,7 +1242,11 @@ public class ContractServiceImpl implements ContractService {
 					"contract status is not waiting for launch!");
 		}
 		if(ContractStatus.INVALID.equals(ContractStatus.fromStatus(cmd.getResult()))) {
-			checkContractAuth(cmd.getNamespaceId(), PrivilegeConstants.CONTRACT_INVALID, cmd.getOrgId(), cmd.getCommunityId());
+			if(cmd.getPaymentFlag() == 1) {
+				checkContractAuth(cmd.getNamespaceId(), PrivilegeConstants.PAYMENT_CONTRACT_INVALID, cmd.getOrgId(), cmd.getCommunityId());
+			} else {
+				checkContractAuth(cmd.getNamespaceId(), PrivilegeConstants.CONTRACT_INVALID, cmd.getOrgId(), cmd.getCommunityId());
+			}
 			contract.setInvalidTime(new Timestamp(DateHelper.currentGMTTime().getTime()));
 			contract.setInvalidUid(UserContext.currentUserId());
 			contract.setStatus(cmd.getResult());
@@ -1146,7 +1273,11 @@ public class ContractServiceImpl implements ContractService {
 		if(ContractStatus.WAITING_FOR_APPROVAL.equals(ContractStatus.fromStatus(cmd.getResult())) &&
 				(ContractStatus.WAITING_FOR_LAUNCH.equals(ContractStatus.fromStatus(contract.getStatus()))
 				 || ContractStatus.APPROVE_NOT_QUALITIED.equals(ContractStatus.fromStatus(contract.getStatus())))) {
-			checkContractAuth(cmd.getNamespaceId(), PrivilegeConstants.CONTRACT_LAUNCH, cmd.getOrgId(), cmd.getCommunityId());
+			if(cmd.getPaymentFlag() == 1) {
+				checkContractAuth(cmd.getNamespaceId(), PrivilegeConstants.PAYMENT_CONTRACT_LAUNCH, cmd.getOrgId(), cmd.getCommunityId());
+			} else {
+				checkContractAuth(cmd.getNamespaceId(), PrivilegeConstants.CONTRACT_LAUNCH, cmd.getOrgId(), cmd.getCommunityId());
+			}
 			//发起审批要把门牌状态置为被占用
 			List<ContractBuildingMapping> contractApartments = contractBuildingMappingProvider.listByContract(contract.getId());
 			if(contractApartments != null && contractApartments.size() > 0) {
@@ -1192,7 +1323,11 @@ public class ContractServiceImpl implements ContractService {
 			contract.setStatus(cmd.getResult());
 			contractProvider.updateContract(contract);
 			contractSearcher.feedDoc(contract);
-			addToFlowCase(contract);
+			if(cmd.getPaymentFlag() == 1) {
+				addToFlowCase(contract, flowcasePaymentContractOwnerType);
+			}else {
+				addToFlowCase(contract, flowcaseContractOwnerType);
+			}
 
 		}
 
@@ -1267,8 +1402,10 @@ public class ContractServiceImpl implements ContractService {
 		ContractParam communityExist = contractProvider.findContractParamByCommunityId(cmd.getNamespaceId(), cmd.getCommunityId());
 		if(cmd.getId() == null && communityExist == null) {
 			contractProvider.createContractParam(param);
+			dealParamGroupMap(param.getId(), cmd.getNotifyGroups(), cmd.getPaidGroups());
 		} else if(cmd.getId() != null && communityExist != null && cmd.getId().equals(communityExist.getId())){
 			contractProvider.updateContractParam(param);
+			dealParamGroupMap(param.getId(), cmd.getNotifyGroups(), cmd.getPaidGroups());
 		} else {
 			LOGGER.error("the community already have param: cmd: {}, exist: {}", cmd, communityExist);
 			throw RuntimeErrorException.errorWith(ContractErrorCode.SCOPE, ContractErrorCode.ERROR_CONTRACT_PARAM_NOT_EXIST,
@@ -1277,25 +1414,84 @@ public class ContractServiceImpl implements ContractService {
 
 	}
 
+	private void dealParamGroupMap(Long id, List<ContractParamGroupMapDTO> notifyGroups, List<ContractParamGroupMapDTO> paidGroups) {
+		List<ContractParamGroupMap> existNotifyGroups = contractProvider.listByParamId(id, ContractParamGroupType.NOTIFY_GROUP.getCode());
+		List<ContractParamGroupMap> existPaidGroups = contractProvider.listByParamId(id, ContractParamGroupType.PAY_GROUP.getCode());
+		Map<Long, ContractParamGroupMap> notifyGroupMap = new HashMap<>();
+		if(existNotifyGroups != null && existNotifyGroups.size() > 0) {
+			existNotifyGroups.forEach(notifyGroup -> {
+				notifyGroupMap.put(notifyGroup.getId(), notifyGroup);
+			});
+		}
+
+		Map<Long, ContractParamGroupMap> paidGroupMap = new HashMap<>();
+		if(existPaidGroups != null && existPaidGroups.size() > 0) {
+			existPaidGroups.forEach(paidGroup -> {
+				paidGroupMap.put(paidGroup.getId(), paidGroup);
+			});
+		}
+		dealParamGroupMap(id, notifyGroups, notifyGroupMap);
+		dealParamGroupMap(id, paidGroups, paidGroupMap);
+
+	}
+
+	private void dealParamGroupMap(Long id, List<ContractParamGroupMapDTO> groups, Map<Long, ContractParamGroupMap> map) {
+		if(groups != null && groups.size() > 0) {
+			groups.forEach(group -> {
+				if(group.getId() == null) {
+					ContractParamGroupMap paramGroupMap = ConvertHelper.convert(group, ContractParamGroupMap.class);
+					paramGroupMap.setParamId(id);
+					contractProvider.createContractParamGroupMap(paramGroupMap);
+				} else {
+					map.remove(group.getId());
+				}
+			});
+		}
+		if(map.size() > 0) {
+			map.forEach((mapId, group) -> {
+				contractProvider.deleteContractParamGroupMap(group);
+			});
+		}
+	}
+
 	@Override
 	public ContractParamDTO getContractParam(GetContractParamCommand cmd) {
 		checkContractAuth(cmd.getNamespaceId(), PrivilegeConstants.CONTRACT_PARAM_LIST, cmd.getOrgId(), cmd.getCommunityId());
 		ContractParam communityExist = contractProvider.findContractParamByCommunityId(cmd.getNamespaceId(), cmd.getCommunityId());
 
 		if(communityExist != null) {
-			return ConvertHelper.convert(communityExist, ContractParamDTO.class);
+			return toContractParamDTO(communityExist);
 		} else if(communityExist == null && cmd.getCommunityId() != null) {
 			communityExist = contractProvider.findContractParamByCommunityId(cmd.getNamespaceId(), null);
 			if(communityExist != null) {
-				return ConvertHelper.convert(communityExist, ContractParamDTO.class);
+				return toContractParamDTO(communityExist);
 			}
 		}
 		return null;
 	}
 
+	private ContractParamDTO toContractParamDTO(ContractParam param) {
+		ContractParamDTO dto = ConvertHelper.convert(param, ContractParamDTO.class);
+		List<ContractParamGroupMap> notifyGroups = contractProvider.listByParamId(param.getId(), ContractParamGroupType.NOTIFY_GROUP.getCode());
+		List<ContractParamGroupMap> paidGroups = contractProvider.listByParamId(param.getId(), ContractParamGroupType.PAY_GROUP.getCode());
+
+		if(notifyGroups != null && notifyGroups.size() > 0) {
+			dto.setNotifyGroups(notifyGroups.stream().map(group -> ConvertHelper.convert(group, ContractParamGroupMapDTO.class)).collect(Collectors.toList()));
+		}
+		if(paidGroups != null && paidGroups.size() > 0) {
+			dto.setPaidGroups(paidGroups.stream().map(group -> ConvertHelper.convert(group, ContractParamGroupMapDTO.class)).collect(Collectors.toList()));
+		}
+		return dto;
+	}
+
 	@Override
 	public void deleteContract(DeleteContractCommand cmd) {
-		checkContractAuth(cmd.getNamespaceId(), PrivilegeConstants.CONTRACT_DELETE, cmd.getOrgId(), cmd.getCommunityId());
+		if(cmd.getPaymentFlag() == 1) {
+			checkContractAuth(cmd.getNamespaceId(), PrivilegeConstants.PAYMENT_CONTRACT_DELETE, cmd.getOrgId(), cmd.getCommunityId());
+		} else {
+			checkContractAuth(cmd.getNamespaceId(), PrivilegeConstants.CONTRACT_DELETE, cmd.getOrgId(), cmd.getCommunityId());
+		}
+
 		Contract contract = checkContract(cmd.getId());
 		Boolean flag = false;
 		if(ContractStatus.WAITING_FOR_LAUNCH.equals(ContractStatus.fromStatus(contract.getStatus())) || ContractStatus.ACTIVE.equals(ContractStatus.fromStatus(contract.getStatus()))
@@ -1400,6 +1596,7 @@ public class ContractServiceImpl implements ContractService {
 		processContractChargingItems(dto);
 		processContractAttachments(dto);
 		processContractChargingChanges(dto);
+		processContractPaymentPlans(dto);
 		return dto;
 	}
 
@@ -1668,6 +1865,18 @@ public class ContractServiceImpl implements ContractService {
 				return attachmentDto;
 			}).collect(Collectors.toList());
 			dto.setAttachments(dtos);
+		}
+	}
+
+	private void processContractPaymentPlans(ContractDetailDTO dto) {
+		List<ContractPaymentPlan> contractPlans = contractPaymentPlanProvider.listByContractId(dto.getId());
+		if(contractPlans != null && contractPlans.size() > 0) {
+			List<ContractPaymentPlanDTO> dtos = contractPlans.stream().map(plan -> {
+				ContractPaymentPlanDTO planDTO = ConvertHelper.convert(plan, ContractPaymentPlanDTO.class);
+				planDTO.setPaidTime(plan.getPaidTime().getTime());
+				return planDTO;
+			}).collect(Collectors.toList());
+			dto.setPlans(dtos);
 		}
 	}
 
