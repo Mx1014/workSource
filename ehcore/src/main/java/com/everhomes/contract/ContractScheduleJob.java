@@ -12,21 +12,18 @@ import com.everhomes.organization.OrganizationMember;
 import com.everhomes.organization.OrganizationProvider;
 import com.everhomes.organization.pm.CommunityAddressMapping;
 import com.everhomes.organization.pm.PropertyMgrProvider;
-<<<<<<< HEAD
 import com.everhomes.organization.pm.PropertyMgrService;
 import com.everhomes.rest.contract.ContractParamDTO;
 import com.everhomes.rest.contract.ContractStatus;
 import com.everhomes.rest.contract.GetContractParamCommand;
 import com.everhomes.rest.contract.PeriodUnit;
 import com.everhomes.rest.customer.CustomerType;
-=======
 import com.everhomes.rest.app.AppConstants;
 import com.everhomes.rest.contract.*;
 import com.everhomes.rest.messaging.MessageBodyType;
 import com.everhomes.rest.messaging.MessageChannel;
 import com.everhomes.rest.messaging.MessageDTO;
 import com.everhomes.rest.messaging.MessagingConstants;
->>>>>>> payment-contract
 import com.everhomes.rest.organization.pm.AddressMappingStatus;
 import com.everhomes.rest.pmNotify.PmNotifyType;
 import com.everhomes.rest.user.MessageChannelType;
