@@ -49,7 +49,8 @@ public class SupplierServiceImpl implements SupplierService{
         supplier.setBankName(cmd.getBankOfDeposit());
         String contactName = cmd.getContactName()==null?"":cmd.getContactName();
         String contactTel = cmd.getContactTel()==null?"":cmd.getContactTel();
-        supplier.setContacts(contactName+"$"+contactTel);
+        supplier.setContactName(contactName);
+        supplier.setContactTel(contactTel);
         supplier.setCorpAddress(cmd.getCorpAddress());
         supplier.setCorpIntroInfo(cmd.getCorpIntroInfo());
         supplier.setEmail(cmd.getEmail());
@@ -102,7 +103,7 @@ public class SupplierServiceImpl implements SupplierService{
         dto.setBizLicense(supplier.getEnterpriseBusinessLicence());
         dto.setCategoryOfEvaluation(supplier.getEvaluationCategory());
         dto.setContactName(supplier.getContactName());
-        dto.setContactTel(supplier.getcontactTel());
+        dto.setContactTel(supplier.getContactTel());
         dto.setCorpAddress(supplier.getCorpAddress());
         dto.setCorpIntroInfo(supplier.getCorpIntroInfo());
         dto.setEmail(supplier.getEmail());

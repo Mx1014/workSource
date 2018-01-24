@@ -81,13 +81,14 @@ public class SupplierController extends ControllerBase {
      * <b>URL: /supplier/searchSuppliers</b>
      * <p>模糊搜索供应商</p>
      */
-    @RequestMapping("searchSuppliers")
-    @RestReturn(value = SearchSuppliersDTO.class,collection = true)
-    private RestResponse searchSuppliers(SearchSuppliersCommand cmd){
-        RestResponse restResponse = new RestResponse();
-        restResponse.setErrorCode(200);
-        restResponse.setErrorDescription("OK");
-        return restResponse;
-    }
+//    @RequestMapping("searchSuppliers")
+//    @RestReturn(value = SearchSuppliersDTO.class,collection = true)
+//    private RestResponse searchSuppliers(SearchSuppliersCommand cmd){
+////        supplierService.searchSuppliers(cmd.getNameKeyword());
+//        RestResponse restResponse = new RestResponse();
+//        restResponse.setErrorCode(200);
+//        restResponse.setErrorDescription("OK");
+//        return restResponse;
+//    }
 
 }
