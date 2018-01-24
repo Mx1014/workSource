@@ -2786,8 +2786,10 @@ private void checkUserPrivilege(Long orgId, Long privilegeId, Long communityId) 
 				} else {
 					equipment = equipmentProvider.findEquipmentById(itemResults.get(0).getEquipmentId());
 				}
-				if (equipment != null)
+				if (equipment != null){
 					dto.setEquipmentName(equipment.getName());
+					dto.setEquipmentLocation(equipment.getLocation());
+				}
 			}
 			dto.setItemResults(results);
 
