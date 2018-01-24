@@ -7,10 +7,10 @@ import com.everhomes.flow.FlowStateProcessor;
 import com.everhomes.flow.FlowStepErrorException;
 
 public class FlowGraphNodeNormal extends FlowGraphNode {
-	private FlowStateProcessor flowStateProcessor;
+
+	transient private FlowStateProcessor flowStateProcessor;
 	
 	public FlowGraphNodeNormal() {
-	    super();
 		flowStateProcessor = PlatformContext.getComponent(FlowStateProcessor.class);
 	}
 	

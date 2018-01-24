@@ -1,9 +1,18 @@
 package com.everhomes.flow;
 
-import java.security.MessageDigest;
-import java.security.NoSuchAlgorithmException;
-import java.util.List;
-
+import com.everhomes.aclink.huarun.*;
+import com.everhomes.bigcollection.Accessor;
+import com.everhomes.bigcollection.BigCollectionProvider;
+import com.everhomes.entity.EntityType;
+import com.everhomes.organization.OrganizationService;
+import com.everhomes.redis.JsonStringRedisSerializer;
+import com.everhomes.rest.organization.ListOrganizationJobPositionCommand;
+import com.everhomes.rest.organization.ListOrganizationJobPositionResponse;
+import com.everhomes.user.User;
+import com.everhomes.user.UserContext;
+import com.everhomes.user.UserProvider;
+import com.everhomes.user.UserService;
+import com.everhomes.user.base.LoginAuthTestCase;
 import org.junit.After;
 import org.junit.Assert;
 import org.junit.Before;
@@ -20,26 +29,7 @@ import org.springframework.data.redis.core.RedisTemplate;
 import org.springframework.data.redis.serializer.JdkSerializationRedisSerializer;
 import org.springframework.data.redis.serializer.StringRedisSerializer;
 
-import com.everhomes.aclink.huarun.AclinkGetSimpleQRCode;
-import com.everhomes.aclink.huarun.AclinkGetSimpleQRCodeResp;
-import com.everhomes.aclink.huarun.AclinkHuarunService;
-import com.everhomes.aclink.huarun.AclinkHuarunSyncUser;
-import com.everhomes.aclink.huarun.AclinkHuarunSyncUserResp;
-import com.everhomes.aclink.huarun.AclinkHuarunVerifyUser;
-import com.everhomes.aclink.huarun.AclinkHuarunVerifyUserResp;
-import com.everhomes.bigcollection.Accessor;
-import com.everhomes.bigcollection.BigCollectionProvider;
-import com.everhomes.entity.EntityType;
-import com.everhomes.organization.OrganizationService;
-import com.everhomes.redis.JsonStringRedisSerializer;
-import com.everhomes.rest.organization.ListOrganizationJobPositionCommand;
-import com.everhomes.rest.organization.ListOrganizationJobPositionResponse;
-import com.everhomes.user.User;
-import com.everhomes.user.UserContext;
-import com.everhomes.user.UserProvider;
-import com.everhomes.user.UserService;
-import com.everhomes.user.base.LoginAuthTestCase;
-import com.everhomes.util.StringHelper;
+import java.security.NoSuchAlgorithmException;
 
 public class FlowUserTest extends LoginAuthTestCase {
 	private static final Logger LOGGER = LoggerFactory.getLogger(FlowServiceTest.class);
@@ -116,8 +106,8 @@ public class FlowUserTest extends LoginAuthTestCase {
     	ListOrganizationJobPositionResponse resp = organizationService.listOrganizationJobPositions(cmd);
     	Assert.assertTrue(resp.getRequests().size() > 0);
     	
-    	List<Long> users = flowUserSelectionService.findUsersByJobPositionId(null, resp.getRequests().get(0).getId(), 300014l);
-    	Assert.assertTrue(users.size() > 0);
+    	// List<Long> users = flowUserSelectionService.findUsersByJobPositionId(null, resp.getRequests().get(0).getId(), 300014l);
+    	// Assert.assertTrue(users.size() > 0);
     }
     
     @Test

@@ -4,12 +4,13 @@ import com.everhomes.rest.flow.FlowActionStatus;
 import com.everhomes.rest.flow.FlowCaseStatus;
 import com.everhomes.rest.flow.FlowNodeType;
 
+import java.io.Serializable;
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 
-public abstract class FlowGraphNode {
+public abstract class FlowGraphNode  implements Serializable {
 
     private FlowNode flowNode;
 
@@ -25,7 +26,7 @@ public abstract class FlowGraphNode {
 
     private List<FlowGraphLink> linksIn;
     private List<FlowGraphLink> linksOut;
-    private Map<Long, FlowGraphLink> idToLink;
+    transient private Map<Long, FlowGraphLink> idToLink;
 
     private List<FlowGraphButton> processorButtons;
     private List<FlowGraphButton> applierButtons;
