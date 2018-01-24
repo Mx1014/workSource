@@ -63,11 +63,11 @@ public class UserMessageRoutingHandler implements MessageRoutingHandler {
     @Autowired
     private PusherService pusherService;
 
-    @Autowired
-    private TaskScheduler taskScheduler;
-
-    @Autowired
-    private MessagePersistWorker messagePersistWorker;
+//    @Autowired
+//    private TaskScheduler taskScheduler;
+//
+//    @Autowired
+//    private MessagePersistWorker messagePersistWorker;
 
 //    private ConcurrentLinkedQueue<MessageRecordDto> queue = new ConcurrentLinkedQueue<>();
 

@@ -6,6 +6,8 @@ import com.everhomes.msgbox.Message;
 import com.everhomes.msgbox.MessageBoxProvider;
 import com.everhomes.msgbox.MessageLocator;
 import com.everhomes.rest.app.AppConstants;
+import com.everhomes.rest.message.MessageRecordDto;
+import com.everhomes.rest.message.MessageRecordStatus;
 import com.everhomes.rest.messaging.MessageChannel;
 import com.everhomes.rest.messaging.MessageDTO;
 import com.everhomes.rest.messaging.MessageMetaConstant;
@@ -98,6 +100,22 @@ public class MessagingServiceImpl implements MessagingService {
             if(r.getChannelToken() == null || r.getChannelToken().isEmpty()) {
                 LOGGER.warn("channel is empty!" + r.getStoreSequence());
             } else {
+
+            MessageRecordDto record = new MessageRecordDto();
+            record.setAppId(cmd.getAppId());
+            record.setNamespaceId(r.getNamespaceId());
+            record.setMessageSeq(r.getMessageSequence());
+            record.setSenderUid(r.getSenderUid());
+            record.setSenderTag("");
+            record.setDstChannelType("USER FETCH");
+            record.setDstChannelToken(UserContext.current().getLogin().getUserId()+"");
+            record.setChannelsInfo("");
+            record.setBodyType(r.getContextType());
+            record.setBody(r.getContent());
+            record.setMessageSeq(r.getStoreSequence());
+            record.setStatus(MessageRecordStatus.CORE_ROUTE.getCode());
+            MessagePersistWorker.getQueue().offer(record);
+
              dtoMessages.add(toMessageDto(r));   
             }
         }
