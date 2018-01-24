@@ -2839,19 +2839,20 @@ public class QualityServiceImpl implements QualityService {
 					&& dto.getUpdateTime().before(syncTime) && dto.getDeleteTime().before(syncTime));
 		}
 		//非真实分页
-		if (cmd.getPageAnchor() == 0L && cmd.getPageAnchor() == null) {
-			int pageSize = PaginationConfigHelper.getPageSize(configurationProvider, cmd.getPageSize());
-			if (pageSize < dtos.size()) {
-				dtos.subList(cmd.getPageAnchor().intValue() * pageSize, cmd.getPageAnchor().intValue() * pageSize + pageSize);
-				response.setNextPageAnchor(cmd.getPageAnchor() + 1);
-			} else {
-				response.setNextPageAnchor(null);
-			}
+		if (cmd.getPageAnchor() == null) {
+			cmd.setPageAnchor(0L);
+		}
+		int pageSize = PaginationConfigHelper.getPageSize(configurationProvider, cmd.getPageSize());
+		if (pageSize < dtos.size()) {
+			dtos.subList(cmd.getPageAnchor().intValue() * pageSize, cmd.getPageAnchor().intValue() * pageSize + pageSize);
+			response.setNextPageAnchor(cmd.getPageAnchor() + 1);
+		} else {
+			response.setNextPageAnchor(null);
 		}
 		//返回数据中添加所属项目
 		processSepcificationScopeName(dtos);
 		List<QualityInspectionSpecificationDTO> result = null;
-		if (dtos != null && dtos.size() > 0) {
+		if (dtos.size() > 0) {
 			result = dtos.stream().sorted(Comparator.comparing(QualityInspectionSpecificationDTO::getId))
 							.collect(Collectors.toList());
 		}
