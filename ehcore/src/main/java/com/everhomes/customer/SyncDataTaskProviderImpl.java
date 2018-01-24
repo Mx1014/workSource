@@ -80,7 +80,7 @@ public class SyncDataTaskProviderImpl implements SyncDataTaskProvider {
         query.addConditions(Tables.EH_SYNC_DATA_TASKS.TYPE.eq(syncType));
 
         if(pageAnchor != null) {
-            query.addConditions(Tables.EH_SYNC_DATA_TASKS.ID.lt(pageAnchor));
+            query.addConditions(Tables.EH_SYNC_DATA_TASKS.ID.le(pageAnchor));
         }
 
         query.addOrderBy(Tables.EH_SYNC_DATA_TASKS.ID.desc());
