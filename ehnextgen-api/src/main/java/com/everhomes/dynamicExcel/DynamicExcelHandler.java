@@ -36,16 +36,16 @@ public interface DynamicExcelHandler {
 //    void postProcess(DynamicImportResponse response);
 
     /**
-     * 在dynamicaService 导入方法exportDynamicExcel中使用
+     * 注意：dynamicSheet中的list<DynamicField>的长度和顺序必须和 @param headers 相同
      * @param sheetName sheet的名字
-     * @param params 在dynamicaService.exportDynamicExcel() 传递的调用者的参数
+     * @param params 在dynamicaService.exportDynamicExcel()和importDynamicExcel() 传递的调用者的参数,导出时dynamicField的前提参数
+     * @param headers 导入时，获取dynamicField的前提参数
      * @Return Dynamic实例对象集合
      */
-    List<DynamicSheet> getDynamicSheet(String sheetName, Object params);
+    List<DynamicSheet> getDynamicSheet(String sheetName, Object params, List<String> headers, boolean isImport);
 
     /**
      * 标题行和返回的数据的list的下表必须保持对应
-     * @param fields 标题行
      * @param sheet 所在的动态sheet对象
      * @param context 上下文，遍历sheet时记录sheets之间的关系
      * @return
@@ -56,11 +56,11 @@ public interface DynamicExcelHandler {
 
     /**
      * 导入数据，提供sheet的名字和行数据的集合，导入的结果应该置入response中
-     * @param sheetName sheet页的名字
+     * @param ds 动态sheet对象，参考DynamicSheet
      * @param rowDatas  sheet页中的行数据列表
      * @param context  上下文，遍历sheet导入时记录sheets之间的关系
      * @param params  在dynamicaService.importMultiSheet() 传递的调用者的参数
      * @param response  方法DynamicExcelService.importMultiSheet的返回，对于每一个sheet的导入结果都应该放入此返回中
      */
-    void importData(String sheetName, List<DynamicRowDTO> rowDatas, Object params,Map<Object,Object> context,DynamicImportResponse response);
+    void importData(DynamicSheet ds, List<DynamicRowDTO> rowDatas, Object params,Map<Object,Object> context,DynamicImportResponse response);
 }

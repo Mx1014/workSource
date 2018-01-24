@@ -9,6 +9,10 @@ import java.util.List;
  */
 
 public class DynamicField {
+    /**
+     * fieldName:字段的名称
+     */
+    private String fieldName;
     @NotNull
     /**
      * displayName: 字段在excel上展示的名字
@@ -22,6 +26,14 @@ public class DynamicField {
 
     public String getDateFormat() {
         return dateFormat;
+    }
+
+    public String getFieldName() {
+        return fieldName;
+    }
+
+    public void setFieldName(String fieldName) {
+        this.fieldName = fieldName;
     }
 
     public List<String> getAllowedValued() {

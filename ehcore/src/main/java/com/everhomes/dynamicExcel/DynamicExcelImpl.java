@@ -58,14 +58,14 @@ public class DynamicExcelImpl implements DynamicExcelService{
         Map<Object,Object> context = new HashMap<>();
         //遍历筛选过的sheet
         for( int i = 0; i < sheetNames.size(); i++){
-            List<DynamicSheet> sheets = h.getDynamicSheet(sheetNames.get(i),params);
+            List<DynamicSheet> sheets = h.getDynamicSheet(sheetNames.get(i),params,null,false);
             for(DynamicSheet sheet: sheets){
                 List<DynamicField> fields = sheet.getDynamicFields();
                 List<List<String>> data = null;
                 String intro = baseInfo;
                 if(withData){
                     //获取数据
-                    data = h.getExportData(fields,sheet,context);
+                    data = h.getExportData(sheet,context);
                 }
                 if(StringUtils.isEmpty(baseInfo)){
                     intro = DynamicExcelStrings.baseIntro;
@@ -148,6 +148,7 @@ public class DynamicExcelImpl implements DynamicExcelService{
             Sheet sheet = null;
             try{
                 sheet = workbook.getSheetAt(i);
+
 //                //获得行对象和列对象时，可以不用这一步吗？
 //                DynamicSheet ds = h.getDynamicSheet(sheet.getSheetName(), storage);
 //                //获得sheet的容器对象
@@ -160,25 +161,31 @@ public class DynamicExcelImpl implements DynamicExcelService{
 //                    continue sheet;
 //                }
 //                List<Object> sheetClassObjs = new ArrayList<>();
-                Row headRow = null;
-                if (headerRow != null) {
-                    headRow = sheet.getRow(headerRow);
-                } else {
-                    headRow = sheet.getRow(1);
-                    headerRow = 1;
-                }
+                    Row headRow = null;
+                    if (headerRow != null) {
+                        headRow = sheet.getRow(headerRow);
+                    } else {
+                        headRow = sheet.getRow(1);
+                        headerRow = 1;
+                    }
 //                List<DynamicField> headers = new ArrayList<>();
-                List<String> headers = new ArrayList<>();
-                //获得了 dynamicField的列表
+                    List<String> headers = new ArrayList<>();
+                    //获得了 dynamicField的列表
 //                for (int j = headRow.getFirstCellNum(); j < headRow.getLastCellNum(); j++) {
 //                    Cell cell = headRow.getCell(j);
 //                    String headerDisplay = ExcelUtils.getCellValue(cell);
 //                    headers.add(headerDisplay);
 //                }
-                for (int j = headRow.getFirstCellNum(); j < headRow.getLastCellNum(); j++) {
-                    Cell cell = headRow.getCell(j);
-                    String headerDisplay = ExcelUtils.getCellValue(cell);
-                    headers.add(headerDisplay);
+                    for (int j = headRow.getFirstCellNum(); j < headRow.getLastCellNum(); j++) {
+                        Cell cell = headRow.getCell(j);
+                        String headerDisplay = ExcelUtils.getCellValue(cell);
+                        headers.add(headerDisplay);
+                    }
+                List<DynamicSheet> ds = h.getDynamicSheet(sheet.getSheetName(),params,headers,true);
+                if (ds.size() != 1) {
+                    LOGGER.error("returned wrong number of dynamicSheet for import = {},size={}",sheet.getSheetName()
+                            ,ds==null?0:ds.size());
+                    continue ;
                 }
 //                //数据的获得
 //                for (int j = headerRow + 1; j <= sheet.getLastRowNum(); j++) {
@@ -207,26 +214,28 @@ public class DynamicExcelImpl implements DynamicExcelService{
 //                    sheetClassObjs.add(sheetClassInstance);
 //                }
                 List<DynamicRowDTO> rowDatas = new ArrayList<>();
+                List<DynamicField> dynamicFields = ds.get(0).getDynamicFields();
                 for (int j = headerRow + 1; j <= sheet.getLastRowNum(); j++) {
-                    Row row = sheet.getRow(j);
-                    DynamicRowDTO rowData = new DynamicRowDTO();
-                    List<DynamicColumnDTO> columns = new ArrayList<>();
-                    for (int k = row.getFirstCellNum(); k < row.getLastCellNum(); k++) {
-                        Cell cell = row.getCell(k);
-                        String cellValue = ExcelUtils.getCellValue(cell);
-                        //少了一步,把cellvalue转成可存储的fieldvalue，例如 男-> 1; varfields , thread pool, jindu,
-                        DynamicColumnDTO dto = new DynamicColumnDTO();
-                        dto.setValue(cellValue);
-                        dto.setHeaderDisplay(headers.get(j));
-                        dto.setColumnNum(k);
-                        columns.add(dto);
+                        Row row = sheet.getRow(j);
+                        DynamicRowDTO rowData = new DynamicRowDTO();
+                        List<DynamicColumnDTO> columns = new ArrayList<>();
+                        for (int k = row.getFirstCellNum(); k < row.getLastCellNum(); k++) {
+                            Cell cell = row.getCell(k);
+                            String cellValue = ExcelUtils.getCellValue(cell);
+                            //少了一步,把cellvalue转成可存储的fieldvalue，例如 男-> 1; varfields , thread pool, jindu,
+                            DynamicColumnDTO dto = new DynamicColumnDTO();
+                            dto.setValue(cellValue);
+                            dto.setHeaderDisplay(headers.get(k));
+                            dto.setFieldName(dynamicFields.get(k).getFieldName());
+                            dto.setColumnNum(k);
+                            columns.add(dto);
+                        }
+                        rowData.setColumns(columns);
+                        rowData.setRowNum(j);
+                        rowDatas.add(rowData);
                     }
-                    rowData.setColumns(columns);
-                    rowData.setRowNum(j);
-                    rowDatas.add(rowData);
-                }
-                h.importData(sheet.getSheetName(),rowDatas,params,context,response);
-                //插入
+                    h.importData(ds.get(0),rowDatas,params,context,response);
+                    //插入
 //                try {
 //                    h.save2Schema(sheetClassObjs, sheetClass,storage1 , context);
 //                    Integer successRowNumber = response.getSuccessRowNumber();

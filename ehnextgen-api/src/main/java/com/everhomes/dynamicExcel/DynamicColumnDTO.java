@@ -7,6 +7,10 @@ package com.everhomes.dynamicExcel;
 
 public class DynamicColumnDTO {
     /**
+     * fieldName 字段的逻辑值
+     */
+    private String fieldName;
+    /**
      * @param value 给定行号和列号的数据，已经转为了string
      */
     private String value;
@@ -21,6 +25,14 @@ public class DynamicColumnDTO {
 
     public String getValue() {
         return value;
+    }
+
+    public String getFieldName() {
+        return fieldName;
+    }
+
+    public void setFieldName(String fieldName) {
+        this.fieldName = fieldName;
     }
 
     public void setValue(String value) {
