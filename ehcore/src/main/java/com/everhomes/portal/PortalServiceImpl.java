@@ -1583,6 +1583,8 @@ public class PortalServiceImpl implements PortalService {
 		List<PortalItem> portalItems = portalItemProvider.listPortalItemByGroupId(itemGroup.getId());
 		for (PortalItem portalItem: portalItems) {
 			LaunchPadItem item = ConvertHelper.convert(portalItem, LaunchPadItem.class);
+			item.setItemLabel(portalItem.getLabel());
+			item.setItemName(portalItem.getName());
 			if(PortalItemActionType.fromCode(portalItem.getActionType()) == PortalItemActionType.LAYOUT){
 				setItemLayoutActionData(item, portalItem.getActionData());
 			}else if(PortalItemActionType.fromCode(portalItem.getActionType()) == PortalItemActionType.MODULEAPP){

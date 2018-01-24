@@ -1,33 +1,20 @@
 package com.everhomes.sms;
 
-import org.apache.commons.collections.MultiMap;
+import com.everhomes.util.StringHelper;
+
+import java.util.Map;
 
 public class RspMessage {
 
-    private String message;
     private Integer code;
-    private MultiMap headers;
+    private String message;
+    private Map<String, String> headers;
 
-    public RspMessage(String message, Integer code, MultiMap headers) {
-        super();
+    private Map<String, ?> meta;
+
+    public RspMessage(String message, Integer code, Map<String, String> headers) {
         this.message = message;
         this.code = code;
-        this.headers = headers;
-    }
-
-    public String getMessage() {
-        return message;
-    }
-
-    public void setMessage(String message) {
-        this.message = message;
-    }
-
-    public MultiMap getHeaders() {
-        return headers;
-    }
-
-    public void setHeaders(MultiMap headers) {
         this.headers = headers;
     }
 
@@ -35,7 +22,28 @@ public class RspMessage {
         return code;
     }
 
-    public void setCode(Integer code) {
-        this.code = code;
+    public String getMessage() {
+        return message;
+    }
+
+    public Map<String, String> getHeaders() {
+        return headers;
+    }
+
+    public Map<String, ?> getMeta() {
+        return meta;
+    }
+
+    public void setMeta(Map<String, ?> meta) {
+        this.meta = meta;
+    }
+
+    public boolean isException() {
+        return this.code == -1;
+    }
+
+    @Override
+    public String toString() {
+        return StringHelper.toJsonString(this);
     }
 }

@@ -4,11 +4,13 @@ import com.everhomes.bootstrap.PlatformContext;
 import com.everhomes.flow.*;
 
 public class FlowGraphNodeEnd extends FlowGraphNode {
-	private FlowStateProcessor flowStateProcessor;
+
+	transient private FlowStateProcessor flowStateProcessor;
 	
 	public FlowGraphNodeEnd() {
 		this(null);
 	}
+
 	public FlowGraphNodeEnd(FlowNode flowNode) {
 		this.setFlowNode(flowNode);
 		flowStateProcessor = PlatformContext.getComponent(FlowStateProcessor.class);
@@ -24,5 +26,4 @@ public class FlowGraphNodeEnd extends FlowGraphNode {
 	public void stepLeave(FlowCaseState ctx, FlowGraphNode to)
 			throws FlowStepErrorException {
 	}
-
 }
