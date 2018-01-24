@@ -12,7 +12,7 @@ CREATE TABLE `eh_message_records` (
   `dst_channel_type` varchar(32) DEFAULT NULL,
   `dst_channel_token` varchar(32) DEFAULT NULL,
   `channels_info` varchar(32) DEFAULT NULL,
-  `body_type`varchar(32),
+  `body_type` varchar(32),
   `body` varchar(128),
   `deliveryOption` int(2) DEFAULT '0',
   `create_time` datetime NOT NULL COMMENT 'message creation time',
