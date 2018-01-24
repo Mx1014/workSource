@@ -2354,7 +2354,7 @@ public class SalaryServiceImpl implements SalaryService {
 
     private SalaryEmployee createSalaryEmployee(Long ownerId, Long detailId, String month) {
         OrganizationMemberDetails detail = organizationProvider.findOrganizationMemberDetailsByDetailId(detailId);
-        SalaryEmployee employee = newSalaryEmployee(detail,month,ownerId);
+        SalaryEmployee employee = newSalaryEmployee(detail, month, ownerId);
         salaryEmployeeProvider.createSalaryEmployee(employee);
         return employee;
     }
@@ -2414,18 +2414,18 @@ public class SalaryServiceImpl implements SalaryService {
         String filePath = "ImportTemplate" + ".xlsx";
         //新建了一个文件
 
-        Workbook wb = createEmployeeSalaryHeadWB(cmd.getOwnerId());
+        Workbook wb = createEmployeeSalaryHeadWB(cmd.getOrganizationId());
 
         return download(wb, filePath, response);
     }
 
-    private Workbook createEmployeeSalaryHeadWB(Long ownerId) {
-        List<SalaryGroupEntity> groupEntities = salaryGroupEntityProvider.listSalaryGroupEntityByOrgId(ownerId);
+    private Workbook createEmployeeSalaryHeadWB(Long orgId) {
+        List<SalaryGroupEntity> groupEntities = salaryGroupEntityProvider.listSalaryGroupEntityByOrgId(orgId);
 
         XSSFWorkbook wb = new XSSFWorkbook();
         XSSFSheet sheet = wb.createSheet("sheet1");
-        String sheetName ="sheet1";
-        createEmployeeSalaryHead(wb,sheet, groupEntities);
+        String sheetName = "sheet1";
+        createEmployeeSalaryHead(wb, sheet, groupEntities);
         return wb;
     }
 
@@ -2434,62 +2434,64 @@ public class SalaryServiceImpl implements SalaryService {
         CreationHelper factory = wb.getCreationHelper();
         XSSFDrawing drawing = sheet.createDrawingPatriarch();
         ClientAnchor anchor = factory.createClientAnchor();
-        int i =-1 ;
+        int i = -1;
         Cell cell = row.createCell(++i);
         cell.setCellValue("手机");
         XSSFComment commentA = drawing.createCellComment(anchor);
-        RichTextString strA = factory.createRichTextString("必填项：员工手机,o0ub号，用于匹配系统用户");
+        RichTextString strA = factory.createRichTextString("必填项：员工手机号，用于匹配系统用户");
         commentA.setString(strA);
         commentA.setAuthor("zuolin");
         cell.setCellComment(commentA);
 
-
         cell = row.createCell(++i);
         cell.setCellValue("姓名");
+        anchor.setCol1(cell.getColumnIndex());
         XSSFComment commentB = drawing.createCellComment(anchor);
         RichTextString strB = factory.createRichTextString("员工姓名仅作为提示作用，编辑将不会生效");
         commentB.setString(strB);
         commentB.setAuthor("zuolin");
         cell.setCellComment(commentB);
 
-        for (SalaryGroupEntity entity : groupEntities) {
-            cell = row.createCell(++i);
-            cell.setCellValue(entity.getName());
-            if(SalaryEntityType.REDUN != SalaryEntityType.fromCode(entity.getType())){
-                XSSFComment comment = drawing.createCellComment(anchor);
-                StringBuilder sb = new StringBuilder();
-                sb.append("金额大于0");
-                sb.append("\n");
-                sb.append("类型：");
-                sb.append(SalaryEntityType.fromCode(entity.getType()).getDescri());
-                sb.append("\n");
-                sb.append("数据策略：");
-                if (NormalFlag.YES == NormalFlag.fromCode(entity.getDataPolicy())) {
-                    sb.append("次月清空");
-                } else {
-                    sb.append("次月沿用");
-                }
-                sb.append("\n");
-                sb.append("发放规则：");
-                if (NormalFlag.YES == NormalFlag.fromCode(entity.getGrantPolicy())) {
-                    sb.append("税后发放");
-                } else {
-                    sb.append("税前发放");
-                }
-                sb.append("\n");
-                sb.append("计税方式：");
-                if (NormalFlag.YES == NormalFlag.fromCode(entity.getTaxPolicy())) {
-                    sb.append("年终奖");
-                } else {
-                    sb.append("工资");
-                }
+        if (null != groupEntities)
+            for (SalaryGroupEntity entity : groupEntities) {
+                cell = row.createCell(++i);
+                cell.setCellValue(entity.getName());
+                anchor.setCol1(cell.getColumnIndex());
+                if (SalaryEntityType.REDUN != SalaryEntityType.fromCode(entity.getType())) {
+                    XSSFComment comment = drawing.createCellComment(anchor);
+                    StringBuilder sb = new StringBuilder();
+                    sb.append("金额大于0");
+                    sb.append("\n");
+                    sb.append("类型：");
+                    sb.append(SalaryEntityType.fromCode(entity.getType()).getDescri());
+                    sb.append("\n");
+                    sb.append("数据策略：");
+                    if (NormalFlag.YES == NormalFlag.fromCode(entity.getDataPolicy())) {
+                        sb.append("次月清空");
+                    } else {
+                        sb.append("次月沿用");
+                    }
+                    sb.append("\n");
+                    sb.append("发放规则：");
+                    if (NormalFlag.YES == NormalFlag.fromCode(entity.getGrantPolicy())) {
+                        sb.append("税后发放");
+                    } else {
+                        sb.append("税前发放");
+                    }
+                    sb.append("\n");
+                    sb.append("计税方式：");
+                    if (NormalFlag.YES == NormalFlag.fromCode(entity.getTaxPolicy())) {
+                        sb.append("年终奖");
+                    } else {
+                        sb.append("工资");
+                    }
 
-                RichTextString str = factory.createRichTextString(sb.toString());
-                comment.setString(str);
-                comment.setAuthor("zuolin");
-                cell.setCellComment(comment);
+                    RichTextString str = factory.createRichTextString(sb.toString());
+                    comment.setString(str);
+                    comment.setAuthor("zuolin");
+                    cell.setCellComment(comment);
+                }
             }
-        }
     }
 
     public HttpServletResponse download(Workbook workbook, String fileName, HttpServletResponse response) {
@@ -2518,6 +2520,7 @@ public class SalaryServiceImpl implements SalaryService {
         }
         return response;
     }
+
     private void addNewGroupEntities(Long organizationId, List<SalaryGroupEntityDTO> entities) {
         for (SalaryGroupEntityDTO dto : entities) {
             if (dto.getId() == null) {

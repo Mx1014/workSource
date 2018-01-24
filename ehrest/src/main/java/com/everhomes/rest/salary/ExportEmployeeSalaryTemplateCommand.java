@@ -7,6 +7,7 @@ import com.everhomes.util.StringHelper;
  * <ul>参数:
  * <li>ownerType: ownerType</li>
  * <li>ownerId: ownerId</li>
+ * <li>organizationId: 总公司id</li>
  * </ul>
  */
 public class ExportEmployeeSalaryTemplateCommand {
@@ -14,6 +15,8 @@ public class ExportEmployeeSalaryTemplateCommand {
     private String ownerType;
 
     private Long ownerId;
+
+    private Long organizationId;
 
     public Long getOwnerId() {
         return ownerId;
@@ -36,4 +39,11 @@ public class ExportEmployeeSalaryTemplateCommand {
         return StringHelper.toJsonString(this);
     }
 
+    public Long getOrganizationId() {
+        return organizationId;
+    }
+
+    public void setOrganizationId(Long organizationId) {
+        this.organizationId = organizationId;
+    }
 }
