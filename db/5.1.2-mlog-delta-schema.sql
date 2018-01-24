@@ -16,6 +16,7 @@ CREATE TABLE `eh_message_records` (
   `body` varchar(128),
   `deliveryOption` int(2) DEFAULT '0',
   `create_time` datetime NOT NULL COMMENT 'message creation time',
+  `status` tinyint(4) DEFAULT NULL COMMENT 'message status',
   PRIMARY KEY (`id`)
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4;
 
