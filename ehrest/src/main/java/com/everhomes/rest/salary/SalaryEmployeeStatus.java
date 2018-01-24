@@ -1,20 +1,19 @@
 package com.everhomes.rest.salary;
 
-import com.everhomes.rest.servicehotline.LayoutType;
 import com.everhomes.util.StringHelper;
 
 /**
  * 
  * <ul>薪酬批次状态
- * <li>	GRANT((byte) 0,"发放项"), DEDUCTION((byte) 1,"扣款项"),COST((byte)2,"成本项"),REDUN((byte)3,"冗余项");</li>
+ * <li>		NORMAL((byte) 0,"正常"), REALPAY_ERROR((byte) 1,"实发合计为负"),UN_SET((byte)2,"未定薪");</li>
  * </ul>
  */
-public enum SalaryEntityType {
-	GRANT((byte) 0,"发放项"), DEDUCTION((byte) 1,"扣款项"),COST((byte)2,"成本项"),REDUN((byte)3,"冗余项");
+public enum SalaryEmployeeStatus {
+	NORMAL((byte) 0,"正常"), REALPAY_ERROR((byte) 1,"实发合计为负"),UN_SET((byte)2,"未定薪");
 	private Byte code;
 	private String descri;
 
-	SalaryEntityType(Byte code,String descri) {
+	SalaryEmployeeStatus(Byte code, String descri) {
 		this.code = code;
 		this.descri = descri;
 	}
@@ -27,9 +26,9 @@ public enum SalaryEntityType {
     public String toString() {
         return StringHelper.toJsonString(this);
     }
-	public static SalaryEntityType fromCode(Byte code) {
+	public static SalaryEmployeeStatus fromCode(Byte code) {
 		if (code != null) {
-			for (SalaryEntityType a : SalaryEntityType.values()) {
+			for (SalaryEmployeeStatus a : SalaryEmployeeStatus.values()) {
 				if (code.byteValue() == a.getCode().byteValue()) {
 					return a;
 				}
