@@ -2844,7 +2844,7 @@ public class QualityServiceImpl implements QualityService {
 		}
 		int pageSize = PaginationConfigHelper.getPageSize(configurationProvider, cmd.getPageSize());
 		if (pageSize < dtos.size()) {
-			dtos.subList(cmd.getPageAnchor().intValue() * pageSize, cmd.getPageAnchor().intValue() * pageSize + pageSize);
+			dtos.subList(cmd.getPageAnchor().intValue() * pageSize, cmd.getPageAnchor().intValue() * pageSize + pageSize - 1);
 			response.setNextPageAnchor(cmd.getPageAnchor() + 1);
 		} else {
 			response.setNextPageAnchor(null);
