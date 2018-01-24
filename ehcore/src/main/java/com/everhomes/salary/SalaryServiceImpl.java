@@ -2438,25 +2438,29 @@ public class SalaryServiceImpl implements SalaryService {
         Cell cell = row.createCell(++i);
         cell.setCellValue("手机");
         XSSFComment commentA = drawing.createCellComment(anchor);
-        RichTextString strA = factory.createRichTextString("必填项：员工手机,o0ub号，用于匹配系统用户");
+        RichTextString strA = factory.createRichTextString("必填项：员工手机号，用于匹配系统用户");
         commentA.setString(strA);
         commentA.setAuthor("zuolin");
         cell.setCellComment(commentA);
 
-
+        XSSFDrawing drawing2 = sheet.createDrawingPatriarch();
+        ClientAnchor anchor2 = factory.createClientAnchor();
         cell = row.createCell(++i);
         cell.setCellValue("姓名");
-        XSSFComment commentB = drawing.createCellComment(anchor);
+        XSSFComment commentB = drawing2.createCellComment(anchor2);
         RichTextString strB = factory.createRichTextString("员工姓名仅作为提示作用，编辑将不会生效");
         commentB.setString(strB);
         commentB.setAuthor("zuolin");
         cell.setCellComment(commentB);
 
         for (SalaryGroupEntity entity : groupEntities) {
+
+            XSSFDrawing drawing3 = sheet.createDrawingPatriarch();
+            ClientAnchor anchor3 = factory.createClientAnchor();
             cell = row.createCell(++i);
             cell.setCellValue(entity.getName());
             if(SalaryEntityType.REDUN != SalaryEntityType.fromCode(entity.getType())){
-                XSSFComment comment = drawing.createCellComment(anchor);
+                XSSFComment comment = drawing3.createCellComment(anchor3);
                 StringBuilder sb = new StringBuilder();
                 sb.append("金额大于0");
                 sb.append("\n");
