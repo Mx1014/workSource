@@ -10,7 +10,7 @@ public class MessageRecordDto implements Serializable {
     private Long id;
     private Integer namespaceId;
     private Long appId;
-    private Long messageSeq;w
+    private Long messageSeq;
     private Long senderUid;
     private String senderTag;
     private String dstChannelType;
