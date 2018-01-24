@@ -49,19 +49,19 @@ public interface Rentalv2Service {
 	FindRentalSiteWeekStatusCommandResponse findRentalSiteWeekStatus(
 			FindRentalSiteWeekStatusCommand cmd);
 
-	RentalBillDTO completeBill(CompleteBillCommand cmd);
+//	RentalBillDTO completeBill(CompleteBillCommand cmd);
+//
+//	RentalBillDTO incompleteBill(IncompleteBillCommand cmd);
 
-	RentalBillDTO incompleteBill(IncompleteBillCommand cmd);
+//	BatchCompleteBillCommandResponse batchIncompleteBill(
+//			BatchIncompleteBillCommand cmd);
+//
+//	BatchCompleteBillCommandResponse batchCompleteBill(
+//			BatchCompleteBillCommand cmd);
 
-	BatchCompleteBillCommandResponse batchIncompleteBill(
-			BatchIncompleteBillCommand cmd);
-
-	BatchCompleteBillCommandResponse batchCompleteBill(
-			BatchCompleteBillCommand cmd);
-
-	HttpServletResponse exportRentalBills(ListRentalBillsCommand cmd,HttpServletResponse response);
-	void mappingRentalBillDTO(RentalBillDTO dto, RentalOrder bill);
-	void addDefaultRule(AddDefaultRuleAdminCommand cmd);
+	void exportRentalBills(ListRentalBillsCommand cmd,HttpServletResponse response);
+	void mappingRentalBillDTO(RentalBillDTO dto, RentalOrder bill, RentalResource rs);
+	void addRule(AddDefaultRuleAdminCommand cmd);
 	QueryDefaultRuleAdminResponse queryDefaultRule(QueryDefaultRuleAdminCommand cmd);
 	GetResourceListAdminResponse getResourceList(GetResourceListAdminCommand cmd);
 	void addResource(AddResourceAdminCommand cmd);
@@ -73,8 +73,9 @@ public interface Rentalv2Service {
 			FindAutoAssignRentalSiteWeekStatusCommand cmd);
 	FindAutoAssignRentalSiteDayStatusResponse findAutoAssignRentalSiteDayStatus(
 			FindAutoAssignRentalSiteDayStatusCommand cmd);
-	void updateRentalSiteSimpleRules(UpdateRentalSiteRulesAdminCommand cmd);
-	void valiRentalBill(List<RentalBillRuleDTO> ruleDTOs);
+	void updateRentalSiteCellRule(UpdateRentalSiteCellRuleAdminCommand cmd);
+	void validateRentalBill(List<RentalBillRuleDTO> ruleDTOs, RentalResource rs,
+							RentalDefaultRule rule);
 
 	void updateDefaultRule(UpdateDefaultRuleAdminCommand cmd);
 
@@ -87,15 +88,15 @@ public interface Rentalv2Service {
 	GetResourceTypeListResponse getResourceTypeList(
 			GetResourceTypeListCommand cmd);
 
-	void createResourceType(CreateResourceTypeCommand cmd);
-
-	void deleteResourceType(DeleteResourceTypeCommand cmd);
-
-	void updateResourceType(UpdateResourceTypeCommand cmd);
-
-	void closeResourceType(CloseResourceTypeCommand cmd);
-
-	void openResourceType(OpenResourceTypeCommand cmd);
+//	void createResourceType(CreateResourceTypeCommand cmd);
+//
+//	void deleteResourceType(DeleteResourceTypeCommand cmd);
+//
+//	void updateResourceType(UpdateResourceTypeCommand cmd);
+//
+//	void closeResourceType(CloseResourceTypeCommand cmd);
+//
+//	void openResourceType(OpenResourceTypeCommand cmd);
 
 	FindRentalSiteMonthStatusCommandResponse findRentalSiteMonthStatus(
 			FindRentalSiteMonthStatusCommand cmd);
@@ -105,17 +106,6 @@ public interface Rentalv2Service {
 
 
 	void deleteResource(DeleteResourceCommand cmd);
-
-
-	void addOrderSendMessage(RentalOrder rentalBill);
-
-
-	void cancelOrderSendMessage(RentalOrder rentalBill);
-
-
-	void sendRentalSuccessSms(Integer namespaceId, String phoneNumber,
-			RentalOrder order);
-
 
 	QueryDefaultRuleAdminResponse getResourceRule(
 			GetResourceRuleAdminCommand cmd);
@@ -128,10 +118,10 @@ public interface Rentalv2Service {
 			FindAutoAssignRentalSiteMonthStatusByWeekCommand cmd);
 
 
-	void addCheckOperator(AddCheckOperatorCommand cmd);
-
-
-	void deleteCheckOperator(AddCheckOperatorCommand cmd);
+//	void addCheckOperator(AddCheckOperatorCommand cmd);
+//
+//
+//	void deleteCheckOperator(AddCheckOperatorCommand cmd);
 
 
 	void onOrderSuccess(RentalOrder bill);
@@ -154,9 +144,6 @@ public interface Rentalv2Service {
 
 	void changeRentalOrderStatus(RentalOrder order, Byte status, Boolean cancelOtherOrderFlag);
 
-
-	void sendMessageCode(Long uid, String locale, Map<String, String> map, int code);
-
 	RentalSiteDTO findRentalSiteById(FindRentalSiteByIdCommand cmd);
 
 	CommonOrderDTO getRentalBillPayInfo(GetRentalBillPayInfoCommand cmd);
@@ -171,4 +158,43 @@ public interface Rentalv2Service {
 
 	void rentalSchedule();
 
+	void updateResourceTimeRule(UpdateResourceTimeRuleCommand cmd);
+
+	ResourceTimeRuleDTO getResourceTimeRule(GetResourceTimeRuleCommand cmd);
+
+	void updateResourcePriceRule(UpdateResourcePriceRuleCommand cmd);
+
+	ResourcePriceRuleDTO getResourcePriceRule(GetResourcePriceRuleCommand cmd);
+
+	void updateResourceRentalRule(UpdateResourceRentalRuleCommand cmd);
+
+	ResourceRentalRuleDTO getResourceRentalRule(GetResourceRentalRuleCommand cmd);
+
+	void updateResourceOrderRule(UpdateResourceOrderRuleCommand cmd);
+
+	ResourceOrderRuleDTO getResourceOrderRule(GetResourceOrderRuleCommand cmd);
+
+	AddRentalOrderUsingInfoResponse addRentalOrderUsingInfo(AddRentalOrderUsingInfoCommand cmd);
+
+	AddRentalOrderUsingInfoV2Response addRentalOrderUsingInfoV2(AddRentalOrderUsingInfoCommand cmd);
+
+	ListRentalOrdersResponse listRentalOrders(ListRentalOrdersCommand cmd);
+
+	RentalOrderDTO getRentalOrderDetail(GetRentalOrderDetailCommand cmd);
+
+	SearchRentalOrdersResponse searchRentalOrders(SearchRentalOrdersCommand cmd);
+
+	GetRenewRentalOrderInfoResponse getRenewRentalOrderInfo(GetRenewRentalOrderInfoCommand cmd);
+
+	CommonOrderDTO renewRentalOrder(RenewRentalOrderCommand cmd);
+
+	PreOrderDTO renewRentalOrderV2(RenewRentalOrderCommand cmd);
+
+	RentalOrderDTO completeRentalOrder(CompleteRentalOrderCommand cmd);
+
+	GetResourceRuleV2Response getResourceRuleV2(GetResourceRuleV2Command cmd);
+
+	GetCancelOrderTipResponse getCancelOrderTip(GetCancelOrderTipCommand cmd);
+
+	void test();
 }

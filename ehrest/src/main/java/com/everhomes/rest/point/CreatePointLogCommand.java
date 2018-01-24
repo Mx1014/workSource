@@ -10,6 +10,8 @@ import javax.validation.constraints.NotNull;
  *     <li>phone: phone</li>
  *     <li>points: points</li>
  *     <li>description: description</li>
+ *     <li>sessionId: sessionId</li>
+ *     <li>captcha: captcha</li>
  * </ul>
  */
 public class CreatePointLogCommand {
@@ -19,6 +21,9 @@ public class CreatePointLogCommand {
     private String phone;
     private Long points;
     private String description;
+
+    private String sessionId;
+    private String captcha;
 
     public Long getSystemId() {
         return systemId;
@@ -50,6 +55,22 @@ public class CreatePointLogCommand {
 
     public void setDescription(String description) {
         this.description = description;
+    }
+
+    public String getSessionId() {
+        return sessionId;
+    }
+
+    public void setSessionId(String sessionId) {
+        this.sessionId = sessionId;
+    }
+
+    public String getCaptcha() {
+        return captcha;
+    }
+
+    public void setCaptcha(String captcha) {
+        this.captcha = captcha;
     }
 
     @Override

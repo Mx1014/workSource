@@ -10,14 +10,16 @@ import com.everhomes.listing.ListingQueryBuilderCallback;
 import com.everhomes.naming.NameMapper;
 import com.everhomes.sequence.SequenceProvider;
 import com.everhomes.server.schema.Tables;
-import com.everhomes.server.schema.tables.records.EhPointActionsRecord;
 import com.everhomes.server.schema.tables.daos.EhPointActionsDao;
 import com.everhomes.server.schema.tables.pojos.EhPointActions;
+import com.everhomes.server.schema.tables.records.EhPointActionsRecord;
 import com.everhomes.util.ConvertHelper;
 import com.everhomes.util.DateUtils;
 import org.jooq.DSLContext;
 import org.jooq.SelectQuery;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.cache.annotation.CacheEvict;
+import org.springframework.cache.annotation.Cacheable;
 import org.springframework.stereotype.Repository;
 
 import java.sql.Timestamp;
@@ -26,29 +28,31 @@ import java.util.List;
 @Repository
 public class PointActionProviderImpl implements PointActionProvider {
 
-	@Autowired
-	private DbProvider dbProvider;
+    @Autowired
+    private DbProvider dbProvider;
 
-	@Autowired
-	private SequenceProvider sequenceProvider;
+    @Autowired
+    private SequenceProvider sequenceProvider;
 
-	@Override
-	public void createPointAction(PointAction pointAction) {
-		Long id = sequenceProvider.getNextSequence(NameMapper.getSequenceDomainFromTablePojo(EhPointActions.class));
-		pointAction.setId(id);
-		pointAction.setCreateTime(DateUtils.currentTimestamp());
-		// pointAction.setCreatorUid(UserContext.currentUserId());
-		rwDao().insert(pointAction);
-		DaoHelper.publishDaoAction(DaoAction.CREATE, EhPointActions.class, id);
-	}
+    @CacheEvict(value = "PointAction", allEntries = true)
+    @Override
+    public void createPointAction(PointAction pointAction) {
+        Long id = sequenceProvider.getNextSequence(NameMapper.getSequenceDomainFromTablePojo(EhPointActions.class));
+        pointAction.setId(id);
+        pointAction.setCreateTime(DateUtils.currentTimestamp());
+        // pointAction.setCreatorUid(UserContext.currentUserId());
+        rwDao().insert(pointAction);
+        DaoHelper.publishDaoAction(DaoAction.CREATE, EhPointActions.class, id);
+    }
 
-	@Override
-	public void updatePointAction(PointAction pointAction) {
-		// pointAction.setUpdateTime(DateUtils.currentTimestamp());
-		// pointAction.setUpdateUid(UserContext.currentUserId());
+    @CacheEvict(value = "PointAction", allEntries = true)
+    @Override
+    public void updatePointAction(PointAction pointAction) {
+        // pointAction.setUpdateTime(DateUtils.currentTimestamp());
+        // pointAction.setUpdateUid(UserContext.currentUserId());
         rwDao().update(pointAction);
-		DaoHelper.publishDaoAction(DaoAction.MODIFY, EhPointActions.class, pointAction.getId());
-	}
+        DaoHelper.publishDaoAction(DaoAction.MODIFY, EhPointActions.class, pointAction.getId());
+    }
 
     @Override
     public List<PointAction> query(ListingLocator locator, int count, ListingQueryBuilderCallback callback) {
@@ -59,7 +63,7 @@ public class PointActionProviderImpl implements PointActionProvider {
             callback.buildCondition(locator, query);
         }
         if (locator.getAnchor() != null) {
-            query.addConditions(t.ID.lt(locator.getAnchor()));
+            query.addConditions(t.ID.le(locator.getAnchor()));
         }
 
         if (count > 0) {
@@ -77,11 +81,13 @@ public class PointActionProviderImpl implements PointActionProvider {
         return list;
     }
 
-	@Override
-	public PointAction findById(Long id) {
-		return ConvertHelper.convert(dao().findById(id), PointAction.class);
-	}
+    @Cacheable(value = "PointAction", key = "{#root.methodName, #root.args}")
+    @Override
+    public PointAction findById(Long id) {
+        return ConvertHelper.convert(dao().findById(id), PointAction.class);
+    }
 
+    @CacheEvict(value = "PointAction", allEntries = true)
     @Override
     public void createPointActions(List<PointAction> pointActions) {
         Timestamp createTime = DateUtils.currentTimestamp();
@@ -93,6 +99,7 @@ public class PointActionProviderImpl implements PointActionProvider {
         rwDao().insert(pointActions.toArray(new EhPointActions[pointActions.size()]));
     }
 
+    @Cacheable(value = "PointAction", key = "{#root.methodName, #root.args}")
     @Override
     public List<PointAction> listByOwner(Integer namespaceId, String ownerType, Long ownerId) {
         com.everhomes.server.schema.tables.EhPointActions t = Tables.EH_POINT_ACTIONS;
@@ -107,12 +114,12 @@ public class PointActionProviderImpl implements PointActionProvider {
     private EhPointActionsDao rwDao() {
         DSLContext context = dbProvider.getDslContext(AccessSpec.readWrite());
         return new EhPointActionsDao(context.configuration());
-	}
+    }
 
-	private EhPointActionsDao dao() {
+    private EhPointActionsDao dao() {
         DSLContext context = dbProvider.getDslContext(AccessSpec.readOnly());
         return new EhPointActionsDao(context.configuration());
-	}
+    }
 
     private DSLContext context() {
         return dbProvider.getDslContext(AccessSpec.readOnly());

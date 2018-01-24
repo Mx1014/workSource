@@ -27,6 +27,8 @@ public class AddItemAdminCommand {
 	private java.lang.Integer    defaultOrder;
 	private java.lang.Byte       itemType;
 	private String description;
+	private String resourceType;
+
 	@Override
     public String toString() {
         return StringHelper.toJsonString(this);
@@ -81,5 +83,13 @@ public class AddItemAdminCommand {
 
 	public void setDescription(String description) {
 		this.description = description;
+	}
+
+	public String getResourceType() {
+		return resourceType;
+	}
+
+	public void setResourceType(String resourceType) {
+		this.resourceType = resourceType;
 	}
 }

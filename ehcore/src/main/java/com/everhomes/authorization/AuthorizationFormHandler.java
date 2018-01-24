@@ -18,7 +18,7 @@ import com.everhomes.rest.general_approval.GeneralApprovalServiceErrorCode;
 import com.everhomes.rest.general_approval.GeneralFormDTO;
 import com.everhomes.rest.general_approval.GeneralFormFieldDTO;
 import com.everhomes.rest.general_approval.GetTemplateBySourceIdCommand;
-import com.everhomes.rest.general_approval.PostGeneralFormCommand;
+import com.everhomes.rest.general_approval.PostGeneralFormValCommand;
 import com.everhomes.rest.general_approval.PostGeneralFormDTO;
 import com.everhomes.server.schema.Tables;
 import com.everhomes.user.UserContext;
@@ -30,7 +30,7 @@ public abstract class AuthorizationFormHandler implements GeneralFormModuleHandl
     @Autowired
     private GeneralFormProvider generalFormProvider;
 
-    public abstract PostGeneralFormDTO postGeneralForm(PostGeneralFormCommand cmd);
+    public abstract PostGeneralFormDTO postGeneralFormVal(PostGeneralFormValCommand cmd);
        
     @Override
     public GeneralFormDTO getTemplateBySourceId(GetTemplateBySourceIdCommand cmd) {

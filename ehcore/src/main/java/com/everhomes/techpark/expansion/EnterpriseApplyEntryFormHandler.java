@@ -7,7 +7,6 @@ import com.everhomes.entity.EntityType;
 import com.everhomes.general_form.GeneralForm;
 import com.everhomes.general_form.GeneralFormModuleHandler;
 import com.everhomes.general_form.GeneralFormProvider;
-import com.everhomes.general_form.GeneralFormService;
 import com.everhomes.rest.general_approval.*;
 import com.everhomes.rest.techpark.expansion.ApplyEntryResponse;
 import com.everhomes.rest.techpark.expansion.EnterpriseApplyEntryCommand;
@@ -34,7 +33,7 @@ public class EnterpriseApplyEntryFormHandler implements GeneralFormModuleHandler
     private GeneralFormProvider generalFormProvider;
 
     @Override
-    public PostGeneralFormDTO postGeneralForm(PostGeneralFormCommand cmd) {
+    public PostGeneralFormDTO postGeneralFormVal(PostGeneralFormValCommand cmd) {
 
         if (null == cmd.getSourceId()) {
             cmd.setSourceId(EnterpriseApplyEntryServiceImpl.DEFAULT_CATEGORY_ID);
@@ -162,6 +161,11 @@ public class EnterpriseApplyEntryFormHandler implements GeneralFormModuleHandler
 //        dto.setFormFields(fieldDTOs);
 
 //        return dto;
+    }
+
+    @Override
+    public PostGeneralFormDTO updateGeneralFormVal(PostGeneralFormValCommand cmd) {
+        return null;
     }
 
 }

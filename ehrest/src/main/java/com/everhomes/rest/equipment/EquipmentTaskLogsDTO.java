@@ -1,10 +1,10 @@
 package com.everhomes.rest.equipment;
 
-import java.sql.Timestamp;
-import java.util.List;
-
 import com.everhomes.discover.ItemType;
 import com.everhomes.util.StringHelper;
+
+import java.sql.Timestamp;
+import java.util.List;
 
 /**
  * <ul>
@@ -21,12 +21,12 @@ import com.everhomes.util.StringHelper;
  *  <li>processEndTime: 操作截止时间</li>
  *  <li>processResult: 操作结果 参考{@link com.everhomes.rest.equipment.EquipmentTaskProcessResult}</li>
  *  <li>processMessage: 操作内容</li>
- *  <li>templateId: 模板id</li>
- *  <li>templateName: 模板名称</li>
  *  <li>itemResults: 设备参数 参考{@link com.everhomes.rest.equipment.InspectionItemResult}</li>
  *  <li>createTime: 创建时间</li>
  *  <li>attachments: 附件， 参考{@link com.everhomes.rest.equipment.EquipmentTaskAttachmentDTO}</li>
  *  <li>reviewResult: 对巡检完成、维修完成、需维修三种需要审阅的记录补充审阅记录 参考{@link com.everhomes.rest.equipment.ReviewResult}</li>
+ *  <li>equipmentName: 设备名称</li>
+ *  <li>flowCaseId: 维修工作流flowCaseId</li>
  * </ul>
  */
 public class EquipmentTaskLogsDTO {
@@ -56,10 +56,15 @@ public class EquipmentTaskLogsDTO {
 	private Byte processResult;
 	
 	private String processMessage;
-	
+
+	@Deprecated
 	private Long templateId;
-	
+	@Deprecated
 	private String templateName;
+
+	private String 	equipmentName;
+
+	private Long  flowCaseId;
 
 	@ItemType(InspectionItemResult.class)
     private List<InspectionItemResult> itemResults; 
@@ -221,6 +226,22 @@ public class EquipmentTaskLogsDTO {
 
 	public void setReviewResult(Byte reviewResult) {
 		this.reviewResult = reviewResult;
+	}
+
+	public String getEquipmentName() {
+		return equipmentName;
+	}
+
+	public void setEquipmentName(String equipmentName) {
+		this.equipmentName = equipmentName;
+	}
+
+	public Long getFlowCaseId() {
+		return flowCaseId;
+	}
+
+	public void setFlowCaseId(Long flowCaseId) {
+		this.flowCaseId = flowCaseId;
 	}
 
 	@Override

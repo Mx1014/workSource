@@ -5,7 +5,20 @@ import com.everhomes.util.StringHelper;
 import java.math.BigDecimal;
 
 /**
- * @author sw on 2017/10/24.
+ * <ul>
+ * <li>ownerType: 归属的类型，{@link com.everhomes.rest.parking.ParkingOwnerType}</li>
+ * <li>ownerId: 归属的ID，如小区ID</li>
+ * <li>parkingLotId: 停车场ID</li>
+ * <li>rateToken: 费率ID</li>
+ * <li>rateName: 费率名称</li>
+ * <li>monthCount: 充值月数</li>
+ * <li>originalPrice: 原价</li>
+ * <li>price: 实际价格</li>
+ * <li>cardTypeId: 卡类型id</li>
+ * <li>cardTypeName: 卡类型名称</li>
+ * <li>startPeriod: 充值开始时间</li>
+ * <li>endPeriod: 充值结束时间</li>
+ * </ul>
  */
 public class ParkingExpiredRechargeInfoDTO {
 

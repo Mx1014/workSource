@@ -10,10 +10,12 @@ import java.util.Map;
 import java.util.UUID;
 import java.util.stream.Collectors;
 
+import com.everhomes.constants.ErrorCodes;
 import com.everhomes.rest.approval.CommonStatus;
 import com.everhomes.server.schema.tables.records.*;
 import com.everhomes.util.*;
 import org.apache.lucene.spatial.geohash.GeoHashUtils;
+import org.eclipse.jdt.internal.compiler.ast.ThrowStatement;
 import org.jooq.Condition;
 import org.jooq.DSLContext;
 import org.jooq.Record;
@@ -84,6 +86,7 @@ import org.springframework.cache.annotation.Cacheable;
 import org.springframework.cache.annotation.Caching;
 import org.springframework.stereotype.Component;
 
+import javax.naming.NamingEnumeration;
 import java.sql.Timestamp;
 import java.util.*;
 import java.util.stream.Collectors;
@@ -767,6 +770,52 @@ public class CommunityProviderImpl implements CommunityProvider {
 	}
 
     @Override
+    public List<Building> ListBuildingsByCommunityId(ListingLocator locator, int count, Long communityId, Integer namespaceId, String keyword, Timestamp lastUpdateTime) {
+        DSLContext context = this.dbProvider.getDslContext(AccessSpec.readOnlyWith(EhCommunities.class, locator.getEntityId()));
+        List<Building> buildings = new ArrayList<Building>();
+        SelectQuery<EhBuildingsRecord> query = context.selectQuery(Tables.EH_BUILDINGS);
+
+        if(locator.getAnchor() != null) {
+            query.addConditions(Tables.EH_BUILDINGS.DEFAULT_ORDER.lt(locator.getAnchor()));
+        }
+
+        if (null != communityId) {
+            query.addConditions(Tables.EH_BUILDINGS.COMMUNITY_ID.eq(communityId));
+        }
+        if (!StringUtils.isBlank(keyword)) {
+            query.addConditions(Tables.EH_BUILDINGS.NAME.like("%" + keyword + "%"));
+        }
+        if (null != namespaceId) {
+            query.addConditions(Tables.EH_BUILDINGS.NAMESPACE_ID.eq(namespaceId));
+        }
+
+        if(lastUpdateTime != null) {
+            query.addConditions(Tables.EH_BUILDINGS.CREATE_TIME.gt(lastUpdateTime)
+                    .or(Tables.EH_BUILDINGS.OPERATE_TIME.gt(lastUpdateTime)));
+        }
+
+        query.addConditions(Tables.EH_BUILDINGS.STATUS.eq(CommunityAdminStatus.ACTIVE.getCode()));
+        query.addOrderBy(Tables.EH_BUILDINGS.DEFAULT_ORDER.desc());
+        query.addLimit(count);
+
+        if(LOGGER.isDebugEnabled()) {
+            LOGGER.debug("Query buildings by count, sql=" + query.getSQL());
+            LOGGER.debug("Query buildings by count, bindValues=" + query.getBindValues());
+        }
+
+        query.fetch().map((EhBuildingsRecord record) -> {
+            buildings.add(ConvertHelper.convert(record, Building.class));
+            return null;
+        });
+
+        if(buildings.size() > 0) {
+            locator.setAnchor(buildings.get(buildings.size() -1).getDefaultOrder());
+        }
+
+        return buildings;
+    }
+
+    @Override
     public List<Building> ListBuildingsBykeywordAndNameSpace(Integer namespaceId, String keyword) {
 
         DSLContext context = this.dbProvider.getDslContext(AccessSpec.readOnlyWith(EhBuildings.class));
@@ -1123,6 +1172,10 @@ public class CommunityProviderImpl implements CommunityProvider {
 
 	@Override
 	public List<Community> listCommunitiesByNamespaceId(Integer namespaceId) {
+        if(namespaceId == null || namespaceId.equals(0) || namespaceId == 0){
+            throw RuntimeErrorException.errorWith(ErrorCodes.SCOPE_GENERAL, ErrorCodes.ERROR_GENERAL_EXCEPTION,
+                    "stupid namespaceId = 0");
+        }
 		DSLContext context = dbProvider.getDslContext(AccessSpec.readOnly());
         context.select().from(Tables.EH_COMMUNITIES);
         List<Community> list = context.select().from(Tables.EH_COMMUNITIES)
@@ -1419,14 +1472,14 @@ public class CommunityProviderImpl implements CommunityProvider {
     }
 
 	@Override
-	public List<Community> listCommunitiesByCategory(Long cityId, Long areaId, Long categoryId, String keyword, Long pageAnchor,
+	public List<Community> listCommunitiesByCategory(Integer namespaceId, Long cityId, Long areaId, Long categoryId, String keyword, Long pageAnchor,
 			Integer pageSize) {
-		int namespaceId =UserContext.getCurrentNamespaceId(null);
+//		int namespaceId =UserContext.getCurrentNamespaceId(null);
 
         DSLContext context = this.dbProvider.getDslContext(AccessSpec.readWriteWith(EhCommunities.class));
 
         SelectJoinStep<Record> query = context.select(Tables.EH_COMMUNITIES.fields()).from(Tables.EH_COMMUNITIES);
-		Condition cond = Tables.EH_COMMUNITIES.NAMESPACE_ID.eq(namespaceId);
+		Condition cond = Tables.EH_COMMUNITIES.NAMESPACE_ID.eq(UserContext.getCurrentNamespaceId(namespaceId));
 		cond = cond.and(Tables.EH_COMMUNITIES.STATUS.eq(CommunityAdminStatus.ACTIVE.getCode()));
 		if(null != pageAnchor && pageAnchor != 0){
 			cond = cond.and(Tables.EH_COMMUNITIES.ID.gt(pageAnchor));

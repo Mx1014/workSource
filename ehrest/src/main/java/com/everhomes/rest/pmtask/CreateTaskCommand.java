@@ -33,6 +33,8 @@ public class CreateTaskCommand {
 	private String address;
 	private String content;
 	private Long organizationId;
+	private String referType;
+	private Long referId;
 
 	
 	private Long taskCategoryId;
@@ -158,6 +160,22 @@ public class CreateTaskCommand {
 	}
 	public String getBuildingName() {
 		return buildingName;
+	}
+
+	public String getReferType() {
+		return referType;
+	}
+
+	public void setReferType(String referType) {
+		this.referType = referType;
+	}
+
+	public Long getReferId() {
+		return referId;
+	}
+
+	public void setReferId(Long referId) {
+		this.referId = referId;
 	}
 
 	public void setBuildingName(String buildingName) {

@@ -1,8 +1,10 @@
 package com.everhomes.rest.equipment;
 
-import javax.validation.constraints.NotNull;
-
+import com.everhomes.discover.ItemType;
 import com.everhomes.util.StringHelper;
+
+import javax.validation.constraints.NotNull;
+import java.util.List;
 
 /**
  * <ul>
@@ -12,13 +14,15 @@ import com.everhomes.util.StringHelper;
  *  <li>targetType: 任务所属管理处类型</li>
  *  <li>startTime: 开始时间</li>
  *  <li>endTime: 截止时间</li>
- *  <li>status: 任务状态 参考{@link com.everhomes.rest.equipment.EquipmentTaskStatus}</li>
+ *  <li>status: 任务状态 list参考{@link com.everhomes.rest.equipment.EquipmentTaskStatus}</li>
  *  <li>reviewStatus: 任务审核状态 0: UNREVIEWED  1: REVIEWED</li>
  *  <li>taskType: 类型 参考{@link com.everhomes.rest.equipment.StandardType}</li>
  *  <li>keyword: 查询关键字</li>
  *  <li>pageAnchor: 锚点</li>
  *  <li>pageSize: 页面大小</li>
  *  <li>inspectionCategoryId: 巡检对象类型id</li>
+ *  <li>inspectionCategoryId: 巡检对象类型id</li>
+ *  <li>namespaceId: namespaceId</li>
  * </ul>
  */
 public class SearchEquipmentTasksCommand {
@@ -35,8 +39,9 @@ public class SearchEquipmentTasksCommand {
 	private Long startTime;
 	
 	private Long endTime;
-	
-	private Byte status;
+
+	@ItemType(Byte.class)
+	private List<Byte> status;
 	
 	private Byte reviewStatus;
 	
@@ -49,6 +54,8 @@ public class SearchEquipmentTasksCommand {
 	private Integer pageSize;
 	
 	private Long inspectionCategoryId;
+
+	private Integer namespaceId;
 	
 	public Long getInspectionCategoryId() {
 		return inspectionCategoryId;
@@ -106,11 +113,11 @@ public class SearchEquipmentTasksCommand {
 		this.endTime = endTime;
 	}
 
-	public Byte getStatus() {
+	public List<Byte> getStatus() {
 		return status;
 	}
 
-	public void setStatus(Byte status) {
+	public void setStatus(List<Byte> status) {
 		this.status = status;
 	}
 
@@ -152,6 +159,14 @@ public class SearchEquipmentTasksCommand {
 
 	public void setPageSize(Integer pageSize) {
 		this.pageSize = pageSize;
+	}
+
+	public Integer getNamespaceId() {
+		return namespaceId;
+	}
+
+	public void setNamespaceId(Integer namespaceId) {
+		this.namespaceId = namespaceId;
 	}
 
 	@Override

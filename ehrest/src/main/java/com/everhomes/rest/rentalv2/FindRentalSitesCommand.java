@@ -20,7 +20,8 @@ import com.everhomes.util.StringHelper;
 public class FindRentalSitesCommand {
 	private String ownerType;
 	private Long ownerId; 
-	private Long communityId; 
+	private Long communityId;
+	private String resourceType;
 	private Long resourceTypeId;
 	private String keyword;
 
@@ -28,13 +29,20 @@ public class FindRentalSitesCommand {
 
 	private Long anchor;
 	private Integer pageSize;
-	@ItemType(Byte.class)
-	private List<Byte> status;
+
 	@Override
     public String toString() {
         return StringHelper.toJsonString(this);
-    } 
-	  
+    }
+
+	public String getResourceType() {
+		return resourceType;
+	}
+
+	public void setResourceType(String resourceType) {
+		this.resourceType = resourceType;
+	}
+
 	public Integer getPageSize() {
 		return pageSize;
 	}
@@ -58,12 +66,6 @@ public class FindRentalSitesCommand {
 	}
 	public void setOwnerId(Long ownerId) {
 		this.ownerId = ownerId;
-	}
-	public List<Byte> getStatus() {
-		return status;
-	}
-	public void setStatus(List<Byte> status) {
-		this.status = status;
 	}
 	public Long getResourceTypeId() {
 		return resourceTypeId;

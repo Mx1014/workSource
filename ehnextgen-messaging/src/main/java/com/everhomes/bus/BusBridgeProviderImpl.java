@@ -1,15 +1,14 @@
 // @formatter:off
 package com.everhomes.bus;
 
-import java.util.UUID;
-
-import javax.annotation.PostConstruct;
-
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Component;
+
+import javax.annotation.PostConstruct;
+import java.util.UUID;
 
 @Component
 public class BusBridgeProviderImpl implements BusBridgeProvider, LocalBusSubscriber {
@@ -46,6 +45,7 @@ public class BusBridgeProviderImpl implements BusBridgeProvider, LocalBusSubscri
         this.coreBusProvider.sendRawBusMessage(bridgeMessage);
         return Action.none;
     }
+
     
     public void onCoreBusMessage(Object message) {
         if(message != null && message instanceof BusBridgeMessage) {

@@ -121,7 +121,7 @@ public class VersionProviderImpl implements VersionProvider {
         return null;
     }
 
-    @Cacheable(value="VersionRealm-Name", key="{#namespaceId, #realmName}", unless="#result == null")
+    @Cacheable(value="VersionRealm-Name", key="{#realmName}", unless="#result == null")
     @Override
     public VersionRealm findVersionRealmByName(String realmName) {
         DSLContext context = this.dbProvider.getDslContext(AccessSpec.readOnly());

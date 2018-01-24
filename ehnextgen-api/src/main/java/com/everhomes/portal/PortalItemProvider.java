@@ -10,7 +10,9 @@ public interface PortalItemProvider {
 
 	void createPortalItem(PortalItem portalItem);
 
-	void updatePortalItem(PortalItem portalItem);
+    void createPortalItems(List<PortalItem> portalItems);
+
+    void updatePortalItem(PortalItem portalItem);
 
 	PortalItem findPortalItemById(Long id);
 
@@ -22,9 +24,9 @@ public interface PortalItemProvider {
 
 	List<PortalItem> listPortalItems(CrossShardListingLocator locator, Integer pageSize, ListingQueryBuilderCallback queryBuilderCallback);
 
-	List<PortalItem> listPortalItems(Long itemCategoryId, Integer namespaceId, String actionType, Long itemGroupId, Byte neStatus);
+	List<PortalItem> listPortalItems(Long itemCategoryId, Integer namespaceId, String actionType, Long itemGroupId, Byte neStatus, Long versionId);
 
 	List<PortalItem> listPortalItems(Long itemCategoryId, Long itemGroupId);
 
-	PortalItem getPortalItemByGroupNameAndName(Integer namespaceId, String location, String groupName, String name, Long itemGroupId);
+    PortalItem getPortalItemByGroupNameAndName(Integer namespaceId, String location, String groupName, String name, Long itemGroupId);
 }

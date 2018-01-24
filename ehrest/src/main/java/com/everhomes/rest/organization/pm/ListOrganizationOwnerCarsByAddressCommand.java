@@ -19,6 +19,15 @@ public class ListOrganizationOwnerCarsByAddressCommand {
     @NotNull private Long organizationId;
     private String ownerType;
     private Long ownerId;
+    private Integer namespaceId;
+
+    public Integer getNamespaceId() {
+        return namespaceId;
+    }
+
+    public void setNamespaceId(Integer namespaceId) {
+        this.namespaceId = namespaceId;
+    }
 
     public Long getAddressId() {
         return addressId;

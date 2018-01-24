@@ -25,6 +25,8 @@ public class ListCommunitiesByCategoryCommand {
 
 	private Long pageAnchor;
 	
+	private Integer namespaceId;
+
 	private Integer pageSize;
 
 	private Long cityId;
@@ -34,6 +36,14 @@ public class ListCommunitiesByCategoryCommand {
 	private Long categoryId;
 
 	private String keywords;
+
+	public Integer getNamespaceId() {
+		return namespaceId;
+	}
+
+	public void setNamespaceId(Integer namespaceId) {
+		this.namespaceId = namespaceId;
+	}
 
 	public Long getPageAnchor() {
 		return pageAnchor;

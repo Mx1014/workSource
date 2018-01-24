@@ -16,6 +16,15 @@ import com.everhomes.util.StringHelper;
 public class DeleteQueueJobsCommand {
 	@ItemType(ListQueueJobsDTO.class)
 	private List<ListQueueJobsDTO> jobs;
+	private Integer namespaceId;
+
+	public Integer getNamespaceId() {
+		return namespaceId;
+	}
+
+	public void setNamespaceId(Integer namespaceId) {
+		this.namespaceId = namespaceId;
+	}
 
 	public List<ListQueueJobsDTO> getJobs() {
 		return jobs;

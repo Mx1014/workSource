@@ -1,6 +1,7 @@
 // @formatter:off
 package com.everhomes.community;
 
+import java.sql.Timestamp;
 import java.util.List;
 import java.util.Map;
 
@@ -40,6 +41,7 @@ public interface CommunityProvider {
 	List<Community> findCommunitiesByNameCityIdAreaId(String name, Long cityId,Long areaId);
 	
 	List<Building> ListBuildingsByCommunityId(ListingLocator locator, int count, Long communityId, Integer namespaceId, String keyword);
+	List<Building> ListBuildingsByCommunityId(ListingLocator locator, int count, Long communityId, Integer namespaceId, String keyword, Timestamp lastUpdateTime);
 
     List<Building> ListBuildingsBykeywordAndNameSpace(Integer namespaceId, String keyword);
 
@@ -96,7 +98,7 @@ public interface CommunityProvider {
     
     void updateResourceCategoryAssignment(ResourceCategoryAssignment resourceCategoryAssignment);
     
-    List<Community> listCommunitiesByCategory(Long cityId, Long areaId, Long categoryId, String keyword, Long pageAnchor, 
+    List<Community> listCommunitiesByCategory(Integer namespaceId, Long cityId, Long areaId, Long categoryId, String keyword, Long pageAnchor,
 			Integer pageSize);
     
     List<ResourceCategory> listResourceCategory(Long ownerId, String ownerType, Long parentId, String path, Byte type);

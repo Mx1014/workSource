@@ -620,12 +620,19 @@ public class ExcelUtils {
     public static Workbook getWorkbook(InputStream inStr, String fileName) throws Exception {
         Workbook wb = null;
         String fileType = fileName.substring(fileName.lastIndexOf("."));
-        if (".xls".equals(fileType)) {
-            wb = new HSSFWorkbook(inStr);  //2003-
-        } else if (".xlsx".equals(fileType)) {
-            wb = new XSSFWorkbook(inStr);  //2007+
-        } else {
-            throw new Exception("解析的文件格式有误！");
+  
+//        if(".xls".equals(fileType)){
+//            wb = new HSSFWorkbook(inStr);  //2003-
+//        }else if(".xlsx".equals(fileType)){
+//            wb = new XSSFWorkbook(inStr);  //2007+
+//        }else{
+//            throw new Exception("解析的文件格式有误！");
+//        }
+        try{
+            wb = new XSSFWorkbook(inStr);
+        }catch (Exception e){
+            wb = new HSSFWorkbook(inStr);
+ 
         }
         return wb;
     }

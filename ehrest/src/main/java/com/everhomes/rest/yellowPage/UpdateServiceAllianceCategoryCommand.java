@@ -13,6 +13,7 @@ import com.everhomes.util.StringHelper;
  *  <li> selectedLogoUrl: 类型logo被选中时的url地址</li>
  *  <li> displayMode: 显示类型 {@link com.everhomes.rest.yellowPage.ServiceAllianceCategoryDisplayMode}</li>
  *  <li> displayDestination: 展示端 {@link com.everhomes.rest.yellowPage.ServiceAllianceCategoryDisplayDestination}</li>
+ *  <li> skipType: 只有一个企业时是否跳过列表页，0 不跳； 1 跳过</li>
  *  <li> namespaceId: 域空间id</li>
  * </ul>
  */
@@ -37,6 +38,16 @@ public class UpdateServiceAllianceCategoryCommand {
 	private Byte displayDestination;
 	
 	private Integer namespaceId;
+
+	private Byte skipType;
+	
+	public Byte getSkipType() {
+		return skipType;
+	}
+
+	public void setSkipType(Byte skipType) {
+		this.skipType = skipType;
+	}
 
 	public Byte getDisplayDestination() {
 		return displayDestination;

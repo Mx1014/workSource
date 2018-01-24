@@ -9,11 +9,21 @@ import com.everhomes.util.StringHelper;
  * </ul>
  */
 public class FindRentalSiteByIdCommand {
+
+    private String resourceType;
     private Long id;
 
     private String sceneToken;
 
-	public String getSceneToken() {
+    public String getResourceType() {
+        return resourceType;
+    }
+
+    public void setResourceType(String resourceType) {
+        this.resourceType = resourceType;
+    }
+
+    public String getSceneToken() {
         return sceneToken;
     }
 
