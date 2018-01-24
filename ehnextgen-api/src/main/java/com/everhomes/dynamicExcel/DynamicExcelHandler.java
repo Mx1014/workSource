@@ -28,6 +28,7 @@ public interface DynamicExcelHandler {
      * @param sheetClassObjs sheet页对应的类的对象的集合
      * @param sheetClass    sheet页对应的类
      */
+
 //    void save2Schema(List<Object> sheetClassObjs, Class<?> sheetClass, Object storage1, Map<Object,Object> context);
     /**
      *

@@ -1,10 +1,7 @@
 package com.everhomes.customer;
 
 import com.everhomes.dynamicExcel.*;
-import com.everhomes.rest.customer.CustomerDynamicSheetClass;
-import com.everhomes.rest.customer.CustomerInfo;
-import com.everhomes.rest.customer.CustomerTaxDTO;
-import com.everhomes.rest.customer.CustomerTrackingTemplateCode;
+import com.everhomes.rest.customer.*;
 import com.everhomes.rest.varField.FieldDTO;
 import com.everhomes.rest.varField.ListFieldCommand;
 import com.everhomes.util.ConvertHelper;
@@ -14,6 +11,7 @@ import com.everhomes.varField.FieldService;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
 
+import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
@@ -34,60 +32,17 @@ public class CustomerDynamicExcelHandler implements DynamicExcelHandler {
     @Autowired
     private CustomerService customerService;
 
-    @Override
-    public void save2Schema(List<Object> sheetClassObjs, Class<?> sheetClass, Object storage1) {
-        CustomerInfo customerInfo = ConvertHelper.convert(storage1, CustomerInfo.class);
-        if(sheetClassObjs != null && sheetClassObjs.size() > 0) {
-            String sheetName = sheetClass.getName();
-            CustomerDynamicSheetClass sheet = CustomerDynamicSheetClass.fromStatus(sheetName);
-            for(Object sheetClassObj : sheetClassObjs) {
-                switch (sheet) {
-                    case CUSTOMER_TAX:
-                        CustomerTaxDTO dto = ConvertHelper.convert(sheetClassObj, CustomerTaxDTO.class);
-
-                            break;
-                    case CUSTOMER_ACCOUNT:
-                        break;
-                    case CUSTOMER_TALENT:
-                        break;
-                    case CUSTOMER_TRADEMARK:
-                        break;
-                    case CUSTOMER_APPLY_PROJECT:
-                        break;
-                    case CUSTOMER_COMMERCIAL:
-                        break;
-                    case CUSTOMER_INVESTMENT:
-                        break;
-                    case CUSTOMER_ECONOMIC_INDICATOR:
-                        break;
-                    case CUSTOMER_PATENT:
-                        break;
-                    case CUSTOMER_CERTIFICATE:
-                        break;
-                    case CUSTOMER_ENTRY_INFO:
-                        break;
-                    case CUSTOMER_DEPARTURE_INFO:
-                        break;
-                }
-
-            }
-
-        }
-    }
+    @Autowired
+    private EnterpriseCustomerProvider customerProvider;
 
     @Override
-    public void postProcess(DynamicImportResponse response) {
-
-    }
-
-    @Override
-    public DynamicSheet getDynamicSheet(String sheetName, Object storage,Object storage1) {
+    public List<DynamicSheet> getDynamicSheet(String sheetName, Object storage) {
         FieldGroup group = fieldProvider.findGroupByGroupDisplayName(sheetName);
         DynamicSheet ds = new DynamicSheet();
         ds.setClassName(group.getName());
         ds.setDisplayName(group.getTitle());
 
-        Map<String, DynamicField> dynamicFields = new HashMap<>();
+        List<DynamicField> dynamicFields = new ArrayList<>();
         ListFieldCommand command = ConvertHelper.convert(storage, ListFieldCommand.class);
         List<FieldDTO> fields = fieldService.listFields(command);
         if(fields != null && fields.size() > 0) {
@@ -100,16 +55,107 @@ public class CustomerDynamicExcelHandler implements DynamicExcelHandler {
                     }).collect(Collectors.toList());
                     df.setAllowedValued(allowedValued);
                 }
-                dynamicFields.put(df.getDisplayName(), df);
+                dynamicFields.add(df);
             });
         }
 
         ds.setDynamicFields(dynamicFields);
-        return ds;
+        List<DynamicSheet> sheets = new ArrayList<>();
+        sheets.add(ds);
+        return sheets;
     }
 
     @Override
-    public List<List<String>> getExportData(List<DynamicField> fields, DynamicSheet sheet) {
+    public void importData(String sheetName, List<DynamicRowDTO> rowDatas, Object params, Map<Object, Object> context, DynamicImportResponse response) {
+//        CustomerInfo customerInfo = ConvertHelper.convert(storage, CustomerInfo.class);
+        if(rowDatas != null && rowDatas.size() > 0) {
+            CustomerDynamicSheetClass sheet = CustomerDynamicSheetClass.fromStatus(sheetName);
+            for(DynamicRowDTO rowData : rowDatas) {
+                List<DynamicColumnDTO> columns = rowData.getColumns();
+                switch (sheet) {
+                    case CUSTOMER_TAX:
+                        CustomerTax tax = ConvertHelper.convert(sheetClassObj, CustomerTax.class);
+                        tax.setCustomerId(Long.valueOf(context.get("customerId").toString()));
+                        tax.setCustomerType(Byte.valueOf(context.get("customerType").toString()));
+                        sheetClass.getClass().getFields();
+                        if("taxPayerTypeId".equals())
+                        customerProvider.createCustomerTax(tax);
+                        break;
+                    case CUSTOMER_ACCOUNT:
+                        CustomerAccount account = ConvertHelper.convert(sheetClassObj, CustomerAccount.class);
+                        account.setCustomerId(customerInfo.getCustomerId());
+                        account.setCustomerType(customerInfo.getCustomerType());
+                        customerProvider.createCustomerAccount(account);
+                        break;
+                    case CUSTOMER_TALENT:
+                        CustomerTalent talent = ConvertHelper.convert(sheetClassObj, CustomerTalent.class);
+                        talent.setCustomerId(customerInfo.getCustomerId());
+                        talent.setCustomerType(customerInfo.getCustomerType());
+                        customerProvider.createCustomerTalent(talent);
+                        break;
+                    case CUSTOMER_TRADEMARK:
+                        CustomerTrademark trademark = ConvertHelper.convert(sheetClassObj, CustomerTrademark.class);
+                        trademark.setCustomerId(customerInfo.getCustomerId());
+                        trademark.setCustomerType(customerInfo.getCustomerType());
+                        customerProvider.createCustomerTrademark(trademark);
+                        break;
+                    case CUSTOMER_APPLY_PROJECT:
+                        CustomerApplyProject project = ConvertHelper.convert(sheetClassObj, CustomerApplyProject.class);
+                        project.setCustomerId(customerInfo.getCustomerId());
+                        project.setCustomerType(customerInfo.getCustomerType());
+                        customerProvider.createCustomerApplyProject(project);
+                        break;
+                    case CUSTOMER_COMMERCIAL:
+                        CustomerCommercial commercial = ConvertHelper.convert(sheetClassObj, CustomerCommercial.class);
+                        commercial.setCustomerId(customerInfo.getCustomerId());
+                        commercial.setCustomerType(customerInfo.getCustomerType());
+                        customerProvider.createCustomerCommercial(commercial);
+                        break;
+                    case CUSTOMER_INVESTMENT:
+                        CustomerInvestment investment = ConvertHelper.convert(sheetClassObj, CustomerInvestment.class);
+                        investment.setCustomerId(customerInfo.getCustomerId());
+                        investment.setCustomerType(customerInfo.getCustomerType());
+                        customerProvider.createCustomerInvestment(investment);
+                        break;
+                    case CUSTOMER_ECONOMIC_INDICATOR:
+                        CustomerEconomicIndicator indicator = ConvertHelper.convert(sheetClassObj, CustomerEconomicIndicator.class);
+                        indicator.setCustomerId(customerInfo.getCustomerId());
+                        indicator.setCustomerType(customerInfo.getCustomerType());
+                        customerProvider.createCustomerEconomicIndicator(indicator);
+                        break;
+                    case CUSTOMER_PATENT:
+                        CustomerPatent patent = ConvertHelper.convert(sheetClassObj, CustomerPatent.class);
+                        patent.setCustomerId(customerInfo.getCustomerId());
+                        patent.setCustomerType(customerInfo.getCustomerType());
+                        customerProvider.createCustomerPatent(patent);
+                        break;
+                    case CUSTOMER_CERTIFICATE:
+                        CustomerCertificate certificate = ConvertHelper.convert(sheetClassObj, CustomerCertificate.class);
+                        certificate.setCustomerId(customerInfo.getCustomerId());
+                        certificate.setCustomerType(customerInfo.getCustomerType());
+                        customerProvider.createCustomerCertificate(certificate);
+                        break;
+                    case CUSTOMER_ENTRY_INFO:
+                        CustomerEntryInfo entryInfo = ConvertHelper.convert(sheetClassObj, CustomerEntryInfo.class);
+                        entryInfo.setCustomerId(customerInfo.getCustomerId());
+                        entryInfo.setCustomerType(customerInfo.getCustomerType());
+                        customerProvider.createCustomerEntryInfo(entryInfo);
+                        break;
+                    case CUSTOMER_DEPARTURE_INFO:
+                        CustomerDepartureInfo departureInfo = ConvertHelper.convert(sheetClassObj, CustomerDepartureInfo.class);
+                        departureInfo.setCustomerId(customerInfo.getCustomerId());
+                        departureInfo.setCustomerType(customerInfo.getCustomerType());
+                        customerProvider.createCustomerDepartureInfo(departureInfo);
+                        break;
+                }
+
+            }
+
+        }
+    }
+
+    @Override
+    public List<List<String>> getExportData(DynamicSheet sheet, Map<Object,Object> context) {
         return null;
     }
 }

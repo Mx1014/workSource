@@ -55,6 +55,145 @@ public interface DynamicExcelService {
      * @param params 业务参数，在handler中的importData方法中使用
      * @return DynamicImportResponse
      */
+<<<<<<< HEAD
+    public DynamicImportResponse importMultiSheet(MultipartFile file, String code, Integer headerRow, Object storage) {
+        DynamicImportResponse response = new DynamicImportResponse();
+        Workbook workbook = null;
+        try{
+            workbook = ExcelUtils.getWorkbook(file.getInputStream(), file.getOriginalFilename());
+            if(workbook == null) {int err = 1/0;}
+        }catch (Exception e){
+            LOGGER.info("import multi sheet failed, failed to get inputStream, workbook is null? = {}, error = {}"
+                    ,workbook==null,e);
+            response.setFailCause("import multi sheet failed, failed to get inputStream,workbook is null >"
+                    +String.valueOf(workbook == null));
+            return response;
+        }
+        DynamicExcelHandler h = getHandler(code);
+        //遍历所有的sheet
+        sheet:for(int i = 0; i < workbook.getNumberOfSheets(); i++) {
+            try{
+                Sheet sheet = workbook.getSheetAt(i);
+                DynamicSheet ds = h.getDynamicSheet(sheet.getSheetName(), storage);
+                //获得sheet的容器对象
+                String className = ds.getClassName();
+                Class<?> sheetClass = null;
+                try {
+                    sheetClass = Class.forName(className);
+                } catch (ClassNotFoundException e) {
+                    LOGGER.error("import failed,class not found exception, group name is = {}", sheet.getSheetName());
+                    continue sheet;
+                }
+                List<Object> sheetClassObjs = new ArrayList<>();
+                Row headRow = null;
+                if (headerRow != null) {
+                    headRow = sheet.getRow(headerRow);
+                } else {
+                    headRow = sheet.getRow(1);
+                    headerRow = 1;
+                }
+                List<DynamicField> headers = new ArrayList<>();
+                //获得了 dynamicField的列表
+                for (int j = headRow.getFirstCellNum(); j < headRow.getLastCellNum(); j++) {
+                    Cell cell = headRow.getCell(j);
+                    String headerDisplay = ExcelUtils.getCellValue(cell);
+                    headers.add(ds.getDynamicFields().get(headerDisplay));
+                }
+                //数据的获得
+                for (int j = headerRow + 1; j <= sheet.getLastRowNum(); j++) {
+                    Row row = sheet.getRow(j);
+                    //构建sheet的实例
+                    Object sheetClassInstance = null;
+                    try {
+                        sheetClassInstance = sheetClass.newInstance();
+                    } catch (Exception e) {
+                        LOGGER.error("sheetClass new Instance failed, sheetClass = {}", sheetClass.getSimpleName());
+                        continue sheet;
+                    }
+                    for (int k = row.getFirstCellNum(); k < row.getLastCellNum(); k++) {
+                        Cell cell = row.getCell(k);
+                        String cellValue = ExcelUtils.getCellValue(cell);
+                        DynamicField df = headers.get(k);
+                        try {
+                            setToObj(df, sheetClassInstance, cellValue);
+                        } catch (Exception e) {
+                            LOGGER.error("set2Obj failed, sheetClass = {},fieldName = {}, cellValue = {}",
+                                    sheetClass.getSimpleName(), df.getFieldName(), cellValue);
+                        }
+                    }
+                    sheetClassObjs.add(sheetClassInstance);
+                }
+                //插入
+                try {
+                    h.save2Schema(sheetClassObjs, sheetClass, storage);
+                    Integer successRowNumber = response.getSuccessRowNumber();
+                    successRowNumber += sheetClassObjs.size();
+                    response.setSuccessRowNumber(successRowNumber);
+                } catch (Exception e) {
+                    LOGGER.error("save2Schema failed, sheetClass = {},sheeClassObjsNum = {}",
+                            sheetClass.getSimpleName(), sheetClassObjs.size());
+                    Integer failedRowNumber = response.getFailedRowNumber();
+                    failedRowNumber += sheetClassObjs.size();
+                    response.setFailedRowNumber(failedRowNumber);
+                    continue sheet;
+                }
+            }catch(Exception e){}
+        }
+        try{
+            //后处理
+            h.postProcess(response);
+        }catch (Exception e){}
+        return response;
+    }
+
+    private void setToObj(DynamicField df, Object dto,String value) throws Exception {
+        Class<?> clz = dto.getClass().getSuperclass();
+        Object val = value;
+        String type = clz.getDeclaredField(df.getFieldName()).getType().getSimpleName();
+        if(StringUtils.isEmpty(value)){
+            val = null;
+        }else{
+            switch(type){
+                case "BigDecimal":
+                    val = new BigDecimal(value);
+                    break;
+                case "Long":
+                    val = Long.parseLong(value);
+                    break;
+                case "Timestamp":
+                    if(value.length()<1){
+                        val = null;
+                        break;
+                    }
+                    Date date = new Date();
+                    SimpleDateFormat sdf = new SimpleDateFormat(df.getDateFormat());
+                    try {
+                        date = sdf.parse(value);
+                    } catch (ParseException e) {
+                        val = null;
+                        break;
+                    }
+                    val = new Timestamp(date.getTime());
+                    break;
+                case "Integer":
+                    val = Integer.parseInt(value);
+                    break;
+                case "Byte":
+                    val = Byte.parseByte(value);
+                    break;
+                case "String":
+                    if(value.trim().length()<1){
+                        val = null;
+                        break;
+                    }
+            }
+        }
+        PropertyDescriptor pd = new PropertyDescriptor(df.getFieldName(),clz);
+        Method writeMethod = pd.getWriteMethod();
+        writeMethod.invoke(dto,val);
+    }
+=======
     public DynamicImportResponse importMultiSheet(MultipartFile file, String code, Integer headerRow,Object params);
+>>>>>>> 823279edce8e9b94718477a4fe10439567769790
 
 }
