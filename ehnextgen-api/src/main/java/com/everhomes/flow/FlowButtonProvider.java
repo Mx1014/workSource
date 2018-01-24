@@ -1,9 +1,9 @@
 package com.everhomes.flow;
 
-import java.util.List;
-
 import com.everhomes.listing.ListingLocator;
 import com.everhomes.listing.ListingQueryBuilderCallback;
+
+import java.util.List;
 
 public interface FlowButtonProvider {
 
@@ -15,16 +15,9 @@ public interface FlowButtonProvider {
 
 	FlowButton getFlowButtonById(Long id);
 
-	List<FlowButton> queryFlowButtons(ListingLocator locator, int count,
-			ListingQueryBuilderCallback queryBuilderCallback);
-
-	FlowButton findFlowButtonByStepType(Long flowNodeId, Integer flowVer,
-			String flowStepType, String userType);
+	List<FlowButton> queryFlowButtons(ListingLocator locator, int count, ListingQueryBuilderCallback queryBuilderCallback);
 
     FlowButton findFlowButtonByStepType(Long flowMainId, Long flowNodeId, Integer flowVer, String flowStepType, String userType);
-
-    List<FlowButton> findFlowButtonsByUserType(Long flowNodeId,
-                                               Integer flowVer, String userType);
 
     List<FlowButton> findFlowButtonsByUserType(Long flowMainId, Long flowNodeId, Integer flowVer, String userType);
 }

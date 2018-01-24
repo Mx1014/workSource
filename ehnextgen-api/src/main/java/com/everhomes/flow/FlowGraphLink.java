@@ -1,6 +1,8 @@
 package com.everhomes.flow;
 
-public abstract class FlowGraphLink {
+import java.io.Serializable;
+
+public abstract class FlowGraphLink implements Serializable {
 
 	protected FlowLink flowLink;
 

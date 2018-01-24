@@ -124,7 +124,7 @@ public class FlowGraphAutoStepEvent extends AbstractFlowGraphEvent {
                 }
 
                 // 再判断是否有其他的分支,这里的分支包含上面的当前分支
-                List<FlowGraphBranch> branches = flowGraph.getBranchByConvergenceNode(next.getFlowNode().getId());
+                List<FlowGraphBranch> branches = flowGraph.getBranchByConvNode(next.getFlowNode().getId());
                 if (branches != null && branches.size() > 0 && ctx.getParentState() != null) {
                     // 再判断其他所有分支是否都已经完成
                     int finishedBranch = 0;

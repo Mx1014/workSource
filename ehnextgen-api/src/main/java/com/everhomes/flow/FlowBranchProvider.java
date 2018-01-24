@@ -13,9 +13,7 @@ public interface FlowBranchProvider {
 
     void deleteFlowBranch(Long flowMainId, Integer flowVersion);
 
-    FlowBranch findBranch(Long originalNodeId);
-
-    List<FlowBranch> findByFlowId(Long flowId, Integer flowVersion);
+    List<FlowBranch> listFlowBranch(Long flowId, Integer flowVersion);
 
     FlowBranch findBranchByOriginalNodeId(Long flowMainId, Integer flowVersion, Long originalNodeId);
 }
