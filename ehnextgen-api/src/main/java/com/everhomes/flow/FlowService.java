@@ -463,6 +463,13 @@ public interface FlowService {
 
     SearchFlowOperateLogResponse searchFlowOperateLogs(SearchFlowOperateLogsCommand cmd);
 
+    /**
+     * 获取正在执行的任务列表（子任务 or 父任务）
+     * @param flowCaseId  子任务id或者父任务id
+     * @return  正在执行的任务列表
+     */
+    List<FlowCase> getProcessingFlowCasesByAnyFlowCaseId(Long flowCaseId);
+
     FlowEvaluateItemDTO createFlowEvaluateItem(CreateFlowEvaluateItemCommand cmd);
 
     void deleteFlowEvaluateItem(DeleteFlowEvaluateItemCommand cmd);

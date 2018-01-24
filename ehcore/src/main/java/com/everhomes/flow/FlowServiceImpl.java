@@ -5776,10 +5776,9 @@ public class FlowServiceImpl implements FlowService {
     private List<FlowButtonDTO> getApplierButtonDTOList(FlowGraph flowGraph, FlowCase flowCase) {
         List<FlowButtonDTO> btnList = new ArrayList<>();
 
-        List<FlowCase> allFlowCase = getAllFlowCase(flowCase.getId());
+        List<FlowCase> processingFlowCase = getProcessingFlowCasesByAnyFlowCaseId(flowCase.getId());
 
-        List<Long> currentNodeIdList = allFlowCase.stream()
-                .filter(r -> !Objects.equals(r.getCurrentNodeId(), r.getEndNodeId()))
+        List<Long> currentNodeIdList = processingFlowCase.stream()
                 .map(FlowCase::getCurrentNodeId)
                 .distinct()
                 .collect(Collectors.toList());
@@ -5845,6 +5844,14 @@ public class FlowServiceImpl implements FlowService {
             }
         }
         return btnList;
+    }
+
+    @Override
+    public List<FlowCase> getProcessingFlowCasesByAnyFlowCaseId(Long flowCaseId) {
+        List<FlowCase> allFlowCase = getAllFlowCase(flowCaseId);
+        return allFlowCase.stream()
+                .filter(r -> !Objects.equals(r.getCurrentNodeId(), r.getEndNodeId()))
+                .collect(Collectors.toList());
     }
 
     private Long getRealCurrentNodeId(FlowCase flowCase, Long currentNodeId) {
