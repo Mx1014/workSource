@@ -21,7 +21,7 @@ public class MessagePersistWorkerCopy implements Runnable {
     private static final Logger LOGGER = LoggerFactory.getLogger(MessagePersistWorkerCopy.class);
 
     //    @Value("${core.service.uri}")
-    private String coreServiceUri = "http://10.1.133.110:8080/evh";
+    private String coreServiceUri = "http://10.1.10.37:8080/evh";
 
     //    @Value("${border.app.key}")
     private String appKey = "b86ddb3b-ac77-4a65-ae03-7e8482a3db70";
@@ -46,7 +46,7 @@ public class MessagePersistWorkerCopy implements Runnable {
         Map<String, String> params = new HashMap<>();
 //        params.put("borderId", String.valueOf(this.borderId));
 //        params.put("borderSessionId", session.getId());
-        params.put("messageRecord", record.toString());
+        params.put("messageRecordDto", record.toString());
 
         this.restCall("/message/persistMessage", params, new ListenableFutureCallback<ResponseEntity<String>>() {
 
