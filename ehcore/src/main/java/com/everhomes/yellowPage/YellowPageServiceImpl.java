@@ -821,8 +821,11 @@ public class YellowPageServiceImpl implements YellowPageService {
 			// 服务联盟跳转到审批，审批模块可控制在app端是否显示
 			if((ServiceAllianceSourceRequestType.CLIENT == sourceRequestType || sourceRequestType == null)
 					&& dto.getJumpType() == JumpType.MODULE.getCode() && dto.getModuleUrl()!=null 
-					&& dto.getModuleUrl().contains("zl://approval/create")
-					&& !Pattern.matches("^.*formId=.*$", dto.getModuleUrl())){
+					&& dto.getModuleUrl().contains("zl://approval/create")){
+				boolean matches = Pattern.matches("^(.*)formId=.*$", dto.getModuleUrl());
+				if(matches){
+					dto.setModuleUrl(dto.getModuleUrl().substring(0,dto.getModuleUrl().lastIndexOf('&')));
+				}
 				int start = dto.getModuleUrl().indexOf('?');
 				String s[] = dto.getModuleUrl().substring(start).split("&");
 				s = s[0].split("=");
@@ -1759,5 +1762,13 @@ public class YellowPageServiceImpl implements YellowPageService {
 		FieldTemplateDTO fields = gson.fromJson(fieldsJson, new TypeToken<FieldTemplateDTO>() {}.getType());
 		List<FieldDTO> dto = fields.getFields();
 		return dto;
+	}
+
+	public static void main(String[] args) {
+		String url = "zl://approval/create?approvalId=1581&sourceId=200172&formId=1472";
+		boolean matches = Pattern.matches("^(.*)formId=.*$", url);
+		if(matches){
+			System.out.println(url.substring(0,url.lastIndexOf('&')));
+		}
 	}
 }
