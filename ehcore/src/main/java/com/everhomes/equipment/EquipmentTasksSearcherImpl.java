@@ -202,10 +202,10 @@ public class EquipmentTasksSearcherImpl extends AbstractElasticSearch implements
         for (Long id : ids) {
             EquipmentInspectionTasks task = equipmentProvider.findEquipmentTaskById(id);
             EquipmentTaskDTO dto = ConvertHelper.convert(task, EquipmentTaskDTO.class);
-            if(task!=null){
-                if (task.getPlanId() == null || task.getPlanId() == 0L) {
+            if (task != null) {
+                if (task.getPlanId() != null && task.getPlanId() != 0L) {
+                    plan = equipmentProvider.getEquipmmentInspectionPlanById(task.getPlanId());
                     if (null != plan) {
-                        plan = equipmentProvider.getEquipmmentInspectionPlanById(task.getPlanId());
                         EquipmentInspectionPlanDTO plansDTO = processEquipmentInspectionObjectsByPlanId(
                                 ConvertHelper.convert(plan, EquipmentInspectionPlanDTO.class));
                         dto.setPlanDescription(plansDTO.getRemarks());
