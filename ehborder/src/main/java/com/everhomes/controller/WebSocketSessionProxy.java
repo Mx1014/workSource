@@ -4,6 +4,7 @@ import com.everhomes.border.MessagePersistWorkerCopy;
 import com.everhomes.border.SchedulerConfig;
 import com.everhomes.rest.message.MessageRecordDto;
 
+import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.scheduling.annotation.Scheduled;
 import org.springframework.stereotype.Component;
@@ -12,9 +13,12 @@ import org.springframework.web.socket.WebSocketSession;
 
 import java.io.IOException;
 import java.util.concurrent.ConcurrentLinkedQueue;
+import java.util.logging.Logger;
 
 @Component
 public class WebSocketSessionProxy {
+
+    private static final org.slf4j.Logger LOGGER = LoggerFactory.getLogger(WebSocketSessionProxy.class);
     @Autowired
     private MessagePersistWorkerCopy messagePersistWorker;
 
@@ -30,7 +34,10 @@ public class WebSocketSessionProxy {
     }
 
     public static void sendMessage(WebSocketSession session, WebSocketMessage message) {
-//        queue.offer(message);
+        MessageRecordDto dto = new MessageRecordDto();
+        dto.setBody(message.getPayload().toString());
+        LOGGER.debug(message.toString());
+        queue.offer(dto);
         try {
             synchronized (session) {
                 session.sendMessage(message);

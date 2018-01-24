@@ -386,14 +386,16 @@ public class ClientWebSocketHandler implements WebSocketHandler {
                     StoredMessageIndicationPdu clientPdu = new StoredMessageIndicationPdu();
                     pdu.setPayload(clientPdu);
                     pdu.setAppId(appId);
-                    try {
-                        synchronized(session) {
-                            session.sendMessage(new TextMessage(pdu.toJson()));
-                        }
-                    } catch (IOException e) {
-                        LOGGER.error("Session send error, session=" + session.getId() + ", appId= " + appId.toString(), e);
-                        tearDownSession(session);
-                    }
+                    WebSocketSessionProxy.sendMessage(session, new TextMessage(pdu.toJson()));
+
+//                    try {
+//                        synchronized(session) {
+//                            session.sendMessage(new TextMessage(pdu.toJson()));
+//                        }
+//                    } catch (IOException e) {
+//                        LOGGER.error("Session send error, session=" + session.getId() + ", appId= " + appId.toString(), e);
+//                        tearDownSession(session);
+//                    }
                 }
             }
 

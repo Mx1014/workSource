@@ -1,6 +1,8 @@
 package com.everhomes.rest.message;
 
-public class PersistMessageRecordDto {
+import com.everhomes.util.StringHelper;
+
+public class PersistMessageRecordCommand {
 
     private String messageRecordDto;
 
@@ -10,5 +12,9 @@ public class PersistMessageRecordDto {
 
     public void setMessageRecordDto(String messageRecordDto) {
         this.messageRecordDto = messageRecordDto;
+    }
+    @Override
+    public String toString() {
+        return StringHelper.toJsonString(this);
     }
 }
