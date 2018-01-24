@@ -9656,3 +9656,149 @@ java.net.ConnectException: Connection refused (Connection refused)
 2018-01-23 15:13:32.339  INFO 3452 [Thread-1] --- o.s.s.c.ThreadPoolTaskScheduler          : Shutting down ExecutorService 'defaultSockJsTaskScheduler'
 2018-01-23 15:13:32.341  INFO 3452 [Thread-1] --- o.s.s.concurrent.ThreadPoolTaskExecutor  : Shutting down ExecutorService 'clientOutboundChannelExecutor'
 2018-01-23 15:13:32.341  INFO 3452 [Thread-1] --- o.s.s.concurrent.ThreadPoolTaskExecutor  : Shutting down ExecutorService 'clientInboundChannelExecutor'
+2018-01-24 16:58:16.904  INFO 7607 [main] --- com.everhomes.border.BorderServerApp     : Starting BorderServerApp on lvleideMacBook-Pro.local with PID 7607 (/Users/lvlei/IdeaProjects/ehnextgen/ehborder/target/classes started by lvlei in /Users/lvlei/IdeaProjects/ehnextgen)
+2018-01-24 16:58:16.914 DEBUG 7607 [main] --- com.everhomes.border.BorderServerApp     : Running with Spring Boot v1.1.9.RELEASE, Spring v4.0.8.RELEASE
+2018-01-24 16:58:16.914 DEBUG 7607 [main] --- o.s.boot.SpringApplication               : Loading source class com.everhomes.border.BorderServerApp
+2018-01-24 16:58:16.972 DEBUG 7607 [main] --- o.s.b.c.c.ConfigFileApplicationListener  : Skipped config file 'file:./config/ehborder_custom.yml' resource not found
+2018-01-24 16:58:16.972 DEBUG 7607 [main] --- o.s.b.c.c.ConfigFileApplicationListener  : Skipped config file 'file:./config/ehborder_custom.properties' resource not found
+2018-01-24 16:58:16.972 DEBUG 7607 [main] --- o.s.b.c.c.ConfigFileApplicationListener  : Skipped config file 'file:./config/ehborder_custom.yaml' resource not found
+2018-01-24 16:58:16.972 DEBUG 7607 [main] --- o.s.b.c.c.ConfigFileApplicationListener  : Skipped config file 'file:./ehborder_custom.yml' resource not found
+2018-01-24 16:58:16.972 DEBUG 7607 [main] --- o.s.b.c.c.ConfigFileApplicationListener  : Skipped config file 'file:./ehborder_custom.properties' resource not found
+2018-01-24 16:58:16.973 DEBUG 7607 [main] --- o.s.b.c.c.ConfigFileApplicationListener  : Skipped config file 'file:./ehborder_custom.yaml' resource not found
+2018-01-24 16:58:16.973 DEBUG 7607 [main] --- o.s.b.c.c.ConfigFileApplicationListener  : Skipped config file 'classpath:/config/ehborder_custom.yml' resource not found
+2018-01-24 16:58:16.973 DEBUG 7607 [main] --- o.s.b.c.c.ConfigFileApplicationListener  : Skipped config file 'classpath:/config/ehborder_custom.properties' resource not found
+2018-01-24 16:58:16.973 DEBUG 7607 [main] --- o.s.b.c.c.ConfigFileApplicationListener  : Skipped config file 'classpath:/config/ehborder_custom.yaml' resource not found
+2018-01-24 16:58:16.974 DEBUG 7607 [main] --- o.s.b.c.c.ConfigFileApplicationListener  : Loaded config file 'classpath:/ehborder_custom.yml' 
+2018-01-24 16:58:16.974 DEBUG 7607 [main] --- o.s.b.c.c.ConfigFileApplicationListener  : Skipped config file 'classpath:/ehborder_custom.properties' resource not found
+2018-01-24 16:58:16.974 DEBUG 7607 [main] --- o.s.b.c.c.ConfigFileApplicationListener  : Skipped config file 'classpath:/ehborder_custom.yaml' resource not found
+2018-01-24 16:58:16.979  INFO 7607 [main] --- ationConfigEmbeddedWebApplicationContext : Refreshing org.springframework.boot.context.embedded.AnnotationConfigEmbeddedWebApplicationContext@503f91c3: startup date [Wed Jan 24 16:58:16 CST 2018]; root of context hierarchy
+2018-01-24 16:58:16.982 DEBUG 7607 [main] --- ationConfigEmbeddedWebApplicationContext : Bean factory for org.springframework.boot.context.embedded.AnnotationConfigEmbeddedWebApplicationContext@503f91c3: org.springframework.beans.factory.support.DefaultListableBeanFactory@73a8da0f: defining beans [org.springframework.context.annotation.internalConfigurationAnnotationProcessor,org.springframework.context.annotation.internalAutowiredAnnotationProcessor,org.springframework.context.annotation.internalRequiredAnnotationProcessor,org.springframework.context.annotation.internalCommonAnnotationProcessor,borderServerApp]; root of factory hierarchy
+2018-01-24 16:58:19.818  INFO 7607 [main] --- o.s.b.f.xml.XmlBeanDefinitionReader      : Loading XML bean definitions from file [/Users/lvlei/IdeaProjects/ehnextgen/ehborder/target/classes/applicationContext.xml]
+2018-01-24 16:58:20.068  INFO 7607 [main] --- o.s.b.f.s.DefaultListableBeanFactory     : Overriding bean definition for bean 'beanNameViewResolver': replacing [Root bean: class [null]; scope=; abstract=false; lazyInit=false; autowireMode=3; dependencyCheck=0; autowireCandidate=true; primary=false; factoryBeanName=org.springframework.boot.autoconfigure.web.ErrorMvcAutoConfiguration$WhitelabelErrorViewConfiguration; factoryMethodName=beanNameViewResolver; initMethodName=null; destroyMethodName=(inferred); defined in class path resource [org/springframework/boot/autoconfigure/web/ErrorMvcAutoConfiguration$WhitelabelErrorViewConfiguration.class]] with [Root bean: class [null]; scope=; abstract=false; lazyInit=false; autowireMode=3; dependencyCheck=0; autowireCandidate=true; primary=false; factoryBeanName=org.springframework.boot.autoconfigure.web.WebMvcAutoConfiguration$WebMvcAutoConfigurationAdapter; factoryMethodName=beanNameViewResolver; initMethodName=null; destroyMethodName=(inferred); defined in class path resource [org/springframework/boot/autoconfigure/web/WebMvcAutoConfiguration$WebMvcAutoConfigurationAdapter.class]]
+2018-01-24 16:58:20.440  INFO 7607 [main] --- trationDelegate$BeanPostProcessorChecker : Bean 'org.springframework.scheduling.annotation.SchedulingConfiguration' of type [class org.springframework.scheduling.annotation.SchedulingConfiguration$$EnhancerBySpringCGLIB$$7a766e17] is not eligible for getting processed by all BeanPostProcessors (for example: not eligible for auto-proxying)
+2018-01-24 16:58:20.452 DEBUG 7607 [main] --- ationConfigEmbeddedWebApplicationContext : Unable to locate MessageSource with name 'messageSource': using default [org.springframework.context.support.DelegatingMessageSource@62d1dc3c]
+2018-01-24 16:58:20.452 DEBUG 7607 [main] --- ationConfigEmbeddedWebApplicationContext : Using ApplicationEventMulticaster [org.springframework.context.event.SimpleApplicationEventMulticaster@3811510]
+2018-01-24 16:58:20.788 DEBUG 7607 [main] --- .t.TomcatEmbeddedServletContainerFactory : Code archive: /Users/lvlei/.m2/everhomes/repository/org/springframework/boot/spring-boot/1.1.9.RELEASE/spring-boot-1.1.9.RELEASE.jar
+2018-01-24 16:58:20.789 DEBUG 7607 [main] --- .t.TomcatEmbeddedServletContainerFactory : Code archive: /Users/lvlei/.m2/everhomes/repository/org/springframework/boot/spring-boot/1.1.9.RELEASE/spring-boot-1.1.9.RELEASE.jar
+2018-01-24 16:58:20.789 DEBUG 7607 [main] --- .t.TomcatEmbeddedServletContainerFactory : None of the document roots [src/main/webapp, public, static] point to a directory and will be ignored.
+2018-01-24 16:58:20.819  INFO 7607 [main] --- .t.TomcatEmbeddedServletContainerFactory : Server initialized with port: 9090
+2018-01-24 16:58:20.981  INFO 7607 [main] --- o.apache.catalina.core.StandardService   : Starting service Tomcat
+2018-01-24 16:58:20.983  INFO 7607 [main] --- org.apache.catalina.core.StandardEngine  : Starting Servlet Engine: Apache Tomcat/8.0.8
+2018-01-24 16:58:21.036  INFO 7607 [localhost-startStop-1] --- o.a.c.c.C.[Tomcat].[localhost].[/]       : Initializing Spring embedded WebApplicationContext
+2018-01-24 16:58:21.036  INFO 7607 [localhost-startStop-1] --- o.s.web.context.ContextLoader            : Root WebApplicationContext: initialization completed in 4061 ms
+2018-01-24 16:58:21.615  INFO 7607 [localhost-startStop-1] --- o.s.b.c.e.ServletRegistrationBean        : Mapping servlet: 'dispatcherServlet' to [/]
+2018-01-24 16:58:21.618  INFO 7607 [localhost-startStop-1] --- o.s.b.c.embedded.FilterRegistrationBean  : Mapping filter: 'hiddenHttpMethodFilter' to: [/*]
+2018-01-24 16:58:21.741  INFO 7607 [main] --- o.s.s.c.ThreadPoolTaskScheduler          : Initializing ExecutorService  'defaultSockJsTaskScheduler'
+2018-01-24 16:58:21.753  INFO 7607 [main] --- o.s.s.c.ThreadPoolTaskScheduler          : Initializing ExecutorService  'messageBrokerSockJsTaskScheduler'
+2018-01-24 16:58:21.761  WARN 7607 [main] --- ationConfigEmbeddedWebApplicationContext : Exception encountered during context initialization - cancelling refresh attempt
+
+org.springframework.beans.factory.BeanCreationException: Error creating bean with name 'webSocketSessionProxy': Injection of autowired dependencies failed; nested exception is org.springframework.beans.factory.BeanCreationException: Could not autowire field: private org.springframework.scheduling.TaskScheduler com.everhomes.border.WebSocketSessionProxy.taskScheduler; nested exception is org.springframework.beans.factory.NoUniqueBeanDefinitionException: No qualifying bean of type [org.springframework.scheduling.TaskScheduler] is defined: expected single matching bean but found 2: defaultSockJsTaskScheduler,messageBrokerSockJsTaskScheduler
+	at org.springframework.beans.factory.annotation.AutowiredAnnotationBeanPostProcessor.postProcessPropertyValues(AutowiredAnnotationBeanPostProcessor.java:301)
+	at org.springframework.beans.factory.support.AbstractAutowireCapableBeanFactory.populateBean(AbstractAutowireCapableBeanFactory.java:1186)
+	at org.springframework.beans.factory.support.AbstractAutowireCapableBeanFactory.doCreateBean(AbstractAutowireCapableBeanFactory.java:537)
+	at org.springframework.beans.factory.support.AbstractAutowireCapableBeanFactory.createBean(AbstractAutowireCapableBeanFactory.java:475)
+	at org.springframework.beans.factory.support.AbstractBeanFactory$1.getObject(AbstractBeanFactory.java:302)
+	at org.springframework.beans.factory.support.DefaultSingletonBeanRegistry.getSingleton(DefaultSingletonBeanRegistry.java:228)
+	at org.springframework.beans.factory.support.AbstractBeanFactory.doGetBean(AbstractBeanFactory.java:298)
+	at org.springframework.beans.factory.support.AbstractBeanFactory.getBean(AbstractBeanFactory.java:193)
+	at org.springframework.beans.factory.support.DefaultListableBeanFactory.preInstantiateSingletons(DefaultListableBeanFactory.java:706)
+	at org.springframework.context.support.AbstractApplicationContext.finishBeanFactoryInitialization(AbstractApplicationContext.java:762)
+	at org.springframework.context.support.AbstractApplicationContext.refresh(AbstractApplicationContext.java:482)
+	at org.springframework.boot.context.embedded.EmbeddedWebApplicationContext.refresh(EmbeddedWebApplicationContext.java:109)
+	at org.springframework.boot.SpringApplication.refresh(SpringApplication.java:691)
+	at org.springframework.boot.SpringApplication.run(SpringApplication.java:320)
+	at com.everhomes.border.BorderServerApp.main(BorderServerApp.java:28)
+Caused by: org.springframework.beans.factory.BeanCreationException: Could not autowire field: private org.springframework.scheduling.TaskScheduler com.everhomes.border.WebSocketSessionProxy.taskScheduler; nested exception is org.springframework.beans.factory.NoUniqueBeanDefinitionException: No qualifying bean of type [org.springframework.scheduling.TaskScheduler] is defined: expected single matching bean but found 2: defaultSockJsTaskScheduler,messageBrokerSockJsTaskScheduler
+	at org.springframework.beans.factory.annotation.AutowiredAnnotationBeanPostProcessor$AutowiredFieldElement.inject(AutowiredAnnotationBeanPostProcessor.java:522)
+	at org.springframework.beans.factory.annotation.InjectionMetadata.inject(InjectionMetadata.java:87)
+	at org.springframework.beans.factory.annotation.AutowiredAnnotationBeanPostProcessor.postProcessPropertyValues(AutowiredAnnotationBeanPostProcessor.java:298)
+	... 14 common frames omitted
+Caused by: org.springframework.beans.factory.NoUniqueBeanDefinitionException: No qualifying bean of type [org.springframework.scheduling.TaskScheduler] is defined: expected single matching bean but found 2: defaultSockJsTaskScheduler,messageBrokerSockJsTaskScheduler
+	at org.springframework.beans.factory.support.DefaultListableBeanFactory.doResolveDependency(DefaultListableBeanFactory.java:974)
+	at org.springframework.beans.factory.support.DefaultListableBeanFactory.resolveDependency(DefaultListableBeanFactory.java:862)
+	at org.springframework.beans.factory.annotation.AutowiredAnnotationBeanPostProcessor$AutowiredFieldElement.inject(AutowiredAnnotationBeanPostProcessor.java:494)
+	... 16 common frames omitted
+
+2018-01-24 16:58:21.761  INFO 7607 [main] --- o.s.s.c.ThreadPoolTaskScheduler          : Shutting down ExecutorService 'messageBrokerSockJsTaskScheduler'
+2018-01-24 16:58:21.762  INFO 7607 [main] --- o.s.s.c.ThreadPoolTaskScheduler          : Shutting down ExecutorService 'defaultSockJsTaskScheduler'
+2018-01-24 16:58:21.763  INFO 7607 [main] --- o.apache.catalina.core.StandardService   : Stopping service Tomcat
+2018-01-24 16:58:21.784 ERROR 7607 [main] --- o.s.boot.SpringApplication               : Error handling failed
+
+org.springframework.beans.factory.BeanCreationException: Error creating bean with name 'borderServerBootstrapBean': Injection of autowired dependencies failed; nested exception is org.springframework.beans.factory.BeanCreationException: Could not autowire field: private com.everhomes.bus.LocalBusMessageClassRegistry com.everhomes.bootstrap.BorderServerBootstrapBean.messageClassRegistry; nested exception is org.springframework.beans.factory.BeanCreationException: Error creating bean with name 'webSocketConfig' defined in file [/Users/lvlei/IdeaProjects/ehnextgen/ehborder/target/classes/com/everhomes/border/WebSocketConfig.class]: Initialization of bean failed; nested exception is java.lang.NoSuchMethodError: com.everhomes.border.WebSocketConfig.setBeanFactory(Lorg/springframework/beans/factory/BeanFactory;)V
+	at org.springframework.beans.factory.annotation.AutowiredAnnotationBeanPostProcessor.postProcessPropertyValues(AutowiredAnnotationBeanPostProcessor.java:301)
+	at org.springframework.beans.factory.support.AbstractAutowireCapableBeanFactory.populateBean(AbstractAutowireCapableBeanFactory.java:1186)
+	at org.springframework.beans.factory.support.AbstractAutowireCapableBeanFactory.doCreateBean(AbstractAutowireCapableBeanFactory.java:537)
+	at org.springframework.beans.factory.support.AbstractAutowireCapableBeanFactory.createBean(AbstractAutowireCapableBeanFactory.java:475)
+	at org.springframework.beans.factory.support.AbstractBeanFactory$1.getObject(AbstractBeanFactory.java:302)
+	at org.springframework.beans.factory.support.DefaultSingletonBeanRegistry.getSingleton(DefaultSingletonBeanRegistry.java:228)
+	at org.springframework.beans.factory.support.AbstractBeanFactory.doGetBean(AbstractBeanFactory.java:298)
+	at org.springframework.beans.factory.support.AbstractBeanFactory.getBean(AbstractBeanFactory.java:198)
+	at org.springframework.context.event.AbstractApplicationEventMulticaster.getApplicationListeners(AbstractApplicationEventMulticaster.java:182)
+	at org.springframework.context.event.SimpleApplicationEventMulticaster.multicastEvent(SimpleApplicationEventMulticaster.java:87)
+	at org.springframework.boot.context.event.EventPublishingRunListener.publishEvent(EventPublishingRunListener.java:100)
+	at org.springframework.boot.context.event.EventPublishingRunListener.finished(EventPublishingRunListener.java:95)
+	at org.springframework.boot.SpringApplication.finishWithException(SpringApplication.java:701)
+	at org.springframework.boot.SpringApplication.run(SpringApplication.java:336)
+	at com.everhomes.border.BorderServerApp.main(BorderServerApp.java:28)
+Caused by: org.springframework.beans.factory.BeanCreationException: Could not autowire field: private com.everhomes.bus.LocalBusMessageClassRegistry com.everhomes.bootstrap.BorderServerBootstrapBean.messageClassRegistry; nested exception is org.springframework.beans.factory.BeanCreationException: Error creating bean with name 'webSocketConfig' defined in file [/Users/lvlei/IdeaProjects/ehnextgen/ehborder/target/classes/com/everhomes/border/WebSocketConfig.class]: Initialization of bean failed; nested exception is java.lang.NoSuchMethodError: com.everhomes.border.WebSocketConfig.setBeanFactory(Lorg/springframework/beans/factory/BeanFactory;)V
+	at org.springframework.beans.factory.annotation.AutowiredAnnotationBeanPostProcessor$AutowiredFieldElement.inject(AutowiredAnnotationBeanPostProcessor.java:522)
+	at org.springframework.beans.factory.annotation.InjectionMetadata.inject(InjectionMetadata.java:87)
+	at org.springframework.beans.factory.annotation.AutowiredAnnotationBeanPostProcessor.postProcessPropertyValues(AutowiredAnnotationBeanPostProcessor.java:298)
+	... 14 common frames omitted
+Caused by: org.springframework.beans.factory.BeanCreationException: Error creating bean with name 'webSocketConfig' defined in file [/Users/lvlei/IdeaProjects/ehnextgen/ehborder/target/classes/com/everhomes/border/WebSocketConfig.class]: Initialization of bean failed; nested exception is java.lang.NoSuchMethodError: com.everhomes.border.WebSocketConfig.setBeanFactory(Lorg/springframework/beans/factory/BeanFactory;)V
+	at org.springframework.beans.factory.support.AbstractAutowireCapableBeanFactory.doCreateBean(AbstractAutowireCapableBeanFactory.java:547)
+	at org.springframework.beans.factory.support.AbstractAutowireCapableBeanFactory.createBean(AbstractAutowireCapableBeanFactory.java:475)
+	at org.springframework.beans.factory.support.AbstractBeanFactory$1.getObject(AbstractBeanFactory.java:302)
+	at org.springframework.beans.factory.support.DefaultSingletonBeanRegistry.getSingleton(DefaultSingletonBeanRegistry.java:228)
+	at org.springframework.beans.factory.support.AbstractBeanFactory.doGetBean(AbstractBeanFactory.java:298)
+	at org.springframework.beans.factory.support.AbstractBeanFactory.getBean(AbstractBeanFactory.java:193)
+	at org.springframework.beans.factory.support.ConstructorResolver.instantiateUsingFactoryMethod(ConstructorResolver.java:370)
+	at org.springframework.beans.factory.support.AbstractAutowireCapableBeanFactory.instantiateUsingFactoryMethod(AbstractAutowireCapableBeanFactory.java:1095)
+	at org.springframework.beans.factory.support.AbstractAutowireCapableBeanFactory.createBeanInstance(AbstractAutowireCapableBeanFactory.java:990)
+	at org.springframework.beans.factory.support.AbstractAutowireCapableBeanFactory.doCreateBean(AbstractAutowireCapableBeanFactory.java:504)
+	at org.springframework.beans.factory.support.AbstractAutowireCapableBeanFactory.createBean(AbstractAutowireCapableBeanFactory.java:475)
+	at org.springframework.beans.factory.support.AbstractBeanFactory$1.getObject(AbstractBeanFactory.java:302)
+	at org.springframework.beans.factory.support.DefaultSingletonBeanRegistry.getSingleton(DefaultSingletonBeanRegistry.java:228)
+	at org.springframework.beans.factory.support.AbstractBeanFactory.doGetBean(AbstractBeanFactory.java:298)
+	at org.springframework.beans.factory.support.AbstractBeanFactory.getBean(AbstractBeanFactory.java:193)
+	at org.springframework.beans.factory.support.DefaultListableBeanFactory.findAutowireCandidates(DefaultListableBeanFactory.java:1021)
+	at org.springframework.beans.factory.support.DefaultListableBeanFactory.doResolveDependency(DefaultListableBeanFactory.java:964)
+	at org.springframework.beans.factory.support.DefaultListableBeanFactory.resolveDependency(DefaultListableBeanFactory.java:862)
+	at org.springframework.beans.factory.annotation.AutowiredAnnotationBeanPostProcessor$AutowiredFieldElement.inject(AutowiredAnnotationBeanPostProcessor.java:494)
+	... 16 common frames omitted
+Caused by: java.lang.NoSuchMethodError: com.everhomes.border.WebSocketConfig.setBeanFactory(Lorg/springframework/beans/factory/BeanFactory;)V
+	at com.everhomes.border.WebSocketConfig$$EnhancerBySpringCGLIB$$5c30bccd.setBeanFactory(<generated>)
+	at org.springframework.context.annotation.ConfigurationClassPostProcessor$EnhancedConfigurationBeanPostProcessor.postProcessPropertyValues(ConfigurationClassPostProcessor.java:448)
+	at org.springframework.beans.factory.support.AbstractAutowireCapableBeanFactory.populateBean(AbstractAutowireCapableBeanFactory.java:1186)
+	at org.springframework.beans.factory.support.AbstractAutowireCapableBeanFactory.doCreateBean(AbstractAutowireCapableBeanFactory.java:537)
+	... 34 common frames omitted
+
+2018-01-24 16:58:21.784 ERROR 7607 [main] --- o.s.boot.SpringApplication               : Application startup failed
+
+org.springframework.beans.factory.BeanCreationException: Error creating bean with name 'webSocketSessionProxy': Injection of autowired dependencies failed; nested exception is org.springframework.beans.factory.BeanCreationException: Could not autowire field: private org.springframework.scheduling.TaskScheduler com.everhomes.border.WebSocketSessionProxy.taskScheduler; nested exception is org.springframework.beans.factory.NoUniqueBeanDefinitionException: No qualifying bean of type [org.springframework.scheduling.TaskScheduler] is defined: expected single matching bean but found 2: defaultSockJsTaskScheduler,messageBrokerSockJsTaskScheduler
+	at org.springframework.beans.factory.annotation.AutowiredAnnotationBeanPostProcessor.postProcessPropertyValues(AutowiredAnnotationBeanPostProcessor.java:301)
+	at org.springframework.beans.factory.support.AbstractAutowireCapableBeanFactory.populateBean(AbstractAutowireCapableBeanFactory.java:1186)
+	at org.springframework.beans.factory.support.AbstractAutowireCapableBeanFactory.doCreateBean(AbstractAutowireCapableBeanFactory.java:537)
+	at org.springframework.beans.factory.support.AbstractAutowireCapableBeanFactory.createBean(AbstractAutowireCapableBeanFactory.java:475)
+	at org.springframework.beans.factory.support.AbstractBeanFactory$1.getObject(AbstractBeanFactory.java:302)
+	at org.springframework.beans.factory.support.DefaultSingletonBeanRegistry.getSingleton(DefaultSingletonBeanRegistry.java:228)
+	at org.springframework.beans.factory.support.AbstractBeanFactory.doGetBean(AbstractBeanFactory.java:298)
+	at org.springframework.beans.factory.support.AbstractBeanFactory.getBean(AbstractBeanFactory.java:193)
+	at org.springframework.beans.factory.support.DefaultListableBeanFactory.preInstantiateSingletons(DefaultListableBeanFactory.java:706)
+	at org.springframework.context.support.AbstractApplicationContext.finishBeanFactoryInitialization(AbstractApplicationContext.java:762)
+	at org.springframework.context.support.AbstractApplicationContext.refresh(AbstractApplicationContext.java:482)
+	at org.springframework.boot.context.embedded.EmbeddedWebApplicationContext.refresh(EmbeddedWebApplicationContext.java:109)
+	at org.springframework.boot.SpringApplication.refresh(SpringApplication.java:691)
+	at org.springframework.boot.SpringApplication.run(SpringApplication.java:320)
+	at com.everhomes.border.BorderServerApp.main(BorderServerApp.java:28)
+Caused by: org.springframework.beans.factory.BeanCreationException: Could not autowire field: private org.springframework.scheduling.TaskScheduler com.everhomes.border.WebSocketSessionProxy.taskScheduler; nested exception is org.springframework.beans.factory.NoUniqueBeanDefinitionException: No qualifying bean of type [org.springframework.scheduling.TaskScheduler] is defined: expected single matching bean but found 2: defaultSockJsTaskScheduler,messageBrokerSockJsTaskScheduler
+	at org.springframework.beans.factory.annotation.AutowiredAnnotationBeanPostProcessor$AutowiredFieldElement.inject(AutowiredAnnotationBeanPostProcessor.java:522)
+	at org.springframework.beans.factory.annotation.InjectionMetadata.inject(InjectionMetadata.java:87)
+	at org.springframework.beans.factory.annotation.AutowiredAnnotationBeanPostProcessor.postProcessPropertyValues(AutowiredAnnotationBeanPostProcessor.java:298)
+	... 14 common frames omitted
+Caused by: org.springframework.beans.factory.NoUniqueBeanDefinitionException: No qualifying bean of type [org.springframework.scheduling.TaskScheduler] is defined: expected single matching bean but found 2: defaultSockJsTaskScheduler,messageBrokerSockJsTaskScheduler
+	at org.springframework.beans.factory.support.DefaultListableBeanFactory.doResolveDependency(DefaultListableBeanFactory.java:974)
+	at org.springframework.beans.factory.support.DefaultListableBeanFactory.resolveDependency(DefaultListableBeanFactory.java:862)
+	at org.springframework.beans.factory.annotation.AutowiredAnnotationBeanPostProcessor$AutowiredFieldElement.inject(AutowiredAnnotationBeanPostProcessor.java:494)
+	... 16 common frames omitted
+
