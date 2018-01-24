@@ -1,36 +1,32 @@
-package com.everhomes.border;
+package com.everhomes.controller;
 
+import com.everhomes.border.MessagePersistWorkerCopy;
+import com.everhomes.border.SchedulerConfig;
 import com.everhomes.rest.message.MessageRecordDto;
+
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.scheduling.concurrent.ThreadPoolTaskScheduler;
+import org.springframework.scheduling.annotation.Scheduled;
 import org.springframework.stereotype.Component;
 import org.springframework.web.socket.WebSocketMessage;
 import org.springframework.web.socket.WebSocketSession;
 
-import javax.annotation.PostConstruct;
 import java.io.IOException;
 import java.util.concurrent.ConcurrentLinkedQueue;
 
 @Component
 public class WebSocketSessionProxy {
-
-    @Autowired
-    private ThreadPoolTaskScheduler taskScheduler;
-
     @Autowired
     private MessagePersistWorkerCopy messagePersistWorker;
 
     private static ConcurrentLinkedQueue<MessageRecordDto> queue = new ConcurrentLinkedQueue<>();
 
 
-    @PostConstruct
+    @Scheduled(fixedDelay = 5000)
     public void setup() {
-        taskScheduler.scheduleAtFixedRate(() -> {
-            while (!queue.isEmpty()) {
-                MessageRecordDto record = queue.poll();
-                this.messagePersistWorker.handleMessagePersist(record);
-            }
-        }, 5 * 1000);
+        while (!queue.isEmpty()) {
+            MessageRecordDto record = queue.poll();
+            this.messagePersistWorker.handleMessagePersist(record);
+        }
     }
 
     public static void sendMessage(WebSocketSession session, WebSocketMessage message) {
