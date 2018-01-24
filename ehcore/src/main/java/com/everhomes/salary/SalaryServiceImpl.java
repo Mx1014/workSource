@@ -2411,7 +2411,7 @@ public class SalaryServiceImpl implements SalaryService {
     @Override
     public HttpServletResponse exportEmployeeSalaryTemplate(ExportEmployeeSalaryTemplateCommand cmd,
                                                             HttpServletResponse response) {
-        String filePath = "导入工资表" + ".xlsx";
+        String filePath = "ImportTemplate" + ".xlsx";
         //新建了一个文件
 
         Workbook wb = createEmployeeSalaryHeadWB(cmd.getOwnerId());
@@ -2430,7 +2430,7 @@ public class SalaryServiceImpl implements SalaryService {
     }
 
     private void createEmployeeSalaryHead(XSSFWorkbook wb, XSSFSheet sheet, List<SalaryGroupEntity> groupEntities) {
-        Row row = sheet.createRow(sheet.getLastRowNum() + 1);
+        Row row = sheet.createRow(sheet.getLastRowNum());
         CreationHelper factory = wb.getCreationHelper();
         XSSFDrawing drawing = sheet.createDrawingPatriarch();
         ClientAnchor anchor = factory.createClientAnchor();
