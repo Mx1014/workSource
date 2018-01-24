@@ -3774,6 +3774,10 @@ public class UserServiceImpl implements UserService {
 
 			return true;
 		} else {
+			userList.get(0).setAvatar(user.getAvatar());
+			userList.get(0).setNickName(user.getNickName());
+
+			userProvider.updateUser(userList.get(0));
 			LOGGER.warn("User already existed, namespaceId={}, userType={}, userToken={}", namespaceId, namespaceUserType, namespaceUserToken);
 			return false;
 		}
