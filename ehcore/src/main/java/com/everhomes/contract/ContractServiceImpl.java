@@ -678,6 +678,7 @@ public class ContractServiceImpl implements ContractService {
 			contract.setSignedTime(new Timestamp(cmd.getSignedTime()));
 		}
 		contract.setCreateTime(exist.getCreateTime());
+		contract.setPaymentFlag((byte)1);
 		contractProvider.updateContract(contract);
 
 		dealContractAttachments(contract.getId(), cmd.getAttachments());
