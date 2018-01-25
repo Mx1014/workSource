@@ -42,6 +42,7 @@ public class ContractPaymentPlanProviderImpl implements ContractPaymentPlanProvi
         long id = this.sequenceProvider.getNextSequence(NameMapper.getSequenceDomainFromTablePojo(EhContractPaymentPlans.class));
         plan.setId(id);
         plan.setCreateTime(new Timestamp(DateHelper.currentGMTTime().getTime()));
+        plan.setStatus(CommonStatus.ACTIVE.getCode());
         DSLContext context = this.dbProvider.getDslContext(AccessSpec.readWriteWith(EhContractPaymentPlans.class, id));
         EhContractPaymentPlansDao dao = new EhContractPaymentPlansDao(context.configuration());
         dao.insert(plan);
@@ -66,7 +67,10 @@ public class ContractPaymentPlanProviderImpl implements ContractPaymentPlanProvi
         SelectQuery<EhContractPaymentPlansRecord> query = context.selectQuery(Tables.EH_CONTRACT_PAYMENT_PLANS);
         query.addConditions(Tables.EH_CONTRACT_PAYMENT_PLANS.CONTRACT_ID.eq(contractId));
         query.addConditions(Tables.EH_CONTRACT_PAYMENT_PLANS.STATUS.eq(CommonStatus.ACTIVE.getCode()));
-
+        if (LOGGER.isDebugEnabled()) {
+            LOGGER.debug("listByContractId, sql=" + query.getSQL());
+            LOGGER.debug("listByContractId, bindValues=" + query.getBindValues());
+        }
         List<ContractPaymentPlan> result = new ArrayList<>();
         query.fetch().map((r) -> {
             result.add(ConvertHelper.convert(r, ContractPaymentPlan.class));

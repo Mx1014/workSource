@@ -286,7 +286,7 @@ public class PmTaskDTO {
 	}
 
 	public void setOrganizationUid(Long organizationUid) {
-		organizationUid = organizationUid;
+		this.organizationUid = organizationUid;
 	}
 
 	public String getRemark() {
