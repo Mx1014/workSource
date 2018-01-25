@@ -426,7 +426,7 @@ public class FileManagementServiceImpl implements  FileManagementService{
             if(cmd.getKeywords() != null){
                 query.addConditions(Tables.EH_FILE_MANAGEMENT_CONTENTS.CONTENT_NAME.like("%" + cmd.getKeywords() + "%"));
                 if (parentContent != null)
-                    query.addConditions(Tables.EH_FILE_MANAGEMENT_CONTENTS.PATH.like("%" + parentContent.getPath() + "%"));
+                    query.addConditions(Tables.EH_FILE_MANAGEMENT_CONTENTS.PATH.like(parentContent.getPath() + "/" + "%"));
             }else{
                 //  2.get results without keywords
                 if (parentContent != null)
