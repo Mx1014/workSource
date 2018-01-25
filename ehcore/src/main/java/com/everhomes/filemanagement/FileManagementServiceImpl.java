@@ -415,26 +415,38 @@ public class FileManagementServiceImpl implements  FileManagementService{
         Map<String, String> fileIcons = fileService.getFileIconUrl();
         Integer namespaceId = UserContext.getCurrentNamespaceId();
         FileCatalog catalog = fileManagementProvider.findFileCatalogById(cmd.getCatalogId());
-        List<FileContent> results;
         //  find the parent content to use the path
         FileContent parentContent = fileManagementProvider.findFileContentById(cmd.getContentId());
-        if(catalog == null)
+        if (catalog == null)
             return response;
 
-        //  1.just search in the folder
-        if (parentContent != null)
-            results = fileManagementProvider.listFileContents(namespaceId, catalog.getOwnerId(), catalog.getId(), parentContent.getPath(), cmd.getKeywords());
-        //  2.search on the catalog
-        else
-            results = fileManagementProvider.listFileContents(namespaceId, catalog.getOwnerId(), catalog.getId(), null, cmd.getKeywords());
-        if(results !=null && results.size() > 0){
-            results.stream().filter(r -> r.getContentType().equals(FileContentType.FOLDER.getCode())).map(r ->{
-                FileContentDTO dto = convertToFileContentDTO(r,fileIcons);
+        List<FileContent> results = fileManagementProvider.queryFileContents(new ListingLocator(), namespaceId, catalog.getOwnerId(), (locator, query) -> {
+            query.addConditions(Tables.EH_FILE_MANAGEMENT_CONTENTS.CATALOG_ID.eq(catalog.getId()));
+            //  1.get results by the keywords
+            if(cmd.getKeywords() != null){
+                query.addConditions(Tables.EH_FILE_MANAGEMENT_CONTENTS.CONTENT_NAME.like("%" + cmd.getKeywords() + "%"));
+                if (parentContent != null)
+                    query.addConditions(Tables.EH_FILE_MANAGEMENT_CONTENTS.PATH.like("%" + parentContent.getPath() + "%"));
+            }else{
+                //  2.get results without keywords
+                if (parentContent != null)
+                    query.addConditions(Tables.EH_FILE_MANAGEMENT_CONTENTS.PARENT_ID.eq(parentContent.getId()));
+                else
+                    query.addConditions(Tables.EH_FILE_MANAGEMENT_CONTENTS.PARENT_ID.isNull());
+            }
+            query.addOrderBy(Tables.EH_FILE_MANAGEMENT_CONTENTS.CREATE_TIME.desc());
+            return query;
+        });
+
+        //  3.process the result
+        if (results != null && results.size() > 0) {
+            results.stream().filter(r -> r.getContentType().equals(FileContentType.FOLDER.getCode())).map(r -> {
+                FileContentDTO dto = convertToFileContentDTO(r, fileIcons);
                 folders.add(dto);
                 return null;
             }).collect(Collectors.toList());
-            results.stream().filter(r -> !r.getContentType().equals(FileContentType.FOLDER.getCode())).map(r ->{
-                FileContentDTO dto = convertToFileContentDTO(r,fileIcons);
+            results.stream().filter(r -> !r.getContentType().equals(FileContentType.FOLDER.getCode())).map(r -> {
+                FileContentDTO dto = convertToFileContentDTO(r, fileIcons);
                 files.add(dto);
                 return null;
             }).collect(Collectors.toList());
