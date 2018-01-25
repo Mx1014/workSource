@@ -62,10 +62,7 @@ import javax.annotation.PostConstruct;
 
 import java.io.ByteArrayInputStream;
 import java.io.IOException;
-import java.util.ArrayList;
-import java.util.Date;
-import java.util.List;
-import java.util.Map;
+import java.util.*;
 import java.util.concurrent.ConcurrentHashMap;
 import java.util.concurrent.ConcurrentMap;
 import java.util.concurrent.Executors;
@@ -448,15 +445,15 @@ public class PusherServiceImpl implements PusherService, ApnsServiceFactory {
                     DeviceMessage msg = (DeviceMessage)StringHelper.fromJsonString(msgStr, DeviceMessage.class);
                     if(msg != null) {
                         deviceMsgs.add(msg);
+                        Map actionData = (Map)StringHelper.fromJsonString(msg.getExtra().get("actionData"), Map.class);
                         MessageRecordDto record = new MessageRecordDto();
                         record.setAppId(mb.getAppId());
                         record.setNamespaceId(mb.getNamespaceId());
                         record.setMessageSeq(mb.getStoreSequence());
-                        record.setSenderUid(mb.getSenderUid());
+                        record.setSenderUid(Long.valueOf(actionData.get("senderUid").toString()));
                         record.setSenderTag("FETCH NOTIFY MESSAGES");
-                        record.setDstChannelType(ChannelType.USER.getCode());
-                        record.setDstChannelToken(mb.getChannelToken());
-                        //                record.setChannelsInfo(r.getChannels().toString());
+                        record.setDstChannelType(actionData.get("dstChannel").toString());
+                        record.setDstChannelToken(actionData.get("dstChannelId").toString());
                         record.setBodyType(mb.getContextType());
                         record.setBody(mb.getContent());
                         record.setStatus(MessageRecordStatus.CORE_FETCH.getCode());
