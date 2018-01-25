@@ -16,7 +16,10 @@ import java.util.List;
  *  <li>pageSize: 页面大小</li>
  *  <li>inspectionCategoryId: 巡检对象类型id</li>
  *  <li>taskStatus: 任务状态列表 参考 {@link com.everhomes.rest.equipment.EquipmentTaskStatus}</li>
- *  <li>lastSyncTime: 离线同步数据时使用</li>
+ *  <li>lastSyncTime: 上次同步MAX_TIME offline</li>
+ *  <li>moduleName: equipment_inspection offline </li>
+ *  <li>communityId: 动态表单项目id offline</li>
+ *  <li>namespaceId: namespaceId</li>
  * </ul>
  */
 public class ListEquipmentTasksCommand {
@@ -37,10 +40,17 @@ public class ListEquipmentTasksCommand {
 	private Long inspectionCategoryId;
 	
 	private Byte isReview;
-	@ItemType(Byte.class)
-	private List<Byte> taskStatus;
 
 	private String lastSyncTime;
+
+	private String moduleName;
+
+	private Integer namespaceId;
+
+	private Long communityId;
+
+	@ItemType(Byte.class)
+	private List<Byte> taskStatus;
 
 	public Byte getIsReview() {
 		return isReview;
@@ -120,6 +130,31 @@ public class ListEquipmentTasksCommand {
 
 	public void setLastSyncTime(String lastSyncTime) {
 		this.lastSyncTime = lastSyncTime;
+	}
+
+
+	public String getModuleName() {
+		return moduleName;
+	}
+
+	public void setModuleName(String moduleName) {
+		this.moduleName = moduleName;
+	}
+
+	public Integer getNamespaceId() {
+		return namespaceId;
+	}
+
+	public void setNamespaceId(Integer namespaceId) {
+		this.namespaceId = namespaceId;
+	}
+
+	public Long getCommunityId() {
+		return communityId;
+	}
+
+	public void setCommunityId(Long communityId) {
+		this.communityId = communityId;
 	}
 
 	@Override

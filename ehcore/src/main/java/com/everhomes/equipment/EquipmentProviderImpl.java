@@ -32,6 +32,7 @@ import com.everhomes.rest.equipment.Status;
 import com.everhomes.rest.equipment.TaskCountDTO;
 import com.everhomes.rest.equipment.TasksStatData;
 import com.everhomes.rest.pmNotify.PmNotifyConfigurationStatus;
+import com.everhomes.rest.pmtask.PmTaskFlowStatus;
 import com.everhomes.rest.quality.QualityGroupType;
 import com.everhomes.scheduler.EquipmentInspectionScheduleJob;
 import com.everhomes.scheduler.ScheduleProvider;
@@ -108,6 +109,7 @@ import org.jooq.DSLContext;
 import org.jooq.Field;
 import org.jooq.Record;
 import org.jooq.SelectQuery;
+import org.jooq.UpdateQuery;
 import org.jooq.impl.DSL;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -1621,7 +1623,7 @@ public class EquipmentProviderImpl implements EquipmentProvider {
             return null;
         });
         LOGGER.info("listQualifiedEquipmentInspectionPlans" + query.getSQL());
-        LOGGER.info("plans.size()" + plans.size());
+        LOGGER.info("plans.size()={}" + plans.size());
 
         return plans;
     }
@@ -2473,8 +2475,8 @@ public class EquipmentProviderImpl implements EquipmentProvider {
 
         DSLContext context = dbProvider.getDslContext(AccessSpec.readOnly());
         SelectQuery<EhEquipmentInspectionTasksRecord> query = context.selectQuery(Tables.EH_EQUIPMENT_INSPECTION_TASKS);
-
-        query.addConditions(Tables.EH_EQUIPMENT_INSPECTION_TASKS.STATUS.in(taskStatus));
+        if (taskStatus != null)
+            query.addConditions(Tables.EH_EQUIPMENT_INSPECTION_TASKS.STATUS.in(taskStatus));
         if (targetType != null && targetType.size() > 0)
             query.addConditions(Tables.EH_EQUIPMENT_INSPECTION_TASKS.TARGET_TYPE.in(targetType));
 
@@ -2997,6 +2999,7 @@ public class EquipmentProviderImpl implements EquipmentProvider {
         DSLContext context = this.dbProvider.getDslContext(AccessSpec.readOnly());
         SelectQuery<EhEquipmentInspectionTaskLogsRecord> query = context.selectQuery(Tables.EH_EQUIPMENT_INSPECTION_TASK_LOGS);
         query.addConditions(Tables.EH_EQUIPMENT_INSPECTION_TASK_LOGS.EQUIPMENT_ID.eq(referId));
+        query.addConditions(Tables.EH_EQUIPMENT_INSPECTION_TASK_LOGS.PROCESS_TYPE.eq(EquipmentTaskProcessType.NEED_MAINTENANCE.getCode()));
         query.addOrderBy(Tables.EH_EQUIPMENT_INSPECTION_TASK_LOGS.CREATE_TIME.desc());
         List<EquipmentInspectionTasksLogs> logs = new ArrayList<>();
         query.fetch((r) -> {
@@ -3010,14 +3013,21 @@ public class EquipmentProviderImpl implements EquipmentProvider {
     }
 
     @Override
-    public void updateMaintanceInspectionLogsById(Long taskLogId, Long flowCaseId) {
+    public void updateMaintanceInspectionLogsById(Long taskLogId, Byte status, Long flowCaseId) {
         DSLContext context = this.dbProvider.getDslContext(AccessSpec.readOnly());
-        context.update(Tables.EH_EQUIPMENT_INSPECTION_TASK_LOGS)
-                .set(Tables.EH_EQUIPMENT_INSPECTION_TASK_LOGS.PROCESS_RESULT, (EquipmentTaskProcessResult.NEED_MAINTENANCE_DELAY_COMPLETE_OK.getCode()))
-                .set(Tables.EH_EQUIPMENT_INSPECTION_TASK_LOGS.PROCESS_TYPE, EquipmentTaskProcessType.COMPLETE_MAINTENANCE.getCode())
-                .set(Tables.EH_EQUIPMENT_INSPECTION_TASK_LOGS.FLOW_CASE_ID, flowCaseId)
-                .where(Tables.EH_EQUIPMENT_INSPECTION_TASK_LOGS.ID.eq(taskLogId))
-                .execute();
+
+        UpdateQuery<EhEquipmentInspectionTaskLogsRecord> updateQuery = context.updateQuery(Tables.EH_EQUIPMENT_INSPECTION_TASK_LOGS);
+        updateQuery.addValue(Tables.EH_EQUIPMENT_INSPECTION_TASK_LOGS.MAINTANCE_STATUS, status);
+
+        updateQuery.addValue(Tables.EH_EQUIPMENT_INSPECTION_TASK_LOGS.MAINTANCE_STATUS, status);
+        updateQuery.addValue(Tables.EH_EQUIPMENT_INSPECTION_TASK_LOGS.FLOW_CASE_ID, flowCaseId);
+        updateQuery.addConditions(Tables.EH_EQUIPMENT_INSPECTION_TASK_LOGS.ID.eq(taskLogId));
+        if(PmTaskFlowStatus.COMPLETED.equals(PmTaskFlowStatus.fromCode(status))){
+            updateQuery.addValue(Tables.EH_EQUIPMENT_INSPECTION_TASK_LOGS.PROCESS_RESULT,
+                    EquipmentTaskProcessResult.NEED_MAINTENANCE_DELAY_COMPLETE_OK.getCode());
+        }
+        updateQuery.addConditions(Tables.EH_EQUIPMENT_INSPECTION_TASK_LOGS.PROCESS_TYPE.eq(EquipmentTaskProcessType.NEED_MAINTENANCE.getCode()));
+        updateQuery.execute();
     }
 
     @Override
