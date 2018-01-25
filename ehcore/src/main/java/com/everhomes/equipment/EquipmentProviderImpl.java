@@ -593,7 +593,7 @@ public class EquipmentProviderImpl implements EquipmentProvider {
         if (locator.getAnchor() != null) {
             query.addConditions(Tables.EH_EQUIPMENT_INSPECTION_TASK_LOGS.ID.lt(locator.getAnchor()));
         }
-        if(equipmentId!=null && equipmentId!=0L){
+        if(equipmentId!=null && equipmentId.size()>0){
             query.addConditions(Tables.EH_EQUIPMENT_INSPECTION_TASK_LOGS.EQUIPMENT_ID.in(equipmentId));
         }
 
