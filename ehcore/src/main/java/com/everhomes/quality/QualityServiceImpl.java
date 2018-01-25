@@ -2839,7 +2839,7 @@ public class QualityServiceImpl implements QualityService {
 					&& dto.getUpdateTime().before(syncTime) && dto.getDeleteTime().before(syncTime));
 		}
 		//非真实分页
-		if (cmd.getPageAnchor() == null) {
+		/*if (cmd.getPageAnchor() == null) {
 			cmd.setPageAnchor(0L);
 		}
 		int pageSize = PaginationConfigHelper.getPageSize(configurationProvider, cmd.getPageSize());
@@ -2853,7 +2853,7 @@ public class QualityServiceImpl implements QualityService {
 			}
 		} else {
 			response.setNextPageAnchor(null);
-		}
+		}*/
 		//返回数据中添加所属项目
 		processSepcificationScopeName(dtos);
 		List<QualityInspectionSpecificationDTO> result = null;
