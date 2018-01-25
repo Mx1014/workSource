@@ -204,6 +204,7 @@ import com.everhomes.rest.user.admin.ImportDataResponse;
 import com.everhomes.rest.varField.FieldDTO;
 import com.everhomes.rest.varField.FieldItemDTO;
 import com.everhomes.rest.varField.ListFieldCommand;
+import com.everhomes.rest.varField.ListFieldGroupCommand;
 import com.everhomes.search.EquipmentAccessoriesSearcher;
 import com.everhomes.search.EquipmentPlanSearcher;
 import com.everhomes.search.EquipmentSearcher;
@@ -5800,7 +5801,7 @@ private void checkUserPrivilege(Long orgId, Long privilegeId, Long communityId) 
 		ListEquipmentTasksResponse response = listEquipmentTasks(cmd);//当前登录人的任务信息
 
 		EquipmentTaskOfflineResponse offlineResponse = new EquipmentTaskOfflineResponse();
-		List<EquipmentTaskDTO> tasks = response.getTasks();//任务表包含planId
+		List<EquipmentTaskDTO> tasks = response.getTasks();
 		List<EquipmentStandardRelationDTO> equipments = new ArrayList<>();//设备标准关联表 设备id 标准id
 		List<InspectionItemDTO> items = new ArrayList<>();//巡检item表包含standardId
 
@@ -5830,7 +5831,14 @@ private void checkUserPrivilege(Long orgId, Long privilegeId, Long communityId) 
 			items.addAll(itemDTOS);
 		});
 		offlineResponse.setItems(items);
+		syncGroupOfflineData(offlineResponse,cmd);
 		return offlineResponse;
+	}
+
+	private void syncGroupOfflineData(EquipmentTaskOfflineResponse response, ListEquipmentTasksCommand cmd) {
+		ListFieldGroupCommand groupCommand = new ListFieldGroupCommand();
+		groupCommand = ConvertHelper.convert(cmd, ListFieldGroupCommand.class);
+		response.setGroups(fieldService.listFieldGroups(groupCommand));
 	}
 
 	@Override
