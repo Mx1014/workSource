@@ -453,7 +453,7 @@ public class PusherServiceImpl implements PusherService, ApnsServiceFactory {
                         record.setNamespaceId(mb.getNamespaceId());
                         record.setMessageSeq(mb.getStoreSequence());
                         record.setSenderUid(mb.getSenderUid());
-                        record.setSenderTag("FETCH PASTTORECENT MESSAGES");
+                        record.setSenderTag("FETCH NOTIFY MESSAGES");
                         record.setDstChannelType(ChannelType.USER.getCode());
                         record.setDstChannelToken(mb.getChannelToken());
                         //                record.setChannelsInfo(r.getChannels().toString());
