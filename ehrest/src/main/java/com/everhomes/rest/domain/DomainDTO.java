@@ -9,7 +9,7 @@ package com.everhomes.rest.domain;
  * <li>portalType: 门户类型，左邻域类型：zuolin，物业公司:pm 和企业：enterprise</li>
  * <li>portalId: 配置类型，左邻域类型填0，物业公司和企业填具体id</li>
  * <li>domain: 域名</li>
- * <ul>
+ * </ul>
  */
 
 public class DomainDTO {
