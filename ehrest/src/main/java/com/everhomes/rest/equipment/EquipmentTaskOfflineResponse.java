@@ -1,6 +1,7 @@
 package com.everhomes.rest.equipment;
 
 import com.everhomes.discover.ItemType;
+import com.everhomes.rest.category.CategoryDTO;
 import com.everhomes.rest.varField.FieldGroupDTO;
 import com.everhomes.util.StringHelper;
 
@@ -11,12 +12,13 @@ import java.util.List;
  * <li>equipments:离线任务列表</li>
  * <li>items:离线任务列表</li>
  * <li>groups:离线类别列表</li>
+ * <li>repiarCategories:物业报修类型列表</li>
  */
 
 public class EquipmentTaskOfflineResponse {
 
-    @ItemType(EquipmentTaskOffLineDTO.class)
-    private List<EquipmentTaskOffLineDTO> offlineTasks;
+    @ItemType(EquipmentTaskDTO.class)
+    private List<EquipmentTaskDTO> offlineTasks;
 
     @ItemType(EquipmentStandardRelationDTO.class)
     private List<EquipmentStandardRelationDTO> equipments;
@@ -27,11 +29,14 @@ public class EquipmentTaskOfflineResponse {
     @ItemType(FieldGroupDTO.class)
     private List<FieldGroupDTO> groups;
 
-    public List<EquipmentTaskOffLineDTO> getOfflineTasks() {
+    @ItemType(CategoryDTO.class)
+    private List<CategoryDTO> repiarCategories;
+
+    public List<EquipmentTaskDTO> getOfflineTasks() {
         return offlineTasks;
     }
 
-    public void setOfflineTasks(List<EquipmentTaskOffLineDTO> offlineTasks) {
+    public void setOfflineTasks(List<EquipmentTaskDTO> offlineTasks) {
         this.offlineTasks = offlineTasks;
     }
 
@@ -57,6 +62,15 @@ public class EquipmentTaskOfflineResponse {
 
     public void setGroups(List<FieldGroupDTO> groups) {
         this.groups = groups;
+    }
+
+
+    public List<CategoryDTO> getRepiarCategories() {
+        return repiarCategories;
+    }
+
+    public void setRepiarCategories(List<CategoryDTO> repiarCategories) {
+        this.repiarCategories = repiarCategories;
     }
 
     @Override

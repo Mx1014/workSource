@@ -190,6 +190,7 @@ import com.everhomes.rest.pmNotify.ReceiverName;
 import com.everhomes.rest.pmNotify.SetPmNotifyParamsCommand;
 import com.everhomes.rest.pmtask.CreateTaskCommand;
 import com.everhomes.rest.pmtask.ListTaskCategoriesCommand;
+import com.everhomes.rest.pmtask.ListTaskCategoriesResponse;
 import com.everhomes.rest.pmtask.PmTaskAddressType;
 import com.everhomes.rest.quality.OwnerType;
 import com.everhomes.rest.quality.ProcessType;
@@ -5823,6 +5824,7 @@ private void checkUserPrivilege(Long orgId, Long privilegeId, Long communityId) 
 				equipments.addAll(planDTO.getEquipmentStandardRelations());
 			}
 		});
+		offlineResponse.setOfflineTasks(tasks);
 		offlineResponse.setEquipments(equipments);
 		ListParametersByStandardIdCommand listParametersByStandardIdCommand = new ListParametersByStandardIdCommand();
 		equipments.forEach((relation) -> {
@@ -5832,7 +5834,16 @@ private void checkUserPrivilege(Long orgId, Long privilegeId, Long communityId) 
 		});
 		offlineResponse.setItems(items);
 		syncGroupOfflineData(offlineResponse,cmd);
+		syncRepairCategoryDate(offlineResponse,cmd);
 		return offlineResponse;
+	}
+
+	private void syncRepairCategoryDate(EquipmentTaskOfflineResponse offlineResponse, ListEquipmentTasksCommand cmd) {
+		ListTaskCategoriesCommand categoriesCommand = new ListTaskCategoriesCommand();
+		categoriesCommand.setPageSize(Integer.MAX_VALUE - 1);
+		categoriesCommand.setTaskCategoryId(6L);
+		ListTaskCategoriesResponse categories = pmTaskService.listTaskCategories(categoriesCommand);
+		offlineResponse.setRepiarCategories(categories.getRequests());
 	}
 
 	private void syncGroupOfflineData(EquipmentTaskOfflineResponse response, ListEquipmentTasksCommand cmd) {
@@ -5843,29 +5854,24 @@ private void checkUserPrivilege(Long orgId, Long privilegeId, Long communityId) 
 
 	@Override
 	public OfflineEquipmentTaskReportResponse offlineEquipmentTaskReport(OfflineEquipmentTaskReportCommand cmd) {
+		processEquipmentRepairTasks(cmd.getEquipmentRepairReportDetail());
 
-		List<ReportEquipmentTaskCommand> reportEquipmentTaskCommands = cmd.getReportEquipmentTaskCommands();
-		List<OfflineEquipmentTaskReportLog> logs = new ArrayList<>();
-		OfflineEquipmentTaskReportResponse reportResponse = new OfflineEquipmentTaskReportResponse();
-		OfflineEquipmentTaskReportLog log = new OfflineEquipmentTaskReportLog();
+		List<OfflineEquipmentTaskReportLog> taskReportLogs =
+				processEquipmentInspectionTasksAndResults(cmd.getTasks(), cmd.getOwnerId(), cmd.getOwnerType(), cmd.getEquipmentTaskReportDetails());
 
-		if (reportEquipmentTaskCommands != null && reportEquipmentTaskCommands.size() > 0) {
-			for (ReportEquipmentTaskCommand command : reportEquipmentTaskCommands) {
-				EquipmentInspectionTasks task = equipmentProvider.findEquipmentTaskById(command.getTaskId());
-				if (task == null) {
-					LOGGER.error("equipment inspection not exist, id = {}", command.getTaskId());
-					log.setErrorCode(ErrorCodes.ERROR_GENERAL_EXCEPTION);
-					log.setErrorDescription(localeStringService.getLocalizedString(String.valueOf(EquipmentServiceErrorCode.SCOPE),
-							String.valueOf(EquipmentServiceErrorCode.ERROR_EQUIPMENT_TASK_NOT_EXIST),
-							UserContext.current().getUser().getLocale(), "equipment inspection task  not exist"));
-					logs.add(log);
-				}
-				this.reportEquipmentTask(command);
-			}
-			reportResponse.setLogs(logs);
-			return reportResponse;
-		}
 		return null;
+	}
+
+	private List<OfflineEquipmentTaskReportLog> processEquipmentInspectionTasksAndResults(List<EquipmentTaskDTO> tasks, Long ownerId, String ownerType, List<EquipmentTaskReportDetail> equipmentTaskReportDetails) {
+//		reportEquipmentTask();
+		return null;
+
+	}
+
+	private void processEquipmentRepairTasks(List<CreateEquipmentRepairCommand> equipmentRepairReportDetail) {
+		if(equipmentRepairReportDetail!=null && equipmentRepairReportDetail.size()>0){
+			equipmentRepairReportDetail.forEach(this::createRepairsTask);
+		}
 	}
 
 	@Override
