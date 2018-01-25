@@ -100,9 +100,9 @@ public class SalaryController extends ControllerBase {
 
 	/**
 	 * <p>5.查询人员的工资字段列表</p>
-	 * <b>URL: /salary/listSalaryEmployees</b>
+	 * <b>URL: /salary/getEmployeeEntities</b>
 	 */
-	@RequestMapping("listSalaryEmployees")
+	@RequestMapping("getEmployeeEntities")
 	@RestReturn(GetEmployeeEntitiesResponse.class)
 	public RestResponse getEmployeeEntities(GetEmployeeEntitiesCommand cmd ){
 		GetEmployeeEntitiesResponse resp = this.salaryService.getEmployeeEntities(cmd);
