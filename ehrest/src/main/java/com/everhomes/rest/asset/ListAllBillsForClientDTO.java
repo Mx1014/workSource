@@ -4,6 +4,9 @@ package com.everhomes.rest.asset;
 /**
  * Created by Wentian Wang on 2017/11/21.
  */
+
+import java.util.Date;
+
 /**
  *<ul>
  * <li>billGroupName:账单组名称</li>
@@ -22,6 +25,15 @@ public class ListAllBillsForClientDTO {
     private String amountOwed;
     private Byte chargeStatus;
     private String dateStr;
+    private Date date;
+
+    public Date getDate() {
+        return date;
+    }
+
+    public void setDate(Date date) {
+        this.date = date;
+    }
 
     private String billId;
 
