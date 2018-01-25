@@ -327,7 +327,7 @@ public class FileManagementProviderImpl implements FileManagementProvider {
         return query.fetchAnyInto(FileContent.class);
     }
 
-    @Override
+/*    @Override
     public List<FileContent> listFileContents(Integer namespaceId, Long ownerId, Long catalogId,
                                               String path, String keywords) {
         List<FileContent> results = new ArrayList<>();
@@ -352,7 +352,7 @@ public class FileManagementProviderImpl implements FileManagementProvider {
             return results;
         }
         return null;
-    }
+    }*/
 
     @Override
     public List<FileContent> queryFileContents(ListingLocator locator, Integer namespaceId, Long ownerId, ListingQueryBuilderCallback queryBuilderCallback){
