@@ -2,7 +2,10 @@
 package com.everhomes.message;
 
 import com.everhomes.rest.message.PersistMessageRecordCommand;
+import com.everhomes.rest.messaging.ChannelType;
+import com.everhomes.rest.user.LoginToken;
 import com.everhomes.util.StringHelper;
+import com.everhomes.util.WebTokenGenerator;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RestController;
@@ -18,7 +21,7 @@ public class MessageController extends ControllerBase {
 	
 	@Autowired
 	private MessageService messageService;
-	
+
 	/**
 	 * <p>1.推送消息给管理员和业务联系人</p>
 	 * <b>URL: /message/pushMessageToAdminAndBusinessContacts</b>
@@ -36,8 +39,16 @@ public class MessageController extends ControllerBase {
 	 */
 	@RequestMapping("persistMessage")
 	@RestReturn(String.class)
-	public RestResponse pushMessageToAdminAndBusinessContacts(PersistMessageRecordCommand dto){
-		messageService.persistMessage((MessageRecord)StringHelper.fromJsonString(dto.getMessageRecordDto(), MessageRecord.class));
+	public RestResponse pushMessageToAdminAndBusinessContacts(PersistMessageRecordCommand cmd){
+		MessageRecord record = (MessageRecord)StringHelper.fromJsonString(cmd.getMessageRecordDto(), MessageRecord.class);
+		LoginToken login = WebTokenGenerator.getInstance().fromWebToken(cmd.getSessionToken(), LoginToken.class);
+
+		if(login != null){
+			record.setDstChannelToken(String.valueOf(login.getUserId()));
+			record.setDstChannelType(ChannelType.USER.getCode());
+		}
+
+		messageService.persistMessage(record);
 		return new RestResponse();
 	}
 

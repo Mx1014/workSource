@@ -250,7 +250,7 @@ public class UserMessageRoutingHandler implements MessageRoutingHandler {
                     MessageRecordDto record = new MessageRecordDto();
                     record.setAppId(appId);
                     record.setNamespaceId(UserContext.getCurrentNamespaceId());
-                    record.setMessageSeq(0L);
+                    record.setMessageSeq(message.getStoreSequence());
                     record.setSenderUid(senderLogin.getUserId());
                     record.setSenderTag("ROUTE STORE MESSAGE");
                     record.setDstChannelType(destChannelType);

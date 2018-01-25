@@ -49,12 +49,12 @@ public class WebSocketSessionProxy {
         }
     }
 
-    public static void sendMessage(WebSocketSession session, WebSocketMessage message, String senderTag) {
+    public static void sendMessage(WebSocketSession session, WebSocketMessage message, String senderTag, String sessionToken) {
         MessageRecordDto dto = new MessageRecordDto();
         dto.setBody(message.getPayload().toString());
-        dto.setDstChannelToken(session.getId());
         dto.setStatus(MessageRecordStatus.BORDER_ROUTE.getCode());
         dto.setSenderTag(senderTag);
+        dto.setSessionToken(sessionToken);
         LOGGER.debug(session.toString());
         LOGGER.debug(message.toString());
         queue.offer(dto);
@@ -73,6 +73,7 @@ public class WebSocketSessionProxy {
 
         Map<String, String> params = new HashMap<>();
         params.put("messageRecordDto", record.toString());
+        params.put("sessionToken", record.getSessionToken());
 
         this.restCall("/message/persistMessage", params, new ListenableFutureCallback<ResponseEntity<String>>() {
 

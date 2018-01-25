@@ -21,6 +21,7 @@ public class MessageRecordDto implements Serializable {
     private String body;
     private Integer deliveryoption;
     private Timestamp createTime;
+    private String sessionToken;
 
     public Long getId() {
         return this.id;
@@ -137,5 +138,13 @@ public class MessageRecordDto implements Serializable {
 
     public void setStatus(String status) {
         this.status = status;
+    }
+
+    public String getSessionToken() {
+        return sessionToken;
+    }
+
+    public void setSessionToken(String sessionToken) {
+        this.sessionToken = sessionToken;
     }
 }
