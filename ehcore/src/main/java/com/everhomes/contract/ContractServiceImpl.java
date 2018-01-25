@@ -1874,7 +1874,9 @@ public class ContractServiceImpl implements ContractService {
 		if(contractPlans != null && contractPlans.size() > 0) {
 			List<ContractPaymentPlanDTO> dtos = contractPlans.stream().map(plan -> {
 				ContractPaymentPlanDTO planDTO = ConvertHelper.convert(plan, ContractPaymentPlanDTO.class);
-				planDTO.setPaidTime(plan.getPaidTime().getTime());
+				if(plan.getPaidTime() != null) {
+					planDTO.setPaidTime(plan.getPaidTime().getTime());
+				}
 				return planDTO;
 			}).collect(Collectors.toList());
 			dto.setPlans(dtos);
