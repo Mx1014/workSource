@@ -84,6 +84,15 @@ public class PortalItemProviderImpl implements PortalItemProvider {
 	}
 
 	@Override
+	public void deleteByVersionId(Long versionId){
+		DeleteQuery query = getReadWriteContext().deleteQuery(Tables.EH_PORTAL_ITEMS);
+		query.addConditions(Tables.EH_PORTAL_ITEMS.VERSION_ID.eq(versionId));
+		query.execute();
+		DaoHelper.publishDaoAction(DaoAction.MODIFY, EhPortalItems.class, null);
+	}
+
+
+	@Override
 	public PortalItem findPortalItemById(Long id) {
 		assert (id != null);
 		return ConvertHelper.convert(getReadOnlyDao().findById(id), PortalItem.class);

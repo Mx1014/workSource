@@ -6,7 +6,7 @@ import com.everhomes.util.StringHelper;
 /**
  * <ul>
  *     <li>namespaceId: 域空间</li>
- *     <li>status:  {@link com.everhomes.rest.portal.PortalVersionDTO}</li>
+ *     <li>status:  {@link com.everhomes.rest.launchpad.PortalVersionStatus}</li>
  * </ul>
  */
 public class ListPortalVersionCommand {

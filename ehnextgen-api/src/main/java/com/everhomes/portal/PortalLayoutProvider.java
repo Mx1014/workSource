@@ -18,4 +18,6 @@ public interface PortalLayoutProvider {
 	PortalLayout getPortalLayout(Integer namespaceId, String name, Long versionId);
 
     List<PortalLayout> listPortalLayoutByVersion(Integer namespaceId, Long versionId);
+
+    void deleteByVersionId(Long versionId);
 }

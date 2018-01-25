@@ -14,7 +14,9 @@ public interface PortalItemProvider {
 
     void updatePortalItem(PortalItem portalItem);
 
-	PortalItem findPortalItemById(Long id);
+    void deleteByVersionId(Long versionId);
+
+    PortalItem findPortalItemById(Long id);
 
 	List<PortalItem> listPortalItemByCategoryId(Long itemCategoryId);
 
