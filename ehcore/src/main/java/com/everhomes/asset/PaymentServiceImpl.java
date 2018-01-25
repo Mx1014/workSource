@@ -70,7 +70,6 @@ public class PaymentServiceImpl implements PaymentService {
             //没有拿到orderType，直接返回
             if(realOrderType == null ) return new ListPaymentBillResp(cmd.getPageAnchor(), cmd.getPageSize());
             cmd.setOrderType(realOrderType);
-            if(cmd.getOrderType()==null) return new ListPaymentBillResp(cmd.getPageAnchor(), cmd.getPageSize());
         }
         if (cmd.getPageSize() == null) {
             cmd.setPageSize(21l);
