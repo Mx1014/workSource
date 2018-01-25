@@ -22,6 +22,8 @@ public class DynamicSheet {
     @NotNull
     private String displayName;
 
+    private Long groupId;
+
     private List<DynamicField> dynamicFields;
 
     public List<DynamicField> getDynamicFields() {
@@ -48,4 +50,11 @@ public class DynamicSheet {
         this.displayName = displayName;
     }
 
+    public Long getGroupId() {
+        return groupId;
+    }
+
+    public void setGroupId(Long groupId) {
+        this.groupId = groupId;
+    }
 }

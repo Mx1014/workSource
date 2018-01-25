@@ -347,6 +347,34 @@ public class FieldProviderImpl implements FieldProvider {
         return fields.get(0);
     }
 
+    @Override
+    public ScopeField findScopeField(Integer namespaceId, Long communityId, Long groupId, String fieldDisplayName) {
+        DSLContext context = this.dbProvider.getDslContext(AccessSpec.readOnly());
+
+        List<ScopeField> fields = new ArrayList<>();
+        SelectQuery<EhVarFieldScopesRecord> query = context.selectQuery(Tables.EH_VAR_FIELD_SCOPES);
+        query.addConditions(Tables.EH_VAR_FIELD_SCOPES.NAMESPACE_ID.eq(namespaceId));
+        query.addConditions(Tables.EH_VAR_FIELD_SCOPES.FIELD_DISPLAY_NAME.eq(fieldDisplayName));
+        query.addConditions(Tables.EH_VAR_FIELD_SCOPES.GROUP_ID.eq(groupId));
+        query.addConditions(Tables.EH_VAR_FIELD_SCOPES.STATUS.eq(VarFieldStatus.ACTIVE.getCode()));
+        if(communityId != null) {
+            query.addConditions(Tables.EH_VAR_FIELD_SCOPES.COMMUNITY_ID.eq(communityId));
+        }
+
+        if(communityId == null) {
+            query.addConditions(Tables.EH_VAR_FIELD_SCOPES.COMMUNITY_ID.isNull());
+        }
+        query.fetch().map((record)-> {
+            fields.add(ConvertHelper.convert(record, ScopeField.class));
+            return null;
+        });
+
+        if(fields == null || fields.size() == 0) {
+            return null;
+        }
+        return fields.get(0);
+    }
+
     /**
      *
      *
@@ -589,6 +617,36 @@ public class FieldProviderImpl implements FieldProvider {
         query.addConditions(Tables.EH_VAR_FIELD_ITEM_SCOPES.MODULE_NAME.eq(moduleName));
         query.addConditions(Tables.EH_VAR_FIELD_ITEM_SCOPES.ITEM_DISPLAY_NAME.eq(displayName));
         query.addConditions(Tables.EH_VAR_FIELD_ITEM_SCOPES.NAMESPACE_ID.eq(namespaceId));
+        query.addConditions(Tables.EH_VAR_FIELD_ITEM_SCOPES.STATUS.eq(VarFieldStatus.ACTIVE.getCode()));
+
+        if(communityId != null) {
+            query.addConditions(Tables.EH_VAR_FIELD_ITEM_SCOPES.COMMUNITY_ID.eq(communityId));
+        }
+
+        if(communityId == null) {
+            query.addConditions(Tables.EH_VAR_FIELD_ITEM_SCOPES.COMMUNITY_ID.isNull());
+        }
+
+        query.fetch().map((r) -> {
+            item.add(ConvertHelper.convert(r, ScopeFieldItem.class));
+            return null;
+        });
+
+        if(item.size()==0)
+            return null;
+
+        return item.get(0);
+    }
+
+    @Override
+    public ScopeFieldItem findScopeFieldItemByDisplayName(Integer namespaceId, Long communityId, String moduleName, Long fieldId, String displayName) {
+        DSLContext context = this.dbProvider.getDslContext(AccessSpec.readOnly());
+        List<ScopeFieldItem> item = new ArrayList<>();
+        SelectQuery<EhVarFieldItemScopesRecord> query = context.selectQuery(Tables.EH_VAR_FIELD_ITEM_SCOPES);
+        query.addConditions(Tables.EH_VAR_FIELD_ITEM_SCOPES.MODULE_NAME.eq(moduleName));
+        query.addConditions(Tables.EH_VAR_FIELD_ITEM_SCOPES.ITEM_DISPLAY_NAME.eq(displayName));
+        query.addConditions(Tables.EH_VAR_FIELD_ITEM_SCOPES.NAMESPACE_ID.eq(namespaceId));
+        query.addConditions(Tables.EH_VAR_FIELD_ITEM_SCOPES.FIELD_ID.eq(fieldId));
         query.addConditions(Tables.EH_VAR_FIELD_ITEM_SCOPES.STATUS.eq(VarFieldStatus.ACTIVE.getCode()));
 
         if(communityId != null) {
