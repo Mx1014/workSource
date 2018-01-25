@@ -43,7 +43,7 @@ public interface EquipmentProvider {
 	void updateEquipmentTask(EquipmentInspectionTasks task);
 	
 	void createEquipmentInspectionTasksLogs(EquipmentInspectionTasksLogs log);
-	List<EquipmentInspectionTasksLogs> listLogsByTaskId(ListingLocator locator, int count, Long taskId, List<Byte> processType,Long equipmentId);
+	List<EquipmentInspectionTasksLogs> listLogsByTaskId(ListingLocator locator, int count, Long taskId, List<Byte> processType,List<Long> equipmentId);
 	void createEquipmentInspectionTasksAttachment(EquipmentInspectionTasksAttachments attachment);
 	List<EquipmentInspectionTasksAttachments> listTaskAttachmentsByLogId(Long logId);
 	

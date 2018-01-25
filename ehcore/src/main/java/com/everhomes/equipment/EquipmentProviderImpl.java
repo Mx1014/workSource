@@ -583,7 +583,7 @@ public class EquipmentProviderImpl implements EquipmentProvider {
 
     @Override
     public List<EquipmentInspectionTasksLogs> listLogsByTaskId(ListingLocator locator, int count, Long taskId,
-                                                               List<Byte> processType,Long equipmentId) {
+                                                               List<Byte> processType,List<Long> equipmentId) {
 
         List<EquipmentInspectionTasksLogs> result = new ArrayList<EquipmentInspectionTasksLogs>();
         assert (locator.getEntityId() != 0);
@@ -593,8 +593,8 @@ public class EquipmentProviderImpl implements EquipmentProvider {
         if (locator.getAnchor() != null) {
             query.addConditions(Tables.EH_EQUIPMENT_INSPECTION_TASK_LOGS.ID.lt(locator.getAnchor()));
         }
-        if(equipmentId!=null && equipmentId!=0L){
-            query.addConditions(Tables.EH_EQUIPMENT_INSPECTION_TASK_LOGS.EQUIPMENT_ID.eq(equipmentId));
+        if(equipmentId!=null && equipmentId.size()>0){
+            query.addConditions(Tables.EH_EQUIPMENT_INSPECTION_TASK_LOGS.EQUIPMENT_ID.in(equipmentId));
         }
 
         if (processType != null) {

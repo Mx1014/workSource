@@ -13,6 +13,8 @@ import java.util.List;
  * <li>ownerType:ownerType</li>
  * <li>ownerId:ownerId</li>
  * <li>content:内容</li>
+ * <li>categoryId:子类型id</li>
+ * <li>taskCategoryId:任务类型</li>
  * <li>namespaceId:namespaceId</li>
  * <li>attachments:附件{@link com.everhomes.rest.pmtask.AttachmentDescriptor}</li>
  * </ul>

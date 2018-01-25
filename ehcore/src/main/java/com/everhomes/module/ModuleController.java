@@ -277,12 +277,12 @@ public class ModuleController extends ControllerBase {
     }
 
     /**
-     * <b>URL: /module/finServiceModuleApp</b>
+     * <b>URL: /module/findServiceModuleApp</b>
      * 查询应用信息
      */
-    @RequestMapping("finServiceModuleApp")
+    @RequestMapping("findServiceModuleApp")
     @RestReturn(value = ServiceModuleAppDTO.class)
-    public RestResponse finServiceModuleApp(@Valid FindServiceModuleAppCommand cmd) {
+    public RestResponse findServiceModuleApp(@Valid FindServiceModuleAppCommand cmd) {
         RestResponse response =  new RestResponse();
         response.setResponseObject(serviceModuleService.findServiceModuleAppById(cmd.getId()));
         response.setErrorCode(ErrorCodes.SUCCESS);
