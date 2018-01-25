@@ -193,7 +193,7 @@ public class ClientWebSocketHandler implements WebSocketHandler {
 //           } catch(IOException e) {
 //               LOGGER.warn("Unable to send message to client, session=" + session.getId() + ", json=" + frameJson, e);
 //           }
-           WebSocketSessionProxy.sendMessage(session,msg, "forward");
+           WebSocketSessionProxy.sendMessage(session,msg, "FORWARD");
        } else {
            LOGGER.warn("Session is null, loginToken=" + token + ", json=" + frameJson);
        }
@@ -315,7 +315,7 @@ public class ClientWebSocketHandler implements WebSocketHandler {
                     RegistedOkResponse respPdu = new RegistedOkResponse();
                     pdu.setPayload(respPdu);
 
-                    WebSocketSessionProxy.sendMessage(session, new TextMessage(pdu.toJson()), "registerLogin");
+                    WebSocketSessionProxy.sendMessage(session, new TextMessage(pdu.toJson()), "REGISTERLOGIN");
                     tearDown = false;
                     
 //                    try {
@@ -386,7 +386,7 @@ public class ClientWebSocketHandler implements WebSocketHandler {
                     StoredMessageIndicationPdu clientPdu = new StoredMessageIndicationPdu();
                     pdu.setPayload(clientPdu);
                     pdu.setAppId(appId);
-                    WebSocketSessionProxy.sendMessage(session, new TextMessage(pdu.toJson()), "appIdStatus");
+                    WebSocketSessionProxy.sendMessage(session, new TextMessage(pdu.toJson()), "APPIDSTATUS");
 
 //                    try {
 //                        synchronized(session) {

@@ -9,18 +9,18 @@ import java.sql.Timestamp;
 public class MessageRecordDto implements Serializable {
     private Long id;
     private Integer namespaceId;
+    private String dstChannelToken;
+    private String dstChannelType;
+    private String status;
     private Long appId;
     private Long messageSeq;
     private Long senderUid;
     private String senderTag;
-    private String dstChannelType;
-    private String dstChannelToken;
     private String channelsInfo;
     private String bodyType;
     private String body;
     private Integer deliveryoption;
     private Timestamp createTime;
-    private Byte status;
 
     public Long getId() {
         return this.id;
@@ -131,11 +131,11 @@ public class MessageRecordDto implements Serializable {
         return StringHelper.toJsonString(this);
     }
 
-    public Byte getStatus() {
+    public String getStatus() {
         return status;
     }
 
-    public void setStatus(Byte status) {
+    public void setStatus(String status) {
         this.status = status;
     }
 }

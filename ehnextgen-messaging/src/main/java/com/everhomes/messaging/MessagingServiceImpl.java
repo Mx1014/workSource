@@ -19,6 +19,7 @@ import com.everhomes.settings.PaginationConfigHelper;
 import com.everhomes.user.UserContext;
 import com.everhomes.user.UserLogin;
 import com.everhomes.util.ConvertHelper;
+import com.everhomes.util.MessagePersistWorker;
 import com.everhomes.util.Name;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -106,15 +107,15 @@ public class MessagingServiceImpl implements MessagingService {
             record.setNamespaceId(r.getNamespaceId());
             record.setMessageSeq(r.getMessageSequence());
             record.setSenderUid(r.getSenderUid());
-            record.setSenderTag("");
-            record.setDstChannelType("USER FETCH");
+            record.setSenderTag("FETCH PAST TO RECENT MESSAGES");
+            record.setDstChannelType("");
             record.setDstChannelToken(UserContext.current().getLogin().getUserId()+"");
             record.setChannelsInfo("");
             record.setBodyType(r.getContextType());
             record.setBody(r.getContent());
             record.setMessageSeq(r.getStoreSequence());
             record.setStatus(MessageRecordStatus.CORE_ROUTE.getCode());
-            MessagePersistWorker.getQueue().offer(record);
+             ;
 
              dtoMessages.add(toMessageDto(r));   
             }

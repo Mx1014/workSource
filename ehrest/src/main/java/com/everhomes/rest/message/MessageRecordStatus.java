@@ -1,38 +1,31 @@
 package com.everhomes.rest.message;
 
-public enum  MessageRecordStatus {
-    CORE_HANDLE((byte)0), CORE_ROUTE((byte)1), BORDER_HANDLE((byte)2), BORDER_ROUTE((byte)3);
+import com.everhomes.util.StringHelper;
+import org.apache.commons.lang.StringUtils;
 
-    private byte code;
+public enum MessageRecordStatus {
+    CORE_HANDLE("CORE_HANDLE"), CORE_ROUTE("CORE_ROUTE"), BORDER_HANDLE("BORDER_HANDLE"), BORDER_ROUTE("BORDER_ROUTE");
 
-    private MessageRecordStatus(byte code) {
+    private String code;
+
+    private MessageRecordStatus(String code) {
         this.code = code;
     }
 
-    public byte getCode() {
+    public String getCode() {
         return this.code;
     }
 
-    public static MessageRecordStatus fromCode(Byte code) {
-        if(code == null)
-            return null;
-
-        switch(code.byteValue()) {
-            case 0 :
-                return CORE_HANDLE;
-
-            case 1 :
-                return CORE_ROUTE;
-
-            case 2 :
-                return BORDER_HANDLE;
-
-            case 3 :
-                return BORDER_ROUTE;
-
-            default :
-                break;
+    public static MessageRecordStatus fromCode(String code) {
+        for (MessageRecordStatus v : MessageRecordStatus.values()) {
+            if (StringUtils.equals(v.getCode(), code))
+                return v;
         }
         return null;
+    }
+
+    @Override
+    public String toString() {
+        return StringHelper.toJsonString(this);
     }
 }

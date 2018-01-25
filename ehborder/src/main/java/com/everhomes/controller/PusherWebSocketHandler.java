@@ -399,7 +399,7 @@ public class PusherWebSocketHandler extends TextWebSocketHandler {
             resp.setContent("notify");
             PduFrame pdu = new PduFrame();
             pdu.setPayload(resp);
-            WebSocketSessionProxy.sendMessage(clientSession, new TextMessage(pdu.toJson()), "notify");
+            WebSocketSessionProxy.sendMessage(clientSession, new TextMessage(pdu.toJson()), "NOTIFY");
 
 //            try {
 //                synchronized(clientSession) {

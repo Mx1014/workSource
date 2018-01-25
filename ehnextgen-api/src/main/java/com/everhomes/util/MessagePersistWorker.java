@@ -1,13 +1,9 @@
-package com.everhomes.messaging;
+package com.everhomes.util;
 
-import com.everhomes.message.MessageRecord;
 import com.everhomes.rest.message.MessageRecordDto;
-import com.everhomes.rest.messaging.MessageDTO;
-import com.everhomes.util.SignatureHelper;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.beans.factory.annotation.Value;
 import org.springframework.http.*;
 import org.springframework.scheduling.TaskScheduler;
 import org.springframework.stereotype.Component;
@@ -35,10 +31,9 @@ public class MessagePersistWorker {
     //    @Value("${border.app.secret}")
     private String secretKey = "2-0cDFNOq-zPzYGtdS8xxqnkR8PRgNhpHcWoku6Ob49NdBw8D9-Q72MLsCidI43IKhP1D_43ujSFbatGPWuVBQ";
 
-
     private static ConcurrentLinkedQueue<MessageRecordDto> queue =  new ConcurrentLinkedQueue<>();
 
-    static ConcurrentLinkedQueue<MessageRecordDto> getQueue(){
+    public static ConcurrentLinkedQueue<MessageRecordDto> getQueue(){
         return queue;
     }
 
@@ -56,20 +51,10 @@ public class MessagePersistWorker {
     }
 
 
-//    @Override
-//    public void run() {
-//        while (true) {
-//            MessageRecordDto record = queue.poll();
-//            this.handleMessagePersist(record);
-//        }
-//    }
-
     //消息持久化
     public void handleMessagePersist(MessageRecordDto record) {
 
         Map<String, String> params = new HashMap<>();
-//        params.put("borderId", String.valueOf(this.borderId));
-//        params.put("borderSessionId", session.getId());
         params.put("messageRecordDto", record.toString());
 
         this.restCall("/message/persistMessage", params, new ListenableFutureCallback<ResponseEntity<String>>() {

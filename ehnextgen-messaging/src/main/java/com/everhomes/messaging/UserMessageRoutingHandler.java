@@ -3,7 +3,6 @@ package com.everhomes.messaging;
 
 import com.everhomes.border.BorderConnection;
 import com.everhomes.border.BorderConnectionProvider;
-import com.everhomes.message.MessageRecord;
 import com.everhomes.msgbox.Message;
 import com.everhomes.msgbox.MessageBoxProvider;
 import com.everhomes.rest.common.EntityType;
@@ -19,22 +18,19 @@ import com.everhomes.rest.rpc.client.StoredMessageIndicationPdu;
 import com.everhomes.rest.rpc.server.ClientForwardPdu;
 import com.everhomes.rest.user.DeviceIdentifierType;
 import com.everhomes.rest.user.UserMuteNotificationFlag;
-import com.everhomes.statistics.transaction.StatTransactionConstant;
 import com.everhomes.user.*;
 import com.everhomes.util.DateHelper;
+import com.everhomes.util.MessagePersistWorker;
 import com.everhomes.util.Name;
 import com.everhomes.util.WebTokenGenerator;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.scheduling.TaskScheduler;
 import org.springframework.stereotype.Component;
 
-import javax.annotation.PostConstruct;
 import java.io.IOException;
 import java.util.HashMap;
 import java.util.List;
-import java.util.concurrent.ConcurrentLinkedQueue;
 
 /**
  * 
@@ -100,7 +96,7 @@ public class UserMessageRoutingHandler implements MessageRoutingHandler {
         record.setNamespaceId(UserContext.getCurrentNamespaceId());
         record.setMessageSeq(0L);
         record.setSenderUid(senderLogin.getUserId());
-        record.setSenderTag("");
+        record.setSenderTag("ROUTE MESSAGE");
         record.setDstChannelType(dstChannelType);
         record.setDstChannelToken(dstChannelToken);
         record.setChannelsInfo(message.getChannels().toString());
@@ -256,7 +252,7 @@ public class UserMessageRoutingHandler implements MessageRoutingHandler {
                     record.setNamespaceId(UserContext.getCurrentNamespaceId());
                     record.setMessageSeq(0L);
                     record.setSenderUid(senderLogin.getUserId());
-                    record.setSenderTag("");
+                    record.setSenderTag("ROUTE STORE MESSAGE");
                     record.setDstChannelType(destChannelType);
                     record.setDstChannelToken(destChannelToken);
                     record.setChannelsInfo(message.getChannels().toString());
@@ -314,7 +310,7 @@ public class UserMessageRoutingHandler implements MessageRoutingHandler {
                     record.setNamespaceId(UserContext.getCurrentNamespaceId());
                     record.setMessageSeq(0L);
                     record.setSenderUid(senderLogin.getUserId());
-                    record.setSenderTag("");
+                    record.setSenderTag("ROUTE REALTIME MESSAGE");
                     record.setDstChannelType(destChannelType);
                     record.setDstChannelToken(destChannelToken);
                     record.setChannelsInfo(message.getChannels().toString());
