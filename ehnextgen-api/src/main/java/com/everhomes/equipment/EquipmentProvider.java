@@ -216,7 +216,7 @@ public interface EquipmentProvider {
 
     EquipmentInspectionTasksLogs getMaintanceLogByEquipmentId(Long referId);
 
-	void updateMaintanceInspectionLogsById(Long taskLogId ,Long flowCaseId);
+	void updateMaintanceInspectionLogsById(Long taskLogId ,Byte status ,Long flowCaseId);
 
     void statInMaintanceTaskCount(TasksStatData stat,Timestamp startTime, Timestamp endTime,StatTodayEquipmentTasksCommand cmd);
 
