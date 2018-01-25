@@ -26,6 +26,9 @@ import com.everhomes.msgbox.MessageLocator;
 import com.everhomes.queue.taskqueue.JesqueClientFactory;
 import com.everhomes.queue.taskqueue.WorkerPoolFactory;
 import com.everhomes.rest.app.AppConstants;
+import com.everhomes.rest.message.MessageRecordDto;
+import com.everhomes.rest.message.MessageRecordStatus;
+import com.everhomes.rest.messaging.ChannelType;
 import com.everhomes.rest.messaging.DeviceMessage;
 import com.everhomes.rest.messaging.DeviceMessages;
 import com.everhomes.rest.pusher.PushMessageCommand;
@@ -35,7 +38,9 @@ import com.everhomes.rest.rpc.server.PusherNotifyPdu;
 import com.everhomes.rest.user.UserLoginStatus;
 import com.everhomes.sequence.LocalSequenceGenerator;
 import com.everhomes.settings.PaginationConfigHelper;
+import com.everhomes.user.UserContext;
 import com.everhomes.user.UserLogin;
+import com.everhomes.util.MessagePersistWorker;
 import com.everhomes.util.StringHelper;
 import com.google.gson.Gson;
 import com.notnoop.apns.*;
@@ -442,7 +447,20 @@ public class PusherServiceImpl implements PusherService, ApnsServiceFactory {
                 if(msgStr != null && !msgStr.isEmpty()) {
                     DeviceMessage msg = (DeviceMessage)StringHelper.fromJsonString(msgStr, DeviceMessage.class);
                     if(msg != null) {
-                        deviceMsgs.add(msg);    
+                        deviceMsgs.add(msg);
+                        MessageRecordDto record = new MessageRecordDto();
+                        record.setAppId(mb.getAppId());
+                        record.setNamespaceId(mb.getNamespaceId());
+                        record.setMessageSeq(mb.getStoreSequence());
+                        record.setSenderUid(mb.getSenderUid());
+                        record.setSenderTag("FETCH PASTTORECENT MESSAGES");
+                        record.setDstChannelType(ChannelType.USER.getCode());
+                        record.setDstChannelToken(mb.getChannelToken());
+                        //                record.setChannelsInfo(r.getChannels().toString());
+                        record.setBodyType(mb.getContextType());
+                        record.setBody(mb.getContent());
+                        record.setStatus(MessageRecordStatus.CORE_FETCH.getCode());
+                        MessagePersistWorker.getQueue().offer(record);
                         }
                     }
                 

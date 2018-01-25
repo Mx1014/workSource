@@ -25,6 +25,9 @@ import com.everhomes.rest.acl.PrivilegeConstants;
 import com.everhomes.rest.address.CommunityDTO;
 import com.everhomes.rest.app.AppConstants;
 import com.everhomes.rest.asset.TargetDTO;
+import com.everhomes.rest.message.MessageRecordDto;
+import com.everhomes.rest.message.MessageRecordStatus;
+import com.everhomes.rest.messaging.ChannelType;
 import com.everhomes.rest.messaging.MessageChannel;
 import com.everhomes.rest.messaging.MessageDTO;
 import com.everhomes.rest.oauth2.AuthorizationCommand;
@@ -655,7 +658,6 @@ public class UserController extends ControllerBase {
 	        FetchMessageCommandResponse cmdResponse = this.messagingService.fetchPastToRecentMessages(cmd);
 	        long endTime = System.currentTimeMillis();
 	        LOGGER.info("fetchPastToRecentMessages took=" + (endTime - startTime) + " milliseconds");
-
 	        response.setResponseObject(cmdResponse);
 	        return response;
 	    } catch(Exception ex) {

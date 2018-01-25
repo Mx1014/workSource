@@ -194,6 +194,7 @@ public class ClientWebSocketHandler implements WebSocketHandler {
 //               LOGGER.warn("Unable to send message to client, session=" + session.getId() + ", json=" + frameJson, e);
 //           }
            WebSocketSessionProxy.sendMessage(session,msg, "FORWARD", sessionToTokenMap.get(session));
+           this.updateSessionSendTick(session);
        } else {
            LOGGER.warn("Session is null, loginToken=" + token + ", json=" + frameJson);
        }
