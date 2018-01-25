@@ -7,8 +7,10 @@ import com.everhomes.db.DbProvider;
 import com.everhomes.listing.CrossShardListingLocator;
 import com.everhomes.locale.LocaleTemplateService;
 import com.everhomes.organization.*;
+import com.everhomes.rest.common.ImportFileResponse;
 import com.everhomes.rest.organization.*;
 import com.everhomes.rest.salary.*;
+import com.everhomes.rest.salary.GetImportFileResultCommand;
 import com.everhomes.rest.salary.ListEnterprisesCommand;
 import com.everhomes.rest.techpark.punch.NormalFlag;
 import com.everhomes.rest.techpark.punch.PunchServiceErrorCode;
@@ -29,6 +31,7 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
+import org.springframework.web.multipart.MultipartFile;
 
 import javax.servlet.http.HttpServletResponse;
 import java.io.BufferedOutputStream;
@@ -2417,6 +2420,26 @@ public class SalaryServiceImpl implements SalaryService {
         Workbook wb = createEmployeeSalaryHeadWB(cmd.getOrganizationId());
 
         return download(wb, filePath, response);
+    }
+
+    @Override
+    public GetEmployeeEntitiesResponse getEmployeeEntities(GetEmployeeEntitiesCommand cmd) {
+        return null;
+    }
+
+    @Override
+    public void exportEmployeeSalary(ExportEmployeeSalaryTemplateCommand cmd) {
+
+    }
+
+    @Override
+    public ImportFileTaskDTO importEmployeeSalary(ExportEmployeeSalaryTemplateCommand cmd, MultipartFile[] files) {
+        return null;
+    }
+
+    @Override
+    public ImportFileResponse getImportResult(GetImportFileResultCommand cmd) {
+        return importFileService.getImportFileResult(cmd.getTaskId());
     }
 
     private Workbook createEmployeeSalaryHeadWB(Long orgId) {

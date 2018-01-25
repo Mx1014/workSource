@@ -1,7 +1,10 @@
 // @formatter:off
 package com.everhomes.salary;
 
+import com.everhomes.rest.common.ImportFileResponse;
+import com.everhomes.rest.organization.ImportFileTaskDTO;
 import com.everhomes.rest.salary.*;
+import org.springframework.web.multipart.MultipartFile;
 
 import javax.servlet.http.HttpServletResponse;
 
@@ -125,4 +128,12 @@ public interface SalaryService {
 
     HttpServletResponse exportEmployeeSalaryTemplate(ExportEmployeeSalaryTemplateCommand cmd,
                                                      HttpServletResponse response);
+
+    GetEmployeeEntitiesResponse getEmployeeEntities(GetEmployeeEntitiesCommand cmd);
+
+    void exportEmployeeSalary(ExportEmployeeSalaryTemplateCommand cmd);
+
+    ImportFileTaskDTO importEmployeeSalary(ExportEmployeeSalaryTemplateCommand cmd, MultipartFile[] files);
+
+    ImportFileResponse getImportResult(GetImportFileResultCommand cmd);
 }
