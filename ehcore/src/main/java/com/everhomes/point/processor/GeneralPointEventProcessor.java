@@ -97,6 +97,8 @@ public class GeneralPointEventProcessor implements IGeneralPointEventProcessor {
             if (bindingPointLog == null) {
                 return null;
             }
+            // 设置binding log id, 防止重复记录
+            pointLog.setBindingLogId(bindingPointLog.getId());
         }
         processPointLog(pointLog, localEvent, rule, pointSystem, pointRuleCategory);
 
