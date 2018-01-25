@@ -1140,6 +1140,9 @@ public class ContractServiceImpl implements ContractService {
 				if(plan.getId() == null) {
 					ContractPaymentPlan contractPaymentPlan = ConvertHelper.convert(plan, ContractPaymentPlan.class);
 					contractPaymentPlan.setContractId(contractId);
+					if(plan.getPaidTime() != null) {
+						contractPaymentPlan.setPaidTime(new Timestamp(plan.getPaidTime()));
+					}
 					contractPaymentPlanProvider.createContractPaymentPlan(contractPaymentPlan);
 				} else {
 					map.remove(plan.getId());
