@@ -17,7 +17,7 @@ import com.everhomes.util.StringHelper;
  * 	<li>type : 申请类型：1.用户认证，2.企业认证</li>
  * 	<li>phone : 电话号码</li>
  * 	<li>addressList : 退租地址列表,参考{@link com.everhomes.rest.user.UnrentAddressDTO}</li>
- * <ul>
+ * </ul>
  * 
  */
 public class CancelAuthFeedbackCommand {
