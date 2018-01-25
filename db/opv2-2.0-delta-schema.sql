@@ -132,9 +132,11 @@ ALTER TABLE `eh_equipment_inspection_standards`
   ADD COLUMN `repeat_type` TINYINT(4) NOT NULL COMMENT ' 0: no repeat, 1: by day, 2: by week, 3: by month, 4: by year';
 -- 操作记录表增加设备id表
 ALTER TABLE `eh_equipment_inspection_task_logs`
-  ADD COLUMN `equipment_id`  BIGINT(20) NULL DEFAULT 0 ;
+  ADD COLUMN `equipment_id`  bigint(20) NULL DEFAULT 0 ;
 ALTER TABLE `eh_equipment_inspection_task_logs`
-  ADD COLUMN `flow_case_id`  BIGINT(20) NULL AFTER `equipment_id`;
+  ADD COLUMN `maintance_type`  varchar(255) NULL DEFAULT '';
+ALTER TABLE `eh_equipment_inspection_task_logs`
+  ADD COLUMN `flow_case_id`  bigint(20) NULL AFTER `equipment_id`;
 
 -- 离线支持  jiarui
 ALTER TABLE `eh_quality_inspection_specifications`
@@ -194,12 +196,14 @@ CREATE TABLE `eh_file_management_contents` (
   `content_type` VARCHAR(32) COMMENT 'file, folder',
   `content_suffix` VARCHAR(64) COMMENT 'the suffix of the file',
   `content_uri` VARCHAR(2048) COMMENT 'the uri of the content',
+  `path` VARCHAR(128) NOT NULL COMMENT 'the path of the content',
   `status` TINYINT NOT NULL DEFAULT 1 COMMENT '0-invalid, 1-valid',
   `creator_uid` BIGINT DEFAULT 0,
   `create_time` DATETIME,
   `operator_uid` BIGINT,
   `update_time` DATETIME,
-  PRIMARY KEY (`id`)
+  PRIMARY KEY (`id`),
+  KEY `file_management_contents_path` (`path`)
 ) ENGINE = INNODB DEFAULT CHARSET = utf8mb4 ;
 
 -- DROP TABLE eh_file_icons;

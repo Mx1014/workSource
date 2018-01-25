@@ -18,6 +18,10 @@ public interface SmsHandler {
     String YOU_XUN_TONG_HANDLER_NAME = "YouXunTong";
     // 连信通
     String LIAN_XIN_TONG_HANDLER_NAME = "LianXinTong";
+    // 云片
+    String YUN_PIAN_HANDLER_NAME = "YunPian";
+    // 茧米
+    String JIAN_MI_HANDLER_NAME = "JianMi";
 
     /**
      * single message
@@ -53,7 +57,7 @@ public interface SmsHandler {
      * @param reportBody    报告结果
      * @return  返回响应内容
      */
-    List<SmsReportDTO> report(String reportBody);
+    SmsReportResponse report(String reportBody);
     
     SmsLog doSend(Integer namespaceId, String phoneNumber, String templateScope, int templateId, String templateLocale, List<Tuple<String, Object>> variables);
 

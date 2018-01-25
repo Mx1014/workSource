@@ -23,6 +23,9 @@ UPDATE eh_equipment_inspection_tasks
 SET `status` = 7
 WHERE `status` = 4 AND review_result = 4;
 
+UPDATE eh_equipment_inspection_task_logs
+SET equipment_id = (SELECT  equipment_id FROM eh_equipment_inspection_tasks WHERE id = task_id);
+
 -- 巡检任务状态统一 end by jiarui 20180105
 
 

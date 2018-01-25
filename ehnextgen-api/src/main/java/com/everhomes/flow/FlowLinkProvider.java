@@ -15,7 +15,7 @@ public interface FlowLinkProvider {
 
     List<FlowLink> listFlowLink(Long flowMainId, Integer flowVersion);
 
-    List<FlowLink> listFlowLinkByToNodeId(Long toNodeId, Integer flowVersion);
+    List<FlowLink> listFlowLinkByToNodeId(Long flowMainId, Integer flowVersion, Long toNodeId);
 
-    List<FlowLink> listFlowLinkByFromNodeId(Long fromNodeId, Integer flowVersion);
+    List<FlowLink> listFlowLinkByFromNodeId(Long flowMainId, Integer flowVersion, Long fromNodeId);
 }

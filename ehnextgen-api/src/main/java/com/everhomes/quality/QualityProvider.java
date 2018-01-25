@@ -190,5 +190,6 @@ public interface QualityProvider {
 
     List<QualityInspectionTasks> listVerificationTasksRefactor(Integer offset, int pageSize,
 															   Timestamp startDate, Timestamp endDate,
-															   List<Long> standardIds, List<ExecuteGroupAndPosition> groupDtos, ListingQueryBuilderCallback builderCallback);
+															   List<Long> executeStandardIds, List<Long> reviewStandardIds,
+															   List<ExecuteGroupAndPosition> groupDtos, ListingQueryBuilderCallback builderCallback);
 }

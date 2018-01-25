@@ -341,6 +341,7 @@ public class FileManagementServiceImpl implements  FileManagementService{
     public FileContentDTO addFileContent(AddFileContentCommand cmd) {
         FileContentDTO dto = new FileContentDTO();
         FileCatalog catalog = fileManagementProvider.findFileCatalogById(cmd.getCatalogId());
+        FileContent parentContent = fileManagementProvider.findFileContentById(cmd.getParentId());
         Integer namespaceId = UserContext.getCurrentNamespaceId();
         if (catalog == null)
             return dto;
@@ -348,13 +349,17 @@ public class FileManagementServiceImpl implements  FileManagementService{
         //  1.whether the name has been used
         checkFileContentName(namespaceId, catalog.getOwnerId(), catalog.getId(), cmd.getParentId(), cmd.getContentName());
 
-        //  2.create it
+        //  2.create it & set the path
         FileContent content = new FileContent();
         content.setNamespaceId(catalog.getNamespaceId());
         content.setOwnerId(catalog.getOwnerId());
         content.setOwnerType(catalog.getOwnerType());
         content.setCatalogId(catalog.getId());
         content.setParentId(cmd.getParentId());
+        if (parentContent != null)
+            content.setPath(parentContent.getPath());
+        else
+            content.setPath("");
         content.setContentType(cmd.getContentType());
         content.setContentName(cmd.getContentName());
         if (!content.getContentType().equals(FileContentType.FOLDER.getCode())) {
@@ -410,18 +415,38 @@ public class FileManagementServiceImpl implements  FileManagementService{
         Map<String, String> fileIcons = fileService.getFileIconUrl();
         Integer namespaceId = UserContext.getCurrentNamespaceId();
         FileCatalog catalog = fileManagementProvider.findFileCatalogById(cmd.getCatalogId());
-        if(catalog == null)
+        //  find the parent content to use the path
+        FileContent parentContent = fileManagementProvider.findFileContentById(cmd.getContentId());
+        if (catalog == null)
             return response;
 
-        List<FileContent> results = fileManagementProvider.listFileContents(namespaceId,catalog.getOwnerId(),catalog.getId(),cmd.getContentId(),cmd.getKeywords());
-        if(results !=null && results.size() > 0){
-            results.stream().filter(r -> r.getContentType().equals(FileContentType.FOLDER.getCode())).map(r ->{
-                FileContentDTO dto = convertToFileContentDTO(r,fileIcons);
+        List<FileContent> results = fileManagementProvider.queryFileContents(new ListingLocator(), namespaceId, catalog.getOwnerId(), (locator, query) -> {
+            query.addConditions(Tables.EH_FILE_MANAGEMENT_CONTENTS.CATALOG_ID.eq(catalog.getId()));
+            //  1.get results by the keywords
+            if(cmd.getKeywords() != null){
+                query.addConditions(Tables.EH_FILE_MANAGEMENT_CONTENTS.CONTENT_NAME.like("%" + cmd.getKeywords() + "%"));
+                if (parentContent != null)
+                    query.addConditions(Tables.EH_FILE_MANAGEMENT_CONTENTS.PATH.like(parentContent.getPath() + "/" + "%"));
+            }else{
+                //  2.get results without keywords
+                if (parentContent != null)
+                    query.addConditions(Tables.EH_FILE_MANAGEMENT_CONTENTS.PARENT_ID.eq(parentContent.getId()));
+                else
+                    query.addConditions(Tables.EH_FILE_MANAGEMENT_CONTENTS.PARENT_ID.isNull());
+            }
+            query.addOrderBy(Tables.EH_FILE_MANAGEMENT_CONTENTS.CREATE_TIME.desc());
+            return query;
+        });
+
+        //  3.process the result
+        if (results != null && results.size() > 0) {
+            results.stream().filter(r -> r.getContentType().equals(FileContentType.FOLDER.getCode())).map(r -> {
+                FileContentDTO dto = convertToFileContentDTO(r, fileIcons);
                 folders.add(dto);
                 return null;
             }).collect(Collectors.toList());
-            results.stream().filter(r -> !r.getContentType().equals(FileContentType.FOLDER.getCode())).map(r ->{
-                FileContentDTO dto = convertToFileContentDTO(r,fileIcons);
+            results.stream().filter(r -> !r.getContentType().equals(FileContentType.FOLDER.getCode())).map(r -> {
+                FileContentDTO dto = convertToFileContentDTO(r, fileIcons);
                 files.add(dto);
                 return null;
             }).collect(Collectors.toList());

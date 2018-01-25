@@ -854,6 +854,8 @@ public class CommunityProviderImpl implements CommunityProvider {
 		query.addConditions(Tables.EH_BUILDINGS.NAMESPACE_ID.eq(namespaceId));
 		query.addConditions(cond);
 
+        LOGGER.debug("findBuildingByCommunityIdAndName, sql=" + query.getSQL());
+        LOGGER.debug("findBuildingByCommunityIdAndName, bindValues=" + query.getBindValues());
         return ConvertHelper.convert(query.fetchOne(), Building.class);
 	}
 

@@ -4,7 +4,8 @@ import com.everhomes.bootstrap.PlatformContext;
 import com.everhomes.flow.*;
 
 public class FlowGraphNodeStart extends FlowGraphNode {
-	private FlowEventLogProvider flowEventLogProvider;
+
+	transient private FlowEventLogProvider flowEventLogProvider;
 	
 	public FlowGraphNodeStart() {
 		this(null);

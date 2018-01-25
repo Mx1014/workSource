@@ -3652,6 +3652,7 @@ public class AssetProviderImpl implements AssetProvider {
             targetId = UserContext.currentUserId();
         }
         query.addConditions(bill.TARGET_ID.eq(targetId));
+        query.addConditions(bill.SWITCH.eq((byte)1));
         query.fetch()
                 .map(r -> {
                     ListAllBillsForClientDTO dto = new ListAllBillsForClientDTO();
@@ -3682,11 +3683,14 @@ public class AssetProviderImpl implements AssetProvider {
     }
 
     @Override
-    public List<PaymentBills> findSettledBillsByCustomer(String targetType, Long targetId) {
+    public List<PaymentBills> findSettledBillsByCustomer(String targetType, Long targetId,String ownerType,Long ownerId) {
         return getReadOnlyContext().selectFrom(Tables.EH_PAYMENT_BILLS)
                 .where(Tables.EH_PAYMENT_BILLS.TARGET_ID.eq(targetId))
                 .and(Tables.EH_PAYMENT_BILLS.TARGET_TYPE.eq(targetType))
                 .and(Tables.EH_PAYMENT_BILLS.SWITCH.eq((byte)1))
+                .and(Tables.EH_PAYMENT_BILLS.STATUS.eq((byte)0))
+                .and(Tables.EH_PAYMENT_BILLS.OWNER_TYPE.eq(ownerType))
+                .and(Tables.EH_PAYMENT_BILLS.OWNER_ID.eq(ownerId))
                 .fetchInto(PaymentBills.class);
     }
 

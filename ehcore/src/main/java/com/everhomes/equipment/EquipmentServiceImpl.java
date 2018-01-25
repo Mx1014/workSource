@@ -190,7 +190,6 @@ import com.everhomes.rest.pmNotify.ReceiverName;
 import com.everhomes.rest.pmNotify.SetPmNotifyParamsCommand;
 import com.everhomes.rest.pmtask.CreateTaskCommand;
 import com.everhomes.rest.pmtask.ListTaskCategoriesCommand;
-import com.everhomes.rest.pmtask.ListTaskCategoriesResponse;
 import com.everhomes.rest.pmtask.PmTaskAddressType;
 import com.everhomes.rest.quality.OwnerType;
 import com.everhomes.rest.quality.ProcessType;
@@ -2739,9 +2738,28 @@ private void checkUserPrivilege(Long orgId, Long privilegeId, Long communityId) 
         locator.setAnchor(cmd.getPageAnchor());
         int pageSize = PaginationConfigHelper.getPageSize(configurationProvider, cmd.getPageSize());
         //根据任务id取出所有待执行和待维修的任务log  0: none, 1: complete, 2: complete maintenance, 3: review, 4: need maintenance
-		//上版维修情况取2  ，任务记录取1  4  ，  对接报修后取2
+		//0: none, 1: complete, 2: complete maintenance, 3: review,
+		//上版维修情况取2  ，任务记录取1  4  ，  对接报修后取2     review  1
+
+		EquipmentInspectionPlans plan = new EquipmentInspectionPlans();
+		List<Long> equipmentIds = new ArrayList<>();
+		if (cmd.getEquipmentId() == null) {
+			if (task.getPlanId() != null && task.getPlanId() != 0L) {
+				plan = equipmentProvider.getEquipmmentInspectionPlanById(task.getPlanId());
+				if (null != plan) {
+					EquipmentInspectionPlanDTO planDTO = ConvertHelper.convert(plan, EquipmentInspectionPlanDTO.class);
+					processEquipmentInspectionObjectsByPlanId(plan.getId(), planDTO);
+					if (planDTO.getEquipmentStandardRelations() != null && planDTO.getEquipmentStandardRelations().size() > 0) {
+						planDTO.getEquipmentStandardRelations().forEach((r) -> equipmentIds.add(r.getEquipmentId()));
+					}
+				}
+			} else if (task.getPlanId() == 0) {
+				//兼容
+				equipmentIds.add(task.getEquipmentId());
+			}
+		}
 		List<EquipmentInspectionTasksLogs> logs = equipmentProvider.listLogsByTaskId(locator, pageSize + 1,
-				task.getId(), cmd.getProcessType(),cmd.getEquipmentId());
+				task.getId(), cmd.getProcessType(), equipmentIds);
 
 		ListLogsByTaskIdResponse response = new ListLogsByTaskIdResponse();
 		if(null == logs) {
@@ -2749,93 +2767,133 @@ private void checkUserPrivilege(Long orgId, Long privilegeId, Long communityId) 
 			response.setLogs(dtos);
 			return response;
 		}
-
 		Long nextPageAnchor = null;
         if(logs.size() > pageSize) {
         	logs.remove(logs.size() - 1);
             nextPageAnchor = logs.get(logs.size() - 1).getId();
         }
-
         response.setNextPageAnchor(nextPageAnchor);
 
-        //兼容之前的通过标准来拿任务类型
-		EquipmentInspectionPlans plan = equipmentProvider.getEquipmmentInspectionPlanById(task.getPlanId());
-		if(plan != null) {
-			response.setTaskType(plan.getPlanType());
+		populateTaskType(task, response);
+		List<EquipmentTaskLogsDTO> dtos = new ArrayList<>();
+		if(cmd.getEquipmentId()!= null){
+			dtos = processEquipmentTaskLogsDTOS(logs);
+		} else {
+			dtos = logs.stream().map((r) -> {
+				EquipmentTaskLogsDTO dto = ConvertHelper.convert(r, EquipmentTaskLogsDTO.class);
+				populateItemResultToTasklog(r, dto);
+				return dto;
+			}).collect(Collectors.toList());
+			//增加正常异常数
+			calculateAbnormalCount(dtos);
 		}
-		EquipmentInspectionStandards standard = equipmentProvider.findStandardById(task.getStandardId());
-		if(standard!=null){
-			response.setTaskType(standard.getStandardType());
-		}
+		response.setLogs(dtos);
+		return response;
+	}
 
-        List<EquipmentTaskLogsDTO> dtos = logs.stream().map((r) -> {
-
-        	EquipmentTaskLogsDTO dto = ConvertHelper.convert(r, EquipmentTaskLogsDTO.class);
-
-        	List<EquipmentInspectionItemResults> itemResults = equipmentProvider.findEquipmentInspectionItemResultsByLogId(dto.getId());
-
-        	List<InspectionItemResult> results = new ArrayList<InspectionItemResult>();
-			if (itemResults != null && itemResults.size() > 0) {
-				results = itemResults.stream()
-						.map(result -> ConvertHelper.convert(result, InspectionItemResult.class))
-						.collect(Collectors.toList());
-				//兼容上一版 只有在result表中才有equipmentId
-				EquipmentInspectionEquipments equipment = new EquipmentInspectionEquipments();
-				if (r.getEquipmentId() != null && r.getEquipmentId() != 0) {
-					equipment = equipmentProvider.findEquipmentById(r.getEquipmentId());
-				} else {
-					equipment = equipmentProvider.findEquipmentById(itemResults.get(0).getEquipmentId());
+	private void calculateAbnormalCount(List<EquipmentTaskLogsDTO> dtos) {
+		if(dtos!=null && dtos.size()>0){
+			for (EquipmentTaskLogsDTO dto : dtos) {
+				Integer abnormalCount =0;
+				Integer normalCount = 0;
+				for (InspectionItemResult result :dto.getItemResults()) {
+					if(result.getNormalFlag()==0)
+						abnormalCount++;
+					if(result.getNormalFlag()==1)
+						normalCount++;
 				}
-				if (equipment != null)
-					dto.setEquipmentName(equipment.getName());
+				dto.setAbnormalCount(abnormalCount);
+				dto.setNormalCount(normalCount);
 			}
-			dto.setItemResults(results);
+		}
+	}
+
+	private List<EquipmentTaskLogsDTO> processEquipmentTaskLogsDTOS(List<EquipmentInspectionTasksLogs> logs) {
+		return logs.stream().map((r) -> {
+
+			EquipmentTaskLogsDTO dto = ConvertHelper.convert(r, EquipmentTaskLogsDTO.class);
+
+			populateItemResultToTasklog(r, dto);
 
 			//总公司 分公司 by xiongying20170328
-			if(r.getOperatorId() != null && r.getOperatorId() != 0) {
+			if (r.getOperatorId() != null && r.getOperatorId() != 0) {
 				List<OrganizationMember> operators = organizationProvider.listOrganizationMembersByUId(r.getOperatorId());
-				if(operators != null && operators.size() > 0) {
+				if (operators != null && operators.size() > 0) {
 					dto.setOperatorName(operators.get(0).getContactName());
 				}
 			}
 
-			if(r.getTargetId() != null && r.getTargetId() != 0) {
+			if (r.getTargetId() != null && r.getTargetId() != 0) {
 				List<OrganizationMember> targets = organizationProvider.listOrganizationMembersByUId(r.getTargetId());
-				if(targets != null && targets.size() > 0) {
+				if (targets != null && targets.size() > 0) {
 					dto.setTargetName(targets.get(0).getContactName());
 				}
 			}
 
-        	List<EquipmentInspectionTasksAttachments> attachmentLists = equipmentProvider.listTaskAttachmentsByLogId(dto.getId());
-        	if(attachmentLists != null && attachmentLists.size() > 0) {
-	        	populateLogAttachements(r, attachmentLists);
-	        	List<EquipmentTaskAttachmentDTO> attachments = new ArrayList<EquipmentTaskAttachmentDTO>();
-	        	for(EquipmentInspectionTasksAttachments attachment :  attachmentLists) {
-	        		EquipmentTaskAttachmentDTO attDto = ConvertHelper.convert(attachment, EquipmentTaskAttachmentDTO.class);
-	        		attachments.add(attDto);
-	        	}
-	        	dto.setAttachments(attachments);
-        	}
+			List<EquipmentInspectionTasksAttachments> attachmentLists = equipmentProvider.listTaskAttachmentsByLogId(dto.getId());
+			if (attachmentLists != null && attachmentLists.size() > 0) {
+				populateLogAttachements(r, attachmentLists);
+				List<EquipmentTaskAttachmentDTO> attachments = new ArrayList<EquipmentTaskAttachmentDTO>();
+				for (EquipmentInspectionTasksAttachments attachment : attachmentLists) {
+					EquipmentTaskAttachmentDTO attDto = ConvertHelper.convert(attachment, EquipmentTaskAttachmentDTO.class);
+					attachments.add(attDto);
+				}
+				dto.setAttachments(attachments);
+			}
 			//这里改成任务完成状态需要拿到当前最近的一条任务审批记录  （之前是完成  需维修  维修完成）
-        	if(EquipmentTaskProcessType.COMPLETE.equals(EquipmentTaskProcessType.fromStatus(dto.getProcessType()))) {
-        		EquipmentInspectionTasksLogs reviewLog =  equipmentProvider.getNearestReviewLogAfterProcess(dto.getTaskId(), dto.getId());
-        		if(null == reviewLog) {
-        			dto.setReviewResult(ReviewResult.NONE.getCode());
-        		}
-        		if(reviewLog != null) {
-        			if(EquipmentTaskProcessResult.REVIEW_QUALIFIED.equals(EquipmentTaskProcessResult.fromStatus(reviewLog.getProcessResult()))) {
-        				dto.setReviewResult(ReviewResult.QUALIFIED.getCode());
-        			}
-        			else if(EquipmentTaskProcessResult.REVIEW_UNQUALIFIED.equals(EquipmentTaskProcessResult.fromStatus(reviewLog.getProcessResult()))) {
-        				dto.setReviewResult(ReviewResult.UNQUALIFIED.getCode());
-        			}
-        		}
-        	}
-        	return dto;
-        }).collect(Collectors.toList());
+			if (EquipmentTaskProcessType.COMPLETE.equals(EquipmentTaskProcessType.fromStatus(dto.getProcessType()))) {
+				EquipmentInspectionTasksLogs reviewLog = equipmentProvider.getNearestReviewLogAfterProcess(dto.getTaskId(), dto.getId());
+				if (null == reviewLog) {
+					dto.setReviewResult(ReviewResult.NONE.getCode());
+				}
+				if (reviewLog != null) {
+					if (EquipmentTaskProcessResult.REVIEW_QUALIFIED.equals(EquipmentTaskProcessResult.fromStatus(reviewLog.getProcessResult()))) {
+						dto.setReviewResult(ReviewResult.QUALIFIED.getCode());
+					} else if (EquipmentTaskProcessResult.REVIEW_UNQUALIFIED.equals(EquipmentTaskProcessResult.fromStatus(reviewLog.getProcessResult()))) {
+						dto.setReviewResult(ReviewResult.UNQUALIFIED.getCode());
+					}
+				}
+			}
+			return dto;
+		}).collect(Collectors.toList());
+	}
 
-        response.setLogs(dtos);
-		return response;
+	private void populateItemResultToTasklog(EquipmentInspectionTasksLogs log, EquipmentTaskLogsDTO dto) {
+		List<EquipmentInspectionItemResults> itemResults = equipmentProvider.findEquipmentInspectionItemResultsByLogId(dto.getId());
+
+		List<InspectionItemResult> results = new ArrayList<>();
+		if (itemResults != null && itemResults.size() > 0) {
+            results = itemResults.stream()
+                    .map(result -> ConvertHelper.convert(result, InspectionItemResult.class))
+                    .collect(Collectors.toList());
+            //兼容上一版 只有在result表中才有equipmentId
+            EquipmentInspectionEquipments equipment = new EquipmentInspectionEquipments();
+            if (log.getEquipmentId() != null && log.getEquipmentId() != 0) {
+                equipment = equipmentProvider.findEquipmentById(log.getEquipmentId());
+            } else {
+                equipment = equipmentProvider.findEquipmentById(itemResults.get(0).getEquipmentId());
+            }
+            if (equipment != null){
+                dto.setEquipmentName(equipment.getName());
+                dto.setEquipmentLocation(equipment.getLocation());
+            }
+        }
+		dto.setItemResults(results);
+	}
+
+	private void populateTaskType(EquipmentInspectionTasks task, ListLogsByTaskIdResponse response) {
+		//兼容之前的通过标准来拿任务类型
+		if (task.getPlanId() != null && task.getPlanId() != 0) {
+			EquipmentInspectionPlans plan = equipmentProvider.getEquipmmentInspectionPlanById(task.getPlanId());
+			if (plan != null) {
+				response.setTaskType(plan.getPlanType());
+			}
+		} else {
+			EquipmentInspectionStandards standard = equipmentProvider.findStandardById(task.getStandardId());
+			if (standard != null) {
+				response.setTaskType(standard.getStandardType());
+			}
+		}
 	}
 
 	@Override
@@ -5816,6 +5874,8 @@ private void checkUserPrivilege(Long orgId, Long privilegeId, Long communityId) 
 		tasksLog.setNamespaceId(cmd.getNamespaceId());
 		tasksLog.setTaskId(cmd.getTaskId());
 		tasksLog.setProcessType(EquipmentTaskProcessType.NEED_MAINTENANCE.getCode());//提交给报修
+		tasksLog.setProcessMessage(cmd.getContent());
+		tasksLog.setMaintanceType(cmd.getMaintanceType());
 		tasksLog.setProcessResult(EquipmentTaskProcessResult.NONE.getCode());
 
 		dbProvider.execute((TransactionStatus status) -> {
@@ -5830,22 +5890,7 @@ private void checkUserPrivilege(Long orgId, Long privilegeId, Long communityId) 
 			repairCommand.setReferType(EquipmentConstant.EQUIPMENT_REPAIR);
 			repairCommand.setTaskCategoryId(6L);
 			ListTaskCategoriesCommand categoriesCommand = new ListTaskCategoriesCommand();
-			categoriesCommand.setPageSize(Integer.MAX_VALUE -1);
-			ListTaskCategoriesResponse categories = pmTaskService.listTaskCategories(categoriesCommand);
-
-			if (categories != null && categories.getRequests().size() > 0) {
-				List<Long> categodyIds = categories.getRequests().stream().map((r) -> {
-					if (r.getName().contains("物业报修")) {
-						return r.getId();
-					}
-					return null;
-				}).collect(Collectors.toList());
-				repairCommand.setCategoryId(categodyIds.get(0));
-			} else {
-				throw RuntimeErrorException.errorWith(EquipmentServiceErrorCode.SCOPE,
-						EquipmentServiceErrorCode.ERROR_EQUIPMENT_REPAIR_CATEGORY_NOT_EXIST, "equipment repair category id not exist!");
-			}
-
+			categoriesCommand.setPageSize(Integer.MAX_VALUE - 1);
 			List<OrganizationMember> members = organizationProvider.listOrganizationMembersByUId(UserContext.currentUserId());
 			if (members != null && members.size() > 0) {
 				repairCommand.setRequestorName(members.get(0).getContactName());

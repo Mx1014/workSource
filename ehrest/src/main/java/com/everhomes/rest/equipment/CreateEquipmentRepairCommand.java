@@ -13,6 +13,9 @@ import java.util.List;
  * <li>ownerType:ownerType</li>
  * <li>ownerId:ownerId</li>
  * <li>content:内容</li>
+ * <li>categoryId:子类型id</li>
+ * <li>taskCategoryId:任务类型</li>
+ * <li>maintanceType:任务类型名称</li>
  * <li>namespaceId:namespaceId</li>
  * <li>attachments:附件{@link com.everhomes.rest.pmtask.AttachmentDescriptor}</li>
  * </ul>
@@ -32,6 +35,7 @@ public class CreateEquipmentRepairCommand {
     private Long organizationId;
     private Integer namespaceId;
     private Long taskCategoryId;
+    private String maintanceType;
     @ItemType(AttachmentDescriptor.class)
     private List<AttachmentDescriptor> attachments;
 
@@ -121,6 +125,14 @@ public class CreateEquipmentRepairCommand {
 
     public void setTaskCategoryId(Long taskCategoryId) {
         this.taskCategoryId = taskCategoryId;
+    }
+
+    public String getMaintanceType() {
+        return maintanceType;
+    }
+
+    public void setMaintanceType(String maintanceType) {
+        this.maintanceType = maintanceType;
     }
 
     @Override
