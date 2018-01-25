@@ -1,8 +1,11 @@
 // @formatter:off
 package com.everhomes.portal;
 
+import com.everhomes.bootstrap.PlatformContext;
 import com.everhomes.constants.ErrorCodes;
 import com.everhomes.rest.portal.*;
+import com.everhomes.user.UserContext;
+import com.everhomes.user.admin.SystemUserPrivilegeMgr;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RestController;
@@ -511,11 +514,11 @@ public class PortalController extends ControllerBase {
 	}
 
 	/**
-	 * <p>>创建预览版本用户</p>
-	 * <b>URL: /portal/createPortalVersionUser</b>
+	 * <p>更新预览版本用户</p>
+	 * <b>URL: /portal/updatePortalVersionUser</b>
 	 */
-	@RequestMapping("createPortalVersionUser")
-	@RestReturn(PortalVersionUserDTO.class)
+	@RequestMapping("updatePortalVersionUser")
+	@RestReturn(String.class)
 	public RestResponse updatePortalVersionUser(UpdatePortalVersionUsersCommand cmd){
 		portalService.updatePortalVersionUsers(cmd);
 		RestResponse response = new RestResponse();
@@ -534,6 +537,23 @@ public class PortalController extends ControllerBase {
 	public RestResponse listPortalVersionUsers(ListPortalVersionUsersCommand cmd){
 		ListPortalVersionUsersResponse res = portalService.listPortalVersionUsers(cmd);
 		RestResponse response = new RestResponse(res);
+		response.setErrorCode(ErrorCodes.SUCCESS);
+		response.setErrorDescription("OK");
+		return response;
+	}
+
+	/**
+	 * <p>小版本回滚</p>
+	 * <b>URL: /portal/revertVersion</b>
+	 */
+	@RequestMapping("revertVersion")
+	@RestReturn(String.class)
+	public RestResponse revertVersion(RevertVersionCommand cmd){
+		SystemUserPrivilegeMgr resolver = PlatformContext.getComponent("SystemUser");
+		resolver.checkUserPrivilege(UserContext.current().getUser().getId(), 0);
+
+		portalService.revertVersion(cmd);
+		RestResponse response = new RestResponse();
 		response.setErrorCode(ErrorCodes.SUCCESS);
 		response.setErrorDescription("OK");
 		return response;

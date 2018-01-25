@@ -131,4 +131,5 @@ public interface PortalService {
 
 	ListPortalVersionUsersResponse listPortalVersionUsers(ListPortalVersionUsersCommand cmd);
 
+    void revertVersion(RevertVersionCommand cmd);
 }

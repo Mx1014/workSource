@@ -2744,31 +2744,41 @@ public class PortalServiceImpl implements PortalService {
 		return response;
 	}
 
+	@Override
+	public void revertVersion(RevertVersionCommand cmd){
 
-//	public void revertVersion(Long versionId){
+		PortalVersion portalversin = portalVersionProvider.findPortalVersionById(cmd.getId());
+
+		//大本版不能回滚
+		if(portalversin.getMinorVersion().intValue() != 0){
+			deleteVersion(cmd.getId());
+			copyPortalToNewMinorVersion(portalversin.getNamespaceId(), portalversin.getParentId());
+		}
+
+	}
 //
 //
-//
-//
-//
-//	}
-//
-//
-//	public void deleteVersion(Long versionId){
-////		delete from `eh_portal_content_scopes`;
-////		delete from `eh_portal_item_categories`;
-////		delete from `eh_portal_item_groups`;
-////		delete from `eh_portal_items`;
-////		delete from `eh_portal_launch_pad_mappings`;
-////		delete from `eh_portal_layouts`;
-////		delete from `eh_service_module_apps`;
-////		delete from `eh_portal_versions`;
-////		delete from `eh_portal_version_users`;
-//
-//
-//		portalContentScopeProvider.deletePortalContentScopeById();
-//
-//
-//	}
+	public void deleteVersion(Long versionId){
+//		delete from `eh_portal_content_scopes`;
+//		delete from `eh_portal_item_categories`;
+//		delete from `eh_portal_item_groups`;
+//		delete from `eh_portal_items`;
+//		delete from `eh_portal_launch_pad_mappings`;
+//		delete from `eh_portal_layouts`;
+//		delete from `eh_service_module_apps`;
+//		delete from `eh_portal_versions`;
+//		delete from `eh_portal_version_users`;
+
+		serviceModuleAppProvider.deleteByVersionId(versionId);
+		portalLayoutProvider.deleteByVersionId(versionId);
+		portalItemGroupProvider.deleteByVersionId(versionId);
+		portalItemCategoryProvider.deleteByVersionId(versionId);
+		portalItemProvider.deleteByVersionId(versionId);
+		portalContentScopeProvider.deleteByVersionId(versionId);
+		portalLaunchPadMappingProvider.deleteByVersionId(versionId);
+		portalVersionProvider.deleteById(versionId);
+		portalVersionUserProvider.deleteByVersionId(versionId);
+
+	}
 
 }

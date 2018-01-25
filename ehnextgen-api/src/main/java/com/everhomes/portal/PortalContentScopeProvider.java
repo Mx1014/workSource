@@ -15,7 +15,9 @@ public interface PortalContentScopeProvider {
 
 	void createPortalContentScopes(List<PortalContentScope> portalContentScopes);
 
-	void deletePortalContentScopes(String contentType, Long contentId);
+    void deleteByVersionId(Long versionId);
+
+    void deletePortalContentScopes(String contentType, Long contentId);
 
 	void deletePortalContentScopeById(Long id);
 
