@@ -291,3 +291,38 @@ INSERT INTO `eh_salary_default_entities` (`id`, `editable_flag`, `delete_flag`, 
 INSERT INTO `eh_salary_default_entities` (`id`, `editable_flag`, `delete_flag`, `type`, `data_policy`, `grant_policy`, `tax_policy`, `category_id`, `category_name`, `name`, `description`, `status`) VALUES('40','1','0','2','1',NULL,NULL,'6','成本项','其他企业成本',NULL,'0');
 INSERT INTO `eh_salary_default_entities` (`id`, `editable_flag`, `delete_flag`, `type`, `data_policy`, `grant_policy`, `tax_policy`, `category_id`, `category_name`, `name`, `description`, `status`) VALUES('41','1','0','3','1',NULL,NULL,'7','其他','备注',NULL,'1');
 
+
+
+
+-- 文档图标 add by nan.rong 01/25/2018
+
+INSERT INTO `eh_file_icons` (`id`, `file_type`, `icon_name`, `icon_uri`, `create_time`) VALUES ('1', 'category', 'category.png', 'cs://1/image/aW1hZ2UvTVRvNFpUaG1ZelZoWTJZd1pHSXlOalJtT0RZek1tTTBObVE1TXpaaU1qbGlOUQ', '2018-01-18 20:32:44');
+INSERT INTO `eh_file_icons` (`id`, `file_type`, `icon_name`, `icon_uri`, `create_time`) VALUES ('2', 'folder', 'folder.png', 'cs://1/image/aW1hZ2UvTVRveVpUUXdOemhsTmpBME5UQTNZVFExT0dWak9UaG1OV0kzWW1Rek1qbGtOQQ', '2018-01-18 20:32:44');
+INSERT INTO `eh_file_icons` (`id`, `file_type`, `icon_name`, `icon_uri`, `create_time`) VALUES ('3', 'rar', 'package.png', 'cs://1/image/aW1hZ2UvTVRvME4yUTBNemt6WkdZeU1HSXdNamxoWm1FNU16RTRNMk15T1dVMU1UWmhaZw', '2018-01-18 20:25:54');
+INSERT INTO `eh_file_icons` (`id`, `file_type`, `icon_name`, `icon_uri`, `create_time`) VALUES ('4', 'zip', 'package.png', 'cs://1/image/aW1hZ2UvTVRvME4yUTBNemt6WkdZeU1HSXdNamxoWm1FNU16RTRNMk15T1dVMU1UWmhaZw', '2018-01-18 20:25:54');
+INSERT INTO `eh_file_icons` (`id`, `file_type`, `icon_name`, `icon_uri`, `create_time`) VALUES ('5', 'tar', 'package.png', 'cs://1/image/aW1hZ2UvTVRvME4yUTBNemt6WkdZeU1HSXdNamxoWm1FNU16RTRNMk15T1dVMU1UWmhaZw', '2018-01-18 20:25:54');
+INSERT INTO `eh_file_icons` (`id`, `file_type`, `icon_name`, `icon_uri`, `create_time`) VALUES ('6', 'bz2', 'package.png', 'cs://1/image/aW1hZ2UvTVRvME4yUTBNemt6WkdZeU1HSXdNamxoWm1FNU16RTRNMk15T1dVMU1UWmhaZw', '2018-01-18 20:25:54');
+INSERT INTO `eh_file_icons` (`id`, `file_type`, `icon_name`, `icon_uri`, `create_time`) VALUES ('7', 'gz', 'package.png', 'cs://1/image/aW1hZ2UvTVRvME4yUTBNemt6WkdZeU1HSXdNamxoWm1FNU16RTRNMk15T1dVMU1UWmhaZw', '2018-01-18 20:25:54');
+INSERT INTO `eh_file_icons` (`id`, `file_type`, `icon_name`, `icon_uri`, `create_time`) VALUES ('8', '7z', 'package.png', 'cs://1/image/aW1hZ2UvTVRvME4yUTBNemt6WkdZeU1HSXdNamxoWm1FNU16RTRNMk15T1dVMU1UWmhaZw', '2018-01-18 20:25:54');
+INSERT INTO `eh_file_icons` (`id`, `file_type`, `icon_name`, `icon_uri`, `create_time`) VALUES ('9', 'doc', 'word.png', 'cs://1/image/aW1hZ2UvTVRvMk56TmlPRGsxTkRjMk9XUmlaVGc0TkRreE1HRTROams0T0RGaU9UZGtOUQ', '2018-01-18 20:27:54');
+INSERT INTO `eh_file_icons` (`id`, `file_type`, `icon_name`, `icon_uri`, `create_time`) VALUES ('10', 'docx', 'word.png', 'cs://1/image/aW1hZ2UvTVRvMk56TmlPRGsxTkRjMk9XUmlaVGc0TkRreE1HRTROams0T0RGaU9UZGtOUQ', '2018-01-18 20:27:54');
+INSERT INTO `eh_file_icons` (`id`, `file_type`, `icon_name`, `icon_uri`, `create_time`) VALUES ('11', 'pages', 'pages.png', 'cs://1/image/aW1hZ2UvTVRvNE1ETmhNR1ExTWpsa01qSTFNak5rTXpVNVl6TTVOR1ZoTmpCbFlUVmlaQQ', '2018-01-18 20:27:54');
+INSERT INTO `eh_file_icons` (`id`, `file_type`, `icon_name`, `icon_uri`, `create_time`) VALUES ('12', 'ppt', 'ppt.png', 'cs://1/image/aW1hZ2UvTVRwbE1EVXlZMlJpTURoak1UTTNaalU1WXpnMVpqaGpNRGhtWkRRNU5qWTFNUQ', '2018-01-18 20:28:27');
+INSERT INTO `eh_file_icons` (`id`, `file_type`, `icon_name`, `icon_uri`, `create_time`) VALUES ('13', 'pptx', 'ppt.png', 'cs://1/image/aW1hZ2UvTVRwbE1EVXlZMlJpTURoak1UTTNaalU1WXpnMVpqaGpNRGhtWkRRNU5qWTFNUQ', '2018-01-18 20:28:27');
+INSERT INTO `eh_file_icons` (`id`, `file_type`, `icon_name`, `icon_uri`, `create_time`) VALUES ('14', 'key', 'key.png', 'cs://1/image/aW1hZ2UvTVRvMU16YzVPR1l6WVdGbE56bGlNMlkyWlRFMk1UbGtNVGM0TnpVNE1qZzVNZw', '2018-01-18 20:28:27');
+INSERT INTO `eh_file_icons` (`id`, `file_type`, `icon_name`, `icon_uri`, `create_time`) VALUES ('15', 'xls', 'excel.png', 'cs://1/image/aW1hZ2UvTVRwbU1Ua3lNalkxWW1ReU1EZGpNVGt4WVdNMk5XSXdZalU1TVdOaU1UUTVZdw', '2018-01-18 20:28:27');
+INSERT INTO `eh_file_icons` (`id`, `file_type`, `icon_name`, `icon_uri`, `create_time`) VALUES ('16', 'xlsx', 'excel.png', 'cs://1/image/aW1hZ2UvTVRwbU1Ua3lNalkxWW1ReU1EZGpNVGt4WVdNMk5XSXdZalU1TVdOaU1UUTVZdw', '2018-01-18 20:28:27');
+INSERT INTO `eh_file_icons` (`id`, `file_type`, `icon_name`, `icon_uri`, `create_time`) VALUES ('17', 'numbers', 'number.png', 'cs://1/image/aW1hZ2UvTVRwbVpEQXhOakkzT0RJMk5qSTVNV0ZtTnpsa01XUXpNbVZoWWpkaVlXWXlOdw', '2018-01-18 20:28:27');
+INSERT INTO `eh_file_icons` (`id`, `file_type`, `icon_name`, `icon_uri`, `create_time`) VALUES ('18', 'pdf', 'pdf.png', 'cs://1/image/aW1hZ2UvTVRvMFptSmhOemxsTVRreVl6VTBNRFUyWVdObU5qUXpPVFEzWXpjNFpUSTROUQ', '2018-01-18 20:30:44');
+INSERT INTO `eh_file_icons` (`id`, `file_type`, `icon_name`, `icon_uri`, `create_time`) VALUES ('19', 'txt', 'txt.png', 'cs://1/image/aW1hZ2UvTVRwalpEZzRZV0ppT1RabE0ySTVaREkxTmpRek1HWTJaVEE1T1RBNE9HWTVOdw', '2018-01-18 20:30:44');
+INSERT INTO `eh_file_icons` (`id`, `file_type`, `icon_name`, `icon_uri`, `create_time`) VALUES ('20', 'rtf', 'rtf.png', 'cs://1/image/aW1hZ2UvTVRwa05UTXpNalZsWXpnek1qaGhNV1JtWXpZeU5qWTRZelJoWXpsbE1qVTFOQQ', '2018-01-18 20:30:44');
+INSERT INTO `eh_file_icons` (`id`, `file_type`, `icon_name`, `icon_uri`, `create_time`) VALUES ('21', 'png', 'image.png', 'cs://1/image/aW1hZ2UvTVRveE56VTBOR0kwWW1JNFltVm1ZV1U0T0Rsak1EWTVaVFU0WVdRd05qVXlNdw', '2018-01-18 20:30:44');
+INSERT INTO `eh_file_icons` (`id`, `file_type`, `icon_name`, `icon_uri`, `create_time`) VALUES ('22', 'jpg', 'image.png', 'cs://1/image/aW1hZ2UvTVRveE56VTBOR0kwWW1JNFltVm1ZV1U0T0Rsak1EWTVaVFU0WVdRd05qVXlNdw', '2018-01-18 20:30:44');
+INSERT INTO `eh_file_icons` (`id`, `file_type`, `icon_name`, `icon_uri`, `create_time`) VALUES ('23', 'jpeg', 'image.png', 'cs://1/image/aW1hZ2UvTVRveE56VTBOR0kwWW1JNFltVm1ZV1U0T0Rsak1EWTVaVFU0WVdRd05qVXlNdw', '2018-01-18 20:30:44');
+INSERT INTO `eh_file_icons` (`id`, `file_type`, `icon_name`, `icon_uri`, `create_time`) VALUES ('24', 'gif', 'image.png', 'cs://1/image/aW1hZ2UvTVRveE56VTBOR0kwWW1JNFltVm1ZV1U0T0Rsak1EWTVaVFU0WVdRd05qVXlNdw', '2018-01-18 20:30:44');
+INSERT INTO `eh_file_icons` (`id`, `file_type`, `icon_name`, `icon_uri`, `create_time`) VALUES ('25', 'mp3', 'music.png', 'cs://1/image/aW1hZ2UvTVRvMk5tRXdaVEF6Wm1Ka1lUazRNMk5oTnpVd1l6bGlZVFJrWmpVM05XWTRPUQ', '2018-01-18 20:32:44');
+INSERT INTO `eh_file_icons` (`id`, `file_type`, `icon_name`, `icon_uri`, `create_time`) VALUES ('26', 'mp4', 'moive.png', 'cs://1/image/aW1hZ2UvTVRvd1l6VXhaak0zWVdZNE0ySTRNelJtWW1KaU1qRmpaRFk1TjJGaU16SmhPQQ', '2018-01-18 20:32:44');
+INSERT INTO `eh_file_icons` (`id`, `file_type`, `icon_name`, `icon_uri`, `create_time`) VALUES ('27', 'mov', 'moive.png', 'cs://1/image/aW1hZ2UvTVRvd1l6VXhaak0zWVdZNE0ySTRNelJtWW1KaU1qRmpaRFk1TjJGaU16SmhPQQ', '2018-01-18 20:32:44');
+INSERT INTO `eh_file_icons` (`id`, `file_type`, `icon_name`, `icon_uri`, `create_time`) VALUES ('28', 'other', 'other.png', 'cs://1/image/aW1hZ2UvTVRveU5EQXpaakU1TXpObU1UVXhZbU15TnpNeU9EZzJPR0l6WlRKaFlqazFZZw', '2018-01-18 20:32:44');
+
+-- end by nan.rong

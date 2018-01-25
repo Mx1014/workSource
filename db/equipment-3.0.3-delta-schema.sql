@@ -81,6 +81,8 @@ ALTER TABLE `eh_equipment_inspection_task_logs`
   ADD COLUMN `maintance_type`  varchar(255) NULL DEFAULT '';
 ALTER TABLE `eh_equipment_inspection_task_logs`
   ADD COLUMN `flow_case_id`  bigint(20) NULL AFTER `equipment_id`;
+ALTER TABLE `eh_equipment_inspection_task_logs`
+  ADD COLUMN `maintance_status` tinyint(4) NOT NULL DEFAULT '0' COMMENT '0: inactive 1: wating, 2: allocated 3: completed 4: closed';
 
 CREATE TABLE `eh_equipment_inspection_equipment_logs` (
   `id` bigint(20) NOT NULL COMMENT 'id',

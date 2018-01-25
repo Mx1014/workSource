@@ -72,20 +72,15 @@ private static final Logger LOGGER = LoggerFactory.getLogger(EquipmentInspection
 		}
 
 		List<EquipmentInspectionPlans> plans = equipmentProvider.listQualifiedEquipmentInspectionPlans();
-		System.out.println(plans);
 		if (plans != null && plans.size() > 0) {
+			LOGGER.info("createTaskByPlan.....plan size = {}"+plans.size());
 			for (EquipmentInspectionPlans plan : plans) {
-				//dbProvider.execute((TransactionStatus status) -> {
 				if (checkPlanRepeat(plan)) {
-					//不需要校验 展示的时候过滤即可
 					LOGGER.info("EquipmentInspectionScheduleJob: createEquipmentTaskByPlan.");
 					equipmentService.createEquipmentTaskByPlan(plan);
 					plan.setLastCreateTasktime(new Timestamp(DateHelper.currentGMTTime().getTime()));
 					equipmentProvider.updateEquipmentInspectionPlan(plan);
 				}
-//						return null;
-//					});
-
 			}
 		}
 	}
