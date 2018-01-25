@@ -1621,7 +1621,7 @@ public class EquipmentProviderImpl implements EquipmentProvider {
             return null;
         });
         LOGGER.info("listQualifiedEquipmentInspectionPlans" + query.getSQL());
-        LOGGER.info("plans.size()" + plans.size());
+        LOGGER.info("plans.size()={}" + plans.size());
 
         return plans;
     }
