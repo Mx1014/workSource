@@ -3653,6 +3653,9 @@ public class AssetProviderImpl implements AssetProvider {
                 .where(Tables.EH_PAYMENT_SERVICE_CONFIGS.NAMESPACE_ID.eq(namespaceId))
                 .and(Tables.EH_PAYMENT_SERVICE_CONFIGS.NAME.eq("物业缴费"))
                 .fetchInto(PaymentServiceConfig.class);
+        if(configs == null || configs.size() < 1){
+            return null;
+        }
         return configs.get(0);
     }
 

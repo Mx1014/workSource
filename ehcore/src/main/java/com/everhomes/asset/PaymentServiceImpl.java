@@ -66,7 +66,10 @@ public class PaymentServiceImpl implements PaymentService {
         //如果是物业缴费这方面，由于是多个orderType，用域空间筛选下，如果该域空间下没有配置新支付，则直接返回
         if(cmd.getOrderType()!=null && (cmd.getOrderType().equals(OrderType.OrderTypeEnum.WUYE_CODE.getPycode()) || cmd.getOrderType().equals(OrderType.OrderTypeEnum.ZJGK_RENTAL_CODE.getPycode())))
         {
-            cmd.setOrderType(getRealOrderType(cmd.getNamespaceId()));
+            String realOrderType = getRealOrderType(cmd.getNamespaceId());
+            //没有拿到orderType，直接返回
+            if(realOrderType == null ) return new ListPaymentBillResp(cmd.getPageAnchor(), cmd.getPageSize());
+            cmd.setOrderType(realOrderType);
             if(cmd.getOrderType()==null) return new ListPaymentBillResp(cmd.getPageAnchor(), cmd.getPageSize());
         }
         if (cmd.getPageSize() == null) {
@@ -103,6 +106,7 @@ public class PaymentServiceImpl implements PaymentService {
 
     private String getRealOrderType(Integer namespaceId) {
         PaymentServiceConfig config = assetProvider.findServiceConfig(namespaceId);
+        if(config == null) return null;
         return config.getOrderType();
     }
 
