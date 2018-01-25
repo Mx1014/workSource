@@ -495,9 +495,9 @@ public class EbeiThirdPartContractHandler implements ThirdPartContractHandler {
 
     private void insertOrUpdateOrganizationAddresses(List<EbeiContractRoomInfo> apartmentIdentifier, EnterpriseCustomer customer){
         List<OrganizationAddress> myOrganizationAddressList = organizationProvider.listOrganizationAddressByOrganizationId(customer.getOrganizationId());
-        List<EbeiContractRoomInfo> apartments = apartmentIdentifier;
+        List<EbeiContractRoomInfo> apartments = apartmentIdentifier.stream().collect(Collectors.toList());
         LOGGER.debug("insertOrUpdateOrganizationAddresses customer: {}, myOrganizationAddressList: {}, apartments: {}",
-                customer.getName(), StringHelper.toJsonString(myOrganizationAddressList), StringHelper.toJsonString(apartmentIdentifier));
+                customer.getName(), StringHelper.toJsonString(myOrganizationAddressList), StringHelper.toJsonString(apartments));
         for (OrganizationAddress organizationAddress : myOrganizationAddressList) {
             Address address = addressProvider.findAddressById(organizationAddress.getAddressId());
             if (address != null && address.getNamespaceAddressType() != null && address.getNamespaceAddressToken() != null) {
