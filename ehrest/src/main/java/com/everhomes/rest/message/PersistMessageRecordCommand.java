@@ -8,6 +8,9 @@ public class PersistMessageRecordCommand {
 
     private String sessionToken;
 
+    private String deviceId;
+
+
     public String getMessageRecordDto() {
         return messageRecordDto;
     }
@@ -28,5 +31,13 @@ public class PersistMessageRecordCommand {
 
     public void setSessionToken(String sessionToken) {
         this.sessionToken = sessionToken;
+    }
+
+    public String getDeviceId() {
+        return deviceId;
+    }
+
+    public void setDeviceId(String deviceId) {
+        this.deviceId = deviceId;
     }
 }

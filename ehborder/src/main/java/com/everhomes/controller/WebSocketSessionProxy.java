@@ -4,6 +4,7 @@ import com.everhomes.rest.message.MessageRecordDto;
 
 import com.everhomes.rest.message.MessageRecordStatus;
 import com.everhomes.util.SignatureHelper;
+import com.everhomes.util.StringHelper;
 import org.slf4j.LoggerFactory;
 import org.springframework.http.*;
 import org.springframework.scheduling.annotation.Scheduled;
@@ -49,15 +50,33 @@ public class WebSocketSessionProxy {
         }
     }
 
-    public static void sendMessage(WebSocketSession session, WebSocketMessage message, String senderTag, String sessionToken) {
+    public static void sendMessage(WebSocketSession session, WebSocketMessage message, String senderTag, String token) {
         MessageRecordDto dto = new MessageRecordDto();
         dto.setBody(message.getPayload().toString());
         dto.setStatus(MessageRecordStatus.BORDER_ROUTE.getCode());
         dto.setSenderTag(senderTag);
-        dto.setSessionToken(sessionToken);
-        LOGGER.debug(session.toString());
-        LOGGER.debug(message.toString());
+
+        switch (token){
+            case "NOTIFY REQUEST":
+                Map actionData = (Map)StringHelper.fromJsonString(message.getPayload().toString(), Map.class);
+                dto.setDstChannelType(actionData.get("dstChannel").toString());
+                dto.setDstChannelToken(actionData.get("dstChannelId").toString());
+                dto.setSenderUid(Long.valueOf(actionData.get("senderUid").toString()));
+                dto.setDeviceId(token);
+                break;
+
+            case "NOTIFY EVENT":
+                dto.setDeviceId(token);
+                break;
+
+            default:
+                dto.setSessionToken(token);
+                break;
+        }
+
+        // 提交队列
         queue.offer(dto);
+
         try {
             synchronized (session) {
                 session.sendMessage(message);
@@ -74,6 +93,7 @@ public class WebSocketSessionProxy {
         Map<String, String> params = new HashMap<>();
         params.put("messageRecordDto", record.toString());
         params.put("sessionToken", record.getSessionToken());
+        params.put("deviceId", record.getDeviceId());
 
         this.restCall("/message/persistMessage", params, new ListenableFutureCallback<ResponseEntity<String>>() {
 

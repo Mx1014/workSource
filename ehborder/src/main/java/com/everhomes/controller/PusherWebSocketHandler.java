@@ -329,7 +329,7 @@ public class PusherWebSocketHandler extends TextWebSocketHandler {
                     PduFrame pdu = new PduFrame();
                     pdu.setName("MESSAGES");
                     pdu.setPayLoadForString(result.getBody());
-                    WebSocketSessionProxy.sendMessage(session, new TextMessage(pdu.getEncodedPayload()), "NOTIFY REQUEST", "");
+                    WebSocketSessionProxy.sendMessage(session, new TextMessage(pdu.getEncodedPayload()), "NOTIFY REQUEST", dev.getDeviceId());
 //                    try {
 //                        synchronized(session) {
 //                            session.sendMessage(new TextMessage(pdu.getEncodedPayload()));
@@ -399,7 +399,7 @@ public class PusherWebSocketHandler extends TextWebSocketHandler {
             resp.setContent("notify");
             PduFrame pdu = new PduFrame();
             pdu.setPayload(resp);
-            WebSocketSessionProxy.sendMessage(clientSession, new TextMessage(pdu.toJson()), "NOTIFY EVENT", "");
+            WebSocketSessionProxy.sendMessage(clientSession, new TextMessage(pdu.toJson()), "NOTIFY EVENT", deviceId);
 
 //            try {
 //                synchronized(clientSession) {
