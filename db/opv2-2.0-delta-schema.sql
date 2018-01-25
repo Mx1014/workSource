@@ -132,9 +132,11 @@ ALTER TABLE `eh_equipment_inspection_standards`
   ADD COLUMN `repeat_type` TINYINT(4) NOT NULL COMMENT ' 0: no repeat, 1: by day, 2: by week, 3: by month, 4: by year';
 -- 操作记录表增加设备id表
 ALTER TABLE `eh_equipment_inspection_task_logs`
-  ADD COLUMN `equipment_id`  BIGINT(20) NULL DEFAULT 0 ;
+  ADD COLUMN `equipment_id`  bigint(20) NULL DEFAULT 0 ;
 ALTER TABLE `eh_equipment_inspection_task_logs`
-  ADD COLUMN `flow_case_id`  BIGINT(20) NULL AFTER `equipment_id`;
+  ADD COLUMN `maintance_type`  varchar(255) NULL DEFAULT '';
+ALTER TABLE `eh_equipment_inspection_task_logs`
+  ADD COLUMN `flow_case_id`  bigint(20) NULL AFTER `equipment_id`;
 
 -- 离线支持  jiarui
 ALTER TABLE `eh_quality_inspection_specifications`
