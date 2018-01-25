@@ -73,6 +73,7 @@ import com.everhomes.rest.app.AppConstants;
 import com.everhomes.rest.asset.TargetDTO;
 import com.everhomes.rest.business.ShopDTO;
 import com.everhomes.rest.community.CommunityType;
+import com.everhomes.rest.contentserver.CsFileLocationDTO;
 import com.everhomes.rest.energy.util.ParamErrorCodes;
 import com.everhomes.rest.family.FamilyDTO;
 import com.everhomes.rest.family.FamilyMemberFullDTO;
@@ -3767,6 +3768,13 @@ public class UserServiceImpl implements UserService {
 		String namespaceUserToken = user.getNamespaceUserToken();
 		List<User> userList = userProvider.findThirdparkUserByTokenAndType(namespaceId, namespaceUserType, namespaceUserToken);
 		if(userList == null || userList.size() == 0) {
+
+			//将微信头像下载下来
+			CsFileLocationDTO fileLocationDTO = contentServerService.uploadFileByUrl("avatar", user.getAvatar());
+			if(fileLocationDTO != null && fileLocationDTO.getUri() != null){
+				user.setAvatar(fileLocationDTO.getUri());
+			}
+
 			userProvider.createUser(user);
 
 			//设定默认园区  add by  yanjun 20170915
@@ -3774,10 +3782,6 @@ public class UserServiceImpl implements UserService {
 
 			return true;
 		} else {
-			userList.get(0).setAvatar(user.getAvatar());
-			userList.get(0).setNickName(user.getNickName());
-
-			userProvider.updateUser(userList.get(0));
 			LOGGER.warn("User already existed, namespaceId={}, userType={}, userToken={}", namespaceId, namespaceUserType, namespaceUserToken);
 			return false;
 		}

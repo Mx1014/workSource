@@ -9,7 +9,9 @@ import com.everhomes.rest.contentserver.*;
 import com.everhomes.rest.contentserver.WebSocketConstant;
 import com.everhomes.rest.messaging.ImageBody;
 import com.everhomes.rest.rpc.PduFrame;
+import com.everhomes.user.User;
 import com.everhomes.user.UserContext;
+import com.everhomes.user.UserLogin;
 import com.everhomes.util.*;
 import org.apache.commons.collections.CollectionUtils;
 import org.apache.commons.io.FilenameUtils;
@@ -34,6 +36,9 @@ import org.springframework.web.multipart.MultipartFile;
 
 import javax.annotation.PostConstruct;
 import javax.annotation.PreDestroy;
+import java.io.IOException;
+import java.net.HttpURLConnection;
+import java.net.URL;
 import java.net.URLEncoder;
 import java.io.InputStream;
 import java.util.ArrayList;
@@ -853,4 +858,40 @@ public class ContentServerServiceImpl implements ContentServerService {
         
         return "ok";
     }
+
+
+    @Override
+    public CsFileLocationDTO uploadFileByUrl(String fileName, String url) {
+        InputStream inputStream = getInputStreamByGet(url);
+        if(inputStream == null){
+            return null;
+        }
+
+        UserLogin userLogin = User.SYSTEM_USER_LOGIN;
+        String token = WebTokenGenerator.getInstance().toWebToken(userLogin.getLoginToken());
+        UploadCsFileResponse re = uploadFileToContentServer(inputStream, fileName, token);
+        CsFileLocationDTO dto = re.getResponse();
+        return dto;
+    }
+
+
+    private InputStream getInputStreamByGet(String url) {
+        try {
+            HttpURLConnection conn = (HttpURLConnection) new URL(url)
+                    .openConnection();
+            conn.setReadTimeout(5000);
+            conn.setConnectTimeout(5000);
+            conn.setRequestMethod("GET");
+
+            if (conn.getResponseCode() == HttpURLConnection.HTTP_OK) {
+                InputStream inputStream = conn.getInputStream();
+                return inputStream;
+            }
+
+        } catch (IOException e) {
+            e.printStackTrace();
+        }
+        return null;
+    }
+
 }
