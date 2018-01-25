@@ -46,7 +46,8 @@ CREATE TABLE `eh_file_management_contents` (
   `create_time` DATETIME,
   `operator_uid` BIGINT,
   `update_time` DATETIME,
-  PRIMARY KEY (`id`)
+  PRIMARY KEY (`id`),
+  KEY `file_management_contents_path` (`path`)
 ) ENGINE = INNODB DEFAULT CHARSET = utf8mb4 ;
 
 -- DROP TABLE eh_file_icons;
