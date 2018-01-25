@@ -17,7 +17,6 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
 
 import java.sql.Timestamp;
-import java.time.*;
 import java.time.LocalDate;
 import java.time.LocalDateTime;
 import java.time.LocalTime;
@@ -94,8 +93,7 @@ public class GeneralPointEventProcessor implements IGeneralPointEventProcessor {
         pointLog.setEventHappenTime(localEvent.getCreateTime());
 
         if (rule.getBindingRuleId() != null && rule.getBindingRuleId() != 0) {
-            PointLog bindingPointLog = pointLogProvider.findByRuleIdAndEntity(namespaceId, pointSystem.getId(), targetUid, rule.getBindingRuleId(),
-                    localEvent.getEntityType(), localEvent.getEntityId());
+            PointLog bindingPointLog = findEventBindingLog(localEvent, rule, pointSystem, targetUid, namespaceId);
             if (bindingPointLog == null) {
                 return null;
             }
@@ -103,6 +101,11 @@ public class GeneralPointEventProcessor implements IGeneralPointEventProcessor {
         processPointLog(pointLog, localEvent, rule, pointSystem, pointRuleCategory);
 
         return new PointEventProcessResult(points, pointLog);
+    }
+
+    protected PointLog findEventBindingLog(LocalEvent localEvent, PointRule rule, PointSystem pointSystem, Long targetUid, Integer namespaceId) {
+        return pointLogProvider.findByRuleIdAndEntity(namespaceId, pointSystem.getId(), targetUid, rule.getBindingRuleId(),
+                        localEvent.getEntityType(), localEvent.getEntityId());
     }
 
     protected void processPointLog(PointLog pointLog, LocalEvent localEvent, PointRule rule, PointSystem pointSystem, PointRuleCategory pointRuleCategory) {
