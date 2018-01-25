@@ -51,7 +51,7 @@ public class EnterpriseApplyBuildingController extends ControllerBase{
 
 	/**
 	 * <b>URL: /techpark/entry/listLeaseProjects</b>
-	 * <p>项目介绍列表
+	 * <p>项目介绍列表</p>
 	 */
 	@RequestMapping("listLeaseProjects")
 	@RestReturn(value=listLeaseProjectsResponse.class)
@@ -65,7 +65,7 @@ public class EnterpriseApplyBuildingController extends ControllerBase{
 
 	/**
 	 * <b>URL: /techpark/entry/updateLeaseProject</b>
-	 * <p>修改项目介绍
+	 * <p>修改项目介绍</p>
 	 */
 	@RequestMapping("updateLeaseProject")
 	@RestReturn(value=LeaseProjectDTO.class)
