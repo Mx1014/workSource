@@ -870,8 +870,11 @@ public class ContentServerServiceImpl implements ContentServerService {
         UserLogin userLogin = User.SYSTEM_USER_LOGIN;
         String token = WebTokenGenerator.getInstance().toWebToken(userLogin.getLoginToken());
         UploadCsFileResponse re = uploadFileToContentServer(inputStream, fileName, token);
-        CsFileLocationDTO dto = re.getResponse();
-        return dto;
+
+        if(re != null){
+            return re.getResponse();
+        }
+        return null;
     }
 
 

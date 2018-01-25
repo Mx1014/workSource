@@ -3770,7 +3770,7 @@ public class UserServiceImpl implements UserService {
 		if(userList == null || userList.size() == 0) {
 
 			//将微信头像下载下来
-			CsFileLocationDTO fileLocationDTO = contentServerService.uploadFileByUrl("avatar", user.getAvatar());
+			CsFileLocationDTO fileLocationDTO = contentServerService.uploadFileByUrl("avatar.jpg", user.getAvatar());
 			if(fileLocationDTO != null && fileLocationDTO.getUri() != null){
 				user.setAvatar(fileLocationDTO.getUri());
 			}
