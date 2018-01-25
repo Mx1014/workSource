@@ -501,7 +501,7 @@ public class EBeiAssetVendorHandler implements AssetVendorHandler {
 
     @Override
     public List<ListAllBillsForClientDTO> listAllBillsForClient(ListAllBillsForClientCommand cmd) {
-        TreeMap<Date,ListAllBillsForClientDTO> map = new TreeMap<>();
+        List<ListAllBillsForClientDTO> list = new ArrayList<>();
         SimpleDateFormat yyyyMM = new SimpleDateFormat("yyyy-MM");
         String endMonth = yyyyMM.format(new Date());
         GetLeaseContractBillOnFiPropertyRes res = keXingBillService.getAllFiPropertyBills(cmd.getNamespaceId(),cmd.getOwnerId(),cmd.getTargetId(),cmd.getTargetType(),null,null,endMonth);
@@ -523,16 +523,19 @@ public class EBeiAssetVendorHandler implements AssetVendorHandler {
             String chargePeriod = source.getChargePeriod();
             try {
                 Date parse = yyyyMM.parse(chargePeriod);
-                map.put(parse,dto);
+                dto.setDate(parse);
             } catch (ParseException e) {
                 LOGGER.error("2.2.4.15 response chargePeriod pattern incorrect, chargePeriod = {},request pattern is yyyyMM",chargePeriod);
-                map.put(null,dto);
             }
+            list.add(dto);
         }
         //按照时间降序排序
-
-        List<ListAllBillsForClientDTO> list = new ArrayList<>(map.values());
-        Collections.reverse(list);
+        Collections.sort(list, new Comparator<ListAllBillsForClientDTO>() {
+            @Override
+            public int compare(ListAllBillsForClientDTO o1, ListAllBillsForClientDTO o2) {
+                return o2.getDate().compareTo(o1.getDate());
+            }
+        });
         return list;
     }
 
