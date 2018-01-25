@@ -105,13 +105,12 @@ public class MessagingServiceImpl implements MessagingService {
                 dtoMessages.add(toMessageDto(r));
                 MessageRecordDto record = new MessageRecordDto();
                 record.setAppId(r.getAppId());
-                record.setNamespaceId(UserContext.getCurrentNamespaceId());
+                record.setNamespaceId(r.getNamespaceId());
                 record.setMessageSeq(r.getStoreSequence());
-                record.setSenderUid(UserContext.currentUserId());
+                record.setSenderUid(r.getSenderUid());
                 record.setSenderTag("FETCH PASTTORECENT MESSAGES");
-                record.setDstChannelType(ChannelType.USER.getCode());
-                record.setDstChannelToken(String.valueOf(UserContext.currentUserId()));
-    //                record.setChannelsInfo(r.getChannels().toString());
+                record.setDstChannelType(r.getChannelType());
+                record.setDstChannelToken(r.getChannelToken());
                 record.setBodyType(r.getContextType());
                 record.setBody(r.getContent());
                 record.setStatus(MessageRecordStatus.CORE_FETCH.getCode());
