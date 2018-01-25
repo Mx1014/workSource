@@ -2738,6 +2738,7 @@ private void checkUserPrivilege(Long orgId, Long privilegeId, Long communityId) 
         locator.setAnchor(cmd.getPageAnchor());
         int pageSize = PaginationConfigHelper.getPageSize(configurationProvider, cmd.getPageSize());
         //根据任务id取出所有待执行和待维修的任务log  0: none, 1: complete, 2: complete maintenance, 3: review, 4: need maintenance
+		//0: none, 1: complete, 2: complete maintenance, 3: review,
 		//上版维修情况取2  ，任务记录取1  4  ，  对接报修后取2     review  1
 
 		EquipmentInspectionPlans plan = new EquipmentInspectionPlans();
@@ -5873,6 +5874,8 @@ private void checkUserPrivilege(Long orgId, Long privilegeId, Long communityId) 
 		tasksLog.setNamespaceId(cmd.getNamespaceId());
 		tasksLog.setTaskId(cmd.getTaskId());
 		tasksLog.setProcessType(EquipmentTaskProcessType.NEED_MAINTENANCE.getCode());//提交给报修
+		tasksLog.setProcessMessage(cmd.getContent());
+		tasksLog.setMaintanceType(cmd.getMaintanceType());
 		tasksLog.setProcessResult(EquipmentTaskProcessResult.NONE.getCode());
 
 		dbProvider.execute((TransactionStatus status) -> {
@@ -5887,22 +5890,7 @@ private void checkUserPrivilege(Long orgId, Long privilegeId, Long communityId) 
 			repairCommand.setReferType(EquipmentConstant.EQUIPMENT_REPAIR);
 			repairCommand.setTaskCategoryId(6L);
 			ListTaskCategoriesCommand categoriesCommand = new ListTaskCategoriesCommand();
-			categoriesCommand.setPageSize(Integer.MAX_VALUE -1);
-			/*ListTaskCategoriesResponse categories = pmTaskService.listTaskCategories(categoriesCommand);
-
-			if (categories != null && categories.getRequests().size() > 0) {
-				List<Long> categodyIds = categories.getRequests().stream().map((r) -> {
-					if (r.getName().contains("物业报修")) {
-						return r.getId();
-					}
-					return null;
-				}).collect(Collectors.toList());
-				repairCommand.setCategoryId(categodyIds.get(0));
-			} else {
-				throw RuntimeErrorException.errorWith(EquipmentServiceErrorCode.SCOPE,
-						EquipmentServiceErrorCode.ERROR_EQUIPMENT_REPAIR_CATEGORY_NOT_EXIST, "equipment repair category id not exist!");
-			}*/
-
+			categoriesCommand.setPageSize(Integer.MAX_VALUE - 1);
 			List<OrganizationMember> members = organizationProvider.listOrganizationMembersByUId(UserContext.currentUserId());
 			if (members != null && members.size() > 0) {
 				repairCommand.setRequestorName(members.get(0).getContactName());
