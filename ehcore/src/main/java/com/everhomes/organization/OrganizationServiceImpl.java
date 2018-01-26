@@ -7671,6 +7671,7 @@ public class OrganizationServiceImpl implements OrganizationService {
         Map<Long, List<String>> orgAdminAccounts = new HashMap<>();
 
         for (ImportEnterpriseDataDTO data : list) {
+
             CreateEnterpriseCommand enterpriseCommand = new CreateEnterpriseCommand();
             ImportFileResultLog<ImportEnterpriseDataDTO> log = new ImportFileResultLog<>(OrganizationServiceErrorCode.SCOPE);
             if (StringUtils.isEmpty(data.getName())) {
