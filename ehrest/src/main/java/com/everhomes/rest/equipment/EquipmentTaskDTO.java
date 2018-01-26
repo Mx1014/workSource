@@ -33,6 +33,7 @@ import java.util.List;
  *  <li>result: 执行结果 参考{@link com.everhomes.rest.equipment.EquipmentTaskResult}</li>
  *  <li>reviewResult: 审阅结果 参考{@link com.everhomes.rest.equipment.ReviewResult}</li>
  *  <li>equipments: 任务关联设备信息列表 参考{@link com.everhomes.rest.equipment.EquipmentStandardRelationDTO}</li>
+ *  <li>inspectionCategoryId: 巡检对象类型</li>
  * </ul>
  */
 public class EquipmentTaskDTO {
@@ -123,6 +124,8 @@ public class EquipmentTaskDTO {
 	private Timestamp reviewTime;
 
 	private Long planId;
+
+	private Long inspectionCategoryId;
 
 	@ItemType(EquipmentStandardRelationDTO.class)
 	private List<EquipmentStandardRelationDTO> equipments;
@@ -485,6 +488,14 @@ public class EquipmentTaskDTO {
 
 	public void setPlanDescription(String planDescription) {
 		this.planDescription = planDescription;
+	}
+
+	public Long getInspectionCategoryId() {
+		return inspectionCategoryId;
+	}
+
+	public void setInspectionCategoryId(Long inspectionCategoryId) {
+		this.inspectionCategoryId = inspectionCategoryId;
 	}
 
 	@Override
