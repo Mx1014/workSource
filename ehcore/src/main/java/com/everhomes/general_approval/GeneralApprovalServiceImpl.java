@@ -878,6 +878,7 @@ public class GeneralApprovalServiceImpl implements GeneralApprovalService {
     @Override
     public ListGeneralApprovalRecordsResponse listGeneralApprovalRecords(ListGeneralApprovalRecordsCommand cmd) {
         ListGeneralApprovalRecordsResponse response = new ListGeneralApprovalRecordsResponse();
+        List<GeneralApprovalRecordDTO> results = new ArrayList<>();
         ListingLocator locator = new ListingLocator();
         SearchFlowCaseCommand command = new SearchFlowCaseCommand();
 
@@ -912,15 +913,13 @@ public class GeneralApprovalServiceImpl implements GeneralApprovalService {
             return query;
         });
         if (details != null && details.size() > 0) {
-            List<GeneralApprovalRecordDTO> results = details.stream().map(r -> {
-
+            results = details.stream().map(r -> {
                 GeneralApprovalRecordDTO dto = convertGeneralApprovalRecordDTO(r);
                 return dto;
             }).collect(Collectors.toList());
-            response.setRecords(results);
-            response.setNextPageAnchor(locator.getAnchor());
-
         }
+        response.setRecords(results);
+        response.setNextPageAnchor(locator.getAnchor());
         return response;
     }
 
