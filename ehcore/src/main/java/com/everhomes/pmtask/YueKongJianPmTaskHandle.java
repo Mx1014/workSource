@@ -1,7 +1,6 @@
 package com.everhomes.pmtask;
 
 import com.alibaba.fastjson.JSONObject;
-import com.everhomes.bootstrap.PlatformContext;
 import com.everhomes.building.Building;
 import com.everhomes.building.BuildingProvider;
 import com.everhomes.category.Category;
@@ -12,7 +11,6 @@ import com.everhomes.constants.ErrorCodes;
 import com.everhomes.db.DbProvider;
 import com.everhomes.entity.EntityType;
 import com.everhomes.flow.*;
-import com.everhomes.rest.category.CategoryDTO;
 import com.everhomes.rest.flow.*;
 import com.everhomes.rest.parking.ParkingErrorCode;
 import com.everhomes.rest.pmtask.*;
@@ -183,7 +181,7 @@ class YueKongJianPmTaskHandle extends DefaultPmTaskHandle {
 //		stepDTO.setStepCount(flowCase.getStepCount());
 //		flowService.processAutoStep(stepDTO);
 
-		List<FlowButton> buttons = flowButtonProvider.findFlowButtonsByUserType(flowCase.getCurrentNodeId(),
+		List<FlowButton> buttons = flowButtonProvider.findFlowButtonsByUserType(flowCase.getFlowMainId(), flowCase.getCurrentNodeId(),
 				flowCase.getFlowVersion(), FlowUserType.PROCESSOR.getCode());
 
 		FlowButton button = null;

@@ -22,6 +22,7 @@ import com.everhomes.settings.PaginationConfigHelper;
 import com.everhomes.user.UserContext;
 import com.everhomes.user.UserPrivilegeMgr;
 import com.everhomes.util.ConvertHelper;
+import com.everhomes.util.RuntimeErrorException;
 import org.elasticsearch.action.bulk.BulkRequestBuilder;
 import org.elasticsearch.action.search.SearchRequestBuilder;
 import org.elasticsearch.action.search.SearchResponse;
@@ -133,7 +134,7 @@ public class EquipmentStandardSearcherImpl extends AbstractElasticSearch impleme
             qb = QueryBuilders.multiMatchQuery(cmd.getKeyword())
             		.field("standardName", 1.2f);
                     //.field("standardNumber", 1.0f);
-            
+
             builder.setHighlighterFragmentSize(60);
             builder.setHighlighterNumOfFragments(8);
             builder.addHighlightedField("standardName");
@@ -157,7 +158,7 @@ public class EquipmentStandardSearcherImpl extends AbstractElasticSearch impleme
         }
          /*if(cmd.getStandardType() != null)
         	fb = FilterBuilders.andFilter(fb, FilterBuilders.termFilter("standardType", cmd.getStandardType()));*/
-        
+
         if(cmd.getStatus() != null)
             fb = FilterBuilders.andFilter(fb, FilterBuilders.termFilter("status", cmd.getStatus()));
 
@@ -177,7 +178,7 @@ public class EquipmentStandardSearcherImpl extends AbstractElasticSearch impleme
         if(cmd.getPageAnchor() != null) {
             anchor = cmd.getPageAnchor();
         }
-        
+
         qb = QueryBuilders.filteredQuery(qb, fb);
         builder.setSearchType(SearchType.QUERY_THEN_FETCH);
         builder.setFrom(anchor.intValue() * pageSize).setSize(pageSize + 1);
@@ -192,7 +193,7 @@ public class EquipmentStandardSearcherImpl extends AbstractElasticSearch impleme
             LOGGER.info("EquipmentStandardSearcherImpl query rsp ："+rsp);
 
         List<Long> ids = getIds(rsp);
-        
+
         Long nextPageAnchor = null;
         if(ids.size() > pageSize) {
             nextPageAnchor = anchor + 1;
@@ -200,7 +201,7 @@ public class EquipmentStandardSearcherImpl extends AbstractElasticSearch impleme
          } else {
             nextPageAnchor = null;
         }
-        
+
         List<EquipmentStandardsDTO> eqStandards = new ArrayList<>();
         List <EquipmentModelCommunityMap> maps = equipmentProvider.listModelCommunityMapByCommunityId(cmd.getTargetId(),EquipmentModelType.STANDARD.getCode());
         for(Long id : ids) {

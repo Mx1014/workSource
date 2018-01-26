@@ -59,9 +59,7 @@ public class EncryptUtil {
       
     /** 
      * 字节数组转化为大写16进制字符串 
-     * @param b 
-     * @return 
-     */  
+     */
    
     private static String byte2HexStr(byte[] b) {  
         StringBuilder sb = new StringBuilder();  

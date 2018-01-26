@@ -25,7 +25,7 @@ public class ForumPostDeletePointEventProcessor extends GeneralPointEventProcess
     }
 
     @Override
-    protected String getEventName(LocalEvent localEvent, String subscriptionPath) {
+    protected String getEventName(LocalEvent localEvent) {
         Long appId = null;
         Byte moduleType = null;
         boolean isComment = false;
