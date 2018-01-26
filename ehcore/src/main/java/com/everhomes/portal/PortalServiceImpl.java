@@ -157,6 +157,14 @@ public class PortalServiceImpl implements PortalService {
 
 	@Override
 	public ListServiceModuleAppsResponse listServiceModuleApps(ListServiceModuleAppsCommand cmd) {
+
+		if(cmd.getVersionId() == null){
+			PortalVersion releaseVersion = portalVersionProvider.findReleaseVersion(cmd.getNamespaceId());
+			if(releaseVersion != null){
+				cmd.setVersionId(releaseVersion.getId());
+			}
+		}
+
 		List<ServiceModuleApp> moduleApps = serviceModuleAppProvider.listServiceModuleApp(cmd.getNamespaceId(), cmd.getModuleId(), cmd.getVersionId());
 		return new ListServiceModuleAppsResponse(moduleApps.stream().map(r ->{
 			return processServiceModuleAppDTO(r);
