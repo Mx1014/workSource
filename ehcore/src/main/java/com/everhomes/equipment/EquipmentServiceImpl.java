@@ -4750,22 +4750,33 @@ private void checkUserPrivilege(Long orgId, Long privilegeId, Long communityId) 
 
 	}
 
-	private Timestamp getDayBegin(Calendar cal, int period) {
-		cal.add(Calendar.DATE, period);
+	private Timestamp getDayBegin(Calendar todayStart, int period) {
+		/*cal.add(Calendar.DATE, period);
 		cal.set(Calendar.HOUR_OF_DAY, 0);
 		cal.set(Calendar.SECOND, 0);
 		cal.set(Calendar.MINUTE, 0);
 		cal.set(Calendar.MILLISECOND, 001);
-		return new Timestamp(cal.getTimeInMillis());
+		return new Timestamp(cal.getTimeInMillis());*/
+		todayStart.set(Calendar.HOUR_OF_DAY, 0);
+		todayStart.set(Calendar.MINUTE, 0);
+		todayStart.set(Calendar.SECOND, 0);
+		todayStart.set(Calendar.MILLISECOND, 0);
+		return new Timestamp(todayStart.getTime().getTime());
 	}
 
 	private Timestamp getDayEnd(Calendar cal, int period) {
-		cal.add(Calendar.DATE, period);
+		/*cal.add(Calendar.DATE, period);
 		cal.set(Calendar.HOUR_OF_DAY, 23);
 		cal.set(Calendar.SECOND, 59);
 		cal.set(Calendar.MINUTE, 59);
 		cal.set(Calendar.MILLISECOND, 999);
-		return new Timestamp(cal.getTimeInMillis());
+		return new Timestamp(cal.getTimeInMillis());*/
+		Calendar todayEnd = Calendar.getInstance();
+		todayEnd.set(Calendar.HOUR_OF_DAY, 23);
+		todayEnd.set(Calendar.MINUTE, 59);
+		todayEnd.set(Calendar.SECOND, 59);
+		todayEnd.set(Calendar.MILLISECOND, 999);
+		return new Timestamp(todayEnd.getTime().getTime());
 	}
 
 	@Override
