@@ -5651,6 +5651,7 @@ private void checkUserPrivilege(Long orgId, Long privilegeId, Long communityId) 
 					relations.setEquipmentId(equipment.getId());
 					relations.setLocation(equipment.getLocation());
 					relations.setQrCodeFlag(equipment.getQrCodeFlag());
+					relations.setSequenceNo(equipment.getSequenceNo());
 					equipmentStandardMaps = equipmentProvider.
 							findEquipmentStandardMap(standard.getId(), equipment.getId(),
 									InspectionStandardMapTargetType.EQUIPMENT.getCode());
@@ -5895,9 +5896,18 @@ private void checkUserPrivilege(Long orgId, Long privilegeId, Long communityId) 
 		List<EquipmentTaskDTO> tasks = command.getTasks();
 		Long ownerId = command.getOwnerId();
 		String ownerType = command.getOwnerType();
+		OfflineEquipmentTaskReportLog reportLog = new OfflineEquipmentTaskReportLog();
+		List<OfflineEquipmentTaskReportLog> reportLogs = new ArrayList<>();
+
 		if (tasks != null && tasks.size() > 0) {
-			tasks.forEach((r)->{
+			tasks.forEach((r) -> {
 				EquipmentInspectionTasks task = verifyEquipmentTask(r.getId(), ownerType, ownerId);
+				LOGGER.error("equipmentInspection task  not exist, id = {}", r.getId());
+				reportLog.setErrorIds(r.getId());
+				reportLog.setErrorCode(ErrorCodes.ERROR_GENERAL_EXCEPTION);
+				reportLog.setErrorDescription(localeStringService.getLocalizedString(String.valueOf(EquipmentServiceErrorCode.SCOPE),
+						String.valueOf(EquipmentServiceErrorCode.ERROR_EQUIPMENT_TASK_NOT_EXIST),
+						UserContext.current().getUser().getLocale(), "equipment inspection task  not exist"));
 				if (EquipmentTaskStatus.WAITING_FOR_EXECUTING.equals(EquipmentTaskStatus.fromStatus(task.getStatus()))) {
 					SetReviewExpireDaysCommand expireDaysCommand = new SetReviewExpireDaysCommand();
 					expireDaysCommand.setCommunityId(task.getTargetId());
@@ -5916,9 +5926,11 @@ private void checkUserPrivilege(Long orgId, Long privilegeId, Long communityId) 
 					equipmentProvider.updateEquipmentTask(task);
 					equipmentTasksSearcher.feedDoc(task);
 				}
+				reportLogs.add(reportLog);
 			});
 		}
-		return  processOfflineTaskLogsAndReportDetails(command.getEquipmentTaskReportDetails(),command.getTasks());
+		reportLogs.addAll(processOfflineTaskLogsAndReportDetails(command.getEquipmentTaskReportDetails(), command.getTasks()));
+		return reportLogs;
 	}
 
 	private List<OfflineEquipmentTaskReportLog> processOfflineTaskLogsAndReportDetails(List<EquipmentTaskReportDetail> equipmentTaskReportDetails, List<EquipmentTaskDTO> tasks) {
