@@ -14,9 +14,7 @@ import com.everhomes.community.CommunityGeoPoint;
 import com.everhomes.community.CommunityProvider;
 import com.everhomes.configuration.ConfigurationProvider;
 import com.everhomes.constants.ErrorCodes;
-import com.everhomes.customer.EnterpriseCustomer;
-import com.everhomes.customer.EnterpriseCustomerProvider;
-import com.everhomes.customer.IndividualCustomerProvider;
+import com.everhomes.customer.*;
 import com.everhomes.db.DbProvider;
 import com.everhomes.http.HttpUtils;
 import com.everhomes.namespace.NamespaceResource;
@@ -34,6 +32,8 @@ import com.everhomes.rest.community.BuildingDTO;
 import com.everhomes.rest.community.NamespaceCommunityType;
 import com.everhomes.rest.customer.EnterpriseCustomerDTO;
 import com.everhomes.rest.customer.NamespaceCustomerType;
+import com.everhomes.rest.customer.SyncDataTaskStatus;
+import com.everhomes.rest.customer.SyncDataTaskType;
 import com.everhomes.rest.namespace.NamespaceResourceType;
 import com.everhomes.rest.openapi.shenzhou.*;
 import com.everhomes.rest.organization.*;
@@ -122,6 +122,9 @@ public class ZJGKOpenServiceImpl {
 
     @Autowired
     private ConfigurationProvider configurationProvider;
+
+    @Autowired
+    private SyncDataTaskProvider syncDataTaskProvider;
 
     @Autowired
     private AppProvider appProvider;
@@ -221,7 +224,7 @@ public class ZJGKOpenServiceImpl {
 
             //如果到最后一页了，则开始更新到我们数据库中
             if(entity.getNextPageOffset() == null) {
-                syncDataToDb(DataType.COMMUNITY.getCode(), SyncFlag.ALL.getCode());
+                syncDataToDb(DataType.COMMUNITY.getCode(), SyncFlag.ALL.getCode(), 0L);
             }
         }
     }
@@ -245,7 +248,7 @@ public class ZJGKOpenServiceImpl {
 
             //如果到最后一页了，则开始更新到我们数据库中
             if(entity.getNextPageOffset() == null) {
-                syncDataToDb(DataType.BUILDING.getCode(), SyncFlag.ALL.getCode());
+                syncDataToDb(DataType.BUILDING.getCode(), SyncFlag.ALL.getCode(), 0L);
             }
         }
     }
@@ -269,7 +272,7 @@ public class ZJGKOpenServiceImpl {
 
             //如果到最后一页了，则开始更新到我们数据库中
             if(entity.getNextPageOffset() == null) {
-                syncDataToDb(DataType.APARTMENT.getCode(), SyncFlag.ALL.getCode());
+                syncDataToDb(DataType.APARTMENT.getCode(), SyncFlag.ALL.getCode(), 0L);
             }
         }
     }
@@ -303,7 +306,7 @@ public class ZJGKOpenServiceImpl {
 
             //如果到最后一页了，则开始更新到我们数据库中
             if(entity.getNextPageOffset() == null) {
-                syncDataToDb(DataType.APARTMENT_LIVING_STATUS.getCode(), SyncFlag.ALL.getCode());
+                syncDataToDb(DataType.APARTMENT_LIVING_STATUS.getCode(), SyncFlag.ALL.getCode(), 0L);
             }
         }
     }
@@ -329,12 +332,12 @@ public class ZJGKOpenServiceImpl {
 
             //如果到最后一页了，则开始更新到我们数据库中
             if(entity.getNextPageOffset() == null) {
-                syncDataToDb(DataType.APARTMENT_LIVING_STATUS.getCode(), SyncFlag.ALL.getCode());
+                syncDataToDb(DataType.APARTMENT_LIVING_STATUS.getCode(), SyncFlag.ALL.getCode(), 0L);
             }
         }
     }
 
-    public void syncEnterprises(String pageOffset, String communityIdentifier) {
+    public void syncEnterprises(String pageOffset, String communityIdentifier, Long taskId) {
         String appKey = configurationProvider.getValue(NAMESPACE_ID, "shenzhoushuma.app.key", "");
         String secretKey = configurationProvider.getValue(NAMESPACE_ID, "shenzhoushuma.secret.key", "");
 
@@ -365,22 +368,22 @@ public class ZJGKOpenServiceImpl {
 
                 //数据有下一页则继续请求
                 if(entity.getNextPageOffset() != null) {
-                    syncEnterprises(entity.getNextPageOffset().toString(), communityIdentifier);
+                    syncEnterprises(entity.getNextPageOffset().toString(), communityIdentifier, taskId);
                 }
             }
 
             //如果到最后一页了，则开始更新到我们数据库中
             if(entity.getNextPageOffset() == null) {
                 if(communityIdentifier == null || "".equals(communityIdentifier)) {
-                    syncDataToDb(DataType.ENTERPRISE.getCode(), SyncFlag.ALL.getCode());
+                    syncDataToDb(DataType.ENTERPRISE.getCode(), SyncFlag.ALL.getCode(), taskId);
                 } else {
-                    syncDataToDb(DataType.ENTERPRISE.getCode(), SyncFlag.PART.getCode());
+                    syncDataToDb(DataType.ENTERPRISE.getCode(), SyncFlag.PART.getCode(), taskId);
                 }
             }
         }
     }
 
-    public void syncIndividuals(String pageOffset, String communityIdentifier) {
+    public void syncIndividuals(String pageOffset, String communityIdentifier, Long taskId) {
         String appKey = configurationProvider.getValue(NAMESPACE_ID, "shenzhoushuma.app.key", "");
         String secretKey = configurationProvider.getValue(NAMESPACE_ID, "shenzhoushuma.secret.key", "");
 
@@ -409,16 +412,16 @@ public class ZJGKOpenServiceImpl {
 
                 //数据有下一页则继续请求
                 if(entity.getNextPageOffset() != null) {
-                    syncIndividuals(entity.getNextPageOffset().toString(), communityIdentifier);
+                    syncIndividuals(entity.getNextPageOffset().toString(), communityIdentifier, taskId);
                 }
             }
 
             //如果到最后一页了，则开始更新到我们数据库中
             if(entity.getNextPageOffset() == null) {
                 if(communityIdentifier == null || "".equals(communityIdentifier)) {
-                    syncDataToDb(DataType.INDIVIDUAL.getCode(), SyncFlag.ALL.getCode());
+                    syncDataToDb(DataType.INDIVIDUAL.getCode(), SyncFlag.ALL.getCode(), taskId);
                 } else {
-                    syncDataToDb(DataType.INDIVIDUAL.getCode(), SyncFlag.PART.getCode());
+                    syncDataToDb(DataType.INDIVIDUAL.getCode(), SyncFlag.PART.getCode(), taskId);
                 }
             }
         }
@@ -467,7 +470,7 @@ public class ZJGKOpenServiceImpl {
 
     }
 
-    private void syncDataToDb(Byte dataType, Byte allFlag) {
+    private void syncDataToDb(Byte dataType, Byte allFlag, Long taskId) {
 //        queueThreadPool.execute(()->{
             if (LOGGER.isDebugEnabled()) {
                 LOGGER.debug("dataType {} enter into thread=================", dataType);
@@ -484,6 +487,22 @@ public class ZJGKOpenServiceImpl {
                 updateAllDate(dataType, allFlag, NAMESPACE_ID , backupList);
             } finally {
                 zjSyncdataBackupProvider.updateZjSyncdataBackupInactive(backupList);
+
+                //万一同步时间太长transaction断掉 在这里也要更新下
+//                if(SyncFlag.PART.equals(SyncFlag.fromCode(allFlag))) {
+//                    String communityIdentifier = backupList.get(0).getUpdateCommunity();
+//                    Community community = communityProvider.findCommunityByNamespaceToken(NamespaceCommunityType.SHENZHOU.getCode(), communityIdentifier);
+//                    if(community != null) {
+//                        SyncDataTask task = syncDataTaskProvider.findExecutingSyncDataTask(community.getId(), SyncDataTaskType.fromName(dataType).getCode());
+//
+//                        if(task != null) {
+//                            task.setStatus(SyncDataTaskStatus.FINISH.getCode());
+//                            task.setResult("同步成功");
+//                            task.setUpdateTime(new Timestamp(DateHelper.currentGMTTime().getTime()));
+//                            syncDataTaskProvider.updateSyncDataTask(task);
+//                        }
+//                    }
+//                }
             }
 
             if (LOGGER.isDebugEnabled()) {

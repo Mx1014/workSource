@@ -26,14 +26,12 @@ import com.everhomes.asset.AssetService;
 
 import com.everhomes.bootstrap.PlatformContext;
 import com.everhomes.contentserver.ContentServerService;
-import com.everhomes.customer.EnterpriseCustomer;
-import com.everhomes.customer.EnterpriseCustomerProvider;
-import com.everhomes.customer.IndividualCustomerProvider;
+import com.everhomes.customer.*;
 import com.everhomes.entity.EntityType;
 import com.everhomes.flow.Flow;
 import com.everhomes.flow.FlowService;
 import com.everhomes.locale.LocaleStringService;
-import com.everhomes.openapi.ContractBuildingMapping;
+import com.everhomes.openapi.*;
 import com.everhomes.organization.*;
 import com.everhomes.organization.pm.CommunityAddressMapping;
 import com.everhomes.organization.pm.PropertyMgrProvider;
@@ -46,8 +44,10 @@ import com.everhomes.rest.acl.PrivilegeServiceErrorCode;
 import com.everhomes.rest.approval.CommonStatus;
 import com.everhomes.rest.asset.*;
 import com.everhomes.rest.common.ServiceModuleConstants;
+import com.everhomes.rest.common.SyncDataResponse;
 import com.everhomes.rest.contract.*;
 import com.everhomes.rest.customer.CustomerType;
+import com.everhomes.rest.customer.SyncDataTaskType;
 import com.everhomes.rest.flow.CreateFlowCaseCommand;
 import com.everhomes.rest.flow.FlowConstants;
 import com.everhomes.rest.flow.FlowModuleType;
@@ -55,6 +55,7 @@ import com.everhomes.rest.flow.FlowOwnerType;
 
 import com.everhomes.rest.launchpad.ActionType;
 import com.everhomes.rest.namespace.NamespaceCommunityType;
+import com.everhomes.rest.openapi.shenzhou.DataType;
 import com.everhomes.rest.organization.OrganizationContactDTO;
 import com.everhomes.rest.organization.pm.AddOrganizationOwnerAddressCommand;
 import com.everhomes.rest.organization.pm.AddressMappingStatus;
@@ -202,6 +203,11 @@ public class ContractServiceImpl implements ContractService {
 	private String flowcaseContractOwnerType = FlowOwnerType.CONTRACT.getCode();
 	private String flowcasePaymentContractOwnerType = FlowOwnerType.PAYMENT_CONTRACT.getCode();
 
+	@Autowired
+	private SyncDataTaskService syncDataTaskService;
+
+	@Autowired
+	private ZjSyncdataBackupProvider zjSyncdataBackupProvider;
 
 	private void checkContractAuth(Integer namespaceId, Long privilegeId, Long orgId, Long communityId) {
 		ListServiceModuleAppsCommand cmd = new ListServiceModuleAppsCommand();
@@ -1887,29 +1893,56 @@ public class ContractServiceImpl implements ContractService {
 	}
 
 	@Override
-	public void syncContractsFromThirdPart(SyncContractsFromThirdPartCommand cmd) {
+	public String syncContractsFromThirdPart(SyncContractsFromThirdPartCommand cmd) {
 		checkContractAuth(cmd.getNamespaceId(), PrivilegeConstants.CONTRACT_SYNC, cmd.getOrgId(), cmd.getCommunityId());
-		this.coordinationProvider.getNamedLock(CoordinationLocks.SYNC_CONTRACT.getCode() + cmd.getNamespaceId() + cmd.getCommunityId()).tryEnter(()-> {
-			ExecutorUtil.submit(new Runnable() {
-				@Override
-				public void run() {
-					try{
-						Community community = communityProvider.findCommunityById(cmd.getCommunityId());
-						if(community == null) {
-							return;
-						}
-						String version = contractProvider.findLastContractVersionByCommunity(cmd.getNamespaceId(), community.getId());
-						ThirdPartContractHandler contractHandler = PlatformContext.getComponent(ThirdPartContractHandler.CONTRACT_PREFIX + cmd.getNamespaceId());
-						if(contractHandler != null) {
-							contractHandler.syncContractsFromThirdPart("1", version, community.getNamespaceCommunityToken());
-						}
 
-					}catch (Exception e){
-						LOGGER.error("syncEnterpriseCustomers error.", e);
-					}
-				}
-			});
-		});
+		Community community = communityProvider.findCommunityById(cmd.getCommunityId());
+		if(community == null) {
+			return "0";
+		}
+		int syncCount = zjSyncdataBackupProvider.listZjSyncdataBackupActiveCountByParam(community.getNamespaceId(), community.getNamespaceCommunityToken(), DataType.CONTRACT.getCode());
+		if(syncCount > 0) {
+			return "1";
+		}
+
+		String version = contractProvider.findLastContractVersionByCommunity(cmd.getNamespaceId(), community.getId());
+		ThirdPartContractHandler contractHandler = PlatformContext.getComponent(ThirdPartContractHandler.CONTRACT_PREFIX + cmd.getNamespaceId());
+		if(contractHandler != null) {
+			SyncDataTask task = new SyncDataTask();
+			task.setOwnerType(EntityType.COMMUNITY.getCode());
+			task.setOwnerId(community.getId());
+			task.setType(SyncDataTaskType.CONTRACT.getCode());
+			task.setCreatorUid(UserContext.currentUserId());
+			syncDataTaskService.executeTask(() -> {
+				SyncDataResponse response = new SyncDataResponse();
+				contractHandler.syncContractsFromThirdPart("1", version, community.getNamespaceCommunityToken(), task.getId());
+				return response;
+			}, task);
+
+		}
+
+		return "0";
+//		this.coordinationProvider.getNamedLock(CoordinationLocks.SYNC_CONTRACT.getCode() + cmd.getNamespaceId() + cmd.getCommunityId()).tryEnter(()-> {
+//			ExecutorUtil.submit(new Runnable() {
+//				@Override
+//				public void run() {
+//					try{
+//						Community community = communityProvider.findCommunityById(cmd.getCommunityId());
+//						if(community == null) {
+//							return;
+//						}
+//						String version = contractProvider.findLastContractVersionByCommunity(cmd.getNamespaceId(), community.getId());
+//						ThirdPartContractHandler contractHandler = PlatformContext.getComponent(ThirdPartContractHandler.CONTRACT_PREFIX + cmd.getNamespaceId());
+//						if(contractHandler != null) {
+//							contractHandler.syncContractsFromThirdPart("1", version, community.getNamespaceCommunityToken());
+//						}
+//
+//					}catch (Exception e){
+//						LOGGER.error("syncEnterpriseCustomers error.", e);
+//					}
+//				}
+//			});
+//		});
 	}
 
 	@Override

@@ -3,14 +3,12 @@ package com.everhomes.rest.launchpad;
 
 /**
  * <ul>
- *     <li>INIT((byte)0): 初始化</li>
- *     <li>EDIT((byte)1): 编辑</li>
- *     <li>PULISH_SUCCESS((byte)2): 发布成功</li>
- *     <li>PUBLISH_FAIL((byte)3): 发布失败</li>
+ *     <li>PREVIEW((byte) 1): PREVIEW</li>
+ *     <li>RELEASE((byte) 2): RELEASE</li>
  * </ul>
  */
 public enum PortalVersionStatus {
-    INIT((byte) 0), EDIT((byte) 1), PULISH_SUCCESS((byte) 2), PUBLISH_FAIL((byte) 3);
+    PREVIEW((byte) 1), RELEASE((byte) 2);
 
     private byte code;
 

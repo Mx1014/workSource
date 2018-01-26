@@ -6,6 +6,7 @@ import java.util.ArrayList;
 import java.util.List;
 
 import org.jooq.DSLContext;
+import org.jooq.DeleteQuery;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -104,6 +105,15 @@ public class PortalContentScopeProviderImpl implements PortalContentScopeProvide
 				.and(Tables.EH_PORTAL_CONTENT_SCOPES.CONTENT_ID.eq(contentId))
 				.orderBy(Tables.EH_PORTAL_CONTENT_SCOPES.ID.asc())
 				.fetch().map(r -> ConvertHelper.convert(r, PortalContentScope.class));
+	}
+
+
+	@Override
+	public void deleteByVersionId(Long versionId){
+		DeleteQuery query = getReadWriteContext().deleteQuery(Tables.EH_PORTAL_CONTENT_SCOPES);
+		query.addConditions(Tables.EH_PORTAL_CONTENT_SCOPES.VERSION_ID.eq(versionId));
+		query.execute();
+		DaoHelper.publishDaoAction(DaoAction.MODIFY, PortalContentScope.class, null);
 	}
 
 	@Override

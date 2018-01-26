@@ -3,21 +3,21 @@ package com.everhomes.rest.portal;
 
 import com.everhomes.util.StringHelper;
 
+import java.util.List;
+
 /**
  * <ul>
- *     <li>namespaceId: 域空间</li>
- *     <li>userId: userId</li>
+ *     <li>namespaceId: namespaceId</li>
  *     <li>versionId: versionId</li>
+ *     <li>userIds: userIds</li>
  * </ul>
  */
-public class CreatePortalVersionUserCommand {
+public class UpdatePortalVersionUsersCommand {
 
 
 	private Integer namespaceId;
-
-	private Long userId;
-
 	private Long versionId;
+	private List<Long> userIds;
 
 	public Integer getNamespaceId() {
 		return namespaceId;
@@ -27,20 +27,20 @@ public class CreatePortalVersionUserCommand {
 		this.namespaceId = namespaceId;
 	}
 
-	public Long getUserId() {
-		return userId;
-	}
-
-	public void setUserId(Long userId) {
-		this.userId = userId;
-	}
-
 	public Long getVersionId() {
 		return versionId;
 	}
 
 	public void setVersionId(Long versionId) {
 		this.versionId = versionId;
+	}
+
+	public List<Long> getUserIds() {
+		return userIds;
+	}
+
+	public void setUserIds(List<Long> userIds) {
+		this.userIds = userIds;
 	}
 
 	@Override

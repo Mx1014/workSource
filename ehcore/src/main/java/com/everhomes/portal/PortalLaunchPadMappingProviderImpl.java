@@ -7,6 +7,7 @@ import java.util.List;
 
 import org.jooq.Condition;
 import org.jooq.DSLContext;
+import org.jooq.DeleteQuery;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
 
@@ -75,6 +76,14 @@ public class PortalLaunchPadMappingProviderImpl implements PortalLaunchPadMappin
 	public void deletePortalLaunchPadMapping(Long id) {
 		assert (id!= null);
 		getReadWriteDao().deleteById(id);
+	}
+
+	@Override
+	public void deleteByVersionId(Long versionId){
+		DeleteQuery query = getReadWriteContext().deleteQuery(Tables.EH_PORTAL_LAUNCH_PAD_MAPPINGS);
+		query.addConditions(Tables.EH_PORTAL_LAUNCH_PAD_MAPPINGS.VERSION_ID.eq(versionId));
+		query.execute();
+		DaoHelper.publishDaoAction(DaoAction.MODIFY, EhPortalLaunchPadMappings.class, null);
 	}
 
 	@Override

@@ -522,6 +522,23 @@ public class CommunityProviderImpl implements CommunityProvider {
     }
 
     @Override
+    public List<Community> listNamespaceCommunities(Integer namespaceId) {
+        DSLContext context = this.dbProvider.getDslContext(AccessSpec.readOnlyWith(EhCommunities.class));
+        SelectQuery<EhCommunitiesRecord> query = context.selectQuery(Tables.EH_COMMUNITIES);
+
+        query.addConditions(Tables.EH_COMMUNITIES.STATUS.eq(CommunityAdminStatus.ACTIVE.getCode()));
+        query.addConditions(Tables.EH_COMMUNITIES.NAMESPACE_ID.eq(namespaceId));
+
+        List<Community> communities = new ArrayList<>();
+        query.fetch().map((r) -> {
+            communities.add(ConvertHelper.convert(r, Community.class));
+            return null;
+        });
+
+        return communities;
+    }
+
+    @Override
     public List<Community> listCommunities(Integer namespaceId, ListingLocator locator, Integer pageSize,
                                                    ListingQueryBuilderCallback queryBuilderCallback) {
         pageSize = pageSize +1;
