@@ -245,8 +245,8 @@ public class FileManagementProviderImpl implements FileManagementProvider {
         query.addConditions(Tables.EH_FILE_MANAGEMENT_CATALOG_SCOPES.CATALOG_ID.eq(catalogId));
         if (keywords != null)
             query.addConditions(Tables.EH_FILE_MANAGEMENT_CATALOG_SCOPES.SOURCE_DESCRIPTION.like("%" + keywords + "%"));
-        if (pageAnchor != null)
-            query.addConditions(Tables.EH_FILE_MANAGEMENT_CATALOG_SCOPES.ID.lt(pageAnchor));
+/*        if (pageAnchor != null)
+            query.addConditions(Tables.EH_FILE_MANAGEMENT_CATALOG_SCOPES.ID.lt(pageAnchor));*/
         query.addLimit(pageSize + 1);
         query.addOrderBy(Tables.EH_FILE_MANAGEMENT_CATALOG_SCOPES.ID.desc());
         query.fetch().map(r -> {

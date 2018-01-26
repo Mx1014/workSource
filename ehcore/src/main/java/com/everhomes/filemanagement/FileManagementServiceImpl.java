@@ -319,8 +319,8 @@ public class FileManagementServiceImpl implements  FileManagementService{
         List<FileCatalogScopeDTO> scopes = new ArrayList<>();
         Long nextPageAnchor = null;
         Integer namespaceId = UserContext.getCurrentNamespaceId();
-        if (cmd.getPageSize() == null)
-            cmd.setPageSize(20);
+        //  set the max pageSize
+        cmd.setPageSize(Integer.MAX_VALUE-1);
 
         List<FileCatalogScope> results = fileManagementProvider.listFileCatalogScopes(namespaceId, cmd.getCatalogId(), cmd.getPageAnchor(), cmd.getPageSize(), cmd.getKeywords());
         if (results != null && results.size() > 0) {
