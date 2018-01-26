@@ -808,8 +808,12 @@ public class ZuolinAssetVendorHandler implements AssetVendorHandler {
                     List<PaymentBills> enclosedBills = (List<PaymentBills>) entry.getValue();
                     if (enclosedBills.size() > 0){
                         dto.setBillGroupName(assetProvider.getbillGroupNameById(enclosedBills.get(0).getBillGroupId()));
-                        dto.setContractId(String.valueOf(enclosedBills.get(0).getContractId()));
-                        dto.setContractNum(String.valueOf(enclosedBills.get(0).getContractNum()));
+                        if(enclosedBills.get(0).getContractId() != null){
+                            dto.setContractId(String.valueOf(enclosedBills.get(0).getContractId()));
+                        }
+                        if(enclosedBills.get(0).getContractNum()!=null){
+                            dto.setContractNum(String.valueOf(enclosedBills.get(0).getContractNum()));
+                        }
                     }
                     //组装
                     List<BillForClientV2> list = new ArrayList<>();
