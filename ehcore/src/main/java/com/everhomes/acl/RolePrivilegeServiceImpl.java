@@ -2415,7 +2415,7 @@ public class RolePrivilegeServiceImpl implements RolePrivilegeService {
 				// 顺便拿project(域空间下所有项目)的ids
 				projectIds.add(project.getProjectId());
 				// try get categories
-				ResourceCategoryAssignment categoryAssignment = communityProvider.findResourceCategoryAssignment(project.getProjectId(), project.getProjectType(), namespaceId);
+				ResourceCategoryAssignment categoryAssignment = communityProvider.findResourceCategoryAssignment(project.getProjectId(), project.getProjectType(), UserContext.getCurrentNamespaceId());
 				if(categoryAssignment != null)
 					categoryIds.add(categoryAssignment.getResourceCategryId());
 			}
@@ -2434,7 +2434,7 @@ public class RolePrivilegeServiceImpl implements RolePrivilegeService {
 
 				// 以项目分类为第一层进行递归
 				projectTrees.addAll(temp);
-				setResourceDTOs(projectTrees, projectIds, namespaceId);
+				setResourceDTOs(projectTrees, projectIds, UserContext.getCurrentNamespaceId());
 			}else {
 				// 如果不存在项目分类，以项目为第一层进行递归
 				projects.stream().filter(r -> EntityType.COMMUNITY == EntityType.fromCode(r.getProjectType())).map(r -> {
