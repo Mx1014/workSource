@@ -10,6 +10,7 @@ import java.util.List;
  * <ul>
  *  <li>attachments: 上报内容图片     参考{@link  com.everhomes.rest.equipment.Attachment}</li>
  *  <li>message: 上报信息</li>
+ *  <li>taskId: 任务id</li>
  *  <li>equipmentId: 巡检设备id</li>
  *  <li>standardId: 巡检标准id</li>
  *  <li>itemResults: 设备参数 参考{@link com.everhomes.rest.equipment.InspectionItemResult}</li>
@@ -21,6 +22,8 @@ public class EquipmentTaskReportDetail {
     private List<Attachment> attachments;
 
     private String message;
+
+    private Long taskId;
 
     private Long equipmentId;
 
@@ -43,6 +46,14 @@ public class EquipmentTaskReportDetail {
 
     public void setMessage(String message) {
         this.message = message;
+    }
+
+    public Long getTaskId() {
+        return taskId;
+    }
+
+    public void setTaskId(Long taskId) {
+        this.taskId = taskId;
     }
 
     public List<InspectionItemResult> getItemResults() {
