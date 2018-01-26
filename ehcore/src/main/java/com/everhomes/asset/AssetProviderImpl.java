@@ -539,19 +539,22 @@ public class AssetProviderImpl implements AssetProvider {
     }
 
     @Override
-    public List<BillDTO> listBillItems(Long billId, String targetName, int pageOffSet, Integer pageSize) {
+    public List<BillDTO> listBillItems(Long billId, String targetName, int pageNum, Integer pageSize) {
         List<BillDTO> dtos = new ArrayList<>();
         DSLContext context = this.dbProvider.getDslContext(AccessSpec.readOnly());
         EhPaymentBillItems t = Tables.EH_PAYMENT_BILL_ITEMS.as("t");
         EhAddresses t2 = Tables.EH_ADDRESSES.as("t2");
+        EhPaymentLateFine t3 = Tables.EH_PAYMENT_LATE_FINE.as("t3");
+        //先算第一个offset
+        int firstOffset = (pageNum - 1) * pageSize;
         String sql = context.select(t.DATE_STR,t.CHARGING_ITEM_NAME,t.AMOUNT_RECEIVABLE,t.AMOUNT_RECEIVED,t.AMOUNT_OWED,t.STATUS,t.ID,t2.APARTMENT_NAME,t2.BUILDING_NAME,t.BILL_GROUP_RULE_ID)
                 .from(t)
                 .leftOuterJoin(t2)
                 .on(t.ADDRESS_ID.eq(t2.ID))
                 .where(t.BILL_ID.eq(billId))
-                .limit(pageOffSet,pageSize+1)
+                .limit(firstOffset,pageSize+1)
                 .getSQL();
-        context.fetch(sql,billId,pageSize,pageOffSet)
+        context.fetch(sql,billId,pageSize,firstOffset)
                 .forEach(r ->{
                     BillDTO dto =new BillDTO();
                     dto.setDateStr(r.getValue(t.DATE_STR));
@@ -566,7 +569,6 @@ public class AssetProviderImpl implements AssetProvider {
                     dto.setBuildingName(r.getValue(t2.BUILDING_NAME));
                     dtos.add(dto);
                     });
-
         for(int i = 0; i < dtos.size(); i ++){
             BillDTO dto = dtos.get(i);
             dto.setTargetName(targetName);
@@ -578,23 +580,33 @@ public class AssetProviderImpl implements AssetProvider {
                         .and(groupRule.ID.eq(dto.getBillGroupRuleId()))
                         .fetchOne(itemScope.PROJECT_LEVEL_NAME);
                 dto.setBillItemName(projectLevelName);
+                //查询billItem的滞纳金
+                getReadOnlyContext().select(t3.NAME,t3.AMOUNT,t3.AMOUNT,t.DATE_STR,t.STATUS,t3.ID,t.BILL_GROUP_RULE_ID
+                        ,t2.APARTMENT_NAME,t2.BUILDING_NAME)
+                        .from(t3)
+                        .leftOuterJoin(t)
+                        .on(t3.BILL_ITEM_ID.eq(t.BILL_ID))
+                        .leftOuterJoin(t2)
+                        .on(t.ADDRESS_ID.eq(t2.ID))
+                        .where(t3.BILL_ITEM_ID.eq(dto.getBillItemId()))
+                        .fetch()
+                        .forEach(r -> {
+                            BillDTO fineDTO = (BillDTO)dto.clone();
+                            fineDTO.setBillItemName(r.getValue(t3.NAME));
+                            fineDTO.setAmountReceivable(r.getValue(t3.AMOUNT));
+                            fineDTO.setAmountReceived(new BigDecimal("0"));
+                            fineDTO.setAmountOwed(r.getValue(t3.AMOUNT));
+                            fineDTO.setDateStr(r.getValue(t.DATE_STR));
+                            fineDTO.setBillStatus(r.getValue(t.STATUS));
+                            fineDTO.setBillItemId(r.getValue(t3.ID));
+                            fineDTO.setBillGroupRuleId(r.getValue(t.BILL_GROUP_RULE_ID));
+                            fineDTO.setApartmentName(r.getValue(t2.APARTMENT_NAME));
+                            fineDTO.setBuildingName(r.getValue(t2.BUILDING_NAME));
+                            dtos.add(fineDTO);
+                        });
             }
             LOGGER.info("start to iterate late fine");
-            //查询billItem的滞纳金
-            getReadOnlyContext().select(Tables.EH_PAYMENT_LATE_FINE.AMOUNT,Tables.EH_PAYMENT_LATE_FINE.NAME)
-                    .from(Tables.EH_PAYMENT_LATE_FINE)
-                    .leftOuterJoin(Tables.EH_PAYMENT_BILL_ITEMS)
-                    .on(Tables.EH_PAYMENT_LATE_FINE.BILL_ITEM_ID.eq(Tables.EH_PAYMENT_BILL_ITEMS.ID))
-                    .where(Tables.EH_PAYMENT_LATE_FINE.BILL_ITEM_ID.eq(dto.getBillItemId()))
-                    .fetch()
-                    .forEach(r -> {
-                        BillDTO fineDTO = (BillDTO)dto.clone();
-                        fineDTO.setBillItemName(r.getValue(Tables.EH_PAYMENT_LATE_FINE.NAME));
-                        fineDTO.setAmountReceivable(r.getValue(Tables.EH_PAYMENT_LATE_FINE.AMOUNT));
-                        fineDTO.setAmountReceived(new BigDecimal("0"));
-                        fineDTO.setAmountOwed(r.getValue(Tables.EH_PAYMENT_LATE_FINE.AMOUNT));
-                        dtos.add(fineDTO);
-                    });
+
         }
         return dtos;
     }

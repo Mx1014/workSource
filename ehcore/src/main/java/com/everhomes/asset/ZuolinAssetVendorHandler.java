@@ -310,18 +310,19 @@ public class ZuolinAssetVendorHandler implements AssetVendorHandler {
     }
 
     @Override
-    public List<BillDTO> listBillItems(String targetType, String billId, String targetName, Integer pageOffSet, Integer pageSize,Long ownerId, ListBillItemsResponse response) {
-        if (pageOffSet == null) {
-            pageOffSet = 0;
+    public List<BillDTO> listBillItems(String targetType, String billId, String targetName, Integer pageNum, Integer pageSize,Long ownerId, ListBillItemsResponse response) {
+        if (pageNum == null) {
+            pageNum = 1;
         }
         if(pageSize == null){
             pageSize = 20;
         }
-        List<BillDTO> list = assetProvider.listBillItems(Long.parseLong(billId),targetName,pageOffSet,pageSize);
+        List<BillDTO> list = assetProvider.listBillItems(Long.parseLong(billId),targetName,pageNum,pageSize);
         if(list.size() <= pageSize) {
             response.setNextPageAnchor(null);
         }else {
-            response.setNextPageAnchor(((Integer)(pageOffSet+pageSize)).longValue());
+            Integer nextPageNum = pageNum + 1;
+            response.setNextPageAnchor(nextPageNum.longValue());
             list.remove(list.size()-1);
         }
         return list;
