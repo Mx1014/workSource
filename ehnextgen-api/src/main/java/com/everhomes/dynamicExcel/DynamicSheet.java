@@ -5,6 +5,8 @@ package com.everhomes.dynamicExcel;
  * Created by Wentian Wang on 2018/1/11.
  */
 
+import com.everhomes.util.StringHelper;
+
 import javax.validation.constraints.NotNull;
 import java.util.List;
 import java.util.Map;
@@ -56,5 +58,10 @@ public class DynamicSheet {
 
     public void setGroupId(Long groupId) {
         this.groupId = groupId;
+    }
+
+    @Override
+    public String toString() {
+        return StringHelper.toJsonString(this);
     }
 }

@@ -3,6 +3,7 @@ package com.everhomes.varField;
 import com.everhomes.constants.ErrorCodes;
 import com.everhomes.controller.ControllerBase;
 import com.everhomes.discover.RestReturn;
+import com.everhomes.dynamicExcel.DynamicImportResponse;
 import com.everhomes.rest.RestResponse;
 import com.everhomes.rest.asset.ImportFieldsExcelResponse;
 import com.everhomes.rest.field.ExportFieldsExcelCommand;
@@ -280,9 +281,9 @@ public class FieldController extends ControllerBase {
      */
     @RequireAuthentication(false)
     @RequestMapping("importFieldsExcel")
-    @RestReturn(ImportFieldsExcelResponse.class)
+    @RestReturn(DynamicImportResponse.class)
     public RestResponse importFieldsExcelRe(@Valid ImportFieldExcelCommand cmd, MultipartFile file){
-        ImportFieldsExcelResponse response = fieldService.importDynamicExcel(cmd,file);
+        DynamicImportResponse response = fieldService.importDynamicExcel(cmd,file);
         RestResponse restResponse = new RestResponse(response);
         restResponse.setErrorCode(200);
         restResponse.setErrorDescription("OK");

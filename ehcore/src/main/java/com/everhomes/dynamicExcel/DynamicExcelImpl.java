@@ -185,7 +185,17 @@ public class DynamicExcelImpl implements DynamicExcelService{
                 if (ds.size() != 1) {
                     LOGGER.error("returned wrong number of dynamicSheet for import = {},size={}",sheet.getSheetName()
                             ,ds==null?0:ds.size());
-                    continue ;
+                    response.setFailedRowNumber(response.getFailedRowNumber()+(sheet.getPhysicalNumberOfRows() - headerRow));
+                    continue sheet;
+                }else{
+                    DynamicSheet dynamicSheet = ds.get(0);
+                    List<DynamicField> dynamicFields = dynamicSheet.getDynamicFields();
+                    if(dynamicFields.size() != headers.size()){
+                        LOGGER.error("headers' size is not euqual to dynamicFields', dynamicSheet = {}, headers = {}, ",
+                                dynamicSheet,headers);
+                        response.setFailedRowNumber(response.getFailedRowNumber()+(sheet.getPhysicalNumberOfRows() - headerRow));
+                        continue sheet;
+                    }
                 }
 //                //数据的获得
 //                for (int j = headerRow + 1; j <= sheet.getLastRowNum(); j++) {
@@ -257,6 +267,7 @@ public class DynamicExcelImpl implements DynamicExcelService{
 //            //后处理
 //            h.postProcess(response);
 //        }catch (Exception e){}
+        response.write2failCause();
         return response;
     }
 

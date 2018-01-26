@@ -134,7 +134,7 @@ public interface UserProvider {
 
     List<TargetDTO> findUesrIdByNameAndAddressId(String targetName, List<Long> ids, String tel);
 
-    TargetDTO findUserByTokenAndName(String tel, String targetName);
+    TargetDTO findUserByToken(String tel,Integer namespaceId);
 
     /**
      * 查询非当前userId的正常用户数据
@@ -156,4 +156,6 @@ public interface UserProvider {
      * 用于测试缓存使用是否正常，不要用于业务使用 by lqs 20171019
      */
     void updateCacheStatus();
+
+    String findMobileByUid(Long contactId);
 }
