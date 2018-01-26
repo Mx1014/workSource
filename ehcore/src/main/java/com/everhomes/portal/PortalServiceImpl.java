@@ -157,6 +157,14 @@ public class PortalServiceImpl implements PortalService {
 
 	@Override
 	public ListServiceModuleAppsResponse listServiceModuleApps(ListServiceModuleAppsCommand cmd) {
+
+		if(cmd.getVersionId() == null){
+			PortalVersion releaseVersion = portalVersionProvider.findReleaseVersion(cmd.getNamespaceId());
+			if(releaseVersion != null){
+				cmd.setVersionId(releaseVersion.getId());
+			}
+		}
+
 		List<ServiceModuleApp> moduleApps = serviceModuleAppProvider.listServiceModuleApp(cmd.getNamespaceId(), cmd.getModuleId(), cmd.getVersionId());
 		return new ListServiceModuleAppsResponse(moduleApps.stream().map(r ->{
 			return processServiceModuleAppDTO(r);
@@ -1394,7 +1402,7 @@ public class PortalServiceImpl implements PortalService {
 		PortalVersion maxBigVersion = portalVersionProvider.findMaxBigVersion(publishVersion.getNamespaceId());
 
 		Calendar calendar = Calendar.getInstance();
-		Integer nowDateVersion = calendar.get(Calendar.YEAR) * 10000 + calendar.get(Calendar.MONTH) * 100 + calendar.get(Calendar.DATE);
+		Integer nowDateVersion = calendar.get(Calendar.YEAR) * 10000 + (calendar.get(Calendar.MONTH) + 1) * 100 + calendar.get(Calendar.DATE);
 
 
 		publishVersion.setDateVersion(nowDateVersion);
@@ -2019,7 +2027,7 @@ public class PortalServiceImpl implements PortalService {
 
 
 		Calendar calendar = Calendar.getInstance();
-		Integer nowDateVersion = calendar.get(Calendar.YEAR) * 10000 + calendar.get(Calendar.MONTH) * 100 + calendar.get(Calendar.DATE);
+		Integer nowDateVersion = calendar.get(Calendar.YEAR) * 10000 + (calendar.get(Calendar.MONTH) + 1) * 100 + calendar.get(Calendar.DATE);
 		newVersion.setDateVersion(nowDateVersion);
 
 		//如果不存在旧版本则设置大版本为1，旧版本存在并且日期和当期前日期不一致则大版本往上加，否则是新日期设置大版本为1
