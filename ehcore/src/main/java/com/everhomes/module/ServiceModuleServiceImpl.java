@@ -24,6 +24,7 @@ import com.everhomes.rest.acl.*;
 import com.everhomes.rest.address.CommunityDTO;
 import com.everhomes.rest.common.AllFlagType;
 import com.everhomes.rest.common.EntityType;
+import com.everhomes.rest.community.CommunityFetchType;
 import com.everhomes.rest.module.*;
 import com.everhomes.rest.oauth2.ControlTargetOption;
 import com.everhomes.rest.oauth2.ModuleManagementType;
@@ -634,7 +635,11 @@ public class ServiceModuleServiceImpl implements ServiceModuleService {
         }
         Integer namespaceId = UserContext.getCurrentNamespaceId();
         List<ProjectDTO> dtos = getUserProjectsByModuleId(userId, cmd.getOrganizationId(), cmd.getModuleId());
+        if(cmd.getCommunityFetchType() != null){
+            return rolePrivilegeService.getTreeProjectCategories(namespaceId, dtos, CommunityFetchType.fromCode(cmd.getCommunityFetchType()));
+        }
         return rolePrivilegeService.getTreeProjectCategories(namespaceId, dtos);
+
     }
 
     @Override

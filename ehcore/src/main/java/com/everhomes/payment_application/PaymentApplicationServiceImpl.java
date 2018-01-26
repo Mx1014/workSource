@@ -18,10 +18,13 @@ import com.everhomes.rest.flow.FlowOwnerType;
 import com.everhomes.rest.launchpad.ActionType;
 import com.everhomes.rest.payment_application.*;
 import com.everhomes.search.PaymentApplicationSearcher;
+import com.everhomes.sms.DateUtil;
 import com.everhomes.user.UserContext;
 import com.everhomes.user.UserPrivilegeMgr;
 import com.everhomes.util.ConvertHelper;
+import com.everhomes.util.DateHelper;
 import com.everhomes.util.RuntimeErrorException;
+import org.apache.commons.lang.math.RandomUtils;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -29,6 +32,7 @@ import org.springframework.stereotype.Component;
 
 import java.math.BigDecimal;
 import java.sql.Timestamp;
+import java.util.Date;
 
 /**
  * Created by ying.xiong on 2017/12/27.
@@ -57,6 +61,12 @@ public class PaymentApplicationServiceImpl implements PaymentApplicationService 
 
     @Autowired
     private UserPrivilegeMgr userPrivilegeMgr;
+
+    @Override
+    public String generatePaymentApplicationNumber() {
+        String num = DateUtil.dateToStr(new Date(), DateUtil.NO_SLASH) + (int)((Math.random()*9+1)*1000);
+        return num;
+    }
 
     @Override
     public PaymentApplicationDTO createPaymentApplication(CreatePaymentApplicationCommand cmd) {

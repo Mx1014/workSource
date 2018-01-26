@@ -5,6 +5,7 @@ import com.everhomes.controller.ControllerBase;
 import com.everhomes.discover.RestReturn;
 import com.everhomes.rest.RestResponse;
 import com.everhomes.rest.contract.*;
+import com.everhomes.rest.openapi.OrganizationDTO;
 import com.everhomes.search.ContractSearcher;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.data.web.SortDefault;
@@ -97,6 +98,16 @@ public class PaymentContractController extends ControllerBase {
         cmd.setPaymentFlag((byte)1);
         getContractService().reviewContract(cmd);
         return new RestResponse();
+    }
+
+    /**
+     * <p>拿到用户的部门</p>
+     * <b>URL: /payment_contract/getUserGroups</b>
+     */
+    @RequestMapping("getUserGroups")
+    @RestReturn(value = OrganizationDTO.class, collection = true)
+    public RestResponse getUserGroups(GetUserGroupsCommand cmd){
+        return new RestResponse(getContractService().getUserGroups(cmd));
     }
 
 

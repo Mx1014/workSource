@@ -48,4 +48,14 @@ public class PaymentApplicationController extends ControllerBase {
     public RestResponse getPaymentApplication(GetPaymentApplicationCommand cmd){
         return new RestResponse(paymentApplicationService.getPaymentApplication(cmd));
     }
+
+    /**
+     * <p>生成单号</p>
+     * <b>URL: /payment_application/generatePaymentApplicationNumber</b>
+     */
+    @RequestMapping("generatePaymentApplicationNumber")
+    @RestReturn(String.class)
+    public RestResponse generatePaymentApplicationNumber(){
+        return new RestResponse(paymentApplicationService.generatePaymentApplicationNumber());
+    }
 }
