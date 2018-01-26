@@ -2,7 +2,6 @@
 package com.everhomes.salary;
 
 import com.everhomes.configuration.ConfigurationProvider;
-import com.everhomes.coordinator.CoordinationProvider;
 import com.everhomes.db.DbProvider;
 import com.everhomes.filedownload.TaskService;
 import com.everhomes.listing.CrossShardListingLocator;
@@ -2287,7 +2286,6 @@ public class SalaryServiceImpl implements SalaryService {
         //更新和删除
         List<SalaryGroupEntity> entities = salaryGroupEntityProvider.listSalaryGroupEntityByOrgId(cmd.getOrganizationId());
         for (SalaryGroupEntity entity : entities) {
-
 //            //不可编辑不可删除直接跳过
 //            if (NormalFlag.NO == NormalFlag.fromCode(entity.getDeleteFlag()) &&
 //                    NormalFlag.NO == NormalFlag.fromCode(entity.getEditableFlag())) {
@@ -2631,7 +2629,7 @@ public class SalaryServiceImpl implements SalaryService {
     }
 
     @Override
-    public OutputStream getEmployeeSalaryOutPut(Long organizationId) {
+    public OutputStream getEmployeeSalaryOutPut(Long organizationId, Long taskId) {
         List<SalaryGroupEntity> groupEntities = salaryGroupEntityProvider.listSalaryGroupEntityByOrgId(organizationId);
 
         XSSFWorkbook wb = new XSSFWorkbook();
@@ -2641,6 +2639,7 @@ public class SalaryServiceImpl implements SalaryService {
         //人员列表
         // TODO: 2018/1/25
         List<Long> detailIds = new ArrayList<>();
+        int processNum = 0;
         for (Long detailId : detailIds) {
             OrganizationMemberDetails detail = organizationProvider.findOrganizationMemberDetailsByDetailId(detailId);
             Row row = sheet.createRow(sheet.getLastRowNum() + 1);
@@ -2655,6 +2654,8 @@ public class SalaryServiceImpl implements SalaryService {
                     row.createCell(++i).setCellValue("");
                 }
             }
+            taskService.updateTaskProcess(taskId, (int) (++processNum *100) / detailIds.size());
+
         }
         ByteArrayOutputStream out = new ByteArrayOutputStream();
         try {

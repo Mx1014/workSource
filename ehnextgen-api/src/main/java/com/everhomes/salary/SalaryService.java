@@ -138,5 +138,5 @@ public interface SalaryService {
 
     ImportFileResponse getImportResult(GetImportFileResultCommand cmd);
 
-    OutputStream getEmployeeSalaryOutPut(Long organizationId);
+    OutputStream getEmployeeSalaryOutPut(Long organizationId, Long taskId);
 }
