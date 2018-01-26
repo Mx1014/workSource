@@ -918,3 +918,6 @@ CREATE TABLE `eh_sync_data_tasks` (
 ) ENGINE=INNODB DEFAULT CHARSET=utf8mb4;
 
 ALTER TABLE `eh_addresses` ADD COLUMN `version` VARCHAR(32) COMMENT '版本号';
+
+-- 更新“论坛/公告”为“论坛” add by yanjun 20180126
+UPDATE eh_service_modules set `name` = '论坛' WHERE id = 10100;
