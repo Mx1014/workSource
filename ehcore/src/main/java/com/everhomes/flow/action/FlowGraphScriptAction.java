@@ -8,9 +8,10 @@ import com.everhomes.bootstrap.PlatformContext;
 import com.everhomes.rest.flow.FlowScriptType;
 
 public class FlowGraphScriptAction extends FlowGraphAction {
+
 	private static final Logger LOGGER = LoggerFactory.getLogger(FlowGraphScriptAction.class);
 	
-	private FlowScriptProvider flowScriptProvider;
+	transient private FlowScriptProvider flowScriptProvider;
 	
 	public FlowGraphScriptAction() {
 		flowScriptProvider = PlatformContext.getComponent(FlowScriptProvider.class);

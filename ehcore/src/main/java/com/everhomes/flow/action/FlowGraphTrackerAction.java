@@ -8,8 +8,8 @@ import com.everhomes.rest.flow.FlowStepType;
 public class FlowGraphTrackerAction extends FlowGraphAction {
 
     private FlowStepType stepType;
-	private FlowService flowService;
-	private FlowEventLogProvider flowEventLogProvider;
+	transient private FlowService flowService;
+	transient private FlowEventLogProvider flowEventLogProvider;
 
 	public FlowGraphTrackerAction() {
 		this(null);

@@ -180,7 +180,7 @@ public class ParkingClearanceFlowEnableTest1 extends LoginAuthTestCase {
     	// updateNodeTracker(node2, orgId);
     	// updateNodeTracker(node3, orgId);
     	
-    	FlowButton node1ApproveStepButton = flowButtonProvider.findFlowButtonByStepType(node1.getId(), FlowConstants.FLOW_CONFIG_VER
+    	FlowButton node1ApproveStepButton = flowButtonProvider.findFlowButtonByStepType(flow.getFlowMainId(),node1.getId(), FlowConstants.FLOW_CONFIG_VER
     			, FlowStepType.APPROVE_STEP.getCode(), FlowUserType.PROCESSOR.getCode());
     	
     	UpdateFlowButtonCommand buttonCmd = new UpdateFlowButtonCommand();
@@ -195,7 +195,7 @@ public class ParkingClearanceFlowEnableTest1 extends LoginAuthTestCase {
     	flowService.updateFlowButton(buttonCmd);
     	
     	//REMIND_COUNT
-    	FlowButton node1ApplierRemindButton = flowButtonProvider.findFlowButtonByStepType(node1.getId(), FlowConstants.FLOW_CONFIG_VER
+    	FlowButton node1ApplierRemindButton = flowButtonProvider.findFlowButtonByStepType(flow.getFlowMainId(),node1.getId(), FlowConstants.FLOW_CONFIG_VER
     			, FlowStepType.REMINDER_STEP.getCode(), FlowUserType.APPLIER.getCode());
     	buttonCmd = new UpdateFlowButtonCommand();
     	buttonCmd.setFlowButtonId(node1ApplierRemindButton.getId());
@@ -204,7 +204,7 @@ public class ParkingClearanceFlowEnableTest1 extends LoginAuthTestCase {
     	buttonCmd.setRemindCount(2);
     	flowService.updateFlowButton(buttonCmd);
 
-    	FlowButton node1ApplierAbsortButton = flowButtonProvider.findFlowButtonByStepType(node1.getId(), FlowConstants.FLOW_CONFIG_VER
+    	FlowButton node1ApplierAbsortButton = flowButtonProvider.findFlowButtonByStepType(flow.getFlowMainId(),node1.getId(), FlowConstants.FLOW_CONFIG_VER
     			, FlowStepType.ABSORT_STEP.getCode(), FlowUserType.APPLIER.getCode());
     	buttonCmd = new UpdateFlowButtonCommand();
     	buttonCmd.setFlowButtonId(node1ApplierAbsortButton.getId());
@@ -213,7 +213,7 @@ public class ParkingClearanceFlowEnableTest1 extends LoginAuthTestCase {
         buttonCmd.setNeedSubject((byte)1);
     	flowService.updateFlowButton(buttonCmd);
 
-        FlowButton node2ApproveStepButton = flowButtonProvider.findFlowButtonByStepType(node2.getId(), FlowConstants.FLOW_CONFIG_VER
+        FlowButton node2ApproveStepButton = flowButtonProvider.findFlowButtonByStepType(flow.getFlowMainId(),node2.getId(), FlowConstants.FLOW_CONFIG_VER
                 , FlowStepType.APPROVE_STEP.getCode(), FlowUserType.PROCESSOR.getCode());
         buttonCmd = new UpdateFlowButtonCommand();
         buttonCmd.setFlowButtonId(node2ApproveStepButton.getId());
@@ -223,7 +223,7 @@ public class ParkingClearanceFlowEnableTest1 extends LoginAuthTestCase {
         flowService.updateFlowButton(buttonCmd);
 
         //REMIND_COUNT
-        FlowButton node2ApplierRemindButton = flowButtonProvider.findFlowButtonByStepType(node2.getId(), FlowConstants.FLOW_CONFIG_VER
+        FlowButton node2ApplierRemindButton = flowButtonProvider.findFlowButtonByStepType(flow.getFlowMainId(),node2.getId(), FlowConstants.FLOW_CONFIG_VER
                 , FlowStepType.REMINDER_STEP.getCode(), FlowUserType.APPLIER.getCode());
         buttonCmd = new UpdateFlowButtonCommand();
         buttonCmd.setFlowButtonId(node2ApplierRemindButton.getId());
@@ -232,7 +232,7 @@ public class ParkingClearanceFlowEnableTest1 extends LoginAuthTestCase {
         buttonCmd.setRemindCount(2);
         flowService.updateFlowButton(buttonCmd);
 
-        FlowButton node2ApplierAbsortButton = flowButtonProvider.findFlowButtonByStepType(node2.getId(), FlowConstants.FLOW_CONFIG_VER
+        FlowButton node2ApplierAbsortButton = flowButtonProvider.findFlowButtonByStepType(flow.getFlowMainId(),node2.getId(), FlowConstants.FLOW_CONFIG_VER
                 , FlowStepType.ABSORT_STEP.getCode(), FlowUserType.APPLIER.getCode());
         buttonCmd = new UpdateFlowButtonCommand();
         buttonCmd.setFlowButtonId(node2ApplierAbsortButton.getId());
@@ -522,7 +522,7 @@ public class ParkingClearanceFlowEnableTest1 extends LoginAuthTestCase {
     	Assert.assertTrue(flowGraph.getNodes().size() == 5);
     	
     	int nodeIndex = 1;
-    	FlowButton flowButton = flowButtonProvider.findFlowButtonByStepType(flowGraph.getNodes().get(nodeIndex).getFlowNode().getId()
+    	FlowButton flowButton = flowButtonProvider.findFlowButtonByStepType(flow.getFlowMainId(),flowGraph.getNodes().get(nodeIndex).getFlowNode().getId()
     			, flow.getFlowVersion()
     			, FlowStepType.APPROVE_STEP.getCode(), FlowUserType.PROCESSOR.getCode());
     	Assert.assertTrue(flowButton != null);
@@ -559,7 +559,7 @@ public class ParkingClearanceFlowEnableTest1 extends LoginAuthTestCase {
     	
     	//step 2 test
     	++nodeIndex;
-    	flowButton = flowButtonProvider.findFlowButtonByStepType(flowGraph.getNodes().get(nodeIndex).getFlowNode().getId()
+    	flowButton = flowButtonProvider.findFlowButtonByStepType(flow.getFlowMainId(),flowGraph.getNodes().get(nodeIndex).getFlowNode().getId()
     			, flow.getFlowVersion()
     			, FlowStepType.APPROVE_STEP.getCode(), FlowUserType.PROCESSOR.getCode());
     	Assert.assertTrue(flowButton != null);
@@ -587,7 +587,7 @@ public class ParkingClearanceFlowEnableTest1 extends LoginAuthTestCase {
     	
     	//step 3 test
     	++nodeIndex;
-    	flowButton = flowButtonProvider.findFlowButtonByStepType(flowGraph.getNodes().get(nodeIndex).getFlowNode().getId()
+    	flowButton = flowButtonProvider.findFlowButtonByStepType(flow.getFlowMainId(),flowGraph.getNodes().get(nodeIndex).getFlowNode().getId()
     			, flow.getFlowVersion()
     			, FlowStepType.APPROVE_STEP.getCode(), FlowUserType.PROCESSOR.getCode());
     	Assert.assertTrue(flowButton != null);
@@ -629,7 +629,7 @@ public class ParkingClearanceFlowEnableTest1 extends LoginAuthTestCase {
     	Assert.assertTrue(flowGraph.getNodes().size() == 5);
     	
     	int nodeIndex = 1;
-    	FlowButton flowButton = flowButtonProvider.findFlowButtonByStepType(flowGraph.getNodes().get(nodeIndex).getFlowNode().getId()
+    	FlowButton flowButton = flowButtonProvider.findFlowButtonByStepType(flow.getFlowMainId(),flowGraph.getNodes().get(nodeIndex).getFlowNode().getId()
     			, flow.getFlowVersion()
     			, FlowStepType.COMMENT_STEP.getCode(), FlowUserType.PROCESSOR.getCode());
     	Assert.assertTrue(flowButton != null);
@@ -672,7 +672,7 @@ public class ParkingClearanceFlowEnableTest1 extends LoginAuthTestCase {
     	Assert.assertTrue(flowGraph.getNodes().size() == 5);
     	
     	int nodeIndex = 1;
-    	FlowButton flowButton = flowButtonProvider.findFlowButtonByStepType(flowGraph.getNodes().get(nodeIndex).getFlowNode().getId()
+    	FlowButton flowButton = flowButtonProvider.findFlowButtonByStepType(flow.getFlowMainId(),flowGraph.getNodes().get(nodeIndex).getFlowNode().getId()
     			, flow.getFlowVersion()
     			, FlowStepType.APPROVE_STEP.getCode(), FlowUserType.PROCESSOR.getCode());
     	Assert.assertTrue(flowButton != null);
@@ -708,7 +708,7 @@ public class ParkingClearanceFlowEnableTest1 extends LoginAuthTestCase {
     	
     	//step 2 test
     	++nodeIndex;
-    	flowButton = flowButtonProvider.findFlowButtonByStepType(flowGraph.getNodes().get(nodeIndex).getFlowNode().getId()
+    	flowButton = flowButtonProvider.findFlowButtonByStepType(flow.getFlowMainId(),flowGraph.getNodes().get(nodeIndex).getFlowNode().getId()
     			, flow.getFlowVersion()
     			, FlowStepType.APPROVE_STEP.getCode(), FlowUserType.PROCESSOR.getCode());
     	Assert.assertTrue(flowButton != null);
@@ -736,7 +736,7 @@ public class ParkingClearanceFlowEnableTest1 extends LoginAuthTestCase {
     	
     	//step 3 test
     	++nodeIndex;
-    	flowButton = flowButtonProvider.findFlowButtonByStepType(flowGraph.getNodes().get(nodeIndex).getFlowNode().getId()
+    	flowButton = flowButtonProvider.findFlowButtonByStepType(flow.getFlowMainId(),flowGraph.getNodes().get(nodeIndex).getFlowNode().getId()
     			, flow.getFlowVersion()
     			, FlowStepType.REJECT_STEP.getCode(), FlowUserType.PROCESSOR.getCode());
     	Assert.assertTrue(flowButton != null);
@@ -771,7 +771,7 @@ public class ParkingClearanceFlowEnableTest1 extends LoginAuthTestCase {
     	Assert.assertTrue(flowGraph.getNodes().size() == 5);
     	
     	int nodeIndex = 1;
-    	FlowButton flowButton = flowButtonProvider.findFlowButtonByStepType(flowGraph.getNodes().get(nodeIndex).getFlowNode().getId()
+    	FlowButton flowButton = flowButtonProvider.findFlowButtonByStepType(flow.getFlowMainId(),flowGraph.getNodes().get(nodeIndex).getFlowNode().getId()
     			, flow.getFlowVersion()
     			, FlowStepType.APPROVE_STEP.getCode(), FlowUserType.PROCESSOR.getCode());
     	Assert.assertTrue(flowButton != null);
@@ -807,7 +807,7 @@ public class ParkingClearanceFlowEnableTest1 extends LoginAuthTestCase {
     	
     	//step 2 test
     	++nodeIndex;
-    	flowButton = flowButtonProvider.findFlowButtonByStepType(flowGraph.getNodes().get(nodeIndex).getFlowNode().getId()
+    	flowButton = flowButtonProvider.findFlowButtonByStepType(flow.getFlowMainId(),flowGraph.getNodes().get(nodeIndex).getFlowNode().getId()
     			, flow.getFlowVersion()
     			, FlowStepType.APPROVE_STEP.getCode(), FlowUserType.PROCESSOR.getCode());
     	Assert.assertTrue(flowButton != null);
@@ -835,7 +835,7 @@ public class ParkingClearanceFlowEnableTest1 extends LoginAuthTestCase {
     	
     	//step 3 test
     	++nodeIndex;
-    	flowButton = flowButtonProvider.findFlowButtonByStepType(flowGraph.getNodes().get(nodeIndex).getFlowNode().getId()
+    	flowButton = flowButtonProvider.findFlowButtonByStepType(flow.getFlowMainId(),flowGraph.getNodes().get(nodeIndex).getFlowNode().getId()
     			, flow.getFlowVersion()
     			, FlowStepType.ABSORT_STEP.getCode(), FlowUserType.PROCESSOR.getCode());
     	Assert.assertTrue(flowButton != null);
@@ -869,7 +869,7 @@ public class ParkingClearanceFlowEnableTest1 extends LoginAuthTestCase {
     	Assert.assertTrue(flowGraph.getNodes().size() == 5);
     	
     	int nodeIndex = 1;
-    	FlowButton flowButton = flowButtonProvider.findFlowButtonByStepType(flowGraph.getNodes().get(nodeIndex).getFlowNode().getId()
+    	FlowButton flowButton = flowButtonProvider.findFlowButtonByStepType(flow.getFlowMainId(),flowGraph.getNodes().get(nodeIndex).getFlowNode().getId()
     			, flow.getFlowVersion()
     			, FlowStepType.APPROVE_STEP.getCode(), FlowUserType.PROCESSOR.getCode());
     	Assert.assertTrue(flowButton != null);
@@ -904,7 +904,7 @@ public class ParkingClearanceFlowEnableTest1 extends LoginAuthTestCase {
     	
     	//step 2 test
     	++nodeIndex;
-    	flowButton = flowButtonProvider.findFlowButtonByStepType(flowGraph.getNodes().get(nodeIndex).getFlowNode().getId()
+    	flowButton = flowButtonProvider.findFlowButtonByStepType(flow.getFlowMainId(),flowGraph.getNodes().get(nodeIndex).getFlowNode().getId()
     			, flow.getFlowVersion()
     			, FlowStepType.TRANSFER_STEP.getCode(), FlowUserType.PROCESSOR.getCode());
     	Assert.assertTrue(flowButton != null);
@@ -947,7 +947,7 @@ public class ParkingClearanceFlowEnableTest1 extends LoginAuthTestCase {
     	Assert.assertTrue(flowGraph.getNodes().size() == 5);
     	
     	int nodeIndex = 1;
-    	FlowButton flowButton = flowButtonProvider.findFlowButtonByStepType(flowGraph.getNodes().get(nodeIndex).getFlowNode().getId()
+    	FlowButton flowButton = flowButtonProvider.findFlowButtonByStepType(flow.getFlowMainId(),flowGraph.getNodes().get(nodeIndex).getFlowNode().getId()
     			, flow.getFlowVersion()
     			, FlowStepType.REMINDER_STEP.getCode(), FlowUserType.APPLIER.getCode());
     	Assert.assertTrue(flowButton != null);
