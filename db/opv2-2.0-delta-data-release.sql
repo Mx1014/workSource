@@ -326,3 +326,9 @@ INSERT INTO `eh_file_icons` (`id`, `file_type`, `icon_name`, `icon_uri`, `create
 INSERT INTO `eh_file_icons` (`id`, `file_type`, `icon_name`, `icon_uri`, `create_time`) VALUES ('28', 'other', 'other.png', 'cs://1/image/aW1hZ2UvTVRveU5EQXpaakU1TXpObU1UVXhZbU15TnpNeU9EZzJPR0l6WlRKaFlqazFZZw', '2018-01-18 20:32:44');
 
 -- end by nan.rong
+
+
+-- 更新“论坛/公告”为“论坛” add by yanjun 20180126
+UPDATE eh_service_modules set `name` = '论坛' WHERE id = 10100;
+
+DELETE from eh_service_module_privileges WHERE module_id = 10600;
