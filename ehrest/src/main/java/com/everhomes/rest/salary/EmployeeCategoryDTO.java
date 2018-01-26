@@ -12,6 +12,7 @@ import java.util.List;
  * <li>description: 提示批注(有就有没有就不展示)</li>
  * <li>customFlag: 是否可以添加自定义字段 1-是 0-否</li>
  * <li>customType: 自定义字段的类型 0-发放项 1-扣款项 2-成本项 3-冗余项</li>
+ * <li>salaryValue: 数据汇总(如果是数值数据)</li>
  * <li>entities: 字段项 {@link com.everhomes.rest.salary.SalaryPeriodEmployeeEntityDTO}</li>
  * </ul>
  */
@@ -23,6 +24,7 @@ public class EmployeeCategoryDTO {
     private Byte customFlag;
     private Byte customType;
     private Byte status;
+    private String salaryValue;
     @ItemType(SalaryPeriodEmployeeEntityDTO.class)
     List<SalaryPeriodEmployeeEntityDTO> entities;
 
@@ -85,5 +87,13 @@ public class EmployeeCategoryDTO {
 
     public void setStatus(Byte status) {
         this.status = status;
+    }
+
+    public String getSalaryValue() {
+        return salaryValue;
+    }
+
+    public void setSalaryValue(String salaryValue) {
+        this.salaryValue = salaryValue;
     }
 }

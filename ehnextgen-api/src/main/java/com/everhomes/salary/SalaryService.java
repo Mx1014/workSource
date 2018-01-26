@@ -7,6 +7,7 @@ import com.everhomes.rest.salary.*;
 import org.springframework.web.multipart.MultipartFile;
 
 import javax.servlet.http.HttpServletResponse;
+import java.io.OutputStream;
 
 public interface SalaryService {
 
@@ -136,4 +137,6 @@ public interface SalaryService {
     ImportFileTaskDTO importEmployeeSalary(ExportEmployeeSalaryTemplateCommand cmd, MultipartFile[] files);
 
     ImportFileResponse getImportResult(GetImportFileResultCommand cmd);
+
+    OutputStream getEmployeeSalaryOutPut(Long organizationId);
 }
