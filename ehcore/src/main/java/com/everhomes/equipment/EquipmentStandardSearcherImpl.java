@@ -235,18 +235,21 @@ public class EquipmentStandardSearcherImpl extends AbstractElasticSearch impleme
         if (maps != null && maps.size() > 0) {
             for (EquipmentModelCommunityMap map : maps) {
                 EquipmentInspectionStandards standard = equipmentProvider.findStandardById(map.getModelId());
-                //有效的才加  fix bug
-                if (cmd.getStatus() != null) {
-                    if (!Objects.equals(standard.getStatus(), cmd.getStatus())) {
-                        continue;
-                    }
-                }
-                if (cmd.getStandardType() != null) {
-                    if (!Objects.equals(standard.getStatus(), cmd.getStandardType())) {
-                        continue;
-                    }
-                }
                 if (standard != null && EquipmentStandardStatus.ACTIVE.equals(EquipmentStandardStatus.fromStatus(standard.getStatus()))) {
+                    LOGGER.info("map standard :"+standard);
+                    //有效的才加  fix bug
+                    if (cmd.getStatus() != null) {
+                        LOGGER.info("map standard :"+cmd.getStatus());
+                        if (!Objects.equals(standard.getStatus(), cmd.getStatus())) {
+                            continue;
+                        }
+                    }
+                    if (cmd.getStandardType() != null) {
+                        LOGGER.info("map standard :"+cmd.getStandardType());
+                        if (!Objects.equals(standard.getStatus(), cmd.getStandardType())) {
+                            continue;
+                        }
+                    }
                     processRepeatSetting(standard);
                     EquipmentStandardsDTO dto = ConvertHelper.convert(standard, EquipmentStandardsDTO.class);
                     dto.setDescription("");
