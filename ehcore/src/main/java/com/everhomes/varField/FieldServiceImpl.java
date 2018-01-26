@@ -209,11 +209,10 @@ public class FieldServiceImpl implements FieldService {
     }
 
     @Override
-    public ImportFieldsExcelResponse importDynamicExcel(ImportFieldExcelCommand cmd, MultipartFile file) {
+    public DynamicImportResponse importDynamicExcel(ImportFieldExcelCommand cmd, MultipartFile file) {
         // try to call dynamicExcelService.importMultiSheet
 
-        dynamicExcelService.importMultiSheet(file, DynamicExcelStrings.CUSTOEMR, null, cmd);
-        return null;
+        return dynamicExcelService.importMultiSheet(file, DynamicExcelStrings.CUSTOEMR, null, cmd);
     }
 
     @Override

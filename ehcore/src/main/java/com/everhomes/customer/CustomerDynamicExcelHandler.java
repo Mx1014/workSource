@@ -58,6 +58,7 @@ public class CustomerDynamicExcelHandler implements DynamicExcelHandler {
 
         List<DynamicField> dynamicFields = new ArrayList<>();
         ListFieldCommand command = ConvertHelper.convert(params, ListFieldCommand.class);
+        command.setGroupPath(group.getPath());
         List<FieldDTO> fields = fieldService.listFields(command);
         if(fields != null && fields.size() > 0) {
             fields.forEach(fieldDTO -> {

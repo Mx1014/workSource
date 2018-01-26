@@ -42,4 +42,8 @@ public class DynamicImportResponse {
     public void setStorage(Object storage) {
         this.storage = storage;
     }
+
+    public void write2failCause() {
+        this.failCause = "成功了" + successRowNumber +"行"+"失败了"+ failedRowNumber+"行";
+    }
 }

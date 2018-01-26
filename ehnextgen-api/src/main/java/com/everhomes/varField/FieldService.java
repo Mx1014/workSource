@@ -3,6 +3,7 @@ package com.everhomes.varField;
 
 import java.util.List;
 
+import com.everhomes.dynamicExcel.DynamicImportResponse;
 import com.everhomes.rest.asset.ImportFieldsExcelResponse;
 import com.everhomes.rest.field.ExportFieldsExcelCommand;
 import com.everhomes.rest.varField.*;
@@ -75,5 +76,5 @@ public interface FieldService {
 
     void exportDynamicExcel(ExportFieldsExcelCommand cmd, HttpServletResponse response);
 
-    ImportFieldsExcelResponse importDynamicExcel(ImportFieldExcelCommand cmd, MultipartFile file);
+    DynamicImportResponse importDynamicExcel(ImportFieldExcelCommand cmd, MultipartFile file);
 }
