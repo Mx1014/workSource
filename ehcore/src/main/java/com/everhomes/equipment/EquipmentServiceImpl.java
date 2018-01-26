@@ -212,7 +212,6 @@ import com.everhomes.search.EquipmentSearcher;
 import com.everhomes.search.EquipmentStandardMapSearcher;
 import com.everhomes.search.EquipmentStandardSearcher;
 import com.everhomes.search.EquipmentTasksSearcher;
-import com.everhomes.server.schema.tables.pojos.EhEquipmentInspectionEquipmentPlanMap;
 import com.everhomes.server.schema.tables.pojos.EhEquipmentInspectionTasks;
 import com.everhomes.settings.PaginationConfigHelper;
 import com.everhomes.sms.DateUtil;
@@ -5635,7 +5634,7 @@ private void checkUserPrivilege(Long orgId, Long privilegeId, Long communityId) 
 		List<EquipmentInspectionEquipmentPlanMap> planMaps = equipmentProvider.getEquipmentInspectionPlanMap(planId);
 		List<EquipmentStandardRelationDTO> relationDTOS = new ArrayList<>();
 		if (planMaps != null && planMaps.size() > 0) {
-			for (EhEquipmentInspectionEquipmentPlanMap map : planMaps) {
+			for (EquipmentInspectionEquipmentPlanMap map : planMaps) {
 				EquipmentInspectionEquipments equipment = equipmentProvider.findEquipmentById(map.getEquimentId());
 				EquipmentInspectionStandards standard = equipmentProvider.findStandardById(map.getStandardId());
 
@@ -5817,22 +5816,46 @@ private void checkUserPrivilege(Long orgId, Long privilegeId, Long communityId) 
 				task.setLastSyncTime(task.getReviewTime().toLocalDateTime().format(dateSF));
 			}
 			EquipmentInspectionPlans plan = equipmentProvider.getEquipmmentInspectionPlanById(task.getPlanId());
-			EquipmentInspectionPlanDTO planDTO = ConvertHelper.convert(plan, EquipmentInspectionPlanDTO.class);
-			if (planDTO != null) {
+			if (plan != null) {
+				EquipmentInspectionPlanDTO planDTO = ConvertHelper.convert(plan, EquipmentInspectionPlanDTO.class);
 				//填充巡检计划相关的巡检对象(需排序)
 				processEquipmentInspectionObjectsByPlanId(task.getPlanId(), planDTO);
 				equipments.addAll(planDTO.getEquipmentStandardRelations());
+			}else {
+				//兼容旧任务
+				EquipmentInspectionEquipments equipment = equipmentProvider.findEquipmentById(task.getEquipmentId());
+				EquipmentInspectionStandards standard = equipmentProvider.findStandardById(task.getStandardId());
+				EquipmentStandardRelationDTO relationDTO = new EquipmentStandardRelationDTO();
+				if (equipment != null && standard != null) {
+					relationDTO.setQrCodeFlag(equipment.getQrCodeFlag());
+					relationDTO.setLocation(equipment.getLocation());
+					relationDTO.setEquipmentName(equipment.getName());
+					relationDTO.setStandardId(standard.getId());
+					List<EquipmentStandardMap> equipmentStandardMaps = equipmentProvider.
+							findEquipmentStandardMap(standard.getId(), equipment.getId(),
+									InspectionStandardMapTargetType.EQUIPMENT.getCode());
+					if(equipmentStandardMaps!=null){
+						relationDTO.setId(equipmentStandardMaps.get(0).getId());
+					}
+					equipments.add(relationDTO);
+				}
 			}
 		});
+
 		offlineResponse.setOfflineTasks(tasks);
 		offlineResponse.setEquipments(equipments);
 		ListParametersByStandardIdCommand listParametersByStandardIdCommand = new ListParametersByStandardIdCommand();
+		Map<Long, Long> standardIds = new HashMap<>();
 		equipments.forEach((relation) -> {
-			listParametersByStandardIdCommand.setStandardId(relation.getStandardId());
+			standardIds.put(relation.getStandardId(),relation.getStandardId());
+		});
+		standardIds.forEach((k,v)->{
+			listParametersByStandardIdCommand.setStandardId(k);
 			List<InspectionItemDTO> itemDTOS = listParametersByStandardId(listParametersByStandardIdCommand);
 			items.addAll(itemDTOS);
 		});
-		offlineResponse.setItems(items);
+		//remove duplicated
+		offlineResponse.setItems(new ArrayList<>(items));
 		syncGroupOfflineData(offlineResponse,cmd);
 		syncRepairCategoryDate(offlineResponse,cmd);
 		return offlineResponse;
