@@ -164,7 +164,7 @@ public class ServiceAllianceFlowModuleListener extends GeneralApprovalFlowModule
 		}
 		flowCase.setContent(contentBuffer.toString());
 		
-		Byte status = flowCase.getStatus();
+		Byte status = ServiceAllianceWorkFlowStatus.PROCESSING.getCode();
 		if(FlowCaseType.fromCode(flowCase.getCaseType()) == FlowCaseType.DUMB){
 			status = ServiceAllianceWorkFlowStatus.NONE.getCode();
 		}
