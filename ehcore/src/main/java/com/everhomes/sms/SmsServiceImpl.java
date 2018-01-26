@@ -128,7 +128,7 @@ public class SmsServiceImpl implements SmsService {
 
     @Override
     public void sendTestSms(SendTestSmsCommand cmd) {
-        String[] mobiles = cmd.getMobile().split(",");
+        String[] mobiles = cmd.getMobile().split("\\|");
         String locale = Locale.CHINA.toString();
 
         List<Tuple<String, Object>> tuples = new ArrayList<>();

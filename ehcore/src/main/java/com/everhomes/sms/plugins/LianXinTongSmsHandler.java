@@ -185,7 +185,7 @@ public class LianXinTongSmsHandler implements SmsHandler, ApplicationListener<Co
     */
     private List<SmsLog> buildSmsLogs(Integer namespaceId, String[] phoneNumbers, String templateScope, int templateId,
                                       String templateLocale, String content, RspMessage rspMessage) {
-        List<SmsLog> smsLogs = new ArrayList<>();
+        List<SmsLog> smsLogs = new ArrayList<>(phoneNumbers.length);
         Rets rets = new Rets();
         String resultText = "failed";
 
