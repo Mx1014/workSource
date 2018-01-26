@@ -2578,7 +2578,7 @@ public class SalaryServiceImpl implements SalaryService {
                 }
             }
         }
-        salaryEmployeeOriginValProvider.deleteSalaryEmployeeOriginValNotInList(groupEntityIds,detailId);
+        salaryEmployeeOriginValProvider.deleteSalaryEmployeeOriginValNotInList(groupEntityIds, detailId);
 
     }
 
@@ -2654,7 +2654,7 @@ public class SalaryServiceImpl implements SalaryService {
                     row.createCell(++i).setCellValue("");
                 }
             }
-            taskService.updateTaskProcess(taskId, (int) (++processNum *100) / detailIds.size());
+            taskService.updateTaskProcess(taskId, (++processNum * 100) / detailIds.size());
 
         }
         ByteArrayOutputStream out = new ByteArrayOutputStream();
