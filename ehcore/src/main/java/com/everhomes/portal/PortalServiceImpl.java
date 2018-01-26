@@ -2613,8 +2613,20 @@ public class PortalServiceImpl implements PortalService {
 			// 同步reflectionServiceModule表
 			this.serviceModuleService.getOrCreateReflectionServiceModuleApp(namespaceId, actionData, moduleApp.getInstanceConfig(), itemLabel, serviceModule);
 
-			//设置OriginId为父辈的OriginId，如果父辈不存在则在createServiceModuleApp中将OriginId设置为自己的id
-			existServiceModuleApp = getServiceModuleApp(namespaceId, newVersion, actionData, moduleApp.getInstanceConfig(), serviceModule);
+
+			//查找设置多入口入口标识
+			String customTag = null;
+			String handlerPrefix = PortalPublishHandler.PORTAL_PUBLISH_OBJECT_PREFIX;
+			PortalPublishHandler handler = PlatformContext.getComponent(handlerPrefix + serviceModule.getId());
+			if(null != handler){
+				customTag = handler.getCustomTag(namespaceId, serviceModule.getId(), actionData, moduleApp.getInstanceConfig());
+				LOGGER.debug("get customTag from handler = {}, customTag =s {}",handler,customTag);
+			}
+			moduleApp.setCustomTag(customTag);
+
+			//查找已存在的应用模块
+			existServiceModuleApp = serviceModuleAppProvider.findServiceModuleApp(namespaceId, newVersion.getId(), serviceModule.getId(), customTag);
+
 		}
 
 		//如果没有则创建，有则返回已存在的
@@ -2627,20 +2639,11 @@ public class PortalServiceImpl implements PortalService {
 		return moduleApp;
 	}
 
-	private ServiceModuleApp getServiceModuleApp(Integer namespaceId, PortalVersion version, String actionData, String instanceConfig, ServiceModule serviceModule){
-
-		String customTag = null;
-		String handlerPrefix = PortalPublishHandler.PORTAL_PUBLISH_OBJECT_PREFIX;
-		PortalPublishHandler handler = PlatformContext.getComponent(handlerPrefix + serviceModule.getId());
-		if(null != handler){
-			customTag = handler.getCustomTag(namespaceId, serviceModule.getId(), actionData, instanceConfig);
-			LOGGER.debug("get customTag from handler = {}, customTag =s {}",handler,customTag);
-		}
-		//找上一版本的serviceModuleApp
-		ServiceModuleApp parentServiceModuleApp = serviceModuleAppProvider.findServiceModuleApp(namespaceId, version.getId(), serviceModule.getId(), customTag);
-		return parentServiceModuleApp;
-	}
-
+//	private ServiceModuleApp getServiceModuleApp(Integer namespaceId, PortalVersion version, String actionData, String instanceConfig, ServiceModule serviceModule){
+//
+//
+//	}
+//
 
 
 	private PortalContentScope syncContentScope(User user, Integer namespaceId, String contentType, Long contentId, Byte scopeType, Long scopeId, String sceneType){

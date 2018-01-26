@@ -18,6 +18,7 @@ import com.everhomes.util.DateHelper;
 import org.jooq.Condition;
 import org.jooq.DSLContext;
 import org.jooq.DeleteQuery;
+import org.jooq.SelectQuery;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -175,6 +176,22 @@ public class ServiceModuleAppProviderImpl implements ServiceModuleAppProvider {
 
 	@Override
 	public ServiceModuleApp findServiceModuleApp(Integer namespaceId, Long versionId, Long moduleId, String customTag) {
-		return null;
+
+		SelectQuery query = getReadOnlyContext().selectFrom(Tables.EH_SERVICE_MODULE_APPS).getQuery();
+		query.addConditions(Tables.EH_SERVICE_MODULE_APPS.NAMESPACE_ID.eq(namespaceId));
+		if(versionId != null){
+			query.addConditions(Tables.EH_SERVICE_MODULE_APPS.VERSION_ID.eq(versionId));
+		}
+
+		if(moduleId != null){
+			query.addConditions(Tables.EH_SERVICE_MODULE_APPS.MODULE_ID.eq(moduleId));
+		}
+
+		if(customTag != null){
+			query.addConditions(Tables.EH_SERVICE_MODULE_APPS.CUSTOM_TAG.eq(customTag));
+		}
+		Object mApp = query.fetchAnyInto(ServiceModuleApp.class);
+		LOGGER.debug("query.fetchAnyInto(ServiceModuleApp.class) type = {}", mApp.getClass());
+		return (ServiceModuleApp) mApp;
 	}
 }
