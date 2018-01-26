@@ -15,7 +15,6 @@ import com.everhomes.configuration.ConfigurationProvider;
 import com.everhomes.contract.ContractService;
 import com.everhomes.http.HttpUtils;
 import com.everhomes.locale.LocaleStringService;
-import com.everhomes.openapi.Contract;
 import com.everhomes.openapi.ContractProvider;
 import com.everhomes.organization.*;
 import com.everhomes.rest.acl.ListServiceModuleAdministratorsCommand;
@@ -38,7 +37,6 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
-import sun.security.krb5.Config;
 
 import javax.xml.bind.JAXBContext;
 import javax.xml.bind.Unmarshaller;
@@ -266,10 +264,10 @@ public class PmKeXingBillServiceImpl implements PmKeXingBillService {
         //获得所有合同
         List<ContractDTO> contracts = new ArrayList<>();
         ListCustomerContractsCommand cmd = new ListCustomerContractsCommand();
-        if(targetType.equals(AssetPaymentStrings.EH_USER)){
+        if(targetType.equals(AssetPaymentConstants.EH_USER)){
             cmd.setTargetId(UserContext.currentUserId());
             cmd.setTargetType(CustomerType.INDIVIDUAL.getCode());
-        }else if(targetType.equals(AssetPaymentStrings.EH_ORGANIZATION)){
+        }else if(targetType.equals(AssetPaymentConstants.EH_ORGANIZATION)){
             cmd.setTargetId(targetId);
             cmd.setTargetType(CustomerType.ENTERPRISE.getCode());
         }

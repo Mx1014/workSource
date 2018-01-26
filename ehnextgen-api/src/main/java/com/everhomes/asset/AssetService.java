@@ -164,4 +164,7 @@ public interface AssetService {
 
     void syncCustomer(Integer namespaceId);
 
+    List<ListLateFineStandardsDTO> listLateFineStandards(OwnerIdentityCommand cmd);
+
+    void activeLateFine();
 }
