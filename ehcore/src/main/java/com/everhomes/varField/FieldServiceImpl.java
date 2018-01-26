@@ -163,10 +163,13 @@ public class FieldServiceImpl implements FieldService {
 
     @Override
     public void exportDynamicExcel(ExportFieldsExcelCommand cmd, HttpServletResponse response) {
-        // try to call dynamicExcelService.exportDynamicExcel
-        //参考代码：匹配出客户选中的group
-        boolean 只要子节点group = true;
-        List<FieldGroupDTO> result = 匹配选中的group获得所有的group(cmd,只要子节点group);
+        List<FieldGroupDTO> results = getAllGroups(cmd,true);
+        if(results != null && results.size() > 0) {
+            List<String> sheetNames = results.stream().map(result -> {
+                return result.getGroupDisplayName();
+            }).collect(Collectors.toList());
+            dynamicExcelService.exportDynamicExcel(response, DynamicExcelStrings.CUSTOEMR, null, sheetNames, cmd, true, true, null);
+        }
 
     }
 
@@ -176,7 +179,7 @@ public class FieldServiceImpl implements FieldService {
      * @param onlyLeaf
      * @return 返回空列表而非null
      */
-    private List<FieldGroupDTO> 匹配选中的group获得所有的group(ExportFieldsExcelCommand cmd,boolean onlyLeaf) {
+    private List<FieldGroupDTO> getAllGroups(ExportFieldsExcelCommand cmd,boolean onlyLeaf) {
         //管理员权限校验
         if(ModuleName.ENTERPRISE_CUSTOMER.getName().equals(cmd.getModuleName())) {
             customerService.checkCustomerAuth(cmd.getNamespaceId(), PrivilegeConstants.ENTERPRISE_CUSTOMER_MANAGE_EXPORT, cmd.getOrgId(), cmd.getCommunityId());
@@ -531,7 +534,8 @@ public class FieldServiceImpl implements FieldService {
      * 获取一个sheet的数据，通过sheet的中文名称进行匹配,同一个excel中sheet名称不会重复
      *
      */
-    private List<List<String>> getDataOnFields(FieldGroupDTO group, Long customerId, Byte customerType,List<FieldDTO> fields,Long communityId,Integer namespaceId,String moduleName, Long orgId) {
+    @Override
+    public List<List<String>> getDataOnFields(FieldGroupDTO group, Long customerId, Byte customerType,List<FieldDTO> fields,Long communityId,Integer namespaceId,String moduleName, Long orgId) {
         List<List<String>> data = new ArrayList<>();
         //使用groupName来对应不同的接口
         String sheetName = group.getGroupDisplayName();

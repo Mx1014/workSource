@@ -13,6 +13,8 @@ public class DynamicField {
      * fieldName:字段的名称
      */
     private String fieldName;
+
+    private String fieldParam;
     @NotNull
     /**
      * displayName: 字段在excel上展示的名字
@@ -72,4 +74,11 @@ public class DynamicField {
         this.displayName = displayName;
     }
 
+    public String getFieldParam() {
+        return fieldParam;
+    }
+
+    public void setFieldParam(String fieldParam) {
+        this.fieldParam = fieldParam;
+    }
 }

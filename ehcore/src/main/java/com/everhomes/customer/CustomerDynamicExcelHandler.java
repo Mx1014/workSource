@@ -4,7 +4,9 @@ import com.everhomes.address.Address;
 import com.everhomes.address.AddressProvider;
 import com.everhomes.dynamicExcel.*;
 import com.everhomes.rest.customer.*;
+import com.everhomes.rest.field.ExportFieldsExcelCommand;
 import com.everhomes.rest.varField.FieldDTO;
+import com.everhomes.rest.varField.FieldGroupDTO;
 import com.everhomes.rest.varField.ImportFieldExcelCommand;
 import com.everhomes.rest.varField.ListFieldCommand;
 import com.everhomes.util.ConvertHelper;
@@ -58,6 +60,7 @@ public class CustomerDynamicExcelHandler implements DynamicExcelHandler {
 
         List<DynamicField> dynamicFields = new ArrayList<>();
         ListFieldCommand command = ConvertHelper.convert(params, ListFieldCommand.class);
+        command.setGroupPath(group.getPath());
         List<FieldDTO> fields = fieldService.listFields(command);
         if(fields != null && fields.size() > 0) {
             fields.forEach(fieldDTO -> {
@@ -477,7 +480,30 @@ public class CustomerDynamicExcelHandler implements DynamicExcelHandler {
     }
 
     @Override
-    public List<List<String>> getExportData(DynamicSheet sheet, Map<Object,Object> context) {
+    public List<List<String>> getExportData(DynamicSheet sheet, Object params, Map<Object,Object> context) {
+        ExportFieldsExcelCommand customerInfo = ConvertHelper.convert(params, ExportFieldsExcelCommand.class);
+        Long customerId = customerInfo.getCustomerId();
+        Byte customerType = Byte.valueOf(customerInfo.getCustomerType());
+        Integer namespaceId = customerInfo.getNamespaceId();
+        Long communityId = customerInfo.getCommunityId();
+        String moduleName = customerInfo.getModuleName();
+        Long orgId = customerInfo.getOrgId();
+
+        FieldGroupDTO group = new FieldGroupDTO();
+        group.setGroupDisplayName(sheet.getDisplayName());
+
+        if(sheet.getDynamicFields() != null && sheet.getDynamicFields().size() > 0) {
+            List<FieldDTO> fields = sheet.getDynamicFields().stream().map(df -> {
+                FieldDTO dto = new FieldDTO();
+                dto.setFieldDisplayName(df.getDisplayName());
+                dto.setFieldName(df.getFieldName());
+                dto.setFieldParam(df.getFieldParam());
+                return dto;
+            }).collect(Collectors.toList());
+
+            List<List<String>> data = fieldService.getDataOnFields(group,customerId,customerType,fields, communityId,namespaceId,moduleName,orgId);
+            return data;
+        }
         return null;
     }
 }
