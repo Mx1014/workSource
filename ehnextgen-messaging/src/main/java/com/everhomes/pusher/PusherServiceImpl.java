@@ -450,6 +450,8 @@ public class PusherServiceImpl implements PusherService, ApnsServiceFactory {
                         record.setAppId(mb.getAppId());
                         record.setNamespaceId(mb.getNamespaceId());
                         record.setMessageSeq(mb.getStoreSequence());
+
+                        // todo error
                         record.setSenderUid(Long.valueOf(actionData.get("senderUid").toString()));
                         record.setSenderTag("FETCH NOTIFY MESSAGES");
                         record.setDstChannelType(actionData.get("dstChannel").toString());

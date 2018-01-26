@@ -56,12 +56,12 @@ public class WebSocketSessionProxy {
         dto.setStatus(MessageRecordStatus.BORDER_ROUTE.getCode());
         dto.setSenderTag(senderTag);
 
-        switch (token){
+        switch (senderTag){
             case "NOTIFY REQUEST":
                 Map actionData = (Map)StringHelper.fromJsonString(message.getPayload().toString(), Map.class);
-                dto.setDstChannelType(actionData.get("dstChannel").toString());
-                dto.setDstChannelToken(actionData.get("dstChannelId").toString());
-                dto.setSenderUid(Long.valueOf(actionData.get("senderUid").toString()));
+//                dto.setDstChannelType(actionData.get("dstChannel").toString());
+//                dto.setDstChannelToken(actionData.get("dstChannelId").toString());
+//                dto.setSenderUid(Long.valueOf(actionData.get("senderUid").toString()));
                 dto.setDeviceId(token);
                 break;
 
