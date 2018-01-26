@@ -569,10 +569,10 @@ public class AssetProviderImpl implements AssetProvider {
                     dto.setBuildingName(r.getValue(t2.BUILDING_NAME));
                     dtos.add(dto);
                     });
+        List<BillDTO> fines = new ArrayList<>();
         for(int i = 0; i < dtos.size(); i ++){
             BillDTO dto = dtos.get(i);
             dto.setTargetName(targetName);
-            LOGGER.info("start to iterate name");
             if(org.apache.commons.lang.StringUtils.isEmpty(dto.getBillItemName())) {
                 String projectLevelName = context.select(itemScope.PROJECT_LEVEL_NAME)
                         .from(itemScope, groupRule)
@@ -580,34 +580,33 @@ public class AssetProviderImpl implements AssetProvider {
                         .and(groupRule.ID.eq(dto.getBillGroupRuleId()))
                         .fetchOne(itemScope.PROJECT_LEVEL_NAME);
                 dto.setBillItemName(projectLevelName);
-                //查询billItem的滞纳金
-                getReadOnlyContext().select(t3.NAME,t3.AMOUNT,t3.AMOUNT,t.DATE_STR,t.STATUS,t3.ID,t.BILL_GROUP_RULE_ID
-                        ,t2.APARTMENT_NAME,t2.BUILDING_NAME)
-                        .from(t3)
-                        .leftOuterJoin(t)
-                        .on(t3.BILL_ITEM_ID.eq(t.BILL_ID))
-                        .leftOuterJoin(t2)
-                        .on(t.ADDRESS_ID.eq(t2.ID))
-                        .where(t3.BILL_ITEM_ID.eq(dto.getBillItemId()))
-                        .fetch()
-                        .forEach(r -> {
-                            BillDTO fineDTO = (BillDTO)dto.clone();
-                            fineDTO.setBillItemName(r.getValue(t3.NAME));
-                            fineDTO.setAmountReceivable(r.getValue(t3.AMOUNT));
-                            fineDTO.setAmountReceived(new BigDecimal("0"));
-                            fineDTO.setAmountOwed(r.getValue(t3.AMOUNT));
-                            fineDTO.setDateStr(r.getValue(t.DATE_STR));
-                            fineDTO.setBillStatus(r.getValue(t.STATUS));
-                            fineDTO.setBillItemId(r.getValue(t3.ID));
-                            fineDTO.setBillGroupRuleId(r.getValue(t.BILL_GROUP_RULE_ID));
-                            fineDTO.setApartmentName(r.getValue(t2.APARTMENT_NAME));
-                            fineDTO.setBuildingName(r.getValue(t2.BUILDING_NAME));
-                            dtos.add(fineDTO);
-                        });
             }
-            LOGGER.info("start to iterate late fine");
-
+            //查询billItem的滞纳金
+            getReadOnlyContext().select(t3.NAME,t3.AMOUNT,t3.AMOUNT,t.DATE_STR,t.STATUS,t3.ID,t.BILL_GROUP_RULE_ID
+                    ,t2.APARTMENT_NAME,t2.BUILDING_NAME)
+                    .from(t3)
+                    .leftOuterJoin(t)
+                    .on(t3.BILL_ITEM_ID.eq(t.ID))
+                    .leftOuterJoin(t2)
+                    .on(t.ADDRESS_ID.eq(t2.ID))
+                    .where(t3.BILL_ITEM_ID.eq(dto.getBillItemId()))
+                    .fetch()
+                    .forEach(r -> {
+                        BillDTO fineDTO = (BillDTO)dto.clone();
+                        fineDTO.setBillItemName(r.getValue(t3.NAME));
+                        fineDTO.setAmountReceivable(r.getValue(t3.AMOUNT));
+                        fineDTO.setAmountReceived(new BigDecimal("0"));
+                        fineDTO.setAmountOwed(r.getValue(t3.AMOUNT));
+                        fineDTO.setDateStr(r.getValue(t.DATE_STR));
+                        fineDTO.setBillStatus(r.getValue(t.STATUS));
+                        fineDTO.setBillItemId(r.getValue(t3.ID));
+                        fineDTO.setBillGroupRuleId(r.getValue(t.BILL_GROUP_RULE_ID));
+                        fineDTO.setApartmentName(r.getValue(t2.APARTMENT_NAME));
+                        fineDTO.setBuildingName(r.getValue(t2.BUILDING_NAME));
+                        fines.add(fineDTO);
+                    });
         }
+        dtos.addAll(fines);
         return dtos;
     }
 
