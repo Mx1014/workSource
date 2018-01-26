@@ -5333,9 +5333,10 @@ private void checkUserPrivilege(Long orgId, Long privilegeId, Long communityId) 
 		EquipmentInspectionPlans updatePlan =null;
 
 		EquipmentInspectionPlans plan = ConvertHelper.convert(cmd, EquipmentInspectionPlans.class);
-		if (cmd.getEquipmentStandardRelations() == null || cmd.getEquipmentStandardRelations().size() != 0
+		if (cmd.getEquipmentStandardRelations() == null || cmd.getEquipmentStandardRelations().size() == 0
 				|| cmd.getRepeatSettings() ==null) {
-			plan.setStatus(EquipmentPlanStatus.WAITTING_FOR_STARTING.getCode());
+			throw RuntimeErrorException.errorWith(EquipmentServiceErrorCode.SCOPE, RepeatServiceErrorCode.ERROR_REPEAT_SETTING_NOT_EXIST,
+					"执行周期或者关联设备为空!");
 		} else {
 			plan.setStatus(EquipmentPlanStatus.WATTING_FOR_APPOVING.getCode());
 		}

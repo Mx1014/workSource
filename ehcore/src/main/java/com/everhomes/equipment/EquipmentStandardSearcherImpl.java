@@ -22,7 +22,6 @@ import com.everhomes.settings.PaginationConfigHelper;
 import com.everhomes.user.UserContext;
 import com.everhomes.user.UserPrivilegeMgr;
 import com.everhomes.util.ConvertHelper;
-import com.everhomes.util.RuntimeErrorException;
 import org.elasticsearch.action.bulk.BulkRequestBuilder;
 import org.elasticsearch.action.search.SearchRequestBuilder;
 import org.elasticsearch.action.search.SearchResponse;
@@ -261,7 +260,7 @@ public class EquipmentStandardSearcherImpl extends AbstractElasticSearch impleme
                         }
                     }
                     if (cmd.getStandardType() != null) {
-                        if (!Objects.equals(standard.getStatus(), cmd.getStandardType())) {
+                        if (!Objects.equals(standard.getStandardType(), cmd.getStandardType())) {
                             continue;
                         }
                     }
