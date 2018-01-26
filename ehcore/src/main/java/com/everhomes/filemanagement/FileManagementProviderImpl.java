@@ -147,6 +147,7 @@ public class FileManagementProviderImpl implements FileManagementProvider {
         query.addConditions(Tables.EH_FILE_MANAGEMENT_CATALOGS.NAMESPACE_ID.eq(namespaceId));
         query.addConditions(Tables.EH_FILE_MANAGEMENT_CATALOGS.OWNER_ID.eq(ownerId));
         query.addConditions(Tables.EH_FILE_MANAGEMENT_CATALOGS.STATUS.eq(FileManagementStatus.VALID.getCode()));
+        query.addOrderBy(Tables.EH_FILE_MANAGEMENT_CATALOGS.ID.desc());
         query.fetch().map(r -> {
             FileCatalog catalog = new FileCatalog();
             catalog.setId(r.getValue(Tables.EH_FILE_MANAGEMENT_CATALOGS.ID));
