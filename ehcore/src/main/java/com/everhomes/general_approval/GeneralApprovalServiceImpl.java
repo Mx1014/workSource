@@ -898,7 +898,7 @@ public class GeneralApprovalServiceImpl implements GeneralApprovalService {
         int count = PaginationConfigHelper.getPageSize(configProvider, cmd.getPageSize());
         command.setPageSize(count);
 
-        List<FlowCaseDetail> details = flowCaseProvider.findAdminFlowCases(locator, count, command, (locator1, query) -> {
+        List<FlowCaseDetail> details = flowCaseProvider.findAdminFlowCases(locator, count+1, command, (locator1, query) -> {
             //  审批类型
             if (cmd.getApprovalType() != null)
                 query.addConditions(Tables.EH_FLOW_CASES.TITLE.eq(cmd.getApprovalType()));
