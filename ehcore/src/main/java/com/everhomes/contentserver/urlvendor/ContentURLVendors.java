@@ -44,7 +44,7 @@ public class ContentURLVendors implements ContentURLVendor {
     @Override
     public String evaluate(String scheme, String domain, Integer port, String uri, Map<String, Object> uriParams) {
         // 根据数据库配置的vendor去求url, 默认Simple
-        String vendorName = configurationProvider.getValue("content.url.vendor", "Simple");
+        String vendorName = configurationProvider.getValue("content.url.vendor", "SimpleAndAliCDN");
         ContentURLVendor vendor = vendorMap.get(vendorName);
         if (vendor == null) {
             vendor = PlatformContext.getComponent(VENDOR_NAME_PREFIX + vendorName);
