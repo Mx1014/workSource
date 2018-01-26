@@ -8,6 +8,7 @@ import com.everhomes.db.DbProvider;
 import com.everhomes.entity.EntityType;
 import com.everhomes.flow.*;
 import com.everhomes.locale.LocaleStringService;
+import com.everhomes.naming.NameMapper;
 import com.everhomes.organization.*;
 import com.everhomes.portal.PortalService;
 import com.everhomes.rest.acl.PrivilegeConstants;
@@ -27,7 +28,11 @@ import com.everhomes.rest.user.UserServiceErrorCode;
 import com.everhomes.rest.user.admin.ImportDataResponse;
 import com.everhomes.rest.warehouse.*;
 import com.everhomes.search.*;
+import com.everhomes.sequence.SequenceProvider;
+import com.everhomes.server.schema.tables.EhWarehouseOrders;
+import com.everhomes.server.schema.tables.pojos.EhWarehouseStockLogs;
 import com.everhomes.settings.PaginationConfigHelper;
+import com.everhomes.supplier.SupplierHelper;
 import com.everhomes.user.UserContext;
 import com.everhomes.user.UserPrivilegeMgr;
 import com.everhomes.util.ConvertHelper;
@@ -118,6 +123,9 @@ public class WarehouseServiceImpl implements WarehouseService {
 
     @Autowired
     private PortalService portalService;
+
+    @Autowired
+    private SequenceProvider sequenceProvider;
 
     @Override
     public WarehouseDTO updateWarehouse(UpdateWarehouseCommand cmd) {
@@ -402,6 +410,9 @@ public class WarehouseServiceImpl implements WarehouseService {
                 if (category != null) {
                     material.setCategoryPath(category.getPath());
                 }
+                //增加供应商
+                material.setSupplierId(cmd.getSupplierId());
+                material.setSupplierName(cmd.getSupplierName());
                 warehouseProvider.creatWarehouseMaterials(material);
             } else {
                 //有，则进行修改该
@@ -413,6 +424,9 @@ public class WarehouseServiceImpl implements WarehouseService {
                 if (category != null) {
                     material.setCategoryPath(category.getPath());
                 }
+                //修改供应商
+                material.setSupplierId(cmd.getSupplierId());
+                material.setSupplierName(cmd.getSupplierName());
                 warehouseProvider.updateWarehouseMaterials(material);
             }
             //更新到es上
@@ -1507,6 +1521,74 @@ public class WarehouseServiceImpl implements WarehouseService {
             anchor = cmd.getPageAnchor();
         }
         SearchRequestsResponse response = getWarehouseRequestMaterials(ids, cmd.getOwnerType(), cmd.getOwnerId(), pageSize, anchor,cmd.getCommunityId());
+        return response;
+    }
+
+    @Override
+    public void createOrUpdateWarehouseEntryOrder(CreateOrUpdateWarehouseEntryOrderCommand cmd) {
+        Long id = cmd.getId();
+        WarehouseOrder order = null;
+        boolean insert = true;
+        if(id == null){
+            //新增
+            order = new WarehouseOrder();
+            long nextSequence = this.sequenceProvider.getNextSequence(NameMapper.getSequenceDomainFromTablePojo(EhWarehouseOrders.class));
+            order.setId(nextSequence);
+            order.setCreateTime(new Timestamp(DateHelper.currentGMTTime().getTime()));
+            order.setCreateUid(UserContext.currentUserId());
+            order.setOwnerType(cmd.getOwnerType());
+            order.setOwnerId(cmd.getOwnerId());
+            order.setNamespaceId(cmd.getNamespaceId());
+            order.setIdentity(SupplierHelper.getIdentity());
+            order.setExecutorId(从工作流中获得执行人);
+            order.setServiceType(cmd.getServiceType());
+        }else{
+            insert = false;
+            //更新
+            order = warehouseProvider.findWarehouseOrderById(id);
+            order.setUpdateUid(UserContext.currentUserId());
+            order.setUpdateTime(new Timestamp(DateHelper.currentGMTTime().getTime()));
+        }
+        if(insert){
+            warehouseProvider.insertWarehouseOrder(order);
+        }else{
+            warehouseProvider.updateWarehouseOrder(order);
+        }
+        //干掉所有的物品，重新添加 vs 行修改/添加； first strategy is now applied for convenience
+        warehouseProvider.deleteWarehouseStockLogs(order.getId());
+        List<WarehouseStockLogs> list = new ArrayList<>();
+        for(CreateWarehouseEntryOrderDTO dto : cmd.getDtos()){
+            WarehouseStockLogs stockLog = new WarehouseStockLogs();
+            stockLog.setWarehouseOrderId(order.getId());
+            stockLog.setNamespaceId(cmd.getNamespaceId());
+            stockLog.setCommunityId(cmd.getOwnerId());
+            stockLog.setCreateTime(new Timestamp(DateHelper.currentGMTTime().getTime()));
+            stockLog.setDeliveryAmount(dto.getQuantity());
+//            stockLog.setDeliveryUid(UserContext.currentUserId());
+            stockLog.setId(this.sequenceProvider.getNextSequence(NameMapper.getSequenceDomainFromTablePojo(EhWarehouseStockLogs.class)));
+            stockLog.setMaterialId(dto.getMaterialId());
+            stockLog.setWarehouseId(dto.getWarehouseId());
+            stockLog.setRequestUid(UserContext.currentUserId());
+            list.add(stockLog);
+        }
+        warehouseProvider.insertWarehouseStockLogs(list);
+        // end
+
+
+    }
+
+    @Override
+    public ListWarehouseStockOrdersResponse listWarehouseStockOrders(ListWarehouseStockOrdersCommand cmd) {
+        ListWarehouseStockOrdersResponse response = new ListWarehouseStockOrdersResponse();
+        Long pageAnchor = cmd.getPageAnchor();
+        Integer pageSize = cmd.getPageSize();
+        if(pageAnchor == null) pageAnchor = 0l;
+        if(pageSize == null) pageSize = 20;
+        List<WarehouseStockOrderDTO> dtos = warehouseProvider.listWarehouseStockOrders(cmd.getExecutor(),cmd.getNamespaceId(),cmd.getOwnerType(),cmd.getOwnerId(),cmd.getServiceType(),pageAnchor,pageSize+1);
+        if(dtos.size() > pageSize){
+            dtos.remove(dtos.size()-1);
+            response.setNextPageAnchor(pageAnchor + pageSize);
+        }
         return response;
     }
 

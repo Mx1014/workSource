@@ -21,4 +21,6 @@ public interface SupplierProvider {
 
     TreeMap<Long,ListSuppliersDTO> findSuppliers(String ownerType, Long ownerId, Integer namespaceId, String contactName, String supplierName
             , Long pageAnchor, Integer pageSize);
+
+    String findSupplierNameById(Long supplierId);
 }

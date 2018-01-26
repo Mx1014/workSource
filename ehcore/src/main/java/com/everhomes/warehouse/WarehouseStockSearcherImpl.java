@@ -200,6 +200,7 @@ public class WarehouseStockSearcherImpl extends AbstractElasticSearch implements
                 dto.setMaterialNumber(material.getMaterialNumber());
                 dto.setCategoryId(material.getCategoryId());
                 dto.setUnitId(material.getUnitId());
+                dto.setSupplierName(material.getsupplierName());
 
                 WarehouseMaterialCategories category = warehouseProvider.findWarehouseMaterialCategories(material.getCategoryId(), cmd.getOwnerType(), cmd.getOwnerId());
                 if(category != null) {

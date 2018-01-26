@@ -15,6 +15,7 @@ import com.everhomes.search.AbstractElasticSearch;
 import com.everhomes.search.SearchUtils;
 import com.everhomes.search.WarehouseMaterialSearcher;
 import com.everhomes.settings.PaginationConfigHelper;
+import com.everhomes.supplier.SupplierProvider;
 import com.everhomes.user.UserContext;
 import com.everhomes.user.UserPrivilegeMgr;
 import com.everhomes.util.ConvertHelper;
@@ -59,6 +60,9 @@ public class WarehouseMaterialSearcherImpl extends AbstractElasticSearch impleme
 
     @Autowired
     private PortalService portalService;
+
+    @Autowired
+    private SupplierProvider supplierProvider;
 
     @Override
     public void deleteById(Long id) {
@@ -177,7 +181,6 @@ public class WarehouseMaterialSearcherImpl extends AbstractElasticSearch impleme
         for(Long id : ids) {
             WarehouseMaterials material = warehouseProvider.findWarehouseMaterials(id, cmd.getOwnerType(), cmd.getOwnerId(),cmd.getCommunityId());
             WarehouseMaterialDTO dto = ConvertHelper.convert(material, WarehouseMaterialDTO.class);
-
             WarehouseMaterialCategories category = warehouseProvider.findWarehouseMaterialCategories(dto.getCategoryId(), dto.getOwnerType(), dto.getOwnerId());
             if(category != null) {
                 dto.setCategoryName(category.getName());

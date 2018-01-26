@@ -221,6 +221,7 @@ public class WarehouseStockLogSearcherImpl extends AbstractElasticSearch impleme
                 dto.setMaterialName(material.getName());
                 dto.setMaterialNumber(material.getMaterialNumber());
                 dto.setUnitId(material.getUnitId());
+                dto.setSupplierName(material.getsupplierName());
 
                 WarehouseUnits unit = warehouseProvider.findWarehouseUnits(material.getUnitId(), cmd.getOwnerType(), cmd.getOwnerId());
                 if(unit != null) {

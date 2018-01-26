@@ -76,6 +76,7 @@ CREATE TABLE `eh_warehouse_purchase_items`(
 
 -- 为物品增加供应商字段
 ALTER TABLE `eh_warehouse_materials` ADD COLUMN `supplier_id` BIGINT DEFAULT NULL COMMENT '物品的供应商的主键id';
+ALTER TABLE `eh_warehouse_materials` ADD COLUMN `supplier_name` VARCHAR(128) DEFAULT NULL COMMENT '物品的供应商的名字';
 
 DROP TABLE IF EXISTS `eh_warehouse_orders`;
 -- 出入库单 模型
@@ -86,6 +87,7 @@ CREATE TABLE `eh_warehouse_orders`(
   `owner_id` BIGINT DEFAULT NULL ,
   `identity` VARCHAR(128) NOT NULL COMMENT '出入库单号',
   `executor_id` BIGINT DEFAULT NULL COMMENT '执行人id',
+  `executor_name` VARCHAR(128) DEFAULT NULL COMMENT '执行人姓名',
   `executor_time` DATETIME DEFAULT now() COMMENT '执行时间',
   `service_type` TINYINT DEFAULT NULL COMMENT '服务类型，1. 普通入库,2.领用出库，3.采购入库',
   `create_time` DATETIME DEFAULT NOW(),
@@ -98,7 +100,8 @@ CREATE TABLE `eh_warehouse_orders`(
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4;
 
 -- 增加出入库记录关联出入库单的字段
-ALTER TABLE `eh_warehouse_stock_logs` ADD COLUMN `warehouse_sheet_id` BIGINT DEFAULT NULL COMMENT '关联的出入库单的id';
+ALTER TABLE `eh_warehouse_stock_logs` ADD COLUMN `warehouse_order_id` BIGINT DEFAULT NULL COMMENT '关联的出入库单的id';
+ALTER TABLE `eh_warehouse_requests` ADD COLUMN `requisition_id` BIGINT DEFAULT NULL COMMENT '关联的请示单的id';
 
 -- 请示单
 DROP TABLE IF EXISTS `eh_requisitions`;
