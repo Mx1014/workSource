@@ -246,7 +246,7 @@ public class EquipmentStandardSearcherImpl extends AbstractElasticSearch impleme
                     }
                     if (cmd.getStandardType() != null) {
                         LOGGER.info("map standard :"+cmd.getStandardType());
-                        if (!Objects.equals(standard.getStatus(), cmd.getStandardType())) {
+                        if (!Objects.equals(standard.getStandardType(), cmd.getStandardType())) {
                             continue;
                         }
                     }
