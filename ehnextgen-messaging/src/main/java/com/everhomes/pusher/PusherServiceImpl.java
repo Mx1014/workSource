@@ -451,11 +451,10 @@ public class PusherServiceImpl implements PusherService, ApnsServiceFactory {
                         record.setNamespaceId(mb.getNamespaceId());
                         record.setMessageSeq(mb.getStoreSequence());
 
-                        // todo error
-                        record.setSenderUid(Long.valueOf(actionData.get("senderUid").toString()));
+                        record.setSenderUid(Long.valueOf(Double.valueOf(actionData.get("senderUid").toString()).intValue()));
                         record.setSenderTag("FETCH NOTIFY MESSAGES");
                         record.setDstChannelType(actionData.get("dstChannel").toString());
-                        record.setDstChannelToken(actionData.get("dstChannelId").toString());
+                        record.setDstChannelToken(Double.valueOf(actionData.get("dstChannelId").toString()).intValue()+ "");
                         record.setBodyType(mb.getContextType());
                         record.setBody(mb.getContent());
                         record.setStatus(MessageRecordStatus.CORE_FETCH.getCode());

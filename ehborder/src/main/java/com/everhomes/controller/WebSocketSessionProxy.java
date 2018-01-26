@@ -93,7 +93,7 @@ public class WebSocketSessionProxy {
         Map<String, String> params = new HashMap<>();
         params.put("messageRecordDto", record.toString());
         params.put("sessionToken", record.getSessionToken());
-        params.put("deviceId", record.getDeviceId());
+        params.put("deviceId", record.getDeviceId().toString());
 
         this.restCall("/message/persistMessage", params, new ListenableFutureCallback<ResponseEntity<String>>() {
 

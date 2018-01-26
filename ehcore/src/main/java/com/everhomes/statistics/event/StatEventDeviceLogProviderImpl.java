@@ -55,7 +55,9 @@ public class StatEventDeviceLogProviderImpl implements StatEventDeviceLogProvide
         DSLContext context = dbProvider.getDslContext(AccessSpec.readOnly());
         SelectQuery<EhStatEventDeviceLogsRecord> query = context.selectQuery(Tables.EH_STAT_EVENT_DEVICE_LOGS);
         query.addConditions(Tables.EH_STAT_EVENT_DEVICE_LOGS.DEVICE_ID.eq(deviceId));
-        return ConvertHelper.convert(query.fetchAny().getUid(), Long.class);
+        query.addOrderBy(Tables.EH_STAT_EVENT_DEVICE_LOGS.CREATE_TIME.desc());
+        query.addLimit(1);
+        return Long.valueOf(query.fetchAny().getUid());
     }
 
     // @Override
