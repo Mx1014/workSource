@@ -76,5 +76,7 @@ public interface FieldService {
 
     void exportDynamicExcel(ExportFieldsExcelCommand cmd, HttpServletResponse response);
 
+    List<List<String>> getDataOnFields(FieldGroupDTO group, Long customerId, Byte customerType,List<FieldDTO> fields,Long communityId,Integer namespaceId,String moduleName, Long orgId);
+
     DynamicImportResponse importDynamicExcel(ImportFieldExcelCommand cmd, MultipartFile file);
 }

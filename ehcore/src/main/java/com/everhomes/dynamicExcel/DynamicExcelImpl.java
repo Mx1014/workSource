@@ -65,7 +65,7 @@ public class DynamicExcelImpl implements DynamicExcelService{
                 String intro = baseInfo;
                 if(withData){
                     //获取数据
-                    data = h.getExportData(sheet,context);
+                    data = h.getExportData(sheet, params, context);
                 }
                 if(StringUtils.isEmpty(baseInfo)){
                     intro = DynamicExcelStrings.baseIntro;
