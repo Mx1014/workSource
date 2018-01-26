@@ -101,10 +101,10 @@ public class PaymentContractController extends ControllerBase {
     }
 
     /**
-     * <p>合同发起审批/合同报废</p>
-     * <b>URL: /payment_contract/reviewContract</b>
+     * <p>拿到用户的部门</p>
+     * <b>URL: /payment_contract/getUserGroups</b>
      */
-    @RequestMapping("reviewContract")
+    @RequestMapping("getUserGroups")
     @RestReturn(value = OrganizationDTO.class, collection = true)
     public RestResponse getUserGroups(GetUserGroupsCommand cmd){
         return new RestResponse(getContractService().getUserGroups(cmd));
