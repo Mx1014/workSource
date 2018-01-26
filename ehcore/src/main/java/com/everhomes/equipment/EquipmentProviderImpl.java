@@ -2645,11 +2645,11 @@ public class EquipmentProviderImpl implements EquipmentProvider {
             query.addConditions(Tables.EH_EQUIPMENT_INSPECTION_TASKS.INSPECTION_CATEGORY_ID.eq(inspectionCategoryId));
         }
         if (startTime != null && endTime != null) {
-            query.addConditions(Tables.EH_EQUIPMENT_INSPECTION_TASKS.EXECUTIVE_TIME.between(startTime, endTime));
+            query.addConditions(Tables.EH_EQUIPMENT_INSPECTION_TASKS.EXECUTIVE_START_TIME.between(startTime, endTime));
         } else if (startTime == null && endTime != null) {
-            query.addConditions(Tables.EH_EQUIPMENT_INSPECTION_TASKS.EXECUTIVE_TIME.le(endTime));
+            query.addConditions(Tables.EH_EQUIPMENT_INSPECTION_TASKS.EXECUTIVE_START_TIME.le(endTime));
         } else if (startTime != null) {
-            query.addConditions(Tables.EH_EQUIPMENT_INSPECTION_TASKS.EXECUTIVE_TIME.ge(startTime));
+            query.addConditions(Tables.EH_EQUIPMENT_INSPECTION_TASKS.EXECUTIVE_START_TIME.ge(startTime));
         }
 
         if (LOGGER.isDebugEnabled()) {

@@ -67,12 +67,12 @@ CREATE TABLE `eh_equipment_inspection_review_date` (
 
 
 -- eh_equipment_inspection_tasks 增加plan_id字段 用于关联task和equipments
-ALTER TABLE `ehcore`.`eh_equipment_inspection_tasks`
+ALTER TABLE eh_equipment_inspection_tasks`
 ADD COLUMN `plan_id`  bigint(20) NOT NULL ;
 
 
 -- 标准增加周期类型
-ALTER TABLE `ehcore`.`eh_equipment_inspection_standards`
+ALTER TABLE eh_equipment_inspection_standards`
 ADD COLUMN `repeat_type` tinyint(4) NOT NULL COMMENT ' 0: no repeat, 1: by day, 2: by week, 3: by month, 4: by year';
 -- 操作记录表增加设备id表
 ALTER TABLE `eh_equipment_inspection_task_logs`
