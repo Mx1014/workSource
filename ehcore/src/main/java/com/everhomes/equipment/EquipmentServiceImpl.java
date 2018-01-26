@@ -1039,19 +1039,16 @@ private void checkUserPrivilege(Long orgId, Long privilegeId, Long communityId) 
 					EquipmentServiceErrorCode.ERROR_PLAN_ALREADY_DELETED,
 					"计划不存在或已失效");
 		}
-
 		if (EquipmentPlanStatus.WATTING_FOR_APPOVING.equals(EquipmentPlanStatus.fromStatus(plan.getStatus()))) {
-			plan.setStatus(cmd.getReviewResult());
-			//plan.setPlanMainId(0L);
+			if (ReviewResult.QUALIFIED.equals(ReviewResult.fromStatus(cmd.getReviewResult()))) {
+				plan.setStatus(EquipmentPlanStatus.QUALIFIED.getCode());
+			} else if (ReviewResult.QUALIFIED.equals(ReviewResult.fromStatus(cmd.getReviewResult()))) {
+				plan.setStatus(EquipmentPlanStatus.UN_QUALIFIED.getCode());
+			}
 			plan.setReviewerUid(UserContext.currentUserId());
 			plan.setReviewTime(new Timestamp(DateHelper.currentGMTTime().getTime()));
 			equipmentProvider.updateEquipmentInspectionPlan(plan);
 			equipmentPlanSearcher.feedDoc(plan);
-//			//处理原始计划和main_id
-//			if (plan.getPlanMainId() != null && plan.getPlanMainId() != 0L){
-//				equipmentProvider.deleteEquipmentInspectionPlanMap(plan.getPlanMainId());
-//				equipmentProvider.deleteEquipmentInspectionPlanById(plan.getPlanMainId());
-//			}
 		}
 	}
 
@@ -4753,22 +4750,33 @@ private void checkUserPrivilege(Long orgId, Long privilegeId, Long communityId) 
 
 	}
 
-	private Timestamp getDayBegin(Calendar cal, int period) {
-		cal.add(Calendar.DATE, period);
+	private Timestamp getDayBegin(Calendar todayStart, int period) {
+		/*cal.add(Calendar.DATE, period);
 		cal.set(Calendar.HOUR_OF_DAY, 0);
 		cal.set(Calendar.SECOND, 0);
 		cal.set(Calendar.MINUTE, 0);
 		cal.set(Calendar.MILLISECOND, 001);
-		return new Timestamp(cal.getTimeInMillis());
+		return new Timestamp(cal.getTimeInMillis());*/
+		todayStart.set(Calendar.HOUR_OF_DAY, 0);
+		todayStart.set(Calendar.MINUTE, 0);
+		todayStart.set(Calendar.SECOND, 0);
+		todayStart.set(Calendar.MILLISECOND, 0);
+		return new Timestamp(todayStart.getTime().getTime());
 	}
 
 	private Timestamp getDayEnd(Calendar cal, int period) {
-		cal.add(Calendar.DATE, period);
+		/*cal.add(Calendar.DATE, period);
 		cal.set(Calendar.HOUR_OF_DAY, 23);
 		cal.set(Calendar.SECOND, 59);
 		cal.set(Calendar.MINUTE, 59);
 		cal.set(Calendar.MILLISECOND, 999);
-		return new Timestamp(cal.getTimeInMillis());
+		return new Timestamp(cal.getTimeInMillis());*/
+		Calendar todayEnd = Calendar.getInstance();
+		todayEnd.set(Calendar.HOUR_OF_DAY, 23);
+		todayEnd.set(Calendar.MINUTE, 59);
+		todayEnd.set(Calendar.SECOND, 59);
+		todayEnd.set(Calendar.MILLISECOND, 999);
+		return new Timestamp(todayEnd.getTime().getTime());
 	}
 
 	@Override
