@@ -9,4 +9,5 @@ public interface PaymentApplicationService {
     PaymentApplicationDTO createPaymentApplication(CreatePaymentApplicationCommand cmd);
     PaymentApplicationDTO getPaymentApplication(GetPaymentApplicationCommand cmd);
     SearchPaymentApplicationResponse searchPaymentApplications(SearchPaymentApplicationCommand cmd);
+    String generatePaymentApplicationNumber();
 }

@@ -55,8 +55,10 @@ import com.everhomes.rest.flow.FlowOwnerType;
 
 import com.everhomes.rest.launchpad.ActionType;
 import com.everhomes.rest.namespace.NamespaceCommunityType;
+import com.everhomes.rest.openapi.OrganizationDTO;
 import com.everhomes.rest.openapi.shenzhou.DataType;
 import com.everhomes.rest.organization.OrganizationContactDTO;
+import com.everhomes.rest.organization.OrganizationGroupType;
 import com.everhomes.rest.organization.pm.AddOrganizationOwnerAddressCommand;
 import com.everhomes.rest.organization.pm.AddressMappingStatus;
 import com.everhomes.rest.organization.pm.OrganizationOwnerAddressDTO;
@@ -1475,6 +1477,26 @@ public class ContractServiceImpl implements ContractService {
 			communityExist = contractProvider.findContractParamByCommunityId(cmd.getNamespaceId(), null);
 			if(communityExist != null) {
 				return toContractParamDTO(communityExist);
+			}
+		}
+		return null;
+	}
+
+	@Override
+	public List<OrganizationDTO> getUserGroups(GetUserGroupsCommand cmd) {
+		List<OrganizationMember> results = organizationProvider.listOrganizationMembersByUId(cmd.getUserId());
+
+		List<OrganizationMember> members = results.stream().filter(r ->
+				r.getGroupType().equals(OrganizationGroupType.DEPARTMENT.getCode()) || r.getGroupType().equals(OrganizationGroupType.DIRECT_UNDER_ENTERPRISE.getCode())
+		).collect(Collectors.toList());
+
+		if(members != null && members.size() > 0) {
+			List<Long> ids = members.stream().map(member -> member.getOrganizationId()).collect(Collectors.toList());
+			List<Organization> organizations = organizationProvider.listOrganizationsByIds(ids);
+			if(organizations != null && organizations.size() > 0) {
+				return organizations.stream().map(organization -> {
+					return ConvertHelper.convert(organization, OrganizationDTO.class);
+				}).collect(Collectors.toList());
 			}
 		}
 		return null;

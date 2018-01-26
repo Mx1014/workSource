@@ -15,6 +15,7 @@ import com.everhomes.rest.asset.PaymentVariable;
 import com.everhomes.rest.community.CommunityType;
 import com.everhomes.rest.contract.*;
 import com.everhomes.rest.customer.CustomerType;
+import com.everhomes.rest.openapi.OrganizationDTO;
 import com.everhomes.rest.openapi.shenzhou.ShenzhouJsonEntity;
 import com.everhomes.rest.openapi.shenzhou.ZJContract;
 import com.everhomes.rest.openapi.shenzhou.ZJContractDetail;
@@ -500,6 +501,13 @@ public class ZJContractHandler implements ContractService{
     @Override
     public ContractParamDTO getContractParam(GetContractParamCommand cmd) {
         LOGGER.error("Insufficient privilege, zjgkhandler getContractParam");
+        throw RuntimeErrorException.errorWith(ErrorCodes.SCOPE_GENERAL, ErrorCodes.ERROR_ACCESS_DENIED,
+                "Insufficient privilege");
+    }
+
+    @Override
+    public List<OrganizationDTO> getUserGroups(GetUserGroupsCommand cmd) {
+        LOGGER.error("Insufficient privilege, zjgkhandler getUserGroups");
         throw RuntimeErrorException.errorWith(ErrorCodes.SCOPE_GENERAL, ErrorCodes.ERROR_ACCESS_DENIED,
                 "Insufficient privilege");
     }

@@ -105,4 +105,14 @@ public class InspectionItemDTO {
 		return StringHelper.toJsonString(this);
 	}
 
+	/*@Override
+	public boolean equals(Object obj) {
+		InspectionItemDTO itemDTO = (InspectionItemDTO) obj;
+		return (obj != null) && (obj.getClass() == this.getClass()) && this.getId().equals(itemDTO.getId());
+	}
+
+	@Override
+	public int hashCode() {
+		 return 7*this.getId().intValue();
+	}*/
 }
