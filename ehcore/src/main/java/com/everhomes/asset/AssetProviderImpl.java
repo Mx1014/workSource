@@ -634,10 +634,16 @@ public class AssetProviderImpl implements AssetProvider {
         SelectQuery<Record> query = dslContext.selectQuery();
         query.addFrom(t);
         //必要用户参数
-        query.addConditions(t.OWNER_TYPE.eq(ownerType));
-        query.addConditions(t.OWNER_ID.eq(ownerId));
         query.addConditions(t.TARGET_TYPE.eq(targetType));
         query.addConditions(t.TARGET_ID.eq(targetId));
+        if(ownerType != null){
+            query.addConditions(t.OWNER_TYPE.eq(ownerType));
+        }
+        if(ownerId != null){
+            query.addConditions(t.OWNER_ID.eq(ownerId));
+        }else{
+            LOGGER.error("showBillClient did not send ownerId which is not right, targetId = {},targetType = {}",targetId,targetType);
+        }
         //已出账单，排除了未来账单
         query.addConditions(t.SWITCH.eq((byte)1));
 
@@ -747,7 +753,8 @@ public class AssetProviderImpl implements AssetProvider {
                     ShowBillDetailForClientDTO dto = new ShowBillDetailForClientDTO();
                     dto.setAmountOwed(r.getValue(t.AMOUNT_OWED));
                     dto.setBillItemName(r.getValue(t.CHARGING_ITEM_NAME));
-                    dto.setAddressName(r.getValue(t.BUILDING_NAME)+r.getValue(t.APARTMENT_NAME));
+                    String address = r.getValue(t.BUILDING_NAME) + r.getValue(t.APARTMENT_NAME);
+                    dto.setAddressName(org.apache.commons.lang.StringUtils.isEmpty(address)?"":address);
                     dto.setAmountReceivable(r.getValue(t.AMOUNT_RECEIVABLE));
                     dto.setDateStrBegin(r.getValue(t.DATE_STR_BEGIN));
                     dto.setDateStrEnd(r.getValue(t.DATE_STR_END));
@@ -1058,6 +1065,11 @@ public class AssetProviderImpl implements AssetProvider {
             com.everhomes.server.schema.tables.pojos.EhPaymentBills newBill = new PaymentBills();
             //  缺少创造者信息，先保存在其他地方，比如持久化日志
             newBill.setAmountOwed(amountOwed);
+            if(amountOwed.compareTo(zero) == 0) {
+                newBill.setStatus((byte)1);
+            }else{
+                newBill.setStatus(billStatus);
+            }
             newBill.setAmountReceivable(amountReceivable);
             newBill.setAmountReceived(zero);
             newBill.setAmountSupplement(amountSupplement);
@@ -1087,7 +1099,7 @@ public class AssetProviderImpl implements AssetProvider {
             newBill.setCreatorId(UserContext.currentUserId());
             newBill.setUpdateTime(new Timestamp(DateHelper.currentGMTTime().getTime()));
             newBill.setNoticeTimes(0);
-            newBill.setStatus(billStatus);
+
             newBill.setSwitch(isSettled);
             newBill.setContractId(contractId);
             newBill.setContractNum(contractNum);
@@ -3622,9 +3634,15 @@ public class AssetProviderImpl implements AssetProvider {
         if(namespaceId!=null){
             query.addConditions(bill.NAMESPACE_ID.eq(namespaceId));
         }
-        query.addConditions(bill.OWNER_ID.eq(ownerId));
+        if(ownerId != null){
+            query.addConditions(bill.OWNER_ID.eq(ownerId));
+        }
+        if(ownerType != null){
+            query.addConditions(bill.OWNER_TYPE.eq(ownerType));
+        }
         query.addConditions(bill.TARGET_TYPE.eq(targetType));
         query.addConditions(bill.TARGET_ID.eq(targetId));
+        query.addOrderBy(bill.DATE_STR.desc());
         query.fetch()
                 .map(r -> {
                     ListAllBillsForClientDTO dto = new ListAllBillsForClientDTO();
@@ -3655,11 +3673,14 @@ public class AssetProviderImpl implements AssetProvider {
     }
 
     @Override
-    public List<PaymentBills> findSettledBillsByCustomer(String targetType, Long targetId) {
+    public List<PaymentBills> findSettledBillsByCustomer(String targetType, Long targetId,String ownerType,Long ownerId) {
         return getReadOnlyContext().selectFrom(Tables.EH_PAYMENT_BILLS)
                 .where(Tables.EH_PAYMENT_BILLS.TARGET_ID.eq(targetId))
                 .and(Tables.EH_PAYMENT_BILLS.TARGET_TYPE.eq(targetType))
                 .and(Tables.EH_PAYMENT_BILLS.SWITCH.eq((byte)1))
+                .and(Tables.EH_PAYMENT_BILLS.STATUS.eq((byte)0))
+                .and(Tables.EH_PAYMENT_BILLS.OWNER_TYPE.eq(ownerType))
+                .and(Tables.EH_PAYMENT_BILLS.OWNER_ID.eq(ownerId))
                 .fetchInto(PaymentBills.class);
     }
 

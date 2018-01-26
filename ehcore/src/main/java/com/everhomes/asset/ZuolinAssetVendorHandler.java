@@ -747,7 +747,7 @@ public class ZuolinAssetVendorHandler implements AssetVendorHandler {
             cmd.setTargetId(UserContext.currentUserId());
         }
         //获得此用户的所有账单
-        List<PaymentBills> paymentBills = assetProvider.findSettledBillsByCustomer(cmd.getTargetType(),cmd.getTargetId());
+        List<PaymentBills> paymentBills = assetProvider.findSettledBillsByCustomer(cmd.getTargetType(),cmd.getTargetId(),cmd.getOwnerType(),cmd.getOwnerId());
         //进行分类，冗杂代码，用空间换时间， 字符串操作+类型转换  vs  新建对象; 对象隐式指定最大寿命
         List<Map<?,?>> maps = new ArrayList<>();
         tryMakeCategory:{
@@ -771,7 +771,7 @@ public class ZuolinAssetVendorHandler implements AssetVendorHandler {
                     }
                     continue;
                 }
-                if (bill.getContractNum() != null) {
+                else if (bill.getContractNum() != null) {
                     ContractNumBillGroup numIden = new ContractNumBillGroup();
                     numIden.setBillGroupId(bill.getBillGroupId());
                     numIden.setContractNum(bill.getContractNum());
@@ -783,13 +783,14 @@ public class ZuolinAssetVendorHandler implements AssetVendorHandler {
                         numMap.put(numIden, idList);
                     }
                     continue;
-                }
-                if (groupMap.containsKey(bill.getBillGroupId())) {
-                    groupMap.get(bill.getBillGroupId()).add(bill);
-                } else {
-                    List<PaymentBills> idList = new ArrayList<>();
-                    idList.add(bill);
-                    groupMap.put(bill.getBillGroupId(), idList);
+                }else{
+                    if (groupMap.containsKey(bill.getBillGroupId())) {
+                        groupMap.get(bill.getBillGroupId()).add(bill);
+                    } else {
+                        List<PaymentBills> idList = new ArrayList<>();
+                        idList.add(bill);
+                        groupMap.put(bill.getBillGroupId(), idList);
+                    }
                 }
             }
             maps.add(idMap);
@@ -805,8 +806,11 @@ public class ZuolinAssetVendorHandler implements AssetVendorHandler {
                 for (HashMap.Entry<?, ?> entry : map.entrySet()) {
                     ShowBillForClientV2DTO dto = new ShowBillForClientV2DTO();
                     List<PaymentBills> enclosedBills = (List<PaymentBills>) entry.getValue();
-                    if (enclosedBills.size() > 0)
+                    if (enclosedBills.size() > 0){
                         dto.setBillGroupName(assetProvider.getbillGroupNameById(enclosedBills.get(0).getBillGroupId()));
+                        dto.setContractId(String.valueOf(enclosedBills.get(0).getContractId()));
+                        dto.setContractNum(String.valueOf(enclosedBills.get(0).getContractNum()));
+                    }
                     //组装
                     List<BillForClientV2> list = new ArrayList<>();
                     Set<Long> addressIds = new HashSet<>();
@@ -844,10 +848,7 @@ public class ZuolinAssetVendorHandler implements AssetVendorHandler {
 
     @Override
     public ShowBillDetailForClientResponse getBillDetailForClient(Long ownerId, String billId,String targetType) {
-        ShowBillDetailForClientResponse response = new ShowBillDetailForClientResponse();
-        response =  assetProvider.getBillDetailForClient(Long.parseLong(billId));
-        return response;
-
+        return assetProvider.getBillDetailForClient(Long.parseLong(billId));
     }
 
     @Override
