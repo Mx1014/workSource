@@ -898,5 +898,8 @@ CREATE TABLE `eh_salary_employee_period_vals` (
   PRIMARY KEY (`id`)
 ) ENGINE=INNODB DEFAULT CHARSET=utf8mb4 ;
 
- 
+
+-- 增加版本号 201801252125
+ALTER TABLE `eh_portal_content_scopes` ADD COLUMN `version_id`  BIGINT(20) NULL;
+ALTER TABLE `eh_portal_launch_pad_mappings` ADD COLUMN `version_id`  BIGINT(20) NULL;
    

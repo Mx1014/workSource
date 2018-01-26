@@ -9,7 +9,9 @@ public interface PortalItemGroupProvider {
 
 	void updatePortalItemGroup(PortalItemGroup portalItemGroup);
 
-	PortalItemGroup findPortalItemGroupById(Long id);
+    void deleteByVersionId(Long versionId);
+
+    PortalItemGroup findPortalItemGroupById(Long id);
 
 	List<PortalItemGroup> listPortalItemGroup(Long layoutId);
 

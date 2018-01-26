@@ -127,9 +127,9 @@ public interface PortalService {
 
     ListPortalVersionResponse listPortalVersions(ListPortalVersionCommand cmd);
 
-	PortalVersionUserDTO createPortalVersionUser(CreatePortalVersionUserCommand cmd);
+	void updatePortalVersionUsers(UpdatePortalVersionUsersCommand cmd);
 
 	ListPortalVersionUsersResponse listPortalVersionUsers(ListPortalVersionUsersCommand cmd);
 
-	void deletePortalVersionUser(DeletePortalVersionUserCommand cmd);
+    void revertVersion(RevertVersionCommand cmd);
 }

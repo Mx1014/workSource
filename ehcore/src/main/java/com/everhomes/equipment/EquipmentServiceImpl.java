@@ -5842,6 +5842,7 @@ private void checkUserPrivilege(Long orgId, Long privilegeId, Long communityId) 
 		ListTaskCategoriesCommand categoriesCommand = new ListTaskCategoriesCommand();
 		categoriesCommand.setPageSize(Integer.MAX_VALUE - 1);
 		categoriesCommand.setTaskCategoryId(6L);
+		categoriesCommand.setNamespaceId(cmd.getNamespaceId());
 		ListTaskCategoriesResponse categories = pmTaskService.listTaskCategories(categoriesCommand);
 		offlineResponse.setRepiarCategories(categories.getRequests());
 	}
