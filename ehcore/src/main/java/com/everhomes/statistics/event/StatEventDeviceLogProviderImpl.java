@@ -57,7 +57,7 @@ public class StatEventDeviceLogProviderImpl implements StatEventDeviceLogProvide
         query.addConditions(Tables.EH_STAT_EVENT_DEVICE_LOGS.DEVICE_ID.eq(deviceId));
         query.addOrderBy(Tables.EH_STAT_EVENT_DEVICE_LOGS.CREATE_TIME.desc());
         query.addLimit(1);
-        return ConvertHelper.convert(query.fetchAny().getUid(), Long.class);
+        return Long.valueOf(query.fetchAny().getUid());
     }
 
     // @Override
