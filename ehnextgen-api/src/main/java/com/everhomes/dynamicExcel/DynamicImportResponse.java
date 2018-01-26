@@ -44,6 +44,6 @@ public class DynamicImportResponse {
     }
 
     public void write2failCause() {
-        this.failCause = "成功了" + successRowNumber +"行"+"失败了"+ failedRowNumber+"行";
+        this.failCause = "导入" + "成功了" + successRowNumber +"行,"+"失败了"+ failedRowNumber+"行";
     }
 }
