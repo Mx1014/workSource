@@ -19,6 +19,7 @@ CREATE TABLE `eh_message_records` (
   `create_time` datetime NOT NULL COMMENT 'message creation time',
   `session_token` varchar(128),
   `deviceId` varchar(2048),
+  `index_id` bigint(20),
   PRIMARY KEY (`id`)
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4;
 
