@@ -2730,9 +2730,7 @@ private void checkUserPrivilege(Long orgId, Long privilegeId, Long communityId) 
 	public ListLogsByTaskIdResponse listLogsByTaskId(ListLogsByTaskIdCommand cmd) {
 		List<EquipmentInspectionTasks> tasks = new ArrayList<>();
 		if (cmd.getTaskId() != null && cmd.getTaskId().size() > 0) {
-			cmd.getTaskId().forEach((t) -> {
-				tasks.add(verifyEquipmentTask(t, cmd.getOwnerType(), cmd.getOwnerId()));
-			});
+			cmd.getTaskId().forEach((t) -> tasks.add(verifyEquipmentTask(t, cmd.getOwnerType(), cmd.getOwnerId())));
 		}
 
 		CrossShardListingLocator locator = new CrossShardListingLocator();
@@ -2786,12 +2784,13 @@ private void checkUserPrivilege(Long orgId, Long privilegeId, Long communityId) 
 			EquipmentTaskLogs taskLogs = new EquipmentTaskLogs();
 			taskLogs.setExecuteEndTime(task.getExecutiveExpireTime());
 			taskLogs.setExecuteStartTime(task.getExecutiveStartTime());
-			taskLogs.setTaskId(task.getId());
+			taskLogs.setTaskNumber(task.getTaskNumber());
+            taskLogs.setTaskName(task.getTaskName());
 			taskLogs.setLogs(dtos);
 			logsList.add(taskLogs);
 		}));
 
-		response.setLogs(logsList);
+		response.setTaskLogs(logsList);
 		return response;
 	}
 

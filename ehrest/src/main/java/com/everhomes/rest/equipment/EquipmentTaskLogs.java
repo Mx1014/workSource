@@ -10,7 +10,8 @@ import java.util.List;
  * <ul>
  *  <li>logs: 任务操作记录列表 参考{@link com.everhomes.rest.equipment.EquipmentTaskLogsDTO}</li>
  *  <li>taskType: 任务类型</li>
- *  <li>taskId: 任务id</li>
+ *  <li>taskNumber: taskNumber</li>
+ *  <li>taskName: 任务name</li>
  *  <li>executeStartTime: 任务开始时间</li>
  *  <li>executeEndTime: 任务结束时间</li>
  * </ul>
@@ -22,7 +23,9 @@ public class EquipmentTaskLogs {
 
     private Byte taskType;
 
-    private Long taskId;
+    private String  taskNumber;
+
+    private String taskName;
 
     private Timestamp executeStartTime;
 
@@ -60,12 +63,20 @@ public class EquipmentTaskLogs {
         this.executeEndTime = executeEndTime;
     }
 
-    public Long getTaskId() {
-        return taskId;
+    public String getTaskNumber() {
+        return taskNumber;
     }
 
-    public void setTaskId(Long taskId) {
-        this.taskId = taskId;
+    public void setTaskNumber(String taskNumber) {
+        this.taskNumber = taskNumber;
+    }
+
+    public String getTaskName() {
+        return taskName;
+    }
+
+    public void setTaskName(String taskName) {
+        this.taskName = taskName;
     }
 
     @Override

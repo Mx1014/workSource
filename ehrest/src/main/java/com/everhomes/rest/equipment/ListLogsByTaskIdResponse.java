@@ -7,22 +7,22 @@ import java.util.List;
 
 /**
  * <ul>
- * <li>logs: 任务操作记录列表 参考{@link com.everhomes.rest.equipment.EquipmentTaskLogs}</li>
+ * <li>taskLogs: 任务操作记录列表 参考{@link com.everhomes.rest.equipment.EquipmentTaskLogs}</li>
  * <li>nextPageAnchor: 下一页的锚点，没有下一页则没有</li>
  * </ul>
  */
 public class ListLogsByTaskIdResponse {
     @ItemType(EquipmentTaskLogs.class)
-    private List<EquipmentTaskLogs> logs;
+    private List<EquipmentTaskLogs> taskLogs;
 
     private Long nextPageAnchor;
 
-    public List<EquipmentTaskLogs> getLogs() {
-        return logs;
+    public List<EquipmentTaskLogs> getTaskLogs() {
+        return taskLogs;
     }
 
-    public void setLogs(List<EquipmentTaskLogs> logs) {
-        this.logs = logs;
+    public void setTaskLogs(List<EquipmentTaskLogs> taskLogs) {
+        this.taskLogs = taskLogs;
     }
 
     public Long getNextPageAnchor() {
