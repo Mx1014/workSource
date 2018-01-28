@@ -2773,6 +2773,7 @@ private void checkUserPrivilege(Long orgId, Long privilegeId, Long communityId) 
 			if(cmd.getEquipmentId()!= null){
 				dtos = processEquipmentTaskLogsDTOS(logs);
 			} else {
+				if(logs!=null && logs.size()>0)
 				dtos = logs.stream().map((r) -> {
 					EquipmentTaskLogsDTO dto = ConvertHelper.convert(r, EquipmentTaskLogsDTO.class);
 					populateItemResultToTasklog(r, dto);
