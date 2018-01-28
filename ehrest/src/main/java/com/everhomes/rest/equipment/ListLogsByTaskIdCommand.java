@@ -8,7 +8,7 @@ import java.util.List;
 
 /**
  * <ul>
- *  <li>taskId: 任务id</li>
+ *  <li>taskId: 任务id (批量审批改成id列表)</li>
  *  <li>equipmentId: 设备id (有id则是查看具体设备下的log)</li>
  *  <li>ownerId: 设备所属的主体id</li>
  *  <li>ownerType: 设备所属的主体，参考{@link com.everhomes.rest.quality.OwnerType}</li>

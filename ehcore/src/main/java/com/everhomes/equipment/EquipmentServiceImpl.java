@@ -2734,13 +2734,14 @@ private void checkUserPrivilege(Long orgId, Long privilegeId, Long communityId) 
 		}
 
 		CrossShardListingLocator locator = new CrossShardListingLocator();
-        locator.setAnchor(cmd.getPageAnchor());
-        int pageSize = PaginationConfigHelper.getPageSize(configurationProvider, cmd.getPageSize());
+//        locator.setAnchor(cmd.getPageAnchor());
+//        int pageSize = PaginationConfigHelper.getPageSize(configurationProvider, cmd.getPageSize());
+		int pageSize = Integer.MAX_VALUE - 1;
 		//0: none, 1: complete, 2: complete maintenance, 3: review,
 		List<EquipmentTaskLogs> logsList = new ArrayList<>();
 		ListLogsByTaskIdResponse response = new ListLogsByTaskIdResponse();
 
-		tasks.forEach((task->{
+		tasks.forEach((task -> {
 			EquipmentInspectionPlans plan = new EquipmentInspectionPlans();
 			List<Long> equipmentIds = new ArrayList<>();
 			if (cmd.getEquipmentId() == null) {
@@ -2770,15 +2771,15 @@ private void checkUserPrivilege(Long orgId, Long privilegeId, Long communityId) 
 
 //			populateTaskType(task, response);
 			List<EquipmentTaskLogsDTO> dtos = new ArrayList<>();
-			if(cmd.getEquipmentId()!= null){
+			if (cmd.getEquipmentId() != null) {
 				dtos = processEquipmentTaskLogsDTOS(logs);
 			} else {
-				if(logs!=null && logs.size()>0)
-				dtos = logs.stream().map((r) -> {
-					EquipmentTaskLogsDTO dto = ConvertHelper.convert(r, EquipmentTaskLogsDTO.class);
-					populateItemResultToTasklog(r, dto);
-					return dto;
-				}).collect(Collectors.toList());
+				if (logs != null && logs.size() > 0)
+					dtos = logs.stream().map((r) -> {
+						EquipmentTaskLogsDTO dto = ConvertHelper.convert(r, EquipmentTaskLogsDTO.class);
+						populateItemResultToTasklog(r, dto);
+						return dto;
+					}).collect(Collectors.toList());
 				//增加正常异常数
 				calculateAbnormalCount(dtos);
 			}
@@ -2786,7 +2787,7 @@ private void checkUserPrivilege(Long orgId, Long privilegeId, Long communityId) 
 			taskLogs.setExecuteEndTime(task.getExecutiveExpireTime());
 			taskLogs.setExecuteStartTime(task.getExecutiveStartTime());
 			taskLogs.setTaskNumber(task.getTaskNumber());
-            taskLogs.setTaskName(task.getTaskName());
+			taskLogs.setTaskName(task.getTaskName());
 			taskLogs.setLogs(dtos);
 			logsList.add(taskLogs);
 		}));
