@@ -2880,7 +2880,7 @@ private void checkUserPrivilege(Long orgId, Long privilegeId, Long communityId) 
             }
             if (equipment != null){
                 dto.setEquipmentName(equipment.getName());
-                dto.setEquipmentLocation(equipment.getLocation());
+                dto.setLocation(equipment.getLocation());
             }
         }
 		dto.setItemResults(results);
