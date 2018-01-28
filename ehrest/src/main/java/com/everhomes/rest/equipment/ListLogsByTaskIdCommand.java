@@ -18,8 +18,8 @@ import java.util.List;
  * </ul>
  */
 public class ListLogsByTaskIdCommand {
-	@NotNull
-	private Long taskId;
+	@ItemType(Long.class)
+	private List<Long> taskId;
 	@NotNull
 	private Long ownerId;
 	
@@ -33,12 +33,12 @@ public class ListLogsByTaskIdCommand {
 	private Long pageAnchor;
 	
 	private Integer pageSize;
-	
-	public Long getTaskId() {
+
+	public List<Long> getTaskId() {
 		return taskId;
 	}
 
-	public void setTaskId(Long taskId) {
+	public void setTaskId(List<Long> taskId) {
 		this.taskId = taskId;
 	}
 
