@@ -13,7 +13,7 @@ WHERE review_status IN (0, 3 ,4) OR review_result = 2;
 -- 巡检任务状态统一 start by jiarui 20180105
 UPDATE eh_equipment_inspection_tasks
 SET `status` = 6
-WHERE `status` = 4 AND review_result = 2;
+WHERE `status` = 4 AND review_result = 1;
 
 UPDATE eh_equipment_inspection_tasks
 SET `status` = 7

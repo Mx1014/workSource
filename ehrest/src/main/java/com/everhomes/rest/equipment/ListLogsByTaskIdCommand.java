@@ -8,7 +8,7 @@ import java.util.List;
 
 /**
  * <ul>
- *  <li>taskId: 任务id</li>
+ *  <li>taskId: 任务id (批量审批改成id列表)</li>
  *  <li>equipmentId: 设备id (有id则是查看具体设备下的log)</li>
  *  <li>ownerId: 设备所属的主体id</li>
  *  <li>ownerType: 设备所属的主体，参考{@link com.everhomes.rest.quality.OwnerType}</li>
@@ -18,8 +18,8 @@ import java.util.List;
  * </ul>
  */
 public class ListLogsByTaskIdCommand {
-	@NotNull
-	private Long taskId;
+	@ItemType(Long.class)
+	private List<Long> taskId;
 	@NotNull
 	private Long ownerId;
 	
@@ -33,12 +33,12 @@ public class ListLogsByTaskIdCommand {
 	private Long pageAnchor;
 	
 	private Integer pageSize;
-	
-	public Long getTaskId() {
+
+	public List<Long> getTaskId() {
 		return taskId;
 	}
 
-	public void setTaskId(Long taskId) {
+	public void setTaskId(List<Long> taskId) {
 		this.taskId = taskId;
 	}
 
