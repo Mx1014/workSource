@@ -270,6 +270,20 @@ public class PmtaskFlowModuleListener implements FlowModuleListener {
 
 		e = new FlowCaseEntity();
 		e.setEntityType(FlowCaseEntityType.MULTI_LINE.getCode());
+		e.setKey("服务类型");
+		e.setValue(dto.getTaskCategoryName());
+		entities.add(e);
+
+		if (StringUtils.isNotBlank(dto.getCategoryName())) {
+			e = new FlowCaseEntity();
+			e.setEntityType(FlowCaseEntityType.LIST.getCode());
+			e.setKey("所属分类");
+			e.setValue(dto.getCategoryName());
+			entities.add(e);
+		}
+
+		e = new FlowCaseEntity();
+		e.setEntityType(FlowCaseEntityType.MULTI_LINE.getCode());
 		e.setKey("服务内容");
 		e.setValue(dto.getContent());
 		entities.add(e);
@@ -290,13 +304,7 @@ public class PmtaskFlowModuleListener implements FlowModuleListener {
 		e.setValue(dto.getAddress());
 		entities.add(e);
 
-		if (StringUtils.isNotBlank(dto.getCategoryName())) {
-			e = new FlowCaseEntity();
-			e.setEntityType(FlowCaseEntityType.LIST.getCode());
-			e.setKey("所属分类");
-			e.setValue(dto.getCategoryName());
-			entities.add(e);
-		}
+
 		String name = dto.getRequestorName();
 		String phone = dto.getRequestorPhone();
 		//代发时填写代发人信息
@@ -315,6 +323,19 @@ public class PmtaskFlowModuleListener implements FlowModuleListener {
 			}
 
 		}
+
+		e = new FlowCaseEntity();
+		e.setEntityType(FlowCaseEntityType.LIST.getCode());
+		e.setKey("联系人");
+		e.setValue(dto.getRequestorName());
+		entities.add(e);
+
+		e = new FlowCaseEntity();
+		e.setEntityType(FlowCaseEntityType.LIST.getCode());
+		e.setKey("联系人电话");
+		e.setValue(dto.getRequestorPhone());
+		entities.add(e);
+
 		e = new FlowCaseEntity();
 		e.setEntityType(FlowCaseEntityType.LIST.getCode());
 		e.setKey("发起人");
