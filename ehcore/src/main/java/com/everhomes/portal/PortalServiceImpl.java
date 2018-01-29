@@ -1359,6 +1359,7 @@ public class PortalServiceImpl implements PortalService {
 							updateReleaseVersion(namespaceId, cmd.getVersionId());
 
 							//清理很的老版本
+							cleanOldVersion(namespaceId);
 
 						}else {
 							//更新预览版本标志
@@ -1984,6 +1985,9 @@ public class PortalServiceImpl implements PortalService {
 
 					//刷新菜单
 					webMenuService.refleshMenuByPortalVersion(portalVersion.getId());
+
+					//清理很的老版本
+					cleanOldVersion(dto.getId());
 
 					return null;
 				}));
