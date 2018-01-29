@@ -61,15 +61,6 @@ public class FlowLaneProviderImpl implements FlowLaneProvider {
     }
 
     @Override
-    public void deleteFlowLane(List<Long> deleteIdList) {
-        DSLContext context = dbProvider.getDslContext(AccessSpec.readWrite());
-        com.everhomes.server.schema.tables.EhFlowLanes t = Tables.EH_FLOW_LANES;
-        context.delete(t)
-                .where(t.ID.in(deleteIdList))
-                .execute();
-    }
-
-    @Override
     public void deleteFlowLane(Long flowMainId, Integer flowVersion, List<Long> retainIdList) {
         DSLContext context = dbProvider.getDslContext(AccessSpec.readWrite());
         com.everhomes.server.schema.tables.EhFlowLanes t = Tables.EH_FLOW_LANES;

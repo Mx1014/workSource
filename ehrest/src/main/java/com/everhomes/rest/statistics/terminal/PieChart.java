@@ -7,7 +7,7 @@ import com.everhomes.discover.ItemType;
 
 /**
  *<ul>
- *<li>data:饼图数据<li>
+ *<li>data:饼图数据</li>
  *</ul>
  */
 public class PieChart {

@@ -1,25 +1,27 @@
 package com.everhomes.flow;
 
+import java.io.Serializable;
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
+import java.util.function.Consumer;
 
-public class FlowGraph {
+public class FlowGraph implements Serializable {
 
     private Flow flow;
     private List<FlowGraphNode> nodes;
     private List<FlowGraphLane> lanes;
     private List<FlowGraphBranch> branches;
 
-    private Map<Long, FlowGraphNode> idToNode;
-    private Map<Long, FlowGraphLane> idToLane;
-    private Map<Integer, FlowGraphNode> levelToNode;
-    private Map<Integer, FlowGraphLane> levelToLane;
-    private Map<Long, FlowGraphButton> idToButton;
-    private Map<Long, FlowGraphAction> idToAction;
-    private Map<Long, FlowGraphBranch> originalNodeToBranch;
-    private Map<Long, List<FlowGraphBranch>> convergenceNodeToBranches;
+    transient private Map<Long, FlowGraphNode> idToNode;
+    transient private Map<Long, FlowGraphLane> idToLane;
+    transient private Map<Integer, FlowGraphNode> levelToNode;
+    transient private Map<Integer, FlowGraphLane> levelToLane;
+    transient private Map<Long, FlowGraphButton> idToButton;
+    transient private Map<Long, FlowGraphAction> idToAction;
+    transient private Map<Long, FlowGraphBranch> originalNodeToBranch;
+    transient private Map<Long, List<FlowGraphBranch>> convergenceNodeToBranches;
 
     private List<FlowEvaluateItem> evaluateItems;
 
@@ -28,18 +30,29 @@ public class FlowGraph {
     private FlowGraphNode startNode;
 
     public FlowGraph() {
-        nodes = new ArrayList<>();
-        lanes = new ArrayList<>();
-        branches = new ArrayList<>();
-        evaluateItems = new ArrayList<>();
-        idToNode = new HashMap<>();
-        idToButton = new HashMap<>();
-        idToAction = new HashMap<>();
-        idToLane = new HashMap<>();
-        originalNodeToBranch = new HashMap<>();
-        convergenceNodeToBranches = new HashMap<>();
-        levelToNode = new HashMap<>();
-        levelToLane = new HashMap<>();
+        initFields();
+    }
+
+    public void initFields() {
+        ifNull(nodes, o -> nodes = new ArrayList<>());
+        ifNull(lanes, o -> lanes = new ArrayList<>());
+        ifNull(branches, o -> branches = new ArrayList<>());
+        ifNull(evaluateItems, o -> evaluateItems = new ArrayList<>());
+
+        ifNull(idToNode, o -> idToNode = new HashMap<>());
+        ifNull(idToButton, o -> idToButton = new HashMap<>());
+        ifNull(idToAction, o -> idToAction = new HashMap<>());
+        ifNull(idToLane, o -> idToLane = new HashMap<>());
+        ifNull(originalNodeToBranch, o -> originalNodeToBranch = new HashMap<>());
+        ifNull(convergenceNodeToBranches, o -> convergenceNodeToBranches = new HashMap<>());
+        ifNull(levelToNode, o -> levelToNode = new HashMap<>());
+        ifNull(levelToLane, o -> levelToLane = new HashMap<>());
+    }
+
+    private <Type> void ifNull(Type o, Consumer<Type> con) {
+        if (o == null) {
+            con.accept(o);
+        }
     }
 
     private void saveNodeIds(FlowGraphNode node) {
@@ -169,7 +182,7 @@ public class FlowGraph {
         return originalNodeToBranch.get(originalNodeId);
     }
 
-    public List<FlowGraphBranch> getBranchByConvergenceNode(Long convergenceNodeId) {
+    public List<FlowGraphBranch> getBranchByConvNode(Long convergenceNodeId) {
         return convergenceNodeToBranches.get(convergenceNodeId);
     }
 

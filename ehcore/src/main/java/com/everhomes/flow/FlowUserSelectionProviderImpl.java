@@ -15,6 +15,7 @@ import com.everhomes.sharding.ShardingProvider;
 import com.everhomes.util.ConvertHelper;
 import com.everhomes.util.DateHelper;
 import org.jooq.DSLContext;
+import org.jooq.DeleteQuery;
 import org.jooq.Record;
 import org.jooq.SelectQuery;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -135,15 +136,17 @@ public class FlowUserSelectionProviderImpl implements FlowUserSelectionProvider 
     }
     
     @Override
-    public List<FlowUserSelection> deleteSelectionByBelong(Long belongId, String belongEntity, String flowUserBelongType) {
-    	DSLContext context = this.dbProvider.getDslContext(AccessSpec.readWriteWith(EhFlowUserSelections.class));
-    	EhFlowUserSelectionsDao dao = new EhFlowUserSelectionsDao(context.configuration());
-    	List<FlowUserSelection> seles = findSelectionByBelong(belongId, belongEntity, flowUserBelongType);
-    	if(seles != null && seles.size() > 0) {
-    		dao.delete(seles.toArray(new FlowUserSelection[seles.size()]));	
-    	}
-    	
-    	return seles;
+    public int deleteSelectionByBelong(Long belongId, String belongEntity, String flowUserBelongType) {
+        DSLContext context = dbProvider.getDslContext(AccessSpec.readWrite());
+        com.everhomes.server.schema.tables.EhFlowUserSelections t = Tables.EH_FLOW_USER_SELECTIONS;
+
+        DeleteQuery<EhFlowUserSelectionsRecord> query = context.deleteQuery(t);
+        query.addConditions(t.BELONG_TO.eq(belongId));
+        query.addConditions(t.BELONG_ENTITY.eq(belongEntity));
+        query.addConditions(t.BELONG_TYPE.eq(flowUserBelongType));
+        query.addConditions(t.STATUS.ne(FlowStatusType.INVALID.getCode()));
+
+        return query.execute();
     }
     
     @Override

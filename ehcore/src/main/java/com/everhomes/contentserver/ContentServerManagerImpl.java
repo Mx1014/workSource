@@ -9,7 +9,6 @@ import com.everhomes.rest.contentserver.ContentServerErrorCode;
 import com.everhomes.rest.user.LoginToken;
 import com.everhomes.util.RuntimeErrorException;
 import com.everhomes.util.StringHelper;
-import com.everhomes.util.Tuple;
 import com.everhomes.util.WebTokenGenerator;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -69,26 +68,18 @@ public class ContentServerManagerImpl implements ContentServerMananger {
             request.setUrl(createUrl(server, result.getResourceId(), request.getObjectType().name(), request.getToken(), schemeInRequest));
             return;
         }
-        // add transaction command
-        long lockStartTime = System.currentTimeMillis();
-        Tuple<ContentServerResource, Boolean> resource = coordinationProvider.getNamedLock(
-                CoordinationLocks.CREATE_RESOURCE.getCode()).enter(() -> {
-            ContentServerResource r = contentServerProvider.findByUidAndMD5(ids[0], request.getMd5());
-            if (r == null) {
-                r = createResource(server.getId(), ids[0], request);
-                contentServerProvider.addResource(r);
-            }
-            return r;
-        });
-        long lockEndTime = System.currentTimeMillis();
-        result = resource.first();
+
+        result = createResource(server.getId(), ids[0], request);
+        contentServerProvider.addResource(result);
+
         request.setObjectId(Generator.createKey(server.getId(), result.getResourceId(), request.getObjectType().name()));
         request.setUrl(createUrl(server, result.getResourceId(), request.getObjectType().name(), request.getToken(), schemeInRequest));
+
         long endTime = System.currentTimeMillis();
         if(LOGGER.isDebugEnabled()) {
             LOGGER.debug("Upload resource file successfully, userId=" + ids[0] + ", reqToken=" + request.getToken() 
                 + ", loginToken=" + login + ", objectId=" + request.getObjectId() + ", url=" + request.getUrl() 
-                + ", lockElapse=" + (lockEndTime - lockStartTime) + ", uploadElapse=" + (endTime - startTime));
+                + ", uploadElapse=" + (endTime - startTime));
         }
     }
 

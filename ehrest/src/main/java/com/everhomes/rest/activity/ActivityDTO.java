@@ -12,7 +12,7 @@ import com.everhomes.util.StringHelper;
  *<li>activityId:活动ID</li>
  *<li>categoryId: 类型</li>
  *<li>contentCategoryId: 主题分类</li>
- *<li>startTime:开始时间,格式:YYYY-MM-DD hh:mm:ss<li>
+ *<li>startTime:开始时间,格式:YYYY-MM-DD hh:mm:ss</li>
  *<li>stopTime:结束时间,格式:YYYY-MM-DD hh:mm:ss</li>
  *<li>signupEndTime:活动报名截止时间,格式:YYYY-MM-DD hh:mm:ss</li>
  *<li>location:位置</li>

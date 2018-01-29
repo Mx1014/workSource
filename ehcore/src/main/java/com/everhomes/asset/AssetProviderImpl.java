@@ -602,7 +602,7 @@ public class AssetProviderImpl implements AssetProvider {
     public List<NoticeInfo> listNoticeInfoByBillId(List<Long> billIds) {
         DSLContext dslContext = this.dbProvider.getDslContext(AccessSpec.readOnly());
         List<NoticeInfo> list = new ArrayList<>();
-        dslContext.select(Tables.EH_PAYMENT_BILLS.NOTICETEL,Tables.EH_PAYMENT_BILLS.AMOUNT_RECEIVABLE,Tables.EH_PAYMENT_BILLS.AMOUNT_OWED,Tables.EH_PAYMENT_BILLS.TARGET_ID,Tables.EH_PAYMENT_BILLS.TARGET_TYPE,Tables.EH_PAYMENT_BILLS.TARGET_NAME)
+        dslContext.select(Tables.EH_PAYMENT_BILLS.NOTICETEL,Tables.EH_PAYMENT_BILLS.AMOUNT_RECEIVABLE,Tables.EH_PAYMENT_BILLS.AMOUNT_OWED,Tables.EH_PAYMENT_BILLS.TARGET_ID,Tables.EH_PAYMENT_BILLS.TARGET_TYPE,Tables.EH_PAYMENT_BILLS.TARGET_NAME,Tables.EH_PAYMENT_BILLS.DATE_STR)
                 .from(Tables.EH_PAYMENT_BILLS)
                 .where(Tables.EH_PAYMENT_BILLS.ID.in(billIds))
                 .fetch().map(r -> {
@@ -613,6 +613,7 @@ public class AssetProviderImpl implements AssetProvider {
             info.setTargetId(r.getValue(Tables.EH_PAYMENT_BILLS.TARGET_ID));
             info.setTargetType(r.getValue(Tables.EH_PAYMENT_BILLS.TARGET_TYPE));
             info.setTargetName(r.getValue(Tables.EH_PAYMENT_BILLS.TARGET_NAME));
+            info.setDateStr(r.getValue(Tables.EH_PAYMENT_BILLS.DATE_STR));
             list.add(info);
             return null;});
         List<String> fetch = dslContext.select(Tables.EH_APP_URLS.NAME)
@@ -3625,6 +3626,7 @@ public class AssetProviderImpl implements AssetProvider {
         query.addConditions(bill.OWNER_ID.eq(ownerId));
         query.addConditions(bill.TARGET_TYPE.eq(targetType));
         query.addConditions(bill.TARGET_ID.eq(targetId));
+        query.addConditions(bill.SWITCH.eq((byte)1));
         query.fetch()
                 .map(r -> {
                     ListAllBillsForClientDTO dto = new ListAllBillsForClientDTO();
@@ -3651,15 +3653,21 @@ public class AssetProviderImpl implements AssetProvider {
                 .where(Tables.EH_PAYMENT_SERVICE_CONFIGS.NAMESPACE_ID.eq(namespaceId))
                 .and(Tables.EH_PAYMENT_SERVICE_CONFIGS.NAME.eq("物业缴费"))
                 .fetchInto(PaymentServiceConfig.class);
+        if(configs == null || configs.size() < 1){
+            return null;
+        }
         return configs.get(0);
     }
 
     @Override
-    public List<PaymentBills> findSettledBillsByCustomer(String targetType, Long targetId) {
+    public List<PaymentBills> findSettledBillsByCustomer(String targetType, Long targetId,String ownerType,Long ownerId) {
         return getReadOnlyContext().selectFrom(Tables.EH_PAYMENT_BILLS)
                 .where(Tables.EH_PAYMENT_BILLS.TARGET_ID.eq(targetId))
                 .and(Tables.EH_PAYMENT_BILLS.TARGET_TYPE.eq(targetType))
                 .and(Tables.EH_PAYMENT_BILLS.SWITCH.eq((byte)1))
+                .and(Tables.EH_PAYMENT_BILLS.STATUS.eq((byte)0))
+                .and(Tables.EH_PAYMENT_BILLS.OWNER_TYPE.eq(ownerType))
+                .and(Tables.EH_PAYMENT_BILLS.OWNER_ID.eq(ownerId))
                 .fetchInto(PaymentBills.class);
     }
 

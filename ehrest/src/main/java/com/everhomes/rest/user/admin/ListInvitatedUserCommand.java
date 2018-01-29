@@ -4,7 +4,6 @@ import com.everhomes.util.StringHelper;
 
 
 /**
- * <p>
  * <ul>
  * <li>anchor: 锚点</li>
  * <li>pageSize: 每页的数量</li>

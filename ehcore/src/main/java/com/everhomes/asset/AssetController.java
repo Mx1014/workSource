@@ -391,7 +391,7 @@ public class AssetController extends ControllerBase {
 
     // this is for 展示一个收费项目的客户可见的所有标准列表         4
     /**
-     * <p>展示一* <b>URL: /asset/listChargingStandards</b>
+     * <p>展示一* <b>URL: /asset/listChargingStandards</b></p>
      * <p>个收费项目的园区下的所有标准列表</p>
      *
      * */

@@ -6,8 +6,6 @@ import com.everhomes.rest.address.CommunityDTO;
 import com.everhomes.discover.ItemType;
 import com.everhomes.util.StringHelper;
 /**
- * 
- * <p>
  * <ul>
  * <li>nextPageAnchor: 下页的锚点 </li>
  * <li>requests: 结果：小区列表{@link com.everhomes.rest.address.CommunityDTO}</li> 

@@ -131,7 +131,7 @@ public class FlowVariableProviderImpl implements FlowVariableProvider {
 					query.addConditions(Tables.EH_FLOW_VARIABLES.NAME.eq(name));	
 				}
                 if (keyword != null && keyword.trim().length() > 0) {
-                    query.addConditions(Tables.EH_FLOW_VARIABLES.LABEL.like(keyword));
+                    query.addConditions(Tables.EH_FLOW_VARIABLES.LABEL.like(keyword+"%"));
                 }
 
                 query.addConditions(Tables.EH_FLOW_VARIABLES.STATUS.eq(FlowStatusType.VALID.getCode()));

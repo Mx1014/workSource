@@ -16,8 +16,6 @@ public class SmsReportDTO {
     private String smsId;
     private String mobile;
     private Byte status;
-    private String responseBody;
-    private String responseContentType;
 
     public String getSmsId() {
         return smsId;
@@ -27,28 +25,12 @@ public class SmsReportDTO {
         this.smsId = smsId;
     }
 
-    public String getResponseBody() {
-        return responseBody;
-    }
-
-    public void setResponseBody(String responseBody) {
-        this.responseBody = responseBody;
-    }
-
     public Byte getStatus() {
         return status;
     }
 
     public void setStatus(Byte status) {
         this.status = status;
-    }
-
-    public String getResponseContentType() {
-        return responseContentType;
-    }
-
-    public void setResponseContentType(String responseContentType) {
-        this.responseContentType = responseContentType;
     }
 
     public String getMobile() {
