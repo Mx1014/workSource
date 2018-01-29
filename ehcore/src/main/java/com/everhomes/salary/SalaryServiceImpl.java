@@ -1024,7 +1024,6 @@ public class SalaryServiceImpl implements SalaryService {
 //                        continue;
 //                    }
 //                    //保存并置状态
-//                    // TODO: 2017/7/13 改成memberid
 //                    Long detailId = Long.valueOf(data.getSalaryEmployeeVal().get(1));
 //                    List<SalaryEmployeeOriginVal> salaryEmployeeOriginVals = this.salaryEmployeeOriginValProvider.
 //                            listSalaryEmployeeOriginValByDetailId(cmd.getOwnerType(), cmd.getOwnerId(), detailId);
@@ -1162,7 +1161,6 @@ public class SalaryServiceImpl implements SalaryService {
 //    private List<SalaryEmployeePeriodVal> processSalaryOriginValDataToPeriodVals(List<SalaryGroupEntity> importGroupEntities, ImportSalaryEmployeeOriginValDTO data, Long salaryGroupId, String ownerType, Long ownerId) {
 //        //  获取个人的项目字段
 //        //对于核算的导入导出 salaryGroupId是这个表的id
-//        // TODO: 2017/7/13 改成member
 //        SalaryGroup salaryGroup = salaryGroupProvider.findSalaryGroupById(salaryGroupId);
 //        Long detailId = Long.valueOf(data.getSalaryEmployeeVal().get(1));
 //        List<SalaryEmployeeOriginVal> salaryEmployeeOriginVals = this.salaryEmployeeOriginValProvider.
@@ -1248,7 +1246,6 @@ public class SalaryServiceImpl implements SalaryService {
 //     */
 //    private void savePeriodSalaryGroup(ImportSalaryEmployeeOriginValDTO data, List<SalaryGroupEntity> salaryGroupEntities,
 //                                       Long groupId, Long organizationId, String ownerType, Long ownerId) {
-//        //TODO: 存入period数据
 //
 //    }
 //
@@ -1427,7 +1424,6 @@ public class SalaryServiceImpl implements SalaryService {
 //        SalaryPeriodEmployeeDTO dto = ConvertHelper.convert(r, SalaryPeriodEmployeeDTO.class);
 //        dto.setCheckFlag((r.getStatus() == null || r.getStatus().equals(SalaryGroupStatus.UNCHECK.getCode())) ? SalaryGroupStatus.UNCHECK.getCode() : SalaryGroupStatus.CHECKED.getCode());
 //        //岗位
-//        // TODO: 2017/7/6 这里和荣楠的实现重叠了,重构一下
 //        SalaryEmployeeDTO detailDTO = getPersonnelInfoByDetailIdForSalary(r.getUserDetailId());
 //        dto.setJobPositions(detailDTO.getJobPosition());
 //        //批次名
@@ -2336,6 +2332,7 @@ public class SalaryServiceImpl implements SalaryService {
         response.setMonth(month);
         // TODO: 2018/1/22 磊哥和楠哥总要给我一个过滤后的detailIds
         List<Long> detailIds = new ArrayList<>();
+        organizationProvider
         if (null == detailIds) {
             return response;
         }
