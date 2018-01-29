@@ -460,6 +460,18 @@ public class ContractProviderImpl implements ContractProvider {
 	}
 
 	@Override
+	public String findContractIdByThirdPartyId(String contractId, String code) {
+		DSLContext context = getReadOnlyContext();
+		Long zuolinContractId = context.select(Tables.EH_CONTRACTS.ID)
+				.from(Tables.EH_CONTRACTS)
+				.where(Tables.EH_CONTRACTS.NAMESPACE_CONTRACT_TOKEN.eq(contractId))
+				.and(Tables.EH_CONTRACTS.NAMESPACE_CONTRACT_TYPE.eq(code))
+				.fetchOne(Tables.EH_CONTRACTS.ID);
+		if(zuolinContractId == null) return null;
+		return String.valueOf(zuolinContractId);
+	}
+
+	@Override
 	public void createContractParam(ContractParam param) {
 		Long id = sequenceProvider.getNextSequence(NameMapper.getSequenceDomainFromTablePojo(EhContractParams.class));
 		param.setId(id);
