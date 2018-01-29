@@ -594,7 +594,7 @@ public class NewsServiceImpl implements NewsService {
 		JSONArray sort = json.getJSONArray("sort");
 		sort.add(JSONObject.parseObject("{\"status\":{\"order\":\"asc\"}}"));
 		sort.add(JSONObject.parseObject("{\"topIndex\":{\"order\":\"desc\"}}"));
-		sort.add(JSONObject.parseObject("{\"publishTime\":{\"order\":\"asc\"}}"));
+		sort.add(JSONObject.parseObject("{\"publishTime\":{\"order\":\"desc\"}}"));
 
 		
 		// 设置查询关键字
