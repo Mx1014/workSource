@@ -5,6 +5,7 @@ import com.everhomes.configuration.ConfigurationProvider;
 import com.everhomes.db.DbProvider;
 import com.everhomes.filedownload.TaskService;
 import com.everhomes.listing.CrossShardListingLocator;
+import com.everhomes.listing.ListingLocator;
 import com.everhomes.locale.LocaleTemplateService;
 import com.everhomes.organization.*;
 import com.everhomes.rest.common.ImportFileResponse;
@@ -2332,8 +2333,15 @@ public class SalaryServiceImpl implements SalaryService {
         response.setMonth(month);
         // TODO: 2018/1/22 磊哥和楠哥总要给我一个过滤后的detailIds
         List<Long> detailIds = new ArrayList<>();
-        organizationProvider
-        if (null == detailIds) {
+        List<Long> orgIds = new ArrayList<>();
+        orgIds.add(cmd.getOwnerId());
+        List<OrganizationMember> members = organizationProvider.listOrganizationMemberByOrganizationIds(new ListingLocator(), Integer.MAX_VALUE - 1, null, orgIds);
+        if (null != members) {
+            for (OrganizationMember member : members) {
+                detailIds.add(member.getDetailId());
+            }
+        }
+        if (null == detailIds || detailIds.size() == 0) {
             return response;
         }
         response.setSalaryEmployeeDTO(new ArrayList<>());
@@ -2396,6 +2404,14 @@ public class SalaryServiceImpl implements SalaryService {
     private void batchCreateMonthSalaryEmployees(Long ownerId, String month) {
         //// TODO: 2018/1/23 获取owner下面的details
         List<OrganizationMemberDetails> details = new ArrayList<>();
+        List<Long> orgIds = new ArrayList<>();
+        orgIds.add(ownerId;
+        List<OrganizationMember> members = organizationProvider.listOrganizationMemberByOrganizationIds(new ListingLocator(), Integer.MAX_VALUE - 1, null, orgIds);
+        if (null != members) {
+            for (OrganizationMember member : members) {
+                details.add(organizationProvider.findOrganizationMemberDetailsByDetailId(member.getDetailId()));
+            }
+        }
         for (OrganizationMemberDetails detail : details) {
             createSalaryEmployee(ownerId, detail.getId(), month);
         }
@@ -2636,6 +2652,14 @@ public class SalaryServiceImpl implements SalaryService {
         //人员列表
         // TODO: 2018/1/25
         List<Long> detailIds = new ArrayList<>();
+        List<Long> orgIds = new ArrayList<>();
+        orgIds.add(organizationId);
+        List<OrganizationMember> members = organizationProvider.listOrganizationMemberByOrganizationIds(new ListingLocator(), Integer.MAX_VALUE - 1, null, orgIds);
+        if (null != members) {
+            for (OrganizationMember member : members) {
+                detailIds.add(member.getDetailId());
+            }
+        }
         int processNum = 0;
         for (Long detailId : detailIds) {
             OrganizationMemberDetails detail = organizationProvider.findOrganizationMemberDetailsByDetailId(detailId);
