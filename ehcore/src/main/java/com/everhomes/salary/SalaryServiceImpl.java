@@ -2456,6 +2456,7 @@ public class SalaryServiceImpl implements SalaryService {
     public GetEmployeeEntitiesResponse getEmployeeEntities(GetEmployeeEntitiesCommand cmd) {
         OrganizationMemberDetails detail = organizationProvider.findOrganizationMemberDetailsByDetailId(cmd.getDetailId());
         GetEmployeeEntitiesResponse response = ConvertHelper.convert(detail, GetEmployeeEntitiesResponse.class);
+        response.setCategories(new ArrayList<>());
 //        response.setCheckInTime(detail.getCheckInTime());
 //        response.setDismissTime(detail.getDismissTime());
         List<SalaryEntityCategory> categories = salaryEntityCategoryProvider.listSalaryEntityCategory();
