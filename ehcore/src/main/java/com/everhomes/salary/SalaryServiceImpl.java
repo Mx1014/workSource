@@ -2370,6 +2370,10 @@ public class SalaryServiceImpl implements SalaryService {
 
     private SalaryEmployee createSalaryEmployee(Long ownerId, Long detailId, String month) {
         OrganizationMemberDetails detail = organizationProvider.findOrganizationMemberDetailsByDetailId(detailId);
+        if (null == detail) {
+            LOGGER.error("出错了找不到detail: detailId ="+detailId);
+            return null;
+        }
         SalaryEmployee employee = newSalaryEmployee(detail, month, ownerId);
         salaryEmployeeProvider.createSalaryEmployee(employee);
         return employee;
