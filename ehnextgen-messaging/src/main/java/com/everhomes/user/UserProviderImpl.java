@@ -1033,6 +1033,37 @@ public class UserProviderImpl implements UserProvider {
 	        
 	        return list;
 	    }
+
+    @Override
+    public List<User> searchUserByIdentifier(String identifier, Integer namespaceId, int pageSize) {
+
+        List<User> list = new ArrayList<User>();
+
+        dbProvider.mapReduce(AccessSpec.readOnlyWith(EhUsers.class), null, (context,obj)->{
+            Condition cond = Tables.EH_USERS.NAMESPACE_ID.eq(namespaceId);
+            cond.and(Tables.EH_USER_IDENTIFIERS.IDENTIFIER_TOKEN.like(identifier + "%"));
+            cond.and(EH_USER_IDENTIFIERS.CLAIM_STATUS.eq(IdentifierClaimStatus.CLAIMED.getCode()));
+            context.select().from(Tables.EH_USERS).leftOuterJoin(Tables.EH_USER_IDENTIFIERS)
+                    .on(Tables.EH_USERS.ID.eq(Tables.EH_USER_IDENTIFIERS.OWNER_UID))
+                    .where(cond).orderBy(Tables.EH_USERS.CREATE_TIME.desc())
+                    .limit(pageSize)
+                    .fetch().map(r -> {
+                User user = ConvertHelper.convert(r,User.class);
+                user.setNamespaceId(r.getValue(Tables.EH_USERS.NAMESPACE_ID));
+                user.setId(r.getValue(Tables.EH_USERS.ID));
+                user.setNickName(r.getValue(Tables.EH_USERS.NICK_NAME));
+                user.setIdentifierToken(r.getValue(Tables.EH_USER_IDENTIFIERS.IDENTIFIER_TOKEN));
+                user.setCreateTime(r.getValue(Tables.EH_USERS.CREATE_TIME));
+                user.setStatus(r.getValue(Tables.EH_USERS.STATUS));
+                user.setGender(r.getValue(Tables.EH_USERS.GENDER));
+                list.add(user);
+                return null;
+            });
+            return true;
+        });
+
+        return list;
+    }
 	
 	/**
 	 * added by Janson
