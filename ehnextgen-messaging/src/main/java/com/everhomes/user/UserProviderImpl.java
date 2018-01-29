@@ -1041,9 +1041,9 @@ public class UserProviderImpl implements UserProvider {
 
         dbProvider.mapReduce(AccessSpec.readOnlyWith(EhUsers.class), null, (context,obj)->{
             Condition cond = Tables.EH_USERS.NAMESPACE_ID.eq(namespaceId);
-            cond.and(Tables.EH_USER_IDENTIFIERS.IDENTIFIER_TOKEN.like(identifier + "%"));
-            cond.and(EH_USER_IDENTIFIERS.CLAIM_STATUS.eq(IdentifierClaimStatus.CLAIMED.getCode()));
-            context.select().from(Tables.EH_USERS).leftOuterJoin(Tables.EH_USER_IDENTIFIERS)
+            cond = cond.and(Tables.EH_USER_IDENTIFIERS.IDENTIFIER_TOKEN.like(identifier + "%"));
+            cond = cond.and(EH_USER_IDENTIFIERS.CLAIM_STATUS.eq(IdentifierClaimStatus.CLAIMED.getCode()));
+            context.select().from(Tables.EH_USERS).join(Tables.EH_USER_IDENTIFIERS, JoinType.JOIN)
                     .on(Tables.EH_USERS.ID.eq(Tables.EH_USER_IDENTIFIERS.OWNER_UID))
                     .where(cond).orderBy(Tables.EH_USERS.CREATE_TIME.desc())
                     .limit(pageSize)
