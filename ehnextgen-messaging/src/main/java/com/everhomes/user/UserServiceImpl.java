@@ -5469,9 +5469,6 @@ public class UserServiceImpl implements UserService {
 		}
 
 		int pageSize = 10 ;
-		if(cmd.getSize() != null){
-			pageSize = cmd.getSize();
-		}
 
 		List<User> users = userProvider.searchUserByIdentifier(cmd.getIdentifierToken(), cmd.getNamespaceId(), pageSize);
 

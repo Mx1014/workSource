@@ -8,7 +8,6 @@ import javax.validation.constraints.NotNull;
  * <ul>
  *     <li>identifierToken: 用户手机号</li>
  *     <li>namespaceId: namespaceId</li>
- *     <li>size: size</li>
  * </ul>
  */
 public class SearchUserByIdentifierCommand {
@@ -16,8 +15,6 @@ public class SearchUserByIdentifierCommand {
     private String identifierToken;
     @NotNull
     private Integer namespaceId;
-
-    private Integer size;
 
     public String getIdentifierToken() {
         return identifierToken;
@@ -33,14 +30,6 @@ public class SearchUserByIdentifierCommand {
 
     public void setNamespaceId(Integer namespaceId) {
         this.namespaceId = namespaceId;
-    }
-
-    public Integer getSize() {
-        return size;
-    }
-
-    public void setSize(Integer size) {
-        this.size = size;
     }
 
     @Override
