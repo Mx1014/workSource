@@ -5,6 +5,8 @@ import com.everhomes.acl.AuthorizationProvider;
 import com.everhomes.db.AccessSpec;
 import com.everhomes.db.DbProvider;
 import com.everhomes.listing.CrossShardListingLocator;
+import com.everhomes.message.MessageProvider;
+import com.everhomes.message.MessageProviderImpl;
 import com.everhomes.module.ServiceModuleProvider;
 import com.everhomes.naming.NameMapper;
 import com.everhomes.rest.admin.GetSequenceCommand;
@@ -46,6 +48,9 @@ public class SequenceServiceImpl implements SequenceService {
 
     @Autowired
     private ServiceModuleProvider serviceModuleProvider;
+
+    @Autowired
+    private MessageProvider messageProvider;
 
     private final Schema[] schemas = new Schema[] {
             com.everhomes.schema.Ehcore.EHCORE,
@@ -134,6 +139,10 @@ public class SequenceServiceImpl implements SequenceService {
 
         // user account is a special field, it default to be number stype, but it can be changed to any character only if they are unique in db
         syncUserAccountName();
+
+        syncActiveAppId();
+
+        syncMessageIndexId();
 
         syncAuthorizationControlId();
 
@@ -2193,6 +2202,22 @@ public class SequenceServiceImpl implements SequenceService {
             long nextSequenceAfterReset = sequenceProvider.getNextSequence(key);
             if (LOGGER.isDebugEnabled()) {
                 LOGGER.debug("maxSyncActiveAppId sequence, key=" + key + ", newSequence=" + (maxSyncActiveAppId + 1)
+                        + ", nextSequenceBeforeReset=" + nextSequenceBeforeReset + ", nextSequenceAfterReset=" + nextSequenceAfterReset);
+            }
+        }
+    }
+
+    private void syncMessageIndexId() {
+        long maxMessageIndexId = 0;
+        maxMessageIndexId = this.messageProvider.getMaxMessageIndexId();
+
+        if (maxMessageIndexId > 0) {
+            String key = "messageIndexId";
+            long nextSequenceBeforeReset = sequenceProvider.getNextSequence(key);
+            sequenceProvider.resetSequence(key, maxMessageIndexId + 1);
+            long nextSequenceAfterReset = sequenceProvider.getNextSequence(key);
+            if (LOGGER.isDebugEnabled()) {
+                LOGGER.debug("syncMessageIndexId sequence, key=" + key + ", newSequence=" + (maxMessageIndexId + 1)
                         + ", nextSequenceBeforeReset=" + nextSequenceBeforeReset + ", nextSequenceAfterReset=" + nextSequenceAfterReset);
             }
         }

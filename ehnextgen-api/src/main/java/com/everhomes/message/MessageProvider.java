@@ -7,5 +7,6 @@ public interface MessageProvider {
     void updateMessageRecord(MessageRecord messageRecord);
     void deleteMessageRecordById(Long id);
     List<MessageRecord> listMessageRecords(Integer namespaceId);
+    Long getMaxMessageIndexId();
 
 }

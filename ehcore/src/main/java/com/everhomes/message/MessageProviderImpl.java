@@ -7,6 +7,7 @@ import com.everhomes.db.DbProvider;
 import com.everhomes.naming.NameMapper;
 import com.everhomes.schema.tables.pojos.EhMessages;
 import com.everhomes.sequence.SequenceProvider;
+import com.everhomes.server.schema.Tables;
 import com.everhomes.server.schema.tables.daos.EhMessageRecordsDao;
 import com.everhomes.server.schema.tables.pojos.EhMessageRecords;
 import com.everhomes.util.DateHelper;
@@ -57,5 +58,12 @@ public class MessageProviderImpl implements MessageProvider {
     @Override
     public List<MessageRecord> listMessageRecords(Integer namespaceId) {
         return null;
+    }
+
+    @Override
+    public Long getMaxMessageIndexId() {
+        DSLContext context = dbProvider.getDslContext(AccessSpec.readOnly());
+        Long index_id = context.select(Tables.EH_MESSAGE_RECORDS.INDEX_ID.max()).fetchOne().value1();
+        return index_id != null ? index_id : 0;
     }
 }

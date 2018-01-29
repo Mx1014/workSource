@@ -18,6 +18,7 @@ import com.everhomes.rest.rpc.client.StoredMessageIndicationPdu;
 import com.everhomes.rest.rpc.server.ClientForwardPdu;
 import com.everhomes.rest.user.DeviceIdentifierType;
 import com.everhomes.rest.user.UserMuteNotificationFlag;
+import com.everhomes.sequence.SequenceProvider;
 import com.everhomes.user.*;
 import com.everhomes.util.DateHelper;
 import com.everhomes.util.MessagePersistWorker;
@@ -58,6 +59,9 @@ public class UserMessageRoutingHandler implements MessageRoutingHandler {
     
     @Autowired
     private PusherService pusherService;
+
+    @Autowired
+    private SequenceProvider sequenceProvider;
 
 //    @Autowired
 //    private TaskScheduler taskScheduler;
@@ -239,6 +243,24 @@ public class UserMessageRoutingHandler implements MessageRoutingHandler {
         this.messageBoxProvider.putMessage(boxKey, msgId);
 
         boolean onlineDelivered = false;
+
+        //把消息添加到队列里
+        MessageRecordDto record = new MessageRecordDto();
+        record.setAppId(appId);
+        record.setNamespaceId(UserContext.getCurrentNamespaceId());
+        record.setMessageSeq(message.getStoreSequence());
+        record.setSenderUid(senderLogin.getUserId());
+        record.setSenderTag("ROUTE STORE MESSAGE");
+        record.setDstChannelType(destChannelType);
+        record.setDstChannelToken(destChannelToken);
+        record.setChannelsInfo(message.getChannels().toString());
+        record.setBodyType(message.getBodyType());
+        record.setBody(message.getBody());
+        record.setDeliveryoption(deliveryOption);
+        record.setStatus(MessageRecordStatus.CORE_ROUTE.getCode());
+        record.setIndexId(this.sequenceProvider.getNextSequence("messageIndexId"));
+        MessagePersistWorker.getQueue().offer(record);
+
         //If not push only, send it by border server
         if((MessagingConstants.MSG_FLAG_PUSH_ENABLED.getCode() != deliveryOption) && (destLogin.getLoginBorderId() != null)) {
             BorderConnection borderConnection = this.borderConnectionProvider.getBorderConnection(destLogin.getLoginBorderId());
@@ -246,30 +268,14 @@ public class UserMessageRoutingHandler implements MessageRoutingHandler {
                 StoredMessageIndicationPdu clientPdu = new StoredMessageIndicationPdu();
                 ClientForwardPdu forwardPdu = buildForwardPdu(destLogin, appId, clientPdu);
                 try {
-                    //把消息添加到队列里
-                    MessageRecordDto record = new MessageRecordDto();
-                    record.setAppId(appId);
-                    record.setNamespaceId(UserContext.getCurrentNamespaceId());
-                    record.setMessageSeq(message.getStoreSequence());
-                    record.setSenderUid(senderLogin.getUserId());
-                    record.setSenderTag("ROUTE STORE MESSAGE");
-                    record.setDstChannelType(destChannelType);
-                    record.setDstChannelToken(destChannelToken);
-                    record.setChannelsInfo(message.getChannels().toString());
-                    record.setBodyType(message.getBodyType());
-                    record.setBody(message.getBody());
-                    record.setDeliveryoption(deliveryOption);
-                    record.setStatus(MessageRecordStatus.CORE_ROUTE.getCode());
-                    MessagePersistWorker.getQueue().offer(record);
-
                     borderConnection.sendMessage(null, forwardPdu);
-                    onlineDelivered = true;
+                    onlineDelivered = true; // 为苹果设备做冗余，即苹果设备在线，也要发推送
                 } catch(IOException e) {
                     LOGGER.warn("Failed to deliver message to border", e);
                 }
             }
         }
-        
+
         if((deliveryOption & MessagingConstants.MSG_FLAG_PUSH_ENABLED.getCode()) != 0) {
             if(onlineDelivered) {
                 this.pusherService.checkAndPush(senderLogin, destLogin, msgId, msg);
