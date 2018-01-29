@@ -2350,7 +2350,9 @@ public class SalaryServiceImpl implements SalaryService {
             if (null == employee) {
                 employee = createSalaryEmployee(cmd.getOwnerId(), detailId, month);
             }
-            response.getSalaryEmployeeDTO().add(processEmployeeDTO(employee));
+            if (null != employee) {
+                response.getSalaryEmployeeDTO().add(processEmployeeDTO(employee));
+            }
         }
 
         CrossShardListingLocator locator = new CrossShardListingLocator();
