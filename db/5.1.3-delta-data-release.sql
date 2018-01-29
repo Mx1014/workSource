@@ -5,3 +5,12 @@ update eh_parking_lots SET config_json = REPLACE(config_json,'}',',"identityCard
 
 INSERT INTO `eh_configurations` (`name`, `value`, `description`, `namespace_id`, `display_name`) VALUES ('parking.zijing.marketid', '075500012201801220001', '紫荆车辆放行markid', 0, NULL);
 INSERT INTO `eh_configurations` (`name`, `value`, `description`, `namespace_id`, `display_name`) VALUES ('parking.zijing.userid', '0755000120180122000000000001', '紫荆车辆放行userid', 0, NULL);
+
+
+-- 更新所有域空间的模块类型
+update eh_service_modules set module_control_type = 'unlimit_control' where id = 41300;
+update eh_service_modules set module_control_type = 'unlimit_control' where id = 49200;
+
+-- 物业缴费模块的催缴短信模板 by wentian and 娟姐
+
+update eh_locale_templates set text = '${targetName}先生/女士，您好，您的物业账单已出，账期${dateStr}，账单金额为${amount}元，使用"${appName} APP"可及时查看账单。' where scope = "sms.default" and namespace_id = 0 and code = 54;

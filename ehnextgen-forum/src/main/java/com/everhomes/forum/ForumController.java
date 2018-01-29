@@ -494,7 +494,7 @@ public class ForumController extends ControllerBase {
 
     /**
      * <b>URL: /forum/listForumServiceTypes</b>
-     * <p>获取论坛服务类型</p></p>
+     * <p>获取论坛服务类型</p>
      * @return
      */
     @RequestMapping("listForumServiceTypes")

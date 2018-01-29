@@ -618,9 +618,9 @@ public class AssetServiceImpl implements AssetService {
             }
             requestCmd.setBillIdAndTypes(billIdAndTypes);
             String appName = assetProvider.findAppName(UserContext.getCurrentNamespaceId());
-            if(appName==null || appName.trim().length()<1){
-                appName="张江高科推荐";
-            }
+//            if(appName==null || appName.trim().length()<1){
+//                appName="张江高科推荐";
+//            }
             if(UserContext.getCurrentNamespaceId()==999971){
                 List<NoticeInfo> list = new ArrayList<>();
                 List<ListBillsDTO> listBillsDTOS1 = convertedResponse.getListBillsDTOS();
@@ -639,6 +639,7 @@ public class AssetServiceImpl implements AssetService {
                     info.setPhoneNums(dto.getNoticeTel());
                     info.setAmountRecevable(dto.getAmountReceivable());
                     info.setAmountOwed(dto.getAmountOwed());
+                    info.setDateStr(dto.getDateStr());
                     Long tid = 0l;
                     String targeType=null;
                     Long uid  = assetProvider.findTargetIdByIdentifier(dto.getTargetId());
@@ -2704,6 +2705,11 @@ public class AssetServiceImpl implements AssetService {
         return handler.showBillForClientV2(cmd);
     }
 
+    /**
+     *
+     * @modify 2018/1/16
+     *  @modifyPoint 1 make bill ordered by date desc
+     */
     @Override
     public List<ListAllBillsForClientDTO> listAllBillsForClient(ListAllBillsForClientCommand cmd) {
         //企业用户的话判断是否为企业管理员

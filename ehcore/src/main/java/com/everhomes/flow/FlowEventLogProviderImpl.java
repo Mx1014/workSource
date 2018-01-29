@@ -672,6 +672,16 @@ public class FlowEventLogProviderImpl implements FlowEventLogProvider {
     }
 
     @Override
+    public List<FlowEventLog> findFlowCaseSupervisors(FlowCase flowCase) {
+        return this.queryFlowEventLogs(new ListingLocator(), 200, (locator, query) -> {
+            query.addConditions(Tables.EH_FLOW_EVENT_LOGS.FLOW_CASE_ID.eq(flowCase.getId()));
+            query.addConditions(Tables.EH_FLOW_EVENT_LOGS.FLOW_VERSION.eq(flowCase.getFlowVersion()));
+            query.addConditions(Tables.EH_FLOW_EVENT_LOGS.LOG_TYPE.eq(FlowLogType.FLOW_SUPERVISOR.getCode()));
+            return query;
+        });
+    }
+
+    @Override
     public List<FlowEventLog> findRejectEventLogsByNodeId(Long nodeId, Long flowCaseId, Long stepCount) {
         return this.queryFlowEventLogs(new ListingLocator(), 1, (locator, query) -> {
             query.addConditions(Tables.EH_FLOW_EVENT_LOGS.FLOW_NODE_ID.eq(nodeId));

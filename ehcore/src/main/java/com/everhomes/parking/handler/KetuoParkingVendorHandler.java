@@ -491,7 +491,10 @@ public abstract class KetuoParkingVendorHandler extends DefaultParkingVendorHand
 								.divide(new BigDecimal(DAY_COUNT), OPEN_CARD_RETAIN_DECIMAL, RoundingMode.HALF_UP));
 				dto.setPayMoney(price);
 			}
-
+			if(configProvider.getBooleanValue("parking.ketuo.debug",false)){
+				LOGGER.debug("parking.ketuo.debug is true, pay 0.01 RMB");
+				dto.setPayMoney(new BigDecimal(0.01));
+			}
 			dto.setOrderType(ParkingOrderType.OPEN_CARD.getCode());
 		}
 

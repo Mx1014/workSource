@@ -26,5 +26,7 @@ public interface PointLogProvider {
 
     PointLog findByRuleIdAndEntity(Integer namespaceId, Long systemId, Long targetUid, Long ruleId, String entityType, Long entityId);
 
-    boolean isExist(Integer namespaceId, Long systemId, Long targetUid, Long ruleId, String entityType, Long entityId);
+    PointLog isExist(Integer namespaceId, Long systemId, Long targetUid, Long ruleId, String entityType, Long entityId);
+
+    PointLog findByBindingLogId(Long logId);
 }

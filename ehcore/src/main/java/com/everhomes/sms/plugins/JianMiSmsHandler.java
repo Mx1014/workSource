@@ -170,10 +170,10 @@ public class JianMiSmsHandler extends BaseSmsHandler {
     }
 
     @Override
-    public SmsReportResponse report(String reportBody) {
+    public SmsReportResponse report(SmsReportRequest reportRequest) {
         ReportResult reportResult = null;
         try {
-            reportResult = xmlToBean(reportBody, ReportResult.class);
+            reportResult = xmlToBean(reportRequest.getRequestBody(), ReportResult.class);
         } catch (Exception e) {
             e.printStackTrace();
         }

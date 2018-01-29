@@ -15,6 +15,8 @@ import com.everhomes.util.ConvertHelper;
 import com.everhomes.util.DateHelper;
 import org.jooq.DSLContext;
 import org.jooq.SelectQuery;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
 
@@ -27,7 +29,7 @@ import java.util.List;
  */
 @Component
 public class ZjSyncdataBackupProviderImpl implements ZjSyncdataBackupProvider {
-
+    private static final Logger LOGGER = LoggerFactory.getLogger(ZjSyncdataBackupProviderImpl.class);
     @Autowired
     private DbProvider dbProvider;
 
@@ -90,6 +92,27 @@ public class ZjSyncdataBackupProviderImpl implements ZjSyncdataBackupProvider {
             return null;
         });
         return backups;
+    }
+
+    @Override
+    public int listZjSyncdataBackupActiveCountByParam(Integer namespaceId, String communityIdentifier, Byte dataType) {
+        DSLContext context = this.dbProvider.getDslContext(AccessSpec.readOnlyWith(EhZjSyncdataBackup.class));
+
+        SelectQuery<EhZjSyncdataBackupRecord> query = context.selectQuery(Tables.EH_ZJ_SYNCDATA_BACKUP);
+
+        query.addConditions(Tables.EH_ZJ_SYNCDATA_BACKUP.NAMESPACE_ID.eq(namespaceId));
+        if(communityIdentifier != null) {
+            query.addConditions(Tables.EH_ZJ_SYNCDATA_BACKUP.UPDATE_COMMUNITY.eq(communityIdentifier));
+        } else {
+            query.addConditions(Tables.EH_ZJ_SYNCDATA_BACKUP.UPDATE_COMMUNITY.isNull());
+        }
+
+        query.addConditions(Tables.EH_ZJ_SYNCDATA_BACKUP.DATA_TYPE.eq(dataType));
+        query.addConditions(Tables.EH_ZJ_SYNCDATA_BACKUP.STATUS.eq(CommonStatus.ACTIVE.getCode()));
+
+        LOGGER.debug("listZjSyncdataBackupActiveCountByParam, sql=" + query.getSQL());
+        LOGGER.debug("listZjSyncdataBackupActiveCountByParam, bindValues=" + query.getBindValues());
+        return query.fetchCount();
     }
 
     @Override

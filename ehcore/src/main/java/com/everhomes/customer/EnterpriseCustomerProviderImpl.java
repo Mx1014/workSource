@@ -15,6 +15,7 @@ import com.everhomes.rest.customer.*;
 import com.everhomes.server.schema.tables.daos.*;
 import com.everhomes.server.schema.tables.pojos.*;
 import com.everhomes.server.schema.tables.records.*;
+import com.everhomes.varField.FieldParams;
 import org.apache.commons.lang.StringUtils;
 import org.apache.lucene.spatial.geohash.GeoHashUtils;
 import org.jooq.*;
@@ -1477,6 +1478,7 @@ public class EnterpriseCustomerProviderImpl implements EnterpriseCustomerProvide
 				String getter = getPrefix + StringUtils.capitalize(field.getFieldName());
 				Method methodNew = ReflectionUtils.findMethod(customer.getClass(), getter);
 				Method methodOld = ReflectionUtils.findMethod(exist.getClass(), getter);
+                String fieldType = field.getFieldType();
 				Object objNew = null;
 				Object objOld = null;
 				try {
@@ -1505,6 +1507,19 @@ public class EnterpriseCustomerProviderImpl implements EnterpriseCustomerProvide
 					        	oldData = levelItemOld.getItemDisplayName();
 					        }
 						}
+
+                        FieldParams params = (FieldParams) StringHelper.fromJsonString(field.getFieldParam(), FieldParams.class);
+                        if(params.getFieldParamType().equals("select") && field.getFieldName().lastIndexOf("Id") > -1){
+                            ScopeFieldItem levelItemNew = fieldProvider.findScopeFieldItemByFieldItemId(customer.getNamespaceId(), customer.getCommunityId(),(objNew == null ? -1l : Long.parseLong(objNew.toString())));
+                            if(levelItemNew != null) {
+                                newData = levelItemNew.getItemDisplayName();
+                            }
+                            ScopeFieldItem levelItemOld = fieldProvider.findScopeFieldItemByFieldItemId(exist.getNamespaceId(),customer.getCommunityId(), (objOld == null ? -1l : Long.parseLong(objOld.toString())));
+                            if(levelItemOld != null) {
+                                oldData = levelItemOld.getItemDisplayName();
+                            }
+                        }
+
 						if("propertyType".equals(field.getFieldName())){
 							ScopeFieldItem levelItemNew = fieldProvider.findScopeFieldItemByFieldItemId(customer.getNamespaceId(), customer.getCommunityId(),(objNew == null ? -1l : Long.parseLong(objNew.toString())));
 					        if(levelItemNew != null) {

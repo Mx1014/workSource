@@ -6,7 +6,6 @@ import com.everhomes.util.StringHelper;
 import javax.validation.constraints.NotNull;
 
 /**
- * <p>
  * <ul>
  * <li>ownerType: 所属实体类型 公司机构：</li>
  * <li>ownerId: 所属实体id</li>
