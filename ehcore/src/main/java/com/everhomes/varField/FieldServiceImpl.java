@@ -640,6 +640,10 @@ public class FieldServiceImpl implements FieldService {
             }
         }
 
+        if(fieldName.equals("addressId")){
+            fieldName = "addressName";
+        }
+
         try {
             //获得get方法并使用获得field的值
             String cellData = getFromObj(fieldName, dto,communityId,namespaceId,moduleName);
