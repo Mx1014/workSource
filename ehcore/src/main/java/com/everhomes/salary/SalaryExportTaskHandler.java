@@ -46,16 +46,16 @@ public class SalaryExportTaskHandler implements FileDownloadTaskHandler {
 	@Override
 	public void execute(Map<String, Object> params) {
 
-		Long organizationId = null;
-		if(params.get("organizationId") != null){
-			organizationId = Long.valueOf(String.valueOf(params.get("organizationId")));
+		Long ownerId = null;
+		if(params.get("ownerId") != null){
+			ownerId = Long.valueOf(String.valueOf(params.get("ownerId")));
 		}
 
 
 		String fileName = (String) params.get("name");
 		Long taskId = (Long) params.get("taskId");
 
-		OutputStream outputStream = salaryService.getEmployeeSalaryOutPut(organizationId,taskId);
+		OutputStream outputStream = salaryService.getEmployeeSalaryOutPut(ownerId,taskId);
 		CsFileLocationDTO fileLocationDTO = fileDownloadTaskService.uploadToContenServer(fileName, outputStream);
 
 
