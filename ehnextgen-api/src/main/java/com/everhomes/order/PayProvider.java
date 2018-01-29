@@ -12,6 +12,8 @@ import java.util.List;
 public interface PayProvider {
     PaymentOrderRecord findOrderRecordByOrder(String orderType, Long orderId);
 
+    void deleteOrderRecordByOrder(String orderType, Long orderId);
+
     PaymentOrderRecord findOrderRecordById(Long id);
 
     PaymentUser findPaymentUserByOwner(String ownerType, Long ownerId);
