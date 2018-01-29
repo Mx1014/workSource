@@ -4489,13 +4489,15 @@ public class QualityServiceImpl implements QualityService {
 	@Override
 	public QualityOfflineTaskDetailsResponse getOfflineTaskDetail(ListQualityInspectionTasksCommand cmd) {
 		//处理传过来的lastSyncTime
-		cmd.setPageSize(Integer.MAX_VALUE - 1);
+//		cmd.setPageSize(Integer.MAX_VALUE - 1);
 		cmd.setLatestUpdateTime(dateStrToTimestamp(cmd.getLastSyncTime()));
 		ListQualityInspectionTasksResponse tasksResponse = listQualityInspectionTasks(cmd);
 		QualityOfflineTaskDetailsResponse offlineTaskDetailsResponse = new QualityOfflineTaskDetailsResponse();
-
 		offlineTaskDetailsResponse.setTasks(tasksResponse.getTasks());
+		offlineTaskDetailsResponse.setNextPageAnchor(tasksResponse.getNextPageAnchor());
 		List<QualityInspectionSpecificationDTO> specifications = new ArrayList<>();
+
+		if(tasksResponse.getTasks()!=null && tasksResponse.getTasks().size()>0)
 		tasksResponse.getTasks().forEach((task) -> {
 			//处理任务
 			if (task.getExecutiveTime() == null) {
