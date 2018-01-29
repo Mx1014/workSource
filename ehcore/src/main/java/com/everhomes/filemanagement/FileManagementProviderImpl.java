@@ -147,6 +147,7 @@ public class FileManagementProviderImpl implements FileManagementProvider {
         query.addConditions(Tables.EH_FILE_MANAGEMENT_CATALOGS.NAMESPACE_ID.eq(namespaceId));
         query.addConditions(Tables.EH_FILE_MANAGEMENT_CATALOGS.OWNER_ID.eq(ownerId));
         query.addConditions(Tables.EH_FILE_MANAGEMENT_CATALOGS.STATUS.eq(FileManagementStatus.VALID.getCode()));
+        query.addOrderBy(Tables.EH_FILE_MANAGEMENT_CATALOGS.ID.desc());
         query.fetch().map(r -> {
             FileCatalog catalog = new FileCatalog();
             catalog.setId(r.getValue(Tables.EH_FILE_MANAGEMENT_CATALOGS.ID));
@@ -245,8 +246,8 @@ public class FileManagementProviderImpl implements FileManagementProvider {
         query.addConditions(Tables.EH_FILE_MANAGEMENT_CATALOG_SCOPES.CATALOG_ID.eq(catalogId));
         if (keywords != null)
             query.addConditions(Tables.EH_FILE_MANAGEMENT_CATALOG_SCOPES.SOURCE_DESCRIPTION.like("%" + keywords + "%"));
-        if (pageAnchor != null)
-            query.addConditions(Tables.EH_FILE_MANAGEMENT_CATALOG_SCOPES.ID.lt(pageAnchor));
+/*        if (pageAnchor != null)
+            query.addConditions(Tables.EH_FILE_MANAGEMENT_CATALOG_SCOPES.ID.lt(pageAnchor));*/
         query.addLimit(pageSize + 1);
         query.addOrderBy(Tables.EH_FILE_MANAGEMENT_CATALOG_SCOPES.ID.desc());
         query.fetch().map(r -> {
@@ -262,7 +263,11 @@ public class FileManagementProviderImpl implements FileManagementProvider {
     @Override
     public void createFileContent(FileContent content) {
         Long id = sequenceProvider.getNextSequence(NameMapper.getSequenceDomainFromTablePojo(EhFileManagementContents.class));
+        //  add the path
+        String path = content.getPath() + "/" + String.valueOf(id);
+
         content.setId(id);
+        content.setPath(path);
         content.setCreatorUid(UserContext.currentUserId());
         content.setCreateTime(new Timestamp(DateHelper.currentGMTTime().getTime()));
         content.setOperatorUid(content.getCreatorUid());
@@ -305,12 +310,13 @@ public class FileManagementProviderImpl implements FileManagementProvider {
     }
 
     @Override
-    public FileContent findFileContentByName(Integer namespaceId, Long ownerId, Long parentId, String name) {
+    public FileContent findFileContentByName(Integer namespaceId, Long ownerId, Long catalogId, Long parentId, String name) {
         DSLContext context = dbProvider.getDslContext(AccessSpec.readOnly());
 
         SelectQuery<EhFileManagementContentsRecord> query = context.selectQuery(Tables.EH_FILE_MANAGEMENT_CONTENTS);
         query.addConditions(Tables.EH_FILE_MANAGEMENT_CONTENTS.NAMESPACE_ID.eq(namespaceId));
         query.addConditions(Tables.EH_FILE_MANAGEMENT_CONTENTS.OWNER_ID.eq(ownerId));
+        query.addConditions(Tables.EH_FILE_MANAGEMENT_CONTENTS.CATALOG_ID.eq(catalogId));
         if (parentId != null)
             query.addConditions(Tables.EH_FILE_MANAGEMENT_CONTENTS.PARENT_ID.eq(parentId));
         else {
@@ -322,9 +328,9 @@ public class FileManagementProviderImpl implements FileManagementProvider {
         return query.fetchAnyInto(FileContent.class);
     }
 
-    @Override
+/*    @Override
     public List<FileContent> listFileContents(Integer namespaceId, Long ownerId, Long catalogId,
-                                              Long parentId, String keywords) {
+                                              String path, String keywords) {
         List<FileContent> results = new ArrayList<>();
         DSLContext context = dbProvider.getDslContext(AccessSpec.readOnly());
 
@@ -333,14 +339,10 @@ public class FileManagementProviderImpl implements FileManagementProvider {
         query.addConditions(Tables.EH_FILE_MANAGEMENT_CONTENTS.OWNER_ID.eq(ownerId));
         query.addConditions(Tables.EH_FILE_MANAGEMENT_CONTENTS.STATUS.eq(FileManagementStatus.VALID.getCode()));
         query.addConditions(Tables.EH_FILE_MANAGEMENT_CONTENTS.CATALOG_ID.eq(catalogId));
-        if (keywords != null) {
+        if (path != null)
+            query.addConditions(Tables.EH_FILE_MANAGEMENT_CONTENTS.PATH.like("%" + path + "%"));
+        if (keywords != null)
             query.addConditions(Tables.EH_FILE_MANAGEMENT_CONTENTS.CONTENT_NAME.like("%" + keywords + "%"));
-        } else {
-            if (parentId != null)
-                query.addConditions(Tables.EH_FILE_MANAGEMENT_CONTENTS.PARENT_ID.eq(parentId));
-            else
-                query.addConditions(Tables.EH_FILE_MANAGEMENT_CONTENTS.PARENT_ID.isNull());
-        }
         query.addOrderBy(Tables.EH_FILE_MANAGEMENT_CONTENTS.CREATE_TIME.desc());
 
         query.fetch().map(r -> {
@@ -351,7 +353,7 @@ public class FileManagementProviderImpl implements FileManagementProvider {
             return results;
         }
         return null;
-    }
+    }*/
 
     @Override
     public List<FileContent> queryFileContents(ListingLocator locator, Integer namespaceId, Long ownerId, ListingQueryBuilderCallback queryBuilderCallback){

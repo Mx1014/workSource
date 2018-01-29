@@ -1,5 +1,5 @@
 -- 滞纳金变量 by wentian
-SET @var_id = (SELECT max(`id`) from `eh_payment_variables`);
+SET @var_id = (SELECT MAX(`id`) FROM `eh_payment_variables`);
 INSERT INTO `eh_payment_variables` (`id`, `charging_standard_id`, `charging_items_id`, `name`, `creator_uid`, `create_time`, `operator_uid`, `update_time`, `identifier`) VALUES (@var_id:=@var_id+1, NULL, '6', '欠费', '0', '2017-10-16 09:31:00', NULL, '2017-10-16 09:31:00', 'qf');
 
 --  标准数据增加周期类型及关系表状态start by jiarui 20180105
@@ -23,6 +23,9 @@ UPDATE eh_equipment_inspection_tasks
 SET `status` = 7
 WHERE `status` = 4 AND review_result = 4;
 
+UPDATE eh_equipment_inspection_task_logs
+SET equipment_id = (SELECT  equipment_id FROM eh_equipment_inspection_tasks WHERE id = task_id);
+
 -- 巡检任务状态统一 end by jiarui 20180105
 
 
@@ -30,9 +33,9 @@ WHERE `status` = 4 AND review_result = 4;
 INSERT INTO `eh_rentalv2_resource_types` (`id`, `name`, `page_type`, `icon_uri`, `status`, `namespace_id`, `pay_mode`, `unauth_visible`, `menu_type`, `identify`)
 	VALUES ('12500', 'VIP车位预约', '0', NULL, '2', '1000000', '0', '0', '1', 'vip_parking');
 
-UPDATE eh_rentalv2_price_rules set user_price_type = 1;
+UPDATE eh_rentalv2_price_rules SET user_price_type = 1;
 
-UPDATE eh_rentalv2_price_packages set user_price_type = 1;
+UPDATE eh_rentalv2_price_packages SET user_price_type = 1;
 
 INSERT INTO `eh_locale_templates` (`scope`, `code`, `locale`, `description`, `text`, `namespace_id`)
 	VALUES ('rental.notification', '13', 'zh_CN', '用户取消订单推送消息', '订单取消通知：您的${resourceTypeName}订单已成功取消。', '0');
@@ -96,7 +99,7 @@ INSERT INTO `eh_locale_templates` (`scope`, `code`, `locale`, `description`, `te
 INSERT INTO `eh_configurations` (`name`, `value`, `description`, `namespace_id`, `display_name`)
 	VALUES ('rental.order.detail.url', '/vip-parking/build/index.html#/intro?namespaceId=1000000&resourceType=%s&resourceTypeId=%s&sourceType=%s&sourceId=%s', '', '0', NULL);
 
-UPDATE eh_parking_lots join eh_communities on eh_communities.id = eh_parking_lots.owner_id set eh_parking_lots.namespace_id = eh_communities.namespace_id;
+UPDATE eh_parking_lots JOIN eh_communities ON eh_communities.id = eh_parking_lots.owner_id SET eh_parking_lots.namespace_id = eh_communities.namespace_id;
 
 INSERT INTO `eh_locale_strings` (`scope`, `code`, `locale`, `text`)
   VALUES ('rental.notification', '12', 'zh_CN', '亲爱的用户，为保障资源使用效益，现在取消订单，系统将不予退款，恳请您谅解。\r\n\r\n确认要取消订单吗？');
@@ -112,3 +115,220 @@ INSERT INTO `ehcore`.`eh_configurations`(`name`, `value`, `description`, `namesp
   VALUES ('parking.dingding.hubMac', 'CC:1B:E0:E0:09:F8', NULL, 0, NULL);
 
 
+-- 删除审批这种服务联盟跳转模块 by dengs,2018/1/12
+select * from eh_service_alliance_jump_module WHERE module_url like '%zl://approval/create%' and module_name='审批';
+DELETE FROM eh_service_alliance_jump_module WHERE module_url like '%zl://approval/create%' and module_name='审批';
+
+-- merge from payment-contract by xiongying 20180124
+INSERT INTO `eh_service_modules` (`id`, `name`, `parent_id`, `path`, `type`, `level`, `status`, `default_order`, `create_time`, `creator_uid`, `operator_uid`) VALUES(21300,'付款管理',20000,'/20000/21300','1','2','2','0',NOW(),1,1);
+INSERT INTO `eh_service_modules` (`id`, `name`, `parent_id`, `path`, `type`, `level`, `status`, `default_order`, `create_time`, `creator_uid`, `operator_uid`) VALUES(21310,'付款申请单',21300,'/20000/21300/21310','1','3','2','0',NOW(),1,1);
+INSERT INTO `eh_service_modules` (`id`, `name`, `parent_id`, `path`, `type`, `level`, `status`, `default_order`, `create_time`, `creator_uid`, `operator_uid`) VALUES(21320,'工作流设置',21300,'/20000/21300/21320','1','3','2','0',NOW(),1,1);
+
+INSERT INTO `eh_service_modules` (`id`, `name`, `parent_id`, `path`, `type`, `level`, `status`, `default_order`, `create_time`, `creator_uid`, `operator_uid`) VALUES(21215,'付款合同',21200,'/20000/21200/21215','1','3','2','0',NOW(),1,1);
+
+INSERT INTO `eh_acl_privileges` (`id`, `app_id`, `name`, `description`, `tag`) VALUES (21300, '0', '付款管理 管理员', '付款管理 业务模块权限', NULL);
+
+SET @module_privilege_id = (SELECT MAX(id) FROM `eh_service_module_privileges`);
+INSERT INTO `eh_service_module_privileges` (`id`, `module_id`, `privilege_type`, `privilege_id`, `remark`, `default_order`, `create_time`) VALUES ((@module_privilege_id := @module_privilege_id + 1), '21300', '1', '21300', '付款管理管理权限', '0', NOW());
+INSERT INTO `eh_service_module_privileges` (`id`, `module_id`, `privilege_type`, `privilege_id`, `remark`, `default_order`, `create_time`) VALUES ((@module_privilege_id := @module_privilege_id + 1), '21300', '2', '21300', '付款管理全部权限', '0', NOW());
+
+INSERT INTO `eh_acl_privileges` (`id`, `app_id`, `name`, `description`, `tag`) VALUES (21301, '0', '付款管理 新增权限', '付款管理 业务模块权限', NULL);
+INSERT INTO `eh_acl_privileges` (`id`, `app_id`, `name`, `description`, `tag`) VALUES (21302, '0', '付款管理 查看权限', '付款管理 业务模块权限', NULL);
+
+INSERT INTO `eh_acl_privileges` (`id`, `app_id`, `name`, `description`, `tag`) VALUES (21215, '0', '付款合同 新增付款合同', '付款合同 业务模块权限', NULL);
+INSERT INTO `eh_acl_privileges` (`id`, `app_id`, `name`, `description`, `tag`) VALUES (21216, '0', '付款合同 签约 发起 付款审批', '付款合同 业务模块权限', NULL);
+INSERT INTO `eh_acl_privileges` (`id`, `app_id`, `name`, `description`, `tag`) VALUES (21217, '0', '付款合同 修改 付款合同', '付款合同 业务模块权限', NULL);
+INSERT INTO `eh_acl_privileges` (`id`, `app_id`, `name`, `description`, `tag`) VALUES (21218, '0', '付款合同 删除 付款合同', '付款合同 业务模块权限', NULL);
+INSERT INTO `eh_acl_privileges` (`id`, `app_id`, `name`, `description`, `tag`) VALUES (21219, '0', '付款合同 作废 付款合同', '付款合同 业务模块权限', NULL);
+INSERT INTO `eh_acl_privileges` (`id`, `app_id`, `name`, `description`, `tag`) VALUES (21220, '0', '付款合同 查看 付款合同', '付款合同 业务模块权限', NULL);
+INSERT INTO `eh_acl_privileges` (`id`, `app_id`, `name`, `description`, `tag`) VALUES (21221, '0', '付款合同 续约 付款合同', '付款合同 业务模块权限', NULL);
+INSERT INTO `eh_acl_privileges` (`id`, `app_id`, `name`, `description`, `tag`) VALUES (21222, '0', '付款合同 变更 付款合同', '付款合同 业务模块权限', NULL);
+INSERT INTO `eh_acl_privileges` (`id`, `app_id`, `name`, `description`, `tag`) VALUES (21223, '0', '付款合同 退约 付款合同', '付款合同 业务模块权限', NULL);
+
+    
+INSERT INTO `eh_service_module_privileges` (`id`, `module_id`, `privilege_type`, `privilege_id`, `remark`, `default_order`, `create_time`) VALUES((@module_privilege_id := @module_privilege_id + 1),'21310','0',21301,'付款管理 新增权限','0',NOW());
+INSERT INTO `eh_service_module_privileges` (`id`, `module_id`, `privilege_type`, `privilege_id`, `remark`, `default_order`, `create_time`) VALUES((@module_privilege_id := @module_privilege_id + 1),'21310','0',21302,'付款管理 查看权限','0',NOW());
+
+INSERT INTO `eh_service_module_privileges` (`id`, `module_id`, `privilege_type`, `privilege_id`, `remark`, `default_order`, `create_time`) VALUES((@module_privilege_id := @module_privilege_id + 1),'21215','0',21215,'付款合同 新增付款合同权限','0',NOW());
+INSERT INTO `eh_service_module_privileges` (`id`, `module_id`, `privilege_type`, `privilege_id`, `remark`, `default_order`, `create_time`) VALUES((@module_privilege_id := @module_privilege_id + 1),'21215','0',21216,'付款合同 签约 发起 付款审批权限','0',NOW());
+INSERT INTO `eh_service_module_privileges` (`id`, `module_id`, `privilege_type`, `privilege_id`, `remark`, `default_order`, `create_time`) VALUES((@module_privilege_id := @module_privilege_id + 1),'21215','0',21217,'付款合同 修改 付款合同权限','0',NOW());
+INSERT INTO `eh_service_module_privileges` (`id`, `module_id`, `privilege_type`, `privilege_id`, `remark`, `default_order`, `create_time`) VALUES((@module_privilege_id := @module_privilege_id + 1),'21215','0',21218,'付款合同 删除 付款合同权限','0',NOW());
+INSERT INTO `eh_service_module_privileges` (`id`, `module_id`, `privilege_type`, `privilege_id`, `remark`, `default_order`, `create_time`) VALUES((@module_privilege_id := @module_privilege_id + 1),'21215','0',21219,'付款合同 作废 付款合同权限','0',NOW());
+INSERT INTO `eh_service_module_privileges` (`id`, `module_id`, `privilege_type`, `privilege_id`, `remark`, `default_order`, `create_time`) VALUES((@module_privilege_id := @module_privilege_id + 1),'21215','0',21220,'付款合同 查看 付款合同权限','0',NOW());
+INSERT INTO `eh_service_module_privileges` (`id`, `module_id`, `privilege_type`, `privilege_id`, `remark`, `default_order`, `create_time`) VALUES((@module_privilege_id := @module_privilege_id + 1),'21215','0',21221,'付款合同 续约 付款合同权限','0',NOW());
+INSERT INTO `eh_service_module_privileges` (`id`, `module_id`, `privilege_type`, `privilege_id`, `remark`, `default_order`, `create_time`) VALUES((@module_privilege_id := @module_privilege_id + 1),'21215','0',21222,'付款合同 变更 付款合同权限','0',NOW());
+INSERT INTO `eh_service_module_privileges` (`id`, `module_id`, `privilege_type`, `privilege_id`, `remark`, `default_order`, `create_time`) VALUES((@module_privilege_id := @module_privilege_id + 1),'21215','0',21223,'付款合同 退约 付款合同权限','0',NOW());
+
+SET @template_id = (SELECT MAX(id) FROM `eh_locale_templates`);
+INSERT INTO `eh_locale_templates` (`id`, `scope`, `code`, `locale`, `description`, `text`, `namespace_id`) VALUES ((@template_id := @template_id + 1), 'contract.notification', '1', 'zh_CN', '通知合同即将过期', '有一份合同为${contractName}将在${time}到期，请尽快处理。', '0');
+INSERT INTO `eh_locale_templates` (`id`, `scope`, `code`, `locale`, `description`, `text`, `namespace_id`) VALUES ((@template_id := @template_id + 1), 'contract.notification', '2', 'zh_CN', '通知付款', '${contractName}有一笔付款金额为${amount}将在${time}需付款，请尽快处理。', '0');
+
+
+SET @field_id = (SELECT MAX(id) FROM `eh_var_fields`);
+SET @item_id = (SELECT MAX(id) FROM `eh_var_field_items`);
+INSERT INTO `eh_var_field_groups` (`id`, `module_name`, `parent_id`, `path`, `title`, `name`, `mandatory_flag`, `default_order`, `status`, `creator_uid`, `create_time`, `operator_uid`, `update_time`) VALUES (30, 'contract', '0', '/30', '付款合同', '', '0', NULL, '2', '1', NOW(), NULL, NULL);
+INSERT INTO `eh_var_field_groups` (`id`, `module_name`, `parent_id`, `path`, `title`, `name`, `mandatory_flag`, `default_order`, `status`, `creator_uid`, `create_time`, `operator_uid`, `update_time`) VALUES (31, 'contract', '30', '/30/31', '合同主体信息', '', '0', NULL, '2', '1', NOW(), NULL, NULL);
+INSERT INTO `eh_var_field_groups` (`id`, `module_name`, `parent_id`, `path`, `title`, `name`, `mandatory_flag`, `default_order`, `status`, `creator_uid`, `create_time`, `operator_uid`, `update_time`) VALUES (32, 'contract', '30', '/30/32', '合同信息', '', '0', NULL, '2', '1', NOW(), NULL, NULL);
+INSERT INTO `eh_var_field_groups` (`id`, `module_name`, `parent_id`, `path`, `title`, `name`, `mandatory_flag`, `default_order`, `status`, `creator_uid`, `create_time`, `operator_uid`, `update_time`) VALUES (33, 'contract', '30', '/30/33', '付款计划', '', '0', NULL, '2', '1', NOW(), NULL, NULL);
+
+
+INSERT INTO `eh_var_fields` (`id`, `module_name`, `name`, `display_name`, `field_type`, `group_id`, `group_path`, `mandatory_flag`, `default_order`, `status`, `creator_uid`, `create_time`, `operator_uid`, `update_time`, `field_param`) VALUES ((@field_id := @field_id + 1), 'contract', 'contractNumber', '合同编号', 'String', '31', '/30/31/', '0', NULL, '2', '1', NOW(), NULL, NULL, '{\"fieldParamType\": \"text\", \"length\": 32}');
+INSERT INTO `eh_var_fields` (`id`, `module_name`, `name`, `display_name`, `field_type`, `group_id`, `group_path`, `mandatory_flag`, `default_order`, `status`, `creator_uid`, `create_time`, `operator_uid`, `update_time`, `field_param`) VALUES ((@field_id := @field_id + 1), 'contract', 'name', '合同名称', 'String', '31', '/30/31/', '1', NULL, '2', '1', NOW(), NULL, NULL, '{\"fieldParamType\": \"text\", \"length\": 32}');
+INSERT INTO `eh_var_fields` (`id`, `module_name`, `name`, `display_name`, `field_type`, `group_id`, `group_path`, `mandatory_flag`, `default_order`, `status`, `creator_uid`, `create_time`, `operator_uid`, `update_time`, `field_param`) VALUES ((@field_id := @field_id + 1), 'contract', 'categoryItemId', '合同类型', 'Long', '31', '/30/31/', '1', NULL, '2', '1', NOW(), NULL, NULL, '{\"fieldParamType\": \"customizationSelect\", \"length\": 32}');
+INSERT INTO `eh_var_fields` (`id`, `module_name`, `name`, `display_name`, `field_type`, `group_id`, `group_path`, `mandatory_flag`, `default_order`, `status`, `creator_uid`, `create_time`, `operator_uid`, `update_time`, `field_param`) VALUES ((@field_id := @field_id + 1), 'contract', 'customerId', '乙方', 'Long', '31', '/30/31/', '1', NULL, '2', '1', NOW(), NULL, NULL, '{\"fieldParamType\": \"text\", \"length\": 32}');
+INSERT INTO `eh_var_fields` (`id`, `module_name`, `name`, `display_name`, `field_type`, `group_id`, `group_path`, `mandatory_flag`, `default_order`, `status`, `creator_uid`, `create_time`, `operator_uid`, `update_time`, `field_param`) VALUES ((@field_id := @field_id + 1), 'contract', 'partyAId', '甲方', 'Long', '31', '/30/31/', '1', NULL, '2', '1', NOW(), NULL, NULL, '{\"fieldParamType\": \"text\", \"length\": 32}');
+INSERT INTO `eh_var_fields` (`id`, `module_name`, `name`, `display_name`, `field_type`, `group_id`, `group_path`, `mandatory_flag`, `default_order`, `status`, `creator_uid`, `create_time`, `operator_uid`, `update_time`, `field_param`) VALUES ((@field_id := @field_id + 1), 'contract', 'contractStartDate', '合同开始时间', 'Long', '31', '/30/31/', '1', NULL, '2', '1', NOW(), NULL, NULL, '{\"fieldParamType\": \"datetime\", \"length\": 32}');
+INSERT INTO `eh_var_fields` (`id`, `module_name`, `name`, `display_name`, `field_type`, `group_id`, `group_path`, `mandatory_flag`, `default_order`, `status`, `creator_uid`, `create_time`, `operator_uid`, `update_time`, `field_param`) VALUES ((@field_id := @field_id + 1), 'contract', 'contractEndDate', '合同截止时间', 'Long', '31', '/30/31/', '1', NULL, '2', '1', NOW(), NULL, NULL, '{\"fieldParamType\": \"datetime\", \"length\": 32}');
+INSERT INTO `eh_var_fields` (`id`, `module_name`, `name`, `display_name`, `field_type`, `group_id`, `group_path`, `mandatory_flag`, `default_order`, `status`, `creator_uid`, `create_time`, `operator_uid`, `update_time`, `field_param`) VALUES ((@field_id := @field_id + 1), 'contract', 'rent', '合同总额', 'BigDecimal', '31', '/30/31/', '0', NULL, '2', '1', NOW(), NULL, NULL, '{\"fieldParamType\": \"text\", \"length\": 32}');
+INSERT INTO `eh_var_fields` (`id`, `module_name`, `name`, `display_name`, `field_type`, `group_id`, `group_path`, `mandatory_flag`, `default_order`, `status`, `creator_uid`, `create_time`, `operator_uid`, `update_time`, `field_param`) VALUES ((@field_id := @field_id + 1), 'contract', 'status', '合同状态', 'Byte', '31', '/30/31/', '1', NULL, '2', '1', NOW(), NULL, NULL, '{"fieldParamType": "select", "length": 32}');
+INSERT INTO `eh_var_field_items` (`id`, `module_name`, `field_id`, `display_name`, `default_order`, `status`, `creator_uid`, `create_time`, `operator_uid`, `update_time`, `business_value`) VALUES ((@item_id := @item_id + 1), 'contract', @field_id, '待发起', '1', '2', '1', NOW(), NULL, NULL, 1);
+INSERT INTO `eh_var_field_items` (`id`, `module_name`, `field_id`, `display_name`, `default_order`, `status`, `creator_uid`, `create_time`, `operator_uid`, `update_time`, `business_value`) VALUES ((@item_id := @item_id + 1), 'contract', @field_id, '正常合同', '2', '2', '1', NOW(), NULL, NULL, 2);
+INSERT INTO `eh_var_field_items` (`id`, `module_name`, `field_id`, `display_name`, `default_order`, `status`, `creator_uid`, `create_time`, `operator_uid`, `update_time`, `business_value`) VALUES ((@item_id := @item_id + 1), 'contract', @field_id, '审批中', '3', '2', '1', NOW(), NULL, NULL, 3);
+INSERT INTO `eh_var_field_items` (`id`, `module_name`, `field_id`, `display_name`, `default_order`, `status`, `creator_uid`, `create_time`, `operator_uid`, `update_time`, `business_value`) VALUES ((@item_id := @item_id + 1), 'contract', @field_id, '审批通过', '4', '2', '1', NOW(), NULL, NULL, 4);
+INSERT INTO `eh_var_field_items` (`id`, `module_name`, `field_id`, `display_name`, `default_order`, `status`, `creator_uid`, `create_time`, `operator_uid`, `update_time`, `business_value`) VALUES ((@item_id := @item_id + 1), 'contract', @field_id, '审批不通过', '5', '2', '1', NOW(), NULL, NULL, 5);
+INSERT INTO `eh_var_field_items` (`id`, `module_name`, `field_id`, `display_name`, `default_order`, `status`, `creator_uid`, `create_time`, `operator_uid`, `update_time`, `business_value`) VALUES ((@item_id := @item_id + 1), 'contract', @field_id, '即将到期', '6', '2', '1', NOW(), NULL, NULL, 6);
+INSERT INTO `eh_var_field_items` (`id`, `module_name`, `field_id`, `display_name`, `default_order`, `status`, `creator_uid`, `create_time`, `operator_uid`, `update_time`, `business_value`) VALUES ((@item_id := @item_id + 1), 'contract', @field_id, '已过期', '7', '2', '1', NOW(), NULL, NULL, 7);
+INSERT INTO `eh_var_field_items` (`id`, `module_name`, `field_id`, `display_name`, `default_order`, `status`, `creator_uid`, `create_time`, `operator_uid`, `update_time`, `business_value`) VALUES ((@item_id := @item_id + 1), 'contract', @field_id, '历史合同', '8', '2', '1', NOW(), NULL, NULL, 8);
+INSERT INTO `eh_var_field_items` (`id`, `module_name`, `field_id`, `display_name`, `default_order`, `status`, `creator_uid`, `create_time`, `operator_uid`, `update_time`, `business_value`) VALUES ((@item_id := @item_id + 1), 'contract', @field_id, '作废合同', '9', '2', '1', NOW(), NULL, NULL, 9);
+INSERT INTO `eh_var_field_items` (`id`, `module_name`, `field_id`, `display_name`, `default_order`, `status`, `creator_uid`, `create_time`, `operator_uid`, `update_time`, `business_value`) VALUES ((@item_id := @item_id + 1), 'contract', @field_id, '退约合同', '10', '2', '1', NOW(), NULL, NULL, 10);
+INSERT INTO `eh_var_field_items` (`id`, `module_name`, `field_id`, `display_name`, `default_order`, `status`, `creator_uid`, `create_time`, `operator_uid`, `update_time`, `business_value`) VALUES ((@item_id := @item_id + 1), 'contract', @field_id, '草稿', '11', '2', '1', NOW(), NULL, NULL, 11);
+
+
+INSERT INTO `eh_var_fields` (`id`, `module_name`, `name`, `display_name`, `field_type`, `group_id`, `group_path`, `mandatory_flag`, `default_order`, `status`, `creator_uid`, `create_time`, `operator_uid`, `update_time`, `field_param`) VALUES ((@field_id := @field_id + 1), 'contract', 'contractType', '合同属性', 'Byte', '31', '/30/31/', '1', NULL, '2', '1', NOW(), NULL, NULL, '{\"fieldParamType\": \"select\", \"length\": 32}');
+INSERT INTO `eh_var_field_items` (`id`, `module_name`, `field_id`, `display_name`, `default_order`, `status`, `creator_uid`, `create_time`, `operator_uid`, `update_time`, `business_value`) VALUES ((@item_id := @item_id + 1), 'contract', @field_id, '新签合同', '1', '2', '1', NOW(), NULL, NULL, 0);
+INSERT INTO `eh_var_field_items` (`id`, `module_name`, `field_id`, `display_name`, `default_order`, `status`, `creator_uid`, `create_time`, `operator_uid`, `update_time`, `business_value`) VALUES ((@item_id := @item_id + 1), 'contract', @field_id, '续约合同', '2', '2', '1', NOW(), NULL, NULL, 1);
+INSERT INTO `eh_var_field_items` (`id`, `module_name`, `field_id`, `display_name`, `default_order`, `status`, `creator_uid`, `create_time`, `operator_uid`, `update_time`, `business_value`) VALUES ((@item_id := @item_id + 1), 'contract', @field_id, '变更合同', '3', '2', '1', NOW(), NULL, NULL, 2);
+
+
+INSERT INTO `eh_var_fields` (`id`, `module_name`, `name`, `display_name`, `field_type`, `group_id`, `group_path`, `mandatory_flag`, `default_order`, `status`, `creator_uid`, `create_time`, `operator_uid`, `update_time`, `field_param`) VALUES ((@field_id := @field_id + 1), 'contract', 'remainingAmount', '剩余金额', 'BigDecimal', '31', '/30/31/', '0', NULL, '2', '1', NOW(), NULL, NULL, '{\"fieldParamType\": \"text\", \"length\": 32}');
+INSERT INTO `eh_var_fields` (`id`, `module_name`, `name`, `display_name`, `field_type`, `group_id`, `group_path`, `mandatory_flag`, `default_order`, `status`, `creator_uid`, `create_time`, `operator_uid`, `update_time`, `field_param`) VALUES ((@field_id := @field_id + 1), 'contract', 'signedTime', '签约日期', 'Long', '31', '/30/31/', '0', NULL, '2', '1', NOW(), NULL, NULL, '{\"fieldParamType\": \"datetime\", \"length\": 32}');
+INSERT INTO `eh_var_fields` (`id`, `module_name`, `name`, `display_name`, `field_type`, `group_id`, `group_path`, `mandatory_flag`, `default_order`, `status`, `creator_uid`, `create_time`, `operator_uid`, `update_time`, `field_param`) VALUES ((@field_id := @field_id + 1), 'contract', 'bidItemId', '是否通过招投标', 'Long', '31', '/30/31/', '0', NULL, '2', '1', NOW(), NULL, NULL, '{\"fieldParamType\": \"select\", \"length\": 32}');
+INSERT INTO `eh_var_field_items` (`id`, `module_name`, `field_id`, `display_name`, `default_order`, `status`, `creator_uid`, `create_time`, `operator_uid`, `update_time`, `business_value`) VALUES ((@item_id := @item_id + 1), 'contract', @field_id, '否', '1', '2', '1', NOW(), NULL, NULL, 1);
+INSERT INTO `eh_var_field_items` (`id`, `module_name`, `field_id`, `display_name`, `default_order`, `status`, `creator_uid`, `create_time`, `operator_uid`, `update_time`, `business_value`) VALUES ((@item_id := @item_id + 1), 'contract', @field_id, '是', '1', '2', '1', NOW(), NULL, NULL, 2);
+
+INSERT INTO `eh_var_fields` (`id`, `module_name`, `name`, `display_name`, `field_type`, `group_id`, `group_path`, `mandatory_flag`, `default_order`, `status`, `creator_uid`, `create_time`, `operator_uid`, `update_time`, `field_param`) VALUES ((@field_id := @field_id + 1), 'contract', 'createUid', '经办人', 'Long', '32', '/30/32/', '0', NULL, '2', '1', NOW(), NULL, NULL, '{\"fieldParamType\": \"text\", \"length\": 32}');
+INSERT INTO `eh_var_fields` (`id`, `module_name`, `name`, `display_name`, `field_type`, `group_id`, `group_path`, `mandatory_flag`, `default_order`, `status`, `creator_uid`, `create_time`, `operator_uid`, `update_time`, `field_param`) VALUES ((@field_id := @field_id + 1), 'contract', 'createOrgId', '经办部门', 'Long', '32', '/30/32/', '0', NULL, '2', '1', NOW(), NULL, NULL, '{\"fieldParamType\": \"text\", \"length\": 32}');
+INSERT INTO `eh_var_fields` (`id`, `module_name`, `name`, `display_name`, `field_type`, `group_id`, `group_path`, `mandatory_flag`, `default_order`, `status`, `creator_uid`, `create_time`, `operator_uid`, `update_time`, `field_param`) VALUES ((@field_id := @field_id + 1), 'contract', 'createPositionId', '岗位', 'Long', '32', '/30/32/', '0', NULL, '2', '1', NOW(), NULL, NULL, '{\"fieldParamType\": \"text\", \"length\": 32}');
+INSERT INTO `eh_var_fields` (`id`, `module_name`, `name`, `display_name`, `field_type`, `group_id`, `group_path`, `mandatory_flag`, `default_order`, `status`, `creator_uid`, `create_time`, `operator_uid`, `update_time`, `field_param`) VALUES ((@field_id := @field_id + 1), 'contract', 'ourLegalRepresentative', '我方法人代表', 'String', '32', '/30/32/', '0', NULL, '2', '1', NOW(), NULL, NULL, '{\"fieldParamType\": \"text\", \"length\": 32}');
+INSERT INTO `eh_var_fields` (`id`, `module_name`, `name`, `display_name`, `field_type`, `group_id`, `group_path`, `mandatory_flag`, `default_order`, `status`, `creator_uid`, `create_time`, `operator_uid`, `update_time`, `field_param`) VALUES ((@field_id := @field_id + 1), 'contract', 'taxpayerIdentificationCode', '纳税人识别码', 'String', '32', '/30/32/', '0', NULL, '2', '1', NOW(), NULL, NULL, '{\"fieldParamType\": \"text\", \"length\": 32}');
+INSERT INTO `eh_var_fields` (`id`, `module_name`, `name`, `display_name`, `field_type`, `group_id`, `group_path`, `mandatory_flag`, `default_order`, `status`, `creator_uid`, `create_time`, `operator_uid`, `update_time`, `field_param`) VALUES ((@field_id := @field_id + 1), 'contract', 'registeredAddress', '注册地址', 'String', '32', '/30/32/', '0', NULL, '2', '1', NOW(), NULL, NULL, '{\"fieldParamType\": \"text\", \"length\": 32}');
+INSERT INTO `eh_var_fields` (`id`, `module_name`, `name`, `display_name`, `field_type`, `group_id`, `group_path`, `mandatory_flag`, `default_order`, `status`, `creator_uid`, `create_time`, `operator_uid`, `update_time`, `field_param`) VALUES ((@field_id := @field_id + 1), 'contract', 'registeredPhone', '注册电话', 'String', '32', '/30/32/', '0', NULL, '2', '1', NOW(), NULL, NULL, '{\"fieldParamType\": \"text\", \"length\": 32}');
+INSERT INTO `eh_var_fields` (`id`, `module_name`, `name`, `display_name`, `field_type`, `group_id`, `group_path`, `mandatory_flag`, `default_order`, `status`, `creator_uid`, `create_time`, `operator_uid`, `update_time`, `field_param`) VALUES ((@field_id := @field_id + 1), 'contract', 'payee', '收款单位', 'String', '32', '/30/32/', '0', NULL, '2', '1', NOW(), NULL, NULL, '{\"fieldParamType\": \"text\", \"length\": 32}');
+INSERT INTO `eh_var_fields` (`id`, `module_name`, `name`, `display_name`, `field_type`, `group_id`, `group_path`, `mandatory_flag`, `default_order`, `status`, `creator_uid`, `create_time`, `operator_uid`, `update_time`, `field_param`) VALUES ((@field_id := @field_id + 1), 'contract', 'payer', '付款单位', 'String', '32', '/30/32/', '0', NULL, '2', '1', NOW(), NULL, NULL, '{\"fieldParamType\": \"text\", \"length\": 32}');
+INSERT INTO `eh_var_fields` (`id`, `module_name`, `name`, `display_name`, `field_type`, `group_id`, `group_path`, `mandatory_flag`, `default_order`, `status`, `creator_uid`, `create_time`, `operator_uid`, `update_time`, `field_param`) VALUES ((@field_id := @field_id + 1), 'contract', 'dueBank', '收款银行', 'String', '32', '/30/32/', '0', NULL, '2', '1', NOW(), NULL, NULL, '{\"fieldParamType\": \"text\", \"length\": 32}');
+INSERT INTO `eh_var_fields` (`id`, `module_name`, `name`, `display_name`, `field_type`, `group_id`, `group_path`, `mandatory_flag`, `default_order`, `status`, `creator_uid`, `create_time`, `operator_uid`, `update_time`, `field_param`) VALUES ((@field_id := @field_id + 1), 'contract', 'bankAccount', '银行账号', 'String', '32', '/30/32/', '0', NULL, '2', '1', NOW(), NULL, NULL, '{\"fieldParamType\": \"text\", \"length\": 32}');
+INSERT INTO `eh_var_fields` (`id`, `module_name`, `name`, `display_name`, `field_type`, `group_id`, `group_path`, `mandatory_flag`, `default_order`, `status`, `creator_uid`, `create_time`, `operator_uid`, `update_time`, `field_param`) VALUES ((@field_id := @field_id + 1), 'contract', 'exchangeRate', '兑换汇率', 'BigDecimal', '32', '/30/32/', '0', NULL, '2', '1', NOW(), NULL, NULL, '{\"fieldParamType\": \"text\", \"length\": 32}');
+INSERT INTO `eh_var_fields` (`id`, `module_name`, `name`, `display_name`, `field_type`, `group_id`, `group_path`, `mandatory_flag`, `default_order`, `status`, `creator_uid`, `create_time`, `operator_uid`, `update_time`, `field_param`) VALUES ((@field_id := @field_id + 1), 'contract', 'ageLimit', '年限', 'Integer', '32', '/30/32/', '0', NULL, '2', '1', NOW(), NULL, NULL, '{\"fieldParamType\": \"text\", \"length\": 32}');
+INSERT INTO `eh_var_fields` (`id`, `module_name`, `name`, `display_name`, `field_type`, `group_id`, `group_path`, `mandatory_flag`, `default_order`, `status`, `creator_uid`, `create_time`, `operator_uid`, `update_time`, `field_param`) VALUES ((@field_id := @field_id + 1), 'contract', 'applicationId', '关联请示', 'Long', '32', '/30/32/', '0', NULL, '2', '1', NOW(), NULL, NULL, '{\"fieldParamType\": \"text\", \"length\": 32}');
+INSERT INTO `eh_var_fields` (`id`, `module_name`, `name`, `display_name`, `field_type`, `group_id`, `group_path`, `mandatory_flag`, `default_order`, `status`, `creator_uid`, `create_time`, `operator_uid`, `update_time`, `field_param`) VALUES ((@field_id := @field_id + 1), 'contract', 'paymentModeItemId', '预计付款方式', 'Long', '32', '/30/32/', '0', NULL, '2', '1', NOW(), NULL, NULL, '{\"fieldParamType\": \"select\", \"length\": 32}');
+INSERT INTO `eh_var_field_items` (`id`, `module_name`, `field_id`, `display_name`, `default_order`, `status`, `creator_uid`, `create_time`, `operator_uid`, `update_time`) VALUES ((@item_id := @item_id + 1), 'contract', @field_id, '一次性付款', '1', '2', '1', NOW(), NULL, NULL);
+INSERT INTO `eh_var_field_items` (`id`, `module_name`, `field_id`, `display_name`, `default_order`, `status`, `creator_uid`, `create_time`, `operator_uid`, `update_time`) VALUES ((@item_id := @item_id + 1), 'contract', @field_id, '分批付款', '2', '2', '1', NOW(), NULL, NULL);
+
+INSERT INTO `eh_var_fields` (`id`, `module_name`, `name`, `display_name`, `field_type`, `group_id`, `group_path`, `mandatory_flag`, `default_order`, `status`, `creator_uid`, `create_time`, `operator_uid`, `update_time`, `field_param`) VALUES ((@field_id := @field_id + 1), 'contract', 'lumpSumPayment', '一次性付款金额', 'BigDecimal', '32', '/30/32/', '0', NULL, '2', '1', NOW(), NULL, NULL, '{\"fieldParamType\": \"text\", \"length\": 32}');
+INSERT INTO `eh_var_fields` (`id`, `module_name`, `name`, `display_name`, `field_type`, `group_id`, `group_path`, `mandatory_flag`, `default_order`, `status`, `creator_uid`, `create_time`, `operator_uid`, `update_time`, `field_param`) VALUES ((@field_id := @field_id + 1), 'contract', 'paidTime', '预计付款时间', 'Long', '32', '/30/32/', '0', NULL, '2', '1', NOW(), NULL, NULL, '{\"fieldParamType\": \"datetime\", \"length\": 32}');
+INSERT INTO `eh_var_fields` (`id`, `module_name`, `name`, `display_name`, `field_type`, `group_id`, `group_path`, `mandatory_flag`, `default_order`, `status`, `creator_uid`, `create_time`, `operator_uid`, `update_time`, `field_param`) VALUES ((@field_id := @field_id + 1), 'contract', 'treatyParticulars', '合同摘要', 'String', '32', '/30/32/', '0', NULL, '2', '1', NOW(), NULL, NULL, '{\"fieldParamType\": \"richText\", \"length\": 1024}');
+INSERT INTO `eh_var_fields` (`id`, `module_name`, `name`, `display_name`, `field_type`, `group_id`, `group_path`, `mandatory_flag`, `default_order`, `status`, `creator_uid`, `create_time`, `operator_uid`, `update_time`, `field_param`) VALUES ((@field_id := @field_id + 1), 'contract', 'remark', '备注', 'String', '32', '/30/32/', '0', NULL, '2', '1', NOW(), NULL, NULL, '{\"fieldParamType\": \"richText\", \"length\": 1024}');
+INSERT INTO `eh_var_fields` (`id`, `module_name`, `name`, `display_name`, `field_type`, `group_id`, `group_path`, `mandatory_flag`, `default_order`, `status`, `creator_uid`, `create_time`, `operator_uid`, `update_time`, `field_param`) VALUES ((@field_id := @field_id + 1), 'contract', 'attachments', '附件', 'List<ContractAttachmentDTO>', '32', '/30/32/', '0', NULL, '2', '1', NOW(), NULL, NULL, '{\"fieldParamType\": \"file\", \"length\": 9}');
+
+
+
+
+
+
+-- 薪酬结构基础数据
+
+INSERT INTO `eh_salary_entity_categories` (`id`, `owner_type`, `owner_id`, `namespace_id`, `category_name`, `description`, `custom_flag`, `custom_type`, `status`, `creator_uid`, `create_time`, `update_time`, `operator_uid`) VALUES('1',NULL,NULL,NULL,'固定工资',NULL,'1','1','2','1','2018-01-19 15:21:33','2018-01-19 15:21:37','1');
+INSERT INTO `eh_salary_entity_categories` (`id`, `owner_type`, `owner_id`, `namespace_id`, `category_name`, `description`, `custom_flag`, `custom_type`, `status`, `creator_uid`, `create_time`, `update_time`, `operator_uid`) VALUES('2',NULL,NULL,NULL,'浮动工资',NULL,'1','1','2','1','2018-01-19 15:23:19','2018-01-19 15:23:21','1');
+INSERT INTO `eh_salary_entity_categories` (`id`, `owner_type`, `owner_id`, `namespace_id`, `category_name`, `description`, `custom_flag`, `custom_type`, `status`, `creator_uid`, `create_time`, `update_time`, `operator_uid`) VALUES('3',NULL,NULL,NULL,'考勤工资','在「津贴设置」中自动同步考勤数据，在「出勤扣款」中设置方案','0',NULL,'2','1','2018-01-19 15:23:19','2018-01-19 15:23:19','1');
+INSERT INTO `eh_salary_entity_categories` (`id`, `owner_type`, `owner_id`, `namespace_id`, `category_name`, `description`, `custom_flag`, `custom_type`, `status`, `creator_uid`, `create_time`, `update_time`, `operator_uid`) VALUES('4',NULL,NULL,NULL,'社保公积金代扣','自动同步社保数据','0',NULL,'2','1','2018-01-19 15:23:19','2018-01-19 15:23:19','1');
+INSERT INTO `eh_salary_entity_categories` (`id`, `owner_type`, `owner_id`, `namespace_id`, `category_name`, `description`, `custom_flag`, `custom_type`, `status`, `creator_uid`, `create_time`, `update_time`, `operator_uid`) VALUES('5',NULL,NULL,NULL,'个税代扣','根据国家法律自动扣减个税','0',NULL,'2','1','2018-01-19 15:23:19','2018-01-19 15:23:19','1');
+INSERT INTO `eh_salary_entity_categories` (`id`, `owner_type`, `owner_id`, `namespace_id`, `category_name`, `description`, `custom_flag`, `custom_type`, `status`, `creator_uid`, `create_time`, `update_time`, `operator_uid`) VALUES('6',NULL,NULL,NULL,'成本项','不计入工资，计入报表「企业人工成本」中','1','2','2','1','2018-01-19 15:23:19','2018-01-19 15:23:19','1');
+INSERT INTO `eh_salary_entity_categories` (`id`, `owner_type`, `owner_id`, `namespace_id`, `category_name`, `description`, `custom_flag`, `custom_type`, `status`, `creator_uid`, `create_time`, `update_time`, `operator_uid`) VALUES('7',NULL,NULL,NULL,'其他',NULL,'1','3','2','1','2018-01-19 15:23:19','2018-01-19 15:23:19','1');
+
+
+-- 薪酬字段基础数据
+
+
+INSERT INTO `eh_salary_default_entities` (`id`, `editable_flag`, `delete_flag`, `type`, `data_policy`, `grant_policy`, `tax_policy`, `category_id`, `category_name`, `name`, `description`, `status`) VALUES('1','0','0','0','0','0','0','1','固定工资','基本工资',NULL,'2');
+INSERT INTO `eh_salary_default_entities` (`id`, `editable_flag`, `delete_flag`, `type`, `data_policy`, `grant_policy`, `tax_policy`, `category_id`, `category_name`, `name`, `description`, `status`) VALUES('2','0','0','0','0','0','0','1','固定工资','岗位工资',NULL,'0');
+INSERT INTO `eh_salary_default_entities` (`id`, `editable_flag`, `delete_flag`, `type`, `data_policy`, `grant_policy`, `tax_policy`, `category_id`, `category_name`, `name`, `description`, `status`) VALUES('3','0','0','0','0','0','0','1','固定工资','绩效工资',NULL,'0');
+INSERT INTO `eh_salary_default_entities` (`id`, `editable_flag`, `delete_flag`, `type`, `data_policy`, `grant_policy`, `tax_policy`, `category_id`, `category_name`, `name`, `description`, `status`) VALUES('4','0','0','0','1','0','1','2','浮动工资','年终奖','自动按照「全年一次性奖金收入」计税','1');
+INSERT INTO `eh_salary_default_entities` (`id`, `editable_flag`, `delete_flag`, `type`, `data_policy`, `grant_policy`, `tax_policy`, `category_id`, `category_name`, `name`, `description`, `status`) VALUES('5','0','0','0','1','0','0','2','浮动工资','代通知金','依法提前一个月通知的，以给付一个月工资作为代替。','1');
+INSERT INTO `eh_salary_default_entities` (`id`, `editable_flag`, `delete_flag`, `type`, `data_policy`, `grant_policy`, `tax_policy`, `category_id`, `category_name`, `name`, `description`, `status`) VALUES('6','0','0','0','1','0','0','2','浮动工资','补偿金','人工计算后可归到「其他税后扣款」项','0');
+INSERT INTO `eh_salary_default_entities` (`id`, `editable_flag`, `delete_flag`, `type`, `data_policy`, `grant_policy`, `tax_policy`, `category_id`, `category_name`, `name`, `description`, `status`) VALUES('7','1','0','0','1','0','0','2','浮动工资','个人年金',NULL,'0');
+INSERT INTO `eh_salary_default_entities` (`id`, `editable_flag`, `delete_flag`, `type`, `data_policy`, `grant_policy`, `tax_policy`, `category_id`, `category_name`, `name`, `description`, `status`) VALUES('8','1','0','0','1','0','0','2','浮动工资','个人商保',NULL,'0');
+INSERT INTO `eh_salary_default_entities` (`id`, `editable_flag`, `delete_flag`, `type`, `data_policy`, `grant_policy`, `tax_policy`, `category_id`, `category_name`, `name`, `description`, `status`) VALUES('9','1','0','0','1','0','0','2','浮动工资','工会会费',NULL,'0');
+INSERT INTO `eh_salary_default_entities` (`id`, `editable_flag`, `delete_flag`, `type`, `data_policy`, `grant_policy`, `tax_policy`, `category_id`, `category_name`, `name`, `description`, `status`) VALUES('10','1','0','0','1','1','0','2','浮动工资','其他税后补发',NULL,'1');
+INSERT INTO `eh_salary_default_entities` (`id`, `editable_flag`, `delete_flag`, `type`, `data_policy`, `grant_policy`, `tax_policy`, `category_id`, `category_name`, `name`, `description`, `status`) VALUES('11','1','0','0','1','0','0','2','浮动工资','其他税前补发',NULL,'1');
+INSERT INTO `eh_salary_default_entities` (`id`, `editable_flag`, `delete_flag`, `type`, `data_policy`, `grant_policy`, `tax_policy`, `category_id`, `category_name`, `name`, `description`, `status`) VALUES('12','1','0','1','1','0','0','2','浮动工资','其他税前扣款',NULL,'1');
+INSERT INTO `eh_salary_default_entities` (`id`, `editable_flag`, `delete_flag`, `type`, `data_policy`, `grant_policy`, `tax_policy`, `category_id`, `category_name`, `name`, `description`, `status`) VALUES('13','1','0','1','1','1','0','2','浮动工资','其他税后扣款',NULL,'1');
+INSERT INTO `eh_salary_default_entities` (`id`, `editable_flag`, `delete_flag`, `type`, `data_policy`, `grant_policy`, `tax_policy`, `category_id`, `category_name`, `name`, `description`, `status`) VALUES('14','1','0','0','1','0','0','2','浮动工资','补上月差额',NULL,'1');
+INSERT INTO `eh_salary_default_entities` (`id`, `editable_flag`, `delete_flag`, `type`, `data_policy`, `grant_policy`, `tax_policy`, `category_id`, `category_name`, `name`, `description`, `status`) VALUES('15','0','0','0','1','0','0','3','考勤工资','加班费',NULL,'0');
+INSERT INTO `eh_salary_default_entities` (`id`, `editable_flag`, `delete_flag`, `type`, `data_policy`, `grant_policy`, `tax_policy`, `category_id`, `category_name`, `name`, `description`, `status`) VALUES('16','0','0','0','1','0','0','3','考勤工资','全勤奖',NULL,'0');
+INSERT INTO `eh_salary_default_entities` (`id`, `editable_flag`, `delete_flag`, `type`, `data_policy`, `grant_policy`, `tax_policy`, `category_id`, `category_name`, `name`, `description`, `status`) VALUES('17','0','0','1','1','0','0','3','考勤工资','迟到扣款',NULL,'0');
+INSERT INTO `eh_salary_default_entities` (`id`, `editable_flag`, `delete_flag`, `type`, `data_policy`, `grant_policy`, `tax_policy`, `category_id`, `category_name`, `name`, `description`, `status`) VALUES('18','0','0','1','1','0','0','3','考勤工资','早退扣款',NULL,'0');
+INSERT INTO `eh_salary_default_entities` (`id`, `editable_flag`, `delete_flag`, `type`, `data_policy`, `grant_policy`, `tax_policy`, `category_id`, `category_name`, `name`, `description`, `status`) VALUES('19','0','0','1','1','0','0','3','考勤工资','请假扣款',NULL,'0');
+INSERT INTO `eh_salary_default_entities` (`id`, `editable_flag`, `delete_flag`, `type`, `data_policy`, `grant_policy`, `tax_policy`, `category_id`, `category_name`, `name`, `description`, `status`) VALUES('20','0','0','1','1','0','0','3','考勤工资','旷工扣款',NULL,'0');
+INSERT INTO `eh_salary_default_entities` (`id`, `editable_flag`, `delete_flag`, `type`, `data_policy`, `grant_policy`, `tax_policy`, `category_id`, `category_name`, `name`, `description`, `status`) VALUES('21','0','0','1','1','0','0','3','考勤工资','缺卡扣款',NULL,'0');
+INSERT INTO `eh_salary_default_entities` (`id`, `editable_flag`, `delete_flag`, `type`, `data_policy`, `grant_policy`, `tax_policy`, `category_id`, `category_name`, `name`, `description`, `status`) VALUES('22','0','0','1','1','0','0','3','考勤工资','缺勤扣款',NULL,'2');
+INSERT INTO `eh_salary_default_entities` (`id`, `editable_flag`, `delete_flag`, `type`, `data_policy`, `grant_policy`, `tax_policy`, `category_id`, `category_name`, `name`, `description`, `status`) VALUES('23','0','0','1','1','0','0','4','社保公积金代扣','社保缴纳（个人）',NULL,'2');
+INSERT INTO `eh_salary_default_entities` (`id`, `editable_flag`, `delete_flag`, `type`, `data_policy`, `grant_policy`, `tax_policy`, `category_id`, `category_name`, `name`, `description`, `status`) VALUES('24','0','0','1','1','0','0','4','社保公积金代扣','公积金缴纳（个人）',NULL,'2');
+INSERT INTO `eh_salary_default_entities` (`id`, `editable_flag`, `delete_flag`, `type`, `data_policy`, `grant_policy`, `tax_policy`, `category_id`, `category_name`, `name`, `description`, `status`) VALUES('25','0','0','1','1','0','0','4','社保公积金代扣','社保补缴（个人）',NULL,'2');
+INSERT INTO `eh_salary_default_entities` (`id`, `editable_flag`, `delete_flag`, `type`, `data_policy`, `grant_policy`, `tax_policy`, `category_id`, `category_name`, `name`, `description`, `status`) VALUES('26','0','0','1','1','0','0','4','社保公积金代扣','公积金补缴（个人）',NULL,'2');
+INSERT INTO `eh_salary_default_entities` (`id`, `editable_flag`, `delete_flag`, `type`, `data_policy`, `grant_policy`, `tax_policy`, `category_id`, `category_name`, `name`, `description`, `status`) VALUES('27','-1','0','1','1',NULL,NULL,'5','个税代扣','年终奖扣个税',NULL,'2');
+INSERT INTO `eh_salary_default_entities` (`id`, `editable_flag`, `delete_flag`, `type`, `data_policy`, `grant_policy`, `tax_policy`, `category_id`, `category_name`, `name`, `description`, `status`) VALUES('28','-1','0','1','1',NULL,NULL,'5','个税代扣','工资扣个税',NULL,'2');
+INSERT INTO `eh_salary_default_entities` (`id`, `editable_flag`, `delete_flag`, `type`, `data_policy`, `grant_policy`, `tax_policy`, `category_id`, `category_name`, `name`, `description`, `status`) VALUES('29','0','0','2','1',NULL,NULL,'6','成本项','社保缴纳（企业）',NULL,'2');
+INSERT INTO `eh_salary_default_entities` (`id`, `editable_flag`, `delete_flag`, `type`, `data_policy`, `grant_policy`, `tax_policy`, `category_id`, `category_name`, `name`, `description`, `status`) VALUES('30','0','0','2','1',NULL,NULL,'6','成本项','公积金缴纳（企业）',NULL,'2');
+INSERT INTO `eh_salary_default_entities` (`id`, `editable_flag`, `delete_flag`, `type`, `data_policy`, `grant_policy`, `tax_policy`, `category_id`, `category_name`, `name`, `description`, `status`) VALUES('31','0','0','2','1',NULL,NULL,'6','成本项','社保补缴（企业）',NULL,'2');
+INSERT INTO `eh_salary_default_entities` (`id`, `editable_flag`, `delete_flag`, `type`, `data_policy`, `grant_policy`, `tax_policy`, `category_id`, `category_name`, `name`, `description`, `status`) VALUES('32','0','0','2','1',NULL,NULL,'6','成本项','公积金补缴（企业）',NULL,'2');
+INSERT INTO `eh_salary_default_entities` (`id`, `editable_flag`, `delete_flag`, `type`, `data_policy`, `grant_policy`, `tax_policy`, `category_id`, `category_name`, `name`, `description`, `status`) VALUES('33','0','0','2','1',NULL,NULL,'6','成本项','商业保险',NULL,'2');
+INSERT INTO `eh_salary_default_entities` (`id`, `editable_flag`, `delete_flag`, `type`, `data_policy`, `grant_policy`, `tax_policy`, `category_id`, `category_name`, `name`, `description`, `status`) VALUES('34','0','0','2','1',NULL,NULL,'6','成本项','残障金',NULL,'2');
+INSERT INTO `eh_salary_default_entities` (`id`, `editable_flag`, `delete_flag`, `type`, `data_policy`, `grant_policy`, `tax_policy`, `category_id`, `category_name`, `name`, `description`, `status`) VALUES('35','1','0','2','1',NULL,NULL,'6','成本项','企业年金',NULL,'0');
+INSERT INTO `eh_salary_default_entities` (`id`, `editable_flag`, `delete_flag`, `type`, `data_policy`, `grant_policy`, `tax_policy`, `category_id`, `category_name`, `name`, `description`, `status`) VALUES('36','1','0','2','1',NULL,NULL,'6','成本项','工会经费',NULL,'0');
+INSERT INTO `eh_salary_default_entities` (`id`, `editable_flag`, `delete_flag`, `type`, `data_policy`, `grant_policy`, `tax_policy`, `category_id`, `category_name`, `name`, `description`, `status`) VALUES('37','1','0','2','1',NULL,NULL,'6','成本项','体检费',NULL,'0');
+INSERT INTO `eh_salary_default_entities` (`id`, `editable_flag`, `delete_flag`, `type`, `data_policy`, `grant_policy`, `tax_policy`, `category_id`, `category_name`, `name`, `description`, `status`) VALUES('38','1','0','2','1',NULL,NULL,'6','成本项','日常报销',NULL,'0');
+INSERT INTO `eh_salary_default_entities` (`id`, `editable_flag`, `delete_flag`, `type`, `data_policy`, `grant_policy`, `tax_policy`, `category_id`, `category_name`, `name`, `description`, `status`) VALUES('39','1','0','2','1',NULL,NULL,'6','成本项','培训费',NULL,'0');
+INSERT INTO `eh_salary_default_entities` (`id`, `editable_flag`, `delete_flag`, `type`, `data_policy`, `grant_policy`, `tax_policy`, `category_id`, `category_name`, `name`, `description`, `status`) VALUES('40','1','0','2','1',NULL,NULL,'6','成本项','其他企业成本',NULL,'0');
+INSERT INTO `eh_salary_default_entities` (`id`, `editable_flag`, `delete_flag`, `type`, `data_policy`, `grant_policy`, `tax_policy`, `category_id`, `category_name`, `name`, `description`, `status`) VALUES('41','1','0','3','1',NULL,NULL,'7','其他','备注',NULL,'1');
+
+
+
+
+-- 文档图标 add by nan.rong 01/25/2018
+
+INSERT INTO `eh_file_icons` (`id`, `file_type`, `icon_name`, `icon_uri`, `create_time`) VALUES ('1', 'category', 'category.png', 'cs://1/image/aW1hZ2UvTVRvNFpUaG1ZelZoWTJZd1pHSXlOalJtT0RZek1tTTBObVE1TXpaaU1qbGlOUQ', '2018-01-18 20:32:44');
+INSERT INTO `eh_file_icons` (`id`, `file_type`, `icon_name`, `icon_uri`, `create_time`) VALUES ('2', 'folder', 'folder.png', 'cs://1/image/aW1hZ2UvTVRveVpUUXdOemhsTmpBME5UQTNZVFExT0dWak9UaG1OV0kzWW1Rek1qbGtOQQ', '2018-01-18 20:32:44');
+INSERT INTO `eh_file_icons` (`id`, `file_type`, `icon_name`, `icon_uri`, `create_time`) VALUES ('3', 'rar', 'package.png', 'cs://1/image/aW1hZ2UvTVRvME4yUTBNemt6WkdZeU1HSXdNamxoWm1FNU16RTRNMk15T1dVMU1UWmhaZw', '2018-01-18 20:25:54');
+INSERT INTO `eh_file_icons` (`id`, `file_type`, `icon_name`, `icon_uri`, `create_time`) VALUES ('4', 'zip', 'package.png', 'cs://1/image/aW1hZ2UvTVRvME4yUTBNemt6WkdZeU1HSXdNamxoWm1FNU16RTRNMk15T1dVMU1UWmhaZw', '2018-01-18 20:25:54');
+INSERT INTO `eh_file_icons` (`id`, `file_type`, `icon_name`, `icon_uri`, `create_time`) VALUES ('5', 'tar', 'package.png', 'cs://1/image/aW1hZ2UvTVRvME4yUTBNemt6WkdZeU1HSXdNamxoWm1FNU16RTRNMk15T1dVMU1UWmhaZw', '2018-01-18 20:25:54');
+INSERT INTO `eh_file_icons` (`id`, `file_type`, `icon_name`, `icon_uri`, `create_time`) VALUES ('6', 'bz2', 'package.png', 'cs://1/image/aW1hZ2UvTVRvME4yUTBNemt6WkdZeU1HSXdNamxoWm1FNU16RTRNMk15T1dVMU1UWmhaZw', '2018-01-18 20:25:54');
+INSERT INTO `eh_file_icons` (`id`, `file_type`, `icon_name`, `icon_uri`, `create_time`) VALUES ('7', 'gz', 'package.png', 'cs://1/image/aW1hZ2UvTVRvME4yUTBNemt6WkdZeU1HSXdNamxoWm1FNU16RTRNMk15T1dVMU1UWmhaZw', '2018-01-18 20:25:54');
+INSERT INTO `eh_file_icons` (`id`, `file_type`, `icon_name`, `icon_uri`, `create_time`) VALUES ('8', '7z', 'package.png', 'cs://1/image/aW1hZ2UvTVRvME4yUTBNemt6WkdZeU1HSXdNamxoWm1FNU16RTRNMk15T1dVMU1UWmhaZw', '2018-01-18 20:25:54');
+INSERT INTO `eh_file_icons` (`id`, `file_type`, `icon_name`, `icon_uri`, `create_time`) VALUES ('9', 'doc', 'word.png', 'cs://1/image/aW1hZ2UvTVRvMk56TmlPRGsxTkRjMk9XUmlaVGc0TkRreE1HRTROams0T0RGaU9UZGtOUQ', '2018-01-18 20:27:54');
+INSERT INTO `eh_file_icons` (`id`, `file_type`, `icon_name`, `icon_uri`, `create_time`) VALUES ('10', 'docx', 'word.png', 'cs://1/image/aW1hZ2UvTVRvMk56TmlPRGsxTkRjMk9XUmlaVGc0TkRreE1HRTROams0T0RGaU9UZGtOUQ', '2018-01-18 20:27:54');
+INSERT INTO `eh_file_icons` (`id`, `file_type`, `icon_name`, `icon_uri`, `create_time`) VALUES ('11', 'pages', 'pages.png', 'cs://1/image/aW1hZ2UvTVRvNE1ETmhNR1ExTWpsa01qSTFNak5rTXpVNVl6TTVOR1ZoTmpCbFlUVmlaQQ', '2018-01-18 20:27:54');
+INSERT INTO `eh_file_icons` (`id`, `file_type`, `icon_name`, `icon_uri`, `create_time`) VALUES ('12', 'ppt', 'ppt.png', 'cs://1/image/aW1hZ2UvTVRwbE1EVXlZMlJpTURoak1UTTNaalU1WXpnMVpqaGpNRGhtWkRRNU5qWTFNUQ', '2018-01-18 20:28:27');
+INSERT INTO `eh_file_icons` (`id`, `file_type`, `icon_name`, `icon_uri`, `create_time`) VALUES ('13', 'pptx', 'ppt.png', 'cs://1/image/aW1hZ2UvTVRwbE1EVXlZMlJpTURoak1UTTNaalU1WXpnMVpqaGpNRGhtWkRRNU5qWTFNUQ', '2018-01-18 20:28:27');
+INSERT INTO `eh_file_icons` (`id`, `file_type`, `icon_name`, `icon_uri`, `create_time`) VALUES ('14', 'key', 'key.png', 'cs://1/image/aW1hZ2UvTVRvMU16YzVPR1l6WVdGbE56bGlNMlkyWlRFMk1UbGtNVGM0TnpVNE1qZzVNZw', '2018-01-18 20:28:27');
+INSERT INTO `eh_file_icons` (`id`, `file_type`, `icon_name`, `icon_uri`, `create_time`) VALUES ('15', 'xls', 'excel.png', 'cs://1/image/aW1hZ2UvTVRwbU1Ua3lNalkxWW1ReU1EZGpNVGt4WVdNMk5XSXdZalU1TVdOaU1UUTVZdw', '2018-01-18 20:28:27');
+INSERT INTO `eh_file_icons` (`id`, `file_type`, `icon_name`, `icon_uri`, `create_time`) VALUES ('16', 'xlsx', 'excel.png', 'cs://1/image/aW1hZ2UvTVRwbU1Ua3lNalkxWW1ReU1EZGpNVGt4WVdNMk5XSXdZalU1TVdOaU1UUTVZdw', '2018-01-18 20:28:27');
+INSERT INTO `eh_file_icons` (`id`, `file_type`, `icon_name`, `icon_uri`, `create_time`) VALUES ('17', 'numbers', 'number.png', 'cs://1/image/aW1hZ2UvTVRwbVpEQXhOakkzT0RJMk5qSTVNV0ZtTnpsa01XUXpNbVZoWWpkaVlXWXlOdw', '2018-01-18 20:28:27');
+INSERT INTO `eh_file_icons` (`id`, `file_type`, `icon_name`, `icon_uri`, `create_time`) VALUES ('18', 'pdf', 'pdf.png', 'cs://1/image/aW1hZ2UvTVRvMFptSmhOemxsTVRreVl6VTBNRFUyWVdObU5qUXpPVFEzWXpjNFpUSTROUQ', '2018-01-18 20:30:44');
+INSERT INTO `eh_file_icons` (`id`, `file_type`, `icon_name`, `icon_uri`, `create_time`) VALUES ('19', 'txt', 'txt.png', 'cs://1/image/aW1hZ2UvTVRwalpEZzRZV0ppT1RabE0ySTVaREkxTmpRek1HWTJaVEE1T1RBNE9HWTVOdw', '2018-01-18 20:30:44');
+INSERT INTO `eh_file_icons` (`id`, `file_type`, `icon_name`, `icon_uri`, `create_time`) VALUES ('20', 'rtf', 'rtf.png', 'cs://1/image/aW1hZ2UvTVRwa05UTXpNalZsWXpnek1qaGhNV1JtWXpZeU5qWTRZelJoWXpsbE1qVTFOQQ', '2018-01-18 20:30:44');
+INSERT INTO `eh_file_icons` (`id`, `file_type`, `icon_name`, `icon_uri`, `create_time`) VALUES ('21', 'png', 'image.png', 'cs://1/image/aW1hZ2UvTVRveE56VTBOR0kwWW1JNFltVm1ZV1U0T0Rsak1EWTVaVFU0WVdRd05qVXlNdw', '2018-01-18 20:30:44');
+INSERT INTO `eh_file_icons` (`id`, `file_type`, `icon_name`, `icon_uri`, `create_time`) VALUES ('22', 'jpg', 'image.png', 'cs://1/image/aW1hZ2UvTVRveE56VTBOR0kwWW1JNFltVm1ZV1U0T0Rsak1EWTVaVFU0WVdRd05qVXlNdw', '2018-01-18 20:30:44');
+INSERT INTO `eh_file_icons` (`id`, `file_type`, `icon_name`, `icon_uri`, `create_time`) VALUES ('23', 'jpeg', 'image.png', 'cs://1/image/aW1hZ2UvTVRveE56VTBOR0kwWW1JNFltVm1ZV1U0T0Rsak1EWTVaVFU0WVdRd05qVXlNdw', '2018-01-18 20:30:44');
+INSERT INTO `eh_file_icons` (`id`, `file_type`, `icon_name`, `icon_uri`, `create_time`) VALUES ('24', 'gif', 'image.png', 'cs://1/image/aW1hZ2UvTVRveE56VTBOR0kwWW1JNFltVm1ZV1U0T0Rsak1EWTVaVFU0WVdRd05qVXlNdw', '2018-01-18 20:30:44');
+INSERT INTO `eh_file_icons` (`id`, `file_type`, `icon_name`, `icon_uri`, `create_time`) VALUES ('25', 'mp3', 'music.png', 'cs://1/image/aW1hZ2UvTVRvMk5tRXdaVEF6Wm1Ka1lUazRNMk5oTnpVd1l6bGlZVFJrWmpVM05XWTRPUQ', '2018-01-18 20:32:44');
+INSERT INTO `eh_file_icons` (`id`, `file_type`, `icon_name`, `icon_uri`, `create_time`) VALUES ('26', 'mp4', 'moive.png', 'cs://1/image/aW1hZ2UvTVRvd1l6VXhaak0zWVdZNE0ySTRNelJtWW1KaU1qRmpaRFk1TjJGaU16SmhPQQ', '2018-01-18 20:32:44');
+INSERT INTO `eh_file_icons` (`id`, `file_type`, `icon_name`, `icon_uri`, `create_time`) VALUES ('27', 'mov', 'moive.png', 'cs://1/image/aW1hZ2UvTVRvd1l6VXhaak0zWVdZNE0ySTRNelJtWW1KaU1qRmpaRFk1TjJGaU16SmhPQQ', '2018-01-18 20:32:44');
+INSERT INTO `eh_file_icons` (`id`, `file_type`, `icon_name`, `icon_uri`, `create_time`) VALUES ('28', 'other', 'other.png', 'cs://1/image/aW1hZ2UvTVRveU5EQXpaakU1TXpObU1UVXhZbU15TnpNeU9EZzJPR0l6WlRKaFlqazFZZw', '2018-01-18 20:32:44');
+
+-- end by nan.rong
+
+
+-- 更新“论坛/公告”为“论坛” add by yanjun 20180126
+UPDATE eh_service_modules set `name` = '论坛' WHERE id = 10100;
+
+DELETE from eh_service_module_privileges WHERE module_id = 10600;

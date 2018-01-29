@@ -12,10 +12,13 @@ import com.everhomes.sequence.SequenceProvider;
 import com.everhomes.server.schema.Tables;
 import com.everhomes.server.schema.tables.daos.EhServiceModuleAppsDao;
 import com.everhomes.server.schema.tables.pojos.EhServiceModuleApps;
+import com.everhomes.server.schema.tables.records.EhServiceModuleAppsRecord;
 import com.everhomes.util.ConvertHelper;
 import com.everhomes.util.DateHelper;
 import org.jooq.Condition;
 import org.jooq.DSLContext;
+import org.jooq.DeleteQuery;
+import org.jooq.SelectQuery;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -118,6 +121,14 @@ public class ServiceModuleAppProviderImpl implements ServiceModuleAppProvider {
 				.fetch().map(r -> ConvertHelper.convert(r, ServiceModuleAppDTO.class));
 	}
 
+	@Override
+	public void deleteByVersionId(Long versionId){
+		DeleteQuery query = getReadWriteContext().deleteQuery(Tables.EH_SERVICE_MODULE_APPS);
+		query.addConditions(Tables.EH_SERVICE_MODULE_APPS.VERSION_ID.eq(versionId));
+		query.execute();
+		DaoHelper.publishDaoAction(DaoAction.MODIFY, EhServiceModuleApps.class, null);
+	}
+
 
 	@Override
 	public List<ServiceModuleApp> listServiceModuleApp(Integer namespaceId, Long moduleId, Byte actionType, String customTag, String customPath, Long versionId) {
@@ -165,6 +176,22 @@ public class ServiceModuleAppProviderImpl implements ServiceModuleAppProvider {
 
 	@Override
 	public ServiceModuleApp findServiceModuleApp(Integer namespaceId, Long versionId, Long moduleId, String customTag) {
-		return null;
+
+		SelectQuery query = getReadOnlyContext().selectFrom(Tables.EH_SERVICE_MODULE_APPS).getQuery();
+		query.addConditions(Tables.EH_SERVICE_MODULE_APPS.NAMESPACE_ID.eq(namespaceId));
+		if(versionId != null){
+			query.addConditions(Tables.EH_SERVICE_MODULE_APPS.VERSION_ID.eq(versionId));
+		}
+
+		if(moduleId != null){
+			query.addConditions(Tables.EH_SERVICE_MODULE_APPS.MODULE_ID.eq(moduleId));
+		}
+
+		if(customTag != null){
+			query.addConditions(Tables.EH_SERVICE_MODULE_APPS.CUSTOM_TAG.eq(customTag));
+		}
+		Object mApp = query.fetchAnyInto(ServiceModuleApp.class);
+		LOGGER.debug("query.fetchAnyInto(ServiceModuleApp.class) type = {}", mApp.getClass());
+		return (ServiceModuleApp) mApp;
 	}
 }

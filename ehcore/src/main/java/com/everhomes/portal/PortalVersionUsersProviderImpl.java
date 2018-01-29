@@ -13,6 +13,7 @@ import com.everhomes.server.schema.tables.pojos.EhPortalVersionUsers;
 import com.everhomes.server.schema.tables.records.EhPortalVersionUsersRecord;
 import com.everhomes.util.ConvertHelper;
 import org.jooq.DSLContext;
+import org.jooq.DeleteQuery;
 import org.jooq.SelectQuery;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
@@ -44,11 +45,21 @@ public class PortalVersionUsersProviderImpl implements PortalVersionUserProvider
 	}
 
 	@Override
-	public void deletePortalVersionUser(Long id) {
+	public void deleteByVersionId(Long versionId){
 		DSLContext context = dbProvider.getDslContext(AccessSpec.readOnly());
-		EhPortalVersionUsersDao dao = new EhPortalVersionUsersDao(context.configuration());
-		dao.deleteById(id);
-		DaoHelper.publishDaoAction(DaoAction.MODIFY, EhPortalVersionUsers.class, id);
+		DeleteQuery query = context.deleteQuery(Tables.EH_PORTAL_VERSION_USERS);
+		query.addConditions(Tables.EH_PORTAL_VERSION_USERS.VERSION_ID.eq(versionId));
+		query.execute();
+		DaoHelper.publishDaoAction(DaoAction.MODIFY, EhPortalVersionUsers.class, null);
+	}
+
+	@Override
+	public void deletePortalVersionUsers(Integer namespaceId){
+		DSLContext context = dbProvider.getDslContext(AccessSpec.readOnly());
+		DeleteQuery query = context.deleteQuery(Tables.EH_PORTAL_VERSION_USERS);
+		query.addConditions(Tables.EH_PORTAL_VERSION_USERS.NAMESPACE_ID.eq(namespaceId));
+		query.execute();
+		DaoHelper.publishDaoAction(DaoAction.MODIFY, EhPortalVersionUsers.class, null);
 	}
 
 	@Override

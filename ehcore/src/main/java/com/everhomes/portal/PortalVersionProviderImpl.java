@@ -6,6 +6,7 @@ import com.everhomes.db.DaoAction;
 import com.everhomes.db.DaoHelper;
 import com.everhomes.db.DbProvider;
 import com.everhomes.naming.NameMapper;
+import com.everhomes.rest.launchpad.PortalVersionStatus;
 import com.everhomes.sequence.SequenceProvider;
 import com.everhomes.server.schema.Tables;
 import com.everhomes.server.schema.tables.daos.EhPortalVersionsDao;
@@ -63,12 +64,41 @@ public class PortalVersionProviderImpl implements PortalVersionProvider {
 	}
 
 	@Override
-	public PortalVersion findMaxVersion(Integer namespaceId) {
+	public void deleteById(Long id){
+		DSLContext context = dbProvider.getDslContext(AccessSpec.readOnly());
+		EhPortalVersionsDao dao = new EhPortalVersionsDao(context.configuration());
+		dao.deleteById(id);
+		DaoHelper.publishDaoAction(DaoAction.MODIFY, PortalVersion.class, null);
+	}
+
+	@Override
+	public PortalVersion findMaxBigVersion(Integer namespaceId) {
 		DSLContext context = dbProvider.getDslContext(AccessSpec.readOnly());
 		SelectQuery<EhPortalVersionsRecord> query = context.selectQuery(Tables.EH_PORTAL_VERSIONS);
 		query.addConditions(Tables.EH_PORTAL_VERSIONS.NAMESPACE_ID.eq(namespaceId));
+		query.addConditions(Tables.EH_PORTAL_VERSIONS.MINOR_VERSION.eq(0));
+		query.addOrderBy(Tables.EH_PORTAL_VERSIONS.DATE_VERSION.desc());
 		query.addOrderBy(Tables.EH_PORTAL_VERSIONS.BIG_VERSION.desc());
 		query.addLimit(1);
+		query.addConditions(Tables.EH_PORTAL_VERSIONS.STATUS.eq(PortalVersionStatus.RELEASE.getCode()));
+		return query.fetchAnyInto(PortalVersion.class);
+	}
+
+	@Override
+	public PortalVersion findReleaseVersion(Integer namespaceId) {
+		DSLContext context = dbProvider.getDslContext(AccessSpec.readOnly());
+		SelectQuery<EhPortalVersionsRecord> query = context.selectQuery(Tables.EH_PORTAL_VERSIONS);
+		query.addConditions(Tables.EH_PORTAL_VERSIONS.NAMESPACE_ID.eq(namespaceId));
+		query.addConditions(Tables.EH_PORTAL_VERSIONS.STATUS.eq(PortalVersionStatus.RELEASE.getCode()));
+		return query.fetchAnyInto(PortalVersion.class);
+	}
+
+	@Override
+	public PortalVersion findPreviewVersion(Integer namespaceId) {
+		DSLContext context = dbProvider.getDslContext(AccessSpec.readOnly());
+		SelectQuery<EhPortalVersionsRecord> query = context.selectQuery(Tables.EH_PORTAL_VERSIONS);
+		query.addConditions(Tables.EH_PORTAL_VERSIONS.NAMESPACE_ID.eq(namespaceId));
+		query.addConditions(Tables.EH_PORTAL_VERSIONS.STATUS.eq(PortalVersionStatus.PREVIEW.getCode()));
 		return query.fetchAnyInto(PortalVersion.class);
 	}
 

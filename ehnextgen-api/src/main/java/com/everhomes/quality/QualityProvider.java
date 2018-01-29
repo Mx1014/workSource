@@ -30,7 +30,7 @@ public interface QualityProvider {
 	void updateQualityInspectionStandards(QualityInspectionStandards standard);
 	QualityInspectionStandards findStandardById(Long id);
 	List<QualityInspectionStandards> findStandardsByCategoryId(Long categoryId);
-	List<QualityInspectionStandards> listQualityInspectionStandards(ListingLocator locator, int count, Long ownerId, String ownerType, String targetType, Long targetId, Byte reviewResult);
+	List<QualityInspectionStandards> listQualityInspectionStandards(ListingLocator locator, int count, Long ownerId, String ownerType, String targetType, Long targetId, Byte reviewResult,String planCondition);
 	
 	void createQualityInspectionEvaluationFactors(QualityInspectionEvaluationFactors factor);
 	void updateQualityInspectionEvaluationFactors(QualityInspectionEvaluationFactors factor);
@@ -190,5 +190,6 @@ public interface QualityProvider {
 
     List<QualityInspectionTasks> listVerificationTasksRefactor(Integer offset, int pageSize,
 															   Timestamp startDate, Timestamp endDate,
-															   List<Long> standardIds, List<ExecuteGroupAndPosition> groupDtos, ListingQueryBuilderCallback builderCallback);
+															   List<Long> executeStandardIds, List<Long> reviewStandardIds,
+															   List<ExecuteGroupAndPosition> groupDtos, ListingQueryBuilderCallback builderCallback);
 }

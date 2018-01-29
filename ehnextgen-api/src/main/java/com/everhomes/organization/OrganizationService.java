@@ -521,6 +521,8 @@ public interface OrganizationService {
 	 */
 	List<OrganizationDTO> listAllPmOrganizations();
 
+	OrganizationDTO listPmOrganizationsByNamespaceId(Integer namespaceId);
+
 	List<Long> getIncludeOrganizationIdsByUserId(Long userId, Long organizationId);
 
 	/**

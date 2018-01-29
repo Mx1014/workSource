@@ -8,6 +8,7 @@ import java.util.List;
 import com.everhomes.rest.portal.PortalLayoutStatus;
 import org.jooq.Condition;
 import org.jooq.DSLContext;
+import org.jooq.DeleteQuery;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
 
@@ -120,7 +121,16 @@ public class PortalLayoutProviderImpl implements PortalLayoutProvider {
 				.and(Tables.EH_PORTAL_LAYOUTS.VERSION_ID.eq(versionId))
 				.fetch().map(r -> ConvertHelper.convert(r, PortalLayout.class));
 	}
-	
+
+	@Override
+	public void deleteByVersionId(Long versionId){
+		DeleteQuery query = getReadWriteContext().deleteQuery(Tables.EH_PORTAL_LAYOUTS);
+		query.addConditions(Tables.EH_PORTAL_LAYOUTS.VERSION_ID.eq(versionId));
+		query.execute();
+		DaoHelper.publishDaoAction(DaoAction.MODIFY, PortalLayout.class, null);
+	}
+
+
 	private EhPortalLayoutsDao getReadWriteDao() {
 		return getDao(getReadWriteContext());
 	}

@@ -32,6 +32,7 @@ import com.everhomes.rest.equipment.Status;
 import com.everhomes.rest.equipment.TaskCountDTO;
 import com.everhomes.rest.equipment.TasksStatData;
 import com.everhomes.rest.pmNotify.PmNotifyConfigurationStatus;
+import com.everhomes.rest.pmtask.PmTaskFlowStatus;
 import com.everhomes.rest.quality.QualityGroupType;
 import com.everhomes.scheduler.EquipmentInspectionScheduleJob;
 import com.everhomes.scheduler.ScheduleProvider;
@@ -108,6 +109,7 @@ import org.jooq.DSLContext;
 import org.jooq.Field;
 import org.jooq.Record;
 import org.jooq.SelectQuery;
+import org.jooq.UpdateQuery;
 import org.jooq.impl.DSL;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -583,7 +585,7 @@ public class EquipmentProviderImpl implements EquipmentProvider {
 
     @Override
     public List<EquipmentInspectionTasksLogs> listLogsByTaskId(ListingLocator locator, int count, Long taskId,
-                                                               List<Byte> processType,Long equipmentId) {
+                                                               List<Byte> processType,List<Long> equipmentId) {
 
         List<EquipmentInspectionTasksLogs> result = new ArrayList<EquipmentInspectionTasksLogs>();
         assert (locator.getEntityId() != 0);
@@ -593,8 +595,8 @@ public class EquipmentProviderImpl implements EquipmentProvider {
         if (locator.getAnchor() != null) {
             query.addConditions(Tables.EH_EQUIPMENT_INSPECTION_TASK_LOGS.ID.lt(locator.getAnchor()));
         }
-        if(equipmentId!=null && equipmentId!=0L){
-            query.addConditions(Tables.EH_EQUIPMENT_INSPECTION_TASK_LOGS.EQUIPMENT_ID.eq(equipmentId));
+        if(equipmentId!=null && equipmentId.size()>0){
+            query.addConditions(Tables.EH_EQUIPMENT_INSPECTION_TASK_LOGS.EQUIPMENT_ID.in(equipmentId));
         }
 
         if (processType != null) {
@@ -1621,7 +1623,7 @@ public class EquipmentProviderImpl implements EquipmentProvider {
             return null;
         });
         LOGGER.info("listQualifiedEquipmentInspectionPlans" + query.getSQL());
-        LOGGER.info("plans.size()" + plans.size());
+        LOGGER.info("plans.size()={}" + plans.size());
 
         return plans;
     }
@@ -2465,11 +2467,16 @@ public class EquipmentProviderImpl implements EquipmentProvider {
                                                                                Integer offset, Integer pageSize, String cacheKey, Byte adminFlag,Timestamp lastSyncTime) {
         long startTime = System.currentTimeMillis();
         List<EquipmentInspectionTasks> result = new ArrayList<EquipmentInspectionTasks>();
+        if (AdminFlag.NO.equals(AdminFlag.fromStatus(adminFlag))
+                && (executeStandardIds == null || executeStandardIds.size() == 0)
+                && (reviewStandardIds == null || reviewStandardIds.size() == 0)) {
+            return result;
+        }
 
         DSLContext context = dbProvider.getDslContext(AccessSpec.readOnly());
         SelectQuery<EhEquipmentInspectionTasksRecord> query = context.selectQuery(Tables.EH_EQUIPMENT_INSPECTION_TASKS);
-
-        query.addConditions(Tables.EH_EQUIPMENT_INSPECTION_TASKS.STATUS.in(taskStatus));
+        if (taskStatus != null)
+            query.addConditions(Tables.EH_EQUIPMENT_INSPECTION_TASKS.STATUS.in(taskStatus));
         if (targetType != null && targetType.size() > 0)
             query.addConditions(Tables.EH_EQUIPMENT_INSPECTION_TASKS.TARGET_TYPE.in(targetType));
 
@@ -2487,14 +2494,14 @@ public class EquipmentProviderImpl implements EquipmentProvider {
         }
 
         Condition con = null;
-        if (AdminFlag.NO.equals(AdminFlag.fromStatus(adminFlag))) {
+        if (AdminFlag.NO.equals(AdminFlag.fromStatus(adminFlag)) && executeStandardIds != null && executeStandardIds.size() > 0) {
             Condition con4 = Tables.EH_EQUIPMENT_INSPECTION_TASKS.PLAN_ID.in(executeStandardIds);
             con4 = con4.and(Tables.EH_EQUIPMENT_INSPECTION_TASKS.STATUS.in(EquipmentTaskStatus.WAITING_FOR_EXECUTING.getCode(),
                     EquipmentTaskStatus.DELAY.getCode()));
             con = con4;
         }
 
-        if (AdminFlag.NO.equals(AdminFlag.fromStatus(adminFlag))) {
+        if (AdminFlag.NO.equals(AdminFlag.fromStatus(adminFlag)) && reviewStandardIds != null && reviewStandardIds.size() > 0) {
             Condition con3 = Tables.EH_EQUIPMENT_INSPECTION_TASKS.PLAN_ID.in(reviewStandardIds);
             //巡检完成关闭的任务
             Condition con1 = Tables.EH_EQUIPMENT_INSPECTION_TASKS.STATUS.in(EquipmentTaskStatus.CLOSE.getCode(),
@@ -2638,11 +2645,11 @@ public class EquipmentProviderImpl implements EquipmentProvider {
             query.addConditions(Tables.EH_EQUIPMENT_INSPECTION_TASKS.INSPECTION_CATEGORY_ID.eq(inspectionCategoryId));
         }
         if (startTime != null && endTime != null) {
-            query.addConditions(Tables.EH_EQUIPMENT_INSPECTION_TASKS.EXECUTIVE_TIME.between(startTime, endTime));
+            query.addConditions(Tables.EH_EQUIPMENT_INSPECTION_TASKS.EXECUTIVE_START_TIME.between(startTime, endTime));
         } else if (startTime == null && endTime != null) {
-            query.addConditions(Tables.EH_EQUIPMENT_INSPECTION_TASKS.EXECUTIVE_TIME.le(endTime));
+            query.addConditions(Tables.EH_EQUIPMENT_INSPECTION_TASKS.EXECUTIVE_START_TIME.le(endTime));
         } else if (startTime != null) {
-            query.addConditions(Tables.EH_EQUIPMENT_INSPECTION_TASKS.EXECUTIVE_TIME.ge(startTime));
+            query.addConditions(Tables.EH_EQUIPMENT_INSPECTION_TASKS.EXECUTIVE_START_TIME.ge(startTime));
         }
 
         if (LOGGER.isDebugEnabled()) {
@@ -2653,7 +2660,7 @@ public class EquipmentProviderImpl implements EquipmentProvider {
             resp.setCompleteInspection(r.getValue("completeInspection", Long.class));
             resp.setCompleteWaitingForApproval(r.getValue("completeInspectionWaitingForApproval", Long.class));
             resp.setWaitingForExecuting(r.getValue("waitingForExecuting", Long.class));
-            resp.setComplete(resp.getCompleteInspection()+resp.getWaitingForExecuting());
+            resp.setComplete(resp.getCompleteInspection() + resp.getCompleteWaitingForApproval());
             resp.setTotalTasks(r.getValue("total", Long.class));
             resp.setDelay(r.getValue("delayTasks", Long.class));
             resp.setDelayInspection(r.getValue("delayInpsectionTasks", Long.class));
@@ -2992,6 +2999,7 @@ public class EquipmentProviderImpl implements EquipmentProvider {
         DSLContext context = this.dbProvider.getDslContext(AccessSpec.readOnly());
         SelectQuery<EhEquipmentInspectionTaskLogsRecord> query = context.selectQuery(Tables.EH_EQUIPMENT_INSPECTION_TASK_LOGS);
         query.addConditions(Tables.EH_EQUIPMENT_INSPECTION_TASK_LOGS.EQUIPMENT_ID.eq(referId));
+        query.addConditions(Tables.EH_EQUIPMENT_INSPECTION_TASK_LOGS.PROCESS_TYPE.eq(EquipmentTaskProcessType.NEED_MAINTENANCE.getCode()));
         query.addOrderBy(Tables.EH_EQUIPMENT_INSPECTION_TASK_LOGS.CREATE_TIME.desc());
         List<EquipmentInspectionTasksLogs> logs = new ArrayList<>();
         query.fetch((r) -> {
@@ -3005,14 +3013,21 @@ public class EquipmentProviderImpl implements EquipmentProvider {
     }
 
     @Override
-    public void updateMaintanceInspectionLogsById(Long taskLogId, Long flowCaseId) {
+    public void updateMaintanceInspectionLogsById(Long taskLogId, Byte status, Long flowCaseId) {
         DSLContext context = this.dbProvider.getDslContext(AccessSpec.readOnly());
-        context.update(Tables.EH_EQUIPMENT_INSPECTION_TASK_LOGS)
-                .set(Tables.EH_EQUIPMENT_INSPECTION_TASK_LOGS.PROCESS_RESULT, (EquipmentTaskProcessResult.NEED_MAINTENANCE_DELAY_COMPLETE_OK.getCode()))
-                .set(Tables.EH_EQUIPMENT_INSPECTION_TASK_LOGS.PROCESS_TYPE, EquipmentTaskProcessType.COMPLETE_MAINTENANCE.getCode())
-                .set(Tables.EH_EQUIPMENT_INSPECTION_TASK_LOGS.FLOW_CASE_ID, flowCaseId)
-                .where(Tables.EH_EQUIPMENT_INSPECTION_TASK_LOGS.ID.eq(taskLogId))
-                .execute();
+
+        UpdateQuery<EhEquipmentInspectionTaskLogsRecord> updateQuery = context.updateQuery(Tables.EH_EQUIPMENT_INSPECTION_TASK_LOGS);
+        updateQuery.addValue(Tables.EH_EQUIPMENT_INSPECTION_TASK_LOGS.MAINTANCE_STATUS, status);
+
+        updateQuery.addValue(Tables.EH_EQUIPMENT_INSPECTION_TASK_LOGS.MAINTANCE_STATUS, status);
+        updateQuery.addValue(Tables.EH_EQUIPMENT_INSPECTION_TASK_LOGS.FLOW_CASE_ID, flowCaseId);
+        updateQuery.addConditions(Tables.EH_EQUIPMENT_INSPECTION_TASK_LOGS.ID.eq(taskLogId));
+        if(PmTaskFlowStatus.COMPLETED.equals(PmTaskFlowStatus.fromCode(status))){
+            updateQuery.addValue(Tables.EH_EQUIPMENT_INSPECTION_TASK_LOGS.PROCESS_RESULT,
+                    EquipmentTaskProcessResult.NEED_MAINTENANCE_DELAY_COMPLETE_OK.getCode());
+        }
+        updateQuery.addConditions(Tables.EH_EQUIPMENT_INSPECTION_TASK_LOGS.PROCESS_TYPE.eq(EquipmentTaskProcessType.NEED_MAINTENANCE.getCode()));
+        updateQuery.execute();
     }
 
     @Override
@@ -3116,11 +3131,16 @@ public class EquipmentProviderImpl implements EquipmentProvider {
         }
 
         Condition con = null;
-        if (AdminFlag.NO.equals(AdminFlag.fromStatus(adminFlag))) {
+        if (AdminFlag.NO.equals(AdminFlag.fromStatus(adminFlag)) && executePlanIds!=null &&  executePlanIds.size()>0) {
             Condition con4 = Tables.EH_EQUIPMENT_INSPECTION_TASKS.PLAN_ID.in(executePlanIds);
             con4 = con4.and(Tables.EH_EQUIPMENT_INSPECTION_TASKS.STATUS.in(EquipmentTaskStatus.WAITING_FOR_EXECUTING.getCode(),
                     EquipmentTaskStatus.DELAY.getCode()));
             con = con4;
+        }
+        if (AdminFlag.NO.equals(AdminFlag.fromStatus(adminFlag)) && (executePlanIds == null || executePlanIds.size() == 0)) {
+            response.setTotayTasksCount(0L);
+            response.setTodayCompleteCount(0L);;
+            return;
         }
 
         if (con != null) {
@@ -3144,7 +3164,5 @@ public class EquipmentProviderImpl implements EquipmentProvider {
             response.setTotayTasksCount(r.getValue("totayTasksCount",Long.class));
             return null;
         });
-
-
     }
 }

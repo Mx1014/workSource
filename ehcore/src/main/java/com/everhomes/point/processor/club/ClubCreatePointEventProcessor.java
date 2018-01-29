@@ -27,7 +27,7 @@ public class ClubCreatePointEventProcessor extends GeneralPointEventProcessor im
     }
 
     @Override
-    protected String getEventName(LocalEvent localEvent, String subscriptionPath) {
+    protected String getEventName(LocalEvent localEvent) {
         Byte clubType = null;
 
         String groupJson = localEvent.getStringParam("group");

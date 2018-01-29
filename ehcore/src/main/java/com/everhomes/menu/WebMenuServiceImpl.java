@@ -626,7 +626,7 @@ public class WebMenuServiceImpl implements WebMenuService {
 					scope.setApplyPolicy(WebMenuScopeApplyPolicy.OVERRIDE.getCode());
 					scope.setOwnerType(EntityType.NAMESPACE.getCode());
 					scope.setOwnerId(portalVersionDTO.getNamespaceId().longValue());
-					scope.setAppId(dto.getOriginId());
+					//scope.setAppId(dto.getOriginId());
 					scope.setConfigId(dto.getId());
 					scopes.add(scope);
 				}

@@ -15,8 +15,8 @@ import java.util.List;
  */
 public class FlowGraphBranchNormal extends FlowGraphBranch {
 
-    private FlowCaseProvider flowCaseProvider;
-    private FlowStateProcessor flowStateProcessor;
+    transient private FlowCaseProvider flowCaseProvider;
+    transient private FlowStateProcessor flowStateProcessor;
 
     public FlowGraphBranchNormal() {
         flowCaseProvider = PlatformContext.getComponent(FlowCaseProvider.class);

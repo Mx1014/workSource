@@ -7,7 +7,7 @@ import java.sql.Timestamp;
 
 /**
  * <ul>
- *     <li>id: 版本id</li>
+ *     <li>id: id</li>
  *     <li>namespaceId: 域空间</li>
  *     <li>userId: userId</li>
  *     <li>versionId: versionId</li>

@@ -7,6 +7,7 @@ import java.util.List;
 
 import com.everhomes.rest.portal.PortalItemGroupStatus;
 import org.jooq.DSLContext;
+import org.jooq.DeleteQuery;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -86,6 +87,14 @@ public class PortalItemGroupProviderImpl implements PortalItemGroupProvider {
 		portalItemGroup.setUpdateTime(new Timestamp(DateHelper.currentGMTTime().getTime()));
 		getReadWriteDao().update(portalItemGroup);
 		DaoHelper.publishDaoAction(DaoAction.MODIFY, EhPortalItemGroups.class, portalItemGroup.getId());
+	}
+
+	@Override
+	public void deleteByVersionId(Long versionId){
+		DeleteQuery query = getReadWriteContext().deleteQuery(Tables.EH_PORTAL_ITEM_GROUPS);
+		query.addConditions(Tables.EH_PORTAL_ITEM_GROUPS.VERSION_ID.eq(versionId));
+		query.execute();
+		DaoHelper.publishDaoAction(DaoAction.MODIFY, EhPortalItemGroups.class, null);
 	}
 
 	@Override

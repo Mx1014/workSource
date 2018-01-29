@@ -5,6 +5,7 @@ import com.everhomes.util.StringHelper;
 /**
  * <ul>
  *     <li>id: id</li>
+ *     <li>moduleId: moduleId</li>
  *     <li>namespaceId: namespaceId</li>
  *     <li>serviceName: serviceName</li>
  * </ul>

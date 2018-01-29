@@ -11,6 +11,7 @@ import java.sql.Timestamp;
  *     <li>id: 版本id</li>
  *     <li>namespaceId: 与空间</li>
  *     <li>parentId: 父版本Id</li>
+ *     <li>dateVersion: 日期本号</li>
  *     <li>bigVersion: 大版本号</li>
  *     <li>minorVersion: 小版本号</li>
  *     <li>createTime: 创建时间</li>
@@ -24,6 +25,7 @@ public class PortalVersionDTO {
     private Long id;
     private Integer namespaceId;
     private Long parentId;
+    private Integer dateVersion;
     private Integer bigVersion;
     private Integer minorVersion;
     private Timestamp createTime;
@@ -53,6 +55,14 @@ public class PortalVersionDTO {
 
     public void setParentId(Long parentId) {
         this.parentId = parentId;
+    }
+
+    public Integer getDateVersion() {
+        return dateVersion;
+    }
+
+    public void setDateVersion(Integer dateVersion) {
+        this.dateVersion = dateVersion;
     }
 
     public Integer getBigVersion() {

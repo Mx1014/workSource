@@ -133,7 +133,7 @@ public class Bosigao2ParkingVendorHandler extends DefaultParkingVendorHandler {
     	ParkWebServiceSoap port = service.getParkWebServiceSoap();
         String json = port.parkingSystemRequestService("", GET_CARD, cmd.toString(), "");
 
-		LOGGER.info("Result={}", json);
+		LOGGER.info("SendResult={}", json);
         
         Bosigao2ResultEntity result = JSONObject.parseObject(json, Bosigao2ResultEntity.class);
         this.checkResultHolderIsNull(result,plateNumber);

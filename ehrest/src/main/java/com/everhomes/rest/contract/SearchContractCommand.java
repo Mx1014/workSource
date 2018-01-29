@@ -48,6 +48,16 @@ public class SearchContractCommand {
         this.orgId = orgId;
     }
 
+    private Byte paymentFlag = 0;
+
+    public Byte getPaymentFlag() {
+        return paymentFlag;
+    }
+
+    public void setPaymentFlag(Byte paymentFlag) {
+        this.paymentFlag = paymentFlag;
+    }
+
     public String getSortField() {
         return sortField;
     }

@@ -462,6 +462,7 @@ public class EbeiPmTaskHandle extends DefaultPmTaskHandle{
                     task.setCreatorUid(userId);
                 task.setOrganizationUid(user.getId());
             }
+            task.setIfUseFeelist((byte)0);
 
             pmTaskProvider.createTask(task);
             createFlowCase(task);

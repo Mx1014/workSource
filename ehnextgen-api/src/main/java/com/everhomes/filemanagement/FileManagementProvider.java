@@ -43,9 +43,9 @@ public interface FileManagementProvider {
 
     FileContent findFileContentById(Long id);
 
-    FileContent findFileContentByName(Integer namespaceId, Long ownerId,  Long parentId, String name);
+    FileContent findFileContentByName(Integer namespaceId, Long ownerId, Long catalogId, Long parentId, String name);
 
-    List<FileContent> listFileContents(Integer namespaceId, Long ownerId, Long catalogId, Long parentId, String keywords);
+//    List<FileContent> listFileContents(Integer namespaceId, Long ownerId, Long catalogId, String path, String keywords);
 
     List<FileContent> queryFileContents(ListingLocator locator, Integer namespaceId, Long ownerId, ListingQueryBuilderCallback queryBuilderCallback);
 }

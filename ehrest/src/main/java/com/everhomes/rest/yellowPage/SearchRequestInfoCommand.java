@@ -9,6 +9,8 @@ import com.everhomes.util.StringHelper;
  *  <li>ownerType: 拥有者类型：EhOrganizations EhCommunities</li>
  *  <li>ownerId: 拥有者ID</li>
  *  <li>categoryId: 服务联盟大类id</li>
+ *  <li>secondCategoryId: 服务联盟小类id</li>
+ *  <li>workflowStatus: 工作流状态，{@link com.everhomes.rest.yellowPage.ServiceAllianceWorkFlowStatus}</li>
  *  <li>startDay: 开始时间</li>
  *  <li>endDay：结束时间</li>
  *  <li>keyword：关键字（创建请求的用户姓名和机构名称）</li>
@@ -30,6 +32,10 @@ public class SearchRequestInfoCommand {
 	
 	private Long categoryId;
 	
+	private Long secondCategoryId;
+	
+	private Byte workflowStatus;
+	
 	private Long startDay;
 	
 	private Long endDay;
@@ -42,6 +48,22 @@ public class SearchRequestInfoCommand {
 	
 	private Integer pageSize;
 	
+	public Long getSecondCategoryId() {
+		return secondCategoryId;
+	}
+
+	public void setSecondCategoryId(Long secondCategoryId) {
+		this.secondCategoryId = secondCategoryId;
+	}
+
+	public Byte getWorkflowStatus() {
+		return workflowStatus;
+	}
+
+	public void setWorkflowStatus(Byte workflowStatus) {
+		this.workflowStatus = workflowStatus;
+	}
+
 	public String getOwnerType() {
 		return ownerType;
 	}
