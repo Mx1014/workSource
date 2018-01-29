@@ -3559,19 +3559,17 @@ private void checkUserPrivilege(Long orgId, Long privilegeId, Long communityId) 
 	}
 
 	@Override
-	public ListEquipmentTasksResponse listEquipmentTasks(
-			ListEquipmentTasksCommand cmd) {
+	public ListEquipmentTasksResponse listEquipmentTasks(ListEquipmentTasksCommand cmd) {
+
 		if(cmd.getTaskStatus() != null && cmd.getTaskStatus().size() == 1
 				&& EquipmentTaskStatus.DELAY.equals(EquipmentTaskStatus.fromStatus(cmd.getTaskStatus().get(0)))) {
 			return listDelayTasks(cmd);
 		}
-
 		Timestamp lastSyncTime = null;
 		if (cmd.getLastSyncTime() != null) {
 			lastSyncTime = dateStrToTimestamp(cmd.getLastSyncTime());
 		}
 		ListEquipmentTasksResponse response = new ListEquipmentTasksResponse();
-		User user = UserContext.current().getUser();
 		int pageSize = cmd.getPageSize() == null ? Integer.MAX_VALUE - 1 : cmd.getPageSize();
 
 		if(null == cmd.getPageAnchor()) {
@@ -3587,26 +3585,15 @@ private void checkUserPrivilege(Long orgId, Long privilegeId, Long communityId) 
 		if(cmd.getTargetId() != null)
 			targetIds.add(cmd.getTargetId());
 
-		Long userId = user.getId();
+		Long userId = UserContext.currentUserId();
 		//是否是管理员
-		boolean isAdmin = false;
-		List<RoleAssignment> resources = aclProvider.getRoleAssignmentByResourceAndTarget(EntityType.ORGANIZATIONS.getCode(), cmd.getOwnerId(), EntityType.USER.getCode(), user.getId());
-		if(null != resources && 0 != resources.size()){
-			for (RoleAssignment resource : resources) {
-				if(resource.getRoleId() == RoleConstants.ENTERPRISE_SUPER_ADMIN
-						|| resource.getRoleId() == RoleConstants.ENTERPRISE_ORDINARY_ADMIN
-						|| resource.getRoleId() == RoleConstants.PM_SUPER_ADMIN
-						|| resource.getRoleId() == RoleConstants.PM_ORDINARY_ADMIN) {
-					isAdmin = true;
-					userId =0L;
-					break;
-				}
-			}
-		}
+		boolean isAdmin = checkCurrentUserisAdmin(cmd.getOwnerId(), userId);
+
 		List<EquipmentInspectionTasks> allTasks = null;
 		if(isAdmin) {
 			String cacheKey = convertListEquipmentInspectionTasksCache(cmd.getTaskStatus(), cmd.getInspectionCategoryId(),
-					targetTypes, targetIds, null, null, offset, userId);
+					targetTypes, targetIds, null, null, offset, 0L);
+			LOGGER.info("listEquipmentInspectionTasks is  Admin  cacheKey = {}" + cacheKey);
 			allTasks = equipmentProvider.listEquipmentInspectionTasksUseCache(cmd.getTaskStatus(), cmd.getInspectionCategoryId(),
 					targetTypes, targetIds, null, null, offset, pageSize + 1, cacheKey, AdminFlag.YES.getCode(),lastSyncTime);
 
@@ -3618,7 +3605,7 @@ private void checkUserPrivilege(Long orgId, Long privilegeId, Long communityId) 
 			List<Long> reviewPlanIds = new ArrayList<>();
 			List<ExecuteGroupAndPosition> groupDtos = listUserRelateGroups();
 			//List<EquipmentInspectionStandardGroupMap> maps = equipmentProvider.listEquipmentInspectionStandardGroupMapByGroupAndPosition(groupDtos, null);
-			//这里换成从计划表中拿执行组和审批组人员
+			//get execute and review members from plans  20180129
 			List<EquipmentInspectionPlanGroupMap> maps = equipmentProvider.listEquipmentInspectionPlanGroupMapByGroupAndPosition(groupDtos, null);
 			if (maps != null && maps.size() > 0) {
 				for (EquipmentInspectionPlanGroupMap r : maps) {
@@ -3633,7 +3620,7 @@ private void checkUserPrivilege(Long orgId, Long privilegeId, Long communityId) 
 
 			String cacheKey = convertListEquipmentInspectionTasksCache(cmd.getTaskStatus(), cmd.getInspectionCategoryId(), targetTypes, targetIds,
 					executePlanIds, reviewPlanIds, offset, userId);
-			LOGGER.info("listEquipmentInspectionTasks  cacheKey = {}" + cacheKey);
+			LOGGER.info("listEquipmentInspectionTasks is not Admin  cacheKey = {}" + cacheKey);
 			allTasks = equipmentProvider.listEquipmentInspectionTasksUseCache(cmd.getTaskStatus(), cmd.getInspectionCategoryId(),
 					targetTypes, targetIds, executePlanIds, reviewPlanIds, offset, pageSize + 1, cacheKey, AdminFlag.NO.getCode(),lastSyncTime);
 
@@ -3665,6 +3652,21 @@ private void checkUserPrivilege(Long orgId, Long privilegeId, Long communityId) 
 
 		return response;
 
+	}
+
+	private boolean checkCurrentUserisAdmin(Long ownerId, Long userId) {
+		List<RoleAssignment> resources = aclProvider.getRoleAssignmentByResourceAndTarget(EntityType.ORGANIZATIONS.getCode(), ownerId, EntityType.USER.getCode(), userId);
+		if (null != resources && 0 != resources.size()) {
+			for (RoleAssignment resource : resources) {
+				if (resource.getRoleId() == RoleConstants.ENTERPRISE_SUPER_ADMIN
+						|| resource.getRoleId() == RoleConstants.ENTERPRISE_ORDINARY_ADMIN
+						|| resource.getRoleId() == RoleConstants.PM_SUPER_ADMIN
+						|| resource.getRoleId() == RoleConstants.PM_ORDINARY_ADMIN) {
+					return true;
+				}
+			}
+		}
+		return false;
 	}
 
 
@@ -5820,6 +5822,7 @@ private void checkUserPrivilege(Long orgId, Long privilegeId, Long communityId) 
 
 		offlineResponse.setTodayCompleteCount(response.getTodayCompleteCount());
 		offlineResponse.setTotayTasksCount(response.getTotayTasksCount());
+		offlineResponse.setNextPageAnchor(response.getNextPageAnchor());
 
 		List<EquipmentTaskDTO> tasks = response.getTasks();
 		tasks.forEach((task) -> {
