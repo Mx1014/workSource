@@ -133,6 +133,7 @@ import javax.validation.Validator;
 import javax.validation.constraints.Size;
 import javax.validation.metadata.ConstraintDescriptor;
 import java.io.UnsupportedEncodingException;
+import java.net.URLDecoder;
 import java.net.URLEncoder;
 import java.nio.charset.Charset;
 import java.sql.Timestamp;
@@ -5481,7 +5482,7 @@ public class UserServiceImpl implements UserService {
 				}
 
 				try {
-					String token = new String(Base64.getDecoder().decode(response.getMessage()), "utf-8");
+					String token = URLDecoder.decode(response.getMessage(), "utf-8");
 					String[] tokenParam = token.split("&");
 					String salt = tokenParam[0];
 					if (salt.equals(SALT)) {
@@ -5514,8 +5515,13 @@ public class UserServiceImpl implements UserService {
 	@Override
 	public String getSercetKeyForScan(String args) {
 		String userToken = WebTokenGenerator.getInstance().toWebToken(UserContext.current().getLogin().getLoginToken());
-		String plain = SALT + "&" + UserContext.currentUserId() + "&" + UserContext.getCurrentNamespaceId() + "&" + args;
-		String token = Base64.getEncoder().encodeToString(plain.getBytes());
+		String plain = SALT + "&" + UserContext.currentUserId() + "&" + UserContext.getCurrentNamespaceId() + "&" + userToken + "&" + args;
+		String token = null;
+		try {
+			token = URLEncoder.encode(plain, "UTF-8");
+		} catch (UnsupportedEncodingException e) {
+			e.printStackTrace();
+		}
 		return token;
 	}
 
