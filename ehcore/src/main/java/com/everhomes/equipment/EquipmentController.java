@@ -89,7 +89,6 @@ import com.everhomes.search.EquipmentSearcher;
 import com.everhomes.search.EquipmentStandardMapSearcher;
 import com.everhomes.search.EquipmentStandardSearcher;
 import com.everhomes.search.EquipmentTasksSearcher;
-import com.everhomes.user.User;
 import com.everhomes.user.UserContext;
 import com.everhomes.user.UserPrivilegeMgr;
 import com.everhomes.util.RuntimeErrorException;
@@ -169,7 +168,7 @@ public class EquipmentController extends ControllerBase {
 
     /**
      * <b>URL: /equipment/searchEquipmentStandards</b>
-     * <p>查看设备巡检标准</p>
+     * <p>列出设备巡检标准</p>
      */
     @RequestMapping("searchEquipmentStandards")
     @RestReturn(value = SearchEquipmentStandardsResponse.class)
@@ -196,8 +195,7 @@ public class EquipmentController extends ControllerBase {
     @RequestMapping("importEquipmentStandards")
     @RestReturn(value = ImportDataResponse.class)
     public RestResponse importEquipmentStandards(ImportOwnerCommand cmd, @RequestParam(value = "attachment") MultipartFile[] files) {
-        User manaUser = UserContext.current().getUser();
-        Long userId = manaUser.getId();
+        Long userId = UserContext.currentUserId();
         if (null == files || null == files[0]) {
             LOGGER.error("files is null userId=" + userId);
             throw RuntimeErrorException.errorWith(UserServiceErrorCode.SCOPE, UserServiceErrorCode.ERROR_INVALID_PARAMS,
@@ -214,7 +212,6 @@ public class EquipmentController extends ControllerBase {
     @RequestMapping("updateEquipments")
     @RestReturn(value = String.class)
     public RestResponse updateEquipments(UpdateEquipmentsCommand cmd) {
-
         equipmentService.updateEquipments(cmd);
         return getSuccessResponse();
     }
@@ -226,9 +223,7 @@ public class EquipmentController extends ControllerBase {
     @RequestMapping("deleteEquipments")
     @RestReturn(value = String.class)
     public RestResponse deleteEquipments(DeleteEquipmentsCommand cmd) {
-
         equipmentService.deleteEquipments(cmd);
-
         return getSuccessResponse();
     }
 
@@ -239,9 +234,7 @@ public class EquipmentController extends ControllerBase {
     @RequestMapping("findEquipment")
     @RestReturn(value = EquipmentsDTO.class)
     public RestResponse findEquipment(DeleteEquipmentsCommand cmd) {
-
         EquipmentsDTO equipment = equipmentService.findEquipment(cmd);
-
         return getRestResponse(equipment);
     }
 
@@ -252,9 +245,7 @@ public class EquipmentController extends ControllerBase {
     @RequestMapping("searchEquipments")
     @RestReturn(value = SearchEquipmentsResponse.class)
     public RestResponse searchEquipments(SearchEquipmentsCommand cmd) {
-
         SearchEquipmentsResponse equipments = equipmentSearcher.queryEquipments(cmd);
-
         return getRestResponse(equipments);
     }
 
@@ -271,7 +262,7 @@ public class EquipmentController extends ControllerBase {
 
     /**
      * <b>URL: /equipment/searchEquipmentStandardRelations</b>
-     * <p>列出设备标准关联列表 新建计划时关联巡检对象</p>
+     * <p>列出设备-标准关联列表 </p>
      */
     @RequestMapping("searchEquipmentStandardRelations")
     @RestReturn(value = SearchEquipmentStandardRelationsResponse.class)
@@ -287,7 +278,6 @@ public class EquipmentController extends ControllerBase {
 	@RequestMapping("exportEquipments")
 	@RestReturn(String.class)
 	public RestResponse exportEquipments(@Valid SearchEquipmentsCommand cmd,HttpServletResponse httpResponse) {
-
 		equipmentService.exportEquipments(cmd, httpResponse);
 		RestResponse response = new RestResponse();
 		response.setErrorCode(ErrorCodes.SUCCESS);
@@ -302,9 +292,8 @@ public class EquipmentController extends ControllerBase {
     @RequestMapping("importEquipments")
     @RestReturn(value=ImportDataResponse.class)
     public RestResponse importEquipments(ImportOwnerCommand cmd, @RequestParam(value = "attachment") MultipartFile[] files){
-    	User manaUser = UserContext.current().getUser();
-		Long userId = manaUser.getId();
-		if(null == files || null == files[0]){
+        Long userId = UserContext.currentUserId();
+        if(null == files || null == files[0]){
 			LOGGER.error("files is null。userId="+userId);
 			throw RuntimeErrorException.errorWith(UserServiceErrorCode.SCOPE, UserServiceErrorCode.ERROR_INVALID_PARAMS,
 					"files is null");
@@ -324,14 +313,9 @@ public class EquipmentController extends ControllerBase {
 	@RequestMapping("updateEquipmentAccessories")
 	@RestReturn(value = EquipmentAccessoriesDTO.class)
 	public RestResponse updateEquipmentAccessories(UpdateEquipmentAccessoriesCommand cmd) {
-		
 		EquipmentAccessoriesDTO accessories = equipmentService.updateEquipmentAccessories(cmd);
-		
-		RestResponse response = new RestResponse(accessories);
-		response.setErrorCode(ErrorCodes.SUCCESS);
-		response.setErrorDescription("OK");
-		return response;
-	}
+        return getRestResponse(accessories);
+    }
 	
 	/**
 	 * <b>URL: /equipment/deleteEquipmentAccessories</b>
@@ -340,9 +324,7 @@ public class EquipmentController extends ControllerBase {
 	@RequestMapping("deleteEquipmentAccessories")
 	@RestReturn(value = String.class)
 	public RestResponse deleteEquipmentAccessories(DeleteEquipmentAccessoriesCommand cmd) {
-
 		equipmentService.deleteEquipmentAccessories(cmd);
-
 		RestResponse response = new RestResponse();
 		response.setErrorCode(ErrorCodes.SUCCESS);
 		response.setErrorDescription("OK");
@@ -356,14 +338,9 @@ public class EquipmentController extends ControllerBase {
 	@RequestMapping("findEquipmentAccessoriesById")
 	@RestReturn(value = EquipmentAccessoriesDTO.class)
 	public RestResponse findEquipmentAccessoriesById(DeleteEquipmentAccessoriesCommand cmd) {
-		
 		EquipmentAccessoriesDTO accessory = equipmentService.findEquipmentAccessoriesById(cmd);
-		
-		RestResponse response = new RestResponse(accessory);
-		response.setErrorCode(ErrorCodes.SUCCESS);
-		response.setErrorDescription("OK");
-		return response;
-	}
+        return getRestResponse(accessory);
+    }
 	
 	/**
 	 * <b>URL: /equipment/searchEquipmentAccessories</b>
@@ -372,14 +349,9 @@ public class EquipmentController extends ControllerBase {
 	@RequestMapping("searchEquipmentAccessories")
 	@RestReturn(value = SearchEquipmentAccessoriesResponse.class)
 	public RestResponse searchEquipmentAccessories(SearchEquipmentAccessoriesCommand cmd) {
-		
 		SearchEquipmentAccessoriesResponse accessories = equipmentAccessoriesSearcher.query(cmd);
-		
-		RestResponse response = new RestResponse(accessories);
-		response.setErrorCode(ErrorCodes.SUCCESS);
-		response.setErrorDescription("OK");
-		return response;
-	}
+        return getRestResponse(accessories);
+    }
 
 	/**
 	 * <b>URL: /equipment/exportEquipmentAccessories</b>
@@ -490,7 +462,6 @@ public class EquipmentController extends ControllerBase {
      */
     @RequestMapping("exportEquipmentTasks")
     public HttpServletResponse exportEquipmentTasks(@Valid SearchEquipmentTasksCommand cmd, HttpServletResponse response) {
-
        return  equipmentService.exportEquipmentTasks(cmd, response);
     }
 
@@ -501,9 +472,7 @@ public class EquipmentController extends ControllerBase {
     @RequestMapping("searchEquipmentTasks")
     @RestReturn(value = ListEquipmentTasksResponse.class)
     public RestResponse searchEquipmentTasks(SearchEquipmentTasksCommand cmd) {
-
         ListEquipmentTasksResponse tasks = equipmentTasksSearcher.query(cmd);
-
         return getRestResponse(tasks);
     }
 
@@ -514,9 +483,7 @@ public class EquipmentController extends ControllerBase {
     @RequestMapping("listEquipmentTasks")
     @RestReturn(value = ListEquipmentTasksResponse.class)
     public RestResponse listEquipmentTasks(ListEquipmentTasksCommand cmd) {
-
         ListEquipmentTasksResponse tasks = equipmentService.listEquipmentTasks(cmd);
-
         return getRestResponse(tasks);
     }
 
@@ -528,7 +495,6 @@ public class EquipmentController extends ControllerBase {
     @RestReturn(value = EquipmentTaskOfflineResponse.class)
     public RestResponse listEquipmentTasksDetails(ListEquipmentTasksCommand cmd) {
         EquipmentTaskOfflineResponse tasksDetail = equipmentService.listEquipmentTasksDetails(cmd);
-
         return getRestResponse(tasksDetail);
     }
 
@@ -632,9 +598,7 @@ public class EquipmentController extends ControllerBase {
     @RequestMapping("reviewEquipmentTasks")
     @RestReturn(value = String.class)
     public RestResponse reviewEquipmentTasks(ReviewEquipmentTasksCommand cmd) {
-
         equipmentService.reviewEquipmentTasks(cmd);
-
         return getSuccessResponse();
     }
 
@@ -645,9 +609,7 @@ public class EquipmentController extends ControllerBase {
     @RequestMapping("listLogsByTaskId")
     @RestReturn(value = ListLogsByTaskIdResponse.class)
     public RestResponse listLogsByTaskId(ListLogsByTaskIdCommand cmd) {
-
         ListLogsByTaskIdResponse records = equipmentService.listLogsByTaskId(cmd);
-
         return getRestResponse(records);
     }
 
@@ -671,9 +633,7 @@ public class EquipmentController extends ControllerBase {
     @RequestMapping("listAttachmentsByEquipmentId")
     @RestReturn(value = EquipmentAttachmentDTO.class, collection = true)
     public RestResponse listAttachmentsByEquipmentId(ListAttachmentsByEquipmentIdCommand cmd) {
-
         List<EquipmentAttachmentDTO> equipmentAttachments = equipmentService.listAttachmentsByEquipmentId(cmd);
-
         return getRestResponse(equipmentAttachments);
     }
 
@@ -758,8 +718,6 @@ public class EquipmentController extends ControllerBase {
     public RestResponse syncEquipmentStandardMapIndex() {
         UserPrivilegeMgr resolver = PlatformContext.getComponent("SystemUser");
         resolver.checkUserPrivilege(UserContext.current().getUser().getId(), 0);
-        
-        equipmentStandardMapSearcher.syncFromDb();
         return getSuccessResponse();
     }
     
