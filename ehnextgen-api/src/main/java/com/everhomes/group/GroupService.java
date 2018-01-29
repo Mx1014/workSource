@@ -13,6 +13,9 @@ public interface GroupService {
 //    GroupDTO createGroup(CreateGroupCommand cmd);
     GroupDTO updateGroup(UpdateGroupCommand cmd);
     GroupDTO getGroup(GetGroupCommand cmd);
+
+    List<GroupDTO> listOwnerGroupsByType(Byte clubType);
+
     List<GroupDTO> listUserRelatedGroups();
     List<GroupDTO> listUserGroups();
     List<GroupDTO> listPublicGroups(ListPublicGroupCommand cmd);

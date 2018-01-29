@@ -2475,6 +2475,9 @@ public class OrganizationServiceImpl implements OrganizationService {
             groupTypes.add(OrganizationGroupType.JOB_POSITION.getCode());
             groupTypes.add(OrganizationGroupType.JOB_LEVEL.getCode());
             List<OrganizationMember> if_empty_members = organizationProvider.listOrganizationMemberByPath(organization.getPath(), groupTypes, "");
+            if(if_empty_members != null && if_empty_members.size() > 0){
+                if_empty_members = if_empty_members.stream().filter(r-> r.getStatus().equals(OrganizationMemberStatus.ACTIVE.getCode())).collect(Collectors.toList());
+            }
             //2.如果仍有活动的人员,直接返回false
             if(if_empty_members.size() != 0){
                 return false;
