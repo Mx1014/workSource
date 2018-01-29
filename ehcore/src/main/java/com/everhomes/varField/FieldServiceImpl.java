@@ -601,11 +601,11 @@ public class FieldServiceImpl implements FieldService {
                 break;
             case "离场信息":
                 ListCustomerDepartureInfosCommand cmd12 = new ListCustomerDepartureInfosCommand();
-                cmd12.setCustomerId(customerId);
                 cmd12.setCustomerType(customerType);
                 cmd12.setCommunityId(communityId);
                 cmd12.setNamespaceId(namespaceId);
                 cmd12.setOrgId(orgId);
+                cmd12.setCustomerId(customerId);
                 LOGGER.info("离场信息 command"+cmd12);
                 List<CustomerDepartureInfoDTO> customerDepartureInfoDTOS = customerService.listCustomerDepartureInfos(cmd12);
                 if(customerDepartureInfoDTOS == null) customerDepartureInfoDTOS = new ArrayList<>();
