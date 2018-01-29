@@ -331,7 +331,7 @@ public class EquipmentStandardSearcherImpl extends AbstractElasticSearch impleme
 	private XContentBuilder createDoc(EquipmentInspectionStandards standard){
 		try {
             XContentBuilder b = XContentFactory.jsonBuilder().startObject();
-            b.field("standardName", standard.getName());
+            b.field("standardName", standard.getName()).field("index","not_analyzed");
            // b.field("standardNumber", standard.getStandardNumber());
             b.field("ownerId", standard.getOwnerId());
             b.field("ownerType", standard.getOwnerType());

@@ -83,6 +83,7 @@ import com.everhomes.rest.equipment.EquipmentStandardsDTO;
 import com.everhomes.rest.equipment.EquipmentStatus;
 import com.everhomes.rest.equipment.EquipmentTaskAttachmentDTO;
 import com.everhomes.rest.equipment.EquipmentTaskDTO;
+import com.everhomes.rest.equipment.EquipmentTaskLogs;
 import com.everhomes.rest.equipment.EquipmentTaskLogsDTO;
 import com.everhomes.rest.equipment.EquipmentTaskOfflineResponse;
 import com.everhomes.rest.equipment.EquipmentTaskProcessResult;
@@ -2727,62 +2728,71 @@ private void checkUserPrivilege(Long orgId, Long privilegeId, Long communityId) 
 
 	@Override
 	public ListLogsByTaskIdResponse listLogsByTaskId(ListLogsByTaskIdCommand cmd) {
-		EquipmentInspectionTasks task = verifyEquipmentTask(cmd.getTaskId(), cmd.getOwnerType(), cmd.getOwnerId());
+		List<EquipmentInspectionTasks> tasks = new ArrayList<>();
+		if (cmd.getTaskId() != null && cmd.getTaskId().size() > 0) {
+			cmd.getTaskId().forEach((t) -> tasks.add(verifyEquipmentTask(t, cmd.getOwnerType(), cmd.getOwnerId())));
+		}
 
 		CrossShardListingLocator locator = new CrossShardListingLocator();
-        locator.setAnchor(cmd.getPageAnchor());
-        int pageSize = PaginationConfigHelper.getPageSize(configurationProvider, cmd.getPageSize());
-        //根据任务id取出所有待执行和待维修的任务log  0: none, 1: complete, 2: complete maintenance, 3: review, 4: need maintenance
+//        locator.setAnchor(cmd.getPageAnchor());
+//        int pageSize = PaginationConfigHelper.getPageSize(configurationProvider, cmd.getPageSize());
+		int pageSize = Integer.MAX_VALUE - 1;
 		//0: none, 1: complete, 2: complete maintenance, 3: review,
-		//上版维修情况取2  ，任务记录取1  4  ，  对接报修后取2     review  1
-
-		EquipmentInspectionPlans plan = new EquipmentInspectionPlans();
-		List<Long> equipmentIds = new ArrayList<>();
-		if (cmd.getEquipmentId() == null) {
-			if (task.getPlanId() != null && task.getPlanId() != 0L) {
-				plan = equipmentProvider.getEquipmmentInspectionPlanById(task.getPlanId());
-				if (null != plan) {
-					EquipmentInspectionPlanDTO planDTO = ConvertHelper.convert(plan, EquipmentInspectionPlanDTO.class);
-					processEquipmentInspectionObjectsByPlanId(plan.getId(), planDTO);
-					if (planDTO.getEquipmentStandardRelations() != null && planDTO.getEquipmentStandardRelations().size() > 0) {
-						planDTO.getEquipmentStandardRelations().forEach((r) -> equipmentIds.add(r.getEquipmentId()));
-					}
-				}
-			} else if (task.getPlanId() == 0) {
-				//兼容
-				equipmentIds.add(task.getEquipmentId());
-			}
-		}
-		List<EquipmentInspectionTasksLogs> logs = equipmentProvider.listLogsByTaskId(locator, pageSize + 1,
-				task.getId(), cmd.getProcessType(), equipmentIds);
-
+		List<EquipmentTaskLogs> logsList = new ArrayList<>();
 		ListLogsByTaskIdResponse response = new ListLogsByTaskIdResponse();
-		if(null == logs) {
-			List<EquipmentTaskLogsDTO> dtos = new ArrayList<EquipmentTaskLogsDTO>();
-			response.setLogs(dtos);
-			return response;
-		}
-		Long nextPageAnchor = null;
-        if(logs.size() > pageSize) {
-        	logs.remove(logs.size() - 1);
-            nextPageAnchor = logs.get(logs.size() - 1).getId();
-        }
-        response.setNextPageAnchor(nextPageAnchor);
 
-		populateTaskType(task, response);
-		List<EquipmentTaskLogsDTO> dtos = new ArrayList<>();
-		if(cmd.getEquipmentId()!= null){
-			dtos = processEquipmentTaskLogsDTOS(logs);
-		} else {
-			dtos = logs.stream().map((r) -> {
-				EquipmentTaskLogsDTO dto = ConvertHelper.convert(r, EquipmentTaskLogsDTO.class);
-				populateItemResultToTasklog(r, dto);
-				return dto;
-			}).collect(Collectors.toList());
-			//增加正常异常数
-			calculateAbnormalCount(dtos);
-		}
-		response.setLogs(dtos);
+		tasks.forEach((task -> {
+			EquipmentInspectionPlans plan = new EquipmentInspectionPlans();
+			List<Long> equipmentIds = new ArrayList<>();
+			if (cmd.getEquipmentId() == null) {
+				if (task.getPlanId() != null && task.getPlanId() != 0L) {
+					plan = equipmentProvider.getEquipmmentInspectionPlanById(task.getPlanId());
+					if (null != plan) {
+						EquipmentInspectionPlanDTO planDTO = ConvertHelper.convert(plan, EquipmentInspectionPlanDTO.class);
+						processEquipmentInspectionObjectsByPlanId(plan.getId(), planDTO);
+						if (planDTO.getEquipmentStandardRelations() != null && planDTO.getEquipmentStandardRelations().size() > 0) {
+							planDTO.getEquipmentStandardRelations().forEach((r) -> equipmentIds.add(r.getEquipmentId()));
+						}
+					}
+				} else if (task.getPlanId() == null || task.getPlanId() == 0) {
+					//兼容
+					equipmentIds.add(task.getEquipmentId());
+				}
+			}
+			List<EquipmentInspectionTasksLogs> logs = equipmentProvider.listLogsByTaskId(locator, pageSize + 1,
+					task.getId(), cmd.getProcessType(), equipmentIds);
+
+//			Long nextPageAnchor = null;
+//			if(logs.size() > pageSize) {
+//				logs.remove(logs.size() - 1);
+//				nextPageAnchor = logs.get(logs.size() - 1).getId();
+//			}
+//			response.setNextPageAnchor(nextPageAnchor);
+
+//			populateTaskType(task, response);
+			List<EquipmentTaskLogsDTO> dtos = new ArrayList<>();
+			if (cmd.getEquipmentId() != null) {
+				dtos = processEquipmentTaskLogsDTOS(logs);
+			} else {
+				if (logs != null && logs.size() > 0)
+					dtos = logs.stream().map((r) -> {
+						EquipmentTaskLogsDTO dto = ConvertHelper.convert(r, EquipmentTaskLogsDTO.class);
+						populateItemResultToTasklog(r, dto);
+						return dto;
+					}).collect(Collectors.toList());
+				//增加正常异常数
+				calculateAbnormalCount(dtos);
+			}
+			EquipmentTaskLogs taskLogs = new EquipmentTaskLogs();
+			taskLogs.setExecuteEndTime(task.getExecutiveExpireTime());
+			taskLogs.setExecuteStartTime(task.getExecutiveStartTime());
+			taskLogs.setTaskNumber(task.getTaskNumber());
+			taskLogs.setTaskName(task.getTaskName());
+			taskLogs.setLogs(dtos);
+			logsList.add(taskLogs);
+		}));
+
+		response.setTaskLogs(logsList);
 		return response;
 	}
 
@@ -2870,26 +2880,27 @@ private void checkUserPrivilege(Long orgId, Long privilegeId, Long communityId) 
             }
             if (equipment != null){
                 dto.setEquipmentName(equipment.getName());
-                dto.setEquipmentLocation(equipment.getLocation());
+                dto.setLocation(equipment.getLocation());
+                dto.setEquipmentId(equipment.getId());
             }
         }
 		dto.setItemResults(results);
 	}
 
-	private void populateTaskType(EquipmentInspectionTasks task, ListLogsByTaskIdResponse response) {
-		//兼容之前的通过标准来拿任务类型
-		if (task.getPlanId() != null && task.getPlanId() != 0) {
-			EquipmentInspectionPlans plan = equipmentProvider.getEquipmmentInspectionPlanById(task.getPlanId());
-			if (plan != null) {
-				response.setTaskType(plan.getPlanType());
-			}
-		} else {
-			EquipmentInspectionStandards standard = equipmentProvider.findStandardById(task.getStandardId());
-			if (standard != null) {
-				response.setTaskType(standard.getStandardType());
-			}
-		}
-	}
+//	private void populateTaskType(EquipmentInspectionTasks task, ListLogsByTaskIdResponse response) {
+//		//兼容之前的通过标准来拿任务类型
+//		if (task.getPlanId() != null && task.getPlanId() != 0) {
+//			EquipmentInspectionPlans plan = equipmentProvider.getEquipmmentInspectionPlanById(task.getPlanId());
+//			if (plan != null) {
+//				response.setTaskType(plan.getPlanType());
+//			}
+//		} else {
+//			EquipmentInspectionStandards standard = equipmentProvider.findStandardById(task.getStandardId());
+//			if (standard != null) {
+//				response.setTaskType(standard.getStandardType());
+//			}
+//		}
+//	}
 
 	@Override
 	public ImportDataResponse importEquipmentStandards(ImportOwnerCommand cmd, MultipartFile mfile,
