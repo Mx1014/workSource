@@ -14276,14 +14276,17 @@ public class OrganizationServiceImpl implements OrganizationService {
     }
 
     @Override
-    public List<Long> listDetailIdWithEnterpriseExclude(String keywords, Integer namespaceId, Long enterpriseId, Timestamp checkinTimeStart, Timestamp checkinTimeEnd, Timestamp dissmissTimeStart, Timestamp dissmissTimeEnd, CrossShardListingLocator locator, Integer pageSize) {
+    public List<Long> listDetailIdWithEnterpriseExclude(String keywords, Integer namespaceId, Long enterpriseId, Timestamp checkinTimeStart,
+                                                        Timestamp checkinTimeEnd, Timestamp dissmissTimeStart, Timestamp dissmissTimeEnd,
+                                                        CrossShardListingLocator locator, Integer pageSize,List<Long> notinDetails,List<Long> inDetails) {
         List groupTypes = new ArrayList();
         groupTypes.add(OrganizationGroupType.ENTERPRISE.getCode());
         Organization org = checkOrganization(enterpriseId);
         List<Organization> underEnterprises = this.organizationProvider.listOrganizationByGroupTypesAndPath(org.getPath(), groupTypes, null, null, null);
         List<String> smallPath = new ArrayList();
         underEnterprises.forEach(r -> smallPath.add(r.getPath()));
-        return this.organizationProvider.listMemberDetailIdWithExclude(keywords, namespaceId, org.getPath(), smallPath, checkinTimeStart, checkinTimeEnd, dissmissTimeStart, dissmissTimeEnd, locator, pageSize);
+        return this.organizationProvider.listMemberDetailIdWithExclude(keywords, namespaceId, org.getPath(), smallPath, checkinTimeStart,
+                checkinTimeEnd, dissmissTimeStart, dissmissTimeEnd, locator, pageSize,notinDetails,inDetails);
     }
 
 

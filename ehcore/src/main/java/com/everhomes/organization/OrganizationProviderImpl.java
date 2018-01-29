@@ -5227,7 +5227,9 @@ public class OrganizationProviderImpl implements OrganizationProvider {
 	}
 
 	@Override
-	public List<Long> listMemberDetailIdWithExclude(String keywords, Integer namespaceId, String big_path, List<String> small_path, Timestamp checkinTimeStart, Timestamp checkinTimeEnd, Timestamp dissmissTimeStart, Timestamp dissmissTimeEnd,  CrossShardListingLocator locator, Integer pageSize) {
+	public List<Long> listMemberDetailIdWithExclude(String keywords, Integer namespaceId, String big_path, List<String> small_path,
+													Timestamp checkinTimeStart, Timestamp checkinTimeEnd, Timestamp dissmissTimeStart, Timestamp dissmissTimeEnd,
+													CrossShardListingLocator locator, Integer pageSize,List<Long> notinDetails,List<Long> inDetails) {
 		DSLContext context = dbProvider.getDslContext(AccessSpec.readOnly());
 		TableLike t1 = Tables.EH_ORGANIZATION_MEMBERS.as("t1");
 		TableLike t2 = Tables.EH_ORGANIZATION_MEMBER_DETAILS.as("t2");
@@ -5237,7 +5239,7 @@ public class OrganizationProviderImpl implements OrganizationProvider {
 
 		cond = cond.and(t1.field("namespace_id").eq(namespaceId));
 		cond = cond.and(t1.field("group_type").eq(OrganizationGroupType.DEPARTMENT.getCode()));
-		cond = cond.and(t1.field("status").eq(OrganizationMemberStatus.ACTIVE.getCode()));
+//		cond = cond.and(t1.field("status").eq(OrganizationMemberStatus.ACTIVE.getCode()));
 
 		if (small_path != null) {
 			for (String p : small_path) {
@@ -5247,26 +5249,34 @@ public class OrganizationProviderImpl implements OrganizationProvider {
 		if(!StringUtils.isEmpty(keywords)){
 			cond = cond.and(t2.field("contact_name").like("%" + keywords + "%"));
 		}
+		if (null != notinDetails) {
+			cond = cond.and(t2.field("id").notIn(notinDetails));
+		}
+		if (null != inDetails) {
+			cond = cond.and(t2.field("id").in(inDetails));
+		}
 		//入职日期
 		if(checkinTimeStart != null && checkinTimeEnd != null){
-			cond = cond.and(t2.field("check_in_time").between(checkinTimeStart, checkinTimeEnd));
+			cond = cond.and(t2.field("check_in_time").gt(checkinTimeStart));
+			cond = cond.and(t2.field("check_in_time").lt(checkinTimeEnd));
 		}
 		//离职日期
 		if(dissmissTimeStart != null && dissmissTimeEnd != null){
-			cond = cond.and(t2.field("dismiss_time").between(checkinTimeStart, checkinTimeEnd));
+			cond = cond.and(t2.field("dismiss_time").gt(checkinTimeStart));
+			cond = cond.and(t2.field("dismiss_time").lt(checkinTimeEnd));
 		}
 		if (null != locator && null != locator.getAnchor())
 			cond = cond.and(t1.field("detail_id").lt(locator.getAnchor()));
 
 		List<Long> result = step.where(cond).groupBy(t2.field("id")).orderBy(t2.field("id").desc()).limit(pageSize).fetch(t2.field("id"));
 
-		if (null != locator)
-			locator.setAnchor(null);
+//		if (null != locator)
+//			locator.setAnchor(null);
 
-		if (result != null & result.size() >= pageSize) {
-			result.remove(result.size() - 1);
-			locator.setAnchor(result.get(result.size() - 1));
-		}
+//		if (result != null & result.size() >= pageSize) {
+//			result.remove(result.size() - 1);
+//			locator.setAnchor(result.get(result.size() - 1));
+//		}
 
 		return result;
 
