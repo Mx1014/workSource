@@ -48,6 +48,7 @@ import com.everhomes.util.RuntimeErrorException;
 import org.jooq.*;
 import org.jooq.impl.DSL;
 import org.jooq.impl.DefaultRecordMapper;
+import org.mockito.internal.verification.Times;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -5223,6 +5224,52 @@ public class OrganizationProviderImpl implements OrganizationProvider {
 			return result;
 		}
 		return null;
+	}
+
+	@Override
+	public List<Long> listMemberDetailIdWithExclude(String keywords, Integer namespaceId, String big_path, List<String> small_path, Timestamp checkinTimeStart, Timestamp checkinTimeEnd, Timestamp dissmissTimeStart, Timestamp dissmissTimeEnd,  CrossShardListingLocator locator, Integer pageSize) {
+		DSLContext context = dbProvider.getDslContext(AccessSpec.readOnly());
+		TableLike t1 = Tables.EH_ORGANIZATION_MEMBERS.as("t1");
+		TableLike t2 = Tables.EH_ORGANIZATION_MEMBER_DETAILS.as("t2");
+		SelectJoinStep step = context.select().from(t1).leftOuterJoin(t2).on(t1.field("detail_id").eq(t2.field("id")));
+
+		Condition cond = t1.field("group_path").like(big_path+"%");
+
+		cond = cond.and(t1.field("namespace_id").eq(namespaceId));
+		cond = cond.and(t1.field("group_type").eq(OrganizationGroupType.DEPARTMENT.getCode()));
+		cond = cond.and(t1.field("status").eq(OrganizationMemberStatus.ACTIVE.getCode()));
+
+		if (small_path != null) {
+			for (String p : small_path) {
+				cond = cond.and(t1.field("group_path").notLike(p+"%"));
+			}
+		}
+		if(!StringUtils.isEmpty(keywords)){
+			cond = cond.and(t2.field("contact_name").like("%" + keywords + "%"));
+		}
+		//入职日期
+		if(checkinTimeStart != null && checkinTimeEnd != null){
+			cond = cond.and(t2.field("check_in_time").between(checkinTimeStart, checkinTimeEnd));
+		}
+		//离职日期
+		if(dissmissTimeStart != null && dissmissTimeEnd != null){
+			cond = cond.and(t2.field("dismiss_time").between(checkinTimeStart, checkinTimeEnd));
+		}
+		if (null != locator && null != locator.getAnchor())
+			cond = cond.and(t1.field("detail_id").lt(locator.getAnchor()));
+
+		List<Long> result = step.where(cond).groupBy(t2.field("id")).orderBy(t2.field("id").desc()).limit(pageSize).fetch(t2.field("id"));
+
+		if (null != locator)
+			locator.setAnchor(null);
+
+		if (result != null & result.size() >= pageSize) {
+			result.remove(result.size() - 1);
+			locator.setAnchor(result.get(result.size() - 1));
+		}
+
+		return result;
+
 	}
 
 	@Override
