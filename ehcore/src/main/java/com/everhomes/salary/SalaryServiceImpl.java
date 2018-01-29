@@ -2545,7 +2545,7 @@ public class SalaryServiceImpl implements SalaryService {
 
 
         }, task);
-        return null;
+        return ConvertHelper.convert(task,ImportFileTaskDTO.class);
     }
 
     private void saveImportEmployeeSalary(List resultList, Long organizationId, String fileLog, ImportFileResponse response, Long ownerId) {
