@@ -5820,8 +5820,8 @@ private void checkUserPrivilege(Long orgId, Long privilegeId, Long communityId) 
 		List<EquipmentStandardRelationDTO> equipments = new ArrayList<>();//设备标准关联表 设备id 标准id
 		List<InspectionItemDTO> items = new ArrayList<>();//巡检item表包含standardId
 
-		offlineResponse.setTodayCompleteCount(response.getTodayCompleteCount());
-		offlineResponse.setTotayTasksCount(response.getTotayTasksCount());
+		offlineResponse.setTodayCompleteCount(new ArrayList<>(Collections.singleton(response.getTodayCompleteCount())));
+		offlineResponse.setTotayTasksCount(new ArrayList<>(Collections.singleton(response.getTotayTasksCount())));
 		offlineResponse.setNextPageAnchor(response.getNextPageAnchor());
 
 		List<EquipmentTaskDTO> tasks = response.getTasks();

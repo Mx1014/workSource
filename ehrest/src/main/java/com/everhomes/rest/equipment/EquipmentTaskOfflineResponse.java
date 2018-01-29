@@ -35,9 +35,9 @@ public class EquipmentTaskOfflineResponse {
     @ItemType(CategoryDTO.class)
     private List<CategoryDTO> repiarCategories;
 
-    private Long totayTasksCount;
+    private List<Long> totayTasksCount;
 
-    private Long todayCompleteCount;
+    private List<Long> todayCompleteCount;
 
     private Long nextPageAnchor;
 
@@ -82,19 +82,19 @@ public class EquipmentTaskOfflineResponse {
         this.repiarCategories = repiarCategories;
     }
 
-    public Long getTotayTasksCount() {
+    public List<Long> getTotayTasksCount() {
         return totayTasksCount;
     }
 
-    public void setTotayTasksCount(Long totayTasksCount) {
+    public void setTotayTasksCount(List<Long> totayTasksCount) {
         this.totayTasksCount = totayTasksCount;
     }
 
-    public Long getTodayCompleteCount() {
+    public List<Long> getTodayCompleteCount() {
         return todayCompleteCount;
     }
 
-    public void setTodayCompleteCount(Long todayCompleteCount) {
+    public void setTodayCompleteCount(List<Long> todayCompleteCount) {
         this.todayCompleteCount = todayCompleteCount;
     }
 
