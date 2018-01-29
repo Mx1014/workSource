@@ -1,42 +1,98 @@
 package com.everhomes.rest.salary;
+
+import com.everhomes.util.StringHelper;
+
 /**
- * 工资条对应人员的字段项DTO
- * <ul>参数:
- * <li>salaryEmployeeId: salaryEmployeeId 确定是哪个员工哪一期的数据</li>
- * <li>groupEntityId: 字段id</li>
- * <li>originEntityId: 字段的origin id</li>
- * <li>groupEntityName: 字段项名称</li>
- * <li>salaryValue: 字段项值</li>
- * <li>isFormula: 是否为公式 0-否 1-是</li>
- * <li>entityType: entity类型 0-文本 1-数值</li>
+ * 工资条的字段项DTO
+ *
+ * <ul>
+ * <li>id: 个人设置的工资字段id</li>
+ * <li>defaultFlag: 是否为缺省参数:0-否 1-是</li>
  * <li>editableFlag: 是否可编辑(对文本类):0-否   1-是</li>
- * <li>numberType: 数值类型:0-普通数值 1-计算公式</li>
- * <li>needCheck: 是否需要核算:0-否 1-是</li>
- * <li>defaultOrder: 排序</li>
- * <li>visibleFlag: 是否展示到工资条:0-否 1-是</li>
+ * <li>deleteFlag: 是否可删除:0-否 1-是</li>
+ * <li>dataPolicy: 数据策略:0-次月沿用 1-次月清空</li>
+ * <li>grantPolicy: 发放策略 0-税前 1-税后</li>
+ * <li>taxPolicy: 纳税策略 0-工资 1-年终</li>
+ * <li>status: 状态:0-不开启 2-开启</li>
+ * <li>type: 字段的类型 0-发放项 1-扣款项 2-成本项 3-冗余项</li>
+ * <li>groupEntityId: 项目字段id(总公司字段id)</li>
+ * <li>groupEntityName: 项目字段名称</li>
+ * <li>salaryValue: 工资值</li>
+ * <li>description: 批注描述</li>
+ * <li>categoryId: 薪酬结构类型 id</li>
+ * <li>categoryName: 薪酬结构类型名</li>
  * </ul>
  * */
 public class SalaryPeriodEmployeeEntityDTO {
 
-    private Long salaryEmployeeId;
-	private Long groupEntityId;
+	private Long id;
 	private Long originEntityId;
-    private String groupEntityName;
-    private String salaryValue;
-	private Byte isFormula;
-	private Byte entityType;
+	private Byte defaultFlag;
 	private Byte editableFlag;
-	private Byte numberType;
-	private Byte needCheck;
-	private Integer defaultOrder;
-	private Byte visibleFlag;
+	private Byte deleteFlag;
+	private Byte type;
+	private Byte dataPolicy;
+	private Byte grantPolicy;
+	private Byte taxPolicy;
+	private Long categoryId;
+	private String categoryName;
+	private Long groupEntityId;
+	private String groupEntityName;
+	private String salaryValue;
+	private String description;
+	private Byte status;
 
-	public Integer getDefaultOrder() {
-		return defaultOrder;
+	@Override
+	public String toString() {
+		return StringHelper.toJsonString(this);
 	}
 
-	public void setDefaultOrder(Integer defaultOrder) {
-		this.defaultOrder = defaultOrder;
+	public Long getCategoryId() {
+		return categoryId;
+	}
+
+	public void setCategoryId(Long categoryId) {
+		this.categoryId = categoryId;
+	}
+
+	public String getCategoryName() {
+		return categoryName;
+	}
+
+	public void setCategoryName(String categoryName) {
+		this.categoryName = categoryName;
+	}
+
+	public Byte getDataPolicy() {
+		return dataPolicy;
+	}
+
+	public void setDataPolicy(Byte dataPolicy) {
+		this.dataPolicy = dataPolicy;
+	}
+
+	public Byte getDefaultFlag() {
+		return defaultFlag;
+	}
+
+	public void setDefaultFlag(Byte defaultFlag) {
+		this.defaultFlag = defaultFlag;
+	}
+
+	public Byte getDeleteFlag() {
+		return deleteFlag;
+	}
+
+	public void setDeleteFlag(Byte deleteFlag) {
+		this.deleteFlag = deleteFlag;
+	}
+
+	public String getDescription() {
+		return description;
+	}
+
+	public void setDescription(String description) {
+		this.description = description;
 	}
 
 	public Byte getEditableFlag() {
@@ -47,63 +103,12 @@ public class SalaryPeriodEmployeeEntityDTO {
 		this.editableFlag = editableFlag;
 	}
 
-	public String getGroupEntityName() {
-		return groupEntityName;
+	public Byte getGrantPolicy() {
+		return grantPolicy;
 	}
 
-	public void setGroupEntityName(String groupEntityName) {
-		this.groupEntityName = groupEntityName;
-	}
-
-	public Byte getNeedCheck() {
-		return needCheck;
-	}
-
-	public void setNeedCheck(Byte needCheck) {
-		this.needCheck = needCheck;
-	}
-
-	public Byte getNumberType() {
-		return numberType;
-	}
-
-	public void setNumberType(Byte numberType) {
-		this.numberType = numberType;
-	}
-
-	public Byte getVisibleFlag() {
-		return visibleFlag;
-	}
-
-	public void setVisibleFlag(Byte visibleFlag) {
-		this.visibleFlag = visibleFlag;
-	}
-
-	public Long getSalaryEmployeeId() {
-		return salaryEmployeeId;
-	}
-	public void setSalaryEmployeeId(Long salaryEmployeeId) {
-		this.salaryEmployeeId = salaryEmployeeId;
-	}
-	public String getGroupEntryName() {
-		return groupEntityName;
-	}
-	public void setGroupEntryName(String groupEntryName) {
-		this.groupEntityName = groupEntryName;
-	}
-	public String getSalaryValue() {
-		return salaryValue;
-	}
-	public void setSalaryValue(String salaryValue) {
-		this.salaryValue = salaryValue;
-	}
-
-	public Byte getIsFormula() {
-		return isFormula;
-	}
-
-	public void setIsFormula(Byte isFormula) {
-		this.isFormula = isFormula;
+	public void setGrantPolicy(Byte grantPolicy) {
+		this.grantPolicy = grantPolicy;
 	}
 
 	public Long getGroupEntityId() {
@@ -114,12 +119,20 @@ public class SalaryPeriodEmployeeEntityDTO {
 		this.groupEntityId = groupEntityId;
 	}
 
-	public Byte getEntityType() {
-		return entityType;
+	public String getGroupEntityName() {
+		return groupEntityName;
 	}
 
-	public void setEntityType(Byte entityType) {
-		this.entityType = entityType;
+	public void setGroupEntityName(String groupEntityName) {
+		this.groupEntityName = groupEntityName;
+	}
+
+	public Long getId() {
+		return id;
+	}
+
+	public void setId(Long id) {
+		this.id = id;
 	}
 
 	public Long getOriginEntityId() {
@@ -128,5 +141,37 @@ public class SalaryPeriodEmployeeEntityDTO {
 
 	public void setOriginEntityId(Long originEntityId) {
 		this.originEntityId = originEntityId;
+	}
+
+	public String getSalaryValue() {
+		return salaryValue;
+	}
+
+	public void setSalaryValue(String salaryValue) {
+		this.salaryValue = salaryValue;
+	}
+
+	public Byte getStatus() {
+		return status;
+	}
+
+	public void setStatus(Byte status) {
+		this.status = status;
+	}
+
+	public Byte getTaxPolicy() {
+		return taxPolicy;
+	}
+
+	public void setTaxPolicy(Byte taxPolicy) {
+		this.taxPolicy = taxPolicy;
+	}
+
+	public Byte getType() {
+		return type;
+	}
+
+	public void setType(Byte type) {
+		this.type = type;
 	}
 }
