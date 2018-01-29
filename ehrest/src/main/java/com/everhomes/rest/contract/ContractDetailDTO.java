@@ -124,7 +124,9 @@ public class ContractDetailDTO {
     private BigDecimal remainingAmount;
     private Long bidItemId;
     private Long createOrgId;
+    private String createOrgName;
     private Long createPositionId;
+    private String createPositionName;
     private String ourLegalRepresentative;
     private String taxpayerIdentificationCode;
     private String registeredAddress;
@@ -797,5 +799,21 @@ public class ContractDetailDTO {
 
     public void setTreatyParticulars(String treatyParticulars) {
         this.treatyParticulars = treatyParticulars;
+    }
+
+    public String getCreateOrgName() {
+        return createOrgName;
+    }
+
+    public void setCreateOrgName(String createOrgName) {
+        this.createOrgName = createOrgName;
+    }
+
+    public String getCreatePositionName() {
+        return createPositionName;
+    }
+
+    public void setCreatePositionName(String createPositionName) {
+        this.createPositionName = createPositionName;
     }
 }

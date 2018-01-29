@@ -644,6 +644,9 @@ public class ContractServiceImpl implements ContractService {
 		if(cmd.getSignedTime() != null) {
 			contract.setSignedTime(new Timestamp(cmd.getSignedTime()));
 		}
+		if(cmd.getPaidTime() != null) {
+			contract.setPaidTime(new Timestamp(cmd.getPaidTime()));
+		}
 		contract.setCreateUid(UserContext.currentUserId());
 		contract.setCreateTime(new Timestamp(DateHelper.currentGMTTime().getTime()));
 		contract.setPaymentFlag((byte)1);
@@ -1487,7 +1490,9 @@ public class ContractServiceImpl implements ContractService {
 		List<OrganizationMember> results = organizationProvider.listOrganizationMembersByUId(cmd.getUserId());
 
 		List<OrganizationMember> members = results.stream().filter(r ->
-				r.getGroupType().equals(OrganizationGroupType.DEPARTMENT.getCode()) || r.getGroupType().equals(OrganizationGroupType.DIRECT_UNDER_ENTERPRISE.getCode())
+				r.getGroupType().equals(OrganizationGroupType.DEPARTMENT.getCode())
+						|| r.getGroupType().equals(OrganizationGroupType.DIRECT_UNDER_ENTERPRISE.getCode())
+						|| r.getGroupType().equals(OrganizationGroupType.JOB_POSITION.getCode())
 		).collect(Collectors.toList());
 
 		if(members != null && members.size() > 0) {
@@ -1590,6 +1595,20 @@ public class ContractServiceImpl implements ContractService {
 				}
 			}
 
+		}
+
+		if(contract.getCreateOrgId() != null) {
+			Organization organization = organizationProvider.findOrganizationById(contract.getCreateOrgId());
+			if(organization != null) {
+				dto.setCreateOrgName(organization.getName());
+			}
+		}
+
+		if(contract.getCreatePositionId() != null) {
+			Organization organization = organizationProvider.findOrganizationById(contract.getCreatePositionId());
+			if(organization != null) {
+				dto.setCreatePositionName(organization.getName());
+			}
 		}
 
 		if(CustomerType.ENTERPRISE.equals(CustomerType.fromStatus(dto.getCustomerType()))) {
