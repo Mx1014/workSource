@@ -2491,6 +2491,8 @@ public class SalaryServiceImpl implements SalaryService {
 
     private SalaryPeriodEmployeeEntityDTO processSalaryPeriodEmployeeEntityDTO(SalaryGroupEntity entity, OrganizationMemberDetails detail) {
         SalaryPeriodEmployeeEntityDTO dto = ConvertHelper.convert(entity, SalaryPeriodEmployeeEntityDTO.class);
+        dto.setGroupEntityId(entity.getId());
+        dto.setGroupEntityName(entity.getName());
         SalaryEmployeeOriginVal val = salaryEmployeeOriginValProvider.findSalaryEmployeeOriginValByDetailId(entity.getId(), detail.getId());
         if (null != val) {
             dto.setSalaryValue(val.getSalaryValue());
