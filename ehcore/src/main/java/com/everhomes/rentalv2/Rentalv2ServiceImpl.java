@@ -11,8 +11,7 @@ import com.everhomes.bus.LocalEventBus;
 import com.everhomes.bus.LocalEventContext;
 import com.everhomes.bus.SystemEvent;
 import com.everhomes.configuration.ConfigConstants;
-import com.everhomes.order.OrderUtil;
-import com.everhomes.order.PayService;
+import com.everhomes.order.*;
 import com.everhomes.pay.order.PaymentType;
 import com.everhomes.rest.aclink.CreateDoorAuthCommand;
 import com.everhomes.rest.aclink.DoorAuthDTO;
@@ -218,6 +217,8 @@ public class Rentalv2ServiceImpl implements Rentalv2Service {
 	private  Rentalv2PricePackageProvider rentalv2PricePackageProvider;
 	@Autowired
 	private PayService payService;
+	@Autowired
+	private PayProvider payProvider;
 	@Autowired
 	private DoorAccessService doorAccessService;
 	@Autowired
@@ -3127,6 +3128,8 @@ public class Rentalv2ServiceImpl implements Rentalv2Service {
 		RentalOrder order = rentalv2Provider.findRentalBillById(cmd.getId());
 		order.setPayTotalMoney(payService.changePayAmount(cmd.getAmount()));
 		rentalv2Provider.updateRentalBill(order);
+		//删除记录方便重新下单
+		payProvider.deleteOrderRecordByOrder(OrderType.OrderTypeEnum.RENTALORDER.getPycode(),Long.valueOf(order.getOrderNo()));
 		Map<String, String> map = new HashMap<String, String>();
 		map.put("resourceName", order.getResourceName());
 		map.put("startTime", order.getUseDetail());

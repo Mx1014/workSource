@@ -26,7 +26,7 @@ public class ForumPostReportPointEventProcessor extends GeneralPointEventProcess
     }
 
     @Override
-    protected String getEventName(LocalEvent localEvent, String subscriptionPath) {
+    protected String getEventName(LocalEvent localEvent) {
         Long appId = null;
 
         String postJson = localEvent.getStringParam("post");

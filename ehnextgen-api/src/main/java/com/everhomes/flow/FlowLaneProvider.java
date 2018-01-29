@@ -13,7 +13,5 @@ public interface FlowLaneProvider {
 
     List<FlowLane> listFlowLane(Long flowMainId, Integer flowVersion);
 
-    void deleteFlowLane(List<Long> deleteIdList);
-
     void deleteFlowLane(Long flowMainId, Integer flowVersion, List<Long> retainIdList);
 }

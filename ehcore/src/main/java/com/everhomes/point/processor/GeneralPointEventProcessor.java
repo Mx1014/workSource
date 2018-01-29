@@ -38,10 +38,10 @@ public class GeneralPointEventProcessor implements IGeneralPointEventProcessor {
     protected PointLogProvider pointLogProvider;
 
     @Autowired
-    private PointRuleProvider pointRuleProvider;
+    protected PointRuleProvider pointRuleProvider;
 
     @Autowired
-    private PointRuleToEventMappingProvider pointRuleToEventMappingProvider;
+    protected PointRuleToEventMappingProvider pointRuleToEventMappingProvider;
 
     @Override
     public String[] init() {
@@ -93,15 +93,21 @@ public class GeneralPointEventProcessor implements IGeneralPointEventProcessor {
         pointLog.setEventHappenTime(localEvent.getCreateTime());
 
         if (rule.getBindingRuleId() != null && rule.getBindingRuleId() != 0) {
-            PointLog bindingPointLog = pointLogProvider.findByRuleIdAndEntity(namespaceId, pointSystem.getId(), targetUid, rule.getBindingRuleId(),
-                    localEvent.getEntityType(), localEvent.getEntityId());
+            PointLog bindingPointLog = findEventBindingLog(localEvent, rule, pointSystem, targetUid, namespaceId);
             if (bindingPointLog == null) {
                 return null;
             }
+            // 设置binding log id, 防止重复记录
+            pointLog.setBindingLogId(bindingPointLog.getId());
         }
         processPointLog(pointLog, localEvent, rule, pointSystem, pointRuleCategory);
 
         return new PointEventProcessResult(points, pointLog);
+    }
+
+    protected PointLog findEventBindingLog(LocalEvent localEvent, PointRule rule, PointSystem pointSystem, Long targetUid, Integer namespaceId) {
+        return pointLogProvider.findByRuleIdAndEntity(namespaceId, pointSystem.getId(), targetUid, rule.getBindingRuleId(),
+                        localEvent.getEntityType(), localEvent.getEntityId());
     }
 
     protected void processPointLog(PointLog pointLog, LocalEvent localEvent, PointRule rule, PointSystem pointSystem, PointRuleCategory pointRuleCategory) {
@@ -137,7 +143,7 @@ public class GeneralPointEventProcessor implements IGeneralPointEventProcessor {
 
     @Override
     public PointEventGroup getEventGroup(Map<String, PointEventGroup> eventNameToPointEventGroupMap, LocalEvent localEvent, String subscriptionPath) {
-        String[] split = getEventName(localEvent, subscriptionPath).split("\\.");
+        String[] split = getEventName(localEvent).split("\\.");
         for (int i = split.length; i >= 0; i--) {
             String[] tokens = new String[i];
             System.arraycopy(split, 0, tokens, 0, i);
@@ -151,13 +157,13 @@ public class GeneralPointEventProcessor implements IGeneralPointEventProcessor {
         return eventNameToPointEventGroupMap.get(subscriptionPath);
     }
 
-    protected String getEventName(LocalEvent localEvent, String subscriptionPath) {
-        return subscriptionPath;
+    protected String getEventName(LocalEvent localEvent) {
+        return localEvent.getEventName();
     }
 
     @Override
     public List<PointRule> getPointRules(LocalEvent localEvent) {
-        String[] split = getEventName(localEvent, localEvent.getEventName()).split("\\.");
+        String[] split = getEventName(localEvent).split("\\.");
         for (int i = split.length; i >= 0; i--) {
             String[] tokens = new String[i];
             System.arraycopy(split, 0, tokens, 0, i);

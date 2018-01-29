@@ -99,8 +99,6 @@ import com.everhomes.rest.organization.*;
 import com.everhomes.rest.organization.CreateOrganizationOwnerCommand;
 import com.everhomes.rest.organization.DeleteOrganizationOwnerCommand;
 import com.everhomes.rest.organization.pm.*;
-import com.everhomes.rest.portal.ListServiceModuleAppsCommand;
-import com.everhomes.rest.portal.ListServiceModuleAppsResponse;
 import com.everhomes.rest.region.RegionScope;
 import com.everhomes.rest.search.GroupQueryResult;
 import com.everhomes.rest.search.OrganizationQueryResult;
@@ -1588,7 +1586,7 @@ public class OrganizationServiceImpl implements OrganizationService {
                 DeleteEnterpriseCustomerCommand command = new DeleteEnterpriseCustomerCommand();
                 command.setId(customer.getId());
                 command.setCommunityId(customer.getCommunityId());
-                customerService.deleteEnterpriseCustomer(command);
+                customerService.deleteEnterpriseCustomer(command, false);
             }
 
             organization.setStatus(OrganizationStatus.DELETED.getCode());
@@ -7576,7 +7574,7 @@ public class OrganizationServiceImpl implements OrganizationService {
                     org.apache.commons.lang.StringUtils.isNotBlank(r.getE()) || org.apache.commons.lang.StringUtils.isNotBlank(r.getF()) ||
                     org.apache.commons.lang.StringUtils.isNotBlank(r.getG()) || org.apache.commons.lang.StringUtils.isNotBlank(r.getH()) ||
                     org.apache.commons.lang.StringUtils.isNotBlank(r.getI()) || org.apache.commons.lang.StringUtils.isNotBlank(r.getJ()) ||
-                    org.apache.commons.lang.StringUtils.isNotBlank(r.getK())) {
+                    org.apache.commons.lang.StringUtils.isNotBlank(r.getK()) || org.apache.commons.lang.StringUtils.isNotBlank(r.getL())) {
                 ImportEnterpriseDataDTO data = new ImportEnterpriseDataDTO();
                 if (null != r.getA())
                     data.setName(r.getA().trim());
@@ -7600,6 +7598,8 @@ public class OrganizationServiceImpl implements OrganizationService {
                     data.setCheckinDate(r.getJ().trim());
                 if (null != r.getK())
                     data.setDescription(r.getK().trim());
+                if (null != r.getL())
+                    data.setUnifiedSocialCreditCode(r.getL().trim());
                 datas.add(data);
             }
         }
@@ -7673,6 +7673,7 @@ public class OrganizationServiceImpl implements OrganizationService {
         Map<Long, List<String>> orgAdminAccounts = new HashMap<>();
 
         for (ImportEnterpriseDataDTO data : list) {
+
             CreateEnterpriseCommand enterpriseCommand = new CreateEnterpriseCommand();
             ImportFileResultLog<ImportEnterpriseDataDTO> log = new ImportFileResultLog<>(OrganizationServiceErrorCode.SCOPE);
             if (StringUtils.isEmpty(data.getName())) {
@@ -7710,6 +7711,7 @@ public class OrganizationServiceImpl implements OrganizationService {
             enterpriseCommand.setCommunityId(cmd.getCommunityId());
             enterpriseCommand.setEmailDomain(data.getEmail());
             enterpriseCommand.setCheckinDate(data.getCheckinDate());
+            enterpriseCommand.setUnifiedSocialCreditCode(data.getUnifiedSocialCreditCode());
             if (!StringUtils.isEmpty(data.getNumber())) {
                 enterpriseCommand.setMemberCount(Long.parseLong(data.getNumber().toString()));
             }
@@ -7782,6 +7784,11 @@ public class OrganizationServiceImpl implements OrganizationService {
                 deleteOrganizationAllAdmins(org.getId());
                 orgAdminAccounts.put(org.getId(), new ArrayList<>());
             }
+            OrganizationMember member = organizationProvider.findOrganizationPersonnelByPhone(org.getId(), data.getAdminToken());
+            if(member != null && OrganizationMemberGroupType.fromCode(member.getMemberGroup()) == OrganizationMemberGroupType.MANAGER){
+                orgAdminAccounts.get(org.getId()).add(member.getContactToken());
+            }
+
             if (!orgAdminAccounts.get(org.getId()).contains(data.getAdminToken())) {
                 if (!StringUtils.isEmpty(data.getAdminToken())) {
                     CreateOrganizationAdminCommand createOrganizationAdminCommand = new CreateOrganizationAdminCommand();
@@ -10885,6 +10892,14 @@ public class OrganizationServiceImpl implements OrganizationService {
         return organizations.stream().map(r -> ConvertHelper.convert(r, OrganizationDTO.class)).collect(Collectors.toList());
     }
 
+
+    @Override
+    public OrganizationDTO listPmOrganizationsByNamespaceId(Integer namespaceId) {
+        List<Organization> organizations = organizationProvider.listOrganizations(OrganizationType.PM.getCode(), namespaceId,
+                0L, null, null);
+        return ConvertHelper.convert(organizations.get(0), OrganizationDTO.class);
+    }
+
     /**
      * 机构树状处理
      *
@@ -11690,23 +11705,8 @@ public class OrganizationServiceImpl implements OrganizationService {
                     return query;
                 }
             });
-            List<OrganizationMember> depart_members = new ArrayList<>();
-            if (organizationIds != null) {
-                for (Long orgId : organizationIds) {
-                    members.stream().map(r -> {
-                        Organization org = this.checkOrganization(orgId);
-                        if (org != null) {
-                            if (this.organizationProvider.checkOneOfOrganizationWithContextToken(org.getPath(), r.getContactToken())) {
-                                depart_members.add(r);
-                            }
-                        }
-                        return null;
-                    }).collect(Collectors.toList());
-                }
-            } else {
-                return members;
-            }
-            return depart_members;
+
+            return members;
         }
 
         return new ArrayList<>();

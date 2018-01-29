@@ -397,20 +397,20 @@ public class AssetServiceImpl implements AssetService {
     }
 
     private void injectSmsVars(NoticeInfo noticeInfo, List<Tuple<String, Object>> variables,Integer namespaceId) {
-        if(namespaceId == 999971){
+//        if(namespaceId == 999971){
             smsProvider.addToTupleList(variables, "targetName", noticeInfo.getTargetName());
             smsProvider.addToTupleList(variables, "dateStr", StringUtils.isBlank(noticeInfo.getDateStr())?"等信息请于应用内查看":noticeInfo.getDateStr());
             smsProvider.addToTupleList(variables, "amount", noticeInfo.getAmountOwed().toString());
             smsProvider.addToTupleList(variables, "appName", noticeInfo.getAppName());
-        }else{
-            smsProvider.addToTupleList(variables, "targetName", noticeInfo.getTargetName());
-            //模板改了，所以这个也要改
-//                smsProvider.addToTupleList(variables, "dateStr", noticeInfo.getDateStr());
-            smsProvider.addToTupleList(variables, "dateStr", StringUtils.isBlank(noticeInfo.getDateStr())?"等信息请于应用内查看":noticeInfo.getDateStr());
-//            smsProvider.addToTupleList(variables,"amount2",noticeInfo.getAmountOwed());
-            smsProvider.addToTupleList(variables, "appName", noticeInfo.getAppName());
-
-        }
+//        }else{
+//            smsProvider.addToTupleList(variables, "targetName", noticeInfo.getTargetName());
+//            //模板改了，所以这个也要改
+////                smsProvider.addToTupleList(variables, "dateStr", noticeInfo.getDateStr());
+//            smsProvider.addToTupleList(variables, "dateStr", StringUtils.isBlank(noticeInfo.getDateStr())?"等信息请于应用内查看":noticeInfo.getDateStr());
+////            smsProvider.addToTupleList(variables,"amount2",noticeInfo.getAmountOwed());
+//            smsProvider.addToTupleList(variables, "appName", noticeInfo.getAppName());
+//
+//        }
     }
 
     private void NoticeWithTextAndMessage(List<Long> billIds, List<NoticeInfo> noticeInfos) {
@@ -618,9 +618,9 @@ public class AssetServiceImpl implements AssetService {
             }
             requestCmd.setBillIdAndTypes(billIdAndTypes);
             String appName = assetProvider.findAppName(UserContext.getCurrentNamespaceId());
-            if(appName==null || appName.trim().length()<1){
-                appName="张江高科推荐";
-            }
+//            if(appName==null || appName.trim().length()<1){
+//                appName="张江高科推荐";
+//            }
             if(UserContext.getCurrentNamespaceId()==999971){
                 List<NoticeInfo> list = new ArrayList<>();
                 List<ListBillsDTO> listBillsDTOS1 = convertedResponse.getListBillsDTOS();
@@ -639,6 +639,7 @@ public class AssetServiceImpl implements AssetService {
                     info.setPhoneNums(dto.getNoticeTel());
                     info.setAmountRecevable(dto.getAmountReceivable());
                     info.setAmountOwed(dto.getAmountOwed());
+                    info.setDateStr(dto.getDateStr());
                     Long tid = 0l;
                     String targeType=null;
                     Long uid  = assetProvider.findTargetIdByIdentifier(dto.getTargetId());
@@ -2704,6 +2705,11 @@ public class AssetServiceImpl implements AssetService {
         return handler.showBillForClientV2(cmd);
     }
 
+    /**
+     *
+     * @modify 2018/1/16
+     *  @modifyPoint 1 make bill ordered by date desc
+     */
     @Override
     public List<ListAllBillsForClientDTO> listAllBillsForClient(ListAllBillsForClientCommand cmd) {
         //企业用户的话判断是否为企业管理员
@@ -2748,7 +2754,7 @@ public class AssetServiceImpl implements AssetService {
         }
         switch (namespaceId){
             case 999971:
-                if(cmd.getOwnerType()!=null && cmd.getOwnerType().equals(AssetPaymentStrings.EH_USER)) hasPay = 1;
+                if(cmd.getOwnerType()!=null && cmd.getOwnerType().equals(AssetPaymentStrings.EH_ORGANIZATION)) hasPay = 0;
                 break;
             case 999983:
                 hasContractView = 0;

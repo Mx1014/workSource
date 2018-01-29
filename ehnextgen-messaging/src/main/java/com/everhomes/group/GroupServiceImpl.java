@@ -4791,7 +4791,7 @@ public class GroupServiceImpl implements GroupService {
         
         sendNotifactionToMembers(members, alias, group, locale);
 
-        // 删除group
+        // 删除group事件
         LocalEventBus.publish(event -> {
             LocalEventContext context = new LocalEventContext();
             context.setNamespaceId(group.getNamespaceId());
@@ -4803,6 +4803,28 @@ public class GroupServiceImpl implements GroupService {
             event.setEventName(SystemEvent.GROUP_GROUP_DELETE.dft());
 
             event.addParam("group", StringHelper.toJsonString(group));
+            GroupMember member = groupProvider.findGroupMemberByMemberInfo(groupId, EhUsers.class.getSimpleName(), user.getId());
+            if (member != null) {
+                event.addParam("member", StringHelper.toJsonString(member));
+            }
+        });
+
+        // 退出group事件
+        LocalEventBus.publish(event -> {
+            LocalEventContext context = new LocalEventContext();
+            context.setNamespaceId(group.getNamespaceId());
+            context.setUid(user.getId());
+            event.setContext(context);
+
+            GroupMember member = groupProvider.findGroupMemberByMemberInfo(groupId, EhUsers.class.getSimpleName(), user.getId());
+            if (member != null) {
+                event.setEntityType(EhGroupMembers.class.getSimpleName());
+                event.setEntityId(member.getId());
+                event.setEventName(SystemEvent.GROUP_GROUP_LEAVE.dft());
+
+                event.addParam("group", StringHelper.toJsonString(group));
+                event.addParam("member", StringHelper.toJsonString(member));
+            }
         });
     }
 
@@ -5150,6 +5172,21 @@ public class GroupServiceImpl implements GroupService {
 				return null;
 			});
 		}
+
+        // 退出group事件
+        LocalEventBus.publish(event -> {
+            LocalEventContext context = new LocalEventContext();
+            context.setNamespaceId(group.getNamespaceId());
+            context.setUid(gm.getMemberId());
+            event.setContext(context);
+
+            event.setEntityType(EhGroupMembers.class.getSimpleName());
+            event.setEntityId(gm.getId());
+            event.setEventName(SystemEvent.GROUP_GROUP_LEAVE.dft());
+
+            event.addParam("group", StringHelper.toJsonString(group));
+            event.addParam("member", StringHelper.toJsonString(gm));
+        });
 	}
 
 	private void sendNotificationToOldCreator(GroupMember gm, User user) {
@@ -5578,7 +5615,7 @@ public class GroupServiceImpl implements GroupService {
         if(ClubType.fromCode(cmd.getClubType()) == ClubType.GUILD){
             forumModuleType = ForumModuleType.GUILD.getCode();
         }
-        forumService.saveInteractSetting(cmd.getNamespaceId(), forumModuleType, null, cmd.getMemberCommentFlag());
+        forumService.saveInteractSetting(cmd.getNamespaceId(), forumModuleType, 0L, cmd.getMemberCommentFlag());
 		
 		return ConvertHelper.convert(groupSetting, GroupParametersResponse.class);
 	}

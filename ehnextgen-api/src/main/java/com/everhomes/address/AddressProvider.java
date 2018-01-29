@@ -75,4 +75,6 @@ public interface AddressProvider {
     void deleteApartmentAttachment(Long id);
     AddressAttachment findByAddressAttachmentId(Long id);
     List<AddressAttachment> listAddressAttachments(Long addressId);
+
+    String findLastVersionByNamespace(Integer namespaceId, Long communityId);
 }

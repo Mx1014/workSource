@@ -31,7 +31,7 @@ public class ForumPostLikePointEventProcessor extends GeneralPointEventProcessor
     }
 
     @Override
-    protected String getEventName(LocalEvent localEvent, String subscriptionPath) {
+    protected String getEventName(LocalEvent localEvent) {
         Long appId = null;
 
         String embeddedAppId = localEvent.getStringParam("embeddedAppId");

@@ -9,7 +9,6 @@ import com.everhomes.discover.ItemType;
 import com.everhomes.util.StringHelper;
 
 /**
- * <p>
  * <ul>
  * <li>ids: 小区Id列表</li>
  * </ul>

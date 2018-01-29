@@ -1,8 +1,6 @@
 // @formatter:off
 package com.everhomes.sms;
 
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
 import org.springframework.context.ApplicationListener;
 import org.springframework.scheduling.annotation.Async;
 import org.springframework.stereotype.Component;
@@ -13,7 +11,7 @@ import org.springframework.stereotype.Component;
 @Component
 public class SendSmsListener implements ApplicationListener<SendSmsEvent> {
 
-    private static final Logger LOGGER = LoggerFactory.getLogger(SendSmsListener.class);
+    // private static final Logger LOGGER = LoggerFactory.getLogger(SendSmsListener.class);
 
     @Async
     @Override

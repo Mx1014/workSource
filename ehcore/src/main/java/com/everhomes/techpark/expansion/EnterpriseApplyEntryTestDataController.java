@@ -221,7 +221,7 @@ public class EnterpriseApplyEntryTestDataController extends ControllerBase {
     }
 
     private FlowButton createButton(FlowNodeDTO node1, String buttonName, FlowStepType stepType, FlowUserType userType, FlowActionInfo actionInfo, int needSubject) {
-        FlowButton button = flowButtonProvider.findFlowButtonByStepType(node1.getId(), FlowConstants.FLOW_CONFIG_VER,
+        FlowButton button = flowButtonProvider.findFlowButtonByStepType(node1.getFlowMainId(), node1.getId(), FlowConstants.FLOW_CONFIG_VER,
                 stepType.getCode(), userType.getCode());
         UpdateFlowButtonCommand buttonCmd = new UpdateFlowButtonCommand();
         buttonCmd.setButtonName(buttonName);

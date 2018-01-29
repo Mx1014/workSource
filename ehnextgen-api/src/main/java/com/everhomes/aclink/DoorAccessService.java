@@ -134,8 +134,6 @@ public interface DoorAccessService {
 
     DoorAuthLevelDTO createDoorAuthLevel(CreateDoorAuthLevelCommand cmd);
 
-    void aliTest(HttpServletRequest request);
-
     String aliTest2(HttpServletRequest request);
 
     ListDoorAuthLevelResponse listDoorAuthLevel(ListDoorAuthLevelCommand cmd);
@@ -147,4 +145,9 @@ public interface DoorAccessService {
     //要不要生成门禁二维码信息，如果是 web 端，则需要直接生成给 web
     ListDoorAccessQRKeyResponse listDoorAccessQRKeyAndGenerateQR(
             boolean generate);
+
+    void doAlipayRedirect(HttpServletRequest request,
+            HttpServletResponse response);
+
+    GetVisitorResponse getAlipayQR(HttpServletRequest r);
 }
