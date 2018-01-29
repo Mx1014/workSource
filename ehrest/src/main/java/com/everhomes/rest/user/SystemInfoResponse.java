@@ -18,6 +18,7 @@ public class SystemInfoResponse {
     private String contentServer;
     private String uploadUrlInBrowser;
     private Long paymentPlatform;
+    private String 
 
     @ItemType(String.class)
     private List<String> accessPoints;

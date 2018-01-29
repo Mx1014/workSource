@@ -26,6 +26,7 @@ import com.everhomes.rest.address.CommunityDTO;
 import com.everhomes.rest.app.AppConstants;
 import com.everhomes.rest.asset.TargetDTO;
 import com.everhomes.rest.messaging.BlockingEventCommand;
+import com.everhomes.rest.messaging.GetSercetKeyForScanCommand;
 import com.everhomes.rest.messaging.MessageChannel;
 import com.everhomes.rest.messaging.MessageDTO;
 import com.everhomes.rest.oauth2.AuthorizationCommand;
@@ -1458,8 +1459,8 @@ public class UserController extends ControllerBase {
 	 */
 	@RequestMapping("getSercetKeyForScan")
 	@RestReturn(String.class)
-	public RestResponse getSercetKeyForScan(HttpServletRequest request, HttpServletResponse response) {
-		RestResponse resp = new RestResponse(userService.getSercetKeyForScan(request, response));
+	public RestResponse getSercetKeyForScan(GetSercetKeyForScanCommand cmd) {
+		RestResponse resp = new RestResponse(userService.getSercetKeyForScan(cmd.getArgs()));
 		resp.setErrorCode(ErrorCodes.SUCCESS);
 		resp.setErrorDescription("OK");
 		return resp;

@@ -5461,11 +5461,12 @@ public class UserServiceImpl implements UserService {
 	// 登录等待
 	@Override
 	public DeferredResult<Object> waitScanForLogon(String subjectId){
-		DeferredResult<Object> result =  this.messagingService.blockingEvent(subjectId, "ORORDINARY", 30 * 1000, null);
-		result.onCompletion(new Runnable(){
+
+		DeferredResult<Object> result =  this.messagingService.blockingEvent(subjectId, "ORORDINARY", 30 * 1000, new DeferredResult.DeferredResultHandler(){
+
 			@Override
-			public void run() {
-				BlockingEventResponse response = (BlockingEventResponse)result.getResult();
+			public void handleResult(Object result) {
+				BlockingEventResponse response = (BlockingEventResponse)result;
 				if(response.getStatus() != BlockingEventStatus.CONTINUTE){
 					LOGGER.error("waitScanForLogon failure");
 					throw RuntimeErrorException.errorWith(ErrorCodes.SCOPE_GENERAL, ErrorCodes.ERROR_INVALID_PARAMETER, "waitScanForLogon failure");
@@ -5481,7 +5482,7 @@ public class UserServiceImpl implements UserService {
 
 				try {
 					String token = new String(Base64.getDecoder().decode(response.getMessage()), "utf-8");
-					String[] tokenParam = token.split(";");
+					String[] tokenParam = token.split("&");
 					String salt = tokenParam[0];
 					if (salt.equals(SALT)) {
 						Long userId = Long.valueOf(tokenParam[1]);
@@ -5490,7 +5491,10 @@ public class UserServiceImpl implements UserService {
 						LoginToken logintoken = WebTokenGenerator.getInstance().fromWebToken(userToken, LoginToken.class);
 						//todo 验证
 						UserLogin userLogin = logonByToken(logintoken);
-						response.setMessage(GsonUtil.toJson(userLogin));
+						Map valueMap = new HashMap();
+						valueMap.put("userLogin", GsonUtil.toJson(userLogin));
+						valueMap.put("args",tokenParam[4]);
+						response.setMessage(GsonUtil.toJson(valueMap));
 					} else {
 						LOGGER.error("waitScanForLogon failure");
 						throw RuntimeErrorException.errorWith(ErrorCodes.SCOPE_GENERAL, ErrorCodes.ERROR_INVALID_PARAMETER, "waitScanForLogon failure");
@@ -5498,8 +5502,8 @@ public class UserServiceImpl implements UserService {
 				} catch (UnsupportedEncodingException e) {
 					e.printStackTrace();
 				}
-
 			}
+
 		});
 		return result;
 	}
@@ -5508,9 +5512,9 @@ public class UserServiceImpl implements UserService {
 
 	// 获取当前准备登录用户的混淆key
 	@Override
-	public String getSercetKeyForScan(HttpServletRequest request, HttpServletResponse response) {
+	public String getSercetKeyForScan(String args) {
 		String userToken = WebTokenGenerator.getInstance().toWebToken(UserContext.current().getLogin().getLoginToken());
-		String plain = SALT + ";" + UserContext.currentUserId() + ";" + UserContext.getCurrentNamespaceId() + ";" + userToken ;
+		String plain = SALT + "&" + UserContext.currentUserId() + "&" + UserContext.getCurrentNamespaceId() + "&" + args;
 		String token = Base64.getEncoder().encodeToString(plain.getBytes());
 		return token;
 	}

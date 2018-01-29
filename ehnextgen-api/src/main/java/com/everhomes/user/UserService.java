@@ -293,7 +293,7 @@ public interface UserService {
 
     DeferredResult<Object> waitScanForLogon(String subjectId);
 
-    String getSercetKeyForScan(HttpServletRequest request, HttpServletResponse response);
+    String getSercetKeyForScan(String args);
 
     void logonByScan(String subjectId, String message);
 
