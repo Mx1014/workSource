@@ -945,7 +945,6 @@ public class QualityController extends ControllerBase {
 	/**
 	 * <b>URL: /quality/getOfflineTaskDetail</b>
 	 * <p>品质核查离线获取任务相关信息</p>
-	 * @return {QualityOfflineTaskDetailsResponse.class}
 	 */
 	@RequestMapping("getOfflineTaskDetail")
 	@RestReturn(value=QualityOfflineTaskDetailsResponse.class)
@@ -958,7 +957,7 @@ public class QualityController extends ControllerBase {
 	}
 
 	/**
-	 * <b>URL: /quality/listSampleQualityInspection</b>
+	 * <b>URL: /quality/getOfflineSampleQualityInspection</b>
 	 * <p>绩效考核-app离线</p>
 	 */
 	@RequestMapping("getOfflineSampleQualityInspection")
