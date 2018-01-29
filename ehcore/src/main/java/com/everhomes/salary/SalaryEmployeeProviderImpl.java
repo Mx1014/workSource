@@ -3,15 +3,13 @@ package com.everhomes.salary;
 
 import java.sql.Timestamp;
 import java.util.List;
+import java.util.stream.Collectors;
 
 import com.everhomes.listing.CrossShardListingLocator;
 import com.everhomes.rest.salary.SalaryEmployeeStatus;
 import com.everhomes.rest.salary.SalaryGroupStatus;
 import com.everhomes.rest.techpark.punch.NormalFlag;
-import org.jooq.DSLContext;
-import org.jooq.Record;
-import org.jooq.Record1;
-import org.jooq.SelectConditionStep;
+import org.jooq.*;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
 
@@ -114,6 +112,20 @@ public class SalaryEmployeeProviderImpl implements SalaryEmployeeProvider {
             return null;
         }
         return record.value1();
+    }
+
+    @Override
+    public List<Long> listEmployeeDetailIdsByStatus(Long ownerId, Byte status) {
+        Result<Record1<Long>> record = getReadOnlyContext().select(Tables.EH_SALARY_EMPLOYEES.USER_DETAIL_ID).from(Tables.EH_SALARY_EMPLOYEES)
+                .where(Tables.EH_SALARY_EMPLOYEES.OWNER_ID.eq(ownerId))
+                .and(Tables.EH_SALARY_EMPLOYEES.STATUS.eq(status))
+                .fetch();
+        if (null == record || record.size() == 0) {
+            return null;
+        }
+        return record.stream().map(r -> {
+            return r.value1();
+        }).collect(Collectors.toList());
     }
 
     private EhSalaryEmployeesDao getReadWriteDao() {
