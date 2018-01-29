@@ -5907,17 +5907,21 @@ private void checkUserPrivilege(Long orgId, Long privilegeId, Long communityId) 
 
 	private List<OfflineEquipmentTaskReportLog> processEquipmentInspectionTasksAndResults(OfflineEquipmentTaskReportCommand command) {
 		//need  sync  tasks list
-		List<EquipmentTaskDTO> tasks = command.getTasks();
+		//List<EquipmentTaskDTO> tasks = command.getTasks();
 		Long ownerId = command.getOwnerId();
 		String ownerType = command.getOwnerType();
 		OfflineEquipmentTaskReportLog reportLog = new OfflineEquipmentTaskReportLog();
 		List<OfflineEquipmentTaskReportLog> reportLogs = new ArrayList<>();
+		List<Long> taskIds = new ArrayList<>();
+		if (command.getEquipmentTaskReportDetails() != null && command.getEquipmentTaskReportDetails().size() > 0) {
+			command.getEquipmentTaskReportDetails().forEach((t) -> taskIds.add(t.getTaskId()));
+		}
 
-		if (tasks != null && tasks.size() > 0) {
-			tasks.forEach((r) -> {
-				EquipmentInspectionTasks task = verifyEquipmentTask(r.getId(), ownerType, ownerId);
-				LOGGER.error("equipmentInspection task  not exist, id = {}", r.getId());
-				reportLog.setErrorIds(r.getId());
+		if (taskIds.size() > 0) {
+			taskIds.forEach((r) -> {
+				EquipmentInspectionTasks task = verifyEquipmentTask(r, ownerType, ownerId);
+				LOGGER.error("equipmentInspection task  not exist, id = {}",r);
+				reportLog.setErrorIds(r);
 				reportLog.setErrorCode(ErrorCodes.ERROR_GENERAL_EXCEPTION);
 				reportLog.setErrorDescription(localeStringService.getLocalizedString(String.valueOf(EquipmentServiceErrorCode.SCOPE),
 						String.valueOf(EquipmentServiceErrorCode.ERROR_EQUIPMENT_TASK_NOT_EXIST),
@@ -5928,12 +5932,12 @@ private void checkUserPrivilege(Long orgId, Long privilegeId, Long communityId) 
 					expireDaysCommand.setNamespaceId(task.getNamespaceId());
 					EquipmentInspectionReviewDateDTO date = listReviewExpireDays(expireDaysCommand);
 					if (date != null) {
-						task.setReviewExpiredDate(addDays(r.getExecutiveTime(), date.getReviewExpiredDays()));
+						task.setReviewExpiredDate(addDays(new Timestamp(DateHelper.currentGMTTime().getTime()), date.getReviewExpiredDays()));
 					} else {
-						task.setReviewExpiredDate(addDays(r.getExecutiveTime(), Integer.MAX_VALUE - 1));
+						task.setReviewExpiredDate(addDays(new Timestamp(DateHelper.currentGMTTime().getTime()), Integer.MAX_VALUE - 1));
 					}
 					task.setStatus(EquipmentTaskStatus.CLOSE.getCode());
-					task.setExecutiveTime(r.getExecutiveTime());
+					task.setExecutiveTime(new Timestamp(DateHelper.currentGMTTime().getTime()));
 					task.setExecutorType(OwnerType.USER.getCode());
 					task.setExecutorId(UserContext.currentUserId());
 
