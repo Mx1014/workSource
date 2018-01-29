@@ -601,7 +601,7 @@ public class FieldServiceImpl implements FieldService {
                 break;
             case "离场信息":
                 ListCustomerDepartureInfosCommand cmd12 = new ListCustomerDepartureInfosCommand();
-                cmd12.setCommunityId(customerId);
+                cmd12.setCustomerId(customerId);
                 cmd12.setCustomerType(customerType);
                 cmd12.setCommunityId(communityId);
                 cmd12.setNamespaceId(namespaceId);
