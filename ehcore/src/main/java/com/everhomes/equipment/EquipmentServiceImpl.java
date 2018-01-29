@@ -1043,7 +1043,7 @@ private void checkUserPrivilege(Long orgId, Long privilegeId, Long communityId) 
 		if (EquipmentPlanStatus.WATTING_FOR_APPOVING.equals(EquipmentPlanStatus.fromStatus(plan.getStatus()))) {
 			if (ReviewResult.QUALIFIED.equals(ReviewResult.fromStatus(cmd.getReviewResult()))) {
 				plan.setStatus(EquipmentPlanStatus.QUALIFIED.getCode());
-			} else if (ReviewResult.QUALIFIED.equals(ReviewResult.fromStatus(cmd.getReviewResult()))) {
+			} else if (ReviewResult.UNQUALIFIED.equals(ReviewResult.fromStatus(cmd.getReviewResult()))) {
 				plan.setStatus(EquipmentPlanStatus.UN_QUALIFIED.getCode());
 			}
 			plan.setReviewerUid(UserContext.currentUserId());
