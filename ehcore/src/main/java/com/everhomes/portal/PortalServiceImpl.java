@@ -1395,7 +1395,7 @@ public class PortalServiceImpl implements PortalService {
 		//查出20以后的第一个大版本
 		int index = 20;
 		for( ; index<list.size(); index++){
-			if(list.get(index).getBigVersion() == 1){
+			if(list.get(index).getMinorVersion() == 0){
 				break;
 			}
 		}
