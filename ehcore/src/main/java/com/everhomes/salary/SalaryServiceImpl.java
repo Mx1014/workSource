@@ -2405,7 +2405,7 @@ public class SalaryServiceImpl implements SalaryService {
         //// TODO: 2018/1/23 获取owner下面的details
         List<OrganizationMemberDetails> details = new ArrayList<>();
         List<Long> orgIds = new ArrayList<>();
-        orgIds.add(ownerId;
+        orgIds.add(ownerId);
         List<OrganizationMember> members = organizationProvider.listOrganizationMemberByOrganizationIds(new ListingLocator(), Integer.MAX_VALUE - 1, null, orgIds);
         if (null != members) {
             for (OrganizationMember member : members) {
