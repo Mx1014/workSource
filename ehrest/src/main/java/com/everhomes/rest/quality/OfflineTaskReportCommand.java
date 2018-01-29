@@ -16,8 +16,8 @@ public class OfflineTaskReportCommand {
     @ItemType(QualityInspectionTaskDTO.class)
     private List<QualityInspectionTaskDTO> tasks;
 
-    @ItemType(offlineReportDetailDTO.class)
-    private List<offlineReportDetailDTO> offlineReportDetail;
+    @ItemType(OfflineReportDetailDTO.class)
+    private List<OfflineReportDetailDTO> offlineReportDetail;
 
 
     public List<QualityInspectionTaskDTO> getTasks() {
@@ -28,11 +28,11 @@ public class OfflineTaskReportCommand {
         this.tasks = tasks;
     }
 
-    public List<offlineReportDetailDTO> getOfflineReportDetail() {
+    public List<OfflineReportDetailDTO> getOfflineReportDetail() {
         return offlineReportDetail;
     }
 
-    public void setOfflineReportDetail(List<offlineReportDetailDTO> offlineReportDetail) {
+    public void setOfflineReportDetail(List<OfflineReportDetailDTO> offlineReportDetail) {
         this.offlineReportDetail = offlineReportDetail;
     }
 

@@ -142,6 +142,7 @@ import com.everhomes.rest.quality.UpdateQualityCategoryCommand;
 import com.everhomes.rest.quality.UpdateQualitySpecificationCommand;
 import com.everhomes.rest.quality.UpdateQualityStandardCommand;
 import com.everhomes.rest.quality.UpdateSampleQualityInspectionCommand;
+import com.everhomes.rest.quality.OfflineReportDetailDTO;
 import com.everhomes.rest.repeat.RepeatSettingsDTO;
 import com.everhomes.rest.repeat.TimeRangeDTO;
 import com.everhomes.rest.user.MessageChannelType;
@@ -4686,15 +4687,22 @@ public class QualityServiceImpl implements QualityService {
 	@Override
 	public QualityOfflineTaskReportResponse OfflineTaskReport(OfflineTaskReportCommand cmd) {
 		if (cmd.getTasks() != null && cmd.getTasks().size() > 0) {
+			Map<Long, OfflineReportDetailDTO> taskDetailMaps = getTaskDetailMaps(cmd.getOfflineReportDetail());
 			cmd.getTasks().forEach((task) -> {
 				QualityInspectionTasks inspectionTask = verifiedTaskById(task.getId());
-				syncTaskInfoToServer(inspectionTask, task);
+				syncTaskInfoToServer(inspectionTask, task, taskDetailMaps);
 			});
 		}
 		return null;
 	}
 
-	private void syncTaskInfoToServer(QualityInspectionTasks task, QualityInspectionTaskDTO taskDTO) {
+	private Map<Long, OfflineReportDetailDTO> getTaskDetailMaps(List<OfflineReportDetailDTO> taskReportDetails) {
+		Map<Long, OfflineReportDetailDTO> taskDetailMaps = new HashMap<>();
+		taskReportDetails.forEach((task) -> taskDetailMaps.put(task.getTaskId(), task));
+		return taskDetailMaps;
+	}
+
+	private void syncTaskInfoToServer(QualityInspectionTasks task, QualityInspectionTaskDTO taskDTO, Map<Long, OfflineReportDetailDTO> taskDetailMaps) {
 		QualityInspectionTaskRecords record = new QualityInspectionTaskRecords();
 		record.setTaskId(task.getId());
 		record.setOperatorType(OwnerType.USER.getCode());
@@ -4703,79 +4711,80 @@ public class QualityServiceImpl implements QualityService {
 		task.setExecutiveTime(taskDTO.getExecutiveTime());
 		task.setExecutorType(OrganizationMemberTargetType.USER.getCode());
 		task.setExecutorId(UserContext.currentUserId());
-		if(taskDTO.getOperatorType() != null) {
+		if (taskDTO.getOperatorType() != null) {
 			task.setOperatorType(taskDTO.getOperatorType());
 			record.setTargetType(taskDTO.getOperatorType());
 		}
 
-		if(taskDTO.getOperatorId() != null) {
+		if (taskDTO.getOperatorId() != null) {
 			task.setOperatorId(taskDTO.getOperatorId());
 			record.setTargetId(taskDTO.getOperatorId());
 		}
 
-		if(taskDTO.getProcessExpireTime() != null) {
+		if (taskDTO.getProcessExpireTime() != null) {
 			task.setProcessExpireTime(taskDTO.getProcessExpireTime());
 			record.setProcessEndTime(task.getProcessExpireTime());
 		}
 
-		if(QualityInspectionTaskResult.CORRECT.getCode() == taskDTO.getVerificationResult()) {
+		if (QualityInspectionTaskResult.CORRECT.getCode() == taskDTO.getVerificationResult()) {
 			task.setStatus(QualityInspectionTaskStatus.WAITING_FOR_EXECUTING.getCode());
 			task.setResult(QualityInspectionTaskResult.CORRECT.getCode());
 			record.setProcessResult(QualityInspectionTaskResult.CORRECT.getCode());
 			record.setProcessType(ProcessType.INSPECT.getCode());
 
-		}
-		else if(QualityInspectionTaskResult.INSPECT_COMPLETE.getCode() == taskDTO.getVerificationResult()) {
+		} else if (QualityInspectionTaskResult.INSPECT_COMPLETE.getCode() == taskDTO.getVerificationResult()) {
 			task.setResult(QualityInspectionTaskResult.INSPECT_COMPLETE.getCode());
 			task.setStatus(QualityInspectionTaskStatus.EXECUTED.getCode());
 			record.setProcessResult(QualityInspectionTaskResult.INSPECT_COMPLETE.getCode());
 			record.setProcessType(ProcessType.INSPECT.getCode());
 		}
 
-		if(!StringUtils.isNullOrEmpty(taskDTO.getOperatorType()) && taskDTO.getOperatorId() != null
+		//proccess send message to processor and bind recored mesaage to record
+		if (!StringUtils.isNullOrEmpty(taskDTO.getOperatorType()) && taskDTO.getOperatorId() != null
 				&& taskDTO.getProcessExpireTime() != null) {
-			//总公司 分公司 在分公司通讯录而不在总公司通讯录中时可能查无此人 by xiongying20170329
-			List<OrganizationMember> operators = organizationProvider.listOrganizationMembersByUId(UserContext.currentUserId());
-//			OrganizationMember operator = organizationProvider.findOrganizationMemberByOrgIdAndUId(user.getId(), task.getOwnerId());
-			Map<String, Object> map = new HashMap<String, Object>();
-			map.put("userName", operators.get(0).getContactName());
-			map.put("taskName", task.getTaskName());
-			map.put("deadline", timeToStr(taskDTO.getProcessExpireTime()));
-			String scope = QualityNotificationTemplateCode.SCOPE;
-			int code = QualityNotificationTemplateCode.ASSIGN_TASK_NOTIFY_OPERATOR;
-			String locale = "zh_CN";
-			String notifyTextForApplicant = localeTemplateService.getLocaleTemplateString(scope, code, locale, map, "");
-			sendMessageToUser(taskDTO.getOperatorId(), notifyTextForApplicant);
-
-			//总公司 分公司 在分公司通讯录而不在总公司通讯录中时可能查无此人 by xiongying20170329
-			List<OrganizationMember> targets = organizationProvider.listOrganizationMembersByUId(taskDTO.getOperatorId());
-//			OrganizationMember target = organizationProvider.findOrganizationMemberByOrgIdAndUId(cmd.getOperatorId(), task.getOwnerId());
-			Map<String, Object> msgMap = new HashMap<String, Object>();
-			msgMap.put("operator", operators.get(0).getContactName());
-			msgMap.put("target", targets.get(0).getContactName());
-			msgMap.put("taskName", task.getTaskName());
-			map.put("deadline", timeToStr(taskDTO.getProcessExpireTime()));
-			int msgCode = QualityNotificationTemplateCode.ASSIGN_TASK_MSG;
-			String msg = localeTemplateService.getLocaleTemplateString(scope, msgCode, locale, msgMap, "");
-			record.setProcessMessage(msg);
+			sendMessageToProcessor(task, taskDTO, record);
 		}
 
-		if(cmd.getMessage() != null) {
+		OfflineReportDetailDTO reportDetailDTO = taskDetailMaps.get(task.getId());
+		if (reportDetailDTO.getMessage() != null) {
 			String attText = localeStringService.getLocalizedString(
 					String.valueOf(QualityServiceErrorCode.SCOPE),
 					String.valueOf(QualityServiceErrorCode.ATTACHMENT_TEXT),
 					UserContext.current().getUser().getLocale(),
 					"text:");
-			if(record.getProcessMessage() != null) {
-				String msg = record.getProcessMessage()  + "<br/>" + attText+cmd.getMessage();
+			if (record.getProcessMessage() != null) {
+				String msg = record.getProcessMessage() + "<br/>" + attText + reportDetailDTO.getMessage();
 				record.setProcessMessage(msg);
 			} else {
-				String msg = attText+cmd.getMessage();
+				String msg = attText + reportDetailDTO.getMessage();
 				record.setProcessMessage(msg);
 			}
-
 		}
+		updateVerificationTasks(task, record, reportDetailDTO.getAttachments(), reportDetailDTO.getItemResults(), reportDetailDTO.getNamespaceId());
+	}
 
-		QualityInspectionTaskDTO dto = updateVerificationTasks(task, record, cmd.getAttachments(), cmd.getItemResults(),cmd.getNamespaceId());
+	private void sendMessageToProcessor(QualityInspectionTasks task, QualityInspectionTaskDTO taskDTO, QualityInspectionTaskRecords record) {
+		//ASSIGN_TASK_NOTIFY_OPERATOR
+		List<OrganizationMember> operators = organizationProvider.listOrganizationMembersByUId(UserContext.currentUserId());
+		Map<String, Object> map = new HashMap<>();
+		map.put("userName", operators.get(0).getContactName());
+		map.put("taskName", task.getTaskName());
+		map.put("deadline", timeToStr(taskDTO.getProcessExpireTime()));
+		String scope = QualityNotificationTemplateCode.SCOPE;
+		int code = QualityNotificationTemplateCode.ASSIGN_TASK_NOTIFY_OPERATOR;
+		String locale = "zh_CN";
+		String notifyTextForApplicant = localeTemplateService.getLocaleTemplateString(scope, code, locale, map, "");
+		sendMessageToUser(taskDTO.getOperatorId(), notifyTextForApplicant);
+
+		//ASSIGN_TASK_MSG
+		List<OrganizationMember> targets = organizationProvider.listOrganizationMembersByUId(taskDTO.getOperatorId());
+		Map<String, Object> msgMap = new HashMap<>();
+		msgMap.put("operator", operators.get(0).getContactName());
+		msgMap.put("target", targets.get(0).getContactName());
+		msgMap.put("taskName", task.getTaskName());
+		map.put("deadline", timeToStr(taskDTO.getProcessExpireTime()));
+		int msgCode = QualityNotificationTemplateCode.ASSIGN_TASK_MSG;
+		String msg = localeTemplateService.getLocaleTemplateString(scope, msgCode, locale, msgMap, "");
+		record.setProcessMessage(msg);
 	}
 }

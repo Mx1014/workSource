@@ -15,7 +15,7 @@ import java.util.List;
  * </ul>
  */
 
-public class offlineReportDetailDTO {
+public class OfflineReportDetailDTO {
 
     private Long taskId;
 
