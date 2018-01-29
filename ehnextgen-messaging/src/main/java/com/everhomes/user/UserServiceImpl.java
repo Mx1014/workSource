@@ -5461,4 +5461,23 @@ public class UserServiceImpl implements UserService {
         return resp;
     }
 
+	@Override
+	public SearchUserByIdentifierResponse searchUserByIdentifier(SearchUserByIdentifierCommand cmd) {
+
+		if(cmd.getIdentifierToken().length() < 7){
+			return null;
+		}
+
+		int pageSize = 10 ;
+
+		List<User> users = userProvider.searchUserByIdentifier(cmd.getIdentifierToken(), cmd.getNamespaceId(), pageSize);
+
+		List<UserDTO> dtos = new ArrayList<>();
+		if(users != null){
+			dtos = users.stream().map(r -> ConvertHelper.convert(r, UserDTO.class)).collect(Collectors.toList());
+		}
+		SearchUserByIdentifierResponse response = new SearchUserByIdentifierResponse();
+		response.setDtos(dtos);
+		return response;
+	}
 }
