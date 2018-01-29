@@ -40,6 +40,8 @@ public class ActivityEntryConfigulation {
 
 	private Byte categoryFlag;
 
+	private Long categoryId;
+
 	@ItemType(ActivityCategoryDTO.class)
 	private List<ActivityCategoryDTO> categoryDTOList;
 
@@ -121,6 +123,14 @@ public class ActivityEntryConfigulation {
 
 	public void setCategoryDTOList(List<ActivityCategoryDTO> categoryDTOList) {
 		this.categoryDTOList = categoryDTOList;
+	}
+
+	public Long getCategoryId() {
+		return categoryId;
+	}
+
+	public void setCategoryId(Long categoryId) {
+		this.categoryId = categoryId;
 	}
 
 	@Override
