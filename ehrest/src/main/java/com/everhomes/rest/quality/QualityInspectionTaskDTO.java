@@ -25,6 +25,7 @@ import java.util.List;
  *  <li>executorName:核查人姓名</li>
  *  <li>operatorId:整改人id</li>
  *  <li>operatorName:整改人姓名</li>
+ *  <li>operatorType:整改执行人类型</li>
  *  <li>reviewerId:审核人id</li>
  *  <li>reviewerName:审核人姓名</li>
  *  <li>executiveStartTime: 核查开始时间</li>
@@ -46,9 +47,10 @@ import java.util.List;
  *  <li>creatorUid : 创建者uid</li>
  *  <li>creatorName : 创建者姓名</li>
  *  <li>createTime : 创建时间</li>
- *  <li>executiveTime : 创建时间</li>
- *  <li>processTime : 创建时间</li>
+ *  <li>executiveTime : 执行时间</li>
+ *  <li>processTime : 整改时间</li>
  *  <li>lastSyncTime : 上次最大同步时间</li>
+ *  <li>verificationResult :offline CORRECT((byte)1), INSPECT_COMPLETE((byte)2)</li>
  * </ul>
  */
 public class QualityInspectionTaskDTO {
@@ -92,6 +94,8 @@ public class QualityInspectionTaskDTO {
 	private Long operatorId;
 	
 	private String operatorName;
+
+	private String operatorType;
 	
 	private Timestamp executiveStartTime;
 	
@@ -138,6 +142,8 @@ public class QualityInspectionTaskDTO {
 	private Timestamp processTime;
 
 	private String lastSyncTime;
+
+	private Byte verificationResult;
 
 	public Long getId() {
 		return id;
@@ -281,6 +287,14 @@ public class QualityInspectionTaskDTO {
 
 	public void setOperatorName(String operatorName) {
 		this.operatorName = operatorName;
+	}
+
+	public String getOperatorType() {
+		return operatorType;
+	}
+
+	public void setOperatorType(String operatorType) {
+		this.operatorType = operatorType;
 	}
 
 	public Timestamp getExecutiveStartTime() {
@@ -473,6 +487,14 @@ public class QualityInspectionTaskDTO {
 
 	public void setLastSyncTime(String lastSyncTime) {
 		this.lastSyncTime = lastSyncTime;
+	}
+
+	public Byte getVerificationResult() {
+		return verificationResult;
+	}
+
+	public void setVerificationResult(Byte verificationResult) {
+		this.verificationResult = verificationResult;
 	}
 
 	@Override

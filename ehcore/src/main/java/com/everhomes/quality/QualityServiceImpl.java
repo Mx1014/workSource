@@ -94,6 +94,7 @@ import com.everhomes.rest.quality.ListUserHistoryTasksCommand;
 import com.everhomes.rest.quality.ListUserQualityInspectionTaskTemplatesCommand;
 import com.everhomes.rest.quality.OfflineDeleteTablesInfo;
 import com.everhomes.rest.quality.OfflineSampleQualityInspectionResponse;
+import com.everhomes.rest.quality.OfflineTaskReportCommand;
 import com.everhomes.rest.quality.OwnerType;
 import com.everhomes.rest.quality.ProcessType;
 import com.everhomes.rest.quality.QualityCategoriesDTO;
@@ -112,6 +113,7 @@ import com.everhomes.rest.quality.QualityInspectionTaskReviewResult;
 import com.everhomes.rest.quality.QualityInspectionTaskStatus;
 import com.everhomes.rest.quality.QualityNotificationTemplateCode;
 import com.everhomes.rest.quality.QualityOfflineTaskDetailsResponse;
+import com.everhomes.rest.quality.QualityOfflineTaskReportResponse;
 import com.everhomes.rest.quality.QualityServiceErrorCode;
 import com.everhomes.rest.quality.QualityStandardStatus;
 import com.everhomes.rest.quality.QualityStandardsDTO;
@@ -4679,5 +4681,101 @@ public class QualityServiceImpl implements QualityService {
 		this.qualityProvider.populateStandardsGroups(standards);
 		this.qualityProvider.populateStandardsSpecifications(standards);
 		return  converStandardToDto(standard);
+	}
+
+	@Override
+	public QualityOfflineTaskReportResponse OfflineTaskReport(OfflineTaskReportCommand cmd) {
+		if (cmd.getTasks() != null && cmd.getTasks().size() > 0) {
+			cmd.getTasks().forEach((task) -> {
+				QualityInspectionTasks inspectionTask = verifiedTaskById(task.getId());
+				syncTaskInfoToServer(inspectionTask, task);
+			});
+		}
+		return null;
+	}
+
+	private void syncTaskInfoToServer(QualityInspectionTasks task, QualityInspectionTaskDTO taskDTO) {
+		QualityInspectionTaskRecords record = new QualityInspectionTaskRecords();
+		record.setTaskId(task.getId());
+		record.setOperatorType(OwnerType.USER.getCode());
+		record.setOperatorId(UserContext.currentUserId());
+
+		task.setExecutiveTime(taskDTO.getExecutiveTime());
+		task.setExecutorType(OrganizationMemberTargetType.USER.getCode());
+		task.setExecutorId(UserContext.currentUserId());
+		if(taskDTO.getOperatorType() != null) {
+			task.setOperatorType(taskDTO.getOperatorType());
+			record.setTargetType(taskDTO.getOperatorType());
+		}
+
+		if(taskDTO.getOperatorId() != null) {
+			task.setOperatorId(taskDTO.getOperatorId());
+			record.setTargetId(taskDTO.getOperatorId());
+		}
+
+		if(taskDTO.getProcessExpireTime() != null) {
+			task.setProcessExpireTime(taskDTO.getProcessExpireTime());
+			record.setProcessEndTime(task.getProcessExpireTime());
+		}
+
+		if(QualityInspectionTaskResult.CORRECT.getCode() == taskDTO.getVerificationResult()) {
+			task.setStatus(QualityInspectionTaskStatus.WAITING_FOR_EXECUTING.getCode());
+			task.setResult(QualityInspectionTaskResult.CORRECT.getCode());
+			record.setProcessResult(QualityInspectionTaskResult.CORRECT.getCode());
+			record.setProcessType(ProcessType.INSPECT.getCode());
+
+		}
+		else if(QualityInspectionTaskResult.INSPECT_COMPLETE.getCode() == taskDTO.getVerificationResult()) {
+			task.setResult(QualityInspectionTaskResult.INSPECT_COMPLETE.getCode());
+			task.setStatus(QualityInspectionTaskStatus.EXECUTED.getCode());
+			record.setProcessResult(QualityInspectionTaskResult.INSPECT_COMPLETE.getCode());
+			record.setProcessType(ProcessType.INSPECT.getCode());
+		}
+
+		if(!StringUtils.isNullOrEmpty(taskDTO.getOperatorType()) && taskDTO.getOperatorId() != null
+				&& taskDTO.getProcessExpireTime() != null) {
+			//总公司 分公司 在分公司通讯录而不在总公司通讯录中时可能查无此人 by xiongying20170329
+			List<OrganizationMember> operators = organizationProvider.listOrganizationMembersByUId(UserContext.currentUserId());
+//			OrganizationMember operator = organizationProvider.findOrganizationMemberByOrgIdAndUId(user.getId(), task.getOwnerId());
+			Map<String, Object> map = new HashMap<String, Object>();
+			map.put("userName", operators.get(0).getContactName());
+			map.put("taskName", task.getTaskName());
+			map.put("deadline", timeToStr(taskDTO.getProcessExpireTime()));
+			String scope = QualityNotificationTemplateCode.SCOPE;
+			int code = QualityNotificationTemplateCode.ASSIGN_TASK_NOTIFY_OPERATOR;
+			String locale = "zh_CN";
+			String notifyTextForApplicant = localeTemplateService.getLocaleTemplateString(scope, code, locale, map, "");
+			sendMessageToUser(taskDTO.getOperatorId(), notifyTextForApplicant);
+
+			//总公司 分公司 在分公司通讯录而不在总公司通讯录中时可能查无此人 by xiongying20170329
+			List<OrganizationMember> targets = organizationProvider.listOrganizationMembersByUId(taskDTO.getOperatorId());
+//			OrganizationMember target = organizationProvider.findOrganizationMemberByOrgIdAndUId(cmd.getOperatorId(), task.getOwnerId());
+			Map<String, Object> msgMap = new HashMap<String, Object>();
+			msgMap.put("operator", operators.get(0).getContactName());
+			msgMap.put("target", targets.get(0).getContactName());
+			msgMap.put("taskName", task.getTaskName());
+			map.put("deadline", timeToStr(taskDTO.getProcessExpireTime()));
+			int msgCode = QualityNotificationTemplateCode.ASSIGN_TASK_MSG;
+			String msg = localeTemplateService.getLocaleTemplateString(scope, msgCode, locale, msgMap, "");
+			record.setProcessMessage(msg);
+		}
+
+		if(cmd.getMessage() != null) {
+			String attText = localeStringService.getLocalizedString(
+					String.valueOf(QualityServiceErrorCode.SCOPE),
+					String.valueOf(QualityServiceErrorCode.ATTACHMENT_TEXT),
+					UserContext.current().getUser().getLocale(),
+					"text:");
+			if(record.getProcessMessage() != null) {
+				String msg = record.getProcessMessage()  + "<br/>" + attText+cmd.getMessage();
+				record.setProcessMessage(msg);
+			} else {
+				String msg = attText+cmd.getMessage();
+				record.setProcessMessage(msg);
+			}
+
+		}
+
+		QualityInspectionTaskDTO dto = updateVerificationTasks(task, record, cmd.getAttachments(), cmd.getItemResults(),cmd.getNamespaceId());
 	}
 }
