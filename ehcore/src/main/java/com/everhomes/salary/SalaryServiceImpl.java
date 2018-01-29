@@ -2419,6 +2419,9 @@ public class SalaryServiceImpl implements SalaryService {
             }
         }
         for (OrganizationMemberDetails detail : details) {
+            if (null == detail) {
+                continue;
+            }
             createSalaryEmployee(ownerId, detail.getId(), month);
         }
     }
@@ -2669,6 +2672,9 @@ public class SalaryServiceImpl implements SalaryService {
         int processNum = 0;
         for (Long detailId : detailIds) {
             OrganizationMemberDetails detail = organizationProvider.findOrganizationMemberDetailsByDetailId(detailId);
+            if (null == detail) {
+                continue;
+            }
             Row row = sheet.createRow(sheet.getLastRowNum() + 1);
             int i = -1;
             row.createCell(++i).setCellValue(detail.getContactToken());
