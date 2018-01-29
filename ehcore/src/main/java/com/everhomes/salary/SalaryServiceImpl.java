@@ -2,24 +2,34 @@
 package com.everhomes.salary;
 
 import com.everhomes.configuration.ConfigurationProvider;
-import com.everhomes.coordinator.CoordinationProvider;
 import com.everhomes.db.DbProvider;
+import com.everhomes.filedownload.TaskService;
 import com.everhomes.listing.CrossShardListingLocator;
+import com.everhomes.listing.ListingLocator;
 import com.everhomes.locale.LocaleTemplateService;
 import com.everhomes.organization.*;
+import com.everhomes.rest.common.ImportFileResponse;
+import com.everhomes.rest.filedownload.TaskRepeatFlag;
+import com.everhomes.rest.filedownload.TaskType;
 import com.everhomes.rest.organization.*;
 import com.everhomes.rest.salary.*;
+import com.everhomes.rest.salary.GetImportFileResultCommand;
 import com.everhomes.rest.salary.ListEnterprisesCommand;
 import com.everhomes.rest.techpark.punch.NormalFlag;
 import com.everhomes.rest.techpark.punch.PunchServiceErrorCode;
 import com.everhomes.settings.PaginationConfigHelper;
 import com.everhomes.techpark.punch.PunchService;
 import com.everhomes.uniongroup.UniongroupService;
+import com.everhomes.user.UserContext;
 import com.everhomes.util.ConvertHelper;
 import com.everhomes.util.DateHelper;
 import com.everhomes.util.RuntimeErrorException;
+import com.everhomes.util.excel.RowResult;
+import com.everhomes.util.excel.handler.PropMrgOwnerHandler;
 import freemarker.cache.StringTemplateLoader;
 import freemarker.template.Configuration;
+import org.apache.commons.collections.map.HashedMap;
+import org.apache.commons.lang.StringUtils;
 import org.apache.poi.ss.usermodel.*;
 import org.apache.poi.xssf.usermodel.XSSFComment;
 import org.apache.poi.xssf.usermodel.XSSFDrawing;
@@ -29,6 +39,7 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
+import org.springframework.web.multipart.MultipartFile;
 
 import javax.servlet.http.HttpServletResponse;
 import java.io.BufferedOutputStream;
@@ -36,6 +47,7 @@ import java.io.ByteArrayOutputStream;
 import java.io.IOException;
 import java.io.OutputStream;
 import java.math.BigDecimal;
+import java.net.URLEncoder;
 import java.text.SimpleDateFormat;
 import java.util.*;
 import java.util.stream.Collectors;
@@ -87,7 +99,7 @@ public class SalaryServiceImpl implements SalaryService {
 
 
     @Autowired
-    private CoordinationProvider coordinationProvider;
+    private TaskService taskService;
 
     @Autowired
     private SalaryDefaultEntityProvider salaryDefaultEntityProvider;
@@ -826,22 +838,23 @@ public class SalaryServiceImpl implements SalaryService {
 //        }
 //    }
 //
-//    /*******
-//     * 导入部分
-//     *******/
-//    //  数字转换(1-A,2-B...)
-//    //  接下来会是很长的导入导出代码
-//    private static String GetExcelLetter(int n) {
-//        String s = "";
-//        while (n > 0) {
-//            int m = n % 26;
-//            if (m == 0)
-//                m = 26;
-//            s = (char) (m + 64) + s;
-//            n = (n - m) / 26;
-//        }
-//        return s;
-//    }
+
+    /*******
+     * 导入部分
+     *******/
+    //  数字转换(1-A,2-B...)
+    //  接下来会是很长的导入导出代码
+    private static String GetExcelLetter(int n) {
+        String s = "";
+        while (n > 0) {
+            int m = n % 26;
+            if (m == 0)
+                m = 26;
+            s = (char) (m + 64) + s;
+            n = (n - m) / 26;
+        }
+        return s;
+    }
 //
 //    @Override
 //    public void exportSalaryGroup(ExportSalaryGroupCommand cmd, HttpServletResponse httpServletResponse) {
@@ -1012,7 +1025,6 @@ public class SalaryServiceImpl implements SalaryService {
 //                        continue;
 //                    }
 //                    //保存并置状态
-//                    // TODO: 2017/7/13 改成memberid
 //                    Long detailId = Long.valueOf(data.getSalaryEmployeeVal().get(1));
 //                    List<SalaryEmployeeOriginVal> salaryEmployeeOriginVals = this.salaryEmployeeOriginValProvider.
 //                            listSalaryEmployeeOriginValByDetailId(cmd.getOwnerType(), cmd.getOwnerId(), detailId);
@@ -1150,7 +1162,6 @@ public class SalaryServiceImpl implements SalaryService {
 //    private List<SalaryEmployeePeriodVal> processSalaryOriginValDataToPeriodVals(List<SalaryGroupEntity> importGroupEntities, ImportSalaryEmployeeOriginValDTO data, Long salaryGroupId, String ownerType, Long ownerId) {
 //        //  获取个人的项目字段
 //        //对于核算的导入导出 salaryGroupId是这个表的id
-//        // TODO: 2017/7/13 改成member
 //        SalaryGroup salaryGroup = salaryGroupProvider.findSalaryGroupById(salaryGroupId);
 //        Long detailId = Long.valueOf(data.getSalaryEmployeeVal().get(1));
 //        List<SalaryEmployeeOriginVal> salaryEmployeeOriginVals = this.salaryEmployeeOriginValProvider.
@@ -1236,7 +1247,6 @@ public class SalaryServiceImpl implements SalaryService {
 //     */
 //    private void savePeriodSalaryGroup(ImportSalaryEmployeeOriginValDTO data, List<SalaryGroupEntity> salaryGroupEntities,
 //                                       Long groupId, Long organizationId, String ownerType, Long ownerId) {
-//        //TODO: 存入period数据
 //
 //    }
 //
@@ -1415,7 +1425,6 @@ public class SalaryServiceImpl implements SalaryService {
 //        SalaryPeriodEmployeeDTO dto = ConvertHelper.convert(r, SalaryPeriodEmployeeDTO.class);
 //        dto.setCheckFlag((r.getStatus() == null || r.getStatus().equals(SalaryGroupStatus.UNCHECK.getCode())) ? SalaryGroupStatus.UNCHECK.getCode() : SalaryGroupStatus.CHECKED.getCode());
 //        //岗位
-//        // TODO: 2017/7/6 这里和荣楠的实现重叠了,重构一下
 //        SalaryEmployeeDTO detailDTO = getPersonnelInfoByDetailIdForSalary(r.getUserDetailId());
 //        dto.setJobPositions(detailDTO.getJobPosition());
 //        //批次名
@@ -2274,7 +2283,6 @@ public class SalaryServiceImpl implements SalaryService {
         //更新和删除
         List<SalaryGroupEntity> entities = salaryGroupEntityProvider.listSalaryGroupEntityByOrgId(cmd.getOrganizationId());
         for (SalaryGroupEntity entity : entities) {
-
 //            //不可编辑不可删除直接跳过
 //            if (NormalFlag.NO == NormalFlag.fromCode(entity.getDeleteFlag()) &&
 //                    NormalFlag.NO == NormalFlag.fromCode(entity.getEditableFlag())) {
@@ -2325,7 +2333,15 @@ public class SalaryServiceImpl implements SalaryService {
         response.setMonth(month);
         // TODO: 2018/1/22 磊哥和楠哥总要给我一个过滤后的detailIds
         List<Long> detailIds = new ArrayList<>();
-        if (null == detailIds) {
+        List<Long> orgIds = new ArrayList<>();
+        orgIds.add(cmd.getOwnerId());
+        List<OrganizationMember> members = organizationProvider.listOrganizationMemberByOrganizationIds(new ListingLocator(), Integer.MAX_VALUE - 1, null, orgIds);
+        if (null != members) {
+            for (OrganizationMember member : members) {
+                detailIds.add(member.getDetailId());
+            }
+        }
+        if (null == detailIds || detailIds.size() == 0) {
             return response;
         }
         response.setSalaryEmployeeDTO(new ArrayList<>());
@@ -2388,6 +2404,14 @@ public class SalaryServiceImpl implements SalaryService {
     private void batchCreateMonthSalaryEmployees(Long ownerId, String month) {
         //// TODO: 2018/1/23 获取owner下面的details
         List<OrganizationMemberDetails> details = new ArrayList<>();
+        List<Long> orgIds = new ArrayList<>();
+        orgIds.add(ownerId);
+        List<OrganizationMember> members = organizationProvider.listOrganizationMemberByOrganizationIds(new ListingLocator(), Integer.MAX_VALUE - 1, null, orgIds);
+        if (null != members) {
+            for (OrganizationMember member : members) {
+                details.add(organizationProvider.findOrganizationMemberDetailsByDetailId(member.getDetailId()));
+            }
+        }
         for (OrganizationMemberDetails detail : details) {
             createSalaryEmployee(ownerId, detail.getId(), month);
         }
@@ -2411,12 +2435,259 @@ public class SalaryServiceImpl implements SalaryService {
     @Override
     public HttpServletResponse exportEmployeeSalaryTemplate(ExportEmployeeSalaryTemplateCommand cmd,
                                                             HttpServletResponse response) {
-        String filePath = "ImportTemplate" + ".xlsx";
+        String filePath = "批量更新工资明细模板" + ".xlsx";
         //新建了一个文件
 
         Workbook wb = createEmployeeSalaryHeadWB(cmd.getOrganizationId());
 
         return download(wb, filePath, response);
+    }
+
+    @Override
+    public GetEmployeeEntitiesResponse getEmployeeEntities(GetEmployeeEntitiesCommand cmd) {
+        OrganizationMemberDetails detail = organizationProvider.findOrganizationMemberDetailsByDetailId(cmd.getDetailId());
+        GetEmployeeEntitiesResponse response = ConvertHelper.convert(detail, GetEmployeeEntitiesResponse.class);
+//        response.setCheckInTime(detail.getCheckInTime());
+//        response.setDismissTime(detail.getDismissTime());
+        List<SalaryEntityCategory> categories = salaryEntityCategoryProvider.listSalaryEntityCategory();
+        List<SalaryGroupEntity> entities = salaryGroupEntityProvider.listSalaryGroupEntityByOrgId(cmd.getOrganizationId());
+        if (null == entities) {
+            entities = copyDefaultEntities2Org(cmd.getOrganizationId());
+        }
+        for (SalaryEntityCategory category : categories) {
+            EmployeeCategoryDTO categoryDTO = ConvertHelper.convert(category, EmployeeCategoryDTO.class);
+            categoryDTO.setEntities(new ArrayList<>());
+            BigDecimal categoryValue = new BigDecimal(0);
+            for (SalaryGroupEntity entity : entities) {
+                if (entity.getCategoryId().equals(category.getId())) {
+                    SalaryPeriodEmployeeEntityDTO dto = processSalaryPeriodEmployeeEntityDTO(entity, detail);
+                    BigDecimal entityVal = new BigDecimal(0);
+                    if (SalaryEntityType.REDUN != SalaryEntityType.fromCode(dto.getType())) {
+                        try {
+                            entityVal = new BigDecimal(dto.getSalaryValue());
+                        } catch (Exception e) {
+                            LOGGER.error("salaryValue :{}不能转换为数字", dto.getSalaryValue());
+                        }
+                    }
+                    categoryValue = categoryValue.add(entityVal);
+                    categoryDTO.getEntities().add(dto);
+                }
+            }
+            categoryDTO.setSalaryValue(categoryValue.toString());
+            response.getCategories().add(categoryDTO);
+        }
+        return response;
+    }
+
+    private SalaryPeriodEmployeeEntityDTO processSalaryPeriodEmployeeEntityDTO(SalaryGroupEntity entity, OrganizationMemberDetails detail) {
+        SalaryPeriodEmployeeEntityDTO dto = ConvertHelper.convert(entity, SalaryPeriodEmployeeEntityDTO.class);
+        SalaryEmployeeOriginVal val = salaryEmployeeOriginValProvider.findSalaryEmployeeOriginValByDetailId(entity.getId(), detail.getId());
+        if (null != val) {
+            dto.setSalaryValue(val.getSalaryValue());
+        } else {
+            dto.setSalaryValue("0");
+        }
+        return dto;
+    }
+
+    @Override
+    public void exportEmployeeSalary(ExportEmployeeSalaryTemplateCommand cmd) {
+        Map<String, Object> params = new HashedMap();
+        params.put("ownerId", cmd.getOwnerId());
+        params.put("organizationId", cmd.getOrganizationId());
+        String fileName = "员工工资表";
+        params.put("name", fileName);
+
+        taskService.createTask(fileName, TaskType.FILEDOWNLOAD.getCode(), SalaryExportTaskHandler.class, params, TaskRepeatFlag.REPEAT.getCode(), new Date());
+    }
+
+    @Override
+    public ImportFileTaskDTO importEmployeeSalary(ExportEmployeeSalaryTemplateCommand cmd, MultipartFile[] files) {
+        ImportFileTask task = new ImportFileTask();
+        List resultList = processorExcel(files[0]);
+        task.setOwnerType("SALARY_OWNER_TYPE");
+        task.setOwnerId(cmd.getOrganizationId());
+        task.setType(ImportFileTaskType.SALARY_GROUP.getCode());
+        task.setCreatorUid(UserContext.currentUserId());
+
+        importFileService.executeTask(new ExecuteImportTaskCallback() {
+            @Override
+            public ImportFileResponse importFile() {
+                ImportFileResponse response = new ImportFileResponse();
+                String fileLog = "";
+                if (resultList.size() > 0) {
+                    RowResult title = (RowResult) resultList.get(0);
+                    Map<String, String> titleMap = title.getCells();
+                    response.setTitle(titleMap);
+                    fileLog = checkImportEmployeeSalaryTitle(titleMap, cmd.getOrganizationId());
+                    if (!StringUtils.isEmpty(fileLog)) {
+                        response.setFileLog(fileLog);
+                        return response;
+                    }
+                    saveImportEmployeeSalary(resultList, cmd.getOrganizationId(), fileLog, response, cmd.getOwnerId());
+                } else {
+                    response.setFileLog(ImportFileErrorType.TITLE_ERROE.getCode());
+                }
+                return response;
+            }
+
+
+        }, task);
+        return null;
+    }
+
+    private void saveImportEmployeeSalary(List resultList, Long organizationId, String fileLog, ImportFileResponse response, Long ownerId) {
+        response.setLogs(new ArrayList<>());
+        for (int i = 1; i < resultList.size(); i++) {
+            RowResult r = (RowResult) resultList.get(i);
+            ImportFileResultLog<Map<String, String>> log = new ImportFileResultLog<>(SalaryConstants.SCOPE);
+            Map<String, String> data = new HashMap();
+            for (Map.Entry<String, String> entry : ((Map<String, String>) response.getTitle()).entrySet()) {
+                data.put(entry.getKey(), (r.getCells().get(entry.getKey()) == null) ? "" : r.getCells().get(entry.getKey()));
+            }
+            log.setData(data);
+            String userContact = r.getA().trim();
+            OrganizationMemberDetails detail = organizationProvider.findOrganizationMemberDetailsByOrganizationIdAndContactToken(ownerId, userContact);
+            if (null == detail) {
+//                response.setFileLog("找不到用户: 手机号" + userContact);
+                LOGGER.error("can not find organization member ,contact token is " + userContact);
+                log.setErrorLog("找不到用户: 手机号" + userContact);
+                log.setCode(SalaryConstants.ERROR_CHECK_CONTACT);
+                log.setErrorDescription(log.getErrorLog());
+                response.getLogs().add(log);
+                continue;
+            } else {
+                //// TODO: 2018/1/26  检验权限 是否有操作此用户的权限
+                saveImportEmployeeSalary(organizationId, detail.getId(), response, r);
+            }
+        }
+    }
+
+    private void saveImportEmployeeSalary(Long organizationId, Long detailId, ImportFileResponse response, RowResult r) {
+        List<SalaryGroupEntity> groupEntities = salaryGroupEntityProvider.listSalaryGroupEntityByOrgId(organizationId);
+        List<Long> groupEntityIds = new ArrayList<>();
+        if (null != groupEntities) {
+            for (int i = 0; i < groupEntities.size(); i++) {
+                groupEntityIds.add(groupEntities.get(i).getId());
+                //i=0时候对应excel是C,所以i要+3
+                String val = r.getCells().get(GetExcelLetter(i + 3));
+                if (SalaryEntityType.REDUN != SalaryEntityType.fromCode(groupEntities.get(i).getType())) {
+                    BigDecimal decimal = new BigDecimal(0);
+                    try {
+                        decimal = new BigDecimal(val);
+                    } catch (Exception e) {
+                        LOGGER.error("转化导入数据出错", e);
+                    }
+                    val = decimal.toString();
+                }
+                SalaryEmployeeOriginVal salaryVal = salaryEmployeeOriginValProvider.findSalaryEmployeeOriginValByDetailId(groupEntities.get(i).getId(), detailId);
+                if (null == salaryVal) {
+                    salaryVal = ConvertHelper.convert(groupEntities.get(i), SalaryEmployeeOriginVal.class);
+                    salaryVal.setSalaryValue(val);
+                    salaryEmployeeOriginValProvider.createSalaryEmployeeOriginVal(salaryVal);
+                } else {
+                    salaryVal.setSalaryValue(val);
+                    salaryEmployeeOriginValProvider.updateSalaryEmployeeOriginVal(salaryVal);
+                }
+            }
+        }
+        salaryEmployeeOriginValProvider.deleteSalaryEmployeeOriginValNotInList(groupEntityIds, detailId);
+
+    }
+
+    private String checkImportEmployeeSalaryTitle(Map<String, String> titleMap, Long organizationId) {
+        List<SalaryGroupEntity> groupEntities = salaryGroupEntityProvider.listSalaryGroupEntityByOrgId(organizationId);
+        List<String> titleList = new ArrayList<String>(titleMap.values());
+        if (!"手机".equals(titleList.get(0))) {
+            return ImportFileErrorType.TITLE_ERROE.getCode();
+        }
+        if (!"姓名".equals(titleList.get(1))) {
+            return ImportFileErrorType.TITLE_ERROE.getCode();
+        }
+        if (null != groupEntities) {
+            for (int i = 0; i < groupEntities.size(); i++) {
+                try {
+                    if (!groupEntities.get(i).equals(titleList.get(i + 2))) {
+                        return ImportFileErrorType.TITLE_ERROE.getCode();
+                    }
+                } catch (Exception e) {
+                    LOGGER.error("检测title报错了,可能是某个数组越界 ", e);
+                    return ImportFileErrorType.TITLE_ERROE.getCode();
+                }
+            }
+        }
+        return null;
+    }
+
+    private List processorExcel(MultipartFile file) {
+        try {
+            List resultList = PropMrgOwnerHandler.processorExcel(file.getInputStream());
+            if (resultList.isEmpty()) {
+                LOGGER.error("File content is empty");
+                throw RuntimeErrorException.errorWith(SalaryConstants.SCOPE, SalaryConstants.ERROR_FILE_IS_EMPTY,
+                        "File content is empty");
+            }
+            return resultList;
+        } catch (IOException e) {
+            LOGGER.error("file process excel error ", e);
+            e.printStackTrace();
+        }
+
+        return null;
+    }
+
+    @Override
+    public ImportFileResponse getImportResult(GetImportFileResultCommand cmd) {
+        return importFileService.getImportFileResult(cmd.getTaskId());
+    }
+
+    @Override
+    public OutputStream getEmployeeSalaryOutPut(Long organizationId, Long taskId) {
+        List<SalaryGroupEntity> groupEntities = salaryGroupEntityProvider.listSalaryGroupEntityByOrgId(organizationId);
+
+        XSSFWorkbook wb = new XSSFWorkbook();
+        XSSFSheet sheet = wb.createSheet("sheet1");
+        String sheetName = "sheet1";
+        createEmployeeSalaryHead(wb, sheet, groupEntities);
+        //人员列表
+        // TODO: 2018/1/25
+        List<Long> detailIds = new ArrayList<>();
+        List<Long> orgIds = new ArrayList<>();
+        orgIds.add(organizationId);
+        List<OrganizationMember> members = organizationProvider.listOrganizationMemberByOrganizationIds(new ListingLocator(), Integer.MAX_VALUE - 1, null, orgIds);
+        if (null != members) {
+            for (OrganizationMember member : members) {
+                detailIds.add(member.getDetailId());
+            }
+        }
+        int processNum = 0;
+        for (Long detailId : detailIds) {
+            OrganizationMemberDetails detail = organizationProvider.findOrganizationMemberDetailsByDetailId(detailId);
+            Row row = sheet.createRow(sheet.getLastRowNum() + 1);
+            int i = -1;
+            row.createCell(++i).setCellValue(detail.getContactToken());
+            row.createCell(++i).setCellValue(detail.getContactName());
+            for (SalaryGroupEntity entity : groupEntities) {
+                SalaryEmployeeOriginVal val = salaryEmployeeOriginValProvider.findSalaryEmployeeOriginValByDetailId(entity.getId(), detailId);
+                if (val != null) {
+                    row.createCell(++i).setCellValue(val.getSalaryValue());
+                } else {
+                    row.createCell(++i).setCellValue("");
+                }
+            }
+            taskService.updateTaskProcess(taskId, (++processNum * 100) / detailIds.size());
+
+        }
+        ByteArrayOutputStream out = new ByteArrayOutputStream();
+        try {
+            wb.write(out);
+        } catch (IOException e) {
+            e.printStackTrace();
+        }
+        // 设置response的Header
+        OutputStream outputStream = new BufferedOutputStream(out);
+
+        return outputStream;
     }
 
     private Workbook createEmployeeSalaryHeadWB(Long orgId) {
@@ -2467,16 +2738,16 @@ public class SalaryServiceImpl implements SalaryService {
                     sb.append("\n");
                     sb.append("数据策略：");
                     if (NormalFlag.YES == NormalFlag.fromCode(entity.getDataPolicy())) {
-                        sb.append("次月清空");
+                        sb.append("次月清零");
                     } else {
                         sb.append("次月沿用");
                     }
                     sb.append("\n");
                     sb.append("发放规则：");
                     if (NormalFlag.YES == NormalFlag.fromCode(entity.getGrantPolicy())) {
-                        sb.append("税后发放");
+                        sb.append("税后计算");
                     } else {
-                        sb.append("税前发放");
+                        sb.append("税前计算");
                     }
                     sb.append("\n");
                     sb.append("计税方式：");
@@ -2500,7 +2771,7 @@ public class SalaryServiceImpl implements SalaryService {
             workbook.write(out);
             response.reset();
             // 设置response的Header
-            response.addHeader("Content-Disposition", "attachment;filename=" + new String(fileName.getBytes()));
+            response.addHeader("Content-Disposition", "attachment;filename*=UTF-8''" + URLEncoder.encode(fileName, "UTF-8"));// new String(fileName.getBytes()));
             OutputStream toClient = new BufferedOutputStream(response.getOutputStream());
             response.setContentType("application/msexcel");
             toClient.write(out.toByteArray());
