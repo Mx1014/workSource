@@ -2757,7 +2757,9 @@ public class AssetServiceImpl implements AssetService {
                 if(cmd.getOwnerType()!=null && cmd.getOwnerType().equals(AssetPaymentStrings.EH_ORGANIZATION)) hasPay = 0;
                 break;
             case 999983:
-                hasContractView = 0;
+                //                hasContractView = 0;
+                //正中会要求可以看合同
+                hasContractView = 1;
                 hasPay = 0;
                 break;
             default:
