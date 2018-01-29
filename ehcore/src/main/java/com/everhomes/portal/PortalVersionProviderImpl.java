@@ -113,6 +113,7 @@ public class PortalVersionProviderImpl implements PortalVersionProvider {
 			query.addConditions(Tables.EH_PORTAL_VERSIONS.STATUS.eq(status));
 		}
 
+		query.addOrderBy(Tables.EH_PORTAL_VERSIONS.DATE_VERSION.desc());
 		query.addOrderBy(Tables.EH_PORTAL_VERSIONS.BIG_VERSION.desc());
 		query.addOrderBy(Tables.EH_PORTAL_VERSIONS.MINOR_VERSION.desc());
 
