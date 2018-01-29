@@ -1,6 +1,7 @@
 // @formatter:off
 package com.everhomes.organization;
 
+import java.sql.Timestamp;
 import java.util.List;
 import java.util.Map;
 import java.util.Set;
@@ -594,4 +595,6 @@ public interface OrganizationService {
 	Long getDepartmentByDetailId(Long detailId);
 
 	ListPMOrganizationsResponse listPMOrganizations(ListPMOrganizationsCommand cmd);
+
+	List<Long> listDetailIdWithEntepriseExclude(String keywords, Integer namespaceId, Long enterpriseId, Timestamp checkinTimeStart, Timestamp checkinTimeEnd, Timestamp dissmissTimeStart, Timestamp dissmissTimeEnd, CrossShardListingLocator locator, Integer pageSize);
 }
