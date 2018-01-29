@@ -2350,7 +2350,9 @@ public class SalaryServiceImpl implements SalaryService {
             if (null == employee) {
                 employee = createSalaryEmployee(cmd.getOwnerId(), detailId, month);
             }
-            response.getSalaryEmployeeDTO().add(processEmployeeDTO(employee));
+            if (null != employee) {
+                response.getSalaryEmployeeDTO().add(processEmployeeDTO(employee));
+            }
         }
 
         CrossShardListingLocator locator = new CrossShardListingLocator();
@@ -2417,6 +2419,9 @@ public class SalaryServiceImpl implements SalaryService {
             }
         }
         for (OrganizationMemberDetails detail : details) {
+            if (null == detail) {
+                continue;
+            }
             createSalaryEmployee(ownerId, detail.getId(), month);
         }
     }
@@ -2451,6 +2456,7 @@ public class SalaryServiceImpl implements SalaryService {
     public GetEmployeeEntitiesResponse getEmployeeEntities(GetEmployeeEntitiesCommand cmd) {
         OrganizationMemberDetails detail = organizationProvider.findOrganizationMemberDetailsByDetailId(cmd.getDetailId());
         GetEmployeeEntitiesResponse response = ConvertHelper.convert(detail, GetEmployeeEntitiesResponse.class);
+        response.setCategories(new ArrayList<>());
 //        response.setCheckInTime(detail.getCheckInTime());
 //        response.setDismissTime(detail.getDismissTime());
         List<SalaryEntityCategory> categories = salaryEntityCategoryProvider.listSalaryEntityCategory();
@@ -2485,6 +2491,8 @@ public class SalaryServiceImpl implements SalaryService {
 
     private SalaryPeriodEmployeeEntityDTO processSalaryPeriodEmployeeEntityDTO(SalaryGroupEntity entity, OrganizationMemberDetails detail) {
         SalaryPeriodEmployeeEntityDTO dto = ConvertHelper.convert(entity, SalaryPeriodEmployeeEntityDTO.class);
+        dto.setGroupEntityId(entity.getId());
+        dto.setGroupEntityName(entity.getName());
         SalaryEmployeeOriginVal val = salaryEmployeeOriginValProvider.findSalaryEmployeeOriginValByDetailId(entity.getId(), detail.getId());
         if (null != val) {
             dto.setSalaryValue(val.getSalaryValue());
@@ -2537,7 +2545,7 @@ public class SalaryServiceImpl implements SalaryService {
 
 
         }, task);
-        return null;
+        return ConvertHelper.convert(task,ImportFileTaskDTO.class);
     }
 
     private void saveImportEmployeeSalary(List resultList, Long organizationId, String fileLog, ImportFileResponse response, Long ownerId) {
@@ -2667,6 +2675,9 @@ public class SalaryServiceImpl implements SalaryService {
         int processNum = 0;
         for (Long detailId : detailIds) {
             OrganizationMemberDetails detail = organizationProvider.findOrganizationMemberDetailsByDetailId(detailId);
+            if (null == detail) {
+                continue;
+            }
             Row row = sheet.createRow(sheet.getLastRowNum() + 1);
             int i = -1;
             row.createCell(++i).setCellValue(detail.getContactToken());
