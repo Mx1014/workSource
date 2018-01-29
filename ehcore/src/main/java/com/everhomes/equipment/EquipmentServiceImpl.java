@@ -3570,10 +3570,8 @@ private void checkUserPrivilege(Long orgId, Long privilegeId, Long communityId) 
 		if (cmd.getLastSyncTime() != null) {
 			lastSyncTime = dateStrToTimestamp(cmd.getLastSyncTime());
 		}
-
 		ListEquipmentTasksResponse response = new ListEquipmentTasksResponse();
 		User user = UserContext.current().getUser();
-
 		int pageSize = cmd.getPageSize() == null ? Integer.MAX_VALUE - 1 : cmd.getPageSize();
 
 		if(null == cmd.getPageAnchor()) {
@@ -4466,9 +4464,7 @@ private void checkUserPrivilege(Long orgId, Long privilegeId, Long communityId) 
 					EquipmentServiceErrorCode.ERROR_EQUIPMENT_NOT_EXIST,
  				"设备不存在");
 		}
-
 		ListEquipmentTasksResponse response = new ListEquipmentTasksResponse();
-
 		User user = UserContext.current().getUser();
 
 		int pageSize = PaginationConfigHelper.getPageSize(configurationProvider, cmd.getPageSize());
@@ -5819,10 +5815,13 @@ private void checkUserPrivilege(Long orgId, Long privilegeId, Long communityId) 
 		ListEquipmentTasksResponse response = listEquipmentTasks(cmd);//当前登录人的任务信息
 
 		EquipmentTaskOfflineResponse offlineResponse = new EquipmentTaskOfflineResponse();
-		List<EquipmentTaskDTO> tasks = response.getTasks();
 		List<EquipmentStandardRelationDTO> equipments = new ArrayList<>();//设备标准关联表 设备id 标准id
 		List<InspectionItemDTO> items = new ArrayList<>();//巡检item表包含standardId
 
+		offlineResponse.setTodayCompleteCount(response.getTodayCompleteCount());
+		offlineResponse.setTotayTasksCount(response.getTotayTasksCount());
+
+		List<EquipmentTaskDTO> tasks = response.getTasks();
 		tasks.forEach((task) -> {
 			if (task.getReviewTime() == null) {
 				if (task.getExecutiveTime() != null) {
