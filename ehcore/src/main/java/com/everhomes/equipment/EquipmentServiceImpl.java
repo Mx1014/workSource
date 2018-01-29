@@ -2881,6 +2881,7 @@ private void checkUserPrivilege(Long orgId, Long privilegeId, Long communityId) 
             if (equipment != null){
                 dto.setEquipmentName(equipment.getName());
                 dto.setLocation(equipment.getLocation());
+                dto.setEquipmentId(equipment.getId());
             }
         }
 		dto.setItemResults(results);
