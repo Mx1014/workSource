@@ -15,6 +15,7 @@ import com.everhomes.server.schema.tables.pojos.EhPaymentApplications;
 import com.everhomes.server.schema.tables.records.EhPaymentApplicationsRecord;
 import com.everhomes.sharding.ShardIterator;
 import com.everhomes.util.ConvertHelper;
+import com.everhomes.util.DateHelper;
 import com.everhomes.util.IterationMapReduceCallback;
 import com.everhomes.warehouse.WarehouseMenuIds;
 import org.jooq.DSLContext;
@@ -23,6 +24,7 @@ import org.jooq.SelectQuery;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
 
+import java.sql.Timestamp;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Set;
@@ -44,6 +46,7 @@ public class PaymentApplicationProviderImpl implements PaymentApplicationProvide
     public void createPaymentApplication(PaymentApplication application) {
         long id = sequenceProvider.getNextSequence(NameMapper.getSequenceDomainFromTablePojo(EhPaymentApplications.class));
         application.setId(id);
+        application.setCreateTime(new Timestamp(DateHelper.currentGMTTime().getTime()));
         DSLContext context = dbProvider.getDslContext(AccessSpec.readWrite());
         EhPaymentApplicationsDao dao = new EhPaymentApplicationsDao(context.configuration());
         dao.insert(application);
