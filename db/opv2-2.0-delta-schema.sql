@@ -132,13 +132,13 @@ ALTER TABLE `eh_equipment_inspection_standards`
   ADD COLUMN `repeat_type` TINYINT(4) NOT NULL COMMENT ' 0: no repeat, 1: by day, 2: by week, 3: by month, 4: by year';
 -- 操作记录表增加设备id表
 ALTER TABLE `eh_equipment_inspection_task_logs`
-  ADD COLUMN `equipment_id`  bigint(20) NULL DEFAULT 0 ;
+  ADD COLUMN `equipment_id`  BIGINT(20) NULL DEFAULT 0 ;
 ALTER TABLE `eh_equipment_inspection_task_logs`
-  ADD COLUMN `maintance_type`  varchar(255) NULL DEFAULT '';
+  ADD COLUMN `maintance_type`  VARCHAR(255) NULL DEFAULT '';
 ALTER TABLE `eh_equipment_inspection_task_logs`
-  ADD COLUMN `flow_case_id`  bigint(20) NULL AFTER `equipment_id`;
+  ADD COLUMN `flow_case_id`  BIGINT(20) NULL AFTER `equipment_id`;
 ALTER TABLE `eh_equipment_inspection_task_logs`
-  ADD COLUMN `maintance_status` tinyint(4) NOT NULL DEFAULT '0' COMMENT '0: inactive 1: wating, 2: allocated 3: completed 4: closed';
+  ADD COLUMN `maintance_status` TINYINT(4) NOT NULL DEFAULT '0' COMMENT '0: inactive 1: wating, 2: allocated 3: completed 4: closed';
 
 
 -- 离线支持  jiarui
@@ -536,7 +536,7 @@ ALTER TABLE `eh_contracts` ADD COLUMN `application_id` BIGINT COMMENT '关联请
 ALTER TABLE `eh_contracts` ADD COLUMN `payment_mode_item_id` BIGINT COMMENT '预计付款方式';
 ALTER TABLE `eh_contracts` ADD COLUMN `paid_time` DATETIME COMMENT '预计付款时间';
 ALTER TABLE `eh_contracts` ADD COLUMN `lump_sum_payment` DECIMAL(10,2) COMMENT '一次性付款金额';
-ALTER TABLE `eh_contracts` ADD COLUMN `treaty_particulars` text COMMENT '合同摘要';
+ALTER TABLE `eh_contracts` ADD COLUMN `treaty_particulars` TEXT COMMENT '合同摘要';
 
 ALTER TABLE `eh_contracts` ADD COLUMN `payment_flag` TINYINT NOT NULL DEFAULT '0' COMMENT '0:普通合同；1：付款合同';
 
@@ -751,6 +751,32 @@ CREATE TABLE `eh_requisition_types`(
 -- 仓库管理2.0 end of the script
 
 
+ 
+
+-- 增加版本号 201801252125
+ALTER TABLE `eh_portal_content_scopes` ADD COLUMN `version_id`  BIGINT(20) NULL;
+ALTER TABLE `eh_portal_launch_pad_mappings` ADD COLUMN `version_id`  BIGINT(20) NULL;
+   
+-- merge from sync-task 20180126
+CREATE TABLE `eh_sync_data_tasks` (
+  `id` BIGINT NOT NULL COMMENT 'id of the record',
+  `owner_type` VARCHAR(32) NOT NULL DEFAULT '',
+  `owner_id` BIGINT NOT NULL DEFAULT 0,
+  `type` VARCHAR(64) NOT NULL DEFAULT '',
+  `status` TINYINT NOT NULL,
+  `result` LONGTEXT,
+  `creator_uid` BIGINT,
+  `create_time` DATETIME,
+  `update_time` DATETIME,
+  PRIMARY KEY (`id`)
+) ENGINE=INNODB DEFAULT CHARSET=utf8mb4;
+
+ALTER TABLE `eh_addresses` ADD COLUMN `version` VARCHAR(32) COMMENT '版本号';
+
+
+-- 薪酬2.0 
+
+ 
 
 -- 薪酬设置可以用的基础字段项(可以被公司继承,不可删除)
 DROP TABLE IF EXISTS eh_salary_default_entities;
@@ -898,23 +924,6 @@ CREATE TABLE `eh_salary_employee_period_vals` (
   PRIMARY KEY (`id`)
 ) ENGINE=INNODB DEFAULT CHARSET=utf8mb4 ;
 
-
--- 增加版本号 201801252125
-ALTER TABLE `eh_portal_content_scopes` ADD COLUMN `version_id`  BIGINT(20) NULL;
-ALTER TABLE `eh_portal_launch_pad_mappings` ADD COLUMN `version_id`  BIGINT(20) NULL;
+ 
+-- 薪酬2.0结束   
    
--- merge from sync-task 20180126
-CREATE TABLE `eh_sync_data_tasks` (
-  `id` BIGINT NOT NULL COMMENT 'id of the record',
-  `owner_type` VARCHAR(32) NOT NULL DEFAULT '',
-  `owner_id` BIGINT NOT NULL DEFAULT 0,
-  `type` VARCHAR(64) NOT NULL DEFAULT '',
-  `status` TINYINT NOT NULL,
-  `result` LONGTEXT,
-  `creator_uid` BIGINT,
-  `create_time` DATETIME,
-  `update_time` DATETIME,
-  PRIMARY KEY (`id`)
-) ENGINE=INNODB DEFAULT CHARSET=utf8mb4;
-
-ALTER TABLE `eh_addresses` ADD COLUMN `version` VARCHAR(32) COMMENT '版本号';
