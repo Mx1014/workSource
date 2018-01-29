@@ -5,6 +5,6 @@ package com.everhomes.customer;
  */
 public interface CustomerHandle {
     String CUSTOMER_PREFIX = "customer-";
-    void syncEnterprises(String pageOffset, String version, String communityIdentifier);
+    void syncEnterprises(String pageOffset, String version, String communityIdentifier, Long taskId);
     void syncIndividuals(String pageOffset, String version, String communityIdentifier);
 }

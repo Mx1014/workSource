@@ -8,7 +8,6 @@ import com.everhomes.util.StringHelper;
 /**
  * <ul>
  * <li>groupId: group id</li>
- *      参考{@link com.everhomes.rest.group.GroupMemberStatus}</li>
  * <li>pageAnchor: 分页的锚点，本次开始取的位置</li>
  * <li>pageSize: 每页的数量</li>
  * </ul>

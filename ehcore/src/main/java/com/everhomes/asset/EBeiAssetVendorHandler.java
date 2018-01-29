@@ -304,7 +304,9 @@ public class EBeiAssetVendorHandler implements AssetVendorHandler {
         if(list.size()>0){
             response.setDatestr(list.get(0).getDateStr());
         }
-        response.setAmountOwed(amountOwed);
+        //改成receivable,来自正中会需求 2018/1/23
+//        response.setAmountOwed(amountOwed);
+        response.setAmountOwed(amountReceivable);
         return response;
     }
 
@@ -430,15 +432,25 @@ public class EBeiAssetVendorHandler implements AssetVendorHandler {
         return null;
     }
 
+    /**
+     *
+     * @modify 2018/1/16 start to change the filter condition. Present + unpaid -> present only
+     */
     @Override
     public List<ShowBillForClientV2DTO> showBillForClientV2(ShowBillForClientV2Command cmd) {
         List<ShowBillForClientV2DTO> list = new ArrayList<>();
         SimpleDateFormat yyyyMM = new SimpleDateFormat("yyyy-MM");
-        String beginMonth = yyyyMM.format(new Date());
-        String endMonth = beginMonth;
+        String endMonth = yyyyMM.format(new Date());
+        String beginMonth = null;
+        //非未来+未缴纳
         GetLeaseContractBillOnFiPropertyRes res = keXingBillService.getAllFiPropertyBills(cmd.getNamespaceId(),cmd.getOwnerId(),cmd.getTargetId(),cmd.getTargetType(),(byte)0,beginMonth,endMonth);
-        //处理数据
         List<GetLeaseContractBillOnFiPropertyData> data = res.getData();
+        //没查到，则改为本月已经缴纳的
+        if(data == null ||data.size() < 1){
+            beginMonth = endMonth;
+            res = keXingBillService.getAllFiPropertyBills(cmd.getNamespaceId(),cmd.getOwnerId(),cmd.getTargetId(),cmd.getTargetType(),(byte)1,beginMonth,endMonth);
+        }
+        data = res.getData();
         Map<String,List<GetLeaseContractBillOnFiPropertyData>> tabs = new HashMap<>();
         if(data == null) return list;
         for(int i = 0; i < data.size(); i++){
@@ -494,7 +506,7 @@ public class EBeiAssetVendorHandler implements AssetVendorHandler {
         String endMonth = yyyyMM.format(new Date());
         GetLeaseContractBillOnFiPropertyRes res = keXingBillService.getAllFiPropertyBills(cmd.getNamespaceId(),cmd.getOwnerId(),cmd.getTargetId(),cmd.getTargetType(),null,null,endMonth);
         List<GetLeaseContractBillOnFiPropertyData> data = res.getData();
-        if(data == null) return list;
+        if(data == null) return new ArrayList<>();
         for(int i = 0; i < data.size(); i ++){
             GetLeaseContractBillOnFiPropertyData source = data.get(i);
             ListAllBillsForClientDTO dto = new ListAllBillsForClientDTO();
@@ -507,8 +519,23 @@ public class EBeiAssetVendorHandler implements AssetVendorHandler {
             dto.setAmountOwed(source.getActualMoney());
             dto.setBillId(source.getBillId());
             dto.setChargeStatus(source.getIsPay().equals("已缴纳")?(byte)1:(byte)0);
+            dto.setDateStr(source.getChargePeriod());
+            String chargePeriod = source.getChargePeriod();
+            try {
+                Date parse = yyyyMM.parse(chargePeriod);
+                dto.setDate(parse);
+            } catch (ParseException e) {
+                LOGGER.error("2.2.4.15 response chargePeriod pattern incorrect, chargePeriod = {},request pattern is yyyyMM",chargePeriod);
+            }
             list.add(dto);
         }
+        //按照时间降序排序
+        Collections.sort(list, new Comparator<ListAllBillsForClientDTO>() {
+            @Override
+            public int compare(ListAllBillsForClientDTO o1, ListAllBillsForClientDTO o2) {
+                return o2.getDate().compareTo(o1.getDate());
+            }
+        });
         return list;
     }
 

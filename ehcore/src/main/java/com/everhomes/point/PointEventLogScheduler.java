@@ -42,7 +42,7 @@ public class PointEventLogScheduler implements ApplicationListener<ContextRefres
 
     private static final Logger LOGGER = LoggerFactory.getLogger(PointEventLogScheduler.class);
 
-    private static final int SCHEDULE_DURATION_SECONDS = 60;
+    private static int SCHEDULE_DURATION_SECONDS = 60;
 
     private final static Random random = new Random();
 
@@ -50,7 +50,7 @@ public class PointEventLogScheduler implements ApplicationListener<ContextRefres
     private String serverId;
 
     private ScheduledExecutorService scheduledExecutorService = Executors.newScheduledThreadPool(
-            1, new CustomizableThreadFactory("PointEventLogSchedule-"));
+            1, getThreadFactory());
 
     @Autowired(required = false)
     private List<IPointEventProcessor> eventProcessors;
@@ -137,7 +137,7 @@ public class PointEventLogScheduler implements ApplicationListener<ContextRefres
     }
 
     private void initScheduledTask() {
-        scheduledExecutorService.schedule(this::doProcessAll, SCHEDULE_DURATION_SECONDS, TimeUnit.SECONDS);
+        scheduledExecutorService.schedule(this::doProcessAll, scheduleDurationSeconds(), TimeUnit.SECONDS);
     }
 
     private void initRestartSubscriber() {
@@ -147,7 +147,7 @@ public class PointEventLogScheduler implements ApplicationListener<ContextRefres
                         scheduledExecutorService.isTerminated());
 
                 scheduledExecutorService = Executors.newScheduledThreadPool(
-                        1, new CustomizableThreadFactory("PointEventLogSchedule-"));
+                        1, getThreadFactory());
                 initScheduledTask();
             } else {
                 LOGGER.info("PointEventLogSchedulerRestart skipped, scheduledExecutorService.isTerminated() is {}.",
@@ -155,6 +155,10 @@ public class PointEventLogScheduler implements ApplicationListener<ContextRefres
             }
             return LocalBusSubscriber.Action.none;
         });
+    }
+
+    private CustomizableThreadFactory getThreadFactory() {
+        return new CustomizableThreadFactory("PointEventLogSchedule-");
     }
 
     private void doProcessAll() {
@@ -166,7 +170,7 @@ public class PointEventLogScheduler implements ApplicationListener<ContextRefres
             }
 
             doProcessGroups();
-            scheduledExecutorService.schedule(this::doProcessAll, SCHEDULE_DURATION_SECONDS, TimeUnit.SECONDS);
+            scheduledExecutorService.schedule(this::doProcessAll, scheduleDurationSeconds(), TimeUnit.SECONDS);
 
             if (i == 1) {
                 long end = System.currentTimeMillis();
@@ -178,6 +182,18 @@ public class PointEventLogScheduler implements ApplicationListener<ContextRefres
             LOGGER.error("Process point event log error.", e);
             sendExceptionMail(e);
         }
+    }
+
+    private int scheduleDurationSeconds() {
+        try {
+            SCHEDULE_DURATION_SECONDS =
+                    configurationProvider.getIntValue(
+                            "point.processLog.durationSeconds",
+                            SCHEDULE_DURATION_SECONDS);
+        } catch (Exception e) {
+            // ignore
+        }
+        return SCHEDULE_DURATION_SECONDS;
     }
 
     private void sendExceptionMail(Exception e) {
@@ -276,10 +292,19 @@ public class PointEventLogScheduler implements ApplicationListener<ContextRefres
                                 });
 
                                 PointLog pl = result.getLog();
-                                if (!pointLogProvider.isExist(pl.getNamespaceId(), pl.getSystemId(), pl.getTargetUid(),
-                                        pl.getRuleId(), pl.getEntityType(), pl.getEntityId())) {
-                                    pointLogProvider.createPointLog(pl);
+                                PointLog dbLog = pointLogProvider.isExist(pl.getNamespaceId(), pl.getSystemId(), pl.getTargetUid(),
+                                        pl.getRuleId(), pl.getEntityType(), pl.getEntityId());
+
+                                // 这个类型的log是否已经存在
+                                if (dbLog != null) {
+                                    PointLog bindingLog = pointLogProvider.findByBindingLogId(dbLog.getId());
+                                    if (bindingLog == null) {
+                                        // bindingLog为空，这时不能加记录，防止重复记录
+                                        continue;
+                                    }
+                                    // 按照顺序，已经有log是这个类型的日志的binding,所以可以记录
                                 }
+                                pointLogProvider.createPointLog(pl);
                             }
                         }
 

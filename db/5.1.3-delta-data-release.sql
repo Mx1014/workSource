@@ -10,3 +10,7 @@ INSERT INTO `eh_configurations` (`name`, `value`, `description`, `namespace_id`,
 -- 更新所有域空间的模块类型
 update eh_service_modules set module_control_type = 'unlimit_control' where id = 41300;
 update eh_service_modules set module_control_type = 'unlimit_control' where id = 49200;
+
+-- 物业缴费模块的催缴短信模板 by wentian and 娟姐
+
+update eh_locale_templates set text = '${targetName}先生/女士，您好，您的物业账单已出，账期${dateStr}，账单金额为${amount}元，使用"${appName} APP"可及时查看账单。' where scope = "sms.default" and namespace_id = 0 and code = 54;

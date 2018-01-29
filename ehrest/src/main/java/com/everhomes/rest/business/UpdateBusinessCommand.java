@@ -15,7 +15,7 @@ import com.everhomes.util.StringHelper;
  * <li>targetId: 商家原始id</li>
  * <li>name: 商家名字</li>
  * <li>displayName: 商家显示名</li>
- * <li>logoUri: 商家logo/li>
+ * <li>logoUri: 商家logo</li>
  * <li>url: 访问商家信息的url</li>
  * <li>contact: 商家拥有者名字</li>
  * <li>phone: 商家所有在联系方式</li>
