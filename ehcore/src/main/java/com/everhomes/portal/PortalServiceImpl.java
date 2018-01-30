@@ -453,6 +453,10 @@ public class PortalServiceImpl implements PortalService {
 		portalItemGroup.setCreatorUid(user.getId());
 		portalItemGroup.setOperatorUid(user.getId());
 		portalItemGroup.setVersionId(portalLayout.getVersionId());
+
+		Integer maxDefaultOrder = portalItemGroupProvider.findMaxDefaultOrder(portalLayout.getId());
+		portalItemGroup.setDefaultOrder(maxDefaultOrder + 1);
+
 		portalItemGroupProvider.createPortalItemGroup(portalItemGroup);
 		return processPortalItemGroupDTO(portalItemGroup);
 	}
@@ -585,6 +589,11 @@ public class PortalServiceImpl implements PortalService {
 		}
 		if(PortalItemActionType.fromCode(portalItem.getActionType()) == PortalItemActionType.ALLORMORE){
 			portalItem.setDefaultOrder(10000);
+		}else {
+			Integer maxDefaultOrder = portalItemGroupProvider.findMaxDefaultOrder(portalItemGroup.getId());
+			portalItem.setDefaultOrder(maxDefaultOrder + 1);
+
+
 		}
 		portalItem.setCreatorUid(user.getId());
 		portalItem.setOperatorUid(user.getId());

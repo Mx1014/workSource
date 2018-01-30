@@ -99,6 +99,16 @@ public class PortalItemProviderImpl implements PortalItemProvider {
 	}
 
 	@Override
+	public Integer findMaxDefaultOrder(Long itemGroupId) {
+		Integer defaultOrder = getReadOnlyContext().select(Tables.EH_PORTAL_ITEMS.DEFAULT_ORDER.max())
+				.from(Tables.EH_PORTAL_ITEMS)
+				.where(Tables.EH_PORTAL_ITEMS.ITEM_GROUP_ID.eq(itemGroupId))
+				.fetchOne().value1();
+
+		return defaultOrder;
+	}
+
+	@Override
 	public List<PortalItem> listPortalItems(Long itemCategoryId, Long itemGroupId){
 		return listPortalItems(itemCategoryId, null, null, itemGroupId, PortalItemStatus.INACTIVE.getCode(), null);
 	}

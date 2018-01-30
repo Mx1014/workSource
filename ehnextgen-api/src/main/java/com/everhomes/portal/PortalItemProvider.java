@@ -28,7 +28,9 @@ public interface PortalItemProvider {
 
 	List<PortalItem> listPortalItems(Long itemCategoryId, Integer namespaceId, String actionType, Long itemGroupId, Byte neStatus, Long versionId);
 
-	List<PortalItem> listPortalItems(Long itemCategoryId, Long itemGroupId);
+    Integer findMaxDefaultOrder(Long itemGroupId);
+
+    List<PortalItem> listPortalItems(Long itemCategoryId, Long itemGroupId);
 
     PortalItem getPortalItemByGroupNameAndName(Integer namespaceId, String location, String groupName, String name, Long itemGroupId);
 }
