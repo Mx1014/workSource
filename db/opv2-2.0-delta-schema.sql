@@ -925,7 +925,12 @@ CREATE TABLE `eh_salary_employee_period_vals` (
 ) ENGINE=INNODB DEFAULT CHARSET=utf8mb4 ;
 
  
--- 薪酬2.0结束
+
+-- 薪酬2.0结束   
+   
+-- 请示单增加编号字段
+ALTER TABLE `eh_payment_applications` ADD COLUMN `application_number`  VARCHAR(32);
+
 
 ALTER TABLE `eh_lease_promotions`
 ADD COLUMN `house_resource_type` VARCHAR(256) NULL COMMENT '房源类型  rentHouse 出租房源   sellHouse 出售房源' AFTER `category_id`;
@@ -957,4 +962,3 @@ SET @var_id = (SELECT max(`id`) from `eh_payment_variables`);
 INSERT INTO `eh_payment_variables` (`id`, `charging_standard_id`, `charging_items_id`, `name`, `creator_uid`, `create_time`, `operator_uid`, `update_time`, `identifier`) VALUES (@var_id:=@var_id+1, NULL, '6', '欠费', '0', '2017-10-16 09:31:00', NULL, '2017-10-16 09:31:00', 'qf');
 
 -- end of contractbug
-   

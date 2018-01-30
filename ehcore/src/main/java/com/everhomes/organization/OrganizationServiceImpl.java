@@ -726,6 +726,7 @@ public class OrganizationServiceImpl implements OrganizationService {
             dtos.add(toOrganizationDetailDTO(id, false));
         }
         dtos = dtos.stream().filter(r->r != null).collect(Collectors.toList());
+        LOGGER.debug("searchEnterprise result = {}", dtos.toString());
         resp.setDtos(dtos);
         return resp;
     }
