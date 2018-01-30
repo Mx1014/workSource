@@ -2338,9 +2338,27 @@ public class SalaryServiceImpl implements SalaryService {
             namespaceId = UserContext.getCurrentNamespaceId();
         }
         //
-        Calendar checkin = Calendar.getInstance();
-        checkin.setTimeInMillis(cmd.getCheckInMonth());
-        checkin.add(Calendar.MONTH, 1);
+        Timestamp checkinStartTime = null;
+        Timestamp checkinEndTime = null;
+        if (null != cmd.getCheckInMonth()) {
+            checkinStartTime= new Timestamp(cmd.getCheckInMonth());
+            Calendar checkin = Calendar.getInstance();
+            checkin.setTimeInMillis(cmd.getCheckInMonth());
+            checkin.add(Calendar.MONTH, 1);
+            checkinEndTime = new Timestamp(checkin.getTimeInMillis());
+
+        }
+
+        Timestamp dissmisStartTime = null;
+        Timestamp dissmisEndTime = null;
+        if (null != cmd.getDismissMonth()) {
+            dissmisStartTime= new Timestamp(cmd.getDismissMonth());
+            Calendar dismissEnd = Calendar.getInstance();
+            dismissEnd.setTimeInMillis(cmd.getDismissMonth());
+            dismissEnd.add(Calendar.MONTH, 1);
+            dissmisEndTime = new Timestamp(dismissEnd.getTimeInMillis());
+
+        }
         Calendar dismissEnd = Calendar.getInstance();
         dismissEnd.setTimeInMillis(cmd.getDismissMonth());
         dismissEnd.add(Calendar.MONTH, 1);
@@ -2360,11 +2378,10 @@ public class SalaryServiceImpl implements SalaryService {
 
         }
         List<Long> detailIds = organizationService.listDetailIdWithEnterpriseExclude(cmd.getKeywords(),
-                namespaceId, cmd.getOwnerId(), new Timestamp(cmd.getCheckInMonth()), new Timestamp(checkin.getTimeInMillis()),
-                new Timestamp(cmd.getDismissMonth()), new Timestamp(dismissEnd.getTimeInMillis()), locator, pageSize + 1,notinDetails,inDetails
+                namespaceId, cmd.getOwnerId(),checkinStartTime,checkinEndTime,dissmisStartTime,dissmisStartTime, locator, pageSize + 1,notinDetails,inDetails
         );
 //        List<Long> orgIds = new ArrayList<>();
-//        orgIds.add(cmd.getOwnerId());
+//        orgIds.add(cmd.getOwnerId());ec“
 //        List<OrganizationMember> members = organizationProvider.listOrganizationMemberByOrganizationIds(new ListingLocator(), Integer.MAX_VALUE - 1, null, orgIds);
 //        if (null != members) {
 //            for (OrganizationMember member : members) {
