@@ -25,6 +25,7 @@ import com.everhomes.user.UserContext;
 import com.everhomes.util.ConvertHelper;
 import com.everhomes.util.DateHelper;
 import com.everhomes.util.RuntimeErrorException;
+import com.everhomes.util.StringHelper;
 import com.everhomes.util.excel.RowResult;
 import com.everhomes.util.excel.handler.PropMrgOwnerHandler;
 import freemarker.cache.StringTemplateLoader;
@@ -2377,6 +2378,11 @@ public class SalaryServiceImpl implements SalaryService {
         List<Long> detailIds = organizationService.listDetailIdWithEnterpriseExclude(cmd.getKeywords(),
                 namespaceId, cmd.getOwnerId(),checkinStartTime,checkinEndTime,dissmisStartTime,dissmisEndTime, locator, pageSize + 1,notinDetails,inDetails
         );
+        LOGGER.debug(" organizationService.listDetailIdWithEnterpriseExclude("+cmd.getKeywords()+",\n" +
+                namespaceId+","+ cmd.getOwnerId()+","+checkinStartTime+","+checkinEndTime+","+dissmisStartTime+","+dissmisEndTime+","+ locator+","+ pageSize + 1+","+notinDetails+","+inDetails+"\n"+
+                "        );");
+        LOGGER.debug("detail Ids : " + StringHelper.toJsonString(detailIds));
+
 //        List<Long> orgIds = new ArrayList<>();
 //        orgIds.add(cmd.getOwnerId());ec“
 //        List<OrganizationMember> members = organizationProvider.listOrganizationMemberByOrganizationIds(new ListingLocator(), Integer.MAX_VALUE - 1, null, orgIds);
