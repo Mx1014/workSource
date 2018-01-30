@@ -85,6 +85,7 @@ public class QualityInspectionSampleSearcherImpl extends AbstractElasticSearch i
 
     @Override
     public ListSampleQualityInspectionResponse query(SearchSampleQualityInspectionCommand cmd) {
+        LOGGER.debug("SearchSampleQualityInspectionCommand time :{}"+System.currentTimeMillis());
         SearchResponse rsp = search(cmd);
         List<Long> ids = getIds(rsp);
 

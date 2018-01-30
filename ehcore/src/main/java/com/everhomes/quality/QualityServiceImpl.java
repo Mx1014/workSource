@@ -3372,6 +3372,7 @@ public class QualityServiceImpl implements QualityService {
 		sample.setStatus(Status.ACTIVE.getCode());
 		qualityProvider.createQualityInspectionSample(sample);
 		sampleSearcher.feedDoc(sample);
+		LOGGER.debug("createSampleQualityInspection feedDoc complete time:{}"+System.currentTimeMillis());
 
 		if(cmd.getCommunityIds() != null && cmd.getCommunityIds().size() > 0) {
 			cmd.getCommunityIds().forEach(communityId -> {
