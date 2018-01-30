@@ -6689,7 +6689,9 @@ public class PunchServiceImpl implements PunchService {
 			if(file.exists())
 				file.delete();
 		}*/
+
 		PunchSchedulingDTO result = convertToPunchSchedulings(resultList);
+		addOperateLog(0L,"",result.toString(),0L,"importPunchScheduling");
 		return result;
 	}
 	@Override
@@ -7262,6 +7264,9 @@ public class PunchServiceImpl implements PunchService {
 	@Override
 	public PunchGroupDTO getPunchGroup(GetPunchGroupCommand cmd) {
 		Organization org = organizationProvider.findOrganizationById(cmd.getId());
+		PunchRule pr = punchProvider.getPunchruleByPunchOrgId(org.getId());
+		addOperateLog(pr.getId(),pr.getName(),cmd.toString(),pr.getOwnerId(),"getPunchGroup");
+
 		return getPunchGroupDTOByOrg(org);
 	}
 	public String getDepartment(Integer namespaceId, Long detailId){
@@ -7290,6 +7295,8 @@ public class PunchServiceImpl implements PunchService {
 						"check app privilege error");
             }
         }
+		addOperateLog(0L,"",cmd.toString(),cmd.getOwnerId(),"listPunchGroups");
+
 //=======
 //        Organization org = organizationProvider.findOrganizationById(cmd.getOwnerId());
 //        Integer allOrganizationInteger = organizationProvider.countOrganizationMemberDetailsByOrgId(org.getNamespaceId(), cmd.getOwnerId());
