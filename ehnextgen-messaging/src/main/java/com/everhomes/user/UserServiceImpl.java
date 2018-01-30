@@ -5519,7 +5519,7 @@ public class UserServiceImpl implements UserService {
 
 				try {
 					String token = URLDecoder.decode(response.getMessage(), "utf-8");
-					String[] tokenParam = token.split("&");
+					String[] tokenParam = token.substring(1,token.length()-2).split("&");
 					String salt = tokenParam[0];
 					if (salt.equals(SALT)) {
 						Long userId = Long.valueOf(tokenParam[1]);
@@ -5536,6 +5536,7 @@ public class UserServiceImpl implements UserService {
                         restResponse.setErrorCode(ErrorCodes.SUCCESS);
 						restResponse.setErrorDescription("OK");
 					} else {
+						restResponse.setErrorCode(ErrorCodes.ERROR_ACCESS_DENIED);
 						LOGGER.error("waitScanForLogon failure");
 						throw RuntimeErrorException.errorWith(ErrorCodes.SCOPE_GENERAL, ErrorCodes.ERROR_INVALID_PARAMETER, "waitScanForLogon failure");
 					}
