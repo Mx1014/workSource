@@ -98,8 +98,33 @@ CREATE TABLE `eh_salary_employee_origin_vals` (
   PRIMARY KEY (`id`)
 ) ENGINE=INNODB DEFAULT CHARSET=utf8mb4 ;
 
-DROP TABLE IF EXISTS eh_salary_groups;
 -- 薪酬批次每期的数据 
+DROP TABLE IF EXISTS eh_salary_groups;
+CREATE TABLE `eh_salary_groups` (
+  `id` BIGINT COMMENT 'id of the record', 
+  `owner_type` VARCHAR(32) COMMENT 'organization',
+  `owner_id` BIGINT COMMENT '属于哪一个分公司的',
+  `organization_id` BIGINT COMMENT '属于哪一个总公司的',
+  `salary_period` VARCHAR(8) COMMENT 'example:201705', 
+  `creator_uid` BIGINT COMMENT'创建者',
+  `create_time` DATETIME,  
+  PRIMARY KEY (`id`)
+) ENGINE=INNODB DEFAULT CHARSET=utf8mb4 ;
+
+-- 薪酬批次归档数据
+-- DROP TABLE IF EXISTS eh_salary_groups_files;
+CREATE TABLE `eh_salary_groups_files` (
+  `id` BIGINT COMMENT 'id of the record', 
+  `owner_type` VARCHAR(32) COMMENT 'organization',
+  `owner_id` BIGINT COMMENT '属于哪一个分公司的',
+  `organization_id` BIGINT COMMENT '属于哪一个总公司的',
+  `salary_period` VARCHAR(8) COMMENT 'example:201705', 
+  `creator_uid` BIGINT COMMENT'创建者',
+  `create_time` DATETIME,  
+  `filer_uid` BIGINT COMMENT'创建者',
+  `file_time` DATETIME,  
+  PRIMARY KEY (`id`)
+) ENGINE=INNODB DEFAULT CHARSET=utf8mb4 ;
 
 -- 薪酬批次每个人的每期数据
 DROP TABLE IF EXISTS eh_salary_employees;
@@ -118,6 +143,29 @@ CREATE TABLE `eh_salary_employees` (
   `creator_uid` BIGINT COMMENT'人员id',
   `create_time` DATETIME, 
   `status` TINYINT COMMENT '状态0-正常 1-实发合计为负  2-未定薪',
+  PRIMARY KEY (`id`)
+) ENGINE=INNODB DEFAULT CHARSET=utf8mb4 ;
+
+
+-- 薪酬批次每个人的归档数据
+DROP TABLE IF EXISTS eh_salary_employees_files;
+CREATE TABLE `eh_salary_employees_files` (
+  `id` BIGINT COMMENT 'id of the record', 
+  `owner_type` VARCHAR(32) COMMENT 'organization',
+  `owner_id` BIGINT COMMENT '属于哪一个分公司的',
+  `organization_id` BIGINT COMMENT '属于哪一个总公司的',
+  `namespace_id` INT ,
+  `salary_period` VARCHAR(8) COMMENT 'example:201705',
+  `user_id` BIGINT ,
+  `user_detail_id` BIGINT , 
+  `regular_salary` DECIMAL (10, 2) COMMENT '固定工资合计',
+  `should_pay_salary` DECIMAL (10, 2) COMMENT '应发工资合计',
+  `real_pay_salary` DECIMAL (10, 2) COMMENT '实发工资合计',
+  `creator_uid` BIGINT COMMENT'人员id',
+  `create_time` DATETIME, 
+  `status` TINYINT COMMENT '状态0-正常 1-实发合计为负  2-未定薪',
+  `filer_uid` BIGINT COMMENT'创建者',
+  `file_time` DATETIME,  
   PRIMARY KEY (`id`)
 ) ENGINE=INNODB DEFAULT CHARSET=utf8mb4 ;
 
