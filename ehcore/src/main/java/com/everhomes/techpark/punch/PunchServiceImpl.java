@@ -7495,6 +7495,11 @@ public class PunchServiceImpl implements PunchService {
 		java.sql.Date tomorrow= new java.sql.Date(tomorrowCalendar.getTimeInMillis());
 		//今日之后用pr的status查,之前用active查
 		List<PunchScheduling> schedulings = punchSchedulingProvider.queryPunchSchedulings(tomorrow,endDate,pr.getId(),pr.getStatus()) ;
+		if (null == schedulings &&PunchRuleStatus.ACTIVE!=PunchRuleStatus.fromCode(pr.getStatus())) {
+			//如果查不到当前状态的就 并且pr 的状态不是正常
+			List<PunchScheduling> schedulings = punchSchedulingProvider.queryPunchSchedulings(tomorrow,endDate,pr.getId(),PunchRuleStatus.ACTIVE.getCode()) ;
+			
+		}
 		if (null == schedulings) {
 			schedulings = new ArrayList<>();
 		}
