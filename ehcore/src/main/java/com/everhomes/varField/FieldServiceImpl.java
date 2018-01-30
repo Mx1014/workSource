@@ -601,11 +601,11 @@ public class FieldServiceImpl implements FieldService {
                 break;
             case "离场信息":
                 ListCustomerDepartureInfosCommand cmd12 = new ListCustomerDepartureInfosCommand();
-                cmd12.setCommunityId(customerId);
                 cmd12.setCustomerType(customerType);
                 cmd12.setCommunityId(communityId);
                 cmd12.setNamespaceId(namespaceId);
                 cmd12.setOrgId(orgId);
+                cmd12.setCustomerId(customerId);
                 LOGGER.info("离场信息 command"+cmd12);
                 List<CustomerDepartureInfoDTO> customerDepartureInfoDTOS = customerService.listCustomerDepartureInfos(cmd12);
                 if(customerDepartureInfoDTOS == null) customerDepartureInfoDTOS = new ArrayList<>();
@@ -633,11 +633,15 @@ public class FieldServiceImpl implements FieldService {
         String fieldParam = field.getFieldParam();
         FieldParams params = (FieldParams) StringHelper.fromJsonString(fieldParam, FieldParams.class);
         //如果是select，则修改fieldName,在末尾加上Name，减去末尾的Id如果存在的话。由抽象跌入现实，拥有了名字，这是从神降格为人的过程---第六天天主波旬
-        if(params.getFieldParamType().equals("select") && fieldName.split("Id").length > 1){
+        if((params.getFieldParamType().equals("select") || params.getFieldParamType().equals("customizationSelect")) && fieldName.split("Id").length > 1){
             if(!fieldName.equals("projectSource") && !fieldName.equals("status")){
                 fieldName = fieldName.split("Id")[0];
                 fieldName += "Name";
             }
+        }
+
+        if(fieldName.equals("addressId")){
+            fieldName = "addressName";
         }
 
         try {

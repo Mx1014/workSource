@@ -1509,7 +1509,7 @@ public class EnterpriseCustomerProviderImpl implements EnterpriseCustomerProvide
 						}
 
                         FieldParams params = (FieldParams) StringHelper.fromJsonString(field.getFieldParam(), FieldParams.class);
-                        if(params.getFieldParamType().equals("select") && field.getFieldName().lastIndexOf("Id") > -1){
+                        if((params.getFieldParamType().equals("select") || params.getFieldParamType().equals("customizationSelect")) && field.getFieldName().lastIndexOf("Id") > -1){
                             ScopeFieldItem levelItemNew = fieldProvider.findScopeFieldItemByFieldItemId(customer.getNamespaceId(), customer.getCommunityId(),(objNew == null ? -1l : Long.parseLong(objNew.toString())));
                             if(levelItemNew != null) {
                                 newData = levelItemNew.getItemDisplayName();

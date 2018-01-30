@@ -56,4 +56,6 @@ public interface ContractProvider {
 
 	List<Contract> listContractByNamespaceType(Integer namespaceId, String namespaceType, Long communityId);
 	List<Contract> listContractsByAddressId(Long addressId);
+
+    String findContractIdByThirdPartyId(String contractId, String code);
 }

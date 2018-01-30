@@ -6689,7 +6689,9 @@ public class PunchServiceImpl implements PunchService {
 			if(file.exists())
 				file.delete();
 		}*/
+
 		PunchSchedulingDTO result = convertToPunchSchedulings(resultList);
+		addOperateLog(0L,"",result.toString(),0L,"importPunchScheduling");
 		return result;
 	}
 	@Override
@@ -7088,45 +7090,48 @@ public class PunchServiceImpl implements PunchService {
         	}
         }
         //排班
+		this.dbProvider.execute((status) -> {
 
-		if (punchGroupDTO.getRuleType().equals(PunchRuleType.PAIBAN.getCode()) && punchGroupDTO.getSchedulings() != null) {
-			List<PunchScheduling> schedulings = new ArrayList<>();
-            Long monthLong = 0L;
-			for (PunchSchedulingDTO monthScheduling : punchGroupDTO.getSchedulings()) {
-				if(monthScheduling.getMonth() == null)
-					continue;
-                if(monthLong.compareTo(monthScheduling.getMonth()) <0 ) {
-                    monthLong = monthScheduling.getMonth();
-                }
-                List<PunchScheduling> psList = saveMonthSchedulings(monthScheduling, pr, ptrs);
-				if (null != psList && psList.size() > 0) {
-					schedulings.addAll(psList);
+			if (punchGroupDTO.getRuleType().equals(PunchRuleType.PAIBAN.getCode()) && punchGroupDTO.getSchedulings() != null) {
+				List<PunchScheduling> schedulings = new ArrayList<>();
+				Long monthLong = 0L;
+				for (PunchSchedulingDTO monthScheduling : punchGroupDTO.getSchedulings()) {
+					if (monthScheduling.getMonth() == null)
+						continue;
+					if (monthLong.compareTo(monthScheduling.getMonth()) < 0) {
+						monthLong = monthScheduling.getMonth();
+					}
+					List<PunchScheduling> psList = saveMonthSchedulings(monthScheduling, pr, ptrs);
+					if (null != psList && psList.size() > 0) {
+						schedulings.addAll(psList);
+					}
 				}
-			}
-			if (schedulings.size() > 0) {
-				//批量保存
+				if (schedulings.size() > 0) {
+					//批量保存
 
 //				Long t1 = System.currentTimeMillis();
-				List<EhPunchSchedulings> ehPsList = new ArrayList<>();
-				Long beginId = sequenceProvider.getNextSequenceBlock(NameMapper.getSequenceDomainFromTablePojo(EhPunchSchedulings.class), schedulings.size());
+					List<EhPunchSchedulings> ehPsList = new ArrayList<>();
+					Long beginId = sequenceProvider.getNextSequenceBlock(NameMapper.getSequenceDomainFromTablePojo(EhPunchSchedulings.class), schedulings.size());
 
-				for (PunchScheduling ps : schedulings) {
-					ps.setId(beginId++);
-					EhPunchSchedulings eps = ConvertHelper.convert(ps, EhPunchSchedulings.class);
-					ehPsList.add(eps);
-				}
+					for (PunchScheduling ps : schedulings) {
+						ps.setId(beginId++);
+						EhPunchSchedulings eps = ConvertHelper.convert(ps, EhPunchSchedulings.class);
+						ehPsList.add(eps);
+					}
 //				Long t2 = System.currentTimeMillis();
 
 //				LOGGER.debug("for schedulings time "+  t2 + "cost: " +(t2-t1));
 
-				punchSchedulingProvider.batchCreatePunchSchedulings(ehPsList);
-                //把设置的最大月份之后的排班都置为pr的status
-                punchSchedulingProvider.updatePunchSchedulingsStatusByDate(pr.getStatus(), pr.getId(), new java.sql.Date(monthLong));
+					punchSchedulingProvider.batchCreatePunchSchedulings(ehPsList);
+					//把设置的最大月份之后的排班都置为pr的status
+					punchSchedulingProvider.updatePunchSchedulingsStatusByDate(pr.getStatus(), pr.getId(), new java.sql.Date(monthLong));
 //				Long t3 = System.currentTimeMillis();
 
 //				LOGGER.debug("batch save schedulings time "+  t3 + "cost: " +(t3-t2));
+				}
 			}
-		}
+			return null;
+		});
 	}
 
 	private List<PunchScheduling> saveMonthSchedulings(PunchSchedulingDTO monthScheduling, PunchRule pr, List<PunchTimeRule> ptrs) {
@@ -7262,6 +7267,9 @@ public class PunchServiceImpl implements PunchService {
 	@Override
 	public PunchGroupDTO getPunchGroup(GetPunchGroupCommand cmd) {
 		Organization org = organizationProvider.findOrganizationById(cmd.getId());
+		PunchRule pr = punchProvider.getPunchruleByPunchOrgId(org.getId());
+		addOperateLog(pr.getId(),pr.getName(),cmd.toString(),pr.getOwnerId(),"getPunchGroup");
+
 		return getPunchGroupDTOByOrg(org);
 	}
 	public String getDepartment(Integer namespaceId, Long detailId){
@@ -7290,6 +7298,8 @@ public class PunchServiceImpl implements PunchService {
 						"check app privilege error");
             }
         }
+		addOperateLog(0L,"",cmd.toString(),cmd.getOwnerId(),"listPunchGroups");
+
 //=======
 //        Organization org = organizationProvider.findOrganizationById(cmd.getOwnerId());
 //        Integer allOrganizationInteger = organizationProvider.countOrganizationMemberDetailsByOrgId(org.getNamespaceId(), cmd.getOwnerId());

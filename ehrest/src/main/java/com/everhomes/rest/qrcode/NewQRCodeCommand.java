@@ -7,7 +7,7 @@ import com.everhomes.util.StringHelper;
  * <ul>
  * <li>logoUri: 二维码中间的图片URI</li>
  * <li>description: 描述</li>
- * <li>expireSeconds: 到期秒数（从当前时间算起多少秒到期），如果没有则认为是永久二维码，否则则是临时二维码</li>
+ * <li>c: 到期秒数（从当前时间算起多少秒到期），如果没有则认为是永久二维码，否则则是临时二维码</li>
  * <li>actionType: 操作类型，参考{@link com.everhomes.rest.launchpad.ActionType}</li>
  * <li>actionData: 操作类型对应的参数，参考跳转相应文档</li>
  * <li>routeUri: 路由uri</li>
