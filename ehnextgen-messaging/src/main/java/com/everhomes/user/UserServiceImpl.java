@@ -5549,7 +5549,7 @@ public class UserServiceImpl implements UserService {
 		return result;
 	}
 
-	private static final String SALT = "this is salt";
+	private static final String SALT = "salt";
 
 	// 获取当前准备登录用户的混淆key
 	@Override
