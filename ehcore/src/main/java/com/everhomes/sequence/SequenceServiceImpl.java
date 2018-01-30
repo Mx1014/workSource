@@ -138,6 +138,9 @@ public class SequenceServiceImpl implements SequenceService {
 
         syncAuthorizationControlId();
 
+        //add by lei.lv
+        syncActiveAppId();
+
         syncTableSequence(EhUniongroupConfigures.class, EhUniongroupConfigures.class, Tables.EH_UNIONGROUP_CONFIGURES.getName(), (dbContext) -> {
             return dbContext.select(Tables.EH_UNIONGROUP_CONFIGURES.ID.max()).from(Tables.EH_UNIONGROUP_CONFIGURES).fetchOne().value1();
         });
