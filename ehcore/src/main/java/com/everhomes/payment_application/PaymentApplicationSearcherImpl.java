@@ -16,6 +16,7 @@ import com.everhomes.search.SearchUtils;
 import com.everhomes.settings.PaginationConfigHelper;
 import com.everhomes.user.UserContext;
 import com.everhomes.util.ConvertHelper;
+import com.everhomes.util.StringHelper;
 import org.elasticsearch.action.bulk.BulkRequestBuilder;
 import org.elasticsearch.action.search.SearchRequestBuilder;
 import org.elasticsearch.action.search.SearchResponse;
@@ -173,10 +174,13 @@ public class PaymentApplicationSearcherImpl extends AbstractElasticSearch implem
     }
 
     private XContentBuilder createDoc(PaymentApplication application){
+        LOGGER.error("Create payment application " + StringHelper.toJsonString(application));
         try {
             XContentBuilder b = XContentFactory.jsonBuilder().startObject();
             b.field("id", application.getId());
             b.field("namespaceId", application.getNamespaceId());
+            b.field("title", application.getTitle());
+            b.field("applicationNumber", application.getApplicationNumber());
             b.field("createTime", application.getCreateTime().getTime());
             b.field("paymentAmount", application.getPaymentAmount());
             b.field("status", application.getStatus());
@@ -214,6 +218,8 @@ public class PaymentApplicationSearcherImpl extends AbstractElasticSearch implem
                 Map<String, Object> source = sd.getSource();
 
                 dto.setContractName(String.valueOf(source.get("contractName")));
+                dto.setTitle(String.valueOf(source.get("title")));
+                dto.setApplicationNumber(String.valueOf(source.get("applicationNumber")));
                 dto.setApplicantName(String.valueOf(source.get("applicantName")));
                 dto.setNamespaceId(SearchUtils.getLongField(source.get("namespaceId")).intValue());
                 dto.setStatus(SearchUtils.getLongField(source.get("status")).byteValue());

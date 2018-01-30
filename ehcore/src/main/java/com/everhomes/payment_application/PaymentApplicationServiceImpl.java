@@ -11,6 +11,7 @@ import com.everhomes.organization.OrganizationMember;
 import com.everhomes.organization.OrganizationProvider;
 import com.everhomes.rest.acl.PrivilegeConstants;
 import com.everhomes.rest.common.ServiceModuleConstants;
+import com.everhomes.rest.customer.CustomerType;
 import com.everhomes.rest.flow.CreateFlowCaseCommand;
 import com.everhomes.rest.flow.FlowConstants;
 import com.everhomes.rest.flow.FlowModuleType;
@@ -19,6 +20,8 @@ import com.everhomes.rest.launchpad.ActionType;
 import com.everhomes.rest.payment_application.*;
 import com.everhomes.search.PaymentApplicationSearcher;
 import com.everhomes.sms.DateUtil;
+import com.everhomes.supplier.SupplierProvider;
+import com.everhomes.supplier.WarehouseSupplier;
 import com.everhomes.user.UserContext;
 import com.everhomes.user.UserPrivilegeMgr;
 import com.everhomes.util.ConvertHelper;
@@ -62,6 +65,9 @@ public class PaymentApplicationServiceImpl implements PaymentApplicationService 
     @Autowired
     private UserPrivilegeMgr userPrivilegeMgr;
 
+    @Autowired
+    private SupplierProvider supplierProvider;
+
     @Override
     public String generatePaymentApplicationNumber() {
         String num = DateUtil.dateToStr(new Date(), DateUtil.NO_SLASH) + (int)((Math.random()*9+1)*1000);
@@ -98,7 +104,13 @@ public class PaymentApplicationServiceImpl implements PaymentApplicationService 
             dto.setContractName(contract.getName());
             dto.setContractNumber(contract.getContractNumber());
             dto.setContractAmount(contract.getRent());
-//            contract.getCustomerId()
+            if(CustomerType.SUPPLIER.equals(CustomerType.fromStatus(contract.getCustomerType()))) {
+                WarehouseSupplier supplier = supplierProvider.findSupplierById(contract.getCustomerId());
+                if(supplier != null) {
+                    dto.setCustomerName(supplier.getName());
+                }
+
+            }
         }
 
         OrganizationMember member = organizationProvider.findOrganizationMemberByOrgIdAndUId(application.getApplicantUid(), application.getApplicantOrgId());

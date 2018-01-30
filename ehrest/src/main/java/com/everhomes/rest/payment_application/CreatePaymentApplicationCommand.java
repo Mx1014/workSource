@@ -11,6 +11,8 @@ import java.math.BigDecimal;
  *     <li>requestId: 请示单id</li>
  *     <li>applicantUid: 申请人id</li>
  *     <li>applicantOrgId: 申请人所在部门id</li>
+ *     <li>title: 标题</li>
+ *     <li>applicationNumber: 编号</li>
  *     <li>payee: 收款单位</li>
  *     <li>payer: 付款单位</li>
  *     <li>dueBank: 收款银行</li>
@@ -31,6 +33,7 @@ public class CreatePaymentApplicationCommand {
     private Long applicantUid;
     private Long applicantOrgId;
     private String title;
+    private String applicationNumber;
     private String payee;
     private String payer;
     private String dueBank;
@@ -38,6 +41,14 @@ public class CreatePaymentApplicationCommand {
     private BigDecimal paymentAmount;
     private Double paymentRate;
     private String remark;
+
+    public String getApplicationNumber() {
+        return applicationNumber;
+    }
+
+    public void setApplicationNumber(String applicationNumber) {
+        this.applicationNumber = applicationNumber;
+    }
 
     public Long getCommunityId() {
         return communityId;

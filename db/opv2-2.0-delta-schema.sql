@@ -927,3 +927,5 @@ CREATE TABLE `eh_salary_employee_period_vals` (
  
 -- 薪酬2.0结束   
    
+-- 请示单增加编号字段
+ALTER TABLE `eh_payment_applications` ADD COLUMN `application_number`  VARCHAR(32);
