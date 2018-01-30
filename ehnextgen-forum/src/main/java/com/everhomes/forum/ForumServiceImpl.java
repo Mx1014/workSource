@@ -213,7 +213,7 @@ public class ForumServiceImpl implements ForumService {
 
     @Autowired
     private UserPrivilegeMgr userPrivilegeMgr;
-    
+
     @Override
     public boolean isSystemForum(long forumId, Long communityId) {
         if(forumId == ForumConstants.SYSTEM_FORUM) {
@@ -278,14 +278,18 @@ public class ForumServiceImpl implements ForumService {
         final PostDTO tempDto = dto;
         LocalEventBus.publish(event -> {
             LocalEventContext context = new LocalEventContext();
-            context.setUid(UserContext.currentUserId());
+            context.setUid(tempDto.getCreatorUid());
             context.setNamespaceId(UserContext.getCurrentNamespaceId());
             event.setContext(context);
 
             event.setEntityType(EhForumPosts.class.getSimpleName());
             event.setEntityId(tempDto.getId());
+            Long embeddedAppId = tempDto.getEmbeddedAppId() != null ? tempDto.getEmbeddedAppId() : 0;
             event.setEventName(SystemEvent.FORUM_POST_CREATE.suffix(
-                    tempDto.getContentCategory(), tempDto.getModuleType(), tempDto.getModuleCategoryId()));
+                    tempDto.getModuleType(), tempDto.getModuleCategoryId(), embeddedAppId));
+
+            event.addParam("embeddedAppId", String.valueOf(embeddedAppId));
+            event.addParam("postDTO", StringHelper.toJsonString(tempDto));
         });
 
         return dto;
@@ -456,6 +460,12 @@ public class ForumServiceImpl implements ForumService {
         if (null != cmd.getEmbeddedAppId() && AppConstants.APPID_ACTIVITY == cmd.getEmbeddedAppId().longValue()) {
 			setActivitySchedule(post.getEmbeddedId());
 		}
+
+		//公告模块要
+		if(ForumModuleType.fromCode(cmd.getModuleType()) == ForumModuleType.ANNOUNCEMENT){
+
+        }
+
 
         PostDTO postDto = ConvertHelper.convert(post, PostDTO.class);
 
@@ -1075,16 +1085,20 @@ public class ForumServiceImpl implements ForumService {
         final Post tempPost = post;
         LocalEventBus.publish(event -> {
             LocalEventContext context = new LocalEventContext();
-            context.setUid(tempPost.getCreatorUid());
+            context.setUid(userId);
             context.setNamespaceId(UserContext.getCurrentNamespaceId());
             event.setContext(context);
 
             event.setEntityType(EhForumPosts.class.getSimpleName());
             event.setEntityId(tempPost.getId());
+            Long embeddedAppId = tempPost.getEmbeddedAppId() != null ? tempPost.getEmbeddedAppId() : 0;
             event.setEventName(SystemEvent.FORUM_POST_DELETE.suffix(
-                    tempPost.getContentCategory(), tempPost.getModuleType(), tempPost.getModuleCategoryId()));
-        });
+                    tempPost.getModuleType(), tempPost.getModuleCategoryId(), embeddedAppId));
 
+            event.addParam("embeddedAppId", String.valueOf(embeddedAppId));
+            event.addParam("post", StringHelper.toJsonString(tempPost));
+            event.addParam("parentPost", StringHelper.toJsonString(parentPost));
+        });
     }
 
     /*private void deletePostPoints(Long postId, Byte moduleType, Long moduleCategoryId){
@@ -1290,6 +1304,22 @@ public class ForumServiceImpl implements ForumService {
             if(null != cond){
             	query.addConditions(cond);
             }
+
+            Timestamp timestemp = new Timestamp(System.currentTimeMillis());
+            if(TopicPublishStatus.fromCode(cmd.getPublishStatus()) == TopicPublishStatus.UNPUBLISHED){
+                query.addConditions(Tables.EH_FORUM_POSTS.START_TIME.gt(timestemp));
+            }
+
+            if(TopicPublishStatus.fromCode(cmd.getPublishStatus()) == TopicPublishStatus.PUBLISHED){
+                query.addConditions(Tables.EH_FORUM_POSTS.START_TIME.lt(timestemp));
+                query.addConditions(Tables.EH_FORUM_POSTS.END_TIME.gt(timestemp));
+            }
+
+            if(TopicPublishStatus.fromCode(cmd.getPublishStatus()) == TopicPublishStatus.EXPIRED){
+                query.addConditions(Tables.EH_FORUM_POSTS.END_TIME.lt(timestemp));
+            }
+
+
             return query;
         });
         this.forumProvider.populatePostAttachments(posts);
@@ -1621,7 +1651,14 @@ public class ForumServiceImpl implements ForumService {
 
          //获取园区id和论坛Id,并返回orgId，因为当查询域空间时需要orgid来查发送到“全部”的帖子 edit by yanjun 20170830
          organizationId = populateCommunityIdAndForumId(communityId, organizationId, namespaceId, communityIdList, forumIds);
-         
+
+         //重复了，去重
+         Set forumIdset = new HashSet();
+        forumIdset.addAll(forumIds);
+        forumIdset.remove(null);
+        forumIds = new ArrayList<Long>();
+        forumIds.addAll(forumIdset);
+
          if(null != cmd.getEmbeddedAppId() && cmd.getEmbeddedAppId().longValue() == AppConstants.APPID_ACTIVITY) {
         	 ListActivitiesReponse response = activityService.listOfficialActivities(cmd);
         	 
@@ -1909,7 +1946,7 @@ public class ForumServiceImpl implements ForumService {
         List<Long> communityIdList = new ArrayList<Long>();
         if(null == communityId){
         	ListCommunitiesByOrganizationIdCommand command = new ListCommunitiesByOrganizationIdCommand();
-        	command.setOrganizationId(organization.getId());;
+        	command.setOrganizationId(organization.getId());
         	List<CommunityDTO> communities = organizationService.listAllChildrenOrganizationCoummunities(organization.getId());
         	if(null != communities){
         		for (CommunityDTO communityDTO : communities) {
@@ -2170,9 +2207,12 @@ public class ForumServiceImpl implements ForumService {
 
                 event.setEntityType(EhForumPosts.class.getSimpleName());
                 event.setEntityId(tempPost.getId());
+                Long embeddedAppId = tempPost.getEmbeddedAppId() != null ? tempPost.getEmbeddedAppId() : 0;
                 event.setEventName(SystemEvent.FORUM_POST_LIKE.suffix(
-                        tempPost.getContentCategory(), tempPost.getEmbeddedAppId(),
-                        tempPost.getModuleType(), tempPost.getModuleCategoryId()));
+                        tempPost.getModuleType(), tempPost.getModuleCategoryId(), embeddedAppId));
+
+                event.addParam("embeddedAppId", String.valueOf(embeddedAppId));
+                event.addParam("post", StringHelper.toJsonString(tempPost));
             });
         } catch(Exception e) {
             LOGGER.error("Failed to update the like count of post, userId=" + operatorId + ", topicId=" + topicId, e);
@@ -2251,8 +2291,12 @@ public class ForumServiceImpl implements ForumService {
 
                 event.setEntityType(EhForumPosts.class.getSimpleName());
                 event.setEntityId(tempPost.getId());
+                Long embeddedAppId = tempPost.getEmbeddedAppId() != null ? tempPost.getEmbeddedAppId() : 0;
                 event.setEventName(SystemEvent.FORUM_POST_LIKE_CANCEL.suffix(
-                        tempPost.getContentCategory(), tempPost.getModuleType(), tempPost.getModuleCategoryId()));
+                        tempPost.getModuleType(), tempPost.getModuleCategoryId(), embeddedAppId));
+
+                event.addParam("embeddedAppId", String.valueOf(embeddedAppId));
+                event.addParam("post", StringHelper.toJsonString(tempPost));
             });
         } catch(Exception e) {
             LOGGER.error("Failed to update the dislike count of post, userId=" + operatorId + ", topicId=" + topicId, e);
@@ -2543,8 +2587,12 @@ public class ForumServiceImpl implements ForumService {
 
             event.setEntityType(EhForumPosts.class.getSimpleName());
             event.setEntityId(postdto.getId());
+            Long embeddedAppId = ownerPost.getEmbeddedAppId() != null ? ownerPost.getEmbeddedAppId() : 0;
             event.setEventName(SystemEvent.FORUM_COMMENT_CREATE.suffix(
-                    ownerPost.getContentCategory(), ownerPost.getModuleType(), ownerPost.getModuleCategoryId()));
+                    ownerPost.getModuleType(), ownerPost.getModuleCategoryId(), embeddedAppId));
+
+            event.addParam("embeddedAppId", String.valueOf(embeddedAppId));
+            event.addParam("post", StringHelper.toJsonString(ownerPost));
         });
         return postdto;
 
@@ -6880,4 +6928,13 @@ public class ForumServiceImpl implements ForumService {
         res.setFlag(TrueOrFalseFlag.FALSE.getCode());
         return res;
     }
+
+    private void scheduleAnnouncement(Post post){
+
+
+    }
+
+
+
+
 }

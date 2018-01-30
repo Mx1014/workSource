@@ -6,17 +6,18 @@ import com.everhomes.util.StringHelper;
  * 查询资源列表
  * <li>communityId: 园区id-暂时不做</li>
  * <li>namespaceId: 域空间</li>
- * <li>status: 菜单dataType 后面添加一个status值 CUSTOM(3)表示是内部会议室 {@link com.everhomes.rest.rentalv2.admin.ResourceTypeStatus}</li>
+ * <li>menuType: 菜单dataType 后面添加一个menuType值 ENTERPRISE(2)表示是内部会议室 {@link com.everhomes.rest.rentalv2.admin.ResourceMenuType}</li>
  * <li>pageAnchor: 锚点</li>
  * <li>pageSize:每页数量 </li>
  * </ul>
  */
 public class GetResourceTypeListCommand {
 
+	private String resourceType;
 	private Integer namespaceId;
 	private Long communityId;
 
-	private Byte status;
+	private Byte menuType;
 
 	private Long pageAnchor;
     
@@ -25,7 +26,15 @@ public class GetResourceTypeListCommand {
     public String toString() {
         return StringHelper.toJsonString(this);
     }
-	
+
+	public String getResourceType() {
+		return resourceType;
+	}
+
+	public void setResourceType(String resourceType) {
+		this.resourceType = resourceType;
+	}
+
 	public Integer getNamespaceId() {
 		return namespaceId;
 	}
@@ -55,12 +64,11 @@ public class GetResourceTypeListCommand {
 		this.pageSize = pageSize;
 	}
 
-	public Byte getStatus() {
-		return status;
+	public Byte getMenuType() {
+		return menuType;
 	}
 
-	public void setStatus(Byte status) {
-		this.status = status;
+	public void setMenuType(Byte menuType) {
+		this.menuType = menuType;
 	}
-
 }

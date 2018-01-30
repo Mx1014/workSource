@@ -1,8 +1,8 @@
 package com.everhomes.rest.quality;
 
-import javax.validation.constraints.NotNull;
-
 import com.everhomes.util.StringHelper;
+
+import javax.validation.constraints.NotNull;
 
 /**
  * <ul>
@@ -13,6 +13,7 @@ import com.everhomes.util.StringHelper;
  *  <li>pageAnchor: 锚点</li>
  *  <li>pageSize: 页面大小</li>
  *  <li>reviewResult: 标准审阅结果 {@link com.everhomes.rest.equipment.ReviewResult}</li>
+ *  <li>planCondition: 搜索条件</li>
  * </ul>
  */
 public class ListQualityStandardsCommand {
@@ -31,6 +32,8 @@ public class ListQualityStandardsCommand {
 	private Integer pageSize;
 	
 	private Byte reviewResult;
+
+	private String planCondition;
 	
 	public Long getOwnerId() {
 		return ownerId;
@@ -86,6 +89,14 @@ public class ListQualityStandardsCommand {
 
 	public void setReviewResult(Byte reviewResult) {
 		this.reviewResult = reviewResult;
+	}
+
+	public String getPlanCondition() {
+		return planCondition;
+	}
+
+	public void setPlanCondition(String planCondition) {
+		this.planCondition = planCondition;
 	}
 
 	@Override

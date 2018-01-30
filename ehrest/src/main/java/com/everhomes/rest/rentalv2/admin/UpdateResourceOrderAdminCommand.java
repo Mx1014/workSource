@@ -10,8 +10,17 @@ import com.everhomes.util.StringHelper;
  * </ul>
  */
 public class UpdateResourceOrderAdminCommand {
+    private String resourceType;
     private Long id;
     private Long defaultOrderId;
+
+    public String getResourceType() {
+        return resourceType;
+    }
+
+    public void setResourceType(String resourceType) {
+        this.resourceType = resourceType;
+    }
 
     public Long getId() {
         return id;

@@ -74,4 +74,12 @@ public interface QualityService {
 	CurrentUserInfoDTO getCurrentUserInfo();
 
 	HttpServletResponse exportSampleTaskCommunityScores(CountSampleTaskCommunityScoresCommand cmd, HttpServletResponse httpResponse);
+
+    QualityOfflineTaskDetailsResponse getOfflineTaskDetail(ListQualityInspectionTasksCommand cmd);
+
+    OfflineSampleQualityInspectionResponse getOfflineSampleQualityInspection(ListSampleQualityInspectionCommand cmd);
+
+    List<QualityInspectionSpecificationDTO> batchUpdateQualitySpecification(BatchUpdateQualitySpecificationsCommand cmd);
+
+    QualityStandardsDTO getQualityStandards(DeleteQualityStandardCommand cmd);
 }

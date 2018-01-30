@@ -33,8 +33,6 @@ public class ListRentalBillsCommand {
 	
 	@Override
     public String toString() {
-
-		
         return StringHelper.toJsonString(this);
     }
 

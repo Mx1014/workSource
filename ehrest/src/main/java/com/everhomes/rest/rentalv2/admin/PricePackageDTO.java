@@ -59,6 +59,15 @@ public class PricePackageDTO {
     private Double approvingUserDiscountRatio;
     private Long cellBeginId;
     private Long cellEndId;
+    private Byte userPriceType;
+
+    public Byte getUserPriceType() {
+        return userPriceType;
+    }
+
+    public void setUserPriceType(Byte userPriceType) {
+        this.userPriceType = userPriceType;
+    }
 
     public Long getId() {
         return id;

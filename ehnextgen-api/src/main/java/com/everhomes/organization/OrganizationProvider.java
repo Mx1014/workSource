@@ -539,10 +539,14 @@ public interface OrganizationProvider {
 	void createCommunityOrganizationDetailDisplay(CommunityOrganizationDetailDisplay detailDisplay);
 	void updateCommunityOrganizationDetailDisplay(CommunityOrganizationDetailDisplay detailDisplay);
 	List checkOrgExistInOrgOrPaths(Integer namespaceId, Long organizationId, List<Long> orgIds, List<String> orgPaths);
+ 
 	
 	List<OrganizationMemberDetails> listOrganizationMemberDetails(Long ownerId);
 
 	Integer queryOrganizationPersonnelCounts(ListingLocator locator, Long organizationId, ListingQueryBuilderCallback queryBuilderCallback);
 	
 	List<OrganizationMember> queryOrganizationPersonnels(ListingLocator locator, Long organizationId, ListingQueryBuilderCallback queryBuilderCallback);
+ 
+
+	List<Organization> listPMOrganizations(Integer namespaceId); 
 }

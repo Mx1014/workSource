@@ -2350,7 +2350,7 @@ public class OrganizationProviderImpl implements OrganizationProvider {
 
         query.addConditions(Tables.EH_ORGANIZATIONS.STATUS.eq(OrganizationStatus.ACTIVE.getCode()));
 
-        query.addOrderBy(Tables.EH_ORGANIZATIONS.ID.desc());
+        query.addOrderBy(Tables.EH_ORGANIZATIONS.LEVEL.asc(),Tables.EH_ORGANIZATIONS.ID.desc());
 
         query.fetch().map((r) -> {
             result.add(ConvertHelper.convert(r, Organization.class));
@@ -6128,4 +6128,18 @@ public class OrganizationProviderImpl implements OrganizationProvider {
         }
         return results;
     }
+
+
+	@Override
+	public List<Organization> listPMOrganizations(Integer namespaceId) {
+		DSLContext context = dbProvider.getDslContext(AccessSpec.readOnly());
+		SelectQuery<EhOrganizationsRecord> query = context.selectQuery(Tables.EH_ORGANIZATIONS);
+		query.addConditions(Tables.EH_ORGANIZATIONS.STATUS.eq(OrganizationStatus.ACTIVE.getCode()));
+		query.addConditions(Tables.EH_ORGANIZATIONS.NAMESPACE_ID.eq(namespaceId));
+		query.addConditions(Tables.EH_ORGANIZATIONS.ORGANIZATION_TYPE.eq(OrganizationType.PM.getCode()));
+		query.addConditions(Tables.EH_ORGANIZATIONS.GROUP_TYPE.eq(OrganizationGroupType.ENTERPRISE.getCode()));
+		query.addConditions(Tables.EH_ORGANIZATIONS.PARENT_ID.eq(0L));
+		List<Organization> list = query.fetch().map(record -> ConvertHelper.convert(record, Organization.class));
+		return list;
+	}
 }

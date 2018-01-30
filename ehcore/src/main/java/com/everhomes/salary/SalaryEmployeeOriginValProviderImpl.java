@@ -67,75 +67,75 @@ public class SalaryEmployeeOriginValProviderImpl implements SalaryEmployeeOrigin
 				.orderBy(Tables.EH_SALARY_EMPLOYEE_ORIGIN_VALS.ID.asc())
 				.fetch().map(r -> ConvertHelper.convert(r, SalaryEmployeeOriginVal.class));
 	}
-
-	@Override
-	public List<SalaryEmployeeOriginVal> listSalaryEmployeeOriginValByDetailId(Long detailId, String ownerType, Long ownerId){
-		return getReadOnlyContext().select().from(Tables.EH_SALARY_EMPLOYEE_ORIGIN_VALS)
-				.where(Tables.EH_SALARY_EMPLOYEE_ORIGIN_VALS.USER_DETAIL_ID.eq(detailId))
-                .and(Tables.EH_SALARY_EMPLOYEE_ORIGIN_VALS.OWNER_TYPE.eq(ownerType))
-                .and(Tables.EH_SALARY_EMPLOYEE_ORIGIN_VALS.OWNER_ID.eq(ownerId))
-				.fetch().map(r -> ConvertHelper.convert(r, SalaryEmployeeOriginVal.class));
-	}
-
-	@Override
-	public void deleteSalaryEmployeeOriginValByGroupId(Long groupId){
-		DSLContext context = this.getContext(AccessSpec.readWrite());
-		context.delete(Tables.EH_SALARY_EMPLOYEE_ORIGIN_VALS)
-                .where(Tables.EH_SALARY_EMPLOYEE_ORIGIN_VALS.GROUP_ID.eq(groupId))
-                .execute();
-	}
-
-	@Override
-    public void deleteSalaryEmployeeOriginValByGroupIdDetailId(Long groupId, Long detailId, String ownerType, Long ownerId){
-        DSLContext context = this.getContext(AccessSpec.readWrite());
-        context.delete(Tables.EH_SALARY_EMPLOYEE_ORIGIN_VALS)
-                .where(Tables.EH_SALARY_EMPLOYEE_ORIGIN_VALS.USER_DETAIL_ID.eq(detailId))
-                .and(Tables.EH_SALARY_EMPLOYEE_ORIGIN_VALS.GROUP_ID.eq(groupId))
-                .and(Tables.EH_SALARY_EMPLOYEE_ORIGIN_VALS.OWNER_ID.eq(ownerId))
-                .and(Tables.EH_SALARY_EMPLOYEE_ORIGIN_VALS.OWNER_TYPE.eq(ownerType))
-                .execute();
-    }
-
-	@Override
-	public List<SalaryEmployeeOriginVal> listSalaryEmployeeOriginValByDetailId(String ownerType, Long ownerId, Long detailId) {
-
-		return getReadOnlyContext().select().from(Tables.EH_SALARY_EMPLOYEE_ORIGIN_VALS)
-				.where(Tables.EH_SALARY_EMPLOYEE_ORIGIN_VALS.USER_DETAIL_ID.eq(detailId))
-				.and(Tables.EH_SALARY_EMPLOYEE_ORIGIN_VALS.OWNER_ID.eq(ownerId))
-				.and(Tables.EH_SALARY_EMPLOYEE_ORIGIN_VALS.OWNER_TYPE.eq(ownerType))
-				.fetch().map(r -> ConvertHelper.convert(r, SalaryEmployeeOriginVal.class));
-	}
-    //  查询批次对应的人数
-    @Override
-    public List<Object[]> getRelevantNumbersByGroupId(List<Long> salaryGroupIds){
-        return getReadWriteContext().select(Tables.EH_SALARY_EMPLOYEE_ORIGIN_VALS.GROUP_ID,
-                DSL.countDistinct(Tables.EH_SALARY_EMPLOYEE_ORIGIN_VALS.USER_DETAIL_ID))
-                .from(Tables.EH_SALARY_EMPLOYEE_ORIGIN_VALS)
-                .where(Tables.EH_SALARY_EMPLOYEE_ORIGIN_VALS.GROUP_ID.in(salaryGroupIds))
-                .groupBy(Tables.EH_SALARY_EMPLOYEE_ORIGIN_VALS.GROUP_ID)
-                .fetchInto(Object[].class);
-    }
-
-	@Override
-	public void deleteSalaryEmployeeValsByGroupIdNotInOriginIds(Long salaryGroupId, List<Long> entityIds) {
-		getReadWriteContext().delete(Tables.EH_SALARY_EMPLOYEE_ORIGIN_VALS)
-				.where(Tables.EH_SALARY_EMPLOYEE_ORIGIN_VALS.GROUP_ID.eq(salaryGroupId))
-				.and(Tables.EH_SALARY_EMPLOYEE_ORIGIN_VALS.ORIGIN_ENTITY_ID.notIn(entityIds))
-				.execute();
-	}
-
-	@Override
-	public List<Object[]> listSalaryEmployeeWagesDetails(Integer namespaceId, Long ownerId){
-        List<Object[]> objects = getReadOnlyContext().select(Tables.EH_SALARY_EMPLOYEE_ORIGIN_VALS.USER_DETAIL_ID,
-                Tables.EH_SALARY_EMPLOYEE_ORIGIN_VALS.SALARY_VALUE)
-                .from(Tables.EH_SALARY_EMPLOYEE_ORIGIN_VALS)
-                .where(Tables.EH_SALARY_EMPLOYEE_ORIGIN_VALS.ORIGIN_ENTITY_ID.eq(Long.valueOf("98")))
-				.and(Tables.EH_SALARY_EMPLOYEE_ORIGIN_VALS.OWNER_ID.eq(ownerId))
-                .and(Tables.EH_SALARY_EMPLOYEE_ORIGIN_VALS.NAMESPACE_ID.eq(namespaceId))
-				.and(Tables.EH_SALARY_EMPLOYEE_ORIGIN_VALS.SALARY_VALUE.isNotNull())
-                .fetchInto(Object[].class);
-        return objects;
-    }
+//
+//	@Override
+//	public List<SalaryEmployeeOriginVal> listSalaryEmployeeOriginValByDetailId(Long detailId, String ownerType, Long ownerId){
+//		return getReadOnlyContext().select().from(Tables.EH_SALARY_EMPLOYEE_ORIGIN_VALS)
+//				.where(Tables.EH_SALARY_EMPLOYEE_ORIGIN_VALS.USER_DETAIL_ID.eq(detailId))
+//                .and(Tables.EH_SALARY_EMPLOYEE_ORIGIN_VALS.OWNER_TYPE.eq(ownerType))
+//                .and(Tables.EH_SALARY_EMPLOYEE_ORIGIN_VALS.OWNER_ID.eq(ownerId))
+//				.fetch().map(r -> ConvertHelper.convert(r, SalaryEmployeeOriginVal.class));
+//	}
+//
+//	@Override
+//	public void deleteSalaryEmployeeOriginValByGroupId(Long groupId){
+//		DSLContext context = this.getContext(AccessSpec.readWrite());
+//		context.delete(Tables.EH_SALARY_EMPLOYEE_ORIGIN_VALS)
+//                .where(Tables.EH_SALARY_EMPLOYEE_ORIGIN_VALS.GROUP_ID.eq(groupId))
+//                .execute();
+//	}
+//
+//	@Override
+//    public void deleteSalaryEmployeeOriginValByGroupIdDetailId(Long groupId, Long detailId, String ownerType, Long ownerId){
+//        DSLContext context = this.getContext(AccessSpec.readWrite());
+//        context.delete(Tables.EH_SALARY_EMPLOYEE_ORIGIN_VALS)
+//                .where(Tables.EH_SALARY_EMPLOYEE_ORIGIN_VALS.USER_DETAIL_ID.eq(detailId))
+//                .and(Tables.EH_SALARY_EMPLOYEE_ORIGIN_VALS.GROUP_ID.eq(groupId))
+//                .and(Tables.EH_SALARY_EMPLOYEE_ORIGIN_VALS.OWNER_ID.eq(ownerId))
+//                .and(Tables.EH_SALARY_EMPLOYEE_ORIGIN_VALS.OWNER_TYPE.eq(ownerType))
+//                .execute();
+//    }
+//
+//	@Override
+//	public List<SalaryEmployeeOriginVal> listSalaryEmployeeOriginValByDetailId(String ownerType, Long ownerId, Long detailId) {
+//
+//		return getReadOnlyContext().select().from(Tables.EH_SALARY_EMPLOYEE_ORIGIN_VALS)
+//				.where(Tables.EH_SALARY_EMPLOYEE_ORIGIN_VALS.USER_DETAIL_ID.eq(detailId))
+//				.and(Tables.EH_SALARY_EMPLOYEE_ORIGIN_VALS.OWNER_ID.eq(ownerId))
+//				.and(Tables.EH_SALARY_EMPLOYEE_ORIGIN_VALS.OWNER_TYPE.eq(ownerType))
+//				.fetch().map(r -> ConvertHelper.convert(r, SalaryEmployeeOriginVal.class));
+//	}
+//    //  查询批次对应的人数
+//    @Override
+//    public List<Object[]> getRelevantNumbersByGroupId(List<Long> salaryGroupIds){
+//        return getReadWriteContext().select(Tables.EH_SALARY_EMPLOYEE_ORIGIN_VALS.GROUP_ID,
+//                DSL.countDistinct(Tables.EH_SALARY_EMPLOYEE_ORIGIN_VALS.USER_DETAIL_ID))
+//                .from(Tables.EH_SALARY_EMPLOYEE_ORIGIN_VALS)
+//                .where(Tables.EH_SALARY_EMPLOYEE_ORIGIN_VALS.GROUP_ID.in(salaryGroupIds))
+//                .groupBy(Tables.EH_SALARY_EMPLOYEE_ORIGIN_VALS.GROUP_ID)
+//                .fetchInto(Object[].class);
+//    }
+//
+//	@Override
+//	public void deleteSalaryEmployeeValsByGroupIdNotInOriginIds(Long salaryGroupId, List<Long> entityIds) {
+//		getReadWriteContext().delete(Tables.EH_SALARY_EMPLOYEE_ORIGIN_VALS)
+//				.where(Tables.EH_SALARY_EMPLOYEE_ORIGIN_VALS.GROUP_ID.eq(salaryGroupId))
+//				.and(Tables.EH_SALARY_EMPLOYEE_ORIGIN_VALS.ORIGIN_ENTITY_ID.notIn(entityIds))
+//				.execute();
+//	}
+//
+//	@Override
+//	public List<Object[]> listSalaryEmployeeWagesDetails(Integer namespaceId, Long ownerId){
+//        List<Object[]> objects = getReadOnlyContext().select(Tables.EH_SALARY_EMPLOYEE_ORIGIN_VALS.USER_DETAIL_ID,
+//                Tables.EH_SALARY_EMPLOYEE_ORIGIN_VALS.SALARY_VALUE)
+//                .from(Tables.EH_SALARY_EMPLOYEE_ORIGIN_VALS)
+//                .where(Tables.EH_SALARY_EMPLOYEE_ORIGIN_VALS.ORIGIN_ENTITY_ID.eq(Long.valueOf("98")))
+//				.and(Tables.EH_SALARY_EMPLOYEE_ORIGIN_VALS.OWNER_ID.eq(ownerId))
+//                .and(Tables.EH_SALARY_EMPLOYEE_ORIGIN_VALS.NAMESPACE_ID.eq(namespaceId))
+//				.and(Tables.EH_SALARY_EMPLOYEE_ORIGIN_VALS.SALARY_VALUE.isNotNull())
+//                .fetchInto(Object[].class);
+//        return objects;
+//    }
 
 /*	@Override
 	public List<SalaryEmployeeOriginVal> listSalaryEmployeeOriginValByDetailId(Long userId){

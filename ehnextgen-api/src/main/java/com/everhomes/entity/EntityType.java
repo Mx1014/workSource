@@ -84,8 +84,8 @@ public enum EntityType {
 
     ENERGY_TASK(EhEnergyMeterTasks.class.getSimpleName()),
     RELOCATION_REQUEST(EhRelocationRequests.class.getSimpleName()),
-    RELOCATION_REQUEST_ITEM(EhRelocationRequestItems.class.getSimpleName());
-
+    RELOCATION_REQUEST_ITEM(EhRelocationRequestItems.class.getSimpleName()),
+    DOMAIN(EhDomains.class.getSimpleName());
 
 
 

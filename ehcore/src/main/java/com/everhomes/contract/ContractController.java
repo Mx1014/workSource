@@ -158,6 +158,19 @@ public class ContractController extends ControllerBase {
 	}
 
 	/**
+	 * <p>查看合同详情</p>
+	 * <b>URL: /contract/findContractForApp</b>
+	 */
+	@RequestMapping("findContractForApp")
+	@RestReturn(ContractDetailDTO.class)
+	public RestResponse findContractForApp(FindContractCommand cmd){
+		Integer namespaceId = cmd.getNamespaceId()==null? UserContext.getCurrentNamespaceId():cmd.getNamespaceId();
+		ContractService contractService = getContractService(namespaceId);
+		ContractDetailDTO detail = contractService.findContractForApp(cmd);
+		return new RestResponse(detail);
+	}
+
+	/**
 	 * <p>查看客户合同</p>
 	 * <b>URL: /contract/listCustomerContracts</b>
 	 */
@@ -257,6 +270,17 @@ public class ContractController extends ControllerBase {
 	}
 
 	/**
+	 * <p>判断是否是管理员</p>
+	 * <b>URL: /contract/checkAdmin</b>
+	 */
+	@RequestMapping("checkAdmin")
+	@RestReturn(Boolean.class)
+	public RestResponse checkAdmin(CheckAdminCommand cmd){
+		ContractService contractService = getContractService(cmd.getNamespaceId());
+		return new RestResponse(contractService.checkAdmin(cmd));
+	}
+
+	/**
 	 * <b>URL: /contract/syncContractsFromThirdPart</b>
 	 * <p>从第三方同步合同</p>
 	 */
@@ -274,6 +298,21 @@ public class ContractController extends ControllerBase {
 	private ContractService getContractService(Integer namespaceId) {
 		String handler = configurationProvider.getValue(namespaceId, "contractService", "");
 		return PlatformContext.getComponent(ContractService.CONTRACT_PREFIX + handler);
+	}
+
+	//通过供应商查看合同 -- by wentian
+	/**
+	 * <b>URL: /contract/listContractsBySupplier</b>
+	 * <p>通过供应商查看合同列表</p>
+	 */
+	@RequestMapping("listContractsBySupplier")
+	@RestReturn(value = ListContractsBySupplierResponse.class)
+	public RestResponse listContractsBySupplier(ListContractsBySupplierCommand cmd) {
+		ContractService contractService = getContractService(UserContext.getCurrentNamespaceId(0));
+		RestResponse response = new RestResponse();
+		response.setErrorCode(ErrorCodes.SUCCESS);
+		response.setErrorDescription("OK");
+		return response;
 	}
 
 }

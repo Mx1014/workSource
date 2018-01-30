@@ -18,6 +18,15 @@ public class ReleaseQueueJobsCommand {
 	private Long ownerId;
 	@ItemType(ListQueueJobsDTO.class)
 	private List<ListQueueJobsDTO> jobs;
+	private Integer namespaceId;
+
+	public Integer getNamespaceId() {
+		return namespaceId;
+	}
+
+	public void setNamespaceId(Integer namespaceId) {
+		this.namespaceId = namespaceId;
+	}
 
 	public String getOwnerType() {
 		return ownerType;

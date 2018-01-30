@@ -149,4 +149,7 @@ public interface YellowPageProvider {
 
 
 	void updateEntryIdNullByNamespaceId(Integer namespaceId);
+
+
+	List<ServiceAlliances> findOldFormServiceAlliance();
 }

@@ -662,6 +662,19 @@ public class EnergyConsumptionController extends ControllerBase {
     }
 
     /**
+     * <p>执行抄表任务-- 离线</p>
+     * <b>URL: /energy/readTaskMeterOffline</b>
+     */
+    @RestReturn(ReadTaskMeterOfflineResponse.class)
+    @RequestMapping("readTaskMeterOffline")
+    public RestResponse readTaskMeterOffline(ReadTaskMeterOfflineCommand cmd) {
+        RestResponse resp = new RestResponse(energyConsumptionService.readTaskMeterOffline(cmd));
+        resp.setErrorCode(ErrorCodes.SUCCESS);
+        resp.setErrorDescription("OK");
+        return resp;
+    }
+
+    /**
      * <p>同步计划索引</p>
      * <b>URL: /energy/syncEnergyPlanIndex</b>
      */
@@ -721,5 +734,17 @@ public class EnergyConsumptionController extends ControllerBase {
         }
         return response(energyConsumptionService.importTasksByEnergyPlan(cmd, files[0], userId));
     }
+
+    /**
+     * <p>同步离线数据</p>
+     * <b>URL: /energy/syncOfflineData</b>
+     */
+    @RestReturn(SyncOfflineDataResponse.class)
+    @RequestMapping("syncOfflineData")
+    public RestResponse syncOfflineData(SyncOfflineDataCommand cmd) {
+        return response(energyConsumptionService.syncOfflineData(cmd));
+    }
+
+
 
 }

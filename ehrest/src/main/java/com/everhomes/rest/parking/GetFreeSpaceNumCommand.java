@@ -3,7 +3,11 @@ package com.everhomes.rest.parking;
 import com.everhomes.util.StringHelper;
 
 /**
- * @author sw on 2017/8/21.
+ * <ul>
+ * <li>ownerType : 目前是community 参考 {@link ParkingOwnerType}</li>
+ * <li>ownerId : 目前是小区/园区ID</li>
+ * <li>parkingLotId : 停车场id</li>
+ * </ul>
  */
 public class GetFreeSpaceNumCommand {
     private String ownerType;

@@ -7,11 +7,8 @@ import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
 import javax.validation.Valid;
 
-import com.everhomes.bus.LocalBusOneshotSubscriber;
-import com.everhomes.bus.LocalBusOneshotSubscriberBuilder;
 import com.everhomes.rest.order.PreOrderDTO;
 import com.everhomes.rest.parking.*;
-import com.everhomes.util.RuntimeErrorException;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RestController;
@@ -340,9 +337,10 @@ public class ParkingController extends ControllerBase {
         response.setErrorDescription("OK");
         return response;
     }
-    
+
     /**
      * <b>URL: /parking/setParkingLotConfig</b>
+     * <p>设置充值参数</p>
      */
     @RequestMapping("setParkingLotConfig")
     @RestReturn(value=String.class)
@@ -388,7 +386,7 @@ public class ParkingController extends ControllerBase {
     
     /**
      * <b>URL: /parking/getParkingRequestCardAgreement</b>
-     * <p>获取申请月卡参数</p>
+     * <p>获取申请月卡协议内容</p>
      */
     @RequireAuthentication(false)
     @RequestMapping("getParkingRequestCardAgreement")
@@ -594,11 +592,11 @@ public class ParkingController extends ControllerBase {
 
     /**
      * <b>URL: /parking/refundParkingOrder</b>
-     * <p>更新订单</p>
+     * <p>退款</p>
      */
     @RequestMapping("refundParkingOrder")
     @RestReturn(value=String.class)
-    public RestResponse refundParkingOrder(UpdateParkingOrderCommand cmd) {
+    public RestResponse refundParkingOrder(RefundParkingOrderCommand cmd) {
 
         parkingService.refundParkingOrder(cmd);
         RestResponse response = new RestResponse();
@@ -728,6 +726,155 @@ public class ParkingController extends ControllerBase {
     public RestResponse deleteCarVerification(DeleteCarVerificationCommand cmd) {
 
         parkingService.deleteCarVerification(cmd);
+        RestResponse response = new RestResponse();
+        response.setErrorCode(ErrorCodes.SUCCESS);
+        response.setErrorDescription("OK");
+        return response;
+    }
+
+    /*------------------------车位管理-------------------------- */
+    /**
+     * <b>URL: /parking/searchParkingSpaces</b>
+     * <p>搜索停车位</p>
+     */
+    @RequestMapping("searchParkingSpaces")
+    @RestReturn(value=SearchParkingSpacesResponse.class)
+    public RestResponse searchParkingSpaces(SearchParkingSpacesCommand cmd) {
+
+        RestResponse response = new RestResponse(parkingService.searchParkingSpaces(cmd));
+        response.setErrorCode(ErrorCodes.SUCCESS);
+        response.setErrorDescription("OK");
+        return response;
+    }
+
+    /**
+     * <b>URL: /parking/addParkingSpace</b>
+     * <p>新增停车位</p>
+     */
+    @RequestMapping("addParkingSpace")
+    @RestReturn(value=ParkingSpaceDTO.class)
+    public RestResponse addParkingSpace(AddParkingSpaceCommand cmd) {
+
+        RestResponse response = new RestResponse(parkingService.addParkingSpace(cmd));
+        response.setErrorCode(ErrorCodes.SUCCESS);
+        response.setErrorDescription("OK");
+        return response;
+    }
+
+    /**
+     * <b>URL: /parking/updateParkingSpace</b>
+     * <p>编辑停车位</p>
+     */
+    @RequestMapping("updateParkingSpace")
+    @RestReturn(value=ParkingSpaceDTO.class)
+    public RestResponse updateParkingSpace(UpdateParkingSpaceCommand cmd) {
+
+        RestResponse response = new RestResponse(parkingService.updateParkingSpace(cmd));
+        response.setErrorCode(ErrorCodes.SUCCESS);
+        response.setErrorDescription("OK");
+        return response;
+    }
+
+    /**
+     * <b>URL: /parking/updateParkingSpaceStatus</b>
+     * <p>开放/关闭 停车位</p>
+     */
+    @RequestMapping("updateParkingSpaceStatus")
+    @RestReturn(value=String.class)
+    public RestResponse updateParkingSpaceStatus(UpdateParkingSpaceStatusCommand cmd) {
+
+        parkingService.updateParkingSpaceStatus(cmd);
+
+        RestResponse response = new RestResponse();
+        response.setErrorCode(ErrorCodes.SUCCESS);
+        response.setErrorDescription("OK");
+        return response;
+    }
+
+    /**
+     * <b>URL: /parking/deleteParkingSpace</b>
+     * <p>删除停车位</p>
+     */
+    @RequestMapping("deleteParkingSpace")
+    @RestReturn(value=String.class)
+    public RestResponse deleteParkingSpace(DeleteParkingSpaceCommand cmd) {
+
+        parkingService.deleteParkingSpace(cmd);
+
+        RestResponse response = new RestResponse();
+        response.setErrorCode(ErrorCodes.SUCCESS);
+        response.setErrorDescription("OK");
+        return response;
+    }
+
+    /**
+     * <b>URL: /parking/listParkingSpaceLogs</b>
+     * <p>获取停车位操作日志</p>
+     */
+    @RequestMapping("listParkingSpaceLogs")
+    @RestReturn(value=ListParkingSpaceLogsResponse.class)
+    public RestResponse listParkingSpaceLogs(ListParkingSpaceLogsCommand cmd) {
+
+        RestResponse response = new RestResponse(parkingService.listParkingSpaceLogs(cmd));
+        response.setErrorCode(ErrorCodes.SUCCESS);
+        response.setErrorDescription("OK");
+        return response;
+    }
+
+    /**
+     * <b>URL: /parking/raiseParkingSpaceLock</b>
+     * <p>升起车锁</p>
+     */
+    @RequestMapping("raiseParkingSpaceLock")
+    @RestReturn(value=String.class)
+    public RestResponse raiseParkingSpaceLock(RaiseParkingSpaceLockCommand cmd) {
+
+        parkingService.raiseParkingSpaceLock(cmd);
+        RestResponse response = new RestResponse();
+        response.setErrorCode(ErrorCodes.SUCCESS);
+        response.setErrorDescription("OK");
+        return response;
+    }
+
+    /**
+     * <b>URL: /parking/downParkingSpaceLock</b>
+     * <p>降下车锁</p>
+     */
+    @RequestMapping("downParkingSpaceLock")
+    @RestReturn(value=String.class)
+    public RestResponse downParkingSpaceLock(DownParkingSpaceLockCommand cmd) {
+
+        parkingService.downParkingSpaceLock(cmd);
+        RestResponse response = new RestResponse();
+        response.setErrorCode(ErrorCodes.SUCCESS);
+        response.setErrorDescription("OK");
+        return response;
+    }
+
+    /**
+     * <b>URL: /parking/raiseParkingSpaceLockForWeb</b>
+     * <p>升起车锁</p>
+     */
+    @RequestMapping("raiseParkingSpaceLockForWeb")
+    @RestReturn(value=String.class)
+    public RestResponse raiseParkingSpaceLockForWeb(RaiseParkingSpaceLockCommand cmd) {
+
+        parkingService.raiseParkingSpaceLockForWeb(cmd);
+        RestResponse response = new RestResponse();
+        response.setErrorCode(ErrorCodes.SUCCESS);
+        response.setErrorDescription("OK");
+        return response;
+    }
+
+    /**
+     * <b>URL: /parking/downParkingSpaceLockForWeb</b>
+     * <p>降下车锁</p>
+     */
+    @RequestMapping("downParkingSpaceLockForWeb")
+    @RestReturn(value=String.class)
+    public RestResponse downParkingSpaceLockForWeb(DownParkingSpaceLockCommand cmd) {
+
+        parkingService.downParkingSpaceLockForWeb(cmd);
         RestResponse response = new RestResponse();
         response.setErrorCode(ErrorCodes.SUCCESS);
         response.setErrorDescription("OK");

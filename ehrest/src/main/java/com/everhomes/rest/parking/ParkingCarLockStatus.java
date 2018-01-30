@@ -1,7 +1,5 @@
 package com.everhomes.rest.parking;
 
-import com.everhomes.rest.energy.EnergyMeterStatus;
-
 /**
  * <ul>
  * <li>UNLOCK(0): 未锁车（解锁）</li>

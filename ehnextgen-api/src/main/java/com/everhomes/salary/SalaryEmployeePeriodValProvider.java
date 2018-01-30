@@ -13,18 +13,18 @@ public interface SalaryEmployeePeriodValProvider {
 
 	List<SalaryEmployeePeriodVal> listSalaryEmployeePeriodVal();
 
-	Integer countNullSalaryEmployeePeriodsByPeriodAndEntity(String ownerType, Long ownerId,
-															String period, Long entityIdShifa);
-
-	List<SalaryEmployeePeriodVal>  listSalaryEmployeePeriodVals(Long salaryEmployeeId);
-
-	void updateSalaryEmployeePeriodVal(Long salaryEmployeeId, Long groupEntryId, String salaryValue);
-
-	void deletePeriodVals(Long employeeId);
-
-	void createSalaryEmployeePeriodVals(List<SalaryEmployeePeriodVal> salaryEmployeePeriodVals);
-
-	int countEntityIsNull(List<Long> salaryEmployeeIds, Long entityIdShifa);
-
-	int countNumberEntityIsNull(List<Long> salaryEmployeeIds);
+//	Integer countNullSalaryEmployeePeriodsByPeriodAndEntity(String ownerType, Long ownerId,
+//															String period, Long entityIdShifa);
+//
+//	List<SalaryEmployeePeriodVal>  listSalaryEmployeePeriodVals(Long salaryEmployeeId);
+//
+//	void updateSalaryEmployeePeriodVal(Long salaryEmployeeId, Long groupEntryId, String salaryValue);
+//
+//	void deletePeriodVals(Long employeeId);
+//
+//	void createSalaryEmployeePeriodVals(List<SalaryEmployeePeriodVal> salaryEmployeePeriodVals);
+//
+//	int countEntityIsNull(List<Long> salaryEmployeeIds, Long entityIdShifa);
+//
+//	int countNumberEntityIsNull(List<Long> salaryEmployeeIds);
 }

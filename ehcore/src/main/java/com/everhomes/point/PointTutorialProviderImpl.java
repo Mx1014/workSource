@@ -24,34 +24,34 @@ import java.util.List;
 @Repository
 public class PointTutorialProviderImpl implements PointTutorialProvider {
 
-	@Autowired
-	private DbProvider dbProvider;
+    @Autowired
+    private DbProvider dbProvider;
 
-	@Autowired
-	private SequenceProvider sequenceProvider;
+    @Autowired
+    private SequenceProvider sequenceProvider;
 
-	@Override
-	public void createPointTutorial(PointTutorial pointTutorial) {
-		Long id = sequenceProvider.getNextSequence(NameMapper.getSequenceDomainFromTablePojo(EhPointTutorials.class));
-		pointTutorial.setId(id);
-		pointTutorial.setCreateTime(DateUtils.currentTimestamp());
-		// pointTutorial.setCreatorUid(UserContext.currentUserId());
-		rwDao().insert(pointTutorial);
-		DaoHelper.publishDaoAction(DaoAction.CREATE, EhPointTutorials.class, id);
-	}
+    @Override
+    public void createPointTutorial(PointTutorial pointTutorial) {
+        Long id = sequenceProvider.getNextSequence(NameMapper.getSequenceDomainFromTablePojo(EhPointTutorials.class));
+        pointTutorial.setId(id);
+        pointTutorial.setCreateTime(DateUtils.currentTimestamp());
+        // pointTutorial.setCreatorUid(UserContext.currentUserId());
+        rwDao().insert(pointTutorial);
+        DaoHelper.publishDaoAction(DaoAction.CREATE, EhPointTutorials.class, id);
+    }
 
-	@Override
-	public void updatePointTutorial(PointTutorial pointTutorial) {
-		// pointTutorial.setUpdateTime(DateUtils.currentTimestamp());
-		// pointTutorial.setUpdateUid(UserContext.currentUserId());
+    @Override
+    public void updatePointTutorial(PointTutorial pointTutorial) {
+        // pointTutorial.setUpdateTime(DateUtils.currentTimestamp());
+        // pointTutorial.setUpdateUid(UserContext.currentUserId());
         rwDao().update(pointTutorial);
-		DaoHelper.publishDaoAction(DaoAction.MODIFY, EhPointTutorials.class, pointTutorial.getId());
-	}
+        DaoHelper.publishDaoAction(DaoAction.MODIFY, EhPointTutorials.class, pointTutorial.getId());
+    }
 
-	@Override
-	public PointTutorial findById(Long id) {
-		return ConvertHelper.convert(dao().findById(id), PointTutorial.class);
-	}
+    @Override
+    public PointTutorial findById(Long id) {
+        return ConvertHelper.convert(dao().findById(id), PointTutorial.class);
+    }
 
     @Override
     public List<PointTutorial> listPointTutorials(Long systemId, int pageSize, ListingLocator locator) {
@@ -92,12 +92,12 @@ public class PointTutorialProviderImpl implements PointTutorialProvider {
     private EhPointTutorialsDao rwDao() {
         DSLContext context = dbProvider.getDslContext(AccessSpec.readWrite());
         return new EhPointTutorialsDao(context.configuration());
-	}
+    }
 
-	private EhPointTutorialsDao dao() {
+    private EhPointTutorialsDao dao() {
         DSLContext context = dbProvider.getDslContext(AccessSpec.readOnly());
         return new EhPointTutorialsDao(context.configuration());
-	}
+    }
 
     private DSLContext context() {
         return dbProvider.getDslContext(AccessSpec.readOnly());

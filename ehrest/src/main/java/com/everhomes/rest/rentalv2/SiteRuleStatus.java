@@ -1,8 +1,8 @@
 package com.everhomes.rest.rentalv2;
 
-import com.everhomes.rest.techpark.punch.PunchStatus;
 /**
  * <ul>
+ * <li>MANUAL_CLOSE(-1): 后台手动关闭</li>
  * <li>OPEN(0): 可以预定</li>
  * <li>CLOSE(1): 场所被订完了！</li>
  * <li>EARLY(2): 太早了，还不能预订 </li>
@@ -10,8 +10,8 @@ import com.everhomes.rest.techpark.punch.PunchStatus;
  * </ul>
  */
 public enum SiteRuleStatus {
-   
-    OPEN((byte)0),CLOSE((byte)1),EARLY((byte)2),LATE((byte)3);
+
+    MANUAL_CLOSE((byte)-1), OPEN((byte)0),CLOSE((byte)1),EARLY((byte)2),LATE((byte)3);
     
     private byte code;
     private SiteRuleStatus(byte code) {

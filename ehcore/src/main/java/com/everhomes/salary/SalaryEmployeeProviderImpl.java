@@ -5,7 +5,9 @@ import java.sql.Timestamp;
 import java.util.List;
 
 import com.everhomes.listing.CrossShardListingLocator;
+import com.everhomes.rest.salary.SalaryEmployeeStatus;
 import com.everhomes.rest.salary.SalaryGroupStatus;
+import com.everhomes.rest.techpark.punch.NormalFlag;
 import org.jooq.DSLContext;
 import org.jooq.Record;
 import org.jooq.Record1;
@@ -29,70 +31,115 @@ import com.everhomes.util.DateHelper;
 @Component
 public class SalaryEmployeeProviderImpl implements SalaryEmployeeProvider {
 
-	@Autowired
-	private DbProvider dbProvider;
+    @Autowired
+    private DbProvider dbProvider;
 
-	@Autowired
-	private SequenceProvider sequenceProvider;
+    @Autowired
+    private SequenceProvider sequenceProvider;
 
-	@Override
-	public void createSalaryEmployee(SalaryEmployee salaryEmployee) {
-		Long id = sequenceProvider.getNextSequence(NameMapper.getSequenceDomainFromTablePojo(EhSalaryEmployees.class));
-		salaryEmployee.setId(id);
-		salaryEmployee.setCreateTime(new Timestamp(DateHelper.currentGMTTime().getTime()));
-		salaryEmployee.setCreatorUid(UserContext.current().getUser().getId());
+    @Override
+    public void createSalaryEmployee(SalaryEmployee salaryEmployee) {
+        Long id = sequenceProvider.getNextSequence(NameMapper.getSequenceDomainFromTablePojo(EhSalaryEmployees.class));
+        salaryEmployee.setId(id);
+        salaryEmployee.setCreateTime(new Timestamp(DateHelper.currentGMTTime().getTime()));
+        salaryEmployee.setCreatorUid(UserContext.current().getUser().getId());
 //		salaryEmployee.setUpdateTime(salaryEmployee.getCreateTime());
 //		salaryEmployee.setOperatorUid(salaryEmployee.getCreatorUid());
-		getReadWriteDao().insert(salaryEmployee);
-		DaoHelper.publishDaoAction(DaoAction.CREATE, EhSalaryEmployees.class, null);
-	}
+        getReadWriteDao().insert(salaryEmployee);
+        DaoHelper.publishDaoAction(DaoAction.CREATE, EhSalaryEmployees.class, null);
+    }
 
-	@Override
-	public void updateSalaryEmployee(SalaryEmployee salaryEmployee) {
-		assert (salaryEmployee.getId() != null);
+    @Override
+    public void updateSalaryEmployee(SalaryEmployee salaryEmployee) {
+        assert (salaryEmployee.getId() != null);
 //		salaryEmployee.setUpdateTime(new Timestamp(DateHelper.currentGMTTime().getTime()));
 //		salaryEmployee.setOperatorUid(UserContext.current().getUser().getId());
-		getReadWriteDao().update(salaryEmployee);
-		DaoHelper.publishDaoAction(DaoAction.MODIFY, EhSalaryEmployees.class, salaryEmployee.getId());
-	}
+ 
+        getReadWriteDao().update(salaryEmployee);
+        DaoHelper.publishDaoAction(DaoAction.MODIFY, EhSalaryEmployees.class, salaryEmployee.getId());
+    }
 
-	@Override
-	public SalaryEmployee findSalaryEmployeeById(Long id) {
-		assert (id != null);
-		return ConvertHelper.convert(getReadOnlyDao().findById(id), SalaryEmployee.class);
-	}
-	
-	@Override
-	public List<SalaryEmployee> listSalaryEmployee() {
-		return getReadOnlyContext().select().from(Tables.EH_SALARY_EMPLOYEES)
-				.orderBy(Tables.EH_SALARY_EMPLOYEES.ID.asc())
-				.fetch().map(r -> ConvertHelper.convert(r, SalaryEmployee.class));
-	}
-	
-	private EhSalaryEmployeesDao getReadWriteDao() {
-		return getDao(getReadWriteContext());
-	}
+    @Override
+    public SalaryEmployee findSalaryEmployeeById(Long id) {
+        assert (id != null);
+        return ConvertHelper.convert(getReadOnlyDao().findById(id), SalaryEmployee.class);
+    }
 
-	private EhSalaryEmployeesDao getReadOnlyDao() {
-		return getDao(getReadOnlyContext());
-	}
+    @Override
+    public List<SalaryEmployee> listSalaryEmployee() {
+        return getReadOnlyContext().select().from(Tables.EH_SALARY_EMPLOYEES)
+                .orderBy(Tables.EH_SALARY_EMPLOYEES.ID.asc())
+                .fetch().map(r -> ConvertHelper.convert(r, SalaryEmployee.class));
+    }
 
-	private EhSalaryEmployeesDao getDao(DSLContext context) {
-		return new EhSalaryEmployeesDao(context.configuration());
-	}
+    @Override
+    public List<SalaryEmployee> listSalaryEmployee(Long ownerId, Byte salaryStatus, List<Long> detailIds, CrossShardListingLocator locator, int pageSize) {
+        SelectConditionStep<Record> step = getReadOnlyContext().select().from(Tables.EH_SALARY_EMPLOYEES)
+                .where(Tables.EH_SALARY_EMPLOYEES.OWNER_ID.eq(ownerId));
+        if (null != salaryStatus) {
+            if (NormalFlag.NO == NormalFlag.fromCode(salaryStatus)) {
+                step = step.and(Tables.EH_SALARY_EMPLOYEES.STATUS.ne(SalaryEmployeeStatus.NORMAL.getCode()));
+            } else {
+                step = step.and(Tables.EH_SALARY_EMPLOYEES.STATUS.eq(SalaryEmployeeStatus.NORMAL.getCode()));
+            }
+        }
+        if (null != detailIds) {
+            step = step.and(Tables.EH_SALARY_EMPLOYEES.USER_DETAIL_ID.in(detailIds));
+        }
+        if (null != locator && locator.getAnchor() != null) {
+            step = step.and(Tables.EH_SALARY_EMPLOYEES.ID.gt(locator.getAnchor()));
+        }
+        step.limit(pageSize);
+        return step.orderBy(Tables.EH_SALARY_EMPLOYEES.ID.asc()).fetch().map(r -> ConvertHelper.convert(r, SalaryEmployee.class));
+    }
 
-	private DSLContext getReadWriteContext() {
-		return getContext(AccessSpec.readWrite());
-	}
+    @Override
+    public SalaryEmployee findSalaryEmployeeByDetailId(Long ownerId, Long detailId) {
 
-	private DSLContext getReadOnlyContext() {
-		return getContext(AccessSpec.readOnly());
-	}
+        Record record = getReadOnlyContext().select().from(Tables.EH_SALARY_EMPLOYEES)
+                .where(Tables.EH_SALARY_EMPLOYEES.OWNER_ID.eq(ownerId))
+                .and(Tables.EH_SALARY_EMPLOYEES.USER_DETAIL_ID.eq(detailId))
+                .fetchAny();
+        if (null == record) {
+            return null;
+        }
+        return ConvertHelper.convert(record, SalaryEmployee.class);
+    }
 
-	private DSLContext getContext(AccessSpec accessSpec) {
-		return dbProvider.getDslContext(accessSpec);
-	}
+    @Override
+    public String getMonthByOwnerId(Long ownerId) {
+        Record1<String> record = getReadOnlyContext().select(Tables.EH_SALARY_EMPLOYEES.SALARY_PERIOD.max()).from(Tables.EH_SALARY_EMPLOYEES)
+                .where(Tables.EH_SALARY_EMPLOYEES.OWNER_ID.eq(ownerId))
+                .fetchAny();
+        if (null == record) {
+            return null;
+        }
+        return record.value1();
+    }
 
+    private EhSalaryEmployeesDao getReadWriteDao() {
+        return getDao(getReadWriteContext());
+    }
+
+    private EhSalaryEmployeesDao getReadOnlyDao() {
+        return getDao(getReadOnlyContext());
+    }
+
+    private EhSalaryEmployeesDao getDao(DSLContext context) {
+        return new EhSalaryEmployeesDao(context.configuration());
+    }
+
+    private DSLContext getReadWriteContext() {
+        return getContext(AccessSpec.readWrite());
+    }
+
+    private DSLContext getReadOnlyContext() {
+        return getContext(AccessSpec.readOnly());
+    }
+
+    private DSLContext getContext(AccessSpec accessSpec) {
+        return dbProvider.getDslContext(accessSpec);
+    } 
 //	@Override
 //	public List<SalaryEmployee> listSalaryEmployeeByPeriodGroupId(Long salaryPeriodGroupId) {
 //		return getReadOnlyContext().select().from(Tables.EH_SALARY_EMPLOYEES)

@@ -15,7 +15,6 @@ import com.everhomes.rest.user.MessageChannelType;
 import com.everhomes.user.User;
 import com.everhomes.util.RouterBuilder;
 import com.everhomes.util.StringHelper;
-import freemarker.template.Configuration;
 
 import java.util.HashMap;
 import java.util.Map;
@@ -30,8 +29,6 @@ public class PointResultMessageAction implements PointResultAction {
     private PointRule pointRule;
     private LocalEvent localEvent;
 
-    private Configuration configuration;
-
     public PointResultMessageAction(PointAction pointAction, PointSystem pointSystem, PointRule pointRule, LocalEvent localEvent) {
         this.pointAction = pointAction;
         this.pointSystem = pointSystem;
@@ -40,8 +37,6 @@ public class PointResultMessageAction implements PointResultAction {
 
         messagingService = PlatformContext.getComponent(MessagingService.class);
         pointService = PlatformContext.getComponent(PointService.class);
-
-        configuration = new Configuration(Configuration.DEFAULT_INCOMPATIBLE_IMPROVEMENTS);
     }
 
     public void doAction() {
@@ -89,7 +84,9 @@ public class PointResultMessageAction implements PointResultAction {
         // 组装消息 meta
         Map<String, String> meta = new HashMap<>();
         meta.put(MessageMetaConstant.META_OBJECT_TYPE, MetaObjectType.MESSAGE_ROUTER.getCode());
-        meta.put(MessageMetaConstant.MESSAGE_SUBJECT, "积分消息");
+
+        PointGeneralTemplate genTpl = pointService.getGeneralTemplate();
+        meta.put(MessageMetaConstant.MESSAGE_SUBJECT, genTpl.getMessageTitle());
         meta.put(MessageMetaConstant.META_OBJECT, StringHelper.toJsonString(metaObject));
         messageDto.setMeta(meta);
 

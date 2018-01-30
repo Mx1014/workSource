@@ -3247,3 +3247,13 @@ update eh_launch_pad_items set scope_code = 5 where namespace_id = 1 and scope_i
 -- added by R 20170907. 增加管理员菜单
 SET @menu_scope_id = (SELECT MAX(id) FROM `eh_web_menu_scopes`);
 INSERT INTO `eh_web_menu_scopes`(`id`, `menu_id`,`menu_name`, `owner_type`, `owner_id`, `apply_policy`) VALUES((@menu_scope_id := @menu_scope_id + 1),604000,'', 'EhNamespaces', 1,2);
+
+-- added by nan.rong 增加工作汇报菜单及入口 20180106
+SET @scope_id = (SELECT MAX(id) FROM eh_web_menu_scopes);
+INSERT INTO `eh_web_menu_scopes` (`id`, `menu_id`, `menu_name`, `owner_type`, `owner_id`, `apply_policy`) VALUES (@scope_id := @scope_id + 1, '54000', '', 'EhNamespaces', '1', '2');
+INSERT INTO `eh_web_menu_scopes` (`id`, `menu_id`, `menu_name`, `owner_type`, `owner_id`, `apply_policy`) VALUES (@scope_id := @scope_id + 1, '54010', '', 'EhNamespaces', '1', '2');
+INSERT INTO `eh_web_menu_scopes` (`id`, `menu_id`, `menu_name`, `owner_type`, `owner_id`, `apply_policy`) VALUES (@scope_id := @scope_id + 1, '54020', '', 'EhNamespaces', '1', '2');
+
+SET @item_id = (SELECT MAX(id) FROM eh_launch_pad_items);
+INSERT INTO `eh_launch_pad_items` (`id`, `namespace_id`, `app_id`, `scope_code`, `scope_id`, `item_location`, `item_group`, `item_name`, `item_label`, `icon_uri`, `item_width`, `item_height`, `action_type`, `action_data`, `default_order`, `apply_policy`, `min_version`, `display_flag`, `display_layout`, `bgcolor`, `tag`, `target_type`, `target_id`, `delete_flag`, `scene_type`, `scale_type`, `service_categry_id`, `selected_icon_uri`, `more_order`, `alias_icon_uri`, `categry_name`) VALUES (@item_id := @item_id + 1, '1', '0', '0', '0', '/home', 'Bizs', '工作汇报', '工作汇报', 'cs://1/image/aW1hZ2UvTVRwbE1ESTRNREV6WkRnMFpEUTJZV0ZtWWpoaE56UmtZbUZrWlRreE56STJPQQ', '1', '1', '68', '{"title":"工作汇报"}', '8', '0', '1', '0', '', '0', NULL, NULL, NULL, '1', 'pm_admin', '0', null, NULL, '0', NULL, '企业服务');
+INSERT INTO `eh_launch_pad_items` (`id`, `namespace_id`, `app_id`, `scope_code`, `scope_id`, `item_location`, `item_group`, `item_name`, `item_label`, `icon_uri`, `item_width`, `item_height`, `action_type`, `action_data`, `default_order`, `apply_policy`, `min_version`, `display_flag`, `display_layout`, `bgcolor`, `tag`, `target_type`, `target_id`, `delete_flag`, `scene_type`, `scale_type`, `service_categry_id`, `selected_icon_uri`, `more_order`, `alias_icon_uri`, `categry_name`) VALUES (@item_id := @item_id + 1, '1', '0', '0', '0', '/home', 'Bizs', '工作汇报', '工作汇报', 'cs://1/image/aW1hZ2UvTVRwbE1ESTRNREV6WkRnMFpEUTJZV0ZtWWpoaE56UmtZbUZrWlRreE56STJPQQ', '1', '1', '68', '{"title":"工作汇报"}', '8', '0', '1', '0', '', '0', NULL, NULL, NULL, '1', 'park_tourist', null, NULL, NULL, '0', NULL, '企业服务');

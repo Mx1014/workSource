@@ -15,6 +15,7 @@ import com.everhomes.organization.Organization;
 import com.everhomes.rest.flow.*;
 import com.everhomes.rest.rentalv2.SiteBillStatus;
 import com.everhomes.rest.rentalv2.admin.ResourceTypeStatus;
+import com.everhomes.util.StringHelper;
 import org.elasticsearch.common.lang3.StringUtils;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -31,7 +32,6 @@ import com.everhomes.organization.OrganizationProvider;
 import com.everhomes.organization.OrganizationService;
 import com.everhomes.rest.organization.ListUserRelatedOrganizationsCommand;
 import com.everhomes.rest.organization.OrganizationSimpleDTO;
-import com.everhomes.rest.rentalv2.NormalFlag;
 import com.everhomes.rest.rentalv2.admin.AttachmentType;
 import com.everhomes.rest.sms.SmsTemplateCode;
 import com.everhomes.rest.user.IdentifierType;
@@ -47,8 +47,7 @@ import com.everhomes.util.Tuple;
 public class Rentalv2FlowModuleListener implements FlowModuleListener {
 
 	private static final Logger LOGGER = LoggerFactory.getLogger(Rentalv2FlowModuleListener.class);
-	@Autowired
-	private FlowUserSelectionProvider flowUserSelectionProvider;
+
 	@Autowired
 	private FlowService flowService;
 	@Autowired
@@ -70,9 +69,10 @@ public class Rentalv2FlowModuleListener implements FlowModuleListener {
     @Autowired
     private LocaleTemplateService localeTemplateService;
 	@Autowired
-	private Rentalv2Service rentalService;
-	@Autowired
 	private SmsProvider smsProvider;
+	@Autowired
+	private RentalCommonServiceImpl rentalCommonService;
+
 	@Override
 	public FlowModuleInfo initModule() {
 		FlowModuleInfo module = new FlowModuleInfo();
@@ -116,7 +116,7 @@ public class Rentalv2FlowModuleListener implements FlowModuleListener {
 				if (currentGraphNode instanceof FlowGraphNodeEnd) {
 					return;
 				}
-				if (null != curNodeParam) {
+				if (!StringUtils.isEmpty(curNodeParam)) {
 					Byte status = convertFlowStatus(curNodeParam);
 
 					if (graphNode instanceof FlowGraphNodeStart && SiteBillStatus.APPROVING.getCode() == status) {
@@ -136,6 +136,7 @@ public class Rentalv2FlowModuleListener implements FlowModuleListener {
 
 		}
 	}
+
 
 	/**
 	 * 转换状态，由产品定义
@@ -210,14 +211,14 @@ public class Rentalv2FlowModuleListener implements FlowModuleListener {
 		e.setKey(this.localeStringService.getLocalizedString(RentalNotificationTemplateCode.FLOW_SCOPE,
 				"organization", RentalNotificationTemplateCode.locale, ""));
 
-		Long orgId = order.getRequestorOrganizationId();
+		Long orgId = order.getUserEnterpriseId();
 		if (null != orgId) {
 			Organization org = organizationProvider.findOrganizationById(orgId);
 			e.setValue(org.getName());
 		}else {
-			List<OrganizationSimpleDTO> organizaiotnDTOs =this.organizationService.listUserRelateOrgs(new ListUserRelatedOrganizationsCommand(),user);
+			List<OrganizationSimpleDTO> organizationDTOs =this.organizationService.listUserRelateOrgs(new ListUserRelatedOrganizationsCommand(),user);
 
-			for(OrganizationSimpleDTO org : organizaiotnDTOs ){
+			for(OrganizationSimpleDTO org : organizationDTOs){
 				if (StringUtils.isNotBlank(e.getValue()))
 					e.setValue(e.getValue() + "、" + org.getName());
 				else
@@ -267,16 +268,16 @@ public class Rentalv2FlowModuleListener implements FlowModuleListener {
 			entities.add(e);
 		}
 
-		RentalResource rs = this.rentalv2Provider.getRentalSiteById(order.getRentalResourceId());
-		if (rs != null && NormalFlag.NONEED.getCode() == rs.getExclusiveFlag()
-				&& NormalFlag.NONEED.getCode() == rs.getAutoAssign()) {
+//		RentalResource rs = this.rentalv2Provider.getRentalSiteById(order.getRentalResourceId());
+//		if (rs != null && NormalFlag.NONEED.getCode() == rs.getExclusiveFlag()
+//				&& NormalFlag.NONEED.getCode() == rs.getAutoAssign()) {
 			e = new FlowCaseEntity();
 			e.setEntityType(FlowCaseEntityType.MULTI_LINE.getCode());
 			e.setKey(this.localeStringService.getLocalizedString(RentalNotificationTemplateCode.FLOW_SCOPE,
 					"count", RentalNotificationTemplateCode.locale, ""));
 			e.setValue(order.getRentalCount() + "");
 			entities.add(e);
-		}
+//		}
 
 		e = new FlowCaseEntity();
 		e.setEntityType(FlowCaseEntityType.MULTI_LINE.getCode());
@@ -286,7 +287,7 @@ public class Rentalv2FlowModuleListener implements FlowModuleListener {
 		entities.add(e);
 
 		List<RentalConfigAttachment> recommendUsers = rentalv2Provider
-				.queryRentalConfigAttachmentByOwner(AttachmentType.ORDER_RECOMMEND_USER.name(), order.getId());
+				.queryRentalConfigAttachmentByOwner(order.getResourceType(), AttachmentType.ORDER_RECOMMEND_USER.name(), order.getId());
 		if (null != recommendUsers && recommendUsers.size() != 0) {
 
 			StringBuilder itemStr = new StringBuilder();
@@ -310,7 +311,7 @@ public class Rentalv2FlowModuleListener implements FlowModuleListener {
 		}
 
 		List<RentalConfigAttachment> goodItems = rentalv2Provider
-				.queryRentalConfigAttachmentByOwner(AttachmentType.ORDER_GOOD_ITEM.name(), order.getId());
+				.queryRentalConfigAttachmentByOwner(order.getResourceType(), AttachmentType.ORDER_GOOD_ITEM.name(), order.getId());
 		if (null != goodItems && goodItems.size() != 0) {
 
 			StringBuilder itemStr = new StringBuilder();
@@ -331,8 +332,7 @@ public class Rentalv2FlowModuleListener implements FlowModuleListener {
 			entities.add(e);
 		}
 
-		List<RentalItemsOrder> ribs = rentalv2Provider.findRentalItemsBillBySiteBillId(order
-				.getId());
+		List<RentalItemsOrder> ribs = rentalv2Provider.findRentalItemsBillBySiteBillId(order.getId(), order.getResourceType());
 		if (null != ribs) { 
 			e = new FlowCaseEntity();
 			e.setEntityType(FlowCaseEntityType.MULTI_LINE.getCode());
@@ -534,15 +534,13 @@ public class Rentalv2FlowModuleListener implements FlowModuleListener {
 			map.put("offlinePayeeName", contactName);
 			map.put("offlinePayeeContact", contactToken);
 			map.put("offlineCashierAddress", order.getOfflineCashierAddress());
-			rentalService.sendMessageCode(order.getRentalUid(),  RentalNotificationTemplateCode.locale, map,
-					RentalNotificationTemplateCode.RENTAL_APPLY_SUCCESS_CODE);
+			rentalCommonService.sendMessageCode(order.getRentalUid(), map, RentalNotificationTemplateCode.RENTAL_APPLY_SUCCESS_CODE);
 		}else if (SmsTemplateCode.RENTAL_APPLY_FAILURE_CODE == templateId) {
 
 			Map<String, String> map = new HashMap<>();
 			map.put("useTime", order.getUseDetail());
 			map.put("resourceName", order.getResourceName());
-			rentalService.sendMessageCode(order.getRentalUid(),  RentalNotificationTemplateCode.locale, map,
-					RentalNotificationTemplateCode.RENTAL_APPLY_FAILURE_CODE);
+			rentalCommonService.sendMessageCode(order.getRentalUid(), map, RentalNotificationTemplateCode.RENTAL_APPLY_FAILURE_CODE);
 			//审批驳回
 			smsProvider.addToTupleList(variables, "useTime", order.getUseDetail());
 			smsProvider.addToTupleList(variables, "resourceName", order.getResourceName());
@@ -551,8 +549,7 @@ public class Rentalv2FlowModuleListener implements FlowModuleListener {
 			Map<String, String> map = new HashMap<>();
 			map.put("useTime", order.getUseDetail());
 			map.put("resourceName", order.getResourceName());
-			rentalService.sendMessageCode(order.getRentalUid(),  RentalNotificationTemplateCode.locale, map,
-					RentalNotificationTemplateCode.RENTAL_PAY_SUCCESS_CODE);
+			rentalCommonService.sendMessageCode(order.getRentalUid(), map, RentalNotificationTemplateCode.RENTAL_PAY_SUCCESS_CODE);
 
 			//支付成功
 			smsProvider.addToTupleList(variables, "useTime", order.getUseDetail());
@@ -579,8 +576,7 @@ public class Rentalv2FlowModuleListener implements FlowModuleListener {
 			Map<String, String> map = new HashMap<>();
 			map.put("useTime", order.getUseDetail());
 			map.put("resourceName", order.getResourceName());
-			rentalService.sendMessageCode(order.getRentalUid(),  RentalNotificationTemplateCode.locale, map,
-					RentalNotificationTemplateCode.APPROVE_RENTAL_APPLY_SUCCESS_CODE);
+			rentalCommonService.sendMessageCode(order.getRentalUid(), map, RentalNotificationTemplateCode.APPROVE_RENTAL_APPLY_SUCCESS_CODE);
 			//审批线上支付模式 审批通过短信
 			smsProvider.addToTupleList(variables, "useTime", order.getUseDetail());
 			smsProvider.addToTupleList(variables, "resourceName", order.getResourceName());
@@ -589,8 +585,7 @@ public class Rentalv2FlowModuleListener implements FlowModuleListener {
 			Map<String, String> map = new HashMap<>();
 			map.put("useTime", order.getUseDetail());
 			map.put("resourceName", order.getResourceName());
-			rentalService.sendMessageCode(order.getRentalUid(),  RentalNotificationTemplateCode.locale, map,
-					RentalNotificationTemplateCode.RENTAL_CANCEL_CODE);
+			rentalCommonService.sendMessageCode(order.getRentalUid(), map, RentalNotificationTemplateCode.RENTAL_CANCEL_CODE);
 
 			//预约失败
 			smsProvider.addToTupleList(variables, "useTime", order.getUseDetail());
@@ -601,8 +596,7 @@ public class Rentalv2FlowModuleListener implements FlowModuleListener {
 			Map<String, String> map = new HashMap<>();
 			map.put("useTime", order.getUseDetail());
 			map.put("resourceName", order.getResourceName());
-			rentalService.sendMessageCode(order.getRentalUid(),  RentalNotificationTemplateCode.locale, map,
-					RentalNotificationTemplateCode.RENTAL_REMIND_CODE);
+			rentalCommonService.sendMessageCode(order.getRentalUid(), map, RentalNotificationTemplateCode.RENTAL_REMIND_CODE);
 
 			//线下支付客户催办
 
@@ -657,7 +651,9 @@ public class Rentalv2FlowModuleListener implements FlowModuleListener {
 
 	@Override
 	public List<FlowServiceTypeDTO> listServiceTypes(Integer namespaceId, String ownerType, Long ownerId) {
-		List<RentalResourceType> resourceTypes =  this.rentalv2Provider.findRentalResourceTypes(namespaceId, ResourceTypeStatus.NORMAL.getCode(), null);
+		List<RentalResourceType> resourceTypes =  this.rentalv2Provider.findRentalResourceTypes(namespaceId, ResourceTypeStatus.NORMAL.getCode(), null, null);
+		if (resourceTypes==null || resourceTypes.size()==0)
+			return null;
 		List<FlowServiceTypeDTO> dtos = resourceTypes.stream().map(r->{
 			FlowServiceTypeDTO dto =new FlowServiceTypeDTO();
 			dto.setId(r.getId());

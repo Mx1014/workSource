@@ -4567,15 +4567,6 @@ public class UserServiceImpl implements UserService {
         groupTypes.add(OrganizationGroupType.DIRECT_UNDER_ENTERPRISE.getCode());
 //        groupTypes.add(OrganizationGroupType.ENTERPRISE.getCode());
         groupTypes.add(OrganizationGroupType.DEPARTMENT.getCode());
-
-        //  设置公司
-        Organization directlyEnterprise = this.organizationProvider.findOrganizationById(organizationId);
-        OrganizationDetail directlyEnterpriseDetail = this.organizationProvider.findOrganizationDetailByOrganizationId(organizationId);
-        if (directlyEnterpriseDetail != null)
-            dto.setEnterpriseName(directlyEnterpriseDetail.getDisplayName());
-        else
-            dto.setEnterpriseName(directlyEnterprise.getName());
-
         //  设置部门
         List<OrganizationDTO> departments = this.organizationService.getOrganizationMemberGroups(groupTypes, dto.getContactToken(), directlyEnterprise.getPath());
         if(departments == null || departments.size() < 1){
@@ -4584,11 +4575,19 @@ public class UserServiceImpl implements UserService {
 		}
 
         dto.setDepartments(departments);*/
+
 		//	设置查询条件
 		Organization directlyEnterprise = this.organizationProvider.findOrganizationById(organizationId);
 		List<String> groupTypes = new ArrayList<>();
 		groupTypes.add(OrganizationGroupType.DIRECT_UNDER_ENTERPRISE.getCode());
 		groupTypes.add(OrganizationGroupType.DEPARTMENT.getCode());
+
+		//  设置公司
+		OrganizationDetail directlyEnterpriseDetail = this.organizationProvider.findOrganizationDetailByOrganizationId(organizationId);
+		if (directlyEnterpriseDetail != null)
+			dto.setEnterpriseName(directlyEnterpriseDetail.getDisplayName());
+		else
+			dto.setEnterpriseName(directlyEnterprise.getName());
 
 		//	查询部门
 		List<OrganizationDTO> departments = getContactDepartments(directlyEnterprise.getPath(), groupTypes, dto.getContactToken());

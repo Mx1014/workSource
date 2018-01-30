@@ -132,4 +132,9 @@ destination.dir: ${EVH_IOS_HOME}/ehrest-respios/src/main/ios/API-objects
 destination.dir.java: ${EVH_HOME}/ehrest-response/src/main/java/
 
 equipment.ip: 127.0.0.1
-schedule.running.flag: 0
+schedule.running.flag: 1
+
+# current core id
+core.server.id: 1
+# core server list
+core.server.list: 1
