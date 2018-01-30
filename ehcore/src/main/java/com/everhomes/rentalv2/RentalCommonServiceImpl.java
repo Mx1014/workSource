@@ -4,6 +4,7 @@ import com.everhomes.app.App;
 import com.everhomes.app.AppProvider;
 import com.everhomes.bootstrap.PlatformContext;
 import com.everhomes.configuration.ConfigurationProvider;
+import com.everhomes.locale.LocaleStringService;
 import com.everhomes.locale.LocaleTemplateService;
 import com.everhomes.messaging.MessagingService;
 import com.everhomes.order.PayService;
@@ -63,6 +64,8 @@ public class RentalCommonServiceImpl {
     private PayService payService;
     @Autowired
     private OnlinePayService onlinePayService;
+    @Autowired
+    private LocaleStringService localeStringService;
 
     public RentalResourceHandler getRentalResourceHandler(String handlerName) {
         RentalResourceHandler handler = null;
@@ -362,11 +365,18 @@ public class RentalCommonServiceImpl {
     }
 
     public void processOrderNotRefundTip(RentalOrder order) {
-        StringBuilder sb = new StringBuilder();
-        sb.append("亲爱的用户，为保障资源使用效益，现在取消订单，系统将不予退款，恳请您谅解。");
-        sb.append("\r\n");
-        sb.append("\r\n");
-        sb.append("确认要取消订单吗？");
+        String locale = UserContext.current().getUser().getLocale();
+
+        String content = localeStringService.getLocalizedString(RentalNotificationTemplateCode.SCOPE,
+                String.valueOf(RentalNotificationTemplateCode.RENTAL_ORDER_NOT_REFUND_TIP), locale, "");
+
+//        StringBuilder sb = new StringBuilder();
+//        sb.append("亲爱的用户，为保障资源使用效益，现在取消订单，系统将不予退款，恳请您谅解。");
+//        sb.append("\r\n");
+//        sb.append("\r\n");
+//        sb.append("确认要取消订单吗？");
+
+        order.setTip(content);
     }
 
     public void processOrderCustomRefundTip(RentalOrder order, List<RentalOrderRule> outerRules, List<RentalOrderRule> innerRules,

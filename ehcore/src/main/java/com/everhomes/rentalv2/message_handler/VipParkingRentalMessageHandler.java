@@ -158,32 +158,48 @@ public class VipParkingRentalMessageHandler implements RentalMessageHandler {
 
         SimpleDateFormat sdf = new SimpleDateFormat("yyyy-MM-dd HH:mm");
 
-        StringBuilder sb = new StringBuilder("VIP车位（");
-        sb.append(useInfoDTO.getParkingLotName());
-        sb.append(useInfoDTO.getSpaceNo());
-        sb.append("车位：");
-        sb.append(sdf.format(rentalBill.getStartTime()));
-        sb.append(" - ");
-        sb.append(sdf.format(rentalBill.getEndTime()));
-        sb.append("）");
+//        StringBuilder sb = new StringBuilder("VIP车位（");
+//        sb.append(useInfoDTO.getParkingLotName());
+//        sb.append(useInfoDTO.getSpaceNo());
+//        sb.append("车位：");
+//        sb.append(sdf.format(rentalBill.getStartTime()));
+//        sb.append(" - ");
+//        sb.append(sdf.format(rentalBill.getEndTime()));
+//        sb.append("）");
 
-        return sb.toString();
+        Map<String, String> map = new HashMap<>();
+        map.put("parkingLotName", useInfoDTO.getParkingLotName());
+        map.put("spaceNo", useInfoDTO.getSpaceNo());
+        map.put("startTime", sdf.format(rentalBill.getStartTime()));
+        map.put("endTime", sdf.format(rentalBill.getEndTime()));
+        String content = localeTemplateService.getLocaleTemplateString(RentalNotificationTemplateCode.SCOPE,
+                RentalNotificationTemplateCode.RENTAL_ORDER_USE_DETAIL, RentalNotificationTemplateCode.locale, map, "");
+
+        return content;
     }
 
     private String getUseDetailStrByOldEndTime(RentalOrder rentalBill, VipParkingUseInfoDTO useInfoDTO) {
 
         SimpleDateFormat sdf = new SimpleDateFormat("yyyy-MM-dd HH:mm");
 
-        StringBuilder sb = new StringBuilder("VIP车位（");
-        sb.append(useInfoDTO.getParkingLotName());
-        sb.append(useInfoDTO.getSpaceNo());
-        sb.append("车位：");
-        sb.append(sdf.format(rentalBill.getStartTime()));
-        sb.append(" - ");
-        sb.append(sdf.format(rentalBill.getOldEndTime()));
-        sb.append("）");
+//        StringBuilder sb = new StringBuilder("VIP车位（");
+//        sb.append(useInfoDTO.getParkingLotName());
+//        sb.append(useInfoDTO.getSpaceNo());
+//        sb.append("车位：");
+//        sb.append(sdf.format(rentalBill.getStartTime()));
+//        sb.append(" - ");
+//        sb.append(sdf.format(rentalBill.getOldEndTime()));
+//        sb.append("）");
 
-        return sb.toString();
+        Map<String, String> map = new HashMap<>();
+        map.put("parkingLotName", useInfoDTO.getParkingLotName());
+        map.put("spaceNo", useInfoDTO.getSpaceNo());
+        map.put("startTime", sdf.format(rentalBill.getStartTime()));
+        map.put("endTime", sdf.format(rentalBill.getOldEndTime()));
+        String content = localeTemplateService.getLocaleTemplateString(RentalNotificationTemplateCode.SCOPE,
+                RentalNotificationTemplateCode.RENTAL_ORDER_USE_DETAIL, RentalNotificationTemplateCode.locale, map, "");
+
+        return content;
     }
 
     @Override
