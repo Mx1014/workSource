@@ -5498,7 +5498,7 @@ public class UserServiceImpl implements UserService {
 	public DeferredResult<RestResponse> waitScanForLogon(String subjectId){
 
 
-		DeferredResult<RestResponse> result =  this.messagingService.blockingEvent(subjectId, "ORORDINARY", 30 * 1000, new DeferredResult.DeferredResultHandler(){
+		DeferredResult<RestResponse> finalResult =  this.messagingService.blockingEvent(subjectId, "ORORDINARY", 30 * 1000, new DeferredResult.DeferredResultHandler(){
 
 			@Override
 			public void handleResult(Object result) {
@@ -5553,7 +5553,7 @@ public class UserServiceImpl implements UserService {
 
 		});
 
-		return result;
+		return finalResult;
 	}
 
 	private static final String SALT = "salt";
