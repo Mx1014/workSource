@@ -935,7 +935,9 @@ public class AssetServiceImpl implements AssetService {
                     item.setOwnerId(cmd.getOwnerId());
                     item.setTargetType(cmd.getTargetType());
                     item.setTargetId(cmd.getTargetId());
-                    item.setContractId(cmd.getContractId());
+                    if(cmd.getContractIdType().byteValue() == (byte)1){
+                        item.setContractId(cmd.getContractId());
+                    }
                     item.setContractNum(cmd.getContractNum());
                     item.setTargetName(cmd.getTargetName());
                     item.setUpdateTime(new Timestamp(DateHelper.currentGMTTime().getTime()));
@@ -977,7 +979,9 @@ public class AssetServiceImpl implements AssetService {
                             newBill.setNamespaceId(cmd.getNamesapceId());
                             newBill.setNoticetel(cmd.getNoticeTel());
                             newBill.setOwnerId(cmd.getOwnerId());
-                            newBill.setContractId(cmd.getContractId());
+                            if(cmd.getContractIdType().byteValue() == (byte)1){
+                                newBill.setContractId(cmd.getContractId());
+                            }
                             newBill.setContractNum(cmd.getContractNum());
                             newBill.setTargetName(cmd.getTargetName());
                             newBill.setOwnerType(cmd.getOwnerType());

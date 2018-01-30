@@ -461,6 +461,9 @@ public class EbeiThirdPartContractHandler implements ThirdPartContractHandler {
     private void deleteContract(Contract contract) {
         DeleteContractCommand command = new DeleteContractCommand();
         command.setId(contract.getId());
+        command.setCommunityId(contract.getCommunityId());
+        command.setNamespaceId(contract.getNamespaceId());
+        command.setCheckAuth(false);
         getContractService(contract.getNamespaceId()).deleteContract(command);
 
         if(contract.getCustomerId() != null) {
