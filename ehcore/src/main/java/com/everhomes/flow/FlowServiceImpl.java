@@ -5139,6 +5139,15 @@ public class FlowServiceImpl implements FlowService {
     }
 
     @Override
+    public FlowCaseDetailDTOV2 getFlowCaseDetailByRefer(Long moduleId, FlowUserType flowUserType, Long userId, String referType, Long referId, boolean needFlowButton) {
+        FlowCase flowCase = flowCaseProvider.findFlowCaseByReferId(referId, referType, moduleId);
+        if (flowCase != null) {
+            return getFlowCaseDetailByIdV2(flowCase.getId(), userId, flowUserType, true, needFlowButton);
+        }
+        return null;
+    }
+
+    @Override
     public FlowGraphDTO createOrUpdateFlowGraph(CreateFlowGraphCommand cmd) {
         ValidatorUtil.validate(cmd);
 
