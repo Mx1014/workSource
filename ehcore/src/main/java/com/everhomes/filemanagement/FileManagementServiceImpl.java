@@ -59,7 +59,7 @@ public class FileManagementServiceImpl implements  FileManagementService{
         fileManagementProvider.createFileCatalog(catalog);
         //  3.return back the dto
         dto.setId(catalog.getId());
-        dto.setName(cmd.getCatalogName());
+        dto.setName(catalogName);
         dto.setCreateTime(catalog.getCreateTime());
         return dto;
     }
@@ -96,18 +96,16 @@ public class FileManagementServiceImpl implements  FileManagementService{
 
     private String setCatalogNameAutomatically(Integer namespaceId, Long ownerId, String name) {
         FileCatalog catalog = fileManagementProvider.findFileCatalogByName(namespaceId, ownerId, name);
-        if (catalog != null){
+        if (catalog != null) {
             List<String> allNames = fileManagementProvider.listFileCatalogNames(namespaceId, ownerId, name);
-            String newName = new String();
-            int n = 1;
-            while(true){
-                newName += name + "(" + n + ")";
-                if(!allNames.contains(newName))
-                    break;
-                n++;
+            for(int n=1; n <= allNames.size() + 1; n++){
+                String newName = name + "(" + n + ")";
+                if (!allNames.contains(newName))
+                    return newName;
             }
-            return newName;
-        }else{
+            throw RuntimeErrorException.errorWith(FileManagementErrorCode.SCOPE, FileManagementErrorCode.ERROR_NAME_GENERATE_FAILED,
+                    "automatically set the name failed.");
+        } else {
             return name;
         }
     }
@@ -366,7 +364,7 @@ public class FileManagementServiceImpl implements  FileManagementService{
 
         //  1.whether the name has been used
         String contentName = setContentNameAutomatically(namespaceId, catalog.getOwnerId(), catalog.getId(),
-                cmd.getParentId(), cmd.getContentType(), cmd.getContentName(), cmd.getContentSuffix());
+                cmd.getParentId(), cmd.getContentName(), cmd.getContentSuffix());
 
         //  2.create it & set the path
         FileContent content = new FileContent();
@@ -422,21 +420,19 @@ public class FileManagementServiceImpl implements  FileManagementService{
     }
 
     private String setContentNameAutomatically(Integer namespaceId, Long ownerId, Long catalogId, Long parentId,
-                                               String contentType, String name, String suffix) {
+                                               String name, String suffix) {
         FileContent content = fileManagementProvider.findFileContentByName(namespaceId, ownerId, catalogId, parentId,
                 name, suffix);
         if (content != null) {
             List<String> allNames = fileManagementProvider.listFileContentNames(namespaceId, ownerId, catalogId, parentId,
                     name, suffix);
-            String newName = new String();
-            int n = 1;
-            while (true) {
-                newName += name + "(" + n + ")";
+            for (int n = 1; n <= allNames.size() + 1; n++) {
+                String newName = name + "(" + n + ")";
                 if (!allNames.contains(newName))
-                    break;
-                n++;
+                    return newName;
             }
-            return newName;
+            throw RuntimeErrorException.errorWith(FileManagementErrorCode.SCOPE, FileManagementErrorCode.ERROR_NAME_GENERATE_FAILED,
+                    "automatically set the name failed.");
         } else
             return name;
     }

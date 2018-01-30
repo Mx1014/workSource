@@ -94,6 +94,7 @@ public class FileManagementProviderImpl implements FileManagementProvider {
 
         SelectQuery<Record> query = context.selectQuery();
         query.addSelect(Tables.EH_FILE_MANAGEMENT_CATALOGS.NAME);
+        query.addFrom(Tables.EH_FILE_MANAGEMENT_CATALOGS);
         query.addConditions(Tables.EH_FILE_MANAGEMENT_CATALOGS.NAMESPACE_ID.eq(namespaceId));
         query.addConditions(Tables.EH_FILE_MANAGEMENT_CATALOGS.OWNER_ID.eq(ownerId));
         query.addConditions(Tables.EH_FILE_MANAGEMENT_CATALOGS.NAME.like(name + "%"));
@@ -352,6 +353,7 @@ public class FileManagementProviderImpl implements FileManagementProvider {
 
         SelectQuery<Record> query = context.selectQuery();
         query.addSelect(Tables.EH_FILE_MANAGEMENT_CONTENTS.CONTENT_NAME);
+        query.addFrom(Tables.EH_FILE_MANAGEMENT_CONTENTS);
         query.addConditions(Tables.EH_FILE_MANAGEMENT_CONTENTS.NAMESPACE_ID.eq(namespaceId));
         query.addConditions(Tables.EH_FILE_MANAGEMENT_CONTENTS.OWNER_ID.eq(ownerId));
         query.addConditions(Tables.EH_FILE_MANAGEMENT_CONTENTS.CATALOG_ID.eq(catalogId));
