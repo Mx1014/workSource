@@ -5517,36 +5517,37 @@ public class UserServiceImpl implements UserService {
 					throw RuntimeErrorException.errorWith(ErrorCodes.SCOPE_GENERAL, ErrorCodes.ERROR_INVALID_PARAMETER, "waitScanForLogon failure");
 				}
 
+				String token = null;
 				try {
-					String token = URLDecoder.decode(response.getMessage(), "utf-8");
-//					String[] tokenParam = token.substring(1,token.length()-2).split("&");
-					if(token.indexOf("\"") == 0)
-						token = token.substring(1, token.length());
-					if(token.indexOf("\"") == token.length() - 1)
-						token = token.substring(0, token.length() -1);
-					String[] tokenParam = token.trim().split("&");
-					String salt = tokenParam[0];
-					if (salt.equals(SALT)) {
-						Long userId = Long.valueOf(tokenParam[1]);
-						Integer namespaceId = Integer.valueOf(tokenParam[2]);
-						String userToken = tokenParam[3];
-						LoginToken logintoken = WebTokenGenerator.getInstance().fromWebToken(userToken, LoginToken.class);
-						//todo 验证
-						UserLogin userLogin = logonByToken(logintoken);
-						Map valueMap = new HashMap();
-						valueMap.put("userLogin", GsonUtil.toJson(userLogin));
-						valueMap.put("args",tokenParam[4]);
-						response.setMessage(GsonUtil.toJson(valueMap));
-						restResponse.setResponseObject(response);
-                        restResponse.setErrorCode(ErrorCodes.SUCCESS);
-						restResponse.setErrorDescription("OK");
-					} else {
-						restResponse.setErrorCode(ErrorCodes.ERROR_ACCESS_DENIED);
-						LOGGER.error("waitScanForLogon failure");
-						throw RuntimeErrorException.errorWith(ErrorCodes.SCOPE_GENERAL, ErrorCodes.ERROR_INVALID_PARAMETER, "waitScanForLogon failure");
-					}
+					token = URLDecoder.decode(response.getMessage(), "utf-8");
 				} catch (UnsupportedEncodingException e) {
 					e.printStackTrace();
+				}
+//					String[] tokenParam = token.substring(1,token.length()-2).split("&");
+				if(token.indexOf("\"") == 0)
+					token = token.substring(1, token.length());
+				if(token.indexOf("\"") == token.length() - 1)
+					token = token.substring(0, token.length() -1);
+				String[] tokenParam = token.trim().split("&");
+				String salt = tokenParam[0];
+				if (salt.equals(SALT)) {
+					Long userId = Long.valueOf(tokenParam[1]);
+					Integer namespaceId = Integer.valueOf(tokenParam[2]);
+					String userToken = tokenParam[3];
+					LoginToken logintoken = WebTokenGenerator.getInstance().fromWebToken(userToken, LoginToken.class);
+					//todo 验证
+					UserLogin userLogin = logonByToken(logintoken);
+					Map valueMap = new HashMap();
+					valueMap.put("userLogin", GsonUtil.toJson(userLogin));
+					valueMap.put("args",tokenParam[4]);
+					response.setMessage(GsonUtil.toJson(valueMap));
+					restResponse.setResponseObject(response);
+					restResponse.setErrorCode(ErrorCodes.SUCCESS);
+					restResponse.setErrorDescription("OK");
+				} else {
+					restResponse.setErrorCode(ErrorCodes.ERROR_ACCESS_DENIED);
+					LOGGER.error("waitScanForLogon failure");
+					throw RuntimeErrorException.errorWith(ErrorCodes.SCOPE_GENERAL, ErrorCodes.ERROR_INVALID_PARAMETER, "waitScanForLogon failure");
 				}
 			}
 
