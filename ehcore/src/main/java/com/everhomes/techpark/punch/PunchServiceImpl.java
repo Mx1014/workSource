@@ -3449,7 +3449,7 @@ public class PunchServiceImpl implements PunchService {
 			//验证是否有这个权限删除这个owner的rule
 
 			//根据id和ownerid删除一条rule
-			this.punchProvider.deletePunchTimeRuleByOwnerAndId(cmd.getOwnerType(), cmd.getOwnerId(), cmd.getId());
+//			this.punchProvider.deletePunchTimeRuleByOwnerAndId(cmd.getOwnerType(), cmd.getOwnerId(), cmd.getId());
 		}
 		else{
 			//被使用的不删,报错
@@ -5872,9 +5872,9 @@ public class PunchServiceImpl implements PunchService {
 		if(obj.getOwnerId().equals(cmd.getOwnerId())&&obj.getOwnerType().equals(cmd.getOwnerType())){
 //			if(null != cmd.getTargetId() && null != cmd.getTargetType()){
 //				if(cmd.getTargetId().equals(obj.getTargetId())&& cmd.getTargetType().equals(obj.getTargetType())){
-					this.punchProvider.deletePunchRuleOwnerMap(obj);
-					this.punchSchedulingProvider.deletePunchSchedulingByOwnerAndTarget(obj.getOwnerType(),obj.getOwnerId(),obj.getTargetType(),obj.getTargetId());
-					this.punchProvider.deletePunchTimeRulesByOwnerAndTarget(obj.getOwnerType(),obj.getOwnerId(),obj.getTargetType(),obj.getTargetId());
+//					this.punchProvider.deletePunchRuleOwnerMap(obj);
+//					this.punchSchedulingProvider.deletePunchSchedulingByOwnerAndTarget(obj.getOwnerType(),obj.getOwnerId(),obj.getTargetType(),obj.getTargetId());
+//					this.punchProvider.deletePunchTimeRulesByOwnerAndTarget(obj.getOwnerType(),obj.getOwnerId(),obj.getTargetType(),obj.getTargetId());
 //				}
 //				else{
 //
@@ -7493,12 +7493,20 @@ public class PunchServiceImpl implements PunchService {
 		Calendar tomorrowCalendar = Calendar.getInstance();
 		tomorrowCalendar.add(Calendar.DAY_OF_MONTH, 1);
 		java.sql.Date tomorrow= new java.sql.Date(tomorrowCalendar.getTimeInMillis());
+		if(tomorrow.before(startDate)){
+			//防止把无关数据查出来
+			tomorrow.setTime(startDate.getTime());
+		}
 		//今日之后用pr的status查,之前用active查
 		List<PunchScheduling> schedulings = punchSchedulingProvider.queryPunchSchedulings(tomorrow,endDate,pr.getId(),pr.getStatus()) ;
-		if ((null == schedulings || schedulings.size() == 0) &&PunchRuleStatus.ACTIVE!=PunchRuleStatus.fromCode(pr.getStatus())) {
+		if ((null == schedulings || schedulings.size() == 0) 
+//				&&PunchRuleStatus.ACTIVE!=PunchRuleStatus.fromCode(pr.getStatus())
+				) {
 			//如果查不到当前状态的就 并且pr 的状态不是正常
 			schedulings = punchSchedulingProvider.queryPunchSchedulings(tomorrow,endDate,pr.getId(),PunchRuleStatus.ACTIVE.getCode()) ;
-			
+			LOGGER.debug("取正常状态的schedulings "+StringHelper.toJsonString(schedulings));
+		}else{
+//			LOGGER.debug("他说有schedulings "+StringHelper.toJsonString(schedulings));
 		}
 		if (null == schedulings) {
 			schedulings = new ArrayList<>();
@@ -7547,7 +7555,7 @@ public class PunchServiceImpl implements PunchService {
 						}
 					}
 					else{
-						employeeDTO.getDaySchedulings().add("");
+						employeeDTO.getDaySchedulings().add("未排班");
 					}
 				}
 				employeeDTOs.add(employeeDTO);
