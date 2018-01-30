@@ -15,21 +15,8 @@ delete from `eh_portal_version_users`;
 */
 
 -- 4、刷新应用id
-/*
-UPDATE eh_service_module_apps a
-SET a.origin_id = IFNULL(
-	(
-		SELECT
-			b.active_app_id
-		FROM
-			eh_reflection_service_module_apps b
-		WHERE
-			a.namespace_id = b.namespace_id
-		AND a.module_id = b.module_id
-		AND a.custom_tag = b.custom_tag
-	),
-	a.origin_id
-);*/
+-- UPDATE eh_service_module_apps a SET a.origin_id = IFNULL((SELECT b.active_app_id FROM eh_reflection_service_module_apps b WHERE	a.namespace_id = b.namespace_id AND a.module_id = b.module_id AND a.custom_tag = b.custom_tag), a.origin_id );
+
 
 
 -- 5、在运营后台添加活动或论坛的主页签应用后需要刷新应用id（选做）

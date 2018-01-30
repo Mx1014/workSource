@@ -1364,6 +1364,9 @@ public class PortalServiceImpl implements PortalService {
 						}else {
 							//更新预览版本标志
 							updatePreviewVersion(namespaceId, cmd.getVersionId());
+
+							//更新预览用户
+							updatePortalVersionUsers(namespaceId, cmd.getVersionId(), cmd.getVersionUserIds());
 						}
 
 						portalPublishLog.setProcess(100);
@@ -2761,13 +2764,18 @@ public class PortalServiceImpl implements PortalService {
 
 	@Override
 	public void updatePortalVersionUsers(UpdatePortalVersionUsersCommand cmd) {
-		portalVersionUserProvider.deletePortalVersionUsers(cmd.getNamespaceId());
-		if(cmd.getUserIds() != null){
-			for (Long userId: cmd.getUserIds()){
+		updatePortalVersionUsers(cmd.getNamespaceId(), cmd.getVersionId(), cmd.getUserIds());
+	}
+
+
+	private void updatePortalVersionUsers(Integer namespaceId, Long versionId, List<Long> userIds) {
+		portalVersionUserProvider.deletePortalVersionUsers(namespaceId);
+		if(userIds != null){
+			for (Long userId: userIds){
 				PortalVersionUser portalVersionUser  = new PortalVersionUser();
-				portalVersionUser.setNamespaceId(cmd.getNamespaceId());
+				portalVersionUser.setNamespaceId(namespaceId);
 				portalVersionUser.setUserId(userId);
-				portalVersionUser.setVersionId(cmd.getVersionId());
+				portalVersionUser.setVersionId(versionId);
 				portalVersionUser.setCreateTime(new Timestamp(System.currentTimeMillis()));
 				portalVersionUserProvider.createPortalVersionUser(portalVersionUser);
 			}
