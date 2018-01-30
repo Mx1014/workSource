@@ -1306,7 +1306,10 @@ public class ContractServiceImpl implements ContractService, ApplicationListener
 
 	@Override
 	public void deleteContract(DeleteContractCommand cmd) {
-		checkContractAuth(cmd.getNamespaceId(), PrivilegeConstants.CONTRACT_DELETE, cmd.getOrgId(), cmd.getCommunityId());
+		if(cmd.getCheckAuth() == null || cmd.getCheckAuth()) {
+			checkContractAuth(cmd.getNamespaceId(), PrivilegeConstants.CONTRACT_DELETE, cmd.getOrgId(), cmd.getCommunityId());
+		}
+
 		Contract contract = checkContract(cmd.getId());
 		Boolean flag = false;
 		if(ContractStatus.WAITING_FOR_LAUNCH.equals(ContractStatus.fromStatus(contract.getStatus())) || ContractStatus.ACTIVE.equals(ContractStatus.fromStatus(contract.getStatus()))
