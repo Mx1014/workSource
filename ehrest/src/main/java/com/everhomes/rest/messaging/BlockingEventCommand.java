@@ -1,5 +1,7 @@
 package com.everhomes.rest.messaging;
 
+import com.everhomes.util.StringHelper;
+
 public class BlockingEventCommand {
     private String subjectId;
     private String type;
@@ -36,5 +38,10 @@ public class BlockingEventCommand {
 
     public void setMessage(String message) {
         this.message = message;
+    }
+
+    @Override
+    public String toString() {
+        return StringHelper.toJsonString(this);
     }
 }

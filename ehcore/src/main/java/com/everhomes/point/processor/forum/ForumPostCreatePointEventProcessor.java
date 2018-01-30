@@ -11,7 +11,6 @@ import com.everhomes.rest.forum.PostDTO;
 import com.everhomes.util.StringHelper;
 import org.springframework.stereotype.Component;
 
-import java.util.Map;
 import java.util.Objects;
 
 /**
@@ -27,7 +26,7 @@ public class ForumPostCreatePointEventProcessor extends GeneralPointEventProcess
     }
 
     @Override
-    protected String getEventName(LocalEvent localEvent, String subscriptionPath) {
+    protected String getEventName(LocalEvent localEvent) {
         Long appId = null;
         Byte moduleType = null;
 

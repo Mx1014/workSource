@@ -1,5 +1,6 @@
 package com.everhomes.techpark.punch;
 
+import java.io.OutputStream;
 import java.sql.Time;
 import java.text.ParseException;
 import java.util.ArrayList;
@@ -254,4 +255,10 @@ public interface PunchService {
 	ListPunchLogsResponse listPunchLogs(ListPunchLogsCommand cmd);
 
 	void checkAppPrivilege(Long orgId, Long checkOrgId, Long privilege);
+
+	OutputStream getPunchDetailsOutputStream(Long startDay, Long endDay, Byte exceptionStatus,
+			String userName, String ownerType, Long ownerId);
+
+	OutputStream getPunchStatisticsOutputStream(Long startDay, Long endDay, Byte exceptionStatus,
+			String userName, String ownerType, Long ownerId);
 }

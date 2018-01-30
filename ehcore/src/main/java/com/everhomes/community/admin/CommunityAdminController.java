@@ -600,7 +600,7 @@ public class CommunityAdminController extends ControllerBase {
 
     /**
      *
-     * <b>URL: /admin/community/updateBuildingOrder<b>
+     * <b>URL: /admin/community/updateBuildingOrder</b>
      * <p>
      * 更新楼栋顺序
      * </p>

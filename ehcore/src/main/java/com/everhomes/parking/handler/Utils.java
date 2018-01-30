@@ -186,6 +186,34 @@ public class Utils {
         return new Timestamp(getLongByAddNatureMonth(source, month));
     }
 
+    /* rp6.4
+    * 深圳湾项目生态园停车场（对接科拓系统），月卡充值计算有效期采用独立规则：
+    1，首先获得车辆当前的月卡有效期，得到该有效期距离该月自然月底的剩余天数；
+    2，用户选择充值月数后，得到目标月份的自然月天数；
+    3，用户新有效期=目标月份自然月月底-「1」所得剩余天数。*/
+    static Timestamp getTimestampByAddDistanceMonth(Long source,int month){
+        Calendar calendar = Calendar.getInstance();
+        calendar.setTimeInMillis(source);
+        int daysToEndOfMonth = getDaysToEndOfMonth(calendar);
+
+        //加month个月
+        calendar.add(Calendar.MONTH,month);
+        //计算最后一天
+        calendar.set(Calendar.DAY_OF_MONTH, calendar.getActualMaximum(Calendar.DAY_OF_MONTH));
+        calendar.set(Calendar.HOUR_OF_DAY, 23);
+        calendar.set(Calendar.MINUTE, 59);
+        calendar.set(Calendar.SECOND, 59);
+        calendar.set(Calendar.MILLISECOND, 0);
+
+        calendar.add(Calendar.DAY_OF_MONTH,-daysToEndOfMonth);
+        return new Timestamp(calendar.getTimeInMillis());
+    }
+
+    //获取到月底的天数
+    static int getDaysToEndOfMonth(Calendar calendar){
+        return calendar.getActualMaximum(Calendar.DAY_OF_MONTH)-calendar.get(Calendar.DAY_OF_MONTH);
+    }
+
     static Long strToLong(String str, String style) {
 
         SimpleDateFormat sdf = new SimpleDateFormat(style);
@@ -302,7 +330,7 @@ public class Utils {
             close(response, httpclient);
         }
 
-        LOGGER.info("Result from third, url={}, result={}", url, result);
+        LOGGER.info("SendResult from third, url={}, result={}", url, result);
 
         return result;
     }
@@ -369,7 +397,7 @@ public class Utils {
         }finally {
             close(response, httpclient);
         }
-        LOGGER.info("Result from third, url={}, result={}", url, result);
+        LOGGER.info("SendResult from third, url={}, result={}", url, result);
 
         return result;
     }

@@ -87,6 +87,8 @@ public class ContractScheduleJob extends QuartzJobBean {
 
                 if(contractList != null) {
                     contractList.forEach(contract -> {
+                        LOGGER.debug("ContractScheduleJob contract id: {}, number: {}, expiredDate: {}", contract.getId(),
+                                contract.getContractNumber(), contract.getContractEndDate());
                         //当前时间在合同到期时间之后 直接过期
                         if(now.after(contract.getContractEndDate())) {
                             contract.setStatus(ContractStatus.EXPIRED.getCode());

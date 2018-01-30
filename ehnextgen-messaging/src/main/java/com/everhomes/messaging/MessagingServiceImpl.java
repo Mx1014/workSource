@@ -299,13 +299,12 @@ public class MessagingServiceImpl implements MessagingService {
     }
 
     @Override
-    public DeferredResult<Object> blockingEvent(String subjectId, String type, Integer timeOut, Runnable callback) {
+    public DeferredResult<Object>  blockingEvent(String subjectId, String type, Integer timeOut, DeferredResult.DeferredResultHandler handler) {
         if(timeOut == 0 || timeOut > MAX_TIME_OUT){
             return null;
         }
         String subject = "blockingEventKey." + subjectId;
         DeferredResult deferredResult = new DeferredResult();
-        deferredResult.onCompletion(callback);
         BlockingEventResponse response = BlockingEventResponse.build(stored, subject);
 
         //信号延迟生效的判断
@@ -316,6 +315,7 @@ public class MessagingServiceImpl implements MessagingService {
                     blockingEventOnSignal(response, subject, stored.get(subject + ".message"));
                     removeEverythingWithKey(subject);
                     deferredResult.setResult(response);
+                    deferredResult.setResultHandler(handler);
                     return deferredResult;
                 }
             }
@@ -326,6 +326,7 @@ public class MessagingServiceImpl implements MessagingService {
             if(redisTemplate.opsForValue().get(key) != null){
                 blockingEventOnSignal(response, subject, redisTemplate.opsForValue().get(key));
                 deferredResult.setResult(response);
+                deferredResult.setResultHandler(handler);
                 return deferredResult;
             }
         }
@@ -345,6 +346,7 @@ public class MessagingServiceImpl implements MessagingService {
                         response.setStatus(BlockingEventStatus.TIMEOUT);
                         removeEverythingWithKey(subject);
                         deferredResult.setResult(response);
+                        deferredResult.setResultHandler(handler);
                     }
 
                 }).setTimeout(timeOut).create();
@@ -356,6 +358,7 @@ public class MessagingServiceImpl implements MessagingService {
                     public Action onLocalBusMessage(Object sender, String subject, Object dtoResp, String path) {
                         blockingEventOnSignal(response, subject, dtoResp);
                         deferredResult.setResult(response);
+                        deferredResult.setResultHandler(handler);
                         return null;
                     }
                 });

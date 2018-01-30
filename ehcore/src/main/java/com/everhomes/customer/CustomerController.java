@@ -93,7 +93,7 @@ public class CustomerController extends ControllerBase {
     @RequestMapping("deleteEnterpriseCustomer")
     @RestReturn(value = String.class)
     public RestResponse deleteEnterpriseCustomer(@Valid DeleteEnterpriseCustomerCommand cmd) {
-        customerService.deleteEnterpriseCustomer(cmd);
+        customerService.deleteEnterpriseCustomer(cmd, true);
         RestResponse response = new RestResponse();
         response.setErrorCode(ErrorCodes.SUCCESS);
         response.setErrorDescription("OK");
@@ -975,8 +975,7 @@ public class CustomerController extends ControllerBase {
     @RequestMapping("syncEnterpriseCustomers")
     @RestReturn(value = String.class)
     public RestResponse syncEnterpriseCustomers(@Valid SyncCustomersCommand cmd) {
-        customerService.syncEnterpriseCustomers(cmd);
-        RestResponse response = new RestResponse();
+        RestResponse response = new RestResponse(customerService.syncEnterpriseCustomers(cmd));
         response.setErrorCode(ErrorCodes.SUCCESS);
         response.setErrorDescription("OK");
         return response;
@@ -1351,6 +1350,19 @@ public class CustomerController extends ControllerBase {
     @RestReturn(value = CustomerDepartureInfoDTO.class, collection = true)
     public RestResponse listCustomerDepartureInfos(@Valid ListCustomerDepartureInfosCommand cmd) {
         RestResponse response = new RestResponse(customerService.listCustomerDepartureInfos(cmd));
+        response.setErrorCode(ErrorCodes.SUCCESS);
+        response.setErrorDescription("OK");
+        return response;
+    }
+
+    /**
+     * <b>URL: /customer/listCommunitySyncResult</b>
+     * <p>列出同步信息</p>
+     */
+    @RequestMapping("listCommunitySyncResult")
+    @RestReturn(value = ListCommunitySyncResultResponse.class)
+    public RestResponse listCommunitySyncResult(ListCommunitySyncResultCommand cmd) {
+        RestResponse response = new RestResponse(customerService.listCommunitySyncResult(cmd));
         response.setErrorCode(ErrorCodes.SUCCESS);
         response.setErrorDescription("OK");
         return response;

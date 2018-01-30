@@ -3,6 +3,7 @@ package com.everhomes.rest.flow;
 /**
  * <ul>
  * <li>department: 选择部门</li>
+ * <li>person: 新的选择部门，代替上面的department</li>
  * <li>position: 选择职位</li>
  * <li>manager: 选择经理</li>
  * <li>variable: 选择变量</li>
@@ -12,6 +13,7 @@ package com.everhomes.rest.flow;
  */
 public enum FlowUserSelectionType {
 	DEPARTMENT("department"),
+    PERSON("person"),
     POSITION("position"),
     MANAGER("manager"),
     VARIABLE("variable"),

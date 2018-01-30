@@ -8,9 +8,7 @@ import java.util.ArrayList;
 import java.util.List;
 import java.util.stream.Collectors;
 
-/**
- * Created by xq.tian on 2017/11/13.
- */
+/** Created by xq.tian on 2017/11/13. */
 public class FlowCaseProcessorsProcessorImpl implements FlowCaseProcessorsProcessor {
 
     private List<Long> processorIdList;
@@ -20,8 +18,12 @@ public class FlowCaseProcessorsProcessorImpl implements FlowCaseProcessorsProces
     private FlowService flowService;
     private UserService userService;
 
-    public FlowCaseProcessorsProcessorImpl(List<Long> processorIdList, List<FlowCase> allFlowCase,
-                                           boolean allFlowCaseFlag, FlowService flowService, UserService userService) {
+    public FlowCaseProcessorsProcessorImpl(
+            List<Long> processorIdList,
+            List<FlowCase> allFlowCase,
+            boolean allFlowCaseFlag,
+            FlowService flowService,
+            UserService userService) {
         this.processorIdList = processorIdList;
         this.flowService = flowService;
         this.userService = userService;
@@ -44,7 +46,9 @@ public class FlowCaseProcessorsProcessorImpl implements FlowCaseProcessorsProces
     public List<UserInfo> getProcessorsInfoList(FlowCaseState ctx) {
         Long organizationId = getOrganizationId();
         List<Long> idList = getProcessorsIdList(ctx);
-        return idList.stream().map(r -> this.fixupUserInfo(organizationId, r)).collect(Collectors.toList());
+        return idList.stream()
+                .map(r -> this.fixupUserInfo(organizationId, r))
+                .collect(Collectors.toList());
     }
 
     @Override
@@ -53,14 +57,10 @@ public class FlowCaseProcessorsProcessorImpl implements FlowCaseProcessorsProces
 
         if (allFlowCaseFlag) {
             for (FlowCaseState flowCaseState : ctx.getAllFlowState()) {
-                processorsIdList.addAll(
-                        ctxLogsFilter(flowCaseState)
-                );
+                processorsIdList.addAll(ctxLogsFilter(flowCaseState));
             }
         } else {
-            processorsIdList.addAll(
-                    ctxLogsFilter(ctx)
-            );
+            processorsIdList.addAll(ctxLogsFilter(ctx));
         }
         processorsIdList.addAll(getProcessorIdList());
         return processorsIdList;
@@ -72,9 +72,14 @@ public class FlowCaseProcessorsProcessorImpl implements FlowCaseProcessorsProces
     }
 
     private List<Long> ctxLogsFilter(FlowCaseState flowCaseState) {
-        return flowCaseState.getLogs().stream()
-                .filter(r -> FlowLogType.fromCode(r.getLogType()) == FlowLogType.NODE_ENTER
-                        && r.getStepCount().equals(flowCaseState.getFlowCase().getStepCount()))
+        return flowCaseState
+                .getLogs()
+                .stream()
+                .filter(
+                        r ->
+                                FlowLogType.fromCode(r.getLogType()) == FlowLogType.NODE_ENTER
+                                        && r.getStepCount()
+                                                .equals(flowCaseState.getFlowCase().getStepCount()))
                 .map(FlowEventLog::getFlowUserId)
                 .collect(Collectors.toList());
     }

@@ -5,9 +5,11 @@ package com.everhomes.user;
 import com.everhomes.acl.AclProvider;
 import com.everhomes.acl.PortalRoleResolver;
 import com.everhomes.acl.Role;
+import com.everhomes.acl.RolePrivilegeService;
 import com.everhomes.address.AddressService;
 import com.everhomes.app.App;
 import com.everhomes.app.AppProvider;
+import com.everhomes.asset.AssetPaymentStrings;
 import com.everhomes.authorization.*;
 import com.everhomes.bigcollection.Accessor;
 import com.everhomes.bigcollection.BigCollectionProvider;
@@ -67,11 +69,13 @@ import com.everhomes.point.UserPointService;
 import com.everhomes.qrcode.QRCodeService;
 import com.everhomes.region.Region;
 import com.everhomes.region.RegionProvider;
+import com.everhomes.rest.acl.ListServiceModuleAdministratorsCommand;
 import com.everhomes.rest.address.*;
 import com.everhomes.rest.app.AppConstants;
 import com.everhomes.rest.asset.TargetDTO;
 import com.everhomes.rest.business.ShopDTO;
 import com.everhomes.rest.community.CommunityType;
+import com.everhomes.rest.contentserver.CsFileLocationDTO;
 import com.everhomes.rest.energy.util.ParamErrorCodes;
 import com.everhomes.rest.family.FamilyDTO;
 import com.everhomes.rest.family.FamilyMemberFullDTO;
@@ -133,6 +137,7 @@ import javax.validation.Validator;
 import javax.validation.constraints.Size;
 import javax.validation.metadata.ConstraintDescriptor;
 import java.io.UnsupportedEncodingException;
+import java.net.URLDecoder;
 import java.net.URLEncoder;
 import java.nio.charset.Charset;
 import java.sql.Timestamp;
@@ -324,6 +329,9 @@ public class UserServiceImpl implements UserService {
 
 	@Autowired
 	private QRCodeService qrCodeService;
+	
+	@Autowired
+	private RolePrivilegeService rolePrivilegeService;
 
 //
 //    @Autowired
@@ -589,7 +597,7 @@ public class UserServiceImpl implements UserService {
 		String templateLocale = UserContext.current().getUser().getLocale();
 		smsProvider.sendSms(namespaceId, phoneNumber, templateScope, templateId, templateLocale, variables);
 
-		//		String smsType = configurationProvider.getValue(namespaceId, VCODE_SEND_TYPE, "");
+		//		String smsType = configurationProvider.getValue(namespaceId, SMS_HANDLER_TYPE, "");
 		//		if(smsType.equalsIgnoreCase("YZX")){
 		//			String templateId = configurationProvider.getValue(namespaceId, YZX_VCODE_TEMPLATE_ID, "");
 		//			smsProvider.sendSms(number, verificationCode,templateId);
@@ -3773,6 +3781,13 @@ public class UserServiceImpl implements UserService {
 		String namespaceUserToken = user.getNamespaceUserToken();
 		List<User> userList = userProvider.findThirdparkUserByTokenAndType(namespaceId, namespaceUserType, namespaceUserToken);
 		if(userList == null || userList.size() == 0) {
+
+			//将微信头像下载下来
+			CsFileLocationDTO fileLocationDTO = contentServerService.uploadFileByUrl("avatar.jpg", user.getAvatar());
+			if(fileLocationDTO != null && fileLocationDTO.getUri() != null){
+				user.setAvatar(fileLocationDTO.getUri());
+			}
+
 			userProvider.createUser(user);
 
 			//设定默认园区  add by  yanjun 20170915
@@ -4714,10 +4729,12 @@ public class UserServiceImpl implements UserService {
 	}
 
 	@Override
-	public TargetDTO findTargetByNameAndAddress(String contractNum, String targetName, Long communityId, String tel,String ownerType,String targetType) {
+	public TargetDTO findTargetByNameAndAddress(String contractNum, String targetName, Long communityId, String tel,String ownerType,String targetType, Integer namespaceId) {
         TargetDTO dto = new TargetDTO();
         if(contractNum!=null) {
-			Integer namespaceId = UserContext.getCurrentNamespaceId();
+        	if(namespaceId == null){
+                namespaceId = UserContext.getCurrentNamespaceId();
+            }
 			String handler = configurationProvider.getValue(namespaceId, "contractService", "");
 			ContractService contractService = PlatformContext.getComponent(ContractService.CONTRACT_PREFIX + handler);
             List<Object> typeIdNameAndTel = contractService.findCustomerByContractNum(contractNum,communityId,ownerType);
@@ -4727,9 +4744,36 @@ public class UserServiceImpl implements UserService {
                 dto.setTargetName((String)typeIdNameAndTel.get(2));
                 dto.setUserIdentifier((String)typeIdNameAndTel.get(3));
                 dto.setContractId((Long)typeIdNameAndTel.get(4));
-                return dto;
             }
-        }else{
+        }
+        if(dto.getTargetId() == null){
+			if(targetType!=null && targetType.equals(AssetPaymentStrings.EH_USER)){
+				dto = userProvider.findUserByToken(tel,namespaceId);
+				return dto;
+			}
+			if(targetType!=null && targetType.equals(AssetPaymentStrings.EH_ORGANIZATION)){
+				Organization org = organizationProvider.findOrganizationByName(targetName, namespaceId);
+				if(org != null){
+					dto.setTargetName(org.getName());
+					dto.setTargetType(AssetPaymentStrings.EH_ORGANIZATION);
+					dto.setTargetId(org.getId());
+					//查企业的管理员
+					ListServiceModuleAdministratorsCommand cmd1 = new ListServiceModuleAdministratorsCommand();
+					cmd1.setOrganizationId(org.getId());
+					cmd1.setActivationFlag((byte)1);
+					cmd1.setOwnerType("EhOrganizations");
+					cmd1.setOwnerId(null);
+					List<OrganizationContactDTO> organizationContactDTOS = rolePrivilegeService
+							.listOrganizationAdministrators(cmd1);
+					if(organizationContactDTOS != null && organizationContactDTOS.size() > 0){
+						Long contactId = organizationContactDTOS.get(0).getTargetId();
+						User enterpriseAdmin = userProvider.findUserById(contactId);
+						dto.setUserIdentifier(enterpriseAdmin.getIdentifierToken());
+					}
+				}
+				return dto;
+			}
+		}
             //确定客户的优先度， 查到合同算查到人，楼栋门牌只是为了填写账单的地址用
 //            List<AddressIdAndName> addressByPossibleName = addressService.findAddressByPossibleName(UserContext.getCurrentNamespaceId(), communityId, buildingName, apartmentName);
 //            List<Long> ids = new ArrayList<>();
@@ -4740,18 +4784,8 @@ public class UserServiceImpl implements UserService {
 //            List<TargetDTO> users = userProvider.findUesrIdByNameAndAddressId(targetName,ids,tel);
 //            //再在eh_organization中找
 //            List<TargetDTO> organizations = organizationProvider.findOrganizationIdByNameAndAddressId(targetName,ids);
-			if(targetType!=null && targetType.equals("eh_user")){
-                dto = userProvider.findUserByTokenAndName(tel,targetName);
-                return dto;
-			}
-			if(targetType!=null && targetType.equals("eh_organization")){
-                Organization organization = organizationProvider.findOrganizationByName(targetName, UserContext.getCurrentNamespaceId());
-                dto.setTargetName(organization.getName());
-                dto.setTargetType("eh_organization");
-                dto.setTargetId(organization.getId());
-                return dto;
-            }
-        }
+
+
         return null;
 	}
 
@@ -5461,11 +5495,12 @@ public class UserServiceImpl implements UserService {
 	// 登录等待
 	@Override
 	public DeferredResult<Object> waitScanForLogon(String subjectId){
-		DeferredResult<Object> result =  this.messagingService.blockingEvent(subjectId, "ORORDINARY", 30 * 1000, null);
-		result.onCompletion(new Runnable(){
+
+		DeferredResult<Object> result =  this.messagingService.blockingEvent(subjectId, "ORORDINARY", 30 * 1000, new DeferredResult.DeferredResultHandler(){
+
 			@Override
-			public void run() {
-				BlockingEventResponse response = (BlockingEventResponse)result.getResult();
+			public void handleResult(Object result) {
+				BlockingEventResponse response = (BlockingEventResponse)result;
 				if(response.getStatus() != BlockingEventStatus.CONTINUTE){
 					LOGGER.error("waitScanForLogon failure");
 					throw RuntimeErrorException.errorWith(ErrorCodes.SCOPE_GENERAL, ErrorCodes.ERROR_INVALID_PARAMETER, "waitScanForLogon failure");
@@ -5480,8 +5515,8 @@ public class UserServiceImpl implements UserService {
 				}
 
 				try {
-					String token = new String(Base64.getDecoder().decode(response.getMessage()), "utf-8");
-					String[] tokenParam = token.split(";");
+					String token = URLDecoder.decode(response.getMessage(), "utf-8");
+					String[] tokenParam = token.split("&");
 					String salt = tokenParam[0];
 					if (salt.equals(SALT)) {
 						Long userId = Long.valueOf(tokenParam[1]);
@@ -5490,7 +5525,10 @@ public class UserServiceImpl implements UserService {
 						LoginToken logintoken = WebTokenGenerator.getInstance().fromWebToken(userToken, LoginToken.class);
 						//todo 验证
 						UserLogin userLogin = logonByToken(logintoken);
-						response.setMessage(GsonUtil.toJson(userLogin));
+						Map valueMap = new HashMap();
+						valueMap.put("userLogin", GsonUtil.toJson(userLogin));
+						valueMap.put("args",tokenParam[4]);
+						response.setMessage(GsonUtil.toJson(valueMap));
 					} else {
 						LOGGER.error("waitScanForLogon failure");
 						throw RuntimeErrorException.errorWith(ErrorCodes.SCOPE_GENERAL, ErrorCodes.ERROR_INVALID_PARAMETER, "waitScanForLogon failure");
@@ -5498,8 +5536,8 @@ public class UserServiceImpl implements UserService {
 				} catch (UnsupportedEncodingException e) {
 					e.printStackTrace();
 				}
-
 			}
+
 		});
 		return result;
 	}
@@ -5508,10 +5546,15 @@ public class UserServiceImpl implements UserService {
 
 	// 获取当前准备登录用户的混淆key
 	@Override
-	public String getSercetKeyForScan(HttpServletRequest request, HttpServletResponse response) {
+	public String getSercetKeyForScan(String args) {
 		String userToken = WebTokenGenerator.getInstance().toWebToken(UserContext.current().getLogin().getLoginToken());
-		String plain = SALT + ";" + UserContext.currentUserId() + ";" + UserContext.getCurrentNamespaceId() + ";" + userToken ;
-		String token = Base64.getEncoder().encodeToString(plain.getBytes());
+		String plain = SALT + "&" + UserContext.currentUserId() + "&" + UserContext.getCurrentNamespaceId() + "&" + userToken + "&" + args;
+		String token = null;
+		try {
+			token = URLEncoder.encode(plain, "UTF-8");
+		} catch (UnsupportedEncodingException e) {
+			e.printStackTrace();
+		}
 		return token;
 	}
 
@@ -5525,9 +5568,10 @@ public class UserServiceImpl implements UserService {
 	// 获取统一的功能卡片
 	@Override
 	public List<FunctionCardDto> listUserRelatedCards(){
+		List<FunctionCardDto> cardDtos = new ArrayList<>();
 		functionCardHandlers.forEach(r->{
-			System.out.print(r);
+			cardDtos.add(r.listCards(1000000, 1L));
 		});
-		return null;
+		return cardDtos;
 	}
 }

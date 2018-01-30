@@ -26,6 +26,7 @@ import com.everhomes.rest.address.CommunityDTO;
 import com.everhomes.rest.app.AppConstants;
 import com.everhomes.rest.asset.TargetDTO;
 import com.everhomes.rest.messaging.BlockingEventCommand;
+import com.everhomes.rest.messaging.GetSercetKeyForScanCommand;
 import com.everhomes.rest.messaging.MessageChannel;
 import com.everhomes.rest.messaging.MessageDTO;
 import com.everhomes.rest.oauth2.AuthorizationCommand;
@@ -265,6 +266,27 @@ public class UserController extends ControllerBase {
         SignupToken token = userService.signup(newCmd, request);
         return new RestResponse(WebTokenGenerator.getInstance().toWebToken(token));
     }
+
+	@RequestMapping("signupForCodeRequest")
+	@RequireAuthentication(false)
+	@RestReturn(String.class)
+	public RestResponse signupForCodeRequest(@Valid SignupCommandByAppKey cmd, HttpServletRequest request) {
+		// 手机号或者邮箱，SignupCommandByAppKey拷贝自com.everhomes.rest.user.SignupCommand， 由于原来使用token字段来填手机号，
+		// 但token属于特殊字段，会导致Webtoken解释异常，故在新接口把字段名称修改一下，但在service仍然用回原来的command
+		// by lqs 20170714
+
+
+		// 敢哥说开一个口给创业场用
+		if(cmd.getNamespaceId().intValue() != 999964){
+			throw RuntimeErrorException.errorWith(UserServiceErrorCode.SCOPE,
+					100000000, "Forbidden");
+		}
+		SignupCommand newCmd = ConvertHelper.convert(cmd, SignupCommand.class);
+		newCmd.setToken(cmd.getUserIdentifier());
+
+		SignupToken token = userService.signup(newCmd, request);
+		return new RestResponse(WebTokenGenerator.getInstance().toWebToken(token));
+	}
 
 	/**
 	 * <b>URL: /user/resendVerificationCode</b>
@@ -1310,7 +1332,7 @@ public class UserController extends ControllerBase {
 	@RequestMapping(value = "findTargetByNameAndAddress")
 	@RestReturn(value = TargetDTO.class)
 	public RestResponse findTargetByNameAndAddress(FindTargetByNameAndAddressCommand cmd) {
-		RestResponse resp = new RestResponse(userService.findTargetByNameAndAddress(cmd.getContractNum(),cmd.getTargetName(),cmd.getOwnerId(),cmd.getTel(),cmd.getOwnerType(),cmd.getTargetType()));
+		RestResponse resp = new RestResponse(userService.findTargetByNameAndAddress(cmd.getContractNum(),cmd.getTargetName(),cmd.getOwnerId(),cmd.getTel(),cmd.getOwnerType(),cmd.getTargetType(),cmd.getNamespaceId()));
 		resp.setErrorCode(ErrorCodes.SUCCESS);
 		resp.setErrorDescription("OK");
 		return resp;
@@ -1429,6 +1451,7 @@ public class UserController extends ControllerBase {
 	 * @return
 	 */
 	@RequestMapping("querySubjectIdForScan")
+	@RequireAuthentication(false)
 	@RestReturn(QRCodeDTO.class)
 	public RestResponse querySubjectIdForScan() {
 		RestResponse resp = new RestResponse(userService.querySubjectIdForScan());
@@ -1443,6 +1466,7 @@ public class UserController extends ControllerBase {
 	 * @return
 	 */
 	@RequestMapping("waitScanForLogon")
+	@RequireAuthentication(false)
 	@RestReturn(String.class)
 	public RestResponse waitScanForLogon(BlockingEventCommand cmd) {
 		RestResponse resp = new RestResponse(userService.waitScanForLogon(cmd.getSubjectId()));
@@ -1459,8 +1483,8 @@ public class UserController extends ControllerBase {
 	 */
 	@RequestMapping("getSercetKeyForScan")
 	@RestReturn(String.class)
-	public RestResponse getSercetKeyForScan(HttpServletRequest request, HttpServletResponse response) {
-		RestResponse resp = new RestResponse(userService.getSercetKeyForScan(request, response));
+	public RestResponse getSercetKeyForScan(GetSercetKeyForScanCommand cmd) {
+		RestResponse resp = new RestResponse(userService.getSercetKeyForScan(cmd.getArgs()));
 		resp.setErrorCode(ErrorCodes.SUCCESS);
 		resp.setErrorDescription("OK");
 		return resp;

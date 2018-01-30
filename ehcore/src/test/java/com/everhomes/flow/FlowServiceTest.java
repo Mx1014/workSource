@@ -221,13 +221,14 @@ public class FlowServiceTest extends LoginAuthTestCase {
     	Assert.assertTrue(flowNode.getId() > 0);
     	Assert.assertTrue(nodeDTO.getId().equals(flowNode.getId()));
     	
-    	FlowButton flowButton1 = flowButtonProvider.findFlowButtonByStepType(flowNode.getId(), flowNode.getFlowVersion(), FlowStepType.COMMENT_STEP.getCode(), FlowUserType.APPLIER.getCode());
-    	FlowButton flowButton2 = flowButtonProvider.findFlowButtonByStepType(flowNode.getId(), flowNode.getFlowVersion(), FlowStepType.COMMENT_STEP.getCode(), FlowUserType.PROCESSOR.getCode());
-    	FlowButton flowButton3 = flowButtonProvider.findFlowButtonByStepType(flowNode.getId(), flowNode.getFlowVersion(), FlowStepType.EVALUATE_STEP.getCode(), FlowUserType.APPLIER.getCode());
+    	FlowButton flowButton1 = flowButtonProvider.findFlowButtonByStepType(flowNode.getFlowMainId(), flowNode.getId(), flowNode.getFlowVersion(), FlowStepType.COMMENT_STEP.getCode(), FlowUserType.APPLIER.getCode());
+    	FlowButton flowButton2 = flowButtonProvider.findFlowButtonByStepType(flowNode.getFlowMainId(), flowNode.getId(), flowNode.getFlowVersion(), FlowStepType.COMMENT_STEP.getCode(), FlowUserType.PROCESSOR.getCode());
+    	FlowButton flowButton3 = flowButtonProvider.findFlowButtonByStepType(flowNode.getFlowMainId(), flowNode.getId(), flowNode.getFlowVersion(), FlowStepType.EVALUATE_STEP.getCode(), FlowUserType.APPLIER.getCode());
     	Assert.assertTrue(flowButton1.getId() > 0 && flowButton2.getId() > 0 && !flowButton1.getId().equals(flowButton2.getId()));
     	Assert.assertTrue(flowButton3.getStatus().equals(FlowButtonStatus.DISABLED.getCode()));
     	
-    	List<FlowButton> buttons = flowButtonProvider.findFlowButtonsByUserType(flowNode.getId(), flowNode.getFlowVersion(), FlowUserType.APPLIER.getCode());
+    	List<FlowButton> buttons = flowButtonProvider.findFlowButtonsByUserType(flowNode.getFlowMainId()
+                , flowNode.getId(), flowNode.getFlowVersion(), FlowUserType.APPLIER.getCode());
     	Assert.assertTrue(buttons.size() == 4);
     	
     	flowService.deleteFlowNode(nodeDTO.getId());
@@ -360,7 +361,7 @@ public class FlowServiceTest extends LoginAuthTestCase {
     	Assert.assertTrue(detail.getProcessors().size() == 0);
     	
     	//got a button
-    	FlowButton flowButton1 = flowButtonProvider.findFlowButtonByStepType(nodeDTO001.getId(), nodeDTO001.getFlowVersion(), FlowStepType.COMMENT_STEP.getCode(), FlowUserType.APPLIER.getCode());
+    	FlowButton flowButton1 = flowButtonProvider.findFlowButtonByStepType(nodeDTO001.getFlowMainId(), nodeDTO001.getId(), nodeDTO001.getFlowVersion(), FlowStepType.COMMENT_STEP.getCode(), FlowUserType.APPLIER.getCode());
     	
     	FlowButtonDetailDTO btnDetail1 = flowService.getFlowButtonDetail(flowButton1.getId());
     	Assert.assertTrue(btnDetail1.getPushMessage() == null);

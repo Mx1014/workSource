@@ -88,7 +88,7 @@ public interface MessagingService {
             MessageDTO message, int deliveryOption);
     FetchMessageCommandResponse fetchRecentToPastMessagesAny(FetchRecentToPastMessageAdminCommand cmd);
 
-    DeferredResult<Object> blockingEvent(String subjectId, String type, Integer timeOut, Runnable callback);
+    DeferredResult<Object> blockingEvent(String subjectId, String type, Integer timeOut, DeferredResult.DeferredResultHandler handler);
 
     String signalBlockingEvent(String subjectId, String message, Integer timeOut);
 

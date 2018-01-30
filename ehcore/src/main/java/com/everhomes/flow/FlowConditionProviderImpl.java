@@ -54,7 +54,7 @@ public class FlowConditionProviderImpl implements FlowConditionProvider {
 	}
 
     @Override
-    public void deleteFlowCondition(Long flowMainId, Long flowNodeId, Integer flowVersion) {
+    public void deleteFlowCondition(Long flowMainId, Integer flowVersion, Long flowNodeId) {
         DSLContext context = dbProvider.getDslContext(AccessSpec.readWrite());
         com.everhomes.server.schema.tables.EhFlowConditions t = Tables.EH_FLOW_CONDITIONS;
 
@@ -69,10 +69,12 @@ public class FlowConditionProviderImpl implements FlowConditionProvider {
     }
 
     @Override
-    public List<FlowCondition> listFlowCondition(Long flowNodeId) {
+    public List<FlowCondition> listFlowCondition(Long flowMainId, Integer flowVersion, Long flowNodeId) {
         com.everhomes.server.schema.tables.EhFlowConditions t = Tables.EH_FLOW_CONDITIONS;
         return context().selectFrom(t)
-                .where(t.FLOW_NODE_ID.eq(flowNodeId))
+                .where(t.FLOW_MAIN_ID.eq(flowMainId))
+                .and(t.FLOW_VERSION.eq(flowVersion))
+                .and(t.FLOW_NODE_ID.eq(flowNodeId))
                 .fetchInto(FlowCondition.class);
     }
 

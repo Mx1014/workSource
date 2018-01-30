@@ -166,11 +166,42 @@ public class LaunchPadServiceImpl implements LaunchPadService {
 		//            result = getLaunchPadItems(cmd,community,request);
 		//        }
 		result = getItemsByCommunity(cmd, request, ItemDisplayFlag.DISPLAY);
+
+		// 更多或者全部不可删除，如果没有更多或者全部则其他icon不可以移除
+		setDefaultEditFlag(result);
+
 		response.setLaunchPadItems(result);
 		long endTime = System.currentTimeMillis();
 		LOGGER.info("Query launch pad complete, cmd=" + cmd + ",esplse=" + (endTime - startTime));
 		return response;
 
+	}
+
+
+	/**
+	 * 更多或者全部不可删除，如果没有更多或者全部则其他icon不可以移除
+	 * @param dtos
+	 */
+	private void setDefaultEditFlag(List<LaunchPadItemDTO> dtos){
+		if(dtos == null){
+			return;
+		}
+
+		boolean deleteFlag = false;
+		for (LaunchPadItemDTO dto: dtos){
+			if(ActionType.fromCode(dto.getActionType()) == ActionType.MORE_BUTTON || ActionType.fromCode(dto.getActionType()) == ActionType.ALL_BUTTON){
+				deleteFlag = true;
+				dto.setDeleteFlag(DeleteFlagType.NO.getCode());
+				dto.setEditFlag(EditFlagType.NO.getCode());
+				break;
+			}
+		}
+		if(!deleteFlag){
+			for (LaunchPadItemDTO dto: dtos){
+				dto.setDeleteFlag(DeleteFlagType.NO.getCode());
+				dto.setEditFlag(EditFlagType.NO.getCode());
+			}
+		}
 	}
 	
 	
@@ -198,8 +229,10 @@ public class LaunchPadServiceImpl implements LaunchPadService {
 			cmd.setCategryId(categry.getId());
 			cmd.setCategryName(categry.getName());
 			List<LaunchPadItemDTO> result = getItemsByCommunity(cmd, request, null);
-			categryItemDTO.setLaunchPadItems(result);
-			categryItemDTOs.add(categryItemDTO);
+			if(result != null && result.size() > 0){
+				categryItemDTO.setLaunchPadItems(result);
+				categryItemDTOs.add(categryItemDTO);
+			}
 		}
 		long endTime = System.currentTimeMillis();
 		LOGGER.info("Query launch pad complete, cmd=" + cmd + ",esplse=" + (endTime - startTime));
@@ -283,8 +316,10 @@ public class LaunchPadServiceImpl implements LaunchPadService {
 			cmd.setCategryId(categry.getId());
 			cmd.setCategryName(categry.getName());
 			List<LaunchPadItemDTO> result = getItemsByOrg(cmd, request, null);
-			categryItemDTO.setLaunchPadItems(result);
-			categryItemDTOs.add(categryItemDTO);
+			if(result != null && result.size() > 0) {
+				categryItemDTO.setLaunchPadItems(result);
+				categryItemDTOs.add(categryItemDTO);
+			}
 		}
 		long endTime = System.currentTimeMillis();
 		LOGGER.info("Query launch pad complete, cmd=" + cmd + ",esplse=" + (endTime - startTime));
@@ -351,6 +386,10 @@ public class LaunchPadServiceImpl implements LaunchPadService {
 		//            result = getLaunchPadItems(cmd,community,request);
 		//        }
 		result = getItemsByOrg(cmd, request,ItemDisplayFlag.DISPLAY);
+
+		// 更多或者全部不可删除，如果没有更多或者全部则其他icon不可以移除
+		setDefaultEditFlag(result);
+
 		response.setLaunchPadItems(result);
 		long endTime = System.currentTimeMillis();
 		LOGGER.info("Query launch pad complete, cmd=" + cmd + ",esplse=" + (endTime - startTime));

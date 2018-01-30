@@ -10,7 +10,6 @@ import com.everhomes.util.StringHelper;
  * <li>resourceId: 资源id</li>
  * <li>projectId: 项目id(根据第三方获取的id)</li>
  * <li>billDate: 账单日期</li>
- *	</li>
  * </ul>
  */
 public class GetPmsyBills {

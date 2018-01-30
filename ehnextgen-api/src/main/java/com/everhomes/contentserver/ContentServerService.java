@@ -3,17 +3,11 @@ package com.everhomes.contentserver;
 import java.io.InputStream;
 import java.util.List;
 
+import com.everhomes.rest.contentserver.*;
 import org.springframework.web.context.request.async.DeferredResult;
 import org.springframework.web.multipart.MultipartFile;
 
 import com.everhomes.rest.RestResponse;
-import com.everhomes.rest.contentserver.AddConfigItemCommand;
-import com.everhomes.rest.contentserver.AddContentServerCommand;
-import com.everhomes.rest.contentserver.ContentServerDTO;
-import com.everhomes.rest.contentserver.UpdateContentServerCommand;
-import com.everhomes.rest.contentserver.UploadCsFileResponse;
-import com.everhomes.rest.contentserver.UploadFileInfoCommand;
-import com.everhomes.rest.contentserver.UploadFileInfoDTO;
 import com.everhomes.rest.messaging.ImageBody;
 
 public interface ContentServerService {
@@ -65,5 +59,7 @@ public interface ContentServerService {
     DeferredResult<RestResponse> waitScan(String uploadId);
 
     String updateUploadInfo(UploadFileInfoCommand cmd);
+
+    CsFileLocationDTO uploadFileByUrl(String fileName, String url);
 
 }

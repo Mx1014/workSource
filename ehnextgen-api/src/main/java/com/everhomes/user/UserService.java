@@ -248,7 +248,7 @@ public interface UserService {
      * created by wentian
      * 根据客户名和地址定位唯一用户
      */
-    TargetDTO findTargetByNameAndAddress(String contractNum, String targetName , Long ownerId,String tel,String ownerType,String targetType);
+    TargetDTO findTargetByNameAndAddress(String contractNum, String targetName , Long ownerId,String tel,String ownerType,String targetType,Integer namespaceId);
 
     Long getCommunityIdBySceneToken(SceneTokenDTO sceneTokenDTO);
 
@@ -293,7 +293,7 @@ public interface UserService {
 
     DeferredResult<Object> waitScanForLogon(String subjectId);
 
-    String getSercetKeyForScan(HttpServletRequest request, HttpServletResponse response);
+    String getSercetKeyForScan(String args);
 
     void logonByScan(String subjectId, String message);
 

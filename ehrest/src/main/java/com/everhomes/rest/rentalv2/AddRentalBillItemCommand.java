@@ -13,8 +13,8 @@ import com.everhomes.util.StringHelper;
  * <li>rentalSiteId：场所id</li>   
  * <li>rentalType：类型</li>   
  * <li>rentalBillId：订单id</li>
- * <li>rentalItems：List<SiteItemDTO> 商品列表</li>
- * <li>rentalAttachments：List<AttachmentDTO> 附件列表</li>
+ * <li>rentalItems：商品列表，参考{@link com.everhomes.rest.rentalv2.SiteItemDTO}</li>
+ * <li>rentalAttachments：附件列表，参考{@link com.everhomes.rest.rentalv2.AttachmentDTO}</li>
  * <li>paymentType: 支付方式，微信公众号支付方式必填，9-公众号支付 参考{@link com.everhomes.rest.order.PaymentType}</li>
  * </ul>
  */

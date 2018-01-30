@@ -15,6 +15,9 @@ import com.everhomes.util.ConvertHelper;
 import com.everhomes.util.DateUtils;
 import org.jooq.DSLContext;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.cache.annotation.CacheEvict;
+import org.springframework.cache.annotation.Cacheable;
+import org.springframework.cache.annotation.Caching;
 import org.springframework.stereotype.Repository;
 
 import java.util.List;
@@ -28,6 +31,10 @@ public class FlowLinkProviderImpl implements FlowLinkProvider {
 	@Autowired
 	private SequenceProvider sequenceProvider;
 
+    @Caching(evict = {
+            @CacheEvict(value = "listFlowLink", key = "{#flowLink.flowMainId, #flowLink.flowVersion}")
+        }
+    )
 	@Override
 	public void createFlowLink(FlowLink flowLink) {
 		Long id = sequenceProvider.getNextSequence(NameMapper.getSequenceDomainFromTablePojo(EhFlowLinks.class));
@@ -38,6 +45,10 @@ public class FlowLinkProviderImpl implements FlowLinkProvider {
 		DaoHelper.publishDaoAction(DaoAction.CREATE, EhFlowLinks.class, id);
 	}
 
+    @Caching(evict = {
+            @CacheEvict(value = "listFlowLink", key = "{#flowLink.flowMainId, #flowLink.flowVersion}")
+        }
+    )
 	@Override
 	public void updateFlowLink(FlowLink flowLink) {
 		flowLink.setUpdateTime(DateUtils.currentTimestamp());
@@ -51,6 +62,10 @@ public class FlowLinkProviderImpl implements FlowLinkProvider {
 		return ConvertHelper.convert(dao().findById(id), FlowLink.class);
 	}
 
+	@Caching(evict = {
+            @CacheEvict(value = "listFlowLink", key = "{#flowMainId, #flowVersion}")
+        }
+    )
     @Override
     public void deleteFlowLink(Long flowMainId, Integer flowVersion) {
         DSLContext context = dbProvider.getDslContext(AccessSpec.readWrite());
@@ -61,6 +76,7 @@ public class FlowLinkProviderImpl implements FlowLinkProvider {
                 .execute();
     }
 
+    @Cacheable(value = "listFlowLink", key = "{#flowMainId, #flowVersion}")
     @Override
     public List<FlowLink> listFlowLink(Long flowMainId, Integer flowVersion) {
         com.everhomes.server.schema.tables.EhFlowLinks t = Tables.EH_FLOW_LINKS;
@@ -71,20 +87,22 @@ public class FlowLinkProviderImpl implements FlowLinkProvider {
     }
 
     @Override
-    public List<FlowLink> listFlowLinkByToNodeId(Long toNodeId, Integer flowVersion) {
+    public List<FlowLink> listFlowLinkByToNodeId(Long flowMainId, Integer flowVersion, Long toNodeId) {
         com.everhomes.server.schema.tables.EhFlowLinks t = Tables.EH_FLOW_LINKS;
         return context().selectFrom(t)
-                .where(t.TO_NODE_ID.eq(toNodeId))
+                .where(t.FLOW_MAIN_ID.eq(flowMainId))
                 .and(t.FLOW_VERSION.eq(flowVersion))
+                .and(t.TO_NODE_ID.eq(toNodeId))
                 .fetchInto(FlowLink.class);
     }
 
     @Override
-    public List<FlowLink> listFlowLinkByFromNodeId(Long fromNodeId, Integer flowVersion) {
+    public List<FlowLink> listFlowLinkByFromNodeId(Long flowMainId, Integer flowVersion, Long fromNodeId) {
         com.everhomes.server.schema.tables.EhFlowLinks t = Tables.EH_FLOW_LINKS;
         return context().selectFrom(t)
-                .where(t.FROM_NODE_ID.eq(fromNodeId))
+                .where(t.FLOW_MAIN_ID.eq(flowMainId))
                 .and(t.FLOW_VERSION.eq(flowVersion))
+                .and(t.FROM_NODE_ID.eq(fromNodeId))
                 .fetchInto(FlowLink.class);
     }
 
