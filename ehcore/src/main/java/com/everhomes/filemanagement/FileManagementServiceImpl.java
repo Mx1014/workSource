@@ -110,11 +110,13 @@ public class FileManagementServiceImpl implements  FileManagementService{
         }
     }
 
-    private void checkTheCatalogName(Integer namespaceId, Long ownerId, String name, Long catalogId){
+    private void checkTheCatalogName(Integer namespaceId, Long ownerId, String name, Long catalogId) {
         FileCatalog catalog = fileManagementProvider.findFileCatalogByName(namespaceId, ownerId, name);
-        if(catalog.getId().longValue() != catalogId.longValue())
-            throw RuntimeErrorException.errorWith(FileManagementErrorCode.SCOPE, FileManagementErrorCode.ERROR_NAME_ALREADY_EXISTS,
-                    "the name has been used.");
+        if (catalog != null) {
+            if (catalog.getId().longValue() != catalogId.longValue())
+                throw RuntimeErrorException.errorWith(FileManagementErrorCode.SCOPE, FileManagementErrorCode.ERROR_NAME_ALREADY_EXISTS,
+                        "the name has been used.");
+        }
     }
 
     @Override
@@ -441,9 +443,11 @@ public class FileManagementServiceImpl implements  FileManagementService{
                                       String suffix, Long contentId) {
         FileContent content = fileManagementProvider.findFileContentByName(namespaceId, ownerId, catalogId, parentId,
                 name, suffix);
-        if (content.getId().longValue() != contentId.longValue())
-            throw RuntimeErrorException.errorWith(FileManagementErrorCode.SCOPE, FileManagementErrorCode.ERROR_NAME_ALREADY_EXISTS,
-                    "the name has been used.");
+        if (content != null) {
+            if (content.getId().longValue() != contentId.longValue())
+                throw RuntimeErrorException.errorWith(FileManagementErrorCode.SCOPE, FileManagementErrorCode.ERROR_NAME_ALREADY_EXISTS,
+                        "the name has been used.");
+        }
     }
 
     @Override
