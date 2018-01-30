@@ -7493,6 +7493,10 @@ public class PunchServiceImpl implements PunchService {
 		Calendar tomorrowCalendar = Calendar.getInstance();
 		tomorrowCalendar.add(Calendar.DAY_OF_MONTH, 1);
 		java.sql.Date tomorrow= new java.sql.Date(tomorrowCalendar.getTimeInMillis());
+		if(tomorrow.before(startDate)){
+			//防止把无关数据查出来
+			tomorrow.setTime(startDate.getTime());
+		}
 		//今日之后用pr的status查,之前用active查
 		List<PunchScheduling> schedulings = punchSchedulingProvider.queryPunchSchedulings(tomorrow,endDate,pr.getId(),pr.getStatus()) ;
 		if ((null == schedulings || schedulings.size() == 0) 
@@ -7502,7 +7506,7 @@ public class PunchServiceImpl implements PunchService {
 			schedulings = punchSchedulingProvider.queryPunchSchedulings(tomorrow,endDate,pr.getId(),PunchRuleStatus.ACTIVE.getCode()) ;
 			LOGGER.debug("取正常状态的schedulings "+StringHelper.toJsonString(schedulings));
 		}else{
-			LOGGER.debug("他说有schedulings "+StringHelper.toJsonString(schedulings));
+//			LOGGER.debug("他说有schedulings "+StringHelper.toJsonString(schedulings));
 		}
 		if (null == schedulings) {
 			schedulings = new ArrayList<>();
