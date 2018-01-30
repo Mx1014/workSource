@@ -725,6 +725,7 @@ public class OrganizationServiceImpl implements OrganizationService {
         for (Long id : rlt.getIds()) {
             dtos.add(toOrganizationDetailDTO(id, false));
         }
+        dtos = dtos.stream().filter(r->r != null).collect(Collectors.toList());
         resp.setDtos(dtos);
         return resp;
     }
