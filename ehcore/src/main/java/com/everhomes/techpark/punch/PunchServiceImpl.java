@@ -7497,7 +7497,7 @@ public class PunchServiceImpl implements PunchService {
 		List<PunchScheduling> schedulings = punchSchedulingProvider.queryPunchSchedulings(tomorrow,endDate,pr.getId(),pr.getStatus()) ;
 		if (null == schedulings &&PunchRuleStatus.ACTIVE!=PunchRuleStatus.fromCode(pr.getStatus())) {
 			//如果查不到当前状态的就 并且pr 的状态不是正常
-			List<PunchScheduling> schedulings = punchSchedulingProvider.queryPunchSchedulings(tomorrow,endDate,pr.getId(),PunchRuleStatus.ACTIVE.getCode()) ;
+			schedulings = punchSchedulingProvider.queryPunchSchedulings(tomorrow,endDate,pr.getId(),PunchRuleStatus.ACTIVE.getCode()) ;
 			
 		}
 		if (null == schedulings) {
