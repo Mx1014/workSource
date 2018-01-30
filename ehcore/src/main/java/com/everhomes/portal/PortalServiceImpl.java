@@ -41,6 +41,7 @@ import com.everhomes.rest.portal.*;
 import com.everhomes.rest.portal.LaunchPadLayoutJson;
 import com.everhomes.rest.search.OrganizationQueryResult;
 import com.everhomes.rest.ui.user.SceneType;
+import com.everhomes.rest.user.IdentifierType;
 import com.everhomes.rest.widget.*;
 import com.everhomes.rest.widget.NewsInstanceConfig;
 import com.everhomes.search.CommunitySearcher;
@@ -55,6 +56,7 @@ import com.everhomes.settings.PaginationConfigHelper;
 import com.everhomes.sms.DateUtil;
 import com.everhomes.user.User;
 import com.everhomes.user.UserContext;
+import com.everhomes.user.UserIdentifier;
 import com.everhomes.user.UserProvider;
 import com.everhomes.util.*;
 import org.jooq.Condition;
@@ -2787,10 +2789,21 @@ public class PortalServiceImpl implements PortalService {
 	public ListPortalVersionUsersResponse listPortalVersionUsers(ListPortalVersionUsersCommand cmd) {
 		List<PortalVersionUser> portalVersionUsers = portalVersionUserProvider.listPortalVersionUsers(cmd.getNamespaceId(), cmd.getVersionId());
 		ListPortalVersionUsersResponse response = new ListPortalVersionUsersResponse();
+		List<PortalVersionUserDTO> dtos = new ArrayList<>();
 		if(portalVersionUsers != null){
-			List<PortalVersionUserDTO> dtos = portalVersionUsers.stream()
-					.map(r -> ConvertHelper.convert(r, PortalVersionUserDTO.class)).collect(Collectors.toList());
-			response.setDtos(dtos);
+			for (PortalVersionUser versionUser: portalVersionUsers){
+				PortalVersionUserDTO dto = ConvertHelper.convert(versionUser, PortalVersionUserDTO.class);
+				User user = userProvider.findUserById(dto.getUserId());
+				if(user != null){
+					dto.setNickName(user.getNickName());
+				}
+
+				UserIdentifier identifier = userProvider.findClaimedIdentifierByOwnerAndType(dto.getUserId(), IdentifierType.MOBILE.getCode());
+				if(identifier != null){
+					dto.setPhone(identifier.getIdentifierToken());
+				}
+				dtos.add(dto);
+			}
 		}
 
 		return response;
