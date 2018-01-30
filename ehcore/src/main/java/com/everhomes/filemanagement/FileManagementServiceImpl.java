@@ -98,7 +98,7 @@ public class FileManagementServiceImpl implements  FileManagementService{
         FileCatalog catalog = fileManagementProvider.findFileCatalogByName(namespaceId, ownerId, name);
         if (catalog != null) {
             List<String> allNames = fileManagementProvider.listFileCatalogNames(namespaceId, ownerId, name);
-            for(int n=1; n <= allNames.size() + 1; n++){
+            for (int n = 1; n <= allNames.size() + 1; n++) {
                 String newName = name + "(" + n + ")";
                 if (!allNames.contains(newName))
                     return newName;
