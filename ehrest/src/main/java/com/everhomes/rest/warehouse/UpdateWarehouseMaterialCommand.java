@@ -49,6 +49,16 @@ public class UpdateWarehouseMaterialCommand {
 
     private Long supplierId;
 
+    private Integer namespaceId;
+
+    public Integer getNamespaceId() {
+        return namespaceId;
+    }
+
+    public void setNamespaceId(Integer namespaceId) {
+        this.namespaceId = namespaceId;
+    }
+
     public Long getSupplierId() {
         return supplierId;
     }
