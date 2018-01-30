@@ -219,8 +219,11 @@ public class WorkReportServiceImpl implements WorkReportService {
 
     @Override
     public WorkReportDTO updateWorkReportName(UpdateWorkReportNameCommand cmd) {
+        Long userId = UserContext.currentUserId();
         WorkReport report = workReportProvider.getWorkReportById(cmd.getReportId());
         report.setReportName(cmd.getReportName());
+        report.setOperatorUserId(userId);
+        report.setOperatorName(fixUpUserName(userId));
         workReportProvider.updateWorkReport(report);
 
         WorkReportDTO dto = new WorkReportDTO();

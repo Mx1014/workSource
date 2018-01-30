@@ -12,7 +12,10 @@ import java.util.List;
  * <li>equipments:离线任务列表</li>
  * <li>items:离线任务列表</li>
  * <li>groups:离线类别列表</li>
- * <li>repiarCategories:物业报修类型列表</li>
+ * <li>repiarCategories:离线物业报修类型列表</li>
+ *  <li>totayTasksCount  : 当前总任务数</li>
+ *  <li>todayCompleteCount: 当前已完成 </li>
+ *  <li>nextPageAnchor: 下一页的锚点（对于task） </li>
  */
 
 public class EquipmentTaskOfflineResponse {
@@ -31,6 +34,12 @@ public class EquipmentTaskOfflineResponse {
 
     @ItemType(CategoryDTO.class)
     private List<CategoryDTO> repiarCategories;
+
+    private List<Long> totayTasksCount;
+
+    private List<Long> todayCompleteCount;
+
+    private Long nextPageAnchor;
 
     public List<EquipmentTaskDTO> getOfflineTasks() {
         return offlineTasks;
@@ -71,6 +80,30 @@ public class EquipmentTaskOfflineResponse {
 
     public void setRepiarCategories(List<CategoryDTO> repiarCategories) {
         this.repiarCategories = repiarCategories;
+    }
+
+    public List<Long> getTotayTasksCount() {
+        return totayTasksCount;
+    }
+
+    public void setTotayTasksCount(List<Long> totayTasksCount) {
+        this.totayTasksCount = totayTasksCount;
+    }
+
+    public List<Long> getTodayCompleteCount() {
+        return todayCompleteCount;
+    }
+
+    public void setTodayCompleteCount(List<Long> todayCompleteCount) {
+        this.todayCompleteCount = todayCompleteCount;
+    }
+
+    public Long getNextPageAnchor() {
+        return nextPageAnchor;
+    }
+
+    public void setNextPageAnchor(Long nextPageAnchor) {
+        this.nextPageAnchor = nextPageAnchor;
     }
 
     @Override

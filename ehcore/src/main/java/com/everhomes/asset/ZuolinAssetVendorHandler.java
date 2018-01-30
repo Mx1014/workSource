@@ -310,18 +310,19 @@ public class ZuolinAssetVendorHandler implements AssetVendorHandler {
     }
 
     @Override
-    public List<BillDTO> listBillItems(String targetType, String billId, String targetName, Integer pageOffSet, Integer pageSize,Long ownerId, ListBillItemsResponse response) {
-        if (pageOffSet == null) {
-            pageOffSet = 0;
+    public List<BillDTO> listBillItems(String targetType, String billId, String targetName, Integer pageNum, Integer pageSize,Long ownerId, ListBillItemsResponse response) {
+        if (pageNum == null) {
+            pageNum = 1;
         }
         if(pageSize == null){
             pageSize = 20;
         }
-        List<BillDTO> list = assetProvider.listBillItems(Long.parseLong(billId),targetName,pageOffSet,pageSize);
+        List<BillDTO> list = assetProvider.listBillItems(Long.parseLong(billId),targetName,pageNum,pageSize);
         if(list.size() <= pageSize) {
             response.setNextPageAnchor(null);
         }else {
-            response.setNextPageAnchor(((Integer)(pageOffSet+pageSize)).longValue());
+            Integer nextPageNum = pageNum + 1;
+            response.setNextPageAnchor(nextPageNum.longValue());
             list.remove(list.size()-1);
         }
         return list;
@@ -769,7 +770,7 @@ public class ZuolinAssetVendorHandler implements AssetVendorHandler {
                     }
                     continue;
                 }
-                if (bill.getContractNum() != null) {
+                else if (bill.getContractNum() != null) {
                     ContractNumBillGroup numIden = new ContractNumBillGroup();
                     numIden.setBillGroupId(bill.getBillGroupId());
                     numIden.setContractNum(bill.getContractNum());
@@ -781,13 +782,14 @@ public class ZuolinAssetVendorHandler implements AssetVendorHandler {
                         numMap.put(numIden, idList);
                     }
                     continue;
-                }
-                if (groupMap.containsKey(bill.getBillGroupId())) {
-                    groupMap.get(bill.getBillGroupId()).add(bill);
-                } else {
-                    List<PaymentBills> idList = new ArrayList<>();
-                    idList.add(bill);
-                    groupMap.put(bill.getBillGroupId(), idList);
+                }else{
+                    if (groupMap.containsKey(bill.getBillGroupId())) {
+                        groupMap.get(bill.getBillGroupId()).add(bill);
+                    } else {
+                        List<PaymentBills> idList = new ArrayList<>();
+                        idList.add(bill);
+                        groupMap.put(bill.getBillGroupId(), idList);
+                    }
                 }
             }
             maps.add(idMap);
@@ -803,8 +805,15 @@ public class ZuolinAssetVendorHandler implements AssetVendorHandler {
                 for (HashMap.Entry<?, ?> entry : map.entrySet()) {
                     ShowBillForClientV2DTO dto = new ShowBillForClientV2DTO();
                     List<PaymentBills> enclosedBills = (List<PaymentBills>) entry.getValue();
-                    if (enclosedBills.size() > 0)
+                    if (enclosedBills.size() > 0){
                         dto.setBillGroupName(assetProvider.getbillGroupNameById(enclosedBills.get(0).getBillGroupId()));
+                        if(enclosedBills.get(0).getContractId() != null){
+                            dto.setContractId(String.valueOf(enclosedBills.get(0).getContractId()));
+                        }
+                        if(enclosedBills.get(0).getContractNum()!=null){
+                            dto.setContractNum(String.valueOf(enclosedBills.get(0).getContractNum()));
+                        }
+                    }
                     //组装
                     List<BillForClientV2> list = new ArrayList<>();
                     Set<Long> addressIds = new HashSet<>();
@@ -842,10 +851,7 @@ public class ZuolinAssetVendorHandler implements AssetVendorHandler {
 
     @Override
     public ShowBillDetailForClientResponse getBillDetailForClient(Long ownerId, String billId,String targetType) {
-        ShowBillDetailForClientResponse response = new ShowBillDetailForClientResponse();
-        response =  assetProvider.getBillDetailForClient(Long.parseLong(billId));
-        return response;
-
+        return assetProvider.getBillDetailForClient(Long.parseLong(billId));
     }
 
     @Override

@@ -4746,8 +4746,8 @@ public class UserServiceImpl implements UserService {
 							.listOrganizationAdministrators(cmd1);
 					if(organizationContactDTOS != null && organizationContactDTOS.size() > 0){
 						Long contactId = organizationContactDTOS.get(0).getTargetId();
-						User enterpriseAdmin = userProvider.findUserById(contactId);
-						dto.setUserIdentifier(enterpriseAdmin.getIdentifierToken());
+						String enterpriseAdminTel = userProvider.findMobileByUid(contactId);
+						dto.setUserIdentifier(enterpriseAdminTel);
 					}
 				}
 				return dto;
@@ -5469,9 +5469,6 @@ public class UserServiceImpl implements UserService {
 		}
 
 		int pageSize = 10 ;
-		if(cmd.getSize() != null){
-			pageSize = cmd.getSize();
-		}
 
 		List<User> users = userProvider.searchUserByIdentifier(cmd.getIdentifierToken(), cmd.getNamespaceId(), pageSize);
 

@@ -539,19 +539,22 @@ public class AssetProviderImpl implements AssetProvider {
     }
 
     @Override
-    public List<BillDTO> listBillItems(Long billId, String targetName, int pageOffSet, Integer pageSize) {
+    public List<BillDTO> listBillItems(Long billId, String targetName, int pageNum, Integer pageSize) {
         List<BillDTO> dtos = new ArrayList<>();
         DSLContext context = this.dbProvider.getDslContext(AccessSpec.readOnly());
         EhPaymentBillItems t = Tables.EH_PAYMENT_BILL_ITEMS.as("t");
         EhAddresses t2 = Tables.EH_ADDRESSES.as("t2");
+        EhPaymentLateFine t3 = Tables.EH_PAYMENT_LATE_FINE.as("t3");
+        //先算第一个offset
+        int firstOffset = (pageNum - 1) * pageSize;
         String sql = context.select(t.DATE_STR,t.CHARGING_ITEM_NAME,t.AMOUNT_RECEIVABLE,t.AMOUNT_RECEIVED,t.AMOUNT_OWED,t.STATUS,t.ID,t2.APARTMENT_NAME,t2.BUILDING_NAME,t.BILL_GROUP_RULE_ID)
                 .from(t)
                 .leftOuterJoin(t2)
                 .on(t.ADDRESS_ID.eq(t2.ID))
                 .where(t.BILL_ID.eq(billId))
-                .limit(pageOffSet,pageSize+1)
+                .limit(firstOffset,pageSize+1)
                 .getSQL();
-        context.fetch(sql,billId,pageSize,pageOffSet)
+        context.fetch(sql,billId,pageSize,firstOffset)
                 .forEach(r ->{
                     BillDTO dto =new BillDTO();
                     dto.setDateStr(r.getValue(t.DATE_STR));
@@ -566,11 +569,10 @@ public class AssetProviderImpl implements AssetProvider {
                     dto.setBuildingName(r.getValue(t2.BUILDING_NAME));
                     dtos.add(dto);
                     });
-
+        List<BillDTO> fines = new ArrayList<>();
         for(int i = 0; i < dtos.size(); i ++){
             BillDTO dto = dtos.get(i);
             dto.setTargetName(targetName);
-            LOGGER.info("start to iterate name");
             if(org.apache.commons.lang.StringUtils.isEmpty(dto.getBillItemName())) {
                 String projectLevelName = context.select(itemScope.PROJECT_LEVEL_NAME)
                         .from(itemScope, groupRule)
@@ -579,23 +581,32 @@ public class AssetProviderImpl implements AssetProvider {
                         .fetchOne(itemScope.PROJECT_LEVEL_NAME);
                 dto.setBillItemName(projectLevelName);
             }
-            LOGGER.info("start to iterate late fine");
             //查询billItem的滞纳金
-            getReadOnlyContext().select(Tables.EH_PAYMENT_LATE_FINE.AMOUNT,Tables.EH_PAYMENT_LATE_FINE.NAME)
-                    .from(Tables.EH_PAYMENT_LATE_FINE)
-                    .leftOuterJoin(Tables.EH_PAYMENT_BILL_ITEMS)
-                    .on(Tables.EH_PAYMENT_LATE_FINE.BILL_ITEM_ID.eq(Tables.EH_PAYMENT_BILL_ITEMS.ID))
-                    .where(Tables.EH_PAYMENT_LATE_FINE.BILL_ITEM_ID.eq(dto.getBillItemId()))
+            getReadOnlyContext().select(t3.NAME,t3.AMOUNT,t3.AMOUNT,t.DATE_STR,t.STATUS,t3.ID,t.BILL_GROUP_RULE_ID
+                    ,t2.APARTMENT_NAME,t2.BUILDING_NAME)
+                    .from(t3)
+                    .leftOuterJoin(t)
+                    .on(t3.BILL_ITEM_ID.eq(t.ID))
+                    .leftOuterJoin(t2)
+                    .on(t.ADDRESS_ID.eq(t2.ID))
+                    .where(t3.BILL_ITEM_ID.eq(dto.getBillItemId()))
                     .fetch()
                     .forEach(r -> {
                         BillDTO fineDTO = (BillDTO)dto.clone();
-                        fineDTO.setBillItemName(r.getValue(Tables.EH_PAYMENT_LATE_FINE.NAME));
-                        fineDTO.setAmountReceivable(r.getValue(Tables.EH_PAYMENT_LATE_FINE.AMOUNT));
+                        fineDTO.setBillItemName(r.getValue(t3.NAME));
+                        fineDTO.setAmountReceivable(r.getValue(t3.AMOUNT));
                         fineDTO.setAmountReceived(new BigDecimal("0"));
-                        fineDTO.setAmountOwed(r.getValue(Tables.EH_PAYMENT_LATE_FINE.AMOUNT));
-                        dtos.add(fineDTO);
+                        fineDTO.setAmountOwed(r.getValue(t3.AMOUNT));
+                        fineDTO.setDateStr(r.getValue(t.DATE_STR));
+                        fineDTO.setBillStatus(r.getValue(t.STATUS));
+                        fineDTO.setBillItemId(r.getValue(t3.ID));
+                        fineDTO.setBillGroupRuleId(r.getValue(t.BILL_GROUP_RULE_ID));
+                        fineDTO.setApartmentName(r.getValue(t2.APARTMENT_NAME));
+                        fineDTO.setBuildingName(r.getValue(t2.BUILDING_NAME));
+                        fines.add(fineDTO);
                     });
         }
+        dtos.addAll(fines);
         return dtos;
     }
 
@@ -635,10 +646,16 @@ public class AssetProviderImpl implements AssetProvider {
         SelectQuery<Record> query = dslContext.selectQuery();
         query.addFrom(t);
         //必要用户参数
-        query.addConditions(t.OWNER_TYPE.eq(ownerType));
-        query.addConditions(t.OWNER_ID.eq(ownerId));
         query.addConditions(t.TARGET_TYPE.eq(targetType));
         query.addConditions(t.TARGET_ID.eq(targetId));
+        if(ownerType != null){
+            query.addConditions(t.OWNER_TYPE.eq(ownerType));
+        }
+        if(ownerId != null){
+            query.addConditions(t.OWNER_ID.eq(ownerId));
+        }else{
+            LOGGER.error("showBillClient did not send ownerId which is not right, targetId = {},targetType = {}",targetId,targetType);
+        }
         //已出账单，排除了未来账单
         query.addConditions(t.SWITCH.eq((byte)1));
 
@@ -749,7 +766,8 @@ public class AssetProviderImpl implements AssetProvider {
                     ShowBillDetailForClientDTO dto = new ShowBillDetailForClientDTO();
                     dto.setAmountOwed(r.getValue(t.AMOUNT_OWED));
                     dto.setBillItemName(r.getValue(t.CHARGING_ITEM_NAME));
-                    dto.setAddressName(r.getValue(t.BUILDING_NAME)+r.getValue(t.APARTMENT_NAME));
+                    String address = r.getValue(t.BUILDING_NAME) + r.getValue(t.APARTMENT_NAME);
+                    dto.setAddressName(org.apache.commons.lang.StringUtils.isEmpty(address)?"":address);
                     dto.setAmountReceivable(r.getValue(t.AMOUNT_RECEIVABLE));
                     dto.setDateStrBegin(r.getValue(t.DATE_STR_BEGIN));
                     dto.setDateStrEnd(r.getValue(t.DATE_STR_END));
@@ -1079,6 +1097,11 @@ public class AssetProviderImpl implements AssetProvider {
             com.everhomes.server.schema.tables.pojos.EhPaymentBills newBill = new PaymentBills();
             //  缺少创造者信息，先保存在其他地方，比如持久化日志
             newBill.setAmountOwed(amountOwed);
+            if(amountOwed.compareTo(zero) == 0) {
+                newBill.setStatus((byte)1);
+            }else{
+                newBill.setStatus(billStatus);
+            }
             newBill.setAmountReceivable(amountReceivable);
             newBill.setAmountReceived(zero);
             newBill.setAmountSupplement(amountSupplement);
@@ -1108,7 +1131,7 @@ public class AssetProviderImpl implements AssetProvider {
             newBill.setCreatorId(UserContext.currentUserId());
             newBill.setUpdateTime(new Timestamp(DateHelper.currentGMTTime().getTime()));
             newBill.setNoticeTimes(0);
-            newBill.setStatus(billStatus);
+
             newBill.setSwitch(isSettled);
             newBill.setContractId(contractId);
             newBill.setContractNum(contractNum);
@@ -3646,13 +3669,20 @@ public class AssetProviderImpl implements AssetProvider {
         if(namespaceId!=null){
             query.addConditions(bill.NAMESPACE_ID.eq(namespaceId));
         }
-        query.addConditions(bill.OWNER_ID.eq(ownerId));
+        if(ownerId != null){
+            query.addConditions(bill.OWNER_ID.eq(ownerId));
+        }
+        if(ownerType != null){
+            query.addConditions(bill.OWNER_TYPE.eq(ownerType));
+        }
         query.addConditions(bill.TARGET_TYPE.eq(targetType));
         if(targetType.equals(AssetPaymentStrings.EH_USER)){
             targetId = UserContext.currentUserId();
         }
         query.addConditions(bill.TARGET_ID.eq(targetId));
         query.addConditions(bill.SWITCH.eq((byte)1));
+        query.addOrderBy(bill.DATE_STR.desc());
+
         query.fetch()
                 .map(r -> {
                     ListAllBillsForClientDTO dto = new ListAllBillsForClientDTO();

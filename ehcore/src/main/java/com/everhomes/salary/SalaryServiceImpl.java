@@ -20,6 +20,7 @@ import com.everhomes.rest.techpark.punch.PunchServiceErrorCode;
 import com.everhomes.settings.PaginationConfigHelper;
 import com.everhomes.techpark.punch.PunchService;
 import com.everhomes.uniongroup.UniongroupService;
+import com.everhomes.user.User;
 import com.everhomes.user.UserContext;
 import com.everhomes.util.ConvertHelper;
 import com.everhomes.util.DateHelper;
@@ -48,6 +49,7 @@ import java.io.IOException;
 import java.io.OutputStream;
 import java.math.BigDecimal;
 import java.net.URLEncoder;
+import java.sql.Timestamp;
 import java.text.SimpleDateFormat;
 import java.util.*;
 import java.util.stream.Collectors;
@@ -2331,45 +2333,74 @@ public class SalaryServiceImpl implements SalaryService {
         ListSalaryEmployeesResponse response = new ListSalaryEmployeesResponse();
         String month = findSalaryMonth(cmd.getOwnerId());
         response.setMonth(month);
-        // TODO: 2018/1/22 磊哥和楠哥总要给我一个过滤后的detailIds
-        List<Long> detailIds = new ArrayList<>();
-        List<Long> orgIds = new ArrayList<>();
-        orgIds.add(cmd.getOwnerId());
-        List<OrganizationMember> members = organizationProvider.listOrganizationMemberByOrganizationIds(new ListingLocator(), Integer.MAX_VALUE - 1, null, orgIds);
-        if (null != members) {
-            for (OrganizationMember member : members) {
-                detailIds.add(member.getDetailId());
-            }
+        Integer namespaceId = cmd.getNamespaceId();
+        if (null == namespaceId) {
+            namespaceId = UserContext.getCurrentNamespaceId();
         }
+        //
+        Calendar checkin = Calendar.getInstance();
+        checkin.setTimeInMillis(cmd.getCheckInMonth());
+        checkin.add(Calendar.MONTH, 1);
+        Calendar dismissEnd = Calendar.getInstance();
+        dismissEnd.setTimeInMillis(cmd.getDismissMonth());
+        dismissEnd.add(Calendar.MONTH, 1);
+        CrossShardListingLocator locator = new CrossShardListingLocator();
+        if (null != cmd.getPageAnchor()) {
+            locator.setAnchor(cmd.getPageAnchor());
+        }
+        int pageSize = cmd.getPageSize() == null ? 20 : cmd.getPageSize();
+        List<Long> inDetails = null;
+        List<Long> notinDetails = null;
+        if (null != cmd.getSalaryStatus()) {
+            if (SalaryEmployeeStatus.NORMAL == SalaryEmployeeStatus.fromCode(cmd.getSalaryStatus())) {
+                inDetails = salaryEmployeeProvider.listEmployeeDetailIdsByStatus(cmd.getOwnerId(), SalaryEmployeeStatus.NORMAL.getCode());
+            } else {
+                notinDetails = salaryEmployeeProvider.listEmployeeDetailIdsByStatus(cmd.getOwnerId(), SalaryEmployeeStatus.NORMAL.getCode());
+            }
+
+        }
+        List<Long> detailIds = organizationService.listDetailIdWithEnterpriseExclude(cmd.getKeywords(),
+                namespaceId, cmd.getOwnerId(), new Timestamp(cmd.getCheckInMonth()), new Timestamp(checkin.getTimeInMillis()),
+                new Timestamp(cmd.getDismissMonth()), new Timestamp(dismissEnd.getTimeInMillis()), locator, pageSize + 1,notinDetails,inDetails
+        );
+//        List<Long> orgIds = new ArrayList<>();
+//        orgIds.add(cmd.getOwnerId());
+//        List<OrganizationMember> members = organizationProvider.listOrganizationMemberByOrganizationIds(new ListingLocator(), Integer.MAX_VALUE - 1, null, orgIds);
+//        if (null != members) {
+//            for (OrganizationMember member : members) {
+//                detailIds.add(member.getDetailId());
+//            }
+//        }
+
         if (null == detailIds || detailIds.size() == 0) {
             return response;
         }
+        Long nextPageAnchor = null;
+        if ( detailIds.size() > pageSize) {
+            detailIds.remove(detailIds.size() - 1);
+            nextPageAnchor = detailIds.get(detailIds.size() - 1);
+        }
+        response.setNextPageAnchor(nextPageAnchor);
         response.setSalaryEmployeeDTO(new ArrayList<>());
         for (Long detailId : detailIds) {
             SalaryEmployee employee = salaryEmployeeProvider.findSalaryEmployeeByDetailId(cmd.getOwnerId(), detailId);
             if (null == employee) {
                 employee = createSalaryEmployee(cmd.getOwnerId(), detailId, month);
             }
-            response.getSalaryEmployeeDTO().add(processEmployeeDTO(employee));
+            if (null != employee) {
+                response.getSalaryEmployeeDTO().add(processEmployeeDTO(employee));
+            }
         }
 
-        CrossShardListingLocator locator = new CrossShardListingLocator();
-        locator.setAnchor(cmd.getPageAnchor());
-        int pageSize = PaginationConfigHelper.getPageSize(configurationProvider, cmd.getPageSize());
-//        List<SalaryEmployee> salaryEmployees = salaryEmployeeProvider.listSalaryEmployee(cmd.getOwnerId(), cmd.getSalaryStatus(), detailIds
-//                , locator, pageSize + 1);
-        Long nextPageAnchor = null;
-//        if (salaryEmployees != null && salaryEmployees.size() > pageSize) {
-//            salaryEmployees.remove(salaryEmployees.size() - 1);
-//            nextPageAnchor = salaryEmployees.get(salaryEmployees.size() - 1).getId();
-//        }
-        response.setNextPageAnchor(nextPageAnchor);
-//        response.setSalaryEmployeeDTO(salaryEmployees.stream().map(this::processEmployeeDTO).collect(Collectors.toList()));
         return response;
     }
 
     private SalaryEmployee createSalaryEmployee(Long ownerId, Long detailId, String month) {
         OrganizationMemberDetails detail = organizationProvider.findOrganizationMemberDetailsByDetailId(detailId);
+        if (null == detail) {
+            LOGGER.error("出错了找不到detail: detailId =" + detailId);
+            return null;
+        }
         SalaryEmployee employee = newSalaryEmployee(detail, month, ownerId);
         salaryEmployeeProvider.createSalaryEmployee(employee);
         return employee;
@@ -2402,17 +2433,15 @@ public class SalaryServiceImpl implements SalaryService {
     }
 
     private void batchCreateMonthSalaryEmployees(Long ownerId, String month) {
-        //// TODO: 2018/1/23 获取owner下面的details
-        List<OrganizationMemberDetails> details = new ArrayList<>();
-        List<Long> orgIds = new ArrayList<>();
-        orgIds.add(ownerId);
-        List<OrganizationMember> members = organizationProvider.listOrganizationMemberByOrganizationIds(new ListingLocator(), Integer.MAX_VALUE - 1, null, orgIds);
-        if (null != members) {
-            for (OrganizationMember member : members) {
-                details.add(organizationProvider.findOrganizationMemberDetailsByDetailId(member.getDetailId()));
+
+        List<Long> detailIds = organizationService.listDetailIdWithEnterpriseExclude(null,
+                UserContext.getCurrentNamespaceId(), ownerId,null,null,null,null, null, Integer.MAX_VALUE-1,null,null
+        );
+        for (Long detailId : detailIds) {
+            OrganizationMemberDetails detail = organizationProvider.findOrganizationMemberDetailsByDetailId(detailId);
+            if (null == detail) {
+                continue;
             }
-        }
-        for (OrganizationMemberDetails detail : details) {
             createSalaryEmployee(ownerId, detail.getId(), month);
         }
     }
@@ -2447,6 +2476,7 @@ public class SalaryServiceImpl implements SalaryService {
     public GetEmployeeEntitiesResponse getEmployeeEntities(GetEmployeeEntitiesCommand cmd) {
         OrganizationMemberDetails detail = organizationProvider.findOrganizationMemberDetailsByDetailId(cmd.getDetailId());
         GetEmployeeEntitiesResponse response = ConvertHelper.convert(detail, GetEmployeeEntitiesResponse.class);
+        response.setCategories(new ArrayList<>());
 //        response.setCheckInTime(detail.getCheckInTime());
 //        response.setDismissTime(detail.getDismissTime());
         List<SalaryEntityCategory> categories = salaryEntityCategoryProvider.listSalaryEntityCategory();
@@ -2481,6 +2511,8 @@ public class SalaryServiceImpl implements SalaryService {
 
     private SalaryPeriodEmployeeEntityDTO processSalaryPeriodEmployeeEntityDTO(SalaryGroupEntity entity, OrganizationMemberDetails detail) {
         SalaryPeriodEmployeeEntityDTO dto = ConvertHelper.convert(entity, SalaryPeriodEmployeeEntityDTO.class);
+        dto.setGroupEntityId(entity.getId());
+        dto.setGroupEntityName(entity.getName());
         SalaryEmployeeOriginVal val = salaryEmployeeOriginValProvider.findSalaryEmployeeOriginValByDetailId(entity.getId(), detail.getId());
         if (null != val) {
             dto.setSalaryValue(val.getSalaryValue());
@@ -2506,7 +2538,7 @@ public class SalaryServiceImpl implements SalaryService {
         ImportFileTask task = new ImportFileTask();
         List resultList = processorExcel(files[0]);
         task.setOwnerType("SALARY_OWNER_TYPE");
-        task.setOwnerId(cmd.getOrganizationId());
+        task.setOwnerId(cmd.getOwnerId());
         task.setType(ImportFileTaskType.SALARY_GROUP.getCode());
         task.setCreatorUid(UserContext.currentUserId());
 
@@ -2533,7 +2565,7 @@ public class SalaryServiceImpl implements SalaryService {
 
 
         }, task);
-        return null;
+        return ConvertHelper.convert(task, ImportFileTaskDTO.class);
     }
 
     private void saveImportEmployeeSalary(List resultList, Long organizationId, String fileLog, ImportFileResponse response, Long ownerId) {
@@ -2642,8 +2674,8 @@ public class SalaryServiceImpl implements SalaryService {
     }
 
     @Override
-    public OutputStream getEmployeeSalaryOutPut(Long organizationId, Long taskId) {
-        List<SalaryGroupEntity> groupEntities = salaryGroupEntityProvider.listSalaryGroupEntityByOrgId(organizationId);
+    public OutputStream getEmployeeSalaryOutPut(Long ownerId, Long taskId) {
+        List<SalaryGroupEntity> groupEntities = salaryGroupEntityProvider.listSalaryGroupEntityByOrgId(ownerId);
 
         XSSFWorkbook wb = new XSSFWorkbook();
         XSSFSheet sheet = wb.createSheet("sheet1");
@@ -2651,18 +2683,15 @@ public class SalaryServiceImpl implements SalaryService {
         createEmployeeSalaryHead(wb, sheet, groupEntities);
         //人员列表
         // TODO: 2018/1/25
-        List<Long> detailIds = new ArrayList<>();
-        List<Long> orgIds = new ArrayList<>();
-        orgIds.add(organizationId);
-        List<OrganizationMember> members = organizationProvider.listOrganizationMemberByOrganizationIds(new ListingLocator(), Integer.MAX_VALUE - 1, null, orgIds);
-        if (null != members) {
-            for (OrganizationMember member : members) {
-                detailIds.add(member.getDetailId());
-            }
-        }
+        List<Long> detailIds = organizationService.listDetailIdWithEnterpriseExclude(null,
+                UserContext.getCurrentNamespaceId(), ownerId,null,null,null,null, null, Integer.MAX_VALUE-1,null,null
+        );
         int processNum = 0;
         for (Long detailId : detailIds) {
             OrganizationMemberDetails detail = organizationProvider.findOrganizationMemberDetailsByDetailId(detailId);
+            if (null == detail) {
+                continue;
+            }
             Row row = sheet.createRow(sheet.getLastRowNum() + 1);
             int i = -1;
             row.createCell(++i).setCellValue(detail.getContactToken());

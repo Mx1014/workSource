@@ -9,7 +9,9 @@ import java.sql.Timestamp;
  * <ul>
  *     <li>id: id</li>
  *     <li>namespaceId: 域空间</li>
- *     <li>userId: userId</li>
+ *     <li>userId: 用户Id</li>
+ *     <li>nickName: 用户昵称</li>
+ *     <li>phone: 用户手机</li>
  *     <li>versionId: versionId</li>
  *     <li>createTime: 创建时间</li>
  * </ul>
@@ -19,6 +21,8 @@ public class PortalVersionUserDTO {
     private Long id;
     private Integer namespaceId;
     private Long userId;
+    private String nickName;
+    private String phone;
     private Long versionId;
     private Timestamp createTime;
 
@@ -60,6 +64,22 @@ public class PortalVersionUserDTO {
 
     public void setCreateTime(Timestamp createTime) {
         this.createTime = createTime;
+    }
+
+    public String getNickName() {
+        return nickName;
+    }
+
+    public void setNickName(String nickName) {
+        this.nickName = nickName;
+    }
+
+    public String getPhone() {
+        return phone;
+    }
+
+    public void setPhone(String phone) {
+        this.phone = phone;
     }
 
     @Override

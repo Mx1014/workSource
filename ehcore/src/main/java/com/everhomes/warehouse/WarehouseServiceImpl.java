@@ -127,7 +127,7 @@ public class WarehouseServiceImpl implements WarehouseService {
                 +cmd.getOwnerType()+cmd.getOwnerId()+cmd.getCommunityId()).enter(()-> {
             checkWarehouseNumber(warehouse.getId(), warehouse.getWarehouseNumber(), warehouse.getOwnerType(), warehouse.getOwnerId(),warehouse.getCommunityId());
             if (cmd.getId() == null) {
-                warehouse.setNamespaceId(UserContext.getCurrentNamespaceId());
+                warehouse.setNamespaceId(cmd.getNamespaceId());
                 warehouse.setCreatorUid(UserContext.current().getUser().getId());
                 warehouseProvider.creatWarehouse(warehouse);
             } else {
@@ -237,7 +237,7 @@ public class WarehouseServiceImpl implements WarehouseService {
         this.coordinationProvider.getNamedLock(CoordinationLocks.UPDATE_WAREHOUSE_CATEGORY.getCode()
                 +cmd.getOwnerType()+cmd.getOwnerId()).enter(()-> {
             if (cmd.getId() == null) {
-                category.setNamespaceId(UserContext.getCurrentNamespaceId());
+                category.setNamespaceId(cmd.getNamespaceId());
                 category.setCreatorUid(UserContext.current().getUser().getId());
                 category.setPath("");
                 WarehouseMaterialCategories parent = warehouseProvider.findWarehouseMaterialCategories(category.getParentId(), category.getOwnerType(), category.getOwnerId());
@@ -396,7 +396,7 @@ public class WarehouseServiceImpl implements WarehouseService {
             checkMaterialNumber(material.getId(), material.getMaterialNumber(), material.getOwnerType(), material.getOwnerId(),cmd.getCommunityId());
             if (cmd.getId() == null) {
                 //没有，则给定分类并新增
-                material.setNamespaceId(UserContext.getCurrentNamespaceId());
+                material.setNamespaceId(cmd.getNamespaceId());
                 material.setCreatorUid(UserContext.current().getUser().getId());
                 WarehouseMaterialCategories category = warehouseProvider.findWarehouseMaterialCategories(material.getCategoryId(), material.getOwnerType(), material.getOwnerId());
                 if (category != null) {
@@ -645,7 +645,7 @@ public class WarehouseServiceImpl implements WarehouseService {
                                         UserContext.current().getUser().getLocale(),"warehouse stock is not enough"));
                     }
                     materialStock = new WarehouseStocks();
-                    materialStock.setNamespaceId(UserContext.getCurrentNamespaceId());
+                    materialStock.setNamespaceId(cmd.getNamespaceId());
                     materialStock.setOwnerId(cmd.getOwnerId());
                     materialStock.setOwnerType(cmd.getOwnerType());
                     //新增园区id字段
@@ -686,7 +686,7 @@ public class WarehouseServiceImpl implements WarehouseService {
         //没有规定项目，如果没有指定全部权限，就不能通过
 //        checkAssetPriviledgeForPropertyOrg(null,PrivilegeConstants.WAREHOUSE_PARAMETER_CONFIG,cmd.getOwnerId());
         Long uid = UserContext.current().getUser().getId();
-        Integer namespaceId = UserContext.getCurrentNamespaceId();
+        Integer namespaceId = cmd.getNamespaceId();
 
         //不带id的create，其他的看unit表中的id在不在cmd里面 不在的删掉
         List<Long> updateUnitIds = new ArrayList<Long>();
@@ -1358,7 +1358,7 @@ public class WarehouseServiceImpl implements WarehouseService {
         }
 
         Long uid = UserContext.current().getUser().getId();
-        Integer namespaceId = UserContext.getCurrentNamespaceId();
+        Integer namespaceId = cmd.getNamespaceId();
         Long communityId = cmd.getCommunityId();
         dbProvider.execute((TransactionStatus status) -> {
             WarehouseRequests request = ConvertHelper.convert(cmd, WarehouseRequests.class);

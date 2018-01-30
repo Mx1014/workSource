@@ -41,6 +41,7 @@ import com.everhomes.rest.portal.*;
 import com.everhomes.rest.portal.LaunchPadLayoutJson;
 import com.everhomes.rest.search.OrganizationQueryResult;
 import com.everhomes.rest.ui.user.SceneType;
+import com.everhomes.rest.user.IdentifierType;
 import com.everhomes.rest.widget.*;
 import com.everhomes.rest.widget.NewsInstanceConfig;
 import com.everhomes.search.CommunitySearcher;
@@ -55,6 +56,7 @@ import com.everhomes.settings.PaginationConfigHelper;
 import com.everhomes.sms.DateUtil;
 import com.everhomes.user.User;
 import com.everhomes.user.UserContext;
+import com.everhomes.user.UserIdentifier;
 import com.everhomes.user.UserProvider;
 import com.everhomes.util.*;
 import org.jooq.Condition;
@@ -1358,9 +1360,15 @@ public class PortalServiceImpl implements PortalService {
 							//更新正式版本标志
 							updateReleaseVersion(namespaceId, cmd.getVersionId());
 
+							//清理很的老版本
+							cleanOldVersion(namespaceId);
+
 						}else {
 							//更新预览版本标志
 							updatePreviewVersion(namespaceId, cmd.getVersionId());
+
+							//更新预览用户
+							updatePortalVersionUsers(namespaceId, cmd.getVersionId(), cmd.getVersionUserIds());
 						}
 
 						portalPublishLog.setProcess(100);
@@ -1380,6 +1388,27 @@ public class PortalServiceImpl implements PortalService {
 			}
 		});
 		return ConvertHelper.convert(portalPublishLog, PortalPublishLogDTO.class);
+	}
+
+	private void cleanOldVersion(Integer namespaceId){
+		List<PortalVersion> list = portalVersionProvider.listPortalVersion(namespaceId, null);
+
+		if(list == null || list.size() <= 20){
+			return;
+		}
+
+		//查出20以后的第一个小版本
+		int index = 20;
+		for( ; index<list.size(); index++){
+			if(list.get(index).getMinorVersion() == 1){
+				break;
+			}
+		}
+
+		//删除之后的所有版本
+		for(; index<list.size(); index++){
+			deleteVersion(list.get(index).getId());
+		}
 	}
 
 
@@ -1962,6 +1991,9 @@ public class PortalServiceImpl implements PortalService {
 					//刷新菜单
 					webMenuService.refleshMenuByPortalVersion(portalVersion.getId());
 
+					//清理很的老版本
+					cleanOldVersion(dto.getId());
+
 					return null;
 				}));
 				LOGGER.info("syncLaunchPadData namespaceId={}  end", dto.getId());
@@ -2092,7 +2124,6 @@ public class PortalServiceImpl implements PortalService {
 		Timestamp createTimestamp = new Timestamp(System.currentTimeMillis());
 
 		for (ServiceModuleApp app: serviceModuleApps){
-			app.setOriginId(app.getId());
 			app.setId(null);
 			app.setVersionId(newVersionId);
 			app.setCreateTime(createTimestamp);
@@ -2571,6 +2602,8 @@ public class PortalServiceImpl implements PortalService {
 		moduleApp.setVersionId(newVersion.getId());
 
 		ServiceModule serviceModule = null;
+
+		//臆测lei.lv是想获取配置成13、44、60的item的模块
 		if(ActionType.fromCode(actionType) == ActionType.OFFICIAL_URL || ActionType.ROUTER == ActionType.fromCode(actionType) || ActionType.OFFLINE_WEBAPP  == ActionType.fromCode(actionType)){
 			Set<String> beans = PortalUrlParserBeanUtil.getkeys();
 			Long moduleId = 0L;
@@ -2587,6 +2620,7 @@ public class PortalServiceImpl implements PortalService {
 				}
 			}
 		}else if(ActionType.THIRDPART_URL  == ActionType.fromCode(actionType) ){
+			//第三方链接没有模块
 			return moduleApp;
 		}else{
 			List<ServiceModule> serviceModules = serviceModuleProvider.listServiceModule(actionType);
@@ -2597,6 +2631,7 @@ public class PortalServiceImpl implements PortalService {
 
 		ServiceModuleApp existServiceModuleApp = null;
 
+		//模块则根据模块id等配置查找已存在的应用，没有则根据actiontype和actionData查询
 		if(serviceModule != null){
 			moduleApp.setModuleId(serviceModule.getId());
 			if(StringUtils.isEmpty(itemLabel)){
@@ -2624,9 +2659,12 @@ public class PortalServiceImpl implements PortalService {
 			}
 			moduleApp.setCustomTag(customTag);
 
-			//查找已存在的应用模块
+			//查找已存在的模块应用
 			existServiceModuleApp = serviceModuleAppProvider.findServiceModuleApp(namespaceId, newVersion.getId(), serviceModule.getId(), customTag);
 
+		}else {
+			//查找已存在的模块应用
+			existServiceModuleApp = serviceModuleAppProvider.findServiceModuleApp(namespaceId, newVersion.getId(), moduleApp.getActionType(), moduleApp.getInstanceConfig());
 		}
 
 		//如果没有则创建，有则返回已存在的
@@ -2728,13 +2766,18 @@ public class PortalServiceImpl implements PortalService {
 
 	@Override
 	public void updatePortalVersionUsers(UpdatePortalVersionUsersCommand cmd) {
-		portalVersionUserProvider.deletePortalVersionUsers(cmd.getNamespaceId());
-		if(cmd.getUserIds() != null){
-			for (Long userId: cmd.getUserIds()){
+		updatePortalVersionUsers(cmd.getNamespaceId(), cmd.getVersionId(), cmd.getUserIds());
+	}
+
+
+	private void updatePortalVersionUsers(Integer namespaceId, Long versionId, List<Long> userIds) {
+		portalVersionUserProvider.deletePortalVersionUsers(namespaceId);
+		if(userIds != null){
+			for (Long userId: userIds){
 				PortalVersionUser portalVersionUser  = new PortalVersionUser();
-				portalVersionUser.setNamespaceId(cmd.getNamespaceId());
+				portalVersionUser.setNamespaceId(namespaceId);
 				portalVersionUser.setUserId(userId);
-				portalVersionUser.setVersionId(cmd.getVersionId());
+				portalVersionUser.setVersionId(versionId);
 				portalVersionUser.setCreateTime(new Timestamp(System.currentTimeMillis()));
 				portalVersionUserProvider.createPortalVersionUser(portalVersionUser);
 			}
@@ -2746,9 +2789,21 @@ public class PortalServiceImpl implements PortalService {
 	public ListPortalVersionUsersResponse listPortalVersionUsers(ListPortalVersionUsersCommand cmd) {
 		List<PortalVersionUser> portalVersionUsers = portalVersionUserProvider.listPortalVersionUsers(cmd.getNamespaceId(), cmd.getVersionId());
 		ListPortalVersionUsersResponse response = new ListPortalVersionUsersResponse();
+		List<PortalVersionUserDTO> dtos = new ArrayList<>();
 		if(portalVersionUsers != null){
-			List<PortalVersionUserDTO> dtos = portalVersionUsers.stream()
-					.map(r -> ConvertHelper.convert(r, PortalVersionUserDTO.class)).collect(Collectors.toList());
+			for (PortalVersionUser versionUser: portalVersionUsers){
+				PortalVersionUserDTO dto = ConvertHelper.convert(versionUser, PortalVersionUserDTO.class);
+				User user = userProvider.findUserById(dto.getUserId());
+				if(user != null){
+					dto.setNickName(user.getNickName());
+				}
+
+				UserIdentifier identifier = userProvider.findClaimedIdentifierByOwnerAndType(dto.getUserId(), IdentifierType.MOBILE.getCode());
+				if(identifier != null){
+					dto.setPhone(identifier.getIdentifierToken());
+				}
+				dtos.add(dto);
+			}
 			response.setDtos(dtos);
 		}
 

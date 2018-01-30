@@ -228,6 +228,9 @@ public class ExpressServiceImpl implements ExpressService {
 	}
 
 	private boolean checkAdmin(ExpressOwner owner) {
+		if(owner.getUserId()!=null && owner.getUserId() ==1L){
+			return true;
+		}
 		List<OrganizationCommunityDTO> organizationCommunityList = organizationProvider.findOrganizationCommunityByCommunityId(owner.getOwnerId());
 		if (organizationCommunityList != null && !organizationCommunityList.isEmpty()) {
 			Long organizationId = organizationCommunityList.get(0).getOrganizationId();
