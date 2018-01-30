@@ -103,7 +103,7 @@ public class SalaryEmployeeProviderImpl implements SalaryEmployeeProvider {
 
 	@Override
 	public int countUnCheckEmployee(Long salaryPeriodGroupId) { 
-		return getReadOnlyContext().selectCount().from(Tables.EH_S	ALARY_EMPLOYEES)
+		return getReadOnlyContext().selectCount().from(Tables.EH_SALARY_EMPLOYEES)
 				.where(Tables.EH_SALARY_EMPLOYEES.SALARY_GROUP_ID.eq(salaryPeriodGroupId)).execute();
 	}
 
