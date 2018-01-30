@@ -1444,8 +1444,11 @@ public class UserController extends ControllerBase {
 	 */
 	@RequestMapping("waitScanForLogon")
 	@RestReturn(String.class)
-	public DeferredResult waitScanForLogon(BlockingEventCommand cmd) {
-		return userService.waitScanForLogon(cmd.getSubjectId());
+	public RestResponse waitScanForLogon(BlockingEventCommand cmd) {
+		RestResponse resp = new RestResponse(userService.waitScanForLogon(cmd.getSubjectId()));
+		resp.setErrorCode(ErrorCodes.SUCCESS);
+		resp.setErrorDescription("OK");
+		return resp;
 	}
 
 
