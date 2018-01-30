@@ -7603,7 +7603,7 @@ public class PunchServiceImpl implements PunchService {
 	@Override
 	public PunchGroupDTO updatePunchGroup(PunchGroupDTO cmd) {
 		//
-//		this.dbProvider.execute((status) -> {
+		this.dbProvider.execute((status) -> {
 			
 			if (cmd.getRuleType() == null)
 				throw RuntimeErrorException.errorWith(ErrorCodes.SCOPE_GENERAL,
@@ -7686,8 +7686,8 @@ public class PunchServiceImpl implements PunchService {
 
 		//发消息 暂时屏蔽
 //		sendMessageToGroupUser(pr,cmd.getTimeRules());
-//			return null;
-//		});
+			return null;
+		});
 		return  null;
 	}
 
