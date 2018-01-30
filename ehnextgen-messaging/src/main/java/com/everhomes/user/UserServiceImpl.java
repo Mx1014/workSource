@@ -4773,6 +4773,8 @@ public class UserServiceImpl implements UserService {
 				}
 				return dto;
 			}
+		}else{
+        	return dto;
 		}
             //确定客户的优先度， 查到合同算查到人，楼栋门牌只是为了填写账单的地址用
 //            List<AddressIdAndName> addressByPossibleName = addressService.findAddressByPossibleName(UserContext.getCurrentNamespaceId(), communityId, buildingName, apartmentName);
