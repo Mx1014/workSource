@@ -2359,9 +2359,6 @@ public class SalaryServiceImpl implements SalaryService {
             dissmisEndTime = new Timestamp(dismissEnd.getTimeInMillis());
 
         }
-        Calendar dismissEnd = Calendar.getInstance();
-        dismissEnd.setTimeInMillis(cmd.getDismissMonth());
-        dismissEnd.add(Calendar.MONTH, 1);
         CrossShardListingLocator locator = new CrossShardListingLocator();
         if (null != cmd.getPageAnchor()) {
             locator.setAnchor(cmd.getPageAnchor());
@@ -2378,7 +2375,7 @@ public class SalaryServiceImpl implements SalaryService {
 
         }
         List<Long> detailIds = organizationService.listDetailIdWithEnterpriseExclude(cmd.getKeywords(),
-                namespaceId, cmd.getOwnerId(),checkinStartTime,checkinEndTime,dissmisStartTime,dissmisStartTime, locator, pageSize + 1,notinDetails,inDetails
+                namespaceId, cmd.getOwnerId(),checkinStartTime,checkinEndTime,dissmisStartTime,dissmisEndTime, locator, pageSize + 1,notinDetails,inDetails
         );
 //        List<Long> orgIds = new ArrayList<>();
 //        orgIds.add(cmd.getOwnerId());ec“
