@@ -38,6 +38,7 @@ public class PaymentApplicationDTO {
     private Long ownerId;
     private Long contractId;
     private String title;
+    private String applicationNumber;
     private String contractName;
     private String contractNumber;
     private String customerName;
@@ -73,6 +74,14 @@ public class PaymentApplicationDTO {
 
     public void setOwnerId(Long ownerId) {
         this.ownerId = ownerId;
+    }
+
+    public String getApplicationNumber() {
+        return applicationNumber;
+    }
+
+    public void setApplicationNumber(String applicationNumber) {
+        this.applicationNumber = applicationNumber;
     }
 
     public String getTitle() {
