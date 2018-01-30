@@ -7495,10 +7495,12 @@ public class PunchServiceImpl implements PunchService {
 		java.sql.Date tomorrow= new java.sql.Date(tomorrowCalendar.getTimeInMillis());
 		//今日之后用pr的status查,之前用active查
 		List<PunchScheduling> schedulings = punchSchedulingProvider.queryPunchSchedulings(tomorrow,endDate,pr.getId(),pr.getStatus()) ;
-		if ((null == schedulings || schedulings.size() == 0) &&PunchRuleStatus.ACTIVE!=PunchRuleStatus.fromCode(pr.getStatus())) {
+		if ((null == schedulings || schedulings.size() == 0) 
+//				&&PunchRuleStatus.ACTIVE!=PunchRuleStatus.fromCode(pr.getStatus())
+				) {
 			//如果查不到当前状态的就 并且pr 的状态不是正常
 			schedulings = punchSchedulingProvider.queryPunchSchedulings(tomorrow,endDate,pr.getId(),PunchRuleStatus.ACTIVE.getCode()) ;
-			
+			LOGGER.debug("取正常状态的schedulings "+StringHelper.toJsonString(schedulings));
 		}
 		if (null == schedulings) {
 			schedulings = new ArrayList<>();
@@ -7547,7 +7549,7 @@ public class PunchServiceImpl implements PunchService {
 						}
 					}
 					else{
-						employeeDTO.getDaySchedulings().add("");
+						employeeDTO.getDaySchedulings().add("未排班");
 					}
 				}
 				employeeDTOs.add(employeeDTO);
