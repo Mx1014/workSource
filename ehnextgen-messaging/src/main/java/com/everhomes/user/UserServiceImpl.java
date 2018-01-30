@@ -5519,7 +5519,12 @@ public class UserServiceImpl implements UserService {
 
 				try {
 					String token = URLDecoder.decode(response.getMessage(), "utf-8");
-					String[] tokenParam = token.substring(1,token.length()-2).split("&");
+//					String[] tokenParam = token.substring(1,token.length()-2).split("&");
+					if(token.indexOf("\"") == 0)
+						token = token.substring(1, token.length());
+					if(token.indexOf("\"") == token.length() - 1)
+						token = token.substring(0, token.length() -1);
+					String[] tokenParam = token.trim().split("&");
 					String salt = tokenParam[0];
 					if (salt.equals(SALT)) {
 						Long userId = Long.valueOf(tokenParam[1]);
