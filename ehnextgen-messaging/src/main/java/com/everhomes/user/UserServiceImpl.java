@@ -5497,11 +5497,13 @@ public class UserServiceImpl implements UserService {
 	@Override
 	public DeferredResult<RestResponse> waitScanForLogon(String subjectId){
 
-		DeferredResult<Object> result =  this.messagingService.blockingEvent(subjectId, "ORORDINARY", 30 * 1000, new DeferredResult.DeferredResultHandler(){
+
+		DeferredResult<RestResponse> result =  this.messagingService.blockingEvent(subjectId, "ORORDINARY", 30 * 1000, new DeferredResult.DeferredResultHandler(){
 
 			@Override
 			public void handleResult(Object result) {
-				BlockingEventResponse response = (BlockingEventResponse)result;
+				RestResponse restResponse = (RestResponse)result;
+				BlockingEventResponse response = (BlockingEventResponse)restResponse.getResponseObject();
 				if(response.getStatus() != BlockingEventStatus.CONTINUTE){
 					LOGGER.error("waitScanForLogon failure");
 					throw RuntimeErrorException.errorWith(ErrorCodes.SCOPE_GENERAL, ErrorCodes.ERROR_INVALID_PARAMETER, "waitScanForLogon failure");
@@ -5530,9 +5532,9 @@ public class UserServiceImpl implements UserService {
 						valueMap.put("userLogin", GsonUtil.toJson(userLogin));
 						valueMap.put("args",tokenParam[4]);
 						response.setMessage(GsonUtil.toJson(valueMap));
-                        RestResponse restResponse = new RestResponse(response);
+						restResponse.setResponseObject(response);
                         restResponse.setErrorCode(ErrorCodes.SUCCESS);
-                        restResponse.setErrorDescription("OK");
+						restResponse.setErrorDescription("OK");
 					} else {
 						LOGGER.error("waitScanForLogon failure");
 						throw RuntimeErrorException.errorWith(ErrorCodes.SCOPE_GENERAL, ErrorCodes.ERROR_INVALID_PARAMETER, "waitScanForLogon failure");
@@ -5543,6 +5545,7 @@ public class UserServiceImpl implements UserService {
 			}
 
 		});
+
 		return result;
 	}
 
