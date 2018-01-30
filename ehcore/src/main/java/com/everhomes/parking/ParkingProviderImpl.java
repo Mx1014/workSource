@@ -1067,8 +1067,8 @@ public class ParkingProviderImpl implements ParkingProvider {
 					condition = condition.and(Tables.EH_PARKING_SPACES.STATUS.eq(ParkingSpaceStatus.OPEN.getCode())
 												.or(Tables.EH_PARKING_SPACES.STATUS.eq(ParkingSpaceStatus.IN_USING.getCode())));
 					condition = condition.and(Tables.EH_PARKING_SPACES.SPACE_NO.notIn(spaces));
-
-					count[0] = query.where(condition).fetchOneInto(Integer.class);
+					if (spaces!=null && spaces.size()>0)
+						count[0] = query.where(condition).fetchOneInto(Integer.class);
 					return true;
 				});
 		return count[0];
