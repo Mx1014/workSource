@@ -517,7 +517,7 @@ public class SocialSecurityServiceImpl implements SocialSecurityService {
         }
         response.setNextPageOffset(nextPageOffset);
         response.setSocialSecurityPayments(result.stream().map(this::processSocialSecurityItemDTO).collect(Collectors.toList()));
-        response.setPaymentMonth(findPaymentMonth(cmd.getOwnerId()));
+        response.setPaymentMonth(month);
         return response;
     }
 
