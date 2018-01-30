@@ -2804,6 +2804,7 @@ public class PortalServiceImpl implements PortalService {
 				}
 				dtos.add(dto);
 			}
+			response.setDtos(dtos);
 		}
 
 		return response;
