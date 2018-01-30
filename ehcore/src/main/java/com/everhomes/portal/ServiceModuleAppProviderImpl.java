@@ -177,7 +177,7 @@ public class ServiceModuleAppProviderImpl implements ServiceModuleAppProvider {
 	@Override
 	public ServiceModuleApp findServiceModuleApp(Integer namespaceId, Long versionId, Long moduleId, String customTag) {
 
-		SelectQuery query = getReadOnlyContext().selectFrom(Tables.EH_SERVICE_MODULE_APPS).getQuery();
+		SelectQuery<EhServiceModuleAppsRecord> query = getReadOnlyContext().selectFrom(Tables.EH_SERVICE_MODULE_APPS).getQuery();
 		query.addConditions(Tables.EH_SERVICE_MODULE_APPS.NAMESPACE_ID.eq(namespaceId));
 		if(versionId != null){
 			query.addConditions(Tables.EH_SERVICE_MODULE_APPS.VERSION_ID.eq(versionId));
@@ -190,8 +190,29 @@ public class ServiceModuleAppProviderImpl implements ServiceModuleAppProvider {
 		if(customTag != null){
 			query.addConditions(Tables.EH_SERVICE_MODULE_APPS.CUSTOM_TAG.eq(customTag));
 		}
-		Object mApp = query.fetchAnyInto(ServiceModuleApp.class);
-		LOGGER.debug("query.fetchAnyInto(ServiceModuleApp.class) type = {}", mApp.getClass());
-		return (ServiceModuleApp) mApp;
+		ServiceModuleApp app = query.fetchAnyInto(ServiceModuleApp.class);
+
+		return  app;
+	}
+
+	@Override
+	public ServiceModuleApp findServiceModuleApp(Integer namespaceId, Long versionId, Byte actionType, String instanceConfig) {
+
+		SelectQuery<EhServiceModuleAppsRecord> query = getReadOnlyContext().selectFrom(Tables.EH_SERVICE_MODULE_APPS).getQuery();
+		query.addConditions(Tables.EH_SERVICE_MODULE_APPS.NAMESPACE_ID.eq(namespaceId));
+		if(versionId != null){
+			query.addConditions(Tables.EH_SERVICE_MODULE_APPS.VERSION_ID.eq(versionId));
+		}
+
+		if(instanceConfig != null){
+			query.addConditions(Tables.EH_SERVICE_MODULE_APPS.INSTANCE_CONFIG.eq(instanceConfig));
+		}
+
+		if(actionType!= null){
+			query.addConditions(Tables.EH_SERVICE_MODULE_APPS.ACTION_TYPE.eq(actionType));
+		}
+		ServiceModuleApp app = query.fetchAnyInto(ServiceModuleApp.class);
+
+		return  app;
 	}
 }
