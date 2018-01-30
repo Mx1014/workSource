@@ -195,6 +195,9 @@ public class LaunchPadProviderImpl implements LaunchPadProvider {
 			condition = condition.and(Tables.EH_LAUNCH_PAD_LAYOUTS.MIN_VERSION_CODE.lessOrEqual(versionCode));
 		}
 
+		//增加版本功能，默认找正式版本，有特别标识的找该版本功能
+		condition = condition.and(getPreviewPortalVersionCondition(Tables.EH_LAUNCH_PAD_LAYOUTS.getName()));
+
         condition = condition.and(Tables.EH_LAUNCH_PAD_LAYOUTS.NAMESPACE_ID.eq(namespaceId));
         condition = condition.and(Tables.EH_LAUNCH_PAD_LAYOUTS.SCENE_TYPE.eq(sceneType));
 		condition = condition.and(Tables.EH_LAUNCH_PAD_LAYOUTS.STATUS.eq(LaunchPadLayoutStatus.ACTIVE.getCode()));

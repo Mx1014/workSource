@@ -1337,6 +1337,16 @@ public class PortalServiceImpl implements PortalService {
 						//发布item分类
 						publishItemCategory(namespaceId, cmd.getVersionId(), cmd.getPublishType());
 
+						//将当前版本改成release版本
+						//服务广场layout的版本号用release版本的日期和大版本号组合，例如2018013001
+						//从而服务广场layout的preview和release版本的版本号一致
+						if(PortalPublishType.fromCode(cmd.getPublishType()) == PortalPublishType.RELEASE) {
+							//更新版本号为新的版本
+							updateVersionAfterPublish(cmd.getVersionId());
+
+							//更新正式版本标志
+							updateReleaseVersion(namespaceId, cmd.getVersionId());
+						}
 
 						for (PortalLayout layout: layouts) {
 							//发布layout
@@ -1345,8 +1355,7 @@ public class PortalServiceImpl implements PortalService {
 
 						//正式发布之后将当前版本改成大版本，再在此基础上生成一个小本版
 						if(PortalPublishType.fromCode(cmd.getPublishType()) == PortalPublishType.RELEASE){
-							//更新版本号为新的版本
-							updateVersionAfterPublish(cmd.getVersionId());
+
 							//新版本复制一个小版本，比如发布3.1版本变成了5.0版本，那5.0要复制一个5.1，3.0也要复制一个新的3.1
 							copyPortalToNewMinorVersion(namespaceId, cmd.getVersionId());
 
@@ -1356,9 +1365,6 @@ public class PortalServiceImpl implements PortalService {
 
 							//刷新菜单
 							webMenuService.refleshMenuByPortalVersion(cmd.getVersionId());
-
-							//更新正式版本标志
-							updateReleaseVersion(namespaceId, cmd.getVersionId());
 
 							//清理很的老版本
 							cleanOldVersion(namespaceId);
@@ -1451,8 +1457,8 @@ public class PortalServiceImpl implements PortalService {
 
 		List<PortalLaunchPadMapping> portalLaunchPadMappings = portalLaunchPadMappingProvider.listPortalLaunchPadMapping(EntityType.PORTAL_LAYOUT.getCode(), layout.getId(), null);
 
-		String now = DateUtil.dateToStr(new Date(), DateUtil.NO_SLASH);
-		Long versionCode = Long.valueOf(now + "01");
+		//String now = DateUtil.dateToStr(new Date(), DateUtil.NO_SLASH);
+		//Long versionCode = Long.valueOf(now + "01");
 		LaunchPadLayoutJson layoutJson = new LaunchPadLayoutJson();
 		layoutJson.setDisplayName(layout.getLabel());
 		layoutJson.setLayoutName(layout.getName());
@@ -1573,15 +1579,22 @@ public class PortalServiceImpl implements PortalService {
 		layoutJson.setGroups(groups);
 		LaunchPadLayout launchPadLayout = new LaunchPadLayout();
 
+
+		PortalVersion releaseVersion = portalVersionProvider.findReleaseVersion(layout.getNamespaceId());
+		Integer versionCode =  releaseVersion.getDateVersion() * 100 + releaseVersion.getBigVersion();
+
+
 		//正式发布才能更改layout，预览的都用新增的，正式发布时会清除掉当前域空间所有的预览版本数据。
 		if(portalLaunchPadMappings.size() > 0  && PortalPublishType.fromCode(publishType) == PortalPublishType.RELEASE){
+
 			for (PortalLaunchPadMapping mapping: portalLaunchPadMappings) {
 				launchPadLayout = launchPadProvider.findLaunchPadLayoutById(mapping.getLaunchPadContentId());
 				if(null != launchPadLayout){
-					if(launchPadLayout.getVersionCode().toString().indexOf(now) != -1){
-						versionCode = launchPadLayout.getVersionCode() + 1;
-					}
-					launchPadLayout.setVersionCode(versionCode);
+//					if(launchPadLayout.getVersionCode().toString().indexOf(now) != -1){
+//						versionCode = launchPadLayout.getVersionCode() + 1;
+//					}
+
+					launchPadLayout.setVersionCode(versionCode.longValue());
 					layoutJson.setVersionCode(versionCode.toString());
 					String json = StringHelper.toJsonString(layoutJson);
 					launchPadLayout.setLayoutJson(json);
@@ -1595,7 +1608,7 @@ public class PortalServiceImpl implements PortalService {
 			String json = StringHelper.toJsonString(layoutJson);
 			launchPadLayout.setNamespaceId(layout.getNamespaceId());
 			launchPadLayout.setName(layout.getName());
-			launchPadLayout.setVersionCode(versionCode);
+			launchPadLayout.setVersionCode(versionCode.longValue());
 			launchPadLayout.setMinVersionCode(0L);
 			launchPadLayout.setStatus(LaunchPadLayoutStatus.ACTIVE.getCode());
 			launchPadLayout.setScopeCode((byte)0);
