@@ -11,6 +11,7 @@ import com.everhomes.rest.varField.ImportFieldExcelCommand;
 import com.everhomes.rest.varField.ListFieldCommand;
 import com.everhomes.util.ConvertHelper;
 import com.everhomes.util.IntegerUtil;
+import com.everhomes.util.StringHelper;
 import com.everhomes.varField.*;
 import org.apache.commons.lang.StringUtils;
 import org.slf4j.LoggerFactory;
@@ -62,8 +63,10 @@ public class CustomerDynamicExcelHandler implements DynamicExcelHandler {
         ListFieldCommand command = ConvertHelper.convert(params, ListFieldCommand.class);
         command.setGroupPath(group.getPath());
         List<FieldDTO> fields = fieldService.listFields(command);
+        LOGGER.debug("getDynamicSheet: headers: {}", StringHelper.toJsonString(headers));
         if(fields != null && fields.size() > 0) {
             fields.forEach(fieldDTO -> {
+                LOGGER.debug("getDynamicSheet: fieldDTO: {}", fieldDTO.getFieldDisplayName());
                 if(isImport) {
                     if(headers.contains(fieldDTO.getFieldDisplayName())) {
                         DynamicField df = ConvertHelper.convert(fieldDTO, DynamicField.class);
