@@ -25,6 +25,7 @@ import com.everhomes.user.UserContext;
 import com.everhomes.util.ConvertHelper;
 import com.everhomes.util.DateHelper;
 import com.everhomes.util.RuntimeErrorException;
+import com.everhomes.util.StringHelper;
 import com.everhomes.util.excel.RowResult;
 import com.everhomes.util.excel.handler.PropMrgOwnerHandler;
 import freemarker.cache.StringTemplateLoader;
@@ -2338,12 +2339,27 @@ public class SalaryServiceImpl implements SalaryService {
             namespaceId = UserContext.getCurrentNamespaceId();
         }
         //
-        Calendar checkin = Calendar.getInstance();
-        checkin.setTimeInMillis(cmd.getCheckInMonth());
-        checkin.add(Calendar.MONTH, 1);
-        Calendar dismissEnd = Calendar.getInstance();
-        dismissEnd.setTimeInMillis(cmd.getDismissMonth());
-        dismissEnd.add(Calendar.MONTH, 1);
+        Timestamp checkinStartTime = null;
+        Timestamp checkinEndTime = null;
+        if (null != cmd.getCheckInMonth()) {
+            checkinStartTime= new Timestamp(cmd.getCheckInMonth());
+            Calendar checkin = Calendar.getInstance();
+            checkin.setTimeInMillis(cmd.getCheckInMonth());
+            checkin.add(Calendar.MONTH, 1);
+            checkinEndTime = new Timestamp(checkin.getTimeInMillis());
+
+        }
+
+        Timestamp dissmisStartTime = null;
+        Timestamp dissmisEndTime = null;
+        if (null != cmd.getDismissMonth()) {
+            dissmisStartTime= new Timestamp(cmd.getDismissMonth());
+            Calendar dismissEnd = Calendar.getInstance();
+            dismissEnd.setTimeInMillis(cmd.getDismissMonth());
+            dismissEnd.add(Calendar.MONTH, 1);
+            dissmisEndTime = new Timestamp(dismissEnd.getTimeInMillis());
+
+        }
         CrossShardListingLocator locator = new CrossShardListingLocator();
         if (null != cmd.getPageAnchor()) {
             locator.setAnchor(cmd.getPageAnchor());
@@ -2360,11 +2376,15 @@ public class SalaryServiceImpl implements SalaryService {
 
         }
         List<Long> detailIds = organizationService.listDetailIdWithEnterpriseExclude(cmd.getKeywords(),
-                namespaceId, cmd.getOwnerId(), new Timestamp(cmd.getCheckInMonth()), new Timestamp(checkin.getTimeInMillis()),
-                new Timestamp(cmd.getDismissMonth()), new Timestamp(dismissEnd.getTimeInMillis()), locator, pageSize + 1,notinDetails,inDetails
+                namespaceId, cmd.getOwnerId(),checkinStartTime,checkinEndTime,dissmisStartTime,dissmisEndTime, locator, pageSize + 1,notinDetails,inDetails
         );
+        LOGGER.debug(" organizationService.listDetailIdWithEnterpriseExclude("+cmd.getKeywords()+",\n" +
+                namespaceId+","+ cmd.getOwnerId()+","+checkinStartTime+","+checkinEndTime+","+dissmisStartTime+","+dissmisEndTime+","+ locator+","+ pageSize + 1+","+notinDetails+","+inDetails+"\n"+
+                "        );");
+        LOGGER.debug("detail Ids : " + StringHelper.toJsonString(detailIds));
+
 //        List<Long> orgIds = new ArrayList<>();
-//        orgIds.add(cmd.getOwnerId());
+//        orgIds.add(cmd.getOwnerId());ec“
 //        List<OrganizationMember> members = organizationProvider.listOrganizationMemberByOrganizationIds(new ListingLocator(), Integer.MAX_VALUE - 1, null, orgIds);
 //        if (null != members) {
 //            for (OrganizationMember member : members) {
@@ -2717,6 +2737,26 @@ public class SalaryServiceImpl implements SalaryService {
         OutputStream outputStream = new BufferedOutputStream(out);
 
         return outputStream;
+    }
+
+    @Override
+    public GetSalaryGroupStatusResponse getSalaryGroupStatus(GetSalaryGroupStatusCommand cmd) {
+        return null;
+    }
+
+    @Override
+    public void exportSalaryReport(ExportSalaryReportCommand cmd) {
+        
+    }
+
+    @Override
+    public void fileSalaryGroup(FileSalaryGroupCommand cmd) {
+
+    }
+
+    @Override
+    public void newSalaryMonth(NewSalaryMonthCommand cmd) {
+
     }
 
     private Workbook createEmployeeSalaryHeadWB(Long orgId) {

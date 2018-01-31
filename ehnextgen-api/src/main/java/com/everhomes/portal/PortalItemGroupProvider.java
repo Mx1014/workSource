@@ -13,7 +13,9 @@ public interface PortalItemGroupProvider {
 
     PortalItemGroup findPortalItemGroupById(Long id);
 
-	List<PortalItemGroup> listPortalItemGroup(Long layoutId);
+    Integer findMaxDefaultOrder(Long layoutId);
+
+    List<PortalItemGroup> listPortalItemGroup(Long layoutId);
 
 	void createPortalItemGroups(List<PortalItemGroup> portalItemGroups);
 

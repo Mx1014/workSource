@@ -102,6 +102,16 @@ public class PortalItemGroupProviderImpl implements PortalItemGroupProvider {
 		assert (id != null);
 		return ConvertHelper.convert(getReadOnlyDao().findById(id), PortalItemGroup.class);
 	}
+
+	@Override
+	public Integer findMaxDefaultOrder(Long layoutId) {
+		Integer defaultOrder = getReadOnlyContext().select(Tables.EH_PORTAL_ITEM_GROUPS.DEFAULT_ORDER.max())
+				.from(Tables.EH_PORTAL_ITEM_GROUPS)
+				.where(Tables.EH_PORTAL_ITEM_GROUPS.LAYOUT_ID.eq(layoutId))
+				.fetchOne().value1();
+
+		return defaultOrder;
+	}
 	
 	@Override
 	public List<PortalItemGroup> listPortalItemGroup(Long layoutId) {
