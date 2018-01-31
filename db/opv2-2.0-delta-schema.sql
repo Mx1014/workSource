@@ -831,6 +831,7 @@ CREATE TABLE `eh_salary_entity_categories` (
 DROP TABLE IF EXISTS eh_salary_group_entities;
 CREATE TABLE `eh_salary_group_entities` (
   `id` BIGINT COMMENT 'id of the record', 
+  `default_id` BIGINT COMMENT 'id of the eh_salary_default_entities', 
   `owner_type` VARCHAR(32) COMMENT 'organization',
   `owner_id` BIGINT COMMENT '属于哪一个分公司的',
   `organization_id` BIGINT COMMENT '属于哪一个总公司的', 
