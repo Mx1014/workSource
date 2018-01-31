@@ -2852,6 +2852,7 @@ public class EquipmentProviderImpl implements EquipmentProvider {
     public void createEquipmentInspectionPlanGroupMap(EquipmentInspectionPlanGroupMap map) {
         DSLContext context = this.dbProvider.getDslContext(AccessSpec.readWrite());
         Long id = this.sequenceProvider.getNextSequence(NameMapper.getSequenceDomainFromTablePojo(EhEquipmentInspectionPlanGroupMap.class));
+        LOGGER.info("create EquipmentInspectionPlanGroupMap id :{}"+id);
         map.setId(id);
         map.setCreateTime(new Timestamp(DateHelper.currentGMTTime().getTime()));
         EhEquipmentInspectionPlanGroupMapDao dao = new EhEquipmentInspectionPlanGroupMapDao(context.configuration());
