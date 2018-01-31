@@ -6058,4 +6058,9 @@ private void checkUserPrivilege(Long orgId, Long privilegeId, Long communityId) 
 		}
 		return null;
 	}
+
+	@Override
+	public void updateEquipmentStatus(DeleteEquipmentsCommand cmd) {
+		equipmentProvider.updateEquipmentStatus(cmd.getEquipmentId(),EquipmentStatus.DISCARDED.getCode());
+	}
 }
