@@ -5269,7 +5269,7 @@ public class OrganizationProviderImpl implements OrganizationProvider {
 			cond = cond.and(t1.field("detail_id").lt(locator.getAnchor()));
 
 		List<Long> result = step.where(cond).groupBy(t2.field("id")).orderBy(t2.field("id").desc()).limit(pageSize).fetch(t2.field("id"));
-
+		LOGGER.debug("step " +step.where(cond).groupBy(t2.field("id")).orderBy(t2.field("id").desc()).limit(pageSize));
 //		if (null != locator)
 //			locator.setAnchor(null);
 
