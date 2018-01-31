@@ -32,7 +32,9 @@ import com.everhomes.util.StringHelper;
  * <li>aclinkId: 门禁组id</li>
  * </ul>
  */
-public class AddResourceAdminCommand { 
+public class AddResourceAdminCommand {
+
+	private String resourceType;
 	@NotNull
 	private Long resourceTypeId;
 	@NotNull
@@ -69,6 +71,14 @@ public class AddResourceAdminCommand {
     public String toString() {
         return StringHelper.toJsonString(this);
     }
+
+	public String getResourceType() {
+		return resourceType;
+	}
+
+	public void setResourceType(String resourceType) {
+		this.resourceType = resourceType;
+	}
 
 	public Long getResourceTypeId() {
 		return resourceTypeId;

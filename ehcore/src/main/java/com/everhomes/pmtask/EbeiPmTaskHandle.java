@@ -421,7 +421,7 @@ public class EbeiPmTaskHandle extends DefaultPmTaskHandle{
         dbProvider.execute((TransactionStatus status) -> {
 
             User user = UserContext.current().getUser();
-            Integer namespaceId = user.getNamespaceId();
+            Integer namespaceId = UserContext.getCurrentNamespaceId(cmd.getNamespaceId());
             String ownerType = cmd.getOwnerType();
             Long ownerId = cmd.getOwnerId();
             Long taskCategoryId = cmd.getTaskCategoryId();
@@ -453,6 +453,15 @@ public class EbeiPmTaskHandle extends DefaultPmTaskHandle{
             task.setRequestorName(requestorName);
             task.setRequestorPhone(requestorPhone);
             task.setOrganizationName(cmd.getOrganizationName());
+            task.setIfUseFeelist((byte)0);
+            task.setReferType(cmd.getReferType());
+            task.setReferId(cmd.getReferId());
+            //代发，设置创建者为被代发的人（如果是注册用户）userId
+            if (null != cmd.getOrganizationId()) {
+                if (null!=userId)
+                    task.setCreatorUid(userId);
+                task.setOrganizationUid(user.getId());
+            }
             task.setIfUseFeelist((byte)0);
 
             pmTaskProvider.createTask(task);
@@ -576,7 +585,6 @@ public class EbeiPmTaskHandle extends DefaultPmTaskHandle{
             //更新工作流case状态
             FlowCase flowCase = flowCaseProvider.getFlowCaseById(task.getFlowCaseId());
             flowCase.setStatus(FlowCaseStatus.ABSORTED.getCode());
-            flowCaseProvider.updateFlowCase(flowCase);
             //elasticsearch更新
             pmTaskSearch.deleteById(task.getId());
 
@@ -749,7 +757,7 @@ public class EbeiPmTaskHandle extends DefaultPmTaskHandle{
 
         SearchTasksResponse response = new SearchTasksResponse();
         List<PmTaskDTO> list = pmTaskSearch.searchDocsByType(cmd.getStatus(), cmd.getKeyword(), cmd.getOwnerId(), cmd.getOwnerType(),
-                cmd.getTaskCategoryId(), cmd.getStartDate(), cmd.getEndDate(), cmd.getAddressId(), cmd.getBuildingName(),
+                cmd.getTaskCategoryId(), cmd.getStartDate(), cmd.getEndDate(), cmd.getAddressId(), cmd.getBuildingName(),cmd.getCreatorType(),
                 cmd.getPageAnchor(), pageSize+1);
         int listSize = list.size();
         if(listSize > 0){
@@ -761,6 +769,10 @@ public class EbeiPmTaskHandle extends DefaultPmTaskHandle{
                 dto.setTaskCategoryId(taskCategory.getId());
                 dto.setTaskCategoryName(taskCategory.getName());
 
+                if (null!=dto.getFlowCaseId()) {
+                    FlowCase flowCase = flowService.getFlowCaseById(dto.getFlowCaseId());
+                    dto.setStatus(flowCase.getStatus());
+                }
                 return dto;
             }).collect(Collectors.toList()));
             if(listSize <= pageSize){

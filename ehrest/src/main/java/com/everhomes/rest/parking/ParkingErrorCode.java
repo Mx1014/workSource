@@ -34,10 +34,16 @@ public interface ParkingErrorCode {
 
     int ERROR_PLATE_REPEAT_ADD = 10021;  //车牌不可重复添加！
 
+    //------------------------vip 车位----------------------------
+    int ERROR_RAISE_PARKING_LOCK = 10022; // 升起车锁失败
+    int ERROR_DOWN_PARKING_LOCK = 10023; //  降下车锁失败
+
     // ------------------ 车辆放行 ----------------------
     String SCOPE_CLEARANCE = "parking.clearance";
 
     int ERROR_DELETE_PARKING_CLEARANCE_OPERATOR = 10001;  //删除用户失败
     int ERROR_NO_WORK_FLOW_ENABLED = 10002;  //没有启用的工作流
     int ERROR_USER_ALREADY_IN_DATABASE = 10003;  //用户已添加
+
+
 }

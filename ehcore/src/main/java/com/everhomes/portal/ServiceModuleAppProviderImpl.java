@@ -12,10 +12,13 @@ import com.everhomes.sequence.SequenceProvider;
 import com.everhomes.server.schema.Tables;
 import com.everhomes.server.schema.tables.daos.EhServiceModuleAppsDao;
 import com.everhomes.server.schema.tables.pojos.EhServiceModuleApps;
+import com.everhomes.server.schema.tables.records.EhServiceModuleAppsRecord;
 import com.everhomes.util.ConvertHelper;
 import com.everhomes.util.DateHelper;
 import org.jooq.Condition;
 import org.jooq.DSLContext;
+import org.jooq.DeleteQuery;
+import org.jooq.SelectQuery;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -41,6 +44,11 @@ public class ServiceModuleAppProviderImpl implements ServiceModuleAppProvider {
 	public void createServiceModuleApp(ServiceModuleApp serviceModuleApp) {
 		Long id = sequenceProvider.getNextSequence(NameMapper.getSequenceDomainFromTablePojo(EhServiceModuleApps.class));
 		serviceModuleApp.setId(id);
+
+		if(serviceModuleApp.getOriginId() == null){
+			serviceModuleApp.setOriginId(id);
+		}
+
 		serviceModuleApp.setCreateTime(new Timestamp(DateHelper.currentGMTTime().getTime()));
 		serviceModuleApp.setUpdateTime(serviceModuleApp.getCreateTime());
 		getReadWriteDao().insert(serviceModuleApp);
@@ -53,11 +61,21 @@ public class ServiceModuleAppProviderImpl implements ServiceModuleAppProvider {
 		if(serviceModuleApps.size() == 0){
 			return;
 		}
-		Long id = sequenceProvider.getNextSequenceBlock(NameMapper.getSequenceDomainFromTablePojo(EhServiceModuleApps.class), (long)serviceModuleApps.size());
+		/**
+		 * 有id使用原来的id，没有则生成新的
+		 */
+		Long id = sequenceProvider.getNextSequenceBlock(NameMapper.getSequenceDomainFromTablePojo(EhServiceModuleApps.class), (long)serviceModuleApps.size() + 1);
 		List<EhServiceModuleApps> moduleApps = new ArrayList<>();
 		for (ServiceModuleApp moduleApp: serviceModuleApps) {
-			id ++;
-			moduleApp.setId(id);
+			if(moduleApp.getId() == null){
+				id ++;
+				moduleApp.setId(id);
+			}
+
+			if(moduleApp.getOriginId() == null){
+				moduleApp.setOriginId(id);
+			}
+
 			moduleApp.setCreateTime(new Timestamp(DateHelper.currentGMTTime().getTime()));
 			moduleApp.setUpdateTime(moduleApp.getCreateTime());
 			moduleApps.add(ConvertHelper.convert(moduleApp, EhServiceModuleApps.class));
@@ -82,13 +100,13 @@ public class ServiceModuleAppProviderImpl implements ServiceModuleAppProvider {
 	}
 
 	@Override
-	public List<ServiceModuleApp> listServiceModuleApp(Integer namespaceId, Long moduleId){
-		return listServiceModuleApp(namespaceId, moduleId, null, null, null);
+	public List<ServiceModuleApp> listServiceModuleApp(Integer namespaceId, Long moduleId, Long versionId){
+		return listServiceModuleApp(namespaceId, moduleId, null, null, null, versionId);
 	}
 
 	@Override
-	public List<ServiceModuleApp> listServiceModuleAppByActionType(Integer namespaceId, Byte actionType){
-		return listServiceModuleApp(namespaceId, null, actionType, null, null);
+	public List<ServiceModuleApp> listServiceModuleAppByActionType(Integer namespaceId, Byte actionType, Long versionId){
+		return listServiceModuleApp(namespaceId, null, actionType, null, null, versionId);
 	}
 
 	@Override
@@ -103,9 +121,17 @@ public class ServiceModuleAppProviderImpl implements ServiceModuleAppProvider {
 				.fetch().map(r -> ConvertHelper.convert(r, ServiceModuleAppDTO.class));
 	}
 
+	@Override
+	public void deleteByVersionId(Long versionId){
+		DeleteQuery query = getReadWriteContext().deleteQuery(Tables.EH_SERVICE_MODULE_APPS);
+		query.addConditions(Tables.EH_SERVICE_MODULE_APPS.VERSION_ID.eq(versionId));
+		query.execute();
+		DaoHelper.publishDaoAction(DaoAction.MODIFY, EhServiceModuleApps.class, null);
+	}
+
 
 	@Override
-	public List<ServiceModuleApp> listServiceModuleApp(Integer namespaceId, Long moduleId, Byte actionType, String customTag, String customPath) {
+	public List<ServiceModuleApp> listServiceModuleApp(Integer namespaceId, Long moduleId, Byte actionType, String customTag, String customPath, Long versionId) {
 		Condition cond = Tables.EH_SERVICE_MODULE_APPS.NAMESPACE_ID.eq(namespaceId);
 		if(null != moduleId)
 			cond = cond.and(Tables.EH_SERVICE_MODULE_APPS.MODULE_ID.eq(moduleId));
@@ -115,6 +141,8 @@ public class ServiceModuleAppProviderImpl implements ServiceModuleAppProvider {
 			cond = cond.and(Tables.EH_SERVICE_MODULE_APPS.CUSTOM_TAG.eq(customTag));
 		if(null != customPath)
 			cond = cond.and(Tables.EH_SERVICE_MODULE_APPS.CUSTOM_PATH.eq(customPath));
+		if(null != versionId)
+			cond = cond.and(Tables.EH_SERVICE_MODULE_APPS.VERSION_ID.eq(versionId));
 		return getReadOnlyContext().select().from(Tables.EH_SERVICE_MODULE_APPS)
 				.where(cond)
 				.and(Tables.EH_SERVICE_MODULE_APPS.STATUS.eq(ServiceModuleAppStatus.ACTIVE.getCode()))
@@ -144,5 +172,47 @@ public class ServiceModuleAppProviderImpl implements ServiceModuleAppProvider {
 
 	private DSLContext getContext(AccessSpec accessSpec) {
 		return dbProvider.getDslContext(accessSpec);
+	}
+
+	@Override
+	public ServiceModuleApp findServiceModuleApp(Integer namespaceId, Long versionId, Long moduleId, String customTag) {
+
+		SelectQuery<EhServiceModuleAppsRecord> query = getReadOnlyContext().selectFrom(Tables.EH_SERVICE_MODULE_APPS).getQuery();
+		query.addConditions(Tables.EH_SERVICE_MODULE_APPS.NAMESPACE_ID.eq(namespaceId));
+		if(versionId != null){
+			query.addConditions(Tables.EH_SERVICE_MODULE_APPS.VERSION_ID.eq(versionId));
+		}
+
+		if(moduleId != null){
+			query.addConditions(Tables.EH_SERVICE_MODULE_APPS.MODULE_ID.eq(moduleId));
+		}
+
+		if(customTag != null){
+			query.addConditions(Tables.EH_SERVICE_MODULE_APPS.CUSTOM_TAG.eq(customTag));
+		}
+		ServiceModuleApp app = query.fetchAnyInto(ServiceModuleApp.class);
+
+		return  app;
+	}
+
+	@Override
+	public ServiceModuleApp findServiceModuleApp(Integer namespaceId, Long versionId, Byte actionType, String instanceConfig) {
+
+		SelectQuery<EhServiceModuleAppsRecord> query = getReadOnlyContext().selectFrom(Tables.EH_SERVICE_MODULE_APPS).getQuery();
+		query.addConditions(Tables.EH_SERVICE_MODULE_APPS.NAMESPACE_ID.eq(namespaceId));
+		if(versionId != null){
+			query.addConditions(Tables.EH_SERVICE_MODULE_APPS.VERSION_ID.eq(versionId));
+		}
+
+		if(instanceConfig != null){
+			query.addConditions(Tables.EH_SERVICE_MODULE_APPS.INSTANCE_CONFIG.eq(instanceConfig));
+		}
+
+		if(actionType!= null){
+			query.addConditions(Tables.EH_SERVICE_MODULE_APPS.ACTION_TYPE.eq(actionType));
+		}
+		ServiceModuleApp app = query.fetchAnyInto(ServiceModuleApp.class);
+
+		return  app;
 	}
 }

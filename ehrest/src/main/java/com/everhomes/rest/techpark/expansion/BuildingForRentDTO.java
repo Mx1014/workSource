@@ -38,6 +38,7 @@ import com.everhomes.rest.general_approval.PostApprovalFormItem;
  * <li>issuerType：发布人类型  {@link com.everhomes.rest.techpark.expansion.LeaseIssuerType  NORMAL_USER：普通用户或公司，ORGANIZATION：物业公司}</li>
  * <li>longitude：经度</li>
  * <li>latitude：纬度</li>
+ * <li>houseResourceType {@link com.everhomes.rest.techpark.expansion.HouseResourceType}</li>
  * <li>leasePromotionFormId：招租表单id</li>
  * <li>customFormFlag：是否启用表单 {@link com.everhomes.rest.techpark.expansion.LeasePromotionFlag  0 ：否  1 是}</li>
  * <li>formValues：招租表单字段列表 {@link com.everhomes.rest.general_approval.PostApprovalFormItem}</li>
@@ -65,6 +66,7 @@ public class BuildingForRentDTO {
 	private Double longitude;
 	
 	private Double latitude;
+	private String houseResourceType;
 	
 	private Timestamp createTime;
 	@ItemType(BuildingForRentAttachmentDTO.class)
@@ -389,5 +391,13 @@ public class BuildingForRentDTO {
 
 	public void setLatitude(Double latitude) {
 		this.latitude = latitude;
+	}
+
+	public String getHouseResourceType() {
+		return houseResourceType;
+	}
+
+	public void setHouseResourceType(String houseResourceType) {
+		this.houseResourceType = houseResourceType;
 	}
 }

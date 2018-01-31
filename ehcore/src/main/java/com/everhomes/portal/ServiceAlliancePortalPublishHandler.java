@@ -94,6 +94,7 @@ public class ServiceAlliancePortalPublishHandler implements PortalPublishHandler
         ServiceAllianceSkipRule rule = yellowPageProvider.getCateorySkipRule(serviceAllianceActionData.getParentId(), namespaceId);
         ServiceAllianceInstanceConfig serviceAllianceInstanceConfig = new ServiceAllianceInstanceConfig();
         serviceAllianceInstanceConfig.setType(serviceAllianceActionData.getParentId());
+        serviceAllianceInstanceConfig.setEntryId(serviceAllianceActionData.getParentId());
         serviceAllianceInstanceConfig.setDisplayType(serviceAllianceActionData.getDisplayType());
         if(null == rule){
             serviceAllianceInstanceConfig.setDetailFlag(DetailFlag.NO.getCode());

@@ -51,6 +51,31 @@ public class PortalItemProviderImpl implements PortalItemProvider {
 	}
 
 	@Override
+	public void createPortalItems(List<PortalItem> portalItems) {
+		if(portalItems.size() == 0){
+			return;
+		}
+		/**
+		 * 有id使用原来的id，没有则生成新的
+		 */
+		Long id = sequenceProvider.getNextSequenceBlock(NameMapper.getSequenceDomainFromTablePojo(EhPortalItems.class), (long)portalItems.size() + 1);
+		List<EhPortalItems> items = new ArrayList<>();
+		for (PortalItem item: portalItems) {
+			if(item.getId() == null){
+				id ++;
+				item.setId(id);
+			}
+			item.setCreateTime(new Timestamp(DateHelper.currentGMTTime().getTime()));
+			item.setUpdateTime(item.getCreateTime());
+			items.add(ConvertHelper.convert(item, EhPortalItems.class));
+		}
+		getReadWriteDao().insert(items);
+		DaoHelper.publishDaoAction(DaoAction.CREATE, EhPortalItems.class, null);
+	}
+
+
+
+	@Override
 	public void updatePortalItem(PortalItem portalItem) {
 		assert (portalItem.getId() != null);
 		portalItem.setUpdateTime(new Timestamp(DateHelper.currentGMTTime().getTime()));
@@ -59,33 +84,52 @@ public class PortalItemProviderImpl implements PortalItemProvider {
 	}
 
 	@Override
+	public void deleteByVersionId(Long versionId){
+		DeleteQuery query = getReadWriteContext().deleteQuery(Tables.EH_PORTAL_ITEMS);
+		query.addConditions(Tables.EH_PORTAL_ITEMS.VERSION_ID.eq(versionId));
+		query.execute();
+		DaoHelper.publishDaoAction(DaoAction.MODIFY, EhPortalItems.class, null);
+	}
+
+
+	@Override
 	public PortalItem findPortalItemById(Long id) {
 		assert (id != null);
 		return ConvertHelper.convert(getReadOnlyDao().findById(id), PortalItem.class);
 	}
 
 	@Override
+	public Integer findMaxDefaultOrder(Long itemGroupId) {
+		Integer defaultOrder = getReadOnlyContext().select(Tables.EH_PORTAL_ITEMS.DEFAULT_ORDER.max())
+				.from(Tables.EH_PORTAL_ITEMS)
+				.where(Tables.EH_PORTAL_ITEMS.ITEM_GROUP_ID.eq(itemGroupId))
+				.fetchOne().value1();
+
+		return defaultOrder;
+	}
+
+	@Override
 	public List<PortalItem> listPortalItems(Long itemCategoryId, Long itemGroupId){
-		return listPortalItems(itemCategoryId, null, null, itemGroupId, PortalItemStatus.INACTIVE.getCode());
+		return listPortalItems(itemCategoryId, null, null, itemGroupId, PortalItemStatus.INACTIVE.getCode(), null);
 	}
 
 	@Override
 	public List<PortalItem> listPortalItemByCategoryId(Long itemCategoryId){
-		return listPortalItems(itemCategoryId, null, null, null, PortalItemStatus.INACTIVE.getCode());
+		return listPortalItems(itemCategoryId, null, null, null, PortalItemStatus.INACTIVE.getCode(), null);
 	}
 
 	@Override
 	public List<PortalItem> listPortalItemByGroupId(Long itemGroupId){
-		return listPortalItems(null, null, null, itemGroupId, PortalItemStatus.INACTIVE.getCode());
+		return listPortalItems(null, null, null, itemGroupId, PortalItemStatus.INACTIVE.getCode(), null);
 	}
 
 	@Override
 	public List<PortalItem> listPortalItemByGroupId(Long itemGroupId, Byte neStatus){
-		return listPortalItems(null, null, null, itemGroupId, neStatus);
+		return listPortalItems(null, null, null, itemGroupId, neStatus, null);
 	}
 
 	@Override
-	public List<PortalItem> listPortalItems(Long itemCategoryId, Integer namespaceId, String actionType, Long itemGroupId, Byte neStatus) {
+	public List<PortalItem> listPortalItems(Long itemCategoryId, Integer namespaceId, String actionType, Long itemGroupId, Byte neStatus, Long versionId) {
 		Condition cond = Tables.EH_PORTAL_ITEMS.ID.isNotNull();
 		if(null != neStatus)
 			cond = cond.and(Tables.EH_PORTAL_ITEMS.STATUS.ne(neStatus));
@@ -105,6 +149,10 @@ public class PortalItemProviderImpl implements PortalItemProvider {
 
 		if(null != itemGroupId){
 			cond = cond.and(Tables.EH_PORTAL_ITEMS.ITEM_GROUP_ID.eq(itemGroupId));
+		}
+
+		if(versionId != null){
+			cond = cond.and(Tables.EH_PORTAL_ITEMS.VERSION_ID.eq(versionId));
 		}
 
 		return getReadOnlyContext().select().from(Tables.EH_PORTAL_ITEMS)
@@ -143,6 +191,10 @@ public class PortalItemProviderImpl implements PortalItemProvider {
 		if(null != itemGroupId){
 			cond = cond.and(Tables.EH_PORTAL_ITEMS.ITEM_GROUP_ID.eq(itemGroupId));
 		}
+
+//		if(versionId != null){
+//			cond = cond.and(Tables.EH_PORTAL_ITEMS.VERSION_ID.eq(versionId));
+//		}
 
 		return getReadOnlyContext().select().from(Tables.EH_PORTAL_ITEMS)
 				.where(cond)

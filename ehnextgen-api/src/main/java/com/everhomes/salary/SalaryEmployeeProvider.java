@@ -15,25 +15,33 @@ public interface SalaryEmployeeProvider {
 
 	List<SalaryEmployee> listSalaryEmployee();
 
-	List<SalaryEmployee> listSalaryEmployeeByPeriodGroupId(Long salaryPeriodGroupId);
+	List<SalaryEmployee> listSalaryEmployee(Long ownerId, Byte salaryStatus, List<Long> detailIds, CrossShardListingLocator locator, int i);
 
-	int countUnCheckEmployee(Long salaryPeriodGroupId);
+	SalaryEmployee findSalaryEmployeeByDetailId(Long ownerId, Long detailId);
 
-	List<SalaryEmployee> listSalaryEmployees(List<Long> userIds, List<String> periods);
+	String getMonthByOwnerId(Long ownerId);
 
-	void updateSalaryEmployeeCheckFlag(List<Long> salaryEmployeeIds, Byte checkFlag);
+	List<Long> listEmployeeDetailIdsByStatus(Long ownerId, Byte status);
 
-	List<SalaryEmployee> listSalaryEmployees(Long salaryPeriodGroupId, List<Long> userIds, Byte checkFlag, CrossShardListingLocator locator, int pageSize);
-
-	void deleteSalaryEmployee(Long ownerId, Long detail_id, Long salaryGroupId);
-
-	void deleteSalaryEmployee(SalaryEmployee employee);
-
-	Integer countSalaryEmployeesByStatus(Long salaryPeriodGroupId,  Byte code);
-
-	SalaryEmployee findSalaryEmployeeBySalaryGroupIdAndDetailId(Long salaryGroupId, Long memberId);
-
-	SalaryEmployee findSalaryEmployee(Long ownerId, Long detailId, Long id);
-
-	List<SalaryEmployee> listSalaryEmployeeByPeriodGroupIdNotInDetailIDS(Long id, List<Long> detailIds);
+//	List<SalaryEmployee> listSalaryEmployeeByPeriodGroupId(Long salaryPeriodGroupId);
+//
+//	int countUnCheckEmployee(Long salaryPeriodGroupId);
+//
+//	List<SalaryEmployee> listSalaryEmployees(List<Long> userIds, List<String> periods);
+//
+//	void updateSalaryEmployeeCheckFlag(List<Long> salaryEmployeeIds, Byte checkFlag);
+//
+//	List<SalaryEmployee> listSalaryEmployees(Long salaryPeriodGroupId, List<Long> userIds, Byte checkFlag, CrossShardListingLocator locator, int pageSize);
+//
+//	void deleteSalaryEmployee(Long ownerId, Long detail_id, Long salaryGroupId);
+//
+//	void deleteSalaryEmployee(SalaryEmployee employee);
+//
+//	Integer countSalaryEmployeesByStatus(Long salaryPeriodGroupId,  Byte code);
+//
+//	SalaryEmployee findSalaryEmployeeBySalaryGroupIdAndDetailId(Long salaryGroupId, Long memberId);
+//
+//	SalaryEmployee findSalaryEmployee(Long ownerId, Long detailId, Long id);
+//
+//	List<SalaryEmployee> listSalaryEmployeeByPeriodGroupIdNotInDetailIDS(Long id, List<Long> detailIds);
 }

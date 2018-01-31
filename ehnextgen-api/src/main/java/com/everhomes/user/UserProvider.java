@@ -83,8 +83,10 @@ public interface UserProvider {
 	List<User> listUserByNickNameOrIdentifier(String keyword);
 	List<UserIdentifier> listUserIdentifierByIdentifier(String identifier);
 	List<User> listUserByIds(Integer namespaceId, List<Long> userIds);
-	
-	/**
+
+    List<User> searchUserByIdentifier(String identifier, Integer namespaceId, int pageSize);
+
+    /**
 	 * Added by Janson
 	 * @param locator
 	 * @param pageSize
@@ -156,4 +158,6 @@ public interface UserProvider {
      * 用于测试缓存使用是否正常，不要用于业务使用 by lqs 20171019
      */
     void updateCacheStatus();
+
+    String findMobileByUid(Long contactId);
 }

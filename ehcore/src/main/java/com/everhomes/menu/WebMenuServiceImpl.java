@@ -7,21 +7,24 @@ import com.everhomes.acl.WebMenuScope;
 import com.everhomes.bootstrap.PlatformContext;
 import com.everhomes.db.DbProvider;
 import com.everhomes.domain.Domain;
+import com.everhomes.domain.DomainService;
 import com.everhomes.entity.EntityType;
 import com.everhomes.module.ServiceModuleProvider;
 import com.everhomes.module.ServiceModuleService;
 import com.everhomes.organization.Organization;
 import com.everhomes.organization.OrganizationProvider;
 import com.everhomes.organization.OrganizationService;
+import com.everhomes.portal.PortalService;
 import com.everhomes.portal.ServiceModuleApp;
-import com.everhomes.rest.acl.WebMenuDTO;
-import com.everhomes.rest.acl.WebMenuScopeApplyPolicy;
-import com.everhomes.rest.acl.WebMenuSelectedFlag;
+import com.everhomes.rest.acl.*;
 import com.everhomes.rest.acl.WebMenuType;
 import com.everhomes.rest.acl.admin.ListWebMenuResponse;
 import com.everhomes.rest.menu.*;
 import com.everhomes.rest.oauth2.ModuleManagementType;
 import com.everhomes.rest.organization.OrganizationType;
+import com.everhomes.rest.portal.ListServiceModuleAppsCommand;
+import com.everhomes.rest.portal.ListServiceModuleAppsResponse;
+import com.everhomes.rest.portal.PortalVersionDTO;
 import com.everhomes.rest.portal.ServiceModuleAppDTO;
 import com.everhomes.user.UserContext;
 import com.everhomes.user.admin.SystemUserPrivilegeMgr;
@@ -71,6 +74,11 @@ public class WebMenuServiceImpl implements WebMenuService {
 	@Autowired
 	private WebMenuPrivilegeProvider webMenuPrivilegeProvider;
 
+	@Autowired
+	private PortalService portalService;
+
+	@Autowired
+	private DomainService domainService;
 
 	@Override
 	public List<WebMenuDTO> listUserRelatedWebMenus(ListUserRelatedWebMenusCommand cmd){
@@ -87,8 +95,16 @@ public class WebMenuServiceImpl implements WebMenuService {
 			menu = webMenuProvider.getWebMenuById(cmd.getMenuId());
 			categories.add(WebMenuCategory.PAGE.getCode());
 		}
-		Domain domain = UserContext.current().getDomain();
-		Long currentOrgId = cmd.getCurrentOrgId();
+
+		Domain domain = null;
+
+		if(UserContext.getCurrentNamespaceId() != null){
+			domain = domainService.findDomainByNamespaceId(UserContext.getCurrentNamespaceId());
+		}
+		if(domain == null){
+			domain = UserContext.current().getDomain();
+		}
+
 		if(null == domain){
 			LOGGER.error("domain not configured, userId = {}", userId);
 			domain = new Domain();
@@ -96,7 +112,9 @@ public class WebMenuServiceImpl implements WebMenuService {
 //			throw RuntimeErrorException.errorWith(UserServiceErrorCode.SCOPE, UserServiceErrorCode.DOMAIN_NOT_CONFIGURED,
 //					"domain not configured");
 		}
-		if(null == cmd.getCurrentOrgId()){
+
+		Long currentOrgId = cmd.getCurrentOrgId();
+		if(currentOrgId == null){
 			currentOrgId = domain.getPortalId();
 		}
 		if(EntityType.fromCode(domain.getPortalType()) == EntityType.ORGANIZATIONS){
@@ -346,25 +364,46 @@ public class WebMenuServiceImpl implements WebMenuService {
 	/**
 	 * 过滤菜单
 	 * @param menus
-	 * @param filterMap
+	 * @param scopes
      * @return
      */
-	private List<WebMenu> filterMenus(List<WebMenu> menus, Map<Long, WebMenuScope> filterMap){
+	private List<WebMenu> filterMenus(List<WebMenu> menus, List<WebMenuScope> scopes){
 		List<WebMenu> filterMenus = new ArrayList<>();
-		for (WebMenu menu: menus) {
-			WebMenuScope scope = filterMap.get(menu.getId());
-			LOGGER.debug("listEnterpriseWebMenu filterMenus scope: {}", scope);
-			if(null != scope){
-				if(WebMenuScopeApplyPolicy.fromCode(scope.getApplyPolicy()) == WebMenuScopeApplyPolicy.OVERRIDE){
-					//override menu
-					menu.setName(scope.getMenuName());
-					filterMenus.add(menu);
-				}else if(WebMenuScopeApplyPolicy.fromCode(scope.getApplyPolicy()) == WebMenuScopeApplyPolicy.REVERT){
-					filterMenus.add(menu);
-				}
+//		for (WebMenu menu: menus) {
+//			WebMenuScope scope = filterMap.get(menu.getId());
+//			LOGGER.debug("listEnterpriseWebMenu filterMenus scope: {}", scope);
+//			if(null != scope){
+//				if(WebMenuScopeApplyPolicy.fromCode(scope.getApplyPolicy()) == WebMenuScopeApplyPolicy.OVERRIDE){
+//					//override menu
+//					menu.setName(scope.getMenuName());
+//					filterMenus.add(menu);
+//				}else if(WebMenuScopeApplyPolicy.fromCode(scope.getApplyPolicy()) == WebMenuScopeApplyPolicy.REVERT){
+//					filterMenus.add(menu);
+//				}
+//				menu.setAppId(scope.getAppId());
+//				menu.setConfigId(scope.getConfigId());
+//
+//			}
+//		}
 
+		if(scopes == null){
+			return filterMenus;
+		}
+
+		for (WebMenuScope scope: scopes){
+			for (WebMenu menu: menus){
+				if(scope.getMenuId().equals(menu.getId())){
+					WebMenu filterMenu = ConvertHelper.convert(menu, WebMenu.class);
+					if(WebMenuScopeApplyPolicy.fromCode(scope.getApplyPolicy()) == WebMenuScopeApplyPolicy.OVERRIDE) {
+						filterMenu.setName(scope.getMenuName());
+					}
+					filterMenu.setAppId(scope.getAppId());
+					filterMenu.setConfigId(scope.getConfigId());
+					filterMenus.add(filterMenu);
+				}
 			}
 		}
+
 		filterMenus.sort((o1, o2) -> o1.getSortNum() - o2.getSortNum());
 		LOGGER.debug("listEnterpriseWebMenu filterMenus: {}", filterMenus);
 		return filterMenus;
@@ -377,11 +416,11 @@ public class WebMenuServiceImpl implements WebMenuService {
      * @return
      */
 	private List<WebMenu> filterMenus(List<WebMenu> menus, Long organizationId){
-		Map<Long, WebMenuScope> filterMap = webMenuProvider.getWebMenuScopeMapByOwnerId(EntityType.ORGANIZATIONS.getCode(), organizationId);
-		if(filterMap.size() == 0 ){
-			filterMap = webMenuProvider.getWebMenuScopeMapByOwnerId(EntityType.NAMESPACE.getCode(), Long.valueOf(UserContext.getCurrentNamespaceId()));
+		List<WebMenuScope> scopes = webMenuProvider.getWebMenuScopeMapByOwnerId(EntityType.ORGANIZATIONS.getCode(), organizationId);
+		if(scopes.size() == 0 ){
+			scopes = webMenuProvider.getWebMenuScopeMapByOwnerId(EntityType.NAMESPACE.getCode(), Long.valueOf(UserContext.getCurrentNamespaceId()));
 		}
-		return filterMenus(menus, filterMap);
+		return filterMenus(menus, scopes);
 	}
 	
     /**
@@ -559,4 +598,91 @@ public class WebMenuServiceImpl implements WebMenuService {
 
 		return webMenuScopes;
 	}
+
+	@Override
+	public void refleshMenuByPortalVersion(Long versionId){
+
+		PortalVersionDTO portalVersionDTO = portalService.findPortalVersionById(versionId);
+		ListServiceModuleAppsCommand cmd = new ListServiceModuleAppsCommand();
+		cmd.setNamespaceId(portalVersionDTO.getNamespaceId());
+		cmd.setVersionId(versionId);
+		ListServiceModuleAppsResponse listServiceModuleAppsResponse = portalService.listServiceModuleApps(cmd);
+		List<ServiceModuleAppDTO> serviceModuleApps = listServiceModuleAppsResponse.getServiceModuleApps();
+
+		List<WebMenuScope> scopes = new ArrayList<>();
+
+		//应用生成的菜单
+		for(ServiceModuleAppDTO dto: serviceModuleApps){
+			if(dto.getModuleId() != null){
+				//门禁设置临时设置，门禁应用在后台配置成“大堂门径”和“公司门禁”，因为客户端只有actiontype对应41000
+				if(dto.getModuleId() == 41000){
+					populateMenuScopeByApplication(scopes, portalVersionDTO.getNamespaceId(), 41010L, dto.getName(), dto.getId());
+					populateMenuScopeByApplication(scopes, portalVersionDTO.getNamespaceId(), 41020L, dto.getName(), dto.getId());
+				}else {
+					populateMenuScopeByApplication(scopes, portalVersionDTO.getNamespaceId(), dto.getModuleId(), dto.getName(), dto.getId());
+				}
+			}
+		}
+
+		//配置域空间固定菜单
+		populateMenuScopeByNamespace(scopes, portalVersionDTO.getNamespaceId());
+
+		webMenuProvider.deleteMenuScopeByOwner(EntityType.NAMESPACE.getCode(), Long.valueOf(cmd.getNamespaceId()));
+		webMenuProvider.deleteMenuScopeByOwner(EntityType.ORGANIZATIONS.getCode(), Long.valueOf(cmd.getNamespaceId()));
+
+		webMenuProvider.createWebMenuScopes(scopes);
+
+	}
+
+	/**
+	 * 根据应用配置菜单
+	 * @param scopes
+	 * @param namespaceId
+	 * @param moduleId
+	 * @param name
+	 * @param configId
+	 */
+	private void populateMenuScopeByApplication(List<WebMenuScope> scopes, Integer namespaceId, Long moduleId, String name, Long configId){
+
+		List<WebMenu> webMenus = new ArrayList<>();
+		List<WebMenu> parkMenus = webMenuProvider.listMenuByModuleIdAndType(moduleId, WebMenuType.PARK.getCode());
+		List<WebMenu> orgMenus = webMenuProvider.listMenuByModuleIdAndType(moduleId, WebMenuType.ORGANIZATION.getCode());
+		webMenus.addAll(parkMenus);
+		webMenus.addAll(orgMenus);
+		for (WebMenu webMenu: webMenus){
+			WebMenuScope scope = new WebMenuScope();
+			scope.setMenuId(webMenu.getId());
+			scope.setMenuName(name);
+			scope.setApplyPolicy(WebMenuScopeApplyPolicy.OVERRIDE.getCode());
+			scope.setOwnerType(EntityType.NAMESPACE.getCode());
+			scope.setOwnerId(namespaceId.longValue());
+			//scope.setAppId(dto.getOriginId());
+			scope.setConfigId(configId);
+			scopes.add(scope);
+		}
+	}
+
+	/**
+	 * 配置域空间固定菜单
+	 * @param scopes
+	 * @param namespaceId
+	 */
+	private void populateMenuScopeByNamespace(List<WebMenuScope> scopes, Integer namespaceId){
+
+		//固定生成的菜单
+		List<WebMenu> webMenus = new ArrayList<>();
+		List<WebMenu> parkMenus = webMenuProvider.listMenuByTypeAndConfigType(WebMenuType.PARK.getCode(), WebMenuConfigType.NAMESPACE.getCode());
+		List<WebMenu> orgMenus = webMenuProvider.listMenuByTypeAndConfigType(WebMenuType.ORGANIZATION.getCode(), WebMenuConfigType.NAMESPACE.getCode());
+		webMenus.addAll(parkMenus);
+		webMenus.addAll(orgMenus);
+		for (WebMenu webMenu: webMenus) {
+			WebMenuScope scope = new WebMenuScope();
+			scope.setMenuId(webMenu.getId());
+			scope.setApplyPolicy(WebMenuScopeApplyPolicy.REVERT.getCode());
+			scope.setOwnerType(EntityType.NAMESPACE.getCode());
+			scope.setOwnerId(namespaceId.longValue());
+			scopes.add(scope);
+		}
+	}
+
 }

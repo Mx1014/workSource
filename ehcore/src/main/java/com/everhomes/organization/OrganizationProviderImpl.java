@@ -48,6 +48,7 @@ import com.everhomes.util.RuntimeErrorException;
 import org.jooq.*;
 import org.jooq.impl.DSL;
 import org.jooq.impl.DefaultRecordMapper;
+import org.mockito.internal.verification.Times;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -2350,7 +2351,7 @@ public class OrganizationProviderImpl implements OrganizationProvider {
 
         query.addConditions(Tables.EH_ORGANIZATIONS.STATUS.eq(OrganizationStatus.ACTIVE.getCode()));
 
-        query.addOrderBy(Tables.EH_ORGANIZATIONS.ID.desc());
+        query.addOrderBy(Tables.EH_ORGANIZATIONS.LEVEL.asc(),Tables.EH_ORGANIZATIONS.ID.desc());
 
         query.fetch().map((r) -> {
             result.add(ConvertHelper.convert(r, Organization.class));
@@ -5226,6 +5227,62 @@ public class OrganizationProviderImpl implements OrganizationProvider {
 	}
 
 	@Override
+	public List<Long> listMemberDetailIdWithExclude(String keywords, Integer namespaceId, String big_path, List<String> small_path,
+													Timestamp checkinTimeStart, Timestamp checkinTimeEnd, Timestamp dissmissTimeStart, Timestamp dissmissTimeEnd,
+													CrossShardListingLocator locator, Integer pageSize,List<Long> notinDetails,List<Long> inDetails) {
+		DSLContext context = dbProvider.getDslContext(AccessSpec.readOnly());
+		TableLike t1 = Tables.EH_ORGANIZATION_MEMBERS.as("t1");
+		TableLike t2 = Tables.EH_ORGANIZATION_MEMBER_DETAILS.as("t2");
+		SelectJoinStep step = context.select().from(t1).leftOuterJoin(t2).on(t1.field("detail_id").eq(t2.field("id")));
+
+		Condition cond = t1.field("group_path").like(big_path+"%");
+
+		cond = cond.and(t1.field("namespace_id").eq(namespaceId));
+		cond = cond.and(t1.field("group_type").eq(OrganizationGroupType.DEPARTMENT.getCode()));
+//		cond = cond.and(t1.field("status").eq(OrganizationMemberStatus.ACTIVE.getCode()));
+
+		if (small_path != null) {
+			for (String p : small_path) {
+				cond = cond.and(t1.field("group_path").notLike(p+"%"));
+			}
+		}
+		if(!StringUtils.isEmpty(keywords)){
+			cond = cond.and(t2.field("contact_name").like("%" + keywords + "%"));
+		}
+		if (null != notinDetails) {
+			cond = cond.and(t2.field("id").notIn(notinDetails));
+		}
+		if (null != inDetails) {
+			cond = cond.and(t2.field("id").in(inDetails));
+		}
+		//入职日期
+		if(checkinTimeStart != null && checkinTimeEnd != null){
+			cond = cond.and(t2.field("check_in_time").gt(checkinTimeStart));
+			cond = cond.and(t2.field("check_in_time").lt(checkinTimeEnd));
+		}
+		//离职日期
+		if(dissmissTimeStart != null && dissmissTimeEnd != null){
+			cond = cond.and(t2.field("dismiss_time").gt(checkinTimeStart));
+			cond = cond.and(t2.field("dismiss_time").lt(checkinTimeEnd));
+		}
+		if (null != locator && null != locator.getAnchor())
+			cond = cond.and(t1.field("detail_id").lt(locator.getAnchor()));
+
+		List<Long> result = step.where(cond).groupBy(t2.field("id")).orderBy(t2.field("id").desc()).limit(pageSize).fetch(t2.field("id"));
+		LOGGER.debug("step " +step.where(cond).groupBy(t2.field("id")).orderBy(t2.field("id").desc()).limit(pageSize));
+//		if (null != locator)
+//			locator.setAnchor(null);
+
+//		if (result != null & result.size() >= pageSize) {
+//			result.remove(result.size() - 1);
+//			locator.setAnchor(result.get(result.size() - 1));
+//		}
+
+		return result;
+
+	}
+
+	@Override
 	public boolean checkIfLastOnNode(Integer namespaceId, Long organizationId, String contactToken, String path) {
 		DSLContext context = dbProvider.getDslContext(AccessSpec.readOnly());
 		SelectQuery<EhOrganizationMembersRecord> query = context.selectQuery(Tables.EH_ORGANIZATION_MEMBERS);
@@ -5925,4 +5982,18 @@ public class OrganizationProviderImpl implements OrganizationProvider {
 		query.addConditions(Tables.EH_ORGANIZATIONS.ID.eq(organizationId));
 		return query.fetch();
     }
+
+
+	@Override
+	public List<Organization> listPMOrganizations(Integer namespaceId) {
+		DSLContext context = dbProvider.getDslContext(AccessSpec.readOnly());
+		SelectQuery<EhOrganizationsRecord> query = context.selectQuery(Tables.EH_ORGANIZATIONS);
+		query.addConditions(Tables.EH_ORGANIZATIONS.STATUS.eq(OrganizationStatus.ACTIVE.getCode()));
+		query.addConditions(Tables.EH_ORGANIZATIONS.NAMESPACE_ID.eq(namespaceId));
+		query.addConditions(Tables.EH_ORGANIZATIONS.ORGANIZATION_TYPE.eq(OrganizationType.PM.getCode()));
+		query.addConditions(Tables.EH_ORGANIZATIONS.GROUP_TYPE.eq(OrganizationGroupType.ENTERPRISE.getCode()));
+		query.addConditions(Tables.EH_ORGANIZATIONS.PARENT_ID.eq(0L));
+		List<Organization> list = query.fetch().map(record -> ConvertHelper.convert(record, Organization.class));
+		return list;
+	}
 }

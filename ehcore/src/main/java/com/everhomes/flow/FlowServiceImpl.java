@@ -5139,6 +5139,15 @@ public class FlowServiceImpl implements FlowService {
     }
 
     @Override
+    public FlowCaseDetailDTOV2 getFlowCaseDetailByRefer(Long moduleId, FlowUserType flowUserType, Long userId, String referType, Long referId, boolean needFlowButton) {
+        FlowCase flowCase = flowCaseProvider.findFlowCaseByReferId(referId, referType, moduleId);
+        if (flowCase != null) {
+            return getFlowCaseDetailByIdV2(flowCase.getId(), userId, flowUserType, true, needFlowButton);
+        }
+        return null;
+    }
+
+    @Override
     public FlowGraphDTO createOrUpdateFlowGraph(CreateFlowGraphCommand cmd) {
         ValidatorUtil.validate(cmd);
 
@@ -5355,7 +5364,6 @@ public class FlowServiceImpl implements FlowService {
         dto.setEntities(entities);
         dto.setCustomObject(ctx.getGrantParentState().getFlowCase().getCustomObject());
 
-        // 后台管理界面不显示按钮
         if (needFlowButton) {
             // 按钮，在这里只要处理人的按钮，只有处理人会看到这个界面
             List<FlowButtonDTO> btnList = getFlowButtonDTOList(flowGraph, userId, flowUserTypes, checkProcessor, flowCase, nodes, laneList);
@@ -5776,10 +5784,9 @@ public class FlowServiceImpl implements FlowService {
     private List<FlowButtonDTO> getApplierButtonDTOList(FlowGraph flowGraph, FlowCase flowCase) {
         List<FlowButtonDTO> btnList = new ArrayList<>();
 
-        List<FlowCase> allFlowCase = getAllFlowCase(flowCase.getId());
+        List<FlowCase> processingFlowCase = getProcessingFlowCasesByAnyFlowCaseId(flowCase.getId());
 
-        List<Long> currentNodeIdList = allFlowCase.stream()
-                .filter(r -> !Objects.equals(r.getCurrentNodeId(), r.getEndNodeId()))
+        List<Long> currentNodeIdList = processingFlowCase.stream()
                 .map(FlowCase::getCurrentNodeId)
                 .distinct()
                 .collect(Collectors.toList());
@@ -5845,6 +5852,14 @@ public class FlowServiceImpl implements FlowService {
             }
         }
         return btnList;
+    }
+
+    @Override
+    public List<FlowCase> getProcessingFlowCasesByAnyFlowCaseId(Long flowCaseId) {
+        List<FlowCase> allFlowCase = getAllFlowCase(flowCaseId);
+        return allFlowCase.stream()
+                .filter(r -> !Objects.equals(r.getCurrentNodeId(), r.getEndNodeId()))
+                .collect(Collectors.toList());
     }
 
     private Long getRealCurrentNodeId(FlowCase flowCase, Long currentNodeId) {

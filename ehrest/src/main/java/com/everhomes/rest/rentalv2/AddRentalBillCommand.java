@@ -5,12 +5,12 @@ import java.util.List;
 import javax.validation.constraints.NotNull;
 
 import com.everhomes.discover.ItemType;
-import com.everhomes.rest.techpark.punch.PunchExceptionRequestDTO;
 import com.everhomes.util.StringHelper;
 
 /**
  * <ul>
  * <li>rentalSiteId：场所id</li>
+ * <li>resourceType: resourceType {@link RentalV2ResourceType}</li>
  * <li>rentalType：类型</li>
  * <li>rentalDate：预定日期</li>
  * <li>startTime：开始时间</li>
@@ -21,7 +21,8 @@ import com.everhomes.util.StringHelper;
  */
 public class AddRentalBillCommand {
 	@NotNull
-	private Long rentalSiteId;   
+	private Long rentalSiteId;
+	private String resourceType;
 	private Byte rentalType;
 	private Long rentalDate;
 //	@NotNull
@@ -36,6 +37,13 @@ public class AddRentalBillCommand {
 	private String sceneToken;
 	private String packageName;
 
+	public String getResourceType() {
+		return resourceType;
+	}
+
+	public void setResourceType(String resourceType) {
+		this.resourceType = resourceType;
+	}
 
 	public Byte getRentalType() {
 		return rentalType;

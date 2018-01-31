@@ -14,6 +14,7 @@ import com.everhomes.util.StringHelper;
  * <li>keyword: 关键字</li>
  * <li>buildingName: 楼栋名称</li>
  * <li>addressId: 门牌id</li>
+ * <li>creatorType: 来源类型{@link com.everhomes.rest.pmtask.PmtaskCreatorType}</li>
  * <li>pageAnchor: 分页瞄</li>
  * <li>pageSize: 每页条数</li>
  * <li>currentOrgId: 当前机构id</li>
@@ -30,6 +31,7 @@ public class SearchTasksCommand {
 	private String keyword;
 	private String buildingName;
 	private Long addressId;
+	private Byte creatorType;
 	private Long pageAnchor;
 	private Integer pageSize;
 
@@ -123,6 +125,14 @@ public class SearchTasksCommand {
 
 	public void setCurrentOrgId(Long currentOrgId) {
 		this.currentOrgId = currentOrgId;
+	}
+
+	public Byte getCreatorType() {
+		return creatorType;
+	}
+
+	public void setCreatorType(Byte creatorType) {
+		this.creatorType = creatorType;
 	}
 
 	public Long getCurrentCommunityId() {

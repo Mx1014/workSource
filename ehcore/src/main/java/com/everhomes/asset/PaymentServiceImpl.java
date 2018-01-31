@@ -55,6 +55,7 @@ public class PaymentServiceImpl implements PaymentService {
     private static final Logger LOGGER = LoggerFactory.getLogger(PaymentServiceImpl.class);
     @Override
     public ListPaymentBillResp listPaymentBill(ListPaymentBillCmd cmd) throws Exception {
+
         //权限校验
         userPrivilegeMgr.checkUserPrivilege(UserContext.currentUserId(), null, PrivilegeConstants.ASSET_DEAL_VIEW, PrivilegeConstants.ASSET_MODULE_ID, (byte)13, null, null, cmd.getCommunityId());
 

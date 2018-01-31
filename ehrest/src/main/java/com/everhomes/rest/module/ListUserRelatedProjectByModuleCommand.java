@@ -12,6 +12,7 @@ import javax.validation.constraints.NotNull;
  * <li>moduleId: 模块id</li>
  * <li>userId: 用户id</li>
  * <li>organizationId: 企业id</li>
+ * <li>communityFetchType：查询类型</li>
  * </ul>
  */
 public class ListUserRelatedProjectByModuleCommand {
@@ -31,6 +32,7 @@ public class ListUserRelatedProjectByModuleCommand {
     @NotNull
     private Long userId;
 
+    private String communityFetchType;
 
     public Long getModuleId() {
         return moduleId;
@@ -77,4 +79,11 @@ public class ListUserRelatedProjectByModuleCommand {
         return StringHelper.toJsonString(this);
     }
 
+    public String getCommunityFetchType() {
+        return communityFetchType;
+    }
+
+    public void setCommunityFetchType(String communityFetchType) {
+        this.communityFetchType = communityFetchType;
+    }
 }

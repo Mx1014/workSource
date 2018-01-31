@@ -615,7 +615,7 @@ public class ServiceModuleProviderImpl implements ServiceModuleProvider {
     @Override
     public Long getMaxActiveAppId() {
         DSLContext context = dbProvider.getDslContext(AccessSpec.readOnly());
-        return context.select(Tables.EH_REFLECTION_SERVICE_MODULE_APPS.ACTIVE_APP_ID.max()).fetchOne().value1();
+        return context.select(Tables.EH_REFLECTION_SERVICE_MODULE_APPS.ACTIVE_APP_ID.max()).from(Tables.EH_REFLECTION_SERVICE_MODULE_APPS).fetchOne().value1();
     }
 
     @Override

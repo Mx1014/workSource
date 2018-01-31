@@ -286,4 +286,6 @@ public interface UserService {
      */
     SystemInfoResponse updateUserBySystemInfo(SystemInfoCommand cmd,
             HttpServletRequest request, HttpServletResponse response);
+
+    SearchUserByIdentifierResponse searchUserByIdentifier(SearchUserByIdentifierCommand cmd);
 }

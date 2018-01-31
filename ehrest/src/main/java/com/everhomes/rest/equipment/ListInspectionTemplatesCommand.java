@@ -11,6 +11,7 @@ import javax.validation.constraints.NotNull;
  *  <li>targetId: 标准所属项目id</li>
  *  <li>targetType: 标准所属项目类型</li>
  *  <li>name: 模板名称</li>
+ *  <li>namespaceId:  namespaceId</li>
  * </ul>
  */
 public class ListInspectionTemplatesCommand {
@@ -26,6 +27,8 @@ public class ListInspectionTemplatesCommand {
 	private  String  targetType;
 	
 	private String name;
+
+	private Integer namespaceId;
 	
 	public Long getOwnerId() {
 		return ownerId;
@@ -65,6 +68,14 @@ public class ListInspectionTemplatesCommand {
 
 	public void setTargetType(String targetType) {
 		this.targetType = targetType;
+	}
+
+	public Integer getNamespaceId() {
+		return namespaceId;
+	}
+
+	public void setNamespaceId(Integer namespaceId) {
+		this.namespaceId = namespaceId;
 	}
 
 	@Override
