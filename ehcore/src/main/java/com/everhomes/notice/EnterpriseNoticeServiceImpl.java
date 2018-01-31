@@ -4,6 +4,7 @@ import com.everhomes.configuration.ConfigurationProvider;
 import com.everhomes.contentserver.ContentServerService;
 import com.everhomes.db.DbProvider;
 import com.everhomes.entity.EntityType;
+import com.everhomes.filemanagement.FileService;
 import com.everhomes.messaging.MessagingService;
 import com.everhomes.organization.*;
 import com.everhomes.rest.app.AppConstants;
@@ -57,6 +58,9 @@ public class EnterpriseNoticeServiceImpl implements EnterpriseNoticeService {
     @Autowired
     private ContentServerService contentServerService;
 
+    @Autowired
+    private FileService fileService;
+
     private ExecutorService bgThreadPool = Executors.newFixedThreadPool(1);
 
 
@@ -73,6 +77,7 @@ public class EnterpriseNoticeServiceImpl implements EnterpriseNoticeService {
         List<EnterpriseNoticeAttachment> attachments = enterpriseNoticeProvider.findEnterpriseNoticeAttachmentsByNoticeId(enterpriseNoticeId);
         List<EnterpriseNoticeReceiver> receivers = enterpriseNoticeProvider.findEnterpriseNoticeReceiversByNoticeId(enterpriseNoticeId);
         if (!CollectionUtils.isEmpty(attachments)) {
+            Map<String, String> fileIconUrlMap = fileService.getFileIconUrl();
             List<EnterpriseNoticeAttachmentDTO> enterpriseNoticeAttachmentDTOS = new ArrayList<>(attachments.size());
             attachments.forEach(enterpriseNoticeAttachment -> {
                 EnterpriseNoticeAttachmentDTO enterpriseNoticeAttachmentDTO = ConvertHelper.convert(enterpriseNoticeAttachment, EnterpriseNoticeAttachmentDTO.class);
@@ -80,8 +85,7 @@ public class EnterpriseNoticeServiceImpl implements EnterpriseNoticeService {
                 String contentUrl = getResourceUrlByUir(enterpriseNoticeAttachment.getContentUri(),
                         EntityType.USER.getCode(), enterpriseNoticeAttachment.getCreatorUid());
                 enterpriseNoticeAttachmentDTO.setContentUrl(contentUrl);
-                //TODO
-                enterpriseNoticeAttachmentDTO.setIconUrl("");
+                enterpriseNoticeAttachmentDTO.setIconUrl(fileIconUrlMap.get(enterpriseNoticeAttachment.getContentSuffix()));
                 enterpriseNoticeAttachmentDTOS.add(enterpriseNoticeAttachmentDTO);
             });
             enterpriseNoticeDTO.setAttachments(enterpriseNoticeAttachmentDTOS);
