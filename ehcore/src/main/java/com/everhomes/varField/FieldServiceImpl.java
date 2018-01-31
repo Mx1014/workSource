@@ -727,6 +727,36 @@ public class FieldServiceImpl implements FieldService {
                     setMutilRowDatas(fields,data,customerDepartureInfoDTOS.get(j),communityId,namespaceId,moduleName);
                 }
                 break;
+            case "税务信息":
+                ListCustomerTaxesCommand cmd13 = new ListCustomerTaxesCommand();
+                cmd13.setCommunityId(customerId);
+                cmd13.setCustomerType(customerType);
+                cmd13.setCommunityId(communityId);
+                cmd13.setNamespaceId(namespaceId);
+                cmd13.setOrgId(orgId);
+                LOGGER.info("税务信息 command"+cmd13);
+                List<CustomerTaxDTO> customerTaxDTOS = customerService.listCustomerTaxes(cmd13);
+                if(customerTaxDTOS == null) customerTaxDTOS = new ArrayList<>();
+                for(int j = 0; j < customerTaxDTOS.size(); j++){
+                    LOGGER.info("税务信息 "+j+":"+customerTaxDTOS.get(j));
+                    setMutilRowDatas(fields,data,customerTaxDTOS.get(j),communityId,namespaceId,moduleName);
+                }
+                break;
+            case "银行账号":
+                ListCustomerAccountsCommand cmd14 = new ListCustomerAccountsCommand();
+                cmd14.setCommunityId(customerId);
+                cmd14.setCustomerType(customerType);
+                cmd14.setCommunityId(communityId);
+                cmd14.setNamespaceId(namespaceId);
+                cmd14.setOrgId(orgId);
+                LOGGER.info("银行账号 command"+cmd14);
+                List<CustomerAccountDTO> customerAccountDTOs = customerService.listCustomerAccounts(cmd14);
+                if(customerAccountDTOs == null) customerAccountDTOs = new ArrayList<>();
+                for(int j = 0; j < customerAccountDTOs.size(); j++){
+                    LOGGER.info("银行账号 "+j+":"+customerAccountDTOs.get(j));
+                    setMutilRowDatas(fields,data,customerAccountDTOs.get(j),communityId,namespaceId,moduleName);
+                }
+                break;
         }
         return data;
     }
