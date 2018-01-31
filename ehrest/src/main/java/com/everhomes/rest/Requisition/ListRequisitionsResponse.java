@@ -11,7 +11,7 @@ import java.util.List;
 
 public class ListRequisitionsResponse {
     private Long nextPageAnchor;
-    private List<ListRequisitionsDTO> data;
+    private List<ListRequisitionsDTO> list;//这里如果命名为data，spring会序列化此项形成json，SerializationFeature.FAIL_ON_EMPTY_BEANS为true时会导致报无法写出json错误
 
     @Override
     public String toString() {
@@ -22,7 +22,11 @@ public class ListRequisitionsResponse {
         this.nextPageAnchor = nextPageAnchor;
     }
 
-    public void setData(List<ListRequisitionsDTO> data) {
-        this.data = data;
+    public List<ListRequisitionsDTO> getList() {
+        return list;
+    }
+
+    public void setList(List<ListRequisitionsDTO> list) {
+        this.list = list;
     }
 }

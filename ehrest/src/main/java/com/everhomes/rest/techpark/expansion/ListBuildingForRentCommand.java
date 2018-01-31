@@ -21,6 +21,7 @@ import java.math.BigDecimal;
  * <li>endRentAmount：结束金额</li>
  * <li>userId：查询业主发布的招租</li>
  * <li>organizationId：公司id</li>
+ * <li>houseResourceType：房源类型 {@link com.everhomes.rest.techpark.expansion.HouseResourceType}/li>
  * <li>issuerType：发布人类型  {@link com.everhomes.rest.techpark.expansion.LeaseIssuerType  NORMAL_USER：普通用户或公司，ORGANIZATION：物业公司}</li>
  * </ul>
  */
@@ -48,6 +49,7 @@ public class ListBuildingForRentCommand {
 	private Long userId;
 	private Long organizationId;
 	private String issuerType;
+	private String houseResourceType;
 
 	private Long categoryId;
 
@@ -164,6 +166,14 @@ public class ListBuildingForRentCommand {
 	}
 	public void setRentType(String rentType) {
 		this.rentType = rentType;
+	}
+
+	public String getHouseResourceType() {
+		return houseResourceType;
+	}
+
+	public void setHouseResourceType(String houseResourceType) {
+		this.houseResourceType = houseResourceType;
 	}
 
 	@Override
