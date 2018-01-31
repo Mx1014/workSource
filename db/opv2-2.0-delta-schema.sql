@@ -631,11 +631,11 @@ CREATE TABLE `eh_warehouse_suppliers`(
   `attachment_url` VARCHAR(2048) DEFAULT NULL COMMENT '附件地址',
   `create_time` DATETIME DEFAULT NOW(),
   `create_uid` BIGINT DEFAULT NULL,
-  `update_time` DATETIME DEFAULT now(),
+  `update_time` DATETIME DEFAULT NOW(),
   `update_uid` BIGINT DEFAULT NULL,
   `default_order` INTEGER DEFAULT 0,
   PRIMARY KEY (`id`)
-) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4;
+) ENGINE=INNODB DEFAULT CHARSET=utf8mb4;
 
 -- 采购管理schemas
 -- 采购单
@@ -656,11 +656,11 @@ CREATE TABLE `eh_warehouse_purchase_orders`(
   `approval_order_id` BIGINT DEFAULT NULL COMMENT '关联的审批单的id',
   `create_time` DATETIME DEFAULT NOW(),
   `create_uid` BIGINT DEFAULT NULL,
-  `update_time` DATETIME DEFAULT now(),
+  `update_time` DATETIME DEFAULT NOW(),
   `update_uid` BIGINT DEFAULT NULL,
   `default_order` INTEGER DEFAULT 0,
   PRIMARY KEY (`id`)
-) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4;
+) ENGINE=INNODB DEFAULT CHARSET=utf8mb4;
 
 -- 采购单物品表
 DROP TABLE IF EXISTS `eh_warehouse_purchase_items`;
@@ -675,11 +675,11 @@ CREATE TABLE `eh_warehouse_purchase_items`(
   `unit_price` DECIMAL(20,2) DEFAULT 0.00 COMMENT '单价',
   `create_time` DATETIME DEFAULT NOW(),
   `create_uid` BIGINT DEFAULT NULL,
-  `update_time` DATETIME DEFAULT now(),
+  `update_time` DATETIME DEFAULT NOW(),
   `update_uid` BIGINT DEFAULT NULL,
   `default_order` INTEGER DEFAULT 0,
   PRIMARY KEY (`id`)
-) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4;
+) ENGINE=INNODB DEFAULT CHARSET=utf8mb4;
 
 -- 为物品增加供应商字段
 ALTER TABLE `eh_warehouse_materials` ADD COLUMN `supplier_id` BIGINT DEFAULT NULL COMMENT '物品的供应商的主键id';
@@ -695,7 +695,7 @@ CREATE TABLE `eh_warehouse_orders`(
   `identity` VARCHAR(128) NOT NULL COMMENT '出入库单号',
   `executor_id` BIGINT DEFAULT NULL COMMENT '执行人id',
   `executor_name` VARCHAR(128) DEFAULT NULL COMMENT '执行人姓名',
-  `executor_time` DATETIME DEFAULT now() COMMENT '执行时间',
+  `executor_time` DATETIME DEFAULT NOW() COMMENT '执行时间',
   `service_type` TINYINT DEFAULT NULL COMMENT '服务类型，1. 普通入库,2.领用出库，3.采购入库',
   `community_id` BIGINT DEFAULT NULL COMMENT '园区id',
   `create_time` DATETIME DEFAULT NOW(),
@@ -705,7 +705,7 @@ CREATE TABLE `eh_warehouse_orders`(
   `default_order` INTEGER DEFAULT 0,
   PRIMARY KEY (`id`),
   KEY `i_service_type` (`service_type`) COMMENT '出入库状态得索引，用于搜索'
-) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4;
+) ENGINE=INNODB DEFAULT CHARSET=utf8mb4;
 
 -- 增加出入库记录关联出入库单的字段
 ALTER TABLE `eh_warehouse_stock_logs` ADD COLUMN `warehouse_order_id` BIGINT DEFAULT NULL COMMENT '关联的出入库单的id';
@@ -733,7 +733,7 @@ CREATE TABLE `eh_requisitions`(
   `update_uid` BIGINT DEFAULT NULL,
   `default_order` INTEGER DEFAULT 0,
   PRIMARY KEY (`id`)
-) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4;
+) ENGINE=INNODB DEFAULT CHARSET=utf8mb4;
 
 -- 请示单类型
 DROP TABLE IF EXISTS `eh_requisition_types`;
@@ -749,7 +749,7 @@ CREATE TABLE `eh_requisition_types`(
   `update_uid` BIGINT DEFAULT NULL,
   `default_order` INTEGER DEFAULT 0,
   PRIMARY KEY (`id`)
-) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4;
+) ENGINE=INNODB DEFAULT CHARSET=utf8mb4;
 
 
 
@@ -832,6 +832,7 @@ CREATE TABLE `eh_salary_entity_categories` (
 DROP TABLE IF EXISTS eh_salary_group_entities;
 CREATE TABLE `eh_salary_group_entities` (
   `id` BIGINT COMMENT 'id of the record', 
+  `default_id` BIGINT COMMENT 'id of the eh_salary_default_entities', 
   `owner_type` VARCHAR(32) COMMENT 'organization',
   `owner_id` BIGINT COMMENT '属于哪一个分公司的',
   `organization_id` BIGINT COMMENT '属于哪一个总公司的', 
@@ -882,8 +883,34 @@ CREATE TABLE `eh_salary_employee_origin_vals` (
   PRIMARY KEY (`id`)
 ) ENGINE=INNODB DEFAULT CHARSET=utf8mb4 ;
 
-DROP TABLE IF EXISTS eh_salary_groups;
+
 -- 薪酬批次每期的数据 
+DROP TABLE IF EXISTS eh_salary_groups;
+CREATE TABLE `eh_salary_groups` (
+  `id` BIGINT COMMENT 'id of the record', 
+  `owner_type` VARCHAR(32) COMMENT 'organization',
+  `owner_id` BIGINT COMMENT '属于哪一个分公司的',
+  `organization_id` BIGINT COMMENT '属于哪一个总公司的',
+  `salary_period` VARCHAR(8) COMMENT 'example:201705', 
+  `creator_uid` BIGINT COMMENT'创建者',
+  `create_time` DATETIME,  
+  PRIMARY KEY (`id`)
+) ENGINE=INNODB DEFAULT CHARSET=utf8mb4 ;
+
+-- 薪酬批次归档数据
+-- DROP TABLE IF EXISTS eh_salary_groups_files;
+CREATE TABLE `eh_salary_groups_files` (
+  `id` BIGINT COMMENT 'id of the record', 
+  `owner_type` VARCHAR(32) COMMENT 'organization',
+  `owner_id` BIGINT COMMENT '属于哪一个分公司的',
+  `organization_id` BIGINT COMMENT '属于哪一个总公司的',
+  `salary_period` VARCHAR(8) COMMENT 'example:201705', 
+  `creator_uid` BIGINT COMMENT'创建者',
+  `create_time` DATETIME,  
+  `filer_uid` BIGINT COMMENT'创建者',
+  `file_time` DATETIME,  
+  PRIMARY KEY (`id`)
+) ENGINE=INNODB DEFAULT CHARSET=utf8mb4 ;
 
 -- 薪酬批次每个人的每期数据
 DROP TABLE IF EXISTS eh_salary_employees;
@@ -902,6 +929,29 @@ CREATE TABLE `eh_salary_employees` (
   `creator_uid` BIGINT COMMENT'人员id',
   `create_time` DATETIME, 
   `status` TINYINT COMMENT '状态0-正常 1-实发合计为负  2-未定薪',
+  PRIMARY KEY (`id`)
+) ENGINE=INNODB DEFAULT CHARSET=utf8mb4 ;
+
+
+-- 薪酬批次每个人的归档数据
+DROP TABLE IF EXISTS eh_salary_employees_files;
+CREATE TABLE `eh_salary_employees_files` (
+  `id` BIGINT COMMENT 'id of the record', 
+  `owner_type` VARCHAR(32) COMMENT 'organization',
+  `owner_id` BIGINT COMMENT '属于哪一个分公司的',
+  `organization_id` BIGINT COMMENT '属于哪一个总公司的',
+  `namespace_id` INT ,
+  `salary_period` VARCHAR(8) COMMENT 'example:201705',
+  `user_id` BIGINT ,
+  `user_detail_id` BIGINT , 
+  `regular_salary` DECIMAL (10, 2) COMMENT '固定工资合计',
+  `should_pay_salary` DECIMAL (10, 2) COMMENT '应发工资合计',
+  `real_pay_salary` DECIMAL (10, 2) COMMENT '实发工资合计',
+  `creator_uid` BIGINT COMMENT'人员id',
+  `create_time` DATETIME, 
+  `status` TINYINT COMMENT '状态0-正常 1-实发合计为负  2-未定薪',
+  `filer_uid` BIGINT COMMENT'创建者',
+  `file_time` DATETIME,  
   PRIMARY KEY (`id`)
 ) ENGINE=INNODB DEFAULT CHARSET=utf8mb4 ;
 

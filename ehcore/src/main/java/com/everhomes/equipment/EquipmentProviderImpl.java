@@ -71,7 +71,9 @@ import com.everhomes.server.schema.tables.pojos.EhEquipmentInspectionEquipmentSt
 import com.everhomes.server.schema.tables.pojos.EhEquipmentInspectionEquipments;
 import com.everhomes.server.schema.tables.pojos.EhEquipmentInspectionItemResults;
 import com.everhomes.server.schema.tables.pojos.EhEquipmentInspectionItems;
+import com.everhomes.server.schema.tables.pojos.EhEquipmentInspectionPlanGroupMap;
 import com.everhomes.server.schema.tables.pojos.EhEquipmentInspectionPlans;
+import com.everhomes.server.schema.tables.pojos.EhEquipmentInspectionReviewDate;
 import com.everhomes.server.schema.tables.pojos.EhEquipmentInspectionStandardGroupMap;
 import com.everhomes.server.schema.tables.pojos.EhEquipmentInspectionStandards;
 import com.everhomes.server.schema.tables.pojos.EhEquipmentInspectionTaskAttachments;
@@ -1524,7 +1526,7 @@ public class EquipmentProviderImpl implements EquipmentProvider {
 
     @Override
     public void createEquipmentPlanMaps(EquipmentInspectionEquipmentPlanMap map) {
-        Long id = this.sequenceProvider.getNextSequence(NameMapper.getSequenceDomainFromTablePojo(EquipmentInspectionEquipmentPlanMap.class));
+        Long id = this.sequenceProvider.getNextSequence(NameMapper.getSequenceDomainFromTablePojo(EhEquipmentInspectionEquipmentPlanMap.class));
         map.setId(id);
         DSLContext context = this.dbProvider.getDslContext(AccessSpec.readWrite());
         EhEquipmentInspectionEquipmentPlanMapDao dao = new EhEquipmentInspectionEquipmentPlanMapDao(context.configuration());
@@ -2848,11 +2850,14 @@ public class EquipmentProviderImpl implements EquipmentProvider {
 
     @Override
     public void createEquipmentInspectionPlanGroupMap(EquipmentInspectionPlanGroupMap map) {
-        Long id = this.sequenceProvider.getNextSequence(NameMapper.getSequenceDomainFromTablePojo(EquipmentInspectionPlanGroupMap.class));
-        map.setId(id);
         DSLContext context = this.dbProvider.getDslContext(AccessSpec.readWrite());
+        Long id = this.sequenceProvider.getNextSequence(NameMapper.getSequenceDomainFromTablePojo(EhEquipmentInspectionPlanGroupMap.class));
+        LOGGER.info("create EquipmentInspectionPlanGroupMap id :{}"+id);
+        map.setId(id);
+        map.setCreateTime(new Timestamp(DateHelper.currentGMTTime().getTime()));
         EhEquipmentInspectionPlanGroupMapDao dao = new EhEquipmentInspectionPlanGroupMapDao(context.configuration());
         dao.insert(map);
+        DaoHelper.publishDaoAction(DaoAction.CREATE, EhEquipmentInspectionPlanGroupMap.class, null);
     }
 
     @Override
@@ -2955,7 +2960,7 @@ public class EquipmentProviderImpl implements EquipmentProvider {
 
     @Override
     public void createReviewExpireDays(EquipmentInspectionReviewDate reviewDate) {
-        Long id = sequenceProvider.getNextSequence(NameMapper.getSequenceDomainFromTablePojo(EquipmentInspectionReviewDate.class));
+        Long id = sequenceProvider.getNextSequence(NameMapper.getSequenceDomainFromTablePojo(EhEquipmentInspectionReviewDate.class));
         DSLContext context = this.dbProvider.getDslContext(AccessSpec.readWrite());
         EhEquipmentInspectionReviewDateDao dateDao = new EhEquipmentInspectionReviewDateDao(context.configuration());
         reviewDate.setId(id);
