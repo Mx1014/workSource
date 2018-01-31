@@ -2798,7 +2798,7 @@ public class SalaryServiceImpl implements SalaryService {
         if (salary.compareTo(new BigDecimal(3500)) < 0) {
             muni = new BigDecimal(3500).subtract(salary);
         }
-        BigDecimal taxBase = bonus.subtract(muni).divide(new BigDecimal(12));
+        BigDecimal taxBase = bonus.subtract(muni).divide(new BigDecimal(12),2,BigDecimal.ROUND_HALF_EVEN);
         //这里要加一个3500的基数计算税
         return calculateSalaryTax(taxBase.add(new BigDecimal(3500)));
     }
