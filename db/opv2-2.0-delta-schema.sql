@@ -935,30 +935,75 @@ ALTER TABLE `eh_payment_applications` ADD COLUMN `application_number`  VARCHAR(3
 ALTER TABLE `eh_lease_promotions`
 ADD COLUMN `house_resource_type` VARCHAR(256) NULL COMMENT '房源类型  rentHouse 出租房源   sellHouse 出售房源' AFTER `category_id`;
 
--- contractbug schema by wentian
 
--- 账单item关联滞纳金
-ALTER TABLE `eh_payment_bill_items` ADD COLUMN `late_fine_standard_id` BIGINT DEFAULT NULL COMMENT '滞纳金标准id';
--- 滞纳金表
-DROP TABLE IF EXISTS `eh_payment_late_fine`;
-CREATE TABLE `eh_payment_late_fine`(
-  `id` BIGINT NOT NULL COMMENT 'primary key',
-  `name` VARCHAR(20) COMMENT '滞纳金名称',
-  `amount` DECIMAL(10,2) NOT NULL DEFAULT '0.00' COMMENT 'amount of overdue payment',
-  `bill_id` BIGINT NOT NULL COMMENT 'the id of the corresponding bill, one to one',
-  `bill_item_id` BIGINT NOT NULL COMMENT 'the id of the corresponding bill item id, one to one',
-  `create_time` DATETIME DEFAULT NOW(),
-  `upate_time` DATETIME DEFAULT NOW(),
-  `update_uid` BIGINT DEFAULT NULL,
-  `namespace_id` INTEGER DEFAULT NULL COMMENT 'location info, for possible statistics later',
-  `community_id` BIGINT DEFAULT NULL,
-  `customer_id` BIGINT NOT NULL COMMENT 'allows searching taking advantage of it',
-  `customer_type` VARCHAR(20) NOT NULL COMMENT 'break of user info benefits',
-  PRIMARY KEY (`id`)
-) ENGINE = INNODB DEFAULT CHARSET = utf8mb4;
 
--- 滞纳金变量 by wentian
-SET @var_id = (SELECT max(`id`) from `eh_payment_variables`);
-INSERT INTO `eh_payment_variables` (`id`, `charging_standard_id`, `charging_items_id`, `name`, `creator_uid`, `create_time`, `operator_uid`, `update_time`, `identifier`) VALUES (@var_id:=@var_id+1, NULL, '6', '欠费', '0', '2017-10-16 09:31:00', NULL, '2017-10-16 09:31:00', 'qf');
 
--- end of contractbug
+-- 企业公告1.0
+-- 企业公告表
+DROP TABLE IF EXISTS `eh_enterprise_notices`;
+CREATE TABLE `eh_enterprise_notices` (
+  `id` BIGINT NOT NULL COMMENT 'id of the record',
+  `namespace_id` INTEGER NOT NULL DEFAULT 0,
+  `owner_type` VARCHAR(64) NOT NULL COMMENT '默认EhOrganizations',
+  `owner_id` BIGINT NOT NULL,
+  `title` VARCHAR(256) NOT NULL COMMENT '企业公告标题',
+  `summary` VARCHAR(512) COMMENT '摘要',
+  `content_type` VARCHAR(32),
+  `content` TEXT COMMENT '公告正文',
+  `publisher` VARCHAR(256) COMMENT '公告发布者',
+  `secret_flag` TINYINT NOT NULL DEFAULT 0 COMMENT '状态 : 0-(PUBLIC)公开, 1-(PRIVATE)保密',
+  `status` TINYINT NOT NULL DEFAULT 1 COMMENT '状态 : 0-(DELETED)已删除, 1-(DRAFT)草稿, 2-(ACTIVE)已发送, 3-(INACTIVE)已撤销',
+  `creator_uid` BIGINT,
+  `create_time` DATETIME,
+  `update_uid` BIGINT,
+  `update_time` DATETIME,
+  `delete_uid` BIGINT,
+  `delete_time` DATETIME,
+
+  PRIMARY KEY (`id`),
+  KEY `i_notices_namespace_id`(`namespace_id`),
+  KEY `i_notices_create_time`(`create_time`)
+) ENGINE=INNODB DEFAULT CHARSET=UTF8MB4;
+
+-- 企业公告附件表
+DROP TABLE IF EXISTS `eh_enterprise_notice_attachments`;
+CREATE TABLE `eh_enterprise_notice_attachments` (
+  `id` BIGINT NOT NULL COMMENT 'id of the record',
+  `namespace_id` INTEGER NOT NULL DEFAULT 0,
+  `notice_id` BIGINT NOT NULL COMMENT 'key of the table eh_enterprise_notices',
+  `content_name` VARCHAR(256) NOT NULL COMMENT 'the name of the content',
+  `content_suffix` VARCHAR(64) COMMENT 'the suffix of the file',
+  `size` INT NOT NULL DEFAULT 0 COMMENT 'the size of the content',
+  `content_type` VARCHAR(32) COMMENT 'attachment object content type',
+  `content_uri` VARCHAR(1024) COMMENT 'attachment object link info on storage',
+  `status` TINYINT NOT NULL DEFAULT 1 COMMENT '0-invalid, 1-valid',
+  `creator_uid` BIGINT,
+  `create_time` DATETIME,
+  `update_uid` BIGINT,
+  `update_time` DATETIME,
+  PRIMARY KEY (`id`),
+  KEY `i_notice_attachment_notice_id`(`notice_id`)
+) ENGINE=INNODB DEFAULT CHARSET=UTF8MB4;
+
+
+-- 企业公告发送信息表
+DROP TABLE IF EXISTS `eh_enterprise_notice_receivers`;
+CREATE TABLE `eh_enterprise_notice_receivers` (
+  `id` BIGINT NOT NULL COMMENT 'id of the record',
+  `namespace_id` INTEGER NOT NULL DEFAULT 0,
+  `notice_id` BIGINT NOT NULL COMMENT 'key of table the eh_enterprise_notices',
+  `receiver_type` VARCHAR(64) NOT NULL COMMENT 'DEPARTMENT OR MEMBER',
+  `receiver_id` BIGINT NOT NULL,
+  `name` VARCHAR(128),
+  `status` TINYINT NOT NULL DEFAULT 1 COMMENT '0-invalid, 1-valid',
+  `creator_uid` BIGINT,
+  `create_time` DATETIME,
+  `update_uid` BIGINT,
+  `update_time` DATETIME,
+  PRIMARY KEY (`id`),
+  KEY `i_notice_receivers_notice_id`(`notice_id`),
+  KEY `i_notice_receivers_receiver_id`(`receiver_type`,`receiver_id`)
+) ENGINE=INNODB DEFAULT CHARSET=UTF8MB4;
+
+--  add by zhiwei.zhang end
+
