@@ -2678,13 +2678,13 @@ public class SalaryServiceImpl implements SalaryService {
             }
         }
         salaryEmployeeOriginValProvider.deleteSalaryEmployeeOriginValNotInList(groupEntityIds, detailId);
-        calculateEmployee(ownerId, detailId, vals,organizationId);
+        calculateEmployee(ownerId, detailId, vals, organizationId);
     }
 
     /**
      * 计算某人的EhSalaryEmployee
      */
-    private void calculateEmployee(Long ownerId, Long detailId, List<SalaryEmployeeOriginVal> vals,Long organizationId) {
+    private void calculateEmployee(Long ownerId, Long detailId, List<SalaryEmployeeOriginVal> vals, Long organizationId) {
 
         String month = findSalaryMonth(ownerId);
         SalaryEmployee employee = salaryEmployeeProvider.findSalaryEmployeeByDetailId(ownerId, detailId);
@@ -2727,35 +2727,35 @@ public class SalaryServiceImpl implements SalaryService {
                         //工资
                         if (SalaryEntityType.COST == SalaryEntityType.fromCode(val.getType())) {
                             //减
-                            salary.subtract(value);
+                            salary = salary.subtract(value);
                         } else if (SalaryEntityType.GRANT == SalaryEntityType.fromCode(val.getType())) {
                             //增
-                            salary.add(value);
+                            salary = salary.add(value);
                         }
                     } else if (SalaryTaxPolicy.BONUS == SalaryTaxPolicy.fromCode(val.getTaxPolicy())) {
                         //年终
                         if (SalaryEntityType.COST == SalaryEntityType.fromCode(val.getType())) {
                             //减
-                            bonus.subtract(value);
+                            bonus = bonus.subtract(value);
                         } else {
                             //增
-                            bonus.add(value);
+                            bonus = bonus.add(value);
                         }
                     }
                 } else if (NormalFlag.YES == NormalFlag.fromCode(val.getGrantPolicy())) {
                     //税后的
                     if (SalaryEntityType.COST == SalaryEntityType.fromCode(val.getType())) {
                         //减
-                        afterTax.subtract(value);
+                        afterTax = afterTax.subtract(value);
                     } else if (SalaryEntityType.GRANT == SalaryEntityType.fromCode(val.getType())) {
                         //增
-                        afterTax.add(value);
+                        afterTax = afterTax.add(value);
                     }
                 }
             }
             //累加完了开始计税
             BigDecimal salaryTax = calculateSalaryTax(salary);
-            BigDecimal bonusTax = calculateBonusTax(bonus,salaryTax);
+            BigDecimal bonusTax = calculateBonusTax(bonus, salaryTax);
             //保存计税
             SalaryGroupEntity groupEntity = salaryGroupEntityProvider.findSalaryGroupEntityByOrgANdDefaultId(ownerId, SalaryConstants.ENTITY_ID_SALARYTAX);
             if (null == groupEntity) {
@@ -2789,14 +2789,14 @@ public class SalaryServiceImpl implements SalaryService {
             SalaryEmployeeOriginVal bonusVal = processSalaryEmployeeOriginVal(groupEntity, detailId, bonusTax.toString());
             salaryEmployeeOriginValProvider.createSalaryEmployeeOriginVal(bonusVal);
             realPay = shouldPay.subtract(salaryTax).subtract(bonusTax).add(afterTax);
-            LOGGER.debug("应付{},工资{},年终{},工资税{},年终税{},实付{}",shouldPay,salary,bonus,salaryTax,bonusTax,realPay);
+            LOGGER.debug("应付{},工资{},年终{},工资税{},年终税{},实付{}", shouldPay, salary, bonus, salaryTax, bonusTax, realPay);
         }
         employee.setRegularSalary(regular);
         employee.setShouldPaySalary(shouldPay);
         employee.setRealPaySalary(realPay);
         if (employee.getId() == null) {
             salaryEmployeeProvider.createSalaryEmployee(employee);
-        }else{
+        } else {
             salaryEmployeeProvider.updateSalaryEmployee(employee);
         }
 
@@ -2818,7 +2818,7 @@ public class SalaryServiceImpl implements SalaryService {
         if (salary.compareTo(new BigDecimal(3500)) < 0) {
             muni = new BigDecimal(3500).subtract(salary);
         }
-        BigDecimal taxBase = bonus.subtract(muni).divide(new BigDecimal(12),2,BigDecimal.ROUND_HALF_EVEN);
+        BigDecimal taxBase = bonus.subtract(muni).divide(new BigDecimal(12), 2, BigDecimal.ROUND_HALF_EVEN);
         //这里要加一个3500的基数计算税
         return calculateSalaryTax(taxBase.add(new BigDecimal(3500)));
     }
