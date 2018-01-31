@@ -2651,15 +2651,19 @@ public class SalaryServiceImpl implements SalaryService {
         List<SalaryGroupEntity> groupEntities = salaryGroupEntityProvider.listSalaryGroupEntityByOrgId(organizationId);
         List<String> titleList = new ArrayList<String>(titleMap.values());
         if (!"手机".equals(titleList.get(0))) {
+            LOGGER.error("第一列不是手机而是"+titleList.get(0));
             return ImportFileErrorType.TITLE_ERROE.getCode();
         }
         if (!"姓名".equals(titleList.get(1))) {
+            LOGGER.error("第2列不是姓名而是"+titleList.get(1));
+
             return ImportFileErrorType.TITLE_ERROE.getCode();
         }
         if (null != groupEntities) {
             for (int i = 0; i < groupEntities.size(); i++) {
                 try {
-                    if (!groupEntities.get(i).equals(titleList.get(i + 2))) {
+                    if (!groupEntities.get(i).getName().equals(titleList.get(i + 2))) {
+                        LOGGER.error("第{}列不是{}而是{}",(i+1),groupEntities.get(i).getName(),titleList.get(i));
                         return ImportFileErrorType.TITLE_ERROE.getCode();
                     }
                 } catch (Exception e) {
@@ -2734,14 +2738,16 @@ public class SalaryServiceImpl implements SalaryService {
             e.printStackTrace();
         }
         // 设置response的Header
-        OutputStream outputStream = new BufferedOutputStream(out);
+//        OutputStream outputStream = new ByteArrayOutputStream(out);
 
-        return outputStream;
+        return out;
     }
 
     @Override
     public GetSalaryGroupStatusResponse getSalaryGroupStatus(GetSalaryGroupStatusCommand cmd) {
-        return null;
+        GetSalaryGroupStatusResponse response = new GetSalaryGroupStatusResponse();
+//        response.set
+        return response;
     }
 
     @Override
