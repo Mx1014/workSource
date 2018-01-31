@@ -14,7 +14,7 @@ import com.everhomes.util.StringHelper;
  */
 public class ListRequisitionTypesDTO {
     private Long id;
-    private Long name;
+    private String name;
 
     public Long getId() {
         return id;
@@ -24,11 +24,11 @@ public class ListRequisitionTypesDTO {
         this.id = id;
     }
 
-    public Long getName() {
+    public String getName() {
         return name;
     }
 
-    public void setName(Long name) {
+    public void setName(String name) {
         this.name = name;
     }
 

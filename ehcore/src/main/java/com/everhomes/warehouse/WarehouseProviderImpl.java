@@ -9,6 +9,7 @@ import com.everhomes.listing.CrossShardListingLocator;
 import com.everhomes.naming.NameMapper;
 import com.everhomes.rest.warehouse.DeliveryFlag;
 import com.everhomes.rest.warehouse.Status;
+import com.everhomes.rest.warehouse.WarehouseStockOrderDTO;
 import com.everhomes.sequence.SequenceProvider;
 import com.everhomes.server.schema.Tables;
 import com.everhomes.server.schema.tables.daos.*;
@@ -20,15 +21,18 @@ import com.everhomes.user.UserContext;
 import com.everhomes.util.ConvertHelper;
 import com.everhomes.util.DateHelper;
 import com.everhomes.util.IterationMapReduceCallback;
+import freemarker.template.SimpleDate;
 import org.jooq.DSLContext;
 import org.jooq.Record;
 import org.jooq.SelectQuery;
+import org.jooq.Table;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
 
 import java.sql.Timestamp;
+import java.text.SimpleDateFormat;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Set;
@@ -536,6 +540,80 @@ public class WarehouseProviderImpl implements WarehouseProvider {
         query.addFrom(Tables.EH_WEB_MENUS);
         query.addConditions(Tables.EH_WEB_MENUS.ID.eq(WarehouseMenuIds.WAREHOUSE_MANAGEMENT));
         return query.fetchOne(Tables.EH_WEB_MENUS.NAME);
+    }
+
+    @Override
+    public List<WarehouseStockOrderDTO> listWarehouseStockOrders(String executor, Integer namespaceId, String ownerType, Long ownerId, Byte serviceType, Long pageAnchor, Integer pageSize) {
+        List<WarehouseStockOrderDTO> list = new ArrayList<>();
+        DSLContext context = dbProvider.getDslContext(AccessSpec.readOnly());
+        SelectQuery<Record> query = context.selectQuery();
+        query.addFrom(Tables.EH_WAREHOUSE_ORDERS);
+        if(executor!=null){
+            query.addConditions(Tables.EH_WAREHOUSE_ORDERS.EXECUTOR_NAME.eq(executor));
+        }
+        if(serviceType!=null){
+            query.addConditions(Tables.EH_WAREHOUSE_ORDERS.SERVICE_TYPE.eq(serviceType));
+        }
+        query.addConditions(Tables.EH_WAREHOUSE_ORDERS.OWNER_TYPE.eq(ownerType));
+        query.addConditions(Tables.EH_WAREHOUSE_ORDERS.OWNER_ID.eq(ownerId));
+        query.addConditions(Tables.EH_WAREHOUSE_ORDERS.NAMESPACE_ID.eq(namespaceId));
+        query.addLimit(pageAnchor.intValue(),pageSize);
+        SimpleDateFormat sdf = new SimpleDateFormat("yyyy-MM-dd");
+        query.fetch()
+                .forEach(r ->{
+                    WarehouseStockOrderDTO dto = new WarehouseStockOrderDTO();
+                    dto.setExecutionTime(sdf.format(r.getValue(Tables.EH_WAREHOUSE_ORDERS.EXECUTOR_TIME)));
+                    dto.setExecutor(r.getValue(Tables.EH_WAREHOUSE_ORDERS.EXECUTOR_NAME));
+                    dto.setId(r.getValue(Tables.EH_WAREHOUSE_ORDERS.ID));
+                    dto.setIdentity(r.getValue(Tables.EH_WAREHOUSE_ORDERS.IDENTITY));
+                    dto.setServiceType(r.getValue(Tables.EH_WAREHOUSE_ORDERS.SERVICE_TYPE));
+                    list.add(dto);
+                });
+        return list;
+    }
+
+    @Override
+    public WarehouseOrder findWarehouseOrderById(Long id) {
+        DSLContext context = this.dbProvider.getDslContext(AccessSpec.readOnly());
+        return context.selectFrom(Tables.EH_WAREHOUSE_ORDERS).where(Tables.EH_WAREHOUSE_ORDERS.ID.eq(id))
+                .fetchOneInto(WarehouseOrder.class);
+    }
+
+    @Override
+    public void insertWarehouseOrder(WarehouseOrder order) {
+        DSLContext context = this.dbProvider.getDslContext(AccessSpec.readWrite());
+        EhWarehouseOrdersDao dao = new EhWarehouseOrdersDao(context.configuration());
+        dao.insert(order);
+    }
+
+    @Override
+    public void updateWarehouseOrder(WarehouseOrder order) {
+        DSLContext context = this.dbProvider.getDslContext(AccessSpec.readWrite());
+        EhWarehouseOrdersDao dao = new EhWarehouseOrdersDao(context.configuration());
+        dao.update(order);
+    }
+
+    @Override
+    public void deleteWarehouseStockLogs(Long id) {
+        DSLContext context = this.dbProvider.getDslContext(AccessSpec.readWrite());
+        context.delete(Tables.EH_WAREHOUSE_STOCK_LOGS)
+                .where(Tables.EH_WAREHOUSE_STOCK_LOGS.WAREHOUSE_ORDER_ID.eq(id))
+                .execute();
+    }
+
+    @Override
+    public void insertWarehouseStockLogs(List<EhWarehouseStockLogs> list) {
+        DSLContext context = this.dbProvider.getDslContext(AccessSpec.readWrite());
+        EhWarehouseStockLogsDao dao = new EhWarehouseStockLogsDao(context.configuration());
+        dao.insert(list);
+    }
+
+    @Override
+    public void deleteWarehouseOrderById(Long id) {
+        DSLContext context = this.dbProvider.getDslContext(AccessSpec.readWrite());
+        context.delete(Tables.EH_WAREHOUSE_ORDERS)
+                .where(Tables.EH_WAREHOUSE_ORDERS.ID.eq(id))
+                .execute();
     }
 
     @Override

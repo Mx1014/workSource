@@ -674,6 +674,7 @@ public class WarehouseController extends ControllerBase {
     @RequestMapping("createOrUpdateWarehouseEntryOrder")
     @RestReturn(value=String.class)
     public RestResponse createOrUpdateWarehouseEntryOrder(CreateOrUpdateWarehouseEntryOrderCommand cmd) {
+        warehouseService.createOrUpdateWarehouseEntryOrder(cmd);
         RestResponse res = new RestResponse();
         res.setErrorCode(ErrorCodes.SUCCESS);
         res.setErrorDescription("OK");
@@ -687,6 +688,7 @@ public class WarehouseController extends ControllerBase {
     @RequestMapping("listWarehouseStockOrders")
     @RestReturn(value=ListWarehouseStockOrdersResponse.class)
     public RestResponse listWarehouseStockOrders(ListWarehouseStockOrdersCommand cmd) {
+        ListWarehouseStockOrdersResponse response = warehouseService.listWarehouseStockOrders(cmd);
         RestResponse res = new RestResponse();
         res.setErrorCode(ErrorCodes.SUCCESS);
         res.setErrorDescription("OK");
@@ -700,6 +702,7 @@ public class WarehouseController extends ControllerBase {
     @RequestMapping("deleteWarehouseStockOrder")
     @RestReturn(value=String.class)
     public RestResponse deleteWarehouseStockOrder(DeleteWarehouseStockOrderCommand cmd) {
+        warehouseService.deleteWarehouseStockOrder(cmd.getId());
         RestResponse res = new RestResponse();
         res.setErrorCode(ErrorCodes.SUCCESS);
         res.setErrorDescription("OK");

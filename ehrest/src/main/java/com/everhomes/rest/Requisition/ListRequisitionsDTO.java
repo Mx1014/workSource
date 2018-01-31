@@ -14,7 +14,7 @@ import com.everhomes.util.StringHelper;
  * <li>applicantDepartment: 请示人部门</li>
  * <li>applicantTime: 请示时间</li>
  * <li>type: 请示类型</li>
- * <li>status: 审批状态</li>
+ * <li>status: 审批状态,审批状态，1:处理中；2:已完成; 3:已取消</li>
  * </ul>
  */
 public class ListRequisitionsDTO {
@@ -24,7 +24,7 @@ public class ListRequisitionsDTO {
     private String applicantDepartment;
     private String applicantTime;
     private String type;
-    private String status;
+    private Byte status;
 
     @Override
     public String toString() {
@@ -79,11 +79,11 @@ public class ListRequisitionsDTO {
         this.type = type;
     }
 
-    public String getStatus() {
+    public Byte getStatus() {
         return status;
     }
 
-    public void setStatus(String status) {
+    public void setStatus(Byte status) {
         this.status = status;
     }
 }
