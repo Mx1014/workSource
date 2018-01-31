@@ -62,9 +62,11 @@ import com.everhomes.msgbox.MessageBoxProvider;
 import com.everhomes.namespace.*;
 import com.everhomes.naming.NameMapper;
 import com.everhomes.news.NewsService;
+import com.everhomes.openapi.FunctionCardHandler;
 import com.everhomes.organization.*;
 import com.everhomes.organization.pm.PropertyMgrService;
 import com.everhomes.point.UserPointService;
+import com.everhomes.qrcode.QRCodeService;
 import com.everhomes.region.Region;
 import com.everhomes.region.RegionProvider;
 import com.everhomes.rest.acl.ListServiceModuleAdministratorsCommand;
@@ -73,6 +75,7 @@ import com.everhomes.rest.app.AppConstants;
 import com.everhomes.rest.asset.TargetDTO;
 import com.everhomes.rest.business.ShopDTO;
 import com.everhomes.rest.community.CommunityType;
+import com.everhomes.rest.contentserver.CsFileLocationDTO;
 import com.everhomes.rest.energy.util.ParamErrorCodes;
 import com.everhomes.rest.family.FamilyDTO;
 import com.everhomes.rest.family.FamilyMemberFullDTO;
@@ -85,11 +88,14 @@ import com.everhomes.rest.launchpad.LaunchPadItemDTO;
 import com.everhomes.rest.link.RichLinkDTO;
 import com.everhomes.rest.messaging.*;
 import com.everhomes.rest.namespace.*;
+import com.everhomes.rest.openapi.FunctionCardDto;
 import com.everhomes.rest.organization.*;
 import com.everhomes.rest.point.AddUserPointCommand;
 import com.everhomes.rest.point.GetUserTreasureCommand;
 import com.everhomes.rest.point.GetUserTreasureResponse;
 import com.everhomes.rest.point.PointType;
+import com.everhomes.rest.qrcode.NewQRCodeCommand;
+import com.everhomes.rest.qrcode.QRCodeDTO;
 import com.everhomes.rest.search.SearchContentType;
 import com.everhomes.rest.sms.SmsTemplateCode;
 import com.everhomes.rest.ui.organization.SetCurrentCommunityForSceneCommand;
@@ -119,6 +125,7 @@ import org.springframework.data.redis.serializer.StringRedisSerializer;
 import org.springframework.stereotype.Component;
 import org.springframework.transaction.TransactionStatus;
 import org.springframework.util.CollectionUtils;
+import org.springframework.web.context.request.async.DeferredResult;
 
 import javax.annotation.PostConstruct;
 import javax.servlet.http.Cookie;
@@ -130,6 +137,7 @@ import javax.validation.Validator;
 import javax.validation.constraints.Size;
 import javax.validation.metadata.ConstraintDescriptor;
 import java.io.UnsupportedEncodingException;
+import java.net.URLDecoder;
 import java.net.URLEncoder;
 import java.nio.charset.Charset;
 import java.sql.Timestamp;
@@ -318,6 +326,12 @@ public class UserServiceImpl implements UserService {
 
 	@Autowired
 	private RolePrivilegeService rolePrivilegeService;
+	
+	@Autowired
+	List<FunctionCardHandler> functionCardHandlers;
+
+	@Autowired
+	private QRCodeService qrCodeService;
 
 //
 //    @Autowired
@@ -3767,6 +3781,13 @@ public class UserServiceImpl implements UserService {
 		String namespaceUserToken = user.getNamespaceUserToken();
 		List<User> userList = userProvider.findThirdparkUserByTokenAndType(namespaceId, namespaceUserType, namespaceUserToken);
 		if(userList == null || userList.size() == 0) {
+
+			//将微信头像下载下来
+			CsFileLocationDTO fileLocationDTO = contentServerService.uploadFileByUrl("avatar.jpg", user.getAvatar());
+			if(fileLocationDTO != null && fileLocationDTO.getUri() != null){
+				user.setAvatar(fileLocationDTO.getUri());
+			}
+
 			userProvider.createUser(user);
 
 			//设定默认园区  add by  yanjun 20170915
@@ -4752,6 +4773,8 @@ public class UserServiceImpl implements UserService {
 				}
 				return dto;
 			}
+		}else{
+        	return dto;
 		}
             //确定客户的优先度， 查到合同算查到人，楼栋门牌只是为了填写账单的地址用
 //            List<AddressIdAndName> addressByPossibleName = addressService.findAddressByPossibleName(UserContext.getCurrentNamespaceId(), communityId, buildingName, apartmentName);
@@ -5461,4 +5484,96 @@ public class UserServiceImpl implements UserService {
         return resp;
     }
 
+	// 生成随机key
+	@Override
+    public QRCodeDTO querySubjectIdForScan(){
+		String uuid = UUID.randomUUID().toString();
+		String subjectId = "waitScanForLogon" + uuid.replace("-", "");
+		NewQRCodeCommand cmd = new NewQRCodeCommand();
+		cmd.setActionData(subjectId);
+		return qrCodeService.createQRCode(cmd);
+	}
+
+	// 登录等待
+	@Override
+	public DeferredResult<Object> waitScanForLogon(String subjectId){
+
+		DeferredResult<Object> result =  this.messagingService.blockingEvent(subjectId, "ORORDINARY", 30 * 1000, new DeferredResult.DeferredResultHandler(){
+
+			@Override
+			public void handleResult(Object result) {
+				BlockingEventResponse response = (BlockingEventResponse)result;
+				if(response.getStatus() != BlockingEventStatus.CONTINUTE){
+					LOGGER.error("waitScanForLogon failure");
+					throw RuntimeErrorException.errorWith(ErrorCodes.SCOPE_GENERAL, ErrorCodes.ERROR_INVALID_PARAMETER, "waitScanForLogon failure");
+				}
+				if(!response.getSubject().equals("blockingEventKey." + subjectId)){
+					LOGGER.error("waitScanForLogon failure");
+					throw RuntimeErrorException.errorWith(ErrorCodes.SCOPE_GENERAL, ErrorCodes.ERROR_INVALID_PARAMETER, "waitScanForLogon failure");
+				}
+				if(StringUtils.isEmpty(response.getMessage())){
+					LOGGER.error("waitScanForLogon failure");
+					throw RuntimeErrorException.errorWith(ErrorCodes.SCOPE_GENERAL, ErrorCodes.ERROR_INVALID_PARAMETER, "waitScanForLogon failure");
+				}
+
+				try {
+					String token = URLDecoder.decode(response.getMessage(), "utf-8");
+					String[] tokenParam = token.split("&");
+					String salt = tokenParam[0];
+					if (salt.equals(SALT)) {
+						Long userId = Long.valueOf(tokenParam[1]);
+						Integer namespaceId = Integer.valueOf(tokenParam[2]);
+						String userToken = tokenParam[3];
+						LoginToken logintoken = WebTokenGenerator.getInstance().fromWebToken(userToken, LoginToken.class);
+						//todo 验证
+						UserLogin userLogin = logonByToken(logintoken);
+						Map valueMap = new HashMap();
+						valueMap.put("userLogin", GsonUtil.toJson(userLogin));
+						valueMap.put("args",tokenParam[4]);
+						response.setMessage(GsonUtil.toJson(valueMap));
+					} else {
+						LOGGER.error("waitScanForLogon failure");
+						throw RuntimeErrorException.errorWith(ErrorCodes.SCOPE_GENERAL, ErrorCodes.ERROR_INVALID_PARAMETER, "waitScanForLogon failure");
+					}
+				} catch (UnsupportedEncodingException e) {
+					e.printStackTrace();
+				}
+			}
+
+		});
+		return result;
+	}
+
+	private static final String SALT = "this is salt";
+
+	// 获取当前准备登录用户的混淆key
+	@Override
+	public String getSercetKeyForScan(String args) {
+		String userToken = WebTokenGenerator.getInstance().toWebToken(UserContext.current().getLogin().getLoginToken());
+		String plain = SALT + "&" + UserContext.currentUserId() + "&" + UserContext.getCurrentNamespaceId() + "&" + userToken + "&" + args;
+		String token = null;
+		try {
+			token = URLEncoder.encode(plain, "UTF-8");
+		} catch (UnsupportedEncodingException e) {
+			e.printStackTrace();
+		}
+		return token;
+	}
+
+	// 扫码登录
+	@Override
+	public void logonByScan(String subjectId, String message){
+		this.messagingService.signalBlockingEvent(subjectId, message, 3*1000);
+	}
+
+
+	// 获取统一的功能卡片
+	@Override
+	public List<FunctionCardDto> listUserRelatedCards(){
+		List<FunctionCardDto> cardDtos = new ArrayList<>();
+		functionCardHandlers.forEach(r->{
+			cardDtos.add(r.listCards(1000000, 1L));
+		});
+		return cardDtos;
+	}
 }

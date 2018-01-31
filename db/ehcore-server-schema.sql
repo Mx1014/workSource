@@ -614,6 +614,7 @@ CREATE TABLE `eh_addresses` (
   `address_ownership_id` BIGINT COMMENT '产权归属: 自有、出售、非产权..., refer to the id of eh_var_field_items',
   `address_ownership_name` VARCHAR(128) COMMENT '产权归属: 自有、出售、非产权..., refer to the display_name of eh_var_field_items',
   `remark` VARCHAR(128),
+  `version` VARCHAR(32) COMMENT '版本号',
   PRIMARY KEY (`id`),
   KEY `i_eh_addr_city` (`city_id`),
   KEY `i_eh_addr_community` (`community_id`),
@@ -8908,7 +8909,7 @@ CREATE TABLE `eh_parking_card_requests` (
   `card_type_id` VARCHAR(64),
   `address_id` BIGINT,
   `invoice_type` BIGINT(4),
-  
+  `identity_card` VARCHAR(40),  
   PRIMARY KEY (`id`)
 ) ENGINE=INNODB DEFAULT CHARSET=utf8mb4;
 
@@ -10151,6 +10152,7 @@ CREATE TABLE `eh_point_logs` (
   `create_time` datetime(3),
   `event_happen_time` BIGINT,
   `extra` TEXT,
+  `binding_log_id` BIGINT NOT NULL DEFAULT 0,
   PRIMARY KEY (`id`)
 ) ENGINE=INNODB DEFAULT CHARSET=utf8mb4;
 
@@ -13570,7 +13572,7 @@ CREATE TABLE `eh_service_alliances` (
   `type` BIGINT NOT NULL DEFAULT 0 COMMENT 'the id reference to eh_service_alliance_categories',
   `address` VARCHAR(255) NOT NULL DEFAULT '',
   `contact` VARCHAR(64),
-  `description` TEXT,
+  `description` MEDIUMTEXT,
   `poster_uri` VARCHAR(128),
   `status` TINYINT NOT NULL DEFAULT 2 COMMENT '0: inactive, 1: waitingForConfirmation, 2: active',
   `default_order` BIGINT COMMENT 'default value is id',
@@ -14611,6 +14613,21 @@ CREATE TABLE `eh_suggestions` (
   CONSTRAINT `fk_eh_suggestions_user_idx` FOREIGN KEY (`USER_ID`) REFERENCES `eh_users` (`id`) ON DELETE NO ACTION ON UPDATE NO ACTION
 ) ENGINE=INNODB DEFAULT CHARSET=utf8mb4;
 
+-- by xiongying 2018/1/26
+DROP TABLE IF EXISTS `eh_sync_data_tasks`;
+
+CREATE TABLE `eh_sync_data_tasks` (
+  `id` BIGINT NOT NULL COMMENT 'id of the record',
+  `owner_type` VARCHAR(32) NOT NULL DEFAULT '',
+  `owner_id` BIGINT NOT NULL DEFAULT 0,
+  `type` VARCHAR(64) NOT NULL DEFAULT '',
+  `status` TINYINT NOT NULL,
+  `result` LONGTEXT,
+  `creator_uid` BIGINT,
+  `create_time` DATETIME,
+  `update_time` DATETIME,
+  PRIMARY KEY (`id`)
+) ENGINE=INNODB DEFAULT CHARSET=utf8mb4;
 
 DROP TABLE IF EXISTS `eh_talent_categories`;
 

@@ -3,6 +3,7 @@ package com.everhomes.point;
 import com.everhomes.bus.LocalBusSubscriber;
 import com.everhomes.bus.LocalEvent;
 import com.everhomes.bus.LocalEventBus;
+import com.everhomes.configuration.ConfigurationProvider;
 import com.everhomes.coordinator.CoordinationLocks;
 import com.everhomes.coordinator.CoordinationProvider;
 import com.everhomes.rest.approval.TrueOrFalseFlag;
@@ -35,7 +36,7 @@ public class PointLocalBusSubscriber implements LocalBusSubscriber, ApplicationL
 
     private static final Logger LOGGER = LoggerFactory.getLogger(PointLocalBusSubscriber.class);
 
-    private static final int SCHEDULE_DURATION_SECONDS = 60;
+    private static int SCHEDULE_DURATION_SECONDS = 60;
 
     private final static Random random = new Random();
 
@@ -71,6 +72,9 @@ public class PointLocalBusSubscriber implements LocalBusSubscriber, ApplicationL
     @Autowired
     private PointEventLogScheduler pointEventLogScheduler;
 
+    @Autowired
+    private ConfigurationProvider configurationProvider;
+
     @Override
     public void onApplicationEvent(ContextRefreshedEvent event) {
         if (event.getApplicationContext().getParent() == null
@@ -84,7 +88,19 @@ public class PointLocalBusSubscriber implements LocalBusSubscriber, ApplicationL
     }
 
     private void initScheduledExecutorService() {
-        scheduledExecutorService.schedule(this::persistAllEventLog, SCHEDULE_DURATION_SECONDS, TimeUnit.SECONDS);
+        scheduledExecutorService.schedule(this::persistAllEventLog, scheduleDurationSeconds(), TimeUnit.SECONDS);
+    }
+
+    private int scheduleDurationSeconds() {
+        try {
+            SCHEDULE_DURATION_SECONDS =
+                    configurationProvider.getIntValue(
+                            "point.persistLog.durationSeconds",
+                            SCHEDULE_DURATION_SECONDS);
+        } catch (Exception e) {
+            // ignore
+        }
+        return SCHEDULE_DURATION_SECONDS;
     }
 
     private void initVMShutdownHook() {
@@ -101,7 +117,7 @@ public class PointLocalBusSubscriber implements LocalBusSubscriber, ApplicationL
         } catch (Exception e) {
             LOGGER.error("Point persist group event log error", e);
         } finally {
-            scheduledExecutorService.schedule(this::persistAllEventLog, SCHEDULE_DURATION_SECONDS, TimeUnit.SECONDS);
+            scheduledExecutorService.schedule(this::persistAllEventLog, scheduleDurationSeconds(), TimeUnit.SECONDS);
         }
     }
 

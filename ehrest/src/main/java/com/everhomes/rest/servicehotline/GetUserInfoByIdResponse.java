@@ -5,11 +5,13 @@ import com.everhomes.discover.ItemType;
 import java.util.List;
 
 /**
+ * <ul>
  *  <li>id:用户id</li>
  *  <li>accountName:用户名</li>
  *  <li>nickName:用户昵称</li>
  *  <li>phones:手机</li>
  *  <li>contractName:用户真实姓名</li>
+ *  </ul>
  */
 public class GetUserInfoByIdResponse {
     private Long id;

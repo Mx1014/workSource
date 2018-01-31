@@ -195,15 +195,16 @@ public class YunPianSmsHandler extends BaseSmsHandler {
              "report_status": "SUCCESS"
          }
      ]
+     * @param reportRequest
      */
     @Override
-    public SmsReportResponse report(String reportBody) {
-        String[] split = reportBody.split("=");
+    public SmsReportResponse report(SmsReportRequest reportRequest) {
+        String[] smsStatuses = reportRequest.getParameter("sms_status");
 
         Gson gson = new GsonBuilder().disableHtmlEscaping().create();
         List<ReportResult> reportList = null;
         try {
-            reportList = gson.fromJson(URLDecoder.decode(split[1], "UTF-8"), new TypeToken<List<ReportResult>>(){}.getType());
+            reportList = gson.fromJson(URLDecoder.decode(smsStatuses[0], "UTF-8"), new TypeToken<List<ReportResult>>(){}.getType());
         } catch (Exception e) {
             e.printStackTrace();
         }

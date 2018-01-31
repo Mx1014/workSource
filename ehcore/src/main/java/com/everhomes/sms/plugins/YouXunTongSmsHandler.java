@@ -145,9 +145,9 @@ public class YouXunTongSmsHandler extends BaseSmsHandler {
        ]
      */
     @Override
-    public SmsReportResponse report(String reportBody) {
+    public SmsReportResponse report(SmsReportRequest reportRequest) {
         Gson gson = new GsonBuilder().disableHtmlEscaping().create();
-        List<Report> reportList = gson.fromJson(reportBody, new TypeToken<List<Report>>(){}.getType());
+        List<Report> reportList = gson.fromJson(reportRequest.getRequestBody(), new TypeToken<List<Report>>(){}.getType());
         if (reportList == null) {
             return null;
         }

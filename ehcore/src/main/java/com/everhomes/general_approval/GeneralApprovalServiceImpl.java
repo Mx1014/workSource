@@ -35,6 +35,7 @@ import com.everhomes.settings.PaginationConfigHelper;
 import com.everhomes.techpark.punch.PunchService;
 import com.everhomes.user.User;
 import com.everhomes.util.DateHelper;
+import com.everhomes.util.StringHelper;
 import com.everhomes.workReport.WorkReportService;
 import com.everhomes.yellowPage.ServiceAllianceCategories;
 import com.everhomes.yellowPage.YellowPageProvider;
@@ -878,6 +879,7 @@ public class GeneralApprovalServiceImpl implements GeneralApprovalService {
     @Override
     public ListGeneralApprovalRecordsResponse listGeneralApprovalRecords(ListGeneralApprovalRecordsCommand cmd) {
         ListGeneralApprovalRecordsResponse response = new ListGeneralApprovalRecordsResponse();
+        List<GeneralApprovalRecordDTO> results = new ArrayList<>();
         ListingLocator locator = new ListingLocator();
         SearchFlowCaseCommand command = new SearchFlowCaseCommand();
 
@@ -896,7 +898,7 @@ public class GeneralApprovalServiceImpl implements GeneralApprovalService {
         int count = PaginationConfigHelper.getPageSize(configProvider, cmd.getPageSize());
         command.setPageSize(count);
 
-        List<FlowCaseDetail> details = flowCaseProvider.findAdminFlowCases(locator, count, command, (locator1, query) -> {
+        List<FlowCaseDetail> details = flowCaseProvider.findAdminFlowCases(locator, count+1, command, (locator1, query) -> {
             //  审批类型
             if (cmd.getApprovalType() != null)
                 query.addConditions(Tables.EH_FLOW_CASES.TITLE.eq(cmd.getApprovalType()));
@@ -912,15 +914,13 @@ public class GeneralApprovalServiceImpl implements GeneralApprovalService {
             return query;
         });
         if (details != null && details.size() > 0) {
-            List<GeneralApprovalRecordDTO> results = details.stream().map(r -> {
-
+            results = details.stream().map(r -> {
                 GeneralApprovalRecordDTO dto = convertGeneralApprovalRecordDTO(r);
                 return dto;
             }).collect(Collectors.toList());
-            response.setRecords(results);
-            response.setNextPageAnchor(locator.getAnchor());
-
         }
+        response.setRecords(results);
+        response.setNextPageAnchor(locator.getAnchor());
         return response;
     }
 
@@ -1025,7 +1025,7 @@ public class GeneralApprovalServiceImpl implements GeneralApprovalService {
 
         //  1. basic data from flowCases
         Cell approvalNoCell = dataRow.createCell(0);
-        approvalNoCell.setCellValue(data.getApprovalNo().toString());
+        approvalNoCell.setCellValue(data.getApprovalNo() != null ? data.getApprovalNo().toString() : "");
         dataRow.createCell(1).setCellValue(data.getCreateTime());
         dataRow.createCell(2).setCellValue(data.getCreatorName());
         dataRow.createCell(3).setCellValue(data.getCreatorDepartment());

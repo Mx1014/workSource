@@ -3449,7 +3449,7 @@ public class PunchServiceImpl implements PunchService {
 			//验证是否有这个权限删除这个owner的rule
 
 			//根据id和ownerid删除一条rule
-			this.punchProvider.deletePunchTimeRuleByOwnerAndId(cmd.getOwnerType(), cmd.getOwnerId(), cmd.getId());
+//			this.punchProvider.deletePunchTimeRuleByOwnerAndId(cmd.getOwnerType(), cmd.getOwnerId(), cmd.getId());
 		}
 		else{
 			//被使用的不删,报错
@@ -5872,9 +5872,9 @@ public class PunchServiceImpl implements PunchService {
 		if(obj.getOwnerId().equals(cmd.getOwnerId())&&obj.getOwnerType().equals(cmd.getOwnerType())){
 //			if(null != cmd.getTargetId() && null != cmd.getTargetType()){
 //				if(cmd.getTargetId().equals(obj.getTargetId())&& cmd.getTargetType().equals(obj.getTargetType())){
-					this.punchProvider.deletePunchRuleOwnerMap(obj);
-					this.punchSchedulingProvider.deletePunchSchedulingByOwnerAndTarget(obj.getOwnerType(),obj.getOwnerId(),obj.getTargetType(),obj.getTargetId());
-					this.punchProvider.deletePunchTimeRulesByOwnerAndTarget(obj.getOwnerType(),obj.getOwnerId(),obj.getTargetType(),obj.getTargetId());
+//					this.punchProvider.deletePunchRuleOwnerMap(obj);
+//					this.punchSchedulingProvider.deletePunchSchedulingByOwnerAndTarget(obj.getOwnerType(),obj.getOwnerId(),obj.getTargetType(),obj.getTargetId());
+//					this.punchProvider.deletePunchTimeRulesByOwnerAndTarget(obj.getOwnerType(),obj.getOwnerId(),obj.getTargetType(),obj.getTargetId());
 //				}
 //				else{
 //
@@ -6689,7 +6689,9 @@ public class PunchServiceImpl implements PunchService {
 			if(file.exists())
 				file.delete();
 		}*/
+
 		PunchSchedulingDTO result = convertToPunchSchedulings(resultList);
+		addOperateLog(0L,"",result.toString(),0L,"importPunchScheduling");
 		return result;
 	}
 	@Override
@@ -7088,45 +7090,48 @@ public class PunchServiceImpl implements PunchService {
         	}
         }
         //排班
+		this.dbProvider.execute((status) -> {
 
-		if (punchGroupDTO.getRuleType().equals(PunchRuleType.PAIBAN.getCode()) && punchGroupDTO.getSchedulings() != null) {
-			List<PunchScheduling> schedulings = new ArrayList<>();
-            Long monthLong = 0L;
-			for (PunchSchedulingDTO monthScheduling : punchGroupDTO.getSchedulings()) {
-				if(monthScheduling.getMonth() == null)
-					continue;
-                if(monthLong.compareTo(monthScheduling.getMonth()) <0 ) {
-                    monthLong = monthScheduling.getMonth();
-                }
-                List<PunchScheduling> psList = saveMonthSchedulings(monthScheduling, pr, ptrs);
-				if (null != psList && psList.size() > 0) {
-					schedulings.addAll(psList);
+			if (punchGroupDTO.getRuleType().equals(PunchRuleType.PAIBAN.getCode()) && punchGroupDTO.getSchedulings() != null) {
+				List<PunchScheduling> schedulings = new ArrayList<>();
+				Long monthLong = 0L;
+				for (PunchSchedulingDTO monthScheduling : punchGroupDTO.getSchedulings()) {
+					if (monthScheduling.getMonth() == null)
+						continue;
+					if (monthLong.compareTo(monthScheduling.getMonth()) < 0) {
+						monthLong = monthScheduling.getMonth();
+					}
+					List<PunchScheduling> psList = saveMonthSchedulings(monthScheduling, pr, ptrs);
+					if (null != psList && psList.size() > 0) {
+						schedulings.addAll(psList);
+					}
 				}
-			}
-			if (schedulings.size() > 0) {
-				//批量保存
+				if (schedulings.size() > 0) {
+					//批量保存
 
 //				Long t1 = System.currentTimeMillis();
-				List<EhPunchSchedulings> ehPsList = new ArrayList<>();
-				Long beginId = sequenceProvider.getNextSequenceBlock(NameMapper.getSequenceDomainFromTablePojo(EhPunchSchedulings.class), schedulings.size());
+					List<EhPunchSchedulings> ehPsList = new ArrayList<>();
+					Long beginId = sequenceProvider.getNextSequenceBlock(NameMapper.getSequenceDomainFromTablePojo(EhPunchSchedulings.class), schedulings.size());
 
-				for (PunchScheduling ps : schedulings) {
-					ps.setId(beginId++);
-					EhPunchSchedulings eps = ConvertHelper.convert(ps, EhPunchSchedulings.class);
-					ehPsList.add(eps);
-				}
+					for (PunchScheduling ps : schedulings) {
+						ps.setId(beginId++);
+						EhPunchSchedulings eps = ConvertHelper.convert(ps, EhPunchSchedulings.class);
+						ehPsList.add(eps);
+					}
 //				Long t2 = System.currentTimeMillis();
 
 //				LOGGER.debug("for schedulings time "+  t2 + "cost: " +(t2-t1));
 
-				punchSchedulingProvider.batchCreatePunchSchedulings(ehPsList);
-                //把设置的最大月份之后的排班都置为pr的status
-                punchSchedulingProvider.updatePunchSchedulingsStatusByDate(pr.getStatus(), pr.getId(), new java.sql.Date(monthLong));
+					punchSchedulingProvider.batchCreatePunchSchedulings(ehPsList);
+					//把设置的最大月份之后的排班都置为pr的status
+					punchSchedulingProvider.updatePunchSchedulingsStatusByDate(pr.getStatus(), pr.getId(), new java.sql.Date(monthLong));
 //				Long t3 = System.currentTimeMillis();
 
 //				LOGGER.debug("batch save schedulings time "+  t3 + "cost: " +(t3-t2));
+				}
 			}
-		}
+			return null;
+		});
 	}
 
 	private List<PunchScheduling> saveMonthSchedulings(PunchSchedulingDTO monthScheduling, PunchRule pr, List<PunchTimeRule> ptrs) {
@@ -7262,6 +7267,9 @@ public class PunchServiceImpl implements PunchService {
 	@Override
 	public PunchGroupDTO getPunchGroup(GetPunchGroupCommand cmd) {
 		Organization org = organizationProvider.findOrganizationById(cmd.getId());
+		PunchRule pr = punchProvider.getPunchruleByPunchOrgId(org.getId());
+		addOperateLog(pr.getId(),pr.getName(),cmd.toString(),pr.getOwnerId(),"getPunchGroup");
+
 		return getPunchGroupDTOByOrg(org);
 	}
 	public String getDepartment(Integer namespaceId, Long detailId){
@@ -7290,6 +7298,8 @@ public class PunchServiceImpl implements PunchService {
 						"check app privilege error");
             }
         }
+		addOperateLog(0L,"",cmd.toString(),cmd.getOwnerId(),"listPunchGroups");
+
 //=======
 //        Organization org = organizationProvider.findOrganizationById(cmd.getOwnerId());
 //        Integer allOrganizationInteger = organizationProvider.countOrganizationMemberDetailsByOrgId(org.getNamespaceId(), cmd.getOwnerId());
@@ -7483,8 +7493,21 @@ public class PunchServiceImpl implements PunchService {
 		Calendar tomorrowCalendar = Calendar.getInstance();
 		tomorrowCalendar.add(Calendar.DAY_OF_MONTH, 1);
 		java.sql.Date tomorrow= new java.sql.Date(tomorrowCalendar.getTimeInMillis());
+		if(tomorrow.before(startDate)){
+			//防止把无关数据查出来
+			tomorrow.setTime(startDate.getTime());
+		}
 		//今日之后用pr的status查,之前用active查
 		List<PunchScheduling> schedulings = punchSchedulingProvider.queryPunchSchedulings(tomorrow,endDate,pr.getId(),pr.getStatus()) ;
+		if ((null == schedulings || schedulings.size() == 0) 
+//				&&PunchRuleStatus.ACTIVE!=PunchRuleStatus.fromCode(pr.getStatus())
+				) {
+			//如果查不到当前状态的就 并且pr 的状态不是正常
+			schedulings = punchSchedulingProvider.queryPunchSchedulings(tomorrow,endDate,pr.getId(),PunchRuleStatus.ACTIVE.getCode()) ;
+//			LOGGER.debug("取正常状态的schedulings "+StringHelper.toJsonString(schedulings));
+		}else{
+//			LOGGER.debug("他说有schedulings "+StringHelper.toJsonString(schedulings));
+		}
 		if (null == schedulings) {
 			schedulings = new ArrayList<>();
 		}
