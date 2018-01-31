@@ -3082,6 +3082,8 @@ public class EquipmentProviderImpl implements EquipmentProvider {
     }
 
     @Override
+    @Caching(evict = {@CacheEvict(value = "findEquipmentById", key = "#equipmentId"),
+            @CacheEvict(value = "listQualifiedEquipmentStandardEquipments", key = "'AllEquipments'")})
     public void updateEquipmentStatus(Long equipmentId, Byte status) {
         DSLContext context = this.dbProvider.getDslContext(AccessSpec.readWrite());
         context.update(Tables.EH_EQUIPMENT_INSPECTION_EQUIPMENTS)
