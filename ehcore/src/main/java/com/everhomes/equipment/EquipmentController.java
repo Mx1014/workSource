@@ -704,7 +704,7 @@ public class EquipmentController extends ControllerBase {
     public RestResponse syncEquipmentPlansIndex() {
         UserPrivilegeMgr resolver = PlatformContext.getComponent("SystemUser");
         resolver.checkUserPrivilege(UserContext.current().getUser().getId(), 0);
-         equipmentPlanSearcher.syncFromDb();
+        equipmentPlanSearcher.syncFromDb();
         return getSuccessResponse();
     }
     
@@ -718,6 +718,7 @@ public class EquipmentController extends ControllerBase {
     public RestResponse syncEquipmentStandardMapIndex() {
         UserPrivilegeMgr resolver = PlatformContext.getComponent("SystemUser");
         resolver.checkUserPrivilege(UserContext.current().getUser().getId(), 0);
+        equipmentStandardMapSearcher.syncFromDb();
         return getSuccessResponse();
     }
     
