@@ -6064,6 +6064,9 @@ private void checkUserPrivilege(Long orgId, Long privilegeId, Long communityId) 
 
 	@Override
 	public void updateEquipmentStatus(DeleteEquipmentsCommand cmd) {
+		EquipmentInspectionEquipments equipment = equipmentProvider.findEquipmentById(cmd.getEquipmentId());
+		equipment.setStatus(EquipmentStatus.DISCARDED.getCode());
 		equipmentProvider.updateEquipmentStatus(cmd.getEquipmentId(),EquipmentStatus.DISCARDED.getCode());
+		equipmentSearcher.feedDoc(equipment);
 	}
 }
