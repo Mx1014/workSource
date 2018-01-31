@@ -5536,15 +5536,16 @@ public class UserServiceImpl implements UserService {
 					String userToken = tokenParam[3];
 					LOGGER.debug("userLoginToken = {}", userToken);
 
+					LoginToken logintoken = WebTokenGenerator.getInstance().fromWebToken(userToken, LoginToken.class);
+
 					Map valueMap = new HashMap();
-					valueMap.put("userLogin", GsonUtil.toJson(userToken));
+					valueMap.put("userLogin", GsonUtil.toJson(logintoken));
 					valueMap.put("args",tokenParam[4]);
 					response.setMessage(GsonUtil.toJson(valueMap));
 					restResponse.setResponseObject(response);
 					restResponse.setErrorCode(ErrorCodes.SUCCESS);
 					restResponse.setErrorDescription("OK");
 
-					LoginToken logintoken = WebTokenGenerator.getInstance().fromWebToken(userToken, LoginToken.class);
 //					//todo 验证
 					UserLogin login = logonByToken(logintoken);
 					LoginToken newToken = new LoginToken(login.getUserId(), login.getLoginId(), login.getLoginInstanceNumber(), login.getImpersonationId());
