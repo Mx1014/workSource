@@ -11,5 +11,10 @@ import java.util.List;
 public interface RequisitionProvider {
     void saveRequisition(Requisition req);
 
-    List<ListRequisitionsDTO> listRequisitions(Integer namespaceId, String ownerType, Long ownerId, String theme, String typeId, Long pageAnchor, Integer integer);
+    List<ListRequisitionsDTO> listRequisitions(Integer namespaceId, String ownerType, Long ownerId, String theme
+            , Long typeId, Long pageAnchor, Integer integer);
+
+    Requisition findRequisitionById(Long requisitionId);
+
+    List<RequisitionType> listRequisitionTypes(Integer namespaceId, Long ownerId, String ownerType);
 }

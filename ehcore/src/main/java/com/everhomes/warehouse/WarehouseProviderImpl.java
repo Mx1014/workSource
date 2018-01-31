@@ -573,6 +573,50 @@ public class WarehouseProviderImpl implements WarehouseProvider {
     }
 
     @Override
+    public WarehouseOrder findWarehouseOrderById(Long id) {
+        DSLContext context = this.dbProvider.getDslContext(AccessSpec.readOnly());
+        return context.selectFrom(Tables.EH_WAREHOUSE_ORDERS).where(Tables.EH_WAREHOUSE_ORDERS.ID.eq(id))
+                .fetchOneInto(WarehouseOrder.class);
+    }
+
+    @Override
+    public void insertWarehouseOrder(WarehouseOrder order) {
+        DSLContext context = this.dbProvider.getDslContext(AccessSpec.readWrite());
+        EhWarehouseOrdersDao dao = new EhWarehouseOrdersDao(context.configuration());
+        dao.insert(order);
+    }
+
+    @Override
+    public void updateWarehouseOrder(WarehouseOrder order) {
+        DSLContext context = this.dbProvider.getDslContext(AccessSpec.readWrite());
+        EhWarehouseOrdersDao dao = new EhWarehouseOrdersDao(context.configuration());
+        dao.update(order);
+    }
+
+    @Override
+    public void deleteWarehouseStockLogs(Long id) {
+        DSLContext context = this.dbProvider.getDslContext(AccessSpec.readWrite());
+        context.delete(Tables.EH_WAREHOUSE_STOCK_LOGS)
+                .where(Tables.EH_WAREHOUSE_STOCK_LOGS.WAREHOUSE_ORDER_ID.eq(id))
+                .execute();
+    }
+
+    @Override
+    public void insertWarehouseStockLogs(List<EhWarehouseStockLogs> list) {
+        DSLContext context = this.dbProvider.getDslContext(AccessSpec.readWrite());
+        EhWarehouseStockLogsDao dao = new EhWarehouseStockLogsDao(context.configuration());
+        dao.insert(list);
+    }
+
+    @Override
+    public void deleteWarehouseOrderById(Long id) {
+        DSLContext context = this.dbProvider.getDslContext(AccessSpec.readWrite());
+        context.delete(Tables.EH_WAREHOUSE_ORDERS)
+                .where(Tables.EH_WAREHOUSE_ORDERS.ID.eq(id))
+                .execute();
+    }
+
+    @Override
     public Long getWarehouseStockAmount(Long warehouseId, String ownerType, Long ownerId) {
         DSLContext context = dbProvider.getDslContext(AccessSpec.readOnly());
         SelectQuery<EhWarehouseStocksRecord> query = context.selectQuery(Tables.EH_WAREHOUSE_STOCKS);

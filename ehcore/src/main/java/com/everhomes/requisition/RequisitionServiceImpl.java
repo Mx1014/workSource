@@ -2,19 +2,16 @@
 package com.everhomes.requisition;
 
 import com.everhomes.naming.NameMapper;
-import com.everhomes.rest.Requisition.CreateRequisitionCommand;
-import com.everhomes.rest.Requisition.ListRequisitionsCommand;
-import com.everhomes.rest.Requisition.ListRequisitionsDTO;
-import com.everhomes.rest.Requisition.ListRequisitionsResponse;
+import com.everhomes.rest.Requisition.*;
 import com.everhomes.sequence.SequenceProvider;
 import com.everhomes.server.schema.tables.pojos.EhRequisitions;
 import com.everhomes.supplier.SupplierHelper;
 import com.everhomes.user.UserContext;
 import com.everhomes.util.ConvertHelper;
-import com.everhomes.util.DateHelper;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
+import java.util.ArrayList;
 import java.util.List;
 
 /**
@@ -54,4 +51,33 @@ public class RequisitionServiceImpl implements RequisitionService {
         response.setData(result);
         return response;
     }
+
+    @Override
+    public GetRequisitionDetailResponse getRequisitionDetail(GetRequisitionDetailCommand cmd) {
+        Requisition requisition = requisitionProvider.findRequisitionById(cmd.getRequisitionId());
+        GetRequisitionDetailResponse response = new GetRequisitionDetailResponse();
+        response.setAmount(requisition.getAmount().toPlainString());
+        response.setApplicantDepartment(requisition.getApplicantDepartment());
+        response.setApplicantName(requisition.getApplicantName());
+        response.setAttachmentUrl(requisition.getAttachmentUrl());
+        response.setDescription(requisition.getDescription());
+        response.setTheme(requisition.getTheme());
+        response.setTypeId(requisition.getRequisitionTypeId());
+        return response;
+    }
+
+    @Override
+    public List<ListRequisitionTypesDTO> listRequisitionTypes(ListRequisitionTypesCommand cmd) {
+        List<ListRequisitionTypesDTO> result = new ArrayList<>();
+        List<RequisitionType> list = requisitionProvider.listRequisitionTypes(cmd.getNamespaceId()
+                ,cmd.getOwnerId(),cmd.getOwnerType());
+        for(RequisitionType type : list){
+            ListRequisitionTypesDTO dto = new ListRequisitionTypesDTO();
+            dto.setId(type.getId());
+            dto.setName(type.getName());
+            result.add(dto);
+        }
+        return result;
+    }
+
 }

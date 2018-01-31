@@ -34,7 +34,7 @@ public class RequisitionProviderImpl implements RequisitionProvider {
 
     @Override
     public List<ListRequisitionsDTO> listRequisitions(Integer namespaceId, String ownerType, Long ownerId, String theme
-            , String typeId, Long pageAnchor, Integer pageSize) {
+            , Long typeId, Long pageAnchor, Integer pageSize) {
         List<ListRequisitionsDTO> list = new ArrayList<>();
         DSLContext context = getReadOnlyContext();
         SelectQuery<Record> query = context.selectQuery();
@@ -62,6 +62,22 @@ public class RequisitionProviderImpl implements RequisitionProvider {
             list.add(dto);
         });
         return list;
+    }
+
+    @Override
+    public Requisition findRequisitionById(Long requisitionId) {
+        DSLContext context = getReadOnlyContext();
+        return context.selectFrom(req)
+                .where(req.ID.eq(requisitionId))
+                .fetchOneInto(Requisition.class);
+    }
+
+    @Override
+    public List<RequisitionType> listRequisitionTypes(Integer namespaceId, Long ownerId, String ownerType) {
+        DSLContext context = getReadOnlyContext();
+        return context.selectFrom(reqType).where(reqType.NAMESPACE_ID.eq(namespaceId))
+                .and(reqType.OWNER_ID.eq(ownerId)).and(reqType.OWNER_TYPE.eq(ownerType))
+                .fetchInto(RequisitionType.class);
     }
 
     private DSLContext getReadOnlyContext(){
