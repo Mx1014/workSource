@@ -63,7 +63,12 @@ public class SalaryGroupProviderImpl implements SalaryGroupProvider {
 				.orderBy(Tables.EH_SALARY_GROUPS.ID.asc())
 				.fetch().map(r -> ConvertHelper.convert(r, SalaryGroup.class));
 	}
-	
+
+	@Override
+	public String getMonthByOwnerId(Long ownerId) {
+		return null;
+	}
+
 	private EhSalaryGroupsDao getReadWriteDao() {
 		return getDao(getReadWriteContext());
 	}
