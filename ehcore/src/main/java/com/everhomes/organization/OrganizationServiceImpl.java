@@ -477,31 +477,50 @@ public class OrganizationServiceImpl implements OrganizationService {
     /**
      * 更新组人员
      *
-     * @param addMemberIds
-     * @param delMemberIds
+     * @param addDetailIds
+     * @param delDetailIds
      * @param organization
      */
-    private void batchUpdateOrganizationMember(List<Long> addMemberIds, List<Long> delMemberIds, Organization organization) {
-        if (null != delMemberIds) {
-            for (Long memberId : delMemberIds) {
-                organizationProvider.deleteOrganizationMemberById(memberId);
-            }
+    // modify by lei.lv 为了适配新后台，需要改成用detailId进行创建的形式
+
+    private void batchUpdateOrganizationMember(List<Long> addDetailIds, List<Long> delDetailIds, Organization organization) {
+        if (null != delDetailIds) {
+            organizationProvider.deleteOrganizationMembersByGroupTypeWithDetailIds(UserContext.getCurrentNamespaceId(), delDetailIds, organization.getGroupType());
+//            for (Long memberId : delMemberIds) {
+//                organizationProvider.deleteOrganizationMemberById(memberId);
+//            }
         } else {
-            LOGGER.debug("delete members is null");
+            LOGGER.debug("delDetailIds is null");
         }
 
-        if (null != addMemberIds) {
-            for (Long memberId : addMemberIds) {
-                OrganizationMember member = organizationProvider.findOrganizationMemberById(memberId);
-                if (null != member) {
-                    OrganizationMember organizationMember = organizationProvider.findOrganizationMemberByOrgIdAndToken(member.getContactToken(), organization.getId());
+//        if (null != addMemberIds) {
+//            for (Long memberId : addMemberIds) {
+//                OrganizationMember member = organizationProvider.findOrganizationMemberById(memberId);
+//                if (null != member) {
+//                    OrganizationMember organizationMember = organizationProvider.findOrganizationMemberByOrgIdAndToken(member.getContactToken(), organization.getId());
+//                    if (null == organizationMember) {
+//                        member.setOrganizationId(organization.getId());
+//                        member.setGroupType(organization.getGroupType());
+//                        member.setGroupPath(organization.getPath());
+//                        organizationProvider.createOrganizationMember(member);
+//                    } else {
+//                        LOGGER.debug("organization member already existing. organizationId = {}, contactToken = {}", organizationMember.getOrganizationId(), organizationMember.getContactToken());
+//                    }
+//                }
+//            }
+        Long enterPriseId = getTopEnterpriserIdOfOrganization(organization.getId());
+        if (null != addDetailIds) {
+            for (Long detailId : addDetailIds) {
+                OrganizationMemberDetails detail = organizationProvider.findOrganizationMemberDetailsByDetailId(detailId);
+                if(detail != null){
+                    OrganizationMember organizationMember = organizationProvider.findOrganizationMemberByOrgIdAndToken(detail.getContactToken(), organization.getId());
                     if (null == organizationMember) {
-                        member.setOrganizationId(organization.getId());
-                        member.setGroupType(organization.getGroupType());
-                        member.setGroupPath(organization.getPath());
-                        organizationProvider.createOrganizationMember(member);
-                    } else {
-                        LOGGER.debug("organization member already existing. organizationId = {}, contactToken = {}", organizationMember.getOrganizationId(), organizationMember.getContactToken());
+                        OrganizationMember enterPriseMember = organizationProvider.findOrganizationMemberByOrgIdAndToken(detail.getContactToken(), enterPriseId);
+                        enterPriseMember.setOrganizationId(organization.getId());
+                        enterPriseMember.setGroupType(organization.getGroupType());
+                        enterPriseMember.setGroupPath(organization.getPath());
+                        enterPriseMember.setStatus(OrganizationMemberStatus.ACTIVE.getCode());
+                        organizationProvider.createOrganizationMember(enterPriseMember);
                     }
                 }
             }
