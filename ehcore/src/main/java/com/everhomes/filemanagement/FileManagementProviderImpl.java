@@ -85,7 +85,22 @@ public class FileManagementProviderImpl implements FileManagementProvider {
         query.addConditions(Tables.EH_FILE_MANAGEMENT_CATALOGS.NAME.eq(name));
         query.addConditions(Tables.EH_FILE_MANAGEMENT_CATALOGS.STATUS.eq(FileManagementStatus.VALID.getCode()));
 
-        return query.fetchAnyInto(FileCatalog.class);
+        return query.fetchOneInto(FileCatalog.class);
+    }
+
+    @Override
+    public List<String> listFileCatalogNames(Integer namespaceId, Long ownerId, String name){
+        DSLContext context = dbProvider.getDslContext(AccessSpec.readOnly());
+
+        SelectQuery<Record> query = context.selectQuery();
+        query.addSelect(Tables.EH_FILE_MANAGEMENT_CATALOGS.NAME);
+        query.addFrom(Tables.EH_FILE_MANAGEMENT_CATALOGS);
+        query.addConditions(Tables.EH_FILE_MANAGEMENT_CATALOGS.NAMESPACE_ID.eq(namespaceId));
+        query.addConditions(Tables.EH_FILE_MANAGEMENT_CATALOGS.OWNER_ID.eq(ownerId));
+        query.addConditions(Tables.EH_FILE_MANAGEMENT_CATALOGS.NAME.like(name + "%"));
+        query.addConditions(Tables.EH_FILE_MANAGEMENT_CATALOGS.STATUS.eq(FileManagementStatus.VALID.getCode()));
+
+        return query.fetchInto(String.class);
     }
 
     @Override
@@ -310,7 +325,7 @@ public class FileManagementProviderImpl implements FileManagementProvider {
     }
 
     @Override
-    public FileContent findFileContentByName(Integer namespaceId, Long ownerId, Long catalogId, Long parentId, String name) {
+    public FileContent findFileContentByName(Integer namespaceId, Long ownerId, Long catalogId, Long parentId, String name, String suffix) {
         DSLContext context = dbProvider.getDslContext(AccessSpec.readOnly());
 
         SelectQuery<EhFileManagementContentsRecord> query = context.selectQuery(Tables.EH_FILE_MANAGEMENT_CONTENTS);
@@ -319,13 +334,41 @@ public class FileManagementProviderImpl implements FileManagementProvider {
         query.addConditions(Tables.EH_FILE_MANAGEMENT_CONTENTS.CATALOG_ID.eq(catalogId));
         if (parentId != null)
             query.addConditions(Tables.EH_FILE_MANAGEMENT_CONTENTS.PARENT_ID.eq(parentId));
-        else {
+        else
             query.addConditions(Tables.EH_FILE_MANAGEMENT_CONTENTS.PARENT_ID.isNull());
-        }
         query.addConditions(Tables.EH_FILE_MANAGEMENT_CONTENTS.CONTENT_NAME.eq(name));
+        if (suffix != null)
+            query.addConditions(Tables.EH_FILE_MANAGEMENT_CONTENTS.CONTENT_SUFFIX.eq(suffix));
+        else
+            query.addConditions(Tables.EH_FILE_MANAGEMENT_CONTENTS.CONTENT_SUFFIX.isNull());
+
         query.addConditions(Tables.EH_FILE_MANAGEMENT_CONTENTS.STATUS.eq(FileManagementStatus.VALID.getCode()));
 
-        return query.fetchAnyInto(FileContent.class);
+        return query.fetchOneInto(FileContent.class);
+    }
+
+    @Override
+    public List<String> listFileContentNames(Integer namespaceId, Long ownerId, Long catalogId, Long parentId, String name, String suffix){
+        DSLContext context = dbProvider.getDslContext(AccessSpec.readOnly());
+
+        SelectQuery<Record> query = context.selectQuery();
+        query.addSelect(Tables.EH_FILE_MANAGEMENT_CONTENTS.CONTENT_NAME);
+        query.addFrom(Tables.EH_FILE_MANAGEMENT_CONTENTS);
+        query.addConditions(Tables.EH_FILE_MANAGEMENT_CONTENTS.NAMESPACE_ID.eq(namespaceId));
+        query.addConditions(Tables.EH_FILE_MANAGEMENT_CONTENTS.OWNER_ID.eq(ownerId));
+        query.addConditions(Tables.EH_FILE_MANAGEMENT_CONTENTS.CATALOG_ID.eq(catalogId));
+        if (parentId != null)
+            query.addConditions(Tables.EH_FILE_MANAGEMENT_CONTENTS.PARENT_ID.eq(parentId));
+        else
+            query.addConditions(Tables.EH_FILE_MANAGEMENT_CONTENTS.PARENT_ID.isNull());
+        query.addConditions(Tables.EH_FILE_MANAGEMENT_CONTENTS.CONTENT_NAME.like(name + "%"));
+        if (suffix != null)
+            query.addConditions(Tables.EH_FILE_MANAGEMENT_CONTENTS.CONTENT_SUFFIX.eq(suffix));
+        else
+            query.addConditions(Tables.EH_FILE_MANAGEMENT_CONTENTS.CONTENT_SUFFIX.isNull());
+        query.addConditions(Tables.EH_FILE_MANAGEMENT_CONTENTS.STATUS.eq(FileManagementStatus.VALID.getCode()));
+
+        return query.fetchInto(String.class);
     }
 
 /*    @Override

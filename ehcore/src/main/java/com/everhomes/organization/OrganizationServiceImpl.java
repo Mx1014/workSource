@@ -725,6 +725,8 @@ public class OrganizationServiceImpl implements OrganizationService {
         for (Long id : rlt.getIds()) {
             dtos.add(toOrganizationDetailDTO(id, false));
         }
+        dtos = dtos.stream().filter(r->r != null).collect(Collectors.toList());
+        LOGGER.debug("searchEnterprise result = {}", dtos.toString());
         resp.setDtos(dtos);
         return resp;
     }
@@ -11479,7 +11481,7 @@ public class OrganizationServiceImpl implements OrganizationService {
         groupTypes.add(OrganizationGroupType.JOB_POSITION.getCode());
         List<Organization> list = new ArrayList<>();
         if(organization.getGroupType().equals(OrganizationGroupType.ENTERPRISE.getCode()) && organization.getParentId() == 0L) {//传入的id为总公司时
-            list = organizationProvider.listOrganizationByGroupTypesAndPath(organization.getPath(),groupTypes, cmd.getKeywords(), cmd.getPageAnchor(), pageSize);
+            list = organizationProvider.listOrganizationByGroupTypesAndPath(organization.getPath() + "%",groupTypes, cmd.getKeywords(), cmd.getPageAnchor(), pageSize);
         }else{
             list = organizationProvider.listOrganizationByGroupTypes(cmd.getId(), groupTypes, cmd.getKeywords(), cmd.getPageAnchor(), pageSize);
         }
@@ -14275,6 +14277,19 @@ public class OrganizationServiceImpl implements OrganizationService {
         return response;
     }
 
+    @Override
+    public List<Long> listDetailIdWithEnterpriseExclude(String keywords, Integer namespaceId, Long enterpriseId, Timestamp checkinTimeStart,
+                                                        Timestamp checkinTimeEnd, Timestamp dissmissTimeStart, Timestamp dissmissTimeEnd,
+                                                        CrossShardListingLocator locator, Integer pageSize,List<Long> notinDetails,List<Long> inDetails) {
+        List groupTypes = new ArrayList();
+        groupTypes.add(OrganizationGroupType.ENTERPRISE.getCode());
+        Organization org = checkOrganization(enterpriseId);
+        List<Organization> underEnterprises = this.organizationProvider.listOrganizationByGroupTypesAndPath(org.getPath() + "%", groupTypes, null, null, null);
+        List<String> smallPath = new ArrayList();
+        underEnterprises.forEach(r -> smallPath.add(r.getPath()));
+        return this.organizationProvider.listMemberDetailIdWithExclude(keywords, namespaceId, org.getPath(), smallPath, checkinTimeStart,
+                checkinTimeEnd, dissmissTimeStart, dissmissTimeEnd, locator, pageSize,notinDetails,inDetails);
+    }
 
 
 }

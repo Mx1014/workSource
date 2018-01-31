@@ -497,4 +497,7 @@ public interface FlowService {
     void deleteFlowForm(UpdateFlowFormCommand cmd);
 
     FlowFormDTO getFlowForm(FlowIdCommand cmd);
+
+    FlowCaseDetailDTOV2 getFlowCaseDetailByRefer(Long moduleId, FlowUserType flowUserType,
+                                                 Long userId, String referType, Long referId, boolean needFlowButton);
 }

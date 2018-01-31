@@ -6929,6 +6929,28 @@ public class ForumServiceImpl implements ForumService {
         return res;
     }
 
+
+
+    @Override
+    public FindDefaultForumResponse findDefaultForum(FindDefaultForumCommand cmd) {
+        CrossShardListingLocator locator = new CrossShardListingLocator();
+        List<Community> communities = communityProvider.listCommunities(cmd.getNamespaceId(), locator, 1, null);
+
+        FindDefaultForumResponse res = new FindDefaultForumResponse();
+        if(communities != null && communities.size() > 0){
+            Forum defaultForum = forumProvider.findForumById(communities.get(0).getDefaultForumId());
+            if(defaultForum != null){
+                res.setDefaultForum(ConvertHelper.convert(defaultForum, ForumDTO.class));
+            }
+
+            Forum feedbackForum = forumProvider.findForumById(communities.get(0).getFeedbackForumId());
+            if(feedbackForum != null){
+                res.setFeedbackForum(ConvertHelper.convert(feedbackForum, ForumDTO.class));
+            }
+        }
+        return res;
+    }
+
     private void scheduleAnnouncement(Post post){
 
 

@@ -16,7 +16,8 @@ curl -XPUT "http://$ELASTIC/$INDEX/_mapping/warehouseStockLog" -d '
             "requestType":{"type":"byte"},
             "createTime":{"type":"date"},
             "requestUid":{"type":"long"},
-            "requestName":{"type":"string", "index":"not_analyzed"}
+            "requestName":{"type":"string", "index":"not_analyzed"},
+            "communityId":{"type":"long"}
         }
     }
 }

@@ -21,6 +21,8 @@ public interface SalaryEmployeeProvider {
 
 	String getMonthByOwnerId(Long ownerId);
 
+	List<Long> listEmployeeDetailIdsByStatus(Long ownerId, Byte status);
+
 //	List<SalaryEmployee> listSalaryEmployeeByPeriodGroupId(Long salaryPeriodGroupId);
 //
 //	int countUnCheckEmployee(Long salaryPeriodGroupId);

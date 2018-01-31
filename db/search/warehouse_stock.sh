@@ -16,7 +16,8 @@ curl -XPUT "http://$ELASTIC/$INDEX/_mapping/warehouseStock" -d '
             "status":{"type":"byte"},
             "warehouseStatus":{"type":"byte"},
             "updateTime":{"type":"date"},
-            "categoryId":{"type":"long"}
+            "categoryId":{"type":"long"},
+            "communityId":{"type":"long"}
         }
     }
 }

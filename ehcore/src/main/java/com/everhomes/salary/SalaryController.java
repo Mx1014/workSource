@@ -154,6 +154,64 @@ public class SalaryController extends ControllerBase {
 		return response;
 	}
 
+	/**
+	 * <b>URL: /salary/getSalaryGroupStatus</b>
+	 * <p>9.进入工资报表页面</p>
+	 */
+	@RequestMapping("getSalaryGroupStatus")
+	@RestReturn(value = GetSalaryGroupStatusResponse.class)
+	public RestResponse getSalaryGroupStatus(GetSalaryGroupStatusCommand cmd) {
+		GetSalaryGroupStatusResponse resp  = salaryService.getSalaryGroupStatus(cmd);
+		RestResponse response = new RestResponse(resp);
+		response.setErrorCode(ErrorCodes.SUCCESS);
+		response.setErrorDescription("OK");
+		return response;
+	}
+
+	/**
+	 * <p>10.导出工资报表</p>
+	 * <b>URL: /salary/exportSalaryReport</b>
+	 */
+	@RequestMapping("exportSalaryReport")
+	@RestReturn(String.class)
+	public RestResponse exportEmployeeSalary(ExportSalaryReportCommand cmd ){
+		salaryService.exportSalaryReport(cmd);
+		RestResponse response = new RestResponse();
+		response.setErrorCode(ErrorCodes.SUCCESS);
+		response.setErrorDescription("OK");
+		return response;
+	}
+
+
+	/**
+	 * <p>11.归档报表</p>
+	 * <b>URL: /salary/fileSalaryGroup</b>
+	 */
+	@RequestMapping("fileSalaryGroup")
+	@RestReturn(String.class)
+	public RestResponse fileSalaryGroup(FileSalaryGroupCommand cmd ){
+		salaryService.fileSalaryGroup(cmd);
+		RestResponse response = new RestResponse();
+		response.setErrorCode(ErrorCodes.SUCCESS);
+		response.setErrorDescription("OK");
+		return response;
+	}
+
+
+	/**
+	 * <p>12.新建报表</p>
+	 * <b>URL: /salary/newSalaryMonth</b>
+	 */
+	@RequestMapping("newSalaryMonth")
+	@RestReturn(String.class)
+	public RestResponse newSalaryMonth(NewSalaryMonthCommand cmd ){
+		salaryService.newSalaryMonth(cmd);
+		RestResponse response = new RestResponse();
+		response.setErrorCode(ErrorCodes.SUCCESS);
+		response.setErrorDescription("OK");
+		return response;
+	}
+
 
 //
 //	/**

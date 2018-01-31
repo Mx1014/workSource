@@ -14,6 +14,7 @@ public class UpdateFileContentNameCommand {
 
     private String contentName;
 
+    private String contentSuffix;
 
     public UpdateFileContentNameCommand() {
     }
@@ -32,6 +33,14 @@ public class UpdateFileContentNameCommand {
 
     public void setContentName(String contentName) {
         this.contentName = contentName;
+    }
+
+    public String getContentSuffix() {
+        return contentSuffix;
+    }
+
+    public void setContentSuffix(String contentSuffix) {
+        this.contentSuffix = contentSuffix;
     }
 
     @Override

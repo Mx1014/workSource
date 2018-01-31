@@ -611,7 +611,8 @@ public class ExcelUtils {
      */
     public static Workbook getWorkbook(InputStream inStr,String fileName) throws Exception{
         Workbook wb = null;
-        String fileType = fileName.substring(fileName.lastIndexOf("."));
+//        String fileType = fileName.substring(fileName.lastIndexOf("."));
+        //现在导出的模板都是xssf了
 //        if(".xls".equals(fileType)){
 //            wb = new HSSFWorkbook(inStr);  //2003-
 //        }else if(".xlsx".equals(fileType)){
@@ -622,7 +623,11 @@ public class ExcelUtils {
         try{
             wb = new XSSFWorkbook(inStr);
         }catch (Exception e){
-            wb = new HSSFWorkbook(inStr);
+            try{
+                wb = new HSSFWorkbook(inStr);
+            }catch (Exception e1){
+                throw e1;
+            }
         }
         return wb;
     }
@@ -633,6 +638,42 @@ public class ExcelUtils {
      * @return
      */
     public static String getCellValue(Cell cell){
+        String value = null;
+        DecimalFormat df = new DecimalFormat("0");  //格式化number String字符
+        SimpleDateFormat sdf = new SimpleDateFormat("yyy-MM-dd");  //日期格式化
+        DecimalFormat df2 = new DecimalFormat("0.00");  //格式化数字
+        switch (cell.getCellType()) {
+            case Cell.CELL_TYPE_STRING:
+                value = cell.getRichStringCellValue().getString();
+                break;
+            case Cell.CELL_TYPE_NUMERIC:
+                if("General".equals(cell.getCellStyle().getDataFormatString())){
+                    value = df.format(cell.getNumericCellValue());
+                }else if("m/d/yy".equals(cell.getCellStyle().getDataFormatString())){
+                    value = sdf.format(cell.getDateCellValue());
+                }else{
+                    value = df2.format(cell.getNumericCellValue());
+                }
+                break;
+            case Cell.CELL_TYPE_BOOLEAN:
+                Boolean booleanCellValue = cell.getBooleanCellValue();
+                value = booleanCellValue.toString();
+                break;
+            case Cell.CELL_TYPE_BLANK:
+                value = "";
+                break;
+            default:
+                break;
+        }
+        return value;
+    }
+
+    /**
+     * 描述：对表格中数值进行格式化
+     * @param cell
+     * @return
+     */
+    public static String getRealCellValue(Cell cell){
         String value = null;
         DecimalFormat df = new DecimalFormat("0");  //格式化number String字符
         SimpleDateFormat sdf = new SimpleDateFormat("yyy-MM-dd");  //日期格式化
