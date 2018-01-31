@@ -2784,7 +2784,7 @@ public class SalaryServiceImpl implements SalaryService {
 
     private SalaryEmployeeOriginVal processSalaryEmployeeOriginVal(SalaryGroupEntity groupEntity, Long detailId, String val) {
         SalaryEmployeeOriginVal salaryVal = ConvertHelper.convert(groupEntity, SalaryEmployeeOriginVal.class);
-        salaryVal.setSalaryValue(val.toString());
+        salaryVal.setSalaryValue(val);
         salaryVal.setUserDetailId(detailId);
         salaryVal.setGroupEntityId(groupEntity.getId());
         salaryVal.setGroupEntityName(groupEntity.getName());
