@@ -42,7 +42,6 @@ import java.io.IOException;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Objects;
-import java.util.concurrent.ConcurrentHashMap;
 
 @Component
 public class EquipmentStandardSearcherImpl extends AbstractElasticSearch implements EquipmentStandardSearcher{
@@ -69,7 +68,7 @@ public class EquipmentStandardSearcherImpl extends AbstractElasticSearch impleme
 
     //add atomic offset for (all community)
     //private static AtomicInteger offset = new AtomicInteger(0);
-    private static ConcurrentHashMap<Long, Integer> offsetHashMap = new ConcurrentHashMap<>();
+    //private static ConcurrentHashMap<Long, Integer> offsetHashMap = new ConcurrentHashMap<>();
 
     @Override
 	public void deleteById(Long id) {
@@ -243,7 +242,7 @@ public class EquipmentStandardSearcherImpl extends AbstractElasticSearch impleme
             nextPageAnchor = anchor + 1;
             ids.remove(ids.size() - 1);
         } else {
-            if (cmd.getTargetId() != null && cmd.getTargetId() != 0) {
+            /*if (cmd.getTargetId() != null && cmd.getTargetId() != 0) {
                 addApplyStandards(cmd, eqStandards);
                 if (eqStandards.size() <= pageSize) {
                     nextPageAnchor = null;
@@ -258,8 +257,8 @@ public class EquipmentStandardSearcherImpl extends AbstractElasticSearch impleme
                         nextPageAnchor = anchor + 1;
                     }
                 }
-            }
-            // addApplyStandards(cmd, eqStandards);
+            }*/
+            addApplyStandards(cmd, eqStandards);
             nextPageAnchor = null;
         }
 
