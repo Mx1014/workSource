@@ -35,9 +35,9 @@ public class SalaryGroupsFileProviderImpl implements SalaryGroupsFileProvider {
 		Long id = sequenceProvider.getNextSequence(NameMapper.getSequenceDomainFromTablePojo(EhSalaryGroupsFiles.class));
 		salaryGroupsFile.setId(id);
 		salaryGroupsFile.setCreateTime(new Timestamp(DateHelper.currentGMTTime().getTime()));
-		salaryGroupsFile.setCreatorUid(UserContext.current().getUser().getId());
-		salaryGroupsFile.setUpdateTime(salaryGroupsFile.getCreateTime());
-		salaryGroupsFile.setOperatorUid(salaryGroupsFile.getCreatorUid());
+		salaryGroupsFile.setCreatorUid(UserContext.currentUserId());
+//		salaryGroupsFile.setUpdateTime(salaryGroupsFile.getCreateTime());
+//		salaryGroupsFile.setOperatorUid(salaryGroupsFile.getCreatorUid());
 		getReadWriteDao().insert(salaryGroupsFile);
 		DaoHelper.publishDaoAction(DaoAction.CREATE, EhSalaryGroupsFiles.class, null);
 	}
@@ -45,8 +45,8 @@ public class SalaryGroupsFileProviderImpl implements SalaryGroupsFileProvider {
 	@Override
 	public void updateSalaryGroupsFile(SalaryGroupsFile salaryGroupsFile) {
 		assert (salaryGroupsFile.getId() != null);
-		salaryGroupsFile.setUpdateTime(new Timestamp(DateHelper.currentGMTTime().getTime()));
-		salaryGroupsFile.setOperatorUid(UserContext.current().getUser().getId());
+//		salaryGroupsFile.setUpdateTime(new Timestamp(DateHelper.currentGMTTime().getTime()));
+//		salaryGroupsFile.setOperatorUid(UserContext.current().getUser().getId());
 		getReadWriteDao().update(salaryGroupsFile);
 		DaoHelper.publishDaoAction(DaoAction.MODIFY, EhSalaryGroupsFiles.class, salaryGroupsFile.getId());
 	}

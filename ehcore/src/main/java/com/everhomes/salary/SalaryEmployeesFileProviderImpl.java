@@ -35,9 +35,9 @@ public class SalaryEmployeesFileProviderImpl implements SalaryEmployeesFileProvi
 		Long id = sequenceProvider.getNextSequence(NameMapper.getSequenceDomainFromTablePojo(EhSalaryEmployeesFiles.class));
 		salaryEmployeesFile.setId(id);
 		salaryEmployeesFile.setCreateTime(new Timestamp(DateHelper.currentGMTTime().getTime()));
-		salaryEmployeesFile.setCreatorUid(UserContext.current().getUser().getId());
-		salaryEmployeesFile.setUpdateTime(salaryEmployeesFile.getCreateTime());
-		salaryEmployeesFile.setOperatorUid(salaryEmployeesFile.getCreatorUid());
+		salaryEmployeesFile.setCreatorUid(UserContext.currentUserId());
+//		salaryEmployeesFile.setUpdateTime(salaryEmployeesFile.getCreateTime());
+//		salaryEmployeesFile.setOperatorUid(salaryEmployeesFile.getCreatorUid());
 		getReadWriteDao().insert(salaryEmployeesFile);
 		DaoHelper.publishDaoAction(DaoAction.CREATE, EhSalaryEmployeesFiles.class, null);
 	}
@@ -45,8 +45,8 @@ public class SalaryEmployeesFileProviderImpl implements SalaryEmployeesFileProvi
 	@Override
 	public void updateSalaryEmployeesFile(SalaryEmployeesFile salaryEmployeesFile) {
 		assert (salaryEmployeesFile.getId() != null);
-		salaryEmployeesFile.setUpdateTime(new Timestamp(DateHelper.currentGMTTime().getTime()));
-		salaryEmployeesFile.setOperatorUid(UserContext.current().getUser().getId());
+//		salaryEmployeesFile.setUpdateTime(new Timestamp(DateHelper.currentGMTTime().getTime()));
+//		salaryEmployeesFile.setOperatorUid(UserContext.current().getUser().getId());
 		getReadWriteDao().update(salaryEmployeesFile);
 		DaoHelper.publishDaoAction(DaoAction.MODIFY, EhSalaryEmployeesFiles.class, salaryEmployeesFile.getId());
 	}
