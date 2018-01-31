@@ -1,5 +1,6 @@
 package com.everhomes.techpark.expansion;
 
+import com.alibaba.fastjson.JSONArray;
 import com.everhomes.db.AccessSpec;
 import com.everhomes.db.DaoAction;
 import com.everhomes.db.DaoHelper;
@@ -142,6 +143,17 @@ public class EnterpriseApplyEntryProviderImpl implements EnterpriseApplyEntryPro
 			cond = cond.and(Tables.EH_LEASE_PROMOTIONS.CREATE_UID.eq(leasePromotion.getCreateUid()));
 			cond = cond.and(Tables.EH_LEASE_PROMOTIONS.ISSUER_TYPE.eq(LeaseIssuerType.NORMAL_USER.getCode()));
 		}
+		if (null != leasePromotion.getHouseResourceType()){
+			Condition cond2 = null;
+			List<String> houseResourceTypes = parseHouseResourceTypes(leasePromotion.getHouseResourceType());
+			for (String s : houseResourceTypes)
+				if (cond2 == null)
+					cond2 = Tables.EH_LEASE_PROMOTIONS.HOUSE_RESOURCE_TYPE.like("%"+s+"%");
+				else
+					cond2 = cond2.or(Tables.EH_LEASE_PROMOTIONS.HOUSE_RESOURCE_TYPE.like("%"+s+"%"));
+			if (cond2!=null)
+				cond = cond.and(cond2);
+		}
 
 		if(null != locator.getAnchor()){
 			cond = cond.and(Tables.EH_LEASE_PROMOTIONS.DEFAULT_ORDER.lt(locator.getAnchor()));
@@ -160,6 +172,14 @@ public class EnterpriseApplyEntryProviderImpl implements EnterpriseApplyEntryPro
 			locator.setAnchor(null);
 		}
 		return leasePromotions;
+	}
+
+	private List<String> parseHouseResourceTypes(String jsonArray){
+		JSONArray array = JSONArray.parseArray(jsonArray);
+		List<String> result = new ArrayList<>();
+		for (Object obj:array)
+			result.add((String)obj);
+		return result;
 	}
 
 	@Override
