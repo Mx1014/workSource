@@ -120,6 +120,7 @@ public class CustomerDynamicExcelHandler implements DynamicExcelHandler {
 
                         if(columns != null && columns.size() > 0) {
                             for(DynamicColumnDTO column : columns) {
+                                LOGGER.warn("CUSTOMER_TAX: cellvalue: {}, namespaceId: {}, communityId: {}, moduleName: {}", column.getValue(), namespaceId, communityId, moduleName);
                                 if("taxPayerTypeId".equals(column.getFieldName())) {
                                     ScopeFieldItem item = fieldService.findScopeFieldItemByDisplayName(namespaceId, communityId, moduleName, column.getValue());
                                     if(item != null) {
