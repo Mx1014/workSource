@@ -21,6 +21,7 @@ import java.util.List;
  * <li>createTime : 创建时间</li>
  * <li>updateUid : 更新者</li>
  * <li>updateTime : 更新时间</li>
+ * <li>operatorName : 操作人姓名</li>
  * <li>receivers : 公告的发送范围：发送给部门或者员工，参考{@link EnterpriseNoticeReceiverDTO}</li>
  * <li>attachments : 已上传的附件，复制公告的时候会使用到，参考{@link EnterpriseNoticeAttachmentDTO }</li>
  * </ul>
@@ -38,6 +39,7 @@ public class EnterpriseNoticeDTO {
     private Date createTime;
     private Long updateUid;
     private Date updateTime;
+    private String operatorName;
     @ItemType(value = EnterpriseNoticeReceiverDTO.class)
     private List<EnterpriseNoticeReceiverDTO> receivers;
     @ItemType(value = EnterpriseNoticeAttachmentDTO.class)
@@ -153,6 +155,14 @@ public class EnterpriseNoticeDTO {
 
     public void setAttachments(List<EnterpriseNoticeAttachmentDTO> attachments) {
         this.attachments = attachments;
+    }
+
+    public String getOperatorName() {
+        return operatorName;
+    }
+
+    public void setOperatorName(String operatorName) {
+        this.operatorName = operatorName;
     }
 
     @Override

@@ -20,4 +20,8 @@ public interface EnterpriseNoticeService {
 
     UserContactSimpleInfoDTO getCurrentUserContactSimpleInfo(GetCurrentUserContactInfoCommand cmd);
 
+    String getUserContactNameByUserId(Long userId);
+
+    boolean isNoticeSendToCurrentUser(Long enterpriseNoticeId);
+
 }

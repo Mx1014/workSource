@@ -16,6 +16,7 @@ CREATE TABLE `eh_enterprise_notices` (
   `create_time` DATETIME,
   `update_uid` BIGINT,
   `update_time` DATETIME,
+  `operator_name` VARCHAR(128) COMMENT 'the name of the operator',
   `delete_uid` BIGINT,
   `delete_time` DATETIME,
 
