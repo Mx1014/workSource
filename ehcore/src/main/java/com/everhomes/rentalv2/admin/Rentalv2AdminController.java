@@ -700,7 +700,6 @@ public class Rentalv2AdminController extends ControllerBase {
 	@RequestMapping("getResourcePriceRule")
 	@RestReturn(ResourcePriceRuleDTO.class)
 	public RestResponse getResourcePriceRule(GetResourcePriceRuleCommand cmd) {
-
 		RestResponse response = new RestResponse(rentalService.getResourcePriceRule(cmd));
 		response.setErrorCode(ErrorCodes.SUCCESS);
 		response.setErrorDescription("OK");
@@ -776,6 +775,20 @@ public class Rentalv2AdminController extends ControllerBase {
 	public RestResponse searchRentalOrders(SearchRentalOrdersCommand cmd) {
 
 		RestResponse response = new RestResponse(rentalService.searchRentalOrders(cmd));
+		response.setErrorCode(ErrorCodes.SUCCESS);
+		response.setErrorDescription("OK");
+		return response;
+	}
+	/*-------------------------------------------新的更新资源接口---------------------------------- */
+	/**
+	 *
+	 * <b>URL: /rental/admin/getResourceSiteCount<b>
+	 * <p>获取价格规则</p>
+	 */
+	@RequestMapping("getResourceSiteCount")
+	@RestReturn(ResourceSiteCountDTO.class)
+	public RestResponse getResourceSiteCount(GetResourceSiteCountCommand cmd) {
+		RestResponse response = new RestResponse(rentalService.getResourceSiteCount(cmd));
 		response.setErrorCode(ErrorCodes.SUCCESS);
 		response.setErrorDescription("OK");
 		return response;

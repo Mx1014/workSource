@@ -7473,6 +7473,15 @@ public class Rentalv2ServiceImpl implements Rentalv2Service {
 	}
 
 	@Override
+	public ResourceSiteCountDTO getResourceSiteCount(GetResourceSiteCountCommand cmd) {
+		if (StringUtils.isBlank(cmd.getResourceType())) {
+			cmd.setResourceType(RentalV2ResourceType.DEFAULT.getCode());
+		}
+		//this.rentalv2Provider.getRentalSiteById()
+		return null;
+	}
+
+	@Override
 	public AddRentalOrderUsingInfoResponse addRentalOrderUsingInfo(AddRentalOrderUsingInfoCommand cmd) {
 
 		AddRentalBillItemCommand actualCmd = ConvertHelper.convert(cmd, AddRentalBillItemCommand.class);

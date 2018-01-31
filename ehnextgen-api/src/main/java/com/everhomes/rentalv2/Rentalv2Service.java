@@ -174,6 +174,8 @@ public interface Rentalv2Service {
 
 	ResourceOrderRuleDTO getResourceOrderRule(GetResourceOrderRuleCommand cmd);
 
+	ResourceSiteCountDTO getResourceSiteCount(GetResourceSiteCountCommand cmd);
+
 	AddRentalOrderUsingInfoResponse addRentalOrderUsingInfo(AddRentalOrderUsingInfoCommand cmd);
 
 	AddRentalOrderUsingInfoV2Response addRentalOrderUsingInfoV2(AddRentalOrderUsingInfoCommand cmd);
