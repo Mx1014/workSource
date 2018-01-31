@@ -1703,6 +1703,8 @@ public class NewsServiceImpl implements NewsService {
 		if(eStatus == NewsStatus.DRAFT){
 			news.setStatus(NewsStatus.ACTIVE.getCode());
 			newsProvider.updateNews(news);
+
+			syncNews(news.getId());
 		}
 	}
 }
