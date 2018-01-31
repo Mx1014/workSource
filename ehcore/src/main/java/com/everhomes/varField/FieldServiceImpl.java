@@ -189,6 +189,8 @@ public class FieldServiceImpl implements FieldService {
         //获得客户所拥有的sheet
         List<FieldGroupDTO> allGroups = listFieldGroups(cmd1);
         List<FieldGroupDTO> groups = new ArrayList<>();
+        List<FieldGroupDTO> targetGroups = new ArrayList<>();
+
         if(onlyLeaf){
             getAllGroups(allGroups,groups);
         }else{
@@ -196,19 +198,19 @@ public class FieldServiceImpl implements FieldService {
         }
         //双重循环匹配浏览器所传的sheetName，获得目标sheet集合
         if(StringUtils.isEmpty(cmd.getIncludedGroupIds())) {
-            return groups;
+            return targetGroups;
         }
         String[] split = cmd.getIncludedGroupIds().split(",");
         for(int i = 0 ; i < split.length; i ++){
             long targetGroupId = Long.parseLong(split[i]);
-            for(int j = 0; j < allGroups.size(); j++){
-                Long id = allGroups.get(j).getGroupId();
+            for(int j = 0; j < groups.size(); j++){
+                Long id = groups.get(j).getGroupId();
                 if(id.compareTo(targetGroupId) == 0){
-                    groups.add(allGroups.get(j));
+                    targetGroups.add(groups.get(j));
                 }
             }
         }
-        return groups;
+        return targetGroups;
     }
 
     @Override

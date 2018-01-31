@@ -73,13 +73,19 @@ public class DynamicExcelImpl implements DynamicExcelService{
                 if(enumSupport){
                     intro += DynamicExcelStrings.enumNotice;
                     for(DynamicField df : fields){
-                        if(df.isMandatory()){
-                            String enumItem = df.getDisplayName() + ":";
+                        if(df.getAllowedValued() !=null){
+                            StringBuilder enumItem = new StringBuilder();
+                            enumItem.append(df.getDisplayName());
+                            enumItem.append(":");
                             for(String enumStr : df.getAllowedValued()){
-                                enumItem += enumStr + "  ";
+                                enumItem.append(enumStr);
+                                enumItem.append(",");
                             }
-                            enumItem += "\n";
-                            intro += enumItem;
+                            if(enumItem.lastIndexOf(",") == enumItem.length() - 1){
+                                enumItem.deleteCharAt(enumItem.length() - 1);
+                            }
+                            enumItem.append("\n");
+                            intro += enumItem.toString();
                         }
                     }
                 }
