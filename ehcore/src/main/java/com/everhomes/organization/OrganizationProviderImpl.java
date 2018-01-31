@@ -5235,10 +5235,9 @@ public class OrganizationProviderImpl implements OrganizationProvider {
 		TableLike t2 = Tables.EH_ORGANIZATION_MEMBER_DETAILS.as("t2");
 		SelectJoinStep step = context.select().from(t1).leftOuterJoin(t2).on(t1.field("detail_id").eq(t2.field("id")));
 
-		Condition cond = t1.field("group_path").like(big_path+"%");
+		Condition cond = t1.field("group_path").like(big_path+"/%");
 
 		cond = cond.and(t1.field("namespace_id").eq(namespaceId));
-		cond = cond.and(t1.field("group_type").eq(OrganizationGroupType.DEPARTMENT.getCode()));
 //		cond = cond.and(t1.field("status").eq(OrganizationMemberStatus.ACTIVE.getCode()));
 
 		if (small_path != null) {
