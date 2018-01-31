@@ -5386,6 +5386,8 @@ private void checkUserPrivilege(Long orgId, Long privilegeId, Long communityId) 
 			equipmentProvider.createEquipmentPlanMaps(equipmentPlanMap);
 			equipmentStandardRelation.add(relation);
 		}
+
+		equipmentProvider.deleteEquipmentInspectionPlanGroupMapByPlanId(plan.getId());
 		//巡检计划增加审批和执行人员
 		processPlanGroups(cmd.getGroupList(), plan);
 		//inActive 所有关联任务当前时间节点之前任务继续   状态变成待审核
