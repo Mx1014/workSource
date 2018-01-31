@@ -2662,8 +2662,8 @@ public class SalaryServiceImpl implements SalaryService {
         if (null != groupEntities) {
             for (int i = 0; i < groupEntities.size(); i++) {
                 try {
-                    if (!groupEntities.get(i).equals(titleList.get(i + 2))) {
-                        LOGGER.error("第{}列不是{}而是{}",(i+1),groupEntities.get(i),titleList.get(1));
+                    if (!groupEntities.get(i).getName().equals(titleList.get(i + 2))) {
+                        LOGGER.error("第{}列不是{}而是{}",(i+1),groupEntities.get(i).getName(),titleList.get(i));
                         return ImportFileErrorType.TITLE_ERROE.getCode();
                     }
                 } catch (Exception e) {
