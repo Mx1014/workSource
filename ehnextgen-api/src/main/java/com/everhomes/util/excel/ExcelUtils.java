@@ -642,6 +642,9 @@ public class ExcelUtils {
         DecimalFormat df = new DecimalFormat("0");  //格式化number String字符
         SimpleDateFormat sdf = new SimpleDateFormat("yyy-MM-dd");  //日期格式化
         DecimalFormat df2 = new DecimalFormat("0.00");  //格式化数字
+        if(cell == null){
+            return "";
+        }
         switch (cell.getCellType()) {
             case Cell.CELL_TYPE_STRING:
                 value = cell.getRichStringCellValue().getString();
