@@ -7504,7 +7504,7 @@ public class PunchServiceImpl implements PunchService {
 				) {
 			//如果查不到当前状态的就 并且pr 的状态不是正常
 			schedulings = punchSchedulingProvider.queryPunchSchedulings(tomorrow,endDate,pr.getId(),PunchRuleStatus.ACTIVE.getCode()) ;
-			LOGGER.debug("取正常状态的schedulings "+StringHelper.toJsonString(schedulings));
+//			LOGGER.debug("取正常状态的schedulings "+StringHelper.toJsonString(schedulings));
 		}else{
 //			LOGGER.debug("他说有schedulings "+StringHelper.toJsonString(schedulings));
 		}
@@ -7555,7 +7555,7 @@ public class PunchServiceImpl implements PunchService {
 						}
 					}
 					else{
-						employeeDTO.getDaySchedulings().add("未排班");
+						employeeDTO.getDaySchedulings().add("");
 					}
 				}
 				employeeDTOs.add(employeeDTO);
