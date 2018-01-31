@@ -1533,6 +1533,7 @@ public class WarehouseServiceImpl implements WarehouseService {
             order.setIdentity(SupplierHelper.getIdentity());
             order.setExecutorId(UserContext.currentUserId());
             order.setServiceType(cmd.getServiceType());
+            order.setCommunityId(cmd.getCommunityId());
         } else {
             insert = false;
             //更新

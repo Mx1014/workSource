@@ -21,6 +21,7 @@ public class CreateOrUpdateWarehouseEntryOrderCommand {
     private Long id;
     private String ownerType;
     private Long ownerId;
+    private Long communityId;
     private Integer namespaceId;
     private Byte serviceType;
 
@@ -38,6 +39,14 @@ public class CreateOrUpdateWarehouseEntryOrderCommand {
 
     public void setOwnerType(String ownerType) {
         this.ownerType = ownerType;
+    }
+
+    public Long getCommunityId() {
+        return communityId;
+    }
+
+    public void setCommunityId(Long communityId) {
+        this.communityId = communityId;
     }
 
     public Long getOwnerId() {

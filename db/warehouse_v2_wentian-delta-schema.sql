@@ -90,6 +90,7 @@ CREATE TABLE `eh_warehouse_orders`(
   `executor_name` VARCHAR(128) DEFAULT NULL COMMENT '执行人姓名',
   `executor_time` DATETIME DEFAULT now() COMMENT '执行时间',
   `service_type` TINYINT DEFAULT NULL COMMENT '服务类型，1. 普通入库,2.领用出库，3.采购入库',
+  `community_id` BIGINT DEFAULT NULL COMMENT '园区id',
   `create_time` DATETIME DEFAULT NOW(),
   `create_uid` BIGINT DEFAULT NULL,
   `update_time` DATETIME DEFAULT NOW(),
