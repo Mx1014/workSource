@@ -139,4 +139,12 @@ public interface SalaryService {
     ImportFileResponse getImportResult(GetImportFileResultCommand cmd);
 
     OutputStream getEmployeeSalaryOutPut(Long organizationId, Long taskId);
+
+    GetSalaryGroupStatusResponse getSalaryGroupStatus(GetSalaryGroupStatusCommand cmd);
+
+    void exportSalaryReport(ExportSalaryReportCommand cmd);
+
+    void fileSalaryGroup(FileSalaryGroupCommand cmd);
+
+    void newSalaryMonth(NewSalaryMonthCommand cmd);
 }

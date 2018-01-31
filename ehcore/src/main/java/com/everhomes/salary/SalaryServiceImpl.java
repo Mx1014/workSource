@@ -2739,6 +2739,26 @@ public class SalaryServiceImpl implements SalaryService {
         return outputStream;
     }
 
+    @Override
+    public GetSalaryGroupStatusResponse getSalaryGroupStatus(GetSalaryGroupStatusCommand cmd) {
+        return null;
+    }
+
+    @Override
+    public void exportSalaryReport(ExportSalaryReportCommand cmd) {
+        
+    }
+
+    @Override
+    public void fileSalaryGroup(FileSalaryGroupCommand cmd) {
+
+    }
+
+    @Override
+    public void newSalaryMonth(NewSalaryMonthCommand cmd) {
+
+    }
+
     private Workbook createEmployeeSalaryHeadWB(Long orgId) {
         List<SalaryGroupEntity> groupEntities = salaryGroupEntityProvider.listSalaryGroupEntityByOrgId(orgId);
 
