@@ -493,6 +493,7 @@ public class EquipmentServiceImpl implements EquipmentService {
 				equipmentStandardMap.setTargetId(equipment.getId());
 				equipmentStandardMap.setTargetType(InspectionStandardMapTargetType.EQUIPMENT.getCode());
 				equipmentProvider.createEquipmentStandardMap(equipmentStandardMap);
+				equipmentStandardMapSearcher.feedDoc(equipmentStandardMap);
 				createdEquipments.add(ConvertHelper.convert(equipment, EquipmentInspectionEquipments.class));
 			}
 			standard.setEquipments(createdEquipments);
