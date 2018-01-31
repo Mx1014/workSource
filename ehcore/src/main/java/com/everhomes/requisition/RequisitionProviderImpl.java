@@ -8,6 +8,7 @@ import com.everhomes.server.schema.Tables;
 import com.everhomes.server.schema.tables.EhRequisitionTypes;
 import com.everhomes.server.schema.tables.EhRequisitions;
 import com.everhomes.server.schema.tables.daos.EhRequisitionsDao;
+import org.apache.commons.lang.StringUtils;
 import org.jooq.DSLContext;
 import org.jooq.Record;
 import org.jooq.SelectQuery;
@@ -43,7 +44,7 @@ public class RequisitionProviderImpl implements RequisitionProvider {
         query.addConditions(req.NAMESPACE_ID.eq(namespaceId));
         query.addConditions(req.OWNER_ID.eq(ownerId));
         query.addConditions(req.OWNER_TYPE.eq(ownerType));
-        if(theme!=null){
+        if(StringUtils.isNotBlank(theme)){
             query.addConditions(req.THEME.eq(theme));
         }
         if(typeId!=null){
@@ -55,7 +56,9 @@ public class RequisitionProviderImpl implements RequisitionProvider {
             ListRequisitionsDTO dto = new ListRequisitionsDTO();
             dto.setApplicantDepartment(r.getValue(req.APPLICANT_DEPARTMENT));
             dto.setApplicantName(r.getValue(req.APPLICANT_NAME));
-            dto.setApplicantTime(sdf.format(r.getValue(req.CREATE_TIME)));
+            if(r.getValue(req.CREATE_TIME) != null){
+                dto.setApplicantTime(sdf.format(r.getValue(req.CREATE_TIME)));
+            }
             dto.setIdentity(r.getValue(req.IDENTITY));
             dto.setStatus(r.getValue(req.STATUS));
             dto.setType(r.getValue(reqType.NAME));

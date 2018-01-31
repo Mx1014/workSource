@@ -31,7 +31,7 @@ public class CreateRequisitionCommand {
     private String applicantDepartment;
     private BigDecimal amount;
     private String description;
-    private Byte requisitionTypeId;
+    private Long requisitionTypeId;
     private String attachmentUrl;
 
     public String getAttachmentUrl() {
@@ -42,11 +42,11 @@ public class CreateRequisitionCommand {
         this.attachmentUrl = attachmentUrl;
     }
 
-    public Byte getRequisitionTypeId() {
+    public Long getRequisitionTypeId() {
         return requisitionTypeId;
     }
 
-    public void setRequisitionTypeId(Byte requisitionTypeId) {
+    public void setRequisitionTypeId(Long requisitionTypeId) {
         this.requisitionTypeId = requisitionTypeId;
     }
 

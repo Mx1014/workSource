@@ -8,9 +8,11 @@ import com.everhomes.server.schema.tables.pojos.EhRequisitions;
 import com.everhomes.supplier.SupplierHelper;
 import com.everhomes.user.UserContext;
 import com.everhomes.util.ConvertHelper;
+import com.everhomes.util.DateHelper;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
+import java.sql.Timestamp;
 import java.util.ArrayList;
 import java.util.List;
 
@@ -31,6 +33,8 @@ public class RequisitionServiceImpl implements RequisitionService {
         req.setCreateUid(UserContext.currentUserId());
         req.setId(this.sequenceProvider.getNextSequence(NameMapper.getSequenceDomainFromTablePojo(EhRequisitions.class)));
         req.setIdentity(SupplierHelper.getIdentity());
+        req.setCreateUid(UserContext.currentUserId());
+        req.setCreateTime(new Timestamp(DateHelper.currentGMTTime().getTime()));
         requisitionProvider.saveRequisition(req);
 
     }
@@ -48,7 +52,7 @@ public class RequisitionServiceImpl implements RequisitionService {
             result.remove(result.size()-1);
             response.setNextPageAnchor(pageSize + pageAnchor);
         }
-        response.setData(result);
+        response.setList(result);
         return response;
     }
 
@@ -71,6 +75,10 @@ public class RequisitionServiceImpl implements RequisitionService {
         List<ListRequisitionTypesDTO> result = new ArrayList<>();
         List<RequisitionType> list = requisitionProvider.listRequisitionTypes(cmd.getNamespaceId()
                 ,cmd.getOwnerId(),cmd.getOwnerType());
+        if(list.size() < 1){
+            list = requisitionProvider.listRequisitionTypes(0
+                    ,0l,"EhNamespaces");
+        }
         for(RequisitionType type : list){
             ListRequisitionTypesDTO dto = new ListRequisitionTypesDTO();
             dto.setId(type.getId());
