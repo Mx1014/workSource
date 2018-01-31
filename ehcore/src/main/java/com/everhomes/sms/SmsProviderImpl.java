@@ -32,14 +32,20 @@ public class SmsProviderImpl implements SmsProvider {
 
     protected static final Logger LOGGER = LoggerFactory.getLogger(SmsProviderImpl.class);
 
-    private static final String SMS_HANDLER_RESOLVER_NAME = "sms.handlerResolverName";
-    private static final String SMS_TEST_PHONE_REGEX = "sms.testPhoneRegex";
-    private static final String SMS_STRICT_PHONE_REGEX = "sms.strictPhoneRegex";
+    private static final String SMS_HANDLER_RESOLVER_NAME_KEY = "sms.handlerResolverName";
+    private static final String SMS_TEST_PHONE_REGEX_KEY = "sms.testPhoneRegex";
+    private static final String SMS_STRICT_PHONE_REGEX_KEY = "sms.strictPhoneRegex";
 
     // 严格正则
-    private Pattern strictPhonePattern = Pattern.compile("^(?:13[0-9]|14[579]|15[0-3,5-9]|17[0135678]|18[0-9])\\d{8}$");
+    private static final String SMS_STRICT_PHONE_REGEX =
+            "^(?:13[0-9]|14[579]|15[0-3,5-9]|17[0135678]|18[0-9])\\d{8}$";
+
     // 测试手机号正则
-    private Pattern testPhonePattern = Pattern.compile("^(?:1[0-2])\\d{9}$");
+    private static final String SMS_TEST_PHONE_REGEX =
+            "^(?:1[0-2])\\d{9}$";
+
+    private Pattern strictPhonePattern = Pattern.compile(SMS_STRICT_PHONE_REGEX);
+    private Pattern testPhonePattern = Pattern.compile(SMS_TEST_PHONE_REGEX);
 
     private Map<String, SmsHandlerResolver> resolvers = new HashMap<>();
 
@@ -216,7 +222,7 @@ public class SmsProviderImpl implements SmsProvider {
 
     private Pattern testPhonePattern() {
         try {
-            String reg = configurationProvider.getValue(SMS_TEST_PHONE_REGEX, "^(?:1[0-2])\\d{9}$");
+            String reg = configurationProvider.getValue(SMS_TEST_PHONE_REGEX_KEY, SMS_TEST_PHONE_REGEX);
             this.testPhonePattern = Pattern.compile(reg);
         } catch (Exception e) {
             //
@@ -226,8 +232,7 @@ public class SmsProviderImpl implements SmsProvider {
 
     private Pattern strictPhonePattern() {
         try {
-            String reg = configurationProvider.getValue(SMS_STRICT_PHONE_REGEX,
-                    "^(?:13[0-9]|14[579]|15[0-3,5-9]|17[0135678]|18[0-9])\\d{8}$");
+            String reg = configurationProvider.getValue(SMS_STRICT_PHONE_REGEX_KEY, SMS_STRICT_PHONE_REGEX);
             this.strictPhonePattern = Pattern.compile(reg);
         } catch (Exception e) {
             //
@@ -237,7 +242,7 @@ public class SmsProviderImpl implements SmsProvider {
 
     private Map<SmsHandler, String[]> getSmsHandlerMap(
             String handlerName, Integer namespaceId, String[] phoneNumbers) {
-        String val = configurationProvider.getValue(SMS_HANDLER_RESOLVER_NAME, "SMART");
+        String val = configurationProvider.getValue(SMS_HANDLER_RESOLVER_NAME_KEY, "SMART");
 
         SmsHandlerResolver resolver = resolvers.get(SmsHandlerResolver.RESOLVER_NAME_PREFIX + val);
 
