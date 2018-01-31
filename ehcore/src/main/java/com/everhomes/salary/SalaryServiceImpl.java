@@ -2671,13 +2671,7 @@ public class SalaryServiceImpl implements SalaryService {
                 }
                 SalaryEmployeeOriginVal salaryVal = salaryEmployeeOriginValProvider.findSalaryEmployeeOriginValByDetailId(groupEntity.getId(), detailId);
                 if (null == salaryVal) {
-                    salaryVal = ConvertHelper.convert(groupEntity, SalaryEmployeeOriginVal.class);
-                    salaryVal.setSalaryValue(val);
-                    salaryVal.setUserDetailId(detailId);
-                    salaryVal.setGroupEntityId(groupEntity.getId());
-                    salaryVal.setGroupEntityName(groupEntity.getName());
-                    salaryVal.setOwnerId(ownerId);
-                    salaryVal.setOwnerType("organization");
+                    salaryVal = processSalaryEmployeeOriginVal(groupEntity, detailId, val);
                     salaryEmployeeOriginValProvider.createSalaryEmployeeOriginVal(salaryVal);
                 } else {
                     salaryVal.setSalaryValue(val);
@@ -2764,9 +2758,17 @@ public class SalaryServiceImpl implements SalaryService {
             }
             //累加完了开始计税
             BigDecimal salaryTax = calculateSalaryTax(salary);
-            BigDecimal bonusTax = calculateBonusTax(bonus);
+            BigDecimal bonusTax = calculateBonusTax(bonus,salaryTax);
             //保存计税
+            SalaryGroupEntity groupEntity = salaryGroupEntityProvider.findSalaryGroupEntityByOwnerANdDefaultId(ownerId, SalaryConstants.ENTITY_ID_SALARYTAX);
+            salaryEmployeeOriginValProvider.deleteSalaryEmployeeOriginValByDetailIdAndGroouEntity(detailId, groupEntity.getId());
+            SalaryEmployeeOriginVal salaryVal = processSalaryEmployeeOriginVal(groupEntity, detailId, salaryTax.toString());
+            salaryEmployeeOriginValProvider.createSalaryEmployeeOriginVal(salaryVal);
 
+            groupEntity = salaryGroupEntityProvider.findSalaryGroupEntityByOwnerANdDefaultId(ownerId, SalaryConstants.ENTITY_ID_BONUSTAX);
+            salaryEmployeeOriginValProvider.deleteSalaryEmployeeOriginValByDetailIdAndGroouEntity(detailId, groupEntity.getId());
+            SalaryEmployeeOriginVal bonusVal = processSalaryEmployeeOriginVal(groupEntity, detailId, bonusTax.toString());
+            salaryEmployeeOriginValProvider.createSalaryEmployeeOriginVal(bonusVal);
         }
         realPay = shouldPay.subtract(salary).subtract(bonus).add(afterTax);
         employee.setRegularSalary(regular);
@@ -2780,13 +2782,48 @@ public class SalaryServiceImpl implements SalaryService {
 
     }
 
-    private BigDecimal calculateBonusTax(BigDecimal bonus) {
-        BigDecimal result = new BigDecimal(0);
-        return result;
+    private SalaryEmployeeOriginVal processSalaryEmployeeOriginVal(SalaryGroupEntity groupEntity, Long detailId, String val) {
+        SalaryEmployeeOriginVal salaryVal = ConvertHelper.convert(groupEntity, SalaryEmployeeOriginVal.class);
+        salaryVal.setSalaryValue(val);
+        salaryVal.setUserDetailId(detailId);
+        salaryVal.setGroupEntityId(groupEntity.getId());
+        salaryVal.setGroupEntityName(groupEntity.getName());
+        salaryVal.setOwnerId(groupEntity.getOwnerId());
+        salaryVal.setOwnerType("organization");
+        return salaryVal;
+    }
+
+    private BigDecimal calculateBonusTax(BigDecimal bonus, BigDecimal salary) {
+        BigDecimal muni = new BigDecimal(0);
+        if (salary.compareTo(new BigDecimal(3500)) < 0) {
+            muni = new BigDecimal(3500).subtract(salary);
+        }
+        BigDecimal taxBase = bonus.subtract(muni).divide(new BigDecimal(12));
+        //这里要加一个3500的基数计算税
+        return calculateSalaryTax(taxBase.add(new BigDecimal(3500)));
     }
 
     private BigDecimal calculateSalaryTax(BigDecimal salary) {
         BigDecimal result = new BigDecimal(0);
+        if (salary.compareTo(new BigDecimal(3500)) <= 0) {
+            return result;
+        }
+        BigDecimal taxBase = salary.subtract(new BigDecimal(3500));
+        if (taxBase.compareTo(new BigDecimal(1500)) <= 0) {
+            result = taxBase.multiply(new BigDecimal(0.03));
+        } else if (taxBase.compareTo(new BigDecimal(4500)) <= 0) {
+            result = taxBase.multiply(new BigDecimal(0.1)).subtract(new BigDecimal(105));
+        } else if (taxBase.compareTo(new BigDecimal(9000)) <= 0) {
+            result = taxBase.multiply(new BigDecimal(0.2)).subtract(new BigDecimal(555));
+        } else if (taxBase.compareTo(new BigDecimal(35000)) <= 0) {
+            result = taxBase.multiply(new BigDecimal(0.25)).subtract(new BigDecimal(1005));
+        } else if (taxBase.compareTo(new BigDecimal(55000)) <= 0) {
+            result = taxBase.multiply(new BigDecimal(0.3)).subtract(new BigDecimal(2755));
+        } else if (taxBase.compareTo(new BigDecimal(80000)) <= 0) {
+            result = taxBase.multiply(new BigDecimal(0.35)).subtract(new BigDecimal(5505));
+        } else {
+            result = taxBase.multiply(new BigDecimal(0.45)).subtract(new BigDecimal(13505));
+        }
         return result;
     }
 
