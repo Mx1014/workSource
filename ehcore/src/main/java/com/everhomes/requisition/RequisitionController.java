@@ -25,6 +25,7 @@ public class RequisitionController extends ControllerBase {
     @RequestMapping("createRequisition")
     @RestReturn(value = String.class)
     public RestResponse createRequisition(CreateRequisitionCommand cmd){
+        requisitionService.createRequisition(cmd);
         RestResponse restResponse = new RestResponse();
         restResponse.setErrorCode(200);
         restResponse.setErrorDescription("OK");
@@ -38,7 +39,8 @@ public class RequisitionController extends ControllerBase {
     @RequestMapping("listRequisitions")
     @RestReturn(value = ListRequisitionsResponse.class)
     public RestResponse listRequisitions(ListRequisitionsCommand cmd){
-        RestResponse restResponse = new RestResponse();
+        ListRequisitionsResponse response = requisitionService.listRequisitions(cmd);
+        RestResponse restResponse = new RestResponse(response);
         restResponse.setErrorCode(200);
         restResponse.setErrorDescription("OK");
         return restResponse;
