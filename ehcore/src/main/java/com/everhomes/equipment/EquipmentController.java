@@ -1017,4 +1017,15 @@ public class EquipmentController extends ControllerBase {
         return getSuccessResponse();
     }
 
+    /**
+     * <b>URL: /equipment/updateEquipmentStatus</b>
+     * <p>报废设备</p>
+     */
+    @RequestMapping("updateEquipmentStatus")
+    @RestReturn(value = String.class)
+    public RestResponse updateEquipmentStatus(DeleteEquipmentsCommand cmd) {
+        equipmentService.updateEquipmentStatus(cmd);
+        return getSuccessResponse();
+    }
+
 }

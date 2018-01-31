@@ -14,6 +14,7 @@ import com.everhomes.rest.equipment.AdminFlag;
 import com.everhomes.rest.equipment.EquipmentOperateObjectType;
 import com.everhomes.rest.equipment.EquipmentPlanStatus;
 import com.everhomes.rest.equipment.EquipmentReviewStatus;
+import com.everhomes.rest.equipment.EquipmentStandardStatus;
 import com.everhomes.rest.equipment.EquipmentStatus;
 import com.everhomes.rest.equipment.EquipmentTaskProcessResult;
 import com.everhomes.rest.equipment.EquipmentTaskProcessType;
@@ -70,7 +71,9 @@ import com.everhomes.server.schema.tables.pojos.EhEquipmentInspectionEquipmentSt
 import com.everhomes.server.schema.tables.pojos.EhEquipmentInspectionEquipments;
 import com.everhomes.server.schema.tables.pojos.EhEquipmentInspectionItemResults;
 import com.everhomes.server.schema.tables.pojos.EhEquipmentInspectionItems;
+import com.everhomes.server.schema.tables.pojos.EhEquipmentInspectionPlanGroupMap;
 import com.everhomes.server.schema.tables.pojos.EhEquipmentInspectionPlans;
+import com.everhomes.server.schema.tables.pojos.EhEquipmentInspectionReviewDate;
 import com.everhomes.server.schema.tables.pojos.EhEquipmentInspectionStandardGroupMap;
 import com.everhomes.server.schema.tables.pojos.EhEquipmentInspectionStandards;
 import com.everhomes.server.schema.tables.pojos.EhEquipmentInspectionTaskAttachments;
@@ -1523,7 +1526,7 @@ public class EquipmentProviderImpl implements EquipmentProvider {
 
     @Override
     public void createEquipmentPlanMaps(EquipmentInspectionEquipmentPlanMap map) {
-        Long id = this.sequenceProvider.getNextSequence(NameMapper.getSequenceDomainFromTablePojo(EquipmentInspectionEquipmentPlanMap.class));
+        Long id = this.sequenceProvider.getNextSequence(NameMapper.getSequenceDomainFromTablePojo(EhEquipmentInspectionEquipmentPlanMap.class));
         map.setId(id);
         DSLContext context = this.dbProvider.getDslContext(AccessSpec.readWrite());
         EhEquipmentInspectionEquipmentPlanMapDao dao = new EhEquipmentInspectionEquipmentPlanMapDao(context.configuration());
@@ -2847,7 +2850,7 @@ public class EquipmentProviderImpl implements EquipmentProvider {
 
     @Override
     public void createEquipmentInspectionPlanGroupMap(EquipmentInspectionPlanGroupMap map) {
-        Long id = this.sequenceProvider.getNextSequence(NameMapper.getSequenceDomainFromTablePojo(EquipmentInspectionPlanGroupMap.class));
+        Long id = this.sequenceProvider.getNextSequence(NameMapper.getSequenceDomainFromTablePojo(EhEquipmentInspectionPlanGroupMap.class));
         map.setId(id);
         DSLContext context = this.dbProvider.getDslContext(AccessSpec.readWrite());
         EhEquipmentInspectionPlanGroupMapDao dao = new EhEquipmentInspectionPlanGroupMapDao(context.configuration());
@@ -2954,7 +2957,7 @@ public class EquipmentProviderImpl implements EquipmentProvider {
 
     @Override
     public void createReviewExpireDays(EquipmentInspectionReviewDate reviewDate) {
-        Long id = sequenceProvider.getNextSequence(NameMapper.getSequenceDomainFromTablePojo(EquipmentInspectionReviewDate.class));
+        Long id = sequenceProvider.getNextSequence(NameMapper.getSequenceDomainFromTablePojo(EhEquipmentInspectionReviewDate.class));
         DSLContext context = this.dbProvider.getDslContext(AccessSpec.readWrite());
         EhEquipmentInspectionReviewDateDao dateDao = new EhEquipmentInspectionReviewDateDao(context.configuration());
         reviewDate.setId(id);
@@ -3164,5 +3167,17 @@ public class EquipmentProviderImpl implements EquipmentProvider {
             response.setTotayTasksCount(r.getValue("totayTasksCount",Long.class));
             return null;
         });
+    }
+
+    @Override
+    public List<EquipmentInspectionStandards> listEquipmentStandardWithReferId(Long targetId, String targetType) {
+        DSLContext context = this.dbProvider.getDslContext(AccessSpec.readOnly());
+        return context.selectFrom(Tables.EH_EQUIPMENT_INSPECTION_STANDARDS)
+                .where(Tables.EH_EQUIPMENT_INSPECTION_STANDARDS.STATUS.eq(EquipmentStandardStatus.ACTIVE.getCode()))
+                .and(Tables.EH_EQUIPMENT_INSPECTION_STANDARDS.TARGET_ID.eq(targetId))
+                .and(Tables.EH_EQUIPMENT_INSPECTION_STANDARDS.TARGET_TYPE.eq(targetType))
+                .and(Tables.EH_EQUIPMENT_INSPECTION_STANDARDS.REFER_ID.ne(0L))
+                .and(Tables.EH_EQUIPMENT_INSPECTION_STANDARDS.NAMESPACE_ID.eq(UserContext.getCurrentNamespaceId()))
+                .fetchInto(EquipmentInspectionStandards.class);
     }
 }

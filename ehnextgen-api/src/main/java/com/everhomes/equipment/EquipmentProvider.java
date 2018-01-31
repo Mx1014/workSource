@@ -227,4 +227,6 @@ public interface EquipmentProvider {
 	List<EquipmentInspectionTasksLogs> listEquipmentOperateLogsByTargetId(Long equipmentId);
 
     void populateTaskStatusCount(Long inspectionCategoryId, List<String> targetTypes, List<Long> targetIds, List<Long> executePlanIds, List<Long> reviewPlanIds, Byte  adminFlag, ListEquipmentTasksResponse response);
+
+    List<EquipmentInspectionStandards> listEquipmentStandardWithReferId(Long targetId, String targetType);
 }

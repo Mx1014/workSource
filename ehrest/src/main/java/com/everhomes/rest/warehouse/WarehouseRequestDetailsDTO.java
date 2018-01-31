@@ -21,7 +21,7 @@ import java.util.List;
  *     <li>createTime: 申请时间</li>
  *     <li>updateTime: 更新时间</li>
  *     <li>materialDetailDTOs: 申请物品列表 参考{@link com.everhomes.rest.warehouse.WarehouseRequestMaterialDetailDTO}</li>
- *     <li>approvalSheetId: 关联的请示单id</li>
+ *     <li>requisitionId: 关联的请示单id</li>
  * </ul>
  * Created by ying.xiong on 2017/5/11.
  */
@@ -52,14 +52,14 @@ public class WarehouseRequestDetailsDTO {
 
     private Timestamp updateTime;
 
-    private Long approvalSheetId;
+    private Long requisitionId;
 
-    public Long getApprovalSheetId() {
-        return approvalSheetId;
+    public Long getRequisitionId() {
+        return requisitionId;
     }
 
-    public void setApprovalSheetId(Long approvalSheetId) {
-        this.approvalSheetId = approvalSheetId;
+    public void setRequisitionId(Long requisitionId) {
+        this.requisitionId = requisitionId;
     }
 
     @ItemType(WarehouseRequestMaterialDetailDTO.class)
