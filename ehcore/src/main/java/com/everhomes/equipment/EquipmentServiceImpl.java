@@ -493,6 +493,7 @@ public class EquipmentServiceImpl implements EquipmentService {
 				equipmentStandardMap.setTargetId(equipment.getId());
 				equipmentStandardMap.setTargetType(InspectionStandardMapTargetType.EQUIPMENT.getCode());
 				equipmentProvider.createEquipmentStandardMap(equipmentStandardMap);
+				equipmentStandardMapSearcher.feedDoc(equipmentStandardMap);
 				createdEquipments.add(ConvertHelper.convert(equipment, EquipmentInspectionEquipments.class));
 			}
 			standard.setEquipments(createdEquipments);
@@ -5386,6 +5387,8 @@ private void checkUserPrivilege(Long orgId, Long privilegeId, Long communityId) 
 			equipmentProvider.createEquipmentPlanMaps(equipmentPlanMap);
 			equipmentStandardRelation.add(relation);
 		}
+
+		equipmentProvider.deleteEquipmentInspectionPlanGroupMapByPlanId(plan.getId());
 		//巡检计划增加审批和执行人员
 		processPlanGroups(cmd.getGroupList(), plan);
 		//inActive 所有关联任务当前时间节点之前任务继续   状态变成待审核
@@ -6061,6 +6064,9 @@ private void checkUserPrivilege(Long orgId, Long privilegeId, Long communityId) 
 
 	@Override
 	public void updateEquipmentStatus(DeleteEquipmentsCommand cmd) {
+		EquipmentInspectionEquipments equipment = equipmentProvider.findEquipmentById(cmd.getEquipmentId());
+		equipment.setStatus(EquipmentStatus.DISCARDED.getCode());
 		equipmentProvider.updateEquipmentStatus(cmd.getEquipmentId(),EquipmentStatus.DISCARDED.getCode());
+		equipmentSearcher.feedDoc(equipment);
 	}
 }
