@@ -14,6 +14,7 @@ import com.everhomes.rest.equipment.AdminFlag;
 import com.everhomes.rest.equipment.EquipmentOperateObjectType;
 import com.everhomes.rest.equipment.EquipmentPlanStatus;
 import com.everhomes.rest.equipment.EquipmentReviewStatus;
+import com.everhomes.rest.equipment.EquipmentStandardStatus;
 import com.everhomes.rest.equipment.EquipmentStatus;
 import com.everhomes.rest.equipment.EquipmentTaskProcessResult;
 import com.everhomes.rest.equipment.EquipmentTaskProcessType;
@@ -3164,5 +3165,17 @@ public class EquipmentProviderImpl implements EquipmentProvider {
             response.setTotayTasksCount(r.getValue("totayTasksCount",Long.class));
             return null;
         });
+    }
+
+    @Override
+    public List<EquipmentInspectionStandards> listEquipmentStandardWithReferId(Long targetId, String targetType) {
+        DSLContext context = this.dbProvider.getDslContext(AccessSpec.readOnly());
+        return context.selectFrom(Tables.EH_EQUIPMENT_INSPECTION_STANDARDS)
+                .where(Tables.EH_EQUIPMENT_INSPECTION_STANDARDS.STATUS.eq(EquipmentStandardStatus.ACTIVE.getCode()))
+                .and(Tables.EH_EQUIPMENT_INSPECTION_STANDARDS.TARGET_ID.eq(targetId))
+                .and(Tables.EH_EQUIPMENT_INSPECTION_STANDARDS.TARGET_TYPE.eq(targetType))
+                .and(Tables.EH_EQUIPMENT_INSPECTION_STANDARDS.REFER_ID.ne(0L))
+                .and(Tables.EH_EQUIPMENT_INSPECTION_STANDARDS.NAMESPACE_ID.eq(UserContext.getCurrentNamespaceId()))
+                .fetchInto(EquipmentInspectionStandards.class);
     }
 }
