@@ -85,6 +85,17 @@ public class SalaryGroupEntityProviderImpl implements SalaryGroupEntityProvider 
 
     }
 
+    @Override
+    public SalaryGroupEntity findSalaryGroupEntityByOwnerANdDefaultId(Long ownerId, Long defaultId) {
+        Record r = getReadOnlyContext().select().from(Tables.EH_SALARY_GROUP_ENTITIES)
+                .where(Tables.EH_SALARY_GROUP_ENTITIES.OWNER_ID.eq(ownerId))
+                .and(Tables.EH_SALARY_GROUP_ENTITIES.DEFAULT_ID.eq(defaultId)).fetchAny();
+        if (null == r) {
+            return null;
+        }
+        return ConvertHelper.convert(r, SalaryGroupEntity.class);
+    }
+
 //	@Override
 //	public List<SalaryGroupEntity> listSalaryGroupEntityByGroupId(Long salaryId) {
 //        SelectQuery<Record> query = getReadOnlyContext().select(Tables.EH_SALARY_GROUP_ENTITIES.fields()).getQuery();

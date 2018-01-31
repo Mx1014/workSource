@@ -2473,7 +2473,7 @@ public class SalaryServiceImpl implements SalaryService {
     }
 
     private void createMonthSalaryGroup(Long ownerId, String month) {
-    
+
         SalaryGroup sg = new SalaryGroup();
         sg.setOwnerType("organization");
         sg.setOwnerId(ownerId);
