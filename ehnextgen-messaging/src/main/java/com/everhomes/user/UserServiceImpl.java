@@ -5495,7 +5495,7 @@ public class UserServiceImpl implements UserService {
 
 	// 登录等待
 	@Override
-	public DeferredResult<RestResponse> waitScanForLogon(String subjectId){
+	public DeferredResult<RestResponse> waitScanForLogon(String subjectId, HttpServletRequest contextRequest, HttpServletResponse contextResponse){
 
 
 		DeferredResult<RestResponse> finalResult =  this.messagingService.blockingEvent(subjectId, "ORORDINARY", 30 * 1000, new DeferredResult.DeferredResultHandler(){
@@ -5537,9 +5537,13 @@ public class UserServiceImpl implements UserService {
 					LOGGER.debug("userLoginToken = {}", userToken);
 					LoginToken logintoken = WebTokenGenerator.getInstance().fromWebToken(userToken, LoginToken.class);
 //					//todo 验证
-					UserLogin userLogin = logonByToken(logintoken);
+					UserLogin login = logonByToken(logintoken);
+					LoginToken newToken = new LoginToken(login.getUserId(), login.getLoginId(), login.getLoginInstanceNumber(), login.getImpersonationId());
+					String tokenString = WebTokenGenerator.getInstance().toWebToken(newToken);
+					WebRequestInterceptor.setCookieInResponse("token", tokenString, contextRequest, contextResponse);
+
 					Map valueMap = new HashMap();
-					valueMap.put("userLogin", GsonUtil.toJson(userLogin));
+					valueMap.put("userLogin", GsonUtil.toJson(login));
 					valueMap.put("args",tokenParam[4]);
 					response.setMessage(GsonUtil.toJson(valueMap));
 					restResponse.setResponseObject(response);

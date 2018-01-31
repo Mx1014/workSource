@@ -292,7 +292,7 @@ public interface UserService {
 
     QRCodeDTO querySubjectIdForScan();
 
-    DeferredResult<RestResponse> waitScanForLogon(String subjectId);
+    DeferredResult<RestResponse> waitScanForLogon(String subjectId, HttpServletRequest request, HttpServletResponse response);
 
     String getSercetKeyForScan(String args);
 
