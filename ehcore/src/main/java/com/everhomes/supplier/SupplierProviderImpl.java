@@ -100,6 +100,14 @@ public class SupplierProviderImpl implements SupplierProvider{
         return data;
     }
 
+    @Override
+    public String findSupplierNameById(Long supplierId) {
+        return getReadOnlyContext().select(supplier.NAME)
+                .from(supplier)
+                .where(supplier.ID.eq(supplierId))
+                .fetchOne(supplier.NAME);
+    }
+
     private DSLContext getReadOnlyContext(){
         return this.dbProvider.getDslContext(AccessSpec.readOnly());
     }

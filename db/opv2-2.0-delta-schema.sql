@@ -628,14 +628,14 @@ CREATE TABLE `eh_warehouse_suppliers`(
   `evaluation_category` TINYINT DEFAULT NULL COMMENT '评定类别， 1：合格；2：临时',
   `evaluation_levle` TINYINT DEFAULT NULL COMMENT '供应商等级 1：A类；2：B类；3：C类',
   `main_biz_scope` VARCHAR(1024) DEFAULT NULL COMMENT '主要经营范围',
-  `attachment_url` VARCHAR(256) DEFAULT NULL COMMENT '附件地址',
+  `attachment_url` VARCHAR(2048) DEFAULT NULL COMMENT '附件地址',
   `create_time` DATETIME DEFAULT NOW(),
   `create_uid` BIGINT DEFAULT NULL,
-  `update_time` DATETIME DEFAULT NOW(),
+  `update_time` DATETIME DEFAULT now(),
   `update_uid` BIGINT DEFAULT NULL,
   `default_order` INTEGER DEFAULT 0,
   PRIMARY KEY (`id`)
-) ENGINE=INNODB DEFAULT CHARSET=utf8mb4;
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4;
 
 -- 采购管理schemas
 -- 采购单
@@ -656,11 +656,11 @@ CREATE TABLE `eh_warehouse_purchase_orders`(
   `approval_order_id` BIGINT DEFAULT NULL COMMENT '关联的审批单的id',
   `create_time` DATETIME DEFAULT NOW(),
   `create_uid` BIGINT DEFAULT NULL,
-  `update_time` DATETIME DEFAULT NOW(),
+  `update_time` DATETIME DEFAULT now(),
   `update_uid` BIGINT DEFAULT NULL,
   `default_order` INTEGER DEFAULT 0,
   PRIMARY KEY (`id`)
-) ENGINE=INNODB DEFAULT CHARSET=utf8mb4;
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4;
 
 -- 采购单物品表
 DROP TABLE IF EXISTS `eh_warehouse_purchase_items`;
@@ -675,14 +675,15 @@ CREATE TABLE `eh_warehouse_purchase_items`(
   `unit_price` DECIMAL(20,2) DEFAULT 0.00 COMMENT '单价',
   `create_time` DATETIME DEFAULT NOW(),
   `create_uid` BIGINT DEFAULT NULL,
-  `update_time` DATETIME DEFAULT NOW(),
+  `update_time` DATETIME DEFAULT now(),
   `update_uid` BIGINT DEFAULT NULL,
   `default_order` INTEGER DEFAULT 0,
   PRIMARY KEY (`id`)
-) ENGINE=INNODB DEFAULT CHARSET=utf8mb4;
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4;
 
 -- 为物品增加供应商字段
 ALTER TABLE `eh_warehouse_materials` ADD COLUMN `supplier_id` BIGINT DEFAULT NULL COMMENT '物品的供应商的主键id';
+ALTER TABLE `eh_warehouse_materials` ADD COLUMN `supplier_name` VARCHAR(128) DEFAULT NULL COMMENT '物品的供应商的名字';
 
 DROP TABLE IF EXISTS `eh_warehouse_orders`;
 -- 出入库单 模型
@@ -693,7 +694,8 @@ CREATE TABLE `eh_warehouse_orders`(
   `owner_id` BIGINT DEFAULT NULL ,
   `identity` VARCHAR(128) NOT NULL COMMENT '出入库单号',
   `executor_id` BIGINT DEFAULT NULL COMMENT '执行人id',
-  `executor_time` DATETIME DEFAULT NOW() COMMENT '执行时间',
+  `executor_name` VARCHAR(128) DEFAULT NULL COMMENT '执行人姓名',
+  `executor_time` DATETIME DEFAULT now() COMMENT '执行时间',
   `service_type` TINYINT DEFAULT NULL COMMENT '服务类型，1. 普通入库,2.领用出库，3.采购入库',
   `create_time` DATETIME DEFAULT NOW(),
   `create_uid` BIGINT DEFAULT NULL,
@@ -702,10 +704,11 @@ CREATE TABLE `eh_warehouse_orders`(
   `default_order` INTEGER DEFAULT 0,
   PRIMARY KEY (`id`),
   KEY `i_service_type` (`service_type`) COMMENT '出入库状态得索引，用于搜索'
-) ENGINE=INNODB DEFAULT CHARSET=utf8mb4;
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4;
 
 -- 增加出入库记录关联出入库单的字段
-ALTER TABLE `eh_warehouse_stock_logs` ADD COLUMN `warehouse_sheet_id` BIGINT DEFAULT NULL COMMENT '关联的出入库单的id';
+ALTER TABLE `eh_warehouse_stock_logs` ADD COLUMN `warehouse_order_id` BIGINT DEFAULT NULL COMMENT '关联的出入库单的id';
+ALTER TABLE `eh_warehouse_requests` ADD COLUMN `requisition_id` BIGINT DEFAULT NULL COMMENT '关联的请示单的id';
 
 -- 请示单
 DROP TABLE IF EXISTS `eh_requisitions`;
@@ -716,19 +719,20 @@ CREATE TABLE `eh_requisitions`(
   `owner_id` BIGINT DEFAULT NULL ,
   `identity` VARCHAR(32) NOT NULL COMMENT '请示单号',
   `theme` VARCHAR(32) NOT NULL COMMENT '请示主题',
-  `type` BIGINT DEFAULT NULL COMMENT '请示类型,参考eh_requisition_type表',
-  `applicant_name` BIGINT NOT NULL COMMENT '请示人id',
-  `applicant_department` BIGINT DEFAULT NULL COMMENT '请示人部门',
+  `requisition_type_id` BIGINT DEFAULT NULL COMMENT '请示类型,参考eh_requisition_type表',
+  `applicant_name` VARCHAR(128) NOT NULL COMMENT '请示人id',
+  `applicant_department` VARCHAR(256) DEFAULT NULL COMMENT '请示人部门',
   `amount` DECIMAL (20,2) DEFAULT 0.00 COMMENT '申请金额',
   `description` TEXT DEFAULT NULL COMMENT '申请说明',
-  `attachment_url` VARCHAR(256) DEFAULT NULL COMMENT '附件地址',
+  `attachment_url` VARCHAR(2048) DEFAULT NULL COMMENT '附件地址',
+  `status` TINYINT DEFAULT 1 NOT NULL COMMENT '审批状态，1:处理中；2:已完成; 3:已取消;',
   `create_time` DATETIME DEFAULT NOW(),
   `create_uid` BIGINT DEFAULT NULL,
   `update_time` DATETIME DEFAULT NOW(),
   `update_uid` BIGINT DEFAULT NULL,
   `default_order` INTEGER DEFAULT 0,
   PRIMARY KEY (`id`)
-) ENGINE=INNODB DEFAULT CHARSET=utf8mb4;
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4;
 
 -- 请示单类型
 DROP TABLE IF EXISTS `eh_requisition_types`;
@@ -744,7 +748,8 @@ CREATE TABLE `eh_requisition_types`(
   `update_uid` BIGINT DEFAULT NULL,
   `default_order` INTEGER DEFAULT 0,
   PRIMARY KEY (`id`)
-) ENGINE=INNODB DEFAULT CHARSET=utf8mb4;
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4;
+
 
 
 
