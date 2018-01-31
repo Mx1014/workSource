@@ -13,6 +13,7 @@ import java.util.List;
  * <li>filerName: 归档人</li>
  * <li>fileTime: 归档时间</li>
  * <li>isFile: 是否归档</li>
+ * <li>month: 月份</li>
  * <li>exportExcels: 导出表列表 {@link com.everhomes.rest.salary.exportExcelDTO}</li>
  * </ul>
  */
@@ -22,6 +23,7 @@ public class GetSalaryGroupStatusResponse {
     private String filerName;
     private Date fileTime;
     private Byte isFile;
+    private String month;
     @ItemType(exportExcelDTO.class)
     private List<exportExcelDTO> exportExcels;
 
@@ -76,5 +78,13 @@ public class GetSalaryGroupStatusResponse {
 
     public void setIsFile(Byte isFile) {
         this.isFile = isFile;
+    }
+
+    public String getMonth() {
+        return month;
+    }
+
+    public void setMonth(String month) {
+        this.month = month;
     }
 }

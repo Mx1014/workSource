@@ -2734,14 +2734,16 @@ public class SalaryServiceImpl implements SalaryService {
             e.printStackTrace();
         }
         // 设置response的Header
-        OutputStream outputStream = new BufferedOutputStream(out);
+//        OutputStream outputStream = new ByteArrayOutputStream(out);
 
-        return outputStream;
+        return out;
     }
 
     @Override
     public GetSalaryGroupStatusResponse getSalaryGroupStatus(GetSalaryGroupStatusCommand cmd) {
-        return null;
+        GetSalaryGroupStatusResponse response = new GetSalaryGroupStatusResponse();
+//        response.set
+        return response;
     }
 
     @Override
