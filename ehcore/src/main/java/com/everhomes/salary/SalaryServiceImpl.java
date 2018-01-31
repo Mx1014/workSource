@@ -2788,8 +2788,9 @@ public class SalaryServiceImpl implements SalaryService {
             salaryEmployeeOriginValProvider.deleteSalaryEmployeeOriginValByDetailIdAndGroouEntity(detailId, groupEntity.getId());
             SalaryEmployeeOriginVal bonusVal = processSalaryEmployeeOriginVal(groupEntity, detailId, bonusTax.toString());
             salaryEmployeeOriginValProvider.createSalaryEmployeeOriginVal(bonusVal);
+            realPay = shouldPay.subtract(salaryTax).subtract(bonusTax).add(afterTax);
+            LOGGER.debug("应付{},工资{},年终{},工资税{},年终税{},实付{}",shouldPay,salary,bonus,salaryTax,bonusTax,realPay);
         }
-        realPay = shouldPay.subtract(salary).subtract(bonus).add(afterTax);
         employee.setRegularSalary(regular);
         employee.setShouldPaySalary(shouldPay);
         employee.setRealPaySalary(realPay);
