@@ -150,12 +150,14 @@ import com.everhomes.server.schema.tables.pojos.EhEquipmentInspectionAccessories
 import com.everhomes.server.schema.tables.pojos.EhEquipmentInspectionAccessoryMap;
 import com.everhomes.server.schema.tables.pojos.EhEquipmentInspectionCategories;
 import com.everhomes.server.schema.tables.pojos.EhEquipmentInspectionEquipmentAttachments;
+import com.everhomes.server.schema.tables.pojos.EhEquipmentInspectionEquipmentLogs;
 import com.everhomes.server.schema.tables.pojos.EhEquipmentInspectionEquipmentParameters;
 import com.everhomes.server.schema.tables.pojos.EhEquipmentInspectionEquipmentPlanMap;
 import com.everhomes.server.schema.tables.pojos.EhEquipmentInspectionEquipmentStandardMap;
 import com.everhomes.server.schema.tables.pojos.EhEquipmentInspectionEquipments;
 import com.everhomes.server.schema.tables.pojos.EhEquipmentInspectionItemResults;
 import com.everhomes.server.schema.tables.pojos.EhEquipmentInspectionItems;
+import com.everhomes.server.schema.tables.pojos.EhEquipmentInspectionPlanGroupMap;
 import com.everhomes.server.schema.tables.pojos.EhEquipmentInspectionPlans;
 import com.everhomes.server.schema.tables.pojos.EhEquipmentInspectionReviewDate;
 import com.everhomes.server.schema.tables.pojos.EhEquipmentInspectionStandardGroupMap;
@@ -1369,7 +1371,7 @@ public class SequenceServiceImpl implements SequenceService {
         syncTableSequence(null, EhEquipmentInspectionPlans.class, Tables.EH_EQUIPMENT_INSPECTION_PLANS.getName(), (dbContext) -> {
             return dbContext.select(Tables.EH_EQUIPMENT_INSPECTION_PLANS.ID.max()).from(Tables.EH_EQUIPMENT_INSPECTION_PLANS).fetchOne().value1();
         });
-        syncTableSequence(null, EhEquipmentInspectionPlans.class, Tables.EH_EQUIPMENT_INSPECTION_PLAN_GROUP_MAP.getName(), (dbContext) -> {
+        syncTableSequence(null, EhEquipmentInspectionPlanGroupMap.class, Tables.EH_EQUIPMENT_INSPECTION_PLAN_GROUP_MAP.getName(), (dbContext) -> {
             return dbContext.select(Tables.EH_EQUIPMENT_INSPECTION_PLAN_GROUP_MAP.ID.max()).from(Tables.EH_EQUIPMENT_INSPECTION_PLAN_GROUP_MAP).fetchOne().value1();
         });
         syncTableSequence(null, EhEquipmentInspectionEquipmentPlanMap.class, Tables.EH_EQUIPMENT_INSPECTION_EQUIPMENT_PLAN_MAP.getName(), (dbContext) -> {
@@ -1378,7 +1380,7 @@ public class SequenceServiceImpl implements SequenceService {
         syncTableSequence(null, EhEquipmentInspectionReviewDate.class, Tables.EH_EQUIPMENT_INSPECTION_REVIEW_DATE.getName(), (dbContext) -> {
             return dbContext.select(Tables.EH_EQUIPMENT_INSPECTION_REVIEW_DATE.ID.max()).from(Tables.EH_EQUIPMENT_INSPECTION_REVIEW_DATE).fetchOne().value1();
         });
-        syncTableSequence(null, EhEquipmentInspectionReviewDate.class, Tables.EH_EQUIPMENT_INSPECTION_EQUIPMENT_LOGS.getName(), (dbContext) -> {
+        syncTableSequence(null, EhEquipmentInspectionEquipmentLogs.class, Tables.EH_EQUIPMENT_INSPECTION_EQUIPMENT_LOGS.getName(), (dbContext) -> {
             return dbContext.select(Tables.EH_EQUIPMENT_INSPECTION_EQUIPMENT_LOGS.ID.max()).from(Tables.EH_EQUIPMENT_INSPECTION_EQUIPMENT_LOGS).fetchOne().value1();
         });
         syncTableSequence(null, EhEquipmentInspectionTasks.class, Tables.EH_EQUIPMENT_INSPECTION_TASKS.getName(), (dbContext) -> {
