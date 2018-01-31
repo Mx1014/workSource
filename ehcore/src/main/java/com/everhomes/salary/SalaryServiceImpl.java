@@ -5,7 +5,6 @@ import com.everhomes.configuration.ConfigurationProvider;
 import com.everhomes.db.DbProvider;
 import com.everhomes.filedownload.TaskService;
 import com.everhomes.listing.CrossShardListingLocator;
-import com.everhomes.listing.ListingLocator;
 import com.everhomes.locale.LocaleTemplateService;
 import com.everhomes.organization.*;
 import com.everhomes.rest.common.ImportFileResponse;
@@ -17,10 +16,8 @@ import com.everhomes.rest.salary.GetImportFileResultCommand;
 import com.everhomes.rest.salary.ListEnterprisesCommand;
 import com.everhomes.rest.techpark.punch.NormalFlag;
 import com.everhomes.rest.techpark.punch.PunchServiceErrorCode;
-import com.everhomes.settings.PaginationConfigHelper;
 import com.everhomes.techpark.punch.PunchService;
 import com.everhomes.uniongroup.UniongroupService;
-import com.everhomes.user.User;
 import com.everhomes.user.UserContext;
 import com.everhomes.util.ConvertHelper;
 import com.everhomes.util.DateHelper;
@@ -2681,13 +2678,13 @@ public class SalaryServiceImpl implements SalaryService {
             }
         }
         salaryEmployeeOriginValProvider.deleteSalaryEmployeeOriginValNotInList(groupEntityIds, detailId);
-        calculateEmployee(ownerId, detailId, vals);
+        calculateEmployee(ownerId, detailId, vals,organizationId);
     }
 
     /**
      * 计算某人的EhSalaryEmployee
      */
-    private void calculateEmployee(Long ownerId, Long detailId, List<SalaryEmployeeOriginVal> vals) {
+    private void calculateEmployee(Long ownerId, Long detailId, List<SalaryEmployeeOriginVal> vals,Long organizationId) {
 
         String month = findSalaryMonth(ownerId);
         SalaryEmployee employee = salaryEmployeeProvider.findSalaryEmployeeByDetailId(ownerId, detailId);
@@ -2760,12 +2757,34 @@ public class SalaryServiceImpl implements SalaryService {
             BigDecimal salaryTax = calculateSalaryTax(salary);
             BigDecimal bonusTax = calculateBonusTax(bonus,salaryTax);
             //保存计税
-            SalaryGroupEntity groupEntity = salaryGroupEntityProvider.findSalaryGroupEntityByOwnerANdDefaultId(ownerId, SalaryConstants.ENTITY_ID_SALARYTAX);
+            SalaryGroupEntity groupEntity = salaryGroupEntityProvider.findSalaryGroupEntityByOrgANdDefaultId(ownerId, SalaryConstants.ENTITY_ID_SALARYTAX);
+            if (null == groupEntity) {
+                SalaryDefaultEntity de = salaryDefaultEntityProvider.findSalaryDefaultEntityById(SalaryConstants.ENTITY_ID_SALARYTAX);
+                groupEntity = ConvertHelper.convert(de, SalaryGroupEntity.class);
+                groupEntity.setDefaultId(de.getId());
+                groupEntity.setOrganizationId(organizationId);
+                groupEntity.setId(null);
+                if (groupEntity.getStatus() == null) {
+                    groupEntity.setStatus((byte) 1);
+                }
+                salaryGroupEntityProvider.createSalaryGroupEntity(groupEntity);
+            }
             salaryEmployeeOriginValProvider.deleteSalaryEmployeeOriginValByDetailIdAndGroouEntity(detailId, groupEntity.getId());
             SalaryEmployeeOriginVal salaryVal = processSalaryEmployeeOriginVal(groupEntity, detailId, salaryTax.toString());
             salaryEmployeeOriginValProvider.createSalaryEmployeeOriginVal(salaryVal);
 
-            groupEntity = salaryGroupEntityProvider.findSalaryGroupEntityByOwnerANdDefaultId(ownerId, SalaryConstants.ENTITY_ID_BONUSTAX);
+            groupEntity = salaryGroupEntityProvider.findSalaryGroupEntityByOrgANdDefaultId(organizationId, SalaryConstants.ENTITY_ID_BONUSTAX);
+            if (null == groupEntity) {
+                SalaryDefaultEntity de = salaryDefaultEntityProvider.findSalaryDefaultEntityById(SalaryConstants.ENTITY_ID_BONUSTAX);
+                groupEntity = ConvertHelper.convert(de, SalaryGroupEntity.class);
+                groupEntity.setDefaultId(de.getId());
+                groupEntity.setOrganizationId(organizationId);
+                groupEntity.setId(null);
+                if (groupEntity.getStatus() == null) {
+                    groupEntity.setStatus((byte) 1);
+                }
+                salaryGroupEntityProvider.createSalaryGroupEntity(groupEntity);
+            }
             salaryEmployeeOriginValProvider.deleteSalaryEmployeeOriginValByDetailIdAndGroouEntity(detailId, groupEntity.getId());
             SalaryEmployeeOriginVal bonusVal = processSalaryEmployeeOriginVal(groupEntity, detailId, bonusTax.toString());
             salaryEmployeeOriginValProvider.createSalaryEmployeeOriginVal(bonusVal);

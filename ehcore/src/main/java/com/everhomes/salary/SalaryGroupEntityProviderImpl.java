@@ -86,9 +86,9 @@ public class SalaryGroupEntityProviderImpl implements SalaryGroupEntityProvider 
     }
 
     @Override
-    public SalaryGroupEntity findSalaryGroupEntityByOwnerANdDefaultId(Long ownerId, Long defaultId) {
+    public SalaryGroupEntity findSalaryGroupEntityByOrgANdDefaultId(Long organizationId, Long defaultId) {
         Record r = getReadOnlyContext().select().from(Tables.EH_SALARY_GROUP_ENTITIES)
-                .where(Tables.EH_SALARY_GROUP_ENTITIES.OWNER_ID.eq(ownerId))
+                .where(Tables.EH_SALARY_GROUP_ENTITIES.ORGANIZATION_ID.eq(organizationId))
                 .and(Tables.EH_SALARY_GROUP_ENTITIES.DEFAULT_ID.eq(defaultId)).fetchAny();
         if (null == r) {
             return null;
