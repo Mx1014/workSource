@@ -5535,12 +5535,6 @@ public class UserServiceImpl implements UserService {
 					Integer namespaceId = Integer.valueOf(tokenParam[2]);
 					String userToken = tokenParam[3];
 					LOGGER.debug("userLoginToken = {}", userToken);
-//					LoginToken logintoken = WebTokenGenerator.getInstance().fromWebToken(userToken, LoginToken.class);
-////					//todo 验证
-//					UserLogin login = logonByToken(logintoken);
-//					LoginToken newToken = new LoginToken(login.getUserId(), login.getLoginId(), login.getLoginInstanceNumber(), login.getImpersonationId());
-//					String tokenString = WebTokenGenerator.getInstance().toWebToken(newToken);
-//					WebRequestInterceptor.setCookieInResponse("token", tokenString, contextRequest, contextResponse);
 
 					Map valueMap = new HashMap();
 					valueMap.put("userLogin", GsonUtil.toJson(userToken));
@@ -5549,6 +5543,13 @@ public class UserServiceImpl implements UserService {
 					restResponse.setResponseObject(response);
 					restResponse.setErrorCode(ErrorCodes.SUCCESS);
 					restResponse.setErrorDescription("OK");
+
+					LoginToken logintoken = WebTokenGenerator.getInstance().fromWebToken(userToken, LoginToken.class);
+//					//todo 验证
+					UserLogin login = logonByToken(logintoken);
+					LoginToken newToken = new LoginToken(login.getUserId(), login.getLoginId(), login.getLoginInstanceNumber(), login.getImpersonationId());
+					String tokenString = WebTokenGenerator.getInstance().toWebToken(newToken);
+					WebRequestInterceptor.setCookieInResponse("token", tokenString, contextRequest, contextResponse);
 				} else {
 					restResponse.setErrorCode(ErrorCodes.ERROR_ACCESS_DENIED);
 					LOGGER.error("waitScanForLogon failure");
