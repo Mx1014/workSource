@@ -51,9 +51,9 @@ public class PaymentApplicationController extends ControllerBase {
 
     /**
      * <p>根据合同查看付款请示单</p>
-     * <b>URL: /payment_application/getPaymentApplication</b>
+     * <b>URL: /payment_application/listPaymentApplicationByContract</b>
      */
-    @RequestMapping("getPaymentApplication")
+    @RequestMapping("listPaymentApplicationByContract")
     @RestReturn(ListPaymentApplicationByContractResponse.class)
     public RestResponse listPaymentApplicationByContract(ListPaymentApplicationByContractCommand cmd){
         return new RestResponse(paymentApplicationService.listPaymentApplicationByContract(cmd));
