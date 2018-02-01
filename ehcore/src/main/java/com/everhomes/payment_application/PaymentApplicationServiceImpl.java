@@ -1,8 +1,10 @@
 package com.everhomes.payment_application;
 
+import com.everhomes.configuration.ConfigurationProvider;
 import com.everhomes.entity.EntityType;
 import com.everhomes.flow.Flow;
 import com.everhomes.flow.FlowService;
+import com.everhomes.listing.CrossShardListingLocator;
 import com.everhomes.locale.LocaleStringService;
 import com.everhomes.openapi.Contract;
 import com.everhomes.openapi.ContractProvider;
@@ -21,6 +23,7 @@ import com.everhomes.rest.flow.FlowOwnerType;
 import com.everhomes.rest.launchpad.ActionType;
 import com.everhomes.rest.payment_application.*;
 import com.everhomes.search.PaymentApplicationSearcher;
+import com.everhomes.settings.PaginationConfigHelper;
 import com.everhomes.sms.DateUtil;
 import com.everhomes.supplier.SupplierProvider;
 import com.everhomes.supplier.WarehouseSupplier;
@@ -38,6 +41,8 @@ import org.springframework.stereotype.Component;
 import java.math.BigDecimal;
 import java.sql.Timestamp;
 import java.util.Date;
+import java.util.List;
+import java.util.stream.Collectors;
 
 /**
  * Created by ying.xiong on 2017/12/27.
@@ -73,6 +78,9 @@ public class PaymentApplicationServiceImpl implements PaymentApplicationService 
     @Autowired
     private RequisitionProvider requisitionProvider;
 
+    @Autowired
+    private ConfigurationProvider configurationProvider;
+
     @Override
     public String generatePaymentApplicationNumber() {
         String num = DateUtil.dateToStr(new Date(), DateUtil.NO_SLASH) + (int)((Math.random()*9+1)*1000);
@@ -99,6 +107,29 @@ public class PaymentApplicationServiceImpl implements PaymentApplicationService 
     public SearchPaymentApplicationResponse searchPaymentApplications(SearchPaymentApplicationCommand cmd) {
         userPrivilegeMgr.checkUserPrivilege(UserContext.currentUserId(), cmd.getOwnerId(), PrivilegeConstants.PAYMENT_APPLICATION_LIST, ServiceModuleConstants.PAYMENT_APPLICATION_MODULE, ActionType.OFFICIAL_URL.getCode(), null, null,cmd.getCommunityId());
         return paymentApplicationSearcher.query(cmd);
+    }
+
+    @Override
+    public ListPaymentApplicationByContractResponse listPaymentApplicationByContract(ListPaymentApplicationByContractCommand cmd) {
+        CrossShardListingLocator locator = new CrossShardListingLocator();
+        locator.setAnchor(cmd.getPageAnchor());
+        int pageSize = PaginationConfigHelper.getPageSize(configurationProvider, cmd.getPageSize());
+        ListPaymentApplicationByContractResponse response = new ListPaymentApplicationByContractResponse();
+        List<PaymentApplication> paymentApplicationList = paymentApplicationProvider.listPaymentApplicationsByContractId(locator, pageSize + 1, cmd.getContractId());
+        if(paymentApplicationList != null && paymentApplicationList.size() > 0) {
+            if(paymentApplicationList.size() > pageSize) {
+                paymentApplicationList.remove(paymentApplicationList.size() - 1);
+                response.setNextPageAnchor(paymentApplicationList.get(paymentApplicationList.size() - 1).getId());
+			}
+
+            List<PaymentApplicationDTO> dtos =  paymentApplicationList.stream().map(paymentApplication -> {
+                return toPaymentApplicationDTO(paymentApplication);
+            }).collect(Collectors.toList());
+
+            response.setApplicationDTOs(dtos);
+        }
+
+        return response;
     }
 
     private PaymentApplicationDTO toPaymentApplicationDTO(PaymentApplication application) {
