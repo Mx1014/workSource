@@ -2,6 +2,7 @@
 package com.everhomes.dynamicExcel;
 
 
+import com.everhomes.rest.dynamicExcel.DynamicImportResponse;
 import org.springframework.stereotype.Service;
 import org.springframework.web.multipart.MultipartFile;
 
@@ -35,7 +36,7 @@ public interface DynamicExcelService {
      * @param params 业务参数，在handler中的importData方法中使用
      * @return DynamicImportResponse
      */
-    public DynamicImportResponse importMultiSheet(MultipartFile file, String code, Integer headerRow,Object params);
+    public DynamicImportResponse importMultiSheet(MultipartFile file, String code, Integer headerRow, Object params);
 
 
 }

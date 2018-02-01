@@ -31,8 +31,10 @@ import com.everhomes.server.schema.tables.EhWarehouseOrders;
 import com.everhomes.server.schema.tables.pojos.EhWarehouseStockLogs;
 import com.everhomes.settings.PaginationConfigHelper;
 import com.everhomes.supplier.SupplierHelper;
+import com.everhomes.user.User;
 import com.everhomes.user.UserContext;
 import com.everhomes.user.UserPrivilegeMgr;
+import com.everhomes.user.UserProvider;
 import com.everhomes.util.ConvertHelper;
 import com.everhomes.util.DateHelper;
 import com.everhomes.util.RuntimeErrorException;
@@ -123,6 +125,9 @@ public class WarehouseServiceImpl implements WarehouseService {
 
     @Autowired
     private SequenceProvider sequenceProvider;
+
+    @Autowired
+    private UserProvider userProvider;
 
     @Override
     public WarehouseDTO updateWarehouse(UpdateWarehouseCommand cmd) {
@@ -1534,6 +1539,9 @@ public class WarehouseServiceImpl implements WarehouseService {
             order.setExecutorId(UserContext.currentUserId());
             order.setServiceType(cmd.getServiceType());
             order.setCommunityId(cmd.getCommunityId());
+            User userById = userProvider.findUserById(UserContext.currentUserId());
+            order.setExecutorName(userById.getNickName());
+            order.setExecutorTime(new Timestamp(DateHelper.currentGMTTime().getTime()));
         } else {
             insert = false;
             //更新
@@ -1581,6 +1589,7 @@ public class WarehouseServiceImpl implements WarehouseService {
             dtos.remove(dtos.size() - 1);
             response.setNextPageAnchor(pageAnchor + pageSize);
         }
+        response.setDtos(dtos);
         return response;
     }
 
