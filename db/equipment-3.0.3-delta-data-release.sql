@@ -36,3 +36,8 @@ INSERT  INTO  `eh_var_fields` VALUES (10707, 'equipment_inspection', 'geohash', 
 
 INSERT  INTO  `eh_var_fields` VALUES (10926, 'equipment_inspection', 'geohash', '经纬度', 'Long', 10000, CONCAT('/',10000,'/'), 1, null, 2, 1, now(),null ,null,'{\"fieldParamType\": \"map\", \"length\": 32}');
 -- 增加经纬度动态表单  jiarui  20180122
+
+-- offline
+-- SET  @id = (SELECT  MAX(id) from eh_version_realm);
+-- INSERT INTO `eh_version_realm` VALUES (@id:=@id+1, 'equipmentInspection', NULL, now(), '999992');
+-- INSERT INTO `eh_version_urls` VALUES ('176', @id, '1.0.0', 'http://jiarui.lab.everhomes.com/nar/equipmentInspection/inspectionOffline/equipmentInspection-1-0-0.zip', 'http://jiarui.lab.everhomes.com/nar/equipmentInspection/inspectionOffline/equipmentInspection-1-0-0.zip', '测试巡检离线', '999992', '物业巡检', NOW(), NULL, '0');
