@@ -118,15 +118,18 @@ public class FieldServiceImpl implements FieldService {
      */
     @Override
     public void exportDynamicExcelTemplate(ListFieldGroupCommand cmd, HttpServletResponse response) {
-//        dynamicExcelService.exportDynamicExcel(response, DynamicExcelStrings.CUSTOEMR, )
-        //try to call dynamicExcelService.exportDynamicExcel
-        //参考代码：管理员校验
         if(ModuleName.ENTERPRISE_CUSTOMER.equals(ModuleName.fromName(cmd.getModuleName()))) {
             customerService.checkCustomerAuth(cmd.getNamespaceId(), PrivilegeConstants.ENTERPRISE_CUSTOMER_MANAGE_IMPORT, cmd.getOrgId(), cmd.getCommunityId());
         }
-        //参考代码：寻找所有的group
-        boolean 只要叶节点吗 = true;
-        List<FieldGroupDTO> result = 找到所有的group(cmd,只要叶节点吗);
+        ExportFieldsExcelCommand command = ConvertHelper.convert(cmd, ExportFieldsExcelCommand.class);
+        List<FieldGroupDTO> results = getAllGroups(command,true);
+        if(results != null && results.size() > 0) {
+            List<String> sheetNames = results.stream().map(result -> {
+                return result.getGroupDisplayName();
+            }).collect(Collectors.toList());
+            dynamicExcelService.exportDynamicExcel(response, DynamicExcelStrings.CUSTOEMR, null, sheetNames, cmd, true, false, null);
+        }
+
     }
 
     private List<FieldGroupDTO> 找到所有的group(ListFieldGroupCommand cmd,boolean onlyLeaf) {

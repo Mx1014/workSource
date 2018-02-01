@@ -110,6 +110,7 @@ public class CustomerDynamicExcelHandler implements DynamicExcelHandler {
         String moduleName = customerInfo.getModuleName();
         if(rowDatas != null && rowDatas.size() > 0) {
             CustomerDynamicSheetClass sheet = CustomerDynamicSheetClass.fromStatus(ds.getClassName());
+            int failedNumber = 0;
             for(DynamicRowDTO rowData : rowDatas) {
                 List<DynamicColumnDTO> columns = rowData.getColumns();
                 switch (sheet) {
@@ -131,6 +132,7 @@ public class CustomerDynamicExcelHandler implements DynamicExcelHandler {
                                     setToObj(column.getFieldName(), tax, column.getValue());
                                 } catch(Exception e){
                                     LOGGER.warn("one row invoke set method for CustomerTax failed");
+                                    failedNumber ++;
                                 }
 
                                 continue;
@@ -155,6 +157,7 @@ public class CustomerDynamicExcelHandler implements DynamicExcelHandler {
                                     setToObj(column.getFieldName(), account, column.getValue());
                                 } catch(Exception e){
                                     LOGGER.warn("one row invoke set method for CustomerAccount failed");
+                                    failedNumber ++;
                                 }
 
                                 continue;
@@ -183,6 +186,7 @@ public class CustomerDynamicExcelHandler implements DynamicExcelHandler {
                                     setToObj(column.getFieldName(), talent, column.getValue());
                                 } catch(Exception e){
                                     LOGGER.warn("one row invoke set method for CustomerTalent failed");
+                                    failedNumber ++;
                                 }
 
                                 continue;
@@ -208,6 +212,7 @@ public class CustomerDynamicExcelHandler implements DynamicExcelHandler {
                                     setToObj(column.getFieldName(), trademark, column.getValue());
                                 } catch(Exception e){
                                     LOGGER.warn("one row invoke set method for CustomerTrademark failed");
+                                    failedNumber ++;
                                 }
 
                                 continue;
@@ -254,6 +259,7 @@ public class CustomerDynamicExcelHandler implements DynamicExcelHandler {
                                     setToObj(column.getFieldName(), project, column.getValue());
                                 } catch(Exception e){
                                     LOGGER.warn("one row invoke set method for CustomerApplyProject failed");
+                                    failedNumber ++;
                                 }
 
                                 continue;
@@ -280,6 +286,7 @@ public class CustomerDynamicExcelHandler implements DynamicExcelHandler {
                                     setToObj(column.getFieldName(), commercial, column.getValue());
                                 } catch(Exception e){
                                     LOGGER.warn("one row invoke set method for CustomerCommercial failed");
+                                    failedNumber ++;
                                 }
 
                                 continue;
@@ -299,6 +306,7 @@ public class CustomerDynamicExcelHandler implements DynamicExcelHandler {
                                     setToObj(column.getFieldName(), investment, column.getValue());
                                 } catch(Exception e){
                                     LOGGER.warn("one row invoke set method for CustomerInvestment failed");
+                                    failedNumber ++;
                                 }
 
                                 continue;
@@ -318,6 +326,7 @@ public class CustomerDynamicExcelHandler implements DynamicExcelHandler {
                                     setToObj(column.getFieldName(), indicator, column.getValue());
                                 } catch(Exception e){
                                     LOGGER.warn("one row invoke set method for CustomerEconomicIndicator failed");
+                                    failedNumber ++;
                                 }
 
                                 continue;
@@ -344,6 +353,7 @@ public class CustomerDynamicExcelHandler implements DynamicExcelHandler {
                                     setToObj(column.getFieldName(), patent, column.getValue());
                                 } catch(Exception e){
                                     LOGGER.warn("one row invoke set method for CustomerPatent failed");
+                                    failedNumber ++;
                                 }
 
                                 continue;
@@ -363,6 +373,7 @@ public class CustomerDynamicExcelHandler implements DynamicExcelHandler {
                                     setToObj(column.getFieldName(), certificate, column.getValue());
                                 } catch(Exception e){
                                     LOGGER.warn("one row invoke set method for CustomerCertificate failed");
+                                    failedNumber ++;
                                 }
 
                                 continue;
@@ -392,6 +403,7 @@ public class CustomerDynamicExcelHandler implements DynamicExcelHandler {
                                     setToObj(column.getFieldName(), entryInfo, column.getValue());
                                 } catch(Exception e){
                                     LOGGER.warn("one row invoke set method for CustomerEntryInfo failed");
+                                    failedNumber ++;
                                 }
 
                                 continue;
@@ -417,6 +429,7 @@ public class CustomerDynamicExcelHandler implements DynamicExcelHandler {
                                     setToObj(column.getFieldName(), departureInfo, column.getValue());
                                 } catch(Exception e){
                                     LOGGER.warn("one row invoke set method for CustomerDepartureInfo failed");
+                                    failedNumber ++;
                                 }
 
                                 continue;
@@ -428,7 +441,8 @@ public class CustomerDynamicExcelHandler implements DynamicExcelHandler {
                 }
 
             }
-
+            response.setSuccessRowNumber(rowDatas.size() - failedNumber);
+            response.setFailedRowNumber(failedNumber);
         }
     }
 
