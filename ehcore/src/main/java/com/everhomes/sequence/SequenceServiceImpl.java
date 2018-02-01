@@ -2671,25 +2671,25 @@ public class SequenceServiceImpl implements SequenceService {
             return dbContext.select(Tables.EH_AUTHORIZATION_THIRD_PARTY_BUTTONS.ID.max()).from(Tables.EH_AUTHORIZATION_THIRD_PARTY_BUTTONS).fetchOne().value1();
         });
  
-        syncTableSequence(null, EhRentalv2ItemsOrders.class, Tables.EH_RENTALV2_ITEMS_ORDERS.getName(), (dbContext) -> {
-            return dbContext.select(Tables.EH_RENTALV2_ITEMS_ORDERS.ID.max()).from(Tables.EH_RENTALV2_ITEMS_ORDERS).fetchOne().value1();
-        });
-
-        syncTableSequence(null, EhIncubatorApplyAttachments.class, Tables.EH_INCUBATOR_APPLY_ATTACHMENTS.getName(), (dbContext) -> {
-            return dbContext.select(Tables.EH_INCUBATOR_APPLY_ATTACHMENTS.ID.max()).from(Tables.EH_INCUBATOR_APPLY_ATTACHMENTS).fetchOne().value1();
-        });
-
-        syncTableSequence(null, EhReflectionServiceModuleApps.class, Tables.EH_REFLECTION_SERVICE_MODULE_APPS.getName(), (dbContext) -> {
-            return dbContext.select(Tables.EH_REFLECTION_SERVICE_MODULE_APPS.ID.max()).from(Tables.EH_REFLECTION_SERVICE_MODULE_APPS).fetchOne().value1();
-        });
-
-        syncTableSequence(null, EhSocialSecurityInoutTime.class, Tables.EH_SOCIAL_SECURITY_INOUT_TIME.getName(), (dbContext) -> {
-            return dbContext.select(Tables.EH_SOCIAL_SECURITY_INOUT_TIME.ID.max()).from(Tables.EH_SOCIAL_SECURITY_INOUT_TIME).fetchOne().value1();
-        });
-
-        syncTableSequence(null, EhSocialSecurityInoutLog.class, Tables.EH_SOCIAL_SECURITY_INOUT_LOG.getName(), (dbContext) -> {
-            return dbContext.select(Tables.EH_SOCIAL_SECURITY_INOUT_LOG.ID.max()).from(Tables.EH_SOCIAL_SECURITY_INOUT_LOG).fetchOne().value1();
-        }); 
+//        syncTableSequence(null, EhRentalv2ItemsOrders.class, Tables.EH_RENTALV2_ITEMS_ORDERS.getName(), (dbContext) -> {
+//            return dbContext.select(Tables.EH_RENTALV2_ITEMS_ORDERS.ID.max()).from(Tables.EH_RENTALV2_ITEMS_ORDERS).fetchOne().value1();
+//        });
+//
+//        syncTableSequence(null, EhIncubatorApplyAttachments.class, Tables.EH_INCUBATOR_APPLY_ATTACHMENTS.getName(), (dbContext) -> {
+//            return dbContext.select(Tables.EH_INCUBATOR_APPLY_ATTACHMENTS.ID.max()).from(Tables.EH_INCUBATOR_APPLY_ATTACHMENTS).fetchOne().value1();
+//        });
+//
+//        syncTableSequence(null, EhReflectionServiceModuleApps.class, Tables.EH_REFLECTION_SERVICE_MODULE_APPS.getName(), (dbContext) -> {
+//            return dbContext.select(Tables.EH_REFLECTION_SERVICE_MODULE_APPS.ID.max()).from(Tables.EH_REFLECTION_SERVICE_MODULE_APPS).fetchOne().value1();
+//        });
+//
+//        syncTableSequence(null, EhSocialSecurityInoutTime.class, Tables.EH_SOCIAL_SECURITY_INOUT_TIME.getName(), (dbContext) -> {
+//            return dbContext.select(Tables.EH_SOCIAL_SECURITY_INOUT_TIME.ID.max()).from(Tables.EH_SOCIAL_SECURITY_INOUT_TIME).fetchOne().value1();
+//        });
+//
+//        syncTableSequence(null, EhSocialSecurityInoutLog.class, Tables.EH_SOCIAL_SECURITY_INOUT_LOG.getName(), (dbContext) -> {
+//            return dbContext.select(Tables.EH_SOCIAL_SECURITY_INOUT_LOG.ID.max()).from(Tables.EH_SOCIAL_SECURITY_INOUT_LOG).fetchOne().value1();
+//        }); 
         //
         // 以后不用在这里加重复的代码了，已经做成自动获取所有表去同步id了，如果有特殊的表，可以写在这里.
         // 
