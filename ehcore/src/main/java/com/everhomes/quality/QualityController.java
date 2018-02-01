@@ -47,10 +47,12 @@ import com.everhomes.rest.quality.ListSampleQualityInspectionResponse;
 import com.everhomes.rest.quality.ListSampleQualityInspectionTasksCommand;
 import com.everhomes.rest.quality.ListUserHistoryTasksCommand;
 import com.everhomes.rest.quality.OfflineSampleQualityInspectionResponse;
+import com.everhomes.rest.quality.OfflineTaskReportCommand;
 import com.everhomes.rest.quality.QualityInspectionSpecificationDTO;
 import com.everhomes.rest.quality.QualityInspectionTaskDTO;
 import com.everhomes.rest.quality.QualityInspectionTaskRecordsDTO;
 import com.everhomes.rest.quality.QualityOfflineTaskDetailsResponse;
+import com.everhomes.rest.quality.QualityOfflineTaskReportResponse;
 import com.everhomes.rest.quality.QualityStandardsDTO;
 import com.everhomes.rest.quality.ReportRectifyResultCommand;
 import com.everhomes.rest.quality.ReportVerificationResultCommand;
@@ -916,6 +918,7 @@ public class QualityController extends ControllerBase {
 		res.setErrorDescription("OK");
 		return res;
 	}
+
 	/**
 	 * <b>URL: /quality/getCurrentUserInfo</b>
 	 * <p>获取当前登录人contactName</p>
@@ -930,22 +933,19 @@ public class QualityController extends ControllerBase {
 		res.setErrorDescription("OK");
 		return res;
 	}
+
 	/**
 	 * <b>URL: /quality/exportSampleTaskCommunityScores</b>
 	 * <p>导出绩效考核列表</p>
 	 */
 	@RequestMapping("exportSampleTaskCommunityScores")
 	public HttpServletResponse export(CountSampleTaskCommunityScoresCommand cmd, HttpServletResponse httpResponse) {
-
-		HttpServletResponse response = qualityService.exportSampleTaskCommunityScores(cmd, httpResponse);
-		return response;
-
+		return  qualityService.exportSampleTaskCommunityScores(cmd, httpResponse);
 	}
 
 	/**
 	 * <b>URL: /quality/getOfflineTaskDetail</b>
 	 * <p>品质核查离线获取任务相关信息</p>
-	 * @return {QualityOfflineTaskDetailsResponse.class}
 	 */
 	@RequestMapping("getOfflineTaskDetail")
 	@RestReturn(value=QualityOfflineTaskDetailsResponse.class)
@@ -958,7 +958,21 @@ public class QualityController extends ControllerBase {
 	}
 
 	/**
-	 * <b>URL: /quality/listSampleQualityInspection</b>
+	 * <b>URL: /quality/OfflineTaskReport</b>
+	 * <p>品质核查离线同步到服务端</p>
+	 */
+	@RequestMapping("OfflineTaskReport")
+	@RestReturn(value=QualityOfflineTaskDetailsResponse.class)
+	public RestResponse OfflineTaskReport(OfflineTaskReportCommand cmd) {
+		QualityOfflineTaskReportResponse offlineTaskReportResponse = qualityService.OfflineTaskReport(cmd);
+		RestResponse res = new RestResponse(offlineTaskReportResponse);
+		res.setErrorCode(ErrorCodes.SUCCESS);
+		res.setErrorDescription("OK");
+		return res;
+	}
+
+	/**
+	 * <b>URL: /quality/getOfflineSampleQualityInspection</b>
 	 * <p>绩效考核-app离线</p>
 	 */
 	@RequestMapping("getOfflineSampleQualityInspection")

@@ -94,6 +94,7 @@ import com.everhomes.rest.quality.ListUserHistoryTasksCommand;
 import com.everhomes.rest.quality.ListUserQualityInspectionTaskTemplatesCommand;
 import com.everhomes.rest.quality.OfflineDeleteTablesInfo;
 import com.everhomes.rest.quality.OfflineSampleQualityInspectionResponse;
+import com.everhomes.rest.quality.OfflineTaskReportCommand;
 import com.everhomes.rest.quality.OwnerType;
 import com.everhomes.rest.quality.ProcessType;
 import com.everhomes.rest.quality.QualityCategoriesDTO;
@@ -112,6 +113,7 @@ import com.everhomes.rest.quality.QualityInspectionTaskReviewResult;
 import com.everhomes.rest.quality.QualityInspectionTaskStatus;
 import com.everhomes.rest.quality.QualityNotificationTemplateCode;
 import com.everhomes.rest.quality.QualityOfflineTaskDetailsResponse;
+import com.everhomes.rest.quality.QualityOfflineTaskReportResponse;
 import com.everhomes.rest.quality.QualityServiceErrorCode;
 import com.everhomes.rest.quality.QualityStandardStatus;
 import com.everhomes.rest.quality.QualityStandardsDTO;
@@ -140,6 +142,7 @@ import com.everhomes.rest.quality.UpdateQualityCategoryCommand;
 import com.everhomes.rest.quality.UpdateQualitySpecificationCommand;
 import com.everhomes.rest.quality.UpdateQualityStandardCommand;
 import com.everhomes.rest.quality.UpdateSampleQualityInspectionCommand;
+import com.everhomes.rest.quality.OfflineReportDetailDTO;
 import com.everhomes.rest.repeat.RepeatSettingsDTO;
 import com.everhomes.rest.repeat.TimeRangeDTO;
 import com.everhomes.rest.user.MessageChannelType;
@@ -320,6 +323,7 @@ public class QualityServiceImpl implements QualityService {
 		//log.setNamespaceId(UserContext.getCurrentNamespaceId());
 		log.setNamespaceId(namespaceId);
 		log.setOwnerType(standard.getOwnerType());
+		log.setScopeId(standard.getTargetId());
 		log.setOwnerId(standard.getOwnerId());
 		log.setTargetType(QualityInspectionLogType.STANDARD.getCode());
 		log.setTargetId(standard.getId());
@@ -2471,26 +2475,25 @@ public class QualityServiceImpl implements QualityService {
 	}
 
 	@Override
-	public ListQualityInspectionLogsResponse listQualityInspectionLogs(
-			ListQualityInspectionLogsCommand cmd) {
-		/*Long privilegeId = configProvider.getLongValue(QualityConstant.QUALITY_UPDATELOG_LIST, 0L);
-		userPrivilegeMgr.checkCurrentUserAuthority(null, null, cmd.getOwnerId(), privilegeId);*/
-		//checkUserPrivilege(cmd.getOwnerId(),PrivilegeConstants.QUALITY_TASK_LIST,null);
+	public ListQualityInspectionLogsResponse listQualityInspectionLogs(ListQualityInspectionLogsCommand cmd) {
+
 		checkUserPrivilege(cmd.getOwnerId(),PrivilegeConstants.QUALITY_UPDATELOG_LIST,cmd.getScopeId());
 		int pageSize = PaginationConfigHelper.getPageSize(configurationProvider, cmd.getPageSize());
         CrossShardListingLocator locator = new CrossShardListingLocator();
         locator.setAnchor(cmd.getPageAnchor());
 
         List<QualityInspectionLogs> logs = qualityProvider.listQualityInspectionLogs(cmd.getOwnerType(), cmd.getOwnerId(),
-        									cmd.getTargetType(), cmd.getTargetId(), locator, pageSize+1);
+        									cmd.getTargetType(), cmd.getTargetId(),cmd.getScopeId(), locator, pageSize+1);
 
         Long nextPageAnchor = null;
         if(logs != null && logs.size() > pageSize) {
         	logs.remove(logs.size() - 1);
             nextPageAnchor = logs.get(logs.size() - 1).getId();
         }
-
-        List<QualityInspectionLogDTO> dtos = logs.stream().map((r) -> {
+		if (logs == null) {
+			logs = new ArrayList<>();
+		}
+		List<QualityInspectionLogDTO> dtos = logs.stream().map((r) -> {
 
         	QualityInspectionLogDTO dto = ConvertHelper.convert(r, QualityInspectionLogDTO.class);
         	dto.setOperateType(r.getProcessType());
@@ -2503,26 +2506,26 @@ public class QualityServiceImpl implements QualityService {
         		}
         	}
 
-        	if(QualityInspectionLogType.STANDARD.getCode().equals(r.getTargetType()) && r.getTargetId() != null) {
-        		QualityInspectionStandards standard = qualityProvider.findStandardById(r.getTargetId());
-        		if(standard != null) {
-        			if(cmd.getScopeId()==null){
-        				//全部中查看
+			if (QualityInspectionLogType.STANDARD.getCode().equals(r.getTargetType()) && r.getTargetId() != null) {
+				QualityInspectionStandards standard = qualityProvider.findStandardById(r.getTargetId());
+				if (standard != null) {
+					if (cmd.getScopeId() == null || cmd.getScopeId() == 0L) {
+						//全部中查看
 						dto.setTargetName(standard.getName());
-					}else {
-        				//项目中查看
-        				if(standard.getTargetId().equals(cmd.getScopeId()))
-						dto.setTargetName(standard.getName());
+					} else {
+						//项目中查看
+						if (standard.getTargetId().equals(cmd.getScopeId()))
+							dto.setTargetName(standard.getName());
 					}
-        		}
-        	}
-        	return dto;
+				}
+			}
+			return dto;
         }).collect(Collectors.toList());
 
         //现在要求有项目分类 去掉dto中targetName为空的 也就是上一步中根据qualityProvider.findStandardById(r.getTargetId());
-		dtos.removeIf((r) -> r.getTargetName() == null);
-		if (dtos.size() < pageSize)
-			nextPageAnchor = null;
+		//dtos.removeIf((r) -> r.getTargetName() == null);
+//		if (dtos.size() < pageSize)
+//			nextPageAnchor = null;
 		ListQualityInspectionLogsResponse response = new ListQualityInspectionLogsResponse();
         response.setNextPageAnchor(nextPageAnchor);
         response.setDtos(dtos);
@@ -3369,6 +3372,7 @@ public class QualityServiceImpl implements QualityService {
 		sample.setStatus(Status.ACTIVE.getCode());
 		qualityProvider.createQualityInspectionSample(sample);
 		sampleSearcher.feedDoc(sample);
+		LOGGER.debug("createSampleQualityInspection feedDoc complete time:{}"+System.currentTimeMillis());
 
 		if(cmd.getCommunityIds() != null && cmd.getCommunityIds().size() > 0) {
 			cmd.getCommunityIds().forEach(communityId -> {
@@ -4489,13 +4493,15 @@ public class QualityServiceImpl implements QualityService {
 	@Override
 	public QualityOfflineTaskDetailsResponse getOfflineTaskDetail(ListQualityInspectionTasksCommand cmd) {
 		//处理传过来的lastSyncTime
-		cmd.setPageSize(Integer.MAX_VALUE - 1);
+//		cmd.setPageSize(Integer.MAX_VALUE - 1);
 		cmd.setLatestUpdateTime(dateStrToTimestamp(cmd.getLastSyncTime()));
 		ListQualityInspectionTasksResponse tasksResponse = listQualityInspectionTasks(cmd);
 		QualityOfflineTaskDetailsResponse offlineTaskDetailsResponse = new QualityOfflineTaskDetailsResponse();
-
 		offlineTaskDetailsResponse.setTasks(tasksResponse.getTasks());
+		offlineTaskDetailsResponse.setNextPageAnchor(tasksResponse.getNextPageAnchor());
 		List<QualityInspectionSpecificationDTO> specifications = new ArrayList<>();
+
+		if(tasksResponse.getTasks()!=null && tasksResponse.getTasks().size()>0)
 		tasksResponse.getTasks().forEach((task) -> {
 			//处理任务
 			if (task.getExecutiveTime() == null) {
@@ -4677,5 +4683,109 @@ public class QualityServiceImpl implements QualityService {
 		this.qualityProvider.populateStandardsGroups(standards);
 		this.qualityProvider.populateStandardsSpecifications(standards);
 		return  converStandardToDto(standard);
+	}
+
+	@Override
+	public QualityOfflineTaskReportResponse OfflineTaskReport(OfflineTaskReportCommand cmd) {
+		if (cmd.getTasks() != null && cmd.getTasks().size() > 0) {
+			Map<Long, OfflineReportDetailDTO> taskDetailMaps = getTaskDetailMaps(cmd.getOfflineReportDetail());
+			cmd.getTasks().forEach((task) -> {
+				QualityInspectionTasks inspectionTask = verifiedTaskById(task.getId());
+				syncTaskInfoToServer(inspectionTask, task, taskDetailMaps);
+			});
+		}
+		return null;
+	}
+
+	private Map<Long, OfflineReportDetailDTO> getTaskDetailMaps(List<OfflineReportDetailDTO> taskReportDetails) {
+		Map<Long, OfflineReportDetailDTO> taskDetailMaps = new HashMap<>();
+		taskReportDetails.forEach((task) -> taskDetailMaps.put(task.getTaskId(), task));
+		return taskDetailMaps;
+	}
+
+	private void syncTaskInfoToServer(QualityInspectionTasks task, QualityInspectionTaskDTO taskDTO, Map<Long, OfflineReportDetailDTO> taskDetailMaps) {
+		QualityInspectionTaskRecords record = new QualityInspectionTaskRecords();
+		record.setTaskId(task.getId());
+		record.setOperatorType(OwnerType.USER.getCode());
+		record.setOperatorId(UserContext.currentUserId());
+
+		task.setExecutiveTime(taskDTO.getExecutiveTime());
+		task.setExecutorType(OrganizationMemberTargetType.USER.getCode());
+		task.setExecutorId(UserContext.currentUserId());
+		if (taskDTO.getOperatorType() != null) {
+			task.setOperatorType(taskDTO.getOperatorType());
+			record.setTargetType(taskDTO.getOperatorType());
+		}
+
+		if (taskDTO.getOperatorId() != null) {
+			task.setOperatorId(taskDTO.getOperatorId());
+			record.setTargetId(taskDTO.getOperatorId());
+		}
+
+		if (taskDTO.getProcessExpireTime() != null) {
+			task.setProcessExpireTime(taskDTO.getProcessExpireTime());
+			record.setProcessEndTime(task.getProcessExpireTime());
+		}
+
+		if (QualityInspectionTaskResult.CORRECT.getCode() == taskDTO.getVerificationResult()) {
+			task.setStatus(QualityInspectionTaskStatus.WAITING_FOR_EXECUTING.getCode());
+			task.setResult(QualityInspectionTaskResult.CORRECT.getCode());
+			record.setProcessResult(QualityInspectionTaskResult.CORRECT.getCode());
+			record.setProcessType(ProcessType.INSPECT.getCode());
+
+		} else if (QualityInspectionTaskResult.INSPECT_COMPLETE.getCode() == taskDTO.getVerificationResult()) {
+			task.setResult(QualityInspectionTaskResult.INSPECT_COMPLETE.getCode());
+			task.setStatus(QualityInspectionTaskStatus.EXECUTED.getCode());
+			record.setProcessResult(QualityInspectionTaskResult.INSPECT_COMPLETE.getCode());
+			record.setProcessType(ProcessType.INSPECT.getCode());
+		}
+
+		//proccess send message to processor and bind recored mesaage to record
+		if (!StringUtils.isNullOrEmpty(taskDTO.getOperatorType()) && taskDTO.getOperatorId() != null
+				&& taskDTO.getProcessExpireTime() != null) {
+			sendMessageToProcessor(task, taskDTO, record);
+		}
+
+		OfflineReportDetailDTO reportDetailDTO = taskDetailMaps.get(task.getId());
+		if (reportDetailDTO.getMessage() != null) {
+			String attText = localeStringService.getLocalizedString(
+					String.valueOf(QualityServiceErrorCode.SCOPE),
+					String.valueOf(QualityServiceErrorCode.ATTACHMENT_TEXT),
+					UserContext.current().getUser().getLocale(),
+					"text:");
+			if (record.getProcessMessage() != null) {
+				String msg = record.getProcessMessage() + "<br/>" + attText + reportDetailDTO.getMessage();
+				record.setProcessMessage(msg);
+			} else {
+				String msg = attText + reportDetailDTO.getMessage();
+				record.setProcessMessage(msg);
+			}
+		}
+		updateVerificationTasks(task, record, reportDetailDTO.getAttachments(), reportDetailDTO.getItemResults(), reportDetailDTO.getNamespaceId());
+	}
+
+	private void sendMessageToProcessor(QualityInspectionTasks task, QualityInspectionTaskDTO taskDTO, QualityInspectionTaskRecords record) {
+		//ASSIGN_TASK_NOTIFY_OPERATOR
+		List<OrganizationMember> operators = organizationProvider.listOrganizationMembersByUId(UserContext.currentUserId());
+		Map<String, Object> map = new HashMap<>();
+		map.put("userName", operators.get(0).getContactName());
+		map.put("taskName", task.getTaskName());
+		map.put("deadline", timeToStr(taskDTO.getProcessExpireTime()));
+		String scope = QualityNotificationTemplateCode.SCOPE;
+		int code = QualityNotificationTemplateCode.ASSIGN_TASK_NOTIFY_OPERATOR;
+		String locale = "zh_CN";
+		String notifyTextForApplicant = localeTemplateService.getLocaleTemplateString(scope, code, locale, map, "");
+		sendMessageToUser(taskDTO.getOperatorId(), notifyTextForApplicant);
+
+		//ASSIGN_TASK_MSG
+		List<OrganizationMember> targets = organizationProvider.listOrganizationMembersByUId(taskDTO.getOperatorId());
+		Map<String, Object> msgMap = new HashMap<>();
+		msgMap.put("operator", operators.get(0).getContactName());
+		msgMap.put("target", targets.get(0).getContactName());
+		msgMap.put("taskName", task.getTaskName());
+		map.put("deadline", timeToStr(taskDTO.getProcessExpireTime()));
+		int msgCode = QualityNotificationTemplateCode.ASSIGN_TASK_MSG;
+		String msg = localeTemplateService.getLocaleTemplateString(scope, msgCode, locale, msgMap, "");
+		record.setProcessMessage(msg);
 	}
 }

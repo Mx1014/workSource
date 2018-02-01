@@ -1358,7 +1358,7 @@ public class QualityProviderImpl implements QualityProvider {
 
 	@Override
 	public List<QualityInspectionLogs> listQualityInspectionLogs(
-			String ownerType, Long ownerId, String targetType, Long targetId,
+			String ownerType, Long ownerId, String targetType, Long targetId,Long scopeId,
 			ListingLocator locator, int count) {
 		assert(locator.getEntityId() != 0);
 		DSLContext context = this.dbProvider.getDslContext(AccessSpec.readOnlyWith(EhQualityInspectionLogs.class, locator.getEntityId()));
@@ -1370,17 +1370,15 @@ public class QualityProviderImpl implements QualityProvider {
         }
 		// 总公司 分公司 改用namespaceId by xiongying20170329
 		query.addConditions(Tables.EH_QUALITY_INSPECTION_LOGS.NAMESPACE_ID.eq(UserContext.getCurrentNamespaceId()));
-//        if(ownerId != null && ownerId != 0) {
-//        	query.addConditions(Tables.EH_QUALITY_INSPECTION_LOGS.OWNER_ID.eq(ownerId));
-//        }
-//		if(!StringUtils.isNullOrEmpty(ownerType)) {
-//			query.addConditions(Tables.EH_QUALITY_INSPECTION_LOGS.OWNER_TYPE.eq(ownerType));
-//		}
+
 		if(targetId != null && targetId != 0) {
         	query.addConditions(Tables.EH_QUALITY_INSPECTION_LOGS.TARGET_ID.eq(targetId));
         }
 		if(!StringUtils.isNullOrEmpty(targetType)) {
 			query.addConditions(Tables.EH_QUALITY_INSPECTION_LOGS.TARGET_TYPE.eq(targetType));    	
+		}
+		if (scopeId != null && scopeId != 0L) {
+			query.addConditions(Tables.EH_QUALITY_INSPECTION_LOGS.SCOPE_ID.eq(scopeId));
 		}
 		
         query.addOrderBy(Tables.EH_QUALITY_INSPECTION_LOGS.ID.desc());
