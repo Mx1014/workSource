@@ -6203,5 +6203,10 @@ public class OrganizationProviderImpl implements OrganizationProvider {
 		List<Organization> list = query.fetch().map(record -> ConvertHelper.convert(record, Organization.class));
 		return list;
 	}
+
+	@Override
+	public Integer countUserOrganization(Integer namespaceId, Long communityId) {
+		 return countUserOrganization(namespaceId, communityId, null, null, null);
+	}
  
 }
