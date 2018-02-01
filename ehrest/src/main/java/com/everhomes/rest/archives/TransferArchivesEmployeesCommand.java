@@ -34,7 +34,7 @@ public class TransferArchivesEmployeesCommand {
 
     private Long organizationId;
 
-    private Date effectiveTime;
+    private String effectiveTime;
 
     private Byte transferType;
 
@@ -59,12 +59,12 @@ public class TransferArchivesEmployeesCommand {
         this.organizationId = organizationId;
     }
 
-    public Date getEffectiveTime() {
+    public String getEffectiveTime() {
         return effectiveTime;
     }
 
     public void setEffectiveTime(String effectiveTime) {
-        this.effectiveTime = ArchivesUtil.parseDate(effectiveTime);
+        this.effectiveTime = effectiveTime;
     }
 
     public Byte getTransferType() {

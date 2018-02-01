@@ -11,9 +11,8 @@ import com.everhomes.rest.app.AppConstants;
 import com.everhomes.rest.common.Router;
 import com.everhomes.rest.messaging.*;
 import com.everhomes.rest.notice.*;
+import com.everhomes.rest.organization.OrganizationDTO;
 import com.everhomes.rest.organization.OrganizationGroupType;
-import com.everhomes.rest.organization.OrganizationMemberDTO;
-import com.everhomes.rest.workReport.WorkReportDetailsActionData;
 import com.everhomes.settings.PaginationConfigHelper;
 import com.everhomes.user.User;
 import com.everhomes.user.UserContext;
@@ -60,6 +59,9 @@ public class EnterpriseNoticeServiceImpl implements EnterpriseNoticeService {
 
     @Autowired
     private FileService fileService;
+
+    @Autowired
+    private OrganizationService organizationService;
 
     private ExecutorService bgThreadPool = Executors.newFixedThreadPool(1);
 
@@ -121,6 +123,7 @@ public class EnterpriseNoticeServiceImpl implements EnterpriseNoticeService {
         if (EnterpriseNoticeContentType.fromCode(cmd.getContentType()) == null) {
             cmd.setContentType(EnterpriseNoticeContentType.TEXT.getCode());
         }
+        OrganizationDTO currentOrganization = organizationService.getUserCurrentOrganization();
         EnterpriseNotice sendEnterpriseNotice = dbProvider.execute((TransactionStatus status) -> {
             Integer namespaceId = UserContext.getCurrentNamespaceId();
             if (namespaceId == null) {
@@ -132,7 +135,8 @@ public class EnterpriseNoticeServiceImpl implements EnterpriseNoticeService {
             }
             enterpriseNotice.setNamespaceId(namespaceId);
             enterpriseNotice.setOwnerType(EntityType.ORGANIZATIONS.getCode());
-            enterpriseNotice.setOwnerId(cmd.getOrganizationId());
+            enterpriseNotice.setOwnerId(currentOrganization.getId());
+            enterpriseNotice.setOperatorName(getUserContactNameByUserId(UserContext.currentUserId()));
             enterpriseNoticeProvider.createEnterpriseNotice(enterpriseNotice);
             createEnterpriseNoticeAttachments(enterpriseNotice, cmd.getAttachments());
             createEnterpriseNoticeReceivers(enterpriseNotice, cmd.getReceivers());
@@ -141,16 +145,16 @@ public class EnterpriseNoticeServiceImpl implements EnterpriseNoticeService {
 
         sendMessageAfterCreateEnterpriseNoticeOnBackground(cmd.getReceivers(), sendEnterpriseNotice);
 
-        return getEnterpriseNoticePreviewDTO(sendEnterpriseNotice);
+        return buildEnterpriseNoticePreviewDTO(sendEnterpriseNotice);
     }
 
-    private EnterpriseNoticePreviewDTO getEnterpriseNoticePreviewDTO(EnterpriseNotice sendEnterpriseNotice) {
+    private EnterpriseNoticePreviewDTO buildEnterpriseNoticePreviewDTO(EnterpriseNotice enterpriseNotice) {
         EnterpriseNoticeDetailActionData actionData = new EnterpriseNoticeDetailActionData();
-        actionData.setBulletinId(sendEnterpriseNotice.getId());
+        actionData.setBulletinId(enterpriseNotice.getId());
         String url = RouterBuilder.build(Router.ENTERPRISE_NOTICE_DETAIL, actionData);
 
         EnterpriseNoticePreviewDTO enterpriseNoticePreviewDTO = new EnterpriseNoticePreviewDTO();
-        enterpriseNoticePreviewDTO.setId(sendEnterpriseNotice.getId());
+        enterpriseNoticePreviewDTO.setId(enterpriseNotice.getId());
         enterpriseNoticePreviewDTO.setUrl(url);
         return enterpriseNoticePreviewDTO;
     }
@@ -229,6 +233,7 @@ public class EnterpriseNoticeServiceImpl implements EnterpriseNoticeService {
             updateEnterpriseNotice.setStatus(cmd.getStatus());
             updateEnterpriseNotice.setPublisher(cmd.getPublisher());
             updateEnterpriseNotice.setSecretFlag(cmd.getSecretFlag());
+            updateEnterpriseNotice.setOperatorName(getUserContactNameByUserId(UserContext.currentUserId()));
             if (!StringUtils.hasText(cmd.getSummary()) && StringUtils.hasText(cmd.getContent()) && EnterpriseNoticeStatus.ACTIVE == EnterpriseNoticeStatus.fromCode(cmd.getStatus())) {
                 updateEnterpriseNotice.setSummary(getSummaryFromContent(updateEnterpriseNotice.getContent(), SUMMARY_CONTENT_MAX_SIZE));
             }
@@ -243,7 +248,7 @@ public class EnterpriseNoticeServiceImpl implements EnterpriseNoticeService {
         });
 
         sendMessageAfterCreateEnterpriseNoticeOnBackground(cmd.getReceivers(), updateEnterpriseNotice);
-        return getEnterpriseNoticePreviewDTO(updateEnterpriseNotice);
+        return buildEnterpriseNoticePreviewDTO(updateEnterpriseNotice);
     }
 
     private void sendMessageAfterSendNotice(EnterpriseNotice notice, Long receiverId) {
@@ -295,6 +300,7 @@ public class EnterpriseNoticeServiceImpl implements EnterpriseNoticeService {
         }
         dbProvider.execute((TransactionStatus status) -> {
             enterpriseNotice.setStatus(EnterpriseNoticeStatus.DELETED.getCode());
+            enterpriseNotice.setOperatorName(getUserContactNameByUserId(UserContext.currentUserId()));
             enterpriseNoticeProvider.updateEnterpriseNotice(enterpriseNotice);
             enterpriseNoticeProvider.logicDeleteEnterpriseNoticeAttachmentsByNoticeId(enterpriseNotice.getId());
             enterpriseNoticeProvider.logicDeleteEnterpriseNoticeReceiversByNoticeId(enterpriseNotice.getId());
@@ -309,6 +315,7 @@ public class EnterpriseNoticeServiceImpl implements EnterpriseNoticeService {
             return;
         }
         enterpriseNotice.setStatus(EnterpriseNoticeStatus.INACTIVE.getCode());
+        enterpriseNotice.setOperatorName(getUserContactNameByUserId(UserContext.currentUserId()));
         enterpriseNoticeProvider.updateEnterpriseNotice(enterpriseNotice);
     }
 
@@ -346,7 +353,7 @@ public class EnterpriseNoticeServiceImpl implements EnterpriseNoticeService {
 
         ListEnterpriseNoticeResponse response = new ListEnterpriseNoticeResponse();
 
-        List<EnterpriseNotice> enterpriseNotices = enterpriseNoticeProvider.listEnterpriseNoticesByOwnerId(parseReceivers(cmd.getOrganizationId()), offset, pageSize);
+        List<EnterpriseNotice> enterpriseNotices = enterpriseNoticeProvider.listEnterpriseNoticesByOwnerId(parseCurrentReceivers(), offset, pageSize);
 
         if (enterpriseNotices != null && enterpriseNotices.size() > 0) {
             List<EnterpriseNoticeDTO> enterpriseNoticeDTOS = new ArrayList<>(enterpriseNotices.size());
@@ -365,14 +372,14 @@ public class EnterpriseNoticeServiceImpl implements EnterpriseNoticeService {
     /**
      * 发给自己的、发给本部门的或者发给上级部门的公告本人均可见
      */
-    private List<EnterpriseNoticeReceiver> parseReceivers(Long organizationId) {
+    private List<EnterpriseNoticeReceiver> parseCurrentReceivers() {
         List<EnterpriseNoticeReceiver> receivers = new ArrayList<>();
         EnterpriseNoticeReceiver receiver = new EnterpriseNoticeReceiver();
         receiver.setReceiverId(UserContext.currentUserId());
         receiver.setReceiverType(EnterpriseNoticeReceiverType.USER.getCode());
         receivers.add(receiver);
 
-        Organization organization = organizationProvider.findOrganizationById(organizationId);
+        OrganizationDTO organization = organizationService.getUserCurrentOrganization();
 
         if (organization != null && StringUtils.hasText(organization.getPath())) {
             for (String orgId : organization.getPath().split("/")) {
@@ -412,5 +419,33 @@ public class EnterpriseNoticeServiceImpl implements EnterpriseNoticeService {
             dto.setContactToken(detail.getContactToken());
             return dto;
         }
+    }
+
+    @Override
+    public String getUserContactNameByUserId(Long userId) {
+        List<OrganizationMember> members = organizationProvider.listOrganizationMembersByUId(userId);
+        if (members != null && members.size() > 0)
+            return members.get(0).getContactName();
+        return "";
+    }
+
+    @Override
+    public boolean isNoticeSendToCurrentUser(Long enterpriseNoticeId) {
+        List<EnterpriseNoticeReceiver> currentReceivers = parseCurrentReceivers();
+        if (CollectionUtils.isEmpty(currentReceivers)) {
+            return false;
+        }
+        List<EnterpriseNoticeReceiver> receivers = enterpriseNoticeProvider.findEnterpriseNoticeReceiversByNoticeId(enterpriseNoticeId);
+        if (CollectionUtils.isEmpty(receivers)) {
+            return false;
+        }
+        for (EnterpriseNoticeReceiver current : currentReceivers) {
+            for (EnterpriseNoticeReceiver receiver : receivers) {
+                if (current.getReceiverType().equals(receiver.getReceiverType()) && current.getReceiverId().compareTo(receiver.getReceiverId()) == 0) {
+                    return true;
+                }
+            }
+        }
+        return false;
     }
 }

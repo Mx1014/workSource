@@ -493,6 +493,7 @@ public class EquipmentServiceImpl implements EquipmentService {
 				equipmentStandardMap.setTargetId(equipment.getId());
 				equipmentStandardMap.setTargetType(InspectionStandardMapTargetType.EQUIPMENT.getCode());
 				equipmentProvider.createEquipmentStandardMap(equipmentStandardMap);
+				equipmentStandardMapSearcher.feedDoc(equipmentStandardMap);
 				createdEquipments.add(ConvertHelper.convert(equipment, EquipmentInspectionEquipments.class));
 			}
 			standard.setEquipments(createdEquipments);
@@ -5386,6 +5387,8 @@ private void checkUserPrivilege(Long orgId, Long privilegeId, Long communityId) 
 			equipmentProvider.createEquipmentPlanMaps(equipmentPlanMap);
 			equipmentStandardRelation.add(relation);
 		}
+
+		equipmentProvider.deleteEquipmentInspectionPlanGroupMapByPlanId(plan.getId());
 		//巡检计划增加审批和执行人员
 		processPlanGroups(cmd.getGroupList(), plan);
 		//inActive 所有关联任务当前时间节点之前任务继续   状态变成待审核
@@ -6061,6 +6064,30 @@ private void checkUserPrivilege(Long orgId, Long privilegeId, Long communityId) 
 
 	@Override
 	public void updateEquipmentStatus(DeleteEquipmentsCommand cmd) {
+		EquipmentInspectionEquipments equipment = equipmentProvider.findEquipmentById(cmd.getEquipmentId());
+		if(equipment==null){
+			throw RuntimeErrorException.errorWith(EquipmentServiceErrorCode.SCOPE,
+					EquipmentServiceErrorCode.ERROR_EQUIPMENT_NOT_EXIST, "设备不存在！");
+		}
+		equipment.setStatus(EquipmentStatus.DISCARDED.getCode());
 		equipmentProvider.updateEquipmentStatus(cmd.getEquipmentId(),EquipmentStatus.DISCARDED.getCode());
+		equipmentSearcher.feedDoc(equipment);
+		List<EquipmentStandardMap> maps = equipmentProvider.findByTarget(equipment.getId(), InspectionStandardMapTargetType.EQUIPMENT.getCode());
+		if(maps != null && maps.size() > 0) {
+			for(EquipmentStandardMap map : maps) {
+				inActiveEquipmentStandardRelations(map);
+			}
+		}
+
+		equipmentProvider.deleteEquipmentPlansMapByEquipmentId(equipment.getId());
+		//增加设备的操作记录
+		EquipmentInspectionEquipmentLogs operateLog = new EquipmentInspectionEquipmentLogs();
+		operateLog.setNamespaceId(equipment.getNamespaceId());
+		operateLog.setOwnerId(cmd.getOwnerId());
+		operateLog.setOwnerType(cmd.getOwnerType());
+		operateLog.setTargetId(equipment.getId());
+		operateLog.setTargetType(EquipmentOperateObjectType.EQUIPMENT.getOperateObjectType());
+		operateLog.setProcessType(EquipmentOperateActionType.UPDATE.getCode());
+		equipmentProvider.createEquipmentOperateLogs(operateLog);
 	}
 }

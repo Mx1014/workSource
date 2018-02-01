@@ -1257,6 +1257,38 @@ public class SequenceServiceImpl implements SequenceService {
             return dbContext.select(Tables.EH_SCHEDULE_TASK_LOGS.ID.max()).from(Tables.EH_SCHEDULE_TASK_LOGS).fetchOne().value1();
         });
 
+        syncTableSequence(null, EhSocialSecurityInoutReport.class, Tables.EH_SOCIAL_SECURITY_INOUT_REPORT.getName(), (dbContext) -> {
+            return dbContext.select(Tables.EH_SOCIAL_SECURITY_INOUT_REPORT.ID.max()).from(Tables.EH_SOCIAL_SECURITY_INOUT_REPORT).fetchOne().value1();
+        });
+
+        syncTableSequence(null, EhSocialSecurityBases.class, Tables.EH_SOCIAL_SECURITY_BASES.getName(), (dbContext) -> {
+            return dbContext.select(Tables.EH_SOCIAL_SECURITY_BASES.ID.max()).from(Tables.EH_SOCIAL_SECURITY_BASES).fetchOne().value1();
+        });
+
+        syncTableSequence(null, EhSocialSecurityDepartmentSummary.class, Tables.EH_SOCIAL_SECURITY_DEPARTMENT_SUMMARY.getName(), (dbContext) -> {
+            return dbContext.select(Tables.EH_SOCIAL_SECURITY_DEPARTMENT_SUMMARY.ID.max()).from(Tables.EH_SOCIAL_SECURITY_DEPARTMENT_SUMMARY).fetchOne().value1();
+        });
+
+        syncTableSequence(null, EhSocialSecurityPaymentLogs.class, Tables.EH_SOCIAL_SECURITY_PAYMENT_LOGS.getName(), (dbContext) -> {
+            return dbContext.select(Tables.EH_SOCIAL_SECURITY_PAYMENT_LOGS.ID.max()).from(Tables.EH_SOCIAL_SECURITY_PAYMENT_LOGS).fetchOne().value1();
+        });
+
+        syncTableSequence(null, EhSocialSecurityPayments.class, Tables.EH_SOCIAL_SECURITY_PAYMENTS.getName(), (dbContext) -> {
+            return dbContext.select(Tables.EH_SOCIAL_SECURITY_PAYMENTS.ID.max()).from(Tables.EH_SOCIAL_SECURITY_PAYMENTS).fetchOne().value1();
+        });
+
+        syncTableSequence(null, EhSocialSecuritySettings.class, Tables.EH_SOCIAL_SECURITY_SETTINGS.getName(), (dbContext) -> {
+            return dbContext.select(Tables.EH_SOCIAL_SECURITY_SETTINGS.ID.max()).from(Tables.EH_SOCIAL_SECURITY_SETTINGS).fetchOne().value1();
+        });
+
+        syncTableSequence(null, EhSocialSecuritySummary.class, Tables.EH_SOCIAL_SECURITY_SUMMARY.getName(), (dbContext) -> {
+            return dbContext.select(Tables.EH_SOCIAL_SECURITY_SUMMARY.ID.max()).from(Tables.EH_SOCIAL_SECURITY_SUMMARY).fetchOne().value1();
+        });
+
+        syncTableSequence(null, EhSocialSecurityReport.class, Tables.EH_SOCIAL_SECURITY_REPORT.getName(), (dbContext) -> {
+            return dbContext.select(Tables.EH_SOCIAL_SECURITY_REPORT.ID.max()).from(Tables.EH_SOCIAL_SECURITY_REPORT).fetchOne().value1();
+        });
+
 
         syncTableSequence(null, EhOpPromotionMessages.class, Tables.EH_OP_PROMOTION_MESSAGES.getName(), (dbContext) -> {
             return dbContext.select(Tables.EH_OP_PROMOTION_MESSAGES.ID.max()).from(Tables.EH_OP_PROMOTION_MESSAGES).fetchOne().value1();
@@ -2638,10 +2670,29 @@ public class SequenceServiceImpl implements SequenceService {
         syncTableSequence(null, EhAuthorizationThirdPartyButtons.class, Tables.EH_AUTHORIZATION_THIRD_PARTY_BUTTONS.getName(), (dbContext) -> {
             return dbContext.select(Tables.EH_AUTHORIZATION_THIRD_PARTY_BUTTONS.ID.max()).from(Tables.EH_AUTHORIZATION_THIRD_PARTY_BUTTONS).fetchOne().value1();
         });
+ 
+        syncTableSequence(null, EhRentalv2ItemsOrders.class, Tables.EH_RENTALV2_ITEMS_ORDERS.getName(), (dbContext) -> {
+            return dbContext.select(Tables.EH_RENTALV2_ITEMS_ORDERS.ID.max()).from(Tables.EH_RENTALV2_ITEMS_ORDERS).fetchOne().value1();
+        });
 
+        syncTableSequence(null, EhIncubatorApplyAttachments.class, Tables.EH_INCUBATOR_APPLY_ATTACHMENTS.getName(), (dbContext) -> {
+            return dbContext.select(Tables.EH_INCUBATOR_APPLY_ATTACHMENTS.ID.max()).from(Tables.EH_INCUBATOR_APPLY_ATTACHMENTS).fetchOne().value1();
+        });
+
+        syncTableSequence(null, EhReflectionServiceModuleApps.class, Tables.EH_REFLECTION_SERVICE_MODULE_APPS.getName(), (dbContext) -> {
+            return dbContext.select(Tables.EH_REFLECTION_SERVICE_MODULE_APPS.ID.max()).from(Tables.EH_REFLECTION_SERVICE_MODULE_APPS).fetchOne().value1();
+        });
+
+        syncTableSequence(null, EhSocialSecurityInoutTime.class, Tables.EH_SOCIAL_SECURITY_INOUT_TIME.getName(), (dbContext) -> {
+            return dbContext.select(Tables.EH_SOCIAL_SECURITY_INOUT_TIME.ID.max()).from(Tables.EH_SOCIAL_SECURITY_INOUT_TIME).fetchOne().value1();
+        });
+
+        syncTableSequence(null, EhSocialSecurityInoutLog.class, Tables.EH_SOCIAL_SECURITY_INOUT_LOG.getName(), (dbContext) -> {
+            return dbContext.select(Tables.EH_SOCIAL_SECURITY_INOUT_LOG.ID.max()).from(Tables.EH_SOCIAL_SECURITY_INOUT_LOG).fetchOne().value1();
+        }); 
         //
         // 以后不用在这里加重复的代码了，已经做成自动获取所有表去同步id了，如果有特殊的表，可以写在这里.
-        //
+        // 
     }
 
     private void syncTableSequence(Class keytableCls, Class pojoClass, String tableName, SequenceQueryCallback callback) {

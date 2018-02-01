@@ -5,7 +5,7 @@ import com.everhomes.util.StringHelper;
 /**
  * <p>获取企业公告详情信息</p>
  * <ul>
- * <li>organizationId : 操作人所属部门ID</li>
+ * <li>organizationId : 公司ID</li>
  * <li>id : 要获取的公告ID</li>
  * </ul>
  */

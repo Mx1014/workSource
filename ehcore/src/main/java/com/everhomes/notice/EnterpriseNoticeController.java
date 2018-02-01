@@ -60,6 +60,31 @@ public class EnterpriseNoticeController extends ControllerBase {
     @RequestMapping("getEnterpriseNoticeDetail")
     @RestReturn(value = EnterpriseNoticeDTO.class)
     public RestResponse getEnterpriseNoticeDetail(GetEnterpriseNoticeCommand cmd) {
+        boolean isNoticeSendToCurrentUser = enterpriseNoticeService.isNoticeSendToCurrentUser(cmd.getId());
+        EnterpriseNoticeDTO enterpriseNoticeDTO = null;
+        if (isNoticeSendToCurrentUser) {
+            enterpriseNoticeDTO = enterpriseNoticeService.getEnterpriseNoticeDetailInfo(cmd.getId());
+        }
+        if (enterpriseNoticeDTO == null) {
+            enterpriseNoticeDTO = new EnterpriseNoticeDTO();
+            enterpriseNoticeDTO.setStatus(EnterpriseNoticeStatus.DELETED.getCode());
+        }
+        RestResponse response = new RestResponse(enterpriseNoticeDTO);
+        response.setErrorCode(ErrorCodes.SUCCESS);
+        response.setErrorDescription("OK");
+        return response;
+    }
+
+    /**
+     * <b>URL : /enterpriseNotice/getEnterpriseNoticeDetail4Admin</b>
+     * <p>获取公告详细信息</p>
+     *
+     * @param cmd，请查看{@link GetEnterpriseNoticeCommand}
+     * @return {@link EnterpriseNoticeDTO}
+     */
+    @RequestMapping("getEnterpriseNoticeDetail4Admin")
+    @RestReturn(value = EnterpriseNoticeDTO.class)
+    public RestResponse getEnterpriseNoticeDetail4Admin(GetEnterpriseNoticeCommand cmd) {
         RestResponse response = new RestResponse(enterpriseNoticeService.getEnterpriseNoticeDetailInfo(cmd.getId()));
         response.setErrorCode(ErrorCodes.SUCCESS);
         response.setErrorDescription("OK");

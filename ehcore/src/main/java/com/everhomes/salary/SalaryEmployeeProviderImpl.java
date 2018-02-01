@@ -52,6 +52,7 @@ public class SalaryEmployeeProviderImpl implements SalaryEmployeeProvider {
         assert (salaryEmployee.getId() != null);
 //		salaryEmployee.setUpdateTime(new Timestamp(DateHelper.currentGMTTime().getTime()));
 //		salaryEmployee.setOperatorUid(UserContext.current().getUser().getId());
+ 
         getReadWriteDao().update(salaryEmployee);
         DaoHelper.publishDaoAction(DaoAction.MODIFY, EhSalaryEmployees.class, salaryEmployee.getId());
     }
@@ -150,8 +151,7 @@ public class SalaryEmployeeProviderImpl implements SalaryEmployeeProvider {
 
     private DSLContext getContext(AccessSpec accessSpec) {
         return dbProvider.getDslContext(accessSpec);
-    }
-
+    } 
 //	@Override
 //	public List<SalaryEmployee> listSalaryEmployeeByPeriodGroupId(Long salaryPeriodGroupId) {
 //		return getReadOnlyContext().select().from(Tables.EH_SALARY_EMPLOYEES)

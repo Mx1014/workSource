@@ -1,11 +1,16 @@
-package com.everhomes.rest.archives;
+package com.everhomes.archives;
 
-import java.text.DateFormat;
+import com.everhomes.rest.archives.SocialSecurityMonthType;
+
 import java.text.SimpleDateFormat;
-import java.util.Calendar;
+import java.time.LocalDate;
+import java.time.format.DateTimeFormatter;
 
 public class ArchivesUtil {
 
+    /**
+     * String 转 java.sql.Date
+     */
     public static java.sql.Date parseDate(String strDate) {
         String pattern = null;
         if (strDate != null) {
@@ -35,19 +40,27 @@ public class ArchivesUtil {
     }
 
     /**
-     * 当前日期(sql.Date类型)
-     * @return
+     * 当前日期( sql.Date 类型)
      */
     public static java.sql.Date currentDate(){
         java.util.Date now  = new java.util.Date();
         java.sql.Date date = new java.sql.Date(now.getTime());
-/*        DateFormat df = DateFormat.getDateInstance();0
-        String str = df.format(now);*/
         return date;
     }
-    /*      Date now = new Date();
-      Calendar cal = Calendar.getInstance();
 
-      DateFormat d1 = DateFormat.getDateInstance(); //默认语言（汉语）下的默认风格（MEDIUM风格，比如：2008-6-16 20:54:53）
-      String str1 = d1.format(now);*/
+    /**
+     * 社保专用月份取值
+     */
+    public static String socialSecurityMonth(Byte monthType) {
+        DateTimeFormatter format = DateTimeFormatter.ofPattern("yyyyMM");
+        //  当前月
+        if (monthType.equals(SocialSecurityMonthType.THIS_MONTH.getCode())) {
+            LocalDate date = LocalDate.now();
+            return date.format(format);
+        } else {
+            //  下一月
+            LocalDate date = LocalDate.now().plusMonths(1L);
+            return date.format(format);
+        }
+    }
 }
