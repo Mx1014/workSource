@@ -131,17 +131,17 @@ public class EquipmentStandardSearcherImpl extends AbstractElasticSearch impleme
 
         SearchRequestBuilder builder = getClient().prepareSearch(getIndexName()).setTypes(getIndexType());
         QueryBuilder qb = null;
-        if(cmd.getKeyword() == null || cmd.getKeyword().isEmpty()) {
+        if (cmd.getKeyword() == null || cmd.getKeyword().isEmpty()) {
             qb = QueryBuilders.matchAllQuery();
         } else {
             qb = QueryBuilders.multiMatchQuery(cmd.getKeyword())
-            		.field("standardName", 1.2f);
-                    //.field("standardNumber", 1.0f);
+                    .field("standardName", 5.0f)
+                    .field("standardNumber", 5.0f);
 
-            builder.setHighlighterFragmentSize(60);
-            builder.setHighlighterNumOfFragments(8);
-            builder.addHighlightedField("standardName");
-                    //.addHighlightedField("standardNumber");
+          /*  builder.setHighlighterFragmentSize(60);
+            builder.setHighlighterNumOfFragments(8);*/
+            builder.addHighlightedField("standardName")
+                    .addHighlightedField("standardNumber");
         }
 
         FilterBuilder fb = null;
