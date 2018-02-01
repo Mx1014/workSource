@@ -138,6 +138,7 @@ public class ContractDetailDTO {
     private BigDecimal exchangeRate;
     private Integer ageLimit;
     private Long applicationId;
+    private String applicationTheme;
     private Long paymentModeItemId;
     private Timestamp paidTime;
     private BigDecimal lumpSumPayment;
@@ -815,5 +816,13 @@ public class ContractDetailDTO {
 
     public void setCreatePositionName(String createPositionName) {
         this.createPositionName = createPositionName;
+    }
+
+    public String getApplicationTheme() {
+        return applicationTheme;
+    }
+
+    public void setApplicationTheme(String applicationTheme) {
+        this.applicationTheme = applicationTheme;
     }
 }

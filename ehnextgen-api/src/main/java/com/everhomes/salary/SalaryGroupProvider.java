@@ -14,4 +14,6 @@ public interface SalaryGroupProvider {
 	List<SalaryGroup> listSalaryGroup();
 
 	String getMonthByOwnerId(Long ownerId);
+
+	SalaryGroup findSalaryGroup(Long ownerId, String month);
 }

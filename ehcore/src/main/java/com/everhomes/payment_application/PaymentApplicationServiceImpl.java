@@ -9,6 +9,8 @@ import com.everhomes.openapi.ContractProvider;
 import com.everhomes.organization.Organization;
 import com.everhomes.organization.OrganizationMember;
 import com.everhomes.organization.OrganizationProvider;
+import com.everhomes.requisition.Requisition;
+import com.everhomes.requisition.RequisitionProvider;
 import com.everhomes.rest.acl.PrivilegeConstants;
 import com.everhomes.rest.common.ServiceModuleConstants;
 import com.everhomes.rest.customer.CustomerType;
@@ -68,6 +70,9 @@ public class PaymentApplicationServiceImpl implements PaymentApplicationService 
     @Autowired
     private SupplierProvider supplierProvider;
 
+    @Autowired
+    private RequisitionProvider requisitionProvider;
+
     @Override
     public String generatePaymentApplicationNumber() {
         String num = DateUtil.dateToStr(new Date(), DateUtil.NO_SLASH) + (int)((Math.random()*9+1)*1000);
@@ -110,6 +115,13 @@ public class PaymentApplicationServiceImpl implements PaymentApplicationService 
                     dto.setCustomerName(supplier.getName());
                 }
 
+            }
+        }
+
+        if(application.getRequestId() != null) {
+            Requisition requisition = requisitionProvider.findRequisitionById(application.getRequestId());
+            if(requisition != null) {
+                dto.setRequestName(requisition.getTheme());
             }
         }
 

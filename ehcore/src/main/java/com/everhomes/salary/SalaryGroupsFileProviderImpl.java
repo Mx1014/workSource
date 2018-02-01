@@ -5,6 +5,7 @@ import java.sql.Timestamp;
 import java.util.List;
 
 import org.jooq.DSLContext;
+import org.jooq.Record;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
 
@@ -63,7 +64,20 @@ public class SalaryGroupsFileProviderImpl implements SalaryGroupsFileProvider {
 				.orderBy(Tables.EH_SALARY_GROUPS_FILES.ID.asc())
 				.fetch().map(r -> ConvertHelper.convert(r, SalaryGroupsFile.class));
 	}
-	
+
+	@Override
+	public SalaryGroupsFile findSalaryGroupsFile(Long ownerId, String month) {
+		Record r = getReadOnlyContext().select().from(Tables.EH_SALARY_GROUPS_FILES)
+				.where(Tables.EH_SALARY_GROUPS_FILES.OWNER_ID.eq(ownerId))
+				.and(Tables.EH_SALARY_GROUPS_FILES.SALARY_PERIOD.eq(month))
+				.orderBy(Tables.EH_SALARY_GROUPS_FILES.ID.asc())
+				.fetchAny();
+		if (null == r) {
+			return null;
+		}
+		return ConvertHelper.convert(r, SalaryGroupsFile.class);
+	}
+
 	private EhSalaryGroupsFilesDao getReadWriteDao() {
 		return getDao(getReadWriteContext());
 	}

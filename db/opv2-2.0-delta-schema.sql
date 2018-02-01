@@ -156,17 +156,6 @@ ALTER TABLE `eh_quality_inspection_specifications`
 
 -- 离线支持  jiarui
 
--- 日志增加项目 jiarui
-
-ALTER TABLE `eh_quality_inspection_logs`
-  ADD COLUMN `scope_id`  bigint(20) NULL DEFAULT 0 ;
-
-UPDATE  `eh_quality_inspection_logs`
-SET scope_id =(SELECT eh_quality_inspection_standards.target_id FROM  eh_quality_inspection_standards where eh_quality_inspection_standards.id = eh_quality_inspection_logs.target_id);
-
--- 日志增加项目 jiarui
-
-
 
 -- 文档管理1.0 add by nan.rong 01/12/2018
 -- DROP TABLE eh_file_management_catalogs;
@@ -937,11 +926,14 @@ CREATE TABLE `eh_salary_employees` (
   `regular_salary` DECIMAL (10, 2) COMMENT '固定工资合计',
   `should_pay_salary` DECIMAL (10, 2) COMMENT '应发工资合计',
   `real_pay_salary` DECIMAL (10, 2) COMMENT '实发工资合计',
+  `cost_salary` DECIMAL (10, 2) COMMENT '人工成本合计',
   `creator_uid` BIGINT COMMENT'人员id',
   `create_time` DATETIME, 
   `status` TINYINT COMMENT '状态0-正常 1-实发合计为负  2-未定薪',
   PRIMARY KEY (`id`)
 ) ENGINE=INNODB DEFAULT CHARSET=utf8mb4 ;
+
+
 
 
 -- 薪酬批次每个人的归档数据
@@ -958,6 +950,7 @@ CREATE TABLE `eh_salary_employees_files` (
   `regular_salary` DECIMAL (10, 2) COMMENT '固定工资合计',
   `should_pay_salary` DECIMAL (10, 2) COMMENT '应发工资合计',
   `real_pay_salary` DECIMAL (10, 2) COMMENT '实发工资合计',
+  `cost_salary` DECIMAL (10, 2) COMMENT '人工成本合计',
   `creator_uid` BIGINT COMMENT'人员id',
   `create_time` DATETIME, 
   `status` TINYINT COMMENT '状态0-正常 1-实发合计为负  2-未定薪',
@@ -966,6 +959,31 @@ CREATE TABLE `eh_salary_employees_files` (
   PRIMARY KEY (`id`)
 ) ENGINE=INNODB DEFAULT CHARSET=utf8mb4 ;
 
+
+-- 薪酬批次每个人的每期数据
+DROP TABLE IF EXISTS eh_salary_depart_statistics;
+CREATE TABLE `eh_salary_depart_statistics` (
+  `id` BIGINT COMMENT 'id of the record', 
+  `owner_type` VARCHAR(32) COMMENT 'organization',
+  `owner_id` BIGINT COMMENT '属于哪一个分公司的',
+  `organization_id` BIGINT COMMENT '属于哪一个总公司的',
+  `dept_id` BIGINT (20) DEFAULT NULL COMMENT 'user department id',
+  `dept_name` VARCHAR (128) DEFAULT NULL COMMENT 'user department name',
+  `namespace_id` INT ,
+  `salary_period` VARCHAR(8) COMMENT 'example:201705', 
+  `regular_salary` DECIMAL (10, 2) COMMENT '固定工资合计',
+  `should_pay_salary` DECIMAL (10, 2) COMMENT '应发工资合计',
+  `real_pay_salary` DECIMAL (10, 2) COMMENT '实发工资合计',
+  `cost_salary` DECIMAL (10, 2) COMMENT '人工成本合计',
+  `cost_mom_salary` DECIMAL (10, 2) COMMENT '人工成本环比',
+  `cost_yoy_salary` DECIMAL (10, 2) COMMENT '人工成本同比',
+  `creator_uid` BIGINT COMMENT'人员id',
+  `create_time` DATETIME, 
+  `is_file` TINYINT COMMENT '0-普通 1-归档',
+  `filer_uid` BIGINT COMMENT'创建者',
+  `file_time` DATETIME,  
+  PRIMARY KEY (`id`)
+) ENGINE=INNODB DEFAULT CHARSET=utf8mb4 ;
 
 -- 薪酬薪酬人员每期的实际值
 DROP TABLE IF EXISTS eh_salary_employee_period_vals;

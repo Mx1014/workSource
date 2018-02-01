@@ -133,6 +133,7 @@ public class PaymentApplicationSearcherImpl extends AbstractElasticSearch implem
         }
 
         FilterBuilder fb = FilterBuilders.termFilter("namespaceId", cmd.getNamespaceId());
+        fb = FilterBuilders.andFilter(fb, FilterBuilders.termFilter("communityId", cmd.getCommunityId()));
 
         if(cmd.getStatus() != null) {
             fb = FilterBuilders.andFilter(fb, FilterBuilders.termFilter("status", cmd.getStatus()));
@@ -179,6 +180,7 @@ public class PaymentApplicationSearcherImpl extends AbstractElasticSearch implem
             XContentBuilder b = XContentFactory.jsonBuilder().startObject();
             b.field("id", application.getId());
             b.field("namespaceId", application.getNamespaceId());
+            b.field("communityId", application.getCommunityId());
             b.field("title", application.getTitle());
             b.field("applicationNumber", application.getApplicationNumber());
             b.field("createTime", application.getCreateTime().getTime());

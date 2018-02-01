@@ -34,4 +34,6 @@ public interface SalaryGroupEntityProvider {
 	void deleteSalaryGroupEntity(SalaryGroupEntity entity);
 
 	SalaryGroupEntity findSalaryGroupEntityByOrgANdDefaultId(Long organizationId, Long entityIdSalarytax);
+
+	List<SalaryGroupEntity> listOpenSalaryGroupEntityByOrgId(Long organizationId);
 }

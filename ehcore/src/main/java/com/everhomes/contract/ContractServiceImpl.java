@@ -36,6 +36,8 @@ import com.everhomes.organization.*;
 import com.everhomes.organization.pm.CommunityAddressMapping;
 import com.everhomes.organization.pm.PropertyMgrProvider;
 import com.everhomes.organization.pm.PropertyMgrService;
+import com.everhomes.requisition.Requisition;
+import com.everhomes.requisition.RequisitionProvider;
 import com.everhomes.rest.address.AddressLivingStatus;
 import com.everhomes.portal.PortalService;
 import com.everhomes.rest.acl.ListServiceModuleAdministratorsCommand;
@@ -209,6 +211,9 @@ public class ContractServiceImpl implements ContractService {
 
 	@Autowired
 	private ZjSyncdataBackupProvider zjSyncdataBackupProvider;
+
+	@Autowired
+	private RequisitionProvider requisitionProvider;
 
 	private void checkContractAuth(Integer namespaceId, Long privilegeId, Long orgId, Long communityId) {
 		ListServiceModuleAppsCommand cmd = new ListServiceModuleAppsCommand();
@@ -1594,6 +1599,13 @@ public class ContractServiceImpl implements ContractService {
 				}
 			}
 
+		}
+
+		if(contract.getApplicationId() != null) {
+			Requisition requisition = requisitionProvider.findRequisitionById(contract.getApplicationId());
+			if(requisition != null) {
+				dto.setApplicationTheme(requisition.getTheme());
+			}
 		}
 
 		if(contract.getCreateOrgId() != null) {
