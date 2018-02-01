@@ -208,15 +208,14 @@ public class GuangDaWeGuParkingVendorHandler extends DefaultParkingVendorHandler
 		params.put("timeFrom", format.format(order.getStartPeriod()));
 		params.put("timeTo", format.format(Utils.addSecond(System.currentTimeMillis(),60*order.getDelayTime())));
 		params.put("paid", order.getPrice().multiply(new BigDecimal(100)).intValue()+"");//单位 分
-		params.put("paytype", order.getOrderToken());
+		params.put("paytype", "4".equals(order.getOrderToken())?"3":"2");//2=临保缴费 3=临保续费 参考  getParkingTempFee()
 		params.put("payway", ""+(VendorType.WEI_XIN.getCode().equals(order.getPaidType()) ? 4 : 5));
 		params.put("tradeOutOrder", order.getOrderNo()+"");
 		String result = post(PARKING_PAY_PARKING, params);
-		order.setErrorDescription(result);
+		order.setErrorDescription(result);//data 缴费记录号 存储
 
 		GuangDaWeGuResponse<Integer> entity = JSONObject.parseObject(result, new TypeReference<GuangDaWeGuResponse<Integer>>() {});
 		if(null != entity && entity.isSuccess()) {
-			order.setOrderToken(""+entity.getData());
 			return true;
 		}
 		return false;
@@ -240,14 +239,13 @@ public class GuangDaWeGuParkingVendorHandler extends DefaultParkingVendorHandler
 			params.put("paid", order.getOriginalPrice().multiply(new BigDecimal(100)).intValue()+"");//单位是分
 
 			String result = post(CARD_PAY_CARD,params);
-			order.setErrorDescription(result);
+			order.setErrorDescription(result); //data 缴费记录号 存储
 
 			GuangDaWeGuResponse<Integer> response = JSONObject.parseObject(result, new TypeReference<GuangDaWeGuResponse<Integer>>() {});
 
 			if(response.isSuccess()){
 				order.setStartPeriod(new Timestamp(newStartTime));
 				order.setEndPeriod(new Timestamp(newEndTime));
-				order.setOrderToken(response.getData()+"");
 				return true;
 			}
 		}
@@ -267,7 +265,6 @@ public class GuangDaWeGuParkingVendorHandler extends DefaultParkingVendorHandler
 
 	@Override
 	public void updateParkingRechargeOrderRate(ParkingLot parkingLot, ParkingRechargeOrder order) {
-//		super.updateParkingRechargeOrderRateInfo(parkingLot, order);
 		List<ParkingRechargeRateDTO> parkingRechargeRates = getParkingRechargeRates(parkingLot, null, null);
 		for (ParkingRechargeRateDTO rate : parkingRechargeRates) {
 			if(rate.getMonthCount().compareTo(order.getMonthCount())==0){
@@ -302,8 +299,9 @@ public class GuangDaWeGuParkingVendorHandler extends DefaultParkingVendorHandler
 			dto.setParkingTime(calculateParkTime(data.getStaydays(),data.getStayhours(),data.getStayminutes()));
 			dto.setDelayTime(15);
 			dto.setPrice(new BigDecimal(data.getDues()));
-
-			dto.setOrderToken("100");
+			//feestate	缴费状态	int	0=无数据;2=免缴费;3=已缴费未超时;4=已缴费需续费;5=需要缴费
+			//这里需要干嘛，缴费完成，回调的时候，读取这个token，向停车场缴费需要这个参数。参考 payTempCardFee()
+			dto.setOrderToken(data.getFeestate()+"");
 		}
 		return dto;
 	}
