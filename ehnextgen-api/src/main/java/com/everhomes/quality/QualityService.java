@@ -82,4 +82,6 @@ public interface QualityService {
     List<QualityInspectionSpecificationDTO> batchUpdateQualitySpecification(BatchUpdateQualitySpecificationsCommand cmd);
 
     QualityStandardsDTO getQualityStandards(DeleteQualityStandardCommand cmd);
+
+    QualityOfflineTaskReportResponse OfflineTaskReport(OfflineTaskReportCommand cmd);
 }

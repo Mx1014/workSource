@@ -6,9 +6,10 @@ import java.util.List;
 
 /**
  * <ul>
- *     <li>tasks:任务列表</li>
+ * <li>tasks:任务列表</li>
+ * <li>specifications:specifications</li>
+ * <li>nextPageAnchor:下一页锚点</li>
  * </ul>
- * Created by rui.jia  2018/1/12 14 :11
  */
 
 public class QualityOfflineTaskDetailsResponse {
@@ -19,6 +20,7 @@ public class QualityOfflineTaskDetailsResponse {
     @ItemType(QualityInspectionSpecificationDTO.class)
     private List<QualityInspectionSpecificationDTO> specifications;
 
+    private Long nextPageAnchor;
 
     public List<QualityInspectionTaskDTO> getTasks() {
         return tasks;
@@ -34,5 +36,13 @@ public class QualityOfflineTaskDetailsResponse {
 
     public void setSpecifications(List<QualityInspectionSpecificationDTO> specifications) {
         this.specifications = specifications;
+    }
+
+    public Long getNextPageAnchor() {
+        return nextPageAnchor;
+    }
+
+    public void setNextPageAnchor(Long nextPageAnchor) {
+        this.nextPageAnchor = nextPageAnchor;
     }
 }

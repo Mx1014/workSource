@@ -82,7 +82,7 @@ public interface QualityProvider {
 
 	
 	void createQualityInspectionLogs(QualityInspectionLogs log);
-	List<QualityInspectionLogs> listQualityInspectionLogs(String ownerType, Long ownerId, String targetType, Long targetId, ListingLocator locator, int count);
+	List<QualityInspectionLogs> listQualityInspectionLogs(String ownerType, Long ownerId, String targetType, Long targetId,Long scopeId, ListingLocator locator, int count);
 	
 	QualityInspectionStandards findStandardById(Long id, String ownerType, Long ownerId, String targetType, Long targetId);
 	void deleteQualityInspectionStandardSpecificationMapByStandardId(Long standardId);
