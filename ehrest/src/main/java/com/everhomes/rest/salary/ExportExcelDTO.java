@@ -5,7 +5,7 @@ import com.everhomes.util.StringHelper;
 /**
  * <ul>
  * <li>excelName: 表名</li>
- * <li>exportToken: 导出token </li>
+ * <li>exportToken: 导出token</li>
  * </ul>
  */
 public class ExportExcelDTO {

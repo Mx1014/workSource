@@ -6,12 +6,12 @@ import org.apache.commons.lang.StringUtils;
  * <p>公告接收范围类型</p>
  * <ul>
  * <li>ORGANIZATIONS("EhOrganizations") : 公告部门可见</li>
- * <li>USER("EhUsers"): 公告某员工可见</li>
+ * <li>MEMBER_DETAIL("EhOrganizationMemberDetails"): 公告某员工可见</li>
  * </ul>
  */
 public enum EnterpriseNoticeReceiverType {
 
-    ORGANIZATIONS("EhOrganizations"), USER("EhUsers");
+    ORGANIZATIONS("EhOrganizations"), MEMBER_DETAIL("EhOrganizationMemberDetails");
 
     private String code;
 
