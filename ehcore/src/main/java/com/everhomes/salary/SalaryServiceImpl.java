@@ -2577,8 +2577,8 @@ public class SalaryServiceImpl implements SalaryService {
         Map<String, Object> params = new HashedMap();
         params.put("ownerId", cmd.getOwnerId());
         params.put("organizationId", cmd.getOrganizationId());
-        String fileName = "员工工资表";
-        params.put("name", fileName);
+        String fileName = "员工工资表" + ".xlsx";
+//        params.put("name", fileName);
 
         taskService.createTask(fileName, TaskType.FILEDOWNLOAD.getCode(), SalaryExportTaskHandler.class, params, TaskRepeatFlag.REPEAT.getCode(), new Date());
     }
