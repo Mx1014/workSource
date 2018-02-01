@@ -165,7 +165,9 @@ public class EnterpriseNoticeServiceImpl implements EnterpriseNoticeService {
         }
         bgThreadPool.execute(() -> {
             List<String> groupTypeList = new ArrayList<String>();
+            groupTypeList.add(OrganizationGroupType.DIRECT_UNDER_ENTERPRISE.getCode());
             groupTypeList.add(OrganizationGroupType.DEPARTMENT.getCode());
+            groupTypeList.add(OrganizationGroupType.GROUP.getCode());
             Set<Long> userIds = new HashSet<>();
             for (EnterpriseNoticeReceiverDTO receiver : receivers) {
                 if (EnterpriseNoticeReceiverType.ORGANIZATIONS == EnterpriseNoticeReceiverType.fromCode(receiver.getReceiverType())) {
@@ -262,8 +264,10 @@ public class EnterpriseNoticeServiceImpl implements EnterpriseNoticeService {
         }
         // set the message
         StringBuilder content = new StringBuilder();
-        content.append(notice.getPublisher());
-        content.append(": ");
+        if (StringUtils.hasText(notice.getPublisher())) {
+            content.append(notice.getPublisher());
+            content.append(": ");
+        }
         content.append(EnterpriseNoticeSecretFlag.PRIVATE == EnterpriseNoticeSecretFlag.fromCode(notice.getSecretFlag()) ? "[保密] " : "");
         content.append(notice.getTitle());
 
@@ -356,10 +360,13 @@ public class EnterpriseNoticeServiceImpl implements EnterpriseNoticeService {
         int pageSize = PaginationConfigHelper.getPageSize(configurationProvider, cmd.getPageSize());
         int pageOffset = cmd.getPageOffset() == null ? 1 : cmd.getPageOffset();
         int offset = (int) PaginationHelper.offsetFromPageOffset((long) pageOffset, pageSize);
-
+        Integer namespaceId = UserContext.getCurrentNamespaceId();
+        if (namespaceId == null) {
+            namespaceId = 0;
+        }
         ListEnterpriseNoticeResponse response = new ListEnterpriseNoticeResponse();
 
-        List<EnterpriseNotice> enterpriseNotices = enterpriseNoticeProvider.listEnterpriseNoticesByOwnerId(parseCurrentReceivers(), offset, pageSize);
+        List<EnterpriseNotice> enterpriseNotices = enterpriseNoticeProvider.listEnterpriseNoticesByOwnerId(parseCurrentReceivers(), namespaceId, offset, pageSize);
 
         if (enterpriseNotices != null && enterpriseNotices.size() > 0) {
             List<EnterpriseNoticeDTO> enterpriseNoticeDTOS = new ArrayList<>(enterpriseNotices.size());
@@ -453,9 +460,14 @@ public class EnterpriseNoticeServiceImpl implements EnterpriseNoticeService {
         if (CollectionUtils.isEmpty(receivers)) {
             return false;
         }
+        Integer namespaceId = UserContext.getCurrentNamespaceId();
+        if (namespaceId == null) {
+            namespaceId = 0;
+        }
         for (EnterpriseNoticeReceiver current : currentReceivers) {
             for (EnterpriseNoticeReceiver receiver : receivers) {
-                if (current.getReceiverType().equals(receiver.getReceiverType()) && current.getReceiverId().compareTo(receiver.getReceiverId()) == 0) {
+                if (namespaceId.equals(receiver.getNamespaceId())
+                        && current.getReceiverType().equals(receiver.getReceiverType()) && current.getReceiverId().compareTo(receiver.getReceiverId()) == 0) {
                     return true;
                 }
             }

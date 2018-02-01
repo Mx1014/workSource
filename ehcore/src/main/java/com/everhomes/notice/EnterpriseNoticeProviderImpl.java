@@ -142,7 +142,7 @@ public class EnterpriseNoticeProviderImpl implements EnterpriseNoticeProvider {
     }
 
     @Override
-    public List<EnterpriseNotice> listEnterpriseNoticesByOwnerId(List<EnterpriseNoticeReceiver> owners, Integer offset, Integer pageSize) {
+    public List<EnterpriseNotice> listEnterpriseNoticesByOwnerId(List<EnterpriseNoticeReceiver> owners, Integer namespaceId, Integer offset, Integer pageSize) {
         if (CollectionUtils.isEmpty(owners)) {
             return Collections.emptyList();
         }
@@ -163,13 +163,14 @@ public class EnterpriseNoticeProviderImpl implements EnterpriseNoticeProvider {
                 .join(Tables.EH_ENTERPRISE_NOTICE_RECEIVERS)
                 .on(Tables.EH_ENTERPRISE_NOTICES.ID.eq(Tables.EH_ENTERPRISE_NOTICE_RECEIVERS.NOTICE_ID));
 
+        Condition condition0 = Tables.EH_ENTERPRISE_NOTICES.NAMESPACE_ID.eq(namespaceId);
         Condition condition1 = Tables.EH_ENTERPRISE_NOTICES.STATUS.eq(EnterpriseNoticeStatus.ACTIVE.getCode());
         Condition condition2 = Tables.EH_ENTERPRISE_NOTICE_RECEIVERS.RECEIVER_TYPE.eq(owners.get(0).getReceiverType()).and(Tables.EH_ENTERPRISE_NOTICE_RECEIVERS.RECEIVER_ID.eq(owners.get(0).getReceiverId()));
         for (int i = 1; i < owners.size(); i++) {
             Condition condition = Tables.EH_ENTERPRISE_NOTICE_RECEIVERS.RECEIVER_TYPE.eq(owners.get(i).getReceiverType()).and(Tables.EH_ENTERPRISE_NOTICE_RECEIVERS.RECEIVER_ID.eq(owners.get(i).getReceiverId()));
             condition2 = condition2.or(condition);
         }
-        Condition allCondition = condition1.and(condition2);
+        Condition allCondition = condition0.and(condition1).and(condition2);
 
         sql.where(allCondition).orderBy(Tables.EH_ENTERPRISE_NOTICES.CREATE_TIME.sort(SortOrder.DESC)).limit(offset, pageSize);
 

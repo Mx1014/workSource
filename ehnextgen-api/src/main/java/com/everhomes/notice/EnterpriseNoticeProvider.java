@@ -14,7 +14,7 @@ public interface EnterpriseNoticeProvider {
 
     int totalCountEnterpriseNoticesByNamespaceId(Integer namespaceId);
 
-    List<EnterpriseNotice> listEnterpriseNoticesByOwnerId(List<EnterpriseNoticeReceiver> owner, Integer offset, Integer pageSize);
+    List<EnterpriseNotice> listEnterpriseNoticesByOwnerId(List<EnterpriseNoticeReceiver> owner, Integer namespaceId, Integer offset, Integer pageSize);
 
     void createEnterpriseNoticeAttachment(EnterpriseNoticeAttachment attachment);
 
