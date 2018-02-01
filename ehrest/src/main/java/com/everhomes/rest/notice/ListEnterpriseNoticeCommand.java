@@ -5,7 +5,7 @@ import com.everhomes.util.StringHelper;
 /**
  * <p>获取发送给我的公告列表</p>
  * <ul>
- * <li>organizationId : 操作人所属部门ID</li>
+ * <li>organizationId : 公司ID</li>
  * <li>pageOffset : 查询开始页码</li>
  * <li>pageSize :每页最大获取记录数</li>
  * </ul>

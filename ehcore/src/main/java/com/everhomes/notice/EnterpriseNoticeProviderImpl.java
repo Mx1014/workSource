@@ -46,7 +46,7 @@ public class EnterpriseNoticeProviderImpl implements EnterpriseNoticeProvider {
         DSLContext context = dbProvider.getDslContext(AccessSpec.readOnly());
         SelectConditionStep<Record> sql = context.select().from(Tables.EH_ENTERPRISE_NOTICES)
                 .where(Tables.EH_ENTERPRISE_NOTICES.ID.eq(id))
-                .and(Tables.EH_ENTERPRISE_NOTICES.STATUS.notEqual(EnterpriseNoticeStatus.DELETED.getCode()));
+                .and(Tables.EH_ENTERPRISE_NOTICES.STATUS.ne(EnterpriseNoticeStatus.DELETED.getCode()));
 
         Record record = sql.fetchOne();
         return ConvertHelper.convert(record, EnterpriseNotice.class);
@@ -91,10 +91,10 @@ public class EnterpriseNoticeProviderImpl implements EnterpriseNoticeProvider {
 
     @Override
     public List<EnterpriseNotice> listEnterpriseNoticesByNamespaceId(Integer namespaceId, Integer offset, Integer pageSize) {
-        SelectForUpdateStep<Record10<Long, String, String, Byte, String, Byte, Timestamp, Long, Timestamp, Long>> sql = baseQueryEnterpriseNoticesByNamespaceId(namespaceId)
+        SelectForUpdateStep<Record11<Long, String, String, Byte, String, Byte, Timestamp, Long, Timestamp, Long,String>> sql = baseQueryEnterpriseNoticesByNamespaceId(namespaceId)
                 .orderBy(Tables.EH_ENTERPRISE_NOTICES.CREATE_TIME.sort(SortOrder.DESC)).limit(offset, pageSize);
 
-        Result<Record10<Long, String, String, Byte, String, Byte, Timestamp, Long, Timestamp, Long>> result = sql.fetch();
+        Result<Record11<Long, String, String, Byte, String, Byte, Timestamp, Long, Timestamp, Long, String>> result = sql.fetch();
         if (result != null && result.size() > 0) {
             return result.map(r -> {
                 EnterpriseNotice enterpriseNotice = new EnterpriseNotice();
@@ -108,15 +108,16 @@ public class EnterpriseNoticeProviderImpl implements EnterpriseNoticeProvider {
                 enterpriseNotice.setCreateTime(r.getValue(Tables.EH_ENTERPRISE_NOTICES.CREATE_TIME));
                 enterpriseNotice.setUpdateUid(r.getValue(Tables.EH_ENTERPRISE_NOTICES.UPDATE_UID));
                 enterpriseNotice.setUpdateTime(r.getValue(Tables.EH_ENTERPRISE_NOTICES.UPDATE_TIME));
+                enterpriseNotice.setOperatorName(r.getValue(Tables.EH_ENTERPRISE_NOTICES.OPERATOR_NAME));
                 return enterpriseNotice;
             });
         }
         return Collections.emptyList();
     }
 
-    private SelectConditionStep<Record10<Long, String, String, Byte, String, Byte, Timestamp, Long, Timestamp, Long>> baseQueryEnterpriseNoticesByNamespaceId(Integer namespaceId) {
+    private SelectConditionStep<Record11<Long, String, String, Byte, String, Byte, Timestamp, Long, Timestamp, Long, String>> baseQueryEnterpriseNoticesByNamespaceId(Integer namespaceId) {
         DSLContext context = dbProvider.getDslContext(AccessSpec.readOnly());
-        SelectConditionStep<Record10<Long, String, String, Byte, String, Byte, Timestamp, Long, Timestamp, Long>> baseSql = context.selectDistinct(
+        SelectConditionStep<Record11<Long, String, String, Byte, String, Byte, Timestamp, Long, Timestamp, Long, String>> baseSql = context.selectDistinct(
                 Tables.EH_ENTERPRISE_NOTICES.ID,
                 Tables.EH_ENTERPRISE_NOTICES.TITLE,
                 Tables.EH_ENTERPRISE_NOTICES.SUMMARY,
@@ -126,16 +127,17 @@ public class EnterpriseNoticeProviderImpl implements EnterpriseNoticeProvider {
                 Tables.EH_ENTERPRISE_NOTICES.CREATE_TIME,
                 Tables.EH_ENTERPRISE_NOTICES.CREATOR_UID,
                 Tables.EH_ENTERPRISE_NOTICES.UPDATE_TIME,
-                Tables.EH_ENTERPRISE_NOTICES.UPDATE_UID)
+                Tables.EH_ENTERPRISE_NOTICES.UPDATE_UID,
+                Tables.EH_ENTERPRISE_NOTICES.OPERATOR_NAME)
                 .from(Tables.EH_ENTERPRISE_NOTICES)
                 .where(Tables.EH_ENTERPRISE_NOTICES.NAMESPACE_ID.eq(namespaceId))
-                .and(Tables.EH_ENTERPRISE_NOTICES.STATUS.notEqual(EnterpriseNoticeStatus.DELETED.getCode()));
+                .and(Tables.EH_ENTERPRISE_NOTICES.STATUS.ne(EnterpriseNoticeStatus.DELETED.getCode()));
         return baseSql;
     }
 
     @Override
     public int totalCountEnterpriseNoticesByNamespaceId(Integer namespaceId) {
-        SelectConditionStep<Record10<Long, String, String, Byte, String, Byte, Timestamp, Long, Timestamp, Long>> sql = baseQueryEnterpriseNoticesByNamespaceId(namespaceId);
+        SelectConditionStep<Record11<Long, String, String, Byte, String, Byte, Timestamp, Long, Timestamp, Long, String>> sql = baseQueryEnterpriseNoticesByNamespaceId(namespaceId);
         return sql.fetchCount();
     }
 
@@ -161,7 +163,7 @@ public class EnterpriseNoticeProviderImpl implements EnterpriseNoticeProvider {
                 .join(Tables.EH_ENTERPRISE_NOTICE_RECEIVERS)
                 .on(Tables.EH_ENTERPRISE_NOTICES.ID.eq(Tables.EH_ENTERPRISE_NOTICE_RECEIVERS.NOTICE_ID));
 
-        Condition condition1 = Tables.EH_ENTERPRISE_NOTICES.STATUS.notEqual(EnterpriseNoticeStatus.DELETED.getCode());
+        Condition condition1 = Tables.EH_ENTERPRISE_NOTICES.STATUS.eq(EnterpriseNoticeStatus.ACTIVE.getCode());
         Condition condition2 = Tables.EH_ENTERPRISE_NOTICE_RECEIVERS.RECEIVER_TYPE.eq(owners.get(0).getReceiverType()).and(Tables.EH_ENTERPRISE_NOTICE_RECEIVERS.RECEIVER_ID.eq(owners.get(0).getReceiverId()));
         for (int i = 1; i < owners.size(); i++) {
             Condition condition = Tables.EH_ENTERPRISE_NOTICE_RECEIVERS.RECEIVER_TYPE.eq(owners.get(i).getReceiverType()).and(Tables.EH_ENTERPRISE_NOTICE_RECEIVERS.RECEIVER_ID.eq(owners.get(i).getReceiverId()));
