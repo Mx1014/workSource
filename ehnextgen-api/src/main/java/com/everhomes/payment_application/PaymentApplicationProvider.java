@@ -15,6 +15,7 @@ public interface PaymentApplicationProvider {
     PaymentApplication findPaymentApplication(Long id);
 
     List<PaymentApplication> listPaymentApplications(CrossShardListingLocator locator, Integer pageSize);
+    List<PaymentApplication> listPaymentApplicationsByContractId(CrossShardListingLocator locator, Integer pageSize, Long contractId);
 
     Set<Long> findPaymentApplicationNamespace();
 

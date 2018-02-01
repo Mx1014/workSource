@@ -74,6 +74,33 @@ public class PaymentApplicationProviderImpl implements PaymentApplicationProvide
     }
 
     @Override
+    public List<PaymentApplication> listPaymentApplicationsByContractId(CrossShardListingLocator locator, Integer pageSize, Long contractId) {
+        List<PaymentApplication> result = new ArrayList<PaymentApplication>();
+        assert (locator.getEntityId() != 0);
+        DSLContext context = dbProvider.getDslContext(AccessSpec.readOnly());
+        SelectQuery<EhPaymentApplicationsRecord> query = context.selectQuery(Tables.EH_PAYMENT_APPLICATIONS);
+
+        if (locator.getAnchor() != null) {
+            query.addConditions(Tables.EH_PAYMENT_APPLICATIONS.ID.lt(locator.getAnchor()));
+        }
+        if(contractId != null){
+            query.addConditions(Tables.EH_PAYMENT_APPLICATIONS.CONTRACT_ID.eq(contractId));
+        }
+
+        query.addOrderBy(Tables.EH_PAYMENT_APPLICATIONS.ID.desc());
+        query.addLimit(pageSize);
+
+        query.fetch().map((r) -> {
+            result.add(ConvertHelper.convert(r, PaymentApplication.class));
+            return null;
+        });
+        if (result.size() == 0)
+            return null;
+
+        return result;
+    }
+
+    @Override
     public List<PaymentApplication> listPaymentApplications(CrossShardListingLocator locator, Integer pageSize) {
         List<PaymentApplication> applications = new ArrayList<>();
 
