@@ -62,6 +62,9 @@ public class RequisitionProviderImpl implements RequisitionProvider {
             dto.setIdentity(r.getValue(req.IDENTITY));
             dto.setStatus(r.getValue(req.STATUS));
             dto.setType(r.getValue(reqType.NAME));
+            dto.setTheme(r.getValue(req.THEME));
+            dto.setAmount(r.getValue(req.AMOUNT).toPlainString());
+            dto.setId(r.getValue(req.ID));
             list.add(dto);
         });
         return list;
