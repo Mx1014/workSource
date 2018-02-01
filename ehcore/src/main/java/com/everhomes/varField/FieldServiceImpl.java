@@ -838,6 +838,7 @@ public class FieldServiceImpl implements FieldService {
             if(!invoke.getClass().getSimpleName().equals("String")){
                 long l = Long.parseLong(invoke.toString());
                 ScopeFieldItem item = findScopeFieldItemByFieldItemId(namespaceId, communityId,l);
+                LOGGER.info("field transferred ScopeFieldItem itemId: "+l);
                 if(item!=null&&item.getItemId()!=null){
                     invoke = String.valueOf(item.getItemDisplayName());
                     LOGGER.info("field transferred to item id is "+invoke);
