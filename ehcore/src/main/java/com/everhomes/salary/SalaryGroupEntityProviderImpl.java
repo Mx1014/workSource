@@ -101,7 +101,7 @@ public class SalaryGroupEntityProviderImpl implements SalaryGroupEntityProvider 
     public List<SalaryGroupEntity> listOpenSalaryGroupEntityByOrgId(Long organizationId) {
         List<SalaryGroupEntity> result = getReadOnlyContext().select().from(Tables.EH_SALARY_GROUP_ENTITIES)
                 .where(Tables.EH_SALARY_GROUP_ENTITIES.ORGANIZATION_ID.eq(organizationId))
-                .and(Tables.EH_SALARY_GROUP_ENTITIES.STATUS.eq(SalaryEntityStatus.OPEN.getCode()))
+                .and(Tables.EH_SALARY_GROUP_ENTITIES.STATUS.ne(SalaryEntityStatus.CLOSE.getCode()))
                 .orderBy(Tables.EH_SALARY_GROUP_ENTITIES.CATEGORY_ID, Tables.EH_SALARY_GROUP_ENTITIES.ID)
                 .fetch().map(r -> {
                     return ConvertHelper.convert(r, SalaryGroupEntity.class);
