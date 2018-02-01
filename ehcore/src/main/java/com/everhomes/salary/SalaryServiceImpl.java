@@ -2794,6 +2794,13 @@ public class SalaryServiceImpl implements SalaryService {
         employee.setRegularSalary(regular);
         employee.setShouldPaySalary(shouldPay);
         employee.setRealPaySalary(realPay);
+        if (regular.compareTo(new BigDecimal(1)) < 0) {
+            employee.setStatus(SalaryEmployeeStatus.UN_SET.getCode());
+        } else if (realPay.compareTo(new BigDecimal(0)) < 0) {
+            employee.setStatus(SalaryEmployeeStatus.REALPAY_ERROR.getCode());
+        }else {
+            employee.setStatus(SalaryEmployeeStatus.NORMAL.getCode());
+        }
         if (employee.getId() == null) {
             salaryEmployeeProvider.createSalaryEmployee(employee);
         } else {
