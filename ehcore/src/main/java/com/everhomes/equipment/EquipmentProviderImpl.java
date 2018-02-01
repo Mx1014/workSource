@@ -37,6 +37,7 @@ import com.everhomes.rest.pmtask.PmTaskFlowStatus;
 import com.everhomes.rest.quality.QualityGroupType;
 import com.everhomes.scheduler.EquipmentInspectionScheduleJob;
 import com.everhomes.scheduler.ScheduleProvider;
+import com.everhomes.search.EquipmentStandardMapSearcher;
 import com.everhomes.search.EquipmentTasksSearcher;
 import com.everhomes.sequence.SequenceProvider;
 import com.everhomes.server.schema.Tables;
@@ -162,6 +163,9 @@ public class EquipmentProviderImpl implements EquipmentProvider {
 
     @Autowired
     private EquipmentTasksSearcher equipmentTasksSearcher;
+
+    @Autowired
+    EquipmentStandardMapSearcher equipmentStandardMapSearcher;
 
     @PostConstruct
     public void init() {
@@ -1598,9 +1602,20 @@ public class EquipmentProviderImpl implements EquipmentProvider {
     @Override
     public void deleteEquipmentInspectionStandardMapByStandardId(Long standardId) {
         DSLContext context = this.dbProvider.getDslContext(AccessSpec.readWrite());
+        SelectQuery<EhEquipmentInspectionEquipmentStandardMapRecord> query = context.selectQuery(Tables.EH_EQUIPMENT_INSPECTION_EQUIPMENT_STANDARD_MAP);
+        query.addConditions(Tables.EH_EQUIPMENT_INSPECTION_EQUIPMENT_STANDARD_MAP.STANDARD_ID.eq(standardId));
+        query.fetch().map((r)->{
+            deleteEquipmentInspectionEquipmentStandardMap(r.getId());
+            equipmentStandardMapSearcher.feedDoc(ConvertHelper.convert(r,EquipmentStandardMap.class));
+            return null;
+        });
+    }
+
+    private void deleteEquipmentInspectionEquipmentStandardMap(Long id) {
+        DSLContext context = this.dbProvider.getDslContext(AccessSpec.readWrite());
         context.update(Tables.EH_EQUIPMENT_INSPECTION_EQUIPMENT_STANDARD_MAP)
                 .set(Tables.EH_EQUIPMENT_INSPECTION_EQUIPMENT_STANDARD_MAP.STATUS,(Status.INACTIVE.getCode()))
-                .where(Tables.EH_EQUIPMENT_INSPECTION_EQUIPMENT_STANDARD_MAP.STANDARD_ID.eq(standardId))
+                .where(Tables.EH_EQUIPMENT_INSPECTION_EQUIPMENT_STANDARD_MAP.ID.eq(id))
                 .execute();
     }
 

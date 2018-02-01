@@ -1099,156 +1099,14 @@ private void checkUserPrivilege(Long orgId, Long privilegeId, Long communityId) 
 		List<EquipmentStandardMapDTO> eqStandardMap = cmd.getEqStandardMap();
 
 		if (cmd.getId() == null) {
-			equipment = ConvertHelper.convert(cmd, EquipmentInspectionEquipments.class);
-			if ((equipment.getLongitude() == null || equipment.getLatitude() == null) && cmd.getQrCodeFlag() == 1) {
-				throw RuntimeErrorException.errorWith(EquipmentServiceErrorCode.SCOPE,
-						EquipmentServiceErrorCode.ERROR_EQUIPMENT_NOT_SET_LOCATION,
-						"设备没有设置经纬度");
-			}
-			String geohash = GeoHashUtils.encode(equipment.getLatitude(), equipment.getLongitude());
-
-			if(cmd.getInstallationTime() != null)
-				equipment.setInstallationTime(new Timestamp(cmd.getInstallationTime()));
-
-			if(cmd.getRepairTime() != null)
-				equipment.setRepairTime(new Timestamp(cmd.getRepairTime()));
-			//V3.0.1中增加
-			if(cmd.getBuyTime() != null)
-				equipment.setBuyTime(new Timestamp(cmd.getBuyTime()));
-
-			if(cmd.getDiscardTime() != null)
-				equipment.setDiscardTime(new Timestamp(cmd.getDiscardTime()));
-
-			if(cmd.getFactoryTime() != null)
-				equipment.setFactoryTime(new Timestamp(cmd.getFactoryTime()));
-
-			equipment.setGeohash(geohash);
-			equipment.setCreatorUid(user.getId());
-			equipment.setOperatorUid(user.getId());
-			equipment.setNamespaceId(cmd.getNamespaceId());
-
-
-			if(cmd.getTargetId() == null || cmd.getTargetId() == 0L) {
-				List<CommunityDTO> communities = organizationService.listAllChildrenOrganizationCoummunities(cmd.getOwnerId());
-				if(communities != null && communities.size() > 0) {
-					for(CommunityDTO community : communities) {
-						equipment.setTargetId(community.getId());
-						equipment.setTargetType(OwnerType.COMMUNITY.getCode());
-
-						String tokenString = UUID.randomUUID().toString();
-						equipment.setQrCodeToken(tokenString);
-						equipmentProvider.creatEquipmentInspectionEquipment(equipment);
-						equipmentSearcher.feedDoc(equipment);
-
-						if(eqStandardMap != null && eqStandardMap.size() > 0) {
-							for(EquipmentStandardMapDTO dto : eqStandardMap) {
-								EquipmentStandardMap map = ConvertHelper.convert(dto, EquipmentStandardMap.class);
-								map.setTargetId(equipment.getId());
-								map.setTargetType(InspectionStandardMapTargetType.EQUIPMENT.getCode());
-//								map.setReviewerUid(0L);
-//								map.setReviewTime(null);
-//								map.setReviewResult(ReviewResult.NONE.getCode());
-//								map.setReviewStatus(EquipmentReviewStatus.WAITING_FOR_APPROVAL.getCode());
-								map.setCreatorUid(user.getId());
-
-								equipmentProvider.createEquipmentStandardMap(map);
-								equipmentStandardMapSearcher.feedDoc(map);
-							}
-						}
-
-						List<EquipmentAttachmentDTO> attachments = new ArrayList<>();
-					    List<EquipmentAccessoryMapDTO> eqAccessoryMap = new ArrayList<>();
-
-						if(cmd.getEqAccessoryMap() != null) {
-							for(EquipmentAccessoryMapDTO map : cmd.getEqAccessoryMap()) {
-								map.setEquipmentId(equipment.getId());
-								updateEquipmentAccessoryMap(map);
-								eqAccessoryMap.add(map);
-							}
-						}
-
-						if(cmd.getAttachments() != null) {
-							for(EquipmentAttachmentDTO attachment : cmd.getAttachments()) {
-								attachment.setEquipmentId(equipment.getId());
-								updateEquipmentAttachment(attachment, user.getId());
-								attachments.add(attachment);
-							}
-						}
-					}
-				}
-			} else {
-				String tokenString = UUID.randomUUID().toString();
-				equipment.setQrCodeToken(tokenString);
-				equipmentProvider.creatEquipmentInspectionEquipment(equipment);
-				equipmentSearcher.feedDoc(equipment);
-
-				if(eqStandardMap != null && eqStandardMap.size() > 0) {
-					for(EquipmentStandardMapDTO dto : eqStandardMap) {
-						EquipmentStandardMap map = ConvertHelper.convert(dto, EquipmentStandardMap.class);
-						map.setTargetId(equipment.getId());
-						map.setTargetType(InspectionStandardMapTargetType.EQUIPMENT.getCode());
-//						map.setReviewerUid(0L);
-//						map.setReviewTime(null);
-//						map.setReviewResult(ReviewResult.NONE.getCode());
-//						map.setReviewStatus(EquipmentReviewStatus.WAITING_FOR_APPROVAL.getCode());
-						map.setCreatorUid(user.getId());
-
-						equipmentProvider.createEquipmentStandardMap(map);
-						equipmentStandardMapSearcher.feedDoc(map);
-					}
-				}
-
-				List<EquipmentAttachmentDTO> attachments = new ArrayList<>();
-			    List<EquipmentAccessoryMapDTO> eqAccessoryMap = new ArrayList<>();
-
-				if(cmd.getEqAccessoryMap() != null) {
-					for(EquipmentAccessoryMapDTO map : cmd.getEqAccessoryMap()) {
-						map.setEquipmentId(equipment.getId());
-						updateEquipmentAccessoryMap(map);
-						eqAccessoryMap.add(map);
-					}
-				}
-
-				deleteEquipmentAttachmentsByEquipmentId(equipment.getId());
-				if(cmd.getAttachments() != null) {
-					for(EquipmentAttachmentDTO attachment : cmd.getAttachments()) {
-						attachment.setEquipmentId(equipment.getId());
-						updateEquipmentAttachment(attachment, user.getId());
-						attachments.add(attachment);
-					}
-				}
-			}
-			//增加设备的操作记录
-			EquipmentInspectionEquipmentLogs operateLog = new EquipmentInspectionEquipmentLogs();
-			operateLog.setNamespaceId(equipment.getNamespaceId());
-			operateLog.setOwnerId(cmd.getOwnerId());
-			operateLog.setOwnerType(cmd.getOwnerType());
-			operateLog.setTargetId(equipment.getId());
-			operateLog.setTargetType(EquipmentOperateObjectType.EQUIPMENT.getOperateObjectType());
-			operateLog.setProcessType(EquipmentOperateActionType.INSERT.getCode());
-			equipmentProvider.createEquipmentOperateLogs(operateLog);
+			createEquipmentInspectionEquipment(cmd,eqStandardMap);
 		} else {
 			EquipmentInspectionEquipments exist = verifyEquipment(cmd.getId(), cmd.getOwnerType(), cmd.getOwnerId());
 			equipment = ConvertHelper.convert(cmd, EquipmentInspectionEquipments.class);
 			equipment.setGeohash(exist.getGeohash());
 			equipment.setQrCodeToken(exist.getQrCodeToken());
 			equipment.setNamespaceId(cmd.getNamespaceId());
-
-			if(cmd.getInstallationTime() != null)
-				equipment.setInstallationTime(new Timestamp(cmd.getInstallationTime()));
-
-			if(cmd.getRepairTime() != null)
-				equipment.setRepairTime(new Timestamp(cmd.getRepairTime()));
-
-			if(cmd.getBuyTime() != null)
-				equipment.setBuyTime(new Timestamp(cmd.getBuyTime()));
-
-			if(cmd.getDiscardTime() != null)
-				equipment.setDiscardTime(new Timestamp(cmd.getDiscardTime()));
-
-			if(cmd.getFactoryTime() != null)
-				equipment.setFactoryTime(new Timestamp(cmd.getFactoryTime()));
-
+			dealEquipmentRelateTime(cmd, equipment);
 
 			if(exist.getLatitude() != null && equipment.getLongitude() != null) {
 				if(!exist.getLatitude().equals(equipment.getLatitude()) || !equipment.getLongitude().equals(exist.getLongitude()) ) {
@@ -1280,21 +1138,17 @@ private void checkUserPrivilege(Long orgId, Long privilegeId, Long communityId) 
 
 			//不带id的create，其他的看map表中的standardId在不在cmd里面 不在的删掉
 			List<Long> updateStandardIds = new ArrayList<Long>();
-			if(eqStandardMap != null && eqStandardMap.size() > 0) {
+			if (eqStandardMap != null && eqStandardMap.size() > 0) {
 
-				for(EquipmentStandardMapDTO dto : eqStandardMap) {
+				for (EquipmentStandardMapDTO dto : eqStandardMap) {
 					List<EquipmentStandardMap> maps = equipmentProvider.findEquipmentStandardMap(dto.getStandardId(),
 							equipment.getId(), InspectionStandardMapTargetType.EQUIPMENT.getCode());
 					LOGGER.debug("equipment standard maps: {}", maps);
-					if(maps == null || maps.size() == 0) {
-						if(dto.getId() == null) {
+					if (maps == null || maps.size() == 0) {
+						if (dto.getId() == null) {
 							EquipmentStandardMap map = ConvertHelper.convert(dto, EquipmentStandardMap.class);
 							map.setTargetId(equipment.getId());
 							map.setTargetType(InspectionStandardMapTargetType.EQUIPMENT.getCode());
-//							map.setReviewerUid(0L);
-//							map.setReviewTime(null);
-//							map.setReviewResult(ReviewResult.NONE.getCode());
-//							map.setReviewStatus(EquipmentReviewStatus.WAITING_FOR_APPROVAL.getCode());
 							map.setCreatorUid(user.getId());
 
 							equipmentProvider.createEquipmentStandardMap(map);
@@ -1305,29 +1159,22 @@ private void checkUserPrivilege(Long orgId, Long privilegeId, Long communityId) 
 						} else {
 							EquipmentStandardMap map = equipmentProvider.findEquipmentStandardMap(dto.getId(), dto.getStandardId(),
 									dto.getEquipmentId(), InspectionStandardMapTargetType.EQUIPMENT.getCode());
-							if(map == null) {
+							if (map == null) {
 								map = ConvertHelper.convert(dto, EquipmentStandardMap.class);
 								map.setTargetId(equipment.getId());
 								map.setTargetType(InspectionStandardMapTargetType.EQUIPMENT.getCode());
-//								map.setReviewerUid(0L);
-//								map.setReviewTime(null);
-//								map.setReviewResult(ReviewResult.NONE.getCode());
-//								map.setReviewStatus(EquipmentReviewStatus.WAITING_FOR_APPROVAL.getCode());
 								map.setCreatorUid(user.getId());
-
 								equipmentProvider.createEquipmentStandardMap(map);
 								equipmentStandardMapSearcher.feedDoc(map);
 							}
-
 							updateStandardIds.add(map.getStandardId());
 						}
-					}
-					else if(maps.size() > 0) {
+					} else {
 						//删除设备多次重复绑定的标准,仅保留最早绑的那个
 						updateStandardIds.add(maps.get(0).getStandardId());
 						maps.remove(0);
 						LOGGER.debug("equipment standard maps after remove: {}", maps);
-						if(maps.size() > 0) {
+						if (maps.size() > 0) {
 							maps.forEach(map -> {
 //								map.setReviewStatus(EquipmentReviewStatus.INACTIVE.getCode());
 								//fix bug #20247
@@ -1342,26 +1189,22 @@ private void checkUserPrivilege(Long orgId, Long privilegeId, Long communityId) 
 
 			List<EquipmentStandardMap> maps = equipmentProvider.findByTarget(equipment.getId(), InspectionStandardMapTargetType.EQUIPMENT.getCode());
 			if (maps != null) {
-				for(EquipmentStandardMap map : maps) {
-                    if(!updateStandardIds.contains(map.getStandardId())) {
-                        //map.setReviewStatus(EquipmentReviewStatus.INACTIVE.getCode());
-                        //fix bug #20247
+				for (EquipmentStandardMap map : maps) {
+					if (!updateStandardIds.contains(map.getStandardId())) {
+						//map.setReviewStatus(EquipmentReviewStatus.INACTIVE.getCode());
+						//fix bug #20247
 						map.setStatus(EquipmentStandardStatus.INACTIVE.getCode());
-                        equipmentProvider.updateEquipmentStandardMap(map);
-                        equipmentStandardMapSearcher.feedDoc(map);
-                        //inactiveTasks(equipment.getId(), map.getStandardId());
-                    }
-                }
+						equipmentProvider.updateEquipmentStandardMap(map);
+						equipmentStandardMapSearcher.feedDoc(map);
+						//inactiveTasks(equipment.getId(), map.getStandardId());
+					}
+				}
 			}
-
-			List<EquipmentAttachmentDTO> attachments = new ArrayList<>();
-		    List<EquipmentAccessoryMapDTO> eqAccessoryMap = new ArrayList<>();
 
 			if(cmd.getEqAccessoryMap() != null) {
 				for(EquipmentAccessoryMapDTO map : cmd.getEqAccessoryMap()) {
 					map.setEquipmentId(equipment.getId());
 					updateEquipmentAccessoryMap(map);
-					eqAccessoryMap.add(map);
 				}
 			}
 			deleteEquipmentAttachmentsByEquipmentId(equipment.getId());
@@ -1369,19 +1212,136 @@ private void checkUserPrivilege(Long orgId, Long privilegeId, Long communityId) 
 				for(EquipmentAttachmentDTO attachment : cmd.getAttachments()) {
 					attachment.setEquipmentId(equipment.getId());
 					updateEquipmentAttachment(attachment, user.getId());
-					attachments.add(attachment);
 				}
 			}
 			//增加设备的操作记录
-			EquipmentInspectionEquipmentLogs operateLog = new EquipmentInspectionEquipmentLogs();
-			operateLog.setNamespaceId(equipment.getNamespaceId());
-			operateLog.setOwnerId(cmd.getOwnerId());
-			operateLog.setOwnerType(cmd.getOwnerType());
-			operateLog.setTargetId(equipment.getId());
-			operateLog.setTargetType(EquipmentOperateObjectType.EQUIPMENT.getOperateObjectType());
-			operateLog.setProcessType(EquipmentOperateActionType.UPDATE.getCode());
-			equipmentProvider.createEquipmentOperateLogs(operateLog);
+			createEquipmentOperateLogs(equipment.getNamespaceId(), cmd.getOwnerId(), cmd.getOwnerType(),
+					equipment.getId(), EquipmentOperateActionType.UPDATE.getCode());
 		}
+	}
+
+	private void dealEquipmentRelateTime(UpdateEquipmentsCommand cmd, EquipmentInspectionEquipments equipment) {
+		if(cmd.getInstallationTime() != null)
+            equipment.setInstallationTime(new Timestamp(cmd.getInstallationTime()));
+
+		if(cmd.getRepairTime() != null)
+            equipment.setRepairTime(new Timestamp(cmd.getRepairTime()));
+
+		if(cmd.getBuyTime() != null)
+            equipment.setBuyTime(new Timestamp(cmd.getBuyTime()));
+
+		if(cmd.getDiscardTime() != null)
+            equipment.setDiscardTime(new Timestamp(cmd.getDiscardTime()));
+
+		if(cmd.getFactoryTime() != null)
+            equipment.setFactoryTime(new Timestamp(cmd.getFactoryTime()));
+	}
+
+	private void createEquipmentInspectionEquipment(UpdateEquipmentsCommand cmd, List<EquipmentStandardMapDTO> eqStandardMap) {
+		EquipmentInspectionEquipments equipment;
+		equipment = ConvertHelper.convert(cmd, EquipmentInspectionEquipments.class);
+		if ((equipment.getLongitude() == null || equipment.getLatitude() == null) && cmd.getQrCodeFlag() == 1) {
+            throw RuntimeErrorException.errorWith(EquipmentServiceErrorCode.SCOPE,
+                    EquipmentServiceErrorCode.ERROR_EQUIPMENT_NOT_SET_LOCATION,
+                    "设备没有设置经纬度");
+        }
+		String geohash = GeoHashUtils.encode(equipment.getLatitude(), equipment.getLongitude());
+
+		dealEquipmentRelateTime(cmd, equipment);
+
+		Long userId = UserContext.currentUserId();
+		equipment.setGeohash(geohash);
+		equipment.setCreatorUid(userId);
+		equipment.setOperatorUid(userId);
+		equipment.setNamespaceId(cmd.getNamespaceId());
+
+
+		if (cmd.getTargetId() == null || cmd.getTargetId() == 0L) {
+            List<CommunityDTO> communities = organizationService.listAllChildrenOrganizationCoummunities(cmd.getOwnerId());
+            if (communities != null && communities.size() > 0) {
+                for (CommunityDTO community : communities) {
+                    equipment.setTargetId(community.getId());
+                    equipment.setTargetType(OwnerType.COMMUNITY.getCode());
+
+                    String tokenString = UUID.randomUUID().toString();
+                    equipment.setQrCodeToken(tokenString);
+                    equipmentProvider.creatEquipmentInspectionEquipment(equipment);
+                    equipmentSearcher.feedDoc(equipment);
+
+                    if (eqStandardMap != null && eqStandardMap.size() > 0) {
+                        for (EquipmentStandardMapDTO dto : eqStandardMap) {
+                            EquipmentStandardMap map = ConvertHelper.convert(dto, EquipmentStandardMap.class);
+                            map.setTargetId(equipment.getId());
+                            map.setTargetType(InspectionStandardMapTargetType.EQUIPMENT.getCode());
+                            map.setCreatorUid(userId);
+
+                            equipmentProvider.createEquipmentStandardMap(map);
+                            equipmentStandardMapSearcher.feedDoc(map);
+                        }
+                    }
+
+                    if (cmd.getEqAccessoryMap() != null) {
+                        for (EquipmentAccessoryMapDTO map : cmd.getEqAccessoryMap()) {
+                            map.setEquipmentId(equipment.getId());
+                            updateEquipmentAccessoryMap(map);
+                        }
+                    }
+
+                    if (cmd.getAttachments() != null) {
+                        for (EquipmentAttachmentDTO attachment : cmd.getAttachments()) {
+                            attachment.setEquipmentId(equipment.getId());
+                            updateEquipmentAttachment(attachment, userId);
+                        }
+                    }
+                }
+            }
+        } else {
+            String tokenString = UUID.randomUUID().toString();
+            equipment.setQrCodeToken(tokenString);
+            equipmentProvider.creatEquipmentInspectionEquipment(equipment);
+            equipmentSearcher.feedDoc(equipment);
+
+            if(eqStandardMap != null && eqStandardMap.size() > 0) {
+                for(EquipmentStandardMapDTO dto : eqStandardMap) {
+                    EquipmentStandardMap map = ConvertHelper.convert(dto, EquipmentStandardMap.class);
+                    map.setTargetId(equipment.getId());
+                    map.setTargetType(InspectionStandardMapTargetType.EQUIPMENT.getCode());
+                    map.setCreatorUid(userId);
+
+                    equipmentProvider.createEquipmentStandardMap(map);
+                    equipmentStandardMapSearcher.feedDoc(map);
+                }
+            }
+
+            if(cmd.getEqAccessoryMap() != null) {
+                for(EquipmentAccessoryMapDTO map : cmd.getEqAccessoryMap()) {
+                    map.setEquipmentId(equipment.getId());
+                    updateEquipmentAccessoryMap(map);
+                }
+            }
+
+            deleteEquipmentAttachmentsByEquipmentId(equipment.getId());
+            if(cmd.getAttachments() != null) {
+                for(EquipmentAttachmentDTO attachment : cmd.getAttachments()) {
+                    attachment.setEquipmentId(equipment.getId());
+                    updateEquipmentAttachment(attachment, userId);
+                }
+            }
+        }
+		//增加设备的操作记录
+		createEquipmentOperateLogs(equipment.getNamespaceId(), cmd.getOwnerId(), cmd.getOwnerType(),
+                equipment.getId(), EquipmentOperateActionType.INSERT.getCode());
+	}
+
+	private void createEquipmentOperateLogs(Integer namespaceId, Long ownerId, String ownerType, Long id, byte code) {
+		EquipmentInspectionEquipmentLogs operateLog = new EquipmentInspectionEquipmentLogs();
+		operateLog.setNamespaceId(namespaceId);
+		operateLog.setOwnerId(ownerId);
+		operateLog.setOwnerType(ownerType);
+		operateLog.setTargetId(id);
+		operateLog.setTargetType(EquipmentOperateObjectType.EQUIPMENT.getOperateObjectType());
+		operateLog.setProcessType(code);
+		equipmentProvider.createEquipmentOperateLogs(operateLog);
 	}
 
 	private void populateEquipmentStandards(EquipmentsDTO dto) {
@@ -1464,9 +1424,7 @@ private void checkUserPrivilege(Long orgId, Long privilegeId, Long communityId) 
 					EquipmentServiceErrorCode.ERROR_EQUIPMENT_ALREADY_DELETED,
  				"设备已删除");
 		}
-//		Long privilegeId = configProvider.getLongValue(EquipmentConstant.EQUIPMENT_DELETE, 0L);
-//		userPrivilegeMgr.checkCurrentUserAuthority(EntityType.COMMUNITY.getCode(), equipment.getTargetId(), cmd.getOwnerId(), privilegeId);
-		checkUserPrivilege(cmd.getOwnerId(),PrivilegeConstants.EQUIPMENT_DELETE,equipment.getTargetId());
+		checkUserPrivilege(cmd.getOwnerId(), PrivilegeConstants.EQUIPMENT_DELETE, equipment.getTargetId());
 
 		equipment.setDeleterUid(user.getId());
 		equipment.setDeleteTime(new Timestamp(DateHelper.currentGMTTime().getTime()));
@@ -1487,14 +1445,7 @@ private void checkUserPrivilege(Long orgId, Long privilegeId, Long communityId) 
 		//新的模式中直接删除计划中设备的关系表即可
 		equipmentProvider.deleteEquipmentPlansMapByEquipmentId(equipment.getId());
 		//增加设备的操作记录
-		EquipmentInspectionEquipmentLogs operateLog = new EquipmentInspectionEquipmentLogs();
-		operateLog.setNamespaceId(equipment.getNamespaceId());
-		operateLog.setOwnerId(cmd.getOwnerId());
-		operateLog.setOwnerType(cmd.getOwnerType());
-		operateLog.setTargetId(equipment.getId());
-		operateLog.setTargetType(EquipmentOperateObjectType.EQUIPMENT.getOperateObjectType());
-		operateLog.setProcessType(EquipmentOperateActionType.DELETE.getCode());
-		equipmentProvider.createEquipmentOperateLogs(operateLog);
+		createEquipmentOperateLogs(equipment.getNamespaceId(), cmd.getOwnerId(), cmd.getOwnerType(), equipment.getId(), EquipmentOperateActionType.DELETE.getCode());
 	}
 
 	/*private void inactiveTasksByStandardId(Long standardId) {
@@ -6081,13 +6032,6 @@ private void checkUserPrivilege(Long orgId, Long privilegeId, Long communityId) 
 
 		equipmentProvider.deleteEquipmentPlansMapByEquipmentId(equipment.getId());
 		//增加设备的操作记录
-		EquipmentInspectionEquipmentLogs operateLog = new EquipmentInspectionEquipmentLogs();
-		operateLog.setNamespaceId(equipment.getNamespaceId());
-		operateLog.setOwnerId(cmd.getOwnerId());
-		operateLog.setOwnerType(cmd.getOwnerType());
-		operateLog.setTargetId(equipment.getId());
-		operateLog.setTargetType(EquipmentOperateObjectType.EQUIPMENT.getOperateObjectType());
-		operateLog.setProcessType(EquipmentOperateActionType.UPDATE.getCode());
-		equipmentProvider.createEquipmentOperateLogs(operateLog);
+		createEquipmentOperateLogs(equipment.getNamespaceId(), cmd.getOwnerId(), cmd.getOwnerType(), equipment.getId(), EquipmentOperateActionType.UPDATE.getCode());
 	}
 }
