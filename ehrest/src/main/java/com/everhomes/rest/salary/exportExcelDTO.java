@@ -13,7 +13,6 @@ public class ExportExcelDTO {
     private String excelName;
     private String exportToken;
     public ExportExcelDTO() {
-
     }
 
     public ExportExcelDTO(String excelName, String exportToken) {
@@ -24,5 +23,21 @@ public class ExportExcelDTO {
 
     public String toString() {
         return StringHelper.toJsonString(this);
+    }
+
+    public String getExcelName() {
+        return excelName;
+    }
+
+    public void setExcelName(String excelName) {
+        this.excelName = excelName;
+    }
+
+    public String getExportToken() {
+        return exportToken;
+    }
+
+    public void setExportToken(String exportToken) {
+        this.exportToken = exportToken;
     }
 }

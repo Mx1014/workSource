@@ -2261,7 +2261,7 @@ public class SalaryServiceImpl implements SalaryService {
             categoryDTO.setEntities(new ArrayList<>());
             for (SalaryGroupEntity entity : entities) {
 
-                if(SalaryEntityStatus.OPEN != SalaryEntityStatus.fromCode(entity.getStatus())){
+                if(SalaryEntityStatus.CLOSE == SalaryEntityStatus.fromCode(entity.getStatus())){
                     //跳过不是开启状态的
                     continue;
                 }
@@ -2545,7 +2545,7 @@ public class SalaryServiceImpl implements SalaryService {
             categoryDTO.setEntities(new ArrayList<>());
             BigDecimal categoryValue = new BigDecimal(0);
             for (SalaryGroupEntity entity : entities) {
-                if(SalaryEntityStatus.OPEN != SalaryEntityStatus.fromCode(entity.getStatus())){
+                if(SalaryEntityStatus.CLOSE == SalaryEntityStatus.fromCode(entity.getStatus())){
                     continue;
                 }
                 if (entity.getCategoryId().equals(category.getId())) {
@@ -2665,7 +2665,7 @@ public class SalaryServiceImpl implements SalaryService {
 
                 SalaryGroupEntity groupEntity = groupEntities.get(i);
 
-                if(SalaryEntityStatus.OPEN != SalaryEntityStatus.fromCode(groupEntity.getStatus())){
+                if(SalaryEntityStatus.CLOSE == SalaryEntityStatus.fromCode(groupEntity.getStatus())){
                     //跳过不是开启状态的
                     continue;
                 }
@@ -2945,7 +2945,7 @@ public class SalaryServiceImpl implements SalaryService {
             row.createCell(++i).setCellValue(detail.getContactName());
             for (SalaryGroupEntity entity : groupEntities) {
 
-                if(SalaryEntityStatus.OPEN != SalaryEntityStatus.fromCode(entity.getStatus())){
+                if(SalaryEntityStatus.CLOSE == SalaryEntityStatus.fromCode(entity.getStatus())){
                     //跳过不是开启状态的
                     continue;
                 }

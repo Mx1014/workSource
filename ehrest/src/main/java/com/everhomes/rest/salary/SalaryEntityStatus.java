@@ -7,11 +7,12 @@ import com.everhomes.util.StringHelper;
  * 
  * <ul>薪酬批次状态
  * <li>CLOSE (0): 关闭</li>
- * <li>OPEN (2): 开启</li>
+ * <li>OPEN (1): 开启</li>
+ * <li>DEFAULT_OPEN (2): 默认开启</li>
  * </ul>
  */
 public enum SalaryEntityStatus {
-	CLOSE((byte) 0), OPEN((byte) 2) ;
+	CLOSE((byte) 0), OPEN((byte) 1) ,DEFAULT_OPEN((byte) 2) ;
 	private Byte code;
 
 	private SalaryEntityStatus(Byte code) {
