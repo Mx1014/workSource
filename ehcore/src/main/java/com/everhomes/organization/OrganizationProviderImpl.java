@@ -45,6 +45,7 @@ import com.everhomes.util.DateHelper;
 import com.everhomes.util.IterationMapReduceCallback.AfterAction;
 import com.everhomes.util.RecordHelper;
 import com.everhomes.util.RuntimeErrorException;
+
 import org.jooq.*;
 import org.jooq.impl.DSL;
 import org.jooq.impl.DefaultRecordMapper;
@@ -6202,4 +6203,10 @@ public class OrganizationProviderImpl implements OrganizationProvider {
 		List<Organization> list = query.fetch().map(record -> ConvertHelper.convert(record, Organization.class));
 		return list;
 	}
+
+	@Override
+	public Integer countUserOrganization(Integer namespaceId, Long communityId) {
+		 return countUserOrganization(namespaceId, communityId, null, null, null);
+	}
+ 
 }

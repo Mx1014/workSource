@@ -1257,37 +1257,37 @@ public class SequenceServiceImpl implements SequenceService {
             return dbContext.select(Tables.EH_SCHEDULE_TASK_LOGS.ID.max()).from(Tables.EH_SCHEDULE_TASK_LOGS).fetchOne().value1();
         });
 
-        syncTableSequence(null, EhSocialSecurityInoutReport.class, Tables.EH_SOCIAL_SECURITY_INOUT_REPORT.getName(), (dbContext) -> {
-            return dbContext.select(Tables.EH_SOCIAL_SECURITY_INOUT_REPORT.ID.max()).from(Tables.EH_SOCIAL_SECURITY_INOUT_REPORT).fetchOne().value1();
-        });
-
-        syncTableSequence(null, EhSocialSecurityBases.class, Tables.EH_SOCIAL_SECURITY_BASES.getName(), (dbContext) -> {
-            return dbContext.select(Tables.EH_SOCIAL_SECURITY_BASES.ID.max()).from(Tables.EH_SOCIAL_SECURITY_BASES).fetchOne().value1();
-        });
-
-        syncTableSequence(null, EhSocialSecurityDepartmentSummary.class, Tables.EH_SOCIAL_SECURITY_DEPARTMENT_SUMMARY.getName(), (dbContext) -> {
-            return dbContext.select(Tables.EH_SOCIAL_SECURITY_DEPARTMENT_SUMMARY.ID.max()).from(Tables.EH_SOCIAL_SECURITY_DEPARTMENT_SUMMARY).fetchOne().value1();
-        });
-
-        syncTableSequence(null, EhSocialSecurityPaymentLogs.class, Tables.EH_SOCIAL_SECURITY_PAYMENT_LOGS.getName(), (dbContext) -> {
-            return dbContext.select(Tables.EH_SOCIAL_SECURITY_PAYMENT_LOGS.ID.max()).from(Tables.EH_SOCIAL_SECURITY_PAYMENT_LOGS).fetchOne().value1();
-        });
-
-        syncTableSequence(null, EhSocialSecurityPayments.class, Tables.EH_SOCIAL_SECURITY_PAYMENTS.getName(), (dbContext) -> {
-            return dbContext.select(Tables.EH_SOCIAL_SECURITY_PAYMENTS.ID.max()).from(Tables.EH_SOCIAL_SECURITY_PAYMENTS).fetchOne().value1();
-        });
-
-        syncTableSequence(null, EhSocialSecuritySettings.class, Tables.EH_SOCIAL_SECURITY_SETTINGS.getName(), (dbContext) -> {
-            return dbContext.select(Tables.EH_SOCIAL_SECURITY_SETTINGS.ID.max()).from(Tables.EH_SOCIAL_SECURITY_SETTINGS).fetchOne().value1();
-        });
-
-        syncTableSequence(null, EhSocialSecuritySummary.class, Tables.EH_SOCIAL_SECURITY_SUMMARY.getName(), (dbContext) -> {
-            return dbContext.select(Tables.EH_SOCIAL_SECURITY_SUMMARY.ID.max()).from(Tables.EH_SOCIAL_SECURITY_SUMMARY).fetchOne().value1();
-        });
-
-        syncTableSequence(null, EhSocialSecurityReport.class, Tables.EH_SOCIAL_SECURITY_REPORT.getName(), (dbContext) -> {
-            return dbContext.select(Tables.EH_SOCIAL_SECURITY_REPORT.ID.max()).from(Tables.EH_SOCIAL_SECURITY_REPORT).fetchOne().value1();
-        });
+//        syncTableSequence(null, EhSocialSecurityInoutReport.class, Tables.EH_SOCIAL_SECURITY_INOUT_REPORT.getName(), (dbContext) -> {
+//            return dbContext.select(Tables.EH_SOCIAL_SECURITY_INOUT_REPORT.ID.max()).from(Tables.EH_SOCIAL_SECURITY_INOUT_REPORT).fetchOne().value1();
+//        });
+//
+//        syncTableSequence(null, EhSocialSecurityBases.class, Tables.EH_SOCIAL_SECURITY_BASES.getName(), (dbContext) -> {
+//            return dbContext.select(Tables.EH_SOCIAL_SECURITY_BASES.ID.max()).from(Tables.EH_SOCIAL_SECURITY_BASES).fetchOne().value1();
+//        });
+//
+//        syncTableSequence(null, EhSocialSecurityDepartmentSummary.class, Tables.EH_SOCIAL_SECURITY_DEPARTMENT_SUMMARY.getName(), (dbContext) -> {
+//            return dbContext.select(Tables.EH_SOCIAL_SECURITY_DEPARTMENT_SUMMARY.ID.max()).from(Tables.EH_SOCIAL_SECURITY_DEPARTMENT_SUMMARY).fetchOne().value1();
+//        });
+//
+//        syncTableSequence(null, EhSocialSecurityPaymentLogs.class, Tables.EH_SOCIAL_SECURITY_PAYMENT_LOGS.getName(), (dbContext) -> {
+//            return dbContext.select(Tables.EH_SOCIAL_SECURITY_PAYMENT_LOGS.ID.max()).from(Tables.EH_SOCIAL_SECURITY_PAYMENT_LOGS).fetchOne().value1();
+//        });
+//
+//        syncTableSequence(null, EhSocialSecurityPayments.class, Tables.EH_SOCIAL_SECURITY_PAYMENTS.getName(), (dbContext) -> {
+//            return dbContext.select(Tables.EH_SOCIAL_SECURITY_PAYMENTS.ID.max()).from(Tables.EH_SOCIAL_SECURITY_PAYMENTS).fetchOne().value1();
+//        });
+//
+//        syncTableSequence(null, EhSocialSecuritySettings.class, Tables.EH_SOCIAL_SECURITY_SETTINGS.getName(), (dbContext) -> {
+//            return dbContext.select(Tables.EH_SOCIAL_SECURITY_SETTINGS.ID.max()).from(Tables.EH_SOCIAL_SECURITY_SETTINGS).fetchOne().value1();
+//        });
+//
+//        syncTableSequence(null, EhSocialSecuritySummary.class, Tables.EH_SOCIAL_SECURITY_SUMMARY.getName(), (dbContext) -> {
+//            return dbContext.select(Tables.EH_SOCIAL_SECURITY_SUMMARY.ID.max()).from(Tables.EH_SOCIAL_SECURITY_SUMMARY).fetchOne().value1();
+//        });
+//
+//        syncTableSequence(null, EhSocialSecurityReport.class, Tables.EH_SOCIAL_SECURITY_REPORT.getName(), (dbContext) -> {
+//            return dbContext.select(Tables.EH_SOCIAL_SECURITY_REPORT.ID.max()).from(Tables.EH_SOCIAL_SECURITY_REPORT).fetchOne().value1();
+//        });
 
 
         syncTableSequence(null, EhOpPromotionMessages.class, Tables.EH_OP_PROMOTION_MESSAGES.getName(), (dbContext) -> {
