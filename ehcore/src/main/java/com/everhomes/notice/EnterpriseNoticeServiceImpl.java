@@ -11,7 +11,6 @@ import com.everhomes.rest.app.AppConstants;
 import com.everhomes.rest.common.Router;
 import com.everhomes.rest.messaging.*;
 import com.everhomes.rest.notice.*;
-import com.everhomes.rest.organization.OrganizationDTO;
 import com.everhomes.rest.organization.OrganizationGroupType;
 import com.everhomes.settings.PaginationConfigHelper;
 import com.everhomes.user.User;
@@ -123,7 +122,7 @@ public class EnterpriseNoticeServiceImpl implements EnterpriseNoticeService {
         if (EnterpriseNoticeContentType.fromCode(cmd.getContentType()) == null) {
             cmd.setContentType(EnterpriseNoticeContentType.TEXT.getCode());
         }
-        OrganizationDTO currentOrganization = organizationService.getUserCurrentOrganization();
+
         EnterpriseNotice sendEnterpriseNotice = dbProvider.execute((TransactionStatus status) -> {
             Integer namespaceId = UserContext.getCurrentNamespaceId();
             if (namespaceId == null) {
@@ -135,7 +134,7 @@ public class EnterpriseNoticeServiceImpl implements EnterpriseNoticeService {
             }
             enterpriseNotice.setNamespaceId(namespaceId);
             enterpriseNotice.setOwnerType(EntityType.ORGANIZATIONS.getCode());
-            enterpriseNotice.setOwnerId(currentOrganization.getId());
+            enterpriseNotice.setOwnerId(cmd.getOrganizationId());
             enterpriseNotice.setOperatorName(getUserContactNameByUserId(UserContext.currentUserId()));
             enterpriseNoticeProvider.createEnterpriseNotice(enterpriseNotice);
             createEnterpriseNoticeAttachments(enterpriseNotice, cmd.getAttachments());
@@ -151,6 +150,7 @@ public class EnterpriseNoticeServiceImpl implements EnterpriseNoticeService {
     private EnterpriseNoticePreviewDTO buildEnterpriseNoticePreviewDTO(EnterpriseNotice enterpriseNotice) {
         EnterpriseNoticeDetailActionData actionData = new EnterpriseNoticeDetailActionData();
         actionData.setBulletinId(enterpriseNotice.getId());
+        actionData.setShowType(EnterpriseNoticeShowType.PREVIEW.getCode());
         String url = RouterBuilder.build(Router.ENTERPRISE_NOTICE_DETAIL, actionData);
 
         EnterpriseNoticePreviewDTO enterpriseNoticePreviewDTO = new EnterpriseNoticePreviewDTO();
@@ -179,10 +179,15 @@ public class EnterpriseNoticeServiceImpl implements EnterpriseNoticeService {
                         continue;
                     }
                     for (OrganizationMember member : members) {
-                        userIds.add(member.getTargetId());
+                        if (member.getTargetId() != null && member.getTargetId() > 0) {
+                            userIds.add(member.getTargetId());
+                        }
                     }
                 } else {
-                    userIds.add(receiver.getReceiverId());
+                    OrganizationMemberDetails details = organizationProvider.findOrganizationMemberDetailsByDetailId(receiver.getReceiverId());
+                    if (details != null || details.getId() != null && details.getTargetId() != null && details.getTargetId() > 0) {
+                        userIds.add(details.getTargetId());
+                    }
                 }
             }
             for (Long userId : userIds) {
@@ -271,6 +276,7 @@ public class EnterpriseNoticeServiceImpl implements EnterpriseNoticeService {
         //  set the route
         EnterpriseNoticeDetailActionData actionData = new EnterpriseNoticeDetailActionData();
         actionData.setBulletinId(notice.getId());
+        actionData.setShowType(EnterpriseNoticeShowType.SHOW.getCode());
         String url = RouterBuilder.build(Router.ENTERPRISE_NOTICE_DETAIL, actionData);
         RouterMetaObject metaObject = new RouterMetaObject();
         metaObject.setUrl(url);
@@ -373,21 +379,29 @@ public class EnterpriseNoticeServiceImpl implements EnterpriseNoticeService {
      * 发给自己的、发给本部门的或者发给上级部门的公告本人均可见
      */
     private List<EnterpriseNoticeReceiver> parseCurrentReceivers() {
+        OrganizationMemberDetails details = organizationProvider.findOrganizationMemberDetailsByTargetId(UserContext.currentUserId());
+        if (details == null || details.getId() == null) {
+            return Collections.emptyList();
+        }
+
         List<EnterpriseNoticeReceiver> receivers = new ArrayList<>();
         EnterpriseNoticeReceiver receiver = new EnterpriseNoticeReceiver();
-        receiver.setReceiverId(UserContext.currentUserId());
-        receiver.setReceiverType(EnterpriseNoticeReceiverType.USER.getCode());
+        receiver.setReceiverId(details.getId());
+        receiver.setReceiverType(EnterpriseNoticeReceiverType.MEMBER_DETAIL.getCode());
         receivers.add(receiver);
 
-        OrganizationDTO organization = organizationService.getUserCurrentOrganization();
+        Long currentOrganizationId = organizationService.getDepartmentByDetailId(details.getId());
 
-        if (organization != null && StringUtils.hasText(organization.getPath())) {
-            for (String orgId : organization.getPath().split("/")) {
-                if (StringUtils.hasText(orgId)) {
-                    receiver = new EnterpriseNoticeReceiver();
-                    receiver.setReceiverId(Long.valueOf(orgId));
-                    receiver.setReceiverType(EnterpriseNoticeReceiverType.ORGANIZATIONS.getCode());
-                    receivers.add(receiver);
+        if (currentOrganizationId != null && currentOrganizationId > 0) {
+            Organization organization = organizationProvider.findOrganizationById(currentOrganizationId);
+            if (organization != null && StringUtils.hasText(organization.getPath())) {
+                for (String orgId : organization.getPath().split("/")) {
+                    if (StringUtils.hasText(orgId)) {
+                        receiver = new EnterpriseNoticeReceiver();
+                        receiver.setReceiverId(Long.valueOf(orgId));
+                        receiver.setReceiverType(EnterpriseNoticeReceiverType.ORGANIZATIONS.getCode());
+                        receivers.add(receiver);
+                    }
                 }
             }
         }

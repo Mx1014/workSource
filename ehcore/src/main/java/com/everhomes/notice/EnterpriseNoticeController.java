@@ -43,8 +43,7 @@ public class EnterpriseNoticeController extends ControllerBase {
     @RequestMapping("updateEnterpriseNotice")
     @RestReturn(value = EnterpriseNoticePreviewDTO.class)
     public RestResponse updateEnterpriseNotice(UpdateEnterpriseNoticeCommand cmd) {
-        enterpriseNoticeService.updateEnterpriseNotice(cmd);
-        RestResponse response = new RestResponse();
+        RestResponse response = new RestResponse(enterpriseNoticeService.updateEnterpriseNotice(cmd));
         response.setErrorCode(ErrorCodes.SUCCESS);
         response.setErrorDescription("OK");
         return response;
@@ -60,9 +59,9 @@ public class EnterpriseNoticeController extends ControllerBase {
     @RequestMapping("getEnterpriseNoticeDetail")
     @RestReturn(value = EnterpriseNoticeDTO.class)
     public RestResponse getEnterpriseNoticeDetail(GetEnterpriseNoticeCommand cmd) {
-        boolean isNoticeSendToCurrentUser = enterpriseNoticeService.isNoticeSendToCurrentUser(cmd.getId());
         EnterpriseNoticeDTO enterpriseNoticeDTO = null;
-        if (isNoticeSendToCurrentUser) {
+        boolean isPreview = EnterpriseNoticeShowType.PREVIEW == EnterpriseNoticeShowType.fromCode(cmd.getShowType());
+        if (isPreview || enterpriseNoticeService.isNoticeSendToCurrentUser(cmd.getId())) {
             enterpriseNoticeDTO = enterpriseNoticeService.getEnterpriseNoticeDetailInfo(cmd.getId());
         }
         if (enterpriseNoticeDTO == null) {
