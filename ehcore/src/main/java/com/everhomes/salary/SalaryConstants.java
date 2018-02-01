@@ -19,5 +19,9 @@ public class SalaryConstants {
 	public static final Long ENTITY_ID_SHENFENZHENG = 7L;
 	public static final Long ENTITY_ID_BANKNO = 8L;
 	public static final Long ENTITY_ID_PERIOD = 9L;
+	public static final Long ENTITY_ID_BONUSTAX = 27L;
+	public static final Long ENTITY_ID_SALARYTAX = 28L;
 
+	public static int ERROR_FILE_IS_EMPTY = 10005;
+	public static Integer ERROR_CHECK_CONTACT = 10006;
 }

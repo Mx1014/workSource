@@ -7,8 +7,8 @@ import com.everhomes.util.StringHelper;
  * 
  * <ul>参数:
  * <li>keywords: 搜索关键词</li>
- * <li>checkInMonth: 入职月份</li>
- * <li>dismissMonth: 离职月份</li>
+ * <li>checkInMonth: 入职月份时间戳</li>
+ * <li>dismissMonth: 离职月份时间戳</li>
  * <li>ownerType: 'organization'</li>
  * <li>ownerId: 子公司organizationId</li>
  * <li>salaryStatus: 0-正常 -1 异常</li>
@@ -20,13 +20,15 @@ public class ListSalaryEmployeesCommand {
 
 	private String keywords;
 
+	private Integer namespaceId;
+
 	private String ownerType;
 
 	private Long ownerId;
 
-	private String checkInMonth;
+	private Long checkInMonth;
 
-	private String dismissMonth;
+	private Long dismissMonth;
 
 	private Byte salaryStatus;
 
@@ -38,19 +40,19 @@ public class ListSalaryEmployeesCommand {
 
 	}
 
-	public String getCheckInMonth() {
+	public Long getCheckInMonth() {
 		return checkInMonth;
 	}
 
-	public void setCheckInMonth(String checkInMonth) {
+	public void setCheckInMonth(Long checkInMonth) {
 		this.checkInMonth = checkInMonth;
 	}
 
-	public String getDismissMonth() {
+	public Long getDismissMonth() {
 		return dismissMonth;
 	}
 
-	public void setDismissMonth(String dismissMonth) {
+	public void setDismissMonth(Long dismissMonth) {
 		this.dismissMonth = dismissMonth;
 	}
 
@@ -105,5 +107,13 @@ public class ListSalaryEmployeesCommand {
 
 	public void setSalaryStatus(Byte salaryStatus) {
 		this.salaryStatus = salaryStatus;
+	}
+
+	public Integer getNamespaceId() {
+		return namespaceId;
+	}
+
+	public void setNamespaceId(Integer namespaceId) {
+		this.namespaceId = namespaceId;
 	}
 }

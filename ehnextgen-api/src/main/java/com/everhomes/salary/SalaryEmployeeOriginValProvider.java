@@ -13,6 +13,12 @@ public interface SalaryEmployeeOriginValProvider {
 
 	List<SalaryEmployeeOriginVal> listSalaryEmployeeOriginVal();
 
+	SalaryEmployeeOriginVal findSalaryEmployeeOriginValByDetailId(Long orginEntityId, Long detailId);
+
+	void deleteSalaryEmployeeOriginValNotInList(List<Long> groupEntityIds, Long detailId);
+
+	void deleteSalaryEmployeeOriginValByDetailIdAndGroouEntity(Long detailId, Long id);
+
 //	List<SalaryEmployeeOriginVal> listSalaryEmployeeOriginValByDetailId(Long userId, String ownerType, Long ownerId);
 //
 //	void deleteSalaryEmployeeOriginValByGroupId(Long groupId);

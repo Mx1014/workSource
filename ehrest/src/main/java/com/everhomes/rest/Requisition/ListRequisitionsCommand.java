@@ -16,7 +16,7 @@ import com.everhomes.util.StringHelper;
  */
 public class ListRequisitionsCommand {
     private String theme;
-    private String typeId;
+    private Long typeId;
     private Long pageAnchor;
     private Integer pageSize;
     private String ownerType;
@@ -31,11 +31,11 @@ public class ListRequisitionsCommand {
         this.theme = theme;
     }
 
-    public String getTypeId() {
+    public Long getTypeId() {
         return typeId;
     }
 
-    public void setTypeId(String typeId) {
+    public void setTypeId(Long typeId) {
         this.typeId = typeId;
     }
 

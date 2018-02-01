@@ -1,9 +1,9 @@
 package com.everhomes.flow;
 
-import java.util.List;
-
 import com.everhomes.listing.ListingLocator;
 import com.everhomes.listing.ListingQueryBuilderCallback;
+
+import java.util.List;
 
 public interface FlowUserSelectionProvider {
 
@@ -21,8 +21,7 @@ public interface FlowUserSelectionProvider {
 	List<FlowUserSelection> findSelectionByBelong(Long belongId,
 			String belongEntity, String flowUserBelongType);
 
-	List<FlowUserSelection> deleteSelectionByBelong(Long belongId, String belongEntity,
-			String flowUserBelongType);
+	int deleteSelectionByBelong(Long belongId, String belongEntity, String flowUserBelongType);
 
 	List<FlowUserSelection> findSelectionByBelong(Long belongId,
 			String belongEntity, String flowUserBelongType, Integer ver);

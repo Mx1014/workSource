@@ -141,4 +141,6 @@ public interface CommunityProvider {
 
     Community findCommunityByCommunityNumber(String communityNumber, Integer namespaceId);
     Building findBuildingByCommunityIdAndNumber(Long communityId, String buildingNumber);
+
+    List<Community> listNamespaceCommunities(Integer namespaceId);
 }

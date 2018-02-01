@@ -246,7 +246,7 @@ public interface UserService {
      * created by wentian
      * 根据客户名和地址定位唯一用户
      */
-    TargetDTO findTargetByNameAndAddress(String contractNum, String targetName , Long ownerId,String tel,String ownerType,String targetType);
+    TargetDTO findTargetByNameAndAddress(String contractNum, String targetName , Long ownerId,String tel,String ownerType,String targetType,Integer namespaceId);
 
     Long getCommunityIdBySceneToken(SceneTokenDTO sceneTokenDTO);
 
@@ -286,4 +286,6 @@ public interface UserService {
      */
     SystemInfoResponse updateUserBySystemInfo(SystemInfoCommand cmd,
             HttpServletRequest request, HttpServletResponse response);
+
+    SearchUserByIdentifierResponse searchUserByIdentifier(SearchUserByIdentifierCommand cmd);
 }

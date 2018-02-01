@@ -19,6 +19,7 @@ import java.math.BigDecimal;
  *     <li>specificationInformation: 规格信息</li>
  *     <li>communityId: 园区id</li>
  *     <li>supplierId: 供应商id</li>
+ *     <li>supplierName: 供应商名字</li>
  * </ul>
  * Created by ying.xiong on 2017/5/11.
  */
@@ -48,6 +49,28 @@ public class UpdateWarehouseMaterialCommand {
     private Long communityId;
 
     private Long supplierId;
+
+
+    private Integer namespaceId;
+
+    public Integer getNamespaceId() {
+        return namespaceId;
+    }
+
+    public void setNamespaceId(Integer namespaceId) {
+        this.namespaceId = namespaceId;
+    }
+
+    private String supplierName;
+
+    public String getSupplierName() {
+        return supplierName;
+    }
+
+    public void setSupplierName(String supplierName) {
+        this.supplierName = supplierName;
+
+    }
 
     public Long getSupplierId() {
         return supplierId;

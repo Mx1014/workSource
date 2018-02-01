@@ -1,6 +1,7 @@
 // @formatter:off
 package com.everhomes.organization;
 
+import com.everhomes.acl.RolePrivilegeService;
 import com.everhomes.community.Community;
 import com.everhomes.constants.ErrorCodes;
 import com.everhomes.db.AccessSpec;
@@ -19,6 +20,7 @@ import com.everhomes.organization.pm.CommunityAddressMapping;
 import com.everhomes.organization.pm.CommunityPmBill;
 import com.everhomes.organization.pm.CommunityPmOwner;
 import com.everhomes.organization.pmsy.OrganizationMemberRecordMapper;
+import com.everhomes.rest.acl.ListServiceModuleAdministratorsCommand;
 import com.everhomes.rest.approval.TrueOrFalseFlag;
 import com.everhomes.rest.asset.TargetDTO;
 import com.everhomes.rest.enterprise.EnterpriseAddressStatus;
@@ -46,6 +48,7 @@ import com.everhomes.util.RuntimeErrorException;
 import org.jooq.*;
 import org.jooq.impl.DSL;
 import org.jooq.impl.DefaultRecordMapper;
+import org.mockito.internal.verification.Times;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -1442,7 +1445,7 @@ public class OrganizationProviderImpl implements OrganizationProvider {
         }
         return result;
 
-//        Result<Record> records = context.select().from(Tables.EH_ORGANIZATION_MEMBERS).where(Tables.EH_ORGANIZATION_MEMBERS.ORGANIZATION_ID.eq(orgId))
+//        SendResult<Record> records = context.select().from(Tables.EH_ORGANIZATION_MEMBERS).where(Tables.EH_ORGANIZATION_MEMBERS.ORGANIZATION_ID.eq(orgId))
 //                .and(Tables.EH_ORGANIZATION_MEMBERS.STATUS.ne(OrganizationMemberStatus.INACTIVE.getCode()))
 //                //added by wh 2016-10-13 把被拒绝的过滤掉
 //                .and(Tables.EH_ORGANIZATION_MEMBERS.STATUS.ne(OrganizationMemberStatus.REJECT.getCode())).fetch();
@@ -3210,7 +3213,7 @@ public class OrganizationProviderImpl implements OrganizationProvider {
         }
         return result;
 //
-//        Result<Record> records = context.select().from(Tables.EH_ORGANIZATION_MEMBERS)
+//        SendResult<Record> records = context.select().from(Tables.EH_ORGANIZATION_MEMBERS)
 //                .where(Tables.EH_ORGANIZATION_MEMBERS.TARGET_ID.eq(uId))
 //                .and(Tables.EH_ORGANIZATION_MEMBERS.STATUS.eq(OrganizationMemberStatus.ACTIVE.getCode())).fetch();
 //
@@ -3602,15 +3605,21 @@ public class OrganizationProviderImpl implements OrganizationProvider {
     @Override
     public Organization findOrganizationByName(String name, Integer namespaceId) {
         DSLContext context = this.dbProvider.getDslContext(AccessSpec.readOnly());
-        Record r = context.select().from(Tables.EH_ORGANIZATIONS)
-                .where(Tables.EH_ORGANIZATIONS.NAME.eq(name))
-                .and(Tables.EH_ORGANIZATIONS.PARENT_ID.eq(0L))
-                .and(Tables.EH_ORGANIZATIONS.NAMESPACE_ID.eq(namespaceId))
-                .and(Tables.EH_ORGANIZATIONS.GROUP_TYPE.eq(OrganizationGroupType.ENTERPRISE.getCode()))
-                .and(Tables.EH_ORGANIZATIONS.STATUS.eq(OrganizationStatus.ACTIVE.getCode()))
-                .fetchAny();
-        if (r != null)
-            return ConvertHelper.convert(r, Organization.class);
+
+        SelectQuery<Record> query = context.selectQuery();
+        query.addSelect(Tables.EH_ORGANIZATIONS.fields());
+        query.addFrom(Tables.EH_ORGANIZATIONS);
+        query.addConditions(Tables.EH_ORGANIZATIONS.NAME.eq(name));
+        //没有域名，重复率会高
+        query.addConditions(Tables.EH_ORGANIZATIONS.NAMESPACE_ID.eq(namespaceId));
+        query.addConditions(Tables.EH_ORGANIZATIONS.PARENT_ID.eq(0l));
+        query.addConditions(Tables.EH_ORGANIZATIONS.GROUP_TYPE.eq(OrganizationGroupType.ENTERPRISE.getCode()));
+        query.addConditions(Tables.EH_ORGANIZATIONS.STATUS.eq(OrganizationStatus.ACTIVE.getCode()));
+
+        List<Organization> list = query.fetchInto(Organization.class);
+        if(list != null && list.size() == 1){
+        	return  list.get(0);
+		} 
         return null;
     }
 
@@ -5161,12 +5170,80 @@ public class OrganizationProviderImpl implements OrganizationProvider {
 
         return result;
     }
+ 
+	@Override
+	public List<Long> listMemberDetailIdWithExclude(String keywords, Integer namespaceId, String big_path, List<String> small_path,
+													Timestamp checkinTimeStart, Timestamp checkinTimeEnd, Timestamp dissmissTimeStart, Timestamp dissmissTimeEnd,
+													CrossShardListingLocator locator, Integer pageSize,List<Long> notinDetails,List<Long> inDetails) {
+		DSLContext context = dbProvider.getDslContext(AccessSpec.readOnly());
+		TableLike t1 = Tables.EH_ORGANIZATION_MEMBERS.as("t1");
+		TableLike t2 = Tables.EH_ORGANIZATION_MEMBER_DETAILS.as("t2");
+		SelectJoinStep step = context.select().from(t1).leftOuterJoin(t2).on(t1.field("detail_id").eq(t2.field("id")));
 
-    @Override
-    public Integer countUserOrganization(Integer namespaceId, Long communityId) {
-        return countUserOrganization(namespaceId, communityId, null, null, null);
-    }
+		Condition cond = t1.field("group_path").like(big_path+"/%");
 
+		cond = cond.and(t1.field("namespace_id").eq(namespaceId));
+//		cond = cond.and(t1.field("status").eq(OrganizationMemberStatus.ACTIVE.getCode()));
+
+		if (small_path != null) {
+			for (String p : small_path) {
+				cond = cond.and(t1.field("group_path").notLike(p+"%"));
+			}
+		}
+		if(!StringUtils.isEmpty(keywords)){
+			cond = cond.and(t2.field("contact_name").like("%" + keywords + "%"));
+		}
+		if (null != notinDetails) {
+			cond = cond.and(t2.field("id").notIn(notinDetails));
+		}
+		if (null != inDetails) {
+			cond = cond.and(t2.field("id").in(inDetails));
+		}
+		//入职日期
+		if(checkinTimeStart != null && checkinTimeEnd != null){
+			cond = cond.and(t2.field("check_in_time").gt(checkinTimeStart));
+			cond = cond.and(t2.field("check_in_time").lt(checkinTimeEnd));
+		}
+		//离职日期
+		if(dissmissTimeStart != null && dissmissTimeEnd != null){
+			cond = cond.and(t2.field("dismiss_time").gt(checkinTimeStart));
+			cond = cond.and(t2.field("dismiss_time").lt(checkinTimeEnd));
+		}
+		if (null != locator && null != locator.getAnchor())
+			cond = cond.and(t1.field("detail_id").lt(locator.getAnchor()));
+
+		List<Long> result = step.where(cond).groupBy(t2.field("id")).orderBy(t2.field("id").desc()).limit(pageSize).fetch(t2.field("id"));
+		LOGGER.debug("step " +step.where(cond).groupBy(t2.field("id")).orderBy(t2.field("id").desc()).limit(pageSize));
+//		if (null != locator)
+//			locator.setAnchor(null);
+
+//		if (result != null & result.size() >= pageSize) {
+//			result.remove(result.size() - 1);
+//			locator.setAnchor(result.get(result.size() - 1));
+//		}
+
+		return result;
+
+	}
+
+	@Override
+	public boolean checkIfLastOnNode(Integer namespaceId, Long organizationId, String contactToken, String path) {
+		DSLContext context = dbProvider.getDslContext(AccessSpec.readOnly());
+		SelectQuery<EhOrganizationMembersRecord> query = context.selectQuery(Tables.EH_ORGANIZATION_MEMBERS);
+		query.addConditions(Tables.EH_ORGANIZATION_MEMBERS.NAMESPACE_ID.eq(namespaceId));
+		query.addConditions(Tables.EH_ORGANIZATION_MEMBERS.STATUS.eq(OrganizationMemberStatus.ACTIVE.getCode()));
+		query.addConditions(Tables.EH_ORGANIZATION_MEMBERS.CONTACT_TOKEN.eq(contactToken));
+		query.addConditions(Tables.EH_ORGANIZATION_MEMBERS.GROUP_TYPE.notEqual(OrganizationGroupType.ENTERPRISE.getCode()));
+		query.addConditions(Tables.EH_ORGANIZATION_MEMBERS.GROUP_PATH.like(path + "%"));
+		List<EhOrganizationMembersRecord> records = query.fetch();
+		if(records != null){
+			if(records.size() > 1){
+				return false;
+			}
+		}
+		return true;
+	} 
+ 
     @Override
     public Integer countUserOrganization(Integer namespaceId, Long communityId, Byte userOrganizationStatus) {
         return countUserOrganization(namespaceId, communityId, userOrganizationStatus, null, null);
@@ -5244,23 +5321,6 @@ public class OrganizationProviderImpl implements OrganizationProvider {
         return null;
     }
 
-    @Override
-    public boolean checkIfLastOnNode(Integer namespaceId, Long organizationId, String contactToken, String path) {
-        DSLContext context = dbProvider.getDslContext(AccessSpec.readOnly());
-        SelectQuery<EhOrganizationMembersRecord> query = context.selectQuery(Tables.EH_ORGANIZATION_MEMBERS);
-        query.addConditions(Tables.EH_ORGANIZATION_MEMBERS.NAMESPACE_ID.eq(namespaceId));
-        query.addConditions(Tables.EH_ORGANIZATION_MEMBERS.STATUS.eq(OrganizationMemberStatus.ACTIVE.getCode()));
-        query.addConditions(Tables.EH_ORGANIZATION_MEMBERS.CONTACT_TOKEN.eq(contactToken));
-        query.addConditions(Tables.EH_ORGANIZATION_MEMBERS.GROUP_TYPE.notEqual(OrganizationGroupType.ENTERPRISE.getCode()));
-        query.addConditions(Tables.EH_ORGANIZATION_MEMBERS.GROUP_PATH.like(path + "%"));
-        List<EhOrganizationMembersRecord> records = query.fetch();
-        if (records != null) {
-            if (records.size() > 1) {
-                return false;
-            }
-        }
-        return true;
-    }
 
     @Override
     public boolean checkOneOfOrganizationWithContextToken(String path, String contactToken) {

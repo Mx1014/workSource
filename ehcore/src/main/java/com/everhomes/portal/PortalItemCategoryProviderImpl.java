@@ -16,6 +16,7 @@ import com.everhomes.util.ConvertHelper;
 import com.everhomes.util.DateHelper;
 import org.jooq.Condition;
 import org.jooq.DSLContext;
+import org.jooq.DeleteQuery;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
 import org.springframework.util.StringUtils;
@@ -77,6 +78,15 @@ public class PortalItemCategoryProviderImpl implements PortalItemCategoryProvide
 		getReadWriteDao().update(portalItemCategory);
 		DaoHelper.publishDaoAction(DaoAction.MODIFY, EhPortalItemCategories.class, portalItemCategory.getId());
 	}
+
+	@Override
+	public void deleteByVersionId(Long versionId){
+		DeleteQuery query = getReadWriteContext().deleteQuery(Tables.EH_PORTAL_ITEM_CATEGORIES);
+		query.addConditions(Tables.EH_PORTAL_ITEM_CATEGORIES.VERSION_ID.eq(versionId));
+		query.execute();
+		DaoHelper.publishDaoAction(DaoAction.MODIFY, EhPortalItemCategories.class, null);
+	}
+
 
 	@Override
 	public PortalItemCategory findPortalItemCategoryById(Long id) {

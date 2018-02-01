@@ -3,6 +3,7 @@ package com.everhomes.varField;
 
 import java.util.List;
 
+import com.everhomes.dynamicExcel.DynamicImportResponse;
 import com.everhomes.rest.asset.ImportFieldsExcelResponse;
 import com.everhomes.rest.field.ExportFieldsExcelCommand;
 import com.everhomes.rest.varField.*;
@@ -71,4 +72,11 @@ public interface FieldService {
     List<SystemFieldItemDTO> listSystemFieldItems(ListSystemFieldItemCommand cmd);
 
 
+    void exportDynamicExcelTemplate(ListFieldGroupCommand cmd, HttpServletResponse response);
+
+    void exportDynamicExcel(ExportFieldsExcelCommand cmd, HttpServletResponse response);
+
+    List<List<String>> getDataOnFields(FieldGroupDTO group, Long customerId, Byte customerType,List<FieldDTO> fields,Long communityId,Integer namespaceId,String moduleName, Long orgId);
+
+    DynamicImportResponse importDynamicExcel(ImportFieldExcelCommand cmd, MultipartFile file);
 }

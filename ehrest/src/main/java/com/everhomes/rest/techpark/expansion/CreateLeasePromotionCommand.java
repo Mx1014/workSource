@@ -27,6 +27,7 @@ import com.everhomes.util.StringHelper;
  * <li>issuerType：发布人类型  {@link com.everhomes.rest.techpark.expansion.LeaseIssuerType  NORMAL_USER：普通用户或公司，ORGANIZATION：物业公司}</li>
  * <li>longitude：经度</li>
  * <li>latitude：纬度</li>
+ * <li>houseResourceType {@link com.everhomes.rest.techpark.expansion.HouseResourceType}</li>
  * <li>generalFormId：表单id</li>
  * <li>customFormFlag：是否启用表单 {@link com.everhomes.rest.techpark.expansion.LeasePromotionFlag  0 ：否  1 是}</li>
  * <li>formValues：表单字段列表 {@link com.everhomes.rest.general_approval.PostApprovalFormItem}</li>
@@ -51,6 +52,7 @@ public class CreateLeasePromotionCommand {
 	private String contacts;
 	private String contactPhone;
 	private String description;
+	private String houseResourceType;
 
 	private Byte enterTimeFlag;
 	private Long enterTime;
@@ -228,6 +230,14 @@ public class CreateLeasePromotionCommand {
 	}
 	public void setPosterUri(String posterUri) {
 		this.posterUri = posterUri;
+	}
+
+	public String getHouseResourceType() {
+		return houseResourceType;
+	}
+
+	public void setHouseResourceType(String houseResourceType) {
+		this.houseResourceType = houseResourceType;
 	}
 
 	public String getRentAreas() {

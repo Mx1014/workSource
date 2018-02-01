@@ -2771,6 +2771,11 @@ public class AssetServiceImpl implements AssetService {
         return handler.showBillForClientV2(cmd);
     }
 
+    /**
+     *
+     * @modify 2018/1/16
+     *  @modifyPoint 1 make bill ordered by date desc
+     */
     @Override
     public List<ListAllBillsForClientDTO> listAllBillsForClient(ListAllBillsForClientCommand cmd) {
         //企业用户的话判断是否为企业管理员
@@ -2815,10 +2820,12 @@ public class AssetServiceImpl implements AssetService {
         }
         switch (namespaceId){
             case 999971:
-                if(cmd.getOwnerType()!=null && cmd.getOwnerType().equals(AssetPaymentStrings.EH_ORGANIZATION)) hasPay = 0;
+                if(cmd.getOwnerType()!=null && cmd.getOwnerType().equals(AssetPaymentStrings.EH_USER)) hasPay = 1;
                 break;
             case 999983:
-                hasContractView = 0;
+//                hasContractView = 0;
+                //正中会要求可以看合同
+                hasContractView = 1;
                 hasPay = 0;
                 break;
             default:

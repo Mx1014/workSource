@@ -2,6 +2,7 @@
 package com.everhomes.user;
 
 import com.everhomes.aclink.AclinkUser;
+import com.everhomes.asset.AssetPaymentStrings;
 import com.everhomes.bootstrap.PlatformContext;
 import com.everhomes.cache.CacheProvider;
 import com.everhomes.configuration.ConfigurationProvider;
@@ -1032,6 +1033,37 @@ public class UserProviderImpl implements UserProvider {
 	        
 	        return list;
 	    }
+
+    @Override
+    public List<User> searchUserByIdentifier(String identifier, Integer namespaceId, int pageSize) {
+
+        List<User> list = new ArrayList<User>();
+
+        dbProvider.mapReduce(AccessSpec.readOnlyWith(EhUsers.class), null, (context,obj)->{
+            Condition cond = Tables.EH_USERS.NAMESPACE_ID.eq(namespaceId);
+            cond = cond.and(Tables.EH_USER_IDENTIFIERS.IDENTIFIER_TOKEN.like(identifier + "%"));
+            cond = cond.and(EH_USER_IDENTIFIERS.CLAIM_STATUS.eq(IdentifierClaimStatus.CLAIMED.getCode()));
+            context.select().from(Tables.EH_USERS).join(Tables.EH_USER_IDENTIFIERS, JoinType.JOIN)
+                    .on(Tables.EH_USERS.ID.eq(Tables.EH_USER_IDENTIFIERS.OWNER_UID))
+                    .where(cond).orderBy(Tables.EH_USERS.CREATE_TIME.desc())
+                    .limit(pageSize)
+                    .fetch().map(r -> {
+                User user = ConvertHelper.convert(r,User.class);
+                user.setNamespaceId(r.getValue(Tables.EH_USERS.NAMESPACE_ID));
+                user.setId(r.getValue(Tables.EH_USERS.ID));
+                user.setNickName(r.getValue(Tables.EH_USERS.NICK_NAME));
+                user.setIdentifierToken(r.getValue(Tables.EH_USER_IDENTIFIERS.IDENTIFIER_TOKEN));
+                user.setCreateTime(r.getValue(Tables.EH_USERS.CREATE_TIME));
+                user.setStatus(r.getValue(Tables.EH_USERS.STATUS));
+                user.setGender(r.getValue(Tables.EH_USERS.GENDER));
+                list.add(user);
+                return null;
+            });
+            return true;
+        });
+
+        return list;
+    }
 	
 	/**
 	 * added by Janson
@@ -1660,55 +1692,33 @@ public class UserProviderImpl implements UserProvider {
     }
 
     @Override
-    public TargetDTO findUserByTokenAndName(String tel, String targetName) {
+    public TargetDTO findUserByToken(String tel,Integer namespaceId) {
         TargetDTO dto = new TargetDTO();
         DSLContext context = this.dbProvider.getDslContext(AccessSpec.readOnly());
         com.everhomes.server.schema.tables.EhUserIdentifiers t = Tables.EH_USER_IDENTIFIERS.as("t");
         com.everhomes.server.schema.tables.EhUsers t1 = Tables.EH_USERS.as("t1");
-        Long userId;
-        if(tel!=null){
-            userId = context.select(t.OWNER_UID)
-                    .from(t)
-                    .where(t.IDENTIFIER_TOKEN.eq(tel))
-                    .fetchOne(0,Long.class);
-            if(userId==null){
-                return null;
-            }
-            String nameFound = context.select(t1.NICK_NAME)
-                    .from(t1)
-                    .where(t1.ID.eq(userId))
-                    .fetchOne(0, String.class);
-            if(targetName!=null){
-                if(!nameFound.equals(targetName)){
-                    return null;
-                }
-            }else{
-                dto.setUserIdentifier(tel);
-                dto.setTargetId(userId);
-                dto.setTargetType("eh_user");
-                dto.setTargetName(nameFound);
-            }
-        }else if(targetName!=null){
-            List<TargetDTO> dtos = new ArrayList<>();
-            context.select(t.IDENTIFIER_TOKEN,t1.ID,t1.NICK_NAME)
-                    .from(t1,t)
-                    .where(t1.ID.eq(t.OWNER_UID))
-                    .and(t1.NICK_NAME.eq(targetName))
-                    .fetch()
-                    .map(r ->{
-                        TargetDTO d = new TargetDTO();
-                        d.setTargetName(r.getValue(t1.NICK_NAME));
-                        d.setTargetType("eh_user");
-                        d.setTargetId(r.getValue(t1.ID));
-                        d.setUserIdentifier(r.getValue(t.IDENTIFIER_TOKEN));
-                        dtos.add(d);
-                        return null;
-                    });
-            if(dtos.size()!=1){
-                return null;
-            }else{
-                return dtos.get(0);
-            }
+        SelectQuery<Record> query = context.selectQuery();
+        query.addSelect(t.OWNER_UID);
+        query.addFrom(t);
+        query.addConditions(t.IDENTIFIER_TOKEN.eq(tel));
+        query.addConditions(t.CLAIM_STATUS.eq((byte)3));
+        query.addConditions(t.IDENTIFIER_TYPE.eq((byte)0));
+        if(namespaceId!=null) query.addConditions(t.NAMESPACE_ID.eq(namespaceId));
+        Long userId = query.fetchOne(0,Long.class);
+        if(userId==null){
+            return null;
+        }
+        SelectQuery<Record> queryUser = context.selectQuery();
+        queryUser.addSelect(t1.NICK_NAME);
+        queryUser.addFrom(t1);
+        queryUser.addConditions(t1.ID.eq(userId));
+        String nameFound = queryUser.fetchOne(0, String.class);
+        if(nameFound != null){
+            dto.setUserIdentifier(tel);
+            dto.setTargetId(userId);
+            dto.setTargetType(AssetPaymentStrings.EH_USER);
+            dto.setTargetName(nameFound);
+            return dto;
         }
         return null;
     }
@@ -1729,5 +1739,15 @@ public class UserProviderImpl implements UserProvider {
     @Override
     public void updateCacheStatus() {
         // 只需要去掉缓存，使可缓存可测
+    }
+
+    @Override
+    public String findMobileByUid(Long contactId) {
+        DSLContext context = this.dbProvider.getDslContext(AccessSpec.readOnly());
+        String s = context.select(Tables.EH_USER_IDENTIFIERS.IDENTIFIER_TOKEN).from(Tables.EH_USER_IDENTIFIERS)
+                .where(Tables.EH_USER_IDENTIFIERS.OWNER_UID.eq(contactId))
+                .and(Tables.EH_USER_IDENTIFIERS.IDENTIFIER_TYPE.eq((byte) 0))
+                .fetchOne(Tables.EH_USER_IDENTIFIERS.IDENTIFIER_TOKEN);
+        return s;
     }
 }

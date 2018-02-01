@@ -137,7 +137,7 @@ public class WarehouseStockLogSearcherImpl extends AbstractElasticSearch impleme
             builder.addHighlightedField("materialName");
 
         }
-        FilterBuilder fb = FilterBuilders.termFilter("namespaceId", UserContext.getCurrentNamespaceId());
+        FilterBuilder fb = FilterBuilders.termFilter("namespaceId", cmd.getNamespaceId());
         fb = FilterBuilders.andFilter(fb, FilterBuilders.termFilter("ownerId", cmd.getOwnerId()));
         fb = FilterBuilders.andFilter(fb, FilterBuilders.termFilter("ownerType", cmd.getOwnerType()));
         //新增， 兼容性还没有
@@ -221,6 +221,7 @@ public class WarehouseStockLogSearcherImpl extends AbstractElasticSearch impleme
                 dto.setMaterialName(material.getName());
                 dto.setMaterialNumber(material.getMaterialNumber());
                 dto.setUnitId(material.getUnitId());
+                dto.setSupplierName(material.getSupplierName());
 
                 WarehouseUnits unit = warehouseProvider.findWarehouseUnits(material.getUnitId(), cmd.getOwnerType(), cmd.getOwnerId());
                 if(unit != null) {

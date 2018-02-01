@@ -24,6 +24,7 @@ public class ShowBillForClientV2DTO {
     private Long billGroupId;
     private String addressStr;
     private String contractId;
+    private String contractNum;
     @ItemType(BillForClientV2.class)
     List<BillForClientV2> bills;
 
@@ -35,8 +36,15 @@ public class ShowBillForClientV2DTO {
         this.contractId = contractId;
     }
 
+    public String getContractNum() {
+        return contractNum;
+    }
 
-    public ShowBillForClientV2DTO(String billGroupName,String contractId) {
+    public void setContractNum(String contractNum) {
+        this.contractNum = contractNum;
+    }
+
+    public ShowBillForClientV2DTO(String billGroupName, String contractId) {
         this.billGroupName = billGroupName;
         this.contractId = contractId;
     }

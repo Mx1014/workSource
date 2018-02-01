@@ -3,6 +3,7 @@ package com.everhomes.varField;
 
 import com.everhomes.constants.ErrorCodes;
 import com.everhomes.customer.CustomerService;
+import com.everhomes.dynamicExcel.*;
 import com.everhomes.entity.EntityType;
 import com.everhomes.naming.NameMapper;
 import com.everhomes.portal.PortalService;
@@ -79,6 +80,9 @@ public class FieldServiceImpl implements FieldService {
     @Autowired
     private UserPrivilegeMgr userPrivilegeMgr;
 
+    @Autowired
+    private DynamicExcelService dynamicExcelService;
+
 
     @Override
     public List<SystemFieldGroupDTO> listSystemFieldGroups(ListSystemFieldGroupCommand cmd) {
@@ -106,6 +110,114 @@ public class FieldServiceImpl implements FieldService {
             return items;
         }
         return null;
+    }
+
+    /**
+     *
+     * 导出excel模板
+     */
+    @Override
+    public void exportDynamicExcelTemplate(ListFieldGroupCommand cmd, HttpServletResponse response) {
+//        dynamicExcelService.exportDynamicExcel(response, DynamicExcelStrings.CUSTOEMR, )
+        //try to call dynamicExcelService.exportDynamicExcel
+        //参考代码：管理员校验
+        if(ModuleName.ENTERPRISE_CUSTOMER.equals(ModuleName.fromName(cmd.getModuleName()))) {
+            customerService.checkCustomerAuth(cmd.getNamespaceId(), PrivilegeConstants.ENTERPRISE_CUSTOMER_MANAGE_IMPORT, cmd.getOrgId(), cmd.getCommunityId());
+        }
+        //参考代码：寻找所有的group
+        boolean 只要叶节点吗 = true;
+        List<FieldGroupDTO> result = 找到所有的group(cmd,只要叶节点吗);
+    }
+
+    private List<FieldGroupDTO> 找到所有的group(ListFieldGroupCommand cmd,boolean onlyLeaf) {
+        List<FieldGroupDTO> result = new ArrayList<>();
+        List<FieldGroupDTO> groups = listFieldGroups(cmd);
+        //设备巡检中字段 暂时单sheet
+        if (cmd.getEquipmentCategoryName() != null) {
+            List<FieldGroupDTO> temp = new ArrayList<>();
+            for (FieldGroupDTO  group :groups) {
+                if (group.getGroupDisplayName().equals(cmd.getEquipmentCategoryName())) {
+                    //groups 中只有一个sheet 只保留传过来的那个（物业巡检）
+                    temp.add(group);
+                }
+            }
+            groups = temp;
+        }
+        //先去掉 名为“基本信息” 的sheet，建议使用stream的方式
+        if(groups==null){
+            groups = new ArrayList<FieldGroupDTO>();
+        }
+        for( int i = 0; i < groups.size(); i++){
+            FieldGroupDTO group = groups.get(i);
+            if(group.getGroupDisplayName().equals("基本信息")){
+                groups.remove(i);
+            }
+        }
+        if(onlyLeaf){
+            getAllGroups(groups,result);
+        }else{
+            result = groups;
+        }
+        return result;
+    }
+
+    @Override
+    public void exportDynamicExcel(ExportFieldsExcelCommand cmd, HttpServletResponse response) {
+        List<FieldGroupDTO> results = getAllGroups(cmd,true);
+        if(results != null && results.size() > 0) {
+            List<String> sheetNames = results.stream().map(result -> {
+                return result.getGroupDisplayName();
+            }).collect(Collectors.toList());
+            dynamicExcelService.exportDynamicExcel(response, DynamicExcelStrings.CUSTOEMR, null, sheetNames, cmd, true, true, null);
+        }
+
+    }
+
+    /**
+     *
+     * @param cmd
+     * @param onlyLeaf
+     * @return 返回空列表而非null
+     */
+    private List<FieldGroupDTO> getAllGroups(ExportFieldsExcelCommand cmd,boolean onlyLeaf) {
+        //管理员权限校验
+        if(ModuleName.ENTERPRISE_CUSTOMER.getName().equals(cmd.getModuleName())) {
+            customerService.checkCustomerAuth(cmd.getNamespaceId(), PrivilegeConstants.ENTERPRISE_CUSTOMER_MANAGE_EXPORT, cmd.getOrgId(), cmd.getCommunityId());
+        }
+        //将command转换为listFieldGroup的参数command
+        ListFieldGroupCommand cmd1 = ConvertHelper.convert(cmd, ListFieldGroupCommand.class);
+        //获得客户所拥有的sheet
+        List<FieldGroupDTO> allGroups = listFieldGroups(cmd1);
+        List<FieldGroupDTO> groups = new ArrayList<>();
+        List<FieldGroupDTO> targetGroups = new ArrayList<>();
+
+        if(onlyLeaf){
+            getAllGroups(allGroups,groups);
+        }else{
+            groups = allGroups;
+        }
+        //双重循环匹配浏览器所传的sheetName，获得目标sheet集合
+        if(StringUtils.isEmpty(cmd.getIncludedGroupIds())) {
+            return targetGroups;
+        }
+        String[] split = cmd.getIncludedGroupIds().split(",");
+        for(int i = 0 ; i < split.length; i ++){
+            long targetGroupId = Long.parseLong(split[i]);
+            for(int j = 0; j < groups.size(); j++){
+                Long id = groups.get(j).getGroupId();
+                if(id.compareTo(targetGroupId) == 0){
+                    targetGroups.add(groups.get(j));
+                }
+            }
+        }
+        return targetGroups;
+    }
+
+    @Override
+    public DynamicImportResponse importDynamicExcel(ImportFieldExcelCommand cmd, MultipartFile file) {
+        // try to call dynamicExcelService.importMultiSheet
+
+        return dynamicExcelService.importMultiSheet(file, DynamicExcelStrings.CUSTOEMR, null, cmd);
     }
 
     @Override
@@ -423,7 +535,8 @@ public class FieldServiceImpl implements FieldService {
      * 获取一个sheet的数据，通过sheet的中文名称进行匹配,同一个excel中sheet名称不会重复
      *
      */
-    private List<List<String>> getDataOnFields(FieldGroupDTO group, Long customerId, Byte customerType,List<FieldDTO> fields,Long communityId,Integer namespaceId,String moduleName, Long orgId) {
+    @Override
+    public List<List<String>> getDataOnFields(FieldGroupDTO group, Long customerId, Byte customerType,List<FieldDTO> fields,Long communityId,Integer namespaceId,String moduleName, Long orgId) {
         List<List<String>> data = new ArrayList<>();
         //使用groupName来对应不同的接口
         String sheetName = group.getGroupDisplayName();
@@ -784,6 +897,7 @@ public class FieldServiceImpl implements FieldService {
 
     @Override
     public void exportFieldsExcel(ExportFieldsExcelCommand cmd, HttpServletResponse response) {
+        //管理员权限校验
         if(ModuleName.ENTERPRISE_CUSTOMER.getName().equals(cmd.getModuleName())) {
             customerService.checkCustomerAuth(cmd.getNamespaceId(), PrivilegeConstants.ENTERPRISE_CUSTOMER_MANAGE_EXPORT, cmd.getOrgId(), cmd.getCommunityId());
         }
@@ -873,16 +987,16 @@ public class FieldServiceImpl implements FieldService {
             workbook = ExcelUtils.getWorkbook(file.getInputStream(), file.getOriginalFilename());
         } catch (Exception e) {
             LOGGER.error("import excel for import failed for unable to get work book, file name is = {}",file.getName());
-            throw RuntimeErrorException.errorWith(ErrorCodes.SCOPE_GENERAL,ErrorCodes.ERROR_INVALID_PARAMETER,"file may not be an invalid excel file");
+            throw RuntimeErrorException.errorWith(ErrorCodes.SCOPE_GENERAL,ErrorCodes.ERROR_INVALID_PARAMETER,"file may not be an invalid excel file,caught exception is "+ e);
         }
         //拿到所有的group，进行匹配sheet用
         ListFieldGroupCommand cmd1 = ConvertHelper.convert(cmd, ListFieldGroupCommand.class);
         List<FieldGroupDTO> partGroups = listFieldGroups(cmd1);
         if(partGroups==null) partGroups = new ArrayList<>();
         List<FieldGroupDTO> groups = new ArrayList<>();
-        for(int i = 0; i < partGroups.size(); i++){
-            getAllGroups(partGroups.get(i),groups);
-        }
+
+        getAllGroups(partGroups,groups);
+
         int numberOfSheets = workbook.getNumberOfSheets();
         int sheets = 0;
         int rows = 0;
@@ -1128,15 +1242,21 @@ public class FieldServiceImpl implements FieldService {
         return response;
     }
 
-    private void getAllGroups(FieldGroupDTO group,List<FieldGroupDTO> allGroups) {
-        if(group.getChildrenGroup()!=null&&group.getChildrenGroup().size()>0){
-            for(int i = 0; i < group.getChildrenGroup().size(); i++){
-                getAllGroups(group.getChildrenGroup().get(i),allGroups);
+    private void getAllGroups(List<FieldGroupDTO> groups,List<FieldGroupDTO> allGroups) {
+        //遍历筛选过的sheet
+        for( int i = 0; i < groups.size(); i++){
+            //是否为叶节点的标识
+            boolean isRealSheet = true;
+            FieldGroupDTO group = groups.get(i);
+            //如果有叶节点，则送去轮回
+            if(group.getChildrenGroup()!=null && group.getChildrenGroup().size()>0){
+                getAllGroups(group.getChildrenGroup(), allGroups);
+                //父节点的标识改为false
+                isRealSheet = false;
             }
-        }else{
-            if(group.getChildrenGroup()==null||group.getChildrenGroup().size()<1){
+            //加入结果group列表
+            if(isRealSheet){
                 allGroups.add(group);
-                return;
             }
         }
     }
@@ -1445,5 +1565,7 @@ public class FieldServiceImpl implements FieldService {
         dto.setChildrenGroup(trees);
         return dto;
     }
+
+
 
 }

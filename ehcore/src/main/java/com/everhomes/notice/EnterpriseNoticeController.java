@@ -1,0 +1,172 @@
+package com.everhomes.notice;
+
+import com.everhomes.constants.ErrorCodes;
+import com.everhomes.controller.ControllerBase;
+import com.everhomes.discover.RestDoc;
+import com.everhomes.discover.RestReturn;
+import com.everhomes.rest.RestResponse;
+import com.everhomes.rest.notice.*;
+import com.everhomes.util.RequireAuthentication;
+import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.web.bind.annotation.RequestMapping;
+import org.springframework.web.bind.annotation.RestController;
+
+@RestDoc(value = "EnterpriseNotice controller", site = "core")
+@RestController
+@RequestMapping("/enterpriseNotice")
+public class EnterpriseNoticeController extends ControllerBase {
+
+    @Autowired
+    private EnterpriseNoticeService enterpriseNoticeService;
+
+    /**
+     * <b>URL : /enterpriseNotice/createEnterpriseNotice</b>
+     * <p>创建公告</p>
+     *
+     * @param cmd ，请查看{@link CreateEnterpriseNoticeCommand}
+     */
+    @RequestMapping("createEnterpriseNotice")
+    @RestReturn(value = EnterpriseNoticePreviewDTO.class)
+    public RestResponse createEnterpriseNotice(CreateEnterpriseNoticeCommand cmd) {
+        RestResponse response = new RestResponse(enterpriseNoticeService.createEnterpriseNotice(cmd));
+        response.setErrorCode(ErrorCodes.SUCCESS);
+        response.setErrorDescription("OK");
+        return response;
+    }
+
+    /**
+     * <b>URL : /enterpriseNotice/updateEnterpriseNotice</b>
+     * <p>编辑公告</p>
+     *
+     * @param cmd，请查看{@link UpdateEnterpriseNoticeCommand}
+     */
+    @RequestMapping("updateEnterpriseNotice")
+    @RestReturn(value = EnterpriseNoticePreviewDTO.class)
+    public RestResponse updateEnterpriseNotice(UpdateEnterpriseNoticeCommand cmd) {
+        enterpriseNoticeService.updateEnterpriseNotice(cmd);
+        RestResponse response = new RestResponse();
+        response.setErrorCode(ErrorCodes.SUCCESS);
+        response.setErrorDescription("OK");
+        return response;
+    }
+
+    /**
+     * <b>URL : /enterpriseNotice/getEnterpriseNoticeDetail</b>
+     * <p>获取公告详细信息</p>
+     *
+     * @param cmd，请查看{@link GetEnterpriseNoticeCommand}
+     * @return {@link EnterpriseNoticeDTO}
+     */
+    @RequestMapping("getEnterpriseNoticeDetail")
+    @RestReturn(value = EnterpriseNoticeDTO.class)
+    public RestResponse getEnterpriseNoticeDetail(GetEnterpriseNoticeCommand cmd) {
+        boolean isNoticeSendToCurrentUser = enterpriseNoticeService.isNoticeSendToCurrentUser(cmd.getId());
+        EnterpriseNoticeDTO enterpriseNoticeDTO = null;
+        if (isNoticeSendToCurrentUser) {
+            enterpriseNoticeDTO = enterpriseNoticeService.getEnterpriseNoticeDetailInfo(cmd.getId());
+        }
+        if (enterpriseNoticeDTO == null) {
+            enterpriseNoticeDTO = new EnterpriseNoticeDTO();
+            enterpriseNoticeDTO.setStatus(EnterpriseNoticeStatus.DELETED.getCode());
+        }
+        RestResponse response = new RestResponse(enterpriseNoticeDTO);
+        response.setErrorCode(ErrorCodes.SUCCESS);
+        response.setErrorDescription("OK");
+        return response;
+    }
+
+    /**
+     * <b>URL : /enterpriseNotice/getEnterpriseNoticeDetail4Admin</b>
+     * <p>获取公告详细信息</p>
+     *
+     * @param cmd，请查看{@link GetEnterpriseNoticeCommand}
+     * @return {@link EnterpriseNoticeDTO}
+     */
+    @RequestMapping("getEnterpriseNoticeDetail4Admin")
+    @RestReturn(value = EnterpriseNoticeDTO.class)
+    public RestResponse getEnterpriseNoticeDetail4Admin(GetEnterpriseNoticeCommand cmd) {
+        RestResponse response = new RestResponse(enterpriseNoticeService.getEnterpriseNoticeDetailInfo(cmd.getId()));
+        response.setErrorCode(ErrorCodes.SUCCESS);
+        response.setErrorDescription("OK");
+        return response;
+    }
+
+    /**
+     * <b>URL : /enterpriseNotice/deleteEnterpriseNotice</b>
+     * <p>删除公告（标记为‘DELETED(0)’）</p>
+     *
+     * @param cmd，请查看{@link DeleteEnterpriseNoticeCommand}
+     */
+    @RequestMapping("deleteEnterpriseNotice")
+    @RestReturn(value = String.class)
+    public RestResponse deleteEnterpriseNotice(DeleteEnterpriseNoticeCommand cmd) {
+        enterpriseNoticeService.deleteEnterpriseNotice(cmd);
+        RestResponse response = new RestResponse();
+        response.setErrorCode(ErrorCodes.SUCCESS);
+        response.setErrorDescription("OK");
+        return response;
+    }
+
+    /**
+     * <b>URL : /enterpriseNotice/cancelEnterpriseNotice</b>
+     * <p>撤销公告（标记为‘INACTIVE(3)’）</p>
+     *
+     * @param cmd，请查看{@link CancelEnterpriseNoticeCommand}
+     */
+    @RequestMapping("cancelEnterpriseNotice")
+    @RestReturn(value = String.class)
+    public RestResponse cancelEnterpriseNotice(CancelEnterpriseNoticeCommand cmd) {
+        enterpriseNoticeService.cancelEnterpriseNotice(cmd);
+        RestResponse response = new RestResponse();
+        response.setErrorCode(ErrorCodes.SUCCESS);
+        response.setErrorDescription("OK");
+        return response;
+    }
+
+    /**
+     * <b>URL : /enterpriseNotice/listEnterpriseNoticeByNamespaceId</b>
+     * <P>分页查询公告列表</P>
+     *
+     * @param cmd，请查看{@link ListEnterpriseNoticeAdminCommand}
+     * @return {@link ListEnterpriseNoticeAdminResponse}
+     */
+    @RequestMapping("listEnterpriseNoticeByNamespaceId")
+    @RestReturn(value = ListEnterpriseNoticeAdminResponse.class)
+    public RestResponse listEnterpriseNoticeByNamespaceId(ListEnterpriseNoticeAdminCommand cmd) {
+        RestResponse response = new RestResponse(enterpriseNoticeService.listEnterpriseNoticesByNamespaceId(cmd));
+        response.setErrorCode(ErrorCodes.SUCCESS);
+        response.setErrorDescription("OK");
+        return response;
+    }
+
+    /**
+     * <b>URL : /enterpriseNotice/listEnterpriseNoticeByUserId</b>
+     * <P>分页查询公告列表</P>
+     *
+     * @param cmd，请查看{@link ListEnterpriseNoticeCommand}
+     * @return {@link ListEnterpriseNoticeResponse}
+     */
+    @RequestMapping("listEnterpriseNoticeByUserId")
+    @RestReturn(value = ListEnterpriseNoticeResponse.class)
+    public RestResponse listEnterpriseNoticeByUserId(ListEnterpriseNoticeCommand cmd) {
+        RestResponse response = new RestResponse(enterpriseNoticeService.listEnterpriseNoticesByUserId(cmd));
+        response.setErrorCode(ErrorCodes.SUCCESS);
+        response.setErrorDescription("OK");
+        return response;
+    }
+
+    /**
+     * <b>URL: /enterpriseNotice/getCurrentUserContactSimpleInfo</b>
+     * <p>查询当前用户的姓名和手机号等简单信息</p>
+     */
+    @RequestMapping("getCurrentUserContactSimpleInfo")
+    @RestReturn(value = UserContactSimpleInfoDTO.class)
+    public RestResponse getCurrentUserContactSimpleInfo(GetCurrentUserContactInfoCommand cmd) {
+        RestResponse response = new RestResponse(enterpriseNoticeService.getCurrentUserContactSimpleInfo(cmd));
+        response.setErrorCode(ErrorCodes.SUCCESS);
+        response.setErrorDescription("OK");
+        return response;
+    }
+
+
+}

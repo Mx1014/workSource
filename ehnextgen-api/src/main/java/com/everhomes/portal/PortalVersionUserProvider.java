@@ -7,9 +7,11 @@ public interface PortalVersionUserProvider {
 
 	void createPortalVersionUser(PortalVersionUser portalVersionUser);
 
-	void deletePortalVersionUser(Long id);
+    void deleteByVersionId(Long versionId);
 
-	PortalVersionUser findPortalVersionUserById(Long id);
+    void deletePortalVersionUsers(Integer namespaceId);
+
+    PortalVersionUser findPortalVersionUserById(Long id);
 
 	List<PortalVersionUser> listPortalVersionUsers(Integer namespaceId, Long versionId);
 

@@ -17,6 +17,7 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
 
 import java.sql.Timestamp;
+import java.time.*;
 import java.time.LocalDate;
 import java.time.LocalDateTime;
 import java.time.LocalTime;
@@ -38,10 +39,10 @@ public class GeneralPointEventProcessor implements IGeneralPointEventProcessor {
     protected PointLogProvider pointLogProvider;
 
     @Autowired
-    private PointRuleProvider pointRuleProvider;
+    protected PointRuleProvider pointRuleProvider;
 
     @Autowired
-    private PointRuleToEventMappingProvider pointRuleToEventMappingProvider;
+    protected PointRuleToEventMappingProvider pointRuleToEventMappingProvider;
 
     @Override
     public String[] init() {
@@ -137,7 +138,7 @@ public class GeneralPointEventProcessor implements IGeneralPointEventProcessor {
 
     @Override
     public PointEventGroup getEventGroup(Map<String, PointEventGroup> eventNameToPointEventGroupMap, LocalEvent localEvent, String subscriptionPath) {
-        String[] split = getEventName(localEvent, subscriptionPath).split("\\.");
+        String[] split = getEventName(localEvent).split("\\.");
         for (int i = split.length; i >= 0; i--) {
             String[] tokens = new String[i];
             System.arraycopy(split, 0, tokens, 0, i);
@@ -151,13 +152,13 @@ public class GeneralPointEventProcessor implements IGeneralPointEventProcessor {
         return eventNameToPointEventGroupMap.get(subscriptionPath);
     }
 
-    protected String getEventName(LocalEvent localEvent, String subscriptionPath) {
-        return subscriptionPath;
+    protected String getEventName(LocalEvent localEvent) {
+        return localEvent.getEventName();
     }
 
     @Override
     public List<PointRule> getPointRules(LocalEvent localEvent) {
-        String[] split = getEventName(localEvent, localEvent.getEventName()).split("\\.");
+        String[] split = getEventName(localEvent).split("\\.");
         for (int i = split.length; i >= 0; i--) {
             String[] tokens = new String[i];
             System.arraycopy(split, 0, tokens, 0, i);

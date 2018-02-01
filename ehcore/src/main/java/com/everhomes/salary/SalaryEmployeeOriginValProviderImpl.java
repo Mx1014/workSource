@@ -6,9 +6,7 @@ import java.util.List;
 
 import com.everhomes.user.User;
 import org.jooq.DSLContext;
-import org.jooq.Record2;
-import org.jooq.SelectSeekStep1;
-import org.jooq.impl.DSL;
+import org.jooq.Record;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
 
@@ -66,6 +64,34 @@ public class SalaryEmployeeOriginValProviderImpl implements SalaryEmployeeOrigin
 		return getReadOnlyContext().select().from(Tables.EH_SALARY_EMPLOYEE_ORIGIN_VALS)
 				.orderBy(Tables.EH_SALARY_EMPLOYEE_ORIGIN_VALS.ID.asc())
 				.fetch().map(r -> ConvertHelper.convert(r, SalaryEmployeeOriginVal.class));
+	}
+
+	@Override
+	public SalaryEmployeeOriginVal findSalaryEmployeeOriginValByDetailId(Long orginEntityId, Long detailId) {
+		Record r = getReadOnlyContext().select().from(Tables.EH_SALARY_EMPLOYEE_ORIGIN_VALS)
+				.where(Tables.EH_SALARY_EMPLOYEE_ORIGIN_VALS.USER_DETAIL_ID.eq(detailId))
+				.and(Tables.EH_SALARY_EMPLOYEE_ORIGIN_VALS.GROUP_ENTITY_ID.eq(orginEntityId))
+				.fetchAny();
+		if (null == r) {
+			return null;
+		}
+		return  ConvertHelper.convert(r, SalaryEmployeeOriginVal.class);
+	}
+
+	@Override
+	public void deleteSalaryEmployeeOriginValNotInList(List<Long> groupEntityIds, Long detailId) {
+		getReadWriteContext().delete(Tables.EH_SALARY_EMPLOYEE_ORIGIN_VALS)
+				.where(Tables.EH_SALARY_EMPLOYEE_ORIGIN_VALS.USER_DETAIL_ID.eq(detailId))
+				.and(Tables.EH_SALARY_EMPLOYEE_ORIGIN_VALS.GROUP_ENTITY_ID.notIn(groupEntityIds))
+				.execute();
+	}
+
+	@Override
+	public void deleteSalaryEmployeeOriginValByDetailIdAndGroouEntity(Long detailId, Long groupEntityId) {
+		getReadWriteContext().delete(Tables.EH_SALARY_EMPLOYEE_ORIGIN_VALS)
+				.where(Tables.EH_SALARY_EMPLOYEE_ORIGIN_VALS.USER_DETAIL_ID.eq(detailId))
+				.and(Tables.EH_SALARY_EMPLOYEE_ORIGIN_VALS.GROUP_ENTITY_ID.eq(groupEntityId))
+				.execute();
 	}
 //
 //	@Override

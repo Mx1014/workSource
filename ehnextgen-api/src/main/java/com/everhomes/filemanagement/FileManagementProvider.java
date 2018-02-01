@@ -15,6 +15,8 @@ public interface FileManagementProvider {
 
     FileCatalog findFileCatalogByName(Integer namespaceId, Long ownerId, String name);
 
+    List<String> listFileCatalogNames(Integer namespaceId, Long ownerId, String name);
+
     List<FileCatalog> listFileCatalogs(Integer namespaceId, Long ownerId, Long pageAnchor, Integer pageSize, String keywords);
 
     List<FileCatalog> queryFileCatalogs(ListingLocator locator, Integer namespaceId, Long ownerId, ListingQueryBuilderCallback queryBuilderCallback);
@@ -43,9 +45,11 @@ public interface FileManagementProvider {
 
     FileContent findFileContentById(Long id);
 
-    FileContent findFileContentByName(Integer namespaceId, Long ownerId, Long catalogId, Long parentId, String name);
+    FileContent findFileContentByName(Integer namespaceId, Long ownerId, Long catalogId, Long parentId, String name, String suffix);
 
-    List<FileContent> listFileContents(Integer namespaceId, Long ownerId, Long catalogId, Long parentId, String keywords);
+    List<String> listFileContentNames(Integer namespaceId, Long ownerId, Long catalogId, Long parentId, String name, String suffix);
+
+//    List<FileContent> listFileContents(Integer namespaceId, Long ownerId, Long catalogId, String path, String keywords);
 
     List<FileContent> queryFileContents(ListingLocator locator, Integer namespaceId, Long ownerId, ListingQueryBuilderCallback queryBuilderCallback);
 }

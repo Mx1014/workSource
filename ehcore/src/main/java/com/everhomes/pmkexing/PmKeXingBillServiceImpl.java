@@ -286,6 +286,7 @@ public class PmKeXingBillServiceImpl implements PmKeXingBillService {
         String api = getBillAPI(ConfigConstants.ASSET_PAYMENT_ZJH_API_15);
         String projectId = communityProvider.getCommunityToken("ebei", ownerId);
         Integer currentPage = 1;
+
         String isPayStr = null;
         if(isPay!=null && StringUtils.isNotBlank(isPay.toString())){
             isPayStr = String.valueOf(isPay);
@@ -299,6 +300,8 @@ public class PmKeXingBillServiceImpl implements PmKeXingBillService {
         if(endMonth != null) params.put("endMonth",endMonth);
         if(isPayStr!=null){
             params.put("isPay",isPayStr);
+        }else{
+            params.put("isPay","");
         }
         for(int i = 0; i < contracts.size(); i ++){
             ContractDTO contract = contracts.get(i);

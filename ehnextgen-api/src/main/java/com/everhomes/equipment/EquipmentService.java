@@ -168,4 +168,6 @@ public interface EquipmentService {
     void createRepairsTask(CreateEquipmentRepairCommand cmd);
 
     List<EquipmentOperateLogsDTO> listOperateLogs(DeleteEquipmentsCommand cmd);
+
+    void updateEquipmentStatus(DeleteEquipmentsCommand cmd);
 }

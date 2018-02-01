@@ -1,9 +1,15 @@
 package com.everhomes.flow;
 
-import java.util.ArrayList;
-import java.util.List;
-import java.util.Random;
-
+import com.everhomes.configuration.ConfigurationProvider;
+import com.everhomes.organization.OrganizationService;
+import com.everhomes.rest.flow.*;
+import com.everhomes.user.User;
+import com.everhomes.user.UserContext;
+import com.everhomes.user.UserProvider;
+import com.everhomes.user.UserService;
+import com.everhomes.user.base.LoginAuthTestCase;
+import com.everhomes.util.ConvertHelper;
+import com.everhomes.util.RuntimeErrorException;
 import org.junit.After;
 import org.junit.Assert;
 import org.junit.Before;
@@ -19,55 +25,8 @@ import org.springframework.context.annotation.Configuration;
 import org.springframework.transaction.TransactionStatus;
 import org.springframework.transaction.support.TransactionCallback;
 
-import com.everhomes.configuration.ConfigurationProvider;
-import com.everhomes.organization.OrganizationService;
-import com.everhomes.rest.flow.CreateFlowCaseCommand;
-import com.everhomes.rest.flow.CreateFlowCommand;
-import com.everhomes.rest.flow.CreateFlowNodeCommand;
-import com.everhomes.rest.flow.CreateFlowUserSelectionCommand;
-import com.everhomes.rest.flow.FlowButtonStatus;
-import com.everhomes.rest.flow.FlowNodeStatus;
-import com.everhomes.rest.flow.FlowServiceErrorCode;
-import com.everhomes.rest.flow.FlowStatusType;
-import com.everhomes.rest.flow.FlowUserSourceType;
-import com.everhomes.rest.flow.FlowActionInfo;
-import com.everhomes.rest.flow.FlowCaseDetailDTO;
-import com.everhomes.rest.flow.FlowCaseSearchType;
-import com.everhomes.rest.flow.FlowConstants;
-import com.everhomes.rest.flow.FlowDTO;
-import com.everhomes.rest.flow.FlowEntityType;
-import com.everhomes.rest.flow.FlowFireButtonCommand;
-import com.everhomes.rest.flow.FlowIdCommand;
-import com.everhomes.rest.flow.FlowModuleType;
-import com.everhomes.rest.flow.FlowNodeDTO;
-import com.everhomes.rest.flow.FlowOwnerType;
-import com.everhomes.rest.flow.FlowSingleUserSelectionCommand;
-import com.everhomes.rest.flow.FlowStepType;
-import com.everhomes.rest.flow.FlowUserSelectionType;
-import com.everhomes.rest.flow.FlowUserType;
-import com.everhomes.rest.flow.ListButtonProcessorSelectionsCommand;
-import com.everhomes.rest.flow.ListFlowUserSelectionResponse;
-import com.everhomes.rest.flow.SearchFlowCaseCommand;
-import com.everhomes.rest.flow.SearchFlowCaseResponse;
-import com.everhomes.rest.flow.UpdateFlowButtonCommand;
-import com.everhomes.rest.flow.UpdateFlowNodeCommand;
-import com.everhomes.rest.flow.UpdateFlowNodeReminderCommand;
-import com.everhomes.rest.flow.UpdateFlowNodeTrackerCommand;
-import com.everhomes.rest.organization.ListOrganizationContactCommand;
-import com.everhomes.rest.organization.ListOrganizationContactCommandResponse;
-import com.everhomes.rest.organization.ListOrganizationsCommandResponse;
-import com.everhomes.rest.organization.OrganizationContactDTO;
-import com.everhomes.rest.organization.OrganizationDTO;
-import com.everhomes.rest.organization.OrganizationGroupType;
-import com.everhomes.rest.organization.OrganizationMemberTargetType;
-import com.everhomes.rest.organization.VisibleFlag;
-import com.everhomes.user.User;
-import com.everhomes.user.UserContext;
-import com.everhomes.user.UserProvider;
-import com.everhomes.user.UserService;
-import com.everhomes.user.base.LoginAuthTestCase;
-import com.everhomes.util.ConvertHelper;
-import com.everhomes.util.RuntimeErrorException;
+import java.util.ArrayList;
+import java.util.List;
 
 public class CreateParkingFlowTest  extends LoginAuthTestCase {
 	private static final Logger LOGGER = LoggerFactory.getLogger(FlowServiceTest.class);
@@ -204,7 +163,7 @@ public class CreateParkingFlowTest  extends LoginAuthTestCase {
     	updateNodeTracker(node2, orgId);
     	updateNodeTracker(node3, orgId);
     	//同意按钮
-    	FlowButton flowButton1 = flowButtonProvider.findFlowButtonByStepType(node1.getId(), FlowConstants.FLOW_CONFIG_VER
+    	FlowButton flowButton1 = flowButtonProvider.findFlowButtonByStepType(node1.getFlowMainId(), node1.getId(), FlowConstants.FLOW_CONFIG_VER
     			, FlowStepType.APPROVE_STEP.getCode(), FlowUserType.PROCESSOR.getCode());
     	flowButton1.setStatus(FlowButtonStatus.ENABLED.getCode());
     	flowButtonProvider.updateFlowButton(flowButton1);
@@ -217,7 +176,7 @@ public class CreateParkingFlowTest  extends LoginAuthTestCase {
     	buttonCmd.setNeedSubject((byte)1);    	
     	flowService.updateFlowButton(buttonCmd);
     	//驳回按钮
-    	FlowButton flowButton11 = flowButtonProvider.findFlowButtonByStepType(node1.getId(), FlowConstants.FLOW_CONFIG_VER
+    	FlowButton flowButton11 = flowButtonProvider.findFlowButtonByStepType(node1.getFlowMainId(), node1.getId(), FlowConstants.FLOW_CONFIG_VER
     			, FlowStepType.ABSORT_STEP.getCode(), FlowUserType.PROCESSOR.getCode());
     	flowButton11.setStatus(FlowButtonStatus.ENABLED.getCode());
     	flowButtonProvider.updateFlowButton(flowButton11);
@@ -230,7 +189,7 @@ public class CreateParkingFlowTest  extends LoginAuthTestCase {
     	buttonCmd11.setNeedSubject((byte)1);    	
     	flowService.updateFlowButton(buttonCmd11);
     	//沟通按钮
-    	FlowButton flowButton12 = flowButtonProvider.findFlowButtonByStepType(node1.getId(), FlowConstants.FLOW_CONFIG_VER
+    	FlowButton flowButton12 = flowButtonProvider.findFlowButtonByStepType(node1.getFlowMainId(), node1.getId(), FlowConstants.FLOW_CONFIG_VER
     			, FlowStepType.COMMENT_STEP.getCode(), FlowUserType.PROCESSOR.getCode());
     	flowButton12.setStatus(FlowButtonStatus.ENABLED.getCode());
     	flowButtonProvider.updateFlowButton(flowButton12);
@@ -244,7 +203,7 @@ public class CreateParkingFlowTest  extends LoginAuthTestCase {
     	flowService.updateFlowButton(buttonCmd12);
     	
     	//发放月卡
-    	FlowButton flowButton2 = flowButtonProvider.findFlowButtonByStepType(node2.getId(), FlowConstants.FLOW_CONFIG_VER
+    	FlowButton flowButton2 = flowButtonProvider.findFlowButtonByStepType(node2.getFlowMainId(), node2.getId(), FlowConstants.FLOW_CONFIG_VER
     			, FlowStepType.APPROVE_STEP.getCode(), FlowUserType.PROCESSOR.getCode());
     	flowButton2.setStatus(FlowButtonStatus.ENABLED.getCode());
     	flowButtonProvider.updateFlowButton(flowButton2);
@@ -260,7 +219,7 @@ public class CreateParkingFlowTest  extends LoginAuthTestCase {
     	buttonCmd.setMessageAction(buttonAction);
     	flowService.updateFlowButton(buttonCmd);
     	//取消资格
-    	FlowButton flowButton21 = flowButtonProvider.findFlowButtonByStepType(node2.getId(), FlowConstants.FLOW_CONFIG_VER
+    	FlowButton flowButton21 = flowButtonProvider.findFlowButtonByStepType(node2.getFlowMainId(), node2.getId(), FlowConstants.FLOW_CONFIG_VER
     			, FlowStepType.ABSORT_STEP.getCode(), FlowUserType.PROCESSOR.getCode());
     	flowButton21.setStatus(FlowButtonStatus.ENABLED.getCode());
     	flowButtonProvider.updateFlowButton(flowButton21);
@@ -276,7 +235,7 @@ public class CreateParkingFlowTest  extends LoginAuthTestCase {
     	buttonCmd.setMessageAction(buttonAction);
     	flowService.updateFlowButton(buttonCmd);
     	
-    	FlowButton flowButton3 = flowButtonProvider.findFlowButtonByStepType(node3.getId(), FlowConstants.FLOW_CONFIG_VER
+    	FlowButton flowButton3 = flowButtonProvider.findFlowButtonByStepType(node3.getFlowMainId(), node3.getId(), FlowConstants.FLOW_CONFIG_VER
     			, FlowStepType.REMINDER_STEP.getCode(), FlowUserType.APPLIER.getCode());
     	flowButton3.setStatus(FlowButtonStatus.ENABLED.getCode());
     	flowButtonProvider.updateFlowButton(flowButton3);

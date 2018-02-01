@@ -522,6 +522,23 @@ public class CommunityProviderImpl implements CommunityProvider {
     }
 
     @Override
+    public List<Community> listNamespaceCommunities(Integer namespaceId) {
+        DSLContext context = this.dbProvider.getDslContext(AccessSpec.readOnlyWith(EhCommunities.class));
+        SelectQuery<EhCommunitiesRecord> query = context.selectQuery(Tables.EH_COMMUNITIES);
+
+        query.addConditions(Tables.EH_COMMUNITIES.STATUS.eq(CommunityAdminStatus.ACTIVE.getCode()));
+        query.addConditions(Tables.EH_COMMUNITIES.NAMESPACE_ID.eq(namespaceId));
+
+        List<Community> communities = new ArrayList<>();
+        query.fetch().map((r) -> {
+            communities.add(ConvertHelper.convert(r, Community.class));
+            return null;
+        });
+
+        return communities;
+    }
+
+    @Override
     public List<Community> listCommunities(Integer namespaceId, ListingLocator locator, Integer pageSize,
                                                    ListingQueryBuilderCallback queryBuilderCallback) {
         pageSize = pageSize +1;
@@ -845,15 +862,17 @@ public class CommunityProviderImpl implements CommunityProvider {
 
 	@Override
 	public Building findBuildingByCommunityIdAndName(long communityId, String buildingName) {
-		int namespaceId = UserContext.getCurrentNamespaceId(null);
+//		int namespaceId = UserContext.getCurrentNamespaceId(null);
 		DSLContext context = dbProvider.getDslContext(AccessSpec.readOnlyWith(EhBuildings.class));
 		Condition cond = Tables.EH_BUILDINGS.NAME.eq(buildingName);
 		cond = cond.or(Tables.EH_BUILDINGS.ALIAS_NAME.eq(buildingName));
 		SelectQuery<EhBuildingsRecord> query = context.selectQuery(Tables.EH_BUILDINGS);
 		query.addConditions(Tables.EH_BUILDINGS.COMMUNITY_ID.eq(communityId));
-		query.addConditions(Tables.EH_BUILDINGS.NAMESPACE_ID.eq(namespaceId));
+//		query.addConditions(Tables.EH_BUILDINGS.NAMESPACE_ID.eq(namespaceId));
 		query.addConditions(cond);
 
+        LOGGER.debug("findBuildingByCommunityIdAndName, sql=" + query.getSQL());
+        LOGGER.debug("findBuildingByCommunityIdAndName, bindValues=" + query.getBindValues());
         return ConvertHelper.convert(query.fetchOne(), Building.class);
 	}
 

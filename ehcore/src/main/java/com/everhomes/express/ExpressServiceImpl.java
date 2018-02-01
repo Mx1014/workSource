@@ -17,6 +17,7 @@ import com.everhomes.order.PayService;
 import com.everhomes.parking.handler.Utils;
 import com.everhomes.rest.express.*;
 import com.everhomes.rest.order.*;
+import com.everhomes.user.*;
 import org.apache.commons.lang.StringUtils;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -46,10 +47,6 @@ import com.everhomes.rest.approval.CommonStatus;
 import com.everhomes.rest.approval.TrueOrFalseFlag;
 import com.everhomes.rest.organization.OrganizationCommunityDTO;
 import com.everhomes.settings.PaginationConfigHelper;
-import com.everhomes.user.User;
-import com.everhomes.user.UserActivityProvider;
-import com.everhomes.user.UserContext;
-import com.everhomes.user.UserProfile;
 import com.everhomes.user.admin.SystemUserPrivilegeMgr;
 import com.everhomes.util.ConvertHelper;
 import com.everhomes.util.DateHelper;
@@ -126,6 +123,12 @@ public class ExpressServiceImpl implements ExpressService {
 	@Autowired
 	private PayService payService;
 
+	@Autowired
+	private UserService userService;
+
+	@Autowired
+	private UserProvider uProvider;
+
 	@Override
 	public ListServiceAddressResponse listServiceAddress(ListServiceAddressCommand cmd) {
 		ExpressOwner owner = checkOwner(cmd.getOwnerType(), cmd.getOwnerId());
@@ -180,14 +183,25 @@ public class ExpressServiceImpl implements ExpressService {
 		}
 		return new ListExpressUserResponse(nextPageAnchor, expressUsers.stream().map(this::convertToExpressUserDTO).collect(Collectors.toList()));
 	}
-	
 	private ExpressUserDTO convertToExpressUserDTO(ExpressUser expressUser) {
 		ExpressUserDTO expressUserDTO = ConvertHelper.convert(expressUser, ExpressUserDTO.class);
 		OrganizationMember organizationMember = organizationProvider.findOrganizationMemberById(expressUser.getOrganizationMemberId());
-		expressUserDTO.setName(organizationMember.getContactName());
-		expressUserDTO.setPhone(organizationMember.getContactToken());
-		return expressUserDTO; 
-	} 
+		if(organizationMember!=null) {
+			expressUserDTO.setName(organizationMember.getContactName());
+			expressUserDTO.setPhone(organizationMember.getContactToken());
+			return expressUserDTO;
+		}
+		UserIdentifier userIdentifier = userService.getUserIdentifier(expressUser.getUserId());
+		if(userIdentifier!=null){
+			expressUserDTO.setPhone(userIdentifier.getIdentifierToken());
+			User user = uProvider.findUserById(expressUser.getUserId());
+			if(user!=null){
+				expressUserDTO.setName(user.getNickName());
+			}
+
+		}
+		return  expressUserDTO;
+	}
 
 	@Override
 	public RestResponse addExpressUser(AddExpressUserCommand cmd) {
@@ -228,6 +242,9 @@ public class ExpressServiceImpl implements ExpressService {
 	}
 
 	private boolean checkAdmin(ExpressOwner owner) {
+		if(owner.getUserId()!=null && owner.getUserId() ==1L){
+			return true;
+		}
 		List<OrganizationCommunityDTO> organizationCommunityList = organizationProvider.findOrganizationCommunityByCommunityId(owner.getOwnerId());
 		if (organizationCommunityList != null && !organizationCommunityList.isEmpty()) {
 			Long organizationId = organizationCommunityList.get(0).getOrganizationId();

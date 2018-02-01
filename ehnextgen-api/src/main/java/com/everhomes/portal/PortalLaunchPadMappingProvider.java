@@ -11,7 +11,9 @@ public interface PortalLaunchPadMappingProvider {
 
     void updatePortalLaunchPadMapping(PortalLaunchPadMapping portalLaunchPadMapping);
 
-	PortalLaunchPadMapping findPortalLaunchPadMappingById(Long id);
+    void deleteByVersionId(Long versionId);
+
+    PortalLaunchPadMapping findPortalLaunchPadMappingById(Long id);
 
 	List<PortalLaunchPadMapping> listPortalLaunchPadMapping(String contentType, Long portalContentId, Long launchPadContentId);
 

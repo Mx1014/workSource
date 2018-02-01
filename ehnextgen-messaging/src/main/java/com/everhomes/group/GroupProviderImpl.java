@@ -469,7 +469,7 @@ public class GroupProviderImpl implements GroupProvider {
             query.addConditions(Tables.EH_GROUP_MEMBERS.ID.gt(locator.getAnchor()));
         query.addOrderBy(Tables.EH_GROUP_MEMBERS.ID.asc());
         query.addLimit(count);
-        
+
         query.fetch().map((r) -> {
             members.add(ConvertHelper.convert(r, GroupMember.class));
             return null;

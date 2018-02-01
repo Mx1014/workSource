@@ -66,7 +66,11 @@ public class EquipmentStandardSearcherImpl extends AbstractElasticSearch impleme
     @Autowired
     private CommunityProvider communityProvider;
 
-	@Override
+    //add atomic offset for (all community)
+    //private static AtomicInteger offset = new AtomicInteger(0);
+    //private static ConcurrentHashMap<Long, Integer> offsetHashMap = new ConcurrentHashMap<>();
+
+    @Override
 	public void deleteById(Long id) {
 		deleteById(id.toString());
 	}
@@ -133,7 +137,7 @@ public class EquipmentStandardSearcherImpl extends AbstractElasticSearch impleme
             qb = QueryBuilders.multiMatchQuery(cmd.getKeyword())
             		.field("standardName", 1.2f);
                     //.field("standardNumber", 1.0f);
-            
+
             builder.setHighlighterFragmentSize(60);
             builder.setHighlighterNumOfFragments(8);
             builder.addHighlightedField("standardName");
@@ -157,7 +161,7 @@ public class EquipmentStandardSearcherImpl extends AbstractElasticSearch impleme
         }
          /*if(cmd.getStandardType() != null)
         	fb = FilterBuilders.andFilter(fb, FilterBuilders.termFilter("standardType", cmd.getStandardType()));*/
-        
+
         if(cmd.getStatus() != null)
             fb = FilterBuilders.andFilter(fb, FilterBuilders.termFilter("status", cmd.getStatus()));
 
@@ -177,7 +181,7 @@ public class EquipmentStandardSearcherImpl extends AbstractElasticSearch impleme
         if(cmd.getPageAnchor() != null) {
             anchor = cmd.getPageAnchor();
         }
-        
+
         qb = QueryBuilders.filteredQuery(qb, fb);
         builder.setSearchType(SearchType.QUERY_THEN_FETCH);
         builder.setFrom(anchor.intValue() * pageSize).setSize(pageSize + 1);
@@ -188,38 +192,25 @@ public class EquipmentStandardSearcherImpl extends AbstractElasticSearch impleme
 
         SearchResponse rsp = builder.execute().actionGet();
 
-        if(LOGGER.isDebugEnabled())
-            LOGGER.info("EquipmentStandardSearcherImpl query rsp ："+rsp);
+        if (LOGGER.isDebugEnabled())
+            LOGGER.info("EquipmentStandardSearcherImpl query rsp ：" + rsp);
 
         List<Long> ids = getIds(rsp);
-        
-        Long nextPageAnchor = null;
-        if(ids.size() > pageSize) {
-            nextPageAnchor = anchor + 1;
-            ids.remove(ids.size() - 1);
-         } else {
-            nextPageAnchor = null;
-        }
-        
+
         List<EquipmentStandardsDTO> eqStandards = new ArrayList<>();
-        List <EquipmentModelCommunityMap> maps = equipmentProvider.listModelCommunityMapByCommunityId(cmd.getTargetId(),EquipmentModelType.STANDARD.getCode());
-        for(Long id : ids) {
+
+        for (Long id : ids) {
             EquipmentInspectionStandards standard = equipmentProvider.findStandardById(id);
-            if (cmd.getTargetId() != null && cmd.getTargetId() != 0) {
-                //权限细化增加   项目的增加上公共标准  过滤已经修改过的模板
-                if (standard.getReferId() != null && standard.getReferId() != 0L) {
-                    if (maps != null && maps.size() > 0)
-                        maps.removeIf((s) -> Objects.equals(s.getModelId(), standard.getReferId()));
-                }
-            } else {
+
+            if (cmd.getTargetId() == null || cmd.getTargetId() == 0L) {
                 //全部里面
                 if (standard != null) {
-                    if(standard.getTargetId() == 0L){
+                    if (standard.getTargetId() == 0L) {
                         List<Long> communityIds = equipmentProvider.listModelCommunityMapByModelId(standard.getId(), EquipmentModelType.STANDARD.getCode());
                         List<EquipmentStandardCommunity> communities = new ArrayList<>();
                         EquipmentStandardCommunity standardCommunity = new EquipmentStandardCommunity();
-                        if(communityIds!=null && communityIds.size()>0){
-                            communityIds.forEach((c)->{
+                        if (communityIds != null && communityIds.size() > 0) {
+                            communityIds.forEach((c) -> {
                                 Community community = communityProvider.findCommunityById(standard.getTargetId());
                                 if (community != null) {
                                     standardCommunity.setCommunityId(community.getId());
@@ -231,24 +222,64 @@ public class EquipmentStandardSearcherImpl extends AbstractElasticSearch impleme
                         standard.setCommunities(communities);
                     }
                     Community community = communityProvider.findCommunityById(standard.getTargetId());
-                    if(community!=null)
-                    standard.setTargetName(community.getName());
+                    if (community != null)
+                        standard.setTargetName(community.getName());
                 }
             }
-        	if(standard != null) {
-        		//processRepeatSetting(standard);
+
+            if (standard != null) {
+                //processRepeatSetting(standard);
                 processEquipmentCount(standard);
-        		EquipmentStandardsDTO dto = ConvertHelper.convert(standard, EquipmentStandardsDTO.class);
+                EquipmentStandardsDTO dto = ConvertHelper.convert(standard, EquipmentStandardsDTO.class);
                 dto.setDescription("");
-        		/*if(null != standard.getRepeat()) {
-    	    		RepeatSettingsDTO rs = ConvertHelper.convert(standard.getRepeat(), RepeatSettingsDTO.class);
-    	    		dto.setRepeat(rs);
-        		}*/
-        		eqStandards.add(dto);
-        	}
+                eqStandards.add(dto);
+            }
 
         }
-        //过滤剩下的maps 增加到项目中
+
+        Long nextPageAnchor = null;
+        if (ids.size() > pageSize) {
+            nextPageAnchor = anchor + 1;
+            ids.remove(ids.size() - 1);
+        } else {
+            /*if (cmd.getTargetId() != null && cmd.getTargetId() != 0) {
+                addApplyStandards(cmd, eqStandards);
+                if (eqStandards.size() <= pageSize) {
+                    nextPageAnchor = null;
+                } else {
+                    int offset = offsetHashMap.getOrDefault(cmd.getTargetId(), 0);
+                    if (offset + pageSize > eqStandards.size()) {
+                        eqStandards.subList(offset, eqStandards.size());
+                        nextPageAnchor = null;
+                    } else {
+                        eqStandards.subList(offset, offset + pageSize);
+                        offsetHashMap.put(cmd.getTargetId(), offset + pageSize);
+                        nextPageAnchor = anchor + 1;
+                    }
+                }
+            }*/
+            addApplyStandards(cmd, eqStandards);
+            nextPageAnchor = null;
+        }
+
+        return new SearchEquipmentStandardsResponse(nextPageAnchor, eqStandards);
+    }
+
+    private void addApplyStandards(SearchEquipmentStandardsCommand cmd, List<EquipmentStandardsDTO> eqStandards) {
+        if (cmd.getTargetId() == null || cmd.getTargetId() == 0L) {
+            return;
+        }
+        List<EquipmentModelCommunityMap> maps = equipmentProvider.listModelCommunityMapByCommunityId(cmd.getTargetId(), EquipmentModelType.STANDARD.getCode());
+        List<EquipmentInspectionStandards> standardsList = equipmentProvider.listEquipmentStandardWithReferId(cmd.getTargetId(), cmd.getTargetType());
+        if (standardsList != null && standardsList.size() > 0) {
+            standardsList.forEach((standard) -> {
+                if (standard.getReferId() != null && standard.getReferId() != 0L) {
+                    if (maps != null && maps.size() > 0)
+                        maps.removeIf((s) -> Objects.equals(s.getModelId(), standard.getReferId()));
+                }
+            });
+        }
+
         if (maps != null && maps.size() > 0) {
             for (EquipmentModelCommunityMap map : maps) {
                 EquipmentInspectionStandards standard = equipmentProvider.findStandardById(map.getModelId());
@@ -260,7 +291,7 @@ public class EquipmentStandardSearcherImpl extends AbstractElasticSearch impleme
                         }
                     }
                     if (cmd.getStandardType() != null) {
-                        if (!Objects.equals(standard.getStatus(), cmd.getStandardType())) {
+                        if (!Objects.equals(standard.getStandardType(), cmd.getStandardType())) {
                             continue;
                         }
                     }
@@ -274,20 +305,19 @@ public class EquipmentStandardSearcherImpl extends AbstractElasticSearch impleme
                             continue;
                         }
                     }
-                        // processRepeatSetting(standard);
-                        EquipmentStandardsDTO dto = ConvertHelper.convert(standard, EquipmentStandardsDTO.class);
-                        dto.setDescription("");
-                        if (null != standard.getRepeat()) {
-                            RepeatSettingsDTO rs = ConvertHelper.convert(standard.getRepeat(), RepeatSettingsDTO.class);
-                            dto.setRepeat(rs);
-                        }
-                        eqStandards.add(dto);
+                    // processRepeatSetting(standard);
+                    EquipmentStandardsDTO dto = ConvertHelper.convert(standard, EquipmentStandardsDTO.class);
+                    dto.setDescription("");
+                    if (null != standard.getRepeat()) {
+                        RepeatSettingsDTO rs = ConvertHelper.convert(standard.getRepeat(), RepeatSettingsDTO.class);
+                        dto.setRepeat(rs);
+                    }
+                    eqStandards.add(dto);
                 }
             }
         }
-
-        return new SearchEquipmentStandardsResponse(nextPageAnchor, eqStandards);
     }
+
     private void checkUserPrivilege(Long orgId, Long privilegeId, Long communityId) {
         /*ListServiceModuleAppsCommand listServiceModuleAppsCommand = new ListServiceModuleAppsCommand();
         listServiceModuleAppsCommand.setNamespaceId(UserContext.getCurrentNamespaceId());
@@ -331,7 +361,7 @@ public class EquipmentStandardSearcherImpl extends AbstractElasticSearch impleme
 	private XContentBuilder createDoc(EquipmentInspectionStandards standard){
 		try {
             XContentBuilder b = XContentFactory.jsonBuilder().startObject();
-            b.field("standardName", standard.getName());
+            b.field("standardName", standard.getName()).field("index","not_analyzed");
            // b.field("standardNumber", standard.getStandardNumber());
             b.field("ownerId", standard.getOwnerId());
             b.field("ownerType", standard.getOwnerType());

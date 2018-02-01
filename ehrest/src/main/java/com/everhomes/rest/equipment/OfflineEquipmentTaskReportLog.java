@@ -8,18 +8,28 @@ import com.everhomes.util.StringHelper;
 
 public class OfflineEquipmentTaskReportLog {
 
-    private Long taskId;
+    private Long sucessIds;
+
+    private Long errorIds;
 
     private Integer errorCode;
 
     private String errorDescription;
 
-    public Long getTaskId() {
-        return taskId;
+    public Long getSucessIds() {
+        return sucessIds;
     }
 
-    public void setTaskId(Long taskId) {
-        this.taskId = taskId;
+    public void setSucessIds(Long sucessIds) {
+        this.sucessIds = sucessIds;
+    }
+
+    public Long getErrorIds() {
+        return errorIds;
+    }
+
+    public void setErrorIds(Long errorIds) {
+        this.errorIds = errorIds;
     }
 
     public Integer getErrorCode() {

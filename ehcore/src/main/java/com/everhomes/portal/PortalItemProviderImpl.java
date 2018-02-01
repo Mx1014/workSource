@@ -84,9 +84,28 @@ public class PortalItemProviderImpl implements PortalItemProvider {
 	}
 
 	@Override
+	public void deleteByVersionId(Long versionId){
+		DeleteQuery query = getReadWriteContext().deleteQuery(Tables.EH_PORTAL_ITEMS);
+		query.addConditions(Tables.EH_PORTAL_ITEMS.VERSION_ID.eq(versionId));
+		query.execute();
+		DaoHelper.publishDaoAction(DaoAction.MODIFY, EhPortalItems.class, null);
+	}
+
+
+	@Override
 	public PortalItem findPortalItemById(Long id) {
 		assert (id != null);
 		return ConvertHelper.convert(getReadOnlyDao().findById(id), PortalItem.class);
+	}
+
+	@Override
+	public Integer findMaxDefaultOrder(Long itemGroupId) {
+		Integer defaultOrder = getReadOnlyContext().select(Tables.EH_PORTAL_ITEMS.DEFAULT_ORDER.max())
+				.from(Tables.EH_PORTAL_ITEMS)
+				.where(Tables.EH_PORTAL_ITEMS.ITEM_GROUP_ID.eq(itemGroupId))
+				.fetchOne().value1();
+
+		return defaultOrder;
 	}
 
 	@Override

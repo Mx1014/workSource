@@ -68,6 +68,7 @@ public class ContractController extends ControllerBase {
 			ListContractsCommand command = ConvertHelper.convert(cmd, ListContractsCommand.class);
 			return new RestResponse(contractService.listContracts(command));
 		}
+		cmd.setPaymentFlag((byte)0);
 		return new RestResponse(contractSearcher.queryContracts(cmd));
 	}
 
@@ -288,8 +289,7 @@ public class ContractController extends ControllerBase {
 	@RestReturn(value = String.class)
 	public RestResponse syncContractsFromThirdPart(@Valid SyncContractsFromThirdPartCommand cmd) {
 		ContractService contractService = getContractService(UserContext.getCurrentNamespaceId(cmd.getNamespaceId()));
-		contractService.syncContractsFromThirdPart(cmd);
-		RestResponse response = new RestResponse();
+		RestResponse response = new RestResponse(contractService.syncContractsFromThirdPart(cmd));
 		response.setErrorCode(ErrorCodes.SUCCESS);
 		response.setErrorDescription("OK");
 		return response;

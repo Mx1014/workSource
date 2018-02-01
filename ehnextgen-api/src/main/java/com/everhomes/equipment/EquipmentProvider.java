@@ -43,7 +43,7 @@ public interface EquipmentProvider {
 	void updateEquipmentTask(EquipmentInspectionTasks task);
 	
 	void createEquipmentInspectionTasksLogs(EquipmentInspectionTasksLogs log);
-	List<EquipmentInspectionTasksLogs> listLogsByTaskId(ListingLocator locator, int count, Long taskId, List<Byte> processType,Long equipmentId);
+	List<EquipmentInspectionTasksLogs> listLogsByTaskId(ListingLocator locator, int count, Long taskId, List<Byte> processType,List<Long> equipmentId);
 	void createEquipmentInspectionTasksAttachment(EquipmentInspectionTasksAttachments attachment);
 	List<EquipmentInspectionTasksAttachments> listTaskAttachmentsByLogId(Long logId);
 	
@@ -216,7 +216,7 @@ public interface EquipmentProvider {
 
     EquipmentInspectionTasksLogs getMaintanceLogByEquipmentId(Long referId);
 
-	void updateMaintanceInspectionLogsById(Long taskLogId ,Long flowCaseId);
+	void updateMaintanceInspectionLogsById(Long taskLogId ,Byte status ,Long flowCaseId);
 
     void statInMaintanceTaskCount(TasksStatData stat,Timestamp startTime, Timestamp endTime,StatTodayEquipmentTasksCommand cmd);
 
@@ -227,4 +227,6 @@ public interface EquipmentProvider {
 	List<EquipmentInspectionTasksLogs> listEquipmentOperateLogsByTargetId(Long equipmentId);
 
     void populateTaskStatusCount(Long inspectionCategoryId, List<String> targetTypes, List<Long> targetIds, List<Long> executePlanIds, List<Long> reviewPlanIds, Byte  adminFlag, ListEquipmentTasksResponse response);
+
+    List<EquipmentInspectionStandards> listEquipmentStandardWithReferId(Long targetId, String targetType);
 }

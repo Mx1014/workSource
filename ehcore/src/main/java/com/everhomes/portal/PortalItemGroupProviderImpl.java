@@ -7,6 +7,7 @@ import java.util.List;
 
 import com.everhomes.rest.portal.PortalItemGroupStatus;
 import org.jooq.DSLContext;
+import org.jooq.DeleteQuery;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -89,9 +90,27 @@ public class PortalItemGroupProviderImpl implements PortalItemGroupProvider {
 	}
 
 	@Override
+	public void deleteByVersionId(Long versionId){
+		DeleteQuery query = getReadWriteContext().deleteQuery(Tables.EH_PORTAL_ITEM_GROUPS);
+		query.addConditions(Tables.EH_PORTAL_ITEM_GROUPS.VERSION_ID.eq(versionId));
+		query.execute();
+		DaoHelper.publishDaoAction(DaoAction.MODIFY, EhPortalItemGroups.class, null);
+	}
+
+	@Override
 	public PortalItemGroup findPortalItemGroupById(Long id) {
 		assert (id != null);
 		return ConvertHelper.convert(getReadOnlyDao().findById(id), PortalItemGroup.class);
+	}
+
+	@Override
+	public Integer findMaxDefaultOrder(Long layoutId) {
+		Integer defaultOrder = getReadOnlyContext().select(Tables.EH_PORTAL_ITEM_GROUPS.DEFAULT_ORDER.max())
+				.from(Tables.EH_PORTAL_ITEM_GROUPS)
+				.where(Tables.EH_PORTAL_ITEM_GROUPS.LAYOUT_ID.eq(layoutId))
+				.fetchOne().value1();
+
+		return defaultOrder;
 	}
 	
 	@Override

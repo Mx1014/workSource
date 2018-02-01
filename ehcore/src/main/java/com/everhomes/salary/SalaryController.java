@@ -97,6 +97,122 @@ public class SalaryController extends ControllerBase {
 		HttpServletResponse resp = salaryService.exportEmployeeSalaryTemplate(cmd,response);
 		return resp;
 	}
+
+	/**
+	 * <p>5.查询人员的工资字段列表</p>
+	 * <b>URL: /salary/getEmployeeEntities</b>
+	 */
+	@RequestMapping("getEmployeeEntities")
+	@RestReturn(GetEmployeeEntitiesResponse.class)
+	public RestResponse getEmployeeEntities(GetEmployeeEntitiesCommand cmd ){
+		GetEmployeeEntitiesResponse resp = this.salaryService.getEmployeeEntities(cmd);
+		RestResponse response = new RestResponse(resp);
+		response.setErrorCode(ErrorCodes.SUCCESS);
+		response.setErrorDescription("OK");
+		return response;
+	}
+
+	/**
+	 * <p>6.导出工资表</p>
+	 * <b>URL: /salary/exportEmployeeSalary</b>
+	 */
+	@RequestMapping("exportEmployeeSalary")
+	@RestReturn(String.class)
+	public RestResponse exportEmployeeSalary(ExportEmployeeSalaryTemplateCommand cmd ){
+		salaryService.exportEmployeeSalary(cmd);
+		RestResponse response = new RestResponse();
+		response.setErrorCode(ErrorCodes.SUCCESS);
+		response.setErrorDescription("OK");
+		return response;
+	}
+	/**
+	 * <p>7.导入工资表</p>
+	 * <b>URL: /salary/importEmployeeSalary</b>
+	 */
+	@RequestMapping("importEmployeeSalary")
+	@RestReturn(ImportFileTaskDTO.class)
+	public RestResponse importEmployeeSalary(@RequestParam(value = "attachment") MultipartFile[] files,
+													ExportEmployeeSalaryTemplateCommand cmd ){
+		ImportFileTaskDTO dto = salaryService.importEmployeeSalary(cmd,files);
+		RestResponse response = new RestResponse(dto);
+		response.setErrorCode(ErrorCodes.SUCCESS);
+		response.setErrorDescription("OK");
+		return response;
+	}
+
+	/**
+	 * <b>URL: /salary/getImportResult</b>
+	 * <p>8.查询导入结果</p>
+	 */
+	@RequestMapping("getImportResult")
+	@RestReturn(value = ImportFileResponse.class)
+	public RestResponse getImportResult(GetImportFileResultCommand cmd) {
+		ImportFileResponse resp  = salaryService.getImportResult(cmd);
+		RestResponse response = new RestResponse(resp);
+		response.setErrorCode(ErrorCodes.SUCCESS);
+		response.setErrorDescription("OK");
+		return response;
+	}
+
+	/**
+	 * <b>URL: /salary/getSalaryGroupStatus</b>
+	 * <p>9.进入工资报表页面</p>
+	 */
+	@RequestMapping("getSalaryGroupStatus")
+	@RestReturn(value = GetSalaryGroupStatusResponse.class)
+	public RestResponse getSalaryGroupStatus(GetSalaryGroupStatusCommand cmd) {
+		GetSalaryGroupStatusResponse resp  = salaryService.getSalaryGroupStatus(cmd);
+		RestResponse response = new RestResponse(resp);
+		response.setErrorCode(ErrorCodes.SUCCESS);
+		response.setErrorDescription("OK");
+		return response;
+	}
+
+	/**
+	 * <p>10.导出工资报表</p>
+	 * <b>URL: /salary/exportSalaryReport</b>
+	 */
+	@RequestMapping("exportSalaryReport")
+	@RestReturn(String.class)
+	public RestResponse exportEmployeeSalary(ExportSalaryReportCommand cmd ){
+		salaryService.exportSalaryReport(cmd);
+		RestResponse response = new RestResponse();
+		response.setErrorCode(ErrorCodes.SUCCESS);
+		response.setErrorDescription("OK");
+		return response;
+	}
+
+
+	/**
+	 * <p>11.归档报表</p>
+	 * <b>URL: /salary/fileSalaryGroup</b>
+	 */
+	@RequestMapping("fileSalaryGroup")
+	@RestReturn(String.class)
+	public RestResponse fileSalaryGroup(FileSalaryGroupCommand cmd ){
+		salaryService.fileSalaryGroup(cmd);
+		RestResponse response = new RestResponse();
+		response.setErrorCode(ErrorCodes.SUCCESS);
+		response.setErrorDescription("OK");
+		return response;
+	}
+
+
+	/**
+	 * <p>12.新建报表</p>
+	 * <b>URL: /salary/newSalaryMonth</b>
+	 */
+	@RequestMapping("newSalaryMonth")
+	@RestReturn(String.class)
+	public RestResponse newSalaryMonth(NewSalaryMonthCommand cmd ){
+		salaryService.newSalaryMonth(cmd);
+		RestResponse response = new RestResponse();
+		response.setErrorCode(ErrorCodes.SUCCESS);
+		response.setErrorDescription("OK");
+		return response;
+	}
+
+
 //
 //	/**
 //	 * <p>2-1.新增、更改 薪酬组(包含的选项 + 更改组名)</p>
