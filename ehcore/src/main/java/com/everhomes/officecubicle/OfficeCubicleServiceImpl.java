@@ -581,14 +581,16 @@ public class OfficeCubicleServiceImpl implements OfficeCubicleService {
 
 	private void sendMessage(OfficeCubicleSpace space,OfficeCubicleOrder order) {
 		// 发消息 +推送
+
+		OfficeRentType officeRentType = OfficeRentType.fromCode(order.getRentType());
 		StringBuffer sb = new StringBuffer();
 		sb.append("您收到一条");
 		sb.append(space.getName());
 		sb.append("的工位续订订单:\n工位类型:");
-		sb.append(OfficeRentType.fromCode(order.getRentType()).getMsg());
+		sb.append(officeRentType.getMsg());
 		sb.append("(");
 		sb.append(order.getSpaceSize());
-		sb.append(OfficeSpaceType.fromCode(order.getSpaceType()).getMsg());
+		sb.append(officeRentType==OfficeRentType.OPENSITE?"个":"㎡");
 		sb.append(")\n预订人:");
 		sb.append(order.getReserverName());
 		sb.append("\n手机号:");
