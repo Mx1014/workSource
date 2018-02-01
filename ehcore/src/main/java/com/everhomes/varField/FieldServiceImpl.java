@@ -734,11 +734,11 @@ public class FieldServiceImpl implements FieldService {
                 cmd13.setCommunityId(communityId);
                 cmd13.setNamespaceId(namespaceId);
                 cmd13.setOrgId(orgId);
-                LOGGER.info("税务信息 command"+cmd13);
+                LOGGER.info("税务信息 command: "+ StringHelper.toJsonString(cmd13));
                 List<CustomerTaxDTO> customerTaxDTOS = customerService.listCustomerTaxes(cmd13);
                 if(customerTaxDTOS == null) customerTaxDTOS = new ArrayList<>();
                 for(int j = 0; j < customerTaxDTOS.size(); j++){
-                    LOGGER.info("税务信息 "+j+":"+customerTaxDTOS.get(j));
+                    LOGGER.info("税务信息 "+j+":"+ customerTaxDTOS.get(j));
                     setMutilRowDatas(fields,data,customerTaxDTOS.get(j),communityId,namespaceId,moduleName);
                 }
                 break;
