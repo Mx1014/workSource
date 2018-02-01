@@ -5,7 +5,8 @@ import javax.validation.constraints.NotNull;
 import com.everhomes.util.StringHelper;
 /**
  * <ul> 
- * <li>rentalSiteId：场所id</li>
+ * <li>sourceType：default_rule:默认规则  resource_rule:资源规则</li>
+ * <li>sourceId：资源规则时 场所id 默认规则时 规则id </li>
  * <li>itemName：商品名称</li>
  * <li>itemPrice：商品价格</li>
  * <li>counts：商品数量</li>
@@ -14,9 +15,11 @@ import com.everhomes.util.StringHelper;
  * <li>itemType：商品类型 参考{@link com.everhomes.rest.rentalv2.RentalItemType}}</li>
  * </ul>
  */
-public class AddItemAdminCommand { 
+public class AddItemAdminCommand {
 	@NotNull
-	private Long rentalSiteId;
+	private String sourceType;
+	@NotNull
+	private Long sourceId;
 	@NotNull
 	private String itemName;
 	@NotNull
@@ -33,12 +36,23 @@ public class AddItemAdminCommand {
     public String toString() {
         return StringHelper.toJsonString(this);
     }
-	public Long getRentalSiteId() {
-		return rentalSiteId;
+
+	public String getSourceType() {
+		return sourceType;
 	}
-	public void setRentalSiteId(Long rentalSiteId) {
-		this.rentalSiteId = rentalSiteId;
+
+	public void setSourceType(String sourceType) {
+		this.sourceType = sourceType;
 	}
+
+	public Long getSourceId() {
+		return sourceId;
+	}
+
+	public void setSourceId(Long sourceId) {
+		this.sourceId = sourceId;
+	}
+
 	public String getItemName() {
 		return itemName;
 	}

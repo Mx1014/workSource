@@ -1023,7 +1023,8 @@ public class Rentalv2ServiceImpl implements Rentalv2Service {
 
 		RentalItem siteItem = ConvertHelper.convert(cmd,RentalItem.class );
 		siteItem.setName(cmd.getItemName());
-		siteItem.setRentalResourceId(cmd.getRentalSiteId());
+		siteItem.setSourceType(cmd.getSourceType());
+		siteItem.setSourceId(cmd.getSourceId());
 		siteItem.setPrice(cmd.getItemPrice());
 		rentalv2Provider.createRentalSiteItem(siteItem);
 	}
@@ -1045,7 +1046,8 @@ public class Rentalv2ServiceImpl implements Rentalv2Service {
 
 		FindRentalSiteItemsAndAttachmentsResponse response = new FindRentalSiteItemsAndAttachmentsResponse();
 		response.setSiteItems(new ArrayList<>());
-		List<RentalItem> rsiSiteItems = rentalv2Provider.findRentalSiteItems(cmd.getRentalSiteId(), cmd.getResourceType());
+		List<RentalItem> rsiSiteItems = rentalv2Provider.findRentalSiteItems(RuleSourceType.RESOURCE.getCode(),cmd.getRentalSiteId(),
+				cmd.getResourceType());
 		if(rsiSiteItems!=null && rsiSiteItems.size()>0)
 			for (RentalItem rsi : rsiSiteItems) {
 				SiteItemDTO dto = convertItem2DTO(rsi);
@@ -3512,10 +3514,12 @@ public class Rentalv2ServiceImpl implements Rentalv2Service {
 	@Override
 	public GetItemListCommandResponse listRentalSiteItems(
 			GetItemListAdminCommand cmd) {
-		if(cmd.getRentalSiteId()==null)
+		if(StringUtils.isEmpty(cmd.getResourceType()))
 			throw RuntimeErrorException.errorWith(ErrorCodes.SCOPE_GENERAL,
-                    ErrorCodes.ERROR_INVALID_PARAMETER, "Invalid paramter of null rental site id");
-
+                    ErrorCodes.ERROR_INVALID_PARAMETER, "Invalid paramter of null resourceType");
+		if(cmd.getSourceId() == 0)
+			throw RuntimeErrorException.errorWith(ErrorCodes.SCOPE_GENERAL,
+					ErrorCodes.ERROR_INVALID_PARAMETER, "Invalid paramter of null source id");
 		if (StringUtils.isBlank(cmd.getResourceType())) {
 			cmd.setResourceType(RentalV2ResourceType.DEFAULT.getCode());
 		}
@@ -3523,7 +3527,7 @@ public class Rentalv2ServiceImpl implements Rentalv2Service {
 		GetItemListCommandResponse response = new GetItemListCommandResponse();
 		response.setSiteItems(new ArrayList<>());
 		List<RentalItem> rsiSiteItems = rentalv2Provider
-				.findRentalSiteItems(cmd.getRentalSiteId(), cmd.getResourceType());
+				.findRentalSiteItems(cmd.getSourceType(),cmd.getSourceId(), cmd.getResourceType());
 		for (RentalItem rsi : rsiSiteItems) {
 			SiteItemDTO dto = convertItem2DTO(rsi);
 			 
@@ -3753,7 +3757,7 @@ public class Rentalv2ServiceImpl implements Rentalv2Service {
 								throw RuntimeErrorException.errorWith(ErrorCodes.SCOPE_GENERAL,
 										ErrorCodes.ERROR_INVALID_PARAMETER, "Invalid parameter of siDto id"+ siDto+".");
 
-							if(!rSiteItem.getRentalResourceId().equals(bill.getRentalResourceId()))
+							if(!rSiteItem.getSourceId().equals(bill.getRentalResourceId()))
 								throw RuntimeErrorException.errorWith(ErrorCodes.SCOPE_GENERAL,
 										ErrorCodes.ERROR_INVALID_PARAMETER, "Invalid parameter item id is not this site");
 

@@ -10,7 +10,7 @@ public interface Rentalv2Provider {
 
 	void createRentalSite(RentalResource rentalSite);
 
-	List<RentalItem> findRentalSiteItems(Long rentalSiteId, String resourceType);
+	List<RentalItem> findRentalSiteItems(String sourceType,Long sourceId, String resourceType);
 
 	void createRentalSiteItem(RentalItem siteItem);
 

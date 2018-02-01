@@ -93,12 +93,13 @@ public class Rentalv2ProviderImpl implements Rentalv2Provider {
 	}
 
 	@Override
-	public List<RentalItem> findRentalSiteItems(Long rentalSiteId, String resourceType) {
+	public List<RentalItem> findRentalSiteItems(String sourceType,Long sourceId, String resourceType) {
 		DSLContext context = dbProvider.getDslContext(AccessSpec.readOnly());
 		SelectJoinStep<Record> step = context.select().from(
 				Tables.EH_RENTALV2_ITEMS);
-		Condition condition = Tables.EH_RENTALV2_ITEMS.RENTAL_RESOURCE_ID
-				.equal(rentalSiteId);
+		Condition condition = Tables.EH_RENTALV2_ITEMS.SOURCE_ID
+				.equal(sourceId);
+		condition.and(Tables.EH_RENTALV2_ITEMS.SOURCE_TYPE.equal(sourceType));
 		condition = condition.and(Tables.EH_RENTALV2_ITEMS.RESOURCE_TYPE.equal(resourceType));
 		step.where(condition);
 		List<RentalItem> result = step
