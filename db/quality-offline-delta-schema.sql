@@ -15,8 +15,6 @@ ALTER TABLE `eh_quality_inspection_specifications`
 -- 日志增加项目 jiarui
 
 ALTER TABLE `eh_quality_inspection_logs`
-  ADD COLUMN `scope_code`  tinyint(4) NULL DEFAULT 1 ;
-ALTER TABLE `eh_quality_inspection_logs`
   ADD COLUMN `scope_id`  bigint(20) NULL DEFAULT 0 ;
 
 UPDATE  `eh_quality_inspection_logs`

@@ -323,6 +323,7 @@ public class QualityServiceImpl implements QualityService {
 		//log.setNamespaceId(UserContext.getCurrentNamespaceId());
 		log.setNamespaceId(namespaceId);
 		log.setOwnerType(standard.getOwnerType());
+		log.setScopeId(standard.getTargetId());
 		log.setOwnerId(standard.getOwnerId());
 		log.setTargetType(QualityInspectionLogType.STANDARD.getCode());
 		log.setTargetId(standard.getId());
@@ -2485,14 +2486,16 @@ public class QualityServiceImpl implements QualityService {
         locator.setAnchor(cmd.getPageAnchor());
 
         List<QualityInspectionLogs> logs = qualityProvider.listQualityInspectionLogs(cmd.getOwnerType(), cmd.getOwnerId(),
-        									cmd.getTargetType(), cmd.getTargetId(), locator, pageSize+1);
+        									cmd.getTargetType(), cmd.getTargetId(),cmd.getScopeId(), locator, pageSize+1);
 
         Long nextPageAnchor = null;
         if(logs != null && logs.size() > pageSize) {
         	logs.remove(logs.size() - 1);
             nextPageAnchor = logs.get(logs.size() - 1).getId();
         }
-
+        if(logs ==null){
+			logs = new ArrayList<>();
+		}
         List<QualityInspectionLogDTO> dtos = logs.stream().map((r) -> {
 
         	QualityInspectionLogDTO dto = ConvertHelper.convert(r, QualityInspectionLogDTO.class);
@@ -2523,7 +2526,7 @@ public class QualityServiceImpl implements QualityService {
         }).collect(Collectors.toList());
 
         //现在要求有项目分类 去掉dto中targetName为空的 也就是上一步中根据qualityProvider.findStandardById(r.getTargetId());
-		dtos.removeIf((r) -> r.getTargetName() == null);
+		//dtos.removeIf((r) -> r.getTargetName() == null);
 		if (dtos.size() < pageSize)
 			nextPageAnchor = null;
 		ListQualityInspectionLogsResponse response = new ListQualityInspectionLogsResponse();
