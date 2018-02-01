@@ -1929,6 +1929,7 @@ private void checkUserPrivilege(Long orgId, Long privilegeId, Long communityId) 
 			if (null != equipment) {
 				relationDTO.setEquipmentName(equipment.getName());
 				relationDTO.setLocation(equipment.getLocation());
+				equipmentStandardRelations.add(relationDTO);
 			}
 		}
 		dto.setEquipments(equipmentStandardRelations);
