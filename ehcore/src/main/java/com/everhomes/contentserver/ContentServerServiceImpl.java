@@ -495,6 +495,10 @@ public class ContentServerServiceImpl implements ContentServerService {
 
         // 通过文件后缀确定Content server中定义的媒体类型
         String mediaType = ContentMediaHelper.getContentMediaType(fileSuffix);
+        if (ContentMediaHelper.UPLOAD_UNKNOW.equals(mediaType)) {
+            throw RuntimeErrorException.errorWith(ErrorCodes.SCOPE_GENERAL, ErrorCodes.ERROR_INVALID_PARAMETER,
+                    "Unsupported content media type for [%s], fix your file name extension.", fileName);
+        }
 
         // https 默认端口443 by sfyan 20161226
         String url = String.format("%s://%s/upload/%s?token=%s", getScheme(), contentServerUri, mediaType, token);
