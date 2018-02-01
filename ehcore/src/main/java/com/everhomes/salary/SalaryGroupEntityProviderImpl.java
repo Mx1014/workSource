@@ -5,6 +5,7 @@ import java.sql.Timestamp;
 import java.util.List;
 
 import com.everhomes.rest.salary.SalaryEditableFlag;
+import com.everhomes.rest.salary.SalaryEntityStatus;
 import com.everhomes.rest.salary.SalaryEntityType;
 import com.everhomes.rest.salary.SalaryNeedCheckType;
 import com.everhomes.user.User;
@@ -94,6 +95,21 @@ public class SalaryGroupEntityProviderImpl implements SalaryGroupEntityProvider 
             return null;
         }
         return ConvertHelper.convert(r, SalaryGroupEntity.class);
+    }
+
+    @Override
+    public List<SalaryGroupEntity> listOpenSalaryGroupEntityByOrgId(Long organizationId) {
+        List<SalaryGroupEntity> result = getReadOnlyContext().select().from(Tables.EH_SALARY_GROUP_ENTITIES)
+                .where(Tables.EH_SALARY_GROUP_ENTITIES.ORGANIZATION_ID.eq(organizationId))
+                .and(Tables.EH_SALARY_GROUP_ENTITIES.STATUS.eq(SalaryEntityStatus.OPEN.getCode()))
+                .orderBy(Tables.EH_SALARY_GROUP_ENTITIES.CATEGORY_ID, Tables.EH_SALARY_GROUP_ENTITIES.ID)
+                .fetch().map(r -> {
+                    return ConvertHelper.convert(r, SalaryGroupEntity.class);
+                });
+        if (result == null || result.size() == 0) {
+            return null;
+        }
+        return result;
     }
 
 //	@Override
