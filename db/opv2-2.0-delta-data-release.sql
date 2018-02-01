@@ -27,7 +27,11 @@ UPDATE eh_equipment_inspection_task_logs
 SET equipment_id = (SELECT  equipment_id FROM eh_equipment_inspection_tasks WHERE id = task_id);
 
 -- 巡检任务状态统一 end by jiarui 20180105
+-- 品质核查操作日志 jiarui
+UPDATE  `eh_quality_inspection_logs`
+SET scope_id =(SELECT eh_quality_inspection_standards.target_id FROM  eh_quality_inspection_standards where eh_quality_inspection_standards.id = eh_quality_inspection_logs.target_id);
 
+-- 品质核查操作日志 jiarui
 
 -- add by sw 20180122 vip车位
 INSERT INTO `eh_rentalv2_resource_types` (`id`, `name`, `page_type`, `icon_uri`, `status`, `namespace_id`, `pay_mode`, `unauth_visible`, `menu_type`, `identify`)

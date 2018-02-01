@@ -2840,7 +2840,6 @@ public class QualityProviderImpl implements QualityProvider {
 		List<QualityInspectionTasks> tasks = new ArrayList<QualityInspectionTasks>();
 		SelectQuery<EhQualityInspectionTasksRecord> query = context.selectQuery(Tables.EH_QUALITY_INSPECTION_TASKS);
 
-
 		if (startDate != null) {
 			query.addConditions(Tables.EH_QUALITY_INSPECTION_TASKS.CREATE_TIME.ge(startDate));
 		}
@@ -2848,26 +2847,29 @@ public class QualityProviderImpl implements QualityProvider {
 			query.addConditions(Tables.EH_QUALITY_INSPECTION_TASKS.CREATE_TIME.le(endDate));
 		}
 
-		Long executeUid = UserContext.currentUserId();
-		if (executeUid != null && executeUid != 0) {
-			Condition con = Tables.EH_QUALITY_INSPECTION_TASKS.EXECUTOR_ID.eq(executeUid);
-			con = con.and(Tables.EH_QUALITY_INSPECTION_TASKS.RESULT.eq(QualityInspectionTaskResult.CORRECT.getCode()));
+		if (groupDtos != null) {//isAdmin =false
+			Long executeUid = UserContext.currentUserId();
+			if (executeUid != null && executeUid != 0) {
+				Condition con = Tables.EH_QUALITY_INSPECTION_TASKS.EXECUTOR_ID.eq(executeUid);
+				con = con.and(Tables.EH_QUALITY_INSPECTION_TASKS.RESULT.eq(QualityInspectionTaskResult.CORRECT.getCode()));
 
-			if (executeStandardIds != null) {
-				Condition con1 = Tables.EH_QUALITY_INSPECTION_TASKS.STANDARD_ID.in(executeStandardIds)
-						.and(Tables.EH_EQUIPMENT_INSPECTION_TASKS.STATUS.eq(QualityInspectionTaskStatus.WAITING_FOR_EXECUTING.getCode()));
-				con = con.or(con1);
+				if (executeStandardIds != null) {
+					Condition con1 = Tables.EH_QUALITY_INSPECTION_TASKS.STANDARD_ID.in(executeStandardIds)
+							.and(Tables.EH_EQUIPMENT_INSPECTION_TASKS.STATUS.eq(QualityInspectionTaskStatus.WAITING_FOR_EXECUTING.getCode()));
+					con = con.or(con1);
+				}
+
+				if (reviewStandardIds != null) {
+					Condition con2 = Tables.EH_QUALITY_INSPECTION_TASKS.STANDARD_ID.in(reviewStandardIds)
+							.and(Tables.EH_EQUIPMENT_INSPECTION_TASKS.STATUS.eq(QualityInspectionTaskStatus.EXECUTED.getCode()))
+							.and(Tables.EH_EQUIPMENT_INSPECTION_TASKS.REVIEW_RESULT.eq(QualityInspectionTaskReviewResult.NONE.getCode()));
+					con = con.or(con2);
+				}
+
+				query.addConditions(con);
 			}
-
-			if (reviewStandardIds != null) {
-				Condition con2 = Tables.EH_QUALITY_INSPECTION_TASKS.STANDARD_ID.in(reviewStandardIds)
-						.and(Tables.EH_EQUIPMENT_INSPECTION_TASKS.STATUS.eq(QualityInspectionTaskStatus.EXECUTED.getCode()))
-						.and(Tables.EH_EQUIPMENT_INSPECTION_TASKS.REVIEW_RESULT.eq(QualityInspectionTaskReviewResult.NONE.getCode()));
-				con = con.or(con2);
-			}
-
-			query.addConditions(con);
 		}
+
 		builderCallback.buildCondition(null, query);
 
 		query.addOrderBy(Tables.EH_QUALITY_INSPECTION_TASKS.EXECUTIVE_EXPIRE_TIME);
