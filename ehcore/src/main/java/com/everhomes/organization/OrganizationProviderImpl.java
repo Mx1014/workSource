@@ -45,6 +45,7 @@ import com.everhomes.util.DateHelper;
 import com.everhomes.util.IterationMapReduceCallback.AfterAction;
 import com.everhomes.util.RecordHelper;
 import com.everhomes.util.RuntimeErrorException;
+
 import org.jooq.*;
 import org.jooq.impl.DSL;
 import org.jooq.impl.DefaultRecordMapper;
@@ -6201,5 +6202,47 @@ public class OrganizationProviderImpl implements OrganizationProvider {
 		query.addConditions(Tables.EH_ORGANIZATIONS.PARENT_ID.eq(0L));
 		List<Organization> list = query.fetch().map(record -> ConvertHelper.convert(record, Organization.class));
 		return list;
+	}
+
+	@Override
+	public Integer countUserOrganization(Integer namespaceId, Long communityId, Byte userOrganizationStatus, String namespaceUserType, Byte gender){
+		List<Long> result = new ArrayList<>();
+		dbProvider.mapReduce(AccessSpec.readOnly(), null,
+				(DSLContext context, Object reducingContext) -> {
+					SelectQuery<Record> query = context.selectQuery();
+					query.addSelect(Tables.EH_USERS.ID);
+					query.addFrom(Tables.EH_USERS);
+					query.addJoin(Tables.EH_USER_IDENTIFIERS, JoinType.LEFT_OUTER_JOIN, Tables.EH_USERS.ID.eq(Tables.EH_USER_IDENTIFIERS.OWNER_UID));
+					query.addJoin(Tables.EH_USER_ORGANIZATIONS,
+							JoinType.LEFT_OUTER_JOIN, Tables.EH_USERS.ID.eq(Tables.EH_USER_ORGANIZATIONS.USER_ID));
+					query.addJoin(Tables.EH_ORGANIZATION_COMMUNITY_REQUESTS, JoinType.LEFT_OUTER_JOIN, Tables.EH_USER_ORGANIZATIONS.ORGANIZATION_ID.eq(Tables.EH_ORGANIZATION_COMMUNITY_REQUESTS.MEMBER_ID).and(Tables.EH_ORGANIZATION_COMMUNITY_REQUESTS.MEMBER_TYPE.eq(OrganizationCommunityRequestType.Organization.getCode())));
+					query.addConditions(Tables.EH_USERS.NAMESPACE_ID.eq(namespaceId));
+					if(null == userOrganizationStatus){
+						query.addConditions(Tables.EH_USER_ORGANIZATIONS.STATUS.notIn(UserOrganizationStatus.REJECT.getCode(), UserOrganizationStatus.INACTIVE.getCode()));
+					}else{
+						query.addConditions(Tables.EH_USER_ORGANIZATIONS.STATUS.eq(userOrganizationStatus));
+					}
+
+					query.addConditions(Tables.EH_USERS.STATUS.eq(UserStatus.ACTIVE.getCode()));
+					if(null != communityId){
+						query.addConditions(Tables.EH_ORGANIZATION_COMMUNITY_REQUESTS.COMMUNITY_ID.eq(communityId));
+					}
+					if(!StringUtils.isEmpty(namespaceUserType)){
+						query.addConditions(Tables.EH_USERS.NAMESPACE_USER_TYPE.eq(namespaceUserType));
+					}
+
+					if(gender != null){
+						query.addConditions(Tables.EH_USERS.GENDER.eq(gender));
+					}
+					query.addGroupBy(Tables.EH_USERS.ID);
+					LOGGER.debug("query sql:{}", query.getSQL());
+					LOGGER.debug("query param:{}", query.getBindValues());
+					query.fetch().map((r) -> {
+						result.add(Long.valueOf(r.getValue(0).toString()));
+						return null;
+					});
+					return true;
+				});
+		return result.size();
 	}
 }
