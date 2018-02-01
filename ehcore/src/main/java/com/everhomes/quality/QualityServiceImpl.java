@@ -2475,11 +2475,8 @@ public class QualityServiceImpl implements QualityService {
 	}
 
 	@Override
-	public ListQualityInspectionLogsResponse listQualityInspectionLogs(
-			ListQualityInspectionLogsCommand cmd) {
-		/*Long privilegeId = configProvider.getLongValue(QualityConstant.QUALITY_UPDATELOG_LIST, 0L);
-		userPrivilegeMgr.checkCurrentUserAuthority(null, null, cmd.getOwnerId(), privilegeId);*/
-		//checkUserPrivilege(cmd.getOwnerId(),PrivilegeConstants.QUALITY_TASK_LIST,null);
+	public ListQualityInspectionLogsResponse listQualityInspectionLogs(ListQualityInspectionLogsCommand cmd) {
+
 		checkUserPrivilege(cmd.getOwnerId(),PrivilegeConstants.QUALITY_UPDATELOG_LIST,cmd.getScopeId());
 		int pageSize = PaginationConfigHelper.getPageSize(configurationProvider, cmd.getPageSize());
         CrossShardListingLocator locator = new CrossShardListingLocator();
@@ -2493,10 +2490,10 @@ public class QualityServiceImpl implements QualityService {
         	logs.remove(logs.size() - 1);
             nextPageAnchor = logs.get(logs.size() - 1).getId();
         }
-        if(logs ==null){
+		if (logs == null) {
 			logs = new ArrayList<>();
 		}
-        List<QualityInspectionLogDTO> dtos = logs.stream().map((r) -> {
+		List<QualityInspectionLogDTO> dtos = logs.stream().map((r) -> {
 
         	QualityInspectionLogDTO dto = ConvertHelper.convert(r, QualityInspectionLogDTO.class);
         	dto.setOperateType(r.getProcessType());
@@ -2509,26 +2506,26 @@ public class QualityServiceImpl implements QualityService {
         		}
         	}
 
-        	if(QualityInspectionLogType.STANDARD.getCode().equals(r.getTargetType()) && r.getTargetId() != null) {
-        		QualityInspectionStandards standard = qualityProvider.findStandardById(r.getTargetId());
-        		if(standard != null) {
-        			if(cmd.getScopeId()==null){
-        				//全部中查看
+			if (QualityInspectionLogType.STANDARD.getCode().equals(r.getTargetType()) && r.getTargetId() != null) {
+				QualityInspectionStandards standard = qualityProvider.findStandardById(r.getTargetId());
+				if (standard != null) {
+					if (cmd.getScopeId() == null || cmd.getScopeId() == 0L) {
+						//全部中查看
 						dto.setTargetName(standard.getName());
-					}else {
-        				//项目中查看
-        				if(standard.getTargetId().equals(cmd.getScopeId()))
-						dto.setTargetName(standard.getName());
+					} else {
+						//项目中查看
+						if (standard.getTargetId().equals(cmd.getScopeId()))
+							dto.setTargetName(standard.getName());
 					}
-        		}
-        	}
-        	return dto;
+				}
+			}
+			return dto;
         }).collect(Collectors.toList());
 
         //现在要求有项目分类 去掉dto中targetName为空的 也就是上一步中根据qualityProvider.findStandardById(r.getTargetId());
 		//dtos.removeIf((r) -> r.getTargetName() == null);
-		if (dtos.size() < pageSize)
-			nextPageAnchor = null;
+//		if (dtos.size() < pageSize)
+//			nextPageAnchor = null;
 		ListQualityInspectionLogsResponse response = new ListQualityInspectionLogsResponse();
         response.setNextPageAnchor(nextPageAnchor);
         response.setDtos(dtos);
