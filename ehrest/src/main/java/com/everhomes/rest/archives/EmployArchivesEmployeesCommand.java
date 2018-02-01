@@ -21,7 +21,7 @@ public class EmployArchivesEmployeesCommand {
 
     private Long organizationId;
 
-    private Date employmentTime;
+    private String employmentTime;
 
     private String employmentEvaluation;
 
@@ -44,12 +44,12 @@ public class EmployArchivesEmployeesCommand {
         this.organizationId = organizationId;
     }
 
-    public Date getEmploymentTime() {
+    public String getEmploymentTime() {
         return employmentTime;
     }
 
     public void setEmploymentTime(String employmentTime) {
-        this.employmentTime = ArchivesUtil.parseDate(employmentTime);
+        this.employmentTime = employmentTime;
     }
 
     public String getEmploymentEvaluation() {

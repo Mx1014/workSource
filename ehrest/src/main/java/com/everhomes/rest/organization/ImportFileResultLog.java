@@ -1,5 +1,8 @@
 package com.everhomes.rest.organization;
 
+import com.everhomes.util.StringHelper;
+import org.omg.CORBA.StringHolder;
+
 /**
  * Created by sfyan on 2017/4/19.
  */
@@ -14,6 +17,8 @@ public class ImportFileResultLog<T> {
     private Integer code;
 
     private String errorDescription;
+
+
 
     public T getData() {
         return data;
@@ -57,5 +62,10 @@ public class ImportFileResultLog<T> {
 
     public void setErrorDescription(String errorDescription) {
         this.errorDescription = errorDescription;
+    }
+
+    @Override
+    public String toString() {
+        return StringHelper.toJsonString(this);
     }
 }

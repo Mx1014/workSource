@@ -14,15 +14,15 @@ public interface SalaryEmployeeProvider {
 	SalaryEmployee findSalaryEmployeeById(Long id);
 
 	List<SalaryEmployee> listSalaryEmployee();
-
+ 
 	List<SalaryEmployee> listSalaryEmployee(Long ownerId, Byte salaryStatus, List<Long> detailIds, CrossShardListingLocator locator, int i);
 
 	SalaryEmployee findSalaryEmployeeByDetailId(Long ownerId, Long detailId);
 
 	String getMonthByOwnerId(Long ownerId);
-
+ 
 	List<Long> listEmployeeDetailIdsByStatus(Long ownerId, Byte status);
-
+ 
 //	List<SalaryEmployee> listSalaryEmployeeByPeriodGroupId(Long salaryPeriodGroupId);
 //
 //	int countUnCheckEmployee(Long salaryPeriodGroupId);

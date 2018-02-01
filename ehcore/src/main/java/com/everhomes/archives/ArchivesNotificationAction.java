@@ -1,7 +1,5 @@
 package com.everhomes.archives;
 
-import com.everhomes.organization.OrganizationMemberDetails;
-import com.everhomes.rest.archives.ArchivesUtil;
 import com.everhomes.scheduler.ScheduleProvider;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;

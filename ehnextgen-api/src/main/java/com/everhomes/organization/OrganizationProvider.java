@@ -313,6 +313,8 @@ public interface OrganizationProvider {
 	Organization findOrganizationByNameAndNamespaceIdForJindie(String name, Integer namespaceId, String namespaceToken,
 															   String namespaceType);
 
+	List<Organization> listOrganizationByGroupTypesOrderByLevel(String superiorPath, List<String> groupTypes);
+
 	List<Organization> listOrganizationByGroupType(Long parentId, OrganizationGroupType groupType);
 
 	List<OrganizationMember> listOrganizationMemberByPath(String keywords, String path, List<String> groupTypes, VisibleFlag visibleFlag, CrossShardListingLocator locator,Integer pageSize);
@@ -539,6 +541,14 @@ public interface OrganizationProvider {
 	void createCommunityOrganizationDetailDisplay(CommunityOrganizationDetailDisplay detailDisplay);
 	void updateCommunityOrganizationDetailDisplay(CommunityOrganizationDetailDisplay detailDisplay);
 	List checkOrgExistInOrgOrPaths(Integer namespaceId, Long organizationId, List<Long> orgIds, List<String> orgPaths);
+ 
+	
+	List<OrganizationMemberDetails> listOrganizationMemberDetails(Long ownerId);
 
-	List<Organization> listPMOrganizations(Integer namespaceId);
+	Integer queryOrganizationPersonnelCounts(ListingLocator locator, Long organizationId, ListingQueryBuilderCallback queryBuilderCallback);
+	
+	List<OrganizationMember> queryOrganizationPersonnels(ListingLocator locator, Long organizationId, ListingQueryBuilderCallback queryBuilderCallback);
+ 
+
+	List<Organization> listPMOrganizations(Integer namespaceId); 
 }
