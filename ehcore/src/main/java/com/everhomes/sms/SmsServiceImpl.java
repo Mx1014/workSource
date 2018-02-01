@@ -72,7 +72,7 @@ public class SmsServiceImpl implements SmsService {
             SmsReportResponse report = handler.report(reportRequest);
             if (report != null) {
                 if (report.getReports() != null) {
-                    doReportDTO(handlerName, body.toString(), report);
+                    doReportDTO(handlerName, reportRequest, report);
                 }
                 if (report.getResponseBody() != null) {
                     writer.write(report.getResponseBody());
@@ -86,10 +86,11 @@ public class SmsServiceImpl implements SmsService {
         }
     }
 
-    private void doReportDTO(String handlerName, String body, SmsReportResponse report) {
+    private void doReportDTO(String handlerName, SmsReportRequest request, SmsReportResponse report) {
         for (SmsReportDTO dto : report.getReports()) {
             if (dto.getSmsId() == null) {
-                LOGGER.warn("sms report smsId are empty, handlerName = {}, reportBody = {}", handlerName, body);
+                LOGGER.warn("sms report smsId are empty, handlerName = {}, reportBody = {}", handlerName,
+                        StringHelper.toJsonString(request));
                 continue;
             }
             List<SmsLog> smsLogs = smsLogProvider.findSmsLog(handlerName, dto.getMobile(), dto.getSmsId());
@@ -97,11 +98,12 @@ public class SmsServiceImpl implements SmsService {
                 for (SmsLog smsLog : smsLogs) {
                     smsLog.setStatus(dto.getStatus());
                     smsLog.setReportTime(DateUtils.currentTimestamp());
-                    smsLog.setReportText(body);
+                    smsLog.setReportText(StringHelper.toJsonString(request));
                     smsLogProvider.updateSmsLog(smsLog);
                 }
             } else {
-                LOGGER.warn("sms report not found, smsLog by handlerName = {}, smsId = {}, reportBody = {}", handlerName, dto.getSmsId(), body);
+                LOGGER.warn("sms report not found, smsLog by handlerName = {}, smsId = {}, reportBody = {}",
+                        handlerName, dto.getSmsId(), StringHelper.toJsonString(request));
             }
         }
     }
@@ -135,7 +137,7 @@ public class SmsServiceImpl implements SmsService {
 
     @Override
     public void sendTestSms(SendTestSmsCommand cmd) {
-        String[] mobiles = cmd.getMobile().split(",");
+        String[] mobiles = cmd.getMobile().split("\\|");
         String locale = Locale.CHINA.toString();
 
         List<Tuple<String, Object>> tuples = new ArrayList<>();

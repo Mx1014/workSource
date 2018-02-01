@@ -1,7 +1,8 @@
-//@formatter: off
+// @formatter: off
 package com.everhomes.sms;
 
 import com.everhomes.configuration.ConfigurationProvider;
+import com.everhomes.util.RuntimeErrorException;
 import com.everhomes.util.Tuple;
 import org.apache.commons.lang.StringUtils;
 import org.slf4j.Logger;
@@ -14,22 +15,37 @@ import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
+import java.util.function.Consumer;
+import java.util.regex.Pattern;
+import java.util.stream.Collectors;
 
 /**
- * TODO To manage throughput and throttling, SMS/email notification service
- * should go through queue service.
+ * TODO To manage throughput and throttling, SMS/email notification service should go through queue
+ * service.
  *
- * For now, it is a fake implementation
- *
+ * <p>For now, it is a fake implementation
  *
  * @author Kelven Yang
- *
  */
 @Component
 public class SmsProviderImpl implements SmsProvider {
-    protected final static Logger LOGGER = LoggerFactory.getLogger(SmsProviderImpl.class);
 
-    private static final String SMS_HANDLER_RESOLVER_NAME = "sms.handlerResolverName";
+    protected static final Logger LOGGER = LoggerFactory.getLogger(SmsProviderImpl.class);
+
+    private static final String SMS_HANDLER_RESOLVER_NAME_KEY = "sms.handlerResolverName";
+    private static final String SMS_TEST_PHONE_REGEX_KEY = "sms.testPhoneRegex";
+    private static final String SMS_STRICT_PHONE_REGEX_KEY = "sms.strictPhoneRegex";
+
+    // 严格正则
+    private static final String SMS_STRICT_PHONE_REGEX =
+            "^(?:13[0-9]|14[579]|15[0-3,5-9]|17[0135678]|18[0-9])\\d{8}$";
+
+    // 测试手机号正则
+    private static final String SMS_TEST_PHONE_REGEX =
+            "^(?:1[0-2])\\d{9}$";
+
+    private Pattern strictPhonePattern = Pattern.compile(SMS_STRICT_PHONE_REGEX);
+    private Pattern testPhonePattern = Pattern.compile(SMS_TEST_PHONE_REGEX);
 
     private Map<String, SmsHandlerResolver> resolvers = new HashMap<>();
 
@@ -47,71 +63,186 @@ public class SmsProviderImpl implements SmsProvider {
         resolverMap.forEach((name, resolver) -> resolvers.put(name, resolver));
     }
 
-    /*private void doSend(String phoneNumber, String text, String templateId) {
-        LOGGER.info("Send SMS text:\"{}\" to {}.beginTime={}", SmsHepler.getEncodingString(text), phoneNumber,
-                System.currentTimeMillis());
-        String escapedText = SmsHepler.convert(text);
-
-        publishEvent(() -> getHandler(Namespace.DEFAULT_NAMESPACE, phoneNumber).doSend(phoneNumber, escapedText, templateId));
-    }
-
-    private void doSend(String[] phoneNumbers, String text, String templateId) {
-        LOGGER.info("Send SMS text:\"{}\" to {}.beginTime={}", SmsHepler.getEncodingString(text),
-                StringUtils.join(phoneNumbers, ","), System.currentTimeMillis());
-        String escapedText = SmsHepler.convert(text);
-
-        publishEvent(() -> {
-            Map<SmsHandler, String[]> handler = getHandler(Namespace.DEFAULT_NAMESPACE, phoneNumbers);
-            handler.forEach((k, v) -> {
-                k.doSend(v, SmsHepler.getEncodingString(escapedText), templateId);
-                LOGGER.info("send sms message ok.endTime={}", System.currentTimeMillis());
-            });
-        });
-    }*/
-
     @Override
-    public void sendSms(Integer namespaceId, String phoneNumber, String templateScope, int templateId, String templateLocale, List<Tuple<String, Object>> variables) {
-        sendSms(null, namespaceId, new String[]{phoneNumber}, templateScope, templateId, templateLocale, variables);
+    public void sendSms(Integer namespaceId, String phoneNumber, String templateScope,
+                        int templateId, String templateLocale, List<Tuple<String, Object>> variables) {
+        sendSms(null, namespaceId,
+                new String[]{phoneNumber}, templateScope, templateId, templateLocale, variables);
     }
 
     @Override
-    public void sendSms(Integer namespaceId, String[] phoneNumbers, String templateScope, int templateId, String templateLocale, List<Tuple<String, Object>> variables) {
-        sendSms(null, namespaceId, phoneNumbers, templateScope, templateId, templateLocale, variables);
+    public void sendSms(Integer namespaceId, String[] phoneNumbers, String templateScope,
+            int templateId, String templateLocale, List<Tuple<String, Object>> variables) {
+        sendSms(null, namespaceId,
+                phoneNumbers, templateScope, templateId, templateLocale, variables);
     }
 
     @Override
-    public void sendSms(String handlerName, Integer namespaceId, String phoneNumber, String templateScope, int templateId, String templateLocale, List<Tuple<String, Object>> variables) {
-        sendSms(handlerName, namespaceId, new String[]{phoneNumber}, templateScope, templateId, templateLocale, variables);
+    public void sendSms(String handlerName, Integer namespaceId, String phoneNumber, String templateScope,
+            int templateId, String templateLocale, List<Tuple<String, Object>> variables) {
+        sendSms(handlerName, namespaceId,
+                new String[]{phoneNumber}, templateScope, templateId, templateLocale, variables);
     }
 
+    // final sendSms
     @Override
-    public void sendSms(String handlerName, Integer namespaceId, String[] phoneNumbers, String templateScope, int templateId, String templateLocale, List<Tuple<String, Object>> variables) {
-        doSend(handlerName, namespaceId, phoneNumbers, templateScope, templateId, templateLocale, variables);
+    public void sendSms(String handlerName, Integer namespaceId, String[] phoneNumbers, String templateScope,
+                        int templateId, String templateLocale, List<Tuple<String, Object>> variables) {
+        doSendWhenFailedRetry(handlerName, namespaceId,
+                phoneNumbers, templateScope, templateId, templateLocale, variables, 2/*Retry times*/);
     }
 
-    private void doSend(String handlerName, Integer namespaceId, String[] phoneNumbers, String templateScope, int templateId, String templateLocale, List<Tuple<String, Object>> variables) {
+    private void doSend(String handlerName, Integer namespaceId, String[] phoneNumbers,
+            String templateScope, int templateId, String templateLocale, List<Tuple<String, Object>> variables) {
         Map<SmsHandler, String[]> handlersMap;
+
+        phoneNumbers = normalize(phoneNumbers);
+        validate(phoneNumbers);
 
         handlersMap = getSmsHandlerMap(handlerName, namespaceId, phoneNumbers);
 
         handlersMap.forEach((handler, phones) -> {
             publishEvent(() -> {
-                List<SmsLog> logs = handler.doSend(namespaceId, phones, templateScope, templateId, templateLocale, variables);
+                List<SmsLog> logs = handler.doSend(namespaceId, phones,
+                                templateScope, templateId, templateLocale, variables);
                 if (logs != null) {
-                    saveSmsLog(logs);
+                    saveSmsLog(logs, null);
                 }
             });
         });
 
         if (LOGGER.isDebugEnabled()) {
-            LOGGER.info("Send sms message, namespaceId=" + namespaceId + ", phoneNumbers=[" + StringUtils.join(phoneNumbers, ",")
-                    + "], templateScope=" + templateScope + ", templateId=" + templateId + ", templateLocale=" + templateLocale);
+            LOGGER.info(
+                    "Send sms message, namespaceId="
+                            + namespaceId
+                            + ", phoneNumbers=["
+                            + StringUtils.join(phoneNumbers, ",")
+                            + "], templateScope="
+                            + templateScope
+                            + ", templateId="
+                            + templateId
+                            + ", templateLocale="
+                            + templateLocale);
         }
-
     }
 
-    private Map<SmsHandler, String[]> getSmsHandlerMap(String handlerName, Integer namespaceId, String[] phoneNumbers) {
-        String val = configurationProvider.getValue(SMS_HANDLER_RESOLVER_NAME, "SMART");
+    private void doSendWhenFailedRetry(String handlerName, Integer namespaceId,
+                                       String[] phoneNumbers, String templateScope,
+                                       int templateId, String templateLocale,
+                                       List<Tuple<String, Object>> variables, int retryTimes) {
+        Map<SmsHandler, String[]> handlersMap;
+
+        phoneNumbers = normalize(phoneNumbers);
+        validate(phoneNumbers);
+
+        handlersMap = getSmsHandlerMap(handlerName, namespaceId, phoneNumbers);
+
+        handlersMap.forEach((handler, phones) -> {
+            publishEvent(() -> {
+                List<SmsLog> logs =
+                        handler.doSend(namespaceId, phones,
+                                templateScope, templateId, templateLocale, variables);
+                if (logs != null) {
+                    saveSmsLog(logs, logList -> {
+                        List<String> failedAndCorrectPhones =
+                                logList.stream()
+                                        .filter(r ->
+                                            SmsLogStatus.fromCode(r.getStatus()) == SmsLogStatus.SEND_FAILED)
+                                        // .filter(r ->
+                                        //     strictPhonePattern().matcher(r.getMobile()).matches())
+                                        .map(SmsLog::getMobile)
+                                        .collect(Collectors.toList());
+
+                        if (failedAndCorrectPhones.size() > 0 && retryTimes > 0) {
+                            doSendWhenFailedRetry(handlerName,
+                                    namespaceId,
+                                    failedAndCorrectPhones.toArray(new String[failedAndCorrectPhones.size()]),
+                                    templateScope,
+                                    templateId,
+                                    templateLocale,
+                                    variables,
+                                    retryTimes - 1);
+                        }
+                    });
+                }
+            });
+        });
+
+        if (LOGGER.isDebugEnabled()) {
+            LOGGER.info(
+                    "Send sms message, namespaceId="
+                            + namespaceId
+                            + ", phoneNumbers=["
+                            + StringUtils.join(phoneNumbers, ",")
+                            + "], templateScope="
+                            + templateScope
+                            + ", templateId="
+                            + templateId
+                            + ", templateLocale="
+                            + templateLocale);
+        }
+    }
+
+    private String[] normalize(String[] phoneNumbers) {
+        if (phoneNumbers == null) {
+            throw new IllegalArgumentException("Illegal argument phoneNumbers null.");
+        }
+        List<String> normalizedPhones = new ArrayList<>(phoneNumbers.length);
+        Pattern pattern = testPhonePattern();
+        for (String phoneNumber : phoneNumbers) {
+            if (phoneNumber == null) {
+                continue;
+            }
+            // 测试手机号，跳过
+            if (pattern.matcher(phoneNumber).matches()) {
+                LOGGER.debug("Test phone '{}' were found while send sms, SKIPPED.", phoneNumber);
+                continue;
+            }
+            normalizedPhones.add(phoneNumber.replaceAll("[_,.\\s+]", ""));
+        }
+        return normalizedPhones.toArray(new String[normalizedPhones.size()]);
+    }
+
+    private void validate(String[] phoneNumbers) {
+        Pattern pattern = strictPhonePattern();
+        for (String phoneNumber : phoneNumbers) {
+            if (phoneNumber.startsWith("00")) {
+                // 前缀带00的可能是国际手机号，国际手机号格式不确定，所以不做校验
+                continue;
+            }
+            if (!pattern.matcher(phoneNumber).matches()) {
+                throw RuntimeErrorException.errorWith(
+                        SmsServiceErrorCode.SCOPE,
+                        SmsServiceErrorCode.PHONE_VALIDATE_ERROR,
+                        "Invalid phone number '%s', this phone number maybe not used.",
+                        phoneNumber);
+            }
+        }
+    }
+
+    private Pattern testPhonePattern() {
+        try {
+            String reg = configurationProvider.getValue(SMS_TEST_PHONE_REGEX_KEY, SMS_TEST_PHONE_REGEX);
+            this.testPhonePattern = Pattern.compile(reg);
+        } catch (Exception e) {
+            //
+        }
+        return testPhonePattern;
+    }
+
+    private Pattern strictPhonePattern() {
+        try {
+            String reg = configurationProvider.getValue(SMS_STRICT_PHONE_REGEX_KEY, SMS_STRICT_PHONE_REGEX);
+            this.strictPhonePattern = Pattern.compile(reg);
+        } catch (Exception e) {
+            //
+        }
+        return strictPhonePattern;
+    }
+
+    private Map<SmsHandler, String[]> getSmsHandlerMap(
+            String handlerName, Integer namespaceId, String[] phoneNumbers) {
+        String val = configurationProvider.getValue(SMS_HANDLER_RESOLVER_NAME_KEY, "SMART");
 
         SmsHandlerResolver resolver = resolvers.get(SmsHandlerResolver.RESOLVER_NAME_PREFIX + val);
 
@@ -125,9 +256,12 @@ public class SmsProviderImpl implements SmsProvider {
         return handlersMap;
     }
 
-    private void saveSmsLog(List<SmsLog> smsLogList) {
+    private void saveSmsLog(List<SmsLog> smsLogList, Consumer<List<SmsLog>> c) {
         for (SmsLog smsLog : smsLogList) {
             smsLogProvider.createSmsLog(smsLog);
+        }
+        if (c != null) {
+            c.accept(smsLogList);
         }
     }
 
