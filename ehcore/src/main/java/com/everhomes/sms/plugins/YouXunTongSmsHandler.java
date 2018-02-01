@@ -57,7 +57,7 @@ public class YouXunTongSmsHandler extends BaseSmsHandler {
       }
      */
     @Override
-    RspMessage createAndSend(String[] phones, String sign, String content) {
+    protected RspMessage createAndSend(String[] phones, String sign, String content) {
         Map<String, String> message = new HashMap<>();
         message.put("phones", StringUtils.join(phones, ","));
         message.put("content", content);
@@ -72,11 +72,17 @@ public class YouXunTongSmsHandler extends BaseSmsHandler {
 
         String sid= SHA1Encode((token+"&"+ jsonMsg));
         params.put("sid", sid);
-        // return channel.sendMessage(server, SmsChannelBuilder.HttpMethod.POST.val(), params, null, null);
+
         return SmsChannelBuilder.create(false)
                 .setUrl(server)
                 .setBodyMap(params)
                 .send();
+    }
+
+    @Override
+    protected RspMessage createAndSendInternationalPhones(String[] phones, String sign, String content) {
+        // 优讯通目前不支持国际手机号发送短信
+        return new RspMessage("Not support international sms", -1, null);
     }
 
     String getHandlerName() {
@@ -93,7 +99,7 @@ public class YouXunTongSmsHandler extends BaseSmsHandler {
     */
     public List<SmsLog> buildSmsLogs(Integer namespaceId, String[] phoneNumbers, String templateScope, int templateId,
                                       String templateLocale, String content, RspMessage rspMessage) {
-        List<SmsLog> smsLogs = new ArrayList<>();
+        List<SmsLog> smsLogs = new ArrayList<>(phoneNumbers.length);
         Result res = new Result();
         String result = "failed";
 
@@ -103,7 +109,7 @@ public class YouXunTongSmsHandler extends BaseSmsHandler {
                 res = (Result) StringHelper.fromJsonString(rspMessage.getMessage(), Result.class);
             } catch (Exception e) {
                 for (String phoneNumber : phoneNumbers) {
-                    smsLogs.add(getSmsErrorLog(namespaceId, phoneNumber, templateScope, templateId, templateLocale, "Exception:"+result));
+                    smsLogs.add(getSmsErrorLog(namespaceId, phoneNumber, templateScope, templateId, templateLocale, content, result));
                 }
                 return smsLogs;
             }

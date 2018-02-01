@@ -3987,6 +3987,7 @@ public class QualityServiceImpl implements QualityService {
 		Double averageScore = 0D;
 		if (response.getScores() != null && response.getScores().size() > 0) {
 			for (ScoreGroupByTargetDTO score : response.getScores()) {
+				if (score != null)
 				sum = sum + score.getTotalScore();
 			}
 			averageScore = sum / response.getScores().size();
