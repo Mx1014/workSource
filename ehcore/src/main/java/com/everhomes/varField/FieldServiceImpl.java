@@ -714,7 +714,7 @@ public class FieldServiceImpl implements FieldService {
                 break;
             case "离场信息":
                 ListCustomerDepartureInfosCommand cmd12 = new ListCustomerDepartureInfosCommand();
-                cmd12.setCommunityId(customerId);
+                cmd12.setCustomerId(customerId);
                 cmd12.setCustomerType(customerType);
                 cmd12.setCommunityId(communityId);
                 cmd12.setNamespaceId(namespaceId);
@@ -729,7 +729,7 @@ public class FieldServiceImpl implements FieldService {
                 break;
             case "税务信息":
                 ListCustomerTaxesCommand cmd13 = new ListCustomerTaxesCommand();
-                cmd13.setCommunityId(customerId);
+                cmd13.setCustomerId(customerId);
                 cmd13.setCustomerType(customerType);
                 cmd13.setCommunityId(communityId);
                 cmd13.setNamespaceId(namespaceId);
@@ -744,7 +744,7 @@ public class FieldServiceImpl implements FieldService {
                 break;
             case "银行账号":
                 ListCustomerAccountsCommand cmd14 = new ListCustomerAccountsCommand();
-                cmd14.setCommunityId(customerId);
+                cmd14.setCustomerId(customerId);
                 cmd14.setCustomerType(customerType);
                 cmd14.setCommunityId(communityId);
                 cmd14.setNamespaceId(namespaceId);
