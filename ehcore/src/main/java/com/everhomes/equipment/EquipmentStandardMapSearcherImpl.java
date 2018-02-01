@@ -139,8 +139,9 @@ public class EquipmentStandardMapSearcherImpl extends AbstractElasticSearch impl
         } else {
             qb = QueryBuilders.multiMatchQuery(cmd.getKeyword())
             		.field("equipmentName", 1.2f)
-                    .field("standardNumber", 1.0f);
-            
+                    .field("standardNumber", 1.0f)
+                    .field("standardName", 1.2f);
+
             builder.setHighlighterFragmentSize(60);
             builder.setHighlighterNumOfFragments(8);
             builder.addHighlightedField("equipmentName").addHighlightedField("standardNumber");
@@ -277,6 +278,7 @@ public class EquipmentStandardMapSearcherImpl extends AbstractElasticSearch impl
             EquipmentInspectionStandards standard = equipmentProvider.findStandardById(map.getStandardId());
             if(standard != null) {
             	b.field("standardNumber", standard.getStandardNumber());
+            	b.field("standardName", standard.getName());
             	//add repeatType
 				b.field("repeatType", standard.getRepeatType());
 				b.field("namespaceId", standard.getNamespaceId());
@@ -292,7 +294,7 @@ public class EquipmentStandardMapSearcherImpl extends AbstractElasticSearch impl
 				b.field("namespaceId", equipment.getNamespaceId());
             	b.field("targetId", equipment.getTargetId());
             	b.field("targetType", equipment.getTargetType());
-            	b.field("equipmentName", equipment.getName());
+            	b.field("equipmentName", equipment.getName()).field("index","not_analyzed");
             	//add equipment   inspectionCategoryId and categoryId  V3.0.2
 				b.field("inspectionCategoryId", equipment.getInspectionCategoryId());
 				b.field("categoryId", equipment.getCategoryId());
