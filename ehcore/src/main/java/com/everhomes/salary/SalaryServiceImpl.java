@@ -2260,6 +2260,11 @@ public class SalaryServiceImpl implements SalaryService {
             CategoryDTO categoryDTO = ConvertHelper.convert(category, CategoryDTO.class);
             categoryDTO.setEntities(new ArrayList<>());
             for (SalaryGroupEntity entity : entities) {
+
+                if(SalaryEntityStatus.OPEN != SalaryEntityStatus.fromCode(entity.getStatus())){
+                    //跳过不是开启状态的
+                    continue;
+                }
                 if (entity.getCategoryId().equals(category.getId())) {
                     SalaryGroupEntityDTO dto = ConvertHelper.convert(entity, SalaryGroupEntityDTO.class);
                     categoryDTO.getEntities().add(dto);
@@ -2299,6 +2304,7 @@ public class SalaryServiceImpl implements SalaryService {
 //                salaryGroupEntityProvider.updateSalaryGroupEntity(entity);
 //                continue;
 //            }
+
             SalaryGroupEntityDTO dto = findSalaryGroupEntityDTOById(cmd.getEntities(), entity.getId());
             if (null == dto) {
                 //不可删除的跳过
@@ -2539,6 +2545,9 @@ public class SalaryServiceImpl implements SalaryService {
             categoryDTO.setEntities(new ArrayList<>());
             BigDecimal categoryValue = new BigDecimal(0);
             for (SalaryGroupEntity entity : entities) {
+                if(SalaryEntityStatus.OPEN != SalaryEntityStatus.fromCode(entity.getStatus())){
+                    continue;
+                }
                 if (entity.getCategoryId().equals(category.getId())) {
                     SalaryPeriodEmployeeEntityDTO dto = processSalaryPeriodEmployeeEntityDTO(entity, detail);
                     BigDecimal entityVal = new BigDecimal(0);
@@ -2653,7 +2662,13 @@ public class SalaryServiceImpl implements SalaryService {
         List<SalaryEmployeeOriginVal> vals = new ArrayList<>();
         if (null != groupEntities) {
             for (int i = 0; i < groupEntities.size(); i++) {
+
                 SalaryGroupEntity groupEntity = groupEntities.get(i);
+
+                if(SalaryEntityStatus.OPEN != SalaryEntityStatus.fromCode(groupEntity.getStatus())){
+                    //跳过不是开启状态的
+                    continue;
+                }
                 groupEntityIds.add(groupEntity.getId());
                 //i=0时候对应excel是C,所以i要+3
                 String val = r.getCells().get(GetExcelLetter(i + 3));
@@ -2837,26 +2852,26 @@ public class SalaryServiceImpl implements SalaryService {
         }
         BigDecimal taxBase = salary.subtract(new BigDecimal(3500));
         if (taxBase.compareTo(new BigDecimal(1500)) <= 0) {
-            result = taxBase.multiply(new BigDecimal(0.03));
+            result = taxBase.multiply(new BigDecimal(3)).divide(new BigDecimal(100), 2, BigDecimal.ROUND_HALF_EVEN);
         } else if (taxBase.compareTo(new BigDecimal(4500)) <= 0) {
-            result = taxBase.multiply(new BigDecimal(0.1)).subtract(new BigDecimal(105));
+            result = taxBase.multiply(new BigDecimal(10)).divide(new BigDecimal(100), 2, BigDecimal.ROUND_HALF_EVEN).subtract(new BigDecimal(105));
         } else if (taxBase.compareTo(new BigDecimal(9000)) <= 0) {
-            result = taxBase.multiply(new BigDecimal(0.2)).subtract(new BigDecimal(555));
+            result = taxBase.multiply(new BigDecimal(20)).divide(new BigDecimal(100), 2, BigDecimal.ROUND_HALF_EVEN).subtract(new BigDecimal(555));
         } else if (taxBase.compareTo(new BigDecimal(35000)) <= 0) {
-            result = taxBase.multiply(new BigDecimal(0.25)).subtract(new BigDecimal(1005));
+            result = taxBase.multiply(new BigDecimal(25)).divide(new BigDecimal(100), 2, BigDecimal.ROUND_HALF_EVEN).subtract(new BigDecimal(1005));
         } else if (taxBase.compareTo(new BigDecimal(55000)) <= 0) {
-            result = taxBase.multiply(new BigDecimal(0.3)).subtract(new BigDecimal(2755));
+            result = taxBase.multiply(new BigDecimal(30)).divide(new BigDecimal(100), 2, BigDecimal.ROUND_HALF_EVEN).subtract(new BigDecimal(2755));
         } else if (taxBase.compareTo(new BigDecimal(80000)) <= 0) {
-            result = taxBase.multiply(new BigDecimal(0.35)).subtract(new BigDecimal(5505));
+            result = taxBase.multiply(new BigDecimal(35)).divide(new BigDecimal(100), 2, BigDecimal.ROUND_HALF_EVEN).subtract(new BigDecimal(5505));
         } else {
-            result = taxBase.multiply(new BigDecimal(0.45)).subtract(new BigDecimal(13505));
+            result = taxBase.multiply(new BigDecimal(45)).divide(new BigDecimal(100), 2, BigDecimal.ROUND_HALF_EVEN).subtract(new BigDecimal(13505));
         }
         return result;
     }
 
 
     private String checkImportEmployeeSalaryTitle(Map<String, String> titleMap, Long organizationId) {
-        List<SalaryGroupEntity> groupEntities = salaryGroupEntityProvider.listSalaryGroupEntityByOrgId(organizationId);
+        List<SalaryGroupEntity> groupEntities = salaryGroupEntityProvider.listOpenSalaryGroupEntityByOrgId(organizationId);
         List<String> titleList = new ArrayList<String>(titleMap.values());
         if (!"手机".equals(titleList.get(0))) {
             LOGGER.error("第一列不是手机而是" + titleList.get(0));
@@ -2929,6 +2944,11 @@ public class SalaryServiceImpl implements SalaryService {
             row.createCell(++i).setCellValue(detail.getContactToken());
             row.createCell(++i).setCellValue(detail.getContactName());
             for (SalaryGroupEntity entity : groupEntities) {
+
+                if(SalaryEntityStatus.OPEN != SalaryEntityStatus.fromCode(entity.getStatus())){
+                    //跳过不是开启状态的
+                    continue;
+                }
                 SalaryEmployeeOriginVal val = salaryEmployeeOriginValProvider.findSalaryEmployeeOriginValByDetailId(entity.getId(), detailId);
                 if (val != null) {
                     row.createCell(++i).setCellValue(val.getSalaryValue());
@@ -2952,10 +2972,55 @@ public class SalaryServiceImpl implements SalaryService {
     }
 
     @Override
+    /**
+     * 如果month为空:则找归档里面最新的month
+     * 如果month不是空,则先找归档 找不到再找未归档,都没有则返回空
+     * */
     public GetSalaryGroupStatusResponse getSalaryGroupStatus(GetSalaryGroupStatusCommand cmd) {
         GetSalaryGroupStatusResponse response = new GetSalaryGroupStatusResponse();
-//        response.set
+        String month = cmd.getMonth();
+        if(null == month)
+            findSalaryMonth(cmd.getOwnerId());
+        response.setMonth(month);
+        SalaryGroupsFile groupFile = salaryGroupsFileProvider.findSalaryGroupsFile(cmd.getOwnerId(), cmd.getMonth());
+        if (null != groupFile) {
+            if (null != groupFile.getCreateTime()) {
+                response.setCreateTime(groupFile.getCreateTime().getTime());
+                OrganizationMemberDetails detail = organizationProvider.findOrganizationMemberDetailsByDetailId(groupFile.getCreatorUid());
+                if (null != detail) {
+                    response.setCreatorName(detail.getContactName());
+                }
+            }
+
+            if (null != groupFile.getFileTime()) {
+                response.setCreateTime(groupFile.getFileTime().getTime());
+                OrganizationMemberDetails detail = organizationProvider.findOrganizationMemberDetailsByDetailId(groupFile.getFilerUid());
+                if (null != detail) {
+                    response.setFilerName(detail.getContactName());
+                }
+            }
+
+        }else{
+            SalaryGroup sg= salaryGroupProvider.findSalaryGroup(cmd.getOwnerId(), cmd.getMonth());
+            if (null != sg) {
+                if (null != sg.getCreateTime()) {
+                    response.setCreateTime(sg.getCreateTime().getTime());
+                    OrganizationMemberDetails detail = organizationProvider.findOrganizationMemberDetailsByDetailId(sg.getCreatorUid());
+                    if (null != detail) {
+                        response.setCreatorName(detail.getContactName());
+                    }
+                }
+            }
+        }
+        response.setExportExcels(getExportExcels());
         return response;
+    }
+
+    private List<ExportExcelDTO> getExportExcels() {
+        List<ExportExcelDTO> result = new ArrayList<>();
+        result.add(new ExportExcelDTO(SalaryReportType.SALARY_DETAIL.getDescri(), String.valueOf(SalaryReportType.SALARY_DETAIL.getCode())));
+        result.add(new ExportExcelDTO(SalaryReportType.DPT_STATISTIC.getDescri(), String.valueOf(SalaryReportType.DPT_STATISTIC.getCode())));
+        return result;
     }
 
     @Override
@@ -2965,7 +3030,11 @@ public class SalaryServiceImpl implements SalaryService {
 
     @Override
     public void fileSalaryGroup(FileSalaryGroupCommand cmd) {
+        //计算
 
+
+        //归档
+        //三个表:groupfile employeefile employeePeriodVal
     }
 
     @Override
@@ -2974,7 +3043,7 @@ public class SalaryServiceImpl implements SalaryService {
     }
 
     private Workbook createEmployeeSalaryHeadWB(Long orgId) {
-        List<SalaryGroupEntity> groupEntities = salaryGroupEntityProvider.listSalaryGroupEntityByOrgId(orgId);
+        List<SalaryGroupEntity> groupEntities = salaryGroupEntityProvider.listOpenSalaryGroupEntityByOrgId(orgId);
 
         XSSFWorkbook wb = new XSSFWorkbook();
         XSSFSheet sheet = wb.createSheet("sheet1");

@@ -3,7 +3,6 @@ package com.everhomes.rest.salary;
 import com.everhomes.discover.ItemType;
 import com.everhomes.util.StringHelper;
 
-import java.sql.Date;
 import java.util.List;
 
 /**
@@ -14,29 +13,29 @@ import java.util.List;
  * <li>fileTime: 归档时间</li>
  * <li>isFile: 是否归档</li>
  * <li>month: 月份</li>
- * <li>exportExcels: 导出表列表 {@link com.everhomes.rest.salary.exportExcelDTO}</li>
+ * <li>exportExcels: 导出表列表 {@link ExportExcelDTO}</li>
  * </ul>
  */
 public class GetSalaryGroupStatusResponse {
     private String creatorName;
-    private Date createTime;
+    private Long createTime;
     private String filerName;
-    private Date fileTime;
+    private Long fileTime;
     private Byte isFile;
     private String month;
-    @ItemType(exportExcelDTO.class)
-    private List<exportExcelDTO> exportExcels;
+    @ItemType(ExportExcelDTO.class)
+    private List<ExportExcelDTO> exportExcels;
 
     @Override
     public String toString() {
         return StringHelper.toJsonString(this);
     }
 
-    public Date getCreateTime() {
+    public Long getCreateTime() {
         return createTime;
     }
 
-    public void setCreateTime(Date createTime) {
+    public void setCreateTime(Long createTime) {
         this.createTime = createTime;
     }
 
@@ -48,11 +47,11 @@ public class GetSalaryGroupStatusResponse {
         this.creatorName = creatorName;
     }
 
-    public List<exportExcelDTO> getExportExcels() {
+    public List<ExportExcelDTO> getExportExcels() {
         return exportExcels;
     }
 
-    public void setExportExcels(List<exportExcelDTO> exportExcels) {
+    public void setExportExcels(List<ExportExcelDTO> exportExcels) {
         this.exportExcels = exportExcels;
     }
 
@@ -64,11 +63,11 @@ public class GetSalaryGroupStatusResponse {
         this.filerName = filerName;
     }
 
-    public Date getFileTime() {
+    public Long getFileTime() {
         return fileTime;
     }
 
-    public void setFileTime(Date fileTime) {
+    public void setFileTime(Long fileTime) {
         this.fileTime = fileTime;
     }
 
