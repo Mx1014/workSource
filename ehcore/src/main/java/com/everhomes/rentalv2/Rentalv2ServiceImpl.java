@@ -548,7 +548,7 @@ public class Rentalv2ServiceImpl implements Rentalv2Service {
 				ruleType, id);
 		response.setAttachments(convertAttachments(attachments));
 
-		populateRentalRule(response, ruleType, id);
+//		populateRentalRule(response, ruleType, id);
 
 		return response;
 	}
@@ -709,8 +709,6 @@ public class Rentalv2ServiceImpl implements Rentalv2Service {
 //				response.getSiteNumbers().add(dto);
 //			}
 //		}
-
-
 
 	}
 
@@ -1198,17 +1196,22 @@ public class Rentalv2ServiceImpl implements Rentalv2Service {
 		if (null != pics)
 			rSiteDTO.setSitePics(convertRentalSitePicDTOs(pics));
 
-//		rSiteDTO.setSiteCounts(rentalSite.getResourceCounts());
-//		if(rentalSite.getAutoAssign().equals(NormalFlag.NEED.getCode())){
-//			List<RentalResourceNumber> resourceNumbers = this.rentalv2Provider.queryRentalResourceNumbersByOwner(
-//					EhRentalv2Resources.class.getSimpleName(),rentalSite.getId());
-//			if(null!=resourceNumbers){
-//				rSiteDTO.setSiteNumbers (new ArrayList<>());
-//				for(RentalResourceNumber number:resourceNumbers){
-//					rSiteDTO.getSiteNumbers().add( number.getResourceNumber());
-//				}
-//			}
-//		}
+		rSiteDTO.setSiteCounts(rentalSite.getResourceCounts());
+		if(rentalSite.getAutoAssign().equals(NormalFlag.NEED.getCode())){
+			List<RentalResourceNumber> resourceNumbers = this.rentalv2Provider.queryRentalResourceNumbersByOwner(
+					rentalSite.getResourceType(),EhRentalv2Resources.class.getSimpleName(),rentalSite.getId());
+			if(null!=resourceNumbers){
+				rSiteDTO.setSiteNumbers (new ArrayList<>());
+				for(RentalResourceNumber number:resourceNumbers){
+					SiteNumberDTO dto = new SiteNumberDTO();
+					dto.setSiteNumber(number.getResourceNumber());
+						dto.setSiteNumberGroup(number.getNumberGroup());
+						dto.setGroupLockFlag(number.getGroupLockFlag());
+						rSiteDTO.getSiteNumbers().add(dto);
+				}
+			}
+		}
+
 		//范围
 		List<RentalSiteRange> owners = this.rentalv2Provider.findRentalSiteOwnersBySiteId(rentalSite.getResourceType(),
 				rentalSite.getId());
@@ -6048,9 +6051,9 @@ public class Rentalv2ServiceImpl implements Rentalv2Service {
 			resource.setStatus(RentalSiteStatus.NORMAL.getCode());
 			resource.setAclinkId(cmd.getAclinkId());
 			//设置资源时
-			resource.setResourceCounts(1.0);
-			resource.setAutoAssign(NormalFlag.NONEED.getCode());
-			resource.setMultiUnit(NormalFlag.NONEED.getCode());
+			resource.setResourceCounts(cmd.getSiteCounts());
+
+			setRentalRuleSiteNumbers(resource.getResourceType(), EhRentalv2Resources.class.getSimpleName(), resource.getId(), cmd.getSiteNumbers());
 //			resource.setExclusiveFlag(defaultRule.getExclusiveFlag());
 //			resource.setDayOpenTime(defaultRule.getDayOpenTime());
 //			resource.setDayCloseTime(defaultRule.getDayCloseTime());
@@ -6308,9 +6311,16 @@ public class Rentalv2ServiceImpl implements Rentalv2Service {
 			rentalSite.setOfflinePayeeUid(cmd.getOfflinePayeeUid());
 			rentalSite.setConfirmationPrompt(cmd.getConfirmationPrompt());
 			rentalSite.setAclinkId(cmd.getAclinkId());
+			rentalSite.setMultiUnit(cmd.getMultiUnit());
+			rentalSite.setAutoAssign(cmd.getAutoAssign());
+			rentalSite.setResourceCounts(cmd.getSiteCounts());
 			rentalv2Provider.updateRentalSite(rentalSite);
 			this.rentalv2Provider.deleteRentalSitePicsBySiteId(rentalSite.getResourceType(), cmd.getId());
 			this.rentalv2Provider.deleteRentalSiteOwnersBySiteId(rentalSite.getResourceType(), cmd.getId());
+			//先删除
+			rentalv2Provider.deleteRentalResourceNumbersByOwnerId(rentalSite.getResourceType(), EhRentalv2Resources.class.getSimpleName(), rentalSite.getId());
+			//set site number
+			setRentalRuleSiteNumbers(rentalSite.getResourceType(), EhRentalv2Resources.class.getSimpleName(), rentalSite.getId(), cmd.getSiteNumbers());
 //			if(cmd.getOwners() != null){
 //				for(SiteOwnerDTO dto:cmd.getOwners()){
 //					RentalSiteRange siteOwner = ConvertHelper.convert(dto, RentalSiteRange.class);
