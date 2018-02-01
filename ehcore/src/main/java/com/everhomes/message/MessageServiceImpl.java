@@ -6,7 +6,6 @@ import java.util.HashSet;
 import java.util.List;
 import java.util.Set;
 
-import com.everhomes.user.UserLogin;
 import org.apache.commons.lang.StringUtils;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -113,10 +112,8 @@ public class MessageServiceImpl implements MessageService {
 
 	}
 
-	@Override
-	public void persistMessage(MessageRecord record) {
-		this.messageProvider.createMessageRecord(record);
-		System.out.print("persitstMessage finished");
+	public void persistMessage(List<MessageRecord> records) {
+		this.messageProvider.createMessageRecords(records);
 	}
 
 }

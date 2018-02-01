@@ -10,12 +10,14 @@ import com.everhomes.sequence.SequenceProvider;
 import com.everhomes.server.schema.Tables;
 import com.everhomes.server.schema.tables.daos.EhMessageRecordsDao;
 import com.everhomes.server.schema.tables.pojos.EhMessageRecords;
+import com.everhomes.util.ConvertHelper;
 import com.everhomes.util.DateHelper;
 import org.jooq.DSLContext;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
 
 import java.sql.Timestamp;
+import java.util.ArrayList;
 import java.util.List;
 
 @Component
@@ -36,6 +38,21 @@ public class MessageProviderImpl implements MessageProvider {
         EhMessageRecordsDao dao = new EhMessageRecordsDao(context.configuration());
         dao.insert(messageRecord);
         DaoHelper.publishDaoAction(DaoAction.CREATE, EhMessageRecords.class, messageRecord.getId());
+    }
+
+    @Override
+    public void createMessageRecords(List<MessageRecord> messageRecords) {
+        List<EhMessageRecords> records = new ArrayList<>();
+        messageRecords.forEach(r->{
+            r.setCreateTime(new Timestamp(DateHelper.currentGMTTime().getTime()));
+            long id = this.sequenceProvider.getNextSequence(NameMapper.getSequenceDomainFromTablePojo(EhMessageRecords.class));
+            r.setId(id);
+            records.add(ConvertHelper.convert(r, EhMessageRecords.class));
+        });
+        DSLContext context = dbProvider.getDslContext(AccessSpec.readWrite());
+        EhMessageRecordsDao dao = new EhMessageRecordsDao(context.configuration());
+        dao.insert(records);
+        DaoHelper.publishDaoAction(DaoAction.CREATE, EhMessageRecords.class, null);
     }
 
     @Override

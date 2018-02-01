@@ -1,6 +1,8 @@
 package com.everhomes.util;
 
 import com.everhomes.rest.message.MessageRecordDto;
+import com.everhomes.rest.message.PersistMessageRecordCommand;
+import com.everhomes.rest.messaging.MessageDTO;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -14,7 +16,9 @@ import org.springframework.util.concurrent.ListenableFutureCallback;
 import org.springframework.web.client.AsyncRestTemplate;
 
 import javax.annotation.PostConstruct;
+import java.util.ArrayList;
 import java.util.HashMap;
+import java.util.List;
 import java.util.Map;
 import java.util.concurrent.ConcurrentLinkedQueue;
 
@@ -41,21 +45,37 @@ public class MessagePersistWorker {
     private TaskScheduler taskScheduler;
 
     @PostConstruct
-    public void setup(){
-        taskScheduler.scheduleAtFixedRate(()-> {
-            while (!queue.isEmpty()){
-                MessageRecordDto record = queue.poll();
-                this.handleMessagePersist(record);
+    public void setup() {
+        ExecutorUtil.submit(new Runnable() {
+            @Override
+            public void run() {
+                List<MessageRecordDto> dtos = new ArrayList<>();
+                for (; ; ) {
+                    while (!queue.isEmpty() || dtos.size() <= 100) {
+                        MessageRecordDto record = queue.poll();
+                        dtos.add(record);
+                    }
+                    handleMessagePersist(dtos);
+                }
             }
-        }, 5*1000);
+        });
     }
 
 
     //消息持久化
-    public void handleMessagePersist(MessageRecordDto record) {
+    public void handleMessagePersist(List<MessageRecordDto> recordDtos) {
+
+        List<PersistMessageRecordCommand> dtos = new ArrayList<>();
+
+        recordDtos.forEach(r->{
+            PersistMessageRecordCommand cmd = new PersistMessageRecordCommand();
+            cmd.setMessageRecordDto(r.toString());
+            dtos.add(cmd);
+        });
 
         Map<String, String> params = new HashMap<>();
-        params.put("messageRecordDto", record.toString());
+//        params.put("messageRecordDto", dtos.toString());
+        params.put("dtos", dtos.toString());
 
         this.restCall("/message/persistMessage", params, new ListenableFutureCallback<ResponseEntity<String>>() {
 

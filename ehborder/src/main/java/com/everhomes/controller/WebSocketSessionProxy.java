@@ -3,6 +3,7 @@ package com.everhomes.controller;
 import com.everhomes.rest.message.MessageRecordDto;
 
 import com.everhomes.rest.message.MessageRecordStatus;
+import com.everhomes.rest.message.PersistMessageRecordCommand;
 import com.everhomes.util.SignatureHelper;
 import com.everhomes.util.StringHelper;
 import org.slf4j.LoggerFactory;
@@ -17,8 +18,11 @@ import org.springframework.web.client.AsyncRestTemplate;
 import org.springframework.web.socket.WebSocketMessage;
 import org.springframework.web.socket.WebSocketSession;
 
+import javax.annotation.PostConstruct;
 import java.io.IOException;
+import java.util.ArrayList;
 import java.util.HashMap;
+import java.util.List;
 import java.util.Map;
 import java.util.concurrent.ConcurrentLinkedQueue;
 
@@ -42,12 +46,20 @@ public class WebSocketSessionProxy {
         return queue;
     }
 
-    @Scheduled(fixedDelay = 5000)
+    @PostConstruct
     public void setup() {
-        while (!queue.isEmpty()) {
-            MessageRecordDto record = queue.poll();
-            handleMessagePersist(record);
-        }
+        new Thread(){
+            public void run(){
+                List<MessageRecordDto> dtos = new ArrayList<>();
+                for (; ; ) {
+                    while (!queue.isEmpty() || dtos.size() <= 100) {
+                        MessageRecordDto record = queue.poll();
+                        dtos.add(record);
+                    }
+                    handleMessagePersist(dtos);
+                }
+            }
+        }.start();
     }
 
     public static void sendMessage(WebSocketSession session, WebSocketMessage message, String senderTag, String token) {
@@ -88,12 +100,23 @@ public class WebSocketSessionProxy {
 
 
     //消息持久化
-    public void handleMessagePersist(MessageRecordDto record) {
+    public void handleMessagePersist(List<MessageRecordDto> recordDtos) {
+
+        List<PersistMessageRecordCommand> dtos = new ArrayList<>();
+
+        recordDtos.forEach(r->{
+            PersistMessageRecordCommand cmd = new PersistMessageRecordCommand();
+            cmd.setMessageRecordDto(r.toString());
+            cmd.setDeviceId(r.getDeviceId().toString());
+            cmd.setSessionToken(r.getSessionToken());
+            dtos.add(cmd);
+        });
 
         Map<String, String> params = new HashMap<>();
-        params.put("messageRecordDto", record.toString());
-        params.put("sessionToken", record.getSessionToken());
-        params.put("deviceId", record.getDeviceId().toString());
+//        params.put("messageRecordDto", record.toString());
+//        params.put("sessionToken", record.getSessionToken());
+//        params.put("deviceId", record.getDeviceId().toString());
+        params.put("dtos", dtos.toString());
 
         this.restCall("/message/persistMessage", params, new ListenableFutureCallback<ResponseEntity<String>>() {
 
