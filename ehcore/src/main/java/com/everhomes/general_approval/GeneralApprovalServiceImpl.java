@@ -914,15 +914,17 @@ public class GeneralApprovalServiceImpl implements GeneralApprovalService {
                 query.addConditions(GeneralApprovalFlowCaseCustomField.CREATOR_DEPARTMENT_ID.getField().eq(cmd.getCreatorDepartmentId()));
             return query;
         });
-        if (details != null && details.size() > 0) {
-            List<GeneralApprovalRecordDTO> results = details.stream().map(r -> {
 
+        if (details != null && details.size() > 0) {
+
+            if (details.size() > count)
+                details.remove(details.size() - 1);
+            List<GeneralApprovalRecordDTO> results = details.stream().map(r -> {
                 GeneralApprovalRecordDTO dto = convertGeneralApprovalRecordDTO(r);
                 return dto;
             }).collect(Collectors.toList());
             response.setRecords(results);
             response.setNextPageAnchor(locator.getAnchor());
-
         }
         return response;
     }
