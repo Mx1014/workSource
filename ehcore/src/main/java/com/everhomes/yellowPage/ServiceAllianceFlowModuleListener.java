@@ -389,7 +389,7 @@ public class ServiceAllianceFlowModuleListener extends GeneralApprovalFlowModule
 
 		List<FlowCaseEntity> entities = new ArrayList<>();
 		if(flowCase.getCreateTime()!=null){
-			entities.add(new FlowCaseEntity("申请时间",FlowCaseEntityType.MULTI_LINE.getCode(), flowCase.getCreateTime().toLocalDateTime().format(fmt)));
+			entities.add(new FlowCaseEntity("申请时间",flowCase.getCreateTime().toLocalDateTime().format(fmt),FlowCaseEntityType.MULTI_LINE.getCode()));
 		}
 
 		GeneralApprovalVal val = this.generalApprovalValProvider.getGeneralApprovalByFlowCaseAndName(flowCase.getId(),
