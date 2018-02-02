@@ -393,7 +393,7 @@ public class ServiceAllianceFlowModuleListener extends GeneralApprovalFlowModule
 		}
 
 		GeneralApprovalVal val = this.generalApprovalValProvider.getGeneralApprovalByFlowCaseAndName(flowCase.getId(),
-				GeneralFormDataSourceType.USER_NAME.getCode());
+				GeneralFormDataSourceType.SOURCE_ID.getCode());
 		Long yellowPageId = Long.valueOf(JSON.parseObject(val.getFieldStr3(), PostApprovalFormTextValue.class).getText());
 		ServiceAlliances  yellowPage = yellowPageProvider.findServiceAllianceById(yellowPageId,null,null);
 		entities.add(new FlowCaseEntity("服务名称",FlowCaseEntityType.MULTI_LINE.getCode(),yellowPage.getName()));
@@ -403,6 +403,8 @@ public class ServiceAllianceFlowModuleListener extends GeneralApprovalFlowModule
 		GeneralForm form = this.generalFormProvider.getActiveGeneralFormByOriginIdAndVersion(
 				val.getFormOriginId(), val.getFormVersion());
 		List<GeneralFormFieldDTO> fieldDTOs = JSONObject.parseArray(form.getTemplateText(), GeneralFormFieldDTO.class);
+		val = this.generalApprovalValProvider.getGeneralApprovalByFlowCaseAndName(flowCase.getId(),
+				GeneralFormDataSourceType.USER_NAME.getCode());
 		GeneralFormFieldDTO dto = getFieldDTO(val.getFieldName(),fieldDTOs); 
 		entities.add(new FlowCaseEntity(dto.getFieldDisplayName(),FlowCaseEntityType.MULTI_LINE.getCode(),JSON.parseObject(val.getFieldStr3(), PostApprovalFormTextValue.class).getText()));
 		
