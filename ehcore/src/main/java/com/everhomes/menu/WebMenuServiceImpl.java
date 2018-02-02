@@ -279,14 +279,19 @@ public class WebMenuServiceImpl implements WebMenuService {
 
 		//return processWebMenus(dtos, ConvertHelper.convert(menu, WebMenuDTO.class)).getDtos();
 
-
-
-		//TODO
-		//前面的不要了
+		//TODO 前面的代码需要提供当前用户有权限的appOriginIds，其他的所有逻辑都不要了
+		//全部appOriginIds   参考serviceModuleAppService.listReleaseServiceModuleApps
 		List<Long> appOriginIds = null;
-		String organizationType = OrganizationType.PM.getCode();
+		List<WebMenuDTO> webMenuDTOS = listWebMenuByApp(WebMenuType.PARK.getCode(), appOriginIds);
+		return webMenuDTOS;
+
+	}
+
+	private List<WebMenuDTO> listWebMenuByApp(String webMenuType, List<Long> appOriginIds){
+
 		Integer namespaceId = UserContext.getCurrentNamespaceId();
 
+		//TODO for test waiting for delete
 		if(appOriginIds == null || appOriginIds.size() == 0){
 			List<ServiceModuleApp> serviceModuleApps = serviceModuleAppService.listReleaseServiceModuleApps(namespaceId);
 			if(serviceModuleApps == null || serviceModuleApps.size() == 0){
@@ -296,10 +301,7 @@ public class WebMenuServiceImpl implements WebMenuService {
 			appOriginIds = serviceModuleApps.stream().map(r -> r.getOriginId()).collect(Collectors.toList());
 		}
 
-		//前面这段只是为了拿到appOriginIds、organizationType和namespaceId
-
-
-		List<WebMenu> webMenus = listWebMenuByAppOriginIds(namespaceId, appOriginIds, organizationType);
+		List<WebMenu> webMenus = listWebMenuByAppOriginIds(namespaceId, webMenuType, appOriginIds);
 		List<WebMenu> parentMenus = listParentMenus(webMenus);
 		webMenus.addAll(parentMenus);
 
@@ -311,7 +313,6 @@ public class WebMenuServiceImpl implements WebMenuService {
 
 		WebMenuDTO treeDto = processWebMenus(webMenuDtos, null);
 		return treeDto.getDtos();
-
 
 	}
 
@@ -336,9 +337,18 @@ public class WebMenuServiceImpl implements WebMenuService {
 		}
 		menus = filterMenus(menus, organizationId);
 		LOGGER.debug("listEnterpriseWebMenu after filter menus: {}", menus);
-		return processWebMenus(menus.stream().map(r->{
-			return ConvertHelper.convert(r, WebMenuDTO.class);
-		}).collect(Collectors.toList()), ConvertHelper.convert(menu, WebMenuDTO.class)).getDtos();
+//		return processWebMenus(menus.stream().map(r->{
+//			return ConvertHelper.convert(r, WebMenuDTO.class);
+//		}).collect(Collectors.toList()), ConvertHelper.convert(menu, WebMenuDTO.class)).getDtos();
+
+
+		//TODO 前面的代码需要提供当前用户有权限的appOriginIds，其他的所有逻辑都不要了
+		//全部appOriginIds   参考serviceModuleAppService.listReleaseServiceModuleApps
+
+		List<Long> appOriginIds = null;
+		List<WebMenuDTO> webMenuDTOS = listWebMenuByApp(WebMenuType.ORGANIZATION.getCode(), appOriginIds);
+		return webMenuDTOS;
+
 	}
 
 	private List<WebMenuDTO> listZuolinAdminWebMenu(Long userId, WebMenu menu, List<String> categories) {
@@ -634,7 +644,7 @@ public class WebMenuServiceImpl implements WebMenuService {
 	}
 
 
-	private List<WebMenu> listWebMenuByAppOriginIds(Integer namespaceId, List<Long> appOrginIds, String organizationType){
+	private List<WebMenu> listWebMenuByAppOriginIds(Integer namespaceId, String webMenuType,  List<Long> appOrginIds){
 
 		if(appOrginIds == null || appOrginIds.size() == 0){
 			return null;
@@ -646,13 +656,7 @@ public class WebMenuServiceImpl implements WebMenuService {
 			return null;
 		}
 
-		List<WebMenu> allMenus = null;
-		if(OrganizationType.fromCode(organizationType) == OrganizationType.PM){
-			allMenus = webMenuProvider.listWebMenus(null, WebMenuType.PARK.getCode());
-		}else {
-			allMenus = webMenuProvider.listWebMenus(null, WebMenuType.ORGANIZATION.getCode());
-		}
-
+		List<WebMenu> allMenus = webMenuProvider.listWebMenus(null, webMenuType);
 
 		List<WebMenu> menus = new ArrayList<>();
 		for(ServiceModuleApp app: serviceModuleApps){
