@@ -67,7 +67,7 @@ public class MessageController extends ControllerBase {
 
 				//当deviceId存在时，使用deviceId解析接收者
 				if(singleCmd.get("deviceId") != null & StringUtils.isNotEmpty(singleCmd.get("deviceId").toString())){
-					Long dstChannelToken = statEventDeviceLogProvider.findUidByDeviceId(singleCmd.getDeviceId());
+					Long dstChannelToken = statEventDeviceLogProvider.findUidByDeviceId(singleCmd.get("deviceId").toString());
 					if(dstChannelToken != null && dstChannelToken != 0L){
 						record.setDstChannelToken(dstChannelToken.toString());
 						record.setDstChannelType(ChannelType.USER.getCode());
