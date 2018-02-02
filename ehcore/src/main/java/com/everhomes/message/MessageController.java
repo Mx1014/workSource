@@ -57,7 +57,7 @@ public class MessageController extends ControllerBase {
 				MessageRecord record = (MessageRecord)StringHelper.fromJsonString((String)singleCmd.get("messageRecordDto"), MessageRecord.class);
 
 				//当存在自sessionToken时，使用sessionToken解析接收者
-				if(singleCmd.get("sessionToken") != null & StringUtils.isNotEmpty(singleCmd.get("sessionToken").toString())){
+				if(singleCmd.get("sessionToken") != null && StringUtils.isNotEmpty(singleCmd.get("sessionToken").toString())){
 					LoginToken login = WebTokenGenerator.getInstance().fromWebToken(singleCmd.get("sessionToken").toString(), LoginToken.class);
 					if(login != null){
 						record.setDstChannelToken(String.valueOf(login.getUserId()));
@@ -66,7 +66,7 @@ public class MessageController extends ControllerBase {
 				}
 
 				//当deviceId存在时，使用deviceId解析接收者
-				if(singleCmd.get("deviceId") != null & StringUtils.isNotEmpty(singleCmd.get("deviceId").toString())){
+				if(singleCmd.get("deviceId") != null && StringUtils.isNotEmpty(singleCmd.get("deviceId").toString())){
 					Long dstChannelToken = statEventDeviceLogProvider.findUidByDeviceId(singleCmd.get("deviceId").toString());
 					if(dstChannelToken != null && dstChannelToken != 0L){
 						record.setDstChannelToken(dstChannelToken.toString());
