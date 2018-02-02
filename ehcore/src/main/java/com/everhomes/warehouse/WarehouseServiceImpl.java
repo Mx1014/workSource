@@ -1561,6 +1561,9 @@ public class WarehouseServiceImpl implements WarehouseService {
             WarehouseStockLogs stockLog = new WarehouseStockLogs();
             stockLog.setWarehouseOrderId(order.getId());
             stockLog.setNamespaceId(cmd.getNamespaceId());
+            stockLog.setOwnerId(cmd.getOwnerId());
+            stockLog.setOwnerType(cmd.getOwnerType());
+            stockLog.setRequestUid(UserContext.currentUserId());
             stockLog.setCommunityId(cmd.getOwnerId());
             stockLog.setCreateTime(new Timestamp(DateHelper.currentGMTTime().getTime()));
             stockLog.setDeliveryAmount(dto.getQuantity());
