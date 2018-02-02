@@ -1490,7 +1490,7 @@ ALTER TABLE `eh_organization_member_details` ADD COLUMN `accumulation_fund_statu
 
 -- 社保结束
 
---工位预定开始 dengs
+-- 工位预定开始 dengs
 
 -- by dengs. 工位预约添加范围 20180120
 ALTER TABLE `eh_office_cubicle_spaces` ADD COLUMN `owner_type` VARCHAR(128);
@@ -1518,4 +1518,4 @@ CREATE TABLE `eh_office_cubicle_ranges` (
   PRIMARY KEY (`id`)
 ) ENGINE=INNODB DEFAULT CHARSET=utf8mb4;
 
---工位预定结束
+-- 工位预定结束
