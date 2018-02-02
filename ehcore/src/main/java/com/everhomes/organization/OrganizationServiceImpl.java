@@ -331,7 +331,9 @@ public class OrganizationServiceImpl implements OrganizationService {
         if(down_organization != null){
             OrganizationDTO orgDto_error = new OrganizationDTO();
             orgDto_error.setErrorCode(OrganizationServiceErrorCode.ERROR_DEPARTMENT_EXISTS);
-            return orgDto_error;
+            LOGGER.error("name repeat, cmd = {}", cmd);
+            throw RuntimeErrorException.errorWith(OrganizationServiceErrorCode.SCOPE, OrganizationServiceErrorCode.ERROR_DEPARTMENT_EXISTS,
+                    "name repeat");
         }
 
         //default show navi, add by sfyan 20160505
