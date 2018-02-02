@@ -2167,6 +2167,7 @@ private void checkUserPrivilege(Long orgId, Long privilegeId, Long communityId) 
 
 	@Override
 	public void reviewEquipmentTasks(ReviewEquipmentTasksCommand cmd) {
+		//可以合并为一个接口 新模式 后面再改
 		cmd.getTaskIds().forEach(taskId -> {
 			ReviewEquipmentTaskCommand command = new ReviewEquipmentTaskCommand();
 			command.setEndTime(cmd.getEndTime());

@@ -140,16 +140,15 @@ public class EquipmentSearcherImpl extends AbstractElasticSearch implements Equi
         FilterBuilder fb = null;
         FilterBuilder nfb = FilterBuilders.termFilter("status", EquipmentStatus.INACTIVE.getCode());
     	fb = FilterBuilders.notFilter(nfb);
-        //分公司和总公司的问题，改为用namespaceId来弄 by xiongying20170328
+
         fb = FilterBuilders.andFilter(fb, FilterBuilders.termFilter("namespaceId",cmd.getNamespaceId()));
-//        fb = FilterBuilders.andFilter(fb, FilterBuilders.termFilter("ownerId", cmd.getOwnerId()));
-//        fb = FilterBuilders.andFilter(fb, FilterBuilders.termFilter("ownerType", OwnerType.fromCode(cmd.getOwnerType()).getCode()));
-        if(cmd.getTargetId() != null)
-        	fb = FilterBuilders.andFilter(fb, FilterBuilders.termFilter("targetId", cmd.getTargetId()));
-        
-        if(!StringUtils.isNullOrEmpty(cmd.getTargetType()))
-        	fb = FilterBuilders.andFilter(fb, FilterBuilders.termFilter("targetType", OwnerType.fromCode(cmd.getTargetType()).getCode()));
-        
+
+        if (cmd.getTargetId() != null && cmd.getTargetId() != 0L) {
+            fb = FilterBuilders.andFilter(fb, FilterBuilders.termFilter("targetId", cmd.getTargetId()));
+            if (!StringUtils.isNullOrEmpty(cmd.getTargetType()))
+                fb = FilterBuilders.andFilter(fb, FilterBuilders.termFilter("targetType", OwnerType.fromCode(cmd.getTargetType()).getCode()));
+        }
+
         if(cmd.getStatus() != null)
         	fb = FilterBuilders.andFilter(fb, FilterBuilders.termFilter("status", cmd.getStatus()));
         
