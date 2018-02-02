@@ -232,7 +232,9 @@ public class ServiceAllianceRequestInfoSearcherImpl extends AbstractElasticSearc
                     request.setCreatorOrganizationId(Long.valueOf(organizationvalue.getText()));
                 }
             }
-            request.setCreatorMobile(identifier.getIdentifierToken());
+            if(identifier!=null) {
+                request.setCreatorMobile(identifier.getIdentifierToken());
+            }
             if (EntityType.COMMUNITY.getCode().equals(flowCase.getProjectType()) || "community".equals(flowCase.getProjectType())
                     || EhCommunities.class.getName().equals(flowCase.getProjectType())){
             	// bydengs,修改owner
