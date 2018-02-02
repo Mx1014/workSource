@@ -781,18 +781,19 @@ public class Rentalv2AdminController extends ControllerBase {
 	}
 	/*-------------------------------------------新的更新资源接口---------------------------------- */
 	/**
-	 *
-	 * <b>URL: /rental/admin/getResourceSiteCount<b>
-	 * <p>获取价格规则</p>
+	 * <b>URL: /rental/admin/getResourceAttachment</b>
+	 * <p>
+	 * 查询资源的提交信息
+	 * </p>
 	 */
-	@RequestMapping("getResourceSiteCount")
-	@RestReturn(ResourceSiteCountDTO.class)
-	public RestResponse getResourceSiteCount(GetResourceSiteCountCommand cmd) {
-		RestResponse response = new RestResponse(rentalService.getResourceSiteCount(cmd));
+
+	@RequestMapping("getResourceAttachment")
+	@RestReturn(value = ResourceAttachmentDTO.class)
+	public RestResponse getResourceAttachment(@Valid GetResourceAttachmentCommand cmd) {
+		RestResponse response = new RestResponse(rentalService.getResourceAttachment(cmd));
 		response.setErrorCode(ErrorCodes.SUCCESS);
 		response.setErrorDescription("OK");
 		return response;
 	}
-
 
 }

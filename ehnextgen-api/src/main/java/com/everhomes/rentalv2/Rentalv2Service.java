@@ -1,10 +1,8 @@
 package com.everhomes.rentalv2;
 
 import java.util.List;
-import java.util.Map;
 
 import javax.servlet.http.HttpServletResponse;
-import javax.validation.Valid;
 
 import com.everhomes.rest.order.CommonOrderDTO;
 import com.everhomes.rest.order.PreOrderDTO;
@@ -174,7 +172,7 @@ public interface Rentalv2Service {
 
 	ResourceOrderRuleDTO getResourceOrderRule(GetResourceOrderRuleCommand cmd);
 
-	ResourceSiteCountDTO getResourceSiteCount(GetResourceSiteCountCommand cmd);
+	ResourceAttachmentDTO getResourceAttachment(GetResourceAttachmentCommand cmd);
 
 	AddRentalOrderUsingInfoResponse addRentalOrderUsingInfo(AddRentalOrderUsingInfoCommand cmd);
 

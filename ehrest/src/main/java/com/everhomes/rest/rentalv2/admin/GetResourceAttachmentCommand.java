@@ -1,10 +1,8 @@
 package com.everhomes.rest.rentalv2.admin;
 
-import com.everhomes.discover.ItemType;
 import com.everhomes.rest.rentalv2.RentalV2ResourceType;
 import com.everhomes.rest.rentalv2.RuleSourceType;
-
-import java.util.List;
+import com.everhomes.util.StringHelper;
 
 /**
  * <ul>
@@ -13,14 +11,11 @@ import java.util.List;
  * <li>resourceTypeId: 图标id</li>
  * <li>resourceType: resourceType {@link RentalV2ResourceType}</li>
  * <li>sourceType: sourceType 默认规则：default_rule， 资源规则：resource_rule{@link RuleSourceType}</li>
- * <li>sourceId: 资源id</li>
- * <li>	exclusiveFlag：    	是否为独占资源0否 1 是	</li>
- * <li>	autoAssign：       	是否动态分配 1是 0否	</li>
- * <li>	siteCounts：资源数量</li>
- * <li>	siteNumbers：资源编号列表 {String}</li>
+ * <li>sourceId: 资源id 默认规则不填</li>
+ * <li>attachmentType: 附件类型 {@link com.everhomes.rest.rentalv2.admin.AttachmentType}</li>
  * </ul>
  */
-public class ResourceSiteCountDTO {
+public class GetResourceAttachmentCommand {
     private String ownerType;
 
     private Long ownerId;
@@ -32,11 +27,13 @@ public class ResourceSiteCountDTO {
     private String sourceType;
 
     private Long sourceId;
-    private java.lang.Byte       exclusiveFlag;
-    private java.lang.Byte       autoAssign;
-    private Double siteCounts;
-    @ItemType(String.class)
-    private List<String> siteNumbers;
+
+    private Byte attachmentType;
+
+    @Override
+    public String toString() {
+        return StringHelper.toJsonString(this);
+    }
 
     public String getOwnerType() {
         return ownerType;
@@ -86,35 +83,11 @@ public class ResourceSiteCountDTO {
         this.sourceId = sourceId;
     }
 
-    public Byte getExclusiveFlag() {
-        return exclusiveFlag;
+    public Byte getAttachmentType() {
+        return attachmentType;
     }
 
-    public void setExclusiveFlag(Byte exclusiveFlag) {
-        this.exclusiveFlag = exclusiveFlag;
-    }
-
-    public Byte getAutoAssign() {
-        return autoAssign;
-    }
-
-    public void setAutoAssign(Byte autoAssign) {
-        this.autoAssign = autoAssign;
-    }
-
-    public Double getSiteCounts() {
-        return siteCounts;
-    }
-
-    public void setSiteCounts(Double siteCounts) {
-        this.siteCounts = siteCounts;
-    }
-
-    public List<String> getSiteNumbers() {
-        return siteNumbers;
-    }
-
-    public void setSiteNumbers(List<String> siteNumbers) {
-        this.siteNumbers = siteNumbers;
+    public void setAttachmentType(Byte attachmentType) {
+        this.attachmentType = attachmentType;
     }
 }
