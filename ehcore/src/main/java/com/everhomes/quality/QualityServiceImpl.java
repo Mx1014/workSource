@@ -354,6 +354,10 @@ public class QualityServiceImpl implements QualityService {
 		standard.setStandardNumber(cmd.getStandardNumber());
 		standard.setDescription(cmd.getDescription());
 		standard.setOperatorUid(user.getId());
+		//要求重新审批
+		standard.setReviewerUid(0L);
+		standard.setReviewResult(ReviewResult.NONE.getCode());
+		standard.setStatus(QualityStandardStatus.WAITING.getCode());
 		qualityProvider.updateQualityInspectionStandards(standard);
 
 		createQualityInspectionStandardLogs(standard, QualityInspectionLogProcessType.UPDATE.getCode(),
