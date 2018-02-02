@@ -39,7 +39,8 @@ public class SalaryDepartStatisticProviderImpl implements SalaryDepartStatisticP
         Long id = sequenceProvider.getNextSequence(NameMapper.getSequenceDomainFromTablePojo(EhSalaryDepartStatistics.class));
         salaryDepartStatistic.setId(id);
         salaryDepartStatistic.setCreateTime(new Timestamp(DateHelper.currentGMTTime().getTime()));
-        salaryDepartStatistic.setCreatorUid(UserContext.current().getUser().getId());
+        if(null == salaryDepartStatistic.getCreatorUid())
+            salaryDepartStatistic.setCreatorUid(UserContext.currentUserId());
 //		salaryDepartStatistic.setUpdateTime(salaryDepartStatistic.getCreateTime());
 //		salaryDepartStatistic.setOperatorUid(salaryDepartStatistic.getCreatorUid());
         getReadWriteDao().insert(salaryDepartStatistic);

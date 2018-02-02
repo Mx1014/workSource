@@ -6,7 +6,7 @@ import java.util.Map;
 
 import com.everhomes.listing.CrossShardListingLocator;
 import com.everhomes.listing.ListingQueryBuilderCallback;
-import com.everhomes.portal.ServiceModuleApp;
+import com.everhomes.serviceModuleApp.ServiceModuleApp;
 import com.everhomes.rest.portal.ServiceModuleAppDTO;
 import org.jooq.Condition;
 
