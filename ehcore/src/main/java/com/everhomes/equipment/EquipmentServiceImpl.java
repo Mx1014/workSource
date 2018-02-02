@@ -5997,10 +5997,16 @@ private void checkUserPrivilege(Long orgId, Long privilegeId, Long communityId) 
 
 	@Override
 	public List<EquipmentOperateLogsDTO> listOperateLogs(DeleteEquipmentsCommand cmd) {
-		List<EquipmentInspectionTasksLogs> logs = equipmentProvider.listEquipmentOperateLogsByTargetId(cmd.getEquipmentId());
+		List<EquipmentInspectionEquipmentLogs> logs = equipmentProvider.listEquipmentOperateLogsByTargetId(cmd.getEquipmentId());
 		if (logs != null && logs.size() > 0) {
-			return logs.stream().map((r) ->
-					ConvertHelper.convert(r, EquipmentOperateLogsDTO.class)).collect(Collectors.toList());
+			return logs.stream().map((r) -> {
+						EquipmentOperateLogsDTO logsDTO = ConvertHelper.convert(r, EquipmentOperateLogsDTO.class);
+						List<OrganizationMember> member = organizationProvider.listOrganizationMembersByUId(r.getOperatorUid());
+						if (member != null && member.size() > 0)
+							logsDTO.setOperatorName(member.get(0).getContactName());
+						return logsDTO;
+					}
+			).collect(Collectors.toList());
 		}
 		return null;
 	}

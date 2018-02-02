@@ -11,6 +11,7 @@ import com.everhomes.listing.CrossShardListingLocator;
 import com.everhomes.listing.ListingLocator;
 import com.everhomes.naming.NameMapper;
 import com.everhomes.rest.equipment.AdminFlag;
+import com.everhomes.rest.equipment.EquipmentOperateLogsDTO;
 import com.everhomes.rest.equipment.EquipmentOperateObjectType;
 import com.everhomes.rest.equipment.EquipmentPlanStatus;
 import com.everhomes.rest.equipment.EquipmentReviewStatus;
@@ -3119,12 +3120,12 @@ public class EquipmentProviderImpl implements EquipmentProvider {
     }
 
     @Override
-    public List<EquipmentInspectionTasksLogs> listEquipmentOperateLogsByTargetId(Long equipmentId) {
+    public List<EquipmentInspectionEquipmentLogs> listEquipmentOperateLogsByTargetId(Long equipmentId) {
         DSLContext context = this.dbProvider.getDslContext(AccessSpec.readOnly());
         return context.selectFrom(Tables.EH_EQUIPMENT_INSPECTION_EQUIPMENT_LOGS)
                 .where(Tables.EH_EQUIPMENT_INSPECTION_EQUIPMENT_LOGS.TARGET_ID.eq(equipmentId))
                 .and(Tables.EH_EQUIPMENT_INSPECTION_EQUIPMENT_LOGS.TARGET_TYPE.eq(EquipmentOperateObjectType.EQUIPMENT.getOperateObjectType()))
-                .fetchInto(EquipmentInspectionTasksLogs.class);
+                .fetchInto(EquipmentInspectionEquipmentLogs.class);
     }
 
     @Override
