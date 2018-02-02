@@ -216,7 +216,7 @@ public class PortalItemProviderImpl implements PortalItemProvider {
 			query.addConditions(Tables.EH_PORTAL_ITEMS.ID.lt(locator.getAnchor()));
 		query.addConditions(Tables.EH_PORTAL_ITEMS.STATUS.ne(PortalItemStatus.INACTIVE.getCode()));
 		query.addGroupBy(Tables.EH_PORTAL_ITEMS.ID);
-		query.addOrderBy(Tables.EH_PORTAL_ITEMS.ID.desc());
+		query.addOrderBy(Tables.EH_PORTAL_ITEMS.ID.asc());
 		query.addLimit(pageSize);
 		query.fetch().map((r) -> {
 			PortalItem item = new PortalItem();
