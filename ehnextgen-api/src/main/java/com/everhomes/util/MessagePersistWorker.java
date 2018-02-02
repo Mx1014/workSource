@@ -54,7 +54,7 @@ public class MessagePersistWorker {
                         MessageRecordDto record = queue.poll();
                         if(record != null)
                             dtos.add(record);
-                        if(dtos.size() > 5){
+                        if(dtos.size() > 99){
                             handleMessagePersist(dtos);
                             dtos.clear();
                         }
