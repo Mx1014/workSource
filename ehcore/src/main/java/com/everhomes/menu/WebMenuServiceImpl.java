@@ -304,7 +304,7 @@ public class WebMenuServiceImpl implements WebMenuService {
 		webMenus.addAll(parentMenus);
 
 		List<WebMenuDTO> webMenuDtos  = new ArrayList<>();
-		for (WebMenu webMenu : menus) {
+		for (WebMenu webMenu : webMenus) {
 			WebMenuDTO dto = ConvertHelper.convert(webMenu, WebMenuDTO.class);
 			webMenuDtos.add(dto);
 		}
