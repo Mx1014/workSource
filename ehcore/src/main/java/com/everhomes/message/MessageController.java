@@ -49,9 +49,10 @@ public class MessageController extends ControllerBase {
 	@RequestMapping("persistMessage")
 	@RestReturn(String.class)
 	public RestResponse pushMessageToAdminAndBusinessContacts(PersistListMessageRecordsCommand cmd){
-		if(cmd.getDtos() != null & cmd.getDtos().size()> 0){
+		if(cmd.getDtos() != null){
+			List<String> dtos = (List<String>)StringHelper.fromJsonString(cmd.getDtos(), List.class);
 			List<MessageRecord> records = new ArrayList<>();
-			for (String singleString : cmd.getDtos()) {
+			for (String singleString : dtos) {
 				PersistMessageRecordCommand singleCmd = (PersistMessageRecordCommand)StringHelper.fromJsonString(singleString, PersistMessageRecordCommand.class);
 				MessageRecord record = (MessageRecord)StringHelper.fromJsonString(singleCmd.getMessageRecordDto(), MessageRecord.class);
 
