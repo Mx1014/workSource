@@ -54,7 +54,8 @@ public class WebSocketSessionProxy {
                 for (; ;) {
                     while (!queue.isEmpty()) {
                         MessageRecordDto record = queue.poll();
-                        dtos.add(record);
+                        if(record != null)
+                            dtos.add(record);
                         if(dtos.size() > 5){
                             handleMessagePersist(dtos);
                             dtos.clear();
