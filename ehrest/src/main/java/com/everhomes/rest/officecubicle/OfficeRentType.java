@@ -1,5 +1,14 @@
 package com.everhomes.rest.officecubicle;
 
+/**
+ * 
+ * <ul>
+ * <li>1 : 开放式工位</li>
+ * <li>2 : 整租空间</li>
+ * </ul>
+ *
+ *  @author:dengs 2018年1月19日
+ */
 public enum OfficeRentType {
 	OPENSITE((byte) 1, "开放式工位"), WHOLE((byte)  2, "整租空间");
 
