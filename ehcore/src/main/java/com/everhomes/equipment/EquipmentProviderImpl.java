@@ -3121,12 +3121,10 @@ public class EquipmentProviderImpl implements EquipmentProvider {
     @Override
     public List<EquipmentInspectionTasksLogs> listEquipmentOperateLogsByTargetId(Long equipmentId) {
         DSLContext context = this.dbProvider.getDslContext(AccessSpec.readOnly());
-        context.selectFrom(Tables.EH_EQUIPMENT_INSPECTION_EQUIPMENT_LOGS)
+        return context.selectFrom(Tables.EH_EQUIPMENT_INSPECTION_EQUIPMENT_LOGS)
                 .where(Tables.EH_EQUIPMENT_INSPECTION_EQUIPMENT_LOGS.TARGET_ID.eq(equipmentId))
-                .and(Tables.EH_EQUIPMENT_INSPECTION_EQUIPMENT_LOGS.TARGET_TYPE.
-                        eq(EquipmentOperateObjectType.EQUIPMENT.getOperateObjectType()))
+                .and(Tables.EH_EQUIPMENT_INSPECTION_EQUIPMENT_LOGS.TARGET_TYPE.eq(EquipmentOperateObjectType.EQUIPMENT.getOperateObjectType()))
                 .fetchInto(EquipmentInspectionTasksLogs.class);
-        return null;
     }
 
     @Override

@@ -2687,8 +2687,6 @@ private void checkUserPrivilege(Long orgId, Long privilegeId, Long communityId) 
 		}
 
 		CrossShardListingLocator locator = new CrossShardListingLocator();
-//        locator.setAnchor(cmd.getPageAnchor());
-//        int pageSize = PaginationConfigHelper.getPageSize(configurationProvider, cmd.getPageSize());
 		int pageSize = Integer.MAX_VALUE - 1;
 		//0: none, 1: complete, 2: complete maintenance, 3: review,
 		List<EquipmentTaskLogs> logsList = new ArrayList<>();
@@ -2715,15 +2713,8 @@ private void checkUserPrivilege(Long orgId, Long privilegeId, Long communityId) 
 			List<EquipmentInspectionTasksLogs> logs = equipmentProvider.listLogsByTaskId(locator, pageSize + 1,
 					task.getId(), cmd.getProcessType(), equipmentIds);
 
-//			Long nextPageAnchor = null;
-//			if(logs.size() > pageSize) {
-//				logs.remove(logs.size() - 1);
-//				nextPageAnchor = logs.get(logs.size() - 1).getId();
-//			}
-//			response.setNextPageAnchor(nextPageAnchor);
-
-//			populateTaskType(task, response);
 			List<EquipmentTaskLogsDTO> dtos = new ArrayList<>();
+			//为了查看特定设备详情和批量审阅的总览  增加以下
 			if (cmd.getEquipmentId() != null) {
 				dtos = processEquipmentTaskLogsDTOS(logs);
 			} else {
