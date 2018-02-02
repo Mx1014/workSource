@@ -51,7 +51,8 @@ public class MessageController extends ControllerBase {
 	public RestResponse pushMessageToAdminAndBusinessContacts(PersistListMessageRecordsCommand cmd){
 		if(cmd.getDtos() != null & cmd.getDtos().size()> 0){
 			List<MessageRecord> records = new ArrayList<>();
-			for (PersistMessageRecordCommand singleCmd : cmd.getDtos()) {
+			for (String singleString : cmd.getDtos()) {
+				PersistMessageRecordCommand singleCmd = (PersistMessageRecordCommand)StringHelper.fromJsonString(singleString, PersistMessageRecordCommand.class);
 				MessageRecord record = (MessageRecord)StringHelper.fromJsonString(singleCmd.getMessageRecordDto(), MessageRecord.class);
 
 				//当存在自sessionToken时，使用sessionToken解析接收者

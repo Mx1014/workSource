@@ -51,12 +51,12 @@ public class WebSocketSessionProxy {
         new Thread(){
             public void run(){
                 List<MessageRecordDto> dtos = new ArrayList<>();
-                for (; ; ) {
-                    while (!queue.isEmpty() || dtos.size() <= 100) {
+                for (; ;) {
+                    while (!queue.isEmpty() && dtos.size() <= 20) {
                         MessageRecordDto record = queue.poll();
                         dtos.add(record);
+                        handleMessagePersist(dtos);
                     }
-                    handleMessagePersist(dtos);
                 }
             }
         }.start();
@@ -106,9 +106,9 @@ public class WebSocketSessionProxy {
 
         recordDtos.forEach(r->{
             PersistMessageRecordCommand cmd = new PersistMessageRecordCommand();
-            cmd.setMessageRecordDto(r.toString());
-            cmd.setDeviceId(r.getDeviceId().toString());
-            cmd.setSessionToken(r.getSessionToken());
+            cmd.setMessageRecordDto(r.toString() != null ? r.toString() : "");
+            cmd.setDeviceId(r.getDeviceId() != null ? r.getDeviceId().toString() : "");
+            cmd.setSessionToken(r.getSessionToken() != null ? r.getSessionToken() : "");
             dtos.add(cmd);
         });
 
