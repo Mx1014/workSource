@@ -20,6 +20,7 @@ import com.everhomes.rest.message.PushMessageToAdminAndBusinessContactsCommand;
 
 import java.util.ArrayList;
 import java.util.List;
+import java.util.Map;
 
 @RestController
 @RequestMapping("/message")
@@ -49,15 +50,15 @@ public class MessageController extends ControllerBase {
 	@RequestMapping("persistMessage")
 	@RestReturn(String.class)
 	public RestResponse pushMessageToAdminAndBusinessContacts(PersistListMessageRecordsCommand cmd){
-		if(cmd.getDtos() != null & cmd.getDtos().size()> 0){
+		if(cmd.getDtos() != null){
+			List<Map> dtos = (List<Map>)StringHelper.fromJsonString(cmd.getDtos(), List.class);
 			List<MessageRecord> records = new ArrayList<>();
-			for (String singleString : cmd.getDtos()) {
-				PersistMessageRecordCommand singleCmd = (PersistMessageRecordCommand)StringHelper.fromJsonString(singleString, PersistMessageRecordCommand.class);
-				MessageRecord record = (MessageRecord)StringHelper.fromJsonString(singleCmd.getMessageRecordDto(), MessageRecord.class);
+			for (Map singleCmd : dtos) {
+				MessageRecord record = (MessageRecord)StringHelper.fromJsonString((String)singleCmd.get("messageRecordDto"), MessageRecord.class);
 
 				//当存在自sessionToken时，使用sessionToken解析接收者
-				if(StringUtils.isNotEmpty(singleCmd.getSessionToken())){
-					LoginToken login = WebTokenGenerator.getInstance().fromWebToken(singleCmd.getSessionToken(), LoginToken.class);
+				if(singleCmd.get("sessionToken") != null & StringUtils.isNotEmpty(singleCmd.get("sessionToken").toString())){
+					LoginToken login = WebTokenGenerator.getInstance().fromWebToken(singleCmd.get("sessionToken").toString(), LoginToken.class);
 					if(login != null){
 						record.setDstChannelToken(String.valueOf(login.getUserId()));
 						record.setDstChannelType(ChannelType.USER.getCode());
@@ -65,8 +66,8 @@ public class MessageController extends ControllerBase {
 				}
 
 				//当deviceId存在时，使用deviceId解析接收者
-				if(StringUtils.isNotEmpty(singleCmd.getDeviceId())){
-					Long dstChannelToken = statEventDeviceLogProvider.findUidByDeviceId(singleCmd.getDeviceId());
+				if(singleCmd.get("deviceId") != null & StringUtils.isNotEmpty(singleCmd.get("deviceId").toString())){
+					Long dstChannelToken = statEventDeviceLogProvider.findUidByDeviceId(singleCmd.get("deviceId").toString());
 					if(dstChannelToken != null && dstChannelToken != 0L){
 						record.setDstChannelToken(dstChannelToken.toString());
 						record.setDstChannelType(ChannelType.USER.getCode());

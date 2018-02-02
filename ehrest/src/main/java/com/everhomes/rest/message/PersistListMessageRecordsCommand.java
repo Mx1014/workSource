@@ -5,7 +5,7 @@ import com.everhomes.util.StringHelper;
 import java.util.List;
 
 public class PersistListMessageRecordsCommand {
-    private List<String> dtos;
+    private String dtos;
 
 
     @Override
@@ -13,11 +13,11 @@ public class PersistListMessageRecordsCommand {
         return StringHelper.toJsonString(this);
     }
 
-    public List<String> getDtos() {
+    public String getDtos() {
         return dtos;
     }
 
-    public void setDtos(List<String> dtos) {
+    public void setDtos(String dtos) {
         this.dtos = dtos;
     }
 }
