@@ -129,8 +129,8 @@ public class EnterpriseNoticeServiceImpl implements EnterpriseNoticeService {
                 namespaceId = 0;
             }
             EnterpriseNotice enterpriseNotice = ConvertHelper.convert(cmd, EnterpriseNotice.class);
-            if (!StringUtils.hasText(cmd.getSummary()) && StringUtils.hasText(cmd.getContent()) && EnterpriseNoticeStatus.ACTIVE == EnterpriseNoticeStatus.fromCode(cmd.getStatus())) {
-                enterpriseNotice.setSummary(getSummaryFromContent(enterpriseNotice.getContent(), SUMMARY_CONTENT_MAX_SIZE));
+            if (EnterpriseNoticeStatus.ACTIVE == EnterpriseNoticeStatus.fromCode(cmd.getStatus())) {
+                enterpriseNotice.setSummary(formatSummaryFromContent(enterpriseNotice.getSummary(), enterpriseNotice.getContent(), SUMMARY_CONTENT_MAX_SIZE));
             }
             enterpriseNotice.setNamespaceId(namespaceId);
             enterpriseNotice.setOwnerType(EntityType.ORGANIZATIONS.getCode());
@@ -150,6 +150,7 @@ public class EnterpriseNoticeServiceImpl implements EnterpriseNoticeService {
     private EnterpriseNoticePreviewDTO buildEnterpriseNoticePreviewDTO(EnterpriseNotice enterpriseNotice) {
         EnterpriseNoticeDetailActionData actionData = new EnterpriseNoticeDetailActionData();
         actionData.setBulletinId(enterpriseNotice.getId());
+        actionData.setBulletinTitle(StringUtils.hasText(enterpriseNotice.getTitle()) ? enterpriseNotice.getTitle() : "公告预览");
         actionData.setShowType(EnterpriseNoticeShowType.PREVIEW.getCode());
         String url = RouterBuilder.build(Router.ENTERPRISE_NOTICE_DETAIL, actionData);
 
@@ -241,8 +242,8 @@ public class EnterpriseNoticeServiceImpl implements EnterpriseNoticeService {
             updateEnterpriseNotice.setPublisher(cmd.getPublisher());
             updateEnterpriseNotice.setSecretFlag(cmd.getSecretFlag());
             updateEnterpriseNotice.setOperatorName(getUserContactNameByUserId(UserContext.currentUserId()));
-            if (!StringUtils.hasText(cmd.getSummary()) && StringUtils.hasText(cmd.getContent()) && EnterpriseNoticeStatus.ACTIVE == EnterpriseNoticeStatus.fromCode(cmd.getStatus())) {
-                updateEnterpriseNotice.setSummary(getSummaryFromContent(updateEnterpriseNotice.getContent(), SUMMARY_CONTENT_MAX_SIZE));
+            if (EnterpriseNoticeStatus.ACTIVE == EnterpriseNoticeStatus.fromCode(cmd.getStatus())) {
+                updateEnterpriseNotice.setSummary(formatSummaryFromContent(updateEnterpriseNotice.getSummary(), updateEnterpriseNotice.getContent(), SUMMARY_CONTENT_MAX_SIZE));
             }
             enterpriseNoticeProvider.updateEnterpriseNotice(updateEnterpriseNotice);
 
@@ -280,6 +281,7 @@ public class EnterpriseNoticeServiceImpl implements EnterpriseNoticeService {
         //  set the route
         EnterpriseNoticeDetailActionData actionData = new EnterpriseNoticeDetailActionData();
         actionData.setBulletinId(notice.getId());
+        actionData.setBulletinTitle(notice.getTitle());
         actionData.setShowType(EnterpriseNoticeShowType.SHOW.getCode());
         String url = RouterBuilder.build(Router.ENTERPRISE_NOTICE_DETAIL, actionData);
         RouterMetaObject metaObject = new RouterMetaObject();
@@ -415,10 +417,13 @@ public class EnterpriseNoticeServiceImpl implements EnterpriseNoticeService {
         return receivers;
     }
 
-    private String getSummaryFromContent(String content, int maxSize) {
+    private static String formatSummaryFromContent(String summary, String content, int maxSize) {
+        if (StringUtils.hasText(summary)) {
+            return summary.replaceAll("\\s|\t|\r|\n", "");
+        }
         if (StringUtils.hasText(content)) {
-            String summary = content.substring(0, Math.min(maxSize, content.length()));
-            return summary.split("\\s|\t|\r|\n")[0];
+            String c = content.replaceAll("\\s|\t|\r|\n", "");
+            return c.substring(0, Math.min(c.length(), maxSize));
         }
         return null;
     }
