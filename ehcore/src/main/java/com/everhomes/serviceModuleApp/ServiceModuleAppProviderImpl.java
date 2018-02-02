@@ -1,5 +1,5 @@
 // @formatter:off
-package com.everhomes.portal;
+package com.everhomes.serviceModuleApp;
 
 import com.everhomes.db.AccessSpec;
 import com.everhomes.db.DaoAction;
@@ -15,10 +15,7 @@ import com.everhomes.server.schema.tables.pojos.EhServiceModuleApps;
 import com.everhomes.server.schema.tables.records.EhServiceModuleAppsRecord;
 import com.everhomes.util.ConvertHelper;
 import com.everhomes.util.DateHelper;
-import org.jooq.Condition;
-import org.jooq.DSLContext;
-import org.jooq.DeleteQuery;
-import org.jooq.SelectQuery;
+import org.jooq.*;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -100,13 +97,13 @@ public class ServiceModuleAppProviderImpl implements ServiceModuleAppProvider {
 	}
 
 	@Override
-	public List<ServiceModuleApp> listServiceModuleApp(Integer namespaceId, Long moduleId, Long versionId){
-		return listServiceModuleApp(namespaceId, moduleId, null, null, null, versionId);
+	public List<ServiceModuleApp> listServiceModuleApp(Integer namespaceId, Long versionId, Long moduleId){
+		return listServiceModuleApp(namespaceId, versionId, moduleId, null, null, null);
 	}
 
 	@Override
-	public List<ServiceModuleApp> listServiceModuleAppByActionType(Integer namespaceId, Byte actionType, Long versionId){
-		return listServiceModuleApp(namespaceId, null, actionType, null, null, versionId);
+	public List<ServiceModuleApp> listServiceModuleAppByActionType(Integer namespaceId, Long versionId, Byte actionType){
+		return listServiceModuleApp(namespaceId, versionId, null, actionType, null, null);
 	}
 
 	@Override
@@ -122,6 +119,19 @@ public class ServiceModuleAppProviderImpl implements ServiceModuleAppProvider {
 	}
 
 	@Override
+	public List<ServiceModuleApp> listServiceModuleAppsByVersionIdAndOriginIds(Long versionId, List<Long> originIds) {
+
+		SelectQuery<EhServiceModuleAppsRecord> query = getReadOnlyContext().selectQuery(Tables.EH_SERVICE_MODULE_APPS);
+		query.addConditions(Tables.EH_SERVICE_MODULE_APPS.VERSION_ID.eq(versionId));
+		query.addConditions(Tables.EH_SERVICE_MODULE_APPS.ORIGIN_ID.in(originIds));
+		query.addConditions(Tables.EH_SERVICE_MODULE_APPS.STATUS.eq(ServiceModuleAppStatus.ACTIVE.getCode()));
+		query.addOrderBy(Tables.EH_SERVICE_MODULE_APPS.ID.asc());
+		List<ServiceModuleApp> apps = query.fetch().map(r -> ConvertHelper.convert(r, ServiceModuleApp.class));
+		return apps;
+	}
+
+
+	@Override
 	public void deleteByVersionId(Long versionId){
 		DeleteQuery query = getReadWriteContext().deleteQuery(Tables.EH_SERVICE_MODULE_APPS);
 		query.addConditions(Tables.EH_SERVICE_MODULE_APPS.VERSION_ID.eq(versionId));
@@ -131,8 +141,10 @@ public class ServiceModuleAppProviderImpl implements ServiceModuleAppProvider {
 
 
 	@Override
-	public List<ServiceModuleApp> listServiceModuleApp(Integer namespaceId, Long moduleId, Byte actionType, String customTag, String customPath, Long versionId) {
+	public List<ServiceModuleApp> listServiceModuleApp(Integer namespaceId, Long versionId, Long moduleId, Byte actionType, String customTag, String customPath) {
 		Condition cond = Tables.EH_SERVICE_MODULE_APPS.NAMESPACE_ID.eq(namespaceId);
+		if(null != versionId)
+			cond = cond.and(Tables.EH_SERVICE_MODULE_APPS.VERSION_ID.eq(versionId));
 		if(null != moduleId)
 			cond = cond.and(Tables.EH_SERVICE_MODULE_APPS.MODULE_ID.eq(moduleId));
 		if(null != actionType)
@@ -141,8 +153,6 @@ public class ServiceModuleAppProviderImpl implements ServiceModuleAppProvider {
 			cond = cond.and(Tables.EH_SERVICE_MODULE_APPS.CUSTOM_TAG.eq(customTag));
 		if(null != customPath)
 			cond = cond.and(Tables.EH_SERVICE_MODULE_APPS.CUSTOM_PATH.eq(customPath));
-		if(null != versionId)
-			cond = cond.and(Tables.EH_SERVICE_MODULE_APPS.VERSION_ID.eq(versionId));
 		return getReadOnlyContext().select().from(Tables.EH_SERVICE_MODULE_APPS)
 				.where(cond)
 				.and(Tables.EH_SERVICE_MODULE_APPS.STATUS.eq(ServiceModuleAppStatus.ACTIVE.getCode()))
