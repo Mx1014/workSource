@@ -52,8 +52,9 @@ import com.everhomes.server.schema.tables.pojos.EhPortalItemCategories;
 import com.everhomes.server.schema.tables.pojos.EhPortalItemGroups;
 import com.everhomes.server.schema.tables.pojos.EhPortalItems;
 import com.everhomes.server.schema.tables.pojos.EhPortalLayouts;
+import com.everhomes.serviceModuleApp.ServiceModuleApp;
+import com.everhomes.serviceModuleApp.ServiceModuleAppProvider;
 import com.everhomes.settings.PaginationConfigHelper;
-import com.everhomes.sms.DateUtil;
 import com.everhomes.user.User;
 import com.everhomes.user.UserContext;
 import com.everhomes.user.UserIdentifier;
@@ -167,11 +168,19 @@ public class PortalServiceImpl implements PortalService {
 			}
 		}
 
-		List<ServiceModuleApp> moduleApps = serviceModuleAppProvider.listServiceModuleApp(cmd.getNamespaceId(), cmd.getModuleId(), cmd.getVersionId());
+		List<ServiceModuleApp> moduleApps = serviceModuleAppProvider.listServiceModuleApp(cmd.getNamespaceId(), cmd.getVersionId(), cmd.getModuleId());
 		return new ListServiceModuleAppsResponse(moduleApps.stream().map(r ->{
 			return processServiceModuleAppDTO(r);
 		}).collect(Collectors.toList()));
 	}
+
+	@Override
+	public PortalVersion findReleaseVersion(Integer namespaceId) {
+
+		return portalVersionProvider.findReleaseVersion(namespaceId);
+
+	}
+
 
 	@Override
 	public ListServiceModuleAppsResponse listServiceModuleAppsWithConditon(ListServiceModuleAppsCommand cmd) {
@@ -1378,9 +1387,6 @@ public class PortalServiceImpl implements PortalService {
 							//给发布的版本的父辈复制一个小版本，比如发布3.1版本变成了5.0版本，那5.0要复制一个5.1，3.0也要复制一个新的3.1
 							copyPortalToNewMinorVersion(namespaceId, publishVersion.getParentId());
 
-							//刷新菜单
-							webMenuService.refleshMenuByPortalVersion(cmd.getVersionId());
-
 							//清理很的老版本
 							cleanOldVersion(namespaceId);
 
@@ -2016,9 +2022,6 @@ public class PortalServiceImpl implements PortalService {
 					//更新当前版本为正式版本
 					updateReleaseVersion(dto.getId(), portalVersion.getId());
 
-					//刷新菜单
-					webMenuService.refleshMenuByPortalVersion(portalVersion.getId());
-
 					//清理很的老版本
 					cleanOldVersion(dto.getId());
 
@@ -2143,7 +2146,7 @@ public class PortalServiceImpl implements PortalService {
 	}
 
 	private void copyServiceModuleAppToNewVersion(Integer namespaceId, Long oldVersionId, Long newVersionId){
-		List<ServiceModuleApp> serviceModuleApps = serviceModuleAppProvider.listServiceModuleApp(namespaceId, null, oldVersionId);
+		List<ServiceModuleApp> serviceModuleApps = serviceModuleAppProvider.listServiceModuleApp(namespaceId, oldVersionId, null);
 
 		if(serviceModuleApps == null || serviceModuleApps.size() == 0){
 			return;

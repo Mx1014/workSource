@@ -1,5 +1,5 @@
 // @formatter:off
-package com.everhomes.portal;
+package com.everhomes.serviceModuleApp;
 
 import com.everhomes.server.schema.tables.pojos.EhServiceModuleApps;
 import com.everhomes.util.StringHelper;
