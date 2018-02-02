@@ -13,7 +13,6 @@ import com.everhomes.rest.equipment.EquipmentStandardStatus;
 import com.everhomes.rest.equipment.EquipmentStandardsDTO;
 import com.everhomes.rest.equipment.SearchEquipmentStandardsCommand;
 import com.everhomes.rest.equipment.SearchEquipmentStandardsResponse;
-import com.everhomes.rest.equipment.TargetIdFlag;
 import com.everhomes.rest.repeat.RepeatSettingsDTO;
 import com.everhomes.search.AbstractElasticSearch;
 import com.everhomes.search.EquipmentStandardSearcher;
@@ -138,8 +137,6 @@ public class EquipmentStandardSearcherImpl extends AbstractElasticSearch impleme
                     .field("standardName", 5.0f)
                     .field("standardNumber", 5.0f);
 
-          /*  builder.setHighlighterFragmentSize(60);
-            builder.setHighlighterNumOfFragments(8);*/
             builder.addHighlightedField("standardName")
                     .addHighlightedField("standardNumber");
         }
@@ -148,20 +145,14 @@ public class EquipmentStandardSearcherImpl extends AbstractElasticSearch impleme
         FilterBuilder nfb = FilterBuilders.termFilter("status", EquipmentStandardStatus.INACTIVE.getCode());
         fb = FilterBuilders.notFilter(nfb);
 
-        // 改用namespaceId by xiongying20170328
         fb = FilterBuilders.andFilter(fb, FilterBuilders.termFilter("namespaceId", cmd.getNamespaceId()));
-    	/*fb = FilterBuilders.andFilter(fb, FilterBuilders.termFilter("ownerId", cmd.getOwnerId()));
-        fb = FilterBuilders.andFilter(fb, FilterBuilders.termFilter("ownerType", OwnerType.fromCode(cmd.getOwnerType()).getCode()));*/
-        if(cmd.getTargetId() != null) {
+        if (cmd.getTargetId() != null && cmd.getTargetId() != 0L) {
             FilterBuilder tfb = FilterBuilders.termFilter("targetId", cmd.getTargetId());
-            if(TargetIdFlag.YES.equals(TargetIdFlag.fromStatus(cmd.getTargetIdFlag()))) {
-                tfb = FilterBuilders.orFilter(tfb, FilterBuilders.termFilter("targetId", 0));
-            }
+//            if(TargetIdFlag.YES.equals(TargetIdFlag.fromStatus(cmd.getTargetIdFlag()))) {
+//                tfb = FilterBuilders.orFilter(tfb, FilterBuilders.termFilter("targetId", 0));
+//            }
             fb = FilterBuilders.andFilter(fb, tfb);
         }
-         /*if(cmd.getStandardType() != null)
-        	fb = FilterBuilders.andFilter(fb, FilterBuilders.termFilter("standardType", cmd.getStandardType()));*/
-
         if(cmd.getStatus() != null)
             fb = FilterBuilders.andFilter(fb, FilterBuilders.termFilter("status", cmd.getStatus()));
 

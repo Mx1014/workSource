@@ -270,8 +270,11 @@ public class FileManagementServiceImpl implements  FileManagementService{
         Integer namespaceId = UserContext.getCurrentNamespaceId();
         List<FileCatalogScopeDTO> scopes = new ArrayList<>();
 
-        if (cmd.getScopes() == null || cmd.getScopes().size() <= 0)
+        if (cmd.getScopes() == null || cmd.getScopes().size() <= 0){
+            //  delete all scopes by catalogId
+            fileManagementProvider.deleteFileCatalogScopeNotInSourceIds(namespaceId, cmd.getCatalogId(), new ArrayList<>());
             return scopes;
+        }
 
         dbProvider.execute((TransactionStatus status) -> {
             List<Long> sourceIds = new ArrayList<>();

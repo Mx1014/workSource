@@ -407,6 +407,14 @@ public class EquipmentProviderImpl implements EquipmentProvider {
     }
 
     @Override
+    public void deleteEquipmentAccessoryMapByEquipmentId(Long equipmentId) {
+        DSLContext context = this.dbProvider.getDslContext(AccessSpec.readWrite());
+        context.delete(Tables.EH_EQUIPMENT_INSPECTION_ACCESSORY_MAP)
+                .where(Tables.EH_EQUIPMENT_INSPECTION_ACCESSORY_MAP.EQUIPMENT_ID.eq(equipmentId))
+                .execute();
+    }
+
+    @Override
     public List<EquipmentInspectionEquipmentAttachments> findEquipmentAttachmentsByEquipmentId(Long equipmentId) {
         DSLContext context = dbProvider.getDslContext(AccessSpec.readOnly());
         SelectQuery<EhEquipmentInspectionEquipmentAttachmentsRecord> query = context.selectQuery(Tables.EH_EQUIPMENT_INSPECTION_EQUIPMENT_ATTACHMENTS);
@@ -3120,12 +3128,12 @@ public class EquipmentProviderImpl implements EquipmentProvider {
     }
 
     @Override
-    public List<EquipmentInspectionTasksLogs> listEquipmentOperateLogsByTargetId(Long equipmentId) {
+    public List<EquipmentInspectionEquipmentLogs> listEquipmentOperateLogsByTargetId(Long equipmentId) {
         DSLContext context = this.dbProvider.getDslContext(AccessSpec.readOnly());
         return context.selectFrom(Tables.EH_EQUIPMENT_INSPECTION_EQUIPMENT_LOGS)
                 .where(Tables.EH_EQUIPMENT_INSPECTION_EQUIPMENT_LOGS.TARGET_ID.eq(equipmentId))
                 .and(Tables.EH_EQUIPMENT_INSPECTION_EQUIPMENT_LOGS.TARGET_TYPE.eq(EquipmentOperateObjectType.EQUIPMENT.getOperateObjectType()))
-                .fetchInto(EquipmentInspectionTasksLogs.class);
+                .fetchInto(EquipmentInspectionEquipmentLogs.class);
     }
 
     @Override

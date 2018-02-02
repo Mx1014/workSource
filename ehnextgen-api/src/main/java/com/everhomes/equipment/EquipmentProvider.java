@@ -34,6 +34,7 @@ public interface EquipmentProvider {
 	void updateEquipmentAccessoryMap(EquipmentInspectionAccessoryMap map);
 	void creatEquipmentAttachment(EquipmentInspectionEquipmentAttachments eqAttachment);
 	void deleteEquipmentAttachmentById(Long id);
+	void deleteEquipmentAccessoryMapByEquipmentId(Long equipmentId);
 	List<EquipmentInspectionEquipmentAttachments> findEquipmentAttachmentsByEquipmentId(Long equipmentId);
 
 	List<EquipmentStandardMap> findByStandardId(Long standardId);
@@ -224,9 +225,10 @@ public interface EquipmentProvider {
 
 	void createEquipmentOperateLogs(EquipmentInspectionEquipmentLogs log);
 
-	List<EquipmentInspectionTasksLogs> listEquipmentOperateLogsByTargetId(Long equipmentId);
+	List<EquipmentInspectionEquipmentLogs> listEquipmentOperateLogsByTargetId(Long equipmentId);
 
     void populateTaskStatusCount(Long inspectionCategoryId, List<String> targetTypes, List<Long> targetIds, List<Long> executePlanIds, List<Long> reviewPlanIds, Byte  adminFlag, ListEquipmentTasksResponse response);
 
     List<EquipmentInspectionStandards> listEquipmentStandardWithReferId(Long targetId, String targetType);
+
 }

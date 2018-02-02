@@ -132,11 +132,13 @@ public class EquipmentPlanSearcherImpl extends AbstractElasticSearch implements 
         FilterBuilder nfb = FilterBuilders.termFilter("status", EquipmentPlanStatus.INACTIVE.getCode());
         FilterBuilder fb = FilterBuilders.notFilter(nfb);
         fb = FilterBuilders.termFilter("namespaceId", cmd.getNamespaceId());
-        if (cmd.getTargetId() != null)
-            fb = FilterBuilders.andFilter(fb, FilterBuilders.termFilter("targetId", cmd.getTargetId()));
 
-        if(!StringUtils.isNullOrEmpty(cmd.getTargetType()))
-            fb = FilterBuilders.andFilter(fb, FilterBuilders.termFilter("targetType", OwnerType.fromCode(cmd.getTargetType()).getCode()));
+        if (cmd.getTargetId() != null && cmd.getTargetId() != 0L) {
+            fb = FilterBuilders.andFilter(fb, FilterBuilders.termFilter("targetId", cmd.getTargetId()));
+            if (!StringUtils.isNullOrEmpty(cmd.getTargetType()))
+                fb = FilterBuilders.andFilter(fb, FilterBuilders.termFilter("targetType", OwnerType.fromCode(cmd.getTargetType()).getCode()));
+        }
+
 
         if(cmd.getInspectionCategoryId()!=null)
             fb = FilterBuilders.andFilter(fb, FilterBuilders.termFilter("inspectionCategoryId", cmd.getInspectionCategoryId()));

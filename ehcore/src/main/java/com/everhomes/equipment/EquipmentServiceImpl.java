@@ -1099,7 +1099,7 @@ private void checkUserPrivilege(Long orgId, Long privilegeId, Long communityId) 
 		List<EquipmentStandardMapDTO> eqStandardMap = cmd.getEqStandardMap();
 
 		if (cmd.getId() == null) {
-			createEquipmentInspectionEquipment(cmd,eqStandardMap);
+			createEquipmentInspectionEquipment(cmd, eqStandardMap);
 		} else {
 			EquipmentInspectionEquipments exist = verifyEquipment(cmd.getId(), cmd.getOwnerType(), cmd.getOwnerId());
 			equipment = ConvertHelper.convert(cmd, EquipmentInspectionEquipments.class);
@@ -1130,62 +1130,11 @@ private void checkUserPrivilege(Long orgId, Long privilegeId, Long communityId) 
 			equipment.setOperatorUid(user.getId());
 			equipment.setUpdateTime(new Timestamp(DateHelper.currentGMTTime().getTime()));
 
-
 			equipmentProvider.updateEquipmentInspectionEquipment(equipment);
 			equipmentSearcher.feedDoc(equipment);
 			//删除计划关联表中的该设备
 			equipmentProvider.deleteEquipmentPlansMapByEquipmentId(equipment.getId());
-
-			//不带id的create，其他的看map表中的standardId在不在cmd里面 不在的删掉
-			List<Long> updateStandardIds = new ArrayList<Long>();
-			if (eqStandardMap != null && eqStandardMap.size() > 0) {
-
-				for (EquipmentStandardMapDTO dto : eqStandardMap) {
-					List<EquipmentStandardMap> maps = equipmentProvider.findEquipmentStandardMap(dto.getStandardId(),
-							equipment.getId(), InspectionStandardMapTargetType.EQUIPMENT.getCode());
-					LOGGER.debug("equipment standard maps: {}", maps);
-					if (maps == null || maps.size() == 0) {
-						if (dto.getId() == null) {
-							EquipmentStandardMap map = ConvertHelper.convert(dto, EquipmentStandardMap.class);
-							map.setTargetId(equipment.getId());
-							map.setTargetType(InspectionStandardMapTargetType.EQUIPMENT.getCode());
-							map.setCreatorUid(user.getId());
-
-							equipmentProvider.createEquipmentStandardMap(map);
-							equipmentStandardMapSearcher.feedDoc(map);
-
-							updateStandardIds.add(map.getStandardId());
-
-						} else {
-							EquipmentStandardMap map = equipmentProvider.findEquipmentStandardMap(dto.getId(), dto.getStandardId(),
-									dto.getEquipmentId(), InspectionStandardMapTargetType.EQUIPMENT.getCode());
-							if (map == null) {
-								map = ConvertHelper.convert(dto, EquipmentStandardMap.class);
-								map.setTargetId(equipment.getId());
-								map.setTargetType(InspectionStandardMapTargetType.EQUIPMENT.getCode());
-								map.setCreatorUid(user.getId());
-								equipmentProvider.createEquipmentStandardMap(map);
-								equipmentStandardMapSearcher.feedDoc(map);
-							}
-							updateStandardIds.add(map.getStandardId());
-						}
-					} else {
-						//删除设备多次重复绑定的标准,仅保留最早绑的那个
-						updateStandardIds.add(maps.get(0).getStandardId());
-						maps.remove(0);
-						LOGGER.debug("equipment standard maps after remove: {}", maps);
-						if (maps.size() > 0) {
-							maps.forEach(map -> {
-//								map.setReviewStatus(EquipmentReviewStatus.INACTIVE.getCode());
-								//fix bug #20247
-								map.setStatus(Status.INACTIVE.getCode());
-								equipmentProvider.updateEquipmentStandardMap(map);
-								equipmentStandardMapSearcher.feedDoc(map);
-							});
-						}
-					}
-				}
-			}
+			List<Long> updateStandardIds = increamentUpdateEquipmentStandardMap(user, equipment, eqStandardMap);
 
 			List<EquipmentStandardMap> maps = equipmentProvider.findByTarget(equipment.getId(), InspectionStandardMapTargetType.EQUIPMENT.getCode());
 			if (maps != null) {
@@ -1200,7 +1149,7 @@ private void checkUserPrivilege(Long orgId, Long privilegeId, Long communityId) 
 					}
 				}
 			}
-
+			equipmentProvider.deleteEquipmentAccessoryMapByEquipmentId(equipment.getId());
 			if(cmd.getEqAccessoryMap() != null) {
 				for(EquipmentAccessoryMapDTO map : cmd.getEqAccessoryMap()) {
 					map.setEquipmentId(equipment.getId());
@@ -1218,6 +1167,60 @@ private void checkUserPrivilege(Long orgId, Long privilegeId, Long communityId) 
 			createEquipmentOperateLogs(equipment.getNamespaceId(), cmd.getOwnerId(), cmd.getOwnerType(),
 					equipment.getId(), EquipmentOperateActionType.UPDATE.getCode());
 		}
+	}
+
+	private List<Long> increamentUpdateEquipmentStandardMap(User user, EquipmentInspectionEquipments equipment, List<EquipmentStandardMapDTO> eqStandardMap) {
+		//不带id的create，其他的看map表中的standardId在不在cmd里面 不在的删掉
+		List<Long> updateStandardIds = new ArrayList<Long>();
+		if (eqStandardMap != null && eqStandardMap.size() > 0) {
+
+            for (EquipmentStandardMapDTO dto : eqStandardMap) {
+                List<EquipmentStandardMap> maps = equipmentProvider.findEquipmentStandardMap(dto.getStandardId(),
+                        equipment.getId(), InspectionStandardMapTargetType.EQUIPMENT.getCode());
+                LOGGER.debug("equipment standard maps: {}", maps);
+                if (maps == null || maps.size() == 0) {
+                    if (dto.getId() == null) {
+                        EquipmentStandardMap map = ConvertHelper.convert(dto, EquipmentStandardMap.class);
+                        map.setTargetId(equipment.getId());
+                        map.setTargetType(InspectionStandardMapTargetType.EQUIPMENT.getCode());
+                        map.setCreatorUid(user.getId());
+
+                        equipmentProvider.createEquipmentStandardMap(map);
+                        equipmentStandardMapSearcher.feedDoc(map);
+
+                        updateStandardIds.add(map.getStandardId());
+
+                    } else {
+                        EquipmentStandardMap map = equipmentProvider.findEquipmentStandardMap(dto.getId(), dto.getStandardId(),
+                                dto.getEquipmentId(), InspectionStandardMapTargetType.EQUIPMENT.getCode());
+                        if (map == null) {
+                            map = ConvertHelper.convert(dto, EquipmentStandardMap.class);
+                            map.setTargetId(equipment.getId());
+                            map.setTargetType(InspectionStandardMapTargetType.EQUIPMENT.getCode());
+                            map.setCreatorUid(user.getId());
+                            equipmentProvider.createEquipmentStandardMap(map);
+                            equipmentStandardMapSearcher.feedDoc(map);
+                        }
+                        updateStandardIds.add(map.getStandardId());
+                    }
+                } else {
+                    //删除设备多次重复绑定的标准,仅保留最早绑的那个
+                    updateStandardIds.add(maps.get(0).getStandardId());
+                    maps.remove(0);
+                    LOGGER.debug("equipment standard maps after remove: {}", maps);
+                    if (maps.size() > 0) {
+                        maps.forEach(map -> {
+//								map.setReviewStatus(EquipmentReviewStatus.INACTIVE.getCode());
+                            //fix bug #20247
+                            map.setStatus(Status.INACTIVE.getCode());
+                            equipmentProvider.updateEquipmentStandardMap(map);
+                            equipmentStandardMapSearcher.feedDoc(map);
+                        });
+                    }
+                }
+            }
+        }
+		return updateStandardIds;
 	}
 
 	private void dealEquipmentRelateTime(UpdateEquipmentsCommand cmd, EquipmentInspectionEquipments equipment) {
@@ -1381,14 +1384,16 @@ private void checkUserPrivilege(Long orgId, Long privilegeId, Long communityId) 
 
 		EquipmentInspectionAccessoryMap map = ConvertHelper.convert(dto, EquipmentInspectionAccessoryMap.class);
 
-		if(dto.getEqAccessories() != null)
+		if (dto.getEqAccessories() != null) {
 			map.setAccessoryId(dto.getEqAccessories().getId());
-
-		if(dto.getId() == null) {
+			equipmentProvider.creatEquipmentAccessoryMap(map);
+		}
+		//==
+		/*if(dto.getId() == null) {
 			equipmentProvider.creatEquipmentAccessoryMap(map);
 		} else {
 			equipmentProvider.updateEquipmentAccessoryMap(map);
-		}
+		}*/
 	}
 
 	private void deleteEquipmentAttachmentsByEquipmentId(Long equipmentId) {
@@ -2162,6 +2167,7 @@ private void checkUserPrivilege(Long orgId, Long privilegeId, Long communityId) 
 
 	@Override
 	public void reviewEquipmentTasks(ReviewEquipmentTasksCommand cmd) {
+		//可以合并为一个接口 新模式 后面再改
 		cmd.getTaskIds().forEach(taskId -> {
 			ReviewEquipmentTaskCommand command = new ReviewEquipmentTaskCommand();
 			command.setEndTime(cmd.getEndTime());
@@ -3821,23 +3827,18 @@ private void checkUserPrivilege(Long orgId, Long privilegeId, Long communityId) 
 		}
 		EquipmentsDTO dto = ConvertHelper.convert(equipment, EquipmentsDTO.class);
 		Community community = communityProvider.findCommunityById(dto.getTargetId());
-		if(community != null)
-			dto.setTargetName(community.getName());
-//		Organization group = organizationProvider.findOrganizationById(dto.getTargetId());
-//		if(group != null)
-//			dto.setTargetName(group.getName());
-
-//		EquipmentInspectionStandards standard = equipmentProvider.findStandardById(equipment.getStandardId(), equipment.getOwnerType(), equipment.getOwnerId());
-//        if(standard != null) {
-//        	dto.setStandardName(standard.getName());
-//        }
-
+		String communityName = null;
+		if(community != null){
+			communityName = community.getName();
+			dto.setTargetName(communityName);
+		}
         List<EquipmentAccessoryMapDTO> eqAccessoryMap = new ArrayList<EquipmentAccessoryMapDTO>();
 
         List<EquipmentInspectionAccessoryMap> map = equipmentProvider.listAccessoryMapByEquipmentId(dto.getId());
         if(null != map) {
         	for(EquipmentInspectionAccessoryMap acMap : map) {
         		EquipmentAccessoryMapDTO mapDto = ConvertHelper.convert(acMap, EquipmentAccessoryMapDTO.class);
+        		mapDto.setCommunityName(communityName);
         		EquipmentInspectionAccessories accessory = equipmentProvider.findAccessoryById(acMap.getAccessoryId());
         		EquipmentAccessoriesDTO accessoryDto = ConvertHelper.convert(accessory, EquipmentAccessoriesDTO.class);
         		Organization target = organizationProvider.findOrganizationById(accessoryDto.getTargetId());
@@ -5997,10 +5998,16 @@ private void checkUserPrivilege(Long orgId, Long privilegeId, Long communityId) 
 
 	@Override
 	public List<EquipmentOperateLogsDTO> listOperateLogs(DeleteEquipmentsCommand cmd) {
-		List<EquipmentInspectionTasksLogs> logs = equipmentProvider.listEquipmentOperateLogsByTargetId(cmd.getEquipmentId());
+		List<EquipmentInspectionEquipmentLogs> logs = equipmentProvider.listEquipmentOperateLogsByTargetId(cmd.getEquipmentId());
 		if (logs != null && logs.size() > 0) {
-			return logs.stream().map((r) ->
-					ConvertHelper.convert(r, EquipmentOperateLogsDTO.class)).collect(Collectors.toList());
+			return logs.stream().map((r) -> {
+						EquipmentOperateLogsDTO logsDTO = ConvertHelper.convert(r, EquipmentOperateLogsDTO.class);
+						List<OrganizationMember> member = organizationProvider.listOrganizationMembersByUId(r.getOperatorUid());
+						if (member != null && member.size() > 0)
+							logsDTO.setOperatorName(member.get(0).getContactName());
+						return logsDTO;
+					}
+			).collect(Collectors.toList());
 		}
 		return null;
 	}
