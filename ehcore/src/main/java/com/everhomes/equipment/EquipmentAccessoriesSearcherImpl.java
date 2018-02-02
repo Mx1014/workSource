@@ -125,18 +125,17 @@ public class EquipmentAccessoriesSearcherImpl extends AbstractElasticSearch impl
 
         }
 
-        //改用namespaceId by xiongying20170328
         FilterBuilder fb = FilterBuilders.termFilter("namespaceId", cmd.getNamespaceId());
-//        FilterBuilder fb = FilterBuilders.termFilter("ownerId", cmd.getOwnerId());
-//        fb = FilterBuilders.andFilter(fb, FilterBuilders.termFilter("ownerType", OwnerType.fromCode(cmd.getOwnerType()).getCode()));
-        if(cmd.getTargetId() != null)
-        	fb = FilterBuilders.andFilter(fb, FilterBuilders.termFilter("targetId", cmd.getTargetId()));
-        
-        if(!StringUtils.isNullOrEmpty(cmd.getTargetType()))
-        	fb = FilterBuilders.andFilter(fb, FilterBuilders.termFilter("targetType", OwnerType.fromCode(cmd.getTargetType()).getCode())); 
-        
+
+        if (cmd.getTargetId() != null && cmd.getTargetId() != 0L) {
+            fb = FilterBuilders.andFilter(fb, FilterBuilders.termFilter("targetId", cmd.getTargetId()));
+            if (!StringUtils.isNullOrEmpty(cmd.getTargetType()))
+                fb = FilterBuilders.andFilter(fb, FilterBuilders.termFilter("targetType", OwnerType.fromCode(cmd.getTargetType()).getCode()));
+        }
+
+
         int pageSize = PaginationConfigHelper.getPageSize(configProvider, cmd.getPageSize());
-        Long anchor = 0l;
+        Long anchor = 0L;
         if(cmd.getPageAnchor() != null) {
             anchor = cmd.getPageAnchor();
         }

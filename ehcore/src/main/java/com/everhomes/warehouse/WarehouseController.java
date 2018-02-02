@@ -689,7 +689,7 @@ public class WarehouseController extends ControllerBase {
     @RestReturn(value=ListWarehouseStockOrdersResponse.class)
     public RestResponse listWarehouseStockOrders(ListWarehouseStockOrdersCommand cmd) {
         ListWarehouseStockOrdersResponse response = warehouseService.listWarehouseStockOrders(cmd);
-        RestResponse res = new RestResponse(response);
+        RestResponse res = new RestResponse();
         res.setErrorCode(ErrorCodes.SUCCESS);
         res.setErrorDescription("OK");
         return res;
