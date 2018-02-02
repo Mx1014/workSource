@@ -19,6 +19,10 @@ public interface SalaryEmployeeOriginValProvider {
 
 	void deleteSalaryEmployeeOriginValByDetailIdAndGroouEntity(Long detailId, Long id);
 
+	List<SalaryEmployeeOriginVal>  listSalaryEmployeeOriginValsByDetailId(Long userDetailId);
+
+	void setValueBlank(Long ownerId);
+
 //	List<SalaryEmployeeOriginVal> listSalaryEmployeeOriginValByDetailId(Long userId, String ownerType, Long ownerId);
 //
 //	void deleteSalaryEmployeeOriginValByGroupId(Long groupId);

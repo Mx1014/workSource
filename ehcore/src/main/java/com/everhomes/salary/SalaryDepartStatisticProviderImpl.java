@@ -4,7 +4,11 @@ package com.everhomes.salary;
 import java.sql.Timestamp;
 import java.util.List;
 
+import com.everhomes.server.schema.tables.records.EhSalaryDepartStatisticsRecord;
 import org.jooq.DSLContext;
+import org.jooq.DeleteConditionStep;
+import org.jooq.Record;
+import org.jooq.Result;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
 
@@ -63,7 +67,40 @@ public class SalaryDepartStatisticProviderImpl implements SalaryDepartStatisticP
 				.orderBy(Tables.EH_SALARY_DEPART_STATISTICS.ID.asc())
 				.fetch().map(r -> ConvertHelper.convert(r, SalaryDepartStatistic.class));
 	}
-	
+
+	@Override
+	public void deleteSalaryDepartStatistic(Long ownerId, byte isFile, String month) {
+		DeleteConditionStep<EhSalaryDepartStatisticsRecord> step = getReadWriteContext().delete(Tables.EH_SALARY_DEPART_STATISTICS)
+				.where(Tables.EH_SALARY_DEPART_STATISTICS.OWNER_ID.eq(ownerId))
+				.and(Tables.EH_SALARY_DEPART_STATISTICS.IS_FILE.eq(isFile));
+		if (null != month) {
+			step.and(Tables.EH_SALARY_DEPART_STATISTICS.SALARY_PERIOD.eq(month));
+		}
+		step.execute();
+	}
+
+	@Override
+	public SalaryDepartStatistic findSalaryDepartStatisticByDptAndMonth(Long dptId, String month) {
+
+		return getReadOnlyContext().select().from(Tables.EH_SALARY_DEPART_STATISTICS)
+				.where(Tables.EH_SALARY_DEPART_STATISTICS.DEPT_ID.eq(dptId))
+				.and(Tables.EH_SALARY_DEPART_STATISTICS.SALARY_PERIOD.eq(month))
+				.fetchAny().map(r -> ConvertHelper.convert(r, SalaryDepartStatistic.class));
+	}
+
+	@Override
+	public List<SalaryDepartStatistic> listSalaryDepartStatistic(Long ownerId, String month) {
+		Result<Record> record = getReadOnlyContext().select().from(Tables.EH_SALARY_DEPART_STATISTICS)
+				.where(Tables.EH_SALARY_DEPART_STATISTICS.OWNER_ID.eq(ownerId))
+				.and(Tables.EH_SALARY_DEPART_STATISTICS.SALARY_PERIOD.eq(month))
+				.orderBy(Tables.EH_SALARY_DEPART_STATISTICS.ID.asc())
+				.fetch();
+		if (null == record) {
+			return null;
+		}
+		return record.map(r -> ConvertHelper.convert(r, SalaryDepartStatistic.class));
+	}
+
 	private EhSalaryDepartStatisticsDao getReadWriteDao() {
 		return getDao(getReadWriteContext());
 	}

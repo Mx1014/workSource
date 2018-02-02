@@ -13,6 +13,13 @@ public interface SalaryEmployeePeriodValProvider {
 
 	List<SalaryEmployeePeriodVal> listSalaryEmployeePeriodVal();
 
+	void deleteEmployeePeriodVals(Long ownerId, String month);
+
+
+	SalaryEmployeePeriodVal findSalaryEmployeePeriodValByGroupEntityIdByDetailId(Long groupEntityId, Long detailId, String month);
+
+	List<SalaryGroupEntity> listOpenSalaryGroupEntityByOrgId(Long ownerId, String month);
+
 //	Integer countNullSalaryEmployeePeriodsByPeriodAndEntity(String ownerType, Long ownerId,
 //															String period, Long entityIdShifa);
 //

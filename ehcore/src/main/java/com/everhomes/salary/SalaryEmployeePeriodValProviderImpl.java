@@ -7,6 +7,7 @@ import java.util.stream.Collectors;
 
 import com.everhomes.rest.salary.SalaryEntityType;
 import org.jooq.DSLContext;
+import org.jooq.Record;
 import org.jooq.Record1;
 import org.jooq.SelectConditionStep;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -67,7 +68,32 @@ public class SalaryEmployeePeriodValProviderImpl implements SalaryEmployeePeriod
 				.orderBy(Tables.EH_SALARY_EMPLOYEE_PERIOD_VALS.ID.asc())
 				.fetch().map(r -> ConvertHelper.convert(r, SalaryEmployeePeriodVal.class));
 	}
-	
+
+	@Override
+	public void deleteEmployeePeriodVals(Long ownerId, String month) {
+
+		getReadWriteContext().delete(Tables.EH_SALARY_EMPLOYEE_PERIOD_VALS)
+				.where(Tables.EH_SALARY_EMPLOYEE_PERIOD_VALS.OWNER_ID.eq(ownerId))
+				.and(Tables.EH_SALARY_EMPLOYEE_PERIOD_VALS.SALARY_PERIOD.eq(month))
+				.execute();
+	}
+
+	@Override
+	public SalaryEmployeePeriodVal findSalaryEmployeePeriodValByGroupEntityIdByDetailId(Long groupEntityId, Long detailId, String month) {
+		Record r = getReadOnlyContext().select().from(Tables.EH_SALARY_EMPLOYEE_PERIOD_VALS)
+				.where(Tables.EH_SALARY_EMPLOYEE_PERIOD_VALS.GROUP_ENTITY_ID.eq(groupEntityId))
+				.and(Tables.EH_SALARY_EMPLOYEE_PERIOD_VALS.USER_DETAIL_ID.eq(detailId))
+				.and(Tables.EH_SALARY_EMPLOYEE_PERIOD_VALS.SALARY_PERIOD.eq(month)).fetchAny();
+		if(null == r)
+			return null;
+		return ConvertHelper.convert(r, SalaryEmployeePeriodVal.class);
+	}
+
+	@Override
+	public List<SalaryGroupEntity> listOpenSalaryGroupEntityByOrgId(Long ownerId, String month) {
+		return null;
+	}
+
 	private EhSalaryEmployeePeriodValsDao getReadWriteDao() {
 		return getDao(getReadWriteContext());
 	}

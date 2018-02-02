@@ -1,15 +1,17 @@
 // @formatter:off
 package com.everhomes.salary;
 
+import java.math.BigDecimal;
 import java.sql.Timestamp;
 import java.util.List;
 import java.util.stream.Collectors;
 
 import com.everhomes.listing.CrossShardListingLocator;
 import com.everhomes.rest.salary.SalaryEmployeeStatus;
-import com.everhomes.rest.salary.SalaryGroupStatus;
 import com.everhomes.rest.techpark.punch.NormalFlag;
 import org.jooq.*;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
 
@@ -28,6 +30,7 @@ import com.everhomes.util.DateHelper;
 
 @Component
 public class SalaryEmployeeProviderImpl implements SalaryEmployeeProvider {
+    private static final Logger LOGGER = LoggerFactory.getLogger(SalaryEmployeeProviderImpl.class);
 
     @Autowired
     private DbProvider dbProvider;
@@ -64,14 +67,14 @@ public class SalaryEmployeeProviderImpl implements SalaryEmployeeProvider {
     }
 
     @Override
-    public List<SalaryEmployee> listSalaryEmployee() {
+    public List<SalaryEmployee> listSalaryEmployees() {
         return getReadOnlyContext().select().from(Tables.EH_SALARY_EMPLOYEES)
                 .orderBy(Tables.EH_SALARY_EMPLOYEES.ID.asc())
                 .fetch().map(r -> ConvertHelper.convert(r, SalaryEmployee.class));
     }
 
     @Override
-    public List<SalaryEmployee> listSalaryEmployee(Long ownerId, Byte salaryStatus, List<Long> detailIds, CrossShardListingLocator locator, int pageSize) {
+    public List<SalaryEmployee> listSalaryEmployees(Long ownerId, Byte salaryStatus, List<Long> detailIds, CrossShardListingLocator locator, int pageSize) {
         SelectConditionStep<Record> step = getReadOnlyContext().select().from(Tables.EH_SALARY_EMPLOYEES)
                 .where(Tables.EH_SALARY_EMPLOYEES.OWNER_ID.eq(ownerId));
         if (null != salaryStatus) {
@@ -127,6 +130,45 @@ public class SalaryEmployeeProviderImpl implements SalaryEmployeeProvider {
         return record.stream().map(r -> {
             return r.value1();
         }).collect(Collectors.toList());
+    }
+
+    @Override
+    public List<SalaryEmployee> listSalaryEmployees(Long ownerId, String month) {
+        SelectConditionStep<Record> step = getReadOnlyContext().select().from(Tables.EH_SALARY_EMPLOYEES)
+                .where(Tables.EH_SALARY_EMPLOYEES.OWNER_ID.eq(ownerId))
+                .and(Tables.EH_SALARY_EMPLOYEES.SALARY_PERIOD.eq(month));
+        return step.orderBy(Tables.EH_SALARY_EMPLOYEES.ID.asc()).fetch().map(r -> ConvertHelper.convert(r, SalaryEmployee.class));
+    }
+
+
+    @Override
+    public SalaryDepartStatistic calculateDptReport(List<Long> detailIds, SalaryDepartStatistic statistic, Long ownerId, String month) {
+        Result<Record8<Long, Long, Integer, String, BigDecimal, BigDecimal, BigDecimal, BigDecimal>> r =
+                getReadOnlyContext().select(Tables.EH_SALARY_EMPLOYEES.ORGANIZATION_ID, Tables.EH_SALARY_EMPLOYEES.OWNER_ID,
+                        Tables.EH_SALARY_EMPLOYEES.NAMESPACE_ID, Tables.EH_SALARY_EMPLOYEES.SALARY_PERIOD,
+                        Tables.EH_SALARY_EMPLOYEES.REGULAR_SALARY.sum(), Tables.EH_SALARY_EMPLOYEES.SHOULD_PAY_SALARY.sum(),
+                        Tables.EH_SALARY_EMPLOYEES.REAL_PAY_SALARY.sum(), Tables.EH_SALARY_EMPLOYEES.COST_SALARY.sum()
+                ).from(Tables.EH_SALARY_EMPLOYEES).where(Tables.EH_SALARY_EMPLOYEES.USER_DETAIL_ID.in(detailIds))
+                        .and(Tables.EH_SALARY_EMPLOYEES.OWNER_ID.eq(ownerId))
+                        .and(Tables.EH_SALARY_EMPLOYEES.SALARY_PERIOD.eq(month))
+                        .groupBy(Tables.EH_SALARY_EMPLOYEES.ORGANIZATION_ID, Tables.EH_SALARY_EMPLOYEES.OWNER_ID,
+                                Tables.EH_SALARY_EMPLOYEES.NAMESPACE_ID, Tables.EH_SALARY_EMPLOYEES.SALARY_PERIOD)
+                        .fetch();
+        if (r.size() > 1) {
+            LOGGER.error("大于一条的部门记录被查出来了!",r);
+        }
+        if (r.size() != 0) {
+            Record8<Long, Long, Integer, String, BigDecimal, BigDecimal, BigDecimal, BigDecimal> record = r.get(0);
+            statistic.setOrganizationId(record.value1());
+            statistic.setOwnerId(record.value2());
+            statistic.setNamespaceId(record.value3());
+            statistic.setSalaryPeriod(record.value4());
+            statistic.setRegularSalary(record.value5());
+            statistic.setShouldPaySalary(record.value6());
+            statistic.setRealPaySalary(record.value7());
+            statistic.setCostSalary(record.value8());
+        }
+        return statistic;
     }
 
     private EhSalaryEmployeesDao getReadWriteDao() {

@@ -4,9 +4,12 @@ package com.everhomes.salary;
 import java.sql.Timestamp;
 import java.util.List;
 
+import com.everhomes.rest.salary.SalaryEntityType;
+import com.everhomes.rest.socialSecurity.NormalFlag;
 import com.everhomes.user.User;
 import org.jooq.DSLContext;
 import org.jooq.Record;
+import org.jooq.Result;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
 
@@ -92,6 +95,34 @@ public class SalaryEmployeeOriginValProviderImpl implements SalaryEmployeeOrigin
 				.where(Tables.EH_SALARY_EMPLOYEE_ORIGIN_VALS.USER_DETAIL_ID.eq(detailId))
 				.and(Tables.EH_SALARY_EMPLOYEE_ORIGIN_VALS.GROUP_ENTITY_ID.eq(groupEntityId))
 				.execute();
+	}
+
+	@Override
+	public List<SalaryEmployeeOriginVal> listSalaryEmployeeOriginValsByDetailId(Long userDetailId) {
+		Result<Record> records = getReadOnlyContext().select().from(Tables.EH_SALARY_EMPLOYEE_ORIGIN_VALS)
+				.where(Tables.EH_SALARY_EMPLOYEE_ORIGIN_VALS.USER_DETAIL_ID.eq(userDetailId))
+				.orderBy(Tables.EH_SALARY_EMPLOYEE_ORIGIN_VALS.ID.asc())
+				.fetch();
+		if (null == records) {
+			return null;
+		}
+
+		return records.map(r -> ConvertHelper.convert(r, SalaryEmployeeOriginVal.class));
+
+	}
+
+	@Override
+	public void setValueBlank(Long ownerId) {
+		getReadWriteContext().update(Tables.EH_SALARY_EMPLOYEE_ORIGIN_VALS)
+				.set(Tables.EH_SALARY_EMPLOYEE_ORIGIN_VALS.SALARY_VALUE,"0")
+				.where(Tables.EH_SALARY_EMPLOYEE_ORIGIN_VALS.OWNER_ID.eq(ownerId))
+				.and(Tables.EH_SALARY_EMPLOYEE_ORIGIN_VALS.DATA_POLICY.eq(NormalFlag.NO.getCode())).execute();
+
+		getReadWriteContext().update(Tables.EH_SALARY_EMPLOYEE_ORIGIN_VALS)
+				.set(Tables.EH_SALARY_EMPLOYEE_ORIGIN_VALS.SALARY_VALUE,"")
+				.where(Tables.EH_SALARY_EMPLOYEE_ORIGIN_VALS.OWNER_ID.eq(ownerId))
+				.and(Tables.EH_SALARY_EMPLOYEE_ORIGIN_VALS.DATA_POLICY.eq(NormalFlag.NO.getCode()))
+				.and(Tables.EH_SALARY_EMPLOYEE_ORIGIN_VALS.TYPE.eq(SalaryEntityType.REDUN.getCode())).execute();
 	}
 //
 //	@Override

@@ -13,4 +13,7 @@ public interface SalaryEmployeesFileProvider {
 
 	List<SalaryEmployeesFile> listSalaryEmployeesFile();
 
+	void deleteEmployeesFile(Long ownerId, String month);
+
+	SalaryEmployeesFile findSalaryEmployeesFileByDetailIDAndMonth(Long ownerId, Long detailId, String month);
 }

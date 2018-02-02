@@ -188,15 +188,29 @@ public class SalaryController extends ControllerBase {
 	 * <b>URL: /salary/fileSalaryGroup</b>
 	 */
 	@RequestMapping("fileSalaryGroup")
-	@RestReturn(String.class)
+	@RestReturn(FileSalaryGroupResponse.class)
 	public RestResponse fileSalaryGroup(FileSalaryGroupCommand cmd ){
-		salaryService.fileSalaryGroup(cmd);
-		RestResponse response = new RestResponse();
+		FileSalaryGroupResponse resp = salaryService.fileSalaryGroup(cmd);
+		RestResponse response = new RestResponse(resp);
 		response.setErrorCode(ErrorCodes.SUCCESS);
 		response.setErrorDescription("OK");
 		return response;
 	}
 
+
+	/**
+	 * <p>11.查询异步任务状态</p>
+	 * <b>URL: /salary/getSalaryTaskStatus</b>
+	 */
+	@RequestMapping("getSalaryTaskStatus")
+	@RestReturn(GetSalaryTaskStatusResponse.class)
+	public RestResponse getSalaryTaskStatus(GetSalaryTaskStatusCommand cmd ){
+		GetSalaryTaskStatusResponse resp = salaryService.getSalaryTaskStatus(cmd);
+		RestResponse response = new RestResponse(resp);
+		response.setErrorCode(ErrorCodes.SUCCESS);
+		response.setErrorDescription("OK");
+		return response;
+	}
 
 	/**
 	 * <p>12.新建报表</p>
