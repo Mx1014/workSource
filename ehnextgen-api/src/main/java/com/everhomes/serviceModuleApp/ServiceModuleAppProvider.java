@@ -1,5 +1,5 @@
 // @formatter:off
-package com.everhomes.portal;
+package com.everhomes.serviceModuleApp;
 
 import com.everhomes.rest.portal.ServiceModuleAppDTO;
 
@@ -13,17 +13,19 @@ public interface ServiceModuleAppProvider {
 
 	ServiceModuleApp findServiceModuleAppById(Long id);
 
-	List<ServiceModuleApp> listServiceModuleApp(Integer namespaceId, Long moduleId, Long versionId);
+	List<ServiceModuleApp> listServiceModuleApp(Integer namespaceId, Long versionId, Long moduleId);
 
-	List<ServiceModuleApp> listServiceModuleAppByActionType(Integer namespaceId, Byte actionType, Long versionId);
+	List<ServiceModuleApp> listServiceModuleAppByActionType(Integer namespaceId, Long versionId, Byte actionType);
 
 	List<ServiceModuleAppDTO> listServiceModuleAppsByModuleIds(Integer namespaceId, List<Long> moduleIds);
 
 	void createServiceModuleApps(List<ServiceModuleApp> serviceModuleApps);
 
-    void deleteByVersionId(Long versionId);
+	List<ServiceModuleApp> listServiceModuleAppsByVersionIdAndOriginIds(Long versionId, List<Long> originIds);
 
-    List<ServiceModuleApp> listServiceModuleApp(Integer namespaceId, Long moduleId, Byte actionType, String customTag, String customPath, Long versionId);
+	void deleteByVersionId(Long versionId);
+
+    List<ServiceModuleApp> listServiceModuleApp(Integer namespaceId, Long versionId, Long moduleId, Byte actionType, String customTag, String customPath);
 
     ServiceModuleApp findServiceModuleApp(Integer namespaceId, Long versionId, Long moduleId, String customTag);
 

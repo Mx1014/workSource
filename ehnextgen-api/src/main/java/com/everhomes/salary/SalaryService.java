@@ -144,7 +144,13 @@ public interface SalaryService {
 
     void exportSalaryReport(ExportSalaryReportCommand cmd);
 
-    void fileSalaryGroup(FileSalaryGroupCommand cmd);
+    FileSalaryGroupResponse fileSalaryGroup(FileSalaryGroupCommand cmd);
 
     void newSalaryMonth(NewSalaryMonthCommand cmd);
+
+    OutputStream getSalaryDetailsOutPut(Long ownerId, String month, Long taskId);
+
+    OutputStream getDepartStatisticsOutPut(Long ownerId, String month, Long taskId);
+
+    GetSalaryTaskStatusResponse getSalaryTaskStatus(GetSalaryTaskStatusCommand cmd);
 }

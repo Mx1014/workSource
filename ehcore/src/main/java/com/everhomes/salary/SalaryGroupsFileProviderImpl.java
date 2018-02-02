@@ -25,80 +25,88 @@ import com.everhomes.util.DateHelper;
 @Component
 public class SalaryGroupsFileProviderImpl implements SalaryGroupsFileProvider {
 
-	@Autowired
-	private DbProvider dbProvider;
+    @Autowired
+    private DbProvider dbProvider;
 
-	@Autowired
-	private SequenceProvider sequenceProvider;
+    @Autowired
+    private SequenceProvider sequenceProvider;
 
-	@Override
-	public void createSalaryGroupsFile(SalaryGroupsFile salaryGroupsFile) {
-		Long id = sequenceProvider.getNextSequence(NameMapper.getSequenceDomainFromTablePojo(EhSalaryGroupsFiles.class));
-		salaryGroupsFile.setId(id);
-		salaryGroupsFile.setCreateTime(new Timestamp(DateHelper.currentGMTTime().getTime()));
-		salaryGroupsFile.setCreatorUid(UserContext.currentUserId());
+    @Override
+    public void createSalaryGroupsFile(SalaryGroupsFile salaryGroupsFile) {
+        Long id = sequenceProvider.getNextSequence(NameMapper.getSequenceDomainFromTablePojo(EhSalaryGroupsFiles.class));
+        salaryGroupsFile.setId(id);
+        salaryGroupsFile.setCreateTime(new Timestamp(DateHelper.currentGMTTime().getTime()));
+        salaryGroupsFile.setCreatorUid(UserContext.currentUserId());
 //		salaryGroupsFile.setUpdateTime(salaryGroupsFile.getCreateTime());
 //		salaryGroupsFile.setOperatorUid(salaryGroupsFile.getCreatorUid());
-		getReadWriteDao().insert(salaryGroupsFile);
-		DaoHelper.publishDaoAction(DaoAction.CREATE, EhSalaryGroupsFiles.class, null);
-	}
+        getReadWriteDao().insert(salaryGroupsFile);
+        DaoHelper.publishDaoAction(DaoAction.CREATE, EhSalaryGroupsFiles.class, null);
+    }
 
-	@Override
-	public void updateSalaryGroupsFile(SalaryGroupsFile salaryGroupsFile) {
-		assert (salaryGroupsFile.getId() != null);
+    @Override
+    public void updateSalaryGroupsFile(SalaryGroupsFile salaryGroupsFile) {
+        assert (salaryGroupsFile.getId() != null);
 //		salaryGroupsFile.setUpdateTime(new Timestamp(DateHelper.currentGMTTime().getTime()));
 //		salaryGroupsFile.setOperatorUid(UserContext.current().getUser().getId());
-		getReadWriteDao().update(salaryGroupsFile);
-		DaoHelper.publishDaoAction(DaoAction.MODIFY, EhSalaryGroupsFiles.class, salaryGroupsFile.getId());
-	}
+        getReadWriteDao().update(salaryGroupsFile);
+        DaoHelper.publishDaoAction(DaoAction.MODIFY, EhSalaryGroupsFiles.class, salaryGroupsFile.getId());
+    }
 
-	@Override
-	public SalaryGroupsFile findSalaryGroupsFileById(Long id) {
-		assert (id != null);
-		return ConvertHelper.convert(getReadOnlyDao().findById(id), SalaryGroupsFile.class);
-	}
-	
-	@Override
-	public List<SalaryGroupsFile> listSalaryGroupsFile() {
-		return getReadOnlyContext().select().from(Tables.EH_SALARY_GROUPS_FILES)
-				.orderBy(Tables.EH_SALARY_GROUPS_FILES.ID.asc())
-				.fetch().map(r -> ConvertHelper.convert(r, SalaryGroupsFile.class));
-	}
+    @Override
+    public SalaryGroupsFile findSalaryGroupsFileById(Long id) {
+        assert (id != null);
+        return ConvertHelper.convert(getReadOnlyDao().findById(id), SalaryGroupsFile.class);
+    }
 
-	@Override
-	public SalaryGroupsFile findSalaryGroupsFile(Long ownerId, String month) {
-		Record r = getReadOnlyContext().select().from(Tables.EH_SALARY_GROUPS_FILES)
-				.where(Tables.EH_SALARY_GROUPS_FILES.OWNER_ID.eq(ownerId))
-				.and(Tables.EH_SALARY_GROUPS_FILES.SALARY_PERIOD.eq(month))
-				.orderBy(Tables.EH_SALARY_GROUPS_FILES.ID.asc())
-				.fetchAny();
-		if (null == r) {
-			return null;
-		}
-		return ConvertHelper.convert(r, SalaryGroupsFile.class);
-	}
+    @Override
+    public List<SalaryGroupsFile> listSalaryGroupsFile() {
+        return getReadOnlyContext().select().from(Tables.EH_SALARY_GROUPS_FILES)
+                .orderBy(Tables.EH_SALARY_GROUPS_FILES.ID.asc())
+                .fetch().map(r -> ConvertHelper.convert(r, SalaryGroupsFile.class));
+    }
 
-	private EhSalaryGroupsFilesDao getReadWriteDao() {
-		return getDao(getReadWriteContext());
-	}
+    @Override
+    public SalaryGroupsFile findSalaryGroupsFile(Long ownerId, String month) {
+        Record r = getReadOnlyContext().select().from(Tables.EH_SALARY_GROUPS_FILES)
+                .where(Tables.EH_SALARY_GROUPS_FILES.OWNER_ID.eq(ownerId))
+                .and(Tables.EH_SALARY_GROUPS_FILES.SALARY_PERIOD.eq(month))
+                .orderBy(Tables.EH_SALARY_GROUPS_FILES.ID.asc())
+                .fetchAny();
+        if (null == r) {
+            return null;
+        }
+        return ConvertHelper.convert(r, SalaryGroupsFile.class);
+    }
 
-	private EhSalaryGroupsFilesDao getReadOnlyDao() {
-		return getDao(getReadOnlyContext());
-	}
+    @Override
+    public void deleteGroupsFile(Long ownerId, String month) {
+        getReadWriteContext().delete(Tables.EH_SALARY_GROUPS_FILES)
+                .where(Tables.EH_SALARY_GROUPS_FILES.OWNER_ID.eq(ownerId))
+                .and(Tables.EH_SALARY_GROUPS_FILES.SALARY_PERIOD.eq(month))
+                .execute();
+    }
 
-	private EhSalaryGroupsFilesDao getDao(DSLContext context) {
-		return new EhSalaryGroupsFilesDao(context.configuration());
-	}
+    private EhSalaryGroupsFilesDao getReadWriteDao() {
+        return getDao(getReadWriteContext());
+    }
 
-	private DSLContext getReadWriteContext() {
-		return getContext(AccessSpec.readWrite());
-	}
+    private EhSalaryGroupsFilesDao getReadOnlyDao() {
+        return getDao(getReadOnlyContext());
+    }
 
-	private DSLContext getReadOnlyContext() {
-		return getContext(AccessSpec.readOnly());
-	}
+    private EhSalaryGroupsFilesDao getDao(DSLContext context) {
+        return new EhSalaryGroupsFilesDao(context.configuration());
+    }
 
-	private DSLContext getContext(AccessSpec accessSpec) {
-		return dbProvider.getDslContext(accessSpec);
-	}
+    private DSLContext getReadWriteContext() {
+        return getContext(AccessSpec.readWrite());
+    }
+
+    private DSLContext getReadOnlyContext() {
+        return getContext(AccessSpec.readOnly());
+    }
+
+    private DSLContext getContext(AccessSpec accessSpec) {
+        return dbProvider.getDslContext(accessSpec);
+    }
 }

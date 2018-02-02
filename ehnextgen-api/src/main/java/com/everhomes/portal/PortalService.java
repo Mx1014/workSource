@@ -11,7 +11,9 @@ public interface PortalService {
 	//todo
 	ListServiceModuleAppsResponse listServiceModuleApps(ListServiceModuleAppsCommand cmd);
 
-	ListServiceModuleAppsResponse listServiceModuleAppsWithConditon(ListServiceModuleAppsCommand cmd);
+    PortalVersion findReleaseVersion(Integer namespaceId);
+
+    ListServiceModuleAppsResponse listServiceModuleAppsWithConditon(ListServiceModuleAppsCommand cmd);
 
 	ServiceModuleAppDTO createServiceModuleApp(CreateServiceModuleAppCommand cmd);
 

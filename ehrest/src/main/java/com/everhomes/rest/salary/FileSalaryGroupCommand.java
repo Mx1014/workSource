@@ -17,7 +17,7 @@ public class FileSalaryGroupCommand {
     private Long ownerId;
 
     private Long organizationId;
-
+    private String month ;
     public Long getOwnerId() {
         return ownerId;
     }
@@ -45,5 +45,13 @@ public class FileSalaryGroupCommand {
 
     public void setOrganizationId(Long organizationId) {
         this.organizationId = organizationId;
+    }
+
+    public String getMonth() {
+        return month;
+    }
+
+    public void setMonth(String month) {
+        this.month = month;
     }
 }

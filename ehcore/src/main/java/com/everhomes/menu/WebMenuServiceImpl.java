@@ -15,17 +15,16 @@ import com.everhomes.organization.Organization;
 import com.everhomes.organization.OrganizationProvider;
 import com.everhomes.organization.OrganizationService;
 import com.everhomes.portal.PortalService;
-import com.everhomes.portal.ServiceModuleApp;
+import com.everhomes.portal.PortalVersion;
+import com.everhomes.serviceModuleApp.ServiceModuleApp;
 import com.everhomes.rest.acl.*;
 import com.everhomes.rest.acl.WebMenuType;
 import com.everhomes.rest.acl.admin.ListWebMenuResponse;
 import com.everhomes.rest.menu.*;
 import com.everhomes.rest.oauth2.ModuleManagementType;
 import com.everhomes.rest.organization.OrganizationType;
-import com.everhomes.rest.portal.ListServiceModuleAppsCommand;
-import com.everhomes.rest.portal.ListServiceModuleAppsResponse;
-import com.everhomes.rest.portal.PortalVersionDTO;
 import com.everhomes.rest.portal.ServiceModuleAppDTO;
+import com.everhomes.serviceModuleApp.ServiceModuleAppService;
 import com.everhomes.user.UserContext;
 import com.everhomes.user.admin.SystemUserPrivilegeMgr;
 import com.everhomes.util.ConvertHelper;
@@ -33,15 +32,12 @@ import com.everhomes.util.Tuple;
 import com.google.gson.Gson;
 import com.google.gson.GsonBuilder;
 import com.google.gson.reflect.TypeToken;
-import com.sun.javafx.scene.control.skin.VirtualFlow;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
 import org.springframework.util.StringUtils;
-import scala.collection.parallel.ParIterableLike;
 
-import javax.validation.constraints.Null;
 import java.util.*;
 import java.util.stream.Collectors;
 
@@ -64,6 +60,9 @@ public class WebMenuServiceImpl implements WebMenuService {
 
 	@Autowired
 	private ServiceModuleService serviceModuleService;
+
+	@Autowired
+	private ServiceModuleAppService serviceModuleAppService;
 
 	@Autowired
 	private DbProvider dbProvider;
@@ -599,90 +598,128 @@ public class WebMenuServiceImpl implements WebMenuService {
 		return webMenuScopes;
 	}
 
-	@Override
-	public void refleshMenuByPortalVersion(Long versionId){
 
-		PortalVersionDTO portalVersionDTO = portalService.findPortalVersionById(versionId);
-		ListServiceModuleAppsCommand cmd = new ListServiceModuleAppsCommand();
-		cmd.setNamespaceId(portalVersionDTO.getNamespaceId());
-		cmd.setVersionId(versionId);
-		ListServiceModuleAppsResponse listServiceModuleAppsResponse = portalService.listServiceModuleApps(cmd);
-		List<ServiceModuleAppDTO> serviceModuleApps = listServiceModuleAppsResponse.getServiceModuleApps();
+	private List<WebMenu> listWebMenuByAppOriginIds(Integer namespaceId, List<Long> appOrginIds, String organizationType){
 
-		List<WebMenuScope> scopes = new ArrayList<>();
+		if(appOrginIds == null || appOrginIds.size() == 0){
+			return null;
+		}
 
-		//应用生成的菜单
-		for(ServiceModuleAppDTO dto: serviceModuleApps){
-			if(dto.getModuleId() != null){
-				//门禁设置临时设置，门禁应用在后台配置成“大堂门径”和“公司门禁”，因为客户端只有actiontype对应41000
-				if(dto.getModuleId() == 41000){
-					populateMenuScopeByApplication(scopes, portalVersionDTO.getNamespaceId(), 41010L, dto.getName(), dto.getId());
-					populateMenuScopeByApplication(scopes, portalVersionDTO.getNamespaceId(), 41020L, dto.getName(), dto.getId());
-				}else {
-					populateMenuScopeByApplication(scopes, portalVersionDTO.getNamespaceId(), dto.getModuleId(), dto.getName(), dto.getId());
+		List<ServiceModuleApp> serviceModuleApps = serviceModuleAppService.listReleaseServiceModuleAppsByOriginIds(namespaceId, appOrginIds);
+
+		if(serviceModuleApps == null || serviceModuleApps.size() == 0){
+			return null;
+		}
+
+		List<WebMenu> allMenus = null;
+		if(OrganizationType.fromCode(organizationType) == OrganizationType.PM){
+			allMenus = webMenuProvider.listWebMenus(null, WebMenuType.PARK.getCode());
+		}else {
+			allMenus = webMenuProvider.listWebMenus(null, WebMenuType.ORGANIZATION.getCode());
+		}
+
+
+		List<WebMenu> menus = new ArrayList<>();
+		for(ServiceModuleApp app: serviceModuleApps){
+			for(WebMenu menu: allMenus){
+				if(app.getMenuId() != null && menu.getModuleId() != null && app.getMenuId().longValue() == menu.getModuleId().longValue()){
+					WebMenu selectMenu = ConvertHelper.convert(menu, WebMenu.class);
+					selectMenu.setConfigId(app.getId());
+					menus.add(selectMenu);
 				}
 			}
 		}
 
-		//配置域空间固定菜单
-		populateMenuScopeByNamespace(scopes, portalVersionDTO.getNamespaceId());
-
-		webMenuProvider.deleteMenuScopeByOwner(EntityType.NAMESPACE.getCode(), Long.valueOf(cmd.getNamespaceId()));
-		webMenuProvider.deleteMenuScopeByOwner(EntityType.ORGANIZATIONS.getCode(), Long.valueOf(cmd.getNamespaceId()));
-
-		webMenuProvider.createWebMenuScopes(scopes);
+		return menus;
 
 	}
 
-	/**
-	 * 根据应用配置菜单
-	 * @param scopes
-	 * @param namespaceId
-	 * @param moduleId
-	 * @param name
-	 * @param configId
-	 */
-	private void populateMenuScopeByApplication(List<WebMenuScope> scopes, Integer namespaceId, Long moduleId, String name, Long configId){
+	@Override
+	public void refleshMenuByPortalVersion(Long versionId){
 
-		List<WebMenu> webMenus = new ArrayList<>();
-		List<WebMenu> parkMenus = webMenuProvider.listMenuByModuleIdAndType(moduleId, WebMenuType.PARK.getCode());
-		List<WebMenu> orgMenus = webMenuProvider.listMenuByModuleIdAndType(moduleId, WebMenuType.ORGANIZATION.getCode());
-		webMenus.addAll(parkMenus);
-		webMenus.addAll(orgMenus);
-		for (WebMenu webMenu: webMenus){
-			WebMenuScope scope = new WebMenuScope();
-			scope.setMenuId(webMenu.getId());
-			scope.setMenuName(name);
-			scope.setApplyPolicy(WebMenuScopeApplyPolicy.OVERRIDE.getCode());
-			scope.setOwnerType(EntityType.NAMESPACE.getCode());
-			scope.setOwnerId(namespaceId.longValue());
-			//scope.setAppId(dto.getOriginId());
-			scope.setConfigId(configId);
-			scopes.add(scope);
-		}
+//		PortalVersionDTO portalVersionDTO = portalService.findPortalVersionById(versionId);
+//		ListServiceModuleAppsCommand cmd = new ListServiceModuleAppsCommand();
+//		cmd.setNamespaceId(portalVersionDTO.getNamespaceId());
+//		cmd.setVersionId(versionId);
+//		ListServiceModuleAppsResponse listServiceModuleAppsResponse = portalService.listServiceModuleApps(cmd);
+//		List<ServiceModuleAppDTO> serviceModuleApps = listServiceModuleAppsResponse.getServiceModuleApps();
+//
+//		List<WebMenuScope> scopes = new ArrayList<>();
+//
+//		//应用生成的菜单
+//		for(ServiceModuleAppDTO dto: serviceModuleApps){
+//			if(dto.getModuleId() != null){
+//				//门禁设置临时设置，门禁应用在后台配置成“大堂门径”和“公司门禁”，因为客户端只有actiontype对应41000
+//				if(dto.getModuleId() == 41000){
+//					populateMenuScopeByApplication(scopes, portalVersionDTO.getNamespaceId(), 41010L, dto.getName(), dto.getId());
+//					populateMenuScopeByApplication(scopes, portalVersionDTO.getNamespaceId(), 41020L, dto.getName(), dto.getId());
+//				}else {
+//					populateMenuScopeByApplication(scopes, portalVersionDTO.getNamespaceId(), dto.getModuleId(), dto.getName(), dto.getId());
+//				}
+//			}
+//		}
+//
+//		//配置域空间固定菜单
+//		populateMenuScopeByNamespace(scopes, portalVersionDTO.getNamespaceId());
+//
+//		webMenuProvider.deleteMenuScopeByOwner(EntityType.NAMESPACE.getCode(), Long.valueOf(cmd.getNamespaceId()));
+//		webMenuProvider.deleteMenuScopeByOwner(EntityType.ORGANIZATIONS.getCode(), Long.valueOf(cmd.getNamespaceId()));
+//
+//		webMenuProvider.createWebMenuScopes(scopes);
+
 	}
 
-	/**
-	 * 配置域空间固定菜单
-	 * @param scopes
-	 * @param namespaceId
-	 */
-	private void populateMenuScopeByNamespace(List<WebMenuScope> scopes, Integer namespaceId){
 
-		//固定生成的菜单
-		List<WebMenu> webMenus = new ArrayList<>();
-		List<WebMenu> parkMenus = webMenuProvider.listMenuByTypeAndConfigType(WebMenuType.PARK.getCode(), WebMenuConfigType.NAMESPACE.getCode());
-		List<WebMenu> orgMenus = webMenuProvider.listMenuByTypeAndConfigType(WebMenuType.ORGANIZATION.getCode(), WebMenuConfigType.NAMESPACE.getCode());
-		webMenus.addAll(parkMenus);
-		webMenus.addAll(orgMenus);
-		for (WebMenu webMenu: webMenus) {
-			WebMenuScope scope = new WebMenuScope();
-			scope.setMenuId(webMenu.getId());
-			scope.setApplyPolicy(WebMenuScopeApplyPolicy.REVERT.getCode());
-			scope.setOwnerType(EntityType.NAMESPACE.getCode());
-			scope.setOwnerId(namespaceId.longValue());
-			scopes.add(scope);
-		}
-	}
+
+//	/**
+//	 * 根据应用配置菜单
+//	 * @param scopes
+//	 * @param namespaceId
+//	 * @param moduleId
+//	 * @param name
+//	 * @param configId
+//	 */
+//	private void populateMenuScopeByApplication(List<WebMenuScope> scopes, Integer namespaceId, Long moduleId, String name, Long configId){
+//
+//		List<WebMenu> webMenus = new ArrayList<>();
+//		List<WebMenu> parkMenus = webMenuProvider.listMenuByModuleIdAndType(moduleId, WebMenuType.PARK.getCode());
+//		List<WebMenu> orgMenus = webMenuProvider.listMenuByModuleIdAndType(moduleId, WebMenuType.ORGANIZATION.getCode());
+//		webMenus.addAll(parkMenus);
+//		webMenus.addAll(orgMenus);
+//		for (WebMenu webMenu: webMenus){
+//			WebMenuScope scope = new WebMenuScope();
+//			scope.setMenuId(webMenu.getId());
+//			scope.setMenuName(name);
+//			scope.setApplyPolicy(WebMenuScopeApplyPolicy.OVERRIDE.getCode());
+//			scope.setOwnerType(EntityType.NAMESPACE.getCode());
+//			scope.setOwnerId(namespaceId.longValue());
+//			//scope.setAppId(dto.getOriginId());
+//			scope.setConfigId(configId);
+//			scopes.add(scope);
+//		}
+//	}
+//
+//	/**
+//	 * 配置域空间固定菜单
+//	 * @param scopes
+//	 * @param namespaceId
+//	 */
+//	private void populateMenuScopeByNamespace(List<WebMenuScope> scopes, Integer namespaceId){
+//
+//		//固定生成的菜单
+//		List<WebMenu> webMenus = new ArrayList<>();
+//		List<WebMenu> parkMenus = webMenuProvider.listMenuByTypeAndConfigType(WebMenuType.PARK.getCode(), WebMenuConfigType.NAMESPACE.getCode());
+//		List<WebMenu> orgMenus = webMenuProvider.listMenuByTypeAndConfigType(WebMenuType.ORGANIZATION.getCode(), WebMenuConfigType.NAMESPACE.getCode());
+//		webMenus.addAll(parkMenus);
+//		webMenus.addAll(orgMenus);
+//		for (WebMenu webMenu: webMenus) {
+//			WebMenuScope scope = new WebMenuScope();
+//			scope.setMenuId(webMenu.getId());
+//			scope.setApplyPolicy(WebMenuScopeApplyPolicy.REVERT.getCode());
+//			scope.setOwnerType(EntityType.NAMESPACE.getCode());
+//			scope.setOwnerId(namespaceId.longValue());
+//			scopes.add(scope);
+//		}
+//	}
 
 }

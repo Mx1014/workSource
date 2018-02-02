@@ -14,4 +14,6 @@ public interface SalaryGroupsFileProvider {
 	List<SalaryGroupsFile> listSalaryGroupsFile();
 
 	SalaryGroupsFile findSalaryGroupsFile(Long ownerId, String month);
+
+	void deleteGroupsFile(Long ownerId, String month);
 }

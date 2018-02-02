@@ -89,6 +89,13 @@ public class SalaryGroupProviderImpl implements SalaryGroupProvider {
 		return ConvertHelper.convert(record, SalaryGroup.class);
 	}
 
+	@Override
+	public void deleteSalaryGroup(Long ownerId) {
+		getReadWriteContext().delete(Tables.EH_SALARY_GROUPS)
+				.where(Tables.EH_SALARY_GROUPS.OWNER_ID.eq(ownerId))
+				.execute();
+	}
+
 	private EhSalaryGroupsDao getReadWriteDao() {
 		return getDao(getReadWriteContext());
 	}

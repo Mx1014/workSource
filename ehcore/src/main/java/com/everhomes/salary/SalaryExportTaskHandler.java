@@ -13,6 +13,7 @@ import com.everhomes.rest.filedownload.TaskStatus;
 import com.everhomes.rest.incubator.ApplyType;
 import com.everhomes.rest.incubator.IncubatorApplyAttachmentType;
 import com.everhomes.rest.incubator.IncubatorApplyDTO;
+import com.everhomes.rest.salary.SalaryReportType;
 import com.everhomes.util.ConvertHelper;
 import com.everhomes.util.excel.ExcelUtils;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -28,56 +29,73 @@ import java.util.Map;
 @Component
 public class SalaryExportTaskHandler implements FileDownloadTaskHandler {
 
-	@Autowired
-	FileDownloadTaskService fileDownloadTaskService;
+    @Autowired
+    FileDownloadTaskService fileDownloadTaskService;
 
-	@Autowired
-	SalaryService salaryService;
+    @Autowired
+    SalaryService salaryService;
 
-	@Autowired
-	TaskService taskService;
-
-
-	@Override
-	public void beforeExecute(Map<String, Object> params) {
-
-	}
-
-	@Override
-	public void execute(Map<String, Object> params) {
-
-		Long ownerId = null;
-		if(params.get("ownerId") != null){
-			ownerId = Long.valueOf(String.valueOf(params.get("ownerId")));
-		}
+    @Autowired
+    TaskService taskService;
 
 
-		String fileName = (String) params.get("name");
-		Long taskId = (Long) params.get("taskId");
+    @Override
+    public void beforeExecute(Map<String, Object> params) {
 
-		OutputStream outputStream = salaryService.getEmployeeSalaryOutPut(ownerId,taskId);
-		CsFileLocationDTO fileLocationDTO = fileDownloadTaskService.uploadToContenServer(fileName, outputStream);
+    }
+
+    @Override
+    public void execute(Map<String, Object> params) {
+
+        Long ownerId = null;
+        if (params.get("ownerId") != null) {
+            ownerId = Long.valueOf(String.valueOf(params.get("ownerId")));
+        }
+
+        String month = null;
+        if (params.get("month") != null) {
+            month = String.valueOf(params.get("month"));
+        }
 
 
-		Task task = taskService.findById(taskId);
-		if(fileLocationDTO != null && fileLocationDTO.getUri() != null){
-			task.setProcess(100);
-			task.setStatus(TaskStatus.SUCCESS.getCode());
-			task.setResultString1(fileLocationDTO.getUri());
-			if(fileLocationDTO.getSize() != null){
-				task.setResultLong1(fileLocationDTO.getSize().longValue());
-			}
-			taskService.updateTask(task);
-		}
+        String fileName = (String) params.get("name");
+        Long taskId = (Long) params.get("taskId");
+        Byte excelToken = (Byte) params.get("excelToken");
+        OutputStream outputStream = null;
+        switch (SalaryReportType.fromCode(excelToken)) {
+            case SALARY_DETAIL:
+                outputStream = salaryService.getSalaryDetailsOutPut(ownerId, month, taskId);
+                break;
+            case DPT_STATISTIC:
+                outputStream = salaryService.getDepartStatisticsOutPut(ownerId, month, taskId);
+                break;
+            case SALARY_EMPLOYEE:
+                outputStream = salaryService.getEmployeeSalaryOutPut(ownerId, taskId);
+                break;
+        }
+        CsFileLocationDTO fileLocationDTO = fileDownloadTaskService.uploadToContenServer(fileName, outputStream);
 
-	}
-	@Override
-	public void commit(Map<String, Object> params) {
 
-	}
+        Task task = taskService.findById(taskId);
+        if (fileLocationDTO != null && fileLocationDTO.getUri() != null) {
+            task.setProcess(100);
+            task.setStatus(TaskStatus.SUCCESS.getCode());
+            task.setResultString1(fileLocationDTO.getUri());
+            if (fileLocationDTO.getSize() != null) {
+                task.setResultLong1(fileLocationDTO.getSize().longValue());
+            }
+            taskService.updateTask(task);
+        }
 
-	@Override
-	public void afterExecute(Map<String, Object> params) {
+    }
 
-	}
+    @Override
+    public void commit(Map<String, Object> params) {
+
+    }
+
+    @Override
+    public void afterExecute(Map<String, Object> params) {
+
+    }
 }

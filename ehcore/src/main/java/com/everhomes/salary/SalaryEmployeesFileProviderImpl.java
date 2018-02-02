@@ -5,6 +5,7 @@ import java.sql.Timestamp;
 import java.util.List;
 
 import org.jooq.DSLContext;
+import org.jooq.Record;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
 
@@ -63,7 +64,26 @@ public class SalaryEmployeesFileProviderImpl implements SalaryEmployeesFileProvi
 				.orderBy(Tables.EH_SALARY_EMPLOYEES_FILES.ID.asc())
 				.fetch().map(r -> ConvertHelper.convert(r, SalaryEmployeesFile.class));
 	}
-	
+
+	@Override
+	public void deleteEmployeesFile(Long ownerId, String month) {
+		getReadWriteContext().delete(Tables.EH_SALARY_EMPLOYEES_FILES)
+				.where(Tables.EH_SALARY_EMPLOYEES_FILES.OWNER_ID.eq(ownerId))
+				.and(Tables.EH_SALARY_EMPLOYEES_FILES.SALARY_PERIOD.eq(month))
+				.execute();
+	}
+
+	@Override
+	public SalaryEmployeesFile findSalaryEmployeesFileByDetailIDAndMonth(Long ownerId, Long detailId, String month) {
+		Record r = getReadOnlyContext().select().from(Tables.EH_SALARY_EMPLOYEES_FILES)
+				.where(Tables.EH_SALARY_EMPLOYEES_FILES.OWNER_ID.eq(ownerId))
+				.and(Tables.EH_SALARY_EMPLOYEES_FILES.USER_DETAIL_ID.eq(detailId))
+				.and(Tables.EH_SALARY_EMPLOYEES_FILES.SALARY_PERIOD.eq(month)).fetchAny();
+		if(null == r)
+			return null;
+		return ConvertHelper.convert(r, SalaryEmployeesFile.class);
+	}
+
 	private EhSalaryEmployeesFilesDao getReadWriteDao() {
 		return getDao(getReadWriteContext());
 	}
