@@ -158,7 +158,7 @@ ALTER TABLE `eh_quality_inspection_specifications`
 -- 日志增加项目 jiarui
 
 ALTER TABLE `eh_quality_inspection_logs`
-  ADD COLUMN `scope_id`  bigint(20) NULL DEFAULT 0 ;
+  ADD COLUMN `scope_id`  BIGINT(20) NULL DEFAULT 0 ;
 
 -- 日志增加项目 jiarui
 
@@ -998,6 +998,8 @@ CREATE TABLE `eh_salary_employee_period_vals` (
   `owner_id` BIGINT,
   `namespace_id` INT ,
   `salary_period` VARCHAR(8) COMMENT 'example:201705',
+  `user_id` BIGINT ,
+  `user_detail_id` BIGINT , 
   `salary_employee_id` BIGINT COMMENT '标签(统计分类) salary_employee表pk', 
   `group_entity_id` BIGINT COMMENT '标签(统计分类) salary group entity表pk', 
   `group_entity_name` VARCHAR(32),
