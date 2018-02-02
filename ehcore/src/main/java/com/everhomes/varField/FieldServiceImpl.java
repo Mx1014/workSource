@@ -785,6 +785,14 @@ public class FieldServiceImpl implements FieldService {
                 fieldName += "Name";
             }
         }
+        if((params.getFieldParamType().equals("select") || params.getFieldParamType().equals("customizationSelect"))
+                && fieldName.split("Type").length > 1) {
+            fieldName += "Name";
+        }
+
+        if(fieldName.split("Uid").length > 1) {
+            fieldName += "Name";
+        }
 
         try {
             //获得get方法并使用获得field的值
