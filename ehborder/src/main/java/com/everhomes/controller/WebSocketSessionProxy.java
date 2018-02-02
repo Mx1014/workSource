@@ -52,10 +52,13 @@ public class WebSocketSessionProxy {
             public void run(){
                 List<MessageRecordDto> dtos = new ArrayList<>();
                 for (; ;) {
-                    while (!queue.isEmpty() && dtos.size() <= 20) {
+                    while (!queue.isEmpty()) {
                         MessageRecordDto record = queue.poll();
                         dtos.add(record);
-                        handleMessagePersist(dtos);
+                        if(dtos.size() > 5){
+                            handleMessagePersist(dtos);
+                            dtos.clear();
+                        }
                     }
                 }
             }

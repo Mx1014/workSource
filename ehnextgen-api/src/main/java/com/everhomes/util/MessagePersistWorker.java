@@ -46,19 +46,21 @@ public class MessagePersistWorker {
 
     @PostConstruct
     public void setup() {
-        ExecutorUtil.submit(new Runnable() {
-            @Override
-            public void run() {
+        new Thread(){
+            public void run(){
                 List<MessageRecordDto> dtos = new ArrayList<>();
-                for (; ; ) {
-                    while (!queue.isEmpty() || dtos.size() <= 100) {
+                for (; ;) {
+                    while (!queue.isEmpty()) {
                         MessageRecordDto record = queue.poll();
                         dtos.add(record);
+                        if(dtos.size() > 5){
+                            handleMessagePersist(dtos);
+                            dtos.clear();
+                        }
                     }
-                    handleMessagePersist(dtos);
                 }
             }
-        });
+        }.start();
     }
 
 
