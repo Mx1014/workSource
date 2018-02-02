@@ -144,17 +144,6 @@ public class EquipmentController extends ControllerBase {
     }
 
     /**
-     * <b>URL: /equipment/updateEquipmentStatus</b>
-     * <p>报废巡检对象</p>
-     */
-    @RequestMapping("updateEquipmentStatus")
-    @RestReturn(value = String.class)
-    public RestResponse updateEquipmentStatus(DeleteEquipmentsCommand cmd) {
-        equipmentService.updateEquipmentStatus(cmd);
-        return getSuccessResponse();
-    }
-
-    /**
      * <b>URL: /equipment/findEquipmentStandard</b>
      * <p>根据id查询巡检标准</p>
      */
@@ -235,6 +224,17 @@ public class EquipmentController extends ControllerBase {
     @RestReturn(value = String.class)
     public RestResponse deleteEquipments(DeleteEquipmentsCommand cmd) {
         equipmentService.deleteEquipments(cmd);
+        return getSuccessResponse();
+    }
+
+    /**
+     * <b>URL: /equipment/updateEquipmentStatus</b>
+     * <p>报废巡检对象</p>
+     */
+    @RequestMapping("updateEquipmentStatus")
+    @RestReturn(value = String.class)
+    public RestResponse updateEquipmentStatus(DeleteEquipmentsCommand cmd) {
+        equipmentService.updateEquipmentStatus(cmd);
         return getSuccessResponse();
     }
 
