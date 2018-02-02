@@ -389,7 +389,7 @@ public class ServiceAllianceFlowModuleListener extends GeneralApprovalFlowModule
 
 		List<FlowCaseEntity> entities = new ArrayList<>();
 		if(flowCase.getCreateTime()!=null){
-			entities.add(new FlowCaseEntity("申请时间",FlowCaseEntityType.MULTI_LINE.getCode(), flowCase.getCreateTime().toLocalDateTime().format(fmt)));
+			entities.add(new FlowCaseEntity("申请时间",flowCase.getCreateTime().toLocalDateTime().format(fmt),FlowCaseEntityType.MULTI_LINE.getCode()));
 		}
 
 		GeneralApprovalVal val = this.generalApprovalValProvider.getGeneralApprovalByFlowCaseAndName(flowCase.getId(),
@@ -406,7 +406,7 @@ public class ServiceAllianceFlowModuleListener extends GeneralApprovalFlowModule
 		val = this.generalApprovalValProvider.getGeneralApprovalByFlowCaseAndName(flowCase.getId(),
 				GeneralFormDataSourceType.USER_NAME.getCode());
 		GeneralFormFieldDTO dto = getFieldDTO(val.getFieldName(),fieldDTOs); 
-		entities.add(new FlowCaseEntity(dto.getFieldDisplayName(),JSON.parseObject(val.getFieldStr3(), PostApprovalFormTextValue.class).getText(),,FlowCaseEntityType.MULTI_LINE.getCode()));
+		entities.add(new FlowCaseEntity(dto.getFieldDisplayName(),JSON.parseObject(val.getFieldStr3(), PostApprovalFormTextValue.class).getText(),FlowCaseEntityType.MULTI_LINE.getCode()));
 		
 		//电话
 		val = this.generalApprovalValProvider.getGeneralApprovalByFlowCaseAndName(flowCase.getId(),
