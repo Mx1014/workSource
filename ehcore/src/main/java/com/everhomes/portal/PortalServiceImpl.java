@@ -593,7 +593,7 @@ public class PortalServiceImpl implements PortalService {
 		if(PortalItemActionType.fromCode(portalItem.getActionType()) == PortalItemActionType.ALLORMORE){
 			portalItem.setDefaultOrder(10000);
 		}else {
-			Integer maxDefaultOrder = portalItemGroupProvider.findMaxDefaultOrder(portalItemGroup.getId());
+			Integer maxDefaultOrder = portalItemProvider.findMaxDefaultOrder(portalItemGroup.getId());
 			if(maxDefaultOrder == null){
 				maxDefaultOrder = 0;
 			}
