@@ -455,6 +455,9 @@ public class PortalServiceImpl implements PortalService {
 		portalItemGroup.setVersionId(portalLayout.getVersionId());
 
 		Integer maxDefaultOrder = portalItemGroupProvider.findMaxDefaultOrder(portalLayout.getId());
+		if(maxDefaultOrder == null){
+			maxDefaultOrder = 0;
+		}
 		portalItemGroup.setDefaultOrder(maxDefaultOrder + 1);
 
 		portalItemGroupProvider.createPortalItemGroup(portalItemGroup);
@@ -591,6 +594,9 @@ public class PortalServiceImpl implements PortalService {
 			portalItem.setDefaultOrder(10000);
 		}else {
 			Integer maxDefaultOrder = portalItemGroupProvider.findMaxDefaultOrder(portalItemGroup.getId());
+			if(maxDefaultOrder == null){
+				maxDefaultOrder = 0;
+			}
 			portalItem.setDefaultOrder(maxDefaultOrder + 1);
 
 
