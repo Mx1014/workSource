@@ -1,6 +1,7 @@
 package com.everhomes.warehouse;
 
 import com.everhomes.listing.CrossShardListingLocator;
+import com.everhomes.rest.warehouse.SearchWarehouseStockLogsResponse;
 import com.everhomes.rest.warehouse.WarehouseStockOrderDTO;
 import com.everhomes.server.schema.tables.pojos.EhWarehouseStockLogs;
 
@@ -83,4 +84,6 @@ public interface WarehouseProvider {
     void insertWarehouseStockLogs(List<EhWarehouseStockLogs> list);
 
     void deleteWarehouseOrderById(Long id);
+
+    List<Long> findAllMaterialLogIds(Long warehouseOrderId, Long anchor, int pageSize, SearchWarehouseStockLogsResponse response);
 }
