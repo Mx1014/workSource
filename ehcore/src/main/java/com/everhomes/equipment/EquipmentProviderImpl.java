@@ -11,7 +11,6 @@ import com.everhomes.listing.CrossShardListingLocator;
 import com.everhomes.listing.ListingLocator;
 import com.everhomes.naming.NameMapper;
 import com.everhomes.rest.equipment.AdminFlag;
-import com.everhomes.rest.equipment.EquipmentOperateLogsDTO;
 import com.everhomes.rest.equipment.EquipmentOperateObjectType;
 import com.everhomes.rest.equipment.EquipmentPlanStatus;
 import com.everhomes.rest.equipment.EquipmentReviewStatus;
@@ -405,6 +404,14 @@ public class EquipmentProviderImpl implements EquipmentProvider {
         DSLContext context = this.dbProvider.getDslContext(AccessSpec.readWriteWith(EhEquipmentInspectionEquipmentAttachments.class));
         EhEquipmentInspectionEquipmentAttachmentsDao dao = new EhEquipmentInspectionEquipmentAttachmentsDao(context.configuration());
         dao.deleteById(id);
+    }
+
+    @Override
+    public void deleteEquipmentAccessoryMapByEquipmentId(Long equipmentId) {
+        DSLContext context = this.dbProvider.getDslContext(AccessSpec.readWrite());
+        context.delete(Tables.EH_EQUIPMENT_INSPECTION_ACCESSORY_MAP)
+                .where(Tables.EH_EQUIPMENT_INSPECTION_ACCESSORY_MAP.EQUIPMENT_ID.eq(equipmentId))
+                .execute();
     }
 
     @Override
