@@ -687,6 +687,7 @@ public class FieldProviderImpl implements FieldProvider {
             query.addConditions(Tables.EH_VAR_FIELD_ITEM_SCOPES.COMMUNITY_ID.isNull());
         }
 
+        LOGGER
         query.fetch().map((r) -> {
             item.add(ConvertHelper.convert(r, ScopeFieldItem.class));
             return null;

@@ -779,7 +779,7 @@ public class FieldServiceImpl implements FieldService {
         String fieldParam = field.getFieldParam();
         FieldParams params = (FieldParams) StringHelper.fromJsonString(fieldParam, FieldParams.class);
         //如果是select，则修改fieldName,在末尾加上Name，减去末尾的Id如果存在的话。由抽象跌入现实，拥有了名字，这是从神降格为人的过程---第六天天主波旬
-        if(params.getFieldParamType().equals("select") && fieldName.split("Id").length > 1){
+        if((params.getFieldParamType().equals("select") || params.getFieldParamType().equals("customizationSelect")) && fieldName.split("Id").length > 1){
             if(!fieldName.equals("projectSource") && !fieldName.equals("status")){
                 fieldName = fieldName.split("Id")[0];
                 fieldName += "Name";
@@ -788,7 +788,7 @@ public class FieldServiceImpl implements FieldService {
 
         try {
             //获得get方法并使用获得field的值
-            String cellData = getFromObj(fieldName, dto,communityId,namespaceId,moduleName);
+            String cellData = getFromObj(fieldName, params, field.getFieldId(), dto,communityId,namespaceId,moduleName);
             if(cellData==null|| cellData.equalsIgnoreCase("null")){
                 cellData = "";
             }
@@ -804,7 +804,7 @@ public class FieldServiceImpl implements FieldService {
         }
     }
 
-    private String getFromObj(String fieldName, Object dto,Long communityId,Integer namespaceId,String moduleName) throws NoSuchFieldException, IntrospectionException, InvocationTargetException, IllegalAccessException {
+    private String getFromObj(String fieldName, FieldParams params, Long fieldId, Object dto,Long communityId,Integer namespaceId,String moduleName) throws NoSuchFieldException, IntrospectionException, InvocationTargetException, IllegalAccessException {
         Class<?> clz = dto.getClass();
         PropertyDescriptor pd = new PropertyDescriptor(fieldName,clz);
         Method readMethod = pd.getReadMethod();
@@ -837,11 +837,16 @@ public class FieldServiceImpl implements FieldService {
             LOGGER.info("begin to handle field "+fieldName+" parameter namespaceid is "+ namespaceId + "communityid is "+ communityId + " moduleName is "+ moduleName + ", fieldName is "+ fieldName+" class is "+clz.toString());
             if(!invoke.getClass().getSimpleName().equals("String")){
                 long l = Long.parseLong(invoke.toString());
-                ScopeFieldItem item = findScopeFieldItemByFieldItemId(namespaceId, communityId,l);
-                LOGGER.info("field transferred ScopeFieldItem itemId: "+l);
+                ScopeFieldItem item = null;
+                if(params.getFieldParamType().equals("customizationSelect")) {
+                    item = fieldProvider.findScopeFieldItemByBusinessValue(namespaceId, communityId, moduleName,fieldId, (byte)l);
+                } else {
+                    item = findScopeFieldItemByFieldItemId(namespaceId, communityId,l);
+                }
+
+                LOGGER.info("field transferred to item id is "+StringHelper.toJsonString(invoke));
                 if(item!=null&&item.getItemId()!=null){
                     invoke = String.valueOf(item.getItemDisplayName());
-                    LOGGER.info("field transferred to item id is "+invoke);
                 }else{
                     if(fieldName.equals("status") ||
                             fieldName.equals("Status") ){
