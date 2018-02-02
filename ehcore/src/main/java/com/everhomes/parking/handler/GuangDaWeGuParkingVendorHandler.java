@@ -180,7 +180,6 @@ public class GuangDaWeGuParkingVendorHandler extends DefaultParkingVendorHandler
 		dto.setMonthCount(new BigDecimal(monthCount));
 		dto.setPrice(new BigDecimal(prices));
 		dto.setVendorName(ParkingLotVendor.GUANG_DA_WE_GU.getCode());
-		dto.setOriginalPrice(new BigDecimal(prices));
 		dto.setParkingLotId(parkingLot.getId());
 		dto.setOwnerType(parkingLot.getOwnerType());
 		dto.setOwnerId(parkingLot.getOwnerId());
@@ -269,7 +268,6 @@ public class GuangDaWeGuParkingVendorHandler extends DefaultParkingVendorHandler
 		for (ParkingRechargeRateDTO rate : parkingRechargeRates) {
 			if(rate.getMonthCount().compareTo(order.getMonthCount())==0){
 				order.setRateName(rate.getRateName());
-				order.setOriginalPrice(order.getPrice());
 				return ;
 			}
 		}
