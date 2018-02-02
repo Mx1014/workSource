@@ -406,7 +406,7 @@ public class ServiceAllianceFlowModuleListener extends GeneralApprovalFlowModule
 		val = this.generalApprovalValProvider.getGeneralApprovalByFlowCaseAndName(flowCase.getId(),
 				GeneralFormDataSourceType.USER_NAME.getCode());
 		GeneralFormFieldDTO dto = getFieldDTO(val.getFieldName(),fieldDTOs); 
-		entities.add(new FlowCaseEntity(dto.getFieldDisplayName(),JSON.parseObject(val.getFieldStr3(), PostApprovalFormTextValue.class).getText(),,FlowCaseEntityType.MULTI_LINE.getCode()));
+		entities.add(new FlowCaseEntity(dto.getFieldDisplayName(),JSON.parseObject(val.getFieldStr3(), PostApprovalFormTextValue.class).getText(),FlowCaseEntityType.MULTI_LINE.getCode()));
 		
 		//电话
 		val = this.generalApprovalValProvider.getGeneralApprovalByFlowCaseAndName(flowCase.getId(),
