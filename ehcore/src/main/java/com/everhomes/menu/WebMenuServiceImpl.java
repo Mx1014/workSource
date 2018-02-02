@@ -277,7 +277,41 @@ public class WebMenuServiceImpl implements WebMenuService {
 			dtos.add(ConvertHelper.convert(webMenu, WebMenuDTO.class));
 		}
 
- 		return processWebMenus(dtos, ConvertHelper.convert(menu, WebMenuDTO.class)).getDtos();
+		//return processWebMenus(dtos, ConvertHelper.convert(menu, WebMenuDTO.class)).getDtos();
+
+
+
+		//前面的不要了
+		List<Long> appOriginIds = null;
+		String organizationType = OrganizationType.PM.getCode();
+		Integer namespaceId = UserContext.getCurrentNamespaceId();
+
+		if(appOriginIds == null || appOriginIds.size() == 0){
+			List<ServiceModuleApp> serviceModuleApps = serviceModuleAppService.listReleaseServiceModuleApps(namespaceId);
+			if(serviceModuleApps == null || serviceModuleApps.size() == 0){
+				return null;
+			}
+
+			appOriginIds = serviceModuleApps.stream().map(r -> r.getOriginId()).collect(Collectors.toList());
+		}
+
+		//前面这段只是为了拿到appOriginIds、organizationType和namespaceId
+
+
+		List<WebMenu> webMenus = listWebMenuByAppOriginIds(namespaceId, appOriginIds, organizationType);
+		List<WebMenu> parentMenus = listParentMenus(webMenus);
+		webMenus.addAll(parentMenus);
+
+		List<WebMenuDTO> webMenuDtos  = new ArrayList<>();
+		for (WebMenu webMenu : menus) {
+			WebMenuDTO dto = ConvertHelper.convert(webMenu, WebMenuDTO.class);
+			webMenuDtos.add(dto);
+		}
+
+		WebMenuDTO treeDto = processWebMenus(webMenuDtos, null);
+		return treeDto.getDtos();
+
+
 	}
 
 	private List<WebMenuDTO> listEnterpriseWebMenu(Long userId, WebMenu menu, List<String> categories, Long organizationId){
@@ -633,6 +667,37 @@ public class WebMenuServiceImpl implements WebMenuService {
 		return menus;
 
 	}
+
+	/**
+	 * 不在menus中的parent
+	 * @param menus
+	 * @return
+	 */
+	private List<WebMenu> listParentMenus(List<WebMenu> menus){
+
+		Set<Long> parentIds = new HashSet<>();
+		for (WebMenu menu: menus) {
+			String[] menuIdStrs = menu.getPath().split("/");
+			for (String menuIdStr: menuIdStrs) {
+				if(!StringUtils.isEmpty(menuIdStr)){
+					parentIds.add(Long.valueOf(menuIdStr));
+				}
+			}
+		}
+
+		//可能有一部分是和menus自己重复了，要删除掉
+		Set<Long> menuIds = new HashSet<>();
+		for(WebMenu menu: menus){
+			menuIds.add(menu.getId());
+		}
+
+		parentIds.removeAll(menuIds);
+
+		return webMenuProvider.listWebMenuByMenuIds(new ArrayList<>(parentIds));
+	}
+
+
+
 
 	@Override
 	public void refleshMenuByPortalVersion(Long versionId){
