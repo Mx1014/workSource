@@ -237,6 +237,7 @@ public class SalaryServiceImpl implements SalaryService {
         for (SalaryDefaultEntity de : defaultEntities) {
             SalaryGroupEntity entity = ConvertHelper.convert(de, SalaryGroupEntity.class);
             entity.setDefaultId(de.getId());
+            entity.setDefaultFlag(NormalFlag.YES.getCode());
             entity.setOrganizationId(organizationId);
             entity.setId(null);
             if (entity.getStatus() == null) {

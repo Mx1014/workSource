@@ -141,16 +141,15 @@ public class EquipmentTasksSearcherImpl extends AbstractElasticSearch implements
             builder.addHighlightedField("taskName");
 
         }
-//
-//        FilterBuilder nfb = FilterBuilders.termFilter("status", EquipmentTaskStatus.NONE.getCode());
-//        FilterBuilder fb = FilterBuilders.notFilter(nfb);
-//产品要求把已失效的任务也显示出来 add by xiongying20170217 改用namespaceId add by xiongying 20170328
-        FilterBuilder fb = FilterBuilders.termFilter("namespaceId", cmd.getNamespaceId());
-        if(cmd.getTargetId() != null)
-        	fb = FilterBuilders.andFilter(fb, FilterBuilders.termFilter("targetId", cmd.getTargetId()));
 
-        if(!StringUtils.isNullOrEmpty(cmd.getTargetType()))
-        	fb = FilterBuilders.andFilter(fb, FilterBuilders.termFilter("targetType", OwnerType.fromCode(cmd.getTargetType()).getCode()));
+        FilterBuilder fb = FilterBuilders.termFilter("namespaceId", cmd.getNamespaceId());
+        if (cmd.getTargetId() != null && cmd.getTargetId() != 0L) {
+            fb = FilterBuilders.andFilter(fb, FilterBuilders.termFilter("targetId", cmd.getTargetId()));
+
+            if (!StringUtils.isNullOrEmpty(cmd.getTargetType()))
+                fb = FilterBuilders.andFilter(fb, FilterBuilders.termFilter("targetType", OwnerType.fromCode(cmd.getTargetType()).getCode()));
+        }
+
 
        // startTime  endTime  status  reviewStatus  taskType
         if(cmd.getStartTime() != null) {

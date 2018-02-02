@@ -8,6 +8,7 @@ import com.everhomes.equipment.EquipmentInspectionStandards;
 import com.everhomes.listing.CrossShardListingLocator;
 import com.everhomes.naming.NameMapper;
 import com.everhomes.rest.warehouse.DeliveryFlag;
+import com.everhomes.rest.warehouse.SearchWarehouseStockLogsResponse;
 import com.everhomes.rest.warehouse.Status;
 import com.everhomes.rest.warehouse.WarehouseStockOrderDTO;
 import com.everhomes.sequence.SequenceProvider;
@@ -26,6 +27,7 @@ import org.jooq.DSLContext;
 import org.jooq.Record;
 import org.jooq.SelectQuery;
 import org.jooq.Table;
+import org.jooq.impl.DSL;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -614,6 +616,20 @@ public class WarehouseProviderImpl implements WarehouseProvider {
         context.delete(Tables.EH_WAREHOUSE_ORDERS)
                 .where(Tables.EH_WAREHOUSE_ORDERS.ID.eq(id))
                 .execute();
+    }
+
+    @Override
+    public List<Long> findAllMaterialLogIds(Long warehouseOrderId, Long anchor, int pageSize, SearchWarehouseStockLogsResponse response) {
+        Integer pageOffset = (anchor.intValue() - 1) * pageSize;
+        DSLContext context = this.dbProvider.getDslContext(AccessSpec.readOnly());
+        Integer total = context.select(DSL.count(Tables.EH_WAREHOUSE_STOCK_LOGS.ID))
+                .where(Tables.EH_WAREHOUSE_STOCK_LOGS.WAREHOUSE_ORDER_ID.eq(warehouseOrderId))
+                .fetchOne(DSL.count(Tables.EH_WAREHOUSE_STOCK_LOGS.ID));
+        response.setTotal(total.longValue());
+        return context.select(Tables.EH_WAREHOUSE_STOCK_LOGS.ID)
+                .where(Tables.EH_WAREHOUSE_STOCK_LOGS.WAREHOUSE_ORDER_ID.eq(warehouseOrderId))
+                .limit(pageOffset,pageSize)
+                .fetch(Tables.EH_WAREHOUSE_STOCK_LOGS.ID);
     }
 
     @Override

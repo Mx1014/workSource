@@ -228,6 +228,17 @@ public class EquipmentController extends ControllerBase {
     }
 
     /**
+     * <b>URL: /equipment/updateEquipmentStatus</b>
+     * <p>报废巡检对象</p>
+     */
+    @RequestMapping("updateEquipmentStatus")
+    @RestReturn(value = String.class)
+    public RestResponse updateEquipmentStatus(DeleteEquipmentsCommand cmd) {
+        equipmentService.updateEquipmentStatus(cmd);
+        return getSuccessResponse();
+    }
+
+    /**
      * <b>URL: /equipment/findEquipment</b>
      * <p>根据id查询设备</p>
      */
@@ -542,19 +553,19 @@ public class EquipmentController extends ControllerBase {
         return getRestResponse(items);
     }
 
-    /**
-     * <b>URL: /equipment/statItemResultsInEquipmentTasks</b>
-     * <p>按设备-标准统计任务的细项</p>
-     *//*
-    @RequestMapping("statItemResultsInEquipmentTasks")
-    @RestReturn(value = StatItemResultsInEquipmentTasksResponse.class)
-    public RestResponse statItemResultsInEquipmentTasks(StatItemResultsInEquipmentTasksCommand cmd) {
-        StatItemResultsInEquipmentTasksResponse stat = equipmentService.statItemResultsInEquipmentTasks(cmd);
-        RestResponse response = new RestResponse(stat);
-        response.setErrorCode(ErrorCodes.SUCCESS);
-        response.setErrorDescription("OK");
-        return response;
-    }*/
+//    *
+//     * <b>URL: /equipment/statItemResultsInEquipmentTasks</b>
+//     * <p>按设备-标准统计任务的细项</p>
+//
+//    @RequestMapping("statItemResultsInEquipmentTasks")
+//    @RestReturn(value = StatItemResultsInEquipmentTasksResponse.class)
+//    public RestResponse statItemResultsInEquipmentTasks(StatItemResultsInEquipmentTasksCommand cmd) {
+//        StatItemResultsInEquipmentTasksResponse stat = equipmentService.statItemResultsInEquipmentTasks(cmd);
+//        RestResponse response = new RestResponse(stat);
+//        response.setErrorCode(ErrorCodes.SUCCESS);
+//        response.setErrorDescription("OK");
+//        return response;
+//    }
 
     /**
      * <b>URL: /equipment/reportEquipmentTask</b>
@@ -1015,17 +1026,6 @@ public class EquipmentController extends ControllerBase {
         UserPrivilegeMgr resolver = PlatformContext.getComponent("SystemUser");
         resolver.checkUserPrivilege(UserContext.current().getUser().getId(), 0);
         equipmentService.syncStandardToEqiupmentPlan();
-        return getSuccessResponse();
-    }
-
-    /**
-     * <b>URL: /equipment/updateEquipmentStatus</b>
-     * <p>报废设备</p>
-     */
-    @RequestMapping("updateEquipmentStatus")
-    @RestReturn(value = String.class)
-    public RestResponse updateEquipmentStatus(DeleteEquipmentsCommand cmd) {
-        equipmentService.updateEquipmentStatus(cmd);
         return getSuccessResponse();
     }
 

@@ -5,11 +5,13 @@ import com.everhomes.util.StringHelper;
 /**
  * <ul>
  * <li>bulletinId : 公告ID</li>
+ * <li>bulletinTitle : 公告标题</li>
  * <li>showType:是否预览，请查看{@link EnterpriseNoticeShowType}</li>
  * </ul>
  */
 public class EnterpriseNoticeDetailActionData {
     private Long bulletinId;
+    private String bulletinTitle;
     private Byte showType;
 
     public Long getBulletinId() {
@@ -26,6 +28,14 @@ public class EnterpriseNoticeDetailActionData {
 
     public void setShowType(Byte showType) {
         this.showType = showType;
+    }
+
+    public String getBulletinTitle() {
+        return bulletinTitle;
+    }
+
+    public void setBulletinTitle(String bulletinTitle) {
+        this.bulletinTitle = bulletinTitle;
     }
 
     @Override

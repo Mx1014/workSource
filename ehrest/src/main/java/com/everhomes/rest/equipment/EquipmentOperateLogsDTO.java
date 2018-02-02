@@ -17,6 +17,7 @@ public class EquipmentOperateLogsDTO {
     private Long targetId;
     private Byte processType;
     private Long operatorUid;
+    private String operatorName;
     private Timestamp createTime;
     private Integer namespaceId;
 
@@ -74,6 +75,14 @@ public class EquipmentOperateLogsDTO {
 
     public void setOperatorUid(Long operatorUid) {
         this.operatorUid = operatorUid;
+    }
+
+    public String getOperatorName() {
+        return operatorName;
+    }
+
+    public void setOperatorName(String operatorName) {
+        this.operatorName = operatorName;
     }
 
     public Timestamp getCreateTime() {
