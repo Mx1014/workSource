@@ -538,6 +538,9 @@ public class ServiceModuleServiceImpl implements ServiceModuleService {
         Integer namespaceId = UserContext.getCurrentNamespaceId(cmd.getNamespaceId());
         //过滤出与scopes匹配的serviceModule
         List<ServiceModuleDTO> tempList = filterByScopes(namespaceId, cmd.getOwnerType(), cmd.getOwnerId());
+        //todo
+//        List<Long> moduleIds = new ArrayList<>();
+//        List<ServiceModuleDTO> tempList = this.serviceModuleProvider.listServiceModuleDtos(moduleIds);
 
         TreeServiceModuleAppsResponse response = new TreeServiceModuleAppsResponse();
         List<ServiceModuleDTO> communityControlList = new ArrayList<>();
