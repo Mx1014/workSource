@@ -5776,11 +5776,16 @@ private void checkUserPrivilege(Long orgId, Long privilegeId, Long communityId) 
 		List<EquipmentStandardRelationDTO> equipments = new ArrayList<>();//设备标准关联表 设备id 标准id
 		List<InspectionItemDTO> items = new ArrayList<>();//巡检item表包含standardId
 
-		OfflineTaskCountStat countStat = new OfflineTaskCountStat();
-		countStat.setTodayCompleteCount(new ArrayList<>(Collections.singleton(response.getTodayCompleteCount())));
-		countStat.setTotayTasksCount(new ArrayList<>(Collections.singleton(response.getTotayTasksCount())));
+		OfflineTaskCountStat todayComplete = new OfflineTaskCountStat();
+		todayComplete.setCount(response.getTodayCompleteCount());
+		todayComplete.setId(UUID.randomUUID().toString());
 
-		offlineResponse.setCountStat(countStat);
+		OfflineTaskCountStat todayTaskCount = new OfflineTaskCountStat();
+		todayTaskCount.setCount(response.getTotayTasksCount());
+		todayTaskCount.setId(UUID.randomUUID().toString());
+
+		offlineResponse.setTodayCompleteCount(new ArrayList<>(Collections.singleton(todayComplete)));
+		offlineResponse.setTodayTasksCount(new ArrayList<>(Collections.singleton(todayTaskCount)));
 		offlineResponse.setNextPageAnchor(response.getNextPageAnchor());
 
 		List<EquipmentTaskDTO> tasks = response.getTasks();
