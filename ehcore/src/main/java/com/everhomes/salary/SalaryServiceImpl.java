@@ -790,7 +790,9 @@ public class SalaryServiceImpl implements SalaryService {
             salaryEmployeeOriginValProvider.deleteSalaryEmployeeOriginValByDetailIdAndGroouEntity(detailId, groupEntity.getId());
             SalaryEmployeeOriginVal bonusVal = processSalaryEmployeeOriginVal(groupEntity, detailId, bonusTax.toString());
             salaryEmployeeOriginValProvider.createSalaryEmployeeOriginVal(bonusVal);
-            realPay = shouldPay.subtract(salaryTax).subtract(bonusTax).add(afterTax);
+            //实发应该是工资+年终-工资税-年终税+税后款
+            //工资和年终是减去了扣款而应发没有,所以计算的时候用工资+年终
+            realPay = salary.add(bonus).subtract(salaryTax).subtract(bonusTax).add(afterTax);
             LOGGER.debug("应付{},工资{},年终{},工资税{},年终税{},实付{}", shouldPay, salary, bonus, salaryTax, bonusTax, realPay);
         }
         employee.setRegularSalary(regular);
