@@ -10,7 +10,7 @@ public interface Rentalv2Provider {
 
 	void createRentalSite(RentalResource rentalSite);
 
-	List<RentalItem> findRentalSiteItems(Long rentalSiteId, String resourceType);
+	List<RentalItem> findRentalSiteItems(String sourceType,Long sourceId, String resourceType);
 
 	void createRentalSiteItem(RentalItem siteItem);
 
@@ -91,7 +91,7 @@ public interface Rentalv2Provider {
 
 	List<RentalCloseDate> queryRentalCloseDateByOwner(String resourceType, String ownerType, Long ownerId);
 
-	List<RentalConfigAttachment> queryRentalConfigAttachmentByOwner(String resourceType, String ownerType, Long ownerId);
+	List<RentalConfigAttachment> queryRentalConfigAttachmentByOwner(String resourceType, String ownerType, Long ownerId,Byte attachmentType);
 
 	List<RentalConfigAttachment> queryRentalConfigAttachmentByIds(List<Long> ids);
 
@@ -115,7 +115,7 @@ public interface Rentalv2Provider {
 
 	Integer deleteRentalCloseDatesByOwnerId(String resourceType, String ownerType, Long id);
 
-	Integer deleteRentalConfigAttachmentsByOwnerId(String resourceType, String ownerType, Long id);
+	Integer deleteRentalConfigAttachmentsByOwnerId(String resourceType, String ownerType, Long id,Byte attachmentType);
 
 	List<RentalSiteRange> findRentalSiteOwnersBySiteId(String resourceType, Long siteId);
 

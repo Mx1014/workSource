@@ -700,7 +700,6 @@ public class Rentalv2AdminController extends ControllerBase {
 	@RequestMapping("getResourcePriceRule")
 	@RestReturn(ResourcePriceRuleDTO.class)
 	public RestResponse getResourcePriceRule(GetResourcePriceRuleCommand cmd) {
-
 		RestResponse response = new RestResponse(rentalService.getResourcePriceRule(cmd));
 		response.setErrorCode(ErrorCodes.SUCCESS);
 		response.setErrorDescription("OK");
@@ -780,4 +779,21 @@ public class Rentalv2AdminController extends ControllerBase {
 		response.setErrorDescription("OK");
 		return response;
 	}
+	/*-------------------------------------------新的更新资源接口---------------------------------- */
+	/**
+	 * <b>URL: /rental/admin/getResourceAttachment</b>
+	 * <p>
+	 * 查询资源的提交信息
+	 * </p>
+	 */
+
+	@RequestMapping("getResourceAttachment")
+	@RestReturn(value = ResourceAttachmentDTO.class)
+	public RestResponse getResourceAttachment(@Valid GetResourceAttachmentCommand cmd) {
+		RestResponse response = new RestResponse(rentalService.getResourceAttachment(cmd));
+		response.setErrorCode(ErrorCodes.SUCCESS);
+		response.setErrorDescription("OK");
+		return response;
+	}
+
 }

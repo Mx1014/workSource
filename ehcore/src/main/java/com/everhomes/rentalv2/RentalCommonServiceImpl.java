@@ -376,13 +376,12 @@ public class RentalCommonServiceImpl {
 //        sb.append("\r\n");
 //        sb.append("\r\n");
 //        sb.append("确认要取消订单吗？");
-
         order.setTip(content);
     }
 
     public void processOrderCustomRefundTip(RentalOrder order, List<RentalOrderRule> outerRules, List<RentalOrderRule> innerRules,
                                         RentalOrderRule orderRule, BigDecimal amount) {
-        //TODO: local template
+
         StringBuilder sb = new StringBuilder();
         sb.append("亲爱的用户，为保障资源使用效益，如在服务开始前取消订单，将扣除您订单金额的一定比例数额，恳请您谅解。具体规则如下：");
         sb.append("\r\n");
