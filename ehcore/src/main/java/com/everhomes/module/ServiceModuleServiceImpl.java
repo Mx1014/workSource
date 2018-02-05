@@ -634,7 +634,7 @@ public class ServiceModuleServiceImpl implements ServiceModuleService {
             userId = user.getId();
         }
         Integer namespaceId = UserContext.getCurrentNamespaceId();
-        List<ProjectDTO> dtos = getUserProjectsByModuleId(userId, cmd.getOrganizationId(), cmd.getModuleId());
+        List<ProjectDTO> dtos = getUserProjectsByModuleId(userId, cmd.getOrganizationId(), cmd.getModuleId(), cmd.getAppId());
         if(cmd.getCommunityFetchType() != null){
             return rolePrivilegeService.getTreeProjectCategories(namespaceId, dtos, CommunityFetchType.fromCode(cmd.getCommunityFetchType()));
         }
@@ -649,14 +649,14 @@ public class ServiceModuleServiceImpl implements ServiceModuleService {
         if(null == cmd.getUserId()){
             userId = user.getId();
         }
-        return getUserProjectsByModuleId(userId, cmd.getOrganizationId(), cmd.getModuleId());
+        return getUserProjectsByModuleId(userId, cmd.getOrganizationId(), cmd.getModuleId(), cmd.getAppId());
     }
 
     @Override
     public List<CommunityDTO> listUserRelatedCommunityByModuleId(ListUserRelatedProjectByModuleCommand cmd) {
         User user = UserContext.current().getUser();
         List<CommunityDTO> dtos = new ArrayList<>();
-        List<ProjectDTO> projects = getUserProjectsByModuleId(user.getId(), cmd.getOrganizationId(), cmd.getModuleId());
+        List<ProjectDTO> projects = getUserProjectsByModuleId(user.getId(), cmd.getOrganizationId(), cmd.getModuleId(), null);
         LOGGER.debug("listAuthorizationCommunityByUser step3"+ DateHelper.currentGMTTime());
         for (ProjectDTO project: projects) {
             if(EntityType.fromCode(project.getProjectType()) == EntityType.COMMUNITY){
@@ -750,9 +750,10 @@ public class ServiceModuleServiceImpl implements ServiceModuleService {
      * @param userId
      * @param organizationId
      * @param moduleId
+     * @param appId
      * @return
      */
-    private List<ProjectDTO> getUserProjectsByModuleId(Long userId, Long organizationId, Long moduleId){
+    private List<ProjectDTO> getUserProjectsByModuleId(Long userId, Long organizationId, Long moduleId, Long appId){
         boolean allProjectFlag = false;
         List<ProjectDTO> dtos = new ArrayList<>();
         //物业超级管理员拿所有项目
@@ -782,7 +783,8 @@ public class ServiceModuleServiceImpl implements ServiceModuleService {
 
 
             //获取人员和人员所有机构所赋予模块的所属项目范围(应用管理员) -- add by lei.lv
-            List<Authorization> authorizations_apps =  authorizationProvider.listAuthorizations(EntityType.ORGANIZATIONS.getCode(), organizationId, EntityType.USER.getCode(), userId, com.everhomes.entity.EntityType.SERVICE_MODULE_APP.getCode(), null, IdentityType.MANAGE.getCode(), true, null, null);
+            // todo 加上应用
+            List<Authorization> authorizations_apps =  authorizationProvider.listAuthorizations(EntityType.ORGANIZATIONS.getCode(), organizationId, EntityType.USER.getCode(), userId, com.everhomes.entity.EntityType.SERVICE_MODULE_APP.getCode(), null, IdentityType.MANAGE.getCode(), appId, null, null, null);
             if(authorizations_apps != null && authorizations_apps.size() > 0){
                 authorizations_apps = authorizations_apps.stream().filter(r->ModuleManagementType.fromCode(r.getModuleControlType()) == COMMUNITY_CONTROL).limit(1).collect(Collectors.toList());
                 if(authorizations_apps !=null && authorizations_apps.size() > 0) {
@@ -803,7 +805,7 @@ public class ServiceModuleServiceImpl implements ServiceModuleService {
 
 
             //获取人员和人员所有机构所赋予模块的所属项目范围(权限细化)
-            List<Project> project_relation = authorizationProvider.getAuthorizationProjectsByAuthIdAndTargets(IdentityType.ORDINARY.getCode(), com.everhomes.entity.EntityType.SERVICE_MODULE_APP.getCode(), moduleId, targets);
+            List<Project> project_relation = authorizationProvider.getAuthorizationProjectsByAppIdAndTargets(IdentityType.ORDINARY.getCode(), com.everhomes.entity.EntityType.SERVICE_MODULE_APP.getCode(), moduleId, appId, targets);
             for (Project project: project_relation) {
                 //在模块下拥有全部项目权限
                 if(EntityType.ALL == EntityType.fromCode(project.getProjectType())){

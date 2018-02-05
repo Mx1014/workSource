@@ -1158,7 +1158,7 @@ public class AddressServiceImpl implements AddressService, LocalBusSubscriber {
                     "Invalid communityId, buildingName parameter");
 
         User user = UserContext.current().getUser();
-        long userId = user.getId();
+        long userId = cmd.getUserId()==null?user.getId():cmd.getUserId();
 
         checkUserPrivilege(userId, cmd.getCommunityId());
 
