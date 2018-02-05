@@ -93,12 +93,13 @@ public class Rentalv2ProviderImpl implements Rentalv2Provider {
 	}
 
 	@Override
-	public List<RentalItem> findRentalSiteItems(Long rentalSiteId, String resourceType) {
+	public List<RentalItem> findRentalSiteItems(String sourceType,Long sourceId, String resourceType) {
 		DSLContext context = dbProvider.getDslContext(AccessSpec.readOnly());
 		SelectJoinStep<Record> step = context.select().from(
 				Tables.EH_RENTALV2_ITEMS);
-		Condition condition = Tables.EH_RENTALV2_ITEMS.RENTAL_RESOURCE_ID
-				.equal(rentalSiteId);
+		Condition condition = Tables.EH_RENTALV2_ITEMS.SOURCE_ID
+				.equal(sourceId);
+		condition.and(Tables.EH_RENTALV2_ITEMS.SOURCE_TYPE.equal(sourceType));
 		condition = condition.and(Tables.EH_RENTALV2_ITEMS.RESOURCE_TYPE.equal(resourceType));
 		step.where(condition);
 		List<RentalItem> result = step
@@ -1430,7 +1431,7 @@ public class Rentalv2ProviderImpl implements Rentalv2Provider {
 
 	@Override
 	public List<RentalConfigAttachment> queryRentalConfigAttachmentByOwner(String resourceType,
-																		   String ownerType, Long ownerId) {
+																		   String ownerType, Long ownerId,Byte attachmentType) {
 		DSLContext context = dbProvider.getDslContext(AccessSpec.readOnly());
 		SelectJoinStep<Record> step = context.select().from(
 				Tables.EH_RENTALV2_CONFIG_ATTACHMENTS);
@@ -1441,9 +1442,13 @@ public class Rentalv2ProviderImpl implements Rentalv2Provider {
 
 		condition = condition.and(Tables.EH_RENTALV2_CONFIG_ATTACHMENTS.RESOURCE_TYPE
 				.equal(resourceType));
+
+		if (attachmentType!=null)
+			condition = condition.and(Tables.EH_RENTALV2_CONFIG_ATTACHMENTS.ATTACHMENT_TYPE
+					.equal(attachmentType));
 		step.where(condition);
 		List<RentalConfigAttachment> result = step
-				.orderBy(Tables.EH_RENTALV2_CONFIG_ATTACHMENTS.ID.desc()).fetch().map((r) -> {
+				.orderBy(Tables.EH_RENTALV2_CONFIG_ATTACHMENTS.DEFAULT_ORDER).fetch().map((r) -> {
 					return ConvertHelper.convert(r, RentalConfigAttachment.class);
 				});
 
@@ -1616,7 +1621,7 @@ public class Rentalv2ProviderImpl implements Rentalv2Provider {
 
 	@Override
 	public Integer deleteRentalConfigAttachmentsByOwnerId(String resourceType, String ownerType,
-			Long id) {
+			Long id,Byte attachmentType) {
 		DSLContext context = dbProvider.getDslContext(AccessSpec.readOnly());
 		DeleteWhereStep<EhRentalv2ConfigAttachmentsRecord> step = context
 				.delete(Tables.EH_RENTALV2_CONFIG_ATTACHMENTS);
@@ -1624,7 +1629,8 @@ public class Rentalv2ProviderImpl implements Rentalv2Provider {
 				.equal(ownerType).and(Tables.EH_RENTALV2_CONFIG_ATTACHMENTS.OWNER_ID
 				.equal(id)).and(Tables.EH_RENTALV2_CONFIG_ATTACHMENTS.RESOURCE_TYPE
 						.equal(resourceType));
-		 
+		 if (attachmentType!=null)
+		 	condition = condition.and(Tables.EH_RENTALV2_CONFIG_ATTACHMENTS.ATTACHMENT_TYPE.equal(attachmentType));
 		step.where(condition);
 		Integer deleteCount = step.execute();
 		return deleteCount;

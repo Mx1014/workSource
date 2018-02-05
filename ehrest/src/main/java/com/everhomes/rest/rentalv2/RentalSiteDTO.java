@@ -7,6 +7,7 @@ import javax.validation.constraints.NotNull;
 
 import com.everhomes.discover.ItemType;
 import com.everhomes.rest.rentalv2.admin.AttachmentConfigDTO;
+import com.everhomes.rest.rentalv2.admin.SiteNumberDTO;
 import com.everhomes.rest.rentalv2.admin.SiteOwnerDTO;
 import com.everhomes.util.StringHelper;
 /**
@@ -104,7 +105,7 @@ public class RentalSiteDTO {
 	private Long createTime;
 	private Double siteCounts;
 	@ItemType(String.class)
-	private List<String> siteNumbers;
+	private List<SiteNumberDTO> siteNumbers;
 	@ItemType(SiteItemDTO.class)
 	private List<SiteItemDTO> siteItems;
 //	@ItemType(RentalSiteRulesDTO.class)
@@ -598,15 +599,13 @@ public class RentalSiteDTO {
 	}
 
 
-	public List<String> getSiteNumbers() {
+	public List<SiteNumberDTO> getSiteNumbers() {
 		return siteNumbers;
 	}
 
-
-	public void setSiteNumbers(List<String> siteNumbers) {
+	public void setSiteNumbers(List<SiteNumberDTO> siteNumbers) {
 		this.siteNumbers = siteNumbers;
 	}
-
 
 	public String getAvgPriceStr() {
 		return avgPriceStr;

@@ -211,10 +211,14 @@ public class EquipmentStandardSearcherImpl extends AbstractElasticSearch impleme
                             });
                         }
                         standard.setCommunities(communities);
+                    } else {
+                        EquipmentStandardCommunity standardCommunity = new EquipmentStandardCommunity();
+                        Community community = communityProvider.findCommunityById(standard.getTargetId());
+                        if (community != null) {
+                            standardCommunity.setCommunityName(community.getName());
+                            standardCommunity.setCommunityId(standard.getTargetId());
+                        }
                     }
-                    Community community = communityProvider.findCommunityById(standard.getTargetId());
-                    if (community != null)
-                        standard.setTargetName(community.getName());
                 }
             }
 
