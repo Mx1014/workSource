@@ -616,9 +616,10 @@ public class SalaryServiceImpl implements SalaryService {
     }
 
     private void saveImportEmployeeSalary(Long organizationId, Long detailId, ImportFileResponse response, RowResult r, Long ownerId) {
-        List<SalaryGroupEntity> groupEntities = salaryGroupEntityProvider.listSalaryGroupEntityByOrgId(organizationId);
+        List<SalaryGroupEntity> groupEntities = salaryGroupEntityProvider.listOpenSalaryGroupEntityByOrgId(organizationId);
         List<Long> groupEntityIds = new ArrayList<>();
         List<SalaryEmployeeOriginVal> vals = new ArrayList<>();
+        LOGGER.debug("groupEntities 是:{}\n导入的数据{}",StringHelper.toJsonString(r.getCells()));
         if (null != groupEntities) {
             for (int i = 0; i < groupEntities.size(); i++) {
 
@@ -628,8 +629,9 @@ public class SalaryServiceImpl implements SalaryService {
                     //跳过不是开启状态的
                     continue;
                 }
-                if (groupEntity.getDefaultId().equals(SalaryConstants.ENTITY_ID_BONUSTAX) ||
-                        groupEntity.getDefaultId().equals(SalaryConstants.ENTITY_ID_SALARYTAX)) {
+                if (groupEntity.getDefaultId()!=null &&
+                        (groupEntity.getDefaultId().equals(SalaryConstants.ENTITY_ID_BONUSTAX) ||
+                        groupEntity.getDefaultId().equals(SalaryConstants.ENTITY_ID_SALARYTAX))) {
                     //税收跳过
                     continue;
                 }
@@ -645,6 +647,7 @@ public class SalaryServiceImpl implements SalaryService {
                     }
                     val = decimal.toString();
                 }
+//                LOGGER.debug("第[{}]个gourpEntities数据[{}]的值是:[{}]列是{}", i+"",groupEntity.getName(), val,GetExcelLetter(i + 3));
                 SalaryEmployeeOriginVal salaryVal = salaryEmployeeOriginValProvider.findSalaryEmployeeOriginValByDetailId(groupEntity.getId(), detailId);
                 if (null == salaryVal) {
                     salaryVal = processSalaryEmployeeOriginVal(groupEntity, detailId, val);

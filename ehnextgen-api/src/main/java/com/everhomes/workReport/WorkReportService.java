@@ -45,11 +45,11 @@ public interface WorkReportService {
 
     WorkReportValDTO getWorkReportValDetail(WorkReportValIdCommand cmd);
 
-    String fixUpUserName(Long userId);
+    String fixUpUserName(Long userId, Long ownerId);
 
-    OrganizationMember getMemberByUserId(Long userId);
+    OrganizationMember getMemberByUserId(Long userId, Long ownerId);
 
-    Long getUserDetailId(Long userId);
+    Long getUserDetailId(Long userId, Long ownerId);
 
     String getUserAvatar(Long userId);
 }
