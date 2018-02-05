@@ -68,7 +68,7 @@ public class WorkReportCommentHandler implements CommentHandler {
 
                 //  return the comment back.
                 CommentDTO dto = new CommentDTO();
-                dto.setCreatorNickName(workReportService.fixUpUserName(comment.getCreatorUserId()));
+                dto.setCreatorNickName(workReportService.fixUpUserName(comment.getCreatorUserId(), reportVal.getOwnerId()));
                 dto.setCreatorAvatarUrl(workReportService.getUserAvatar(comment.getCreatorUserId()));
                 dto.setCreatorUid(comment.getCreatorUserId());
                 dto.setContent(comment.getContent());
@@ -138,7 +138,7 @@ public class WorkReportCommentHandler implements CommentHandler {
             if (parentCommentId == null) {
                 //  1) all receivers.
                 content = getMessageContent(WorkReportNotificationTemplateCode.AUTHOR_COMMENT_WORK_REPORT_VAL,
-                        null, workReportService.fixUpUserName(applierId), report.getReportName());
+                        null, workReportService.fixUpUserName(applierId, reportVal.getOwnerId()), report.getReportName());
                 subject = getMetaSubject(WorkReportNotificationTemplateCode.AUTHOR_COMMENT_WORK_REPORT_VAL);
                 List<WorkReportValReceiverMap> receivers = workReportValProvider.listReportValReceiversByValId(reportVal.getId());
                 for (WorkReportValReceiverMap receiver : receivers)
@@ -146,7 +146,7 @@ public class WorkReportCommentHandler implements CommentHandler {
             } else {
                 //  2) parentComment.creator
                 content = getMessageContent(WorkReportNotificationTemplateCode.AUTHOR_REPLY_WORK_REPORT_VAL,
-                        null, workReportService.fixUpUserName(applierId), report.getReportName());
+                        null, workReportService.fixUpUserName(applierId, reportVal.getOwnerId()), report.getReportName());
                 subject = getMetaSubject(WorkReportNotificationTemplateCode.AUTHOR_REPLY_WORK_REPORT_VAL);
                 WorkReportValComment parentComment = workReportValProvider.getWorkReportValCommentById(parentCommentId);
                 sendMessage(content, subject, parentComment.getCreatorUserId(), reportVal.getReportId(), reportVal.getId());
@@ -155,7 +155,7 @@ public class WorkReportCommentHandler implements CommentHandler {
             if (parentCommentId == null) {
                 //  3) author
                 content = getMessageContent(WorkReportNotificationTemplateCode.READER_COMMENT_WORK_REPORT_VAL,
-                        workReportService.fixUpUserName(creatorId), null, report.getReportName());
+                        workReportService.fixUpUserName(creatorId, reportVal.getOwnerId()), null, report.getReportName());
                 subject = getMetaSubject(WorkReportNotificationTemplateCode.READER_COMMENT_WORK_REPORT_VAL);
                 sendMessage(content, subject, applierId, reportVal.getReportId(), reportVal.getId());
             } else {
@@ -163,18 +163,18 @@ public class WorkReportCommentHandler implements CommentHandler {
                 if (parentComment.getCreatorUserId().longValue() == applierId.longValue()) {
                     //  4-1) author.
                     content = getMessageContent(WorkReportNotificationTemplateCode.READER_REPLY_WORK_REPORT_VAL_FOR_AUTHOR,
-                            workReportService.fixUpUserName(creatorId), null, report.getReportName());
+                            workReportService.fixUpUserName(creatorId, reportVal.getOwnerId()), null, report.getReportName());
                     subject = getMetaSubject(WorkReportNotificationTemplateCode.READER_REPLY_WORK_REPORT_VAL_FOR_AUTHOR);
                     sendMessage(content, subject, applierId, reportVal.getReportId(), reportVal.getId());
                 } else {
                     //  4-2) parentComment.creator && author
                     content = getMessageContent(WorkReportNotificationTemplateCode.READER_REPLY_WORK_REPORT_VAL_FOR_READER,
-                            workReportService.fixUpUserName(creatorId), workReportService.fixUpUserName(applierId), report.getReportName());
+                            workReportService.fixUpUserName(creatorId, reportVal.getOwnerId()), workReportService.fixUpUserName(applierId, reportVal.getOwnerId()), report.getReportName());
                     subject = getMetaSubject(WorkReportNotificationTemplateCode.READER_REPLY_WORK_REPORT_VAL_FOR_READER);
                     sendMessage(content, subject, parentComment.getCreatorUserId(), reportVal.getReportId(), reportVal.getId());
 
                     content = getMessageContent(WorkReportNotificationTemplateCode.READER_COMMENT_WORK_REPORT_VAL,
-                            workReportService.fixUpUserName(creatorId), null, report.getReportName());
+                            workReportService.fixUpUserName(creatorId, reportVal.getOwnerId()), null, report.getReportName());
                     subject = getMetaSubject(WorkReportNotificationTemplateCode.READER_COMMENT_WORK_REPORT_VAL);
                     sendMessage(content, subject, applierId, applierId, reportVal.getId());
                 }
@@ -283,7 +283,7 @@ public class WorkReportCommentHandler implements CommentHandler {
             results.forEach(r -> {
                 CommentDTO dto = ConvertHelper.convert(r, CommentDTO.class);
                 dto.setCreatorUid(r.getCreatorUserId());
-                dto.setCreatorNickName(workReportService.fixUpUserName(dto.getCreatorUid()));
+                dto.setCreatorNickName(workReportService.fixUpUserName(dto.getCreatorUid(), r.getOwnerId()));
                 dto.setCreatorAvatarUrl(workReportService.getUserAvatar(dto.getCreatorUid()));
                 dto.setAttachments(attachments.get(dto.getId()));
                 dto.setCreateTime(r.getCreateTime());
