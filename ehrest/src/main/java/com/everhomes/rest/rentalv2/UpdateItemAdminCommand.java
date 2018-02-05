@@ -6,7 +6,6 @@ import com.everhomes.util.StringHelper;
 /**
  * <ul>
  * <li>id：id</li>
- * <li>rentalSiteId：场所id</li>
  * <li>itemName：商品名称</li>
  * <li>itemPrice：商品价格</li>
  * <li>counts：商品数量</li> 
@@ -18,8 +17,7 @@ import com.everhomes.util.StringHelper;
 public class UpdateItemAdminCommand {
 	@NotNull
 	private Long id;
-	@NotNull
-	private Long rentalSiteId;
+
 	@NotNull
 	private String itemName;
 	@NotNull
@@ -34,12 +32,6 @@ public class UpdateItemAdminCommand {
     public String toString() {
         return StringHelper.toJsonString(this);
     }
-	public Long getRentalSiteId() {
-		return rentalSiteId;
-	}
-	public void setRentalSiteId(Long rentalSiteId) {
-		this.rentalSiteId = rentalSiteId;
-	}
 	public String getItemName() {
 		return itemName;
 	}

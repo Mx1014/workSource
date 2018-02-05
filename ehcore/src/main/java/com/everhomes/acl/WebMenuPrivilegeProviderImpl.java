@@ -275,7 +275,7 @@ public class WebMenuPrivilegeProviderImpl implements WebMenuPrivilegeProvider {
 		DSLContext context = this.dbProvider.getDslContext(AccessSpec.readWriteWith(EhWebMenus.class));
 
 		SelectQuery<EhWebMenusRecord> query = context.selectQuery(Tables.EH_WEB_MENUS);
-		if(parentId == null){
+		if(parentId != null){
 			query.addConditions(Tables.EH_WEB_MENUS.PARENT_ID.eq(parentId));
 		}
 		query.addConditions(Tables.EH_WEB_MENUS.TYPE.eq(type));

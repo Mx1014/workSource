@@ -543,7 +543,7 @@ public class SalaryServiceImpl implements SalaryService {
         Map<String, Object> params = new HashedMap();
         params.put("ownerId", cmd.getOwnerId());
         params.put("organizationId", cmd.getOrganizationId());
-        params.put("excelToken", SalaryReportType.SALARY_EMPLOYEE.getCode());
+        params.put("excelToken", SalaryReportType.SALARY_EMPLOYEE.getCode()+"");
 
         String fileName = "员工工资表" + ".xlsx";
 //        params.put("name", fileName);
@@ -619,6 +619,7 @@ public class SalaryServiceImpl implements SalaryService {
         List<SalaryGroupEntity> groupEntities = salaryGroupEntityProvider.listSalaryGroupEntityByOrgId(organizationId);
         List<Long> groupEntityIds = new ArrayList<>();
         List<SalaryEmployeeOriginVal> vals = new ArrayList<>();
+        LOGGER.debug("导入的数据{}",StringHelper.toJsonString(r.getCells()));
         if (null != groupEntities) {
             for (int i = 0; i < groupEntities.size(); i++) {
 
@@ -628,8 +629,9 @@ public class SalaryServiceImpl implements SalaryService {
                     //跳过不是开启状态的
                     continue;
                 }
-                if (groupEntity.getDefaultId().equals(SalaryConstants.ENTITY_ID_BONUSTAX) ||
-                        groupEntity.getDefaultId().equals(SalaryConstants.ENTITY_ID_SALARYTAX)) {
+                if (groupEntity.getDefaultId()!=null &&
+                        (groupEntity.getDefaultId().equals(SalaryConstants.ENTITY_ID_BONUSTAX) ||
+                        groupEntity.getDefaultId().equals(SalaryConstants.ENTITY_ID_SALARYTAX))) {
                     //税收跳过
                     continue;
                 }
@@ -645,6 +647,7 @@ public class SalaryServiceImpl implements SalaryService {
                     }
                     val = decimal.toString();
                 }
+                LOGGER.debug("导入数据[{}]的值是:[{}]", groupEntity.getName(), val);
                 SalaryEmployeeOriginVal salaryVal = salaryEmployeeOriginValProvider.findSalaryEmployeeOriginValByDetailId(groupEntity.getId(), detailId);
                 if (null == salaryVal) {
                     salaryVal = processSalaryEmployeeOriginVal(groupEntity, detailId, val);
@@ -1232,7 +1235,7 @@ public class SalaryServiceImpl implements SalaryService {
             }
 
             if (null != groupFile.getFileTime()) {
-                response.setCreateTime(groupFile.getFileTime().getTime());
+                response.setFileTime(groupFile.getFileTime().getTime());
                 OrganizationMemberDetails detail = organizationProvider.findOrganizationMemberDetailsByDetailId(groupFile.getFilerUid());
                 if (null != detail) {
                     response.setFilerName(detail.getContactName());

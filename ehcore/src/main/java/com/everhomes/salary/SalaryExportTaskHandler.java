@@ -60,7 +60,7 @@ public class SalaryExportTaskHandler implements FileDownloadTaskHandler {
 
         String fileName = (String) params.get("name");
         Long taskId = (Long) params.get("taskId");
-        Byte excelToken = (Byte) params.get("excelToken");
+        Byte excelToken = Byte.valueOf((String) params.get("excelToken"));
         OutputStream outputStream = null;
         switch (SalaryReportType.fromCode(excelToken)) {
             case SALARY_DETAIL:

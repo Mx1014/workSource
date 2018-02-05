@@ -219,7 +219,12 @@ public class ServiceAllianceRequestInfoSearcherImpl extends AbstractElasticSearc
             PostApprovalFormItem organizationVal = getFormFieldDTO(GeneralFormDataSourceType.ORGANIZATION_ID.getCode(),values);
 
             User user = this.userProvider.findUserById(flowCase.getApplyUserId());
-            UserIdentifier identifier = userProvider.findClaimedIdentifierByOwnerAndType(user.getId(), IdentifierType.MOBILE.getCode());
+            if(user!=null) {
+                UserIdentifier identifier = userProvider.findClaimedIdentifierByOwnerAndType(user.getId(), IdentifierType.MOBILE.getCode());
+                if (identifier != null) {
+                    request.setCreatorMobile(identifier.getIdentifierToken());
+                }
+            }
             request.setJumpType(2L);
             request.setCreateTime(new Timestamp(DateHelper.currentGMTTime().getTime()));
             if(lists!=null && lists.size()>0) {
@@ -232,9 +237,7 @@ public class ServiceAllianceRequestInfoSearcherImpl extends AbstractElasticSearc
                     request.setCreatorOrganizationId(Long.valueOf(organizationvalue.getText()));
                 }
             }
-            if(identifier!=null) {
-                request.setCreatorMobile(identifier.getIdentifierToken());
-            }
+
             if (EntityType.COMMUNITY.getCode().equals(flowCase.getProjectType()) || "community".equals(flowCase.getProjectType())
                     || EhCommunities.class.getName().equals(flowCase.getProjectType())){
             	// bydengs,修改owner

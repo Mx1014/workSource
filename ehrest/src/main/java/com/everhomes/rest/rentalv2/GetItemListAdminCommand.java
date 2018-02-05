@@ -4,14 +4,17 @@ import com.everhomes.util.StringHelper;
 
 /**
  * <ul>
- * <li>rentalSiteId：场所id</li>
+ * <li>sourceType：default_rule:默认规则  resource_rule:资源规则</li>
+ * <li>sourceId：资源规则时 场所id 默认规则时 规则id </li>
  * <li>pageAnchor: 锚点</li>
  * <li>pageSize:每页数量 </li>
  * </ul>
  */
 public class GetItemListAdminCommand {
 
-	private Long rentalSiteId;
+	private String sourceType;
+
+	private Long sourceId;
 
 	private String resourceType;
 
@@ -32,12 +35,20 @@ public class GetItemListAdminCommand {
 		this.resourceType = resourceType;
 	}
 
-	public Long getRentalSiteId() {
-		return rentalSiteId;
+	public String getSourceType() {
+		return sourceType;
 	}
 
-	public void setRentalSiteId(Long rentalSiteId) {
-		this.rentalSiteId = rentalSiteId;
+	public void setSourceType(String sourceType) {
+		this.sourceType = sourceType;
+	}
+
+	public Long getSourceId() {
+		return sourceId;
+	}
+
+	public void setSourceId(Long sourceId) {
+		this.sourceId = sourceId;
 	}
 
 	public Long getPageAnchor() {

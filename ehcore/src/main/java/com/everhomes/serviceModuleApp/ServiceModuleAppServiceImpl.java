@@ -77,4 +77,34 @@ public class ServiceModuleAppServiceImpl implements ServiceModuleAppService {
 
 		return moduleApps;
 	}
+
+	@Override
+	public List<ServiceModuleApp> listServiceModuleAppByModuleIds(Integer namespaceId, List<Long> moduleIds){
+		PortalVersion releaseVersion = portalVersionProvider.findReleaseVersion(namespaceId);
+
+		List<ServiceModuleApp> apps = new ArrayList<>();
+		if(releaseVersion != null){
+			apps = serviceModuleAppProvider.listServiceModuleAppByModuleIds(namespaceId, releaseVersion.getId(), moduleIds);
+		}
+
+		return apps;
+	}
+
+
+	@Override
+	public List<ServiceModuleApp> listServiceModuleApp(Integer namespaceId, Long versionId, Long moduleId, Byte actionType, String customTag, String controlType){
+		List<ServiceModuleApp> apps = serviceModuleAppProvider.listServiceModuleApp(namespaceId, versionId, moduleId, actionType, customTag, controlType);
+		return apps;
+	}
+
+	@Override
+	public List<ServiceModuleApp> listReleaseServiceModuleApp(Integer namespaceId, Long moduleId, Byte actionType, String customTag, String controlType){
+		PortalVersion releaseVersion = portalVersionProvider.findReleaseVersion(namespaceId);
+		List<ServiceModuleApp> apps = new ArrayList<>();
+		if(releaseVersion != null){
+			apps = listServiceModuleApp(namespaceId, releaseVersion.getId(), moduleId, actionType, customTag, controlType);
+		}
+
+		return apps;
+	}
 }
