@@ -543,7 +543,7 @@ public class SalaryServiceImpl implements SalaryService {
         Map<String, Object> params = new HashedMap();
         params.put("ownerId", cmd.getOwnerId());
         params.put("organizationId", cmd.getOrganizationId());
-        params.put("excelToken", SalaryReportType.SALARY_EMPLOYEE.getCode());
+        params.put("excelToken", SalaryReportType.SALARY_EMPLOYEE.getCode()+"");
 
         String fileName = "员工工资表" + ".xlsx";
 //        params.put("name", fileName);
