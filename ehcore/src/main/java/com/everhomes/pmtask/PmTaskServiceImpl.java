@@ -18,10 +18,13 @@ import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
 
 
+import com.everhomes.address.AddressService;
 import com.everhomes.app.App;
 import com.everhomes.app.AppProvider;
 import com.everhomes.building.BuildingProvider;
 import com.everhomes.community.CommunityService;
+import com.everhomes.core.AppConfig;
+import com.everhomes.family.Family;
 import com.everhomes.family.FamilyProvider;
 import com.everhomes.flow.*;
 import com.everhomes.module.ServiceModuleService;
@@ -30,6 +33,7 @@ import com.everhomes.organization.*;
 import com.everhomes.pmtask.ebei.EbeiBuildingType;
 import com.everhomes.portal.PortalService;
 import com.everhomes.rest.acl.PrivilegeServiceErrorCode;
+import com.everhomes.rest.address.*;
 import com.everhomes.rest.blacklist.BlacklistErrorCode;
 import com.everhomes.rest.community.BuildingDTO;
 import com.everhomes.rest.community.ListBuildingCommand;
@@ -48,6 +52,7 @@ import com.everhomes.scheduler.RunningFlag;
 import com.everhomes.scheduler.ScheduleProvider;
 import com.everhomes.user.*;
 import com.everhomes.util.DownloadUtils;
+import com.everhomes.util.PaginationHelper;
 import com.everhomes.util.doc.DocUtil;
 import org.apache.commons.collections.CollectionUtils;
 import org.apache.commons.lang.StringUtils;
@@ -83,7 +88,6 @@ import com.everhomes.db.DbProvider;
 import com.everhomes.entity.EntityType;
 import com.everhomes.locale.LocaleTemplateService;
 import com.everhomes.rest.acl.PrivilegeConstants;
-import com.everhomes.rest.address.CommunityDTO;
 import com.everhomes.rest.category.CategoryAdminStatus;
 import com.everhomes.rest.category.CategoryDTO;
 import com.everhomes.rest.family.FamilyDTO;
@@ -162,6 +166,8 @@ public class PmTaskServiceImpl implements PmTaskService {
 	private PortalService portalService;
 	@Autowired
 	private UserService userService;
+	@Autowired
+	private AddressService addressService;
 
 	@Override
 	public SearchTasksResponse searchTasks(SearchTasksCommand cmd) {
@@ -578,7 +584,13 @@ public class PmTaskServiceImpl implements PmTaskService {
 		throw RuntimeErrorException.errorWith(OrganizationServiceErrorCode.SCOPE, OrganizationServiceErrorCode.ERROR_NO_PRIVILEGED,
 				"non-privileged.");
     }
-	
+
+	@Override
+	public ListApartmentByBuildingNameCommandResponse listApartmentsByBuildingName(ListApartmentByBuildingNameCommand cmd) {
+		cmd.setUserId(1l);
+		return addressService.listApartmentsByBuildingName(cmd);
+	}
+
 	@Override
 	public PmTaskDTO getTaskDetail(GetTaskDetailCommand cmd) {
 
