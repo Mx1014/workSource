@@ -141,7 +141,7 @@ public class ServiceModuleAppProviderImpl implements ServiceModuleAppProvider {
 
 
 	@Override
-	public List<ServiceModuleApp> listServiceModuleApp(Integer namespaceId, Long versionId, Long moduleId, Byte actionType, String customTag, String customPath) {
+	public List<ServiceModuleApp> listServiceModuleApp(Integer namespaceId, Long versionId, Long moduleId, Byte actionType, String customTag, String controlType) {
 		Condition cond = Tables.EH_SERVICE_MODULE_APPS.NAMESPACE_ID.eq(namespaceId);
 		if(null != versionId)
 			cond = cond.and(Tables.EH_SERVICE_MODULE_APPS.VERSION_ID.eq(versionId));
@@ -151,8 +151,23 @@ public class ServiceModuleAppProviderImpl implements ServiceModuleAppProvider {
 			cond = cond.and(Tables.EH_SERVICE_MODULE_APPS.ACTION_TYPE.eq(actionType));
 		if(null != customTag)
 			cond = cond.and(Tables.EH_SERVICE_MODULE_APPS.CUSTOM_TAG.eq(customTag));
-		if(null != customPath)
-			cond = cond.and(Tables.EH_SERVICE_MODULE_APPS.CUSTOM_PATH.eq(customPath));
+		if(null != controlType)
+			cond = cond.and(Tables.EH_SERVICE_MODULE_APPS.MODULE_CONTROL_TYPE.eq(controlType));
+
+		return getReadOnlyContext().select().from(Tables.EH_SERVICE_MODULE_APPS)
+				.where(cond)
+				.and(Tables.EH_SERVICE_MODULE_APPS.STATUS.eq(ServiceModuleAppStatus.ACTIVE.getCode()))
+				.orderBy(Tables.EH_SERVICE_MODULE_APPS.ID.asc())
+				.fetch().map(r -> ConvertHelper.convert(r, ServiceModuleApp.class));
+	}
+
+	@Override
+	public List<ServiceModuleApp> listServiceModuleAppByModuleIds(Integer namespaceId, Long versionId, List<Long> moduleIds) {
+		Condition cond = Tables.EH_SERVICE_MODULE_APPS.NAMESPACE_ID.eq(namespaceId);
+		if(null != versionId)
+			cond = cond.and(Tables.EH_SERVICE_MODULE_APPS.VERSION_ID.eq(versionId));
+		if(null != moduleIds)
+			cond = cond.and(Tables.EH_SERVICE_MODULE_APPS.MODULE_ID.in(moduleIds));
 		return getReadOnlyContext().select().from(Tables.EH_SERVICE_MODULE_APPS)
 				.where(cond)
 				.and(Tables.EH_SERVICE_MODULE_APPS.STATUS.eq(ServiceModuleAppStatus.ACTIVE.getCode()))
