@@ -216,10 +216,6 @@ public class SalaryServiceImpl implements SalaryService {
             categoryDTO.setEntities(new ArrayList<>());
             for (SalaryGroupEntity entity : entities) {
 
-                if (SalaryEntityStatus.CLOSE == SalaryEntityStatus.fromCode(entity.getStatus())) {
-                    //跳过不是开启状态的
-                    continue;
-                }
                 if (entity.getCategoryId().equals(category.getId())) {
                     SalaryGroupEntityDTO dto = ConvertHelper.convert(entity, SalaryGroupEntityDTO.class);
                     categoryDTO.getEntities().add(dto);
