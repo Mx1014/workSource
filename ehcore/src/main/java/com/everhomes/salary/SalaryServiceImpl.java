@@ -1232,7 +1232,7 @@ public class SalaryServiceImpl implements SalaryService {
             }
 
             if (null != groupFile.getFileTime()) {
-                response.setCreateTime(groupFile.getFileTime().getTime());
+                response.setFileTime(groupFile.getFileTime().getTime());
                 OrganizationMemberDetails detail = organizationProvider.findOrganizationMemberDetailsByDetailId(groupFile.getFilerUid());
                 if (null != detail) {
                     response.setFilerName(detail.getContactName());
