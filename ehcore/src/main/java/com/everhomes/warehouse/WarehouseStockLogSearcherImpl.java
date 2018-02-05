@@ -123,7 +123,6 @@ public class WarehouseStockLogSearcherImpl extends AbstractElasticSearch impleme
     @Override
     public SearchWarehouseStockLogsResponse query(SearchWarehouseStockLogsCommand cmd) {
         checkAssetPriviledgeForPropertyOrg(cmd.getCommunityId(),PrivilegeConstants.WAREHOUSE_REPO_MAINTAIN_SEARCH,cmd.getOwnerId());
-        checkAssetPriviledgeForPropertyOrg(cmd.getCommunityId(),PrivilegeConstants.WAREHOUSE_REPO_MAINTAIN_SEARCH,cmd.getOwnerId());
 //        SearchRequestBuilder builder = getClient().prepareSearch(getIndexName()).setTypes(getIndexType());
 //        QueryBuilder qb = null;
 //        if(cmd.getMaterialName() == null || cmd.getMaterialName().isEmpty()) {

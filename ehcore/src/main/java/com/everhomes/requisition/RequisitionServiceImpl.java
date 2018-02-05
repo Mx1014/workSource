@@ -2,10 +2,12 @@
 package com.everhomes.requisition;
 
 import com.everhomes.db.DbProvider;
+import com.everhomes.entity.EntityType;
 import com.everhomes.flow.Flow;
 import com.everhomes.flow.FlowService;
 import com.everhomes.naming.NameMapper;
-import com.everhomes.rest.Requisition.*;
+import com.everhomes.rest.flow.CreateFlowCaseCommand;
+import com.everhomes.rest.requisition.*;
 import com.everhomes.rest.flow.FlowConstants;
 import com.everhomes.rest.flow.FlowModuleType;
 import com.everhomes.rest.flow.FlowOwnerType;
@@ -15,6 +17,9 @@ import com.everhomes.supplier.SupplierHelper;
 import com.everhomes.user.UserContext;
 import com.everhomes.util.ConvertHelper;
 import com.everhomes.util.DateHelper;
+import com.everhomes.util.RuntimeErrorException;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.TransactionStatus;
@@ -29,6 +34,7 @@ import java.util.List;
 
 @Service
 public class RequisitionServiceImpl implements RequisitionService {
+    private static final Logger LOGGER = LoggerFactory.getLogger(RequisitionServiceImpl.class);
     @Autowired
     private RequisitionProvider requisitionProvider;
     @Autowired
@@ -49,15 +55,28 @@ public class RequisitionServiceImpl implements RequisitionService {
         //创建工作流
         Flow flow = flowService.getEnabledFlow(cmd.getNamespaceId(), FlowConstants.REQUISITION_MODULE
                 , FlowModuleType.NO_MODULE.getCode(),cmd.getOwnerId(), FlowOwnerType.REQUISITION_REQUEST.getCode());
-        if(flow == null){
-            //工作流问题
+        if (null == flow) {
+            LOGGER.error("Enable request flow not found, moduleId={}", FlowConstants.REQUISITION_MODULE);
+            throw RuntimeErrorException.errorWith(RequistionErrorCodes.SCOPE, RequistionErrorCodes.ERROR_CREATE_FLOW_CASE,
+                     "requistion flow case not found.");
         }
+        CreateFlowCaseCommand createFlowCaseCommand = new CreateFlowCaseCommand();
+        createFlowCaseCommand.setCurrentOrganizationId(req.getOwnerId());
+        createFlowCaseCommand.setTitle("请示单申请");
+        createFlowCaseCommand.setApplyUserId(req.getCreateUid());
+        createFlowCaseCommand.setFlowMainId(flow.getFlowMainId());
+        createFlowCaseCommand.setFlowVersion(flow.getFlowVersion());
+        createFlowCaseCommand.setReferId(req.getId());
+        createFlowCaseCommand.setReferType(EntityType.WAREHOUSE_REQUEST.getCode());
+        createFlowCaseCommand.setServiceType("requisition");
+        createFlowCaseCommand.setProjectId(req.getOwnerId());
+        createFlowCaseCommand.setProjectType(req.getOwnerType());
+
         this.dbProvider.execute((TransactionStatus status) -> {
             requisitionProvider.saveRequisition(req);
+            flowService.createFlowCase(createFlowCaseCommand);
             return null;
         });
-
-
     }
 
     @Override

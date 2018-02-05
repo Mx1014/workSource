@@ -537,6 +537,22 @@ public class WarehouseServiceImpl implements WarehouseService {
         } else if (cmd.getRequestType().byteValue() == WarehouseStockRequestType.STOCK_OUT.getCode()) {
             checkAssetPriviledgeForPropertyOrg(cmd.getCommunityId(), PrivilegeConstants.WAREHOUSE_REPO_MAINTAIN_OUTSTOCK, cmd.getOwnerId());
         }
+        //增加普通入库单
+        WarehouseOrder order = new WarehouseOrder();
+        order = new WarehouseOrder();
+        long warehouseOrderId = this.sequenceProvider.getNextSequence(NameMapper
+                .getSequenceDomainFromTablePojo(EhWarehouseOrders.class));
+        order.setId(warehouseOrderId);
+        order.setCreateTime(new Timestamp(DateHelper.currentGMTTime().getTime()));
+        order.setCreateUid(UserContext.currentUserId());
+        order.setOwnerType(cmd.getOwnerType());
+        order.setOwnerId(cmd.getOwnerId());
+        order.setNamespaceId(cmd.getNamespaceId());
+        order.setIdentity(SupplierHelper.getIdentity());
+        order.setExecutorId(UserContext.currentUserId());
+        order.setServiceType(cmd.getServiceType());
+        warehouseProvider.insertWarehouseOrder(order);
+
         if (cmd.getStocks() != null && cmd.getStocks().size() > 0) {
             cmd.getStocks().forEach(stock -> {
                 if (stock.getAmount() <= 0) {
@@ -584,6 +600,7 @@ public class WarehouseServiceImpl implements WarehouseService {
                         log.setStockAmount(materialStock.getAmount());
                         log.setRequestSource(WarehouseStockRequestSource.MANUAL_INPUT.getCode());
                         log.setDeliveryUid(uid);
+                        log.setWarehouseOrderId(warehouseOrderId);
                         warehouseProvider.creatWarehouseStockLogs(log);
                         //更新入库log，增加园区id到es中
                         warehouseStockLogSearcher.feedDoc(log);
@@ -1563,6 +1580,8 @@ public class WarehouseServiceImpl implements WarehouseService {
             list.add(stockLog);
         }
         warehouseProvider.insertWarehouseStockLogs(list);
+        //更改物品的库存
+
         // end
 
 
