@@ -628,8 +628,9 @@ public class SalaryServiceImpl implements SalaryService {
                     //跳过不是开启状态的
                     continue;
                 }
-                if (groupEntity.getDefaultId().equals(SalaryConstants.ENTITY_ID_BONUSTAX) ||
-                        groupEntity.getDefaultId().equals(SalaryConstants.ENTITY_ID_SALARYTAX)) {
+                if (groupEntity.getDefaultId()!=null &&
+                        (groupEntity.getDefaultId().equals(SalaryConstants.ENTITY_ID_BONUSTAX) ||
+                        groupEntity.getDefaultId().equals(SalaryConstants.ENTITY_ID_SALARYTAX))) {
                     //税收跳过
                     continue;
                 }
