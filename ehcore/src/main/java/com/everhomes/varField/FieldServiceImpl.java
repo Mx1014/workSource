@@ -185,7 +185,8 @@ public class FieldServiceImpl implements FieldService {
      * @param onlyLeaf
      * @return 返回空列表而非null
      */
-    private List<FieldGroupDTO> getAllGroups(ExportFieldsExcelCommand cmd,boolean onlyLeaf) {
+    @Override
+    public List<FieldGroupDTO> getAllGroups(ExportFieldsExcelCommand cmd,boolean onlyLeaf) {
         //管理员权限校验
         if(ModuleName.ENTERPRISE_CUSTOMER.getName().equals(cmd.getModuleName())) {
             customerService.checkCustomerAuth(cmd.getNamespaceId(), PrivilegeConstants.ENTERPRISE_CUSTOMER_MANAGE_EXPORT, cmd.getOrgId(), cmd.getCommunityId());

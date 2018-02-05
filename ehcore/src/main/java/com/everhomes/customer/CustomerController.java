@@ -130,6 +130,15 @@ public class CustomerController extends ControllerBase {
     }
 
     /**
+     * <b>URL: /customer/exportEnterpriseCustomer</b>
+     * <p>导出企业客户</p>
+     */
+    @RequestMapping("exportEnterpriseCustomer")
+    public void exportEnterpriseCustomer(@Valid SearchEnterpriseCustomerCommand cmd, HttpServletResponse response) {
+        customerService.exportEnterpriseCustomer(cmd, response);
+    }
+
+    /**
      * <b>URL: /customer/searchEnterpriseCustomerWithoutAuth</b>
      * <p>列出企业客户（不进行权限校验）</p>
      */

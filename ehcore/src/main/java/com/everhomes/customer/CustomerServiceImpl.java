@@ -17,6 +17,8 @@ import com.everhomes.address.Address;
 import com.everhomes.address.AddressProvider;
 import com.everhomes.bootstrap.PlatformContext;
 import com.everhomes.contract.ContractService;
+import com.everhomes.dynamicExcel.DynamicExcelService;
+import com.everhomes.dynamicExcel.DynamicExcelStrings;
 import com.everhomes.organization.*;
 import com.everhomes.organization.pm.CommunityAddressMapping;
 import com.everhomes.organization.pm.PropertyMgrProvider;
@@ -26,11 +28,13 @@ import com.everhomes.rest.acl.PrivilegeServiceErrorCode;
 import com.everhomes.rest.common.ServiceModuleConstants;
 import com.everhomes.rest.contract.ContractStatus;
 import com.everhomes.rest.customer.*;
+import com.everhomes.rest.field.ExportFieldsExcelCommand;
 import com.everhomes.rest.launchpad.ActionType;
 import com.everhomes.rest.organization.*;
 import com.everhomes.rest.organization.pm.AddressMappingStatus;
 import com.everhomes.rest.portal.ListServiceModuleAppsCommand;
 import com.everhomes.rest.portal.ListServiceModuleAppsResponse;
+import com.everhomes.rest.varField.FieldGroupDTO;
 import com.everhomes.user.UserPrivilegeMgr;
 
 import com.everhomes.user.UserProvider;
@@ -181,6 +185,9 @@ public class CustomerServiceImpl implements CustomerService {
     @Autowired
     private UserPrivilegeMgr userPrivilegeMgr;
 
+    @Autowired
+    private DynamicExcelService dynamicExcelService;
+
     @Override
     public void checkCustomerAuth(Integer namespaceId, Long privilegeId, Long orgId, Long communityId) {
 //        ListServiceModuleAppsCommand cmd = new ListServiceModuleAppsCommand();
@@ -247,6 +254,18 @@ public class CustomerServiceImpl implements CustomerService {
     public SearchEnterpriseCustomerResponse queryEnterpriseCustomers(SearchEnterpriseCustomerCommand cmd) {
         checkCustomerAuth(cmd.getNamespaceId(), PrivilegeConstants.ENTERPRISE_CUSTOMER_LIST, cmd.getOrgId(), cmd.getCommunityId());
         return enterpriseCustomerSearcher.queryEnterpriseCustomers(cmd);
+    }
+
+    @Override
+    public void exportEnterpriseCustomer(SearchEnterpriseCustomerCommand cmd, HttpServletResponse response) {
+        ExportFieldsExcelCommand command = ConvertHelper.convert(cmd, ExportFieldsExcelCommand.class);
+        List<FieldGroupDTO> results = fieldService.getAllGroups(command,true);
+        if(results != null && results.size() > 0) {
+            List<String> sheetNames = results.stream().map(result -> {
+                return result.getGroupDisplayName();
+            }).collect(Collectors.toList());
+            dynamicExcelService.exportDynamicExcel(response, DynamicExcelStrings.CUSTOEMR, null, sheetNames, cmd, true, true, null);
+        }
     }
 
     @Override
