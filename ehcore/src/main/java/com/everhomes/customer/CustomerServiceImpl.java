@@ -95,6 +95,8 @@ import com.everhomes.varField.FieldProvider;
 import com.everhomes.varField.FieldService;
 import com.everhomes.varField.ScopeFieldItem;
 
+import javax.servlet.http.HttpServletResponse;
+
 /**
  * Created by ying.xiong on 2017/8/15.
  */
@@ -2817,6 +2819,4 @@ public class CustomerServiceImpl implements CustomerService {
 	    calendar.set(Calendar.MILLISECOND, 0);
 		return calendar.getTime().getTime();
 	}
-	
-	
 }

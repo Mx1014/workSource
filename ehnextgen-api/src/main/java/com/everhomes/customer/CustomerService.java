@@ -5,6 +5,7 @@ import com.everhomes.rest.customer.*;
 import com.everhomes.rest.organization.ImportFileTaskDTO;
 import org.springframework.web.multipart.MultipartFile;
 
+import javax.servlet.http.HttpServletResponse;
 import java.util.List;
 
 /**
@@ -133,6 +134,5 @@ public interface CustomerService {
     void checkCustomerAuth(Integer namespaceId, Long privilegeId, Long orgId, Long communityId);
 
     SearchEnterpriseCustomerResponse queryEnterpriseCustomers(SearchEnterpriseCustomerCommand cmd);
-
 
 }

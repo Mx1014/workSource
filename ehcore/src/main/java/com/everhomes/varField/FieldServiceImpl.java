@@ -17,6 +17,7 @@ import com.everhomes.rest.launchpad.ActionType;
 import com.everhomes.rest.portal.ListServiceModuleAppsCommand;
 import com.everhomes.rest.portal.ListServiceModuleAppsResponse;
 import com.everhomes.rest.varField.*;
+import com.everhomes.search.EnterpriseCustomerSearcher;
 import com.everhomes.sequence.SequenceProvider;
 import com.everhomes.user.UserContext;
 import com.everhomes.user.UserPrivilegeMgr;
@@ -83,6 +84,8 @@ public class FieldServiceImpl implements FieldService {
     @Autowired
     private DynamicExcelService dynamicExcelService;
 
+    @Autowired
+    private EnterpriseCustomerSearcher enterpriseCustomerSearcher;
 
     @Override
     public List<SystemFieldGroupDTO> listSystemFieldGroups(ListSystemFieldGroupCommand cmd) {
@@ -539,11 +542,29 @@ public class FieldServiceImpl implements FieldService {
      *
      */
     @Override
-    public List<List<String>> getDataOnFields(FieldGroupDTO group, Long customerId, Byte customerType,List<FieldDTO> fields,Long communityId,Integer namespaceId,String moduleName, Long orgId) {
+    public List<List<String>> getDataOnFields(FieldGroupDTO group, Long customerId, Byte customerType,List<FieldDTO> fields,Long communityId,Integer namespaceId,String moduleName, Long orgId, Object params) {
         List<List<String>> data = new ArrayList<>();
         //使用groupName来对应不同的接口
         String sheetName = group.getGroupDisplayName();
         switch (sheetName){
+            case "基本信息":
+            case "企业情况":
+            case "员工情况":
+                SearchEnterpriseCustomerCommand cmd0 = ConvertHelper.convert(params, SearchEnterpriseCustomerCommand.class);
+                cmd0.setCommunityId(communityId);
+                cmd0.setNamespaceId(namespaceId);
+                cmd0.setOrgId(orgId);
+                cmd0.setPageSize(Integer.MAX_VALUE-1);
+                SearchEnterpriseCustomerResponse response = enterpriseCustomerSearcher.queryEnterpriseCustomers(cmd0);
+                if(response.getDtos() != null && response.getDtos().size() > 0) {
+                    List<EnterpriseCustomerDTO> enterpriseCustomerDTOs = response.getDtos();
+                    for(int j = 0; j < enterpriseCustomerDTOs.size(); j ++){
+                        EnterpriseCustomerDTO dto = enterpriseCustomerDTOs.get(j);
+                        setMutilRowDatas(fields, data, dto,communityId,namespaceId,moduleName);
+                    }
+                }
+
+                break;
             case "人才团队信息":
                 ListCustomerTalentsCommand cmd1 = new ListCustomerTalentsCommand();
                 cmd1.setCustomerId(customerId);

@@ -519,7 +519,7 @@ public class CustomerDynamicExcelHandler implements DynamicExcelHandler {
                 return dto;
             }).collect(Collectors.toList());
 
-            List<List<String>> data = fieldService.getDataOnFields(group,customerId,customerType,fields, communityId,namespaceId,moduleName,orgId);
+            List<List<String>> data = fieldService.getDataOnFields(group,customerId,customerType,fields, communityId,namespaceId,moduleName,orgId,params);
             return data;
         }
         return null;
