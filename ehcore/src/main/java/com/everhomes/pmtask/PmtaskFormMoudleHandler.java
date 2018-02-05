@@ -82,6 +82,13 @@ public class PmtaskFormMoudleHandler implements GeneralFormModuleHandler {
         FlowCase flowCase = flowCaseProvider.findFlowCaseByReferId(pmTask.getId(), EntityType.PM_TASK.getCode(), moduleId);
         FlowCaseTree tree = flowService.getProcessingFlowCaseTree(flowCase.getId());
         flowCase = tree.getLeafNodes().get(0).getFlowCase();
+        LOGGER.info("target:"+JSONObject.toJSONString(flowCase));
+        while (tree.getNodes()!=null){
+            LOGGER.info("trace:"+JSONObject.toJSONString(tree));
+            tree = tree.getNodes().get(0);
+        }
+        LOGGER.info("trace:"+JSONObject.toJSONString(tree));
+
         FlowNodeDetailDTO detail = flowService.getFlowNodeDetail(flowCase.getCurrentNodeId());
         String params = detail.getParams();
         String nodeType = "";
