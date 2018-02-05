@@ -247,6 +247,11 @@ public interface PrivilegeConstants {
     long EQUIPMENT_ITEM_UPDATE = 30079L;       //设备巡检 巡检项修改权限
     long EQUIPMENT_STAT_PANDECT = 30080L;      //设备巡检 统计总览权限
     long EQUIPMENT_STAT_ALLTASK = 30081L;     //设备巡检 统计查看所有任务权限
+    long EQUIPMENT_PLAN_CREATE = 30083L;     //设备巡检 计划创建
+    long EQUIPMENT_PLAN_UPDATE = 30084L;     //设备巡检 计划修改
+    long EQUIPMENT_PLAN_LIST = 30085L;     //设备巡检  计划查看
+    long EQUIPMENT_PLAN_DELETE = 30086L;     //设备巡检 计划删除
+    long EQUIPMENT_PLAN_REVIEW = 30087L;     //设备巡检 计划审批
 
 
 
