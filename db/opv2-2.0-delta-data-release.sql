@@ -29,25 +29,25 @@ SET equipment_id = (SELECT  equipment_id FROM eh_equipment_inspection_tasks WHER
 -- 巡检任务状态统一 end by jiarui 20180105
 
 -- 增加经纬度动态表单  jiarui   20180122
-INSERT  INTO  `eh_var_fields` VALUES (10007, 'equipment_inspection', 'geohash', '经纬度', 'Long', 10008, CONCAT('/',10008,'/'), 1, null, 2, 1, now(),null ,null,'{\"fieldParamType\": \"map\", \"length\": 32}');
-INSERT  INTO  `eh_var_fields` VALUES (10107, 'equipment_inspection', 'geohash', '经纬度', 'Long', 10007, CONCAT('/',10007,'/'), 1, null, 2, 1, now(),null ,null,'{\"fieldParamType\": \"map\", \"length\": 32}');
-INSERT  INTO  `eh_var_fields` VALUES (10207, 'equipment_inspection', 'geohash', '经纬度', 'Long', 10006, CONCAT('/',10006,'/'), 1, null, 2, 1, now(),null ,null,'{\"fieldParamType\": \"map\", \"length\": 32}');
-INSERT  INTO  `eh_var_fields` VALUES (10307, 'equipment_inspection', 'geohash', '经纬度', 'Long', 10005, CONCAT('/',10005,'/'), 1, null, 2, 1, now(),null ,null,'{\"fieldParamType\": \"map\", \"length\": 32}');
-INSERT  INTO  `eh_var_fields` VALUES (10407, 'equipment_inspection', 'geohash', '经纬度', 'Long', 10004, CONCAT('/',10004,'/'), 1, null, 2, 1, now(),null ,null,'{\"fieldParamType\": \"map\", \"length\": 32}');
-INSERT  INTO  `eh_var_fields` VALUES (10507, 'equipment_inspection', 'geohash', '经纬度', 'Long', 10003, CONCAT('/',10003,'/'), 1, null, 2, 1, now(),null ,null,'{\"fieldParamType\": \"map\", \"length\": 32}');
-INSERT  INTO  `eh_var_fields` VALUES (10607, 'equipment_inspection', 'geohash', '经纬度', 'Long', 10002, CONCAT('/',10002,'/'), 1, null, 2, 1, now(),null ,null,'{\"fieldParamType\": \"map\", \"length\": 32}');
-INSERT  INTO  `eh_var_fields` VALUES (10707, 'equipment_inspection', 'geohash', '经纬度', 'Long', 10001, CONCAT('/',10001,'/'), 1, null, 2, 1, now(),null ,null,'{\"fieldParamType\": \"map\", \"length\": 32}');
+INSERT  INTO  `eh_var_fields` VALUES (10007, 'equipment_inspection', 'geohash', '经纬度', 'Long', 10008, CONCAT('/',10008,'/'), 1, NULL, 2, 1, NOW(),NULL ,NULL,'{\"fieldParamType\": \"map\", \"length\": 32}');
+INSERT  INTO  `eh_var_fields` VALUES (10107, 'equipment_inspection', 'geohash', '经纬度', 'Long', 10007, CONCAT('/',10007,'/'), 1, NULL, 2, 1, NOW(),NULL ,NULL,'{\"fieldParamType\": \"map\", \"length\": 32}');
+INSERT  INTO  `eh_var_fields` VALUES (10207, 'equipment_inspection', 'geohash', '经纬度', 'Long', 10006, CONCAT('/',10006,'/'), 1, NULL, 2, 1, NOW(),NULL ,NULL,'{\"fieldParamType\": \"map\", \"length\": 32}');
+INSERT  INTO  `eh_var_fields` VALUES (10307, 'equipment_inspection', 'geohash', '经纬度', 'Long', 10005, CONCAT('/',10005,'/'), 1, NULL, 2, 1, NOW(),NULL ,NULL,'{\"fieldParamType\": \"map\", \"length\": 32}');
+INSERT  INTO  `eh_var_fields` VALUES (10407, 'equipment_inspection', 'geohash', '经纬度', 'Long', 10004, CONCAT('/',10004,'/'), 1, NULL, 2, 1, NOW(),NULL ,NULL,'{\"fieldParamType\": \"map\", \"length\": 32}');
+INSERT  INTO  `eh_var_fields` VALUES (10507, 'equipment_inspection', 'geohash', '经纬度', 'Long', 10003, CONCAT('/',10003,'/'), 1, NULL, 2, 1, NOW(),NULL ,NULL,'{\"fieldParamType\": \"map\", \"length\": 32}');
+INSERT  INTO  `eh_var_fields` VALUES (10607, 'equipment_inspection', 'geohash', '经纬度', 'Long', 10002, CONCAT('/',10002,'/'), 1, NULL, 2, 1, NOW(),NULL ,NULL,'{\"fieldParamType\": \"map\", \"length\": 32}');
+INSERT  INTO  `eh_var_fields` VALUES (10707, 'equipment_inspection', 'geohash', '经纬度', 'Long', 10001, CONCAT('/',10001,'/'), 1, NULL, 2, 1, NOW(),NULL ,NULL,'{\"fieldParamType\": \"map\", \"length\": 32}');
 
-INSERT  INTO  `eh_var_fields` VALUES (10926, 'equipment_inspection', 'geohash', '经纬度', 'Long', 10000, CONCAT('/',10000,'/'), 1, null, 2, 1, now(),null ,null,'{\"fieldParamType\": \"map\", \"length\": 32}');
+INSERT  INTO  `eh_var_fields` VALUES (10926, 'equipment_inspection', 'geohash', '经纬度', 'Long', 10000, CONCAT('/',10000,'/'), 1, NULL, 2, 1, NOW(),NULL ,NULL,'{\"fieldParamType\": \"map\", \"length\": 32}');
 -- 增加经纬度动态表单  jiarui  20180122
 
 -- 新增权限  by jiarui 20180205
 
-DELETE from  eh_service_module_privileges
+DELETE FROM  eh_service_module_privileges
 WHERE  privilege_id IN (30070,30076,30071,30077,30078,30079);
 
 UPDATE eh_service_modules
-SET name = '巡检计划'
+SET NAME = '巡检计划'
 WHERE id = 20840;
 
 INSERT INTO `eh_acl_privileges` VALUES ('30083', '0', '设备巡检 巡检计划创建', '设备巡检 业务模块权限', NULL);
@@ -56,7 +56,7 @@ INSERT INTO `eh_acl_privileges` VALUES ('30085', '0', '设备巡检 巡检计划
 INSERT INTO `eh_acl_privileges` VALUES ('30086', '0', '设备巡检 巡检计划删除', '设备巡检 业务模块权限', NULL);
 INSERT INTO `eh_acl_privileges` VALUES ('30087', '0', '设备巡检 巡检计划审批', '设备巡检 业务模块权限', NULL);
 
-set @mp_id = (select MAX(id) from eh_service_module_privileges);
+SET @mp_id = (SELECT MAX(id) FROM eh_service_module_privileges);
 INSERT INTO `eh_service_module_privileges` (`id`, `module_id`, `privilege_type`, `privilege_id`, `remark`, `default_order`, `create_time`)
 VALUES (@mp_id:=@mp_id+1, '20840', '0', 30083, '设备巡检 巡检计划创建', '0', NOW());
 
@@ -77,7 +77,7 @@ VALUES (@mp_id:=@mp_id+1, '20840', '0', 30087, '设备巡检 巡检计划审批'
 
 -- 品质核查操作日志 jiarui
 UPDATE  `eh_quality_inspection_logs`
-SET scope_id =(SELECT eh_quality_inspection_standards.target_id FROM  eh_quality_inspection_standards where eh_quality_inspection_standards.id = eh_quality_inspection_logs.target_id);
+SET scope_id =(SELECT eh_quality_inspection_standards.target_id FROM  eh_quality_inspection_standards WHERE eh_quality_inspection_standards.id = eh_quality_inspection_logs.target_id);
 
 -- 品质核查操作日志 jiarui
 
@@ -289,8 +289,8 @@ INSERT INTO `eh_var_fields` (`id`, `module_name`, `name`, `display_name`, `field
 
 -- 薪酬结构基础数据
 
-INSERT INTO `eh_salary_entity_categories` (`id`, `owner_type`, `owner_id`, `namespace_id`, `category_name`, `description`, `custom_flag`, `custom_type`, `status`, `creator_uid`, `create_time`, `update_time`, `operator_uid`) VALUES('1',NULL,NULL,NULL,'固定工资',NULL,'1','1','2','1','2018-01-19 15:21:33','2018-01-19 15:21:37','1');
-INSERT INTO `eh_salary_entity_categories` (`id`, `owner_type`, `owner_id`, `namespace_id`, `category_name`, `description`, `custom_flag`, `custom_type`, `status`, `creator_uid`, `create_time`, `update_time`, `operator_uid`) VALUES('2',NULL,NULL,NULL,'浮动工资',NULL,'1','1','2','1','2018-01-19 15:23:19','2018-01-19 15:23:21','1');
+INSERT INTO `eh_salary_entity_categories` (`id`, `owner_type`, `owner_id`, `namespace_id`, `category_name`, `description`, `custom_flag`, `custom_type`, `status`, `creator_uid`, `create_time`, `update_time`, `operator_uid`) VALUES('1',NULL,NULL,NULL,'固定工资',NULL,'1','0','2','1','2018-01-19 15:21:33','2018-01-19 15:21:37','1');
+INSERT INTO `eh_salary_entity_categories` (`id`, `owner_type`, `owner_id`, `namespace_id`, `category_name`, `description`, `custom_flag`, `custom_type`, `status`, `creator_uid`, `create_time`, `update_time`, `operator_uid`) VALUES('2',NULL,NULL,NULL,'浮动工资',NULL,'1','0','2','1','2018-01-19 15:23:19','2018-01-19 15:23:21','1');
 INSERT INTO `eh_salary_entity_categories` (`id`, `owner_type`, `owner_id`, `namespace_id`, `category_name`, `description`, `custom_flag`, `custom_type`, `status`, `creator_uid`, `create_time`, `update_time`, `operator_uid`) VALUES('3',NULL,NULL,NULL,'考勤工资','在「津贴设置」中自动同步考勤数据，在「出勤扣款」中设置方案','0',NULL,'2','1','2018-01-19 15:23:19','2018-01-19 15:23:19','1');
 INSERT INTO `eh_salary_entity_categories` (`id`, `owner_type`, `owner_id`, `namespace_id`, `category_name`, `description`, `custom_flag`, `custom_type`, `status`, `creator_uid`, `create_time`, `update_time`, `operator_uid`) VALUES('4',NULL,NULL,NULL,'社保公积金代扣','自动同步社保数据','0',NULL,'2','1','2018-01-19 15:23:19','2018-01-19 15:23:19','1');
 INSERT INTO `eh_salary_entity_categories` (`id`, `owner_type`, `owner_id`, `namespace_id`, `category_name`, `description`, `custom_flag`, `custom_type`, `status`, `creator_uid`, `create_time`, `update_time`, `operator_uid`) VALUES('5',NULL,NULL,NULL,'个税代扣','根据国家法律自动扣减个税','0',NULL,'2','1','2018-01-19 15:23:19','2018-01-19 15:23:19','1');
