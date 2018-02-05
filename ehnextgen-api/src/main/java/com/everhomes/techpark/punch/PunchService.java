@@ -11,6 +11,7 @@ import java.util.List;
 import javax.servlet.http.HttpServletResponse;
 
 import com.everhomes.organization.Organization;
+import com.everhomes.organization.OrganizationMember;
 import com.everhomes.rest.RestResponse;
 import com.everhomes.rest.general_approval.GeneralApprovalAttribute;
 import com.everhomes.rest.techpark.punch.*;
@@ -195,6 +196,8 @@ public interface PunchService {
 	Long convertTimeToGMTMillisecond(Time time);
 
 	public CheckPunchAdminResponse checkPunchAdmin(CheckPunchAdminCommand cmd);
+
+	OrganizationMember findOrganizationMemberByOrgIdAndUId(Long targetId, String path);
 
 	Long getTopEnterpriseId(Long organizationId);
 
