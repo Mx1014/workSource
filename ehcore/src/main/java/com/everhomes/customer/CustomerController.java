@@ -134,7 +134,7 @@ public class CustomerController extends ControllerBase {
      * <p>导出企业客户</p>
      */
     @RequestMapping("exportEnterpriseCustomer")
-    public void exportEnterpriseCustomer(@Valid SearchEnterpriseCustomerCommand cmd, HttpServletResponse response) {
+    public void exportEnterpriseCustomer(@Valid ExportEnterpriseCustomerCommand cmd, HttpServletResponse response) {
         customerService.exportEnterpriseCustomer(cmd, response);
     }
 

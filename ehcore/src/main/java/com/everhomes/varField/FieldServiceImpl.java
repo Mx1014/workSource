@@ -818,6 +818,7 @@ public class FieldServiceImpl implements FieldService {
 
         try {
             //获得get方法并使用获得field的值
+            LOGGER.debug("field: {}", StringHelper.toJsonString(field));
             String cellData = getFromObj(fieldName, params, field.getFieldId(), dto,communityId,namespaceId,moduleName);
             if(cellData==null|| cellData.equalsIgnoreCase("null")){
                 cellData = "";
@@ -864,7 +865,8 @@ public class FieldServiceImpl implements FieldService {
                 fieldName.indexOf("Flag") == fieldName.length() - 4
                 )
         {
-            LOGGER.info("begin to handle field "+fieldName+" parameter namespaceid is "+ namespaceId + "communityid is "+ communityId + " moduleName is "+ moduleName + ", fieldName is "+ fieldName+" class is "+clz.toString());
+            LOGGER.info("begin to handle field "+fieldName+" parameter namespaceid is "+ namespaceId + "communityid is "+ communityId
+                    + " moduleName is "+ moduleName + ", fieldParamType is "+ params.getFieldParamType()+" class is "+clz.toString());
             if(!invoke.getClass().getSimpleName().equals("String")){
                 long l = Long.parseLong(invoke.toString());
                 ScopeFieldItem item = null;

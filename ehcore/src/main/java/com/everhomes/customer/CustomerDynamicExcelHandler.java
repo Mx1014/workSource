@@ -516,6 +516,7 @@ public class CustomerDynamicExcelHandler implements DynamicExcelHandler {
                 dto.setFieldDisplayName(df.getDisplayName());
                 dto.setFieldName(df.getFieldName());
                 dto.setFieldParam(df.getFieldParam());
+                dto.setFieldId(df.getFieldId());
                 return dto;
             }).collect(Collectors.toList());
 
