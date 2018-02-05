@@ -623,10 +623,12 @@ public class WarehouseProviderImpl implements WarehouseProvider {
         Integer pageOffset = (anchor.intValue() - 1) * pageSize;
         DSLContext context = this.dbProvider.getDslContext(AccessSpec.readOnly());
         Integer total = context.select(DSL.count(Tables.EH_WAREHOUSE_STOCK_LOGS.ID))
+                .from(Tables.EH_WAREHOUSE_STOCK_LOGS)
                 .where(Tables.EH_WAREHOUSE_STOCK_LOGS.WAREHOUSE_ORDER_ID.eq(warehouseOrderId))
                 .fetchOne(DSL.count(Tables.EH_WAREHOUSE_STOCK_LOGS.ID));
         response.setTotal(total.longValue());
         return context.select(Tables.EH_WAREHOUSE_STOCK_LOGS.ID)
+                .from(Tables.EH_WAREHOUSE_STOCK_LOGS)
                 .where(Tables.EH_WAREHOUSE_STOCK_LOGS.WAREHOUSE_ORDER_ID.eq(warehouseOrderId))
                 .limit(pageOffset,pageSize)
                 .fetch(Tables.EH_WAREHOUSE_STOCK_LOGS.ID);
