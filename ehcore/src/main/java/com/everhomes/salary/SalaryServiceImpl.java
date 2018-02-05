@@ -619,6 +619,7 @@ public class SalaryServiceImpl implements SalaryService {
         List<SalaryGroupEntity> groupEntities = salaryGroupEntityProvider.listSalaryGroupEntityByOrgId(organizationId);
         List<Long> groupEntityIds = new ArrayList<>();
         List<SalaryEmployeeOriginVal> vals = new ArrayList<>();
+        LOGGER.debug("导入的数据",StringHelper.toJsonString(r.getCells()));
         if (null != groupEntities) {
             for (int i = 0; i < groupEntities.size(); i++) {
 
