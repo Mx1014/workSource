@@ -679,17 +679,17 @@ public class QualityController extends ControllerBase {
 	 * <b>URL: /quality/listUserRelatedProjectByModuleId</b>
 	 * <p>用户关联项目</p>
 	 */
-	@RequestMapping("listUserRelatedProjectByModuleId")
-	@RestReturn(value = CommunityDTO.class, collection = true)
-	public RestResponse listUserRelatedProjectByModuleId(ListUserRelatedProjectByModuleIdCommand cmd) {
-
-		List<CommunityDTO> dtos = serviceModuleService.listUserRelatedCommunityByModuleId(ConvertHelper.convert(cmd, ListUserRelatedProjectByModuleCommand.class));
-
-		RestResponse response = new RestResponse(dtos);
-		response.setErrorCode(ErrorCodes.SUCCESS);
-		response.setErrorDescription("OK");
-		return response;
-	}
+//	@RequestMapping("listUserRelatedProjectByModuleId")
+//	@RestReturn(value = CommunityDTO.class, collection = true)
+//	public RestResponse listUserRelatedProjectByModuleId(ListUserRelatedProjectByModuleIdCommand cmd) {
+//
+//		List<CommunityDTO> dtos = serviceModuleService.listUserRelatedCommunityByModuleId(ConvertHelper.convert(cmd, ListUserRelatedProjectByModuleCommand.class));
+//
+//		RestResponse response = new RestResponse(dtos);
+//		response.setErrorCode(ErrorCodes.SUCCESS);
+//		response.setErrorDescription("OK");
+//		return response;
+//	}
 
 	/**
 	 * <b>URL: /quality/createSampleQualityInspection</b>

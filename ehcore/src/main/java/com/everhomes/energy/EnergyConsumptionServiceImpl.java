@@ -3243,6 +3243,7 @@ public class EnergyConsumptionServiceImpl implements EnergyConsumptionService {
         return null;
     }
 
+    @Deprecated
     @Override
     public ListAuthorizationCommunityByUserResponse listAuthorizationCommunityByUser(ListAuthorizationCommunityCommand cmd) {
         if (null != cmd.getCheckPrivilegeFlag() && cmd.getCheckPrivilegeFlag() == PmTaskCheckPrivilegeFlag.CHECKED.getCode()) {

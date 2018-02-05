@@ -1910,6 +1910,7 @@ public class PmTaskServiceImpl implements PmTaskService {
 		handler.updateTaskByOrg(cmd);
 	}
 
+	@Deprecated
 	@Override
 	public ListAuthorizationCommunityByUserResponse listAuthorizationCommunityByUser(ListAuthorizationCommunityCommand cmd) {
 		Long step1 = System.currentTimeMillis();
