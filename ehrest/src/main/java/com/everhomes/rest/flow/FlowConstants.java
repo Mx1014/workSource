@@ -30,4 +30,6 @@ public interface FlowConstants {
     Long PAYMENT_APPLICATION_MODULE = 21300L;
     //请示单模块id
     Long REQUISITION_MODULE = 25000L;
+    //电子报
+    Long JOURNAL_MODULE = 10400L;
 }
