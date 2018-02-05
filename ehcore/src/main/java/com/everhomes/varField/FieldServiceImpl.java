@@ -522,7 +522,7 @@ public class FieldServiceImpl implements FieldService {
                     headers[j] = field.getFieldDisplayName();
                 }
                 //获取一个sheet的数据,这里只有叶节点，将header传回作为顺序.传递field来确保顺序
-                List<List<String>> data = getDataOnFields(group,customerId,customerType,fields, communityId,namespaceId,moduleName,orgId);
+                List<List<String>> data = getDataOnFields(group,customerId,customerType,fields, communityId,namespaceId,moduleName,orgId, null);
                 try {
                     //写入workbook
                     System.out.println(sheetNum.get());
