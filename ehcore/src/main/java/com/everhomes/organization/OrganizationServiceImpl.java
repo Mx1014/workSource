@@ -23,6 +23,7 @@ import com.everhomes.constants.ErrorCodes;
 import com.everhomes.contentserver.ContentServerService;
 import com.everhomes.coordinator.CoordinationLocks;
 import com.everhomes.coordinator.CoordinationProvider;
+import com.everhomes.customer.CustomerEntryInfo;
 import com.everhomes.customer.CustomerService;
 import com.everhomes.customer.EnterpriseCustomer;
 import com.everhomes.customer.EnterpriseCustomerProvider;
@@ -78,6 +79,7 @@ import com.everhomes.rest.category.CategoryConstants;
 import com.everhomes.rest.common.*;
 import com.everhomes.rest.contract.BuildingApartmentDTO;
 import com.everhomes.rest.contract.ContractDTO;
+import com.everhomes.rest.customer.CustomerType;
 import com.everhomes.rest.customer.DeleteEnterpriseCustomerCommand;
 import com.everhomes.rest.customer.NamespaceCustomerType;
 import com.everhomes.rest.enterprise.*;
@@ -1306,7 +1308,7 @@ public class OrganizationServiceImpl implements OrganizationService {
                 this.addAddresses(organization.getId(), addressDTOs, user.getId());
             }
 
-            createEnterpriseCustomer(organization, cmd.getAvatar(), enterprise, cmd.getCommunityId());
+            createEnterpriseCustomer(organization, cmd.getAvatar(), enterprise, cmd.getCommunityId(), addressDTOs);
             return null;
         });
 
@@ -1316,7 +1318,7 @@ public class OrganizationServiceImpl implements OrganizationService {
         return ConvertHelper.convert(organization, OrganizationDTO.class);
     }
 
-    private void createEnterpriseCustomer(Organization organization, String logo, OrganizationDetail enterprise, Long communityId) {
+    private void createEnterpriseCustomer(Organization organization, String logo, OrganizationDetail enterprise, Long communityId, List<OrganizationAddressDTO> addressDTOs) {
 //        if(organization.getNamespaceId() == 999971 || organization.getNamespaceId() == 999983) {
 //            LOGGER.error("Insufficient privilege, createEnterpriseCustomer");
 //            throw RuntimeErrorException.errorWith(ErrorCodes.SCOPE_GENERAL, ErrorCodes.ERROR_ACCESS_DENIED,
@@ -1337,6 +1339,9 @@ public class OrganizationServiceImpl implements OrganizationService {
             enterpriseCustomerProvider.updateEnterpriseCustomer(customer);
             enterpriseCustomerSearcher.feedDoc(customer);
 
+            //企业管理楼栋与客户tab页的入驻信息双向同步 产品功能22898
+            this.updateCustomerEntryInfo(customer, addressDTOs);
+
         } else {
             EnterpriseCustomer customer = new EnterpriseCustomer();
             customer.setCommunityId(communityId);
@@ -1351,6 +1356,9 @@ public class OrganizationServiceImpl implements OrganizationService {
             customer.setTrackingUid(-1L);
             enterpriseCustomerProvider.createEnterpriseCustomer(customer);
             enterpriseCustomerSearcher.feedDoc(customer);
+
+            //企业管理楼栋与客户tab页的入驻信息双向同步 产品功能22898
+            this.updateCustomerEntryInfo(customer, addressDTOs);
         }
 
     }
@@ -1391,6 +1399,33 @@ public class OrganizationServiceImpl implements OrganizationService {
             return null;
         });
 
+    }
+
+    private void updateCustomerEntryInfo(EnterpriseCustomer customer, List<OrganizationAddressDTO> addressDTOs) {
+        if (addressDTOs != null && addressDTOs.size() > 0) {
+            List<CustomerEntryInfo> entryInfos = enterpriseCustomerProvider.listCustomerEntryInfos(customer.getId());
+            if(entryInfos != null && entryInfos.size() > 0) {
+                List<Long> addressIds = entryInfos.stream().map(entryInfo -> {
+                    return entryInfo.getAddressId();
+                }).collect(Collectors.toList());
+
+                for (OrganizationAddressDTO organizationAddressDTO : addressDTOs) {
+                    if(addressIds.contains(organizationAddressDTO.getAddressId())) {
+                        continue;
+                    }
+
+                    CustomerEntryInfo info = new CustomerEntryInfo();
+                    info.setNamespaceId(customer.getNamespaceId());
+                    info.setCustomerType(CustomerType.ENTERPRISE.getCode());
+                    info.setCustomerId(customer.getId());
+                    info.setCustomerName(customer.getName());
+                    info.setAddressId(organizationAddressDTO.getAddressId());
+                    info.setBuildingId(organizationAddressDTO.getBuildingId());
+                    enterpriseCustomerProvider.createCustomerEntryInfo(info);
+                }
+            }
+
+        }
     }
 
     /**
@@ -1451,9 +1486,10 @@ public class OrganizationServiceImpl implements OrganizationService {
             checkUnifiedSocialCreditCode(cmd.getUnifiedSocialCreditCode(), cmd.getNamespaceId(), cmd.getId());
         }
         checkOrgNameUnique(cmd.getId(), cmd.getNamespaceId(), cmd.getName());
+        EnterpriseCustomer customer = enterpriseCustomerProvider.findByOrganizationId(organization.getId());
         dbProvider.execute((TransactionStatus status) -> {
             //查到有关联的客户则同步修改过去
-            EnterpriseCustomer customer = enterpriseCustomerProvider.findByOrganizationId(organization.getId());
+
             if(customer != null) {
                 //产品功能 #20796 同步过来的客户名称不可改
                 if(NamespaceCustomerType.EBEI.equals(NamespaceCustomerType.fromCode(customer.getNamespaceCustomerType()))
@@ -1559,6 +1595,10 @@ public class OrganizationServiceImpl implements OrganizationService {
             List<OrganizationAddressDTO> addressDTOs = cmd.getAddressDTOs();
 //			if(null != addressDTOs && 0 != addressDTOs.size()){
             this.addAddresses(organization.getId(), addressDTOs, user.getId());
+            //企业管理楼栋与客户tab页的入驻信息双向同步 产品功能22898
+            if(customer != null) {
+                this.updateCustomerEntryInfo(customer, addressDTOs);
+            }
 //			}
         }
     }

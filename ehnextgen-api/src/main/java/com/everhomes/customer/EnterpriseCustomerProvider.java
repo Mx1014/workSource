@@ -92,6 +92,7 @@ public interface EnterpriseCustomerProvider {
     void updateCustomerEntryInfo(CustomerEntryInfo entryInfo);
     void deleteCustomerEntryInfo(CustomerEntryInfo entryInfo);
     CustomerEntryInfo findCustomerEntryInfoById(Long id);
+    CustomerEntryInfo findCustomerEntryInfoByAddressId(Long customerId, Byte customerType, Long addressId);
     List<CustomerEntryInfo> listCustomerEntryInfos(Long customerId);
     List<CustomerEntryInfo> listAddressEntryInfos(Long addressId);
 

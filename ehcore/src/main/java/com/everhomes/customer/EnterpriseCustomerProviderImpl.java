@@ -702,6 +702,28 @@ public class EnterpriseCustomerProviderImpl implements EnterpriseCustomerProvide
     }
 
     @Override
+    public CustomerEntryInfo findCustomerEntryInfoByAddressId(Long customerId, Byte customerType, Long addressId) {
+        DSLContext context = dbProvider.getDslContext(AccessSpec.readOnly());
+        SelectQuery<EhCustomerEntryInfosRecord> query = context.selectQuery(Tables.EH_CUSTOMER_ENTRY_INFOS);
+        query.addConditions(Tables.EH_CUSTOMER_ENTRY_INFOS.CUSTOMER_ID.eq(customerId));
+        query.addConditions(Tables.EH_CUSTOMER_ENTRY_INFOS.ADDRESS_ID.eq(addressId));
+        query.addConditions(Tables.EH_CUSTOMER_ENTRY_INFOS.CUSTOMER_TYPE.eq(customerType));
+        query.addConditions(Tables.EH_CUSTOMER_ENTRY_INFOS.STATUS.eq(CommonStatus.ACTIVE.getCode()));
+
+        List<CustomerEntryInfo> result = new ArrayList<>();
+        query.fetch().map((r) -> {
+            result.add(ConvertHelper.convert(r, CustomerEntryInfo.class));
+            return null;
+        });
+
+        if(result.size() > 0) {
+            return result.get(0);
+        }
+
+        return null;
+    }
+
+    @Override
     public List<CustomerDepartureInfo> listCustomerDepartureInfos(Long customerId) {
         DSLContext context = dbProvider.getDslContext(AccessSpec.readOnly());
         SelectQuery<EhCustomerDepartureInfosRecord> query = context.selectQuery(Tables.EH_CUSTOMER_DEPARTURE_INFOS);

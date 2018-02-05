@@ -133,6 +133,4 @@ public interface CustomerService {
     void checkCustomerAuth(Integer namespaceId, Long privilegeId, Long orgId, Long communityId);
 
     SearchEnterpriseCustomerResponse queryEnterpriseCustomers(SearchEnterpriseCustomerCommand cmd);
-
-
 }
