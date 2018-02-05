@@ -3,7 +3,7 @@ package com.everhomes.requisition;
 
 import com.everhomes.controller.ControllerBase;
 import com.everhomes.discover.RestReturn;
-import com.everhomes.rest.Requisition.*;
+import com.everhomes.rest.requisition.*;
 import com.everhomes.rest.RestResponse;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.web.bind.annotation.RequestMapping;

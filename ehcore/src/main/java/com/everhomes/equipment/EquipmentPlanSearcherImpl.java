@@ -6,6 +6,7 @@ import com.everhomes.listing.ListingLocator;
 import com.everhomes.repeat.RepeatProvider;
 import com.everhomes.repeat.RepeatService;
 import com.everhomes.repeat.RepeatSettings;
+import com.everhomes.rest.acl.PrivilegeConstants;
 import com.everhomes.rest.equipment.EquipmentInspectionPlanDTO;
 import com.everhomes.rest.equipment.EquipmentPlanStatus;
 import com.everhomes.rest.equipment.searchEquipmentInspectionPlansCommand;
@@ -16,6 +17,8 @@ import com.everhomes.search.AbstractElasticSearch;
 import com.everhomes.search.EquipmentPlanSearcher;
 import com.everhomes.search.SearchUtils;
 import com.everhomes.settings.PaginationConfigHelper;
+import com.everhomes.user.UserContext;
+import com.everhomes.user.UserPrivilegeMgr;
 import com.everhomes.util.ConvertHelper;
 import com.mysql.jdbc.StringUtils;
 import org.elasticsearch.action.bulk.BulkRequestBuilder;
@@ -54,6 +57,9 @@ public class EquipmentPlanSearcherImpl extends AbstractElasticSearch implements 
 
     @Autowired
     private RepeatService repeatService;
+
+    @Autowired
+    private UserPrivilegeMgr userPrivilegeMgr;
 
 
     @Override
@@ -116,6 +122,10 @@ public class EquipmentPlanSearcherImpl extends AbstractElasticSearch implements 
 
     @Override
     public searchEquipmentInspectionPlansResponse query(searchEquipmentInspectionPlansCommand cmd) {
+
+        //check auth
+        checkUserPrivilege(cmd.getOwnerId(), PrivilegeConstants.EQUIPMENT_PLAN_LIST,cmd.getTargetId());
+
         SearchRequestBuilder builder = getClient().prepareSearch(getIndexName()).setTypes(getIndexType());
         QueryBuilder qb = null;
         if(cmd.getKeyword() == null || cmd.getKeyword().isEmpty()) {
@@ -242,5 +252,9 @@ public class EquipmentPlanSearcherImpl extends AbstractElasticSearch implements 
             LOGGER.error("Create EquipmentInspectionPlan " + plan.getId() + " error");
             return null;
         }
+    }
+
+    private void checkUserPrivilege(Long orgId, Long privilegeId, Long communityId) {
+        userPrivilegeMgr.checkUserPrivilege(UserContext.currentUserId(), orgId, privilegeId, EquipmentConstant.EQUIPMENT_MODULE, null, null, null,communityId);
     }
 }

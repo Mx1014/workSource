@@ -46,6 +46,7 @@ public class SearchWarehouseStockLogsCommand {
 
     private Integer namespaceId;
 
+
     public Long getWarehouseOrderId() {
         return warehouseOrderId;
     }
@@ -61,6 +62,7 @@ public class SearchWarehouseStockLogsCommand {
     public void setNamespaceId(Integer namespaceId) {
         this.namespaceId = namespaceId;
     }
+
 
     public Long getCommunityId() {
         return communityId;

@@ -13,9 +13,8 @@ import java.util.List;
  * <li>items:离线任务列表</li>
  * <li>groups:离线类别列表</li>
  * <li>repiarCategories:离线物业报修类型列表</li>
- *  <li>totayTasksCount  : 当前总任务数</li>
- *  <li>todayCompleteCount: 当前已完成 </li>
- *  <li>nextPageAnchor: 下一页的锚点（对于task） </li>
+ * <li>countStat:离线任务数统计</li>
+ * <li>nextPageAnchor: 下一页的锚点（对于task） </li>
  */
 
 public class EquipmentTaskOfflineResponse {
@@ -35,9 +34,7 @@ public class EquipmentTaskOfflineResponse {
     @ItemType(CategoryDTO.class)
     private List<CategoryDTO> repiarCategories;
 
-    private List<Long> totayTasksCount;
-
-    private List<Long> todayCompleteCount;
+    private OfflineTaskCountStat countStat;
 
     private Long nextPageAnchor;
 
@@ -82,20 +79,12 @@ public class EquipmentTaskOfflineResponse {
         this.repiarCategories = repiarCategories;
     }
 
-    public List<Long> getTotayTasksCount() {
-        return totayTasksCount;
+    public OfflineTaskCountStat getCountStat() {
+        return countStat;
     }
 
-    public void setTotayTasksCount(List<Long> totayTasksCount) {
-        this.totayTasksCount = totayTasksCount;
-    }
-
-    public List<Long> getTodayCompleteCount() {
-        return todayCompleteCount;
-    }
-
-    public void setTodayCompleteCount(List<Long> todayCompleteCount) {
-        this.todayCompleteCount = todayCompleteCount;
+    public void setCountStat(OfflineTaskCountStat countStat) {
+        this.countStat = countStat;
     }
 
     public Long getNextPageAnchor() {

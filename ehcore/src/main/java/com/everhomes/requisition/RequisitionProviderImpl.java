@@ -3,7 +3,7 @@ package com.everhomes.requisition;
 
 import com.everhomes.db.AccessSpec;
 import com.everhomes.db.DbProvider;
-import com.everhomes.rest.Requisition.ListRequisitionsDTO;
+import com.everhomes.rest.requisition.ListRequisitionsDTO;
 import com.everhomes.server.schema.Tables;
 import com.everhomes.server.schema.tables.EhRequisitionTypes;
 import com.everhomes.server.schema.tables.EhRequisitions;

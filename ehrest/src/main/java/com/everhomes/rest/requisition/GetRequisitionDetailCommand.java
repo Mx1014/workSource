@@ -1,5 +1,5 @@
 //@formatter:off
-package com.everhomes.rest.Requisition;
+package com.everhomes.rest.requisition;
 
 /**
  * Created by Wentian Wang on 2018/1/20.
