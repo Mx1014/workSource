@@ -5479,6 +5479,8 @@ public class UserServiceImpl implements UserService {
 		Integer mypublishFlag = configurationProvider.getIntValue(UserContext.getCurrentNamespaceId(cmd.getNamespaceId()), ConfigConstants.MY_PUBLISH_FLAG, 1);
 
 		resp.setMyPublishFlag(mypublishFlag.byteValue());
+
+		resp.setScanForLogonServer("https://web.zuolin.com");
         
         return resp;
     }
