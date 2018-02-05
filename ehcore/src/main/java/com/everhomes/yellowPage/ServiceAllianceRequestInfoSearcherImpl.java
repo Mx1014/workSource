@@ -41,6 +41,7 @@ import org.springframework.stereotype.Component;
 import com.alibaba.fastjson.JSON;
 import com.alibaba.fastjson.JSONObject;
 import com.everhomes.configuration.ConfigurationProvider;
+import com.everhomes.constants.ErrorCodes;
 import com.everhomes.flow.FlowCaseDetail;
 import com.everhomes.flow.FlowCaseProvider;
 import com.everhomes.flow.FlowService;
@@ -635,6 +636,7 @@ public class ServiceAllianceRequestInfoSearcherImpl extends AbstractElasticSearc
 			}
 			
 			//生成excel并，输出到httpResponse
+			ServiceAllianceCategories category = yellowPageProvider.findCategoryById(cmd.getCategoryId());
 			try(
 				XSSFWorkbook wb = new XSSFWorkbook();
 				ByteArrayOutputStream out = new ByteArrayOutputStream();
@@ -643,9 +645,15 @@ public class ServiceAllianceRequestInfoSearcherImpl extends AbstractElasticSearc
 					createXSSFWorkbook(wb, templateMap.get(entry.getKey()), entry.getValue());
 				}
 				wb.write(out);
-			    DownloadUtil.download(out, httpResponse);
+				if(category!=null){
+					DownloadUtil.download(out, httpResponse,category.getName());
+				}else{
+					DownloadUtil.download(out, httpResponse);
+				}
 			} catch (Exception e) {
 				LOGGER.error("export error, e = {}", e);
+				throw RuntimeErrorException.errorWith(ErrorCodes.SCOPE_GENERAL, ErrorCodes.ERROR_GENERAL_EXCEPTION, 
+	                    e.getMessage());
 			} 
 		}
 	}
@@ -887,7 +895,10 @@ public class ServiceAllianceRequestInfoSearcherImpl extends AbstractElasticSearc
 				localeStringService.getLocalizedString(ServiceAllianceRequestNotificationTemplateCode.SCOPE, 
 						ServiceAllianceRequestNotificationTemplateCode.APPLY_STRING, 
 						UserContext.current().getUser().getLocale(),""):templateName;
-		XSSFSheet sheet = wb.createSheet(templateName);
+		XSSFSheet sheet = wb.getSheet(templateName);
+		if(sheet==null){
+			sheet = wb.createSheet(templateName);
+		}
         return sheet;
 	}
 
