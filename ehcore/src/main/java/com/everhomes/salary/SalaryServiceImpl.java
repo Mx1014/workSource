@@ -548,7 +548,7 @@ public class SalaryServiceImpl implements SalaryService {
         Map<String, Object> params = new HashedMap();
         params.put("ownerId", cmd.getOwnerId());
         params.put("organizationId", cmd.getOrganizationId());
-        params.put("namespaceId", UserContext.getCurrentNamespaceId());
+        params.put("namespaceId", UserContext.getCurrentNamespaceId()+"");
         params.put("excelToken", SalaryReportType.SALARY_EMPLOYEE.getCode() + "");
 
         String fileName = "员工工资表" + ".xlsx";
@@ -1278,7 +1278,7 @@ public class SalaryServiceImpl implements SalaryService {
         Map<String, Object> params = new HashedMap();
         params.put("ownerId", cmd.getOwnerId());
         params.put("organizationId", cmd.getOrganizationId());
-        params.put("namespaceId", UserContext.getCurrentNamespaceId());
+        params.put("namespaceId", UserContext.getCurrentNamespaceId()+"");
         params.put("month", cmd.getMonth());
         params.put("excelToken", cmd.getExportToken());
         SimpleDateFormat sf = new SimpleDateFormat("yyyy年MM月");
