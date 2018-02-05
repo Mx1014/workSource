@@ -1032,8 +1032,8 @@ private void checkUserPrivilege(Long orgId, Long privilegeId, Long communityId) 
 
 	@Override
 	public void reviewEquipmentInspectionplan(ReviewEquipmentPlanCommand cmd) {
-		//User user = UserContext.current().getUser();
-		//TODO:新增功能应该需要加上权限细化中的 下版本再搞
+		//check auth
+		checkUserPrivilege(cmd.getOwnerId(), PrivilegeConstants.EQUIPMENT_PLAN_REVIEW, cmd.getTargetId());
 
 		EquipmentInspectionPlans plan = equipmentProvider.getEquipmmentInspectionPlanById(cmd.getId());
 		if (plan == null || EquipmentPlanStatus.INACTIVE.equals(EquipmentPlanStatus.fromStatus(plan.getStatus()))) {
@@ -5196,6 +5196,8 @@ private void checkUserPrivilege(Long orgId, Long privilegeId, Long communityId) 
 
 	@Override
 	public EquipmentInspectionPlanDTO createEquipmentsInspectionPlan(UpdateEquipmentPlanCommand cmd) {
+		//check auth
+		checkUserPrivilege(cmd.getOwnerId(),PrivilegeConstants.EQUIPMENT_PLAN_CREATE,cmd.getTargetId());
 
 		EquipmentInspectionPlans plan = ConvertHelper.convert(cmd, EquipmentInspectionPlans.class);
 		User user = UserContext.current().getUser();
@@ -5282,6 +5284,9 @@ private void checkUserPrivilege(Long orgId, Long privilegeId, Long communityId) 
 
 	@Override
 	public EquipmentInspectionPlanDTO updateEquipmentInspectionPlan(UpdateEquipmentPlanCommand cmd) {
+
+		//check auth
+		checkUserPrivilege(cmd.getOwnerId(),PrivilegeConstants.EQUIPMENT_PLAN_UPDATE,cmd.getTargetId());
 
 		EquipmentInspectionPlans exist = verifyEquipmentInspectionPlan(cmd.getId());
 		EquipmentInspectionPlans updatePlan =null;
@@ -5452,6 +5457,9 @@ private void checkUserPrivilege(Long orgId, Long privilegeId, Long communityId) 
 
 	@Override
 	public void deleteEquipmentInspectionPlan(DeleteEquipmentPlanCommand cmd) {
+		//check auth
+		checkUserPrivilege(cmd.getOwnerId(),PrivilegeConstants.EQUIPMENT_PLAN_DELETE,cmd.getTargetId());
+
 		EquipmentInspectionPlans exist = equipmentProvider.getEquipmmentInspectionPlanById(cmd.getId());
 		exist.setStatus(EquipmentPlanStatus.INACTIVE.getCode());
 		exist.setDeleterUid(UserContext.currentUserId());
