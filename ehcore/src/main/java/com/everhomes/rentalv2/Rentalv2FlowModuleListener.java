@@ -287,7 +287,7 @@ public class Rentalv2FlowModuleListener implements FlowModuleListener {
 		entities.add(e);
 
 		List<RentalConfigAttachment> recommendUsers = rentalv2Provider
-				.queryRentalConfigAttachmentByOwner(order.getResourceType(), AttachmentType.ORDER_RECOMMEND_USER.name(), order.getId());
+				.queryRentalConfigAttachmentByOwner(order.getResourceType(), AttachmentType.ORDER_RECOMMEND_USER.name(), order.getId(),null);
 		if (null != recommendUsers && recommendUsers.size() != 0) {
 
 			StringBuilder itemStr = new StringBuilder();
@@ -311,7 +311,7 @@ public class Rentalv2FlowModuleListener implements FlowModuleListener {
 		}
 
 		List<RentalConfigAttachment> goodItems = rentalv2Provider
-				.queryRentalConfigAttachmentByOwner(order.getResourceType(), AttachmentType.ORDER_GOOD_ITEM.name(), order.getId());
+				.queryRentalConfigAttachmentByOwner(order.getResourceType(), AttachmentType.ORDER_GOOD_ITEM.name(), order.getId(),null);
 		if (null != goodItems && goodItems.size() != 0) {
 
 			StringBuilder itemStr = new StringBuilder();
