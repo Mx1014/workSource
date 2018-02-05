@@ -303,7 +303,7 @@ public class WebMenuServiceImpl implements WebMenuService {
 			}
 			if (moduleIds != null && moduleIds.size() > 0) {
 				// 根据模块和域空间拿所有应用
-				List<ServiceModuleApp> module_apps =this.serviceModuleAppService.listServiceModuleAppByModuleIds(UserContext.getCurrentNamespaceId(), moduleIds);
+				List<ServiceModuleApp> module_apps =this.serviceModuleAppService.listReleaseServiceModuleAppByModuleIds(UserContext.getCurrentNamespaceId(), moduleIds);
 				if(module_apps != null && module_apps.size() > 0){
 					appIds.addAll(module_apps.stream().map(r->r.getOriginId()).collect(Collectors.toList()));
 				}

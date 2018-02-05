@@ -1032,18 +1032,6 @@ public class ServiceModuleServiceImpl implements ServiceModuleService {
     }
 
     /**
-     * 获取serviceModuleApps的平行结构（level  = 2）
-     *
-     * @param tempList
-     * @return
-     */
-    private List<ServiceModuleAppDTO> getServiceModuleAppsAsList(List<ServiceModuleDTO> tempList) {
-        List<Long> moduleIds = tempList.stream().map(ServiceModuleDTO::getId).collect(Collectors.toList());
-        List<ServiceModuleAppDTO> serviceModuleAppDTOS = serviceModuleAppProvider.listServiceModuleAppsByModuleIds(UserContext.getCurrentNamespaceId(), moduleIds);
-        return serviceModuleAppDTOS;
-    }
-
-    /**
      * 检查assignmentService更新命令参数
      *
      * @param cmd
