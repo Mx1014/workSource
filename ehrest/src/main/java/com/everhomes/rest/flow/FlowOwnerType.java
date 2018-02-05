@@ -35,6 +35,7 @@ public enum FlowOwnerType {
     CUSTOM_REQUEST("CUSTOM_REQUEST"),
     PARKING_CAR_VERIFICATION("PARKING_CAR_VERIFICATION"),
     RELOCATION_REQUEST("EhRelocationRequests"),
+    REQUISITION_REQUEST("RequisitionRequest")
     ;
 
 	private String code;

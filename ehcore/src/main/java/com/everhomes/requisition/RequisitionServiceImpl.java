@@ -1,8 +1,14 @@
 //@formatter:off
 package com.everhomes.requisition;
 
+import com.everhomes.db.DbProvider;
+import com.everhomes.flow.Flow;
+import com.everhomes.flow.FlowService;
 import com.everhomes.naming.NameMapper;
 import com.everhomes.rest.Requisition.*;
+import com.everhomes.rest.flow.FlowConstants;
+import com.everhomes.rest.flow.FlowModuleType;
+import com.everhomes.rest.flow.FlowOwnerType;
 import com.everhomes.sequence.SequenceProvider;
 import com.everhomes.server.schema.tables.pojos.EhRequisitions;
 import com.everhomes.supplier.SupplierHelper;
@@ -11,6 +17,7 @@ import com.everhomes.util.ConvertHelper;
 import com.everhomes.util.DateHelper;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
+import org.springframework.transaction.TransactionStatus;
 
 import java.sql.Timestamp;
 import java.util.ArrayList;
@@ -26,6 +33,10 @@ public class RequisitionServiceImpl implements RequisitionService {
     private RequisitionProvider requisitionProvider;
     @Autowired
     private SequenceProvider sequenceProvider;
+    @Autowired
+    private DbProvider dbProvider;
+    @Autowired
+    private FlowService flowService;
 
     @Override
     public void createRequisition(CreateRequisitionCommand cmd) {
@@ -35,7 +46,17 @@ public class RequisitionServiceImpl implements RequisitionService {
         req.setIdentity(SupplierHelper.getIdentity());
         req.setCreateUid(UserContext.currentUserId());
         req.setCreateTime(new Timestamp(DateHelper.currentGMTTime().getTime()));
-        requisitionProvider.saveRequisition(req);
+        //创建工作流
+        Flow flow = flowService.getEnabledFlow(cmd.getNamespaceId(), FlowConstants.REQUISITION_MODULE
+                , FlowModuleType.NO_MODULE.getCode(),cmd.getOwnerId(), FlowOwnerType.REQUISITION_REQUEST.getCode());
+        if(flow == null){
+            //工作流问题
+        }
+        this.dbProvider.execute((TransactionStatus status) -> {
+            requisitionProvider.saveRequisition(req);
+            return null;
+        });
+
 
     }
 

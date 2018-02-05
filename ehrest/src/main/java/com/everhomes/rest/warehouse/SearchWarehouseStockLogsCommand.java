@@ -20,6 +20,8 @@ import com.everhomes.util.StringHelper;
  */
 public class SearchWarehouseStockLogsCommand {
 
+    private Long warehouseOrderId;
+
     private String ownerType;
 
     private Long ownerId;
@@ -41,6 +43,14 @@ public class SearchWarehouseStockLogsCommand {
     private Integer pageSize;
 
     private Long communityId;
+
+    public Long getWarehouseOrderId() {
+        return warehouseOrderId;
+    }
+
+    public void setWarehouseOrderId(Long warehouseOrderId) {
+        this.warehouseOrderId = warehouseOrderId;
+    }
 
     public Long getCommunityId() {
         return communityId;
