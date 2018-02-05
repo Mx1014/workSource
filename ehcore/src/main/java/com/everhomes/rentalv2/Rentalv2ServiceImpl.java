@@ -7218,6 +7218,16 @@ public class Rentalv2ServiceImpl implements Rentalv2Service {
 			}else if (RuleSourceType.RESOURCE.getCode().equals(rule.getSourceType())) {
 				priceRuleType = PriceRuleType.RESOURCE.getCode();
 				ownerId = rule.getSourceId();
+				//cellbeginid 和 cellendid拷贝
+				List<Rentalv2PriceRule> priceRules = rentalv2PriceRuleProvider.listPriceRuleByOwner(rule.getResourceType(), priceRuleType, ownerId);
+				cmd.getPriceRules().forEach(r->{
+					priceRules.forEach(g->{
+						if (r.getRentalType().equals(g.getRentalType())){
+							r.setCellBeginId(g.getCellBeginId());
+							r.setCellEndId(g.getCellEndId());
+						}
+					});
+				});
 			}
 
 			//先删除后添加
