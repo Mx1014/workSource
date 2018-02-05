@@ -757,7 +757,7 @@ public class SalaryServiceImpl implements SalaryService {
             cost = cost.add(shouldPay);
             //累加完了开始计税
             BigDecimal salaryTax = calculateSalaryTax(salary);
-            BigDecimal bonusTax = calculateBonusTax(bonus, salaryTax);
+            BigDecimal bonusTax = calculateBonusTax(bonus, salary);
             //保存计税
             SalaryGroupEntity groupEntity = salaryGroupEntityProvider.findSalaryGroupEntityByOrgANdDefaultId(ownerId, SalaryConstants.ENTITY_ID_SALARYTAX);
             if (null == groupEntity) {
