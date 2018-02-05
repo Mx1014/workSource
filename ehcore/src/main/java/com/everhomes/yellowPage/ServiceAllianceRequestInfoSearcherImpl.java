@@ -624,6 +624,8 @@ public class ServiceAllianceRequestInfoSearcherImpl extends AbstractElasticSearc
 						if(val!=null){
 							GeneralForm form = this.generalFormProvider.getActiveGeneralFormByOriginIdAndVersion(
 									val.getFormOriginId(), val.getFormVersion());
+							if(form==null)
+								continue;
 							//使用表单名称+表单id作为sheet的名称 by dengs 20170510
 							requestInfo.setTemplateType("flowCase"+form.getId());
 							templateMap.put("flowCase"+form.getId(), form.getFormName()+form.getId());
@@ -646,7 +648,7 @@ public class ServiceAllianceRequestInfoSearcherImpl extends AbstractElasticSearc
 				}
 				wb.write(out);
 				if(category!=null){
-					DownloadUtil.download(out, httpResponse,category.getName());
+					DownloadUtil.download(out, httpResponse,category.getName()+"的申请记录");
 				}else{
 					DownloadUtil.download(out, httpResponse);
 				}
