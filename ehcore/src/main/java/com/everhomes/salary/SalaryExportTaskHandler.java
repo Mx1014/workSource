@@ -57,6 +57,7 @@ public class SalaryExportTaskHandler implements FileDownloadTaskHandler {
             month = String.valueOf(params.get("month"));
         }
 
+        Integer namespaceId = Integer.valueOf( (String) params.get("namespaceId"));
 
         String fileName = (String) params.get("name");
         Long taskId = (Long) params.get("taskId");
@@ -64,13 +65,13 @@ public class SalaryExportTaskHandler implements FileDownloadTaskHandler {
         OutputStream outputStream = null;
         switch (SalaryReportType.fromCode(excelToken)) {
             case SALARY_DETAIL:
-                outputStream = salaryService.getSalaryDetailsOutPut(ownerId, month, taskId);
+                outputStream = salaryService.getSalaryDetailsOutPut(ownerId, month, taskId,namespaceId);
                 break;
             case DPT_STATISTIC:
-                outputStream = salaryService.getDepartStatisticsOutPut(ownerId, month, taskId);
+                outputStream = salaryService.getDepartStatisticsOutPut(ownerId, month, taskId,namespaceId);
                 break;
             case SALARY_EMPLOYEE:
-                outputStream = salaryService.getEmployeeSalaryOutPut(ownerId, taskId);
+                outputStream = salaryService.getEmployeeSalaryOutPut(ownerId, taskId,namespaceId);
                 break;
         }
         CsFileLocationDTO fileLocationDTO = fileDownloadTaskService.uploadToContenServer(fileName, outputStream);

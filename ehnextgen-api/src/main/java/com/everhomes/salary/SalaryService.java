@@ -8,6 +8,7 @@ import org.springframework.web.multipart.MultipartFile;
 
 import javax.servlet.http.HttpServletResponse;
 import java.io.OutputStream;
+import java.math.BigDecimal;
 
 public interface SalaryService {
 
@@ -136,9 +137,13 @@ public interface SalaryService {
 
     ImportFileTaskDTO importEmployeeSalary(ExportEmployeeSalaryTemplateCommand cmd, MultipartFile[] files);
 
+    BigDecimal calculateBonusTax(BigDecimal bonus, BigDecimal salary);
+
+    BigDecimal calculateSalaryTax(BigDecimal salary);
+
     ImportFileResponse getImportResult(GetImportFileResultCommand cmd);
 
-    OutputStream getEmployeeSalaryOutPut(Long organizationId, Long taskId);
+    OutputStream getEmployeeSalaryOutPut(Long organizationId, Long taskId, Integer namespaceId);
 
     GetSalaryGroupStatusResponse getSalaryGroupStatus(GetSalaryGroupStatusCommand cmd);
 
@@ -148,9 +153,9 @@ public interface SalaryService {
 
     void newSalaryMonth(NewSalaryMonthCommand cmd);
 
-    OutputStream getSalaryDetailsOutPut(Long ownerId, String month, Long taskId);
+    OutputStream getSalaryDetailsOutPut(Long ownerId, String month, Long taskId, Integer namespaceId);
 
-    OutputStream getDepartStatisticsOutPut(Long ownerId, String month, Long taskId);
+    OutputStream getDepartStatisticsOutPut(Long ownerId, String month, Long taskId, Integer namespaceId);
 
     GetSalaryTaskStatusResponse getSalaryTaskStatus(GetSalaryTaskStatusCommand cmd);
 }

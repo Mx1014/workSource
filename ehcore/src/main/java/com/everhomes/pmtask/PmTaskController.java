@@ -5,10 +5,13 @@ import java.util.List;
 
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
+import javax.validation.Valid;
 
 import com.everhomes.entity.EntityType;
 import com.everhomes.portal.PortalService;
 import com.everhomes.rest.acl.PrivilegeConstants;
+import com.everhomes.rest.address.ListApartmentByBuildingNameCommand;
+import com.everhomes.rest.address.ListApartmentByBuildingNameCommandResponse;
 import com.everhomes.rest.community.ListBuildingCommand;
 import com.everhomes.rest.community.ListBuildingCommandResponse;
 import com.everhomes.rest.flow.FlowConstants;
@@ -17,6 +20,7 @@ import com.everhomes.rest.portal.ListServiceModuleAppsCommand;
 import com.everhomes.rest.portal.ListServiceModuleAppsResponse;
 import com.everhomes.user.UserContext;
 import com.everhomes.user.UserPrivilegeMgr;
+import com.everhomes.util.EtagHelper;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RestController;
@@ -305,16 +309,16 @@ public class PmTaskController extends ControllerBase {
      * <b>URL: /pmtask/listAuthorizationCommunityByUser</b>
      * <p>授权人员 管理小区列表</p>
      */
-    @RequestMapping("listAuthorizationCommunityByUser")
-    @RestReturn(value=ListAuthorizationCommunityByUserResponse.class)
-    public RestResponse listAuthorizationCommunityByUser(ListAuthorizationCommunityCommand cmd) {
-        //TODO:
-        ListAuthorizationCommunityByUserResponse resp = pmTaskService.listAuthorizationCommunityByUser(cmd);
-        RestResponse response = new RestResponse(resp);
-        response.setErrorCode(ErrorCodes.SUCCESS);
-        response.setErrorDescription("OK");
-        return response;
-    }
+//    @RequestMapping("listAuthorizationCommunityByUser")
+//    @RestReturn(value=ListAuthorizationCommunityByUserResponse.class)
+//    public RestResponse listAuthorizationCommunityByUser(ListAuthorizationCommunityCommand cmd) {
+//        //TODO:
+//        ListAuthorizationCommunityByUserResponse resp = pmTaskService.listAuthorizationCommunityByUser(cmd);
+//        RestResponse response = new RestResponse(resp);
+//        response.setErrorCode(ErrorCodes.SUCCESS);
+//        response.setErrorDescription("OK");
+//        return response;
+//    }
 
 	
 //	/**
@@ -586,6 +590,24 @@ public class PmTaskController extends ControllerBase {
         pmTaskService.exportTasksCard(cmd, response);
 
         RestResponse resp = new RestResponse();
+        resp.setErrorCode(ErrorCodes.SUCCESS);
+        resp.setErrorDescription("OK");
+        return resp;
+    }
+
+    /**
+     * <b>URL: /pmtask/listApartmentsByBuildingName</b>
+     * <p>根据小区Id、楼栋号查询门牌列表</p>
+     */
+    @RequestMapping("listApartmentsByBuildingName")
+    @RestReturn(value=ListApartmentByBuildingNameCommandResponse.class)
+    public RestResponse listApartmentsByBuildingName(@Valid ListApartmentByBuildingNameCommand cmd, HttpServletRequest request, HttpServletResponse response) {
+        ListApartmentByBuildingNameCommandResponse result = this.pmTaskService.listApartmentsByBuildingName(cmd);
+        RestResponse resp = new RestResponse();
+        if(EtagHelper.checkHeaderEtagOnly(30,result.hashCode()+"", request, response)) {
+            resp.setResponseObject(result);
+        }
+
         resp.setErrorCode(ErrorCodes.SUCCESS);
         resp.setErrorDescription("OK");
         return resp;

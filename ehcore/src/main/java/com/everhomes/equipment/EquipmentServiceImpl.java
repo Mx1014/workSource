@@ -120,6 +120,7 @@ import com.everhomes.rest.equipment.ListUserHistoryTasksCommand;
 import com.everhomes.rest.equipment.OfflineEquipmentTaskReportCommand;
 import com.everhomes.rest.equipment.OfflineEquipmentTaskReportLog;
 import com.everhomes.rest.equipment.OfflineEquipmentTaskReportResponse;
+import com.everhomes.rest.equipment.OfflineTaskCountStat;
 import com.everhomes.rest.equipment.QRCodeFlag;
 import com.everhomes.rest.equipment.ReportEquipmentTaskCommand;
 import com.everhomes.rest.equipment.ReviewEquipmentPlanCommand;
@@ -1032,8 +1033,8 @@ private void checkUserPrivilege(Long orgId, Long privilegeId, Long communityId) 
 
 	@Override
 	public void reviewEquipmentInspectionplan(ReviewEquipmentPlanCommand cmd) {
-		//User user = UserContext.current().getUser();
-		//TODO:新增功能应该需要加上权限细化中的 下版本再搞
+		//check auth
+		checkUserPrivilege(cmd.getOwnerId(), PrivilegeConstants.EQUIPMENT_PLAN_REVIEW, cmd.getTargetId());
 
 		EquipmentInspectionPlans plan = equipmentProvider.getEquipmmentInspectionPlanById(cmd.getId());
 		if (plan == null || EquipmentPlanStatus.INACTIVE.equals(EquipmentPlanStatus.fromStatus(plan.getStatus()))) {
@@ -1528,10 +1529,16 @@ private void checkUserPrivilege(Long orgId, Long privilegeId, Long communityId) 
 	}*/
 
 	@Override
-	public void exportEquipments(SearchEquipmentsCommand cmd,
-			HttpServletResponse response) {
-		SearchEquipmentsResponse equipments = equipmentSearcher.queryEquipments(cmd);
-		List<EquipmentsDTO> dtos = equipments.getEquipment();
+	public void exportEquipments(SearchEquipmentsCommand cmd, HttpServletResponse response) {
+		List<EquipmentsDTO> dtos = null;
+		if(cmd.getEquipmentIds()!=null && cmd.getEquipmentIds().size()>0){
+			dtos = cmd.getEquipmentIds().stream().map((e) -> ConvertHelper.convert(equipmentProvider.findEquipmentById(e), EquipmentsDTO.class))
+					.collect(Collectors.toList());
+		}else {
+			SearchEquipmentsResponse equipments = equipmentSearcher.queryEquipments(cmd);
+			dtos = equipments.getEquipment();
+		}
+
 		//把DTO中状态代码转换成映射String
 		List<ExportEquipmentData> data = dtos.stream().map(this::toExportEquipment).collect(Collectors.toList());
 		if (data != null && dtos.size() > 0) {
@@ -2855,12 +2862,6 @@ private void checkUserPrivilege(Long orgId, Long privilegeId, Long communityId) 
 	@Override
 	public ImportDataResponse importEquipmentStandards(ImportOwnerCommand cmd, MultipartFile mfile,
 			Long userId) {
-		/*Long privilegeId = configProvider.getLongValue(EquipmentConstant.EQUIPMENT_STANDARD_UPDATE, 0L);
-		if(cmd.getTargetId() != null) {
-			userPrivilegeMgr.checkCurrentUserAuthority(EntityType.COMMUNITY.getCode(), cmd.getTargetId(), cmd.getOwnerId(), privilegeId);
-		} else {
-			userPrivilegeMgr.checkCurrentUserAuthority(null, null, cmd.getOwnerId(), privilegeId);
-		}*/
 		checkUserPrivilege(cmd.getOwnerId(),PrivilegeConstants.EQUIPMENT_STANDARD_UPDATE,cmd.getTargetId());
 		ImportDataResponse importDataResponse = importData(cmd, mfile, userId, ImportDataType.EQUIPMENT_STANDARDS.getCode());
 		return importDataResponse;
@@ -5196,6 +5197,8 @@ private void checkUserPrivilege(Long orgId, Long privilegeId, Long communityId) 
 
 	@Override
 	public EquipmentInspectionPlanDTO createEquipmentsInspectionPlan(UpdateEquipmentPlanCommand cmd) {
+		//check auth
+		checkUserPrivilege(cmd.getOwnerId(),PrivilegeConstants.EQUIPMENT_PLAN_CREATE,cmd.getTargetId());
 
 		EquipmentInspectionPlans plan = ConvertHelper.convert(cmd, EquipmentInspectionPlans.class);
 		User user = UserContext.current().getUser();
@@ -5282,6 +5285,9 @@ private void checkUserPrivilege(Long orgId, Long privilegeId, Long communityId) 
 
 	@Override
 	public EquipmentInspectionPlanDTO updateEquipmentInspectionPlan(UpdateEquipmentPlanCommand cmd) {
+
+		//check auth
+		checkUserPrivilege(cmd.getOwnerId(),PrivilegeConstants.EQUIPMENT_PLAN_UPDATE,cmd.getTargetId());
 
 		EquipmentInspectionPlans exist = verifyEquipmentInspectionPlan(cmd.getId());
 		EquipmentInspectionPlans updatePlan =null;
@@ -5452,6 +5458,9 @@ private void checkUserPrivilege(Long orgId, Long privilegeId, Long communityId) 
 
 	@Override
 	public void deleteEquipmentInspectionPlan(DeleteEquipmentPlanCommand cmd) {
+		//check auth
+		checkUserPrivilege(cmd.getOwnerId(),PrivilegeConstants.EQUIPMENT_PLAN_DELETE,cmd.getTargetId());
+
 		EquipmentInspectionPlans exist = equipmentProvider.getEquipmmentInspectionPlanById(cmd.getId());
 		exist.setStatus(EquipmentPlanStatus.INACTIVE.getCode());
 		exist.setDeleterUid(UserContext.currentUserId());
@@ -5767,8 +5776,16 @@ private void checkUserPrivilege(Long orgId, Long privilegeId, Long communityId) 
 		List<EquipmentStandardRelationDTO> equipments = new ArrayList<>();//设备标准关联表 设备id 标准id
 		List<InspectionItemDTO> items = new ArrayList<>();//巡检item表包含standardId
 
-		offlineResponse.setTodayCompleteCount(new ArrayList<>(Collections.singleton(response.getTodayCompleteCount())));
-		offlineResponse.setTotayTasksCount(new ArrayList<>(Collections.singleton(response.getTotayTasksCount())));
+		OfflineTaskCountStat todayComplete = new OfflineTaskCountStat();
+		todayComplete.setCount(response.getTodayCompleteCount());
+		todayComplete.setId(1L);
+
+		OfflineTaskCountStat todayTaskCount = new OfflineTaskCountStat();
+		todayTaskCount.setCount(response.getTotayTasksCount());
+		todayComplete.setId(1L);
+
+		offlineResponse.setTodayCompleteCount(new ArrayList<>(Collections.singleton(todayComplete)));
+		offlineResponse.setTodayTasksCount(new ArrayList<>(Collections.singleton(todayTaskCount)));
 		offlineResponse.setNextPageAnchor(response.getNextPageAnchor());
 
 		List<EquipmentTaskDTO> tasks = response.getTasks();
@@ -5906,41 +5923,43 @@ private void checkUserPrivilege(Long orgId, Long privilegeId, Long communityId) 
 		}
 		List<OfflineEquipmentTaskReportLog> reportLogs = new ArrayList<>();
 		OfflineEquipmentTaskReportLog reportLog = new OfflineEquipmentTaskReportLog();
-		for (EquipmentTaskDTO taskDTO : tasks) {
-			EquipmentInspectionTasks task = verifyEquipmentTask(taskDTO.getId(), taskDTO.getOwnerType(), taskDTO.getOwnerId());
-			EquipmentInspectionTasksLogs log = new EquipmentInspectionTasksLogs();
-			log.setTaskId(taskDTO.getId());
-			log.setOperatorType(OwnerType.USER.getCode());
-			log.setOperatorId(UserContext.currentUserId());
-			log.setProcessType(EquipmentTaskProcessType.COMPLETE.getCode());
-			if (taskDTO.getExecutiveExpireTime() == null || taskDTO.getExecutiveTime().before(task.getExecutiveExpireTime())) {
-				log.setProcessResult(EquipmentTaskProcessResult.COMPLETE_OK.getCode());
-			} else {
-				log.setProcessResult(EquipmentTaskProcessResult.COMPLETE_DELAY.getCode());
-			}
-			EquipmentTaskReportDetail reportDetail = taskAndDetailsMap.get(task.getId());
-			if (reportDetail.getMessage() != null) {
-				log.setProcessMessage(reportDetail.getMessage());
-			}
-			//process  attachements and   logs
-			log.setEquipmentId(reportDetail.getEquipmentId());
-			updateEquipmentTasksAttachmentAndLogs(task, log, reportDetail.getAttachments());
-
-			List<InspectionItemResult> itemResults = reportDetail.getItemResults();
-			if (itemResults != null && itemResults.size() > 0) {
-				for (InspectionItemResult itemResult : itemResults) {
-					EquipmentInspectionItemResults result = ConvertHelper.convert(itemResult, EquipmentInspectionItemResults.class);
-					result.setTaskLogId(log.getId());
-					result.setCommunityId(task.getTargetId());
-					result.setEquipmentId(reportDetail.getEquipmentId());
-					result.setStandardId(reportDetail.getStandardId());
-					result.setInspectionCategoryId(task.getInspectionCategoryId());
-					result.setNamespaceId(task.getNamespaceId());
-					equipmentProvider.createEquipmentInspectionItemResults(result);
+		if (tasks != null && tasks.size() > 0) {
+			for (EquipmentTaskDTO taskDTO : tasks) {
+				EquipmentInspectionTasks task = verifyEquipmentTask(taskDTO.getId(), taskDTO.getOwnerType(), taskDTO.getOwnerId());
+				EquipmentInspectionTasksLogs log = new EquipmentInspectionTasksLogs();
+				log.setTaskId(taskDTO.getId());
+				log.setOperatorType(OwnerType.USER.getCode());
+				log.setOperatorId(UserContext.currentUserId());
+				log.setProcessType(EquipmentTaskProcessType.COMPLETE.getCode());
+				if (taskDTO.getExecutiveExpireTime() == null || taskDTO.getExecutiveTime().before(task.getExecutiveExpireTime())) {
+					log.setProcessResult(EquipmentTaskProcessResult.COMPLETE_OK.getCode());
+				} else {
+					log.setProcessResult(EquipmentTaskProcessResult.COMPLETE_DELAY.getCode());
 				}
+				EquipmentTaskReportDetail reportDetail = taskAndDetailsMap.get(task.getId());
+				if (reportDetail.getMessage() != null) {
+					log.setProcessMessage(reportDetail.getMessage());
+				}
+				//process  attachements and   logs
+				log.setEquipmentId(reportDetail.getEquipmentId());
+				updateEquipmentTasksAttachmentAndLogs(task, log, reportDetail.getAttachments());
+
+				List<InspectionItemResult> itemResults = reportDetail.getItemResults();
+				if (itemResults != null && itemResults.size() > 0) {
+					for (InspectionItemResult itemResult : itemResults) {
+						EquipmentInspectionItemResults result = ConvertHelper.convert(itemResult, EquipmentInspectionItemResults.class);
+						result.setTaskLogId(log.getId());
+						result.setCommunityId(task.getTargetId());
+						result.setEquipmentId(reportDetail.getEquipmentId());
+						result.setStandardId(reportDetail.getStandardId());
+						result.setInspectionCategoryId(task.getInspectionCategoryId());
+						result.setNamespaceId(task.getNamespaceId());
+						equipmentProvider.createEquipmentInspectionItemResults(result);
+					}
+				}
+				reportLog.setSucessIds(task.getId());
+				reportLogs.add(reportLog);
 			}
-			reportLog.setSucessIds(task.getId());
-			reportLogs.add(reportLog);
 		}
 		return reportLogs;
 	}

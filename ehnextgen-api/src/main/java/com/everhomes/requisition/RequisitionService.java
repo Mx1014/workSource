@@ -1,7 +1,7 @@
 //@formatter:off
 package com.everhomes.requisition;
 
-import com.everhomes.rest.Requisition.*;
+import com.everhomes.rest.requisition.*;
 
 import java.util.List;
 

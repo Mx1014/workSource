@@ -13,9 +13,9 @@ import java.util.List;
  * <li>items:离线任务列表</li>
  * <li>groups:离线类别列表</li>
  * <li>repiarCategories:离线物业报修类型列表</li>
- *  <li>totayTasksCount  : 当前总任务数</li>
- *  <li>todayCompleteCount: 当前已完成 </li>
- *  <li>nextPageAnchor: 下一页的锚点（对于task） </li>
+ * <li>todayTasksCount : 当前总任务数</li>
+ * <li>todayCompleteCount: 当前已完成 </li>
+ * <li>nextPageAnchor: 下一页的锚点（对于task） </li>
  */
 
 public class EquipmentTaskOfflineResponse {
@@ -35,9 +35,11 @@ public class EquipmentTaskOfflineResponse {
     @ItemType(CategoryDTO.class)
     private List<CategoryDTO> repiarCategories;
 
-    private List<Long> totayTasksCount;
+    @ItemType(OfflineTaskCountStat.class)
+    private List<OfflineTaskCountStat> todayTasksCount;
 
-    private List<Long> todayCompleteCount;
+    @ItemType(OfflineTaskCountStat.class)
+    private List<OfflineTaskCountStat> todayCompleteCount;
 
     private Long nextPageAnchor;
 
@@ -82,19 +84,19 @@ public class EquipmentTaskOfflineResponse {
         this.repiarCategories = repiarCategories;
     }
 
-    public List<Long> getTotayTasksCount() {
-        return totayTasksCount;
+    public List<OfflineTaskCountStat> getTodayTasksCount() {
+        return todayTasksCount;
     }
 
-    public void setTotayTasksCount(List<Long> totayTasksCount) {
-        this.totayTasksCount = totayTasksCount;
+    public void setTodayTasksCount(List<OfflineTaskCountStat> todayTasksCount) {
+        this.todayTasksCount = todayTasksCount;
     }
 
-    public List<Long> getTodayCompleteCount() {
+    public List<OfflineTaskCountStat> getTodayCompleteCount() {
         return todayCompleteCount;
     }
 
-    public void setTodayCompleteCount(List<Long> todayCompleteCount) {
+    public void setTodayCompleteCount(List<OfflineTaskCountStat> todayCompleteCount) {
         this.todayCompleteCount = todayCompleteCount;
     }
 
