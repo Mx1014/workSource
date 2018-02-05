@@ -143,7 +143,7 @@ public interface SalaryService {
 
     ImportFileResponse getImportResult(GetImportFileResultCommand cmd);
 
-    OutputStream getEmployeeSalaryOutPut(Long organizationId, Long taskId);
+    OutputStream getEmployeeSalaryOutPut(Long organizationId, Long taskId, Integer namespaceId);
 
     GetSalaryGroupStatusResponse getSalaryGroupStatus(GetSalaryGroupStatusCommand cmd);
 
@@ -153,9 +153,9 @@ public interface SalaryService {
 
     void newSalaryMonth(NewSalaryMonthCommand cmd);
 
-    OutputStream getSalaryDetailsOutPut(Long ownerId, String month, Long taskId);
+    OutputStream getSalaryDetailsOutPut(Long ownerId, String month, Long taskId, Integer namespaceId);
 
-    OutputStream getDepartStatisticsOutPut(Long ownerId, String month, Long taskId);
+    OutputStream getDepartStatisticsOutPut(Long ownerId, String month, Long taskId, Integer namespaceId);
 
     GetSalaryTaskStatusResponse getSalaryTaskStatus(GetSalaryTaskStatusCommand cmd);
 }
