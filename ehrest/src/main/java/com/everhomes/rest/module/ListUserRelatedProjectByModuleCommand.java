@@ -10,6 +10,7 @@ import javax.validation.constraints.NotNull;
  * <li>ownerType: 范围权限</li>
  * <li>ownerId: 范围id</li>
  * <li>moduleId: 模块id</li>
+ * <li>appId: 应用id</li>
  * <li>userId: 用户id</li>
  * <li>organizationId: 企业id</li>
  * <li>communityFetchType：查询类型</li>
@@ -28,6 +29,9 @@ public class ListUserRelatedProjectByModuleCommand {
 
     @NotNull
     private Long moduleId;
+
+    @NotNull
+    private Long appId;
 
     @NotNull
     private Long userId;
@@ -85,5 +89,13 @@ public class ListUserRelatedProjectByModuleCommand {
 
     public void setCommunityFetchType(String communityFetchType) {
         this.communityFetchType = communityFetchType;
+    }
+
+    public Long getAppId() {
+        return appId;
+    }
+
+    public void setAppId(Long appId) {
+        this.appId = appId;
     }
 }
