@@ -300,6 +300,8 @@ public class MessagingServiceImpl implements MessagingService {
         return dto;
     }
 
+    static DeferredResult.DeferredResultHandler staticHandler;
+
     @Override
     public DeferredResult<RestResponse> blockingEvent(String subjectId, String type, Integer timeOut, DeferredResult.DeferredResultHandler handler) {
         if(timeOut == 0 || timeOut > MAX_TIME_OUT){
@@ -307,6 +309,8 @@ public class MessagingServiceImpl implements MessagingService {
         }
         String subject = "blockingEventKey." + subjectId;
         DeferredResult deferredResult = new DeferredResult();
+//        staticHandler = handler;
+//        deferredResult.setResultHandler(handler);
         RestResponse restResponse = new RestResponse();
         BlockingEventResponse response = BlockingEventResponse.build(stored, subject);
 
@@ -321,7 +325,7 @@ public class MessagingServiceImpl implements MessagingService {
                     restResponse.setErrorCode(ErrorCodes.SUCCESS);
                     restResponse.setErrorDescription("OK");
                     deferredResult.setResult(restResponse);
-                    deferredResult.setResultHandler(handler);
+//                    deferredResult.setResultHandler(handler);
                     return deferredResult;
                 }
             }
@@ -335,7 +339,7 @@ public class MessagingServiceImpl implements MessagingService {
                 restResponse.setErrorCode(ErrorCodes.SUCCESS);
                 restResponse.setErrorDescription("OK");
                 deferredResult.setResult(restResponse);
-                deferredResult.setResultHandler(handler);
+//                deferredResult.setResultHandler(handler);
                 return deferredResult;
             }
         }
@@ -349,7 +353,9 @@ public class MessagingServiceImpl implements MessagingService {
                         restResponse.setResponseObject(response);
                         restResponse.setErrorCode(ErrorCodes.SUCCESS);
                         restResponse.setErrorDescription("OK");
+                        handler.handleResult(restResponse);
                         deferredResult.setResult(restResponse);
+//                        deferredResult.setResultHandler(handler);
                         return null;
                     }
                     @Override
@@ -361,7 +367,6 @@ public class MessagingServiceImpl implements MessagingService {
                         restResponse.setErrorCode(ErrorCodes.SUCCESS);
                         restResponse.setErrorDescription("OK");
                         deferredResult.setResult(restResponse);
-                        deferredResult.setResultHandler(handler);
                     }
 
                 }).setTimeout(timeOut).create();
@@ -375,8 +380,9 @@ public class MessagingServiceImpl implements MessagingService {
                         restResponse.setResponseObject(response);
                         restResponse.setErrorCode(ErrorCodes.SUCCESS);
                         restResponse.setErrorDescription("OK");
+                        handler.handleResult(restResponse);
                         deferredResult.setResult(restResponse);
-                        deferredResult.setResultHandler(handler);
+//                        deferredResult.setResultHandler(handler);
                         return null;
                     }
                 });

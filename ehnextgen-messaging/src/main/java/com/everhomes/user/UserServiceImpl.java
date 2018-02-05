@@ -5539,7 +5539,6 @@ public class UserServiceImpl implements UserService {
 					LOGGER.debug("userLoginToken = {}", userToken);
 
 					LoginToken logintoken = WebTokenGenerator.getInstance().fromWebToken(userToken, LoginToken.class);
-
 					Map valueMap = new HashMap();
 					valueMap.put("userLogin", GsonUtil.toJson(logintoken));
 					valueMap.put("args",tokenParam[4]);
@@ -5549,7 +5548,9 @@ public class UserServiceImpl implements UserService {
 					restResponse.setErrorDescription("OK");
 
 //					//todo 验证
-					UserLogin login = logonByToken(logintoken);
+					UserLogin origin_login = logonByToken(logintoken);
+					User user = userProvider.findUserById(origin_login.getUserId());
+					UserLogin login = createLogin(namespaceId, user, null, null);
 					LoginToken newToken = new LoginToken(login.getUserId(), login.getLoginId(), login.getLoginInstanceNumber(), login.getImpersonationId());
 					String tokenString = WebTokenGenerator.getInstance().toWebToken(newToken);
 					WebRequestInterceptor.setCookieInResponse("token", tokenString, contextRequest, contextResponse);
