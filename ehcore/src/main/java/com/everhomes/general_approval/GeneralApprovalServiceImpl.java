@@ -241,12 +241,12 @@ public class GeneralApprovalServiceImpl implements GeneralApprovalService {
             cmd21.setTitle(ga.getApprovalName());
 
 
-            //  存储更多的信息 added by approval1.6
+            //  存储更多的信息 added by nan.rong for approval-1.6
             GeneralApprovalFlowCaseAdditionalFieldDTO fieldDTO = new GeneralApprovalFlowCaseAdditionalFieldDTO();
-            List<OrganizationMember> member = organizationProvider.listOrganizationMembersByUId(user.getId());
-            member = member.stream().filter(r -> {
-                return OrganizationGroupType.DEPARTMENT.getCode().equals(r.getGroupType());
-            }).collect(Collectors.toList());
+            List<OrganizationMember> results = organizationProvider.findOrganizationMembersByOrgIdAndUId(user.getId(), cmd.getOrganizationId());
+            List<OrganizationMember> member = results.stream().filter(r ->
+                    r.getGroupType().equals(OrganizationGroupType.DEPARTMENT.getCode()) || r.getGroupType().equals(OrganizationGroupType.DIRECT_UNDER_ENTERPRISE.getCode())
+            ).collect(Collectors.toList());
             if (member != null && member.size() > 0) {
                 Organization department = organizationProvider.findOrganizationById(member.get(0).getOrganizationId());
                 //  存储部门 id 及名称
