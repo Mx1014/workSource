@@ -5776,11 +5776,16 @@ private void checkUserPrivilege(Long orgId, Long privilegeId, Long communityId) 
 		List<EquipmentStandardRelationDTO> equipments = new ArrayList<>();//设备标准关联表 设备id 标准id
 		List<InspectionItemDTO> items = new ArrayList<>();//巡检item表包含standardId
 
-		OfflineTaskCountStat countStat = new OfflineTaskCountStat();
-		countStat.setTodayCompleteCount(new ArrayList<>(Collections.singleton(response.getTodayCompleteCount())));
-		countStat.setTotayTasksCount(new ArrayList<>(Collections.singleton(response.getTotayTasksCount())));
+		OfflineTaskCountStat todayComplete = new OfflineTaskCountStat();
+		todayComplete.setCount(response.getTodayCompleteCount());
+		todayComplete.setId(UUID.randomUUID().toString());
 
-		offlineResponse.setCountStat(countStat);
+		OfflineTaskCountStat todayTaskCount = new OfflineTaskCountStat();
+		todayTaskCount.setCount(response.getTotayTasksCount());
+		todayTaskCount.setId(UUID.randomUUID().toString());
+
+		offlineResponse.setTodayCompleteCount(new ArrayList<>(Collections.singleton(todayComplete)));
+		offlineResponse.setTodayTasksCount(new ArrayList<>(Collections.singleton(todayTaskCount)));
 		offlineResponse.setNextPageAnchor(response.getNextPageAnchor());
 
 		List<EquipmentTaskDTO> tasks = response.getTasks();
@@ -5918,41 +5923,43 @@ private void checkUserPrivilege(Long orgId, Long privilegeId, Long communityId) 
 		}
 		List<OfflineEquipmentTaskReportLog> reportLogs = new ArrayList<>();
 		OfflineEquipmentTaskReportLog reportLog = new OfflineEquipmentTaskReportLog();
-		for (EquipmentTaskDTO taskDTO : tasks) {
-			EquipmentInspectionTasks task = verifyEquipmentTask(taskDTO.getId(), taskDTO.getOwnerType(), taskDTO.getOwnerId());
-			EquipmentInspectionTasksLogs log = new EquipmentInspectionTasksLogs();
-			log.setTaskId(taskDTO.getId());
-			log.setOperatorType(OwnerType.USER.getCode());
-			log.setOperatorId(UserContext.currentUserId());
-			log.setProcessType(EquipmentTaskProcessType.COMPLETE.getCode());
-			if (taskDTO.getExecutiveExpireTime() == null || taskDTO.getExecutiveTime().before(task.getExecutiveExpireTime())) {
-				log.setProcessResult(EquipmentTaskProcessResult.COMPLETE_OK.getCode());
-			} else {
-				log.setProcessResult(EquipmentTaskProcessResult.COMPLETE_DELAY.getCode());
-			}
-			EquipmentTaskReportDetail reportDetail = taskAndDetailsMap.get(task.getId());
-			if (reportDetail.getMessage() != null) {
-				log.setProcessMessage(reportDetail.getMessage());
-			}
-			//process  attachements and   logs
-			log.setEquipmentId(reportDetail.getEquipmentId());
-			updateEquipmentTasksAttachmentAndLogs(task, log, reportDetail.getAttachments());
-
-			List<InspectionItemResult> itemResults = reportDetail.getItemResults();
-			if (itemResults != null && itemResults.size() > 0) {
-				for (InspectionItemResult itemResult : itemResults) {
-					EquipmentInspectionItemResults result = ConvertHelper.convert(itemResult, EquipmentInspectionItemResults.class);
-					result.setTaskLogId(log.getId());
-					result.setCommunityId(task.getTargetId());
-					result.setEquipmentId(reportDetail.getEquipmentId());
-					result.setStandardId(reportDetail.getStandardId());
-					result.setInspectionCategoryId(task.getInspectionCategoryId());
-					result.setNamespaceId(task.getNamespaceId());
-					equipmentProvider.createEquipmentInspectionItemResults(result);
+		if (tasks != null && tasks.size() > 0) {
+			for (EquipmentTaskDTO taskDTO : tasks) {
+				EquipmentInspectionTasks task = verifyEquipmentTask(taskDTO.getId(), taskDTO.getOwnerType(), taskDTO.getOwnerId());
+				EquipmentInspectionTasksLogs log = new EquipmentInspectionTasksLogs();
+				log.setTaskId(taskDTO.getId());
+				log.setOperatorType(OwnerType.USER.getCode());
+				log.setOperatorId(UserContext.currentUserId());
+				log.setProcessType(EquipmentTaskProcessType.COMPLETE.getCode());
+				if (taskDTO.getExecutiveExpireTime() == null || taskDTO.getExecutiveTime().before(task.getExecutiveExpireTime())) {
+					log.setProcessResult(EquipmentTaskProcessResult.COMPLETE_OK.getCode());
+				} else {
+					log.setProcessResult(EquipmentTaskProcessResult.COMPLETE_DELAY.getCode());
 				}
+				EquipmentTaskReportDetail reportDetail = taskAndDetailsMap.get(task.getId());
+				if (reportDetail.getMessage() != null) {
+					log.setProcessMessage(reportDetail.getMessage());
+				}
+				//process  attachements and   logs
+				log.setEquipmentId(reportDetail.getEquipmentId());
+				updateEquipmentTasksAttachmentAndLogs(task, log, reportDetail.getAttachments());
+
+				List<InspectionItemResult> itemResults = reportDetail.getItemResults();
+				if (itemResults != null && itemResults.size() > 0) {
+					for (InspectionItemResult itemResult : itemResults) {
+						EquipmentInspectionItemResults result = ConvertHelper.convert(itemResult, EquipmentInspectionItemResults.class);
+						result.setTaskLogId(log.getId());
+						result.setCommunityId(task.getTargetId());
+						result.setEquipmentId(reportDetail.getEquipmentId());
+						result.setStandardId(reportDetail.getStandardId());
+						result.setInspectionCategoryId(task.getInspectionCategoryId());
+						result.setNamespaceId(task.getNamespaceId());
+						equipmentProvider.createEquipmentInspectionItemResults(result);
+					}
+				}
+				reportLog.setSucessIds(task.getId());
+				reportLogs.add(reportLog);
 			}
-			reportLog.setSucessIds(task.getId());
-			reportLogs.add(reportLog);
 		}
 		return reportLogs;
 	}

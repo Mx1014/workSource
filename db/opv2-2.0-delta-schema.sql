@@ -899,6 +899,7 @@ CREATE TABLE `eh_salary_groups` (
   `salary_period` VARCHAR(8) COMMENT 'example:201705', 
   `creator_uid` BIGINT COMMENT'创建者',
   `create_time` DATETIME,  
+  `creator_Name` VARCHAR(128) COMMENT'创建者姓名',
   PRIMARY KEY (`id`)
 ) ENGINE=INNODB DEFAULT CHARSET=utf8mb4 ;
 
@@ -910,9 +911,11 @@ CREATE TABLE `eh_salary_groups_files` (
   `owner_id` BIGINT COMMENT '属于哪一个分公司的',
   `organization_id` BIGINT COMMENT '属于哪一个总公司的',
   `salary_period` VARCHAR(8) COMMENT 'example:201705', 
+  `creator_Name` VARCHAR(128) COMMENT'创建者姓名',
   `creator_uid` BIGINT COMMENT'创建者',
   `create_time` DATETIME,  
-  `filer_uid` BIGINT COMMENT'创建者',
+  `filer_Name` VARCHAR(128) COMMENT'归档者姓名',
+  `filer_uid` BIGINT COMMENT'归档者',
   `file_time` DATETIME,  
   PRIMARY KEY (`id`)
 ) ENGINE=INNODB DEFAULT CHARSET=utf8mb4 ;
