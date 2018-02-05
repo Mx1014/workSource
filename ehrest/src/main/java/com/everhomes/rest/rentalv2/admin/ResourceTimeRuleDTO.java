@@ -24,6 +24,7 @@ import java.util.List;
  * <li>closeDates: 特殊设置关闭日期</li>
  * <li>timeIntervals: 按小时模式下，开放时间 {@link com.everhomes.rest.rentalv2.admin.TimeIntervalDTO}</li>
  * <li>halfDayTimeIntervals: 半天模式下 早上/下午/晚上 开放时间 {@link com.everhomes.rest.rentalv2.admin.TimeIntervalDTO}</li>
+ * <li>rentalTypes: 预约类型 {@link com.everhomes.rest.rentalv2.RentalType} </li>
  * </ul>
  */
 public class ResourceTimeRuleDTO {
