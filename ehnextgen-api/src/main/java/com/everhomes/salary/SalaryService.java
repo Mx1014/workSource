@@ -8,6 +8,7 @@ import org.springframework.web.multipart.MultipartFile;
 
 import javax.servlet.http.HttpServletResponse;
 import java.io.OutputStream;
+import java.math.BigDecimal;
 
 public interface SalaryService {
 
@@ -135,6 +136,10 @@ public interface SalaryService {
     void exportEmployeeSalary(ExportEmployeeSalaryTemplateCommand cmd);
 
     ImportFileTaskDTO importEmployeeSalary(ExportEmployeeSalaryTemplateCommand cmd, MultipartFile[] files);
+
+    BigDecimal calculateBonusTax(BigDecimal bonus, BigDecimal salary);
+
+    BigDecimal calculateSalaryTax(BigDecimal salary);
 
     ImportFileResponse getImportResult(GetImportFileResultCommand cmd);
 
