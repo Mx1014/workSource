@@ -1,8 +1,10 @@
 package com.everhomes.rest.equipment;
 
+import com.everhomes.discover.ItemType;
 import com.everhomes.util.StringHelper;
 
 import javax.validation.constraints.NotNull;
+import java.util.List;
 
 /**
  * <ul>
@@ -21,6 +23,7 @@ import javax.validation.constraints.NotNull;
  *  <li>communityId: 项目id</li>
  *  <li>moduleName: 模块名</li>
  *  <li>groupPath: 所属字段组在系统中的path</li>
+ *  <li>equipmentIds: 设备id列表用于导出excel</li>
  * </ul>
  */
 public class SearchEquipmentsCommand {
@@ -58,6 +61,9 @@ public class SearchEquipmentsCommand {
 	private String moduleName;
 
 	private String groupPath;
+
+	@ItemType(Long.class)
+	private List<Long> equipmentIds;
 
 	public Long getInspectionCategoryId() {
 		return inspectionCategoryId;
@@ -185,6 +191,14 @@ public class SearchEquipmentsCommand {
 
 	public void setGroupPath(String groupPath) {
 		this.groupPath = groupPath;
+	}
+
+	public List<Long> getEquipmentIds() {
+		return equipmentIds;
+	}
+
+	public void setEquipmentIds(List<Long> equipmentIds) {
+		this.equipmentIds = equipmentIds;
 	}
 
 	@Override

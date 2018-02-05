@@ -120,6 +120,7 @@ import com.everhomes.rest.equipment.ListUserHistoryTasksCommand;
 import com.everhomes.rest.equipment.OfflineEquipmentTaskReportCommand;
 import com.everhomes.rest.equipment.OfflineEquipmentTaskReportLog;
 import com.everhomes.rest.equipment.OfflineEquipmentTaskReportResponse;
+import com.everhomes.rest.equipment.OfflineTaskCountStat;
 import com.everhomes.rest.equipment.QRCodeFlag;
 import com.everhomes.rest.equipment.ReportEquipmentTaskCommand;
 import com.everhomes.rest.equipment.ReviewEquipmentPlanCommand;
@@ -1528,10 +1529,16 @@ private void checkUserPrivilege(Long orgId, Long privilegeId, Long communityId) 
 	}*/
 
 	@Override
-	public void exportEquipments(SearchEquipmentsCommand cmd,
-			HttpServletResponse response) {
-		SearchEquipmentsResponse equipments = equipmentSearcher.queryEquipments(cmd);
-		List<EquipmentsDTO> dtos = equipments.getEquipment();
+	public void exportEquipments(SearchEquipmentsCommand cmd, HttpServletResponse response) {
+		List<EquipmentsDTO> dtos = null;
+		if(cmd.getEquipmentIds()!=null && cmd.getEquipmentIds().size()>0){
+			dtos = cmd.getEquipmentIds().stream().map((e) -> ConvertHelper.convert(equipmentProvider.findEquipmentById(e), EquipmentsDTO.class))
+					.collect(Collectors.toList());
+		}else {
+			SearchEquipmentsResponse equipments = equipmentSearcher.queryEquipments(cmd);
+			dtos = equipments.getEquipment();
+		}
+
 		//把DTO中状态代码转换成映射String
 		List<ExportEquipmentData> data = dtos.stream().map(this::toExportEquipment).collect(Collectors.toList());
 		if (data != null && dtos.size() > 0) {
@@ -2855,12 +2862,6 @@ private void checkUserPrivilege(Long orgId, Long privilegeId, Long communityId) 
 	@Override
 	public ImportDataResponse importEquipmentStandards(ImportOwnerCommand cmd, MultipartFile mfile,
 			Long userId) {
-		/*Long privilegeId = configProvider.getLongValue(EquipmentConstant.EQUIPMENT_STANDARD_UPDATE, 0L);
-		if(cmd.getTargetId() != null) {
-			userPrivilegeMgr.checkCurrentUserAuthority(EntityType.COMMUNITY.getCode(), cmd.getTargetId(), cmd.getOwnerId(), privilegeId);
-		} else {
-			userPrivilegeMgr.checkCurrentUserAuthority(null, null, cmd.getOwnerId(), privilegeId);
-		}*/
 		checkUserPrivilege(cmd.getOwnerId(),PrivilegeConstants.EQUIPMENT_STANDARD_UPDATE,cmd.getTargetId());
 		ImportDataResponse importDataResponse = importData(cmd, mfile, userId, ImportDataType.EQUIPMENT_STANDARDS.getCode());
 		return importDataResponse;
@@ -5775,8 +5776,11 @@ private void checkUserPrivilege(Long orgId, Long privilegeId, Long communityId) 
 		List<EquipmentStandardRelationDTO> equipments = new ArrayList<>();//设备标准关联表 设备id 标准id
 		List<InspectionItemDTO> items = new ArrayList<>();//巡检item表包含standardId
 
-		offlineResponse.setTodayCompleteCount(new ArrayList<>(Collections.singleton(response.getTodayCompleteCount())));
-		offlineResponse.setTotayTasksCount(new ArrayList<>(Collections.singleton(response.getTotayTasksCount())));
+		OfflineTaskCountStat countStat = new OfflineTaskCountStat();
+		countStat.setTodayCompleteCount(new ArrayList<>(Collections.singleton(response.getTodayCompleteCount())));
+		countStat.setTotayTasksCount(new ArrayList<>(Collections.singleton(response.getTotayTasksCount())));
+
+		offlineResponse.setCountStat(countStat);
 		offlineResponse.setNextPageAnchor(response.getNextPageAnchor());
 
 		List<EquipmentTaskDTO> tasks = response.getTasks();

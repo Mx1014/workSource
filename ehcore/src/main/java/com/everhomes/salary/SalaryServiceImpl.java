@@ -543,7 +543,7 @@ public class SalaryServiceImpl implements SalaryService {
         Map<String, Object> params = new HashedMap();
         params.put("ownerId", cmd.getOwnerId());
         params.put("organizationId", cmd.getOrganizationId());
-        params.put("excelToken", SalaryReportType.SALARY_EMPLOYEE.getCode()+"");
+        params.put("excelToken", SalaryReportType.SALARY_EMPLOYEE.getCode() + "");
 
         String fileName = "员工工资表" + ".xlsx";
 //        params.put("name", fileName);
@@ -619,7 +619,7 @@ public class SalaryServiceImpl implements SalaryService {
         List<SalaryGroupEntity> groupEntities = salaryGroupEntityProvider.listOpenSalaryGroupEntityByOrgId(organizationId);
         List<Long> groupEntityIds = new ArrayList<>();
         List<SalaryEmployeeOriginVal> vals = new ArrayList<>();
-        LOGGER.debug("groupEntities 是:{}\n导入的数据{}",StringHelper.toJsonString(r.getCells()));
+        LOGGER.debug("groupEntities 是:{}\n导入的数据{}", StringHelper.toJsonString(r.getCells()));
         if (null != groupEntities) {
             for (int i = 0; i < groupEntities.size(); i++) {
 
@@ -629,9 +629,9 @@ public class SalaryServiceImpl implements SalaryService {
                     //跳过不是开启状态的
                     continue;
                 }
-                if (groupEntity.getDefaultId()!=null &&
+                if (groupEntity.getDefaultId() != null &&
                         (groupEntity.getDefaultId().equals(SalaryConstants.ENTITY_ID_BONUSTAX) ||
-                        groupEntity.getDefaultId().equals(SalaryConstants.ENTITY_ID_SALARYTAX))) {
+                                groupEntity.getDefaultId().equals(SalaryConstants.ENTITY_ID_SALARYTAX))) {
                     //税收跳过
                     continue;
                 }
@@ -825,22 +825,31 @@ public class SalaryServiceImpl implements SalaryService {
         return salaryVal;
     }
 
-    private BigDecimal calculateBonusTax(BigDecimal bonus, BigDecimal salary) {
+    @Override
+    public BigDecimal calculateBonusTax(BigDecimal bonus, BigDecimal salary) {
+        LOGGER.debug("参数 bonus: {} salary:{}",bonus,salary);
         BigDecimal muni = new BigDecimal(0);
         if (salary.compareTo(new BigDecimal(3500)) < 0) {
             muni = new BigDecimal(3500).subtract(salary);
+            LOGGER.debug("muni = {}", muni);
         }
+
         BigDecimal taxBase = bonus.subtract(muni).divide(new BigDecimal(12), 2, BigDecimal.ROUND_HALF_EVEN);
+        LOGGER.debug("taxBase = {}", taxBase);
+
         //这里要加一个3500的基数计算税
         return calculateSalaryTax(taxBase.add(new BigDecimal(3500)));
     }
 
-    private BigDecimal calculateSalaryTax(BigDecimal salary) {
+    @Override
+    public BigDecimal calculateSalaryTax(BigDecimal salary) {
+        LOGGER.debug("计算salary 参数 "+salary);
         BigDecimal result = new BigDecimal(0);
         if (salary.compareTo(new BigDecimal(3500)) <= 0) {
             return result;
         }
         BigDecimal taxBase = salary.subtract(new BigDecimal(3500));
+        LOGGER.debug("taxBase = {}", taxBase);
         if (taxBase.compareTo(new BigDecimal(1500)) <= 0) {
             result = taxBase.multiply(new BigDecimal(3)).divide(new BigDecimal(100), 2, BigDecimal.ROUND_HALF_EVEN);
         } else if (taxBase.compareTo(new BigDecimal(4500)) <= 0) {
