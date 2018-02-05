@@ -616,10 +616,10 @@ public class SalaryServiceImpl implements SalaryService {
     }
 
     private void saveImportEmployeeSalary(Long organizationId, Long detailId, ImportFileResponse response, RowResult r, Long ownerId) {
-        List<SalaryGroupEntity> groupEntities = salaryGroupEntityProvider.listSalaryGroupEntityByOrgId(organizationId);
+        List<SalaryGroupEntity> groupEntities = salaryGroupEntityProvider.listOpenSalaryGroupEntityByOrgId(organizationId);
         List<Long> groupEntityIds = new ArrayList<>();
         List<SalaryEmployeeOriginVal> vals = new ArrayList<>();
-        LOGGER.debug("导入的数据",StringHelper.toJsonString(r.getCells()));
+        LOGGER.debug("groupEntities 是:{}\n导入的数据{}",StringHelper.toJsonString(r.getCells()));
         if (null != groupEntities) {
             for (int i = 0; i < groupEntities.size(); i++) {
 
@@ -647,7 +647,7 @@ public class SalaryServiceImpl implements SalaryService {
                     }
                     val = decimal.toString();
                 }
-                LOGGER.debug("导入数据[{}]的值是:[{}]", groupEntity.getName(), val);
+//                LOGGER.debug("第[{}]个gourpEntities数据[{}]的值是:[{}]列是{}", i+"",groupEntity.getName(), val,GetExcelLetter(i + 3));
                 SalaryEmployeeOriginVal salaryVal = salaryEmployeeOriginValProvider.findSalaryEmployeeOriginValByDetailId(groupEntity.getId(), detailId);
                 if (null == salaryVal) {
                     salaryVal = processSalaryEmployeeOriginVal(groupEntity, detailId, val);
@@ -790,7 +790,9 @@ public class SalaryServiceImpl implements SalaryService {
             salaryEmployeeOriginValProvider.deleteSalaryEmployeeOriginValByDetailIdAndGroouEntity(detailId, groupEntity.getId());
             SalaryEmployeeOriginVal bonusVal = processSalaryEmployeeOriginVal(groupEntity, detailId, bonusTax.toString());
             salaryEmployeeOriginValProvider.createSalaryEmployeeOriginVal(bonusVal);
-            realPay = shouldPay.subtract(salaryTax).subtract(bonusTax).add(afterTax);
+            //实发应该是工资+年终-工资税-年终税+税后款
+            //工资和年终是减去了扣款而应发没有,所以计算的时候用工资+年终
+            realPay = salary.add(bonus).subtract(salaryTax).subtract(bonusTax).add(afterTax);
             LOGGER.debug("应付{},工资{},年终{},工资税{},年终税{},实付{}", shouldPay, salary, bonus, salaryTax, bonusTax, realPay);
         }
         employee.setRegularSalary(regular);
