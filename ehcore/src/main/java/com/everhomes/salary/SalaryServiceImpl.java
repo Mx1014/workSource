@@ -216,10 +216,6 @@ public class SalaryServiceImpl implements SalaryService {
             categoryDTO.setEntities(new ArrayList<>());
             for (SalaryGroupEntity entity : entities) {
 
-                if (SalaryEntityStatus.CLOSE == SalaryEntityStatus.fromCode(entity.getStatus())) {
-                    //跳过不是开启状态的
-                    continue;
-                }
                 if (entity.getCategoryId().equals(category.getId())) {
                     SalaryGroupEntityDTO dto = ConvertHelper.convert(entity, SalaryGroupEntityDTO.class);
                     categoryDTO.getEntities().add(dto);
@@ -440,6 +436,11 @@ public class SalaryServiceImpl implements SalaryService {
         sg.setCreateTime(new Timestamp(DateHelper.currentGMTTime()
                 .getTime()));
         sg.setCreatorUid(UserContext.currentUserId());
+        Organization organization = organizationProvider.findOrganizationById(ownerId);
+        OrganizationMember member = punchService.findOrganizationMemberByOrgIdAndUId(sg.getCreatorUid(), organization.getPath());
+        if (null != member) {
+            sg.setCreatorName(member.getContactName());
+        }
         salaryGroupProvider.createSalaryGroup(sg);
 
     }
@@ -543,6 +544,7 @@ public class SalaryServiceImpl implements SalaryService {
         Map<String, Object> params = new HashedMap();
         params.put("ownerId", cmd.getOwnerId());
         params.put("organizationId", cmd.getOrganizationId());
+        params.put("namespaceId", UserContext.getCurrentNamespaceId()+"");
         params.put("excelToken", SalaryReportType.SALARY_EMPLOYEE.getCode() + "");
 
         String fileName = "员工工资表" + ".xlsx";
@@ -921,7 +923,7 @@ public class SalaryServiceImpl implements SalaryService {
 
 
     @Override
-    public OutputStream getSalaryDetailsOutPut(Long ownerId, String month, Long taskId) {
+    public OutputStream getSalaryDetailsOutPut(Long ownerId, String month, Long taskId, Integer namespaceId) {
         String toMonth = salaryGroupProvider.getMonthByOwnerId(ownerId);
         NormalFlag isFile = NormalFlag.fromCode(month.equals(toMonth) ? (byte) 0 : (byte) 1);
         List<SalaryGroupEntity> groupEntities = new ArrayList<>();
@@ -939,7 +941,7 @@ public class SalaryServiceImpl implements SalaryService {
         // TODO: 2018/1/25
         //如果查询month和薪酬正在做的month一样,就是查未归档,否则查已归档
         List<Long> detailIds = organizationService.listDetailIdWithEnterpriseExclude(null,
-                UserContext.getCurrentNamespaceId(), ownerId, null, null, null, null, null, Integer.MAX_VALUE - 1, null, null
+                namespaceId, ownerId, null, null, null, null, null, Integer.MAX_VALUE - 1, null, null
         );
         int processNum = 0;
         for (Long detailId : detailIds) {
@@ -1063,7 +1065,7 @@ public class SalaryServiceImpl implements SalaryService {
     }
 
     @Override
-    public OutputStream getDepartStatisticsOutPut(Long ownerId, String month, Long taskId) {
+    public OutputStream getDepartStatisticsOutPut(Long ownerId, String month, Long taskId, Integer namespaceId) {
         XSSFWorkbook wb = new XSSFWorkbook();
         XSSFSheet sheet = wb.createSheet("sheet1");
         String sheetName = "sheet1";
@@ -1168,7 +1170,7 @@ public class SalaryServiceImpl implements SalaryService {
     }
 
     @Override
-    public OutputStream getEmployeeSalaryOutPut(Long ownerId, Long taskId) {
+    public OutputStream getEmployeeSalaryOutPut(Long ownerId, Long taskId, Integer namespaceId) {
         List<SalaryGroupEntity> groupEntities = salaryGroupEntityProvider.listOpenSalaryGroupEntityByOrgId(ownerId);
 
         XSSFWorkbook wb = new XSSFWorkbook();
@@ -1178,7 +1180,7 @@ public class SalaryServiceImpl implements SalaryService {
         //人员列表
         // TODO: 2018/1/25
         List<Long> detailIds = organizationService.listDetailIdWithEnterpriseExclude(null,
-                UserContext.getCurrentNamespaceId(), ownerId, null, null, null, null, null, Integer.MAX_VALUE - 1, null, null
+                namespaceId, ownerId, null, null, null, null, null, Integer.MAX_VALUE - 1, null, null
         );
         int processNum = 0;
         for (Long detailId : detailIds) {
@@ -1239,18 +1241,12 @@ public class SalaryServiceImpl implements SalaryService {
         if (null != groupFile) {
             if (null != groupFile.getCreateTime()) {
                 response.setCreateTime(groupFile.getCreateTime().getTime());
-                OrganizationMemberDetails detail = organizationProvider.findOrganizationMemberDetailsByDetailId(groupFile.getCreatorUid());
-                if (null != detail) {
-                    response.setCreatorName(detail.getContactName());
-                }
+                response.setCreatorName(groupFile.getCreatorName());
             }
 
             if (null != groupFile.getFileTime()) {
                 response.setFileTime(groupFile.getFileTime().getTime());
-                OrganizationMemberDetails detail = organizationProvider.findOrganizationMemberDetailsByDetailId(groupFile.getFilerUid());
-                if (null != detail) {
-                    response.setFilerName(detail.getContactName());
-                }
+                response.setFilerName(groupFile.getFilerName());
             }
 
         } else {
@@ -1258,10 +1254,7 @@ public class SalaryServiceImpl implements SalaryService {
             if (null != sg) {
                 if (null != sg.getCreateTime()) {
                     response.setCreateTime(sg.getCreateTime().getTime());
-                    OrganizationMemberDetails detail = organizationProvider.findOrganizationMemberDetailsByDetailId(sg.getCreatorUid());
-                    if (null != detail) {
-                        response.setCreatorName(detail.getContactName());
-                    }
+                    response.setCreatorName(sg.getCreatorName());
                 }
             }
         }
@@ -1281,6 +1274,7 @@ public class SalaryServiceImpl implements SalaryService {
         Map<String, Object> params = new HashedMap();
         params.put("ownerId", cmd.getOwnerId());
         params.put("organizationId", cmd.getOrganizationId());
+        params.put("namespaceId", UserContext.getCurrentNamespaceId()+"");
         params.put("month", cmd.getMonth());
         params.put("excelToken", cmd.getExportToken());
         SimpleDateFormat sf = new SimpleDateFormat("yyyy年MM月");
@@ -1291,7 +1285,7 @@ public class SalaryServiceImpl implements SalaryService {
             e.printStackTrace();
         }
         Organization org = organizationProvider.findOrganizationById(cmd.getOwnerId());
-        String fileName = sf.format(date) + org.getName() + "公司" +
+        String fileName = sf.format(date) + org.getName()  +
                 SalaryReportType.fromCode(Byte.valueOf(cmd.getExportToken())).getDescri() + ".xlsx";
 //        params.put("name", fileName);
 
@@ -1357,6 +1351,11 @@ public class SalaryServiceImpl implements SalaryService {
         SalaryGroupsFile sgf = ConvertHelper.convert(group, SalaryGroupsFile.class);
         sgf.setFileTime(filerTime);
         sgf.setFilerUid(userId);
+        Organization organization = organizationProvider.findOrganizationById(ownerId);
+        OrganizationMember member = punchService.findOrganizationMemberByOrgIdAndUId(userId, organization.getPath());
+        if (null != member) {
+            sgf.setFilerName(member.getContactName());
+        }
         salaryGroupsFileProvider.createSalaryGroupsFile(sgf);
 
         List<SalaryEmployee> ses = salaryEmployeeProvider.listSalaryEmployees(ownerId, month);
@@ -1365,6 +1364,7 @@ public class SalaryServiceImpl implements SalaryService {
                 SalaryEmployeesFile sef = ConvertHelper.convert(se, SalaryEmployeesFile.class);
                 sef.setFilerUid(userId);
                 sef.setFileTime(filerTime);
+
                 salaryEmployeesFileProvider.createSalaryEmployeesFile(sef);
             }
         }

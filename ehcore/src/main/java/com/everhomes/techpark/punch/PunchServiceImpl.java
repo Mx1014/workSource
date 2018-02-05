@@ -4287,7 +4287,8 @@ public class PunchServiceImpl implements PunchService {
 		}
 		return response;
 	}
-	private OrganizationMember findOrganizationMemberByOrgIdAndUId(Long targetId, String path) {
+	@Override
+	public OrganizationMember findOrganizationMemberByOrgIdAndUId(Long targetId, String path) {
 		List<OrganizationMember> members = this.organizationProvider.listOrganizationMemberByPath(null, path, null, null, new CrossShardListingLocator(), 1000000);
 		if(null== members || members.size() == 0)
 			return null;
