@@ -272,7 +272,7 @@ public class FileManagementServiceImpl implements  FileManagementService{
 
         if (cmd.getScopes() == null || cmd.getScopes().size() <= 0){
             //  delete all scopes by catalogId
-            fileManagementProvider.deleteFileCatalogScopeNotInSourceIds(namespaceId, cmd.getCatalogId(), new ArrayList<>());
+            fileManagementProvider.deleteFileCatalogScopeByCatalogId(namespaceId, cmd.getCatalogId());
             return scopes;
         }
 
