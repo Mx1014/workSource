@@ -5778,11 +5778,11 @@ private void checkUserPrivilege(Long orgId, Long privilegeId, Long communityId) 
 
 		OfflineTaskCountStat todayComplete = new OfflineTaskCountStat();
 		todayComplete.setCount(response.getTodayCompleteCount());
-		todayComplete.setId(UUID.randomUUID().toString());
+		todayComplete.setId(1L);
 
 		OfflineTaskCountStat todayTaskCount = new OfflineTaskCountStat();
 		todayTaskCount.setCount(response.getTotayTasksCount());
-		todayTaskCount.setId(UUID.randomUUID().toString());
+		todayComplete.setId(1L);
 
 		offlineResponse.setTodayCompleteCount(new ArrayList<>(Collections.singleton(todayComplete)));
 		offlineResponse.setTodayTasksCount(new ArrayList<>(Collections.singleton(todayTaskCount)));
