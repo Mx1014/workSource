@@ -1155,7 +1155,7 @@ public class ServiceModuleServiceImpl implements ServiceModuleService {
                 }
             }
             //获取人员和人员所有机构所赋予模块的所属项目范围(权限细化)
-            List<Project> project_relation = authorizationProvider.getAuthorizationProjectsByAuthIdAndTargets(IdentityType.ORDINARY.getCode(), com.everhomes.entity.EntityType.SERVICE_MODULE_APP.getCode(), cmd.getModuleId(), targets);
+            List<Project> project_relation = authorizationProvider.getAuthorizationProjectsByAppIdAndTargets(IdentityType.ORDINARY.getCode(), com.everhomes.entity.EntityType.SERVICE_MODULE_APP.getCode(), cmd.getModuleId(), cmd.getAppId(), targets);
             for (Project project: project_relation) {
                 //在模块下拥有全部项目权限
                 if(EntityType.ALL == EntityType.fromCode(project.getProjectType())){

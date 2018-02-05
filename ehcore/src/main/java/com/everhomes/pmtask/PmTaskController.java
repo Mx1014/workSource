@@ -309,16 +309,16 @@ public class PmTaskController extends ControllerBase {
      * <b>URL: /pmtask/listAuthorizationCommunityByUser</b>
      * <p>授权人员 管理小区列表</p>
      */
-    @RequestMapping("listAuthorizationCommunityByUser")
-    @RestReturn(value=ListAuthorizationCommunityByUserResponse.class)
-    public RestResponse listAuthorizationCommunityByUser(ListAuthorizationCommunityCommand cmd) {
-        //TODO:
-        ListAuthorizationCommunityByUserResponse resp = pmTaskService.listAuthorizationCommunityByUser(cmd);
-        RestResponse response = new RestResponse(resp);
-        response.setErrorCode(ErrorCodes.SUCCESS);
-        response.setErrorDescription("OK");
-        return response;
-    }
+//    @RequestMapping("listAuthorizationCommunityByUser")
+//    @RestReturn(value=ListAuthorizationCommunityByUserResponse.class)
+//    public RestResponse listAuthorizationCommunityByUser(ListAuthorizationCommunityCommand cmd) {
+//        //TODO:
+//        ListAuthorizationCommunityByUserResponse resp = pmTaskService.listAuthorizationCommunityByUser(cmd);
+//        RestResponse response = new RestResponse(resp);
+//        response.setErrorCode(ErrorCodes.SUCCESS);
+//        response.setErrorDescription("OK");
+//        return response;
+//    }
 
 	
 //	/**
