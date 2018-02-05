@@ -647,7 +647,7 @@ public class SalaryServiceImpl implements SalaryService {
                     }
                     val = decimal.toString();
                 }
-                LOGGER.debug("导入数据[{}]的值是:[{}]", groupEntity.getName(), val);
+                LOGGER.debug("第[{}]个gourpEntities数据[{}]的值是:[{}]列是", i+"",groupEntity.getName(), val,GetExcelLetter(i + 3));
                 SalaryEmployeeOriginVal salaryVal = salaryEmployeeOriginValProvider.findSalaryEmployeeOriginValByDetailId(groupEntity.getId(), detailId);
                 if (null == salaryVal) {
                     salaryVal = processSalaryEmployeeOriginVal(groupEntity, detailId, val);
