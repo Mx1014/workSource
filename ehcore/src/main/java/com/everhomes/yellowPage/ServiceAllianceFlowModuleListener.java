@@ -402,41 +402,45 @@ public class ServiceAllianceFlowModuleListener extends GeneralApprovalFlowModule
 		//姓名
 		GeneralForm form = this.generalFormProvider.getActiveGeneralFormByOriginIdAndVersion(
 				val.getFormOriginId(), val.getFormVersion());
-		List<GeneralFormFieldDTO> fieldDTOs = JSONObject.parseArray(form.getTemplateText(), GeneralFormFieldDTO.class);
-		val = this.generalApprovalValProvider.getGeneralApprovalByFlowCaseAndName(flowCase.getId(),
-				GeneralFormDataSourceType.USER_NAME.getCode());
-		GeneralFormFieldDTO dto = getFieldDTO(val.getFieldName(),fieldDTOs); 
-		entities.add(new FlowCaseEntity(dto.getFieldDisplayName(),JSON.parseObject(val.getFieldStr3(), PostApprovalFormTextValue.class).getText(),FlowCaseEntityType.MULTI_LINE.getCode()));
-		
-		//电话
-		val = this.generalApprovalValProvider.getGeneralApprovalByFlowCaseAndName(flowCase.getId(),
-				GeneralFormDataSourceType.USER_PHONE.getCode()); 
-		if(val != null){
+		List<GeneralFormFieldDTO> fieldDTOs;
+		GeneralFormFieldDTO dto;
+		if(form!=null){
+			fieldDTOs = JSONObject.parseArray(form.getTemplateText(), GeneralFormFieldDTO.class);
+			val = this.generalApprovalValProvider.getGeneralApprovalByFlowCaseAndName(flowCase.getId(),
+					GeneralFormDataSourceType.USER_NAME.getCode());
 			dto = getFieldDTO(val.getFieldName(),fieldDTOs); 
 			entities.add(new FlowCaseEntity(dto.getFieldDisplayName(),JSON.parseObject(val.getFieldStr3(), PostApprovalFormTextValue.class).getText(),FlowCaseEntityType.MULTI_LINE.getCode()));
-		}
 		
-		//企业
-		val = this.generalApprovalValProvider.getGeneralApprovalByFlowCaseAndName(flowCase.getId(),
-				GeneralFormDataSourceType.USER_COMPANY.getCode()); 
-		if(val != null){
-			dto = getFieldDTO(val.getFieldName(),fieldDTOs);
-			entities.add(new FlowCaseEntity(dto.getFieldDisplayName(),JSON.parseObject(val.getFieldStr3(), PostApprovalFormTextValue.class).getText(),FlowCaseEntityType.MULTI_LINE.getCode()));
-		}
-		
-		//楼栋门牌
-		FlowCaseEntity e = new FlowCaseEntity();
-		val = this.generalApprovalValProvider.getGeneralApprovalByFlowCaseAndName(flowCase.getId(),
-				GeneralFormDataSourceType.USER_ADDRESS.getCode()); 
-		if(val != null){
-			dto = getFieldDTO(val.getFieldName(),fieldDTOs); 
-			e.setKey(dto.getFieldDisplayName());
-			e.setEntityType(FlowCaseEntityType.MULTI_LINE.getCode()); 
-			if(JSON.parseObject(val.getFieldStr3(), PostApprovalFormTextValue.class) != null){
-				e.setValue(JSON.parseObject(val.getFieldStr3(), PostApprovalFormTextValue.class).getText());
-				entities.add(e);	
+			//电话
+			val = this.generalApprovalValProvider.getGeneralApprovalByFlowCaseAndName(flowCase.getId(),
+					GeneralFormDataSourceType.USER_PHONE.getCode()); 
+			if(val != null){
+				dto = getFieldDTO(val.getFieldName(),fieldDTOs); 
+				entities.add(new FlowCaseEntity(dto.getFieldDisplayName(),JSON.parseObject(val.getFieldStr3(), PostApprovalFormTextValue.class).getText(),FlowCaseEntityType.MULTI_LINE.getCode()));
 			}
-		}
+			
+			//企业
+			val = this.generalApprovalValProvider.getGeneralApprovalByFlowCaseAndName(flowCase.getId(),
+					GeneralFormDataSourceType.USER_COMPANY.getCode()); 
+			if(val != null){
+				dto = getFieldDTO(val.getFieldName(),fieldDTOs);
+				entities.add(new FlowCaseEntity(dto.getFieldDisplayName(),JSON.parseObject(val.getFieldStr3(), PostApprovalFormTextValue.class).getText(),FlowCaseEntityType.MULTI_LINE.getCode()));
+			}
+			
+			//楼栋门牌
+			FlowCaseEntity e = new FlowCaseEntity();
+			val = this.generalApprovalValProvider.getGeneralApprovalByFlowCaseAndName(flowCase.getId(),
+					GeneralFormDataSourceType.USER_ADDRESS.getCode()); 
+			if(val != null){
+				dto = getFieldDTO(val.getFieldName(),fieldDTOs); 
+				e.setKey(dto.getFieldDisplayName());
+				e.setEntityType(FlowCaseEntityType.MULTI_LINE.getCode()); 
+				if(JSON.parseObject(val.getFieldStr3(), PostApprovalFormTextValue.class) != null){
+					e.setValue(JSON.parseObject(val.getFieldStr3(), PostApprovalFormTextValue.class).getText());
+					entities.add(e);	
+				}
+			}
+		
 
 //		ServiceAllianceCategories  parentPage = null;
 //		////申请来源
@@ -451,9 +455,11 @@ public class ServiceAllianceFlowModuleListener extends GeneralApprovalFlowModule
 //		entities.add(e);
 
 
-		//后面跟自定义模块-- 
-		entities.addAll(onFlowCaseCustomDetailRender(flowCase, flowUserType));
-		return entities;
+			//后面跟自定义模块-- 
+			entities.addAll(onFlowCaseCustomDetailRender(flowCase, flowUserType));
+			return entities;
+		}
+		return null;
 	}
 
 	@Override
