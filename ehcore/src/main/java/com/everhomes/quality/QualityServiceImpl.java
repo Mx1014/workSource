@@ -4690,7 +4690,7 @@ public class QualityServiceImpl implements QualityService {
 	}
 
 	@Override
-	public QualityOfflineTaskReportResponse OfflineTaskReport(OfflineTaskReportCommand cmd) {
+	public QualityOfflineTaskReportResponse offlineTaskReport(OfflineTaskReportCommand cmd) {
 		if (cmd.getTasks() != null && cmd.getTasks().size() > 0) {
 			Map<Long, OfflineReportDetailDTO> taskDetailMaps = getTaskDetailMaps(cmd.getOfflineReportDetail());
 			cmd.getTasks().forEach((task) -> {

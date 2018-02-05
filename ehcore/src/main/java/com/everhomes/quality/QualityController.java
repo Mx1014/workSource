@@ -958,13 +958,13 @@ public class QualityController extends ControllerBase {
 	}
 
 	/**
-	 * <b>URL: /quality/OfflineTaskReport</b>
+	 * <b>URL: /quality/offlineTaskReport</b>
 	 * <p>品质核查离线同步到服务端</p>
 	 */
-	@RequestMapping("OfflineTaskReport")
+	@RequestMapping("offlineTaskReport")
 	@RestReturn(value=QualityOfflineTaskDetailsResponse.class)
-	public RestResponse OfflineTaskReport(OfflineTaskReportCommand cmd) {
-		QualityOfflineTaskReportResponse offlineTaskReportResponse = qualityService.OfflineTaskReport(cmd);
+	public RestResponse offlineTaskReport(OfflineTaskReportCommand cmd) {
+		QualityOfflineTaskReportResponse offlineTaskReportResponse = qualityService.offlineTaskReport(cmd);
 		RestResponse res = new RestResponse(offlineTaskReportResponse);
 		res.setErrorCode(ErrorCodes.SUCCESS);
 		res.setErrorDescription("OK");
