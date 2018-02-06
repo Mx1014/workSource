@@ -33,7 +33,7 @@ INSERT  INTO  `eh_var_fields` VALUES (11999, 'equipment_inspection', 'geohash', 
 -- SET  @id = (SELECT  MAX(id) from eh_version_realm);
 -- INSERT INTO `eh_version_realm` VALUES (@id:=@id+1, 'equipmentInspection', NULL, now(), '0');
 -- SET  @vId = (SELECT  MAX(id) from eh_version_urls);
--- INSERT INTO `eh_version_urls` VALUES (@vId:=@vId+1, @id, '1.0.0', 'http://lixian.zuolin.com/nar/equipmentInspection/inspectionOffline/equipmentInspection-1-0-0.zip', 'http://10.1.10.196/nar/equipmentInspection/inspectionOffline/equipmentInspection-1-0-0.zip', '物业巡检巡检离线', '0', '物业巡检', NOW(), NULL, '0');
+-- INSERT INTO `eh_version_urls` VALUES (@vId:=@vId+1, @id, '1.0.0', 'http://lixian.zuolin.com/nar/equipmentInspection/inspectionOffLine/equipmentInspection-1-0-0.zip', 'http://10.1.10.196/nar/equipmentInspection/inspectionOffLine/equipmentInspection-1-0-0.zip', '物业巡检巡检离线', '0', '物业巡检', NOW(), NULL, '0');
 
 
 -- 新增权限  by jiarui 20180205
