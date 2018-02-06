@@ -1,6 +1,8 @@
 package com.everhomes.varField;
 
 
+import com.everhomes.address.Address;
+import com.everhomes.address.AddressProvider;
 import com.everhomes.constants.ErrorCodes;
 import com.everhomes.customer.CustomerService;
 import com.everhomes.dynamicExcel.*;
@@ -98,6 +100,9 @@ public class FieldServiceImpl implements FieldService {
 
     @Autowired
     private UserService userService;
+
+    @Autowired
+    private AddressProvider addressProvider;
 
     @Override
     public List<SystemFieldGroupDTO> listSystemFieldGroups(ListSystemFieldGroupCommand cmd) {
@@ -210,28 +215,26 @@ public class FieldServiceImpl implements FieldService {
         List<FieldGroupDTO> groups = new ArrayList<>();
         List<FieldGroupDTO> targetGroups = new ArrayList<>();
 
-        //获得目标target group
+        if(onlyLeaf){
+            getAllGroups(allGroups,groups);
+        }else{
+            groups = allGroups;
+        }
+        //双重循环匹配浏览器所传的sheetName，获得目标sheet集合
         if(StringUtils.isEmpty(cmd.getIncludedGroupIds())) {
             return targetGroups;
         }
         String[] split = cmd.getIncludedGroupIds().split(",");
         for(int i = 0 ; i < split.length; i ++){
             long targetGroupId = Long.parseLong(split[i]);
-            for(int j = 0; j < allGroups.size(); j++){
-                Long id = allGroups.get(j).getGroupId();
+            for(int j = 0; j < groups.size(); j++){
+                Long id = groups.get(j).getGroupId();
                 if(id.compareTo(targetGroupId) == 0){
-                    targetGroups.add(allGroups.get(j));
+                    targetGroups.add(groups.get(j));
                 }
             }
         }
-        //转成叶节点
-        if(onlyLeaf){
-            getAllGroups(targetGroups,groups);
-        }else{
-            groups = targetGroups;
-        }
-
-        return groups;
+        return targetGroups;
     }
 
     @Override
@@ -939,6 +942,17 @@ public class FieldServiceImpl implements FieldService {
                 } else {
                     LOGGER.error("field "+ fieldName+" find name in organization member failed ,uid is "+ uid);
                 }
+            }
+        }
+
+        //处理addressId
+        if("addressId".equals(fieldName)) {
+            long addressId = Long.parseLong(invoke.toString());
+            Address address = addressProvider.findAddressById(addressId);
+            if(address != null){
+                invoke = String.valueOf(address.getAddress());
+            }else{
+                LOGGER.error("field "+ fieldName+" find name in address failed ,addressId is "+ addressId);
             }
         }
         return String.valueOf(invoke);
