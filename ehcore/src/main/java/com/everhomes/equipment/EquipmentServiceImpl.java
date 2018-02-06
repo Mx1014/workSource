@@ -1105,7 +1105,7 @@ private void checkUserPrivilege(Long orgId, Long privilegeId, Long communityId) 
 		} else {
 			EquipmentInspectionEquipments exist = verifyEquipment(cmd.getId(), cmd.getOwnerType(), cmd.getOwnerId());
 			equipment = ConvertHelper.convert(cmd, EquipmentInspectionEquipments.class);
-			equipment.setGeohash(exist.getGeohash());
+			//equipment.setGeohash(exist.getGeohash());
 			equipment.setQrCodeToken(exist.getQrCodeToken());
 			equipment.setNamespaceId(cmd.getNamespaceId());
 			equipment.setOperatorUid(user.getId());
