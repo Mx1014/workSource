@@ -4,3 +4,29 @@ INSERT INTO `eh_parking_lots` (`id`, `owner_type`, `owner_id`, `name`, `vendor_n
 INSERT INTO `eh_configurations` (`name`, `value`, `description`, `namespace_id`, `display_name`) VALUES ('parking.guangdawegu.url', 'http://120.25.238.52', '光大url', 0, NULL);
 INSERT INTO `eh_configurations` (`name`, `value`, `description`, `namespace_id`, `display_name`) VALUES ('parking.guangdawegu.parkingCode', '4d398d36-5e63-4e46-807c-2bb2ebd4ad38', '光大parkingCode', 0, NULL);
 INSERT INTO `eh_configurations` (`name`, `value`, `description`, `namespace_id`, `display_name`) VALUES ('parking.guangdawegu.appKey', 'wwwbsznsmartcom20180130', '光大appkey', 0, NULL);
+
+-- alpha CDN 配置   add by xq.tian
+SET @configurations_id = IFNULL((SELECT MAX(id) FROM `eh_configurations`), 0);
+INSERT INTO `eh_configurations` (`id`, `name`, `value`, `description`, `namespace_id`, `display_name`)
+  VALUES ((@configurations_id := @configurations_id + 1), 'content.url.vendor', 'Simple', '资源URL解析器, 注意：这里的配置改了，对应的contentServer的配置也要改', 0, NULL);
+INSERT INTO `eh_configurations` (`id`, `name`, `value`, `description`, `namespace_id`, `display_name`)
+  VALUES ((@configurations_id := @configurations_id + 1), 'content.alicdn.privateKey', 'ehdjlajgls39hdsfjwl2', 'AliCDN URL鉴权 privateKey', 0, NULL);
+INSERT INTO `eh_configurations` (`id`, `name`, `value`, `description`, `namespace_id`, `display_name`)
+  VALUES ((@configurations_id := @configurations_id + 1), 'content.alicdn.domain', 'betacdn-cs.zuolin.com', 'AliCDN 域名', 0, NULL);
+INSERT INTO `eh_configurations` (`id`, `name`, `value`, `description`, `namespace_id`, `display_name`)
+  VALUES ((@configurations_id := @configurations_id + 1), 'content.alicdn.expireSeconds', '1800', 'AliCDN 资源链接过期时间', 0, NULL);
+INSERT INTO `eh_configurations` (`id`, `name`, `value`, `description`, `namespace_id`, `display_name`)
+  VALUES ((@configurations_id := @configurations_id + 1), 'content.client.cacheConfig', '{"ignoreParameters":["token","auth_key"]}', '客户端资源的Cache配置', 0, NULL);
+
+-- beta CDN 配置   add by xq.tian
+SET @configurations_id = IFNULL((SELECT MAX(id) FROM `eh_configurations`), 0);
+INSERT INTO `eh_configurations` (`id`, `name`, `value`, `description`, `namespace_id`, `display_name`)
+  VALUES ((@configurations_id := @configurations_id + 1), 'content.url.vendor', 'SimpleAndAliCDN', '资源URL解析器, 注意：这里的配置改了，对应的contentServer的配置也要改', 0, NULL);
+INSERT INTO `eh_configurations` (`id`, `name`, `value`, `description`, `namespace_id`, `display_name`)
+  VALUES ((@configurations_id := @configurations_id + 1), 'content.alicdn.privateKey', 'ehdjlajgls39hdsfjwl2', 'AliCDN URL鉴权 privateKey', 0, NULL);
+INSERT INTO `eh_configurations` (`id`, `name`, `value`, `description`, `namespace_id`, `display_name`)
+  VALUES ((@configurations_id := @configurations_id + 1), 'content.alicdn.domain', 'betacdn-cs.zuolin.com', 'AliCDN 域名', 0, NULL);
+INSERT INTO `eh_configurations` (`id`, `name`, `value`, `description`, `namespace_id`, `display_name`)
+  VALUES ((@configurations_id := @configurations_id + 1), 'content.alicdn.expireSeconds', '1800', 'AliCDN 资源链接过期时间', 0, NULL);
+INSERT INTO `eh_configurations` (`id`, `name`, `value`, `description`, `namespace_id`, `display_name`)
+  VALUES ((@configurations_id := @configurations_id + 1), 'content.client.cacheConfig', '{"ignoreParameters":["token","auth_key"]}', '客户端资源的Cache配置', 0, NULL);

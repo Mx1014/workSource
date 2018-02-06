@@ -20,7 +20,7 @@ public class SimpleAndAliCDNContentURLVendor implements ContentURLVendor {
      * 所以小于此版本的客户端提供原来的资源链接
      * </pre>
      */
-    private static final Version SEPARATION_VERSION = Version.fromVersionString("5.1.5");
+    private static final Version SEPARATION_VERSION = Version.fromVersionString("5.2.0");
 
     @Override
     public String evaluate(
