@@ -94,7 +94,8 @@ public class GeneralPointEventProcessor implements IGeneralPointEventProcessor {
         pointLog.setEventHappenTime(localEvent.getCreateTime());
 
         if (rule.getBindingRuleId() != null && rule.getBindingRuleId() != 0) {
-            PointLog bindingPointLog = findEventBindingLog(localEvent, rule, pointSystem, targetUid, namespaceId);
+            PointLog bindingPointLog = findEventBindingLog(
+                    localEvent, rule, pointSystem, targetUid, namespaceId);
             if (bindingPointLog == null) {
                 return null;
             }
@@ -109,12 +110,14 @@ public class GeneralPointEventProcessor implements IGeneralPointEventProcessor {
     protected PointLog findEventBindingLog(LocalEvent localEvent, PointRule rule,
                                            PointSystem pointSystem, Long targetUid, Integer namespaceId) {
         return pointLogProvider.findByRuleIdAndEntity(
-                namespaceId, pointSystem.getId(), targetUid, rule.getBindingRuleId(),
+                namespaceId, pointSystem.getId(),
+                targetUid, rule.getBindingRuleId(),
                         localEvent.getEntityType(), localEvent.getEntityId());
     }
 
     protected void processPointLog(PointLog pointLog, LocalEvent localEvent,
-                                   PointRule rule, PointSystem pointSystem, PointRuleCategory pointRuleCategory) {
+                                   PointRule rule,
+                                   PointSystem pointSystem, PointRuleCategory pointRuleCategory) {
 
     }
 
@@ -128,8 +131,10 @@ public class GeneralPointEventProcessor implements IGeneralPointEventProcessor {
 
     @Override
     public List<PointResultAction> getResultActions(List<PointAction> pointActions,
-                                                    LocalEvent localEvent, PointRule rule,
-                                                    PointSystem pointSystem, PointRuleCategory category) {
+                                                    LocalEvent localEvent,
+                                                    PointRule rule,
+                                                    PointSystem pointSystem,
+                                                    PointRuleCategory category) {
         List<PointResultAction> resultActions = new ArrayList<>();
         for (PointAction pointAction : pointActions) {
             PointActionType actionType = PointActionType.fromCode(pointAction.getActionType());
@@ -198,8 +203,10 @@ public class GeneralPointEventProcessor implements IGeneralPointEventProcessor {
     }
 
     protected boolean doLimit(LocalEvent localEvent, PointRule rule, PointSystem pointSystem) {
-        PointRuleLimitTypeVO limitTypeVO = (PointRuleLimitTypeVO)
-                StringHelper.fromJsonString(rule.getLimitType(), PointRuleLimitTypeVO.class);
+        PointRuleLimitTypeVO limitTypeVO =
+                (PointRuleLimitTypeVO)
+                StringHelper.fromJsonString(
+                        rule.getLimitType(), PointRuleLimitTypeVO.class);
         PointRuleLimitType limitType = PointRuleLimitType.fromCode(limitTypeVO.getType());
 
         Long targetUid = localEvent.getContext().getUid();
@@ -210,11 +217,15 @@ public class GeneralPointEventProcessor implements IGeneralPointEventProcessor {
                 case TIMES_PER_DAY: {
                     LocalDateTime dateTime = LocalDateTime.of(LocalDate.now(), LocalTime.MIN);
                     Integer count = pointLogProvider.countPointLog(
-                            namespaceId, pointSystem.getId(), targetUid,
+                            namespaceId, pointSystem.getId(),
+                            targetUid,
                             rule.getId(), Timestamp.valueOf(dateTime), null);
 
-                    PointRuleLimitDataVO limitData = (PointRuleLimitDataVO)
-                            StringHelper.fromJsonString(rule.getLimitData(), PointRuleLimitDataVO.class);
+
+                    PointRuleLimitDataVO limitData =
+                            (PointRuleLimitDataVO)
+                            StringHelper.fromJsonString(
+                                    rule.getLimitData(), PointRuleLimitDataVO.class);
                     if (count >= limitData.getTimes()) {
                         return false;
                     }
@@ -222,9 +233,13 @@ public class GeneralPointEventProcessor implements IGeneralPointEventProcessor {
                 }
                 case TIMES: {
                     Integer count = pointLogProvider.countPointLog(
-                            namespaceId, pointSystem.getId(), targetUid, rule.getId(), null, null);
-                    PointRuleLimitDataVO limitData = (PointRuleLimitDataVO)
-                            StringHelper.fromJsonString(rule.getLimitData(), PointRuleLimitDataVO.class);
+                            namespaceId, pointSystem.getId(),
+                            targetUid, rule.getId(), null, null);
+
+                    PointRuleLimitDataVO limitData =
+                            (PointRuleLimitDataVO)
+                            StringHelper.fromJsonString(
+                                    rule.getLimitData(), PointRuleLimitDataVO.class);
                     if (count >= limitData.getTimes()) {
                         return false;
                     }

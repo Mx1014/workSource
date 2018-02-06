@@ -75,6 +75,7 @@ import com.everhomes.rest.app.AppConstants;
 import com.everhomes.rest.asset.TargetDTO;
 import com.everhomes.rest.business.ShopDTO;
 import com.everhomes.rest.community.CommunityType;
+import com.everhomes.rest.contentserver.ContentCacheConfigDTO;
 import com.everhomes.rest.contentserver.CsFileLocationDTO;
 import com.everhomes.rest.energy.util.ParamErrorCodes;
 import com.everhomes.rest.family.FamilyDTO;
@@ -111,7 +112,6 @@ import com.everhomes.sms.*;
 import com.everhomes.user.admin.SystemUserPrivilegeMgr;
 import com.everhomes.util.*;
 import org.apache.commons.lang.StringUtils;
-import org.elasticsearch.common.geo.GeoHashUtils;
 import org.jooq.DSLContext;
 import org.jooq.Record;
 import org.slf4j.Logger;
@@ -326,7 +326,7 @@ public class UserServiceImpl implements UserService {
 
 	@Autowired
 	private RolePrivilegeService rolePrivilegeService;
-	
+
 	@Autowired
 	List<FunctionCardHandler> functionCardHandlers;
 
@@ -3005,10 +3005,6 @@ public class UserServiceImpl implements UserService {
 		}
 	}
 
-    public static void main(String[] args) {
-        System.out.println(GeoHashUtils.encode(121.643166, 31.223298));
-    }
-
 	@Override
 	public SceneDTO toOrganizationSceneDTO(Integer namespaceId, Long userId, OrganizationDTO organizationDto, SceneType sceneType) {
 		SceneDTO sceneDto = new SceneDTO();
@@ -5438,12 +5434,19 @@ public class UserServiceImpl implements UserService {
 	}
 
     @Override
-    public SystemInfoResponse updateUserBySystemInfo(SystemInfoCommand cmd,
-            HttpServletRequest request, HttpServletResponse response) {
+    public SystemInfoResponse updateUserBySystemInfo(
+            SystemInfoCommand cmd, HttpServletRequest request, HttpServletResponse response) {
+
+        Integer namespaceId = UserContext.getCurrentNamespaceId(cmd.getNamespaceId());
         User user = UserContext.current().getUser();
         UserLogin login = UserContext.current().getLogin();
+
         SystemInfoResponse resp = new SystemInfoResponse();
-        String urlInBrowser = configProvider.getValue(UserContext.getCurrentNamespaceId(cmd.getNamespaceId()), ConfigConstants.APP_SYSTEM_UPLOAD_URL_IN_BROWSER, "https://upload.zuolin.com");
+        String urlInBrowser = configProvider.getValue(
+                namespaceId,
+                ConfigConstants.APP_SYSTEM_UPLOAD_URL_IN_BROWSER,
+                "https://upload.zuolin.com");
+
         resp.setUploadUrlInBrowser(urlInBrowser);
         
         if(user != null && user.getId() >= User.MAX_SYSTEM_USER_ID && login != null) {
@@ -5479,14 +5482,20 @@ public class UserServiceImpl implements UserService {
             resp.setContentServer(contentServerService.getContentServer());
         }
 
-        Long l = configurationProvider.getLongValue(UserContext.getCurrentNamespaceId(cmd.getNamespaceId()), ConfigConstants.PAY_PLATFORM, 0l);
-
+        Long l = configurationProvider.getLongValue(namespaceId, ConfigConstants.PAY_PLATFORM, 0L);
         resp.setPaymentPlatform(l);
 
-		Integer mypublishFlag = configurationProvider.getIntValue(UserContext.getCurrentNamespaceId(cmd.getNamespaceId()), ConfigConstants.MY_PUBLISH_FLAG, 1);
-
+		Integer mypublishFlag = configurationProvider.getIntValue(namespaceId, ConfigConstants.MY_PUBLISH_FLAG, 1);
 		resp.setMyPublishFlag(mypublishFlag.byteValue());
-        
+
+		// 客户端资源缓存配置
+		String clientCacheConfig = configurationProvider.getValue(
+		        namespaceId, ConfigConstants.CONTENT_CLIENT_CACHE_CONFIG,
+                // Default config
+                "{\"ignoreParameters\":[\"token\",\"auth_key\"]}");
+		resp.setContentCacheConfig(
+		        (ContentCacheConfigDTO) StringHelper.fromJsonString(clientCacheConfig, ContentCacheConfigDTO.class));
+
         return resp;
     }
 
