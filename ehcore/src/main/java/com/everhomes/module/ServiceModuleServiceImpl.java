@@ -1023,7 +1023,7 @@ public class ServiceModuleServiceImpl implements ServiceModuleService {
                         //给一级模块设置APPS
                         // 这里因为运营后台的不完善，暂时使用reflectionServiceModuleApps代替真正的serviceModuleApps。原来的代码为serviceModuleAppProvider.listServiceModuleAppsByModuleIds(UserContext.getCurrentNamespaceId(), moduleIds);
 //                        List<ServiceModuleAppDTO> apps = serviceModuleProvider.listReflectionServiceModuleAppsByModuleIds(UserContext.getCurrentNamespaceId(), moduleIds);
-                        List<ServiceModuleApp> apps = serviceModuleAppService.listServiceModuleAppByModuleIds(UserContext.getCurrentNamespaceId(), moduleIds);
+                        List<ServiceModuleApp> apps = serviceModuleAppService.listReleaseServiceModuleAppByModuleIds(UserContext.getCurrentNamespaceId(), moduleIds);
                         if(apps != null){
                             current.setServiceModuleApps(apps.stream().map(r-> ConvertHelper.convert(r,ServiceModuleAppDTO.class)).collect(Collectors.toList()));
                             LOGGER.debug(current.getName()+ "分类下一共有"+moduleIds.toString() +"的模块和"+ apps.size() + "个应用");
