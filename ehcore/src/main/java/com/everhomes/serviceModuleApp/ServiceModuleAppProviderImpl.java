@@ -246,4 +246,15 @@ public class ServiceModuleAppProviderImpl implements ServiceModuleAppProvider {
 		return  app;
 	}
 
+	@Override
+	public List<ServiceModuleApp> listServiceModuleAppByOriginId(Long originId) {
+
+		SelectQuery<EhServiceModuleAppsRecord> query = getReadOnlyContext().selectFrom(Tables.EH_SERVICE_MODULE_APPS).getQuery();
+		query.addConditions(Tables.EH_SERVICE_MODULE_APPS.ORIGIN_ID.eq(originId));
+
+		List<ServiceModuleApp> apps = query.fetch().map(r -> ConvertHelper.convert(r, ServiceModuleApp.class));
+
+		return  apps;
+	}
+
 }
