@@ -193,12 +193,13 @@ public class SmsProviderImpl implements SmsProvider {
             if (phoneNumber == null) {
                 continue;
             }
+            phoneNumber = phoneNumber.replaceAll("[_,.\\s+]", "");
             // 测试手机号，跳过
             if (pattern.matcher(phoneNumber).matches()) {
                 LOGGER.debug("Test phone '{}' were found while send sms, SKIPPED.", phoneNumber);
                 continue;
             }
-            normalizedPhones.add(phoneNumber.replaceAll("[_,.\\s+]", ""));
+            normalizedPhones.add(phoneNumber);
         }
         return normalizedPhones.toArray(new String[normalizedPhones.size()]);
     }

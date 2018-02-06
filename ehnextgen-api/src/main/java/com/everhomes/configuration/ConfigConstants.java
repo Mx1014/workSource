@@ -149,4 +149,6 @@ public interface ConfigConstants {
 
 	String WORK_REPORT_VAL_DETAIL_URL = "work.report.val.detail.url";
 
+	String CONTENT_CLIENT_CACHE_CONFIG = "content.client.cacheConfig";
+
 }
