@@ -277,6 +277,9 @@ public class DynamicExcelImpl implements DynamicExcelService{
 //                }
             }catch(Exception e){
                 LOGGER.info("sheet = {}, failed to import,error = {}",sheet.getSheetName(),e);
+                if(response.getFailCause() != null){
+                    response.setFailCause(sheet.getSheetName() + "页无法识别，sheet页需要来自模板");
+                }
             }
         }
 //        try{
