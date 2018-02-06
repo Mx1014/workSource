@@ -705,11 +705,23 @@ public class SalaryServiceImpl implements SalaryService {
 
                 //固定工资
                 if (val.getCategoryId().equals(1L)) {
-                    regular = regular.add(value);
+                    if (SalaryEntityType.DEDUCTION == SalaryEntityType.fromCode(val.getType())) {
+                        //减
+                        regular = regular.subtract(value);
+                    } else {
+                        //增
+                        regular = regular.add(value);
+                    }
                 }
                 //应发工资
                 if (SalaryEntityType.GRANT == SalaryEntityType.fromCode(val.getType())) {
-                    shouldPay = shouldPay.add(value);
+//                    if (SalaryEntityType.DEDUCTION == SalaryEntityType.fromCode(val.getType())) {
+//                        //减
+//                        shouldPay = shouldPay.subtract(value);
+//                    } else {
+                        //增
+                        shouldPay = shouldPay.add(value);
+//                    }
                 }
                 if (NormalFlag.NO == NormalFlag.fromCode(val.getGrantPolicy())) {
                     //税前的
