@@ -568,20 +568,27 @@ public class FieldServiceImpl implements FieldService {
             case "基本信息":
             case "企业情况":
             case "员工情况":
-                SearchEnterpriseCustomerCommand cmd0 = ConvertHelper.convert(params, SearchEnterpriseCustomerCommand.class);
-                cmd0.setCommunityId(communityId);
-                cmd0.setNamespaceId(namespaceId);
-                cmd0.setOrgId(orgId);
-                cmd0.setPageSize(Integer.MAX_VALUE-1);
-                SearchEnterpriseCustomerResponse response = enterpriseCustomerSearcher.queryEnterpriseCustomers(cmd0);
-                if(response.getDtos() != null && response.getDtos().size() > 0) {
-                    List<EnterpriseCustomerDTO> enterpriseCustomerDTOs = response.getDtos();
-                    for(int j = 0; j < enterpriseCustomerDTOs.size(); j ++){
-                        EnterpriseCustomerDTO dto = enterpriseCustomerDTOs.get(j);
-                        setMutilRowDatas(fields, data, dto,communityId,namespaceId,moduleName);
+                if(customerType == null) {
+                    SearchEnterpriseCustomerCommand cmd0 = ConvertHelper.convert(params, SearchEnterpriseCustomerCommand.class);
+                    cmd0.setCommunityId(communityId);
+                    cmd0.setNamespaceId(namespaceId);
+                    cmd0.setOrgId(orgId);
+                    cmd0.setPageSize(Integer.MAX_VALUE-1);
+                    SearchEnterpriseCustomerResponse response = enterpriseCustomerSearcher.queryEnterpriseCustomers(cmd0);
+                    if(response.getDtos() != null && response.getDtos().size() > 0) {
+                        List<EnterpriseCustomerDTO> enterpriseCustomerDTOs = response.getDtos();
+                        for(int j = 0; j < enterpriseCustomerDTOs.size(); j ++){
+                            EnterpriseCustomerDTO dto = enterpriseCustomerDTOs.get(j);
+                            setMutilRowDatas(fields, data, dto,communityId,namespaceId,moduleName);
+                        }
                     }
+                } else {
+                    GetEnterpriseCustomerCommand cmd0 = new GetEnterpriseCustomerCommand();
+                    cmd0.setId(customerId);
+                    cmd0.setCommunityId(communityId);
+                    EnterpriseCustomerDTO dto = customerService.getEnterpriseCustomer(cmd0);
+                    setMutilRowDatas(fields, data, dto,communityId,namespaceId,moduleName);
                 }
-
                 break;
             case "人才团队信息":
                 ListCustomerTalentsCommand cmd1 = new ListCustomerTalentsCommand();
