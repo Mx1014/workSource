@@ -125,10 +125,21 @@ public class ServiceModuleAppServiceImpl implements ServiceModuleAppService {
 
 	@Override
 	public ServiceModuleApp findReleaseServiceModuleAppByOriginId(Long originId) {
-		Integer namespaceId = UserContext.getCurrentNamespaceId();
-		PortalVersion releaseVersion = portalVersionProvider.findReleaseVersion(namespaceId);
-		ServiceModuleApp serviceModuleApp = serviceModuleAppProvider.findServiceModuleApp(namespaceId, releaseVersion.getId(), originId);
-		return serviceModuleApp;
+
+		List<ServiceModuleApp> serviceModuleApps = serviceModuleAppProvider.listServiceModuleAppByOriginId(originId);
+		if(serviceModuleApps != null && serviceModuleApps.size()> 0){
+
+			PortalVersion releaseVersion = portalVersionProvider.findReleaseVersion(serviceModuleApps.get(0).getNamespaceId());
+
+			for (ServiceModuleApp app: serviceModuleApps){
+				if(releaseVersion.getId().longValue() == app.getVersionId().longValue()){
+					return app;
+				}
+			}
+
+		}
+
+		return null;
 	}
 
 }
