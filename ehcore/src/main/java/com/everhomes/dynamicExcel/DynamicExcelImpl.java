@@ -242,6 +242,9 @@ public class DynamicExcelImpl implements DynamicExcelService{
                             //必填项校验
                             if(dynamicFields.get(k).isMandatory() && StringUtils.isBlank(cellValue)){
                                 response.setFailedRowNumber(response.getFailedRowNumber() + 1);
+                                if(response.getFailCause()!=null){
+                                    response.setFailCause(dynamicFields.get(k).getDisplayName() + "为必填项!");
+                                }
                                 continue;
                             }
                             DynamicColumnDTO dto = new DynamicColumnDTO();
