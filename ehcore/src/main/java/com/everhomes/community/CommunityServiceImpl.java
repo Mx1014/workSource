@@ -677,6 +677,7 @@ public class CommunityServiceImpl implements CommunityService {
 	private BuildingExportDetailDTO convertToExportDetail(BuildingDTO dto) {
 		BuildingExportDetailDTO exportDetailDTO = ConvertHelper.convert(dto, BuildingExportDetailDTO.class);
 		try {
+			exportDetailDTO.setName(dto.getBuildingName());
 			Community community = communityProvider.findCommunityById(dto.getCommunityId());
 			if(community != null) {
 				exportDetailDTO.setCommuntiyName(community.getName());
