@@ -1167,6 +1167,23 @@ CREATE TABLE `eh_social_security_settings` (
   KEY `i_eh_organization_id` (`organization_id`)
 ) ENGINE = INNODB DEFAULT CHARSET = utf8mb4 ;
 
+-- 社保组表 存新建报表的人和归档的人
+-- DROP TABLE eh_social_security_groups;
+CREATE TABLE `eh_social_security_groups` (
+  `id` BIGINT, 
+  `organization_id` BIGINT, 
+  `pay_month` VARCHAR (8) DEFAULT NULL COMMENT 'yyyymm',
+  `is_filed` TINYINT DEFAULT 0 COMMENT '是否归档 0-否 1是',
+  `creator_uid` BIGINT  DEFAULT '0',
+  `create_time` DATETIME,
+  `operator_uid` BIGINT,
+  `update_time` DATETIME,
+  `file_uid` BIGINT (20) COMMENT '归档人',
+  `file_time` DATETIME COMMENT '归档时间',
+  PRIMARY KEY (`id`),
+  KEY `i_eh_organization_id` (`organization_id`)
+) ENGINE = INNODB DEFAULT CHARSET = utf8mb4 ;
+
 -- 社保缴费表
 -- DROP TABLE eh_social_security_payments;
 CREATE TABLE `eh_social_security_payments` (

@@ -105,7 +105,7 @@ public class ServiceModuleAppServiceImpl implements ServiceModuleAppService {
 		PortalVersion releaseVersion = portalVersionProvider.findReleaseVersion(namespaceId);
 		List<ServiceModuleApp> apps = new ArrayList<>();
 		if(releaseVersion != null){
-			apps = listServiceModuleApp(namespaceId, releaseVersion.getId(), moduleId, actionType, customTag, controlType);
+			apps = listServiceModuleApp(namespaceId, releaseVersion.getId(), moduleId, actionType, customTag , controlType);
 		}
 
 		return apps;
