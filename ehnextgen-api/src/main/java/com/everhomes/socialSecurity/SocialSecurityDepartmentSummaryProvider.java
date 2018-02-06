@@ -15,7 +15,9 @@ public interface SocialSecurityDepartmentSummaryProvider {
 
 	List<SocialSecurityDepartmentSummary> listSocialSecurityDepartmentSummary();
 
-	void deleteSocialSecurityDptReports(Long ownerId, String month);
+	void deleteSocialSecurityDptReports(Long ownerId, String month, Byte isFiled);
 
-	List<SocialSecurityDepartmentSummary> listSocialSecurityDepartmentSummary(Long ownerId, String paymentMonth, CrossShardListingLocator locator, int i);
+	List<SocialSecurityDepartmentSummary> listFiledSocialSecurityDepartmentSummary(Long ownerId, String paymentMonth, CrossShardListingLocator locator, int i);
+
+	List<SocialSecurityDepartmentSummary> listSocialSecurityDepartmentSummary(Long ownerId, String payMonth, Byte isFiled);
 }

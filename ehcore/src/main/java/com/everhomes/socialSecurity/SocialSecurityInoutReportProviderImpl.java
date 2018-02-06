@@ -5,6 +5,7 @@ import java.sql.Timestamp;
 import java.util.List;
 
 import com.everhomes.listing.CrossShardListingLocator;
+import com.everhomes.rest.socialSecurity.NormalFlag;
 import org.jooq.DSLContext;
 import org.jooq.Record;
 import org.jooq.SelectConditionStep;
@@ -68,17 +69,19 @@ public class SocialSecurityInoutReportProviderImpl implements SocialSecurityInou
 	}
 
 	@Override
-	public void deleteSocialSecurityInoutReportByMonth(Long ownerId, String month) {
+	public void deleteSocialSecurityInoutReportByMonth(Long ownerId, String month, Byte isFIled) {
 
 		getReadWriteContext().delete(Tables.EH_SOCIAL_SECURITY_INOUT_REPORT)
 				.where(Tables.EH_SOCIAL_SECURITY_INOUT_REPORT.ORGANIZATION_ID.eq(ownerId))
-				.and(Tables.EH_SOCIAL_SECURITY_INOUT_REPORT.PAY_MONTH.eq(month)).execute();
+				.and(Tables.EH_SOCIAL_SECURITY_INOUT_REPORT.PAY_MONTH.eq(month))
+				.and(Tables.EH_SOCIAL_SECURITY_INOUT_REPORT.IS_FILED.eq(isFIled)).execute();
 	}
 
 	@Override
-	public List<SocialSecurityInoutReport> listSocialSecurityInoutReport(Long ownerId, String paymentMonth, CrossShardListingLocator locator, int pageSize) {
+	public List<SocialSecurityInoutReport> listFiledSocialSecurityInoutReport(Long ownerId, String paymentMonth, CrossShardListingLocator locator, int pageSize) {
 		SelectConditionStep<Record> step = getReadOnlyContext().select().from(Tables.EH_SOCIAL_SECURITY_INOUT_REPORT)
-				.where(Tables.EH_SOCIAL_SECURITY_INOUT_REPORT.ORGANIZATION_ID.eq(ownerId));
+				.where(Tables.EH_SOCIAL_SECURITY_INOUT_REPORT.ORGANIZATION_ID.eq(ownerId))
+				.and(Tables.EH_SOCIAL_SECURITY_INOUT_REPORT.IS_FILED.eq(NormalFlag.YES.getCode()));
 		if (null != paymentMonth) {
 			step = step.and(Tables.EH_SOCIAL_SECURITY_INOUT_REPORT.PAY_MONTH.eq(paymentMonth));
 		}
@@ -86,6 +89,19 @@ public class SocialSecurityInoutReportProviderImpl implements SocialSecurityInou
 			step.and(Tables.EH_SOCIAL_SECURITY_INOUT_REPORT.ID.gt(locator.getAnchor()));
 		}
 		step.limit(pageSize);
+		return step.orderBy(Tables.EH_SOCIAL_SECURITY_INOUT_REPORT.ID.asc())
+				.fetch().map(r -> ConvertHelper.convert(r, SocialSecurityInoutReport.class));
+	}
+
+	@Override
+	public List<SocialSecurityInoutReport> listSocialSecurityInoutReport(Long ownerId, String payMonth, Byte isFiled) {
+		SelectConditionStep<Record> step = getReadOnlyContext().select().from(Tables.EH_SOCIAL_SECURITY_INOUT_REPORT)
+				.where(Tables.EH_SOCIAL_SECURITY_INOUT_REPORT.ORGANIZATION_ID.eq(ownerId));
+		if(null !=isFiled)
+				step = step.and(Tables.EH_SOCIAL_SECURITY_INOUT_REPORT.IS_FILED.eq(isFiled));
+		if (null != payMonth) {
+			step = step.and(Tables.EH_SOCIAL_SECURITY_INOUT_REPORT.PAY_MONTH.eq(payMonth));
+		}
 		return step.orderBy(Tables.EH_SOCIAL_SECURITY_INOUT_REPORT.ID.asc())
 				.fetch().map(r -> ConvertHelper.convert(r, SocialSecurityInoutReport.class));
 	}

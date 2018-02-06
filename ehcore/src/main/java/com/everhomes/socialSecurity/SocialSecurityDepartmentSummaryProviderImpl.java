@@ -5,6 +5,7 @@ import java.sql.Timestamp;
 import java.util.List;
 
 import com.everhomes.listing.CrossShardListingLocator;
+import com.everhomes.rest.socialSecurity.NormalFlag;
 import org.jooq.DSLContext;
 import org.jooq.Record;
 import org.jooq.SelectConditionStep;
@@ -60,7 +61,6 @@ public class SocialSecurityDepartmentSummaryProviderImpl implements SocialSecuri
 		return ConvertHelper.convert(getReadOnlyDao().findById(id), SocialSecurityDepartmentSummary.class);
 	}
 	
-	@Override
 	public List<SocialSecurityDepartmentSummary> listSocialSecurityDepartmentSummary() {
 		return getReadOnlyContext().select().from(Tables.EH_SOCIAL_SECURITY_DEPARTMENT_SUMMARY)
 				.orderBy(Tables.EH_SOCIAL_SECURITY_DEPARTMENT_SUMMARY.ID.asc())
@@ -68,16 +68,18 @@ public class SocialSecurityDepartmentSummaryProviderImpl implements SocialSecuri
 	}
 
 	@Override
-	public void deleteSocialSecurityDptReports(Long ownerId, String month) {
+	public void deleteSocialSecurityDptReports(Long ownerId, String month, Byte isFiled) {
 		getReadWriteContext().delete(Tables.EH_SOCIAL_SECURITY_DEPARTMENT_SUMMARY)
 				.where(Tables.EH_SOCIAL_SECURITY_DEPARTMENT_SUMMARY.OWNER_ID.eq(ownerId))
-				.and(Tables.EH_SOCIAL_SECURITY_DEPARTMENT_SUMMARY.PAY_MONTH.eq(month)).execute();
+				.and(Tables.EH_SOCIAL_SECURITY_DEPARTMENT_SUMMARY.PAY_MONTH.eq(month))
+				.and(Tables.EH_SOCIAL_SECURITY_DEPARTMENT_SUMMARY.IS_FILED.eq(isFiled)).execute();
 	}
 
 	@Override
-	public List<SocialSecurityDepartmentSummary> listSocialSecurityDepartmentSummary(Long ownerId, String paymentMonth, CrossShardListingLocator locator, int pageSize) {
+	public List<SocialSecurityDepartmentSummary> listFiledSocialSecurityDepartmentSummary(Long ownerId, String paymentMonth, CrossShardListingLocator locator, int pageSize) {
 		SelectConditionStep<Record> step = getReadOnlyContext().select().from(Tables.EH_SOCIAL_SECURITY_DEPARTMENT_SUMMARY)
-				.where(Tables.EH_SOCIAL_SECURITY_DEPARTMENT_SUMMARY.OWNER_ID.eq(ownerId));
+				.where(Tables.EH_SOCIAL_SECURITY_DEPARTMENT_SUMMARY.OWNER_ID.eq(ownerId))
+				.and(Tables.EH_SOCIAL_SECURITY_DEPARTMENT_SUMMARY.IS_FILED.eq(NormalFlag.YES.getCode()));
 		if (null != paymentMonth) {
 			step = step.and(Tables.EH_SOCIAL_SECURITY_DEPARTMENT_SUMMARY.PAY_MONTH.eq(paymentMonth));
 		}
@@ -88,6 +90,20 @@ public class SocialSecurityDepartmentSummaryProviderImpl implements SocialSecuri
 		return step.orderBy(Tables.EH_SOCIAL_SECURITY_DEPARTMENT_SUMMARY.ID.asc())
 				.fetch().map(r -> ConvertHelper.convert(r, SocialSecurityDepartmentSummary.class));
 	}
+
+	@Override
+	public List<SocialSecurityDepartmentSummary> listSocialSecurityDepartmentSummary(Long ownerId, String payMonth, Byte isFiled) {
+		SelectConditionStep<Record> step = getReadOnlyContext().select().from(Tables.EH_SOCIAL_SECURITY_DEPARTMENT_SUMMARY)
+				.where(Tables.EH_SOCIAL_SECURITY_DEPARTMENT_SUMMARY.OWNER_ID.eq(ownerId));
+		if (null != payMonth) {
+			step = step.and(Tables.EH_SOCIAL_SECURITY_DEPARTMENT_SUMMARY.PAY_MONTH.eq(payMonth));
+		}
+		if(null != isFiled)
+			step = step.and(Tables.EH_SOCIAL_SECURITY_DEPARTMENT_SUMMARY.IS_FILED.eq(isFiled));
+		return step.orderBy(Tables.EH_SOCIAL_SECURITY_DEPARTMENT_SUMMARY.ID.asc())
+				.fetch().map(r -> ConvertHelper.convert(r, SocialSecurityDepartmentSummary.class));
+	}
+
 
 	private EhSocialSecurityDepartmentSummaryDao getReadWriteDao() {
 		return getDao(getReadWriteContext());
