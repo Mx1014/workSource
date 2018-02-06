@@ -1153,13 +1153,13 @@ private void checkUserPrivilege(Long orgId, Long privilegeId, Long communityId) 
 	}
 
 	private void checkEquipmentLngAndLat(UpdateEquipmentsCommand cmd, EquipmentInspectionEquipments equipment, EquipmentInspectionEquipments exist) {
-		if(exist.getLatitude() != null && equipment.getLongitude() != null) {
-            if(!exist.getLatitude().equals(equipment.getLatitude()) || !equipment.getLongitude().equals(exist.getLongitude()) ) {
-                throw RuntimeErrorException.errorWith(EquipmentServiceErrorCode.SCOPE,
-                        EquipmentServiceErrorCode.ERROR_EQUIPMENT_LOCATION_CANNOT_MODIFY,
-                     "设备经纬度不能修改");
-            }
-        } else {
+//		if(exist.getLatitude() != null && equipment.getLongitude() != null) {
+//            if(!exist.getLatitude().equals(equipment.getLatitude()) || !equipment.getLongitude().equals(exist.getLongitude()) ) {
+//                throw RuntimeErrorException.errorWith(EquipmentServiceErrorCode.SCOPE,
+//                        EquipmentServiceErrorCode.ERROR_EQUIPMENT_LOCATION_CANNOT_MODIFY,
+//                     "设备经纬度不能修改");
+//            }
+//        } else {
             equipment.setLatitude(cmd.getLatitude());
             equipment.setLongitude(cmd.getLongitude());
             if ((equipment.getLongitude() == null || equipment.getLatitude() == null) && cmd.getQrCodeFlag() == 1) {
@@ -1170,7 +1170,7 @@ private void checkUserPrivilege(Long orgId, Long privilegeId, Long communityId) 
 
             String geohash= GeoHashUtils.encode(equipment.getLatitude(), equipment.getLongitude());
             equipment.setGeohash(geohash);
-        }
+//        }
 	}
 
 	private List<Long> increamentUpdateEquipmentStandardMap(User user, EquipmentInspectionEquipments equipment, List<EquipmentStandardMapDTO> eqStandardMap) {

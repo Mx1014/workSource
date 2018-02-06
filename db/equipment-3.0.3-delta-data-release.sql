@@ -31,8 +31,17 @@ INSERT  INTO  `eh_var_fields` VALUES (11999, 'equipment_inspection', 'geohash', 
 
 -- offline
 -- SET  @id = (SELECT  MAX(id) from eh_version_realm);
--- INSERT INTO `eh_version_realm` VALUES (@id:=@id+1, 'equipmentInspection', NULL, now(), '999992');
--- INSERT INTO `eh_version_urls` VALUES ('176', @id, '1.0.0', 'http://jiarui.lab.everhomes.com/nar/equipmentInspection/inspectionOffline/equipmentInspection-1-0-0.zip', 'http://jiarui.lab.everhomes.com/nar/equipmentInspection/inspectionOffline/equipmentInspection-1-0-0.zip', '测试巡检离线', '999992', '物业巡检', NOW(), NULL, '0');
+-- INSERT INTO `eh_version_realm` VALUES (@id:=@id+1, 'equipmentInspection', NULL, now(), '0');
+-- SET  @vId = (SELECT  MAX(id) from eh_version_urls);
+-- INSERT INTO `eh_version_urls` VALUES (@vId:=@vId+1, @id, '1.0.0', 'http://lixian.zuolin.com/nar/equipmentInspection/inspectionOffLine/equipmentInspection-1-0-0.zip', 'http://10.1.10.196/nar/equipmentInspection/inspectionOffLine/equipmentInspection-1-0-0.zip', '物业巡检巡检离线', '0', '物业巡检', NOW(), NULL, '0');
+UPDATE eh_launch_pad_items
+SET action_data = '{\"realm\":\"equipmentInspection\",\"entryUrl\":\"http://10.1.10.88/equipment-inspection/dist/index.html?hideNavigationBar=1#sign_suffix\"}'
+WHERE item_label LIKE '%巡检%';
+
+
+UPDATE eh_launch_pad_items
+SET action_type = 44
+WHERE item_label LIKE '%巡检%';
 
 
 -- 新增权限  by jiarui 20180205
