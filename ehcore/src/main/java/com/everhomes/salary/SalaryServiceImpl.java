@@ -544,7 +544,7 @@ public class SalaryServiceImpl implements SalaryService {
         Map<String, Object> params = new HashedMap();
         params.put("ownerId", cmd.getOwnerId());
         params.put("organizationId", cmd.getOrganizationId());
-        params.put("namespaceId", UserContext.getCurrentNamespaceId()+"");
+        params.put("namespaceId", UserContext.getCurrentNamespaceId() + "");
         params.put("excelToken", SalaryReportType.SALARY_EMPLOYEE.getCode() + "");
 
         String fileName = "员工工资表" + ".xlsx";
@@ -829,7 +829,7 @@ public class SalaryServiceImpl implements SalaryService {
 
     @Override
     public BigDecimal calculateBonusTax(BigDecimal bonus, BigDecimal salary) {
-        LOGGER.debug("参数 bonus: {} salary:{}",bonus,salary);
+        LOGGER.debug("参数 bonus: {} salary:{}", bonus, salary);
         BigDecimal muni = new BigDecimal(0);
         if (salary.compareTo(new BigDecimal(3500)) < 0) {
             muni = new BigDecimal(3500).subtract(salary);
@@ -845,7 +845,7 @@ public class SalaryServiceImpl implements SalaryService {
 
     @Override
     public BigDecimal calculateSalaryTax(BigDecimal salary) {
-        LOGGER.debug("计算salary 参数 "+salary);
+        LOGGER.debug("计算salary 参数 " + salary);
         BigDecimal result = new BigDecimal(0);
         if (salary.compareTo(new BigDecimal(3500)) <= 0) {
             return result;
@@ -1274,7 +1274,7 @@ public class SalaryServiceImpl implements SalaryService {
         Map<String, Object> params = new HashedMap();
         params.put("ownerId", cmd.getOwnerId());
         params.put("organizationId", cmd.getOrganizationId());
-        params.put("namespaceId", UserContext.getCurrentNamespaceId()+"");
+        params.put("namespaceId", UserContext.getCurrentNamespaceId() + "");
         params.put("month", cmd.getMonth());
         params.put("excelToken", cmd.getExportToken());
         SimpleDateFormat sf = new SimpleDateFormat("yyyy年MM月");
@@ -1285,7 +1285,7 @@ public class SalaryServiceImpl implements SalaryService {
             e.printStackTrace();
         }
         Organization org = organizationProvider.findOrganizationById(cmd.getOwnerId());
-        String fileName = sf.format(date) + org.getName()  +
+        String fileName = sf.format(date) + org.getName() +
                 SalaryReportType.fromCode(Byte.valueOf(cmd.getExportToken())).getDescri() + ".xlsx";
 //        params.put("name", fileName);
 
@@ -1431,7 +1431,7 @@ public class SalaryServiceImpl implements SalaryService {
         }
         calendar.add(Calendar.MONTH, -12);
         SalaryDepartStatistic lastYear = salaryDepartStatisticProvider.findSalaryDepartStatisticByDptAndMonth(dpt.getId(), monthSF.get().format(calendar.getTime()));
-        if (null != lastYear) {
+        if (null != lastYear && lastYear.getCostSalary() != null && lastYear.getCostSalary().compareTo(new BigDecimal(0)) > 0) {
             statistic.setCostYoySalary(statistic.getCostSalary().subtract(lastYear.getCostSalary()).divide(lastYear.getCostSalary()).multiply(new BigDecimal(100)));
 
         }
@@ -1443,7 +1443,7 @@ public class SalaryServiceImpl implements SalaryService {
         }
         calendar.add(Calendar.MONTH, -1);
         SalaryDepartStatistic lastMonth = salaryDepartStatisticProvider.findSalaryDepartStatisticByDptAndMonth(dpt.getId(), monthSF.get().format(calendar.getTime()));
-        if (null != lastMonth) {
+        if (null != lastMonth && lastMonth.getCostSalary() != null && lastMonth.getCostSalary().compareTo(new BigDecimal(0)) > 0) {
             statistic.setCostMomSalary(statistic.getCostSalary().subtract(lastMonth.getCostSalary()).divide(lastMonth.getCostSalary()).multiply(new BigDecimal(100)));
         }
         return statistic;
