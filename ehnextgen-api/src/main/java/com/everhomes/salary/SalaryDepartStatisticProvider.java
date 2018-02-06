@@ -13,9 +13,4 @@ public interface SalaryDepartStatisticProvider {
 
 	List<SalaryDepartStatistic> listSalaryDepartStatistic();
 
-	void deleteSalaryDepartStatistic(Long ownerId, byte isFile, String month);
-
-	SalaryDepartStatistic findSalaryDepartStatisticByDptAndMonth(Long id, String format);
-
-	List<SalaryDepartStatistic> listSalaryDepartStatistic(Long ownerId, String month);
 }

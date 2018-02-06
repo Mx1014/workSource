@@ -6,7 +6,7 @@ import com.everhomes.util.StringHelper;
 
 public class SalaryDepartStatistic extends EhSalaryDepartStatistics {
 	
-	private static final long serialVersionUID = 2632569652370719878L;
+	private static final long serialVersionUID = -698897237003958037L;
 	
 	@Override
 	public String toString() {
