@@ -1524,8 +1524,8 @@ private void checkUserPrivilege(Long orgId, Long privilegeId, Long communityId) 
 			excelUtils.setNeedSequenceColumn(true);
 			//fieldService.listFields();
 			for (FieldDTO field : fields) {
-				//去除附件cell
-				if (!Objects.equals(field.getFieldName(), "attachments")) {
+				//去除附件 经纬度cell
+				if (!(Objects.equals(field.getFieldName(), "attachments") && Objects.equals(field.getFieldName(), "geohash"))) {
 					propertyNames.add(field.getFieldName());
 					titleNames.add(field.getFieldDisplayName());
 					titleSizes.add(20);
@@ -2922,8 +2922,8 @@ private void checkUserPrivilege(Long orgId, Long privilegeId, Long communityId) 
 		//记录excel中的field顺序
 		List<String> fieldOrders = new ArrayList<>();
 		for (FieldDTO field : fieldsDTO) {
-			//去除附件
-			if (!field.getFieldName().equals("attachments")){
+			//去除附件 和 经纬度
+			if (!(field.getFieldName().equals("attachments") && field.getFieldName().equals("geohash"))){
 				fieldOrders.add(field.getFieldName());
 			}
 		}
@@ -3050,8 +3050,7 @@ private void checkUserPrivilege(Long orgId, Long privilegeId, Long communityId) 
 		Class<?> clz = dto.getClass().getSuperclass();
 		Object val = value;
 		String type = clz.getDeclaredField(fieldName).getType().getSimpleName();
-		System.out.println(type);
-		System.out.println("==============");
+		LOGGER.info("export equipments setToObj type={}" + type);
 		if(StringUtils.isEmpty((String)value)){
 			val = null;
 		}else{
