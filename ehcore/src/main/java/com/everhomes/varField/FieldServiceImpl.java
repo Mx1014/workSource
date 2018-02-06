@@ -210,26 +210,28 @@ public class FieldServiceImpl implements FieldService {
         List<FieldGroupDTO> groups = new ArrayList<>();
         List<FieldGroupDTO> targetGroups = new ArrayList<>();
 
-        if(onlyLeaf){
-            getAllGroups(allGroups,groups);
-        }else{
-            groups = allGroups;
-        }
-        //双重循环匹配浏览器所传的sheetName，获得目标sheet集合
+        //获得目标target group
         if(StringUtils.isEmpty(cmd.getIncludedGroupIds())) {
             return targetGroups;
         }
         String[] split = cmd.getIncludedGroupIds().split(",");
         for(int i = 0 ; i < split.length; i ++){
             long targetGroupId = Long.parseLong(split[i]);
-            for(int j = 0; j < groups.size(); j++){
-                Long id = groups.get(j).getGroupId();
+            for(int j = 0; j < allGroups.size(); j++){
+                Long id = allGroups.get(j).getGroupId();
                 if(id.compareTo(targetGroupId) == 0){
-                    targetGroups.add(groups.get(j));
+                    targetGroups.add(allGroups.get(j));
                 }
             }
         }
-        return targetGroups;
+        //转成叶节点
+        if(onlyLeaf){
+            getAllGroups(targetGroups,groups);
+        }else{
+            groups = targetGroups;
+        }
+
+        return groups;
     }
 
     @Override
