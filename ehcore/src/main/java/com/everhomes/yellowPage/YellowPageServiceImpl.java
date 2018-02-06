@@ -757,6 +757,9 @@ public class YellowPageServiceImpl implements YellowPageService {
         	 }
         	
         }else{
+        	if(cmd.getParentId()==null){
+        		return null;
+			}
         	Condition condition =  DSL.trueCondition();
 			if (ServiceAllianceBelongType.ORGANAIZATION.getCode().equals(cmd.getOwnerType())) {
 				List<OrganizationCommunity> communityList = organizationProvider.listOrganizationCommunities(cmd.getOwnerId());

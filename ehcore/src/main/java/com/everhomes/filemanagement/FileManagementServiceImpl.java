@@ -189,7 +189,7 @@ public class FileManagementServiceImpl implements  FileManagementService{
         ListServiceModuleAppsResponse apps = portalService.listServiceModuleAppsWithConditon(appCommand);
         Long appId = null;
         if(null != apps && apps.getServiceModuleApps().size() > 0){
-            appId = apps.getServiceModuleApps().get(0).getId();
+            appId = apps.getServiceModuleApps().get(0).getOriginId();
         }
         CheckModuleManageCommand moduleCommand = new CheckModuleManageCommand();
         moduleCommand.setAppId(appId);
@@ -272,7 +272,7 @@ public class FileManagementServiceImpl implements  FileManagementService{
 
         if (cmd.getScopes() == null || cmd.getScopes().size() <= 0){
             //  delete all scopes by catalogId
-            fileManagementProvider.deleteFileCatalogScopeNotInSourceIds(namespaceId, cmd.getCatalogId(), new ArrayList<>());
+            fileManagementProvider.deleteFileCatalogScopeByCatalogId(namespaceId, cmd.getCatalogId());
             return scopes;
         }
 

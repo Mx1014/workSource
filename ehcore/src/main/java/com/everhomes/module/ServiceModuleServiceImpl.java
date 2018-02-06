@@ -36,6 +36,7 @@ import com.everhomes.rest.portal.TreeServiceModuleAppsResponse;
 import com.everhomes.sequence.SequenceProvider;
 import com.everhomes.server.schema.Tables;
 import com.everhomes.server.schema.tables.pojos.EhUsers;
+import com.everhomes.serviceModuleApp.ServiceModuleAppService;
 import com.everhomes.settings.PaginationConfigHelper;
 import com.everhomes.user.User;
 import com.everhomes.user.UserContext;
@@ -111,6 +112,9 @@ public class ServiceModuleServiceImpl implements ServiceModuleService {
 
     @Autowired
     private AclProvider aclProvider;
+
+    @Autowired
+    private ServiceModuleAppService serviceModuleAppService;
 
 
     @Override
@@ -537,7 +541,10 @@ public class ServiceModuleServiceImpl implements ServiceModuleService {
 
         Integer namespaceId = UserContext.getCurrentNamespaceId(cmd.getNamespaceId());
         //过滤出与scopes匹配的serviceModule
-        List<ServiceModuleDTO> tempList = filterByScopes(namespaceId, cmd.getOwnerType(), cmd.getOwnerId());
+//        List<ServiceModuleDTO> tempList = filterByScopes(namespaceId, cmd.getOwnerType(), cmd.getOwnerId());
+        //todo
+        List<Long> moduleIds = serviceModuleAppService.listReleaseServiceModuleIdsByNamespace(UserContext.getCurrentNamespaceId());
+        List<ServiceModuleDTO> tempList = this.serviceModuleProvider.listServiceModuleDtos(moduleIds);
 
         TreeServiceModuleAppsResponse response = new TreeServiceModuleAppsResponse();
         List<ServiceModuleDTO> communityControlList = new ArrayList<>();
@@ -1015,9 +1022,10 @@ public class ServiceModuleServiceImpl implements ServiceModuleService {
                     if(moduleIds.size() != 0){
                         //给一级模块设置APPS
                         // 这里因为运营后台的不完善，暂时使用reflectionServiceModuleApps代替真正的serviceModuleApps。原来的代码为serviceModuleAppProvider.listServiceModuleAppsByModuleIds(UserContext.getCurrentNamespaceId(), moduleIds);
-                        List<ServiceModuleAppDTO> apps = serviceModuleProvider.listReflectionServiceModuleAppsByModuleIds(UserContext.getCurrentNamespaceId(), moduleIds);
+//                        List<ServiceModuleAppDTO> apps = serviceModuleProvider.listReflectionServiceModuleAppsByModuleIds(UserContext.getCurrentNamespaceId(), moduleIds);
+                        List<ServiceModuleApp> apps = serviceModuleAppService.listServiceModuleAppByModuleIds(UserContext.getCurrentNamespaceId(), moduleIds);
                         if(apps != null){
-                            current.setServiceModuleApps(apps);
+                            current.setServiceModuleApps(apps.stream().map(r-> ConvertHelper.convert(r,ServiceModuleAppDTO.class)).collect(Collectors.toList()));
                             LOGGER.debug(current.getName()+ "分类下一共有"+moduleIds.toString() +"的模块和"+ apps.size() + "个应用");
                         }
                     }
@@ -1026,18 +1034,6 @@ public class ServiceModuleServiceImpl implements ServiceModuleService {
             }
         }
         return results;
-    }
-
-    /**
-     * 获取serviceModuleApps的平行结构（level  = 2）
-     *
-     * @param tempList
-     * @return
-     */
-    private List<ServiceModuleAppDTO> getServiceModuleAppsAsList(List<ServiceModuleDTO> tempList) {
-        List<Long> moduleIds = tempList.stream().map(ServiceModuleDTO::getId).collect(Collectors.toList());
-        List<ServiceModuleAppDTO> serviceModuleAppDTOS = serviceModuleAppProvider.listServiceModuleAppsByModuleIds(UserContext.getCurrentNamespaceId(), moduleIds);
-        return serviceModuleAppDTOS;
     }
 
     /**

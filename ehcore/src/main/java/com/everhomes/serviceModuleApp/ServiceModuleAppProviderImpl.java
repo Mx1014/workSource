@@ -5,6 +5,7 @@ import com.everhomes.db.AccessSpec;
 import com.everhomes.db.DaoAction;
 import com.everhomes.db.DaoHelper;
 import com.everhomes.db.DbProvider;
+import com.everhomes.module.ReflectionServiceModuleApp;
 import com.everhomes.naming.NameMapper;
 import com.everhomes.rest.portal.ServiceModuleAppDTO;
 import com.everhomes.rest.portal.ServiceModuleAppStatus;
@@ -107,19 +108,23 @@ public class ServiceModuleAppProviderImpl implements ServiceModuleAppProvider {
 	}
 
 	@Override
-	public List<ServiceModuleAppDTO> listServiceModuleAppsByModuleIds(Integer namespaceId, List<Long> moduleIds) {
+	public List<ServiceModuleApp> listServiceModuleAppsByModuleIds(Integer namespaceId, Long versionId, List<Long> moduleIds) {
 		Condition cond = Tables.EH_SERVICE_MODULE_APPS.NAMESPACE_ID.eq(namespaceId);
 		if (null != moduleIds && moduleIds.size() > 0)
 			cond = cond.and(Tables.EH_SERVICE_MODULE_APPS.MODULE_ID.in(moduleIds));
+
+		if(versionId != null){
+			cond = cond.and(Tables.EH_SERVICE_MODULE_APPS.VERSION_ID.eq(versionId));
+		}
 		return getReadOnlyContext().select().from(Tables.EH_SERVICE_MODULE_APPS)
 				.where(cond)
 				.and(Tables.EH_SERVICE_MODULE_APPS.STATUS.eq(ServiceModuleAppStatus.ACTIVE.getCode()))
 				.orderBy(Tables.EH_SERVICE_MODULE_APPS.MODULE_ID.asc())
-				.fetch().map(r -> ConvertHelper.convert(r, ServiceModuleAppDTO.class));
+				.fetch().map(r -> ConvertHelper.convert(r, ServiceModuleApp.class));
 	}
 
 	@Override
-	public List<ServiceModuleApp> listServiceModuleAppsByVersionIdAndOriginIds(Long versionId, List<Long> originIds) {
+	public List<ServiceModuleApp> listServiceModuleAppsByOriginIds(Long versionId, List<Long> originIds) {
 
 		SelectQuery<EhServiceModuleAppsRecord> query = getReadOnlyContext().selectQuery(Tables.EH_SERVICE_MODULE_APPS);
 		query.addConditions(Tables.EH_SERVICE_MODULE_APPS.VERSION_ID.eq(versionId));
@@ -240,4 +245,5 @@ public class ServiceModuleAppProviderImpl implements ServiceModuleAppProvider {
 
 		return  app;
 	}
+
 }

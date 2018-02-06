@@ -17,11 +17,11 @@ public interface ServiceModuleAppProvider {
 
 	List<ServiceModuleApp> listServiceModuleAppByActionType(Integer namespaceId, Long versionId, Byte actionType);
 
-	List<ServiceModuleAppDTO> listServiceModuleAppsByModuleIds(Integer namespaceId, List<Long> moduleIds);
-
 	void createServiceModuleApps(List<ServiceModuleApp> serviceModuleApps);
 
-	List<ServiceModuleApp> listServiceModuleAppsByVersionIdAndOriginIds(Long versionId, List<Long> originIds);
+	List<ServiceModuleApp> listServiceModuleAppsByModuleIds(Integer namespaceId, Long versionId, List<Long> moduleIds);
+
+	List<ServiceModuleApp> listServiceModuleAppsByOriginIds(Long versionId, List<Long> originIds);
 
 	void deleteByVersionId(Long versionId);
 

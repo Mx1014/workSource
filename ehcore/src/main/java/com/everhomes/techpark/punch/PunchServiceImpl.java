@@ -339,7 +339,7 @@ public class PunchServiceImpl implements PunchService {
 		ListServiceModuleAppsResponse apps = portalService.listServiceModuleAppsWithConditon(cmd);
 		Long appId = null;
 		if(null != apps && apps.getServiceModuleApps().size() > 0){
-			appId = apps.getServiceModuleApps().get(0).getId();
+			appId = apps.getServiceModuleApps().get(0).getOriginId();
 		}
 		if (null != apps) {
 			if(userPrivilegeMgr.checkUserPrivilege(UserContext.currentUserId(), EntityType.ORGANIZATIONS.getCode(), orgId,

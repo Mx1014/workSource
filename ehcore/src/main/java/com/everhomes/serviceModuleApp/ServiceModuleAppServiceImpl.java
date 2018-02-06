@@ -73,13 +73,13 @@ public class ServiceModuleAppServiceImpl implements ServiceModuleAppService {
 
 		PortalVersion releaseVersion = portalVersionProvider.findReleaseVersion(namespaceId);
 
-		List<ServiceModuleApp> moduleApps = serviceModuleAppProvider.listServiceModuleAppsByVersionIdAndOriginIds(releaseVersion.getId(), originIds);
+		List<ServiceModuleApp> moduleApps = serviceModuleAppProvider.listServiceModuleAppsByOriginIds(releaseVersion.getId(), originIds);
 
 		return moduleApps;
 	}
 
 	@Override
-	public List<ServiceModuleApp> listServiceModuleAppByModuleIds(Integer namespaceId, List<Long> moduleIds){
+	public List<ServiceModuleApp> listReleaseServiceModuleAppByModuleIds(Integer namespaceId, List<Long> moduleIds){
 		PortalVersion releaseVersion = portalVersionProvider.findReleaseVersion(namespaceId);
 
 		List<ServiceModuleApp> apps = new ArrayList<>();
@@ -107,4 +107,16 @@ public class ServiceModuleAppServiceImpl implements ServiceModuleAppService {
 
 		return apps;
 	}
+
+    @Override
+    public List<Long> listReleaseServiceModuleIdsByNamespace(Integer namespaceId) {
+        return null;
+    }
+
+	@Override
+	public ServiceModuleApp findReleaseServiceModuleAppByOriginId(Long originId) {
+		return null;
+	}
+
+
 }
