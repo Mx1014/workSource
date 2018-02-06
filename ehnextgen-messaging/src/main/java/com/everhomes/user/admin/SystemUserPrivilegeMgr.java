@@ -29,6 +29,7 @@ import com.everhomes.rest.order.OwnerType;
 import com.everhomes.rest.organization.OrganizationType;
 import com.everhomes.rest.portal.ListServiceModuleAppsCommand;
 import com.everhomes.rest.portal.ListServiceModuleAppsResponse;
+import com.everhomes.serviceModuleApp.ServiceModuleAppService;
 import com.everhomes.user.*;
 
 import org.slf4j.Logger;
@@ -74,6 +75,9 @@ public class SystemUserPrivilegeMgr implements UserPrivilegeMgr {
 
     @Autowired
     private PortalService portalService;
+
+    @Autowired
+    private ServiceModuleAppService serviceModuleAppService;
 
 
     @Override
@@ -218,7 +222,8 @@ public class SystemUserPrivilegeMgr implements UserPrivilegeMgr {
             }
         }
         // 查询app关联的moduleId
-        ServiceModuleApp app = this.serviceModuleProvider.findReflectionServiceModuleAppByActiveAppId(appId);
+        ServiceModuleApp app  = serviceModuleAppService.findReleaseServiceModuleAppByOriginId(appId);
+//        ServiceModuleApp app = this.serviceModuleProvider.findReflectionServiceModuleAppByActiveAppId(appId);
         if(app != null && p_moduleId != 0L && p_moduleId.longValue() == app.getModuleId().longValue()){//如果权限对应的moduleId和appId对应的模块Id相等，再校验是否对应用有权
           return checkModuleAppAdmin(namespaceId, ownerType, ownerId, userId, p_moduleId, appId, communityId, organizationId);
         }
@@ -292,7 +297,8 @@ public class SystemUserPrivilegeMgr implements UserPrivilegeMgr {
 
     @Override
     public boolean checkModuleAppAdmin(Integer namespaceId, Long organizationId, Long userId, Long appId) {
-        ServiceModuleApp app = this.serviceModuleProvider.findReflectionServiceModuleAppByActiveAppId(appId);
+//        ServiceModuleApp app = this.serviceModuleProvider.findReflectionServiceModuleAppByActiveAppId(appId);
+        ServiceModuleApp app  = serviceModuleAppService.findReleaseServiceModuleAppByOriginId(appId);
         if(app == null)
             return false;
         ServiceModule serviceModule = this.serviceModuleProvider.findServiceModuleById(app.getModuleId());
@@ -334,7 +340,7 @@ public class SystemUserPrivilegeMgr implements UserPrivilegeMgr {
         ListServiceModuleAppsResponse apps = portalService.listServiceModuleAppsWithConditon(cmd);
         Long appId = null;
         if(null != apps && apps.getServiceModuleApps().size() > 0){
-            appId = apps.getServiceModuleApps().get(0).getId();
+            appId = apps.getServiceModuleApps().get(0).getOriginId();
         }
         LOGGER.debug("checkUserPrivilege get appId = {}", appId);
         if(appId ==  null){

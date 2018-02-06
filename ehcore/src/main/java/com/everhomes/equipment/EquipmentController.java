@@ -305,9 +305,9 @@ public class EquipmentController extends ControllerBase {
     public RestResponse importEquipments(ImportOwnerCommand cmd, @RequestParam(value = "attachment") MultipartFile[] files){
         Long userId = UserContext.currentUserId();
         if(null == files || null == files[0]){
-			LOGGER.error("files is null。userId="+userId);
+			LOGGER.error("export files is null! userId="+userId);
 			throw RuntimeErrorException.errorWith(UserServiceErrorCode.SCOPE, UserServiceErrorCode.ERROR_INVALID_PARAMS,
-					"files is null");
+					"export files is null");
 		}
 		ImportDataResponse importResponse = this.equipmentService.importEquipments(cmd, files[0], userId);
         RestResponse response = new RestResponse(importResponse);

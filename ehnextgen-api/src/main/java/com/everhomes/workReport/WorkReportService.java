@@ -47,7 +47,7 @@ public interface WorkReportService {
 
     String fixUpUserName(Long userId, Long ownerId);
 
-    OrganizationMember getMemberByUserId(Long userId, Long ownerId);
+    OrganizationMember getMemberDepartmentByUserId(Long userId, Long ownerId);
 
     Long getUserDetailId(Long userId, Long ownerId);
 

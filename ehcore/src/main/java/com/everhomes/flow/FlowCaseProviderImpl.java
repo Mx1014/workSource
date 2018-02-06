@@ -282,26 +282,26 @@ public class FlowCaseProviderImpl implements FlowCaseProvider {
 				return null;
 			}
 	}
-    
+
     @Override
     public List<FlowCaseDetail> findAdminFlowCases(ListingLocator locator, int count, SearchFlowCaseCommand cmd, ListingQueryBuilderCallback callback) {
     	DSLContext context = this.dbProvider.getDslContext(AccessSpec.readOnlyWith(EhFlowCases.class));
     	Condition cond = Tables.EH_FLOW_CASES.STATUS.ne(FlowCaseStatus.INVALID.getCode())
     			.and(Tables.EH_FLOW_CASES.NAMESPACE_ID.eq(cmd.getNamespaceId()));
-    	
+
     	if(locator.getAnchor() == null) {
     		locator.setAnchor(cmd.getPageAnchor());
     	}
-    	
+
     	FlowCaseSearchType searchType = FlowCaseSearchType.fromCode(cmd.getFlowCaseSearchType());
     	if(searchType.equals(FlowCaseSearchType.ADMIN)) { //enum equal
 
             cond = cond.and(Tables.EH_FLOW_CASES.PARENT_ID.eq(0L));
 
             if(cmd.getUserId() != null) {
-    			cond = cond.and(Tables.EH_FLOW_CASES.APPLY_USER_ID.eq(cmd.getUserId()));	
+    			cond = cond.and(Tables.EH_FLOW_CASES.APPLY_USER_ID.eq(cmd.getUserId()));
     		}
-    		
+
     		if(cmd.getProjectId() != null) {
     			cond = cond.and(Tables.EH_FLOW_CASES.PROJECT_ID.eq(cmd.getProjectId()));
     		}
@@ -315,7 +315,7 @@ public class FlowCaseProviderImpl implements FlowCaseProvider {
     		} else if(cmd.getEndTime() != null && cmd.getStartTime() != null) {
     			cond = cond.and(Tables.EH_FLOW_CASES.CREATE_TIME.between(new Timestamp(cmd.getStartTime()), new Timestamp(cmd.getEndTime())));
     		}
-    		
+
     	    if(locator.getAnchor() != null) {
     	    	cond = cond.and(Tables.EH_FLOW_CASES.ID.lt(locator.getAnchor()));
             }
@@ -354,25 +354,24 @@ public class FlowCaseProviderImpl implements FlowCaseProvider {
                     .from(Tables.EH_FLOW_CASES).join(Tables.EH_FLOWS)
                     .on(Tables.EH_FLOW_CASES.FLOW_MAIN_ID.eq(Tables.EH_FLOWS.FLOW_MAIN_ID)
                             .and(Tables.EH_FLOW_CASES.FLOW_VERSION.eq(Tables.EH_FLOWS.FLOW_VERSION)))
-                    .where(cond).orderBy(Tables.EH_FLOW_CASES.ID.desc()).limit(count +1).getQuery();
+                    .where(cond).orderBy(Tables.EH_FLOW_CASES.ID.desc()).limit(count + 1).getQuery();
 
             if (callback != null) {
                 callback.buildCondition(locator, query);
             }
 
             List<FlowCaseDetail> objs = query.fetchInto(FlowCaseDetail.class);
-    		
+
             if(objs.size() >= count) {
+                objs.remove(objs.size() - 1);
                 locator.setAnchor(objs.get(objs.size() - 1).getId());
             } else {
                 locator.setAnchor(null);
             }
-            
             return objs;
-    		
     	} else {
     		return null;
-    	}   	
+    	}
     }
     
     @Override

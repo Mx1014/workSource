@@ -526,6 +526,8 @@ public class PmtaskFlowModuleListener implements FlowModuleListener {
 			}
 		}else if(FlowStepType.NO_STEP.getCode().equals(stepType)) {
 			if ("MOTIFYFEE".equals(nodeType)) {
+				FlowCaseTree tree = flowService.getProcessingFlowCaseTree(flowCase.getId());
+				flowCase = tree.getLeafNodes().get(0).getFlowCase();
 				FlowGraphEvent evt = ctx.getCurrentEvent();
 				if (FlowUserType.APPLIER.equals(evt.getUserType())){
 					FlowAutoStepDTO dto = new FlowAutoStepDTO();
@@ -636,7 +638,7 @@ public class PmtaskFlowModuleListener implements FlowModuleListener {
 		}
 		return apps.stream().map(c -> {
 			FlowServiceTypeDTO dto = new FlowServiceTypeDTO();
-			dto.setId(c.getId());
+			dto.setId(c.getOriginId());
 			dto.setNamespaceId(namespaceId);
 			dto.setServiceName(c.getName());
 			return dto;

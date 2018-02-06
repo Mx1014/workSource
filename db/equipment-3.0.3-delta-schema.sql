@@ -97,6 +97,11 @@ CREATE TABLE `eh_equipment_inspection_equipment_logs` (
   PRIMARY KEY (`id`)
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4;
 
+--   设备增加经纬度字符串  by jiarui
+ALTER TABLE `eh_equipment_inspection_equipments`
+  ADD COLUMN `coordinate`  varchar(1024) NULL AFTER `geohash`;
+-- 设备增加经纬度字符串  by jiarui
+
 -- by st.zheng
 ALTER TABLE `eh_pm_tasks`
   ADD COLUMN `refer_type` VARCHAR(32) NULL COMMENT '引用类型' AFTER `if_use_feelist`;

@@ -214,6 +214,7 @@ import com.everhomes.search.EquipmentSearcher;
 import com.everhomes.search.EquipmentStandardMapSearcher;
 import com.everhomes.search.EquipmentStandardSearcher;
 import com.everhomes.search.EquipmentTasksSearcher;
+import com.everhomes.server.schema.Tables;
 import com.everhomes.server.schema.tables.pojos.EhEquipmentInspectionTasks;
 import com.everhomes.settings.PaginationConfigHelper;
 import com.everhomes.sms.DateUtil;
@@ -894,9 +895,9 @@ private void checkUserPrivilege(Long orgId, Long privilegeId, Long communityId) 
 		if (standard.getTargetId() == 0L) {
 			List<Long> communityIds = equipmentProvider.listModelCommunityMapByModelId(standard.getId(), EquipmentModelType.STANDARD.getCode());
 			List<EquipmentStandardCommunity> communities = new ArrayList<>();
-			EquipmentStandardCommunity standardCommunity = new EquipmentStandardCommunity();
 			if (communityIds != null && communityIds.size() > 0) {
 				communityIds.forEach((c) -> {
+					EquipmentStandardCommunity standardCommunity = new EquipmentStandardCommunity();
 					Community community = communityProvider.findCommunityById(standard.getTargetId());
 					if (community != null) {
 						standardCommunity.setCommunityId(community.getId());
@@ -1104,33 +1105,14 @@ private void checkUserPrivilege(Long orgId, Long privilegeId, Long communityId) 
 		} else {
 			EquipmentInspectionEquipments exist = verifyEquipment(cmd.getId(), cmd.getOwnerType(), cmd.getOwnerId());
 			equipment = ConvertHelper.convert(cmd, EquipmentInspectionEquipments.class);
-			equipment.setGeohash(exist.getGeohash());
+			//equipment.setGeohash(exist.getGeohash());
 			equipment.setQrCodeToken(exist.getQrCodeToken());
 			equipment.setNamespaceId(cmd.getNamespaceId());
-			dealEquipmentRelateTime(cmd, equipment);
-
-			if(exist.getLatitude() != null && equipment.getLongitude() != null) {
-				if(!exist.getLatitude().equals(equipment.getLatitude()) || !equipment.getLongitude().equals(exist.getLongitude()) ) {
-					throw RuntimeErrorException.errorWith(EquipmentServiceErrorCode.SCOPE,
-							EquipmentServiceErrorCode.ERROR_EQUIPMENT_LOCATION_CANNOT_MODIFY,
-		 				"设备经纬度不能修改");
-				}
-			} else {
-				equipment.setLatitude(cmd.getLatitude());
-				equipment.setLongitude(cmd.getLongitude());
-				if ((equipment.getLongitude() == null || equipment.getLatitude() == null) && cmd.getQrCodeFlag() == 1) {
-					throw RuntimeErrorException.errorWith(EquipmentServiceErrorCode.SCOPE,
-							EquipmentServiceErrorCode.ERROR_EQUIPMENT_NOT_SET_LOCATION,
-		 				"设备没有设置经纬度");
-				}
-
-				String geohash=GeoHashUtils.encode(equipment.getLatitude(), equipment.getLongitude());
-				equipment.setGeohash(geohash);
-			}
-
 			equipment.setOperatorUid(user.getId());
 			equipment.setUpdateTime(new Timestamp(DateHelper.currentGMTTime().getTime()));
 
+			dealEquipmentRelateTime(cmd, equipment);
+			checkEquipmentLngAndLat(cmd, equipment, exist);
 			equipmentProvider.updateEquipmentInspectionEquipment(equipment);
 			equipmentSearcher.feedDoc(equipment);
 			//删除计划关联表中的该设备
@@ -1170,6 +1152,27 @@ private void checkUserPrivilege(Long orgId, Long privilegeId, Long communityId) 
 		}
 	}
 
+	private void checkEquipmentLngAndLat(UpdateEquipmentsCommand cmd, EquipmentInspectionEquipments equipment, EquipmentInspectionEquipments exist) {
+//		if(exist.getLatitude() != null && equipment.getLongitude() != null) {
+//            if(!exist.getLatitude().equals(equipment.getLatitude()) || !equipment.getLongitude().equals(exist.getLongitude()) ) {
+//                throw RuntimeErrorException.errorWith(EquipmentServiceErrorCode.SCOPE,
+//                        EquipmentServiceErrorCode.ERROR_EQUIPMENT_LOCATION_CANNOT_MODIFY,
+//                     "设备经纬度不能修改");
+//            }
+//        } else {
+            equipment.setLatitude(cmd.getLatitude());
+            equipment.setLongitude(cmd.getLongitude());
+            if ((equipment.getLongitude() == null || equipment.getLatitude() == null) && cmd.getQrCodeFlag() == 1) {
+                throw RuntimeErrorException.errorWith(EquipmentServiceErrorCode.SCOPE,
+                        EquipmentServiceErrorCode.ERROR_EQUIPMENT_NOT_SET_LOCATION,
+                     "设备没有设置经纬度");
+            }
+
+            String geohash= GeoHashUtils.encode(equipment.getLatitude(), equipment.getLongitude());
+            equipment.setGeohash(geohash);
+//        }
+	}
+
 	private List<Long> increamentUpdateEquipmentStandardMap(User user, EquipmentInspectionEquipments equipment, List<EquipmentStandardMapDTO> eqStandardMap) {
 		//不带id的create，其他的看map表中的standardId在不在cmd里面 不在的删掉
 		List<Long> updateStandardIds = new ArrayList<Long>();
@@ -1204,21 +1207,19 @@ private void checkUserPrivilege(Long orgId, Long privilegeId, Long communityId) 
                         }
                         updateStandardIds.add(map.getStandardId());
                     }
-                } else {
-                    //删除设备多次重复绑定的标准,仅保留最早绑的那个
-                    updateStandardIds.add(maps.get(0).getStandardId());
-                    maps.remove(0);
-                    LOGGER.debug("equipment standard maps after remove: {}", maps);
-                    if (maps.size() > 0) {
-                        maps.forEach(map -> {
-//								map.setReviewStatus(EquipmentReviewStatus.INACTIVE.getCode());
-                            //fix bug #20247
-                            map.setStatus(Status.INACTIVE.getCode());
-                            equipmentProvider.updateEquipmentStandardMap(map);
-                            equipmentStandardMapSearcher.feedDoc(map);
-                        });
-                    }
-                }
+				} else {
+					//删除设备多次重复绑定的标准,仅保留最早绑的那个
+					updateStandardIds.add(maps.get(0).getStandardId());
+					maps.remove(0);
+					LOGGER.debug("equipment standard maps after remove: {}", maps);
+					if (maps.size() > 0) {
+						maps.forEach(map -> {
+							map.setStatus(Status.INACTIVE.getCode());
+							equipmentProvider.updateEquipmentStandardMap(map);
+							equipmentStandardMapSearcher.feedDoc(map);
+						});
+					}
+				}
             }
         }
 		return updateStandardIds;
@@ -1242,13 +1243,12 @@ private void checkUserPrivilege(Long orgId, Long privilegeId, Long communityId) 
 	}
 
 	private void createEquipmentInspectionEquipment(UpdateEquipmentsCommand cmd, List<EquipmentStandardMapDTO> eqStandardMap) {
-		EquipmentInspectionEquipments equipment;
-		equipment = ConvertHelper.convert(cmd, EquipmentInspectionEquipments.class);
+		EquipmentInspectionEquipments equipment = ConvertHelper.convert(cmd, EquipmentInspectionEquipments.class);
 		if ((equipment.getLongitude() == null || equipment.getLatitude() == null) && cmd.getQrCodeFlag() == 1) {
-            throw RuntimeErrorException.errorWith(EquipmentServiceErrorCode.SCOPE,
-                    EquipmentServiceErrorCode.ERROR_EQUIPMENT_NOT_SET_LOCATION,
-                    "设备没有设置经纬度");
-        }
+			throw RuntimeErrorException.errorWith(EquipmentServiceErrorCode.SCOPE,
+					EquipmentServiceErrorCode.ERROR_EQUIPMENT_NOT_SET_LOCATION,
+					"设备没有设置经纬度");
+		}
 		String geohash = GeoHashUtils.encode(equipment.getLatitude(), equipment.getLongitude());
 
 		dealEquipmentRelateTime(cmd, equipment);
@@ -1259,82 +1259,54 @@ private void checkUserPrivilege(Long orgId, Long privilegeId, Long communityId) 
 		equipment.setOperatorUid(userId);
 		equipment.setNamespaceId(cmd.getNamespaceId());
 
-
 		if (cmd.getTargetId() == null || cmd.getTargetId() == 0L) {
-            List<CommunityDTO> communities = organizationService.listAllChildrenOrganizationCoummunities(cmd.getOwnerId());
-            if (communities != null && communities.size() > 0) {
-                for (CommunityDTO community : communities) {
-                    equipment.setTargetId(community.getId());
-                    equipment.setTargetType(OwnerType.COMMUNITY.getCode());
-
-                    String tokenString = UUID.randomUUID().toString();
-                    equipment.setQrCodeToken(tokenString);
-                    equipmentProvider.creatEquipmentInspectionEquipment(equipment);
-                    equipmentSearcher.feedDoc(equipment);
-
-                    if (eqStandardMap != null && eqStandardMap.size() > 0) {
-                        for (EquipmentStandardMapDTO dto : eqStandardMap) {
-                            EquipmentStandardMap map = ConvertHelper.convert(dto, EquipmentStandardMap.class);
-                            map.setTargetId(equipment.getId());
-                            map.setTargetType(InspectionStandardMapTargetType.EQUIPMENT.getCode());
-                            map.setCreatorUid(userId);
-
-                            equipmentProvider.createEquipmentStandardMap(map);
-                            equipmentStandardMapSearcher.feedDoc(map);
-                        }
-                    }
-
-                    if (cmd.getEqAccessoryMap() != null) {
-                        for (EquipmentAccessoryMapDTO map : cmd.getEqAccessoryMap()) {
-                            map.setEquipmentId(equipment.getId());
-                            updateEquipmentAccessoryMap(map);
-                        }
-                    }
-
-                    if (cmd.getAttachments() != null) {
-                        for (EquipmentAttachmentDTO attachment : cmd.getAttachments()) {
-                            attachment.setEquipmentId(equipment.getId());
-                            updateEquipmentAttachment(attachment, userId);
-                        }
-                    }
-                }
-            }
-        } else {
-            String tokenString = UUID.randomUUID().toString();
-            equipment.setQrCodeToken(tokenString);
-            equipmentProvider.creatEquipmentInspectionEquipment(equipment);
-            equipmentSearcher.feedDoc(equipment);
-
-            if(eqStandardMap != null && eqStandardMap.size() > 0) {
-                for(EquipmentStandardMapDTO dto : eqStandardMap) {
-                    EquipmentStandardMap map = ConvertHelper.convert(dto, EquipmentStandardMap.class);
-                    map.setTargetId(equipment.getId());
-                    map.setTargetType(InspectionStandardMapTargetType.EQUIPMENT.getCode());
-                    map.setCreatorUid(userId);
-
-                    equipmentProvider.createEquipmentStandardMap(map);
-                    equipmentStandardMapSearcher.feedDoc(map);
-                }
-            }
-
-            if(cmd.getEqAccessoryMap() != null) {
-                for(EquipmentAccessoryMapDTO map : cmd.getEqAccessoryMap()) {
-                    map.setEquipmentId(equipment.getId());
-                    updateEquipmentAccessoryMap(map);
-                }
-            }
-
-            deleteEquipmentAttachmentsByEquipmentId(equipment.getId());
-            if(cmd.getAttachments() != null) {
-                for(EquipmentAttachmentDTO attachment : cmd.getAttachments()) {
-                    attachment.setEquipmentId(equipment.getId());
-                    updateEquipmentAttachment(attachment, userId);
-                }
-            }
-        }
+			List<CommunityDTO> communities = organizationService.listAllChildrenOrganizationCoummunities(cmd.getOwnerId());
+			if (communities != null && communities.size() > 0) {
+				for (CommunityDTO community : communities) {
+					equipment.setTargetId(community.getId());
+					equipment.setTargetType(OwnerType.COMMUNITY.getCode());
+					createEquipmentStage(cmd, eqStandardMap, equipment);
+				}
+			}
+		} else {
+			createEquipmentStage(cmd, eqStandardMap, equipment);
+		}
 		//增加设备的操作记录
 		createEquipmentOperateLogs(equipment.getNamespaceId(), cmd.getOwnerId(), cmd.getOwnerType(),
-                equipment.getId(), EquipmentOperateActionType.INSERT.getCode());
+				equipment.getId(), EquipmentOperateActionType.INSERT.getCode());
+	}
+
+	private void createEquipmentStage(UpdateEquipmentsCommand cmd, List<EquipmentStandardMapDTO> eqStandardMap, EquipmentInspectionEquipments equipment) {
+		Long userId = UserContext.currentUserId();
+		String tokenString = UUID.randomUUID().toString();
+		equipment.setQrCodeToken(tokenString);
+		equipmentProvider.creatEquipmentInspectionEquipment(equipment);
+		equipmentSearcher.feedDoc(equipment);
+
+		if (eqStandardMap != null && eqStandardMap.size() > 0) {
+            for (EquipmentStandardMapDTO dto : eqStandardMap) {
+                EquipmentStandardMap map = ConvertHelper.convert(dto, EquipmentStandardMap.class);
+                map.setTargetId(equipment.getId());
+                map.setTargetType(InspectionStandardMapTargetType.EQUIPMENT.getCode());
+                map.setCreatorUid(userId);
+                equipmentProvider.createEquipmentStandardMap(map);
+                equipmentStandardMapSearcher.feedDoc(map);
+            }
+        }
+
+		if (cmd.getEqAccessoryMap() != null) {
+            for (EquipmentAccessoryMapDTO map : cmd.getEqAccessoryMap()) {
+                map.setEquipmentId(equipment.getId());
+                updateEquipmentAccessoryMap(map);
+            }
+        }
+
+		if (cmd.getAttachments() != null) {
+            for (EquipmentAttachmentDTO attachment : cmd.getAttachments()) {
+                attachment.setEquipmentId(equipment.getId());
+                updateEquipmentAttachment(attachment, userId);
+            }
+        }
 	}
 
 	private void createEquipmentOperateLogs(Integer namespaceId, Long ownerId, String ownerType, Long id, byte code) {
@@ -1553,8 +1525,8 @@ private void checkUserPrivilege(Long orgId, Long privilegeId, Long communityId) 
 			excelUtils.setNeedSequenceColumn(true);
 			//fieldService.listFields();
 			for (FieldDTO field : fields) {
-				//去除附件cell
-				if (!Objects.equals(field.getFieldName(), "attachments")) {
+				//去除附件 经纬度cell
+				if (!(Objects.equals(field.getFieldName(), "attachments") && Objects.equals(field.getFieldName(), "geohash"))) {
 					propertyNames.add(field.getFieldName());
 					titleNames.add(field.getFieldDisplayName());
 					titleSizes.add(20);
@@ -1922,11 +1894,11 @@ private void checkUserPrivilege(Long orgId, Long privilegeId, Long communityId) 
 			dto.setTaskType(standard.getStandardType());
 		}
 		List<EquipmentInspectionEquipmentPlanMap> planMaps = equipmentProvider.getEquipmentInspectionPlanMap(task.getPlanId());
-		EquipmentStandardRelationDTO relationDTO = new EquipmentStandardRelationDTO();
 		List<EquipmentStandardRelationDTO> equipmentStandardRelations = new ArrayList<>();
 		if (planMaps != null && planMaps.size() > 0) {
 			for (EquipmentInspectionEquipmentPlanMap map : planMaps) {
 				EquipmentInspectionEquipments equipment = equipmentProvider.findEquipmentById(map.getEquimentId());
+				EquipmentStandardRelationDTO relationDTO = new EquipmentStandardRelationDTO();
 				relationDTO.setEquipmentName(equipment.getName());
 				relationDTO.setLocation(equipment.getLocation());
 				equipmentStandardRelations.add(relationDTO);
@@ -1939,6 +1911,7 @@ private void checkUserPrivilege(Long orgId, Long privilegeId, Long communityId) 
 				equipment = equipmentProvider.findEquipmentById(task.getEquipmentId());
 			}
 			if (null != equipment) {
+				EquipmentStandardRelationDTO relationDTO = new EquipmentStandardRelationDTO();
 				relationDTO.setEquipmentName(equipment.getName());
 				relationDTO.setLocation(equipment.getLocation());
 				equipmentStandardRelations.add(relationDTO);
@@ -2951,8 +2924,8 @@ private void checkUserPrivilege(Long orgId, Long privilegeId, Long communityId) 
 		//记录excel中的field顺序
 		List<String> fieldOrders = new ArrayList<>();
 		for (FieldDTO field : fieldsDTO) {
-			//去除附件
-			if (!field.getFieldName().equals("attachments")){
+			//去除附件 和 经纬度
+			if (!(field.getFieldName().equals("attachments") && field.getFieldName().equals("geohash"))){
 				fieldOrders.add(field.getFieldName());
 			}
 		}
@@ -3079,8 +3052,7 @@ private void checkUserPrivilege(Long orgId, Long privilegeId, Long communityId) 
 		Class<?> clz = dto.getClass().getSuperclass();
 		Object val = value;
 		String type = clz.getDeclaredField(fieldName).getType().getSimpleName();
-		System.out.println(type);
-		System.out.println("==============");
+		LOGGER.info("export equipments setToObj type={}" + type);
 		if(StringUtils.isEmpty((String)value)){
 			val = null;
 		}else{
@@ -3548,8 +3520,18 @@ private void checkUserPrivilege(Long orgId, Long privilegeId, Long communityId) 
 			allTasks = equipmentProvider.listEquipmentInspectionTasksUseCache(cmd.getTaskStatus(), cmd.getInspectionCategoryId(),
 					targetTypes, targetIds, null, null, offset, pageSize + 1, cacheKey, AdminFlag.YES.getCode(),lastSyncTime);
 
-			equipmentProvider.populateTaskStatusCount(cmd.getInspectionCategoryId(),
-					targetTypes, targetIds, null, null, AdminFlag.YES.getCode(), response);
+			equipmentProvider.populateTodayTaskStatusCount(null, null, AdminFlag.YES.getCode(), response,(loc,query)->{
+				if (targetTypes.size() > 0)
+					query.addConditions(Tables.EH_EQUIPMENT_INSPECTION_TASKS.TARGET_TYPE.in(targetTypes));
+
+				if (targetIds.size() > 0)
+					query.addConditions(Tables.EH_EQUIPMENT_INSPECTION_TASKS.TARGET_ID.in(targetIds));
+
+				if (cmd.getInspectionCategoryId() != null) {
+					query.addConditions(Tables.EH_EQUIPMENT_INSPECTION_TASKS.INSPECTION_CATEGORY_ID.eq(cmd.getInspectionCategoryId()));
+				}
+				return query;
+			});
 		}
 		if(!isAdmin) {
 			List<Long> executePlanIds = new ArrayList<>();
@@ -3575,8 +3557,21 @@ private void checkUserPrivilege(Long orgId, Long privilegeId, Long communityId) 
 			allTasks = equipmentProvider.listEquipmentInspectionTasksUseCache(cmd.getTaskStatus(), cmd.getInspectionCategoryId(),
 					targetTypes, targetIds, executePlanIds, reviewPlanIds, offset, pageSize + 1, cacheKey, AdminFlag.NO.getCode(),lastSyncTime);
 
-			equipmentProvider.populateTaskStatusCount(cmd.getInspectionCategoryId(),
-					targetTypes, targetIds, executePlanIds, reviewPlanIds, AdminFlag.NO.getCode(), response);
+			equipmentProvider.populateTodayTaskStatusCount(executePlanIds, reviewPlanIds, AdminFlag.NO.getCode(), response,(loc,query)->{
+				if (targetTypes.size() > 0)
+					query.addConditions(Tables.EH_EQUIPMENT_INSPECTION_TASKS.TARGET_TYPE.in(targetTypes));
+
+				if (targetIds.size() > 0)
+					query.addConditions(Tables.EH_EQUIPMENT_INSPECTION_TASKS.TARGET_ID.in(targetIds));
+
+				if (cmd.getInspectionCategoryId() != null) {
+					query.addConditions(Tables.EH_EQUIPMENT_INSPECTION_TASKS.INSPECTION_CATEGORY_ID.eq(cmd.getInspectionCategoryId()));
+				}
+				Calendar calendar = Calendar.getInstance();
+				calendar.setTime(new Date(DateHelper.currentGMTTime().getTime()));
+				query.addConditions(Tables.EH_EQUIPMENT_INSPECTION_TASKS.CREATE_TIME.gt(getDayBegin(calendar, 0)));
+				return query;
+			});
 		}
 
 		if (allTasks.size() > pageSize) {
@@ -4133,7 +4128,9 @@ private void checkUserPrivilege(Long orgId, Long privilegeId, Long communityId) 
 
 		EquipmentInspectionTemplates template = equipmentProvider.findEquipmentInspectionTemplate(standard.getTemplateId(),
 				cmd.getOwnerId(), cmd.getOwnerType());
-		if(template == null || Status.INACTIVE.equals(Status.fromStatus(template.getStatus()))) {
+		//解决之前的删除导致的任务查不到巡检template问题
+//		if(template == null || Status.INACTIVE.equals(Status.fromStatus(template.getStatus()))) {
+		if(template == null) {
 			throw RuntimeErrorException.errorWith(EquipmentServiceErrorCode.SCOPE,
 					EquipmentServiceErrorCode.ERROR_TEMPLATE_NOT_EXIST,
  				"巡检项不存在");
@@ -5691,14 +5688,14 @@ private void checkUserPrivilege(Long orgId, Long privilegeId, Long communityId) 
 				List<EquipmentStandardRelationDTO> equipmentRelations = new ArrayList<>();
 				EquipmentInspectionEquipments equipment = equipmentProvider.findEquipmentById(task.getEquipmentId());
 				EquipmentInspectionStandards standard = equipmentProvider.findStandardById(task.getStandardId());
-				EquipmentStandardRelationDTO relationDTO = new EquipmentStandardRelationDTO();
 				if (equipment != null && standard != null) {
+					EquipmentStandardRelationDTO relationDTO = new EquipmentStandardRelationDTO();
 					relationDTO.setQrCodeFlag(equipment.getQrCodeFlag());
 					relationDTO.setLocation(equipment.getLocation());
 					relationDTO.setEquipmentName(equipment.getName());
 					relationDTO.setStandardId(standard.getId());
+					equipmentRelations.add(relationDTO);
 				}
-				equipmentRelations.add(relationDTO);
 				return equipmentRelations;
 			}
 		}
@@ -5782,7 +5779,7 @@ private void checkUserPrivilege(Long orgId, Long privilegeId, Long communityId) 
 
 		OfflineTaskCountStat todayTaskCount = new OfflineTaskCountStat();
 		todayTaskCount.setCount(response.getTotayTasksCount());
-		todayComplete.setId(1L);
+		todayTaskCount.setId(1L);
 
 		offlineResponse.setTodayCompleteCount(new ArrayList<>(Collections.singleton(todayComplete)));
 		offlineResponse.setTodayTasksCount(new ArrayList<>(Collections.singleton(todayTaskCount)));
@@ -5809,8 +5806,8 @@ private void checkUserPrivilege(Long orgId, Long privilegeId, Long communityId) 
 				//兼容旧任务
 				EquipmentInspectionEquipments equipment = equipmentProvider.findEquipmentById(task.getEquipmentId());
 				EquipmentInspectionStandards standard = equipmentProvider.findStandardById(task.getStandardId());
-				EquipmentStandardRelationDTO relationDTO = new EquipmentStandardRelationDTO();
 				if (equipment != null && standard != null) {
+					EquipmentStandardRelationDTO relationDTO = new EquipmentStandardRelationDTO();
 					relationDTO.setQrCodeFlag(equipment.getQrCodeFlag());
 					relationDTO.setLocation(equipment.getLocation());
 					relationDTO.setEquipmentName(equipment.getName());
@@ -5829,10 +5826,8 @@ private void checkUserPrivilege(Long orgId, Long privilegeId, Long communityId) 
 		offlineResponse.setOfflineTasks(tasks);
 		offlineResponse.setEquipments(equipments);
 		ListParametersByStandardIdCommand listParametersByStandardIdCommand = new ListParametersByStandardIdCommand();
-		Map<Long, Long> standardIds = new HashMap<>();
-		equipments.forEach((relation) -> {
-			standardIds.put(relation.getStandardId(),relation.getStandardId());
-		});
+		Map<Long, Long> standardIds = new HashMap<>();//去除重复的
+		equipments.forEach((relation) -> standardIds.put(relation.getStandardId(),relation.getStandardId()));
 		standardIds.forEach((k,v)->{
 			listParametersByStandardIdCommand.setStandardId(k);
 			List<InspectionItemDTO> itemDTOS = listParametersByStandardId(listParametersByStandardIdCommand);

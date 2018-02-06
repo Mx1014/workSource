@@ -4385,7 +4385,7 @@ public class QualityServiceImpl implements QualityService {
 		checkModuleManageCommand.setOwnerType(ownerType);
 		checkModuleManageCommand.setUserId(UserContext.currentUserId());
 		if (null != apps && null != apps.getServiceModuleApps() && apps.getServiceModuleApps().size() > 0) {
-			checkModuleManageCommand.setAppId(apps.getServiceModuleApps().get(0).getId());
+			checkModuleManageCommand.setAppId(apps.getServiceModuleApps().get(0).getOriginId());
 		}
 		if (serviceModuleService.checkModuleManage(checkModuleManageCommand) == 0) {
 			LOGGER.error("Permission is denied, namespaceId={}, orgId={},", namespaceId, ownerId);
@@ -4405,7 +4405,7 @@ public class QualityServiceImpl implements QualityService {
 		checkModuleManageCommand.setOwnerType(ownerType);
 		checkModuleManageCommand.setUserId(UserContext.currentUserId());
 		if (null != apps && null != apps.getServiceModuleApps() && apps.getServiceModuleApps().size() > 0) {
-			checkModuleManageCommand.setAppId(apps.getServiceModuleApps().get(0).getId());
+			checkModuleManageCommand.setAppId(apps.getServiceModuleApps().get(0).getOriginId());
 		}
 		return serviceModuleService.checkModuleManage(checkModuleManageCommand) != 0;
 	}

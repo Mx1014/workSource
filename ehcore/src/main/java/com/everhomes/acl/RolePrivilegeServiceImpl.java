@@ -42,6 +42,7 @@ import com.everhomes.rest.user.admin.ImportDataResponse;
 import com.everhomes.search.OrganizationSearcher;
 import com.everhomes.sequence.SequenceProvider;
 import com.everhomes.server.schema.Tables;
+import com.everhomes.serviceModuleApp.ServiceModuleAppService;
 import com.everhomes.settings.PaginationConfigHelper;
 import com.everhomes.user.User;
 import com.everhomes.user.UserContext;
@@ -137,6 +138,9 @@ public class RolePrivilegeServiceImpl implements RolePrivilegeService {
 
 	@Autowired
 	private CoordinationProvider coordinationProvider;
+
+	@Autowired
+	private ServiceModuleAppService serviceModuleAppService;
 
 	@Override
 	public ListWebMenuResponse listWebMenu(ListWebMenuCommand cmd) {
@@ -3499,7 +3503,8 @@ public class RolePrivilegeServiceImpl implements RolePrivilegeService {
 				return authorizationsAppControl;
 			}
 
-			ServiceModuleApp serviceModuleApp = serviceModuleProvider.findReflectionServiceModuleAppByActiveAppId(authorization.getModuleAppId());
+//			ServiceModuleApp serviceModuleApp = serviceModuleProvider.findReflectionServiceModuleAppByActiveAppId(authorization.getModuleAppId());
+			ServiceModuleApp serviceModuleApp  = serviceModuleAppService.findReleaseServiceModuleAppByOriginId(authorization.getModuleAppId());
 			if(null != serviceModuleApp){
 				serviceModuleApps.add(serviceModuleApp);
 			}

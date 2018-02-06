@@ -121,6 +121,10 @@ CREATE TABLE `eh_equipment_inspection_equipment_logs` (
   PRIMARY KEY (`id`)
 ) ENGINE=INNODB DEFAULT CHARSET=utf8mb4;
 
+--   设备增加经纬度字符串  by jiarui
+ALTER TABLE `eh_equipment_inspection_equipments`
+  ADD COLUMN `coordinate`  varchar(1024) NULL AFTER `geohash`;
+-- 设备增加经纬度字符串  by jiarui
 
 -- eh_equipment_inspection_tasks 增加plan_id字段 用于关联task和equipments
 ALTER TABLE `eh_equipment_inspection_tasks`
