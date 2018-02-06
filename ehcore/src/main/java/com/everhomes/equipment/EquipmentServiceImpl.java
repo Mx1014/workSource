@@ -895,9 +895,9 @@ private void checkUserPrivilege(Long orgId, Long privilegeId, Long communityId) 
 		if (standard.getTargetId() == 0L) {
 			List<Long> communityIds = equipmentProvider.listModelCommunityMapByModelId(standard.getId(), EquipmentModelType.STANDARD.getCode());
 			List<EquipmentStandardCommunity> communities = new ArrayList<>();
-			EquipmentStandardCommunity standardCommunity = new EquipmentStandardCommunity();
 			if (communityIds != null && communityIds.size() > 0) {
 				communityIds.forEach((c) -> {
+					EquipmentStandardCommunity standardCommunity = new EquipmentStandardCommunity();
 					Community community = communityProvider.findCommunityById(standard.getTargetId());
 					if (community != null) {
 						standardCommunity.setCommunityId(community.getId());
@@ -1894,11 +1894,11 @@ private void checkUserPrivilege(Long orgId, Long privilegeId, Long communityId) 
 			dto.setTaskType(standard.getStandardType());
 		}
 		List<EquipmentInspectionEquipmentPlanMap> planMaps = equipmentProvider.getEquipmentInspectionPlanMap(task.getPlanId());
-		EquipmentStandardRelationDTO relationDTO = new EquipmentStandardRelationDTO();
 		List<EquipmentStandardRelationDTO> equipmentStandardRelations = new ArrayList<>();
 		if (planMaps != null && planMaps.size() > 0) {
 			for (EquipmentInspectionEquipmentPlanMap map : planMaps) {
 				EquipmentInspectionEquipments equipment = equipmentProvider.findEquipmentById(map.getEquimentId());
+				EquipmentStandardRelationDTO relationDTO = new EquipmentStandardRelationDTO();
 				relationDTO.setEquipmentName(equipment.getName());
 				relationDTO.setLocation(equipment.getLocation());
 				equipmentStandardRelations.add(relationDTO);
@@ -1911,6 +1911,7 @@ private void checkUserPrivilege(Long orgId, Long privilegeId, Long communityId) 
 				equipment = equipmentProvider.findEquipmentById(task.getEquipmentId());
 			}
 			if (null != equipment) {
+				EquipmentStandardRelationDTO relationDTO = new EquipmentStandardRelationDTO();
 				relationDTO.setEquipmentName(equipment.getName());
 				relationDTO.setLocation(equipment.getLocation());
 				equipmentStandardRelations.add(relationDTO);
@@ -5687,14 +5688,14 @@ private void checkUserPrivilege(Long orgId, Long privilegeId, Long communityId) 
 				List<EquipmentStandardRelationDTO> equipmentRelations = new ArrayList<>();
 				EquipmentInspectionEquipments equipment = equipmentProvider.findEquipmentById(task.getEquipmentId());
 				EquipmentInspectionStandards standard = equipmentProvider.findStandardById(task.getStandardId());
-				EquipmentStandardRelationDTO relationDTO = new EquipmentStandardRelationDTO();
 				if (equipment != null && standard != null) {
+					EquipmentStandardRelationDTO relationDTO = new EquipmentStandardRelationDTO();
 					relationDTO.setQrCodeFlag(equipment.getQrCodeFlag());
 					relationDTO.setLocation(equipment.getLocation());
 					relationDTO.setEquipmentName(equipment.getName());
 					relationDTO.setStandardId(standard.getId());
+					equipmentRelations.add(relationDTO);
 				}
-				equipmentRelations.add(relationDTO);
 				return equipmentRelations;
 			}
 		}
@@ -5805,8 +5806,8 @@ private void checkUserPrivilege(Long orgId, Long privilegeId, Long communityId) 
 				//兼容旧任务
 				EquipmentInspectionEquipments equipment = equipmentProvider.findEquipmentById(task.getEquipmentId());
 				EquipmentInspectionStandards standard = equipmentProvider.findStandardById(task.getStandardId());
-				EquipmentStandardRelationDTO relationDTO = new EquipmentStandardRelationDTO();
 				if (equipment != null && standard != null) {
+					EquipmentStandardRelationDTO relationDTO = new EquipmentStandardRelationDTO();
 					relationDTO.setQrCodeFlag(equipment.getQrCodeFlag());
 					relationDTO.setLocation(equipment.getLocation());
 					relationDTO.setEquipmentName(equipment.getName());
