@@ -733,6 +733,7 @@ public class WebMenuServiceImpl implements WebMenuService {
 				if(app.getModuleId() != null && menu.getModuleId() != null && app.getModuleId().longValue() == menu.getModuleId().longValue()){
 					WebMenu selectMenu = ConvertHelper.convert(menu, WebMenu.class);
 					selectMenu.setConfigId(app.getId());
+					selectMenu.setName(app.getName());
 					menus.add(selectMenu);
 				}
 			}
