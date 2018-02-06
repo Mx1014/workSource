@@ -16,6 +16,7 @@ import com.everhomes.server.schema.Tables;
 import com.everhomes.server.schema.tables.daos.EhServiceModuleAppsDao;
 import com.everhomes.server.schema.tables.pojos.EhServiceModuleApps;
 import com.everhomes.server.schema.tables.records.EhServiceModuleAppsRecord;
+import com.everhomes.user.UserContext;
 import com.everhomes.util.ConvertHelper;
 import com.everhomes.util.DateHelper;
 import org.jooq.*;
@@ -27,6 +28,8 @@ import org.springframework.stereotype.Component;
 import java.sql.Timestamp;
 import java.util.ArrayList;
 import java.util.List;
+import java.util.Set;
+import java.util.stream.Collectors;
 
 @Component
 public class ServiceModuleAppServiceImpl implements ServiceModuleAppService {
@@ -110,13 +113,22 @@ public class ServiceModuleAppServiceImpl implements ServiceModuleAppService {
 
     @Override
     public List<Long> listReleaseServiceModuleIdsByNamespace(Integer namespaceId) {
-        return null;
+		List<Long> moduleIds = new ArrayList<>();
+		List<ServiceModuleApp> apps = listReleaseServiceModuleApps(namespaceId);
+
+		if(apps != null && apps.size() > 0){
+			Set<Long> set = apps.stream().map(r -> r.getModuleId()).collect(Collectors.toSet());
+			moduleIds = new ArrayList<>(set);
+		}
+		return moduleIds;
     }
 
 	@Override
 	public ServiceModuleApp findReleaseServiceModuleAppByOriginId(Long originId) {
-		return null;
+		Integer namespaceId = UserContext.getCurrentNamespaceId();
+		PortalVersion releaseVersion = portalVersionProvider.findReleaseVersion(namespaceId);
+		ServiceModuleApp serviceModuleApp = serviceModuleAppProvider.findServiceModuleApp(namespaceId, releaseVersion.getId(), originId);
+		return serviceModuleApp;
 	}
-
 
 }

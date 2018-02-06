@@ -246,4 +246,22 @@ public class ServiceModuleAppProviderImpl implements ServiceModuleAppProvider {
 		return  app;
 	}
 
+	@Override
+	public ServiceModuleApp findServiceModuleApp(Integer namespaceId, Long versionId, Long originId) {
+
+		SelectQuery<EhServiceModuleAppsRecord> query = getReadOnlyContext().selectFrom(Tables.EH_SERVICE_MODULE_APPS).getQuery();
+		query.addConditions(Tables.EH_SERVICE_MODULE_APPS.NAMESPACE_ID.eq(namespaceId));
+		if(versionId != null){
+			query.addConditions(Tables.EH_SERVICE_MODULE_APPS.VERSION_ID.eq(versionId));
+		}
+
+		if(originId != null){
+			query.addConditions(Tables.EH_SERVICE_MODULE_APPS.ORIGIN_ID.eq(originId));
+		}
+
+		ServiceModuleApp app = query.fetchAnyInto(ServiceModuleApp.class);
+
+		return  app;
+	}
+
 }

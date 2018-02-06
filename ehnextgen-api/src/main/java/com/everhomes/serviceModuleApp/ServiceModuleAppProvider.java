@@ -32,4 +32,6 @@ public interface ServiceModuleAppProvider {
     ServiceModuleApp findServiceModuleApp(Integer namespaceId, Long versionId, Long moduleId, String customTag);
 
 	ServiceModuleApp findServiceModuleApp(Integer namespaceId, Long versionId, Byte actionType, String instanceConfig);
+
+	ServiceModuleApp findServiceModuleApp(Integer namespaceId, Long versionId, Long originId);
 }
