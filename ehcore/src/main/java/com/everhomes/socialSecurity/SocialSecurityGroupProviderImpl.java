@@ -5,6 +5,7 @@ import java.sql.Timestamp;
 import java.util.List;
 
 import org.jooq.DSLContext;
+import org.jooq.Record;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
 
@@ -69,6 +70,19 @@ public class SocialSecurityGroupProviderImpl implements SocialSecurityGroupProvi
 		getReadWriteContext().delete(Tables.EH_SOCIAL_SECURITY_GROUPS)
 				.where(Tables.EH_SOCIAL_SECURITY_GROUPS.ORGANIZATION_ID.eq(ownerId))
 				.and(Tables.EH_SOCIAL_SECURITY_GROUPS.PAY_MONTH.eq(month)).execute();
+	}
+
+	@Override
+	public SocialSecurityGroup findSocialSecurityGroupByOrg(Long ownerId, String payMonth) {
+		Record r = getReadOnlyContext().select().from(Tables.EH_SOCIAL_SECURITY_GROUPS)
+				.where(Tables.EH_SOCIAL_SECURITY_GROUPS.ORGANIZATION_ID.eq(ownerId))
+				.and(Tables.EH_SOCIAL_SECURITY_GROUPS.PAY_MONTH.eq(payMonth))
+				.orderBy(Tables.EH_SOCIAL_SECURITY_GROUPS.ID.asc())
+				.fetchAny();
+		if (null == r) {
+			return null;
+		}
+		return ConvertHelper.convert(r, SocialSecurityGroup.class);
 	}
 
 	private EhSocialSecurityGroupsDao getReadWriteDao() {
