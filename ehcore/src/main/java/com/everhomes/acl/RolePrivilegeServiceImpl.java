@@ -3530,7 +3530,7 @@ public class RolePrivilegeServiceImpl implements RolePrivilegeService {
 		List<ServiceModuleApp> serviceModuleApps = authorizationsAppControl.getServiceModuleApps();
 
 		// todo: 对auth根据controlType做分类
-		if(null != serviceModuleApps){
+		if(null != serviceModuleApps){//为null代表无此分类的应用
             switch (ModuleManagementType.fromCode(controlType)){
                 case COMMUNITY_CONTROL:
                     if (serviceModuleApps.size() == 0){
