@@ -51,6 +51,7 @@ import java.util.List;
  *  <li>price: 购买价格</li>
  *  <li>buyTime: 购买日期</li>
  *  <li>depreciationYears: 折旧年限</li>
+ *  <li>coordinate: 坐标信息</li>
  *  <li>inspectionCategoryId: 巡检类型</li>
  * </ul>
  */
@@ -145,6 +146,8 @@ public class EquipmentsDTO {
 	private Timestamp buyTime;
 
 	private Long depreciationYear;
+
+	private String coordinate;
 
 
 	public Long getId() {
@@ -481,6 +484,14 @@ public class EquipmentsDTO {
 
 	public void setDepreciationYear(Long depreciationYear) {
 		this.depreciationYear = depreciationYear;
+	}
+
+	public String getCoordinate() {
+		return coordinate;
+	}
+
+	public void setCoordinate(String coordinate) {
+		this.coordinate = coordinate;
 	}
 
 	public Long getInspectionCategoryId() {

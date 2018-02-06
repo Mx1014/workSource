@@ -49,6 +49,7 @@ import java.util.List;
  *  <li>price: 购买价格</li>
  *  <li>buyTime: 购买日期</li>
  *  <li>depreciationYears: 折旧年限</li>
+ *  <li>coordinate: 坐标信息</li>
  *  <li>namespaceId: namespaceId</li>
  * </ul>
  */
@@ -138,6 +139,8 @@ public class UpdateEquipmentsCommand {
 	private Long buyTime;
 
 	private Long depreciationYear;
+
+	private String coordinate;
 
 	private Integer namespaceId;
 
@@ -461,6 +464,14 @@ public class UpdateEquipmentsCommand {
 
 	public void setDepreciationYear(Long depreciationYear) {
 		this.depreciationYear = depreciationYear;
+	}
+
+	public String getCoordinate() {
+		return coordinate;
+	}
+
+	public void setCoordinate(String coordinate) {
+		this.coordinate = coordinate;
 	}
 
 	public Integer getNamespaceId() {
