@@ -76,8 +76,3 @@ INSERT INTO `eh_service_module_privileges` (`id`, `module_id`, `privilege_type`,
 VALUES (@mp_id:=@mp_id+1, '20840', '0', 30087, '设备巡检 巡检计划审批', '0', NOW());
 
 -- 新增权限  by jiarui 20180205
-
---   设备增加经纬度字符串  by jiarui
-ALTER TABLE `eh_equipment_inspection_equipments`
-  ADD COLUMN `coordinate`  varchar(1024) NULL AFTER `geohash`;
--- 设备增加经纬度字符串  by jiarui
