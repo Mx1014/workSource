@@ -1402,27 +1402,29 @@ public class OrganizationServiceImpl implements OrganizationService {
     }
 
     private void updateCustomerEntryInfo(EnterpriseCustomer customer, List<OrganizationAddressDTO> addressDTOs) {
+        LOGGER.debug("updateCustomerEntryInfo customer id: {}, address: {}", customer.getId(), addressDTOs);
         if (addressDTOs != null && addressDTOs.size() > 0) {
             List<CustomerEntryInfo> entryInfos = enterpriseCustomerProvider.listCustomerEntryInfos(customer.getId());
+            List<Long> addressIds = new ArrayList<>();
             if(entryInfos != null && entryInfos.size() > 0) {
-                List<Long> addressIds = entryInfos.stream().map(entryInfo -> {
+                addressIds = entryInfos.stream().map(entryInfo -> {
                     return entryInfo.getAddressId();
                 }).collect(Collectors.toList());
+            }
 
-                for (OrganizationAddressDTO organizationAddressDTO : addressDTOs) {
-                    if(addressIds.contains(organizationAddressDTO.getAddressId())) {
-                        continue;
-                    }
-
-                    CustomerEntryInfo info = new CustomerEntryInfo();
-                    info.setNamespaceId(customer.getNamespaceId());
-                    info.setCustomerType(CustomerType.ENTERPRISE.getCode());
-                    info.setCustomerId(customer.getId());
-                    info.setCustomerName(customer.getName());
-                    info.setAddressId(organizationAddressDTO.getAddressId());
-                    info.setBuildingId(organizationAddressDTO.getBuildingId());
-                    enterpriseCustomerProvider.createCustomerEntryInfo(info);
+            for (OrganizationAddressDTO organizationAddressDTO : addressDTOs) {
+                if(addressIds.contains(organizationAddressDTO.getAddressId())) {
+                    continue;
                 }
+
+                CustomerEntryInfo info = new CustomerEntryInfo();
+                info.setNamespaceId(customer.getNamespaceId());
+                info.setCustomerType(CustomerType.ENTERPRISE.getCode());
+                info.setCustomerId(customer.getId());
+                info.setCustomerName(customer.getName());
+                info.setAddressId(organizationAddressDTO.getAddressId());
+                info.setBuildingId(organizationAddressDTO.getBuildingId());
+                enterpriseCustomerProvider.createCustomerEntryInfo(info);
             }
 
         }
