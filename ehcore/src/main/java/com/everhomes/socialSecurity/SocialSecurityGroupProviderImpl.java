@@ -35,7 +35,7 @@ public class SocialSecurityGroupProviderImpl implements SocialSecurityGroupProvi
 		Long id = sequenceProvider.getNextSequence(NameMapper.getSequenceDomainFromTablePojo(EhSocialSecurityGroups.class));
 		socialSecurityGroup.setId(id);
 		socialSecurityGroup.setCreateTime(new Timestamp(DateHelper.currentGMTTime().getTime()));
-		socialSecurityGroup.setCreatorUid(UserContext.current().getUser().getId());
+		socialSecurityGroup.setCreatorUid(UserContext.currentUserId());
 		socialSecurityGroup.setUpdateTime(socialSecurityGroup.getCreateTime());
 		socialSecurityGroup.setOperatorUid(socialSecurityGroup.getCreatorUid());
 		getReadWriteDao().insert(socialSecurityGroup);
@@ -46,7 +46,7 @@ public class SocialSecurityGroupProviderImpl implements SocialSecurityGroupProvi
 	public void updateSocialSecurityGroup(SocialSecurityGroup socialSecurityGroup) {
 		assert (socialSecurityGroup.getId() != null);
 		socialSecurityGroup.setUpdateTime(new Timestamp(DateHelper.currentGMTTime().getTime()));
-		socialSecurityGroup.setOperatorUid(UserContext.current().getUser().getId());
+		socialSecurityGroup.setOperatorUid(UserContext.currentUserId());
 		getReadWriteDao().update(socialSecurityGroup);
 		DaoHelper.publishDaoAction(DaoAction.MODIFY, EhSocialSecurityGroups.class, socialSecurityGroup.getId());
 	}
@@ -63,7 +63,14 @@ public class SocialSecurityGroupProviderImpl implements SocialSecurityGroupProvi
 				.orderBy(Tables.EH_SOCIAL_SECURITY_GROUPS.ID.asc())
 				.fetch().map(r -> ConvertHelper.convert(r, SocialSecurityGroup.class));
 	}
-	
+
+	@Override
+	public void deleteGroup(Long ownerId, String month) {
+		getReadWriteContext().delete(Tables.EH_SOCIAL_SECURITY_GROUPS)
+				.where(Tables.EH_SOCIAL_SECURITY_GROUPS.ORGANIZATION_ID.eq(ownerId))
+				.and(Tables.EH_SOCIAL_SECURITY_GROUPS.PAY_MONTH.eq(month)).execute();
+	}
+
 	private EhSocialSecurityGroupsDao getReadWriteDao() {
 		return getDao(getReadWriteContext());
 	}

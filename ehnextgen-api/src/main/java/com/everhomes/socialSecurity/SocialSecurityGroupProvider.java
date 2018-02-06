@@ -13,4 +13,7 @@ public interface SocialSecurityGroupProvider {
 
 	List<SocialSecurityGroup> listSocialSecurityGroup();
 
+	void deleteGroup(Long ownerId, String month);
+
+	SocialSecurityGroup findSocialSecurityGroupByOrg(Long ownerId, String payMonth);
 }
