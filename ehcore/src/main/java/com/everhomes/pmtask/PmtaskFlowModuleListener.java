@@ -636,7 +636,7 @@ public class PmtaskFlowModuleListener implements FlowModuleListener {
 		}
 		return apps.stream().map(c -> {
 			FlowServiceTypeDTO dto = new FlowServiceTypeDTO();
-			dto.setId(c.getId());
+			dto.setId(c.getOriginId());
 			dto.setNamespaceId(namespaceId);
 			dto.setServiceName(c.getName());
 			return dto;

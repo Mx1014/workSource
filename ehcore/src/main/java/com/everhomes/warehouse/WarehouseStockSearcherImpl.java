@@ -269,7 +269,7 @@ public class WarehouseStockSearcherImpl extends AbstractElasticSearch implements
         cmd1.setModuleId(PrivilegeConstants.WAREHOUSE_MODULE_ID);
         cmd1.setNamespaceId(UserContext.getCurrentNamespaceId());
         ListServiceModuleAppsResponse res = portalService.listServiceModuleAppsWithConditon(cmd1);
-        Long appId = res.getServiceModuleApps().get(0).getId();
+        Long appId = res.getServiceModuleApps().get(0).getOriginId();
         if(!userPrivilegeMgr.checkUserPrivilege(UserContext.currentUserId(), EntityType.ORGANIZATIONS.getCode(), OrganizationId, OrganizationId,priviledgeId , appId, null,communityId )){
             throw RuntimeErrorException.errorWith(PrivilegeServiceErrorCode.SCOPE, PrivilegeServiceErrorCode.ERROR_CHECK_APP_PRIVILEGE,
                     "check app privilege error");

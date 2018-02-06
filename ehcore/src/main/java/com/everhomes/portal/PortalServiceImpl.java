@@ -54,6 +54,7 @@ import com.everhomes.server.schema.tables.pojos.EhPortalItems;
 import com.everhomes.server.schema.tables.pojos.EhPortalLayouts;
 import com.everhomes.serviceModuleApp.ServiceModuleApp;
 import com.everhomes.serviceModuleApp.ServiceModuleAppProvider;
+import com.everhomes.serviceModuleApp.ServiceModuleAppService;
 import com.everhomes.settings.PaginationConfigHelper;
 import com.everhomes.user.User;
 import com.everhomes.user.UserContext;
@@ -158,6 +159,9 @@ public class PortalServiceImpl implements PortalService {
 	@Autowired
 	private WebMenuService webMenuService;
 
+	@Autowired
+	private ServiceModuleAppService serviceModuleAppService;
+
 	@Override
 	public ListServiceModuleAppsResponse listServiceModuleApps(ListServiceModuleAppsCommand cmd) {
 
@@ -191,10 +195,11 @@ public class PortalServiceImpl implements PortalService {
 //			return new ListServiceModuleAppsResponse(dtos);
 //		}
 //		return null;
-		List<ServiceModuleAppDTO> moduleApps = serviceModuleProvider.listReflectionServiceModuleApp(cmd.getNamespaceId(), cmd.getModuleId(), cmd.getActionType(), cmd.getCustomTag(), cmd.getCustomPath(), null);
+		List<ServiceModuleApp> moduleApps = serviceModuleAppService.listReleaseServiceModuleApp(cmd.getNamespaceId(), cmd.getModuleId(), cmd.getActionType(), cmd.getCustomTag(), null);
+//		List<ServiceModuleAppDTO> moduleApps = serviceModuleProvider.listReflectionServiceModuleApp(cmd.getNamespaceId(), cmd.getModuleId(), cmd.getActionType(), cmd.getCustomTag(), cmd.getCustomPath(), null);
 //		LOGGER.debug("list apps size:" + moduleApps.size());
 		if(moduleApps != null && moduleApps.size() > 0){
-			List dtos = Collections.singletonList(moduleApps.get(0));
+			List dtos = Collections.singletonList(ConvertHelper.convert(moduleApps.get(0), ServiceModuleAppDTO.class);
 			return new ListServiceModuleAppsResponse(dtos);
 		}
 		return null;

@@ -18,4 +18,8 @@ public interface ServiceModuleAppService {
 	List<ServiceModuleApp> listServiceModuleApp(Integer namespaceId, Long versionId, Long moduleId, Byte actionType, String customTag, String controlType);
 
 	List<ServiceModuleApp> listReleaseServiceModuleApp(Integer namespaceId, Long moduleId, Byte actionType, String customTag, String controlType);
+
+	List<Long> listReleaseServiceModuleIdsByNamespace(Integer namespaceId);
+
+	ServiceModuleApp findReleaseServiceModuleAppByOriginId(Long originId);
 }

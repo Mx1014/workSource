@@ -107,4 +107,16 @@ public class ServiceModuleAppServiceImpl implements ServiceModuleAppService {
 
 		return apps;
 	}
+
+    @Override
+    public List<Long> listReleaseServiceModuleIdsByNamespace(Integer namespaceId) {
+        return null;
+    }
+
+	@Override
+	public ServiceModuleApp findReleaseServiceModuleAppByOriginId(Long originId) {
+		return null;
+	}
+
+
 }

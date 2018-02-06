@@ -189,7 +189,7 @@ public class FileManagementServiceImpl implements  FileManagementService{
         ListServiceModuleAppsResponse apps = portalService.listServiceModuleAppsWithConditon(appCommand);
         Long appId = null;
         if(null != apps && apps.getServiceModuleApps().size() > 0){
-            appId = apps.getServiceModuleApps().get(0).getId();
+            appId = apps.getServiceModuleApps().get(0).getOriginId();
         }
         CheckModuleManageCommand moduleCommand = new CheckModuleManageCommand();
         moduleCommand.setAppId(appId);
