@@ -39,6 +39,7 @@ import org.springframework.stereotype.Component;
 
 import java.io.IOException;
 import java.util.ArrayList;
+import java.util.Collections;
 import java.util.List;
 import java.util.Objects;
 
@@ -212,11 +213,12 @@ public class EquipmentStandardSearcherImpl extends AbstractElasticSearch impleme
                         }
                         standard.setCommunities(communities);
                     } else {
-                        EquipmentStandardCommunity standardCommunity = new EquipmentStandardCommunity();
                         Community community = communityProvider.findCommunityById(standard.getTargetId());
                         if (community != null) {
+                            EquipmentStandardCommunity standardCommunity = new EquipmentStandardCommunity();
                             standardCommunity.setCommunityName(community.getName());
                             standardCommunity.setCommunityId(standard.getTargetId());
+                            standard.setCommunities(new ArrayList<>(Collections.singletonList(standardCommunity)));
                         }
                     }
                 }
