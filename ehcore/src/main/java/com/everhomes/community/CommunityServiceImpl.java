@@ -1177,6 +1177,7 @@ public class CommunityServiceImpl implements CommunityService {
 				building.setName(data.getName());
 				building.setAliasName(data.getAliasName());
 				building.setAddress(data.getAddress());
+				building.setManagerName(data.getContactor());
 				building.setContact(data.getPhone());
 				if (StringUtils.isNotBlank(data.getAreaSize())) {
 					building.setAreaSize(Double.valueOf(data.getAreaSize()));
@@ -1206,6 +1207,7 @@ public class CommunityServiceImpl implements CommunityService {
 			}else {
 				building.setAliasName(data.getAliasName());
 				building.setAddress(data.getAddress());
+				building.setManagerName(data.getContactor());
 				building.setContact(data.getPhone());
 				if (StringUtils.isNotBlank(data.getAreaSize())) {
 					building.setAreaSize(Double.valueOf(data.getAreaSize()));
