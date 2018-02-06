@@ -818,9 +818,7 @@ public class FieldServiceImpl implements FieldService {
         String fieldParam = field.getFieldParam();
         FieldParams params = (FieldParams) StringHelper.fromJsonString(fieldParam, FieldParams.class);
         //如果是select，则修改fieldName,在末尾加上Name，减去末尾的Id如果存在的话。由抽象跌入现实，拥有了名字，这是从神降格为人的过程---第六天天主波旬
-        if(fieldName.indexOf("Uid") == fieldName.length()-3) {
-            fieldName += "Name";
-        } else if((params.getFieldParamType().equals("select") || params.getFieldParamType().equals("customizationSelect"))
+        if((params.getFieldParamType().equals("select") || params.getFieldParamType().equals("customizationSelect"))
                 && fieldName.lastIndexOf("Type") > -1) {
             fieldName += "Name";
         } else if((params.getFieldParamType().equals("select") || params.getFieldParamType().equals("customizationSelect")) && fieldName.lastIndexOf("Id") > -1){
