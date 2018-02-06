@@ -3167,7 +3167,7 @@ public class EquipmentProviderImpl implements EquipmentProvider {
         }
         if (AdminFlag.NO.equals(AdminFlag.fromStatus(adminFlag)) && (executePlanIds == null || executePlanIds.size() == 0)) {
             response.setTotayTasksCount(0L);
-            response.setTodayCompleteCount(0L);;
+            response.setTodayCompleteCount(0L);
             return;
         }
 
