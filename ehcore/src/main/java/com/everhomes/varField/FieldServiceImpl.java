@@ -142,7 +142,7 @@ public class FieldServiceImpl implements FieldService {
             customerService.checkCustomerAuth(cmd.getNamespaceId(), PrivilegeConstants.ENTERPRISE_CUSTOMER_MANAGE_IMPORT, cmd.getOrgId(), cmd.getCommunityId());
         }
         ExportFieldsExcelCommand command = ConvertHelper.convert(cmd, ExportFieldsExcelCommand.class);
-        List<FieldGroupDTO> results = getAllGroups(command,true);
+        List<FieldGroupDTO> results = getAllGroups(command,true,false);
         if(results != null && results.size() > 0) {
             List<String> sheetNames = results.stream().map(result -> {
                 return result.getGroupDisplayName();
@@ -186,7 +186,7 @@ public class FieldServiceImpl implements FieldService {
 
     @Override
     public void exportDynamicExcel(ExportFieldsExcelCommand cmd, HttpServletResponse response) {
-        List<FieldGroupDTO> results = getAllGroups(cmd,true);
+        List<FieldGroupDTO> results = getAllGroups(cmd,true,true);
         if(results != null && results.size() > 0) {
             List<String> sheetNames = results.stream().map(result -> {
                 return result.getGroupDisplayName();
@@ -202,8 +202,7 @@ public class FieldServiceImpl implements FieldService {
      * @param onlyLeaf
      * @return 返回空列表而非null
      */
-    @Override
-    public List<FieldGroupDTO> getAllGroups(ExportFieldsExcelCommand cmd,boolean onlyLeaf) {
+    private List<FieldGroupDTO> getAllGroups(ExportFieldsExcelCommand cmd,boolean onlyLeaf,boolean filter) {
         //管理员权限校验
         if(ModuleName.ENTERPRISE_CUSTOMER.getName().equals(cmd.getModuleName())) {
             customerService.checkCustomerAuth(cmd.getNamespaceId(), PrivilegeConstants.ENTERPRISE_CUSTOMER_MANAGE_EXPORT, cmd.getOrgId(), cmd.getCommunityId());
@@ -214,27 +213,30 @@ public class FieldServiceImpl implements FieldService {
         List<FieldGroupDTO> allGroups = listFieldGroups(cmd1);
         List<FieldGroupDTO> groups = new ArrayList<>();
         List<FieldGroupDTO> targetGroups = new ArrayList<>();
-
-        if(onlyLeaf){
-            getAllGroups(allGroups,groups);
-        }else{
-            groups = allGroups;
-        }
-        //双重循环匹配浏览器所传的sheetName，获得目标sheet集合
-        if(StringUtils.isEmpty(cmd.getIncludedGroupIds())) {
-            return targetGroups;
-        }
-        String[] split = cmd.getIncludedGroupIds().split(",");
-        for(int i = 0 ; i < split.length; i ++){
-            long targetGroupId = Long.parseLong(split[i]);
-            for(int j = 0; j < groups.size(); j++){
-                Long id = groups.get(j).getGroupId();
-                if(id.compareTo(targetGroupId) == 0){
-                    targetGroups.add(groups.get(j));
+        if(filter){
+            //双重循环匹配浏览器所传的sheetName，获得目标sheet集合
+            if(StringUtils.isEmpty(cmd.getIncludedGroupIds())) {
+                return targetGroups;
+            }
+            String[] split = cmd.getIncludedGroupIds().split(",");
+            for(int i = 0 ; i < split.length; i ++){
+                long targetGroupId = Long.parseLong(split[i]);
+                for(int j = 0; j < allGroups.size(); j++){
+                    Long id = allGroups.get(j).getGroupId();
+                    if(id.compareTo(targetGroupId) == 0){
+                        targetGroups.add(allGroups.get(j));
+                    }
                 }
             }
+        }else{
+            targetGroups = allGroups;
         }
-        return targetGroups;
+        if(onlyLeaf){
+            getAllGroups(targetGroups,groups);
+        }else{
+            groups = targetGroups;
+        }
+        return groups;
     }
 
     @Override
