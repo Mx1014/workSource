@@ -537,6 +537,8 @@ public class ServiceModuleServiceImpl implements ServiceModuleService {
 
     @Override
     public TreeServiceModuleAppsResponse treeServiceModuleApps(TreeServiceModuleCommand cmd) {
+        TreeServiceModuleAppsResponse response = new TreeServiceModuleAppsResponse();
+
         checkOwnerIdAndOwnerType(cmd.getOwnerType(), cmd.getOwnerId());
 
         Integer namespaceId = UserContext.getCurrentNamespaceId(cmd.getNamespaceId());
@@ -544,9 +546,11 @@ public class ServiceModuleServiceImpl implements ServiceModuleService {
 //        List<ServiceModuleDTO> tempList = filterByScopes(namespaceId, cmd.getOwnerType(), cmd.getOwnerId());
         //todo
         List<Long> moduleIds = serviceModuleAppService.listReleaseServiceModuleIdsByNamespace(UserContext.getCurrentNamespaceId());
+        if(moduleIds.size() == 0){
+            return response;
+        }
         List<ServiceModuleDTO> tempList = this.serviceModuleProvider.listServiceModuleDtos(moduleIds);
 
-        TreeServiceModuleAppsResponse response = new TreeServiceModuleAppsResponse();
         List<ServiceModuleDTO> communityControlList = new ArrayList<>();
         List<ServiceModuleDTO> orgControlList = new ArrayList<>();
         List<ServiceModuleDTO> unlimitControlList = new ArrayList<>();

@@ -6,6 +6,7 @@ import java.sql.Timestamp;
 import java.util.List;
 
 import com.everhomes.listing.CrossShardListingLocator;
+import com.everhomes.rest.socialSecurity.NormalFlag;
 import org.jooq.DSLContext;
 import org.jooq.Record;
 import org.jooq.SelectConditionStep;
@@ -73,10 +74,11 @@ public class SocialSecurityReportProviderImpl implements SocialSecurityReportPro
     }
 
     @Override
-    public void deleteSocialSecurityReports(Long ownerId, String payMonth) {
+    public void deleteSocialSecurityReports(Long ownerId, String payMonth, Byte isFiled) {
         getReadWriteContext().delete(Tables.EH_SOCIAL_SECURITY_REPORT)
                 .where(Tables.EH_SOCIAL_SECURITY_REPORT.ORGANIZATION_ID.eq(ownerId))
-                .and(Tables.EH_SOCIAL_SECURITY_REPORT.PAY_MONTH.eq(payMonth)).execute();
+                .and(Tables.EH_SOCIAL_SECURITY_REPORT.PAY_MONTH.eq(payMonth))
+                .and(Tables.EH_SOCIAL_SECURITY_REPORT.IS_FILED.eq(isFiled)).execute();
     }
 
     @Override
@@ -181,9 +183,10 @@ public class SocialSecurityReportProviderImpl implements SocialSecurityReportPro
     }
 
     @Override
-    public List<SocialSecurityReport> listSocialSecurityReport(Long ownerId, String paymentMonth, CrossShardListingLocator locator, int pageSize) {
+    public List<SocialSecurityReport> listFiledSocialSecurityReport(Long ownerId, String paymentMonth, CrossShardListingLocator locator, int pageSize) {
         SelectConditionStep<Record> step = getReadOnlyContext().select().from(Tables.EH_SOCIAL_SECURITY_REPORT)
-                .where(Tables.EH_SOCIAL_SECURITY_REPORT.ORGANIZATION_ID.eq(ownerId));
+                .where(Tables.EH_SOCIAL_SECURITY_REPORT.ORGANIZATION_ID.eq(ownerId))
+                .and(Tables.EH_SOCIAL_SECURITY_REPORT.IS_FILED.eq(NormalFlag.YES.getCode()));
         if (null != paymentMonth) {
             step = step.and(Tables.EH_SOCIAL_SECURITY_REPORT.PAY_MONTH.eq(paymentMonth));
         }
@@ -191,6 +194,19 @@ public class SocialSecurityReportProviderImpl implements SocialSecurityReportPro
             step.and(Tables.EH_SOCIAL_SECURITY_REPORT.ID.gt(locator.getAnchor()));
         }
         step.limit(pageSize);
+        return step.orderBy(Tables.EH_SOCIAL_SECURITY_REPORT.ID.asc())
+                .fetch().map(r -> ConvertHelper.convert(r, SocialSecurityReport.class));
+    }
+
+    @Override
+    public List<SocialSecurityReport> listSocialSecurityReport(Long ownerId, String payMonth, Byte isFiled) {
+        SelectConditionStep<Record> step = getReadOnlyContext().select().from(Tables.EH_SOCIAL_SECURITY_REPORT)
+                .where(Tables.EH_SOCIAL_SECURITY_REPORT.ORGANIZATION_ID.eq(ownerId));
+        if(null != isFiled)
+                step = step.and(Tables.EH_SOCIAL_SECURITY_REPORT.IS_FILED.eq(isFiled));
+        if (null != payMonth) {
+            step = step.and(Tables.EH_SOCIAL_SECURITY_REPORT.PAY_MONTH.eq(payMonth));
+        }
         return step.orderBy(Tables.EH_SOCIAL_SECURITY_REPORT.ID.asc())
                 .fetch().map(r -> ConvertHelper.convert(r, SocialSecurityReport.class));
     }
