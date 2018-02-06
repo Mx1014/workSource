@@ -373,6 +373,8 @@ public class SalaryServiceImpl implements SalaryService {
                 employee = createSalaryEmployee(cmd.getOwnerId(), detailId, month);
             }
             if (null != employee) {
+                OrganizationMemberDetails detail = organizationProvider.findOrganizationMemberDetailsByDetailId(detailId);
+                calculateEmployee(cmd.getOwnerId(), detailId, detail.getOrganizationId());
                 response.getSalaryEmployeeDTO().add(processEmployeeDTO(employee));
             }
         }
@@ -1388,6 +1390,16 @@ public class SalaryServiceImpl implements SalaryService {
     }
 
     private void calculateReports(Long ownerId, String month, Long userId) {
+        //重新计算每个人的数据
+        List<SalaryEmployee> employees = salaryEmployeeProvider.listSalaryEmployees(ownerId, month);
+
+        if (null != employees) {
+            for (SalaryEmployee e : employees) {
+                calculateEmployee(ownerId, e.getUserDetailId(), e.getOrganizationId());
+
+            }
+        }
+        //计算部门汇总
         calculateDptStatistic(ownerId, month, userId);
 
     }
@@ -1492,17 +1504,27 @@ public class SalaryServiceImpl implements SalaryService {
         //把vals的次月清空数据清零
         salaryEmployeeOriginValProvider.setValueBlank(cmd.getOwnerId());
         //重新计算employee
+        calculateEmployees(cmd.getOwnerId(), cmd.getOrganizationId(), UserContext.getCurrentNamespaceId());
+
+        //删除未归档的汇总
+        salaryDepartStatisticProvider.deleteSalaryDepartStatistic(cmd.getOwnerId(), NormalFlag.NO.getCode(), null);
+    }
+
+    private void calculateEmployees(Long ownerId, Long organizationId, Integer namespaceId) {
         List<Long> detailIds = organizationService.listDetailIdWithEnterpriseExclude(null,
-                UserContext.getCurrentNamespaceId(), cmd.getOwnerId(), null, null, null, null, null, Integer.MAX_VALUE - 1, null, null
+                namespaceId, ownerId, null, null, null, null, null, Integer.MAX_VALUE - 1, null, null
         );
         if (null != detailIds) {
             for (Long detailId : detailIds) {
-                List<SalaryEmployeeOriginVal> vals = salaryEmployeeOriginValProvider.listSalaryEmployeeOriginValsByDetailId(detailId);
-                calculateEmployee(cmd.getOwnerId(), detailId, vals, cmd.getOrganizationId());
+                calculateEmployee(ownerId, detailId, organizationId);
+
             }
         }
-        //删除未归档的汇总
-        salaryDepartStatisticProvider.deleteSalaryDepartStatistic(cmd.getOwnerId(), NormalFlag.NO.getCode(), null);
+    }
+
+    private void calculateEmployee(Long ownerId, Long detailId, Long organizationId) {
+        List<SalaryEmployeeOriginVal> vals = salaryEmployeeOriginValProvider.listSalaryEmployeeOriginValsByDetailId(detailId);
+        calculateEmployee(ownerId, detailId, vals, organizationId);
     }
 
     private Workbook createEmployeeSalaryHeadWB(Long orgId) {
