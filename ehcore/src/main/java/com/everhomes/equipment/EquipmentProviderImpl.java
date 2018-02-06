@@ -9,6 +9,7 @@ import com.everhomes.db.DaoHelper;
 import com.everhomes.db.DbProvider;
 import com.everhomes.listing.CrossShardListingLocator;
 import com.everhomes.listing.ListingLocator;
+import com.everhomes.listing.ListingQueryBuilderCallback;
 import com.everhomes.naming.NameMapper;
 import com.everhomes.rest.equipment.AdminFlag;
 import com.everhomes.rest.equipment.EquipmentOperateObjectType;
@@ -3136,27 +3137,17 @@ public class EquipmentProviderImpl implements EquipmentProvider {
     }
 
     @Override
-    public void populateTaskStatusCount(Long inspectionCategoryId, List<String> targetType, List<Long> targetId,
-                                        List<Long> executePlanIds, List<Long> reviewPlanIds, Byte adminFlag,
-                                        ListEquipmentTasksResponse response) {
+    public void populateTodayTaskStatusCount(List<Long> executePlanIds, List<Long> reviewPlanIds, Byte adminFlag,
+                                             ListEquipmentTasksResponse response, ListingQueryBuilderCallback queryBuilderCallback) {
 
         DSLContext context = dbProvider.getDslContext(AccessSpec.readOnly());
         SelectQuery<Record> query = context.selectQuery();
-        if (targetType != null && targetType.size() > 0)
-            query.addConditions(Tables.EH_EQUIPMENT_INSPECTION_TASKS.TARGET_TYPE.in(targetType));
 
-        if (targetId != null && targetId.size() > 0)
-            query.addConditions(Tables.EH_EQUIPMENT_INSPECTION_TASKS.TARGET_ID.in(targetId));
-
-        if (inspectionCategoryId != null) {
-            query.addConditions(Tables.EH_EQUIPMENT_INSPECTION_TASKS.INSPECTION_CATEGORY_ID.eq(inspectionCategoryId));
-        }
-
-
-        if (AdminFlag.YES.equals(AdminFlag.fromStatus(adminFlag))) {
-            Condition con = Tables.EH_EQUIPMENT_INSPECTION_TASKS.STATUS.ne(EquipmentTaskStatus.NONE.getCode());
-            query.addConditions(con);
-        }
+//        if (AdminFlag.YES.equals(AdminFlag.fromStatus(adminFlag))) {
+//            Condition con = Tables.EH_EQUIPMENT_INSPECTION_TASKS.STATUS.ne(EquipmentTaskStatus.NONE.getCode());
+//            query.addConditions(con);
+//        }
+        queryBuilderCallback.buildCondition(null, query);
 
         Condition con = null;
         if (AdminFlag.NO.equals(AdminFlag.fromStatus(adminFlag)) && executePlanIds!=null &&  executePlanIds.size()>0) {
@@ -3181,11 +3172,13 @@ public class EquipmentProviderImpl implements EquipmentProvider {
                 EquipmentTaskStatus.WAITING_FOR_EXECUTING.getCode());
         final Field<?>[] fields = {DSL.count(totayTasksCount).as("totayTasksCount"),
                 DSL.count(todayCompleteCount).as("todayCompleteCount")};
+
         query.addSelect(fields);
         query.addFrom(Tables.EH_EQUIPMENT_INSPECTION_TASKS);
+
         if (LOGGER.isDebugEnabled()) {
-            LOGGER.debug("Query tasks by count, sql=" + query.getSQL());
-            LOGGER.debug("Query tasks by count, bindValues=" + query.getBindValues());
+            LOGGER.debug("Query Today tasks count , sql=" + query.getSQL());
+            LOGGER.debug("Query Today tasks count =" + query.getBindValues());
         }
         query.fetch().map((r)->{
             response.setTodayCompleteCount(r.getValue("todayCompleteCount",Long.class));

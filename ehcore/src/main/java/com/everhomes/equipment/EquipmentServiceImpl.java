@@ -214,6 +214,7 @@ import com.everhomes.search.EquipmentSearcher;
 import com.everhomes.search.EquipmentStandardMapSearcher;
 import com.everhomes.search.EquipmentStandardSearcher;
 import com.everhomes.search.EquipmentTasksSearcher;
+import com.everhomes.server.schema.Tables;
 import com.everhomes.server.schema.tables.pojos.EhEquipmentInspectionTasks;
 import com.everhomes.settings.PaginationConfigHelper;
 import com.everhomes.sms.DateUtil;
@@ -3518,8 +3519,18 @@ private void checkUserPrivilege(Long orgId, Long privilegeId, Long communityId) 
 			allTasks = equipmentProvider.listEquipmentInspectionTasksUseCache(cmd.getTaskStatus(), cmd.getInspectionCategoryId(),
 					targetTypes, targetIds, null, null, offset, pageSize + 1, cacheKey, AdminFlag.YES.getCode(),lastSyncTime);
 
-			equipmentProvider.populateTaskStatusCount(cmd.getInspectionCategoryId(),
-					targetTypes, targetIds, null, null, AdminFlag.YES.getCode(), response);
+			equipmentProvider.populateTodayTaskStatusCount(null, null, AdminFlag.YES.getCode(), response,(loc,query)->{
+				if (targetTypes.size() > 0)
+					query.addConditions(Tables.EH_EQUIPMENT_INSPECTION_TASKS.TARGET_TYPE.in(targetTypes));
+
+				if (targetIds.size() > 0)
+					query.addConditions(Tables.EH_EQUIPMENT_INSPECTION_TASKS.TARGET_ID.in(targetIds));
+
+				if (cmd.getInspectionCategoryId() != null) {
+					query.addConditions(Tables.EH_EQUIPMENT_INSPECTION_TASKS.INSPECTION_CATEGORY_ID.eq(cmd.getInspectionCategoryId()));
+				}
+				return query;
+			});
 		}
 		if(!isAdmin) {
 			List<Long> executePlanIds = new ArrayList<>();
@@ -3545,8 +3556,21 @@ private void checkUserPrivilege(Long orgId, Long privilegeId, Long communityId) 
 			allTasks = equipmentProvider.listEquipmentInspectionTasksUseCache(cmd.getTaskStatus(), cmd.getInspectionCategoryId(),
 					targetTypes, targetIds, executePlanIds, reviewPlanIds, offset, pageSize + 1, cacheKey, AdminFlag.NO.getCode(),lastSyncTime);
 
-			equipmentProvider.populateTaskStatusCount(cmd.getInspectionCategoryId(),
-					targetTypes, targetIds, executePlanIds, reviewPlanIds, AdminFlag.NO.getCode(), response);
+			equipmentProvider.populateTodayTaskStatusCount(executePlanIds, reviewPlanIds, AdminFlag.NO.getCode(), response,(loc,query)->{
+				if (targetTypes.size() > 0)
+					query.addConditions(Tables.EH_EQUIPMENT_INSPECTION_TASKS.TARGET_TYPE.in(targetTypes));
+
+				if (targetIds.size() > 0)
+					query.addConditions(Tables.EH_EQUIPMENT_INSPECTION_TASKS.TARGET_ID.in(targetIds));
+
+				if (cmd.getInspectionCategoryId() != null) {
+					query.addConditions(Tables.EH_EQUIPMENT_INSPECTION_TASKS.INSPECTION_CATEGORY_ID.eq(cmd.getInspectionCategoryId()));
+				}
+				Calendar calendar = Calendar.getInstance();
+				calendar.setTime(new Date(DateHelper.currentGMTTime().getTime()));
+				query.addConditions(Tables.EH_EQUIPMENT_INSPECTION_TASKS.CREATE_TIME.gt(getDayBegin(calendar, 0)));
+				return query;
+			});
 		}
 
 		if (allTasks.size() > pageSize) {
