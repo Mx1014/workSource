@@ -309,16 +309,16 @@ public class PmTaskController extends ControllerBase {
      * <b>URL: /pmtask/listAuthorizationCommunityByUser</b>
      * <p>授权人员 管理小区列表</p>
      */
-    @RequestMapping("listAuthorizationCommunityByUser")
-    @RestReturn(value=ListAuthorizationCommunityByUserResponse.class)
-    public RestResponse listAuthorizationCommunityByUser(ListAuthorizationCommunityCommand cmd) {
-        //TODO:
-        ListAuthorizationCommunityByUserResponse resp = pmTaskService.listAuthorizationCommunityByUser(cmd);
-        RestResponse response = new RestResponse(resp);
-        response.setErrorCode(ErrorCodes.SUCCESS);
-        response.setErrorDescription("OK");
-        return response;
-    }
+//    @RequestMapping("listAuthorizationCommunityByUser")
+//    @RestReturn(value=ListAuthorizationCommunityByUserResponse.class)
+//    public RestResponse listAuthorizationCommunityByUser(ListAuthorizationCommunityCommand cmd) {
+//        //TODO:
+//        ListAuthorizationCommunityByUserResponse resp = pmTaskService.listAuthorizationCommunityByUser(cmd);
+//        RestResponse response = new RestResponse(resp);
+//        response.setErrorCode(ErrorCodes.SUCCESS);
+//        response.setErrorDescription("OK");
+//        return response;
+//    }
 
 	
 //	/**
@@ -686,7 +686,7 @@ public class PmTaskController extends ControllerBase {
             listServiceModuleAppsCommand.setCustomTag(String.valueOf(cmd.getTaskCategoryId()));
             ListServiceModuleAppsResponse apps = portalService.listServiceModuleAppsWithConditon(listServiceModuleAppsCommand);
             if (null != apps && null != apps.getServiceModuleApps() && apps.getServiceModuleApps().size() > 0) {
-                flag = userPrivilegeMgr.checkUserPrivilege(UserContext.currentUserId(), EntityType.ORGANIZATIONS.getCode(), cmd.getOwnerId(), cmd.getCurrentOrgId(), PrivilegeConstants.PMTASK_LIST, apps.getServiceModuleApps().get(0).getId(), null,cmd.getCurrentCommunityId());
+                flag = userPrivilegeMgr.checkUserPrivilege(UserContext.currentUserId(), EntityType.ORGANIZATIONS.getCode(), cmd.getOwnerId(), cmd.getCurrentOrgId(), PrivilegeConstants.PMTASK_LIST, apps.getServiceModuleApps().get(0).getOriginId(), null,cmd.getCurrentCommunityId());
                 System.out.print(flag) ;
             }
         }

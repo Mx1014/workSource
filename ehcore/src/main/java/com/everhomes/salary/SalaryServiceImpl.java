@@ -216,10 +216,6 @@ public class SalaryServiceImpl implements SalaryService {
             categoryDTO.setEntities(new ArrayList<>());
             for (SalaryGroupEntity entity : entities) {
 
-                if (SalaryEntityStatus.CLOSE == SalaryEntityStatus.fromCode(entity.getStatus())) {
-                    //跳过不是开启状态的
-                    continue;
-                }
                 if (entity.getCategoryId().equals(category.getId())) {
                     SalaryGroupEntityDTO dto = ConvertHelper.convert(entity, SalaryGroupEntityDTO.class);
                     categoryDTO.getEntities().add(dto);
@@ -548,7 +544,7 @@ public class SalaryServiceImpl implements SalaryService {
         Map<String, Object> params = new HashedMap();
         params.put("ownerId", cmd.getOwnerId());
         params.put("organizationId", cmd.getOrganizationId());
-        params.put("namespaceId", UserContext.getCurrentNamespaceId());
+        params.put("namespaceId", UserContext.getCurrentNamespaceId()+"");
         params.put("excelToken", SalaryReportType.SALARY_EMPLOYEE.getCode() + "");
 
         String fileName = "员工工资表" + ".xlsx";
@@ -1278,7 +1274,7 @@ public class SalaryServiceImpl implements SalaryService {
         Map<String, Object> params = new HashedMap();
         params.put("ownerId", cmd.getOwnerId());
         params.put("organizationId", cmd.getOrganizationId());
-        params.put("namespaceId", UserContext.getCurrentNamespaceId());
+        params.put("namespaceId", UserContext.getCurrentNamespaceId()+"");
         params.put("month", cmd.getMonth());
         params.put("excelToken", cmd.getExportToken());
         SimpleDateFormat sf = new SimpleDateFormat("yyyy年MM月");
