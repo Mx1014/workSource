@@ -1119,4 +1119,14 @@ public class GeneralApprovalServiceImpl implements GeneralApprovalService {
     public void disableApprovalByFormOriginId(Long formOriginId, Long moduleId, String moduleType){
         generalApprovalProvider.disableApprovalByFormOriginId(formOriginId, moduleId, moduleType);
     }
+
+    @Override
+    public String getUserRealName(GetUserRealNameCommand cmd){
+        User user = UserContext.current().getUser();
+        OrganizationMember member = organizationProvider.findOrganizationMemberByOrgIdAndUId(user.getId(), cmd.getOwnerId());
+        if(member != null)
+            return member.getContactName();
+        //  若没有真实姓名则返回昵称
+        return user.getNickName();
+    }
 }
