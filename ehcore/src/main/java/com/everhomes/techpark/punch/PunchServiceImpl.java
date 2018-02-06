@@ -190,6 +190,7 @@ import com.everhomes.user.UserProvider;
 import com.everhomes.user.admin.SystemUserPrivilegeMgr;
 import com.everhomes.util.excel.RowResult;
 import com.everhomes.util.excel.handler.PropMrgOwnerHandler;
+import com.itextpdf.text.pdf.PdfStructTreeController.returnType;
 
 @Service
 public class PunchServiceImpl implements PunchService {
@@ -8003,6 +8004,9 @@ public class PunchServiceImpl implements PunchService {
 
 	private Long findRuleTime(PunchTimeRule ptr, Byte punchType, Integer punchIntervalNo) {
 		LOGGER.debug("find rule time ptr:"+JSON.toJSONString(ptr));
+		if(null == ptr){
+			return null;
+		}
 		if(ptr.getPunchTimesPerDay().intValue() == 2){
 			if (punchType.equals(PunchType.ON_DUTY.getCode())) {
 				return ptr.getStartEarlyTimeLong();
@@ -8865,7 +8869,11 @@ public class PunchServiceImpl implements PunchService {
 		PunchRule pr = getPunchRule(PunchOwnerType.ORGANIZATION.getCode(), request.getEnterpriseId(),
 				request.getUserId());
 		PunchTimeRule ptr = getPunchTimeRuleByRuleIdAndDate(pr, request.getPunchDate(),request.getUserId());
-		pl.setRuleTime(findRuleTime(ptr, request.getPunchType(), request.getPunchIntervalNo()));
+		if(null == ptr){
+//			pl.setRuleTime(0);
+		}else{
+			pl.setRuleTime(findRuleTime(ptr, request.getPunchType(), request.getPunchIntervalNo()));
+		}
 		pl.setStatus(PunchStatus.UNPUNCH.getCode());
 		return pl;
 	}
