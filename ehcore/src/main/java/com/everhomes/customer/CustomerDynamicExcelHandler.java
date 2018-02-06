@@ -501,7 +501,10 @@ public class CustomerDynamicExcelHandler implements DynamicExcelHandler {
     public List<List<String>> getExportData(DynamicSheet sheet, Object params, Map<Object,Object> context) {
         ExportFieldsExcelCommand customerInfo = ConvertHelper.convert(params, ExportFieldsExcelCommand.class);
         Long customerId = customerInfo.getCustomerId();
-        Byte customerType = Byte.valueOf(customerInfo.getCustomerType());
+        Byte customerType = null;
+        if(customerInfo.getCustomerType() != null) {
+            customerType = Byte.valueOf(customerInfo.getCustomerType());
+        }
         Integer namespaceId = customerInfo.getNamespaceId();
         Long communityId = customerInfo.getCommunityId();
         String moduleName = customerInfo.getModuleName();

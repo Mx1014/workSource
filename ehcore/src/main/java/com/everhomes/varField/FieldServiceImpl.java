@@ -6,6 +6,9 @@ import com.everhomes.customer.CustomerService;
 import com.everhomes.dynamicExcel.*;
 import com.everhomes.entity.EntityType;
 import com.everhomes.naming.NameMapper;
+import com.everhomes.organization.OrganizationMember;
+import com.everhomes.organization.OrganizationMemberDetails;
+import com.everhomes.organization.OrganizationProvider;
 import com.everhomes.portal.PortalService;
 import com.everhomes.rest.acl.PrivilegeConstants;
 import com.everhomes.rest.acl.PrivilegeServiceErrorCode;
@@ -16,11 +19,14 @@ import com.everhomes.rest.field.ExportFieldsExcelCommand;
 import com.everhomes.rest.launchpad.ActionType;
 import com.everhomes.rest.portal.ListServiceModuleAppsCommand;
 import com.everhomes.rest.portal.ListServiceModuleAppsResponse;
+import com.everhomes.rest.user.UserInfo;
 import com.everhomes.rest.varField.*;
 import com.everhomes.search.EnterpriseCustomerSearcher;
 import com.everhomes.sequence.SequenceProvider;
+import com.everhomes.user.User;
 import com.everhomes.user.UserContext;
 import com.everhomes.user.UserPrivilegeMgr;
+import com.everhomes.user.UserService;
 import com.everhomes.util.ConvertHelper;
 import com.everhomes.util.RuntimeErrorException;
 import com.everhomes.util.StringHelper;
@@ -86,6 +92,12 @@ public class FieldServiceImpl implements FieldService {
 
     @Autowired
     private EnterpriseCustomerSearcher enterpriseCustomerSearcher;
+
+    @Autowired
+    private OrganizationProvider organizationProvider;
+
+    @Autowired
+    private UserService userService;
 
     @Override
     public List<SystemFieldGroupDTO> listSystemFieldGroups(ListSystemFieldGroupCommand cmd) {
@@ -812,7 +824,7 @@ public class FieldServiceImpl implements FieldService {
             fieldName += "Name";
         }
 
-        if(fieldName.split("Uid").length > 1) {
+        if(fieldName.indexOf("Uid") == fieldName.length()-3) {
             fieldName += "Name";
         }
 
@@ -912,6 +924,21 @@ public class FieldServiceImpl implements FieldService {
             }
         }
 
+        //处理uid的
+        if(fieldName.indexOf("Uid") == fieldName.length()-3) {
+            long uid = Long.parseLong(invoke.toString());
+            OrganizationMemberDetails detail = organizationProvider.findOrganizationMemberDetailsByTargetId(uid);
+            if(null != detail && null != detail.getContactName()){
+                invoke = String.valueOf(detail.getContactName());
+            }else{
+                UserInfo userInfo = userService.getUserInfo(uid);
+                if(userInfo != null){
+                    invoke = String.valueOf(userInfo.getNickName());
+                } else {
+                    LOGGER.error("field "+ fieldName+" find name in organization member failed ,uid is "+ uid);
+                }
+            }
+        }
         return String.valueOf(invoke);
     }
     private String setToObj(String fieldName, Object dto,Object value) throws NoSuchFieldException, IntrospectionException, InvocationTargetException, IllegalAccessException {
