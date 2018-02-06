@@ -88,7 +88,7 @@ public class WorkReportServiceImpl implements WorkReportService {
         report.setModuleId(cmd.getModuleId());
         report.setModuleType(cmd.getModuleType());
         report.setOperatorUserId(userId);
-        report.setOperatorName(fixUpUserName(userId));
+        report.setOperatorName(fixUpUserName(userId, cmd.getOwnerId()));
 
         //  add it with the initial scope.
         dbProvider.execute((TransactionStatus status) -> {
@@ -139,7 +139,7 @@ public class WorkReportServiceImpl implements WorkReportService {
                 report.setStatus(WorkReportStatus.VALID.getCode());
             report.setFormVersion(cmd.getFormVersion());
             report.setOperatorUserId(userId);
-            report.setOperatorName(fixUpUserName(userId));
+            report.setOperatorName(fixUpUserName(userId, report.getOwnerId()));
             dbProvider.execute((TransactionStatus status) -> {
                 workReportProvider.updateWorkReport(report);
                 updateWorkReportScopeMap(report.getId(), cmd.getScopes());
@@ -219,8 +219,11 @@ public class WorkReportServiceImpl implements WorkReportService {
 
     @Override
     public WorkReportDTO updateWorkReportName(UpdateWorkReportNameCommand cmd) {
+        Long userId = UserContext.currentUserId();
         WorkReport report = workReportProvider.getWorkReportById(cmd.getReportId());
         report.setReportName(cmd.getReportName());
+        report.setOperatorUserId(userId);
+        report.setOperatorName(fixUpUserName(userId, report.getOwnerId()));
         workReportProvider.updateWorkReport(report);
 
         WorkReportDTO dto = new WorkReportDTO();
@@ -310,7 +313,7 @@ public class WorkReportServiceImpl implements WorkReportService {
             report.setReportName(template.getReportName());
             report.setReportType(template.getReportType());
             report.setOperatorUserId(userId);
-            report.setOperatorName(fixUpUserName(userId));
+            report.setOperatorName(fixUpUserName(userId, cmd.getOwnerId()));
             if (formOriginId != null)
                 report.setFormOriginId(formOriginId);
             workReportProvider.updateWorkReport(report);
@@ -323,7 +326,7 @@ public class WorkReportServiceImpl implements WorkReportService {
             report.setOrganizationId(cmd.getOrganizationId());
             report.setStatus(WorkReportStatus.RUNNING.getCode());
             report.setOperatorUserId(userId);
-            report.setOperatorName(fixUpUserName(userId));
+            report.setOperatorName(fixUpUserName(userId, cmd.getOwnerId()));
             if (formOriginId != null)
                 report.setFormOriginId(formOriginId);
             report.setReportTemplateId(template.getId());
@@ -351,7 +354,7 @@ public class WorkReportServiceImpl implements WorkReportService {
                 dto.setReportId(r.getId());
                 dto.setReportType(r.getReportType());
                 //  check the scope.
-                if (checkTheScope(r.getId(), userId))
+                if (checkTheScope(r.getId(), userId, cmd.getOwnerId()))
                     reports.add(dto);
             });
         }
@@ -360,11 +363,11 @@ public class WorkReportServiceImpl implements WorkReportService {
         return response;
     }
 
-    private boolean checkTheScope(Long reportId, Long userId) {
+    private boolean checkTheScope(Long reportId, Long userId, Long ownerId) {
         //  1.check the user id list.
         //  2.check the user's department.
         List<WorkReportScopeMapDTO> scopes = listWorkReportScopes(reportId);
-        OrganizationMember user = getMemberByUserId(userId);
+        OrganizationMember user = getMemberByUserId(userId, ownerId);
         List<Long> scopeUserIds = scopes.stream()
                 .filter(p1 -> p1.getSourceType().equals(UniongroupTargetType.MEMBERDETAIL.getCode()))
                 .map(p2 -> p2.getSourceId()).collect(Collectors.toList());
@@ -381,16 +384,15 @@ public class WorkReportServiceImpl implements WorkReportService {
     }
 
     @Override
-    public String fixUpUserName(Long userId) {
-        List<OrganizationMember> members = organizationProvider.listOrganizationMembersByUId(userId);
-        if (members != null && members.size() > 0)
+    public String fixUpUserName(Long userId, Long ownerId) {
+        List<OrganizationMember> members = organizationProvider.findOrganizationMembersByOrgIdAndUId(userId, ownerId);        if (members != null && members.size() > 0)
             return members.get(0).getContactName();
         return "";
     }
 
     @Override
-    public OrganizationMember getMemberByUserId(Long userId) {
-        List<OrganizationMember> results = organizationProvider.listOrganizationMembersByUId(userId);
+    public OrganizationMember getMemberByUserId(Long userId, Long ownerId) {
+        List<OrganizationMember> results = organizationProvider.findOrganizationMembersByOrgIdAndUId(userId, ownerId);
 
         List<OrganizationMember> members = results.stream().filter(r ->
                 r.getGroupType().equals(OrganizationGroupType.DEPARTMENT.getCode()) || r.getGroupType().equals(OrganizationGroupType.DIRECT_UNDER_ENTERPRISE.getCode())
@@ -401,8 +403,8 @@ public class WorkReportServiceImpl implements WorkReportService {
     }
 
     @Override
-    public Long getUserDetailId(Long userId) {
-        List<OrganizationMember> members = organizationProvider.listOrganizationMembersByUId(userId);
+    public Long getUserDetailId(Long userId, Long ownerId) {
+        List<OrganizationMember> members = organizationProvider.findOrganizationMembersByOrgIdAndUId(userId, ownerId);
         if (members != null && members.size() > 0)
             return members.get(0).getDetailId();
         return null;
@@ -439,7 +441,7 @@ public class WorkReportServiceImpl implements WorkReportService {
         reportVal.setReportId(cmd.getReportId());
         reportVal.setReportTime(new Timestamp(cmd.getReportTime()));
         reportVal.setApplierUserId(user.getId());
-        reportVal.setApplierName(fixUpUserName(user.getId()));
+        reportVal.setApplierName(fixUpUserName(user.getId(), cmd.getOrganizationId()));
         reportVal.setReportType(cmd.getReportType());
 
         PostGeneralFormValCommand formCommand = new PostGeneralFormValCommand();
@@ -455,7 +457,7 @@ public class WorkReportServiceImpl implements WorkReportService {
             formCommand.setSourceId(valId);
             generalFormService.postGeneralForm(formCommand);
             for (Long receiverId : cmd.getReceiverIds()) {
-                WorkReportValReceiverMap receiver = packageWorkReportValReceiverMap(namespaceId, valId, receiverId, user.getId());
+                WorkReportValReceiverMap receiver = packageWorkReportValReceiverMap(namespaceId, valId, receiverId, user.getId(), cmd.getOrganizationId());
                 //  create the receiver.
                 workReportValProvider.createWorkReportValReceiverMap(receiver);
                 //  send message to the receiver.
@@ -478,12 +480,12 @@ public class WorkReportServiceImpl implements WorkReportService {
         return dto;
     }
 
-    private WorkReportValReceiverMap packageWorkReportValReceiverMap(Integer namespaceId, Long reportValId, Long receiverId, Long applierId) {
+    private WorkReportValReceiverMap packageWorkReportValReceiverMap(Integer namespaceId, Long reportValId, Long receiverId, Long applierId, Long organizationId) {
         WorkReportValReceiverMap receiver = new WorkReportValReceiverMap();
         receiver.setNamespaceId(namespaceId);
         receiver.setReportValId(reportValId);
         receiver.setReceiverUserId(receiverId);
-        receiver.setReceiverName(fixUpUserName(receiverId));
+        receiver.setReceiverName(fixUpUserName(receiverId, organizationId));
         receiver.setReceiverAvatar(getUserAvatar(receiverId));
         receiver.setReadStatus(WorkReportReadStatus.UNREAD.getCode());
         if (receiverId.longValue() == applierId.longValue())
@@ -535,7 +537,7 @@ public class WorkReportServiceImpl implements WorkReportService {
             //  3.update receivers.
             workReportValProvider.deleteReportValReceiverByValId(reportVal.getId());
             for (Long receiverId : cmd.getReceiverIds()) {
-                WorkReportValReceiverMap receiver = packageWorkReportValReceiverMap(namespaceId, reportVal.getId(), receiverId, user.getId());
+                WorkReportValReceiverMap receiver = packageWorkReportValReceiverMap(namespaceId, reportVal.getId(), receiverId, user.getId(), cmd.getOrganizationId());
                 //  create the receiver.
                 workReportValProvider.createWorkReportValReceiverMap(receiver);
                 //  send message to the receiver.
@@ -873,7 +875,7 @@ public class WorkReportServiceImpl implements WorkReportService {
         dto.setTitle(report.getReportName());
         dto.setApplierUserId(reportVal.getApplierUserId());
         dto.setApplierName(reportVal.getApplierName());
-        dto.setApplierDetailId(getUserDetailId(reportVal.getApplierUserId()));
+        dto.setApplierDetailId(getUserDetailId(reportVal.getApplierUserId(), reportVal.getOwnerId()));
         dto.setApplierUserAvatar(getUserAvatar(reportVal.getApplierUserId()));
         dto.setCreateTime(reportVal.getCreateTime());
         dto.setReceivers(receivers);
