@@ -86,4 +86,6 @@ public interface WarehouseProvider {
     void deleteWarehouseOrderById(Long id);
 
     List<Long> findAllMaterialLogIds(Long warehouseOrderId, Long anchor, int pageSize, SearchWarehouseStockLogsResponse response);
+
+    void updateWarehouseStockByPurchase(Long materialId, Long purchaseQuantity);
 }

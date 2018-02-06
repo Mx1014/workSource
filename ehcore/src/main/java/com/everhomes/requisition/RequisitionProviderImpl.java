@@ -62,6 +62,7 @@ public class RequisitionProviderImpl implements RequisitionProvider {
             dto.setIdentity(r.getValue(req.IDENTITY));
             dto.setStatus(r.getValue(req.STATUS));
             dto.setType(r.getValue(reqType.NAME));
+            dto.setId(r.getValue(req.ID));
             list.add(dto);
         });
         return list;
@@ -81,6 +82,15 @@ public class RequisitionProviderImpl implements RequisitionProvider {
         return context.selectFrom(reqType).where(reqType.NAMESPACE_ID.eq(namespaceId))
                 .and(reqType.OWNER_ID.eq(ownerId)).and(reqType.OWNER_TYPE.eq(ownerType))
                 .fetchInto(RequisitionType.class);
+    }
+
+    @Override
+    public void changeRequisitionStatus2Target(Byte target, Long referId) {
+        DSLContext context = getReadWriteContext();
+        context.update(req)
+                .set(req.STATUS,target)
+                .where(req.ID.eq(referId))
+                .execute();
     }
 
     private DSLContext getReadOnlyContext(){

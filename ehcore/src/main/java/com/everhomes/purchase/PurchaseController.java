@@ -5,6 +5,7 @@ import com.everhomes.controller.ControllerBase;
 import com.everhomes.discover.RestReturn;
 import com.everhomes.rest.RestResponse;
 import com.everhomes.rest.purchase.*;
+import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RestController;
 
@@ -15,7 +16,8 @@ import org.springframework.web.bind.annotation.RestController;
 @RestController
 @RequestMapping("/purchase")
 public class PurchaseController extends ControllerBase{
-
+    @Autowired
+    private PurchaseService purchaseService;
 
     /**
      * <b>URL: /purchase/searchPurchases</b>
@@ -24,7 +26,8 @@ public class PurchaseController extends ControllerBase{
     @RequestMapping("searchPurchases")
     @RestReturn(value = SearchPurchasesResponse.class)
     private RestResponse searchPurchases(SearchPurchasesCommand cmd){
-        RestResponse restResponse = new RestResponse();
+        SearchPurchasesResponse response = purchaseService.searchPurchases(cmd);
+        RestResponse restResponse = new RestResponse(response);
         restResponse.setErrorCode(200);
         restResponse.setErrorDescription("OK");
         return restResponse;
@@ -37,6 +40,7 @@ public class PurchaseController extends ControllerBase{
     @RequestMapping("entryWarehouse")
     @RestReturn(value = String.class)
     private RestResponse entryWarehouse(EntryWarehouseCommand cmd){
+        purchaseService.entryWarehouse(cmd.getPurchaseRequestId());
         RestResponse restResponse = new RestResponse();
         restResponse.setErrorCode(200);
         restResponse.setErrorDescription("OK");
@@ -45,11 +49,12 @@ public class PurchaseController extends ControllerBase{
 
     /**
      * <b>URL: /purchase/createOrUpdatePurchaseOrder</b>
-     * <p>新增或者修改一个采购单</p>
+     * <p>新增或者修改一个采购单(1.0版本暂不支持修改)</p>
      */
     @RequestMapping("createOrUpdatePurchaseOrder")
     @RestReturn(value = String.class)
     private RestResponse createOrUpdatePurchaseOrder(CreateOrUpdatePurchaseOrderCommand cmd){
+        purchaseService.CreateOrUpdatePurchaseOrderCommand(cmd);
         RestResponse restResponse = new RestResponse();
         restResponse.setErrorCode(200);
         restResponse.setErrorDescription("OK");

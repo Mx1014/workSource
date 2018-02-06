@@ -635,6 +635,15 @@ public class WarehouseProviderImpl implements WarehouseProvider {
     }
 
     @Override
+    public void updateWarehouseStockByPurchase(Long materialId, Long purchaseQuantity) {
+        DSLContext context = this.dbProvider.getDslContext(AccessSpec.readWrite());
+        context.update(Tables.EH_WAREHOUSE_STOCKS)
+                .set(Tables.EH_WAREHOUSE_STOCKS.AMOUNT,Tables.EH_WAREHOUSE_STOCKS.AMOUNT.add(purchaseQuantity))
+                .where(Tables.EH_WAREHOUSE_STOCKS.ID.eq(materialId))
+                .execute();
+    }
+
+    @Override
     public Long getWarehouseStockAmount(Long warehouseId, String ownerType, Long ownerId) {
         DSLContext context = dbProvider.getDslContext(AccessSpec.readOnly());
         SelectQuery<EhWarehouseStocksRecord> query = context.selectQuery(Tables.EH_WAREHOUSE_STOCKS);

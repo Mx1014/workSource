@@ -48,7 +48,9 @@ public class RequisitionServiceImpl implements RequisitionService {
     public void createRequisition(CreateRequisitionCommand cmd) {
         Requisition req = ConvertHelper.convert(cmd, Requisition.class);
         req.setCreateUid(UserContext.currentUserId());
-        req.setId(this.sequenceProvider.getNextSequence(NameMapper.getSequenceDomainFromTablePojo(EhRequisitions.class)));
+        long nextReqId = this.sequenceProvider.getNextSequence(NameMapper.getSequenceDomainFromTablePojo
+                (EhRequisitions.class));
+        req.setId(nextReqId);
         req.setIdentity(SupplierHelper.getIdentity());
         req.setCreateUid(UserContext.currentUserId());
         req.setCreateTime(new Timestamp(DateHelper.currentGMTTime().getTime()));
@@ -61,6 +63,8 @@ public class RequisitionServiceImpl implements RequisitionService {
                      "requistion flow case not found.");
         }
         CreateFlowCaseCommand createFlowCaseCommand = new CreateFlowCaseCommand();
+        createFlowCaseCommand.setReferId(nextReqId);
+        createFlowCaseCommand.setReferType("requisitionId");
         createFlowCaseCommand.setCurrentOrganizationId(req.getOwnerId());
         createFlowCaseCommand.setTitle("请示单申请");
         createFlowCaseCommand.setApplyUserId(req.getCreateUid());

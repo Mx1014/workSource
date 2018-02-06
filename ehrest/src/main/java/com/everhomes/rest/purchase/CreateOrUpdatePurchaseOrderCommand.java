@@ -7,6 +7,8 @@ package com.everhomes.rest.purchase;
 
 import com.everhomes.util.StringHelper;
 
+import java.sql.Timestamp;
+import java.util.Date;
 import java.util.List;
 
 /**
@@ -22,10 +24,46 @@ import java.util.List;
 public class CreateOrUpdatePurchaseOrderCommand {
     private Long purchaseRequestId;
     private Long supplierId;
-    private String deliveryDate;
+    private Timestamp deliveryDate;
     private String remark;
     private Long approvalSheetId;
     private List<PurchaseMaterialDTO> dtos;
+    private Integer namespaceId;
+    private String ownerType;
+    private Long ownerId;
+    private Long communityId;
+
+    public Long getCommunityId() {
+        return communityId;
+    }
+
+    public void setCommunityId(Long communityId) {
+        this.communityId = communityId;
+    }
+
+    public Integer getNamespaceId() {
+        return namespaceId;
+    }
+
+    public void setNamespaceId(Integer namespaceId) {
+        this.namespaceId = namespaceId;
+    }
+
+    public String getOwnerType() {
+        return ownerType;
+    }
+
+    public void setOwnerType(String ownerType) {
+        this.ownerType = ownerType;
+    }
+
+    public Long getOwnerId() {
+        return ownerId;
+    }
+
+    public void setOwnerId(Long ownerId) {
+        this.ownerId = ownerId;
+    }
 
     @Override
     public String toString() {
@@ -48,11 +86,11 @@ public class CreateOrUpdatePurchaseOrderCommand {
         this.supplierId = supplierId;
     }
 
-    public String getDeliveryDate() {
+    public Timestamp getDeliveryDate() {
         return deliveryDate;
     }
 
-    public void setDeliveryDate(String deliveryDate) {
+    public void setDeliveryDate(Timestamp deliveryDate) {
         this.deliveryDate = deliveryDate;
     }
 

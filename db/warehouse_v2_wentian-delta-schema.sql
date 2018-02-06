@@ -142,3 +142,6 @@ CREATE TABLE `eh_requisition_types`(
   `default_order` INTEGER DEFAULT 0,
   PRIMARY KEY (`id`)
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4;
+
+ALTER TABLE `eh_warehouse_purchase_orders` ADD COLUMN `community_id` BIGINT DEFAULT NULL;
+ALTER TABLE `eh_warehouse_purchase_orders` ADD COLUMN `applicant_name` BIGINT DEFAULT NULL;
