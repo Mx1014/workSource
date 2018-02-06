@@ -24,7 +24,8 @@ public class AccountCompleteInfoPointEventProcessor extends GeneralPointEventPro
     }
 
     @Override
-    public PointEventProcessResult execute(LocalEvent localEvent, PointRule rule, PointSystem pointSystem, PointRuleCategory pointRuleCategory) {
+    public PointEventProcessResult execute(LocalEvent localEvent, PointRule rule,
+                                           PointSystem pointSystem, PointRuleCategory pointRuleCategory) {
         if (isValid(localEvent)) {
             return super.execute(localEvent, rule, pointSystem, pointRuleCategory);
         }
@@ -33,7 +34,10 @@ public class AccountCompleteInfoPointEventProcessor extends GeneralPointEventPro
 
     private boolean isValid(LocalEvent localEvent) {
         User user = userProvider.findUserById(localEvent.getContext().getUid());
-        return isValid(user.getAvatar()) && isValid(user.getBirthday()) && isValid(user.getStatusLine()) && isValid(user.getOccupation());
+        return isValid(user.getAvatar())
+                && isValid(user.getBirthday())
+                && isValid(user.getStatusLine())
+                && isValid(user.getOccupation());
     }
 
     private boolean isValid(Object o) {

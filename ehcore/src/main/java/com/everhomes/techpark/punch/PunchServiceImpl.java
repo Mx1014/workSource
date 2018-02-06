@@ -3164,7 +3164,7 @@ public class PunchServiceImpl implements PunchService {
 
 	}
 
-	public Workbook createPunchStatisticsBook(List<PunchCountDTO> results, ListPunchCountCommand cmd) {
+	public Workbook createPunchStatisticsBook(List<PunchCountDTO> results, ListPunchCountCommand cmd, Long taskId) {
 		
 		XSSFWorkbook wb = new XSSFWorkbook(); 
 		int columnNo = 13;
@@ -3209,11 +3209,15 @@ public class PunchServiceImpl implements PunchService {
 				+dateSF.get().format(new Date(cmd.getEndDay())));
 		rowReminder.setRowStyle(titleStyle1);
 		this.createPunchStatisticsBookSheetHead(sheet,results );
-
+		taskService.updateTaskProcess(taskId, 55);
+		Integer num =0;
+		
 		if (null == results || results.size() == 0)
 			return wb;
-		for (PunchCountDTO statistic : results )
+		for (PunchCountDTO statistic : results ){
 			this.setNewPunchStatisticsBookRow(sheet, statistic);
+			taskService.updateTaskProcess(taskId,55 + (int)(++num / (results.size()/45)));
+		}
 		return wb;
 //		try {
 //
@@ -4811,7 +4815,7 @@ public class PunchServiceImpl implements PunchService {
 //		return download(wb,filePath,response);
 //	}
 	 @Override
-	 public OutputStream getPunchDetailsOutputStream(Long startDay,Long endDay,Byte exceptionStatus, String userName,String ownerType,Long ownerId) {
+	 public OutputStream getPunchDetailsOutputStream(Long startDay,Long endDay,Byte exceptionStatus, String userName,String ownerType,Long ownerId, Long taskId) {
 
 			ListPunchDetailsCommand cmd = new ListPunchDetailsCommand() ;
 			cmd .setPageSize(Integer.MAX_VALUE-1);
@@ -4821,9 +4825,10 @@ public class PunchServiceImpl implements PunchService {
 			cmd.setUserName(userName);
 			cmd.setOwnerId(ownerId);
 			cmd.setOwnerType(ownerType);
+			taskService.updateTaskProcess(taskId, 2);
 			ListPunchDetailsResponse resp = listPunchDetails(cmd);
-
-	        Workbook workbook = createPunchDetailsBook(resp.getPunchDayDetails() ,cmd);
+			taskService.updateTaskProcess(taskId, 50);
+	        Workbook workbook = createPunchDetailsBook(resp.getPunchDayDetails() ,cmd,taskId);
 	        ByteArrayOutputStream out = new ByteArrayOutputStream();
 	        try {
 	            workbook.write(out);
@@ -4855,7 +4860,7 @@ public class PunchServiceImpl implements PunchService {
 	        return response;
 	    }
 	
-    private Workbook createPunchDetailsBook(List<PunchDayDetailDTO> dtos, ListPunchDetailsCommand cmd) {
+    private Workbook createPunchDetailsBook(List<PunchDayDetailDTO> dtos, ListPunchDetailsCommand cmd, Long taskId) {
     	
 		XSSFWorkbook wb = new XSSFWorkbook();
 		XSSFSheet sheet = wb.createSheet("punchDetails");
@@ -4893,12 +4898,16 @@ public class PunchServiceImpl implements PunchService {
 		rowReminder.createCell(0).setCellValue("统计时间:"+dateSF.get().format(new Date(cmd.getStartDay())) +"~"
 		+dateSF.get().format(new Date(cmd.getEndDay())));
 		rowReminder.setRowStyle(titleStyle1);
-
+		taskService.updateTaskProcess(taskId, 55);
 		this.createPunchDetailsBookSheetHead(sheet );
+		int num = 0;
 		if (null == dtos || dtos.size() == 0)
 			return wb;
-		for (PunchDayDetailDTO dto : dtos )
+		for (PunchDayDetailDTO dto : dtos ){
 			this.setNewPunchDetailsBookRow(sheet, dto);
+
+			taskService.updateTaskProcess(taskId,55 + (int)(++num / (dtos.size()/45)));
+		}
 		return wb;
 	}
     private String convertTimeLongToString(Long timeLong){
@@ -5349,8 +5358,8 @@ public class PunchServiceImpl implements PunchService {
 	}
 
 	 @Override
-	 public OutputStream getPunchStatisticsOutputStream(Long startDay,Long endDay,Byte exceptionStatus, String userName,String ownerType,Long ownerId) {
-
+	 public OutputStream getPunchStatisticsOutputStream(Long startDay,Long endDay,Byte exceptionStatus, String userName,String ownerType,Long ownerId, Long taskId) {
+		 
 		 ListPunchCountCommand cmd = new ListPunchCountCommand() ;
 			cmd .setPageSize(Integer.MAX_VALUE-1);
 			cmd.setStartDay(startDay);
@@ -5359,9 +5368,11 @@ public class PunchServiceImpl implements PunchService {
 			cmd.setUserName(userName);
 			cmd.setOwnerId(ownerId);
 			cmd.setOwnerType(ownerType);
+			taskService.updateTaskProcess(taskId, 2);
 			ListPunchCountCommandResponse resp = listPunchCount(cmd);
 
-			Workbook wb = createPunchStatisticsBook(resp.getPunchCountList(),cmd);
+			taskService.updateTaskProcess(taskId, 50);
+			Workbook wb = createPunchStatisticsBook(resp.getPunchCountList(),cmd,taskId);
 	        ByteArrayOutputStream out = new ByteArrayOutputStream();
 	        try {
 	        	wb.write(out);

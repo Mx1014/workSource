@@ -4,6 +4,8 @@ package com.everhomes.address;
 import java.util.List;
 
 import com.everhomes.rest.address.*;
+import com.everhomes.rest.community.ListApartmentEnterpriseCustomersCommand;
+import com.everhomes.rest.customer.EnterpriseCustomerDTO;
 import org.springframework.web.multipart.MultipartFile;
 
 import com.everhomes.asset.AddressIdAndName;
@@ -80,6 +82,7 @@ public interface AddressService {
     ApartmentAttachmentDTO uploadApartmentAttachment(UploadApartmentAttachmentCommand cmd);
     void deleteApartmentAttachment(DeleteApartmentAttachmentCommand cmd);
     List<ApartmentAttachmentDTO> listApartmentAttachments(ListApartmentAttachmentsCommand cmd);
+    List<EnterpriseCustomerDTO> listApartmentEnterpriseCustomers(ListApartmentEnterpriseCustomersCommand cmd);
     void downloadApartmentAttachment(DownloadApartmentAttachmentCommand cmd);
 
 }
