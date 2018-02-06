@@ -34,6 +34,25 @@ INSERT  INTO  `eh_var_fields` VALUES (10926, 'equipment_inspection', 'geohash', 
 
 -- 增加经纬度动态表单  jiarui  20180122
 
+INSERT  INTO  `eh_var_fields` VALUES (11999, 'equipment_inspection', 'geohash', '经纬度', 'Long', 10000, CONCAT('/',10000,'/'), 1, null, 2, 1, now(),null ,null,'{\"fieldParamType\": \"map\", \"length\": 32}');
+-- 增加经纬度动态表单  jiarui  20180122
+
+-- offline  by jiarui
+SET  @id = (SELECT  MAX(id) from eh_version_realm);
+INSERT INTO `eh_version_realm` VALUES (@id:=@id+1, 'equipmentInspection', NULL, now(), '0');
+
+SET  @vId = (SELECT  MAX(id) from eh_version_urls);
+INSERT INTO `eh_version_urls` VALUES (@vId:=@vId+1, @id, '1.0.0', 'http://opv2-test.zuolin.com/nar/equipmentInspection/inspectionOffLine/equipmentInspection-1-0-0.zip', 'http://opv2-test.zuolin.com/nar/equipmentInspection/inspectionOffLine/equipmentInspection-1-0-0.zip', '物业巡检巡检离线', '0', '物业巡检', NOW(), NULL, '0');
+
+UPDATE eh_launch_pad_items
+SET action_data = '{\"realm\":\"equipmentInspection\",\"entryUrl\":\"http://opv2-test.zuolin.com/nar/equipmentInspection/dist/index.html?hideNavigationBar=1#sign_suffix\"}'
+WHERE item_label LIKE '%巡检%';
+-- offline  by jiarui
+
+UPDATE eh_launch_pad_items
+SET action_type = 44
+WHERE item_label LIKE '%巡检%';
+
 -- 新增权限  by jiarui 20180205
 
 DELETE FROM  eh_service_module_privileges
