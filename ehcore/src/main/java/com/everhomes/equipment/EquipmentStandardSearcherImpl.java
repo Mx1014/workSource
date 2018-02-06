@@ -199,15 +199,15 @@ public class EquipmentStandardSearcherImpl extends AbstractElasticSearch impleme
                     if (standard.getTargetId() == 0L) {
                         List<Long> communityIds = equipmentProvider.listModelCommunityMapByModelId(standard.getId(), EquipmentModelType.STANDARD.getCode());
                         List<EquipmentStandardCommunity> communities = new ArrayList<>();
-                        EquipmentStandardCommunity standardCommunity = new EquipmentStandardCommunity();
                         if (communityIds != null && communityIds.size() > 0) {
                             communityIds.forEach((c) -> {
                                 Community community = communityProvider.findCommunityById(c);
                                 if (community != null) {
+                                    EquipmentStandardCommunity standardCommunity = new EquipmentStandardCommunity();
                                     standardCommunity.setCommunityId(community.getId());
                                     standardCommunity.setCommunityName(community.getName());
+                                    communities.add(standardCommunity);
                                 }
-                                communities.add(standardCommunity);
                             });
                         }
                         standard.setCommunities(communities);
