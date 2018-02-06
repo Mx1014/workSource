@@ -34,6 +34,14 @@ INSERT  INTO  `eh_var_fields` VALUES (11999, 'equipment_inspection', 'geohash', 
 -- INSERT INTO `eh_version_realm` VALUES (@id:=@id+1, 'equipmentInspection', NULL, now(), '0');
 -- SET  @vId = (SELECT  MAX(id) from eh_version_urls);
 -- INSERT INTO `eh_version_urls` VALUES (@vId:=@vId+1, @id, '1.0.0', 'http://lixian.zuolin.com/nar/equipmentInspection/inspectionOffLine/equipmentInspection-1-0-0.zip', 'http://10.1.10.196/nar/equipmentInspection/inspectionOffLine/equipmentInspection-1-0-0.zip', '物业巡检巡检离线', '0', '物业巡检', NOW(), NULL, '0');
+UPDATE eh_launch_pad_items
+SET action_data = '{\"realm\":\"equipmentInspection\",\"entryUrl\":\"http://10.1.10.88/equipment-inspection/dist/index.html?hideNavigationBar=1#sign_suffix\"}'
+WHERE item_label LIKE '%巡检%';
+
+
+UPDATE eh_launch_pad_items
+SET action_type = 44
+WHERE item_label LIKE '%巡检%';
 
 
 -- 新增权限  by jiarui 20180205
@@ -68,3 +76,8 @@ INSERT INTO `eh_service_module_privileges` (`id`, `module_id`, `privilege_type`,
 VALUES (@mp_id:=@mp_id+1, '20840', '0', 30087, '设备巡检 巡检计划审批', '0', NOW());
 
 -- 新增权限  by jiarui 20180205
+
+--   设备增加经纬度字符串  by jiarui
+ALTER TABLE `eh_equipment_inspection_equipments`
+  ADD COLUMN `coordinate`  varchar(1024) NULL AFTER `geohash`;
+-- 设备增加经纬度字符串  by jiarui
