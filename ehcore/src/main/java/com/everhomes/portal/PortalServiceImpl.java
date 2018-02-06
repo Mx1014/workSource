@@ -199,7 +199,7 @@ public class PortalServiceImpl implements PortalService {
 //		List<ServiceModuleAppDTO> moduleApps = serviceModuleProvider.listReflectionServiceModuleApp(cmd.getNamespaceId(), cmd.getModuleId(), cmd.getActionType(), cmd.getCustomTag(), cmd.getCustomPath(), null);
 //		LOGGER.debug("list apps size:" + moduleApps.size());
 		if(moduleApps != null && moduleApps.size() > 0){
-			List dtos = Collections.singletonList(ConvertHelper.convert(moduleApps.get(0), ServiceModuleAppDTO.class);
+			List dtos = Collections.singletonList(ConvertHelper.convert(moduleApps.get(0), ServiceModuleAppDTO.class));
 			return new ListServiceModuleAppsResponse(dtos);
 		}
 		return null;
