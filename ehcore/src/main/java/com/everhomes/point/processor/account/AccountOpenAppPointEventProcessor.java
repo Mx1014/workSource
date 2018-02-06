@@ -13,14 +13,14 @@ import org.springframework.stereotype.Component;
  * Created by xq.tian on 2017/12/7.
  */
 @Component
-public class AccountCompleteInfoPointEventProcessor extends GeneralPointEventProcessor implements IPointEventProcessor {
+public class AccountOpenAppPointEventProcessor extends GeneralPointEventProcessor implements IPointEventProcessor {
 
     @Autowired
     private UserProvider userProvider;
 
     @Override
     public String[] init() {
-        return new String[]{SystemEvent.ACCOUNT_COMPLETE_INFO.dft()};
+        return new String[]{SystemEvent.ACCOUNT_OPEN_APP.dft()};
     }
 
     @Override
@@ -34,10 +34,7 @@ public class AccountCompleteInfoPointEventProcessor extends GeneralPointEventPro
 
     private boolean isValid(LocalEvent localEvent) {
         User user = userProvider.findUserById(localEvent.getContext().getUid());
-        return isValid(user.getAvatar())
-                && isValid(user.getBirthday())
-                && isValid(user.getStatusLine())
-                && isValid(user.getOccupation());
+        return isValid(user.getNickName());
     }
 
     private boolean isValid(Object o) {

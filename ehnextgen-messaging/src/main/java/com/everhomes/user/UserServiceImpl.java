@@ -1656,6 +1656,9 @@ public class UserServiceImpl implements UserService {
 	public void setUserInfo(SetUserInfoCommand cmd) {
 		User user = this.userProvider.findUserById(UserContext.current().getUser().getId());
 
+		// 修改用户信息之前的user
+        User oldUser = ConvertHelper.convert(user, User.class);
+
 		user.setAvatar(cmd.getAvatarUri());
 		String birthdayString = cmd.getBirthday();
 		if(StringUtils.isNotEmpty(birthdayString)) {
@@ -1688,6 +1691,9 @@ public class UserServiceImpl implements UserService {
             event.setEntityType(EntityType.USER.getCode());
             event.setEntityId(user.getId());
             event.setEventName(SystemEvent.ACCOUNT_COMPLETE_INFO.dft());
+
+            event.addParam("oldUser", StringHelper.toJsonString(oldUser));
+            event.addParam("newUser", StringHelper.toJsonString(user));
         });
 	}
 
