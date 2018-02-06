@@ -17,7 +17,6 @@ import com.everhomes.rest.comment.OwnerType;
 import com.everhomes.rest.common.Router;
 import com.everhomes.rest.general_approval.*;
 import com.everhomes.rest.messaging.*;
-import com.everhomes.rest.organization.OrganizationGroupType;
 import com.everhomes.rest.ui.user.SceneContactDTO;
 import com.everhomes.rest.uniongroup.UniongroupTargetType;
 import com.everhomes.rest.workReport.*;
@@ -338,6 +337,7 @@ public class WorkReportServiceImpl implements WorkReportService {
     public ListWorkReportsResponse listActiveWorkReports(ListWorkReportsCommand cmd) {
         ListWorkReportsResponse response = new ListWorkReportsResponse();
         Long userId = UserContext.currentUserId();
+        OrganizationMember member = getMemberDepartmentByUserId(userId, cmd.getOwnerId());
         List<WorkReportDTO> reports = new ArrayList<>();
         cmd.setPageSize(10000000);
 
@@ -354,7 +354,7 @@ public class WorkReportServiceImpl implements WorkReportService {
                 dto.setReportId(r.getId());
                 dto.setReportType(r.getReportType());
                 //  check the scope.
-                if (checkTheScope(r.getId(), userId, cmd.getOwnerId()))
+                if (checkTheScope(r.getId(), member))
                     reports.add(dto);
             });
         }
@@ -363,43 +363,46 @@ public class WorkReportServiceImpl implements WorkReportService {
         return response;
     }
 
-    private boolean checkTheScope(Long reportId, Long userId, Long ownerId) {
+    private boolean checkTheScope(Long reportId, OrganizationMember member) {
         //  1.check the user id list.
         //  2.check the user's department.
+        if(member == null)
+            return false;
         List<WorkReportScopeMapDTO> scopes = listWorkReportScopes(reportId);
-        OrganizationMember user = getMemberByUserId(userId, ownerId);
         List<Long> scopeUserIds = scopes.stream()
                 .filter(p1 -> p1.getSourceType().equals(UniongroupTargetType.MEMBERDETAIL.getCode()))
                 .map(p2 -> p2.getSourceId()).collect(Collectors.toList());
         List<Long> scopeDepartmentIds = scopes.stream()
                 .filter(p1 -> p1.getSourceType().equals(UniongroupTargetType.ORGANIZATION.getCode()))
                 .map(p2 -> p2.getSourceId()).collect(Collectors.toList());
-        if (scopeUserIds.contains(user.getDetailId()))
+        if (scopeUserIds.contains(member.getDetailId()))
             return true;
-        if (user != null)
-            for (Long departmentId : scopeDepartmentIds)
-                if (user.getGroupPath().contains(String.valueOf(departmentId)))
-                    return true;
+        for (Long departmentId : scopeDepartmentIds)
+            if (member.getGroupPath().contains(String.valueOf(departmentId)))
+                return true;
         return false;
     }
 
     @Override
     public String fixUpUserName(Long userId, Long ownerId) {
-        List<OrganizationMember> members = organizationProvider.findOrganizationMembersByOrgIdAndUId(userId, ownerId);        if (members != null && members.size() > 0)
+        List<OrganizationMember> members = organizationProvider.findOrganizationMembersByOrgIdAndUId(userId, ownerId);
+        if (members != null && members.size() > 0)
             return members.get(0).getContactName();
         return "";
     }
 
     @Override
-    public OrganizationMember getMemberByUserId(Long userId, Long ownerId) {
-        List<OrganizationMember> results = organizationProvider.findOrganizationMembersByOrgIdAndUId(userId, ownerId);
+    public OrganizationMember getMemberDepartmentByUserId(Long userId, Long ownerId) {
+        OrganizationMember member = organizationProvider.findDepartmentMemberByTargetIdAndOrgId(userId, ownerId);
+        return member;
+/*        List<OrganizationMember> results = organizationProvider.findOrganizationMembersByOrgIdAndUId(userId, ownerId);
 
         List<OrganizationMember> members = results.stream().filter(r ->
                 r.getGroupType().equals(OrganizationGroupType.DEPARTMENT.getCode()) || r.getGroupType().equals(OrganizationGroupType.DIRECT_UNDER_ENTERPRISE.getCode())
         ).collect(Collectors.toList());
         if (members != null && members.size() > 0)
             return members.get(0);
-        return results.get(0);
+        return results.get(0);*/
     }
 
     @Override
