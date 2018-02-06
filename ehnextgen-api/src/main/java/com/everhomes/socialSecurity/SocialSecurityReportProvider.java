@@ -15,11 +15,13 @@ public interface SocialSecurityReportProvider {
 
 	List<SocialSecurityReport> listSocialSecurityReport();
 
-	void deleteSocialSecurityReports(Long ownerId, String payMonth);
+	void deleteSocialSecurityReports(Long ownerId, String payMonth, Byte isFiled);
 
 	SocialSecurityDepartmentSummary calculateSocialSecurityDepartmentSummary(List<Long> detailIds, String month);
 
 	SocialSecurityReport findSocialSecurityReportByDetailId(Long id, String month);
 
-	List<SocialSecurityReport> listSocialSecurityReport(Long ownerId, String paymentMonth, CrossShardListingLocator locator, int pageSize);
+	List<SocialSecurityReport> listFiledSocialSecurityReport(Long ownerId, String paymentMonth, CrossShardListingLocator locator, int pageSize);
+
+	List<SocialSecurityReport> listSocialSecurityReport(Long ownerId, String payMonth, Byte isFiled);
 }
