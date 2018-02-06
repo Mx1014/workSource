@@ -5754,7 +5754,7 @@ private void checkUserPrivilege(Long orgId, Long privilegeId, Long communityId) 
 
 		OfflineTaskCountStat todayTaskCount = new OfflineTaskCountStat();
 		todayTaskCount.setCount(response.getTotayTasksCount());
-		todayComplete.setId(1L);
+		todayTaskCount.setId(1L);
 
 		offlineResponse.setTodayCompleteCount(new ArrayList<>(Collections.singleton(todayComplete)));
 		offlineResponse.setTodayTasksCount(new ArrayList<>(Collections.singleton(todayTaskCount)));
