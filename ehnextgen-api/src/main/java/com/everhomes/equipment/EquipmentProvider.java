@@ -2,7 +2,15 @@ package com.everhomes.equipment;
 
 import com.everhomes.listing.CrossShardListingLocator;
 import com.everhomes.listing.ListingLocator;
-import com.everhomes.rest.equipment.*;
+import com.everhomes.listing.ListingQueryBuilderCallback;
+import com.everhomes.rest.equipment.ExecuteGroupAndPosition;
+import com.everhomes.rest.equipment.ItemResultStat;
+import com.everhomes.rest.equipment.ListEquipmentTasksResponse;
+import com.everhomes.rest.equipment.ReviewedTaskStat;
+import com.everhomes.rest.equipment.StandardAndStatus;
+import com.everhomes.rest.equipment.StatTodayEquipmentTasksCommand;
+import com.everhomes.rest.equipment.TaskCountDTO;
+import com.everhomes.rest.equipment.TasksStatData;
 
 import java.sql.Timestamp;
 import java.util.List;
@@ -227,7 +235,7 @@ public interface EquipmentProvider {
 
 	List<EquipmentInspectionEquipmentLogs> listEquipmentOperateLogsByTargetId(Long equipmentId);
 
-    void populateTaskStatusCount(Long inspectionCategoryId, List<String> targetTypes, List<Long> targetIds, List<Long> executePlanIds, List<Long> reviewPlanIds, Byte  adminFlag, ListEquipmentTasksResponse response);
+    void populateTodayTaskStatusCount(List<Long> executePlanIds, List<Long> reviewPlanIds, Byte  adminFlag, ListEquipmentTasksResponse response, ListingQueryBuilderCallback queryBuilderCallback);
 
     List<EquipmentInspectionStandards> listEquipmentStandardWithReferId(Long targetId, String targetType);
 
