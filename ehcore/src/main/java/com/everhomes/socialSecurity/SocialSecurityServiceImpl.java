@@ -109,6 +109,8 @@ public class SocialSecurityServiceImpl implements SocialSecurityService {
     private SequenceProvider sequenceProvider;
     @Autowired
     private CoordinationProvider coordinationProvider;
+    @Autowired
+    private SocialSecurityGroupProvider socialSecurityGroupProvider;
     /**
      * 处理计算的线程池,预设最大值是5
      */
@@ -152,6 +154,7 @@ public class SocialSecurityServiceImpl implements SocialSecurityService {
                         checkSocialSercurityFiled(ownerId);
                         deleteOldMonthPayments(ownerId);
                         addNewMonthPayments(newPayMonth, ownerId);
+                        newSocialSecurityGroup(ownerId,newPayMonth);
                     } catch (ParseException e) {
                         e.printStackTrace();
                         LOGGER.error("payment month is wrong  " + paymentMonth, e);
@@ -161,6 +164,16 @@ public class SocialSecurityServiceImpl implements SocialSecurityService {
             }
             return null;
         });
+    }
+
+    private SocialSecurityGroup newSocialSecurityGroup(Long ownerId, String month) {
+        socialSecurityGroupProvider.deleteGroup(ownerId, month);
+        SocialSecurityGroup group = new SocialSecurityGroup();
+        group.setOrganizationId(ownerId);
+        group.setPayMonth(month);
+        group.setIsFiled(NormalFlag.NO.getCode());
+        socialSecurityGroupProvider.createSocialSecurityGroup(group);
+        return group;
     }
 
     private void deleteOldMonthPayments(Long ownerId) {
@@ -2617,7 +2630,13 @@ public class SocialSecurityServiceImpl implements SocialSecurityService {
                 socialSecurityInoutReportProvider.createSocialSecurityInoutReport(inout);
             }
         }
-
+        SocialSecurityGroup group = socialSecurityGroupProvider.findSocialSecurityGroupByOrg(ownerId, payMonth);
+        if (null == group) {
+            group = newSocialSecurityGroup(ownerId,payMonth);
+        }
+        group.setFileUid(userId);
+        group.setFileTime(fileTime);
+        group.setIsFiled(NormalFlag.YES.getCode());
     }
 
     @Override
@@ -2746,10 +2765,13 @@ public class SocialSecurityServiceImpl implements SocialSecurityService {
         if (null == log) {
             return null;
         }
-        response.setCreateTime(log.getCreateTime().getTime());
-        response.setCreatorUid(log.getCreatorUid());
-        response.setFileUid(log.getFileUid());
-        response.setFileTime(log.getFileTime().getTime());
+        SocialSecurityGroup group = socialSecurityGroupProvider.findSocialSecurityGroupByOrg(cmd.getOwnerId(), cmd.getPayMonth());
+        if (null != group) {
+            response.setCreateTime(group.getCreateTime().getTime());
+            response.setCreatorUid(group.getCreatorUid());
+            response.setFileUid(group.getFileUid());
+            response.setFileTime(group.getFileTime().getTime());
+        }
         processCreatorName(response, cmd.getOwnerId());
         return response;
     }

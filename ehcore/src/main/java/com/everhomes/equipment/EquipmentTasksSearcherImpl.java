@@ -169,7 +169,7 @@ public class EquipmentTasksSearcherImpl extends AbstractElasticSearch implements
         	fb = FilterBuilders.andFilter(fb, FilterBuilders.termFilter("inspectionCategoryId", cmd.getInspectionCategoryId()));
 
         //3.0.3需要改成多状态匹配
-        if (cmd.getStatus() != null && cmd.getStatus().size() > 0) {
+        if (cmd.getStatus() != null && cmd.getStatus().size() > 0 && cmd.getStatus().get(0) != null) {
                 fb = FilterBuilders.andFilter(fb, FilterBuilders.termsFilter("status", cmd.getStatus()));
         }
         int pageSize = PaginationConfigHelper.getPageSize(configProvider, cmd.getPageSize());
