@@ -3574,8 +3574,8 @@ public class RolePrivilegeServiceImpl implements RolePrivilegeService {
                     if (serviceModuleApps.size() == 0){
                         dto.setUnlimitControlFlag(AllFlagType.YES.getCode());
                     }else{
-                        dto.setCommunityControlFlag(AllFlagType.NO.getCode());
-                        dto.setCommunityApps(serviceModuleApps.stream().map((a)->{
+                        dto.setUnlimitControlFlag(AllFlagType.NO.getCode());
+                        dto.setUnlimitApps(serviceModuleApps.stream().map((a)->{
                             return ConvertHelper.convert(a, ServiceModuleAppDTO.class);
                         }).collect(Collectors.toList()));
                     }
