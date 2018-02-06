@@ -60,6 +60,7 @@ public interface FieldService {
     void exportFieldsExcel(ExportFieldsExcelCommand cmd, HttpServletResponse response);
 
     void exportExcelTemplate(ListFieldGroupCommand cmd,HttpServletResponse response);
+    List<FieldGroupDTO> getAllGroups(ExportFieldsExcelCommand cmd,boolean onlyLeaf, boolean filter);
 
 
 
