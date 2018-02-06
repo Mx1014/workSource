@@ -27,6 +27,7 @@ import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.RestController;
 import org.springframework.web.multipart.MultipartFile;
 
+import javax.servlet.http.HttpServletResponse;
 import javax.validation.Valid;
 import java.util.List;
 
@@ -375,6 +376,20 @@ public class CommunityAdminController extends ControllerBase {
 		}
 //		ImportDataResponse importDataResponse = this.communityService.importBuildingData(files[0], userId);
         RestResponse response = new RestResponse(communityService.importBuildingData(communityId, files[0]));
+        response.setErrorCode(ErrorCodes.SUCCESS);
+        response.setErrorDescription("OK");
+        return response;
+    }
+
+    /**
+     * <b>URL: /admin/community/exportBuildingByCommunityId</b>
+     * <p>后台管理 楼栋列表</p>
+     */
+    @RequestMapping("exportBuildingByCommunityId")
+    @RestReturn(value = String.class)
+    public RestResponse exportBuildingByCommunityId(@Valid ListBuildingCommand cmd, HttpServletResponse httpServletResponse) {
+        communityService.exportBuildingByCommunityId(cmd, httpServletResponse);
+        RestResponse response = new RestResponse();
         response.setErrorCode(ErrorCodes.SUCCESS);
         response.setErrorDescription("OK");
         return response;
