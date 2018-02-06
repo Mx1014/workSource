@@ -15,7 +15,9 @@ public interface SocialSecurityInoutReportProvider {
 
 	List<SocialSecurityInoutReport> listSocialSecurityInoutReport();
 
-	void deleteSocialSecurityInoutReportByMonth(Long ownerId, String month);
+	void deleteSocialSecurityInoutReportByMonth(Long ownerId, String month, Byte isFIled);
 
-	List<SocialSecurityInoutReport> listSocialSecurityInoutReport(Long ownerId, String paymentMonth, CrossShardListingLocator locator, int i);
+	List<SocialSecurityInoutReport> listFiledSocialSecurityInoutReport(Long ownerId, String paymentMonth, CrossShardListingLocator locator, int i);
+
+	List<SocialSecurityInoutReport> listSocialSecurityInoutReport(Long ownerId, String payMonth, Byte isFiled);
 }

@@ -1181,7 +1181,7 @@ public class SocialSecurityServiceImpl implements SocialSecurityService {
                     response.getLogs().add(log);
                     continue;
                 }
-                importUpdateSetting(detail, ssBases, afBases, r, log, ssCityId, afCItyId, response,houseType);
+                importUpdateSetting(detail, ssBases, afBases, r, log, ssCityId, afCItyId, response, houseType);
             }
         }
         response.setTotalCount((long) list.size() - 1);
@@ -1292,7 +1292,7 @@ public class SocialSecurityServiceImpl implements SocialSecurityService {
             SocialSecurityBase base = findSSBaseWithOutException(bases, item);
             if (null == setting) {
                 if (item.getCompanyRadix() == null || item.getCompanyRatio() == null) {
-                    if(!item.getPayItem().equals("商业保险") && !item.getPayItem().equals("残障金")){
+                    if (!item.getPayItem().equals("商业保险") && !item.getPayItem().equals("残障金")) {
                         String errorString = "增员的人员基数和比例不能为空";
                         LOGGER.error(errorString);
                         log.setErrorLog(errorString);
@@ -1512,7 +1512,7 @@ public class SocialSecurityServiceImpl implements SocialSecurityService {
     private void calculateSocialSecurityInoutReports(Long ownerId) {
         //todo 组织架构获取本月增员本月减员的人
         String month = findPaymentMonth(ownerId);
-        socialSecurityInoutReportProvider.deleteSocialSecurityInoutReportByMonth(ownerId, month);
+        socialSecurityInoutReportProvider.deleteSocialSecurityInoutReportByMonth(ownerId, month, NormalFlag.NO.getCode());
         List<Byte> socialInouts = new ArrayList<>();
         socialInouts.add(InOutLogType.ACCUMULATION_FUND_IN.getCode());
         socialInouts.add(InOutLogType.ACCUMULATION_FUND_OUT.getCode());
@@ -1551,6 +1551,8 @@ public class SocialSecurityServiceImpl implements SocialSecurityService {
     private SocialSecurityInoutReport crateInoutReport(OrganizationMemberDetails detail, String month) {
         SocialSecurityReport ssReport = socialSecurityReportProvider.findSocialSecurityReportByDetailId(detail.getId(), month);
         SocialSecurityInoutReport report = new SocialSecurityInoutReport();
+
+        report.setIsFiled(NormalFlag.NO.getCode());
         if (null == ssReport) {
 //            LOGGER.error("can not find report : detail:{}{},month:{}", detail.getId(), detail.getContactName(), month);
 //            return null;
@@ -1603,7 +1605,7 @@ public class SocialSecurityServiceImpl implements SocialSecurityService {
 
     private void calculateSocialSecurityDptReports(Long ownerId) {
         String month = findPaymentMonth(ownerId);
-        socialSecurityDepartmentSummaryProvider.deleteSocialSecurityDptReports(ownerId, month);
+        socialSecurityDepartmentSummaryProvider.deleteSocialSecurityDptReports(ownerId, month, NormalFlag.NO.getCode());
         List<Organization> orgs = findOrganizationDpts(ownerId);
         for (Organization dpt : orgs) {
             if (null == dpt) {
@@ -1645,6 +1647,7 @@ public class SocialSecurityServiceImpl implements SocialSecurityService {
         if (null == summary) {
             summary = new SocialSecurityDepartmentSummary();
         }
+        summary.setIsFiled(NormalFlag.NO.getCode());
         summary.setNamespaceId(dpt.getNamespaceId());
         summary.setDeptId(dpt.getId());
         summary.setDeptName(processOrgPathName(dpt.getPath()));
@@ -1694,7 +1697,7 @@ public class SocialSecurityServiceImpl implements SocialSecurityService {
                     "没有找到缴费数据");
         }
         //删除这个公司这个月的数据
-        socialSecurityReportProvider.deleteSocialSecurityReports(ownerId, payments.get(0).getPayMonth());
+        socialSecurityReportProvider.deleteSocialSecurityReports(ownerId, payments.get(0).getPayMonth(), NormalFlag.NO.getCode());
         List<OrganizationMemberDetails> details = organizationProvider.listOrganizationMemberDetails(ownerId);
         for (OrganizationMemberDetails detail : details) {
             if (NormalFlag.YES != NormalFlag.fromCode(detail.getAccumulationFundStatus()) &&
@@ -1733,6 +1736,7 @@ public class SocialSecurityServiceImpl implements SocialSecurityService {
         if (null == userPayments || userPayments.size() == 0) {
             return null;
         }
+        report.setIsFiled(NormalFlag.NO.getCode());
         report.setPayMonth(userPayments.get(0).getPayMonth());
         report.setCreatorUid(userPayments.get(0).getCreatorUid());
         report.setCreateTime(userPayments.get(0).getCreateTime());
@@ -1963,7 +1967,7 @@ public class SocialSecurityServiceImpl implements SocialSecurityService {
         int pageSize = cmd.getPageSize() == null ? 10 : cmd.getPageSize();
         CrossShardListingLocator locator = new CrossShardListingLocator();
         locator.setAnchor(cmd.getPageAnchor());
-        List<SocialSecurityReport> result = socialSecurityReportProvider.listSocialSecurityReport(cmd.getOwnerId(),
+        List<SocialSecurityReport> result = socialSecurityReportProvider.listFiledSocialSecurityReport(cmd.getOwnerId(),
                 cmd.getPayMonth(), locator, pageSize + 1);
         if (null == result)
             return response;
@@ -2035,7 +2039,7 @@ public class SocialSecurityServiceImpl implements SocialSecurityService {
         row.createCell(++i).setCellValue(r.getPayMonth());
         row.createCell(++i).setCellValue(checkNullBigDecimal(r.getAccumulationFundRadix()));
         row.createCell(++i).setCellValue(checkNullBigDecimal(r.getAccumulationFundCompanyRadix()));
-        row.createCell(++i).setCellValue(checkNull(r.getAccumulationFundCompanyRatio() ));
+        row.createCell(++i).setCellValue(checkNull(r.getAccumulationFundCompanyRatio()));
         row.createCell(++i).setCellValue(checkNullBigDecimal(r.getAccumulationFundEmployeeRadix()));
         row.createCell(++i).setCellValue(checkNull(r.getAccumulationFundEmployeeRatio()));
         row.createCell(++i).setCellValue(checkNullBigDecimal(r.getAccumulationFundSum()));
@@ -2198,7 +2202,7 @@ public class SocialSecurityServiceImpl implements SocialSecurityService {
         int pageSize = cmd.getPageSize() == null ? 10 : cmd.getPageSize();
         CrossShardListingLocator locator = new CrossShardListingLocator();
         locator.setAnchor(cmd.getPageAnchor());
-        List<SocialSecurityDepartmentSummary> result = socialSecurityDepartmentSummaryProvider.listSocialSecurityDepartmentSummary(cmd.getOwnerId(),
+        List<SocialSecurityDepartmentSummary> result = socialSecurityDepartmentSummaryProvider.listFiledSocialSecurityDepartmentSummary(cmd.getOwnerId(),
                 cmd.getPayMonth(), locator, pageSize + 1);
         if (null == result)
             return response;
@@ -2235,7 +2239,7 @@ public class SocialSecurityServiceImpl implements SocialSecurityService {
 
     @Override
     public OutputStream getSocialSecurityReportsOutputStream(Long ownerId, String payMonth) {
-        List<SocialSecurityReport> result = socialSecurityReportProvider.listSocialSecurityReport(ownerId,
+        List<SocialSecurityReport> result = socialSecurityReportProvider.listFiledSocialSecurityReport(ownerId,
                 payMonth, null, Integer.MAX_VALUE - 1);
         XSSFWorkbook workbook = createSocialSecurityReportWorkBook(result);
         ByteArrayOutputStream out = new ByteArrayOutputStream();
@@ -2251,7 +2255,7 @@ public class SocialSecurityServiceImpl implements SocialSecurityService {
 
     @Override
     public OutputStream getSocialSecurityDepartmentSummarysOutputStream(Long ownerId, String payMonth) {
-        List<SocialSecurityDepartmentSummary> result = socialSecurityDepartmentSummaryProvider.listSocialSecurityDepartmentSummary(
+        List<SocialSecurityDepartmentSummary> result = socialSecurityDepartmentSummaryProvider.listFiledSocialSecurityDepartmentSummary(
                 ownerId, payMonth, null, Integer.MAX_VALUE - 1);
         Workbook workbook = createSocialSecurityDepartmentSummarysWorkBook(result);
         ByteArrayOutputStream out = new ByteArrayOutputStream();
@@ -2268,7 +2272,7 @@ public class SocialSecurityServiceImpl implements SocialSecurityService {
     @Override
     public OutputStream getSocialSecurityInoutReportsOutputStream(Long ownerId, String payMonth) {
 
-        List<SocialSecurityInoutReport> result = socialSecurityInoutReportProvider.listSocialSecurityInoutReport(
+        List<SocialSecurityInoutReport> result = socialSecurityInoutReportProvider.listFiledSocialSecurityInoutReport(
                 ownerId, payMonth, null, Integer.MAX_VALUE - 1);
         Workbook workbook = createSocialSecurityInoutReportsWorkBook(result);
         ByteArrayOutputStream out = new ByteArrayOutputStream();
@@ -2420,7 +2424,7 @@ public class SocialSecurityServiceImpl implements SocialSecurityService {
         int pageSize = cmd.getPageSize() == null ? 10 : cmd.getPageSize();
         CrossShardListingLocator locator = new CrossShardListingLocator();
         locator.setAnchor(cmd.getPageAnchor());
-        List<SocialSecurityInoutReport> result = socialSecurityInoutReportProvider.listSocialSecurityInoutReport(cmd.getOwnerId(),
+        List<SocialSecurityInoutReport> result = socialSecurityInoutReportProvider.listFiledSocialSecurityInoutReport(cmd.getOwnerId(),
                 cmd.getPayMonth(), locator, pageSize + 1);
         if (null == result)
             return response;
@@ -2543,6 +2547,7 @@ public class SocialSecurityServiceImpl implements SocialSecurityService {
             @Override
             public void run() {
                 try {
+                    calculateReports(cmd.getOwnerId());
                     fileSocialSecurity(cmd.getOwnerId(), cmd.getPayMonth(), payments, userId);
                 } catch (Exception e) {
                     LOGGER.error("calculate reports error!! cmd is  :" + cmd, e);
@@ -2559,6 +2564,7 @@ public class SocialSecurityServiceImpl implements SocialSecurityService {
     private void fileSocialSecurity(Long ownerId, String payMonth, List<SocialSecurityPayment> payments, Long userId) {
         //删除之前当月的归档表
         LOGGER.debug("开始归档报表");
+        Timestamp fileTime = new Timestamp(DateHelper.currentGMTTime().getTime());
         socialSecurityPaymentLogProvider.deleteMonthLog(ownerId, payMonth);
         Long id = sequenceProvider.getNextSequenceBlock(NameMapper.getSequenceDomainFromTablePojo(EhSocialSecurityPaymentLogs.class), payments.size() + 1);
         List<EhSocialSecurityPaymentLogs> logs = new ArrayList<>();
@@ -2579,6 +2585,39 @@ public class SocialSecurityServiceImpl implements SocialSecurityService {
         summary.setCreatorUid(userId);
         socialSecuritySummaryProvider.createSocialSecuritySummary(summary);
         //更新归档状态
+        //三个报表删除归档状态的表,再把未归档状态的表复制一份归档状态的
+        socialSecurityReportProvider.deleteSocialSecurityReports(ownerId, payMonth, NormalFlag.YES.getCode());
+        socialSecurityDepartmentSummaryProvider.deleteSocialSecurityDptReports(ownerId, payMonth, NormalFlag.YES.getCode());
+        socialSecurityInoutReportProvider.deleteSocialSecurityInoutReportByMonth(ownerId, payMonth, NormalFlag.YES.getCode());
+
+        List<SocialSecurityDepartmentSummary> dptSums = socialSecurityDepartmentSummaryProvider.listSocialSecurityDepartmentSummary(ownerId, payMonth, NormalFlag.NO.getCode());
+        if (null != dptSums) {
+            for (SocialSecurityDepartmentSummary summary1 : dptSums) {
+                summary1.setIsFiled(NormalFlag.YES.getCode());
+                summary1.setFileTime(fileTime);
+                summary1.setFileUid(userId);
+                socialSecurityDepartmentSummaryProvider.createSocialSecurityDepartmentSummary(summary1);
+            }
+        }
+        List<SocialSecurityReport> reports = socialSecurityReportProvider.listSocialSecurityReport(ownerId, payMonth, NormalFlag.NO.getCode());
+        if (reports != null){
+            for (SocialSecurityReport report1 : reports) {
+                report1.setIsFiled(NormalFlag.YES.getCode());
+                report1.setFileTime(fileTime);
+                report1.setFileUid(userId);
+                socialSecurityReportProvider.createSocialSecurityReport(report1);
+            }
+        }
+        List<SocialSecurityInoutReport> inouts = socialSecurityInoutReportProvider.listSocialSecurityInoutReport(ownerId, payMonth, NormalFlag.NO.getCode());
+        if (inouts != null) {
+            for (SocialSecurityInoutReport inout : inouts) {
+                inout.setIsFiled(NormalFlag.YES.getCode());
+                inout.setFileTime(fileTime);
+                inout.setFileUid(userId);
+                socialSecurityInoutReportProvider.createSocialSecurityInoutReport(inout);
+            }
+        }
+
     }
 
     @Override
