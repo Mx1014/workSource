@@ -40,7 +40,7 @@ public class SalaryEmployeePeriodValProviderImpl implements SalaryEmployeePeriod
 		Long id = sequenceProvider.getNextSequence(NameMapper.getSequenceDomainFromTablePojo(EhSalaryEmployeePeriodVals.class));
 		salaryEmployeePeriodVal.setId(id);
 		salaryEmployeePeriodVal.setCreateTime(new Timestamp(DateHelper.currentGMTTime().getTime()));
-		salaryEmployeePeriodVal.setCreatorUid(UserContext.current().getUser().getId());
+		salaryEmployeePeriodVal.setCreatorUid(UserContext.currentUserId());
 //		salaryEmployeePeriodVal.setUpdateTime(salaryEmployeePeriodVal.getCreateTime());
 //		salaryEmployeePeriodVal.setOperatorUid(salaryEmployeePeriodVal.getCreatorUid());
 		getReadWriteDao().insert(salaryEmployeePeriodVal);
