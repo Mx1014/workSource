@@ -123,7 +123,7 @@ CREATE TABLE `eh_equipment_inspection_equipment_logs` (
 
 --   设备增加经纬度字符串  by jiarui
 ALTER TABLE `eh_equipment_inspection_equipments`
-  ADD COLUMN `coordinate`  varchar(1024) NULL AFTER `geohash`;
+  ADD COLUMN `coordinate`  VARCHAR(1024) NULL AFTER `geohash`;
 -- 设备增加经纬度字符串  by jiarui
 
 -- eh_equipment_inspection_tasks 增加plan_id字段 用于关联task和equipments
@@ -805,7 +805,7 @@ CREATE TABLE `eh_salary_default_entities` (
   `tax_policy` TINYINT COMMENT '纳税策略:0-工资 1-年终',
   `category_id` BIGINT COMMENT '标签(薪酬结构) category表pk',
   `category_name` VARCHAR(64) COMMENT '标签(统计分类)名称 example:固定工资,浮动工资,津补贴',
-  `name` VARCHAR(32), 
+  `name` VARCHAR(64), 
   `description` TEXT COMMENT '说明文字',
   `template_name` VARCHAR(32) COMMENT '',
   `default_order` INT,
@@ -856,7 +856,7 @@ CREATE TABLE `eh_salary_group_entities` (
   `tax_policy` TINYINT COMMENT '纳税策略:0-工资 1-年终',
   `category_id` BIGINT COMMENT '标签(薪酬结构) category表pk',
   `category_name` VARCHAR(64) COMMENT '标签(统计分类)名称 example:固定工资,浮动工资,津补贴',
-  `name` VARCHAR(32), 
+  `name` VARCHAR(64), 
   `description` TEXT COMMENT '说明文字',
   `creator_uid` BIGINT,
   `create_time` DATETIME, 
@@ -878,7 +878,7 @@ CREATE TABLE `eh_salary_employee_origin_vals` (
   `user_id` BIGINT ,
   `user_detail_id` BIGINT , 
   `group_entity_id` BIGINT COMMENT '标签(统计分类) salary group entity表pk', 
-  `group_entity_name` VARCHAR(32),
+  `group_entity_name` VARCHAR(64),
   `type` TINYINT COMMENT '字段类型:0-发放项;1-扣款项;2-成本项;3-冗余项',
   `data_policy` TINYINT COMMENT '数据策略:0-次月延用 1-次月清空',
   `grant_policy` TINYINT COMMENT '发放策略:0-税前 1-税后',
@@ -1009,7 +1009,7 @@ CREATE TABLE `eh_salary_employee_period_vals` (
   `user_detail_id` BIGINT , 
   `salary_employee_id` BIGINT COMMENT '标签(统计分类) salary_employee表pk', 
   `group_entity_id` BIGINT COMMENT '标签(统计分类) salary group entity表pk', 
-  `group_entity_name` VARCHAR(32),
+  `group_entity_name` VARCHAR(64),
   `type` TINYINT COMMENT '字段类型:0-发放项;1-扣款项;2-成本项;3-冗余项',
   `data_policy` TINYINT COMMENT '数据策略:0-次月延用 1-次月清空',
   `grant_policy` TINYINT COMMENT '发放策略:0-税前 1-税后',
@@ -1523,10 +1523,8 @@ ALTER TABLE `eh_organization_member_details` ADD COLUMN `accumulation_fund_statu
 -- 工位预定开始 dengs
 
 -- by dengs. 工位预约添加范围 20180120
--- by dengs. 工位预约添加范围 20180120
 ALTER TABLE `eh_office_cubicle_spaces` ADD COLUMN `owner_type` VARCHAR(128);
 ALTER TABLE `eh_office_cubicle_spaces` ADD COLUMN `owner_id` BIGINT;
-ALTER TABLE `eh_office_cubicle_categories` ADD COLUMN `status` TINYINT;
 
 ALTER TABLE `eh_office_cubicle_categories` ADD COLUMN `position_nums` INTEGER;
 ALTER TABLE `eh_office_cubicle_categories` ADD COLUMN `name` VARCHAR(256);
@@ -1535,9 +1533,7 @@ ALTER TABLE `eh_office_cubicle_orders` ADD COLUMN `flow_case_Id` BIGINT;
 ALTER TABLE `eh_office_cubicle_orders` ADD COLUMN `work_flow_status` TINYINT;
 ALTER TABLE `eh_office_cubicle_orders` ADD COLUMN `owner_type` VARCHAR(128);
 ALTER TABLE `eh_office_cubicle_orders` ADD COLUMN `owner_id` BIGINT;
-ALTER TABLE `eh_office_cubicle_orders` ADD COLUMN `position_nums` INTEGER;
-ALTER TABLE `eh_office_cubicle_orders` ADD COLUMN `category_name` VARCHAR(256);
-ALTER TABLE `eh_office_cubicle_orders` ADD COLUMN `category_id` LONG;
+
 
 CREATE TABLE `eh_office_cubicle_ranges` (
   `id` BIGINT NOT NULL,
@@ -1567,21 +1563,3 @@ ADD COLUMN `default_order` INT NULL DEFAULT '0' AFTER `string_tag5`;
 UPDATE eh_rentalv2_default_rules set rental_start_time = 7776000000 where rental_start_time = 0;
 UPDATE eh_rentalv2_default_rules set rental_start_time_flag = 1;
 -- 资源预订3.2结束
-
--- 审批2.0 start by nan.rong
-ALTER TABLE `eh_general_approvals` ADD COLUMN `approval_remark` VARCHAR(256) COMMENT 'the remark of the approval';
-
-ALTER TABLE `eh_general_approvals` ADD COLUMN `default_order` INTEGER NOT NULL DEFAULT 0;
-
--- DROP TABLE IF EXISTS `eh_general_approval_scope_map`;
-CREATE TABLE `eh_general_approval_scope_map` (
-  `id` BIGINT NOT NULL,
-  `namespace_id` INTEGER NOT NULL DEFAULT 0,
-  `approval_id` BIGINT NOT NULL COMMENT 'id of the approval',
-  `source_type` VARCHAR(64) NOT NULL COMMENT 'ORGANIZATION, MEMBERDETAIL',
-  `source_id` BIGINT NOT NULL COMMENT 'id of the source',
-  `source_description` VARCHAR(128) COMMENT 'the description of the source',
-  `create_time` DATETIME COMMENT 'create time',
-  PRIMARY KEY (`id`)
-) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4;
--- end by nan.rong
