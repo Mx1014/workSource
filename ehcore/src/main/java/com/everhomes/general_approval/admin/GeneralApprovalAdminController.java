@@ -251,7 +251,7 @@ public class GeneralApprovalAdminController extends ControllerBase {
 	@RequestMapping("orderGeneralApprovals")
 	@RestReturn(value=String.class)
 	public RestResponse orderGeneralApprovals(OrderGeneralApprovalsCommand cmd) {
-		generalFormService.orderGeneralApprovals(cmd);
+		generalApprovalService.orderGeneralApprovals(cmd);
 		RestResponse response = new RestResponse();
 		response.setErrorCode(ErrorCodes.SUCCESS);
 		response.setErrorDescription("OK");

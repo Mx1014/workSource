@@ -80,4 +80,8 @@ public interface GeneralApprovalService {
 //	GetTemplateByApprovalIdResponse postForm(PostFormCommand cmd);
 
     void disableApprovalByFormOriginId(Long formOriginId, Long moduleId, String moduleType);
+
+    void orderGeneralApprovals(OrderGeneralApprovalsCommand cmd);
+
+    ListGeneralApprovalResponse listAvailableGeneralApprovals(ListGeneralApprovalCommand cmd);
 }

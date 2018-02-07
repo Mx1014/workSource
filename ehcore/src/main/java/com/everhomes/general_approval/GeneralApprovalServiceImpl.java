@@ -1126,4 +1126,14 @@ public class GeneralApprovalServiceImpl implements GeneralApprovalService {
     public void disableApprovalByFormOriginId(Long formOriginId, Long moduleId, String moduleType){
         generalApprovalProvider.disableApprovalByFormOriginId(formOriginId, moduleId, moduleType);
     }
+
+    @Override
+    public void orderGeneralApprovals(OrderGeneralApprovalsCommand cmd){
+
+    }
+
+    @Override
+    public ListGeneralApprovalResponse listAvailableGeneralApprovals(ListGeneralApprovalCommand cmd){
+        return null;
+    }
 }
