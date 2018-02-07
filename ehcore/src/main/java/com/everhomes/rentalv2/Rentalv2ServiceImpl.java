@@ -32,6 +32,8 @@ import com.everhomes.bus.SystemEvent;
 import com.everhomes.configuration.ConfigConstants;
 import com.everhomes.order.OrderUtil;
 import com.everhomes.order.PayService;
+import com.everhomes.organization.Organization;
+import com.everhomes.organization.OrganizationAddress;
 import com.everhomes.parking.vip_parking.DingDingParkingLockHandler;
 import com.everhomes.pay.order.PaymentType;
 import com.everhomes.rentalv2.job.RentalMessageJob;
@@ -2515,6 +2517,14 @@ public class Rentalv2ServiceImpl implements Rentalv2Service {
 			dto.setCancelTime(bill.getCancelTime().getTime());
 		}
 
+		if (null!=bill.getUserEnterpriseId()){
+			Organization org = this.organizationProvider.findOrganizationById(bill.getUserEnterpriseId());
+			dto.setCompanyName(org.getName());
+			List<OrganizationAddress> addresses = this.organizationProvider.findOrganizationAddressByOrganizationId(bill.getUserEnterpriseId());
+			if (addresses!=null && addresses.size()>0)
+				dto.setBuildingName(addresses.get(0).getBuildingName());
+		}
+
 		dto.setTotalPrice(bill.getPayTotalMoney());
 		dto.setSitePrice(bill.getResourceTotalMoney());
 //		dto.setReservePrice(bill.getReserveMoney());
@@ -3453,14 +3463,18 @@ public class Rentalv2ServiceImpl implements Rentalv2Service {
 	@Override
 	public GetItemListCommandResponse listRentalSiteItems(
 			GetItemListAdminCommand cmd) {
-		if(StringUtils.isEmpty(cmd.getResourceType()))
-			throw RuntimeErrorException.errorWith(ErrorCodes.SCOPE_GENERAL,
-                    ErrorCodes.ERROR_INVALID_PARAMETER, "Invalid paramter of null resourceType");
-		if(cmd.getSourceId() == 0)
-			throw RuntimeErrorException.errorWith(ErrorCodes.SCOPE_GENERAL,
-					ErrorCodes.ERROR_INVALID_PARAMETER, "Invalid paramter of null source id");
+
 		if (StringUtils.isBlank(cmd.getResourceType())) {
 			cmd.setResourceType(RentalV2ResourceType.DEFAULT.getCode());
+		}
+
+		if (cmd.getResourceType().equals(RentalV2ResourceType.DEFAULT.getCode())){
+			RentalDefaultRule rule = this.rentalv2Provider.getRentalDefaultRule(cmd.getOwnerType(), cmd.getOwnerId(),
+					cmd.getResourceType(), cmd.getResourceTypeId(), cmd.getSourceType(), cmd.getSourceId());
+			if (rule == null)
+				throw RuntimeErrorException.errorWith(ErrorCodes.SCOPE_GENERAL,ErrorCodes.ERROR_INVALID_PARAMETER,
+						"cannot find default rule");
+			cmd.setSourceId(rule.getId());
 		}
 
 		GetItemListCommandResponse response = new GetItemListCommandResponse();
