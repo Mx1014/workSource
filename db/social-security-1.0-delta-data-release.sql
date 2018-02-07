@@ -24,21 +24,4 @@ INSERT INTO `eh_social_security_bases` (`id`, `city_id`, `household_type`, `pay_
 -- 暂时取消ratio options
 UPDATE eh_social_security_bases SET ratio_options = NULL ;
 
- 
-INSERT INTO `EH_WEB_MENUS` (`id`, `name`, `parent_id`, `icon_url`, `data_type`, `leaf_flag`, `status`, `path`, `type`, `sort_num`, `module_id`, `level`, `condition_type`, `category`) VALUES('51300','社保管理','50000',NULL,'','1','2','/50000/51300','park','539','51300','2',NULL,'module');
-INSERT INTO `EH_WEB_MENUS` (`id`, `name`, `parent_id`, `icon_url`, `data_type`, `leaf_flag`, `status`, `path`, `type`, `sort_num`, `module_id`, `level`, `condition_type`, `category`) VALUES('51301','员工社保','51300',NULL,'react:/social-security/security-list','1','2','/50000/51300/51301','park','539','51300','3',NULL,'module');
-INSERT INTO `EH_WEB_MENUS` (`id`, `name`, `parent_id`, `icon_url`, `data_type`, `leaf_flag`, `status`, `path`, `type`, `sort_num`, `module_id`, `level`, `condition_type`, `category`) VALUES('51302','历史归档','51300',NULL,'react:/social-security/security-history','1','2','/50000/51300/51301','park','539','51300','3',NULL,'module');
-INSERT INTO `EH_WEB_MENUS` (`id`, `name`, `parent_id`, `icon_url`, `data_type`, `leaf_flag`, `status`, `path`, `type`, `sort_num`, `module_id`, `level`, `condition_type`, `category`) VALUES('513000','社保管理','500000',NULL,'','1','2','/500000/513000','organization','539','51300','2',NULL,'module');
-INSERT INTO `EH_WEB_MENUS` (`id`, `name`, `parent_id`, `icon_url`, `data_type`, `leaf_flag`, `status`, `path`, `type`, `sort_num`, `module_id`, `level`, `condition_type`, `category`) VALUES('513001','员工社保','513000',NULL,'react:/social-security/security-list','1','2','/50000/513000/513001','park','539','51300','3',NULL,'module');
-INSERT INTO `EH_WEB_MENUS` (`id`, `name`, `parent_id`, `icon_url`, `data_type`, `leaf_flag`, `status`, `path`, `type`, `sort_num`, `module_id`, `level`, `condition_type`, `category`) VALUES('513002','历史归档','513000',NULL,'react:/social-security/security-history','1','2','/50000/513000/513001','park','539','51300','3',NULL,'module');
-
-SET @scope_id = (SELECT MAX(id) FROM `eh_web_menu_scopes`);
-INSERT INTO `eh_web_menu_scopes` (`id`, `menu_id`, `menu_name`, `owner_type`, `owner_id`, `apply_policy`) VALUES ((@scope_id:=@scope_id+1), '51300', '打卡记录', 'EhNamespaces', '1', '2');
-INSERT INTO `eh_web_menu_scopes` (`id`, `menu_id`, `menu_name`, `owner_type`, `owner_id`, `apply_policy`) VALUES ((@scope_id:=@scope_id+1), '51301', '员工社保', 'EhNamespaces', '1', '2');
-INSERT INTO `eh_web_menu_scopes` (`id`, `menu_id`, `menu_name`, `owner_type`, `owner_id`, `apply_policy`) VALUES ((@scope_id:=@scope_id+1), '51302', '历史归档', 'EhNamespaces', '1', '2');
-INSERT INTO `eh_web_menu_scopes` (`id`, `menu_id`, `menu_name`, `owner_type`, `owner_id`, `apply_policy`) VALUES ((@scope_id:=@scope_id+1), '513000', '打卡记录', 'EhNamespaces', '1', '2');
-INSERT INTO `eh_web_menu_scopes` (`id`, `menu_id`, `menu_name`, `owner_type`, `owner_id`, `apply_policy`) VALUES ((@scope_id:=@scope_id+1), '513001', '员工社保', 'EhNamespaces', '1', '2');
-INSERT INTO `eh_web_menu_scopes` (`id`, `menu_id`, `menu_name`, `owner_type`, `owner_id`, `apply_policy`) VALUES ((@scope_id:=@scope_id+1), '513002', '历史归档', 'EhNamespaces', '1', '2');
-
-
-
+  
