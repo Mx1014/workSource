@@ -153,7 +153,7 @@ public class GeneralApprovalAdminController extends ControllerBase {
 
 	/**
 	 * <b>URL: /admin/general_approval/setGeneralApprovalForm</b>
-	 * <p> 修改审批 </p>
+	 * <p> 设置审批表单 </p>
 	 * @return
 	 */
 	@RequestMapping("setGeneralApprovalForm")
