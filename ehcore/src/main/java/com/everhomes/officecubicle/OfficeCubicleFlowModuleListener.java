@@ -58,7 +58,7 @@ public class OfficeCubicleFlowModuleListener implements FlowModuleListener {
     	List<FlowServiceTypeDTO> list = new ArrayList<FlowServiceTypeDTO>();
     	FlowServiceTypeDTO dto = new FlowServiceTypeDTO();
     	dto.setNamespaceId(namespaceId);
-    	dto.setServiceName("工位预定");
+    	dto.setServiceName("工位预订");
     	dto.setModuleId(MODULE_ID);
     	list.add(dto);
         return list;
@@ -106,15 +106,20 @@ public class OfficeCubicleFlowModuleListener implements FlowModuleListener {
     final static DateTimeFormatter dtf = DateTimeFormatter.ofPattern("yyyy-MM-dd HH:mm:ss");
     @Override
     public List<FlowCaseEntity> onFlowCaseDetailRender(FlowCase flowCase, FlowUserType flowUserType) {
-    	LOGGER.debug("onFlowCaseDetailRender");
-    	OfficeCubicleOrder order = officeCubicleProvider.getOrderById(flowCase.getReferId());
-    	if(order == null)
-    		return null;
-    	List<FlowCaseEntity> list = new ArrayList<FlowCaseEntity>();
-    	
-    	list.add(new FlowCaseEntity("申请时间", order.getCreateTime()==null?null:order.getCreateTime().toLocalDateTime().format(dtf) , FlowCaseEntityType.MULTI_LINE.getCode()));
-    	list.add(new FlowCaseEntity("工位类型", OfficeRentType.fromCode(order.getRentType()).getMsg(), FlowCaseEntityType.MULTI_LINE.getCode()));
-    	list.add(new FlowCaseEntity("预订空间", order.getSpaceName() , FlowCaseEntityType.MULTI_LINE.getCode()));
+        LOGGER.debug("onFlowCaseDetailRender");
+        OfficeCubicleOrder order = officeCubicleProvider.getOrderById(flowCase.getReferId());
+        if (order == null)
+            return null;
+        List<FlowCaseEntity> list = new ArrayList<FlowCaseEntity>();
+        OfficeRentType officeRentType = OfficeRentType.fromCode(order.getRentType());
+
+        list.add(new FlowCaseEntity("申请时间", order.getCreateTime() == null ? null : order.getCreateTime().toLocalDateTime().format(dtf), FlowCaseEntityType.MULTI_LINE.getCode()));
+        list.add(new FlowCaseEntity("工位类型", officeRentType.getMsg(), FlowCaseEntityType.MULTI_LINE.getCode()));
+        if (officeRentType == OfficeRentType.OPENSITE) {
+            list.add(new FlowCaseEntity("预订工位数", order.getPositionNums()+"", FlowCaseEntityType.MULTI_LINE.getCode()));
+        }else {
+            list.add(new FlowCaseEntity("预订空间", order.getSpaceName(), FlowCaseEntityType.MULTI_LINE.getCode()));
+        }
     	list.add(new FlowCaseEntity("发起人", order.getReserverName() , FlowCaseEntityType.MULTI_LINE.getCode()));
     	list.add(new FlowCaseEntity("发起人电话", order.getContactPhone(), FlowCaseEntityType.MULTI_LINE.getCode()));
     	list.add(new FlowCaseEntity("公司名称", order.getReserveEnterprise(), FlowCaseEntityType.MULTI_LINE.getCode()));

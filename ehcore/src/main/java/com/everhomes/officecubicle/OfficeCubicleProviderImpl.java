@@ -4,14 +4,9 @@ import java.sql.Timestamp;
 import java.util.ArrayList;
 import java.util.List;
 
+import com.everhomes.rest.approval.CommonStatus;
 import org.apache.commons.lang.StringUtils;
-import org.jooq.Condition;
-import org.jooq.DSLContext;
-import org.jooq.DeleteWhereStep;
-import org.jooq.InsertQuery;
-import org.jooq.Record;
-import org.jooq.Result;
-import org.jooq.SelectJoinStep;
+import org.jooq.*;
 import org.jooq.impl.DefaultRecordMapper;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -56,6 +51,7 @@ public class OfficeCubicleProviderImpl implements OfficeCubicleProvider {
 		DSLContext context = dbProvider.getDslContext(AccessSpec.readOnly());
 		SelectJoinStep<Record> step = context.select().from(Tables.EH_OFFICE_CUBICLE_CATEGORIES);
 		Condition condition = Tables.EH_OFFICE_CUBICLE_CATEGORIES.SPACE_ID.equal(id);
+		condition = condition.and(Tables.EH_OFFICE_CUBICLE_CATEGORIES.STATUS.equal(CommonStatus.ACTIVE.getCode()));
 		step.where(condition);
 		List<OfficeCubicleCategory> result = step.orderBy(Tables.EH_OFFICE_CUBICLE_CATEGORIES.ID.desc()).fetch().map((r) -> {
 			return ConvertHelper.convert(r, OfficeCubicleCategory.class);
@@ -82,6 +78,7 @@ public class OfficeCubicleProviderImpl implements OfficeCubicleProvider {
 
 		long id = sequenceProvider.getNextSequence(NameMapper.getSequenceDomainFromTablePojo(EhOfficeCubicleCategories.class));
 		category.setId(id);
+		category.setStatus(CommonStatus.ACTIVE.getCode());
 		DSLContext context = dbProvider.getDslContext(AccessSpec.readWrite());
 		EhOfficeCubicleCategoriesRecord record = ConvertHelper.convert(category, EhOfficeCubicleCategoriesRecord.class);
 		InsertQuery<EhOfficeCubicleCategoriesRecord> query = context.insertQuery(Tables.EH_OFFICE_CUBICLE_CATEGORIES);
@@ -111,11 +108,14 @@ public class OfficeCubicleProviderImpl implements OfficeCubicleProvider {
 
 	@Override
 	public void deleteCategoriesBySpaceId(Long id) {
-		DSLContext context = dbProvider.getDslContext(AccessSpec.readOnly());
-		DeleteWhereStep<EhOfficeCubicleCategoriesRecord> step = context.delete(Tables.EH_OFFICE_CUBICLE_CATEGORIES);
-		Condition condition = Tables.EH_OFFICE_CUBICLE_CATEGORIES.SPACE_ID.equal(id);
-		step.where(condition);
-		step.execute();
+//		DSLContext context = dbProvider.getDslContext(AccessSpec.readOnly());
+//		DeleteWhereStep<EhOfficeCubicleCategoriesRecord> step = context.delete(Tables.EH_OFFICE_CUBICLE_CATEGORIES);
+//		Condition condition = Tables.EH_OFFICE_CUBICLE_CATEGORIES.SPACE_ID.equal(id);
+		DSLContext context = dbProvider.getDslContext(AccessSpec.readWrite());
+		context.update(Tables.EH_OFFICE_CUBICLE_CATEGORIES)
+				.set(Tables.EH_OFFICE_CUBICLE_CATEGORIES.STATUS,CommonStatus.INACTIVE.getCode())
+				.where(Tables.EH_OFFICE_CUBICLE_CATEGORIES.SPACE_ID.equal(id))
+				.execute();
 	}
 
 	@Override

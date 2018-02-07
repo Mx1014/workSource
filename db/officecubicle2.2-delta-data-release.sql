@@ -1,0 +1,1 @@
+update eh_office_cubicle_categories SET status=2;
