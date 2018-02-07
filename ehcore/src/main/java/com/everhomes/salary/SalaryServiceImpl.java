@@ -726,13 +726,18 @@ public class SalaryServiceImpl implements SalaryService {
         BigDecimal afterTax = new BigDecimal(0);
         if (null != vals) {
             for (SalaryEmployeeOriginVal val : vals) {
+
+                SalaryGroupEntity groupEntity = salaryGroupEntityProvider.findSalaryGroupEntityById(val.getGroupEntityId());
+                if (null == groupEntity || groupEntity.getStatus().equals(SalaryEntityStatus.CLOSE.getCode())) {
+                    salaryEmployeeOriginValProvider.deleteSalaryEmployeeOriginValById(val.getId());
+                    continue;
+                }
                 BigDecimal value = new BigDecimal(0);
                 try {
                     value = new BigDecimal(val.getSalaryValue());
                 } catch (Exception e) {
                     //不能转换数字就不用管它
                 }
-
                 //固定工资
                 if (val.getCategoryId().equals(1L)) {
                     if (SalaryEntityType.DEDUCTION == SalaryEntityType.fromCode(val.getType())) {

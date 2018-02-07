@@ -124,6 +124,13 @@ public class SalaryEmployeeOriginValProviderImpl implements SalaryEmployeeOrigin
 				.and(Tables.EH_SALARY_EMPLOYEE_ORIGIN_VALS.DATA_POLICY.eq(NormalFlag.NO.getCode()))
 				.and(Tables.EH_SALARY_EMPLOYEE_ORIGIN_VALS.TYPE.eq(SalaryEntityType.REDUN.getCode())).execute();
 	}
+
+	@Override
+	public void deleteSalaryEmployeeOriginValById(Long id) {
+		getReadWriteDao().deleteById(id);
+		DaoHelper.publishDaoAction(DaoAction.MODIFY, EhSalaryEmployeeOriginVals.class, id);
+
+	}
 //
 //	@Override
 //	public List<SalaryEmployeeOriginVal> listSalaryEmployeeOriginValByDetailId(Long detailId, String ownerType, Long ownerId){
