@@ -726,5 +726,10 @@ public class GeneralFormServiceImpl implements GeneralFormService {
         return dto;
     }
 
+    @Override
+    public void orderGeneralApprovals(OrderGeneralApprovalsCommand cmd){
+
+    }
+
 }
 

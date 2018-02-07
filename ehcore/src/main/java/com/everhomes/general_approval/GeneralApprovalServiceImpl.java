@@ -589,12 +589,17 @@ public class GeneralApprovalServiceImpl implements GeneralApprovalService {
 
         if (null != cmd.getSupportType())
             ga.setSupportType(cmd.getSupportType());
-        if (null != cmd.getFormOriginId())
-            ga.setFormOriginId(cmd.getFormOriginId());
+/*        if (null != cmd.getFormOriginId())
+            ga.setFormOriginId(cmd.getFormOriginId());*/
         if (null != cmd.getApprovalName())
             ga.setApprovalName(cmd.getApprovalName());
         this.generalApprovalProvider.updateGeneralApproval(ga);
         return processApproval(ga);
+    }
+
+    @Override
+    public GeneralApprovalDTO setGeneralApprovalForm(SetGeneralApprovalFormCommand cmd){
+        return null;
     }
 
     @Override

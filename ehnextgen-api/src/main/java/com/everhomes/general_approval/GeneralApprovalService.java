@@ -38,6 +38,8 @@ public interface GeneralApprovalService {
 
     GeneralApprovalDTO updateGeneralApproval(UpdateGeneralApprovalCommand cmd);
 
+    GeneralApprovalDTO setGeneralApprovalForm(SetGeneralApprovalFormCommand cmd);
+
     void deleteGeneralApproval(GeneralApprovalIdCommand cmd);
 
     GeneralFormDTO updateApprovalForm(UpdateApprovalFormCommand cmd);
