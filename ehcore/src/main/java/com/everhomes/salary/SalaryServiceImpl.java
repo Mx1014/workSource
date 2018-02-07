@@ -1396,11 +1396,12 @@ public class SalaryServiceImpl implements SalaryService {
         SalaryGroupsFile sgf = ConvertHelper.convert(group, SalaryGroupsFile.class);
         sgf.setFileTime(filerTime);
         sgf.setFilerUid(userId);
-        Organization organization = organizationProvider.findOrganizationById(ownerId);
-        OrganizationMember member = punchService.findOrganizationMemberByOrgIdAndUId(userId, organization.getPath());
-        if (null != member) {
-            sgf.setFilerName(member.getContactName());
-        }
+        sgf.setFilerName(findNameByOwnerAndUser(ownerId,userId));
+//        Organization organization = organizationProvider.findOrganizationById(ownerId);
+//        OrganizationMember member = punchService.findOrganizationMemberByOrgIdAndUId(userId, organization.getPath());
+//        if (null != member) {
+//            sgf.setFilerName(member.getContactName());
+//        }
         salaryGroupsFileProvider.createSalaryGroupsFile(sgf);
 
         List<SalaryEmployee> ses = salaryEmployeeProvider.listSalaryEmployees(ownerId, month);
