@@ -1,6 +1,7 @@
 -- by dengs. 工位预约添加范围 20180120
 ALTER TABLE `eh_office_cubicle_spaces` ADD COLUMN `owner_type` VARCHAR(128);
 ALTER TABLE `eh_office_cubicle_spaces` ADD COLUMN `owner_id` BIGINT;
+ALTER TABLE `eh_office_cubicle_categories` ADD COLUMN `status` TINYINT;
 
 ALTER TABLE `eh_office_cubicle_categories` ADD COLUMN `position_nums` INTEGER;
 ALTER TABLE `eh_office_cubicle_categories` ADD COLUMN `name` VARCHAR(256);
