@@ -37,12 +37,12 @@ public class SalaryEmployeeOriginValProviderImpl implements SalaryEmployeeOrigin
 
 	@Override
 	public void createSalaryEmployeeOriginVal(SalaryEmployeeOriginVal salaryEmployeeOriginVal) {
-		User user = UserContext.current().getUser();
+//		User user = UserContext.current().getUser();
 		Long id = sequenceProvider.getNextSequence(NameMapper.getSequenceDomainFromTablePojo(EhSalaryEmployeeOriginVals.class));
 		salaryEmployeeOriginVal.setId(id);
 		salaryEmployeeOriginVal.setCreateTime(new Timestamp(DateHelper.currentGMTTime().getTime()));
-		salaryEmployeeOriginVal.setCreatorUid(user.getId());
-		salaryEmployeeOriginVal.setNamespaceId(user.getNamespaceId());
+//		salaryEmployeeOriginVal.setCreatorUid(user.getId());
+//		salaryEmployeeOriginVal.setNamespaceId(user.getNamespaceId());
 		getReadWriteDao().insert(salaryEmployeeOriginVal);
 		DaoHelper.publishDaoAction(DaoAction.CREATE, EhSalaryEmployeeOriginVals.class, null);
 	}
