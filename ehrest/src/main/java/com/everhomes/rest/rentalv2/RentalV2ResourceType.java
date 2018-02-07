@@ -9,7 +9,7 @@ package com.everhomes.rest.rentalv2;
  * </ul>
  */
 public enum RentalV2ResourceType {
-	DEFAULT("default"), VIP_PARKING("vip_parking"),CONFERENCE("conference"),SCREEM("screen"),AREA("area");
+	DEFAULT("default"), VIP_PARKING("vip_parking"),CONFERENCE("conference"),SCREEN("screen"),AREA("area");
 
 	private String code;
 
