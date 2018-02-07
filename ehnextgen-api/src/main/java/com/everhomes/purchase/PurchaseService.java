@@ -1,9 +1,7 @@
 //@formatter:off
 package com.everhomes.purchase;
 
-import com.everhomes.rest.purchase.CreateOrUpdatePurchaseOrderCommand;
-import com.everhomes.rest.purchase.SearchPurchasesCommand;
-import com.everhomes.rest.purchase.SearchPurchasesResponse;
+import com.everhomes.rest.purchase.*;
 
 /**
  * Created by Wentian Wang on 2018/2/5.
@@ -15,4 +13,6 @@ public interface PurchaseService {
     SearchPurchasesResponse searchPurchases(SearchPurchasesCommand cmd);
 
     void entryWarehouse(Long purchaseRequestId);
+
+    GetPurchaseOrderDTO getPurchaseOrder(GetPurchaseOrderCommand cmd);
 }

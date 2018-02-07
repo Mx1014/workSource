@@ -68,7 +68,8 @@ public class PurchaseController extends ControllerBase{
     @RequestMapping("getPurchaseOrder")
     @RestReturn(value = GetPurchaseOrderDTO.class)
     private RestResponse getPurchaseOrder(GetPurchaseOrderCommand cmd){
-        RestResponse restResponse = new RestResponse();
+        GetPurchaseOrderDTO dto = purchaseService.getPurchaseOrder(cmd);
+        RestResponse restResponse = new RestResponse(dto);
         restResponse.setErrorCode(200);
         restResponse.setErrorDescription("OK");
         return restResponse;

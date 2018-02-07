@@ -166,4 +166,17 @@ public class PurchaseServiceImpl implements PurchaseService {
             warehouseProvider.updateWarehouseStockByPurchase(materialId,purchaseQuantity);
         }
     }
+
+    @Override
+    public GetPurchaseOrderDTO getPurchaseOrder(GetPurchaseOrderCommand cmd) {
+        PurchaseOrder order = purchaseProvider.getPurchaseOrderById(cmd.getPurchaseRequestId());
+        List<PurchaseItem> items = purchaseProvider.getPurchaseItemsByOrderId(cmd.getPurchaseRequestId());
+        //组装数据 TODO api字段和jooq字段保持一致可以节省代码
+        GetPurchaseOrderDTO dto = new GetPurchaseOrderDTO();
+        dto.setApprovalSheetId(order.getApprovalOrderId());
+        dto.setContact(order.getApplicantName());
+        return dto;
+
+
+    }
 }
