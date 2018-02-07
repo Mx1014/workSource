@@ -15,10 +15,10 @@ CREATE TABLE `eh_message_records` (
   `channels_info` varchar(2048) DEFAULT NULL,
   `body_type`varchar(32),
   `body` varchar(2048),
-  `deliveryOption` int(2) DEFAULT '0',
+  `delivery_option` int(2) DEFAULT '0',
   `create_time` datetime NOT NULL COMMENT 'message creation time',
   `session_token` varchar(128),
-  `deviceId` varchar(2048),
+  `device_id` varchar(2048),
   `index_id` bigint(20),
   PRIMARY KEY (`id`)
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4;
