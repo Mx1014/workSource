@@ -645,6 +645,8 @@ public class SalaryServiceImpl implements SalaryService {
         response.setTotalCount((long) (resultList.size() - 1));
         response.setFailCount((long) response.getLogs().size());
         response.setCoverCount((long) coverNum);
+        LOGGER.debug("resp" +
+                response);
     }
 
     private void saveImportEmployeeSalary(Long organizationId, Long detailId, ImportFileResponse response, RowResult r, Long ownerId) {
