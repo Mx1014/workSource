@@ -58,7 +58,7 @@ public class PointEventLogScheduler implements ApplicationListener<ContextRefres
     @Autowired(required = false)
     private List<IGeneralPointEventProcessor> generalProcessors;
 
-    private final Map<String, BasePointEventProcessor> processorMap = new HashMap<>();
+    private final Map<String, PointEventProcessorHolder> processorHolderMap = new HashMap<>();
 
     @Autowired
     private ConfigurationProvider configurationProvider;
@@ -104,26 +104,40 @@ public class PointEventLogScheduler implements ApplicationListener<ContextRefres
     }
 
     private void initEventProcessor() {
-        BiConsumer<String, BasePointEventProcessor> putCon = processorMap::put;
+        // 具体处理器
+        if (eventProcessors != null) {
+            initProcessor(eventProcessors, (event, processor) -> {
+                processorHolderMap.compute(event, (key, processorHolder) -> {
+                    if (processorHolder == null) {
+                        processorHolder = new PointEventProcessorHolder();
+                    }
+                    processorHolder.addProcessor(processor);
+                    return processorHolder;
+                });
+            });
+        }
 
         // 通用处理器
         if (generalProcessors != null) {
-            // 通用处理器需要单独订阅
-            BiConsumer<String, BasePointEventProcessor> andThen = putCon.andThen(
-                    (event, processor) -> LocalEventBus.subscribe(event, pointLocalBusSubscriber)
-            );
-            initProcessor(generalProcessors, andThen);
-        }
+            initProcessor(generalProcessors, (event, processor) -> {
+                // 通用处理器需要单独订阅
+                LocalEventBus.subscribe(event, pointLocalBusSubscriber);
 
-        // 具体处理器
-        if (eventProcessors != null) {
-            initProcessor(eventProcessors, putCon);
-        } else {
-            LOGGER.warn("There is no event processor found.");
+                processorHolderMap.compute(event, (key, processorHolder) -> {
+                    if (processorHolder == null) {
+                        processorHolder = new PointEventProcessorHolder();
+                    }
+                    if (processorHolder.notExist(event)) {
+                        processorHolder.addProcessor(processor);
+                    }
+                    return processorHolder;
+                });
+            });
         }
     }
 
-    private void initProcessor(List<? extends BasePointEventProcessor> processors, BiConsumer<String, BasePointEventProcessor> consumer) {
+    private void initProcessor(List<? extends BasePointEventProcessor> processors,
+                               BiConsumer<String, BasePointEventProcessor> consumer) {
         for (BasePointEventProcessor processor : processors) {
             try {
                 String[] events = processor.init();
@@ -208,7 +222,8 @@ public class PointEventLogScheduler implements ApplicationListener<ContextRefres
              PrintStream stream = new PrintStream(out)) {
             e.printStackTrace(stream);
             String message = out.toString("UTF-8");
-            handler.sendMail(0, account, xqt, "PointEventLogSchedule error (" + serverId + ")(" + home + ")", message);
+            handler.sendMail(0, account, xqt,
+                    "PointEventLogSchedule error (" + serverId + ")(" + home + ")", message);
         } catch (Exception ignored) { }
         // ------------------------------------------------------------------------
     }
@@ -244,68 +259,56 @@ public class PointEventLogScheduler implements ApplicationListener<ContextRefres
                         for (PointSystem pointSystem : enabledPointSystems) {
                             LocalEvent localEvent = (LocalEvent) StringHelper.fromJsonString(log.getEventJson(), LocalEvent.class);
 
-                            BasePointEventProcessor processor = getPointEventProcessor(log.getEventName());
-                            if (processor == null) {
+                            PointEventProcessorHolder processorHolder = getPointEventProcessor(log.getEventName());
+                            if (processorHolder == null) {
                                 continue;
                             }
 
-                            List<PointRule> pointRules = processor.getPointRules(localEvent);
-                            for (PointRule rule : pointRules) {
-                                // rule config
-                                PointRuleConfig ruleConfig = pointRuleConfigProvider.findByRuleIdAndSystemId(
-                                        pointSystem.getId(), rule.getId());
+                            processorHolder.doProcess(processor -> {
+                                List<PointRule> pointRules = processor.getPointRules(localEvent);
+                                for (PointRule rule : pointRules) {
+                                    // rule config
+                                    PointRuleConfig ruleConfig = pointRuleConfigProvider.findByRuleIdAndSystemId(
+                                            pointSystem.getId(), rule.getId());
 
-                                if (ruleConfig != null) {
-                                    rule.setStatus(ruleConfig.getStatus());
-                                    rule.setLimitData(ruleConfig.getLimitData());
-                                    rule.setLimitType(ruleConfig.getLimitType());
-                                    rule.setPoints(ruleConfig.getPoints());
-                                    rule.setDescription(ruleConfig.getDescription());
-                                }
-
-                                PointCommonStatus status = PointCommonStatus.fromCode(rule.getStatus());
-                                if (status == PointCommonStatus.DISABLED) {
-                                    continue;
-                                }
-                                PointEventProcessResult result = processor.execute(localEvent, rule, pointSystem, category);
-                                if (result == null) {
-                                    continue;
-                                }
-
-                                List<PointAction> pointActions = pointActionProvider.listByOwner(
-                                        Namespace.DEFAULT_NAMESPACE, EhPointRules.class.getSimpleName(), rule.getId());
-                                List<PointResultAction> resultActions = processor.getResultActions(
-                                        pointActions, localEvent, rule, pointSystem, category);
-
-                                if (resultActions != null && resultActions.size() > 0) {
-                                    actions.addAll(resultActions);
-                                }
-
-                                pointKeyToScoreMap.compute(getKey(pointSystem.getNamespaceId(), pointSystem.getId(),
-                                        localEvent.getContext().getUid()), (uid, score) -> {
-                                    if (score == null) {
-                                        score = result.getPoints();
-                                    } else {
-                                        score += result.getPoints();
+                                    if (ruleConfig != null) {
+                                        rule.setStatus(ruleConfig.getStatus());
+                                        rule.setLimitData(ruleConfig.getLimitData());
+                                        rule.setLimitType(ruleConfig.getLimitType());
+                                        rule.setPoints(ruleConfig.getPoints());
+                                        rule.setDescription(ruleConfig.getDescription());
                                     }
-                                    return score;
-                                });
 
-                                PointLog pl = result.getLog();
-                                PointLog dbLog = pointLogProvider.isExist(pl.getNamespaceId(), pl.getSystemId(), pl.getTargetUid(),
-                                        pl.getRuleId(), pl.getEntityType(), pl.getEntityId());
-
-                                // 这个类型的log是否已经存在
-                                if (dbLog != null) {
-                                    PointLog bindingLog = pointLogProvider.findByBindingLogId(dbLog.getId());
-                                    if (bindingLog == null) {
-                                        // bindingLog为空，这时不能加记录，防止重复记录
+                                    PointCommonStatus status = PointCommonStatus.fromCode(rule.getStatus());
+                                    if (status == PointCommonStatus.DISABLED) {
                                         continue;
                                     }
-                                    // 按照顺序，已经有log是这个类型的日志的binding,所以可以记录
+                                    PointEventProcessResult result = processor.execute(localEvent, rule, pointSystem, category);
+                                    if (result == null) {
+                                        continue;
+                                    }
+
+                                    List<PointAction> pointActions = pointActionProvider.listByOwner(
+                                            Namespace.DEFAULT_NAMESPACE, EhPointRules.class.getSimpleName(), rule.getId());
+                                    List<PointResultAction> resultActions = processor.getResultActions(
+                                            pointActions, localEvent, rule, pointSystem, category);
+
+                                    if (resultActions != null && resultActions.size() > 0) {
+                                        actions.addAll(resultActions);
+                                    }
+
+                                    pointKeyToScoreMap.compute(getKey(pointSystem.getNamespaceId(), pointSystem.getId(),
+                                            localEvent.getContext().getUid()), (uid, score) -> {
+                                        if (score == null) {
+                                            score = result.getPoints();
+                                        } else {
+                                            score += result.getPoints();
+                                        }
+                                        return score;
+                                    });
+                                    pointLogProvider.createPointLog(result.getLog());
                                 }
-                                pointLogProvider.createPointLog(pl);
-                            }
+                            });
                         }
 
                         // 设置状态为已完成
@@ -326,16 +329,16 @@ public class PointEventLogScheduler implements ApplicationListener<ContextRefres
         });
     }
 
-    public BasePointEventProcessor getPointEventProcessor(String eventName) {
+    public PointEventProcessorHolder getPointEventProcessor(String eventName) {
         String[] split = eventName.split("\\.");
         for (int i = split.length; i >= 0; i--) {
             String[] tokens = new String[i];
             System.arraycopy(split, 0, tokens, 0, i);
             String name = StringUtils.join(tokens, ".");
 
-            BasePointEventProcessor processor = processorMap.get(name);
-            if (processor != null) {
-                return processor;
+            PointEventProcessorHolder holder = processorHolderMap.get(name);
+            if (holder != null) {
+                return holder;
             }
         }
         return null;

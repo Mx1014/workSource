@@ -16,6 +16,7 @@ import java.util.stream.Collectors;
 import com.everhomes.address.Address;
 import com.everhomes.address.AddressProvider;
 import com.everhomes.bootstrap.PlatformContext;
+import com.everhomes.community.Building;
 import com.everhomes.contract.ContractService;
 import com.everhomes.openapi.ZjSyncdataBackupProvider;
 import com.everhomes.organization.*;
@@ -34,9 +35,7 @@ import com.everhomes.rest.organization.*;
 import com.everhomes.rest.organization.pm.AddressMappingStatus;
 import com.everhomes.rest.portal.ListServiceModuleAppsCommand;
 import com.everhomes.rest.portal.ListServiceModuleAppsResponse;
-import com.everhomes.user.UserPrivilegeMgr;
-
-import com.everhomes.user.UserProvider;
+import com.everhomes.user.*;
 
 import org.apache.commons.lang.StringUtils;
 import org.apache.lucene.spatial.geohash.GeoHashUtils;
@@ -84,9 +83,6 @@ import com.everhomes.scheduler.ScheduleProvider;
 import com.everhomes.search.ContractSearcher;
 import com.everhomes.search.EnterpriseCustomerSearcher;
 import com.everhomes.settings.PaginationConfigHelper;
-import com.everhomes.user.User;
-import com.everhomes.user.UserContext;
-import com.everhomes.user.UserService;
 import com.everhomes.util.ConvertHelper;
 import com.everhomes.util.DateHelper;
 import com.everhomes.util.ExecutorUtil;
@@ -1816,7 +1812,47 @@ public class CustomerServiceImpl implements CustomerService {
             entryInfo.setContractStartDate(new Timestamp(cmd.getContractStartDate()));
         }
         enterpriseCustomerProvider.createCustomerEntryInfo(entryInfo);
+
+        EnterpriseCustomer customer = enterpriseCustomerProvider.findById(cmd.getCustomerId());
+        if(customer != null && customer.getOrganizationId() != null && customer.getOrganizationId() != 0L) {
+            Organization organization = organizationProvider.findOrganizationById(customer.getOrganizationId());
+            if(organization != null) {
+                updateOrganizationAddress(organization.getId(), entryInfo.getBuildingId(), entryInfo.getAddressId());
+            }
+        }
     }
+
+    // 企业管理楼栋与客户tab页的入驻信息双向同步 产品功能22898
+    private void updateOrganizationAddress(Long orgId, Long buildingId, Long addressId) {
+        Long userId = UserContext.currentUserId();
+        OrganizationAddress address = organizationProvider.findOrganizationAddressByOrganizationIdAndAddressId(orgId, addressId);
+        if(address != null) {
+            return;
+        }
+        address = new OrganizationAddress();
+        Address addr = this.addressProvider.findAddressById(addressId);
+        if(addr != null) {
+            address.setBuildingName(addr.getBuildingName());
+        }
+        address.setOrganizationId(orgId);
+        address.setAddressId(addressId);
+        address.setBuildingId(buildingId);
+        address.setCreatorUid(userId);
+        address.setCreateTime(new Timestamp(DateHelper.currentGMTTime().getTime()));
+        address.setUpdateTime(new Timestamp(DateHelper.currentGMTTime().getTime()));
+        address.setStatus(OrganizationAddressStatus.ACTIVE.getCode());
+
+        this.organizationProvider.createOrganizationAddress(address);
+    }
+
+    // 企业管理楼栋与客户tab页的入驻信息双向同步 产品功能22898
+    private void deleteOrganizationAddress(Long orgId, Long buildingId, Long addressId) {
+        OrganizationAddress address = organizationProvider.findOrganizationAddressByOrganizationIdAndAddressId(orgId, addressId);
+        if(address != null) {
+            organizationProvider.deleteOrganizationAddress(address);
+        }
+    }
+
 
     @Override
     public void deleteCustomerDepartureInfo(DeleteCustomerDepartureInfoCommand cmd) {
@@ -1830,6 +1866,14 @@ public class CustomerServiceImpl implements CustomerService {
         checkCustomerAuth(cmd.getNamespaceId(), PrivilegeConstants.ENTERPRISE_CUSTOMER_MANAGE_DELETE, cmd.getOrgId(), cmd.getCommunityId());
         CustomerEntryInfo entryInfo = checkCustomerEntryInfo(cmd.getId(), cmd.getCustomerId());
         enterpriseCustomerProvider.deleteCustomerEntryInfo(entryInfo);
+
+        EnterpriseCustomer customer = enterpriseCustomerProvider.findById(cmd.getCustomerId());
+        if(customer != null && customer.getOrganizationId() != null && customer.getOrganizationId() != 0L) {
+            Organization organization = organizationProvider.findOrganizationById(customer.getOrganizationId());
+            if(organization != null) {
+                deleteOrganizationAddress(organization.getId(), entryInfo.getBuildingId(), entryInfo.getAddressId());
+            }
+        }
     }
 
     private CustomerEntryInfo checkCustomerEntryInfo(Long id, Long customerId) {
@@ -1979,6 +2023,14 @@ public class CustomerServiceImpl implements CustomerService {
         entryInfo.setCreateUid(exist.getCreateUid());
         entryInfo.setStatus(exist.getStatus());
         enterpriseCustomerProvider.updateCustomerEntryInfo(entryInfo);
+
+        EnterpriseCustomer customer = enterpriseCustomerProvider.findById(cmd.getCustomerId());
+        if(customer != null && customer.getOrganizationId() != null && customer.getOrganizationId() != 0L) {
+            Organization organization = organizationProvider.findOrganizationById(customer.getOrganizationId());
+            if(organization != null) {
+                updateOrganizationAddress(organization.getId(), entryInfo.getBuildingId(), entryInfo.getAddressId());
+            }
+        }
     }
 
     @Override
