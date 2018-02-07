@@ -1,6 +1,9 @@
 package com.everhomes.rest.general_approval;
 
+import com.everhomes.discover.ItemType;
 import com.everhomes.util.StringHelper;
+
+import java.util.List;
 
 /**
  * <ul>
@@ -12,8 +15,9 @@ import com.everhomes.util.StringHelper;
  * <li>projectType : </li>
  * <li>projectId : </li>
  * <li>supportType: APP可用，WEB 可用，APP 与 WEB 都可用 {@link com.everhomes.rest.general_approval.GeneralApprovalSupportType}</li>
- * <li>formOriginId: 原始 formId，如果修改了版本，则原始的数据保留</li>
  * <li>approvalName : 审批名称</li>
+ * <li>approvalRemark : 审批备注</li>
+ * <li>scopes : 可见范围 参考{@link com.everhomes.rest.general_approval.GeneralApprovalScopeMapDTO}</li>
  * <li>approvalAttribute: 审批属性 比如: DEFAULT-系统默认 参考{@link com.everhomes.rest.general_approval.GeneralApprovalAttribute}</li>
  * <li>modifyFlag: 是否可修改 0-不可修改 1-可以修改</li>
  * <li>deleteFlag: 是否可修改 0-不可删除 1-可以删除</li>
@@ -22,22 +26,30 @@ import com.everhomes.util.StringHelper;
  * @author janson
  *
  */
-public class CreateGeneralApprovalCommand { 
-    private Long     ownerId;
-    private String     ownerType;
-    private String     moduleType;
+public class CreateGeneralApprovalCommand {
+    private Long ownerId;
+    private String ownerType;
+    private String moduleType;
     private Long organizationId;
-    private Long     moduleId;
+    private Long moduleId;
     private String projectType;
     private Long projectId;
     private Byte supportType;
-    private	Long formOriginId;
+//    private	Long formOriginId;
     private	String approvalName;
 
-    //added by R.
+    //added by nan.rong for approval-2.0
+	private String approvalRemark;
+
+	@ItemType(GeneralApprovalScopeMapDTO.class)
+	private List<GeneralApprovalScopeMapDTO> scopes;
+
 	private String approvalAttribute;
+
 	private Byte modifyFlag;
+
 	private Byte deleteFlag;
+
 	private String iconUri;
 
 	public Byte getSupportType() {
@@ -46,14 +58,6 @@ public class CreateGeneralApprovalCommand {
 
 	public void setSupportType(Byte supportType) {
 		this.supportType = supportType;
-	}
-
-	public Long getFormOriginId() {
-		return formOriginId;
-	}
-
-	public void setFormOriginId(Long formOriginId) {
-		this.formOriginId = formOriginId;
 	}
 
 	public String getApprovalName() {
@@ -120,7 +124,23 @@ public class CreateGeneralApprovalCommand {
 		this.projectId = projectId;
 	}
 
-	public String getApprovalAttribute() {
+	public String getApprovalRemark() {
+		return approvalRemark;
+	}
+
+	public void setApprovalRemark(String approvalRemark) {
+		this.approvalRemark = approvalRemark;
+	}
+
+    public List<GeneralApprovalScopeMapDTO> getScopes() {
+        return scopes;
+    }
+
+    public void setScopes(List<GeneralApprovalScopeMapDTO> scopes) {
+        this.scopes = scopes;
+    }
+
+    public String getApprovalAttribute() {
 		return approvalAttribute;
 	}
 
