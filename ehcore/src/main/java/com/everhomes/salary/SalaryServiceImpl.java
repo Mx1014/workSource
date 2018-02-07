@@ -614,6 +614,7 @@ public class SalaryServiceImpl implements SalaryService {
 
     private void saveImportEmployeeSalary(List resultList, Long organizationId, String fileLog, ImportFileResponse response, Long ownerId) {
         response.setLogs(new ArrayList<>());
+        int coverNum = 0;
         for (int i = 1; i < resultList.size(); i++) {
             RowResult r = (RowResult) resultList.get(i);
             ImportFileResultLog<Map<String, String>> log = new ImportFileResultLog<>(SalaryConstants.SCOPE);
@@ -634,11 +635,16 @@ public class SalaryServiceImpl implements SalaryService {
                 continue;
             } else {
                 //// TODO: 2018/1/26  检验权限 是否有操作此用户的权限
+                SalaryEmployee employee = salaryEmployeeProvider.findSalaryEmployeeByDetailId(ownerId, detail.getId());
+                if (null != employee) {
+                    coverNum++;
+                }
                 saveImportEmployeeSalary(organizationId, detail.getId(), response, r, ownerId);
             }
         }
         response.setTotalCount((long) (resultList.size() - 1));
         response.setFailCount((long) response.getLogs().size());
+        response.setCoverCount((long) coverNum);
     }
 
     private void saveImportEmployeeSalary(Long organizationId, Long detailId, ImportFileResponse response, RowResult r, Long ownerId) {
