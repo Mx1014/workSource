@@ -383,7 +383,7 @@ public class SalaryServiceImpl implements SalaryService {
             }
             if (null != employee) {
                 OrganizationMemberDetails detail = organizationProvider.findOrganizationMemberDetailsByDetailId(detailId);
-                calculateEmployee(cmd.getOwnerId(), detailId, detail.getOrganizationId());
+                employee = calculateEmployee(cmd.getOwnerId(), detailId, detail.getOrganizationId());
                 response.getSalaryEmployeeDTO().add(processEmployeeDTO(employee));
             }
         }
@@ -700,7 +700,7 @@ public class SalaryServiceImpl implements SalaryService {
     /**
      * 计算某人的EhSalaryEmployee
      */
-    private void calculateEmployee(Long ownerId, Long detailId, List<SalaryEmployeeOriginVal> vals, Long organizationId) {
+    private SalaryEmployee calculateEmployee(Long ownerId, Long detailId, List<SalaryEmployeeOriginVal> vals, Long organizationId) {
 
         String month = findSalaryMonth(ownerId);
         SalaryEmployee employee = salaryEmployeeProvider.findSalaryEmployeeByDetailId(ownerId, detailId);
@@ -863,7 +863,7 @@ public class SalaryServiceImpl implements SalaryService {
         } else {
             salaryEmployeeProvider.updateSalaryEmployee(employee);
         }
-
+        return employee;
     }
 
     private SalaryEmployeeOriginVal processSalaryEmployeeOriginVal(SalaryGroupEntity groupEntity, Long detailId, String val) {
@@ -1571,9 +1571,10 @@ public class SalaryServiceImpl implements SalaryService {
         }
     }
 
-    private void calculateEmployee(Long ownerId, Long detailId, Long organizationId) {
+    private SalaryEmployee calculateEmployee(Long ownerId, Long detailId, Long organizationId) {
         List<SalaryEmployeeOriginVal> vals = salaryEmployeeOriginValProvider.listSalaryEmployeeOriginValsByDetailId(detailId);
-        calculateEmployee(ownerId, detailId, vals, organizationId);
+        SalaryEmployee employee = calculateEmployee(ownerId, detailId, vals, organizationId);
+        return employee;
     }
 
     private Workbook createEmployeeSalaryHeadWB(Long orgId) {
