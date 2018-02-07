@@ -819,6 +819,7 @@ public class SalaryServiceImpl implements SalaryService {
             }
             salaryEmployeeOriginValProvider.deleteSalaryEmployeeOriginValByDetailIdAndGroouEntity(detailId, groupEntity.getId());
             SalaryEmployeeOriginVal salaryVal = processSalaryEmployeeOriginVal(groupEntity, detailId, salaryTax.toString());
+//            salaryVal.setCreatorUid();
             salaryEmployeeOriginValProvider.createSalaryEmployeeOriginVal(salaryVal);
 
             groupEntity = salaryGroupEntityProvider.findSalaryGroupEntityByOrgANdDefaultId(organizationId, SalaryConstants.ENTITY_ID_BONUSTAX);
