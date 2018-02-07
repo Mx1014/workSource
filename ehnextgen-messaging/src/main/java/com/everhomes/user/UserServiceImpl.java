@@ -5542,6 +5542,7 @@ public class UserServiceImpl implements UserService {
 					Map valueMap = new HashMap();
 					valueMap.put("userLogin", GsonUtil.toJson(logintoken));
 					valueMap.put("args",tokenParam[4]);
+					valueMap.put("contentServer",contentServerService.getContentServer());
 					response.setMessage(GsonUtil.toJson(valueMap));
 					restResponse.setResponseObject(response);
 					restResponse.setErrorCode(ErrorCodes.SUCCESS);
