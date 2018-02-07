@@ -29,7 +29,9 @@ import com.everhomes.server.schema.tables.EhOrganizationMemberDetails;
 import com.everhomes.server.schema.tables.pojos.EhSocialSecurityPaymentLogs;
 import com.everhomes.server.schema.tables.pojos.EhSocialSecurityPayments;
 import com.everhomes.server.schema.tables.pojos.EhSocialSecuritySettings;
+import com.everhomes.user.User;
 import com.everhomes.user.UserContext;
+import com.everhomes.user.UserProvider;
 import com.everhomes.util.*;
 import com.everhomes.util.excel.RowResult;
 import com.everhomes.util.excel.handler.PropMrgOwnerHandler;
@@ -100,6 +102,8 @@ public class SocialSecurityServiceImpl implements SocialSecurityService {
     @Autowired
     private OrganizationProvider organizationProvider;
     @Autowired
+    private UserProvider userProvider;
+    @Autowired
     private CommunityProvider communityProvider;
     @Autowired
     private BigCollectionProvider bigCollectionProvider;
@@ -154,7 +158,7 @@ public class SocialSecurityServiceImpl implements SocialSecurityService {
                         checkSocialSercurityFiled(ownerId);
                         deleteOldMonthPayments(ownerId);
                         addNewMonthPayments(newPayMonth, ownerId);
-                        newSocialSecurityGroup(ownerId,newPayMonth);
+                        newSocialSecurityGroup(ownerId, newPayMonth);
                     } catch (ParseException e) {
                         e.printStackTrace();
                         LOGGER.error("payment month is wrong  " + paymentMonth, e);
@@ -2613,7 +2617,7 @@ public class SocialSecurityServiceImpl implements SocialSecurityService {
             }
         }
         List<SocialSecurityReport> reports = socialSecurityReportProvider.listSocialSecurityReport(ownerId, payMonth, NormalFlag.NO.getCode());
-        if (reports != null){
+        if (reports != null) {
             for (SocialSecurityReport report1 : reports) {
                 report1.setIsFiled(NormalFlag.YES.getCode());
                 report1.setFileTime(fileTime);
@@ -2632,7 +2636,7 @@ public class SocialSecurityServiceImpl implements SocialSecurityService {
         }
         SocialSecurityGroup group = socialSecurityGroupProvider.findSocialSecurityGroupByOrg(ownerId, payMonth);
         if (null == group) {
-            group = newSocialSecurityGroup(ownerId,payMonth);
+            group = newSocialSecurityGroup(ownerId, payMonth);
         }
         group.setFileUid(userId);
         group.setFileTime(fileTime);
@@ -2777,18 +2781,26 @@ public class SocialSecurityServiceImpl implements SocialSecurityService {
     }
 
     private void processCreatorName(GetSocialSecurityReportsHeadResponse response, Long ownerId) {
-        if (null != response.getCreatorUid()) {
-            OrganizationMember detail = organizationProvider.findOrganizationMemberByOrgIdAndUId(response.getCreatorUid(), ownerId);
-            if (null != detail) {
-                response.setCreatorName(detail.getContactName());
-            }
+
+        response.setCreatorName(findNameByOwnerAndUser(ownerId, response.getCreatorUid()));
+
+        response.setFileName(findNameByOwnerAndUser(ownerId,response.getFileUid()));
+    }
+
+    @Override
+    public String findNameByOwnerAndUser(Long ownerId, Long uid) {
+        if (null == uid) {
+            return null;
         }
-        if (null != response.getFileUid()) {
-            OrganizationMember detail = organizationProvider.findOrganizationMemberByOrgIdAndUId(response.getFileUid(), ownerId);
-            if (null != detail) {
-                response.setFileName(detail.getContactName());
-            }
+        OrganizationMember detail = organizationProvider.findOrganizationMemberByOrgIdAndUId(uid, ownerId);
+        if (null != detail) {
+            return detail.getContactName();
         }
+        User user = userProvider.findUserById(uid);
+        if (null != user) {
+            return user.getNickName();
+        }
+        return null;
     }
 
     @Override

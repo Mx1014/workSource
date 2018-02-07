@@ -34,14 +34,14 @@ INSERT  INTO  `eh_var_fields` VALUES (10926, 'equipment_inspection', 'geohash', 
 
 -- 增加经纬度动态表单  jiarui  20180122
 
-INSERT  INTO  `eh_var_fields` VALUES (11999, 'equipment_inspection', 'geohash', '经纬度', 'Long', 10000, CONCAT('/',10000,'/'), 1, null, 2, 1, now(),null ,null,'{\"fieldParamType\": \"map\", \"length\": 32}');
+INSERT  INTO  `eh_var_fields` VALUES (11999, 'equipment_inspection', 'geohash', '经纬度', 'Long', 10000, CONCAT('/',10000,'/'), 1, NULL, 2, 1, NOW(),NULL ,NULL,'{\"fieldParamType\": \"map\", \"length\": 32}');
 -- 增加经纬度动态表单  jiarui  20180122
 
 -- offline  by jiarui
-SET  @id = (SELECT  MAX(id) from eh_version_realm);
-INSERT INTO `eh_version_realm` VALUES (@id:=@id+1, 'equipmentInspection', NULL, now(), '0');
+SET  @id = (SELECT  MAX(id) FROM eh_version_realm);
+INSERT INTO `eh_version_realm` VALUES (@id:=@id+1, 'equipmentInspection', NULL, NOW(), '0');
 
-SET  @vId = (SELECT  MAX(id) from eh_version_urls);
+SET  @vId = (SELECT  MAX(id) FROM eh_version_urls);
 INSERT INTO `eh_version_urls` VALUES (@vId:=@vId+1, @id, '1.0.0', 'http://opv2-test.zuolin.com/nar/equipmentInspection/inspectionOffLine/equipmentInspection-1-0-0.zip', 'http://opv2-test.zuolin.com/nar/equipmentInspection/inspectionOffLine/equipmentInspection-1-0-0.zip', '物业巡检巡检离线', '0', '物业巡检', NOW(), NULL, '0');
 
 UPDATE eh_launch_pad_items
@@ -498,28 +498,13 @@ INSERT INTO `eh_social_security_bases` (`id`, `city_id`, `household_type`, `pay_
 
 -- 暂时取消ratio options
 UPDATE eh_social_security_bases SET ratio_options = NULL ;
-
  
-INSERT INTO `EH_WEB_MENUS` (`id`, `name`, `parent_id`, `icon_url`, `data_type`, `leaf_flag`, `status`, `path`, `type`, `sort_num`, `module_id`, `level`, `condition_type`, `category`) VALUES('51300','社保管理','50000',NULL,'','1','2','/50000/51300','park','539','51300','2',NULL,'module');
-INSERT INTO `EH_WEB_MENUS` (`id`, `name`, `parent_id`, `icon_url`, `data_type`, `leaf_flag`, `status`, `path`, `type`, `sort_num`, `module_id`, `level`, `condition_type`, `category`) VALUES('51301','员工社保','51300',NULL,'react:/social-security/security-list','1','2','/50000/51300/51301','park','539','51300','3',NULL,'module');
-INSERT INTO `EH_WEB_MENUS` (`id`, `name`, `parent_id`, `icon_url`, `data_type`, `leaf_flag`, `status`, `path`, `type`, `sort_num`, `module_id`, `level`, `condition_type`, `category`) VALUES('51302','历史归档','51300',NULL,'react:/social-security/security-history','1','2','/50000/51300/51301','park','539','51300','3',NULL,'module');
-INSERT INTO `EH_WEB_MENUS` (`id`, `name`, `parent_id`, `icon_url`, `data_type`, `leaf_flag`, `status`, `path`, `type`, `sort_num`, `module_id`, `level`, `condition_type`, `category`) VALUES('513000','社保管理','500000',NULL,'','1','2','/500000/513000','organization','539','51300','2',NULL,'module');
-INSERT INTO `EH_WEB_MENUS` (`id`, `name`, `parent_id`, `icon_url`, `data_type`, `leaf_flag`, `status`, `path`, `type`, `sort_num`, `module_id`, `level`, `condition_type`, `category`) VALUES('513001','员工社保','513000',NULL,'react:/social-security/security-list','1','2','/50000/513000/513001','park','539','51300','3',NULL,'module');
-INSERT INTO `EH_WEB_MENUS` (`id`, `name`, `parent_id`, `icon_url`, `data_type`, `leaf_flag`, `status`, `path`, `type`, `sort_num`, `module_id`, `level`, `condition_type`, `category`) VALUES('513002','历史归档','513000',NULL,'react:/social-security/security-history','1','2','/50000/513000/513001','park','539','51300','3',NULL,'module');
-
-SET @scope_id = (SELECT MAX(id) FROM `eh_web_menu_scopes`);
-INSERT INTO `eh_web_menu_scopes` (`id`, `menu_id`, `menu_name`, `owner_type`, `owner_id`, `apply_policy`) VALUES ((@scope_id:=@scope_id+1), '51300', '打卡记录', 'EhNamespaces', '1', '2');
-INSERT INTO `eh_web_menu_scopes` (`id`, `menu_id`, `menu_name`, `owner_type`, `owner_id`, `apply_policy`) VALUES ((@scope_id:=@scope_id+1), '51301', '员工社保', 'EhNamespaces', '1', '2');
-INSERT INTO `eh_web_menu_scopes` (`id`, `menu_id`, `menu_name`, `owner_type`, `owner_id`, `apply_policy`) VALUES ((@scope_id:=@scope_id+1), '51302', '历史归档', 'EhNamespaces', '1', '2');
-INSERT INTO `eh_web_menu_scopes` (`id`, `menu_id`, `menu_name`, `owner_type`, `owner_id`, `apply_policy`) VALUES ((@scope_id:=@scope_id+1), '513000', '打卡记录', 'EhNamespaces', '1', '2');
-INSERT INTO `eh_web_menu_scopes` (`id`, `menu_id`, `menu_name`, `owner_type`, `owner_id`, `apply_policy`) VALUES ((@scope_id:=@scope_id+1), '513001', '员工社保', 'EhNamespaces', '1', '2');
-INSERT INTO `eh_web_menu_scopes` (`id`, `menu_id`, `menu_name`, `owner_type`, `owner_id`, `apply_policy`) VALUES ((@scope_id:=@scope_id+1), '513002', '历史归档', 'EhNamespaces', '1', '2');
 
 
 
 -- 域空间volgo
 -- 增加公告管理模块信息
-INSERT INTO eh_service_modules(id,name,parent_id,path,type,level,status,create_time,creator_uid,operator_uid,action_type,multiple_flag,module_control_type,default_order)
+INSERT INTO eh_service_modules(id,NAME,parent_id,path,TYPE,LEVEL,STATUS,create_time,creator_uid,operator_uid,action_type,multiple_flag,module_control_type,default_order)
 VALUE(57000,'公告管理',50000,'/50000/57000',1,2,2,NOW(),0,0,70,0,'org_control',0);
 
 -- 增加公告模块与域空间的关联信息
@@ -532,5 +517,8 @@ SET @item_id = (SELECT MAX(id) FROM eh_launch_pad_items);
 INSERT INTO `eh_launch_pad_items` (`id`, `namespace_id`, `app_id`, `scope_code`, `scope_id`, `item_location`, `item_group`, `item_name`, `item_label`, `icon_uri`, `item_width`, `item_height`, `action_type`, `action_data`, `default_order`, `apply_policy`, `min_version`, `display_flag`, `display_layout`, `bgcolor`, `tag`, `target_type`, `target_id`, `delete_flag`, `scene_type`, `scale_type`, `service_categry_id`, `selected_icon_uri`, `more_order`, `alias_icon_uri`, `categry_name`) VALUES (@item_id := @item_id + 1, '1', '0', '0', '0', '/home', 'Bizs', '公告', '公告', 'cs://1/image/aW1hZ2UvTVRvNE5XWmpNakV4TW1VNFlUbG1aR0ppWWpoaU16RmxNekUxWWpFMk1XRXlZUQ', '1', '1', '70', '{"title":"公告管理"}', '10', '0', '1', '1', '', '0', NULL, NULL, NULL, '1', 'pm_admin', '0', NULL, NULL, '0', NULL,NULL);
 
 -- error codes added by wentian
-SET @eh_locale_strings_id = (SELECT MAX(id) from `eh_locale_strings`);
+SET @eh_locale_strings_id = (SELECT MAX(id) FROM `eh_locale_strings`);
 INSERT INTO `eh_locale_strings` (`id`, `scope`, `code`, `locale`, `text`) VALUES (@eh_locale_strings_id:=@eh_locale_strings_id+1, 'requisition', '1001', 'zh_CN', '未找到请示单工作流');
+
+-- by dengs.
+update eh_office_cubicle_categories SET status=2;

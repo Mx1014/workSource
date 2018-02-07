@@ -24,7 +24,9 @@ public interface PortalItemProvider {
 
 	List<PortalItem> listPortalItemByGroupId(Long itemGroupId, Byte neStatus);
 
-	List<PortalItem> listPortalItems(CrossShardListingLocator locator, Integer pageSize, ListingQueryBuilderCallback queryBuilderCallback);
+    List<PortalItem> listPortalItemsByVersionId(Long versionId);
+
+    List<PortalItem> listPortalItems(CrossShardListingLocator locator, Integer pageSize, ListingQueryBuilderCallback queryBuilderCallback);
 
 	List<PortalItem> listPortalItems(Long itemCategoryId, Integer namespaceId, String actionType, Long itemGroupId, Byte neStatus, Long versionId);
 

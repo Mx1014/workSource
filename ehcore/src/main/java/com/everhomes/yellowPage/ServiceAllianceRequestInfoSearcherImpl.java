@@ -648,7 +648,7 @@ public class ServiceAllianceRequestInfoSearcherImpl extends AbstractElasticSearc
 				}
 				wb.write(out);
 				if(category!=null){
-					DownloadUtil.download(out, httpResponse,category.getName()+"的申请记录");
+					DownloadUtil.download(out, httpResponse,category.getName()+"apply records");
 				}else{
 					DownloadUtil.download(out, httpResponse);
 				}

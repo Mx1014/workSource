@@ -13,6 +13,8 @@ import com.everhomes.util.StringHelper;
  * <li>reserverName: 预订人姓名 </li> 
  * <li>reserveContactToken:  预订人联系方式</li> 
  * <li>reserveEnterprise: 预订人公司</li> 
+ * <li>categoryName: 预定空间名称</li>
+ * <li>categoryId: 空间id</li>
  * </ul>
  */
 public class AddSpaceOrderCommand {
@@ -27,7 +29,25 @@ public class AddSpaceOrderCommand {
     private Integer size;
     private String reserverName;
     private String reserveEnterprise;
-    private String reserveContactToken;
+	private String reserveContactToken;
+	private String categoryName;
+	private Long categoryId;
+
+	public String getCategoryName() {
+		return categoryName;
+	}
+
+	public void setCategoryName(String categoryName) {
+		this.categoryName = categoryName;
+	}
+
+	public Long getCategoryId() {
+		return categoryId;
+	}
+
+	public void setCategoryId(Long categoryId) {
+		this.categoryId = categoryId;
+	}
 
 	@Override
     public String toString() {
