@@ -306,21 +306,7 @@ public class PointEventLogScheduler implements ApplicationListener<ContextRefres
                                         }
                                         return score;
                                     });
-
-                                    PointLog pl = result.getLog();
-                                    PointLog dbLog = pointLogProvider.isExist(pl.getNamespaceId(), pl.getSystemId(), pl.getTargetUid(),
-                                            pl.getCategoryId(), pl.getRuleId(), pl.getEntityType(), pl.getEntityId());
-
-                                    // 这个类型的log是否已经存在
-                                    if (dbLog != null) {
-                                        PointLog bindingLog = pointLogProvider.findByBindingLogId(dbLog.getId());
-                                        if (bindingLog == null) {
-                                            // bindingLog为空，这时不能加记录，防止重复记录
-                                            continue;
-                                        }
-                                        // 按照顺序，已经有log是这个类型的日志的binding,所以可以记录
-                                    }
-                                    pointLogProvider.createPointLog(pl);
+                                    pointLogProvider.createPointLog(result.getLog());
                                 }
                             });
                         }
