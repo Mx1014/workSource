@@ -2231,6 +2231,7 @@ public class PortalServiceImpl implements PortalService {
 						if(portalLayout.getLocation().equals(oldPortalLayout.getLocation()) && portalLayout.getName().equals(oldPortalLayout.getName())){
 							actionData.setLayoutId(portalLayout.getId());
 							item.setActionData(actionData.toString());
+							portalItemProvider.updatePortalItem(item);
 							break;
 						}
 					}
