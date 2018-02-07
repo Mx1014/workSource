@@ -273,9 +273,10 @@ public abstract class KetuoParkingVendorHandler extends DefaultParkingVendorHand
 		Timestamp tempStart = Utils.addSecond(expireTime, 1);
 		Timestamp tempEnd = null;
 		if(ADD_DISTANCE_MONTH.equals(monthCardTimeArithmetic)) {
-			tempEnd = Utils.getTimestampByAddNatureMonth(expireTime, order.getMonthCount().intValue());
-		}else{
 			tempEnd = Utils.getTimestampByAddDistanceMonth(expireTime,order.getMonthCount().intValue());
+		}else{
+			tempEnd = Utils.getTimestampByAddNatureMonth(expireTime, order.getMonthCount().intValue());
+
 		}
 		String validStart = sdf1.format(tempStart);
 		String validEnd = sdf1.format(tempEnd);
