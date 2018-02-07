@@ -530,6 +530,7 @@ public class PmtaskFlowModuleListener implements FlowModuleListener {
 				flowCase = tree.getLeafNodes().get(0).getFlowCase();
 				FlowGraphEvent evt = ctx.getCurrentEvent();
 				if (FlowUserType.APPLIER.equals(evt.getUserType())){
+					LOGGER.info("nextStep:"+JSONObject.toJSONString(flowCase));
 					FlowAutoStepDTO dto = new FlowAutoStepDTO();
 					dto.setAutoStepType(FlowStepType.APPROVE_STEP.getCode());
 					dto.setFlowCaseId(flowCase.getId());
