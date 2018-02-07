@@ -166,7 +166,9 @@ public class GuangDaWeGuParkingVendorHandler extends DefaultParkingVendorHandler
 			params.put("monthCount", count+"");
 			String result = post(CARD_GET_PAY_INFO,params);
 			GuangDaWeGuResponse<Double> entity = JSONObject.parseObject(result, new TypeReference<GuangDaWeGuResponse<Double>>() {});
-			rechargeRateDTOS.add(populaterate(entity.getData(),count,parkingLot));
+			if(entity.isSuccess()) {
+				rechargeRateDTOS.add(populaterate(entity.getData(), count, parkingLot));
+			}
 		}
 		return rechargeRateDTOS;
 
