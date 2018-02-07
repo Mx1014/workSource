@@ -19,9 +19,12 @@ import com.everhomes.rest.salary.ListEnterprisesCommand;
 import com.everhomes.rest.techpark.punch.NormalFlag;
 import com.everhomes.rest.techpark.punch.PunchServiceErrorCode;
 import com.everhomes.socialSecurity.SocialSecurityConstants;
+import com.everhomes.socialSecurity.SocialSecurityService;
 import com.everhomes.techpark.punch.PunchService;
 import com.everhomes.uniongroup.UniongroupService;
+import com.everhomes.user.User;
 import com.everhomes.user.UserContext;
+import com.everhomes.user.UserProvider;
 import com.everhomes.util.ConvertHelper;
 import com.everhomes.util.DateHelper;
 import com.everhomes.util.RuntimeErrorException;
@@ -154,6 +157,9 @@ public class SalaryServiceImpl implements SalaryService {
     private OrganizationProvider organizationProvider;
 
     @Autowired
+    private SocialSecurityService socialSecurityService;
+
+    @Autowired
     private ImportFileService importFileService;
 
     @Autowired
@@ -161,6 +167,9 @@ public class SalaryServiceImpl implements SalaryService {
 
     @Autowired
     private ConfigurationProvider configurationProvider;
+
+    @Autowired
+    private UserProvider userProvider;
 
     /*******
      * 导入部分
@@ -438,13 +447,26 @@ public class SalaryServiceImpl implements SalaryService {
         sg.setCreateTime(new Timestamp(DateHelper.currentGMTTime()
                 .getTime()));
         sg.setCreatorUid(UserContext.currentUserId());
-        Organization organization = organizationProvider.findOrganizationById(ownerId);
-        OrganizationMember member = punchService.findOrganizationMemberByOrgIdAndUId(sg.getCreatorUid(), organization.getPath());
-        if (null != member) {
-            sg.setCreatorName(member.getContactName());
-        }
+        sg.setCreatorName(findNameByOwnerAndUser(ownerId,sg.getCreatorUid()));
+
         salaryGroupProvider.createSalaryGroup(sg);
 
+    }
+    public String findNameByOwnerAndUser(Long ownerId, Long uid) {
+        if (null == uid) {
+            return null;
+        }
+        Organization organization = organizationProvider.findOrganizationById(ownerId);
+        OrganizationMember member = punchService.findOrganizationMemberByOrgIdAndUId(uid, organization.getPath());
+
+        if (null != member) {
+            return member.getContactName();
+        }
+        User user = userProvider.findUserById(uid);
+        if (null != user) {
+            return user.getNickName();
+        }
+        return null;
     }
 
     private void batchCreateMonthSalaryEmployees(Long ownerId, String month) {
