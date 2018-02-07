@@ -125,11 +125,9 @@ public class MessagePersistWorker {
 //            e.printStackTrace();
 //        }
 
-        while (true){
-            // 每次满一百条就持久化一次
-            Worker worker = new Worker(100);
-            worker.start();
-        }
+        // 每次满一百条就持久化一次
+        Worker worker = new Worker(100);
+        worker.start();
 
     }
 

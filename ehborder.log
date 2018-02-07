@@ -38396,3 +38396,322 @@ java.net.ConnectException: Connection refused (Connection refused)
 2018-02-02 17:06:30.190  INFO 9519 [SimpleAsyncTaskExecutor-1] --- c.e.controller.PusherWebSocketHandler    : added deviceId, deviceId=ns:1000000:manufacturer:HUAWEI,brand:Honor,model:CHM-TL00H,serial:unknown,deviceId:529138997853768, session=1840
 2018-02-02 17:06:33.607  INFO 9519 [http-nio-0.0.0.0-9090-exec-6] --- c.e.controller.ServerWebSocketHandler    : Received inter-server message. session: 180e, message: {"name":"heartbeat","payload":"{\"lastPeerReceiveTime\":1517562389106}"}
 2018-02-02 17:06:52.344  INFO 9519 [http-nio-0.0.0.0-9090-exec-9] --- c.e.controller.ServerWebSocketHandler    : Received inter-server message. session: 180e, message: {"name":"heartbeat","payload":"{\"lastPeerReceiveTime\":1517562409117}"}
+2018-02-07 14:38:48.019  INFO 1191 [main] --- com.everhomes.border.BorderServerApp     : Starting BorderServerApp on lvleideMacBook-Pro.local with PID 1191 (/Users/lvlei/IdeaProjects/ehnextgen/ehborder/target/classes started by lvlei in /Users/lvlei/IdeaProjects/ehnextgen)
+2018-02-07 14:38:48.023 DEBUG 1191 [main] --- o.s.boot.SpringApplication               : Loading source class com.everhomes.border.BorderServerApp
+2018-02-07 14:38:48.049 DEBUG 1191 [main] --- o.s.b.c.c.ConfigFileApplicationListener  : Skipped config file 'file:./config/ehborder_custom.yml' resource not found
+2018-02-07 14:38:48.049 DEBUG 1191 [main] --- o.s.b.c.c.ConfigFileApplicationListener  : Skipped config file 'file:./config/ehborder_custom.properties' resource not found
+2018-02-07 14:38:48.049 DEBUG 1191 [main] --- o.s.b.c.c.ConfigFileApplicationListener  : Skipped config file 'file:./config/ehborder_custom.yaml' resource not found
+2018-02-07 14:38:48.049 DEBUG 1191 [main] --- o.s.b.c.c.ConfigFileApplicationListener  : Skipped config file 'file:./ehborder_custom.yml' resource not found
+2018-02-07 14:38:48.049 DEBUG 1191 [main] --- o.s.b.c.c.ConfigFileApplicationListener  : Skipped config file 'file:./ehborder_custom.properties' resource not found
+2018-02-07 14:38:48.049 DEBUG 1191 [main] --- o.s.b.c.c.ConfigFileApplicationListener  : Skipped config file 'file:./ehborder_custom.yaml' resource not found
+2018-02-07 14:38:48.049 DEBUG 1191 [main] --- o.s.b.c.c.ConfigFileApplicationListener  : Skipped config file 'classpath:/config/ehborder_custom.yml' resource not found
+2018-02-07 14:38:48.050 DEBUG 1191 [main] --- o.s.b.c.c.ConfigFileApplicationListener  : Skipped config file 'classpath:/config/ehborder_custom.properties' resource not found
+2018-02-07 14:38:48.050 DEBUG 1191 [main] --- o.s.b.c.c.ConfigFileApplicationListener  : Skipped config file 'classpath:/config/ehborder_custom.yaml' resource not found
+2018-02-07 14:38:48.050 DEBUG 1191 [main] --- o.s.b.c.c.ConfigFileApplicationListener  : Loaded config file 'classpath:/ehborder_custom.yml' 
+2018-02-07 14:38:48.050 DEBUG 1191 [main] --- o.s.b.c.c.ConfigFileApplicationListener  : Skipped config file 'classpath:/ehborder_custom.properties' resource not found
+2018-02-07 14:38:48.050 DEBUG 1191 [main] --- o.s.b.c.c.ConfigFileApplicationListener  : Skipped config file 'classpath:/ehborder_custom.yaml' resource not found
+2018-02-07 14:38:48.054  INFO 1191 [main] --- ationConfigEmbeddedWebApplicationContext : Refreshing org.springframework.boot.context.embedded.AnnotationConfigEmbeddedWebApplicationContext@17503f6b: startup date [Wed Feb 07 14:38:48 CST 2018]; root of context hierarchy
+2018-02-07 14:38:48.056 DEBUG 1191 [main] --- ationConfigEmbeddedWebApplicationContext : Bean factory for org.springframework.boot.context.embedded.AnnotationConfigEmbeddedWebApplicationContext@17503f6b: org.springframework.beans.factory.support.DefaultListableBeanFactory@6bf08014: defining beans [org.springframework.context.annotation.internalConfigurationAnnotationProcessor,org.springframework.context.annotation.internalAutowiredAnnotationProcessor,org.springframework.context.annotation.internalRequiredAnnotationProcessor,org.springframework.context.annotation.internalCommonAnnotationProcessor,borderServerApp]; root of factory hierarchy
+2018-02-07 14:38:50.082  INFO 1191 [main] --- o.s.b.f.xml.XmlBeanDefinitionReader      : Loading XML bean definitions from file [/Users/lvlei/IdeaProjects/ehnextgen/ehborder/target/classes/applicationContext.xml]
+2018-02-07 14:38:50.321  INFO 1191 [main] --- o.s.b.f.s.DefaultListableBeanFactory     : Overriding bean definition for bean 'beanNameViewResolver': replacing [Root bean: class [null]; scope=; abstract=false; lazyInit=false; autowireMode=3; dependencyCheck=0; autowireCandidate=true; primary=false; factoryBeanName=org.springframework.boot.autoconfigure.web.ErrorMvcAutoConfiguration$WhitelabelErrorViewConfiguration; factoryMethodName=beanNameViewResolver; initMethodName=null; destroyMethodName=(inferred); defined in class path resource [org/springframework/boot/autoconfigure/web/ErrorMvcAutoConfiguration$WhitelabelErrorViewConfiguration.class]] with [Root bean: class [null]; scope=; abstract=false; lazyInit=false; autowireMode=3; dependencyCheck=0; autowireCandidate=true; primary=false; factoryBeanName=org.springframework.boot.autoconfigure.web.WebMvcAutoConfiguration$WebMvcAutoConfigurationAdapter; factoryMethodName=beanNameViewResolver; initMethodName=null; destroyMethodName=(inferred); defined in class path resource [org/springframework/boot/autoconfigure/web/WebMvcAutoConfiguration$WebMvcAutoConfigurationAdapter.class]]
+2018-02-07 14:38:50.645  INFO 1191 [main] --- trationDelegate$BeanPostProcessorChecker : Bean 'org.springframework.scheduling.annotation.SchedulingConfiguration' of type [class org.springframework.scheduling.annotation.SchedulingConfiguration$$EnhancerBySpringCGLIB$$7e3737ee] is not eligible for getting processed by all BeanPostProcessors (for example: not eligible for auto-proxying)
+2018-02-07 14:38:50.661 DEBUG 1191 [main] --- ationConfigEmbeddedWebApplicationContext : Unable to locate MessageSource with name 'messageSource': using default [org.springframework.context.support.DelegatingMessageSource@6749fe50]
+2018-02-07 14:38:50.661 DEBUG 1191 [main] --- ationConfigEmbeddedWebApplicationContext : Using ApplicationEventMulticaster [org.springframework.context.event.SimpleApplicationEventMulticaster@52bf7bf6]
+2018-02-07 14:38:50.955 DEBUG 1191 [main] --- .t.TomcatEmbeddedServletContainerFactory : Code archive: /Users/lvlei/.m2/everhomes/repository/org/springframework/boot/spring-boot/1.1.9.RELEASE/spring-boot-1.1.9.RELEASE.jar
+2018-02-07 14:38:50.955 DEBUG 1191 [main] --- .t.TomcatEmbeddedServletContainerFactory : Code archive: /Users/lvlei/.m2/everhomes/repository/org/springframework/boot/spring-boot/1.1.9.RELEASE/spring-boot-1.1.9.RELEASE.jar
+2018-02-07 14:38:50.955 DEBUG 1191 [main] --- .t.TomcatEmbeddedServletContainerFactory : None of the document roots [src/main/webapp, public, static] point to a directory and will be ignored.
+2018-02-07 14:38:50.993  INFO 1191 [main] --- .t.TomcatEmbeddedServletContainerFactory : Server initialized with port: 9090
+2018-02-07 14:38:51.142  INFO 1191 [main] --- o.apache.catalina.core.StandardService   : Starting service Tomcat
+2018-02-07 14:38:51.142  INFO 1191 [main] --- org.apache.catalina.core.StandardEngine  : Starting Servlet Engine: Apache Tomcat/8.0.8
+2018-02-07 14:38:51.219  INFO 1191 [localhost-startStop-1] --- o.a.c.c.C.[Tomcat].[localhost].[/]       : Initializing Spring embedded WebApplicationContext
+2018-02-07 14:38:51.220  INFO 1191 [localhost-startStop-1] --- o.s.web.context.ContextLoader            : Root WebApplicationContext: initialization completed in 3169 ms
+2018-02-07 14:38:51.855  INFO 1191 [localhost-startStop-1] --- o.s.b.c.e.ServletRegistrationBean        : Mapping servlet: 'dispatcherServlet' to [/]
+2018-02-07 14:38:51.861  INFO 1191 [localhost-startStop-1] --- o.s.b.c.embedded.FilterRegistrationBean  : Mapping filter: 'hiddenHttpMethodFilter' to: [/*]
+2018-02-07 14:38:51.986  INFO 1191 [main] --- o.s.s.concurrent.ThreadPoolTaskExecutor  : Initializing ExecutorService  'clientInboundChannelExecutor'
+2018-02-07 14:38:51.991  INFO 1191 [main] --- o.s.s.concurrent.ThreadPoolTaskExecutor  : Initializing ExecutorService  'clientOutboundChannelExecutor'
+2018-02-07 14:38:52.054  INFO 1191 [main] --- o.s.s.c.ThreadPoolTaskScheduler          : Initializing ExecutorService  'defaultSockJsTaskScheduler'
+2018-02-07 14:38:52.071  INFO 1191 [main] --- o.s.w.s.handler.SimpleUrlHandlerMapping  : Mapped URL path [/interserver] onto handler of type [class org.springframework.web.socket.server.support.WebSocketHttpRequestHandler]
+2018-02-07 14:38:52.071  INFO 1191 [main] --- o.s.w.s.handler.SimpleUrlHandlerMapping  : Mapped URL path [/pusher] onto handler of type [class org.springframework.web.socket.server.support.WebSocketHttpRequestHandler]
+2018-02-07 14:38:52.071  INFO 1191 [main] --- o.s.w.s.handler.SimpleUrlHandlerMapping  : Mapped URL path [/client] onto handler of type [class org.springframework.web.socket.server.support.WebSocketHttpRequestHandler]
+2018-02-07 14:38:52.072  INFO 1191 [main] --- o.s.w.s.handler.SimpleUrlHandlerMapping  : Mapped URL path [/aclink/**] onto handler of type [class org.springframework.web.socket.server.support.WebSocketHttpRequestHandler]
+2018-02-07 14:38:52.079  INFO 1191 [main] --- o.s.s.c.ThreadPoolTaskScheduler          : Initializing ExecutorService  'messageBrokerSockJsTaskScheduler'
+2018-02-07 14:38:52.093  INFO 1191 [main] --- o.s.w.s.handler.SimpleUrlHandlerMapping  : Mapped URL path [/messaging/**] onto handler of type [class org.springframework.web.socket.sockjs.support.SockJsHttpRequestHandler]
+2018-02-07 14:38:52.094  INFO 1191 [main] --- o.s.s.concurrent.ThreadPoolTaskExecutor  : Initializing ExecutorService  'brokerChannelExecutor'
+2018-02-07 14:38:52.207  INFO 1191 [main] --- s.a.s.SimpAnnotationMethodMessageHandler : Mapped "{[/greeting],messageType=[MESSAGE]}" onto public com.everhomes.message.GreetingMessage com.everhomes.controller.MessagingController.greeting(com.everhomes.message.HelloMessage) throws java.lang.Exception
+2018-02-07 14:38:52.248  INFO 1191 [main] --- o.s.w.s.handler.SimpleUrlHandlerMapping  : Mapped URL path [/**/favicon.ico] onto handler of type [class org.springframework.web.servlet.resource.ResourceHttpRequestHandler]
+2018-02-07 14:38:52.269  INFO 1191 [main] --- s.w.s.m.m.a.RequestMappingHandlerMapping : Mapped "{[/admin/getDeviceSessions],methods=[],params=[],headers=[],consumes=[],produces=[],custom=[]}" onto public java.lang.String com.everhomes.controller.MessagingController.getDeviceSessions(javax.servlet.http.HttpServletRequest,javax.servlet.http.HttpServletResponse) throws java.lang.Exception
+2018-02-07 14:38:52.269  INFO 1191 [main] --- s.w.s.m.m.a.RequestMappingHandlerMapping : Mapped "{[/borderlog],methods=[GET],params=[],headers=[],consumes=[],produces=[],custom=[]}" onto public void com.everhomes.controller.ExportLog.doPost(javax.servlet.http.HttpServletRequest,javax.servlet.http.HttpServletResponse) throws java.lang.Exception
+2018-02-07 14:38:52.271  INFO 1191 [main] --- s.w.s.m.m.a.RequestMappingHandlerMapping : Mapped "{[/error],methods=[],params=[],headers=[],consumes=[],produces=[],custom=[]}" onto public org.springframework.http.ResponseEntity<java.util.Map<java.lang.String, java.lang.Object>> org.springframework.boot.autoconfigure.web.BasicErrorController.error(javax.servlet.http.HttpServletRequest)
+2018-02-07 14:38:52.271  INFO 1191 [main] --- s.w.s.m.m.a.RequestMappingHandlerMapping : Mapped "{[/error],methods=[],params=[],headers=[],consumes=[],produces=[text/html],custom=[]}" onto public org.springframework.web.servlet.ModelAndView org.springframework.boot.autoconfigure.web.BasicErrorController.errorHtml(javax.servlet.http.HttpServletRequest)
+2018-02-07 14:38:52.281  INFO 1191 [main] --- o.s.w.s.handler.SimpleUrlHandlerMapping  : Mapped URL path [/webjars/**] onto handler of type [class org.springframework.web.servlet.resource.ResourceHttpRequestHandler]
+2018-02-07 14:38:52.281  INFO 1191 [main] --- o.s.w.s.handler.SimpleUrlHandlerMapping  : Mapped URL path [/**] onto handler of type [class org.springframework.web.servlet.resource.ResourceHttpRequestHandler]
+2018-02-07 14:38:52.358  INFO 1191 [main] --- o.s.j.e.a.AnnotationMBeanExporter        : Registering beans for JMX exposure on startup
+2018-02-07 14:38:52.368 DEBUG 1191 [main] --- ationConfigEmbeddedWebApplicationContext : Unable to locate LifecycleProcessor with name 'lifecycleProcessor': using default [org.springframework.context.support.DefaultLifecycleProcessor@68af87ad]
+2018-02-07 14:38:52.369  INFO 1191 [main] --- o.s.c.support.DefaultLifecycleProcessor  : Starting beans in phase 2147483647
+2018-02-07 14:38:52.371 DEBUG 1191 [main] --- utoConfigurationReportLoggingInitializer : 
+
+
+=========================
+AUTO-CONFIGURATION REPORT
+=========================
+
+
+Positive matches:
+-----------------
+
+   DispatcherServletAutoConfiguration
+      - found web application StandardServletEnvironment (OnWebApplicationCondition)
+      - @ConditionalOnClass classes found: org.springframework.web.servlet.DispatcherServlet (OnClassCondition)
+
+   DispatcherServletAutoConfiguration.DispatcherServletConfiguration
+      - no ServletRegistrationBean found (DispatcherServletAutoConfiguration.DefaultDispatcherServletCondition)
+      - @ConditionalOnClass classes found: javax.servlet.ServletRegistration (OnClassCondition)
+
+   EmbeddedServletContainerAutoConfiguration
+      - found web application StandardServletEnvironment (OnWebApplicationCondition)
+
+   EmbeddedServletContainerAutoConfiguration.EmbeddedTomcat
+      - @ConditionalOnClass classes found: javax.servlet.Servlet,org.apache.catalina.startup.Tomcat (OnClassCondition)
+      - @ConditionalOnMissingBean (types: org.springframework.boot.context.embedded.EmbeddedServletContainerFactory; SearchStrategy: current) found no beans (OnBeanCondition)
+
+   ErrorMvcAutoConfiguration
+      - @ConditionalOnClass classes found: javax.servlet.Servlet,org.springframework.web.servlet.DispatcherServlet (OnClassCondition)
+      - found web application StandardServletEnvironment (OnWebApplicationCondition)
+
+   ErrorMvcAutoConfiguration#basicErrorController
+      - @ConditionalOnMissingBean (types: org.springframework.boot.autoconfigure.web.ErrorController; SearchStrategy: current) found no beans (OnBeanCondition)
+
+   ErrorMvcAutoConfiguration#errorAttributes
+      - @ConditionalOnMissingBean (types: org.springframework.boot.autoconfigure.web.ErrorAttributes; SearchStrategy: current) found no beans (OnBeanCondition)
+
+   ErrorMvcAutoConfiguration.WhitelabelErrorViewConfiguration
+      - No error template view detected (ErrorMvcAutoConfiguration.ErrorTemplateMissingCondition)
+      - SpEL expression on org.springframework.boot.autoconfigure.web.ErrorMvcAutoConfiguration$WhitelabelErrorViewConfiguration: ${error.whitelabel.enabled:true} (OnExpressionCondition)
+
+   ErrorMvcAutoConfiguration.WhitelabelErrorViewConfiguration#beanNameViewResolver
+      - @ConditionalOnMissingBean (types: org.springframework.web.servlet.view.BeanNameViewResolver; SearchStrategy: all) found no beans (OnBeanCondition)
+
+   ErrorMvcAutoConfiguration.WhitelabelErrorViewConfiguration#defaultErrorView
+      - @ConditionalOnMissingBean (names: error; SearchStrategy: all) found no beans (OnBeanCondition)
+
+   HttpMessageConvertersAutoConfiguration
+      - @ConditionalOnClass classes found: org.springframework.http.converter.HttpMessageConverter (OnClassCondition)
+
+   HttpMessageConvertersAutoConfiguration#messageConverters
+      - @ConditionalOnMissingBean (types: org.springframework.boot.autoconfigure.web.HttpMessageConverters; SearchStrategy: all) found no beans (OnBeanCondition)
+
+   HttpMessageConvertersAutoConfiguration.ObjectMappers
+      - @ConditionalOnClass classes found: com.fasterxml.jackson.databind.ObjectMapper (OnClassCondition)
+
+   HttpMessageConvertersAutoConfiguration.ObjectMappers#mappingJackson2HttpMessageConverter
+      - @ConditionalOnMissingBean (types: org.springframework.http.converter.json.MappingJackson2HttpMessageConverter; SearchStrategy: all) found no beans (OnBeanCondition)
+
+   JacksonAutoConfiguration
+      - @ConditionalOnClass classes found: com.fasterxml.jackson.databind.ObjectMapper (OnClassCondition)
+
+   JacksonAutoConfiguration.JacksonObjectMapperAutoConfiguration
+      - @ConditionalOnClass classes found: com.fasterxml.jackson.databind.ObjectMapper (OnClassCondition)
+
+   JacksonAutoConfiguration.JacksonObjectMapperAutoConfiguration#jacksonObjectMapper
+      - @ConditionalOnMissingBean (types: com.fasterxml.jackson.databind.ObjectMapper; SearchStrategy: all) found no beans (OnBeanCondition)
+
+   JmxAutoConfiguration
+      - @ConditionalOnClass classes found: org.springframework.jmx.export.MBeanExporter (OnClassCondition)
+      - SpEL expression on org.springframework.boot.autoconfigure.jmx.JmxAutoConfiguration: ${spring.jmx.enabled:true} (OnExpressionCondition)
+
+   JmxAutoConfiguration#mbeanServer
+      - @ConditionalOnMissingBean (types: javax.management.MBeanServer; SearchStrategy: all) found no beans (OnBeanCondition)
+
+   JmxAutoConfiguration#objectNamingStrategy
+      - @ConditionalOnMissingBean (types: org.springframework.jmx.export.naming.ObjectNamingStrategy; SearchStrategy: all) found no beans (OnBeanCondition)
+
+   MultipartAutoConfiguration
+      - @ConditionalOnClass classes found: javax.servlet.Servlet,org.springframework.web.multipart.support.StandardServletMultipartResolver,javax.servlet.MultipartConfigElement (OnClassCondition)
+      - SpEL expression on org.springframework.boot.autoconfigure.web.MultipartAutoConfiguration: ${multipart.enabled:true} (OnExpressionCondition)
+
+   MultipartAutoConfiguration#multipartConfigElement
+      - @ConditionalOnMissingBean (types: javax.servlet.MultipartConfigElement; SearchStrategy: all) found no beans (OnBeanCondition)
+
+   MultipartAutoConfiguration#multipartResolver
+      - @ConditionalOnMissingBean (types: org.springframework.web.multipart.MultipartResolver; SearchStrategy: all) found no beans (OnBeanCondition)
+
+   PropertyPlaceholderAutoConfiguration#propertySourcesPlaceholderConfigurer
+      - @ConditionalOnMissingBean (types: org.springframework.context.support.PropertySourcesPlaceholderConfigurer; SearchStrategy: current) found no beans (OnBeanCondition)
+
+   ServerPropertiesAutoConfiguration
+      - found web application StandardServletEnvironment (OnWebApplicationCondition)
+
+   ServerPropertiesAutoConfiguration#serverProperties
+      - @ConditionalOnMissingBean (types: org.springframework.boot.autoconfigure.web.ServerProperties; SearchStrategy: current) found no beans (OnBeanCondition)
+
+   WebMvcAutoConfiguration
+      - found web application StandardServletEnvironment (OnWebApplicationCondition)
+      - @ConditionalOnClass classes found: javax.servlet.Servlet,org.springframework.web.servlet.DispatcherServlet,org.springframework.web.servlet.config.annotation.WebMvcConfigurerAdapter (OnClassCondition)
+      - @ConditionalOnMissingBean (types: org.springframework.web.servlet.config.annotation.WebMvcConfigurationSupport; SearchStrategy: all) found no beans (OnBeanCondition)
+
+   WebMvcAutoConfiguration#hiddenHttpMethodFilter
+      - @ConditionalOnMissingBean (types: org.springframework.web.filter.HiddenHttpMethodFilter; SearchStrategy: all) found no beans (OnBeanCondition)
+
+   WebMvcAutoConfiguration.WebMvcAutoConfigurationAdapter#beanNameViewResolver
+      - @ConditionalOnBean (types: org.springframework.web.servlet.View; SearchStrategy: all) found the following [error] (OnBeanCondition)
+
+   WebMvcAutoConfiguration.WebMvcAutoConfigurationAdapter#defaultViewResolver
+      - @ConditionalOnMissingBean (types: org.springframework.web.servlet.view.InternalResourceViewResolver; SearchStrategy: all) found no beans (OnBeanCondition)
+
+   WebMvcAutoConfiguration.WebMvcAutoConfigurationAdapter#requestContextListener
+      - @ConditionalOnMissingBean (types: org.springframework.web.context.request.RequestContextListener; SearchStrategy: all) found no beans (OnBeanCondition)
+
+   WebMvcAutoConfiguration.WebMvcAutoConfigurationAdapter#viewResolver
+      - @ConditionalOnBean (types: org.springframework.web.servlet.ViewResolver; SearchStrategy: all) found the following [beanNameViewResolver, defaultViewResolver] @ConditionalOnMissingBean (names: viewResolver; SearchStrategy: all) found no beans (OnBeanCondition)
+
+   WebSocketAutoConfiguration
+      - @ConditionalOnClass classes found: javax.servlet.Servlet,org.apache.catalina.startup.Tomcat,org.springframework.web.socket.WebSocketHandler,org.apache.tomcat.websocket.server.WsSci (OnClassCondition)
+
+   WebSocketAutoConfiguration#websocketContainerCustomizer
+      - @ConditionalOnMissingBean (names: websocketContainerCustomizer; SearchStrategy: all) found no beans (OnBeanCondition)
+
+
+Negative matches:
+-----------------
+
+   ActiveMQAutoConfiguration
+      - required @ConditionalOnClass classes not found: javax.jms.ConnectionFactory,org.apache.activemq.ActiveMQConnectionFactory (OnClassCondition)
+
+   AopAutoConfiguration
+      - required @ConditionalOnClass classes not found: org.aspectj.lang.annotation.Aspect,org.aspectj.lang.reflect.Advice (OnClassCondition)
+
+   BatchAutoConfiguration
+      - required @ConditionalOnClass classes not found: org.springframework.batch.core.launch.JobLauncher,org.springframework.jdbc.core.JdbcOperations (OnClassCondition)
+
+   DataSourceTransactionManagerAutoConfiguration
+      - required @ConditionalOnClass classes not found: org.springframework.jdbc.core.JdbcTemplate,org.springframework.transaction.PlatformTransactionManager (OnClassCondition)
+
+   DeviceDelegatingViewResolverAutoConfiguration
+      - found web application StandardServletEnvironment (OnWebApplicationCondition)
+      - required @ConditionalOnClass classes not found: org.springframework.mobile.device.view.LiteDeviceDelegatingViewResolver (OnClassCondition)
+
+   DeviceResolverAutoConfiguration
+      - required @ConditionalOnClass classes not found: org.springframework.mobile.device.DeviceResolverHandlerInterceptor,org.springframework.mobile.device.DeviceHandlerMethodArgumentResolver (OnClassCondition)
+
+   ElasticsearchAutoConfiguration
+      - required @ConditionalOnClass classes not found: org.elasticsearch.client.Client,org.springframework.data.elasticsearch.client.TransportClientFactoryBean,org.springframework.data.elasticsearch.client.NodeClientFactoryBean (OnClassCondition)
+
+   ElasticsearchDataAutoConfiguration
+      - required @ConditionalOnClass classes not found: org.elasticsearch.client.Client,org.springframework.data.elasticsearch.core.ElasticsearchTemplate (OnClassCondition)
+
+   ElasticsearchRepositoriesAutoConfiguration
+      - required @ConditionalOnClass classes not found: org.elasticsearch.client.Client,org.springframework.data.elasticsearch.repository.ElasticsearchRepository (OnClassCondition)
+
+   EmbeddedServletContainerAutoConfiguration.EmbeddedJetty
+      - required @ConditionalOnClass classes not found: org.eclipse.jetty.server.Server,org.eclipse.jetty.util.Loader (OnClassCondition)
+
+   FacebookAutoConfiguration
+      - required @ConditionalOnClass classes not found: org.springframework.social.config.annotation.SocialConfigurerAdapter,org.springframework.social.facebook.connect.FacebookConnectionFactory (OnClassCondition)
+
+   FallbackWebSecurityAutoConfiguration
+      - SpEL expression on org.springframework.boot.autoconfigure.security.FallbackWebSecurityAutoConfiguration: !${security.basic.enabled:true} (OnExpressionCondition)
+      - required @ConditionalOnClass classes not found: org.springframework.security.config.annotation.web.configuration.EnableWebSecurity (OnClassCondition)
+
+   FlywayAutoConfiguration
+      - required @ConditionalOnClass classes not found: org.flywaydb.core.Flyway (OnClassCondition)
+
+   FreeMarkerAutoConfiguration
+      - required @ConditionalOnClass classes not found: freemarker.template.Configuration,org.springframework.ui.freemarker.FreeMarkerConfigurationFactory (OnClassCondition)
+
+   GroovyTemplateAutoConfiguration
+      - required @ConditionalOnClass classes not found: groovy.text.TemplateEngine (OnClassCondition)
+
+   HornetQAutoConfiguration
+      - required @ConditionalOnClass classes not found: javax.jms.ConnectionFactory,org.hornetq.api.jms.HornetQJMSClient (OnClassCondition)
+
+   HypermediaAutoConfiguration
+      - required @ConditionalOnClass classes not found: org.springframework.hateoas.Resource,org.springframework.plugin.core.Plugin (OnClassCondition)
+
+   IntegrationAutoConfiguration
+      - required @ConditionalOnClass classes not found: org.springframework.integration.config.EnableIntegration (OnClassCondition)
+
+   JacksonAutoConfiguration.JodaModuleAutoConfiguration
+      - required @ConditionalOnClass classes not found: com.fasterxml.jackson.datatype.joda.JodaModule (OnClassCondition)
+
+   JacksonAutoConfiguration.Jsr310ModuleAutoConfiguration
+      - Required JVM version 1.8 or newer found 1.8 (OnJavaCondition)
+      - required @ConditionalOnClass classes not found: com.fasterxml.jackson.datatype.jsr310.JSR310Module (OnClassCondition)
+
+   JmsAutoConfiguration
+      - required @ConditionalOnClass classes not found: org.springframework.jms.core.JmsTemplate (OnClassCondition)
+
+   JmxAutoConfiguration#mbeanExporter
+      - @ConditionalOnMissingBean (types: org.springframework.jmx.export.MBeanExporter; SearchStrategy: current) found the following [mbeanExporter] (OnBeanCondition)
+
+   JpaRepositoriesAutoConfiguration
+      - required @ConditionalOnClass classes not found: org.springframework.data.jpa.repository.JpaRepository (OnClassCondition)
+
+   LinkedInAutoConfiguration
+      - required @ConditionalOnClass classes not found: org.springframework.social.config.annotation.SocialConfigurerAdapter,org.springframework.social.linkedin.connect.LinkedInConnectionFactory (OnClassCondition)
+
+   LiquibaseAutoConfiguration
+      - required @ConditionalOnClass classes not found: liquibase.integration.spring.SpringLiquibase (OnClassCondition)
+
+   MessageSourceAutoConfiguration
+      - No bundle found for spring.messages.basename: messages (MessageSourceAutoConfiguration.ResourceBundleCondition)
+
+   MongoAutoConfiguration
+      - required @ConditionalOnClass classes not found: com.mongodb.Mongo (OnClassCondition)
+
+   MongoDataAutoConfiguration
+      - required @ConditionalOnClass classes not found: com.mongodb.Mongo,org.springframework.data.mongodb.core.MongoTemplate (OnClassCondition)
+
+   MongoRepositoriesAutoConfiguration
+      - required @ConditionalOnClass classes not found: com.mongodb.Mongo,org.springframework.data.mongodb.repository.MongoRepository (OnClassCondition)
+
+   RabbitAutoConfiguration
+      - required @ConditionalOnClass classes not found: org.springframework.amqp.rabbit.core.RabbitTemplate,com.rabbitmq.client.Channel (OnClassCondition)
+
+   ReactorAutoConfiguration
+      - required @ConditionalOnClass classes not found: reactor.spring.context.config.EnableReactor (OnClassCondition)
+
+   RedisAutoConfiguration
+      - required @ConditionalOnClass classes not found: org.springframework.data.redis.connection.jedis.JedisConnection,org.springframework.data.redis.core.RedisOperations,redis.clients.jedis.Jedis (OnClassCondition)
+
+   RepositoryRestMvcAutoConfiguration
+      - found web application StandardServletEnvironment (OnWebApplicationCondition)
+      - required @ConditionalOnClass classes not found: org.springframework.data.rest.webmvc.config.RepositoryRestMvcConfiguration (OnClassCondition)
+
+   SecurityAutoConfiguration
+      - required @ConditionalOnClass classes not found: org.springframework.security.authentication.AuthenticationManager (OnClassCondition)
+
+   SitePreferenceAutoConfiguration
+      - required @ConditionalOnClass classes not found: org.springframework.mobile.device.site.SitePreferenceHandlerInterceptor,org.springframework.mobile.device.site.SitePreferenceHandlerMethodArgumentResolver (OnClassCondition)
+
+   SocialWebAutoConfiguration
+      - required @ConditionalOnClass classes not found: org.springframework.social.connect.web.ConnectController,org.springframework.social.config.annotation.SocialConfigurerAdapter (OnClassCondition)
+
+   SolrAutoConfiguration
+      - required @ConditionalOnClass classes not found: org.apache.solr.client.solrj.impl.HttpSolrServer,org.apache.solr.client.solrj.impl.CloudSolrServer (OnClassCondition)
+
+   SolrRepositoriesAutoConfiguration
+      - required @ConditionalOnClass classes not found: org.apache.solr.client.solrj.SolrServer,org.springframework.data.solr.repository.SolrRepository (OnClassCondition)
+
+   ThymeleafAutoConfiguration
+      - required @ConditionalOnClass classes not found: org.thymeleaf.spring4.SpringTemplateEngine (OnClassCondition)
+
+   TwitterAutoConfiguration
+      - required @ConditionalOnClass classes not found: org.springframework.social.config.annotation.SocialConfigurerAdapter,org.springframework.social.twitter.connect.TwitterConnectionFactory (OnClassCondition)
+
+   VelocityAutoConfiguration
+      - required @ConditionalOnClass classes not found: org.apache.velocity.app.VelocityEngine,org.springframework.ui.velocity.VelocityEngineFactory (OnClassCondition)
+
+   WebMvcAutoConfiguration.WebMvcAutoConfigurationAdapter#dateFormatter
+      - @ConditionalOnProperty missing required properties: date-format not found (OnPropertyCondition)
+
+   WebMvcAutoConfiguration.WebMvcAutoConfigurationAdapter#localeResolver
+      - @ConditionalOnMissingBean (types: org.springframework.web.servlet.LocaleResolver; SearchStrategy: all) found no beans (OnBeanCondition)
+      - @ConditionalOnProperty missing required properties: locale not found (OnPropertyCondition)
+
+
+
+2018-02-07 14:38:53.906  INFO 1191 [main] --- com.everhomes.util.ReflectionHelper      : Load class from jar: /Users/lvlei/.m2/everhomes/repository/com/everhomes/ehrest-response/5.1.2-mlog-SNAPSHOT/ehrest-response-5.1.2-mlog-20180125.111848-5.jar
+2018-02-07 14:38:54.376  INFO 1191 [main] --- com.everhomes.util.ReflectionHelper      : Load class from jar: /Users/lvlei/.m2/everhomes/repository/com/everhomes/ehutil/0.0.7-SNAPSHOT/ehutil-0.0.7-20171214.234913-63.jar
+2018-02-07 14:38:54.394  INFO 1191 [main] --- com.everhomes.util.ReflectionHelper      : Load class from jar: /Users/lvlei/.m2/everhomes/repository/com/everhomes/ehutil-common/1.0.0-SNAPSHOT/ehutil-common-1.0.0-20171212.025820-8.jar
+2018-02-07 14:38:54.486  INFO 1191 [main] --- s.b.c.e.t.TomcatEmbeddedServletContainer : Tomcat started on port(s): 9090/http
+2018-02-07 14:38:54.491  INFO 1191 [main] --- com.everhomes.border.BorderServerApp     : Started BorderServerApp in 7.361 seconds (JVM running for 8.173)
