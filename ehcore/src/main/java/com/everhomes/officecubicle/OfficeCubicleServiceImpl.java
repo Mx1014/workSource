@@ -553,8 +553,15 @@ public class OfficeCubicleServiceImpl implements OfficeCubicleService {
 		cmd21.setReferId(order.getId());
 		cmd21.setProjectType(order.getOwnerType());
 		cmd21.setProjectId(order.getOwnerId());
-		cmd21.setContent("工位预定");
-		cmd21.setTitle("工位预定");
+		OfficeRentType type= OfficeRentType.fromCode(order.getRentType());
+		if(type == OfficeRentType.OPENSITE) {
+			cmd21.setContent("工位类型：" + type.getMsg() + "\n"
+					+ "预订工位数：" + order.getPositionNums());
+		}else if(type == OfficeRentType.WHOLE){
+			cmd21.setContent("工位类型：" + type.getMsg() + "\n"
+					+ "预订空间：" + order.getCategoryName());
+		}
+		cmd21.setTitle("工位预订");
 		cmd21.setFlowMainId(flow.getFlowMainId());
 		cmd21.setFlowVersion(flow.getFlowVersion());
 		cmd21.setFlowCaseId(flowCaseId);
