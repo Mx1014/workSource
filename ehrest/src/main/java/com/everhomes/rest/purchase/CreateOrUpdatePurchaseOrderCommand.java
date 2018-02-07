@@ -16,9 +16,14 @@ import java.util.List;
  * <li>purchaseRequestId:采购单id</li>
  * <li>supplierId:供应商id</li>
  * <li>deliveryDate:交付日期</li>
+ * <li>contactName:联系人</li>
+ * <li>contactTel:联系电话</li>
  * <li>remark:备注</li>
  * <li>approvalSheetId:关联的请示单的id</li>
  * <li>dtos:采购物品列表，参考{@link com.everhomes.rest.purchase.PurchaseMaterialDTO}</li>
+ * <li>xxxx</li>
+ * <li>xxxx</li>
+ * <li>xxxx</li>
  *</ul>
  */
 public class CreateOrUpdatePurchaseOrderCommand {
@@ -32,6 +37,8 @@ public class CreateOrUpdatePurchaseOrderCommand {
     private String ownerType;
     private Long ownerId;
     private Long communityId;
+    private String contactTel;
+    private String contactName;
 
     public Long getCommunityId() {
         return communityId;

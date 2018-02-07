@@ -175,6 +175,7 @@ public class PurchaseServiceImpl implements PurchaseService {
         GetPurchaseOrderDTO dto = new GetPurchaseOrderDTO();
         dto.setApprovalSheetId(order.getApprovalOrderId());
         dto.setContact(order.getApplicantName());
+        dto.setContactTel(order.get);
         return dto;
 
 

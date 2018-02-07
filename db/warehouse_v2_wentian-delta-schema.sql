@@ -144,4 +144,6 @@ CREATE TABLE `eh_requisition_types`(
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4;
 
 ALTER TABLE `eh_warehouse_purchase_orders` ADD COLUMN `community_id` BIGINT DEFAULT NULL;
-ALTER TABLE `eh_warehouse_purchase_orders` ADD COLUMN `applicant_name` BIGINT DEFAULT NULL;
+ALTER TABLE `eh_warehouse_purchase_orders` ADD COLUMN `applicant_name` VARCHAR(128) DEFAULT NULL;
+ALTER TABLE `eh_warehouse_purchase_orders` ADD COLUMN `contact_tel` VARCHAR(128) DEFAULT NULL;
+ALTER TABLE `eh_warehouse_purchase_orders` ADD COLUMN `contact_name` BIGINT(128) DEFAULT NULL;
