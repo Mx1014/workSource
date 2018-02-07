@@ -650,7 +650,12 @@ public class ParkingServiceImpl implements ParkingService {
 //
 //        preOrderCommand.setOrderType(OrderType.OrderTypeEnum.PARKING.getPycode());
 //        preOrderCommand.setOrderId(parkingRechargeOrder.getOrderNo());
+
 		Long amount = payService.changePayAmount(parkingRechargeOrder.getPrice());
+		boolean flag = configProvider.getBooleanValue("parking.order.amount", false);
+		if(flag) {
+			amount = 1L;
+		}
 //        preOrderCommand.setAmount(amount);
 //
 //        preOrderCommand.setPayerId(parkingRechargeOrder.getPayerUid());
@@ -683,7 +688,7 @@ public class ParkingServiceImpl implements ParkingService {
 
 		boolean flag = configProvider.getBooleanValue("parking.order.amount", false);
 		if(flag) {
-			orderCmd.setTotalFee(new BigDecimal(0.02).setScale(2, RoundingMode.FLOOR));
+			orderCmd.setTotalFee(new BigDecimal(0.01).setScale(2, RoundingMode.FLOOR));
 		} else {
 			orderCmd.setTotalFee(parkingRechargeOrder.getPrice());
 		}
@@ -1875,6 +1880,10 @@ public class ParkingServiceImpl implements ParkingService {
 		BigDecimal price = order.getPrice();
 
 		Long amount = payService.changePayAmount(price);
+		boolean flag = configProvider.getBooleanValue("parking.order.amount", false);
+		if(flag) {
+			amount = 1L;
+		}
 
 		CreateOrderRestResponse refundResponse = payService.refund(OrderType.OrderTypeEnum.PARKING.getPycode(), order.getId(), refoundOrderNo, amount);
 
@@ -1907,7 +1916,7 @@ public class ParkingServiceImpl implements ParkingService {
 		refundCmd.setOrderType(OrderType.OrderTypeEnum.PARKING.getPycode());
 		boolean flag = configProvider.getBooleanValue("parking.order.amount", false);
 		if (flag) {
-			refundCmd.setRefundAmount(new BigDecimal(0.02).setScale(2, RoundingMode.FLOOR));
+			refundCmd.setRefundAmount(new BigDecimal(0.01).setScale(2, RoundingMode.FLOOR));
 		}else {
 			refundCmd.setRefundAmount(order.getPrice());
 		}
