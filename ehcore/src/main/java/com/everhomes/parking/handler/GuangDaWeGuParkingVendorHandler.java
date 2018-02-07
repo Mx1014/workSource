@@ -166,7 +166,9 @@ public class GuangDaWeGuParkingVendorHandler extends DefaultParkingVendorHandler
 			params.put("monthCount", count+"");
 			String result = post(CARD_GET_PAY_INFO,params);
 			GuangDaWeGuResponse<Double> entity = JSONObject.parseObject(result, new TypeReference<GuangDaWeGuResponse<Double>>() {});
-			rechargeRateDTOS.add(populaterate(entity.getData(),count,parkingLot));
+			if(entity.isSuccess()) {
+				rechargeRateDTOS.add(populaterate(entity.getData(), count, parkingLot));
+			}
 		}
 		return rechargeRateDTOS;
 
@@ -179,6 +181,10 @@ public class GuangDaWeGuParkingVendorHandler extends DefaultParkingVendorHandler
 		dto.setCardType(cardType.getTypeName());
 		dto.setMonthCount(new BigDecimal(monthCount));
 		dto.setPrice(new BigDecimal(prices));
+		boolean flag = configProvider.getBooleanValue("parking.order.amount", false);
+		if(flag){
+			dto.setPrice(new BigDecimal(0.01));
+		}
 		dto.setVendorName(ParkingLotVendor.GUANG_DA_WE_GU.getCode());
 		dto.setParkingLotId(parkingLot.getId());
 		dto.setOwnerType(parkingLot.getOwnerType());
@@ -235,7 +241,7 @@ public class GuangDaWeGuParkingVendorHandler extends DefaultParkingVendorHandler
 			params.put("begin", format.format(new Date(newStartTime)));
 			Long newEndTime = Utils.getLongByAddNatureMonth(newStartTime, order.getMonthCount().intValue());
 			params.put("end", format.format(new Date(newEndTime)));
-			params.put("paid", order.getOriginalPrice().multiply(new BigDecimal(100)).intValue()+"");//单位是分
+			params.put("paid", order.getPrice().multiply(new BigDecimal(100)).intValue()+"");//单位是分
 
 			String result = post(CARD_PAY_CARD,params);
 			order.setErrorDescription(result); //data 缴费记录号 存储
@@ -297,6 +303,10 @@ public class GuangDaWeGuParkingVendorHandler extends DefaultParkingVendorHandler
 			dto.setParkingTime(calculateParkTime(data.getStaydays(),data.getStayhours(),data.getStayminutes()));
 			dto.setDelayTime(15);
 			dto.setPrice(new BigDecimal(data.getDues()));
+			boolean flag = configProvider.getBooleanValue("parking.order.amount", false);
+			if(flag){
+				dto.setPrice(new BigDecimal(0.01));
+			}
 			//feestate	缴费状态	int	0=无数据;2=免缴费;3=已缴费未超时;4=已缴费需续费;5=需要缴费
 			//这里需要干嘛，缴费完成，回调的时候，读取这个token，向停车场缴费需要这个参数。参考 payTempCardFee()
 			dto.setOrderToken(data.getFeestate()+"");
