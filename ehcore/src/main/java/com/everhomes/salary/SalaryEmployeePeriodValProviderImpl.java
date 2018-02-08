@@ -6,10 +6,7 @@ import java.util.List;
 import java.util.stream.Collectors;
 
 import com.everhomes.rest.salary.SalaryEntityType;
-import org.jooq.DSLContext;
-import org.jooq.Record;
-import org.jooq.Record1;
-import org.jooq.SelectConditionStep;
+import org.jooq.*;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
 
@@ -91,7 +88,21 @@ public class SalaryEmployeePeriodValProviderImpl implements SalaryEmployeePeriod
 
 	@Override
 	public List<SalaryGroupEntity> listOpenSalaryGroupEntityByOrgId(Long ownerId, String month) {
-		return null;
+		List<SalaryGroupEntity> results = null;
+		Result<Record> records = getReadOnlyContext().select().from(Tables.EH_SALARY_EMPLOYEE_PERIOD_VALS)
+				.where(Tables.EH_SALARY_EMPLOYEE_PERIOD_VALS.OWNER_ID.eq(ownerId))
+				.and(Tables.EH_SALARY_EMPLOYEE_PERIOD_VALS.SALARY_PERIOD.eq(month)).fetch();
+		if (null == records) {
+			return null;
+		}
+		records.stream().map(r -> {
+			SalaryGroupEntity entity = ConvertHelper.convert(r, SalaryGroupEntity.class);
+			entity.setId((Long) r.getValue("group_entity_id"));
+			results.add(entity);
+			return entity;
+		});
+
+		return results;
 	}
 
 	private EhSalaryEmployeePeriodValsDao getReadWriteDao() {

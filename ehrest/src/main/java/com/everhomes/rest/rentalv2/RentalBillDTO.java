@@ -35,6 +35,7 @@ import com.everhomes.util.StringHelper;
  * <li>rentalCount: 场所预定数量</li>
  * <li>refundFlag: 是否退款 0-否 1-是</li>
  * <li>refundRatio: 退款比例 百分比</li>
+ * <li>refundAmount: 退款金额</li>
  * <li>cancelFlag: 是否允许取消,永远为1</li>
  * <li>useDetail: 使用详情</li>
  * <li>vendorType: 支付方式,10001-支付宝，10002-微信</li>
@@ -82,7 +83,8 @@ public class RentalBillDTO {
 	private Byte status;
 	private Double rentalCount;
 	private Byte refundFlag;
-	private Integer refundRatio;
+//	private Integer refundRatio;
+	private BigDecimal refundAmount;
 	private Byte cancelFlag;
 	private java.lang.String useDetail;
 	private java.lang.String vendorType;
@@ -428,15 +430,13 @@ public class RentalBillDTO {
 	}
 
 
-	public Integer getRefundRatio() {
-		return refundRatio;
+	public BigDecimal getRefundAmount() {
+		return refundAmount;
 	}
 
-
-	public void setRefundRatio(Integer refundRatio) {
-		this.refundRatio = refundRatio;
+	public void setRefundAmount(BigDecimal refundAmount) {
+		this.refundAmount = refundAmount;
 	}
-
 
 	public Byte getCancelFlag() {
 		return cancelFlag;

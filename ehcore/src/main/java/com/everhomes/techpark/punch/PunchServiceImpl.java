@@ -8607,7 +8607,7 @@ public class PunchServiceImpl implements PunchService {
         String key = cmd.getQrToken().trim();
         ValueOperations<String, String> valueOperations = getValueOperations(key);
         int timeout = configurationProvider.getIntValue(PunchConstants.PUNCH_QRCODE_TIMEOUT, 15);
-        TimeUnit unit = TimeUnit.MINUTES;;
+        TimeUnit unit = TimeUnit.MINUTES;
         // 先放一个和key一样的值,表示这个人key有效
         valueOperations.set(key, key, timeout, unit);
 //		try{
