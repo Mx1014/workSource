@@ -18,6 +18,7 @@ import com.everhomes.rest.flow.CreateFlowCaseCommand;
 import com.everhomes.rest.flow.FlowConstants;
 import com.everhomes.rest.flow.FlowModuleType;
 import com.everhomes.rest.flow.FlowOwnerType;
+import com.everhomes.rest.order.OwnerType;
 import com.everhomes.rest.organization.ImportFileResultLog;
 import com.everhomes.rest.organization.ImportFileTaskDTO;
 import com.everhomes.rest.organization.ImportFileTaskType;
@@ -1458,7 +1459,10 @@ public class WarehouseServiceImpl implements WarehouseService {
                     dto.setRequestUserContact(members.get(0).getContactToken());
                 }
             }
-
+            //公司的id存在了ownerId中
+            if(dto.getOwnerType().equals(OwnerType.ORGANIZATION.getCode())){
+                dto.setRequestOrganizationId(dto.getOwnerId());
+            }
 
             Organization organization = organizationProvider.findOrganizationById(dto.getRequestOrganizationId());
             if (organization != null) {
