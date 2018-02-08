@@ -5,14 +5,15 @@ import com.everhomes.db.DaoAction;
 import com.everhomes.db.DaoHelper;
 import com.everhomes.db.DbProvider;
 import com.everhomes.naming.NameMapper;
-import com.everhomes.schema.tables.pojos.EhMessages;
 import com.everhomes.sequence.SequenceProvider;
 import com.everhomes.server.schema.Tables;
 import com.everhomes.server.schema.tables.daos.EhMessageRecordsDao;
 import com.everhomes.server.schema.tables.pojos.EhMessageRecords;
+import com.everhomes.server.schema.tables.records.EhMessageRecordsRecord;
 import com.everhomes.util.ConvertHelper;
 import com.everhomes.util.DateHelper;
 import org.jooq.DSLContext;
+import org.jooq.SelectQuery;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
 
@@ -74,7 +75,13 @@ public class MessageProviderImpl implements MessageProvider {
 
     @Override
     public List<MessageRecord> listMessageRecords(Integer namespaceId) {
-        return null;
+        DSLContext context = dbProvider.getDslContext(AccessSpec.readWrite());
+        SelectQuery<EhMessageRecordsRecord> query = context.selectQuery(Tables.EH_MESSAGE_RECORDS);
+        query.addConditions(Tables.EH_MESSAGE_RECORDS.NAMESPACE_ID.eq(namespaceId));
+
+        return query.fetch().map(r->{
+           return ConvertHelper.convert(r,MessageRecord.class);
+        });
     }
 
     @Override
