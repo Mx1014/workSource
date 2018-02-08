@@ -1584,4 +1584,13 @@ CREATE TABLE `eh_general_approval_scope_map` (
   `create_time` DATETIME COMMENT 'create time',
   PRIMARY KEY (`id`)
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4;
+
+UPDATE eh_general_approvals SET approval_attribute = 'CUSTOMIZE' WHERE approval_attribute IS NULL;
+ALTER TABLE eh_general_approvals MODIFY approval_attribute VARCHAR(128) NOT NULL DEFAULT 'CUSTOMIZE';
+
+UPDATE eh_general_approvals SET modify_flag = 1 WHERE modify_flag IS NULL;
+ALTER TABLE eh_general_approvals MODIFY modify_flag TINYINT NOT NULL DEFAULT 1;
+
+UPDATE eh_general_approvals SET delete_flag = 1 WHERE delete_flag IS NULL;
+ALTER TABLE eh_general_approvals MODIFY delete_flag TINYINT NOT NULL DEFAULT 1;
 -- end by nan.rong
