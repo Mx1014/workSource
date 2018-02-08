@@ -61,8 +61,10 @@ public class GuangDaWeGuParkingVendorHandler extends DefaultParkingVendorHandler
 
 			// 格式yyyyMMddHHmmss
 			generateMaxStartEndTime(entity.getData(),parkingCardDTO);
-			if(parkingCardDTO.getEndTime()!=null)
-				setCardStatus(parkingLot, parkingCardDTO.getEndTime(), parkingCardDTO);// 这里设置过期可用，正常可用
+			if(parkingCardDTO.getEndTime()==null){
+				return resultList;
+			}
+			setCardStatus(parkingLot, parkingCardDTO.getEndTime(), parkingCardDTO);// 这里设置过期可用，正常可用
 
 			parkingCardDTO.setOwnerType(parkingLot.getOwnerType());
 			parkingCardDTO.setOwnerId(parkingLot.getOwnerId());
