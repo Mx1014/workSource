@@ -2282,10 +2282,8 @@ public class PortalServiceImpl implements PortalService {
 
 				for(ServiceModuleApp serviceModuleApp: newServiceModuleApps){
 					if(serviceModuleApp.getOriginId().longValue() == oldServiceModuleApp.getOriginId().longValue()){
-						//使用替换的方式，防止ItemGroupInstanceConfig缺少某些字段导致参数丢失
-						String configStr = itemGroup.getInstanceConfig();
-						configStr.replace(config.getModuleAppId().toString(), serviceModuleApp.getId().toString());
-						itemGroup.setInstanceConfig(configStr);
+						config.setModuleAppId(serviceModuleApp.getId());
+						itemGroup.setInstanceConfig(config.toString());
 						portalItemGroupProvider.updatePortalItemGroup(itemGroup);
 						break;
 					}
