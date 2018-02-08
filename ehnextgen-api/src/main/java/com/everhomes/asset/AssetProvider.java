@@ -10,7 +10,6 @@ import com.everhomes.server.schema.tables.pojos.*;
 import java.math.BigDecimal;
 import java.sql.Timestamp;
 import java.util.Collection;
-import java.util.Date;
 import java.util.List;
 import java.util.Map;
 

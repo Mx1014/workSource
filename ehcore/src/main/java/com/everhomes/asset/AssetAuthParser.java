@@ -6,6 +6,7 @@ import com.google.gson.Gson;
 import com.google.gson.reflect.TypeToken;
 import org.springframework.stereotype.Component;
 
+import java.util.Arrays;
 import java.util.HashMap;
 import java.util.Map;
 
@@ -21,8 +22,12 @@ public class AssetAuthParser implements PortalUrlParser {
         if(actionType == 13){
             Map<String,String> data= new Gson().fromJson(actionData,new TypeToken<HashMap<String,String>>(){}.getType());
             if(data!=null && data.size() > 0 && data.get("url")!=null){
-                String wd = data.get("url").split("/")[3];
-                if( wd.equals("property-payment") || wd.equals("property-management")) res = 20400l;
+                String[] wd = data.get("url").split("/");
+                if(wd == null || wd.length < 1) return res;
+                boolean containsAssetKeyWord = Arrays.stream(wd).anyMatch(s -> s.equals("property-payment") || s.equals("property-management"));
+                if(containsAssetKeyWord){
+                    res = 20400l;
+                }
             }
         }
         return res;
