@@ -539,7 +539,16 @@ public class SalaryServiceImpl implements SalaryService {
                         } catch (Exception e) {
                             LOGGER.error("salaryValue :{}不能转换为数字", dto.getSalaryValue());
                         }
+
+                        if (SalaryEntityType.DEDUCTION == SalaryEntityType.fromCode(dto.getType())) {
+                            //减
+                            categoryValue = categoryValue.subtract(entityVal);
+                        } else {
+                            //增
+                            categoryValue = categoryValue.add(entityVal);
+                        }
                     }
+
                     categoryValue = categoryValue.add(entityVal);
                     categoryDTO.getEntities().add(dto);
                 }
