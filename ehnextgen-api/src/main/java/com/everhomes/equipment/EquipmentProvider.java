@@ -139,7 +139,7 @@ public interface EquipmentProvider {
 
 
 	List<EquipmentInspectionTasks> listEquipmentInspectionTasksUseCache(List<Byte> taskStatus, Long inspectionCategoryId,
-		List<String> targetType, List<Long> targetId, List<Long> executeStandardIds, List<Long> reviewStandardIds, Integer offset, Integer pageSize, String cacheKey, Byte adminFlag,Timestamp lastSyncTime);
+		List<String> targetType, List<Long> targetId, Map<String, List<Long>> executeAndReviewStandardPlanIds, Integer offset, Integer pageSize, String cacheKey, Byte adminFlag,Timestamp lastSyncTime);
 
 
 	Map<Long, EquipmentInspectionEquipments> listEquipmentsById(Set<Long> ids);
@@ -151,7 +151,7 @@ public interface EquipmentProvider {
 	ReviewedTaskStat statDaysReviewedTasks(Long communityId, Long inspectionCategoryId, Timestamp startTime, Timestamp endTime,Integer namespaceId);
 	List<ItemResultStat> statItemResults(Long equipmentId, Long standardId, Timestamp startTime, Timestamp endTime);
 
-	List<EquipmentInspectionTasks> listDelayTasks(Long inspectionCategoryId, List<Long> standards, String targetType, Long targetId, Integer offset, Integer pageSize, Byte adminFlag, Timestamp startTime);
+	List<EquipmentInspectionTasks> listDelayTasks(Long inspectionCategoryId,List<Long> planIds, List<Long> standards, String targetType, Long targetId, Integer offset, Integer pageSize, Byte adminFlag, Timestamp startTime);
 
 	void createEquipmentModelCommunityMap(EquipmentModelCommunityMap map);
 
@@ -235,7 +235,7 @@ public interface EquipmentProvider {
 
 	List<EquipmentInspectionEquipmentLogs> listEquipmentOperateLogsByTargetId(Long equipmentId);
 
-    void populateTodayTaskStatusCount(List<Long> executePlanIds, List<Long> reviewPlanIds, Byte  adminFlag, ListEquipmentTasksResponse response, ListingQueryBuilderCallback queryBuilderCallback);
+    void populateTodayTaskStatusCount(Map<String, List<Long>> executeAndReviewStandardPlanIds, Byte  adminFlag, ListEquipmentTasksResponse response, ListingQueryBuilderCallback queryBuilderCallback);
 
     List<EquipmentInspectionStandards> listEquipmentStandardWithReferId(Long targetId, String targetType);
 

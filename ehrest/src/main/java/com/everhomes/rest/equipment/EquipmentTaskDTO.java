@@ -18,45 +18,19 @@ import java.util.List;
  *  <li>executorType: 执行人类型</li>
  *  <li>executorId:执行人id</li>
  *  <li>executorName:执行人姓名</li>
- *  <li>operatorType: 维修人类型</li>
- *  <li>operatorId:维修人id</li>
- *  <li>operatorName:维修人姓名</li>
  *  <li>reviewerType: 审核人类型</li>
  *  <li>reviewerId:审核人id</li>
  *  <li>reviewerName:审核人姓名</li>
  *  <li>executiveStartTime: 巡检开始时间</li>
  *  <li>executiveExpireTime: 巡检结束时间</li>
  *  <li>executiveTime: 巡检执行上报时间</li>
- *  <li>processExpireTime: 维修结束时间</li>
- *  <li>processTime: 维修执行上报时间</li>
  *  <li>status: 执行状态 参考{@link com.everhomes.rest.equipment.EquipmentTaskStatus}</li>
- *  <li>result: 执行结果 参考{@link com.everhomes.rest.equipment.EquipmentTaskResult}</li>
- *  <li>reviewResult: 审阅结果 参考{@link com.everhomes.rest.equipment.ReviewResult}</li>
  *  <li>equipments: 任务关联设备信息列表 参考{@link com.everhomes.rest.equipment.EquipmentStandardRelationDTO}</li>
  *  <li>inspectionCategoryId: 巡检对象类型</li>
  * </ul>
  */
 public class EquipmentTaskDTO {
 	private Long id;
-
-	@Deprecated
-	private Long standardId;
-	@Deprecated
-	private String standardName;
-	@Deprecated
-	private Long templateId;
-	@Deprecated
-	private String templateName;
-	@Deprecated
-	private Long equipmentId;
-	@Deprecated
-	private String equipmentName;
-	@Deprecated
-	private String equipmentLocation;
-	@Deprecated
-	private Long parentId;
-	@Deprecated
-	private Long childCount;
 
 	private String ownerType;
 	
@@ -71,11 +45,15 @@ public class EquipmentTaskDTO {
 	private String taskName;
 	
 	private String taskNumber;
-	@Deprecated
-	private String groupName;
-	@Deprecated
-	private Long executiveGroupId;
-	
+	/**
+	 * 兼容旧版本
+	 */
+	private Long equipmentId;
+	/**
+	 * 兼容旧版本
+	 */
+	private Long standardId;
+
 	private String executorType;
 	
 	private Long executorId;
@@ -94,10 +72,6 @@ public class EquipmentTaskDTO {
 	
 	private Timestamp executiveExpireTime;
 	
-	private Timestamp processExpireTime;
-	
-	private Timestamp processTime;
-	
 	private Byte status;
 	
 	private Byte result;
@@ -109,13 +83,16 @@ public class EquipmentTaskDTO {
 	private String reviewerType;
 	
 	private String reviewerName;
-	@Deprecated
-	private String standardDescription;
+
 	private String planDescription;
-	@Deprecated
+
 	private Byte qrCodeFlag;
-	@Deprecated
+
 	private Byte pictureFlag;
+
+	private String equipmentLocation;
+
+	private String equipmentName;
 
 	private String lastSyncTime;
 
@@ -130,92 +107,12 @@ public class EquipmentTaskDTO {
 	@ItemType(EquipmentStandardRelationDTO.class)
 	private List<EquipmentStandardRelationDTO> equipments;
 
-	public Long getPlanId() {
-		return planId;
-	}
-
-	public void setPlanId(Long planId) {
-		this.planId = planId;
-	}
-
 	public Long getId() {
 		return id;
 	}
 
 	public void setId(Long id) {
 		this.id = id;
-	}
-
-	public Long getStandardId() {
-		return standardId;
-	}
-
-	public void setStandardId(Long standardId) {
-		this.standardId = standardId;
-	}
-
-	public String getStandardName() {
-		return standardName;
-	}
-
-	public void setStandardName(String standardName) {
-		this.standardName = standardName;
-	}
-
-	public Long getTemplateId() {
-		return templateId;
-	}
-
-	public void setTemplateId(Long templateId) {
-		this.templateId = templateId;
-	}
-
-	public String getTemplateName() {
-		return templateName;
-	}
-
-	public void setTemplateName(String templateName) {
-		this.templateName = templateName;
-	}
-
-	public Long getEquipmentId() {
-		return equipmentId;
-	}
-
-	public void setEquipmentId(Long equipmentId) {
-		this.equipmentId = equipmentId;
-	}
-
-	public String getEquipmentName() {
-		return equipmentName;
-	}
-
-	public void setEquipmentName(String equipmentName) {
-		this.equipmentName = equipmentName;
-	}
-
-	public String getEquipmentLocation() {
-		return equipmentLocation;
-	}
-
-	public void setEquipmentLocation(String equipmentLocation) {
-		this.equipmentLocation = equipmentLocation;
-	}
-
-	public Long getParentId() {
-		return parentId;
-	}
-
-	public void setParentId(Long parentId) {
-		this.parentId = parentId;
-	}
-
-	public Long getChildCount() {
-		return childCount;
-	}
-
-	public void setChildCount(Long childCount) {
-		this.childCount = childCount;
 	}
 
 	public String getOwnerType() {
@@ -274,20 +171,20 @@ public class EquipmentTaskDTO {
 		this.taskNumber = taskNumber;
 	}
 
-	public String getGroupName() {
-		return groupName;
+	public Long getEquipmentId() {
+		return equipmentId;
 	}
 
-	public void setGroupName(String groupName) {
-		this.groupName = groupName;
+	public void setEquipmentId(Long equipmentId) {
+		this.equipmentId = equipmentId;
 	}
 
-	public Long getExecutiveGroupId() {
-		return executiveGroupId;
+	public Long getStandardId() {
+		return standardId;
 	}
 
-	public void setExecutiveGroupId(Long executiveGroupId) {
-		this.executiveGroupId = executiveGroupId;
+	public void setStandardId(Long standardId) {
+		this.standardId = standardId;
 	}
 
 	public String getExecutorType() {
@@ -362,22 +259,6 @@ public class EquipmentTaskDTO {
 		this.executiveExpireTime = executiveExpireTime;
 	}
 
-	public Timestamp getProcessExpireTime() {
-		return processExpireTime;
-	}
-
-	public void setProcessExpireTime(Timestamp processExpireTime) {
-		this.processExpireTime = processExpireTime;
-	}
-
-	public Timestamp getProcessTime() {
-		return processTime;
-	}
-
-	public void setProcessTime(Timestamp processTime) {
-		this.processTime = processTime;
-	}
-
 	public Byte getStatus() {
 		return status;
 	}
@@ -426,12 +307,12 @@ public class EquipmentTaskDTO {
 		this.reviewerName = reviewerName;
 	}
 
-	public String getStandardDescription() {
-		return standardDescription;
+	public String getPlanDescription() {
+		return planDescription;
 	}
 
-	public void setStandardDescription(String standardDescription) {
-		this.standardDescription = standardDescription;
+	public void setPlanDescription(String planDescription) {
+		this.planDescription = planDescription;
 	}
 
 	public Byte getQrCodeFlag() {
@@ -448,14 +329,6 @@ public class EquipmentTaskDTO {
 
 	public void setPictureFlag(Byte pictureFlag) {
 		this.pictureFlag = pictureFlag;
-	}
-
-	public List<EquipmentStandardRelationDTO> getEquipments() {
-		return equipments;
-	}
-
-	public void setEquipments(List<EquipmentStandardRelationDTO> equipments) {
-		this.equipments = equipments;
 	}
 
 	public String getLastSyncTime() {
@@ -482,12 +355,12 @@ public class EquipmentTaskDTO {
 		this.reviewTime = reviewTime;
 	}
 
-	public String getPlanDescription() {
-		return planDescription;
+	public Long getPlanId() {
+		return planId;
 	}
 
-	public void setPlanDescription(String planDescription) {
-		this.planDescription = planDescription;
+	public void setPlanId(Long planId) {
+		this.planId = planId;
 	}
 
 	public Long getInspectionCategoryId() {
@@ -496,6 +369,30 @@ public class EquipmentTaskDTO {
 
 	public void setInspectionCategoryId(Long inspectionCategoryId) {
 		this.inspectionCategoryId = inspectionCategoryId;
+	}
+
+	public List<EquipmentStandardRelationDTO> getEquipments() {
+		return equipments;
+	}
+
+	public void setEquipments(List<EquipmentStandardRelationDTO> equipments) {
+		this.equipments = equipments;
+	}
+
+	public String getEquipmentLocation() {
+		return equipmentLocation;
+	}
+
+	public void setEquipmentLocation(String equipmentLocation) {
+		this.equipmentLocation = equipmentLocation;
+	}
+
+	public String getEquipmentName() {
+		return equipmentName;
+	}
+
+	public void setEquipmentName(String equipmentName) {
+		this.equipmentName = equipmentName;
 	}
 
 	@Override
