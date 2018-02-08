@@ -1,4 +1,4 @@
-http://10.1.10.37:9200/_mapping/messageRecord
+
 ELASTIC=elasticsearch:9200
 INDEX=everhomesv3
 

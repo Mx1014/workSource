@@ -1,9 +1,14 @@
 // @formatter:off
 package com.everhomes.message;
 
+import com.everhomes.constants.ErrorCodes;
+import com.everhomes.controller.ControllerBase;
+import com.everhomes.discover.RestReturn;
+import com.everhomes.rest.RestResponse;
 import com.everhomes.rest.message.PersistListMessageRecordsCommand;
-import com.everhomes.rest.message.PersistMessageRecordCommand;
+import com.everhomes.rest.message.PushMessageToAdminAndBusinessContactsCommand;
 import com.everhomes.rest.messaging.ChannelType;
+import com.everhomes.rest.messaging.SearchMessageRecordCommand;
 import com.everhomes.rest.user.LoginToken;
 import com.everhomes.statistics.event.StatEventDeviceLogProvider;
 import com.everhomes.util.StringHelper;
@@ -12,11 +17,6 @@ import org.apache.commons.lang.StringUtils;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RestController;
-
-import com.everhomes.controller.ControllerBase;
-import com.everhomes.discover.RestReturn;
-import com.everhomes.rest.RestResponse;
-import com.everhomes.rest.message.PushMessageToAdminAndBusinessContactsCommand;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -83,4 +83,27 @@ public class MessageController extends ControllerBase {
 		return new RestResponse();
 	}
 
+	/**
+	 * <p>同步所有消息记录</p>
+	 * <b>URL: /message/syncMessageRecord</b>
+	 */
+	@RequestMapping("syncMessageRecord")
+	@RestReturn(String.class)
+	public RestResponse syncMessageRecord(){
+		messageService.syncMessageRecord();
+		return new RestResponse();
+	}
+
+	/**
+	 * <p>根据条件查询消息记录</p>
+	 * <b>URL: /message/searchMessageRecord</b>
+	 */
+	@RequestMapping("searchMessageRecord")
+	@RestReturn(value = MessageRecord.class, collection = true)
+	public RestResponse searchMessageRecord(SearchMessageRecordCommand cmd){
+		RestResponse response = new RestResponse(messageService.searchMessageRecord(cmd));
+		response.setErrorCode(ErrorCodes.SUCCESS);
+		response.setErrorDescription("OK");
+		return response;
+	}
 }

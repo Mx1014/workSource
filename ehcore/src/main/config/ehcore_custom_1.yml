@@ -107,7 +107,7 @@ db.tx.timeout: 600
 # ElasticSearch configuration
 #
 elastic:    
-    index: everhomesv31x
+    index: everhomesv3
     nodes:
         hosts: elasticsearch
         ports: 9300
