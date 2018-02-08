@@ -1709,4 +1709,14 @@ public class UserProviderImpl implements UserProvider {
     public void updateCacheStatus() {
         // 只需要去掉缓存，使可缓存可测
     }
+
+    @Override
+    public String findMobileByUid(Long contactId) {
+        DSLContext context = this.dbProvider.getDslContext(AccessSpec.readOnly());
+        String s = context.select(Tables.EH_USER_IDENTIFIERS.IDENTIFIER_TOKEN).from(Tables.EH_USER_IDENTIFIERS)
+                .where(Tables.EH_USER_IDENTIFIERS.OWNER_UID.eq(contactId))
+                .and(Tables.EH_USER_IDENTIFIERS.IDENTIFIER_TYPE.eq((byte) 0))
+                .fetchOne(Tables.EH_USER_IDENTIFIERS.IDENTIFIER_TOKEN);
+        return s;
+    }
 }

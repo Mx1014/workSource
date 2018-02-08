@@ -5,7 +5,7 @@ import com.everhomes.acl.RolePrivilegeService;
 import com.everhomes.address.Address;
 import com.everhomes.address.AddressProvider;
 import com.everhomes.appurl.AppUrlService;
-import com.everhomes.asset.AssetPaymentStrings;
+import com.everhomes.asset.AssetPaymentConstants;
 import com.everhomes.asset.AssetProvider;
 import com.everhomes.asset.AssetService;
 import com.everhomes.bootstrap.PlatformContext;
@@ -13,28 +13,14 @@ import com.everhomes.community.Community;
 import com.everhomes.community.CommunityProvider;
 import com.everhomes.configuration.ConfigurationProvider;
 import com.everhomes.contentserver.ContentServerService;
-
 import com.everhomes.coordinator.CoordinationLocks;
 import com.everhomes.coordinator.CoordinationProvider;
-import com.everhomes.customer.EnterpriseCustomer;
-import com.everhomes.customer.EnterpriseCustomerProvider;
-import com.everhomes.customer.IndividualCustomerProvider;
-
 import com.everhomes.customer.*;
-
 import com.everhomes.entity.EntityType;
 import com.everhomes.flow.Flow;
 import com.everhomes.flow.FlowService;
 import com.everhomes.locale.LocaleStringService;
-
-import com.everhomes.openapi.Contract;
-import com.everhomes.openapi.ContractBuildingMapping;
-import com.everhomes.openapi.ContractBuildingMappingProvider;
-import com.everhomes.openapi.ContractProvider;
-
-
 import com.everhomes.openapi.*;
-
 import com.everhomes.organization.*;
 import com.everhomes.organization.pm.CommunityAddressMapping;
 import com.everhomes.organization.pm.PropertyMgrProvider;
@@ -57,10 +43,7 @@ import com.everhomes.rest.flow.FlowConstants;
 import com.everhomes.rest.flow.FlowModuleType;
 import com.everhomes.rest.flow.FlowOwnerType;
 import com.everhomes.rest.launchpad.ActionType;
-
-import com.everhomes.rest.namespace.NamespaceCommunityType;
 import com.everhomes.rest.openapi.shenzhou.DataType;
-
 import com.everhomes.rest.organization.OrganizationContactDTO;
 import com.everhomes.rest.organization.OrganizationServiceUser;
 import com.everhomes.rest.organization.pm.AddressMappingStatus;
@@ -87,7 +70,6 @@ import org.springframework.context.ApplicationListener;
 import org.springframework.context.event.ContextRefreshedEvent;
 import org.springframework.scheduling.annotation.Scheduled;
 import org.springframework.stereotype.Component;
-
 
 import java.sql.Timestamp;
 import java.text.ParseException;
@@ -616,7 +598,7 @@ public class ContractServiceImpl implements ContractService, ApplicationListener
 	}
 
 	private void generatePaymentExpectancies(Contract contract, List<ContractChargingItemDTO> chargingItems, List<ContractChargingChangeDTO> adjusts, List<ContractChargingChangeDTO> frees) {
-		assetService.upodateBillStatusOnContractStatusChange(contract.getId(), AssetPaymentStrings.CONTRACT_CANCEL);
+		assetService.upodateBillStatusOnContractStatusChange(contract.getId(), AssetPaymentConstants.CONTRACT_CANCEL);
 
 		if((chargingItems == null || chargingItems.size() == 0)
 				&& (adjusts == null || adjusts.size() == 0) && (frees == null || frees.size() == 0)) {
@@ -736,6 +718,7 @@ public class ContractServiceImpl implements ContractService, ApplicationListener
 			FeeRules feeRule = new FeeRules();
 			feeRule.setChargingItemId(chargingItem.getChargingItemId());
 			feeRule.setChargingStandardId(chargingItem.getChargingStandardId());
+			feeRule.setLateFeeStandardId(chargingItem.getLateFeeStandardId());
 			if(chargingItem.getChargingStartTime() != null){
 				feeRule.setDateStrBegin(new Date(chargingItem.getChargingStartTime()));
 			}
@@ -1239,7 +1222,7 @@ public class ContractServiceImpl implements ContractService, ApplicationListener
 			}
 		}
 
-		assetService.upodateBillStatusOnContractStatusChange(contract.getId(), AssetPaymentStrings.CONTRACT_SAVE);
+		assetService.upodateBillStatusOnContractStatusChange(contract.getId(), AssetPaymentConstants.CONTRACT_SAVE);
 		if(contract.getParentId() != null) {
 			Contract parentContract = contractProvider.findContractById(contract.getParentId());
 			if(parentContract != null) {
@@ -1624,6 +1607,8 @@ public class ContractServiceImpl implements ContractService, ApplicationListener
 				itemDto.setChargingItemName(itemName);
 				String standardName = assetProvider.getStandardNameById(itemDto.getChargingStandardId());
 				itemDto.setChargingStandardName(standardName);
+				String lateFeeStandardName = assetProvider.getStandardNameById(itemDto.getLateFeeStandardId());
+				itemDto.setLateFeeStandardName(lateFeeStandardName);
 				processContractChargingItemAddresses(itemDto);
 
 				return itemDto;

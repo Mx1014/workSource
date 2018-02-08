@@ -9,6 +9,7 @@ import com.everhomes.rest.contract.NamespaceContractType;
 import com.everhomes.rest.order.PreOrderDTO;
 import com.everhomes.rest.pmkexing.*;
 import com.everhomes.util.RuntimeErrorException;
+import org.jooq.tools.StringUtils;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -132,7 +133,7 @@ public class EBeiAssetVendorHandler implements AssetVendorHandler {
     @Override
     public List<ListBillsDTO> listBills(String contractNum, Integer currentNamespaceId, Long ownerId, String ownerType, String buildingName, String apartmentName, Long addressId, String billGroupName, Long billGroupId, Byte billStatus, String dateStrBegin, String dateStrEnd, Long pageAnchor, Integer pageSize, String targetName, Byte status, String targetType, ListBillsResponse response) {
         List<ListBillsDTO> list = new ArrayList<>();
-        if(targetType!=null && targetType.equals(AssetPaymentStrings.EH_USER)) {
+        if(targetType!=null && targetType.equals(AssetPaymentConstants.EH_USER)) {
             return list;
         }
         if(pageAnchor==null || pageAnchor == 0l){
