@@ -6023,7 +6023,7 @@ public class Rentalv2ServiceImpl implements Rentalv2Service {
 			//设置资源时
 			resource.setResourceCounts(cmd.getSiteCounts());
 
-			setRentalRuleSiteNumbers(resource.getResourceType(), EhRentalv2Resources.class.getSimpleName(), resource.getId(), cmd.getSiteNumbers());
+
 //			resource.setExclusiveFlag(defaultRule.getExclusiveFlag());
 //			resource.setDayOpenTime(defaultRule.getDayOpenTime());
 //			resource.setDayCloseTime(defaultRule.getDayCloseTime());
@@ -6060,6 +6060,7 @@ public class Rentalv2ServiceImpl implements Rentalv2Service {
 
 			rentalv2Provider.createRentalSite(resource);
 			//添加资源时，才添加场所编号 TODO:新的对接需要添加
+			setRentalRuleSiteNumbers(resource.getResourceType(), EhRentalv2Resources.class.getSimpleName(), resource.getId(), cmd.getSiteNumbers());
 			//resource.setSiteNumbers(cmd.getOwners());
 			//新增资源规则
 			createResourceRule(resource);
