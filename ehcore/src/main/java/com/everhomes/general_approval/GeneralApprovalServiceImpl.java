@@ -589,12 +589,17 @@ public class GeneralApprovalServiceImpl implements GeneralApprovalService {
 
         if (null != cmd.getSupportType())
             ga.setSupportType(cmd.getSupportType());
-        if (null != cmd.getFormOriginId())
-            ga.setFormOriginId(cmd.getFormOriginId());
+/*        if (null != cmd.getFormOriginId())
+            ga.setFormOriginId(cmd.getFormOriginId());*/
         if (null != cmd.getApprovalName())
             ga.setApprovalName(cmd.getApprovalName());
         this.generalApprovalProvider.updateGeneralApproval(ga);
         return processApproval(ga);
+    }
+
+    @Override
+    public GeneralApprovalDTO setGeneralApprovalForm(SetGeneralApprovalFormCommand cmd){
+        return null;
     }
 
     @Override
@@ -1120,5 +1125,15 @@ public class GeneralApprovalServiceImpl implements GeneralApprovalService {
     @Override
     public void disableApprovalByFormOriginId(Long formOriginId, Long moduleId, String moduleType){
         generalApprovalProvider.disableApprovalByFormOriginId(formOriginId, moduleId, moduleType);
+    }
+
+    @Override
+    public void orderGeneralApprovals(OrderGeneralApprovalsCommand cmd){
+
+    }
+
+    @Override
+    public ListGeneralApprovalResponse listAvailableGeneralApprovals(ListGeneralApprovalCommand cmd){
+        return null;
     }
 }

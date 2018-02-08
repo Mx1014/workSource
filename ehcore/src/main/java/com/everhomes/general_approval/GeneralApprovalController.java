@@ -130,4 +130,19 @@ public class GeneralApprovalController extends ControllerBase {
 
 		return response;
 	}
+
+	/**
+	 * <b>URL: /general_approval/listAvailableGeneralApprovals</b>
+	 * <p> 根据模块 id 与审判类型导出对应的审批记录 </p>
+	 */
+	@RequestMapping("listAvailableGeneralApprovals")
+	@RestReturn(value=ListGeneralApprovalResponse.class)
+	public RestResponse listAvailableGeneralApprovals(ListGeneralApprovalCommand cmd) {
+		ListGeneralApprovalResponse res = generalApprovalService.listAvailableGeneralApprovals(cmd);
+		RestResponse response = new RestResponse(res);
+		response.setErrorCode(ErrorCodes.SUCCESS);
+		response.setErrorDescription("OK");
+
+		return response;
+	}
 }

@@ -383,7 +383,7 @@ public class SalaryServiceImpl implements SalaryService {
             }
             if (null != employee) {
                 OrganizationMemberDetails detail = organizationProvider.findOrganizationMemberDetailsByDetailId(detailId);
-                calculateEmployee(cmd.getOwnerId(), detailId, detail.getOrganizationId());
+                employee = calculateEmployee(cmd.getOwnerId(), detailId, detail.getOrganizationId());
                 response.getSalaryEmployeeDTO().add(processEmployeeDTO(employee));
             }
         }
@@ -614,6 +614,7 @@ public class SalaryServiceImpl implements SalaryService {
 
     private void saveImportEmployeeSalary(List resultList, Long organizationId, String fileLog, ImportFileResponse response, Long ownerId) {
         response.setLogs(new ArrayList<>());
+        int coverNum = 0;
         for (int i = 1; i < resultList.size(); i++) {
             RowResult r = (RowResult) resultList.get(i);
             ImportFileResultLog<Map<String, String>> log = new ImportFileResultLog<>(SalaryConstants.SCOPE);
@@ -634,11 +635,18 @@ public class SalaryServiceImpl implements SalaryService {
                 continue;
             } else {
                 //// TODO: 2018/1/26  检验权限 是否有操作此用户的权限
+                SalaryEmployee employee = salaryEmployeeProvider.findSalaryEmployeeByDetailId(ownerId, detail.getId());
+                if (null != employee) {
+                    coverNum++;
+                }
                 saveImportEmployeeSalary(organizationId, detail.getId(), response, r, ownerId);
             }
         }
         response.setTotalCount((long) (resultList.size() - 1));
         response.setFailCount((long) response.getLogs().size());
+        response.setCoverCount((long) coverNum);
+        LOGGER.debug("resp" +
+                response);
     }
 
     private void saveImportEmployeeSalary(Long organizationId, Long detailId, ImportFileResponse response, RowResult r, Long ownerId) {
@@ -692,7 +700,7 @@ public class SalaryServiceImpl implements SalaryService {
     /**
      * 计算某人的EhSalaryEmployee
      */
-    private void calculateEmployee(Long ownerId, Long detailId, List<SalaryEmployeeOriginVal> vals, Long organizationId) {
+    private SalaryEmployee calculateEmployee(Long ownerId, Long detailId, List<SalaryEmployeeOriginVal> vals, Long organizationId) {
 
         String month = findSalaryMonth(ownerId);
         SalaryEmployee employee = salaryEmployeeProvider.findSalaryEmployeeByDetailId(ownerId, detailId);
@@ -718,13 +726,18 @@ public class SalaryServiceImpl implements SalaryService {
         BigDecimal afterTax = new BigDecimal(0);
         if (null != vals) {
             for (SalaryEmployeeOriginVal val : vals) {
+
+                SalaryGroupEntity groupEntity = salaryGroupEntityProvider.findSalaryGroupEntityById(val.getGroupEntityId());
+                if (null == groupEntity || groupEntity.getStatus().equals(SalaryEntityStatus.CLOSE.getCode())) {
+                    salaryEmployeeOriginValProvider.deleteSalaryEmployeeOriginValById(val.getId());
+                    continue;
+                }
                 BigDecimal value = new BigDecimal(0);
                 try {
                     value = new BigDecimal(val.getSalaryValue());
                 } catch (Exception e) {
                     //不能转换数字就不用管它
                 }
-
                 //固定工资
                 if (val.getCategoryId().equals(1L)) {
                     if (SalaryEntityType.DEDUCTION == SalaryEntityType.fromCode(val.getType())) {
@@ -811,6 +824,7 @@ public class SalaryServiceImpl implements SalaryService {
             }
             salaryEmployeeOriginValProvider.deleteSalaryEmployeeOriginValByDetailIdAndGroouEntity(detailId, groupEntity.getId());
             SalaryEmployeeOriginVal salaryVal = processSalaryEmployeeOriginVal(groupEntity, detailId, salaryTax.toString());
+//            salaryVal.setCreatorUid();
             salaryEmployeeOriginValProvider.createSalaryEmployeeOriginVal(salaryVal);
 
             groupEntity = salaryGroupEntityProvider.findSalaryGroupEntityByOrgANdDefaultId(organizationId, SalaryConstants.ENTITY_ID_BONUSTAX);
@@ -849,7 +863,7 @@ public class SalaryServiceImpl implements SalaryService {
         } else {
             salaryEmployeeProvider.updateSalaryEmployee(employee);
         }
-
+        return employee;
     }
 
     private SalaryEmployeeOriginVal processSalaryEmployeeOriginVal(SalaryGroupEntity groupEntity, Long detailId, String val) {
@@ -1387,11 +1401,12 @@ public class SalaryServiceImpl implements SalaryService {
         SalaryGroupsFile sgf = ConvertHelper.convert(group, SalaryGroupsFile.class);
         sgf.setFileTime(filerTime);
         sgf.setFilerUid(userId);
-        Organization organization = organizationProvider.findOrganizationById(ownerId);
-        OrganizationMember member = punchService.findOrganizationMemberByOrgIdAndUId(userId, organization.getPath());
-        if (null != member) {
-            sgf.setFilerName(member.getContactName());
-        }
+        sgf.setFilerName(findNameByOwnerAndUser(ownerId,userId));
+//        Organization organization = organizationProvider.findOrganizationById(ownerId);
+//        OrganizationMember member = punchService.findOrganizationMemberByOrgIdAndUId(userId, organization.getPath());
+//        if (null != member) {
+//            sgf.setFilerName(member.getContactName());
+//        }
         salaryGroupsFileProvider.createSalaryGroupsFile(sgf);
 
         List<SalaryEmployee> ses = salaryEmployeeProvider.listSalaryEmployees(ownerId, month);
@@ -1556,9 +1571,10 @@ public class SalaryServiceImpl implements SalaryService {
         }
     }
 
-    private void calculateEmployee(Long ownerId, Long detailId, Long organizationId) {
+    private SalaryEmployee calculateEmployee(Long ownerId, Long detailId, Long organizationId) {
         List<SalaryEmployeeOriginVal> vals = salaryEmployeeOriginValProvider.listSalaryEmployeeOriginValsByDetailId(detailId);
-        calculateEmployee(ownerId, detailId, vals, organizationId);
+        SalaryEmployee employee = calculateEmployee(ownerId, detailId, vals, organizationId);
+        return employee;
     }
 
     private Workbook createEmployeeSalaryHeadWB(Long orgId) {
