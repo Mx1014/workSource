@@ -1550,8 +1550,8 @@ CREATE TABLE `eh_office_cubicle_ranges` (
   `namespace_id` INTEGER NOT NULL DEFAULT 0,
   PRIMARY KEY (`id`)
 ) ENGINE=INNODB DEFAULT CHARSET=utf8mb4;
-
 -- 工位预定结束
+
 -- 资源预订3.2
 ALTER TABLE `eh_rentalv2_items`
   CHANGE COLUMN `rental_resource_id` `source_id` BIGINT(20) NULL DEFAULT NULL;
@@ -1566,6 +1566,7 @@ ADD COLUMN `default_order` INT NULL DEFAULT '0' AFTER `string_tag5`;
 UPDATE eh_rentalv2_default_rules set rental_start_time = 7776000000 where rental_start_time = 0;
 UPDATE eh_rentalv2_default_rules set rental_start_time_flag = 1;
 -- 资源预订3.2结束
+
 -- 审批2.0 start by nan.rong
 ALTER TABLE `eh_general_approvals` ADD COLUMN `approval_remark` VARCHAR(256) COMMENT 'the remark of the approval';
 
