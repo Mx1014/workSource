@@ -54,12 +54,14 @@ public class DynamicExcelImpl implements DynamicExcelService{
     //    public void exportDynamicExcel(HttpServletResponse response, String code, List<DynamicSheet> dynamicSheets, List<String> sheetNames,String baseInfo, boolean enumSupport, boolean withData, String excelName, Workbook workbook){
     public void exportDynamicExcel(HttpServletResponse response, String code, String baseInfo, List<String> sheetNames,
                                    Object params, boolean enumSupport, boolean withData, String excelName){
+        LOGGER.info("export dynamic excel sheetNames = {} , params = {}, code = {}",sheetNames,params,code);
         Workbook workbook = new XSSFWorkbook();
         DynamicExcelHandler h = getHandler(code);
         Map<Object,Object> context = new HashMap<>();
         //遍历筛选过的sheet
         for( int i = 0; i < sheetNames.size(); i++){
             List<DynamicSheet> sheets = h.getDynamicSheet(sheetNames.get(i),params,null,false);
+            LOGGER.info("export dyanmic excel dynamic sheets include = {}", sheets);
             for(DynamicSheet sheet: sheets){
                 List<DynamicField> fields = sheet.getDynamicFields();
                 List<List<String>> data = null;
@@ -196,6 +198,7 @@ public class DynamicExcelImpl implements DynamicExcelService{
                     continue sheet;
                 }else{
                     DynamicSheet dynamicSheet = ds.get(0);
+                    LOGGER.info("import dyanmic excel dynamic sheets include = {}", dynamicSheet);
                     List<DynamicField> dynamicFields = dynamicSheet.getDynamicFields();
                     if(dynamicFields.size() != headers.size()){
                         LOGGER.error("headers' size is not euqual to dynamicFields', dynamicSheet = {}, headers = {}, ",
