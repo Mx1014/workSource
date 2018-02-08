@@ -2106,12 +2106,16 @@ public class PortalServiceImpl implements PortalService {
 			for (String bean : beans) {
 				PortalUrlParser parser = PlatformContext.getComponent(bean);
 				if(parser != null){
-					moduleId = parser.getModuleId(namespaceId, actionData, actionType, itemLabel);
-					if(moduleId != null && moduleId != 0L){
-						serviceModule = serviceModuleProvider.findServiceModuleById(moduleId);
-						if(serviceModule != null){
-							break;
+					try{
+						moduleId = parser.getModuleId(namespaceId, actionData, actionType, itemLabel);
+						if(moduleId != null && moduleId != 0L){
+							serviceModule = serviceModuleProvider.findServiceModuleById(moduleId);
+							if(serviceModule != null){
+								break;
+							}
 						}
+					}catch (Exception e){
+						e.printStackTrace();
 					}
 				}
 			}
