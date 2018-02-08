@@ -93,7 +93,7 @@ public class MessageRecordSearcherImpl extends AbstractElasticSearch implements 
         BoolQueryBuilder bqb = new BoolQueryBuilder();
         if (cmd.getNamespaceId() != null )
             bqb = bqb.must(QueryBuilders.termQuery("namespaceId", cmd.getNamespaceId()));
-        if (!StringUtils.isNotEmpty(cmd.getBodyType()))
+        if (StringUtils.isNotEmpty(cmd.getBodyType()))
             bqb = bqb.must(QueryBuilders.termQuery("bodyType", cmd.getBodyType()));
         if (cmd.getSenderUid() != null)
             bqb = bqb.must(QueryBuilders.termQuery("senderUid", cmd.getSenderUid()));
@@ -138,11 +138,12 @@ public class MessageRecordSearcherImpl extends AbstractElasticSearch implements 
             SimpleDateFormat sdf = new SimpleDateFormat("yyyy-MM-dd HH:mm:ss");
             record.setCreateTime(Timestamp.valueOf(sdf.format(myDate)));
 
-            record.setDeviceId(m.get("deviceId").toString());
-            record.setIndexId(Long.valueOf(m.get("indexId").toString()));
+            if(m.get("deviceId") != null)
+                record.setDeviceId(m.get(m.get("deviceId").toString();
+            if(m.get("indexId") != null)
+                record.setIndexId(Long.valueOf(m.get("indexId").toString()));
 
             list.add(record);
-
         }
 
         if (list.size() > cmd.getPageSize()) {
