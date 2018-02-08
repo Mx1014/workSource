@@ -903,7 +903,7 @@ public class FieldServiceImpl implements FieldService {
         try {
             //获得get方法并使用获得field的值
             LOGGER.debug("field: {}", StringHelper.toJsonString(field));
-            String cellData = getFromObj(fieldName, params, field.getFieldId(), dto,communityId,namespaceId,moduleName);
+            String cellData = getFromObj(fieldName, params, field, dto,communityId,namespaceId,moduleName);
             if(cellData==null|| cellData.equalsIgnoreCase("null")){
                 cellData = "";
             }
@@ -919,7 +919,7 @@ public class FieldServiceImpl implements FieldService {
         }
     }
 
-    private String getFromObj(String fieldName, FieldParams params, Long fieldId, Object dto,Long communityId,Integer namespaceId,String moduleName) throws NoSuchFieldException, IntrospectionException, InvocationTargetException, IllegalAccessException {
+    private String getFromObj(String fieldName, FieldParams params, FieldDTO field, Object dto,Long communityId,Integer namespaceId,String moduleName) throws NoSuchFieldException, IntrospectionException, InvocationTargetException, IllegalAccessException {
         Class<?> clz = dto.getClass();
         PropertyDescriptor pd = new PropertyDescriptor(fieldName,clz);
         Method readMethod = pd.getReadMethod();
@@ -931,7 +931,7 @@ public class FieldServiceImpl implements FieldService {
         }
         try {
             if(invoke.getClass().getSimpleName().equals("Timestamp")){
-                SimpleDateFormat sdf = new SimpleDateFormat("yyyy-MM-dd");
+                SimpleDateFormat sdf = new SimpleDateFormat(field.getDateFormat());
                 Timestamp var = (Timestamp)invoke;
                 invoke = sdf.format(var.getTime());
             }
@@ -955,7 +955,7 @@ public class FieldServiceImpl implements FieldService {
                 long l = Long.parseLong(invoke.toString());
                 ScopeFieldItem item = null;
                 if(params.getFieldParamType().equals("customizationSelect")) {
-                    item = fieldProvider.findScopeFieldItemByBusinessValue(namespaceId, communityId, moduleName,fieldId, (byte)l);
+                    item = fieldProvider.findScopeFieldItemByBusinessValue(namespaceId, communityId, moduleName,field.getFieldId(), (byte)l);
                 } else {
                     item = findScopeFieldItemByFieldItemId(namespaceId, communityId,l);
                 }

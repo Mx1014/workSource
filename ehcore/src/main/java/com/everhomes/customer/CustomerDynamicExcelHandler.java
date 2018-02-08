@@ -538,6 +538,8 @@ public class CustomerDynamicExcelHandler implements DynamicExcelHandler {
                 dto.setFieldName(df.getFieldName());
                 dto.setFieldParam(df.getFieldParam());
                 dto.setFieldId(df.getFieldId());
+                //在这里传递date格式
+                dto.setDateFormat(df.getDateFormat());
                 return dto;
             }).collect(Collectors.toList());
 

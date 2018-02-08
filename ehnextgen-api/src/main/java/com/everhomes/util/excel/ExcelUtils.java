@@ -1,5 +1,6 @@
 package com.everhomes.util.excel;
 
+import com.everhomes.dynamicExcel.DynamicField;
 import org.apache.commons.lang.ArrayUtils;
 import org.apache.commons.lang.StringEscapeUtils;
 import org.apache.commons.lang.StringUtils;
@@ -638,10 +639,49 @@ public class ExcelUtils {
      * @param cell
      * @return
      */
+    public static String getCellValue(Cell cell, DynamicField ds){
+        String value = ds.getDefaultValue();
+        DecimalFormat df = new DecimalFormat("0");  //格式化number String字符
+        SimpleDateFormat sdf = new SimpleDateFormat(ds.getDateFormat());  //日期格式化
+        DecimalFormat df2 = new DecimalFormat("0.00");  //格式化数字
+        if(cell == null){
+            return "";
+        }
+        switch (cell.getCellType()) {
+            case Cell.CELL_TYPE_STRING:
+                value = cell.getRichStringCellValue().getString();
+                break;
+            case Cell.CELL_TYPE_NUMERIC:
+                if("General".equals(cell.getCellStyle().getDataFormatString())){
+                    value = df.format(cell.getNumericCellValue());
+                }else if("m/d/yy".equals(cell.getCellStyle().getDataFormatString())){
+                    value = sdf.format(cell.getDateCellValue());
+                }else{
+                    value = df2.format(cell.getNumericCellValue());
+                }
+                break;
+            case Cell.CELL_TYPE_BOOLEAN:
+                Boolean booleanCellValue = cell.getBooleanCellValue();
+                value = booleanCellValue.toString();
+                break;
+            case Cell.CELL_TYPE_BLANK:
+                value = "";
+                break;
+            default:
+                break;
+        }
+        return value;
+    }
+
+    /**
+     * 描述：对表格中数值进行格式化
+     * @param cell
+     * @return
+     */
     public static String getCellValue(Cell cell){
         String value = null;
         DecimalFormat df = new DecimalFormat("0");  //格式化number String字符
-        SimpleDateFormat sdf = new SimpleDateFormat("yyy-MM-dd");  //日期格式化
+        SimpleDateFormat sdf = new SimpleDateFormat("yyyy-MM-dd");  //日期格式化
         DecimalFormat df2 = new DecimalFormat("0.00");  //格式化数字
         if(cell == null){
             return "";
