@@ -239,4 +239,5 @@ public interface EquipmentProvider {
 
     List<EquipmentInspectionStandards> listEquipmentStandardWithReferId(Long targetId, String targetType);
 
+    void deletePlanMapByEquipmentIdAndStandardId(Long equipmentId, Long standardId);
 }
