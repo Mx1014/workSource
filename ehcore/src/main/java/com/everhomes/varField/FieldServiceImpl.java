@@ -203,6 +203,11 @@ public class FieldServiceImpl implements FieldService {
                 excelTemplateName = cmd.getEquipmentCategoryName() +
                         new SimpleDateFormat("yyyy-MM-dd-HH-mm").format(Calendar.getInstance().getTime()) + ".xls";
             }
+            if(ModuleName.ENTERPRISE_CUSTOMER.equals(ModuleName.fromName(cmd.getModuleName()))) {
+                sheetNames.remove("基本信息");
+                sheetNames.remove("企业情况");
+                sheetNames.remove("员工情况");
+            }
 
             dynamicExcelService.exportDynamicExcel(response, DynamicExcelStrings.CUSTOEMR, null, sheetNames, cmd, true, false, excelTemplateName);
         }
@@ -260,7 +265,7 @@ public class FieldServiceImpl implements FieldService {
      * @return 返回空列表而非null
      */
     @Override
-    public List<FieldGroupDTO> getAllGroups(ExportFieldsExcelCommand cmd,boolean onlyLeaf,boolean filter) {
+    public List<FieldGroupDTO> getAllGroups(ExportFieldsExcelCommand cmd,@Deprecated boolean onlyLeaf, boolean filter) {
         //管理员权限校验
         if(ModuleName.ENTERPRISE_CUSTOMER.getName().equals(cmd.getModuleName())) {
             customerService.checkCustomerAuth(cmd.getNamespaceId(), PrivilegeConstants.ENTERPRISE_CUSTOMER_MANAGE_EXPORT, cmd.getOrgId(), cmd.getCommunityId());
@@ -268,8 +273,10 @@ public class FieldServiceImpl implements FieldService {
         //将command转换为listFieldGroup的参数command
         ListFieldGroupCommand cmd1 = ConvertHelper.convert(cmd, ListFieldGroupCommand.class);
         //获得客户所拥有的sheet
-        List<FieldGroupDTO> allGroups = listFieldGroups(cmd1);
-        List<FieldGroupDTO> groups = new ArrayList<>();
+        List<FieldGroupDTO> allParentGroups = listFieldGroups(cmd1);
+        List<FieldGroupDTO> allGroups = new ArrayList<>();
+        getAllGroups(allParentGroups,allGroups);
+//        List<FieldGroupDTO> groups = new ArrayList<>();
         List<FieldGroupDTO> targetGroups = new ArrayList<>();
         if(filter){
             //双重循环匹配浏览器所传的sheetName，获得目标sheet集合
@@ -289,12 +296,13 @@ public class FieldServiceImpl implements FieldService {
         }else{
             targetGroups = allGroups;
         }
-        if(onlyLeaf){
-            getAllGroups(targetGroups,groups);
-        }else{
-            groups = targetGroups;
-        }
-        return groups;
+        return targetGroups;
+//        if(onlyLeaf){
+//            getAllGroups(targetGroups,groups);
+//        }else{
+//            groups = targetGroups;
+//        }
+//        return groups;
     }
 
     @Override
