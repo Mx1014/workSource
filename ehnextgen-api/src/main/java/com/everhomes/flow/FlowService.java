@@ -499,4 +499,6 @@ public interface FlowService {
 
     FlowCaseDetailDTOV2 getFlowCaseDetailByRefer(Long moduleId, FlowUserType flowUserType,
                                                  Long userId, String referType, Long referId, boolean needFlowButton);
+
+    GetFlowCaseCountResponse getFlowCaseCount(SearchFlowCaseCommand cmd);
 }

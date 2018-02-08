@@ -3616,6 +3616,7 @@ public class FlowServiceImpl implements FlowService {
                 log.setStepCount(ctx.getFlowCase().getStepCount());
 
                 log.setLogType(FlowLogType.NODE_ENTER.getCode());
+                log.setEnterLogCompleteFlag(TrueOrFalseFlag.FALSE.getCode());
                 log.setLogTitle("");
                 ctx.getLogs().add(log);
             }
@@ -5148,6 +5149,36 @@ public class FlowServiceImpl implements FlowService {
     }
 
     @Override
+    public GetFlowCaseCountResponse getFlowCaseCount(SearchFlowCaseCommand cmd) {
+        if (cmd.getNamespaceId() == null) {
+            cmd.setNamespaceId(UserContext.getCurrentNamespaceId());
+        }
+        if (cmd.getFlowCaseSearchType() == null) {
+            throw RuntimeErrorException.errorWith(FlowServiceErrorCode.SCOPE, FlowServiceErrorCode.ERROR_FLOW_PARAM_ERROR, "flow param error");
+        }
+
+        if (!cmd.getFlowCaseSearchType().equals(FlowCaseSearchType.ADMIN.getCode()) && cmd.getUserId() == null) {
+            cmd.setUserId(UserContext.current().getUser().getId());
+        }
+        if (cmd.getModuleId() != null && cmd.getModuleId() == 0L) {
+            cmd.setModuleId(null);
+        }
+
+        Integer count;
+        if (cmd.getFlowCaseSearchType().equals(FlowCaseSearchType.APPLIER.getCode())) {
+            count = flowCaseProvider.countApplierFlowCases(cmd);
+        } else if (cmd.getFlowCaseSearchType().equals(FlowCaseSearchType.ADMIN.getCode())) {
+            count = flowCaseProvider.countAdminFlowCases(cmd);
+        } else {
+            count = flowEventLogProvider.countProcessorFlowCases(cmd);
+        }
+        if (count == null) {
+            count = 0;
+        }
+        return new GetFlowCaseCountResponse(count);
+    }
+
+    @Override
     public FlowGraphDTO createOrUpdateFlowGraph(CreateFlowGraphCommand cmd) {
         ValidatorUtil.validate(cmd);
 
@@ -5501,14 +5532,14 @@ public class FlowServiceImpl implements FlowService {
 
         List<FlowCase> allFlowCase = ctx.getAllFlowCases();
 
-        List<FlowNode> nodes = flowGraph.getNodes().stream().map(FlowGraphNode::getFlowNode).collect(Collectors.toList());
-        nodes.sort(Comparator.comparingInt(FlowNode::getNodeLevel));
+        List<FlowNode> nodes = flowGraph.getNodes().stream().map(FlowGraphNode::getFlowNode)
+                .sorted(Comparator.comparingInt(FlowNode::getNodeLevel)).collect(Collectors.toList());
 
-        List<FlowLane> laneList = flowGraph.getLanes().stream().map(FlowGraphLane::getFlowLane).collect(Collectors.toList());
+        List<FlowLane> laneList = flowGraph.getLanes().stream().map(FlowGraphLane::getFlowLane)
+                .sorted(Comparator.comparingInt(FlowLane::getLaneLevel)).collect(Collectors.toList());
         // if (laneList.size() < 3) {
         //     return dto;
         // }
-        laneList.sort(Comparator.comparingInt(FlowLane::getLaneLevel));
 
         Long userId = UserContext.currentUserId();
         if (userId == null) {
