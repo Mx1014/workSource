@@ -642,7 +642,18 @@ public class ExcelUtils {
     public static String getCellValue(Cell cell, DynamicField ds){
         String value = ds.getDefaultValue();
         DecimalFormat df = new DecimalFormat("0");  //格式化number String字符
-        SimpleDateFormat sdf = new SimpleDateFormat(ds.getDateFormat());  //日期格式化
+        String dateFormat = ds.getDateFormat();
+        SimpleDateFormat sdf = null;
+        if(null == dateFormat){
+            sdf = new SimpleDateFormat("yyyy-MM-dd");
+        }else{
+            try{
+                sdf = new SimpleDateFormat(dateFormat);  //日期格式化
+            }catch (Exception e){
+                sdf = new SimpleDateFormat("yyyy-MM-dd");
+            }
+        }
+
         DecimalFormat df2 = new DecimalFormat("0.00");  //格式化数字
         if(cell == null){
             return "";
