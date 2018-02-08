@@ -549,7 +549,6 @@ public class SalaryServiceImpl implements SalaryService {
                         }
                     }
 
-                    categoryValue = categoryValue.add(entityVal);
                     categoryDTO.getEntities().add(dto);
                 }
             }
