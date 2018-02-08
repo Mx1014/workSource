@@ -2218,12 +2218,12 @@ public class PortalServiceImpl implements PortalService {
 			for (PortalItem item: portalItems){
 
 				ItemActionData actionData = (ItemActionData) StringHelper.fromJsonString(item.getActionData(), ItemActionData.class);
-				if(actionData == null || actionData.getLayoutId() == null){
+				if(actionData == null){
 					continue;
 				}
 
 				//如果是指向layout，则更新layout的Id
-				if(PortalItemActionType.fromCode(item.getActionType()) == PortalItemActionType.LAYOUT && item.getActionData() != null){
+				if(PortalItemActionType.fromCode(item.getActionType()) == PortalItemActionType.LAYOUT && actionData.getLayoutId() != null){
 
 					PortalLayout oldPortalLayout = portalLayoutProvider.findPortalLayoutById(actionData.getLayoutId());
 					if(oldPortalLayout == null){
@@ -2238,10 +2238,8 @@ public class PortalServiceImpl implements PortalService {
 							break;
 						}
 					}
-				}
-
-				//如果是指向layout，则更新layout的Id
-				if(PortalItemActionType.fromCode(item.getActionType()) == PortalItemActionType.MODULEAPP && item.getActionData() != null){
+				}else if(PortalItemActionType.fromCode(item.getActionType()) == PortalItemActionType.MODULEAPP && actionData.getModuleAppId() != null){
+					//如果是指向serviceModuleApp，则更新serviceModuleApp的Id
 					ServiceModuleApp oldServiceModuleApp = serviceModuleAppProvider.findServiceModuleAppById(actionData.getModuleAppId());
 					if(oldServiceModuleApp == null){
 						continue;
