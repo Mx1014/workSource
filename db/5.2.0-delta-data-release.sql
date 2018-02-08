@@ -8,3 +8,7 @@ INSERT INTO `eh_configurations` (`id`, `name`, `value`, `description`, `namespac
 -- 滞纳金变量 by wentian
 SET @var_id = (SELECT max(`id`) from `eh_payment_variables`);
 INSERT INTO `eh_payment_variables` (`id`, `charging_standard_id`, `charging_items_id`, `name`, `creator_uid`, `create_time`, `operator_uid`, `update_time`, `identifier`) VALUES (@var_id:=@var_id+1, NULL, '6', '欠费', '0', '2017-10-16 09:31:00', NULL, '2017-10-16 09:31:00', 'qf');
+
+-- by dengs,新闻分享连接修改
+
+update eh_configurations SET `value`='/park-news-web/build/index.html?ns=%s&isFS=1&widget=News&timeWidgetStyle=time/#/newsDetail?newsToken=%s' WHERE `name` in ('news.web.url','news.url');
