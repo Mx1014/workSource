@@ -644,7 +644,10 @@ public class SalaryServiceImpl implements SalaryService {
             } else {
                 //// TODO: 2018/1/26  检验权限 是否有操作此用户的权限
                 SalaryEmployee employee = salaryEmployeeProvider.findSalaryEmployeeByDetailId(ownerId, detail.getId());
-                if (null != employee) {
+                if (null != employee &&(employee.getRealPaySalary().compareTo(new BigDecimal(0) )!=0 ||
+                        employee.getShouldPaySalary().compareTo(new BigDecimal(0) )!=0 ||
+                        employee.getRealPaySalary().compareTo(new BigDecimal(0) )!=0)) {
+                    //原本employee 计算的实收,应收,实发等如果不是0 就说明是覆盖
                     coverNum++;
                 }
                 saveImportEmployeeSalary(organizationId, detail.getId(), response, r, ownerId);
