@@ -12,3 +12,8 @@ INSERT INTO `eh_payment_variables` (`id`, `charging_standard_id`, `charging_item
 -- by dengs,新闻分享连接修改
 
 update eh_configurations SET `value`='/park-news-web/build/index.html?ns=%s&isFS=1&widget=News&timeWidgetStyle=time/#/newsDetail?newsToken=%s' WHERE `name` in ('news.web.url','news.url');
+
+
+-- by xiongying 加上对象名
+update eh_var_field_groups set name = 'com.everhomes.customer.CustomerTax' where title = '税务信息';
+update eh_var_field_groups set name = 'com.everhomes.customer.CustomerAccount' where title = '银行账号';
