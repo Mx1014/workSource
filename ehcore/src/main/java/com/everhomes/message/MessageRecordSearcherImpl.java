@@ -139,7 +139,7 @@ public class MessageRecordSearcherImpl extends AbstractElasticSearch implements 
             record.setCreateTime(Timestamp.valueOf(sdf.format(myDate)));
 
             if(m.get("deviceId") != null)
-                record.setDeviceId(m.get(m.get("deviceId").toString();
+                record.setDeviceId(m.get("deviceId").toString());
             if(m.get("indexId") != null)
                 record.setIndexId(Long.valueOf(m.get("indexId").toString()));
 
