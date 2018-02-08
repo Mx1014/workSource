@@ -12,6 +12,8 @@ public class OfflineEquipmentTaskReportLog {
 
     private Long errorIds;
 
+    private Byte errorType;
+
     private Integer errorCode;
 
     private String errorDescription;
@@ -38,6 +40,14 @@ public class OfflineEquipmentTaskReportLog {
 
     public void setErrorCode(Integer errorCode) {
         this.errorCode = errorCode;
+    }
+
+    public Byte getErrorType() {
+        return errorType;
+    }
+
+    public void setErrorType(Byte errorType) {
+        this.errorType = errorType;
     }
 
     public String getErrorDescription() {

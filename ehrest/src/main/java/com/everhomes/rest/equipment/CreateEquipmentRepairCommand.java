@@ -26,7 +26,7 @@ public class CreateEquipmentRepairCommand {
 
     private Long equipmentId;
     private Long taskId;
-    //以下为报修参数
+    /**以下为报修参数*/
     private String ownerType;
     private Long ownerId;
     private Long categoryId;

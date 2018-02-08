@@ -16,12 +16,13 @@ public class DefaultRentalOrderHandler implements RentalOrderHandler {
 
     @Autowired
     private Rentalv2Provider rentalv2Provider;
+    @Autowired
+    private RentalCommonServiceImpl rentalCommonService;
 
     @Override
     public BigDecimal getRefundAmount(RentalOrder order, Long time) {
-
-        return order.getPaidMoney().multiply(new BigDecimal(order.getRefundRatio()))
-                .divide(new BigDecimal(100), RoundingMode.HALF_UP);
+        BigDecimal refundAmount = rentalCommonService.calculateRefundAmount(order, time);
+        return refundAmount;
     }
 
     @Override

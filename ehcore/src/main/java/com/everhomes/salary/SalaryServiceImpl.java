@@ -539,8 +539,16 @@ public class SalaryServiceImpl implements SalaryService {
                         } catch (Exception e) {
                             LOGGER.error("salaryValue :{}不能转换为数字", dto.getSalaryValue());
                         }
+
+                        if (SalaryEntityType.DEDUCTION == SalaryEntityType.fromCode(dto.getType())) {
+                            //减
+                            categoryValue = categoryValue.subtract(entityVal);
+                        } else {
+                            //增
+                            categoryValue = categoryValue.add(entityVal);
+                        }
                     }
-                    categoryValue = categoryValue.add(entityVal);
+
                     categoryDTO.getEntities().add(dto);
                 }
             }
@@ -636,7 +644,10 @@ public class SalaryServiceImpl implements SalaryService {
             } else {
                 //// TODO: 2018/1/26  检验权限 是否有操作此用户的权限
                 SalaryEmployee employee = salaryEmployeeProvider.findSalaryEmployeeByDetailId(ownerId, detail.getId());
-                if (null != employee) {
+                if (null != employee &&(employee.getRealPaySalary().compareTo(new BigDecimal(0) )!=0 ||
+                        employee.getShouldPaySalary().compareTo(new BigDecimal(0) )!=0 ||
+                        employee.getRealPaySalary().compareTo(new BigDecimal(0) )!=0)) {
+                    //原本employee 计算的实收,应收,实发等如果不是0 就说明是覆盖
                     coverNum++;
                 }
                 saveImportEmployeeSalary(organizationId, detail.getId(), response, r, ownerId);
