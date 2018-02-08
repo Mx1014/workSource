@@ -6071,10 +6071,12 @@ private void checkUserPrivilege(Long orgId, Long privilegeId, Long communityId) 
 			return logs.stream().map((r) -> {
 						EquipmentOperateLogsDTO logsDTO = ConvertHelper.convert(r, EquipmentOperateLogsDTO.class);
 						List<OrganizationMember> member = organizationProvider.listOrganizationMembersByUId(r.getOperatorUid());
-						if (member != null && member.size() > 0){
+						if (member != null && member.size() > 0) {
 							logsDTO.setOperatorName(member.get(0).getContactName());
-						}else {
-							logsDTO.setOperatorName(userService.getUserInfo(r.getOperatorUid()).getNickName());
+						} else {
+							User user = userProvider.findUserById(r.getOperatorUid());
+							if (user != null)
+								logsDTO.setOperatorName(user.getNickName());
 						}
 						return logsDTO;
 					}

@@ -14,6 +14,9 @@ import java.sql.Timestamp;
  *     <li>contractAmount: 合同金额</li>
  *     <li>requestId: 请示单id</li>
  *     <li>requestName: 请示单名称</li>
+ *     <li>requestIdentity: 请示单编号</li>
+ *     <li>requestUserName: 请示人姓名</li>
+ *     <li>requestDepartment: 请示人部门</li>
  *     <li>applicantUid: 申请人id</li>
  *     <li>applicantName: 申请人名称</li>
  *     <li>applicantOrgId: 申请人所在部门id</li>
@@ -45,6 +48,9 @@ public class PaymentApplicationDTO {
     private BigDecimal contractAmount;
     private Long requestId;
     private String requestName;
+    private String requestIdentity;
+    private String requestUserName;
+    private String requestDepartment;
     private Long applicantUid;
     private String applicantName;
     private Long applicantOrgId;
@@ -59,6 +65,30 @@ public class PaymentApplicationDTO {
     private Byte status;
     private Long createUid;
     private Timestamp createTime;
+
+    public String getRequestDepartment() {
+        return requestDepartment;
+    }
+
+    public void setRequestDepartment(String requestDepartment) {
+        this.requestDepartment = requestDepartment;
+    }
+
+    public String getRequestIdentity() {
+        return requestIdentity;
+    }
+
+    public void setRequestIdentity(String requestIdentity) {
+        this.requestIdentity = requestIdentity;
+    }
+
+    public String getRequestUserName() {
+        return requestUserName;
+    }
+
+    public void setRequestUserName(String requestUserName) {
+        this.requestUserName = requestUserName;
+    }
 
     public Long getCommunityId() {
         return communityId;

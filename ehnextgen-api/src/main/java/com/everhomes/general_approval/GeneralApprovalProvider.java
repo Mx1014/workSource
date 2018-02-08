@@ -36,6 +36,7 @@ public interface GeneralApprovalProvider {
 
     void deleteOddGeneralApprovalDetailScope(Integer namespaceId, Long approvalId, List<Long> detailIds);
 
-    void deleteOddGeneralApprovalOraganizationScope(Integer namespaceId, Long approvalId, List<Long> detailIds);
+    void deleteOddGeneralApprovalOrganizationScope(Integer namespaceId, Long approvalId, List<Long> detailIds);
 
+	List<GeneralApprovalScopeMap> listGeneralApprovalScopes(Integer namespaceId, Long approvalId);
 }
