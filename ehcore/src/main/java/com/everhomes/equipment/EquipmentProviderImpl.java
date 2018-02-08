@@ -3198,4 +3198,13 @@ public class EquipmentProviderImpl implements EquipmentProvider {
                 .and(Tables.EH_EQUIPMENT_INSPECTION_STANDARDS.NAMESPACE_ID.eq(UserContext.getCurrentNamespaceId()))
                 .fetchInto(EquipmentInspectionStandards.class);
     }
+
+    @Override
+    public void deletePlanMapByEquipmentIdAndStandardId(Long equipmentId, Long standardId) {
+        DSLContext context = this.dbProvider.getDslContext(AccessSpec.readWrite());
+        context.delete(Tables.EH_EQUIPMENT_INSPECTION_EQUIPMENT_PLAN_MAP)
+                .where(Tables.EH_EQUIPMENT_INSPECTION_EQUIPMENT_PLAN_MAP.EQUIMENT_ID.eq(equipmentId))
+                .and(Tables.EH_EQUIPMENT_INSPECTION_EQUIPMENT_PLAN_MAP.STANDARD_ID.eq(standardId))
+                .execute();
+    }
 }

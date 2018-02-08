@@ -1103,14 +1103,14 @@ private void checkUserPrivilege(Long orgId, Long privilegeId, Long communityId) 
 		} else {
 			EquipmentInspectionEquipments exist = verifyEquipment(cmd.getId(), cmd.getOwnerType(), cmd.getOwnerId());
 			equipment = ConvertHelper.convert(cmd, EquipmentInspectionEquipments.class);
-			//equipment.setGeohash(exist.getGeohash());
-			equipment.setQrCodeToken(exist.getQrCodeToken());
-			equipment.setNamespaceId(cmd.getNamespaceId());
+			equipment.setNamespaceId(exist.getNamespaceId());
+			equipment.setCreateTime(exist.getCreateTime());
+			equipment.setCreatorUid(exist.getCreatorUid());
 			equipment.setOperatorUid(user.getId());
 			equipment.setUpdateTime(new Timestamp(DateHelper.currentGMTTime().getTime()));
 
 			dealEquipmentRelateTime(cmd, equipment);
-			checkEquipmentLngAndLat(cmd, equipment, exist);
+			checkEquipmentLngAndLat(cmd, equipment);
 			equipmentProvider.updateEquipmentInspectionEquipment(equipment);
 			equipmentSearcher.feedDoc(equipment);
 			//删除计划关联表中的该设备
@@ -1121,12 +1121,10 @@ private void checkUserPrivilege(Long orgId, Long privilegeId, Long communityId) 
 			if (maps != null) {
 				for (EquipmentStandardMap map : maps) {
 					if (!updateStandardIds.contains(map.getStandardId())) {
-						//map.setReviewStatus(EquipmentReviewStatus.INACTIVE.getCode());
-						//fix bug #20247
 						map.setStatus(EquipmentStandardStatus.INACTIVE.getCode());
 						equipmentProvider.updateEquipmentStandardMap(map);
 						equipmentStandardMapSearcher.feedDoc(map);
-						//inactiveTasks(equipment.getId(), map.getStandardId());
+						inactivePlansByEquipmentIdAndStandardId(equipment.getId(), map.getStandardId());
 					}
 				}
 			}
@@ -1150,25 +1148,22 @@ private void checkUserPrivilege(Long orgId, Long privilegeId, Long communityId) 
 		}
 	}
 
-	private void checkEquipmentLngAndLat(UpdateEquipmentsCommand cmd, EquipmentInspectionEquipments equipment, EquipmentInspectionEquipments exist) {
-//		if(exist.getLatitude() != null && equipment.getLongitude() != null) {
-//            if(!exist.getLatitude().equals(equipment.getLatitude()) || !equipment.getLongitude().equals(exist.getLongitude()) ) {
-//                throw RuntimeErrorException.errorWith(EquipmentServiceErrorCode.SCOPE,
-//                        EquipmentServiceErrorCode.ERROR_EQUIPMENT_LOCATION_CANNOT_MODIFY,
-//                     "设备经纬度不能修改");
-//            }
-//        } else {
-            equipment.setLatitude(cmd.getLatitude());
-            equipment.setLongitude(cmd.getLongitude());
-            if ((equipment.getLongitude() == null || equipment.getLatitude() == null) && cmd.getQrCodeFlag() == 1) {
-                throw RuntimeErrorException.errorWith(EquipmentServiceErrorCode.SCOPE,
-                        EquipmentServiceErrorCode.ERROR_EQUIPMENT_NOT_SET_LOCATION,
-                     "设备没有设置经纬度");
-            }
+	private void inactivePlansByEquipmentIdAndStandardId(Long equipmentId, Long standardId) {
+		equipmentProvider.deletePlanMapByEquipmentIdAndStandardId(equipmentId, standardId);
+	}
 
-            String geohash= GeoHashUtils.encode(equipment.getLatitude(), equipment.getLongitude());
-            equipment.setGeohash(geohash);
-//        }
+	private void checkEquipmentLngAndLat(UpdateEquipmentsCommand cmd, EquipmentInspectionEquipments equipment) {
+		equipment.setLatitude(cmd.getLatitude());
+		equipment.setLongitude(cmd.getLongitude());
+		if ((equipment.getLongitude() == null || equipment.getLatitude() == null) && cmd.getQrCodeFlag() == 1) {
+			throw RuntimeErrorException.errorWith(EquipmentServiceErrorCode.SCOPE,
+					EquipmentServiceErrorCode.ERROR_EQUIPMENT_NOT_SET_LOCATION,
+					"设备没有设置经纬度");
+		}
+		if (equipment.getLatitude() != null && equipment.getLongitude() != null) {
+			String geohash = GeoHashUtils.encode(equipment.getLatitude(), equipment.getLongitude());
+			equipment.setGeohash(geohash);
+		}
 	}
 
 	private List<Long> increamentUpdateEquipmentStandardMap(User user, EquipmentInspectionEquipments equipment, List<EquipmentStandardMapDTO> eqStandardMap) {
@@ -1247,10 +1242,12 @@ private void checkUserPrivilege(Long orgId, Long privilegeId, Long communityId) 
 					EquipmentServiceErrorCode.ERROR_EQUIPMENT_NOT_SET_LOCATION,
 					"设备没有设置经纬度");
 		}
-		String geohash = GeoHashUtils.encode(equipment.getLatitude(), equipment.getLongitude());
+		String geohash = null;
+		if (equipment.getLatitude() != null && equipment.getLongitude() != null) {
+			geohash = GeoHashUtils.encode(equipment.getLatitude(), equipment.getLongitude());
+		}
 
 		dealEquipmentRelateTime(cmd, equipment);
-
 		Long userId = UserContext.currentUserId();
 		equipment.setGeohash(geohash);
 		equipment.setCreatorUid(userId);
@@ -2518,8 +2515,6 @@ private void checkUserPrivilege(Long orgId, Long privilegeId, Long communityId) 
 	}
 
 	private EquipmentInspectionEquipments verifyEquipment(Long equipmentId, String ownerType, Long ownerId) {
-
-//		EquipmentInspectionEquipments equipment = equipmentProvider.findEquipmentById(equipmentId, ownerType, ownerId);
 
 		//改用namespaceId by xiongying20170328
 		EquipmentInspectionEquipments equipment = equipmentProvider.findEquipmentById(equipmentId);
