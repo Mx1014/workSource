@@ -545,7 +545,7 @@ public class ServiceModuleServiceImpl implements ServiceModuleService {
         //过滤出与scopes匹配的serviceModule
 //        List<ServiceModuleDTO> tempList = filterByScopes(namespaceId, cmd.getOwnerType(), cmd.getOwnerId());
         //todo
-        List<Long> moduleIds = serviceModuleAppService.listReleaseServiceModuleIdsByNamespace(UserContext.getCurrentNamespaceId());
+        List<Long> moduleIds = serviceModuleAppService.listReleaseServiceModuleIdsWithParentByNamespace(UserContext.getCurrentNamespaceId());
         if(moduleIds.size() == 0){
             return response;
         }

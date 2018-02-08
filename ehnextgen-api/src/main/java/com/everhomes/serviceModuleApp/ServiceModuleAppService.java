@@ -21,5 +21,7 @@ public interface ServiceModuleAppService {
 
 	List<Long> listReleaseServiceModuleIdsByNamespace(Integer namespaceId);
 
+	List<Long> listReleaseServiceModuleIdsWithParentByNamespace(Integer namespaceId);
+
 	ServiceModuleApp findReleaseServiceModuleAppByOriginId(Long originId);
 }

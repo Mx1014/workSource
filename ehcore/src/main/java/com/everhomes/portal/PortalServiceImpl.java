@@ -195,7 +195,7 @@ public class PortalServiceImpl implements PortalService {
 //			return new ListServiceModuleAppsResponse(dtos);
 //		}
 //		return null;
-		List<ServiceModuleApp> moduleApps = serviceModuleAppService.listReleaseServiceModuleApp(cmd.getNamespaceId(), cmd.getModuleId(), cmd.getActionType(), cmd.getCustomTag(), null);
+		List<ServiceModuleApp> moduleApps = serviceModuleAppService.listReleaseServiceModuleApp(cmd.getNamespaceId(), cmd.getModuleId(), null, cmd.getCustomTag(), null);
 //		List<ServiceModuleAppDTO> moduleApps = serviceModuleProvider.listReflectionServiceModuleApp(cmd.getNamespaceId(), cmd.getModuleId(), cmd.getActionType(), cmd.getCustomTag(), cmd.getCustomPath(), null);
 //		LOGGER.debug("list apps size:" + moduleApps.size());
 		if(moduleApps != null && moduleApps.size() > 0){
@@ -2203,6 +2203,43 @@ public class PortalServiceImpl implements PortalService {
 
 		//10、生成LaunchPadMappings
 		portalLaunchPadMappingProvider.createPortalLaunchPadMappings(portalLaunchPadMappings);
+
+		//此时发生了一个很伤心的事情，指向门户的item的actionData的内容中指定的layoutId还是旧的。
+		updateItemActionData(namespaceId, newVersionId);
+
+	}
+
+	private void updateItemActionData(Integer namespaceId, Long newVersionId){
+
+		List<PortalLayout> newPortalLayouts = portalLayoutProvider.listPortalLayoutByVersion(namespaceId, newVersionId);
+		List<PortalItem> portalItems = portalItemProvider.listPortalItemsByVersionId(newVersionId);
+		if (portalItems == null || portalItems.size() > 0){
+			for (PortalItem item: portalItems){
+
+				//如果是指向layout，则更新layout的Id
+				if(PortalItemActionType.fromCode(item.getActionType()) == PortalItemActionType.LAYOUT && item.getActionData() != null){
+					ItemActionData actionData = (ItemActionData) StringHelper.fromJsonString(item.getActionData(), ItemActionData.class);
+					if(actionData == null || actionData.getLayoutId() == null){
+						continue;
+					}
+					PortalLayout oldPortalLayout = portalLayoutProvider.findPortalLayoutById(actionData.getLayoutId());
+					if(oldPortalLayout == null){
+						continue;
+					}
+
+					for(PortalLayout portalLayout: newPortalLayouts){
+						if(portalLayout.getLocation().equals(oldPortalLayout.getLocation()) && portalLayout.getName().equals(oldPortalLayout.getName())){
+							actionData.setLayoutId(portalLayout.getId());
+							item.setActionData(actionData.toString());
+							portalItemProvider.updatePortalItem(item);
+							break;
+						}
+					}
+				}
+
+			}
+		}
+
 	}
 
 

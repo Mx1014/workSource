@@ -38,6 +38,8 @@ public interface GeneralApprovalService {
 
     GeneralApprovalDTO updateGeneralApproval(UpdateGeneralApprovalCommand cmd);
 
+    GeneralApprovalDTO setGeneralApprovalForm(SetGeneralApprovalFormCommand cmd);
+
     void deleteGeneralApproval(GeneralApprovalIdCommand cmd);
 
     GeneralFormDTO updateApprovalForm(UpdateApprovalFormCommand cmd);
@@ -78,4 +80,8 @@ public interface GeneralApprovalService {
 //	GetTemplateByApprovalIdResponse postForm(PostFormCommand cmd);
 
     void disableApprovalByFormOriginId(Long formOriginId, Long moduleId, String moduleType);
+
+    void orderGeneralApprovals(OrderGeneralApprovalsCommand cmd);
+
+    ListGeneralApprovalResponse listAvailableGeneralApprovals(ListGeneralApprovalCommand cmd);
 }

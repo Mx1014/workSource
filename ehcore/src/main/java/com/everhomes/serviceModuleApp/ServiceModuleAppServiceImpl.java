@@ -5,6 +5,7 @@ import com.everhomes.db.AccessSpec;
 import com.everhomes.db.DaoAction;
 import com.everhomes.db.DaoHelper;
 import com.everhomes.db.DbProvider;
+import com.everhomes.module.ServiceModule;
 import com.everhomes.module.ServiceModuleProvider;
 import com.everhomes.naming.NameMapper;
 import com.everhomes.portal.PortalVersion;
@@ -27,6 +28,7 @@ import org.springframework.stereotype.Component;
 
 import java.sql.Timestamp;
 import java.util.ArrayList;
+import java.util.HashSet;
 import java.util.List;
 import java.util.Set;
 import java.util.stream.Collectors;
@@ -105,7 +107,7 @@ public class ServiceModuleAppServiceImpl implements ServiceModuleAppService {
 		PortalVersion releaseVersion = portalVersionProvider.findReleaseVersion(namespaceId);
 		List<ServiceModuleApp> apps = new ArrayList<>();
 		if(releaseVersion != null){
-			apps = listServiceModuleApp(namespaceId, releaseVersion.getId(), moduleId, actionType, customTag, controlType);
+			apps = listServiceModuleApp(namespaceId, releaseVersion.getId(), moduleId, actionType, customTag , controlType);
 		}
 
 		return apps;
@@ -122,6 +124,23 @@ public class ServiceModuleAppServiceImpl implements ServiceModuleAppService {
 		}
 		return moduleIds;
     }
+
+	@Override
+	public List<Long> listReleaseServiceModuleIdsWithParentByNamespace(Integer namespaceId) {
+		List<Long> moduleIds = listReleaseServiceModuleIdsByNamespace(namespaceId);
+		List<ServiceModule> modules = this.serviceModuleProvider.listServiceModule(moduleIds);
+		Set<Long> process_moduleIds = new HashSet<>();
+		modules.stream().map(r -> {
+			String[] ids = r.getPath().split("/");
+			for (String id : ids) {
+				if(!id.equals(""))
+					process_moduleIds.add(Long.valueOf(id));
+			}
+			return null;
+		}).collect(Collectors.toList());
+
+		return new ArrayList<>(process_moduleIds);
+	}
 
 	@Override
 	public ServiceModuleApp findReleaseServiceModuleAppByOriginId(Long originId) {

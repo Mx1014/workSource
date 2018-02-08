@@ -550,5 +550,7 @@ public interface OrganizationProvider {
 	List<OrganizationMember> queryOrganizationPersonnels(ListingLocator locator, Long organizationId, ListingQueryBuilderCallback queryBuilderCallback);
  
 
-	List<Organization> listPMOrganizations(Integer namespaceId); 
+	List<Organization> listPMOrganizations(Integer namespaceId);
+
+	Organization findOrganizationByName(String groupType, String name, Long directlyEnterpriseId);
 }

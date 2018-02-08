@@ -29,15 +29,17 @@ SET equipment_id = (SELECT  equipment_id FROM eh_equipment_inspection_tasks WHER
 INSERT  INTO  `eh_var_fields` VALUES (11999, 'equipment_inspection', 'geohash', '经纬度', 'Long', 10000, CONCAT('/',10000,'/'), 1, null, 2, 1, now(),null ,null,'{\"fieldParamType\": \"map\", \"length\": 32}');
 -- 增加经纬度动态表单  jiarui  20180122
 
--- offline
--- SET  @id = (SELECT  MAX(id) from eh_version_realm);
--- INSERT INTO `eh_version_realm` VALUES (@id:=@id+1, 'equipmentInspection', NULL, now(), '0');
--- SET  @vId = (SELECT  MAX(id) from eh_version_urls);
--- INSERT INTO `eh_version_urls` VALUES (@vId:=@vId+1, @id, '1.0.0', 'http://lixian.zuolin.com/nar/equipmentInspection/inspectionOffLine/equipmentInspection-1-0-0.zip', 'http://10.1.10.196/nar/equipmentInspection/inspectionOffLine/equipmentInspection-1-0-0.zip', '物业巡检巡检离线', '0', '物业巡检', NOW(), NULL, '0');
-UPDATE eh_launch_pad_items
-SET action_data = '{\"realm\":\"equipmentInspection\",\"entryUrl\":\"http://10.1.10.88/equipment-inspection/dist/index.html?hideNavigationBar=1#sign_suffix\"}'
-WHERE item_label LIKE '%巡检%';
+-- offline  by jiarui
+SET  @id = (SELECT  MAX(id) from eh_version_realm);
+INSERT INTO `eh_version_realm` VALUES (@id:=@id+1, 'equipmentInspection', NULL, now(), '0');
 
+SET  @vId = (SELECT  MAX(id) from eh_version_urls);
+INSERT INTO `eh_version_urls` VALUES (@vId:=@vId+1, @id, '1.0.0', 'http://opv2-test.zuolin.com/nar/equipmentInspection/inspectionOffLine/equipmentInspection-1-0-0.zip', 'http://opv2-test.zuolin.com/nar/equipmentInspection/inspectionOffLine/equipmentInspection-1-0-0.zip', '物业巡检巡检离线', '0', '物业巡检', NOW(), NULL, '0');
+
+UPDATE eh_launch_pad_items
+SET action_data = '{\"realm\":\"equipmentInspection\",\"entryUrl\":\"http://opv2-test.zuolin.com/nar/equipmentInspection/dist/index.html?hideNavigationBar=1#sign_suffix\"}'
+WHERE item_label LIKE '%巡检%';
+-- offline  by jiarui
 
 UPDATE eh_launch_pad_items
 SET action_type = 44
