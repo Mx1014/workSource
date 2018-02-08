@@ -796,4 +796,21 @@ public class Rentalv2AdminController extends ControllerBase {
 		return response;
 	}
 
+	/**
+	 * <b>URL: /rental/admin/confirmRefund</b>
+	 * <p>
+	 * 确认退款
+	 * </p>
+	 */
+
+	@RequestMapping("confirmRefund")
+	@RestReturn(value = String.class)
+	public RestResponse confirmRefund( ConfirmRefundCommand cmd) {
+		rentalService.confirmRefund(cmd);
+		RestResponse response = new RestResponse();
+		response.setErrorCode(ErrorCodes.SUCCESS);
+		response.setErrorDescription("OK");
+		return response;
+	}
+
 }

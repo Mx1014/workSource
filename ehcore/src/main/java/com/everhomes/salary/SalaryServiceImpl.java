@@ -447,11 +447,12 @@ public class SalaryServiceImpl implements SalaryService {
         sg.setCreateTime(new Timestamp(DateHelper.currentGMTTime()
                 .getTime()));
         sg.setCreatorUid(UserContext.currentUserId());
-        sg.setCreatorName(findNameByOwnerAndUser(ownerId,sg.getCreatorUid()));
+        sg.setCreatorName(findNameByOwnerAndUser(ownerId, sg.getCreatorUid()));
 
         salaryGroupProvider.createSalaryGroup(sg);
 
     }
+
     public String findNameByOwnerAndUser(Long ownerId, Long uid) {
         if (null == uid) {
             return null;
@@ -539,8 +540,16 @@ public class SalaryServiceImpl implements SalaryService {
                         } catch (Exception e) {
                             LOGGER.error("salaryValue :{}不能转换为数字", dto.getSalaryValue());
                         }
+
+                        if (SalaryEntityType.DEDUCTION == SalaryEntityType.fromCode(dto.getType())) {
+                            //减
+                            categoryValue = categoryValue.subtract(entityVal);
+                        } else {
+                            //增
+                            categoryValue = categoryValue.add(entityVal);
+                        }
                     }
-                    categoryValue = categoryValue.add(entityVal);
+
                     categoryDTO.getEntities().add(dto);
                 }
             }
@@ -636,7 +645,10 @@ public class SalaryServiceImpl implements SalaryService {
             } else {
                 //// TODO: 2018/1/26  检验权限 是否有操作此用户的权限
                 SalaryEmployee employee = salaryEmployeeProvider.findSalaryEmployeeByDetailId(ownerId, detail.getId());
-                if (null != employee) {
+                if (null != employee && (employee.getRealPaySalary().compareTo(new BigDecimal(0)) != 0 ||
+                        employee.getShouldPaySalary().compareTo(new BigDecimal(0)) != 0 ||
+                        employee.getRealPaySalary().compareTo(new BigDecimal(0)) != 0)) {
+                    //原本employee 计算的实收,应收,实发等如果不是0 就说明是覆盖
                     coverNum++;
                 }
                 saveImportEmployeeSalary(organizationId, detail.getId(), response, r, ownerId);
@@ -754,8 +766,8 @@ public class SalaryServiceImpl implements SalaryService {
 //                        //减
 //                        shouldPay = shouldPay.subtract(value);
 //                    } else {
-                        //增
-                        shouldPay = shouldPay.add(value);
+                    //增
+                    shouldPay = shouldPay.add(value);
 //                    }
                 }
                 if (NormalFlag.NO == NormalFlag.fromCode(val.getGrantPolicy())) {
@@ -1023,12 +1035,17 @@ public class SalaryServiceImpl implements SalaryService {
 
         if (null != categories) {
             for (SalaryEntityCategory category : categories) {
-                Cell categoryCell = row.createCell(++i);
-                BigDecimal categorySum = new BigDecimal(0);
+                Cell categoryCell = null;
                 if (!category.getId().equals(SalaryConstants.CATEGORY_REDU)) {
-                    row.createCell(++i).setCellValue(category.getCategoryName() + "合计");
+                    //其他项不增加合计,其他的增加
+                    categoryCell = row.createCell(++i);
                 }
+                BigDecimal categorySum = new BigDecimal(0);
                 for (SalaryGroupEntity entity : groupEntities) {
+                    //category不对的直接跳过先
+                    if (!entity.getCategoryId().equals(category.getId())) {
+                        continue;
+                    }
                     SalaryEmployeeOriginVal val = null;
 
                     if (isFile == NormalFlag.NO) {
@@ -1041,22 +1058,32 @@ public class SalaryServiceImpl implements SalaryService {
                             val = ConvertHelper.convert(pval, SalaryEmployeeOriginVal.class);
                         }
                     }
+
+
                     if (val == null) {
-                        row.createCell(++i).setCellValue("0");
+                        row.createCell(++i).setCellValue("");
                         continue;
                     }
-                    if (entity.getCategoryId().equals(category.getId())) {
-                        row.createCell(++i).setCellValue(val.getSalaryValue());
-                        BigDecimal entityValue = new BigDecimal(0);
-                        try {
-                            entityValue = new BigDecimal(val.getSalaryValue());
-                        } catch (Exception e) {
+                    row.createCell(++i).setCellValue(val.getSalaryValue());
+                    BigDecimal entityValue = new BigDecimal(0);
+                    try {
+                        entityValue = new BigDecimal(val.getSalaryValue());
+                    } catch (Exception e) {
 
-                        }
-                        categorySum.add(entityValue);
                     }
+
+                    if (SalaryEntityType.DEDUCTION == SalaryEntityType.fromCode(entity.getType())) {
+                        //减
+                        categorySum = categorySum.subtract(entityValue);
+                    } else {
+                        //增
+                        categorySum = categorySum.add(entityValue);
+                    }
+
                 }
-                categoryCell.setCellValue(categorySum.toString());
+                if (null != categoryCell) {
+                    categoryCell.setCellValue(categorySum.toString());
+                }
             }
         }
         SalaryEmployee employee = null;
@@ -1093,7 +1120,6 @@ public class SalaryServiceImpl implements SalaryService {
         row.createCell(++i).setCellValue("部门");
         row.createCell(++i).setCellValue("身份证号");
         row.createCell(++i).setCellValue("工资卡号");
-        row.createCell(++i).setCellValue("在职离职状态");
         row.createCell(++i).setCellValue("在职离职状态");
 
         if (null != categories) {
@@ -1401,7 +1427,7 @@ public class SalaryServiceImpl implements SalaryService {
         SalaryGroupsFile sgf = ConvertHelper.convert(group, SalaryGroupsFile.class);
         sgf.setFileTime(filerTime);
         sgf.setFilerUid(userId);
-        sgf.setFilerName(findNameByOwnerAndUser(ownerId,userId));
+        sgf.setFilerName(findNameByOwnerAndUser(ownerId, userId));
 //        Organization organization = organizationProvider.findOrganizationById(ownerId);
 //        OrganizationMember member = punchService.findOrganizationMemberByOrgIdAndUId(userId, organization.getPath());
 //        if (null != member) {
@@ -1507,6 +1533,7 @@ public class SalaryServiceImpl implements SalaryService {
         if (null != lastMonth && lastMonth.getCostSalary() != null && lastMonth.getCostSalary().compareTo(new BigDecimal(0)) > 0) {
             statistic.setCostMomSalary(statistic.getCostSalary().subtract(lastMonth.getCostSalary()).divide(lastMonth.getCostSalary()).multiply(new BigDecimal(100)));
         }
+        LOGGER.debug("计算[{}]公司的汇总数据,人员列表[{}] ,结果[{}] ",dpt.getName(),StringHelper.toJsonString(detailIds), StringHelper.toJsonString(statistic));
         return statistic;
     }
 
