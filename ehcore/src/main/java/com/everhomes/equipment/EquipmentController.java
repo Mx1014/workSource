@@ -553,20 +553,6 @@ public class EquipmentController extends ControllerBase {
         return getRestResponse(items);
     }
 
-//    *
-//     * <b>URL: /equipment/statItemResultsInEquipmentTasks</b>
-//     * <p>按设备-标准统计任务的细项</p>
-//
-//    @RequestMapping("statItemResultsInEquipmentTasks")
-//    @RestReturn(value = StatItemResultsInEquipmentTasksResponse.class)
-//    public RestResponse statItemResultsInEquipmentTasks(StatItemResultsInEquipmentTasksCommand cmd) {
-//        StatItemResultsInEquipmentTasksResponse stat = equipmentService.statItemResultsInEquipmentTasks(cmd);
-//        RestResponse response = new RestResponse(stat);
-//        response.setErrorCode(ErrorCodes.SUCCESS);
-//        response.setErrorDescription("OK");
-//        return response;
-//    }
-
     /**
      * <b>URL: /equipment/reportEquipmentTask</b>
      * <p>任务上报</p>
@@ -999,7 +985,7 @@ public class EquipmentController extends ControllerBase {
      * <p>创建物业报修任务</p>
      */
     @RequestMapping("createRepairsTask")
-    @RestReturn(value = String.class)
+    @RestReturn(value = EquipmentTaskDTO.class)
     public RestResponse createRepairsTask(CreateEquipmentRepairCommand cmd) {
         equipmentService.createRepairsTask(cmd);
         return getSuccessResponse();
