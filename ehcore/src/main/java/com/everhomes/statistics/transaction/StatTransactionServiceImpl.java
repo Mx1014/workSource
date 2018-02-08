@@ -1989,7 +1989,7 @@ public class StatTransactionServiceImpl implements StatTransactionService{
 	     params.put("pageSize", pageSize);
 //	     params.put("pageAnchor", 1464157283126L);
 	     params.put("startTime", startDate.getTime());
-	     params.put("endTime", endDate.getTime() - 1);     
+	     params.put("endTime", endDate.getTime() - 1);
 	     return params;
 
 	}
