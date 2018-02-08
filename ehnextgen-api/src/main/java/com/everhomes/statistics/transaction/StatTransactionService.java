@@ -1,15 +1,10 @@
 package com.everhomes.statistics.transaction;
 
-import java.util.List;
+import com.everhomes.rest.business.BusinessDTO;
+import com.everhomes.rest.statistics.transaction.*;
 
 import javax.servlet.http.HttpServletResponse;
-
-import com.everhomes.rest.business.BusinessDTO;
-import com.everhomes.rest.statistics.transaction.ListStatServiceSettlementAmountsCommand;
-import com.everhomes.rest.statistics.transaction.ListStatShopTransactionsResponse;
-import com.everhomes.rest.statistics.transaction.ListStatTransactionCommand;
-import com.everhomes.rest.statistics.transaction.StatServiceSettlementResultDTO;
-import com.everhomes.rest.statistics.transaction.StatTaskLogDTO;
+import java.util.List;
 
 public interface StatTransactionService {
 
@@ -26,4 +21,8 @@ public interface StatTransactionService {
 	void exportStatShopTransactions(ListStatTransactionCommand cmd, HttpServletResponse response);
 	
 	List<BusinessDTO> listZuoLinBusinesses();
+
+    void syncPaidPlatformToStatTransaction(String date) throws Exception;
+
+    void syncNewPaidPlatformToStatTransaction(String date) throws Exception;
 }

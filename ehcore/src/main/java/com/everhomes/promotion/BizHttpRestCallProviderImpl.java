@@ -100,7 +100,8 @@ public class BizHttpRestCallProviderImpl implements BizHttpRestCallProvider {
         AsyncRestTemplate template = new AsyncRestTemplate();
         String url = getRestUri(cmd);
         HttpHeaders headers = new HttpHeaders();
-        headers.setContentType(MediaType.APPLICATION_JSON);
+        // headers.setContentType(new MediaType(MediaType.APPLICATION_JSON.toString(), ));
+        headers.add("Content-Type", "application/json;charset=utf-8");
 
         String appKey = configProvider.getValue(OpPromotionConstant.BIZ_APPKEY, "");
         String secretKey = configProvider.getValue(OpPromotionConstant.BIZ_SECRET_KEY, "");

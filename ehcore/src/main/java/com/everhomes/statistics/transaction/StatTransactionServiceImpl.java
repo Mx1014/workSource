@@ -1,67 +1,5 @@
 package com.everhomes.statistics.transaction;
 
-import java.io.ByteArrayOutputStream;
-import java.io.IOException;
-import java.math.BigDecimal;
-import java.net.URLEncoder;
-import java.sql.Timestamp;
-import java.util.ArrayList;
-import java.util.Calendar;
-import java.util.Date;
-import java.util.HashMap;
-import java.util.List;
-import java.util.Map;
-
-
-
-import java.util.stream.Collectors;
-
-import javax.annotation.PostConstruct;
-import javax.servlet.http.HttpServletResponse;
-
-
-import com.everhomes.namespace.Namespace;
-import org.apache.http.protocol.HTTP;
-import org.apache.poi.ss.usermodel.Font;
-import org.apache.poi.ss.util.CellRangeAddress;
-import org.apache.poi.xssf.usermodel.XSSFCell;
-import org.apache.poi.xssf.usermodel.XSSFCellStyle;
-import org.apache.poi.xssf.usermodel.XSSFRow;
-import org.apache.poi.xssf.usermodel.XSSFSheet;
-import org.apache.poi.xssf.usermodel.XSSFWorkbook;
-import org.jooq.Condition;
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
-import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.stereotype.Component;
-import org.springframework.transaction.TransactionStatus;
-import org.springframework.util.StringUtils;
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
 import com.everhomes.business.Business;
 import com.everhomes.business.BusinessProvider;
 import com.everhomes.business.BusinessService;
@@ -73,6 +11,7 @@ import com.everhomes.coordinator.CoordinationProvider;
 import com.everhomes.db.DbProvider;
 import com.everhomes.http.HttpUtils;
 import com.everhomes.listing.CrossShardListingLocator;
+import com.everhomes.namespace.Namespace;
 import com.everhomes.organization.pmsy.PmsyOrder;
 import com.everhomes.organization.pmsy.PmsyProvider;
 import com.everhomes.parking.ParkingProvider;
@@ -81,7 +20,7 @@ import com.everhomes.payment.PaymentCardProvider;
 import com.everhomes.payment.PaymentCardRechargeOrder;
 import com.everhomes.payment.PaymentCardTransaction;
 import com.everhomes.payment.util.DownloadUtil;
-import com.everhomes.rest.address.admin.ListBuildingByCommunityIdsCommand;
+import com.everhomes.promotion.BizHttpRestCallProvider;
 import com.everhomes.rest.business.BusinessDTO;
 import com.everhomes.rest.business.BusinessTargetType;
 import com.everhomes.rest.business.ListBusinessByKeywordCommand;
@@ -91,24 +30,7 @@ import com.everhomes.rest.payment.CardOrderStatus;
 import com.everhomes.rest.payment.CardTransactionStatus;
 import com.everhomes.rest.pmsy.PmsyOrderStatus;
 import com.everhomes.rest.pmsy.PmsyOwnerType;
-import com.everhomes.rest.statistics.transaction.ListStatServiceSettlementAmountsCommand;
-import com.everhomes.rest.statistics.transaction.ListStatShopTransactionsResponse;
-import com.everhomes.rest.statistics.transaction.ListStatTransactionCommand;
-import com.everhomes.rest.statistics.transaction.PaidChannel;
-import com.everhomes.rest.statistics.transaction.SettlementErrorCode;
-import com.everhomes.rest.statistics.transaction.SettlementOrderType;
-import com.everhomes.rest.statistics.transaction.SettlementResourceType;
-import com.everhomes.rest.statistics.transaction.SettlementServiceType;
-import com.everhomes.rest.statistics.transaction.SettlementStatOrderStatus;
-import com.everhomes.rest.statistics.transaction.SettlementStatTransactionPaidStatus;
-import com.everhomes.rest.statistics.transaction.StatPaidOrderStatus;
-import com.everhomes.rest.statistics.transaction.StatRefundOrderStatus;
-import com.everhomes.rest.statistics.transaction.StatServiceSettlementResultDTO;
-import com.everhomes.rest.statistics.transaction.StatTaskLock;
-import com.everhomes.rest.statistics.transaction.StatTaskLogDTO;
-import com.everhomes.rest.statistics.transaction.StatTaskStatus;
-import com.everhomes.rest.statistics.transaction.StatShopTransactionDTO;
-import com.everhomes.rest.statistics.transaction.StatWareDTO;
+import com.everhomes.rest.statistics.transaction.*;
 import com.everhomes.rest.user.IdentifierType;
 import com.everhomes.scheduler.ScheduleProvider;
 import com.everhomes.server.schema.Tables;
@@ -121,6 +43,28 @@ import com.everhomes.util.ConvertHelper;
 import com.everhomes.util.RuntimeErrorException;
 import com.everhomes.util.SignatureHelper;
 import com.everhomes.util.StringHelper;
+import org.apache.http.protocol.HTTP;
+import org.apache.poi.ss.usermodel.Font;
+import org.apache.poi.ss.util.CellRangeAddress;
+import org.apache.poi.xssf.usermodel.*;
+import org.jooq.Condition;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
+import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.http.ResponseEntity;
+import org.springframework.stereotype.Component;
+import org.springframework.transaction.TransactionStatus;
+import org.springframework.util.StringUtils;
+
+import javax.annotation.PostConstruct;
+import javax.servlet.http.HttpServletResponse;
+import java.io.ByteArrayOutputStream;
+import java.io.IOException;
+import java.math.BigDecimal;
+import java.net.URLEncoder;
+import java.sql.Timestamp;
+import java.util.*;
+import java.util.stream.Collectors;
 
 @Component
 public class StatTransactionServiceImpl implements StatTransactionService{
@@ -162,6 +106,9 @@ public class StatTransactionServiceImpl implements StatTransactionService{
 	
 	@Autowired
 	private BusinessService businessService;
+
+    @Autowired
+    private BizHttpRestCallProvider bizHttpRestCallProvider;
 	
 	@PostConstruct
 	public void setup(){
@@ -1435,12 +1382,13 @@ public class StatTransactionServiceImpl implements StatTransactionService{
 			break;
 		}
 	}
-	
+
 	/**
 	 * 同步支付平台交易流水到结算交易流水表
 	 * @param date
 	 */
-	private void syncPaidPlatformToStatTransaction(String date) throws Exception{
+	@Override
+	public void syncPaidPlatformToStatTransaction(String date) throws Exception{
 		String serverURL = configurationProvider.getValue(StatTransactionConstant.PAID_SERVER_URL, "");
 		if(StringUtils.isEmpty(serverURL)){
 			LOGGER.error("paid serverURL not configured, param = {}", StatTransactionConstant.PAID_SERVER_URL);
@@ -1507,7 +1455,65 @@ public class StatTransactionServiceImpl implements StatTransactionService{
 	        params.put("signature", URLEncoder.encode(signature,"UTF-8"));
 		}
 	}
-	
+
+	/**
+	 * 同步新支付平台交易流水到结算交易流水表
+	 */
+	@Override
+	public void syncNewPaidPlatformToStatTransaction(String date) throws Exception {
+	    Map<String, Object> body = new HashMap<>();
+		List<String> status = new ArrayList<String>();
+		status.add("success");
+		Map<String, Object> params = this.getParams(date);
+		String pageAnchor = null;
+		params.put("status", status);
+		String appKey = configurationProvider.getValue(StatTransactionConstant.PAID_APPKEY, "");
+        String secretKey = configurationProvider.getValue(StatTransactionConstant.PAID_SECRET_KEY, "");
+        params.put("appKey", appKey);
+        Map<String, String> mapForSignature = new HashMap<String, String>();
+        for(Map.Entry<String, Object> entry : params.entrySet()) {
+        	if(!entry.getKey().equals("status")) {
+				mapForSignature.put(entry.getKey(), entry.getValue().toString());
+			}
+        }
+        mapForSignature.put("status", org.apache.commons.lang.StringUtils.join(status, ","));
+        String signature = SignatureHelper.computeSignature(mapForSignature, secretKey);
+        params.put("signature", URLEncoder.encode(signature,"UTF-8"));
+
+        body.put("body", params);
+        while (true) {
+            ResponseEntity<String> responseEntity =
+                    bizHttpRestCallProvider.syncRestCall("/rest/openapi/payinfo/listPaidTransactions",
+                            StringHelper.toJsonString(body));
+
+            // String result = HttpUtils.postJson(url, StringHelper.toJsonString(params), 30, null);
+
+			ListPaidTransactionResponse response = (ListPaidTransactionResponse)
+                    StringHelper.fromJsonString(responseEntity.getBody(), ListPaidTransactionResponse.class);
+
+			this.checkErrorCode("/openapi/payinfo/listPaidTransactions",
+                    StringHelper.toJsonString(params), response.getErrorCode(), responseEntity.getBody());
+
+			if(null != response.getResponse()){
+				PaidTransactionResponse res = response.getResponse();
+				pageAnchor = res.getNextAnchor();
+				if(null != res.getList()){
+					// 批量添加支付流水
+					this.batchAddStatTransaction(res.getList());
+				}
+			}
+
+			if(StringUtils.isEmpty(pageAnchor)){
+				break;
+			}
+
+			params.put("pageAnchor", pageAnchor);
+			mapForSignature.put("pageAnchor", pageAnchor.toString());
+			signature = SignatureHelper.computeSignature(mapForSignature, secretKey);
+	        params.put("signature", URLEncoder.encode(signature,"UTF-8"));
+		}
+	}
+
 	private void batchAddStatTransaction(List<PaidTransaction> transactions){
 		for (PaidTransaction paidTransaction : transactions) {
 			StatTransaction statTransaction = new StatTransaction();
@@ -1997,7 +2003,7 @@ public class StatTransactionServiceImpl implements StatTransactionService{
 	}
 	
 	
-	public static void main(String[] args) {
+	/*public static void main(String[] args) {
 		String json = "{\"version\" : \"1\",\"response\" : {\"nextAnchor\" : \"1\",list:[{\"orderNo\" : \"1\"}]}}";
 		ListPaidOrderResponse response = (ListPaidOrderResponse)StringHelper.fromJsonString(json, ListPaidOrderResponse.class);
 		PaidOrderResponse res = response.getResponse();
@@ -2011,5 +2017,5 @@ public class StatTransactionServiceImpl implements StatTransactionService{
 			System.out.println(DateUtil.dateToStr(date, DateUtil.YMR_SLASH));
 
 		}
-	}
+	}*/
 }
