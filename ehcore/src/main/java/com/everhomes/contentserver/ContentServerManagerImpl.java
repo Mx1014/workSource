@@ -3,7 +3,6 @@ package com.everhomes.contentserver;
 import com.everhomes.configuration.ConfigurationProvider;
 import com.everhomes.constants.ErrorCodes;
 import com.everhomes.contentserver.urlvendor.ContentURLVendors;
-import com.everhomes.coordinator.CoordinationLocks;
 import com.everhomes.coordinator.CoordinationProvider;
 import com.everhomes.rest.contentserver.ContentServerErrorCode;
 import com.everhomes.rest.user.LoginToken;
@@ -93,7 +92,9 @@ public class ContentServerManagerImpl implements ContentServerMananger {
         uriParams.put("token", token);
 
         String uri = String.format("%s/%s", type, Generator.encodeUrl(resourceId));
-        return ContentURLVendors.evaluateURL(schemeInRequest, content.getPublicAddress(), port, uri, uriParams);
+        // 这里指定用Simple, 因为有些业务是把url直接存在数据库的,所以不能返回CDN链接
+        return ContentURLVendors.evaluateURL(schemeInRequest,
+                content.getPublicAddress(), port, uri, uriParams, "Simple");
 
         // boolean cdnOn = configurationProvider.getBooleanValue("content.cdn.on", true);
         // if (cdnOn) {
