@@ -7502,7 +7502,7 @@ public class Rentalv2ServiceImpl implements Rentalv2Service {
 
 		ResourceAttachmentDTO dto = new ResourceAttachmentDTO();
 		dto.setAttachments(convertAttachments(attachments));
-		return null;
+		return dto;
 	}
 
 	@Override
