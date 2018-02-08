@@ -7,6 +7,7 @@ import javax.validation.constraints.NotNull;
 import com.everhomes.discover.ItemType;
 import com.everhomes.rest.rentalv2.RentalV2ResourceType;
 import com.everhomes.rest.rentalv2.RuleSourceType;
+import com.everhomes.rest.rentalv2.SiteItemDTO;
 import com.everhomes.util.StringHelper;
 
 /**
@@ -39,6 +40,9 @@ import com.everhomes.util.StringHelper;
  * <li>priceRules: priceRules {@link com.everhomes.rest.rentalv2.admin.PriceRuleDTO}</li>
  * <li>pricePackages: pricePackages {@link com.everhomes.rest.rentalv2.admin.PricePackageDTO}</li>
  * <li>halfDayTimeIntervals: 半天时间设置 {@link com.everhomes.rest.rentalv2.admin.TimeIntervalDTO}</li>
+ * <li>refundStrategies: 退款规则{@link com.everhomes.rest.rentalv2.admin.RentalOrderRuleDTO}</li>
+ * <li>overtimeStrategies: 超时规则{@link com.everhomes.rest.rentalv2.admin.RentalOrderRuleDTO}</li>
+ * <li>siteItems: 付费物资</li>
  * </ul>
  */
 public class AddDefaultRuleAdminCommand {
@@ -121,6 +125,8 @@ public class AddDefaultRuleAdminCommand {
 	private List<RentalOrderRuleDTO> refundStrategies;
 	@ItemType(RentalOrderRuleDTO.class)
 	private List<RentalOrderRuleDTO> overtimeStrategies;
+	@ItemType(SiteItemDTO.class)
+	private List<SiteItemDTO> siteItems;
 
 	@Override
 	public String toString() {
@@ -365,5 +371,13 @@ public class AddDefaultRuleAdminCommand {
 
 	public void setHalfDayTimeIntervals(List<TimeIntervalDTO> halfDayTimeIntervals) {
 		this.halfDayTimeIntervals = halfDayTimeIntervals;
+	}
+
+	public List<SiteItemDTO> getSiteItems() {
+		return siteItems;
+	}
+
+	public void setSiteItems(List<SiteItemDTO> siteItems) {
+		this.siteItems = siteItems;
 	}
 }
