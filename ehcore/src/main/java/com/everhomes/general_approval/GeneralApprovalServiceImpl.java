@@ -30,6 +30,7 @@ import com.everhomes.rest.approval.TrueOrFalseFlag;
 import com.everhomes.rest.flow.*;
 import com.everhomes.rest.general_approval.*;
 import com.everhomes.rest.organization.OrganizationGroupType;
+import com.everhomes.rest.uniongroup.UniongroupTargetType;
 import com.everhomes.rest.user.UserInfo;
 import com.everhomes.settings.PaginationConfigHelper;
 import com.everhomes.techpark.punch.PunchService;
@@ -559,25 +560,22 @@ public class GeneralApprovalServiceImpl implements GeneralApprovalService {
 
     @Override
     public GeneralApprovalDTO createGeneralApproval(CreateGeneralApprovalCommand cmd) {
-        //
+
+        //  1.set the general approval
         GeneralApproval ga = ConvertHelper.convert(cmd, GeneralApproval.class);
-        ga.setNamespaceId(UserContext.getCurrentNamespaceId());
+        Integer namespaceId = UserContext.getCurrentNamespaceId();
+        ga.setNamespaceId(namespaceId);
         ga.setStatus(GeneralApprovalStatus.INVALID.getCode());
-        if (cmd.getApprovalAttribute() == null)
-            ga.setApprovalAttribute(GeneralApprovalAttribute.CUSTOMIZE.getCode());
-        if (cmd.getModifyFlag() == null)
-            ga.setModifyFlag(Byte.valueOf("1"));
-        if (cmd.getDeleteFlag() == null)
-            ga.setDeleteFlag(Byte.valueOf("1"));
         if (cmd.getIconUri() == null)
             ga.setIconUri("cs://1/image/aW1hZ2UvTVRvMU9EVTBNR1psWW1Kak1XSTNZalUwT0RVeVlUQXdOak0zWWpObE1ERmpZUQ");
-        // 新增加审批的时候可能并为设置 formId
-        // GeneralForm form =
-        // this.generalFormProvider.getActiveGeneralFormByOriginId(cmd
-        // .getFormOriginId());
-        // ga.setFormVersion(form.getFormVersion());// 目前这个值并没用到
 
-        this.generalApprovalProvider.createGeneralApproval(ga);
+        dbProvider.execute((TransactionStatus status) ->{
+            //  2.create it into the database
+            Long approvalId = generalApprovalProvider.createGeneralApproval(ga);
+            //  3.update the scope
+            updateGeneralApprovalScope(namespaceId, approvalId, cmd.getScopes());
+            return null;
+        });
 
         return processApproval(ga);
     }
@@ -586,15 +584,53 @@ public class GeneralApprovalServiceImpl implements GeneralApprovalService {
     public GeneralApprovalDTO updateGeneralApproval(UpdateGeneralApprovalCommand cmd) {
         GeneralApproval ga = this.generalApprovalProvider.getGeneralApprovalById(cmd
                 .getApprovalId());
-
+        if(ga == null)
+            return null;
+        ga.setApprovalName(cmd.getApprovalName());
+        ga.setApprovalRemark(cmd.getApprovalRemark());
         if (null != cmd.getSupportType())
             ga.setSupportType(cmd.getSupportType());
-/*        if (null != cmd.getFormOriginId())
-            ga.setFormOriginId(cmd.getFormOriginId());*/
-        if (null != cmd.getApprovalName())
-            ga.setApprovalName(cmd.getApprovalName());
+
         this.generalApprovalProvider.updateGeneralApproval(ga);
         return processApproval(ga);
+    }
+
+    private void updateGeneralApprovalScope(Integer namespaceId, Long approvalId, List<GeneralApprovalScopeMapDTO> dtos) {
+        //  1.set the temporary array to save ids
+        List<Long> detailIds = new ArrayList<>();
+        List<Long> organizationIds = new ArrayList<>();
+
+        if (dtos == null || dtos.size() <= 0)
+            return;
+
+        for(GeneralApprovalScopeMapDTO dto : dtos){
+            GeneralApprovalScopeMap scope = generalApprovalProvider.findGeneralApprovalScopeMap(namespaceId, approvalId,
+                    dto.getSourceId(), dto.getSourceType());
+
+            //  2.save ids under the sourceType condition
+            if(dto.getSourceType().equals(UniongroupTargetType.ORGANIZATION.getCode()))
+                organizationIds.add(dto.getSourceId());
+            else if(dto.getSourceType().equals(UniongroupTargetType.MEMBERDETAIL.getCode()))
+                detailIds.add(dto.getSourceId());
+
+            //  3.create or update the scope
+            if(scope != null){
+                scope.setSourceDescription(dto.getSourceDescription());
+                generalApprovalProvider.updateGeneralApprovalScopeMap(scope);
+            }else{
+                scope = new GeneralApprovalScopeMap();
+                scope.setApprovalId(approvalId);
+                scope.setNamespaceId(namespaceId);
+                scope.setSourceId(dto.getSourceId());
+                scope.setSourceType(dto.getSourceType());
+                scope.setSourceDescription(dto.getSourceDescription());
+                generalApprovalProvider.createGeneralApprovalScopeMap(scope);
+            }
+        }
+
+        //  4.delete the scope which is not in the array
+        generalApprovalProvider.deleteOddGeneralApprovalDetailScope(namespaceId, approvalId, detailIds);
+        generalApprovalProvider.deleteOddGeneralApprovalOraganizationScope(namespaceId, approvalId, organizationIds);
     }
 
     @Override

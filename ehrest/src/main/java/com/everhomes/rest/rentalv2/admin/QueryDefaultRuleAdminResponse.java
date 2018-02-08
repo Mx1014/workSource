@@ -3,6 +3,7 @@ package com.everhomes.rest.rentalv2.admin;
 import java.util.List;
 
 import com.everhomes.discover.ItemType;
+import com.everhomes.rest.rentalv2.SiteItemDTO;
 import com.everhomes.util.StringHelper;
 
 import javax.validation.constraints.NotNull;
@@ -49,6 +50,9 @@ import javax.validation.constraints.NotNull;
  * <li>rentalTypes: 时间单元类型列表 {@link com.everhomes.rest.rentalv2.RentalType}</li>
  * <li>priceRules: 价格策略列表 {@link com.everhomes.rest.rentalv2.admin.PriceRuleDTO}</li>
  * <li>pricePackages: 套餐价格表{@link com.everhomes.rest.rentalv2.admin.PricePackageDTO}</li>
+ * <li>refundStrategies: 退款规则{@link com.everhomes.rest.rentalv2.admin.RentalOrderRuleDTO}</li>
+ * <li>overtimeStrategies: 超时规则{@link com.everhomes.rest.rentalv2.admin.RentalOrderRuleDTO}</li>
+ * <li>siteItems: 付费物资</li>
  * </ul>
  */
 public class QueryDefaultRuleAdminResponse {
@@ -133,6 +137,15 @@ public class QueryDefaultRuleAdminResponse {
 
 	@ItemType(TimeIntervalDTO.class)
 	private List<TimeIntervalDTO> halfDayTimeIntervals;
+	private Byte refundStrategy;
+	private Byte overtimeStrategy;
+	@ItemType(RentalOrderRuleDTO.class)
+	private List<RentalOrderRuleDTO> refundStrategies;
+	@ItemType(RentalOrderRuleDTO.class)
+	private List<RentalOrderRuleDTO> overtimeStrategies;
+	@ItemType(SiteItemDTO.class)
+	private List<SiteItemDTO> siteItems;
+
 
 	@Override
     public String toString() {
@@ -329,5 +342,45 @@ public class QueryDefaultRuleAdminResponse {
 
 	public void setHalfDayTimeIntervals(List<TimeIntervalDTO> halfDayTimeIntervals) {
 		this.halfDayTimeIntervals = halfDayTimeIntervals;
+	}
+
+	public List<RentalOrderRuleDTO> getRefundStrategies() {
+		return refundStrategies;
+	}
+
+	public void setRefundStrategies(List<RentalOrderRuleDTO> refundStrategies) {
+		this.refundStrategies = refundStrategies;
+	}
+
+	public List<RentalOrderRuleDTO> getOvertimeStrategies() {
+		return overtimeStrategies;
+	}
+
+	public void setOvertimeStrategies(List<RentalOrderRuleDTO> overtimeStrategies) {
+		this.overtimeStrategies = overtimeStrategies;
+	}
+
+	public List<SiteItemDTO> getSiteItems() {
+		return siteItems;
+	}
+
+	public void setSiteItems(List<SiteItemDTO> siteItems) {
+		this.siteItems = siteItems;
+	}
+
+	public Byte getRefundStrategy() {
+		return refundStrategy;
+	}
+
+	public void setRefundStrategy(Byte refundStrategy) {
+		this.refundStrategy = refundStrategy;
+	}
+
+	public Byte getOvertimeStrategy() {
+		return overtimeStrategy;
+	}
+
+	public void setOvertimeStrategy(Byte overtimeStrategy) {
+		this.overtimeStrategy = overtimeStrategy;
 	}
 }
