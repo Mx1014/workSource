@@ -982,8 +982,8 @@ public class EquipmentProviderImpl implements EquipmentProvider {
     }
 
     @Override
-    public List<EquipmentInspectionTasks> listDelayTasks(Long inspectionCategoryId, List<Long> planIds, List<Long> standardIds,String targetType, Long targetId, Integer offset, Integer pageSize, Byte adminFlag, Timestamp startTime) {
-        List<EquipmentInspectionTasks> result = new ArrayList<>();
+    public List<EquipmentInspectionTasks> listDelayTasks(Long inspectionCategoryId, List<Long> standards, String targetType, Long targetId, Integer offset, Integer pageSize, Byte adminFlag, Timestamp startTime) {
+        List<EquipmentInspectionTasks> result = new ArrayList<EquipmentInspectionTasks>();
 
         DSLContext context = dbProvider.getDslContext(AccessSpec.readOnly());
         SelectQuery<EhEquipmentInspectionTasksRecord> query = context.selectQuery(Tables.EH_EQUIPMENT_INSPECTION_TASKS);
@@ -996,15 +996,14 @@ public class EquipmentProviderImpl implements EquipmentProvider {
         }
 
         if (AdminFlag.NO.equals(AdminFlag.fromStatus(adminFlag))) {
-            query.addConditions(Tables.EH_EQUIPMENT_INSPECTION_TASKS.PLAN_ID.in(planIds)
-                    .or(Tables.EH_EQUIPMENT_INSPECTION_TASKS.STANDARD_ID.in(standardIds)));
+            query.addConditions(Tables.EH_EQUIPMENT_INSPECTION_TASKS.STANDARD_ID.in(standards));
         }
 
         query.addConditions(Tables.EH_EQUIPMENT_INSPECTION_TASKS.EXECUTIVE_EXPIRE_TIME.ge(startTime));
         query.addOrderBy(Tables.EH_EQUIPMENT_INSPECTION_TASKS.EXECUTIVE_EXPIRE_TIME.desc());
-        query.addLimit(pageSize);
+//        query.addLimit(pageSize);
         //由于app端没做分页 去掉limit条件
-		query.addLimit(offset * (pageSize-1), pageSize);
+//		query.addLimit(offset * (pageSize-1), pageSize);
 
         if (LOGGER.isDebugEnabled()) {
             LOGGER.debug("Query tasks by count, sql=" + query.getSQL());
@@ -2491,19 +2490,13 @@ public class EquipmentProviderImpl implements EquipmentProvider {
     @Cacheable(value = "listEquipmentInspectionTasksUseCache", key = "{#cacheKey}", unless = "#result.size() == 0")
     @Override
     public List<EquipmentInspectionTasks> listEquipmentInspectionTasksUseCache(List<Byte> taskStatus, Long inspectionCategoryId,
-                                                                               List<String> targetType, List<Long> targetId, Map<String, List<Long>> executeAndReviewStandardPlanIds,
+                                                                               List<String> targetType, List<Long> targetId, List<Long> executeStandardIds, List<Long> reviewStandardIds,
                                                                                Integer offset, Integer pageSize, String cacheKey, Byte adminFlag,Timestamp lastSyncTime) {
         long startTime = System.currentTimeMillis();
-        List<Long> executeStandardIds = executeAndReviewStandardPlanIds.get("executeStandardIds");
-        List<Long> reviewStandardIds = executeAndReviewStandardPlanIds.get("reviewStandardIds");
-        List<Long> executePlanIds = executeAndReviewStandardPlanIds.get("executePlanIds");
-        List<Long> reviewPlanIds = executeAndReviewStandardPlanIds.get("reviewPlanIds");
-        List<EquipmentInspectionTasks> result = new ArrayList<>();
+        List<EquipmentInspectionTasks> result = new ArrayList<EquipmentInspectionTasks>();
         if (AdminFlag.NO.equals(AdminFlag.fromStatus(adminFlag))
-                && !(executeStandardIds != null && (executeStandardIds.size() != 0))
-                && !(reviewStandardIds != null && reviewStandardIds.size() != 0)
-                && !(executePlanIds != null && executePlanIds.size() != 0)
-                && !(reviewPlanIds != null && reviewPlanIds.size() != 0)) {
+                && (executeStandardIds == null || executeStandardIds.size() == 0)
+                && (reviewStandardIds == null || reviewStandardIds.size() == 0)) {
             return result;
         }
 
@@ -2523,43 +2516,21 @@ public class EquipmentProviderImpl implements EquipmentProvider {
 
 
         if (AdminFlag.YES.equals(AdminFlag.fromStatus(adminFlag))) {
-            Condition con1 = Tables.EH_EQUIPMENT_INSPECTION_TASKS.STATUS.ne(EquipmentTaskStatus.NONE.getCode());
-            query.addConditions(con1);
+            Condition con2 = Tables.EH_EQUIPMENT_INSPECTION_TASKS.STATUS.ne(EquipmentTaskStatus.NONE.getCode());
+            query.addConditions(con2);
         }
 
         Condition con = null;
-        if (AdminFlag.NO.equals(AdminFlag.fromStatus(adminFlag)) && (executePlanIds != null && executePlanIds.size() > 0)) {
-           Condition con2 = Tables.EH_EQUIPMENT_INSPECTION_TASKS.PLAN_ID.in(executePlanIds);
-
-            con2 = con2.and(Tables.EH_EQUIPMENT_INSPECTION_TASKS.STATUS.in(EquipmentTaskStatus.WAITING_FOR_EXECUTING.getCode(),
+        if (AdminFlag.NO.equals(AdminFlag.fromStatus(adminFlag)) && executeStandardIds != null && executeStandardIds.size() > 0) {
+            Condition con4 = Tables.EH_EQUIPMENT_INSPECTION_TASKS.PLAN_ID.in(executeStandardIds);
+            con4 = con4.and(Tables.EH_EQUIPMENT_INSPECTION_TASKS.STATUS.in(EquipmentTaskStatus.WAITING_FOR_EXECUTING.getCode(),
                     EquipmentTaskStatus.DELAY.getCode()));
-            con = con2;
-        }
-        if (AdminFlag.NO.equals(AdminFlag.fromStatus(adminFlag)) && (executeStandardIds != null && executeStandardIds.size() > 0)) {
-            Condition con3 = Tables.EH_EQUIPMENT_INSPECTION_TASKS.STANDARD_ID.in(executeStandardIds);
-
-            con3 = con3.and(Tables.EH_EQUIPMENT_INSPECTION_TASKS.STATUS.in(EquipmentTaskStatus.WAITING_FOR_EXECUTING.getCode(),
-                    EquipmentTaskStatus.DELAY.getCode()));
-            if (con == null) {
-                con = con3;
-            } else {
-                con = con.or(con3);
-            }
+            con = con4;
         }
 
-        if (AdminFlag.NO.equals(AdminFlag.fromStatus(adminFlag)) && (reviewPlanIds != null && reviewPlanIds.size() > 0)) {
-            Condition con3  = Tables.EH_EQUIPMENT_INSPECTION_TASKS.PLAN_ID.in(reviewPlanIds);
-            Condition con1 = Tables.EH_EQUIPMENT_INSPECTION_TASKS.STATUS.in(EquipmentTaskStatus.CLOSE.getCode(),
-                     EquipmentTaskStatus.REVIEW_DELAY.getCode());
-            con3 = con3.and(con1);
-            if (con == null) {
-                con = con3;
-            } else {
-                con = con.or(con3);
-            }
-        }
-        if (AdminFlag.NO.equals(AdminFlag.fromStatus(adminFlag)) && (reviewStandardIds != null && reviewStandardIds.size() > 0)) {
-            Condition con3  = Tables.EH_EQUIPMENT_INSPECTION_TASKS.STANDARD_ID.in(reviewStandardIds);
+        if (AdminFlag.NO.equals(AdminFlag.fromStatus(adminFlag)) && reviewStandardIds != null && reviewStandardIds.size() > 0) {
+            Condition con3 = Tables.EH_EQUIPMENT_INSPECTION_TASKS.PLAN_ID.in(reviewStandardIds);
+            //巡检完成关闭的任务
             Condition con1 = Tables.EH_EQUIPMENT_INSPECTION_TASKS.STATUS.in(EquipmentTaskStatus.CLOSE.getCode(),
                      EquipmentTaskStatus.REVIEW_DELAY.getCode());
             con3 = con3.and(con1);
@@ -3166,33 +3137,22 @@ public class EquipmentProviderImpl implements EquipmentProvider {
     }
 
     @Override
-    public void populateTodayTaskStatusCount(Map<String, List<Long>> executeAndReviewStandardPlanIds, Byte adminFlag,
+    public void populateTodayTaskStatusCount(List<Long> executePlanIds, List<Long> reviewPlanIds, Byte adminFlag,
                                              ListEquipmentTasksResponse response, ListingQueryBuilderCallback queryBuilderCallback) {
 
         DSLContext context = dbProvider.getDslContext(AccessSpec.readOnly());
         SelectQuery<Record> query = context.selectQuery();
 
+//        if (AdminFlag.YES.equals(AdminFlag.fromStatus(adminFlag))) {
+//            Condition con = Tables.EH_EQUIPMENT_INSPECTION_TASKS.STATUS.ne(EquipmentTaskStatus.NONE.getCode());
+//            query.addConditions(con);
+//        }
         queryBuilderCallback.buildCondition(null, query);
 
-        //兼容上一版 == 以后再删
-        List<Long> executeStandardIds = executeAndReviewStandardPlanIds.get("executeStandardIds");
-        List<Long> executePlanIds = executeAndReviewStandardPlanIds.get("executePlanIds");
-        if (AdminFlag.NO.equals(AdminFlag.fromStatus(adminFlag))
-                && !(executeStandardIds != null && (executeStandardIds.size() != 0))
-                && !(executePlanIds != null && executePlanIds.size() != 0)) {
-            return ;
-        }
-
         Condition con = null;
-        if (AdminFlag.NO.equals(AdminFlag.fromStatus(adminFlag))) {
-            Condition con4 = null;
-            if(executePlanIds!=null &&  executePlanIds.size()>0){
-                con4 = Tables.EH_EQUIPMENT_INSPECTION_TASKS.PLAN_ID.in(executePlanIds);
-            }
-            if(executeStandardIds!=null &&  executeStandardIds.size()>0){
-                con4 = Tables.EH_EQUIPMENT_INSPECTION_TASKS.STANDARD_ID.in(executePlanIds);
-            }
-            con4 = con4.or(Tables.EH_EQUIPMENT_INSPECTION_TASKS.STATUS.in(EquipmentTaskStatus.WAITING_FOR_EXECUTING.getCode(),
+        if (AdminFlag.NO.equals(AdminFlag.fromStatus(adminFlag)) && executePlanIds!=null &&  executePlanIds.size()>0) {
+            Condition con4 = Tables.EH_EQUIPMENT_INSPECTION_TASKS.PLAN_ID.in(executePlanIds);
+            con4 = con4.and(Tables.EH_EQUIPMENT_INSPECTION_TASKS.STATUS.in(EquipmentTaskStatus.WAITING_FOR_EXECUTING.getCode(),
                     EquipmentTaskStatus.DELAY.getCode()));
             con = con4;
         }
