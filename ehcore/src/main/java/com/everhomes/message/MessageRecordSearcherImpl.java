@@ -113,18 +113,30 @@ public class MessageRecordSearcherImpl extends AbstractElasticSearch implements 
             Map<String, Object> m = sd.getSource();
             MessageRecord record = new MessageRecord();
             record.setId(Long.valueOf(m.get("id").toString()));
-            record.setNamespaceId(Integer.valueOf(m.get("namespaceId").toString()));
-            record.setDstChannelToken(m.get("dstChannelToken").toString());
-            record.setDstChannelType(m.get("dstChannelType").toString());
-            record.setStatus(m.get("status").toString());
-            record.setAppId(Long.valueOf(m.get("appId").toString()));
-            record.setMessageSeq(Long.valueOf(m.get("messageSeq").toString()));
-            record.setSenderUid(Long.valueOf(m.get("senderUid").toString()));
-            record.setSenderTag(m.get("senderTag").toString());
-            record.setChannelsInfo(m.get("channelsInfo").toString());
-            record.setBodyType(m.get("bodyType").toString());
-            record.setBody(m.get("body").toString());
-            record.setDeliveryOption(Integer.valueOf(m.get("deliveryOption").toString()));
+            if(m.get("namespaceId") != null)
+                record.setNamespaceId(Integer.valueOf(m.get("namespaceId").toString()));
+            if(m.get("dstChannelToken") != null)
+                record.setDstChannelToken(m.get("dstChannelToken").toString());
+            if(m.get("dstChannelType") != null)
+                record.setDstChannelType(m.get("dstChannelType").toString());
+            if(m.get("status") != null)
+                record.setStatus(m.get("status").toString());
+            if(m.get("appId") != null)
+                record.setAppId(Long.valueOf(m.get("appId").toString()));
+            if(m.get("messageSeq") != null)
+                record.setMessageSeq(Long.valueOf(m.get("messageSeq").toString()));
+            if(m.get("senderUid") != null)
+                record.setSenderUid(Long.valueOf(m.get("senderUid").toString()));
+            if(m.get("senderTag") != null)
+                record.setSenderTag(m.get("senderTag").toString());
+            if(m.get("channelsInfo") != null)
+                record.setChannelsInfo(m.get("channelsInfo").toString());
+            if(m.get("bodyType") != null)
+                record.setBodyType(m.get("bodyType").toString());
+            if(m.get("body") != null)
+                record.setBody(m.get("body").toString());
+            if(m.get("deliveryOption") != null)
+                record.setDeliveryOption(Integer.valueOf(m.get("deliveryOption").toString()));
 
             SimpleDateFormat simpleDateFormat = new SimpleDateFormat("yyyy-MM-dd'T'HH:mm:ss.SSS'Z'");
             TimeZone utcZone = TimeZone.getTimeZone("UTC");
