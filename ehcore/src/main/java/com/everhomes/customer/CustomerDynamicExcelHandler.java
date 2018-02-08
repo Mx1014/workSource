@@ -118,6 +118,7 @@ public class CustomerDynamicExcelHandler implements DynamicExcelHandler {
                         CustomerTax tax = new CustomerTax();
                         tax.setCustomerId(customerId);
                         tax.setCustomerType(customerType);
+                        tax.setNamespaceId(namespaceId);
 
                         if(columns != null && columns.size() > 0) {
                             for(DynamicColumnDTO column : columns) {
@@ -144,7 +145,7 @@ public class CustomerDynamicExcelHandler implements DynamicExcelHandler {
                         CustomerAccount account = new CustomerAccount();
                         account.setCustomerId(customerId);
                         account.setCustomerType(customerType);
-
+                        account.setNamespaceId(namespaceId);
                         if(columns != null && columns.size() > 0) {
                             for(DynamicColumnDTO column : columns) {
                                 if("accountNumberTypeId".equals(column.getFieldName()) || "accountTypeId".equals(column.getFieldName())) {
@@ -170,6 +171,7 @@ public class CustomerDynamicExcelHandler implements DynamicExcelHandler {
                         CustomerTalent talent = new CustomerTalent();
                         talent.setCustomerId(customerId);
                         talent.setCustomerType(customerType);
+                        talent.setNamespaceId(namespaceId);
 
                         if(columns != null && columns.size() > 0) {
                             for(DynamicColumnDTO column : columns) {
@@ -199,6 +201,7 @@ public class CustomerDynamicExcelHandler implements DynamicExcelHandler {
                         CustomerTrademark trademark = new CustomerTrademark();
                         trademark.setCustomerId(customerId);
                         trademark.setCustomerType(customerType);
+                        trademark.setNamespaceId(namespaceId);
 
                         if(columns != null && columns.size() > 0) {
                             for(DynamicColumnDTO column : columns) {
@@ -225,6 +228,7 @@ public class CustomerDynamicExcelHandler implements DynamicExcelHandler {
                         CustomerApplyProject project = new CustomerApplyProject();
                         project.setCustomerId(customerId);
                         project.setCustomerType(customerType);
+                        project.setNamespaceId(namespaceId);
 
                         if(columns != null && columns.size() > 0) {
                             for(DynamicColumnDTO column : columns) {
@@ -272,6 +276,7 @@ public class CustomerDynamicExcelHandler implements DynamicExcelHandler {
                         CustomerCommercial commercial = new CustomerCommercial();
                         commercial.setCustomerId(customerId);
                         commercial.setCustomerType(customerType);
+                        commercial.setNamespaceId(namespaceId);
 
                         if(columns != null && columns.size() > 0) {
                             for(DynamicColumnDTO column : columns) {
@@ -299,6 +304,7 @@ public class CustomerDynamicExcelHandler implements DynamicExcelHandler {
                         CustomerInvestment investment = new CustomerInvestment();
                         investment.setCustomerId(customerId);
                         investment.setCustomerType(customerType);
+                        investment.setNamespaceId(namespaceId);
 
                         if(columns != null && columns.size() > 0) {
                             for(DynamicColumnDTO column : columns) {
@@ -319,18 +325,19 @@ public class CustomerDynamicExcelHandler implements DynamicExcelHandler {
                         CustomerEconomicIndicator indicator = new CustomerEconomicIndicator();
                         indicator.setCustomerId(customerId);
                         indicator.setCustomerType(customerType);
+                        indicator.setNamespaceId(namespaceId);
 
-                        if(columns != null && columns.size() > 0) {
-                            for(DynamicColumnDTO column : columns) {
-                                try {
-                                    setToObj(column.getFieldName(), indicator, column.getValue());
-                                } catch(Exception e){
-                                    LOGGER.warn("one row invoke set method for CustomerEconomicIndicator failed");
-                                    failedNumber ++;
+                            if(columns != null && columns.size() > 0) {
+                                for(DynamicColumnDTO column : columns) {
+                                    try {
+                                        setToObj(column.getFieldName(), indicator, column.getValue());
+                                    } catch(Exception e){
+                                        LOGGER.warn("one row invoke set method for CustomerEconomicIndicator failed");
+                                        failedNumber ++;
+                                    }
+
+                                    continue;
                                 }
-
-                                continue;
-                            }
                         }
 
                         customerProvider.createCustomerEconomicIndicator(indicator);
@@ -339,6 +346,7 @@ public class CustomerDynamicExcelHandler implements DynamicExcelHandler {
                         CustomerPatent patent = new CustomerPatent();
                         patent.setCustomerId(customerId);
                         patent.setCustomerType(customerType);
+                        patent.setNamespaceId(namespaceId);
 
                         if(columns != null && columns.size() > 0) {
                             for(DynamicColumnDTO column : columns) {
@@ -366,6 +374,7 @@ public class CustomerDynamicExcelHandler implements DynamicExcelHandler {
                         CustomerCertificate certificate = new CustomerCertificate();
                         certificate.setCustomerId(customerId);
                         certificate.setCustomerType(customerType);
+                        certificate.setNamespaceId(namespaceId);
 
                         if(columns != null && columns.size() > 0) {
                             for(DynamicColumnDTO column : columns) {
@@ -386,6 +395,7 @@ public class CustomerDynamicExcelHandler implements DynamicExcelHandler {
                         CustomerEntryInfo entryInfo = new CustomerEntryInfo();
                         entryInfo.setCustomerId(customerId);
                         entryInfo.setCustomerType(customerType);
+                        entryInfo.setNamespaceId(namespaceId);
 
                         if(columns != null && columns.size() > 0) {
                             for(DynamicColumnDTO column : columns) {
@@ -416,6 +426,7 @@ public class CustomerDynamicExcelHandler implements DynamicExcelHandler {
                         CustomerDepartureInfo departureInfo = new CustomerDepartureInfo();
                         departureInfo.setCustomerId(customerId);
                         departureInfo.setCustomerType(customerType);
+                        departureInfo.setNamespaceId(namespaceId);
 
                         if(columns != null && columns.size() > 0) {
                             for(DynamicColumnDTO column : columns) {
