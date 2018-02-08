@@ -202,6 +202,15 @@ public class PortalItemProviderImpl implements PortalItemProvider {
 				.fetch().map(r -> ConvertHelper.convert(r, PortalItem.class));
 	}
 
+	@Override
+	public List<PortalItem> listPortalItemsByVersionId(Long versionId) {
+		Condition cond = Tables.EH_PORTAL_ITEMS.STATUS.ne(PortalItemStatus.INACTIVE.getCode());
+			cond = cond.and(Tables.EH_PORTAL_ITEMS.VERSION_ID.eq(versionId));
+		return getReadOnlyContext().select().from(Tables.EH_PORTAL_ITEMS)
+				.where(cond)
+				.orderBy(Tables.EH_PORTAL_ITEMS.ID.asc())
+				.fetch().map(r -> ConvertHelper.convert(r, PortalItem.class));
+	}
 
 	@Override
 	public List<PortalItem> listPortalItems(CrossShardListingLocator locator, Integer pageSize, ListingQueryBuilderCallback queryBuilderCallback) {

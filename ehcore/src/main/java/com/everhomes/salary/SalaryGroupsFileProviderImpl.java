@@ -36,7 +36,7 @@ public class SalaryGroupsFileProviderImpl implements SalaryGroupsFileProvider {
         Long id = sequenceProvider.getNextSequence(NameMapper.getSequenceDomainFromTablePojo(EhSalaryGroupsFiles.class));
         salaryGroupsFile.setId(id);
         salaryGroupsFile.setCreateTime(new Timestamp(DateHelper.currentGMTTime().getTime()));
-        salaryGroupsFile.setCreatorUid(UserContext.currentUserId());
+//        salaryGroupsFile.setCreatorUid(UserContext.currentUserId());
 //		salaryGroupsFile.setUpdateTime(salaryGroupsFile.getCreateTime());
 //		salaryGroupsFile.setOperatorUid(salaryGroupsFile.getCreatorUid());
         getReadWriteDao().insert(salaryGroupsFile);

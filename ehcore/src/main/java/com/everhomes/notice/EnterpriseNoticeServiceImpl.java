@@ -288,6 +288,7 @@ public class EnterpriseNoticeServiceImpl implements EnterpriseNoticeService {
         metaObject.setUrl(url);
         Map<String, String> meta = new HashMap<>();
         meta.put(MessageMetaConstant.META_OBJECT_TYPE, MetaObjectType.MESSAGE_ROUTER.getCode());
+        meta.put(MessageMetaConstant.MESSAGE_SUBJECT, "公告");
         meta.put(MessageMetaConstant.META_OBJECT, StringHelper.toJsonString(metaObject));
         message.setMeta(meta);
         //  send the message

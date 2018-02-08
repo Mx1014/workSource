@@ -94,6 +94,8 @@ public interface SocialSecurityService {
 
 	GetSocialSecurityReportsHeadResponse getSocialSecurityReportsHead(GetSocialSecurityReportsHeadCommand cmd);
 
+	String findNameByOwnerAndUser(Long ownerId, Long creatorUid);
+
 	List<SocialSecurityEmployeeDTO> listSocialSecurityEmployees(ListSocialSecurityPaymentsCommand cmd);
 
 	SocialSecurityEmployeeDTO getSocialSecurityEmployeeInfo(Long detailId);

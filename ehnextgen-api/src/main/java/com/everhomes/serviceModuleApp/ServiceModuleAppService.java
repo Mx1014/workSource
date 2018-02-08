@@ -13,9 +13,15 @@ public interface ServiceModuleAppService {
 
 	List<ServiceModuleApp> listReleaseServiceModuleAppsByOriginIds(Integer namespaceId, List<Long> originIds);
 
-	List<ServiceModuleApp> listServiceModuleAppByModuleIds(Integer namespaceId, List<Long> moduleIds);
+	List<ServiceModuleApp> listReleaseServiceModuleAppByModuleIds(Integer namespaceId, List<Long> moduleIds);
 
 	List<ServiceModuleApp> listServiceModuleApp(Integer namespaceId, Long versionId, Long moduleId, Byte actionType, String customTag, String controlType);
 
 	List<ServiceModuleApp> listReleaseServiceModuleApp(Integer namespaceId, Long moduleId, Byte actionType, String customTag, String controlType);
+
+	List<Long> listReleaseServiceModuleIdsByNamespace(Integer namespaceId);
+
+	List<Long> listReleaseServiceModuleIdsWithParentByNamespace(Integer namespaceId);
+
+	ServiceModuleApp findReleaseServiceModuleAppByOriginId(Long originId);
 }

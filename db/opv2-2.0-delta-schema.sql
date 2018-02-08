@@ -121,6 +121,10 @@ CREATE TABLE `eh_equipment_inspection_equipment_logs` (
   PRIMARY KEY (`id`)
 ) ENGINE=INNODB DEFAULT CHARSET=utf8mb4;
 
+--   设备增加经纬度字符串  by jiarui
+ALTER TABLE `eh_equipment_inspection_equipments`
+  ADD COLUMN `coordinate`  VARCHAR(1024) NULL AFTER `geohash`;
+-- 设备增加经纬度字符串  by jiarui
 
 -- eh_equipment_inspection_tasks 增加plan_id字段 用于关联task和equipments
 ALTER TABLE `eh_equipment_inspection_tasks`
@@ -801,7 +805,7 @@ CREATE TABLE `eh_salary_default_entities` (
   `tax_policy` TINYINT COMMENT '纳税策略:0-工资 1-年终',
   `category_id` BIGINT COMMENT '标签(薪酬结构) category表pk',
   `category_name` VARCHAR(64) COMMENT '标签(统计分类)名称 example:固定工资,浮动工资,津补贴',
-  `name` VARCHAR(32), 
+  `name` VARCHAR(64), 
   `description` TEXT COMMENT '说明文字',
   `template_name` VARCHAR(32) COMMENT '',
   `default_order` INT,
@@ -852,7 +856,7 @@ CREATE TABLE `eh_salary_group_entities` (
   `tax_policy` TINYINT COMMENT '纳税策略:0-工资 1-年终',
   `category_id` BIGINT COMMENT '标签(薪酬结构) category表pk',
   `category_name` VARCHAR(64) COMMENT '标签(统计分类)名称 example:固定工资,浮动工资,津补贴',
-  `name` VARCHAR(32), 
+  `name` VARCHAR(64), 
   `description` TEXT COMMENT '说明文字',
   `creator_uid` BIGINT,
   `create_time` DATETIME, 
@@ -874,7 +878,7 @@ CREATE TABLE `eh_salary_employee_origin_vals` (
   `user_id` BIGINT ,
   `user_detail_id` BIGINT , 
   `group_entity_id` BIGINT COMMENT '标签(统计分类) salary group entity表pk', 
-  `group_entity_name` VARCHAR(32),
+  `group_entity_name` VARCHAR(64),
   `type` TINYINT COMMENT '字段类型:0-发放项;1-扣款项;2-成本项;3-冗余项',
   `data_policy` TINYINT COMMENT '数据策略:0-次月延用 1-次月清空',
   `grant_policy` TINYINT COMMENT '发放策略:0-税前 1-税后',
@@ -1005,7 +1009,7 @@ CREATE TABLE `eh_salary_employee_period_vals` (
   `user_detail_id` BIGINT , 
   `salary_employee_id` BIGINT COMMENT '标签(统计分类) salary_employee表pk', 
   `group_entity_id` BIGINT COMMENT '标签(统计分类) salary group entity表pk', 
-  `group_entity_name` VARCHAR(32),
+  `group_entity_name` VARCHAR(64),
   `type` TINYINT COMMENT '字段类型:0-发放项;1-扣款项;2-成本项;3-冗余项',
   `data_policy` TINYINT COMMENT '数据策略:0-次月延用 1-次月清空',
   `grant_policy` TINYINT COMMENT '发放策略:0-税前 1-税后',
@@ -1163,6 +1167,23 @@ CREATE TABLE `eh_social_security_settings` (
   KEY `i_eh_organization_id` (`organization_id`)
 ) ENGINE = INNODB DEFAULT CHARSET = utf8mb4 ;
 
+-- 社保组表 存新建报表的人和归档的人
+-- DROP TABLE eh_social_security_groups;
+CREATE TABLE `eh_social_security_groups` (
+  `id` BIGINT, 
+  `organization_id` BIGINT, 
+  `pay_month` VARCHAR (8) DEFAULT NULL COMMENT 'yyyymm',
+  `is_filed` TINYINT DEFAULT 0 COMMENT '是否归档 0-否 1是',
+  `creator_uid` BIGINT  DEFAULT '0',
+  `create_time` DATETIME,
+  `operator_uid` BIGINT,
+  `update_time` DATETIME,
+  `file_uid` BIGINT (20) COMMENT '归档人',
+  `file_time` DATETIME COMMENT '归档时间',
+  PRIMARY KEY (`id`),
+  KEY `i_eh_organization_id` (`organization_id`)
+) ENGINE = INNODB DEFAULT CHARSET = utf8mb4 ;
+
 -- 社保缴费表
 -- DROP TABLE eh_social_security_payments;
 CREATE TABLE `eh_social_security_payments` (
@@ -1243,6 +1264,7 @@ CREATE TABLE `eh_social_security_summary` (
   `create_time` DATETIME,
   `operator_uid` BIGINT,
   `update_time` DATETIME,
+  `is_filed` TINYINT DEFAULT 0 COMMENT '是否归档 0-否 1是',
   `file_uid` BIGINT (20) COMMENT '归档人',
   `file_time` DATETIME COMMENT '归档时间',
   PRIMARY KEY (`id`), 
@@ -1299,6 +1321,7 @@ CREATE TABLE `eh_social_security_department_summary` (
   `create_time` DATETIME,
   `operator_uid` BIGINT,
   `update_time` DATETIME,
+  `is_filed` TINYINT DEFAULT 0 COMMENT '是否归档 0-否 1是',
   `file_uid` BIGINT (20) COMMENT '归档人',
   `file_time` DATETIME COMMENT '归档时间',
   PRIMARY KEY (`id`),
@@ -1402,6 +1425,7 @@ CREATE TABLE `eh_social_security_report` (
   `create_time` DATETIME,
   `operator_uid` BIGINT,
   `update_time` DATETIME,
+  `is_filed` TINYINT DEFAULT 0 COMMENT '是否归档 0-否 1是',
   `file_uid` BIGINT (20) COMMENT '归档人',
   `file_time` DATETIME COMMENT '归档时间',
   PRIMARY KEY (`id`),
@@ -1446,6 +1470,7 @@ CREATE TABLE `eh_social_security_inout_report` (
   `create_time` DATETIME,
   `operator_uid` BIGINT,
   `update_time` DATETIME,
+  `is_filed` TINYINT DEFAULT 0 COMMENT '是否归档 0-否 1是',
   `file_uid` BIGINT (20) COMMENT '归档人',
   `file_time` DATETIME COMMENT '归档时间',
   PRIMARY KEY (`id`),

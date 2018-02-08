@@ -8,14 +8,14 @@ import com.everhomes.util.StringHelper;
  */
 
 public class OfflineTaskCountStat {
-    private String id ;
+    private Long id ;
     private Long count;
 
-    public String getId() {
+    public Long getId() {
         return id;
     }
 
-    public void setId(String id) {
+    public void setId(Long id) {
         this.id = id;
     }
 

@@ -5,6 +5,7 @@ import com.everhomes.db.AccessSpec;
 import com.everhomes.db.DaoAction;
 import com.everhomes.db.DaoHelper;
 import com.everhomes.db.DbProvider;
+import com.everhomes.module.ServiceModule;
 import com.everhomes.module.ServiceModuleProvider;
 import com.everhomes.naming.NameMapper;
 import com.everhomes.portal.PortalVersion;
@@ -16,6 +17,7 @@ import com.everhomes.server.schema.Tables;
 import com.everhomes.server.schema.tables.daos.EhServiceModuleAppsDao;
 import com.everhomes.server.schema.tables.pojos.EhServiceModuleApps;
 import com.everhomes.server.schema.tables.records.EhServiceModuleAppsRecord;
+import com.everhomes.user.UserContext;
 import com.everhomes.util.ConvertHelper;
 import com.everhomes.util.DateHelper;
 import org.jooq.*;
@@ -26,7 +28,10 @@ import org.springframework.stereotype.Component;
 
 import java.sql.Timestamp;
 import java.util.ArrayList;
+import java.util.HashSet;
 import java.util.List;
+import java.util.Set;
+import java.util.stream.Collectors;
 
 @Component
 public class ServiceModuleAppServiceImpl implements ServiceModuleAppService {
@@ -73,13 +78,13 @@ public class ServiceModuleAppServiceImpl implements ServiceModuleAppService {
 
 		PortalVersion releaseVersion = portalVersionProvider.findReleaseVersion(namespaceId);
 
-		List<ServiceModuleApp> moduleApps = serviceModuleAppProvider.listServiceModuleAppsByVersionIdAndOriginIds(releaseVersion.getId(), originIds);
+		List<ServiceModuleApp> moduleApps = serviceModuleAppProvider.listServiceModuleAppsByOriginIds(releaseVersion.getId(), originIds);
 
 		return moduleApps;
 	}
 
 	@Override
-	public List<ServiceModuleApp> listServiceModuleAppByModuleIds(Integer namespaceId, List<Long> moduleIds){
+	public List<ServiceModuleApp> listReleaseServiceModuleAppByModuleIds(Integer namespaceId, List<Long> moduleIds){
 		PortalVersion releaseVersion = portalVersionProvider.findReleaseVersion(namespaceId);
 
 		List<ServiceModuleApp> apps = new ArrayList<>();
@@ -102,9 +107,58 @@ public class ServiceModuleAppServiceImpl implements ServiceModuleAppService {
 		PortalVersion releaseVersion = portalVersionProvider.findReleaseVersion(namespaceId);
 		List<ServiceModuleApp> apps = new ArrayList<>();
 		if(releaseVersion != null){
-			apps = listServiceModuleApp(namespaceId, releaseVersion.getId(), moduleId, actionType, customTag, controlType);
+			apps = listServiceModuleApp(namespaceId, releaseVersion.getId(), moduleId, actionType, customTag , controlType);
 		}
 
 		return apps;
 	}
+
+    @Override
+    public List<Long> listReleaseServiceModuleIdsByNamespace(Integer namespaceId) {
+		List<Long> moduleIds = new ArrayList<>();
+		List<ServiceModuleApp> apps = listReleaseServiceModuleApps(namespaceId);
+
+		if(apps != null && apps.size() > 0){
+			Set<Long> set = apps.stream().map(r -> r.getModuleId()).collect(Collectors.toSet());
+			moduleIds = new ArrayList<>(set);
+		}
+		return moduleIds;
+    }
+
+	@Override
+	public List<Long> listReleaseServiceModuleIdsWithParentByNamespace(Integer namespaceId) {
+		List<Long> moduleIds = listReleaseServiceModuleIdsByNamespace(namespaceId);
+		List<ServiceModule> modules = this.serviceModuleProvider.listServiceModule(moduleIds);
+		Set<Long> process_moduleIds = new HashSet<>();
+		modules.stream().map(r -> {
+			String[] ids = r.getPath().split("/");
+			for (String id : ids) {
+				if(!id.equals(""))
+					process_moduleIds.add(Long.valueOf(id));
+			}
+			return null;
+		}).collect(Collectors.toList());
+
+		return new ArrayList<>(process_moduleIds);
+	}
+
+	@Override
+	public ServiceModuleApp findReleaseServiceModuleAppByOriginId(Long originId) {
+
+		List<ServiceModuleApp> serviceModuleApps = serviceModuleAppProvider.listServiceModuleAppByOriginId(originId);
+		if(serviceModuleApps != null && serviceModuleApps.size()> 0){
+
+			PortalVersion releaseVersion = portalVersionProvider.findReleaseVersion(serviceModuleApps.get(0).getNamespaceId());
+
+			for (ServiceModuleApp app: serviceModuleApps){
+				if(releaseVersion.getId().longValue() == app.getVersionId().longValue()){
+					return app;
+				}
+			}
+
+		}
+
+		return null;
+	}
+
 }

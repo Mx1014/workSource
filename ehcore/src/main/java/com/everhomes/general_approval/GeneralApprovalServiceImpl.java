@@ -239,15 +239,11 @@ public class GeneralApprovalServiceImpl implements GeneralApprovalService {
             cmd21.setCurrentOrganizationId(cmd.getOrganizationId());
             cmd21.setTitle(ga.getApprovalName());
 
-
-            //  存储更多的信息 added by approval1.6
+            /*****************  存储更多的信息 start by nan.rong for approval-1.6  *****************/
             GeneralApprovalFlowCaseAdditionalFieldDTO fieldDTO = new GeneralApprovalFlowCaseAdditionalFieldDTO();
-            List<OrganizationMember> member = organizationProvider.listOrganizationMembersByUId(user.getId());
-            member = member.stream().filter(r -> {
-                return OrganizationGroupType.DEPARTMENT.getCode().equals(r.getGroupType());
-            }).collect(Collectors.toList());
-            if (member != null && member.size() > 0) {
-                Organization department = organizationProvider.findOrganizationById(member.get(0).getOrganizationId());
+            OrganizationMember member = organizationProvider.findDepartmentMemberByTargetIdAndOrgId(user.getId(), cmd.getOrganizationId());
+            if (member != null ) {
+                Organization department = organizationProvider.findOrganizationById(member.getOrganizationId());
                 //  存储部门 id 及名称
                 fieldDTO.setDepartment(department.getName());
                 fieldDTO.setDepartmentId(department.getId());
@@ -270,8 +266,9 @@ public class GeneralApprovalServiceImpl implements GeneralApprovalService {
             approvalNo += count;
             op.increment(countKey, 1L);
             fieldDTO.setApprovalNo(Long.valueOf(approvalNo));
-            cmd21.setAdditionalFieldDTO(fieldDTO);
+            /*****************  存储更多的信息 end by nan.rong for approval-1.6  *****************/
 
+            cmd21.setAdditionalFieldDTO(fieldDTO);
             ServiceAllianceCategories category = yellowPageProvider.findCategoryById(ga.getModuleId());
             if (category != null) {
                 cmd21.setServiceType(category.getName());
@@ -592,12 +589,17 @@ public class GeneralApprovalServiceImpl implements GeneralApprovalService {
 
         if (null != cmd.getSupportType())
             ga.setSupportType(cmd.getSupportType());
-        if (null != cmd.getFormOriginId())
-            ga.setFormOriginId(cmd.getFormOriginId());
+/*        if (null != cmd.getFormOriginId())
+            ga.setFormOriginId(cmd.getFormOriginId());*/
         if (null != cmd.getApprovalName())
             ga.setApprovalName(cmd.getApprovalName());
         this.generalApprovalProvider.updateGeneralApproval(ga);
         return processApproval(ga);
+    }
+
+    @Override
+    public GeneralApprovalDTO setGeneralApprovalForm(SetGeneralApprovalFormCommand cmd){
+        return null;
     }
 
     @Override
@@ -881,6 +883,7 @@ public class GeneralApprovalServiceImpl implements GeneralApprovalService {
     @Override
     public ListGeneralApprovalRecordsResponse listGeneralApprovalRecords(ListGeneralApprovalRecordsCommand cmd) {
         ListGeneralApprovalRecordsResponse response = new ListGeneralApprovalRecordsResponse();
+        List<GeneralApprovalRecordDTO> results = new ArrayList<>();
         ListingLocator locator = new ListingLocator();
         SearchFlowCaseCommand command = new SearchFlowCaseCommand();
 
@@ -916,16 +919,13 @@ public class GeneralApprovalServiceImpl implements GeneralApprovalService {
         });
 
         if (details != null && details.size() > 0) {
-
-            if (details.size() > count)
-                details.remove(details.size() - 1);
-            List<GeneralApprovalRecordDTO> results = details.stream().map(r -> {
+            results = details.stream().map(r -> {
                 GeneralApprovalRecordDTO dto = convertGeneralApprovalRecordDTO(r);
                 return dto;
             }).collect(Collectors.toList());
-            response.setRecords(results);
-            response.setNextPageAnchor(locator.getAnchor());
         }
+        response.setRecords(results);
+        response.setNextPageAnchor(locator.getAnchor());
         return response;
     }
 
@@ -1125,5 +1125,15 @@ public class GeneralApprovalServiceImpl implements GeneralApprovalService {
     @Override
     public void disableApprovalByFormOriginId(Long formOriginId, Long moduleId, String moduleType){
         generalApprovalProvider.disableApprovalByFormOriginId(formOriginId, moduleId, moduleType);
+    }
+
+    @Override
+    public void orderGeneralApprovals(OrderGeneralApprovalsCommand cmd){
+
+    }
+
+    @Override
+    public ListGeneralApprovalResponse listAvailableGeneralApprovals(ListGeneralApprovalCommand cmd){
+        return null;
     }
 }

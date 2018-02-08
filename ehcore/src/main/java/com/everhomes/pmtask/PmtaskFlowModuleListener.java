@@ -441,6 +441,9 @@ public class PmtaskFlowModuleListener implements FlowModuleListener {
 		FlowGraphNode currentNode = ctx.getCurrentNode();
 		FlowNode flowNode = currentNode.getFlowNode();
 		FlowCase flowCase = ctx.getFlowCase();
+		FlowCaseTree tree = flowService.getProcessingFlowCaseTree(flowCase.getId());
+		flowCase = tree.getLeafNodes().get(0).getFlowCase();//获取真正正在进行的flowcase
+		flowNode = ctx.getFlowGraph().getGraphNode(flowCase.getCurrentNodeId()).getFlowNode();
 
 		String stepType = ctx.getStepType().getCode();
 		String params = flowNode.getParams();
@@ -528,6 +531,7 @@ public class PmtaskFlowModuleListener implements FlowModuleListener {
 			if ("MOTIFYFEE".equals(nodeType)) {
 				FlowGraphEvent evt = ctx.getCurrentEvent();
 				if (FlowUserType.APPLIER.equals(evt.getUserType())){
+					LOGGER.info("nextStep:"+JSONObject.toJSONString(flowCase));
 					FlowAutoStepDTO dto = new FlowAutoStepDTO();
 					dto.setAutoStepType(FlowStepType.APPROVE_STEP.getCode());
 					dto.setFlowCaseId(flowCase.getId());
@@ -636,7 +640,7 @@ public class PmtaskFlowModuleListener implements FlowModuleListener {
 		}
 		return apps.stream().map(c -> {
 			FlowServiceTypeDTO dto = new FlowServiceTypeDTO();
-			dto.setId(c.getId());
+			dto.setId(c.getOriginId());
 			dto.setNamespaceId(namespaceId);
 			dto.setServiceName(c.getName());
 			return dto;

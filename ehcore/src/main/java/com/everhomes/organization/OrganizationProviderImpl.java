@@ -5933,7 +5933,7 @@ public class OrganizationProviderImpl implements OrganizationProvider {
         Condition condition = Tables.EH_ORGANIZATION_MEMBERS.TARGET_ID.eq(userId)
                 .and(Tables.EH_ORGANIZATION_MEMBERS.GROUP_PATH.like("/" + organizationId + "%"))
                 .and(Tables.EH_ORGANIZATION_MEMBERS.STATUS.eq(OrganizationMemberStatus.ACTIVE.getCode()))
-                .and(Tables.EH_ORGANIZATION_MEMBERS.GROUP_TYPE.eq(OrganizationGroupType.DEPARTMENT.getCode()));
+                .and(Tables.EH_ORGANIZATION_MEMBERS.GROUP_TYPE.eq(OrganizationGroupType.DEPARTMENT.getCode()).or(Tables.EH_ORGANIZATION_MEMBERS.GROUP_TYPE.eq(OrganizationGroupType.DIRECT_UNDER_ENTERPRISE.getCode())));
 
         Record r = context.select().from(Tables.EH_ORGANIZATION_MEMBERS).where(condition).fetchOne();
 
@@ -6204,7 +6204,20 @@ public class OrganizationProviderImpl implements OrganizationProvider {
 		return list;
 	}
 
-	@Override
+    @Override
+    public Organization findOrganizationByName(String groupType, String name, Long directlyEnterpriseId) {
+        DSLContext context = this.dbProvider.getDslContext(AccessSpec.readOnly());
+        Record r = context.select().from(Tables.EH_ORGANIZATIONS).where(Tables.EH_ORGANIZATIONS.NAME.eq(name))
+                .and(Tables.EH_ORGANIZATIONS.DIRECTLY_ENTERPRISE_ID.eq(directlyEnterpriseId))
+                .and(Tables.EH_ORGANIZATIONS.GROUP_TYPE.eq(groupType))
+                .and(Tables.EH_ORGANIZATIONS.STATUS.eq(OrganizationStatus.ACTIVE.getCode()))
+                .fetchAny();
+        if (r != null)
+            return ConvertHelper.convert(r, Organization.class);
+        return null;
+    }
+
+    @Override
 	public Integer countUserOrganization(Integer namespaceId, Long communityId) {
 		 return countUserOrganization(namespaceId, communityId, null, null, null);
 	}

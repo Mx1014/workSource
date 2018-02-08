@@ -142,7 +142,7 @@ public class QuestionnaireServiceImpl implements QuestionnaireService {
 	private void checkListQuestionnairesCommand(ListQuestionnairesCommand cmd) {
 		checkQuestionnaireStatus(cmd.getStatus());
 		checkQuestionnaireCollectFlag(cmd.getCollectFlag());
-		checkQuestionnaireTargetType(cmd.getTargetType());
+//		checkQuestionnaireTargetType(cmd.getTargetType());
 		cmd.setNowTime(new Timestamp(System.currentTimeMillis()));
 	}
 
@@ -993,7 +993,7 @@ public class QuestionnaireServiceImpl implements QuestionnaireService {
 	}
 
 	private void checkListTargetQuestionnairesCommand(ListTargetQuestionnairesCommand cmd) {
-		checkQuestionnaireTargetType(cmd.getTargetType());
+//		checkQuestionnaireTargetType(cmd.getTargetType());
 		checkQuestionnaireCollectFlag(cmd.getCollectFlag());
 		if(cmd.getPageAnchor()!=null){
 			String value = String.valueOf(cmd.getPageAnchor());
