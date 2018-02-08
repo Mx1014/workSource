@@ -1885,6 +1885,7 @@ public class SocialSecurityServiceImpl implements SocialSecurityService {
                         report.setDisabilitySum(userPayment.getCompanyRadix());
 //                        report.setDisabilitySum(calculateAmount(userPayment.getCompanyRadix(), userPayment.getCompanyRatio())
 //                                .add(calculateAmount(userPayment.getEmployeeRadix(), userPayment.getEmployeeRatio(), report.getDisabilitySum())));
+                        break;
                     case BUSINESS:
                         report.setCommercialInsurance(userPayment.getCompanyRadix());
 //                        report.setCommercialInsurance(calculateAmount(userPayment.getCompanyRadix(), userPayment.getCompanyRatio())

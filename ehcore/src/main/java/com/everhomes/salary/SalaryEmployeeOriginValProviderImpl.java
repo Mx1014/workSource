@@ -37,12 +37,12 @@ public class SalaryEmployeeOriginValProviderImpl implements SalaryEmployeeOrigin
 
 	@Override
 	public void createSalaryEmployeeOriginVal(SalaryEmployeeOriginVal salaryEmployeeOriginVal) {
-		User user = UserContext.current().getUser();
+//		User user = UserContext.current().getUser();
 		Long id = sequenceProvider.getNextSequence(NameMapper.getSequenceDomainFromTablePojo(EhSalaryEmployeeOriginVals.class));
 		salaryEmployeeOriginVal.setId(id);
 		salaryEmployeeOriginVal.setCreateTime(new Timestamp(DateHelper.currentGMTTime().getTime()));
-		salaryEmployeeOriginVal.setCreatorUid(user.getId());
-		salaryEmployeeOriginVal.setNamespaceId(user.getNamespaceId());
+//		salaryEmployeeOriginVal.setCreatorUid(user.getId());
+//		salaryEmployeeOriginVal.setNamespaceId(user.getNamespaceId());
 		getReadWriteDao().insert(salaryEmployeeOriginVal);
 		DaoHelper.publishDaoAction(DaoAction.CREATE, EhSalaryEmployeeOriginVals.class, null);
 	}
@@ -123,6 +123,13 @@ public class SalaryEmployeeOriginValProviderImpl implements SalaryEmployeeOrigin
 				.where(Tables.EH_SALARY_EMPLOYEE_ORIGIN_VALS.OWNER_ID.eq(ownerId))
 				.and(Tables.EH_SALARY_EMPLOYEE_ORIGIN_VALS.DATA_POLICY.eq(NormalFlag.NO.getCode()))
 				.and(Tables.EH_SALARY_EMPLOYEE_ORIGIN_VALS.TYPE.eq(SalaryEntityType.REDUN.getCode())).execute();
+	}
+
+	@Override
+	public void deleteSalaryEmployeeOriginValById(Long id) {
+		getReadWriteDao().deleteById(id);
+		DaoHelper.publishDaoAction(DaoAction.MODIFY, EhSalaryEmployeeOriginVals.class, id);
+
 	}
 //
 //	@Override
