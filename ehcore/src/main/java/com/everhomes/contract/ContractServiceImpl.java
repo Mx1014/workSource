@@ -561,6 +561,7 @@ public class ContractServiceImpl implements ContractService {
 		}
 
 		Contract contract = ConvertHelper.convert(cmd, Contract.class);
+		contract.setPaymentFlag((byte)0);
 		if(cmd.getContractNumber() != null) {
 			checkContractNumberUnique(cmd.getNamespaceId(), cmd.getContractNumber());
 		} else {
@@ -1218,6 +1219,7 @@ public class ContractServiceImpl implements ContractService {
 		if(ContractStatus.WAITING_FOR_APPROVAL.equals(ContractStatus.fromStatus(contract.getStatus()))) {
 			addToFlowCase(contract, flowcaseContractOwnerType);
 		}
+
 		contractSearcher.feedDoc(contract);
 		ExecutorUtil.submit(new Runnable() {
 			@Override
