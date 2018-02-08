@@ -3442,15 +3442,15 @@ private void checkUserPrivilege(Long orgId, Long privilegeId, Long communityId) 
 						cmd.getTargetId(), offset, pageSize, AdminFlag.YES.getCode(), startTime);
 		}
 		if(!isAdmin) {
-			List<Long> standards = new ArrayList<>();
+			List<Long> planIds = new ArrayList<>();
 			List<ExecuteGroupAndPosition> groupDtos = listUserRelateGroups();
-			List<EquipmentInspectionStandardGroupMap> maps = equipmentProvider.listEquipmentInspectionStandardGroupMapByGroupAndPosition(groupDtos, null);
+			List<EquipmentInspectionPlanGroupMap> maps = equipmentProvider.listEquipmentInspectionPlanGroupMapByGroupAndPosition(groupDtos, null);
 			if (maps != null && maps.size() > 0) {
-				for (EquipmentInspectionStandardGroupMap r : maps) {
-						standards.add(r.getStandardId());
+				for (EquipmentInspectionPlanGroupMap r : maps) {
+                    planIds.add(r.getPlanId());
 				}
 			}
-			tasks = equipmentProvider.listDelayTasks(cmd.getInspectionCategoryId(), standards, cmd.getTargetType(),
+			tasks = equipmentProvider.listDelayTasks(cmd.getInspectionCategoryId(), planIds, cmd.getTargetType(),
 						cmd.getTargetId(), offset, pageSize, AdminFlag.NO.getCode(), startTime);
 		}
 
@@ -3514,8 +3514,8 @@ private void checkUserPrivilege(Long orgId, Long privilegeId, Long communityId) 
 		List<EquipmentInspectionTasks> allTasks = null;
 		if(isAdmin) {
 			String cacheKey = convertListEquipmentInspectionTasksCache(cmd.getTaskStatus(), cmd.getInspectionCategoryId(),
-					targetTypes, targetIds, null, null, offset, 0L);
-			LOGGER.info("listEquipmentInspectionTasks is  Admin  cacheKey = {}" + cacheKey);
+                    targetTypes, targetIds, null, null, offset, pageSize, 0L);
+            LOGGER.info("listEquipmentInspectionTasks is  Admin  cacheKey = {}" + cacheKey);
 			allTasks = equipmentProvider.listEquipmentInspectionTasksUseCache(cmd.getTaskStatus(), cmd.getInspectionCategoryId(),
 					targetTypes, targetIds, null, null, offset, pageSize + 1, cacheKey, AdminFlag.YES.getCode(),lastSyncTime);
 
@@ -3551,7 +3551,7 @@ private void checkUserPrivilege(Long orgId, Long privilegeId, Long communityId) 
 			}
 
 			String cacheKey = convertListEquipmentInspectionTasksCache(cmd.getTaskStatus(), cmd.getInspectionCategoryId(), targetTypes, targetIds,
-					executePlanIds, reviewPlanIds, offset, userId);
+					executePlanIds, reviewPlanIds, offset, pageSize,userId);
 			LOGGER.info("listEquipmentInspectionTasks is not Admin  cacheKey = {}" + cacheKey);
 			allTasks = equipmentProvider.listEquipmentInspectionTasksUseCache(cmd.getTaskStatus(), cmd.getInspectionCategoryId(),
 					targetTypes, targetIds, executePlanIds, reviewPlanIds, offset, pageSize + 1, cacheKey, AdminFlag.NO.getCode(),lastSyncTime);
@@ -3616,7 +3616,7 @@ private void checkUserPrivilege(Long orgId, Long privilegeId, Long communityId) 
 
 
 	private String convertListEquipmentInspectionTasksCache(List<Byte> taskStatus, Long inspectionCategoryId,List<String> targetType, List<Long> targetId,
-				List<Long> executeStandardIds, List<Long> reviewStandardIds, Integer offset, Long userId) {
+				List<Long> executeStandardIds, List<Long> reviewStandardIds, Integer offset,Integer pageSize, Long userId) {
 
 		StringBuilder sb = new StringBuilder();
 		if(inspectionCategoryId == null) {
@@ -3633,7 +3633,8 @@ private void checkUserPrivilege(Long orgId, Long privilegeId, Long communityId) 
 		sb.append(inspectionCategoryId);
 		sb.append("-");
 		sb.append(offset);
-		sb.append("-");
+        sb.append(pageSize);
+        sb.append("-");
 		if(executeStandardIds == null) {
 			sb.append("all");
 		} else {
