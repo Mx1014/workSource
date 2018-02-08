@@ -6204,7 +6204,20 @@ public class OrganizationProviderImpl implements OrganizationProvider {
 		return list;
 	}
 
-	@Override
+    @Override
+    public Organization findOrganizationByName(String groupType, String name, Long directlyEnterpriseId) {
+        DSLContext context = this.dbProvider.getDslContext(AccessSpec.readOnly());
+        Record r = context.select().from(Tables.EH_ORGANIZATIONS).where(Tables.EH_ORGANIZATIONS.NAME.eq(name))
+                .and(Tables.EH_ORGANIZATIONS.DIRECTLY_ENTERPRISE_ID.eq(directlyEnterpriseId))
+                .and(Tables.EH_ORGANIZATIONS.GROUP_TYPE.eq(groupType))
+                .and(Tables.EH_ORGANIZATIONS.STATUS.eq(OrganizationStatus.ACTIVE.getCode()))
+                .fetchAny();
+        if (r != null)
+            return ConvertHelper.convert(r, Organization.class);
+        return null;
+    }
+
+    @Override
 	public Integer countUserOrganization(Integer namespaceId, Long communityId) {
 		 return countUserOrganization(namespaceId, communityId, null, null, null);
 	}

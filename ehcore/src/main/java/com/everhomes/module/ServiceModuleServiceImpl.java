@@ -180,8 +180,10 @@ public class ServiceModuleServiceImpl implements ServiceModuleService {
 
     private ServiceModuleDTO processServiceModuleDTO(ServiceModule module){
         ServiceModuleDTO dto = ConvertHelper.convert(module, ServiceModuleDTO.class);
-        dto.setCreateTime(module.getCreateTime().getTime());
-        dto.setUpdateTime(module.getUpdateTime().getTime());
+        if(module.getCreateTime() != null)
+            dto.setCreateTime(module.getCreateTime().getTime());
+        if(module.getUpdateTime() != null)
+            dto.setUpdateTime(module.getUpdateTime().getTime());
         User operator = userProvider.findUserById(module.getOperatorUid());
         if(null != operator) dto.setOperatorUName(operator.getNickName());
         return dto;
