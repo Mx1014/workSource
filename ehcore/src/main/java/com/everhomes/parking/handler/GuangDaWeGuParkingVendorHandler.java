@@ -205,7 +205,7 @@ public class GuangDaWeGuParkingVendorHandler extends DefaultParkingVendorHandler
 
 		TreeMap<String,String> params = new TreeMap();
 		params.put("plateNumber", order.getPlateNumber());
-		SimpleDateFormat format = new SimpleDateFormat("yyyy-MM-dd");
+		SimpleDateFormat format = new SimpleDateFormat("yyyy-MM-dd HH:mm:ss");
 		params.put("timeFrom", format.format(order.getStartPeriod()));
 		params.put("timeTo", format.format(Utils.addSecond(System.currentTimeMillis(),60*order.getDelayTime())));
 		params.put("paid", order.getPrice().multiply(new BigDecimal(100)).intValue()+"");//单位 分
@@ -227,13 +227,18 @@ public class GuangDaWeGuParkingVendorHandler extends DefaultParkingVendorHandler
 
 		if (isMonthCard(entity)) {
 			Long newStartTime = generateMaxStartEndTime(entity.getData(), null);
-			if(newStartTime==null) {
-				newStartTime = System.currentTimeMillis();
+
+			ParkingLot parkingLot = parkingProvider.findParkingLotById(order.getParkingLotId());
+			Byte isSupportRecharge = parkingLot.getExpiredRechargeFlag();
+			if(ParkingConfigFlag.SUPPORT.getCode() == isSupportRecharge){
+				if(newStartTime==null || newStartTime<System.currentTimeMillis()) {
+					newStartTime = System.currentTimeMillis();
+				}
 			}
 
 			TreeMap<String,String> params = new TreeMap();
 			params.put("plateNumber", order.getPlateNumber());
-			SimpleDateFormat format = new SimpleDateFormat("yyyy-MM-dd");
+			SimpleDateFormat format = new SimpleDateFormat("yyyy-MM-dd HH:mm:ss");
 			params.put("begin", format.format(new Date(newStartTime)));
 			Long newEndTime = Utils.getLongByAddNatureMonth(newStartTime, order.getMonthCount().intValue());
 			params.put("end", format.format(new Date(newEndTime)));
