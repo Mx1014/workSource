@@ -225,6 +225,7 @@ import com.everhomes.user.User;
 import com.everhomes.user.UserContext;
 import com.everhomes.user.UserPrivilegeMgr;
 import com.everhomes.user.UserProvider;
+import com.everhomes.user.UserService;
 import com.everhomes.util.ConvertHelper;
 import com.everhomes.util.DateHelper;
 import com.everhomes.util.DownloadUtils;
@@ -398,6 +399,9 @@ public class EquipmentServiceImpl implements EquipmentService {
 
 	@Autowired
 	private PmTaskService pmTaskService;
+
+	@Autowired
+	private UserService userService;
 
 	@Override
 	public EquipmentStandardsDTO updateEquipmentStandard(UpdateEquipmentStandardCommand cmd) {
@@ -6066,8 +6070,11 @@ private void checkUserPrivilege(Long orgId, Long privilegeId, Long communityId) 
 			return logs.stream().map((r) -> {
 						EquipmentOperateLogsDTO logsDTO = ConvertHelper.convert(r, EquipmentOperateLogsDTO.class);
 						List<OrganizationMember> member = organizationProvider.listOrganizationMembersByUId(r.getOperatorUid());
-						if (member != null && member.size() > 0)
+						if (member != null && member.size() > 0){
 							logsDTO.setOperatorName(member.get(0).getContactName());
+						}else {
+							logsDTO.setOperatorName(userService.getUserInfo(r.getOperatorUid()).getNickName());
+						}
 						return logsDTO;
 					}
 			).collect(Collectors.toList());
