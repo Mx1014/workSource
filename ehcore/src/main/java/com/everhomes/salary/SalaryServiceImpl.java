@@ -1035,11 +1035,12 @@ public class SalaryServiceImpl implements SalaryService {
 
         if (null != categories) {
             for (SalaryEntityCategory category : categories) {
-                Cell categoryCell = row.createCell(++i);
-                BigDecimal categorySum = new BigDecimal(0);
+                Cell categoryCell = null;
                 if (!category.getId().equals(SalaryConstants.CATEGORY_REDU)) {
-                    row.createCell(++i).setCellValue(category.getCategoryName() + "合计");
+                    //其他项不增加合计,其他的增加
+                    categoryCell = row.createCell(++i);
                 }
+                BigDecimal categorySum = new BigDecimal(0);
                 for (SalaryGroupEntity entity : groupEntities) {
                     //category不对的直接跳过先
                     if (!entity.getCategoryId().equals(category.getId())) {
@@ -1060,7 +1061,7 @@ public class SalaryServiceImpl implements SalaryService {
 
 
                     if (val == null) {
-                        row.createCell(++i).setCellValue("0");
+                        row.createCell(++i).setCellValue("");
                         continue;
                     }
                     row.createCell(++i).setCellValue(val.getSalaryValue());
@@ -1070,10 +1071,19 @@ public class SalaryServiceImpl implements SalaryService {
                     } catch (Exception e) {
 
                     }
-                    categorySum.add(entityValue);
+
+                    if (SalaryEntityType.DEDUCTION == SalaryEntityType.fromCode(entity.getType())) {
+                        //减
+                        categorySum = categorySum.subtract(entityValue);
+                    } else {
+                        //增
+                        categorySum = categorySum.add(entityValue);
+                    }
 
                 }
-                categoryCell.setCellValue(categorySum.toString());
+                if (null != categoryCell) {
+                    categoryCell.setCellValue(categorySum.toString());
+                }
             }
         }
         SalaryEmployee employee = null;
