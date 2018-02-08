@@ -17,6 +17,7 @@ import com.everhomes.rest.parking.*;
 import com.everhomes.util.ConvertHelper;
 import com.everhomes.util.RuntimeErrorException;
 import com.everhomes.util.StringHelper;
+import com.everhomes.util.Tuple;
 import org.jooq.util.derby.sys.Sys;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -61,8 +62,15 @@ public class GuangDaWeGuParkingVendorHandler extends DefaultParkingVendorHandler
 
 			// 格式yyyyMMddHHmmss
 			generateMaxStartEndTime(entity.getData(),parkingCardDTO);
-			if(parkingCardDTO.getEndTime()!=null)
-				setCardStatus(parkingLot, parkingCardDTO.getEndTime(), parkingCardDTO);// 这里设置过期可用，正常可用
+			if(parkingCardDTO.getEndTime()==null){
+				boolean sptNullEtime = configProvider.getBooleanValue("parking.guangdawegu.sptNullEtime", false);
+				if(sptNullEtime){
+					parkingCardDTO.setEndTime(System.currentTimeMillis());
+				}else {
+					return resultList;
+				}
+			}
+			setCardStatus(parkingLot, parkingCardDTO.getEndTime(), parkingCardDTO);// 这里设置过期可用，正常可用
 
 			parkingCardDTO.setOwnerType(parkingLot.getOwnerType());
 			parkingCardDTO.setOwnerId(parkingLot.getOwnerId());
@@ -79,7 +87,14 @@ public class GuangDaWeGuParkingVendorHandler extends DefaultParkingVendorHandler
 		return resultList;
 	}
 
-	private Long generateMaxStartEndTime(GuangDaWeGuData data,ParkingCardDTO parkingCardDTO) {
+	/**
+	 *
+	 * @param data
+	 * @param parkingCardDTO
+	 * @return
+	 * 			tuple<starttime,endTime></starttime,endTime>
+	 */
+	private Tuple<Long,Long> generateMaxStartEndTime(GuangDaWeGuData data, ParkingCardDTO parkingCardDTO) {
 		if(data.getEnd1() == null && data.getEnd2() == null){
 			return null;
 		}
@@ -88,27 +103,27 @@ public class GuangDaWeGuParkingVendorHandler extends DefaultParkingVendorHandler
 				parkingCardDTO.setEndTime(data.getEnd2());
 				parkingCardDTO.setStartTime(data.getBegin2());
 			}
-			return data.getEnd2();
+			return new Tuple<>(data.getBegin2(),data.getEnd2());
 		}
 		if(data.getEnd2() == null){
 			if(parkingCardDTO!=null) {
 				parkingCardDTO.setEndTime(data.getEnd1());
 				parkingCardDTO.setStartTime(data.getBegin1());
 			}
-			return data.getEnd1();
+			return new Tuple<>(data.getBegin1(),data.getEnd1());
 		}
 		if(data.getEnd2()>data.getEnd1()){
 			if(parkingCardDTO!=null) {
 				parkingCardDTO.setEndTime(data.getEnd2());
 				parkingCardDTO.setStartTime(data.getBegin2());
 			}
-			return data.getEnd2();
+			return new Tuple<>(data.getBegin2(),data.getEnd2());
 		}else{
 			if(parkingCardDTO!=null) {
 				parkingCardDTO.setEndTime(data.getEnd1());
 				parkingCardDTO.setStartTime(data.getBegin1());
 			}
-			return data.getEnd1();
+			return new Tuple<>(data.getBegin1(),data.getEnd1());
 		}
 	}
 
@@ -150,7 +165,7 @@ public class GuangDaWeGuParkingVendorHandler extends DefaultParkingVendorHandler
 	@Override
 	public List<ParkingRechargeRateDTO> getParkingRechargeRates(ParkingLot parkingLot, String plateNumber,
 			String cardNo) {
-		String month = configProvider.getValue("parking.guangdawegu.monthcardnums","1");
+		String month = configProvider.getValue("parking.guangdawegu.monthcardnums","1,3,6");
 		List<Integer> monthCounts = new ArrayList<>();
 		monthCounts.add(1);
 		try {
@@ -166,7 +181,9 @@ public class GuangDaWeGuParkingVendorHandler extends DefaultParkingVendorHandler
 			params.put("monthCount", count+"");
 			String result = post(CARD_GET_PAY_INFO,params);
 			GuangDaWeGuResponse<Double> entity = JSONObject.parseObject(result, new TypeReference<GuangDaWeGuResponse<Double>>() {});
-			rechargeRateDTOS.add(populaterate(entity.getData(),count,parkingLot));
+			if(entity.isSuccess()) {
+				rechargeRateDTOS.add(populaterate(entity.getData(), count, parkingLot));
+			}
 		}
 		return rechargeRateDTOS;
 
@@ -203,7 +220,7 @@ public class GuangDaWeGuParkingVendorHandler extends DefaultParkingVendorHandler
 
 		TreeMap<String,String> params = new TreeMap();
 		params.put("plateNumber", order.getPlateNumber());
-		SimpleDateFormat format = new SimpleDateFormat("yyyy-MM-dd");
+		SimpleDateFormat format = new SimpleDateFormat("yyyy-MM-dd HH:mm:ss");
 		params.put("timeFrom", format.format(order.getStartPeriod()));
 		params.put("timeTo", format.format(Utils.addSecond(System.currentTimeMillis(),60*order.getDelayTime())));
 		params.put("paid", order.getPrice().multiply(new BigDecimal(100)).intValue()+"");//单位 分
@@ -224,18 +241,39 @@ public class GuangDaWeGuParkingVendorHandler extends DefaultParkingVendorHandler
 		GuangDaWeGuResponse<GuangDaWeGuData> entity = getCardInfo(order.getPlateNumber());
 
 		if (isMonthCard(entity)) {
-			Long newStartTime = generateMaxStartEndTime(entity.getData(), null);
-			if(newStartTime==null) {
-				newStartTime = System.currentTimeMillis();
+			Tuple<Long, Long> peridTuple = generateMaxStartEndTime(entity.getData(), null);
+			Long first,second;
+
+			if(peridTuple == null){
+				//支持对方月卡没有时间返回
+				boolean sptNullEtime = configProvider.getBooleanValue("parking.guangdawegu.sptNullEtime", false);
+				if(sptNullEtime){
+					first = System.currentTimeMillis();
+					second = first;
+				}else{
+					LOGGER.info("not sport null end time, peridTuple is null.");
+					return false;
+				}
+			}else{
+				first = peridTuple.first();
+				second = peridTuple.second();
+			}
+
+			ParkingLot parkingLot = parkingProvider.findParkingLotById(order.getParkingLotId());
+			Byte isSupportRecharge = parkingLot.getExpiredRechargeFlag();
+			if(ParkingConfigFlag.SUPPORT.getCode() == isSupportRecharge){//支持过期缴费
+				if(second<System.currentTimeMillis()) {
+					second = System.currentTimeMillis();
+				}
 			}
 
 			TreeMap<String,String> params = new TreeMap();
 			params.put("plateNumber", order.getPlateNumber());
-			SimpleDateFormat format = new SimpleDateFormat("yyyy-MM-dd");
-			params.put("begin", format.format(new Date(newStartTime)));
-			Long newEndTime = Utils.getLongByAddNatureMonth(newStartTime, order.getMonthCount().intValue());
+			SimpleDateFormat format = new SimpleDateFormat("yyyy-MM-dd HH:mm:ss");
+			params.put("begin", format.format(new Date(first)));
+			Long newEndTime = Utils.getLongByAddNatureMonth(second+1000, order.getMonthCount().intValue());
 			params.put("end", format.format(new Date(newEndTime)));
-			params.put("paid", order.getOriginalPrice().multiply(new BigDecimal(100)).intValue()+"");//单位是分
+			params.put("paid", order.getPrice().multiply(new BigDecimal(100)).intValue()+"");//单位是分
 
 			String result = post(CARD_PAY_CARD,params);
 			order.setErrorDescription(result); //data 缴费记录号 存储
@@ -243,7 +281,7 @@ public class GuangDaWeGuParkingVendorHandler extends DefaultParkingVendorHandler
 			GuangDaWeGuResponse<Integer> response = JSONObject.parseObject(result, new TypeReference<GuangDaWeGuResponse<Integer>>() {});
 
 			if(response.isSuccess()){
-				order.setStartPeriod(new Timestamp(newStartTime));
+				order.setStartPeriod(new Timestamp(second));
 				order.setEndPeriod(new Timestamp(newEndTime));
 				return true;
 			}

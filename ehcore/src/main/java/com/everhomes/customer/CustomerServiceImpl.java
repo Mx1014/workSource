@@ -16,30 +16,39 @@ import java.util.stream.Collectors;
 import com.everhomes.address.Address;
 import com.everhomes.address.AddressProvider;
 import com.everhomes.bootstrap.PlatformContext;
-import com.everhomes.community.Building;
-import com.everhomes.contract.ContractService;
 import com.everhomes.openapi.ZjSyncdataBackupProvider;
+
+import com.everhomes.dynamicExcel.DynamicExcelService;
+import com.everhomes.dynamicExcel.DynamicExcelStrings;
+
 import com.everhomes.organization.*;
 import com.everhomes.organization.pm.CommunityAddressMapping;
 import com.everhomes.organization.pm.PropertyMgrProvider;
 import com.everhomes.portal.PortalService;
 import com.everhomes.rest.acl.PrivilegeConstants;
-import com.everhomes.rest.acl.PrivilegeServiceErrorCode;
+
 import com.everhomes.rest.common.ServiceModuleConstants;
 import com.everhomes.rest.common.SyncDataResponse;
 import com.everhomes.rest.contract.ContractStatus;
 import com.everhomes.rest.customer.*;
+import com.everhomes.rest.field.ExportFieldsExcelCommand;
 import com.everhomes.rest.launchpad.ActionType;
 import com.everhomes.rest.openapi.shenzhou.DataType;
 import com.everhomes.rest.organization.*;
 import com.everhomes.rest.organization.pm.AddressMappingStatus;
-import com.everhomes.rest.portal.ListServiceModuleAppsCommand;
-import com.everhomes.rest.portal.ListServiceModuleAppsResponse;
+
+
 import com.everhomes.user.*;
+
+import com.everhomes.rest.varField.FieldGroupDTO;
+import com.everhomes.user.UserPrivilegeMgr;
+
+import com.everhomes.user.UserProvider;
+
 
 import org.apache.commons.lang.StringUtils;
 import org.apache.lucene.spatial.geohash.GeoHashUtils;
-import org.apache.tomcat.jni.Time;
+
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -93,6 +102,8 @@ import com.everhomes.util.excel.handler.PropMrgOwnerHandler;
 import com.everhomes.varField.FieldProvider;
 import com.everhomes.varField.FieldService;
 import com.everhomes.varField.ScopeFieldItem;
+
+import javax.servlet.http.HttpServletResponse;
 
 /**
  * Created by ying.xiong on 2017/8/15.
@@ -184,6 +195,10 @@ public class CustomerServiceImpl implements CustomerService {
     @Autowired
     private SyncDataTaskService syncDataTaskService;
 
+    @Autowired
+    private DynamicExcelService dynamicExcelService;
+
+
     @Override
     public void checkCustomerAuth(Integer namespaceId, Long privilegeId, Long orgId, Long communityId) {
 //        ListServiceModuleAppsCommand cmd = new ListServiceModuleAppsCommand();
@@ -257,6 +272,18 @@ public class CustomerServiceImpl implements CustomerService {
         int pageSize = PaginationConfigHelper.getPageSize(configurationProvider, cmd.getPageSize());
         ListCommunitySyncResultResponse response = syncDataTaskService.listCommunitySyncResult(cmd.getCommunityId(), cmd.getSyncType(), pageSize, cmd.getPageAnchor());
         return response;
+    }
+
+    @Override
+    public void exportEnterpriseCustomer(ExportEnterpriseCustomerCommand cmd, HttpServletResponse response) {
+        ExportFieldsExcelCommand command = ConvertHelper.convert(cmd, ExportFieldsExcelCommand.class);
+        List<FieldGroupDTO> results = fieldService.getAllGroups(command,false,true);
+        if(results != null && results.size() > 0) {
+            List<String> sheetNames = results.stream().map(result -> {
+                return result.getGroupDisplayName();
+            }).collect(Collectors.toList());
+            dynamicExcelService.exportDynamicExcel(response, DynamicExcelStrings.CUSTOEMR, null, sheetNames, cmd, true, true, null);
+        }
     }
 
     @Override
@@ -2658,6 +2685,7 @@ public class CustomerServiceImpl implements CustomerService {
 		CustomerTrackingPlanDTO dto = ConvertHelper.convert(plan, CustomerTrackingPlanDTO.class);
         if(dto.getTrackingType() != null) {
         	String trackingTypeName = localeTemplateService.getLocaleTemplateString(CustomerTrackingTemplateCode.SCOPE, Integer.parseInt(dto.getTrackingType().toString()) , UserContext.current().getUser().getLocale(), new HashMap<>(), "");
+//        	String trackingTypeName = fieldProvider.findScopeFieldItemByBusinessValue(plan.getNamespaceId(), communityId, ModuleName.ENTERPRISE_CUSTOMER.getName(), , plan.getTrackingType());
         	dto.setTrackingTypeName(trackingTypeName);
         }
         return dto;
@@ -2987,6 +3015,4 @@ public class CustomerServiceImpl implements CustomerService {
 	    calendar.set(Calendar.MILLISECOND, 0);
 		return calendar.getTime().getTime();
 	}
-	
-	
 }

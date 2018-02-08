@@ -15,7 +15,7 @@ import com.everhomes.util.StringHelper;
  *     <li>taxBank: 开户行名称</li>
  *     <li>taxBankNo: 开户行账号</li>
  *     <li>taxPayerTypeId: 报税人类型id</li>
- *     <li>taxPayerTypeId: 报税人类型名称</li>
+ *     <li>taxPayerTypeName: 报税人类型名称</li>
  * </ul>
  * Created by ying.xiong on 2017/8/3.
  */

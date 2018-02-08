@@ -1,7 +1,6 @@
 package com.everhomes.asset;
 
 import com.everhomes.rest.asset.*;
-import com.everhomes.rest.contract.FindContractCommand;
 import com.everhomes.rest.order.PreOrderDTO;
 import com.everhomes.rest.pmkexing.ListOrganizationsByPmAdminDTO;
 import com.everhomes.rest.user.admin.ImportDataResponse;
@@ -164,4 +163,7 @@ public interface AssetService {
 
     void syncCustomer(Integer namespaceId);
 
+    List<ListLateFineStandardsDTO> listLateFineStandards(ListLateFineStandardsCommand cmd);
+
+    void activeLateFine();
 }

@@ -7367,6 +7367,10 @@ public class PunchServiceImpl implements PunchService {
 		List<PunchGroupDTO> punchGroups = new ArrayList<>();
 		for (Organization r : organizations) {
 			PunchGroupDTO dto = getPunchGroupDTOByOrg(r);
+			//2018年2月7日 by wh  :如果dto为空,就是找不到punchrule,那就是脏数据删掉
+			if(null == dto){
+				organizationProvider.deleteOrganization(r);
+			}
 			if (null != dto) {
 				punchGroups.add(dto);
 			}
