@@ -257,4 +257,19 @@ public class GeneralApprovalAdminController extends ControllerBase {
 		response.setErrorDescription("OK");
 		return response;
 	}
+
+	/**
+	 * <b>URL: /admin/general_approval/initializeGeneralApprovalScope</b>
+	 * <p> 初始化审批可见范围（上线时执行一次） </p>
+	 * @return
+	 */
+	@RequestMapping("initializeGeneralApprovalScope")
+	@RestReturn(value=String.class)
+	public RestResponse initializeGeneralApprovalScope() {
+		generalApprovalService.initializeGeneralApprovalScope();
+		RestResponse response = new RestResponse();
+		response.setErrorCode(ErrorCodes.SUCCESS);
+		response.setErrorDescription("OK");
+		return response;
+	}
 }
