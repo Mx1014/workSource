@@ -48,19 +48,23 @@ public class RequisitionServiceImpl implements RequisitionService {
     public void createRequisition(CreateRequisitionCommand cmd) {
         Requisition req = ConvertHelper.convert(cmd, Requisition.class);
         req.setCreateUid(UserContext.currentUserId());
-        req.setId(this.sequenceProvider.getNextSequence(NameMapper.getSequenceDomainFromTablePojo(EhRequisitions.class)));
+        long nextReqId = this.sequenceProvider.getNextSequence(NameMapper.getSequenceDomainFromTablePojo
+                (EhRequisitions.class));
+        req.setId(nextReqId);
         req.setIdentity(SupplierHelper.getIdentity());
         req.setCreateUid(UserContext.currentUserId());
         req.setCreateTime(new Timestamp(DateHelper.currentGMTTime().getTime()));
         //创建工作流
         Flow flow = flowService.getEnabledFlow(cmd.getNamespaceId(), FlowConstants.REQUISITION_MODULE
-                , FlowModuleType.NO_MODULE.getCode(),cmd.getOwnerId(), FlowOwnerType.REQUISITION_REQUEST.getCode());
+                , FlowModuleType.NO_MODULE.getCode(),cmd.getOwnerId(), cmd.getFlowOwnerType());
         if (null == flow) {
             LOGGER.error("Enable request flow not found, moduleId={}", FlowConstants.REQUISITION_MODULE);
             throw RuntimeErrorException.errorWith(RequistionErrorCodes.SCOPE, RequistionErrorCodes.ERROR_CREATE_FLOW_CASE,
                      "requistion flow case not found.");
         }
         CreateFlowCaseCommand createFlowCaseCommand = new CreateFlowCaseCommand();
+        createFlowCaseCommand.setReferId(nextReqId);
+        createFlowCaseCommand.setReferType("requisitionId");
         createFlowCaseCommand.setCurrentOrganizationId(req.getOwnerId());
         createFlowCaseCommand.setTitle("请示单申请");
         createFlowCaseCommand.setApplyUserId(req.getCreateUid());
