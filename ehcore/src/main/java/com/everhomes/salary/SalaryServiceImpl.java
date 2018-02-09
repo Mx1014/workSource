@@ -1495,7 +1495,6 @@ public class SalaryServiceImpl implements SalaryService {
     }
 
     private void calculateSocialSecurityDptReports(Long ownerId, Organization dpt, String month, Long userId) {
-
         List<Long> detailIds = organizationService.listDetailIdWithEnterpriseExclude(null,
                 dpt.getNamespaceId(), dpt.getId(), null, null, null, null, null, Integer.MAX_VALUE - 1, null, null
         );

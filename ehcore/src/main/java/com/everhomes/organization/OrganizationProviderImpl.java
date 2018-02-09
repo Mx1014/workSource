@@ -5175,7 +5175,7 @@ public class OrganizationProviderImpl implements OrganizationProvider {
 	@Override
 	public List<Long> listMemberDetailIdWithExclude(String keywords, Integer namespaceId, String big_path, List<String> small_path,
 													Timestamp checkinTimeStart, Timestamp checkinTimeEnd, Timestamp dissmissTimeStart, Timestamp dissmissTimeEnd,
-													CrossShardListingLocator locator, Integer pageSize,List<Long> notinDetails,List<Long> inDetails) {
+													CrossShardListingLocator locator, Integer pageSize,List<Long> notinDetails,List<Long> inDetails,List<String> groupTypes ) {
 		DSLContext context = dbProvider.getDslContext(AccessSpec.readOnly());
 		TableLike t1 = Tables.EH_ORGANIZATION_MEMBERS.as("t1");
 		TableLike t2 = Tables.EH_ORGANIZATION_MEMBER_DETAILS.as("t2");
@@ -5194,7 +5194,10 @@ public class OrganizationProviderImpl implements OrganizationProvider {
 		if(!StringUtils.isEmpty(keywords)){
 			cond = cond.and(t2.field("contact_name").like("%" + keywords + "%"));
 		}
-		if (null != notinDetails) {
+        if (null != groupTypes) {
+            cond = cond.and(t1.field("group_type").in(groupTypes));
+        }
+        if (null != notinDetails) {
 			cond = cond.and(t2.field("id").notIn(notinDetails));
 		}
 		if (null != inDetails) {
