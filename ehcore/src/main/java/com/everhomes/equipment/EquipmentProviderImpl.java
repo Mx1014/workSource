@@ -3235,6 +3235,7 @@ public class EquipmentProviderImpl implements EquipmentProvider {
                 .and(Tables.EH_EQUIPMENT_INSPECTION_TASKS.STANDARD_ID.eq(standardId))
                 .and(Tables.EH_EQUIPMENT_INSPECTION_TASKS.STATUS.ne(EquipmentTaskStatus.NONE.getCode()))
                 .execute();
+        LOGGER.info("transferPlanIdForTasks....");
     }
 
     @Override
@@ -3244,6 +3245,7 @@ public class EquipmentProviderImpl implements EquipmentProvider {
                 .set(Tables.EH_EQUIPMENT_INSPECTION_TASKS.STATUS, EquipmentTaskStatus.NONE.getCode())
                 .where(Tables.EH_EQUIPMENT_INSPECTION_TASKS.PLAN_ID.eq(0L))
                 .execute();
+        LOGGER.info("batchUpdateUnusedTaskStatus....");
 
     }
 }

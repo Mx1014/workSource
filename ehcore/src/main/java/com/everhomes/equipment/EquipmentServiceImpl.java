@@ -5874,8 +5874,8 @@ private void checkUserPrivilege(Long orgId, Long privilegeId, Long communityId) 
 		OfflineEquipmentTaskReportResponse offlineReportResponse = new OfflineEquipmentTaskReportResponse();
 		List<OfflineEquipmentTaskReportLog> taskReportLogs = processEquipmentInspectionTasksAndResults(cmd);
 		List<OfflineEquipmentTaskReportLog> repairLogs = processEquipmentRepairTasks(cmd.getEquipmentRepairReportDetail());
-		taskReportLogs.addAll(repairLogs);
-		offlineReportResponse.setLogs(taskReportLogs);
+		offlineReportResponse.setTaskLogs(taskReportLogs);
+		offlineReportResponse.setRepairLogs(repairLogs);
 		return offlineReportResponse;
 	}
 
@@ -5897,6 +5897,7 @@ private void checkUserPrivilege(Long orgId, Long privilegeId, Long communityId) 
 					task = verifyEquipmentTask(r, ownerType, ownerId);
 				} catch (Exception e) {
 					LOGGER.error("equipmentInspection task  not exist, id = {}", r);
+					e.printStackTrace();
 					reportLog = getOfflineEquipmentTaskReportLogObject(r, ErrorCodes.ERROR_GENERAL_EXCEPTION,
 							EquipmentServiceErrorCode.ERROR_EQUIPMENT_TASK_NOT_EXIST, EquipmentOfflineErrorType.INEPECT_TASK.getCode());
 				}

@@ -11,14 +11,25 @@ import java.util.List;
 
 public class OfflineEquipmentTaskReportResponse {
     @ItemType(OfflineEquipmentTaskReportLog.class)
-    private List<OfflineEquipmentTaskReportLog> logs;
+    private List<OfflineEquipmentTaskReportLog> taskLogs;
 
-    public List<OfflineEquipmentTaskReportLog> getLogs() {
-        return logs;
+    @ItemType(OfflineEquipmentTaskReportLog.class)
+    private List<OfflineEquipmentTaskReportLog> repairLogs;
+
+    public List<OfflineEquipmentTaskReportLog> getTaskLogs() {
+        return taskLogs;
     }
 
-    public void setLogs(List<OfflineEquipmentTaskReportLog> logs) {
-        this.logs = logs;
+    public void setTaskLogs(List<OfflineEquipmentTaskReportLog> taskLogs) {
+        this.taskLogs = taskLogs;
+    }
+
+    public List<OfflineEquipmentTaskReportLog> getRepairLogs() {
+        return repairLogs;
+    }
+
+    public void setRepairLogs(List<OfflineEquipmentTaskReportLog> repairLogs) {
+        this.repairLogs = repairLogs;
     }
 
     @Override
