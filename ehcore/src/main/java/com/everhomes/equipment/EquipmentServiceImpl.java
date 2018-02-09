@@ -5763,6 +5763,17 @@ private void checkUserPrivilege(Long orgId, Long privilegeId, Long communityId) 
 			});
 		}
 		LOGGER.info("sync for standard_equipment_map to eqiupmentInspectionPlan task ok.....");
+		transferTasksPlanIds();
+	}
+
+	private void transferTasksPlanIds() {
+		List<EquipmentInspectionEquipmentPlanMap> planMaps = equipmentProvider.listEquipmentPlanMaps();
+		if(planMaps!=null && planMaps.size()>0){
+			planMaps.forEach((map)-> equipmentProvider.transferPlanIdForTasks(map.getEquipmentId(),map.getStandardId(),map.getPlanId()));
+		}
+		//update tasks status
+		equipmentProvider.batchUpdateUnusedTaskStatus();
+
 	}
 
 	@Override

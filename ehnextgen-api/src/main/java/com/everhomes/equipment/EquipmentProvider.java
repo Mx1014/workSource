@@ -240,4 +240,10 @@ public interface EquipmentProvider {
     List<EquipmentInspectionStandards> listEquipmentStandardWithReferId(Long targetId, String targetType);
 
     void deletePlanMapByEquipmentIdAndStandardId(Long equipmentId, Long standardId);
+
+    List<EquipmentInspectionEquipmentPlanMap> listEquipmentPlanMaps();
+
+	void transferPlanIdForTasks(Long equipmentId, Long standardId,Long planId);
+
+	void batchUpdateUnusedTaskStatus();
 }
