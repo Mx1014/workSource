@@ -501,7 +501,7 @@ UPDATE eh_social_security_bases SET ratio_options = NULL ;
  
 
 
-
+-- 公告管理 add by zhiwei.zhang
 -- 域空间volgo
 -- 增加公告管理模块信息
 INSERT INTO eh_service_modules(id,NAME,parent_id,path,TYPE,LEVEL,STATUS,create_time,creator_uid,operator_uid,action_type,multiple_flag,module_control_type,default_order)
@@ -516,9 +516,28 @@ VALUE(@id+1,1,57000,'公告管理','EhNamespaces',1,2);
 SET @item_id = (SELECT MAX(id) FROM eh_launch_pad_items);
 INSERT INTO `eh_launch_pad_items` (`id`, `namespace_id`, `app_id`, `scope_code`, `scope_id`, `item_location`, `item_group`, `item_name`, `item_label`, `icon_uri`, `item_width`, `item_height`, `action_type`, `action_data`, `default_order`, `apply_policy`, `min_version`, `display_flag`, `display_layout`, `bgcolor`, `tag`, `target_type`, `target_id`, `delete_flag`, `scene_type`, `scale_type`, `service_categry_id`, `selected_icon_uri`, `more_order`, `alias_icon_uri`, `categry_name`) VALUES (@item_id := @item_id + 1, '1', '0', '0', '0', '/home', 'Bizs', '公告', '公告', 'cs://1/image/aW1hZ2UvTVRvNE5XWmpNakV4TW1VNFlUbG1aR0ppWWpoaU16RmxNekUxWWpFMk1XRXlZUQ', '1', '1', '70', '{"title":"公告管理"}', '10', '0', '1', '1', '', '0', NULL, NULL, NULL, '1', 'pm_admin', '0', NULL, NULL, '0', NULL,NULL);
 
+-- end by zhiwei.zhang
+
 -- error codes added by wentian
 SET @eh_locale_strings_id = (SELECT MAX(id) FROM `eh_locale_strings`);
 INSERT INTO `eh_locale_strings` (`id`, `scope`, `code`, `locale`, `text`) VALUES (@eh_locale_strings_id:=@eh_locale_strings_id+1, 'requisition', '1001', 'zh_CN', '未找到请示单工作流');
 
 -- by dengs.
 update eh_office_cubicle_categories SET status=2;
+
+-- 付款合同主体信息加上原合同和初始合同 by xiongying
+SET @field_id = (SELECT MAX(id) FROM eh_var_fields);
+INSERT INTO `eh_var_fields` (`id`, `module_name`, `name`, `display_name`, `field_type`, `group_id`, `group_path`, `mandatory_flag`, `default_order`, `status`, `creator_uid`, `create_time`, `operator_uid`, `update_time`, `field_param`) VALUES ((@field_id := @field_id + 1), 'contract', 'parentId', '原合同', 'Long', '31', '/30/31/', '0', NULL, '2', '1', NOW(), NULL, NULL, '{\"fieldParamType\": \"text\", \"length\": 32}');
+INSERT INTO `eh_var_fields` (`id`, `module_name`, `name`, `display_name`, `field_type`, `group_id`, `group_path`, `mandatory_flag`, `default_order`, `status`, `creator_uid`, `create_time`, `operator_uid`, `update_time`, `field_param`) VALUES ((@field_id := @field_id + 1), 'contract', 'rootParentId', '初始合同', 'Long', '31', '/30/31/', '0', NULL, '2', '1', NOW(), NULL, NULL, '{\"fieldParamType\": \"text\", \"length\": 32}');
+
+--by zheng
+UPDATE eh_rentalv2_default_rules set rental_start_time = 7776000000 where rental_start_time = 0;
+UPDATE eh_rentalv2_default_rules set rental_start_time_flag = 1;
+
+update eh_rentalv2_resource_types set identify = 'conference' where name like '%会议室%';
+update eh_rentalv2_resource_types set identify = 'screen' where name like '%电子屏%';
+update eh_rentalv2_resource_types set identify = 'area' where name like '%场地%';
+-- beta 和 现网执行
+update eh_rentalv2_resource_types set identify = 'conference' where id in (10819,12030);
+update eh_rentalv2_resource_types set identify = 'screen' where id in (11,12168);
+update eh_rentalv2_resource_types set identify = 'area' where id in (10012,10062,10715,10716,10717,10814,12044,12078,12081,12082,12131,12175);

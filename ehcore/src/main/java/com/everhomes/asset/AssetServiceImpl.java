@@ -262,6 +262,7 @@ public class AssetServiceImpl implements AssetService {
 //            throw RuntimeErrorException.errorWith(ErrorCodes.SCOPE_GENERAL, ErrorCodes.ERROR_ACCESS_DENIED,
 //                    "Insufficient privilege");
 //        }
+
         userPrivilegeMgr.checkUserPrivilege(UserContext.currentUserId(), null, priviledgeId, PrivilegeConstants.ASSET_MODULE_ID, (byte)13, null, null, communityId);
     }
 
