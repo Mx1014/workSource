@@ -1,3 +1,6 @@
+-- 下载资源名称字段长度过短,加长
+ALTER TABLE  eh_content_server_resources CHANGE resource_name resource_name VARCHAR(1024) NOT NULL ;
+
 -- domain 增加name, icon
 ALTER TABLE `eh_domains` ADD COLUMN `favicon_uri`  VARCHAR(255) NULL;
 ALTER TABLE `eh_domains` ADD COLUMN `name`  VARCHAR(255) NULL AFTER `namespace_id`;
@@ -792,7 +795,8 @@ ALTER TABLE `eh_addresses` ADD COLUMN `version` VARCHAR(32) COMMENT '版本号';
 -- 薪酬2.0 
 
  
-
+-- added by wh 
+-- drop语句是必须的,因为之前薪酬1.0的表要删掉,数据全不要
 -- 薪酬设置可以用的基础字段项(可以被公司继承,不可删除)
 DROP TABLE IF EXISTS eh_salary_default_entities;
 CREATE TABLE `eh_salary_default_entities` (
@@ -1109,6 +1113,7 @@ CREATE TABLE `eh_enterprise_notice_receivers` (
 
 
 -- 社保开始
+-- added by wh 
 -- 社保建表social_security
 -- 社保基准表
 -- DROP TABLE eh_social_security_bases;
