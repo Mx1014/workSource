@@ -1,5 +1,5 @@
 -- 物业巡检V3.1
--- 设备巡检计划表
+-- 设备巡检计划表   by jiarui
 CREATE TABLE `eh_equipment_inspection_plans` (
   `id` bigint(20) NOT NULL,
   `owner_id` bigint(20) NOT NULL DEFAULT '0' COMMENT 'organization_id',
@@ -27,7 +27,7 @@ CREATE TABLE `eh_equipment_inspection_plans` (
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4;
 
 
--- 设备巡检计划--设备 关联表
+-- 设备巡检计划--设备 关联表  by jiarui
 CREATE TABLE `eh_equipment_inspection_equipment_plan_map` (
   `id` bigint(20) NOT NULL,
   `equiment_id` bigint(20) NOT NULL DEFAULT '0',
@@ -66,15 +66,16 @@ CREATE TABLE `eh_equipment_inspection_review_date` (
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4;
 
 
--- eh_equipment_inspection_tasks 增加plan_id字段 用于关联task和equipments
+-- eh_equipment_inspection_tasks 增加plan_id字段 用于关联task和equipments  by jiarui
 ALTER TABLE eh_equipment_inspection_tasks
 ADD COLUMN `plan_id`  bigint(20) NOT NULL ;
 
 
--- 标准增加周期类型
+-- 标准增加周期类型  by jiarui
 ALTER TABLE eh_equipment_inspection_standards
 ADD COLUMN `repeat_type` tinyint(4) NOT NULL COMMENT ' 0: no repeat, 1: by day, 2: by week, 3: by month, 4: by year';
--- 操作记录表增加设备id表
+
+-- 操作记录表增加设备id  by jiarui
 ALTER TABLE `eh_equipment_inspection_task_logs`
   ADD COLUMN `equipment_id`  bigint(20) NULL DEFAULT 0 ;
 ALTER TABLE `eh_equipment_inspection_task_logs`
@@ -84,6 +85,7 @@ ALTER TABLE `eh_equipment_inspection_task_logs`
 ALTER TABLE `eh_equipment_inspection_task_logs`
   ADD COLUMN `maintance_status` tinyint(4) NOT NULL DEFAULT '0' COMMENT '0: inactive 1: wating, 2: allocated 3: completed 4: closed';
 
+-- 设备操作记录表  by jiarui
 CREATE TABLE `eh_equipment_inspection_equipment_logs` (
   `id` bigint(20) NOT NULL COMMENT 'id',
   `owner_type` varchar(32) NOT NULL DEFAULT '' COMMENT 'the type of who own the log, enterprise, etc',

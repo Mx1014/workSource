@@ -1241,7 +1241,7 @@ private void checkUserPrivilege(Long orgId, Long privilegeId, Long communityId) 
 
 	private void createEquipmentInspectionEquipment(UpdateEquipmentsCommand cmd, List<EquipmentStandardMapDTO> eqStandardMap) {
 		EquipmentInspectionEquipments equipment = ConvertHelper.convert(cmd, EquipmentInspectionEquipments.class);
-		if ((equipment.getLongitude() == null || equipment.getLatitude() == null) && cmd.getQrCodeFlag() == 1) {
+		if ((equipment.getLongitude() == null || equipment.getLatitude() == null) && (cmd.getQrCodeFlag() != null && cmd.getQrCodeFlag() == 1)) {
 			throw RuntimeErrorException.errorWith(EquipmentServiceErrorCode.SCOPE,
 					EquipmentServiceErrorCode.ERROR_EQUIPMENT_NOT_SET_LOCATION,
 					"设备没有设置经纬度");
