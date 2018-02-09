@@ -1,7 +1,7 @@
 -- 账单item关联滞纳金 by wentian
 ALTER TABLE `eh_payment_bill_items` ADD COLUMN `late_fine_standard_id` BIGINT DEFAULT NULL COMMENT '滞纳金标准id';
 
-DROP TABLE IF EXISTS `eh_payment_late_fine`;
+# DROP TABLE IF EXISTS `eh_payment_late_fine`;
 CREATE TABLE `eh_payment_late_fine`(
   `id` BIGINT NOT NULL COMMENT 'primary key',
   `name` VARCHAR(20) COMMENT '滞纳金名称',

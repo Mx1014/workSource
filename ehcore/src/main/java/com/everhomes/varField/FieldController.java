@@ -257,7 +257,7 @@ public class FieldController extends ControllerBase {
      * <p>模板的导出</p>
      * <b>URL: /varField/exportExcelTemplate</b>
      */
-    @RequireAuthentication(false)
+//    @RequireAuthentication(false)
     @RequestMapping("exportExcelTemplate")
     public void exportExcelTemplateRe(@Valid ListFieldGroupCommand cmd,HttpServletResponse response){
         fieldService.exportDynamicExcelTemplate(cmd,response);
@@ -268,7 +268,7 @@ public class FieldController extends ControllerBase {
      * <p>excel数据的导出</p>
      * <b>URL: /varField/exportFieldsExcel</b>
      */
-    @RequireAuthentication(false)
+//    @RequireAuthentication(false)
     @RequestMapping("exportFieldsExcel")
     public void exportFieldsExcelRe(@Valid ExportFieldsExcelCommand cmd, HttpServletResponse response){
         fieldService.exportDynamicExcel(cmd,response);
@@ -278,7 +278,7 @@ public class FieldController extends ControllerBase {
      * <p>excel数据导入</p>
      * <b>URL: /varField/importFieldsExcel</b>
      */
-    @RequireAuthentication(false)
+//    @RequireAuthentication(false)
     @RequestMapping("importFieldsExcel")
     @RestReturn(DynamicImportResponse.class)
     public RestResponse importFieldsExcelRe(@Valid ImportFieldExcelCommand cmd, MultipartFile file){
