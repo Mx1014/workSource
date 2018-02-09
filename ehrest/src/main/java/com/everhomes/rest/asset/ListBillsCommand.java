@@ -51,14 +51,14 @@ public class ListBillsCommand {
     private Byte status;
     private String targetType;
     private String contractNum;
-    private Long orgazationId;
+    private Long organizationId;
 
-    public Long getOrgazationId() {
-        return orgazationId;
+    public Long getOrganizationId() {
+        return organizationId;
     }
 
-    public void setOrgazationId(Long orgazationId) {
-        this.orgazationId = orgazationId;
+    public void setOrganizationId(Long organizationId) {
+        this.organizationId = organizationId;
     }
 
     public Integer getNamespaceId() {
