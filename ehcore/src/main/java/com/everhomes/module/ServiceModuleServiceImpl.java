@@ -797,7 +797,7 @@ public class ServiceModuleServiceImpl implements ServiceModuleService {
 
             //获取人员和人员所有机构所赋予模块的所属项目范围(应用管理员) -- add by lei.lv
             // todo 加上应用
-            List<Authorization> authorizations_apps =  authorizationProvider.listAuthorizations(EntityType.ORGANIZATIONS.getCode(), organizationId, EntityType.USER.getCode(), userId, com.everhomes.entity.EntityType.SERVICE_MODULE_APP.getCode(), null, IdentityType.MANAGE.getCode(), appId, null, null, null);
+            List<Authorization> authorizations_apps =  authorizationProvider.listAuthorizations(EntityType.ORGANIZATIONS.getCode(), organizationId, EntityType.USER.getCode(), userId, com.everhomes.entity.EntityType.SERVICE_MODULE_APP.getCode(), null, IdentityType.MANAGE.getCode(), appId, null, null, false);
             if(authorizations_apps != null && authorizations_apps.size() > 0){
                 authorizations_apps = authorizations_apps.stream().filter(r->ModuleManagementType.fromCode(r.getModuleControlType()) == COMMUNITY_CONTROL).limit(1).collect(Collectors.toList());
                 if(authorizations_apps !=null && authorizations_apps.size() > 0) {

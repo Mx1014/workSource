@@ -201,6 +201,7 @@ public class PurchaseServiceImpl implements PurchaseService {
             pto.setTotalAmount(String.valueOf((item.getUnitPrice().longValue() * item.getPurchaseQuantity())));
             pto.setUnit(warehouseProvider.findWarehouseUnitNameById(material.getUnitId()));
             pto.setUnitPrice(item.getUnitPrice().toPlainString());
+            itemDtos.add(pto);
         }
         dto.setDtos(itemDtos);
         return dto;
