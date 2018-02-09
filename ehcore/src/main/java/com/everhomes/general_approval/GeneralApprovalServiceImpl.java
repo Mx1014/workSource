@@ -602,7 +602,7 @@ public class GeneralApprovalServiceImpl implements GeneralApprovalService {
         List<Long> detailIds = new ArrayList<>();
         List<Long> organizationIds = new ArrayList<>();
 
-        if (dtos == null || dtos.size() <= 0)
+        if (dtos == null || dtos.size() == 0)
             return;
 
         for (GeneralApprovalScopeMapDTO dto : dtos) {
@@ -1186,22 +1186,28 @@ public class GeneralApprovalServiceImpl implements GeneralApprovalService {
         Integer count = Integer.MAX_VALUE - 1;
         List<GeneralApproval> approvals = generalApprovalProvider.queryGeneralApprovals(new ListingLocator(), count, ((locator, query) -> {
             query.addConditions(Tables.EH_GENERAL_APPROVALS.MODULE_ID.eq(52000L));
-            query.addConditions(Tables.EH_GENERAL_APPROVALS.MODULE_TYPE.eq("EhOrganizations"));
+            query.addConditions(Tables.EH_GENERAL_APPROVALS.MODULE_TYPE.eq("any-module"));
             return query;
         }));
         if (approvals == null || approvals.size() == 0)
             return;
         for (GeneralApproval approval : approvals) {
-            GeneralApprovalScopeMap scope = new GeneralApprovalScopeMap();
             Organization organization = organizationProvider.findOrganizationById(approval.getOwnerId());
             if (organization == null)
                 continue;
-            scope.setSourceId(organization.getId());
-            scope.setSourceType(UniongroupTargetType.ORGANIZATION.getCode());
-            scope.setSourceDescription(organization.getName());
-            scope.setApprovalId(approval.getId());
-            scope.setNamespaceId(approval.getNamespaceId());
-            generalApprovalProvider.createGeneralApprovalScopeMap(scope);
+            GeneralApprovalScopeMap scope = generalApprovalProvider.findGeneralApprovalScopeMap(approval.getNamespaceId(),
+                    approval.getId(), organization.getId(), UniongroupTargetType.ORGANIZATION.getCode());
+            if(scope !=null)
+                continue;
+            else{
+                scope = new GeneralApprovalScopeMap();
+                scope.setSourceId(organization.getId());
+                scope.setSourceType(UniongroupTargetType.ORGANIZATION.getCode());
+                scope.setSourceDescription(organization.getName());
+                scope.setApprovalId(approval.getId());
+                scope.setNamespaceId(approval.getNamespaceId());
+                generalApprovalProvider.createGeneralApprovalScopeMap(scope);
+            }
         }
     }
 
