@@ -160,10 +160,12 @@ public class NewsServiceImpl implements NewsService {
 			}
 			if (null != cmd.getNewsTagVals())
 				cmd.getNewsTagVals().forEach(r->{
-					NewsTagVals newsTagVals = new NewsTagVals();
-					newsTagVals.setNewsTagId(r.getNewsTagId());
-					newsTagVals.setNewsId(id);
-					newsProvider.createNewsTagVals(newsTagVals);
+					if(r!=null && r.getNewsTagId()!=null) {
+						NewsTagVals newsTagVals = new NewsTagVals();
+						newsTagVals.setNewsTagId(r.getNewsTagId());
+						newsTagVals.setNewsId(news.getId());
+						newsProvider.createNewsTagVals(newsTagVals);
+					}
 				});
 			return null;
 		});
@@ -759,6 +761,9 @@ public class NewsServiceImpl implements NewsService {
 		newsTagVals.stream().map(r->{  //创建旧新闻的父标签-子标签id映射
 			NewsTag newsTag = newsProvider.findNewsTagById(r.getNewsTagId());
 			NewsTagVals t= new NewsTagVals();
+			if(newsTag==null){
+				return t;
+			}
 			if (newsTag.getDeleteFlag()!=(byte)1) //没被删除
 				t.setNewsTagId(newsTag.getId()); //子标签id
 			newsTag = newsProvider.findNewsTagById(newsTag.getParentId());
