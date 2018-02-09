@@ -1036,10 +1036,9 @@ ADD COLUMN `house_resource_type` VARCHAR(256) NULL COMMENT '房源类型  rentHo
 
 
 
-
+-- 公告管理 add by zhiwei.zhang 
 -- 企业公告1.0
 -- 企业公告表
-DROP TABLE IF EXISTS `eh_enterprise_notices`;
 CREATE TABLE `eh_enterprise_notices` (
   `id` BIGINT NOT NULL COMMENT 'id of the record',
   `namespace_id` INTEGER NOT NULL DEFAULT 0,
@@ -1066,7 +1065,6 @@ CREATE TABLE `eh_enterprise_notices` (
 ) ENGINE=INNODB DEFAULT CHARSET=UTF8MB4;
 
 -- 企业公告附件表
-DROP TABLE IF EXISTS `eh_enterprise_notice_attachments`;
 CREATE TABLE `eh_enterprise_notice_attachments` (
   `id` BIGINT NOT NULL COMMENT 'id of the record',
   `namespace_id` INTEGER NOT NULL DEFAULT 0,
@@ -1087,7 +1085,6 @@ CREATE TABLE `eh_enterprise_notice_attachments` (
 
 
 -- 企业公告发送信息表
-DROP TABLE IF EXISTS `eh_enterprise_notice_receivers`;
 CREATE TABLE `eh_enterprise_notice_receivers` (
   `id` BIGINT NOT NULL COMMENT 'id of the record',
   `namespace_id` INTEGER NOT NULL DEFAULT 0,
@@ -1105,7 +1102,7 @@ CREATE TABLE `eh_enterprise_notice_receivers` (
   KEY `i_notice_receivers_receiver_id`(`receiver_type`,`receiver_id`)
 ) ENGINE=INNODB DEFAULT CHARSET=UTF8MB4;
 
---  add by zhiwei.zhang end
+--  end by zhiwei.zhang
 
 
 -- 社保开始
