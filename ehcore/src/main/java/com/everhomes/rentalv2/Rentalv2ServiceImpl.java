@@ -6196,6 +6196,7 @@ public class Rentalv2ServiceImpl implements Rentalv2Service {
 					singleCmd.setAutoAssign(resource.getAutoAssign());
 					singleCmd.setMultiUnit(resource.getMultiUnit());
 					singleCmd.setSiteNumbers(resource.getSiteNumbers());
+					singleCmd.setSiteCounts(resource.getResourceCounts());
 					addSingleRules.add(singleCmd);
 				}
 			}
@@ -6215,7 +6216,7 @@ public class Rentalv2ServiceImpl implements Rentalv2Service {
 			singleCmd.setAutoAssign(resource.getAutoAssign());
 			singleCmd.setMultiUnit(resource.getMultiUnit());
 			singleCmd.setSiteNumbers(resource.getSiteNumbers());
-
+			singleCmd.setSiteCounts(resource.getResourceCounts());
 			addSingleRules.add(singleCmd);
 		}
 
