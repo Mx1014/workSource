@@ -5763,6 +5763,17 @@ private void checkUserPrivilege(Long orgId, Long privilegeId, Long communityId) 
 			});
 		}
 		LOGGER.info("sync for standard_equipment_map to eqiupmentInspectionPlan task ok.....");
+		transferTasksPlanIds();
+	}
+
+	private void transferTasksPlanIds() {
+		List<EquipmentInspectionEquipmentPlanMap> planMaps = equipmentProvider.listEquipmentPlanMaps();
+		if(planMaps!=null && planMaps.size()>0){
+			planMaps.forEach((map)-> equipmentProvider.transferPlanIdForTasks(map.getEquipmentId(),map.getStandardId(),map.getPlanId()));
+		}
+		//update tasks status
+		equipmentProvider.batchUpdateUnusedTaskStatus();
+
 	}
 
 	@Override
@@ -5863,8 +5874,8 @@ private void checkUserPrivilege(Long orgId, Long privilegeId, Long communityId) 
 		OfflineEquipmentTaskReportResponse offlineReportResponse = new OfflineEquipmentTaskReportResponse();
 		List<OfflineEquipmentTaskReportLog> taskReportLogs = processEquipmentInspectionTasksAndResults(cmd);
 		List<OfflineEquipmentTaskReportLog> repairLogs = processEquipmentRepairTasks(cmd.getEquipmentRepairReportDetail());
-		taskReportLogs.addAll(repairLogs);
-		offlineReportResponse.setLogs(taskReportLogs);
+		offlineReportResponse.setTaskLogs(taskReportLogs);
+		offlineReportResponse.setRepairLogs(repairLogs);
 		return offlineReportResponse;
 	}
 
@@ -5886,6 +5897,7 @@ private void checkUserPrivilege(Long orgId, Long privilegeId, Long communityId) 
 					task = verifyEquipmentTask(r, ownerType, ownerId);
 				} catch (Exception e) {
 					LOGGER.error("equipmentInspection task  not exist, id = {}", r);
+					e.printStackTrace();
 					reportLog = getOfflineEquipmentTaskReportLogObject(r, ErrorCodes.ERROR_GENERAL_EXCEPTION,
 							EquipmentServiceErrorCode.ERROR_EQUIPMENT_TASK_NOT_EXIST, EquipmentOfflineErrorType.INEPECT_TASK.getCode());
 				}
@@ -5909,7 +5921,7 @@ private void checkUserPrivilege(Long orgId, Long privilegeId, Long communityId) 
 						equipmentProvider.updateEquipmentTask(task);
 					} catch (Exception e) {
 						LOGGER.error("equipmentInspection task update failed, id = {}", r);
-						e.printStackTrace();
+						LOGGER.error("equipmentInspection task update failed, ", e);
 						OfflineEquipmentTaskReportLog logObject = getOfflineEquipmentTaskReportLogObject(r, ErrorCodes.ERROR_GENERAL_EXCEPTION,
 								EquipmentServiceErrorCode.ERROR_EQUIPMENT_TASK_SYNC_ERROR, EquipmentOfflineErrorType.INEPECT_TASK.getCode());
 						reportLogs.add(logObject);
@@ -6050,9 +6062,9 @@ private void checkUserPrivilege(Long orgId, Long privilegeId, Long communityId) 
                     //设备状态变为维修中
                     equipmentProvider.updateEquipmentStatus(cmd.getEquipmentId(), EquipmentStatus.IN_MAINTENANCE.getCode());
                 } catch (Exception e) {
-                    e.printStackTrace();
-                    LOGGER.error("Sync Repair Tasks Erro TaskId={}"+task.getId());
-                    OfflineEquipmentTaskReportLog repairLogs = getOfflineEquipmentTaskReportLogObject(task.getId(),ErrorCodes.ERROR_GENERAL_EXCEPTION,
+					LOGGER.error("Sync Repair Tasks Erro TaskId = {}" + task.getId());
+					LOGGER.error("Sync Repair Tasks Erro " + e);
+					OfflineEquipmentTaskReportLog repairLogs = getOfflineEquipmentTaskReportLogObject(task.getId(),ErrorCodes.ERROR_GENERAL_EXCEPTION,
                             EquipmentServiceErrorCode.ERROR_EQUIPMENT_TASK_SYNC_ERROR, EquipmentOfflineErrorType.INEPECT_TASK.getCode());
                     logs.add(repairLogs);
                 }
