@@ -178,7 +178,7 @@ public class PurchaseServiceImpl implements PurchaseService {
         GetPurchaseOrderDTO dto = new GetPurchaseOrderDTO();
         dto.setApprovalSheetId(order.getApprovalOrderId());
         dto.setContact(order.getContactName());
-        dto.setContactTel(order.getConatactTel());
+        dto.setContactTel(order.getContactTel());
         SimpleDateFormat sdf = new SimpleDateFormat("yyyy-MM-dd HH:mm");
         dto.setDeliveryDate(sdf.format(order.getDeliveryDate()));
         dto.setPurchaseRequestId(order.getId());
