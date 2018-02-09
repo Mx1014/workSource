@@ -211,7 +211,7 @@ public class GeneralApprovalProviderImpl implements GeneralApprovalProvider {
         DaoHelper.publishDaoAction(DaoAction.MODIFY, EhGeneralApprovalScopeMap.class, scope.getId());
     }
 
-    @Cacheable(value = "GeneralApprovalScopes", key = "#approvalId", unless = "#result.size() == 0")
+    @Cacheable(value = "GeneralApprovalScopes", key = "#approvalId", unless = "#result == null")
     @Override
     public GeneralApprovalScopeMap findGeneralApprovalScopeMap(Integer namespaceId, Long approvalId, Long sourceId, String sourceType){
         DSLContext context = dbProvider.getDslContext(AccessSpec.readOnly());

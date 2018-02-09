@@ -310,36 +310,62 @@ CREATE TABLE `eh_rentalv2_order_rules` (
 
 
 ALTER TABLE `eh_rentalv2_default_rules`
-ADD COLUMN `source_type` VARCHAR(255) DEFAULT NULL COMMENT 'default_rule, resource_rule',
-ADD COLUMN `source_id` BIGINT(20) DEFAULT NULL,
-ADD COLUMN `resource_type` VARCHAR(64) DEFAULT NULL COMMENT '资源类型',
-ADD COLUMN `holiday_open_flag` TINYINT(4) DEFAULT NULL COMMENT '节假日是否开放预约: 1-是, 0-否',
-ADD COLUMN `holiday_type` TINYINT(4) DEFAULT NULL COMMENT '1-普通双休, 2-同步中国节假日',
-ADD COLUMN `refund_strategy` TINYINT(4) DEFAULT NULL COMMENT '1-custom, 2-full',
-ADD COLUMN `overtime_strategy` TINYINT(4) DEFAULT NULL COMMENT '1-custom, 2-full';
+ADD COLUMN `source_type` varchar(255) DEFAULT NULL COMMENT 'default_rule, resource_rule';
+ALTER TABLE `eh_rentalv2_default_rules`
+ADD COLUMN `source_id` bigint(20) DEFAULT NULL;
+ALTER TABLE `eh_rentalv2_default_rules`
+ADD COLUMN `resource_type` varchar(64) DEFAULT NULL COMMENT '资源类型';
+ALTER TABLE `eh_rentalv2_default_rules`
+ADD COLUMN `holiday_open_flag` tinyint(4) DEFAULT NULL COMMENT '节假日是否开放预约: 1-是, 0-否';
+ALTER TABLE `eh_rentalv2_default_rules`
+ADD COLUMN `holiday_type` tinyint(4) DEFAULT NULL COMMENT '1-普通双休, 2-同步中国节假日';
+ALTER TABLE `eh_rentalv2_default_rules`
+ADD COLUMN `refund_strategy` tinyint(4) DEFAULT NULL COMMENT '1-custom, 2-full';
+ALTER TABLE `eh_rentalv2_default_rules`
+ADD COLUMN `overtime_strategy` tinyint(4) DEFAULT NULL COMMENT '1-custom, 2-full';
 
 ALTER TABLE `eh_rentalv2_default_rules`
-DROP COLUMN pay_start_time,
-DROP COLUMN pay_end_time,
-DROP COLUMN payment_ratio,
-DROP COLUMN contact_num,
-DROP COLUMN overtime_time,
-DROP COLUMN unit,
-DROP COLUMN rental_step,
-DROP COLUMN time_step,
-DROP COLUMN cancel_time,
-DROP COLUMN cancel_flag,
-DROP COLUMN workday_price,
-DROP COLUMN weekend_price,
-DROP COLUMN org_member_workday_price,
-DROP COLUMN org_member_weekend_price,
-DROP COLUMN approving_user_workday_price,
-DROP COLUMN approving_user_weekend_price,
-DROP COLUMN rental_type,
-DROP COLUMN exclusive_flag,
-DROP COLUMN auto_assign,
-DROP COLUMN multi_unit,
-DROP COLUMN resource_counts;
+drop column pay_start_time;
+ALTER TABLE `eh_rentalv2_default_rules`
+drop column pay_end_time;
+ALTER TABLE `eh_rentalv2_default_rules`
+drop column payment_ratio;
+ALTER TABLE `eh_rentalv2_default_rules`
+drop column contact_num;
+ALTER TABLE `eh_rentalv2_default_rules`
+drop column overtime_time;
+ALTER TABLE `eh_rentalv2_default_rules`
+drop column unit;
+ALTER TABLE `eh_rentalv2_default_rules`
+drop column rental_step;
+ALTER TABLE `eh_rentalv2_default_rules`
+drop column time_step;
+ALTER TABLE `eh_rentalv2_default_rules`
+drop column cancel_time;
+ALTER TABLE `eh_rentalv2_default_rules`
+drop column cancel_flag;
+ALTER TABLE `eh_rentalv2_default_rules`
+drop column workday_price;
+ALTER TABLE `eh_rentalv2_default_rules`
+drop column weekend_price;
+ALTER TABLE `eh_rentalv2_default_rules`
+drop column org_member_workday_price;
+ALTER TABLE `eh_rentalv2_default_rules`
+drop column org_member_weekend_price;
+ALTER TABLE `eh_rentalv2_default_rules`
+drop column approving_user_workday_price;
+ALTER TABLE `eh_rentalv2_default_rules`
+drop column approving_user_weekend_price;
+ALTER TABLE `eh_rentalv2_default_rules`
+drop column rental_type;
+ALTER TABLE `eh_rentalv2_default_rules`
+drop column exclusive_flag;
+ALTER TABLE `eh_rentalv2_default_rules`
+drop column auto_assign;
+ALTER TABLE `eh_rentalv2_default_rules`
+drop column multi_unit;
+ALTER TABLE `eh_rentalv2_default_rules`
+drop column resource_counts;
 
 UPDATE eh_rentalv2_default_rules SET source_type = 'default_rule' WHERE source_type IS NULL;
 -- 资源表中规则信息迁移到规则表中
@@ -349,30 +375,49 @@ SELECT (@id := @id + 1), 'organization', organization_id, resource_type_id, rent
 
 
 ALTER TABLE `eh_rentalv2_resources`
-DROP COLUMN unit,
-DROP COLUMN time_step,
-DROP COLUMN cancel_time,
-DROP COLUMN cancel_flag,
-DROP COLUMN exclusive_flag;
+drop column unit;
+ALTER TABLE `eh_rentalv2_resources`
+drop column time_step;
+ALTER TABLE `eh_rentalv2_resources`
+drop column cancel_time;
+ALTER TABLE `eh_rentalv2_resources`
+drop column cancel_flag;
+ALTER TABLE `eh_rentalv2_resources`
+drop column exclusive_flag;
 
 -- 资源表中规则信息迁移到规则表中
 ALTER TABLE `eh_rentalv2_resources`
-DROP COLUMN rental_start_time_flag,
-DROP COLUMN rental_end_time_flag,
-DROP COLUMN open_weekday,
-DROP COLUMN begin_date,
-DROP COLUMN end_date,
-DROP COLUMN rental_start_time,
-DROP COLUMN rental_end_time,
-DROP COLUMN refund_flag,
-DROP COLUMN refund_ratio,
-DROP COLUMN multi_time_interval,
-DROP COLUMN day_open_time,
-DROP COLUMN day_close_time,
-DROP COLUMN day_begin_time,
-DROP COLUMN day_end_time,
-DROP COLUMN need_pay,
-DROP COLUMN resource_type2;
+drop column rental_start_time_flag;
+ALTER TABLE `eh_rentalv2_resources`
+drop column rental_end_time_flag;
+ALTER TABLE `eh_rentalv2_resources`
+drop column open_weekday;
+ALTER TABLE `eh_rentalv2_resources`
+drop column begin_date;
+ALTER TABLE `eh_rentalv2_resources`
+drop column end_date;
+ALTER TABLE `eh_rentalv2_resources`
+drop column rental_start_time;
+ALTER TABLE `eh_rentalv2_resources`
+drop column rental_end_time;
+ALTER TABLE `eh_rentalv2_resources`
+drop column refund_flag;
+ALTER TABLE `eh_rentalv2_resources`
+drop column refund_ratio;
+ALTER TABLE `eh_rentalv2_resources`
+drop column multi_time_interval;
+ALTER TABLE `eh_rentalv2_resources`
+drop column day_open_time;
+ALTER TABLE `eh_rentalv2_resources`
+drop column day_close_time;
+ALTER TABLE `eh_rentalv2_resources`
+drop column day_begin_time;
+ALTER TABLE `eh_rentalv2_resources`
+drop column day_end_time;
+ALTER TABLE `eh_rentalv2_resources`
+drop column need_pay;
+ALTER TABLE `eh_rentalv2_resources`
+drop column resource_type2;
 
 ALTER TABLE `eh_rentalv2_resources`
 ADD COLUMN `resource_type` VARCHAR(64) DEFAULT NULL COMMENT '资源类型';
@@ -380,23 +425,33 @@ ADD COLUMN `resource_type` VARCHAR(64) DEFAULT NULL COMMENT '资源类型';
 
 -- 资源单元格表
 ALTER TABLE `eh_rentalv2_cells`
-DROP COLUMN unit,
-DROP COLUMN exclusive_flag,
-DROP COLUMN rental_step,
-DROP COLUMN halfresource_price,
-DROP COLUMN halfresource_original_price,
-DROP COLUMN half_org_member_original_price,
-DROP COLUMN half_org_member_price,
-DROP COLUMN half_approving_user_original_price,
-DROP COLUMN half_approving_user_price;
+drop column unit;
+ALTER TABLE `eh_rentalv2_cells`
+drop column exclusive_flag;
+ALTER TABLE `eh_rentalv2_cells`
+drop column rental_step;
+ALTER TABLE `eh_rentalv2_cells`
+drop column halfresource_price;
+ALTER TABLE `eh_rentalv2_cells`
+drop column halfresource_original_price;
+ALTER TABLE `eh_rentalv2_cells`
+drop column half_org_member_original_price;
+ALTER TABLE `eh_rentalv2_cells`
+drop column half_org_member_price;
+ALTER TABLE `eh_rentalv2_cells`
+drop column half_approving_user_original_price;
+ALTER TABLE `eh_rentalv2_cells`
+drop column half_approving_user_price;
 
 ALTER TABLE `eh_rentalv2_cells`
 ADD COLUMN `resource_type` VARCHAR(64) DEFAULT NULL COMMENT '资源类型';
 
 ALTER TABLE `eh_rentalv2_price_rules`
-DROP COLUMN weekend_price,
-DROP COLUMN org_member_weekend_price,
-DROP COLUMN approving_user_weekend_price;
+drop column weekend_price;
+ALTER TABLE `eh_rentalv2_price_rules`
+drop column org_member_weekend_price;
+ALTER TABLE `eh_rentalv2_price_rules`
+drop column approving_user_weekend_price;
 
 ALTER TABLE `eh_rentalv2_price_rules`
 ADD COLUMN `user_price_type` TINYINT(4) DEFAULT NULL COMMENT '用户价格类型, 1:统一价格 2：用户类型价格';
@@ -407,32 +462,50 @@ ADD COLUMN `user_price_type` TINYINT(4) DEFAULT NULL COMMENT '用户价格类型
 ALTER TABLE eh_rentalv2_orders CHANGE requestor_organization_id user_enterprise_id BIGINT(20) DEFAULT NULL COMMENT '申请人公司ID';
 
 ALTER TABLE `eh_rentalv2_orders`
-ADD COLUMN `resource_type` VARCHAR(64) DEFAULT NULL COMMENT '资源类型',
-ADD COLUMN `custom_object` TEXT,
-ADD COLUMN `user_enterprise_name` VARCHAR(64) DEFAULT NULL COMMENT '申请人公司名称',
-ADD COLUMN `user_phone` VARCHAR(20) DEFAULT NULL COMMENT '申请人手机',
-ADD COLUMN `user_name` VARCHAR(20) DEFAULT NULL COMMENT '申请人姓名',
-ADD COLUMN `address_id` BIGINT(20) DEFAULT NULL COMMENT '楼栋门牌ID',
-ADD COLUMN `refund_amount` DECIMAL(10,2) DEFAULT NULL,
-ADD COLUMN `actual_start_time` DATETIME DEFAULT NULL COMMENT '实际使用开始时间',
-ADD COLUMN `actual_end_time` DATETIME DEFAULT NULL COMMENT '实际使用结束时间',
-ADD COLUMN `string_tag1` VARCHAR(128) DEFAULT NULL,
-ADD COLUMN `string_tag2` VARCHAR(128) DEFAULT NULL,
-ADD COLUMN `scene` VARCHAR(64) DEFAULT NULL COMMENT '下单时场景信息，用来计算价格',
-ADD COLUMN `refund_strategy` TINYINT(4) DEFAULT NULL COMMENT '1-custom, 2-full',
-ADD COLUMN `overtime_strategy` TINYINT(4) DEFAULT NULL COMMENT '1-custom, 2-full',
-ADD COLUMN `old_end_time` DATETIME DEFAULT NULL COMMENT '延长订单时，存老的使用结束时间',
-ADD COLUMN `old_custom_object` TEXT;
+ADD COLUMN `resource_type` varchar(64) DEFAULT NULL COMMENT '资源类型';
+ALTER TABLE `eh_rentalv2_orders`
+ADD COLUMN `custom_object` text;
+ALTER TABLE `eh_rentalv2_orders`
+ADD COLUMN `user_enterprise_name` varchar(64) DEFAULT NULL COMMENT '申请人公司名称';
+ALTER TABLE `eh_rentalv2_orders`
+ADD COLUMN `user_phone` varchar(20) DEFAULT NULL COMMENT '申请人手机';
+ALTER TABLE `eh_rentalv2_orders`
+ADD COLUMN `user_name` varchar(20) DEFAULT NULL COMMENT '申请人姓名';
+ALTER TABLE `eh_rentalv2_orders`
+ADD COLUMN `address_id` bigint(20) DEFAULT NULL COMMENT '楼栋门牌ID';
+ALTER TABLE `eh_rentalv2_orders`
+ADD COLUMN `refund_amount` decimal(10,2) DEFAULT NULL;
+ALTER TABLE `eh_rentalv2_orders`
+ADD COLUMN `actual_start_time` datetime DEFAULT NULL COMMENT '实际使用开始时间';
+ALTER TABLE `eh_rentalv2_orders`
+ADD COLUMN `actual_end_time` datetime DEFAULT NULL COMMENT '实际使用结束时间';
+ALTER TABLE `eh_rentalv2_orders`
+ADD COLUMN `string_tag1` varchar(128) DEFAULT NULL;
+ALTER TABLE `eh_rentalv2_orders`
+ADD COLUMN `string_tag2` varchar(128) DEFAULT NULL;
+ALTER TABLE `eh_rentalv2_orders`
+ADD COLUMN `scene` varchar(64) DEFAULT NULL COMMENT '下单时场景信息，用来计算价格';
+ALTER TABLE `eh_rentalv2_orders`
+ADD COLUMN `refund_strategy` tinyint(4) DEFAULT NULL COMMENT '1-custom, 2-full';
+ALTER TABLE `eh_rentalv2_orders`
+ADD COLUMN `overtime_strategy` tinyint(4) DEFAULT NULL COMMENT '1-custom, 2-full';
+ALTER TABLE `eh_rentalv2_orders`
+ADD COLUMN `old_end_time` datetime DEFAULT NULL COMMENT '延长订单时，存老的使用结束时间';
+ALTER TABLE `eh_rentalv2_orders`
+ADD COLUMN `old_custom_object` text;
 
 
 ALTER TABLE `eh_rentalv2_orders`
-DROP COLUMN reserve_money,
-DROP COLUMN pay_start_time,
-DROP COLUMN pay_end_time;
+drop column reserve_money;
+ALTER TABLE `eh_rentalv2_orders`
+drop column pay_start_time;
+ALTER TABLE `eh_rentalv2_orders`
+drop column pay_end_time;
 
 ALTER TABLE `eh_rentalv2_resource_orders`
-DROP COLUMN rental_step,
-DROP COLUMN exclusive_flag;
+drop column rental_step;
+ALTER TABLE `eh_rentalv2_resource_orders`
+drop column exclusive_flag;
 
 UPDATE eh_rentalv2_default_rules SET resource_type = 'default';
 UPDATE eh_rentalv2_resources SET resource_type = 'default';
@@ -646,11 +719,11 @@ CREATE TABLE `eh_warehouse_suppliers`(
   `attachment_url` VARCHAR(2048) DEFAULT NULL COMMENT '附件地址',
   `create_time` DATETIME DEFAULT NOW(),
   `create_uid` BIGINT DEFAULT NULL,
-  `update_time` DATETIME DEFAULT NOW(),
+  `update_time` DATETIME DEFAULT now(),
   `update_uid` BIGINT DEFAULT NULL,
   `default_order` INTEGER DEFAULT 0,
   PRIMARY KEY (`id`)
-) ENGINE=INNODB DEFAULT CHARSET=utf8mb4;
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4;
 
 -- 采购管理schemas
 -- 采购单
@@ -667,15 +740,19 @@ CREATE TABLE `eh_warehouse_purchase_orders`(
   `total_amount` DECIMAL(20,2) DEFAULT 0.00 COMMENT '总金额',
   `warehouse_status` TINYINT DEFAULT NULL COMMENT '库存状态',
   `delivery_date` DATETIME DEFAULT NULL COMMENT '交付日期',
+  `community_id` BIGINT DEFAULT NULL,
+  `applicant_name` VARCHAR(128) DEFAULT NULL,
+  `contact_tel` VARCHAR(128) DEFAULT NULL,
+  `contact_name` VARCHAR(128) DEFAULT NULL,
   `remark` VARCHAR(2048) DEFAULT NULL COMMENT '备注',
   `approval_order_id` BIGINT DEFAULT NULL COMMENT '关联的审批单的id',
   `create_time` DATETIME DEFAULT NOW(),
   `create_uid` BIGINT DEFAULT NULL,
-  `update_time` DATETIME DEFAULT NOW(),
+  `update_time` DATETIME DEFAULT now(),
   `update_uid` BIGINT DEFAULT NULL,
   `default_order` INTEGER DEFAULT 0,
   PRIMARY KEY (`id`)
-) ENGINE=INNODB DEFAULT CHARSET=utf8mb4;
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4;
 
 -- 采购单物品表
 DROP TABLE IF EXISTS `eh_warehouse_purchase_items`;
@@ -690,11 +767,11 @@ CREATE TABLE `eh_warehouse_purchase_items`(
   `unit_price` DECIMAL(20,2) DEFAULT 0.00 COMMENT '单价',
   `create_time` DATETIME DEFAULT NOW(),
   `create_uid` BIGINT DEFAULT NULL,
-  `update_time` DATETIME DEFAULT NOW(),
+  `update_time` DATETIME DEFAULT now(),
   `update_uid` BIGINT DEFAULT NULL,
   `default_order` INTEGER DEFAULT 0,
   PRIMARY KEY (`id`)
-) ENGINE=INNODB DEFAULT CHARSET=utf8mb4;
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4;
 
 -- 为物品增加供应商字段
 ALTER TABLE `eh_warehouse_materials` ADD COLUMN `supplier_id` BIGINT DEFAULT NULL COMMENT '物品的供应商的主键id';
@@ -710,7 +787,7 @@ CREATE TABLE `eh_warehouse_orders`(
   `identity` VARCHAR(128) NOT NULL COMMENT '出入库单号',
   `executor_id` BIGINT DEFAULT NULL COMMENT '执行人id',
   `executor_name` VARCHAR(128) DEFAULT NULL COMMENT '执行人姓名',
-  `executor_time` DATETIME DEFAULT NOW() COMMENT '执行时间',
+  `executor_time` DATETIME DEFAULT now() COMMENT '执行时间',
   `service_type` TINYINT DEFAULT NULL COMMENT '服务类型，1. 普通入库,2.领用出库，3.采购入库',
   `community_id` BIGINT DEFAULT NULL COMMENT '园区id',
   `create_time` DATETIME DEFAULT NOW(),
@@ -720,7 +797,7 @@ CREATE TABLE `eh_warehouse_orders`(
   `default_order` INTEGER DEFAULT 0,
   PRIMARY KEY (`id`),
   KEY `i_service_type` (`service_type`) COMMENT '出入库状态得索引，用于搜索'
-) ENGINE=INNODB DEFAULT CHARSET=utf8mb4;
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4;
 
 -- 增加出入库记录关联出入库单的字段
 ALTER TABLE `eh_warehouse_stock_logs` ADD COLUMN `warehouse_order_id` BIGINT DEFAULT NULL COMMENT '关联的出入库单的id';
@@ -748,7 +825,7 @@ CREATE TABLE `eh_requisitions`(
   `update_uid` BIGINT DEFAULT NULL,
   `default_order` INTEGER DEFAULT 0,
   PRIMARY KEY (`id`)
-) ENGINE=INNODB DEFAULT CHARSET=utf8mb4;
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4;
 
 -- 请示单类型
 DROP TABLE IF EXISTS `eh_requisition_types`;
@@ -764,7 +841,9 @@ CREATE TABLE `eh_requisition_types`(
   `update_uid` BIGINT DEFAULT NULL,
   `default_order` INTEGER DEFAULT 0,
   PRIMARY KEY (`id`)
-) ENGINE=INNODB DEFAULT CHARSET=utf8mb4;
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4;
+
+
 
 
 

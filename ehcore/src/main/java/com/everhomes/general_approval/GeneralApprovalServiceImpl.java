@@ -578,16 +578,23 @@ public class GeneralApprovalServiceImpl implements GeneralApprovalService {
 
     @Override
     public GeneralApprovalDTO updateGeneralApproval(UpdateGeneralApprovalCommand cmd) {
-        GeneralApproval ga = this.generalApprovalProvider.getGeneralApprovalById(cmd.getApprovalId());
-        if(ga == null)
+        Integer namespaceId = UserContext.getCurrentNamespaceId();
+        GeneralApproval result = this.generalApprovalProvider.getGeneralApprovalById(cmd.getApprovalId());
+        if (result == null)
             return null;
-        ga.setApprovalName(cmd.getApprovalName());
-        ga.setApprovalRemark(cmd.getApprovalRemark());
+        result.setApprovalName(cmd.getApprovalName());
+        result.setApprovalRemark(cmd.getApprovalRemark());
         if (null != cmd.getSupportType())
-            ga.setSupportType(cmd.getSupportType());
+            result.setSupportType(cmd.getSupportType());
 
-        this.generalApprovalProvider.updateGeneralApproval(ga);
-        return processApproval(ga);
+        dbProvider.execute((TransactionStatus status) -> {
+            //  1.update the approval
+            generalApprovalProvider.updateGeneralApproval(result);
+            //  2.update the scope
+            updateGeneralApprovalScope(namespaceId, result.getId(), cmd.getScopes());
+            return null;
+        });
+        return processApproval(result);
     }
 
     private void updateGeneralApprovalScope(Integer namespaceId, Long approvalId, List<GeneralApprovalScopeMapDTO> dtos) {
@@ -598,21 +605,21 @@ public class GeneralApprovalServiceImpl implements GeneralApprovalService {
         if (dtos == null || dtos.size() <= 0)
             return;
 
-        for(GeneralApprovalScopeMapDTO dto : dtos){
+        for (GeneralApprovalScopeMapDTO dto : dtos) {
             GeneralApprovalScopeMap scope = generalApprovalProvider.findGeneralApprovalScopeMap(namespaceId, approvalId,
                     dto.getSourceId(), dto.getSourceType());
 
             //  2.save ids under the sourceType condition
-            if(dto.getSourceType().equals(UniongroupTargetType.ORGANIZATION.getCode()))
+            if (dto.getSourceType().equals(UniongroupTargetType.ORGANIZATION.getCode()))
                 organizationIds.add(dto.getSourceId());
-            else if(dto.getSourceType().equals(UniongroupTargetType.MEMBERDETAIL.getCode()))
+            else if (dto.getSourceType().equals(UniongroupTargetType.MEMBERDETAIL.getCode()))
                 detailIds.add(dto.getSourceId());
 
             //  3.create or update the scope
-            if(scope != null){
+            if (scope != null) {
                 scope.setSourceDescription(dto.getSourceDescription());
                 generalApprovalProvider.updateGeneralApprovalScopeMap(scope);
-            }else{
+            } else {
                 scope = new GeneralApprovalScopeMap();
                 scope.setApprovalId(approvalId);
                 scope.setNamespaceId(namespaceId);
@@ -624,8 +631,10 @@ public class GeneralApprovalServiceImpl implements GeneralApprovalService {
         }
 
         //  4.delete the scope which is not in the array
-        generalApprovalProvider.deleteOddGeneralApprovalDetailScope(namespaceId, approvalId, detailIds);
-        generalApprovalProvider.deleteOddGeneralApprovalOrganizationScope(namespaceId, approvalId, organizationIds);
+        if (detailIds.size() > 0)
+            generalApprovalProvider.deleteOddGeneralApprovalDetailScope(namespaceId, approvalId, detailIds);
+        if (organizationIds.size() > 0)
+            generalApprovalProvider.deleteOddGeneralApprovalOrganizationScope(namespaceId, approvalId, organizationIds);
     }
 
     @Override
@@ -1173,7 +1182,32 @@ public class GeneralApprovalServiceImpl implements GeneralApprovalService {
     }
 
     @Override
+    public void initializeGeneralApprovalScope() {
+        Integer count = Integer.MAX_VALUE - 1;
+        List<GeneralApproval> approvals = generalApprovalProvider.queryGeneralApprovals(new ListingLocator(), count, ((locator, query) -> {
+            query.addConditions(Tables.EH_GENERAL_APPROVALS.MODULE_ID.eq(52000L));
+            query.addConditions(Tables.EH_GENERAL_APPROVALS.MODULE_TYPE.eq("EhOrganizations"));
+            return query;
+        }));
+        if (approvals == null || approvals.size() == 0)
+            return;
+        for (GeneralApproval approval : approvals) {
+            GeneralApprovalScopeMap scope = new GeneralApprovalScopeMap();
+            Organization organization = organizationProvider.findOrganizationById(approval.getOwnerId());
+            if (organization == null)
+                continue;
+            scope.setSourceId(organization.getId());
+            scope.setSourceType(UniongroupTargetType.ORGANIZATION.getCode());
+            scope.setSourceDescription(organization.getName());
+            scope.setApprovalId(approval.getId());
+            scope.setNamespaceId(approval.getNamespaceId());
+            generalApprovalProvider.createGeneralApprovalScopeMap(scope);
+        }
+    }
+
+    @Override
     public ListGeneralApprovalResponse listAvailableGeneralApprovals(ListGeneralApprovalCommand cmd){
         return null;
     }
+
 }

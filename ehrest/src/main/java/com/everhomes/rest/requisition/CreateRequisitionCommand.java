@@ -20,6 +20,7 @@ import java.math.BigDecimal;
  * <li>amount:金额</li>
  * <li>description:描述</li>
  * <li>attachmentUrl:附件的地址</li>
+ * <li>flowOwnerType:工作流的ownerType</li>
  *</ul>
  */
 public class CreateRequisitionCommand {
@@ -33,6 +34,15 @@ public class CreateRequisitionCommand {
     private String description;
     private Long requisitionTypeId;
     private String attachmentUrl;
+    private String flowOwnerType;
+
+    public String getFlowOwnerType() {
+        return flowOwnerType;
+    }
+
+    public void setFlowOwnerType(String flowOwnerType) {
+        this.flowOwnerType = flowOwnerType;
+    }
 
     public String getAttachmentUrl() {
         return attachmentUrl;

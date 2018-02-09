@@ -87,4 +87,6 @@ public interface GeneralApprovalService {
     void orderGeneralApprovals(OrderGeneralApprovalsCommand cmd);
 
     ListGeneralApprovalResponse listAvailableGeneralApprovals(ListGeneralApprovalCommand cmd);
+
+    void initializeGeneralApprovalScope();
 }
