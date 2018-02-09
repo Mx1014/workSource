@@ -1,5 +1,7 @@
+-- 公告管理 add by zhiwei.zhang
+
 -- 企业公告表
-DROP TABLE IF EXISTS `eh_enterprise_notices`;
+-- DROP TABLE IF EXISTS `eh_enterprise_notices`;
 CREATE TABLE `eh_enterprise_notices` (
   `id` BIGINT NOT NULL COMMENT 'id of the record',
   `namespace_id` INTEGER NOT NULL DEFAULT 0,
@@ -26,7 +28,7 @@ CREATE TABLE `eh_enterprise_notices` (
 ) ENGINE=INNODB DEFAULT CHARSET=UTF8MB4;
 
 -- 企业公告附件表
-DROP TABLE IF EXISTS `eh_enterprise_notice_attachments`;
+-- DROP TABLE IF EXISTS `eh_enterprise_notice_attachments`;
 CREATE TABLE `eh_enterprise_notice_attachments` (
   `id` BIGINT NOT NULL COMMENT 'id of the record',
   `namespace_id` INTEGER NOT NULL DEFAULT 0,
@@ -47,7 +49,7 @@ CREATE TABLE `eh_enterprise_notice_attachments` (
 
 
 -- 企业公告发送信息表
-DROP TABLE IF EXISTS `eh_enterprise_notice_receivers`;
+-- DROP TABLE IF EXISTS `eh_enterprise_notice_receivers`;
 CREATE TABLE `eh_enterprise_notice_receivers` (
   `id` BIGINT NOT NULL COMMENT 'id of the record',
   `namespace_id` INTEGER NOT NULL DEFAULT 0,
@@ -64,3 +66,5 @@ CREATE TABLE `eh_enterprise_notice_receivers` (
   KEY `i_notice_receivers_notice_id`(`notice_id`),
   KEY `i_notice_receivers_receiver_id`(`receiver_type`,`receiver_id`)
 ) ENGINE=INNODB DEFAULT CHARSET=UTF8MB4;
+
+-- end by zhiwei.zhang

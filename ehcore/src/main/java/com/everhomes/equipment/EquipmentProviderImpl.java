@@ -129,6 +129,7 @@ import org.springframework.stereotype.Component;
 import javax.annotation.PostConstruct;
 import java.sql.Timestamp;
 import java.util.ArrayList;
+import java.util.Calendar;
 import java.util.HashMap;
 import java.util.HashSet;
 import java.util.List;
@@ -982,7 +983,7 @@ public class EquipmentProviderImpl implements EquipmentProvider {
     }
 
     @Override
-    public List<EquipmentInspectionTasks> listDelayTasks(Long inspectionCategoryId, List<Long> standards, String targetType, Long targetId, Integer offset, Integer pageSize, Byte adminFlag, Timestamp startTime) {
+    public List<EquipmentInspectionTasks> listDelayTasks(Long inspectionCategoryId, List<Long> planIds, String targetType, Long targetId, Integer offset, Integer pageSize, Byte adminFlag, Timestamp startTime) {
         List<EquipmentInspectionTasks> result = new ArrayList<EquipmentInspectionTasks>();
 
         DSLContext context = dbProvider.getDslContext(AccessSpec.readOnly());
@@ -996,7 +997,7 @@ public class EquipmentProviderImpl implements EquipmentProvider {
         }
 
         if (AdminFlag.NO.equals(AdminFlag.fromStatus(adminFlag))) {
-            query.addConditions(Tables.EH_EQUIPMENT_INSPECTION_TASKS.STANDARD_ID.in(standards));
+            query.addConditions(Tables.EH_EQUIPMENT_INSPECTION_TASKS.PLAN_ID.in(planIds));
         }
 
         query.addConditions(Tables.EH_EQUIPMENT_INSPECTION_TASKS.EXECUTIVE_EXPIRE_TIME.ge(startTime));
@@ -2502,8 +2503,10 @@ public class EquipmentProviderImpl implements EquipmentProvider {
 
         DSLContext context = dbProvider.getDslContext(AccessSpec.readOnly());
         SelectQuery<EhEquipmentInspectionTasksRecord> query = context.selectQuery(Tables.EH_EQUIPMENT_INSPECTION_TASKS);
-        if (taskStatus != null)
+        if (taskStatus != null && taskStatus.size()>0){
             query.addConditions(Tables.EH_EQUIPMENT_INSPECTION_TASKS.STATUS.in(taskStatus));
+        }
+
         if (targetType != null && targetType.size() > 0)
             query.addConditions(Tables.EH_EQUIPMENT_INSPECTION_TASKS.TARGET_TYPE.in(targetType));
 
@@ -2518,6 +2521,8 @@ public class EquipmentProviderImpl implements EquipmentProvider {
         if (AdminFlag.YES.equals(AdminFlag.fromStatus(adminFlag))) {
             Condition con2 = Tables.EH_EQUIPMENT_INSPECTION_TASKS.STATUS.ne(EquipmentTaskStatus.NONE.getCode());
             query.addConditions(con2);
+            //测试使用
+            query.addConditions(Tables.EH_EQUIPMENT_INSPECTION_TASKS.CREATE_TIME.ge(addMonths(new Timestamp(System.currentTimeMillis()), -1)));
         }
 
         Condition con = null;
@@ -3207,5 +3212,13 @@ public class EquipmentProviderImpl implements EquipmentProvider {
                 .where(Tables.EH_EQUIPMENT_INSPECTION_EQUIPMENT_PLAN_MAP.EQUIMENT_ID.eq(equipmentId))
                 .and(Tables.EH_EQUIPMENT_INSPECTION_EQUIPMENT_PLAN_MAP.STANDARD_ID.eq(standardId))
                 .execute();
+    }
+    private Timestamp addMonths(Timestamp now, int months) {
+        Calendar calendar = Calendar.getInstance();
+        calendar.setTime(now);
+        calendar.add(Calendar.MONTH, months);
+        Timestamp time = new Timestamp(calendar.getTimeInMillis());
+
+        return time;
     }
 }
