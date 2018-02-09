@@ -164,7 +164,7 @@ import com.everhomes.rest.equipment.UpdateInspectionTemplateCommand;
 import com.everhomes.rest.equipment.VerifyEquipmentLocationCommand;
 import com.everhomes.rest.equipment.VerifyEquipmentLocationResponse;
 import com.everhomes.rest.equipment.findScopeFieldItemCommand;
-import com.everhomes.rest.equipment.searchEquipmentInspectionPlansCommand;
+import com.everhomes.rest.equipment.SearchEquipmentInspectionPlansCommand;
 import com.everhomes.rest.messaging.MessageBodyType;
 import com.everhomes.rest.messaging.MessageChannel;
 import com.everhomes.rest.messaging.MessageDTO;
@@ -5642,7 +5642,7 @@ private void checkUserPrivilege(Long orgId, Long privilegeId, Long communityId) 
 	}
 
 	@Override
-	public void exportInspectionPlans(searchEquipmentInspectionPlansCommand cmd, HttpServletResponse response) {
+	public void exportInspectionPlans(SearchEquipmentInspectionPlansCommand cmd, HttpServletResponse response) {
 		List<EquipmentInspectionPlanDTO> dtos = equipmentPlanSearcher.query(cmd).getEquipmentInspectionPlans();
 		List<EquipmentInspectionPlanDTO> plans = dtos.stream().map(this::toExportPlans).collect(Collectors.toList());
 		if (plans != null && plans.size() > 0) {
