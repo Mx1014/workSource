@@ -529,3 +529,15 @@ update eh_office_cubicle_categories SET status=2;
 SET @field_id = (SELECT MAX(id) FROM eh_var_fields);
 INSERT INTO `eh_var_fields` (`id`, `module_name`, `name`, `display_name`, `field_type`, `group_id`, `group_path`, `mandatory_flag`, `default_order`, `status`, `creator_uid`, `create_time`, `operator_uid`, `update_time`, `field_param`) VALUES ((@field_id := @field_id + 1), 'contract', 'parentId', '原合同', 'Long', '31', '/30/31/', '0', NULL, '2', '1', NOW(), NULL, NULL, '{\"fieldParamType\": \"text\", \"length\": 32}');
 INSERT INTO `eh_var_fields` (`id`, `module_name`, `name`, `display_name`, `field_type`, `group_id`, `group_path`, `mandatory_flag`, `default_order`, `status`, `creator_uid`, `create_time`, `operator_uid`, `update_time`, `field_param`) VALUES ((@field_id := @field_id + 1), 'contract', 'rootParentId', '初始合同', 'Long', '31', '/30/31/', '0', NULL, '2', '1', NOW(), NULL, NULL, '{\"fieldParamType\": \"text\", \"length\": 32}');
+
+--by zheng
+UPDATE eh_rentalv2_default_rules set rental_start_time = 7776000000 where rental_start_time = 0;
+UPDATE eh_rentalv2_default_rules set rental_start_time_flag = 1;
+
+update eh_rentalv2_resource_types set identify = 'conference' where name like '%会议室%';
+update eh_rentalv2_resource_types set identify = 'screen' where name like '%电子屏%';
+update eh_rentalv2_resource_types set identify = 'area' where name like '%场地%';
+-- beta 和 现网执行
+update eh_rentalv2_resource_types set identify = 'conference' where id in (10819,12030);
+update eh_rentalv2_resource_types set identify = 'screen' where id in (11,12168);
+update eh_rentalv2_resource_types set identify = 'area' where id in (10012,10062,10715,10716,10717,10814,12044,12078,12081,12082,12131,12175);
