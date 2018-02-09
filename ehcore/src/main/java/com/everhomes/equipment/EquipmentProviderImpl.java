@@ -3233,7 +3233,8 @@ public class EquipmentProviderImpl implements EquipmentProvider {
                 .set(Tables.EH_EQUIPMENT_INSPECTION_TASKS.PLAN_ID, planId)
                 .where(Tables.EH_EQUIPMENT_INSPECTION_TASKS.EQUIPMENT_ID.eq(equipmentId))
                 .and(Tables.EH_EQUIPMENT_INSPECTION_TASKS.STANDARD_ID.eq(standardId))
-                .and(Tables.EH_EQUIPMENT_INSPECTION_TASKS.STATUS.ne(EquipmentTaskStatus.NONE.getCode()));
+                .and(Tables.EH_EQUIPMENT_INSPECTION_TASKS.STATUS.ne(EquipmentTaskStatus.NONE.getCode()))
+                .execute();
     }
 
     @Override
@@ -3241,7 +3242,8 @@ public class EquipmentProviderImpl implements EquipmentProvider {
         DSLContext context = this.dbProvider.getDslContext(AccessSpec.readWrite());
         context.update(Tables.EH_EQUIPMENT_INSPECTION_TASKS)
                 .set(Tables.EH_EQUIPMENT_INSPECTION_TASKS.STATUS, EquipmentTaskStatus.NONE.getCode())
-                .where(Tables.EH_EQUIPMENT_INSPECTION_TASKS.PLAN_ID.eq(0L));
+                .where(Tables.EH_EQUIPMENT_INSPECTION_TASKS.PLAN_ID.eq(0L))
+                .execute();
 
     }
 }
