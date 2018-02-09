@@ -1616,6 +1616,7 @@ public class OrganizationServiceImpl implements OrganizationService {
 //        }
         User user = UserContext.current().getUser();
 
+        Long startTime = DateHelper.currentGMTTime().getTime();
 		dbProvider.execute((TransactionStatus status) -> {
             //已删除则直接跳出
             if(OrganizationStatus.DELETED.equals(OrganizationStatus.fromCode(organization.getStatus()))) {
@@ -1631,6 +1632,9 @@ public class OrganizationServiceImpl implements OrganizationService {
                 customerService.deleteEnterpriseCustomer(command, false);
             }
 
+            Long deleteEnterpriseCustomerTime = DateHelper.currentGMTTime().getTime();
+            LOGGER.debug("deleteEnterpriseById deleteEnterpriseCustomer els: {}", deleteEnterpriseCustomerTime - startTime);
+
             organization.setStatus(OrganizationStatus.DELETED.getCode());
             Timestamp now = new Timestamp(DateHelper.currentGMTTime().getTime());
             organization.setUpdateTime(now);
@@ -1644,9 +1648,15 @@ public class OrganizationServiceImpl implements OrganizationService {
                 organizationProvider.updateOrganizationCommunityRequest(r);
             }
 
+            Long updateOrganizationTime = DateHelper.currentGMTTime().getTime();
+            LOGGER.debug("deleteEnterpriseById updateOrganization els: {}", updateOrganizationTime - deleteEnterpriseCustomerTime);
+
             List<OrganizationMember> members = organizationProvider.listOrganizationMembers(organization.getId(), null);
             //把user_organization表中的相应记录更新为失效
             inactiveUserOrganizationWithMembers(members);
+
+            Long membersTime = DateHelper.currentGMTTime().getTime();
+            LOGGER.debug("deleteEnterpriseById inactiveUserOrganizationWithMembers els: {}", membersTime - updateOrganizationTime);
 
             List<OrganizationAddress> organizationAddresses = organizationProvider.findOrganizationAddressByOrganizationId(organization.getId());
 
@@ -1657,6 +1667,8 @@ public class OrganizationServiceImpl implements OrganizationService {
                     organizationProvider.updateOrganizationAddress(organizationAddress);
                 }
             }
+            Long organizationAddressesTime = DateHelper.currentGMTTime().getTime();
+            LOGGER.debug("deleteEnterpriseById updateOrganizationAddress els: {}", organizationAddressesTime - membersTime);
 
             /**modify by lei.lv**/
             //删除organizaiton时，需要把organizaiton下面的所有机构状态置为无效，而且把人员和机构的关系置为无效状态
@@ -1679,9 +1691,13 @@ public class OrganizationServiceImpl implements OrganizationService {
                 return null;
             }).collect(Collectors.toList());
 
+            Long underOrganiztionsTime = DateHelper.currentGMTTime().getTime();
+            LOGGER.debug("deleteEnterpriseById underOrganiztions els: {}", underOrganiztionsTime - organizationAddressesTime);
             organizationSearcher.deleteById(cmd.getId());
             return null;
         });
+        Long endTime = DateHelper.currentGMTTime().getTime();
+        LOGGER.debug("deleteEnterpriseById total els: {}", endTime - startTime);
     }
 
     @Override
