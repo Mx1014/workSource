@@ -6047,7 +6047,7 @@ private void checkUserPrivilege(Long orgId, Long privilegeId, Long communityId) 
                     CreateTaskCommand repairCommand = new CreateTaskCommand();
                     repairCommand = ConvertHelper.convert(cmd, CreateTaskCommand.class);
                     repairCommand.setAddress(equipment.getLocation());
-                    repairCommand.setAddressType(PmTaskAddressType.ORGANIZATION.getCode());
+                    repairCommand.setAddressType(PmTaskAddressType.FAMILY.getCode());
                     repairCommand.setReferId(cmd.getEquipmentId());
                     repairCommand.setReferType(EquipmentConstant.EQUIPMENT_REPAIR);
                     repairCommand.setTaskCategoryId(6L);
@@ -6062,7 +6062,7 @@ private void checkUserPrivilege(Long orgId, Long privilegeId, Long communityId) 
                     //设备状态变为维修中
                     equipmentProvider.updateEquipmentStatus(cmd.getEquipmentId(), EquipmentStatus.IN_MAINTENANCE.getCode());
                 } catch (Exception e) {
-					LOGGER.error("Sync Repair Tasks Erro TaskId = {}" + task.getId());
+					LOGGER.error("Sync Repair Tasks Erro, TaskId = {}" + task.getId());
 					LOGGER.error("Sync Repair Tasks Erro " + e);
 					OfflineEquipmentTaskReportLog repairLogs = getOfflineEquipmentTaskReportLogObject(task.getId(),ErrorCodes.ERROR_GENERAL_EXCEPTION,
                             EquipmentServiceErrorCode.ERROR_EQUIPMENT_TASK_SYNC_ERROR, EquipmentOfflineErrorType.INEPECT_TASK.getCode());
