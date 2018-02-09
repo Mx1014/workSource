@@ -44,7 +44,7 @@ ALTER TABLE `eh_pm_tasks`
 ALTER TABLE `eh_pm_tasks`
   ADD COLUMN `refer_id` BIGINT(20) NULL COMMENT '引用id' AFTER `refer_type`;
 
--- 物业巡检V3.1
+-- 物业巡检V3.1    by jiarui
 -- 设备巡检计划表
 CREATE TABLE `eh_equipment_inspection_plans` (
   `id` BIGINT(20) NOT NULL,
@@ -73,7 +73,7 @@ CREATE TABLE `eh_equipment_inspection_plans` (
 ) ENGINE=INNODB DEFAULT CHARSET=utf8mb4;
 
 
--- 设备巡检计划--设备 关联表
+-- 设备巡检计划--设备 关联表   by jiarui
 CREATE TABLE `eh_equipment_inspection_equipment_plan_map` (
   `id` BIGINT(20) NOT NULL,
   `equiment_id` BIGINT(20) NOT NULL DEFAULT '0',
@@ -98,7 +98,8 @@ CREATE TABLE `eh_equipment_inspection_plan_group_map` (
   `create_time` DATETIME DEFAULT NULL,
   PRIMARY KEY (`id`)
 ) ENGINE=INNODB DEFAULT CHARSET=utf8mb4;
--- 巡检计划 执行组审批组 关联表 end  by jiarui
+
+-- 巡检计划 审批时间表 end  by jiarui
 
 CREATE TABLE `eh_equipment_inspection_review_date` (
   `id` BIGINT(20) NOT NULL,
@@ -111,6 +112,7 @@ CREATE TABLE `eh_equipment_inspection_review_date` (
   PRIMARY KEY (`id`)
 ) ENGINE=INNODB DEFAULT CHARSET=utf8mb4;
 
+-- 设备操作记录表   by jiarui
 CREATE TABLE `eh_equipment_inspection_equipment_logs` (
   `id` BIGINT(20) NOT NULL COMMENT 'id',
   `owner_type` VARCHAR(32) NOT NULL DEFAULT '' COMMENT 'the type of who own the log, enterprise, etc',
@@ -127,17 +129,18 @@ CREATE TABLE `eh_equipment_inspection_equipment_logs` (
 --   设备增加经纬度字符串  by jiarui
 ALTER TABLE `eh_equipment_inspection_equipments`
   ADD COLUMN `coordinate`  VARCHAR(1024) NULL AFTER `geohash`;
--- 设备增加经纬度字符串  by jiarui
 
--- eh_equipment_inspection_tasks 增加plan_id字段 用于关联task和equipments
+
+-- eh_equipment_inspection_tasks 增加plan_id字段 用于关联task和equipments  by jiarui
 ALTER TABLE `eh_equipment_inspection_tasks`
   ADD COLUMN `plan_id`  BIGINT(20) NOT NULL ;
 
 
--- 标准增加周期类型
+-- 标准增加周期类型   by jiarui
 ALTER TABLE `eh_equipment_inspection_standards`
   ADD COLUMN `repeat_type` TINYINT(4) NOT NULL COMMENT ' 0: no repeat, 1: by day, 2: by week, 3: by month, 4: by year';
--- 操作记录表增加设备id表
+
+-- 任务操作记录表增加设备id表   by jiarui
 ALTER TABLE `eh_equipment_inspection_task_logs`
   ADD COLUMN `equipment_id`  BIGINT(20) NULL DEFAULT 0 ;
 ALTER TABLE `eh_equipment_inspection_task_logs`
@@ -148,7 +151,9 @@ ALTER TABLE `eh_equipment_inspection_task_logs`
   ADD COLUMN `maintance_status` TINYINT(4) NOT NULL DEFAULT '0' COMMENT '0: inactive 1: wating, 2: allocated 3: completed 4: closed';
 
 
--- 离线支持  jiarui
+-- 物业巡检V3.1  end   by jiarui
+
+-- 离线支持   by jiarui
 ALTER TABLE `eh_quality_inspection_specifications`
   ADD COLUMN `update_uid` BIGINT (20) NULL AFTER `status`;
 
@@ -161,13 +166,11 @@ ALTER TABLE `eh_quality_inspection_specifications`
 ALTER TABLE `eh_quality_inspection_specifications`
   ADD COLUMN `delete_time` DATETIME NULL ON UPDATE CURRENT_TIMESTAMP AFTER `delete_uid`;
 
--- 离线支持  jiarui
 -- 日志增加项目 jiarui
 
 ALTER TABLE `eh_quality_inspection_logs`
   ADD COLUMN `scope_id`  BIGINT(20) NULL DEFAULT 0 ;
 
--- 日志增加项目 jiarui
 
 -- 文档管理1.0 add by nan.rong 01/12/2018
 -- DROP TABLE eh_file_management_catalogs;
