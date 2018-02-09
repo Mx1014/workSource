@@ -17,4 +17,6 @@ public interface RequisitionProvider {
     Requisition findRequisitionById(Long requisitionId);
 
     List<RequisitionType> listRequisitionTypes(Integer namespaceId, Long ownerId, String ownerType);
+
+    void changeRequisitionStatus2Target(Byte target, Long referId);
 }

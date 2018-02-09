@@ -969,10 +969,23 @@ public class Rentalv2ServiceImpl implements Rentalv2Service {
 			cmd.setResourceType(RentalV2ResourceType.DEFAULT.getCode());
 		}
 
+		String ownerType = null;
+		Long ownerId = null;
+		if(RuleSourceType.DEFAULT.getCode().equals(cmd.getSourceType())){
+			ownerType = RuleSourceType.DEFAULT.getCode();
+			RentalDefaultRule rule = this.rentalv2Provider.getRentalDefaultRule(cmd.getOwnerType(), cmd.getOwnerId(),
+					cmd.getResourceType(), cmd.getResourceTypeId(), cmd.getSourceType(), cmd.getSourceId());
+			ownerId = rule.getId();
+		}else if(RuleSourceType.RESOURCE.getCode().equals(cmd.getSourceType())){
+			RentalResource rs = rentalCommonService.getRentalResource(cmd.getResourceType(), cmd.getSourceId());
+			ownerType = RuleSourceType.RESOURCE.getCode();
+			ownerId = rs.getId();
+		}
+
 		RentalItem siteItem = ConvertHelper.convert(cmd,RentalItem.class );
 		siteItem.setName(cmd.getItemName());
-		siteItem.setSourceType(cmd.getSourceType());
-		siteItem.setSourceId(cmd.getSourceId());
+		siteItem.setSourceType(ownerType);
+		siteItem.setSourceId(ownerId);
 		siteItem.setPrice(cmd.getItemPrice());
 		rentalv2Provider.createRentalSiteItem(siteItem);
 	}

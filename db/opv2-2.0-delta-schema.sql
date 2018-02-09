@@ -76,7 +76,7 @@ CREATE TABLE `eh_equipment_inspection_plans` (
 -- 设备巡检计划--设备 关联表   by jiarui
 CREATE TABLE `eh_equipment_inspection_equipment_plan_map` (
   `id` BIGINT(20) NOT NULL,
-  `equiment_id` BIGINT(20) NOT NULL DEFAULT '0',
+  `equipment_id` BIGINT(20) NOT NULL DEFAULT '0',
   `owner_id` BIGINT(20) NOT NULL DEFAULT '0',
   `owner_type` VARCHAR(32) NOT NULL DEFAULT '',
   `target_id` BIGINT(20) NOT NULL DEFAULT '0',
@@ -719,11 +719,11 @@ CREATE TABLE `eh_warehouse_suppliers`(
   `attachment_url` VARCHAR(2048) DEFAULT NULL COMMENT '附件地址',
   `create_time` DATETIME DEFAULT NOW(),
   `create_uid` BIGINT DEFAULT NULL,
-  `update_time` DATETIME DEFAULT NOW(),
+  `update_time` DATETIME DEFAULT now(),
   `update_uid` BIGINT DEFAULT NULL,
   `default_order` INTEGER DEFAULT 0,
   PRIMARY KEY (`id`)
-) ENGINE=INNODB DEFAULT CHARSET=utf8mb4;
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4;
 
 -- 采购管理schemas
 -- 采购单
@@ -740,15 +740,19 @@ CREATE TABLE `eh_warehouse_purchase_orders`(
   `total_amount` DECIMAL(20,2) DEFAULT 0.00 COMMENT '总金额',
   `warehouse_status` TINYINT DEFAULT NULL COMMENT '库存状态',
   `delivery_date` DATETIME DEFAULT NULL COMMENT '交付日期',
+  `community_id` BIGINT DEFAULT NULL,
+  `applicant_name` VARCHAR(128) DEFAULT NULL,
+  `contact_tel` VARCHAR(128) DEFAULT NULL,
+  `contact_name` VARCHAR(128) DEFAULT NULL,
   `remark` VARCHAR(2048) DEFAULT NULL COMMENT '备注',
   `approval_order_id` BIGINT DEFAULT NULL COMMENT '关联的审批单的id',
   `create_time` DATETIME DEFAULT NOW(),
   `create_uid` BIGINT DEFAULT NULL,
-  `update_time` DATETIME DEFAULT NOW(),
+  `update_time` DATETIME DEFAULT now(),
   `update_uid` BIGINT DEFAULT NULL,
   `default_order` INTEGER DEFAULT 0,
   PRIMARY KEY (`id`)
-) ENGINE=INNODB DEFAULT CHARSET=utf8mb4;
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4;
 
 -- 采购单物品表
 DROP TABLE IF EXISTS `eh_warehouse_purchase_items`;
@@ -763,11 +767,11 @@ CREATE TABLE `eh_warehouse_purchase_items`(
   `unit_price` DECIMAL(20,2) DEFAULT 0.00 COMMENT '单价',
   `create_time` DATETIME DEFAULT NOW(),
   `create_uid` BIGINT DEFAULT NULL,
-  `update_time` DATETIME DEFAULT NOW(),
+  `update_time` DATETIME DEFAULT now(),
   `update_uid` BIGINT DEFAULT NULL,
   `default_order` INTEGER DEFAULT 0,
   PRIMARY KEY (`id`)
-) ENGINE=INNODB DEFAULT CHARSET=utf8mb4;
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4;
 
 -- 为物品增加供应商字段
 ALTER TABLE `eh_warehouse_materials` ADD COLUMN `supplier_id` BIGINT DEFAULT NULL COMMENT '物品的供应商的主键id';
@@ -783,7 +787,7 @@ CREATE TABLE `eh_warehouse_orders`(
   `identity` VARCHAR(128) NOT NULL COMMENT '出入库单号',
   `executor_id` BIGINT DEFAULT NULL COMMENT '执行人id',
   `executor_name` VARCHAR(128) DEFAULT NULL COMMENT '执行人姓名',
-  `executor_time` DATETIME DEFAULT NOW() COMMENT '执行时间',
+  `executor_time` DATETIME DEFAULT now() COMMENT '执行时间',
   `service_type` TINYINT DEFAULT NULL COMMENT '服务类型，1. 普通入库,2.领用出库，3.采购入库',
   `community_id` BIGINT DEFAULT NULL COMMENT '园区id',
   `create_time` DATETIME DEFAULT NOW(),
@@ -793,7 +797,7 @@ CREATE TABLE `eh_warehouse_orders`(
   `default_order` INTEGER DEFAULT 0,
   PRIMARY KEY (`id`),
   KEY `i_service_type` (`service_type`) COMMENT '出入库状态得索引，用于搜索'
-) ENGINE=INNODB DEFAULT CHARSET=utf8mb4;
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4;
 
 -- 增加出入库记录关联出入库单的字段
 ALTER TABLE `eh_warehouse_stock_logs` ADD COLUMN `warehouse_order_id` BIGINT DEFAULT NULL COMMENT '关联的出入库单的id';
@@ -821,7 +825,7 @@ CREATE TABLE `eh_requisitions`(
   `update_uid` BIGINT DEFAULT NULL,
   `default_order` INTEGER DEFAULT 0,
   PRIMARY KEY (`id`)
-) ENGINE=INNODB DEFAULT CHARSET=utf8mb4;
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4;
 
 -- 请示单类型
 DROP TABLE IF EXISTS `eh_requisition_types`;
@@ -837,7 +841,9 @@ CREATE TABLE `eh_requisition_types`(
   `update_uid` BIGINT DEFAULT NULL,
   `default_order` INTEGER DEFAULT 0,
   PRIMARY KEY (`id`)
-) ENGINE=INNODB DEFAULT CHARSET=utf8mb4;
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4;
+
+
 
 
 

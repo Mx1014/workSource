@@ -20,7 +20,7 @@ import javax.validation.constraints.NotNull;
  *  <li>namespaceId: namespaceId</li>
  * </ul>
  */
-public class searchEquipmentInspectionPlansCommand {
+public class SearchEquipmentInspectionPlansCommand {
     @NotNull
     private Long ownerId;
 

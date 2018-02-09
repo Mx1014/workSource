@@ -11,6 +11,9 @@ WHERE STATUS =2  AND repeat_type =0;
 UPDATE eh_equipment_inspection_equipment_standard_map
 SET `status` = 0
 WHERE review_status IN (0, 3 ,4) OR review_result = 2;
+UPDATE eh_equipment_inspection_equipment_standard_map
+SET `status` = 0
+WHERE id NOT IN (SELECT id FROM (SELECT MIN(id)  AS id, count(target_id) AS count FROM eh_equipment_inspection_equipment_standard_map WHERE `status` = 1 GROUP BY target_id, standard_id HAVING count(target_id) >= 1) tmp);
 -- 上版bug数据修改
 
 --  标准数据增加周期类型 及关系表状态 end by jiarui 20180105
@@ -463,7 +466,7 @@ INSERT INTO `eh_salary_default_entities` (`id`, `editable_flag`, `delete_flag`, 
 UPDATE eh_launch_pad_items SET action_type = 71 WHERE namespace_id = 999964 AND action_type = 68;
 
 
--- initially added four kinds of requisiton types to schema eh_requistion_types
+-- initially added four kinds of requisiton types to schema eh_requistion_types by wentian
 INSERT INTO `eh_requisition_types` (`id`, `namespace_id`, `owner_type`, `owner_id`, `name`, `create_time`, `create_uid`, `update_time`, `update_uid`, `default_order`) VALUES (1, '0', 'EhNamespaces', '0', '采购申请', NOW(), '0', NULL, NULL, 1);
 SET @type_id = (SELECT MAX(`id`) FROM `eh_requisition_types`);
 SET @order_id = (SELECT MAX(`default_order`) FROM `eh_requisition_types`);
@@ -471,6 +474,7 @@ INSERT INTO `eh_requisition_types` (`id`, `namespace_id`, `owner_type`, `owner_i
 INSERT INTO `eh_requisition_types` (`id`, `namespace_id`, `owner_type`, `owner_id`, `name`, `create_time`, `create_uid`, `update_time`, `update_uid`, `default_order`) VALUES (@type_id:=@type_id+1, '0', 'EhNamespaces', '0', '付款申请', NOW(), '0', NULL, NULL, @order_id:=@order_id+10);
 INSERT INTO `eh_requisition_types` (`id`, `namespace_id`, `owner_type`, `owner_id`, `name`, `create_time`, `create_uid`, `update_time`, `update_uid`, `default_order`) VALUES (@type_id:=@type_id+1, '0', 'EhNamespaces', '0', '合同申请', NOW(), '0', NULL, NULL, @order_id:=@order_id+10);
 
+-- end of script by wentian
 
 
 
@@ -519,8 +523,10 @@ INSERT INTO `eh_launch_pad_items` (`id`, `namespace_id`, `app_id`, `scope_code`,
 -- end by zhiwei.zhang
 
 -- error codes added by wentian
-SET @eh_locale_strings_id = (SELECT MAX(id) FROM `eh_locale_strings`);
+SET @eh_locale_strings_id = (SELECT MAX(id) from `eh_locale_strings`);
 INSERT INTO `eh_locale_strings` (`id`, `scope`, `code`, `locale`, `text`) VALUES (@eh_locale_strings_id:=@eh_locale_strings_id+1, 'requisition', '1001', 'zh_CN', '未找到请示单工作流');
+INSERT INTO `eh_locale_strings` (`id`, `scope`, `code`, `locale`, `text`) VALUES (@eh_locale_strings_id:=@eh_locale_strings_id+1, 'purchase', '1001', 'zh_CN', '该采购单未完成或者已取消,不能进行入库操作');
+INSERT INTO `eh_locale_strings` (`id`, `scope`, `code`, `locale`, `text`) VALUES (@eh_locale_strings_id:=@eh_locale_strings_id+1, 'purchase', '1002', 'zh_CN', '未找到用户的采购模块工作流');
 
 -- by dengs.
 update eh_office_cubicle_categories SET status=2;
