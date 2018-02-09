@@ -5181,7 +5181,7 @@ public class OrganizationProviderImpl implements OrganizationProvider {
 		TableLike t2 = Tables.EH_ORGANIZATION_MEMBER_DETAILS.as("t2");
 		SelectJoinStep step = context.select().from(t1).leftOuterJoin(t2).on(t1.field("detail_id").eq(t2.field("id")));
 
-		Condition cond = t1.field("group_path").like(big_path+"/%");
+		Condition cond = t1.field("group_path").like(big_path+"%");
 
 		cond = cond.and(t1.field("namespace_id").eq(namespaceId));
 //		cond = cond.and(t1.field("status").eq(OrganizationMemberStatus.ACTIVE.getCode()));
@@ -5217,7 +5217,7 @@ public class OrganizationProviderImpl implements OrganizationProvider {
 			cond = cond.and(t1.field("detail_id").lt(locator.getAnchor()));
 
 		List<Long> result = step.where(cond).groupBy(t2.field("id")).orderBy(t2.field("id").desc()).limit(pageSize).fetch(t2.field("id"));
-		LOGGER.debug("step " +step.where(cond).groupBy(t2.field("id")).orderBy(t2.field("id").desc()).limit(pageSize));
+		LOGGER.debug("step " +step);
 //		if (null != locator)
 //			locator.setAnchor(null);
 
