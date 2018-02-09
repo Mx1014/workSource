@@ -178,7 +178,7 @@ public class PurchaseServiceImpl implements PurchaseService {
         GetPurchaseOrderDTO dto = new GetPurchaseOrderDTO();
         dto.setApprovalSheetId(order.getApprovalOrderId());
         dto.setContact(order.getContactName());
-        dto.setContactTel(order.getConatactTel());
+        dto.setContactTel(order.getContactTel());
         SimpleDateFormat sdf = new SimpleDateFormat("yyyy-MM-dd HH:mm");
         dto.setDeliveryDate(sdf.format(order.getDeliveryDate()));
         dto.setPurchaseRequestId(order.getId());
@@ -201,6 +201,7 @@ public class PurchaseServiceImpl implements PurchaseService {
             pto.setTotalAmount(String.valueOf((item.getUnitPrice().longValue() * item.getPurchaseQuantity())));
             pto.setUnit(warehouseProvider.findWarehouseUnitNameById(material.getUnitId()));
             pto.setUnitPrice(item.getUnitPrice().toPlainString());
+            itemDtos.add(pto);
         }
         dto.setDtos(itemDtos);
         return dto;

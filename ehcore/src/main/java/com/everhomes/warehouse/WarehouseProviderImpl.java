@@ -649,6 +649,7 @@ public class WarehouseProviderImpl implements WarehouseProvider {
                 .fetch(Tables.EH_WAREHOUSE_STOCKS.WAREHOUSE_ID);
         if(list.size() < 1) return null;
         return context.select(Tables.EH_WAREHOUSES.NAME)
+                .from(Tables.EH_WAREHOUSES)
                 .where(Tables.EH_WAREHOUSES.ID.eq(list.get(0)))
                 .fetchOne(Tables.EH_WAREHOUSES.NAME);
     }
