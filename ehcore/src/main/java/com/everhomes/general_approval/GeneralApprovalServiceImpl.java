@@ -559,9 +559,11 @@ public class GeneralApprovalServiceImpl implements GeneralApprovalService {
 
         //  1.set the general approval
         GeneralApproval ga = ConvertHelper.convert(cmd, GeneralApproval.class);
-        Integer namespaceId = UserContext.getCurrentNamespaceId();
-        ga.setNamespaceId(namespaceId);
+        User user = UserContext.current().getUser();
+        ga.setNamespaceId(user.getNamespaceId());
         ga.setStatus(GeneralApprovalStatus.INVALID.getCode());
+        ga.setOperatorUid(user.getId());
+        ga.setOperatorName(getUserRealName(user.getId(), ga.getOwnerId()));
         if (cmd.getIconUri() == null)
             ga.setIconUri("cs://1/image/aW1hZ2UvTVRvMU9EVTBNR1psWW1Kak1XSTNZalUwT0RVeVlUQXdOak0zWWpObE1ERmpZUQ");
 
@@ -569,7 +571,7 @@ public class GeneralApprovalServiceImpl implements GeneralApprovalService {
             //  2.create it into the database
             Long approvalId = generalApprovalProvider.createGeneralApproval(ga);
             //  3.update the scope
-            updateGeneralApprovalScope(namespaceId, approvalId, cmd.getScopes());
+            updateGeneralApprovalScope(ga.getNamespaceId(), approvalId, cmd.getScopes());
             return null;
         });
 
@@ -578,22 +580,25 @@ public class GeneralApprovalServiceImpl implements GeneralApprovalService {
 
     @Override
     public GeneralApprovalDTO updateGeneralApproval(UpdateGeneralApprovalCommand cmd) {
-        GeneralApproval result = this.generalApprovalProvider.getGeneralApprovalById(cmd.getApprovalId());
-        if (result == null)
+        Long userId = UserContext.currentUserId();
+        GeneralApproval ga = this.generalApprovalProvider.getGeneralApprovalById(cmd.getApprovalId());
+        if (ga == null)
             return null;
-        result.setApprovalName(cmd.getApprovalName());
-        result.setApprovalRemark(cmd.getApprovalRemark());
+        ga.setApprovalName(cmd.getApprovalName());
+        ga.setApprovalRemark(cmd.getApprovalRemark());
+        ga.setOperatorUid(userId);
+        ga.setOperatorName(getUserRealName(userId, ga.getOwnerId()));
         if (null != cmd.getSupportType())
-            result.setSupportType(cmd.getSupportType());
+            ga.setSupportType(cmd.getSupportType());
 
         dbProvider.execute((TransactionStatus status) -> {
             //  1.update the approval
-            generalApprovalProvider.updateGeneralApproval(result);
+            generalApprovalProvider.updateGeneralApproval(ga);
             //  2.update the scope
-            updateGeneralApprovalScope(result.getNamespaceId(), result.getId(), cmd.getScopes());
+            updateGeneralApprovalScope(ga.getNamespaceId(), ga.getId(), cmd.getScopes());
             return null;
         });
-        return processApproval(result);
+        return processApproval(ga);
     }
 
     private void updateGeneralApprovalScope(Integer namespaceId, Long approvalId, List<GeneralApprovalScopeMapDTO> dtos) {
@@ -634,6 +639,14 @@ public class GeneralApprovalServiceImpl implements GeneralApprovalService {
             generalApprovalProvider.deleteOddGeneralApprovalDetailScope(namespaceId, approvalId, detailIds);
         if (organizationIds.size() > 0)
             generalApprovalProvider.deleteOddGeneralApprovalOrganizationScope(namespaceId, approvalId, organizationIds);
+    }
+
+    private String getUserRealName(Long userId, Long ownerId){
+        OrganizationMember member = organizationProvider.findOrganizationMemberByOrgIdAndUId(userId, ownerId);
+        if(member != null)
+            return member.getContactName();
+        //  若没有真实姓名则返回昵称
+        return null;
     }
 
     @Override
