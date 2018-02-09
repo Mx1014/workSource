@@ -164,7 +164,7 @@ import com.everhomes.rest.equipment.UpdateInspectionTemplateCommand;
 import com.everhomes.rest.equipment.VerifyEquipmentLocationCommand;
 import com.everhomes.rest.equipment.VerifyEquipmentLocationResponse;
 import com.everhomes.rest.equipment.findScopeFieldItemCommand;
-import com.everhomes.rest.equipment.searchEquipmentInspectionPlansCommand;
+import com.everhomes.rest.equipment.SearchEquipmentInspectionPlansCommand;
 import com.everhomes.rest.messaging.MessageBodyType;
 import com.everhomes.rest.messaging.MessageChannel;
 import com.everhomes.rest.messaging.MessageDTO;
@@ -1896,7 +1896,7 @@ private void checkUserPrivilege(Long orgId, Long privilegeId, Long communityId) 
 		List<EquipmentStandardRelationDTO> equipmentStandardRelations = new ArrayList<>();
 		if (planMaps != null && planMaps.size() > 0) {
 			for (EquipmentInspectionEquipmentPlanMap map : planMaps) {
-				EquipmentInspectionEquipments equipment = equipmentProvider.findEquipmentById(map.getEquimentId());
+				EquipmentInspectionEquipments equipment = equipmentProvider.findEquipmentById(map.getEquipmentId());
 				EquipmentStandardRelationDTO relationDTO = new EquipmentStandardRelationDTO();
 				relationDTO.setEquipmentName(equipment.getName());
 				relationDTO.setLocation(equipment.getLocation());
@@ -5236,7 +5236,7 @@ private void checkUserPrivilege(Long orgId, Long privilegeId, Long communityId) 
 				equipmentPlanMap.setTargetId(cmd.getTargetId());
 				equipmentPlanMap.setTargetType(cmd.getTargetType());
 				equipmentPlanMap.setStandardId(relation.getStandardId());
-				equipmentPlanMap.setEquimentId(relation.getEquipmentId());
+				equipmentPlanMap.setEquipmentId(relation.getEquipmentId());
 
 				equipmentProvider.createEquipmentPlanMaps(equipmentPlanMap);
 				equipmentStandardRelation.add(relation);
@@ -5329,7 +5329,7 @@ private void checkUserPrivilege(Long orgId, Long privilegeId, Long communityId) 
 			equipmentPlanMap.setTargetId(cmd.getTargetId());
 			equipmentPlanMap.setTargetType(cmd.getTargetType());
 			equipmentPlanMap.setStandardId(relation.getStandardId());
-			equipmentPlanMap.setEquimentId(relation.getTargetId());
+			equipmentPlanMap.setEquipmentId(relation.getTargetId());
 
 			equipmentProvider.createEquipmentPlanMaps(equipmentPlanMap);
 			equipmentStandardRelation.add(relation);
@@ -5603,7 +5603,7 @@ private void checkUserPrivilege(Long orgId, Long privilegeId, Long communityId) 
 		List<EquipmentStandardRelationDTO> relationDTOS = new ArrayList<>();
 		if (planMaps != null && planMaps.size() > 0) {
 			for (EquipmentInspectionEquipmentPlanMap map : planMaps) {
-				EquipmentInspectionEquipments equipment = equipmentProvider.findEquipmentById(map.getEquimentId());
+				EquipmentInspectionEquipments equipment = equipmentProvider.findEquipmentById(map.getEquipmentId());
 				EquipmentInspectionStandards standard = equipmentProvider.findStandardById(map.getStandardId());
 
 				EquipmentStandardRelationDTO relations = new EquipmentStandardRelationDTO();
@@ -5642,7 +5642,7 @@ private void checkUserPrivilege(Long orgId, Long privilegeId, Long communityId) 
 	}
 
 	@Override
-	public void exportInspectionPlans(searchEquipmentInspectionPlansCommand cmd, HttpServletResponse response) {
+	public void exportInspectionPlans(SearchEquipmentInspectionPlansCommand cmd, HttpServletResponse response) {
 		List<EquipmentInspectionPlanDTO> dtos = equipmentPlanSearcher.query(cmd).getEquipmentInspectionPlans();
 		List<EquipmentInspectionPlanDTO> plans = dtos.stream().map(this::toExportPlans).collect(Collectors.toList());
 		if (plans != null && plans.size() > 0) {
@@ -5737,7 +5737,7 @@ private void checkUserPrivilege(Long orgId, Long privilegeId, Long communityId) 
 			equipmentProvider.createEquipmentInspectionPlans(plan);
 			EquipmentInspectionEquipmentPlanMap planMap = new EquipmentInspectionEquipmentPlanMap();
 			if (equipment != null){
-				planMap.setEquimentId(equipment.getId());
+				planMap.setEquipmentId(equipment.getId());
 				planMap.setTargetId(equipment.getTargetId());
 				planMap.setTargetType(equipment.getTargetType());
 			}
@@ -5907,14 +5907,14 @@ private void checkUserPrivilege(Long orgId, Long privilegeId, Long communityId) 
 
 					try {
 						equipmentProvider.updateEquipmentTask(task);
-						equipmentTasksSearcher.feedDoc(task);
 					} catch (Exception e) {
-						LOGGER.error("equipmentInspection task update failed, id = {}",r);
-						LOGGER.error("equipmentInspection task update failed",e.toString());
-						OfflineEquipmentTaskReportLog logObject = getOfflineEquipmentTaskReportLogObject(r,ErrorCodes.ERROR_GENERAL_EXCEPTION,
+						LOGGER.error("equipmentInspection task update failed, id = {}", r);
+						e.printStackTrace();
+						OfflineEquipmentTaskReportLog logObject = getOfflineEquipmentTaskReportLogObject(r, ErrorCodes.ERROR_GENERAL_EXCEPTION,
 								EquipmentServiceErrorCode.ERROR_EQUIPMENT_TASK_SYNC_ERROR, EquipmentOfflineErrorType.INEPECT_TASK.getCode());
 						reportLogs.add(logObject);
 					}
+					equipmentTasksSearcher.feedDoc(task);
 				}
 				reportLogs.add(reportLog);
 			});

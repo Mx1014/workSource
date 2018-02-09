@@ -11,6 +11,9 @@ WHERE STATUS =2  AND repeat_type =0;
 UPDATE eh_equipment_inspection_equipment_standard_map
 SET `status` = 0
 WHERE review_status IN (0, 3 ,4) OR review_result = 2;
+UPDATE eh_equipment_inspection_equipment_standard_map
+SET `status` = 0
+WHERE id NOT IN (SELECT id FROM (SELECT MIN(id)  AS id, count(target_id) AS count FROM eh_equipment_inspection_equipment_standard_map WHERE `status` = 1 GROUP BY target_id, standard_id HAVING count(target_id) >= 1) tmp);
 -- 上版bug数据修改
 
 --  标准数据增加周期类型 及关系表状态 end by jiarui 20180105
