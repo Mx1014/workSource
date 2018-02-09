@@ -5907,14 +5907,14 @@ private void checkUserPrivilege(Long orgId, Long privilegeId, Long communityId) 
 
 					try {
 						equipmentProvider.updateEquipmentTask(task);
-						equipmentTasksSearcher.feedDoc(task);
 					} catch (Exception e) {
-						LOGGER.error("equipmentInspection task update failed, id = {}",r);
-						LOGGER.error("equipmentInspection task update failed",e.toString());
-						OfflineEquipmentTaskReportLog logObject = getOfflineEquipmentTaskReportLogObject(r,ErrorCodes.ERROR_GENERAL_EXCEPTION,
+						LOGGER.error("equipmentInspection task update failed, id = {}", r);
+						e.printStackTrace();
+						OfflineEquipmentTaskReportLog logObject = getOfflineEquipmentTaskReportLogObject(r, ErrorCodes.ERROR_GENERAL_EXCEPTION,
 								EquipmentServiceErrorCode.ERROR_EQUIPMENT_TASK_SYNC_ERROR, EquipmentOfflineErrorType.INEPECT_TASK.getCode());
 						reportLogs.add(logObject);
 					}
+					equipmentTasksSearcher.feedDoc(task);
 				}
 				reportLogs.add(reportLog);
 			});

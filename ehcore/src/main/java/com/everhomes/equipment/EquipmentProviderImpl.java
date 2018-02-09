@@ -554,9 +554,7 @@ public class EquipmentProviderImpl implements EquipmentProvider {
     @Caching(evict = {@CacheEvict(value = "listEquipmentInspectionTasksUseCache", allEntries = true)})
     @Override
     public void updateEquipmentTask(EquipmentInspectionTasks task) {
-
-        assert (task.getId() != null);
-
+        LOGGER.info("update task id ={}"+task.getId());
         DSLContext context = this.dbProvider.getDslContext(AccessSpec.readWriteWith(EhEquipmentInspectionTasks.class, task.getId()));
         EhEquipmentInspectionTasksDao dao = new EhEquipmentInspectionTasksDao(context.configuration());
         dao.update(task);
