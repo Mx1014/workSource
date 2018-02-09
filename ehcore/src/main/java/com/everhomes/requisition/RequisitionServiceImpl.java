@@ -56,7 +56,7 @@ public class RequisitionServiceImpl implements RequisitionService {
         req.setCreateTime(new Timestamp(DateHelper.currentGMTTime().getTime()));
         //创建工作流
         Flow flow = flowService.getEnabledFlow(cmd.getNamespaceId(), FlowConstants.REQUISITION_MODULE
-                , FlowModuleType.NO_MODULE.getCode(),cmd.getOwnerId(), FlowOwnerType.REQUISITION_REQUEST.getCode());
+                , FlowModuleType.NO_MODULE.getCode(),cmd.getOwnerId(), cmd.getFlowOwnerType());
         if (null == flow) {
             LOGGER.error("Enable request flow not found, moduleId={}", FlowConstants.REQUISITION_MODULE);
             throw RuntimeErrorException.errorWith(RequistionErrorCodes.SCOPE, RequistionErrorCodes.ERROR_CREATE_FLOW_CASE,

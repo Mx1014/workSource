@@ -40,8 +40,25 @@ public class CreateOrUpdatePurchaseOrderCommand {
     private String contactTel;
     private String contactName;
 
+
     public Long getCommunityId() {
         return communityId;
+    }
+
+    public String getContactTel() {
+        return contactTel;
+    }
+
+    public void setContactTel(String contactTel) {
+        this.contactTel = contactTel;
+    }
+
+    public String getContactName() {
+        return contactName;
+    }
+
+    public void setContactName(String contactName) {
+        this.contactName = contactName;
     }
 
     public void setCommunityId(Long communityId) {

@@ -82,6 +82,7 @@ public class PurchaseController extends ControllerBase{
     @RequestMapping("deletePurchaseOrder")
     @RestReturn(value = String.class)
     private RestResponse deletePurchaseOrder(DeletePurchaseOrderCommand cmd){
+        purchaseService.deletePurchaseOrder(cmd.getPurchaseRequestId());
         RestResponse restResponse = new RestResponse();
         restResponse.setErrorCode(200);
         restResponse.setErrorDescription("OK");

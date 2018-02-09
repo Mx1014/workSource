@@ -22,4 +22,8 @@ public interface PurchaseProvider {
     PurchaseOrder getPurchaseOrderById(Long purchaseRequestId);
 
     List<PurchaseItem> getPurchaseItemsByOrderId(Long purchaseRequestId);
+
+    void deleteOrderById(Long purchaseRequestId);
+
+    void deleteOrderItemsByOrderId(Long purchaseRequestId);
 }

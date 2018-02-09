@@ -6,23 +6,20 @@ import com.everhomes.entity.EntityType;
 import com.everhomes.flow.Flow;
 import com.everhomes.flow.FlowService;
 import com.everhomes.naming.NameMapper;
-import com.everhomes.purchase.PurchaseService;
-import com.everhomes.requisition.RequisitionService;
 import com.everhomes.rest.flow.CreateFlowCaseCommand;
 import com.everhomes.rest.flow.FlowConstants;
 import com.everhomes.rest.flow.FlowModuleType;
 import com.everhomes.rest.flow.FlowOwnerType;
 import com.everhomes.rest.purchase.*;
-import com.everhomes.rest.requisition.CreateRequisitionCommand;
-import com.everhomes.rest.requisition.RequistionErrorCodes;
+import com.everhomes.rest.warehouse.WarehouseMaterialStock;
 import com.everhomes.sequence.SequenceProvider;
 import com.everhomes.server.schema.tables.pojos.EhWarehousePurchaseItems;
 import com.everhomes.server.schema.tables.pojos.EhWarehousePurchaseOrders;
-import com.everhomes.user.User;
+import com.everhomes.supplier.SupplierProvider;
 import com.everhomes.user.UserContext;
-import com.everhomes.util.ConvertHelper;
 import com.everhomes.util.DateHelper;
 import com.everhomes.util.RuntimeErrorException;
+import com.everhomes.warehouse.WarehouseMaterials;
 import com.everhomes.warehouse.WarehouseProvider;
 import com.everhomes.warehouse.WarehouseStatus;
 import org.slf4j.Logger;
@@ -33,6 +30,7 @@ import org.springframework.transaction.TransactionStatus;
 
 import java.math.BigDecimal;
 import java.sql.Timestamp;
+import java.text.SimpleDateFormat;
 import java.util.ArrayList;
 import java.util.List;
 
@@ -53,6 +51,9 @@ public class PurchaseServiceImpl implements PurchaseService {
     private FlowService flowService;
     @Autowired
     private WarehouseProvider warehouseProvider;
+    @Autowired
+    private SupplierProvider supplierProvider;
+
 
 
     @Override
@@ -69,8 +70,10 @@ public class PurchaseServiceImpl implements PurchaseService {
         order.setNamespaceId(cmd.getNamespaceId());
         order.setOwnerId(cmd.getOwnerId());
         order.setOwnerType(cmd.getOwnerType());
-        order.setCommunityId(cmd.getCommunityId());
+        order.setCommunity(cmd.getCommunityId());
         order.setApplicantName(UserContext.current().getUser().getNickName());
+        order.setContactTel(cmd.getContactTel());
+        order.setContactName(cmd.getContactName());
         order.setRemark(cmd.getRemark());
         order.setCreateTime(new Timestamp(DateHelper.currentGMTTime().getTime()));
         order.setSupplierId(cmd.getSupplierId());
@@ -106,12 +109,12 @@ public class PurchaseServiceImpl implements PurchaseService {
         }
         //工作流case
         //创建工作流
-        Flow flow = flowService.getEnabledFlow(cmd.getNamespaceId(), FlowConstants.REQUISITION_MODULE
-                , FlowModuleType.NO_MODULE.getCode(),cmd.getOwnerId(), FlowOwnerType.REQUISITION_REQUEST.getCode());
+        Flow flow = flowService.getEnabledFlow(cmd.getNamespaceId(), FlowConstants.PURCHASE_MODULE
+                , FlowModuleType.NO_MODULE.getCode(),cmd.getOwnerId(), FlowOwnerType.PURCHASE.getCode());
         if (null == flow) {
-            LOGGER.error("Enable request flow not found, moduleId={}", FlowConstants.REQUISITION_MODULE);
-            throw RuntimeErrorException.errorWith(RequistionErrorCodes.SCOPE, RequistionErrorCodes.ERROR_CREATE_FLOW_CASE,
-                    "requistion flow case not found.");
+            LOGGER.error("Enable request flow not found, moduleId={}", FlowConstants.PURCHASE_MODULE);
+            throw RuntimeErrorException.errorWith(PurchaseErrorCodes.SCOPE, PurchaseErrorCodes.ERROR_CREATE_FLOW_CASE,
+                    "purchase flow case not found.");
         }
         CreateFlowCaseCommand createFlowCaseCommand = new CreateFlowCaseCommand();
         createFlowCaseCommand.setReferId(nextPurchaseOrderId);
@@ -174,10 +177,45 @@ public class PurchaseServiceImpl implements PurchaseService {
         //组装数据 TODO api字段和jooq字段保持一致可以节省代码
         GetPurchaseOrderDTO dto = new GetPurchaseOrderDTO();
         dto.setApprovalSheetId(order.getApprovalOrderId());
-        dto.setContact(order.getApplicantName());
-        dto.setContactTel(order.get);
+        dto.setContact(order.getContactName());
+        dto.setContactTel(order.getConatactTel());
+        SimpleDateFormat sdf = new SimpleDateFormat("yyyy-MM-dd HH:mm");
+        dto.setDeliveryDate(sdf.format(order.getDeliveryDate()));
+        dto.setPurchaseRequestId(order.getId());
+        dto.setRemark(order.getRemark());
+        dto.setSupplierId(order.getSupplierId());
+        dto.setSupplierName(supplierProvider.findSupplierNameById(order.getSupplierId()));
+        List<PurchaseMaterialDetailDTO> itemDtos = new ArrayList<>();
+        for(PurchaseItem item : items){
+            PurchaseMaterialDetailDTO pto = new PurchaseMaterialDetailDTO();
+            WarehouseMaterials material = warehouseProvider.findWarehouseMaterialById(item.getMaterialId());
+            WarehouseMaterialStock stock = warehouseProvider.findWarehouseStocksByMaterialId(item.getMaterialId());
+            pto.setBelongedWarehouse(warehouseProvider.findWarehouseNameByMaterialId(item.getMaterialId()));
+            pto.setMaterialCategory(warehouseProvider.findWarehouseMaterialCategoryByMaterialId(item.getMaterialId()));
+            pto.setMaterialId(item.getMaterialId());
+            pto.setMaterialName(material.getName());
+            pto.setMaterialNumber(material.getMaterialNumber());
+            pto.setPurchaseQuantity(item.getPurchaseQuantity());
+            pto.setStock(stock.getAmount());
+            pto.setSupplierName(material.getSupplierName());
+            pto.setTotalAmount(String.valueOf((item.getUnitPrice().longValue() * item.getPurchaseQuantity())));
+            pto.setUnit(warehouseProvider.findWarehouseUnitNameById(material.getUnitId()));
+            pto.setUnitPrice(item.getUnitPrice().toPlainString());
+        }
+        dto.setDtos(itemDtos);
         return dto;
 
 
+    }
+
+    @Override
+    public void deletePurchaseOrder(Long purchaseRequestId) {
+        this.dbProvider.execute((TransactionStatus status) -> {
+            //删除采购单表个
+            purchaseProvider.deleteOrderById(purchaseRequestId);
+            //删除采购单中的item
+            purchaseProvider.deleteOrderItemsByOrderId(purchaseRequestId);
+            return null;
+        });
     }
 }

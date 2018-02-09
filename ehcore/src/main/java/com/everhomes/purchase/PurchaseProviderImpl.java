@@ -97,6 +97,22 @@ public class PurchaseProviderImpl implements PurchaseProvider {
                 .fetchInto(PurchaseItem.class);
     }
 
+    @Override
+    public void deleteOrderById(Long purchaseRequestId) {
+        DSLContext context = getReadWriteContext();
+        context.delete(purchase)
+                .where(purchase.ID.eq(purchaseRequestId))
+                .execute();
+    }
+
+    @Override
+    public void deleteOrderItemsByOrderId(Long purchaseRequestId) {
+        DSLContext context = getReadWriteContext();
+        context.delete(purchaseItems)
+                .where(purchaseItems.PURCHASE_REQUEST_ID.eq(purchaseRequestId))
+                .execute();
+    }
+
     private DSLContext getReadOnlyContext(){
         return this.dbProvider.getDslContext(AccessSpec.readOnly());
     }

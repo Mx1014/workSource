@@ -2,6 +2,7 @@ package com.everhomes.warehouse;
 
 import com.everhomes.listing.CrossShardListingLocator;
 import com.everhomes.rest.warehouse.SearchWarehouseStockLogsResponse;
+import com.everhomes.rest.warehouse.WarehouseMaterialStock;
 import com.everhomes.rest.warehouse.WarehouseStockOrderDTO;
 import com.everhomes.server.schema.tables.pojos.EhWarehouseStockLogs;
 
@@ -88,4 +89,14 @@ public interface WarehouseProvider {
     List<Long> findAllMaterialLogIds(Long warehouseOrderId, Long anchor, int pageSize, SearchWarehouseStockLogsResponse response);
 
     void updateWarehouseStockByPurchase(Long materialId, Long purchaseQuantity);
+
+    String findWarehouseNameByMaterialId(Long materialId);
+
+    String findWarehouseMaterialCategoryByMaterialId(Long materialId);
+
+    String findWarehouseUnitNameById(Long unitId);
+
+    WarehouseMaterials findWarehouseMaterialById(Long materialId);
+
+    WarehouseMaterialStock findWarehouseStocksByMaterialId(Long materialId);
 }

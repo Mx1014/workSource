@@ -15,4 +15,6 @@ public interface PurchaseService {
     void entryWarehouse(Long purchaseRequestId);
 
     GetPurchaseOrderDTO getPurchaseOrder(GetPurchaseOrderCommand cmd);
+
+    void deletePurchaseOrder(Long purchaseRequestId);
 }
