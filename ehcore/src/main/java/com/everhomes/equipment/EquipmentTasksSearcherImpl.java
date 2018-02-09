@@ -290,7 +290,7 @@ public class EquipmentTasksSearcherImpl extends AbstractElasticSearch implements
         List<EquipmentStandardRelationDTO> relationDTOS = new ArrayList<>();
         if (planMaps != null && planMaps.size() > 0) {
             for (EhEquipmentInspectionEquipmentPlanMap map : planMaps) {
-                EquipmentInspectionEquipments equipment = equipmentProvider.findEquipmentById(map.getEquimentId());
+                EquipmentInspectionEquipments equipment = equipmentProvider.findEquipmentById(map.getEquipmentId());
                 EquipmentInspectionStandards standard = equipmentProvider.findStandardById(map.getStandardId());
 
                 EquipmentStandardRelationDTO relations = new EquipmentStandardRelationDTO();

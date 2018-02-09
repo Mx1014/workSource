@@ -1896,7 +1896,7 @@ private void checkUserPrivilege(Long orgId, Long privilegeId, Long communityId) 
 		List<EquipmentStandardRelationDTO> equipmentStandardRelations = new ArrayList<>();
 		if (planMaps != null && planMaps.size() > 0) {
 			for (EquipmentInspectionEquipmentPlanMap map : planMaps) {
-				EquipmentInspectionEquipments equipment = equipmentProvider.findEquipmentById(map.getEquimentId());
+				EquipmentInspectionEquipments equipment = equipmentProvider.findEquipmentById(map.getEquipmentId());
 				EquipmentStandardRelationDTO relationDTO = new EquipmentStandardRelationDTO();
 				relationDTO.setEquipmentName(equipment.getName());
 				relationDTO.setLocation(equipment.getLocation());
@@ -5236,7 +5236,7 @@ private void checkUserPrivilege(Long orgId, Long privilegeId, Long communityId) 
 				equipmentPlanMap.setTargetId(cmd.getTargetId());
 				equipmentPlanMap.setTargetType(cmd.getTargetType());
 				equipmentPlanMap.setStandardId(relation.getStandardId());
-				equipmentPlanMap.setEquimentId(relation.getEquipmentId());
+				equipmentPlanMap.setEquipmentId(relation.getEquipmentId());
 
 				equipmentProvider.createEquipmentPlanMaps(equipmentPlanMap);
 				equipmentStandardRelation.add(relation);
@@ -5329,7 +5329,7 @@ private void checkUserPrivilege(Long orgId, Long privilegeId, Long communityId) 
 			equipmentPlanMap.setTargetId(cmd.getTargetId());
 			equipmentPlanMap.setTargetType(cmd.getTargetType());
 			equipmentPlanMap.setStandardId(relation.getStandardId());
-			equipmentPlanMap.setEquimentId(relation.getTargetId());
+			equipmentPlanMap.setEquipmentId(relation.getTargetId());
 
 			equipmentProvider.createEquipmentPlanMaps(equipmentPlanMap);
 			equipmentStandardRelation.add(relation);
@@ -5603,7 +5603,7 @@ private void checkUserPrivilege(Long orgId, Long privilegeId, Long communityId) 
 		List<EquipmentStandardRelationDTO> relationDTOS = new ArrayList<>();
 		if (planMaps != null && planMaps.size() > 0) {
 			for (EquipmentInspectionEquipmentPlanMap map : planMaps) {
-				EquipmentInspectionEquipments equipment = equipmentProvider.findEquipmentById(map.getEquimentId());
+				EquipmentInspectionEquipments equipment = equipmentProvider.findEquipmentById(map.getEquipmentId());
 				EquipmentInspectionStandards standard = equipmentProvider.findStandardById(map.getStandardId());
 
 				EquipmentStandardRelationDTO relations = new EquipmentStandardRelationDTO();
@@ -5737,7 +5737,7 @@ private void checkUserPrivilege(Long orgId, Long privilegeId, Long communityId) 
 			equipmentProvider.createEquipmentInspectionPlans(plan);
 			EquipmentInspectionEquipmentPlanMap planMap = new EquipmentInspectionEquipmentPlanMap();
 			if (equipment != null){
-				planMap.setEquimentId(equipment.getId());
+				planMap.setEquipmentId(equipment.getId());
 				planMap.setTargetId(equipment.getTargetId());
 				planMap.setTargetType(equipment.getTargetType());
 			}

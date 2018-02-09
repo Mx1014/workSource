@@ -1660,7 +1660,7 @@ public class EquipmentProviderImpl implements EquipmentProvider {
     public List<EquipmentInspectionEquipmentPlanMap> listPlanMapByEquipmentId(Long equipmentId) {
         DSLContext context = this.dbProvider.getDslContext(AccessSpec.readOnly());
         return context.selectFrom(Tables.EH_EQUIPMENT_INSPECTION_EQUIPMENT_PLAN_MAP)
-                .where(Tables.EH_EQUIPMENT_INSPECTION_EQUIPMENT_PLAN_MAP.EQUIMENT_ID.eq(equipmentId))
+                .where(Tables.EH_EQUIPMENT_INSPECTION_EQUIPMENT_PLAN_MAP.EQUIPMENT_ID.eq(equipmentId))
                 .fetchInto(EquipmentInspectionEquipmentPlanMap.class);
     }
 
@@ -3024,7 +3024,7 @@ public class EquipmentProviderImpl implements EquipmentProvider {
     public void deleteEquipmentPlansMapByEquipmentId(Long equipmentId) {
         DSLContext context = this.dbProvider.getDslContext(AccessSpec.readWrite());
         context.delete(Tables.EH_EQUIPMENT_INSPECTION_EQUIPMENT_PLAN_MAP)
-                .where(Tables.EH_EQUIPMENT_INSPECTION_EQUIPMENT_PLAN_MAP.EQUIMENT_ID.eq(equipmentId))
+                .where(Tables.EH_EQUIPMENT_INSPECTION_EQUIPMENT_PLAN_MAP.EQUIPMENT_ID.eq(equipmentId))
                 .execute();
     }
 
@@ -3208,7 +3208,7 @@ public class EquipmentProviderImpl implements EquipmentProvider {
     public void deletePlanMapByEquipmentIdAndStandardId(Long equipmentId, Long standardId) {
         DSLContext context = this.dbProvider.getDslContext(AccessSpec.readWrite());
         context.delete(Tables.EH_EQUIPMENT_INSPECTION_EQUIPMENT_PLAN_MAP)
-                .where(Tables.EH_EQUIPMENT_INSPECTION_EQUIPMENT_PLAN_MAP.EQUIMENT_ID.eq(equipmentId))
+                .where(Tables.EH_EQUIPMENT_INSPECTION_EQUIPMENT_PLAN_MAP.EQUIPMENT_ID.eq(equipmentId))
                 .and(Tables.EH_EQUIPMENT_INSPECTION_EQUIPMENT_PLAN_MAP.STANDARD_ID.eq(standardId))
                 .execute();
     }
