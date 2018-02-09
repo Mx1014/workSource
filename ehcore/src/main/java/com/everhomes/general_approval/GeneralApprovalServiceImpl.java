@@ -602,7 +602,7 @@ public class GeneralApprovalServiceImpl implements GeneralApprovalService {
         List<Long> detailIds = new ArrayList<>();
         List<Long> organizationIds = new ArrayList<>();
 
-        if (dtos == null || dtos.size() <= 0)
+        if (dtos == null || dtos.size() == 0)
             return;
 
         for (GeneralApprovalScopeMapDTO dto : dtos) {
