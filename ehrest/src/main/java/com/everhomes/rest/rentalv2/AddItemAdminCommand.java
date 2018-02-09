@@ -4,9 +4,12 @@ import javax.validation.constraints.NotNull;
 
 import com.everhomes.util.StringHelper;
 /**
- * <ul> 
+ * <ul>
+ * <li>ownerType: ownerType {@link com.everhomes.rest.rentalv2.RentalOwnerType}</li>
+ * <li>ownerId: 园区id</li>
  * <li>sourceType：default_rule:默认规则  resource_rule:资源规则</li>
  * <li>sourceId：资源规则时 场所id 默认规则时 规则id </li>
+ * <li>resourceTypeId: 图标id</li>
  * <li>itemName：商品名称</li>
  * <li>itemPrice：商品价格</li>
  * <li>counts：商品数量</li>
@@ -16,6 +19,10 @@ import com.everhomes.util.StringHelper;
  * </ul>
  */
 public class AddItemAdminCommand {
+
+	private String ownerType;
+
+	private Long ownerId;
 	@NotNull
 	private String sourceType;
 	@NotNull
@@ -31,6 +38,7 @@ public class AddItemAdminCommand {
 	private java.lang.Byte       itemType;
 	private String description;
 	private String resourceType;
+	private Long resourceTypeId;
 
 	@Override
     public String toString() {
@@ -105,5 +113,29 @@ public class AddItemAdminCommand {
 
 	public void setResourceType(String resourceType) {
 		this.resourceType = resourceType;
+	}
+
+	public String getOwnerType() {
+		return ownerType;
+	}
+
+	public void setOwnerType(String ownerType) {
+		this.ownerType = ownerType;
+	}
+
+	public Long getOwnerId() {
+		return ownerId;
+	}
+
+	public void setOwnerId(Long ownerId) {
+		this.ownerId = ownerId;
+	}
+
+	public Long getResourceTypeId() {
+		return resourceTypeId;
+	}
+
+	public void setResourceTypeId(Long resourceTypeId) {
+		this.resourceTypeId = resourceTypeId;
 	}
 }
