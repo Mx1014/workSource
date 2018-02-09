@@ -5122,7 +5122,7 @@ private void checkUserPrivilege(Long orgId, Long privilegeId, Long communityId) 
 				scopeType = PmNotifyScopeType.NAMESPACE.getCode();
 				scopeId = cmd.getNamespaceId().longValue();
 				reviewDate = equipmentProvider.getEquipmentInspectiomExpireDays(scopeId, scopeType);
-				ConvertHelper.convert(reviewDate, EquipmentInspectionReviewDateDTO.class);
+				return ConvertHelper.convert(reviewDate, EquipmentInspectionReviewDateDTO.class);
 			}
 		}
 
@@ -5910,7 +5910,7 @@ private void checkUserPrivilege(Long orgId, Long privilegeId, Long communityId) 
 					if (date != null) {
 						task.setReviewExpiredDate(addDays(new Timestamp(DateHelper.currentGMTTime().getTime()), date.getReviewExpiredDays()));
 					} else {
-						task.setReviewExpiredDate(addDays(new Timestamp(DateHelper.currentGMTTime().getTime()), Integer.MAX_VALUE - 1));
+						task.setReviewExpiredDate(null);
 					}
 					task.setStatus(EquipmentTaskStatus.CLOSE.getCode());
 					task.setExecutiveTime(new Timestamp(DateHelper.currentGMTTime().getTime()));
