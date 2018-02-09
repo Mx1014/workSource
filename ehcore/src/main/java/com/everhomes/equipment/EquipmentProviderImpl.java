@@ -493,8 +493,7 @@ public class EquipmentProviderImpl implements EquipmentProvider {
     }
 
     @Override
-    public EquipmentInspectionAccessories findAccessoryById(Long id,
-                                                            String ownerType, Long ownerId) {
+    public EquipmentInspectionAccessories findAccessoryById(Long id, String ownerType, Long ownerId) {
         DSLContext context = dbProvider.getDslContext(AccessSpec.readOnly());
         SelectQuery<EhEquipmentInspectionAccessoriesRecord> query = context.selectQuery(Tables.EH_EQUIPMENT_INSPECTION_ACCESSORIES);
         query.addConditions(Tables.EH_EQUIPMENT_INSPECTION_ACCESSORIES.ID.eq(id));
@@ -554,7 +553,7 @@ public class EquipmentProviderImpl implements EquipmentProvider {
     @Caching(evict = {@CacheEvict(value = "listEquipmentInspectionTasksUseCache", allEntries = true)})
     @Override
     public void updateEquipmentTask(EquipmentInspectionTasks task) {
-        LOGGER.info("update task id ={}"+task.getId());
+        LOGGER.info("update task id = {}" + task.getId());
         DSLContext context = this.dbProvider.getDslContext(AccessSpec.readWriteWith(EhEquipmentInspectionTasks.class, task.getId()));
         EhEquipmentInspectionTasksDao dao = new EhEquipmentInspectionTasksDao(context.configuration());
         dao.update(task);

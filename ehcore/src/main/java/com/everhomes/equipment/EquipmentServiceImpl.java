@@ -5921,7 +5921,7 @@ private void checkUserPrivilege(Long orgId, Long privilegeId, Long communityId) 
 						equipmentProvider.updateEquipmentTask(task);
 					} catch (Exception e) {
 						LOGGER.error("equipmentInspection task update failed, id = {}", r);
-						e.printStackTrace();
+						LOGGER.error("equipmentInspection task update failed, ", e);
 						OfflineEquipmentTaskReportLog logObject = getOfflineEquipmentTaskReportLogObject(r, ErrorCodes.ERROR_GENERAL_EXCEPTION,
 								EquipmentServiceErrorCode.ERROR_EQUIPMENT_TASK_SYNC_ERROR, EquipmentOfflineErrorType.INEPECT_TASK.getCode());
 						reportLogs.add(logObject);
@@ -6062,9 +6062,9 @@ private void checkUserPrivilege(Long orgId, Long privilegeId, Long communityId) 
                     //设备状态变为维修中
                     equipmentProvider.updateEquipmentStatus(cmd.getEquipmentId(), EquipmentStatus.IN_MAINTENANCE.getCode());
                 } catch (Exception e) {
-                    e.printStackTrace();
-                    LOGGER.error("Sync Repair Tasks Erro TaskId={}"+task.getId());
-                    OfflineEquipmentTaskReportLog repairLogs = getOfflineEquipmentTaskReportLogObject(task.getId(),ErrorCodes.ERROR_GENERAL_EXCEPTION,
+					LOGGER.error("Sync Repair Tasks Erro TaskId = {}" + task.getId());
+					LOGGER.error("Sync Repair Tasks Erro " + e);
+					OfflineEquipmentTaskReportLog repairLogs = getOfflineEquipmentTaskReportLogObject(task.getId(),ErrorCodes.ERROR_GENERAL_EXCEPTION,
                             EquipmentServiceErrorCode.ERROR_EQUIPMENT_TASK_SYNC_ERROR, EquipmentOfflineErrorType.INEPECT_TASK.getCode());
                     logs.add(repairLogs);
                 }
