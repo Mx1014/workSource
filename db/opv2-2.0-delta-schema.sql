@@ -76,7 +76,7 @@ CREATE TABLE `eh_equipment_inspection_plans` (
 -- 设备巡检计划--设备 关联表   by jiarui
 CREATE TABLE `eh_equipment_inspection_equipment_plan_map` (
   `id` BIGINT(20) NOT NULL,
-  `equiment_id` BIGINT(20) NOT NULL DEFAULT '0',
+  `equipment_id` BIGINT(20) NOT NULL DEFAULT '0',
   `owner_id` BIGINT(20) NOT NULL DEFAULT '0',
   `owner_type` VARCHAR(32) NOT NULL DEFAULT '',
   `target_id` BIGINT(20) NOT NULL DEFAULT '0',
