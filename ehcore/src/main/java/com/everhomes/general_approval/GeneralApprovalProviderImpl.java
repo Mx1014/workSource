@@ -95,7 +95,7 @@ public class GeneralApprovalProviderImpl implements GeneralApprovalProvider {
 
     @Override
     public List<GeneralApproval> queryGeneralApprovals(ListingLocator locator, int count, ListingQueryBuilderCallback queryBuilderCallback) {
-        DSLContext context = this.dbProvider.getDslContext(AccessSpec.readWriteWith(EhGeneralApprovals.class));
+        DSLContext context = this.dbProvider.getDslContext(AccessSpec.readOnly());
 
         SelectQuery<EhGeneralApprovalsRecord> query = context.selectQuery(Tables.EH_GENERAL_APPROVALS);
         if (queryBuilderCallback != null)
@@ -106,9 +106,7 @@ public class GeneralApprovalProviderImpl implements GeneralApprovalProvider {
         }
 
         query.addLimit(count);
-        List<GeneralApproval> objs = query.fetch().map((r) -> {
-            return ConvertHelper.convert(r, GeneralApproval.class);
-        });
+        List<GeneralApproval> objs = query.fetch().map((r) -> ConvertHelper.convert(r, GeneralApproval.class));
 
         if (objs.size() >= count) {
             locator.setAnchor(objs.get(objs.size() - 1).getId());
