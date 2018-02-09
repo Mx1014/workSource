@@ -68,7 +68,7 @@ public class ServiceModuleAppServiceImpl implements ServiceModuleAppService {
 			}
 		}
 
-		List<ServiceModuleApp> moduleApps = serviceModuleAppProvider.listServiceModuleApp(namespaceId, moduleId, versionId);
+		List<ServiceModuleApp> moduleApps = serviceModuleAppProvider.listServiceModuleApp(namespaceId, versionId, moduleId);
 
 		return moduleApps;
 	}

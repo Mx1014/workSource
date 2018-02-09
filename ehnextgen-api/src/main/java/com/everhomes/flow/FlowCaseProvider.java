@@ -42,4 +42,8 @@ public interface FlowCaseProvider {
     FlowCase findFlowCaseByStartLinkId(Long parentId, Long originalNodeId, Long convergenceNodeId, Long startLinkId);
 
     Long getNextId();
+
+    Integer countApplierFlowCases(SearchFlowCaseCommand cmd);
+
+    Integer countAdminFlowCases(SearchFlowCaseCommand cmd);
 }

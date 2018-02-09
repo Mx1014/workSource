@@ -1,24 +1,31 @@
 package com.everhomes.general_approval;
 
 import com.everhomes.db.AccessSpec;
+import com.everhomes.db.DaoAction;
+import com.everhomes.db.DaoHelper;
 import com.everhomes.db.DbProvider;
 import com.everhomes.naming.NameMapper;
-import com.everhomes.listing.CrossShardListingLocator;
 import com.everhomes.listing.ListingLocator;
 import com.everhomes.listing.ListingQueryBuilderCallback;
 
 import java.sql.Timestamp;
 import java.util.ArrayList;
 import java.util.List;
-import java.util.stream.Collectors;
 
-import com.everhomes.rest.approval.ApprovalStatus;
 import com.everhomes.rest.general_approval.GeneralApprovalStatus;
+import com.everhomes.rest.uniongroup.UniongroupTargetType;
+import com.everhomes.server.schema.tables.daos.EhGeneralApprovalScopeMapDao;
+import com.everhomes.server.schema.tables.pojos.EhGeneralApprovalScopeMap;
+import com.everhomes.server.schema.tables.records.EhGeneralApprovalScopeMapRecord;
 import com.everhomes.server.schema.tables.records.EhGeneralApprovalTemplatesRecord;
 import org.jooq.DSLContext;
+import org.jooq.DeleteQuery;
 import org.jooq.SelectQuery;
 import org.jooq.UpdateQuery;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.cache.annotation.CacheEvict;
+import org.springframework.cache.annotation.Cacheable;
+import org.springframework.cache.annotation.Caching;
 import org.springframework.stereotype.Component;
 
 import com.everhomes.server.schema.Tables;
@@ -26,11 +33,9 @@ import com.everhomes.sequence.SequenceProvider;
 import com.everhomes.server.schema.tables.daos.EhGeneralApprovalsDao;
 import com.everhomes.server.schema.tables.pojos.EhGeneralApprovals;
 import com.everhomes.server.schema.tables.records.EhGeneralApprovalsRecord;
-import com.everhomes.sharding.ShardIterator;
 import com.everhomes.sharding.ShardingProvider;
 import com.everhomes.util.ConvertHelper;
 import com.everhomes.util.DateHelper;
-import com.everhomes.util.IterationMapReduceCallback.AfterAction;
 
 @Component
 public class GeneralApprovalProviderImpl implements GeneralApprovalProvider {
@@ -183,5 +188,80 @@ public class GeneralApprovalProviderImpl implements GeneralApprovalProvider {
         query.addValue(Tables.EH_GENERAL_APPROVALS.STATUS, GeneralApprovalStatus.INVALID.getCode());
         query.addValue(Tables.EH_GENERAL_APPROVALS.FORM_ORIGIN_ID, 0L);
         query.execute();
+    }
+
+    @Caching(evict = {@CacheEvict(value = "GeneralApprovalScopes", key = "#scope.approvalId")})
+    @Override
+    public void createGeneralApprovalScopeMap(GeneralApprovalScopeMap scope){
+        Long id = this.sequenceProvider.getNextSequence(NameMapper.getSequenceDomainFromTablePojo(EhGeneralApprovalScopeMap.class));
+        DSLContext context = this.dbProvider.getDslContext(AccessSpec.readWrite());
+        scope.setId(id);
+        scope.setCreateTime(new Timestamp(DateHelper.currentGMTTime().getTime()));
+        EhGeneralApprovalScopeMapDao dao = new EhGeneralApprovalScopeMapDao(context.configuration());
+        dao.insert(scope);
+        DaoHelper.publishDaoAction(DaoAction.CREATE, EhGeneralApprovalScopeMap.class, null);
+    }
+
+    @Caching(evict = {@CacheEvict(value = "GeneralApprovalScopes", key = "#scope.approvalId")})
+    @Override
+    public void updateGeneralApprovalScopeMap(GeneralApprovalScopeMap scope){
+        DSLContext context = this.dbProvider.getDslContext(AccessSpec.readWrite());
+        EhGeneralApprovalScopeMapDao dao = new EhGeneralApprovalScopeMapDao(context.configuration());
+        dao.update(scope);
+        DaoHelper.publishDaoAction(DaoAction.MODIFY, EhGeneralApprovalScopeMap.class, scope.getId());
+    }
+
+    @Cacheable(value = "GeneralApprovalScopes", key = "#approvalId", unless = "#result.size() == 0")
+    @Override
+    public GeneralApprovalScopeMap findGeneralApprovalScopeMap(Integer namespaceId, Long approvalId, Long sourceId, String sourceType){
+        DSLContext context = dbProvider.getDslContext(AccessSpec.readOnly());
+        SelectQuery<EhGeneralApprovalScopeMapRecord> query = context.selectQuery(Tables.EH_GENERAL_APPROVAL_SCOPE_MAP);
+        query.addConditions(Tables.EH_GENERAL_APPROVAL_SCOPE_MAP.NAMESPACE_ID.eq(namespaceId));
+        query.addConditions(Tables.EH_GENERAL_APPROVAL_SCOPE_MAP.APPROVAL_ID.eq(approvalId));
+        query.addConditions(Tables.EH_GENERAL_APPROVAL_SCOPE_MAP.SOURCE_ID.eq(sourceId));
+        query.addConditions(Tables.EH_GENERAL_APPROVAL_SCOPE_MAP.SOURCE_TYPE.eq(sourceType));
+        return query.fetchAnyInto(GeneralApprovalScopeMap.class);
+    }
+
+    //  delete odd detail source data
+    @Caching(evict = {@CacheEvict(value = "GeneralApprovalScopes", key = "#approvalId")})
+    @Override
+    public void deleteOddGeneralApprovalDetailScope(Integer namespaceId, Long approvalId, List<Long> detailIds){
+        DSLContext context = dbProvider.getDslContext(AccessSpec.readWrite());
+        DeleteQuery<EhGeneralApprovalScopeMapRecord> query = context.deleteQuery(Tables.EH_GENERAL_APPROVAL_SCOPE_MAP);
+        query.addConditions(Tables.EH_GENERAL_APPROVAL_SCOPE_MAP.NAMESPACE_ID.eq(namespaceId));
+        query.addConditions(Tables.EH_GENERAL_APPROVAL_SCOPE_MAP.APPROVAL_ID.eq(approvalId));
+        query.addConditions(Tables.EH_GENERAL_APPROVAL_SCOPE_MAP.SOURCE_TYPE.eq(UniongroupTargetType.MEMBERDETAIL.getCode()));
+        query.addConditions(Tables.EH_GENERAL_APPROVAL_SCOPE_MAP.SOURCE_ID.notIn(detailIds));
+        query.execute();
+        DaoHelper.publishDaoAction(DaoAction.MODIFY, EhGeneralApprovalScopeMap.class, null);
+    }
+
+    @Caching(evict = {@CacheEvict(value = "GeneralApprovalScopes", key = "#approvalId")})
+    @Override
+    public void deleteOddGeneralApprovalOrganizationScope(Integer namespaceId, Long approvalId, List<Long> detailIds){
+        DSLContext context = dbProvider.getDslContext(AccessSpec.readWrite());
+        DeleteQuery<EhGeneralApprovalScopeMapRecord> query = context.deleteQuery(Tables.EH_GENERAL_APPROVAL_SCOPE_MAP);
+        query.addConditions(Tables.EH_GENERAL_APPROVAL_SCOPE_MAP.NAMESPACE_ID.eq(namespaceId));
+        query.addConditions(Tables.EH_GENERAL_APPROVAL_SCOPE_MAP.APPROVAL_ID.eq(approvalId));
+        query.addConditions(Tables.EH_GENERAL_APPROVAL_SCOPE_MAP.SOURCE_TYPE.eq(UniongroupTargetType.ORGANIZATION.getCode()));
+        query.addConditions(Tables.EH_GENERAL_APPROVAL_SCOPE_MAP.SOURCE_ID.notIn(detailIds));
+        query.execute();
+        DaoHelper.publishDaoAction(DaoAction.MODIFY, EhGeneralApprovalScopeMap.class, null);
+    }
+
+    @Cacheable(value = "GeneralApprovalScopes", key = "#approvalId", unless = "#result.size() == 0")
+    @Override
+    public List<GeneralApprovalScopeMap> listGeneralApprovalScopes(Integer namespaceId, Long approvalId) {
+        List<GeneralApprovalScopeMap> results = new ArrayList<>();
+        DSLContext context = dbProvider.getDslContext(AccessSpec.readOnly());
+        SelectQuery<EhGeneralApprovalScopeMapRecord> query = context.selectQuery(Tables.EH_GENERAL_APPROVAL_SCOPE_MAP);
+        query.addConditions(Tables.EH_GENERAL_APPROVAL_SCOPE_MAP.NAMESPACE_ID.eq(namespaceId));
+        query.addConditions(Tables.EH_GENERAL_APPROVAL_SCOPE_MAP.APPROVAL_ID.eq(approvalId));
+        query.fetch().map(r -> {
+            results.add(ConvertHelper.convert(r, GeneralApprovalScopeMap.class));
+            return null;
+        });
+        return results;
     }
 }

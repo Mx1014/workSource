@@ -22,6 +22,8 @@ import com.everhomes.rest.flow.FlowModuleType;
 import com.everhomes.rest.flow.FlowOwnerType;
 import com.everhomes.rest.launchpad.ActionType;
 import com.everhomes.rest.payment_application.*;
+import com.everhomes.rest.requisition.GetRequisitionDetailCommand;
+import com.everhomes.rest.requisition.GetRequisitionDetailResponse;
 import com.everhomes.search.PaymentApplicationSearcher;
 import com.everhomes.settings.PaginationConfigHelper;
 import com.everhomes.sms.DateUtil;
@@ -153,6 +155,9 @@ public class PaymentApplicationServiceImpl implements PaymentApplicationService 
             Requisition requisition = requisitionProvider.findRequisitionById(application.getRequestId());
             if(requisition != null) {
                 dto.setRequestName(requisition.getTheme());
+                dto.setRequestIdentity(requisition.getIdentity());
+                dto.setRequestUserName(requisition.getApplicantName());
+                dto.setRequestDepartment(requisition.getApplicantDepartment());
             }
         }
 

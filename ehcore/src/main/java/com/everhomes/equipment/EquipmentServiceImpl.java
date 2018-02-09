@@ -68,6 +68,7 @@ import com.everhomes.rest.equipment.EquipmentInspectionPlanDTO;
 import com.everhomes.rest.equipment.EquipmentInspectionReviewDateDTO;
 import com.everhomes.rest.equipment.EquipmentModelType;
 import com.everhomes.rest.equipment.EquipmentNotificationTemplateCode;
+import com.everhomes.rest.equipment.EquipmentOfflineErrorType;
 import com.everhomes.rest.equipment.EquipmentOperateActionType;
 import com.everhomes.rest.equipment.EquipmentOperateLogsDTO;
 import com.everhomes.rest.equipment.EquipmentOperateObjectType;
@@ -224,6 +225,7 @@ import com.everhomes.user.User;
 import com.everhomes.user.UserContext;
 import com.everhomes.user.UserPrivilegeMgr;
 import com.everhomes.user.UserProvider;
+import com.everhomes.user.UserService;
 import com.everhomes.util.ConvertHelper;
 import com.everhomes.util.DateHelper;
 import com.everhomes.util.DownloadUtils;
@@ -397,6 +399,9 @@ public class EquipmentServiceImpl implements EquipmentService {
 
 	@Autowired
 	private PmTaskService pmTaskService;
+
+	@Autowired
+	private UserService userService;
 
 	@Override
 	public EquipmentStandardsDTO updateEquipmentStandard(UpdateEquipmentStandardCommand cmd) {
@@ -948,11 +953,8 @@ private void checkUserPrivilege(Long orgId, Long privilegeId, Long communityId) 
 	}
 
 	@Override
-	public void reviewEquipmentStandardRelations(
-			ReviewEquipmentStandardRelationsCommand cmd) {
+	public void reviewEquipmentStandardRelations(ReviewEquipmentStandardRelationsCommand cmd) {
 		User user = UserContext.current().getUser();
-		/*Long privilegeId = configProvider.getLongValue(EquipmentConstant.EQUIPMENT_RELATION_REVIEW, 0L);
-		userPrivilegeMgr.checkCurrentUserAuthority(EntityType.COMMUNITY.getCode(), cmd.getTargetId(), cmd.getOwnerId(), privilegeId);*/
 		checkUserPrivilege(cmd.getOwnerId(),PrivilegeConstants.EQUIPMENT_RELATION_REVIEW,cmd.getTargetId());
 
 		EquipmentStandardMap map = equipmentProvider.findEquipmentStandardMapById(cmd.getId());
@@ -1105,14 +1107,14 @@ private void checkUserPrivilege(Long orgId, Long privilegeId, Long communityId) 
 		} else {
 			EquipmentInspectionEquipments exist = verifyEquipment(cmd.getId(), cmd.getOwnerType(), cmd.getOwnerId());
 			equipment = ConvertHelper.convert(cmd, EquipmentInspectionEquipments.class);
-			//equipment.setGeohash(exist.getGeohash());
-			equipment.setQrCodeToken(exist.getQrCodeToken());
-			equipment.setNamespaceId(cmd.getNamespaceId());
+			equipment.setNamespaceId(exist.getNamespaceId());
+			equipment.setCreateTime(exist.getCreateTime());
+			equipment.setCreatorUid(exist.getCreatorUid());
 			equipment.setOperatorUid(user.getId());
 			equipment.setUpdateTime(new Timestamp(DateHelper.currentGMTTime().getTime()));
 
 			dealEquipmentRelateTime(cmd, equipment);
-			checkEquipmentLngAndLat(cmd, equipment, exist);
+			checkEquipmentLngAndLat(cmd, equipment);
 			equipmentProvider.updateEquipmentInspectionEquipment(equipment);
 			equipmentSearcher.feedDoc(equipment);
 			//删除计划关联表中的该设备
@@ -1123,12 +1125,10 @@ private void checkUserPrivilege(Long orgId, Long privilegeId, Long communityId) 
 			if (maps != null) {
 				for (EquipmentStandardMap map : maps) {
 					if (!updateStandardIds.contains(map.getStandardId())) {
-						//map.setReviewStatus(EquipmentReviewStatus.INACTIVE.getCode());
-						//fix bug #20247
 						map.setStatus(EquipmentStandardStatus.INACTIVE.getCode());
 						equipmentProvider.updateEquipmentStandardMap(map);
 						equipmentStandardMapSearcher.feedDoc(map);
-						//inactiveTasks(equipment.getId(), map.getStandardId());
+						inactivePlansByEquipmentIdAndStandardId(equipment.getId(), map.getStandardId());
 					}
 				}
 			}
@@ -1152,25 +1152,22 @@ private void checkUserPrivilege(Long orgId, Long privilegeId, Long communityId) 
 		}
 	}
 
-	private void checkEquipmentLngAndLat(UpdateEquipmentsCommand cmd, EquipmentInspectionEquipments equipment, EquipmentInspectionEquipments exist) {
-//		if(exist.getLatitude() != null && equipment.getLongitude() != null) {
-//            if(!exist.getLatitude().equals(equipment.getLatitude()) || !equipment.getLongitude().equals(exist.getLongitude()) ) {
-//                throw RuntimeErrorException.errorWith(EquipmentServiceErrorCode.SCOPE,
-//                        EquipmentServiceErrorCode.ERROR_EQUIPMENT_LOCATION_CANNOT_MODIFY,
-//                     "设备经纬度不能修改");
-//            }
-//        } else {
-            equipment.setLatitude(cmd.getLatitude());
-            equipment.setLongitude(cmd.getLongitude());
-            if ((equipment.getLongitude() == null || equipment.getLatitude() == null) && cmd.getQrCodeFlag() == 1) {
-                throw RuntimeErrorException.errorWith(EquipmentServiceErrorCode.SCOPE,
-                        EquipmentServiceErrorCode.ERROR_EQUIPMENT_NOT_SET_LOCATION,
-                     "设备没有设置经纬度");
-            }
+	private void inactivePlansByEquipmentIdAndStandardId(Long equipmentId, Long standardId) {
+		equipmentProvider.deletePlanMapByEquipmentIdAndStandardId(equipmentId, standardId);
+	}
 
-            String geohash= GeoHashUtils.encode(equipment.getLatitude(), equipment.getLongitude());
-            equipment.setGeohash(geohash);
-//        }
+	private void checkEquipmentLngAndLat(UpdateEquipmentsCommand cmd, EquipmentInspectionEquipments equipment) {
+		equipment.setLatitude(cmd.getLatitude());
+		equipment.setLongitude(cmd.getLongitude());
+		if ((equipment.getLongitude() == null || equipment.getLatitude() == null) && cmd.getQrCodeFlag() == 1) {
+			throw RuntimeErrorException.errorWith(EquipmentServiceErrorCode.SCOPE,
+					EquipmentServiceErrorCode.ERROR_EQUIPMENT_NOT_SET_LOCATION,
+					"设备没有设置经纬度");
+		}
+		if (equipment.getLatitude() != null && equipment.getLongitude() != null) {
+			String geohash = GeoHashUtils.encode(equipment.getLatitude(), equipment.getLongitude());
+			equipment.setGeohash(geohash);
+		}
 	}
 
 	private List<Long> increamentUpdateEquipmentStandardMap(User user, EquipmentInspectionEquipments equipment, List<EquipmentStandardMapDTO> eqStandardMap) {
@@ -1249,10 +1246,12 @@ private void checkUserPrivilege(Long orgId, Long privilegeId, Long communityId) 
 					EquipmentServiceErrorCode.ERROR_EQUIPMENT_NOT_SET_LOCATION,
 					"设备没有设置经纬度");
 		}
-		String geohash = GeoHashUtils.encode(equipment.getLatitude(), equipment.getLongitude());
+		String geohash = null;
+		if (equipment.getLatitude() != null && equipment.getLongitude() != null) {
+			geohash = GeoHashUtils.encode(equipment.getLatitude(), equipment.getLongitude());
+		}
 
 		dealEquipmentRelateTime(cmd, equipment);
-
 		Long userId = UserContext.currentUserId();
 		equipment.setGeohash(geohash);
 		equipment.setCreatorUid(userId);
@@ -2521,8 +2520,6 @@ private void checkUserPrivilege(Long orgId, Long privilegeId, Long communityId) 
 
 	private EquipmentInspectionEquipments verifyEquipment(Long equipmentId, String ownerType, Long ownerId) {
 
-//		EquipmentInspectionEquipments equipment = equipmentProvider.findEquipmentById(equipmentId, ownerType, ownerId);
-
 		//改用namespaceId by xiongying20170328
 		EquipmentInspectionEquipments equipment = equipmentProvider.findEquipmentById(equipmentId);
 
@@ -2732,10 +2729,12 @@ private void checkUserPrivilege(Long orgId, Long privilegeId, Long communityId) 
 				Integer abnormalCount =0;
 				Integer normalCount = 0;
 				for (InspectionItemResult result :dto.getItemResults()) {
-					if(result.getNormalFlag()==0)
+					if(result.getNormalFlag()==0) {
 						abnormalCount++;
-					if(result.getNormalFlag()==1)
+					}
+					if(result.getNormalFlag()==1) {
 						normalCount++;
+					}
 				}
 				dto.setAbnormalCount(abnormalCount);
 				dto.setNormalCount(normalCount);
@@ -3443,15 +3442,15 @@ private void checkUserPrivilege(Long orgId, Long privilegeId, Long communityId) 
 						cmd.getTargetId(), offset, pageSize, AdminFlag.YES.getCode(), startTime);
 		}
 		if(!isAdmin) {
-			List<Long> standards = new ArrayList<>();
+			List<Long> planIds = new ArrayList<>();
 			List<ExecuteGroupAndPosition> groupDtos = listUserRelateGroups();
-			List<EquipmentInspectionStandardGroupMap> maps = equipmentProvider.listEquipmentInspectionStandardGroupMapByGroupAndPosition(groupDtos, null);
+			List<EquipmentInspectionPlanGroupMap> maps = equipmentProvider.listEquipmentInspectionPlanGroupMapByGroupAndPosition(groupDtos, null);
 			if (maps != null && maps.size() > 0) {
-				for (EquipmentInspectionStandardGroupMap r : maps) {
-						standards.add(r.getStandardId());
+				for (EquipmentInspectionPlanGroupMap r : maps) {
+                    planIds.add(r.getPlanId());
 				}
 			}
-			tasks = equipmentProvider.listDelayTasks(cmd.getInspectionCategoryId(), standards, cmd.getTargetType(),
+			tasks = equipmentProvider.listDelayTasks(cmd.getInspectionCategoryId(), planIds, cmd.getTargetType(),
 						cmd.getTargetId(), offset, pageSize, AdminFlag.NO.getCode(), startTime);
 		}
 
@@ -3515,8 +3514,8 @@ private void checkUserPrivilege(Long orgId, Long privilegeId, Long communityId) 
 		List<EquipmentInspectionTasks> allTasks = null;
 		if(isAdmin) {
 			String cacheKey = convertListEquipmentInspectionTasksCache(cmd.getTaskStatus(), cmd.getInspectionCategoryId(),
-					targetTypes, targetIds, null, null, offset, 0L);
-			LOGGER.info("listEquipmentInspectionTasks is  Admin  cacheKey = {}" + cacheKey);
+                    targetTypes, targetIds, null, null, offset, pageSize, 0L);
+            LOGGER.info("listEquipmentInspectionTasks is  Admin  cacheKey = {}" + cacheKey);
 			allTasks = equipmentProvider.listEquipmentInspectionTasksUseCache(cmd.getTaskStatus(), cmd.getInspectionCategoryId(),
 					targetTypes, targetIds, null, null, offset, pageSize + 1, cacheKey, AdminFlag.YES.getCode(),lastSyncTime);
 
@@ -3552,8 +3551,8 @@ private void checkUserPrivilege(Long orgId, Long privilegeId, Long communityId) 
 			}
 
 			String cacheKey = convertListEquipmentInspectionTasksCache(cmd.getTaskStatus(), cmd.getInspectionCategoryId(), targetTypes, targetIds,
-					executePlanIds, reviewPlanIds, offset, userId);
-			LOGGER.info("listEquipmentInspectionTasks is not Admin  cacheKey = {}" + cacheKey);
+					executePlanIds, reviewPlanIds, offset, pageSize, userId);
+            LOGGER.info("listEquipmentInspectionTasks is not Admin  cacheKey = {}" + cacheKey);
 			allTasks = equipmentProvider.listEquipmentInspectionTasksUseCache(cmd.getTaskStatus(), cmd.getInspectionCategoryId(),
 					targetTypes, targetIds, executePlanIds, reviewPlanIds, offset, pageSize + 1, cacheKey, AdminFlag.NO.getCode(),lastSyncTime);
 
@@ -3617,7 +3616,7 @@ private void checkUserPrivilege(Long orgId, Long privilegeId, Long communityId) 
 
 
 	private String convertListEquipmentInspectionTasksCache(List<Byte> taskStatus, Long inspectionCategoryId,List<String> targetType, List<Long> targetId,
-				List<Long> executeStandardIds, List<Long> reviewStandardIds, Integer offset, Long userId) {
+				List<Long> executeStandardIds, List<Long> reviewStandardIds, Integer offset,Integer pageSize, Long userId) {
 
 		StringBuilder sb = new StringBuilder();
 		if(inspectionCategoryId == null) {
@@ -3634,7 +3633,8 @@ private void checkUserPrivilege(Long orgId, Long privilegeId, Long communityId) 
 		sb.append(inspectionCategoryId);
 		sb.append("-");
 		sb.append(offset);
-		sb.append("-");
+        sb.append(pageSize);
+        sb.append("-");
 		if(executeStandardIds == null) {
 			sb.append("all");
 		} else {
@@ -5767,11 +5767,13 @@ private void checkUserPrivilege(Long orgId, Long privilegeId, Long communityId) 
 
 	@Override
 	public EquipmentTaskOfflineResponse listEquipmentTasksDetails(ListEquipmentTasksCommand cmd) {
-		ListEquipmentTasksResponse response = listEquipmentTasks(cmd);//当前登录人的任务信息
-
+		//当前登录人的任务信息
+		ListEquipmentTasksResponse response = listEquipmentTasks(cmd);
 		EquipmentTaskOfflineResponse offlineResponse = new EquipmentTaskOfflineResponse();
-		List<EquipmentStandardRelationDTO> equipments = new ArrayList<>();//设备标准关联表 设备id 标准id
-		List<InspectionItemDTO> items = new ArrayList<>();//巡检item表包含standardId
+		//设备标准关联表 设备id 标准id
+		List<EquipmentStandardRelationDTO> equipments = new ArrayList<>();
+		//巡检item表包含standardId
+		List<InspectionItemDTO> items = new ArrayList<>();
 
 		OfflineTaskCountStat todayComplete = new OfflineTaskCountStat();
 		todayComplete.setCount(response.getTodayCompleteCount());
@@ -5781,8 +5783,8 @@ private void checkUserPrivilege(Long orgId, Long privilegeId, Long communityId) 
 		todayTaskCount.setCount(response.getTotayTasksCount());
 		todayTaskCount.setId(1L);
 
-		offlineResponse.setTodayCompleteCount(new ArrayList<>(Collections.singleton(todayComplete)));
-		offlineResponse.setTodayTasksCount(new ArrayList<>(Collections.singleton(todayTaskCount)));
+		offlineResponse.setTodayCompleteCount(new ArrayList<>(Collections.singletonList(todayComplete)));
+		offlineResponse.setTodayTasksCount(new ArrayList<>(Collections.singletonList(todayTaskCount)));
 		offlineResponse.setNextPageAnchor(response.getNextPageAnchor());
 
 		List<EquipmentTaskDTO> tasks = response.getTasks();
@@ -5826,7 +5828,8 @@ private void checkUserPrivilege(Long orgId, Long privilegeId, Long communityId) 
 		offlineResponse.setOfflineTasks(tasks);
 		offlineResponse.setEquipments(equipments);
 		ListParametersByStandardIdCommand listParametersByStandardIdCommand = new ListParametersByStandardIdCommand();
-		Map<Long, Long> standardIds = new HashMap<>();//去除重复的
+		//去除重复的
+		Map<Long, Long> standardIds = new HashMap<>();
 		equipments.forEach((relation) -> standardIds.put(relation.getStandardId(),relation.getStandardId()));
 		standardIds.forEach((k,v)->{
 			listParametersByStandardIdCommand.setStandardId(k);
@@ -5858,18 +5861,17 @@ private void checkUserPrivilege(Long orgId, Long privilegeId, Long communityId) 
 	@Override
 	public OfflineEquipmentTaskReportResponse offlineEquipmentTaskReport(OfflineEquipmentTaskReportCommand cmd) {
 		OfflineEquipmentTaskReportResponse offlineReportResponse = new OfflineEquipmentTaskReportResponse();
-		processEquipmentRepairTasks(cmd.getEquipmentRepairReportDetail());
 		List<OfflineEquipmentTaskReportLog> taskReportLogs = processEquipmentInspectionTasksAndResults(cmd);
+		List<OfflineEquipmentTaskReportLog> repairLogs = processEquipmentRepairTasks(cmd.getEquipmentRepairReportDetail());
+		taskReportLogs.addAll(repairLogs);
 		offlineReportResponse.setLogs(taskReportLogs);
 		return offlineReportResponse;
 	}
 
 	private List<OfflineEquipmentTaskReportLog> processEquipmentInspectionTasksAndResults(OfflineEquipmentTaskReportCommand command) {
 		//need  sync  tasks list
-		//List<EquipmentTaskDTO> tasks = command.getTasks();
 		Long ownerId = command.getOwnerId();
 		String ownerType = command.getOwnerType();
-		OfflineEquipmentTaskReportLog reportLog = new OfflineEquipmentTaskReportLog();
 		List<OfflineEquipmentTaskReportLog> reportLogs = new ArrayList<>();
 		List<Long> taskIds = new ArrayList<>();
 		if (command.getEquipmentTaskReportDetails() != null && command.getEquipmentTaskReportDetails().size() > 0) {
@@ -5878,14 +5880,17 @@ private void checkUserPrivilege(Long orgId, Long privilegeId, Long communityId) 
 
 		if (taskIds.size() > 0) {
 			taskIds.forEach((r) -> {
-				EquipmentInspectionTasks task = verifyEquipmentTask(r, ownerType, ownerId);
-				LOGGER.error("equipmentInspection task  not exist, id = {}",r);
-				reportLog.setErrorIds(r);
-				reportLog.setErrorCode(ErrorCodes.ERROR_GENERAL_EXCEPTION);
-				reportLog.setErrorDescription(localeStringService.getLocalizedString(String.valueOf(EquipmentServiceErrorCode.SCOPE),
-						String.valueOf(EquipmentServiceErrorCode.ERROR_EQUIPMENT_TASK_NOT_EXIST),
-						UserContext.current().getUser().getLocale(), "equipment inspection task  not exist"));
-				if (EquipmentTaskStatus.WAITING_FOR_EXECUTING.equals(EquipmentTaskStatus.fromStatus(task.getStatus()))) {
+				EquipmentInspectionTasks task = null;
+				OfflineEquipmentTaskReportLog reportLog = null;
+				try {
+					task = verifyEquipmentTask(r, ownerType, ownerId);
+				} catch (Exception e) {
+					LOGGER.error("equipmentInspection task  not exist, id = {}", r);
+					reportLog = getOfflineEquipmentTaskReportLogObject(r, ErrorCodes.ERROR_GENERAL_EXCEPTION,
+							EquipmentServiceErrorCode.ERROR_EQUIPMENT_TASK_NOT_EXIST, EquipmentOfflineErrorType.INEPECT_TASK.getCode());
+				}
+
+				if (task!=null && EquipmentTaskStatus.WAITING_FOR_EXECUTING.equals(EquipmentTaskStatus.fromStatus(task.getStatus()))) {
 					SetReviewExpireDaysCommand expireDaysCommand = new SetReviewExpireDaysCommand();
 					expireDaysCommand.setCommunityId(task.getTargetId());
 					expireDaysCommand.setNamespaceId(task.getNamespaceId());
@@ -5900,14 +5905,33 @@ private void checkUserPrivilege(Long orgId, Long privilegeId, Long communityId) 
 					task.setExecutorType(OwnerType.USER.getCode());
 					task.setExecutorId(UserContext.currentUserId());
 
-					equipmentProvider.updateEquipmentTask(task);
-					equipmentTasksSearcher.feedDoc(task);
+					try {
+						equipmentProvider.updateEquipmentTask(task);
+						equipmentTasksSearcher.feedDoc(task);
+					} catch (Exception e) {
+						LOGGER.error("equipmentInspection task update failed, id = {}",r);
+						LOGGER.error("equipmentInspection task update failed",e.toString());
+						OfflineEquipmentTaskReportLog logObject = getOfflineEquipmentTaskReportLogObject(r,ErrorCodes.ERROR_GENERAL_EXCEPTION,
+								EquipmentServiceErrorCode.ERROR_EQUIPMENT_TASK_SYNC_ERROR, EquipmentOfflineErrorType.INEPECT_TASK.getCode());
+						reportLogs.add(logObject);
+					}
 				}
 				reportLogs.add(reportLog);
 			});
 		}
 		reportLogs.addAll(processOfflineTaskLogsAndReportDetails(command.getEquipmentTaskReportDetails(), command.getTasks()));
 		return reportLogs;
+	}
+
+	private OfflineEquipmentTaskReportLog getOfflineEquipmentTaskReportLogObject(Long errorId, int errorCode, int errorDescription,Byte errorType) {
+		OfflineEquipmentTaskReportLog reportLog = new OfflineEquipmentTaskReportLog();
+		reportLog.setErrorIds(errorId);
+		reportLog.setErrorCode(errorCode);
+		reportLog.setErrorType(errorType);
+		reportLog.setErrorDescription(localeStringService.getLocalizedString(String.valueOf(EquipmentServiceErrorCode.SCOPE),
+				String.valueOf(errorDescription),
+				UserContext.current().getUser().getLocale(), "equipment inspection task  sync error"));
+		return reportLog;
 	}
 
 	private List<OfflineEquipmentTaskReportLog> processOfflineTaskLogsAndReportDetails(List<EquipmentTaskReportDetail> equipmentTaskReportDetails, List<EquipmentTaskDTO> tasks) {
@@ -5959,54 +5983,84 @@ private void checkUserPrivilege(Long orgId, Long privilegeId, Long communityId) 
 		return reportLogs;
 	}
 
-	private void processEquipmentRepairTasks(List<CreateEquipmentRepairCommand> equipmentRepairReportDetail) {
+	private List<OfflineEquipmentTaskReportLog> processEquipmentRepairTasks(List<CreateEquipmentRepairCommand> equipmentRepairReportDetail) {
+		List<OfflineEquipmentTaskReportLog> repairSyncLogs = new ArrayList<>();
 		if (equipmentRepairReportDetail != null && equipmentRepairReportDetail.size() > 0) {
-			equipmentRepairReportDetail.forEach(this::createRepairsTask);
+			equipmentRepairReportDetail.forEach((detail)->{
+				List<OfflineEquipmentTaskReportLog> reportLog = createRepairsTask(detail);
+				repairSyncLogs.addAll(reportLog);
+			});
 		}
+		return repairSyncLogs;
 	}
 
 	@Override
-	public void createRepairsTask(CreateEquipmentRepairCommand cmd) {
+	public List<OfflineEquipmentTaskReportLog> createRepairsTask(CreateEquipmentRepairCommand cmd) {
 
-		EquipmentInspectionTasks tasks = verifyEquipmentTask(cmd.getTaskId(), null, null);
-		//报修后log表中需维修状态保留
-		EquipmentInspectionTasksLogs tasksLog = new EquipmentInspectionTasksLogs();
-		tasksLog.setEquipmentId(cmd.getEquipmentId());
-		tasksLog.setOperatorType(OwnerType.USER.getCode());
-		tasksLog.setOperatorId(UserContext.currentUserId());
-		tasksLog.setInspectionCategoryId(tasks.getInspectionCategoryId());
-		tasksLog.setCommunityId(tasks.getTargetId());
-		tasksLog.setNamespaceId(cmd.getNamespaceId());
-		tasksLog.setTaskId(cmd.getTaskId());
-		tasksLog.setProcessType(EquipmentTaskProcessType.NEED_MAINTENANCE.getCode());//提交给报修
-		tasksLog.setProcessMessage(cmd.getContent());
-		tasksLog.setMaintanceType(cmd.getMaintanceType());
-		tasksLog.setProcessResult(EquipmentTaskProcessResult.NONE.getCode());
+		List<OfflineEquipmentTaskReportLog> logs =new ArrayList<>();
 
-		dbProvider.execute((TransactionStatus status) -> {
-			equipmentProvider.createEquipmentInspectionTasksLogs(tasksLog);
-			//调用物业报修
-			EquipmentInspectionEquipments equipment = verifyEquipment(cmd.getEquipmentId(), null, null);
-			CreateTaskCommand repairCommand = new CreateTaskCommand();
-			repairCommand = ConvertHelper.convert(cmd, CreateTaskCommand.class);
-			repairCommand.setAddress(equipment.getLocation());
-			repairCommand.setAddressType(PmTaskAddressType.ORGANIZATION.getCode());
-			repairCommand.setReferId(cmd.getEquipmentId());
-			repairCommand.setReferType(EquipmentConstant.EQUIPMENT_REPAIR);
-			repairCommand.setTaskCategoryId(6L);
-			ListTaskCategoriesCommand categoriesCommand = new ListTaskCategoriesCommand();
-			categoriesCommand.setPageSize(Integer.MAX_VALUE - 1);
-			List<OrganizationMember> members = organizationProvider.listOrganizationMembersByUId(UserContext.currentUserId());
-			if (members != null && members.size() > 0) {
-				repairCommand.setRequestorName(members.get(0).getContactName());
-				repairCommand.setRequestorPhone(members.get(0).getContactToken());
-			}
-			pmTaskService.createTask(repairCommand);
-			//设备状态变为维修中
-			equipmentProvider.updateEquipmentStatus(cmd.getEquipmentId(), EquipmentStatus.IN_MAINTENANCE.getCode());
-			return null;
-		});
+		EquipmentInspectionTasks tasks = null;
+		OfflineEquipmentTaskReportLog reportLog = null;
+		try {
+			tasks = verifyEquipmentTask(cmd.getTaskId(), null, null);
+		} catch (Exception e) {
+			e.printStackTrace();
+			LOGGER.error("equipmentInspection task  not exist, id = {}", cmd.getTaskId());
+			reportLog = getOfflineEquipmentTaskReportLogObject(cmd.getTaskId(), ErrorCodes.ERROR_GENERAL_EXCEPTION,
+					EquipmentServiceErrorCode.ERROR_EQUIPMENT_TASK_NOT_EXIST, EquipmentOfflineErrorType.INEPECT_TASK.getCode());
+			logs.add(reportLog);
+		}
+		if (tasks != null) {
+			//报修后log表中需维修状态保留
+			EquipmentInspectionTasksLogs tasksLog = new EquipmentInspectionTasksLogs();
+			tasksLog.setEquipmentId(cmd.getEquipmentId());
+			tasksLog.setOperatorType(OwnerType.USER.getCode());
+			tasksLog.setOperatorId(UserContext.currentUserId());
+			tasksLog.setInspectionCategoryId(tasks.getInspectionCategoryId());
+			tasksLog.setCommunityId(tasks.getTargetId());
+			tasksLog.setNamespaceId(cmd.getNamespaceId());
+			tasksLog.setTaskId(cmd.getTaskId());
+			//提交给报修
+			tasksLog.setProcessType(EquipmentTaskProcessType.NEED_MAINTENANCE.getCode());
+			tasksLog.setProcessMessage(cmd.getContent());
+			tasksLog.setMaintanceType(cmd.getMaintanceType());
+			tasksLog.setProcessResult(EquipmentTaskProcessResult.NONE.getCode());
+			EquipmentInspectionTasks task = tasks;
 
+			dbProvider.execute((TransactionStatus status) -> {
+                try {
+                    equipmentProvider.createEquipmentInspectionTasksLogs(tasksLog);
+                    //调用物业报修
+                    EquipmentInspectionEquipments equipment = verifyEquipment(cmd.getEquipmentId(), null, null);
+                    CreateTaskCommand repairCommand = new CreateTaskCommand();
+                    repairCommand = ConvertHelper.convert(cmd, CreateTaskCommand.class);
+                    repairCommand.setAddress(equipment.getLocation());
+                    repairCommand.setAddressType(PmTaskAddressType.ORGANIZATION.getCode());
+                    repairCommand.setReferId(cmd.getEquipmentId());
+                    repairCommand.setReferType(EquipmentConstant.EQUIPMENT_REPAIR);
+                    repairCommand.setTaskCategoryId(6L);
+                    ListTaskCategoriesCommand categoriesCommand = new ListTaskCategoriesCommand();
+                    categoriesCommand.setPageSize(Integer.MAX_VALUE - 1);
+                    List<OrganizationMember> members = organizationProvider.listOrganizationMembersByUId(UserContext.currentUserId());
+                    if (members != null && members.size() > 0) {
+                        repairCommand.setRequestorName(members.get(0).getContactName());
+                        repairCommand.setRequestorPhone(members.get(0).getContactToken());
+                    }
+                    pmTaskService.createTask(repairCommand);
+                    //设备状态变为维修中
+                    equipmentProvider.updateEquipmentStatus(cmd.getEquipmentId(), EquipmentStatus.IN_MAINTENANCE.getCode());
+                } catch (Exception e) {
+                    e.printStackTrace();
+                    LOGGER.error("Sync Repair Tasks Erro TaskId={}"+task.getId());
+                    OfflineEquipmentTaskReportLog repairLogs = getOfflineEquipmentTaskReportLogObject(task.getId(),ErrorCodes.ERROR_GENERAL_EXCEPTION,
+                            EquipmentServiceErrorCode.ERROR_EQUIPMENT_TASK_SYNC_ERROR, EquipmentOfflineErrorType.INEPECT_TASK.getCode());
+                    logs.add(repairLogs);
+                }
+                return null;
+            });
+		}
+
+		return logs;
 	}
 
 
@@ -6017,8 +6071,13 @@ private void checkUserPrivilege(Long orgId, Long privilegeId, Long communityId) 
 			return logs.stream().map((r) -> {
 						EquipmentOperateLogsDTO logsDTO = ConvertHelper.convert(r, EquipmentOperateLogsDTO.class);
 						List<OrganizationMember> member = organizationProvider.listOrganizationMembersByUId(r.getOperatorUid());
-						if (member != null && member.size() > 0)
+						if (member != null && member.size() > 0) {
 							logsDTO.setOperatorName(member.get(0).getContactName());
+						} else {
+							User user = userProvider.findUserById(r.getOperatorUid());
+							if (user != null)
+								logsDTO.setOperatorName(user.getNickName());
+						}
 						return logsDTO;
 					}
 			).collect(Collectors.toList());

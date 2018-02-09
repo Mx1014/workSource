@@ -11,7 +11,7 @@ import java.util.List;
 
 public class OfflineEquipmentTaskReportResponse {
     @ItemType(OfflineEquipmentTaskReportLog.class)
-    List<OfflineEquipmentTaskReportLog> logs;
+    private List<OfflineEquipmentTaskReportLog> logs;
 
     public List<OfflineEquipmentTaskReportLog> getLogs() {
         return logs;

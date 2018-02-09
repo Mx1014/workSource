@@ -174,6 +174,8 @@ public interface Rentalv2Service {
 
 	ResourceAttachmentDTO getResourceAttachment(GetResourceAttachmentCommand cmd);
 
+	void confirmRefund(ConfirmRefundCommand cmd);
+
 	AddRentalOrderUsingInfoResponse addRentalOrderUsingInfo(AddRentalOrderUsingInfoCommand cmd);
 
 	AddRentalOrderUsingInfoV2Response addRentalOrderUsingInfoV2(AddRentalOrderUsingInfoCommand cmd);
