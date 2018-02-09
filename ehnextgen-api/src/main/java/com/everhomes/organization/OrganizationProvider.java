@@ -445,7 +445,7 @@ public interface OrganizationProvider {
 
 	Set<Long> listMemberDetailIdWithExclude(Integer namespaceId, String big_path, List<String> small_path);
 
-	List<Long> listMemberDetailIdWithExclude(String keywords, Integer namespaceId, String big_path, List<String> small_path, Timestamp checkinTimeStart, Timestamp checkinTimeEnd, Timestamp dissmissTimeStart, Timestamp dissmissTimeEnd, CrossShardListingLocator locator, Integer pageSize, List<Long> notinDetails, List<Long> inDetails);
+	List<Long> listMemberDetailIdWithExclude(String keywords, Integer namespaceId, String big_path, List<String> small_path, Timestamp checkinTimeStart, Timestamp checkinTimeEnd, Timestamp dissmissTimeStart, Timestamp dissmissTimeEnd, CrossShardListingLocator locator, Integer pageSize, List<Long> notinDetails, List<Long> inDetails,List<String> groupTypes );
 
 	boolean checkIfLastOnNode(Integer namespaceId, Long organizationId, String contactToken, String path);
 

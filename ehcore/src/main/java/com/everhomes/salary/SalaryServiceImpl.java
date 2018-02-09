@@ -1017,6 +1017,14 @@ public class SalaryServiceImpl implements SalaryService {
         return writeOutPut(wb);
     }
 
+    private String getDepartmentName(Long detailId) {
+        Long departmentId = organizationService.getDepartmentByDetailId(detailId);
+        Organization department = organizationProvider.findOrganizationById(departmentId);
+        if (department != null)
+            return department.getName();
+        return "";
+    }
+
     private void createSalaryDetailRow(XSSFSheet sheet, Long detailId, List<SalaryGroupEntity> groupEntities, List<SalaryEntityCategory> categories, NormalFlag isFile, String month, Long ownerId) {
 
         OrganizationMemberDetails detail = organizationProvider.findOrganizationMemberDetailsByDetailId(detailId);
@@ -1028,7 +1036,7 @@ public class SalaryServiceImpl implements SalaryService {
         row.createCell(++i).setCellValue(detail.getContactName());
         row.createCell(++i).setCellValue(detail.getContactToken());
         row.createCell(++i).setCellValue(detail.getEmployeeNo());
-        row.createCell(++i).setCellValue(detail.getDepartment());
+        row.createCell(++i).setCellValue(getDepartmentName(detail.getId()));
         row.createCell(++i).setCellValue(detail.getIdNumber());
         row.createCell(++i).setCellValue(detail.getSalaryCardNumber());
         row.createCell(++i).setCellValue("在职不在职荣楠没跟我说");
@@ -1495,7 +1503,6 @@ public class SalaryServiceImpl implements SalaryService {
     }
 
     private void calculateSocialSecurityDptReports(Long ownerId, Organization dpt, String month, Long userId) {
-
         List<Long> detailIds = organizationService.listDetailIdWithEnterpriseExclude(null,
                 dpt.getNamespaceId(), dpt.getId(), null, null, null, null, null, Integer.MAX_VALUE - 1, null, null
         );

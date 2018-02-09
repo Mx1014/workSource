@@ -5175,13 +5175,13 @@ public class OrganizationProviderImpl implements OrganizationProvider {
 	@Override
 	public List<Long> listMemberDetailIdWithExclude(String keywords, Integer namespaceId, String big_path, List<String> small_path,
 													Timestamp checkinTimeStart, Timestamp checkinTimeEnd, Timestamp dissmissTimeStart, Timestamp dissmissTimeEnd,
-													CrossShardListingLocator locator, Integer pageSize,List<Long> notinDetails,List<Long> inDetails) {
+													CrossShardListingLocator locator, Integer pageSize,List<Long> notinDetails,List<Long> inDetails,List<String> groupTypes ) {
 		DSLContext context = dbProvider.getDslContext(AccessSpec.readOnly());
 		TableLike t1 = Tables.EH_ORGANIZATION_MEMBERS.as("t1");
 		TableLike t2 = Tables.EH_ORGANIZATION_MEMBER_DETAILS.as("t2");
 		SelectJoinStep step = context.select().from(t1).leftOuterJoin(t2).on(t1.field("detail_id").eq(t2.field("id")));
 
-		Condition cond = t1.field("group_path").like(big_path+"/%");
+		Condition cond = t1.field("group_path").like(big_path+"%");
 
 		cond = cond.and(t1.field("namespace_id").eq(namespaceId));
 //		cond = cond.and(t1.field("status").eq(OrganizationMemberStatus.ACTIVE.getCode()));
@@ -5194,7 +5194,10 @@ public class OrganizationProviderImpl implements OrganizationProvider {
 		if(!StringUtils.isEmpty(keywords)){
 			cond = cond.and(t2.field("contact_name").like("%" + keywords + "%"));
 		}
-		if (null != notinDetails) {
+        if (null != groupTypes) {
+            cond = cond.and(t1.field("group_type").in(groupTypes));
+        }
+        if (null != notinDetails) {
 			cond = cond.and(t2.field("id").notIn(notinDetails));
 		}
 		if (null != inDetails) {
@@ -5214,7 +5217,7 @@ public class OrganizationProviderImpl implements OrganizationProvider {
 			cond = cond.and(t1.field("detail_id").lt(locator.getAnchor()));
 
 		List<Long> result = step.where(cond).groupBy(t2.field("id")).orderBy(t2.field("id").desc()).limit(pageSize).fetch(t2.field("id"));
-		LOGGER.debug("step " +step.where(cond).groupBy(t2.field("id")).orderBy(t2.field("id").desc()).limit(pageSize));
+		LOGGER.debug("step " +step);
 //		if (null != locator)
 //			locator.setAnchor(null);
 

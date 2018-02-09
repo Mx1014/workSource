@@ -2204,8 +2204,11 @@ public class PortalServiceImpl implements PortalService {
 		//10、生成LaunchPadMappings
 		portalLaunchPadMappingProvider.createPortalLaunchPadMappings(portalLaunchPadMappings);
 
-		//此时发生了一个很伤心的事情，指向门户的item的actionData的内容中指定的layoutId还是旧的。
+		//此时发生了一个很伤心的事情，指向门户的item的actionData的内容中指定的layoutId还是旧的，指向应用的也是旧的。
 		updateItemActionData(namespaceId, newVersionId);
+
+		// 此时又发生了一个很伤心的事情，例如运营板块也包含了一些应用id，也是旧的
+		updateItemGroupConfig(namespaceId, newVersionId);
 
 	}
 
@@ -2214,16 +2217,16 @@ public class PortalServiceImpl implements PortalService {
 		List<PortalLayout> newPortalLayouts = portalLayoutProvider.listPortalLayoutByVersion(namespaceId, newVersionId);
 		List<ServiceModuleApp> newServiceModuleApps = serviceModuleAppProvider.listServiceModuleApp(namespaceId, newVersionId, null);
 		List<PortalItem> portalItems = portalItemProvider.listPortalItemsByVersionId(newVersionId);
-		if (portalItems == null || portalItems.size() > 0){
+		if (portalItems != null || portalItems.size() > 0){
 			for (PortalItem item: portalItems){
 
 				ItemActionData actionData = (ItemActionData) StringHelper.fromJsonString(item.getActionData(), ItemActionData.class);
-				if(actionData == null || actionData.getLayoutId() == null){
+				if(actionData == null){
 					continue;
 				}
 
 				//如果是指向layout，则更新layout的Id
-				if(PortalItemActionType.fromCode(item.getActionType()) == PortalItemActionType.LAYOUT && item.getActionData() != null){
+				if(PortalItemActionType.fromCode(item.getActionType()) == PortalItemActionType.LAYOUT && actionData.getLayoutId() != null){
 
 					PortalLayout oldPortalLayout = portalLayoutProvider.findPortalLayoutById(actionData.getLayoutId());
 					if(oldPortalLayout == null){
@@ -2238,10 +2241,8 @@ public class PortalServiceImpl implements PortalService {
 							break;
 						}
 					}
-				}
-
-				//如果是指向layout，则更新layout的Id
-				if(PortalItemActionType.fromCode(item.getActionType()) == PortalItemActionType.MODULEAPP && item.getActionData() != null){
+				}else if(PortalItemActionType.fromCode(item.getActionType()) == PortalItemActionType.MODULEAPP && actionData.getModuleAppId() != null){
+					//如果是指向serviceModuleApp，则更新serviceModuleApp的Id
 					ServiceModuleApp oldServiceModuleApp = serviceModuleAppProvider.findServiceModuleAppById(actionData.getModuleAppId());
 					if(oldServiceModuleApp == null){
 						continue;
@@ -2254,6 +2255,37 @@ public class PortalServiceImpl implements PortalService {
 							portalItemProvider.updatePortalItem(item);
 							break;
 						}
+					}
+				}
+
+			}
+		}
+
+	}
+
+	private void updateItemGroupConfig(Integer namespaceId, Long newVersionId){
+
+		List<PortalItemGroup> portalItemGroups = portalItemGroupProvider.listPortalItemGroupByVersion(namespaceId, newVersionId);
+		List<ServiceModuleApp> newServiceModuleApps = serviceModuleAppProvider.listServiceModuleApp(namespaceId, newVersionId, null);
+		if (portalItemGroups != null || portalItemGroups.size() > 0){
+			for (PortalItemGroup itemGroup: portalItemGroups){
+
+				ItemGroupInstanceConfig config = (ItemGroupInstanceConfig) StringHelper.fromJsonString(itemGroup.getInstanceConfig(), ItemGroupInstanceConfig.class);
+				if(config == null || config.getModuleAppId() == null){
+					continue;
+				}
+
+				ServiceModuleApp oldServiceModuleApp = serviceModuleAppProvider.findServiceModuleAppById(config.getModuleAppId());
+				if(oldServiceModuleApp == null){
+					continue;
+				}
+
+				for(ServiceModuleApp serviceModuleApp: newServiceModuleApps){
+					if(serviceModuleApp.getOriginId().longValue() == oldServiceModuleApp.getOriginId().longValue()){
+						config.setModuleAppId(serviceModuleApp.getId());
+						itemGroup.setInstanceConfig(config.toString());
+						portalItemGroupProvider.updatePortalItemGroup(itemGroup);
+						break;
 					}
 				}
 

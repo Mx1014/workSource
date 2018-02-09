@@ -14319,8 +14319,9 @@ public class OrganizationServiceImpl implements OrganizationService {
         List<Organization> underEnterprises = this.organizationProvider.listOrganizationByGroupTypesAndPath(org.getPath() + "/%", groupTypes, null, null, null);
         List<String> smallPath = new ArrayList();
         underEnterprises.forEach(r -> smallPath.add(r.getPath()));
+        groupTypes.add(OrganizationGroupType.DEPARTMENT.getCode());
         return this.organizationProvider.listMemberDetailIdWithExclude(keywords, namespaceId, org.getPath(), smallPath, checkinTimeStart,
-                checkinTimeEnd, dissmissTimeStart, dissmissTimeEnd, locator, pageSize,notinDetails,inDetails);
+                checkinTimeEnd, dissmissTimeStart, dissmissTimeEnd, locator, pageSize,notinDetails,inDetails,groupTypes);
     }
 
 
