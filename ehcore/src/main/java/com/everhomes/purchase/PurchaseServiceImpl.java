@@ -70,7 +70,7 @@ public class PurchaseServiceImpl implements PurchaseService {
         order.setNamespaceId(cmd.getNamespaceId());
         order.setOwnerId(cmd.getOwnerId());
         order.setOwnerType(cmd.getOwnerType());
-        order.setCommunity(cmd.getCommunityId());
+        order.setCommunityId(cmd.getCommunityId());
         order.setApplicantName(UserContext.current().getUser().getNickName());
         order.setContactTel(cmd.getContactTel());
         order.setContactName(cmd.getContactName());

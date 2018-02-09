@@ -48,7 +48,7 @@ CREATE TABLE `eh_warehouse_purchase_orders`(
   `community_id` BIGINT DEFAULT NULL,
   `applicant_name` VARCHAR(128) DEFAULT NULL,
   `contact_tel` VARCHAR(128) DEFAULT NULL,
-  `contact_name` BIGINT(128) DEFAULT NULL,
+  `contact_name` VARCHAR(128) DEFAULT NULL,
   `remark` VARCHAR(2048) DEFAULT NULL COMMENT '备注',
   `approval_order_id` BIGINT DEFAULT NULL COMMENT '关联的审批单的id',
   `create_time` DATETIME DEFAULT NOW(),
