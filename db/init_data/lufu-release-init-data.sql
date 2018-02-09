@@ -811,7 +811,7 @@ INSERT INTO `eh_categories`(`id`, `parent_id`, `link_id`, `name`, `path`, `defau
 -- added by wh  #23960 【路福联合广场】【资源预定】增加调整为四个发布类别：广告位预约 场地预约 VIP车位预约 服务预约
 -- 删除旧的
 DELETE FROM eh_rentalv2_resource_types  WHERE  namespace_id = 999963 ;
-SELECT * FROM eh_launch_pad_items WHERE namespace_id = 999963 AND item_location = '/home/resourcebook';
+DELETE FROM eh_launch_pad_items WHERE namespace_id = 999963 AND item_location = '/home/resourcebook';
 
 -- 增加新的
 SET @resource_id = ( SELECT MAX(id) FROM eh_rentalv2_resource_types);
