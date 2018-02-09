@@ -21,7 +21,7 @@ import com.everhomes.util.DateHelper;
 import com.everhomes.util.RuntimeErrorException;
 import com.everhomes.warehouse.WarehouseMaterials;
 import com.everhomes.warehouse.WarehouseProvider;
-import com.everhomes.warehouse.WarehouseStatus;
+import com.everhomes.warehouse.WarehouseOrderStatus;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -88,7 +88,7 @@ public class PurchaseServiceImpl implements PurchaseService {
         //关联已经通过的请示单，和请示单的状态不联动，采购单的状态走自己的工作流（purchase）
         order.setApprovalOrderId(cmd.getApprovalSheetId());
         order.setSubmissionStatus(PurchaseSubmissionStatus.HANDLING.getCode());
-        order.setWarehouseStatus(WarehouseStatus.SUSPEND.getCode());
+        order.setWarehouseStatus(WarehouseOrderStatus.SUSPEND.getCode());
         //关联的物品的新增
         List<EhWarehousePurchaseItems> list = new ArrayList<>();
         for(PurchaseMaterialDTO dto : cmd.getDtos()) {
@@ -178,7 +178,7 @@ public class PurchaseServiceImpl implements PurchaseService {
         GetPurchaseOrderDTO dto = new GetPurchaseOrderDTO();
         dto.setApprovalSheetId(order.getApprovalOrderId());
         dto.setContact(order.getContactName());
-        dto.setContactTel(order.getConatactTel());
+        dto.setContactTel(order.getContactTel());
         SimpleDateFormat sdf = new SimpleDateFormat("yyyy-MM-dd HH:mm");
         dto.setDeliveryDate(sdf.format(order.getDeliveryDate()));
         dto.setPurchaseRequestId(order.getId());
