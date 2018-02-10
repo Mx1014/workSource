@@ -1363,19 +1363,23 @@ public class PortalServiceImpl implements PortalService {
 						//清理预览版本服务广场数据
 						removePreviewVersion(namespaceId);
 
-						//发布item分类
-						publishItemCategory(namespaceId, cmd.getVersionId(), cmd.getPublishType());
-
 						//将当前版本改成release版本
 						//服务广场layout的版本号用release版本的日期和大版本号组合，例如2018013001
 						//从而服务广场layout的preview和release版本的版本号一致
 						if(PortalPublishType.fromCode(cmd.getPublishType()) == PortalPublishType.RELEASE) {
 							//更新版本号为新的版本
-							updateVersionAfterPublish(cmd.getVersionId());
+							updateVersionToNewVersion(cmd.getVersionId());
 
 							//更新正式版本标志
 							updateReleaseVersion(namespaceId, cmd.getVersionId());
 						}
+
+						//发布应用
+						publishServiceModuleApp(namespaceId, cmd.getVersionId());
+
+						//发布item分类
+						publishItemCategory(namespaceId, cmd.getVersionId(), cmd.getPublishType());
+
 
 						for (PortalLayout layout: layouts) {
 							//发布layout
@@ -1422,6 +1426,24 @@ public class PortalServiceImpl implements PortalService {
 		return ConvertHelper.convert(portalPublishLog, PortalPublishLogDTO.class);
 	}
 
+	//发布应用
+	private void publishServiceModuleApp(Integer namespaceId, Long versionId){
+		List<ServiceModuleApp> apps = serviceModuleAppProvider.listServiceModuleApp(namespaceId, versionId, null);
+		if(apps == null || apps.size() == 0){
+			return;
+		}
+
+		for(ServiceModuleApp app: apps){
+			PortalPublishHandler handler = getPortalPublishHandler(app.getModuleId());
+			if(null != handler){
+				String instanceConfig = handler.publish(app.getNamespaceId(), app.getInstanceConfig(), app.getName());
+				app.setInstanceConfig(instanceConfig);
+				serviceModuleAppProvider.updateServiceModuleApp(app);
+			}
+		}
+
+	}
+
 	private void cleanOldVersion(Integer namespaceId){
 		List<PortalVersion> list = portalVersionProvider.listPortalVersion(namespaceId, null);
 
@@ -1458,7 +1480,7 @@ public class PortalServiceImpl implements PortalService {
 	 * 发布成功后将该版本号改成当前日期的大版本
 	 * @param versionId
 	 */
-	private void updateVersionAfterPublish(Long versionId){
+	private void updateVersionToNewVersion(Long versionId){
 		PortalVersion publishVersion = portalVersionProvider.findPortalVersionById(versionId);
 		PortalVersion maxBigVersion = portalVersionProvider.findMaxBigVersion(publishVersion.getNamespaceId());
 
@@ -1861,10 +1883,11 @@ public class PortalServiceImpl implements PortalService {
 			PortalPublishHandler handler = getPortalPublishHandler(moduleApp.getModuleId());
 			item.setActionType(moduleApp.getActionType());
 			if(null != handler){
-				String instanceConfig = handler.publish(moduleApp.getNamespaceId(), moduleApp.getInstanceConfig(), item.getItemLabel());
-				moduleApp.setInstanceConfig(instanceConfig);
-				serviceModuleAppProvider.updateServiceModuleApp(moduleApp);
-				item.setActionData(handler.getItemActionData(moduleApp.getNamespaceId(), instanceConfig));
+				//一开始发布的时候就已经发布过应用了。
+//				String instanceConfig = handler.publish(moduleApp.getNamespaceId(), moduleApp.getInstanceConfig(), item.getItemLabel());
+//				moduleApp.setInstanceConfig(instanceConfig);
+//				serviceModuleAppProvider.updateServiceModuleApp(moduleApp);
+				item.setActionData(handler.getItemActionData(moduleApp.getNamespaceId(), moduleApp.getInstanceConfig()));
 			}else{
 				item.setActionData(moduleApp.getInstanceConfig());
 			}
@@ -1874,13 +1897,16 @@ public class PortalServiceImpl implements PortalService {
 	private String setItemModuleAppActionData(String name, Long moduleAppId){
 		ServiceModuleApp moduleApp = serviceModuleAppProvider.findServiceModuleAppById(moduleAppId);
 		if(null != moduleApp){
-			PortalPublishHandler handler = getPortalPublishHandler(moduleApp.getModuleId());
-			if(null != handler){
-				String instanceConfig = handler.publish(moduleApp.getNamespaceId(), moduleApp.getInstanceConfig(), name);
-				moduleApp.setInstanceConfig(instanceConfig);
-				serviceModuleAppProvider.updateServiceModuleApp(moduleApp);
-				return instanceConfig;
-			}
+			return moduleApp.getInstanceConfig();
+
+			//一开始发布的时候就已经发布过应用了。
+//			PortalPublishHandler handler = getPortalPublishHandler(moduleApp.getModuleId());
+//			if(null != handler){
+//				String instanceConfig = handler.publish(moduleApp.getNamespaceId(), moduleApp.getInstanceConfig(), name);
+//				moduleApp.setInstanceConfig(instanceConfig);
+//				serviceModuleAppProvider.updateServiceModuleApp(moduleApp);
+//				return instanceConfig;
+//			}
 		}
 		return null;
 	}
