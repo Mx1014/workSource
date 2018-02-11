@@ -38,8 +38,8 @@ public class UpdateRentalSiteCellRuleAdminCommand {
 	private Long resourceId;
 	private Long ruleId;
 	//按小时或者半天
-	private Double beginTime;
-	private Double endTime;
+//	private Double beginTime;
+//	private Double endTime;
 
 	private Byte status;
 
@@ -85,22 +85,6 @@ public class UpdateRentalSiteCellRuleAdminCommand {
 	@Override
 	public String toString() {
 		return StringHelper.toJsonString(this);
-	}
-
-	public Double getBeginTime() {
-		return beginTime;
-	}
-
-	public void setBeginTime(Double beginTime) {
-		this.beginTime = beginTime;
-	}
-
-	public Double getEndTime() {
-		return endTime;
-	}
-
-	public void setEndTime(Double endTime) {
-		this.endTime = endTime;
 	}
 
 	public Byte getStatus() {
