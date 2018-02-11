@@ -132,6 +132,7 @@ import com.everhomes.rest.equipment.ReviewResult;
 import com.everhomes.rest.equipment.ReviewedTaskStat;
 import com.everhomes.rest.equipment.SearchEquipmentAccessoriesCommand;
 import com.everhomes.rest.equipment.SearchEquipmentAccessoriesResponse;
+import com.everhomes.rest.equipment.SearchEquipmentInspectionPlansCommand;
 import com.everhomes.rest.equipment.SearchEquipmentStandardsCommand;
 import com.everhomes.rest.equipment.SearchEquipmentStandardsResponse;
 import com.everhomes.rest.equipment.SearchEquipmentTasksCommand;
@@ -164,7 +165,6 @@ import com.everhomes.rest.equipment.UpdateInspectionTemplateCommand;
 import com.everhomes.rest.equipment.VerifyEquipmentLocationCommand;
 import com.everhomes.rest.equipment.VerifyEquipmentLocationResponse;
 import com.everhomes.rest.equipment.findScopeFieldItemCommand;
-import com.everhomes.rest.equipment.SearchEquipmentInspectionPlansCommand;
 import com.everhomes.rest.messaging.MessageBodyType;
 import com.everhomes.rest.messaging.MessageChannel;
 import com.everhomes.rest.messaging.MessageDTO;
@@ -195,6 +195,7 @@ import com.everhomes.rest.pmtask.CreateTaskCommand;
 import com.everhomes.rest.pmtask.ListTaskCategoriesCommand;
 import com.everhomes.rest.pmtask.ListTaskCategoriesResponse;
 import com.everhomes.rest.pmtask.PmTaskAddressType;
+import com.everhomes.rest.pmtask.PmTaskDTO;
 import com.everhomes.rest.quality.OwnerType;
 import com.everhomes.rest.quality.ProcessType;
 import com.everhomes.rest.quality.QualityGroupType;
@@ -291,6 +292,7 @@ import java.util.Map;
 import java.util.Objects;
 import java.util.Set;
 import java.util.UUID;
+import java.util.concurrent.ConcurrentHashMap;
 import java.util.stream.Collectors;
 
 @Component
@@ -2682,19 +2684,22 @@ private void checkUserPrivilege(Long orgId, Long privilegeId, Long communityId) 
 				if (task.getPlanId() != null && task.getPlanId() != 0L) {
 					plan = equipmentProvider.getEquipmmentInspectionPlanById(task.getPlanId());
 					if (null != plan) {
-						EquipmentInspectionPlanDTO planDTO = ConvertHelper.convert(plan, EquipmentInspectionPlanDTO.class);
-						processEquipmentInspectionObjectsByPlanId(plan.getId(), planDTO);
-						if (planDTO.getEquipmentStandardRelations() != null && planDTO.getEquipmentStandardRelations().size() > 0) {
-							planDTO.getEquipmentStandardRelations().forEach((r) -> equipmentIds.add(r.getEquipmentId()));
+						List<EquipmentInspectionEquipmentPlanMap> planMaps = equipmentProvider.getEquipmentInspectionPlanMap(plan.getId());
+						if (planMaps != null && planMaps.size() > 0) {
+							planMaps.forEach((r) -> equipmentIds.add(r.getEquipmentId()));
 						}
 					}
 				} else if (task.getPlanId() == null || task.getPlanId() == 0) {
 					//兼容
 					equipmentIds.add(task.getEquipmentId());
 				}
+			} else {
+				equipmentIds.addAll(new ArrayList<>(Collections.singletonList(cmd.getEquipmentId())));
 			}
 			List<EquipmentInspectionTasksLogs> logs = equipmentProvider.listLogsByTaskId(locator, pageSize + 1,
 					task.getId(), cmd.getProcessType(), equipmentIds);
+			//展示最新一次的任务日志记录
+			logs = getLatestTaskLogs(logs);
 
 			List<EquipmentTaskLogsDTO> dtos = new ArrayList<>();
 			//为了查看特定设备详情和批量审阅的总览  增加以下
@@ -2721,6 +2726,17 @@ private void checkUserPrivilege(Long orgId, Long privilegeId, Long communityId) 
 
 		response.setTaskLogs(logsList);
 		return response;
+	}
+
+	private List<EquipmentInspectionTasksLogs> getLatestTaskLogs(List<EquipmentInspectionTasksLogs> logs) {
+		Map<Long, EquipmentInspectionTasksLogs> logsMap = new ConcurrentHashMap<>();
+		if(logs!=null && logs.size()>0){
+			logs.forEach((log)->{
+				logsMap.putIfAbsent(log.getEquipmentId(), log);
+			});
+			return new ArrayList<>(logsMap.values());
+		}
+		return null;
 	}
 
 	private void calculateAbnormalCount(List<EquipmentTaskLogsDTO> dtos) {
@@ -6039,9 +6055,8 @@ private void checkUserPrivilege(Long orgId, Long privilegeId, Long communityId) 
 			tasksLog.setProcessResult(EquipmentTaskProcessResult.NONE.getCode());
 			EquipmentInspectionTasks task = tasks;
 
-			dbProvider.execute((TransactionStatus status) -> {
+//			dbProvider.execute((TransactionStatus status) -> {
                 try {
-                    equipmentProvider.createEquipmentInspectionTasksLogs(tasksLog);
                     //调用物业报修
                     EquipmentInspectionEquipments equipment = verifyEquipment(cmd.getEquipmentId(), null, null);
                     CreateTaskCommand repairCommand = new CreateTaskCommand();
@@ -6051,25 +6066,30 @@ private void checkUserPrivilege(Long orgId, Long privilegeId, Long communityId) 
                     repairCommand.setReferId(cmd.getEquipmentId());
                     repairCommand.setReferType(EquipmentConstant.EQUIPMENT_REPAIR);
                     repairCommand.setTaskCategoryId(6L);
-                    ListTaskCategoriesCommand categoriesCommand = new ListTaskCategoriesCommand();
-                    categoriesCommand.setPageSize(Integer.MAX_VALUE - 1);
+
                     List<OrganizationMember> members = organizationProvider.listOrganizationMembersByUId(UserContext.currentUserId());
                     if (members != null && members.size() > 0) {
                         repairCommand.setRequestorName(members.get(0).getContactName());
                         repairCommand.setRequestorPhone(members.get(0).getContactToken());
                     }
-                    pmTaskService.createTask(repairCommand);
-                    //设备状态变为维修中
+                    LOGGER.info("create repair tasks command ={}", repairCommand);
+					PmTaskDTO pmTaskDTO = pmTaskService.createTask(repairCommand);
+                    tasksLog.setPmTaskId(pmTaskDTO.getId());
+					equipmentProvider.createEquipmentInspectionTasksLogs(tasksLog);
+                    //update equipment status to inMaintance
                     equipmentProvider.updateEquipmentStatus(cmd.getEquipmentId(), EquipmentStatus.IN_MAINTENANCE.getCode());
-                } catch (Exception e) {
-					LOGGER.error("Sync Repair Tasks Erro TaskId = {}" + task.getId());
+					OfflineEquipmentTaskReportLog successLogs = new OfflineEquipmentTaskReportLog();
+					successLogs.setSucessIds(task.getId());
+					logs.add(successLogs);
+				} catch (Exception e) {
+					LOGGER.error("Sync Repair Tasks Erro, TaskId = {}" , task.getId());
 					LOGGER.error("Sync Repair Tasks Erro " + e);
 					OfflineEquipmentTaskReportLog repairLogs = getOfflineEquipmentTaskReportLogObject(task.getId(),ErrorCodes.ERROR_GENERAL_EXCEPTION,
                             EquipmentServiceErrorCode.ERROR_EQUIPMENT_TASK_SYNC_ERROR, EquipmentOfflineErrorType.INEPECT_TASK.getCode());
                     logs.add(repairLogs);
                 }
                 return null;
-            });
+//            });
 		}
 
 		return logs;
