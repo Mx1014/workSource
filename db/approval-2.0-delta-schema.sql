@@ -27,3 +27,12 @@ ALTER TABLE eh_general_approvals MODIFY modify_flag TINYINT NOT NULL DEFAULT 1;
 
 UPDATE eh_general_approvals SET delete_flag = 1 WHERE delete_flag IS NULL;
 ALTER TABLE eh_general_approvals MODIFY delete_flag TINYINT NOT NULL DEFAULT 1;
+
+UPDATE eh_general_forms SET form_attribute = 'CUSTOMIZE' WHERE form_attribute IS NULL;
+ALTER TABLE eh_general_forms MODIFY form_attribute VARCHAR(128) NOT NULL DEFAULT 'CUSTOMIZE';
+
+UPDATE eh_general_forms SET modify_flag = 1 WHERE modify_flag IS NULL;
+ALTER TABLE eh_general_forms MODIFY modify_flag TINYINT NOT NULL DEFAULT 1;
+
+UPDATE eh_general_forms SET delete_flag = 1 WHERE delete_flag IS NULL;
+ALTER TABLE eh_general_forms MODIFY delete_flag TINYINT NOT NULL DEFAULT 1;
