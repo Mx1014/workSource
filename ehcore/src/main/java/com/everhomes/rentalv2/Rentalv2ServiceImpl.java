@@ -3087,6 +3087,21 @@ public class Rentalv2ServiceImpl implements Rentalv2Service {
 		Rentalv2PriceRule priceRule = rentalv2PriceRuleProvider.findRentalv2PriceRuleByOwner(rs.getResourceType(),
 				PriceRuleType.RESOURCE.getCode(), rs.getId(), rentalType);
 
+		if(rs.getAutoAssign().equals(NormalFlag.NEED.getCode())){
+			List<RentalResourceNumber> resourceNumbers = this.rentalv2Provider.queryRentalResourceNumbersByOwner(
+					rs.getResourceType(),EhRentalv2Resources.class.getSimpleName(),rs.getId());
+			if(null!=resourceNumbers){
+				rs.setSiteNumbers (new ArrayList<>());
+				for(RentalResourceNumber number:resourceNumbers){
+					SiteNumberDTO dto = new SiteNumberDTO();
+					dto.setSiteNumber(number.getResourceNumber());
+					dto.setSiteNumberGroup(number.getNumberGroup());
+					dto.setGroupLockFlag(number.getGroupLockFlag());
+					rs.getSiteNumbers().add(dto);
+				}
+			}
+		}
+
 		cellList.set(new ArrayList<>());
 		currentId.set(priceRule.getCellBeginId());
 		seqNum.set(0L);
@@ -6322,6 +6337,8 @@ public class Rentalv2ServiceImpl implements Rentalv2Service {
 			rentalv2Provider.deleteRentalResourceNumbersByOwnerId(rentalSite.getResourceType(), EhRentalv2Resources.class.getSimpleName(), rentalSite.getId());
 			//set site number
 			setRentalRuleSiteNumbers(rentalSite.getResourceType(), EhRentalv2Resources.class.getSimpleName(), rentalSite.getId(), cmd.getSiteNumbers());
+			if (cmd.getIfUpdateCells()==null || cmd.getIfUpdateCells()==(byte)1)
+				updateResourceRule(rentalSite, true); //更改资源数量需要刷新单元格
 //			if(cmd.getOwners() != null){
 //				for(SiteOwnerDTO dto:cmd.getOwners()){
 //					RentalSiteRange siteOwner = ConvertHelper.convert(dto, RentalSiteRange.class);
