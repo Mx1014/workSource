@@ -135,6 +135,8 @@ ALTER TABLE `eh_equipment_inspection_equipments`
 ALTER TABLE `eh_equipment_inspection_tasks`
   ADD COLUMN `plan_id`  BIGINT(20) NOT NULL ;
 
+ALTER TABLE eh_equipment_inspection_tasks ADD INDEX eq_task_plan_id (plan_id) ;
+
 
 -- 标准增加周期类型   by jiarui
 ALTER TABLE `eh_equipment_inspection_standards`
@@ -151,6 +153,8 @@ ALTER TABLE `eh_equipment_inspection_task_logs`
   ADD COLUMN `maintance_status` TINYINT(4) NOT NULL DEFAULT '0' COMMENT '0: inactive 1: wating, 2: allocated 3: completed 4: closed';
 ALTER TABLE `eh_equipment_inspection_task_logs`
   ADD COLUMN `pm_task_id` bigint(20) NULL DEFAULT 0 ;
+
+ALTER TABLE eh_equipment_inspection_task_logs ADD INDEX eq_log_pm_task_id (pm_task_id) ;
 
 -- 物业巡检V3.1  end   by jiarui
 
@@ -1621,7 +1625,7 @@ ALTER TABLE `eh_office_cubicle_orders` ADD COLUMN `owner_type` VARCHAR(128);
 ALTER TABLE `eh_office_cubicle_orders` ADD COLUMN `owner_id` BIGINT;
 ALTER TABLE `eh_office_cubicle_orders` ADD COLUMN `position_nums` INTEGER;
 ALTER TABLE `eh_office_cubicle_orders` ADD COLUMN `category_name` VARCHAR(256);
-ALTER TABLE `eh_office_cubicle_orders` ADD COLUMN `category_id` LONG;
+ALTER TABLE `eh_office_cubicle_orders` ADD COLUMN `category_id` BIGINT;
 
 CREATE TABLE `eh_office_cubicle_ranges` (
   `id` BIGINT NOT NULL,

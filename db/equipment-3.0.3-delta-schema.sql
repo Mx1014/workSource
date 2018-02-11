@@ -70,6 +70,8 @@ CREATE TABLE `eh_equipment_inspection_review_date` (
 ALTER TABLE eh_equipment_inspection_tasks
 ADD COLUMN `plan_id`  bigint(20) NOT NULL ;
 
+ALTER TABLE eh_equipment_inspection_tasks ADD INDEX eq_task_plan_id (plan_id) ;
+
 
 -- 标准增加周期类型  by jiarui
 ALTER TABLE eh_equipment_inspection_standards
@@ -86,6 +88,7 @@ ALTER TABLE `eh_equipment_inspection_task_logs`
   ADD COLUMN `maintance_status` tinyint(4) NOT NULL DEFAULT '0' COMMENT '0: inactive 1: wating, 2: allocated 3: completed 4: closed';
 ALTER TABLE `eh_equipment_inspection_task_logs`
   ADD COLUMN `pm_task_id` bigint(20) NULL DEFAULT 0 ;
+ALTER TABLE eh_equipment_inspection_task_logs ADD INDEX eq_log_pm_task_id (pm_task_id) ;
 
 -- 设备操作记录表  by jiarui
 CREATE TABLE `eh_equipment_inspection_equipment_logs` (

@@ -12,7 +12,7 @@ ALTER TABLE `eh_office_cubicle_orders` ADD COLUMN `owner_type` VARCHAR(128);
 ALTER TABLE `eh_office_cubicle_orders` ADD COLUMN `owner_id` BIGINT;
 ALTER TABLE `eh_office_cubicle_orders` ADD COLUMN `position_nums` INTEGER;
 ALTER TABLE `eh_office_cubicle_orders` ADD COLUMN `category_name` VARCHAR(256);
-ALTER TABLE `eh_office_cubicle_orders` ADD COLUMN `category_id` LONG;
+ALTER TABLE `eh_office_cubicle_orders` ADD COLUMN `category_id` BIGINT;
 
 CREATE TABLE `eh_office_cubicle_ranges` (
   `id` BIGINT NOT NULL,
