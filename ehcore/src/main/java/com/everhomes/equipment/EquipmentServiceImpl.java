@@ -3665,7 +3665,9 @@ private void checkUserPrivilege(Long orgId, Long privilegeId, Long communityId) 
 			Collections.sort(reviewStandardIds);
 			sb.append(reviewStandardIds);
 		}
-		sb.append(lastSyncTime.toString());
+		if(lastSyncTime!=null){
+			sb.append(lastSyncTime.toString());
+		}
 
 		return sb.toString();
 	}
@@ -6018,7 +6020,8 @@ private void checkUserPrivilege(Long orgId, Long privilegeId, Long communityId) 
 		if (equipmentRepairReportDetail != null && equipmentRepairReportDetail.size() > 0) {
 			equipmentRepairReportDetail.forEach((detail)->{
 				List<OfflineEquipmentTaskReportLog> reportLog = createRepairsTask(detail);
-				repairSyncLogs.addAll(reportLog);
+				if (reportLog != null)
+					repairSyncLogs.addAll(reportLog);
 			});
 		}
 		return repairSyncLogs;
