@@ -106,13 +106,12 @@ public class MessageRecordSearcherImpl extends AbstractElasticSearch implements 
             bqb = bqb.must(QueryBuilders.termQuery("dstChannelToken", cmd.getDstChannelToken()));
         if (StringUtils.isNotEmpty(cmd.getSenderTag()))
             bqb = bqb.must(QueryBuilders.termQuery("senderTag", cmd.getSenderTag()));
-        if (cmd.getIsGroupBy() == 1){
+        if (cmd.getIsGroupBy() == 1) {
 //           TermsBuilder bodyAgg = AggregationBuilders.terms("bodyAgg").field("body");
-           TermsBuilder sendAgg = AggregationBuilders.terms("sendAgg").field("senderUid");
-           TermsBuilder dstAgg = AggregationBuilders.terms("dstAgg").field("dstChannelToken");
-           builder.addAggregation(sendAgg.subAggregation(dstAgg));
+            TermsBuilder sendAgg = AggregationBuilders.terms("sendAgg").field("senderUid");
+            TermsBuilder dstAgg = AggregationBuilders.terms("dstAgg").field("dstChannelToken");
+            builder.addAggregation(sendAgg.subAggregation(dstAgg));
 //           builder.addAggregation(dstAgg);
-
         }
         builder.setFrom(cmd.getPageAnchor().intValue() * cmd.getPageSize()).setSize(cmd.getPageSize() + 1).setSize(cmd.getPageSize()+1);
         builder.setQuery(bqb);
