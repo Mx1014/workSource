@@ -2731,16 +2731,14 @@ private void checkUserPrivilege(Long orgId, Long privilegeId, Long communityId) 
 	private List<EquipmentInspectionTasksLogs> getLatestTaskLogs(List<EquipmentInspectionTasksLogs> logs) {
 		Map<Long, EquipmentInspectionTasksLogs> logsMap = new ConcurrentHashMap<>();
 		if(logs!=null && logs.size()>0){
-			logs.forEach((log)->{
-				logsMap.putIfAbsent(log.getEquipmentId(), log);
-			});
+			logs.forEach((log)-> logsMap.putIfAbsent(log.getEquipmentId(), log));
 			return new ArrayList<>(logsMap.values());
 		}
 		return null;
 	}
 
 	private void calculateAbnormalCount(List<EquipmentTaskLogsDTO> dtos) {
-		if(dtos!=null && dtos.size()>0){
+		if (dtos != null && dtos.size() > 0) {
 			for (EquipmentTaskLogsDTO dto : dtos) {
 				Integer abnormalCount =0;
 				Integer normalCount = 0;
@@ -2759,53 +2757,57 @@ private void checkUserPrivilege(Long orgId, Long privilegeId, Long communityId) 
 	}
 
 	private List<EquipmentTaskLogsDTO> processEquipmentTaskLogsDTOS(List<EquipmentInspectionTasksLogs> logs) {
-		return logs.stream().map((r) -> {
+		if (logs != null && logs.size() > 0) {
+			return logs.stream().map((r) -> {
 
-			EquipmentTaskLogsDTO dto = ConvertHelper.convert(r, EquipmentTaskLogsDTO.class);
+				EquipmentTaskLogsDTO dto = ConvertHelper.convert(r, EquipmentTaskLogsDTO.class);
 
-			populateItemResultToTasklog(r, dto);
+				populateItemResultToTasklog(r, dto);
 
-			//总公司 分公司 by xiongying20170328
-			if (r.getOperatorId() != null && r.getOperatorId() != 0) {
-				List<OrganizationMember> operators = organizationProvider.listOrganizationMembersByUId(r.getOperatorId());
-				if (operators != null && operators.size() > 0) {
-					dto.setOperatorName(operators.get(0).getContactName());
-				}
-			}
-
-			if (r.getTargetId() != null && r.getTargetId() != 0) {
-				List<OrganizationMember> targets = organizationProvider.listOrganizationMembersByUId(r.getTargetId());
-				if (targets != null && targets.size() > 0) {
-					dto.setTargetName(targets.get(0).getContactName());
-				}
-			}
-
-			List<EquipmentInspectionTasksAttachments> attachmentLists = equipmentProvider.listTaskAttachmentsByLogId(dto.getId());
-			if (attachmentLists != null && attachmentLists.size() > 0) {
-				populateLogAttachements(r, attachmentLists);
-				List<EquipmentTaskAttachmentDTO> attachments = new ArrayList<EquipmentTaskAttachmentDTO>();
-				for (EquipmentInspectionTasksAttachments attachment : attachmentLists) {
-					EquipmentTaskAttachmentDTO attDto = ConvertHelper.convert(attachment, EquipmentTaskAttachmentDTO.class);
-					attachments.add(attDto);
-				}
-				dto.setAttachments(attachments);
-			}
-			//这里改成任务完成状态需要拿到当前最近的一条任务审批记录  （之前是完成  需维修  维修完成）
-			if (EquipmentTaskProcessType.COMPLETE.equals(EquipmentTaskProcessType.fromStatus(dto.getProcessType()))) {
-				EquipmentInspectionTasksLogs reviewLog = equipmentProvider.getNearestReviewLogAfterProcess(dto.getTaskId(), dto.getId());
-				if (null == reviewLog) {
-					dto.setReviewResult(ReviewResult.NONE.getCode());
-				}
-				if (reviewLog != null) {
-					if (EquipmentTaskProcessResult.REVIEW_QUALIFIED.equals(EquipmentTaskProcessResult.fromStatus(reviewLog.getProcessResult()))) {
-						dto.setReviewResult(ReviewResult.QUALIFIED.getCode());
-					} else if (EquipmentTaskProcessResult.REVIEW_UNQUALIFIED.equals(EquipmentTaskProcessResult.fromStatus(reviewLog.getProcessResult()))) {
-						dto.setReviewResult(ReviewResult.UNQUALIFIED.getCode());
+				//总公司 分公司 by xiongying20170328
+				if (r.getOperatorId() != null && r.getOperatorId() != 0) {
+					List<OrganizationMember> operators = organizationProvider.listOrganizationMembersByUId(r.getOperatorId());
+					if (operators != null && operators.size() > 0) {
+						dto.setOperatorName(operators.get(0).getContactName());
 					}
 				}
-			}
-			return dto;
-		}).collect(Collectors.toList());
+
+				if (r.getTargetId() != null && r.getTargetId() != 0) {
+					List<OrganizationMember> targets = organizationProvider.listOrganizationMembersByUId(r.getTargetId());
+					if (targets != null && targets.size() > 0) {
+						dto.setTargetName(targets.get(0).getContactName());
+					}
+				}
+
+				List<EquipmentInspectionTasksAttachments> attachmentLists = equipmentProvider.listTaskAttachmentsByLogId(dto.getId());
+				if (attachmentLists != null && attachmentLists.size() > 0) {
+					populateLogAttachements(r, attachmentLists);
+					List<EquipmentTaskAttachmentDTO> attachments = new ArrayList<EquipmentTaskAttachmentDTO>();
+					for (EquipmentInspectionTasksAttachments attachment : attachmentLists) {
+						EquipmentTaskAttachmentDTO attDto = ConvertHelper.convert(attachment, EquipmentTaskAttachmentDTO.class);
+						attachments.add(attDto);
+					}
+					dto.setAttachments(attachments);
+				}
+				//这里改成任务完成状态需要拿到当前最近的一条任务审批记录  （之前是完成  需维修  维修完成）
+				if (EquipmentTaskProcessType.COMPLETE.equals(EquipmentTaskProcessType.fromStatus(dto.getProcessType()))) {
+					EquipmentInspectionTasksLogs reviewLog = equipmentProvider.getNearestReviewLogAfterProcess(dto.getTaskId(), dto.getId());
+					if (null == reviewLog) {
+						dto.setReviewResult(ReviewResult.NONE.getCode());
+					}
+					if (reviewLog != null) {
+						if (EquipmentTaskProcessResult.REVIEW_QUALIFIED.equals(EquipmentTaskProcessResult.fromStatus(reviewLog.getProcessResult()))) {
+							dto.setReviewResult(ReviewResult.QUALIFIED.getCode());
+						} else if (EquipmentTaskProcessResult.REVIEW_UNQUALIFIED.equals(EquipmentTaskProcessResult.fromStatus(reviewLog.getProcessResult()))) {
+							dto.setReviewResult(ReviewResult.UNQUALIFIED.getCode());
+						}
+					}
+				}
+				return dto;
+			}).collect(Collectors.toList());
+		}
+		return null;
+
 	}
 
 	private void populateItemResultToTasklog(EquipmentInspectionTasksLogs log, EquipmentTaskLogsDTO dto) {
