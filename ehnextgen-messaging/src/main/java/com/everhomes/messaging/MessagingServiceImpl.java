@@ -204,7 +204,7 @@ public class MessagingServiceImpl implements MessagingService {
             MessageDTO message, int deliveryOption) {
         MessageRoutingHandler handler = handlerMap.get(dstChannelType);
         //手动添加消息唯一索引
-        message.getMeta().put(MESSAGE_INDEX_ID,  messageProvider.getMaxMessageIndexId().toString());
+        message.getMeta().put(MESSAGE_INDEX_ID,  messageProvider.getNextMessageIndexId().toString());
 
         if(handler != null) {
             if(handler.allowToRoute(senderLogin, appId, dstChannelType, dstChannelToken, message)) {

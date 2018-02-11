@@ -225,7 +225,8 @@ public class MessagePersistWorker {
                         MessageRecordDto record = queue.poll();
                         if (record != null)
                             dtos.add(record);
-                        if (dtos.size() > threshold || System.currentTimeMillis() > tick + 10 * 1000) { //当取出的条数大于99或者距离上次持久化过去10S
+                        if (dtos.size() > threshold - 1 || System.currentTimeMillis() > tick + 10 * 1000) { //当取出的条数大于99或者距离上次持久化过去10S
+                            dtos.add(record);
                             tick = System.currentTimeMillis();
                             handleMessagePersist(dtos);
                             dtos.clear();

@@ -52,31 +52,49 @@ public class WebSocketSessionProxy {
     }
 
     public static void sendMessage(WebSocketSession session, WebSocketMessage message, String senderTag, String token) {
-        MessageRecordDto dto = new MessageRecordDto();
-        dto.setBody(message.getPayload().toString());
-        dto.setStatus(MessageRecordStatus.BORDER_ROUTE.getCode());
-        dto.setSenderTag(senderTag);
+//        MessageRecordDto dto = new MessageRecordDto();
+//        dto.setBody(message.getPayload().toString());
+//        dto.setStatus(MessageRecordStatus.BORDER_ROUTE.getCode());
+//        dto.setSenderTag(senderTag);
 
         switch (senderTag){
             case "NOTIFY REQUEST":
                 Map actionData = (Map)StringHelper.fromJsonString(message.getPayload().toString(), Map.class);
-//                dto.setDstChannelType(actionData.get("dstChannel").toString());
-//                dto.setDstChannelToken(actionData.get("dstChannelId").toString());
-//                dto.setSenderUid(Long.valueOf(actionData.get("senderUid").toString()));
-                dto.setDeviceId(token);
+                Map dataMap = (Map) actionData.get("response");
+                List<Map> messages = (List<Map>) dataMap.get("message");
+                for (Map m : messages) {
+                    MessageRecordDto dto = new MessageRecordDto();
+                    dto.setBody(message.getPayload().toString());
+                    dto.setStatus(MessageRecordStatus.BORDER_ROUTE.getCode());
+                    dto.setSenderTag(senderTag);
+                    Map extraInfo = (Map) m.get("extra");
+                    dto.setIndexId(extraInfo.get("indexId") != null ? Long.valueOf(extraInfo.get("indexId").toString()) : 0);
+                    dto.setDeviceId(token);
+                    queue.offer(dto);
+                }
+
                 break;
 
             case "NOTIFY EVENT":
-                dto.setDeviceId(token);
+                MessageRecordDto dto1 = new MessageRecordDto();
+                dto1.setBody(message.getPayload().toString());
+                dto1.setStatus(MessageRecordStatus.BORDER_ROUTE.getCode());
+                dto1.setSenderTag(senderTag);
+                dto1.setDeviceId(token);
+                queue.offer(dto1);
                 break;
 
             default:
-                dto.setSessionToken(token);
+                MessageRecordDto dto2 = new MessageRecordDto();
+                dto2.setBody(message.getPayload().toString());
+                dto2.setStatus(MessageRecordStatus.BORDER_ROUTE.getCode());
+                dto2.setSenderTag(senderTag);
+                dto2.setSessionToken(token);
+                queue.offer(dto2);
                 break;
         }
 
         // 提交队列
-        queue.offer(dto);
 
         try {
             synchronized (session) {
@@ -183,8 +201,9 @@ public class WebSocketSessionProxy {
                         MessageRecordDto record = queue.poll();
                         if (record != null)
                             dtos.add(record);
-                        if (dtos.size() > threshold || System.currentTimeMillis() > tick + 10 * 1000) { //当取出的条数大于99或者距离上次持久化过去10S
+                        if (dtos.size() > threshold - 1 || System.currentTimeMillis() > tick + 10 * 1000) { //当取出的条数大于99或者距离上次持久化过去10S
                             tick = System.currentTimeMillis();
+                            dtos.add(record);
                             handleMessagePersist(dtos);
                             dtos.clear();
                         } else if (this.finished) {
