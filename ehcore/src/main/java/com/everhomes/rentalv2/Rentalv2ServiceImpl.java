@@ -7707,7 +7707,7 @@ public class Rentalv2ServiceImpl implements Rentalv2Service {
 		Integer pageSize = PaginationConfigHelper.getPageSize(configurationProvider, cmd.getPageSize());
 
 		List<RentalOrder> orders = rentalv2Provider.searchRentalOrders(cmd.getResourceTypeId(), cmd.getResourceType(),
-				cmd.getResourceId(), cmd.getBillStatus(), cmd.getStartTime(), cmd.getEndTime(),cmd.getCommunityId(), cmd.getTag1(),
+				cmd.getResourceId(), cmd.getBillStatus(), cmd.getStartTime(), cmd.getEndTime(),cmd.getTag1(),
 				cmd.getTag2(), cmd.getPageAnchor(), pageSize);
 
 		int size = orders.size();

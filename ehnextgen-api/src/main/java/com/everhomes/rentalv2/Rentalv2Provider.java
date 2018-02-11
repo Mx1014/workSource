@@ -186,7 +186,7 @@ public interface Rentalv2Provider {
 	List<RentalOrderRule> listRentalOrderRules(String resourceType, String ownerType, Long ownerId, Byte handleType);
 
 	List<RentalOrder> searchRentalOrders(Long resourceTypeId, String resourceType, Long rentalSiteId, Byte billStatus,
-										 Long startTime, Long endTime, Long communityId,String tag1, String tag2, Long pageAnchor ,
+										 Long startTime, Long endTime,String tag1, String tag2, Long pageAnchor ,
 										 Integer pageSize);
 
 	List<String> listOverTimeSpaces(Integer namespaceId, Long resourceTypeId, String resourceType,

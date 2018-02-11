@@ -872,7 +872,7 @@ public class Rentalv2ProviderImpl implements Rentalv2Provider {
 
 	@Override
 	public List<RentalOrder> searchRentalOrders(Long resourceTypeId, String resourceType, Long rentalSiteId, Byte billStatus,
-												Long startTime, Long endTime,Long communityId, String tag1, String tag2, Long pageAnchor ,
+												Long startTime, Long endTime, String tag1, String tag2, Long pageAnchor ,
 												Integer pageSize){
 		DSLContext context = dbProvider.getDslContext(AccessSpec.readOnly());
 		SelectJoinStep<Record> step = context.select().from(Tables.EH_RENTALV2_ORDERS);
@@ -894,9 +894,6 @@ public class Rentalv2ProviderImpl implements Rentalv2Provider {
 		}
 		if (null != endTime) {
 			condition = condition.and(Tables.EH_RENTALV2_ORDERS.RESERVE_TIME.lt(new Timestamp(endTime)));
-		}
-		if (null != communityId){
-			condition = condition.and(Tables.EH_RENTALV2_ORDERS.COMMUNITY_ID.eq(communityId));
 		}
 		if (null != billStatus)
 			condition = condition.and(Tables.EH_RENTALV2_ORDERS.STATUS.equal(billStatus));
