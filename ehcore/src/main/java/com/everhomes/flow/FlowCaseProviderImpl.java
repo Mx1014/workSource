@@ -238,7 +238,8 @@ public class FlowCaseProviderImpl implements FlowCaseProvider {
         Condition cond = Tables.EH_FLOW_CASES.STATUS.ne(FlowCaseStatus.INVALID.getCode())
                 .and(Tables.EH_FLOW_CASES.NAMESPACE_ID.eq(cmd.getNamespaceId()));
 
-        cond = cond.and(Tables.EH_FLOW_CASES.APPLY_USER_ID.eq(cmd.getUserId()));
+        if(cmd.getUserId() != null)
+            cond = cond.and(Tables.EH_FLOW_CASES.APPLY_USER_ID.eq(cmd.getUserId()));
         cond = cond.and(Tables.EH_FLOW_CASES.PARENT_ID.eq(0L));
         cond = cond.and(Tables.EH_FLOW_CASES.DELETE_FLAG.eq(TrueOrFalseFlag.FALSE.getCode()));
 
