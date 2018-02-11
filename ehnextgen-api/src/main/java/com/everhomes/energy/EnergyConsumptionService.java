@@ -54,6 +54,7 @@ public interface EnergyConsumptionService {
      * @return  SearchEnergyMeterResponse
      */
     SearchEnergyMeterResponse searchEnergyMeter(SearchEnergyMeterCommand cmd);
+    SearchEnergyMeterResponse searchSimpleEnergyMeter(SearchEnergyMeterCommand cmd);
 
     /**
      * 更新表记的状态
