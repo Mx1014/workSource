@@ -2568,23 +2568,6 @@ public class PortalServiceImpl implements PortalService {
 								moduleId = 10600L;
 								itemGroup.setContentType(EntityType.ACTIVITY.getCode());
 
-								//最新活动的items是指向实际已存在的活动，此处查询已有应用与其关联，不需要新建应用  edit by yanjun  (还有点问题，可能这时候应用还没创建还不存在，暂时注释掉)
-//								ActivityActionData padActionData = (ActivityActionData)StringHelper.fromJsonString(padItems.get(0).getActionData(), ActivityActionData.class);
-//								Long categoryId = padActionData.getCategoryId();
-//								if(categoryId == null){
-//									categoryId = 1L;
-//								}
-//								List<ServiceModuleApp> moduleApps = serviceModuleAppProvider.listServiceModuleApp(itemGroup.getNamespaceId(), 10600L);
-//								for (ServiceModuleApp app: moduleApps){
-//									ActivityEntryConfigulation configulation = (ActivityEntryConfigulation)StringHelper.fromJsonString(app.getInstanceConfig(), ActivityEntryConfigulation.class);
-//									if(configulation.getEntryId() != null && configulation.getEntryId() == categoryId.longValue()){
-//										config.setModuleAppId(app.getId());
-//										//不需要新建应用
-//										moduleId = null;
-//										break;
-//									}
-//								}
-
 							}else if(OPPushWidgetStyle.LARGE_IMAGE_LIST_VIEW == OPPushWidgetStyle.fromCode(padLayoutGroup.getStyle())){
 								moduleId = 40500L;
 								itemGroup.setContentType(EntityType.SERVICE_ALLIANCE.getCode());
