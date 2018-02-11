@@ -107,7 +107,7 @@ public class UserMessageRoutingHandler implements MessageRoutingHandler {
         record.setChannelsInfo(message.getChannels().toString());
         record.setBodyType(message.getBodyType());
         record.setBody(message.getBody());
-        record.setDeliveryoption(deliveryOption);
+        record.setDeliveryOption(deliveryOption);
         record.setStatus(MessageRecordStatus.CORE_HANDLE.getCode());
         record.setIndexId(message.getMeta().get(MESSAGE_INDEX_ID) != null ?Long.valueOf(message.getMeta().get(MESSAGE_INDEX_ID)) : 0);
         MessagePersistWorker.getQueue().offer(record);
@@ -258,7 +258,7 @@ public class UserMessageRoutingHandler implements MessageRoutingHandler {
         record.setChannelsInfo(message.getChannels().toString());
         record.setBodyType(message.getBodyType());
         record.setBody(message.getBody());
-        record.setDeliveryoption(deliveryOption);
+        record.setDeliveryOption(deliveryOption);
         record.setStatus(MessageRecordStatus.CORE_ROUTE.getCode());
         record.setIndexId(message.getMeta().get(MESSAGE_INDEX_ID) != null ? Long.valueOf(message.getMeta().get(MESSAGE_INDEX_ID)) : 0);
         MessagePersistWorker.getQueue().offer(record);
@@ -324,7 +324,7 @@ public class UserMessageRoutingHandler implements MessageRoutingHandler {
                     record.setChannelsInfo(message.getChannels().toString());
                     record.setBodyType(message.getBodyType());
                     record.setBody(message.getBody());
-                    record.setDeliveryoption(deliveryOption);
+                    record.setDeliveryOption(deliveryOption);
                     record.setStatus(MessageRecordStatus.CORE_ROUTE.getCode());
                     record.setIndexId(message.getMeta().get(MESSAGE_INDEX_ID) != null ? Long.valueOf(message.getMeta().get(MESSAGE_INDEX_ID)) : 0);
                     MessagePersistWorker.getQueue().offer(record);
