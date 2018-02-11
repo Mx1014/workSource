@@ -92,6 +92,7 @@ public class AddRentalSiteSingleSimpleRule {
 
 	private BigDecimal approvingUserInitiatePrice;
 	private BigDecimal approvingUserWorkdayPrice;
+	private Byte userPriceType;
 
 	@ItemType(TimeIntervalDTO.class)
 	private List<TimeIntervalDTO> halfDayTimeIntervals;
@@ -370,5 +371,13 @@ public class AddRentalSiteSingleSimpleRule {
 
 	public void setHalfDayTimeIntervals(List<TimeIntervalDTO> halfDayTimeIntervals) {
 		this.halfDayTimeIntervals = halfDayTimeIntervals;
+	}
+
+	public Byte getUserPriceType() {
+		return userPriceType;
+	}
+
+	public void setUserPriceType(Byte userPriceType) {
+		this.userPriceType = userPriceType;
 	}
 }

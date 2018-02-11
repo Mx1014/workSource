@@ -32,6 +32,7 @@ import com.everhomes.util.StringHelper;
  * <li>	autoAssign：       	是否动态分配 1是 0否	</li>
  * <li>	siteCounts：资源数量</li>
  * <li>	siteNumbers：资源编号列表 {String}</li>
+ * <li>	ifUpdateCells：是否刷新单元格 0 不刷新 1 刷新</li>
  * </ul>
  */
 public class UpdateResourceAdminCommand {
@@ -71,6 +72,7 @@ public class UpdateResourceAdminCommand {
 	private Double siteCounts;
 	@ItemType(SiteNumberDTO.class)
 	private List<SiteNumberDTO> siteNumbers;
+	private Byte ifUpdateCells;
 
 	@Override
 	public String toString() {
@@ -280,5 +282,13 @@ public class UpdateResourceAdminCommand {
 
 	public void setMultiUnit(Byte multiUnit) {
 		this.multiUnit = multiUnit;
+	}
+
+	public Byte getIfUpdateCells() {
+		return ifUpdateCells;
+	}
+
+	public void setIfUpdateCells(Byte ifUpdateCells) {
+		this.ifUpdateCells = ifUpdateCells;
 	}
 }

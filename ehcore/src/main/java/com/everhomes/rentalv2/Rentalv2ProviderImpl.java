@@ -1924,7 +1924,7 @@ public class Rentalv2ProviderImpl implements Rentalv2Provider {
 				.equal(ownerId);
 		condition = condition.and(Tables.EH_RENTALV2_RESOURCE_NUMBERS.OWNER_TYPE
 				.equal(ownerType));
-		condition = condition.and(Tables.EH_RENTALV2_RESOURCE_NUMBERS.OWNER_TYPE
+		condition = condition.and(Tables.EH_RENTALV2_RESOURCE_NUMBERS.RESOURCE_TYPE
 				.equal(resourceType));
 		step.where(condition);
 		List<RentalResourceNumber> result = step
