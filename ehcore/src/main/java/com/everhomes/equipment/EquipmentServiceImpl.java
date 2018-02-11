@@ -6021,7 +6021,7 @@ private void checkUserPrivilege(Long orgId, Long privilegeId, Long communityId) 
 			equipmentRepairReportDetail.forEach((detail)->{
 				List<OfflineEquipmentTaskReportLog> reportLog = createRepairsTask(detail);
 				if (reportLog != null)
-				repairSyncLogs.addAll(reportLog);
+					repairSyncLogs.addAll(reportLog);
 			});
 		}
 		return repairSyncLogs;
