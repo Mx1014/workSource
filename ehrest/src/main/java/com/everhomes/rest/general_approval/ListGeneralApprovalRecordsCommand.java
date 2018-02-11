@@ -5,6 +5,7 @@ package com.everhomes.rest.general_approval;
  * <li>startTime: 申请开始时间</li>
  * <li>endTime: 申请结束时间</li>
  * <li>approvalStatus: 审批状态 {@link com.everhomes.rest.flow.FlowCaseStatus }</li>
+ * <li>approvalId: 审批类型(传id)</li>
  * <li>creatorDepartmentId: 申请人部门id</li>
  * <li>creatorName: 申请人</li>
  * <li>approvalNo: 审批编号</li>
