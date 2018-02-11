@@ -3532,7 +3532,7 @@ private void checkUserPrivilege(Long orgId, Long privilegeId, Long communityId) 
 		List<EquipmentInspectionTasks> allTasks = null;
 		if(isAdmin) {
 			String cacheKey = convertListEquipmentInspectionTasksCache(cmd.getTaskStatus(), cmd.getInspectionCategoryId(),
-                    targetTypes, targetIds, null, null, offset, pageSize, 0L);
+                    targetTypes, targetIds, null, null, offset, pageSize,lastSyncTime, 0L);
             LOGGER.info("listEquipmentInspectionTasks is  Admin  cacheKey = {}" + cacheKey);
 			allTasks = equipmentProvider.listEquipmentInspectionTasksUseCache(cmd.getTaskStatus(), cmd.getInspectionCategoryId(),
 					targetTypes, targetIds, null, null, offset, pageSize + 1, cacheKey, AdminFlag.YES.getCode(),lastSyncTime);
@@ -3569,7 +3569,7 @@ private void checkUserPrivilege(Long orgId, Long privilegeId, Long communityId) 
 			}
 
 			String cacheKey = convertListEquipmentInspectionTasksCache(cmd.getTaskStatus(), cmd.getInspectionCategoryId(), targetTypes, targetIds,
-					executePlanIds, reviewPlanIds, offset, pageSize, userId);
+					executePlanIds, reviewPlanIds, offset, pageSize, lastSyncTime,userId);
             LOGGER.info("listEquipmentInspectionTasks is not Admin  cacheKey = {}" + cacheKey);
 			allTasks = equipmentProvider.listEquipmentInspectionTasksUseCache(cmd.getTaskStatus(), cmd.getInspectionCategoryId(),
 					targetTypes, targetIds, executePlanIds, reviewPlanIds, offset, pageSize + 1, cacheKey, AdminFlag.NO.getCode(),lastSyncTime);
@@ -3634,7 +3634,7 @@ private void checkUserPrivilege(Long orgId, Long privilegeId, Long communityId) 
 
 
 	private String convertListEquipmentInspectionTasksCache(List<Byte> taskStatus, Long inspectionCategoryId,List<String> targetType, List<Long> targetId,
-				List<Long> executeStandardIds, List<Long> reviewStandardIds, Integer offset,Integer pageSize, Long userId) {
+				List<Long> executeStandardIds, List<Long> reviewStandardIds, Integer offset,Integer pageSize, Timestamp lastSyncTime,Long userId) {
 
 		StringBuilder sb = new StringBuilder();
 		if(inspectionCategoryId == null) {
@@ -3665,6 +3665,7 @@ private void checkUserPrivilege(Long orgId, Long privilegeId, Long communityId) 
 			Collections.sort(reviewStandardIds);
 			sb.append(reviewStandardIds);
 		}
+		sb.append(lastSyncTime.toString());
 
 		return sb.toString();
 	}
