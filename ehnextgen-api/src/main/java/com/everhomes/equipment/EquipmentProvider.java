@@ -223,7 +223,7 @@ public interface EquipmentProvider {
 
     void deleteEquipmentPlansMapByEquipmentId(Long equipmentId);
 
-    EquipmentInspectionTasksLogs getMaintanceLogByEquipmentId(Long referId);
+    EquipmentInspectionTasksLogs getMaintanceLogByEquipmentId(Long referId,Long pmTaskId);
 
 	void updateMaintanceInspectionLogsById(Long taskLogId ,Byte status ,Long flowCaseId);
 
