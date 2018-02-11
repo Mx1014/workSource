@@ -95,6 +95,7 @@ public class SearchRentalOrdersCommand {
         this.billStatus = billStatus;
     }
 
+
     public Long getPageAnchor() {
         return pageAnchor;
     }

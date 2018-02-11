@@ -96,6 +96,16 @@ public class EnergyConsumptionController extends ControllerBase {
     }
 
     /**
+     * <p>搜索表记</p>
+     * <b>URL: /energy/searchSimpleEnergyMeter</b>
+     */
+    @RestReturn(SearchEnergyMeterResponse.class)
+    @RequestMapping("searchSimpleEnergyMeter")
+    public RestResponse searchSimpleEnergyMeter(SearchEnergyMeterCommand cmd) {
+        return response(energyConsumptionService.searchSimpleEnergyMeter(cmd));
+    }
+
+    /**
      * <p>更改表记状态(删除, 报废)</p>
      * <b>URL: /energy/updateEnergyMeterStatus</b>
      */
