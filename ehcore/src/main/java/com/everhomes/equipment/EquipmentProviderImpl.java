@@ -3248,4 +3248,13 @@ public class EquipmentProviderImpl implements EquipmentProvider {
         LOGGER.info("batchUpdateUnusedTaskStatus....");
 
     }
+
+    @Override
+    public void updateEquipmentTaskByPlanId(Long planId) {
+        DSLContext context = this.dbProvider.getDslContext(AccessSpec.readWrite());
+        context.update(Tables.EH_EQUIPMENT_INSPECTION_TASKS)
+                .set(Tables.EH_EQUIPMENT_INSPECTION_TASKS.STATUS, EquipmentTaskStatus.NONE.getCode())
+                .where(Tables.EH_EQUIPMENT_INSPECTION_TASKS.PLAN_ID.eq(planId))
+                .execute();
+    }
 }
