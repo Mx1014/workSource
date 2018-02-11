@@ -154,6 +154,8 @@ ALTER TABLE `eh_equipment_inspection_task_logs`
 ALTER TABLE `eh_equipment_inspection_task_logs`
   ADD COLUMN `pm_task_id` bigint(20) NULL DEFAULT 0 ;
 
+ALTER TABLE eh_equipment_inspection_task_logs ADD INDEX eq_log_pm_task_id (pm_task_id) ;
+
 -- 物业巡检V3.1  end   by jiarui
 
 -- 离线支持   by jiarui
