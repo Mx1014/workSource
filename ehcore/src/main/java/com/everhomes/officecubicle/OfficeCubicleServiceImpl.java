@@ -630,7 +630,7 @@ public class OfficeCubicleServiceImpl implements OfficeCubicleService {
 		order.setFlowCaseId(flowCaseId);
 		order.setPositionNums(cmd.getPositionNums());
 		order.setCategoryName(cmd.getCategoryName());
-		order.setCategoryId(cmd.getCategoryId()+"");
+		order.setCategoryId(cmd.getCategoryId());
 		return order;
 	}
 
