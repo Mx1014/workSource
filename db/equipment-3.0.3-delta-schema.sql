@@ -84,6 +84,8 @@ ALTER TABLE `eh_equipment_inspection_task_logs`
   ADD COLUMN `flow_case_id`  bigint(20) NULL AFTER `equipment_id`;
 ALTER TABLE `eh_equipment_inspection_task_logs`
   ADD COLUMN `maintance_status` tinyint(4) NOT NULL DEFAULT '0' COMMENT '0: inactive 1: wating, 2: allocated 3: completed 4: closed';
+ALTER TABLE `eh_equipment_inspection_task_logs`
+  ADD COLUMN `pm_task_id` bigint(20) NULL DEFAULT 0 ;
 
 -- 设备操作记录表  by jiarui
 CREATE TABLE `eh_equipment_inspection_equipment_logs` (
