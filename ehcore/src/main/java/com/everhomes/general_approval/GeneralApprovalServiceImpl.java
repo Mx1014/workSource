@@ -645,7 +645,7 @@ public class GeneralApprovalServiceImpl implements GeneralApprovalService {
         OrganizationMember member = organizationProvider.findOrganizationMemberByOrgIdAndUId(userId, ownerId);
         if(member != null)
             return member.getContactName();
-        //  若没有真实姓名则返回昵称
+        //  若没有真实姓名则返回空
         return null;
     }
 
@@ -686,6 +686,7 @@ public class GeneralApprovalServiceImpl implements GeneralApprovalService {
                 query.addConditions(Tables.EH_GENERAL_APPROVALS.OWNER_ID.eq(cmd.getOwnerId()));
                 query.addConditions(Tables.EH_GENERAL_APPROVALS.OWNER_TYPE.eq(cmd.getOwnerType()));
                 query.addOrderBy(Tables.EH_GENERAL_APPROVALS.DEFAULT_ORDER.asc());
+                query.addOrderBy(Tables.EH_GENERAL_APPROVALS.ID.desc());
             }
             query.addConditions(Tables.EH_GENERAL_APPROVALS.STATUS.ne(GeneralApprovalStatus.DELETED.getCode()));
             query.addConditions(Tables.EH_GENERAL_APPROVALS.MODULE_ID.eq(cmd.getModuleId()));
@@ -805,17 +806,23 @@ public class GeneralApprovalServiceImpl implements GeneralApprovalService {
 
     @Override
     public void enableGeneralApproval(GeneralApprovalIdCommand cmd) {
+        Long userId = UserContext.currentUserId();
         GeneralApproval ga = this.generalApprovalProvider.getGeneralApprovalById(cmd
                 .getApprovalId());
         ga.setStatus(GeneralApprovalStatus.RUNNING.getCode());
+        ga.setOperatorUid(userId);
+        ga.setOperatorName(getUserRealName(userId, ga.getOwnerId()));
         this.generalApprovalProvider.updateGeneralApproval(ga);
     }
 
     @Override
     public void disableGeneralApproval(GeneralApprovalIdCommand cmd) {
+        Long userId = UserContext.currentUserId();
         GeneralApproval ga = this.generalApprovalProvider.getGeneralApprovalById(cmd
                 .getApprovalId());
         ga.setStatus(GeneralApprovalStatus.INVALID.getCode());
+        ga.setOperatorUid(userId);
+        ga.setOperatorName(getUserRealName(userId, ga.getOwnerId()));
         this.generalApprovalProvider.updateGeneralApproval(ga);
     }
 
