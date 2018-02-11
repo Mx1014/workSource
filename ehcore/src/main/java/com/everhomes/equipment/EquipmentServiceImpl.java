@@ -6066,19 +6066,22 @@ private void checkUserPrivilege(Long orgId, Long privilegeId, Long communityId) 
                     repairCommand.setReferId(cmd.getEquipmentId());
                     repairCommand.setReferType(EquipmentConstant.EQUIPMENT_REPAIR);
                     repairCommand.setTaskCategoryId(6L);
-                    ListTaskCategoriesCommand categoriesCommand = new ListTaskCategoriesCommand();
-                    categoriesCommand.setPageSize(Integer.MAX_VALUE - 1);
+
                     List<OrganizationMember> members = organizationProvider.listOrganizationMembersByUId(UserContext.currentUserId());
                     if (members != null && members.size() > 0) {
                         repairCommand.setRequestorName(members.get(0).getContactName());
                         repairCommand.setRequestorPhone(members.get(0).getContactToken());
                     }
+                    LOGGER.info("create repair tasks command ={}", repairCommand);
 					PmTaskDTO pmTaskDTO = pmTaskService.createTask(repairCommand);
                     tasksLog.setPmTaskId(pmTaskDTO.getId());
 					equipmentProvider.createEquipmentInspectionTasksLogs(tasksLog);
-                    //设备状态变为维修中
+                    //update equipment status to inMaintance
                     equipmentProvider.updateEquipmentStatus(cmd.getEquipmentId(), EquipmentStatus.IN_MAINTENANCE.getCode());
-                } catch (Exception e) {
+					OfflineEquipmentTaskReportLog successLogs = new OfflineEquipmentTaskReportLog();
+					successLogs.setSucessIds(task.getId());
+					logs.add(successLogs);
+				} catch (Exception e) {
 					LOGGER.error("Sync Repair Tasks Erro, TaskId = {}" , task.getId());
 					LOGGER.error("Sync Repair Tasks Erro " + e);
 					OfflineEquipmentTaskReportLog repairLogs = getOfflineEquipmentTaskReportLogObject(task.getId(),ErrorCodes.ERROR_GENERAL_EXCEPTION,
