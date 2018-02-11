@@ -388,12 +388,8 @@ public class SiYinPrintController extends ControllerBase {
 	 @RequestMapping("getPrintQrcode")
 	 @RestReturn(value=String.class)
 	 @RequireAuthentication(false)
-	 public RestResponse getPrintQrcode(@RequestParam(value="data", required=true) String data,
-			 @RequestParam(value="height", required=true) Integer height,
-			 @RequestParam(value="width", required=true) Integer width,
-			 HttpServletRequest req,HttpServletResponse rps) {
-		 GetPrintQrcodeCommand cmd = new GetPrintQrcodeCommand(data,height,width);
-	     siyinPrintService.getPrintQrcode(cmd,req,rps);
+	 public RestResponse getPrintQrcode(HttpServletRequest req,HttpServletResponse rps) {
+	     siyinPrintService.getPrintQrcode(req,rps);
 	     RestResponse response = new RestResponse();
 	     response.setErrorCode(ErrorCodes.SUCCESS);
 	     response.setErrorDescription("OK");

@@ -59,5 +59,5 @@ public interface SiyinPrintService {
 
 	void mfpLogNotification(String jobData, HttpServletResponse response);
 
-	void getPrintQrcode(GetPrintQrcodeCommand cmd,  HttpServletRequest req, HttpServletResponse rps);
+	void getPrintQrcode(HttpServletRequest req, HttpServletResponse rps);
 }

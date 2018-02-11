@@ -53,6 +53,7 @@ import com.everhomes.organization.OrganizationCommunity;
 import com.everhomes.organization.OrganizationProvider;
 import com.everhomes.organization.OrganizationService;
 import com.everhomes.qrcode.QRCodeController;
+import com.everhomes.qrcode.QRCodeService;
 import com.everhomes.rest.RestResponse;
 import com.everhomes.rest.approval.CommonStatus;
 import com.everhomes.rest.launchpad.ActionType;
@@ -102,6 +103,7 @@ import com.everhomes.rest.print.PrintOrderStatusType;
 import com.everhomes.rest.print.PrintOwnerType;
 import com.everhomes.rest.print.PrintPaperSizeType;
 import com.everhomes.rest.print.PrintRecordDTO;
+import com.everhomes.rest.print.PrintScanTarget;
 import com.everhomes.rest.print.PrintSettingColorTypeDTO;
 import com.everhomes.rest.print.PrintSettingPaperSizePriceDTO;
 import com.everhomes.rest.print.PrintSettingType;
@@ -123,6 +125,7 @@ import com.everhomes.util.ExecutorUtil;
 import com.everhomes.util.RuntimeErrorException;
 import com.everhomes.util.Tuple;
 import com.everhomes.util.xml.XMLToJSON;
+import com.google.gson.JsonObject;
 /**
  * 
  *  @author:dengs 2017年6月22日
@@ -196,6 +199,8 @@ public class SiyinPrintServiceImpl implements SiyinPrintService {
 	
 	@Autowired
 	private QRCodeController qrController;
+	@Autowired
+	private QRCodeService qrcodeService;
 	@Override
 	public GetPrintSettingResponse getPrintSetting(GetPrintSettingCommand cmd) {
 		//检查参数
@@ -612,11 +617,10 @@ public class SiyinPrintServiceImpl implements SiyinPrintService {
 		StringBuffer buffer = new StringBuffer();
 		String siyinUrl =  configurationProvider.getValue(PrintErrorCode.PRINT_SIYIN_SERVER_URL, "http://siyin.zuolin.com:8119");
 
-		String url = buffer.append("http://").append(siyinUrl).append("/authagent/oauthLogin").toString();
+		String url = buffer.append(siyinUrl).append("/authagent/oauthLogin").toString();
 		try {
 			String result = HttpUtils.post(url, params, 30);
-			String siyinCode = getSiyinCode(result);
-			if(!siyinCode.equals("OK")){
+			if(!result.equals("OK")){
 				LOGGER.error("siyin api:"+url+"request failed : "+result);
 				throw RuntimeErrorException.errorWith(ErrorCodes.SCOPE_GENERAL, ErrorCodes.ERROR_GENERAL_EXCEPTION, url+" request failed, message = "+result);
 			}
@@ -624,7 +628,21 @@ public class SiyinPrintServiceImpl implements SiyinPrintService {
 			LOGGER.error("siyin api:"+url+" request exception : "+e.getMessage());
 			throw RuntimeErrorException.errorWith(ErrorCodes.SCOPE_GENERAL, ErrorCodes.ERROR_GENERAL_EXCEPTION, url+" return exception, message = "+e.getMessage());
 		}
-		return null;
+		
+		UnlockPrinterResponse response = new UnlockPrinterResponse();
+		try{
+			JSONObject jsObject = JSONObject.parseObject(dto.getExtra());
+			String readerName = jsObject.getString("readerName");
+			if(StringUtils.isEmpty(readerName)){
+				response.setSourceType(PrintScanTarget.UL_CLIENT.getCode());
+			}else{
+				response.setSourceType(PrintScanTarget.UL_PRINTER.getCode());
+			}
+		}catch (Exception e) {
+			LOGGER.error("parse json error, qrcode = {}", dto.getExtra(),e);
+		}
+		
+		return response;
 	}
 
 
@@ -1386,9 +1404,10 @@ public class SiyinPrintServiceImpl implements SiyinPrintService {
 	}
 	
 	@Override
-	public void getPrintQrcode(GetPrintQrcodeCommand cmd, HttpServletRequest req, HttpServletResponse rps) {
+	public void getPrintQrcode(HttpServletRequest req, HttpServletResponse rps) {
+		GetPrintQrcodeCommand cmd = getParamsFromReq(req);
 		NewQRCodeCommand nQRCmd = new NewQRCodeCommand();
-		String cloudprinturl = configurationProvider.getValue("print.siyin.actiondata", "{\"url\":\"http://core.zuolin.com/cloud-print/build/index.html#/home#sign_suffix\"}");
+		String cloudprinturl = configurationProvider.getValue("print.siyin.actiondata", "{\"url\":\"http://printtest.zuolin.com/cloud-print/build/index.html#/home#sign_suffix\"}");
 		nQRCmd.setActionData(cloudprinturl);
 		nQRCmd.setActionType(ActionType.OFFICIAL_URL.getCode());
 		nQRCmd.setDescription("cloud print");
@@ -1409,6 +1428,23 @@ public class SiyinPrintServiceImpl implements SiyinPrintService {
 		}else{
 			LOGGER.error("create qrcode error "+restResponse);
 		}
+	}
+
+
+	private GetPrintQrcodeCommand getParamsFromReq(HttpServletRequest req) {
+		GetPrintQrcodeCommand cmd = new GetPrintQrcodeCommand();
+		Object object = req.getParameter("data");
+		if(object==null){
+			throw RuntimeErrorException.errorWith(ErrorCodes.SCOPE_GENERAL, ErrorCodes.ERROR_INVALID_PARAMETER, "unknow param data=null");
+		}
+		cmd.setData(object.toString());
+		Object width = req.getParameter("width");
+		Object height = req.getParameter("height");
+		if(width!=null && height!=null){
+			cmd.setHeight(Integer.valueOf(height.toString()));
+			cmd.setWidth(Integer.valueOf(width.toString()));
+		}
+		return cmd;
 	}
 
 

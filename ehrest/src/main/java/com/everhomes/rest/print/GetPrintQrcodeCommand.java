@@ -15,6 +15,12 @@ public class GetPrintQrcodeCommand {
 	private Integer height;
 	private Integer width;
 	
+	
+	
+	public GetPrintQrcodeCommand() {
+		super();
+	}
+
 	public GetPrintQrcodeCommand(String data, Integer height, Integer width) {
 		super();
 		this.data = data;

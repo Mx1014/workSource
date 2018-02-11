@@ -25,7 +25,7 @@ public class SiyinPrintQRCodeModuleListener implements QRCodeModuleListener {
     public void onGetQRCodeInfo(QRCodeDTO qrCode, QRCodeSource source) {
     	//actionData={"url":"http://printtest.zuolin.com/cloud-print/build/index.html?qrid=123213123123#/home#sign_suffix"}
     	String actionData = qrCode.getActionData();
-    	actionData = actionData.replace("index.html#/home#sign_suffix", "index.html?qrid="+qrCode.getExtra()+"#/home#sign_suffix");
+    	actionData = actionData.replace("index.html#/home#sign_suffix", "index.html?qrid="+qrCode.getQrid()+"#/home#sign_suffix");
     	qrCode.setActionData(actionData);
     }
 }
