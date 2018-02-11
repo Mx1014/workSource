@@ -15,6 +15,7 @@ public class SearchRentalOrdersCommand {
     private String tag1;
     private String tag2;
     private Byte billStatus;
+    private Long communityId;
     private Long pageAnchor;
     private Integer pageSize;
 
@@ -93,6 +94,14 @@ public class SearchRentalOrdersCommand {
 
     public void setBillStatus(Byte billStatus) {
         this.billStatus = billStatus;
+    }
+
+    public Long getCommunityId() {
+        return communityId;
+    }
+
+    public void setCommunityId(Long communityId) {
+        this.communityId = communityId;
     }
 
     public Long getPageAnchor() {
