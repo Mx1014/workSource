@@ -87,7 +87,7 @@ public class MessageProviderImpl implements MessageProvider {
     @Override
     public Long getMaxMessageIndexId() {
         DSLContext context = dbProvider.getDslContext(AccessSpec.readOnly());
-        Long index_id = context.select(Tables.EH_MESSAGE_RECORDS.INDEX_ID.max()).fetchOne().value1();
+        Long index_id = context.select(Tables.EH_MESSAGE_RECORDS.INDEX_ID.max()).from(Tables.EH_MESSAGE_RECORDS).fetchOne().value1();
         return index_id != null ? index_id : 0;
     }
 }
