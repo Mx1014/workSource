@@ -61,7 +61,7 @@ public class WebSocketSessionProxy {
             case "NOTIFY REQUEST":
                 Map actionData = (Map)StringHelper.fromJsonString(message.getPayload().toString(), Map.class);
                 Map dataMap = (Map) actionData.get("response");
-                List<Map> messages = (List<Map>) dataMap.get("message");
+                List<Map> messages = (List<Map>) dataMap.get("messages");
                 for (Map m : messages) {
                     MessageRecordDto dto = new MessageRecordDto();
                     dto.setBody(message.getPayload().toString());

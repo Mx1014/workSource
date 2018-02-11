@@ -450,7 +450,7 @@ public class PusherServiceImpl implements PusherService, ApnsServiceFactory {
                         record.setBodyType(mb.getContextType());
                         record.setBody(mb.getContent());
                         record.setStatus(MessageRecordStatus.CORE_FETCH.getCode());
-                        record.setIndexId(Long.valueOf(mb.getMeta().get(MESSAGE_INDEX_ID)));
+                        record.setIndexId(mb.getMeta().get(MESSAGE_INDEX_ID) != null ? Long.valueOf(mb.getMeta().get(MESSAGE_INDEX_ID)) : 0);
                         MessagePersistWorker.getQueue().offer(record);
                         }
                     }

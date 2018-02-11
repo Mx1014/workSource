@@ -119,7 +119,7 @@ public class MessagingServiceImpl implements MessagingService {
                 record.setBodyType(r.getContextType());
                 record.setBody(r.getContent());
                 record.setStatus(MessageRecordStatus.CORE_FETCH.getCode());
-                record.setIndexId(Long.valueOf(r.getMeta().get(MESSAGE_INDEX_ID)));
+                record.setIndexId(r.getMeta().get(MESSAGE_INDEX_ID) != null ? Long.valueOf(r.getMeta().get(MESSAGE_INDEX_ID)) : 0);
                 MessagePersistWorker.getQueue().offer(record);
             }
         }
