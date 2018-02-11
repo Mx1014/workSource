@@ -1,10 +1,7 @@
 package com.everhomes.util;
 
-import com.atomikos.util.DateHelper;
 import com.everhomes.rest.message.MessageRecordDto;
 import com.everhomes.rest.message.PersistMessageRecordCommand;
-import com.everhomes.rest.messaging.MessageDTO;
-import javafx.concurrent.Worker;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -18,12 +15,11 @@ import org.springframework.util.concurrent.ListenableFutureCallback;
 import org.springframework.web.client.AsyncRestTemplate;
 
 import javax.annotation.PostConstruct;
-import java.util.*;
+import java.util.ArrayList;
+import java.util.HashMap;
+import java.util.List;
+import java.util.Map;
 import java.util.concurrent.ConcurrentLinkedQueue;
-import java.util.concurrent.CountDownLatch;
-import java.util.concurrent.locks.Condition;
-import java.util.concurrent.locks.Lock;
-import java.util.concurrent.locks.ReentrantLock;
 
 @Component
 public class MessagePersistWorker {

@@ -44,6 +44,7 @@ import java.util.List;
 @Name("user")
 public class UserMessageRoutingHandler implements MessageRoutingHandler {
     private static final Logger LOGGER = LoggerFactory.getLogger(MessagingServiceImpl.class);
+    private final static String MESSAGE_INDEX_ID = "indexId";
     
     @Autowired
     private UserService userService;
@@ -108,6 +109,7 @@ public class UserMessageRoutingHandler implements MessageRoutingHandler {
         record.setBody(message.getBody());
         record.setDeliveryoption(deliveryOption);
         record.setStatus(MessageRecordStatus.CORE_HANDLE.getCode());
+        record.setIndexId(Long.valueOf(message.getMeta().get(MESSAGE_INDEX_ID)));
         MessagePersistWorker.getQueue().offer(record);
 
         long uid = Long.parseLong(dstChannelToken);
@@ -258,7 +260,7 @@ public class UserMessageRoutingHandler implements MessageRoutingHandler {
         record.setBody(message.getBody());
         record.setDeliveryoption(deliveryOption);
         record.setStatus(MessageRecordStatus.CORE_ROUTE.getCode());
-        record.setIndexId(this.sequenceProvider.getNextSequence("messageIndexId"));
+        record.setIndexId(Long.valueOf(message.getMeta().get(MESSAGE_INDEX_ID)));
         MessagePersistWorker.getQueue().offer(record);
 
         //If not push only, send it by border server
@@ -324,6 +326,7 @@ public class UserMessageRoutingHandler implements MessageRoutingHandler {
                     record.setBody(message.getBody());
                     record.setDeliveryoption(deliveryOption);
                     record.setStatus(MessageRecordStatus.CORE_ROUTE.getCode());
+                    record.setIndexId(Long.valueOf(message.getMeta().get(MESSAGE_INDEX_ID)));
                     MessagePersistWorker.getQueue().offer(record);
 
                     borderConnection.sendMessage(null, forwardPdu);

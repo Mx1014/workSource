@@ -14,21 +14,13 @@ import com.everhomes.cert.CertProvider;
 import com.everhomes.configuration.ConfigurationProvider;
 import com.everhomes.device.Device;
 import com.everhomes.device.DeviceProvider;
-import com.everhomes.messaging.ApnsServiceFactory;
-import com.everhomes.messaging.PushMessageResolver;
-import com.everhomes.messaging.PusherService;
-import com.everhomes.messaging.PusherVenderType;
-import com.everhomes.messaging.PusherVendorData;
-import com.everhomes.messaging.PusherVendorService;
+import com.everhomes.messaging.*;
 import com.everhomes.msgbox.Message;
 import com.everhomes.msgbox.MessageBoxProvider;
 import com.everhomes.msgbox.MessageLocator;
-import com.everhomes.queue.taskqueue.JesqueClientFactory;
-import com.everhomes.queue.taskqueue.WorkerPoolFactory;
 import com.everhomes.rest.app.AppConstants;
 import com.everhomes.rest.message.MessageRecordDto;
 import com.everhomes.rest.message.MessageRecordStatus;
-import com.everhomes.rest.messaging.ChannelType;
 import com.everhomes.rest.messaging.DeviceMessage;
 import com.everhomes.rest.messaging.DeviceMessages;
 import com.everhomes.rest.pusher.PushMessageCommand;
@@ -38,17 +30,14 @@ import com.everhomes.rest.rpc.server.PusherNotifyPdu;
 import com.everhomes.rest.user.UserLoginStatus;
 import com.everhomes.sequence.LocalSequenceGenerator;
 import com.everhomes.settings.PaginationConfigHelper;
-import com.everhomes.user.UserContext;
 import com.everhomes.user.UserLogin;
 import com.everhomes.util.MessagePersistWorker;
 import com.everhomes.util.StringHelper;
 import com.google.gson.Gson;
 import com.notnoop.apns.*;
 import com.notnoop.exceptions.NetworkIOException;
-import com.xiaomi.xmpush.server.Constants;
 import com.xiaomi.xmpush.server.Result;
 import com.xiaomi.xmpush.server.Sender;
-
 import org.json.simple.parser.ParseException;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -59,10 +48,12 @@ import org.springframework.data.redis.serializer.StringRedisSerializer;
 import org.springframework.stereotype.Component;
 
 import javax.annotation.PostConstruct;
-
 import java.io.ByteArrayInputStream;
 import java.io.IOException;
-import java.util.*;
+import java.util.ArrayList;
+import java.util.Date;
+import java.util.List;
+import java.util.Map;
 import java.util.concurrent.ConcurrentHashMap;
 import java.util.concurrent.ConcurrentMap;
 import java.util.concurrent.Executors;
@@ -71,7 +62,8 @@ import java.util.concurrent.TimeUnit;
 @Component
 public class PusherServiceImpl implements PusherService, ApnsServiceFactory {
     private static final Logger LOGGER = LoggerFactory.getLogger(PusherServiceImpl.class);
-    
+    private final static String MESSAGE_INDEX_ID = "indexId";
+
     @Autowired
     private BorderConnectionProvider borderConnectionProvider;
 
@@ -458,6 +450,7 @@ public class PusherServiceImpl implements PusherService, ApnsServiceFactory {
                         record.setBodyType(mb.getContextType());
                         record.setBody(mb.getContent());
                         record.setStatus(MessageRecordStatus.CORE_FETCH.getCode());
+                        record.setIndexId(Long.valueOf(mb.getMeta().get(MESSAGE_INDEX_ID)));
                         MessagePersistWorker.getQueue().offer(record);
                         }
                     }

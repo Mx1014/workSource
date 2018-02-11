@@ -2,13 +2,13 @@
 package com.everhomes.messaging;
 
 import com.everhomes.configuration.ConfigurationProvider;
+import com.everhomes.message.MessageProvider;
 import com.everhomes.msgbox.Message;
 import com.everhomes.msgbox.MessageBoxProvider;
 import com.everhomes.msgbox.MessageLocator;
 import com.everhomes.rest.app.AppConstants;
 import com.everhomes.rest.message.MessageRecordDto;
 import com.everhomes.rest.message.MessageRecordStatus;
-import com.everhomes.rest.messaging.ChannelType;
 import com.everhomes.rest.messaging.MessageChannel;
 import com.everhomes.rest.messaging.MessageDTO;
 import com.everhomes.rest.messaging.MessageMetaConstant;
@@ -54,9 +54,14 @@ public class MessagingServiceImpl implements MessagingService {
 
     @Autowired
     private ConfigurationProvider configProvider;
+
+    @Autowired
+    private MessageProvider messageProvider;
     
     public MessagingServiceImpl() {
     }
+
+    private final static String MESSAGE_INDEX_ID = "indexId";
     
     @PostConstruct
     public void setup() {
@@ -114,6 +119,7 @@ public class MessagingServiceImpl implements MessagingService {
                 record.setBodyType(r.getContextType());
                 record.setBody(r.getContent());
                 record.setStatus(MessageRecordStatus.CORE_FETCH.getCode());
+                record.setIndexId(Long.valueOf(r.getMeta().get(MESSAGE_INDEX_ID)));
                 MessagePersistWorker.getQueue().offer(record);
             }
         }
@@ -197,6 +203,9 @@ public class MessagingServiceImpl implements MessagingService {
     public void routeMessage(MessageRoutingContext context, UserLogin senderLogin, long appId, String dstChannelType, String dstChannelToken,
             MessageDTO message, int deliveryOption) {
         MessageRoutingHandler handler = handlerMap.get(dstChannelType);
+        //手动添加消息唯一索引
+        message.getMeta().put(MESSAGE_INDEX_ID,  messageProvider.getMaxMessageIndexId().toString());
+
         if(handler != null) {
             if(handler.allowToRoute(senderLogin, appId, dstChannelType, dstChannelToken, message)) {
             

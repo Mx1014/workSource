@@ -1,14 +1,12 @@
 package com.everhomes.controller;
 
 import com.everhomes.rest.message.MessageRecordDto;
-
 import com.everhomes.rest.message.MessageRecordStatus;
 import com.everhomes.rest.message.PersistMessageRecordCommand;
 import com.everhomes.util.SignatureHelper;
 import com.everhomes.util.StringHelper;
 import org.slf4j.LoggerFactory;
 import org.springframework.http.*;
-import org.springframework.scheduling.annotation.Scheduled;
 import org.springframework.stereotype.Component;
 import org.springframework.util.LinkedMultiValueMap;
 import org.springframework.util.MultiValueMap;
@@ -48,22 +46,9 @@ public class WebSocketSessionProxy {
 
     @PostConstruct
     public void setup() {
-        new Thread(){
-            public void run(){
-                List<MessageRecordDto> dtos = new ArrayList<>();
-                for (; ;) {
-                    while (!queue.isEmpty()) {
-                        MessageRecordDto record = queue.poll();
-                        if(record != null)
-                            dtos.add(record);
-                        if(dtos.size() > 99){
-                            handleMessagePersist(dtos);
-                            dtos.clear();
-                        }
-                    }
-                }
-            }
-        }.start();
+        // 每次满一百条就持久化一次
+        Worker worker = new Worker(100);
+        worker.start();
     }
 
     public static void sendMessage(WebSocketSession session, WebSocketMessage message, String senderTag, String token) {
@@ -170,6 +155,50 @@ public class WebSocketSessionProxy {
             sb.append(relativeUri);
 
         return sb.toString();
+    }
+
+    class Worker extends Thread {
+
+        Worker(Integer threshold) {
+            this.threshold = threshold;
+        }
+
+        private boolean finished = false;
+
+        private Long tick = 0L;
+
+        private Integer threshold = 0;
+
+        private void stopMe() {
+            this.finished = true;
+        }
+
+        @Override
+        public void run() {
+            try {
+                List<MessageRecordDto> dtos = new ArrayList<>();
+
+                for (; ; ) {
+                    while (!queue.isEmpty() && !this.finished) {
+                        MessageRecordDto record = queue.poll();
+                        if (record != null)
+                            dtos.add(record);
+                        if (dtos.size() > threshold || System.currentTimeMillis() > tick + 10 * 1000) { //当取出的条数大于99或者距离上次持久化过去10S
+                            tick = System.currentTimeMillis();
+                            handleMessagePersist(dtos);
+                            dtos.clear();
+                        } else if (this.finished) {
+                            handleMessagePersist(dtos);
+                            dtos.clear();
+                            Thread.sleep(60*1000L);
+                        }
+                    }
+
+                }
+            } catch (Exception e) {
+                e.printStackTrace();
+            }
+        }
     }
 
 }
