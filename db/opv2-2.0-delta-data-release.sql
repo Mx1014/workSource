@@ -58,12 +58,24 @@ WHERE item_label LIKE '%巡检%';
 
 -- 新增权限  by jiarui 20180205
 
-DELETE FROM  eh_service_module_privileges
-WHERE  privilege_id IN (30070,30076,30071,30077,30078,30079);
+DELETE from  eh_service_module_privileges
+WHERE  privilege_id IN (30070,30076,30071,30077,30078,30079,30082);
 
 UPDATE eh_service_modules
-SET NAME = '巡检计划'
+SET name = '计划管理'
 WHERE id = 20840;
+UPDATE eh_service_modules
+SET name = '台帐管理'
+WHERE id = 20820;
+UPDATE eh_service_modules
+SET name = '任务管理'
+WHERE id = 20830;
+UPDATE eh_service_modules
+SET name = '统计分析'
+WHERE id = 20850;
+UPDATE eh_service_modules
+SET name = '标准管理'
+WHERE id = 20810;
 
 INSERT INTO `eh_acl_privileges` VALUES ('30083', '0', '设备巡检 巡检计划创建', '设备巡检 业务模块权限', NULL);
 INSERT INTO `eh_acl_privileges` VALUES ('30084', '0', '设备巡检 巡检计划修改', '设备巡检 业务模块权限', NULL);

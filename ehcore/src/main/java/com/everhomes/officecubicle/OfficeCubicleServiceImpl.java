@@ -628,6 +628,9 @@ public class OfficeCubicleServiceImpl implements OfficeCubicleService {
 		order.setOwnerId(space.getOwnerId());
 		order.setWorkFlowStatus(OfficeOrderWorkFlowStatus.PROCESSING.getCode());
 		order.setFlowCaseId(flowCaseId);
+		order.setPositionNums(cmd.getPositionNums());
+		order.setCategoryName(cmd.getCategoryName());
+		order.setCategoryId(cmd.getCategoryId());
 		return order;
 	}
 

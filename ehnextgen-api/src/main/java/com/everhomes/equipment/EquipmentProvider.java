@@ -246,4 +246,6 @@ public interface EquipmentProvider {
 	void transferPlanIdForTasks(Long equipmentId, Long standardId,Long planId);
 
 	void batchUpdateUnusedTaskStatus();
+
+    void updateEquipmentTaskByPlanId(Long planId);
 }

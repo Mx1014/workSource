@@ -70,6 +70,8 @@ CREATE TABLE `eh_equipment_inspection_review_date` (
 ALTER TABLE eh_equipment_inspection_tasks
 ADD COLUMN `plan_id`  bigint(20) NOT NULL ;
 
+ALTER TABLE eh_equipment_inspection_tasks ADD INDEX eq_task_plan_id (plan_id) ;
+
 
 -- 标准增加周期类型  by jiarui
 ALTER TABLE eh_equipment_inspection_standards

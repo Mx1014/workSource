@@ -5364,6 +5364,7 @@ private void checkUserPrivilege(Long orgId, Long privilegeId, Long communityId) 
 	}
 
 	private void inActiveTaskByPlanId(Long planId) {
+		equipmentProvider.updateEquipmentTaskByPlanId(planId);
 		int pageSize = 200;
 		CrossShardListingLocator locator = new CrossShardListingLocator();
 		for(;;) {
@@ -5371,9 +5372,6 @@ private void checkUserPrivilege(Long orgId, Long privilegeId, Long communityId) 
 
 			if(tasks.size() > 0) {
 				for(EquipmentInspectionTasks task : tasks) {
-					task.setStatus(EquipmentTaskStatus.NONE.getCode());
-					equipmentProvider.updateEquipmentTask(task);
-
 					equipmentTasksSearcher.feedDoc(task);
 				}
 			}
@@ -5382,6 +5380,7 @@ private void checkUserPrivilege(Long orgId, Long privilegeId, Long communityId) 
 				break;
 			}
 		}
+
 	}
 
 	private EquipmentInspectionPlans verifyEquipmentInspectionPlan(Long id) {
@@ -5485,7 +5484,7 @@ private void checkUserPrivilege(Long orgId, Long privilegeId, Long communityId) 
 		// 删除巡检计划关联审批检查组
 		equipmentProvider.deleteEquipmentInspectionPlanGroupMapByPlanId(exist.getId());
 		//删除repeatSetting  不删也可
-		repeatService.deleteRepeatSettingsById(exist.getRepeatSettingId());
+		//repeatService.deleteRepeatSettingsById(exist.getRepeatSettingId());
 		//删除所有此计划产生的任务
 		inActiveTaskByPlanId(cmd.getId());
 		equipmentPlanSearcher.deleteById(cmd.getId());

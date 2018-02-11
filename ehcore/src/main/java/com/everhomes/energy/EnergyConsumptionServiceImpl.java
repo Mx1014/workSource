@@ -812,6 +812,13 @@ public class EnergyConsumptionServiceImpl implements EnergyConsumptionService {
     }
 
     @Override
+    public SearchEnergyMeterResponse searchSimpleEnergyMeter(SearchEnergyMeterCommand cmd) {
+        validate(cmd);
+        checkEnergyAuth(cmd.getNamespaceId(), PrivilegeConstants.METER_LIST, cmd.getOrganizationId(),  cmd.getCommunityId());
+        return meterSearcher.querySimpleEnergyMeters(cmd);
+    }
+
+    @Override
     public void changeEnergyMeter(ChangeEnergyMeterCommand cmd) {
         validate(cmd);
 //        checkCurrentUserNotInOrg(cmd.getOrganizationId());
