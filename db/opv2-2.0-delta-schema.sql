@@ -154,6 +154,9 @@ ALTER TABLE `eh_equipment_inspection_task_logs`
 ALTER TABLE `eh_equipment_inspection_task_logs`
   ADD COLUMN `pm_task_id` bigint(20) NULL DEFAULT 0 ;
 
+ALTER TABLE eh_equipment_inspection_task_logs ADD INDEX eq_log_pm_task_id (pm_task_id) ;
+ALTER TABLE eh_equipment_inspection_task_logs ADD INDEX eq_log_task_id (task_id) ;
+
 -- 物业巡检V3.1  end   by jiarui
 
 -- 离线支持   by jiarui
@@ -1676,11 +1679,21 @@ CREATE TABLE `eh_general_approval_scope_map` (
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4;
 
 UPDATE eh_general_approvals SET approval_attribute = 'CUSTOMIZE' WHERE approval_attribute IS NULL;
-ALTER TABLE eh_general_approvals MODIFY approval_attribute VARCHAR(128) NOT NULL DEFAULT 'CUSTOMIZE';
+ALTER TABLE eh_general_approvals MODIFY approval_attribute VARCHAR(128) NOT NULL DEFAULT 'CUSTOMIZE' COMMENT 'CUSTOMIZE, DEFAULT';
 
 UPDATE eh_general_approvals SET modify_flag = 1 WHERE modify_flag IS NULL;
-ALTER TABLE eh_general_approvals MODIFY modify_flag TINYINT NOT NULL DEFAULT 1;
+ALTER TABLE eh_general_approvals MODIFY modify_flag TINYINT NOT NULL DEFAULT 1 COMMENT '0: no, 1: yes';
 
 UPDATE eh_general_approvals SET delete_flag = 1 WHERE delete_flag IS NULL;
-ALTER TABLE eh_general_approvals MODIFY delete_flag TINYINT NOT NULL DEFAULT 1;
+ALTER TABLE eh_general_approvals MODIFY delete_flag TINYINT NOT NULL DEFAULT 1 COMMENT '0: no, 1: yes';
+
+UPDATE eh_general_forms SET form_attribute = 'CUSTOMIZE' WHERE form_attribute IS NULL;
+ALTER TABLE eh_general_forms MODIFY form_attribute VARCHAR(128) NOT NULL DEFAULT 'CUSTOMIZE' COMMENT 'CUSTOMIZE, DEFAULT';
+
+UPDATE eh_general_forms SET modify_flag = 1 WHERE modify_flag IS NULL;
+ALTER TABLE eh_general_forms MODIFY modify_flag TINYINT NOT NULL DEFAULT 1 COMMENT '0: no, 1: yes';
+
+UPDATE eh_general_forms SET delete_flag = 1 WHERE delete_flag IS NULL;
+ALTER TABLE eh_general_forms MODIFY delete_flag TINYINT NOT NULL DEFAULT 1 COMMENT '0: no, 1: yes';
+
 -- end by nan.rong

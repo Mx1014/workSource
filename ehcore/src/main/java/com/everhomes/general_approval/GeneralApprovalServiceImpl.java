@@ -645,7 +645,7 @@ public class GeneralApprovalServiceImpl implements GeneralApprovalService {
         OrganizationMember member = organizationProvider.findOrganizationMemberByOrgIdAndUId(userId, ownerId);
         if(member != null)
             return member.getContactName();
-        //  若没有真实姓名则返回昵称
+        //  若没有真实姓名则返回空
         return null;
     }
 
@@ -686,6 +686,7 @@ public class GeneralApprovalServiceImpl implements GeneralApprovalService {
                 query.addConditions(Tables.EH_GENERAL_APPROVALS.OWNER_ID.eq(cmd.getOwnerId()));
                 query.addConditions(Tables.EH_GENERAL_APPROVALS.OWNER_TYPE.eq(cmd.getOwnerType()));
                 query.addOrderBy(Tables.EH_GENERAL_APPROVALS.DEFAULT_ORDER.asc());
+                query.addOrderBy(Tables.EH_GENERAL_APPROVALS.ID.desc());
             }
             query.addConditions(Tables.EH_GENERAL_APPROVALS.STATUS.ne(GeneralApprovalStatus.DELETED.getCode()));
             query.addConditions(Tables.EH_GENERAL_APPROVALS.MODULE_ID.eq(cmd.getModuleId()));
@@ -805,17 +806,23 @@ public class GeneralApprovalServiceImpl implements GeneralApprovalService {
 
     @Override
     public void enableGeneralApproval(GeneralApprovalIdCommand cmd) {
+        Long userId = UserContext.currentUserId();
         GeneralApproval ga = this.generalApprovalProvider.getGeneralApprovalById(cmd
                 .getApprovalId());
         ga.setStatus(GeneralApprovalStatus.RUNNING.getCode());
+        ga.setOperatorUid(userId);
+        ga.setOperatorName(getUserRealName(userId, ga.getOwnerId()));
         this.generalApprovalProvider.updateGeneralApproval(ga);
     }
 
     @Override
     public void disableGeneralApproval(GeneralApprovalIdCommand cmd) {
+        Long userId = UserContext.currentUserId();
         GeneralApproval ga = this.generalApprovalProvider.getGeneralApprovalById(cmd
                 .getApprovalId());
         ga.setStatus(GeneralApprovalStatus.INVALID.getCode());
+        ga.setOperatorUid(userId);
+        ga.setOperatorName(getUserRealName(userId, ga.getOwnerId()));
         this.generalApprovalProvider.updateGeneralApproval(ga);
     }
 
@@ -1218,9 +1225,7 @@ public class GeneralApprovalServiceImpl implements GeneralApprovalService {
                 continue;
             GeneralApprovalScopeMap scope = generalApprovalProvider.findGeneralApprovalScopeMap(approval.getNamespaceId(),
                     approval.getId(), organization.getId(), UniongroupTargetType.ORGANIZATION.getCode());
-            if(scope !=null)
-                continue;
-            else{
+            if(scope ==null) {
                 scope = new GeneralApprovalScopeMap();
                 scope.setSourceId(organization.getId());
                 scope.setSourceType(UniongroupTargetType.ORGANIZATION.getCode());
@@ -1234,7 +1239,34 @@ public class GeneralApprovalServiceImpl implements GeneralApprovalService {
 
     @Override
     public ListGeneralApprovalResponse listAvailableGeneralApprovals(ListGeneralApprovalCommand cmd){
-        return null;
+        ListGeneralApprovalResponse res = new ListGeneralApprovalResponse();
+        List<GeneralApprovalDTO> dtos = new ArrayList<>();
+
+        ListGeneralApprovalResponse response = listGeneralApproval(cmd);
+        List<GeneralApprovalDTO> approvals = response.getDtos();
+        OrganizationMember member = organizationProvider.findDepartmentMemberByTargetIdAndOrgId(UserContext.currentUserId(), cmd.getOwnerId());
+        approvals.forEach(r ->{
+            if(checkTheScope(r.getScopes(), member))
+                dtos.add(r);
+        });
+        res.setDtos(dtos);
+        return res;
     }
 
+    private boolean checkTheScope(List<GeneralApprovalScopeMapDTO> scopes, OrganizationMember member) {
+        if (member == null)
+            return false;
+        List<Long> scopeUserIds = scopes.stream()
+                .filter(p1 -> p1.getSourceType().equals(UniongroupTargetType.MEMBERDETAIL.getCode()))
+                .map(GeneralApprovalScopeMapDTO::getSourceId).collect(Collectors.toList());
+        List<Long> scopeDepartmentIds = scopes.stream()
+                .filter(p1 -> p1.getSourceType().equals(UniongroupTargetType.ORGANIZATION.getCode()))
+                .map(GeneralApprovalScopeMapDTO::getSourceId).collect(Collectors.toList());
+        if (scopeUserIds.contains(member.getDetailId()))
+            return true;
+        for (Long departmentId : scopeDepartmentIds)
+            if (member.getGroupPath().contains(String.valueOf(departmentId)))
+                return true;
+        return false;
+    }
 }
