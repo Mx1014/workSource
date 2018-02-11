@@ -4780,6 +4780,7 @@ public class Rentalv2ServiceImpl implements Rentalv2Service {
 			dto.setPrice(pricePackage.getPrice()==null?new BigDecimal(0) :pricePackage.getPrice());
 			dto.setInitiatePrice(pricePackage.getInitiatePrice());
 			dto.setOriginalPrice(pricePackage.getOriginalPrice());
+			dto.setUserPriceType(pricePackage.getUserPriceType());
 			packageDtos.add(dto);
 		}
 	}
@@ -6197,6 +6198,7 @@ public class Rentalv2ServiceImpl implements Rentalv2Service {
 					singleCmd.setMultiUnit(resource.getMultiUnit());
 					singleCmd.setSiteNumbers(resource.getSiteNumbers());
 					singleCmd.setSiteCounts(resource.getResourceCounts());
+					singleCmd.setUserPriceType(priceRule.getUserPriceType());
 					addSingleRules.add(singleCmd);
 				}
 			}
@@ -6217,6 +6219,7 @@ public class Rentalv2ServiceImpl implements Rentalv2Service {
 			singleCmd.setMultiUnit(resource.getMultiUnit());
 			singleCmd.setSiteNumbers(resource.getSiteNumbers());
 			singleCmd.setSiteCounts(resource.getResourceCounts());
+			singleCmd.setUserPriceType(priceRule.getUserPriceType());
 			addSingleRules.add(singleCmd);
 		}
 
@@ -6401,6 +6404,7 @@ public class Rentalv2ServiceImpl implements Rentalv2Service {
 			cell.setCounts(cmd.getCounts());
 			cell.setPricePackageId(cmd.getSitePackageId());
 			cell.setResourceType(cmd.getResourceType());
+			cell.userPriceType(cmd.getUserPriceType());
 			RentalCell dbCell = this.rentalv2Provider.getRentalCellById(cell.getId());
 			if(null == dbCell)
 				this.rentalv2Provider.createRentalSiteRule(cell);
@@ -6538,6 +6542,7 @@ public class Rentalv2ServiceImpl implements Rentalv2Service {
 		rentalv2PricePackage.setName(pricePackages.get(0).getName());
 		rentalv2PricePackage.setRentalType(pricePackages.get(0).getRentalType());
 		rentalv2PricePackage.setResourceType(resourceType);
+		rentalv2PricePackage.setUserPriceType(pricePackages.get(0).getUserPriceType());
 		Long id = rentalv2PricePackageProvider.createRentalv2PricePackage(rentalv2PricePackage);
 		createPricePackages(resourceType, PriceRuleType.CELL,id,pricePackages);
 		return id;
