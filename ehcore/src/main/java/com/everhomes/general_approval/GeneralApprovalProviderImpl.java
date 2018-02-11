@@ -75,7 +75,7 @@ public class GeneralApprovalProviderImpl implements GeneralApprovalProvider {
 
     @Override
     public GeneralApproval getGeneralApprovalById(Long id) {
-        try {
+        /*try {
             GeneralApproval[] result = new GeneralApproval[1];
             DSLContext context = this.dbProvider.getDslContext(AccessSpec.readWriteWith(EhGeneralApprovals.class));
 
@@ -90,7 +90,10 @@ public class GeneralApprovalProviderImpl implements GeneralApprovalProvider {
         } catch (Exception ex) {
             //fetchAny() maybe return null
             return null;
-        }
+        }*/
+        DSLContext context = dbProvider.getDslContext(AccessSpec.readOnly());
+        EhGeneralApprovalsDao dao = new EhGeneralApprovalsDao(context.configuration());
+        return ConvertHelper.convert(dao.findById(id), GeneralApproval.class);
     }
 
     @Override
