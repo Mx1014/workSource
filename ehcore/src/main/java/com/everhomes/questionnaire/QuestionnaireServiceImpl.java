@@ -143,6 +143,12 @@ public class QuestionnaireServiceImpl implements QuestionnaireService {
 		checkQuestionnaireStatus(cmd.getStatus());
 		checkQuestionnaireCollectFlag(cmd.getCollectFlag());
 //		checkQuestionnaireTargetType(cmd.getTargetType());
+
+		QuestionnaireTargetType enumTargetType = QuestionnaireTargetType.fromCode(cmd.getTargetType());
+		if (enumTargetType == null){
+			cmd.setTargetType(null);
+		}
+
 		cmd.setNowTime(new Timestamp(System.currentTimeMillis()));
 	}
 
@@ -994,6 +1000,11 @@ public class QuestionnaireServiceImpl implements QuestionnaireService {
 
 	private void checkListTargetQuestionnairesCommand(ListTargetQuestionnairesCommand cmd) {
 //		checkQuestionnaireTargetType(cmd.getTargetType());
+		QuestionnaireTargetType enumTargetType = QuestionnaireTargetType.fromCode(cmd.getTargetType());
+		if (enumTargetType == null){
+			cmd.setTargetType(null);
+		}
+
 		checkQuestionnaireCollectFlag(cmd.getCollectFlag());
 		if(cmd.getPageAnchor()!=null){
 			String value = String.valueOf(cmd.getPageAnchor());

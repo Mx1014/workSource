@@ -15,6 +15,15 @@ public class AutoNoticeConfigCommand {
     private Long ownerId;
     @ItemType(Integer.class)
     private List<Integer> configDays;
+    private Long organizationId;
+
+    public Long getOrganizationId() {
+        return organizationId;
+    }
+
+    public void setOrganizationId(Long organizationId) {
+        this.organizationId = organizationId;
+    }
 
     public Integer getNamespaceId() {
         return namespaceId;

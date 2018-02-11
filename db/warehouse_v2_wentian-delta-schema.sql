@@ -45,6 +45,10 @@ CREATE TABLE `eh_warehouse_purchase_orders`(
   `total_amount` DECIMAL(20,2) DEFAULT 0.00 COMMENT '总金额',
   `warehouse_status` TINYINT DEFAULT NULL COMMENT '库存状态',
   `delivery_date` DATETIME DEFAULT NULL COMMENT '交付日期',
+  `community_id` BIGINT DEFAULT NULL,
+  `applicant_name` VARCHAR(128) DEFAULT NULL,
+  `contact_tel` VARCHAR(128) DEFAULT NULL,
+  `contact_name` VARCHAR(128) DEFAULT NULL,
   `remark` VARCHAR(2048) DEFAULT NULL COMMENT '备注',
   `approval_order_id` BIGINT DEFAULT NULL COMMENT '关联的审批单的id',
   `create_time` DATETIME DEFAULT NOW(),
@@ -143,3 +147,4 @@ CREATE TABLE `eh_requisition_types`(
   `default_order` INTEGER DEFAULT 0,
   PRIMARY KEY (`id`)
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4;
+

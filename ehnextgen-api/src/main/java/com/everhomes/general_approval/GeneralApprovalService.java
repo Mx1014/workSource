@@ -4,6 +4,7 @@ import com.everhomes.flow.FlowCase;
 import com.everhomes.flow.FlowCaseDetail;
 import com.everhomes.rest.general_approval.*;
 
+import java.util.List;
 import java.util.Map;
 
 import com.everhomes.rest.general_approval.CreateGeneralApprovalCommand;
@@ -36,9 +37,13 @@ public interface GeneralApprovalService {
 
     ListGeneralApprovalResponse listGeneralApproval(ListGeneralApprovalCommand cmd);
 
+    List<GeneralApprovalScopeMapDTO> listGeneralApprovalScopes(Integer namespaceId, Long approvalId);
+
     GeneralApprovalDTO updateGeneralApproval(UpdateGeneralApprovalCommand cmd);
 
     GeneralApprovalDTO setGeneralApprovalForm(SetGeneralApprovalFormCommand cmd);
+
+    void orderGeneralApprovals(OrderGeneralApprovalsCommand cmd);
 
     void deleteGeneralApproval(GeneralApprovalIdCommand cmd);
 
@@ -81,7 +86,7 @@ public interface GeneralApprovalService {
 
     void disableApprovalByFormOriginId(Long formOriginId, Long moduleId, String moduleType);
 
-    void orderGeneralApprovals(OrderGeneralApprovalsCommand cmd);
-
     ListGeneralApprovalResponse listAvailableGeneralApprovals(ListGeneralApprovalCommand cmd);
+
+    void initializeGeneralApprovalScope();
 }

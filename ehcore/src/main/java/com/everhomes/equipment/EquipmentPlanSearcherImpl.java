@@ -9,7 +9,7 @@ import com.everhomes.repeat.RepeatSettings;
 import com.everhomes.rest.acl.PrivilegeConstants;
 import com.everhomes.rest.equipment.EquipmentInspectionPlanDTO;
 import com.everhomes.rest.equipment.EquipmentPlanStatus;
-import com.everhomes.rest.equipment.searchEquipmentInspectionPlansCommand;
+import com.everhomes.rest.equipment.SearchEquipmentInspectionPlansCommand;
 import com.everhomes.rest.equipment.searchEquipmentInspectionPlansResponse;
 import com.everhomes.rest.quality.OwnerType;
 import com.everhomes.rest.repeat.RepeatSettingsDTO;
@@ -121,7 +121,7 @@ public class EquipmentPlanSearcherImpl extends AbstractElasticSearch implements 
     }
 
     @Override
-    public searchEquipmentInspectionPlansResponse query(searchEquipmentInspectionPlansCommand cmd) {
+    public searchEquipmentInspectionPlansResponse query(SearchEquipmentInspectionPlansCommand cmd) {
 
         //check auth
         checkUserPrivilege(cmd.getOwnerId(), PrivilegeConstants.EQUIPMENT_PLAN_LIST,cmd.getTargetId());

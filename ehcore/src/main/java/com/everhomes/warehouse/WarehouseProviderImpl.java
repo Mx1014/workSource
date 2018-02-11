@@ -7,10 +7,7 @@ import com.everhomes.db.DbProvider;
 import com.everhomes.equipment.EquipmentInspectionStandards;
 import com.everhomes.listing.CrossShardListingLocator;
 import com.everhomes.naming.NameMapper;
-import com.everhomes.rest.warehouse.DeliveryFlag;
-import com.everhomes.rest.warehouse.SearchWarehouseStockLogsResponse;
-import com.everhomes.rest.warehouse.Status;
-import com.everhomes.rest.warehouse.WarehouseStockOrderDTO;
+import com.everhomes.rest.warehouse.*;
 import com.everhomes.sequence.SequenceProvider;
 import com.everhomes.server.schema.Tables;
 import com.everhomes.server.schema.tables.daos.*;
@@ -632,6 +629,68 @@ public class WarehouseProviderImpl implements WarehouseProvider {
                 .where(Tables.EH_WAREHOUSE_STOCK_LOGS.WAREHOUSE_ORDER_ID.eq(warehouseOrderId))
                 .limit(pageOffset,pageSize)
                 .fetch(Tables.EH_WAREHOUSE_STOCK_LOGS.ID);
+    }
+
+    @Override
+    public void updateWarehouseStockByPurchase(Long materialId, Long purchaseQuantity) {
+        DSLContext context = this.dbProvider.getDslContext(AccessSpec.readWrite());
+        context.update(Tables.EH_WAREHOUSE_STOCKS)
+                .set(Tables.EH_WAREHOUSE_STOCKS.AMOUNT,Tables.EH_WAREHOUSE_STOCKS.AMOUNT.add(purchaseQuantity))
+                .where(Tables.EH_WAREHOUSE_STOCKS.ID.eq(materialId))
+                .execute();
+    }
+
+    @Override
+    public String findWarehouseNameByMaterialId(Long materialId) {
+        DSLContext context = this.dbProvider.getDslContext(AccessSpec.readOnly());
+        List<Long> list = context.select(Tables.EH_WAREHOUSE_STOCKS.WAREHOUSE_ID)
+                .from(Tables.EH_WAREHOUSE_STOCKS)
+                .where(Tables.EH_WAREHOUSE_STOCKS.MATERIAL_ID.eq(materialId))
+                .fetch(Tables.EH_WAREHOUSE_STOCKS.WAREHOUSE_ID);
+        if(list.size() < 1) return null;
+        return context.select(Tables.EH_WAREHOUSES.NAME)
+                .from(Tables.EH_WAREHOUSES)
+                .where(Tables.EH_WAREHOUSES.ID.eq(list.get(0)))
+                .fetchOne(Tables.EH_WAREHOUSES.NAME);
+    }
+
+    @Override
+    public String findWarehouseMaterialCategoryByMaterialId(Long materialId) {
+        DSLContext context = this.dbProvider.getDslContext(AccessSpec.readOnly());
+        Long categoryId = context.select(Tables.EH_WAREHOUSE_MATERIALS.CATEGORY_ID)
+                .from(Tables.EH_WAREHOUSE_MATERIALS)
+                .where(Tables.EH_WAREHOUSE_MATERIALS.ID.eq(materialId))
+                .fetchOne(Tables.EH_WAREHOUSE_MATERIALS.CATEGORY_ID);
+        return context.select(Tables.EH_WAREHOUSE_MATERIAL_CATEGORIES.NAME)
+                .from(Tables.EH_WAREHOUSE_MATERIAL_CATEGORIES)
+                .where(Tables.EH_WAREHOUSE_MATERIAL_CATEGORIES.ID.eq(categoryId))
+                .fetchOne(Tables.EH_WAREHOUSE_MATERIAL_CATEGORIES.NAME);
+
+    }
+
+    @Override
+    public String findWarehouseUnitNameById(Long unitId) {
+        DSLContext context = dbProvider.getDslContext(AccessSpec.readOnly());
+        return context.select(Tables.EH_WAREHOUSE_UNITS.NAME)
+                .from(Tables.EH_WAREHOUSE_UNITS)
+                .where(Tables.EH_WAREHOUSE_UNITS.ID.eq(unitId))
+                .fetchOne(Tables.EH_WAREHOUSE_UNITS.NAME);
+    }
+
+    @Override
+    public WarehouseMaterials findWarehouseMaterialById(Long materialId) {
+        DSLContext context = dbProvider.getDslContext(AccessSpec.readOnly());
+        return context.selectFrom(Tables.EH_WAREHOUSE_MATERIALS)
+                .where(Tables.EH_WAREHOUSE_MATERIALS.ID.eq(materialId))
+                .fetchOneInto(WarehouseMaterials.class);
+    }
+
+    @Override
+    public WarehouseMaterialStock findWarehouseStocksByMaterialId(Long materialId) {
+        DSLContext context = dbProvider.getDslContext(AccessSpec.readOnly());
+        return context.selectFrom(Tables.EH_WAREHOUSE_STOCKS)
+                .where(Tables.EH_WAREHOUSE_STOCKS.MATERIAL_ID.eq(materialId))
+                .fetchOneInto(WarehouseMaterialStock.class);
     }
 
     @Override

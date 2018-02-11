@@ -74,7 +74,7 @@ import com.everhomes.rest.equipment.UpdateEquipmentsCommand;
 import com.everhomes.rest.equipment.VerifyEquipmentLocationCommand;
 import com.everhomes.rest.equipment.VerifyEquipmentLocationResponse;
 import com.everhomes.rest.equipment.findScopeFieldItemCommand;
-import com.everhomes.rest.equipment.searchEquipmentInspectionPlansCommand;
+import com.everhomes.rest.equipment.SearchEquipmentInspectionPlansCommand;
 import com.everhomes.rest.equipment.searchEquipmentInspectionPlansResponse;
 import com.everhomes.rest.pmNotify.DeletePmNotifyParamsCommand;
 import com.everhomes.rest.pmNotify.ListPmNotifyParamsCommand;
@@ -441,7 +441,7 @@ public class EquipmentController extends ControllerBase {
      */
     @RequestMapping("searchEquipmentInspectionPlans")
     @RestReturn(value = searchEquipmentInspectionPlansResponse.class)
-    public RestResponse searchEquipmentInspectionPlans(searchEquipmentInspectionPlansCommand cmd) {
+    public RestResponse searchEquipmentInspectionPlans(SearchEquipmentInspectionPlansCommand cmd) {
         searchEquipmentInspectionPlansResponse equipmentInspectionPlansResponse = equipmentPlanSearcher.query(cmd);
         return getRestResponse(equipmentInspectionPlansResponse);
     }
@@ -462,7 +462,7 @@ public class EquipmentController extends ControllerBase {
      * <p>导出计划表</p>
      */
     @RequestMapping("exportEquipmentInspectionPlans")
-    public RestResponse exportEquipmentInspectionPlans(searchEquipmentInspectionPlansCommand cmd, HttpServletResponse response) {
+    public RestResponse exportEquipmentInspectionPlans(SearchEquipmentInspectionPlansCommand cmd, HttpServletResponse response) {
         equipmentService.exportInspectionPlans(cmd, response);
         return getSuccessResponse();
     }

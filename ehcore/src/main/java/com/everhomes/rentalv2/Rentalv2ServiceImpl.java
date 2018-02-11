@@ -969,10 +969,23 @@ public class Rentalv2ServiceImpl implements Rentalv2Service {
 			cmd.setResourceType(RentalV2ResourceType.DEFAULT.getCode());
 		}
 
+		String ownerType = null;
+		Long ownerId = null;
+		if(RuleSourceType.DEFAULT.getCode().equals(cmd.getSourceType())){
+			ownerType = RuleSourceType.DEFAULT.getCode();
+			RentalDefaultRule rule = this.rentalv2Provider.getRentalDefaultRule(cmd.getOwnerType(), cmd.getOwnerId(),
+					cmd.getResourceType(), cmd.getResourceTypeId(), cmd.getSourceType(), cmd.getSourceId());
+			ownerId = rule.getId();
+		}else if(RuleSourceType.RESOURCE.getCode().equals(cmd.getSourceType())){
+			RentalResource rs = rentalCommonService.getRentalResource(cmd.getResourceType(), cmd.getSourceId());
+			ownerType = RuleSourceType.RESOURCE.getCode();
+			ownerId = rs.getId();
+		}
+
 		RentalItem siteItem = ConvertHelper.convert(cmd,RentalItem.class );
 		siteItem.setName(cmd.getItemName());
-		siteItem.setSourceType(cmd.getSourceType());
-		siteItem.setSourceId(cmd.getSourceId());
+		siteItem.setSourceType(ownerType);
+		siteItem.setSourceId(ownerId);
 		siteItem.setPrice(cmd.getItemPrice());
 		rentalv2Provider.createRentalSiteItem(siteItem);
 	}
@@ -4005,7 +4018,7 @@ public class Rentalv2ServiceImpl implements Rentalv2Service {
 		CrossShardListingLocator locator = new CrossShardListingLocator();
 		locator.setAnchor(cmd.getPageAnchor());
 
-		List<RentalOrder> bills = rentalv2Provider.listRentalBills(cmd.getResourceTypeId(), cmd.getOrganizationId(), 
+		List<RentalOrder> bills = rentalv2Provider.listRentalBills(cmd.getResourceTypeId(), cmd.getOrganizationId(), cmd.getCommunityId(),
 				cmd.getRentalSiteId(), locator, cmd.getBillStatus(), cmd.getVendorType(), pageSize+1, cmd.getStartTime(), cmd.getEndTime(),
 				null, null);
 
@@ -5764,7 +5777,7 @@ public class Rentalv2ServiceImpl implements Rentalv2Service {
 	public void exportRentalBills(ListRentalBillsCommand cmd, HttpServletResponse response) {
 
 		Integer pageSize = Integer.MAX_VALUE; 
-		List<RentalOrder> bills = rentalv2Provider.listRentalBills(cmd.getResourceTypeId(), cmd.getOrganizationId(), 
+		List<RentalOrder> bills = rentalv2Provider.listRentalBills(cmd.getResourceTypeId(), cmd.getOrganizationId(), cmd.getCommunityId(),
 				cmd.getRentalSiteId(), new CrossShardListingLocator(), cmd.getBillStatus(), cmd.getVendorType(), pageSize, cmd.getStartTime(), cmd.getEndTime(),
 				null, null); 
 		if(null == bills){
@@ -6183,6 +6196,7 @@ public class Rentalv2ServiceImpl implements Rentalv2Service {
 					singleCmd.setAutoAssign(resource.getAutoAssign());
 					singleCmd.setMultiUnit(resource.getMultiUnit());
 					singleCmd.setSiteNumbers(resource.getSiteNumbers());
+					singleCmd.setSiteCounts(resource.getResourceCounts());
 					addSingleRules.add(singleCmd);
 				}
 			}
@@ -6202,7 +6216,7 @@ public class Rentalv2ServiceImpl implements Rentalv2Service {
 			singleCmd.setAutoAssign(resource.getAutoAssign());
 			singleCmd.setMultiUnit(resource.getMultiUnit());
 			singleCmd.setSiteNumbers(resource.getSiteNumbers());
-
+			singleCmd.setSiteCounts(resource.getResourceCounts());
 			addSingleRules.add(singleCmd);
 		}
 
@@ -7693,7 +7707,7 @@ public class Rentalv2ServiceImpl implements Rentalv2Service {
 		Integer pageSize = PaginationConfigHelper.getPageSize(configurationProvider, cmd.getPageSize());
 
 		List<RentalOrder> orders = rentalv2Provider.searchRentalOrders(cmd.getResourceTypeId(), cmd.getResourceType(),
-				cmd.getResourceId(), cmd.getBillStatus(), cmd.getStartTime(), cmd.getEndTime(), cmd.getTag1(),
+				cmd.getResourceId(), cmd.getBillStatus(), cmd.getStartTime(), cmd.getEndTime(),cmd.getTag1(),
 				cmd.getTag2(), cmd.getPageAnchor(), pageSize);
 
 		int size = orders.size();

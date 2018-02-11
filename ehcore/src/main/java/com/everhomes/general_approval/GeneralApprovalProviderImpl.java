@@ -23,6 +23,9 @@ import org.jooq.DeleteQuery;
 import org.jooq.SelectQuery;
 import org.jooq.UpdateQuery;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.cache.annotation.CacheEvict;
+import org.springframework.cache.annotation.Cacheable;
+import org.springframework.cache.annotation.Caching;
 import org.springframework.stereotype.Component;
 
 import com.everhomes.server.schema.Tables;
@@ -72,7 +75,7 @@ public class GeneralApprovalProviderImpl implements GeneralApprovalProvider {
 
     @Override
     public GeneralApproval getGeneralApprovalById(Long id) {
-        try {
+        /*try {
             GeneralApproval[] result = new GeneralApproval[1];
             DSLContext context = this.dbProvider.getDslContext(AccessSpec.readWriteWith(EhGeneralApprovals.class));
 
@@ -87,12 +90,15 @@ public class GeneralApprovalProviderImpl implements GeneralApprovalProvider {
         } catch (Exception ex) {
             //fetchAny() maybe return null
             return null;
-        }
+        }*/
+        DSLContext context = dbProvider.getDslContext(AccessSpec.readOnly());
+        EhGeneralApprovalsDao dao = new EhGeneralApprovalsDao(context.configuration());
+        return ConvertHelper.convert(dao.findById(id), GeneralApproval.class);
     }
 
     @Override
     public List<GeneralApproval> queryGeneralApprovals(ListingLocator locator, int count, ListingQueryBuilderCallback queryBuilderCallback) {
-        DSLContext context = this.dbProvider.getDslContext(AccessSpec.readWriteWith(EhGeneralApprovals.class));
+        DSLContext context = this.dbProvider.getDslContext(AccessSpec.readOnly());
 
         SelectQuery<EhGeneralApprovalsRecord> query = context.selectQuery(Tables.EH_GENERAL_APPROVALS);
         if (queryBuilderCallback != null)
@@ -103,9 +109,7 @@ public class GeneralApprovalProviderImpl implements GeneralApprovalProvider {
         }
 
         query.addLimit(count);
-        List<GeneralApproval> objs = query.fetch().map((r) -> {
-            return ConvertHelper.convert(r, GeneralApproval.class);
-        });
+        List<GeneralApproval> objs = query.fetch().map((r) -> ConvertHelper.convert(r, GeneralApproval.class));
 
         if (objs.size() >= count) {
             locator.setAnchor(objs.get(objs.size() - 1).getId());
@@ -187,6 +191,7 @@ public class GeneralApprovalProviderImpl implements GeneralApprovalProvider {
         query.execute();
     }
 
+    @Caching(evict = {@CacheEvict(value = "GeneralApprovalScopes", key = "#scope.approvalId")})
     @Override
     public void createGeneralApprovalScopeMap(GeneralApprovalScopeMap scope){
         Long id = this.sequenceProvider.getNextSequence(NameMapper.getSequenceDomainFromTablePojo(EhGeneralApprovalScopeMap.class));
@@ -198,6 +203,7 @@ public class GeneralApprovalProviderImpl implements GeneralApprovalProvider {
         DaoHelper.publishDaoAction(DaoAction.CREATE, EhGeneralApprovalScopeMap.class, null);
     }
 
+    @Caching(evict = {@CacheEvict(value = "GeneralApprovalScopes", key = "#scope.approvalId")})
     @Override
     public void updateGeneralApprovalScopeMap(GeneralApprovalScopeMap scope){
         DSLContext context = this.dbProvider.getDslContext(AccessSpec.readWrite());
@@ -218,6 +224,7 @@ public class GeneralApprovalProviderImpl implements GeneralApprovalProvider {
     }
 
     //  delete odd detail source data
+    @Caching(evict = {@CacheEvict(value = "GeneralApprovalScopes", key = "#approvalId")})
     @Override
     public void deleteOddGeneralApprovalDetailScope(Integer namespaceId, Long approvalId, List<Long> detailIds){
         DSLContext context = dbProvider.getDslContext(AccessSpec.readWrite());
@@ -230,8 +237,9 @@ public class GeneralApprovalProviderImpl implements GeneralApprovalProvider {
         DaoHelper.publishDaoAction(DaoAction.MODIFY, EhGeneralApprovalScopeMap.class, null);
     }
 
+    @Caching(evict = {@CacheEvict(value = "GeneralApprovalScopes", key = "#approvalId")})
     @Override
-    public void deleteOddGeneralApprovalOraganizationScope(Integer namespaceId, Long approvalId, List<Long> detailIds){
+    public void deleteOddGeneralApprovalOrganizationScope(Integer namespaceId, Long approvalId, List<Long> detailIds){
         DSLContext context = dbProvider.getDslContext(AccessSpec.readWrite());
         DeleteQuery<EhGeneralApprovalScopeMapRecord> query = context.deleteQuery(Tables.EH_GENERAL_APPROVAL_SCOPE_MAP);
         query.addConditions(Tables.EH_GENERAL_APPROVAL_SCOPE_MAP.NAMESPACE_ID.eq(namespaceId));
@@ -240,5 +248,20 @@ public class GeneralApprovalProviderImpl implements GeneralApprovalProvider {
         query.addConditions(Tables.EH_GENERAL_APPROVAL_SCOPE_MAP.SOURCE_ID.notIn(detailIds));
         query.execute();
         DaoHelper.publishDaoAction(DaoAction.MODIFY, EhGeneralApprovalScopeMap.class, null);
+    }
+
+    @Cacheable(value = "GeneralApprovalScopes", key = "#approvalId", unless = "#result.size() == 0")
+    @Override
+    public List<GeneralApprovalScopeMap> listGeneralApprovalScopes(Integer namespaceId, Long approvalId) {
+        List<GeneralApprovalScopeMap> results = new ArrayList<>();
+        DSLContext context = dbProvider.getDslContext(AccessSpec.readOnly());
+        SelectQuery<EhGeneralApprovalScopeMapRecord> query = context.selectQuery(Tables.EH_GENERAL_APPROVAL_SCOPE_MAP);
+        query.addConditions(Tables.EH_GENERAL_APPROVAL_SCOPE_MAP.NAMESPACE_ID.eq(namespaceId));
+        query.addConditions(Tables.EH_GENERAL_APPROVAL_SCOPE_MAP.APPROVAL_ID.eq(approvalId));
+        query.fetch().map(r -> {
+            results.add(ConvertHelper.convert(r, GeneralApprovalScopeMap.class));
+            return null;
+        });
+        return results;
     }
 }
