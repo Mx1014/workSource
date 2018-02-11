@@ -13,7 +13,7 @@ public interface PortalPublishHandler {
      * @param instanceConfig 具体模块配置的参数
      * @return instanceConfig 把json对象里面个个实体需要的id补充返回
      */
-    String publish(Integer namespaceId, String instanceConfig,String itemLabel);
+    String publish(Integer namespaceId, String instanceConfig,String appName);
 
     /**
      * 配置应用的信息，比如说是icon的url等

@@ -19,6 +19,15 @@ public class SelectedNoticeCommand {
     private List<BillIdAndType> billIdAndTypes;
     private String ownerType;
     private Long ownerId;
+    private Long organizationId;
+
+    public Long getOrganizationId() {
+        return organizationId;
+    }
+
+    public void setOrganizationId(Long organizationId) {
+        this.organizationId = organizationId;
+    }
 
     public List<BillIdAndType> getBillIdAndTypes() {
         return billIdAndTypes;
