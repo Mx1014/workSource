@@ -516,7 +516,9 @@ public class CustomerServiceImpl implements CustomerService {
         }
         enterpriseCustomerProvider.updateEnterpriseCustomer(updateCustomer);
         enterpriseCustomerSearcher.feedDoc(updateCustomer);
-        
+
+        //保存之后重查一遍 因为数据类型导致 fix 22978
+        updateCustomer = checkEnterpriseCustomer(cmd.getId());
         //保存客户事件
         saveCustomerEvent( 3  ,updateCustomer ,customer);
 
