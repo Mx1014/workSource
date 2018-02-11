@@ -5364,6 +5364,7 @@ private void checkUserPrivilege(Long orgId, Long privilegeId, Long communityId) 
 	}
 
 	private void inActiveTaskByPlanId(Long planId) {
+		equipmentProvider.updateEquipmentTaskByPlanId(planId);
 		int pageSize = 200;
 		CrossShardListingLocator locator = new CrossShardListingLocator();
 		for(;;) {
@@ -5371,9 +5372,6 @@ private void checkUserPrivilege(Long orgId, Long privilegeId, Long communityId) 
 
 			if(tasks.size() > 0) {
 				for(EquipmentInspectionTasks task : tasks) {
-					task.setStatus(EquipmentTaskStatus.NONE.getCode());
-					equipmentProvider.updateEquipmentTask(task);
-
 					equipmentTasksSearcher.feedDoc(task);
 				}
 			}
@@ -5382,6 +5380,7 @@ private void checkUserPrivilege(Long orgId, Long privilegeId, Long communityId) 
 				break;
 			}
 		}
+
 	}
 
 	private EquipmentInspectionPlans verifyEquipmentInspectionPlan(Long id) {
