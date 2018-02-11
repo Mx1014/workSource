@@ -19,7 +19,7 @@ public class MessageRecordDto implements Serializable {
     private String channelsInfo;
     private String bodyType;
     private String body;
-    private Integer deliveryoption;
+    private Integer deliveryOption;
     private Timestamp createTime;
     private String sessionToken;
     private String deviceId;
@@ -113,14 +113,6 @@ public class MessageRecordDto implements Serializable {
         this.body = body;
     }
 
-    public Integer getDeliveryoption() {
-        return this.deliveryoption;
-    }
-
-    public void setDeliveryoption(Integer deliveryoption) {
-        this.deliveryoption = deliveryoption;
-    }
-
     public Timestamp getCreateTime() {
         return this.createTime;
     }
@@ -164,5 +156,13 @@ public class MessageRecordDto implements Serializable {
 
     public void setIndexId(Long indexId) {
         this.indexId = indexId;
+    }
+
+    public Integer getDeliveryOption() {
+        return deliveryOption;
+    }
+
+    public void setDeliveryOption(Integer deliveryOption) {
+        this.deliveryOption = deliveryOption;
     }
 }

@@ -5,6 +5,7 @@ import com.everhomes.constants.ErrorCodes;
 import com.everhomes.controller.ControllerBase;
 import com.everhomes.discover.RestReturn;
 import com.everhomes.rest.RestResponse;
+import com.everhomes.rest.message.MessageRecordDto;
 import com.everhomes.rest.message.PersistListMessageRecordsCommand;
 import com.everhomes.rest.message.PushMessageToAdminAndBusinessContactsCommand;
 import com.everhomes.rest.messaging.ChannelType;
@@ -99,7 +100,7 @@ public class MessageController extends ControllerBase {
 	 * <b>URL: /message/searchMessageRecord</b>
 	 */
 	@RequestMapping("searchMessageRecord")
-	@RestReturn(value = MessageRecord.class, collection = true)
+	@RestReturn(value = MessageRecordDto.class, collection = true)
 	public RestResponse searchMessageRecord(SearchMessageRecordCommand cmd){
 		RestResponse response = new RestResponse(messageService.searchMessageRecord(cmd));
 		response.setErrorCode(ErrorCodes.SUCCESS);

@@ -1,6 +1,7 @@
 // @formatter:off
 package com.everhomes.message;
 
+import com.everhomes.rest.message.MessageRecordDto;
 import com.everhomes.rest.message.PushMessageToAdminAndBusinessContactsCommand;
 import com.everhomes.rest.messaging.SearchMessageRecordCommand;
 
@@ -15,7 +16,7 @@ public interface MessageService {
 	void persistMessage(List<MessageRecord> records);
 
 
-	List<MessageRecord> searchMessageRecord(SearchMessageRecordCommand cmd);
+	List<MessageRecordDto> searchMessageRecord(SearchMessageRecordCommand cmd);
 
 	void syncMessageRecord();
 

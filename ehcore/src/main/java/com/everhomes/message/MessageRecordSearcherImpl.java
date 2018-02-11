@@ -2,6 +2,7 @@ package com.everhomes.message;
 
 import com.everhomes.namespace.Namespace;
 import com.everhomes.namespace.NamespaceProvider;
+import com.everhomes.rest.message.MessageRecordDto;
 import com.everhomes.rest.messaging.SearchMessageRecordCommand;
 import com.everhomes.search.AbstractElasticSearch;
 import com.everhomes.search.MessageRecordSearcher;
@@ -142,11 +143,11 @@ public class MessageRecordSearcherImpl extends AbstractElasticSearch implements 
         }
 
 
-        List<MessageRecord> list = new ArrayList<>();
+        List<MessageRecordDto> list = new ArrayList<>();
         SearchHit[] docs = rsp.getHits().getHits();
         for (SearchHit sd : docs) {
             Map<String, Object> m = sd.getSource();
-            MessageRecord record = new MessageRecord();
+            MessageRecordDto record = new MessageRecordDto();
             record.setId(Long.valueOf(m.get("id").toString()));
             if(m.get("namespaceId") != null)
                 record.setNamespaceId(Integer.valueOf(m.get("namespaceId").toString()));

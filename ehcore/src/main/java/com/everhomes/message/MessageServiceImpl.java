@@ -8,6 +8,7 @@ import com.everhomes.organization.OrganizationCommunityRequest;
 import com.everhomes.organization.OrganizationProvider;
 import com.everhomes.organization.OrganizationService;
 import com.everhomes.rest.approval.TrueOrFalseFlag;
+import com.everhomes.rest.message.MessageRecordDto;
 import com.everhomes.rest.message.PushMessageToAdminAndBusinessContactsCommand;
 import com.everhomes.rest.messaging.SearchMessageRecordCommand;
 import com.everhomes.rest.sms.SmsTemplateCode;
@@ -118,7 +119,7 @@ public class MessageServiceImpl implements MessageService {
 	}
 
 	@Override
-	public List<MessageRecord> searchMessageRecord(SearchMessageRecordCommand cmd) {
+	public List<MessageRecordDto> searchMessageRecord(SearchMessageRecordCommand cmd) {
 		return messageRecordSearcher.query(cmd);
 	}
 
