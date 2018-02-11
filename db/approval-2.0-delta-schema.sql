@@ -3,6 +3,10 @@ ALTER TABLE `eh_general_approvals` ADD COLUMN `approval_remark` VARCHAR(256) COM
 
 ALTER TABLE `eh_general_approvals` ADD COLUMN `default_order` INTEGER NOT NULL DEFAULT 0;
 
+ALTER TABLE `eh_general_approvals` ADD COLUMN `operator_uid` BIGINT NOT NULL DEFAULT 0 COMMENT 'the userId of the operator';
+
+ALTER TABLE `eh_general_approvals` ADD COLUMN `operator_name` VARCHAR(128) COMMENT 'the real name of the operator';
+
 -- DROP TABLE IF EXISTS `eh_general_approval_scope_map`;
 CREATE TABLE `eh_general_approval_scope_map` (
   `id` BIGINT NOT NULL,

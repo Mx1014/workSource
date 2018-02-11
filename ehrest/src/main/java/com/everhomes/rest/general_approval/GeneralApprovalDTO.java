@@ -29,6 +29,8 @@ import com.everhomes.discover.ItemType;
  * <li>deleteFlag: 是否可修改 0-不可删除 1-可以删除</li>
  * <li>iconUri: 图标的uri</li>
  * <li>iconUrl: 图标的url</li>
+ * <li>operatorUid: 更新人id</li>
+ * <li>iconUrl: 更新人名称</li>
  * </ul>
  * @author janson
  *
@@ -64,6 +66,8 @@ public class GeneralApprovalDTO {
     private String approvalAttribute;
 	private String iconUri;
 	private String iconUrl;
+	private Long operatorUid;
+	private String operatorName;
 
     public Byte getStatus() {
 		return status;
@@ -272,6 +276,22 @@ public class GeneralApprovalDTO {
     public void setIconUrl(String iconUrl) {
         this.iconUrl = iconUrl;
     }
+
+	public Long getOperatorUid() {
+		return operatorUid;
+	}
+
+	public void setOperatorUid(Long operatorUid) {
+		this.operatorUid = operatorUid;
+	}
+
+	public String getOperatorName() {
+		return operatorName;
+	}
+
+	public void setOperatorName(String operatorName) {
+		this.operatorName = operatorName;
+	}
 
 	@Override
 	public String toString() {
