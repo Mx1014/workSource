@@ -1617,13 +1617,13 @@ public class PortalServiceImpl implements PortalService {
 				if(EntityType.fromCode(itemGroup.getContentType()) == EntityType.BIZ){
 					itemGroup.setName("OPPushBiz");
 				}
-				publishOPPushItem(itemGroup, layout.getLocation());
+				publishOPPushItem(itemGroup, versionId, layout.getLocation(), publishType);
 				config.setItemGroup(itemGroup.getName());
 //				group.setInstanceConfig(StringHelper.toJsonString(config));
 				group.setInstanceConfig(config);
 			}else if(Widget.fromCode(group.getWidget()) == Widget.TAB){
 				TabInstanceConfig config = new TabInstanceConfig();
-				publishTabItem(itemGroup);
+				publishTabItem(itemGroup, versionId, layout.getLocation(), publishType);
 				config.setItemGroup(itemGroup.getName());
 				group.setInstanceConfig(config);
 			}
@@ -1696,7 +1696,17 @@ public class PortalServiceImpl implements PortalService {
 	}
 
 
-	private void publishTabItem(PortalItemGroup itemGroup){
+	private void publishTabItem(PortalItemGroup itemGroup, Long versionId, String location, Byte publishType){
+
+		List<LaunchPadItem> items = launchPadProvider.findLaunchPadItem(itemGroup.getNamespaceId(), itemGroup.getName(), location);
+		for (LaunchPadItem item: items) {
+
+			//正式发布才能删除items，正式发布时会清除掉当前域空间所有的预览版本数据。
+			if(PortalPublishType.fromCode(publishType) == PortalPublishType.RELEASE){
+				launchPadProvider.deleteLaunchPadItem(item.getId());
+			}
+		}
+
 		List<PortalItem> portalItems = portalItemProvider.listPortalItemByGroupId(itemGroup.getId());
 		for (PortalItem portalItem: portalItems) {
 			LaunchPadItem item = ConvertHelper.convert(portalItem, LaunchPadItem.class);
@@ -1709,13 +1719,19 @@ public class PortalServiceImpl implements PortalService {
 			}
 
 			item.setAppId(AppConstants.APPID_DEFAULT);
-			item.setApplyPolicy(ApplyPolicy.OVERRIDE.getCode());
+			item.setApplyPolicy(ApplyPolicy.DEFAULT.getCode());
 			item.setMinVersion(1L);
 			item.setItemGroup(portalItem.getGroupName());
 			item.setItemLabel(portalItem.getLabel());
 			item.setItemName(portalItem.getName());
 			item.setDeleteFlag(DeleteFlagType.YES.getCode());
 			item.setScaleType(ScaleType.TAILOR.getCode());
+			item.setScopeCode(ScopeType.ALL.getCode());
+			item.setScopeId(0L);
+
+			if(PortalPublishType.fromCode(publishType) == PortalPublishType.PREVIEW){
+				item.setPreviewPortalVersionId(versionId);
+			}
 
 			for (SceneType sceneType: SceneType.values()) {
 				if(sceneType == SceneType.PARK_TOURIST ||
@@ -1727,10 +1743,14 @@ public class PortalServiceImpl implements PortalService {
 		}
 	}
 
-	private void publishOPPushItem(PortalItemGroup itemGroup, String location){
+	private void publishOPPushItem(PortalItemGroup itemGroup, Long versionId, String location, Byte publishType){
 		List<LaunchPadItem> items = launchPadProvider.findLaunchPadItem(itemGroup.getNamespaceId(), itemGroup.getName(), location);
 		for (LaunchPadItem item: items) {
-			launchPadProvider.deleteLaunchPadItem(item.getId());
+
+			//正式发布才能删除items，正式发布时会清除掉当前域空间所有的预览版本数据。
+			if(PortalPublishType.fromCode(publishType) == PortalPublishType.RELEASE){
+				launchPadProvider.deleteLaunchPadItem(item.getId());
+			}
 		}
 		PortalLayout layout = portalLayoutProvider.findPortalLayoutById(itemGroup.getLayoutId());
 		LaunchPadItem item = new LaunchPadItem();
@@ -1748,6 +1768,11 @@ public class PortalServiceImpl implements PortalService {
 		item.setScaleType(ScaleType.TAILOR.getCode());
 		item.setScopeCode(ScopeType.ALL.getCode());
 		item.setScopeId(0L);
+
+		if(PortalPublishType.fromCode(publishType) == PortalPublishType.PREVIEW){
+			item.setPreviewPortalVersionId(versionId);
+		}
+
 		if(null != layout){
 			item.setItemLocation(layout.getLocation());
 		}
