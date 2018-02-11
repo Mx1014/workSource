@@ -547,11 +547,11 @@ public class CustomerServiceImpl implements CustomerService {
         if(!customer.getName().equals(cmd.getName())) {
             List<Contract> contracts = contractProvider.listContractByCustomerId(updateCustomer.getCommunityId(), updateCustomer.getId(), CustomerType.ENTERPRISE.getCode());
             if(contracts != null && contracts.size() > 0) {
-                contracts.forEach(contract -> {
+                for(Contract contract : contracts) {
                     contract.setCustomerName(updateCustomer.getName());
                     contractProvider.updateContract(contract);
                     contractSearcher.feedDoc(contract);
-                });
+                }
             }
         }
         return convertToDTO(updateCustomer);
