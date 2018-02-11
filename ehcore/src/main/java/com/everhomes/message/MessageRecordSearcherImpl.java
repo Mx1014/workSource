@@ -7,7 +7,6 @@ import com.everhomes.search.AbstractElasticSearch;
 import com.everhomes.search.MessageRecordSearcher;
 import com.everhomes.search.SearchUtils;
 import org.apache.commons.lang.StringUtils;
-import org.apache.lucene.index.Terms;
 import org.elasticsearch.action.bulk.BulkRequestBuilder;
 import org.elasticsearch.action.search.SearchRequestBuilder;
 import org.elasticsearch.action.search.SearchResponse;
@@ -18,6 +17,7 @@ import org.elasticsearch.index.query.BoolQueryBuilder;
 import org.elasticsearch.index.query.QueryBuilders;
 import org.elasticsearch.search.SearchHit;
 import org.elasticsearch.search.aggregations.AggregationBuilders;
+import org.elasticsearch.search.aggregations.Aggregations;
 import org.elasticsearch.search.aggregations.bucket.terms.TermsBuilder;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -104,15 +104,18 @@ public class MessageRecordSearcherImpl extends AbstractElasticSearch implements 
         if (StringUtils.isNotEmpty(cmd.getSenderTag()))
             bqb = bqb.must(QueryBuilders.termQuery("senderTag", cmd.getSenderTag()));
         if (cmd.getIsGroupBy() == 1){
-           TermsBuilder bodyAgg = AggregationBuilders.terms("bodyAgg").field("body");
+//           TermsBuilder bodyAgg = AggregationBuilders.terms("bodyAgg").field("body");
            TermsBuilder sendAgg = AggregationBuilders.terms("sendAgg").field("senderUid");
            TermsBuilder dstAgg = AggregationBuilders.terms("dstAgg").field("dstChannelToken");
-            builder.addAggregation(bodyAgg.subAggregation(sendAgg.subAggregation(dstAgg)));
+           builder.addAggregation(sendAgg.subAggregation(dstAgg));
+//           builder.addAggregation(dstAgg);
 
         }
         builder.setFrom(cmd.getPageAnchor().intValue() * cmd.getPageSize()).setSize(cmd.getPageSize() + 1).setSize(cmd.getPageSize()+1);
         builder.setQuery(bqb);
         SearchResponse rsp = builder.execute().actionGet();
+        Aggregations agg = rsp.getAggregations();
+        agg.getAsMap();
 
         List<MessageRecord> list = new ArrayList<>();
         SearchHit[] docs = rsp.getHits().getHits();
