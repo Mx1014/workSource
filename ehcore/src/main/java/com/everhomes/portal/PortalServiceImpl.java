@@ -1339,14 +1339,9 @@ public class PortalServiceImpl implements PortalService {
 		User user = UserContext.current().getUser();
 		Integer namespaceId = UserContext.getCurrentNamespaceId(cmd.getNamespaceId());
 		List<PortalLayout> layouts = portalLayoutProvider.listPortalLayout(cmd.getNamespaceId(), null, cmd.getVersionId());
-		PortalPublishLog portalPublishLog = new PortalPublishLog();
-		portalPublishLog.setNamespaceId(namespaceId);
-		portalPublishLog.setStatus(PortalPublishLogStatus.PUBLISHING.getCode());
-		portalPublishLog.setCreatorUid(user.getId());
-		portalPublishLog.setOperatorUid(user.getId());
-		portalPublishLog.setVersionId(cmd.getVersionId());
-		portalPublishLog.setProcess(0);
-		portalPublishLogProvider.createPortalPublishLog(portalPublishLog);
+
+		//生成版本发布log
+		PortalPublishLog portalPublishLog = createNewPortalPublishLog(cmd.getNamespaceId(), user, cmd.getVersionId());
 
 		ExecutorUtil.submit(new Runnable() {
 			@Override
@@ -1386,7 +1381,7 @@ public class PortalServiceImpl implements PortalService {
 							publishLayout(layout, cmd.getVersionId(), cmd.getPublishType());
 						}
 
-						//正式发布之后将当前版本改成大版本，再在此基础上生成一个小本版
+						//正式发布之后，在此基础上生成小本版
 						if(PortalPublishType.fromCode(cmd.getPublishType()) == PortalPublishType.RELEASE){
 
 							//新版本复制一个小版本，比如发布3.1版本变成了5.0版本，那5.0要复制一个5.1，3.0也要复制一个新的3.1
@@ -1424,6 +1419,20 @@ public class PortalServiceImpl implements PortalService {
 			}
 		});
 		return ConvertHelper.convert(portalPublishLog, PortalPublishLogDTO.class);
+	}
+
+
+	private PortalPublishLog createNewPortalPublishLog(Integer namespaceId, User user, Long versionId){
+		PortalPublishLog portalPublishLog = new PortalPublishLog();
+
+		portalPublishLog.setNamespaceId(namespaceId);
+		portalPublishLog.setStatus(PortalPublishLogStatus.PUBLISHING.getCode());
+		portalPublishLog.setCreatorUid(user.getId());
+		portalPublishLog.setOperatorUid(user.getId());
+		portalPublishLog.setVersionId(versionId);
+		portalPublishLog.setProcess(0);
+		portalPublishLogProvider.createPortalPublishLog(portalPublishLog);
+		return portalPublishLog;
 	}
 
 	//发布应用
@@ -1566,17 +1575,18 @@ public class PortalServiceImpl implements PortalService {
 				config.setItemGroup(itemGroup.getName());
 				group.setInstanceConfig(config);
 			}else if(Widget.fromCode(group.getWidget()) == Widget.NEWS){
-				String instanceConf = setItemModuleAppActionData(itemGroup.getLabel(), instanceConfig.getModuleAppId());
-				if(null != instanceConf){
-					NewsInstanceConfig config = (NewsInstanceConfig)StringHelper.fromJsonString(instanceConf, NewsInstanceConfig.class);
+//				String instanceConf = setItemModuleAppActionData(itemGroup.getLabel(), instanceConfig.getModuleAppId());
+				ServiceModuleApp moduleApp = serviceModuleAppProvider.findServiceModuleAppById(instanceConfig.getModuleAppId());
+				if(moduleApp != null && moduleApp.getInstanceConfig() != null){
+					NewsInstanceConfig config = (NewsInstanceConfig)StringHelper.fromJsonString(moduleApp.getInstanceConfig(), NewsInstanceConfig.class);
 					config.setItemGroup(itemGroup.getName());
 					config.setTimeWidgetStyle(instanceConfig.getTimeWidgetStyle());
 					group.setInstanceConfig(config);
 				}
 			}else if(Widget.fromCode(group.getWidget()) == Widget.NEWS_FLASH){
-				String instanceConf = setItemModuleAppActionData(itemGroup.getLabel(), instanceConfig.getModuleAppId());
-				if(null != instanceConf){
-					NewsFlashInstanceConfig config = (NewsFlashInstanceConfig)StringHelper.fromJsonString(instanceConf, NewsFlashInstanceConfig.class);
+				ServiceModuleApp moduleApp = serviceModuleAppProvider.findServiceModuleAppById(instanceConfig.getModuleAppId());
+				if(moduleApp != null && moduleApp.getInstanceConfig() != null){
+					NewsFlashInstanceConfig config = (NewsFlashInstanceConfig)StringHelper.fromJsonString(moduleApp.getInstanceConfig(), NewsFlashInstanceConfig.class);
 					config.setItemGroup(itemGroup.getName());
 					config.setTimeWidgetStyle(instanceConfig.getTimeWidgetStyle());
 					config.setNewsSize(instanceConfig.getNewsSize());

@@ -43,14 +43,14 @@ public class ActivityPortalPublishHandler implements PortalPublishHandler {
 	 * @param instanceConfig 具体模块配置的参数
 	 * @return
 	 */
-	public String publish(Integer namespaceId, String instanceConfig, String itemLabel){
+	public String publish(Integer namespaceId, String instanceConfig, String appName){
 
-		LOGGER.info("ActivityPortalPublishHandler publish start namespaceId = {}, instanceConfig = {}, itemLabel = {}", namespaceId, instanceConfig, itemLabel);
+		LOGGER.info("ActivityPortalPublishHandler publish start namespaceId = {}, instanceConfig = {}, itemLabel = {}", namespaceId, instanceConfig, appName);
 
 		ActivityEntryConfigulation config = (ActivityEntryConfigulation)StringHelper.fromJsonString(instanceConfig, ActivityEntryConfigulation.class);
 
 		//保存应用入口的信息，不存在则新增，存在则更新
-		ActivityCategories activityCategory = saveEntry(config, namespaceId, itemLabel);
+		ActivityCategories activityCategory = saveEntry(config, namespaceId, appName);
 
 		//将值组装到config中，用于后面返回服务广场
 		config.setId(activityCategory.getId());
