@@ -3532,8 +3532,8 @@ private void checkUserPrivilege(Long orgId, Long privilegeId, Long communityId) 
 		List<EquipmentInspectionTasks> allTasks = null;
 		if(isAdmin) {
 			String cacheKey = convertListEquipmentInspectionTasksCache(cmd.getTaskStatus(), cmd.getInspectionCategoryId(),
-                    targetTypes, targetIds, null, null, offset, pageSize,lastSyncTime, 0L);
-            LOGGER.info("listEquipmentInspectionTasks is  Admin  cacheKey = {}" + cacheKey);
+					targetTypes, targetIds, null, null, offset, pageSize, lastSyncTime, 0L);
+			LOGGER.info("listEquipmentInspectionTasks is  Admin  cacheKey = {}" + cacheKey);
 			allTasks = equipmentProvider.listEquipmentInspectionTasksUseCache(cmd.getTaskStatus(), cmd.getInspectionCategoryId(),
 					targetTypes, targetIds, null, null, offset, pageSize + 1, cacheKey, AdminFlag.YES.getCode(),lastSyncTime);
 
