@@ -6070,7 +6070,7 @@ private void checkUserPrivilege(Long orgId, Long privilegeId, Long communityId) 
                     repairCommand.setAddressType(PmTaskAddressType.FAMILY.getCode());
                     repairCommand.setReferId(cmd.getEquipmentId());
                     repairCommand.setReferType(EquipmentConstant.EQUIPMENT_REPAIR);
-                    repairCommand.setTaskCategoryId(6L);
+                    repairCommand.setTaskCategoryId(cmd.getCategoryId());
 
                     List<OrganizationMember> members = organizationProvider.listOrganizationMembersByUId(UserContext.currentUserId());
                     if (members != null && members.size() > 0) {
