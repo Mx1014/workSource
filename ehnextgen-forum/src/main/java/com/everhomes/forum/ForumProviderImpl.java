@@ -1108,6 +1108,10 @@ public class ForumProviderImpl implements ForumProvider {
             category.setId(id);
         }
 
+        if(category.getUuid() == null){
+            category.setUuid(UUID.randomUUID().toString());
+        }
+
         EhForumCategoriesDao dao = new EhForumCategoriesDao(context.configuration());
         dao.insert(category);
         DaoHelper.publishDaoAction(DaoAction.CREATE, EhForumCategories.class, null);
