@@ -497,7 +497,7 @@ public class Rentalv2AdminController extends ControllerBase {
 		response.setErrorDescription("OK");
 		return response;
 	}
-	
+
 
 	/**
 	 * <b>URL: /rental/admin/exportRentalBills</b>
