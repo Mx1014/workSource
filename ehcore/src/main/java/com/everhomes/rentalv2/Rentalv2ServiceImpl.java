@@ -4382,6 +4382,7 @@ public class Rentalv2ServiceImpl implements Rentalv2Service {
 //		response.setSitePics(convertRentalSitePicDTOs(pics));
 
 		response.setAnchorTime(0L);
+		response.setRentalType(cmd.getRentalType());
 
 //		List<RentalConfigAttachment> attachments=this.rentalv2Provider.queryRentalConfigAttachmentByOwner(EhRentalv2Resources.class.getSimpleName(),rs.getId());
 //		response.setAttachments(convertAttachments(attachments));
