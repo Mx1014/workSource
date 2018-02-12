@@ -5350,7 +5350,7 @@ private void checkUserPrivilege(Long orgId, Long privilegeId, Long communityId) 
 			equipmentPlanMap.setTargetId(cmd.getTargetId());
 			equipmentPlanMap.setTargetType(cmd.getTargetType());
 			equipmentPlanMap.setStandardId(relation.getStandardId());
-			equipmentPlanMap.setEquipmentId(relation.getTargetId());
+			equipmentPlanMap.setEquipmentId(relation.getEquipmentId());
 
 			equipmentProvider.createEquipmentPlanMaps(equipmentPlanMap);
 			equipmentStandardRelation.add(relation);
