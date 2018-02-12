@@ -482,6 +482,24 @@ public class Rentalv2AdminController extends ControllerBase {
 	}
 
 	/**
+	 * <b>URL: /rental/admin/listActiveRentalBills</b>
+	 * <p>
+	 * 查询正在进行中的订单
+	 * </p>
+	 */
+	@RequestMapping("listActiveRentalBills")
+	@RestReturn(value = ListRentalBillsCommandResponse.class)
+	public RestResponse listActiveRentalBills(@Valid ListRentalBillsCommand cmd) {
+		ListRentalBillsCommandResponse lsitRentalBillsCommandResponse = rentalService
+				.listActiveRentalBills(cmd);
+		RestResponse response = new RestResponse(lsitRentalBillsCommandResponse);
+		response.setErrorCode(ErrorCodes.SUCCESS);
+		response.setErrorDescription("OK");
+		return response;
+	}
+	
+
+	/**
 	 * <b>URL: /rental/admin/exportRentalBills</b>
 	 * <p>
 	 * 导出预订详情
@@ -779,6 +797,7 @@ public class Rentalv2AdminController extends ControllerBase {
 		response.setErrorDescription("OK");
 		return response;
 	}
+
 	/*-------------------------------------------新的更新资源接口---------------------------------- */
 	/**
 	 * <b>URL: /rental/admin/getResourceAttachment</b>

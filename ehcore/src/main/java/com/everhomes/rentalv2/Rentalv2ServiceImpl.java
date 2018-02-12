@@ -2170,8 +2170,8 @@ public class Rentalv2ServiceImpl implements Rentalv2Service {
 		});
 
 
-		//状态为已完成时 创建门禁授权
-		if (SiteBillStatus.COMPLETE.getCode() == status){
+		//状态为付款成功时 创建门禁授权
+		if (SiteBillStatus.SUCCESS.getCode() == status){
 
 //			RentalResource rs = this.rentalv2Provider.getRentalSiteById(order.getRentalResourceId());
 			if (rs.getAclinkId()!=null) {
@@ -4052,6 +4052,35 @@ public class Rentalv2ServiceImpl implements Rentalv2Service {
 			response.getRentalBills().add(dto);
 		}
  
+		return response;
+	}
+
+	@Override
+	public ListRentalBillsCommandResponse listActiveRentalBills(ListRentalBillsCommand cmd) {
+		ListRentalBillsCommandResponse response = new ListRentalBillsCommandResponse();
+		if(cmd.getPageAnchor() == null)
+			cmd.setPageAnchor(Long.MAX_VALUE);
+		Integer pageSize = PaginationConfigHelper.getPageSize(
+				configurationProvider, cmd.getPageSize());
+		CrossShardListingLocator locator = new CrossShardListingLocator();
+		locator.setAnchor(cmd.getPageAnchor());
+		List<RentalOrder> bills = rentalv2Provider.listActiveBills(cmd.getRentalSiteId(),locator,pageSize,cmd.getStartTime(),cmd.getEndTime());
+
+		if (bills == null) {
+			return response;
+		}
+
+		if(bills.size() > pageSize) {
+			bills.remove(bills.size() - 1);
+			response.setNextPageAnchor( bills.get(bills.size() -1).getReserveTime().getTime());
+		}
+
+		response.setRentalBills(new ArrayList<>());
+		for (RentalOrder bill : bills) {
+			RentalBillDTO dto = processOrderDTO(bill);
+			response.getRentalBills().add(dto);
+		}
+
 		return response;
 	}
 
@@ -6058,6 +6087,8 @@ public class Rentalv2ServiceImpl implements Rentalv2Service {
 			resource.setAclinkId(cmd.getAclinkId());
 			//设置资源时 默认为1
 			resource.setResourceCounts(1.0);
+			resource.setAutoAssign((byte)0);
+			resource.setMultiUnit((byte)0);
 
 
 //			resource.setExclusiveFlag(defaultRule.getExclusiveFlag());
