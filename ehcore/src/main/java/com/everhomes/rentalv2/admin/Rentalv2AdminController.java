@@ -797,6 +797,40 @@ public class Rentalv2AdminController extends ControllerBase {
 	}
 
 	/**
+	 * <b>URL: /rental/admin/getResourceSiteNumbers</b>
+	 * <p>
+	 * 查询资源的编号设置
+	 * </p>
+	 */
+
+	@RequestMapping("getResourceSiteNumbers")
+	@RestReturn(value = ResourceSiteNumbersDTO.class)
+	public RestResponse getResourceSiteNumbers(@Valid GetResourceSiteNumbersCommand cmd) {
+		RestResponse response = new RestResponse(rentalService.getResourceSiteNumbers(cmd));
+		response.setErrorCode(ErrorCodes.SUCCESS);
+		response.setErrorDescription("OK");
+		return response;
+	}
+
+	/**
+	 * <b>URL: /rental/admin/updateResourceSiteNumbers</b>
+	 * <p>
+	 * 更改资源的编号设置
+	 * </p>
+	 */
+
+	@RequestMapping("updateResourceSiteNumbers")
+	@RestReturn(value = String.class)
+	public RestResponse updateResourceSiteNumbers(@Valid UpdateResourceSiteNumbersCommand cmd) {
+		rentalService.updateResourceSiteNumbers(cmd);
+		RestResponse response = new RestResponse();
+		response.setErrorCode(ErrorCodes.SUCCESS);
+		response.setErrorDescription("OK");
+		return response;
+	}
+
+
+	/**
 	 * <b>URL: /rental/admin/confirmRefund</b>
 	 * <p>
 	 * 确认退款
