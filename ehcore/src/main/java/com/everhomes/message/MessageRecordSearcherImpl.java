@@ -17,6 +17,7 @@ import org.elasticsearch.common.xcontent.XContentFactory;
 import org.elasticsearch.index.query.BoolQueryBuilder;
 import org.elasticsearch.index.query.QueryBuilders;
 import org.elasticsearch.search.SearchHit;
+import org.elasticsearch.search.SearchHits;
 import org.elasticsearch.search.aggregations.Aggregation;
 import org.elasticsearch.search.aggregations.AggregationBuilders;
 import org.elasticsearch.search.aggregations.bucket.terms.LongTerms;
@@ -148,7 +149,8 @@ public class MessageRecordSearcherImpl extends AbstractElasticSearch implements 
             Terms.Bucket indexAggBucket = it.next();
             indexAggBucket.getKey();
             indexAggBucket.getDocCount();
-            InternalSearchHits hits = (InternalSearchHits) indexAggBucket.getAggregations().asMap().get("infoAgg");
+            InternalTopHits infoAgg = (InternalTopHits) indexAggBucket.getAggregations().asMap().get("infoAgg");
+            SearchHits hits = infoAgg.getHits();
             if(hits.getHits() != null && hits.getHits().length > 0){
                 SearchHit hit = hits.getHits()[0];
                 hit.getFields().get("senderUid");
@@ -158,55 +160,55 @@ public class MessageRecordSearcherImpl extends AbstractElasticSearch implements 
         }
 
         List<MessageRecordDto> list = new ArrayList<>();
-        SearchHit[] docs = rsp.getHits().getHits();
-        for (SearchHit sd : docs) {
-            Map<String, Object> m = sd.getSource();
-            MessageRecordDto record = new MessageRecordDto();
-            record.setId(Long.valueOf(m.get("id").toString()));
-            if(m.get("namespaceId") != null)
-                record.setNamespaceId(Integer.valueOf(m.get("namespaceId").toString()));
-            if(m.get("dstChannelToken") != null)
-                record.setDstChannelToken(m.get("dstChannelToken").toString());
-            if(m.get("dstChannelType") != null)
-                record.setDstChannelType(m.get("dstChannelType").toString());
-            if(m.get("status") != null)
-                record.setStatus(m.get("status").toString());
-            if(m.get("appId") != null)
-                record.setAppId(Long.valueOf(m.get("appId").toString()));
-            if(m.get("messageSeq") != null)
-                record.setMessageSeq(Long.valueOf(m.get("messageSeq").toString()));
-            if(m.get("senderUid") != null)
-                record.setSenderUid(Long.valueOf(m.get("senderUid").toString()));
-            if(m.get("senderTag") != null)
-                record.setSenderTag(m.get("senderTag").toString());
-            if(m.get("channelsInfo") != null)
-                record.setChannelsInfo(m.get("channelsInfo").toString());
-            if(m.get("bodyType") != null)
-                record.setBodyType(m.get("bodyType").toString());
-            if(m.get("body") != null)
-                record.setBody(m.get("body").toString());
-            if(m.get("deliveryOption") != null)
-                record.setDeliveryOption(Integer.valueOf(m.get("deliveryOption").toString()));
-
-            SimpleDateFormat simpleDateFormat = new SimpleDateFormat("yyyy-MM-dd'T'HH:mm:ss.SSS'Z'");
-            TimeZone utcZone = TimeZone.getTimeZone("UTC");
-            simpleDateFormat.setTimeZone(utcZone);
-            Date myDate = null;
-            try {
-                myDate = simpleDateFormat.parse(m.get("createTime").toString());
-            } catch (ParseException e) {
-                e.printStackTrace();
-            }
-            SimpleDateFormat sdf = new SimpleDateFormat("yyyy-MM-dd HH:mm:ss");
-            record.setCreateTime(Timestamp.valueOf(sdf.format(myDate)));
-
-            if(m.get("deviceId") != null)
-                record.setDeviceId(m.get("deviceId").toString());
-            if(m.get("indexId") != null)
-                record.setIndexId(Long.valueOf(m.get("indexId").toString()));
-
-            list.add(record);
-        }
+//        SearchHit[] docs = rsp.getHits().getHits();
+//        for (SearchHit sd : docs) {
+//            Map<String, Object> m = sd.getSource();
+//            MessageRecordDto record = new MessageRecordDto();
+//            record.setId(Long.valueOf(m.get("id").toString()));
+//            if(m.get("namespaceId") != null)
+//                record.setNamespaceId(Integer.valueOf(m.get("namespaceId").toString()));
+//            if(m.get("dstChannelToken") != null)
+//                record.setDstChannelToken(m.get("dstChannelToken").toString());
+//            if(m.get("dstChannelType") != null)
+//                record.setDstChannelType(m.get("dstChannelType").toString());
+//            if(m.get("status") != null)
+//                record.setStatus(m.get("status").toString());
+//            if(m.get("appId") != null)
+//                record.setAppId(Long.valueOf(m.get("appId").toString()));
+//            if(m.get("messageSeq") != null)
+//                record.setMessageSeq(Long.valueOf(m.get("messageSeq").toString()));
+//            if(m.get("senderUid") != null)
+//                record.setSenderUid(Long.valueOf(m.get("senderUid").toString()));
+//            if(m.get("senderTag") != null)
+//                record.setSenderTag(m.get("senderTag").toString());
+//            if(m.get("channelsInfo") != null)
+//                record.setChannelsInfo(m.get("channelsInfo").toString());
+//            if(m.get("bodyType") != null)
+//                record.setBodyType(m.get("bodyType").toString());
+//            if(m.get("body") != null)
+//                record.setBody(m.get("body").toString());
+//            if(m.get("deliveryOption") != null)
+//                record.setDeliveryOption(Integer.valueOf(m.get("deliveryOption").toString()));
+//
+//            SimpleDateFormat simpleDateFormat = new SimpleDateFormat("yyyy-MM-dd'T'HH:mm:ss.SSS'Z'");
+//            TimeZone utcZone = TimeZone.getTimeZone("UTC");
+//            simpleDateFormat.setTimeZone(utcZone);
+//            Date myDate = null;
+//            try {
+//                myDate = simpleDateFormat.parse(m.get("createTime").toString());
+//            } catch (ParseException e) {
+//                e.printStackTrace();
+//            }
+//            SimpleDateFormat sdf = new SimpleDateFormat("yyyy-MM-dd HH:mm:ss");
+//            record.setCreateTime(Timestamp.valueOf(sdf.format(myDate)));
+//
+//            if(m.get("deviceId") != null)
+//                record.setDeviceId(m.get("deviceId").toString());
+//            if(m.get("indexId") != null)
+//                record.setIndexId(Long.valueOf(m.get("indexId").toString()));
+//
+//            list.add(record);
+//        }
 
         if (list.size() > cmd.getPageSize()) {
             list.remove(list.size() - 1);
