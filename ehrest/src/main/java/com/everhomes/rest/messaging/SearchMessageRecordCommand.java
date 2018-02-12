@@ -9,6 +9,7 @@ public class  SearchMessageRecordCommand {
     private Long pageAnchor;
     private Integer pageSize;
     private Integer isGroupBy;
+    private Long indexId;
 
 
 
@@ -74,5 +75,13 @@ public class  SearchMessageRecordCommand {
 
     public void setIsGroupBy(Integer isGroupBy) {
         this.isGroupBy = isGroupBy;
+    }
+
+    public Long getIndexId() {
+        return indexId;
+    }
+
+    public void setIndexId(Long indexId) {
+        this.indexId = indexId;
     }
 }

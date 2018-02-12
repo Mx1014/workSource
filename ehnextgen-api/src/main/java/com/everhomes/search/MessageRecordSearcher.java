@@ -16,7 +16,9 @@ public interface MessageRecordSearcher {
 
     void syncMessageRecordsByNamespace(Integer namespaceId);
 
-    List query(SearchMessageRecordCommand cmd);
+    List queryMessage(SearchMessageRecordCommand cmd);
+
+    List queryMessageByIndex(SearchMessageRecordCommand cmd);
 
     void deleteAll();
 

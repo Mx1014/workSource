@@ -120,7 +120,7 @@ public class MessageServiceImpl implements MessageService {
 
 	@Override
 	public List<MessageRecordDto> searchMessageRecord(SearchMessageRecordCommand cmd) {
-		return messageRecordSearcher.query(cmd);
+		return messageRecordSearcher.queryMessage(cmd);
 	}
 
 	@Override
