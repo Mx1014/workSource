@@ -62,6 +62,7 @@ public class UpdateRentalSiteCellRuleAdminCommand {
 	private BigDecimal approvingUserPrice;
 
 	private Byte rentalType;
+	private Byte userPriceType;
 	@ItemType(PricePackageDTO.class)
 	private List<PricePackageDTO> sitePackages;
 	private Long sitePackageId;
@@ -230,5 +231,13 @@ public class UpdateRentalSiteCellRuleAdminCommand {
 
 	public void setApprovingUserInitiatePrice(BigDecimal approvingUserInitiatePrice) {
 		this.approvingUserInitiatePrice = approvingUserInitiatePrice;
+	}
+
+	public Byte getUserPriceType() {
+		return userPriceType;
+	}
+
+	public void setUserPriceType(Byte userPriceType) {
+		this.userPriceType = userPriceType;
 	}
 }
