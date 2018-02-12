@@ -169,27 +169,43 @@ public class ActivityPortalPublishHandler implements PortalPublishHandler {
 			entryCategory.setName(name);
 			activityProvider.updateActivityCategories(entryCategory);
 		} else {
-			entryCategory = createActivityCategories(namespaceId, name, entryId);
+			entryCategory = createActivityCategories(namespaceId, name, -1L, entryId, (byte)1, (byte) 0);
 		}
 
 		return  entryCategory;
 	}
 
 
-	private ActivityCategories createActivityCategories(Integer namespaceId, String name, Long entryId){
+	private ActivityCategories createActivityCategories(Integer namespaceId, String name, Long parentId, Long entryId, Byte enabled, Byte allFlag){
 
 		long id = this.sequenceProvider.getNextSequence(NameMapper.getSequenceDomainFromTablePojo(EhActivityCategories.class));
 		ActivityCategories entryCategory = new ActivityCategories();
 		entryCategory.setId(id);
-		if(entryId != null){
-			entryCategory.setEntryId(entryId);
-			entryCategory.setPath("/" + entryId);
-		}else {
-			entryCategory.setEntryId(id);
-			entryCategory.setPath("/" + id);
+
+		//设置parentId
+		if(parentId == null){
+			parentId = -1L;
 		}
+		entryCategory.setParentId(parentId);
+
+
+		//设置入口Id
+		if(entryId == null){
+			entryId = id;
+		}
+		entryCategory.setEntryId(entryId);
+
+		//设置路径
+		String path = "";
+		if(parentId == -1){
+			path = "/" + entryId;
+		}else {
+			path = "/" + parentId + "/" + entryId;
+		}
+		entryCategory.setPath(path);
+
 		entryCategory.setOwnerId(0L);
-		entryCategory.setParentId(-1L);
+
 		if(StringUtils.isEmpty(name)){
 			name = "default";
 		}
@@ -198,8 +214,13 @@ public class ActivityPortalPublishHandler implements PortalPublishHandler {
 		entryCategory.setStatus((byte)2);
 		entryCategory.setCreatorUid(1L);
 		entryCategory.setNamespaceId(namespaceId);
-		entryCategory.setAllFlag((byte)0);
-		entryCategory.setEnabled((byte)1);
+		entryCategory.setEnabled(enabled);
+
+		if(allFlag == null){
+			allFlag = (byte)0;
+		}
+		entryCategory.setAllFlag(allFlag);
+
 		activityProvider.createActivityCategories(entryCategory);
 		return entryCategory;
 	}
@@ -227,11 +248,11 @@ public class ActivityPortalPublishHandler implements PortalPublishHandler {
 			config.setCategoryDTOList(listDto);
 		}
 
-		//新增、更新入口
-		Long maxEntryId = activityProvider.findActivityCategoriesMaxEntryId(namespaceId);
-		if(maxEntryId == null){
-			maxEntryId = 1L;
-		}
+//		//新增、更新入口
+//		Long maxEntryId = activityProvider.findActivityCategoriesMaxEntryId(namespaceId);
+//		if(maxEntryId == null){
+//			maxEntryId = 1L;
+//		}
 
 		for(int i=0; i<config.getCategoryDTOList().size(); i++){
 			ActivityCategoryDTO dto = config.getCategoryDTOList().get(i);
@@ -246,24 +267,7 @@ public class ActivityPortalPublishHandler implements PortalPublishHandler {
 				oldCategory.setEnabled(dto.getEnabled());
 				activityProvider.updateActivityCategories(oldCategory);
 			}else {
-				maxEntryId++;
-				ActivityCategories newCategory = ConvertHelper.convert(dto, ActivityCategories.class);
-				newCategory.setParentId(parentCategory.getEntryId());
-				newCategory.setEntryId(maxEntryId);
-				newCategory.setPath(parentCategory.getPath() + "/" + maxEntryId);
-				newCategory.setOwnerId(0L);
-				newCategory.setDefaultOrder(0);
-				newCategory.setStatus((byte)2);
-				newCategory.setCreatorUid(1L);
-				newCategory.setEnabled(dto.getEnabled());
-				if(newCategory.getName() == null){
-					newCategory.setName("default");
-				}
-				newCategory.setNamespaceId(namespaceId);
-				if(newCategory.getAllFlag() == null){
-					newCategory.setAllFlag((byte)0);
-				}
-				activityProvider.createActivityCategories(newCategory);
+				ActivityCategories newCategory = createActivityCategories(namespaceId, dto.getName(), parentCategory.getEntryId(), null, (byte)1, dto.getAllFlag());
 
 				dto.setId(newCategory.getId());
 				dto.setEntryId(newCategory.getEntryId());
