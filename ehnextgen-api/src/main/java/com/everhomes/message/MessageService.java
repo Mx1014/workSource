@@ -18,6 +18,8 @@ public interface MessageService {
 
 	List<MessageRecordDto> searchMessageRecord(SearchMessageRecordCommand cmd);
 
+	List<MessageRecordDto> searchMessageRecordByIndexId(SearchMessageRecordCommand cmd);
+
 	void syncMessageRecord();
 
 }

@@ -107,4 +107,17 @@ public class MessageController extends ControllerBase {
 		response.setErrorDescription("OK");
 		return response;
 	}
+
+	/**
+	 * <p>根据条件查询消息记录--byIndexId</p>
+	 * <b>URL: /message/searchMessageRecordByIndexId</b>
+	 */
+	@RequestMapping("searchMessageRecordByIndexId")
+	@RestReturn(value = MessageRecordDto.class, collection = true)
+	public RestResponse searchMessageRecordByIndexId(SearchMessageRecordCommand cmd){
+		RestResponse response = new RestResponse(messageService.searchMessageRecordByIndexId(cmd));
+		response.setErrorCode(ErrorCodes.SUCCESS);
+		response.setErrorDescription("OK");
+		return response;
+	}
 }

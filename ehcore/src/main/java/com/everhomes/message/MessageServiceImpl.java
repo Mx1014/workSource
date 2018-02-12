@@ -124,6 +124,11 @@ public class MessageServiceImpl implements MessageService {
 	}
 
 	@Override
+	public List<MessageRecordDto> searchMessageRecordByIndexId(SearchMessageRecordCommand cmd) {
+		return messageRecordSearcher.queryMessageByIndex(cmd);
+	}
+
+	@Override
 	public void syncMessageRecord() {
 		messageRecordSearcher.syncMessageRecordIndexs();
 	}
