@@ -210,7 +210,7 @@ public class MessagingServiceImpl implements MessagingService {
                 if(null == context) {
                     //手动添加消息唯一索引
                     message.getMeta().put(MESSAGE_INDEX_ID,  messageProvider.getNextMessageIndexId().toString());
-                    
+
                     MessageRoutingContext newCtx = new MessageRoutingContext();
                     String inStr = null;
                     if(null != message.getMeta() && (null != (inStr = message.getMeta().get(MessageMetaConstant.INCLUDE)))) {

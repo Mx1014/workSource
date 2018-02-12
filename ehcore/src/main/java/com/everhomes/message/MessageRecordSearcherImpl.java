@@ -22,7 +22,11 @@ import org.elasticsearch.search.aggregations.AggregationBuilders;
 import org.elasticsearch.search.aggregations.bucket.terms.LongTerms;
 import org.elasticsearch.search.aggregations.bucket.terms.Terms;
 import org.elasticsearch.search.aggregations.bucket.terms.TermsBuilder;
+import org.elasticsearch.search.aggregations.metrics.tophits.InternalTopHits;
+import org.elasticsearch.search.aggregations.metrics.tophits.TopHits;
 import org.elasticsearch.search.aggregations.metrics.tophits.TopHitsBuilder;
+import org.elasticsearch.search.internal.InternalSearchHit;
+import org.elasticsearch.search.internal.InternalSearchHits;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -144,8 +148,14 @@ public class MessageRecordSearcherImpl extends AbstractElasticSearch implements 
             Terms.Bucket indexAggBucket = it.next();
             indexAggBucket.getKey();
             indexAggBucket.getDocCount();
+            InternalSearchHits hits = (InternalSearchHits) indexAggBucket.getAggregations().asMap().get("infoAgg");
+            if(hits.getHits() != null && hits.getHits().length > 0){
+                SearchHit hit = hits.getHits()[0];
+                hit.getFields().get("senderUid");
+                hit.getFields().get("bodyType");
+                hit.getFields().get("body");
+            }
         }
-
 
         List<MessageRecordDto> list = new ArrayList<>();
         SearchHit[] docs = rsp.getHits().getHits();
