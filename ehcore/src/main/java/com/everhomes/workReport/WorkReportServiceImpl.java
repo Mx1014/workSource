@@ -403,21 +403,13 @@ public class WorkReportServiceImpl implements WorkReportService {
     public OrganizationMember getMemberDepartmentByUserId(Long userId, Long ownerId) {
         OrganizationMember member = organizationProvider.findDepartmentMemberByTargetIdAndOrgId(userId, ownerId);
         return member;
-/*        List<OrganizationMember> results = organizationProvider.findOrganizationMembersByOrgIdAndUId(userId, ownerId);
-
-        List<OrganizationMember> members = results.stream().filter(r ->
-                r.getGroupType().equals(OrganizationGroupType.DEPARTMENT.getCode()) || r.getGroupType().equals(OrganizationGroupType.DIRECT_UNDER_ENTERPRISE.getCode())
-        ).collect(Collectors.toList());
-        if (members != null && members.size() > 0)
-            return members.get(0);
-        return results.get(0);*/
     }
 
     @Override
     public Long getUserDetailId(Long userId, Long ownerId) {
-        List<OrganizationMember> members = organizationProvider.findOrganizationMembersByOrgIdAndUId(userId, ownerId);
-        if (members != null && members.size() > 0)
-            return members.get(0).getDetailId();
+        OrganizationMember members = organizationProvider.findOrganizationMemberByOrgIdAndUId(userId, ownerId);
+        if (members != null)
+            return members.getDetailId();
         return null;
     }
 

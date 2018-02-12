@@ -28,11 +28,6 @@ import com.everhomes.util.StringHelper;
  * <li>offlineCashierAddress: 线下支付收银地址</li>
  * <li>offlinePayeeUid: 线下支付收款人id</li>
  * <li>aclinkId: aclinkId</li>
- * <li>multiUnit: 是否允许预约多个场所</li>
- * <li>	autoAssign：       	是否动态分配 1是 0否	</li>
- * <li>	siteCounts：资源数量</li>
- * <li>	siteNumbers：资源编号列表 {String}</li>
- * <li>	ifUpdateCells：是否刷新单元格 0 不刷新 1 刷新</li>
  * </ul>
  */
 public class UpdateResourceAdminCommand {
@@ -67,12 +62,6 @@ public class UpdateResourceAdminCommand {
 	private String offlineCashierAddress;
 	private Long offlinePayeeUid;
 	private Long aclinkId;
-	private Byte multiUnit;
-	private java.lang.Byte       autoAssign;
-	private Double siteCounts;
-	@ItemType(SiteNumberDTO.class)
-	private List<SiteNumberDTO> siteNumbers;
-	private Byte ifUpdateCells;
 
 	@Override
 	public String toString() {
@@ -251,44 +240,4 @@ public class UpdateResourceAdminCommand {
 		this.aclinkId = aclinkId;
 	}
 
-
-	public Byte getAutoAssign() {
-		return autoAssign;
-	}
-
-	public void setAutoAssign(Byte autoAssign) {
-		this.autoAssign = autoAssign;
-	}
-
-	public Double getSiteCounts() {
-		return siteCounts;
-	}
-
-	public void setSiteCounts(Double siteCounts) {
-		this.siteCounts = siteCounts;
-	}
-
-	public List<SiteNumberDTO> getSiteNumbers() {
-		return siteNumbers;
-	}
-
-	public void setSiteNumbers(List<SiteNumberDTO> siteNumbers) {
-		this.siteNumbers = siteNumbers;
-	}
-
-	public Byte getMultiUnit() {
-		return multiUnit;
-	}
-
-	public void setMultiUnit(Byte multiUnit) {
-		this.multiUnit = multiUnit;
-	}
-
-	public Byte getIfUpdateCells() {
-		return ifUpdateCells;
-	}
-
-	public void setIfUpdateCells(Byte ifUpdateCells) {
-		this.ifUpdateCells = ifUpdateCells;
-	}
 }

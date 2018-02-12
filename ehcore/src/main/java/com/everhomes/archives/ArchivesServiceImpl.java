@@ -16,8 +16,6 @@ import com.everhomes.rest.common.ImportFileResponse;
 import com.everhomes.rest.general_approval.*;
 import com.everhomes.rest.organization.*;
 import com.everhomes.rest.rentalv2.NormalFlag;
-import com.everhomes.rest.socialSecurity.AddSocialSecurityInOutTimeCommand;
-import com.everhomes.rest.socialSecurity.InOutTimeType;
 import com.everhomes.rest.user.IdentifierType;
 import com.everhomes.rest.user.UserGender;
 import com.everhomes.rest.user.UserServiceErrorCode;
@@ -239,25 +237,26 @@ public class ArchivesServiceImpl implements ArchivesService {
     //  通讯录成员置顶接口
     @Override
     public void stickArchivesContact(StickArchivesContactCommand cmd) {
-        User user = UserContext.current().getUser();
+        Long userId = UserContext.currentUserId();
+        Integer namespaceId = UserContext.getCurrentNamespaceId();
 
         //  状态码为 0 时删除
         if (cmd.getStick().equals("0")) {
             ArchivesStickyContacts result = archivesProvider.findArchivesStickyContactsByDetailIdAndOrganizationId(
-                    user.getNamespaceId(), cmd.getOrganizationId(), cmd.getDetailId());
+                    namespaceId, cmd.getOrganizationId(), cmd.getDetailId());
             if (result != null)
                 archivesProvider.deleteArchivesStickyContacts(result);
         }
 
         //  状态码为 1 时新增置顶
         if (cmd.getStick().equals("1")) {
-            ArchivesStickyContacts result = archivesProvider.findArchivesStickyContactsByDetailIdAndOrganizationId(user.getNamespaceId(), cmd.getOrganizationId(), cmd.getDetailId());
+            ArchivesStickyContacts result = archivesProvider.findArchivesStickyContactsByDetailIdAndOrganizationId(namespaceId, cmd.getOrganizationId(), cmd.getDetailId());
             if (result == null) {
                 ArchivesStickyContacts contactsSticky = new ArchivesStickyContacts();
-                contactsSticky.setNamespaceId(user.getNamespaceId());
+                contactsSticky.setNamespaceId(namespaceId);
                 contactsSticky.setOrganizationId(cmd.getOrganizationId());
                 contactsSticky.setDetailId(cmd.getDetailId());
-                contactsSticky.setOperatorUid(user.getId());
+                contactsSticky.setOperatorUid(userId);
                 archivesProvider.createArchivesStickyContacts(contactsSticky);
             } else {
                 archivesProvider.updateArchivesStickyContacts(result);

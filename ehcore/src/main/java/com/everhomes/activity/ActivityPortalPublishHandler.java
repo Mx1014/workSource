@@ -169,7 +169,7 @@ public class ActivityPortalPublishHandler implements PortalPublishHandler {
 			entryCategory.setName(name);
 			activityProvider.updateActivityCategories(entryCategory);
 		} else {
-			createActivityCategories(namespaceId, name, entryId);
+			entryCategory = createActivityCategories(namespaceId, name, entryId);
 		}
 
 		return  entryCategory;

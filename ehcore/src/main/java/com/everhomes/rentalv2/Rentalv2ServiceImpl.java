@@ -4382,6 +4382,7 @@ public class Rentalv2ServiceImpl implements Rentalv2Service {
 //		response.setSitePics(convertRentalSitePicDTOs(pics));
 
 		response.setAnchorTime(0L);
+		response.setRentalType(cmd.getRentalType());
 
 //		List<RentalConfigAttachment> attachments=this.rentalv2Provider.queryRentalConfigAttachmentByOwner(EhRentalv2Resources.class.getSimpleName(),rs.getId());
 //		response.setAttachments(convertAttachments(attachments));
@@ -6055,8 +6056,8 @@ public class Rentalv2ServiceImpl implements Rentalv2Service {
 			resource.setResourceName(cmd.getSiteName());
 			resource.setStatus(RentalSiteStatus.NORMAL.getCode());
 			resource.setAclinkId(cmd.getAclinkId());
-			//设置资源时
-			resource.setResourceCounts(cmd.getSiteCounts());
+			//设置资源时 默认为1
+			resource.setResourceCounts(1.0);
 
 
 //			resource.setExclusiveFlag(defaultRule.getExclusiveFlag());
@@ -6095,11 +6096,10 @@ public class Rentalv2ServiceImpl implements Rentalv2Service {
 
 			rentalv2Provider.createRentalSite(resource);
 			//添加资源时，才添加场所编号 TODO:新的对接需要添加
-			setRentalRuleSiteNumbers(resource.getResourceType(), EhRentalv2Resources.class.getSimpleName(), resource.getId(), cmd.getSiteNumbers());
+//			setRentalRuleSiteNumbers(resource.getResourceType(), EhRentalv2Resources.class.getSimpleName(), resource.getId(), cmd.getSiteNumbers());
 			//resource.setSiteNumbers(cmd.getOwners());
 			//新增资源规则
 			createResourceRule(resource);
-			Long siteId = resource.getId();
 			//资源范围
 			createSiteOwners(cmd.getOwners(), resource);
 			//资源图片
@@ -6327,18 +6327,16 @@ public class Rentalv2ServiceImpl implements Rentalv2Service {
 			rentalSite.setOfflinePayeeUid(cmd.getOfflinePayeeUid());
 			rentalSite.setConfirmationPrompt(cmd.getConfirmationPrompt());
 			rentalSite.setAclinkId(cmd.getAclinkId());
-			rentalSite.setMultiUnit(cmd.getMultiUnit());
-			rentalSite.setAutoAssign(cmd.getAutoAssign());
-			rentalSite.setResourceCounts(cmd.getSiteCounts());
+//			rentalSite.setMultiUnit(cmd.getMultiUnit());
+//			rentalSite.setAutoAssign(cmd.getAutoAssign());
+			//rentalSite.setResourceCounts(cmd.getSiteCounts());
 			rentalv2Provider.updateRentalSite(rentalSite);
 			this.rentalv2Provider.deleteRentalSitePicsBySiteId(rentalSite.getResourceType(), cmd.getId());
 			this.rentalv2Provider.deleteRentalSiteOwnersBySiteId(rentalSite.getResourceType(), cmd.getId());
 			//先删除
-			rentalv2Provider.deleteRentalResourceNumbersByOwnerId(rentalSite.getResourceType(), EhRentalv2Resources.class.getSimpleName(), rentalSite.getId());
-			//set site number
-			setRentalRuleSiteNumbers(rentalSite.getResourceType(), EhRentalv2Resources.class.getSimpleName(), rentalSite.getId(), cmd.getSiteNumbers());
-			if (cmd.getIfUpdateCells()==null || cmd.getIfUpdateCells()==(byte)1)
-				updateResourceRule(rentalSite, true); //更改资源数量需要刷新单元格
+//			rentalv2Provider.deleteRentalResourceNumbersByOwnerId(rentalSite.getResourceType(), EhRentalv2Resources.class.getSimpleName(), rentalSite.getId());
+//			//set site number
+//			setRentalRuleSiteNumbers(rentalSite.getResourceType(), EhRentalv2Resources.class.getSimpleName(), rentalSite.getId(), cmd.getSiteNumbers());
 //			if(cmd.getOwners() != null){
 //				for(SiteOwnerDTO dto:cmd.getOwners()){
 //					RentalSiteRange siteOwner = ConvertHelper.convert(dto, RentalSiteRange.class);
@@ -7267,6 +7265,9 @@ public class Rentalv2ServiceImpl implements Rentalv2Service {
 						}
 					});
 				});
+
+				//修改价格规则 覆盖掉单个单元格的设置
+				this.rentalv2Provider.deleteRentalCellsByResourceId(rule.getResourceType(), rule.getSourceId());
 			}
 
 			//先删除后添加
@@ -7491,6 +7492,48 @@ public class Rentalv2ServiceImpl implements Rentalv2Service {
 		ResourceAttachmentDTO dto = new ResourceAttachmentDTO();
 		dto.setAttachments(convertAttachments(attachments));
 		return dto;
+	}
+
+	@Override
+	public ResourceSiteNumbersDTO getResourceSiteNumbers(GetResourceSiteNumbersCommand cmd) {
+		RentalResource rentalSite = rentalCommonService.getRentalResource(cmd.getResourceType(), cmd.getRentalSiteId());
+		ResourceSiteNumbersDTO dto = new ResourceSiteNumbersDTO();
+		dto.setRentalSiteId(rentalSite.getId());
+		dto.setAutoAssign(rentalSite.getAutoAssign());
+		dto.setMultiUnit(rentalSite.getMultiUnit());
+		dto.setSiteCounts(rentalSite.getResourceCounts());
+
+		if(rentalSite.getAutoAssign().equals(NormalFlag.NEED.getCode())){
+			List<RentalResourceNumber> resourceNumbers = this.rentalv2Provider.queryRentalResourceNumbersByOwner(
+					rentalSite.getResourceType(),EhRentalv2Resources.class.getSimpleName(),rentalSite.getId());
+			if(null!=resourceNumbers){
+				dto.setSiteNumbers (new ArrayList<>());
+				for(RentalResourceNumber number:resourceNumbers){
+					SiteNumberDTO dto2 = new SiteNumberDTO();
+					dto2.setSiteNumber(number.getResourceNumber());
+					dto2.setSiteNumberGroup(number.getNumberGroup());
+					dto2.setGroupLockFlag(number.getGroupLockFlag());
+					dto.getSiteNumbers().add(dto2);
+				}
+			}
+		}
+		return dto;
+	}
+
+	@Override
+	public void updateResourceSiteNumbers(UpdateResourceSiteNumbersCommand cmd) {
+		RentalResource rentalSite = rentalCommonService.getRentalResource(cmd.getResourceType(), cmd.getRentalSiteId());
+		rentalSite.setMultiUnit(cmd.getMultiUnit());
+		rentalSite.setAutoAssign(cmd.getAutoAssign());
+		rentalSite.setResourceCounts(cmd.getSiteCounts());
+		rentalv2Provider.updateRentalSite(rentalSite);
+
+		//先删除
+		rentalv2Provider.deleteRentalResourceNumbersByOwnerId(rentalSite.getResourceType(), EhRentalv2Resources.class.getSimpleName(), rentalSite.getId());
+		//set site number
+		setRentalRuleSiteNumbers(rentalSite.getResourceType(), EhRentalv2Resources.class.getSimpleName(), rentalSite.getId(), cmd.getSiteNumbers());
+		//更新所有单元格
+		updateResourceRule(rentalSite, true);
 	}
 
 	@Override
