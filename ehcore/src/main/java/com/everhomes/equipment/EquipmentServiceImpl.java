@@ -6093,7 +6093,7 @@ private void checkUserPrivilege(Long orgId, Long privilegeId, Long communityId) 
                             EquipmentServiceErrorCode.ERROR_EQUIPMENT_TASK_SYNC_ERROR, EquipmentOfflineErrorType.INEPECT_TASK.getCode());
                     logs.add(repairLogs);
                 }
-                return null;
+               // return null;
 //            });
 		}
 
