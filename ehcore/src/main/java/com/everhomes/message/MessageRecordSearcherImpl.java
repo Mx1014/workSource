@@ -142,24 +142,29 @@ public class MessageRecordSearcherImpl extends AbstractElasticSearch implements 
 //                dstAggBucket.getDocCount();
 //            }
 //        }
+
+
+        List<MessageRecordDto> list = new ArrayList<>();
         Map<String, Aggregation> sendAggMap = rsp.getAggregations().asMap();
         LongTerms indexAggTerms = (LongTerms) sendAggMap.get("indexAgg");
         Iterator<Terms.Bucket> it = indexAggTerms.getBuckets().iterator();
         while(it.hasNext()){
+            MessageRecordDto record = new MessageRecordDto();
             Terms.Bucket indexAggBucket = it.next();
-            indexAggBucket.getKey();
-            indexAggBucket.getDocCount();
+            record.setIndexId(Long.valueOf(indexAggBucket.getKey()));
+            record.setNum(indexAggBucket.getDocCount());
             InternalTopHits infoAgg = (InternalTopHits) indexAggBucket.getAggregations().asMap().get("infoAgg");
             SearchHits hits = infoAgg.getHits();
             if(hits.getHits() != null && hits.getHits().length > 0){
                 SearchHit hit = hits.getHits()[0];
-                hit.getFields().get("senderUid");
-                hit.getFields().get("bodyType");
-                hit.getFields().get("body");
+                record.setSenderUid(hit.getSource().get("senderUid") != null ? Long.valueOf(hit.getSource().get("senderUid").toString()) : null);
+                record.setBodyType(hit.getSource().get("bodyType") != null ? hit.getSource().get("bodyType").toString(): null);
+                record.setBody(hit.getSource().get("body") != null ? hit.getSource().get("body").toString(): null);
             }
+            list.add(record);
         }
 
-        List<MessageRecordDto> list = new ArrayList<>();
+//        List<MessageRecordDto> list = new ArrayList<>();
 //        SearchHit[] docs = rsp.getHits().getHits();
 //        for (SearchHit sd : docs) {
 //            Map<String, Object> m = sd.getSource();

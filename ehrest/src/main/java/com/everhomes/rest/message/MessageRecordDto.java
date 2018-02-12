@@ -24,6 +24,7 @@ public class MessageRecordDto implements Serializable {
     private String sessionToken;
     private String deviceId;
     private Long indexId;
+    private Long num;
 
     public Long getId() {
         return this.id;
@@ -164,5 +165,13 @@ public class MessageRecordDto implements Serializable {
 
     public void setDeliveryOption(Integer deliveryOption) {
         this.deliveryOption = deliveryOption;
+    }
+
+    public Long getNum() {
+        return num;
+    }
+
+    public void setNum(Long num) {
+        this.num = num;
     }
 }
