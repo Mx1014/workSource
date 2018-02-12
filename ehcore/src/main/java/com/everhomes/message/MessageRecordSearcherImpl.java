@@ -20,9 +20,9 @@ import org.elasticsearch.search.SearchHit;
 import org.elasticsearch.search.aggregations.Aggregation;
 import org.elasticsearch.search.aggregations.AggregationBuilders;
 import org.elasticsearch.search.aggregations.bucket.terms.LongTerms;
-import org.elasticsearch.search.aggregations.bucket.terms.StringTerms;
 import org.elasticsearch.search.aggregations.bucket.terms.Terms;
 import org.elasticsearch.search.aggregations.bucket.terms.TermsBuilder;
+import org.elasticsearch.search.aggregations.metrics.tophits.TopHitsBuilder;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -109,37 +109,41 @@ public class MessageRecordSearcherImpl extends AbstractElasticSearch implements 
             bqb = bqb.must(QueryBuilders.termQuery("senderTag", cmd.getSenderTag()));
         if (cmd.getIsGroupBy() == 1) {
 //           TermsBuilder bodyAgg = AggregationBuilders.terms("bodyAgg").field("body");
-            TermsBuilder sendAgg = AggregationBuilders.terms("sendAgg").field("senderUid");
-            TermsBuilder dstAgg = AggregationBuilders.terms("dstAgg").field("dstChannelToken");
-            builder.addAggregation(sendAgg.subAggregation(dstAgg));
+//            TermsBuilder sendAgg = AggregationBuilders.terms("sendAgg").field("senderUid");
+//            TermsBuilder dstAgg = AggregationBuilders.terms("dstAgg").field("dstChannelToken");
+//            builder.addAggregation(sendAgg.subAggregation(dstAgg));
 //           builder.addAggregation(dstAgg);
+            TermsBuilder indexAgg = AggregationBuilders.terms("indexAgg").field("indexId");
+            TopHitsBuilder infoAgg = AggregationBuilders.topHits("infoAgg").setFetchSource(new String[]{"senderUid","bodyType","body"}, null).setSize(1);
+            builder.addAggregation(indexAgg.subAggregation(infoAgg));
+
         }
         builder.setFrom(cmd.getPageAnchor().intValue() * cmd.getPageSize()).setSize(cmd.getPageSize() + 1).setSize(cmd.getPageSize()+1);
         builder.setQuery(bqb);
         SearchResponse rsp = builder.execute().actionGet();
-//        Aggregations agg = rsp.getAggregations();
-//        Map<String, Aggregation> sendAggMap = rsp.getAggregations().getAsMap();
-//        sendAggMap.keySet().forEach(r->{
-//            LongTerms termAgg = (LongTerms) sendAggMap.get(r);
-//            termAgg.getBuckets().forEach(y ->{
-//                y.getKey();
-//            });
-//        });
 
+//        Map<String, Aggregation> sendAggMap = rsp.getAggregations().asMap();
+//        LongTerms sendAggTerms = (LongTerms) sendAggMap.get("sendAgg");
+//        Iterator<Terms.Bucket> it = sendAggTerms.getBuckets().iterator();
+//        while(it.hasNext()){
+//            Terms.Bucket sendAggBucket = it.next();
+//            sendAggBucket.getKey();
+//            sendAggBucket.getDocCount();
+//            StringTerms dstAggTerms = (StringTerms) sendAggBucket.getAggregations().asMap().get("dstAgg");
+//            Iterator<Terms.Bucket> it2 = dstAggTerms.getBuckets().iterator();
+//            while (it2.hasNext()){
+//                Terms.Bucket dstAggBucket = it2.next();
+//                dstAggBucket.getKey();
+//                dstAggBucket.getDocCount();
+//            }
+//        }
         Map<String, Aggregation> sendAggMap = rsp.getAggregations().asMap();
-        LongTerms sendAggTerms = (LongTerms) sendAggMap.get("sendAgg");
-        Iterator<Terms.Bucket> it = sendAggTerms.getBuckets().iterator();
+        LongTerms indexAggTerms = (LongTerms) sendAggMap.get("indexAgg");
+        Iterator<Terms.Bucket> it = indexAggTerms.getBuckets().iterator();
         while(it.hasNext()){
-            Terms.Bucket sendAggBucket = it.next();
-            sendAggBucket.getKey();
-            sendAggBucket.getDocCount();
-            StringTerms dstAggTerms = (StringTerms) sendAggBucket.getAggregations().asMap().get("dstAgg");
-            Iterator<Terms.Bucket> it2 = dstAggTerms.getBuckets().iterator();
-            while (it2.hasNext()){
-                Terms.Bucket dstAggBucket = it2.next();
-                dstAggBucket.getKey();
-                dstAggBucket.getDocCount();
-            }
+            Terms.Bucket indexAggBucket = it.next();
+            indexAggBucket.getKey();
+            indexAggBucket.getDocCount();
         }
 
 

@@ -1,6 +1,6 @@
 package com.everhomes.rest.messaging;
 
-public class SearchMessageRecordCommand {
+public class  SearchMessageRecordCommand {
     private Integer namespaceId;
     private String bodyType;
     private Long senderUid;
@@ -9,6 +9,7 @@ public class SearchMessageRecordCommand {
     private Long pageAnchor;
     private Integer pageSize;
     private Integer isGroupBy;
+
 
 
     public Integer getNamespaceId() {
