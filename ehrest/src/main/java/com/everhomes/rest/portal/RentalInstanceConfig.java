@@ -8,6 +8,8 @@ import com.everhomes.util.StringHelper;
  * <ul>
  * <li>resourceTypeId: 资源id</li>
  * <li>pageType: 样式</li>
+ * <li>payMode: 支付模式 0 :线上支付 1 :线下支付 2 :审批线上支付/li>
+ * <li>identify: 资源类型的分类 {@link com.everhomes.rest.rentalv2.RentalV2ResourceType}</li>
  * </ul>
  */
 public class RentalInstanceConfig {
@@ -15,6 +17,10 @@ public class RentalInstanceConfig {
 	private Long resourceTypeId;
 
 	private Byte pageType;
+
+	private Byte payMode;
+
+	private String identify;
 
 	public Long getResourceTypeId() {
 		return resourceTypeId;
@@ -30,6 +36,22 @@ public class RentalInstanceConfig {
 
 	public void setPageType(Byte pageType) {
 		this.pageType = pageType;
+	}
+
+	public Byte getPayMode() {
+		return payMode;
+	}
+
+	public void setPayMode(Byte payMode) {
+		this.payMode = payMode;
+	}
+
+	public String getIdentify() {
+		return identify;
+	}
+
+	public void setIdentify(String identify) {
+		this.identify = identify;
 	}
 
 	@Override
