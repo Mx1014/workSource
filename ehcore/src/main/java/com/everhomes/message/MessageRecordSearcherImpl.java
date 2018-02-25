@@ -109,11 +109,6 @@ public class MessageRecordSearcherImpl extends AbstractElasticSearch implements 
         if (StringUtils.isNotEmpty(cmd.getSenderTag()))
             bqb = bqb.must(QueryBuilders.termQuery("senderTag", cmd.getSenderTag()));
         if (cmd.getIsGroupBy() == 1) {
-//           TermsBuilder bodyAgg = AggregationBuilders.terms("bodyAgg").field("body");
-//            TermsBuilder sendAgg = AggregationBuilders.terms("sendAgg").field("senderUid");
-//            TermsBuilder dstAgg = AggregationBuilders.terms("dstAgg").field("dstChannelToken");
-//            builder.addAggregation(sendAgg.subAggregation(dstAgg));
-//           builder.addAggregation(dstAgg);
             TermsBuilder indexAgg = AggregationBuilders.terms("indexAgg").field("indexId");
             TopHitsBuilder infoAgg = AggregationBuilders.topHits("infoAgg").setFetchSource(new String[]{"senderUid","bodyType","body"}, null).setSize(1);
             builder.addAggregation(indexAgg.subAggregation(infoAgg));
@@ -122,23 +117,6 @@ public class MessageRecordSearcherImpl extends AbstractElasticSearch implements 
         builder.setFrom(cmd.getPageAnchor().intValue() * cmd.getPageSize()).setSize(cmd.getPageSize() + 1).setSize(cmd.getPageSize()+1);
         builder.setQuery(bqb);
         SearchResponse rsp = builder.execute().actionGet();
-
-//        Map<String, Aggregation> sendAggMap = rsp.getAggregations().asMap();
-//        LongTerms sendAggTerms = (LongTerms) sendAggMap.get("sendAgg");
-//        Iterator<Terms.Bucket> it = sendAggTerms.getBuckets().iterator();
-//        while(it.hasNext()){
-//            Terms.Bucket sendAggBucket = it.next();
-//            sendAggBucket.getKey();
-//            sendAggBucket.getDocCount();
-//            StringTerms dstAggTerms = (StringTerms) sendAggBucket.getAggregations().asMap().get("dstAgg");
-//            Iterator<Terms.Bucket> it2 = dstAggTerms.getBuckets().iterator();
-//            while (it2.hasNext()){
-//                Terms.Bucket dstAggBucket = it2.next();
-//                dstAggBucket.getKey();
-//                dstAggBucket.getDocCount();
-//            }
-//        }
-
 
         List<MessageRecordDto> list = new ArrayList<>();
         Map<String, Aggregation> sendAggMap = rsp.getAggregations().asMap();
@@ -159,57 +137,6 @@ public class MessageRecordSearcherImpl extends AbstractElasticSearch implements 
             }
             list.add(record);
         }
-
-//        List<MessageRecordDto> list = new ArrayList<>();
-//        SearchHit[] docs = rsp.getHits().getHits();
-//        for (SearchHit sd : docs) {
-//            Map<String, Object> m = sd.getSource();
-//            MessageRecordDto record = new MessageRecordDto();
-//            record.setId(Long.valueOf(m.get("id").toString()));
-//            if(m.get("namespaceId") != null)
-//                record.setNamespaceId(Integer.valueOf(m.get("namespaceId").toString()));
-//            if(m.get("dstChannelToken") != null)
-//                record.setDstChannelToken(m.get("dstChannelToken").toString());
-//            if(m.get("dstChannelType") != null)
-//                record.setDstChannelType(m.get("dstChannelType").toString());
-//            if(m.get("status") != null)
-//                record.setStatus(m.get("status").toString());
-//            if(m.get("appId") != null)
-//                record.setAppId(Long.valueOf(m.get("appId").toString()));
-//            if(m.get("messageSeq") != null)
-//                record.setMessageSeq(Long.valueOf(m.get("messageSeq").toString()));
-//            if(m.get("senderUid") != null)
-//                record.setSenderUid(Long.valueOf(m.get("senderUid").toString()));
-//            if(m.get("senderTag") != null)
-//                record.setSenderTag(m.get("senderTag").toString());
-//            if(m.get("channelsInfo") != null)
-//                record.setChannelsInfo(m.get("channelsInfo").toString());
-//            if(m.get("bodyType") != null)
-//                record.setBodyType(m.get("bodyType").toString());
-//            if(m.get("body") != null)
-//                record.setBody(m.get("body").toString());
-//            if(m.get("deliveryOption") != null)
-//                record.setDeliveryOption(Integer.valueOf(m.get("deliveryOption").toString()));
-//
-//            SimpleDateFormat simpleDateFormat = new SimpleDateFormat("yyyy-MM-dd'T'HH:mm:ss.SSS'Z'");
-//            TimeZone utcZone = TimeZone.getTimeZone("UTC");
-//            simpleDateFormat.setTimeZone(utcZone);
-//            Date myDate = null;
-//            try {
-//                myDate = simpleDateFormat.parse(m.get("createTime").toString());
-//            } catch (ParseException e) {
-//                e.printStackTrace();
-//            }
-//            SimpleDateFormat sdf = new SimpleDateFormat("yyyy-MM-dd HH:mm:ss");
-//            record.setCreateTime(Timestamp.valueOf(sdf.format(myDate)));
-//
-//            if(m.get("deviceId") != null)
-//                record.setDeviceId(m.get("deviceId").toString());
-//            if(m.get("indexId") != null)
-//                record.setIndexId(Long.valueOf(m.get("indexId").toString()));
-//
-//            list.add(record);
-//        }
 
         if (list.size() > cmd.getPageSize()) {
             list.remove(list.size() - 1);
