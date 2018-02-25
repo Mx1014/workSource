@@ -1,5 +1,19 @@
 package com.everhomes.rest.messaging;
 
+/**
+ *
+ * <ul>参数:
+ * <li>namespaceId: 域空间id</li>
+ * <li>bodyType: 内容类型</li>
+ * <li>senderUid: 发送者id</li>
+ * <li>dstChannelToken: 接收者token</li>
+ * <li>senderTag: 标志</li>
+ * <li>pageAnchor: 锚点</li>
+ * <li>pageSize: 页数</li>
+ * <li>isGroupBy: 是否聚合</li>
+ * <li>indexId: 索引id</li>
+ * </ul>
+ */
 public class  SearchMessageRecordCommand {
     private Integer namespaceId;
     private String bodyType;
