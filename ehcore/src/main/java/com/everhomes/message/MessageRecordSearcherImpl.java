@@ -98,6 +98,8 @@ public class MessageRecordSearcherImpl extends AbstractElasticSearch implements 
     public List queryMessage(SearchMessageRecordCommand cmd) {
         SearchRequestBuilder builder = getClient().prepareSearch(getIndexName()).setTypes(getIndexType());
         BoolQueryBuilder bqb = new BoolQueryBuilder();
+        if (cmd.getKeyWords() != null)
+            bqb = bqb.must(QueryBuilders.matchPhraseQuery("body", cmd.getKeyWords()));
         if (cmd.getNamespaceId() != null )
             bqb = bqb.must(QueryBuilders.termQuery("namespaceId", cmd.getNamespaceId()));
         if (StringUtils.isNotEmpty(cmd.getBodyType()))

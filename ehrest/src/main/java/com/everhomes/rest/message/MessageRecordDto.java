@@ -6,6 +6,29 @@ import com.everhomes.util.StringHelper;
 import java.io.Serializable;
 import java.sql.Timestamp;
 
+/**
+ *
+ * <ul>参数:
+ * <li>id: 记录id</li>
+ * <li>namespaceId: 域空间id</li>
+ * <li>dstChannelToken: 接收者的Token</li>
+ * <li>dstChannelType: 接收者类型</li>
+ * <li>status: 消息状态</li>
+ * <li>appId: 应用id</li>
+ * <li>messageSeq: 消息在队列中的位置</li>
+ * <li>body: 内容主体</li>
+ * <li>bodyType: 内容类型</li>
+ * <li>deliveryOption: delivery设置</li>
+ * <li>senderUid: 发送者id</li>
+ * <li>channelsInfo: channel信息</li>
+ * <li>senderTag: 标志</li>
+ * <li>createTime: 创建消息记录的时间</li>
+ * <li>sessionToken: 会话token</li>
+ * <li>deviceId: 设备Id</li>
+ * <li>indexId: 索引id</li>
+ * </ul>
+ */
+
 public class MessageRecordDto implements Serializable {
     private Long id;
     private Integer namespaceId;

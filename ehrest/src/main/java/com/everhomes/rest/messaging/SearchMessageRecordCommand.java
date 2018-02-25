@@ -12,6 +12,7 @@ package com.everhomes.rest.messaging;
  * <li>pageSize: 页数</li>
  * <li>isGroupBy: 是否聚合</li>
  * <li>indexId: 索引id</li>
+ * <li>keyWords: 搜索关键字</li>
  * </ul>
  */
 public class  SearchMessageRecordCommand {
@@ -24,6 +25,7 @@ public class  SearchMessageRecordCommand {
     private Integer pageSize;
     private Integer isGroupBy;
     private Long indexId;
+    private String keyWords;
 
 
 
@@ -97,5 +99,13 @@ public class  SearchMessageRecordCommand {
 
     public void setIndexId(Long indexId) {
         this.indexId = indexId;
+    }
+
+    public String getKeyWords() {
+        return keyWords;
+    }
+
+    public void setKeyWords(String keyWords) {
+        this.keyWords = keyWords;
     }
 }
