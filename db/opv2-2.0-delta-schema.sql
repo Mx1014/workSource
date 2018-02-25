@@ -76,7 +76,7 @@ CREATE TABLE `eh_equipment_inspection_plans` (
 -- 设备巡检计划--设备 关联表   by jiarui
 CREATE TABLE `eh_equipment_inspection_equipment_plan_map` (
   `id` BIGINT(20) NOT NULL,
-  `equiment_id` BIGINT(20) NOT NULL DEFAULT '0',
+  `equipment_id` BIGINT(20) NOT NULL DEFAULT '0',
   `owner_id` BIGINT(20) NOT NULL DEFAULT '0',
   `owner_type` VARCHAR(32) NOT NULL DEFAULT '',
   `target_id` BIGINT(20) NOT NULL DEFAULT '0',
@@ -102,15 +102,15 @@ CREATE TABLE `eh_equipment_inspection_plan_group_map` (
 -- 巡检计划 审批时间表 end  by jiarui
 
 CREATE TABLE `eh_equipment_inspection_review_date` (
-  `id` BIGINT(20) NOT NULL,
-  `owner_type` VARCHAR(64) NOT NULL COMMENT 'refer to object type EhEquipmentInspectionTasksReviewExpireDays...',
-  `scope_type` TINYINT(4) NOT NULL DEFAULT '0' COMMENT '0: all; 1: namespace; 2: community',
-  `scope_id` BIGINT(20) NOT NULL,
-  `review_expired_days` INT(11) NOT NULL DEFAULT '0' COMMENT 'review_expired_days',
-  `status` TINYINT(4) NOT NULL COMMENT '0: invalid, 1: valid',
-  `create_time` DATETIME NOT NULL COMMENT 'record create time',
+  `id` bigint(20) NOT NULL,
+  `owner_type` varchar(64) NOT NULL COMMENT 'refer to object type EhEquipmentInspectionTasksReviewExpireDays...',
+  `scope_type` tinyint(4) NOT NULL DEFAULT '0' COMMENT '0: all; 1: namespace; 2: community',
+  `scope_id` bigint(20) NOT NULL,
+  `review_expired_days` int(11) NOT NULL DEFAULT '0' COMMENT 'review_expired_days',
+  `status` tinyint(4) NOT NULL DEFAULT '0' COMMENT '0: invalid, 1: valid',
+  `create_time` datetime  COMMENT 'record create time',
   PRIMARY KEY (`id`)
-) ENGINE=INNODB DEFAULT CHARSET=utf8mb4;
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4;
 
 -- 设备操作记录表   by jiarui
 CREATE TABLE `eh_equipment_inspection_equipment_logs` (
@@ -135,6 +135,8 @@ ALTER TABLE `eh_equipment_inspection_equipments`
 ALTER TABLE `eh_equipment_inspection_tasks`
   ADD COLUMN `plan_id`  BIGINT(20) NOT NULL ;
 
+ALTER TABLE eh_equipment_inspection_tasks ADD INDEX eq_task_plan_id (plan_id) ;
+
 
 -- 标准增加周期类型   by jiarui
 ALTER TABLE `eh_equipment_inspection_standards`
@@ -149,7 +151,11 @@ ALTER TABLE `eh_equipment_inspection_task_logs`
   ADD COLUMN `flow_case_id`  BIGINT(20) NULL AFTER `equipment_id`;
 ALTER TABLE `eh_equipment_inspection_task_logs`
   ADD COLUMN `maintance_status` TINYINT(4) NOT NULL DEFAULT '0' COMMENT '0: inactive 1: wating, 2: allocated 3: completed 4: closed';
+ALTER TABLE `eh_equipment_inspection_task_logs`
+  ADD COLUMN `pm_task_id` bigint(20) NULL DEFAULT 0 ;
 
+ALTER TABLE eh_equipment_inspection_task_logs ADD INDEX eq_log_pm_task_id (pm_task_id) ;
+ALTER TABLE eh_equipment_inspection_task_logs ADD INDEX eq_log_task_id (task_id) ;
 
 -- 物业巡检V3.1  end   by jiarui
 
@@ -457,6 +463,8 @@ ALTER TABLE `eh_rentalv2_price_rules`
 ADD COLUMN `user_price_type` TINYINT(4) DEFAULT NULL COMMENT '用户价格类型, 1:统一价格 2：用户类型价格';
 ALTER TABLE `eh_rentalv2_price_packages`
 ADD COLUMN `user_price_type` TINYINT(4) DEFAULT NULL COMMENT '用户价格类型, 1:统一价格 2：用户类型价格';
+ALTER TABLE `eh_rentalv2_cells`
+ADD COLUMN `user_price_type` tinyint(4) DEFAULT NULL COMMENT '用户价格类型, 1:统一价格 2：用户类型价格';
 
 
 ALTER TABLE eh_rentalv2_orders CHANGE requestor_organization_id user_enterprise_id BIGINT(20) DEFAULT NULL COMMENT '申请人公司ID';
@@ -719,11 +727,11 @@ CREATE TABLE `eh_warehouse_suppliers`(
   `attachment_url` VARCHAR(2048) DEFAULT NULL COMMENT '附件地址',
   `create_time` DATETIME DEFAULT NOW(),
   `create_uid` BIGINT DEFAULT NULL,
-  `update_time` DATETIME DEFAULT NOW(),
+  `update_time` DATETIME DEFAULT now(),
   `update_uid` BIGINT DEFAULT NULL,
   `default_order` INTEGER DEFAULT 0,
   PRIMARY KEY (`id`)
-) ENGINE=INNODB DEFAULT CHARSET=utf8mb4;
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4;
 
 -- 采购管理schemas
 -- 采购单
@@ -740,15 +748,19 @@ CREATE TABLE `eh_warehouse_purchase_orders`(
   `total_amount` DECIMAL(20,2) DEFAULT 0.00 COMMENT '总金额',
   `warehouse_status` TINYINT DEFAULT NULL COMMENT '库存状态',
   `delivery_date` DATETIME DEFAULT NULL COMMENT '交付日期',
+  `community_id` BIGINT DEFAULT NULL,
+  `applicant_name` VARCHAR(128) DEFAULT NULL,
+  `contact_tel` VARCHAR(128) DEFAULT NULL,
+  `contact_name` VARCHAR(128) DEFAULT NULL,
   `remark` VARCHAR(2048) DEFAULT NULL COMMENT '备注',
   `approval_order_id` BIGINT DEFAULT NULL COMMENT '关联的审批单的id',
   `create_time` DATETIME DEFAULT NOW(),
   `create_uid` BIGINT DEFAULT NULL,
-  `update_time` DATETIME DEFAULT NOW(),
+  `update_time` DATETIME DEFAULT now(),
   `update_uid` BIGINT DEFAULT NULL,
   `default_order` INTEGER DEFAULT 0,
   PRIMARY KEY (`id`)
-) ENGINE=INNODB DEFAULT CHARSET=utf8mb4;
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4;
 
 -- 采购单物品表
 DROP TABLE IF EXISTS `eh_warehouse_purchase_items`;
@@ -763,11 +775,11 @@ CREATE TABLE `eh_warehouse_purchase_items`(
   `unit_price` DECIMAL(20,2) DEFAULT 0.00 COMMENT '单价',
   `create_time` DATETIME DEFAULT NOW(),
   `create_uid` BIGINT DEFAULT NULL,
-  `update_time` DATETIME DEFAULT NOW(),
+  `update_time` DATETIME DEFAULT now(),
   `update_uid` BIGINT DEFAULT NULL,
   `default_order` INTEGER DEFAULT 0,
   PRIMARY KEY (`id`)
-) ENGINE=INNODB DEFAULT CHARSET=utf8mb4;
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4;
 
 -- 为物品增加供应商字段
 ALTER TABLE `eh_warehouse_materials` ADD COLUMN `supplier_id` BIGINT DEFAULT NULL COMMENT '物品的供应商的主键id';
@@ -783,7 +795,7 @@ CREATE TABLE `eh_warehouse_orders`(
   `identity` VARCHAR(128) NOT NULL COMMENT '出入库单号',
   `executor_id` BIGINT DEFAULT NULL COMMENT '执行人id',
   `executor_name` VARCHAR(128) DEFAULT NULL COMMENT '执行人姓名',
-  `executor_time` DATETIME DEFAULT NOW() COMMENT '执行时间',
+  `executor_time` DATETIME DEFAULT now() COMMENT '执行时间',
   `service_type` TINYINT DEFAULT NULL COMMENT '服务类型，1. 普通入库,2.领用出库，3.采购入库',
   `community_id` BIGINT DEFAULT NULL COMMENT '园区id',
   `create_time` DATETIME DEFAULT NOW(),
@@ -793,7 +805,7 @@ CREATE TABLE `eh_warehouse_orders`(
   `default_order` INTEGER DEFAULT 0,
   PRIMARY KEY (`id`),
   KEY `i_service_type` (`service_type`) COMMENT '出入库状态得索引，用于搜索'
-) ENGINE=INNODB DEFAULT CHARSET=utf8mb4;
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4;
 
 -- 增加出入库记录关联出入库单的字段
 ALTER TABLE `eh_warehouse_stock_logs` ADD COLUMN `warehouse_order_id` BIGINT DEFAULT NULL COMMENT '关联的出入库单的id';
@@ -821,7 +833,7 @@ CREATE TABLE `eh_requisitions`(
   `update_uid` BIGINT DEFAULT NULL,
   `default_order` INTEGER DEFAULT 0,
   PRIMARY KEY (`id`)
-) ENGINE=INNODB DEFAULT CHARSET=utf8mb4;
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4;
 
 -- 请示单类型
 DROP TABLE IF EXISTS `eh_requisition_types`;
@@ -837,7 +849,9 @@ CREATE TABLE `eh_requisition_types`(
   `update_uid` BIGINT DEFAULT NULL,
   `default_order` INTEGER DEFAULT 0,
   PRIMARY KEY (`id`)
-) ENGINE=INNODB DEFAULT CHARSET=utf8mb4;
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4;
+
+
 
 
 
@@ -1614,7 +1628,7 @@ ALTER TABLE `eh_office_cubicle_orders` ADD COLUMN `owner_type` VARCHAR(128);
 ALTER TABLE `eh_office_cubicle_orders` ADD COLUMN `owner_id` BIGINT;
 ALTER TABLE `eh_office_cubicle_orders` ADD COLUMN `position_nums` INTEGER;
 ALTER TABLE `eh_office_cubicle_orders` ADD COLUMN `category_name` VARCHAR(256);
-ALTER TABLE `eh_office_cubicle_orders` ADD COLUMN `category_id` LONG;
+ALTER TABLE `eh_office_cubicle_orders` ADD COLUMN `category_id` BIGINT;
 
 CREATE TABLE `eh_office_cubicle_ranges` (
   `id` BIGINT NOT NULL,
@@ -1650,6 +1664,10 @@ ALTER TABLE `eh_general_approvals` ADD COLUMN `approval_remark` VARCHAR(256) COM
 
 ALTER TABLE `eh_general_approvals` ADD COLUMN `default_order` INTEGER NOT NULL DEFAULT 0;
 
+ALTER TABLE `eh_general_approvals` ADD COLUMN `operator_uid` BIGINT NOT NULL DEFAULT 0 COMMENT 'the userId of the operator';
+
+ALTER TABLE `eh_general_approvals` ADD COLUMN `operator_name` VARCHAR(128) COMMENT 'the real name of the operator';
+
 -- DROP TABLE IF EXISTS `eh_general_approval_scope_map`;
 CREATE TABLE `eh_general_approval_scope_map` (
   `id` BIGINT NOT NULL,
@@ -1663,11 +1681,21 @@ CREATE TABLE `eh_general_approval_scope_map` (
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4;
 
 UPDATE eh_general_approvals SET approval_attribute = 'CUSTOMIZE' WHERE approval_attribute IS NULL;
-ALTER TABLE eh_general_approvals MODIFY approval_attribute VARCHAR(128) NOT NULL DEFAULT 'CUSTOMIZE';
+ALTER TABLE eh_general_approvals MODIFY approval_attribute VARCHAR(128) NOT NULL DEFAULT 'CUSTOMIZE' COMMENT 'CUSTOMIZE, DEFAULT';
 
 UPDATE eh_general_approvals SET modify_flag = 1 WHERE modify_flag IS NULL;
-ALTER TABLE eh_general_approvals MODIFY modify_flag TINYINT NOT NULL DEFAULT 1;
+ALTER TABLE eh_general_approvals MODIFY modify_flag TINYINT NOT NULL DEFAULT 1 COMMENT '0: no, 1: yes';
 
 UPDATE eh_general_approvals SET delete_flag = 1 WHERE delete_flag IS NULL;
-ALTER TABLE eh_general_approvals MODIFY delete_flag TINYINT NOT NULL DEFAULT 1;
+ALTER TABLE eh_general_approvals MODIFY delete_flag TINYINT NOT NULL DEFAULT 1 COMMENT '0: no, 1: yes';
+
+UPDATE eh_general_forms SET form_attribute = 'CUSTOMIZE' WHERE form_attribute IS NULL;
+ALTER TABLE eh_general_forms MODIFY form_attribute VARCHAR(128) NOT NULL DEFAULT 'CUSTOMIZE' COMMENT 'CUSTOMIZE, DEFAULT';
+
+UPDATE eh_general_forms SET modify_flag = 1 WHERE modify_flag IS NULL;
+ALTER TABLE eh_general_forms MODIFY modify_flag TINYINT NOT NULL DEFAULT 1 COMMENT '0: no, 1: yes';
+
+UPDATE eh_general_forms SET delete_flag = 1 WHERE delete_flag IS NULL;
+ALTER TABLE eh_general_forms MODIFY delete_flag TINYINT NOT NULL DEFAULT 1 COMMENT '0: no, 1: yes';
+
 -- end by nan.rong

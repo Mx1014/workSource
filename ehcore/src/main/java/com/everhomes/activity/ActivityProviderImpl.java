@@ -717,14 +717,17 @@ public class ActivityProviderImpl implements ActivityProivider {
 
     @Override
     public void createActivityCategories(ActivityCategories activityCategory) {
-        long id = this.sequenceProvider.getNextSequence(NameMapper.getSequenceDomainFromTablePojo(EhActivityCategories.class));
 
-        activityCategory.setId(id);
+        if(activityCategory.getId() == null){
+            long id = this.sequenceProvider.getNextSequence(NameMapper.getSequenceDomainFromTablePojo(EhActivityCategories.class));
+            activityCategory.setId(id);
+        }
+
         activityCategory.setCreateTime(new Timestamp(DateHelper.currentGMTTime().getTime()));
 
         LOGGER.info("createActivityCategories: " + activityCategory);
 
-        DSLContext context = this.dbProvider.getDslContext(AccessSpec.readWriteWith(ActivityCategories.class, id));
+        DSLContext context = this.dbProvider.getDslContext(AccessSpec.readWriteWith(ActivityCategories.class, activityCategory.getId()));
         EhActivityCategoriesDao dao = new EhActivityCategoriesDao(context.configuration());
         dao.insert(activityCategory);
 

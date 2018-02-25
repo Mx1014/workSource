@@ -493,8 +493,7 @@ public class EquipmentProviderImpl implements EquipmentProvider {
     }
 
     @Override
-    public EquipmentInspectionAccessories findAccessoryById(Long id,
-                                                            String ownerType, Long ownerId) {
+    public EquipmentInspectionAccessories findAccessoryById(Long id, String ownerType, Long ownerId) {
         DSLContext context = dbProvider.getDslContext(AccessSpec.readOnly());
         SelectQuery<EhEquipmentInspectionAccessoriesRecord> query = context.selectQuery(Tables.EH_EQUIPMENT_INSPECTION_ACCESSORIES);
         query.addConditions(Tables.EH_EQUIPMENT_INSPECTION_ACCESSORIES.ID.eq(id));
@@ -554,9 +553,7 @@ public class EquipmentProviderImpl implements EquipmentProvider {
     @Caching(evict = {@CacheEvict(value = "listEquipmentInspectionTasksUseCache", allEntries = true)})
     @Override
     public void updateEquipmentTask(EquipmentInspectionTasks task) {
-
-        assert (task.getId() != null);
-
+        LOGGER.info("update task id = {}" + task.getId());
         DSLContext context = this.dbProvider.getDslContext(AccessSpec.readWriteWith(EhEquipmentInspectionTasks.class, task.getId()));
         EhEquipmentInspectionTasksDao dao = new EhEquipmentInspectionTasksDao(context.configuration());
         dao.update(task);
@@ -1660,7 +1657,7 @@ public class EquipmentProviderImpl implements EquipmentProvider {
     public List<EquipmentInspectionEquipmentPlanMap> listPlanMapByEquipmentId(Long equipmentId) {
         DSLContext context = this.dbProvider.getDslContext(AccessSpec.readOnly());
         return context.selectFrom(Tables.EH_EQUIPMENT_INSPECTION_EQUIPMENT_PLAN_MAP)
-                .where(Tables.EH_EQUIPMENT_INSPECTION_EQUIPMENT_PLAN_MAP.EQUIMENT_ID.eq(equipmentId))
+                .where(Tables.EH_EQUIPMENT_INSPECTION_EQUIPMENT_PLAN_MAP.EQUIPMENT_ID.eq(equipmentId))
                 .fetchInto(EquipmentInspectionEquipmentPlanMap.class);
     }
 
@@ -3025,16 +3022,17 @@ public class EquipmentProviderImpl implements EquipmentProvider {
     public void deleteEquipmentPlansMapByEquipmentId(Long equipmentId) {
         DSLContext context = this.dbProvider.getDslContext(AccessSpec.readWrite());
         context.delete(Tables.EH_EQUIPMENT_INSPECTION_EQUIPMENT_PLAN_MAP)
-                .where(Tables.EH_EQUIPMENT_INSPECTION_EQUIPMENT_PLAN_MAP.EQUIMENT_ID.eq(equipmentId))
+                .where(Tables.EH_EQUIPMENT_INSPECTION_EQUIPMENT_PLAN_MAP.EQUIPMENT_ID.eq(equipmentId))
                 .execute();
     }
 
     @Override
-    public EquipmentInspectionTasksLogs getMaintanceLogByEquipmentId(Long referId) {
+    public EquipmentInspectionTasksLogs getMaintanceLogByEquipmentId(Long referId,Long pmTaskId) {
         DSLContext context = this.dbProvider.getDslContext(AccessSpec.readOnly());
         SelectQuery<EhEquipmentInspectionTaskLogsRecord> query = context.selectQuery(Tables.EH_EQUIPMENT_INSPECTION_TASK_LOGS);
         query.addConditions(Tables.EH_EQUIPMENT_INSPECTION_TASK_LOGS.EQUIPMENT_ID.eq(referId));
-        query.addConditions(Tables.EH_EQUIPMENT_INSPECTION_TASK_LOGS.PROCESS_TYPE.eq(EquipmentTaskProcessType.NEED_MAINTENANCE.getCode()));
+//        query.addConditions(Tables.EH_EQUIPMENT_INSPECTION_TASK_LOGS.PROCESS_TYPE.eq(EquipmentTaskProcessType.NEED_MAINTENANCE.getCode()));
+        query.addConditions(Tables.EH_EQUIPMENT_INSPECTION_TASK_LOGS.PM_TASK_ID.eq(pmTaskId));
         query.addOrderBy(Tables.EH_EQUIPMENT_INSPECTION_TASK_LOGS.CREATE_TIME.desc());
         List<EquipmentInspectionTasksLogs> logs = new ArrayList<>();
         query.fetch((r) -> {
@@ -3059,7 +3057,7 @@ public class EquipmentProviderImpl implements EquipmentProvider {
         updateQuery.addConditions(Tables.EH_EQUIPMENT_INSPECTION_TASK_LOGS.ID.eq(taskLogId));
         if(PmTaskFlowStatus.COMPLETED.equals(PmTaskFlowStatus.fromCode(status))){
             updateQuery.addValue(Tables.EH_EQUIPMENT_INSPECTION_TASK_LOGS.PROCESS_RESULT,
-                    EquipmentTaskProcessResult.NEED_MAINTENANCE_DELAY_COMPLETE_OK.getCode());
+                    EquipmentTaskProcessResult.NEED_MAINTENANCE_OK_COMPLETE_OK.getCode());
         }
         updateQuery.addConditions(Tables.EH_EQUIPMENT_INSPECTION_TASK_LOGS.PROCESS_TYPE.eq(EquipmentTaskProcessType.NEED_MAINTENANCE.getCode()));
         updateQuery.execute();
@@ -3209,7 +3207,7 @@ public class EquipmentProviderImpl implements EquipmentProvider {
     public void deletePlanMapByEquipmentIdAndStandardId(Long equipmentId, Long standardId) {
         DSLContext context = this.dbProvider.getDslContext(AccessSpec.readWrite());
         context.delete(Tables.EH_EQUIPMENT_INSPECTION_EQUIPMENT_PLAN_MAP)
-                .where(Tables.EH_EQUIPMENT_INSPECTION_EQUIPMENT_PLAN_MAP.EQUIMENT_ID.eq(equipmentId))
+                .where(Tables.EH_EQUIPMENT_INSPECTION_EQUIPMENT_PLAN_MAP.EQUIPMENT_ID.eq(equipmentId))
                 .and(Tables.EH_EQUIPMENT_INSPECTION_EQUIPMENT_PLAN_MAP.STANDARD_ID.eq(standardId))
                 .execute();
     }
@@ -3220,5 +3218,44 @@ public class EquipmentProviderImpl implements EquipmentProvider {
         Timestamp time = new Timestamp(calendar.getTimeInMillis());
 
         return time;
+    }
+
+    @Override
+    public List<EquipmentInspectionEquipmentPlanMap> listEquipmentPlanMaps() {
+        DSLContext context = this.dbProvider.getDslContext(AccessSpec.readOnly());
+        return context.selectFrom(Tables.EH_EQUIPMENT_INSPECTION_EQUIPMENT_PLAN_MAP)
+                .fetchInto(EquipmentInspectionEquipmentPlanMap.class);
+    }
+
+    @Override
+    public void transferPlanIdForTasks(Long equipmentId, Long standardId,Long planId) {
+        DSLContext context = this.dbProvider.getDslContext(AccessSpec.readWrite());
+        context.update(Tables.EH_EQUIPMENT_INSPECTION_TASKS)
+                .set(Tables.EH_EQUIPMENT_INSPECTION_TASKS.PLAN_ID, planId)
+                .where(Tables.EH_EQUIPMENT_INSPECTION_TASKS.EQUIPMENT_ID.eq(equipmentId))
+                .and(Tables.EH_EQUIPMENT_INSPECTION_TASKS.STANDARD_ID.eq(standardId))
+                .and(Tables.EH_EQUIPMENT_INSPECTION_TASKS.STATUS.ne(EquipmentTaskStatus.NONE.getCode()))
+                .execute();
+        LOGGER.info("transferPlanIdForTasks....");
+    }
+
+    @Override
+    public void batchUpdateUnusedTaskStatus() {
+        DSLContext context = this.dbProvider.getDslContext(AccessSpec.readWrite());
+        context.update(Tables.EH_EQUIPMENT_INSPECTION_TASKS)
+                .set(Tables.EH_EQUIPMENT_INSPECTION_TASKS.STATUS, EquipmentTaskStatus.NONE.getCode())
+                .where(Tables.EH_EQUIPMENT_INSPECTION_TASKS.PLAN_ID.eq(0L))
+                .execute();
+        LOGGER.info("batchUpdateUnusedTaskStatus....");
+
+    }
+
+    @Override
+    public void updateEquipmentTaskByPlanId(Long planId) {
+        DSLContext context = this.dbProvider.getDslContext(AccessSpec.readWrite());
+        context.update(Tables.EH_EQUIPMENT_INSPECTION_TASKS)
+                .set(Tables.EH_EQUIPMENT_INSPECTION_TASKS.STATUS, EquipmentTaskStatus.NONE.getCode())
+                .where(Tables.EH_EQUIPMENT_INSPECTION_TASKS.PLAN_ID.eq(planId))
+                .execute();
     }
 }

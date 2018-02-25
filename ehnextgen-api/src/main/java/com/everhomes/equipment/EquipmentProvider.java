@@ -223,7 +223,7 @@ public interface EquipmentProvider {
 
     void deleteEquipmentPlansMapByEquipmentId(Long equipmentId);
 
-    EquipmentInspectionTasksLogs getMaintanceLogByEquipmentId(Long referId);
+    EquipmentInspectionTasksLogs getMaintanceLogByEquipmentId(Long referId,Long pmTaskId);
 
 	void updateMaintanceInspectionLogsById(Long taskLogId ,Byte status ,Long flowCaseId);
 
@@ -240,4 +240,12 @@ public interface EquipmentProvider {
     List<EquipmentInspectionStandards> listEquipmentStandardWithReferId(Long targetId, String targetType);
 
     void deletePlanMapByEquipmentIdAndStandardId(Long equipmentId, Long standardId);
+
+    List<EquipmentInspectionEquipmentPlanMap> listEquipmentPlanMaps();
+
+	void transferPlanIdForTasks(Long equipmentId, Long standardId,Long planId);
+
+	void batchUpdateUnusedTaskStatus();
+
+    void updateEquipmentTaskByPlanId(Long planId);
 }

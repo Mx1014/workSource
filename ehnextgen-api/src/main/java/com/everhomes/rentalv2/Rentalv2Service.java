@@ -39,6 +39,8 @@ public interface Rentalv2Service {
 
 	ListRentalBillsCommandResponse listRentalBills(ListRentalBillsCommand cmd);
 
+	ListRentalBillsCommandResponse listActiveRentalBills(ListRentalBillsCommand cmd);
+
 	void deleteRentalBill(DeleteRentalBillCommand cmd);
  
 	OnlinePayCallbackCommandResponse onlinePayCallback(
@@ -173,6 +175,10 @@ public interface Rentalv2Service {
 	ResourceOrderRuleDTO getResourceOrderRule(GetResourceOrderRuleCommand cmd);
 
 	ResourceAttachmentDTO getResourceAttachment(GetResourceAttachmentCommand cmd);
+
+	ResourceSiteNumbersDTO getResourceSiteNumbers(GetResourceSiteNumbersCommand cmd);
+
+	void updateResourceSiteNumbers(UpdateResourceSiteNumbersCommand cmd);
 
 	void confirmRefund(ConfirmRefundCommand cmd);
 

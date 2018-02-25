@@ -30,7 +30,7 @@ CREATE TABLE `eh_equipment_inspection_plans` (
 -- 设备巡检计划--设备 关联表  by jiarui
 CREATE TABLE `eh_equipment_inspection_equipment_plan_map` (
   `id` bigint(20) NOT NULL,
-  `equiment_id` bigint(20) NOT NULL DEFAULT '0',
+  `equipment_id` bigint(20) NOT NULL DEFAULT '0',
   `owner_id` bigint(20) NOT NULL DEFAULT '0',
   `owner_type` varchar(32) NOT NULL DEFAULT '',
   `target_id` bigint(20) NOT NULL DEFAULT '0',
@@ -60,8 +60,8 @@ CREATE TABLE `eh_equipment_inspection_review_date` (
   `scope_type` tinyint(4) NOT NULL DEFAULT '0' COMMENT '0: all; 1: namespace; 2: community',
   `scope_id` bigint(20) NOT NULL,
   `review_expired_days` int(11) NOT NULL DEFAULT '0' COMMENT 'review_expired_days',
-  `status` tinyint(4) NOT NULL COMMENT '0: invalid, 1: valid',
-  `create_time` datetime NOT NULL COMMENT 'record create time',
+  `status` tinyint(4) NOT NULL DEFAULT '0' COMMENT '0: invalid, 1: valid',
+  `create_time` datetime  COMMENT 'record create time',
   PRIMARY KEY (`id`)
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4;
 
@@ -69,6 +69,8 @@ CREATE TABLE `eh_equipment_inspection_review_date` (
 -- eh_equipment_inspection_tasks 增加plan_id字段 用于关联task和equipments  by jiarui
 ALTER TABLE eh_equipment_inspection_tasks
 ADD COLUMN `plan_id`  bigint(20) NOT NULL ;
+
+ALTER TABLE eh_equipment_inspection_tasks ADD INDEX eq_task_plan_id (plan_id) ;
 
 
 -- 标准增加周期类型  by jiarui
@@ -84,6 +86,10 @@ ALTER TABLE `eh_equipment_inspection_task_logs`
   ADD COLUMN `flow_case_id`  bigint(20) NULL AFTER `equipment_id`;
 ALTER TABLE `eh_equipment_inspection_task_logs`
   ADD COLUMN `maintance_status` tinyint(4) NOT NULL DEFAULT '0' COMMENT '0: inactive 1: wating, 2: allocated 3: completed 4: closed';
+ALTER TABLE `eh_equipment_inspection_task_logs`
+  ADD COLUMN `pm_task_id` bigint(20) NULL DEFAULT 0 ;
+ALTER TABLE eh_equipment_inspection_task_logs ADD INDEX eq_log_pm_task_id (pm_task_id) ;
+ALTER TABLE eh_equipment_inspection_task_logs ADD INDEX eq_log_task_id (task_id) ;
 
 -- 设备操作记录表  by jiarui
 CREATE TABLE `eh_equipment_inspection_equipment_logs` (

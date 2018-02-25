@@ -21,7 +21,7 @@ public interface FileManagementProvider {
 
     List<FileCatalog> queryFileCatalogs(ListingLocator locator, Integer namespaceId, Long ownerId, ListingQueryBuilderCallback queryBuilderCallback);
 
-    List<FileCatalog> listAvailableFileCatalogs(Integer namespaceId, Long ownerId, Long userId);
+    List<FileCatalog> listAvailableFileCatalogs(Integer namespaceId, Long ownerId, Long detailId);
 
     void createFileCatalogScope(FileCatalogScope scope);
 

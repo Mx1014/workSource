@@ -152,6 +152,8 @@ ALTER TABLE `eh_rentalv2_price_rules`
 ADD COLUMN `user_price_type` tinyint(4) DEFAULT NULL COMMENT '用户价格类型, 1:统一价格 2：用户类型价格';
 ALTER TABLE `eh_rentalv2_price_packages`
 ADD COLUMN `user_price_type` tinyint(4) DEFAULT NULL COMMENT '用户价格类型, 1:统一价格 2：用户类型价格';
+ALTER TABLE `eh_rentalv2_cells`
+ADD COLUMN `user_price_type` tinyint(4) DEFAULT NULL COMMENT '用户价格类型, 1:统一价格 2：用户类型价格';
 
 
 ALTER TABLE eh_rentalv2_orders CHANGE requestor_organization_id user_enterprise_id bigint(20) DEFAULT NULL COMMENT '申请人公司ID';

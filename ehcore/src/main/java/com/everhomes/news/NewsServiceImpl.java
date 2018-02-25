@@ -724,6 +724,8 @@ public class NewsServiceImpl implements NewsService {
 		List<NewsTagVals> list = newsProvider.listNewsTagVals(newsId);
 		list.forEach(r->{
 			NewsTag newsTag = newsProvider.findNewsTagById(r.getNewsTagId());
+			if(newsTag==null)
+				return ;
 			if (newsTag.getDeleteFlag()!=(byte)1)//未删除
 				r.setValue(newsTag.getValue());
 

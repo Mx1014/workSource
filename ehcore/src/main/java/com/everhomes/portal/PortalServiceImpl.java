@@ -1339,14 +1339,9 @@ public class PortalServiceImpl implements PortalService {
 		User user = UserContext.current().getUser();
 		Integer namespaceId = UserContext.getCurrentNamespaceId(cmd.getNamespaceId());
 		List<PortalLayout> layouts = portalLayoutProvider.listPortalLayout(cmd.getNamespaceId(), null, cmd.getVersionId());
-		PortalPublishLog portalPublishLog = new PortalPublishLog();
-		portalPublishLog.setNamespaceId(namespaceId);
-		portalPublishLog.setStatus(PortalPublishLogStatus.PUBLISHING.getCode());
-		portalPublishLog.setCreatorUid(user.getId());
-		portalPublishLog.setOperatorUid(user.getId());
-		portalPublishLog.setVersionId(cmd.getVersionId());
-		portalPublishLog.setProcess(0);
-		portalPublishLogProvider.createPortalPublishLog(portalPublishLog);
+
+		//生成版本发布log
+		PortalPublishLog portalPublishLog = createNewPortalPublishLog(cmd.getNamespaceId(), user, cmd.getVersionId());
 
 		ExecutorUtil.submit(new Runnable() {
 			@Override
@@ -1363,26 +1358,30 @@ public class PortalServiceImpl implements PortalService {
 						//清理预览版本服务广场数据
 						removePreviewVersion(namespaceId);
 
-						//发布item分类
-						publishItemCategory(namespaceId, cmd.getVersionId(), cmd.getPublishType());
-
 						//将当前版本改成release版本
 						//服务广场layout的版本号用release版本的日期和大版本号组合，例如2018013001
 						//从而服务广场layout的preview和release版本的版本号一致
 						if(PortalPublishType.fromCode(cmd.getPublishType()) == PortalPublishType.RELEASE) {
 							//更新版本号为新的版本
-							updateVersionAfterPublish(cmd.getVersionId());
+							updateVersionToNewVersion(cmd.getVersionId());
 
 							//更新正式版本标志
 							updateReleaseVersion(namespaceId, cmd.getVersionId());
 						}
+
+						//发布应用
+						publishServiceModuleApp(namespaceId, cmd.getVersionId());
+
+						//发布item分类
+						publishItemCategory(namespaceId, cmd.getVersionId(), cmd.getPublishType());
+
 
 						for (PortalLayout layout: layouts) {
 							//发布layout
 							publishLayout(layout, cmd.getVersionId(), cmd.getPublishType());
 						}
 
-						//正式发布之后将当前版本改成大版本，再在此基础上生成一个小本版
+						//正式发布之后，在此基础上生成小本版
 						if(PortalPublishType.fromCode(cmd.getPublishType()) == PortalPublishType.RELEASE){
 
 							//新版本复制一个小版本，比如发布3.1版本变成了5.0版本，那5.0要复制一个5.1，3.0也要复制一个新的3.1
@@ -1422,6 +1421,38 @@ public class PortalServiceImpl implements PortalService {
 		return ConvertHelper.convert(portalPublishLog, PortalPublishLogDTO.class);
 	}
 
+
+	private PortalPublishLog createNewPortalPublishLog(Integer namespaceId, User user, Long versionId){
+		PortalPublishLog portalPublishLog = new PortalPublishLog();
+
+		portalPublishLog.setNamespaceId(namespaceId);
+		portalPublishLog.setStatus(PortalPublishLogStatus.PUBLISHING.getCode());
+		portalPublishLog.setCreatorUid(user.getId());
+		portalPublishLog.setOperatorUid(user.getId());
+		portalPublishLog.setVersionId(versionId);
+		portalPublishLog.setProcess(0);
+		portalPublishLogProvider.createPortalPublishLog(portalPublishLog);
+		return portalPublishLog;
+	}
+
+	//发布应用
+	private void publishServiceModuleApp(Integer namespaceId, Long versionId){
+		List<ServiceModuleApp> apps = serviceModuleAppProvider.listServiceModuleApp(namespaceId, versionId, null);
+		if(apps == null || apps.size() == 0){
+			return;
+		}
+
+		for(ServiceModuleApp app: apps){
+			PortalPublishHandler handler = getPortalPublishHandler(app.getModuleId());
+			if(null != handler){
+				String instanceConfig = handler.publish(app.getNamespaceId(), app.getInstanceConfig(), app.getName());
+				app.setInstanceConfig(instanceConfig);
+				serviceModuleAppProvider.updateServiceModuleApp(app);
+			}
+		}
+
+	}
+
 	private void cleanOldVersion(Integer namespaceId){
 		List<PortalVersion> list = portalVersionProvider.listPortalVersion(namespaceId, null);
 
@@ -1458,7 +1489,7 @@ public class PortalServiceImpl implements PortalService {
 	 * 发布成功后将该版本号改成当前日期的大版本
 	 * @param versionId
 	 */
-	private void updateVersionAfterPublish(Long versionId){
+	private void updateVersionToNewVersion(Long versionId){
 		PortalVersion publishVersion = portalVersionProvider.findPortalVersionById(versionId);
 		PortalVersion maxBigVersion = portalVersionProvider.findMaxBigVersion(publishVersion.getNamespaceId());
 
@@ -1544,17 +1575,18 @@ public class PortalServiceImpl implements PortalService {
 				config.setItemGroup(itemGroup.getName());
 				group.setInstanceConfig(config);
 			}else if(Widget.fromCode(group.getWidget()) == Widget.NEWS){
-				String instanceConf = setItemModuleAppActionData(itemGroup.getLabel(), instanceConfig.getModuleAppId());
-				if(null != instanceConf){
-					NewsInstanceConfig config = (NewsInstanceConfig)StringHelper.fromJsonString(instanceConf, NewsInstanceConfig.class);
+//				String instanceConf = setItemModuleAppActionData(itemGroup.getLabel(), instanceConfig.getModuleAppId());
+				ServiceModuleApp moduleApp = serviceModuleAppProvider.findServiceModuleAppById(instanceConfig.getModuleAppId());
+				if(moduleApp != null && moduleApp.getInstanceConfig() != null){
+					NewsInstanceConfig config = (NewsInstanceConfig)StringHelper.fromJsonString(moduleApp.getInstanceConfig(), NewsInstanceConfig.class);
 					config.setItemGroup(itemGroup.getName());
 					config.setTimeWidgetStyle(instanceConfig.getTimeWidgetStyle());
 					group.setInstanceConfig(config);
 				}
 			}else if(Widget.fromCode(group.getWidget()) == Widget.NEWS_FLASH){
-				String instanceConf = setItemModuleAppActionData(itemGroup.getLabel(), instanceConfig.getModuleAppId());
-				if(null != instanceConf){
-					NewsFlashInstanceConfig config = (NewsFlashInstanceConfig)StringHelper.fromJsonString(instanceConf, NewsFlashInstanceConfig.class);
+				ServiceModuleApp moduleApp = serviceModuleAppProvider.findServiceModuleAppById(instanceConfig.getModuleAppId());
+				if(moduleApp != null && moduleApp.getInstanceConfig() != null){
+					NewsFlashInstanceConfig config = (NewsFlashInstanceConfig)StringHelper.fromJsonString(moduleApp.getInstanceConfig(), NewsFlashInstanceConfig.class);
 					config.setItemGroup(itemGroup.getName());
 					config.setTimeWidgetStyle(instanceConfig.getTimeWidgetStyle());
 					config.setNewsSize(instanceConfig.getNewsSize());
@@ -1585,13 +1617,13 @@ public class PortalServiceImpl implements PortalService {
 				if(EntityType.fromCode(itemGroup.getContentType()) == EntityType.BIZ){
 					itemGroup.setName("OPPushBiz");
 				}
-				publishOPPushItem(itemGroup, layout.getLocation());
+				publishOPPushItem(itemGroup, versionId, layout.getLocation(), publishType);
 				config.setItemGroup(itemGroup.getName());
 //				group.setInstanceConfig(StringHelper.toJsonString(config));
 				group.setInstanceConfig(config);
 			}else if(Widget.fromCode(group.getWidget()) == Widget.TAB){
 				TabInstanceConfig config = new TabInstanceConfig();
-				publishTabItem(itemGroup);
+				publishTabItem(itemGroup, versionId, layout.getLocation(), publishType);
 				config.setItemGroup(itemGroup.getName());
 				group.setInstanceConfig(config);
 			}
@@ -1664,7 +1696,17 @@ public class PortalServiceImpl implements PortalService {
 	}
 
 
-	private void publishTabItem(PortalItemGroup itemGroup){
+	private void publishTabItem(PortalItemGroup itemGroup, Long versionId, String location, Byte publishType){
+
+		List<LaunchPadItem> items = launchPadProvider.findLaunchPadItem(itemGroup.getNamespaceId(), itemGroup.getName(), location);
+		for (LaunchPadItem item: items) {
+
+			//正式发布才能删除items，正式发布时会清除掉当前域空间所有的预览版本数据。
+			if(PortalPublishType.fromCode(publishType) == PortalPublishType.RELEASE){
+				launchPadProvider.deleteLaunchPadItem(item.getId());
+			}
+		}
+
 		List<PortalItem> portalItems = portalItemProvider.listPortalItemByGroupId(itemGroup.getId());
 		for (PortalItem portalItem: portalItems) {
 			LaunchPadItem item = ConvertHelper.convert(portalItem, LaunchPadItem.class);
@@ -1677,13 +1719,19 @@ public class PortalServiceImpl implements PortalService {
 			}
 
 			item.setAppId(AppConstants.APPID_DEFAULT);
-			item.setApplyPolicy(ApplyPolicy.OVERRIDE.getCode());
+			item.setApplyPolicy(ApplyPolicy.DEFAULT.getCode());
 			item.setMinVersion(1L);
 			item.setItemGroup(portalItem.getGroupName());
 			item.setItemLabel(portalItem.getLabel());
 			item.setItemName(portalItem.getName());
 			item.setDeleteFlag(DeleteFlagType.YES.getCode());
 			item.setScaleType(ScaleType.TAILOR.getCode());
+			item.setScopeCode(ScopeType.ALL.getCode());
+			item.setScopeId(0L);
+
+			if(PortalPublishType.fromCode(publishType) == PortalPublishType.PREVIEW){
+				item.setPreviewPortalVersionId(versionId);
+			}
 
 			for (SceneType sceneType: SceneType.values()) {
 				if(sceneType == SceneType.PARK_TOURIST ||
@@ -1695,10 +1743,14 @@ public class PortalServiceImpl implements PortalService {
 		}
 	}
 
-	private void publishOPPushItem(PortalItemGroup itemGroup, String location){
+	private void publishOPPushItem(PortalItemGroup itemGroup, Long versionId, String location, Byte publishType){
 		List<LaunchPadItem> items = launchPadProvider.findLaunchPadItem(itemGroup.getNamespaceId(), itemGroup.getName(), location);
 		for (LaunchPadItem item: items) {
-			launchPadProvider.deleteLaunchPadItem(item.getId());
+
+			//正式发布才能删除items，正式发布时会清除掉当前域空间所有的预览版本数据。
+			if(PortalPublishType.fromCode(publishType) == PortalPublishType.RELEASE){
+				launchPadProvider.deleteLaunchPadItem(item.getId());
+			}
 		}
 		PortalLayout layout = portalLayoutProvider.findPortalLayoutById(itemGroup.getLayoutId());
 		LaunchPadItem item = new LaunchPadItem();
@@ -1716,6 +1768,11 @@ public class PortalServiceImpl implements PortalService {
 		item.setScaleType(ScaleType.TAILOR.getCode());
 		item.setScopeCode(ScopeType.ALL.getCode());
 		item.setScopeId(0L);
+
+		if(PortalPublishType.fromCode(publishType) == PortalPublishType.PREVIEW){
+			item.setPreviewPortalVersionId(versionId);
+		}
+
 		if(null != layout){
 			item.setItemLocation(layout.getLocation());
 		}
@@ -1861,10 +1918,11 @@ public class PortalServiceImpl implements PortalService {
 			PortalPublishHandler handler = getPortalPublishHandler(moduleApp.getModuleId());
 			item.setActionType(moduleApp.getActionType());
 			if(null != handler){
-				String instanceConfig = handler.publish(moduleApp.getNamespaceId(), moduleApp.getInstanceConfig(), item.getItemLabel());
-				moduleApp.setInstanceConfig(instanceConfig);
-				serviceModuleAppProvider.updateServiceModuleApp(moduleApp);
-				item.setActionData(handler.getItemActionData(moduleApp.getNamespaceId(), instanceConfig));
+				//一开始发布的时候就已经发布过应用了。
+//				String instanceConfig = handler.publish(moduleApp.getNamespaceId(), moduleApp.getInstanceConfig(), item.getItemLabel());
+//				moduleApp.setInstanceConfig(instanceConfig);
+//				serviceModuleAppProvider.updateServiceModuleApp(moduleApp);
+				item.setActionData(handler.getItemActionData(moduleApp.getNamespaceId(), moduleApp.getInstanceConfig()));
 			}else{
 				item.setActionData(moduleApp.getInstanceConfig());
 			}
@@ -1874,13 +1932,16 @@ public class PortalServiceImpl implements PortalService {
 	private String setItemModuleAppActionData(String name, Long moduleAppId){
 		ServiceModuleApp moduleApp = serviceModuleAppProvider.findServiceModuleAppById(moduleAppId);
 		if(null != moduleApp){
-			PortalPublishHandler handler = getPortalPublishHandler(moduleApp.getModuleId());
-			if(null != handler){
-				String instanceConfig = handler.publish(moduleApp.getNamespaceId(), moduleApp.getInstanceConfig(), name);
-				moduleApp.setInstanceConfig(instanceConfig);
-				serviceModuleAppProvider.updateServiceModuleApp(moduleApp);
-				return instanceConfig;
-			}
+			return moduleApp.getInstanceConfig();
+
+			//一开始发布的时候就已经发布过应用了。
+//			PortalPublishHandler handler = getPortalPublishHandler(moduleApp.getModuleId());
+//			if(null != handler){
+//				String instanceConfig = handler.publish(moduleApp.getNamespaceId(), moduleApp.getInstanceConfig(), name);
+//				moduleApp.setInstanceConfig(instanceConfig);
+//				serviceModuleAppProvider.updateServiceModuleApp(moduleApp);
+//				return instanceConfig;
+//			}
 		}
 		return null;
 	}
@@ -2531,23 +2592,6 @@ public class PortalServiceImpl implements PortalService {
 							if(OPPushWidgetStyle.LIST_VIEW == OPPushWidgetStyle.fromCode(padLayoutGroup.getStyle())){
 								moduleId = 10600L;
 								itemGroup.setContentType(EntityType.ACTIVITY.getCode());
-
-								//最新活动的items是指向实际已存在的活动，此处查询已有应用与其关联，不需要新建应用  edit by yanjun  (还有点问题，可能这时候应用还没创建还不存在，暂时注释掉)
-//								ActivityActionData padActionData = (ActivityActionData)StringHelper.fromJsonString(padItems.get(0).getActionData(), ActivityActionData.class);
-//								Long categoryId = padActionData.getCategoryId();
-//								if(categoryId == null){
-//									categoryId = 1L;
-//								}
-//								List<ServiceModuleApp> moduleApps = serviceModuleAppProvider.listServiceModuleApp(itemGroup.getNamespaceId(), 10600L);
-//								for (ServiceModuleApp app: moduleApps){
-//									ActivityEntryConfigulation configulation = (ActivityEntryConfigulation)StringHelper.fromJsonString(app.getInstanceConfig(), ActivityEntryConfigulation.class);
-//									if(configulation.getEntryId() != null && configulation.getEntryId() == categoryId.longValue()){
-//										config.setModuleAppId(app.getId());
-//										//不需要新建应用
-//										moduleId = null;
-//										break;
-//									}
-//								}
 
 							}else if(OPPushWidgetStyle.LARGE_IMAGE_LIST_VIEW == OPPushWidgetStyle.fromCode(padLayoutGroup.getStyle())){
 								moduleId = 40500L;

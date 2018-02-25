@@ -3,10 +3,14 @@ UPDATE eh_equipment_inspection_standards
 SET repeat_type = (SELECT repeat_type FROM eh_repeat_settings WHERE id = eh_equipment_inspection_standards.repeat_setting_id)
 WHERE STATUS =2  AND repeat_type =0;
 
--- 上版未置状态数据修改
+-- 上版未置状态数据修改 清洗掉重复的  by jiarui
 UPDATE eh_equipment_inspection_equipment_standard_map
 SET `status` = 0
 WHERE review_status IN (0, 3 ,4) OR review_result = 2;
+
+UPDATE eh_equipment_inspection_equipment_standard_map
+SET `status` = 0
+WHERE id NOT IN (SELECT id FROM (SELECT MIN(id)  AS id, count(target_id) AS count FROM eh_equipment_inspection_equipment_standard_map WHERE `status` = 1 GROUP BY target_id, standard_id HAVING count(target_id) >= 1) tmp);
 -- 上版bug数据修改
 
 --  标准数据增加周期类型 及关系表状态 end by jiarui 20180105
@@ -49,11 +53,23 @@ WHERE item_label LIKE '%巡检%';
 -- 新增权限  by jiarui 20180205
 
 DELETE from  eh_service_module_privileges
-WHERE  privilege_id IN (30070,30076,30071,30077,30078,30079);
+WHERE  privilege_id IN (30070,30076,30071,30077,30078,30079,30082);
 
 UPDATE eh_service_modules
-SET name = '巡检计划'
+SET name = '计划管理'
 WHERE id = 20840;
+UPDATE eh_service_modules
+SET name = '台帐管理'
+WHERE id = 20820;
+UPDATE eh_service_modules
+SET name = '任务管理'
+WHERE id = 20830;
+UPDATE eh_service_modules
+SET name = '统计分析'
+WHERE id = 20850;
+UPDATE eh_service_modules
+SET name = '标准管理'
+WHERE id = 20810;
 
 INSERT INTO `eh_acl_privileges` VALUES ('30083', '0', '设备巡检 巡检计划创建', '设备巡检 业务模块权限', NULL);
 INSERT INTO `eh_acl_privileges` VALUES ('30084', '0', '设备巡检 巡检计划修改', '设备巡检 业务模块权限', NULL);

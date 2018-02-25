@@ -14,6 +14,7 @@ import com.everhomes.user.User;
 import com.everhomes.user.UserContext;
 import com.everhomes.util.ConvertHelper;
 import com.everhomes.util.RuntimeErrorException;
+import com.everhomes.workReport.WorkReportService;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
 import org.springframework.transaction.TransactionStatus;
@@ -43,6 +44,9 @@ public class FileManagementServiceImpl implements  FileManagementService{
 
     @Autowired
     private DbProvider dbProvider;
+
+    @Autowired
+    private WorkReportService workReportService;
 
     @Override
     public FileCatalogDTO addFileCatalog(AddFileCatalogCommand cmd) {
@@ -169,13 +173,16 @@ public class FileManagementServiceImpl implements  FileManagementService{
             response = listFileCatalogs(cmd);
         } else {
             //  2.normal user
-            List<FileCatalog> results = fileManagementProvider.listAvailableFileCatalogs(user.getNamespaceId(), cmd.getOwnerId(), user.getId());
-            if (results != null && results.size() > 0) {
-                results.forEach(r -> {
-                    catalogs.add(convertToCatalogDTO(r, false, fileIcons));
-                });
+            Long detailId = workReportService.getUserDetailId(user.getId(), cmd.getOwnerId());
+            if (detailId != null) {
+                List<FileCatalog> results = fileManagementProvider.listAvailableFileCatalogs(user.getNamespaceId(), cmd.getOwnerId(), detailId);
+                if (results != null && results.size() > 0) {
+                    results.forEach(r -> {
+                        catalogs.add(convertToCatalogDTO(r, false, fileIcons));
+                    });
+                }
+                response.setCatalogs(catalogs);
             }
-            response.setCatalogs(catalogs);
         }
         return response;
     }

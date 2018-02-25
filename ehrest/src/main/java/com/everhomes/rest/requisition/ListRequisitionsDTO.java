@@ -22,7 +22,6 @@ import java.math.BigDecimal;
  * </ul>
  */
 public class ListRequisitionsDTO {
-    private Long id;
     private String identity;
     private String theme;
     private String applicantName;
@@ -31,11 +30,14 @@ public class ListRequisitionsDTO {
     private String type;
     private Byte status;
     private String amount;
+    private Long id;
+
 
     @Override
     public String toString() {
         return StringHelper.toJsonString(this);
     }
+
 
     public String getIdentity() {
         return identity;

@@ -32,4 +32,6 @@ public interface FlowConstants {
     Long REQUISITION_MODULE = 25000L;
     //电子报
     Long JOURNAL_MODULE = 10400L;
+    //采购管理模块id
+    Long PURCHASE_MODULE= 26000L;
 }

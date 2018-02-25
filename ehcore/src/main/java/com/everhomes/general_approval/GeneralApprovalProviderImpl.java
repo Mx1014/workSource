@@ -62,6 +62,7 @@ public class GeneralApprovalProviderImpl implements GeneralApprovalProvider {
     @Override
     public void updateGeneralApproval(GeneralApproval obj) {
         DSLContext context = this.dbProvider.getDslContext(AccessSpec.readWriteWith(EhGeneralApprovals.class));
+        obj.setUpdateTime(new Timestamp(DateHelper.currentGMTTime().getTime()));
         EhGeneralApprovalsDao dao = new EhGeneralApprovalsDao(context.configuration());
         dao.update(obj);
     }
@@ -75,7 +76,7 @@ public class GeneralApprovalProviderImpl implements GeneralApprovalProvider {
 
     @Override
     public GeneralApproval getGeneralApprovalById(Long id) {
-        try {
+        /*try {
             GeneralApproval[] result = new GeneralApproval[1];
             DSLContext context = this.dbProvider.getDslContext(AccessSpec.readWriteWith(EhGeneralApprovals.class));
 
@@ -90,12 +91,15 @@ public class GeneralApprovalProviderImpl implements GeneralApprovalProvider {
         } catch (Exception ex) {
             //fetchAny() maybe return null
             return null;
-        }
+        }*/
+        DSLContext context = dbProvider.getDslContext(AccessSpec.readOnly());
+        EhGeneralApprovalsDao dao = new EhGeneralApprovalsDao(context.configuration());
+        return ConvertHelper.convert(dao.findById(id), GeneralApproval.class);
     }
 
     @Override
     public List<GeneralApproval> queryGeneralApprovals(ListingLocator locator, int count, ListingQueryBuilderCallback queryBuilderCallback) {
-        DSLContext context = this.dbProvider.getDslContext(AccessSpec.readWriteWith(EhGeneralApprovals.class));
+        DSLContext context = this.dbProvider.getDslContext(AccessSpec.readOnly());
 
         SelectQuery<EhGeneralApprovalsRecord> query = context.selectQuery(Tables.EH_GENERAL_APPROVALS);
         if (queryBuilderCallback != null)
@@ -106,9 +110,7 @@ public class GeneralApprovalProviderImpl implements GeneralApprovalProvider {
         }
 
         query.addLimit(count);
-        List<GeneralApproval> objs = query.fetch().map((r) -> {
-            return ConvertHelper.convert(r, GeneralApproval.class);
-        });
+        List<GeneralApproval> objs = query.fetch().map((r) -> ConvertHelper.convert(r, GeneralApproval.class));
 
         if (objs.size() >= count) {
             locator.setAnchor(objs.get(objs.size() - 1).getId());
@@ -211,7 +213,6 @@ public class GeneralApprovalProviderImpl implements GeneralApprovalProvider {
         DaoHelper.publishDaoAction(DaoAction.MODIFY, EhGeneralApprovalScopeMap.class, scope.getId());
     }
 
-    @Cacheable(value = "GeneralApprovalScopes", key = "#approvalId", unless = "#result.size() == 0")
     @Override
     public GeneralApprovalScopeMap findGeneralApprovalScopeMap(Integer namespaceId, Long approvalId, Long sourceId, String sourceType){
         DSLContext context = dbProvider.getDslContext(AccessSpec.readOnly());
