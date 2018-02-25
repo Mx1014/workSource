@@ -592,4 +592,7 @@ public interface OrganizationService {
 
 	// 根据detailId获取部门
 	Long getDepartmentByDetailId(Long detailId);
+
+	// 根据detailId获取部门
+	Long getDepartmentByDetailIdAndOrgId(Long detailId, Long OrgId);
 }
