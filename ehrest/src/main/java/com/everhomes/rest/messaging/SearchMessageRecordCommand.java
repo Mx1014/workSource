@@ -13,6 +13,8 @@ package com.everhomes.rest.messaging;
  * <li>isGroupBy: 是否聚合</li>
  * <li>indexId: 索引id</li>
  * <li>keyWords: 搜索关键字</li>
+ * <li>startTime: 开始时间</li>
+ * <li>endTime: 结束时间</li>
  * </ul>
  */
 public class  SearchMessageRecordCommand {
@@ -26,7 +28,8 @@ public class  SearchMessageRecordCommand {
     private Integer isGroupBy;
     private Long indexId;
     private String keyWords;
-
+    private Long startTime;
+    private Long endTime;
 
 
     public Integer getNamespaceId() {
@@ -107,5 +110,21 @@ public class  SearchMessageRecordCommand {
 
     public void setKeyWords(String keyWords) {
         this.keyWords = keyWords;
+    }
+
+    public Long getStartTime() {
+        return startTime;
+    }
+
+    public void setStartTime(Long startTime) {
+        this.startTime = startTime;
+    }
+
+    public Long getEndTime() {
+        return endTime;
+    }
+
+    public void setEndTime(Long endTime) {
+        this.endTime = endTime;
     }
 }

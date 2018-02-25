@@ -9,10 +9,12 @@ curl -XPUT "http://$ELASTIC/$INDEX/_mapping/messageRecord" -d '
     "messageRecord": {
         "properties": {
             "id": {
-                "type": "long"
+                "type": "long",
+                "index": "not_analyzed"
             },
             "namespaceId": {
-                "type": "integer"
+                "type": "integer",
+                "index": "not_analyzed"
             },
             "dstChannelToken": {
                 "type": "string"
@@ -21,40 +23,49 @@ curl -XPUT "http://$ELASTIC/$INDEX/_mapping/messageRecord" -d '
                "type": "string"
             },
             "status": {
-                "type": "string"
+                "type": "string",
+                "index": "not_analyzed"
             },
             "appId": {
                 "type": "integer"
             },
             "messageSeq": {
-                "type": "long"
+                "type": "long",
+                "index": "not_analyzed"
             },
             "senderUid": {
-                "type": "long"
+                "type": "long",
+                "index": "not_analyzed"
             },
             "senderTag": {
-                "type": "string"
+                "type": "string",
+                "index": "not_analyzed"
             },
             "channelsInfo": {
-                "type": "string"
+                "type": "string",
+                "index": "not_analyzed"
             },
             "bodyType": {
-                "type": "string"
+                "type": "string",
+                "index": "not_analyzed"
             },
             "body": {
                 "type": "string","index_analyzer":"standard_edge", "search_analyzer":"standard_edge"
             },
             "deliveryOption": {
-                "type": "string"
+                "type": "string",
+                "index": "not_analyzed"
             },
             "createTime": {
                 "type": "date"
             },
             "deviceId": {
-                "type": "string"
+                "type": "string",
+                "index": "not_analyzed"
             },
             "indexId": {
-                "type": "long"
+                "type": "long",
+                "index": "not_analyzed"
             }
         }
     }
