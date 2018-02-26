@@ -9,8 +9,7 @@ import com.everhomes.util.StringHelper;
 
 /**
  * <ul>
- * 列出资源列表返回值(根据图标和园区)
- * <li>id: 资源id</li> 
+ * <li>id: 资源id</li>
  * <li>siteName: 名称</li>
  * <li>spec: 规格</li>
  * <li>address: 地址</li>
@@ -20,17 +19,21 @@ import com.everhomes.util.StringHelper;
  * <li>contactPhonenum: 咨询电话</li>
  * <li>chargeUid: 负责人id</li>
  * <li>introduction: 详情</li>
+ * <li>notice: notice</li>
  * <li>coverUri: 封面图uri</li>
  * <li>detailUris: 详情图</li>
- * <li>owners: 可见社区</li>
+ * <li>owners: 可见社区 {@link com.everhomes.rest.rentalv2.admin.SiteOwnerDTO}</li>
  * <li>status: 是否开启，1是0否</li>
  * <li>confirmationPrompt: 确认提示(非必填)</li>
  * <li>offlineCashierAddress: 线下支付收银地址</li>
  * <li>offlinePayeeUid: 线下支付收款人id</li>
+ * <li>aclinkId: aclinkId</li>
  * </ul>
  */
 public class UpdateResourceAdminCommand {
-	private Long id;  
+
+	private String resourceType;
+	private Long id;
 	@NotNull
 	private String siteName;
 	@NotNull
@@ -56,14 +59,22 @@ public class UpdateResourceAdminCommand {
 	private List<SiteOwnerDTO> owners;
 	private Byte status;
 	private String confirmationPrompt;
-    private String offlineCashierAddress;
-    private Long offlinePayeeUid;
-    private Long aclinkId;
+	private String offlineCashierAddress;
+	private Long offlinePayeeUid;
+	private Long aclinkId;
+
 	@Override
-    public String toString() {
-        return StringHelper.toJsonString(this);
-    }
- 
+	public String toString() {
+		return StringHelper.toJsonString(this);
+	}
+
+	public String getResourceType() {
+		return resourceType;
+	}
+
+	public void setResourceType(String resourceType) {
+		this.resourceType = resourceType;
+	}
 
 	public Long getId() {
 		return id;
@@ -74,7 +85,6 @@ public class UpdateResourceAdminCommand {
 		this.id = id;
 	}
 
- 
 
 	public String getSiteName() {
 		return siteName;
@@ -229,4 +239,5 @@ public class UpdateResourceAdminCommand {
 	public void setAclinkId(Long aclinkId) {
 		this.aclinkId = aclinkId;
 	}
+
 }

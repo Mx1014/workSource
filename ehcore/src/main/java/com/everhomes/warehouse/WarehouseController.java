@@ -5,14 +5,9 @@ import com.everhomes.constants.ErrorCodes;
 import com.everhomes.controller.ControllerBase;
 import com.everhomes.discover.RestDoc;
 import com.everhomes.discover.RestReturn;
-import com.everhomes.entity.EntityType;
-import com.everhomes.organization.OrganizationMember;
 import com.everhomes.portal.PortalService;
 import com.everhomes.rest.RestResponse;
 import com.everhomes.rest.organization.ImportFileTaskDTO;
-import com.everhomes.rest.organization.OrganizationType;
-import com.everhomes.rest.portal.ListServiceModuleAppsCommand;
-import com.everhomes.rest.portal.ListServiceModuleAppsResponse;
 import com.everhomes.rest.user.UserServiceErrorCode;
 import com.everhomes.rest.warehouse.*;
 import com.everhomes.search.*;
@@ -653,6 +648,61 @@ public class WarehouseController extends ControllerBase {
         resolver.checkUserPrivilege(UserContext.current().getUser().getId(), 0);
 
         warehouseRequestMaterialSearcher.syncFromDb();
+        RestResponse res = new RestResponse();
+        res.setErrorCode(ErrorCodes.SUCCESS);
+        res.setErrorDescription("OK");
+        return res;
+    }
+
+    /**
+     * <b>URL: /warehouse/listMaterialLogsBySupplier</b>
+     * <p>查询供应商的供货记录</p>
+     */
+    @RequestMapping("listMaterialLogsBySupplier")
+    @RestReturn(value=ListMaterialLogsBySupplierResponse.class)
+    public RestResponse listMaterialLogsBySupplier(ListMaterialLogsBySupplierCommand cmd) {
+        RestResponse res = new RestResponse();
+        res.setErrorCode(ErrorCodes.SUCCESS);
+        res.setErrorDescription("OK");
+        return res;
+    }
+
+    /**
+     * <b>URL: /warehouse/createOrUpdateWarehouseEntryOrder</b>
+     * <p>库存入库操作，新增或者更新出入库单</p>
+     */
+    @RequestMapping("createOrUpdateWarehouseEntryOrder")
+    @RestReturn(value=String.class)
+    public RestResponse createOrUpdateWarehouseEntryOrder(CreateOrUpdateWarehouseEntryOrderCommand cmd) {
+        warehouseService.createOrUpdateWarehouseEntryOrder(cmd);
+        RestResponse res = new RestResponse();
+        res.setErrorCode(ErrorCodes.SUCCESS);
+        res.setErrorDescription("OK");
+        return res;
+    }
+
+    /**
+     * <b>URL: /warehouse/listWarehouseStockOrders</b>
+     * <p>获得出入库单的列表</p>
+     */
+    @RequestMapping("listWarehouseStockOrders")
+    @RestReturn(value=ListWarehouseStockOrdersResponse.class)
+    public RestResponse listWarehouseStockOrders(ListWarehouseStockOrdersCommand cmd) {
+        ListWarehouseStockOrdersResponse response = warehouseService.listWarehouseStockOrders(cmd);
+        RestResponse res = new RestResponse(response);
+        res.setErrorCode(ErrorCodes.SUCCESS);
+        res.setErrorDescription("OK");
+        return res;
+    }
+
+    /**
+     * <b>URL: /warehouse/deleteWarehouseStockOrder</b>
+     * <p>删除一个出入库单</p>
+     */
+    @RequestMapping("deleteWarehouseStockOrder")
+    @RestReturn(value=String.class)
+    public RestResponse deleteWarehouseStockOrder(DeleteWarehouseStockOrderCommand cmd) {
+        warehouseService.deleteWarehouseStockOrder(cmd.getId());
         RestResponse res = new RestResponse();
         res.setErrorCode(ErrorCodes.SUCCESS);
         res.setErrorDescription("OK");

@@ -1100,6 +1100,23 @@ public class ForumProviderImpl implements ForumProvider {
                 .fetchOneInto(ForumCategory.class);
     }
 
+    @Override
+    public void createForumCategory(ForumCategory category){
+        DSLContext context = dbProvider.getDslContext(AccessSpec.readWrite());
+        if(category.getId() == null){
+            long id = sequenceProvider.getNextSequence(NameMapper.getSequenceDomainFromTablePojo(EhForumCategories.class));
+            category.setId(id);
+        }
+
+        if(category.getUuid() == null){
+            category.setUuid(UUID.randomUUID().toString());
+        }
+
+        EhForumCategoriesDao dao = new EhForumCategoriesDao(context.configuration());
+        dao.insert(category);
+        DaoHelper.publishDaoAction(DaoAction.CREATE, EhForumCategories.class, null);
+    }
+
     @Cacheable(value="findInteractSetting", key="{#namespaceId, #moduleType, #categoryId}", unless="#result == null")
     @Override
     public InteractSetting findInteractSetting(Integer namespaceId, Byte moduleType, Long categoryId) {

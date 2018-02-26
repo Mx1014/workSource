@@ -1842,6 +1842,20 @@ public class OrganizationController extends ControllerBase {
     }
 
     /**
+     * <b>URL: /org/listOrganizationPersonnelsWithDownStream</b>
+     * <p>组织架构查询人员接口/p>
+     */
+    @RequestMapping("listOrganizationPersonnelsWithDownStream")
+    @RestReturn(value = FindOrgPersonelCommandResponse.class)
+    public RestResponse listOrganizationPersonnelsWithDownStream(ListOrganizationContactCommand cmd) {
+        ListOrganizationMemberCommandResponse res = this.organizationService.listOrganizationPersonnelsWithDownStream(cmd);
+        RestResponse response = new RestResponse(res);
+        response.setErrorCode(ErrorCodes.SUCCESS);
+        response.setErrorDescription("OK");
+        return response;
+    }
+
+    /**
      * <b>URL: /org/findOrgByName</b>
      * <p>根据名字查部门</p>
      */
@@ -1932,6 +1946,19 @@ public class OrganizationController extends ControllerBase {
     @RestReturn(value = Byte.class)
     public RestResponse getOrganizationDetailFlag(@Valid GetOrganizationDetailFlagCommand cmd) {
         RestResponse response = new RestResponse(organizationService.getOrganizationDetailFlag(cmd));
+        response.setErrorCode(ErrorCodes.SUCCESS);
+        response.setErrorDescription("OK");
+        return response;
+    }
+
+    /**
+     * <b>URL: /org/listPMOrganizations</b>
+     * <p>查询管理公司列表</p>
+     */
+    @RequestMapping("listPMOrganizations")
+    @RestReturn(value = ListPMOrganizationsResponse.class)
+    public RestResponse listPMOrganizations(@Valid ListPMOrganizationsCommand cmd) {
+        RestResponse response = new RestResponse(organizationService.listPMOrganizations(cmd));
         response.setErrorCode(ErrorCodes.SUCCESS);
         response.setErrorDescription("OK");
         return response;

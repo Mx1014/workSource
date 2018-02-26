@@ -18,11 +18,13 @@ import com.everhomes.organization.OrganizationProvider;
 import com.everhomes.organization.OrganizationService;
 import com.everhomes.organization.pm.pay.GsonUtil;
 import com.everhomes.portal.PortalPublishHandler;
-import com.everhomes.portal.ServiceModuleAppProvider;
+import com.everhomes.serviceModuleApp.ServiceModuleApp;
+import com.everhomes.serviceModuleApp.ServiceModuleAppProvider;
 import com.everhomes.rest.acl.*;
 import com.everhomes.rest.address.CommunityDTO;
 import com.everhomes.rest.common.AllFlagType;
 import com.everhomes.rest.common.EntityType;
+import com.everhomes.rest.community.CommunityFetchType;
 import com.everhomes.rest.module.*;
 import com.everhomes.rest.oauth2.ControlTargetOption;
 import com.everhomes.rest.oauth2.ModuleManagementType;
@@ -33,6 +35,8 @@ import com.everhomes.rest.portal.ServiceModuleAppStatus;
 import com.everhomes.rest.portal.TreeServiceModuleAppsResponse;
 import com.everhomes.sequence.SequenceProvider;
 import com.everhomes.server.schema.Tables;
+import com.everhomes.server.schema.tables.pojos.EhUsers;
+import com.everhomes.serviceModuleApp.ServiceModuleAppService;
 import com.everhomes.settings.PaginationConfigHelper;
 import com.everhomes.user.User;
 import com.everhomes.user.UserContext;
@@ -106,6 +110,12 @@ public class ServiceModuleServiceImpl implements ServiceModuleService {
     @Autowired
     private UserPrivilegeMgr userPrivilegeMgr;
 
+    @Autowired
+    private AclProvider aclProvider;
+
+    @Autowired
+    private ServiceModuleAppService serviceModuleAppService;
+
 
     @Override
     public List<ServiceModuleDTO> listServiceModules(ListServiceModulesCommand cmd) {
@@ -170,8 +180,10 @@ public class ServiceModuleServiceImpl implements ServiceModuleService {
 
     private ServiceModuleDTO processServiceModuleDTO(ServiceModule module){
         ServiceModuleDTO dto = ConvertHelper.convert(module, ServiceModuleDTO.class);
-        dto.setCreateTime(module.getCreateTime().getTime());
-        dto.setUpdateTime(module.getUpdateTime().getTime());
+        if(module.getCreateTime() != null)
+            dto.setCreateTime(module.getCreateTime().getTime());
+        if(module.getUpdateTime() != null)
+            dto.setUpdateTime(module.getUpdateTime().getTime());
         User operator = userProvider.findUserById(module.getOperatorUid());
         if(null != operator) dto.setOperatorUName(operator.getNickName());
         return dto;
@@ -527,13 +539,20 @@ public class ServiceModuleServiceImpl implements ServiceModuleService {
 
     @Override
     public TreeServiceModuleAppsResponse treeServiceModuleApps(TreeServiceModuleCommand cmd) {
+        TreeServiceModuleAppsResponse response = new TreeServiceModuleAppsResponse();
+
         checkOwnerIdAndOwnerType(cmd.getOwnerType(), cmd.getOwnerId());
 
         Integer namespaceId = UserContext.getCurrentNamespaceId(cmd.getNamespaceId());
         //过滤出与scopes匹配的serviceModule
-        List<ServiceModuleDTO> tempList = filterByScopes(namespaceId, cmd.getOwnerType(), cmd.getOwnerId());
+//        List<ServiceModuleDTO> tempList = filterByScopes(namespaceId, cmd.getOwnerType(), cmd.getOwnerId());
+        //todo
+        List<Long> moduleIds = serviceModuleAppService.listReleaseServiceModuleIdsWithParentByNamespace(UserContext.getCurrentNamespaceId());
+        if(moduleIds.size() == 0){
+            return response;
+        }
+        List<ServiceModuleDTO> tempList = this.serviceModuleProvider.listServiceModuleDtos(moduleIds);
 
-        TreeServiceModuleAppsResponse response = new TreeServiceModuleAppsResponse();
         List<ServiceModuleDTO> communityControlList = new ArrayList<>();
         List<ServiceModuleDTO> orgControlList = new ArrayList<>();
         List<ServiceModuleDTO> unlimitControlList = new ArrayList<>();
@@ -628,8 +647,12 @@ public class ServiceModuleServiceImpl implements ServiceModuleService {
             userId = user.getId();
         }
         Integer namespaceId = UserContext.getCurrentNamespaceId();
-        List<ProjectDTO> dtos = getUserProjectsByModuleId(userId, cmd.getOrganizationId(), cmd.getModuleId());
+        List<ProjectDTO> dtos = getUserProjectsByModuleId(userId, cmd.getOrganizationId(), cmd.getModuleId(), cmd.getAppId());
+        if(cmd.getCommunityFetchType() != null){
+            return rolePrivilegeService.getTreeProjectCategories(namespaceId, dtos, CommunityFetchType.fromCode(cmd.getCommunityFetchType()));
+        }
         return rolePrivilegeService.getTreeProjectCategories(namespaceId, dtos);
+
     }
 
     @Override
@@ -639,14 +662,15 @@ public class ServiceModuleServiceImpl implements ServiceModuleService {
         if(null == cmd.getUserId()){
             userId = user.getId();
         }
-        return getUserProjectsByModuleId(userId, cmd.getOrganizationId(), cmd.getModuleId());
+        return getUserProjectsByModuleId(userId, cmd.getOrganizationId(), cmd.getModuleId(), cmd.getAppId());
     }
 
     @Override
     public List<CommunityDTO> listUserRelatedCommunityByModuleId(ListUserRelatedProjectByModuleCommand cmd) {
         User user = UserContext.current().getUser();
         List<CommunityDTO> dtos = new ArrayList<>();
-        List<ProjectDTO> projects = getUserProjectsByModuleId(user.getId(), cmd.getOrganizationId(), cmd.getModuleId());
+        List<ProjectDTO> projects = getUserProjectsByModuleId(user.getId(), cmd.getOrganizationId(), cmd.getModuleId(), null);
+        LOGGER.debug("listAuthorizationCommunityByUser step3"+ DateHelper.currentGMTTime());
         for (ProjectDTO project: projects) {
             if(EntityType.fromCode(project.getProjectType()) == EntityType.COMMUNITY){
                 Community community = communityProvider.findCommunityById(project.getProjectId());
@@ -721,6 +745,13 @@ public class ServiceModuleServiceImpl implements ServiceModuleService {
 
     private boolean checkModuleManage(Long userId, Long organizationId, Long moduleId) {
         SystemUserPrivilegeMgr resolver = PlatformContext.getComponent("SystemUser");
+
+        //TODO add by yanjun, check by lv
+        if(aclProvider.checkAccess("system", null, EhUsers.class.getSimpleName(),
+                UserContext.current().getUser().getId(), Privilege.Write, null)) {
+            return true;
+        }
+
         if (resolver.checkSuperAdmin(userId, organizationId) || resolver.checkModuleAdmin(EntityType.ORGANIZATIONS.getCode(), organizationId, userId, moduleId)) {
             return true;
         }
@@ -732,9 +763,10 @@ public class ServiceModuleServiceImpl implements ServiceModuleService {
      * @param userId
      * @param organizationId
      * @param moduleId
+     * @param appId
      * @return
      */
-    private List<ProjectDTO> getUserProjectsByModuleId(Long userId, Long organizationId, Long moduleId){
+    private List<ProjectDTO> getUserProjectsByModuleId(Long userId, Long organizationId, Long moduleId, Long appId){
         boolean allProjectFlag = false;
         List<ProjectDTO> dtos = new ArrayList<>();
         //物业超级管理员拿所有项目
@@ -764,7 +796,8 @@ public class ServiceModuleServiceImpl implements ServiceModuleService {
 
 
             //获取人员和人员所有机构所赋予模块的所属项目范围(应用管理员) -- add by lei.lv
-            List<Authorization> authorizations_apps =  authorizationProvider.listAuthorizations(EntityType.ORGANIZATIONS.getCode(), organizationId, EntityType.USER.getCode(), userId, com.everhomes.entity.EntityType.SERVICE_MODULE_APP.getCode(), null, IdentityType.MANAGE.getCode(), true, null, null);
+            // todo 加上应用
+            List<Authorization> authorizations_apps =  authorizationProvider.listAuthorizations(EntityType.ORGANIZATIONS.getCode(), organizationId, EntityType.USER.getCode(), userId, com.everhomes.entity.EntityType.SERVICE_MODULE_APP.getCode(), null, IdentityType.MANAGE.getCode(), appId, null, null, false);
             if(authorizations_apps != null && authorizations_apps.size() > 0){
                 authorizations_apps = authorizations_apps.stream().filter(r->ModuleManagementType.fromCode(r.getModuleControlType()) == COMMUNITY_CONTROL).limit(1).collect(Collectors.toList());
                 if(authorizations_apps !=null && authorizations_apps.size() > 0) {
@@ -785,7 +818,7 @@ public class ServiceModuleServiceImpl implements ServiceModuleService {
 
 
             //获取人员和人员所有机构所赋予模块的所属项目范围(权限细化)
-            List<Project> project_relation = authorizationProvider.getAuthorizationProjectsByAuthIdAndTargets(IdentityType.ORDINARY.getCode(), com.everhomes.entity.EntityType.SERVICE_MODULE_APP.getCode(), moduleId, targets);
+            List<Project> project_relation = authorizationProvider.getAuthorizationProjectsByAppIdAndTargets(IdentityType.ORDINARY.getCode(), com.everhomes.entity.EntityType.SERVICE_MODULE_APP.getCode(), moduleId, appId, targets);
             for (Project project: project_relation) {
                 //在模块下拥有全部项目权限
                 if(EntityType.ALL == EntityType.fromCode(project.getProjectType())){
@@ -995,9 +1028,10 @@ public class ServiceModuleServiceImpl implements ServiceModuleService {
                     if(moduleIds.size() != 0){
                         //给一级模块设置APPS
                         // 这里因为运营后台的不完善，暂时使用reflectionServiceModuleApps代替真正的serviceModuleApps。原来的代码为serviceModuleAppProvider.listServiceModuleAppsByModuleIds(UserContext.getCurrentNamespaceId(), moduleIds);
-                        List<ServiceModuleAppDTO> apps = serviceModuleProvider.listReflectionServiceModuleAppsByModuleIds(UserContext.getCurrentNamespaceId(), moduleIds);
+//                        List<ServiceModuleAppDTO> apps = serviceModuleProvider.listReflectionServiceModuleAppsByModuleIds(UserContext.getCurrentNamespaceId(), moduleIds);
+                        List<ServiceModuleApp> apps = serviceModuleAppService.listReleaseServiceModuleAppByModuleIds(UserContext.getCurrentNamespaceId(), moduleIds);
                         if(apps != null){
-                            current.setServiceModuleApps(apps);
+                            current.setServiceModuleApps(apps.stream().map(r-> ConvertHelper.convert(r,ServiceModuleAppDTO.class)).collect(Collectors.toList()));
                             LOGGER.debug(current.getName()+ "分类下一共有"+moduleIds.toString() +"的模块和"+ apps.size() + "个应用");
                         }
                     }
@@ -1006,18 +1040,6 @@ public class ServiceModuleServiceImpl implements ServiceModuleService {
             }
         }
         return results;
-    }
-
-    /**
-     * 获取serviceModuleApps的平行结构（level  = 2）
-     *
-     * @param tempList
-     * @return
-     */
-    private List<ServiceModuleAppDTO> getServiceModuleAppsAsList(List<ServiceModuleDTO> tempList) {
-        List<Long> moduleIds = tempList.stream().map(ServiceModuleDTO::getId).collect(Collectors.toList());
-        List<ServiceModuleAppDTO> serviceModuleAppDTOS = serviceModuleAppProvider.listServiceModuleAppsByModuleIds(UserContext.getCurrentNamespaceId(), moduleIds);
-        return serviceModuleAppDTOS;
     }
 
     /**
@@ -1135,7 +1157,7 @@ public class ServiceModuleServiceImpl implements ServiceModuleService {
                 }
             }
             //获取人员和人员所有机构所赋予模块的所属项目范围(权限细化)
-            List<Project> project_relation = authorizationProvider.getAuthorizationProjectsByAuthIdAndTargets(IdentityType.ORDINARY.getCode(), com.everhomes.entity.EntityType.SERVICE_MODULE_APP.getCode(), cmd.getModuleId(), targets);
+            List<Project> project_relation = authorizationProvider.getAuthorizationProjectsByAppIdAndTargets(IdentityType.ORDINARY.getCode(), com.everhomes.entity.EntityType.SERVICE_MODULE_APP.getCode(), cmd.getModuleId(), cmd.getAppId(), targets);
             for (Project project: project_relation) {
                 //在模块下拥有全部项目权限
                 if(EntityType.ALL == EntityType.fromCode(project.getProjectType())){
@@ -1145,6 +1167,13 @@ public class ServiceModuleServiceImpl implements ServiceModuleService {
         }
 
         return AllFlag.NOT_ALL.getCode();
+    }
+
+    @Override
+    public ServiceModuleAppDTO findServiceModuleAppById(Long id){
+        ServiceModuleApp serviceModuleApp = serviceModuleAppProvider.findServiceModuleAppById(id);
+        return ConvertHelper.convert(serviceModuleApp, ServiceModuleAppDTO.class);
+
     }
 
 }

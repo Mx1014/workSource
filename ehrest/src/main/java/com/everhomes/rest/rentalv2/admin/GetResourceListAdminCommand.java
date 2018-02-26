@@ -19,6 +19,7 @@ public class GetResourceListAdminCommand {
 	private String ownerType;
 
 	private Long communityId;
+	private String resourceType;
 	@NotNull
 	private Long resourceTypeId;
 	private Long organizationId;
@@ -27,8 +28,15 @@ public class GetResourceListAdminCommand {
 	private Long pageAnchor;
     
 	private Integer pageSize;
-	
-	
+
+	public String getResourceType() {
+		return resourceType;
+	}
+
+	public void setResourceType(String resourceType) {
+		this.resourceType = resourceType;
+	}
+
 	public Long getOwnerId() {
 		return ownerId;
 	}

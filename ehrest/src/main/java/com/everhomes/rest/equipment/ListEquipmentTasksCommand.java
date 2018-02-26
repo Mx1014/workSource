@@ -1,10 +1,9 @@
 package com.everhomes.rest.equipment;
 
-import javax.validation.constraints.NotNull;
-
 import com.everhomes.discover.ItemType;
 import com.everhomes.util.StringHelper;
 
+import javax.validation.constraints.NotNull;
 import java.util.List;
 
 /**
@@ -16,8 +15,11 @@ import java.util.List;
  *  <li>pageAnchor: 锚点</li>
  *  <li>pageSize: 页面大小</li>
  *  <li>inspectionCategoryId: 巡检对象类型id</li>
- *  <li>isReview: 是否查审阅任务 0：执行任务；1：审核任务</li>
  *  <li>taskStatus: 任务状态列表 参考 {@link com.everhomes.rest.equipment.EquipmentTaskStatus}</li>
+ *  <li>lastSyncTime: 上次同步MAX_TIME offline</li>
+ *  <li>moduleName: equipment_inspection offline </li>
+ *  <li>communityId: 动态表单项目id offline</li>
+ *  <li>namespaceId: namespaceId</li>
  * </ul>
  */
 public class ListEquipmentTasksCommand {
@@ -38,6 +40,15 @@ public class ListEquipmentTasksCommand {
 	private Long inspectionCategoryId;
 	
 	private Byte isReview;
+
+	private String lastSyncTime;
+
+	private String moduleName;
+
+	private Integer namespaceId;
+
+	private Long communityId;
+
 	@ItemType(Byte.class)
 	private List<Byte> taskStatus;
 
@@ -111,6 +122,39 @@ public class ListEquipmentTasksCommand {
 
 	public void setTaskStatus(List<Byte> taskStatus) {
 		this.taskStatus = taskStatus;
+	}
+
+	public String getLastSyncTime() {
+		return lastSyncTime;
+	}
+
+	public void setLastSyncTime(String lastSyncTime) {
+		this.lastSyncTime = lastSyncTime;
+	}
+
+
+	public String getModuleName() {
+		return moduleName;
+	}
+
+	public void setModuleName(String moduleName) {
+		this.moduleName = moduleName;
+	}
+
+	public Integer getNamespaceId() {
+		return namespaceId;
+	}
+
+	public void setNamespaceId(Integer namespaceId) {
+		this.namespaceId = namespaceId;
+	}
+
+	public Long getCommunityId() {
+		return communityId;
+	}
+
+	public void setCommunityId(Long communityId) {
+		this.communityId = communityId;
 	}
 
 	@Override

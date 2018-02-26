@@ -2,6 +2,7 @@ package com.everhomes.officecubicle;
 
 import java.util.List;
 
+import com.everhomes.rest.officecubicle.*;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -13,14 +14,6 @@ import com.everhomes.controller.ControllerBase;
 import com.everhomes.discover.RestDoc;
 import com.everhomes.discover.RestReturn;
 import com.everhomes.rest.RestResponse;
-import com.everhomes.rest.officecubicle.AddSpaceOrderCommand;
-import com.everhomes.rest.officecubicle.CityDTO;
-import com.everhomes.rest.officecubicle.DeleteUserSpaceOrderCommand;
-import com.everhomes.rest.officecubicle.GetSpaceDetailCommand;
-import com.everhomes.rest.officecubicle.OfficeOrderDTO;
-import com.everhomes.rest.officecubicle.OfficeSpaceDTO;
-import com.everhomes.rest.officecubicle.QuerySpacesCommand;
-import com.everhomes.rest.officecubicle.QuerySpacesResponse;
 import com.everhomes.rest.officecubicle.admin.SearchSpacesAdminResponse;
 
 /**
@@ -43,8 +36,8 @@ public class OfficeCubicleController extends ControllerBase {
      */
     @RequestMapping("queryCities")
     @RestReturn(value=CityDTO.class ,collection=true)
-    public RestResponse queryCities() {
-    	List<CityDTO> resp = this.officeCubicleService.queryCities();
+    public RestResponse queryCities(QueryCitiesCommand cmd) {
+    	List<CityDTO> resp = this.officeCubicleService.queryCities(cmd);
     	
         RestResponse response = new RestResponse(resp);
         response.setErrorCode(ErrorCodes.SUCCESS);
@@ -94,11 +87,9 @@ public class OfficeCubicleController extends ControllerBase {
      * <p>工位预定-添加预定</p>
      */
     @RequestMapping("addSpaceOrder")
-    @RestReturn(value=String.class )
+    @RestReturn(value=AddSpaceOrderResponse.class )
     public RestResponse addSpaceOrder(AddSpaceOrderCommand cmd) {
-    	this.officeCubicleService.addSpaceOrder(cmd);
-    	
-        RestResponse response = new RestResponse();
+        RestResponse response = new RestResponse(officeCubicleService.addSpaceOrder(cmd));
         response.setErrorCode(ErrorCodes.SUCCESS);
         response.setErrorDescription("OK");
         return response;
@@ -111,7 +102,7 @@ public class OfficeCubicleController extends ControllerBase {
      */
     @RequestMapping("getUserOrders")
     @RestReturn(value=OfficeOrderDTO.class ,collection = true)
-    public RestResponse getUserOrders() {
+    public RestResponse getUserOrders(GetUserOrdersCommand cmd) {
     	List<OfficeOrderDTO> resp = this.officeCubicleService.getUserOrders();
     	
         RestResponse response = new RestResponse(resp);

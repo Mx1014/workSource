@@ -81,7 +81,7 @@ public class EnergyPlanSearcherImpl extends AbstractElasticSearch implements Ene
         cmd.setModuleId(ServiceModuleConstants.ENERGY_MODULE);
         cmd.setActionType(ActionType.OFFICIAL_URL.getCode());
         ListServiceModuleAppsResponse apps = portalService.listServiceModuleAppsWithConditon(cmd);
-        Long appId = apps.getServiceModuleApps().get(0).getId();
+        Long appId = apps.getServiceModuleApps().get(0).getOriginId();
         if(!userPrivilegeMgr.checkUserPrivilege(UserContext.currentUserId(), EntityType.ORGANIZATIONS.getCode(), orgId,
                 orgId, privilegeId, appId, null, communityId)) {
             LOGGER.error("Permission is prohibited, namespaceId={}, orgId={}, ownerType={}, ownerId={}, privilegeId={}",

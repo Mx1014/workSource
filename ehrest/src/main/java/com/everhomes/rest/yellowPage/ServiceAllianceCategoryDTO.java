@@ -24,6 +24,7 @@ import java.sql.Timestamp;
  * <li> selectedLogoUrl: 类型logo被选中时的url地址</li>
  * <li>displayMode: 显示类型</li>
  * <li>displayModeName: 显示类型名称</li>
+ * <li> skipType: 只有一个企业时是否跳过列表页，0 不跳； 1 跳过</li>
  * </ul>
  */
 public class ServiceAllianceCategoryDTO {
@@ -58,6 +59,15 @@ public class ServiceAllianceCategoryDTO {
 
 	private Byte displayMode;
 	private String displayModeName;
+	private Byte skipType;
+
+	public Byte getSkipType() {
+		return skipType;
+	}
+
+	public void setSkipType(Byte skipType) {
+		this.skipType = skipType;
+	}
 
 	public Long getId() {
 		return id;

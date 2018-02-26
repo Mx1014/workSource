@@ -107,7 +107,7 @@ public abstract class AbstractElasticSearch {
         IndexRequestBuilder irb = getClient()
                 .prepareIndex(getIndexName(), getIndexType(), id)
                 .setConsistencyLevel(WriteConsistencyLevel.DEFAULT)
-                .setSource(b);
+                .setSource(b).setRefresh(true);//add setRefresh by Rui.Jia
         irb.execute().actionGet();
     }
 

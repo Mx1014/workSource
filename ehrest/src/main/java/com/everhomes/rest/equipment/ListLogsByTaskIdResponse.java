@@ -1,50 +1,39 @@
 package com.everhomes.rest.equipment;
 
-import java.util.List;
-
 import com.everhomes.discover.ItemType;
 import com.everhomes.util.StringHelper;
 
+import java.util.List;
+
 /**
  * <ul>
- *  <li>logs: 任务操作记录列表 参考{@link com.everhomes.rest.equipment.EquipmentTaskLogsDTO}</li>
- *  <li>taskType: 任务类型</li>
- *  <li>nextPageAnchor: 下一页的锚点，没有下一页则没有</li>
+ * <li>taskLogs: 任务操作记录列表 参考{@link com.everhomes.rest.equipment.EquipmentTaskLogs}</li>
+ * <li>nextPageAnchor: 下一页的锚点，没有下一页则没有</li>
  * </ul>
  */
 public class ListLogsByTaskIdResponse {
-	@ItemType(EquipmentTaskLogsDTO.class)
-	private List<EquipmentTaskLogsDTO> logs;
-	
-	private Long nextPageAnchor;
-	
-	private Byte taskType;
-	
-	public List<EquipmentTaskLogsDTO> getLogs() {
-		return logs;
-	}
+    @ItemType(EquipmentTaskLogs.class)
+    private List<EquipmentTaskLogs> taskLogs;
 
-	public void setLogs(List<EquipmentTaskLogsDTO> logs) {
-		this.logs = logs;
-	}
+    private Long nextPageAnchor;
 
-	public Long getNextPageAnchor() {
-		return nextPageAnchor;
-	}
+    public List<EquipmentTaskLogs> getTaskLogs() {
+        return taskLogs;
+    }
 
-	public void setNextPageAnchor(Long nextPageAnchor) {
-		this.nextPageAnchor = nextPageAnchor;
-	}
+    public void setTaskLogs(List<EquipmentTaskLogs> taskLogs) {
+        this.taskLogs = taskLogs;
+    }
 
-	public Byte getTaskType() {
-		return taskType;
-	}
+    public Long getNextPageAnchor() {
+        return nextPageAnchor;
+    }
 
-	public void setTaskType(Byte taskType) {
-		this.taskType = taskType;
-	}
+    public void setNextPageAnchor(Long nextPageAnchor) {
+        this.nextPageAnchor = nextPageAnchor;
+    }
 
-	@Override
+    @Override
     public String toString() {
         return StringHelper.toJsonString(this);
     }

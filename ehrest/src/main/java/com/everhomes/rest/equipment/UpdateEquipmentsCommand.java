@@ -33,7 +33,7 @@ import java.util.List;
  *  <li>sequenceNo: 出厂编号</li>
  *  <li>versionNo: 版号</li>
  *  <li>manager: 联系人编号</li>
- *  <li>attachments: 操作图示&说明书 参考{@link com.everhomes.rest.equipment.EquipmentAttachmentDTO}</li>
+ *  <li>attachments: 操作图示 说明书 参考{@link com.everhomes.rest.equipment.EquipmentAttachmentDTO}</li>
  *  <li>remarks: 备注</li>
  *  <li>eqAccessoryMap: 设备备品配件 参考{@link com.everhomes.rest.equipment.EquipmentAccessoryMapDTO}</li>
  *  <li>eqStandardMap: 设备-标准关联 参考{@link com.everhomes.rest.equipment.EquipmentStandardMapDTO}</li>
@@ -49,6 +49,8 @@ import java.util.List;
  *  <li>price: 购买价格</li>
  *  <li>buyTime: 购买日期</li>
  *  <li>depreciationYears: 折旧年限</li>
+ *  <li>coordinate: 坐标信息</li>
+ *  <li>namespaceId: namespaceId</li>
  * </ul>
  */
 public class UpdateEquipmentsCommand {
@@ -137,6 +139,10 @@ public class UpdateEquipmentsCommand {
 	private Long buyTime;
 
 	private Long depreciationYear;
+
+	private String coordinate;
+
+	private Integer namespaceId;
 
 
 	public Byte getPictureFlag() {
@@ -458,6 +464,22 @@ public class UpdateEquipmentsCommand {
 
 	public void setDepreciationYear(Long depreciationYear) {
 		this.depreciationYear = depreciationYear;
+	}
+
+	public String getCoordinate() {
+		return coordinate;
+	}
+
+	public void setCoordinate(String coordinate) {
+		this.coordinate = coordinate;
+	}
+
+	public Integer getNamespaceId() {
+		return namespaceId;
+	}
+
+	public void setNamespaceId(Integer namespaceId) {
+		this.namespaceId = namespaceId;
 	}
 
 	@Override

@@ -1,5 +1,6 @@
 package com.everhomes.energy;
 
+import java.sql.Timestamp;
 import java.util.List;
 
 /**
@@ -21,6 +22,7 @@ public interface EnergyMeterCategoryProvider {
      * 获取表记分类列表
      */
     List<EnergyMeterCategory> listMeterCategories(Integer namespaceId, Byte categoryType, Long ownerId, String ownerType, Long communityId);
+    List<EnergyMeterCategory> listMeterCategories(Integer namespaceId, Byte categoryType, Long ownerId, String ownerType, Long communityId, Timestamp lastUpdateTime);
 
     List<EnergyMeterCategory> listMeterCategories(List<Long> categoryIds, Byte categoryType);
 

@@ -31,13 +31,13 @@ public class SalaryController extends ControllerBase {
 	private SalaryService salaryService;
 
 	/**
-	 * <p>0.查询人员</p>
-	 * <b>URL: /salary/listSalaryDefaultEntities</b>
+	 * <p>0.查询子公司</p>
+	 * <b>URL: /salary/listEnterprises</b>
 	 */
-	@RequestMapping("listSalaryContacts")
-	@RestReturn(ListSalaryContactResponse.class)
-	public RestResponse listSalaryContacts(ListOrganizationContactCommand cmd){
-        ListSalaryContactResponse res = this.salaryService.listSalaryContacts(cmd);
+	@RequestMapping("listEnterprises")
+	@RestReturn(ListEnterprisesResponse.class)
+	public RestResponse listEnterprises(ListEnterprisesCommand cmd){
+		ListEnterprisesResponse res = this.salaryService.listEnterprises(cmd);
 		RestResponse response = new RestResponse(res);
 		response.setErrorCode(ErrorCodes.SUCCESS);
 		response.setErrorDescription("OK");
@@ -45,13 +45,13 @@ public class SalaryController extends ControllerBase {
 	}
 
 	/**
-	 * <p>1.查询基础项目设置</p>
-	 * <b>URL: /salary/listSalaryDefaultEntities</b>
+	 * <p>1.列出薪酬选项</p>
+	 * <b>URL: /salary/listGroupEntities</b>
 	 */
-	@RequestMapping("listSalaryDefaultEntities")
-	@RestReturn(ListSalaryDefaultEntitiesResponse.class)
-	public RestResponse listSalaryDefaultEntities(){
-		ListSalaryDefaultEntitiesResponse res = this.salaryService.listSalaryDefaultEntities();
+	@RequestMapping("listGroupEntities")
+	@RestReturn(ListGroupEntitiesResponse.class)
+	public RestResponse listGroupEntities(ListGroupEntitiesCommand cmd ){
+		ListGroupEntitiesResponse res = this.salaryService.listGroupEntities(cmd);
 		RestResponse response = new RestResponse(res);
 		response.setErrorCode(ErrorCodes.SUCCESS);
 		response.setErrorDescription("OK");
@@ -59,412 +59,582 @@ public class SalaryController extends ControllerBase {
 	}
 
 	/**
-	 * <p>2-1.新增、更改 薪酬组(包含的选项 + 更改组名)</p>
-	 * <b>URL: /salary/addSalaryGroup</b>
+	 * <p>2.更新薪酬选项</p>
+	 * <b>URL: /salary/updateGroupEntities</b>
 	 */
-	@RequestMapping("addSalaryGroup")
-	@RestReturn(AddSalaryGroupResponse.class)
-	public RestResponse addSalaryGroup(AddSalaryGroupCommand cmd){
-	    AddSalaryGroupResponse res = this.salaryService.addSalaryGroup(cmd);
-	    RestResponse response = new RestResponse(res);
-	    response.setErrorCode(ErrorCodes.SUCCESS);
-	    response.setErrorDescription("OK");
-		return response;
-	}
-
-	/**
-	 * <p>2-2.更改薪酬组包含的选项+更改组名</p>
-	 * <b>URL: /salary/updateSalaryGroup</b>
-	 */
-	@RequestMapping("updateSalaryGroup")
-	@RestReturn(UpdateSalaryGroupResponse.class)
-	public RestResponse updateSalaryGroup(UpdateSalaryGroupCommand cmd){
-        AddSalaryGroupResponse res = this.salaryService.updateSalaryGroup(cmd);
-        RestResponse response = new RestResponse(res);
-        response.setErrorCode(ErrorCodes.SUCCESS);
-        response.setErrorDescription("OK");
-        return response;
-	}
-
-    /**
-     * <p>2-3.删除薪酬组</p>
-     * <b>URL: /salary/deleteSalaryGroup</b>
-     */
-    @RequestMapping("deleteSalaryGroup")
-    @RestReturn(String.class)
-    public RestResponse deleteSalaryGroup(DeleteSalaryGroupCommand cmd) {
-        this.salaryService.deleteSalaryGroup(cmd);
-        RestResponse response = new RestResponse();
-        response.setErrorCode(ErrorCodes.SUCCESS);
-        response.setErrorDescription("OK");
-        return response;
-    }
-
-    /**
-	 * <p>2-4.复制薪酬组</p>
-	 * <b>URL: /salary/copySalaryGroup</b>
-	 */
-	@RequestMapping("copySalaryGroup")
+	@RequestMapping("updateGroupEntities")
 	@RestReturn(String.class)
-	public RestResponse copySalaryGroup(CopySalaryGroupCommand cmd){
-		this.salaryService.copySalaryGroup(cmd);
+	public RestResponse updateGroupEntities(UpdateGroupEntitiesCommand cmd ){
+		this.salaryService.updateGroupEntities(cmd);
 		RestResponse response = new RestResponse();
 		response.setErrorCode(ErrorCodes.SUCCESS);
 		response.setErrorDescription("OK");
 		return response;
 	}
 
-    /**
-     * <p>2-5.展示薪酬组详细批次</p>
-     * <b>URL: /salary/getSalaryGroup</b>
-     */
-    @RequestMapping("getSalaryGroup")
-    @RestReturn(GetSalaryGroupResponse.class)
-    public RestResponse getSalaryGroup(GetSalaryGroupCommand cmd){
-        GetSalaryGroupResponse res = this.salaryService.getSalaryGroup(cmd);
-        RestResponse response = new RestResponse(res);
-        response.setErrorCode(ErrorCodes.SUCCESS);
-        response.setErrorDescription("OK");
-        return response;
-    }
-
 	/**
-	 * <p>2-6.展示所有薪酬组</p>
-	 * <b>URL: /salary/listSalaryGroup</b>
-	 */
-	@RequestMapping("listSalaryGroup")
-	@RestReturn(ListSalaryGroupResponse.class)
-	public RestResponse listSalaryGroup(ListSalaryGroupCommand cmd){
-        ListSalaryGroupResponse res = this.salaryService.listSalaryGroup(cmd);
-        RestResponse response = new RestResponse(res);
-        response.setErrorCode(ErrorCodes.SUCCESS);
-        response.setErrorDescription("OK");
-        return response;
-	}
-
-	/**
-	 * <p>3-1.根据组织架构/薪酬组/异常状态 查询人员</p>
+	 * <p>3.查询子公司的人员</p>
 	 * <b>URL: /salary/listSalaryEmployees</b>
 	 */
 	@RequestMapping("listSalaryEmployees")
 	@RestReturn(ListSalaryEmployeesResponse.class)
-	public RestResponse listSalaryEmployees(ListSalaryEmployeesCommand cmd){
-        ListSalaryEmployeesResponse res = this.salaryService.listSalaryEmployees(cmd);
-        RestResponse response = new RestResponse(res);
-        response.setErrorCode(ErrorCodes.SUCCESS);
-        response.setErrorDescription("OK");
+	public RestResponse listSalaryEmployees(ListSalaryEmployeesCommand cmd ){
+		ListSalaryEmployeesResponse resp = this.salaryService.listSalaryEmployees(cmd);
+		RestResponse response = new RestResponse(resp);
+		response.setErrorCode(ErrorCodes.SUCCESS);
+		response.setErrorDescription("OK");
 		return response;
 	}
 
-    /**
-     * <p>3-2.查询人员批次详情</p>
-     * <b>URL: /salary/getSalaryEmployees</b>
-     */
-    @RequestMapping("getSalaryEmployees")
-    @RestReturn(value = SalaryEmployeeOriginValDTO.class, collection = true)
-    public RestResponse getSalaryEmployees(GetSalaryEmployeesCommand cmd){
-        List<SalaryEmployeeOriginValDTO> res = this.salaryService.getSalaryEmployees(cmd);
-        RestResponse response = new RestResponse(res);
-        response.setErrorCode(ErrorCodes.SUCCESS);
-        response.setErrorDescription("OK");
-        return response;
-    }
 
 	/**
-	 * <p>3-3.修改人员薪酬组(批次)</p>
-	 * <b>URL: /salary/updateSalaryEmployeesGroup</b>
+	 * <p>4.导出导入工资表模板</p>
+	 * <b>URL: /salary/exportEmployeeSalaryTemplate</b>
 	 */
-	@RequestMapping("updateSalaryEmployeesGroup")
-	@RestReturn(value = String.class)
-	public RestResponse updateSalaryEmployeesGroup(UpdateSalaryEmployeesGroupCommand cmd){
-		this.salaryService.updateSalaryEmployeesGroup(cmd);
+	@RequestMapping("exportEmployeeSalaryTemplate")
+	public HttpServletResponse exportEmployeeSalaryTemplate(ExportEmployeeSalaryTemplateCommand cmd ,
+													 HttpServletResponse response ){
+		HttpServletResponse resp = salaryService.exportEmployeeSalaryTemplate(cmd,response);
+		return resp;
+	}
+
+	/**
+	 * <p>5.查询人员的工资字段列表</p>
+	 * <b>URL: /salary/getEmployeeEntities</b>
+	 */
+	@RequestMapping("getEmployeeEntities")
+	@RestReturn(GetEmployeeEntitiesResponse.class)
+	public RestResponse getEmployeeEntities(GetEmployeeEntitiesCommand cmd ){
+		GetEmployeeEntitiesResponse resp = this.salaryService.getEmployeeEntities(cmd);
+		RestResponse response = new RestResponse(resp);
+		response.setErrorCode(ErrorCodes.SUCCESS);
+		response.setErrorDescription("OK");
+		return response;
+	}
+
+	/**
+	 * <p>6.导出工资表</p>
+	 * <b>URL: /salary/exportEmployeeSalary</b>
+	 */
+	@RequestMapping("exportEmployeeSalary")
+	@RestReturn(String.class)
+	public RestResponse exportEmployeeSalary(ExportEmployeeSalaryTemplateCommand cmd ){
+		salaryService.exportEmployeeSalary(cmd);
+		RestResponse response = new RestResponse();
+		response.setErrorCode(ErrorCodes.SUCCESS);
+		response.setErrorDescription("OK");
+		return response;
+	}
+	/**
+	 * <p>7.导入工资表</p>
+	 * <b>URL: /salary/importEmployeeSalary</b>
+	 */
+	@RequestMapping("importEmployeeSalary")
+	@RestReturn(ImportFileTaskDTO.class)
+	public RestResponse importEmployeeSalary(@RequestParam(value = "attachment") MultipartFile[] files,
+													ExportEmployeeSalaryTemplateCommand cmd ){
+		ImportFileTaskDTO dto = salaryService.importEmployeeSalary(cmd,files);
+		RestResponse response = new RestResponse(dto);
+		response.setErrorCode(ErrorCodes.SUCCESS);
+		response.setErrorDescription("OK");
+		return response;
+	}
+
+	/**
+	 * <b>URL: /salary/getImportResult</b>
+	 * <p>8.查询导入结果</p>
+	 */
+	@RequestMapping("getImportResult")
+	@RestReturn(value = ImportFileResponse.class)
+	public RestResponse getImportResult(GetImportFileResultCommand cmd) {
+		ImportFileResponse resp  = salaryService.getImportResult(cmd);
+		RestResponse response = new RestResponse(resp);
+		response.setErrorCode(ErrorCodes.SUCCESS);
+		response.setErrorDescription("OK");
+		return response;
+	}
+
+	/**
+	 * <b>URL: /salary/getSalaryGroupStatus</b>
+	 * <p>9.进入工资报表页面</p>
+	 */
+	@RequestMapping("getSalaryGroupStatus")
+	@RestReturn(value = GetSalaryGroupStatusResponse.class)
+	public RestResponse getSalaryGroupStatus(GetSalaryGroupStatusCommand cmd) {
+		GetSalaryGroupStatusResponse resp  = salaryService.getSalaryGroupStatus(cmd);
+		RestResponse response = new RestResponse(resp);
+		response.setErrorCode(ErrorCodes.SUCCESS);
+		response.setErrorDescription("OK");
+		return response;
+	}
+
+	/**
+	 * <p>10.导出工资报表</p>
+	 * <b>URL: /salary/exportSalaryReport</b>
+	 */
+	@RequestMapping("exportSalaryReport")
+	@RestReturn(String.class)
+	public RestResponse exportEmployeeSalary(ExportSalaryReportCommand cmd ){
+		salaryService.exportSalaryReport(cmd);
 		RestResponse response = new RestResponse();
 		response.setErrorCode(ErrorCodes.SUCCESS);
 		response.setErrorDescription("OK");
 		return response;
 	}
 
-    /**
-     * <p>3-4.编辑人员批次详情,有增加没有更新</p>
-     * <b>URL: /salary/updateSalaryEmployees</b>
-     */
-    @RequestMapping("updateSalaryEmployees")
-    @RestReturn(value = String.class)
-    public RestResponse updateSalaryEmployees(UpdateSalaryEmployeesCommand cmd){
-        this.salaryService.updateSalaryEmployees(cmd);
-        RestResponse response = new RestResponse();
-        response.setErrorCode(ErrorCodes.SUCCESS);
-        response.setErrorDescription("OK");
-        return response;
-    }
 
 	/**
-	 * <p>3-5.添加(关联)人员至组织架构的薪酬组</p>
-	 * <b>URL: /salary/addToOrganizationSalaryGroup</b>
+	 * <p>11.归档报表</p>
+	 * <b>URL: /salary/fileSalaryGroup</b>
 	 */
-	@RequestMapping("addToOrganizationSalaryGroup")
-	@RestReturn(String.class)
-	public RestResponse addToOrganizationSalaryGroup(AddToOrganizationSalaryGroupCommand cmd){
-		salaryService.addToOrganizationSalaryGroup(cmd);
-        RestResponse response = new RestResponse();
-        response.setErrorCode(ErrorCodes.SUCCESS);
-        response.setErrorDescription("OK");
-        return response;
+	@RequestMapping("fileSalaryGroup")
+	@RestReturn(FileSalaryGroupResponse.class)
+	public RestResponse fileSalaryGroup(FileSalaryGroupCommand cmd ){
+		FileSalaryGroupResponse resp = salaryService.fileSalaryGroup(cmd);
+		RestResponse response = new RestResponse(resp);
+		response.setErrorCode(ErrorCodes.SUCCESS);
+		response.setErrorDescription("OK");
+		return response;
 	}
 
-    /**
-     * <p>3-6.检查异常人数</p>
-     * <b>URL: /salary/countAbnormalSalaryEmployees</b>
-     */
-    @RequestMapping("countAbnormalSalaryEmployees")
-    @RestReturn(String.class)
-    public RestResponse countAbnormalSalaryEmployees(CountAbnormalSalaryEmployees cmd){
-        String res = this.salaryService.countAbnormalSalaryEmployees(cmd);
-        RestResponse response = new RestResponse(res);
-        response.setErrorCode(ErrorCodes.SUCCESS);
-        response.setErrorDescription("OK");
-        return response;
-    }
-
-
-    /**
-	 * <p>4-1.导出某个薪酬组excel</p>
-	 * <b>URL: /salary/exportSalaryGroup</b>
-	 */
-	@RequestMapping("exportSalaryGroup")
-	@RestReturn(String.class)
-	public RestResponse exportSalaryGroup(ExportSalaryGroupCommand cmd, HttpServletResponse httpResponse){
-		salaryService.exportSalaryGroup(cmd,httpResponse);
-		return new RestResponse();
-	}
 
 	/**
-	 * <p>4-2.导入员工薪酬表</p>
-	 * <b>URL: /salary/importSalaryGroup</b>
+	 * <p>11.查询异步任务状态</p>
+	 * <b>URL: /salary/getSalaryTaskStatus</b>
 	 */
-	@RequestMapping("importSalaryGroup")
-	@RestReturn(ImportFileTaskDTO.class)
-	public RestResponse importSalaryGroup(ImportSalaryInfoCommand cmd, @RequestParam(value = "attachment") MultipartFile[] files){
-        User user = UserContext.current().getUser();
-        RestResponse response = new RestResponse(this.salaryService.importSalaryGroup(files[0], user.getId(),user.getNamespaceId(),cmd));
-        response.setErrorCode(ErrorCodes.SUCCESS);
-        response.setErrorDescription("OK");
-        return response;
-	}
-
-	/**
-	 * <p>5-1.根据批次导出核算表</p>
-	 * <b>URL: /salary/exportPeriodSalary</b>
-	 */
-	@RequestMapping("exportPeriodSalary")
-	@RestReturn(String.class)
-	public RestResponse exportPeriodSalary(ExportPeriodSalaryCommand cmd, HttpServletResponse httpResponse){
-		salaryService.exportPeriodSalary(cmd, httpResponse);
-		return new RestResponse();
-	}
-
-	/**
-	 * <p>5-2.根据批次导入核算表</p>
-	 * <b>URL: /salary/importPeriodSalary</b>
-	 */
-	@RequestMapping("importPeriodSalary")
-	@RestReturn(ImportFileTaskDTO.class)
-	public RestResponse importPeriodSalary(ImportSalaryInfoCommand cmd, @RequestParam(value = "attachment") MultipartFile[] files){
-		User user = UserContext.current().getUser();
-		RestResponse response = new RestResponse(this.salaryService.importPeriodSalary(files[0], user.getId(),user.getNamespaceId(),cmd));
+	@RequestMapping("getSalaryTaskStatus")
+	@RestReturn(GetSalaryTaskStatusResponse.class)
+	public RestResponse getSalaryTaskStatus(GetSalaryTaskStatusCommand cmd ){
+		GetSalaryTaskStatusResponse resp = salaryService.getSalaryTaskStatus(cmd);
+		RestResponse response = new RestResponse(resp);
 		response.setErrorCode(ErrorCodes.SUCCESS);
 		response.setErrorDescription("OK");
 		return response;
 	}
 
 	/**
-	 * <p>6.查询导入的文件结果</p>
-	 * <b>URL: /salary/getImportFileResult</b>
+	 * <p>12.新建报表</p>
+	 * <b>URL: /salary/newSalaryMonth</b>
 	 */
-	@RequestMapping("getImportFileResult")
-	@RestReturn(value = ImportFileResponse.class)
-	public RestResponse getImportFileResult(@Valid GetImportFileResultCommand cmd) {
-		RestResponse response = new RestResponse(this.salaryService.getImportFileResult(cmd));
+	@RequestMapping("newSalaryMonth")
+	@RestReturn(String.class)
+	public RestResponse newSalaryMonth(NewSalaryMonthCommand cmd ){
+		salaryService.newSalaryMonth(cmd);
+		RestResponse response = new RestResponse();
 		response.setErrorCode(ErrorCodes.SUCCESS);
 		response.setErrorDescription("OK");
 		return response;
 	}
 
-	/**
-	 * <p>7.导出薪酬组对应的人员核算信息</p>
-	 * <b>URL: /salary/exportPeriodSalaryEmployees</b>
-	 */
-	@RequestMapping("exportPeriodSalaryEmployees")
-	@RestReturn(value = String.class)
-	public RestResponse exportPeriodSalaryEmployees(@Valid ExportPeriodSalaryEmployeesCommand cmd, HttpServletResponse httpResponse) {
-        salaryService.exportPeriodSalaryEmployees(cmd,httpResponse);
-        return new RestResponse();
-	}
 
-
-	/**
-	 * <p>12.查询异常员工人数</p>
-	 * <b>URL: /salary/getAbnormalEmployeeNumber</b>
-	 */
-	@RequestMapping("getAbnormalEmployeeNumber")
-	@RestReturn(GetAbnormalEmployeeNumberResponse.class)
-	public RestResponse getAbnormalEmployeeNumber(GetAbnormalEmployeeNumberCommand cmd){
-		return new RestResponse(salaryService.getAbnormalEmployeeNumber(cmd));
-	}
-
-	/**
-	 * <p>13.查询谋期的(审核/发放) 批次列表</p>
-	 * <b>URL: /salary/listPeriodSalary</b>
-	 */
-	@RequestMapping("listPeriodSalary")
-	@RestReturn(ListPeriodSalaryResponse.class)
-	public RestResponse listPeriodSalary(ListPeriodSalaryCommand cmd){
-		return new RestResponse(salaryService.listPeriodSalary(cmd));
-	}
-
-	/**
-	 * <p>14.查询某个批次的核算列表</p>
-	 * <b>URL: /salary/listPeriodSalaryEmployees</b>
-	 */
-	@RequestMapping("listPeriodSalaryEmployees")
-	@RestReturn(ListPeriodSalaryEmployeesResponse.class)
-	public RestResponse listPeriodSalaryEmployees(ListPeriodSalaryEmployeesCommand cmd){
-		return new RestResponse(salaryService.listPeriodSalaryEmployees(cmd));
-	}
-
-	/**
-	 * <p>15.保存某个批次的核算后数值和更改状态</p>
-	 * <b>URL: /salary/updatePeriodSalaryEmployee</b>
-	 */
-	@RequestMapping("updatePeriodSalaryEmployee")
-	@RestReturn(String.class)
-	public RestResponse updatePeriodSalaryEmployee(UpdatePeriodSalaryEmployeeCommand cmd){
-		salaryService.updatePeriodSalaryEmployee(cmd);
-		return new RestResponse();
-	}
-
-	/**
-	 * <p>15-2.批量设置核算状态</p>
-	 * <b>URL: /salary/batchSetEmployeeCheckFlag</b>
-	 */
-	@RequestMapping("batchSetEmployeeCheckFlag")
-	@RestReturn(String.class)
-	public RestResponse batchSetEmployeeCheckFlag(BatchSetEmployeeCheckFlagCommand cmd){
-		salaryService.batchSetEmployeeCheckFlag(cmd);
-		return new RestResponse();
-	}
-	/**
-	 * <p>16.设置某期薪酬批次核算完成</p>
-	 * <b>URL: /salary/checkPeriodSalary</b>
-	 */
-	@RequestMapping("checkPeriodSalary")
-	@RestReturn(String.class)
-	public RestResponse checkPeriodSalary(CheckPeriodSalaryCommand cmd){
-		salaryService.checkPeriodSalary(cmd);
-		return new RestResponse();
-	}
-
-	/**
-	 * <p>17.查询某批次工资条内容(说明+字段)</p>
-	 * <b>URL: /salary/getPeriodSalaryEmailContent</b>
-	 */
-	@RequestMapping("getPeriodSalaryEmailContent")
-	@RestReturn(GetPeriodSalaryEmailContentResponse.class)
-	public RestResponse getPeriodSalaryEmailContent(GetPeriodSalaryEmailContentCommand cmd){
-		return new RestResponse(salaryService.getPeriodSalaryEmailContent(cmd));
-	}
-
-	/**
-	 * <p>17-2.查询公司下所有批次的内容(说明+字段)</p>
-	 * <b>URL: /salary/listPeriodSalaryEmailContents</b>
-	 */
-	@RequestMapping("listPeriodSalaryEmailContents")
-	@RestReturn(ListPeriodSalaryEmailContentsResponse.class)
-	public RestResponse listPeriodSalaryEmailContents(ListPeriodSalaryEmailContentsCommand cmd){
-		return new RestResponse(salaryService.listPeriodSalaryEmailContents(cmd));
-	}
-	/**
-	 * <p>18.设置工资条邮件内容</p>
-	 * <b>URL: /salary/setSalaryEmailContent</b>
-	 */
-	@RequestMapping("setSalaryEmailContent")
-	@RestReturn(String.class)
-	public RestResponse setSalaryEmailContent(SetSalaryEmailContentCommand cmd){
-		salaryService.setSalaryEmailContent(cmd);
-		return new RestResponse();
-	}
-
-	/**
-	 * <p>19-2.批量设置工资条邮件和显示字段</p>
-	 * <b>URL: /salary/batchUpdateSalaryGroupEntitiesVisable</b>
-	 */
-	@RequestMapping("batchUpdateSalaryGroupEntitiesVisable")
-	@RestReturn(String.class)
-	public RestResponse batchUpdateSalaryGroupEntitiesVisable(BatchUpdateSalaryGroupEntitiesVisableCommand cmd){
-		salaryService.batchUpdateSalaryGroupEntitiesVisable(cmd);
-		return new RestResponse();
-	}
-	/**
-	 * <p>19.设置工资条字段项显示状态</p>
-	 * <b>URL: /salary/updateSalaryGroupEntitiesVisable</b>
-	 */
-	@RequestMapping("updateSalaryGroupEntitiesVisable")
-	@RestReturn(String.class)
-	public RestResponse updateSalaryGroupEntitiesVisable(UpdateSalaryGroupEntitiesVisableCommand cmd){
-		salaryService.updateSalaryGroupEntitiesVisable(cmd);
-		return new RestResponse();
-	}
-
-	/**
-	 * <p>20.发送某期薪酬批次</p>
-	 * <b>URL: /salary/sendPeriodSalary</b>
-	 */
-	@RequestMapping("sendPeriodSalary")
-	@RestReturn(String.class)
-	public RestResponse sendPeriodSalary(SendPeriodSalaryCommand cmd){
-		salaryService.sendPeriodSalary(cmd);
-		return new RestResponse();
-	}
-	/**
-	 * <p>20.撤销发送某期薪酬批次</p>
-	 * <b>URL: /salary/revokeSendPeriodSalary</b>
-	 */
-	@RequestMapping("revokeSendPeriodSalary")
-	@RestReturn(String.class)
-	public RestResponse revokeSendPeriodSalary(SendPeriodSalaryCommand cmd){
-		salaryService.revokeSendPeriodSalary(cmd);
-		return new RestResponse();
-	}
-
-	/**
-	 * <p>21.查发放历史</p>
-	 * <b>URL: /salary/listSalarySendHistory</b>
-	 */
-	@RequestMapping("listSalarySendHistory")
-	@RestReturn(ListSalarySendHistoryResponse.class)
-	public RestResponse listSalarySendHistory(ListSalarySendHistoryCommand cmd){
-		return new RestResponse(salaryService.listSalarySendHistory(cmd));
-	}
-
-	/**
-	 * <p>22.导出发放历史</p>
-	 * <b>URL: /salary/exportSalarySendHistory</b>
-	 */
-	@RequestMapping("exportSalarySendHistory")
-	@RestReturn(String.class)
-	public RestResponse exportSalarySendHistory(ExportSalarySendHistoryCommand cmd, HttpServletResponse httpResponse){
-		salaryService.exportSalarySendHistory(cmd,httpResponse);
-		return new RestResponse();
-	}
-	/**
-	 * <p>22.刷新某一期的值</p>
-	 * <b>URL: /salary/refreshPeriodVals</b>
-	 */
-	@RequestMapping("refreshPeriodVals")
-	@RestReturn(String.class)
-	public RestResponse refreshPeriodVals(RefreshPeriodValsCommand cmd){
-		salaryService.monthScheduled(cmd.getPeriod());
-		return new RestResponse();
-	}
+//
+//	/**
+//	 * <p>2-1.新增、更改 薪酬组(包含的选项 + 更改组名)</p>
+//	 * <b>URL: /salary/addSalaryGroup</b>
+//	 */
+//	@RequestMapping("addSalaryGroup")
+//	@RestReturn(AddSalaryGroupResponse.class)
+//	public RestResponse addSalaryGroup(AddSalaryGroupCommand cmd){
+//	    AddSalaryGroupResponse res = this.salaryService.addSalaryGroup(cmd);
+//	    RestResponse response = new RestResponse(res);
+//	    response.setErrorCode(ErrorCodes.SUCCESS);
+//	    response.setErrorDescription("OK");
+//		return response;
+//	}
+//
+//	/**
+//	 * <p>2-2.更改薪酬组包含的选项+更改组名</p>
+//	 * <b>URL: /salary/updateSalaryGroup</b>
+//	 */
+//	@RequestMapping("updateSalaryGroup")
+//	@RestReturn(UpdateSalaryGroupResponse.class)
+//	public RestResponse updateSalaryGroup(UpdateSalaryGroupCommand cmd){
+//        AddSalaryGroupResponse res = this.salaryService.updateSalaryGroup(cmd);
+//        RestResponse response = new RestResponse(res);
+//        response.setErrorCode(ErrorCodes.SUCCESS);
+//        response.setErrorDescription("OK");
+//        return response;
+//	}
+//
+//    /**
+//     * <p>2-3.删除薪酬组</p>
+//     * <b>URL: /salary/deleteSalaryGroup</b>
+//     */
+//    @RequestMapping("deleteSalaryGroup")
+//    @RestReturn(String.class)
+//    public RestResponse deleteSalaryGroup(DeleteSalaryGroupCommand cmd) {
+//        this.salaryService.deleteSalaryGroup(cmd);
+//        RestResponse response = new RestResponse();
+//        response.setErrorCode(ErrorCodes.SUCCESS);
+//        response.setErrorDescription("OK");
+//        return response;
+//    }
+//
+//    /**
+//	 * <p>2-4.复制薪酬组</p>
+//	 * <b>URL: /salary/copySalaryGroup</b>
+//	 */
+//	@RequestMapping("copySalaryGroup")
+//	@RestReturn(String.class)
+//	public RestResponse copySalaryGroup(CopySalaryGroupCommand cmd){
+//		this.salaryService.copySalaryGroup(cmd);
+//		RestResponse response = new RestResponse();
+//		response.setErrorCode(ErrorCodes.SUCCESS);
+//		response.setErrorDescription("OK");
+//		return response;
+//	}
+//
+//    /**
+//     * <p>2-5.展示薪酬组详细批次</p>
+//     * <b>URL: /salary/getSalaryGroup</b>
+//     */
+//    @RequestMapping("getSalaryGroup")
+//    @RestReturn(GetSalaryGroupResponse.class)
+//    public RestResponse getSalaryGroup(GetSalaryGroupCommand cmd){
+//        GetSalaryGroupResponse res = this.salaryService.getSalaryGroup(cmd);
+//        RestResponse response = new RestResponse(res);
+//        response.setErrorCode(ErrorCodes.SUCCESS);
+//        response.setErrorDescription("OK");
+//        return response;
+//    }
+//
+//	/**
+//	 * <p>2-6.展示所有薪酬组</p>
+//	 * <b>URL: /salary/listSalaryGroup</b>
+//	 */
+//	@RequestMapping("listSalaryGroup")
+//	@RestReturn(ListSalaryGroupResponse.class)
+//	public RestResponse listSalaryGroup(ListSalaryGroupCommand cmd){
+//        ListSalaryGroupResponse res = this.salaryService.listSalaryGroup(cmd);
+//        RestResponse response = new RestResponse(res);
+//        response.setErrorCode(ErrorCodes.SUCCESS);
+//        response.setErrorDescription("OK");
+//        return response;
+//	}
+//
+//	/**
+//	 * <p>3-1.根据组织架构/薪酬组/异常状态 查询人员</p>
+//	 * <b>URL: /salary/listSalaryEmployees</b>
+//	 */
+//	@RequestMapping("listSalaryEmployees")
+//	@RestReturn(ListSalaryEmployeesResponse.class)
+//	public RestResponse listSalaryEmployees(ListSalaryEmployeesCommand cmd){
+//        ListSalaryEmployeesResponse res = this.salaryService.listSalaryEmployees(cmd);
+//        RestResponse response = new RestResponse(res);
+//        response.setErrorCode(ErrorCodes.SUCCESS);
+//        response.setErrorDescription("OK");
+//		return response;
+//	}
+//
+//    /**
+//     * <p>3-2.查询人员批次详情</p>
+//     * <b>URL: /salary/getSalaryEmployees</b>
+//     */
+//    @RequestMapping("getSalaryEmployees")
+//    @RestReturn(value = SalaryEmployeeOriginValDTO.class, collection = true)
+//    public RestResponse getSalaryEmployees(GetSalaryEmployeesCommand cmd){
+//        List<SalaryEmployeeOriginValDTO> res = this.salaryService.getSalaryEmployees(cmd);
+//        RestResponse response = new RestResponse(res);
+//        response.setErrorCode(ErrorCodes.SUCCESS);
+//        response.setErrorDescription("OK");
+//        return response;
+//    }
+//
+//	/**
+//	 * <p>3-3.修改人员薪酬组(批次)</p>
+//	 * <b>URL: /salary/updateSalaryEmployeesGroup</b>
+//	 */
+//	@RequestMapping("updateSalaryEmployeesGroup")
+//	@RestReturn(value = String.class)
+//	public RestResponse updateSalaryEmployeesGroup(UpdateSalaryEmployeesGroupCommand cmd){
+//		this.salaryService.updateSalaryEmployeesGroup(cmd);
+//		RestResponse response = new RestResponse();
+//		response.setErrorCode(ErrorCodes.SUCCESS);
+//		response.setErrorDescription("OK");
+//		return response;
+//	}
+//
+//    /**
+//     * <p>3-4.编辑人员批次详情,有增加没有更新</p>
+//     * <b>URL: /salary/updateSalaryEmployees</b>
+//     */
+//    @RequestMapping("updateSalaryEmployees")
+//    @RestReturn(value = String.class)
+//    public RestResponse updateSalaryEmployees(UpdateSalaryEmployeesCommand cmd){
+//        this.salaryService.updateSalaryEmployees(cmd);
+//        RestResponse response = new RestResponse();
+//        response.setErrorCode(ErrorCodes.SUCCESS);
+//        response.setErrorDescription("OK");
+//        return response;
+//    }
+//
+//	/**
+//	 * <p>3-5.添加(关联)人员至组织架构的薪酬组</p>
+//	 * <b>URL: /salary/addToOrganizationSalaryGroup</b>
+//	 */
+//	@RequestMapping("addToOrganizationSalaryGroup")
+//	@RestReturn(String.class)
+//	public RestResponse addToOrganizationSalaryGroup(AddToOrganizationSalaryGroupCommand cmd){
+//		salaryService.addToOrganizationSalaryGroup(cmd);
+//        RestResponse response = new RestResponse();
+//        response.setErrorCode(ErrorCodes.SUCCESS);
+//        response.setErrorDescription("OK");
+//        return response;
+//	}
+//
+//    /**
+//     * <p>3-6.检查异常人数</p>
+//     * <b>URL: /salary/countAbnormalSalaryEmployees</b>
+//     */
+//    @RequestMapping("countAbnormalSalaryEmployees")
+//    @RestReturn(String.class)
+//    public RestResponse countAbnormalSalaryEmployees(CountAbnormalSalaryEmployees cmd){
+//        String res = this.salaryService.countAbnormalSalaryEmployees(cmd);
+//        RestResponse response = new RestResponse(res);
+//        response.setErrorCode(ErrorCodes.SUCCESS);
+//        response.setErrorDescription("OK");
+//        return response;
+//    }
+//
+//
+//    /**
+//	 * <p>4-1.导出某个薪酬组excel</p>
+//	 * <b>URL: /salary/exportSalaryGroup</b>
+//	 */
+//	@RequestMapping("exportSalaryGroup")
+//	@RestReturn(String.class)
+//	public RestResponse exportSalaryGroup(ExportSalaryGroupCommand cmd, HttpServletResponse httpResponse){
+//		salaryService.exportSalaryGroup(cmd,httpResponse);
+//		return new RestResponse();
+//	}
+//
+//	/**
+//	 * <p>4-2.导入员工薪酬表</p>
+//	 * <b>URL: /salary/importSalaryGroup</b>
+//	 */
+//	@RequestMapping("importSalaryGroup")
+//	@RestReturn(ImportFileTaskDTO.class)
+//	public RestResponse importSalaryGroup(ImportSalaryInfoCommand cmd, @RequestParam(value = "attachment") MultipartFile[] files){
+//        User user = UserContext.current().getUser();
+//        RestResponse response = new RestResponse(this.salaryService.importSalaryGroup(files[0], user.getId(),user.getNamespaceId(),cmd));
+//        response.setErrorCode(ErrorCodes.SUCCESS);
+//        response.setErrorDescription("OK");
+//        return response;
+//	}
+//
+//	/**
+//	 * <p>5-1.根据批次导出核算表</p>
+//	 * <b>URL: /salary/exportPeriodSalary</b>
+//	 */
+//	@RequestMapping("exportPeriodSalary")
+//	@RestReturn(String.class)
+//	public RestResponse exportPeriodSalary(ExportPeriodSalaryCommand cmd, HttpServletResponse httpResponse){
+//		salaryService.exportPeriodSalary(cmd, httpResponse);
+//		return new RestResponse();
+//	}
+//
+//	/**
+//	 * <p>5-2.根据批次导入核算表</p>
+//	 * <b>URL: /salary/importPeriodSalary</b>
+//	 */
+//	@RequestMapping("importPeriodSalary")
+//	@RestReturn(ImportFileTaskDTO.class)
+//	public RestResponse importPeriodSalary(ImportSalaryInfoCommand cmd, @RequestParam(value = "attachment") MultipartFile[] files){
+//		User user = UserContext.current().getUser();
+//		RestResponse response = new RestResponse(this.salaryService.importPeriodSalary(files[0], user.getId(),user.getNamespaceId(),cmd));
+//		response.setErrorCode(ErrorCodes.SUCCESS);
+//		response.setErrorDescription("OK");
+//		return response;
+//	}
+//
+//	/**
+//	 * <p>6.查询导入的文件结果</p>
+//	 * <b>URL: /salary/getImportFileResult</b>
+//	 */
+//	@RequestMapping("getImportFileResult")
+//	@RestReturn(value = ImportFileResponse.class)
+//	public RestResponse getImportFileResult(@Valid GetImportFileResultCommand cmd) {
+//		RestResponse response = new RestResponse(this.salaryService.getImportFileResult(cmd));
+//		response.setErrorCode(ErrorCodes.SUCCESS);
+//		response.setErrorDescription("OK");
+//		return response;
+//	}
+//
+//	/**
+//	 * <p>7.导出薪酬组对应的人员核算信息</p>
+//	 * <b>URL: /salary/exportPeriodSalaryEmployees</b>
+//	 */
+//	@RequestMapping("exportPeriodSalaryEmployees")
+//	@RestReturn(value = String.class)
+//	public RestResponse exportPeriodSalaryEmployees(@Valid ExportPeriodSalaryEmployeesCommand cmd, HttpServletResponse httpResponse) {
+//        salaryService.exportPeriodSalaryEmployees(cmd,httpResponse);
+//        return new RestResponse();
+//	}
+//
+//
+//	/**
+//	 * <p>12.查询异常员工人数</p>
+//	 * <b>URL: /salary/getAbnormalEmployeeNumber</b>
+//	 */
+//	@RequestMapping("getAbnormalEmployeeNumber")
+//	@RestReturn(GetAbnormalEmployeeNumberResponse.class)
+//	public RestResponse getAbnormalEmployeeNumber(GetAbnormalEmployeeNumberCommand cmd){
+//		return new RestResponse(salaryService.getAbnormalEmployeeNumber(cmd));
+//	}
+//
+//	/**
+//	 * <p>13.查询谋期的(审核/发放) 批次列表</p>
+//	 * <b>URL: /salary/listPeriodSalary</b>
+//	 */
+//	@RequestMapping("listPeriodSalary")
+//	@RestReturn(ListPeriodSalaryResponse.class)
+//	public RestResponse listPeriodSalary(ListPeriodSalaryCommand cmd){
+//		return new RestResponse(salaryService.listPeriodSalary(cmd));
+//	}
+//
+//	/**
+//	 * <p>14.查询某个批次的核算列表</p>
+//	 * <b>URL: /salary/listPeriodSalaryEmployees</b>
+//	 */
+//	@RequestMapping("listPeriodSalaryEmployees")
+//	@RestReturn(ListPeriodSalaryEmployeesResponse.class)
+//	public RestResponse listPeriodSalaryEmployees(ListPeriodSalaryEmployeesCommand cmd){
+//		return new RestResponse(salaryService.listPeriodSalaryEmployees(cmd));
+//	}
+//
+//	/**
+//	 * <p>15.保存某个批次的核算后数值和更改状态</p>
+//	 * <b>URL: /salary/updatePeriodSalaryEmployee</b>
+//	 */
+//	@RequestMapping("updatePeriodSalaryEmployee")
+//	@RestReturn(String.class)
+//	public RestResponse updatePeriodSalaryEmployee(UpdatePeriodSalaryEmployeeCommand cmd){
+//		salaryService.updatePeriodSalaryEmployee(cmd);
+//		return new RestResponse();
+//	}
+//
+//	/**
+//	 * <p>15-2.批量设置核算状态</p>
+//	 * <b>URL: /salary/batchSetEmployeeCheckFlag</b>
+//	 */
+//	@RequestMapping("batchSetEmployeeCheckFlag")
+//	@RestReturn(String.class)
+//	public RestResponse batchSetEmployeeCheckFlag(BatchSetEmployeeCheckFlagCommand cmd){
+//		salaryService.batchSetEmployeeCheckFlag(cmd);
+//		return new RestResponse();
+//	}
+//	/**
+//	 * <p>16.设置某期薪酬批次核算完成</p>
+//	 * <b>URL: /salary/checkPeriodSalary</b>
+//	 */
+//	@RequestMapping("checkPeriodSalary")
+//	@RestReturn(String.class)
+//	public RestResponse checkPeriodSalary(CheckPeriodSalaryCommand cmd){
+//		salaryService.checkPeriodSalary(cmd);
+//		return new RestResponse();
+//	}
+//
+//	/**
+//	 * <p>17.查询某批次工资条内容(说明+字段)</p>
+//	 * <b>URL: /salary/getPeriodSalaryEmailContent</b>
+//	 */
+//	@RequestMapping("getPeriodSalaryEmailContent")
+//	@RestReturn(GetPeriodSalaryEmailContentResponse.class)
+//	public RestResponse getPeriodSalaryEmailContent(GetPeriodSalaryEmailContentCommand cmd){
+//		return new RestResponse(salaryService.getPeriodSalaryEmailContent(cmd));
+//	}
+//
+//	/**
+//	 * <p>17-2.查询公司下所有批次的内容(说明+字段)</p>
+//	 * <b>URL: /salary/listPeriodSalaryEmailContents</b>
+//	 */
+//	@RequestMapping("listPeriodSalaryEmailContents")
+//	@RestReturn(ListPeriodSalaryEmailContentsResponse.class)
+//	public RestResponse listPeriodSalaryEmailContents(ListPeriodSalaryEmailContentsCommand cmd){
+//		return new RestResponse(salaryService.listPeriodSalaryEmailContents(cmd));
+//	}
+//	/**
+//	 * <p>18.设置工资条邮件内容</p>
+//	 * <b>URL: /salary/setSalaryEmailContent</b>
+//	 */
+//	@RequestMapping("setSalaryEmailContent")
+//	@RestReturn(String.class)
+//	public RestResponse setSalaryEmailContent(SetSalaryEmailContentCommand cmd){
+//		salaryService.setSalaryEmailContent(cmd);
+//		return new RestResponse();
+//	}
+//
+//	/**
+//	 * <p>19-2.批量设置工资条邮件和显示字段</p>
+//	 * <b>URL: /salary/batchUpdateSalaryGroupEntitiesVisable</b>
+//	 */
+//	@RequestMapping("batchUpdateSalaryGroupEntitiesVisable")
+//	@RestReturn(String.class)
+//	public RestResponse batchUpdateSalaryGroupEntitiesVisable(BatchUpdateSalaryGroupEntitiesVisableCommand cmd){
+//		salaryService.batchUpdateSalaryGroupEntitiesVisable(cmd);
+//		return new RestResponse();
+//	}
+//	/**
+//	 * <p>19.设置工资条字段项显示状态</p>
+//	 * <b>URL: /salary/updateSalaryGroupEntitiesVisable</b>
+//	 */
+//	@RequestMapping("updateSalaryGroupEntitiesVisable")
+//	@RestReturn(String.class)
+//	public RestResponse updateSalaryGroupEntitiesVisable(UpdateSalaryGroupEntitiesVisableCommand cmd){
+//		salaryService.updateSalaryGroupEntitiesVisable(cmd);
+//		return new RestResponse();
+//	}
+//
+//	/**
+//	 * <p>20.发送某期薪酬批次</p>
+//	 * <b>URL: /salary/sendPeriodSalary</b>
+//	 */
+//	@RequestMapping("sendPeriodSalary")
+//	@RestReturn(String.class)
+//	public RestResponse sendPeriodSalary(SendPeriodSalaryCommand cmd){
+//		salaryService.sendPeriodSalary(cmd);
+//		return new RestResponse();
+//	}
+//	/**
+//	 * <p>20.撤销发送某期薪酬批次</p>
+//	 * <b>URL: /salary/revokeSendPeriodSalary</b>
+//	 */
+//	@RequestMapping("revokeSendPeriodSalary")
+//	@RestReturn(String.class)
+//	public RestResponse revokeSendPeriodSalary(SendPeriodSalaryCommand cmd){
+//		salaryService.revokeSendPeriodSalary(cmd);
+//		return new RestResponse();
+//	}
+//
+//	/**
+//	 * <p>21.查发放历史</p>
+//	 * <b>URL: /salary/listSalarySendHistory</b>
+//	 */
+//	@RequestMapping("listSalarySendHistory")
+//	@RestReturn(ListSalarySendHistoryResponse.class)
+//	public RestResponse listSalarySendHistory(ListSalarySendHistoryCommand cmd){
+//		return new RestResponse(salaryService.listSalarySendHistory(cmd));
+//	}
+//
+//	/**
+//	 * <p>22.导出发放历史</p>
+//	 * <b>URL: /salary/exportSalarySendHistory</b>
+//	 */
+//	@RequestMapping("exportSalarySendHistory")
+//	@RestReturn(String.class)
+//	public RestResponse exportSalarySendHistory(ExportSalarySendHistoryCommand cmd, HttpServletResponse httpResponse){
+//		salaryService.exportSalarySendHistory(cmd,httpResponse);
+//		return new RestResponse();
+//	}
+//	/**
+//	 * <p>22.刷新某一期的值</p>
+//	 * <b>URL: /salary/refreshPeriodVals</b>
+//	 */
+//	@RequestMapping("refreshPeriodVals")
+//	@RestReturn(String.class)
+//	public RestResponse refreshPeriodVals(RefreshPeriodValsCommand cmd){
+//		salaryService.monthScheduled(cmd.getPeriod());
+//		return new RestResponse();
+//	}
 
 }

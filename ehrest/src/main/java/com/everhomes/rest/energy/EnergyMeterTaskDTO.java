@@ -75,6 +75,16 @@ public class EnergyMeterTaskDTO {
     private Long billCategoryId;
     private String billCategory;
 
+    private String lastTime;
+
+    public String getLastTime() {
+        return lastTime;
+    }
+
+    public void setLastTime(String lastTime) {
+        this.lastTime = lastTime;
+    }
+
     public String getBillCategory() {
         return billCategory;
     }

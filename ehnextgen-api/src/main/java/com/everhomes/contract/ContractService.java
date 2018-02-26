@@ -2,6 +2,7 @@
 package com.everhomes.contract;
 
 import com.everhomes.rest.contract.*;
+import com.everhomes.rest.openapi.OrganizationDTO;
 
 import javax.servlet.http.HttpServletResponse;
 import java.util.List;
@@ -39,8 +40,14 @@ public interface ContractService {
 	ContractParamDTO getContractParam(GetContractParamCommand cmd);
 
 	String generateContractNumber();
-	void syncContractsFromThirdPart(SyncContractsFromThirdPartCommand cmd);
+	String syncContractsFromThirdPart(SyncContractsFromThirdPartCommand cmd);
 
 	Boolean checkAdmin(CheckAdminCommand cmd);
 	ContractDetailDTO findContractForApp(FindContractCommand cmd);
+
+	ContractDetailDTO updatePaymentContract(UpdatePaymentContractCommand cmd);
+	ContractDetailDTO createPaymentContract(CreatePaymentContractCommand cmd);
+
+	List<OrganizationDTO> getUserGroups(GetUserGroupsCommand cmd);
+
 }

@@ -95,4 +95,5 @@ public interface OrganizationServiceErrorCode {
     static final int ERROR_DEPARTMENT_EXISTS = 300002; //部门已存在
     static final int ERROR_JOB_POSITION_EXISTS = 300003; //通用岗位已存在
 
+    int ERROR_ORG_NAME_REPEAT = 900030; //名称重复
 }

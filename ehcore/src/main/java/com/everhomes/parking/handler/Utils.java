@@ -3,6 +3,9 @@ package com.everhomes.parking.handler;
 import java.io.IOException;
 import java.nio.charset.Charset;
 import java.nio.charset.StandardCharsets;
+import java.security.KeyManagementException;
+import java.security.cert.CertificateException;
+import java.security.cert.X509Certificate;
 import java.sql.Timestamp;
 import java.text.ParseException;
 import java.text.SimpleDateFormat;
@@ -19,7 +22,10 @@ import org.apache.http.NameValuePair;
 import org.apache.http.StatusLine;
 import org.apache.http.client.entity.UrlEncodedFormEntity;
 import org.apache.http.client.methods.CloseableHttpResponse;
+import org.apache.http.client.methods.HttpGet;
 import org.apache.http.client.methods.HttpPost;
+import org.apache.http.conn.ssl.AllowAllHostnameVerifier;
+import org.apache.http.conn.ssl.SSLConnectionSocketFactory;
 import org.apache.http.entity.StringEntity;
 import org.apache.http.impl.client.CloseableHttpClient;
 import org.apache.http.impl.client.HttpClients;
@@ -29,13 +35,15 @@ import org.apache.http.util.EntityUtils;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
-import java.math.BigInteger;
-import java.security.MessageDigest;
 import java.security.NoSuchAlgorithmException;
 import java.util.*;
 import com.alibaba.fastjson.JSONObject;
 import com.everhomes.constants.ErrorCodes;
 import com.everhomes.util.RuntimeErrorException;
+
+import javax.net.ssl.SSLContext;
+import javax.net.ssl.TrustManager;
+import javax.net.ssl.X509TrustManager;
 
 public class Utils {
 
@@ -383,5 +391,70 @@ public class Utils {
         } catch (IOException e) {
             LOGGER.error("Close response error", e);
         }
+    }
+
+    public static String get(String url, Charset charset) {
+
+        String result = null;
+        CloseableHttpResponse response = null;
+        CloseableHttpClient httpclient = null;
+        try {
+            SSLContext ctx = SSLContext.getInstance("TLS");
+            X509TrustManager tm = new X509TrustManager() {
+                public X509Certificate[] getAcceptedIssuers() {
+                    return null;
+                }
+
+                public void checkClientTrusted(X509Certificate[] arg0,
+                                               String arg1) throws CertificateException {
+                }
+
+                public void checkServerTrusted(X509Certificate[] arg0,
+                                               String arg1) throws CertificateException {
+                }
+            };
+            ctx.init(null, new TrustManager[] { tm }, null);
+            SSLConnectionSocketFactory ssf = new SSLConnectionSocketFactory(
+                    ctx, new AllowAllHostnameVerifier());
+
+            httpclient = HttpClients.custom()
+                    .setSSLSocketFactory(ssf).build();
+
+            HttpGet httpGet = new HttpGet(url);
+
+            LOGGER.info("The request info, url={}", url);
+            response = httpclient.execute(httpGet);
+
+            StatusLine statusLine = response.getStatusLine();
+            LOGGER.info("Parking responseCode={}, responseProtocol={}", statusLine.getStatusCode(), statusLine.getProtocolVersion().toString());
+            int status = statusLine.getStatusCode();
+
+            if(status == HttpStatus.SC_OK) {
+                HttpEntity entity = response.getEntity();
+
+                if (null != entity) {
+                    if(charset==null){
+                        result = EntityUtils.toString(entity);
+                    }else{
+                        result = EntityUtils.toString(entity,charset);
+                    }
+                }
+            }
+
+        } catch (IOException e) {
+            LOGGER.error("The request error, url={}", url, e);
+            throw RuntimeErrorException.errorWith(ErrorCodes.SCOPE_GENERAL, ErrorCodes.ERROR_GENERAL_EXCEPTION,
+                    "The request error.");
+        } catch (NoSuchAlgorithmException e) {
+            e.printStackTrace();
+        } catch (KeyManagementException e) {
+            e.printStackTrace();
+        } finally {
+            close(response, httpclient);
+        }
+
+        LOGGER.info("Result from third, url={}, result={}", url, result);
+
+        return result;
     }
 }

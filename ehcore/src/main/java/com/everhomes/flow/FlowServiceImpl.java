@@ -3229,8 +3229,8 @@ public class FlowServiceImpl implements FlowService {
     }
 
     //获取每个节点的跟踪日志，如果有文本，则格式化文本
-    private void getFlowNodeLogDTO(FlowCase flowCase, FlowUserType flowUserType, FlowNode currNode, Long stepCount, FlowNodeLogDTO nodeLogDTO) {
-        /*List<FlowEventLog> trackerLogs = flowEventLogProvider.findEventLogsByNodeId(currNode.getId()
+    /*private void getFlowNodeLogDTO(FlowCase flowCase, FlowUserType flowUserType, FlowNode currNode, Long stepCount, FlowNodeLogDTO nodeLogDTO) {
+        *//*List<FlowEventLog> trackerLogs = flowEventLogProvider.findEventLogsByNodeId(currNode.getId()
                 , flowCase.getId(), stepCount, Collections.singletonList(flowUserType));
         if (trackerLogs != null) {
             trackerLogs.forEach((t) -> {
@@ -3240,8 +3240,8 @@ public class FlowServiceImpl implements FlowService {
                 }
                 nodeLogDTO.getLogs().add(eventDTO);
             });
-        }*/
-    }
+        }*//*
+    }*/
 
     @Override
     public FlowSubjectDTO postSubject(FlowPostSubjectCommand cmd) {
@@ -3616,6 +3616,7 @@ public class FlowServiceImpl implements FlowService {
                 log.setStepCount(ctx.getFlowCase().getStepCount());
 
                 log.setLogType(FlowLogType.NODE_ENTER.getCode());
+                log.setEnterLogCompleteFlag(TrueOrFalseFlag.FALSE.getCode());
                 log.setLogTitle("");
                 ctx.getLogs().add(log);
             }
@@ -5139,6 +5140,45 @@ public class FlowServiceImpl implements FlowService {
     }
 
     @Override
+    public FlowCaseDetailDTOV2 getFlowCaseDetailByRefer(Long moduleId, FlowUserType flowUserType, Long userId, String referType, Long referId, boolean needFlowButton) {
+        FlowCase flowCase = flowCaseProvider.findFlowCaseByReferId(referId, referType, moduleId);
+        if (flowCase != null) {
+            return getFlowCaseDetailByIdV2(flowCase.getId(), userId, flowUserType, true, needFlowButton);
+        }
+        return null;
+    }
+
+    @Override
+    public GetFlowCaseCountResponse getFlowCaseCount(SearchFlowCaseCommand cmd) {
+        if (cmd.getNamespaceId() == null) {
+            cmd.setNamespaceId(UserContext.getCurrentNamespaceId());
+        }
+        if (cmd.getFlowCaseSearchType() == null) {
+            throw RuntimeErrorException.errorWith(FlowServiceErrorCode.SCOPE, FlowServiceErrorCode.ERROR_FLOW_PARAM_ERROR, "flow param error");
+        }
+
+        if (!cmd.getFlowCaseSearchType().equals(FlowCaseSearchType.ADMIN.getCode()) && cmd.getUserId() == null) {
+            cmd.setUserId(UserContext.current().getUser().getId());
+        }
+        if (cmd.getModuleId() != null && cmd.getModuleId() == 0L) {
+            cmd.setModuleId(null);
+        }
+
+        Integer count;
+        if (cmd.getFlowCaseSearchType().equals(FlowCaseSearchType.APPLIER.getCode())) {
+            count = flowCaseProvider.countApplierFlowCases(cmd);
+        } else if (cmd.getFlowCaseSearchType().equals(FlowCaseSearchType.ADMIN.getCode())) {
+            count = flowCaseProvider.countAdminFlowCases(cmd);
+        } else {
+            count = flowEventLogProvider.countProcessorFlowCases(cmd);
+        }
+        if (count == null) {
+            count = 0;
+        }
+        return new GetFlowCaseCountResponse(count);
+    }
+
+    @Override
     public FlowGraphDTO createOrUpdateFlowGraph(CreateFlowGraphCommand cmd) {
         ValidatorUtil.validate(cmd);
 
@@ -5355,7 +5395,6 @@ public class FlowServiceImpl implements FlowService {
         dto.setEntities(entities);
         dto.setCustomObject(ctx.getGrantParentState().getFlowCase().getCustomObject());
 
-        // 后台管理界面不显示按钮
         if (needFlowButton) {
             // 按钮，在这里只要处理人的按钮，只有处理人会看到这个界面
             List<FlowButtonDTO> btnList = getFlowButtonDTOList(flowGraph, userId, flowUserTypes, checkProcessor, flowCase, nodes, laneList);
@@ -5493,14 +5532,14 @@ public class FlowServiceImpl implements FlowService {
 
         List<FlowCase> allFlowCase = ctx.getAllFlowCases();
 
-        List<FlowNode> nodes = flowGraph.getNodes().stream().map(FlowGraphNode::getFlowNode).collect(Collectors.toList());
-        nodes.sort(Comparator.comparingInt(FlowNode::getNodeLevel));
+        List<FlowNode> nodes = flowGraph.getNodes().stream().map(FlowGraphNode::getFlowNode)
+                .sorted(Comparator.comparingInt(FlowNode::getNodeLevel)).collect(Collectors.toList());
 
-        List<FlowLane> laneList = flowGraph.getLanes().stream().map(FlowGraphLane::getFlowLane).collect(Collectors.toList());
+        List<FlowLane> laneList = flowGraph.getLanes().stream().map(FlowGraphLane::getFlowLane)
+                .sorted(Comparator.comparingInt(FlowLane::getLaneLevel)).collect(Collectors.toList());
         // if (laneList.size() < 3) {
         //     return dto;
         // }
-        laneList.sort(Comparator.comparingInt(FlowLane::getLaneLevel));
 
         Long userId = UserContext.currentUserId();
         if (userId == null) {
@@ -5776,10 +5815,9 @@ public class FlowServiceImpl implements FlowService {
     private List<FlowButtonDTO> getApplierButtonDTOList(FlowGraph flowGraph, FlowCase flowCase) {
         List<FlowButtonDTO> btnList = new ArrayList<>();
 
-        List<FlowCase> allFlowCase = getAllFlowCase(flowCase.getId());
+        List<FlowCase> processingFlowCase = getProcessingFlowCasesByAnyFlowCaseId(flowCase.getId());
 
-        List<Long> currentNodeIdList = allFlowCase.stream()
-                .filter(r -> !Objects.equals(r.getCurrentNodeId(), r.getEndNodeId()))
+        List<Long> currentNodeIdList = processingFlowCase.stream()
                 .map(FlowCase::getCurrentNodeId)
                 .distinct()
                 .collect(Collectors.toList());
@@ -5845,6 +5883,104 @@ public class FlowServiceImpl implements FlowService {
             }
         }
         return btnList;
+    }
+
+    private List<FlowCase> getProcessingFlowCasesByAnyFlowCaseId(Long flowCaseId) {
+        List<FlowCase> allFlowCase = getAllFlowCase(flowCaseId);
+        return allFlowCase.stream()
+                .filter(r -> !Objects.equals(r.getCurrentNodeId(), r.getEndNodeId()))
+                .collect(Collectors.toList());
+    }
+
+    @Override
+    public FlowCaseTree getProcessingFlowCaseTree(Long flowCaseId) {
+        List<FlowCase> allFlowCase = getAllFlowCase(flowCaseId);
+
+        Map<Long, List<FlowCase>> parentIdToFlowCase = allFlowCase.stream()
+                .filter(r -> !Objects.equals(r.getCurrentNodeId(), r.getEndNodeId()))
+                .sorted(Comparator.comparing(FlowCase::getParentId))
+                .collect(Collectors.groupingBy(FlowCase::getParentId));
+
+        List<FlowCase> grantParent = parentIdToFlowCase.get(0L);
+        if (grantParent != null && grantParent.size() > 0) {
+            FlowCase flowCase = grantParent.iterator().next();
+            return toFlowCaseTree(parentIdToFlowCase, new FlowCaseTree(flowCase), flowCase.getId());
+        }
+        return new FlowCaseTree();
+    }
+
+    // Only for test
+    private List<FlowCase> getAllFlowCaseMock(Long flowCaseId) {
+        List<FlowCase> flowCases = new ArrayList<>();
+        FlowCase fc = new FlowCase();
+        fc.setId(1L);
+        fc.setParentId(0L);
+        fc.setCurrentNodeId(11L);
+        fc.setEndNodeId(110L);
+        flowCases.add(fc);
+
+        fc = new FlowCase();
+        fc.setId(2L);
+        fc.setParentId(1L);
+        fc.setCurrentNodeId(11L);
+        fc.setEndNodeId(110L);
+        flowCases.add(fc);
+
+        fc = new FlowCase();
+        fc.setId(3L);
+        fc.setParentId(1L);
+        fc.setCurrentNodeId(11L);
+        fc.setEndNodeId(110L);
+        flowCases.add(fc);
+
+        fc = new FlowCase();
+        fc.setId(4L);
+        fc.setParentId(1L);
+        fc.setCurrentNodeId(11L);
+        fc.setEndNodeId(110L);
+        flowCases.add(fc);
+
+        fc = new FlowCase();
+        fc.setId(5L);
+        fc.setParentId(2L);
+        fc.setCurrentNodeId(11L);
+        fc.setEndNodeId(110L);
+        flowCases.add(fc);
+
+        fc = new FlowCase();
+        fc.setId(6L);
+        fc.setParentId(2L);
+        fc.setCurrentNodeId(11L);
+        fc.setEndNodeId(110L);
+        flowCases.add(fc);
+
+        fc = new FlowCase();
+        fc.setId(7L);
+        fc.setParentId(6L);
+        fc.setCurrentNodeId(11L);
+        fc.setEndNodeId(110L);
+        flowCases.add(fc);
+
+        return flowCases;
+    }
+
+    public static void main(String[] args) {
+        FlowServiceImpl impl = new FlowServiceImpl();
+        FlowCaseTree processingFlowCaseTree = impl.getProcessingFlowCaseTree(1L);
+
+        System.out.println(processingFlowCaseTree);
+
+        System.out.println(processingFlowCaseTree.getLeafNodes());
+    }
+
+    private FlowCaseTree toFlowCaseTree(Map<Long, List<FlowCase>> parentIdToFlowCase, FlowCaseTree tree, Long parentId) {
+        List<FlowCase> childs = parentIdToFlowCase.get(parentId);
+        if (childs != null) {
+            for (FlowCase child : childs) {
+                tree.addChild(toFlowCaseTree(parentIdToFlowCase, new FlowCaseTree(child), child.getId()));
+            }
+        }
+        return tree;
     }
 
     private Long getRealCurrentNodeId(FlowCase flowCase, Long currentNodeId) {

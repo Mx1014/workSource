@@ -19,7 +19,7 @@
             <!-- The database type. The format here is:
             org.util.[database].[database]Database -->
             <name>org.jooq.util.mysql.MySQLDatabase</name>
-
+ 
             <!-- The database schema (or in the absence of schema support, in your RDBMS this
                 can be the owner, user, database name) to be generated -->
             <inputSchema>ehcore</inputSchema>
@@ -208,7 +208,8 @@
 
                 <!-- 不用再在这里加具体的表名称了，用了通配符，就可以获取所有表了，哈哈 -->
                 .*
-            </includes>
+            </includes> 
+
 
             <!-- All elements that are excluded from your schema
             (A Java regular expression. Use the pipe to separate several expressions).

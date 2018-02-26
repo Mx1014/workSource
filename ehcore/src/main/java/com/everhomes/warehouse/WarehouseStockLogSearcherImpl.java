@@ -123,70 +123,72 @@ public class WarehouseStockLogSearcherImpl extends AbstractElasticSearch impleme
     @Override
     public SearchWarehouseStockLogsResponse query(SearchWarehouseStockLogsCommand cmd) {
         checkAssetPriviledgeForPropertyOrg(cmd.getCommunityId(),PrivilegeConstants.WAREHOUSE_REPO_MAINTAIN_SEARCH,cmd.getOwnerId());
-        SearchRequestBuilder builder = getClient().prepareSearch(getIndexName()).setTypes(getIndexType());
-        QueryBuilder qb = null;
-        if(cmd.getMaterialName() == null || cmd.getMaterialName().isEmpty()) {
-            qb = QueryBuilders.matchAllQuery();
-        } else {
-            qb = QueryBuilders.multiMatchQuery(cmd.getMaterialName())
-                    .field("materialName", 5.0f)
-                    .field("materialName.pinyin_prefix", 2.0f)
-                    .field("materialName.pinyin_gram", 1.0f);
-            builder.setHighlighterFragmentSize(60);
-            builder.setHighlighterNumOfFragments(8);
-            builder.addHighlightedField("materialName");
-
-        }
-        FilterBuilder fb = FilterBuilders.termFilter("namespaceId", UserContext.getCurrentNamespaceId());
-        fb = FilterBuilders.andFilter(fb, FilterBuilders.termFilter("ownerId", cmd.getOwnerId()));
-        fb = FilterBuilders.andFilter(fb, FilterBuilders.termFilter("ownerType", cmd.getOwnerType()));
-        //新增， 兼容性还没有
-        fb = FilterBuilders.andFilter(fb, FilterBuilders.termFilter("communityId", cmd.getCommunityId()));
-
-        if(cmd.getWarehouseId() != null) {
-            fb = FilterBuilders.andFilter(fb, FilterBuilders.termFilter("warehouseId", cmd.getWarehouseId()));
-        }
-
-        if(cmd.getMaterialId() != null) {
-            fb = FilterBuilders.andFilter(fb, FilterBuilders.termFilter("materialId", cmd.getMaterialId()));
-        }
-
-        if(cmd.getRequestType() != null) {
-            fb = FilterBuilders.andFilter(fb, FilterBuilders.termFilter("requestType", cmd.getRequestType()));
-        }
-
-        if(cmd.getMaterialNumber() != null) {
-            fb = FilterBuilders.andFilter(fb, FilterBuilders.termFilter("materialNumber", cmd.getMaterialNumber()));
-        }
-
-        if(cmd.getRequestName() != null) {
-            fb = FilterBuilders.andFilter(fb, FilterBuilders.termFilter("requestName", cmd.getRequestName()));
-        }
+//        SearchRequestBuilder builder = getClient().prepareSearch(getIndexName()).setTypes(getIndexType());
+//        QueryBuilder qb = null;
+//        if(cmd.getMaterialName() == null || cmd.getMaterialName().isEmpty()) {
+//            qb = QueryBuilders.matchAllQuery();
+//        } else {
+//            qb = QueryBuilders.multiMatchQuery(cmd.getMaterialName())
+//                    .field("materialName", 5.0f)
+//                    .field("materialName.pinyin_prefix", 2.0f)
+//                    .field("materialName.pinyin_gram", 1.0f);
+//            builder.setHighlighterFragmentSize(60);
+//            builder.setHighlighterNumOfFragments(8);
+//            builder.addHighlightedField("materialName");
+//
+//        }
+//        FilterBuilder fb = FilterBuilders.termFilter("namespaceId", cmd.getNamespaceId());
+//        fb = FilterBuilders.andFilter(fb, FilterBuilders.termFilter("ownerId", cmd.getOwnerId()));
+//        fb = FilterBuilders.andFilter(fb, FilterBuilders.termFilter("ownerType", cmd.getOwnerType()));
+//        //新增， 兼容性还没有
+//        fb = FilterBuilders.andFilter(fb, FilterBuilders.termFilter("communityId", cmd.getCommunityId()));
+//
+//        if(cmd.getWarehouseId() != null) {
+//            fb = FilterBuilders.andFilter(fb, FilterBuilders.termFilter("warehouseId", cmd.getWarehouseId()));
+//        }
+//
+//        if(cmd.getMaterialId() != null) {
+//            fb = FilterBuilders.andFilter(fb, FilterBuilders.termFilter("materialId", cmd.getMaterialId()));
+//        }
+//
+//        if(cmd.getRequestType() != null) {
+//            fb = FilterBuilders.andFilter(fb, FilterBuilders.termFilter("requestType", cmd.getRequestType()));
+//        }
+//
+//        if(cmd.getMaterialNumber() != null) {
+//            fb = FilterBuilders.andFilter(fb, FilterBuilders.termFilter("materialNumber", cmd.getMaterialNumber()));
+//        }
+//
+//        if(cmd.getRequestName() != null) {
+//            fb = FilterBuilders.andFilter(fb, FilterBuilders.termFilter("requestName", cmd.getRequestName()));
+//        }
         int pageSize = PaginationConfigHelper.getPageSize(configProvider, cmd.getPageSize());
-        Long anchor = 0l;
+//        Long anchor = 0l;
+        Long anchor = 1l;
         if(cmd.getPageAnchor() != null) {
             anchor = cmd.getPageAnchor();
         }
+//
+//        qb = QueryBuilders.filteredQuery(qb, fb);
+//        builder.setSearchType(SearchType.QUERY_THEN_FETCH);
+//        builder.setFrom(anchor.intValue() * pageSize).setSize(pageSize + 1);
+//        builder.setQuery(qb);
+//
+//        if(cmd.getMaterialName() == null || cmd.getMaterialName().isEmpty()) {
+//            builder.addSort(SortBuilders.fieldSort("createTime").order(SortOrder.DESC).ignoreUnmapped(true));
+//        }
+//
+//        SearchResponse rsp = builder.execute().actionGet();
+//
+//        if(LOGGER.isDebugEnabled()) {
+//            LOGGER.debug("query warehouse stock logs :{}, rsp :{}", builder, rsp);
+//        }
 
-        qb = QueryBuilders.filteredQuery(qb, fb);
-        builder.setSearchType(SearchType.QUERY_THEN_FETCH);
-        builder.setFrom(anchor.intValue() * pageSize).setSize(pageSize + 1);
-        builder.setQuery(qb);
-
-        if(cmd.getMaterialName() == null || cmd.getMaterialName().isEmpty()) {
-            builder.addSort(SortBuilders.fieldSort("createTime").order(SortOrder.DESC).ignoreUnmapped(true));
-        }
-
-        SearchResponse rsp = builder.execute().actionGet();
-
-        if(LOGGER.isDebugEnabled()) {
-            LOGGER.debug("query warehouse stock logs :{}, rsp :{}", builder, rsp);
-        }
-
-        List<Long> ids = getIds(rsp);
-        Long total = getTotal(rsp);
+//        List<Long> ids = getIds(rsp);
+//        Long total = getTotal(rsp);
         SearchWarehouseStockLogsResponse response = new SearchWarehouseStockLogsResponse();
-        response.setTotal(total);
+        List<Long> ids = warehouseProvider.findAllMaterialLogIds(
+                cmd.getWarehouseOrderId(),anchor,pageSize,response);
         if(ids.size() > pageSize) {
             response.setNextPageAnchor(anchor + 1);
             ids.remove(ids.size() - 1);
@@ -221,6 +223,7 @@ public class WarehouseStockLogSearcherImpl extends AbstractElasticSearch impleme
                 dto.setMaterialName(material.getName());
                 dto.setMaterialNumber(material.getMaterialNumber());
                 dto.setUnitId(material.getUnitId());
+                dto.setSupplierName(material.getSupplierName());
 
                 WarehouseUnits unit = warehouseProvider.findWarehouseUnits(material.getUnitId(), cmd.getOwnerType(), cmd.getOwnerId());
                 if(unit != null) {
@@ -288,7 +291,7 @@ public class WarehouseStockLogSearcherImpl extends AbstractElasticSearch impleme
         cmd1.setModuleId(PrivilegeConstants.WAREHOUSE_MODULE_ID);
         cmd1.setNamespaceId(UserContext.getCurrentNamespaceId());
         ListServiceModuleAppsResponse res = portalService.listServiceModuleAppsWithConditon(cmd1);
-        Long appId = res.getServiceModuleApps().get(0).getId();
+        Long appId = res.getServiceModuleApps().get(0).getOriginId();
         if(!userPrivilegeMgr.checkUserPrivilege(UserContext.currentUserId(), EntityType.ORGANIZATIONS.getCode(), OrganizationId, OrganizationId,priviledgeId , appId, null,communityId )){
             throw RuntimeErrorException.errorWith(PrivilegeServiceErrorCode.SCOPE, PrivilegeServiceErrorCode.ERROR_CHECK_APP_PRIVILEGE,
                     "check app privilege error");

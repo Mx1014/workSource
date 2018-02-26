@@ -48,6 +48,15 @@ public class OneKeyNoticeCommand {
     private Byte status;
     private String contractNum;
     private String targetType;
+    private Long organizationId;
+
+    public Long getOrganizationId() {
+        return organizationId;
+    }
+
+    public void setOrganizationId(Long organizationId) {
+        this.organizationId = organizationId;
+    }
 
     public Long getBillGroupId() {
         return billGroupId;

@@ -45,6 +45,26 @@ public class FlowController extends ControllerBase {
     }
 
     /**
+     * <b>URL: /flow/getFlowCaseCount</b>
+     * <p> 统计任务数量 </p>
+     */
+    @RequestMapping("getFlowCaseCount")
+    @RestReturn(value=GetFlowCaseCountResponse.class)
+    public RestResponse getFlowCaseCount(@Valid SearchFlowCaseCommand cmd) {
+    	RestResponse response = new RestResponse();
+    	response.setErrorCode(ErrorCodes.SUCCESS);
+    	response.setErrorDescription("OK");
+
+    	Byte admin = FlowCaseSearchType.ADMIN.getCode();
+    	if(admin.equals(cmd.getFlowCaseSearchType())) {
+    		//never admin here
+    		return response;
+    	}
+    	response.setResponseObject(flowService.getFlowCaseCount(cmd));
+    	return response;
+    }
+
+    /**
      * <b>URL: /flow/getFlowCaseDetailById</b>
      * <p> flowCase详细信息 </p>
      */
@@ -204,13 +224,13 @@ public class FlowController extends ControllerBase {
     }
     
     /**
-     * <b>URL: /flow/listSelectionsById</b>
+     * <b>URL: /flow/listSelectUsers</b>
      * <p> 获取选择的用户列表 </p>
      * @return 返回用户选择的信息
      */
     @RequestMapping("listSelectUsers")
     @RestReturn(value=ListSelectUsersResponse.class)
-    public RestResponse listSelectionsById(@Valid ListSelectUsersCommand cmd) {
+    public RestResponse listSelectUsers(@Valid ListSelectUsersCommand cmd) {
         RestResponse response = new RestResponse(flowService.listUserSelections(cmd));
         response.setErrorCode(ErrorCodes.SUCCESS);
         response.setErrorDescription("OK");

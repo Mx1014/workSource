@@ -1,8 +1,8 @@
 package com.everhomes.rest.quality;
 
-import javax.validation.constraints.NotNull;
-
 import com.everhomes.util.StringHelper;
+
+import javax.validation.constraints.NotNull;
 
 /**
  * <ul>
@@ -12,6 +12,8 @@ import com.everhomes.util.StringHelper;
  *  <li>scopeId: 看见范围具体Id，全部为0 </li>
  *  <li>parentId: 父节点id。全要则不填</li>
  *  <li>inspectionType: 规范类型 0: 类型, 1: 规范, 2: 规范事项</li>
+ *  <li>pageAnchor: 锚点</li>
+ *  <li>pageSize: 页面大小</li>
  * </ul>
  */
 public class ListQualitySpecificationsCommand {
@@ -29,6 +31,12 @@ public class ListQualitySpecificationsCommand {
 	private Long parentId;
 	
 	private Byte inspectionType;
+
+	private String lastSyncTime;//用于离线
+
+	private Long pageAnchor;
+
+	private Integer pageSize;
 	
 	public Long getOwnerId() {
 		return ownerId;
@@ -76,6 +84,30 @@ public class ListQualitySpecificationsCommand {
 
 	public void setInspectionType(Byte inspectionType) {
 		this.inspectionType = inspectionType;
+	}
+
+	public String getLastSyncTime() {
+		return lastSyncTime;
+	}
+
+	public void setLastSyncTime(String lastSyncTime) {
+		this.lastSyncTime = lastSyncTime;
+	}
+
+	public Long getPageAnchor() {
+		return pageAnchor;
+	}
+
+	public void setPageAnchor(Long pageAnchor) {
+		this.pageAnchor = pageAnchor;
+	}
+
+	public Integer getPageSize() {
+		return pageSize;
+	}
+
+	public void setPageSize(Integer pageSize) {
+		this.pageSize = pageSize;
 	}
 
 	@Override

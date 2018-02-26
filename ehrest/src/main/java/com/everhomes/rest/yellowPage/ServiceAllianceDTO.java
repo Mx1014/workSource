@@ -53,6 +53,8 @@ import java.util.List;
  *  <li>jumpServiceAllianceRouting : "grid" 样式下，点击服务联盟的banner图跳转到其他服务联盟的路由</li>
  *  <li>onlineServiceUid : 在线服务用户的id</li>
  *  <li>onlineServiceUname : 在线服务用户的名称</li>
+ *  <li>skipType: 只有一个企业时是否跳过列表页，0 不跳； 1 跳过</li>
+ *  <li>displayMode:类型 {@link com.everhomes.rest.yellowPage.ServiceAllianceCategoryDisplayMode} </li>
  * </ul>
  */
 public class ServiceAllianceDTO {
@@ -151,7 +153,25 @@ public class ServiceAllianceDTO {
 	
 	private Long onlineServiceUid;
 	private String onlineServiceUname;
+	private Byte displayMode;
 	
+	private Byte skipType;
+	
+	public Byte getDisplayMode() {
+		return displayMode;
+	}
+
+	public void setDisplayMode(Byte displayMode) {
+		this.displayMode = displayMode;
+	}
+
+	public Byte getSkipType() {
+		return skipType;
+	}
+
+	public void setSkipType(Byte skipType) {
+		this.skipType = skipType;
+	}
 	public Long getOnlineServiceUid() {
 		return onlineServiceUid;
 	}

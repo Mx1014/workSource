@@ -8,15 +8,28 @@ import java.util.List;
 import java.util.Map;
 
 import com.everhomes.contract.ContractParam;
+import com.everhomes.contract.ContractParamGroupMap;
 import com.everhomes.listing.CrossShardListingLocator;
 import com.everhomes.rest.contract.ContractStatus;
 import com.everhomes.rest.customer.CustomerType;
 import com.everhomes.server.schema.tables.*;
+import com.everhomes.server.schema.tables.EhContractAttachments;
+import com.everhomes.server.schema.tables.EhContracts;
+import com.everhomes.server.schema.tables.EhEnterpriseCustomers;
+import com.everhomes.server.schema.tables.EhOrganizationOwners;
+import com.everhomes.server.schema.tables.EhOrganizations;
+import com.everhomes.server.schema.tables.EhUserIdentifiers;
+import com.everhomes.server.schema.tables.EhUsers;
+import com.everhomes.server.schema.tables.daos.EhContractParamGroupMapDao;
 import com.everhomes.server.schema.tables.daos.EhContractParamsDao;
+import com.everhomes.server.schema.tables.pojos.*;
+import com.everhomes.server.schema.tables.pojos.EhContractParamGroupMap;
 import com.everhomes.server.schema.tables.pojos.EhContractParams;
+import com.everhomes.server.schema.tables.records.EhContractParamGroupMapRecord;
 import com.everhomes.server.schema.tables.records.EhContractParamsRecord;
 import com.everhomes.server.schema.tables.records.EhContractsRecord;
 import com.everhomes.sharding.ShardIterator;
+import com.everhomes.util.DateHelper;
 import com.everhomes.util.IterationMapReduceCallback;
 
 import org.jooq.DSLContext;
@@ -41,7 +54,6 @@ import com.everhomes.rest.approval.CommonStatus;
 import com.everhomes.sequence.SequenceProvider;
 import com.everhomes.server.schema.Tables;
 import com.everhomes.server.schema.tables.daos.EhContractsDao;
-import com.everhomes.server.schema.tables.pojos.EhContracts;
 import com.everhomes.util.ConvertHelper;
 import org.springframework.util.StringUtils;
 
@@ -460,6 +472,18 @@ public class ContractProviderImpl implements ContractProvider {
 	}
 
 	@Override
+	public String findContractIdByThirdPartyId(String contractId, String code) {
+		DSLContext context = getReadOnlyContext();
+		Long zuolinContractId = context.select(Tables.EH_CONTRACTS.ID)
+				.from(Tables.EH_CONTRACTS)
+				.where(Tables.EH_CONTRACTS.NAMESPACE_CONTRACT_TOKEN.eq(contractId))
+				.and(Tables.EH_CONTRACTS.NAMESPACE_CONTRACT_TYPE.eq(code))
+				.fetchOne(Tables.EH_CONTRACTS.ID);
+		if(zuolinContractId == null) return null;
+		return String.valueOf(zuolinContractId);
+	}
+
+	@Override
 	public void createContractParam(ContractParam param) {
 		Long id = sequenceProvider.getNextSequence(NameMapper.getSequenceDomainFromTablePojo(EhContractParams.class));
 		param.setId(id);
@@ -504,6 +528,44 @@ public class ContractProviderImpl implements ContractProvider {
 		dao.update(param);
 		DaoHelper.publishDaoAction(DaoAction.MODIFY, EhContractParams.class, param.getId());
 
+	}
+
+	@Override
+	public void createContractParamGroupMap(ContractParamGroupMap map) {
+		long id = this.sequenceProvider.getNextSequence(NameMapper.getSequenceDomainFromTablePojo(EhContractParamGroupMap.class));
+		map.setId(id);
+		map.setCreateTime(new Timestamp(DateHelper.currentGMTTime().getTime()));
+
+		DSLContext context = this.dbProvider.getDslContext(AccessSpec.readWriteWith(EhContractParamGroupMap.class, id));
+		EhContractParamGroupMapDao dao = new EhContractParamGroupMapDao(context.configuration());
+		dao.insert(map);
+		DaoHelper.publishDaoAction(DaoAction.CREATE, EhContractParamGroupMap.class, id);
+	}
+
+	@Override
+	public void deleteContractParamGroupMap(ContractParamGroupMap map) {
+		assert(map.getId() != null);
+
+		DSLContext context = this.dbProvider.getDslContext(AccessSpec.readWriteWith(EhContractParamGroupMap.class, map.getId()));
+		EhContractParamGroupMapDao dao = new EhContractParamGroupMapDao(context.configuration());
+		dao.delete(map);
+		DaoHelper.publishDaoAction(DaoAction.MODIFY, EhContractParamGroupMap.class, map.getId());
+	}
+
+	@Override
+	public List<ContractParamGroupMap> listByParamId(Long paramId, Byte groupType) {
+		DSLContext context = dbProvider.getDslContext(AccessSpec.readOnly());
+		SelectQuery<EhContractParamGroupMapRecord> query = context.selectQuery(Tables.EH_CONTRACT_PARAM_GROUP_MAP);
+		query.addConditions(Tables.EH_CONTRACT_PARAM_GROUP_MAP.PARAM_ID.eq(paramId));
+		query.addConditions(Tables.EH_CONTRACT_PARAM_GROUP_MAP.GROUP_TYPE.eq(groupType));
+
+		List<ContractParamGroupMap> result = new ArrayList<>();
+		query.fetch().map((r) -> {
+			result.add(ConvertHelper.convert(r, ContractParamGroupMap.class));
+			return null;
+		});
+
+		return result;
 	}
 
 	@Override

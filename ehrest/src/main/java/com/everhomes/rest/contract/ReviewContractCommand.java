@@ -22,6 +22,16 @@ public class ReviewContractCommand {
 
     private Integer namespaceId;
 
+    private Byte paymentFlag = 0;
+
+    public Byte getPaymentFlag() {
+        return paymentFlag;
+    }
+
+    public void setPaymentFlag(Byte paymentFlag) {
+        this.paymentFlag = paymentFlag;
+    }
+
     public Long getId() {
         return id;
     }

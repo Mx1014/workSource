@@ -404,7 +404,7 @@ public class EnterpriseApplyEntryController extends ControllerBase{
 
 	/**
 	 * <b>URL: /techpark/entry/listLeaseIssuerBuildings</b>
-	 * <p>根据园区号查询楼栋列表</p>
+	 * <p>根据出租发布者楼栋列表</p>
 	 */
 	@RequestMapping("listLeaseIssuerBuildings")
 	@RestReturn(value=ListLeaseIssuerBuildingsResponse.class)
@@ -420,7 +420,7 @@ public class EnterpriseApplyEntryController extends ControllerBase{
 
 	/**
 	 * <b>URL: /techpark/entry/listLeaseIssuerApartments</b>
-	 * <p>根据小区Id、楼栋号和关键字查询门牌(物业)</p>
+	 * <p>根据出租发布者门牌</p>
 	 */
 	@RequestMapping("listLeaseIssuerApartments")
 	@RestReturn(value=AddressDTO.class, collection=true)

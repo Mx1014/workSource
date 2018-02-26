@@ -8,6 +8,7 @@ import com.everhomes.rest.organization.ImportFileTaskDTO;
 import org.springframework.web.multipart.MultipartFile;
 
 import javax.servlet.http.HttpServletResponse;
+import java.util.List;
 
 public interface ArchivesService {
 

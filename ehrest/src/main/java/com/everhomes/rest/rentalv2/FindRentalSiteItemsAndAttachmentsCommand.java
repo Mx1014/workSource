@@ -18,12 +18,22 @@ public class FindRentalSiteItemsAndAttachmentsCommand {
 	private Long rentalSiteId;  
     @ItemType(Long.class)
 	private List<Long> rentalSiteRuleIds;
-	
+
+    private String resourceType;
+
 	@Override
     public String toString() {
         return StringHelper.toJsonString(this);
     }
-  
+
+	public String getResourceType() {
+		return resourceType;
+	}
+
+	public void setResourceType(String resourceType) {
+		this.resourceType = resourceType;
+	}
+
 	public Long getRentalSiteId() {
 		return rentalSiteId;
 	}

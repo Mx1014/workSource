@@ -157,6 +157,7 @@ import java.util.*;
 import java.util.concurrent.ExecutorService;
 import java.util.concurrent.Executors;
 import java.util.stream.Collectors;
+import java.util.stream.Stream;
 
 import static com.everhomes.util.RuntimeErrorException.errorWith;
 
@@ -330,7 +331,9 @@ public class OrganizationServiceImpl implements OrganizationService {
         if(down_organization != null){
             OrganizationDTO orgDto_error = new OrganizationDTO();
             orgDto_error.setErrorCode(OrganizationServiceErrorCode.ERROR_DEPARTMENT_EXISTS);
-            return orgDto_error;
+            LOGGER.error("name repeat, cmd = {}", cmd);
+            throw RuntimeErrorException.errorWith(OrganizationServiceErrorCode.SCOPE, OrganizationServiceErrorCode.ERROR_DEPARTMENT_EXISTS,
+                    "name repeat");
         }
 
         //default show navi, add by sfyan 20160505
@@ -476,31 +479,50 @@ public class OrganizationServiceImpl implements OrganizationService {
     /**
      * 更新组人员
      *
-     * @param addMemberIds
-     * @param delMemberIds
+     * @param addDetailIds
+     * @param delDetailIds
      * @param organization
      */
-    private void batchUpdateOrganizationMember(List<Long> addMemberIds, List<Long> delMemberIds, Organization organization) {
-        if (null != delMemberIds) {
-            for (Long memberId : delMemberIds) {
-                organizationProvider.deleteOrganizationMemberById(memberId);
-            }
+    // modify by lei.lv 为了适配新后台，需要改成用detailId进行创建的形式
+
+    private void batchUpdateOrganizationMember(List<Long> addDetailIds, List<Long> delDetailIds, Organization organization) {
+        if (null != delDetailIds) {
+            organizationProvider.deleteOrganizationMembersByGroupTypeWithDetailIds(UserContext.getCurrentNamespaceId(), delDetailIds, organization.getGroupType());
+//            for (Long memberId : delMemberIds) {
+//                organizationProvider.deleteOrganizationMemberById(memberId);
+//            }
         } else {
-            LOGGER.debug("delete members is null");
+            LOGGER.debug("delDetailIds is null");
         }
 
-        if (null != addMemberIds) {
-            for (Long memberId : addMemberIds) {
-                OrganizationMember member = organizationProvider.findOrganizationMemberById(memberId);
-                if (null != member) {
-                    OrganizationMember organizationMember = organizationProvider.findOrganizationMemberByOrgIdAndToken(member.getContactToken(), organization.getId());
+//        if (null != addMemberIds) {
+//            for (Long memberId : addMemberIds) {
+//                OrganizationMember member = organizationProvider.findOrganizationMemberById(memberId);
+//                if (null != member) {
+//                    OrganizationMember organizationMember = organizationProvider.findOrganizationMemberByOrgIdAndToken(member.getContactToken(), organization.getId());
+//                    if (null == organizationMember) {
+//                        member.setOrganizationId(organization.getId());
+//                        member.setGroupType(organization.getGroupType());
+//                        member.setGroupPath(organization.getPath());
+//                        organizationProvider.createOrganizationMember(member);
+//                    } else {
+//                        LOGGER.debug("organization member already existing. organizationId = {}, contactToken = {}", organizationMember.getOrganizationId(), organizationMember.getContactToken());
+//                    }
+//                }
+//            }
+        Long enterPriseId = getTopEnterpriserIdOfOrganization(organization.getId());
+        if (null != addDetailIds) {
+            for (Long detailId : addDetailIds) {
+                OrganizationMemberDetails detail = organizationProvider.findOrganizationMemberDetailsByDetailId(detailId);
+                if(detail != null){
+                    OrganizationMember organizationMember = organizationProvider.findOrganizationMemberByOrgIdAndToken(detail.getContactToken(), organization.getId());
                     if (null == organizationMember) {
-                        member.setOrganizationId(organization.getId());
-                        member.setGroupType(organization.getGroupType());
-                        member.setGroupPath(organization.getPath());
-                        organizationProvider.createOrganizationMember(member);
-                    } else {
-                        LOGGER.debug("organization member already existing. organizationId = {}, contactToken = {}", organizationMember.getOrganizationId(), organizationMember.getContactToken());
+                        OrganizationMember enterPriseMember = organizationProvider.findOrganizationMemberByOrgIdAndToken(detail.getContactToken(), enterPriseId);
+                        enterPriseMember.setOrganizationId(organization.getId());
+                        enterPriseMember.setGroupType(organization.getGroupType());
+                        enterPriseMember.setGroupPath(organization.getPath());
+                        enterPriseMember.setStatus(OrganizationMemberStatus.ACTIVE.getCode());
+                        organizationProvider.createOrganizationMember(enterPriseMember);
                     }
                 }
             }
@@ -724,6 +746,8 @@ public class OrganizationServiceImpl implements OrganizationService {
         for (Long id : rlt.getIds()) {
             dtos.add(toOrganizationDetailDTO(id, false));
         }
+        dtos = dtos.stream().filter(r->r != null).collect(Collectors.toList());
+        LOGGER.debug("searchEnterprise result = {}", dtos.toString());
         resp.setDtos(dtos);
         return resp;
     }
@@ -7670,6 +7694,7 @@ public class OrganizationServiceImpl implements OrganizationService {
         Map<Long, List<String>> orgAdminAccounts = new HashMap<>();
 
         for (ImportEnterpriseDataDTO data : list) {
+
             CreateEnterpriseCommand enterpriseCommand = new CreateEnterpriseCommand();
             ImportFileResultLog<ImportEnterpriseDataDTO> log = new ImportFileResultLog<>(OrganizationServiceErrorCode.SCOPE);
             if (StringUtils.isEmpty(data.getName())) {
@@ -11477,7 +11502,7 @@ public class OrganizationServiceImpl implements OrganizationService {
         groupTypes.add(OrganizationGroupType.JOB_POSITION.getCode());
         List<Organization> list = new ArrayList<>();
         if(organization.getGroupType().equals(OrganizationGroupType.ENTERPRISE.getCode()) && organization.getParentId() == 0L) {//传入的id为总公司时
-            list = organizationProvider.listOrganizationByGroupTypesAndPath(organization.getPath(),groupTypes, cmd.getKeywords(), cmd.getPageAnchor(), pageSize);
+            list = organizationProvider.listOrganizationByGroupTypesAndPath(organization.getPath() + "%",groupTypes, cmd.getKeywords(), cmd.getPageAnchor(), pageSize);
         }else{
             list = organizationProvider.listOrganizationByGroupTypes(cmd.getId(), groupTypes, cmd.getKeywords(), cmd.getPageAnchor(), pageSize);
         }
@@ -14043,7 +14068,7 @@ public class OrganizationServiceImpl implements OrganizationService {
     
     @Override
     public Organization createUniongroupOrganization(Long organizationId, String name,String groupType) {
-
+        checkNameRepeat(organizationId, name, groupType);
         User user = UserContext.current().getUser();
         Organization parOrg = this.checkOrganization(organizationId);
         Organization organization = ConvertHelper.convert(parOrg, Organization.class);
@@ -14060,6 +14085,17 @@ public class OrganizationServiceImpl implements OrganizationService {
 
         return organization;
     }
+
+    private void checkNameRepeat(Long organizationId, String name, String groupType) {
+        Organization org = organizationProvider.findOrganizationByName(groupType, name, organizationId);
+        if (null != org) {
+            throw RuntimeErrorException.errorWith(OrganizationServiceErrorCode.SCOPE,
+                    OrganizationServiceErrorCode.ERROR_ORG_NAME_REPEAT,  "名称重复错误");
+
+        }
+
+    }
+
     @Override
     public ListOrganizationMemberCommandResponse listOrganizationMemberByPathHavingDetailId(String keywords, Long pageAnchorLong, Long organizationId, Integer pageSize) {
         ListOrganizationMemberCommandResponse response = new ListOrganizationMemberCommandResponse();
@@ -14261,5 +14297,33 @@ public class OrganizationServiceImpl implements OrganizationService {
         }
         return null;
     }
+
+    @Override
+    public ListPMOrganizationsResponse listPMOrganizations(ListPMOrganizationsCommand cmd){
+        List<Organization> organizations = organizationProvider.listPMOrganizations(cmd.getNamespaceId());
+        ListPMOrganizationsResponse response = new ListPMOrganizationsResponse();
+        if(organizations != null){
+            List<OrganizationDTO> collect = organizations.stream().map(r -> ConvertHelper.convert(r, OrganizationDTO.class)).collect(Collectors.toList());
+            response.setDtos(collect);
+        }
+        return response;
+    }
+
+    @Override
+    public List<Long> listDetailIdWithEnterpriseExclude(String keywords, Integer namespaceId, Long enterpriseId, Timestamp checkinTimeStart,
+                                                        Timestamp checkinTimeEnd, Timestamp dissmissTimeStart, Timestamp dissmissTimeEnd,
+                                                        CrossShardListingLocator locator, Integer pageSize,List<Long> notinDetails,List<Long> inDetails) {
+        List groupTypes = new ArrayList();
+        groupTypes.add(OrganizationGroupType.ENTERPRISE.getCode());
+        Organization org = checkOrganization(enterpriseId);
+        List<Organization> underEnterprises = this.organizationProvider.listOrganizationByGroupTypesAndPath(org.getPath() + "/%", groupTypes, null, null, null);
+        List<String> smallPath = new ArrayList();
+        underEnterprises.forEach(r -> smallPath.add(r.getPath()));
+        groupTypes.add(OrganizationGroupType.DEPARTMENT.getCode());
+        return this.organizationProvider.listMemberDetailIdWithExclude(keywords, namespaceId, org.getPath(), smallPath, checkinTimeStart,
+                checkinTimeEnd, dissmissTimeStart, dissmissTimeEnd, locator, pageSize,notinDetails,inDetails,groupTypes);
+    }
+
+
 }
 

@@ -111,6 +111,16 @@ public class BuildingDTO {
 	@ItemType(BuildingAttachmentDTO.class)
 	private List<BuildingAttachmentDTO> attachments;
 
+	private String lastTime;
+
+	public String getLastTime() {
+		return lastTime;
+	}
+
+	public void setLastTime(String lastTime) {
+		this.lastTime = lastTime;
+	}
+
 	public String getPosterUri() {
 		return posterUri;
 	}

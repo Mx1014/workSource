@@ -88,4 +88,6 @@ public interface FlowEventLogProvider {
     List<FlowEventLog> findRejectEventLogsByNodeId(Long nodeId, Long flowCaseId, Long stepCount);
 
     FlowEventLog isHistoryProcessors(Long userId, FlowCase flowCase);
+
+    Integer countProcessorFlowCases(SearchFlowCaseCommand cmd);
 }

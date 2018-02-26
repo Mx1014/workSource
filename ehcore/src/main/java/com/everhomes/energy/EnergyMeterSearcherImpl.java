@@ -1,11 +1,10 @@
 package com.everhomes.energy;
 
 import com.everhomes.configuration.ConfigurationProvider;
+import com.everhomes.locale.LocaleStringService;
 import com.everhomes.repeat.RepeatService;
 import com.everhomes.rest.approval.CommonStatus;
-import com.everhomes.rest.energy.EnergyMeterAddressDTO;
-import com.everhomes.rest.energy.SearchEnergyMeterCommand;
-import com.everhomes.rest.energy.SearchEnergyMeterResponse;
+import com.everhomes.rest.energy.*;
 import com.everhomes.search.AbstractElasticSearch;
 import com.everhomes.search.EnergyMeterSearcher;
 import com.everhomes.search.SearchUtils;
@@ -23,6 +22,7 @@ import org.elasticsearch.client.Requests;
 import org.elasticsearch.common.xcontent.XContentBuilder;
 import org.elasticsearch.common.xcontent.XContentFactory;
 import org.elasticsearch.index.query.*;
+import org.elasticsearch.search.SearchHit;
 import org.elasticsearch.search.sort.FieldSortBuilder;
 import org.elasticsearch.search.sort.SortBuilders;
 import org.elasticsearch.search.sort.SortOrder;
@@ -51,8 +51,8 @@ public class EnergyMeterSearcherImpl extends AbstractElasticSearch implements En
     @Autowired
     private EnergyMeterProvider meterProvider;
 
-    // @Autowired
-    // private LocaleStringService localeStringService;
+     @Autowired
+     private LocaleStringService localeStringService;
 
     @Autowired
     private EnergyConsumptionService energyConsumptionService;
@@ -115,6 +115,13 @@ public class EnergyMeterSearcherImpl extends AbstractElasticSearch implements En
             if(existAddress != null && existAddress.size() > 0) {
                 builder.field("buildingId", existAddress.get(0).getBuildingId());
                 builder.field("addressId", existAddress.get(0).getAddressId());
+                builder.field("buildingName", existAddress.get(0).getBuildingName());
+                builder.field("apartmentName", existAddress.get(0).getApartmentName());
+            } else {
+                builder.field("buildingId", 0);
+                builder.field("addressId", 0);
+                builder.field("buildingName", "");
+                builder.field("apartmentName", "");
             }
 
             EnergyMeterReadingLog lastReading = meterReadingLogProvider.findLastReadingLogByMeterId(meter.getNamespaceId(), meter.getId());
@@ -169,8 +176,7 @@ public class EnergyMeterSearcherImpl extends AbstractElasticSearch implements En
         LOGGER.info("sync for energy meter ok");
     }
 
-    @Override
-    public List<Long> getMeterIds(SearchEnergyMeterCommand cmd) {
+    private SearchResponse query(SearchEnergyMeterCommand cmd) {
         SearchRequestBuilder builder = getClient().prepareSearch(getIndexName()).setTypes(getIndexType());
         QueryBuilder qb;
         if(cmd.getKeyword() == null || cmd.getKeyword().isEmpty()) {
@@ -180,27 +186,7 @@ public class EnergyMeterSearcherImpl extends AbstractElasticSearch implements En
 //                    .field("meterNumber", 5.0f)
                     .field("name", 5.0f);
         }
-        /*FilterBuilder fb = new AndFilterBuilder();
-        if (cmd.getCommunityId() != null) {
-            fb = FilterBuilders.termFilter("communityId", cmd.getCommunityId());
-        }
-        if (cmd.getMeterType() != null) {
-            fb = FilterBuilders.andFilter(fb, FilterBuilders.termFilter("meterType", cmd.getMeterType()));
-        }
-        if (cmd.getBillCategoryId() != null) {
-            fb = FilterBuilders.andFilter(fb, FilterBuilders.termFilter("billCategoryId", cmd.getBillCategoryId()));
-        }
-        if (cmd.getServiceCategoryId() != null) {
-            fb = FilterBuilders.andFilter(fb, FilterBuilders.termFilter("serviceCategoryId", cmd.getServiceCategoryId()));
-        }
-        if (cmd.getStatus() != null) {
-            fb = FilterBuilders.andFilter(fb, FilterBuilders.termFilter("status", cmd.getStatus()));
-        }
-        int pageSize = PaginationConfigHelper.getPageSize(configProvider, cmd.getPageSize());
-        Long anchor = 0L;
-        if(cmd.getPageAnchor() != null) {
-            anchor = cmd.getPageAnchor();
-        }*/
+
         List<FilterBuilder> filterBuilders = new ArrayList<>();
         //编号精确搜索 by xiongying20170525
         if (!StringUtils.isNullOrEmpty(cmd.getMeterNumber())) {
@@ -277,8 +263,14 @@ public class EnergyMeterSearcherImpl extends AbstractElasticSearch implements En
         }
 
         SearchResponse rsp = builder.execute().actionGet();
-        List<Long> ids = getIds(rsp);
 
+        return rsp;
+    }
+
+    @Override
+    public List<Long> getMeterIds(SearchEnergyMeterCommand cmd) {
+        SearchResponse rsp = query(cmd);
+        List<Long> ids = getIds(rsp);
         return ids;
     }
 
@@ -301,7 +293,15 @@ public class EnergyMeterSearcherImpl extends AbstractElasticSearch implements En
         return response;
     }
 
-    /*private EnergyMeterDTO toMeterDTO(EnergyMeter meter) {
+    @Override
+    public SearchEnergyMeterResponse querySimpleEnergyMeters(SearchEnergyMeterCommand cmd) {
+        SearchResponse rsp = query(cmd);
+        SearchEnergyMeterResponse response = new SearchEnergyMeterResponse();
+        List<EnergyMeterDTO> meters = getSimpleDTOs(rsp);
+        response.setMeters(meters);
+        return response;
+    }
+/*private EnergyMeterDTO toMeterDTO(EnergyMeter meter) {
         EnergyMeterDTO dto = ConvertHelper.convert(meter, EnergyMeterDTO.class);
         String meterStatusLocale = localeStringService.getLocalizedString(EnergyLocalStringCode.SCOPE_METER_STATUS,
                 String.valueOf(meter.getStatus()), UserContext.current().getUser().getLocale(), "");
@@ -312,5 +312,47 @@ public class EnergyMeterSearcherImpl extends AbstractElasticSearch implements En
     @Override
     public String getIndexType() {
         return SearchUtils.ENERGY_METER;
+    }
+
+    private List<EnergyMeterDTO> getSimpleDTOs(SearchResponse rsp) {
+        List<EnergyMeterDTO> dtos = new ArrayList<>();
+        SearchHit[] docs = rsp.getHits().getHits();
+        for (SearchHit sd : docs) {
+            try {
+                EnergyMeterDTO dto = new EnergyMeterDTO();
+                dto.setId(Long.parseLong(sd.getId()));
+                Map<String, Object> source = sd.getSource();
+                dto.setName(String.valueOf(source.get("name")));
+                dto.setMeterNumber(String.valueOf(source.get("meterNumber")));
+
+                List<EnergyMeterAddressDTO> addresses = new ArrayList<>();
+                EnergyMeterAddressDTO addressDTO = new EnergyMeterAddressDTO();
+                addressDTO.setApartmentName(String.valueOf(source.get("apartmentName")));
+                addressDTO.setBuildingName(String.valueOf(source.get("buildingName")));
+                addressDTO.setBuildingId(SearchUtils.getLongField(source.get("buildingId")));
+                addressDTO.setAddressId(SearchUtils.getLongField(source.get("addressId")));
+                addresses.add(addressDTO);
+                dto.setAddresses(addresses);
+
+                // 表的类型
+                String meterType = localeStringService.getLocalizedString(EnergyLocalStringCode.SCOPE_METER_TYPE, String.valueOf(source.get("meterType")), currLocale(), "");
+                dto.setMeterType(meterType);
+
+                // 表的状态
+                String meterStatus = localeStringService.getLocalizedString(EnergyLocalStringCode.SCOPE_METER_STATUS, String.valueOf(source.get("status")), currLocale(), "");
+                dto.setStatus(meterStatus);
+                dtos.add(dto);
+
+            }
+            catch(Exception ex) {
+                LOGGER.info("getTopicIds error " + ex.getMessage());
+            }
+        }
+
+        return dtos;
+    }
+
+    private String currLocale() {
+        return UserContext.current().getUser().getLocale();
     }
 }

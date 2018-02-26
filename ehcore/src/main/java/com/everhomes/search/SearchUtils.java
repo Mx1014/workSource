@@ -26,7 +26,9 @@ public class SearchUtils {
     public static final String NEWS = "news";
 
     public static final String EQUIPMENTTASKINDEXTYPE = "equipmentTask";
-    
+
+    public static final String EQUIPMENTPLANINDEXTYPE = "equipmentPlan";
+
     public static final String EQUIPMENTACCESSORYINDEXTYPE = "equipmentAccessory";
     
     public static final String EQUIPMENTINDEXTYPE = "equipment";
@@ -72,7 +74,8 @@ public class SearchUtils {
     public static final String UNIONGROUP_DETAILS= "uniongroupDetails";
     public static final String ENERGY_PLAN= "energyPlan";
     public static final String ENERGY_TASK= "energyTask";
-    public static final String MESSAGE_RECORD= "messageRecord";
+    public static final String PAYMENT_APPLICATION= "paymentApplication";
+	public static final String MESSAGE_RECORD= "messageRecord";
 
     public static Long getLongField(Object o) {
         Long v = -1l;

@@ -6,6 +6,7 @@ import java.util.ArrayList;
 import java.util.List;
 
 import org.jooq.DSLContext;
+import org.jooq.DeleteQuery;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -52,11 +53,16 @@ public class PortalContentScopeProviderImpl implements PortalContentScopeProvide
 		if(portalContentScopes.size() == 0){
 			return;
 		}
-		Long id = sequenceProvider.getNextSequenceBlock(NameMapper.getSequenceDomainFromTablePojo(EhPortalContentScopes.class), (long)portalContentScopes.size());
+		/**
+		 * 有id使用原来的id，没有则生成新的
+		 */
+		Long id = sequenceProvider.getNextSequenceBlock(NameMapper.getSequenceDomainFromTablePojo(EhPortalContentScopes.class), (long)portalContentScopes.size() + 1);
 		List<EhPortalContentScopes> scopes = new ArrayList<>();
 		for (PortalContentScope scope: portalContentScopes) {
-			id ++;
-			scope.setId(id);
+			if(scope.getId() == null){
+				id ++;
+				scope.setId(id);
+			}
 			scope.setCreateTime(new Timestamp(DateHelper.currentGMTTime().getTime()));
 			scope.setUpdateTime(scope.getCreateTime());
 			scopes.add(ConvertHelper.convert(scope, EhPortalContentScopes.class));
@@ -99,6 +105,15 @@ public class PortalContentScopeProviderImpl implements PortalContentScopeProvide
 				.and(Tables.EH_PORTAL_CONTENT_SCOPES.CONTENT_ID.eq(contentId))
 				.orderBy(Tables.EH_PORTAL_CONTENT_SCOPES.ID.asc())
 				.fetch().map(r -> ConvertHelper.convert(r, PortalContentScope.class));
+	}
+
+
+	@Override
+	public void deleteByVersionId(Long versionId){
+		DeleteQuery query = getReadWriteContext().deleteQuery(Tables.EH_PORTAL_CONTENT_SCOPES);
+		query.addConditions(Tables.EH_PORTAL_CONTENT_SCOPES.VERSION_ID.eq(versionId));
+		query.execute();
+		DaoHelper.publishDaoAction(DaoAction.MODIFY, PortalContentScope.class, null);
 	}
 
 	@Override

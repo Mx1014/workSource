@@ -1,12 +1,11 @@
 package com.everhomes.rest.quality;
 
-import java.util.List;
-
-import javax.validation.constraints.NotNull;
-
 import com.everhomes.discover.ItemType;
 import com.everhomes.rest.forum.AttachmentDescriptor;
 import com.everhomes.util.StringHelper;
+
+import javax.validation.constraints.NotNull;
+import java.util.List;
 
 /**
  * <ul>
@@ -18,6 +17,7 @@ import com.everhomes.util.StringHelper;
  *  <li>operatorType: 整改执行人类型</li>
  *  <li>operatorId: 整改执行人id</li>
  *  <li>itemResults: 规范事项  参考{@link com.everhomes.rest.quality.ReportSpecificationItemResultsDTO}</li>
+ *  <li>namespaceId: namespaceId</li>
  * </ul>
  */
 public class ReportVerificationResultCommand {
@@ -39,6 +39,8 @@ public class ReportVerificationResultCommand {
 	private Long operatorId;
 	
 	private String message;
+
+	private Integer namespaceId;
 	
 	@ItemType(ReportSpecificationItemResultsDTO.class)
 	private List<ReportSpecificationItemResultsDTO> itemResults;
@@ -105,6 +107,14 @@ public class ReportVerificationResultCommand {
 
 	public void setItemResults(List<ReportSpecificationItemResultsDTO> itemResults) {
 		this.itemResults = itemResults;
+	}
+
+	public Integer getNamespaceId() {
+		return namespaceId;
+	}
+
+	public void setNamespaceId(Integer namespaceId) {
+		this.namespaceId = namespaceId;
 	}
 
 	@Override

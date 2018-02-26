@@ -17,7 +17,7 @@ public enum PayMode {
 		this.code = code;
 	}
 
-	public Byte getCode() {
+	public byte getCode() {
 		return code;
 	}
 

@@ -68,6 +68,7 @@ public class ContractController extends ControllerBase {
 			ListContractsCommand command = ConvertHelper.convert(cmd, ListContractsCommand.class);
 			return new RestResponse(contractService.listContracts(command));
 		}
+		cmd.setPaymentFlag((byte)0);
 		return new RestResponse(contractSearcher.queryContracts(cmd));
 	}
 
@@ -288,8 +289,7 @@ public class ContractController extends ControllerBase {
 	@RestReturn(value = String.class)
 	public RestResponse syncContractsFromThirdPart(@Valid SyncContractsFromThirdPartCommand cmd) {
 		ContractService contractService = getContractService(UserContext.getCurrentNamespaceId(cmd.getNamespaceId()));
-		contractService.syncContractsFromThirdPart(cmd);
-		RestResponse response = new RestResponse();
+		RestResponse response = new RestResponse(contractService.syncContractsFromThirdPart(cmd));
 		response.setErrorCode(ErrorCodes.SUCCESS);
 		response.setErrorDescription("OK");
 		return response;
@@ -298,6 +298,21 @@ public class ContractController extends ControllerBase {
 	private ContractService getContractService(Integer namespaceId) {
 		String handler = configurationProvider.getValue(namespaceId, "contractService", "");
 		return PlatformContext.getComponent(ContractService.CONTRACT_PREFIX + handler);
+	}
+
+	//通过供应商查看合同 -- by wentian
+	/**
+	 * <b>URL: /contract/listContractsBySupplier</b>
+	 * <p>通过供应商查看合同列表</p>
+	 */
+	@RequestMapping("listContractsBySupplier")
+	@RestReturn(value = ListContractsBySupplierResponse.class)
+	public RestResponse listContractsBySupplier(ListContractsBySupplierCommand cmd) {
+		ContractService contractService = getContractService(UserContext.getCurrentNamespaceId(0));
+		RestResponse response = new RestResponse();
+		response.setErrorCode(ErrorCodes.SUCCESS);
+		response.setErrorDescription("OK");
+		return response;
 	}
 
 }

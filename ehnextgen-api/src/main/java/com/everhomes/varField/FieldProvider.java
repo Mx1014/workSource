@@ -20,12 +20,14 @@ public interface FieldProvider {
     void saveFieldGroups(String customerType, Long customerId, List<Object> objects, String simpleName);
 
     String findClassNameByGroupDisplayName(String groupDisplayName);
+    FieldGroup findGroupByGroupDisplayName(String groupDisplayName);
 
     List<FieldItem> listFieldItems(Long fieldId);
     List<ScopeFieldItem> listScopeFieldItems(Long fieldId, Integer namespaceId, Long communityId);
     Map<Long, ScopeFieldItem> listScopeFieldsItems(List<Long> fieldIds, Integer namespaceId, Long communityId);
     ScopeFieldItem findScopeFieldItemByFieldItemId(Integer namespaceId, Long communityId, Long itemId);
     ScopeFieldItem findScopeFieldItemByDisplayName(Integer namespaceId, Long communityId, String moduleName, String displayName);
+    ScopeFieldItem findScopeFieldItemByDisplayName(Integer namespaceId, Long communityId, String moduleName, Long fieldId, String displayName);
     ScopeFieldItem findScopeFieldItemByBusinessValue(Integer namespaceId, Long communityId, String moduleName, Long fieldId, Byte businessValue);
     ScopeField findScopeField(Integer namespaceId, Long communityId, Long fieldId);
 
@@ -44,5 +46,6 @@ public interface FieldProvider {
     ScopeFieldItem findScopeFieldItem(Long id, Integer namespaceId, Long communityId);
 
     void createFieldItem(FieldItem item);
+    ScopeField findScopeField(Integer namespaceId, Long communityId, Long groupId, String fieldDisplayName);
 
 }

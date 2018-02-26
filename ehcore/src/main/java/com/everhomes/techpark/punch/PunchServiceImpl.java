@@ -339,7 +339,7 @@ public class PunchServiceImpl implements PunchService {
 		ListServiceModuleAppsResponse apps = portalService.listServiceModuleAppsWithConditon(cmd);
 		Long appId = null;
 		if(null != apps && apps.getServiceModuleApps().size() > 0){
-			appId = apps.getServiceModuleApps().get(0).getId();
+			appId = apps.getServiceModuleApps().get(0).getOriginId();
 		}
 		if (null != apps) {
 			if(userPrivilegeMgr.checkUserPrivilege(UserContext.currentUserId(), EntityType.ORGANIZATIONS.getCode(), orgId,
@@ -4287,7 +4287,8 @@ public class PunchServiceImpl implements PunchService {
 		}
 		return response;
 	}
-	private OrganizationMember findOrganizationMemberByOrgIdAndUId(Long targetId, String path) {
+	@Override
+	public OrganizationMember findOrganizationMemberByOrgIdAndUId(Long targetId, String path) {
 		List<OrganizationMember> members = this.organizationProvider.listOrganizationMemberByPath(null, path, null, null, new CrossShardListingLocator(), 1000000);
 		if(null== members || members.size() == 0)
 			return null;
@@ -8606,7 +8607,7 @@ public class PunchServiceImpl implements PunchService {
         String key = cmd.getQrToken().trim();
         ValueOperations<String, String> valueOperations = getValueOperations(key);
         int timeout = configurationProvider.getIntValue(PunchConstants.PUNCH_QRCODE_TIMEOUT, 15);
-        TimeUnit unit = TimeUnit.MINUTES;;
+        TimeUnit unit = TimeUnit.MINUTES;
         // 先放一个和key一样的值,表示这个人key有效
         valueOperations.set(key, key, timeout, unit);
 //		try{

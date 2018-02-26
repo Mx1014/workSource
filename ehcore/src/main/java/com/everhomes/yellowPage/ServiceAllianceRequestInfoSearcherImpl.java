@@ -41,6 +41,7 @@ import org.springframework.stereotype.Component;
 import com.alibaba.fastjson.JSON;
 import com.alibaba.fastjson.JSONObject;
 import com.everhomes.configuration.ConfigurationProvider;
+import com.everhomes.constants.ErrorCodes;
 import com.everhomes.flow.FlowCaseDetail;
 import com.everhomes.flow.FlowCaseProvider;
 import com.everhomes.flow.FlowService;
@@ -63,6 +64,8 @@ import com.everhomes.rest.flow.FlowCaseEntityType;
 import com.everhomes.rest.flow.FlowCaseFileDTO;
 import com.everhomes.rest.flow.FlowCaseFileValue;
 import com.everhomes.rest.flow.FlowCaseSearchType;
+import com.everhomes.rest.flow.FlowCaseStatus;
+import com.everhomes.rest.flow.FlowCaseType;
 import com.everhomes.rest.flow.FlowUserType;
 import com.everhomes.rest.flow.SearchFlowCaseCommand;
 import com.everhomes.rest.general_approval.GeneralFormDataSourceType;
@@ -81,6 +84,7 @@ import com.everhomes.rest.yellowPage.SearchRequestInfoCommand;
 import com.everhomes.rest.yellowPage.SearchRequestInfoResponse;
 import com.everhomes.rest.yellowPage.ServiceAllianceBelongType;
 import com.everhomes.rest.yellowPage.ServiceAllianceRequestNotificationTemplateCode;
+import com.everhomes.rest.yellowPage.ServiceAllianceWorkFlowStatus;
 import com.everhomes.search.AbstractElasticSearch;
 import com.everhomes.search.SearchUtils;
 import com.everhomes.search.ServiceAllianceRequestInfoSearcher;
@@ -207,13 +211,21 @@ public class ServiceAllianceRequestInfoSearcherImpl extends AbstractElasticSearc
                 ServiceAllianceCategories  parentPage = yellowPageProvider.findCategoryById(yellowPage.getParentId());
                 request.setServiceAllianceId(yellowPageId);
                 request.setType(yellowPage.getParentId());
+                
+                request.setSecondCategoryId(yellowPage.getCategoryId());
+                request.setSecondCategoryName(yellowPage.getServiceType());
 
             }
             //服务联盟加一个申请
             PostApprovalFormItem organizationVal = getFormFieldDTO(GeneralFormDataSourceType.ORGANIZATION_ID.getCode(),values);
 
             User user = this.userProvider.findUserById(flowCase.getApplyUserId());
-            UserIdentifier identifier = userProvider.findClaimedIdentifierByOwnerAndType(user.getId(), IdentifierType.MOBILE.getCode());
+            if(user!=null) {
+                UserIdentifier identifier = userProvider.findClaimedIdentifierByOwnerAndType(user.getId(), IdentifierType.MOBILE.getCode());
+                if (identifier != null) {
+                    request.setCreatorMobile(identifier.getIdentifierToken());
+                }
+            }
             request.setJumpType(2L);
             request.setCreateTime(new Timestamp(DateHelper.currentGMTTime().getTime()));
             if(lists!=null && lists.size()>0) {
@@ -226,7 +238,7 @@ public class ServiceAllianceRequestInfoSearcherImpl extends AbstractElasticSearc
                     request.setCreatorOrganizationId(Long.valueOf(organizationvalue.getText()));
                 }
             }
-            request.setCreatorMobile(identifier.getIdentifierToken());
+
             if (EntityType.COMMUNITY.getCode().equals(flowCase.getProjectType()) || "community".equals(flowCase.getProjectType())
                     || EhCommunities.class.getName().equals(flowCase.getProjectType())){
             	// bydengs,修改owner
@@ -249,6 +261,13 @@ public class ServiceAllianceRequestInfoSearcherImpl extends AbstractElasticSearc
             request.setId(flowCase.getId());
             request.setCreatorUid(user.getId());
             request.setTemplateType("flowCase");
+           
+            
+            Byte status = flowCase.getStatus();
+    		if(FlowCaseType.fromCode(flowCase.getCaseType()) == FlowCaseType.DUMB){
+    			status = ServiceAllianceWorkFlowStatus.NONE.getCode();
+    		}
+    		request.setWorkflowStatus(status);
             feedDoc(request);
             LOGGER.debug("request = "+request);
         }
@@ -355,6 +374,10 @@ public class ServiceAllianceRequestInfoSearcherImpl extends AbstractElasticSearc
             ServiceAllianceRequestInfo requestInfo = ConvertHelper.convert(request, ServiceAllianceRequestInfo.class);
             requestInfo.setTemplateType(CustomRequestConstants.SERVICE_ALLIANCE_REQUEST_CUSTOM);
             requestInfo.setJumpType(JumpType.TEMPLATE.getCode());
+            requestInfo.setSecondCategoryId(request.getCategoryId());
+            ServiceAllianceCategories categories = yellowPageProvider.findCategoryById(request.getCategoryId());
+            requestInfo.setSecondCategoryName(categories==null?null:categories.getName());
+            requestInfo.setWorkflowStatus(ServiceAllianceWorkFlowStatus.NONE.getCode());
             XContentBuilder source = createDoc(requestInfo);
             if(null != source) {
                 LOGGER.info("service alliance request id:" + request.getId()+"-EhServiceAllianceRequests");
@@ -376,6 +399,10 @@ public class ServiceAllianceRequestInfoSearcherImpl extends AbstractElasticSearc
             ServiceAllianceRequestInfo requestInfo = ConvertHelper.convert(request, ServiceAllianceRequestInfo.class);
             requestInfo.setTemplateType(CustomRequestConstants.INVEST_REQUEST_CUSTOM);
             requestInfo.setJumpType(JumpType.TEMPLATE.getCode());
+            requestInfo.setSecondCategoryId(request.getCategoryId());
+            ServiceAllianceCategories categories = yellowPageProvider.findCategoryById(request.getCategoryId());
+            requestInfo.setSecondCategoryName(categories==null?null:categories.getName());
+            requestInfo.setWorkflowStatus(ServiceAllianceWorkFlowStatus.NONE.getCode());
             XContentBuilder source = createDoc(requestInfo);
             if(null != source) {
                 LOGGER.info("service alliance invest request id:" + request.getId()+"-EhServiceAllianceInvestRequests");
@@ -397,6 +424,10 @@ public class ServiceAllianceRequestInfoSearcherImpl extends AbstractElasticSearc
             ServiceAllianceRequestInfo requestInfo = ConvertHelper.convert(request, ServiceAllianceRequestInfo.class);
             requestInfo.setTemplateType(CustomRequestConstants.APARTMENT_REQUEST_CUSTOM);
             requestInfo.setJumpType(JumpType.TEMPLATE.getCode());
+            requestInfo.setSecondCategoryId(request.getCategoryId());
+            ServiceAllianceCategories categories = yellowPageProvider.findCategoryById(request.getCategoryId());
+            requestInfo.setSecondCategoryName(categories==null?null:categories.getName());
+            requestInfo.setWorkflowStatus(ServiceAllianceWorkFlowStatus.NONE.getCode());
             XContentBuilder source = createDoc(requestInfo);
             if(null != source) {
                 LOGGER.info("service alliance apartment request id:" + request.getId() + "-EhServiceAllianceApartmentRequests");
@@ -417,6 +448,10 @@ public class ServiceAllianceRequestInfoSearcherImpl extends AbstractElasticSearc
             ServiceAllianceRequestInfo requestInfo = ConvertHelper.convert(request, ServiceAllianceRequestInfo.class);
             requestInfo.setTemplateType(CustomRequestConstants.SETTLE_REQUEST_CUSTOM);
             requestInfo.setJumpType(JumpType.TEMPLATE.getCode());
+            requestInfo.setSecondCategoryId(request.getCategoryId());
+            ServiceAllianceCategories categories = yellowPageProvider.findCategoryById(request.getCategoryId());
+            requestInfo.setSecondCategoryName(categories==null?null:categories.getName());
+            requestInfo.setWorkflowStatus(ServiceAllianceWorkFlowStatus.NONE.getCode());
             XContentBuilder source = createDoc(requestInfo);
             if(null != source) {
                 LOGGER.info("settle request id:" + request.getId() + "-EhSettleRequests");
@@ -438,6 +473,10 @@ public class ServiceAllianceRequestInfoSearcherImpl extends AbstractElasticSearc
             ServiceAllianceRequestInfo requestInfo = ConvertHelper.convert(request, ServiceAllianceRequestInfo.class);
             requestInfo.setTemplateType(CustomRequestConstants.RESERVE_REQUEST_CUSTOM);
             requestInfo.setJumpType(JumpType.TEMPLATE.getCode());
+            requestInfo.setSecondCategoryId(request.getCategoryId());
+            ServiceAllianceCategories categories = yellowPageProvider.findCategoryById(request.getCategoryId());
+            requestInfo.setSecondCategoryName(categories==null?null:categories.getName());
+            requestInfo.setWorkflowStatus(ServiceAllianceWorkFlowStatus.NONE.getCode());
             XContentBuilder source = createDoc(requestInfo);
             if(null != source) {
                 LOGGER.info("reserve request id:" + request.getId() + "-" + request.getTemplateType());
@@ -498,6 +537,12 @@ public class ServiceAllianceRequestInfoSearcherImpl extends AbstractElasticSearc
 
         if(cmd.getCategoryId() != null)
         	fb = FilterBuilders.andFilter(fb, FilterBuilders.termFilter("type", cmd.getCategoryId()));
+        
+        if(cmd.getSecondCategoryId() != null)
+        	fb = FilterBuilders.andFilter(fb, FilterBuilders.termFilter("secondCategoryId", cmd.getSecondCategoryId()));
+        
+        if(cmd.getWorkflowStatus() != null)
+        	fb = FilterBuilders.andFilter(fb, FilterBuilders.termFilter("workflowStatus", cmd.getWorkflowStatus()));
         
         RangeFilterBuilder rf = new RangeFilterBuilder("createDate");
         if(cmd.getStartDay() != null) {
@@ -579,6 +624,8 @@ public class ServiceAllianceRequestInfoSearcherImpl extends AbstractElasticSearc
 						if(val!=null){
 							GeneralForm form = this.generalFormProvider.getActiveGeneralFormByOriginIdAndVersion(
 									val.getFormOriginId(), val.getFormVersion());
+							if(form==null)
+								continue;
 							//使用表单名称+表单id作为sheet的名称 by dengs 20170510
 							requestInfo.setTemplateType("flowCase"+form.getId());
 							templateMap.put("flowCase"+form.getId(), form.getFormName()+form.getId());
@@ -591,6 +638,7 @@ public class ServiceAllianceRequestInfoSearcherImpl extends AbstractElasticSearc
 			}
 			
 			//生成excel并，输出到httpResponse
+			ServiceAllianceCategories category = yellowPageProvider.findCategoryById(cmd.getCategoryId());
 			try(
 				XSSFWorkbook wb = new XSSFWorkbook();
 				ByteArrayOutputStream out = new ByteArrayOutputStream();
@@ -599,9 +647,15 @@ public class ServiceAllianceRequestInfoSearcherImpl extends AbstractElasticSearc
 					createXSSFWorkbook(wb, templateMap.get(entry.getKey()), entry.getValue());
 				}
 				wb.write(out);
-			    DownloadUtil.download(out, httpResponse);
+				if(category!=null){
+					DownloadUtil.download(out, httpResponse,category.getName()+"apply records");
+				}else{
+					DownloadUtil.download(out, httpResponse);
+				}
 			} catch (Exception e) {
 				LOGGER.error("export error, e = {}", e);
+				throw RuntimeErrorException.errorWith(ErrorCodes.SCOPE_GENERAL, ErrorCodes.ERROR_GENERAL_EXCEPTION, 
+	                    e.getMessage());
 			} 
 		}
 	}
@@ -843,7 +897,10 @@ public class ServiceAllianceRequestInfoSearcherImpl extends AbstractElasticSearc
 				localeStringService.getLocalizedString(ServiceAllianceRequestNotificationTemplateCode.SCOPE, 
 						ServiceAllianceRequestNotificationTemplateCode.APPLY_STRING, 
 						UserContext.current().getUser().getLocale(),""):templateName;
-		XSSFSheet sheet = wb.createSheet(templateName);
+		XSSFSheet sheet = wb.getSheet(templateName);
+		if(sheet==null){
+			sheet = wb.createSheet(templateName);
+		}
         return sheet;
 	}
 
@@ -969,30 +1026,27 @@ public class ServiceAllianceRequestInfoSearcherImpl extends AbstractElasticSearc
             b.field("jumpType", request.getJumpType());
             b.field("templateType", request.getTemplateType());
             b.field("type", request.getType());
-            //by dengs,修改owner
-//            if (ServiceAllianceBelongType.COMMUNITY.getCode().equals(request.getOwnerType())){
-//                b.field("ownerType", EntityType.ORGANIZATIONS.getCode());
-//                List <Organization> organizations = organizationProvider.findOrganizationByCommunityId(request.getOwnerId());
-//                if(organizations!=null && organizations.size()>0) {
-//                    b.field("ownerId", organizations.get(0).getId());
-//                }
-//            }else{
             b.field("ownerType", request.getOwnerType());
             b.field("ownerId", request.getOwnerId());
-//            }
             b.field("creatorName", request.getCreatorName());
             b.field("creatorOrganizationId", request.getCreatorOrganizationId());
             b.field("creatorMobile", request.getCreatorMobile());
-            b.field("createTime", request.getCreateTime().getTime());
+            if(request.getCreateTime()!=null){
+            	b.field("createTime", request.getCreateTime().getTime());
+            	 String d = format.format(request.getCreateTime().getTime());  
+                 try {
+     				Date date=format.parse(d);
+     				b.field("createDate", date.getTime());
+     			} catch (Exception e) {
+     				e.printStackTrace();
+     			}
+            }
             b.field("creatorUid", request.getCreatorUid()); 
             b.field("flowCaseId", request.getFlowCaseId());
-            String d = format.format(request.getCreateTime().getTime());  
-            try {
-				Date date=format.parse(d);
-				b.field("createDate", date.getTime());
-			} catch (Exception e) {
-				e.printStackTrace();
-			}
+            b.field("secondCategoryId", request.getSecondCategoryId());
+            b.field("secondCategoryName", request.getSecondCategoryName());
+            b.field("workflowStatus", request.getWorkflowStatus());
+           
             
 			Organization org = organizationProvider.findOrganizationById(request.getCreatorOrganizationId());
           
@@ -1031,7 +1085,10 @@ public class ServiceAllianceRequestInfoSearcherImpl extends AbstractElasticSearc
             	dto.setCreatorMobile(String.valueOf(source.get("creatorMobile")));
             	dto.setCreatorOrganization(String.valueOf(source.get("creatorOrganization")));
             	dto.setServiceOrganization(String.valueOf(source.get("serviceOrganization")));
+            	dto.setSecondCategoryName(String.valueOf(source.get("secondCategoryName")));
             	dto.setFlowCaseId(SearchUtils.getLongField(source.get("flowCaseId")));
+            	dto.setSecondCategoryId(SearchUtils.getLongField(source.get("secondCategoryId")));
+            	dto.setWorkflowStatus(Byte.valueOf(String.valueOf(source.get("workflowStatus"))));
             	Long time = SearchUtils.getLongField(source.get("createDate"));  
                 String day = format.format(time);
             	dto.setCreateTime(day);

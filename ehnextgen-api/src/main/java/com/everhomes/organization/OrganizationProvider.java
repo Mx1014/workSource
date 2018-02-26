@@ -313,6 +313,8 @@ public interface OrganizationProvider {
 	Organization findOrganizationByNameAndNamespaceIdForJindie(String name, Integer namespaceId, String namespaceToken,
 															   String namespaceType);
 
+	List<Organization> listOrganizationByGroupTypesOrderByLevel(String superiorPath, List<String> groupTypes);
+
 	List<Organization> listOrganizationByGroupType(Long parentId, OrganizationGroupType groupType);
 
 	List<OrganizationMember> listOrganizationMemberByPath(String keywords, String path, List<String> groupTypes, VisibleFlag visibleFlag, CrossShardListingLocator locator,Integer pageSize);
@@ -443,6 +445,8 @@ public interface OrganizationProvider {
 
 	Set<Long> listMemberDetailIdWithExclude(Integer namespaceId, String big_path, List<String> small_path);
 
+	List<Long> listMemberDetailIdWithExclude(String keywords, Integer namespaceId, String big_path, List<String> small_path, Timestamp checkinTimeStart, Timestamp checkinTimeEnd, Timestamp dissmissTimeStart, Timestamp dissmissTimeEnd, CrossShardListingLocator locator, Integer pageSize, List<Long> notinDetails, List<Long> inDetails,List<String> groupTypes );
+
 	boolean checkIfLastOnNode(Integer namespaceId, Long organizationId, String contactToken, String path);
 
 	boolean checkOneOfOrganizationWithContextToken(String path, String contactToken);
@@ -537,4 +541,16 @@ public interface OrganizationProvider {
 	void createCommunityOrganizationDetailDisplay(CommunityOrganizationDetailDisplay detailDisplay);
 	void updateCommunityOrganizationDetailDisplay(CommunityOrganizationDetailDisplay detailDisplay);
 	List checkOrgExistInOrgOrPaths(Integer namespaceId, Long organizationId, List<Long> orgIds, List<String> orgPaths);
+ 
+	
+	List<OrganizationMemberDetails> listOrganizationMemberDetails(Long ownerId);
+
+	Integer queryOrganizationPersonnelCounts(ListingLocator locator, Long organizationId, ListingQueryBuilderCallback queryBuilderCallback);
+	
+	List<OrganizationMember> queryOrganizationPersonnels(ListingLocator locator, Long organizationId, ListingQueryBuilderCallback queryBuilderCallback);
+ 
+
+	List<Organization> listPMOrganizations(Integer namespaceId);
+
+	Organization findOrganizationByName(String groupType, String name, Long directlyEnterpriseId);
 }
