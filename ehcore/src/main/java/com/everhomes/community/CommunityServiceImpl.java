@@ -1385,8 +1385,8 @@ public class CommunityServiceImpl implements CommunityService {
 	@Override
 	public CommunityAuthUserAddressResponse listCommunityAuthUserAddress(CommunityAuthUserAddressCommand cmd){
 		// Long communityId = cmd.getCommunityId();
-        Integer namespaceId = UserContext.getCurrentNamespaceId();
-        List<NamespaceResource> resourceList = namespaceResourceProvider.listResourceByNamespace(namespaceId, NamespaceResourceType.COMMUNITY);
+//        Integer namespaceId = UserContext.getCurrentNamespaceId();
+        List<NamespaceResource> resourceList = namespaceResourceProvider.listResourceByNamespace(cmd.getNamespaceId(), NamespaceResourceType.COMMUNITY);
         if (resourceList == null) {
             return new CommunityAuthUserAddressResponse();
         }
