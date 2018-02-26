@@ -115,12 +115,12 @@ public class SalaryEmployeeOriginValProviderImpl implements SalaryEmployeeOrigin
 	public void setValueBlank(Long ownerId) {
 		getReadWriteContext().update(Tables.EH_SALARY_EMPLOYEE_ORIGIN_VALS)
 				.set(Tables.EH_SALARY_EMPLOYEE_ORIGIN_VALS.SALARY_VALUE,"0")
-				.where(Tables.EH_SALARY_EMPLOYEE_ORIGIN_VALS.OWNER_ID.eq(ownerId))
+				.where(Tables.EH_SALARY_EMPLOYEE_ORIGIN_VALS.ORGANIZATION_ID.eq(ownerId))
 				.and(Tables.EH_SALARY_EMPLOYEE_ORIGIN_VALS.DATA_POLICY.eq(NormalFlag.NO.getCode())).execute();
 
 		getReadWriteContext().update(Tables.EH_SALARY_EMPLOYEE_ORIGIN_VALS)
 				.set(Tables.EH_SALARY_EMPLOYEE_ORIGIN_VALS.SALARY_VALUE,"")
-				.where(Tables.EH_SALARY_EMPLOYEE_ORIGIN_VALS.OWNER_ID.eq(ownerId))
+				.where(Tables.EH_SALARY_EMPLOYEE_ORIGIN_VALS.ORGANIZATION_ID.eq(ownerId))
 				.and(Tables.EH_SALARY_EMPLOYEE_ORIGIN_VALS.DATA_POLICY.eq(NormalFlag.NO.getCode()))
 				.and(Tables.EH_SALARY_EMPLOYEE_ORIGIN_VALS.TYPE.eq(SalaryEntityType.REDUN.getCode())).execute();
 	}

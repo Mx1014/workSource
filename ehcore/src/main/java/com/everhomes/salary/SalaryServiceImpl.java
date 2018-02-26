@@ -986,8 +986,9 @@ public class SalaryServiceImpl implements SalaryService {
 
     @Override
     public OutputStream getSalaryDetailsOutPut(Long ownerId, String month, Long taskId, Integer namespaceId) {
-        String toMonth = salaryGroupProvider.getMonthByOwnerId(ownerId);
-        NormalFlag isFile = NormalFlag.fromCode(month.equals(toMonth) ? (byte) 0 : (byte) 1);
+//        String toMonth = salaryGroupProvider.getMonthByOwnerId(ownerId);
+//        NormalFlag isFile = NormalFlag.fromCode(month.equals(toMonth) ? (byte) 0 : (byte) 1);
+        NormalFlag isFile = isMonthFile(month);
         List<SalaryGroupEntity> groupEntities = new ArrayList<>();
         if (isFile == NormalFlag.NO) {
             groupEntities = salaryGroupEntityProvider.listOpenSalaryGroupEntityByOrgId(ownerId);
@@ -1015,6 +1016,11 @@ public class SalaryServiceImpl implements SalaryService {
 //        OutputStream outputStream = new ByteArrayOutputStream(out);
 
         return writeOutPut(wb);
+    }
+
+    private NormalFlag isMonthFile(String month) {
+        //todo: 现在只导出归档的内容 今后有没有可能导出未归档内容,我认为是没可能的
+        return NormalFlag.YES;
     }
 
     private String getDepartmentName(Long detailId) {
