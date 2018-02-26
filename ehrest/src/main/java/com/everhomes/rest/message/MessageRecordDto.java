@@ -26,6 +26,7 @@ import java.sql.Timestamp;
  * <li>sessionToken: 会话token</li>
  * <li>deviceId: 设备Id</li>
  * <li>indexId: 索引id</li>
+ * <li>num: 关联数量</li>
  * </ul>
  */
 

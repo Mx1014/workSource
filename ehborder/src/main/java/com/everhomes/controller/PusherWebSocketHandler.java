@@ -10,6 +10,7 @@ import java.util.Map;
 import java.util.Map.Entry;
 import java.util.concurrent.ConcurrentHashMap;
 
+import com.everhomes.rest.message.MessageRecordSenderTag;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -329,7 +330,7 @@ public class PusherWebSocketHandler extends TextWebSocketHandler {
                     PduFrame pdu = new PduFrame();
                     pdu.setName("MESSAGES");
                     pdu.setPayLoadForString(result.getBody());
-                    WebSocketSessionProxy.sendMessage(session, new TextMessage(pdu.getEncodedPayload()), "NOTIFY REQUEST", dev.getDeviceId());
+                    WebSocketSessionProxy.sendMessage(session, new TextMessage(pdu.getEncodedPayload()), MessageRecordSenderTag.NOTIFY_REQUEST.getCode(), dev.getDeviceId());
 //                    try {
 //                        synchronized(session) {
 //                            session.sendMessage(new TextMessage(pdu.getEncodedPayload()));
@@ -399,7 +400,7 @@ public class PusherWebSocketHandler extends TextWebSocketHandler {
             resp.setContent("notify");
             PduFrame pdu = new PduFrame();
             pdu.setPayload(resp);
-            WebSocketSessionProxy.sendMessage(clientSession, new TextMessage(pdu.toJson()), "NOTIFY EVENT", deviceId);
+            WebSocketSessionProxy.sendMessage(clientSession, new TextMessage(pdu.toJson()), MessageRecordSenderTag.NOTIFY_EVENT.getCode(), deviceId);
 
 //            try {
 //                synchronized(clientSession) {

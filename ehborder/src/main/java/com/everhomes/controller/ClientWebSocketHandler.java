@@ -8,6 +8,7 @@ import java.util.List;
 import java.util.Map;
 import java.util.concurrent.ConcurrentHashMap;
 
+import com.everhomes.rest.message.MessageRecordSenderTag;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -193,7 +194,7 @@ public class ClientWebSocketHandler implements WebSocketHandler {
 //           } catch(IOException e) {
 //               LOGGER.warn("Unable to send message to client, session=" + session.getId() + ", json=" + frameJson, e);
 //           }
-           WebSocketSessionProxy.sendMessage(session,msg, "FORWARD EVENT", sessionToTokenMap.get(session));
+           WebSocketSessionProxy.sendMessage(session,msg, MessageRecordSenderTag.FORWARD_EVENT.getCode(), sessionToTokenMap.get(session));
            this.updateSessionSendTick(session);
        } else {
            LOGGER.warn("Session is null, loginToken=" + token + ", json=" + frameJson);
@@ -316,7 +317,7 @@ public class ClientWebSocketHandler implements WebSocketHandler {
                     RegistedOkResponse respPdu = new RegistedOkResponse();
                     pdu.setPayload(respPdu);
 
-                    WebSocketSessionProxy.sendMessage(session, new TextMessage(pdu.toJson()), "REGISTER LOGIN", sessionToTokenMap.get(session));
+                    WebSocketSessionProxy.sendMessage(session, new TextMessage(pdu.toJson()), MessageRecordSenderTag.REGISTER_LOGIN.getCode(), sessionToTokenMap.get(session));
                     tearDown = false;
                     
 //                    try {
@@ -387,7 +388,7 @@ public class ClientWebSocketHandler implements WebSocketHandler {
                     StoredMessageIndicationPdu clientPdu = new StoredMessageIndicationPdu();
                     pdu.setPayload(clientPdu);
                     pdu.setAppId(appId);
-                    WebSocketSessionProxy.sendMessage(session, new TextMessage(pdu.toJson()), "APPIDSTATUS", sessionToTokenMap.get(session));
+                    WebSocketSessionProxy.sendMessage(session, new TextMessage(pdu.toJson()), MessageRecordSenderTag.APPIDSTATUS.getCode(), sessionToTokenMap.get(session));
 
 //                    try {
 //                        synchronized(session) {

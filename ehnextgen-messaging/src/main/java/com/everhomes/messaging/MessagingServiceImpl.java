@@ -8,6 +8,7 @@ import com.everhomes.msgbox.MessageBoxProvider;
 import com.everhomes.msgbox.MessageLocator;
 import com.everhomes.rest.app.AppConstants;
 import com.everhomes.rest.message.MessageRecordDto;
+import com.everhomes.rest.message.MessageRecordSenderTag;
 import com.everhomes.rest.message.MessageRecordStatus;
 import com.everhomes.rest.messaging.MessageChannel;
 import com.everhomes.rest.messaging.MessageDTO;
@@ -113,7 +114,7 @@ public class MessagingServiceImpl implements MessagingService {
                 record.setNamespaceId(r.getNamespaceId());
                 record.setMessageSeq(r.getMessageSequence());
                 record.setSenderUid(r.getSenderUid());
-                record.setSenderTag("FETCH PASTTORECENT MESSAGES");
+                record.setSenderTag(MessageRecordSenderTag.FETCH_PASTTORECENT_MESSAGES.getCode());
                 record.setDstChannelType(r.getChannelType());
                 record.setDstChannelToken(r.getChannelToken());
                 record.setBodyType(r.getContextType());

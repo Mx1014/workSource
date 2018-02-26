@@ -7,6 +7,7 @@ import com.everhomes.msgbox.Message;
 import com.everhomes.msgbox.MessageBoxProvider;
 import com.everhomes.rest.common.EntityType;
 import com.everhomes.rest.message.MessageRecordDto;
+import com.everhomes.rest.message.MessageRecordSenderTag;
 import com.everhomes.rest.message.MessageRecordStatus;
 import com.everhomes.rest.messaging.ChannelType;
 import com.everhomes.rest.messaging.MessageChannel;
@@ -101,7 +102,7 @@ public class UserMessageRoutingHandler implements MessageRoutingHandler {
         record.setNamespaceId(UserContext.getCurrentNamespaceId());
         record.setMessageSeq(0L);
         record.setSenderUid(senderLogin.getUserId());
-        record.setSenderTag("ROUTE MESSAGE");
+        record.setSenderTag(MessageRecordSenderTag.ROUTE_MESSAGE.getCode());
         record.setDstChannelType(dstChannelType);
         record.setDstChannelToken(dstChannelToken);
         record.setChannelsInfo(message.getChannels().toString());
@@ -252,7 +253,7 @@ public class UserMessageRoutingHandler implements MessageRoutingHandler {
         record.setNamespaceId(UserContext.getCurrentNamespaceId());
         record.setMessageSeq(message.getStoreSequence());
         record.setSenderUid(senderLogin.getUserId());
-        record.setSenderTag("ROUTE STORE MESSAGE");
+        record.setSenderTag(MessageRecordSenderTag.ROUTE_STORE_MESSAGE.getCode());
         record.setDstChannelType(destChannelType);
         record.setDstChannelToken(destChannelToken);
         record.setChannelsInfo(message.getChannels().toString());
@@ -318,7 +319,7 @@ public class UserMessageRoutingHandler implements MessageRoutingHandler {
                     record.setNamespaceId(UserContext.getCurrentNamespaceId());
                     record.setMessageSeq(0L);
                     record.setSenderUid(senderLogin.getUserId());
-                    record.setSenderTag("ROUTE REALTIME MESSAGE");
+                    record.setSenderTag(MessageRecordSenderTag.ROUTE_REALTIME_MESSAGE.getCode());
                     record.setDstChannelType(destChannelType);
                     record.setDstChannelToken(destChannelToken);
                     record.setChannelsInfo(message.getChannels().toString());

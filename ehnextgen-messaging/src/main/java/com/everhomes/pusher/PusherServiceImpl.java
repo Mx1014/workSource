@@ -20,6 +20,7 @@ import com.everhomes.msgbox.MessageBoxProvider;
 import com.everhomes.msgbox.MessageLocator;
 import com.everhomes.rest.app.AppConstants;
 import com.everhomes.rest.message.MessageRecordDto;
+import com.everhomes.rest.message.MessageRecordSenderTag;
 import com.everhomes.rest.message.MessageRecordStatus;
 import com.everhomes.rest.messaging.DeviceMessage;
 import com.everhomes.rest.messaging.DeviceMessages;
@@ -444,7 +445,7 @@ public class PusherServiceImpl implements PusherService, ApnsServiceFactory {
                         record.setMessageSeq(mb.getMessageSequence());
 
                         record.setSenderUid(Long.valueOf(Double.valueOf(actionData.get("senderUid").toString()).intValue()));
-                        record.setSenderTag("FETCH NOTIFY MESSAGES");
+                        record.setSenderTag(MessageRecordSenderTag.FETCH_NOTIFY_MESSAGES.getCode());
                         record.setDstChannelType(actionData.get("dstChannel").toString());
                         record.setDstChannelToken(Double.valueOf(actionData.get("dstChannelId").toString()).intValue()+ "");
                         record.setBodyType(mb.getContextType());
