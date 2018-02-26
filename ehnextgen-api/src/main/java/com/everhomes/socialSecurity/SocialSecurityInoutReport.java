@@ -1,7 +1,7 @@
 // @formatter:off
 package com.everhomes.socialSecurity;
 
-import com.everhomes.server.schema.tables.pojos.EhSocialSecurityInoutReport;
+import com.everhomes.server.schema.tables.pojos.Eh    ;
 import com.everhomes.util.StringHelper;
 
 public class SocialSecurityInoutReport extends EhSocialSecurityInoutReport {
