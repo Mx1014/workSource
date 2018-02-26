@@ -278,6 +278,8 @@ public class EnterpriseCustomerSearcherImpl extends AbstractElasticSearch implem
             } else if(cmd.getSortType() == 1) {
                 builder.addSort(cmd.getSortField(), SortOrder.DESC);
             }
+        } else {
+
         }
         SearchResponse rsp = builder.execute().actionGet();
 

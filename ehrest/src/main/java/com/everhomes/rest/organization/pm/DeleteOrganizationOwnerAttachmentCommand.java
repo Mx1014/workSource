@@ -18,6 +18,15 @@ public class DeleteOrganizationOwnerAttachmentCommand {
     @NotNull private Long organizationId;
     private String ownerType;
     private Long ownerId;
+    private Integer namespaceId;
+
+    public Integer getNamespaceId() {
+        return namespaceId;
+    }
+
+    public void setNamespaceId(Integer namespaceId) {
+        this.namespaceId = namespaceId;
+    }
 
     public String getOwnerType() {
         return ownerType;
