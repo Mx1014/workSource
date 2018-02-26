@@ -19,6 +19,7 @@ import com.everhomes.bootstrap.PlatformContext;
 import com.everhomes.configuration.ConfigurationProvider;
 import com.everhomes.contentserver.ContentServerService;
 import com.everhomes.entity.EntityType;
+import com.everhomes.filedownload.TaskService;
 import com.everhomes.flow.*;
 import com.everhomes.general_form.GeneralForm;
 import com.everhomes.general_form.GeneralFormProvider;
@@ -26,11 +27,14 @@ import com.everhomes.general_form.GeneralFormService;
 import com.everhomes.organization.Organization;
 import com.everhomes.organization.OrganizationMember;
 import com.everhomes.rest.approval.TrueOrFalseFlag;
+import com.everhomes.rest.filedownload.TaskRepeatFlag;
+import com.everhomes.rest.filedownload.TaskType;
 import com.everhomes.rest.flow.*;
 import com.everhomes.rest.general_approval.*;
 import com.everhomes.rest.uniongroup.UniongroupTargetType;
 import com.everhomes.rest.user.UserInfo;
 import com.everhomes.settings.PaginationConfigHelper;
+import com.everhomes.sms.DateUtil;
 import com.everhomes.techpark.punch.PunchService;
 import com.everhomes.user.User;
 import com.everhomes.util.DateHelper;
@@ -147,6 +151,9 @@ public class GeneralApprovalServiceImpl implements GeneralApprovalService {
 
     @Autowired
     private WorkReportService workReportService;
+
+    @Autowired
+    private TaskService taskService;
 
     private StringTemplateLoader templateLoader;
 
@@ -1032,6 +1039,28 @@ public class GeneralApprovalServiceImpl implements GeneralApprovalService {
         dto.setFlowCaseId(flowCase.getId());
         return dto;
     }
+
+    public void exportGeneralApprovalRecordsV2(ListGeneralApprovalRecordsCommand cmd, HttpServletResponse httpResponse){
+
+        //  export with te file download center
+        Map<String, Object> params = new HashMap<>();
+
+        //  the value could be null if it is not exist.
+        params.put("organizationId", cmd.getOrganizationId());
+        params.put("moduleId", cmd.getModuleId());
+        params.put("startTime", cmd.getStartTime());
+        params.put("endTime", cmd.getEndTime());
+        params.put("approvalStatus", cmd.getApprovalStatus());
+        params.put("approvalId", cmd.getApprovalId());
+        params.put("creatorDepartmentId", cmd.getCreatorDepartmentId());
+        params.put("creatorName", cmd.getCreatorName());
+        params.put("approvalNo", cmd.getApprovalNo());
+        String fileName = String.format("审批记录_%s.xlsx", DateUtil.dateToStr(new Date(), DateUtil.NO_SLASH));
+
+        taskService.createTask(fileName, TaskType.FILEDOWNLOAD.getCode(), GeneralApprovalExportTaskHandler.class, params, TaskRepeatFlag.REPEAT.getCode(), new Date());
+
+    }
+
     @Override
     public void exportGeneralApprovalRecords(ListGeneralApprovalRecordsCommand cmd, HttpServletResponse httpResponse) {
         cmd.setPageAnchor(null);
