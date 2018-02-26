@@ -216,6 +216,7 @@ public class EquipmentStandardMapSearcherImpl extends AbstractElasticSearch impl
 	    			dto.setTargetName(community.getName());*/
 
 					dto.setEquipmentName(equipment.getName());
+					dto.setLocation(equipment.getLocation());
 					dto.setEquipmentModel(equipment.getEquipmentModel());
 					dto.setLocation(equipment.getLocation());
 					dto.setStatus(equipment.getStatus());

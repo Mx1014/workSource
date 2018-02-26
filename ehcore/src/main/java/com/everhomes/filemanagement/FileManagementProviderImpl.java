@@ -149,7 +149,7 @@ public class FileManagementProviderImpl implements FileManagementProvider {
     }
 
     @Override
-    public List<FileCatalog> listAvailableFileCatalogs(Integer namespaceId, Long ownerId, Long userId) {
+    public List<FileCatalog> listAvailableFileCatalogs(Integer namespaceId, Long ownerId, Long detailId) {
         List<FileCatalog> results = new ArrayList<>();
 
         DSLContext context = dbProvider.getDslContext(AccessSpec.readOnly());
@@ -158,7 +158,7 @@ public class FileManagementProviderImpl implements FileManagementProvider {
         query.addJoin(Tables.EH_FILE_MANAGEMENT_CATALOGS, JoinType.JOIN,
                 Tables.EH_FILE_MANAGEMENT_CATALOG_SCOPES.CATALOG_ID.eq(Tables.EH_FILE_MANAGEMENT_CATALOGS.ID));
 
-        query.addConditions(Tables.EH_FILE_MANAGEMENT_CATALOG_SCOPES.SOURCE_ID.eq(userId));
+        query.addConditions(Tables.EH_FILE_MANAGEMENT_CATALOG_SCOPES.SOURCE_ID.eq(detailId));
         query.addConditions(Tables.EH_FILE_MANAGEMENT_CATALOGS.NAMESPACE_ID.eq(namespaceId));
         query.addConditions(Tables.EH_FILE_MANAGEMENT_CATALOGS.OWNER_ID.eq(ownerId));
         query.addConditions(Tables.EH_FILE_MANAGEMENT_CATALOGS.STATUS.eq(FileManagementStatus.VALID.getCode()));

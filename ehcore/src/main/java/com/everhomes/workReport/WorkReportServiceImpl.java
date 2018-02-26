@@ -141,7 +141,7 @@ public class WorkReportServiceImpl implements WorkReportService {
             report.setOperatorName(fixUpUserName(userId, report.getOwnerId()));
             dbProvider.execute((TransactionStatus status) -> {
                 workReportProvider.updateWorkReport(report);
-                updateWorkReportScopeMap(report.getId(), cmd.getScopes());
+                updateWorkReportScopeMap(report.getNamespaceId(), report.getId(), cmd.getScopes());
                 return null;
             });
 
@@ -157,13 +157,20 @@ public class WorkReportServiceImpl implements WorkReportService {
         return null;
     }
 
-    private void updateWorkReportScopeMap(Long reportId, List<WorkReportScopeMapDTO> scopes) {
+    private void updateWorkReportScopeMap(Integer namespaceId, Long reportId, List<WorkReportScopeMapDTO> scopes) {
+        List<Long> detailIds = new ArrayList<>();
+        List<Long> organizationIds = new ArrayList<>();
+
         if (scopes == null)
             return;
-        List<Long> sourceIds = new ArrayList<>();
+
         for (WorkReportScopeMapDTO dto : scopes) {
             //  in order to record those ids.
-            sourceIds.add(dto.getSourceId());
+            if (dto.getSourceType().equals(UniongroupTargetType.ORGANIZATION.getCode()))
+                organizationIds.add(dto.getSourceId());
+            else if (dto.getSourceType().equals(UniongroupTargetType.MEMBERDETAIL.getCode()))
+                detailIds.add(dto.getSourceId());
+
             WorkReportScopeMap scopeMap = workReportProvider.getWorkReportScopeMapBySourceId(reportId, dto.getSourceId());
             if (scopeMap != null) {
                 scopeMap.setSourceDescription(dto.getSourceDescription());
@@ -180,7 +187,8 @@ public class WorkReportServiceImpl implements WorkReportService {
             }
         }
         //  remove the extra scope.
-        workReportProvider.deleteWorkReportScopeMapNotInIds(reportId, sourceIds);
+        workReportProvider.deleteOddWorkReportDetailScope(namespaceId, reportId, detailIds);
+        workReportProvider.deleteOddWorkReportOrganizationScope(namespaceId, reportId, organizationIds);
     }
 
     @Override
@@ -395,21 +403,13 @@ public class WorkReportServiceImpl implements WorkReportService {
     public OrganizationMember getMemberDepartmentByUserId(Long userId, Long ownerId) {
         OrganizationMember member = organizationProvider.findDepartmentMemberByTargetIdAndOrgId(userId, ownerId);
         return member;
-/*        List<OrganizationMember> results = organizationProvider.findOrganizationMembersByOrgIdAndUId(userId, ownerId);
-
-        List<OrganizationMember> members = results.stream().filter(r ->
-                r.getGroupType().equals(OrganizationGroupType.DEPARTMENT.getCode()) || r.getGroupType().equals(OrganizationGroupType.DIRECT_UNDER_ENTERPRISE.getCode())
-        ).collect(Collectors.toList());
-        if (members != null && members.size() > 0)
-            return members.get(0);
-        return results.get(0);*/
     }
 
     @Override
     public Long getUserDetailId(Long userId, Long ownerId) {
-        List<OrganizationMember> members = organizationProvider.findOrganizationMembersByOrgIdAndUId(userId, ownerId);
-        if (members != null && members.size() > 0)
-            return members.get(0).getDetailId();
+        OrganizationMember members = organizationProvider.findOrganizationMemberByOrgIdAndUId(userId, ownerId);
+        if (members != null)
+            return members.getDetailId();
         return null;
     }
 

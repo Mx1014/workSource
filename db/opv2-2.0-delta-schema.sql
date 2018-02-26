@@ -135,6 +135,8 @@ ALTER TABLE `eh_equipment_inspection_equipments`
 ALTER TABLE `eh_equipment_inspection_tasks`
   ADD COLUMN `plan_id`  BIGINT(20) NOT NULL ;
 
+ALTER TABLE eh_equipment_inspection_tasks ADD INDEX eq_task_plan_id (plan_id) ;
+
 
 -- 标准增加周期类型   by jiarui
 ALTER TABLE `eh_equipment_inspection_standards`
@@ -151,6 +153,9 @@ ALTER TABLE `eh_equipment_inspection_task_logs`
   ADD COLUMN `maintance_status` TINYINT(4) NOT NULL DEFAULT '0' COMMENT '0: inactive 1: wating, 2: allocated 3: completed 4: closed';
 ALTER TABLE `eh_equipment_inspection_task_logs`
   ADD COLUMN `pm_task_id` bigint(20) NULL DEFAULT 0 ;
+
+ALTER TABLE eh_equipment_inspection_task_logs ADD INDEX eq_log_pm_task_id (pm_task_id) ;
+ALTER TABLE eh_equipment_inspection_task_logs ADD INDEX eq_log_task_id (task_id) ;
 
 -- 物业巡检V3.1  end   by jiarui
 
@@ -458,6 +463,8 @@ ALTER TABLE `eh_rentalv2_price_rules`
 ADD COLUMN `user_price_type` TINYINT(4) DEFAULT NULL COMMENT '用户价格类型, 1:统一价格 2：用户类型价格';
 ALTER TABLE `eh_rentalv2_price_packages`
 ADD COLUMN `user_price_type` TINYINT(4) DEFAULT NULL COMMENT '用户价格类型, 1:统一价格 2：用户类型价格';
+ALTER TABLE `eh_rentalv2_cells`
+ADD COLUMN `user_price_type` tinyint(4) DEFAULT NULL COMMENT '用户价格类型, 1:统一价格 2：用户类型价格';
 
 
 ALTER TABLE eh_rentalv2_orders CHANGE requestor_organization_id user_enterprise_id BIGINT(20) DEFAULT NULL COMMENT '申请人公司ID';
@@ -1621,7 +1628,7 @@ ALTER TABLE `eh_office_cubicle_orders` ADD COLUMN `owner_type` VARCHAR(128);
 ALTER TABLE `eh_office_cubicle_orders` ADD COLUMN `owner_id` BIGINT;
 ALTER TABLE `eh_office_cubicle_orders` ADD COLUMN `position_nums` INTEGER;
 ALTER TABLE `eh_office_cubicle_orders` ADD COLUMN `category_name` VARCHAR(256);
-ALTER TABLE `eh_office_cubicle_orders` ADD COLUMN `category_id` LONG;
+ALTER TABLE `eh_office_cubicle_orders` ADD COLUMN `category_id` BIGINT;
 
 CREATE TABLE `eh_office_cubicle_ranges` (
   `id` BIGINT NOT NULL,
@@ -1674,11 +1681,21 @@ CREATE TABLE `eh_general_approval_scope_map` (
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4;
 
 UPDATE eh_general_approvals SET approval_attribute = 'CUSTOMIZE' WHERE approval_attribute IS NULL;
-ALTER TABLE eh_general_approvals MODIFY approval_attribute VARCHAR(128) NOT NULL DEFAULT 'CUSTOMIZE';
+ALTER TABLE eh_general_approvals MODIFY approval_attribute VARCHAR(128) NOT NULL DEFAULT 'CUSTOMIZE' COMMENT 'CUSTOMIZE, DEFAULT';
 
 UPDATE eh_general_approvals SET modify_flag = 1 WHERE modify_flag IS NULL;
-ALTER TABLE eh_general_approvals MODIFY modify_flag TINYINT NOT NULL DEFAULT 1;
+ALTER TABLE eh_general_approvals MODIFY modify_flag TINYINT NOT NULL DEFAULT 1 COMMENT '0: no, 1: yes';
 
 UPDATE eh_general_approvals SET delete_flag = 1 WHERE delete_flag IS NULL;
-ALTER TABLE eh_general_approvals MODIFY delete_flag TINYINT NOT NULL DEFAULT 1;
+ALTER TABLE eh_general_approvals MODIFY delete_flag TINYINT NOT NULL DEFAULT 1 COMMENT '0: no, 1: yes';
+
+UPDATE eh_general_forms SET form_attribute = 'CUSTOMIZE' WHERE form_attribute IS NULL;
+ALTER TABLE eh_general_forms MODIFY form_attribute VARCHAR(128) NOT NULL DEFAULT 'CUSTOMIZE' COMMENT 'CUSTOMIZE, DEFAULT';
+
+UPDATE eh_general_forms SET modify_flag = 1 WHERE modify_flag IS NULL;
+ALTER TABLE eh_general_forms MODIFY modify_flag TINYINT NOT NULL DEFAULT 1 COMMENT '0: no, 1: yes';
+
+UPDATE eh_general_forms SET delete_flag = 1 WHERE delete_flag IS NULL;
+ALTER TABLE eh_general_forms MODIFY delete_flag TINYINT NOT NULL DEFAULT 1 COMMENT '0: no, 1: yes';
+
 -- end by nan.rong
