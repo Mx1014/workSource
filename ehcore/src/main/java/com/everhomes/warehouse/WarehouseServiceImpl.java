@@ -11,6 +11,8 @@ import com.everhomes.locale.LocaleStringService;
 import com.everhomes.naming.NameMapper;
 import com.everhomes.organization.*;
 import com.everhomes.portal.PortalService;
+import com.everhomes.purchase.PurchaseService;
+import com.everhomes.requisition.RequisitionService;
 import com.everhomes.rest.acl.PrivilegeConstants;
 import com.everhomes.rest.acl.PrivilegeServiceErrorCode;
 import com.everhomes.rest.common.ImportFileResponse;
@@ -123,6 +125,9 @@ public class WarehouseServiceImpl implements WarehouseService {
 
     @Autowired
     private SequenceProvider sequenceProvider;
+
+    @Autowired
+    private RequisitionService requisitionService;
 
     @Override
     public WarehouseDTO updateWarehouse(UpdateWarehouseCommand cmd) {
@@ -1472,7 +1477,9 @@ public class WarehouseServiceImpl implements WarehouseService {
                 dto.setMaterialDetailDTOs(materialDetailDTOs);
             }
         }
-
+        //通过请示单id获得请示单名称
+        String requisitionName = requisitionService.getRequisitionNameById(dto.getRequisitionId());
+        dto.setRequestOrganizationName(requisitionName);
         return dto;
     }
 

@@ -93,6 +93,14 @@ public class RequisitionProviderImpl implements RequisitionProvider {
                 .execute();
     }
 
+    @Override
+    public String getNameById(Long requisitionId) {
+        return getReadOnlyContext().select(req.THEME)
+                .from(req)
+                .where(req.ID.eq(requisitionId))
+                .fetchOne(req.THEME);
+    }
+
     private DSLContext getReadOnlyContext(){
         return this.dbProvider.getDslContext(AccessSpec.readOnly());
     }

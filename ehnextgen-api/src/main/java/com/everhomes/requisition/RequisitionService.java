@@ -16,4 +16,6 @@ public interface RequisitionService {
     GetRequisitionDetailResponse getRequisitionDetail(GetRequisitionDetailCommand cmd);
 
     List<ListRequisitionTypesDTO> listRequisitionTypes(ListRequisitionTypesCommand cmd);
+
+    String getRequisitionNameById(Long requisitionId);
 }
