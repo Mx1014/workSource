@@ -619,81 +619,93 @@ public class OrganizationServiceImpl implements OrganizationService {
             cmd.setNaviFlag((byte) 1);
         }
 
-        Organization parOrg = this.checkOrganization(cmd.getId());
+        Organization modifyOrg = this.checkOrganization(cmd.getId());
 
-        parOrg.setShowFlag(cmd.getNaviFlag());
-        if(!StringUtils.isEmpty(cmd.getName()))
-            parOrg.setName(cmd.getName());
+        modifyOrg.setShowFlag(cmd.getNaviFlag());
 
-        Organization org = dbProvider.execute((TransactionStatus status) -> {
-            if (OrganizationGroupType.fromCode(parOrg.getGroupType()) == OrganizationGroupType.ENTERPRISE) {
-                OrganizationDetail enterprise = organizationProvider.findOrganizationDetailByOrganizationId(parOrg.getId());
+        //name check
+        if(!StringUtils.isEmpty(cmd.getName())){
+            //同级重名校验
+            Organization down_organization = organizationProvider.findOrganizationByParentAndName(modifyOrg.getParentId(), cmd.getName());
+            if(down_organization != null){
+                OrganizationDTO orgDto_error = new OrganizationDTO();
+                orgDto_error.setErrorCode(OrganizationServiceErrorCode.ERROR_DEPARTMENT_EXISTS);
+                LOGGER.error("name repeat, cmd = {}", cmd);
+                throw RuntimeErrorException.errorWith(OrganizationServiceErrorCode.SCOPE, OrganizationServiceErrorCode.ERROR_DEPARTMENT_EXISTS,
+                        "name repeat");
+            }
+            modifyOrg.setName(cmd.getName());
+        }
+
+        dbProvider.execute((TransactionStatus status) -> {
+            if (OrganizationGroupType.fromCode(modifyOrg.getGroupType()) == OrganizationGroupType.ENTERPRISE) {
+                OrganizationDetail enterprise = organizationProvider.findOrganizationDetailByOrganizationId(modifyOrg.getId());
                 if (null != enterprise) {
                     enterprise.setAddress(cmd.getAddress());
                     organizationProvider.updateOrganizationDetail(enterprise);
                 }
                 //如果是enterprise，要判断是否有直属部门，要同时更新直属部门的名字
-                Organization underOrg = this.organizationProvider.findUnderOrganizationByParentOrgId(parOrg.getId());
+                Organization underOrg = this.organizationProvider.findUnderOrganizationByParentOrgId(modifyOrg.getId());
                 if (underOrg != null) {
                     underOrg.setName(cmd.getName());
                     this.organizationProvider.updateOrganization(underOrg);
                 }
 
                 // 创建经理群组
-                Organization managerGroup = this.createManagerGroup(parOrg, parOrg.getId());
+                Organization managerGroup = this.createManagerGroup(modifyOrg, modifyOrg.getId());
 
                 // 更新经理群组人员
                 this.batchUpdateOrganizationMember(cmd.getAddManagerMemberIds(), cmd.getDelManagerMemberIds(), managerGroup);
 
-            } else if (OrganizationGroupType.fromCode(parOrg.getGroupType()) == OrganizationGroupType.JOB_POSITION) {
+            } else if (OrganizationGroupType.fromCode(modifyOrg.getGroupType()) == OrganizationGroupType.JOB_POSITION) {
 
                 //更新通用岗位
-                this.updateOrganizationJobPositionMap(parOrg, cmd.getJobPositionIds());
+                this.updateOrganizationJobPositionMap(modifyOrg, cmd.getJobPositionIds());
 
                 //更新组人员
-                this.batchUpdateOrganizationMember(cmd.getAddMemberIds(), cmd.getDelMemberIds(), parOrg);
-            } else if (OrganizationGroupType.fromCode(parOrg.getGroupType()) == OrganizationGroupType.JOB_LEVEL) {
+                this.batchUpdateOrganizationMember(cmd.getAddMemberIds(), cmd.getDelMemberIds(), modifyOrg);
+            } else if (OrganizationGroupType.fromCode(modifyOrg.getGroupType()) == OrganizationGroupType.JOB_LEVEL) {
                 // 增加职级大小
-                parOrg.setSize(cmd.getSize());
+                modifyOrg.setSize(cmd.getSize());
                 //更新组人员
-                this.batchUpdateOrganizationMember(cmd.getAddMemberIds(), cmd.getDelMemberIds(), parOrg);
-            } else if (OrganizationGroupType.fromCode(parOrg.getGroupType()) == OrganizationGroupType.DEPARTMENT || OrganizationGroupType.fromCode(parOrg.getGroupType()) == OrganizationGroupType.GROUP) {
+                this.batchUpdateOrganizationMember(cmd.getAddMemberIds(), cmd.getDelMemberIds(), modifyOrg);
+            } else if (OrganizationGroupType.fromCode(modifyOrg.getGroupType()) == OrganizationGroupType.DEPARTMENT || OrganizationGroupType.fromCode(modifyOrg.getGroupType()) == OrganizationGroupType.GROUP) {
                 // 创建经理群组
-                Organization managerGroup = this.createManagerGroup(parOrg, parOrg.getDirectlyEnterpriseId());
+                Organization managerGroup = this.createManagerGroup(modifyOrg, modifyOrg.getDirectlyEnterpriseId());
                 // 更新经理群组人员
                 this.batchUpdateOrganizationMember(cmd.getAddManagerMemberIds(), cmd.getDelManagerMemberIds(), managerGroup);
             }
 
-            parOrg.setOperatorUid(user.getId());
-            organizationProvider.updateOrganization(parOrg);
+            modifyOrg.setOperatorUid(user.getId());
+            organizationProvider.updateOrganization(modifyOrg);
 
             if (null != cmd.getCommunityId()) {
                 if (OrganizationCommunityScopeType.CURRENT == OrganizationCommunityScopeType.fromCode(cmd.getScopeType())) {
                     //修改当前节点
-                    updateCurrentOrganziationCommunityReqeust(user.getId(), parOrg.getId(), cmd.getCommunityId());
+                    updateCurrentOrganziationCommunityReqeust(user.getId(), modifyOrg.getId(), cmd.getCommunityId());
                 } else if (OrganizationCommunityScopeType.CURRENT_CHILD == OrganizationCommunityScopeType.fromCode(cmd.getScopeType())) {
                     //修改当前节点
-                    updateCurrentOrganziationCommunityReqeust(user.getId(), parOrg.getId(), cmd.getCommunityId());
+                    updateCurrentOrganziationCommunityReqeust(user.getId(), modifyOrg.getId(), cmd.getCommunityId());
                     //修改所有子节点
-                    updateChildOrganizationCommunityRequest(user.getId(), parOrg.getPath(), cmd.getCommunityId());
+                    updateChildOrganizationCommunityRequest(user.getId(), modifyOrg.getPath(), cmd.getCommunityId());
                 } else if (OrganizationCommunityScopeType.CURRENT_LEVEL_CHILD == OrganizationCommunityScopeType.fromCode(cmd.getScopeType())) {
                     //修改所有子节点
-                    updateChildOrganizationCommunityRequest(user.getId(), parOrg.getPath(), cmd.getCommunityId());
+                    updateChildOrganizationCommunityRequest(user.getId(), modifyOrg.getPath(), cmd.getCommunityId());
 
                     //如果修改的是根节点，则不需要修改同级只需要修改当前节点
-                    if (0L != parOrg.getParentId()) {
+                    if (0L != modifyOrg.getParentId()) {
                         //修改同级节点包括当前节点
-                        updateLevenOrganizationCommunityRequest(user.getId(), parOrg.getParentId(), cmd.getCommunityId());
+                        updateLevenOrganizationCommunityRequest(user.getId(), modifyOrg.getParentId(), cmd.getCommunityId());
                     } else {
                         //修改当前节点
-                        updateCurrentOrganziationCommunityReqeust(user.getId(), parOrg.getId(), cmd.getCommunityId());
+                        updateCurrentOrganziationCommunityReqeust(user.getId(), modifyOrg.getId(), cmd.getCommunityId());
                     }
                 }
             } else {
                 LOGGER.warn("communityId is null");
             }
 
-            return parOrg;
+            return modifyOrg;
         });
     }
 
