@@ -13,7 +13,7 @@ SET `status` = 0
 WHERE review_status IN (0, 3 ,4) OR review_result = 2;
 UPDATE eh_equipment_inspection_equipment_standard_map
 SET `status` = 0
-WHERE id NOT IN (SELECT id FROM (SELECT MIN(id)  AS id, count(target_id) AS count FROM eh_equipment_inspection_equipment_standard_map WHERE `status` = 1 GROUP BY target_id, standard_id HAVING count(target_id) >= 1) tmp);
+WHERE id NOT IN (SELECT id FROM (SELECT MIN(id)  AS id, COUNT(target_id) AS COUNT FROM eh_equipment_inspection_equipment_standard_map WHERE `status` = 1 GROUP BY target_id, standard_id HAVING COUNT(target_id) >= 1) tmp);
 -- 上版bug数据修改
 
 --  标准数据增加周期类型 及关系表状态 end by jiarui 20180105
@@ -58,23 +58,23 @@ WHERE item_label LIKE '%巡检%';
 
 -- 新增权限  by jiarui 20180205
 
-DELETE from  eh_service_module_privileges
+DELETE FROM  eh_service_module_privileges
 WHERE  privilege_id IN (30070,30076,30071,30077,30078,30079,30082);
 
 UPDATE eh_service_modules
-SET name = '计划管理'
+SET NAME = '计划管理'
 WHERE id = 20840;
 UPDATE eh_service_modules
-SET name = '台帐管理'
+SET NAME = '台帐管理'
 WHERE id = 20820;
 UPDATE eh_service_modules
-SET name = '任务管理'
+SET NAME = '任务管理'
 WHERE id = 20830;
 UPDATE eh_service_modules
-SET name = '统计分析'
+SET NAME = '统计分析'
 WHERE id = 20850;
 UPDATE eh_service_modules
-SET name = '标准管理'
+SET NAME = '标准管理'
 WHERE id = 20810;
 
 INSERT INTO `eh_acl_privileges` VALUES ('30083', '0', '设备巡检 巡检计划创建', '设备巡检 业务模块权限', NULL);
@@ -495,22 +495,22 @@ INSERT INTO `eh_social_security_bases` (`id`, `city_id`, `household_type`, `pay_
 INSERT INTO `eh_social_security_bases` (`id`, `city_id`, `household_type`, `pay_item`, `company_radix_min`, `company_radix_max`, `company_ratio_min`, `company_ratio_max`, `employee_radix_min`, `employee_radix_max`, `employee_ratio_min`, `employee_ratio_max`, `editable_flag`, `is_default`, `effect_time_begin`, `effect_time_end`, `ratio_options`, `accum_or_socail`, `creator_uid`, `create_time`, `operator_uid`, `update_time`) VALUES('3','13905','本市','医疗','4488.00','22440.00','600','600','4488.00','22440.00','200','200','0','1','2017-07-01 00:00:00','2018-06-30 00:00:00',NULL,'1','0','2017-12-28 13:53:41',NULL,NULL);
 INSERT INTO `eh_social_security_bases` (`id`, `city_id`, `household_type`, `pay_item`, `company_radix_min`, `company_radix_max`, `company_ratio_min`, `company_ratio_max`, `employee_radix_min`, `employee_radix_max`, `employee_ratio_min`, `employee_ratio_max`, `editable_flag`, `is_default`, `effect_time_begin`, `effect_time_end`, `ratio_options`, `accum_or_socail`, `creator_uid`, `create_time`, `operator_uid`, `update_time`) VALUES('4','13905','本市','生育','2130.00','22440.00','100','100','2130.00','22440.00','0','0','0','1','2017-07-01 00:00:00','2018-06-30 00:00:00',NULL,'1','0','2017-12-28 13:53:41',NULL,NULL);
 INSERT INTO `eh_social_security_bases` (`id`, `city_id`, `household_type`, `pay_item`, `company_radix_min`, `company_radix_max`, `company_ratio_min`, `company_ratio_max`, `employee_radix_min`, `employee_radix_max`, `employee_ratio_min`, `employee_ratio_max`, `editable_flag`, `is_default`, `effect_time_begin`, `effect_time_end`, `ratio_options`, `accum_or_socail`, `creator_uid`, `create_time`, `operator_uid`, `update_time`) VALUES('5','13905','本市','失业','2130.00','2130.00','80','100','2130.00','2130.00','100','100','0','1','2017-07-01 00:00:00','2018-06-30 00:00:00',NULL,'1','0','2017-12-28 13:53:41',NULL,NULL);
-INSERT INTO `eh_social_security_bases` (`id`, `city_id`, `household_type`, `pay_item`, `company_radix_min`, `company_radix_max`, `company_ratio_min`, `company_ratio_max`, `employee_radix_min`, `employee_radix_max`, `employee_ratio_min`, `employee_ratio_max`, `editable_flag`, `is_default`, `effect_time_begin`, `effect_time_end`, `ratio_options`, `accum_or_socail`, `creator_uid`, `create_time`, `operator_uid`, `update_time`) VALUES('6','13905','本市','工伤','2130.00','22440.00','14','114','2130.00','22440.00','0','0','0','1','2017-07-01 00:00:00','2018-06-30 00:00:00','[14,28,49,63,66,78,96,114]','1','0','2017-12-28 13:53:41',NULL,NULL);
+INSERT INTO `eh_social_security_bases` (`id`, `city_id`, `household_type`, `pay_item`, `company_radix_min`, `company_radix_max`, `company_ratio_min`, `company_ratio_max`, `employee_radix_min`, `employee_radix_max`, `employee_ratio_min`, `employee_ratio_max`, `editable_flag`, `is_default`, `effect_time_begin`, `effect_time_end`, `ratio_options`, `accum_or_socail`, `creator_uid`, `create_time`, `operator_uid`, `update_time`) VALUES('6','13905','本市','工伤','2130.00','22440.00','14','171','2130.00','22440.00','0','0','0','1','2017-07-01 00:00:00','2018-06-30 00:00:00','[14,28,49,63,66,78,96,114]','1','0','2017-12-28 13:53:41',NULL,NULL);
 INSERT INTO `eh_social_security_bases` (`id`, `city_id`, `household_type`, `pay_item`, `company_radix_min`, `company_radix_max`, `company_ratio_min`, `company_ratio_max`, `employee_radix_min`, `employee_radix_max`, `employee_ratio_min`, `employee_ratio_max`, `editable_flag`, `is_default`, `effect_time_begin`, `effect_time_end`, `ratio_options`, `accum_or_socail`, `creator_uid`, `create_time`, `operator_uid`, `update_time`) VALUES('7','13905','外埠一档','养老','2130.00','22440.00','1300','1300','2130.00','22440.00','800','800','0','1','2017-07-01 00:00:00','2018-06-30 00:00:00',NULL,'1','0','2017-12-28 13:53:41',NULL,NULL);
 INSERT INTO `eh_social_security_bases` (`id`, `city_id`, `household_type`, `pay_item`, `company_radix_min`, `company_radix_max`, `company_ratio_min`, `company_ratio_max`, `employee_radix_min`, `employee_radix_max`, `employee_ratio_min`, `employee_ratio_max`, `editable_flag`, `is_default`, `effect_time_begin`, `effect_time_end`, `ratio_options`, `accum_or_socail`, `creator_uid`, `create_time`, `operator_uid`, `update_time`) VALUES('8','13905','外埠一档','医疗','4488.00','22440.00','600','600','4488.00','22440.00','200','200','0','1','2017-07-01 00:00:00','2018-06-30 00:00:00',NULL,'1','0','2017-12-28 13:53:41',NULL,NULL);
 INSERT INTO `eh_social_security_bases` (`id`, `city_id`, `household_type`, `pay_item`, `company_radix_min`, `company_radix_max`, `company_ratio_min`, `company_ratio_max`, `employee_radix_min`, `employee_radix_max`, `employee_ratio_min`, `employee_ratio_max`, `editable_flag`, `is_default`, `effect_time_begin`, `effect_time_end`, `ratio_options`, `accum_or_socail`, `creator_uid`, `create_time`, `operator_uid`, `update_time`) VALUES('9','13905','外埠一档','生育','2130.00','22440.00','100','100','2130.00','22440.00','0','0','0','1','2017-07-01 00:00:00','2018-06-30 00:00:00',NULL,'1','0','2017-12-28 13:53:41',NULL,NULL);
 INSERT INTO `eh_social_security_bases` (`id`, `city_id`, `household_type`, `pay_item`, `company_radix_min`, `company_radix_max`, `company_ratio_min`, `company_ratio_max`, `employee_radix_min`, `employee_radix_max`, `employee_ratio_min`, `employee_ratio_max`, `editable_flag`, `is_default`, `effect_time_begin`, `effect_time_end`, `ratio_options`, `accum_or_socail`, `creator_uid`, `create_time`, `operator_uid`, `update_time`) VALUES('10','13905','外埠一档','失业','2130.00','2130.00','80','100','2130.00','2130.00','100','100','0','1','2017-07-01 00:00:00','2018-06-30 00:00:00',NULL,'1','0','2017-12-28 13:53:41',NULL,NULL);
-INSERT INTO `eh_social_security_bases` (`id`, `city_id`, `household_type`, `pay_item`, `company_radix_min`, `company_radix_max`, `company_ratio_min`, `company_ratio_max`, `employee_radix_min`, `employee_radix_max`, `employee_ratio_min`, `employee_ratio_max`, `editable_flag`, `is_default`, `effect_time_begin`, `effect_time_end`, `ratio_options`, `accum_or_socail`, `creator_uid`, `create_time`, `operator_uid`, `update_time`) VALUES('11','13905','外埠一档','工伤','2130.00','22440.00','14','114','2130.00','22440.00','0','0','0','1','2017-07-01 00:00:00','2018-06-30 00:00:00','[14,28,49,63,66,78,96,114]','1','0','2017-12-28 13:53:41',NULL,NULL);
+INSERT INTO `eh_social_security_bases` (`id`, `city_id`, `household_type`, `pay_item`, `company_radix_min`, `company_radix_max`, `company_ratio_min`, `company_ratio_max`, `employee_radix_min`, `employee_radix_max`, `employee_ratio_min`, `employee_ratio_max`, `editable_flag`, `is_default`, `effect_time_begin`, `effect_time_end`, `ratio_options`, `accum_or_socail`, `creator_uid`, `create_time`, `operator_uid`, `update_time`) VALUES('11','13905','外埠一档','工伤','2130.00','22440.00','14','171','2130.00','22440.00','0','0','0','1','2017-07-01 00:00:00','2018-06-30 00:00:00','[14,28,49,63,66,78,96,114]','1','0','2017-12-28 13:53:41',NULL,NULL);
 INSERT INTO `eh_social_security_bases` (`id`, `city_id`, `household_type`, `pay_item`, `company_radix_min`, `company_radix_max`, `company_ratio_min`, `company_ratio_max`, `employee_radix_min`, `employee_radix_max`, `employee_ratio_min`, `employee_ratio_max`, `editable_flag`, `is_default`, `effect_time_begin`, `effect_time_end`, `ratio_options`, `accum_or_socail`, `creator_uid`, `create_time`, `operator_uid`, `update_time`) VALUES('12','13905','外埠二档','养老','2130.00','22440.00','1300','1300','2130.00','22440.00','800','800','0','1','2017-07-01 00:00:00','2018-06-30 00:00:00',NULL,'1','0','2017-12-28 13:53:41',NULL,NULL);
 INSERT INTO `eh_social_security_bases` (`id`, `city_id`, `household_type`, `pay_item`, `company_radix_min`, `company_radix_max`, `company_ratio_min`, `company_ratio_max`, `employee_radix_min`, `employee_radix_max`, `employee_ratio_min`, `employee_ratio_max`, `editable_flag`, `is_default`, `effect_time_begin`, `effect_time_end`, `ratio_options`, `accum_or_socail`, `creator_uid`, `create_time`, `operator_uid`, `update_time`) VALUES('13','13905','外埠二档','医疗','7480.00','7480.00','100','100','7480.00','7480.00','0','0','0','1','2017-07-01 00:00:00','2018-06-30 00:00:00',NULL,'1','0','2017-12-28 13:53:41',NULL,NULL);
 INSERT INTO `eh_social_security_bases` (`id`, `city_id`, `household_type`, `pay_item`, `company_radix_min`, `company_radix_max`, `company_ratio_min`, `company_ratio_max`, `employee_radix_min`, `employee_radix_max`, `employee_ratio_min`, `employee_ratio_max`, `editable_flag`, `is_default`, `effect_time_begin`, `effect_time_end`, `ratio_options`, `accum_or_socail`, `creator_uid`, `create_time`, `operator_uid`, `update_time`) VALUES('14','13905','外埠二档','生育','2130.00','22440.00','100','100','2130.00','22440.00','0','0','0','1','2017-07-01 00:00:00','2018-06-30 00:00:00',NULL,'1','0','2017-12-28 13:53:41',NULL,NULL);
 INSERT INTO `eh_social_security_bases` (`id`, `city_id`, `household_type`, `pay_item`, `company_radix_min`, `company_radix_max`, `company_ratio_min`, `company_ratio_max`, `employee_radix_min`, `employee_radix_max`, `employee_ratio_min`, `employee_ratio_max`, `editable_flag`, `is_default`, `effect_time_begin`, `effect_time_end`, `ratio_options`, `accum_or_socail`, `creator_uid`, `create_time`, `operator_uid`, `update_time`) VALUES('15','13905','外埠二档','失业','2130.00','2130.00','80','100','2130.00','2130.00','100','100','0','1','2017-07-01 00:00:00','2018-06-30 00:00:00',NULL,'1','0','2017-12-28 13:53:41',NULL,NULL);
-INSERT INTO `eh_social_security_bases` (`id`, `city_id`, `household_type`, `pay_item`, `company_radix_min`, `company_radix_max`, `company_ratio_min`, `company_ratio_max`, `employee_radix_min`, `employee_radix_max`, `employee_ratio_min`, `employee_ratio_max`, `editable_flag`, `is_default`, `effect_time_begin`, `effect_time_end`, `ratio_options`, `accum_or_socail`, `creator_uid`, `create_time`, `operator_uid`, `update_time`) VALUES('16','13905','外埠二档','工伤','2130.00','22440.00','14','114','2130.00','22440.00','0','0','0','1','2017-07-01 00:00:00','2018-06-30 00:00:00','[14,28,49,63,66,78,96,114]','1','0','2017-12-28 13:53:41',NULL,NULL);
+INSERT INTO `eh_social_security_bases` (`id`, `city_id`, `household_type`, `pay_item`, `company_radix_min`, `company_radix_max`, `company_ratio_min`, `company_ratio_max`, `employee_radix_min`, `employee_radix_max`, `employee_ratio_min`, `employee_ratio_max`, `editable_flag`, `is_default`, `effect_time_begin`, `effect_time_end`, `ratio_options`, `accum_or_socail`, `creator_uid`, `create_time`, `operator_uid`, `update_time`) VALUES('16','13905','外埠二档','工伤','2130.00','22440.00','14','171','2130.00','22440.00','0','0','0','1','2017-07-01 00:00:00','2018-06-30 00:00:00','[14,28,49,63,66,78,96,114]','1','0','2017-12-28 13:53:41',NULL,NULL);
 INSERT INTO `eh_social_security_bases` (`id`, `city_id`, `household_type`, `pay_item`, `company_radix_min`, `company_radix_max`, `company_ratio_min`, `company_ratio_max`, `employee_radix_min`, `employee_radix_max`, `employee_ratio_min`, `employee_ratio_max`, `editable_flag`, `is_default`, `effect_time_begin`, `effect_time_end`, `ratio_options`, `accum_or_socail`, `creator_uid`, `create_time`, `operator_uid`, `update_time`) VALUES('17','13905','外埠三档','养老','2130.00','22440.00','1300','1300','2130.00','22440.00','800','800','0','1','2017-07-01 00:00:00','2018-06-30 00:00:00',NULL,'1','0','2017-12-28 13:53:41',NULL,NULL);
 INSERT INTO `eh_social_security_bases` (`id`, `city_id`, `household_type`, `pay_item`, `company_radix_min`, `company_radix_max`, `company_ratio_min`, `company_ratio_max`, `employee_radix_min`, `employee_radix_max`, `employee_ratio_min`, `employee_ratio_max`, `editable_flag`, `is_default`, `effect_time_begin`, `effect_time_end`, `ratio_options`, `accum_or_socail`, `creator_uid`, `create_time`, `operator_uid`, `update_time`) VALUES('18','13905','外埠三档','医疗','7480.00','7480.00','0','0','7480.00','7480.00','0','0','0','1','2017-07-01 00:00:00','2018-06-30 00:00:00',NULL,'1','0','2017-12-28 13:53:41',NULL,NULL);
 INSERT INTO `eh_social_security_bases` (`id`, `city_id`, `household_type`, `pay_item`, `company_radix_min`, `company_radix_max`, `company_ratio_min`, `company_ratio_max`, `employee_radix_min`, `employee_radix_max`, `employee_ratio_min`, `employee_ratio_max`, `editable_flag`, `is_default`, `effect_time_begin`, `effect_time_end`, `ratio_options`, `accum_or_socail`, `creator_uid`, `create_time`, `operator_uid`, `update_time`) VALUES('19','13905','外埠三档','生育','2130.00','22440.00','100','100','2130.00','22440.00','0','0','0','1','2017-07-01 00:00:00','2018-06-30 00:00:00',NULL,'1','0','2017-12-28 13:53:41',NULL,NULL);
 INSERT INTO `eh_social_security_bases` (`id`, `city_id`, `household_type`, `pay_item`, `company_radix_min`, `company_radix_max`, `company_ratio_min`, `company_ratio_max`, `employee_radix_min`, `employee_radix_max`, `employee_ratio_min`, `employee_ratio_max`, `editable_flag`, `is_default`, `effect_time_begin`, `effect_time_end`, `ratio_options`, `accum_or_socail`, `creator_uid`, `create_time`, `operator_uid`, `update_time`) VALUES('20','13905','外埠三档','失业','2130.00','2130.00','80','100','2130.00','2130.00','100','100','0','1','2017-07-01 00:00:00','2018-06-30 00:00:00',NULL,'1','0','2017-12-28 13:53:41',NULL,NULL);
-INSERT INTO `eh_social_security_bases` (`id`, `city_id`, `household_type`, `pay_item`, `company_radix_min`, `company_radix_max`, `company_ratio_min`, `company_ratio_max`, `employee_radix_min`, `employee_radix_max`, `employee_ratio_min`, `employee_ratio_max`, `editable_flag`, `is_default`, `effect_time_begin`, `effect_time_end`, `ratio_options`, `accum_or_socail`, `creator_uid`, `create_time`, `operator_uid`, `update_time`) VALUES('21','13905','外埠三档','工伤','2130.00','22440.00','14','114','2130.00','22440.00','0','0','0','1','2017-07-01 00:00:00','2018-06-30 00:00:00','[14,28,49,63,66,78,96,114]','1','0','2017-12-28 13:53:41',NULL,NULL);
+INSERT INTO `eh_social_security_bases` (`id`, `city_id`, `household_type`, `pay_item`, `company_radix_min`, `company_radix_max`, `company_ratio_min`, `company_ratio_max`, `employee_radix_min`, `employee_radix_max`, `employee_ratio_min`, `employee_ratio_max`, `editable_flag`, `is_default`, `effect_time_begin`, `effect_time_end`, `ratio_options`, `accum_or_socail`, `creator_uid`, `create_time`, `operator_uid`, `update_time`) VALUES('21','13905','外埠三档','工伤','2130.00','22440.00','14','171','2130.00','22440.00','0','0','0','1','2017-07-01 00:00:00','2018-06-30 00:00:00','[14,28,49,63,66,78,96,114]','1','0','2017-12-28 13:53:41',NULL,NULL);
 
 -- 暂时取消ratio options
 UPDATE eh_social_security_bases SET ratio_options = NULL ;
@@ -535,27 +535,27 @@ INSERT INTO `eh_launch_pad_items` (`id`, `namespace_id`, `app_id`, `scope_code`,
 -- end by zhiwei.zhang
 
 -- error codes added by wentian
-SET @eh_locale_strings_id = (SELECT MAX(id) from `eh_locale_strings`);
+SET @eh_locale_strings_id = (SELECT MAX(id) FROM `eh_locale_strings`);
 INSERT INTO `eh_locale_strings` (`id`, `scope`, `code`, `locale`, `text`) VALUES (@eh_locale_strings_id:=@eh_locale_strings_id+1, 'requisition', '1001', 'zh_CN', '未找到请示单工作流');
 INSERT INTO `eh_locale_strings` (`id`, `scope`, `code`, `locale`, `text`) VALUES (@eh_locale_strings_id:=@eh_locale_strings_id+1, 'purchase', '1001', 'zh_CN', '该采购单未完成或者已取消,不能进行入库操作');
 INSERT INTO `eh_locale_strings` (`id`, `scope`, `code`, `locale`, `text`) VALUES (@eh_locale_strings_id:=@eh_locale_strings_id+1, 'purchase', '1002', 'zh_CN', '未找到用户的采购模块工作流');
 
 -- by dengs.
-update eh_office_cubicle_categories SET status=2;
+UPDATE eh_office_cubicle_categories SET STATUS=2;
 
 -- 付款合同主体信息加上原合同和初始合同 by xiongying
 SET @field_id = (SELECT MAX(id) FROM eh_var_fields);
 INSERT INTO `eh_var_fields` (`id`, `module_name`, `name`, `display_name`, `field_type`, `group_id`, `group_path`, `mandatory_flag`, `default_order`, `status`, `creator_uid`, `create_time`, `operator_uid`, `update_time`, `field_param`) VALUES ((@field_id := @field_id + 1), 'contract', 'parentId', '原合同', 'Long', '31', '/30/31/', '0', NULL, '2', '1', NOW(), NULL, NULL, '{\"fieldParamType\": \"text\", \"length\": 32}');
 INSERT INTO `eh_var_fields` (`id`, `module_name`, `name`, `display_name`, `field_type`, `group_id`, `group_path`, `mandatory_flag`, `default_order`, `status`, `creator_uid`, `create_time`, `operator_uid`, `update_time`, `field_param`) VALUES ((@field_id := @field_id + 1), 'contract', 'rootParentId', '初始合同', 'Long', '31', '/30/31/', '0', NULL, '2', '1', NOW(), NULL, NULL, '{\"fieldParamType\": \"text\", \"length\": 32}');
 
---by zheng
-UPDATE eh_rentalv2_default_rules set rental_start_time = 7776000000 where rental_start_time = 0;
-UPDATE eh_rentalv2_default_rules set rental_start_time_flag = 1;
+--bY zheng
+UPDATE eh_rentalv2_default_rules SET rental_start_time = 7776000000 WHERE rental_start_time = 0;
+UPDATE eh_rentalv2_default_rules SET rental_start_time_flag = 1;
 
-update eh_rentalv2_resource_types set identify = 'conference' where name like '%会议室%';
-update eh_rentalv2_resource_types set identify = 'screen' where name like '%电子屏%';
-update eh_rentalv2_resource_types set identify = 'area' where name like '%场地%';
+UPDATE eh_rentalv2_resource_types SET identify = 'conference' WHERE NAME LIKE '%会议室%';
+UPDATE eh_rentalv2_resource_types SET identify = 'screen' WHERE NAME LIKE '%电子屏%';
+UPDATE eh_rentalv2_resource_types SET identify = 'area' WHERE NAME LIKE '%场地%';
 -- beta 和 现网执行
-update eh_rentalv2_resource_types set identify = 'conference' where id in (10819,12030);
-update eh_rentalv2_resource_types set identify = 'screen' where id in (11,12168);
-update eh_rentalv2_resource_types set identify = 'area' where id in (10012,10062,10715,10716,10717,10814,12044,12078,12081,12082,12131,12175);
+UPDATE eh_rentalv2_resource_types SET identify = 'conference' WHERE id IN (10819,12030);
+UPDATE eh_rentalv2_resource_types SET identify = 'screen' WHERE id IN (11,12168);
+UPDATE eh_rentalv2_resource_types SET identify = 'area' WHERE id IN (10012,10062,10715,10716,10717,10814,12044,12078,12081,12082,12131,12175);
