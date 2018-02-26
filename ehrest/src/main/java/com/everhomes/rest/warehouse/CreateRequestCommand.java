@@ -14,6 +14,7 @@ import java.util.List;
  *     <li>remark: 申请说明</li>
  *     <li>requestType: 申请类型 参考{@link com.everhomes.rest.warehouse.WarehouseStockRequestType}</li>
  *     <li>stocks: 库存列表 参考{@link com.everhomes.rest.warehouse.WarehouseMaterialStock}</li>
+ *     <li>requisitionId:关联的请示单id</li>
  * </ul>
  * Created by ying.xiong on 2017/5/11.
  */
@@ -42,6 +43,15 @@ public class CreateRequestCommand {
 
     public void setNamespaceId(Integer namespaceId) {
         this.namespaceId = namespaceId;
+    }
+    private Long requisitionId;
+
+    public Long getRequisitionId() {
+        return requisitionId;
+    }
+
+    public void setRequisitionId(Long requisitionId) {
+        this.requisitionId = requisitionId;
     }
 
     public Long getCommunityId() {
