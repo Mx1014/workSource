@@ -2,7 +2,9 @@
 package com.everhomes.supplier;
 
 import com.everhomes.rest.supplier.ListSuppliersDTO;
+import com.everhomes.rest.supplier.SearchSuppliersDTO;
 
+import java.util.List;
 import java.util.TreeMap;
 
 /**
@@ -23,4 +25,6 @@ public interface SupplierProvider {
             , Long pageAnchor, Integer pageSize);
 
     String findSupplierNameById(Long supplierId);
+
+    List<SearchSuppliersDTO> findSuppliersByKeyword(String nameKeyword);
 }

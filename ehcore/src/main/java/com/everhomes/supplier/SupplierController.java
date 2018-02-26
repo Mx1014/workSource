@@ -11,6 +11,8 @@ import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.RestController;
 import org.springframework.web.multipart.MultipartFile;
 
+import java.util.List;
+
 /**
  * Created by Wentian Wang on 2018/1/9.
  */
@@ -84,8 +86,8 @@ public class SupplierController extends ControllerBase {
     @RequestMapping("searchSuppliers")
     @RestReturn(value = SearchSuppliersDTO.class,collection = true)
     private RestResponse searchSuppliers(SearchSuppliersCommand cmd){
-//        supplierService.searchSuppliers(cmd.getNameKeyword());
-        RestResponse restResponse = new RestResponse();
+        List<SearchSuppliersDTO> dtos = supplierService.searchSuppliers(cmd.getNameKeyword());
+        RestResponse restResponse = new RestResponse(dtos);
         restResponse.setErrorCode(200);
         restResponse.setErrorDescription("OK");
         return restResponse;
