@@ -622,8 +622,20 @@ public class OrganizationServiceImpl implements OrganizationService {
         Organization parOrg = this.checkOrganization(cmd.getId());
 
         parOrg.setShowFlag(cmd.getNaviFlag());
-        if(!StringUtils.isEmpty(cmd.getName()))
+
+        //name check
+        if(!StringUtils.isEmpty(cmd.getName())){
+            //同级重名校验
+            Organization down_organization = organizationProvider.findOrganizationByParentAndName(parOrg.getId(), cmd.getName());
+            if(down_organization != null){
+                OrganizationDTO orgDto_error = new OrganizationDTO();
+                orgDto_error.setErrorCode(OrganizationServiceErrorCode.ERROR_DEPARTMENT_EXISTS);
+                LOGGER.error("name repeat, cmd = {}", cmd);
+                throw RuntimeErrorException.errorWith(OrganizationServiceErrorCode.SCOPE, OrganizationServiceErrorCode.ERROR_DEPARTMENT_EXISTS,
+                        "name repeat");
+            }
             parOrg.setName(cmd.getName());
+        }
 
         Organization org = dbProvider.execute((TransactionStatus status) -> {
             if (OrganizationGroupType.fromCode(parOrg.getGroupType()) == OrganizationGroupType.ENTERPRISE) {
