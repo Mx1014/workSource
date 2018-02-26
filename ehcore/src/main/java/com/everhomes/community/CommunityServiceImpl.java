@@ -3509,7 +3509,7 @@ public class CommunityServiceImpl implements CommunityService {
     				"ResourceType cannot be null.");
         }
 
-		Integer namespaceId = UserContext.current().getUser().getNamespaceId();
+		Integer namespaceId = cmd.getNamespaceId();
 		ResourceCategoryAssignment rca = communityProvider.findResourceCategoryAssignment(cmd.getResourceId(), cmd.getResourceType(), 
 				namespaceId);
 		if(null != rca) {
