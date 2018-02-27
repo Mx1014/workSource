@@ -687,7 +687,7 @@ public class GeneralApprovalServiceImpl implements GeneralApprovalService {
         List<GeneralApproval> results = this.generalApprovalProvider.queryGeneralApprovals(new ListingLocator(), Integer.MAX_VALUE - 1, (locator, query) -> {
             //  1-(1)when ownerType is ORGANIZATION then process it like community (dengs at 20170428)
             if (EntityType.ORGANIZATIONS.getCode().equals(cmd.getOwnerType()) && FlowModuleType.SERVICE_ALLIANCE.getCode().equals(cmd.getModuleType())) {
-                processSAApprovalQuery(cmd, query);
+                setServiceAllianceQuery(cmd, query);
             } else {
                 //  1-(2)normal operation (nan.rong at 10/16/2017)
                 query.addConditions(Tables.EH_GENERAL_APPROVALS.OWNER_ID.eq(cmd.getOwnerId()));
@@ -728,7 +728,7 @@ public class GeneralApprovalServiceImpl implements GeneralApprovalService {
         return resp;
     }
 
-    private void processSAApprovalQuery(ListGeneralApprovalCommand cmd, SelectQuery<? extends Record> query) {
+    private void setServiceAllianceQuery(ListGeneralApprovalCommand cmd, SelectQuery<? extends Record> query) {
         List<OrganizationCommunity> communityList = organizationProvider.listOrganizationCommunities(cmd.getOwnerId());
         Condition conditionOR = null;
         for (OrganizationCommunity organizationCommunity : communityList) {
@@ -1037,6 +1037,7 @@ public class GeneralApprovalServiceImpl implements GeneralApprovalService {
         dto.setApprovalNo(flowCase.getApprovalNo());
         dto.setApprovalStatus(r.getStatus());
         dto.setFlowCaseId(flowCase.getId());
+        dto.setApprovalId(r.getReferId());
         return dto;
     }
 
@@ -1270,7 +1271,11 @@ public class GeneralApprovalServiceImpl implements GeneralApprovalService {
     public ListGeneralApprovalResponse listAvailableGeneralApprovals(ListGeneralApprovalCommand cmd){
         ListGeneralApprovalResponse res = new ListGeneralApprovalResponse();
         List<GeneralApprovalDTO> dtos = new ArrayList<>();
-
+        cmd.setStatus(GeneralApprovalStatus.RUNNING.getCode());
+        if (null == cmd.getModuleType())
+            cmd.setModuleType(FlowModuleType.NO_MODULE.getCode());
+        if (null == cmd.getModuleId())
+            cmd.setModuleId(GeneralApprovalController.MODULE_ID);
         ListGeneralApprovalResponse response = listGeneralApproval(cmd);
         List<GeneralApprovalDTO> approvals = response.getDtos();
         OrganizationMember member = organizationProvider.findDepartmentMemberByTargetIdAndOrgId(UserContext.currentUserId(), cmd.getOwnerId());

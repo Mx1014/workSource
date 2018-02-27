@@ -52,26 +52,13 @@ public class GeneralApprovalExportTaskHandler implements FileDownloadTaskHandler
         Long approvalNo = null;
         if (params.get("approvalNo") != null)
             approvalNo = (Long) params.get("approvalNo");
+
+        //  get the out put stream before start download
         OutputStream outputStream = null;
         String fileName = (String) params.get("name");
         Long taskId = (Long) params.get("taskId");
         CsFileLocationDTO fileLocationDTO = fileDownloadTaskService.uploadToContenServer(fileName, outputStream);
         taskService.processUpdateTask(taskId, fileLocationDTO);
-
-
-/*
-        params.put("organizationId", cmd.getOrganizationId());
-        params.put("moduleId", cmd.getModuleId());
-        params.put("startTime", cmd.getStartTime());
-        params.put("endTime", cmd.getEndTime());
-        params.put("approvalStatus", cmd.getApprovalStatus());
-        params.put("approvalId", cmd.getApprovalId());
-        params.put("creatorDepartmentId", cmd.getCreatorDepartmentId());
-        params.put("creatorName", cmd.getCreatorName());
-        params.put("approvalNo", cmd.getApprovalNo());
-*/
-
-
     }
 
     @Override
