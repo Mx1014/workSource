@@ -1348,6 +1348,8 @@ public class WarehouseServiceImpl implements WarehouseService {
     @Override
     public void createRequest(CreateRequestCommand cmd) {
         checkAssetPriviledgeForPropertyOrg(cmd.getCommunityId(), PrivilegeConstants.WAREHOUSE_CLAIM_MANAGEMENT_APPLICATION, cmd.getOwnerId());
+        //根据requestId先进行删除,request和requestMaterials,然后根据startFlow是否为1来决定直接发起审批否，给与request正确审核状态
+        warehouseProvider.deleteWarehouseRequest(cmd.getRequestId());
         if (WarehouseStockRequestType.STOCK_OUT.equals(WarehouseStockRequestType.fromCode(cmd.getRequestType()))) {
             if (cmd.getStocks() != null && cmd.getStocks().size() > 0) {
                 cmd.getStocks().forEach(stock -> {
@@ -1393,7 +1395,11 @@ public class WarehouseServiceImpl implements WarehouseService {
             request.setCommunityId(communityId);
             request.setRequestUid(uid);
             request.setCreatorUid(uid);
-            request.setReviewResult(ReviewResult.NONE.getCode());
+            if(cmd.getStartFlow().byteValue() == (byte)1){
+                request.setReviewResult(ReviewResult.NONE.getCode());
+            }else{
+                request.setReviewResult(ReviewResult.UNINITIALIZED.getCode());
+            }
             request.setDeliveryFlag(DeliveryFlag.NO.getCode());
             warehouseProvider.creatWarehouseRequest(request);
             Long requestId = request.getId();
@@ -1413,34 +1419,37 @@ public class WarehouseServiceImpl implements WarehouseService {
                     warehouseRequestMaterialSearcher.feedDoc(material);
                 });
             }
-            //新建flowcase
-            Flow flow = flowService.getEnabledFlow(namespaceId, FlowConstants.WAREHOUSE_REQUEST,
-                    FlowModuleType.NO_MODULE.getCode(), cmd.getOwnerId(), FlowOwnerType.WAREHOUSE_REQUEST.getCode());
-            if (null == flow) {
-                LOGGER.error("Enable request flow not found, moduleId={}", FlowConstants.WAREHOUSE_REQUEST);
-                throw RuntimeErrorException.errorWith(WarehouseServiceErrorCode.SCOPE, WarehouseServiceErrorCode.ERROR_ENABLE_FLOW,
-                        localeStringService.getLocalizedString(String.valueOf(WarehouseServiceErrorCode.SCOPE),
-                                String.valueOf(WarehouseServiceErrorCode.ERROR_ENABLE_FLOW),
-                                UserContext.current().getUser().getLocale(), "Enable request flow not found."));
-            }
-            CreateFlowCaseCommand createFlowCaseCommand = new CreateFlowCaseCommand();
-            createFlowCaseCommand.setCurrentOrganizationId(request.getOwnerId());
-            createFlowCaseCommand.setTitle("领用申请");
-            createFlowCaseCommand.setApplyUserId(request.getCreatorUid());
-            createFlowCaseCommand.setFlowMainId(flow.getFlowMainId());
-            createFlowCaseCommand.setFlowVersion(flow.getFlowVersion());
-            createFlowCaseCommand.setReferId(request.getId());
-            createFlowCaseCommand.setReferType(EntityType.WAREHOUSE_REQUEST.getCode());
-            createFlowCaseCommand.setContent(request.getRemark());
-            createFlowCaseCommand.setServiceType("领用申请");
-            //这里先注释掉试试
+            if(cmd.getStartFlow().byteValue() == (byte)1){
+
+                //新建flowcase
+                Flow flow = flowService.getEnabledFlow(namespaceId, FlowConstants.WAREHOUSE_REQUEST,
+                        FlowModuleType.NO_MODULE.getCode(), cmd.getOwnerId(), FlowOwnerType.WAREHOUSE_REQUEST.getCode());
+                if (null == flow) {
+                    LOGGER.error("Enable request flow not found, moduleId={}", FlowConstants.WAREHOUSE_REQUEST);
+                    throw RuntimeErrorException.errorWith(WarehouseServiceErrorCode.SCOPE, WarehouseServiceErrorCode.ERROR_ENABLE_FLOW,
+                            localeStringService.getLocalizedString(String.valueOf(WarehouseServiceErrorCode.SCOPE),
+                                    String.valueOf(WarehouseServiceErrorCode.ERROR_ENABLE_FLOW),
+                                    UserContext.current().getUser().getLocale(), "Enable request flow not found."));
+                }
+                CreateFlowCaseCommand createFlowCaseCommand = new CreateFlowCaseCommand();
+                createFlowCaseCommand.setCurrentOrganizationId(request.getOwnerId());
+                createFlowCaseCommand.setTitle("领用申请");
+                createFlowCaseCommand.setApplyUserId(request.getCreatorUid());
+                createFlowCaseCommand.setFlowMainId(flow.getFlowMainId());
+                createFlowCaseCommand.setFlowVersion(flow.getFlowVersion());
+                createFlowCaseCommand.setReferId(request.getId());
+                createFlowCaseCommand.setReferType(EntityType.WAREHOUSE_REQUEST.getCode());
+                createFlowCaseCommand.setContent(request.getRemark());
+                createFlowCaseCommand.setServiceType("领用申请");
+                //这里先注释掉试试
 //            createFlowCaseCommand.setProjectId(request.getOwnerId());
 //            createFlowCaseCommand.setProjectType(request.getOwnerType());
-            //增加园区
-            createFlowCaseCommand.setProjectId(request.getCommunityId());
-            createFlowCaseCommand.setProjectType("EhCommunities");
+                //增加园区
+                createFlowCaseCommand.setProjectId(request.getCommunityId());
+                createFlowCaseCommand.setProjectType("EhCommunities");
 
-            flowService.createFlowCase(createFlowCaseCommand);
+                flowService.createFlowCase(createFlowCaseCommand);
+            }
             return null;
         });
     }

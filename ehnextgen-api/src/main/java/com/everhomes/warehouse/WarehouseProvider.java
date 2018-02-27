@@ -99,4 +99,6 @@ public interface WarehouseProvider {
     WarehouseMaterials findWarehouseMaterialById(Long materialId);
 
     WarehouseMaterialStock findWarehouseStocksByMaterialId(Long materialId);
+
+    void deleteWarehouseRequest(Long requestId);
 }

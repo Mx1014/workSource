@@ -694,6 +694,17 @@ public class WarehouseProviderImpl implements WarehouseProvider {
     }
 
     @Override
+    public void deleteWarehouseRequest(Long requestId) {
+        DSLContext context = dbProvider.getDslContext(AccessSpec.readWrite());
+        context.delete(Tables.EH_WAREHOUSE_REQUESTS)
+                .where(Tables.EH_WAREHOUSE_REQUESTS.ID.eq(requestId))
+                .execute();
+        context.delete(Tables.EH_WAREHOUSE_REQUEST_MATERIALS)
+                .where(Tables.EH_WAREHOUSE_REQUEST_MATERIALS.REQUEST_ID.eq(requestId))
+                .execute();
+    }
+
+    @Override
     public Long getWarehouseStockAmount(Long warehouseId, String ownerType, Long ownerId) {
         DSLContext context = dbProvider.getDslContext(AccessSpec.readOnly());
         SelectQuery<EhWarehouseStocksRecord> query = context.selectQuery(Tables.EH_WAREHOUSE_STOCKS);
