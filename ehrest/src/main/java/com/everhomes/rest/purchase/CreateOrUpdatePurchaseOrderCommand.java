@@ -39,7 +39,15 @@ public class CreateOrUpdatePurchaseOrderCommand {
     private Long communityId;
     private String contactTel;
     private String contactName;
+    private Byte startFlow;
 
+    public Byte getStartFlow() {
+        return startFlow;
+    }
+
+    public void setStartFlow(Byte startFlow) {
+        this.startFlow = startFlow;
+    }
 
     public Long getCommunityId() {
         return communityId;
