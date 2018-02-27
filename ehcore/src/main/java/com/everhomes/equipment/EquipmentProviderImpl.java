@@ -3067,15 +3067,15 @@ public class EquipmentProviderImpl implements EquipmentProvider {
         DSLContext context = this.dbProvider.getDslContext(AccessSpec.readOnly());
         SelectQuery<Record> query = context.selectQuery();
         Condition inMaintanceCountCondition =
-                Tables.EH_EQUIPMENT_INSPECTION_TASK_LOGS.PROCESS_RESULT.eq(EquipmentTaskProcessResult.NONE.getCode());
+                Tables.EH_EQUIPMENT_INSPECTION_TASK_LOGS.PROCESS_RESULT.ne(EquipmentTaskProcessResult.NEED_MAINTENANCE_OK_COMPLETE_OK.getCode());
         inMaintanceCountCondition = inMaintanceCountCondition.
                 and(Tables.EH_EQUIPMENT_INSPECTION_TASK_LOGS.PROCESS_TYPE.eq(EquipmentTaskProcessType.NEED_MAINTENANCE.getCode()));
-        Field<?> inMaintanceCount = DSL.decode().when(inMaintanceCountCondition, EquipmentTaskProcessResult.NEED_MAINTENANCE_OK_COMPLETE_OK.getCode());
+        Field<?> inMaintanceCount = DSL.decode().when(inMaintanceCountCondition, Tables.EH_EQUIPMENT_INSPECTION_TASK_LOGS.TASK_ID);
 
         Condition allMaintanceCountCondition =
-                Tables.EH_EQUIPMENT_INSPECTION_TASK_LOGS.PROCESS_RESULT.eq(EquipmentTaskProcessType.NEED_MAINTENANCE.getCode());
+                Tables.EH_EQUIPMENT_INSPECTION_TASK_LOGS.PROCESS_TYPE.eq(EquipmentTaskProcessType.NEED_MAINTENANCE.getCode());
 
-        Field<?> maintanceTotalCount = DSL.decode().when(allMaintanceCountCondition, EquipmentTaskProcessResult.NONE.getCode());
+        Field<?> maintanceTotalCount = DSL.decode().when(allMaintanceCountCondition, Tables.EH_EQUIPMENT_INSPECTION_TASK_LOGS.TASK_ID);
         final Field<?>[] fields = {DSL.countDistinct(inMaintanceCount).as("inMaintanceCount"),
                 DSL.countDistinct(maintanceTotalCount).as("maintanceTotalCount")};
 
