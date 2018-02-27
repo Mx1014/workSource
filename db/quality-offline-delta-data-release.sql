@@ -8,15 +8,23 @@ SET scope_id =(SELECT eh_quality_inspection_standards.target_id FROM  eh_quality
 UPDATE eh_service_modules
 SET name = '计划管理'
 WHERE id = 20630;
+
 UPDATE eh_service_modules
 SET name = '计划审批'
 WHERE id = 20640;
+
 UPDATE eh_service_modules
 SET name = '日志管理'
 WHERE id = 20670;
+
 UPDATE  eh_service_modules
 SET name ='任务管理'
 WHERE id = 20650;
+
 UPDATE  eh_service_modules
 SET name ='统计分析'
 WHERE id = 20660;
+
+UPDATE eh_service_module_privileges
+SET remark = REPLACE(remark,'标准','计划')
+where id in (120,121,122,123,125);
