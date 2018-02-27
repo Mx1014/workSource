@@ -832,21 +832,11 @@ CREATE TABLE `eh_requisition_types`(
   PRIMARY KEY (`id`)
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4;
 
-
-
-
-
-
 -- 仓库管理2.0 end of the script
-
-
- 
 
 -- 增加版本号 201801252125
 ALTER TABLE `eh_portal_content_scopes` ADD COLUMN `version_id`  BIGINT(20) NULL;
 ALTER TABLE `eh_portal_launch_pad_mappings` ADD COLUMN `version_id`  BIGINT(20) NULL;
-
-ALTER TABLE `eh_addresses` ADD COLUMN `version` VARCHAR(32) COMMENT '版本号';
 
 
 -- 薪酬2.0 
