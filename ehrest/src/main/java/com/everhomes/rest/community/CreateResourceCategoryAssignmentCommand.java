@@ -19,6 +19,8 @@ public class CreateResourceCategoryAssignmentCommand {
 
     private Long resourceCategoryId;
 
+    private Integer namespaceId;
+
     public CreateResourceCategoryAssignmentCommand() {
     }
 
@@ -44,6 +46,14 @@ public class CreateResourceCategoryAssignmentCommand {
 
     public void setResourceCategoryId(Long resourceCategoryId) {
         this.resourceCategoryId = resourceCategoryId;
+    }
+
+    public Integer getNamespaceId() {
+        return namespaceId;
+    }
+
+    public void setNamespaceId(Integer namespaceId) {
+        this.namespaceId = namespaceId;
     }
 
     @Override

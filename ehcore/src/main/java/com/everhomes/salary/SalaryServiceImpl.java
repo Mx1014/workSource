@@ -696,7 +696,7 @@ public class SalaryServiceImpl implements SalaryService {
 //                LOGGER.debug("第[{}]个gourpEntities数据[{}]的值是:[{}]列是{}", i+"",groupEntity.getName(), val,GetExcelLetter(i + 3));
                 SalaryEmployeeOriginVal salaryVal = salaryEmployeeOriginValProvider.findSalaryEmployeeOriginValByDetailId(groupEntity.getId(), detailId);
                 if (null == salaryVal) {
-                    salaryVal = processSalaryEmployeeOriginVal(groupEntity, detailId, val);
+                    salaryVal = processSalaryEmployeeOriginVal(groupEntity, detailId, val,ownerId);
                     salaryEmployeeOriginValProvider.createSalaryEmployeeOriginVal(salaryVal);
                 } else {
                     salaryVal.setSalaryValue(val);
@@ -835,7 +835,7 @@ public class SalaryServiceImpl implements SalaryService {
                 salaryGroupEntityProvider.createSalaryGroupEntity(groupEntity);
             }
             salaryEmployeeOriginValProvider.deleteSalaryEmployeeOriginValByDetailIdAndGroouEntity(detailId, groupEntity.getId());
-            SalaryEmployeeOriginVal salaryVal = processSalaryEmployeeOriginVal(groupEntity, detailId, salaryTax.toString());
+            SalaryEmployeeOriginVal salaryVal = processSalaryEmployeeOriginVal(groupEntity, detailId, salaryTax.toString(), ownerId);
 //            salaryVal.setCreatorUid();
             salaryEmployeeOriginValProvider.createSalaryEmployeeOriginVal(salaryVal);
 
@@ -852,7 +852,7 @@ public class SalaryServiceImpl implements SalaryService {
                 salaryGroupEntityProvider.createSalaryGroupEntity(groupEntity);
             }
             salaryEmployeeOriginValProvider.deleteSalaryEmployeeOriginValByDetailIdAndGroouEntity(detailId, groupEntity.getId());
-            SalaryEmployeeOriginVal bonusVal = processSalaryEmployeeOriginVal(groupEntity, detailId, bonusTax.toString());
+            SalaryEmployeeOriginVal bonusVal = processSalaryEmployeeOriginVal(groupEntity, detailId, bonusTax.toString(), ownerId);
             salaryEmployeeOriginValProvider.createSalaryEmployeeOriginVal(bonusVal);
             //实发应该是工资+年终-工资税-年终税+税后款
             //工资和年终是减去了扣款而应发没有,所以计算的时候用工资+年终
@@ -878,13 +878,13 @@ public class SalaryServiceImpl implements SalaryService {
         return employee;
     }
 
-    private SalaryEmployeeOriginVal processSalaryEmployeeOriginVal(SalaryGroupEntity groupEntity, Long detailId, String val) {
+    private SalaryEmployeeOriginVal processSalaryEmployeeOriginVal(SalaryGroupEntity groupEntity, Long detailId, String val, Long ownerId) {
         SalaryEmployeeOriginVal salaryVal = ConvertHelper.convert(groupEntity, SalaryEmployeeOriginVal.class);
         salaryVal.setSalaryValue(val);
         salaryVal.setUserDetailId(detailId);
         salaryVal.setGroupEntityId(groupEntity.getId());
         salaryVal.setGroupEntityName(groupEntity.getName());
-        salaryVal.setOwnerId(groupEntity.getOwnerId());
+        salaryVal.setOwnerId(ownerId);
         salaryVal.setOwnerType("organization");
         return salaryVal;
     }
@@ -986,8 +986,9 @@ public class SalaryServiceImpl implements SalaryService {
 
     @Override
     public OutputStream getSalaryDetailsOutPut(Long ownerId, String month, Long taskId, Integer namespaceId) {
-        String toMonth = salaryGroupProvider.getMonthByOwnerId(ownerId);
-        NormalFlag isFile = NormalFlag.fromCode(month.equals(toMonth) ? (byte) 0 : (byte) 1);
+//        String toMonth = salaryGroupProvider.getMonthByOwnerId(ownerId);
+//        NormalFlag isFile = NormalFlag.fromCode(month.equals(toMonth) ? (byte) 0 : (byte) 1);
+        NormalFlag isFile = isMonthFile(month);
         List<SalaryGroupEntity> groupEntities = new ArrayList<>();
         if (isFile == NormalFlag.NO) {
             groupEntities = salaryGroupEntityProvider.listOpenSalaryGroupEntityByOrgId(ownerId);
@@ -1015,6 +1016,11 @@ public class SalaryServiceImpl implements SalaryService {
 //        OutputStream outputStream = new ByteArrayOutputStream(out);
 
         return writeOutPut(wb);
+    }
+
+    private NormalFlag isMonthFile(String month) {
+        //todo: 现在只导出归档的内容 今后有没有可能导出未归档内容,我认为是没可能的
+        return NormalFlag.YES;
     }
 
     private String getDepartmentName(Long detailId) {

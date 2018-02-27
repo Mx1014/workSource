@@ -1385,8 +1385,8 @@ public class CommunityServiceImpl implements CommunityService {
 	@Override
 	public CommunityAuthUserAddressResponse listCommunityAuthUserAddress(CommunityAuthUserAddressCommand cmd){
 		// Long communityId = cmd.getCommunityId();
-        Integer namespaceId = UserContext.getCurrentNamespaceId();
-        List<NamespaceResource> resourceList = namespaceResourceProvider.listResourceByNamespace(namespaceId, NamespaceResourceType.COMMUNITY);
+//        Integer namespaceId = UserContext.getCurrentNamespaceId();
+        List<NamespaceResource> resourceList = namespaceResourceProvider.listResourceByNamespace(cmd.getNamespaceId(), NamespaceResourceType.COMMUNITY);
         if (resourceList == null) {
             return new CommunityAuthUserAddressResponse();
         }
@@ -3509,7 +3509,7 @@ public class CommunityServiceImpl implements CommunityService {
     				"ResourceType cannot be null.");
         }
 
-		Integer namespaceId = UserContext.current().getUser().getNamespaceId();
+		Integer namespaceId = cmd.getNamespaceId();
 		ResourceCategoryAssignment rca = communityProvider.findResourceCategoryAssignment(cmd.getResourceId(), cmd.getResourceType(), 
 				namespaceId);
 		if(null != rca) {

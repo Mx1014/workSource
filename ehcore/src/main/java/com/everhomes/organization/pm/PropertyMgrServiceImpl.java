@@ -4751,8 +4751,8 @@ public class PropertyMgrServiceImpl implements PropertyMgrService {
 	public OrganizationOwnerDTO createOrganizationOwner(CreateOrganizationOwnerCommand cmd) {
         validate(cmd);
         checkCurrentUserNotInOrg(cmd.getOrganizationId());
-		User currentUser = UserContext.current().getUser();
-		if(currentUser.getNamespaceId() == 999971) {
+//		User currentUser = UserContext.current().getUser();
+		if(cmd.getNamespaceId() == 999971) {
 			LOGGER.error("Insufficient privilege, createOrganizationOwner");
 			throw RuntimeErrorException.errorWith(ErrorCodes.SCOPE_GENERAL, ErrorCodes.ERROR_ACCESS_DENIED,
 					"Insufficient privilege");
@@ -4769,7 +4769,7 @@ public class PropertyMgrServiceImpl implements PropertyMgrService {
         }
 		owner.setCommunityId(cmd.getCommunityId().toString());
         owner.setOrgOwnerTypeId(ownerType.getId());
-        owner.setNamespaceId(currentUser.getNamespaceId());
+        owner.setNamespaceId(cmd.getNamespaceId());
         owner.setStatus(OrganizationOwnerStatus.NORMAL.getCode());
         UserGender gender = UserGender.fromCode(cmd.getGender());
         if (gender != null) {
@@ -4802,7 +4802,7 @@ public class PropertyMgrServiceImpl implements PropertyMgrService {
 					//只有在申请了才会自动通过，现要改为只要是注册用户不管申没申请都自动同步给客户 19558 by xiongying20171219
 //                    autoApprovalOrganizationOwnerAddress(cmd.getCommunityId(), cmd.getContactToken(), ownerAddress);
                     propertyMgrProvider.createOrganizationOwnerAddress(ownerAddress);
-					getIntoFamily(address, cmd.getContactToken(), currentUser.getNamespaceId());
+					getIntoFamily(address, cmd.getContactToken(), cmd.getNamespaceId());
                 } else {
                     LOGGER.error("CreateOrganizationOwner: address id is wrong! addressId = {}", addressCmd.getAddressId());
                 }
@@ -5142,7 +5142,7 @@ public class PropertyMgrServiceImpl implements PropertyMgrService {
         checkCurrentUserNotInOrg(cmd.getOrganizationId());
 
         OrganizationOwnerAttachment attachment = propertyMgrProvider.findOrganizationOwnerAttachment(
-                currentNamespaceId(), cmd.getId());
+                cmd.getNamespaceId(), cmd.getId());
         if (attachment == null) {
             LOGGER.error("Organization owner attachment is not exist. id = {}", cmd.getId());
             throw errorWith(ErrorCodes.SCOPE_GENERAL, ErrorCodes.ERROR_INVALID_PARAMETER,
@@ -5515,6 +5515,20 @@ public class PropertyMgrServiceImpl implements PropertyMgrService {
             dto.setBirthday(owner.getBirthday().getTime());
 			dto.setBirthdayDate(DateUtil.dateToStr(new Date(dto.getBirthday()), DateUtil.YMR_SLASH));
         }
+
+		//添加门牌
+		List<OrganizationOwnerAddress> addresses = propertyMgrProvider.listOrganizationOwnerAddressByOwnerId(owner.getNamespaceId(), owner.getId());
+		dto.setAddresses(addresses.stream().map(r2 -> {
+			OrganizationOwnerAddressDTO d = ConvertHelper.convert(r2, OrganizationOwnerAddressDTO.class);
+			Address address = addressProvider.findAddressById(r2.getAddressId());
+			if(address != null) {
+				d.setAddressId(address.getId());
+				d.setAddress(address.getAddress());
+				d.setApartment(address.getApartmentName());
+				d.setBuilding(address.getBuildingName());
+			}
+			return d;
+		}).collect(Collectors.toList()));
         return dto;
     }
 

@@ -5,6 +5,7 @@ import com.everhomes.constants.ErrorCodes;
 import com.everhomes.db.AccessSpec;
 import com.everhomes.db.DbProvider;
 import com.everhomes.rest.supplier.ListSuppliersDTO;
+import com.everhomes.rest.supplier.SearchSuppliersDTO;
 import com.everhomes.server.schema.Tables;
 import com.everhomes.server.schema.tables.EhWarehouseSuppliers;
 import com.everhomes.server.schema.tables.daos.EhWarehouseSuppliersDao;
@@ -13,6 +14,8 @@ import org.jooq.Record;
 import org.jooq.SelectQuery;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Repository;
+
+import java.util.ArrayList;
 import java.util.List;
 import java.util.TreeMap;
 
@@ -106,6 +109,22 @@ public class SupplierProviderImpl implements SupplierProvider{
                 .from(supplier)
                 .where(supplier.ID.eq(supplierId))
                 .fetchOne(supplier.NAME);
+    }
+
+    @Override
+    public List<SearchSuppliersDTO> findSuppliersByKeyword(String nameKeyword) {
+        List<SearchSuppliersDTO> list = new ArrayList<>();
+        getReadOnlyContext().select(supplier.ID,supplier.NAME)
+                .from(supplier)
+                .where(supplier.NAME.like("%" + nameKeyword + "%"))
+                .fetch()
+                .forEach(r -> {
+                    SearchSuppliersDTO dto = new SearchSuppliersDTO();
+                    dto.setSupplierId(r.getValue(supplier.ID));
+                    dto.setSupplierName(r.getValue(supplier.NAME));
+                    list.add(dto);
+                });
+        return list;
     }
 
     private DSLContext getReadOnlyContext(){
