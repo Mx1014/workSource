@@ -1309,9 +1309,9 @@ public class FieldServiceImpl implements FieldService {
     @Override
     public void updateFieldGroups(UpdateFieldGroupsCommand cmd) {
         List<ScopeFieldGroupInfo> groups = cmd.getGroups();
+        Map<Long, ScopeFieldGroup> existGroups = fieldProvider.listScopeFieldGroups(cmd.getNamespaceId(), cmd.getCommunityId(), cmd.getModuleName());
         if(groups != null && groups.size() > 0) {
             Long userId = UserContext.currentUserId();
-            Map<Long, ScopeFieldGroup> existGroups = fieldProvider.listScopeFieldGroups(cmd.getNamespaceId(), cmd.getCommunityId(), cmd.getModuleName());
             //查出所有符合的map列表
             //处理 没有id的增加，有的在数据库中查询找到则更新,且在列表中去掉对应的，没找到则增加
             //将map列表中剩下的置为inactive
@@ -1338,18 +1338,18 @@ public class FieldServiceImpl implements FieldService {
                     }
                 }
             });
+        }
 
-            if(existGroups.size() > 0) {
-                existGroups.forEach((id, group) -> {
-                    group.setStatus(VarFieldStatus.INACTIVE.getCode());
-                    fieldProvider.updateScopeFieldGroup(group);
+        if(existGroups.size() > 0) {
+            existGroups.forEach((id, group) -> {
+                group.setStatus(VarFieldStatus.INACTIVE.getCode());
+                fieldProvider.updateScopeFieldGroup(group);
 
-                    FieldGroup systemGroup = fieldProvider.findFieldGroup(group.getGroupId());
-                    //删除组下的字段和选项
-                    Map<Long, ScopeField> scopeFieldMap = fieldProvider.listScopeFields(cmd.getNamespaceId(), cmd.getCommunityId(), cmd.getModuleName(), systemGroup.getPath());
-                    inactiveScopeField(scopeFieldMap);
-                });
-            }
+                FieldGroup systemGroup = fieldProvider.findFieldGroup(group.getGroupId());
+                //删除组下的字段和选项
+                Map<Long, ScopeField> scopeFieldMap = fieldProvider.listScopeFields(cmd.getNamespaceId(), cmd.getCommunityId(), cmd.getModuleName(), systemGroup.getPath());
+                inactiveScopeField(scopeFieldMap);
+            });
         }
     }
 
