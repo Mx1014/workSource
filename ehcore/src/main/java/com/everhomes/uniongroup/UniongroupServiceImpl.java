@@ -330,7 +330,7 @@ public class UniongroupServiceImpl implements UniongroupService {
             List<OrganizationMemberDTO> dtos = details.stream().map(r->{
                 OrganizationMemberDTO dto = ConvertHelper.convert(r, OrganizationMemberDTO.class);
                 //:todo 寻找部门名
-                List<OrganizationMember> departments = this.organizationProvider.listOrganizationMembersByDetailId(r.getId(),groupTypes);
+                List<OrganizationMember> departments = this.organizationProvider.listOrganizationMembersByDetailIdAndOrgId(r.getId(), cmd.getOrganizationId(), groupTypes);
                 if(departments != null && departments.size() > 0){
                     for(OrganizationMember d: departments){
                         Organization departOrg = organizationProvider.findOrganizationById(d.getOrganizationId());

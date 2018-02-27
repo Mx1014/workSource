@@ -10,7 +10,6 @@ import com.everhomes.discover.ItemType;
 import com.everhomes.util.StringHelper;
 
 /**
- * <p>
  * <ul>
  * <li>communityId: 被更新的小区Id</li>
  * <li>address: 小区地址</li>

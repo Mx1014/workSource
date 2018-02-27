@@ -4,7 +4,6 @@ package com.everhomes.rest.community;
 import com.everhomes.util.StringHelper;
 
 /**
- * <p>
  * <ul>
  * <li>resourceType: 资源实体类型 小区园区：EhCommunities</li>
  * <li>resourceId: 资源实体id</li>

@@ -453,8 +453,13 @@ public interface OrganizationProvider {
   
  
 	Map<Long, String> listOrganizationsOfDetail(Integer namespaceId, Long detailId, String organizationGroupType);
+
+	// 根据人事档案id获取members，可能会获取到同一域空间下不同总公司的人
 	List<OrganizationMember> listOrganizationMembersByDetailId(Long detailId,List<String> groupTypes);
-	
+
+	// 根据人事档案id和orgId获取members，智辉获取到该公司下的人
+	List<OrganizationMember> listOrganizationMembersByDetailIdAndOrgId(Long detailId, Long orgId, List<String> groupTypes);
+
 	Integer countUserOrganization(Integer namespaceId, Long communityId, Byte userOrganizationStatus, String namespaceUserType, Byte gender);
 	Integer countUserOrganization(Integer namespaceId, Long communityId, Byte userOrganizationStatus);
 	Integer countUserOrganization(Integer namespaceId, Long communityId);

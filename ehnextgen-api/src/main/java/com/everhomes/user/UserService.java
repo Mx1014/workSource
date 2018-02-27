@@ -4,14 +4,16 @@ package com.everhomes.user;
 import com.everhomes.community.Community;
 import com.everhomes.rest.address.CommunityDTO;
 import com.everhomes.rest.asset.TargetDTO;
-import com.everhomes.rest.community.admin.ListUserCommunitiesCommand;
 import com.everhomes.rest.family.FamilyDTO;
 import com.everhomes.rest.link.RichLinkDTO;
+import com.everhomes.rest.openapi.FunctionCardDto;
 import com.everhomes.rest.organization.OrganizationDTO;
+import com.everhomes.rest.qrcode.QRCodeDTO;
 import com.everhomes.rest.ui.organization.SetCurrentCommunityForSceneCommand;
 import com.everhomes.rest.ui.user.*;
 import com.everhomes.rest.user.*;
 import com.everhomes.rest.user.admin.*;
+import org.springframework.web.context.request.async.DeferredResult;
 
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
@@ -288,4 +290,14 @@ public interface UserService {
             HttpServletRequest request, HttpServletResponse response);
 
     SearchUserByIdentifierResponse searchUserByIdentifier(SearchUserByIdentifierCommand cmd);
+
+    QRCodeDTO querySubjectIdForScan();
+
+    DeferredResult<Object> waitScanForLogon(String subjectId);
+
+    String getSercetKeyForScan(String args);
+
+    void logonByScan(String subjectId, String message);
+
+    List<FunctionCardDto> listUserRelatedCards();
 }

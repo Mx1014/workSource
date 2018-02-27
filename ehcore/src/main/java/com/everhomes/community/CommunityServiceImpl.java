@@ -58,11 +58,13 @@ import com.everhomes.search.CommunitySearcher;
 import com.everhomes.search.UserWithoutConfAccountSearcher;
 import com.everhomes.server.schema.Tables;
 import com.everhomes.settings.PaginationConfigHelper;
+import com.everhomes.sms.*;
 import com.everhomes.techpark.servicehotline.ServiceConfiguration;
 import com.everhomes.techpark.servicehotline.ServiceConfigurationsProvider;
 import com.everhomes.user.*;
 import com.everhomes.userOrganization.UserOrganizations;
 import com.everhomes.util.*;
+import com.everhomes.util.excel.ExcelUtils;
 import com.everhomes.util.excel.RowResult;
 import com.everhomes.util.excel.handler.PropMrgOwnerHandler;
 import com.everhomes.version.VersionProvider;
@@ -71,6 +73,7 @@ import com.everhomes.version.VersionUpgradeRule;
 import org.apache.commons.lang.StringUtils;
 import org.apache.lucene.spatial.geohash.GeoHashUtils;
 import org.apache.poi.ss.usermodel.*;
+import org.apache.poi.ss.usermodel.DateUtil;
 import org.apache.poi.xssf.usermodel.XSSFWorkbook;
 import org.jooq.Condition;
 import org.jooq.JoinType;
@@ -90,6 +93,8 @@ import java.sql.Timestamp;
 import java.text.SimpleDateFormat;
 import java.util.*;
 import java.util.stream.Collectors;
+
+import static com.everhomes.util.RuntimeErrorException.errorWith;
 
 @Component
 public class CommunityServiceImpl implements CommunityService {
@@ -651,6 +656,45 @@ public class CommunityServiceImpl implements CommunityService {
 	}
 
 	@Override
+	public void exportBuildingByCommunityId(ListBuildingCommand cmd, HttpServletResponse response) {
+		cmd.setPageSize(10000);
+		List<BuildingDTO> buildings = listBuildings(cmd).getBuildings();
+		if (buildings != null && buildings.size() > 0) {
+			String fileName = String.format("楼栋信息_%s", com.everhomes.sms.DateUtil.dateToStr(new Date(), com.everhomes.sms.DateUtil.NO_SLASH));
+			ExcelUtils excelUtils = new ExcelUtils(response, fileName, "楼栋信息");
+
+			List<BuildingExportDetailDTO> data = buildings.stream().map(this::convertToExportDetail).collect(Collectors.toList());
+			String[] propertyNames = {"communtiyName", "name", "buildingNumber", "aliasName", "address", "latitudeLongitude", "areaSize", "managerName", "contact"};
+			String[] titleNames = {"园区名称", "楼栋名称", "楼栋编号", "简称", "地址", "经纬度", "面积", "联系人", "联系电话"};
+			int[] titleSizes = {20, 20, 20, 20, 20, 20, 20, 20, 20};
+			excelUtils.writeExcel(propertyNames, titleNames, titleSizes, data);
+		} else {
+			throw errorWith(OrganizationServiceErrorCode.SCOPE, OrganizationServiceErrorCode.ERROR_NO_DATA,
+					"no data");
+		}
+	}
+
+	private BuildingExportDetailDTO convertToExportDetail(BuildingDTO dto) {
+		BuildingExportDetailDTO exportDetailDTO = ConvertHelper.convert(dto, BuildingExportDetailDTO.class);
+		try {
+			exportDetailDTO.setName(dto.getBuildingName());
+			Community community = communityProvider.findCommunityById(dto.getCommunityId());
+			if(community != null) {
+				exportDetailDTO.setCommuntiyName(community.getName());
+			}
+
+			if(dto.getLatitude() != null && dto.getLongitude() != null) {
+				exportDetailDTO.setLatitudeLongitude(dto.getLongitude() + "," + dto.getLatitude());
+			}
+		} catch (Exception e) {
+			LOGGER.error("dto : {}", dto);
+			throw e;
+		}
+
+		return exportDetailDTO;
+	}
+
+	@Override
 	public BuildingDTO getBuilding(GetBuildingCommand cmd) {
 		
 		Building building = communityProvider.findBuildingById(cmd.getBuildingId());
@@ -1134,6 +1178,7 @@ public class CommunityServiceImpl implements CommunityService {
 				building.setName(data.getName());
 				building.setAliasName(data.getAliasName());
 				building.setAddress(data.getAddress());
+				building.setManagerName(data.getContactor());
 				building.setContact(data.getPhone());
 				if (StringUtils.isNotBlank(data.getAreaSize())) {
 					building.setAreaSize(Double.valueOf(data.getAreaSize()));
@@ -1163,6 +1208,7 @@ public class CommunityServiceImpl implements CommunityService {
 			}else {
 				building.setAliasName(data.getAliasName());
 				building.setAddress(data.getAddress());
+				building.setManagerName(data.getContactor());
 				building.setContact(data.getPhone());
 				if (StringUtils.isNotBlank(data.getAreaSize())) {
 					building.setAreaSize(Double.valueOf(data.getAreaSize()));

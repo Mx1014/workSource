@@ -8,7 +8,6 @@ import com.everhomes.point.IPointEventProcessor;
 import com.everhomes.point.processor.GeneralPointEventProcessor;
 import com.everhomes.rest.group.ClubType;
 import com.everhomes.rest.group.GroupDTO;
-import com.everhomes.rest.group.GroupMemberStatus;
 import com.everhomes.util.StringHelper;
 import org.springframework.stereotype.Component;
 
@@ -54,12 +53,10 @@ public class ClubLeavePointEventProcessor extends GeneralPointEventProcessor imp
         }
 
         String eventName = "";
-        if (Objects.equals(memberStatus, GroupMemberStatus.ACTIVE.getCode())) {
-            if (Objects.equals(clubType, ClubType.NORMAL.getCode())) {
-                eventName = SystemEvent.CLUB_CLUB_LEAVE.suffix(ClubType.NORMAL.getCode());
-            } else if (Objects.equals(clubType, ClubType.GUILD.getCode())) {
-                eventName = SystemEvent.CLUB_CLUB_LEAVE.suffix(ClubType.GUILD.getCode());
-            }
+        if (Objects.equals(clubType, ClubType.NORMAL.getCode())) {
+            eventName = SystemEvent.CLUB_CLUB_LEAVE.suffix(ClubType.NORMAL.getCode());
+        } else if (Objects.equals(clubType, ClubType.GUILD.getCode())) {
+            eventName = SystemEvent.CLUB_CLUB_LEAVE.suffix(ClubType.GUILD.getCode());
         }
         return eventName;
     }

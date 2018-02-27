@@ -7,7 +7,6 @@ import javax.validation.constraints.NotNull;
 import com.everhomes.util.StringHelper;
 
 /**
- * <p>
  * <ul>
  * <li>uuid: 小区唯一标识</li>
  * </ul>

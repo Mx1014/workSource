@@ -15,6 +15,8 @@ public class DynamicField {
     private String fieldName;
 
     private String fieldParam;
+
+    private Long fieldId;
     @NotNull
     /**
      * displayName: 字段在excel上展示的名字
@@ -80,5 +82,13 @@ public class DynamicField {
 
     public void setFieldParam(String fieldParam) {
         this.fieldParam = fieldParam;
+    }
+
+    public Long getFieldId() {
+        return fieldId;
+    }
+
+    public void setFieldId(Long fieldId) {
+        this.fieldId = fieldId;
     }
 }

@@ -4,7 +4,7 @@ package com.everhomes.rest.statistics.terminal;
 
 /**
  *<ul>
- *<li>date:日期字符串<li>
+ *<li>date:日期字符串</li>
  *</ul>
  */
 public class ListTerminalStatisticsByDayCommand {

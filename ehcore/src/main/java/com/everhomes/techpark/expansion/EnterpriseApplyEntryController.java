@@ -47,8 +47,8 @@ public class EnterpriseApplyEntryController extends ControllerBase{
 	private GeneralFormService generalFormService;
 
 	/**
-	 * <b>URL: /techpark/entry/listEnterprisesAbstract
-	 * <p>企业概要列表
+	 * <b>URL: /techpark/entry/listEnterprisesAbstract</b>
+	 * <p>企业概要列表</p>
 	 */
 	@RequestMapping("listEnterprisesAbstract")
 	@RestReturn(value=ListEnterpriseDetailResponse.class)
@@ -79,8 +79,8 @@ public class EnterpriseApplyEntryController extends ControllerBase{
 	}
 	
 	/**
-	 * <b>URL: /techpark/entry/listEnterpriseDetails
-	 * <p>企业列表
+	 * <b>URL: /techpark/entry/listEnterpriseDetails</b>
+	 * <p>企业列表</p>
 	 */
 	@RequestMapping("listEnterpriseDetails")
 	@RestReturn(value=ListEnterpriseDetailResponse.class)
@@ -122,8 +122,8 @@ public class EnterpriseApplyEntryController extends ControllerBase{
 	}
 	
 	/**
-	 * <b>URL: /techpark/entry/getEnterpriseExpansionById
-	 * <p>获取企业信息
+	 * <b>URL: /techpark/entry/getEnterpriseDetailById</b>
+	 * <p>获取企业信息</p>
 	 */
 	@RequestMapping("getEnterpriseDetailById")
 	@RestReturn(value=GetEnterpriseDetailByIdResponse.class)
@@ -136,8 +136,8 @@ public class EnterpriseApplyEntryController extends ControllerBase{
 	}
 	
 	/**
-	 * <b>URL: /techpark/entry/listForRents
-	 * <p>招租列表
+	 * <b>URL: /techpark/entry/listForRents</b>
+	 * <p>招租列表</p>
 	 */
 	@RequestMapping("listForRents")
 	@RestReturn(value=ListBuildingForRentResponse.class)
@@ -150,8 +150,8 @@ public class EnterpriseApplyEntryController extends ControllerBase{
 	}
 
 	/**
-	 * <b>URL: /techpark/entry/createLeasePromotionForAdmin
-	 * <p>创建招租(后台管理用)
+	 * <b>URL: /techpark/entry/createLeasePromotionForAdmin</b>
+	 * <p>创建招租(后台管理用)</p>
 	 */
 	@RequestMapping("createLeasePromotionForAdmin")
 	@RestReturn(value=BuildingForRentDTO.class)
@@ -164,8 +164,8 @@ public class EnterpriseApplyEntryController extends ControllerBase{
 	}
 
 	/**
-	 * <b>URL: /techpark/entry/updateLeasePromotionForAdmin
-	 * <p>修改招租（后台管理用）
+	 * <b>URL: /techpark/entry/updateLeasePromotionForAdmin</b>
+	 * <p>修改招租（后台管理用）</p>
 	 */
 	@RequestMapping("updateLeasePromotionForAdmin")
 	@RestReturn(value=BuildingForRentDTO.class)
@@ -178,8 +178,8 @@ public class EnterpriseApplyEntryController extends ControllerBase{
 	}
 
 	/**
-	 * <b>URL: /techpark/entry/createLeasePromotion
-	 * <p>创建招租（app用）
+	 * <b>URL: /techpark/entry/createLeasePromotion</b>
+	 * <p>创建招租（app用）</p>
 	 */
 	@RequestMapping("createLeasePromotion")
 	@RestReturn(value=BuildingForRentDTO.class)
@@ -192,8 +192,8 @@ public class EnterpriseApplyEntryController extends ControllerBase{
 	}
 	
 	/**
-	 * <b>URL: /techpark/entry/updateLeasePromotion
-	 * <p>修改招租（app用）
+	 * <b>URL: /techpark/entry/updateLeasePromotion</b>
+	 * <p>修改招租（app用）</p>
 	 */
 	@RequestMapping("updateLeasePromotion")
 	@RestReturn(value=BuildingForRentDTO.class)
@@ -206,8 +206,8 @@ public class EnterpriseApplyEntryController extends ControllerBase{
 	}
 	
 	/**
-	 * <b>URL: /techpark/entry/findLeasePromotionById
-	 * <p>根据id查询招租
+	 * <b>URL: /techpark/entry/findLeasePromotionById</b>
+	 * <p>根据id查询招租</p>
 	 */
 	@RequestMapping("findLeasePromotionById")
 	@RestReturn(value=BuildingForRentDTO.class)
@@ -220,8 +220,8 @@ public class EnterpriseApplyEntryController extends ControllerBase{
 	}
 
 	/**
-	 * <b>URL: /techpark/entry/updateLeasePromotionStatus
-	 * <p>修改招租状态
+	 * <b>URL: /techpark/entry/updateLeasePromotionStatus</b>
+	 * <p>修改招租状态</p>
 	 */
 	@RequestMapping("updateLeasePromotionStatus")
 	@RestReturn(value=String.class)
@@ -233,8 +233,8 @@ public class EnterpriseApplyEntryController extends ControllerBase{
 	}
 
 	/**
-	 * <b>URL: /techpark/entry/deleteLeasePromotion
-	 * <p>删除招租
+	 * <b>URL: /techpark/entry/deleteLeasePromotion</b>
+	 * <p>删除招租</p>
 	 */
 	@RequestMapping("deleteLeasePromotion")
 	@RestReturn(value=String.class)
@@ -246,8 +246,8 @@ public class EnterpriseApplyEntryController extends ControllerBase{
 	}
 
 	/**
-	 * <b>URL: /techpark/entry/listApplyEntrys
-	 * <p>入住信息列表
+	 * <b>URL: /techpark/entry/listApplyEntrys</b>
+	 * <p>入住信息列表</p>
 	 */
 	@RequestMapping("listApplyEntrys")
 	@RestReturn(value=EnterpriseApplyEntryResponse.class)
@@ -260,8 +260,8 @@ public class EnterpriseApplyEntryController extends ControllerBase{
 	}
 
 	/**
-	 * <b>URL: /techpark/entry/exportApplyEntrys
-	 * <p>导出入住信息列表
+	 * <b>URL: /techpark/entry/exportApplyEntrys</b>
+	 * <p>导出入住信息列表</p>
 	 */
 	@RequestMapping("exportApplyEntrys")
 	public void exportApplyEntrys(ListEnterpriseApplyEntryCommand cmd, HttpServletResponse resp){
@@ -270,8 +270,8 @@ public class EnterpriseApplyEntryController extends ControllerBase{
 	}
 
 	/**
-	 * <b>URL: /techpark/entry/applyEntry
-	 * <p>申请入住
+	 * <b>URL: /techpark/entry/applyEntry</b>
+	 * <p>申请入住</p>
 	 */
 	@RequestMapping("applyEntry")
 	@RestReturn(value=ApplyEntryResponse.class)
@@ -284,8 +284,8 @@ public class EnterpriseApplyEntryController extends ControllerBase{
 	}
 
 	/**
-	 * <b>URL: /techpark/entry/updateApplyEntryStatus
-	 * <p>修改入住状态
+	 * <b>URL: /techpark/entry/updateApplyEntryStatus</b>
+	 * <p>修改入住状态</p>
 	 */
 	@RequestMapping("updateApplyEntryStatus")
 	@RestReturn(value=String.class)
@@ -299,8 +299,8 @@ public class EnterpriseApplyEntryController extends ControllerBase{
 
 	
 	/**
-	 * <b>URL: /techpark/entry/deleteApplyEntry
-	 * <p>删除申请
+	 * <b>URL: /techpark/entry/deleteApplyEntry</b>
+	 * <p>删除申请</p>
 	 */
 	@RequestMapping("deleteApplyEntry")
 	@RestReturn(value=String.class)
@@ -312,8 +312,8 @@ public class EnterpriseApplyEntryController extends ControllerBase{
 	}
 
 	/**
-	 * <b>URL: /techpark/entry/setLeasePromotionConfig
-	 * <p>修改园区入驻设置
+	 * <b>URL: /techpark/entry/setLeasePromotionConfig</b>
+	 * <p>修改园区入驻设置</p>
 	 */
 	@RequestMapping("setLeasePromotionConfig")
 	@RestReturn(value=String.class)
@@ -327,8 +327,8 @@ public class EnterpriseApplyEntryController extends ControllerBase{
 	}
 
 	/**
-	 * <b>URL: /techpark/entry/getLeasePromotionConfig
-	 * <p>获取园区入驻设置
+	 * <b>URL: /techpark/entry/getLeasePromotionConfig</b>
+	 * <p>获取园区入驻设置</p>
 	 */
 	@RequestMapping("getLeasePromotionConfig")
 	@RestReturn(value=LeasePromotionConfigDTO.class)
@@ -342,8 +342,8 @@ public class EnterpriseApplyEntryController extends ControllerBase{
 	}
 
 	/**
-	 * <b>URL: /techpark/entry/addLeaseIssuer
-	 * <p>添加出租发布者
+	 * <b>URL: /techpark/entry/addLeaseIssuer</b>
+	 * <p>添加出租发布者</p>
 	 */
 	@RequestMapping("addLeaseIssuer")
 	@RestReturn(value=String.class)
@@ -358,8 +358,8 @@ public class EnterpriseApplyEntryController extends ControllerBase{
 	}
 
 	/**
-	 * <b>URL: /techpark/entry/deleteLeaseIssuer
-	 * <p>删除出租发布者
+	 * <b>URL: /techpark/entry/deleteLeaseIssuer</b>
+	 * <p>删除出租发布者</p>
 	 */
 	@RequestMapping("deleteLeaseIssuer")
 	@RestReturn(value=String.class)
@@ -373,8 +373,8 @@ public class EnterpriseApplyEntryController extends ControllerBase{
 	}
 
 	/**
-	 * <b>URL: /techpark/entry/listLeaseIssuers
-	 * <p>获取出租发布者列表
+	 * <b>URL: /techpark/entry/listLeaseIssuers</b>
+	 * <p>获取出租发布者列表</p>
 	 */
 	@RequestMapping("listLeaseIssuers")
 	@RestReturn(value=ListLeaseIssuersResponse.class)
@@ -388,8 +388,8 @@ public class EnterpriseApplyEntryController extends ControllerBase{
 	}
 
 	/**
-	 * <b>URL: /techpark/entry/checkIsLeaseIssuer
-	 * <p>检查是否可以发布
+	 * <b>URL: /techpark/entry/checkIsLeaseIssuer</b>
+	 * <p>检查是否可以发布</p>
 	 */
 	@RequestMapping("checkIsLeaseIssuer")
 	@RestReturn(value=CheckIsLeaseIssuerDTO.class)
@@ -484,7 +484,7 @@ public class EnterpriseApplyEntryController extends ControllerBase{
 
 	/**
 	 *
-	 * <b>URL: /techpark/entry/updateLeasePromotionOrder<b>
+	 * <b>URL: /techpark/entry/updateLeasePromotionOrder</b>
 	 * <p>
 	 * 更新招租顺序
 	 * </p>

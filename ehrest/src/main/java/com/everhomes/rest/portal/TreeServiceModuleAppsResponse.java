@@ -1,18 +1,17 @@
 package com.everhomes.rest.portal;
 
+import java.util.List;
+
 import com.everhomes.discover.ItemType;
 import com.everhomes.rest.acl.ServiceModuleDTO;
-import com.everhomes.rest.energy.util.EnumType;
 import com.everhomes.util.StringHelper;
-import org.omg.CORBA.PRIVATE_MEMBER;
-
-import java.util.ArrayList;
-import java.util.List;
 
 /**
  *
- * <ul>返回值:
- * <li>List<ServiceModuleAppDTO>: 模块应用列表，参考{@link com.everhomes.rest.portal.ServiceModuleAppDTO}</li>
+ * <ul>
+ * <li>communityControlList: 公司列表，参考{@link com.everhomes.rest.portal.ServiceModuleAppDTO}</li>
+ * <li>orgControlList: 公司列表，参考{@link com.everhomes.rest.portal.ServiceModuleAppDTO}</li>
+ * <li>unlimitControlList: ??列表，参考{@link com.everhomes.rest.portal.ServiceModuleAppDTO}</li>
  * </ul>
  */
 public class TreeServiceModuleAppsResponse {

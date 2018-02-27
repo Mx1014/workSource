@@ -38,6 +38,7 @@ import com.everhomes.sms.DateUtil;
 import com.everhomes.techpark.punch.PunchService;
 import com.everhomes.user.User;
 import com.everhomes.util.DateHelper;
+import com.everhomes.util.StringHelper;
 import com.everhomes.workReport.WorkReportService;
 import com.everhomes.yellowPage.ServiceAllianceCategories;
 import com.everhomes.yellowPage.YellowPageProvider;
@@ -1141,7 +1142,7 @@ public class GeneralApprovalServiceImpl implements GeneralApprovalService {
 
         //  1. basic data from flowCases
         Cell approvalNoCell = dataRow.createCell(0);
-        approvalNoCell.setCellValue(data.getApprovalNo().toString());
+        approvalNoCell.setCellValue(data.getApprovalNo() != null ? data.getApprovalNo().toString() : "");
         dataRow.createCell(1).setCellValue(data.getCreateTime());
         dataRow.createCell(2).setCellValue(data.getCreatorName());
         dataRow.createCell(3).setCellValue(data.getCreatorDepartment());
@@ -1297,5 +1298,15 @@ public class GeneralApprovalServiceImpl implements GeneralApprovalService {
             if (member.getGroupPath().contains(String.valueOf(departmentId)))
                 return true;
         return false;
+    }
+
+    @Override
+    public String getUserRealName(GetUserRealNameCommand cmd){
+        User user = UserContext.current().getUser();
+        OrganizationMember member = organizationProvider.findOrganizationMemberByOrgIdAndUId(user.getId(), cmd.getOwnerId());
+        if(member != null)
+            return member.getContactName();
+        //  若没有真实姓名则返回昵称
+        return user.getNickName();
     }
 }

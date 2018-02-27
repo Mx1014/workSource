@@ -456,7 +456,7 @@ public class EBeiAssetVendorHandler implements AssetVendorHandler {
         if(data == null) return list;
         for(int i = 0; i < data.size(); i++){
             GetLeaseContractBillOnFiPropertyData source = data.get(i);
-            String key = source.getContractId()+"-"+source.getFiProperty();
+            String key = source.getContractId()+"$"+source.getFiProperty();
             if(tabs.containsKey(key)){
                 tabs.get(key).add(source);
             }else{
@@ -466,8 +466,9 @@ public class EBeiAssetVendorHandler implements AssetVendorHandler {
             }
         }
         for(Map.Entry<String,List<GetLeaseContractBillOnFiPropertyData>> entry : tabs.entrySet()){
-            String[] fiPropertyAndContractId = entry.getKey().split("-");
-            ShowBillForClientV2DTO dto = new ShowBillForClientV2DTO(getFiPropertyName(fiPropertyAndContractId[0]),fiPropertyAndContractId[1]);
+            LOGGER.info("tab key is = {}",entry.getKey());
+            String[] fiPropertyAndContractId = entry.getKey().split("\\$");
+            ShowBillForClientV2DTO dto = new ShowBillForClientV2DTO(getFiPropertyName(fiPropertyAndContractId[1]),fiPropertyAndContractId[0]);
             //把正中会传过来的contratId转为左邻存储的contractId
             String zuolinContractId = contractProvider.findContractIdByThirdPartyId(dto.getContractId(), NamespaceContractType.EBEI.getCode());
             dto.setContractId(zuolinContractId);
@@ -488,7 +489,7 @@ public class EBeiAssetVendorHandler implements AssetVendorHandler {
                 addresses.add(value.getBuildingRename());
                 bills.add(bill);
             }
-            dto.setBillGroupName(getFiPropertyName(values.get(0).getFiProperty()));
+//            dto.setBillGroupName(getFiPropertyName(values.get(0).getFiProperty()));
             dto.setBills(bills);
             dto.setOverAllAmountOwed(overallOwedAmount.toString());
             Iterator<String> it = addresses.iterator();

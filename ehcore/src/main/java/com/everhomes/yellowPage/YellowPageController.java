@@ -403,7 +403,7 @@ public class YellowPageController  extends ControllerBase {
     
     /**
      * <b>URL: /yellowPage/exportRequestInfo</b>
-     * <p>导出申请信息/p>
+     * <p>导出申请信息</p>
      */
     @RequestMapping("exportRequestInfo")
     @RestReturn(value=String.class)
