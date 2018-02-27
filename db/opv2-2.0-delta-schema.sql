@@ -1699,3 +1699,6 @@ UPDATE eh_general_forms SET delete_flag = 1 WHERE delete_flag IS NULL;
 ALTER TABLE eh_general_forms MODIFY delete_flag TINYINT NOT NULL DEFAULT 1 COMMENT '0: no, 1: yes';
 
 -- end by nan.rong
+
+
+
