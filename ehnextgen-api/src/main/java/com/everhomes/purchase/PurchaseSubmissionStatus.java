@@ -4,7 +4,7 @@ package com.everhomes.purchase;
  * Created by Wentian on 2018/2/6.
  */
 public enum PurchaseSubmissionStatus {
-    HANDLING((byte)1),FINISH((byte)2),CANCELED((byte)3);
+    UNINITIALIZED((byte)0),HANDLING((byte)1),FINISH((byte)2),CANCELED((byte)3);
     private byte code;
     PurchaseSubmissionStatus(byte code) {
         this.code = code;

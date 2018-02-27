@@ -58,6 +58,11 @@ public class PurchaseServiceImpl implements PurchaseService {
 
     @Override
     public void CreateOrUpdatePurchaseOrderCommand(CreateOrUpdatePurchaseOrderCommand cmd) {
+        if(cmd.getPurchaseRequestId() != null){
+            //删除
+            purchaseProvider.deleteOrderById(cmd.getPurchaseRequestId());
+            purchaseProvider.deleteOrderItemsByOrderId(cmd.getPurchaseRequestId());
+        }
         PurchaseOrder order = new PurchaseOrder();
         order.setApplicantId(UserContext.currentUserId());
         order.setApplicantTime(new Timestamp(DateHelper.currentGMTTime().getTime()));
@@ -87,7 +92,11 @@ public class PurchaseServiceImpl implements PurchaseService {
 
         //关联已经通过的请示单，和请示单的状态不联动，采购单的状态走自己的工作流（purchase）
         order.setApprovalOrderId(cmd.getApprovalSheetId());
-        order.setSubmissionStatus(PurchaseSubmissionStatus.HANDLING.getCode());
+        if(cmd.getStartFlow().byteValue() == (byte) 1){
+            order.setSubmissionStatus(PurchaseSubmissionStatus.HANDLING.getCode());
+        }else{
+            order.setSubmissionStatus(PurchaseSubmissionStatus.UNINITIALIZED.getCode());
+        }
         order.setWarehouseStatus(WarehouseOrderStatus.SUSPEND.getCode());
         //关联的物品的新增
         List<EhWarehousePurchaseItems> list = new ArrayList<>();
@@ -107,32 +116,35 @@ public class PurchaseServiceImpl implements PurchaseService {
             item.setUnitPrice(new BigDecimal(dto.getUnitPrice()));
             list.add(item);
         }
-        //工作流case
-        //创建工作流
-        Flow flow = flowService.getEnabledFlow(cmd.getNamespaceId(), FlowConstants.PURCHASE_MODULE
-                , FlowModuleType.NO_MODULE.getCode(),cmd.getOwnerId(), FlowOwnerType.PURCHASE.getCode());
-        if (null == flow) {
-            LOGGER.error("Enable request flow not found, moduleId={}", FlowConstants.PURCHASE_MODULE);
-            throw RuntimeErrorException.errorWith(PurchaseErrorCodes.SCOPE, PurchaseErrorCodes.ERROR_CREATE_FLOW_CASE,
-                    "purchase flow case not found.");
-        }
-        CreateFlowCaseCommand createFlowCaseCommand = new CreateFlowCaseCommand();
-        createFlowCaseCommand.setReferId(nextPurchaseOrderId);
-        createFlowCaseCommand.setReferType("purchaseId");
-        createFlowCaseCommand.setCurrentOrganizationId(order.getOwnerId());
-        createFlowCaseCommand.setTitle("请示单申请");
-        createFlowCaseCommand.setApplyUserId(order.getCreateUid());
-        createFlowCaseCommand.setFlowMainId(flow.getFlowMainId());
-        createFlowCaseCommand.setFlowVersion(flow.getFlowVersion());
-        createFlowCaseCommand.setReferId(order.getId());
-        createFlowCaseCommand.setReferType(EntityType.WAREHOUSE_REQUEST.getCode());
-        createFlowCaseCommand.setServiceType("requisition");
-        createFlowCaseCommand.setProjectId(order.getOwnerId());
-        createFlowCaseCommand.setProjectType(order.getOwnerType());
+
         this.dbProvider.execute((TransactionStatus status) -> {
             purchaseProvider.insertPurchaseOrder(order);
             purchaseProvider.insertPurchaseItems(list);
-            flowService.createFlowCase(createFlowCaseCommand);
+            if(cmd.getStartFlow().byteValue() == (byte)1){
+                //工作流case
+                //创建工作流
+                Flow flow = flowService.getEnabledFlow(cmd.getNamespaceId(), FlowConstants.PURCHASE_MODULE
+                        , FlowModuleType.NO_MODULE.getCode(),cmd.getOwnerId(), FlowOwnerType.PURCHASE.getCode());
+                if (null == flow) {
+                    LOGGER.error("Enable request flow not found, moduleId={}", FlowConstants.PURCHASE_MODULE);
+                    throw RuntimeErrorException.errorWith(PurchaseErrorCodes.SCOPE, PurchaseErrorCodes.ERROR_CREATE_FLOW_CASE,
+                            "purchase flow case not found.");
+                }
+                CreateFlowCaseCommand createFlowCaseCommand = new CreateFlowCaseCommand();
+                createFlowCaseCommand.setReferId(nextPurchaseOrderId);
+                createFlowCaseCommand.setReferType("purchaseId");
+                createFlowCaseCommand.setCurrentOrganizationId(order.getOwnerId());
+                createFlowCaseCommand.setTitle("请示单申请");
+                createFlowCaseCommand.setApplyUserId(order.getCreateUid());
+                createFlowCaseCommand.setFlowMainId(flow.getFlowMainId());
+                createFlowCaseCommand.setFlowVersion(flow.getFlowVersion());
+                createFlowCaseCommand.setReferId(order.getId());
+                createFlowCaseCommand.setReferType(EntityType.WAREHOUSE_REQUEST.getCode());
+                createFlowCaseCommand.setServiceType("requisition");
+                createFlowCaseCommand.setProjectId(order.getOwnerId());
+                createFlowCaseCommand.setProjectType(order.getOwnerType());
+                flowService.createFlowCase(createFlowCaseCommand);
+            }
             return null;
         });
     }
