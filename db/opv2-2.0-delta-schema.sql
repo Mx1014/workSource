@@ -845,20 +845,6 @@ CREATE TABLE `eh_requisition_types`(
 -- 增加版本号 201801252125
 ALTER TABLE `eh_portal_content_scopes` ADD COLUMN `version_id`  BIGINT(20) NULL;
 ALTER TABLE `eh_portal_launch_pad_mappings` ADD COLUMN `version_id`  BIGINT(20) NULL;
-   
--- merge from sync-task 20180126
-CREATE TABLE `eh_sync_data_tasks` (
-  `id` BIGINT NOT NULL COMMENT 'id of the record',
-  `owner_type` VARCHAR(32) NOT NULL DEFAULT '',
-  `owner_id` BIGINT NOT NULL DEFAULT 0,
-  `type` VARCHAR(64) NOT NULL DEFAULT '',
-  `status` TINYINT NOT NULL,
-  `result` LONGTEXT,
-  `creator_uid` BIGINT,
-  `create_time` DATETIME,
-  `update_time` DATETIME,
-  PRIMARY KEY (`id`)
-) ENGINE=INNODB DEFAULT CHARSET=utf8mb4;
 
 ALTER TABLE `eh_addresses` ADD COLUMN `version` VARCHAR(32) COMMENT '版本号';
 
