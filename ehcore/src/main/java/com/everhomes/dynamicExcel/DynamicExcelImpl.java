@@ -54,12 +54,14 @@ public class DynamicExcelImpl implements DynamicExcelService{
     //    public void exportDynamicExcel(HttpServletResponse response, String code, List<DynamicSheet> dynamicSheets, List<String> sheetNames,String baseInfo, boolean enumSupport, boolean withData, String excelName, Workbook workbook){
     public void exportDynamicExcel(HttpServletResponse response, String code, String baseInfo, List<String> sheetNames,
                                    Object params, boolean enumSupport, boolean withData, String excelName){
+        LOGGER.info("export dynamic excel sheetNames = {} , params = {}, code = {}",sheetNames,params,code);
         Workbook workbook = new XSSFWorkbook();
         DynamicExcelHandler h = getHandler(code);
         Map<Object,Object> context = new HashMap<>();
         //遍历筛选过的sheet
         for( int i = 0; i < sheetNames.size(); i++){
             List<DynamicSheet> sheets = h.getDynamicSheet(sheetNames.get(i),params,null,false);
+            LOGGER.info("export dyanmic excel dynamic sheets include = {}", sheets);
             for(DynamicSheet sheet: sheets){
                 List<DynamicField> fields = sheet.getDynamicFields();
                 List<List<String>> data = null;
@@ -196,6 +198,7 @@ public class DynamicExcelImpl implements DynamicExcelService{
                     continue sheet;
                 }else{
                     DynamicSheet dynamicSheet = ds.get(0);
+                    LOGGER.info("import dyanmic excel dynamic sheets include = {}", dynamicSheet);
                     List<DynamicField> dynamicFields = dynamicSheet.getDynamicFields();
                     if(dynamicFields.size() != headers.size()){
                         LOGGER.error("headers' size is not euqual to dynamicFields', dynamicSheet = {}, headers = {}, ",
@@ -238,8 +241,16 @@ public class DynamicExcelImpl implements DynamicExcelService{
                         List<DynamicColumnDTO> columns = new ArrayList<>();
                         for (int k = row.getFirstCellNum(); k < row.getLastCellNum(); k++) {
                             Cell cell = row.getCell(k);
-                            String cellValue = ExcelUtils.getCellValue(cell);
+                            String cellValue = ExcelUtils.getCellValue(cell,dynamicFields.get(k));
                             //少了一步,把cellvalue转成可存储的fieldvalue，例如 男-> 1; varfields , thread pool, jindu,
+                            //必填项校验
+                            if(dynamicFields.get(k).isMandatory() && StringUtils.isBlank(cellValue)){
+                                response.setFailedRowNumber(response.getFailedRowNumber() + 1);
+                                if(response.getFailCause()!=null){
+                                    response.setFailCause(dynamicFields.get(k).getDisplayName() + "为必填项!");
+                                }
+                                continue;
+                            }
                             DynamicColumnDTO dto = new DynamicColumnDTO();
                             dto.setValue(cellValue);
                             dto.setHeaderDisplay(headers.get(k));
@@ -251,6 +262,8 @@ public class DynamicExcelImpl implements DynamicExcelService{
                         rowData.setRowNum(j);
                         rowDatas.add(rowData);
                     }
+
+
                     h.importData(ds.get(0),rowDatas,params,context,response);
                     //插入
 //                try {
@@ -268,6 +281,9 @@ public class DynamicExcelImpl implements DynamicExcelService{
 //                }
             }catch(Exception e){
                 LOGGER.info("sheet = {}, failed to import,error = {}",sheet.getSheetName(),e);
+                if(response.getFailCause() != null){
+                    response.setFailCause(sheet.getSheetName() + "页无法识别，sheet页需要来自模板");
+                }
             }
         }
 //        try{

@@ -1,5 +1,6 @@
 package com.everhomes.util.excel;
 
+import com.everhomes.dynamicExcel.DynamicField;
 import org.apache.commons.lang.ArrayUtils;
 import org.apache.commons.lang.StringEscapeUtils;
 import org.apache.commons.lang.StringUtils;
@@ -135,6 +136,7 @@ public class ExcelUtils {
 
     /**
      * 设置首行备注信息
+     *
      */
     public ExcelUtils setTitleRemark(String titleRemark, short titleRemarkFontSize, short titleRemarkCellHeight) {
         this.titleRemark = titleRemark;
@@ -152,9 +154,9 @@ public class ExcelUtils {
      * 写excel.
      *
      * @param propertyNames 对应bean的属性名
-     * @param titleName     列名
+     * @param titleName   列名
      * @param columnSizes   列宽
-     * @param dataList      数据
+     * @param dataList    数据
      */
     public void writeExcel(String[] propertyNames, String[] titleName, int[] columnSizes, List<?> dataList) {
         try (OutputStream out = getOutputStream();) {
@@ -166,18 +168,12 @@ public class ExcelUtils {
         }
     }
 
-    public void writeExcel(List<String> propertyNames, List<String> titleName, List<Integer> columnSizes,
-                           List<?> dataList) {
-        writeExcel(propertyNames.toArray(new String[propertyNames.size()]), titleName.toArray(new String[titleName.size()]), ArrayUtils.toPrimitive(columnSizes.toArray(new Integer[columnSizes.size()])), dataList);
-    }
+	public void writeExcel(List<String> propertyNames, List<String> titleName, List<Integer> columnSizes,
+			List<?> dataList) {
+		writeExcel(propertyNames.toArray(new String[propertyNames.size()]), titleName.toArray(new String[titleName.size()]), ArrayUtils.toPrimitive(columnSizes.toArray(new Integer[columnSizes.size()])), dataList);
+	}
 
-    /**
-     * @param propertyNames 每一列data的属性
-     * @param titleName     标题行
-     * @param columnSizes   每一列的宽度
-     * @param dataList 每行数据
-     */
-    public OutputStream getOutputStream(List<String> propertyNames, List<String> titleName, List<Integer> columnSizes, List<?> dataList) {
+	public OutputStream getOutputStream(List<String> propertyNames, List<String> titleName, List<Integer> columnSizes, List<?> dataList){
         try {
             ByteArrayOutputStream excelStream = buildExcel(propertyNames.toArray(new String[propertyNames.size()]), titleName.toArray(new String[titleName.size()]), ArrayUtils.toPrimitive(columnSizes.toArray(new Integer[columnSizes.size()])), dataList);
             return excelStream;
@@ -249,7 +245,7 @@ public class ExcelUtils {
                         cell.setCellValue(rowIndex);
                         continue;
                     }
-                    String title = propertyNames[needSequenceColumn ? propertyIndex - 1 : propertyIndex].trim();
+                    String title = propertyNames[needSequenceColumn ? propertyIndex-1 : propertyIndex].trim();
                     if (!"".equals(title)) {  //字段不为空
                         //使首字母大写
                         String UTitle = StringUtils.capitalize(title); // 使其首字母大写;
@@ -284,8 +280,8 @@ public class ExcelUtils {
             }
         }
         ByteArrayOutputStream out = new ByteArrayOutputStream();
-        if (needTitleRemark)
-            addTitleRemark(workbook, titleRemarkCellHeight);
+        if(needTitleRemark)
+            addTitleRemark(workbook,titleRemarkCellHeight);
         workbook.write(out);
         return out;
     }
@@ -293,11 +289,11 @@ public class ExcelUtils {
     /**
      * 设置首行备注
      */
-    private void addTitleRemark(XSSFWorkbook workbook, short titleRemarkCellHeight) {
+    private void addTitleRemark(XSSFWorkbook workbook,short titleRemarkCellHeight){
         Sheet sheet = workbook.getSheet(this.sheetName);
-        sheet.shiftRows(0, sheet.getLastRowNum(), 1, true, false);
+        sheet.shiftRows(0,sheet.getLastRowNum(),1,true,false);
         // 合并首行单元格
-        sheet.addMergedRegion(new CellRangeAddress(0, 0, 0, 12));
+        sheet.addMergedRegion(new CellRangeAddress(0,0,0,12));
         // 表头
         Row titleRemarkRow = sheet.createRow(0);
         titleRemarkRow.setHeight(titleRemarkCellHeight);
@@ -421,20 +417,19 @@ public class ExcelUtils {
             this.time = time;
         }
     }*/
-
     /**
-     * @param workbook
-     * @param sheetNum   (sheet的位置，0表示第一个表格中的第一个sheet)
-     * @param sheetTitle （sheet的名称）
-     * @param headers    （表格的标题）
-     * @param result     （表格的数据）
-     * @throws Exception
      * @Title: exportExcel
      * @Description: 导出Excel的方法
      * @Author from internet
+     * @param workbook
+     * @param sheetNum (sheet的位置，0表示第一个表格中的第一个sheet)
+     * @param sheetTitle  （sheet的名称）
+     * @param headers    （表格的标题）
+     * @param result   （表格的数据）
+     * @throws Exception
      */
     public void exportExcel(org.apache.poi.ss.usermodel.Workbook workbook, int sheetNum,
-                            String sheetTitle, String[] headers, List<List<String>> result, String[] mandatory) throws Exception {
+                            String sheetTitle, String[] headers, List<List<String>> result,String[] mandatory) throws Exception {
         // 生成一个表格
         Sheet sheet = workbook.createSheet();
         workbook.setSheetName(sheetNum, sheetTitle);
@@ -496,7 +491,7 @@ public class ExcelUtils {
         introStyle.setAlignment(HorizontalAlignment.LEFT);
         introStyle.setFillBackgroundColor(HSSFColor.YELLOW.index);
         introStyle.setFont(font3);
-        CellRangeAddress cra = new CellRangeAddress(0, 0, 0, 11);
+        CellRangeAddress cra = new CellRangeAddress(0,0,0,11);
         sheet.addMergedRegion(cra);
         Row introRow = sheet.createRow(0);
         //这里改成170 原：130
@@ -505,23 +500,23 @@ public class ExcelUtils {
         introCell.setCellStyle(introStyle);
         //这里可以根据sheet决定怎么显示枚举，晚上搞这个
         String instruction = "";
-        switch (sheetTitle) {
+        switch (sheetTitle){
             case "人才团队信息":
                 instruction =
-                        "性别: 男、女 \n" +
-                                "技术职称: 高级、中级、初级 \n" +
-                                "是否海归: 是、否 \n" +
-                                "个人评定: 否、上海（千人批次）、中央（千人批次）、浦江人才、两院院士、高层次人才、其他 \n";
+                            "性别: 男、女 \n" +
+                            "技术职称: 高级、中级、初级 \n" +
+                            "是否海归: 是、否 \n"  +
+                            "个人评定: 否、上海（千人批次）、中央（千人批次）、浦江人才、两院院士、高层次人才、其他 \n";
                 break;
             case "申报项目":
                 instruction =
-                        "项目来源: 国家、上海市、嘉定区、其他（可多选） \n" +
-                                "项目状态: 进行中、已完结 \n";
+                            "项目来源: 国家、上海市、嘉定区、其他（可多选） \n" +
+                            "项目状态: 进行中、已完结 \n";
                 break;
             case "工商信息":
                 instruction =
-                        "企业类型: 企业、事业单位、政府机关、社会团体、民办非企业单位、基金会、其他组织机构 \n" +
-                                "企业控股情况: 国有控股、集体控股、私人控股、港澳台商控股、外商投资、其他 \n";
+                            "企业类型: 企业、事业单位、政府机关、社会团体、民办非企业单位、基金会、其他组织机构 \n" +
+                            "企业控股情况: 国有控股、集体控股、私人控股、港澳台商控股、外商投资、其他 \n";
                 break;
             case "投融情况":
                 break;
@@ -529,14 +524,14 @@ public class ExcelUtils {
                 break;
             case "商标信息":
                 instruction =
-                        "商标类型: 文字商标、图片商标、品牌商标、著名商标 \n" +
-                                "企业控股情况: 国有控股、集体控股、私人控股、港澳台商控股、外商投资、其他 \n";
+                            "商标类型: 文字商标、图片商标、品牌商标、著名商标 \n" +
+                            "企业控股情况: 国有控股、集体控股、私人控股、港澳台商控股、外商投资、其他 \n";
 
                 break;
             case "专利信息":
                 instruction =
                         "专利类型: 发明专利、实用新型、外观设计、集成电路布图、软件著作权、证书 \n" +
-                                "专利状态: 申请、授权 \n";
+                        "专利状态: 申请、授权 \n";
                 break;
             case "证书":
                 break;
@@ -551,10 +546,10 @@ public class ExcelUtils {
             //物业巡检中添加 备注信息 暂时在注意事项中协商select的byte值  列出
             default:
                 instruction =
-                        "二维码状态： 停用 、启用 \n" +
-                                "当前状态：不完整 、使用中 、维修中 、报废 、停用  、备用 \n" +
-                                "设备类型：消防 、强电 、弱电 、电梯 、空调 、给排水、空置房、装修、安保、日常工作检查、公共设施检查、周末值班、安全检查、其他 \n" +
-                                "日期格式:  yyyy-MM-dd \n";
+                        "二维码状态： 停用 、启用 \n"+
+                        "当前状态：不完整 、使用中 、维修中 、报废 、停用  、备用 \n"+
+                        "设备类型：消防 、强电 、弱电 、电梯 、空调 、给排水、空置房、装修、安保、日常工作检查、公共设施检查、周末值班、安全检查、其他 \n"+
+                        "日期格式:  yyyy-MM-dd \n";
         }
         introCell.setCellValue("填写注意事项：（未按照如下要求填写，会导致数据不能正常导入）\n" +
                 "1、请不要修改此表格的格式，包括插入删除行和列、合并拆分单元格等。需要填写的单元格有字段规则校验，请按照要求输入。\n" +
@@ -584,9 +579,9 @@ public class ExcelUtils {
 
         for (int i = 0; i < headers.length; i++) {
             Cell cell = row.createCell((short) i);
-            if (mandatory[i].equals("1")) {
+            if(mandatory[i].equals("1")){
                 cell.setCellStyle(style_m);
-            } else {
+            }else{
                 cell.setCellStyle(style_non_m);
             }
             HSSFRichTextString text = new HSSFRichTextString(headers[i]);
@@ -597,7 +592,7 @@ public class ExcelUtils {
         if (result != null) {
             int index = 1;
             for (List<String> m : result) {
-                row = sheet.createRow(index + 1);
+                row = sheet.createRow(index+1);
                 int cellIndex = 0;
                 for (String str : m) {
                     Cell cell = row.createCell((short) cellIndex);
@@ -609,20 +604,17 @@ public class ExcelUtils {
             }
         }
     }
-
     /**
      * 描述：根据文件后缀，自适应上传文件的版本
-     *
      * @param inStr,fileName
      * @return
      * @throws Exception
      */
-    public static Workbook getWorkbook(InputStream inStr, String fileName) throws Exception {
+    public static Workbook getWorkbook(InputStream inStr,String fileName) throws Exception{
         Workbook wb = null;
- 
 //        String fileType = fileName.substring(fileName.lastIndexOf("."));
         //现在导出的模板都是xssf了
- 
+
 //        if(".xls".equals(fileType)){
 //            wb = new HSSFWorkbook(inStr);  //2003-
 //        }else if(".xlsx".equals(fileType)){
@@ -633,37 +625,88 @@ public class ExcelUtils {
         try{
             wb = new XSSFWorkbook(inStr);
         }catch (Exception e){
- 
             try{
                 wb = new HSSFWorkbook(inStr);
             }catch (Exception e1){
                 throw e1;
-            } 
+            }
         }
         return wb;
     }
 
     /**
      * 描述：对表格中数值进行格式化
-     *
      * @param cell
      * @return
      */
-    public static String getCellValue(Cell cell) {
-        String value = null;
+    public static String getCellValue(Cell cell, DynamicField ds){
+        String value = ds.getDefaultValue();
         DecimalFormat df = new DecimalFormat("0");  //格式化number String字符
-        SimpleDateFormat sdf = new SimpleDateFormat("yyy-MM-dd");  //日期格式化
+        String dateFormat = ds.getDateFormat();
+        SimpleDateFormat sdf = null;
+        if(null == dateFormat){
+            sdf = new SimpleDateFormat("yyyy-MM-dd");
+        }else{
+            try{
+                sdf = new SimpleDateFormat(dateFormat);  //日期格式化
+            }catch (Exception e){
+                sdf = new SimpleDateFormat("yyyy-MM-dd");
+            }
+        }
+
         DecimalFormat df2 = new DecimalFormat("0.00");  //格式化数字
+        if(cell == null){
+            return "";
+        }
         switch (cell.getCellType()) {
             case Cell.CELL_TYPE_STRING:
                 value = cell.getRichStringCellValue().getString();
                 break;
             case Cell.CELL_TYPE_NUMERIC:
-                if ("General".equals(cell.getCellStyle().getDataFormatString())) {
+                if("General".equals(cell.getCellStyle().getDataFormatString())){
                     value = df.format(cell.getNumericCellValue());
-                } else if ("m/d/yy".equals(cell.getCellStyle().getDataFormatString())) {
+                }else if("m/d/yy".equals(cell.getCellStyle().getDataFormatString())){
                     value = sdf.format(cell.getDateCellValue());
-                } else {
+                }else{
+                    value = df2.format(cell.getNumericCellValue());
+                }
+                break;
+            case Cell.CELL_TYPE_BOOLEAN:
+                Boolean booleanCellValue = cell.getBooleanCellValue();
+                value = booleanCellValue.toString();
+                break;
+            case Cell.CELL_TYPE_BLANK:
+                value = "";
+                break;
+            default:
+                break;
+        }
+        return value;
+    }
+
+    /**
+     * 描述：对表格中数值进行格式化
+     * @param cell
+     * @return
+     */
+    public static String getCellValue(Cell cell){
+        String value = null;
+        DecimalFormat df = new DecimalFormat("0");  //格式化number String字符
+        SimpleDateFormat sdf = new SimpleDateFormat("yyyy-MM-dd");  //日期格式化
+        DecimalFormat df2 = new DecimalFormat("0.00");  //格式化数字
+        if(cell == null){
+            return "";
+        }
+        switch (cell.getCellType()) {
+            case Cell.CELL_TYPE_STRING:
+                value = cell.getRichStringCellValue().getString();
+                break;
+            case Cell.CELL_TYPE_NUMERIC:
+                if("General".equals(cell.getCellStyle().getDataFormatString())){
+                    value = df.format(cell.getNumericCellValue());
+                }else if("m/d/yy".equals(cell.getCellStyle().getDataFormatString())){
+                    value = sdf.format(cell.getDateCellValue());
+                }else{
                     value = df2.format(cell.getNumericCellValue());
                 }
                 break;
