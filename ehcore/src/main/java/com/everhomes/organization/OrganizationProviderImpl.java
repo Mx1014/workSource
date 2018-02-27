@@ -3620,7 +3620,7 @@ public class OrganizationProviderImpl implements OrganizationProvider {
         List<Organization> list = query.fetchInto(Organization.class);
         if(list != null && list.size() == 1){
         	return  list.get(0);
-		} 
+		}
         return null;
     }
 
@@ -5171,7 +5171,7 @@ public class OrganizationProviderImpl implements OrganizationProvider {
 
         return result;
     }
- 
+
 	@Override
 	public List<Long> listMemberDetailIdWithExclude(String keywords, Integer namespaceId, String big_path, List<String> small_path,
 													Timestamp checkinTimeStart, Timestamp checkinTimeEnd, Timestamp dissmissTimeStart, Timestamp dissmissTimeEnd,
@@ -5246,8 +5246,8 @@ public class OrganizationProviderImpl implements OrganizationProvider {
 			}
 		}
 		return true;
-	} 
- 
+	}
+
     @Override
     public Integer countUserOrganization(Integer namespaceId, Long communityId, Byte userOrganizationStatus) {
         return countUserOrganization(namespaceId, communityId, userOrganizationStatus, null, null);
@@ -5403,17 +5403,34 @@ public class OrganizationProviderImpl implements OrganizationProvider {
         return list;
     }
 
-    private Long getTopOrganizationId(Long organizationId) {
-        Organization organization = findOrganizationById(organizationId);
-        if (organization != null) {
-            if(organization.getParentId() == null )
-                return organizationId;
-            String path = organization.getPath();
-            String[] ogs = path.split("/");
-            return Long.valueOf(ogs[1]);
-        }
-        return null;
-    }
+	@Override
+	public List<OrganizationMember> listOrganizationMembersByDetailIdAndOrgId(Long detailId, Long orgId, List<String> groupTypes) {
+		List<OrganizationMember> list = new ArrayList<OrganizationMember>();
+		DSLContext context = this.dbProvider.getDslContext(AccessSpec.readOnly());
+		SelectConditionStep<Record> query = context.select().from(Tables.EH_ORGANIZATION_MEMBERS).where(Tables.EH_ORGANIZATION_MEMBERS.DETAIL_ID.eq(detailId).and(Tables.EH_ORGANIZATION_MEMBERS.ORGANIZATION_ID.eq(orgId)));
+		query = query.and(Tables.EH_ORGANIZATION_MEMBERS.STATUS.eq(OrganizationMemberStatus.ACTIVE.getCode()));
+
+		if(groupTypes != null && groupTypes.size()>0){
+			query = query.and(Tables.EH_ORGANIZATION_MEMBERS.GROUP_TYPE.in(groupTypes));
+		}
+		List<Record> records = query.fetch();
+
+		if (records != null && !records.isEmpty()) {
+			for (Record r : records)
+				list.add(ConvertHelper.convert(r, OrganizationMember.class));
+		}
+
+		return list;
+	}private Long getTopOrganizationId(Long organizationId) {
+		Organization organization = findOrganizationById(organizationId);
+		if (organization != null) {
+			if(organization.getParentId() == null )
+                return organizationId;String path = organization.getPath();
+			String[] ogs = path.split("/");
+			return Long.valueOf(ogs[1]);
+		}
+		return null;
+	}
 
 
     @Override
@@ -6224,5 +6241,5 @@ public class OrganizationProviderImpl implements OrganizationProvider {
 	public Integer countUserOrganization(Integer namespaceId, Long communityId) {
 		 return countUserOrganization(namespaceId, communityId, null, null, null);
 	}
- 
+
 }

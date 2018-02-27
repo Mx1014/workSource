@@ -614,6 +614,7 @@ CREATE TABLE `eh_addresses` (
   `address_ownership_id` BIGINT COMMENT '产权归属: 自有、出售、非产权..., refer to the id of eh_var_field_items',
   `address_ownership_name` VARCHAR(128) COMMENT '产权归属: 自有、出售、非产权..., refer to the display_name of eh_var_field_items',
   `remark` VARCHAR(128),
+  `version` VARCHAR(32) COMMENT '版本号',
   PRIMARY KEY (`id`),
   KEY `i_eh_addr_city` (`city_id`),
   KEY `i_eh_addr_community` (`community_id`),
@@ -8908,7 +8909,7 @@ CREATE TABLE `eh_parking_card_requests` (
   `card_type_id` VARCHAR(64),
   `address_id` BIGINT,
   `invoice_type` BIGINT(4),
-  
+  `identity_card` VARCHAR(40),  
   PRIMARY KEY (`id`)
 ) ENGINE=INNODB DEFAULT CHARSET=utf8mb4;
 
@@ -10151,6 +10152,7 @@ CREATE TABLE `eh_point_logs` (
   `create_time` datetime(3),
   `event_happen_time` BIGINT,
   `extra` TEXT,
+  `binding_log_id` BIGINT NOT NULL DEFAULT 0,
   PRIMARY KEY (`id`)
 ) ENGINE=INNODB DEFAULT CHARSET=utf8mb4;
 
@@ -13570,7 +13572,7 @@ CREATE TABLE `eh_service_alliances` (
   `type` BIGINT NOT NULL DEFAULT 0 COMMENT 'the id reference to eh_service_alliance_categories',
   `address` VARCHAR(255) NOT NULL DEFAULT '',
   `contact` VARCHAR(64),
-  `description` TEXT,
+  `description` MEDIUMTEXT,
   `poster_uri` VARCHAR(128),
   `status` TINYINT NOT NULL DEFAULT 2 COMMENT '0: inactive, 1: waitingForConfirmation, 2: active',
   `default_order` BIGINT COMMENT 'default value is id',
@@ -14611,6 +14613,21 @@ CREATE TABLE `eh_suggestions` (
   CONSTRAINT `fk_eh_suggestions_user_idx` FOREIGN KEY (`USER_ID`) REFERENCES `eh_users` (`id`) ON DELETE NO ACTION ON UPDATE NO ACTION
 ) ENGINE=INNODB DEFAULT CHARSET=utf8mb4;
 
+-- by xiongying 2018/1/26
+DROP TABLE IF EXISTS `eh_sync_data_tasks`;
+
+CREATE TABLE `eh_sync_data_tasks` (
+  `id` BIGINT NOT NULL COMMENT 'id of the record',
+  `owner_type` VARCHAR(32) NOT NULL DEFAULT '',
+  `owner_id` BIGINT NOT NULL DEFAULT 0,
+  `type` VARCHAR(64) NOT NULL DEFAULT '',
+  `status` TINYINT NOT NULL,
+  `result` LONGTEXT,
+  `creator_uid` BIGINT,
+  `create_time` DATETIME,
+  `update_time` DATETIME,
+  PRIMARY KEY (`id`)
+) ENGINE=INNODB DEFAULT CHARSET=utf8mb4;
 
 DROP TABLE IF EXISTS `eh_talent_categories`;
 
@@ -16399,4 +16416,27 @@ CREATE TABLE `eh_zj_syncdata_backup` (
   PRIMARY KEY (`id`),
   KEY `i_eh_namespaceid_data_type` (`namespace_id`,`update_community`,`data_type`)
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4;
+
+
+-- 账单item关联滞纳金 by wentian
+ALTER TABLE `eh_payment_bill_items` ADD COLUMN `late_fine_standard_id` BIGINT DEFAULT NULL COMMENT '滞纳金标准id';
+
+# DROP TABLE IF EXISTS `eh_payment_late_fine`;
+CREATE TABLE `eh_payment_late_fine`(
+  `id` BIGINT NOT NULL COMMENT 'primary key',
+  `name` VARCHAR(20) COMMENT '滞纳金名称',
+  `amount` DECIMAL(10,2) NOT NULL DEFAULT '0.00' COMMENT 'amount of overdue payment',
+  `bill_id` BIGINT NOT NULL COMMENT 'the id of the corresponding bill, one to one',
+  `bill_item_id` BIGINT NOT NULL COMMENT 'the id of the corresponding bill item id, one to one',
+  `create_time` DATETIME DEFAULT NOW(),
+  `upate_time` DATETIME DEFAULT NOW(),
+  `update_uid` BIGINT DEFAULT NULL,
+  `namespace_id` INTEGER DEFAULT NULL COMMENT 'location info, for possible statistics later',
+  `community_id` BIGINT DEFAULT NULL,
+  `customer_id` BIGINT NOT NULL COMMENT 'allows searching taking advantage of it',
+  `customer_type` VARCHAR(20) NOT NULL COMMENT 'break of user info benefits',
+  PRIMARY KEY (`id`)
+) ENGINE = INNODB DEFAULT CHARSET = utf8mb4;
+
+-- end of script by wentian
 

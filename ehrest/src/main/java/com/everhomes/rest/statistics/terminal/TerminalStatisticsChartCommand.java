@@ -6,7 +6,7 @@ import java.util.List;
 
 /**
  *<ul>
- *<li>dates:日期字符串<li>
+ *<li>dates:日期字符串</li>
  *</ul>
  */
 public class TerminalStatisticsChartCommand {

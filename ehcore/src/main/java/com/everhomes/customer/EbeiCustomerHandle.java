@@ -322,7 +322,8 @@ public class EbeiCustomerHandle implements CustomerHandle {
 
             insertOrUpdateOrganizationDetail(organization, customer);
             insertOrUpdateOrganizationCommunityRequest(communityId, organization);
-            insertOrUpdateOrganizationMembers(namespaceId, organization, customer.getContactName(), customer.getContactPhone());
+            //项目要求不要把联系人同步为管理员 20180125
+//            insertOrUpdateOrganizationMembers(namespaceId, organization, customer.getContactName(), customer.getContactPhone());
             organizationSearcher.feedDoc(organization);
             return null;
         });

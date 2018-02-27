@@ -22,6 +22,15 @@ public class ParkingLotConfig {
 
     private Byte businessLicenseFlag = 0;
     private Byte vipParkingFlag = 0;
+    private Byte identityCardFlag;
+
+    public Byte getIdentityCardFlag() {
+        return identityCardFlag;
+    }
+
+    public void setIdentityCardFlag(Byte identityCardFlag) {
+        this.identityCardFlag = identityCardFlag;
+    }
 
     public Byte getVipParkingFlag() {
         return vipParkingFlag;

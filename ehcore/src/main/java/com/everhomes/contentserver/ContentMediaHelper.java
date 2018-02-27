@@ -1,11 +1,11 @@
 package com.everhomes.contentserver;
 
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
+
 import java.util.Collections;
 import java.util.HashMap;
 import java.util.Map;
-
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
 
 public class ContentMediaHelper {
     private static final Logger LOGGER = LoggerFactory.getLogger(ContentMediaHelper.class);
@@ -22,9 +22,9 @@ public class ContentMediaHelper {
         aMap.put("jpeg", UPLOAD_IMAGE);        
         aMap.put("jpg", UPLOAD_IMAGE);        
         aMap.put("gif", UPLOAD_IMAGE);        
-        aMap.put("webp", UPLOAD_IMAGE);        
+        aMap.put("webp", UPLOAD_FILE);
         aMap.put("png", UPLOAD_IMAGE);        
-        aMap.put("bmp", UPLOAD_IMAGE);        
+        aMap.put("bmp", UPLOAD_FILE);
         aMap.put("m4a", UPLOAD_AUDEO + "/m4a");        
         aMap.put("mp3", UPLOAD_AUDEO + "/mp3");        
         aMap.put("pdf", UPLOAD_FILE);        

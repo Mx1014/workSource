@@ -150,4 +150,6 @@ public interface ConfigConstants {
     String RENTAL_ORDER_DETAIL_URL = "rental.order.detail.url";
 	String WORK_REPORT_VAL_DETAIL_URL = "work.report.val.detail.url";
 
+	String CONTENT_CLIENT_CACHE_CONFIG = "content.client.cacheConfig";
+
 }

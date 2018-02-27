@@ -11,7 +11,7 @@ import java.text.SimpleDateFormat;
 import java.util.*;
 
 import java.util.concurrent.ExecutorService;
-import java.util.concurrent.Executors; 
+import java.util.concurrent.Executors;
 import java.util.stream.Collectors;
 
 import javax.annotation.PostConstruct;
@@ -31,8 +31,7 @@ import com.everhomes.bus.LocalEventContext;
 import com.everhomes.bus.SystemEvent;
 import com.everhomes.configuration.ConfigConstants;
 import com.everhomes.news.Attachment;
-import com.everhomes.order.OrderUtil;
-import com.everhomes.order.PayService;
+import com.everhomes.order.*;
 import com.everhomes.organization.Organization;
 import com.everhomes.organization.OrganizationAddress;
 import com.everhomes.parking.vip_parking.DingDingParkingLockHandler;
@@ -189,6 +188,8 @@ public class Rentalv2ServiceImpl implements Rentalv2Service {
 	private  Rentalv2PricePackageProvider rentalv2PricePackageProvider;
 	@Autowired
 	private PayService payService;
+	@Autowired
+	private PayProvider payProvider;
 	@Autowired
 	private DoorAccessService doorAccessService;
 	@Autowired
@@ -3411,6 +3412,8 @@ public class Rentalv2ServiceImpl implements Rentalv2Service {
 		RentalOrder order = rentalv2Provider.findRentalBillById(cmd.getId());
 		order.setPayTotalMoney(payService.changePayAmount(cmd.getAmount()));
 		rentalv2Provider.updateRentalBill(order);
+		//删除记录方便重新下单
+		payProvider.deleteOrderRecordByOrder(OrderType.OrderTypeEnum.RENTALORDER.getPycode(),Long.valueOf(order.getOrderNo()));
 		Map<String, String> map = new HashMap<>();
 		map.put("resourceName", order.getResourceName());
 		map.put("startTime", order.getUseDetail());
@@ -3445,27 +3448,81 @@ public class Rentalv2ServiceImpl implements Rentalv2Service {
 		}
 
 		if (order.getStatus().equals(SiteBillStatus.SUCCESS.getCode()) &&
-				timestamp > order.getStartTime().getTime()) {
-				//当成功预约之后要判断是否过了取消时间
-				LOGGER.error("cancel over time");
-				throw RuntimeErrorException.errorWith(RentalServiceErrorCode.SCOPE,
-						RentalServiceErrorCode.ERROR_ORDER_CANCEL_OVERTIME,"cancel bill over time");
+				cancelTime.after(new java.util.Date(order.getStartTime().getTime() - rs.getCancelTime()))) {
+			//当成功预约之后要判断是否过了取消时间
+			LOGGER.error("cancel over time");
+			throw RuntimeErrorException
+					.errorWith(RentalServiceErrorCode.SCOPE,
+							RentalServiceErrorCode.ERROR_CANCEL_OVERTIME,"cancel bill over time");
+		}else{
+		this.dbProvider.execute((TransactionStatus status) -> {
+				//默认是已退款
+				order.setStatus(SiteBillStatus.REFUNDED.getCode());
+				if (rs.getRefundFlag().equals(NormalFlag.NEED.getCode())&&(order.getPaidMoney().compareTo(new BigDecimal(0))==1)){ 
+					List<RentalOrderPayorderMap>  billmaps = this.rentalv2Provider.findRentalBillPaybillMapByBillId(order.getId());
+					for(RentalOrderPayorderMap billMap : billmaps) {
+						//循环退款
+						PayZuolinRefundCommand refundCmd = new PayZuolinRefundCommand();
+						String refoundApi = this.configurationProvider.getValue(UserContext.getCurrentNamespaceId(), "pay.zuolin.refound", "POST /EDS_PAY/rest/pay_common/refund/save_refundInfo_record");
+						String appKey = configurationProvider.getValue(UserContext.getCurrentNamespaceId(), "pay.appKey", "");
+						refundCmd.setAppKey(appKey);
+						Long timestamp = System.currentTimeMillis();
+						refundCmd.setTimestamp(timestamp);
+						Integer randomNum = (int) (Math.random() * 1000);
+						refundCmd.setNonce(randomNum);
+						Long refoundOrderNo = this.onlinePayService.createBillId(DateHelper
+								.currentGMTTime().getTime());
+						refundCmd.setRefundOrderNo(String.valueOf(refoundOrderNo));
+						refundCmd.setOrderNo(String.valueOf(billMap.getOrderNo()));
+						refundCmd.setOnlinePayStyleNo(VendorType.fromCode(billMap.getVendorType()).getStyleNo());
+						refundCmd.setOrderType(OrderType.OrderTypeEnum.RENTALORDER.getPycode());
+						//已付金额乘以退款比例除以100
+						refundCmd.setRefundAmount(order.getPaidMoney().multiply(new BigDecimal(rs.getRefundRatio() / 100.0)));
+						refundCmd.setRefundMsg("预订单取消退款");
+						this.setSignatureParam(refundCmd);
+						RentalRefundOrder rentalRefundOrder = ConvertHelper.convert(refundCmd, RentalRefundOrder.class);
+						rentalRefundOrder.setOrderNo(billMap.getOrderNo());
+						rentalRefundOrder.setRefundOrderNo(refoundOrderNo);
+						rentalRefundOrder.setOrderId(order.getId());
+						rentalRefundOrder.setCreateTime(new Timestamp(DateHelper.currentGMTTime().getTime()));
+						rentalRefundOrder.setCreatorUid(UserContext.current().getUser().getId());
+						rentalRefundOrder.setOperateTime(new Timestamp(DateHelper.currentGMTTime().getTime()));
+						rentalRefundOrder.setOperatorUid(UserContext.current().getUser().getId());
+						rentalRefundOrder.setResourceTypeId(order.getResourceTypeId());
+						rentalRefundOrder.setAmount(refundCmd.getRefundAmount());
+						//微信直接退款，支付宝置为退款中 
+						//update by wuhan 2017-5-15 :支付宝也和微信一样退款
+						if (order.getPaidVersion() == ActivityRosterPayVersionFlag.V2.getCode()) { //新支付退款
+							Long amount = payService.changePayAmount(refundCmd.getRefundAmount());
+							CreateOrderRestResponse refundResponse = payService.refund(OrderType.OrderTypeEnum.RENTALORDER.getPycode(), Long.valueOf(order.getOrderNo()), refoundOrderNo, amount);
 
-		}
+							if(refundResponse != null || refundResponse.getErrorCode() != null && refundResponse.getErrorCode().equals(HttpStatus.OK.value())){
+								rentalRefundOrder.setStatus(SiteBillStatus.REFUNDED.getCode());
+								order.setStatus(SiteBillStatus.REFUNDING.getCode());
+							} else{
+								LOGGER.error("Refund failed from vendor, cmd={}, response={}",
+										cmd, refundResponse);
+								throw RuntimeErrorException.errorWith(RentalServiceErrorCode.SCOPE,
+										RentalServiceErrorCode.ERROR_REFUND_ERROR,
+										"bill refund error");
+							}
+							this.rentalv2Provider.createRentalRefundOrder(rentalRefundOrder);
+						} else {
+							PayZuolinRefundResponse refundResponse = (PayZuolinRefundResponse) this.restCall(refoundApi, refundCmd, PayZuolinRefundResponse.class);
+							if (refundResponse != null && refundResponse.getErrorCode().equals(HttpStatus.OK.value())) {
+								//退款成功保存退款单信息，修改bill状态
+								rentalRefundOrder.setStatus(SiteBillStatus.REFUNDED.getCode());
+								order.setStatus(SiteBillStatus.REFUNDED.getCode());
+							} else {
+								LOGGER.error("bill id=[" + order.getId() + "] refound error param is " + refundCmd.toString());
+								throw RuntimeErrorException.errorWith(RentalServiceErrorCode.SCOPE,
+										RentalServiceErrorCode.ERROR_REFUND_ERROR,
+										"bill  refound error");
+							}
 
-		RentalOrderHandler handler = rentalCommonService.getRentalOrderHandler(order.getResourceType());
-		dbProvider.execute((TransactionStatus status) -> {
-			//如果是预约成功，则要判断是否退款，否则将订单置为已取消
-			if (order.getStatus().equals(SiteBillStatus.SUCCESS.getCode())) {
-				if ((order.getRefundFlag().equals(NormalFlag.NEED.getCode())
-						|| (null != order.getRefundStrategy() && order.getRefundStrategy() != RentalOrderStrategy.NONE.getCode()))
-						&& (order.getPaidMoney().compareTo(new BigDecimal(0)) == 1)){
+							this.rentalv2Provider.createRentalRefundOrder(rentalRefundOrder);
 
-					BigDecimal orderAmount = handler.getRefundAmount(order, timestamp);
-					if (PayMode.ONLINE_PAY.equals(order.getPayMode())||PayMode.APPROVE_ONLINE_PAY.equals(order.getPayMode())) {
-						rentalCommonService.refundOrder(order, timestamp, orderAmount);
-						//更新bill状态
-						order.setStatus(SiteBillStatus.REFUNDED.getCode());
+						}
 					}
 					else {
 						order.setRefundAmount(orderAmount);
@@ -3508,6 +3565,63 @@ public class Rentalv2ServiceImpl implements Rentalv2Service {
 			return null;
 		});
 
+
+	private Long createOrderNo(Long time) {
+//		SimpleDateFormat sdf = new SimpleDateFormat("yyyyMMddHHmmssSSS");
+//		String prefix = sdf.format(new Date());
+		String suffix = String.valueOf(generateRandomNumber(3));
+
+		return Long.valueOf(String.valueOf(time) + suffix);
+	}
+
+	private long generateRandomNumber(int n){
+		return (long)((Math.random() * 9 + 1) * Math.pow(10, n-1));
+	}
+
+	/**
+	 * 取消订单发推送
+	 * 
+	 * */
+	@Override
+	public void cancelOrderSendMessage(RentalOrder rentalBill){
+		RentalResource rs = this.rentalv2Provider.getRentalSiteById(rentalBill.getRentalResourceId());
+		if(null == rs)
+			return;
+		//给负责人推送
+		StringBuilder managerContent = new StringBuilder();
+		User user =this.userProvider.findUserById(rentalBill.getRentalUid()) ;
+		if (null == user )
+			return;
+		managerContent.append(user.getNickName());
+		managerContent.append("取消了");
+		managerContent.append(rentalBill.getResourceName());
+		managerContent.append("\n使用详情：");
+		managerContent.append(rentalBill.getUseDetail());
+		if(null != rentalBill.getRentalCount() ){
+			managerContent.append("\n预约数：");
+			managerContent.append(rentalBill.getRentalCount());
+		}
+		sendMessageToUser(rs.getChargeUid(), managerContent.toString());
+	}
+	
+	/***给支付相关的参数签名*/
+	private void setSignatureParam(PayZuolinRefundCommand cmd) {
+		App app = appProvider.findAppByKey(cmd.getAppKey());
+		
+		Map<String,String> map = new HashMap<>();
+		map.put("appKey",cmd.getAppKey());
+		map.put("timestamp",cmd.getTimestamp()+"");
+		map.put("nonce",cmd.getNonce()+"");
+		map.put("refundOrderNo",cmd.getRefundOrderNo());
+		map.put("orderNo", cmd.getOrderNo());
+		map.put("onlinePayStyleNo",cmd.getOnlinePayStyleNo() );
+		map.put("orderType",cmd.getOrderType() );
+		//modify by wh 2016-10-24 退款使用toString,下订单的时候使用doubleValue,两边用的不一样,为了和电商保持一致,要修改成toString
+//		map.put("refundAmount", cmd.getRefundAmount().doubleValue()+"");
+		map.put("refundAmount", cmd.getRefundAmount().toString());
+		map.put("refundMsg", cmd.getRefundMsg()); 
+		String signature = SignatureHelper.computeSignature(map, app.getSecretKey());
+		cmd.setSignature(signature);
 	}
 
 	@Override
@@ -5902,7 +6016,7 @@ public class Rentalv2ServiceImpl implements Rentalv2Service {
 //        }
 //        return response;
 //    }
-	
+
 	private ByteArrayOutputStream createRentalBillsStream(List<RentalBillDTO> dtos) {
 
 		ByteArrayOutputStream out = new ByteArrayOutputStream();
@@ -6859,7 +6973,7 @@ public class Rentalv2ServiceImpl implements Rentalv2Service {
 		}
 		rs.setStatus(RentalSiteStatus.DELETED.getCode());
 		rentalv2Provider.updateRentalSite(rs);
-		
+
 	}
 
 //	@Override
