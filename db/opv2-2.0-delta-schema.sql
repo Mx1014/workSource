@@ -12,25 +12,6 @@ ALTER TABLE `eh_domains` ADD COLUMN `menu_logo_collapsed_uri`  VARCHAR(255) NULL
 ALTER TABLE `eh_web_menu_scopes` ADD COLUMN `app_id`  BIGINT(20) NULL COMMENT 'eh_service_module_app id';
 ALTER TABLE `eh_web_menu_scopes` DROP INDEX `u_menu_scope_owner` , ADD UNIQUE INDEX `u_menu_scope_owner` (`menu_id`, `owner_type`, `owner_id`, `app_id`) USING BTREE ;
 
--- 账单item关联滞纳金 by wentian
-ALTER TABLE `eh_payment_bill_items` ADD COLUMN `late_fine_standard_id` BIGINT DEFAULT NULL COMMENT '滞纳金标准id';
--- 滞纳金表 by wentian
--- DROP TABLE IF EXISTS `eh_payment_late_fine`;
-CREATE TABLE `eh_payment_late_fine`(
-  `id` BIGINT NOT NULL COMMENT 'primary key',
-  `name` VARCHAR(20) COMMENT '滞纳金名称',
-  `amount` DECIMAL(10,2) NOT NULL DEFAULT '0.00' COMMENT 'amount of overdue payment',
-  `bill_id` BIGINT NOT NULL COMMENT 'the id of the corresponding bill, one to one',
-  `bill_item_id` BIGINT NOT NULL COMMENT 'the id of the corresponding bill item id, one to one',
-  `create_time` DATETIME DEFAULT NOW(),
-  `upate_time` DATETIME DEFAULT NOW(),
-  `update_uid` BIGINT DEFAULT NULL,
-  `namespace_id` INTEGER DEFAULT NULL COMMENT 'location info, for possible statistics later',
-  `community_id` BIGINT DEFAULT NULL,
-  `customer_id` BIGINT NOT NULL COMMENT 'allows searching taking advantage of it',
-  `customer_type` VARCHAR(20) NOT NULL COMMENT 'break of user info benefits',
-  PRIMARY KEY (`id`)
-) ENGINE = INNODB DEFAULT CHARSET = utf8mb4;
 
 -- 增加项目区分 by st.zheng
 ALTER TABLE `eh_categories`
@@ -864,20 +845,6 @@ CREATE TABLE `eh_requisition_types`(
 -- 增加版本号 201801252125
 ALTER TABLE `eh_portal_content_scopes` ADD COLUMN `version_id`  BIGINT(20) NULL;
 ALTER TABLE `eh_portal_launch_pad_mappings` ADD COLUMN `version_id`  BIGINT(20) NULL;
-   
--- merge from sync-task 20180126
-CREATE TABLE `eh_sync_data_tasks` (
-  `id` BIGINT NOT NULL COMMENT 'id of the record',
-  `owner_type` VARCHAR(32) NOT NULL DEFAULT '',
-  `owner_id` BIGINT NOT NULL DEFAULT 0,
-  `type` VARCHAR(64) NOT NULL DEFAULT '',
-  `status` TINYINT NOT NULL,
-  `result` LONGTEXT,
-  `creator_uid` BIGINT,
-  `create_time` DATETIME,
-  `update_time` DATETIME,
-  PRIMARY KEY (`id`)
-) ENGINE=INNODB DEFAULT CHARSET=utf8mb4;
 
 ALTER TABLE `eh_addresses` ADD COLUMN `version` VARCHAR(32) COMMENT '版本号';
 

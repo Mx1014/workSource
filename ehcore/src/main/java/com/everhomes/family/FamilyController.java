@@ -174,7 +174,7 @@ public class FamilyController extends ControllerBase {
     
     /**
      * <b>URL: /family/rejectMember</b>
-     * <p>拒绝加入家庭（自己拒绝<别人邀请>或家庭成员拒绝）</p>
+     * <p>拒绝加入家庭（自己拒绝"别人邀请"或家庭成员拒绝）</p>
      */
     @RequestMapping("rejectMember")
     @RestReturn(value=String.class)

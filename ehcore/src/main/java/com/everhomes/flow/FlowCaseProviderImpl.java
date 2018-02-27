@@ -231,7 +231,7 @@ public class FlowCaseProviderImpl implements FlowCaseProvider {
             return objs;
     	} else {
     		return null;
-    	}   	
+    	}
     }
 
     private Condition buildSearchFlowCaseCmdCondition(ListingLocator locator, SearchFlowCaseCommand cmd) {
@@ -324,13 +324,15 @@ public class FlowCaseProviderImpl implements FlowCaseProvider {
     public List<FlowCaseDetail> findAdminFlowCases(ListingLocator locator, int count, SearchFlowCaseCommand cmd, ListingQueryBuilderCallback callback) {
     	DSLContext context = this.dbProvider.getDslContext(AccessSpec.readOnlyWith(EhFlowCases.class));
 
+
     	if(locator.getAnchor() == null) {
     		locator.setAnchor(cmd.getPageAnchor());
     	}
 
-        FlowCaseSearchType searchType = FlowCaseSearchType.fromCode(cmd.getFlowCaseSearchType());
-        if(searchType.equals(FlowCaseSearchType.ADMIN)) { //enum equal
-            Condition cond = buildSearchFlowCaseCmdCondition(locator, cmd);
+    	FlowCaseSearchType searchType = FlowCaseSearchType.fromCode(cmd.getFlowCaseSearchType());
+    	if(searchType.equals(FlowCaseSearchType.ADMIN)) { //enum equal
+
+           Condition cond = buildSearchFlowCaseCmdCondition(locator,cmd);
 
             SelectQuery<Record> query = context.select(Tables.EH_FLOW_CASES.fields())
                     .from(Tables.EH_FLOW_CASES).join(Tables.EH_FLOWS)
@@ -351,6 +353,7 @@ public class FlowCaseProviderImpl implements FlowCaseProvider {
                 locator.setAnchor(null);
             }
             return objs;
+    		
     	} else {
     		return null;
     	}

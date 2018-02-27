@@ -4,8 +4,8 @@ package com.everhomes.rest.statistics.terminal;
 
 /**
  *<ul>
- *<li>startDate:开始时间日期<li>
- *<li>endDate:结束时间日期<li>
+ *<li>startDate:开始时间日期</li>
+ *<li>endDate:结束时间日期</li>
  *</ul>
  */
 public class ListTerminalStatisticsByDateCommand {

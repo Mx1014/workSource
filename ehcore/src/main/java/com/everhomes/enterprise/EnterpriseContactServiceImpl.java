@@ -2151,9 +2151,9 @@ public class EnterpriseContactServiceImpl implements EnterpriseContactService {
 			orgId = org.getId();
 		}
 		
-		List<OrganizationRoleMap> organizationRoleMaps = organizationRoleMapProvider.listOrganizationRoleMaps(orgId, EntityType.ORGANIZATIONS, PrivateFlag.PUBLIC);
+//		List<OrganizationRoleMap> organizationRoleMaps = organizationRoleMapProvider.listOrganizationRoleMaps(orgId, EntityType.ORGANIZATIONS, PrivateFlag.PUBLIC);
 		
-	    Map<Long, OrganizationRoleMap> roleMap =  this.convertOrganizationRoleMap(organizationRoleMaps);
+//	    Map<Long, OrganizationRoleMap> roleMap =  this.convertOrganizationRoleMap(organizationRoleMaps);
 		
 		Map<Long, Organization> deptMaps = this.convertListToMap(depts);
 		return organizationMembers.stream().map((c) ->{
@@ -2176,8 +2176,8 @@ public class EnterpriseContactServiceImpl implements EnterpriseContactService {
 					for (Long roleId : resources) {
 						AclRoleAssignmentsDTO aclRoleAssignmentsDTO = new AclRoleAssignmentsDTO();
 						aclRoleAssignmentsDTO.setRoleId(roleId);
-						OrganizationRoleMap role = roleMap.get(roleId);
-						aclRoleAssignmentsDTO.setRoleName(null == role ? "" : role.getRoleName());
+//						OrganizationRoleMap role = roleMap.get(roleId);
+//						aclRoleAssignmentsDTO.setRoleName(null == role ? "" : role.getRoleName());
 						aclRoles.add(aclRoleAssignmentsDTO);
 					}
 //					dto.setAclRoles(aclRoles);

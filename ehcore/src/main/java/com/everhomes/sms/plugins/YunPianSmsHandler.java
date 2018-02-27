@@ -24,9 +24,11 @@ public class YunPianSmsHandler extends BaseSmsHandler {
 
     private static final String API_KEY_NAME = "sms.YunPian.apiKey";
     private static final String SERVER_NAME = "sms.YunPian.server";
+    private static final String INTERNATIONAL_SERVER_NAME = "sms.YunPian.internationalServer";
 
     private String apiKey;
     private String server;
+    private String internationalServer;
 
     @Override
     String getHandlerName() {
@@ -34,17 +36,23 @@ public class YunPianSmsHandler extends BaseSmsHandler {
     }
 
     @Override
+    protected int internationalSmsMaxLimit() {
+        return 1;
+    }
+
+    @Override
     void initAccount() {
         try {
             apiKey = configurationProvider.getValue(API_KEY_NAME, "a010af7f5e94f889c010ed38a7fc3a05");
             server = configurationProvider.getValue(SERVER_NAME, "https://sms.yunpian.com/v2/sms/batch_send.json");
+            internationalServer = configurationProvider.getValue(INTERNATIONAL_SERVER_NAME, "https://sms.yunpian.com/v2/sms/single_send.json");
         } catch (Exception e) {
             //
         }
     }
 
     @Override
-    RspMessage createAndSend(String[] phones, String sign, String content) {
+    protected RspMessage createAndSend(String[] phones, String sign, String content) {
         Map<String, Object> params = new HashMap<>();
         params.put("apikey", apiKey);
         params.put("text", sign + content);
@@ -56,26 +64,64 @@ public class YunPianSmsHandler extends BaseSmsHandler {
                 .send();
     }
 
+    @Override
+    protected RspMessage createAndSendInternationalPhones(String[] phones, String sign, String content) {
+        // 国际短信一次只能发一个手机号
+        if (phones.length > 0) {
+            Map<String, Object> params = new HashMap<>();
+            params.put("apikey", apiKey);
+            params.put("text", sign + content);
+
+            String phone = phones[0];
+
+            if (phone.startsWith("00")) {
+                phone = phone.substring(2, phone.length());
+            }
+            params.put("mobile", "+" + phone);
+            return SmsChannelBuilder.create(true)
+                    .setUrl(internationalServer)
+                    .setBodyMap(params)
+                    .send();
+        }
+        return null;
+    }
+
     /**
      * {"http_status_code":400,"code":3,"msg":"账户余额不足","detail":"请充值后重试"}
+     *
+     * {"http_status_code":400,"code":22,"msg":"验证码类短信1小时内同一手机号发送次数不能超过3次","detail":"验证码类短信1小时内同一手机号发送次数不能超过3次"}
+     *
+     * // 国际短信返回值
+     * {"code":0,"msg":"发送成功","count":1,"fee":0.05,"unit":"RMB","mobile":"13246687272","sid":21364791658}
      */
     @Override
-    List<SmsLog> buildSmsLogs(Integer namespaceId, String[] phoneNumbers, String templateScope, int templateId, String templateLocale, String content, RspMessage rspMessage) {
-        List<SmsLog> smsLogs = new ArrayList<>();
+    List<SmsLog> buildSmsLogs(Integer namespaceId, String[] phoneNumbers, String templateScope,
+                              int templateId, String templateLocale, String content, RspMessage rspMessage) {
+        List<SmsLog> smsLogs = new ArrayList<>(phoneNumbers.length);
         SendResult res = new SendResult();
         String result = "failed";
 
         if (rspMessage != null) {
             try {
                 result = rspMessage.getMessage();
-                res = (SendResult) StringHelper.fromJsonString(rspMessage.getMessage(), SendResult.class);
+                SendData sendData = (SendData) StringHelper.fromJsonString(result, SendData.class);
+                if (sendData != null && sendData.code != null && sendData.code > 0) {
+                    return error(namespaceId, phoneNumbers, templateScope, templateId, templateLocale, content, result);
+                }
+                res = (SendResult) StringHelper.fromJsonString(result, SendResult.class);
             } catch (Exception e) {
-                return error(namespaceId, phoneNumbers, templateScope, templateId, templateLocale, smsLogs, result);
+                return error(namespaceId, phoneNumbers, templateScope, templateId, templateLocale, content, result);
             }
         }
 
         if (res.data == null) {
-            return error(namespaceId, phoneNumbers, templateScope, templateId, templateLocale, smsLogs, result);
+            SendData sendData = (SendData) StringHelper.fromJsonString(result, SendData.class);
+            if (sendData != null) {
+                res.data = new ArrayList<>();
+                res.data.add(sendData);
+            } else {
+                return error(namespaceId, phoneNumbers, templateScope, templateId, templateLocale, content, result);
+            }
         }
 
         for (SendData data : res.data) {
@@ -101,9 +147,11 @@ public class YunPianSmsHandler extends BaseSmsHandler {
         return smsLogs;
     }
 
-    private List<SmsLog> error(Integer namespaceId, String[] phoneNumbers, String templateScope, int templateId, String templateLocale, List<SmsLog> smsLogs, String result) {
+    private List<SmsLog> error(Integer namespaceId, String[] phoneNumbers, String templateScope,
+                               int templateId, String templateLocale, String content, String result) {
+        List<SmsLog> smsLogs = new ArrayList<>(phoneNumbers.length);
         for (String phoneNumber : phoneNumbers) {
-            smsLogs.add(getSmsErrorLog(namespaceId, phoneNumber, templateScope, templateId, templateLocale, result));
+            smsLogs.add(getSmsErrorLog(namespaceId, phoneNumber, templateScope, templateId, templateLocale, content, result));
         }
         return smsLogs;
     }
@@ -147,15 +195,16 @@ public class YunPianSmsHandler extends BaseSmsHandler {
              "report_status": "SUCCESS"
          }
      ]
+     * @param reportRequest
      */
     @Override
-    public SmsReportResponse report(String reportBody) {
-        String[] split = reportBody.split("=");
+    public SmsReportResponse report(SmsReportRequest reportRequest) {
+        String[] smsStatuses = reportRequest.getParameter("sms_status");
 
         Gson gson = new GsonBuilder().disableHtmlEscaping().create();
         List<ReportResult> reportList = null;
         try {
-            reportList = gson.fromJson(URLDecoder.decode(split[1], "UTF-8"), new TypeToken<List<ReportResult>>(){}.getType());
+            reportList = gson.fromJson(URLDecoder.decode(smsStatuses[0], "UTF-8"), new TypeToken<List<ReportResult>>(){}.getType());
         } catch (Exception e) {
             e.printStackTrace();
         }

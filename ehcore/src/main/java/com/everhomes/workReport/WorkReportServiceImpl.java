@@ -407,9 +407,9 @@ public class WorkReportServiceImpl implements WorkReportService {
 
     @Override
     public Long getUserDetailId(Long userId, Long ownerId) {
-        OrganizationMember members = organizationProvider.findOrganizationMemberByOrgIdAndUId(userId, ownerId);
-        if (members != null)
-            return members.getDetailId();
+        List<OrganizationMember> members = organizationProvider.findOrganizationMembersByOrgIdAndUId(userId, ownerId);
+        if (members != null && members.size() > 0)
+            return members.get(0).getDetailId();
         return null;
     }
 

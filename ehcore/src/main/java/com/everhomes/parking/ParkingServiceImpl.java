@@ -668,7 +668,12 @@ public class ParkingServiceImpl implements ParkingService {
 //
 //        preOrderCommand.setOrderType(OrderType.OrderTypeEnum.PARKING.getPycode());
 //        preOrderCommand.setOrderId(parkingRechargeOrder.getOrderNo());
+
 		Long amount = payService.changePayAmount(parkingRechargeOrder.getPrice());
+		boolean flag = configProvider.getBooleanValue("parking.order.amount", false);
+		if(flag) {
+			amount = 1L;
+		}
 //        preOrderCommand.setAmount(amount);
 //
 //        preOrderCommand.setPayerId(parkingRechargeOrder.getPayerUid());
@@ -701,7 +706,7 @@ public class ParkingServiceImpl implements ParkingService {
 
 		boolean flag = configProvider.getBooleanValue("parking.order.amount", false);
 		if(flag) {
-			orderCmd.setTotalFee(new BigDecimal(0.02).setScale(2, RoundingMode.FLOOR));
+			orderCmd.setTotalFee(new BigDecimal(0.01).setScale(2, RoundingMode.FLOOR));
 		} else {
 			orderCmd.setTotalFee(parkingRechargeOrder.getPrice());
 		}
@@ -1331,21 +1336,12 @@ public class ParkingServiceImpl implements ParkingService {
 		row.createCell(7).setCellValue("支付方式");
 		row.createCell(8).setCellValue("缴费类型");
 
-		SimpleDateFormat datetimeSF = new SimpleDateFormat("yyyy-MM-dd HH:mm:ss");
-		for(int i=0, size = list.size();i<size;i++){
-			Row tempRow = sheet.createRow(i + 1);
-			ParkingRechargeOrder order = list.get(i);
-			tempRow.createCell(0).setCellValue(String.valueOf(order.getOrderNo()));
-			tempRow.createCell(1).setCellValue(order.getPlateNumber());
-			tempRow.createCell(2).setCellValue(order.getPlateOwnerName());
-			tempRow.createCell(3).setCellValue(order.getPayerPhone());
-			tempRow.createCell(4).setCellValue(datetimeSF.format(order.getCreateTime()));
-			tempRow.createCell(5).setCellValue(null == order.getMonthCount()?"":order.getMonthCount().toString());
-			tempRow.createCell(6).setCellValue(order.getPrice().doubleValue());
-			VendorType type = VendorType.fromCode(order.getPaidType());
-			tempRow.createCell(7).setCellValue(null==type?"":type.getDescribe());
-			tempRow.createCell(8).setCellValue(ParkingRechargeType.fromCode(order.getRechargeType()).getDescribe());
+		ParkingLot parkingLot = checkParkingLot(cmd.getOwnerType(), cmd.getOwnerId(), cmd.getParkingLotId());
 
+		String vendor = parkingLot.getVendorName();
+		ParkingVendorHandler handler = getParkingVendorHandler(vendor);
+		if(handler != null){
+			handler.setCellValues(list,sheet);
 		}
 		ByteArrayOutputStream out = null;
 		try {
@@ -1893,6 +1889,10 @@ public class ParkingServiceImpl implements ParkingService {
 		BigDecimal price = order.getPrice();
 
 		Long amount = payService.changePayAmount(price);
+		boolean flag = configProvider.getBooleanValue("parking.order.amount", false);
+		if(flag) {
+			amount = 1L;
+		}
 
 		CreateOrderRestResponse refundResponse = payService.refund(OrderType.OrderTypeEnum.PARKING.getPycode(), order.getId(), refoundOrderNo, amount);
 
@@ -1925,7 +1925,7 @@ public class ParkingServiceImpl implements ParkingService {
 		refundCmd.setOrderType(OrderType.OrderTypeEnum.PARKING.getPycode());
 		boolean flag = configProvider.getBooleanValue("parking.order.amount", false);
 		if (flag) {
-			refundCmd.setRefundAmount(new BigDecimal(0.02).setScale(2, RoundingMode.FLOOR));
+			refundCmd.setRefundAmount(new BigDecimal(0.01).setScale(2, RoundingMode.FLOOR));
 		}else {
 			refundCmd.setRefundAmount(order.getPrice());
 		}
