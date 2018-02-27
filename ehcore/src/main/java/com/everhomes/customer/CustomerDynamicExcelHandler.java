@@ -11,6 +11,7 @@ import com.everhomes.rest.varField.FieldGroupDTO;
 import com.everhomes.rest.varField.ImportFieldExcelCommand;
 import com.everhomes.rest.varField.ListFieldCommand;
 import com.everhomes.util.ConvertHelper;
+import com.everhomes.util.StringHelper;
 import com.everhomes.varField.*;
 import org.apache.commons.lang.StringUtils;
 import org.slf4j.LoggerFactory;
@@ -62,12 +63,21 @@ public class CustomerDynamicExcelHandler implements DynamicExcelHandler {
         ListFieldCommand command = ConvertHelper.convert(params, ListFieldCommand.class);
         command.setGroupPath(group.getPath());
         List<FieldDTO> fields = fieldService.listFields(command);
+        LOGGER.debug("getDynamicSheet: headers: {}", StringHelper.toJsonString(headers));
         if(fields != null && fields.size() > 0) {
             fields.forEach(fieldDTO -> {
+                LOGGER.debug("getDynamicSheet: fieldDTO: {}", fieldDTO.getFieldDisplayName());
                 if(isImport) {
                     if(headers.contains(fieldDTO.getFieldDisplayName())) {
                         DynamicField df = ConvertHelper.convert(fieldDTO, DynamicField.class);
                         df.setDisplayName(fieldDTO.getFieldDisplayName());
+                        if("trackingTime".equals(fieldDTO.getFieldName()) || "notifyTime".equals(fieldDTO.getFieldName())) {
+                            df.setDateFormat("yyyy-MM-dd HH:mm");
+                        }
+                        //boolean isMandatory 数据库是0和1 默认false
+                        if(fieldDTO.getMandatoryFlag() == 1) {
+                            df.setMandatory(true);
+                        }
                         if(fieldDTO.getItems() != null && fieldDTO.getItems().size() > 0) {
                             List<String> allowedValued = fieldDTO.getItems().stream().map(item -> {
                                 return item.getItemDisplayName();
@@ -79,6 +89,10 @@ public class CustomerDynamicExcelHandler implements DynamicExcelHandler {
                 } else {
                     DynamicField df = ConvertHelper.convert(fieldDTO, DynamicField.class);
                     df.setDisplayName(fieldDTO.getFieldDisplayName());
+                    //boolean isMandatory 数据库是0和1 默认false
+                    if(fieldDTO.getMandatoryFlag() == 1) {
+                        df.setMandatory(true);
+                    }
                     if(fieldDTO.getItems() != null && fieldDTO.getItems().size() > 0) {
                         List<String> allowedValued = fieldDTO.getItems().stream().map(item -> {
                             return item.getItemDisplayName();
@@ -107,6 +121,7 @@ public class CustomerDynamicExcelHandler implements DynamicExcelHandler {
         String moduleName = customerInfo.getModuleName();
         if(rowDatas != null && rowDatas.size() > 0) {
             CustomerDynamicSheetClass sheet = CustomerDynamicSheetClass.fromStatus(ds.getClassName());
+            int failedNumber = 0;
             for(DynamicRowDTO rowData : rowDatas) {
                 List<DynamicColumnDTO> columns = rowData.getColumns();
                 switch (sheet) {
@@ -114,9 +129,11 @@ public class CustomerDynamicExcelHandler implements DynamicExcelHandler {
                         CustomerTax tax = new CustomerTax();
                         tax.setCustomerId(customerId);
                         tax.setCustomerType(customerType);
+                        tax.setNamespaceId(namespaceId);
 
                         if(columns != null && columns.size() > 0) {
                             for(DynamicColumnDTO column : columns) {
+                                LOGGER.warn("CUSTOMER_TAX: cellvalue: {}, namespaceId: {}, communityId: {}, moduleName: {}", column.getValue(), namespaceId, communityId, moduleName);
                                 if("taxPayerTypeId".equals(column.getFieldName())) {
                                     ScopeFieldItem item = fieldService.findScopeFieldItemByDisplayName(namespaceId, communityId, moduleName, column.getValue());
                                     if(item != null) {
@@ -127,6 +144,7 @@ public class CustomerDynamicExcelHandler implements DynamicExcelHandler {
                                     setToObj(column.getFieldName(), tax, column.getValue());
                                 } catch(Exception e){
                                     LOGGER.warn("one row invoke set method for CustomerTax failed");
+                                    failedNumber ++;
                                 }
 
                                 continue;
@@ -138,7 +156,7 @@ public class CustomerDynamicExcelHandler implements DynamicExcelHandler {
                         CustomerAccount account = new CustomerAccount();
                         account.setCustomerId(customerId);
                         account.setCustomerType(customerType);
-
+                        account.setNamespaceId(namespaceId);
                         if(columns != null && columns.size() > 0) {
                             for(DynamicColumnDTO column : columns) {
                                 if("accountNumberTypeId".equals(column.getFieldName()) || "accountTypeId".equals(column.getFieldName())) {
@@ -151,6 +169,7 @@ public class CustomerDynamicExcelHandler implements DynamicExcelHandler {
                                     setToObj(column.getFieldName(), account, column.getValue());
                                 } catch(Exception e){
                                     LOGGER.warn("one row invoke set method for CustomerAccount failed");
+                                    failedNumber ++;
                                 }
 
                                 continue;
@@ -163,6 +182,7 @@ public class CustomerDynamicExcelHandler implements DynamicExcelHandler {
                         CustomerTalent talent = new CustomerTalent();
                         talent.setCustomerId(customerId);
                         talent.setCustomerType(customerType);
+                        talent.setNamespaceId(namespaceId);
 
                         if(columns != null && columns.size() > 0) {
                             for(DynamicColumnDTO column : columns) {
@@ -179,6 +199,7 @@ public class CustomerDynamicExcelHandler implements DynamicExcelHandler {
                                     setToObj(column.getFieldName(), talent, column.getValue());
                                 } catch(Exception e){
                                     LOGGER.warn("one row invoke set method for CustomerTalent failed");
+                                    failedNumber ++;
                                 }
 
                                 continue;
@@ -191,6 +212,7 @@ public class CustomerDynamicExcelHandler implements DynamicExcelHandler {
                         CustomerTrademark trademark = new CustomerTrademark();
                         trademark.setCustomerId(customerId);
                         trademark.setCustomerType(customerType);
+                        trademark.setNamespaceId(namespaceId);
 
                         if(columns != null && columns.size() > 0) {
                             for(DynamicColumnDTO column : columns) {
@@ -204,6 +226,7 @@ public class CustomerDynamicExcelHandler implements DynamicExcelHandler {
                                     setToObj(column.getFieldName(), trademark, column.getValue());
                                 } catch(Exception e){
                                     LOGGER.warn("one row invoke set method for CustomerTrademark failed");
+                                    failedNumber ++;
                                 }
 
                                 continue;
@@ -216,6 +239,7 @@ public class CustomerDynamicExcelHandler implements DynamicExcelHandler {
                         CustomerApplyProject project = new CustomerApplyProject();
                         project.setCustomerId(customerId);
                         project.setCustomerType(customerType);
+                        project.setNamespaceId(namespaceId);
 
                         if(columns != null && columns.size() > 0) {
                             for(DynamicColumnDTO column : columns) {
@@ -250,6 +274,7 @@ public class CustomerDynamicExcelHandler implements DynamicExcelHandler {
                                     setToObj(column.getFieldName(), project, column.getValue());
                                 } catch(Exception e){
                                     LOGGER.warn("one row invoke set method for CustomerApplyProject failed");
+                                    failedNumber ++;
                                 }
 
                                 continue;
@@ -262,6 +287,7 @@ public class CustomerDynamicExcelHandler implements DynamicExcelHandler {
                         CustomerCommercial commercial = new CustomerCommercial();
                         commercial.setCustomerId(customerId);
                         commercial.setCustomerType(customerType);
+                        commercial.setNamespaceId(namespaceId);
 
                         if(columns != null && columns.size() > 0) {
                             for(DynamicColumnDTO column : columns) {
@@ -276,6 +302,7 @@ public class CustomerDynamicExcelHandler implements DynamicExcelHandler {
                                     setToObj(column.getFieldName(), commercial, column.getValue());
                                 } catch(Exception e){
                                     LOGGER.warn("one row invoke set method for CustomerCommercial failed");
+                                    failedNumber ++;
                                 }
 
                                 continue;
@@ -288,6 +315,7 @@ public class CustomerDynamicExcelHandler implements DynamicExcelHandler {
                         CustomerInvestment investment = new CustomerInvestment();
                         investment.setCustomerId(customerId);
                         investment.setCustomerType(customerType);
+                        investment.setNamespaceId(namespaceId);
 
                         if(columns != null && columns.size() > 0) {
                             for(DynamicColumnDTO column : columns) {
@@ -295,6 +323,7 @@ public class CustomerDynamicExcelHandler implements DynamicExcelHandler {
                                     setToObj(column.getFieldName(), investment, column.getValue());
                                 } catch(Exception e){
                                     LOGGER.warn("one row invoke set method for CustomerInvestment failed");
+                                    failedNumber ++;
                                 }
 
                                 continue;
@@ -307,17 +336,19 @@ public class CustomerDynamicExcelHandler implements DynamicExcelHandler {
                         CustomerEconomicIndicator indicator = new CustomerEconomicIndicator();
                         indicator.setCustomerId(customerId);
                         indicator.setCustomerType(customerType);
+                        indicator.setNamespaceId(namespaceId);
 
-                        if(columns != null && columns.size() > 0) {
-                            for(DynamicColumnDTO column : columns) {
-                                try {
-                                    setToObj(column.getFieldName(), indicator, column.getValue());
-                                } catch(Exception e){
-                                    LOGGER.warn("one row invoke set method for CustomerEconomicIndicator failed");
+                            if(columns != null && columns.size() > 0) {
+                                for(DynamicColumnDTO column : columns) {
+                                    try {
+                                        setToObj(column.getFieldName(), indicator, column.getValue());
+                                    } catch(Exception e){
+                                        LOGGER.warn("one row invoke set method for CustomerEconomicIndicator failed");
+                                        failedNumber ++;
+                                    }
+
+                                    continue;
                                 }
-
-                                continue;
-                            }
                         }
 
                         customerProvider.createCustomerEconomicIndicator(indicator);
@@ -326,6 +357,7 @@ public class CustomerDynamicExcelHandler implements DynamicExcelHandler {
                         CustomerPatent patent = new CustomerPatent();
                         patent.setCustomerId(customerId);
                         patent.setCustomerType(customerType);
+                        patent.setNamespaceId(namespaceId);
 
                         if(columns != null && columns.size() > 0) {
                             for(DynamicColumnDTO column : columns) {
@@ -340,6 +372,7 @@ public class CustomerDynamicExcelHandler implements DynamicExcelHandler {
                                     setToObj(column.getFieldName(), patent, column.getValue());
                                 } catch(Exception e){
                                     LOGGER.warn("one row invoke set method for CustomerPatent failed");
+                                    failedNumber ++;
                                 }
 
                                 continue;
@@ -352,6 +385,7 @@ public class CustomerDynamicExcelHandler implements DynamicExcelHandler {
                         CustomerCertificate certificate = new CustomerCertificate();
                         certificate.setCustomerId(customerId);
                         certificate.setCustomerType(customerType);
+                        certificate.setNamespaceId(namespaceId);
 
                         if(columns != null && columns.size() > 0) {
                             for(DynamicColumnDTO column : columns) {
@@ -359,6 +393,7 @@ public class CustomerDynamicExcelHandler implements DynamicExcelHandler {
                                     setToObj(column.getFieldName(), certificate, column.getValue());
                                 } catch(Exception e){
                                     LOGGER.warn("one row invoke set method for CustomerCertificate failed");
+                                    failedNumber ++;
                                 }
 
                                 continue;
@@ -371,6 +406,7 @@ public class CustomerDynamicExcelHandler implements DynamicExcelHandler {
                         CustomerEntryInfo entryInfo = new CustomerEntryInfo();
                         entryInfo.setCustomerId(customerId);
                         entryInfo.setCustomerType(customerType);
+                        entryInfo.setNamespaceId(namespaceId);
 
                         if(columns != null && columns.size() > 0) {
                             for(DynamicColumnDTO column : columns) {
@@ -388,6 +424,7 @@ public class CustomerDynamicExcelHandler implements DynamicExcelHandler {
                                     setToObj(column.getFieldName(), entryInfo, column.getValue());
                                 } catch(Exception e){
                                     LOGGER.warn("one row invoke set method for CustomerEntryInfo failed");
+                                    failedNumber ++;
                                 }
 
                                 continue;
@@ -400,6 +437,7 @@ public class CustomerDynamicExcelHandler implements DynamicExcelHandler {
                         CustomerDepartureInfo departureInfo = new CustomerDepartureInfo();
                         departureInfo.setCustomerId(customerId);
                         departureInfo.setCustomerType(customerType);
+                        departureInfo.setNamespaceId(namespaceId);
 
                         if(columns != null && columns.size() > 0) {
                             for(DynamicColumnDTO column : columns) {
@@ -413,6 +451,7 @@ public class CustomerDynamicExcelHandler implements DynamicExcelHandler {
                                     setToObj(column.getFieldName(), departureInfo, column.getValue());
                                 } catch(Exception e){
                                     LOGGER.warn("one row invoke set method for CustomerDepartureInfo failed");
+                                    failedNumber ++;
                                 }
 
                                 continue;
@@ -424,7 +463,8 @@ public class CustomerDynamicExcelHandler implements DynamicExcelHandler {
                 }
 
             }
-
+            response.setSuccessRowNumber(rowDatas.size() - failedNumber);
+            response.setFailedRowNumber(failedNumber);
         }
     }
 
@@ -483,7 +523,10 @@ public class CustomerDynamicExcelHandler implements DynamicExcelHandler {
     public List<List<String>> getExportData(DynamicSheet sheet, Object params, Map<Object,Object> context) {
         ExportFieldsExcelCommand customerInfo = ConvertHelper.convert(params, ExportFieldsExcelCommand.class);
         Long customerId = customerInfo.getCustomerId();
-        Byte customerType = Byte.valueOf(customerInfo.getCustomerType());
+        Byte customerType = null;
+        if(customerInfo.getCustomerType() != null) {
+            customerType = Byte.valueOf(customerInfo.getCustomerType());
+        }
         Integer namespaceId = customerInfo.getNamespaceId();
         Long communityId = customerInfo.getCommunityId();
         String moduleName = customerInfo.getModuleName();
@@ -498,10 +541,13 @@ public class CustomerDynamicExcelHandler implements DynamicExcelHandler {
                 dto.setFieldDisplayName(df.getDisplayName());
                 dto.setFieldName(df.getFieldName());
                 dto.setFieldParam(df.getFieldParam());
+                dto.setFieldId(df.getFieldId());
+                //在这里传递date格式
+                dto.setDateFormat(df.getDateFormat());
                 return dto;
             }).collect(Collectors.toList());
 
-            List<List<String>> data = fieldService.getDataOnFields(group,customerId,customerType,fields, communityId,namespaceId,moduleName,orgId);
+            List<List<String>> data = fieldService.getDataOnFields(group,customerId,customerType,fields, communityId,namespaceId,moduleName,orgId,params);
             return data;
         }
         return null;
