@@ -2,6 +2,7 @@ package com.everhomes.equipment;
 
 import com.everhomes.configuration.ConfigurationProvider;
 import com.everhomes.listing.CrossShardListingLocator;
+import com.everhomes.organization.OrganizationMember;
 import com.everhomes.organization.OrganizationProvider;
 import com.everhomes.portal.PortalService;
 import com.everhomes.rest.acl.PrivilegeConstants;
@@ -231,6 +232,10 @@ public class EquipmentTasksSearcherImpl extends AbstractElasticSearch implements
                     List<EquipmentStandardRelationDTO> equipments = new ArrayList<>();
                     equipments.add(equipmentStandardRelation);
                     dto.setEquipments(equipments);
+                }
+                List<OrganizationMember> executors = organizationProvider.listOrganizationMembersByUId(task.getExecutorId());
+                if (executors != null && executors.size() > 0) {
+                    dto.setExecutorName(executors.get(0).getContactName());
                 }
                 tasks.add(dto);
             }
