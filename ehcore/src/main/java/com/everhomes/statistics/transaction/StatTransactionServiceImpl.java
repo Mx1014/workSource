@@ -933,8 +933,12 @@ public class StatTransactionServiceImpl implements StatTransactionService{
 				statTaskLog.setStatus(StatTaskStatus.SYNC_PAYMENT_CARD_TRANSACTION.getCode());
 				statTransactionProvider.updateStatTaskLog(statTaskLog);
 			}
-			
 			if(StatTaskStatus.fromCode(statTaskLog.getStatus()) == StatTaskStatus.SYNC_PAYMENT_CARD_TRANSACTION){
+				this.syncNewPaidPlatformToStatTransaction(date);
+				statTaskLog.setStatus(StatTaskStatus.SYNC_NEW_PAYMENT_CARD_TRANSACTION.getCode());
+				statTransactionProvider.updateStatTaskLog(statTaskLog);
+			}
+			if(StatTaskStatus.fromCode(statTaskLog.getStatus()) == StatTaskStatus.SYNC_NEW_PAYMENT_CARD_TRANSACTION){
 //				this.syncPaymentToStatTransaction(date);   //屏蔽一卡通
 				statTaskLog.setStatus(StatTaskStatus.SYNC_PAID_PLATFORM_REFUND.getCode());
 				statTransactionProvider.updateStatTaskLog(statTaskLog);
@@ -1046,7 +1050,8 @@ public class StatTransactionServiceImpl implements StatTransactionService{
 	 * 同步电商订单到结算订单表
 	 * @param date
 	 */
-	private void syncShopToStatOrderByDate(String date) throws Exception{
+	@Override
+	public void syncShopToStatOrderByDate(String date) throws Exception{
 		String serverURL = configurationProvider.getValue(StatTransactionConstant.BIZ_SERVER_URL, "");
 		if(StringUtils.isEmpty(serverURL)){
 			LOGGER.error("biz serverURL not configured, param = {}", StatTransactionConstant.BIZ_SERVER_URL);
@@ -1482,17 +1487,23 @@ public class StatTransactionServiceImpl implements StatTransactionService{
 
         body.put("body", params);
         while (true) {
+            String jsonBody = StringHelper.toJsonString(body);
+            if (LOGGER.isDebugEnabled()) {
+                LOGGER.debug("SyncNewPaidPlatformToStatTransaction request param = {}", jsonBody);
+            }
+
             ResponseEntity<String> responseEntity =
                     bizHttpRestCallProvider.syncRestCall("/rest/openapi/payinfo/listPaidTransactions",
-                            StringHelper.toJsonString(body));
-
-            // String result = HttpUtils.postJson(url, StringHelper.toJsonString(params), 30, null);
+                            jsonBody);
+            if (LOGGER.isDebugEnabled()) {
+                LOGGER.debug("SyncNewPaidPlatformToStatTransaction response body = {}", responseEntity.getBody());
+            }
 
 			ListPaidTransactionResponse response = (ListPaidTransactionResponse)
                     StringHelper.fromJsonString(responseEntity.getBody(), ListPaidTransactionResponse.class);
 
 			this.checkErrorCode("/openapi/payinfo/listPaidTransactions",
-                    StringHelper.toJsonString(params), response.getErrorCode(), responseEntity.getBody());
+                    jsonBody, response.getErrorCode(), responseEntity.getBody());
 
 			if(null != response.getResponse()){
 				PaidTransactionResponse res = response.getResponse();
@@ -1508,7 +1519,7 @@ public class StatTransactionServiceImpl implements StatTransactionService{
 			}
 
 			params.put("pageAnchor", pageAnchor);
-			mapForSignature.put("pageAnchor", pageAnchor.toString());
+			mapForSignature.put("pageAnchor", pageAnchor);
 			signature = SignatureHelper.computeSignature(mapForSignature, secretKey);
 	        params.put("signature", URLEncoder.encode(signature,"UTF-8"));
 		}
@@ -1982,7 +1993,7 @@ public class StatTransactionServiceImpl implements StatTransactionService{
 	     Timestamp startDate = Timestamp.valueOf(date + " 00:00:00");
 		 Timestamp endDate = Timestamp.valueOf(date + " 00:00:00");
 		 endDate.setDate(endDate.getDate() + 1);
-	     
+
 	     Map<String,Object> params = new HashMap<String, Object>();
 	     params.put("nonce", nonce);
 	     params.put("timestamp", timestamp);

@@ -22,6 +22,8 @@ public interface StatTransactionService {
 	
 	List<BusinessDTO> listZuoLinBusinesses();
 
+    void syncShopToStatOrderByDate(String date) throws Exception;
+
     void syncPaidPlatformToStatTransaction(String date) throws Exception;
 
     void syncNewPaidPlatformToStatTransaction(String date) throws Exception;
