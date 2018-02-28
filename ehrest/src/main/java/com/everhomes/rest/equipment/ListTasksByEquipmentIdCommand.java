@@ -1,13 +1,16 @@
 package com.everhomes.rest.equipment;
 
-import javax.validation.constraints.NotNull;
-
+import com.everhomes.discover.ItemType;
 import com.everhomes.util.StringHelper;
+
+import javax.validation.constraints.NotNull;
+import java.util.List;
 
 /**
  * <ul>
  *  <li>equipmentId: 设备id</li>
  *  <li>taskType: 类型 全部不传 参考{@link com.everhomes.rest.equipment.StandardType}</li>
+ *  <li>taskStatus: 类型 全部不传 参考{@link com.everhomes.rest.equipment.EquipmentTaskStatus}</li>
  *  <li>startTime: 开始时间</li>
  *  <li>expireTime: 截止时间</li>
  *  <li>pageAnchor: 锚点</li>
@@ -20,6 +23,9 @@ public class ListTasksByEquipmentIdCommand {
 	private Long equipmentId;
 	
 	private Byte taskType;
+
+	@ItemType(Byte.class)
+	private List<Byte> taskStatus;
 	
 	private Long startTime;
 	
@@ -44,7 +50,15 @@ public class ListTasksByEquipmentIdCommand {
 	public void setTaskType(Byte taskType) {
 		this.taskType = taskType;
 	}
-	
+
+	public List<Byte> getTaskStatus() {
+		return taskStatus;
+	}
+
+	public void setTaskStatus(List<Byte> taskStatus) {
+		this.taskStatus = taskStatus;
+	}
+
 	public Long getStartTime() {
 		return startTime;
 	}
