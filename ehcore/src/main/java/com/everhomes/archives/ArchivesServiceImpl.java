@@ -2111,9 +2111,7 @@ public class ArchivesServiceImpl implements ArchivesService {
         GeneralFormDTO form = generalFormService.getGeneralForm(formCommand);
 
         //  1.设置导出标题
-        List<String> titles = form.getFormFields().stream().map(r -> {
-            return r.getFieldDisplayName();
-        }).collect(Collectors.toList());
+        List<String> titles = form.getFormFields().stream().map(GeneralFormFieldDTO::getFieldDisplayName).collect(Collectors.toList());
 
         //  2.设置导出变量值
         List<Long> detailIds = organizationService.ListDetailsByEnterpriseId(cmd.getOrganizationId());
@@ -2123,9 +2121,7 @@ public class ArchivesServiceImpl implements ArchivesService {
             ExportArchivesEmployeesDTO dto = new ExportArchivesEmployeesDTO();
             GetArchivesEmployeeCommand getCommand = new GetArchivesEmployeeCommand(cmd.getFormOriginId(), cmd.getOrganizationId(), detailId);
             GetArchivesEmployeeResponse response = getArchivesEmployee(getCommand);
-            List<String> employeeValues = response.getForm().getFormFields().stream().map(r -> {
-                return r.getFieldValue();
-            }).collect(Collectors.toList());
+            List<String> employeeValues = response.getForm().getFormFields().stream().map(GeneralFormFieldDTO::getFieldValue).collect(Collectors.toList());
             dto.setVals(employeeValues);
             values.add(dto);
         }
