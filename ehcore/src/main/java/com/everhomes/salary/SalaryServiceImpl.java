@@ -1148,7 +1148,7 @@ public class SalaryServiceImpl implements SalaryService {
         row.createCell(++i).setCellValue("工资卡号");
         row.createCell(++i).setCellValue("在职离职状态");
 
-        if (null != categories) {
+        if (null != categories && null!=groupEntities) {
             for (SalaryEntityCategory category : categories) {
                 if (!category.getId().equals(SalaryConstants.CATEGORY_REDU)) {
                     row.createCell(++i).setCellValue(category.getCategoryName() + "合计");
