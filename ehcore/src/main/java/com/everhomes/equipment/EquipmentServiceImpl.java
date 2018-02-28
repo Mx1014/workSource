@@ -4019,14 +4019,21 @@ private void checkUserPrivilege(Long orgId, Long privilegeId, Long communityId) 
 		List<EquipmentInspectionEquipmentPlanMap> planMaps = equipmentProvider.listPlanMapByEquipmentId(cmd.getEquipmentId());
 		List<EquipmentInspectionTasks> tasks = new ArrayList<>();
 		if (planMaps != null && planMaps.size() > 0) {
-			tasks = equipmentProvider.listTaskByPlanMaps(planMaps, startTime, endTime, locator, pageSize + 1, null);
+			List<Long> planIds = new ArrayList<>();
+			if (planMaps != null && planMaps.size() > 0) {
+				planIds = planMaps.stream()
+						.map(EquipmentInspectionEquipmentPlanMap::getPlanId)
+						.collect(Collectors.toList());
+			}
+			tasks = equipmentProvider.listTaskByPlanMaps(planIds, startTime, endTime, locator, pageSize + 1, cmd.getTaskStatus());
 		} else {
-			List<Long> standardIds = null;
+//			List<Long> standardIds = null;
 //			if (cmd.getTaskType() != null) {
 //				standardIds = equipmentProvider.listStandardIdsByType(cmd.getTaskType());
 //			}
-			tasks = equipmentProvider.listTasksByEquipmentId(cmd.getEquipmentId(),
-					standardIds, startTime, endTime, locator, pageSize + 1, null);
+//			tasks = equipmentProvider.listTasksByEquipmentId(cmd.getEquipmentId(),
+//					standardIds, startTime, endTime, locator, pageSize + 1, null);
+			return null;
 		}
 		if (tasks.size() > pageSize) {
 			tasks.remove(tasks.size() - 1);
@@ -4035,10 +4042,7 @@ private void checkUserPrivilege(Long orgId, Long privilegeId, Long communityId) 
 			response.setNextPageAnchor(null);
 		}
 
-		List<EquipmentTaskDTO> dtos = tasks.stream().map(r -> {
-			EquipmentTaskDTO dto = convertEquipmentTaskToDTO(r);
-			return dto;
-		}).filter(Objects::nonNull).collect(Collectors.toList());
+		List<EquipmentTaskDTO> dtos = tasks.stream().map(this::convertEquipmentTaskToDTO).filter(Objects::nonNull).collect(Collectors.toList());
 
 		response.setTasks(dtos);
 
@@ -4473,7 +4477,13 @@ private void checkUserPrivilege(Long orgId, Long privilegeId, Long communityId) 
 	        taskStatus.add(EquipmentTaskStatus.IN_MAINTENANCE.getCode());
 			//tasks = equipmentProvider.listTasksByEquipmentId(equipment.getId(), null, null, null, locator, pageSize+1, taskStatus);
 			List<EquipmentInspectionEquipmentPlanMap> planMaps = equipmentProvider.listPlanMapByEquipmentId(equipment.getId());
-			tasks = equipmentProvider.listTaskByPlanMaps(planMaps, null, null, locator, pageSize + 1,taskStatus);
+			List<Long> planIds = new ArrayList<>();
+			if(planMaps!=null && planMaps.size()>0){
+					planIds = planMaps.stream()
+							.map(EquipmentInspectionEquipmentPlanMap::getPlanId)
+							.collect(Collectors.toList());
+			}
+			tasks = equipmentProvider.listTaskByPlanMaps(planIds, null, null, locator, pageSize + 1,taskStatus);
 		} else {
 			//扫码任务做权限控制 只能扫出设备下有执行权限的任务
 			List<StandardAndStatus> standards = new ArrayList<>();
