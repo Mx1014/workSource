@@ -1041,7 +1041,7 @@ public class GeneralApprovalServiceImpl implements GeneralApprovalService {
     }
 
     @Override
-    public void exportGeneralApprovalRecords(ListGeneralApprovalRecordsCommand cmd, HttpServletResponse httpResponse) {
+    public void exportGeneralApprovalRecords(ListGeneralApprovalRecordsCommand cmd) {
 
         //  export with te file download center
         Map<String, Object> params = new HashMap<>();

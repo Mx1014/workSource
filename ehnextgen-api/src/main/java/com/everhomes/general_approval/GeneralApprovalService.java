@@ -71,7 +71,7 @@ public interface GeneralApprovalService {
 
     GeneralApprovalRecordDTO convertGeneralApprovalRecordDTO(FlowCase r);
 
-    void exportGeneralApprovalRecords(ListGeneralApprovalRecordsCommand cmd, HttpServletResponse httpResponse);
+    void exportGeneralApprovalRecords(ListGeneralApprovalRecordsCommand cmd);
 
     OutputStream getGeneralApprovalOutputStream(ListGeneralApprovalRecordsCommand cmd, Long taskId);
 

@@ -2,10 +2,8 @@ package com.everhomes.general_approval;
 
 import com.everhomes.filedownload.FileDownloadTaskHandler;
 import com.everhomes.filedownload.FileDownloadTaskService;
-import com.everhomes.filedownload.Task;
 import com.everhomes.filedownload.TaskService;
 import com.everhomes.rest.contentserver.CsFileLocationDTO;
-import com.everhomes.rest.filedownload.TaskStatus;
 import com.everhomes.rest.general_approval.ListGeneralApprovalRecordsCommand;
 import org.springframework.beans.factory.annotation.Autowired;
 
@@ -19,6 +17,9 @@ public class GeneralApprovalExportTaskHandler implements FileDownloadTaskHandler
 
     @Autowired
     private TaskService taskService;
+
+    @Autowired
+    private GeneralApprovalService generalApprovalService;
 
     @Override
     public void beforeExecute(Map<String, Object> params) {
@@ -66,9 +67,10 @@ public class GeneralApprovalExportTaskHandler implements FileDownloadTaskHandler
         cmd.setApprovalNo(approvalNo);
 
         //  get the out put stream before start download
-        OutputStream outputStream = null;
         String fileName = (String) params.get("name");
         Long taskId = (Long) params.get("taskId");
+//        OutputStream outputStream = null;
+        OutputStream outputStream = generalApprovalService.getGeneralApprovalOutputStream(cmd, taskId);
         CsFileLocationDTO fileLocationDTO = fileDownloadTaskService.uploadToContenServer(fileName, outputStream);
         taskService.processUpdateTask(taskId, fileLocationDTO);
     }
