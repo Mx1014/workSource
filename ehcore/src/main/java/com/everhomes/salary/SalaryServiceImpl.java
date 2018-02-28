@@ -488,6 +488,9 @@ public class SalaryServiceImpl implements SalaryService {
     }
 
     private SalaryEmployeeDTO processEmployeeDTO(SalaryEmployee r) {
+        if (null == r) {
+            return null;
+        }
         SalaryEmployeeDTO dto = ConvertHelper.convert(r, SalaryEmployeeDTO.class);
         OrganizationMemberDetails detail = organizationProvider.findOrganizationMemberDetailsByDetailId(r.getUserDetailId());
         if (null != detail) {
@@ -719,6 +722,9 @@ public class SalaryServiceImpl implements SalaryService {
 
         String month = findSalaryMonth(ownerId);
         SalaryEmployee employee = salaryEmployeeProvider.findSalaryEmployeeByDetailId(ownerId, detailId);
+        if (null == employee) {
+            return null;
+        }
         employee.setSalaryPeriod(month);
 
         if (null == employee) {
