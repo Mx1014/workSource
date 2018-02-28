@@ -1507,6 +1507,7 @@ public class SalaryServiceImpl implements SalaryService {
         ByteArrayOutputStream os = (ByteArrayOutputStream)ops;
         InputStream ins = new ByteArrayInputStream(os.toByteArray());
         UploadCsFileResponse resp = contentServerService.uploadFileToContentServer(ins, fileName, token);
+        LOGGER.debug("上传文件,content serverresponse " + resp);
 //        contentServerService.parserUri(token)
         saveSalaryGroupReport(sgf, SalaryReportType.SALARY_DETAIL, resp.getResponse().getUri(), resp.getResponse().getUrl());
         //部门汇总表
