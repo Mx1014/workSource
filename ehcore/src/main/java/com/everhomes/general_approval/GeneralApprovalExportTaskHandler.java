@@ -2,10 +2,9 @@ package com.everhomes.general_approval;
 
 import com.everhomes.filedownload.FileDownloadTaskHandler;
 import com.everhomes.filedownload.FileDownloadTaskService;
-import com.everhomes.filedownload.Task;
 import com.everhomes.filedownload.TaskService;
 import com.everhomes.rest.contentserver.CsFileLocationDTO;
-import com.everhomes.rest.filedownload.TaskStatus;
+import com.everhomes.rest.general_approval.ListGeneralApprovalRecordsCommand;
 import org.springframework.beans.factory.annotation.Autowired;
 
 import java.io.OutputStream;
@@ -18,6 +17,9 @@ public class GeneralApprovalExportTaskHandler implements FileDownloadTaskHandler
 
     @Autowired
     private TaskService taskService;
+
+    @Autowired
+    private GeneralApprovalService generalApprovalService;
 
     @Override
     public void beforeExecute(Map<String, Object> params) {
@@ -52,26 +54,25 @@ public class GeneralApprovalExportTaskHandler implements FileDownloadTaskHandler
         Long approvalNo = null;
         if (params.get("approvalNo") != null)
             approvalNo = (Long) params.get("approvalNo");
-        OutputStream outputStream = null;
+
+        ListGeneralApprovalRecordsCommand cmd = new ListGeneralApprovalRecordsCommand();
+        cmd.setOrganizationId(organizationId);
+        cmd.setModuleId(moduleId);
+        cmd.setStartTime(startTime);
+        cmd.setEndTime(endTime);
+        cmd.setApprovalStatus(approvalStatus);
+        cmd.setApprovalId(approvalId);
+        cmd.setCreatorDepartmentId(creatorDepartmentId);
+        cmd.setCreatorName(creatorName);
+        cmd.setApprovalNo(approvalNo);
+
+        //  get the out put stream before start download
         String fileName = (String) params.get("name");
         Long taskId = (Long) params.get("taskId");
+//        OutputStream outputStream = null;
+        OutputStream outputStream = generalApprovalService.getGeneralApprovalOutputStream(cmd, taskId);
         CsFileLocationDTO fileLocationDTO = fileDownloadTaskService.uploadToContenServer(fileName, outputStream);
         taskService.processUpdateTask(taskId, fileLocationDTO);
-
-
-/*
-        params.put("organizationId", cmd.getOrganizationId());
-        params.put("moduleId", cmd.getModuleId());
-        params.put("startTime", cmd.getStartTime());
-        params.put("endTime", cmd.getEndTime());
-        params.put("approvalStatus", cmd.getApprovalStatus());
-        params.put("approvalId", cmd.getApprovalId());
-        params.put("creatorDepartmentId", cmd.getCreatorDepartmentId());
-        params.put("creatorName", cmd.getCreatorName());
-        params.put("approvalNo", cmd.getApprovalNo());
-*/
-
-
     }
 
     @Override

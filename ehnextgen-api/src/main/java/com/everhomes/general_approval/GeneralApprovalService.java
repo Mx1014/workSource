@@ -4,6 +4,7 @@ import com.everhomes.flow.FlowCase;
 import com.everhomes.flow.FlowCaseDetail;
 import com.everhomes.rest.general_approval.*;
 
+import java.io.OutputStream;
 import java.util.List;
 import java.util.Map;
 
@@ -70,7 +71,9 @@ public interface GeneralApprovalService {
 
     GeneralApprovalRecordDTO convertGeneralApprovalRecordDTO(FlowCase r);
 
-    void exportGeneralApprovalRecords(ListGeneralApprovalRecordsCommand cmd, HttpServletResponse httpResponse);
+    void exportGeneralApprovalRecords(ListGeneralApprovalRecordsCommand cmd);
+
+    OutputStream getGeneralApprovalOutputStream(ListGeneralApprovalRecordsCommand cmd, Long taskId);
 
     GeneralApprovalDTO verifyApprovalName(VerifyApprovalNameCommand cmd);
 

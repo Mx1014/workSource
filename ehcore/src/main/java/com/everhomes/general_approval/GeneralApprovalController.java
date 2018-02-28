@@ -122,8 +122,8 @@ public class GeneralApprovalController extends ControllerBase {
 	 */
 	@RequestMapping("exportGeneralApprovalRecords")
 	@RestReturn(value=String.class)
-	public RestResponse exportGeneralApprovalRecords(ListGeneralApprovalRecordsCommand cmd, HttpServletResponse httpResponse) {
-		generalApprovalService.exportGeneralApprovalRecords(cmd, httpResponse);
+	public RestResponse exportGeneralApprovalRecords(ListGeneralApprovalRecordsCommand cmd) {
+		generalApprovalService.exportGeneralApprovalRecords(cmd);
 		RestResponse response = new RestResponse();
 		response.setErrorCode(ErrorCodes.SUCCESS);
 		response.setErrorDescription("OK");
@@ -133,7 +133,7 @@ public class GeneralApprovalController extends ControllerBase {
 
 	/**
 	 * <b>URL: /general_approval/listAvailableGeneralApprovals</b>
-	 * <p> 根据模块 id 与审判类型导出对应的审批记录 </p>
+	 * <p> 根据可见范围获取审批列表 </p>
 	 */
 	@RequestMapping("listAvailableGeneralApprovals")
 	@RestReturn(value=ListGeneralApprovalResponse.class)
