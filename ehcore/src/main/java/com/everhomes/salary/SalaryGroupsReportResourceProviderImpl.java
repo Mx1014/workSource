@@ -34,8 +34,8 @@ public class SalaryGroupsReportResourceProviderImpl implements SalaryGroupsRepor
 	public void createSalaryGroupsReportResource(SalaryGroupsReportResource salaryGroupsReportResource) {
 		Long id = sequenceProvider.getNextSequence(NameMapper.getSequenceDomainFromTablePojo(EhSalaryGroupsReportResources.class));
 		salaryGroupsReportResource.setId(id);
-		salaryGroupsReportResource.setCreateTime(new Timestamp(DateHelper.currentGMTTime().getTime()));
-		salaryGroupsReportResource.setCreatorUid(UserContext.current().getUser().getId());
+//		salaryGroupsReportResource.setCreateTime(new Timestamp(DateHelper.currentGMTTime().getTime()));
+//		salaryGroupsReportResource.setCreatorUid(UserContext.current().getUser().getId());
 //		salaryGroupsReportResource.setUpdateTime(salaryGroupsReportResource.getCreateTime());
 //		salaryGroupsReportResource.setOperatorUid(salaryGroupsReportResource.getCreatorUid());
 		getReadWriteDao().insert(salaryGroupsReportResource);
