@@ -1684,7 +1684,9 @@ public class EquipmentProviderImpl implements EquipmentProvider {
         if(taskStatus!=null && taskStatus.size()>0){
             query.addConditions(Tables.EH_EQUIPMENT_INSPECTION_TASKS.STATUS.in(taskStatus));
         }
-        query.addConditions(Tables.EH_EQUIPMENT_INSPECTION_TASKS.ID.lt(locator.getAnchor()));
+        if(locator.getAnchor()!=null){
+            query.addConditions(Tables.EH_EQUIPMENT_INSPECTION_TASKS.ID.lt(locator.getAnchor()));
+        }
         query.addConditions(Tables.EH_EQUIPMENT_INSPECTION_TASKS.PLAN_ID.in(planIds));
         query.addLimit(pageSize);
         query.addOrderBy(Tables.EH_EQUIPMENT_INSPECTION_TASKS.ID.desc());
@@ -1695,7 +1697,6 @@ public class EquipmentProviderImpl implements EquipmentProvider {
         }
 
         query.fetch().map((r) -> {
-
             tasks.add(ConvertHelper.convert(r, EquipmentInspectionTasks.class));
             return null;
         });
