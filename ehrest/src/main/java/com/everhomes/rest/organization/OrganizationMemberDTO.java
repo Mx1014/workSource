@@ -29,7 +29,7 @@ import java.util.List;
  * <li>status：状态</li>
  * <li>roles：角色列表</li>
  * <li>departments：部门列表</li>
- * <li>memberDetailIds: 添加人员返回的detail表ID</>
+ * <li>memberDetailIds: 添加人员返回的detail表ID</li>
  * <li>groups：群组列表</li>
  * <li>employeeNo：工号</li>
  * <li>initial：首字母</li>
@@ -46,7 +46,7 @@ import java.util.List;
  * <li>approveTime: 审核时间</li>
  * <li>operatorName: 审核人</li>
  * <li>operatorPhone: 审核人电话</li>
- * <li>departmentName: 部门名称</>
+ * <li>departmentName: 部门名称</li>
  * </ul>
  */
 public class OrganizationMemberDTO {

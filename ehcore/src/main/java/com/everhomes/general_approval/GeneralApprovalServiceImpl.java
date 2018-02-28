@@ -35,6 +35,7 @@ import com.everhomes.settings.PaginationConfigHelper;
 import com.everhomes.techpark.punch.PunchService;
 import com.everhomes.user.User;
 import com.everhomes.util.DateHelper;
+import com.everhomes.util.StringHelper;
 import com.everhomes.workReport.WorkReportService;
 import com.everhomes.yellowPage.ServiceAllianceCategories;
 import com.everhomes.yellowPage.YellowPageProvider;
@@ -239,15 +240,11 @@ public class GeneralApprovalServiceImpl implements GeneralApprovalService {
             cmd21.setCurrentOrganizationId(cmd.getOrganizationId());
             cmd21.setTitle(ga.getApprovalName());
 
-
-            //  存储更多的信息 added by approval1.6
+            /*****************  存储更多的信息 start by nan.rong for approval-1.6  *****************/
             GeneralApprovalFlowCaseAdditionalFieldDTO fieldDTO = new GeneralApprovalFlowCaseAdditionalFieldDTO();
-            List<OrganizationMember> member = organizationProvider.listOrganizationMembersByUId(user.getId());
-            member = member.stream().filter(r -> {
-                return OrganizationGroupType.DEPARTMENT.getCode().equals(r.getGroupType());
-            }).collect(Collectors.toList());
-            if (member != null && member.size() > 0) {
-                Organization department = organizationProvider.findOrganizationById(member.get(0).getOrganizationId());
+            OrganizationMember member = organizationProvider.findDepartmentMemberByTargetIdAndOrgId(user.getId(), cmd.getOrganizationId());
+            if (member != null ) {
+                Organization department = organizationProvider.findOrganizationById(member.getOrganizationId());
                 //  存储部门 id 及名称
                 fieldDTO.setDepartment(department.getName());
                 fieldDTO.setDepartmentId(department.getId());
@@ -270,8 +267,9 @@ public class GeneralApprovalServiceImpl implements GeneralApprovalService {
             approvalNo += count;
             op.increment(countKey, 1L);
             fieldDTO.setApprovalNo(Long.valueOf(approvalNo));
-            cmd21.setAdditionalFieldDTO(fieldDTO);
+            /*****************  存储更多的信息 end by nan.rong for approval-1.6  *****************/
 
+            cmd21.setAdditionalFieldDTO(fieldDTO);
             ServiceAllianceCategories category = yellowPageProvider.findCategoryById(ga.getModuleId());
             if (category != null) {
                 cmd21.setServiceType(category.getName());
@@ -878,6 +876,7 @@ public class GeneralApprovalServiceImpl implements GeneralApprovalService {
     @Override
     public ListGeneralApprovalRecordsResponse listGeneralApprovalRecords(ListGeneralApprovalRecordsCommand cmd) {
         ListGeneralApprovalRecordsResponse response = new ListGeneralApprovalRecordsResponse();
+        List<GeneralApprovalRecordDTO> results = new ArrayList<>();
         ListingLocator locator = new ListingLocator();
         SearchFlowCaseCommand command = new SearchFlowCaseCommand();
 
@@ -911,16 +910,15 @@ public class GeneralApprovalServiceImpl implements GeneralApprovalService {
                 query.addConditions(GeneralApprovalFlowCaseCustomField.CREATOR_DEPARTMENT_ID.getField().eq(cmd.getCreatorDepartmentId()));
             return query;
         });
-        if (details != null && details.size() > 0) {
-            List<GeneralApprovalRecordDTO> results = details.stream().map(r -> {
 
+        if (details != null && details.size() > 0) {
+            results = details.stream().map(r -> {
                 GeneralApprovalRecordDTO dto = convertGeneralApprovalRecordDTO(r);
                 return dto;
             }).collect(Collectors.toList());
-            response.setRecords(results);
-            response.setNextPageAnchor(locator.getAnchor());
-
         }
+        response.setRecords(results);
+        response.setNextPageAnchor(locator.getAnchor());
         return response;
     }
 
@@ -1025,7 +1023,7 @@ public class GeneralApprovalServiceImpl implements GeneralApprovalService {
 
         //  1. basic data from flowCases
         Cell approvalNoCell = dataRow.createCell(0);
-        approvalNoCell.setCellValue(data.getApprovalNo().toString());
+        approvalNoCell.setCellValue(data.getApprovalNo() != null ? data.getApprovalNo().toString() : "");
         dataRow.createCell(1).setCellValue(data.getCreateTime());
         dataRow.createCell(2).setCellValue(data.getCreatorName());
         dataRow.createCell(3).setCellValue(data.getCreatorDepartment());
@@ -1120,5 +1118,15 @@ public class GeneralApprovalServiceImpl implements GeneralApprovalService {
     @Override
     public void disableApprovalByFormOriginId(Long formOriginId, Long moduleId, String moduleType){
         generalApprovalProvider.disableApprovalByFormOriginId(formOriginId, moduleId, moduleType);
+    }
+
+    @Override
+    public String getUserRealName(GetUserRealNameCommand cmd){
+        User user = UserContext.current().getUser();
+        OrganizationMember member = organizationProvider.findOrganizationMemberByOrgIdAndUId(user.getId(), cmd.getOwnerId());
+        if(member != null)
+            return member.getContactName();
+        //  若没有真实姓名则返回昵称
+        return user.getNickName();
     }
 }

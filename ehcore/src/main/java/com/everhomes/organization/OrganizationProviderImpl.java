@@ -5319,6 +5319,26 @@ public class OrganizationProviderImpl implements OrganizationProvider {
 		return list;
 	}
 
+	@Override
+	public List<OrganizationMember> listOrganizationMembersByDetailIdAndOrgId(Long detailId, Long orgId, List<String> groupTypes) {
+		List<OrganizationMember> list = new ArrayList<OrganizationMember>();
+		DSLContext context = this.dbProvider.getDslContext(AccessSpec.readOnly());
+		SelectConditionStep<Record> query = context.select().from(Tables.EH_ORGANIZATION_MEMBERS).where(Tables.EH_ORGANIZATION_MEMBERS.DETAIL_ID.eq(detailId).and(Tables.EH_ORGANIZATION_MEMBERS.ORGANIZATION_ID.eq(orgId)));
+		query = query.and(Tables.EH_ORGANIZATION_MEMBERS.STATUS.eq(OrganizationMemberStatus.ACTIVE.getCode()));
+
+		if(groupTypes != null && groupTypes.size()>0){
+			query = query.and(Tables.EH_ORGANIZATION_MEMBERS.GROUP_TYPE.in(groupTypes));
+		}
+		List<Record> records = query.fetch();
+
+		if (records != null && !records.isEmpty()) {
+			for (Record r : records)
+				list.add(ConvertHelper.convert(r, OrganizationMember.class));
+		}
+
+		return list;
+	}
+
 	private Long getTopOrganizationId(Long organizationId) {
 		Organization organization = findOrganizationById(organizationId);
 		if (organization != null) {
@@ -5849,7 +5869,7 @@ public class OrganizationProviderImpl implements OrganizationProvider {
 		Condition condition = Tables.EH_ORGANIZATION_MEMBERS.TARGET_ID.eq(userId)
 				.and(Tables.EH_ORGANIZATION_MEMBERS.GROUP_PATH.like("/" +organizationId + "%"))
 				.and(Tables.EH_ORGANIZATION_MEMBERS.STATUS.eq(OrganizationMemberStatus.ACTIVE.getCode()))
-				.and(Tables.EH_ORGANIZATION_MEMBERS.GROUP_TYPE.eq(OrganizationGroupType.DEPARTMENT.getCode()));
+				.and(Tables.EH_ORGANIZATION_MEMBERS.GROUP_TYPE.eq(OrganizationGroupType.DEPARTMENT.getCode()).or(Tables.EH_ORGANIZATION_MEMBERS.GROUP_TYPE.eq(OrganizationGroupType.DIRECT_UNDER_ENTERPRISE.getCode())));
 
 		Record r = context.select().from(Tables.EH_ORGANIZATION_MEMBERS).where(condition).fetchOne();
 

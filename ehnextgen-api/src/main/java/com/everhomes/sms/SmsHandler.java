@@ -54,10 +54,10 @@ public interface SmsHandler {
 
     /**
      * 状态报告
-     * @param reportBody    报告结果
+     * @param reportRequest    报告结果
      * @return  返回响应内容
      */
-    SmsReportResponse report(String reportBody);
+    SmsReportResponse report(SmsReportRequest reportRequest);
     
     SmsLog doSend(Integer namespaceId, String phoneNumber, String templateScope, int templateId, String templateLocale, List<Tuple<String, Object>> variables);
 

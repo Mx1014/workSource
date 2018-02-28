@@ -46,7 +46,7 @@ public class Rentalv2AdminController extends ControllerBase {
 
 	/**
 	 * 
-	 * <b>URL: /rental/admin/getResourceTypeList<b>
+	 * <b>URL: /rental/admin/getResourceTypeList</b>
 	 * <p>
 	 * 查询资源类型列表
 	 * </p>
@@ -63,7 +63,7 @@ public class Rentalv2AdminController extends ControllerBase {
 
 	/**
 	 * 
-	 * <b>URL: /rental/admin/createResourceType<b>
+	 * <b>URL: /rental/admin/createResourceType</b>
 	 * <p>
 	 * 添加资源类型
 	 * </p>
@@ -80,7 +80,7 @@ public class Rentalv2AdminController extends ControllerBase {
 
 	/**
 	 * 
-	 * <b>URL: /rental/admin/deleteResourceType<b>
+	 * <b>URL: /rental/admin/deleteResourceType</b>
 	 * <p>
 	 * 删除资源类型
 	 * </p>
@@ -98,7 +98,7 @@ public class Rentalv2AdminController extends ControllerBase {
 	
 	/**
 	 * 
-	 * <b>URL: /rental/admin/deleteResource<b>
+	 * <b>URL: /rental/admin/deleteResource</b>
 	 * <p>
 	 * 删除资源 
 	 * </p>
@@ -115,7 +115,7 @@ public class Rentalv2AdminController extends ControllerBase {
 	
 	/**
 	 * 
-	 * <b>URL: /rental/admin/closeResourceType<b>
+	 * <b>URL: /rental/admin/closeResourceType</b>
 	 * <p>
 	 * 关闭资源类型
 	 * </p>
@@ -132,7 +132,7 @@ public class Rentalv2AdminController extends ControllerBase {
 
 	/**
 	 * 
-	 * <b>URL: /rental/admin/openResourceType<b>
+	 * <b>URL: /rental/admin/openResourceType</b>
 	 * <p>
 	 * 开启资源类型
 	 * </p>
@@ -149,7 +149,7 @@ public class Rentalv2AdminController extends ControllerBase {
 
 	/**
 	 * 
-	 * <b>URL: /rental/admin/updateResourceType<b>
+	 * <b>URL: /rental/admin/updateResourceType</b>
 	 * <p>
 	 * 修改资源类型
 	 * </p>
@@ -167,7 +167,7 @@ public class Rentalv2AdminController extends ControllerBase {
 	
 	/**
 	 *
-	 * <b>URL: /rental/admin/queryDefaultRule<b>
+	 * <b>URL: /rental/admin/queryDefaultRule</b>
 	 * <p>
 	 * 查询默认规则
 	 * </p>
@@ -184,7 +184,7 @@ public class Rentalv2AdminController extends ControllerBase {
 
 	/**
 	 * 
-	 * <b>URL: /rental/admin/getResourceRule<b>
+	 * <b>URL: /rental/admin/getResourceRule</b>
 	 * <p>
 	 * 查询资源的规则
 	 * </p>
@@ -201,7 +201,7 @@ public class Rentalv2AdminController extends ControllerBase {
 
 	/**
 	 * 
-	 * <b>URL: /rental/admin/updateDefaultRule<b>
+	 * <b>URL: /rental/admin/updateDefaultRule</b>
 	 * <p>
 	 * 修改默认规则
 	 * </p>
@@ -217,7 +217,7 @@ public class Rentalv2AdminController extends ControllerBase {
 	}
 	/**
 	 * 
-	 * <b>URL: /rental/admin/updateDefaultDateRule<b>
+	 * <b>URL: /rental/admin/updateDefaultDateRule</b>
 	 * <p>
 	 * 修改默认规则时间
 	 * </p>
@@ -233,7 +233,7 @@ public class Rentalv2AdminController extends ControllerBase {
 	}
 	/**
 	 * 
-	 * <b>URL: /rental/admin/updateDefaultAttachmentRule<b>
+	 * <b>URL: /rental/admin/updateDefaultAttachmentRule</b>
 	 * <p>
 	 * 修改默认规则提示文字
 	 * </p>
@@ -249,7 +249,7 @@ public class Rentalv2AdminController extends ControllerBase {
 	}
 	/**
 	 * 
-	 * <b>URL: /rental/admin/getResourceList<b>
+	 * <b>URL: /rental/admin/getResourceList</b>
 	 * <p>
 	 * 获取资源列表
 	 * </p>
@@ -266,7 +266,7 @@ public class Rentalv2AdminController extends ControllerBase {
 
 	/**
 	 * 
-	 * <b>URL: /rental/admin/addResource<b>
+	 * <b>URL: /rental/admin/addResource</b>
 	 * <p>
 	 * 添加一个预约资源
 	 * </p>
@@ -283,7 +283,7 @@ public class Rentalv2AdminController extends ControllerBase {
 
 	/**
 	 * 
-	 * <b>URL: /rental/admin/updateResource<b>
+	 * <b>URL: /rental/admin/updateResource</b>
 	 * <p>
 	 * 更新资源
 	 * </p>
@@ -300,7 +300,7 @@ public class Rentalv2AdminController extends ControllerBase {
 
 	/**
 	 *
-	 * <b>URL: /rental/admin/updateResourceOrder<b>
+	 * <b>URL: /rental/admin/updateResourceOrder</b>
 	 * <p>
 	 * 更新资源顺序
 	 * </p>
