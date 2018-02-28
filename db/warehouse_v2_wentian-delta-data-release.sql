@@ -12,5 +12,20 @@ INSERT INTO `eh_locale_strings` (`id`, `scope`, `code`, `locale`, `text`) VALUES
 INSERT INTO `eh_locale_strings` (`id`, `scope`, `code`, `locale`, `text`) VALUES (@eh_locale_strings_id:=@eh_locale_strings_id+1, 'purchase', '1001', 'zh_CN', '该采购单未完成或者已取消,不能进行入库操作');
 INSERT INTO `eh_locale_strings` (`id`, `scope`, `code`, `locale`, `text`) VALUES (@eh_locale_strings_id:=@eh_locale_strings_id+1, 'purchase', '1002', 'zh_CN', '未找到用户的采购模块工作流');
 
+-- 新模块
+INSERT INTO `eh_service_modules`
+(`id`, `name`, `parent_id`, `path`, `type`, `level`, `status`, `default_order`, `create_time`, `instance_config`, `action_type`, `update_time`, `operator_uid`, `creator_uid`, `description`, `multiple_flag`, `module_control_type`)
+VALUES
+(25000, '请示单管理', '20000', '/20000/25000', '1', '3', '2', '0', NOW(), NULL, NULL, NOW(), '0', '0', '0', '0', 'community_control');
+INSERT INTO `eh_service_modules`
+(`id`, `name`, `parent_id`, `path`, `type`, `level`, `status`, `default_order`, `create_time`, `instance_config`, `action_type`, `update_time`, `operator_uid`, `creator_uid`, `description`, `multiple_flag`, `module_control_type`)
+VALUES
+(26000, '采购管理', '20000', '/20000/26000', '1', '3', '2', '0', NOW(), NULL, NULL, NOW(), '0', '0', '0', '0', 'community_control');
+INSERT INTO `eh_service_modules`
+(`id`, `name`, `parent_id`, `path`, `type`, `level`, `status`, `default_order`, `create_time`, `instance_config`, `action_type`, `update_time`, `operator_uid`, `creator_uid`, `description`, `multiple_flag`, `module_control_type`)
+VALUES
+(27000, '供应商管理', '20000', '/20000/27000', '1', '3', '2', '0', NOW(), NULL, NULL, NOW(), '0', '0', '0', '0', 'community_control');
+
+
 
 

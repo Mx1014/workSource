@@ -1413,7 +1413,11 @@ public class WarehouseServiceImpl implements WarehouseService {
                     material.setRequestId(requestId);
                     material.setRequestType(request.getRequestType());
                     material.setRequestSource(WarehouseStockRequestSource.REQUEST.getCode());
-                    material.setReviewResult(ReviewResult.NONE.getCode());
+                    if(cmd.getStartFlow().byteValue() == (byte)1){
+                        material.setReviewResult(ReviewResult.NONE.getCode());
+                    }else{
+                        material.setReviewResult(ReviewResult.UNINITIALIZED.getCode());
+                    }
                     material.setDeliveryFlag(DeliveryFlag.NO.getCode());
                     warehouseProvider.creatWarehouseRequestMaterial(material);
                     warehouseRequestMaterialSearcher.feedDoc(material);
