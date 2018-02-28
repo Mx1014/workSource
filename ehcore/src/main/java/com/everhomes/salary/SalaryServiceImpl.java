@@ -1485,7 +1485,6 @@ public class SalaryServiceImpl implements SalaryService {
 //        if (null != member) {
 //            sgf.setFilerName(member.getContactName());
 //        }
-        salaryGroupsFileProvider.createSalaryGroupsFile(sgf);
 
         List<SalaryEmployee> ses = salaryEmployeeProvider.listSalaryEmployees(ownerId, month);
         if (null != ses) {
@@ -1523,6 +1522,7 @@ public class SalaryServiceImpl implements SalaryService {
         saveSalaryGroupReport(sgf, SalaryReportType.DPT_STATISTIC, resp.getResponse().getUri(), resp.getResponse().getUrl());
 
 
+        salaryGroupsFileProvider.createSalaryGroupsFile(sgf);
     }
 
     private void saveSalaryGroupReport(SalaryGroupsFile sgf, SalaryReportType reportType, String uri, String url) {
