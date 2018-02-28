@@ -13,4 +13,7 @@ public interface SalaryGroupsReportResourceProvider {
 
 	List<SalaryGroupsReportResource> listSalaryGroupsReportResource();
 
+	void deleteSalaryGroupsReportResourceByPeriodAndType(Long ownerId, String salaryPeriod, Byte reportType);
+
+	SalaryGroupsReportResource findSalaryGroupsReportResourceByPeriodAndType(Long ownerId, String month, Byte code);
 }

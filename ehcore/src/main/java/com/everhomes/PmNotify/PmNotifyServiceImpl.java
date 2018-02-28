@@ -1,10 +1,6 @@
 package com.everhomes.PmNotify;
 
-import com.everhomes.energy.EnergyConsumptionService;
-import com.everhomes.energy.EnergyMeter;
-import com.everhomes.energy.EnergyMeterProvider;
-import com.everhomes.energy.EnergyMeterTask;
-import com.everhomes.energy.EnergyMeterTaskProvider;
+import com.everhomes.energy.*;
 import com.everhomes.entity.EntityType;
 import com.everhomes.equipment.EquipmentInspectionTasks;
 import com.everhomes.equipment.EquipmentProvider;
@@ -27,11 +23,7 @@ import com.everhomes.rest.messaging.MessageBodyType;
 import com.everhomes.rest.messaging.MessageChannel;
 import com.everhomes.rest.messaging.MessageDTO;
 import com.everhomes.rest.messaging.MessagingConstants;
-import com.everhomes.rest.pmNotify.PmNotifyMode;
-import com.everhomes.rest.pmNotify.PmNotifyReceiver;
-import com.everhomes.rest.pmNotify.PmNotifyReceiverList;
-import com.everhomes.rest.pmNotify.PmNotifyReceiverType;
-import com.everhomes.rest.pmNotify.PmNotifyType;
+import com.everhomes.rest.pmNotify.*;
 import com.everhomes.rest.quality.QualityGroupType;
 import com.everhomes.rest.sms.SmsTemplateCode;
 import com.everhomes.rest.user.IdentifierType;
@@ -54,13 +46,8 @@ import org.springframework.stereotype.Component;
 import javax.annotation.PostConstruct;
 import java.sql.Timestamp;
 import java.text.SimpleDateFormat;
-import java.util.ArrayList;
+import java.util.*;
 import java.util.Date;
-import java.util.HashMap;
-import java.util.HashSet;
-import java.util.List;
-import java.util.Map;
-import java.util.Set;
 
 /**
  * Created by ying.xiong on 2017/9/12.
