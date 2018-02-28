@@ -22,6 +22,12 @@ public class ExportExcelDTO {
         this.exportToken = exportToken;
         this.url = url;
     }
+
+    public ExportExcelDTO(String excelName, String exportToken) {
+        this.excelName = excelName;
+        this.exportToken = exportToken;
+    }
+
     @Override
 
     public String toString() {

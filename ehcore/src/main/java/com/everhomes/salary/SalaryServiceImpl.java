@@ -1379,8 +1379,19 @@ public class SalaryServiceImpl implements SalaryService {
     private List<ExportExcelDTO> getExportExcels(Long ownerId, String month) {
         List<ExportExcelDTO> result = new ArrayList<>();
         SalaryGroupsReportResource resource = salaryGroupsReportResourceProvider.findSalaryGroupsReportResourceByPeriodAndType(ownerId, month, SalaryReportType.SALARY_DETAIL.getCode());
-        result.add(new ExportExcelDTO(SalaryReportType.SALARY_DETAIL.getDescri(), String.valueOf(SalaryReportType.SALARY_DETAIL.getCode()),contentServerService.parserUri(resource.getUrl())));
-        result.add(new ExportExcelDTO(SalaryReportType.DPT_STATISTIC.getDescri(), String.valueOf(SalaryReportType.DPT_STATISTIC.getCode()),contentServerService.parserUri(resource.getUrl())));
+        if (null != resource) {
+            result.add(new ExportExcelDTO(SalaryReportType.SALARY_DETAIL.getDescri(), String.valueOf(SalaryReportType.SALARY_DETAIL.getCode()), contentServerService.parserUri(resource.getUrl())));
+        }else{
+            result.add(new ExportExcelDTO(SalaryReportType.SALARY_DETAIL.getDescri(), String.valueOf(SalaryReportType.SALARY_DETAIL.getCode())));
+        }
+
+        resource = salaryGroupsReportResourceProvider.findSalaryGroupsReportResourceByPeriodAndType(ownerId, month, SalaryReportType.DPT_STATISTIC.getCode());
+        if (null != resource) {
+            result.add(new ExportExcelDTO(SalaryReportType.DPT_STATISTIC.getDescri(), String.valueOf(SalaryReportType.SALARY_DETAIL.getCode()), contentServerService.parserUri(resource.getUrl())));
+        }else{
+            result.add(new ExportExcelDTO(SalaryReportType.DPT_STATISTIC.getDescri(), String.valueOf(SalaryReportType.SALARY_DETAIL.getCode())));
+        }
+
         return result;
     }
 

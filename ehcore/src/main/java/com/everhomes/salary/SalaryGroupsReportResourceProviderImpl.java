@@ -63,7 +63,21 @@ public class SalaryGroupsReportResourceProviderImpl implements SalaryGroupsRepor
 				.orderBy(Tables.EH_SALARY_GROUPS_REPORT_RESOURCES.ID.asc())
 				.fetch().map(r -> ConvertHelper.convert(r, SalaryGroupsReportResource.class));
 	}
-	
+
+	@Override
+	public void deleteSalaryGroupsReportResourceByPeriodAndType(Long ownerId, String salaryPeriod, Byte reportType) {
+		getReadWriteContext().delete(Tables.EH_SALARY_GROUPS_REPORT_RESOURCES)
+				.where(Tables.EH_SALARY_GROUPS_REPORT_RESOURCES.OWNER_ID.eq(ownerId))
+				.and(Tables.EH_SALARY_GROUPS_REPORT_RESOURCES.REPORT_TYPE.eq(reportType))
+				.and(Tables.EH_SALARY_GROUPS_REPORT_RESOURCES.SALARY_PERIOD.eq(salaryPeriod))
+				.execute();
+	}
+
+	@Override
+	public SalaryGroupsReportResource findSalaryGroupsReportResourceByPeriodAndType(Long ownerId, String month, Byte code) {
+		return null;
+	}
+
 	private EhSalaryGroupsReportResourcesDao getReadWriteDao() {
 		return getDao(getReadWriteContext());
 	}
