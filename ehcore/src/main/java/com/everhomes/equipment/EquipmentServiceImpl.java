@@ -4021,12 +4021,13 @@ private void checkUserPrivilege(Long orgId, Long privilegeId, Long communityId) 
 		if (planMaps != null && planMaps.size() > 0) {
 			tasks = equipmentProvider.listTaskByPlanMaps(planMaps, startTime, endTime, locator, pageSize + 1, null);
 		} else {
-			List<Long> standardIds = null;
-//			if (cmd.getTaskType() != null) {
-//				standardIds = equipmentProvider.listStandardIdsByType(cmd.getTaskType());
-//			}
-			tasks = equipmentProvider.listTasksByEquipmentId(cmd.getEquipmentId(),
-					standardIds, startTime, endTime, locator, pageSize + 1, null);
+//			List<Long> standardIds = null;
+////			if (cmd.getTaskType() != null) {
+////				standardIds = equipmentProvider.listStandardIdsByType(cmd.getTaskType());
+////			}
+//			tasks = equipmentProvider.listTasksByEquipmentId(cmd.getEquipmentId(),
+//					standardIds, startTime, endTime, locator, pageSize + 1, null);
+			return null;
 		}
 		if (tasks.size() > pageSize) {
 			tasks.remove(tasks.size() - 1);
@@ -4035,10 +4036,7 @@ private void checkUserPrivilege(Long orgId, Long privilegeId, Long communityId) 
 			response.setNextPageAnchor(null);
 		}
 
-		List<EquipmentTaskDTO> dtos = tasks.stream().map(r -> {
-			EquipmentTaskDTO dto = convertEquipmentTaskToDTO(r);
-			return dto;
-		}).filter(Objects::nonNull).collect(Collectors.toList());
+		List<EquipmentTaskDTO> dtos = tasks.stream().map(this::convertEquipmentTaskToDTO).filter(Objects::nonNull).collect(Collectors.toList());
 
 		response.setTasks(dtos);
 
