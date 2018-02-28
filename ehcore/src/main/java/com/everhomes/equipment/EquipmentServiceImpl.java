@@ -5818,11 +5818,13 @@ private void checkUserPrivilege(Long orgId, Long privilegeId, Long communityId) 
 
 		OfflineTaskCountStat todayComplete = new OfflineTaskCountStat();
 		todayComplete.setCount(response.getTodayCompleteCount());
-		todayComplete.setId(1L);
+		todayComplete.setId(Long.valueOf(new SimpleDateFormat("yyMMddhhmmssSSS").format(DateHelper.currentGMTTime())) * 10000);
+		todayComplete.setTargetId(cmd.getTargetId());
 
 		OfflineTaskCountStat todayTaskCount = new OfflineTaskCountStat();
 		todayTaskCount.setCount(response.getTotayTasksCount());
-		todayTaskCount.setId(1L);
+		todayTaskCount.setId(Long.valueOf(new SimpleDateFormat("yyMMddhhmmssSSS").format(DateHelper.currentGMTTime())) * 10000);
+		todayTaskCount.setTargetId(cmd.getTargetId());
 
 		offlineResponse.setTodayCompleteCount(new ArrayList<>(Collections.singletonList(todayComplete)));
 		offlineResponse.setTodayTasksCount(new ArrayList<>(Collections.singletonList(todayTaskCount)));
@@ -5844,9 +5846,10 @@ private void checkUserPrivilege(Long orgId, Long privilegeId, Long communityId) 
 				EquipmentInspectionPlanDTO planDTO = ConvertHelper.convert(plan, EquipmentInspectionPlanDTO.class);
 				//填充巡检计划相关的巡检对象(需排序)
 				processEquipmentInspectionObjectsByPlanId(task.getPlanId(), planDTO);
+				if(planDTO.getEquipmentStandardRelations()!=null)
 				equipments.addAll(planDTO.getEquipmentStandardRelations());
 			}else {
-				//兼容旧任务
+				//兼容旧任务 可以去掉了
 				EquipmentInspectionEquipments equipment = equipmentProvider.findEquipmentById(task.getEquipmentId());
 				EquipmentInspectionStandards standard = equipmentProvider.findStandardById(task.getStandardId());
 				if (equipment != null && standard != null) {
