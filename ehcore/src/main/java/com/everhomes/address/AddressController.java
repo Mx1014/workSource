@@ -8,6 +8,8 @@ import javax.validation.Valid;
 
 import com.everhomes.rest.address.*;
 
+import com.everhomes.rest.community.ListApartmentEnterpriseCustomersCommand;
+import com.everhomes.rest.customer.EnterpriseCustomerDTO;
 import com.everhomes.util.RequireAuthentication;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -435,4 +437,17 @@ public class AddressController extends ControllerBase {
         return response;
     }
 
+    /**
+     * <b>URL: /address/listApartmentEnterpriseCustomers</b>
+     * <p>查询门牌的关联的企业</p>
+     */
+    @RequestMapping("listApartmentEnterpriseCustomers")
+    @RestReturn(value=EnterpriseCustomerDTO.class, collection = true)
+    public RestResponse listApartmentEnterpriseCustomers(@Valid ListApartmentEnterpriseCustomersCommand cmd) {
+        List<EnterpriseCustomerDTO> dtos = addressService.listApartmentEnterpriseCustomers(cmd);
+        RestResponse response = new RestResponse(dtos);
+        response.setErrorCode(ErrorCodes.SUCCESS);
+        response.setErrorDescription("OK");
+        return response;
+    }
 }

@@ -40,7 +40,6 @@ public class PunchExportTaskHandler implements FileDownloadTaskHandler {
 
 	@Override
 	public void execute(Map<String, Object> params) {
-   
         
         String ownerType = null;
 		if(params.get("ownerType") != null){
@@ -68,27 +67,13 @@ public class PunchExportTaskHandler implements FileDownloadTaskHandler {
 		Long taskId = (Long) params.get("taskId");
 		OutputStream outputStream = null;
 		if(reportType.equals("exportPunchStatistics")){ 
-			outputStream = punchService.getPunchStatisticsOutputStream(startDay, endDay, exceptionStatus, userName, ownerType, ownerId);
+			outputStream = punchService.getPunchStatisticsOutputStream(startDay, endDay, exceptionStatus, userName, ownerType, ownerId,taskId);
 		}else if (reportType.equals("exportPunchDetails")){ 
-			outputStream = punchService.getPunchDetailsOutputStream(startDay, endDay, exceptionStatus, userName, ownerType, ownerId);
+			outputStream = punchService.getPunchDetailsOutputStream(startDay, endDay, exceptionStatus, userName, ownerType, ownerId,taskId);
 		}
 		CsFileLocationDTO fileLocationDTO = fileDownloadTaskService.uploadToContenServer(fileName, outputStream);
-
-
-		Task task = taskService.findById(taskId);
-		if(fileLocationDTO != null && fileLocationDTO.getUri() != null){
-			task.setProcess(100);
-			task.setStatus(TaskStatus.SUCCESS.getCode());
-			task.setResultString1(fileLocationDTO.getUri());
-			if(fileLocationDTO.getSize() != null){
-				task.setResultLong1(fileLocationDTO.getSize().longValue());
-			}
-			taskService.updateTask(task);
-		}
-
+		taskService.processUpdateTask(taskId, fileLocationDTO);
 	}
-
-  
 
 	@Override
 	public void commit(Map<String, Object> params) {

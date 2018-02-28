@@ -117,6 +117,11 @@ public class EnergyMeterSearcherImpl extends AbstractElasticSearch implements En
                 builder.field("addressId", existAddress.get(0).getAddressId());
                 builder.field("buildingName", existAddress.get(0).getBuildingName());
                 builder.field("apartmentName", existAddress.get(0).getApartmentName());
+            } else {
+                builder.field("buildingId", 0);
+                builder.field("addressId", 0);
+                builder.field("buildingName", "");
+                builder.field("apartmentName", "");
             }
 
             EnergyMeterReadingLog lastReading = meterReadingLogProvider.findLastReadingLogByMeterId(meter.getNamespaceId(), meter.getId());

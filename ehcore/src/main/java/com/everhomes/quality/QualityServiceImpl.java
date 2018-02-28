@@ -510,12 +510,13 @@ public class QualityServiceImpl implements QualityService {
 
 		this.qualityProvider.populateStandardsGroups(standards);
 		this.qualityProvider.populateStandardsSpecifications(standards);
-		Long nextPageAnchor = null;
-		if (standards.size() > pageSize) {
-			standards.remove(standards.size() - 1);
-			nextPageAnchor = standards.get(standards.size() - 1).getId();
-        }
 
+
+        Long nextPageAnchor = null;
+        if(standards.size() > pageSize) {
+        	standards.remove(standards.size() - 1);
+            nextPageAnchor = standards.get(standards.size() - 1).getId();
+        }
 
         List<QualityStandardsDTO> qaStandards = standards.stream().map((r) -> {
 
@@ -3883,7 +3884,8 @@ public class QualityServiceImpl implements QualityService {
 		Double averageScore = 0D;
 		if (response.getScores() != null && response.getScores().size() > 0) {
 			for (ScoreGroupByTargetDTO score : response.getScores()) {
-				sum = sum + score.getTotalScore();
+				if (score != null && score.getTotalScore() != null)
+					sum = sum + score.getTotalScore();
 			}
 			averageScore = sum / response.getScores().size();
 		}
@@ -4690,7 +4692,7 @@ public class QualityServiceImpl implements QualityService {
 	}
 
 	@Override
-	public QualityOfflineTaskReportResponse OfflineTaskReport(OfflineTaskReportCommand cmd) {
+	public QualityOfflineTaskReportResponse offlineTaskReport(OfflineTaskReportCommand cmd) {
 		if (cmd.getTasks() != null && cmd.getTasks().size() > 0) {
 			Map<Long, OfflineReportDetailDTO> taskDetailMaps = getTaskDetailMaps(cmd.getOfflineReportDetail());
 			cmd.getTasks().forEach((task) -> {

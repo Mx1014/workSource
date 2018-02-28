@@ -26,6 +26,12 @@ import com.everhomes.asset.AssetService;
 
 import com.everhomes.bootstrap.PlatformContext;
 import com.everhomes.contentserver.ContentServerService;
+import com.everhomes.appurl.AppUrlService;
+import com.everhomes.community.Community;
+import com.everhomes.community.CommunityProvider;
+import com.everhomes.configuration.ConfigurationProvider;
+import com.everhomes.coordinator.CoordinationLocks;
+import com.everhomes.coordinator.CoordinationProvider;
 import com.everhomes.customer.*;
 import com.everhomes.entity.EntityType;
 import com.everhomes.flow.Flow;
@@ -54,7 +60,6 @@ import com.everhomes.rest.flow.CreateFlowCaseCommand;
 import com.everhomes.rest.flow.FlowConstants;
 import com.everhomes.rest.flow.FlowModuleType;
 import com.everhomes.rest.flow.FlowOwnerType;
-
 import com.everhomes.rest.launchpad.ActionType;
 
 import com.everhomes.rest.openapi.OrganizationDTO;
@@ -66,6 +71,9 @@ import com.everhomes.rest.organization.pm.AddressMappingStatus;
 
 import com.everhomes.rest.portal.ListServiceModuleAppsCommand;
 import com.everhomes.rest.portal.ListServiceModuleAppsResponse;
+import com.everhomes.rest.sms.SmsTemplateCode;
+import com.everhomes.scheduler.RunningFlag;
+import com.everhomes.scheduler.ScheduleProvider;
 
 
 import com.everhomes.search.ContractSearcher;
@@ -83,23 +91,20 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.scheduling.annotation.Scheduled;
 import org.springframework.stereotype.Component;
 
-import com.everhomes.appurl.AppUrlService;
-import com.everhomes.community.Community;
-import com.everhomes.community.CommunityProvider;
-import com.everhomes.configuration.ConfigurationProvider;
-import com.everhomes.coordinator.CoordinationLocks;
-import com.everhomes.coordinator.CoordinationProvider;
+
 import com.everhomes.openapi.Contract;
 import com.everhomes.openapi.ContractBuildingMappingProvider;
 import com.everhomes.openapi.ContractProvider;
 import com.everhomes.rest.appurl.AppUrlDTO;
 import com.everhomes.rest.appurl.GetAppInfoCommand;
 import com.everhomes.rest.organization.OrganizationServiceUser;
-import com.everhomes.rest.sms.SmsTemplateCode;
-import com.everhomes.scheduler.RunningFlag;
-import com.everhomes.scheduler.ScheduleProvider;
 import com.everhomes.settings.PaginationConfigHelper;
 import com.everhomes.sms.SmsProvider;
+import java.sql.Timestamp;
+import java.text.ParseException;
+import java.text.SimpleDateFormat;
+import java.util.*;
+import java.util.stream.Collectors;
 
 import javax.annotation.PostConstruct;
 
@@ -1219,7 +1224,7 @@ public class ContractServiceImpl implements ContractService {
 		if(ContractStatus.WAITING_FOR_APPROVAL.equals(ContractStatus.fromStatus(contract.getStatus()))) {
 			addToFlowCase(contract, flowcaseContractOwnerType);
 		}
-
+		contract.setPaymentFlag(exist.getPaymentFlag());
 		contractSearcher.feedDoc(contract);
 		ExecutorUtil.submit(new Runnable() {
 			@Override

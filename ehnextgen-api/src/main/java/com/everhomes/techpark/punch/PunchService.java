@@ -260,8 +260,8 @@ public interface PunchService {
 	void checkAppPrivilege(Long orgId, Long checkOrgId, Long privilege);
 
 	OutputStream getPunchDetailsOutputStream(Long startDay, Long endDay, Byte exceptionStatus,
-			String userName, String ownerType, Long ownerId);
+			String userName, String ownerType, Long ownerId, Long taskId);
 
 	OutputStream getPunchStatisticsOutputStream(Long startDay, Long endDay, Byte exceptionStatus,
-			String userName, String ownerType, Long ownerId);
+			String userName, String ownerType, Long ownerId, Long taskId);
 }

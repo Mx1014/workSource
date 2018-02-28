@@ -132,4 +132,9 @@ public class RequisitionServiceImpl implements RequisitionService {
         return result;
     }
 
+    @Override
+    public String getRequisitionNameById(Long requisitionId) {
+        return requisitionProvider.getNameById(requisitionId);
+    }
+
 }

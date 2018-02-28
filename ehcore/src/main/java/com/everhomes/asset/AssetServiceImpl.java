@@ -600,9 +600,9 @@ public class AssetServiceImpl implements AssetService {
             }
             requestCmd.setBillIdAndTypes(billIdAndTypes);
             String appName = assetProvider.findAppName(UserContext.getCurrentNamespaceId());
-            if(appName==null || appName.trim().length()<1){
-                appName="张江高科推荐";
-            }
+//            if(appName==null || appName.trim().length()<1){
+//                appName="张江高科推荐";
+//            }
             if(UserContext.getCurrentNamespaceId()==999971){
                 List<NoticeInfo> list = new ArrayList<>();
                 List<ListBillsDTO> listBillsDTOS1 = convertedResponse.getListBillsDTOS();
@@ -621,6 +621,7 @@ public class AssetServiceImpl implements AssetService {
                     info.setPhoneNums(dto.getNoticeTel());
                     info.setAmountRecevable(dto.getAmountReceivable());
                     info.setAmountOwed(dto.getAmountOwed());
+                    info.setDateStr(dto.getDateStr());
                     Long tid = 0l;
                     String targeType=null;
                     Long uid  = assetProvider.findTargetIdByIdentifier(dto.getTargetId());
@@ -916,7 +917,9 @@ public class AssetServiceImpl implements AssetService {
                     item.setOwnerId(cmd.getOwnerId());
                     item.setTargetType(cmd.getTargetType());
                     item.setTargetId(cmd.getTargetId());
-                    item.setContractId(cmd.getContractId());
+                    if(cmd.getContractIdType().byteValue() == (byte)1){
+                        item.setContractId(cmd.getContractId());
+                    }
                     item.setContractNum(cmd.getContractNum());
                     item.setTargetName(cmd.getTargetName());
                     item.setUpdateTime(new Timestamp(DateHelper.currentGMTTime().getTime()));
@@ -958,7 +961,9 @@ public class AssetServiceImpl implements AssetService {
                             newBill.setNamespaceId(cmd.getNamesapceId());
                             newBill.setNoticetel(cmd.getNoticeTel());
                             newBill.setOwnerId(cmd.getOwnerId());
-                            newBill.setContractId(cmd.getContractId());
+                            if(cmd.getContractIdType().byteValue() == (byte)1){
+                                newBill.setContractId(cmd.getContractId());
+                            }
                             newBill.setContractNum(cmd.getContractNum());
                             newBill.setTargetName(cmd.getTargetName());
                             newBill.setOwnerType(cmd.getOwnerType());
@@ -2824,7 +2829,7 @@ public class AssetServiceImpl implements AssetService {
                 if(cmd.getOwnerType()!=null && cmd.getOwnerType().equals(AssetPaymentStrings.EH_USER)) hasPay = 1;
                 break;
             case 999983:
-//                hasContractView = 0;
+                //hasContractView = 0;
                 //正中会要求可以看合同
                 hasContractView = 1;
                 hasPay = 0;
@@ -2854,7 +2859,7 @@ public class AssetServiceImpl implements AssetService {
     }
 
     @Override
-    public List<ListLateFineStandardsDTO> listLateFineStandards(OwnerIdentityCommand cmd) {
+    public List<ListLateFineStandardsDTO> listLateFineStandards(ListLateFineStandardsCommand cmd) {
         Long ownerId = cmd.getOwnerId();
         String ownerType = cmd.getOwnerType();
         Integer namespaceId = cmd.getNamespaceId();

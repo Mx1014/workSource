@@ -4,6 +4,7 @@ import com.everhomes.flow.FlowCase;
 import com.everhomes.flow.FlowCaseDetail;
 import com.everhomes.rest.general_approval.*;
 
+import java.io.OutputStream;
 import java.util.List;
 import java.util.Map;
 
@@ -70,21 +71,15 @@ public interface GeneralApprovalService {
 
     GeneralApprovalRecordDTO convertGeneralApprovalRecordDTO(FlowCase r);
 
-    void exportGeneralApprovalRecords(ListGeneralApprovalRecordsCommand cmd, HttpServletResponse httpResponse);
+    void exportGeneralApprovalRecords(ListGeneralApprovalRecordsCommand cmd);
+
+    OutputStream getGeneralApprovalOutputStream(ListGeneralApprovalRecordsCommand cmd, Long taskId);
 
     GeneralApprovalDTO verifyApprovalName(VerifyApprovalNameCommand cmd);
 
-//	/**
-//	 * 直接通过表单id获取表单
-//	 */
-//	GetTemplateByApprovalIdResponse getActiveGeneralFormByOriginId(GetActiveGeneralFormByOriginIdCommand cmd);
-//
-//	/**
-//	 * 没关联工作流的表单提交数据
-//	 */
-//	GetTemplateByApprovalIdResponse postForm(PostFormCommand cmd);
-
     void disableApprovalByFormOriginId(Long formOriginId, Long moduleId, String moduleType);
+
+    String getUserRealName(GetUserRealNameCommand cmd);
 
     ListGeneralApprovalResponse listAvailableGeneralApprovals(ListGeneralApprovalCommand cmd);
 

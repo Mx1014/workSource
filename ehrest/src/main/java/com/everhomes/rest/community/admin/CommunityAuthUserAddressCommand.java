@@ -7,6 +7,7 @@ package com.everhomes.rest.community.admin;
  *     <li>pageSize: 每页的数量</li>
  *     <li>memberStatus: 参考{@link com.everhomes.rest.group.GroupMemberStatus}</li>
  *     <li>communityId: 小区id</li>
+ *     <li>namespaceId: 域空间id</li>
  *     <li>userInfoKeyword: 用户昵称、手机号</li>
  *     <li>communityKeyword: 小区名称</li>
  * </ul>
@@ -15,6 +16,7 @@ public class CommunityAuthUserAddressCommand {
 
     private Long pageAnchor;
     private Integer pageSize;
+    private Integer namespaceId;
     private Byte memberStatus;
     private Long communityId;
 
@@ -35,6 +37,14 @@ public class CommunityAuthUserAddressCommand {
 
     public void setPageSize(Integer pageSize) {
         this.pageSize = pageSize;
+    }
+
+    public Integer getNamespaceId() {
+        return namespaceId;
+    }
+
+    public void setNamespaceId(Integer namespaceId) {
+        this.namespaceId = namespaceId;
     }
 
     public Byte getMemberStatus() {

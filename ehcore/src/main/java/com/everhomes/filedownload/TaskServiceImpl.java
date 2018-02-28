@@ -2,6 +2,7 @@
 package com.everhomes.filedownload;
 
 
+import com.everhomes.rest.contentserver.CsFileLocationDTO;
 import com.everhomes.rest.filedownload.TaskRepeatFlag;
 import com.everhomes.rest.filedownload.TaskStatus;
 import com.everhomes.rest.scheduler.ScheduleJobInfoDTO;
@@ -162,6 +163,20 @@ public class TaskServiceImpl implements TaskService, ApplicationListener<Context
     @Override
     public List<Long> listWaitingTaskIds() {
         return taskProvider.listWaitingTaskIds();
+    }
+
+    @Override
+    public void processUpdateTask(Long taskId, CsFileLocationDTO fileLocationDTO){
+        Task task = findById(taskId);
+        if(fileLocationDTO != null && fileLocationDTO.getUri() != null){
+            task.setProcess(100);
+            task.setStatus(TaskStatus.SUCCESS.getCode());
+            task.setResultString1(fileLocationDTO.getUri());
+            if(fileLocationDTO.getSize() != null){
+                task.setResultLong1(fileLocationDTO.getSize().longValue());
+            }
+            updateTask(task);
+        }
     }
 
 }

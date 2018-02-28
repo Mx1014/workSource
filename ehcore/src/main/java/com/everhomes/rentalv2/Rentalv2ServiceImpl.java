@@ -1,60 +1,266 @@
 package com.everhomes.rentalv2;
 
 
-import java.io.*;
-import java.math.BigDecimal;
-import java.net.URLEncoder;
-import java.sql.Date;
-import java.sql.Time;
-import java.sql.Timestamp;
-import java.text.SimpleDateFormat;
-import java.util.*;
-
-import java.util.concurrent.ExecutorService;
-import java.util.concurrent.Executors; 
-import java.util.stream.Collectors;
-
-import javax.annotation.PostConstruct;
-import javax.servlet.http.HttpServletResponse;
-
-
+import com.alibaba.fastjson.JSON;
 import com.alibaba.fastjson.JSONObject;
 import com.everhomes.aclink.DoorAccessProvider;
 import com.everhomes.aclink.DoorAccessService;
 import com.everhomes.address.Address;
 import com.everhomes.address.AddressProvider;
-import com.alibaba.fastjson.JSON;
 import com.everhomes.app.App;
 import com.everhomes.app.AppProvider;
 import com.everhomes.bus.LocalEventBus;
 import com.everhomes.bus.LocalEventContext;
 import com.everhomes.bus.SystemEvent;
+import com.everhomes.community.Community;
+import com.everhomes.community.CommunityProvider;
 import com.everhomes.configuration.ConfigConstants;
-import com.everhomes.news.Attachment;
+import com.everhomes.configuration.ConfigurationProvider;
+import com.everhomes.constants.ErrorCodes;
+import com.everhomes.contentserver.ContentServerResource;
+import com.everhomes.contentserver.ContentServerService;
+import com.everhomes.coordinator.CoordinationLocks;
+import com.everhomes.coordinator.CoordinationProvider;
+import com.everhomes.db.DbProvider;
+import com.everhomes.entity.EntityType;
+import com.everhomes.flow.Flow;
+import com.everhomes.flow.FlowAutoStepDTO;
+import com.everhomes.flow.FlowCase;
+import com.everhomes.flow.FlowCaseProvider;
+import com.everhomes.flow.FlowService;
+import com.everhomes.listing.CrossShardListingLocator;
+import com.everhomes.listing.ListingLocator;
+import com.everhomes.locale.LocaleStringService;
+import com.everhomes.locale.LocaleTemplateService;
+import com.everhomes.messaging.MessagingService;
+import com.everhomes.naming.NameMapper;
 import com.everhomes.order.OrderUtil;
+import com.everhomes.order.PayProvider;
 import com.everhomes.order.PayService;
 import com.everhomes.organization.Organization;
 import com.everhomes.organization.OrganizationAddress;
+import com.everhomes.organization.OrganizationMember;
+import com.everhomes.organization.OrganizationProvider;
 import com.everhomes.parking.vip_parking.DingDingParkingLockHandler;
 import com.everhomes.pay.order.PaymentType;
+import com.everhomes.queue.taskqueue.JesqueClientFactory;
+import com.everhomes.queue.taskqueue.WorkerPoolFactory;
 import com.everhomes.rentalv2.job.RentalMessageJob;
 import com.everhomes.rentalv2.job.RentalMessageQuartzJob;
 import com.everhomes.rentalv2.order_action.CancelUnsuccessRentalOrderAction;
 import com.everhomes.rest.aclink.CreateDoorAuthCommand;
 import com.everhomes.rest.aclink.DoorAuthDTO;
 import com.everhomes.rest.activity.ActivityRosterPayVersionFlag;
-import com.everhomes.rest.flow.*;
-import com.everhomes.rest.order.*;
+import com.everhomes.rest.app.AppConstants;
+import com.everhomes.rest.approval.TrueOrFalseFlag;
+import com.everhomes.rest.flow.CreateFlowCaseCommand;
+import com.everhomes.rest.flow.FlowCaseType;
+import com.everhomes.rest.flow.FlowModuleType;
+import com.everhomes.rest.flow.FlowOwnerType;
+import com.everhomes.rest.flow.FlowReferType;
+import com.everhomes.rest.flow.FlowStepType;
+import com.everhomes.rest.flow.FlowUserType;
+import com.everhomes.rest.flow.GeneralModuleInfo;
+import com.everhomes.rest.messaging.MessageBodyType;
+import com.everhomes.rest.messaging.MessageChannel;
+import com.everhomes.rest.messaging.MessageDTO;
+import com.everhomes.rest.messaging.MessagingConstants;
+import com.everhomes.rest.order.CommonOrderCommand;
+import com.everhomes.rest.order.CommonOrderDTO;
+import com.everhomes.rest.order.OrderType;
+import com.everhomes.rest.order.PaymentParamsDTO;
+import com.everhomes.rest.order.PreOrderCommand;
+import com.everhomes.rest.order.PreOrderDTO;
+import com.everhomes.rest.organization.VendorType;
 import com.everhomes.rest.parking.ParkingSpaceDTO;
 import com.everhomes.rest.parking.ParkingSpaceLockStatus;
-import com.everhomes.rest.rentalv2.*;
-import com.everhomes.rest.rentalv2.admin.*;
+import com.everhomes.rest.rentalv2.AddItemAdminCommand;
+import com.everhomes.rest.rentalv2.AddRentalBillCommand;
+import com.everhomes.rest.rentalv2.AddRentalBillItemCommand;
+import com.everhomes.rest.rentalv2.AddRentalBillItemCommandResponse;
+import com.everhomes.rest.rentalv2.AddRentalBillItemV2Response;
+import com.everhomes.rest.rentalv2.AddRentalOrderUsingInfoCommand;
+import com.everhomes.rest.rentalv2.AddRentalOrderUsingInfoResponse;
+import com.everhomes.rest.rentalv2.AddRentalOrderUsingInfoV2Response;
+import com.everhomes.rest.rentalv2.AddRentalSiteSingleSimpleRule;
+import com.everhomes.rest.rentalv2.AmorpmFlag;
+import com.everhomes.rest.rentalv2.AttachmentDTO;
+import com.everhomes.rest.rentalv2.BillAttachmentDTO;
+import com.everhomes.rest.rentalv2.BillQueryStatus;
+import com.everhomes.rest.rentalv2.CancelRentalBillCommand;
+import com.everhomes.rest.rentalv2.ChangeRentalBillPayInfoCommand;
+import com.everhomes.rest.rentalv2.CompleteRentalOrderCommand;
+import com.everhomes.rest.rentalv2.DateLength;
+import com.everhomes.rest.rentalv2.DeleteItemAdminCommand;
+import com.everhomes.rest.rentalv2.DeleteRentalBillCommand;
+import com.everhomes.rest.rentalv2.FindAutoAssignRentalSiteDayStatusCommand;
+import com.everhomes.rest.rentalv2.FindAutoAssignRentalSiteDayStatusResponse;
+import com.everhomes.rest.rentalv2.FindAutoAssignRentalSiteMonthStatusByWeekCommand;
+import com.everhomes.rest.rentalv2.FindAutoAssignRentalSiteMonthStatusByWeekResponse;
+import com.everhomes.rest.rentalv2.FindAutoAssignRentalSiteMonthStatusCommand;
+import com.everhomes.rest.rentalv2.FindAutoAssignRentalSiteMonthStatusResponse;
+import com.everhomes.rest.rentalv2.FindAutoAssignRentalSiteWeekStatusCommand;
+import com.everhomes.rest.rentalv2.FindAutoAssignRentalSiteWeekStatusResponse;
+import com.everhomes.rest.rentalv2.FindAutoAssignRentalSiteYearStatusCommand;
+import com.everhomes.rest.rentalv2.FindAutoAssignRentalSiteYearStatusResponse;
+import com.everhomes.rest.rentalv2.FindRentalBillsCommand;
+import com.everhomes.rest.rentalv2.FindRentalBillsCommandResponse;
+import com.everhomes.rest.rentalv2.FindRentalSiteByIdCommand;
+import com.everhomes.rest.rentalv2.FindRentalSiteItemsAndAttachmentsCommand;
+import com.everhomes.rest.rentalv2.FindRentalSiteItemsAndAttachmentsResponse;
+import com.everhomes.rest.rentalv2.FindRentalSiteMonthStatusByWeekCommand;
+import com.everhomes.rest.rentalv2.FindRentalSiteMonthStatusByWeekCommandResponse;
+import com.everhomes.rest.rentalv2.FindRentalSiteMonthStatusCommand;
+import com.everhomes.rest.rentalv2.FindRentalSiteMonthStatusCommandResponse;
+import com.everhomes.rest.rentalv2.FindRentalSiteWeekStatusCommand;
+import com.everhomes.rest.rentalv2.FindRentalSiteWeekStatusCommandResponse;
+import com.everhomes.rest.rentalv2.FindRentalSiteYearStatusCommand;
+import com.everhomes.rest.rentalv2.FindRentalSiteYearStatusCommandResponse;
+import com.everhomes.rest.rentalv2.FindRentalSitesCommand;
+import com.everhomes.rest.rentalv2.FindRentalSitesCommandResponse;
+import com.everhomes.rest.rentalv2.GetCancelOrderTipCommand;
+import com.everhomes.rest.rentalv2.GetCancelOrderTipResponse;
+import com.everhomes.rest.rentalv2.GetItemListAdminCommand;
+import com.everhomes.rest.rentalv2.GetItemListCommandResponse;
+import com.everhomes.rest.rentalv2.GetRenewRentalOrderInfoCommand;
+import com.everhomes.rest.rentalv2.GetRenewRentalOrderInfoResponse;
+import com.everhomes.rest.rentalv2.GetRentalBillPayInfoCommand;
+import com.everhomes.rest.rentalv2.GetRentalOrderDetailCommand;
+import com.everhomes.rest.rentalv2.GetResourceRuleV2Command;
+import com.everhomes.rest.rentalv2.GetResourceRuleV2Response;
+import com.everhomes.rest.rentalv2.InvoiceFlag;
+import com.everhomes.rest.rentalv2.ListRentalBillsCommand;
+import com.everhomes.rest.rentalv2.ListRentalBillsCommandResponse;
+import com.everhomes.rest.rentalv2.ListRentalOrdersCommand;
+import com.everhomes.rest.rentalv2.ListRentalOrdersResponse;
+import com.everhomes.rest.rentalv2.LoopType;
+import com.everhomes.rest.rentalv2.MaxMinPrice;
+import com.everhomes.rest.rentalv2.NormalFlag;
+import com.everhomes.rest.rentalv2.OnlinePayCallbackCommand;
+import com.everhomes.rest.rentalv2.OnlinePayCallbackCommandResponse;
+import com.everhomes.rest.rentalv2.PayZuolinRefundCommand;
+import com.everhomes.rest.rentalv2.PayZuolinRefundResponse;
+import com.everhomes.rest.rentalv2.PriceRuleType;
+import com.everhomes.rest.rentalv2.RenewRentalOrderCommand;
+import com.everhomes.rest.rentalv2.RentalBillDTO;
+import com.everhomes.rest.rentalv2.RentalBillRuleDTO;
+import com.everhomes.rest.rentalv2.RentalBriefOrderDTO;
+import com.everhomes.rest.rentalv2.RentalGoodItem;
+import com.everhomes.rest.rentalv2.RentalItemType;
+import com.everhomes.rest.rentalv2.RentalOrderDTO;
+import com.everhomes.rest.rentalv2.RentalPriceType;
+import com.everhomes.rest.rentalv2.RentalRecommendUser;
+import com.everhomes.rest.rentalv2.RentalServiceErrorCode;
+import com.everhomes.rest.rentalv2.RentalSiteDTO;
+import com.everhomes.rest.rentalv2.RentalSiteDayRulesDTO;
+import com.everhomes.rest.rentalv2.RentalSiteNumberDayRulesDTO;
+import com.everhomes.rest.rentalv2.RentalSiteNumberRuleDTO;
+import com.everhomes.rest.rentalv2.RentalSitePackagesDTO;
+import com.everhomes.rest.rentalv2.RentalSitePicDTO;
+import com.everhomes.rest.rentalv2.RentalSiteRulesDTO;
+import com.everhomes.rest.rentalv2.RentalSiteStatus;
+import com.everhomes.rest.rentalv2.RentalTimeIntervalOwnerType;
+import com.everhomes.rest.rentalv2.RentalType;
+import com.everhomes.rest.rentalv2.RentalUserPriceType;
+import com.everhomes.rest.rentalv2.RentalV2ResourceType;
+import com.everhomes.rest.rentalv2.ResourceOrderStatus;
+import com.everhomes.rest.rentalv2.RuleSourceType;
+import com.everhomes.rest.rentalv2.SiteBillStatus;
+import com.everhomes.rest.rentalv2.SiteItemDTO;
+import com.everhomes.rest.rentalv2.SitePricePackageDTO;
+import com.everhomes.rest.rentalv2.SitePriceRuleDTO;
+import com.everhomes.rest.rentalv2.SiteRuleStatus;
+import com.everhomes.rest.rentalv2.UpdateItemAdminCommand;
+import com.everhomes.rest.rentalv2.VipParkingUseInfoDTO;
+import com.everhomes.rest.rentalv2.VisibleFlag;
+import com.everhomes.rest.rentalv2.admin.AddDefaultRuleAdminCommand;
+import com.everhomes.rest.rentalv2.admin.AddRentalSiteRulesAdminCommand;
+import com.everhomes.rest.rentalv2.admin.AddResourceAdminCommand;
+import com.everhomes.rest.rentalv2.admin.AttachmentConfigDTO;
 import com.everhomes.rest.rentalv2.admin.AttachmentType;
+import com.everhomes.rest.rentalv2.admin.ConfirmRefundCommand;
+import com.everhomes.rest.rentalv2.admin.DeleteResourceCommand;
+import com.everhomes.rest.rentalv2.admin.DiscountType;
+import com.everhomes.rest.rentalv2.admin.GetRefundOrderListCommand;
+import com.everhomes.rest.rentalv2.admin.GetRefundOrderListResponse;
+import com.everhomes.rest.rentalv2.admin.GetRefundUrlCommand;
+import com.everhomes.rest.rentalv2.admin.GetRentalBillCommand;
+import com.everhomes.rest.rentalv2.admin.GetResourceAttachmentCommand;
+import com.everhomes.rest.rentalv2.admin.GetResourceListAdminCommand;
+import com.everhomes.rest.rentalv2.admin.GetResourceListAdminResponse;
+import com.everhomes.rest.rentalv2.admin.GetResourceOrderRuleCommand;
+import com.everhomes.rest.rentalv2.admin.GetResourcePriceRuleCommand;
+import com.everhomes.rest.rentalv2.admin.GetResourceRentalRuleCommand;
+import com.everhomes.rest.rentalv2.admin.GetResourceRuleAdminCommand;
+import com.everhomes.rest.rentalv2.admin.GetResourceSiteNumbersCommand;
+import com.everhomes.rest.rentalv2.admin.GetResourceTimeRuleCommand;
+import com.everhomes.rest.rentalv2.admin.GetResourceTypeListCommand;
+import com.everhomes.rest.rentalv2.admin.GetResourceTypeListResponse;
+import com.everhomes.rest.rentalv2.admin.PayMode;
+import com.everhomes.rest.rentalv2.admin.PricePackageDTO;
+import com.everhomes.rest.rentalv2.admin.PriceRuleDTO;
+import com.everhomes.rest.rentalv2.admin.QueryDefaultRuleAdminCommand;
+import com.everhomes.rest.rentalv2.admin.QueryDefaultRuleAdminResponse;
+import com.everhomes.rest.rentalv2.admin.RefundOrderDTO;
+import com.everhomes.rest.rentalv2.admin.RentalDurationType;
+import com.everhomes.rest.rentalv2.admin.RentalDurationUnit;
+import com.everhomes.rest.rentalv2.admin.RentalOpenTimeDTO;
+import com.everhomes.rest.rentalv2.admin.RentalOrderHandleType;
+import com.everhomes.rest.rentalv2.admin.RentalOrderRuleDTO;
+import com.everhomes.rest.rentalv2.admin.RentalOrderStrategy;
+import com.everhomes.rest.rentalv2.admin.ResourceAttachmentDTO;
+import com.everhomes.rest.rentalv2.admin.ResourceOrderRuleDTO;
+import com.everhomes.rest.rentalv2.admin.ResourcePriceRuleDTO;
+import com.everhomes.rest.rentalv2.admin.ResourceRentalRuleDTO;
+import com.everhomes.rest.rentalv2.admin.ResourceSiteNumbersDTO;
+import com.everhomes.rest.rentalv2.admin.ResourceTimeRuleDTO;
+import com.everhomes.rest.rentalv2.admin.ResourceTypeDTO;
+import com.everhomes.rest.rentalv2.admin.SearchRentalOrdersCommand;
+import com.everhomes.rest.rentalv2.admin.SearchRentalOrdersResponse;
+import com.everhomes.rest.rentalv2.admin.SiteNumberDTO;
+import com.everhomes.rest.rentalv2.admin.SiteOwnerDTO;
+import com.everhomes.rest.rentalv2.admin.TimeIntervalDTO;
+import com.everhomes.rest.rentalv2.admin.UpdateDefaultAttachmentRuleAdminCommand;
+import com.everhomes.rest.rentalv2.admin.UpdateDefaultDateRuleAdminCommand;
+import com.everhomes.rest.rentalv2.admin.UpdateDefaultRuleAdminCommand;
+import com.everhomes.rest.rentalv2.admin.UpdateItemsAdminCommand;
+import com.everhomes.rest.rentalv2.admin.UpdateRentalDateCommand;
+import com.everhomes.rest.rentalv2.admin.UpdateRentalSiteCellRuleAdminCommand;
+import com.everhomes.rest.rentalv2.admin.UpdateResourceAdminCommand;
+import com.everhomes.rest.rentalv2.admin.UpdateResourceAttachmentCommand;
+import com.everhomes.rest.rentalv2.admin.UpdateResourceOrderAdminCommand;
+import com.everhomes.rest.rentalv2.admin.UpdateResourceOrderRuleCommand;
+import com.everhomes.rest.rentalv2.admin.UpdateResourcePriceRuleCommand;
+import com.everhomes.rest.rentalv2.admin.UpdateResourceRentalRuleCommand;
+import com.everhomes.rest.rentalv2.admin.UpdateResourceSiteNumbersCommand;
+import com.everhomes.rest.rentalv2.admin.UpdateResourceTimeRuleCommand;
+import com.everhomes.rest.sms.SmsTemplateCode;
 import com.everhomes.rest.ui.user.SceneTokenDTO;
 import com.everhomes.rest.ui.user.SceneType;
+import com.everhomes.rest.user.IdentifierType;
+import com.everhomes.rest.user.MessageChannelType;
+import com.everhomes.scheduler.RunningFlag;
+import com.everhomes.scheduler.ScheduleProvider;
+import com.everhomes.sequence.SequenceProvider;
 import com.everhomes.server.schema.tables.EhRentalv2Orders;
-import com.everhomes.user.*;
-import com.everhomes.util.*;
+import com.everhomes.server.schema.tables.pojos.EhRentalv2Cells;
+import com.everhomes.server.schema.tables.pojos.EhRentalv2DefaultRules;
+import com.everhomes.server.schema.tables.pojos.EhRentalv2Resources;
+import com.everhomes.settings.PaginationConfigHelper;
+import com.everhomes.sms.SmsProvider;
+import com.everhomes.techpark.onlinePay.OnlinePayService;
+import com.everhomes.techpark.rental.IncompleteUnsuccessRentalBillAction;
+import com.everhomes.user.User;
+import com.everhomes.user.UserContext;
+import com.everhomes.user.UserIdentifier;
+import com.everhomes.user.UserProvider;
+import com.everhomes.user.UserService;
+import com.everhomes.util.ConvertHelper;
+import com.everhomes.util.DateHelper;
+import com.everhomes.util.DownloadUtils;
+import com.everhomes.util.RuntimeErrorException;
+import com.everhomes.util.SignatureHelper;
+import com.everhomes.util.Tuple;
 import net.greghaines.jesque.Job;
 import org.apache.commons.lang.StringUtils;
 import org.apache.poi.ss.usermodel.Row;
@@ -67,50 +273,31 @@ import org.springframework.beans.BeanUtils;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpStatus;
 import org.springframework.scheduling.annotation.Scheduled;
-import org.springframework.security.access.method.P;
 import org.springframework.stereotype.Component;
 import org.springframework.transaction.TransactionStatus;
-import com.everhomes.community.Community;
-import com.everhomes.community.CommunityProvider;
-import com.everhomes.configuration.ConfigurationProvider;
-import com.everhomes.constants.ErrorCodes;
-import com.everhomes.contentserver.ContentServerResource;
-import com.everhomes.contentserver.ContentServerService;
-import com.everhomes.coordinator.CoordinationLocks;
-import com.everhomes.coordinator.CoordinationProvider;
-import com.everhomes.db.DbProvider;
-import com.everhomes.entity.EntityType;
-import com.everhomes.flow.*;
-import com.everhomes.listing.CrossShardListingLocator;
-import com.everhomes.listing.ListingLocator;
-import com.everhomes.locale.LocaleStringService;
-import com.everhomes.locale.LocaleTemplateService;
-import com.everhomes.naming.NameMapper;
-import com.everhomes.organization.OrganizationMember;
-import com.everhomes.organization.OrganizationProvider;
-import com.everhomes.queue.taskqueue.JesqueClientFactory;
-import com.everhomes.queue.taskqueue.WorkerPoolFactory;
-import com.everhomes.rest.approval.TrueOrFalseFlag;
-import com.everhomes.rest.flow.CreateFlowCaseCommand;
-import com.everhomes.flow.FlowAutoStepDTO;
-import com.everhomes.rest.flow.FlowModuleType;
-import com.everhomes.rest.flow.FlowOwnerType;
-import com.everhomes.rest.flow.FlowReferType;
-import com.everhomes.rest.flow.FlowStepType;
-import com.everhomes.rest.flow.FlowUserType;
-import com.everhomes.rest.organization.VendorType;
-import com.everhomes.rest.sms.SmsTemplateCode;
-import com.everhomes.rest.user.IdentifierType;
-import com.everhomes.scheduler.RunningFlag;
-import com.everhomes.scheduler.ScheduleProvider;
-import com.everhomes.sequence.SequenceProvider;
-import com.everhomes.server.schema.tables.pojos.EhRentalv2Cells;
-import com.everhomes.server.schema.tables.pojos.EhRentalv2DefaultRules;
-import com.everhomes.server.schema.tables.pojos.EhRentalv2Resources;
-import com.everhomes.settings.PaginationConfigHelper;
-import com.everhomes.sms.SmsProvider;
-import com.everhomes.techpark.onlinePay.OnlinePayService;
-import com.everhomes.techpark.rental.IncompleteUnsuccessRentalBillAction;
+
+import javax.annotation.PostConstruct;
+import javax.servlet.http.HttpServletResponse;
+import java.io.ByteArrayOutputStream;
+import java.io.IOException;
+import java.math.BigDecimal;
+import java.net.URLEncoder;
+import java.sql.Date;
+import java.sql.Time;
+import java.sql.Timestamp;
+import java.text.SimpleDateFormat;
+import java.util.ArrayList;
+import java.util.Arrays;
+import java.util.Calendar;
+import java.util.Collections;
+import java.util.HashMap;
+import java.util.HashSet;
+import java.util.List;
+import java.util.Map;
+import java.util.Optional;
+import java.util.concurrent.ExecutorService;
+import java.util.concurrent.Executors;
+import java.util.stream.Collectors;
 
 @Component
 public class Rentalv2ServiceImpl implements Rentalv2Service {
@@ -145,6 +332,8 @@ public class Rentalv2ServiceImpl implements Rentalv2Service {
 	private LocaleTemplateService localeTemplateService;
 	@Autowired
 	private SmsProvider smsProvider;
+	@Autowired
+	private MessagingService messagingService;
 	@Autowired
 	private ContentServerService contentServerService;
     @Autowired
@@ -189,6 +378,8 @@ public class Rentalv2ServiceImpl implements Rentalv2Service {
 	private  Rentalv2PricePackageProvider rentalv2PricePackageProvider;
 	@Autowired
 	private PayService payService;
+	@Autowired
+	private PayProvider payProvider;
 	@Autowired
 	private DoorAccessService doorAccessService;
 	@Autowired
@@ -2243,6 +2434,63 @@ public class Rentalv2ServiceImpl implements Rentalv2Service {
 			}
 		}
 	}
+
+	/**
+	 * 给成功的订单发推送
+	 *
+	 * */
+	@Override
+	public void addOrderSendMessage(RentalOrder rentalBill ){
+		//消息推送
+		//定时任务给用户推送
+		User user =this.userProvider.findUserById(rentalBill.getRentalUid()) ;
+		if (null == user )
+			return;
+		Map<String, String> map = new HashMap<String, String>();
+		RentalResource rs = this.rentalv2Provider.getRentalSiteById(rentalBill.getRentalResourceId());
+		if(null == rs)
+			return;
+
+		try{
+
+			map = new HashMap<>();
+			map.put("userName", user.getNickName());
+			map.put("resourceName", rentalBill.getResourceName());
+			map.put("useDetail", rentalBill.getUseDetail());
+			map.put("rentalCount", rentalBill.getRentalCount()==null?"1":""+rentalBill.getRentalCount());
+			sendMessageCode(rs.getChargeUid(),  RentalNotificationTemplateCode.locale, map, RentalNotificationTemplateCode.RENTAL_ADMIN_NOTIFY);
+		}catch(Exception e){
+			LOGGER.error("SEND MESSAGE FAILED ,cause "+e.getLocalizedMessage());
+		}
+	}
+
+
+
+	@Override
+	public void sendMessageCode(Long uid, String locale, Map<String, String> map, int code) {
+		String scope = RentalNotificationTemplateCode.SCOPE;
+
+		String notifyTextForOther = localeTemplateService.getLocaleTemplateString(scope, code, locale, map, "");
+		sendMessageToUser(uid, notifyTextForOther);
+	}
+
+	private void sendMessageToUser(Long userId, String content) {
+		if(null == userId)
+			return;
+		MessageDTO messageDto = new MessageDTO();
+		messageDto.setAppId(AppConstants.APPID_MESSAGING);
+		messageDto.setSenderUid(User.SYSTEM_USER_LOGIN.getUserId());
+		messageDto.setChannels(new MessageChannel(MessageChannelType.USER.getCode(), userId.toString()));
+		messageDto
+				.setChannels(new MessageChannel(MessageChannelType.USER.getCode(), Long.toString(User.SYSTEM_USER_LOGIN.getUserId())));
+		messageDto.setBodyType(MessageBodyType.TEXT.getCode());
+		messageDto.setBody(content);
+		messageDto.setMetaAppId(AppConstants.APPID_MESSAGING);
+		LOGGER.debug("messageDTO : ++++ \n " + messageDto);
+		// 发消息 +推送
+		messagingService.routeMessage(User.SYSTEM_USER_LOGIN, AppConstants.APPID_MESSAGING, MessageChannelType.USER.getCode(),
+				userId.toString(), messageDto, MessagingConstants.MSG_FLAG_STORED_PUSH.getCode());
+	}
 	
 	private List<RentalCell> findGroupRentalSiteRules(RentalCell rsr) {
 		List<RentalCell> result = new ArrayList<>();
@@ -3411,6 +3659,8 @@ public class Rentalv2ServiceImpl implements Rentalv2Service {
 		RentalOrder order = rentalv2Provider.findRentalBillById(cmd.getId());
 		order.setPayTotalMoney(payService.changePayAmount(cmd.getAmount()));
 		rentalv2Provider.updateRentalBill(order);
+		//删除记录方便重新下单
+		payProvider.deleteOrderRecordByOrder(OrderType.OrderTypeEnum.RENTALORDER.getPycode(),Long.valueOf(order.getOrderNo()));
 		Map<String, String> map = new HashMap<>();
 		map.put("resourceName", order.getResourceName());
 		map.put("startTime", order.getUseDetail());
@@ -3425,7 +3675,7 @@ public class Rentalv2ServiceImpl implements Rentalv2Service {
 	@Override
 	public void cancelRentalBill(CancelRentalBillCommand cmd) {
 
-		Long timestamp = System.currentTimeMillis();
+		/*Long timestamp = System.currentTimeMillis();
 
 		if(null == cmd.getRentalBillId()) {
 			throw RuntimeErrorException.errorWith(ErrorCodes.SCOPE_GENERAL,
@@ -3445,27 +3695,81 @@ public class Rentalv2ServiceImpl implements Rentalv2Service {
 		}
 
 		if (order.getStatus().equals(SiteBillStatus.SUCCESS.getCode()) &&
-				timestamp > order.getStartTime().getTime()) {
-				//当成功预约之后要判断是否过了取消时间
-				LOGGER.error("cancel over time");
-				throw RuntimeErrorException.errorWith(RentalServiceErrorCode.SCOPE,
-						RentalServiceErrorCode.ERROR_ORDER_CANCEL_OVERTIME,"cancel bill over time");
+				cancelTime.after(new java.util.Date(order.getStartTime().getTime() - rs.getCancelTime()))) {
+			//当成功预约之后要判断是否过了取消时间
+			LOGGER.error("cancel over time");
+			throw RuntimeErrorException
+					.errorWith(RentalServiceErrorCode.SCOPE,
+							RentalServiceErrorCode.ERROR_CANCEL_OVERTIME,"cancel bill over time");
+		}else{
+		this.dbProvider.execute((TransactionStatus status) -> {
+				//默认是已退款
+				order.setStatus(SiteBillStatus.REFUNDED.getCode());
+				if (rs.getRefundFlag().equals(NormalFlag.NEED.getCode())&&(order.getPaidMoney().compareTo(new BigDecimal(0))==1)){ 
+					List<RentalOrderPayorderMap>  billmaps = this.rentalv2Provider.findRentalBillPaybillMapByBillId(order.getId());
+					for(RentalOrderPayorderMap billMap : billmaps) {
+						//循环退款
+						PayZuolinRefundCommand refundCmd = new PayZuolinRefundCommand();
+						String refoundApi = this.configurationProvider.getValue(UserContext.getCurrentNamespaceId(), "pay.zuolin.refound", "POST /EDS_PAY/rest/pay_common/refund/save_refundInfo_record");
+						String appKey = configurationProvider.getValue(UserContext.getCurrentNamespaceId(), "pay.appKey", "");
+						refundCmd.setAppKey(appKey);
+						Long timestamp = System.currentTimeMillis();
+						refundCmd.setTimestamp(timestamp);
+						Integer randomNum = (int) (Math.random() * 1000);
+						refundCmd.setNonce(randomNum);
+						Long refoundOrderNo = this.onlinePayService.createBillId(DateHelper
+								.currentGMTTime().getTime());
+						refundCmd.setRefundOrderNo(String.valueOf(refoundOrderNo));
+						refundCmd.setOrderNo(String.valueOf(billMap.getOrderNo()));
+						refundCmd.setOnlinePayStyleNo(VendorType.fromCode(billMap.getVendorType()).getStyleNo());
+						refundCmd.setOrderType(OrderType.OrderTypeEnum.RENTALORDER.getPycode());
+						//已付金额乘以退款比例除以100
+						refundCmd.setRefundAmount(order.getPaidMoney().multiply(new BigDecimal(rs.getRefundRatio() / 100.0)));
+						refundCmd.setRefundMsg("预订单取消退款");
+						this.setSignatureParam(refundCmd);
+						RentalRefundOrder rentalRefundOrder = ConvertHelper.convert(refundCmd, RentalRefundOrder.class);
+						rentalRefundOrder.setOrderNo(billMap.getOrderNo());
+						rentalRefundOrder.setRefundOrderNo(refoundOrderNo);
+						rentalRefundOrder.setOrderId(order.getId());
+						rentalRefundOrder.setCreateTime(new Timestamp(DateHelper.currentGMTTime().getTime()));
+						rentalRefundOrder.setCreatorUid(UserContext.current().getUser().getId());
+						rentalRefundOrder.setOperateTime(new Timestamp(DateHelper.currentGMTTime().getTime()));
+						rentalRefundOrder.setOperatorUid(UserContext.current().getUser().getId());
+						rentalRefundOrder.setResourceTypeId(order.getResourceTypeId());
+						rentalRefundOrder.setAmount(refundCmd.getRefundAmount());
+						//微信直接退款，支付宝置为退款中 
+						//update by wuhan 2017-5-15 :支付宝也和微信一样退款
+						if (order.getPaidVersion() == ActivityRosterPayVersionFlag.V2.getCode()) { //新支付退款
+							Long amount = payService.changePayAmount(refundCmd.getRefundAmount());
+							CreateOrderRestResponse refundResponse = payService.refund(OrderType.OrderTypeEnum.RENTALORDER.getPycode(), Long.valueOf(order.getOrderNo()), refoundOrderNo, amount);
 
-		}
+							if(refundResponse != null || refundResponse.getErrorCode() != null && refundResponse.getErrorCode().equals(HttpStatus.OK.value())){
+								rentalRefundOrder.setStatus(SiteBillStatus.REFUNDED.getCode());
+								order.setStatus(SiteBillStatus.REFUNDING.getCode());
+							} else{
+								LOGGER.error("Refund failed from vendor, cmd={}, response={}",
+										cmd, refundResponse);
+								throw RuntimeErrorException.errorWith(RentalServiceErrorCode.SCOPE,
+										RentalServiceErrorCode.ERROR_REFUND_ERROR,
+										"bill refund error");
+							}
+							this.rentalv2Provider.createRentalRefundOrder(rentalRefundOrder);
+						} else {
+							PayZuolinRefundResponse refundResponse = (PayZuolinRefundResponse) this.restCall(refoundApi, refundCmd, PayZuolinRefundResponse.class);
+							if (refundResponse != null && refundResponse.getErrorCode().equals(HttpStatus.OK.value())) {
+								//退款成功保存退款单信息，修改bill状态
+								rentalRefundOrder.setStatus(SiteBillStatus.REFUNDED.getCode());
+								order.setStatus(SiteBillStatus.REFUNDED.getCode());
+							} else {
+								LOGGER.error("bill id=[" + order.getId() + "] refound error param is " + refundCmd.toString());
+								throw RuntimeErrorException.errorWith(RentalServiceErrorCode.SCOPE,
+										RentalServiceErrorCode.ERROR_REFUND_ERROR,
+										"bill  refound error");
+							}
 
-		RentalOrderHandler handler = rentalCommonService.getRentalOrderHandler(order.getResourceType());
-		dbProvider.execute((TransactionStatus status) -> {
-			//如果是预约成功，则要判断是否退款，否则将订单置为已取消
-			if (order.getStatus().equals(SiteBillStatus.SUCCESS.getCode())) {
-				if ((order.getRefundFlag().equals(NormalFlag.NEED.getCode())
-						|| (null != order.getRefundStrategy() && order.getRefundStrategy() != RentalOrderStrategy.NONE.getCode()))
-						&& (order.getPaidMoney().compareTo(new BigDecimal(0)) == 1)){
+							this.rentalv2Provider.createRentalRefundOrder(rentalRefundOrder);
 
-					BigDecimal orderAmount = handler.getRefundAmount(order, timestamp);
-					if (PayMode.ONLINE_PAY.equals(order.getPayMode())||PayMode.APPROVE_ONLINE_PAY.equals(order.getPayMode())) {
-						rentalCommonService.refundOrder(order, timestamp, orderAmount);
-						//更新bill状态
-						order.setStatus(SiteBillStatus.REFUNDED.getCode());
+						}
 					}
 					else {
 						order.setRefundAmount(orderAmount);
@@ -3506,8 +3810,66 @@ public class Rentalv2ServiceImpl implements Rentalv2Service {
 				event.setEventName(SystemEvent.RENTAL_RESOURCE_APPLY_CANCEL.dft());
 			});
 			return null;
-		});
+		});*/
+	}
 
+
+	private Long createOrderNo(Long time) {
+//		SimpleDateFormat sdf = new SimpleDateFormat("yyyyMMddHHmmssSSS");
+//		String prefix = sdf.format(new Date());
+		String suffix = String.valueOf(generateRandomNumber(3));
+
+		return Long.valueOf(String.valueOf(time) + suffix);
+	}
+
+	private long generateRandomNumber(int n){
+		return (long)((Math.random() * 9 + 1) * Math.pow(10, n-1));
+	}
+
+	/**
+	 * 取消订单发推送
+	 * 
+	 * */
+	@Override
+	public void cancelOrderSendMessage(RentalOrder rentalBill){
+		RentalResource rs = this.rentalv2Provider.getRentalSiteById(rentalBill.getRentalResourceId());
+		if(null == rs)
+			return;
+		//给负责人推送
+		StringBuilder managerContent = new StringBuilder();
+		User user =this.userProvider.findUserById(rentalBill.getRentalUid()) ;
+		if (null == user )
+			return;
+		managerContent.append(user.getNickName());
+		managerContent.append("取消了");
+		managerContent.append(rentalBill.getResourceName());
+		managerContent.append("\n使用详情：");
+		managerContent.append(rentalBill.getUseDetail());
+		if(null != rentalBill.getRentalCount() ){
+			managerContent.append("\n预约数：");
+			managerContent.append(rentalBill.getRentalCount());
+		}
+		//sendMessageToUser(rs.getChargeUid(), managerContent.toString());
+	}
+	
+	/***给支付相关的参数签名*/
+	private void setSignatureParam(PayZuolinRefundCommand cmd) {
+		App app = appProvider.findAppByKey(cmd.getAppKey());
+		
+		Map<String,String> map = new HashMap<>();
+		map.put("appKey",cmd.getAppKey());
+		map.put("timestamp",cmd.getTimestamp()+"");
+		map.put("nonce",cmd.getNonce()+"");
+		map.put("refundOrderNo",cmd.getRefundOrderNo());
+		map.put("orderNo", cmd.getOrderNo());
+		map.put("onlinePayStyleNo",cmd.getOnlinePayStyleNo() );
+		map.put("orderType",cmd.getOrderType() );
+		//modify by wh 2016-10-24 退款使用toString,下订单的时候使用doubleValue,两边用的不一样,为了和电商保持一致,要修改成toString
+//		map.put("refundAmount", cmd.getRefundAmount().doubleValue()+"");
+		map.put("refundAmount", cmd.getRefundAmount().toString());
+		map.put("refundMsg", cmd.getRefundMsg()); 
+		String signature = SignatureHelper.computeSignature(map, app.getSecretKey());
+		cmd.setSignature(signature);
 	}
 
 	@Override
@@ -5902,7 +6264,7 @@ public class Rentalv2ServiceImpl implements Rentalv2Service {
 //        }
 //        return response;
 //    }
-	
+
 	private ByteArrayOutputStream createRentalBillsStream(List<RentalBillDTO> dtos) {
 
 		ByteArrayOutputStream out = new ByteArrayOutputStream();
@@ -6859,7 +7221,7 @@ public class Rentalv2ServiceImpl implements Rentalv2Service {
 		}
 		rs.setStatus(RentalSiteStatus.DELETED.getCode());
 		rentalv2Provider.updateRentalSite(rs);
-		
+
 	}
 
 //	@Override

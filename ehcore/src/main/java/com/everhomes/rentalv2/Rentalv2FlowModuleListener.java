@@ -670,6 +670,8 @@ public class Rentalv2FlowModuleListener implements FlowModuleListener {
 		List<RentalResourceType> resourceTypes =  this.rentalv2Provider.findRentalResourceTypes(namespaceId, ResourceTypeStatus.NORMAL.getCode(), null, null);
 		if (resourceTypes==null || resourceTypes.size()==0)
 			return null;
+		if (resourceTypes==null || resourceTypes.size()==0)
+			return null;
 		List<FlowServiceTypeDTO> dtos = resourceTypes.stream().map(r->{
 			FlowServiceTypeDTO dto =new FlowServiceTypeDTO();
 			dto.setId(r.getId());

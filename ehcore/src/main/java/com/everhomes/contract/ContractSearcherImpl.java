@@ -269,12 +269,12 @@ public class ContractSearcherImpl extends AbstractElasticSearch implements Contr
             ids.forEach(id -> {
                 Contract contract = contracts.get(id);
                 ContractDTO dto = ConvertHelper.convert(contract, ContractDTO.class);
-                if(CustomerType.ENTERPRISE.equals(CustomerType.fromStatus(contract.getCustomerType()))) {
+                if(contract.getCustomerType() != null && CustomerType.ENTERPRISE.equals(CustomerType.fromStatus(contract.getCustomerType()))) {
                     EnterpriseCustomer customer = enterpriseCustomerProvider.findById(contract.getCustomerId());
                     if(customer != null) {
                         dto.setCustomerName(customer.getName());
                     }
-                } else if(CustomerType.INDIVIDUAL.equals(CustomerType.fromStatus(contract.getCustomerType()))) {
+                } else if(contract.getCustomerType() != null && CustomerType.INDIVIDUAL.equals(CustomerType.fromStatus(contract.getCustomerType()))) {
                     OrganizationOwner owner = individualCustomerProvider.findOrganizationOwnerById(contract.getCustomerId());
                     if(owner != null) {
                         dto.setCustomerName(owner.getContactName());

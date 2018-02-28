@@ -597,4 +597,7 @@ public interface OrganizationService {
 	ListPMOrganizationsResponse listPMOrganizations(ListPMOrganizationsCommand cmd);
 
 	List<Long> listDetailIdWithEnterpriseExclude(String keywords, Integer namespaceId, Long enterpriseId, Timestamp checkinTimeStart, Timestamp checkinTimeEnd, Timestamp dissmissTimeStart, Timestamp dissmissTimeEnd, CrossShardListingLocator locator, Integer pageSize,List<Long> notinDetails,List<Long> inDetails);
+
+	// 根据detailId获取部门
+	Long getDepartmentByDetailIdAndOrgId(Long detailId, Long OrgId);
 }

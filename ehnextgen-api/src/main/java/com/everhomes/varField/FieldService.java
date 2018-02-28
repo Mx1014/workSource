@@ -56,7 +56,7 @@ public interface FieldService {
     void exportFieldsExcel(ExportFieldsExcelCommand cmd, HttpServletResponse response);
 
     void exportExcelTemplate(ListFieldGroupCommand cmd,HttpServletResponse response);
-
+    List<FieldGroupDTO> getAllGroups(ExportFieldsExcelCommand cmd,boolean onlyLeaf, boolean filter);
 
 
 
@@ -72,7 +72,7 @@ public interface FieldService {
 
     void exportDynamicExcel(ExportFieldsExcelCommand cmd, HttpServletResponse response);
 
-    List<List<String>> getDataOnFields(FieldGroupDTO group, Long customerId, Byte customerType,List<FieldDTO> fields,Long communityId,Integer namespaceId,String moduleName, Long orgId);
+    List<List<String>> getDataOnFields(FieldGroupDTO group, Long customerId, Byte customerType,List<FieldDTO> fields,Long communityId,Integer namespaceId,String moduleName, Long orgId, Object params);
 
     DynamicImportResponse importDynamicExcel(ImportFieldExcelCommand cmd, MultipartFile file);
 }

@@ -4,7 +4,6 @@ package com.everhomes.rest.community.admin;
 import com.everhomes.util.StringHelper;
 
 /**
- * <p>
  * <ul>
  * <li>id: 类型id</li>
  * </ul>

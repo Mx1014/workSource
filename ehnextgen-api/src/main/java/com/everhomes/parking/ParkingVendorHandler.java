@@ -5,6 +5,7 @@ import java.util.List;
 
 import com.everhomes.rest.order.CommonOrderDTO;
 import com.everhomes.rest.parking.*;
+import org.apache.poi.ss.usermodel.Sheet;
 
 public interface ParkingVendorHandler {
     String PARKING_VENDOR_PREFIX = "ParkingVendor-";
@@ -113,4 +114,11 @@ public interface ParkingVendorHandler {
      * @return
      */
     ParkingExpiredRechargeInfoDTO getExpiredRechargeInfo(ParkingLot parkingLot, GetExpiredRechargeInfoCommand cmd);
+
+    /**
+     * excel导出
+     * @param list
+     * @param sheet
+     */
+    void setCellValues(List<ParkingRechargeOrder> list, Sheet sheet);
 }

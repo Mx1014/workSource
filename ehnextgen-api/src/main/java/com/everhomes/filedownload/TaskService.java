@@ -1,5 +1,6 @@
 package com.everhomes.filedownload;
 
+import com.everhomes.rest.contentserver.CsFileLocationDTO;
 import com.everhomes.rest.filedownload.*;
 
 import java.util.Date;
@@ -48,4 +49,6 @@ public interface TaskService {
     List<Task> listTasks(Integer namespaceId, Long communityId, Long orgId, Long userId, Byte type, Byte status,  String keyword, Long startTime, Long endTime, Long pageAnchor, Integer count);
 
     List<Long> listWaitingTaskIds();
+
+    void processUpdateTask(Long taskId, CsFileLocationDTO fileLocationDTO);
 }

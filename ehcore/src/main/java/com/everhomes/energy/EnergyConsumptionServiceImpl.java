@@ -910,7 +910,7 @@ public class EnergyConsumptionServiceImpl implements EnergyConsumptionService {
         validate(cmd);
 //        checkCurrentUserNotInOrg(cmd.getOrganizationId());
 //        userPrivilegeMgr.checkCurrentUserAuthority(EntityType.COMMUNITY.getCode(), cmd.getCommunityId(), cmd.getOrganizationId(), PrivilegeConstants.METER_READ);
-        checkEnergyAuth(cmd.getNamespaceId(), PrivilegeConstants.ENERGY_SETTING, cmd.getOrganizationId(),  cmd.getCommunityId());
+        checkEnergyAuth(cmd.getNamespaceId(), PrivilegeConstants.METER_READ, cmd.getOrganizationId(),  cmd.getCommunityId());
         EnergyMeter meter = this.findMeterById(cmd.getMeterId(),cmd.getNamespaceId());
 
         // 读数大于最大量程

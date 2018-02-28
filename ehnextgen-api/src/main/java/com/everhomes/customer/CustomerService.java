@@ -5,6 +5,7 @@ import com.everhomes.rest.customer.*;
 import com.everhomes.rest.organization.ImportFileTaskDTO;
 import org.springframework.web.multipart.MultipartFile;
 
+import javax.servlet.http.HttpServletResponse;
 import java.util.List;
 
 /**
@@ -134,6 +135,10 @@ public interface CustomerService {
 
     SearchEnterpriseCustomerResponse queryEnterpriseCustomers(SearchEnterpriseCustomerCommand cmd);
 
+
     ListCommunitySyncResultResponse listCommunitySyncResult(ListCommunitySyncResultCommand cmd);
+
+    void exportEnterpriseCustomer(ExportEnterpriseCustomerCommand cmd, HttpServletResponse response);
+
 
 }

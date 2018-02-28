@@ -4,7 +4,6 @@ package com.everhomes.rest.community;
 import com.everhomes.util.StringHelper;
 
 /**
- * <p>
  * <ul>
  * <li>resourceType: 资源实体类型 小区园区：EhCommunities</li>
  * <li>resourceId: 资源实体id</li>
@@ -18,6 +17,8 @@ public class CreateResourceCategoryAssignmentCommand {
     private Long resourceId;
 
     private Long resourceCategoryId;
+
+    private Integer namespaceId;
 
     public CreateResourceCategoryAssignmentCommand() {
     }
@@ -44,6 +45,14 @@ public class CreateResourceCategoryAssignmentCommand {
 
     public void setResourceCategoryId(Long resourceCategoryId) {
         this.resourceCategoryId = resourceCategoryId;
+    }
+
+    public Integer getNamespaceId() {
+        return namespaceId;
+    }
+
+    public void setNamespaceId(Integer namespaceId) {
+        this.namespaceId = namespaceId;
     }
 
     @Override
