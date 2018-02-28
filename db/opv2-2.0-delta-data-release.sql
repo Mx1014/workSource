@@ -575,3 +575,6 @@ UPDATE eh_rentalv2_resource_types SET identify = 'area' WHERE NAME LIKE '%场地
 UPDATE eh_rentalv2_resource_types SET identify = 'conference' WHERE id IN (10819,12030);
 UPDATE eh_rentalv2_resource_types SET identify = 'screen' WHERE id IN (11,12168);
 UPDATE eh_rentalv2_resource_types SET identify = 'area' WHERE id IN (10012,10062,10715,10716,10717,10814,12044,12078,12081,12082,12131,12175);
+
+-- fix 24613 by xiongying
+update eh_var_fields set display_name = '离场时间(月)' where display_name = '离场时间';
