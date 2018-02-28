@@ -1150,6 +1150,7 @@ public class SocialSecurityServiceImpl implements SocialSecurityService {
 
     private void batchUpdateSSSettingAndPayments(List list, Long ownerId, String fileLog, ImportFileResponse response) {
         //
+        Set<Long> count = new HashSet<>();
         RowResult title = (RowResult) list.get(0);
         Map<String, String> titleMap = title.getCells();
         response.setTitle(titleMap);
@@ -1174,6 +1175,7 @@ public class SocialSecurityServiceImpl implements SocialSecurityService {
                 response.getLogs().add(log);
                 continue;
             } else {
+                count.add(detail.getId());
                 String ssCityName = r.getC();
                 Long ssCityId = getZuolinNamespaceCityId(ssCityName);
                 String afCityName = r.getD();
@@ -1201,7 +1203,7 @@ public class SocialSecurityServiceImpl implements SocialSecurityService {
                 importUpdateSetting(detail, ssBases, afBases, r, log, ssCityId, afCItyId, response, houseType);
             }
         }
-        response.setTotalCount((long) list.size() - 1);
+        response.setTotalCount((long) count.size() );
         response.setFailCount((long) response.getLogs().size());
         //设置完后同步一下
         socialSecuritySettingProvider.syncRadixAndRatioToPayments(ownerId);
