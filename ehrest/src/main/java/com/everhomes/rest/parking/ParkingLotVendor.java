@@ -12,12 +12,13 @@ package com.everhomes.rest.parking;
  * <li>INNOSPRING("INNOSPRING"): 创源</li>
  * <li>JIN_YI("JIN_YI"): 金溢(清华信息港)</li>
  * <li>ZHONG_BAI_CHANG("ZHONG_BAI_CHANG"): 中百畅(广兴源)</li>
+ * <li>GUANG_DA_WE_GU("GUANG_DA_WE_GU"): 光大we谷停车场</li>
  * </ul>
  */
 public enum ParkingLotVendor {
     BOSIGAO("BOSIGAO"), BOSIGAO2("BOSIGAO2"), KETUO("KETUO"), KETUO2("KETUO2"), WANKE("WANKE"),
     INNOSPRING("INNOSPRING"), JIN_YI("JIN_YI"), XIAOMAO("XIAOMAO"), MYBAY("Mybay"), TEST("TEST"),
-    ZHONG_BAI_CHANG("ZHONG_BAI_CHANG");
+    ZHONG_BAI_CHANG("ZHONG_BAI_CHANG"),GUANG_DA_WE_GU("GUANG_DA_WE_GU");
     
     private String code;
     private ParkingLotVendor(String code) {

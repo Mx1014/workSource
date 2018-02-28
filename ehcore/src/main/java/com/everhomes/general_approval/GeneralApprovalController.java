@@ -166,4 +166,19 @@ public class GeneralApprovalController extends ControllerBase {
 
 		return response;
 	}
+
+	/**
+	 * <b>URL: /general_approval/getUserRealName</b>
+	 * <p> 获取用户在公司中的信息 </p>
+	 */
+	@RequestMapping("getUserRealName")
+	@RestReturn(value=String.class)
+	public RestResponse getUserContactName(GetUserRealNameCommand cmd) {
+		String res = generalApprovalService.getUserRealName(cmd);
+		RestResponse response = new RestResponse(res);
+		response.setErrorCode(ErrorCodes.SUCCESS);
+		response.setErrorDescription("OK");
+
+		return response;
+	}
 }

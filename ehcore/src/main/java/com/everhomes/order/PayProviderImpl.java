@@ -27,10 +27,7 @@ import com.everhomes.server.schema.tables.records.EhPaymentWithdrawOrdersRecord;
 import com.everhomes.util.ConvertHelper;
 import com.everhomes.util.DateHelper;
 import com.everhomes.util.StringHelper;
-import org.jooq.DSLContext;
-import org.jooq.Record;
-import org.jooq.SelectConditionStep;
-import org.jooq.SelectQuery;
+import org.jooq.*;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Repository;
 
@@ -54,6 +51,16 @@ public class PayProviderImpl implements PayProvider {
         query.addConditions(Tables.EH_PAYMENT_ORDER_RECORDS.ORDER_ID.eq(orderId));
         query.addConditions(Tables.EH_PAYMENT_ORDER_RECORDS.ORDER_TYPE.eq(orderType));
         return query.fetchOneInto(PaymentOrderRecord.class);
+    }
+
+    @Override
+    public void deleteOrderRecordByOrder(String orderType, Long orderId) {
+        DSLContext context = dbProvider.getDslContext(AccessSpec.readOnly());
+        DeleteQuery<EhPaymentOrderRecordsRecord> query = context.deleteQuery(Tables.EH_PAYMENT_ORDER_RECORDS);
+        query.addConditions(Tables.EH_PAYMENT_ORDER_RECORDS.ORDER_ID.eq(orderId));
+        query.addConditions(Tables.EH_PAYMENT_ORDER_RECORDS.ORDER_TYPE.eq(orderType));
+        query.execute();
+        DaoHelper.publishDaoAction(DaoAction.MODIFY, EhPaymentOrderRecordsRecord.class, null);
     }
 
     @Override

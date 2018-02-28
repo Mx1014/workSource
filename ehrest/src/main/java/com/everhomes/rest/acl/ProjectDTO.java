@@ -6,7 +6,7 @@ import com.everhomes.discover.ItemType;
 import java.util.List;
 
 /**
- * <p>项目/p>
+ * <p>项目</p>
  * <ul>
  * <li>projectId: 项目id</li>
  * <li>projectType: 项目类型 </li>

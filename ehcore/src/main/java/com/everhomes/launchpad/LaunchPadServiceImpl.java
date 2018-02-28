@@ -168,7 +168,7 @@ public class LaunchPadServiceImpl implements LaunchPadService {
 		result = getItemsByCommunity(cmd, request, ItemDisplayFlag.DISPLAY);
 
 		// 更多或者全部不可删除，如果没有更多或者全部则其他icon不可以移除
-		setDefaultDeleteFalg(result);
+		setDefaultEditFlag(result);
 
 		response.setLaunchPadItems(result);
 		long endTime = System.currentTimeMillis();
@@ -182,7 +182,7 @@ public class LaunchPadServiceImpl implements LaunchPadService {
 	 * 更多或者全部不可删除，如果没有更多或者全部则其他icon不可以移除
 	 * @param dtos
 	 */
-	private void setDefaultDeleteFalg(List<LaunchPadItemDTO> dtos){
+	private void setDefaultEditFlag(List<LaunchPadItemDTO> dtos){
 		if(dtos == null){
 			return;
 		}
@@ -192,12 +192,14 @@ public class LaunchPadServiceImpl implements LaunchPadService {
 			if(ActionType.fromCode(dto.getActionType()) == ActionType.MORE_BUTTON || ActionType.fromCode(dto.getActionType()) == ActionType.ALL_BUTTON){
 				deleteFlag = true;
 				dto.setDeleteFlag(DeleteFlagType.NO.getCode());
+				dto.setEditFlag(EditFlagType.NO.getCode());
 				break;
 			}
 		}
 		if(!deleteFlag){
 			for (LaunchPadItemDTO dto: dtos){
 				dto.setDeleteFlag(DeleteFlagType.NO.getCode());
+				dto.setEditFlag(EditFlagType.NO.getCode());
 			}
 		}
 	}
@@ -386,7 +388,7 @@ public class LaunchPadServiceImpl implements LaunchPadService {
 		result = getItemsByOrg(cmd, request,ItemDisplayFlag.DISPLAY);
 
 		// 更多或者全部不可删除，如果没有更多或者全部则其他icon不可以移除
-		setDefaultDeleteFalg(result);
+		setDefaultEditFlag(result);
 
 		response.setLaunchPadItems(result);
 		long endTime = System.currentTimeMillis();
