@@ -281,10 +281,8 @@ public class EquipmentStandardSearcherImpl extends AbstractElasticSearch impleme
             for (EquipmentModelCommunityMap map : maps) {
                 EquipmentInspectionStandards standard = equipmentProvider.findStandardById(map.getModelId());
                 if (standard != null && EquipmentStandardStatus.ACTIVE.equals(EquipmentStandardStatus.fromStatus(standard.getStatus()))) {
-                    LOGGER.info("map standard :"+standard);
                     //有效的才加  fix bug
                     if (cmd.getStatus() != null) {
-                        LOGGER.info("map standard :"+cmd.getStatus());
                         if (!Objects.equals(standard.getStatus(), cmd.getStatus())) {
                             continue;
                         }
