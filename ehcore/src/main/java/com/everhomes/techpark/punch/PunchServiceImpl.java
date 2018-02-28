@@ -7083,7 +7083,7 @@ public class PunchServiceImpl implements PunchService {
         if(null != punchGroupDTO.getSpecialDays()){
         	for(PunchSpecialDayDTO specialDayDTO : punchGroupDTO.getSpecialDays()){
 				PunchSpecialDay psd = ConvertHelper.convert(specialDayDTO, PunchSpecialDay.class);
-				psd.setStatus(pr.getStatus());
+//				psd.setStatus(pr.getStatus());
 				psd.setOwnerType(PunchOwnerType.ORGANIZATION.getCode());
         		psd.setOwnerId(punchGroupDTO.getOwnerId());
         		psd.setPunchRuleId(pr.getId());
