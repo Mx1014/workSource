@@ -1082,7 +1082,7 @@ CREATE TABLE `eh_salary_groups_report_resources` (
   `owner_id` BIGINT COMMENT '属于哪一个分公司的',
   `organization_id` BIGINT COMMENT '属于哪一个总公司的',
   `salary_period` VARCHAR(8) COMMENT 'example:201705', 
-  `report_type` VARCHAR(8) COMMENT'文件类型:0-工资明细 1-部门汇总',
+  `report_type` TINYINT COMMENT'文件类型:0-工资明细 1-部门汇总',
   `uri` VARCHAR(1024),
   `url` VARCHAR(1024),
   `creator_Name` VARCHAR(128) COMMENT'创建者姓名',
