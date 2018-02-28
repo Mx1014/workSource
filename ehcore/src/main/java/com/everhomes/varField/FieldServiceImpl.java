@@ -1012,12 +1012,15 @@ public class FieldServiceImpl implements FieldService {
             if(null != detail && null != detail.getContactName()){
                 invoke = String.valueOf(detail.getContactName());
             }else{
-                UserInfo userInfo = userService.getUserInfo(uid);
-                if(userInfo != null){
-                    invoke = String.valueOf(userInfo.getNickName());
-                } else {
-                    LOGGER.error("field "+ fieldName+" find name in organization member failed ,uid is "+ uid);
+                if(uid > 0) {
+                    UserInfo userInfo = userService.getUserInfo(uid);
+                    if(userInfo != null){
+                        invoke = String.valueOf(userInfo.getNickName());
+                    } else {
+                        LOGGER.error("field "+ fieldName+" find name in organization member failed ,uid is "+ uid);
+                    }
                 }
+
             }
         }
 
