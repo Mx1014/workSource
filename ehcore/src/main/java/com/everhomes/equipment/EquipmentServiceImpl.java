@@ -3596,16 +3596,16 @@ private void checkUserPrivilege(Long orgId, Long privilegeId, Long communityId) 
 			response.setNextPageAnchor((long) (offset + 1));
 		}
 
-		tasks = allTasks.stream().map(r -> {
-			if ((EquipmentTaskStatus.WAITING_FOR_EXECUTING.equals(EquipmentTaskStatus.fromStatus(r.getStatus())))
-					|| EquipmentTaskStatus.DELAY.equals(EquipmentTaskStatus.fromStatus(r.getStatus()))) {
-				return r;
-			} else if (EquipmentTaskStatus.CLOSE.equals(EquipmentTaskStatus.fromStatus(r.getStatus()))
-					|| (EquipmentTaskStatus.REVIEW_DELAY.equals(EquipmentTaskStatus.fromStatus(r.getStatus())))) {
-				return r;
-			}
-			return null;
-		}).filter(Objects::nonNull).collect(Collectors.toList());
+//		tasks = allTasks.stream().map(r -> {
+//			if ((EquipmentTaskStatus.WAITING_FOR_EXECUTING.equals(EquipmentTaskStatus.fromStatus(r.getStatus())))
+//					|| EquipmentTaskStatus.DELAY.equals(EquipmentTaskStatus.fromStatus(r.getStatus()))) {
+//				return r;
+//			} else if (EquipmentTaskStatus.CLOSE.equals(EquipmentTaskStatus.fromStatus(r.getStatus()))
+//					|| (EquipmentTaskStatus.REVIEW_DELAY.equals(EquipmentTaskStatus.fromStatus(r.getStatus())))) {
+//				return r;
+//			}
+//			return null;
+//		}).filter(Objects::nonNull).collect(Collectors.toList());
 
 		List<EquipmentTaskDTO> dtos = tasks.stream().map((r) ->
 				ConvertHelper.convert(r, EquipmentTaskDTO.class))
