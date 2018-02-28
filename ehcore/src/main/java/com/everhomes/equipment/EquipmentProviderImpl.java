@@ -135,7 +135,6 @@ import java.util.HashSet;
 import java.util.List;
 import java.util.Map;
 import java.util.Set;
-import java.util.stream.Collectors;
 
 @Component
 @DependsOn("platformContext")
@@ -1662,16 +1661,11 @@ public class EquipmentProviderImpl implements EquipmentProvider {
     }
 
     @Override
-    public List<EquipmentInspectionTasks> listTaskByPlanMaps(List<EquipmentInspectionEquipmentPlanMap> planMaps,
+    public List<EquipmentInspectionTasks> listTaskByPlanMaps(List<Long> planIds,
       Timestamp startTime, Timestamp endTime, ListingLocator locator, int pageSize,List<Byte> taskStatus) {
 
         List<EquipmentInspectionTasks> tasks = new ArrayList<EquipmentInspectionTasks>();
-        List<Long> planIds = new ArrayList<>();
-        if (planMaps != null && planMaps.size() > 0) {
-            planIds = planMaps.stream()
-                    .map(EquipmentInspectionEquipmentPlanMap::getPlanId)
-                    .collect(Collectors.toList());
-        }
+
         DSLContext context = this.dbProvider.getDslContext(AccessSpec.readOnly());
         SelectQuery<EhEquipmentInspectionTasksRecord> query = context.selectQuery(Tables.EH_EQUIPMENT_INSPECTION_TASKS);
         if (startTime != null && !"".equals(startTime)) {
@@ -1681,11 +1675,15 @@ public class EquipmentProviderImpl implements EquipmentProvider {
         if (endTime != null && !"".equals(endTime)) {
             query.addConditions(Tables.EH_EQUIPMENT_INSPECTION_TASKS.EXECUTIVE_EXPIRE_TIME.le(endTime));
         }
-        if(taskStatus!=null && taskStatus.size()>0){
+        if (taskStatus != null && taskStatus.size() > 0) {
             query.addConditions(Tables.EH_EQUIPMENT_INSPECTION_TASKS.STATUS.in(taskStatus));
         }
-        query.addConditions(Tables.EH_EQUIPMENT_INSPECTION_TASKS.ID.lt(locator.getAnchor()));
-        query.addConditions(Tables.EH_EQUIPMENT_INSPECTION_TASKS.PLAN_ID.in(planIds));
+        if (locator.getAnchor() != null) {
+            query.addConditions(Tables.EH_EQUIPMENT_INSPECTION_TASKS.ID.lt(locator.getAnchor()));
+        }
+        if (planIds != null && planIds.size() > 0) {
+            query.addConditions(Tables.EH_EQUIPMENT_INSPECTION_TASKS.PLAN_ID.in(planIds));
+        }
         query.addLimit(pageSize);
         query.addOrderBy(Tables.EH_EQUIPMENT_INSPECTION_TASKS.ID.desc());
 
@@ -1695,7 +1693,6 @@ public class EquipmentProviderImpl implements EquipmentProvider {
         }
 
         query.fetch().map((r) -> {
-
             tasks.add(ConvertHelper.convert(r, EquipmentInspectionTasks.class));
             return null;
         });

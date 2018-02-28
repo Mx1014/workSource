@@ -5515,9 +5515,9 @@ public class GroupServiceImpl implements GroupService {
 			throw RuntimeErrorException.errorWith(ErrorCodes.SCOPE_GENERAL, ErrorCodes.ERROR_INVALID_PARAMETER,
 					"Invalid parameters");
 		}
-		if (cmd.getTitle().length() > 10) {
+		if (cmd.getTitle().length() > 30) {
 			throw RuntimeErrorException.errorWith(GroupServiceErrorCode.SCOPE, GroupServiceErrorCode.ERROR_BROADCAST_TITLE_LENGTH,
-					"title length cannot be greater than 10!");
+					"title length cannot be greater than 30!");
 		}
 		if (cmd.getContent().length() > 200) {
 			throw RuntimeErrorException.errorWith(GroupServiceErrorCode.SCOPE, GroupServiceErrorCode.ERROR_BROADCAST_CONTENT_LENGTH,

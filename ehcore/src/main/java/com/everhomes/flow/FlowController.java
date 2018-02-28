@@ -170,7 +170,7 @@ public class FlowController extends ControllerBase {
 
     /**
      * <b>URL: /flow/postSubject</b>
-     * <p> 显示用户所有的 FlowCase </p>
+     * <p> 附言 </p>
      * @return FlowCase 的列表信息
      */
     @RequestMapping("postSubject")
@@ -240,7 +240,6 @@ public class FlowController extends ControllerBase {
     /**
      * <b>URL: /flow/postEvaluate</b>
      * <p> 对节点进行评价 </p>
-     * @return 返回评价信息
      */
     @RequestMapping("postEvaluate")
     @RestReturn(value=FlowEvaluateDTO.class)
@@ -253,7 +252,7 @@ public class FlowController extends ControllerBase {
     
     /**
      * <b>URL: /flow/getEvaluateInfo</b>
-     * <p> 对节点进行评价 </p>
+     * <p> 获取评价信息 </p>
      * @return 返回评价信息
      */
     @RequestMapping("getEvaluateInfo")
@@ -267,7 +266,7 @@ public class FlowController extends ControllerBase {
     
     /**
      * <b>URL: /flow/listModules</b>
-     * <p> 对节点进行评价 </p>
+     * <p> 获取模块列表 </p>
      * @return 返回评价信息
      */
     @RequestMapping("listModules")
