@@ -2120,12 +2120,13 @@ public class CustomerServiceImpl implements CustomerService {
         Map<Long, Long> properties = enterpriseCustomerProvider.listCustomerPatentsByCustomerIds(customerIds);
         properties.forEach((categoryId, count) -> {
             CustomerIntellectualPropertyStatisticsDTO dto = new CustomerIntellectualPropertyStatisticsDTO();
+            dto.setPropertyType("专利");
             dto.setPropertyCount(count);
 //            ScopeFieldItem item = fieldProvider.findScopeFieldItemByFieldItemId(cmd.getNamespaceId(), categoryId);
-            ScopeFieldItem item = fieldService.findScopeFieldItemByFieldItemId(cmd.getNamespaceId(), cmd.getCommunityId(), categoryId);
-            if(item != null) {
-                dto.setPropertyType(item.getItemDisplayName());
-            }
+//            ScopeFieldItem item = fieldService.findScopeFieldItemByFieldItemId(cmd.getNamespaceId(), cmd.getCommunityId(), categoryId);
+//            if(item != null) {
+//                dto.setPropertyType(item.getItemDisplayName());
+//            }
             dtos.add(dto);
             response.setPropertyTotalCount(response.getPropertyTotalCount() + count);
         });

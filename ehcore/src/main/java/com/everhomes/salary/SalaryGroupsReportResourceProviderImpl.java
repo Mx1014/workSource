@@ -5,6 +5,7 @@ import java.sql.Timestamp;
 import java.util.List;
 
 import org.jooq.DSLContext;
+import org.jooq.Record;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
 
@@ -34,8 +35,8 @@ public class SalaryGroupsReportResourceProviderImpl implements SalaryGroupsRepor
 	public void createSalaryGroupsReportResource(SalaryGroupsReportResource salaryGroupsReportResource) {
 		Long id = sequenceProvider.getNextSequence(NameMapper.getSequenceDomainFromTablePojo(EhSalaryGroupsReportResources.class));
 		salaryGroupsReportResource.setId(id);
-		salaryGroupsReportResource.setCreateTime(new Timestamp(DateHelper.currentGMTTime().getTime()));
-		salaryGroupsReportResource.setCreatorUid(UserContext.current().getUser().getId());
+//		salaryGroupsReportResource.setCreateTime(new Timestamp(DateHelper.currentGMTTime().getTime()));
+//		salaryGroupsReportResource.setCreatorUid(UserContext.current().getUser().getId());
 //		salaryGroupsReportResource.setUpdateTime(salaryGroupsReportResource.getCreateTime());
 //		salaryGroupsReportResource.setOperatorUid(salaryGroupsReportResource.getCreatorUid());
 		getReadWriteDao().insert(salaryGroupsReportResource);
@@ -63,7 +64,28 @@ public class SalaryGroupsReportResourceProviderImpl implements SalaryGroupsRepor
 				.orderBy(Tables.EH_SALARY_GROUPS_REPORT_RESOURCES.ID.asc())
 				.fetch().map(r -> ConvertHelper.convert(r, SalaryGroupsReportResource.class));
 	}
-	
+
+	@Override
+	public void deleteSalaryGroupsReportResourceByPeriodAndType(Long ownerId, String salaryPeriod, Byte reportType) {
+		getReadWriteContext().delete(Tables.EH_SALARY_GROUPS_REPORT_RESOURCES)
+				.where(Tables.EH_SALARY_GROUPS_REPORT_RESOURCES.OWNER_ID.eq(ownerId))
+				.and(Tables.EH_SALARY_GROUPS_REPORT_RESOURCES.REPORT_TYPE.eq(reportType))
+				.and(Tables.EH_SALARY_GROUPS_REPORT_RESOURCES.SALARY_PERIOD.eq(salaryPeriod))
+				.execute();
+	}
+
+	@Override
+	public SalaryGroupsReportResource findSalaryGroupsReportResourceByPeriodAndType(Long ownerId, String month, Byte code) {
+		Record record = getReadOnlyContext().select().from(Tables.EH_SALARY_GROUPS_REPORT_RESOURCES)
+				.where(Tables.EH_SALARY_GROUPS_REPORT_RESOURCES.OWNER_ID.eq(ownerId))
+				.and(Tables.EH_SALARY_GROUPS_REPORT_RESOURCES.SALARY_PERIOD.eq(month))
+				.and(Tables.EH_SALARY_GROUPS_REPORT_RESOURCES.REPORT_TYPE.eq(code)).fetchAny();
+		if (null == record) {
+			return null;
+		}
+		return ConvertHelper.convert(record, SalaryGroupsReportResource.class);
+	}
+
 	private EhSalaryGroupsReportResourcesDao getReadWriteDao() {
 		return getDao(getReadWriteContext());
 	}

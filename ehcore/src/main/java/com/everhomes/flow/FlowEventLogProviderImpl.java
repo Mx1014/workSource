@@ -93,18 +93,19 @@ public class FlowEventLogProviderImpl implements FlowEventLogProvider {
             queryBuilderCallback.buildCondition(locator, query);
 
         if(locator.getAnchor() != null) {
-            query.addConditions(Tables.EH_FLOW_EVENT_LOGS.ID.gt(locator.getAnchor()));
+            query.addConditions(Tables.EH_FLOW_EVENT_LOGS.ID.ge(locator.getAnchor()));
         }
         query.addConditions(Tables.EH_FLOW_EVENT_LOGS.STEP_COUNT.ge(0L));
 
         query.addOrderBy(Tables.EH_FLOW_EVENT_LOGS.ID);
-        query.addLimit(count);
+        query.addLimit(count + 1);
         List<FlowEventLog> objs = query.fetch().map((r) -> {
             return ConvertHelper.convert(r, FlowEventLog.class);
         });
 
-        if(objs.size() >= count) {
+        if(objs.size() > count) {
             locator.setAnchor(objs.get(objs.size() - 1).getId());
+            objs.remove(objs.size() - 1);
         } else {
             locator.setAnchor(null);
         }
@@ -159,7 +160,7 @@ public class FlowEventLogProviderImpl implements FlowEventLogProvider {
                 .join(Tables.EH_FLOWS)
                 .on(Tables.EH_FLOW_CASES.FLOW_MAIN_ID.eq(Tables.EH_FLOWS.FLOW_MAIN_ID)
                         .and(Tables.EH_FLOW_CASES.FLOW_VERSION.eq(Tables.EH_FLOWS.FLOW_VERSION)))
-                .where(cond).orderBy(Tables.EH_FLOW_EVENT_LOGS.ID.desc()).limit(count).getQuery();
+                .where(cond).orderBy(Tables.EH_FLOW_EVENT_LOGS.ID.desc()).limit(count + 1).getQuery();
 
         if (callback != null) {
             callback.buildCondition(locator, query);
@@ -173,8 +174,9 @@ public class FlowEventLogProviderImpl implements FlowEventLogProvider {
             return detail;
         });
 
-        if(objs.size() >= count) {
-            locator.setAnchor(objs.get(objs.size() - 1).getEventLogId());
+        if(objs.size() > count) {
+            locator.setAnchor(objs.get(objs.size() - 1).getId());
+            objs.remove(objs.size() - 1);
         } else {
             locator.setAnchor(null);
         }
@@ -258,7 +260,7 @@ public class FlowEventLogProviderImpl implements FlowEventLogProvider {
         }
 
         if(locator.getAnchor() != null) {
-    	    cond = cond.and(Tables.EH_FLOW_EVENT_LOGS.ID.lt(locator.getAnchor()));
+    	    cond = cond.and(Tables.EH_FLOW_EVENT_LOGS.ID.le(locator.getAnchor()));
         }
         cond = cond.and(Tables.EH_FLOW_EVENT_LOGS.STEP_COUNT.ge(0L));
         return cond;
