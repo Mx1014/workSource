@@ -132,7 +132,6 @@ public class EbeiThirdPartContractHandler implements ThirdPartContractHandler {
 
     @Override
     public void syncContractsFromThirdPart(String pageOffset, String version, String communityIdentifier, Long taskId) {
-        LOGGER.debug("INTO syncContractsFromThirdPart");
         Map<String, String> params= new HashMap<String,String>();
         if(communityIdentifier == null) {
             communityIdentifier = "";
@@ -149,11 +148,9 @@ public class EbeiThirdPartContractHandler implements ThirdPartContractHandler {
         }
         params.put("version", version);
 
-        LOGGER.debug("params: {}", StringHelper.toJsonString(params));
         String enterprises = null;
         String url = configurationProvider.getValue("ebei.url", "");
 //        String url = "http://183.62.222.87:5902/sf";
-        LOGGER.debug("URL: {}", url);
         try {
             enterprises = HttpUtils.get(url+SYNC_CONTRACTS, params, 600, "UTF-8");
         } catch (Exception e) {
