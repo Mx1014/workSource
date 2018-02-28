@@ -36,8 +36,8 @@ public class SalaryGroupsReportResourceProviderImpl implements SalaryGroupsRepor
 		salaryGroupsReportResource.setId(id);
 		salaryGroupsReportResource.setCreateTime(new Timestamp(DateHelper.currentGMTTime().getTime()));
 		salaryGroupsReportResource.setCreatorUid(UserContext.current().getUser().getId());
-		salaryGroupsReportResource.setUpdateTime(salaryGroupsReportResource.getCreateTime());
-		salaryGroupsReportResource.setOperatorUid(salaryGroupsReportResource.getCreatorUid());
+//		salaryGroupsReportResource.setUpdateTime(salaryGroupsReportResource.getCreateTime());
+//		salaryGroupsReportResource.setOperatorUid(salaryGroupsReportResource.getCreatorUid());
 		getReadWriteDao().insert(salaryGroupsReportResource);
 		DaoHelper.publishDaoAction(DaoAction.CREATE, EhSalaryGroupsReportResources.class, null);
 	}
@@ -45,8 +45,8 @@ public class SalaryGroupsReportResourceProviderImpl implements SalaryGroupsRepor
 	@Override
 	public void updateSalaryGroupsReportResource(SalaryGroupsReportResource salaryGroupsReportResource) {
 		assert (salaryGroupsReportResource.getId() != null);
-		salaryGroupsReportResource.setUpdateTime(new Timestamp(DateHelper.currentGMTTime().getTime()));
-		salaryGroupsReportResource.setOperatorUid(UserContext.current().getUser().getId());
+//		salaryGroupsReportResource.setUpdateTime(new Timestamp(DateHelper.currentGMTTime().getTime()));
+//		salaryGroupsReportResource.setOperatorUid(UserContext.current().getUser().getId());
 		getReadWriteDao().update(salaryGroupsReportResource);
 		DaoHelper.publishDaoAction(DaoAction.MODIFY, EhSalaryGroupsReportResources.class, salaryGroupsReportResource.getId());
 	}
