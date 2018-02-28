@@ -1151,6 +1151,7 @@ public class SocialSecurityServiceImpl implements SocialSecurityService {
     private void batchUpdateSSSettingAndPayments(List list, Long ownerId, String fileLog, ImportFileResponse response) {
         //
         Set<Long> count = new HashSet<>();
+        Set<Long> cover = new HashSet<>();
         RowResult title = (RowResult) list.get(0);
         Map<String, String> titleMap = title.getCells();
         response.setTitle(titleMap);
@@ -1200,10 +1201,11 @@ public class SocialSecurityServiceImpl implements SocialSecurityService {
                     response.getLogs().add(log);
                     continue;
                 }
-                importUpdateSetting(detail, ssBases, afBases, r, log, ssCityId, afCItyId, response, houseType);
+                importUpdateSetting(detail, ssBases, afBases, r, log, ssCityId, afCItyId, response, houseType, cover);
             }
         }
-        response.setTotalCount((long) count.size() );
+        response.setTotalCount((long) count.size());
+        response.setCoverCount((long) cover.size());
         response.setFailCount((long) response.getLogs().size());
         //设置完后同步一下
         socialSecuritySettingProvider.syncRadixAndRatioToPayments(ownerId);
@@ -1211,7 +1213,7 @@ public class SocialSecurityServiceImpl implements SocialSecurityService {
     }
 
     private void importUpdateSetting(OrganizationMemberDetails detail, List<SocialSecurityBase> ssBases,
-                                     List<SocialSecurityBase> afBases, RowResult r, ImportFileResultLog<Map<String, String>> log, Long ssCityId, Long afCItyId, ImportFileResponse response, String houseType) {
+                                     List<SocialSecurityBase> afBases, RowResult r, ImportFileResultLog<Map<String, String>> log, Long ssCityId, Long afCItyId, ImportFileResponse response, String houseType, Set<Long> cover) {
         List<SocialSecuritySetting> settings = socialSecuritySettingProvider.listSocialSecuritySetting(detail.getId());
 
         // 社保
@@ -1376,6 +1378,7 @@ public class SocialSecurityServiceImpl implements SocialSecurityService {
                 SocialSecurityPayment payment = processSocialSecurityPayment(setting, payMonth, NormalFlag.NO.getCode());
                 socialSecurityPaymentProvider.createSocialSecurityPayment(payment);
             } else {
+                cover.add(detail.getId());
                 socialSecuritySettingProvider.updateSocialSecuritySetting(setting);
             }
         }
@@ -2787,7 +2790,7 @@ public class SocialSecurityServiceImpl implements SocialSecurityService {
 
         response.setCreatorName(findNameByOwnerAndUser(ownerId, response.getCreatorUid()));
 
-        response.setFileName(findNameByOwnerAndUser(ownerId,response.getFileUid()));
+        response.setFileName(findNameByOwnerAndUser(ownerId, response.getFileUid()));
     }
 
     @Override
