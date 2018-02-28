@@ -1009,11 +1009,11 @@ public class SalaryServiceImpl implements SalaryService {
 
         NormalFlag isFile = isMonthFile(month);
         List<SalaryGroupEntity> groupEntities = new ArrayList<>();
-        if (isFile == NormalFlag.NO) {
+//        if (isFile == NormalFlag.NO) {
             groupEntities = salaryGroupEntityProvider.listOpenSalaryGroupEntityByOrgId(ownerId);
-        } else {
-            groupEntities = salaryEmployeePeriodValProvider.listOpenSalaryGroupEntityByOrgId(ownerId, month);
-        }
+//        } else {
+//            groupEntities = salaryEmployeePeriodValProvider.listOpenSalaryGroupEntityByOrgId(ownerId, month);
+//        }
         List<SalaryEntityCategory> categories = salaryEntityCategoryProvider.listSalaryEntityCategory();
         XSSFWorkbook wb = new XSSFWorkbook();
         XSSFSheet sheet = wb.createSheet("sheet1");
@@ -1065,7 +1065,7 @@ public class SalaryServiceImpl implements SalaryService {
         row.createCell(++i).setCellValue(detail.getSalaryCardNumber());
         row.createCell(++i).setCellValue("在职不在职荣楠没跟我说");
 
-        if (null != categories) {
+        if (null != categories && null != groupEntities) {
             for (SalaryEntityCategory category : categories) {
                 Cell categoryCell = null;
                 if (!category.getId().equals(SalaryConstants.CATEGORY_REDU)) {
