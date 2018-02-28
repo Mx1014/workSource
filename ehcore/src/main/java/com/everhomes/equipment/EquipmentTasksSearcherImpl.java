@@ -233,9 +233,11 @@ public class EquipmentTasksSearcherImpl extends AbstractElasticSearch implements
                     equipments.add(equipmentStandardRelation);
                     dto.setEquipments(equipments);
                 }
-                List<OrganizationMember> executors = organizationProvider.listOrganizationMembersByUId(task.getExecutorId());
-                if (executors != null && executors.size() > 0) {
-                    dto.setExecutorName(executors.get(0).getContactName());
+                if(task.getExecutorId() != null && task.getExecutorId() != 0) {
+                    List<OrganizationMember> executors = organizationProvider.listOrganizationMembersByUId(task.getExecutorId());
+                    if(executors != null && executors.size() > 0) {
+                        dto.setExecutorName(executors.get(0).getContactName());
+                    }
                 }
                 tasks.add(dto);
             }

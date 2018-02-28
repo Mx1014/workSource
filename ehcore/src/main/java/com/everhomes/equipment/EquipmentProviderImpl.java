@@ -1697,7 +1697,6 @@ public class EquipmentProviderImpl implements EquipmentProvider {
         }
 
         query.fetch().map((r) -> {
-
             tasks.add(ConvertHelper.convert(r, EquipmentInspectionTasks.class));
             return null;
         });
