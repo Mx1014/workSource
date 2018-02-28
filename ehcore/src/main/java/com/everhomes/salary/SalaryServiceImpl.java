@@ -4,12 +4,15 @@ package com.everhomes.salary;
 import com.everhomes.bigcollection.Accessor;
 import com.everhomes.bigcollection.BigCollectionProvider;
 import com.everhomes.configuration.ConfigurationProvider;
+import com.everhomes.contentserver.ContentServer;
+import com.everhomes.contentserver.ContentServerService;
 import com.everhomes.db.DbProvider;
 import com.everhomes.filedownload.TaskService;
 import com.everhomes.listing.CrossShardListingLocator;
 import com.everhomes.locale.LocaleTemplateService;
 import com.everhomes.organization.*;
 import com.everhomes.rest.common.ImportFileResponse;
+import com.everhomes.rest.contentserver.UploadCsFileResponse;
 import com.everhomes.rest.filedownload.TaskRepeatFlag;
 import com.everhomes.rest.filedownload.TaskType;
 import com.everhomes.rest.organization.*;
@@ -25,10 +28,7 @@ import com.everhomes.uniongroup.UniongroupService;
 import com.everhomes.user.User;
 import com.everhomes.user.UserContext;
 import com.everhomes.user.UserProvider;
-import com.everhomes.util.ConvertHelper;
-import com.everhomes.util.DateHelper;
-import com.everhomes.util.RuntimeErrorException;
-import com.everhomes.util.StringHelper;
+import com.everhomes.util.*;
 import com.everhomes.util.excel.RowResult;
 import com.everhomes.util.excel.handler.PropMrgOwnerHandler;
 import freemarker.cache.StringTemplateLoader;
@@ -40,6 +40,7 @@ import org.apache.poi.xssf.usermodel.XSSFComment;
 import org.apache.poi.xssf.usermodel.XSSFDrawing;
 import org.apache.poi.xssf.usermodel.XSSFSheet;
 import org.apache.poi.xssf.usermodel.XSSFWorkbook;
+import org.apache.zookeeper.server.ByteBufferInputStream;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -50,10 +51,7 @@ import org.springframework.stereotype.Component;
 import org.springframework.web.multipart.MultipartFile;
 
 import javax.servlet.http.HttpServletResponse;
-import java.io.BufferedOutputStream;
-import java.io.ByteArrayOutputStream;
-import java.io.IOException;
-import java.io.OutputStream;
+import java.io.*;
 import java.math.BigDecimal;
 import java.net.URLEncoder;
 import java.sql.Timestamp;
@@ -104,6 +102,10 @@ public class SalaryServiceImpl implements SalaryService {
     @Autowired
     private DbProvider dbProvider;
 
+    @Autowired
+    private ContentServerService contentServerService;
+    @Autowired
+    private SalaryGroupsReportResourceProvider salaryGroupsReportResourceProvider;
     @Autowired
     private BigCollectionProvider bigCollectionProvider;
 
@@ -296,6 +298,7 @@ public class SalaryServiceImpl implements SalaryService {
                     entity.setName(dto.getName());
                 }
                 salaryGroupEntityProvider.updateSalaryGroupEntity(entity);
+                salaryGroupEntityProvider.updateSalaryGroupEntityOperator(cmd.getOrganizationId());
             }
         }
         //新增
@@ -988,6 +991,16 @@ public class SalaryServiceImpl implements SalaryService {
     public OutputStream getSalaryDetailsOutPut(Long ownerId, String month, Long taskId, Integer namespaceId) {
 //        String toMonth = salaryGroupProvider.getMonthByOwnerId(ownerId);
 //        NormalFlag isFile = NormalFlag.fromCode(month.equals(toMonth) ? (byte) 0 : (byte) 1);
+        XSSFWorkbook wb = getSalaryDetailsWB(ownerId, month, taskId, namespaceId);
+        // 设置response的Header
+//        OutputStream outputStream = new ByteArrayOutputStream(out);
+
+        return writeOutPut(wb);
+    }
+
+    private XSSFWorkbook getSalaryDetailsWB(Long ownerId, String month, Long taskId, Integer namespaceId) {
+
+
         NormalFlag isFile = isMonthFile(month);
         List<SalaryGroupEntity> groupEntities = new ArrayList<>();
         if (isFile == NormalFlag.NO) {
@@ -1009,13 +1022,12 @@ public class SalaryServiceImpl implements SalaryService {
         int processNum = 0;
         for (Long detailId : detailIds) {
             createSalaryDetailRow(sheet, detailId, groupEntities, categories, isFile, month, ownerId);
-            taskService.updateTaskProcess(taskId, (++processNum * 100) / detailIds.size());
+            if (null != taskId) {
+                taskService.updateTaskProcess(taskId, (++processNum * 100) / detailIds.size());
+            }
 
         }
-        // 设置response的Header
-//        OutputStream outputStream = new ByteArrayOutputStream(out);
-
-        return writeOutPut(wb);
+        return wb;
     }
 
     private NormalFlag isMonthFile(String month) {
@@ -1156,6 +1168,11 @@ public class SalaryServiceImpl implements SalaryService {
 
     @Override
     public OutputStream getDepartStatisticsOutPut(Long ownerId, String month, Long taskId, Integer namespaceId) {
+        XSSFWorkbook wb = getDepartStatisticsWB(ownerId, month, taskId, namespaceId);
+        return writeOutPut(wb);
+    }
+
+    private XSSFWorkbook getDepartStatisticsWB(Long ownerId, String month, Long taskId, Integer namespaceId) {
         XSSFWorkbook wb = new XSSFWorkbook();
         XSSFSheet sheet = wb.createSheet("sheet1");
         String sheetName = "sheet1";
@@ -1166,7 +1183,7 @@ public class SalaryServiceImpl implements SalaryService {
                 createDepartStatisticsRow(sheet, stat);
             }
         }
-        return writeOutPut(wb);
+        return wb;
     }
 
     private String objToString(Object o) {
@@ -1261,6 +1278,16 @@ public class SalaryServiceImpl implements SalaryService {
 
     @Override
     public OutputStream getEmployeeSalaryOutPut(Long ownerId, Long taskId, Integer namespaceId) {
+        XSSFWorkbook wb = getEmployeeSalaryWB(ownerId,taskId,namespaceId);
+
+        // 设置response的Header
+//        OutputStream outputStream = new ByteArrayOutputStream(out);
+
+        return writeOutPut(wb);
+    }
+
+    private XSSFWorkbook getEmployeeSalaryWB(Long ownerId, Long taskId, Integer namespaceId) {
+
         List<SalaryGroupEntity> groupEntities = salaryGroupEntityProvider.listOpenSalaryGroupEntityByOrgId(ownerId);
 
         XSSFWorkbook wb = new XSSFWorkbook();
@@ -1298,10 +1325,7 @@ public class SalaryServiceImpl implements SalaryService {
             taskService.updateTaskProcess(taskId, (++processNum * 100) / detailIds.size());
 
         }
-        // 设置response的Header
-//        OutputStream outputStream = new ByteArrayOutputStream(out);
-
-        return writeOutPut(wb);
+        return wb;
     }
 
     private OutputStream writeOutPut(XSSFWorkbook wb) {
@@ -1348,14 +1372,26 @@ public class SalaryServiceImpl implements SalaryService {
                 }
             }
         }
-        response.setExportExcels(getExportExcels());
+        response.setExportExcels(getExportExcels(cmd.getOwnerId(), cmd.getMonth()));
         return response;
     }
 
-    private List<ExportExcelDTO> getExportExcels() {
+    private List<ExportExcelDTO> getExportExcels(Long ownerId, String month) {
         List<ExportExcelDTO> result = new ArrayList<>();
-        result.add(new ExportExcelDTO(SalaryReportType.SALARY_DETAIL.getDescri(), String.valueOf(SalaryReportType.SALARY_DETAIL.getCode())));
-        result.add(new ExportExcelDTO(SalaryReportType.DPT_STATISTIC.getDescri(), String.valueOf(SalaryReportType.DPT_STATISTIC.getCode())));
+        SalaryGroupsReportResource resource = salaryGroupsReportResourceProvider.findSalaryGroupsReportResourceByPeriodAndType(ownerId, month, SalaryReportType.SALARY_DETAIL.getCode());
+        if (null != resource) {
+            result.add(new ExportExcelDTO(SalaryReportType.SALARY_DETAIL.getDescri(), String.valueOf(SalaryReportType.SALARY_DETAIL.getCode()), contentServerService.parserUri(resource.getUrl())));
+        }else{
+            result.add(new ExportExcelDTO(SalaryReportType.SALARY_DETAIL.getDescri(), String.valueOf(SalaryReportType.SALARY_DETAIL.getCode())));
+        }
+
+        resource = salaryGroupsReportResourceProvider.findSalaryGroupsReportResourceByPeriodAndType(ownerId, month, SalaryReportType.DPT_STATISTIC.getCode());
+        if (null != resource) {
+            result.add(new ExportExcelDTO(SalaryReportType.DPT_STATISTIC.getDescri(), String.valueOf(SalaryReportType.SALARY_DETAIL.getCode()), contentServerService.parserUri(resource.getUrl())));
+        }else{
+            result.add(new ExportExcelDTO(SalaryReportType.DPT_STATISTIC.getDescri(), String.valueOf(SalaryReportType.SALARY_DETAIL.getCode())));
+        }
+
         return result;
     }
 
@@ -1459,8 +1495,42 @@ public class SalaryServiceImpl implements SalaryService {
                 salaryEmployeesFileProvider.createSalaryEmployeesFile(sef);
             }
         }
-
+        String token = WebTokenGenerator.getInstance().toWebToken(UserContext.current().getLogin().getLoginToken());
+        Organization org = organizationProvider.findOrganizationById(ownerId);
         createEmployeePeriodVals(ownerId, month, ses);
+        //保存excel到contentServer ,以后直接给归档excel
+        //工资明细表
+        OutputStream ops = getSalaryDetailsOutPut(ownerId, month, null, UserContext.getCurrentNamespaceId());
+
+        String fileName = month + org.getName() +
+                SalaryReportType.SALARY_DETAIL.getDescri() + ".xlsx";
+        ByteArrayOutputStream os = (ByteArrayOutputStream)ops;
+        InputStream ins = new ByteArrayInputStream(os.toByteArray());
+        UploadCsFileResponse resp = contentServerService.uploadFileToContentServer(ins, fileName, token);
+//        contentServerService.parserUri(token)
+        saveSalaryGroupReport(sgf, SalaryReportType.SALARY_DETAIL, resp.getResponse().getUri(), resp.getResponse().getUrl());
+        //部门汇总表
+        ops = getDepartStatisticsOutPut(ownerId, month, null, UserContext.getCurrentNamespaceId());
+
+        fileName = month + org.getName() +
+                SalaryReportType.DPT_STATISTIC.getDescri() + ".xlsx";
+        os = (ByteArrayOutputStream)ops;
+        ins = new ByteArrayInputStream(os.toByteArray());
+        resp = contentServerService.uploadFileToContentServer(ins, fileName, token);
+//        contentServerService.parserUri(token)
+        saveSalaryGroupReport(sgf, SalaryReportType.DPT_STATISTIC, resp.getResponse().getUri(), resp.getResponse().getUrl());
+
+
+    }
+
+    private void saveSalaryGroupReport(SalaryGroupsFile sgf, SalaryReportType reportType, String uri, String url) {
+        //先删后插 本月的
+        salaryGroupsReportResourceProvider.deleteSalaryGroupsReportResourceByPeriodAndType(sgf.getOwnerId(), sgf.getSalaryPeriod(), reportType.getCode());
+        SalaryGroupsReportResource resource = ConvertHelper.convert(sgf, SalaryGroupsReportResource.class);
+        resource.setReportType(reportType.getCode());
+        resource.setUri(uri);
+        resource.setUrl(url);
+        salaryGroupsReportResourceProvider.createSalaryGroupsReportResource(resource);
     }
 
     private void createEmployeePeriodVals(Long ownerId, String month, List<SalaryEmployee> ses) {
@@ -1531,7 +1601,7 @@ public class SalaryServiceImpl implements SalaryService {
         }
         calendar.add(Calendar.MONTH, -12);
         SalaryDepartStatistic lastYear = salaryDepartStatisticProvider.findSalaryDepartStatisticByDptAndMonth(dpt.getId(), monthSF.get().format(calendar.getTime()));
-        if (null != lastYear && lastYear.getCostSalary() != null && lastYear.getCostSalary().compareTo(new BigDecimal(0)) > 0) {
+        if (null!=statistic.getCostSalary() && null != lastYear && lastYear.getCostSalary() != null && lastYear.getCostSalary().compareTo(new BigDecimal(0)) > 0) {
             statistic.setCostYoySalary(statistic.getCostSalary().subtract(lastYear.getCostSalary()).divide(lastYear.getCostSalary()).multiply(new BigDecimal(100)));
 
         }
@@ -1543,7 +1613,7 @@ public class SalaryServiceImpl implements SalaryService {
         }
         calendar.add(Calendar.MONTH, -1);
         SalaryDepartStatistic lastMonth = salaryDepartStatisticProvider.findSalaryDepartStatisticByDptAndMonth(dpt.getId(), monthSF.get().format(calendar.getTime()));
-        if (null != lastMonth && lastMonth.getCostSalary() != null && lastMonth.getCostSalary().compareTo(new BigDecimal(0)) > 0) {
+        if (null!=statistic.getCostSalary() && null != lastMonth && lastMonth.getCostSalary() != null && lastMonth.getCostSalary().compareTo(new BigDecimal(0)) > 0) {
             statistic.setCostMomSalary(statistic.getCostSalary().subtract(lastMonth.getCostSalary()).divide(lastMonth.getCostSalary()).multiply(new BigDecimal(100)));
         }
         LOGGER.debug("计算[{}]公司的汇总数据,人员列表[{}] ,结果[{}] ",dpt.getName(),StringHelper.toJsonString(detailIds), StringHelper.toJsonString(statistic));

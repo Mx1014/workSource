@@ -612,7 +612,6 @@ public class ExcelUtils {
      */
     public static Workbook getWorkbook(InputStream inStr,String fileName) throws Exception{
         Workbook wb = null;
-
 //        String fileType = fileName.substring(fileName.lastIndexOf("."));
         //现在导出的模板都是xssf了
 
