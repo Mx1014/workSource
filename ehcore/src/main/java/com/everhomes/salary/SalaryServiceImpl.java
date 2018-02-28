@@ -1438,6 +1438,8 @@ public class SalaryServiceImpl implements SalaryService {
         int timeout = 15;
         TimeUnit unit = TimeUnit.MINUTES;
         final Long userId = UserContext.currentUserId();
+        final String token = WebTokenGenerator.getInstance().toWebToken(UserContext.current().getLogin().getLoginToken());
+
         // 先放一个和key一样的值,表示这个人key有效
         valueOperations.set(key, key, timeout, unit);
         //线程池中处理计算规则
@@ -1449,7 +1451,7 @@ public class SalaryServiceImpl implements SalaryService {
                     calculateReports(cmd.getOwnerId(), month, userId);
 
                     //归档
-                    fileSalaryGroup(cmd.getOwnerId(), month, cmd.getOrganizationId(), userId);
+                    fileSalaryGroup(cmd.getOwnerId(), month, cmd.getOrganizationId(), userId,token);
                 } catch (Exception e) {
                     LOGGER.error("calculate reports error!! cmd is  :" + cmd, e);
                 } finally {
@@ -1462,7 +1464,7 @@ public class SalaryServiceImpl implements SalaryService {
         return new FileSalaryGroupResponse(key);
     }
 
-    private void fileSalaryGroup(Long ownerId, String month, Long organizationId, Long userId) {
+    private void fileSalaryGroup(Long ownerId, String month, Long organizationId, Long userId, String token) {
 
         //表:groupfile employeefile employeePeriodVal dptStatistics
 //        Long userId = UserContext.currentUserId();
@@ -1495,7 +1497,6 @@ public class SalaryServiceImpl implements SalaryService {
                 salaryEmployeesFileProvider.createSalaryEmployeesFile(sef);
             }
         }
-        String token = WebTokenGenerator.getInstance().toWebToken(UserContext.current().getLogin().getLoginToken());
         Organization org = organizationProvider.findOrganizationById(ownerId);
         createEmployeePeriodVals(ownerId, month, ses);
         //保存excel到contentServer ,以后直接给归档excel
