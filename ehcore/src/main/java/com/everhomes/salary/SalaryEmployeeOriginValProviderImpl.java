@@ -119,7 +119,7 @@ public class SalaryEmployeeOriginValProviderImpl implements SalaryEmployeeOrigin
                 .where(Tables.EH_SALARY_EMPLOYEE_ORIGIN_VALS.OWNER_ID.eq(ownerId))
                 .andExists(getReadOnlyContext().select().from(Tables.EH_SALARY_GROUP_ENTITIES)
                         .where(Tables.EH_SALARY_GROUP_ENTITIES.ID.eq(Tables.EH_SALARY_EMPLOYEE_ORIGIN_VALS.GROUP_ENTITY_ID))
-                        .and(Tables.EH_SALARY_GROUP_ENTITIES.DATA_POLICY.eq(NormalFlag.NO.getCode())))
+                        .and(Tables.EH_SALARY_GROUP_ENTITIES.DATA_POLICY.eq(NormalFlag.YES.getCode())))
                 .execute();
 
         getReadWriteContext().update(Tables.EH_SALARY_EMPLOYEE_ORIGIN_VALS)
@@ -127,7 +127,7 @@ public class SalaryEmployeeOriginValProviderImpl implements SalaryEmployeeOrigin
                 .where(Tables.EH_SALARY_EMPLOYEE_ORIGIN_VALS.OWNER_ID.eq(ownerId))
                 .andExists(getReadOnlyContext().select().from(Tables.EH_SALARY_GROUP_ENTITIES)
                         .where(Tables.EH_SALARY_GROUP_ENTITIES.ID.eq(Tables.EH_SALARY_EMPLOYEE_ORIGIN_VALS.GROUP_ENTITY_ID))
-                        .and(Tables.EH_SALARY_GROUP_ENTITIES.DATA_POLICY.eq(NormalFlag.NO.getCode())))
+                        .and(Tables.EH_SALARY_GROUP_ENTITIES.DATA_POLICY.eq(NormalFlag.YES.getCode())))
                 .and(Tables.EH_SALARY_EMPLOYEE_ORIGIN_VALS.TYPE.eq(SalaryEntityType.REDUN.getCode())).execute();
     }
 

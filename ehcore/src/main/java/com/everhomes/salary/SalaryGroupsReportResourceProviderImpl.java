@@ -5,6 +5,7 @@ import java.sql.Timestamp;
 import java.util.List;
 
 import org.jooq.DSLContext;
+import org.jooq.Record;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
 
@@ -75,7 +76,14 @@ public class SalaryGroupsReportResourceProviderImpl implements SalaryGroupsRepor
 
 	@Override
 	public SalaryGroupsReportResource findSalaryGroupsReportResourceByPeriodAndType(Long ownerId, String month, Byte code) {
-		return null;
+		Record record = getReadOnlyContext().select().from(Tables.EH_SALARY_GROUPS_REPORT_RESOURCES)
+				.where(Tables.EH_SALARY_GROUPS_REPORT_RESOURCES.OWNER_ID.eq(ownerId))
+				.and(Tables.EH_SALARY_GROUPS_REPORT_RESOURCES.SALARY_PERIOD.eq(month))
+				.and(Tables.EH_SALARY_GROUPS_REPORT_RESOURCES.REPORT_TYPE.eq(code)).fetchAny();
+		if (null == record) {
+			return null;
+		}
+		return ConvertHelper.convert(record, SalaryGroupsReportResource.class);
 	}
 
 	private EhSalaryGroupsReportResourcesDao getReadWriteDao() {
