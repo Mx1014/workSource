@@ -8,6 +8,7 @@ public interface MessageProvider {
     void updateMessageRecord(MessageRecord messageRecord);
     void deleteMessageRecordById(Long id);
     List<MessageRecord> listMessageRecords(Integer namespaceId);
+    List<MessageRecord> listMessageRecords();
     Long getMaxMessageIndexId();
     Long getNextMessageIndexId();
 

@@ -11,6 +11,7 @@ import com.everhomes.rest.approval.TrueOrFalseFlag;
 import com.everhomes.rest.message.MessageRecordDto;
 import com.everhomes.rest.message.PushMessageToAdminAndBusinessContactsCommand;
 import com.everhomes.rest.messaging.SearchMessageRecordCommand;
+import com.everhomes.rest.messaging.SearchMessageRecordResponse;
 import com.everhomes.rest.sms.SmsTemplateCode;
 import com.everhomes.search.MessageRecordSearcher;
 import com.everhomes.sms.SmsProvider;
@@ -119,13 +120,19 @@ public class MessageServiceImpl implements MessageService {
 	}
 
 	@Override
-	public List<MessageRecordDto> searchMessageRecord(SearchMessageRecordCommand cmd) {
-		return messageRecordSearcher.queryMessage(cmd);
+	public SearchMessageRecordResponse searchMessageRecord(SearchMessageRecordCommand cmd) {
+		SearchMessageRecordResponse response = new SearchMessageRecordResponse();
+		response.setDtos(messageRecordSearcher.queryMessage(cmd));
+		response.setNextPageAnchor(cmd.getPageAnchor());
+		return response;
 	}
 
 	@Override
-	public List<MessageRecordDto> searchMessageRecordByIndexId(SearchMessageRecordCommand cmd) {
-		return messageRecordSearcher.queryMessageByIndex(cmd);
+	public SearchMessageRecordResponse searchMessageRecordByIndexId(SearchMessageRecordCommand cmd) {
+		SearchMessageRecordResponse response = new SearchMessageRecordResponse();
+		response.setDtos(messageRecordSearcher.queryMessageByIndex(cmd));
+		response.setNextPageAnchor(cmd.getPageAnchor());
+		return response;
 	}
 
 	@Override

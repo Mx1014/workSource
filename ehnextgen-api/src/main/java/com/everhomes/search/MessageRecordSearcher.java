@@ -16,6 +16,8 @@ public interface MessageRecordSearcher {
 
     void syncMessageRecordsByNamespace(Integer namespaceId);
 
+    void syncMessageRecords();
+
     List queryMessage(SearchMessageRecordCommand cmd);
 
     List queryMessageByIndex(SearchMessageRecordCommand cmd);

@@ -85,6 +85,15 @@ public class MessageProviderImpl implements MessageProvider {
     }
 
     @Override
+    public List<MessageRecord> listMessageRecords() {
+        DSLContext context = dbProvider.getDslContext(AccessSpec.readWrite());
+        SelectQuery<EhMessageRecordsRecord> query = context.selectQuery(Tables.EH_MESSAGE_RECORDS);
+        return query.fetch().map(r->{
+            return ConvertHelper.convert(r,MessageRecord.class);
+        });
+    }
+
+    @Override
     public Long getMaxMessageIndexId() {
         DSLContext context = dbProvider.getDslContext(AccessSpec.readOnly());
         Long index_id = context.select(Tables.EH_MESSAGE_RECORDS.INDEX_ID.max()).from(Tables.EH_MESSAGE_RECORDS).fetchOne().value1();

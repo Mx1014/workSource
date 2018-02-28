@@ -4,6 +4,7 @@ package com.everhomes.message;
 import com.everhomes.rest.message.MessageRecordDto;
 import com.everhomes.rest.message.PushMessageToAdminAndBusinessContactsCommand;
 import com.everhomes.rest.messaging.SearchMessageRecordCommand;
+import com.everhomes.rest.messaging.SearchMessageRecordResponse;
 
 import java.util.List;
 
@@ -16,9 +17,9 @@ public interface MessageService {
 	void persistMessage(List<MessageRecord> records);
 
 
-	List<MessageRecordDto> searchMessageRecord(SearchMessageRecordCommand cmd);
+	SearchMessageRecordResponse searchMessageRecord(SearchMessageRecordCommand cmd);
 
-	List<MessageRecordDto> searchMessageRecordByIndexId(SearchMessageRecordCommand cmd);
+	SearchMessageRecordResponse searchMessageRecordByIndexId(SearchMessageRecordCommand cmd);
 
 	void syncMessageRecord();
 

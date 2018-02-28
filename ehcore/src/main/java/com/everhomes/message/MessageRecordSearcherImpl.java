@@ -3,6 +3,7 @@ package com.everhomes.message;
 import com.everhomes.namespace.Namespace;
 import com.everhomes.namespace.NamespaceProvider;
 import com.everhomes.rest.message.MessageRecordDto;
+import com.everhomes.rest.message.MessageRecordSenderTag;
 import com.everhomes.rest.messaging.SearchMessageRecordCommand;
 import com.everhomes.search.AbstractElasticSearch;
 import com.everhomes.search.MessageRecordSearcher;
@@ -20,11 +21,15 @@ import org.elasticsearch.search.SearchHit;
 import org.elasticsearch.search.SearchHits;
 import org.elasticsearch.search.aggregations.Aggregation;
 import org.elasticsearch.search.aggregations.AggregationBuilders;
+import org.elasticsearch.search.aggregations.Aggregations;
 import org.elasticsearch.search.aggregations.bucket.terms.LongTerms;
 import org.elasticsearch.search.aggregations.bucket.terms.Terms;
 import org.elasticsearch.search.aggregations.bucket.terms.TermsBuilder;
 import org.elasticsearch.search.aggregations.metrics.tophits.InternalTopHits;
 import org.elasticsearch.search.aggregations.metrics.tophits.TopHitsBuilder;
+import org.elasticsearch.search.sort.SortBuilder;
+import org.elasticsearch.search.sort.SortBuilders;
+import org.elasticsearch.search.sort.SortOrder;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -85,12 +90,24 @@ public class MessageRecordSearcherImpl extends AbstractElasticSearch implements 
     }
 
     @Override
+    public void syncMessageRecords() {
+        List<MessageRecord> records = this.messageProvider.listMessageRecords();
+        if (records != null && records.size() > 0) {
+            this.bulkUpdate(records);
+            LOGGER.info("syncMessageRecordsByNamespace processStat count: " + records.size());
+        }
+    }
+
+    @Override
     public void syncMessageRecordIndexs() {
         this.deleteAll();
-        List<Namespace> namespaces = this.namespaceProvider.listNamespaces();
-        namespaces.forEach(r -> {
-            this.syncMessageRecordsByNamespace(r.getId());
-        });
+//        List<Namespace> namespaces = this.namespaceProvider.listNamespaces();
+//        namespaces.forEach(r -> {
+//            this.syncMessageRecordsByNamespace(r.getId());
+//        });
+
+        syncMessageRecords();
+
         this.refresh();
     }
 
@@ -111,39 +128,52 @@ public class MessageRecordSearcherImpl extends AbstractElasticSearch implements 
         if (StringUtils.isNotEmpty(cmd.getSenderTag()))
             bqb = bqb.must(QueryBuilders.termQuery("senderTag", cmd.getSenderTag()));
         if (cmd.getStartTime() != null && cmd.getEndTime() != null)
-            bqb = bqb.must(QueryBuilders.rangeQuery("createTime").to(new Date(cmd.getEndTime())).from(new Date(cmd.getEndTime())));
+            bqb = bqb.must(QueryBuilders.rangeQuery("createTime").to(new Date(cmd.getEndTime())).from(new Date(cmd.getStartTime())));
         if (cmd.getIsGroupBy() == 1) {
             TermsBuilder indexAgg = AggregationBuilders.terms("indexAgg").field("indexId");
             TopHitsBuilder infoAgg = AggregationBuilders.topHits("infoAgg").setFetchSource(new String[]{"senderUid","bodyType","body"}, null).setSize(1);
             builder.addAggregation(indexAgg.subAggregation(infoAgg));
         }
+
+        if(cmd.getPageAnchor() == null){
+            cmd.setPageAnchor(1000000L);
+        }
+
+        SortBuilder sortBuilder = SortBuilders.fieldSort("id").order(SortOrder.DESC);
+        builder.addSort(sortBuilder);
+
         builder.setFrom(cmd.getPageAnchor().intValue() * cmd.getPageSize()).setSize(cmd.getPageSize() + 1).setSize(cmd.getPageSize()+1);
         builder.setQuery(bqb);
         SearchResponse rsp = builder.execute().actionGet();
 
         List<MessageRecordDto> list = new ArrayList<>();
-        Map<String, Aggregation> sendAggMap = rsp.getAggregations().asMap();
-        LongTerms indexAggTerms = (LongTerms) sendAggMap.get("indexAgg");
-        Iterator<Terms.Bucket> it = indexAggTerms.getBuckets().iterator();
-        while(it.hasNext()){
-            MessageRecordDto record = new MessageRecordDto();
-            Terms.Bucket indexAggBucket = it.next();
-            record.setIndexId(Long.valueOf(indexAggBucket.getKey()));
-            record.setNum(indexAggBucket.getDocCount());
-            InternalTopHits infoAgg = (InternalTopHits) indexAggBucket.getAggregations().asMap().get("infoAgg");
-            SearchHits hits = infoAgg.getHits();
-            if(hits.getHits() != null && hits.getHits().length > 0){
-                SearchHit hit = hits.getHits()[0];
-                record.setSenderUid(hit.getSource().get("senderUid") != null ? Long.valueOf(hit.getSource().get("senderUid").toString()) : null);
-                record.setBodyType(hit.getSource().get("bodyType") != null ? hit.getSource().get("bodyType").toString(): null);
-                record.setBody(hit.getSource().get("body") != null ? hit.getSource().get("body").toString(): null);
+        Aggregations aggregations = rsp.getAggregations();
+        if(aggregations != null){
+            Map<String, Aggregation> sendAggMap = aggregations.asMap();
+            LongTerms indexAggTerms = (LongTerms) sendAggMap.get("indexAgg");
+            Iterator<Terms.Bucket> it = indexAggTerms.getBuckets().iterator();
+            while(it.hasNext()){
+                MessageRecordDto record = new MessageRecordDto();
+                Terms.Bucket indexAggBucket = it.next();
+                record.setIndexId(Long.valueOf(indexAggBucket.getKey()));
+                record.setNum(indexAggBucket.getDocCount());
+                InternalTopHits infoAgg = (InternalTopHits) indexAggBucket.getAggregations().asMap().get("infoAgg");
+                SearchHits hits = infoAgg.getHits();
+                if(hits.getHits() != null && hits.getHits().length > 0){
+                    SearchHit hit = hits.getHits()[0];
+                    record.setSenderUid(hit.getSource().get("senderUid") != null ? Long.valueOf(hit.getSource().get("senderUid").toString()) : null);
+                    record.setBodyType(hit.getSource().get("bodyType") != null ? hit.getSource().get("bodyType").toString(): null);
+                    record.setBody(hit.getSource().get("body") != null ? hit.getSource().get("body").toString(): null);
+                }
+                list.add(record);
             }
-            list.add(record);
         }
 
         if (list.size() > cmd.getPageSize()) {
             list.remove(list.size() - 1);
             cmd.setPageAnchor(list.get(list.size() - 1).getId());
+        }else{
+            cmd.setPageAnchor(null);
         }
 
         return list;
@@ -155,10 +185,44 @@ public class MessageRecordSearcherImpl extends AbstractElasticSearch implements 
         BoolQueryBuilder bqb = new BoolQueryBuilder();
         if (StringUtils.isNotEmpty(cmd.getDstChannelToken()))
             bqb = bqb.must(QueryBuilders.termQuery("dstChannelToken", cmd.getDstChannelToken()));
-        if (null !=cmd.getIndexId())
+        if (null != cmd.getIndexId())
             bqb = bqb.must(QueryBuilders.termQuery("indexId", cmd.getIndexId()));
+        if (cmd.getStartTime() != null && cmd.getEndTime() != null)
+            bqb = bqb.must(QueryBuilders.rangeQuery("createTime").to(new Date(cmd.getEndTime())).from(new Date(cmd.getStartTime())));
+        if (cmd.getType() != null){
+            List<String> tagMatchs = new ArrayList<>();
+
+            switch (cmd.getType()){
+                case 0:
+                    break;
+                case 1:
+                    tagMatchs.add(MessageRecordSenderTag.NOTIFY_EVENT.getCode());
+                    tagMatchs.add(MessageRecordSenderTag.NOTIFY_REQUEST.getCode());
+                    tagMatchs.add(MessageRecordSenderTag.FETCH_NOTIFY_MESSAGES.getCode());
+                    bqb = bqb.must(QueryBuilders.termsQuery("senderTag", tagMatchs));
+                    break;
+                case 2:
+                    tagMatchs.add(MessageRecordSenderTag.FORWARD_EVENT.getCode());
+                    tagMatchs.add(MessageRecordSenderTag.APPIDSTATUS.getCode());
+                    tagMatchs.add(MessageRecordSenderTag.REGISTER_LOGIN.getCode());
+                    tagMatchs.add(MessageRecordSenderTag.FETCH_PASTTORECENT_MESSAGES.getCode());
+                    tagMatchs.add(MessageRecordSenderTag.ROUTE_STORE_MESSAGE.getCode());
+                    tagMatchs.add(MessageRecordSenderTag.ROUTE_REALTIME_MESSAGE.getCode());
+                    tagMatchs.add(MessageRecordSenderTag.ROUTE_MESSAGE.getCode());
+                    bqb = bqb.must(QueryBuilders.termsQuery("senderTag", tagMatchs));
+                    break;
+            }
+        }
+
+        if(cmd.getPageAnchor() == null){
+            cmd.setPageAnchor(0L);
+        }
+
+        SortBuilder sortBuilder = SortBuilders.fieldSort("id").order(SortOrder.DESC);
+        builder.addSort(sortBuilder);
 
         builder.setFrom(cmd.getPageAnchor().intValue() * cmd.getPageSize()).setSize(cmd.getPageSize() + 1).setSize(cmd.getPageSize()+1);
+
         builder.setQuery(bqb);
         SearchResponse rsp = builder.execute().actionGet();
 
@@ -217,6 +281,8 @@ public class MessageRecordSearcherImpl extends AbstractElasticSearch implements 
         if (list.size() > cmd.getPageSize()) {
             list.remove(list.size() - 1);
             cmd.setPageAnchor(list.get(list.size() - 1).getId());
+        }else{
+            cmd.setPageAnchor(null);
         }
 
         return list;

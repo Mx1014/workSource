@@ -10,6 +10,7 @@ import com.everhomes.rest.message.PersistListMessageRecordsCommand;
 import com.everhomes.rest.message.PushMessageToAdminAndBusinessContactsCommand;
 import com.everhomes.rest.messaging.ChannelType;
 import com.everhomes.rest.messaging.SearchMessageRecordCommand;
+import com.everhomes.rest.messaging.SearchMessageRecordResponse;
 import com.everhomes.rest.user.LoginToken;
 import com.everhomes.statistics.event.StatEventDeviceLogProvider;
 import com.everhomes.util.StringHelper;
@@ -100,7 +101,7 @@ public class MessageController extends ControllerBase {
 	 * <b>URL: /message/searchMessageRecord</b>
 	 */
 	@RequestMapping("searchMessageRecord")
-	@RestReturn(value = MessageRecordDto.class, collection = true)
+	@RestReturn(value = SearchMessageRecordResponse.class)
 	public RestResponse searchMessageRecord(SearchMessageRecordCommand cmd){
 		RestResponse response = new RestResponse(messageService.searchMessageRecord(cmd));
 		response.setErrorCode(ErrorCodes.SUCCESS);
@@ -113,7 +114,7 @@ public class MessageController extends ControllerBase {
 	 * <b>URL: /message/searchMessageRecordByIndexId</b>
 	 */
 	@RequestMapping("searchMessageRecordByIndexId")
-	@RestReturn(value = MessageRecordDto.class, collection = true)
+	@RestReturn(value = SearchMessageRecordResponse.class)
 	public RestResponse searchMessageRecordByIndexId(SearchMessageRecordCommand cmd){
 		RestResponse response = new RestResponse(messageService.searchMessageRecordByIndexId(cmd));
 		response.setErrorCode(ErrorCodes.SUCCESS);

@@ -15,6 +15,7 @@ package com.everhomes.rest.messaging;
  * <li>keyWords: 搜索关键字</li>
  * <li>startTime: 开始时间</li>
  * <li>endTime: 结束时间</li>
+ * <li>type: 消息类型（0：不限；1：消息；2：推送）</li>
  * </ul>
  */
 public class  SearchMessageRecordCommand {
@@ -30,6 +31,7 @@ public class  SearchMessageRecordCommand {
     private String keyWords;
     private Long startTime;
     private Long endTime;
+    private Integer type;
 
 
     public Integer getNamespaceId() {
@@ -126,5 +128,13 @@ public class  SearchMessageRecordCommand {
 
     public void setEndTime(Long endTime) {
         this.endTime = endTime;
+    }
+
+    public Integer getType() {
+        return type;
+    }
+
+    public void setType(Integer type) {
+        this.type = type;
     }
 }
