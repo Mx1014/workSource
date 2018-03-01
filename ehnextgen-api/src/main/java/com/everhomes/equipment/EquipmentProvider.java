@@ -217,7 +217,7 @@ public interface EquipmentProvider {
 
 	void updateReviewExpireDays(EquipmentInspectionReviewDate reviewDate);
 
-	EquipmentInspectionReviewDate getEquipmentInspectiomExpireDaysById(Long id);
+	EquipmentInspectionReviewDate getEquipmentInspectiomExpireDaysById(Long id,Byte scopeType, Long scopeId);
 
     EquipmentInspectionReviewDate getEquipmentInspectiomExpireDays(Long scopeId, Byte scopeType);
 

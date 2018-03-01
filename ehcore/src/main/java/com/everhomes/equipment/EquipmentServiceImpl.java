@@ -4022,11 +4022,9 @@ private void checkUserPrivilege(Long orgId, Long privilegeId, Long communityId) 
 		List<EquipmentInspectionTasks> tasks = new ArrayList<>();
 		if (planMaps != null && planMaps.size() > 0) {
 			List<Long> planIds = new ArrayList<>();
-			if (planMaps != null && planMaps.size() > 0) {
 				planIds = planMaps.stream()
 						.map(EquipmentInspectionEquipmentPlanMap::getPlanId)
 						.collect(Collectors.toList());
-			}
 			tasks = equipmentProvider.listTaskByPlanMaps(planIds, startTime, endTime, locator, pageSize + 1, cmd.getTaskStatus());
 		} else {
 //			List<Long> standardIds = null;
@@ -5129,8 +5127,18 @@ private void checkUserPrivilege(Long orgId, Long privilegeId, Long communityId) 
 
 	@Override
 	public void deleteReviewExpireDays(SetReviewExpireDaysCommand cmd) {
-		if(cmd.getId()!=null){
-			EquipmentInspectionReviewDate reviewDate = equipmentProvider.getEquipmentInspectiomExpireDaysById(cmd.getId());
+
+		if (cmd.getId() == null) {
+			return;
+		}
+		Byte scopeType = PmNotifyScopeType.NAMESPACE.getCode();
+		Long scopeId = cmd.getNamespaceId().longValue();
+		if (cmd.getCommunityId() != null && cmd.getCommunityId() != 0L) {
+			scopeType = PmNotifyScopeType.COMMUNITY.getCode();
+			scopeId = cmd.getCommunityId();
+		}
+		EquipmentInspectionReviewDate reviewDate = equipmentProvider.getEquipmentInspectiomExpireDaysById(cmd.getId(), scopeType, scopeId);
+		if (reviewDate != null) {
 			reviewDate.setStatus(PmNotifyConfigurationStatus.INVAILD.getCode());
 			equipmentProvider.updateReviewExpireDays(reviewDate);
 		}
