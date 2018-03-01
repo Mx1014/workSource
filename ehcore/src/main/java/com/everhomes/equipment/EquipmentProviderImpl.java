@@ -2985,10 +2985,12 @@ public class EquipmentProviderImpl implements EquipmentProvider {
 
     public EquipmentInspectionReviewDate getEquipmentInspectiomExpireDaysById(Long id, Byte scopeType, Long scopeId) {
         DSLContext context = this.dbProvider.getDslContext(AccessSpec.readWrite());
-        context.selectFrom(Tables.EH_EQUIPMENT_INSPECTION_REVIEW_DATE)
-                .where(Tables.EH_EQUIPMENT_INSPECTION_REVIEW_DATE.SCOPE_TYPE.eq(scopeType))
-                .and(Tables.EH_EQUIPMENT_INSPECTION_REVIEW_DATE.SCOPE_ID.eq(scopeId))
-                .fetchInto(EquipmentInspectionReviewDate.class);
+        SelectQuery<EhEquipmentInspectionReviewDateRecord> query = context.selectQuery(Tables.EH_EQUIPMENT_INSPECTION_REVIEW_DATE);
+        Condition condition = Tables.EH_EQUIPMENT_INSPECTION_REVIEW_DATE.SCOPE_TYPE.eq(scopeType)
+                .and(Tables.EH_EQUIPMENT_INSPECTION_REVIEW_DATE.SCOPE_ID.eq(scopeId));
+        query.addConditions(condition);
+        return ConvertHelper.convert(query.fetchAny(), EquipmentInspectionReviewDate.class);
+
     }
 
     @Override
