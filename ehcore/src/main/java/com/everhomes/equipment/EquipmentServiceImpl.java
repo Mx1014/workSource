@@ -4781,8 +4781,8 @@ private void checkUserPrivilege(Long orgId, Long privilegeId, Long communityId) 
 		StatTodayEquipmentTasksResponse response = ConvertHelper.convert(stat, StatTodayEquipmentTasksResponse.class);
 		response.setReviewQualified(reviewStat.getQualifiedTasks());
 		response.setReviewUnqualified(reviewStat.getUnqualifiedTasks());
-		response.setCurrentWaitingForExecuting(response.getWaitingForExecuting());
-		response.setCurrentWaitingForApproval(response.getCompleteWaitingForApproval());
+		response.setCurrentWaitingForExecuting(stat.getWaitingForExecuting());
+		response.setCurrentWaitingForApproval(stat.getCompleteWaitingForApproval());
 		response.setReviewed(response.getReviewQualified() + response.getReviewUnqualified());
 		return response;
 	}
@@ -4803,7 +4803,7 @@ private void checkUserPrivilege(Long orgId, Long privilegeId, Long communityId) 
 				cmd.getInspectionCategoryId(), getDayBegin(cal, -cmd.getLastDays()), getDayEnd(cal, 0),cmd.getNamespaceId());
 
 		StatLastDaysEquipmentTasksResponse response = new StatLastDaysEquipmentTasksResponse();
-		response.setCompleteInspection(statTasks.getCompleteInspection());
+		response.setCompleteInspection(statTasks.getCompleteWaitingForApproval());
 		response.setCompleteMaintance(statTasks.getCompleteMaintance());
 		response.setReviewUnqualified(reviewStat.getUnqualifiedTasks());
 		response.setReviewQualified(reviewStat.getQualifiedTasks());
@@ -4838,10 +4838,10 @@ private void checkUserPrivilege(Long orgId, Long privilegeId, Long communityId) 
 		response.setUnReviewedTasks(statTasks.getCompleteWaitingForApproval());
 		response.setReviewTasks(response.getUnReviewedTasks() + response.getReviewedTasks());
 
-		Double maintanceRate = response.getComplete().equals(0L) ? 0.00 : (double)response.getCompleteMaintance()/(double)response.getComplete();
+		Double maintanceRate = response.getCompleteInspection().equals(0L) ? 0.00 : (double)response.getCompleteMaintance()/(double)response.getCompleteInspection();
 		response.setMaintanceRate(maintanceRate);
-		Double delayRate = (response.getComplete()+response.getDelay()) == 0L ? 0.00 : (double)response.getDelay()/(double)(response.getComplete()+response.getDelay());
-		response.setDelayRate(delayRate);
+		Double delayInspectionRate = (response.getCompleteInspection()+response.getDelayInspection()) == 0L ? 0.00 : (double)response.getDelayInspection()/(double)(response.getCompleteInspection()+response.getDelayInspection());
+		response.setDelayInspectionRate(delayInspectionRate);
 		Double reviewQualifiedRate = response.getReviewedTasks().equals(0L) ? 0.00 : (double)response.getReviewQualified()/(double)response.getReviewedTasks();
 		response.setReviewQualifiedRate(reviewQualifiedRate);
 		Double reviewDalayRate = response.getReviewTasks().equals(0L) ? 0.00 : (double)response.getReviewDelayTasks()/(double)response.getReviewTasks();
