@@ -608,6 +608,11 @@ INSERT INTO `eh_var_field_items` (`id`, `module_name`, `field_id`, `display_name
 INSERT INTO `eh_var_field_items` (`id`, `module_name`, `field_id`, `display_name`, `default_order`, `status`, `creator_uid`, `create_time`, `operator_uid`, `update_time`, `business_value`) VALUES ((@item_id := @item_id + 1), 'enterprise_customer', @field_id, '草稿', '11', '2', '1', NOW(), NULL, NULL, 11);
 
 
+-- fix 24623 by xiongying
+update eh_var_field_groups set name = 'com.everhomes.customer.CustomerTax' where title = '税务信息';
+update eh_var_field_groups set name = 'com.everhomes.customer.CustomerAccount' where title = '银行账号';
+
 -- by dengs,20180301,园区快讯权限项添加
 set @id = (select max(id) from eh_service_module_privileges);
 INSERT INTO `eh_service_module_privileges` (`id`, `module_id`, `privilege_type`, `privilege_id`, `remark`, `default_order`, `create_time`) VALUES (@id:=@id+1, '10800', '0', '10005', '全部权限', '0', now());
+

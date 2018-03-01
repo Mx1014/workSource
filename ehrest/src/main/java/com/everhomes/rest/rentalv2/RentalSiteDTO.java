@@ -105,7 +105,7 @@ public class RentalSiteDTO {
 	private java.lang.Byte     status;
 	private Long createTime;
 	private Double siteCounts;
-	@ItemType(String.class)
+	@ItemType(SiteNumberDTO.class)
 	private List<SiteNumberDTO> siteNumbers;
 	@ItemType(SiteItemDTO.class)
 	private List<SiteItemDTO> siteItems;
