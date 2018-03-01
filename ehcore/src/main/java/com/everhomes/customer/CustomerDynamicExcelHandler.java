@@ -124,6 +124,9 @@ public class CustomerDynamicExcelHandler implements DynamicExcelHandler {
         String moduleName = customerInfo.getModuleName();
         if(rowDatas != null && rowDatas.size() > 0) {
             CustomerDynamicSheetClass sheet = CustomerDynamicSheetClass.fromStatus(ds.getClassName());
+            if(sheet == null) {
+                return;
+            }
             int failedNumber = 0;
             for(DynamicRowDTO rowData : rowDatas) {
                 List<DynamicColumnDTO> columns = rowData.getColumns();
@@ -364,8 +367,7 @@ public class CustomerDynamicExcelHandler implements DynamicExcelHandler {
 
                         if(columns != null && columns.size() > 0) {
                             for(DynamicColumnDTO column : columns) {
-                                if("enterpriseTypeItemId".equals(column.getFieldName()) || "shareTypeItemId".equals(column.getFieldName())
-                                        || "propertyType".equals(column.getFieldName())) {
+                                if("patentStatusItemId".equals(column.getFieldName()) || "patentTypeItemId".equals(column.getFieldName())) {
                                     ScopeFieldItem item = fieldService.findScopeFieldItemByDisplayName(namespaceId, communityId, moduleName, column.getValue());
                                     if(item != null) {
                                         column.setValue(item.getItemId().toString());

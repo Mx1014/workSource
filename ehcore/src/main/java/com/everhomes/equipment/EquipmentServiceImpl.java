@@ -4022,11 +4022,9 @@ private void checkUserPrivilege(Long orgId, Long privilegeId, Long communityId) 
 		List<EquipmentInspectionTasks> tasks = new ArrayList<>();
 		if (planMaps != null && planMaps.size() > 0) {
 			List<Long> planIds = new ArrayList<>();
-			if (planMaps != null && planMaps.size() > 0) {
 				planIds = planMaps.stream()
 						.map(EquipmentInspectionEquipmentPlanMap::getPlanId)
 						.collect(Collectors.toList());
-			}
 			tasks = equipmentProvider.listTaskByPlanMaps(planIds, startTime, endTime, locator, pageSize + 1, cmd.getTaskStatus());
 		} else {
 //			List<Long> standardIds = null;
@@ -4781,8 +4779,8 @@ private void checkUserPrivilege(Long orgId, Long privilegeId, Long communityId) 
 		StatTodayEquipmentTasksResponse response = ConvertHelper.convert(stat, StatTodayEquipmentTasksResponse.class);
 		response.setReviewQualified(reviewStat.getQualifiedTasks());
 		response.setReviewUnqualified(reviewStat.getUnqualifiedTasks());
-		response.setCurrentWaitingForExecuting(response.getWaitingForExecuting());
-		response.setCurrentWaitingForApproval(response.getCompleteWaitingForApproval());
+		response.setCurrentWaitingForExecuting(stat.getWaitingForExecuting());
+		response.setCurrentWaitingForApproval(stat.getCompleteWaitingForApproval());
 		response.setReviewed(response.getReviewQualified() + response.getReviewUnqualified());
 		return response;
 	}
@@ -4803,7 +4801,7 @@ private void checkUserPrivilege(Long orgId, Long privilegeId, Long communityId) 
 				cmd.getInspectionCategoryId(), getDayBegin(cal, -cmd.getLastDays()), getDayEnd(cal, 0),cmd.getNamespaceId());
 
 		StatLastDaysEquipmentTasksResponse response = new StatLastDaysEquipmentTasksResponse();
-		response.setCompleteInspection(statTasks.getCompleteInspection());
+		response.setCompleteInspection(statTasks.getCompleteWaitingForApproval());
 		response.setCompleteMaintance(statTasks.getCompleteMaintance());
 		response.setReviewUnqualified(reviewStat.getUnqualifiedTasks());
 		response.setReviewQualified(reviewStat.getQualifiedTasks());
@@ -4837,11 +4835,12 @@ private void checkUserPrivilege(Long orgId, Long privilegeId, Long communityId) 
 		response.setReviewedTasks(response.getReviewUnqualified() + response.getReviewQualified());
 		response.setUnReviewedTasks(statTasks.getCompleteWaitingForApproval());
 		response.setReviewTasks(response.getUnReviewedTasks() + response.getReviewedTasks());
+		response.setCompleteInspection(statTasks.getCompleteWaitingForApproval());
 
-		Double maintanceRate = response.getComplete().equals(0L) ? 0.00 : (double)response.getCompleteMaintance()/(double)response.getComplete();
+		Double maintanceRate = response.getCompleteInspection().equals(0L) ? 0.00 : (double)response.getCompleteMaintance()/(double)response.getCompleteInspection();
 		response.setMaintanceRate(maintanceRate);
-		Double delayRate = (response.getComplete()+response.getDelay()) == 0L ? 0.00 : (double)response.getDelay()/(double)(response.getComplete()+response.getDelay());
-		response.setDelayRate(delayRate);
+		Double delayInspectionRate = (response.getCompleteInspection()+response.getDelayInspection()) == 0L ? 0.00 : (double)response.getDelayInspection()/(double)(response.getCompleteInspection()+response.getDelayInspection());
+		response.setDelayInspectionRate(delayInspectionRate);
 		Double reviewQualifiedRate = response.getReviewedTasks().equals(0L) ? 0.00 : (double)response.getReviewQualified()/(double)response.getReviewedTasks();
 		response.setReviewQualifiedRate(reviewQualifiedRate);
 		Double reviewDalayRate = response.getReviewTasks().equals(0L) ? 0.00 : (double)response.getReviewDelayTasks()/(double)response.getReviewTasks();
@@ -5129,8 +5128,18 @@ private void checkUserPrivilege(Long orgId, Long privilegeId, Long communityId) 
 
 	@Override
 	public void deleteReviewExpireDays(SetReviewExpireDaysCommand cmd) {
-		if(cmd.getId()!=null){
-			EquipmentInspectionReviewDate reviewDate = equipmentProvider.getEquipmentInspectiomExpireDaysById(cmd.getId());
+
+		if (cmd.getId() == null) {
+			return;
+		}
+		Byte scopeType = PmNotifyScopeType.NAMESPACE.getCode();
+		Long scopeId = cmd.getNamespaceId().longValue();
+		if (cmd.getCommunityId() != null && cmd.getCommunityId() != 0L) {
+			scopeType = PmNotifyScopeType.COMMUNITY.getCode();
+			scopeId = cmd.getCommunityId();
+		}
+		EquipmentInspectionReviewDate reviewDate = equipmentProvider.getEquipmentInspectiomExpireDaysById(cmd.getId(), scopeType, scopeId);
+		if (reviewDate != null) {
 			reviewDate.setStatus(PmNotifyConfigurationStatus.INVAILD.getCode());
 			equipmentProvider.updateReviewExpireDays(reviewDate);
 		}

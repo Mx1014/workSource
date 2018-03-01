@@ -787,7 +787,8 @@ CREATE TABLE `eh_warehouse_orders`(
   PRIMARY KEY (`id`),
   KEY `i_service_type` (`service_type`) COMMENT '出入库状态得索引，用于搜索'
 ) ENGINE=INNODB DEFAULT CHARSET=utf8mb4;
-
+-- 仓库出入库单增加community_id字段
+ALTER TABLE `eh_warehouse_orders` ADD COLUMN `community_id` BIGINT DEFAULT NULL COMMENT '园区id';
 -- 增加出入库记录关联出入库单的字段
 ALTER TABLE `eh_warehouse_stock_logs` ADD COLUMN `warehouse_order_id` BIGINT DEFAULT NULL COMMENT '关联的出入库单的id';
 ALTER TABLE `eh_warehouse_requests` ADD COLUMN `requisition_id` BIGINT DEFAULT NULL COMMENT '关联的请示单的id';
@@ -1633,7 +1634,7 @@ UPDATE eh_rentalv2_default_rules set rental_start_time = 7776000000 where rental
 UPDATE eh_rentalv2_default_rules set rental_start_time_flag = 1;
 -- 资源预订3.2结束
 
--- 审批2.0 start by nan.rong
+-- 审批2.0 & 人事2.0.1 start by nan.rong
 ALTER TABLE `eh_general_approvals` ADD COLUMN `approval_remark` VARCHAR(256) COMMENT 'the remark of the approval';
 
 ALTER TABLE `eh_general_approvals` ADD COLUMN `default_order` INTEGER NOT NULL DEFAULT 0;
@@ -1671,6 +1672,23 @@ ALTER TABLE eh_general_forms MODIFY modify_flag TINYINT NOT NULL DEFAULT 1 COMME
 
 UPDATE eh_general_forms SET delete_flag = 1 WHERE delete_flag IS NULL;
 ALTER TABLE eh_general_forms MODIFY delete_flag TINYINT NOT NULL DEFAULT 1 COMMENT '0: no, 1: yes';
+
+-- add by ryan at 03/01/02018.
+ALTER TABLE eh_organization_member_details MODIFY employee_status TINYINT NOT NULL DEFAULT 0 COMMENT '0:probation, 1:on the job, 2:internship, 3:dismissal';
+
+ALTER TABLE eh_archives_dismiss_employees MODIFY department VARCHAR(128) COMMENT '离职前部门';
+
+ALTER TABLE eh_archives_dismiss_employees MODIFY employee_status TINYINT NOT NULL DEFAULT 0 COMMENT '0:probation, 1:on the job, 2:internship, 3:dismissal';
+
+ALTER TABLE eh_archives_dismiss_employees ADD COLUMN department_ids VARCHAR(128) COMMENT '离职前部门id';
+
+ALTER TABLE eh_archives_dismiss_employees ADD COLUMN job_position VARCHAR(128) COMMENT '离职前职位';
+
+ALTER TABLE eh_archives_dismiss_employees ADD COLUMN job_position_ids VARCHAR(128) COMMENT '离职前职位id';
+
+ALTER TABLE eh_archives_dismiss_employees ADD COLUMN job_level VARCHAR(128) COMMENT '离职前职级';
+
+ALTER TABLE eh_archives_dismiss_employees ADD COLUMN job_level_ids VARCHAR(128) COMMENT '离职前职级id';
 
 -- end by nan.rong
 
