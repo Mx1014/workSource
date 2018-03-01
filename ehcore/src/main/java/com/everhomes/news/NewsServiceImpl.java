@@ -25,6 +25,7 @@ import com.everhomes.organization.OrganizationCommunity;
 import com.everhomes.organization.OrganizationCommunityRequest;
 import com.everhomes.rest.acl.PrivilegeConstants;
 import com.everhomes.rest.acl.ProjectDTO;
+import com.everhomes.rest.common.TrueOrFalseFlag;
 import com.everhomes.rest.family.FamilyDTO;
 import com.everhomes.rest.news.*;
 import com.everhomes.user.*;
@@ -446,15 +447,12 @@ public class NewsServiceImpl implements NewsService {
 	 * <b>listNews:/</b>
 	 * <p>isSearchDraft: true 检索草稿出来，false 不检索草稿</p>
 	 */
-	@CallerSensitive
 	public ListNewsResponse listNews(ListNewsCommand cmd) {
 		final Long userId = UserContext.current().getUser().getId();
 		final Integer namespaceId = checkOwner(userId, cmd.getOwnerId(), cmd.getOwnerType());
-		Class callerClass = Reflection.getCallerClass();
-		LOGGER.info("callerClass is"+callerClass);
-		if(callerClass.equals(NewsController.class)) {
+		if(TrueOrFalseFlag.fromCode(cmd.getCheckPrivilegeFlag())==TrueOrFalseFlag.TRUE) {
 			LOGGER.info("news check privilege");
-			boolean b = userPrivilegeMgr.checkUserPrivilege(userId, cmd.getOwnerId(), 10005L, cmd.getCategoryId(), null, null);
+			boolean b = userPrivilegeMgr.checkUserPrivilege(userId, cmd.getOwnerId(), 10005L, 10800L,null,""+cmd.getCategoryId(), null, null);
 		}
 		if (StringUtils.isEmpty(cmd.getKeyword()) && cmd.getTagIds()==null ) {
 			NewsOwnerType newsOwnerType = NewsOwnerType.fromCode(cmd.getOwnerType());
