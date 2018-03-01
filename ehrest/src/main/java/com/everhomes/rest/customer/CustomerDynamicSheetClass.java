@@ -32,9 +32,11 @@ public enum CustomerDynamicSheetClass {
     }
 
     public static CustomerDynamicSheetClass fromStatus(String code) {
-        for(CustomerDynamicSheetClass v : CustomerDynamicSheetClass.values()) {
-            if(v.getCode().equals(code))
-                return v;
+        if(code != null) {
+            for(CustomerDynamicSheetClass v : CustomerDynamicSheetClass.values()) {
+                if(v.getCode().equals(code))
+                    return v;
+            }
         }
         return null;
     }

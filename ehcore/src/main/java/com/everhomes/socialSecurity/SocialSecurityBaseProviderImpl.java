@@ -126,6 +126,9 @@ public class SocialSecurityBaseProviderImpl implements SocialSecurityBaseProvide
 
     @Override
     public List<SocialSecurityBase> listSocialSecurityBase(Long cityId, String householdType, byte accumOrSocial) {
+        if (null == cityId) {
+            return null;
+        }
         SelectConditionStep<Record> step = getReadOnlyContext().select().from(Tables.EH_SOCIAL_SECURITY_BASES)
                 .where(Tables.EH_SOCIAL_SECURITY_BASES.CITY_ID.eq(cityId))
                 .and(Tables.EH_SOCIAL_SECURITY_BASES.ACCUM_OR_SOCAIL.eq(accumOrSocial));
