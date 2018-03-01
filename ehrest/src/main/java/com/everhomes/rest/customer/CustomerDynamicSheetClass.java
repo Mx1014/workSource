@@ -17,7 +17,9 @@ public enum CustomerDynamicSheetClass {
     CUSTOMER_PATENT("com.everhomes.customer.CustomerPatent"),
     CUSTOMER_CERTIFICATE("com.everhomes.customer.CustomerCertificate"),
     CUSTOMER_ENTRY_INFO("com.everhomes.customer.CustomerEntryInfo"),
-    CUSTOMER_DEPARTURE_INFO("com.everhomes.customer.CustomerDepartureInfo");
+    CUSTOMER_DEPARTURE_INFO("com.everhomes.customer.CustomerDepartureInfo"),
+    CUSTOMER_TRACKING("com.everhomes.customer.CustomerTracking"),
+    CUSTOMER_TRACKING_PLAN("com.everhomes.customer.CustomerTrackingPlan");
 
     private String code;
 

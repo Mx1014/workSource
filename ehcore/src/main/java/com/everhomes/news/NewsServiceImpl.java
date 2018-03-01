@@ -452,7 +452,7 @@ public class NewsServiceImpl implements NewsService {
 		final Integer namespaceId = checkOwner(userId, cmd.getOwnerId(), cmd.getOwnerType());
 		if(TrueOrFalseFlag.fromCode(cmd.getCheckPrivilegeFlag())==TrueOrFalseFlag.TRUE) {
 			LOGGER.info("news check privilege");
-			boolean b = userPrivilegeMgr.checkUserPrivilege(userId, cmd.getOwnerId(), 10005L, cmd.getCategoryId(), null, null);
+			boolean b = userPrivilegeMgr.checkUserPrivilege(userId, cmd.getOwnerId(), 10005L, 10800L,null,""+cmd.getCategoryId(), null, null);
 		}
 		if (StringUtils.isEmpty(cmd.getKeyword()) && cmd.getTagIds()==null ) {
 			NewsOwnerType newsOwnerType = NewsOwnerType.fromCode(cmd.getOwnerType());
