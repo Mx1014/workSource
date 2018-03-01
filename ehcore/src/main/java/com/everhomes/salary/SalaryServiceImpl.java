@@ -35,6 +35,7 @@ import freemarker.cache.StringTemplateLoader;
 import freemarker.template.Configuration;
 import org.apache.commons.collections.map.HashedMap;
 import org.apache.commons.lang.StringUtils;
+import org.apache.commons.logging.Log;
 import org.apache.poi.ss.usermodel.*;
 import org.apache.poi.xssf.usermodel.XSSFComment;
 import org.apache.poi.xssf.usermodel.XSSFDrawing;
@@ -201,12 +202,16 @@ public class SalaryServiceImpl implements SalaryService {
             StringBuilder sb = new StringBuilder();
             String[] dptIds = department.getPath().split("/");
             for(String dptId : dptIds){
-                Organization dpt1 = organizationProvider.findOrganizationById(Long.valueOf(dptId));
-                if (null != dpt1) {
-                    if (sb.length() > 0) {
-                        sb.append("/");
+                try {
+                    Organization dpt1 = organizationProvider.findOrganizationById(Long.valueOf(dptId));
+                    if (null != dpt1) {
+                        if (sb.length() > 0) {
+                            sb.append("/");
+                        }
+                        sb.append(dpt1.getName());
                     }
-                    sb.append(dpt1.getName());
+                }catch (Exception e ){
+                    LOGGER.error("找部门的路径名称出了错",e);
                 }
             }
             return sb.toString();
