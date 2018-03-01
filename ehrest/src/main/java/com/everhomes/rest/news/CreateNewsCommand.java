@@ -28,6 +28,8 @@ import com.everhomes.util.StringHelper;
  * <li>communityIds: 可见范围</li>
  * <li>newsTagVals: 标签集合,参考{@link com.everhomes.rest.news.NewsTagValsDTO}</li>
  * <li>status: 新闻状态,参考{@link com.everhomes.rest.news.NewsStatus}</li>
+ * <li>currentPMId: 当前管理公司ID</li>
+ * <li>currentProjectId: 当前选中项目Id，如果是全部则不传</li>
  * </ul>
  */
 public class CreateNewsCommand {
@@ -53,6 +55,25 @@ public class CreateNewsCommand {
 	private List<NewsTagValsDTO> newsTagVals;
 	private String visibleType;
 	private byte status;
+	private Long currentPMId;
+	private Long currentProjectId;
+
+	public Long getCurrentPMId() {
+		return currentPMId;
+	}
+
+	public void setCurrentPMId(Long currentPMId) {
+		this.currentPMId = currentPMId;
+	}
+
+	public Long getCurrentProjectId() {
+		return currentProjectId;
+	}
+
+	public void setCurrentProjectId(Long currentProjectId) {
+		this.currentProjectId = currentProjectId;
+	}
+
 
 	public String getVisibleType() {
 		return visibleType;
