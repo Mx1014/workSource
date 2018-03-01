@@ -250,7 +250,10 @@ public class CustomerDynamicExcelHandler implements DynamicExcelHandler {
                         if(columns != null && columns.size() > 0) {
                             for(DynamicColumnDTO column : columns) {
                                 if("projectSource".equals(column.getFieldName())) {
-                                    column.getValue().replace("，", ",");
+                                    if(column.getValue() != null && column.getValue().contains("，")) {
+                                        column.getValue().replace("，", ",");
+                                    }
+
                                     String[] sources = column.getValue().split(",");
                                     String displayName = column.getValue();
                                     if(sources.length > 0) {
