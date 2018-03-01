@@ -1640,7 +1640,7 @@ public class SalaryServiceImpl implements SalaryService {
         calendar.add(Calendar.MONTH, -12);
         SalaryDepartStatistic lastYear = salaryDepartStatisticProvider.findSalaryDepartStatisticByDptAndMonth(dpt.getId(), monthSF.get().format(calendar.getTime()));
         if (null!=statistic.getCostSalary() && null != lastYear && lastYear.getCostSalary() != null && lastYear.getCostSalary().compareTo(new BigDecimal(0)) > 0) {
-            statistic.setCostYoySalary(statistic.getCostSalary().subtract(lastYear.getCostSalary()).divide(lastYear.getCostSalary()).multiply(new BigDecimal(100)));
+            statistic.setCostYoySalary(statistic.getCostSalary().subtract(lastYear.getCostSalary()).divide(lastYear.getCostSalary(),2).multiply(new BigDecimal(100)));
 
         }
         //环比
