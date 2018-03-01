@@ -367,8 +367,7 @@ public class CustomerDynamicExcelHandler implements DynamicExcelHandler {
 
                         if(columns != null && columns.size() > 0) {
                             for(DynamicColumnDTO column : columns) {
-                                if("enterpriseTypeItemId".equals(column.getFieldName()) || "shareTypeItemId".equals(column.getFieldName())
-                                        || "propertyType".equals(column.getFieldName())) {
+                                if("patentStatusItemId".equals(column.getFieldName()) || "patentTypeItemId".equals(column.getFieldName())) {
                                     ScopeFieldItem item = fieldService.findScopeFieldItemByDisplayName(namespaceId, communityId, moduleName, column.getValue());
                                     if(item != null) {
                                         column.setValue(item.getItemId().toString());

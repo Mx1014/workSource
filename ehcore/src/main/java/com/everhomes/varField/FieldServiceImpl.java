@@ -197,7 +197,7 @@ public class FieldServiceImpl implements FieldService {
         if(results != null && results.size() > 0) {
             List<String> sheetNames = results.stream().map(FieldGroupDTO::getGroupDisplayName).collect(Collectors.toList());
             // for equipment inspection dynamicExcelTemplate
-            String excelTemplateName = null;
+            String excelTemplateName = "客户管理模板" + new SimpleDateFormat("yyyy-MM-dd-HH-mm").format(Calendar.getInstance().getTime()) + ".xls";;
             if (StringUtils.isNotEmpty(cmd.getEquipmentCategoryName())) {
                 sheetNames.removeIf((s) -> !s.equals(cmd.getEquipmentCategoryName()));
                 excelTemplateName = cmd.getEquipmentCategoryName() +
@@ -1011,7 +1011,7 @@ public class FieldServiceImpl implements FieldService {
         }
 
         //处理uid的
-        LOGGER.debug("field name index uid: {}, fieldName length-3: {}", fieldName.indexOf("Uid"), fieldName.length()-3);
+        LOGGER.debug("field name: {} index uid: {}, fieldName length-3: {}", fieldName, fieldName.indexOf("Uid"), fieldName.length()-3);
         if(fieldName.indexOf("Uid") == fieldName.length()-3) {
             long uid = Long.parseLong(invoke.toString());
             OrganizationMemberDetails detail = organizationProvider.findOrganizationMemberDetailsByTargetId(uid);
@@ -1025,6 +1025,8 @@ public class FieldServiceImpl implements FieldService {
                     } else {
                         LOGGER.error("field "+ fieldName+" find name in organization member failed ,uid is "+ uid);
                     }
+                } else {
+                    invoke = "";
                 }
 
             }

@@ -74,6 +74,7 @@ import com.everhomes.server.schema.tables.EhUsers;
 import com.everhomes.server.schema.tables.pojos.EhGroupMembers;
 import com.everhomes.settings.PaginationConfigHelper;
 import com.everhomes.user.*;
+import com.everhomes.user.admin.SystemUserPrivilegeMgr;
 import com.everhomes.util.*;
 import com.everhomes.user.UserPrivilegeMgr;
 import com.everhomes.version.VersionService;
@@ -2862,10 +2863,19 @@ public class GroupServiceImpl implements GroupService {
 
         UserPrivilegeMgr sysResolver = PlatformContext.getComponent("SystemUser");
         boolean result = sysResolver.checkSuperAdmin(uid, organizationId);
-        if (!result) {
-            throw RuntimeErrorException.errorWith(ErrorCodes.SCOPE_GENERAL, ErrorCodes.ERROR_ACCESS_DENIED,
-                    "Insufficient privilege");
+
+        if(result){
+            return;
         }
+
+        //最后检查root权限，没有权限报错
+        SystemUserPrivilegeMgr systemResolver = PlatformContext.getComponent("SystemUser");
+        systemResolver.checkUserPrivilege(uid, 0);
+
+//        if (!result) {
+//            throw RuntimeErrorException.errorWith(ErrorCodes.SCOPE_GENERAL, ErrorCodes.ERROR_ACCESS_DENIED,
+//                    "Insufficient privilege");
+//        }
 
     }
     
