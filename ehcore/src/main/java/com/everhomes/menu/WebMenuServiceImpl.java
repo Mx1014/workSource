@@ -318,18 +318,24 @@ public class WebMenuServiceImpl implements WebMenuService {
 			}
 
 			List<Tuple<Long, String>> appTuples = authorizationProvider.getAuthorizationAppModuleIdsByTarget(targets);
+
+			//getVersion
+			PortalVersion version = this.portalService.findReleaseVersion(UserContext.getCurrentNamespaceId());
+
+			Long versionId = version != null ? version.getId() : null;
+
 			appTuples.stream().map(r -> {
 				if (Long.valueOf(r.first()) == 0L) {
 					List<ServiceModuleApp> appDtos = null;
 					switch (ModuleManagementType.fromCode(r.second())) {
 						case COMMUNITY_CONTROL:
-							appDtos = serviceModuleAppService.listServiceModuleApp(UserContext.getCurrentNamespaceId(), null, null, null, null, ModuleManagementType.COMMUNITY_CONTROL.getCode());
+							appDtos = serviceModuleAppService.listServiceModuleApp(UserContext.getCurrentNamespaceId(), versionId, null, null, null, ModuleManagementType.COMMUNITY_CONTROL.getCode());
 							break;
 						case ORG_CONTROL:
-							appDtos = serviceModuleAppService.listServiceModuleApp(UserContext.getCurrentNamespaceId(), null, null, null, null, ModuleManagementType.ORG_CONTROL.getCode());
+							appDtos = serviceModuleAppService.listServiceModuleApp(UserContext.getCurrentNamespaceId(), versionId, null, null, null, ModuleManagementType.ORG_CONTROL.getCode());
 							break;
 						case UNLIMIT_CONTROL:
-							appDtos = serviceModuleAppService.listServiceModuleApp(UserContext.getCurrentNamespaceId(), null, null, null, null, ModuleManagementType.UNLIMIT_CONTROL.getCode());
+							appDtos = serviceModuleAppService.listServiceModuleApp(UserContext.getCurrentNamespaceId(), versionId, null, null, null, ModuleManagementType.UNLIMIT_CONTROL.getCode());
 							break;
 					}
 					if (appDtos != null && appDtos.size() > 0) {
