@@ -1140,6 +1140,7 @@ public class Rentalv2ServiceImpl implements Rentalv2Service {
 		rSiteDTO.setDetailUrl(homeUrl + detailUrl);
 		rSiteDTO.setResourceTypeId(resourceType.getId());
 		rSiteDTO.setPayMode(resourceType.getPayMode());
+		rSiteDTO.setIdentify(resourceType.getIdentify());
 		rSiteDTO.setAclinkId(rentalSite.getAclinkId());
 		if (rSiteDTO.getAclinkId()!=null)
 			rSiteDTO.setAclinkName(doorAccessProvider.getDoorAccessById(rentalSite.getAclinkId()).getName());
