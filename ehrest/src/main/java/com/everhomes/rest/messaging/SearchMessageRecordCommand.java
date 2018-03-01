@@ -1,7 +1,6 @@
 package com.everhomes.rest.messaging;
 
 /**
- *
  * <ul>参数:
  * <li>namespaceId: 域空间id</li>
  * <li>bodyType: 内容类型</li>
@@ -12,13 +11,13 @@ package com.everhomes.rest.messaging;
  * <li>pageSize: 页数</li>
  * <li>isGroupBy: 是否聚合</li>
  * <li>indexId: 索引id</li>
- * <li>keyWords: 搜索关键字</li>
+ * <li>keywords: 搜索关键字</li>
  * <li>startTime: 开始时间</li>
  * <li>endTime: 结束时间</li>
  * <li>type: 消息类型（0：不限；1：消息；2：推送）</li>
  * </ul>
  */
-public class  SearchMessageRecordCommand {
+public class SearchMessageRecordCommand {
     private Integer namespaceId;
     private String bodyType;
     private Long senderUid;
@@ -28,7 +27,7 @@ public class  SearchMessageRecordCommand {
     private Integer pageSize;
     private Integer isGroupBy;
     private Long indexId;
-    private String keyWords;
+    private String keywords;
     private Long startTime;
     private Long endTime;
     private Integer type;
@@ -106,13 +105,6 @@ public class  SearchMessageRecordCommand {
         this.indexId = indexId;
     }
 
-    public String getKeyWords() {
-        return keyWords;
-    }
-
-    public void setKeyWords(String keyWords) {
-        this.keyWords = keyWords;
-    }
 
     public Long getStartTime() {
         return startTime;
@@ -136,5 +128,13 @@ public class  SearchMessageRecordCommand {
 
     public void setType(Integer type) {
         this.type = type;
+    }
+
+    public String getKeywords() {
+        return keywords;
+    }
+
+    public void setKeywords(String keywords) {
+        this.keywords = keywords;
     }
 }

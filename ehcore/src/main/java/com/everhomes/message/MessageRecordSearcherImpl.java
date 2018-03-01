@@ -115,8 +115,10 @@ public class MessageRecordSearcherImpl extends AbstractElasticSearch implements 
     public List queryMessage(SearchMessageRecordCommand cmd) {
         SearchRequestBuilder builder = getClient().prepareSearch(getIndexName()).setTypes(getIndexType());
         BoolQueryBuilder bqb = new BoolQueryBuilder();
-        if (cmd.getKeyWords() != null)
-            bqb = bqb.must(QueryBuilders.matchPhraseQuery("body", cmd.getKeyWords()));
+        if (cmd.getIndexId() != null)
+            bqb = bqb.must(QueryBuilders.matchQuery("indexId", cmd.getIndexId()));
+        if (cmd.getKeywords() != null)
+            bqb = bqb.must(QueryBuilders.matchQuery("body", cmd.getKeywords()));
         if (cmd.getNamespaceId() != null )
             bqb = bqb.must(QueryBuilders.termQuery("namespaceId", cmd.getNamespaceId()));
         if (StringUtils.isNotEmpty(cmd.getBodyType()))
@@ -196,12 +198,6 @@ public class MessageRecordSearcherImpl extends AbstractElasticSearch implements 
                 case 0:
                     break;
                 case 1:
-                    tagMatchs.add(MessageRecordSenderTag.NOTIFY_EVENT.getCode());
-                    tagMatchs.add(MessageRecordSenderTag.NOTIFY_REQUEST.getCode());
-                    tagMatchs.add(MessageRecordSenderTag.FETCH_NOTIFY_MESSAGES.getCode());
-                    bqb = bqb.must(QueryBuilders.termsQuery("senderTag", tagMatchs));
-                    break;
-                case 2:
                     tagMatchs.add(MessageRecordSenderTag.FORWARD_EVENT.getCode());
                     tagMatchs.add(MessageRecordSenderTag.APPIDSTATUS.getCode());
                     tagMatchs.add(MessageRecordSenderTag.REGISTER_LOGIN.getCode());
@@ -209,6 +205,12 @@ public class MessageRecordSearcherImpl extends AbstractElasticSearch implements 
                     tagMatchs.add(MessageRecordSenderTag.ROUTE_STORE_MESSAGE.getCode());
                     tagMatchs.add(MessageRecordSenderTag.ROUTE_REALTIME_MESSAGE.getCode());
                     tagMatchs.add(MessageRecordSenderTag.ROUTE_MESSAGE.getCode());
+                    bqb = bqb.must(QueryBuilders.termsQuery("senderTag", tagMatchs));
+                    break;
+                case 2:
+                    tagMatchs.add(MessageRecordSenderTag.NOTIFY_EVENT.getCode());
+                    tagMatchs.add(MessageRecordSenderTag.NOTIFY_REQUEST.getCode());
+                    tagMatchs.add(MessageRecordSenderTag.FETCH_NOTIFY_MESSAGES.getCode());
                     bqb = bqb.must(QueryBuilders.termsQuery("senderTag", tagMatchs));
                     break;
             }
