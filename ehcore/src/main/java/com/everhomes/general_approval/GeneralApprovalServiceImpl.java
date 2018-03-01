@@ -1235,8 +1235,8 @@ public class GeneralApprovalServiceImpl implements GeneralApprovalService {
             } catch (IOException e) {
                 LOGGER.error("close error", e);
             }
-            return out;
         }
+        return out;
     }
 
     @Override
