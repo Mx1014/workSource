@@ -97,7 +97,7 @@ public class ArchivesProviderImpl implements ArchivesProvider {
         query.addConditions(Tables.EH_ARCHIVES_STICKY_CONTACTS.ORGANIZATION_ID.eq(organizationId));
         query.addConditions(Tables.EH_ARCHIVES_STICKY_CONTACTS.DETAIL_ID.eq(detailId));
         if (query.fetch() != null) {
-            return ConvertHelper.convert(query.fetchOne(), ArchivesStickyContacts.class);
+            return ConvertHelper.convert(query.fetchAny(), ArchivesStickyContacts.class);
         } else
             return null;
     }
