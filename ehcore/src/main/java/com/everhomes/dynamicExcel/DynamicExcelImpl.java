@@ -290,7 +290,7 @@ public class DynamicExcelImpl implements DynamicExcelService{
 //            //后处理
 //            h.postProcess(response);
 //        }catch (Exception e){}
-        response.write2failCause();
+        response.write2failCause(workbook.getNumberOfSheets());
         return response;
     }
 
