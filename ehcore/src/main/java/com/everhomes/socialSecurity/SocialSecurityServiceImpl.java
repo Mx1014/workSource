@@ -23,6 +23,7 @@ import com.everhomes.rest.filedownload.TaskRepeatFlag;
 import com.everhomes.rest.filedownload.TaskType;
 import com.everhomes.rest.organization.*;
 import com.everhomes.rest.socialSecurity.*;
+import com.everhomes.salary.SalaryConstants;
 import com.everhomes.sequence.SequenceProvider;
 import com.everhomes.server.schema.Tables;
 import com.everhomes.server.schema.tables.EhOrganizationMemberDetails;
@@ -297,14 +298,18 @@ public class SocialSecurityServiceImpl implements SocialSecurityService {
 
     private Long getZuolinNamespaceCityId(Long cityId) {
         Region currentNSCity = regionProvider.findRegionById(cityId);
-        return getZuolinNamespaceCityId(currentNSCity.getName());
+        Long id = getZuolinNamespaceCityId(currentNSCity.getName());
+        if (null == id) {
+            return SocialSecurityConstants.DEFAULT_CITY;
+        }
+        return id;
     }
 
     private Long getZuolinNamespaceCityId(String name) {
 
         Region zuolinCity = regionProvider.findRegionByName(0, name);
         if (null == zuolinCity) {
-            return SocialSecurityConstants.DEFAULT_CITY;
+            return null;
         }
         return zuolinCity.getId();
     }
@@ -1179,6 +1184,14 @@ public class SocialSecurityServiceImpl implements SocialSecurityService {
                 count.add(detail.getId());
                 String ssCityName = r.getC();
                 Long ssCityId = getZuolinNamespaceCityId(ssCityName);
+                if(null == ssCityId){
+                    LOGGER.error("没有这个城市 " + r.getC() );
+                    log.setErrorLog("没有这个户籍城市");
+                    log.setCode(SocialSecurityConstants.ERROR_CHECK_SOCIAL_CITY);
+                    log.setErrorDescription(log.getErrorLog());
+                    response.getLogs().add(log);
+                    continue;
+                }
                 String afCityName = r.getD();
                 Long afCItyId = getZuolinNamespaceCityId(afCityName);
                 String houseType = r.getE();
