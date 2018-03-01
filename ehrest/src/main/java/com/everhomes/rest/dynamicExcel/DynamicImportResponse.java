@@ -43,11 +43,11 @@ public class DynamicImportResponse {
         this.storage = storage;
     }
 
-    public void write2failCause() {
-        if(this.failCause != null){
-            this.failCause = "导入" + "成功了" + successRowNumber +"行,"+"失败了"+ failedRowNumber+"行" + "," + failCause;
-        }else{
-            this.failCause = "导入" + "成功了" + successRowNumber +"行,"+"失败了"+ failedRowNumber+"行";
+    public void write2failCause(Integer numOfSheet) {
+        this.failCause = "导入了"+numOfSheet+"个sheet页," +"共导入" + "成功了" + successRowNumber +"行,"+"失败了"+ failedRowNumber+"行";
+        if(failCause != null){
+            //failCause是导入失败的第一次原因
+            this.failCause += "," + failCause;
         }
     }
 }

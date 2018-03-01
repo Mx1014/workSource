@@ -35,6 +35,7 @@ import freemarker.cache.StringTemplateLoader;
 import freemarker.template.Configuration;
 import org.apache.commons.collections.map.HashedMap;
 import org.apache.commons.lang.StringUtils;
+import org.apache.commons.logging.Log;
 import org.apache.poi.ss.usermodel.*;
 import org.apache.poi.xssf.usermodel.XSSFComment;
 import org.apache.poi.xssf.usermodel.XSSFDrawing;
@@ -189,6 +190,35 @@ public class SalaryServiceImpl implements SalaryService {
         }
         return s;
     }
+    @Override
+    public String getDptPathNameByDetailId(Long detailId) {
+        Long departmentId = organizationService.getDepartmentByDetailId(detailId);
+        Organization department = organizationProvider.findOrganizationById(departmentId);
+        return getDptPathName(department);
+    }
+
+    private String getDptPathName(Organization department) {
+        if (department.getPath().contains("/")) {
+            StringBuilder sb = new StringBuilder();
+            String[] dptIds = department.getPath().split("/");
+            for(String dptId : dptIds){
+                try {
+                    Organization dpt1 = organizationProvider.findOrganizationById(Long.valueOf(dptId));
+                    if (null != dpt1) {
+                        if (sb.length() > 0) {
+                            sb.append("/");
+                        }
+                        sb.append(dpt1.getName());
+                    }
+                }catch (Exception e ){
+                    LOGGER.error("找部门的路径名称出了错",e);
+                }
+            }
+            return sb.toString();
+        }else
+        return department.getName();
+    }
+
 
     @Override
     public ListEnterprisesResponse listEnterprises(ListEnterprisesCommand cmd) {
@@ -1598,7 +1628,7 @@ public class SalaryServiceImpl implements SalaryService {
     private SalaryDepartStatistic processSalaryDepartStatistic(Long ownerId, List<Long> detailIds, String month, Organization dpt) {
         SalaryDepartStatistic statistic = new SalaryDepartStatistic();
         statistic = salaryEmployeeProvider.calculateDptReport(detailIds, statistic, ownerId, month);
-        statistic.setDeptName(dpt.getName());
+        statistic.setDeptName(getDptPathName(dpt));
         statistic.setDeptId(dpt.getId());
         //同比
         Calendar calendar = Calendar.getInstance();
@@ -1610,7 +1640,7 @@ public class SalaryServiceImpl implements SalaryService {
         calendar.add(Calendar.MONTH, -12);
         SalaryDepartStatistic lastYear = salaryDepartStatisticProvider.findSalaryDepartStatisticByDptAndMonth(dpt.getId(), monthSF.get().format(calendar.getTime()));
         if (null!=statistic.getCostSalary() && null != lastYear && lastYear.getCostSalary() != null && lastYear.getCostSalary().compareTo(new BigDecimal(0)) > 0) {
-            statistic.setCostYoySalary(statistic.getCostSalary().subtract(lastYear.getCostSalary()).divide(lastYear.getCostSalary()).multiply(new BigDecimal(100)));
+            statistic.setCostYoySalary(statistic.getCostSalary().subtract(lastYear.getCostSalary()).divide(lastYear.getCostSalary(),2).multiply(new BigDecimal(100)));
 
         }
         //环比
@@ -1622,7 +1652,7 @@ public class SalaryServiceImpl implements SalaryService {
         calendar.add(Calendar.MONTH, -1);
         SalaryDepartStatistic lastMonth = salaryDepartStatisticProvider.findSalaryDepartStatisticByDptAndMonth(dpt.getId(), monthSF.get().format(calendar.getTime()));
         if (null!=statistic.getCostSalary() && null != lastMonth && lastMonth.getCostSalary() != null && lastMonth.getCostSalary().compareTo(new BigDecimal(0)) > 0) {
-            statistic.setCostMomSalary(statistic.getCostSalary().subtract(lastMonth.getCostSalary()).divide(lastMonth.getCostSalary()).multiply(new BigDecimal(100)));
+            statistic.setCostMomSalary(statistic.getCostSalary().subtract(lastMonth.getCostSalary()).divide(lastMonth.getCostSalary(),2).multiply(new BigDecimal(100)));
         }
         LOGGER.debug("计算[{}]公司的汇总数据,人员列表[{}] ,结果[{}] ",dpt.getName(),StringHelper.toJsonString(detailIds), StringHelper.toJsonString(statistic));
         return statistic;
