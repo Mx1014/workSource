@@ -6782,17 +6782,18 @@ public class Rentalv2ServiceImpl implements Rentalv2Service {
 	}
 
 	private void addItems(List<SiteItemDTO> siteItems, Long sourceId, String sourceType, String resourceType){
-		this.dbProvider.execute((TransactionStatus status) -> {
-			siteItems.stream().forEach(r->{
-				AddItemAdminCommand cmd = ConvertHelper.convert(r,AddItemAdminCommand.class);
-				cmd.setResourceType(resourceType);
-				cmd.setSourceType(sourceType);
+		if (siteItems != null)
+			this.dbProvider.execute((TransactionStatus status) -> {
+				siteItems.stream().forEach(r->{
+					AddItemAdminCommand cmd = ConvertHelper.convert(r,AddItemAdminCommand.class);
+					cmd.setResourceType(resourceType);
+					cmd.setSourceType(sourceType);
 
-				cmd.setSourceId(sourceId);
-				this.addItem(cmd);
+					cmd.setSourceId(sourceId);
+					this.addItem(cmd);
+				});
+				return null;
 			});
-			return null;
-		});
 	}
 
 	private void updateRSRs(List<RentalCell> changeRentalSiteRules, UpdateRentalSiteCellRuleAdminCommand cmd){
