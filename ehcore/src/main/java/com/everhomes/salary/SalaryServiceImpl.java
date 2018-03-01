@@ -35,6 +35,7 @@ import freemarker.cache.StringTemplateLoader;
 import freemarker.template.Configuration;
 import org.apache.commons.collections.map.HashedMap;
 import org.apache.commons.lang.StringUtils;
+import org.apache.commons.logging.Log;
 import org.apache.poi.ss.usermodel.*;
 import org.apache.poi.xssf.usermodel.XSSFComment;
 import org.apache.poi.xssf.usermodel.XSSFDrawing;
@@ -189,6 +190,35 @@ public class SalaryServiceImpl implements SalaryService {
         }
         return s;
     }
+    @Override
+    public String getDptPathNameByDetailId(Long detailId) {
+        Long departmentId = organizationService.getDepartmentByDetailId(detailId);
+        Organization department = organizationProvider.findOrganizationById(departmentId);
+        return getDptPathName(department);
+    }
+
+    private String getDptPathName(Organization department) {
+        if (department.getPath().contains("/")) {
+            StringBuilder sb = new StringBuilder();
+            String[] dptIds = department.getPath().split("/");
+            for(String dptId : dptIds){
+                try {
+                    Organization dpt1 = organizationProvider.findOrganizationById(Long.valueOf(dptId));
+                    if (null != dpt1) {
+                        if (sb.length() > 0) {
+                            sb.append("/");
+                        }
+                        sb.append(dpt1.getName());
+                    }
+                }catch (Exception e ){
+                    LOGGER.error("找部门的路径名称出了错",e);
+                }
+            }
+            return sb.toString();
+        }else
+        return department.getName();
+    }
+
 
     @Override
     public ListEnterprisesResponse listEnterprises(ListEnterprisesCommand cmd) {
@@ -1598,7 +1628,7 @@ public class SalaryServiceImpl implements SalaryService {
     private SalaryDepartStatistic processSalaryDepartStatistic(Long ownerId, List<Long> detailIds, String month, Organization dpt) {
         SalaryDepartStatistic statistic = new SalaryDepartStatistic();
         statistic = salaryEmployeeProvider.calculateDptReport(detailIds, statistic, ownerId, month);
-        statistic.setDeptName(dpt.getName());
+        statistic.setDeptName(getDptPathName(dpt));
         statistic.setDeptId(dpt.getId());
         //同比
         Calendar calendar = Calendar.getInstance();
