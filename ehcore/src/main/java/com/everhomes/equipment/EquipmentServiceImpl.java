@@ -4022,11 +4022,9 @@ private void checkUserPrivilege(Long orgId, Long privilegeId, Long communityId) 
 		List<EquipmentInspectionTasks> tasks = new ArrayList<>();
 		if (planMaps != null && planMaps.size() > 0) {
 			List<Long> planIds = new ArrayList<>();
-			if (planMaps != null && planMaps.size() > 0) {
 				planIds = planMaps.stream()
 						.map(EquipmentInspectionEquipmentPlanMap::getPlanId)
 						.collect(Collectors.toList());
-			}
 			tasks = equipmentProvider.listTaskByPlanMaps(planIds, startTime, endTime, locator, pageSize + 1, cmd.getTaskStatus());
 		} else {
 //			List<Long> standardIds = null;
