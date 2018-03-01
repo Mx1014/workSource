@@ -191,7 +191,7 @@ public class UserServiceImpl implements UserService {
 	private static String ANBANG_CLIENTID = "zuolin";
 	private static String ANBANG_CLIENTSECRET = "enVvbGluMjAxODAxMDI=";
 	private static String ANBANG_OAUTH_URL = "http://139.196.255.176:8000/api/auth/oauth/token";
-	private static String ANBANG_USERS_URL = "http://139.196.255.176:8000/api/auth/syn/users";
+	private static String ANBANG_USERS_URL = "http://139.196.255.176:8000/api/permission/user/synchronization";
 
 
 	@Autowired
