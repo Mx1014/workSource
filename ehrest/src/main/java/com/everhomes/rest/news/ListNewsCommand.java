@@ -7,6 +7,7 @@ import java.util.List;
 import javax.validation.constraints.NotNull;
 
 import com.everhomes.discover.ItemType;
+import com.everhomes.rest.common.TrueOrFalseFlag;
 import com.everhomes.util.StringHelper;
 
 /**
@@ -34,6 +35,16 @@ public class ListNewsCommand {
 	@ItemType(Long.class)
 	private List<Long> tagIds;	
 	private Byte status;
+
+	public Byte getCheckPrivilegeFlag() {
+		return checkPrivilegeFlag;
+	}
+
+	public void setCheckPrivilegeFlag(Byte checkPrivilegeFlag) {
+		this.checkPrivilegeFlag = checkPrivilegeFlag;
+	}
+
+	private Byte checkPrivilegeFlag = TrueOrFalseFlag.FALSE.getCode();
 	
 	public Byte getStatus() {
 		return status;
