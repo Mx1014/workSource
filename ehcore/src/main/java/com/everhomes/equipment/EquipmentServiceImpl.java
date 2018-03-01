@@ -3596,21 +3596,23 @@ private void checkUserPrivilege(Long orgId, Long privilegeId, Long communityId) 
 			response.setNextPageAnchor((long) (offset + 1));
 		}
 
-		tasks = allTasks.stream().map(r -> {
-			if ((EquipmentTaskStatus.WAITING_FOR_EXECUTING.equals(EquipmentTaskStatus.fromStatus(r.getStatus())))
-					|| EquipmentTaskStatus.DELAY.equals(EquipmentTaskStatus.fromStatus(r.getStatus()))) {
-				return r;
-			} else if (EquipmentTaskStatus.CLOSE.equals(EquipmentTaskStatus.fromStatus(r.getStatus()))
-					|| (EquipmentTaskStatus.REVIEW_DELAY.equals(EquipmentTaskStatus.fromStatus(r.getStatus())))) {
-				return r;
-			}
-			return null;
-		}).filter(Objects::nonNull).collect(Collectors.toList());
+//		tasks = allTasks.stream().map(r -> {
+//			if ((EquipmentTaskStatus.WAITING_FOR_EXECUTING.equals(EquipmentTaskStatus.fromStatus(r.getStatus())))
+//					|| EquipmentTaskStatus.DELAY.equals(EquipmentTaskStatus.fromStatus(r.getStatus()))) {
+//				return r;
+//			} else if (EquipmentTaskStatus.CLOSE.equals(EquipmentTaskStatus.fromStatus(r.getStatus()))
+//					|| (EquipmentTaskStatus.REVIEW_DELAY.equals(EquipmentTaskStatus.fromStatus(r.getStatus())))) {
+//				return r;
+//			}
+//			return null;
+//		}).filter(Objects::nonNull).collect(Collectors.toList());
 
-		List<EquipmentTaskDTO> dtos = tasks.stream().map((r) ->
-				ConvertHelper.convert(r, EquipmentTaskDTO.class))
-				.collect(Collectors.toList());
-
+		List<EquipmentTaskDTO> dtos = new ArrayList<>();
+		if (allTasks.size() > 0) {
+			dtos = allTasks.stream().map((r) ->
+					ConvertHelper.convert(r, EquipmentTaskDTO.class))
+					.collect(Collectors.toList());
+		}
 		response.setTasks(dtos);
 
 		return response;
@@ -4779,8 +4781,8 @@ private void checkUserPrivilege(Long orgId, Long privilegeId, Long communityId) 
 		StatTodayEquipmentTasksResponse response = ConvertHelper.convert(stat, StatTodayEquipmentTasksResponse.class);
 		response.setReviewQualified(reviewStat.getQualifiedTasks());
 		response.setReviewUnqualified(reviewStat.getUnqualifiedTasks());
-		response.setCurrentWaitingForExecuting(response.getWaitingForExecuting());
-		response.setCurrentWaitingForApproval(response.getCompleteWaitingForApproval());
+		response.setCurrentWaitingForExecuting(stat.getWaitingForExecuting());
+		response.setCurrentWaitingForApproval(stat.getCompleteWaitingForApproval());
 		response.setReviewed(response.getReviewQualified() + response.getReviewUnqualified());
 		return response;
 	}
@@ -4801,7 +4803,7 @@ private void checkUserPrivilege(Long orgId, Long privilegeId, Long communityId) 
 				cmd.getInspectionCategoryId(), getDayBegin(cal, -cmd.getLastDays()), getDayEnd(cal, 0),cmd.getNamespaceId());
 
 		StatLastDaysEquipmentTasksResponse response = new StatLastDaysEquipmentTasksResponse();
-		response.setCompleteInspection(statTasks.getCompleteInspection());
+		response.setCompleteInspection(statTasks.getCompleteWaitingForApproval());
 		response.setCompleteMaintance(statTasks.getCompleteMaintance());
 		response.setReviewUnqualified(reviewStat.getUnqualifiedTasks());
 		response.setReviewQualified(reviewStat.getQualifiedTasks());
@@ -4836,10 +4838,10 @@ private void checkUserPrivilege(Long orgId, Long privilegeId, Long communityId) 
 		response.setUnReviewedTasks(statTasks.getCompleteWaitingForApproval());
 		response.setReviewTasks(response.getUnReviewedTasks() + response.getReviewedTasks());
 
-		Double maintanceRate = response.getComplete().equals(0L) ? 0.00 : (double)response.getCompleteMaintance()/(double)response.getComplete();
+		Double maintanceRate = response.getCompleteInspection().equals(0L) ? 0.00 : (double)response.getCompleteMaintance()/(double)response.getCompleteInspection();
 		response.setMaintanceRate(maintanceRate);
-		Double delayRate = (response.getComplete()+response.getDelay()) == 0L ? 0.00 : (double)response.getDelay()/(double)(response.getComplete()+response.getDelay());
-		response.setDelayRate(delayRate);
+		Double delayInspectionRate = (response.getCompleteInspection()+response.getDelayInspection()) == 0L ? 0.00 : (double)response.getDelayInspection()/(double)(response.getCompleteInspection()+response.getDelayInspection());
+		response.setDelayInspectionRate(delayInspectionRate);
 		Double reviewQualifiedRate = response.getReviewedTasks().equals(0L) ? 0.00 : (double)response.getReviewQualified()/(double)response.getReviewedTasks();
 		response.setReviewQualifiedRate(reviewQualifiedRate);
 		Double reviewDalayRate = response.getReviewTasks().equals(0L) ? 0.00 : (double)response.getReviewDelayTasks()/(double)response.getReviewTasks();
@@ -5818,11 +5820,13 @@ private void checkUserPrivilege(Long orgId, Long privilegeId, Long communityId) 
 
 		OfflineTaskCountStat todayComplete = new OfflineTaskCountStat();
 		todayComplete.setCount(response.getTodayCompleteCount());
-		todayComplete.setId(1L);
+		todayComplete.setId(Long.valueOf(new SimpleDateFormat("yyMMddhhmmssSSS").format(DateHelper.currentGMTTime())) * 10000);
+		todayComplete.setTargetId(cmd.getTargetId());
 
 		OfflineTaskCountStat todayTaskCount = new OfflineTaskCountStat();
 		todayTaskCount.setCount(response.getTotayTasksCount());
-		todayTaskCount.setId(1L);
+		todayTaskCount.setId(Long.valueOf(new SimpleDateFormat("yyMMddhhmmssSSS").format(DateHelper.currentGMTTime())) * 10000);
+		todayTaskCount.setTargetId(cmd.getTargetId());
 
 		offlineResponse.setTodayCompleteCount(new ArrayList<>(Collections.singletonList(todayComplete)));
 		offlineResponse.setTodayTasksCount(new ArrayList<>(Collections.singletonList(todayTaskCount)));
@@ -5844,9 +5848,10 @@ private void checkUserPrivilege(Long orgId, Long privilegeId, Long communityId) 
 				EquipmentInspectionPlanDTO planDTO = ConvertHelper.convert(plan, EquipmentInspectionPlanDTO.class);
 				//填充巡检计划相关的巡检对象(需排序)
 				processEquipmentInspectionObjectsByPlanId(task.getPlanId(), planDTO);
+				if(planDTO.getEquipmentStandardRelations()!=null)
 				equipments.addAll(planDTO.getEquipmentStandardRelations());
 			}else {
-				//兼容旧任务
+				//兼容旧任务 可以去掉了
 				EquipmentInspectionEquipments equipment = equipmentProvider.findEquipmentById(task.getEquipmentId());
 				EquipmentInspectionStandards standard = equipmentProvider.findStandardById(task.getStandardId());
 				if (equipment != null && standard != null) {

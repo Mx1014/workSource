@@ -4,11 +4,13 @@ import com.everhomes.util.StringHelper;
 
 /**
  *  <li>id  : id</li>
+ *  <li>targetId  : 项目id</li>
  *  <li>count: count </li>
  */
 
 public class OfflineTaskCountStat {
     private Long id ;
+    private Long targetId ;
     private Long count;
 
     public Long getId() {
@@ -17,6 +19,14 @@ public class OfflineTaskCountStat {
 
     public void setId(Long id) {
         this.id = id;
+    }
+
+    public Long getTargetId() {
+        return targetId;
+    }
+
+    public void setTargetId(Long targetId) {
+        this.targetId = targetId;
     }
 
     public Long getCount() {

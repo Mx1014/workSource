@@ -12,8 +12,8 @@ public class NewsTest extends CoreServerTestCase {
 	private NewsProvider newsProvider;
 	
 	@Test
-	public void testListNews(){ 
+	public void testListNews(){
 /*		List<News> list = newsProvider.listNews(0L,0L, 0, 0L, 20,true);
-		list.forEach(s->System.err.println(s));*/ 
+		list.forEach(s->System.err.println(s));*/
 	}
 }

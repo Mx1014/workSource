@@ -940,7 +940,12 @@ public class FieldServiceImpl implements FieldService {
         }
         try {
             if(invoke.getClass().getSimpleName().equals("Timestamp")){
-                SimpleDateFormat sdf = new SimpleDateFormat(field.getDateFormat());
+                SimpleDateFormat sdf = null;
+                if(field.getDateFormat() == null){
+                    sdf = new SimpleDateFormat("yyyy-MM-dd");
+                }else{
+                    sdf = new SimpleDateFormat(field.getDateFormat());
+                }
                 Timestamp var = (Timestamp)invoke;
                 invoke = sdf.format(var.getTime());
             }
@@ -1006,6 +1011,7 @@ public class FieldServiceImpl implements FieldService {
         }
 
         //处理uid的
+        LOGGER.debug("field name index uid: {}, fieldName length-3: {}", fieldName.indexOf("Uid"), fieldName.length()-3);
         if(fieldName.indexOf("Uid") == fieldName.length()-3) {
             long uid = Long.parseLong(invoke.toString());
             OrganizationMemberDetails detail = organizationProvider.findOrganizationMemberDetailsByTargetId(uid);

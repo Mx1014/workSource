@@ -46,6 +46,9 @@ public class CustomerDynamicExcelHandler implements DynamicExcelHandler {
     private CustomerService customerService;
 
     @Autowired
+    private EnterpriseCustomerSearcherImpl customerSearcher;
+
+    @Autowired
     private EnterpriseCustomerProvider customerProvider;
 
     @Autowired
@@ -121,6 +124,9 @@ public class CustomerDynamicExcelHandler implements DynamicExcelHandler {
         String moduleName = customerInfo.getModuleName();
         if(rowDatas != null && rowDatas.size() > 0) {
             CustomerDynamicSheetClass sheet = CustomerDynamicSheetClass.fromStatus(ds.getClassName());
+            if(sheet == null) {
+                return;
+            }
             int failedNumber = 0;
             for(DynamicRowDTO rowData : rowDatas) {
                 List<DynamicColumnDTO> columns = rowData.getColumns();
@@ -401,6 +407,58 @@ public class CustomerDynamicExcelHandler implements DynamicExcelHandler {
                         }
 
                         customerProvider.createCustomerCertificate(certificate);
+                        break;
+                    case CUSTOMER_TRACKING:
+                        CustomerTracking tracking = new CustomerTracking();
+                        tracking.setCustomerId(customerId);
+                        tracking.setCustomerType(customerType);
+                        tracking.setNamespaceId(namespaceId);
+                        if(columns != null && columns.size() > 0) {
+                            for(DynamicColumnDTO column : columns) {
+                                try {
+                                    setToObj(column.getFieldName(), tracking, column.getValue());
+                                } catch(Exception e){
+                                    LOGGER.warn("one row invoke set method for CustomerTracking failed");
+                                    failedNumber ++;
+                                }
+
+                                continue;
+                            }
+                        }
+                        customerProvider.createCustomerTracking(tracking);
+                        EnterpriseCustomer customer = customerProvider.findById(customerId);
+                        if(customer != null) {
+                            customer.setLastTrackingTime(tracking.getTrackingTime());
+                            //更细客户表的最后跟进时间
+                            customerProvider.updateCustomerLastTrackingTime(customer);
+                            customerSearcher.feedDoc(customer);
+                        }
+
+                        break;
+                    case CUSTOMER_TRACKING_PLAN:
+                        CustomerTrackingPlan plan = new CustomerTrackingPlan();
+                        plan.setCustomerId(customerId);
+                        plan.setCustomerType(customerType);
+                        plan.setNamespaceId(namespaceId);
+                        plan.setNotifyStatus(TrackingPlanNotifyStatus.INVAILD.getCode());
+                        plan.setReadStatus(TrackingPlanReadStatus.UNREAD.getCode());
+                        if(columns != null && columns.size() > 0) {
+                            for(DynamicColumnDTO column : columns) {
+                                try {
+                                    setToObj(column.getFieldName(), plan, column.getValue());
+                                } catch(Exception e){
+                                    LOGGER.warn("one row invoke set method for CustomerTrackingPlan failed");
+                                    failedNumber ++;
+                                }
+
+                                continue;
+                            }
+                        }
+                        if(plan.getNotifyTime() != null ){
+                            plan.setNotifyStatus(TrackingPlanNotifyStatus.WAITING_FOR_SEND_OUT.getCode());
+                        }
+                        customerProvider.createCustomerTrackingPlan(plan);
+
                         break;
                     case CUSTOMER_ENTRY_INFO:
                         CustomerEntryInfo entryInfo = new CustomerEntryInfo();
