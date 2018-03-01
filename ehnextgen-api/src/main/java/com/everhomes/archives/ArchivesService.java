@@ -9,6 +9,7 @@ import org.springframework.web.multipart.MultipartFile;
 
 import javax.servlet.http.HttpServletResponse;
 import java.util.List;
+import java.util.Map;
 
 public interface ArchivesService {
 
@@ -36,6 +37,14 @@ public interface ArchivesService {
     void exportImportFileFailResults(GetImportFileResultCommand cmd, HttpServletResponse httpResponse);
 
     ListArchivesEmployeesResponse listArchivesEmployees(ListArchivesEmployeesCommand cmd);
+
+    String getEmployeeRealName(Long userId, Long organizationId);
+
+    Map<Long, String> getEmployeeDepartment(String phone, Long organizationId);
+
+    Map<Long, String> getEmployeeJobPosition(String phone, Long organizationId);
+
+    Map<Long, String> getEmployeeJobLevel(String phone, Long organizationId);
 
     ArchivesEmployeeDTO addArchivesEmployee(AddArchivesEmployeeCommand cmd);
 
@@ -78,4 +87,6 @@ public interface ArchivesService {
     ImportFileResponse<ImportArchivesEmployeesDTO> getImportEmployeesResult(GetImportFileResultCommand cmd);
 
     void remindArchivesEmployee(RemindArchivesEmployeeCommand cmd);
+
+    void syncArchivesDismissStatus();
 }

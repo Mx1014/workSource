@@ -27,6 +27,8 @@ public interface ArchivesProvider {
 
     void createArchivesDismissEmployee(ArchivesDismissEmployees archivesDismissEmployee);
 
+    void updateArchivesDismissEmployee(ArchivesDismissEmployees dismissEmployee);
+
     List<ArchivesDismissEmployees> listArchivesDismissEmployees(Integer offset, Integer count, Integer namespaceId, Condition condition);
 
     void createArchivesForm(ArchivesFroms form);
