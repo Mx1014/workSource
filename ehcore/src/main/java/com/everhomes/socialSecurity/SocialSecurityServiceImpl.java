@@ -2078,48 +2078,48 @@ public class SocialSecurityServiceImpl implements SocialSecurityService {
         row.createCell(++i).setCellValue(r.getPayMonth());
         row.createCell(++i).setCellValue(checkNullBigDecimal(r.getAccumulationFundRadix()));
         row.createCell(++i).setCellValue(checkNullBigDecimal(r.getAccumulationFundCompanyRadix()));
-        row.createCell(++i).setCellValue(checkNull(r.getAccumulationFundCompanyRatio()));
+        row.createCell(++i).setCellValue(checkNullRatio(r.getAccumulationFundCompanyRatio()));
         row.createCell(++i).setCellValue(checkNullBigDecimal(r.getAccumulationFundEmployeeRadix()));
-        row.createCell(++i).setCellValue(checkNull(r.getAccumulationFundEmployeeRatio()));
+        row.createCell(++i).setCellValue(checkNullRatio(r.getAccumulationFundEmployeeRatio()));
         row.createCell(++i).setCellValue(checkNullBigDecimal(r.getAccumulationFundSum()));
         row.createCell(++i).setCellValue(checkNullBigDecimal(r.getAccumulationFundCompanySum()));
         row.createCell(++i).setCellValue(checkNullBigDecimal(r.getAccumulationFundEmployeeSum()));
-        row.createCell(++i).setCellValue("");
+//        row.createCell(++i).setCellValue("");
         //养老
         row.createCell(++i).setCellValue(checkNullBigDecimal(r.getPensionCompanyRadix()));
-        row.createCell(++i).setCellValue(checkNullInteger(r.getPensionCompanyRatio()));
+        row.createCell(++i).setCellValue(checkNullRatio(r.getPensionCompanyRatio()));
         row.createCell(++i).setCellValue(checkNullBigDecimal(r.getPensionCompanySum()));
         row.createCell(++i).setCellValue(checkNullBigDecimal(r.getPensionEmployeeRadix()));
-        row.createCell(++i).setCellValue(checkNullInteger(r.getPensionEmployeeRatio()));
+        row.createCell(++i).setCellValue(checkNullRatio(r.getPensionEmployeeRatio()));
         row.createCell(++i).setCellValue(checkNullBigDecimal(r.getPensionEmployeeSum()));
         //失业
         row.createCell(++i).setCellValue(checkNullBigDecimal(r.getUnemploymentCompanyRadix()));
-        row.createCell(++i).setCellValue(checkNullInteger(r.getUnemploymentCompanyRatio()));
+        row.createCell(++i).setCellValue(checkNullRatio(r.getUnemploymentCompanyRatio()));
         row.createCell(++i).setCellValue(checkNullBigDecimal(r.getUnemploymentCompanySum()));
         row.createCell(++i).setCellValue(checkNullBigDecimal(r.getUnemploymentEmployeeRadix()));
-        row.createCell(++i).setCellValue(checkNullInteger(r.getUnemploymentEmployeeRatio()));
+        row.createCell(++i).setCellValue(checkNullRatio(r.getUnemploymentEmployeeRatio()));
         row.createCell(++i).setCellValue(checkNullBigDecimal(r.getUnemploymentEmployeeSum()));
         //医疗
         row.createCell(++i).setCellValue(checkNullBigDecimal(r.getMedicalCompanyRadix()));
-        row.createCell(++i).setCellValue(checkNullInteger(r.getMedicalCompanyRatio()));
+        row.createCell(++i).setCellValue(checkNullRatio(r.getMedicalCompanyRatio()));
         row.createCell(++i).setCellValue(checkNullBigDecimal(r.getMedicalCompanySum()));
         row.createCell(++i).setCellValue(checkNullBigDecimal(r.getMedicalEmployeeRadix()));
-        row.createCell(++i).setCellValue(checkNullInteger(r.getMedicalEmployeeRatio()));
+        row.createCell(++i).setCellValue(checkNullRatio(r.getMedicalEmployeeRatio()));
         row.createCell(++i).setCellValue(checkNullBigDecimal(r.getMedicalEmployeeSum()));
         //工伤
         row.createCell(++i).setCellValue(checkNullBigDecimal(r.getInjuryCompanyRadix()));
-        row.createCell(++i).setCellValue(checkNullInteger(r.getInjuryCompanyRatio()));
+        row.createCell(++i).setCellValue(checkNullRatio(r.getInjuryCompanyRatio()));
         row.createCell(++i).setCellValue(checkNullBigDecimal(r.getInjuryCompanySum()));
         //生育
         row.createCell(++i).setCellValue(checkNullBigDecimal(r.getBirthCompanyRadix()));
-        row.createCell(++i).setCellValue(checkNullInteger(r.getBirthCompanyRatio()));
+        row.createCell(++i).setCellValue(checkNullRatio(r.getBirthCompanyRatio()));
         row.createCell(++i).setCellValue(checkNullBigDecimal(r.getBirthCompanySum()));
         //大病
         row.createCell(++i).setCellValue(checkNullBigDecimal(r.getCriticalIllnessCompanyRadix()));
-        row.createCell(++i).setCellValue(checkNullInteger(r.getCriticalIllnessCompanyRatio()));
+        row.createCell(++i).setCellValue(checkNullRatio(r.getCriticalIllnessCompanyRatio()));
         row.createCell(++i).setCellValue(checkNullBigDecimal(r.getCriticalIllnessCompanySum()));
         row.createCell(++i).setCellValue(checkNullBigDecimal(r.getCriticalIllnessEmployeeRadix()));
-        row.createCell(++i).setCellValue(checkNullInteger(r.getCriticalIllnessEmployeeRatio()));
+        row.createCell(++i).setCellValue(checkNullRatio(r.getCriticalIllnessEmployeeRatio()));
         row.createCell(++i).setCellValue(checkNullBigDecimal(r.getCriticalIllnessEmployeeSum()));
 
         //补缴
@@ -2141,6 +2141,14 @@ public class SocialSecurityServiceImpl implements SocialSecurityService {
         row.createCell(++i).setCellValue(checkNullBigDecimal(r.getDisabilitySum()));
         row.createCell(++i).setCellValue(checkNullBigDecimal(r.getCommercialInsurance()));
         return sheet;
+    }
+
+    private String checkNullRatio(Integer ratio) {
+        if (null == ratio) {
+            return "";
+        }
+
+        return new BigDecimal(ratio).divide(new BigDecimal(100),2).toString()+"%";
     }
 
     private String checkNull(Object o) {
@@ -2181,7 +2189,7 @@ public class SocialSecurityServiceImpl implements SocialSecurityService {
         row.createCell(++i).setCellValue("公积金合计");
         row.createCell(++i).setCellValue("公积金企业");
         row.createCell(++i).setCellValue("公积金个人");
-        row.createCell(++i).setCellValue("公积金需纳税额");
+//        row.createCell(++i).setCellValue("公积金需纳税额");
         row.createCell(++i).setCellValue("养老企业基数");
         row.createCell(++i).setCellValue("养老企业比例");
         row.createCell(++i).setCellValue("养老企业");
