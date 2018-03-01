@@ -124,6 +124,9 @@ public class CustomerDynamicExcelHandler implements DynamicExcelHandler {
         String moduleName = customerInfo.getModuleName();
         if(rowDatas != null && rowDatas.size() > 0) {
             CustomerDynamicSheetClass sheet = CustomerDynamicSheetClass.fromStatus(ds.getClassName());
+            if(sheet == null) {
+                return;
+            }
             int failedNumber = 0;
             for(DynamicRowDTO rowData : rowDatas) {
                 List<DynamicColumnDTO> columns = rowData.getColumns();
