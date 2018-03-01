@@ -326,9 +326,6 @@ public class UserServiceImpl implements UserService {
 	private NamespaceResourceService namespaceResourceService;
 
 	@Autowired
-	private RolePrivilegeService rolePrivilegeService;
-
-	@Autowired
 	List<FunctionCardHandler> functionCardHandlers;
 
 	@Autowired
