@@ -20,6 +20,7 @@ import com.everhomes.util.ConvertHelper;
 import com.everhomes.util.DateHelper;
 import org.jooq.DSLContext;
 import org.jooq.JoinType;
+import org.jooq.Record;
 import org.jooq.SelectQuery;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -136,7 +137,12 @@ public class DefaultChargingItemProviderImpl implements DefaultChargingItemProvi
     @Override
     public List<DefaultChargingItemProperty> findByPropertyId(Byte propertyType, Long propertyId, Byte meterType) {
         DSLContext context = dbProvider.getDslContext(AccessSpec.readOnly());
-        SelectQuery<EhDefaultChargingItemPropertiesRecord> query = context.selectQuery(Tables.EH_DEFAULT_CHARGING_ITEM_PROPERTIES);
+        SelectQuery<Record> query = context.selectQuery();
+        query.addSelect(Tables.EH_DEFAULT_CHARGING_ITEM_PROPERTIES.ID, Tables.EH_DEFAULT_CHARGING_ITEM_PROPERTIES.NAMESPACE_ID,
+                Tables.EH_DEFAULT_CHARGING_ITEM_PROPERTIES.DEFAULT_CHARGING_ITEM_ID, Tables.EH_DEFAULT_CHARGING_ITEM_PROPERTIES.PROPERTY_TYPE,
+                Tables.EH_DEFAULT_CHARGING_ITEM_PROPERTIES.PROPERTY_ID, Tables.EH_DEFAULT_CHARGING_ITEM_PROPERTIES.STATUS,
+                Tables.EH_DEFAULT_CHARGING_ITEM_PROPERTIES.CREATE_UID, Tables.EH_DEFAULT_CHARGING_ITEM_PROPERTIES.CREATE_TIME);
+        query.addFrom(Tables.EH_DEFAULT_CHARGING_ITEM_PROPERTIES);
         query.addJoin(Tables.EH_DEFAULT_CHARGING_ITEMS, JoinType.LEFT_OUTER_JOIN,
                 Tables.EH_DEFAULT_CHARGING_ITEMS.ID.eq(Tables.EH_DEFAULT_CHARGING_ITEM_PROPERTIES.DEFAULT_CHARGING_ITEM_ID));
 
@@ -158,7 +164,16 @@ public class DefaultChargingItemProviderImpl implements DefaultChargingItemProvi
 
         List<DefaultChargingItemProperty> result = new ArrayList<>();
         query.fetch().map((r) -> {
-            result.add(ConvertHelper.convert(r, DefaultChargingItemProperty.class));
+            DefaultChargingItemProperty property = new DefaultChargingItemProperty();
+            property.setId(r.getValue(Tables.EH_DEFAULT_CHARGING_ITEM_PROPERTIES.ID));
+            property.setNamespaceId(r.getValue(Tables.EH_DEFAULT_CHARGING_ITEM_PROPERTIES.NAMESPACE_ID));
+            property.setDefaultChargingItemId(r.getValue(Tables.EH_DEFAULT_CHARGING_ITEM_PROPERTIES.DEFAULT_CHARGING_ITEM_ID));
+            property.setPropertyType(r.getValue(Tables.EH_DEFAULT_CHARGING_ITEM_PROPERTIES.PROPERTY_TYPE));
+            property.setPropertyId(r.getValue(Tables.EH_DEFAULT_CHARGING_ITEM_PROPERTIES.PROPERTY_ID));
+            property.setStatus(r.getValue(Tables.EH_DEFAULT_CHARGING_ITEM_PROPERTIES.STATUS));
+            property.setCreateUid(r.getValue(Tables.EH_DEFAULT_CHARGING_ITEM_PROPERTIES.CREATE_UID));
+            property.setCreateTime(r.getValue(Tables.EH_DEFAULT_CHARGING_ITEM_PROPERTIES.CREATE_TIME));
+            result.add(property);
             return null;
         });
 

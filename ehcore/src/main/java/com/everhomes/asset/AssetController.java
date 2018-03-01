@@ -1,30 +1,20 @@
 package com.everhomes.asset;
 
-import com.everhomes.bootstrap.PlatformContext;
 import com.everhomes.configuration.ConfigurationProvider;
 import com.everhomes.constants.ErrorCodes;
 import com.everhomes.controller.ControllerBase;
 import com.everhomes.discover.RestDoc;
 import com.everhomes.discover.RestReturn;
-import com.everhomes.entity.EntityType;
 import com.everhomes.portal.PortalService;
 import com.everhomes.rest.RestResponse;
-import com.everhomes.rest.RestResponseBase;
-import com.everhomes.rest.acl.PrivilegeConstants;
-import com.everhomes.rest.acl.PrivilegeServiceErrorCode;
 import com.everhomes.rest.asset.*;
-import com.everhomes.rest.contract.FindContractCommand;
 import com.everhomes.rest.order.PreOrderDTO;
 import com.everhomes.rest.pmkexing.ListOrganizationsByPmAdminDTO;
-import com.everhomes.rest.portal.ListServiceModuleAppsCommand;
-import com.everhomes.rest.portal.ListServiceModuleAppsResponse;
-import com.everhomes.rest.user.UserInfo;
 import com.everhomes.rest.user.UserServiceErrorCode;
 import com.everhomes.rest.user.admin.ImportDataResponse;
 import com.everhomes.user.User;
 import com.everhomes.user.UserContext;
 import com.everhomes.user.UserPrivilegeMgr;
-import com.everhomes.util.RequireAuthentication;
 import com.everhomes.util.RuntimeErrorException;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -35,7 +25,6 @@ import org.springframework.web.multipart.MultipartFile;
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
 import javax.validation.Valid;
-import java.math.BigDecimal;
 import java.util.List;
 
 /**
@@ -368,6 +357,21 @@ public class AssetController extends ControllerBase {
         response.setErrorCode(ErrorCodes.SUCCESS);
         return response;
     }
+
+    // this is for 获取园区下的所有滞纳金标准   4
+    /**
+     * <p>获取园区下的所有滞纳金标准</p>
+     * <b>URL: /asset/listLateFineStandards</b>
+     */
+    @RequestMapping("listLateFineStandards")
+    @RestReturn(value = ListLateFineStandardsDTO.class, collection = true)
+    public RestResponse listLateFineStandards(ListLateFineStandardsCommand cmd) {
+        List<ListLateFineStandardsDTO> list = assetService.listLateFineStandards(cmd);
+        RestResponse response = new RestResponse(list);
+        response.setErrorDescription("OK");
+        response.setErrorCode(ErrorCodes.SUCCESS);
+        return response;
+    }
     //左邻管理员可以进入，点击收费项目，传递所在园区，点击保存，其园区可以看到此收费项目          ---   4
     // 查看时，全部情况是查看域空间为namespaceid的，(接口为listAllChargingItems
     // )
@@ -389,7 +393,7 @@ public class AssetController extends ControllerBase {
 
     // this is for 展示一个收费项目的客户可见的所有标准列表         4
     /**
-     * <p>展示一* <b>URL: /asset/listChargingStandards</b>
+     * <p>展示一* <b>URL: /asset/listChargingStandards</b></p>
      * <p>个收费项目的园区下的所有标准列表</p>
      *
      * */
@@ -1153,19 +1157,6 @@ public class AssetController extends ControllerBase {
     }
 
     /**
-     * <b>URL: /asset/activeAutoBillNotice</b>
-     * <p>主动调用定期催缴的功能</p>
-     */
-    @RequestMapping("activeAutoBillNotice")
-    @RestReturn(String.class)
-    public RestResponse listAutoNoticeConfig(){
-        assetService.activeAutoBillNotice();
-        RestResponse restResponse = new RestResponse();
-        restResponse.setErrorCode(ErrorCodes.SUCCESS);
-        restResponse.setErrorDescription("OK");
-        return restResponse;
-    }
-    /**
      * <b>URL: /asset/checkEnterpriseHasArrearage</b>
      * <p>检查企业是否有欠费的账单</p>
      */
@@ -1178,6 +1169,19 @@ public class AssetController extends ControllerBase {
         restResponse.setErrorCode(ErrorCodes.SUCCESS);
         return restResponse;
     }
+    /**
+     * <b>URL: /asset/activeLateFine</b>
+     * <p>主动调用定期催缴的功能</p>
+     */
+//    @RequestMapping("activeLateFine")
+//    @RestReturn(String.class)
+//    public RestResponse activeLateFine(){
+//        assetService.activeLateFine();
+//        RestResponse restResponse = new RestResponse();
+//        restResponse.setErrorCode(ErrorCodes.SUCCESS);
+//        restResponse.setErrorDescription("OK");
+//        return restResponse;
+//    }
 
     /**
      * <b>URL: /asset/functionDisableList</b>
@@ -1197,14 +1201,13 @@ public class AssetController extends ControllerBase {
      * <b>URL: /asset/sc</b>
      * <p></p>
      */
-    @RequestMapping("sc")
-    @RequireAuthentication(value = false)
-    public RestResponse syncCustomer(SyncCustomerCommand cmd){
-        RestResponse restResponse = new RestResponse();
-        assetService.syncCustomer(cmd.getNamespaceId());
-        restResponse.setErrorCode(ErrorCodes.SUCCESS);
-        restResponse.setErrorDescription("OK");
-        return restResponse;
-    }
-
+//    @RequestMapping("sc")
+//    @RequireAuthentication(value = false)
+//    public RestResponse syncCustomer(SyncCustomerCommand cmd){
+//        RestResponse restResponse = new RestResponse();
+//        assetService.syncCustomer(cmd.getNamespaceId());
+//        restResponse.setErrorCode(ErrorCodes.SUCCESS);
+//        restResponse.setErrorDescription("OK");
+//        return restResponse;
+//    }
 }

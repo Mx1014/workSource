@@ -521,6 +521,8 @@ public interface OrganizationService {
 	 */
 	List<OrganizationDTO> listAllPmOrganizations();
 
+	OrganizationDTO listPmOrganizationsByNamespaceId(Integer namespaceId);
+
 	List<Long> getIncludeOrganizationIdsByUserId(Long userId, Long organizationId);
 
 	/**
@@ -590,4 +592,7 @@ public interface OrganizationService {
 
 	// 根据detailId获取部门
 	Long getDepartmentByDetailId(Long detailId);
+
+	// 根据detailId获取部门
+	Long getDepartmentByDetailIdAndOrgId(Long detailId, Long OrgId);
 }

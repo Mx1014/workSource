@@ -39,5 +39,8 @@ public interface ContractService {
 	ContractParamDTO getContractParam(GetContractParamCommand cmd);
 
 	String generateContractNumber();
-	void syncContractsFromThirdPart(SyncContractsFromThirdPartCommand cmd);
+	String syncContractsFromThirdPart(SyncContractsFromThirdPartCommand cmd);
+
+	Boolean checkAdmin(CheckAdminCommand cmd);
+	ContractDetailDTO findContractForApp(FindContractCommand cmd);
 }

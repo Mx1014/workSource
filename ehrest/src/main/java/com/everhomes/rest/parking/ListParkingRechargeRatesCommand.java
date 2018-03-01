@@ -10,21 +10,22 @@ import com.everhomes.util.StringHelper;
  * <li>ownerType: 归属的类型，{@link com.everhomes.rest.parking.ParkingOwnerType}</li>
  * <li>ownerId: 归属的ID，如小区ID</li>
  * <li>parkingLotId: 停车场ID</li>
- * <li>palteNumber: 车牌号</li>
+ * <li>plateNumber: 车牌，app查询费率需要根据车牌来查</li>
+ * <li>cardNo: 卡ID, 来自第三方</li>
  * </ul>
  */
 public class ListParkingRechargeRatesCommand {
-	@NotNull
+    @NotNull
     private String ownerType;
-	@NotNull
+    @NotNull
     private Long ownerId;
-	@NotNull
+    @NotNull
     private Long parkingLotId;
-	@NotNull
-	private String plateNumber;
-	@NotNull
-	private String cardNo;
-    
+    @NotNull
+    private String plateNumber;
+    @NotNull
+    private String cardNo;
+
     public ListParkingRechargeRatesCommand() {
     }
 
@@ -57,20 +58,20 @@ public class ListParkingRechargeRatesCommand {
         return StringHelper.toJsonString(this);
     }
 
-	public String getPlateNumber() {
-		return plateNumber;
-	}
+    public String getPlateNumber() {
+        return plateNumber;
+    }
 
-	public void setPlateNumber(String plateNumber) {
-		this.plateNumber = plateNumber;
-	}
+    public void setPlateNumber(String plateNumber) {
+        this.plateNumber = plateNumber;
+    }
 
-	public String getCardNo() {
-		return cardNo;
-	}
+    public String getCardNo() {
+        return cardNo;
+    }
 
-	public void setCardNo(String cardNo) {
-		this.cardNo = cardNo;
-	}
-	
+    public void setCardNo(String cardNo) {
+        this.cardNo = cardNo;
+    }
+
 }

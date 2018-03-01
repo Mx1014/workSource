@@ -14,7 +14,13 @@ import com.everhomes.listing.CrossShardListingLocator;
 import com.everhomes.locale.LocaleStringService;
 import com.everhomes.locale.LocaleTemplateService;
 import com.everhomes.messaging.MessagingService;
-import com.everhomes.organization.*;
+import com.everhomes.module.ServiceModuleService;
+import com.everhomes.organization.Organization;
+import com.everhomes.organization.OrganizationJobPosition;
+import com.everhomes.organization.OrganizationJobPositionMap;
+import com.everhomes.organization.OrganizationMember;
+import com.everhomes.organization.OrganizationProvider;
+import com.everhomes.organization.OrganizationService;
 import com.everhomes.portal.PortalService;
 import com.everhomes.rentalv2.Rentalv2ServiceImpl;
 import com.everhomes.repeat.RepeatService;
@@ -29,8 +35,109 @@ import com.everhomes.rest.messaging.MessageBodyType;
 import com.everhomes.rest.messaging.MessageChannel;
 import com.everhomes.rest.messaging.MessageDTO;
 import com.everhomes.rest.messaging.MessagingConstants;
-import com.everhomes.rest.organization.*;
-import com.everhomes.rest.quality.*;
+import com.everhomes.rest.module.CheckModuleManageCommand;
+import com.everhomes.rest.organization.ListOrganizationContactByJobPositionIdCommand;
+import com.everhomes.rest.organization.OrganizationContactDTO;
+import com.everhomes.rest.organization.OrganizationDTO;
+import com.everhomes.rest.organization.OrganizationGroupType;
+import com.everhomes.rest.organization.OrganizationMemberTargetType;
+import com.everhomes.rest.portal.ListServiceModuleAppsCommand;
+import com.everhomes.rest.portal.ListServiceModuleAppsResponse;
+import com.everhomes.rest.quality.CountSampleTaskCommunityScoresCommand;
+import com.everhomes.rest.quality.CountSampleTaskScoresCommand;
+import com.everhomes.rest.quality.CountSampleTaskScoresResponse;
+import com.everhomes.rest.quality.CountSampleTaskSpecificationItemScoresCommand;
+import com.everhomes.rest.quality.CountSampleTaskSpecificationItemScoresResponse;
+import com.everhomes.rest.quality.CountSampleTasksCommand;
+import com.everhomes.rest.quality.CountSampleTasksResponse;
+import com.everhomes.rest.quality.CountScoresCommand;
+import com.everhomes.rest.quality.CountScoresResponse;
+import com.everhomes.rest.quality.CountScoresSpecificationDTO;
+import com.everhomes.rest.quality.CountTasksCommand;
+import com.everhomes.rest.quality.CountTasksResponse;
+import com.everhomes.rest.quality.CreatQualityStandardCommand;
+import com.everhomes.rest.quality.CreateQualityInspectionTaskCommand;
+import com.everhomes.rest.quality.CreateQualitySpecificationCommand;
+import com.everhomes.rest.quality.CreateSampleQualityInspectionCommand;
+import com.everhomes.rest.quality.CurrentUserInfoDTO;
+import com.everhomes.rest.quality.DeleteFactorCommand;
+import com.everhomes.rest.quality.DeleteQualityCategoryCommand;
+import com.everhomes.rest.quality.DeleteQualitySpecificationCommand;
+import com.everhomes.rest.quality.DeleteQualityStandardCommand;
+import com.everhomes.rest.quality.DeleteUserQualityInspectionTaskTemplateCommand;
+import com.everhomes.rest.quality.EvaluationDTO;
+import com.everhomes.rest.quality.ExecuteGroupAndPosition;
+import com.everhomes.rest.quality.FactorsDTO;
+import com.everhomes.rest.quality.FindQualityInspectionTaskCommand;
+import com.everhomes.rest.quality.FindSampleQualityInspectionCommand;
+import com.everhomes.rest.quality.GetQualitySpecificationCommand;
+import com.everhomes.rest.quality.GroupUserDTO;
+import com.everhomes.rest.quality.ListEvaluationsCommand;
+import com.everhomes.rest.quality.ListEvaluationsResponse;
+import com.everhomes.rest.quality.ListFactorsCommand;
+import com.everhomes.rest.quality.ListFactorsResponse;
+import com.everhomes.rest.quality.ListQualityCategoriesCommand;
+import com.everhomes.rest.quality.ListQualityCategoriesResponse;
+import com.everhomes.rest.quality.ListQualityInspectionLogsCommand;
+import com.everhomes.rest.quality.ListQualityInspectionLogsResponse;
+import com.everhomes.rest.quality.ListQualityInspectionTasksCommand;
+import com.everhomes.rest.quality.ListQualityInspectionTasksResponse;
+import com.everhomes.rest.quality.ListQualitySpecificationsCommand;
+import com.everhomes.rest.quality.ListQualitySpecificationsResponse;
+import com.everhomes.rest.quality.ListQualityStandardsCommand;
+import com.everhomes.rest.quality.ListQualityStandardsResponse;
+import com.everhomes.rest.quality.ListRecordsByTaskIdCommand;
+import com.everhomes.rest.quality.ListSampleQualityInspectionCommand;
+import com.everhomes.rest.quality.ListSampleQualityInspectionResponse;
+import com.everhomes.rest.quality.ListSampleQualityInspectionTasksCommand;
+import com.everhomes.rest.quality.ListUserHistoryTasksCommand;
+import com.everhomes.rest.quality.ListUserQualityInspectionTaskTemplatesCommand;
+import com.everhomes.rest.quality.OwnerType;
+import com.everhomes.rest.quality.ProcessType;
+import com.everhomes.rest.quality.QualityCategoriesDTO;
+import com.everhomes.rest.quality.QualityGroupType;
+import com.everhomes.rest.quality.QualityInspectionCategoryStatus;
+import com.everhomes.rest.quality.QualityInspectionLogDTO;
+import com.everhomes.rest.quality.QualityInspectionLogProcessType;
+import com.everhomes.rest.quality.QualityInspectionLogType;
+import com.everhomes.rest.quality.QualityInspectionSpecificationDTO;
+import com.everhomes.rest.quality.QualityInspectionSpecificationItemResultsDTO;
+import com.everhomes.rest.quality.QualityInspectionTaskAttachmentDTO;
+import com.everhomes.rest.quality.QualityInspectionTaskDTO;
+import com.everhomes.rest.quality.QualityInspectionTaskRecordsDTO;
+import com.everhomes.rest.quality.QualityInspectionTaskResult;
+import com.everhomes.rest.quality.QualityInspectionTaskReviewResult;
+import com.everhomes.rest.quality.QualityInspectionTaskStatus;
+import com.everhomes.rest.quality.QualityModelType;
+import com.everhomes.rest.quality.QualityNotificationTemplateCode;
+import com.everhomes.rest.quality.QualityServiceErrorCode;
+import com.everhomes.rest.quality.QualityStandardStatus;
+import com.everhomes.rest.quality.QualityStandardsDTO;
+import com.everhomes.rest.quality.QualityTaskType;
+import com.everhomes.rest.quality.ReportRectifyResultCommand;
+import com.everhomes.rest.quality.ReportSpecificationItemResultsDTO;
+import com.everhomes.rest.quality.ReportVerificationResultCommand;
+import com.everhomes.rest.quality.ReviewReviewQualityStandardCommand;
+import com.everhomes.rest.quality.ReviewVerificationResultCommand;
+import com.everhomes.rest.quality.SampleCommunity;
+import com.everhomes.rest.quality.SampleCommunitySpecification;
+import com.everhomes.rest.quality.SampleGroupDTO;
+import com.everhomes.rest.quality.SampleQualityInspectionDTO;
+import com.everhomes.rest.quality.SampleTaskScoreDTO;
+import com.everhomes.rest.quality.ScoreDTO;
+import com.everhomes.rest.quality.ScoreGroupByTargetDTO;
+import com.everhomes.rest.quality.SearchQualityTasksCommand;
+import com.everhomes.rest.quality.SpecificationApplyPolicy;
+import com.everhomes.rest.quality.SpecificationInspectionType;
+import com.everhomes.rest.quality.SpecificationItemScores;
+import com.everhomes.rest.quality.SpecificationScopeCode;
+import com.everhomes.rest.quality.StandardGroupDTO;
+import com.everhomes.rest.quality.TaskCountDTO;
+import com.everhomes.rest.quality.UpdateFactorCommand;
+import com.everhomes.rest.quality.UpdateQualityCategoryCommand;
+import com.everhomes.rest.quality.UpdateQualitySpecificationCommand;
+import com.everhomes.rest.quality.UpdateQualityStandardCommand;
+import com.everhomes.rest.quality.UpdateSampleQualityInspectionCommand;
 import com.everhomes.rest.repeat.RepeatSettingsDTO;
 import com.everhomes.rest.repeat.TimeRangeDTO;
 import com.everhomes.rest.user.MessageChannelType;
@@ -56,13 +163,30 @@ import org.springframework.scheduling.annotation.Scheduled;
 import org.springframework.stereotype.Component;
 
 import javax.servlet.http.HttpServletResponse;
-import java.io.*;
+import java.io.BufferedInputStream;
+import java.io.BufferedOutputStream;
+import java.io.File;
+import java.io.FileInputStream;
+import java.io.FileOutputStream;
+import java.io.IOException;
+import java.io.InputStream;
+import java.io.OutputStream;
 import java.net.URL;
 import java.sql.Date;
 import java.sql.Timestamp;
 import java.text.ParseException;
 import java.text.SimpleDateFormat;
-import java.util.*;
+import java.util.ArrayList;
+import java.util.Calendar;
+import java.util.Collections;
+import java.util.Comparator;
+import java.util.HashMap;
+import java.util.HashSet;
+import java.util.Iterator;
+import java.util.LinkedHashMap;
+import java.util.List;
+import java.util.Map;
+import java.util.Set;
 import java.util.stream.Collectors;
 
 
@@ -127,6 +251,9 @@ public class QualityServiceImpl implements QualityService {
 	@Autowired
 	private PortalService portalService;
 
+	@Autowired
+	private ServiceModuleService serviceModuleService;
+
 	@Override
 	public QualityStandardsDTO creatQualityStandard(CreatQualityStandardCommand cmd) {
 		/*Long privilegeId = configProvider.getLongValue(QualityConstant.QUALITY_STANDARD_CREATE, 0L);
@@ -136,7 +263,7 @@ public class QualityServiceImpl implements QualityService {
 			userPrivilegeMgr.checkCurrentUserAuthority(null, null, cmd.getOwnerId(), privilegeId);
 		}*/
 
-		checkUserPrivilege(cmd.getOwnerId(), PrivilegeConstants.QUALITY_STANDARD_CREATE,cmd.getTargetId());
+		checkUserPrivilege(cmd.getOwnerId(), PrivilegeConstants.QUALITY_STANDARD_CREATE, cmd.getTargetId());
 
 		User user = UserContext.current().getUser();
 		RepeatSettings repeat = null;
@@ -183,8 +310,8 @@ public class QualityServiceImpl implements QualityService {
 			return dto;
 		} else {
 			//List<CommunityDTO> communities = organizationService.listAllChildrenOrganizationCoummunities(cmd.getOwnerId());
-			QualityStandardsDTO dto = new QualityStandardsDTO();
-			qualityProvider.createQualityInspectionStandards(standard);
+			//QualityStandardsDTO dto = new QualityStandardsDTO();
+			/*qualityProvider.createQualityInspectionStandards(standard);
 			if (cmd.getCommunities() != null && cmd.getCommunities().size() > 0) {
 				for (Long communityId : cmd.getCommunities()) {
 					//standard.setTargetId(communityId);
@@ -210,12 +337,9 @@ public class QualityServiceImpl implements QualityService {
 
 			dto = ConvertHelper.convert(standard, QualityStandardsDTO.class);
 			convertSpecificationToDTO(standard, dto);
-
-			return dto;
+*/
+			return null;
 		}
-
-
-
 	}
 
 	private void createQualityInspectionStandardLogs(QualityInspectionStandards standard, Byte processType, Long userId) {
@@ -235,7 +359,7 @@ public class QualityServiceImpl implements QualityService {
 	public QualityStandardsDTO updateQualityStandard(UpdateQualityStandardCommand cmd) {
 		/*Long privilegeId = configProvider.getLongValue(QualityConstant.QUALITY_STANDARD_UPDATE, 0L);
 		userPrivilegeMgr.checkCurrentUserAuthority(EntityType.COMMUNITY.getCode(), cmd.getTargetId(), cmd.getOwnerId(), privilegeId);*/
-		checkUserPrivilege(cmd.getOwnerId(), PrivilegeConstants.QUALITY_STANDARD_UPDATE,cmd.getTargetId());
+		checkUserPrivilege(cmd.getOwnerId(), PrivilegeConstants.QUALITY_STANDARD_UPDATE, cmd.getTargetId());
 
 		User user = UserContext.current().getUser();
 
@@ -263,7 +387,7 @@ public class QualityServiceImpl implements QualityService {
 			if (cmd.getCommunities() != null && cmd.getCommunities().size() > 0 && cmd.getTargetId() == null) {
 				//在全部中修改 公共标准
 				qualityProvider.deleteQualityModelCommunityMapByModelId(standard.getId(), QualityModelType.STANDARD.getCode());
-				for (Long communityId : cmd.getCommunities()) {
+				/*for (Long communityId : cmd.getCommunities()) {
 					//standard.setTargetId(communityId);
 					//standard.setTargetType(OwnerType.COMMUNITY.getCode());
 					//qualityProvider.createQualityInspectionStandards(standard);
@@ -275,8 +399,7 @@ public class QualityServiceImpl implements QualityService {
 					map.setModelId(standard.getId());
 					//创建标准项目关联表
 					qualityProvider.createQualityModelCommunityMap(map);
-				}
-
+				}*/
 			}
 		}
 
@@ -420,15 +543,8 @@ public class QualityServiceImpl implements QualityService {
 
 	@Override
 	public ListQualityStandardsResponse listQualityStandards(ListQualityStandardsCommand cmd) {
-		//Long privilegeId = configProvider.getLongValue(QualityConstant.QUALITY_STANDARD_LIST, 0L);
-		/*if(0L == cmd.getTargetId()) {
-			userPrivilegeMgr.checkCurrentUserAuthority(null, null, cmd.getOwnerId(), privilegeId);
-		} else {
-			userPrivilegeMgr.checkCurrentUserAuthority(EntityType.COMMUNITY.getCode(), cmd.getTargetId(), cmd.getOwnerId(), privilegeId);
-		}*/
-		checkUserPrivilege(cmd.getOwnerId(), PrivilegeConstants.QUALITY_STANDARD_LIST,cmd.getTargetId());
 
-
+		checkUserPrivilege(cmd.getOwnerId(), PrivilegeConstants.QUALITY_STANDARD_LIST, cmd.getTargetId());
 		Long ownerId = cmd.getOwnerId();
 		String ownerType = cmd.getOwnerType();
 		int pageSize = PaginationConfigHelper.getPageSize(configurationProvider, cmd.getPageSize());
@@ -437,16 +553,16 @@ public class QualityServiceImpl implements QualityService {
 
 		List<QualityInspectionStandards> standards = new ArrayList<>();
 		if (cmd.getTargetId() != null && cmd.getTargetId() != 0L) {
-			//首先查出标准和项目之间关联表
+			/*//首先查出标准和项目之间关联表
 			List<QualityInspectionModelCommunityMap> modleCommunityMaps = qualityProvider.
 					listQualityModelCommunityMapByTargetId(cmd.getTargetId(),QualityModelType.STANDARD.getCode());
 			List<Long> containIds = new ArrayList<>();
 			if (modleCommunityMaps != null && modleCommunityMaps.size() > 0)
-				modleCommunityMaps.forEach(m -> containIds.add(m.getModelId()));
+				modleCommunityMaps.forEach(m -> containIds.add(m.getModelId()));*/
 
 			standards = qualityProvider.listQualityInspectionStandards(locator, pageSize + 1,
 					ownerId, ownerType, cmd.getTargetType(), cmd.getTargetId(), cmd.getReviewResult());
-			standards.forEach((s) -> {
+			/*standards.forEach((s) -> {
 				if (s.getReferId() != null && s.getReferId() != 0) {
 					containIds.remove(s.getReferId());
 				}
@@ -454,26 +570,22 @@ public class QualityServiceImpl implements QualityService {
 			for (Long standardId : containIds) {
 				//将referid的过滤 剩下的加到结果集中
 				standards.add(qualityProvider.findStandardById(standardId));
-			}
+			}*/
 		} else {
 			//如果在全部中查看标准则显示全部
 			standards = qualityProvider.listQualityInspectionStandards(locator, pageSize + 1,
-					ownerId, ownerType, cmd.getTargetType(), null, cmd.getReviewResult());
+					ownerId, ownerType, null, null, cmd.getReviewResult());
 		}
 
 
 		this.qualityProvider.populateStandardsGroups(standards);
 		this.qualityProvider.populateStandardsSpecifications(standards);
-//		for(QualityInspectionStandards standard : standards) {
-//			processRepeatSetting(standard);
-//		}
 
         Long nextPageAnchor = null;
         if(standards.size() > pageSize) {
         	standards.remove(standards.size() - 1);
             nextPageAnchor = standards.get(standards.size() - 1).getId();
         }
-
 
         List<QualityStandardsDTO> qaStandards = standards.stream().map((r) -> {
 
@@ -2204,7 +2316,7 @@ public class QualityServiceImpl implements QualityService {
 	@Override
 	public HttpServletResponse exportInspectionTasks(
 			ListQualityInspectionTasksCommand cmd, HttpServletResponse response) {
-		Long privilegeId = configProvider.getLongValue(QualityConstant.QUALITY_TASK_LIST, 0L);
+		//Long privilegeId = configProvider.getLongValue(QualityConstant.QUALITY_TASK_LIST, 0L);
 		/*if(cmd.getTargetId() == 0L) {
 			userPrivilegeMgr.checkCurrentUserAuthority(null, null, cmd.getOwnerId(), privilegeId);
 		} else {
@@ -3057,6 +3169,7 @@ public class QualityServiceImpl implements QualityService {
 				Community community = communityProvider.findCommunityById(target);
 				if(community != null) {
 					scoreGroupDto.setTargetName(community.getName());
+					scoreGroupDto.setBuildArea(community.getAreaSize());
 				}
 
 				if(specificationTree != null && specificationTree.size() > 0) {
@@ -3111,7 +3224,9 @@ public class QualityServiceImpl implements QualityService {
 		} else {
 			userPrivilegeMgr.checkCurrentUserAuthority(null, null, cmd.getOwnerId(), privilegeId);
 		}*/
-		checkUserPrivilege(cmd.getOwnerId(),PrivilegeConstants.QUALITY_STAT_TASK,cmd.getTargetId());
+		//针对检查统计和任务数统计 检查统计里面没有具体的项目id
+		if (cmd.getCheckFlag() == null || !cmd.getCheckFlag().equals(true))
+			checkUserPrivilege(cmd.getOwnerId(), PrivilegeConstants.QUALITY_STAT_TASK, cmd.getTargetId());
 
 
 		CountTasksResponse response = new CountTasksResponse();
@@ -3356,6 +3471,9 @@ public class QualityServiceImpl implements QualityService {
 
 	@Override
 	public SampleQualityInspectionDTO createSampleQualityInspection(CreateSampleQualityInspectionCommand cmd) {
+
+		checkManager(cmd.getOwnerId(), cmd.getOwnerType());
+
 		QualityInspectionSamples sample = ConvertHelper.convert(cmd, QualityInspectionSamples.class);
 		Long uid = UserContext.current().getUser().getId();
 		Integer namespaceId = UserContext.getCurrentNamespaceId();
@@ -3394,6 +3512,9 @@ public class QualityServiceImpl implements QualityService {
 
 	@Override
 	public void deleteSampleQualityInspection(FindSampleQualityInspectionCommand cmd) {
+
+		checkManager(cmd.getOwnerId(), cmd.getOwnerType());
+
 		List<QualityInspectionTasks> tasks = qualityProvider.listTaskByParentId(cmd.getId());
 		if(tasks != null && tasks.size() > 0) {
 			LOGGER.error("the sample which id="+cmd.getId()+" has generate tasks!");
@@ -3769,7 +3890,7 @@ public class QualityServiceImpl implements QualityService {
 				if(community != null) {
 					scoreGroupDto.setTargetName(community.getName());
 					//add for order
-					//PM换成areaSize字段 20171208
+					//换成areaSize字段 20171208
 					//scoreGroupDto.setBuildArea(community.getBuildArea());
 					scoreGroupDto.setBuildArea(community.getAreaSize());
 				}
@@ -3812,6 +3933,9 @@ public class QualityServiceImpl implements QualityService {
 					Double totalScore = 0D;
 					if (scores.size() > 0) {
 						for (ScoreDTO score : scores) {
+							if (score.getScore() == null) {
+								score.setScore(0D);
+							}
 							totalScore = totalScore + score.getScore();
 						}
 						scoreGroupDto.setTotalScore(totalScore);
@@ -3820,13 +3944,13 @@ public class QualityServiceImpl implements QualityService {
 				scoresByTarget.add(scoreGroupDto);
 			}
 		}
-		//List<ScoreGroupByTargetDTO> sortedScoresByTarget = new ArrayList<>();
 		if (scoresByTarget.size() > 0) {
+			// 现网数据有很多建筑面积null
+			scoresByTarget.forEach((s) -> {
+				if (s.getBuildArea() == null)
+					s.setBuildArea(0D);
+			});
 			//sort  scoreByTarget
-			/*sortedScoresByTarget = scoresByTarget.stream()
-					.sorted(Comparator.comparing(ScoreGroupByTargetDTO::getTotalScore).reversed())
-                    .collect(Collectors.toList());*/
-
 			scoresByTarget.sort((o1, o2) -> {
 				if (!o1.getTotalScore().equals(o2.getTotalScore())) {
 					return o2.getTotalScore().compareTo(o1.getTotalScore());
@@ -3851,11 +3975,25 @@ public class QualityServiceImpl implements QualityService {
 			}
 
 		}
-//		//再次按照order排序
-//		sortedScoresByTarget.sort(Comparator.comparing(ScoreGroupByTargetDTO::getOrderId));
 
 		response.setScores(scoresByTarget);
+		//计算平均分 临时解决平均分的问题
+		calculateAverageScore(response);
 		return response;
+	}
+
+	private void calculateAverageScore(CountScoresResponse response) {
+		Double sum = 0D;
+		Double averageScore = 0D;
+		if (response.getScores() != null && response.getScores().size() > 0) {
+			for (ScoreGroupByTargetDTO score : response.getScores()) {
+				if (score != null && score.getTotalScore() != null)
+					sum = sum + score.getTotalScore();
+			}
+			averageScore = sum / response.getScores().size();
+		}
+
+		response.setAverageScore((double) Math.round(1.00*averageScore*100)/100);
 	}
 
 	@Override
@@ -4336,8 +4474,31 @@ public class QualityServiceImpl implements QualityService {
 
 
 	}
+
+	private void checkManager(Long ownerId, String ownerType) {
+		ListServiceModuleAppsCommand listServiceModuleAppsCommand = new ListServiceModuleAppsCommand();
+		listServiceModuleAppsCommand.setNamespaceId(UserContext.getCurrentNamespaceId());
+		listServiceModuleAppsCommand.setModuleId(QualityConstant.QUALITY_MODULE);
+		ListServiceModuleAppsResponse apps = portalService.listServiceModuleAppsWithConditon(listServiceModuleAppsCommand);
+		CheckModuleManageCommand checkModuleManageCommand = new CheckModuleManageCommand();
+		checkModuleManageCommand.setModuleId(QualityConstant.QUALITY_MODULE);
+		checkModuleManageCommand.setOrganizationId(ownerId);
+		checkModuleManageCommand.setOwnerType(ownerType);
+		checkModuleManageCommand.setUserId(UserContext.currentUserId());
+		if (null != apps && null != apps.getServiceModuleApps() && apps.getServiceModuleApps().size() > 0) {
+			checkModuleManageCommand.setAppId(apps.getServiceModuleApps().get(0).getId());
+		}
+		if (serviceModuleService.checkModuleManage(checkModuleManageCommand) == 0) {
+			LOGGER.error("Permission is denied, namespaceId={}, orgId={},", UserContext.getCurrentNamespaceId(), ownerId);
+			throw RuntimeErrorException.errorWith(ErrorCodes.SCOPE_GENERAL, ErrorCodes.ERROR_ACCESS_DENIED,
+					"权限不足");
+		}
+	}
 	@Override
 	public HttpServletResponse exportSampleTaskCommunityScores(CountSampleTaskCommunityScoresCommand cmd, HttpServletResponse httpResponse) {
+		//处理targetId  String类型的
+		processStringTargetIds(cmd);
+
 		CountScoresResponse dataResponse = countSampleTaskCommunityScores(cmd);
 		URL rootPath = QualityServiceImpl.class.getResource("/");
 		String filePath = rootPath.getPath() + this.downloadDir;
@@ -4350,6 +4511,18 @@ public class QualityServiceImpl implements QualityService {
 
 		return download(filePath, httpResponse);
 
+	}
+
+	private void processStringTargetIds(CountSampleTaskCommunityScoresCommand cmd) {
+		//解析
+		if (cmd.getTargetIdString() != null) {
+			String targetStrings[] = cmd.getTargetIdString().split(",");
+			List<Long> targetIds = new ArrayList<>();
+			for (String targetId : targetStrings) {
+				targetIds.add(Long.parseLong(targetId));
+			}
+			cmd.setTargetIds(targetIds);
+		}
 	}
 
 
@@ -4383,12 +4556,12 @@ public class QualityServiceImpl implements QualityService {
 		int i = -1;
 		row.createCell(++i).setCellValue("排名");
 		row.createCell(++i).setCellValue("项目名称");
-		row.createCell(++i).setCellValue("项目面积");
+		row.createCell(++i).setCellValue("项目面积(平米)");
+		row.createCell(++i).setCellValue("加权得分");
+		row.createCell(++i).setCellValue("加权扣分");
 		for (CountScoresSpecificationDTO score : specifications) {
 			row.createCell(++i).setCellValue(score.getSpecificationName()+score.getSpecificationWeight()*100+"%");
 		}
-		row.createCell(++i).setCellValue("加权得分");
-
 	}
 
 	private void setNewQualityScoreBookRow(Sheet sheet, ScoreGroupByTargetDTO dto) {
@@ -4397,12 +4570,12 @@ public class QualityServiceImpl implements QualityService {
 		row.createCell(++i).setCellValue(dto.getOrderId());
 		row.createCell(++i).setCellValue(dto.getTargetName());
 		row.createCell(++i).setCellValue(dto.getBuildArea());
+		row.createCell(++i).setCellValue(dto.getTotalScore());
+		row.createCell(++i).setCellValue(dto.getTotalScore() > 100 ? dto.getTotalScore() - 100 : 100 - dto.getTotalScore());
 
 		List<ScoreDTO> scores = dto.getScores();
 		for (ScoreDTO score : scores) {
 			row.createCell(++i).setCellValue(score.getScore());
 		}
-		row.createCell(++i).setCellValue(dto.getTotalScore());
-
 	}
 }

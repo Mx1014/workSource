@@ -5,6 +5,7 @@ import com.everhomes.listing.ListingLocator;
 import com.everhomes.listing.ListingQueryBuilderCallback;
 import com.everhomes.rest.point.ListPointLogsCommand;
 
+import java.sql.Timestamp;
 import java.util.List;
 
 public interface PointLogProvider {
@@ -21,7 +22,11 @@ public interface PointLogProvider {
 
     PointLog findByUidAndEntity(Integer namespaceId, Long uid, String eventName, String entityType, Long entityId);
 
-    Integer countPointLog(Integer namespaceId, Long systemId, Long uid, Long ruleId, Long createTime);
+    Integer countPointLog(Integer namespaceId, Long systemId, Long uid, Long ruleId, Timestamp startTime, Timestamp endTime);
 
-    PointLog findByRuleIdAndEntity(Integer namespaceId, Long uid, Long ruleId, String entityType, Long entityId);
+    PointLog findByRuleIdAndEntity(Integer namespaceId, Long systemId, Long targetUid, Long ruleId, String entityType, Long entityId);
+
+    PointLog isExist(Integer namespaceId, Long systemId, Long targetUid, Long categoryId, Long ruleId, String entityType, Long entityId);
+
+    PointLog findByBindingLogId(Long logId);
 }

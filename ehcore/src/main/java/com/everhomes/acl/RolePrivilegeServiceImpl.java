@@ -50,6 +50,7 @@ import com.everhomes.user.admin.SystemUserPrivilegeMgr;
 import com.everhomes.util.*;
 import com.everhomes.util.excel.RowResult;
 import com.everhomes.util.excel.handler.PropMrgOwnerHandler;
+import com.itextpdf.text.PageSize;
 import org.apache.poi.xssf.usermodel.XSSFWorkbook;
 import org.jooq.Condition;
 import org.jooq.Record;
@@ -1548,7 +1549,9 @@ public class RolePrivilegeServiceImpl implements RolePrivilegeService {
         String organizationName = "NotFound";
         if (organizationDetail == null || organizationDetail.getDisplayName() == null) {
             Organization organization = organizationProvider.findOrganizationById(organizationId);
-            organizationName = defaultIfNull(organization.getName(), organizationName);
+			if(organization != null) {
+				organizationName = defaultIfNull(organization.getName(), organizationName);
+			}
         } else {
             organizationName = organizationDetail.getDisplayName();
         }
@@ -1663,6 +1666,19 @@ public class RolePrivilegeServiceImpl implements RolePrivilegeService {
 			}
 		}else{
 			moduleIds.add(moduleId);
+
+			//把子模块的权限加入
+			ListServiceModulesCommand cmd = new ListServiceModulesCommand();
+			cmd.setParentId(moduleId);
+			cmd.setPageAnchor(null);
+			cmd.setPageSize(1000);
+			ListServiceModulesResponse res = serviceModuleService.listAllServiceModules(cmd);
+			if(res.getDtos() != null && res.getDtos().size() > 0){
+				res.getDtos().forEach(r->{
+					moduleIds.add(r.getId());
+					LOGGER.debug("ListServiceModulesResponse.childModuleId = {}", r.getId());
+				});
+			}
 		}
 		this.assignmentModulePrivileges(ownerType, ownerId, targetType, targetId, scope, moduleIds, privilegeType, tag);
 	}
@@ -1863,11 +1879,15 @@ public class RolePrivilegeServiceImpl implements RolePrivilegeService {
 				organizationSearcher.feedDoc(o);
 			}
 		}
-        sendMessageAfterChangeOrganizationAdmin(
-                ConvertHelper.convert(member, OrganizationContactDTO.class),
-                OrganizationNotificationTemplateCode.DELETE_ORGANIZATION_ADMIN_MESSAGE_TO_TARGET_TEMPLATE,
-                OrganizationNotificationTemplateCode.DELETE_ORGANIZATION_ADMIN_MESSAGE_TO_OTHER_TEMPLATE
-        );
+		if(OrganizationMemberTargetType.fromCode(member.getTargetType()) == OrganizationMemberTargetType.USER
+				&& member.getTargetId() != null){
+			sendMessageAfterChangeOrganizationAdmin(
+					ConvertHelper.convert(member, OrganizationContactDTO.class),
+					OrganizationNotificationTemplateCode.DELETE_ORGANIZATION_ADMIN_MESSAGE_TO_TARGET_TEMPLATE,
+					OrganizationNotificationTemplateCode.DELETE_ORGANIZATION_ADMIN_MESSAGE_TO_OTHER_TEMPLATE
+			);
+		}
+
 	}
 
 	@Override
@@ -3337,7 +3357,9 @@ public class RolePrivilegeServiceImpl implements RolePrivilegeService {
 
 		if(AllFlagType.fromCode(allFlag) == AllFlagType.YES){
 			//给对象分配模块的全部权限
-			assignmentPrivileges(ownerType, ownerId, targetType, targetId, EntityType.SERVICE_MODULE.getCode() + moduleId, moduleId, ServiceModulePrivilegeType.ORDINARY_ALL, tag);
+			//这里用的是EntityType.SERVICE_MODULE，但是relation那边用的是EntityType.SERVICE_MODULE_APP,这是一个坑
+			assignmentPrivileges(ownerType, ownerId, targetType, targetId, EntityType.SERVICE_MODULE.getCode() + moduleId, moduleId, null, tag);
+//			assignmentPrivileges(ownerType, ownerId, targetType, targetId, EntityType.SERVICE_MODULE.getCode() + moduleId, privilegeIds, tag);
 		}else{
 			assignmentPrivileges(ownerType, ownerId, targetType, targetId, EntityType.SERVICE_MODULE.getCode() + moduleId, privilegeIds, tag);
 		}
@@ -3508,7 +3530,7 @@ public class RolePrivilegeServiceImpl implements RolePrivilegeService {
 		List<ServiceModuleApp> serviceModuleApps = authorizationsAppControl.getServiceModuleApps();
 
 		// todo: 对auth根据controlType做分类
-		if(null != serviceModuleApps){
+		if(null != serviceModuleApps){//为null代表无此分类的应用
             switch (ModuleManagementType.fromCode(controlType)){
                 case COMMUNITY_CONTROL:
                     if (serviceModuleApps.size() == 0){
@@ -3552,8 +3574,8 @@ public class RolePrivilegeServiceImpl implements RolePrivilegeService {
                     if (serviceModuleApps.size() == 0){
                         dto.setUnlimitControlFlag(AllFlagType.YES.getCode());
                     }else{
-                        dto.setCommunityControlFlag(AllFlagType.NO.getCode());
-                        dto.setCommunityApps(serviceModuleApps.stream().map((a)->{
+                        dto.setUnlimitControlFlag(AllFlagType.NO.getCode());
+                        dto.setUnlimitApps(serviceModuleApps.stream().map((a)->{
                             return ConvertHelper.convert(a, ServiceModuleAppDTO.class);
                         }).collect(Collectors.toList()));
                     }

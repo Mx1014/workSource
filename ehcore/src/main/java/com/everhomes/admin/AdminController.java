@@ -20,7 +20,6 @@ import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
 import javax.validation.Valid;
 
-import com.everhomes.rest.user.*;
 import org.apache.commons.lang.StringUtils;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -59,16 +58,7 @@ import com.everhomes.mail.MailHandler;
 import com.everhomes.namespace.Namespace;
 import com.everhomes.namespace.NamespaceProvider;
 import com.everhomes.rest.RestResponse;
-import com.everhomes.rest.admin.AppCreateCommand;
-import com.everhomes.rest.admin.DecodeContentPathCommand;
-import com.everhomes.rest.admin.EncodeWebTokenCommand;
-import com.everhomes.rest.admin.GetSequenceCommand;
-import com.everhomes.rest.admin.GetSequenceDTO;
-import com.everhomes.rest.admin.NamespaceDTO;
-import com.everhomes.rest.admin.SampleCommand;
-import com.everhomes.rest.admin.SampleEmbedded;
-import com.everhomes.rest.admin.SampleObject;
-import com.everhomes.rest.admin.ServerDTO;
+import com.everhomes.rest.admin.*;
 import com.everhomes.rest.border.AddBorderCommand;
 import com.everhomes.rest.border.BorderDTO;
 import com.everhomes.rest.border.UpdateBorderCommand;
@@ -77,33 +67,46 @@ import com.everhomes.rest.persist.server.UpdatePersistServerCommand;
 import com.everhomes.rest.repeat.ExpressionDTO;
 import com.everhomes.rest.rpc.server.PingRequestPdu;
 import com.everhomes.rest.rpc.server.PingResponsePdu;
-import com.everhomes.rest.ui.user.SceneDTO;
-import com.everhomes.rest.ui.user.SceneTokenDTO;
-import com.everhomes.rest.ui.user.SceneType;
-import com.everhomes.rest.admin.DecodeWebTokenCommand;
+import com.everhomes.rest.user.*;
 import com.everhomes.sequence.LocalSequenceGenerator;
 import com.everhomes.sequence.SequenceService;
 import com.everhomes.server.schema.tables.pojos.EhUsers;
 import com.everhomes.sharding.Server;
 import com.everhomes.sharding.ShardingProvider;
-import com.everhomes.user.User;
 import com.everhomes.user.UserContext;
 import com.everhomes.user.UserLogin;
 import com.everhomes.user.UserProvider;
 import com.everhomes.user.UserService;
 import com.everhomes.user.admin.SystemUserPrivilegeMgr;
+import com.everhomes.util.*;
+import com.google.gson.Gson;
+import org.apache.commons.lang.StringUtils;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
+import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.beans.factory.annotation.Value;
+import org.springframework.web.bind.annotation.RequestMapping;
+import org.springframework.web.bind.annotation.RequestParam;
+import org.springframework.web.bind.annotation.RestController;
+import org.springframework.web.context.request.async.DeferredResult;
+import org.springframework.web.servlet.ModelAndView;
+
+import javax.servlet.http.HttpServletRequest;
+import javax.servlet.http.HttpServletResponse;
+import javax.validation.Valid;
+import java.io.BufferedInputStream;
+import java.io.BufferedOutputStream;
+import java.io.File;
+import java.io.FileInputStream;
+import java.lang.reflect.Field;
+import java.sql.Timestamp;
+import java.util.*;
+import java.util.stream.Collectors;
+
+//import org.springframework.web.servlet.mvc.method.annotation.ResponseBodyEmitter;
+//import org.springframework.web.servlet.mvc.method.annotation.SseEmitter;
 //import com.everhomes.util.ConsoleOutputFilter;
 //import com.everhomes.util.ConsoleOutputListener;
-import com.everhomes.util.ConvertHelper;
-import com.everhomes.util.FileHelper;
-import com.everhomes.util.ReflectionHelper;
-import com.everhomes.util.RequireAuthentication;
-import com.everhomes.util.RuntimeErrorException;
-import com.everhomes.util.StringHelper;
-import com.everhomes.util.WebTokenGenerator;
-import com.everhomes.util.ZipHelper;
-import com.google.gson.Gson;
-import com.google.gson.JsonObject;
 
 /**
  * Infrastructure Administration API controller
@@ -354,11 +357,9 @@ public class AdminController extends ControllerBase {
     public RestResponse syncSequence() {
         if(!this.aclProvider.checkAccess("system", null, EhUsers.class.getSimpleName(),
             UserContext.current().getUser().getId(), Privilege.Write, null)) {
-
             throw RuntimeErrorException.errorWith(ErrorCodes.SCOPE_GENERAL, ErrorCodes.ERROR_ACCESS_DENIED, "Access denied");
         }
-
-         sequenceService.syncSequence();
+        sequenceService.syncSequence();
         return new RestResponse("OK");
     }
     
@@ -367,10 +368,8 @@ public class AdminController extends ControllerBase {
     public RestResponse getSequence(GetSequenceCommand cmd) {
         if(!this.aclProvider.checkAccess("system", null, EhUsers.class.getSimpleName(),
             UserContext.current().getUser().getId(), Privilege.Write, null)) {
-
             throw RuntimeErrorException.errorWith(ErrorCodes.SCOPE_GENERAL, ErrorCodes.ERROR_ACCESS_DENIED, "Access denied");
         }
-
         GetSequenceDTO dto = sequenceService.getSequence(cmd);
         return new RestResponse(dto);
     }
@@ -995,4 +994,25 @@ public class AdminController extends ControllerBase {
         return response;
     }
 
+
+
+    /**
+     *
+     * 生成代码VersionRealmType枚举值
+     * @return
+     */
+    @RequestMapping("listVersionRealmTypeInCodeEnum")
+    @RestReturn(Map.class)
+    public RestResponse listVersionRealmTypeInCodeEnum() {
+        SystemUserPrivilegeMgr resolver = PlatformContext.getComponent("SystemUser");
+        resolver.checkUserPrivilege(UserContext.current().getUser().getId(), 0);
+        Map map = new HashMap<String, String>();
+        for (VersionRealmType versionRealmType: VersionRealmType.values()){
+            map.put(versionRealmType.name(), versionRealmType.getCode());
+        }
+        RestResponse response = new RestResponse(map);
+        response.setErrorCode(ErrorCodes.SUCCESS);
+        response.setErrorDescription("OK");
+        return response;
+    }
 }

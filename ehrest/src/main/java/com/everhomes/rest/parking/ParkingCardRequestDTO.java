@@ -25,13 +25,23 @@ import com.everhomes.util.StringHelper;
  * <li>plateOwnerPhone: 车主手机号</li>
  * <li>ranking: 当前排位号</li>
  * <li>status: 申请状态，{@link com.everhomes.rest.parking.ParkingCardRequestStatus}</li>
- * <li>issueFlag: 充值状态， {@link com.everhomes.rest.parking.ParkingCardIssueFlag}</li>
- * <li>issueTime: 领卡时间</li>
  * <li>createTime: 订单创建时间</li>
+ * <li>flowId: flowId</li>
+ * <li>flowVersion: flowVersion</li>
+ * <li>flowCaseId: flowCaseId</li>
  * <li>carBrand: 车品牌</li>
  * <li>carSerieName: 车系列</li>
  * <li>carColor: 车颜色</li>
- * <li>attachments: 申请资料</li>
+ * <li>attachments: 申请资料 {@link com.everhomes.rest.parking.ParkingAttachmentDTO}</li>
+ * <li>auditSucceedTime: 审核通过时间</li>
+ * <li>issueTime: 发放资格时间</li>
+ * <li>processSucceedTime: 办理成功时间</li>
+ * <li>openCardTime: 开通月卡时间</li>
+ * <li>cancelTime: 取消时间</li>
+ * <li>cardTypeName: 卡类型名称</li>
+ * <li>apartmentName: 门牌号</li>
+ * <li>invoiceName: 发票名称</li>
+ * <li>identityCard: 身份证号码</li>
  * </ul>
  */
 public class ParkingCardRequestDTO {
@@ -51,26 +61,34 @@ public class ParkingCardRequestDTO {
 
     private Timestamp issueTime;
     private Timestamp createTime;
-    
+
     private Long flowId;
-	private Integer flowVersion;
-	private Long flowCaseId;
-    
+    private Integer flowVersion;
+    private Long flowCaseId;
+
     private String carBrand;
     private String carSerieName;
     private String carColor;
     @ItemType(ParkingAttachmentDTO.class)
     private List<ParkingAttachmentDTO> attachments;
-    
-    private Timestamp auditSucceedTime;
-	private Timestamp processSucceedTime;
-	private Timestamp openCardTime;
-	private Timestamp cancelTime;
 
-	private String cardTypeName;
+    private Timestamp auditSucceedTime;
+    private Timestamp processSucceedTime;
+    private Timestamp openCardTime;
+    private Timestamp cancelTime;
+
+    private String cardTypeName;
     private String apartmentName;
     private String invoiceName;
+    private String identityCard;
 
+    public String getIdentityCard() {
+        return identityCard;
+    }
+
+    public void setIdentityCard(String identityCard) {
+        this.identityCard = identityCard;
+    }
     public String getApartmentName() {
         return apartmentName;
     }
@@ -219,94 +237,94 @@ public class ParkingCardRequestDTO {
     }
 
     public String getCarBrand() {
-		return carBrand;
-	}
+        return carBrand;
+    }
 
-	public void setCarBrand(String carBrand) {
-		this.carBrand = carBrand;
-	}
+    public void setCarBrand(String carBrand) {
+        this.carBrand = carBrand;
+    }
 
-	public String getCarSerieName() {
-		return carSerieName;
-	}
+    public String getCarSerieName() {
+        return carSerieName;
+    }
 
-	public void setCarSerieName(String carSerieName) {
-		this.carSerieName = carSerieName;
-	}
+    public void setCarSerieName(String carSerieName) {
+        this.carSerieName = carSerieName;
+    }
 
-	public String getCarColor() {
-		return carColor;
-	}
+    public String getCarColor() {
+        return carColor;
+    }
 
-	public void setCarColor(String carColor) {
-		this.carColor = carColor;
-	}
+    public void setCarColor(String carColor) {
+        this.carColor = carColor;
+    }
 
-	public List<ParkingAttachmentDTO> getAttachments() {
-		return attachments;
-	}
+    public List<ParkingAttachmentDTO> getAttachments() {
+        return attachments;
+    }
 
-	public void setAttachments(List<ParkingAttachmentDTO> attachments) {
-		this.attachments = attachments;
-	}
+    public void setAttachments(List<ParkingAttachmentDTO> attachments) {
+        this.attachments = attachments;
+    }
 
-	public Long getFlowId() {
-		return flowId;
-	}
+    public Long getFlowId() {
+        return flowId;
+    }
 
-	public void setFlowId(Long flowId) {
-		this.flowId = flowId;
-	}
+    public void setFlowId(Long flowId) {
+        this.flowId = flowId;
+    }
 
-	public Integer getFlowVersion() {
-		return flowVersion;
-	}
+    public Integer getFlowVersion() {
+        return flowVersion;
+    }
 
-	public void setFlowVersion(Integer flowVersion) {
-		this.flowVersion = flowVersion;
-	}
+    public void setFlowVersion(Integer flowVersion) {
+        this.flowVersion = flowVersion;
+    }
 
-	public Long getFlowCaseId() {
-		return flowCaseId;
-	}
+    public Long getFlowCaseId() {
+        return flowCaseId;
+    }
 
-	public void setFlowCaseId(Long flowCaseId) {
-		this.flowCaseId = flowCaseId;
-	}
+    public void setFlowCaseId(Long flowCaseId) {
+        this.flowCaseId = flowCaseId;
+    }
 
-	public Timestamp getAuditSucceedTime() {
-		return auditSucceedTime;
-	}
+    public Timestamp getAuditSucceedTime() {
+        return auditSucceedTime;
+    }
 
-	public void setAuditSucceedTime(Timestamp auditSucceedTime) {
-		this.auditSucceedTime = auditSucceedTime;
-	}
+    public void setAuditSucceedTime(Timestamp auditSucceedTime) {
+        this.auditSucceedTime = auditSucceedTime;
+    }
 
-	public Timestamp getProcessSucceedTime() {
-		return processSucceedTime;
-	}
+    public Timestamp getProcessSucceedTime() {
+        return processSucceedTime;
+    }
 
-	public void setProcessSucceedTime(Timestamp processSucceedTime) {
-		this.processSucceedTime = processSucceedTime;
-	}
+    public void setProcessSucceedTime(Timestamp processSucceedTime) {
+        this.processSucceedTime = processSucceedTime;
+    }
 
-	public Timestamp getOpenCardTime() {
-		return openCardTime;
-	}
+    public Timestamp getOpenCardTime() {
+        return openCardTime;
+    }
 
-	public void setOpenCardTime(Timestamp openCardTime) {
-		this.openCardTime = openCardTime;
-	}
+    public void setOpenCardTime(Timestamp openCardTime) {
+        this.openCardTime = openCardTime;
+    }
 
-	public Timestamp getCancelTime() {
-		return cancelTime;
-	}
+    public Timestamp getCancelTime() {
+        return cancelTime;
+    }
 
-	public void setCancelTime(Timestamp cancelTime) {
-		this.cancelTime = cancelTime;
-	}
+    public void setCancelTime(Timestamp cancelTime) {
+        this.cancelTime = cancelTime;
+    }
 
-	@Override
+    @Override
     public String toString() {
         return StringHelper.toJsonString(this);
     }

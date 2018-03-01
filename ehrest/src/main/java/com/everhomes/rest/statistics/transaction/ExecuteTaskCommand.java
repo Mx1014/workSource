@@ -2,7 +2,7 @@ package com.everhomes.rest.statistics.transaction;
 
 /**
  *<ul>
- *<li>taskType:任務類型<li>
+ *<li>taskType:任務類型</li>
  *</ul>
  */
 public class ExecuteTaskCommand {

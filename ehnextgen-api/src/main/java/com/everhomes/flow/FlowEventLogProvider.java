@@ -85,6 +85,8 @@ public interface FlowEventLogProvider {
 
     FlowEventLog isSupervisor(Long userId, FlowCase flowCase);
 
+    List<FlowEventLog> findFlowCaseSupervisors(FlowCase flowCase);
+
     List<FlowEventLog> findRejectEventLogsByNodeId(Long nodeId, Long flowCaseId, Long stepCount);
 
     FlowEventLog isHistoryProcessors(Long userId, FlowCase flowCase);

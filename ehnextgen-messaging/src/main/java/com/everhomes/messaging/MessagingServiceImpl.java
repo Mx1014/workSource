@@ -1,14 +1,15 @@
 // @formatter:off
 package com.everhomes.messaging;
 
+import com.everhomes.bigcollection.Accessor;
+import com.everhomes.bigcollection.BigCollectionProvider;
+import com.everhomes.bus.*;
 import com.everhomes.configuration.ConfigurationProvider;
 import com.everhomes.msgbox.Message;
 import com.everhomes.msgbox.MessageBoxProvider;
 import com.everhomes.msgbox.MessageLocator;
 import com.everhomes.rest.app.AppConstants;
-import com.everhomes.rest.messaging.MessageChannel;
-import com.everhomes.rest.messaging.MessageDTO;
-import com.everhomes.rest.messaging.MessageMetaConstant;
+import com.everhomes.rest.messaging.*;
 import com.everhomes.rest.user.FetchMessageCommandResponse;
 import com.everhomes.rest.user.FetchPastToRecentMessageCommand;
 import com.everhomes.rest.user.FetchRecentToPastMessageAdminCommand;
@@ -16,18 +17,19 @@ import com.everhomes.rest.user.FetchRecentToPastMessageCommand;
 import com.everhomes.settings.PaginationConfigHelper;
 import com.everhomes.user.UserContext;
 import com.everhomes.user.UserLogin;
-import com.everhomes.util.ConvertHelper;
-import com.everhomes.util.Name;
+import com.everhomes.util.*;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.data.redis.core.RedisTemplate;
+import org.springframework.data.redis.serializer.StringRedisSerializer;
+import org.springframework.scheduling.TaskScheduler;
 import org.springframework.stereotype.Component;
+import org.springframework.web.context.request.async.DeferredResult;
 
 import javax.annotation.PostConstruct;
-import java.util.ArrayList;
-import java.util.List;
-import java.util.Map;
-import java.util.concurrent.ConcurrentHashMap;
+import java.util.*;
+import java.util.concurrent.*;
 import java.util.stream.Collectors;
 
 
@@ -41,6 +43,12 @@ import java.util.stream.Collectors;
 public class MessagingServiceImpl implements MessagingService {
     private static final Logger LOGGER = LoggerFactory.getLogger(MessagingServiceImpl.class);
 
+//    private static BlockingEventStored blockingEventStored = new BlockingEventStored();
+
+    private static final ConcurrentHashMap stored = new ConcurrentHashMap();
+
+    private static final boolean REDIS_ENABLE = true;
+
     @Autowired
     private List<MessageRoutingHandler> handlers; //TODO 给企业一个新的消息信道？
     private Map<String, MessageRoutingHandler> handlerMap = new ConcurrentHashMap<>();
@@ -50,6 +58,31 @@ public class MessagingServiceImpl implements MessagingService {
 
     @Autowired
     private ConfigurationProvider configProvider;
+
+    @Autowired
+    private LocalBusOneshotSubscriberBuilder localBusSubscriberBuilder;
+
+    @Autowired
+    private BusBridgeProvider busBridgeProvider;
+
+    @Autowired
+    private LocalBus localBus;
+
+    @Autowired
+    private LocalBusProvider localBusProvider;
+
+    @Autowired
+    private LocalBusTaskScheduler scheduler;
+
+    @Autowired
+    private TaskScheduler taskScheduler;
+
+    @Autowired
+    private BigCollectionProvider bigCollectionProvider;
+
+    private final StringRedisSerializer stringRedisSerializer = new StringRedisSerializer();
+
+    static final Integer MAX_TIME_OUT =30*60*1000;
     
     public MessagingServiceImpl() {
     }
@@ -65,6 +98,14 @@ public class MessagingServiceImpl implements MessagingService {
                     LOGGER.error("MessageRoutingHandler " + handler.getClass().getName() + " is not properly annotated with @Name");
                 }
             });
+        }
+
+        if(!REDIS_ENABLE){
+            //启动一个定时器去删stored中的key
+            @SuppressWarnings({ "unchecked", "rawtypes" })
+            Map<String, Object> map = new HashMap<>();
+            map.put("stored",stored);
+            taskScheduler.scheduleWithFixedDelay(()-> { setExpireKey(stored); }, 60*1000);
         }
     }
     
@@ -256,4 +297,156 @@ public class MessagingServiceImpl implements MessagingService {
         
         return dto;
     }
+
+    @Override
+    public DeferredResult<Object>  blockingEvent(String subjectId, String type, Integer timeOut, DeferredResult.DeferredResultHandler handler) {
+        if(timeOut == 0 || timeOut > MAX_TIME_OUT){
+            return null;
+        }
+        String subject = "blockingEventKey." + subjectId;
+        DeferredResult deferredResult = new DeferredResult();
+        BlockingEventResponse response = BlockingEventResponse.build(stored, subject);
+
+        //信号延迟生效的判断
+        if(!REDIS_ENABLE){
+            if(stored.get(subject + ".expireTime") != null){
+                //如果value时间戳大于服务器时间，说明key未过期
+                if(Long.valueOf((stored.get(subject + ".expireTime").toString())) > System.currentTimeMillis()){
+                    blockingEventOnSignal(response, subject, stored.get(subject + ".message"));
+                    removeEverythingWithKey(subject);
+                    deferredResult.setResult(response);
+                    deferredResult.setResultHandler(handler);
+                    return deferredResult;
+                }
+            }
+        }else{
+            String key = subject+ ".expireKey";
+            Accessor acc = bigCollectionProvider.getMapAccessor(key, "");
+            RedisTemplate redisTemplate = acc.getTemplate(stringRedisSerializer);
+            if(redisTemplate.opsForValue().get(key) != null){
+                blockingEventOnSignal(response, subject, redisTemplate.opsForValue().get(key));
+                deferredResult.setResult(response);
+                deferredResult.setResultHandler(handler);
+                return deferredResult;
+            }
+        }
+
+        switch (type){
+            case "ONESHOT":
+                localBusSubscriberBuilder.build(subject, new LocalBusOneshotSubscriber() {
+                    @Override
+                    public Action onLocalBusMessage(Object sender, String subject, Object dtoResp, String path) {
+                        blockingEventOnSignal(response, subject, dtoResp);
+                        deferredResult.setResult(response);
+                        return null;
+                    }
+                    @Override
+                    public void onLocalBusListeningTimeout() {
+                        //wait again
+                        response.setStatus(BlockingEventStatus.TIMEOUT);
+                        removeEverythingWithKey(subject);
+                        deferredResult.setResult(response);
+                        deferredResult.setResultHandler(handler);
+                    }
+
+                }).setTimeout(timeOut).create();
+
+                break;
+            case "ORORDINARY":
+                this.localBusProvider.subscribe(subject, new LocalBusSubscriber() {
+                    @Override
+                    public Action onLocalBusMessage(Object sender, String subject, Object dtoResp, String path) {
+                        blockingEventOnSignal(response, subject, dtoResp);
+                        deferredResult.setResult(response);
+                        deferredResult.setResultHandler(handler);
+                        return null;
+                    }
+                });
+                if (timeOut != null) {
+                    Date startTime = new Date(DateHelper.currentGMTTime().getTime() + timeOut.longValue());
+                    this.scheduler.getScheduler().schedule(new Runnable() {
+                        public void run() {
+                            localBusProvider.unsubscribe(subject, (LocalBusSubscriber)stored.get(subject+"subscriber"));
+                            removeEverythingWithKey(subject);
+                            response.setStatus(BlockingEventStatus.TIMEOUT);
+                            deferredResult.setResult(response);
+                        }
+                    }, startTime);
+                }
+                break;
+        }
+
+
+        //dto 只有一个线程能成功，如果某一个线程失败，则需要重新请求 uuid
+        return deferredResult;
+    }
+
+
+    @Override
+    public String signalBlockingEvent(String uploadId, String message, Integer timeOut) {
+        String subject = "blockingEventKey." + uploadId;
+//        UploadFileInfoDTO dto = signalFileDTO(cmd, UserContext.currentUserId());
+        ExecutorUtil.submit(new Thread(new Runnable() {
+            @Override
+            public void run() {
+                try {
+                    LocalBusSubscriber localBusSubscriber = (LocalBusSubscriber) busBridgeProvider;
+                    localBusSubscriber.onLocalBusMessage(null, subject, StringHelper.toJsonString(message), null);
+                } catch (Exception e) {
+                    LOGGER.error("submit LocalBusSubscriber failed, subject=" + subject, e);
+                }
+
+                try {
+                    localBus.publish(null, subject, StringHelper.toJsonString(message));
+                    if(!REDIS_ENABLE){
+                        removeEverythingWithKey(subject);
+                        stored.put(subject + ".expireTime", System.currentTimeMillis() + timeOut);
+                        stored.put(subject + ".message", message);
+                    }else{
+                        String key = subject+ ".expireKey";
+                        Accessor acc = bigCollectionProvider.getMapAccessor(key, "");
+                        RedisTemplate redisTemplate = acc.getTemplate(stringRedisSerializer);
+                        redisTemplate.opsForValue().set(key, message, timeOut, TimeUnit.MILLISECONDS);
+                    }
+
+                } catch (Exception e) {
+                    LOGGER.error("submit localBus failed, subject=" + subject, e);
+                }
+
+            }
+        },"signalBlockingEvent"));
+
+        return "ok";
+    }
+
+
+    // 内存key过期方法
+    private void setExpireKey(ConcurrentHashMap stored){
+        Iterator iter = stored.entrySet().iterator();
+        while (iter.hasNext()) {
+            Map.Entry entry = (Map.Entry) iter.next();
+            if(entry.getKey().toString().contains(".expireTime") && Long.valueOf(entry.getValue().toString()) < DateHelper.currentGMTTime().getTime()){
+                iter.remove();
+            }
+        }
+    }
+
+    // 信号成功接受方法
+    private BlockingEventResponse blockingEventOnSignal(BlockingEventResponse response, String subject, Object dtoResp){
+        response.setMessage(dtoResp.toString());
+        response.setSubject(subject);
+        response.setStatus(BlockingEventStatus.CONTINUTE);
+        response.incrCalledTime();
+        stored.remove(subject + ".calledTimes");
+        stored.remove(subject+ ".expireTime");
+        return response;
+    }
+
+    // 移除key相关的内容
+    private static void removeEverythingWithKey(String subject){
+        stored.remove(subject + ".calledTimes");
+        stored.remove(subject+ ".expireTime");
+        stored.remove(subject+ ".message");
+    }
+
 }

@@ -213,7 +213,7 @@ public class ForumServiceImpl implements ForumService {
 
     @Autowired
     private UserPrivilegeMgr userPrivilegeMgr;
-    
+
     @Override
     public boolean isSystemForum(long forumId, Long communityId) {
         if(forumId == ForumConstants.SYSTEM_FORUM) {
@@ -278,14 +278,18 @@ public class ForumServiceImpl implements ForumService {
         final PostDTO tempDto = dto;
         LocalEventBus.publish(event -> {
             LocalEventContext context = new LocalEventContext();
-            context.setUid(UserContext.currentUserId());
+            context.setUid(tempDto.getCreatorUid());
             context.setNamespaceId(UserContext.getCurrentNamespaceId());
             event.setContext(context);
 
             event.setEntityType(EhForumPosts.class.getSimpleName());
             event.setEntityId(tempDto.getId());
+            Long embeddedAppId = tempDto.getEmbeddedAppId() != null ? tempDto.getEmbeddedAppId() : 0;
             event.setEventName(SystemEvent.FORUM_POST_CREATE.suffix(
-                    tempDto.getContentCategory(), tempDto.getModuleType(), tempDto.getModuleCategoryId()));
+                    tempDto.getModuleType(), tempDto.getModuleCategoryId(), embeddedAppId));
+
+            event.addParam("embeddedAppId", String.valueOf(embeddedAppId));
+            event.addParam("postDTO", StringHelper.toJsonString(tempDto));
         });
 
         return dto;
@@ -456,6 +460,12 @@ public class ForumServiceImpl implements ForumService {
         if (null != cmd.getEmbeddedAppId() && AppConstants.APPID_ACTIVITY == cmd.getEmbeddedAppId().longValue()) {
 			setActivitySchedule(post.getEmbeddedId());
 		}
+
+		//公告模块要
+		if(ForumModuleType.fromCode(cmd.getModuleType()) == ForumModuleType.ANNOUNCEMENT){
+
+        }
+
 
         PostDTO postDto = ConvertHelper.convert(post, PostDTO.class);
 
@@ -937,6 +947,11 @@ public class ForumServiceImpl implements ForumService {
             
             try {
                 this.coordinationProvider.getNamedLock(CoordinationLocks.UPDATE_POST.getCode()).enter(()-> {
+
+                    if(handler != null) {
+                        handler.beforePostDelete(post);
+                    }
+
                     this.forumProvider.updatePost(post);
                  // 删除评论时帖子的child count减1 mod by xiongying 20160428
                     if(parentPost != null) {
@@ -973,32 +988,35 @@ public class ForumServiceImpl implements ForumService {
                 this.postSearcher.deleteById(post.getId());
 
                 if(handler != null) {
-                    handler.postProcessEmbeddedObject(post);
+                    //改用新的handler方法，原来的方法TM是创建时候用的，这里是删除 add by yanjun 20171227
+//                    handler.postProcessEmbeddedObject(post);
+                    handler.afterPostDelete(post);
                 } 
-                
-                //进行退款，取消报名   add by yanjun 20170519
-                if (embededAppId.longValue() == AppConstants.APPID_ACTIVITY) {
-                	Activity activity = activityProivider.findActivityById(post.getEmbeddedId());
-                	if (activity != null) {
-                		List<ActivityRoster> activityRosters = activityProivider.listRosters(activity.getId(), ActivityRosterStatus.NORMAL);
-                		for( int i=0; i< activityRosters.size(); i++){
-                			//如果有退款，先退款再取消订单
-                			ActivityRoster tempRoster = activityRosters.get(i);
-                			if(tempRoster.getStatus() != null && tempRoster.getStatus().byteValue() == ActivityRosterStatus.NORMAL.getCode()){
-                				activityService.signupOrderRefund(activity, tempRoster.getUid());
-                				
-                				tempRoster.setStatus(ActivityRosterStatus.CANCEL.getCode());
-                				tempRoster.setCancelTime(new Timestamp(DateHelper.currentGMTTime().getTime()));
-      			             	activityProvider.updateRoster(tempRoster);
-                			}
-                			
-                		}
 
-                        activity.setStatus(PostStatus.INACTIVE.getCode());
-                        activity.setDeleteTime(new Timestamp(DateHelper.currentGMTTime().getTime()));
-                        activityProvider.updateActivity(activity);
-            		}
-				}
+                //新增handler.afterPostDelete，搬到里面了
+//                //进行退款，取消报名   add by yanjun 20170519
+//                if (embededAppId.longValue() == AppConstants.APPID_ACTIVITY) {
+//                	Activity activity = activityProivider.findActivityById(post.getEmbeddedId());
+//                	if (activity != null) {
+//                		List<ActivityRoster> activityRosters = activityProivider.listRosters(activity.getId(), ActivityRosterStatus.NORMAL);
+//                		for( int i=0; i< activityRosters.size(); i++){
+//                			//如果有退款，先退款再取消订单
+//                			ActivityRoster tempRoster = activityRosters.get(i);
+//                			if(tempRoster.getStatus() != null && tempRoster.getStatus().byteValue() == ActivityRosterStatus.NORMAL.getCode()){
+//                				activityService.signupOrderRefund(activity, tempRoster.getUid());
+//
+//                				tempRoster.setStatus(ActivityRosterStatus.CANCEL.getCode());
+//                				tempRoster.setCancelTime(new Timestamp(DateHelper.currentGMTTime().getTime()));
+//      			             	activityProvider.updateRoster(tempRoster);
+//                			}
+//
+//                		}
+//
+//                        activity.setStatus(PostStatus.INACTIVE.getCode());
+//                        activity.setDeleteTime(new Timestamp(DateHelper.currentGMTTime().getTime()));
+//                        activityProvider.updateActivity(activity);
+//            		}
+//				}
 
                 //删除克隆帖子  add by yanjun 20170830
                 deletePostAndActivity(post, userId);
@@ -1067,16 +1085,20 @@ public class ForumServiceImpl implements ForumService {
         final Post tempPost = post;
         LocalEventBus.publish(event -> {
             LocalEventContext context = new LocalEventContext();
-            context.setUid(tempPost.getCreatorUid());
+            context.setUid(userId);
             context.setNamespaceId(UserContext.getCurrentNamespaceId());
             event.setContext(context);
 
             event.setEntityType(EhForumPosts.class.getSimpleName());
             event.setEntityId(tempPost.getId());
+            Long embeddedAppId = tempPost.getEmbeddedAppId() != null ? tempPost.getEmbeddedAppId() : 0;
             event.setEventName(SystemEvent.FORUM_POST_DELETE.suffix(
-                    tempPost.getContentCategory(), tempPost.getModuleType(), tempPost.getModuleCategoryId()));
-        });
+                    tempPost.getModuleType(), tempPost.getModuleCategoryId(), embeddedAppId));
 
+            event.addParam("embeddedAppId", String.valueOf(embeddedAppId));
+            event.addParam("post", StringHelper.toJsonString(tempPost));
+            event.addParam("parentPost", StringHelper.toJsonString(parentPost));
+        });
     }
 
     /*private void deletePostPoints(Long postId, Byte moduleType, Long moduleCategoryId){
@@ -1148,10 +1170,11 @@ public class ForumServiceImpl implements ForumService {
 
                     //删除活动
                     Activity r_activity = activityProvider.findSnapshotByPostId(r.getId());
-                    r_activity.setStatus(PostStatus.INACTIVE.getCode());
-                    r_activity.setDeleteTime(new Timestamp(DateHelper.currentGMTTime().getTime()));
-                    activityProvider.updateActivity(r_activity);
-
+                    if(r_activity != null){
+                        r_activity.setStatus(PostStatus.INACTIVE.getCode());
+                        r_activity.setDeleteTime(new Timestamp(DateHelper.currentGMTTime().getTime()));
+                        activityProvider.updateActivity(r_activity);
+                    }
                 });
             }
         }
@@ -1281,6 +1304,22 @@ public class ForumServiceImpl implements ForumService {
             if(null != cond){
             	query.addConditions(cond);
             }
+
+            Timestamp timestemp = new Timestamp(System.currentTimeMillis());
+            if(TopicPublishStatus.fromCode(cmd.getPublishStatus()) == TopicPublishStatus.UNPUBLISHED){
+                query.addConditions(Tables.EH_FORUM_POSTS.START_TIME.gt(timestemp));
+            }
+
+            if(TopicPublishStatus.fromCode(cmd.getPublishStatus()) == TopicPublishStatus.PUBLISHED){
+                query.addConditions(Tables.EH_FORUM_POSTS.START_TIME.lt(timestemp));
+                query.addConditions(Tables.EH_FORUM_POSTS.END_TIME.gt(timestemp));
+            }
+
+            if(TopicPublishStatus.fromCode(cmd.getPublishStatus()) == TopicPublishStatus.EXPIRED){
+                query.addConditions(Tables.EH_FORUM_POSTS.END_TIME.lt(timestemp));
+            }
+
+
             return query;
         });
         this.forumProvider.populatePostAttachments(posts);
@@ -2161,9 +2200,12 @@ public class ForumServiceImpl implements ForumService {
 
                 event.setEntityType(EhForumPosts.class.getSimpleName());
                 event.setEntityId(tempPost.getId());
+                Long embeddedAppId = tempPost.getEmbeddedAppId() != null ? tempPost.getEmbeddedAppId() : 0;
                 event.setEventName(SystemEvent.FORUM_POST_LIKE.suffix(
-                        tempPost.getContentCategory(), tempPost.getEmbeddedAppId(),
-                        tempPost.getModuleType(), tempPost.getModuleCategoryId()));
+                        tempPost.getModuleType(), tempPost.getModuleCategoryId(), embeddedAppId));
+
+                event.addParam("embeddedAppId", String.valueOf(embeddedAppId));
+                event.addParam("post", StringHelper.toJsonString(tempPost));
             });
         } catch(Exception e) {
             LOGGER.error("Failed to update the like count of post, userId=" + operatorId + ", topicId=" + topicId, e);
@@ -2242,8 +2284,12 @@ public class ForumServiceImpl implements ForumService {
 
                 event.setEntityType(EhForumPosts.class.getSimpleName());
                 event.setEntityId(tempPost.getId());
+                Long embeddedAppId = tempPost.getEmbeddedAppId() != null ? tempPost.getEmbeddedAppId() : 0;
                 event.setEventName(SystemEvent.FORUM_POST_LIKE_CANCEL.suffix(
-                        tempPost.getContentCategory(), tempPost.getModuleType(), tempPost.getModuleCategoryId()));
+                        tempPost.getModuleType(), tempPost.getModuleCategoryId(), embeddedAppId));
+
+                event.addParam("embeddedAppId", String.valueOf(embeddedAppId));
+                event.addParam("post", StringHelper.toJsonString(tempPost));
             });
         } catch(Exception e) {
             LOGGER.error("Failed to update the dislike count of post, userId=" + operatorId + ", topicId=" + topicId, e);
@@ -2534,8 +2580,12 @@ public class ForumServiceImpl implements ForumService {
 
             event.setEntityType(EhForumPosts.class.getSimpleName());
             event.setEntityId(postdto.getId());
+            Long embeddedAppId = ownerPost.getEmbeddedAppId() != null ? ownerPost.getEmbeddedAppId() : 0;
             event.setEventName(SystemEvent.FORUM_COMMENT_CREATE.suffix(
-                    ownerPost.getContentCategory(), ownerPost.getModuleType(), ownerPost.getModuleCategoryId()));
+                    ownerPost.getModuleType(), ownerPost.getModuleCategoryId(), embeddedAppId));
+
+            event.addParam("embeddedAppId", String.valueOf(embeddedAppId));
+            event.addParam("post", StringHelper.toJsonString(ownerPost));
         });
         return postdto;
 
@@ -4402,7 +4452,11 @@ public class ForumServiceImpl implements ForumService {
                             wechatSignup = activity.getWechatSignup();
                         }
                         post.setShareUrl(homeUrl + relativeUrl + "?namespaceId=" + namespaceId + "&forumId=" + post.getForumId() + "&topicId=" + post.getId() + "&wechatSignup=" + wechatSignup);
-                	} else {
+                	} else if(post.getCategoryId() != null && post.getCategoryId() == CategoryConstants.CATEGORY_ID_TOPIC_POLLING) {
+                        //投票帖子用自己的分享链接 modified by yanjun 220171227
+                        relativeUrl = configProvider.getValue(ConfigConstants.POLL_SHARE_URL, "");
+                	    post.setShareUrl(homeUrl + relativeUrl + "?namespaceId=" + namespaceId + "&forumId=" + post.getForumId() + "&topicId=" + post.getId());
+                    }else {
                 		post.setShareUrl(homeUrl + relativeUrl + "?namespaceId=" + namespaceId + "&forumId=" + post.getForumId() + "&topicId=" + post.getId());
                 	}
                 }
@@ -6400,8 +6454,14 @@ public class ForumServiceImpl implements ForumService {
 				String content = highlightText(highlight.get("content").getFragments());
 				dto.setContent(content);
 			}
-        	
-        	PostDTO postDto =  getTopicById(dto.getId(), null, true, true);
+
+			//查询真身帖
+            Post post = forumProvider.findPostById(dto.getId());
+            if(post.getRealPostId() != null){
+                dto.setId(post.getRealPostId());
+            }
+
+            PostDTO postDto =  getTopicById(dto.getId(), null, true, true);
         	if(postDto != null && postDto.getAttachments() != null && postDto.getAttachments().size() > 0) {
         		postDto.getAttachments();
         		postDto.getAttachments().get(0);
@@ -6861,4 +6921,13 @@ public class ForumServiceImpl implements ForumService {
         res.setFlag(TrueOrFalseFlag.FALSE.getCode());
         return res;
     }
+
+    private void scheduleAnnouncement(Post post){
+
+
+    }
+
+
+
+
 }

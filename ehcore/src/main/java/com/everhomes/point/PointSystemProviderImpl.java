@@ -27,29 +27,29 @@ import java.util.List;
 @Repository
 public class PointSystemProviderImpl implements PointSystemProvider {
 
-	@Autowired
-	private DbProvider dbProvider;
+    @Autowired
+    private DbProvider dbProvider;
 
-	@Autowired
-	private SequenceProvider sequenceProvider;
+    @Autowired
+    private SequenceProvider sequenceProvider;
 
-	@Override
-	public void createPointSystem(PointSystem pointSystem) {
-		Long id = sequenceProvider.getNextSequence(NameMapper.getSequenceDomainFromTablePojo(EhPointSystems.class));
-		pointSystem.setId(id);
-		pointSystem.setCreateTime(DateUtils.currentTimestamp());
-		pointSystem.setCreatorUid(UserContext.currentUserId());
-		rwDao().insert(pointSystem);
-		DaoHelper.publishDaoAction(DaoAction.CREATE, EhPointSystems.class, id);
-	}
+    @Override
+    public void createPointSystem(PointSystem pointSystem) {
+        Long id = sequenceProvider.getNextSequence(NameMapper.getSequenceDomainFromTablePojo(EhPointSystems.class));
+        pointSystem.setId(id);
+        pointSystem.setCreateTime(DateUtils.currentTimestamp());
+        pointSystem.setCreatorUid(UserContext.currentUserId());
+        rwDao().insert(pointSystem);
+        DaoHelper.publishDaoAction(DaoAction.CREATE, EhPointSystems.class, id);
+    }
 
-	@Override
-	public void updatePointSystem(PointSystem pointSystem) {
-		pointSystem.setUpdateTime(DateUtils.currentTimestamp());
-		pointSystem.setUpdateUid(UserContext.currentUserId());
+    @Override
+    public void updatePointSystem(PointSystem pointSystem) {
+        pointSystem.setUpdateTime(DateUtils.currentTimestamp());
+        pointSystem.setUpdateUid(UserContext.currentUserId());
         rwDao().update(pointSystem);
-		DaoHelper.publishDaoAction(DaoAction.MODIFY, EhPointSystems.class, pointSystem.getId());
-	}
+        DaoHelper.publishDaoAction(DaoAction.MODIFY, EhPointSystems.class, pointSystem.getId());
+    }
 
     @Override
     public List<PointSystem> query(ListingLocator locator, int count, ListingQueryBuilderCallback callback) {
@@ -60,7 +60,7 @@ public class PointSystemProviderImpl implements PointSystemProvider {
             callback.buildCondition(locator, query);
         }
         if (locator.getAnchor() != null) {
-            query.addConditions(t.ID.lt(locator.getAnchor()));
+            query.addConditions(t.ID.le(locator.getAnchor()));
         }
         query.addConditions(t.STATUS.ne(PointCommonStatus.INACTIVE.getCode()));
 
@@ -79,10 +79,10 @@ public class PointSystemProviderImpl implements PointSystemProvider {
         return list;
     }
 
-	@Override
-	public PointSystem findById(Long id) {
-		return ConvertHelper.convert(dao().findById(id), PointSystem.class);
-	}
+    @Override
+    public PointSystem findById(Long id) {
+        return ConvertHelper.convert(dao().findById(id), PointSystem.class);
+    }
 
     @Override
     public List<PointSystem> getEnabledPointSystems(Integer namespaceId) {
@@ -105,15 +105,20 @@ public class PointSystemProviderImpl implements PointSystemProvider {
         });
     }
 
+    @Override
+    public List<PointSystem> listPointSystems() {
+        return this.query(new ListingLocator(), -1, (locator1, query) -> query);
+    }
+
     private EhPointSystemsDao rwDao() {
         DSLContext context = dbProvider.getDslContext(AccessSpec.readWrite());
         return new EhPointSystemsDao(context.configuration());
-	}
+    }
 
-	private EhPointSystemsDao dao() {
+    private EhPointSystemsDao dao() {
         DSLContext context = dbProvider.getDslContext(AccessSpec.readOnly());
         return new EhPointSystemsDao(context.configuration());
-	}
+    }
 
     private DSLContext context() {
         return dbProvider.getDslContext(AccessSpec.readOnly());

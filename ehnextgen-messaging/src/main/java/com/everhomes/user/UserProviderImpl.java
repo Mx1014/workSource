@@ -2,6 +2,7 @@
 package com.everhomes.user;
 
 import com.everhomes.aclink.AclinkUser;
+import com.everhomes.asset.AssetPaymentStrings;
 import com.everhomes.bootstrap.PlatformContext;
 import com.everhomes.cache.CacheProvider;
 import com.everhomes.configuration.ConfigurationProvider;
@@ -1783,5 +1784,46 @@ public class UserProviderImpl implements UserProvider {
     @Override
     public void updateCacheStatus() {
         // 只需要去掉缓存，使可缓存可测
+    }
+  @Override
+    public TargetDTO findUserByToken(String tel,Integer namespaceId) {
+        TargetDTO dto = new TargetDTO();
+        DSLContext context = this.dbProvider.getDslContext(AccessSpec.readOnly());
+        com.everhomes.server.schema.tables.EhUserIdentifiers t = Tables.EH_USER_IDENTIFIERS.as("t");
+        com.everhomes.server.schema.tables.EhUsers t1 = Tables.EH_USERS.as("t1");
+        SelectQuery<Record> query = context.selectQuery();
+        query.addSelect(t.OWNER_UID);
+        query.addFrom(t);
+        query.addConditions(t.IDENTIFIER_TOKEN.eq(tel));
+        query.addConditions(t.CLAIM_STATUS.eq((byte)3));
+        query.addConditions(t.IDENTIFIER_TYPE.eq((byte)0));
+        if(namespaceId!=null) query.addConditions(t.NAMESPACE_ID.eq(namespaceId));
+        Long userId = query.fetchOne(0,Long.class);
+        if(userId==null){
+            return null;
+        }
+        SelectQuery<Record> queryUser = context.selectQuery();
+        queryUser.addSelect(t1.NICK_NAME);
+        queryUser.addFrom(t1);
+        queryUser.addConditions(t1.ID.eq(userId));
+        String nameFound = queryUser.fetchOne(0, String.class);
+        if(nameFound != null){
+            dto.setUserIdentifier(tel);
+            dto.setTargetId(userId);
+            dto.setTargetType(AssetPaymentStrings.EH_USER);
+            dto.setTargetName(nameFound);
+            return dto;
+        }
+        return null;
+    }
+	
+	@Override
+    public String findMobileByUid(Long contactId) {
+        DSLContext context = this.dbProvider.getDslContext(AccessSpec.readOnly());
+        String s = context.select(Tables.EH_USER_IDENTIFIERS.IDENTIFIER_TOKEN).from(Tables.EH_USER_IDENTIFIERS)
+                .where(Tables.EH_USER_IDENTIFIERS.OWNER_UID.eq(contactId))
+                .and(Tables.EH_USER_IDENTIFIERS.IDENTIFIER_TYPE.eq((byte) 0))
+                .fetchOne(Tables.EH_USER_IDENTIFIERS.IDENTIFIER_TOKEN);
+        return s;
     }
 }

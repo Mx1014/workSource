@@ -1,8 +1,9 @@
 package com.everhomes.flow;
 
+import java.io.Serializable;
 import java.util.List;
 
-public abstract class FlowGraphBranch {
+public abstract class FlowGraphBranch implements Serializable {
 
 	protected FlowBranch flowBranch;
 

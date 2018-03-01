@@ -2,8 +2,6 @@
 package com.everhomes.point;
 
 import com.everhomes.db.AccessSpec;
-import com.everhomes.db.DaoAction;
-import com.everhomes.db.DaoHelper;
 import com.everhomes.db.DbProvider;
 import com.everhomes.listing.ListingLocator;
 import com.everhomes.listing.ListingQueryBuilderCallback;
@@ -27,29 +25,29 @@ import java.util.List;
 @Repository
 public class PointLogProviderImpl implements PointLogProvider {
 
-	@Autowired
-	private DbProvider dbProvider;
+    @Autowired
+    private DbProvider dbProvider;
 
-	@Autowired
-	private SequenceProvider sequenceProvider;
+    @Autowired
+    private SequenceProvider sequenceProvider;
 
-	@Override
-	public void createPointLog(PointLog pointLog) {
-		Long id = sequenceProvider.getNextSequence(NameMapper.getSequenceDomainFromTablePojo(EhPointLogs.class));
-		pointLog.setId(id);
-		pointLog.setCreateTime(DateUtils.currentTimestamp());
-		// pointLog.setCreatorUid(UserContext.currentUserId());
-		rwDao().insert(pointLog);
-		DaoHelper.publishDaoAction(DaoAction.CREATE, EhPointLogs.class, id);
-	}
+    @Override
+    public void createPointLog(PointLog pointLog) {
+        Long id = sequenceProvider.getNextSequence(NameMapper.getSequenceDomainFromTablePojo(EhPointLogs.class));
+        pointLog.setId(id);
+        pointLog.setCreateTime(DateUtils.currentTimestamp());
+        // pointLog.setCreatorUid(UserContext.currentUserId());
+        rwDao().insert(pointLog);
+        // DaoHelper.publishDaoAction(DaoAction.CREATE, EhPointLogs.class, id);
+    }
 
-	@Override
-	public void updatePointLog(PointLog pointLog) {
-		// pointLog.setUpdateTime(DateUtils.currentTimestamp());
-		// pointLog.setUpdateUid(UserContext.currentUserId());
+    @Override
+    public void updatePointLog(PointLog pointLog) {
+        // pointLog.setUpdateTime(DateUtils.currentTimestamp());
+        // pointLog.setUpdateUid(UserContext.currentUserId());
         rwDao().update(pointLog);
-		DaoHelper.publishDaoAction(DaoAction.MODIFY, EhPointLogs.class, pointLog.getId());
-	}
+        // DaoHelper.publishDaoAction(DaoAction.MODIFY, EhPointLogs.class, pointLog.getId());
+    }
 
     @Override
     public List<PointLog> query(ListingLocator locator, int count, ListingQueryBuilderCallback callback) {
@@ -60,7 +58,7 @@ public class PointLogProviderImpl implements PointLogProvider {
             callback.buildCondition(locator, query);
         }
         if (locator.getAnchor() != null) {
-            query.addConditions(t.ID.lt(locator.getAnchor()));
+            query.addConditions(t.ID.le(locator.getAnchor()));
         }
 
         if (count > 0) {
@@ -85,6 +83,9 @@ public class PointLogProviderImpl implements PointLogProvider {
             if (cmd.getSystemId() != null) {
                 query.addConditions(t.SYSTEM_ID.eq(cmd.getSystemId()));
             }
+            if (cmd.getOperatorType() != null) {
+                query.addConditions(t.OPERATOR_TYPE.eq(cmd.getOperatorType()));
+            }
             if (cmd.getUserId() != null) {
                 query.addConditions(t.TARGET_UID.eq(cmd.getUserId()));
             }
@@ -94,8 +95,8 @@ public class PointLogProviderImpl implements PointLogProvider {
             if (cmd.getArithmeticType() != null) {
                 query.addConditions(t.ARITHMETIC_TYPE.eq(cmd.getArithmeticType()));
             }
-            if (cmd.getPhone() != null) {
-                query.addConditions(t.TARGET_PHONE.eq(cmd.getPhone()));
+            if (cmd.getPhone() != null && cmd.getPhone().trim().length() > 0) {
+                query.addConditions(t.TARGET_PHONE.eq(cmd.getPhone().trim()));
             }
             if (cmd.getStartTime() != null) {
                 query.addConditions(t.CREATE_TIME.gt(new Timestamp(cmd.getStartTime())));
@@ -107,10 +108,10 @@ public class PointLogProviderImpl implements PointLogProvider {
         });
     }
 
-	@Override
-	public PointLog findById(Long id) {
-		return ConvertHelper.convert(dao().findById(id), PointLog.class);
-	}
+    @Override
+    public PointLog findById(Long id) {
+        return ConvertHelper.convert(dao().findById(id), PointLog.class);
+    }
 
     @Override
     public PointLog findByUidAndEntity(Integer namespaceId, Long uid, String eventName, String entityType, Long entityId) {
@@ -138,28 +139,34 @@ public class PointLogProviderImpl implements PointLogProvider {
     }
 
     @Override
-    public Integer countPointLog(Integer namespaceId, Long systemId, Long uid, Long ruleId, Long createTime) {
+    public Integer countPointLog(Integer namespaceId, Long systemId, Long uid, Long ruleId, Timestamp startTime, Timestamp endTime) {
         com.everhomes.server.schema.tables.EhPointLogs t = Tables.EH_POINT_LOGS;
         SelectQuery<EhPointLogsRecord> query = context().selectFrom(t).getQuery();
         query.addConditions(t.NAMESPACE_ID.eq(namespaceId));
         query.addConditions(t.SYSTEM_ID.eq(systemId));
         query.addConditions(t.TARGET_UID.eq(uid));
         query.addConditions(t.RULE_ID.eq(ruleId));
-        if (createTime != null) {
-            query.addConditions(t.CREATE_TIME.gt(new Timestamp(createTime)));
+        if (startTime != null) {
+            query.addConditions(t.CREATE_TIME.gt(startTime));
+        }
+        if (endTime != null) {
+            query.addConditions(t.CREATE_TIME.le(endTime));
         }
         return query.fetchCount();
     }
 
     @Override
-    public PointLog findByRuleIdAndEntity(Integer namespaceId, Long uid, Long ruleId, String entityType, Long entityId) {
+    public PointLog findByRuleIdAndEntity(Integer namespaceId, Long systemId, Long targetUid, Long ruleId, String entityType, Long entityId) {
         com.everhomes.server.schema.tables.EhPointLogs t = Tables.EH_POINT_LOGS;
         List<PointLog> logList = this.query(new ListingLocator(), 1, (locator1, query) -> {
             if (namespaceId != null) {
                 query.addConditions(t.NAMESPACE_ID.eq(namespaceId));
             }
-            if (uid != null) {
-                query.addConditions(t.TARGET_UID.eq(uid));
+            if (systemId != null) {
+                query.addConditions(t.SYSTEM_ID.eq(systemId));
+            }
+            if (targetUid != null) {
+                query.addConditions(t.TARGET_UID.eq(targetUid));
             }
             if (ruleId != null) {
                 query.addConditions(t.RULE_ID.eq(ruleId));
@@ -171,7 +178,54 @@ public class PointLogProviderImpl implements PointLogProvider {
             return query;
         });
         if (logList.size() > 0) {
-            return logList.get(0);
+            return logList.iterator().next();
+        }
+        return null;
+    }
+
+    @Override
+    public PointLog isExist(Integer namespaceId, Long systemId, Long targetUid, Long categoryId, Long ruleId, String entityType, Long entityId) {
+        com.everhomes.server.schema.tables.EhPointLogs t = Tables.EH_POINT_LOGS;
+
+        List<PointLog> logList = this.query(new ListingLocator(), 1, (locator, query) -> {
+            if (namespaceId != null) {
+                query.addConditions(t.NAMESPACE_ID.eq(namespaceId));
+            }
+            if (systemId != null) {
+                query.addConditions(t.SYSTEM_ID.eq(systemId));
+            }
+            if (targetUid != null) {
+                query.addConditions(t.TARGET_UID.eq(targetUid));
+            }
+            if (categoryId != null) {
+                query.addConditions(t.CATEGORY_ID.eq(categoryId));
+            }
+            if (ruleId != null) {
+                query.addConditions(t.RULE_ID.eq(ruleId));
+            }
+            if (entityType != null && entityId != null) {
+                query.addConditions(t.ENTITY_TYPE.eq(entityType));
+                query.addConditions(t.ENTITY_ID.eq(entityId));
+            }
+            return query;
+        });
+
+        if (logList.size() > 0) {
+            return logList.iterator().next();
+        }
+        return null;
+    }
+
+    @Override
+    public PointLog findByBindingLogId(Long logId) {
+        com.everhomes.server.schema.tables.EhPointLogs t = Tables.EH_POINT_LOGS;
+
+        List<PointLog> logList = this.query(new ListingLocator(), 1, (locator, query) -> {
+            query.addConditions(t.BINDING_LOG_ID.eq(logId));
+            return query;
+        });
+        if (logList.size() > 0) {
+            return logList.iterator().next();
         }
         return null;
     }
@@ -179,12 +233,12 @@ public class PointLogProviderImpl implements PointLogProvider {
     private EhPointLogsDao rwDao() {
         DSLContext context = dbProvider.getDslContext(AccessSpec.readWrite());
         return new EhPointLogsDao(context.configuration());
-	}
+    }
 
-	private EhPointLogsDao dao() {
+    private EhPointLogsDao dao() {
         DSLContext context = dbProvider.getDslContext(AccessSpec.readOnly());
         return new EhPointLogsDao(context.configuration());
-	}
+    }
 
     private DSLContext context() {
         return dbProvider.getDslContext(AccessSpec.readOnly());

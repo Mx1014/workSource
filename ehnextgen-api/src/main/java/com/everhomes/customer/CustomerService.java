@@ -5,6 +5,7 @@ import com.everhomes.rest.customer.*;
 import com.everhomes.rest.organization.ImportFileTaskDTO;
 import org.springframework.web.multipart.MultipartFile;
 
+import javax.servlet.http.HttpServletResponse;
 import java.util.List;
 
 /**
@@ -13,7 +14,7 @@ import java.util.List;
 public interface CustomerService {
     EnterpriseCustomerDTO createEnterpriseCustomer(CreateEnterpriseCustomerCommand cmd);
     EnterpriseCustomerDTO updateEnterpriseCustomer(UpdateEnterpriseCustomerCommand cmd);
-    void deleteEnterpriseCustomer(DeleteEnterpriseCustomerCommand cmd);
+    void deleteEnterpriseCustomer(DeleteEnterpriseCustomerCommand cmd, Boolean checkAuth);
     SearchEnterpriseCustomerResponse searchEnterpriseCustomer(SearchEnterpriseCustomerCommand cmd);
     ImportFileTaskDTO importEnterpriseCustomer(ImportEnterpriseCustomerDataCommand cmd, MultipartFile mfile, Long userId);
     EnterpriseCustomerDTO getEnterpriseCustomer(GetEnterpriseCustomerCommand cmd);
@@ -72,6 +73,7 @@ public interface CustomerService {
     void deleteCustomerEntryInfo(DeleteCustomerEntryInfoCommand cmd);
     CustomerEntryInfoDTO getCustomerEntryInfo(GetCustomerEntryInfoCommand cmd);
     List<CustomerEntryInfoDTO> listCustomerEntryInfos(ListCustomerEntryInfosCommand cmd);
+    List<CustomerEntryInfoDTO> listCustomerEntryInfosWithoutAuth(ListCustomerEntryInfosCommand cmd);
 
     void createCustomerDepartureInfo(CreateCustomerDepartureInfoCommand cmd);
     void updateCustomerDepartureInfo(UpdateCustomerDepartureInfoCommand cmd);
@@ -89,8 +91,8 @@ public interface CustomerService {
     ListCustomerAnnualStatisticsResponse listCustomerAnnualStatistics(ListCustomerAnnualStatisticsCommand cmd);
     ListCustomerAnnualDetailsResponse listCustomerAnnualDetails(ListCustomerAnnualDetailsCommand cmd);
 
-    void syncEnterpriseCustomers(SyncCustomersCommand cmd);
-    void syncIndividualCustomers(SyncCustomersCommand cmd);
+    String syncEnterpriseCustomers(SyncCustomersCommand cmd);
+    String syncIndividualCustomers(SyncCustomersCommand cmd);
     
     
     List<CustomerTrackingDTO> listCustomerTrackings(ListCustomerTrackingsCommand cmd);
@@ -132,6 +134,11 @@ public interface CustomerService {
     void checkCustomerAuth(Integer namespaceId, Long privilegeId, Long orgId, Long communityId);
 
     SearchEnterpriseCustomerResponse queryEnterpriseCustomers(SearchEnterpriseCustomerCommand cmd);
+
+
+    ListCommunitySyncResultResponse listCommunitySyncResult(ListCommunitySyncResultCommand cmd);
+
+    void exportEnterpriseCustomer(ExportEnterpriseCustomerCommand cmd, HttpServletResponse response);
 
 
 }

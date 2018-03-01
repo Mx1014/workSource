@@ -76,7 +76,6 @@ public class SmsController extends ControllerBase {
      */
     @RequestMapping("listSmsLogs")
     @RestReturn(value = ListSmsLogsResponse.class)
-    @RequireAuthentication(false)
     public RestResponse listReportLogs(ListReportLogCommand cmd) {
         ListSmsLogsResponse resp = smsService.listReportLogs(cmd);
         RestResponse response = new RestResponse(resp);

@@ -57,7 +57,8 @@ public class StatEventPortalStatisticProviderImpl implements StatEventPortalStat
 
     @Override
     public List<StatEventPortalStatistic> listEventPortalStatByZeroParentId(Integer namespaceId, Byte statType, Date startDate, Date endDate) {
-        SelectHavingStep<Record1<Long>> lastRecordIdCondition = context().select(DSL.max(Tables.EH_STAT_EVENT_PORTAL_STATISTICS.ID))
+        SelectHavingStep<Record1<Long>> lastRecordIdCondition =
+                context().select(DSL.max(Tables.EH_STAT_EVENT_PORTAL_STATISTICS.ID))
                 .from(Tables.EH_STAT_EVENT_PORTAL_STATISTICS)
                 .where(Tables.EH_STAT_EVENT_PORTAL_STATISTICS.NAMESPACE_ID.eq(namespaceId))
                 .and(Tables.EH_STAT_EVENT_PORTAL_STATISTICS.PARENT_ID.eq(0L))

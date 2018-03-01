@@ -63,13 +63,17 @@ public class LianXinTongSmsHandler implements SmsHandler, ApplicationListener<Co
 
     private RspMessage createAndSend(Map<String, Object> message) {
         initAccount();
-        SmsChannel channel = SmsBuilder.create(false);
         message.put("authCode", authCode);
         message.put("spId", spId);
         message.put("srcId", srcId);
         message.put("reqId", "123456");
         message.put("serviceId", "");
-        return channel.sendMessage(server, SmsBuilder.HttpMethod.POST.val(), null, null, StringHelper.toJsonString(message));
+
+        return SmsChannelBuilder.create(true)
+                .setUrl(server)
+                .setBodyStr(StringHelper.toJsonString(message))
+                .setMethod(SmsChannelBuilder.HttpMethod.POST)
+                .send();
     }
 
     @Override
@@ -181,7 +185,7 @@ public class LianXinTongSmsHandler implements SmsHandler, ApplicationListener<Co
     */
     private List<SmsLog> buildSmsLogs(Integer namespaceId, String[] phoneNumbers, String templateScope, int templateId,
                                       String templateLocale, String content, RspMessage rspMessage) {
-        List<SmsLog> smsLogs = new ArrayList<>();
+        List<SmsLog> smsLogs = new ArrayList<>(phoneNumbers.length);
         Rets rets = new Rets();
         String resultText = "failed";
 
@@ -239,8 +243,8 @@ public class LianXinTongSmsHandler implements SmsHandler, ApplicationListener<Co
         {"destId":"12306123","mobile":"18211111111","msgId":"1234567890001","reqId":"","status":"DELIVERD"}
     */
     @Override
-    public List<SmsReportDTO> report(String reportBody) {
-        Report report = (Report) StringHelper.fromJsonString(reportBody, Report.class);
+    public SmsReportResponse report(SmsReportRequest reportRequest) {
+        Report report = (Report) StringHelper.fromJsonString(reportRequest.getRequestBody(), Report.class);
         if (report == null) {
             return null;
         }
@@ -252,7 +256,7 @@ public class LianXinTongSmsHandler implements SmsHandler, ApplicationListener<Co
         } else {
             dto.setStatus(SmsLogStatus.REPORT_FAILED.getCode());
         }
-        return Collections.singletonList(dto);
+        return new SmsReportResponse(Collections.singletonList(dto));
     }
 
     private static class Result {

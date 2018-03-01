@@ -650,7 +650,12 @@ public class ParkingServiceImpl implements ParkingService {
 //
 //        preOrderCommand.setOrderType(OrderType.OrderTypeEnum.PARKING.getPycode());
 //        preOrderCommand.setOrderId(parkingRechargeOrder.getOrderNo());
+
 		Long amount = payService.changePayAmount(parkingRechargeOrder.getPrice());
+		boolean flag = configProvider.getBooleanValue("parking.order.amount", false);
+		if(flag) {
+			amount = 1L;
+		}
 //        preOrderCommand.setAmount(amount);
 //
 //        preOrderCommand.setPayerId(parkingRechargeOrder.getPayerUid());
@@ -683,7 +688,7 @@ public class ParkingServiceImpl implements ParkingService {
 
 		boolean flag = configProvider.getBooleanValue("parking.order.amount", false);
 		if(flag) {
-			orderCmd.setTotalFee(new BigDecimal(0.02).setScale(2, RoundingMode.FLOOR));
+			orderCmd.setTotalFee(new BigDecimal(0.01).setScale(2, RoundingMode.FLOOR));
 		} else {
 			orderCmd.setTotalFee(parkingRechargeOrder.getPrice());
 		}
@@ -1313,21 +1318,12 @@ public class ParkingServiceImpl implements ParkingService {
 		row.createCell(7).setCellValue("支付方式");
 		row.createCell(8).setCellValue("缴费类型");
 
-		SimpleDateFormat datetimeSF = new SimpleDateFormat("yyyy-MM-dd HH:mm:ss");
-		for(int i=0, size = list.size();i<size;i++){
-			Row tempRow = sheet.createRow(i + 1);
-			ParkingRechargeOrder order = list.get(i);
-			tempRow.createCell(0).setCellValue(String.valueOf(order.getOrderNo()));
-			tempRow.createCell(1).setCellValue(order.getPlateNumber());
-			tempRow.createCell(2).setCellValue(order.getPlateOwnerName());
-			tempRow.createCell(3).setCellValue(order.getPayerPhone());
-			tempRow.createCell(4).setCellValue(order.getRechargeTime()==null?"":datetimeSF.format(order.getRechargeTime()));
-			tempRow.createCell(5).setCellValue(null == order.getMonthCount()?"":order.getMonthCount().toString());
-			tempRow.createCell(6).setCellValue(order.getPrice().doubleValue());
-			VendorType type = VendorType.fromCode(order.getPaidType());
-			tempRow.createCell(7).setCellValue(null==type?"":type.getDescribe());
-			tempRow.createCell(8).setCellValue(ParkingRechargeType.fromCode(order.getRechargeType()).getDescribe());
+		ParkingLot parkingLot = checkParkingLot(cmd.getOwnerType(), cmd.getOwnerId(), cmd.getParkingLotId());
 
+		String vendor = parkingLot.getVendorName();
+		ParkingVendorHandler handler = getParkingVendorHandler(vendor);
+		if(handler != null){
+			handler.setCellValues(list,sheet);
 		}
 		ByteArrayOutputStream out = null;
 		try {
@@ -1847,7 +1843,7 @@ public class ParkingServiceImpl implements ParkingService {
 	}
 
 	@Override
-	public void refundParkingOrder(UpdateParkingOrderCommand cmd){
+	public void refundParkingOrder(RefundParkingOrderCommand cmd){
 		ParkingLot parkingLot = checkParkingLot(cmd.getOwnerType(), cmd.getOwnerId(), cmd.getParkingLotId());
 
 		long startTime = System.currentTimeMillis();
@@ -1868,13 +1864,17 @@ public class ParkingServiceImpl implements ParkingService {
 		parkingProvider.updateParkingRechargeOrder(order);
 	}
 
-	private void refundParkingOrderV2 (UpdateParkingOrderCommand cmd, ParkingRechargeOrder order) {
+	private void refundParkingOrderV2 (RefundParkingOrderCommand cmd, ParkingRechargeOrder order) {
 
 		Long refoundOrderNo = createOrderNo(System.currentTimeMillis());
 
 		BigDecimal price = order.getPrice();
 
 		Long amount = payService.changePayAmount(price);
+		boolean flag = configProvider.getBooleanValue("parking.order.amount", false);
+		if(flag) {
+			amount = 1L;
+		}
 
 		CreateOrderRestResponse refundResponse = payService.refund(OrderType.OrderTypeEnum.PARKING.getPycode(), order.getId(), refoundOrderNo, amount);
 
@@ -1889,7 +1889,7 @@ public class ParkingServiceImpl implements ParkingService {
 		}
 	}
 
-	private void refundParkingOrderV1 (UpdateParkingOrderCommand cmd, ParkingRechargeOrder order) {
+	private void refundParkingOrderV1 (RefundParkingOrderCommand cmd, ParkingRechargeOrder order) {
 		PayZuolinRefundCommand refundCmd = new PayZuolinRefundCommand();
 		String refundApi =  configProvider.getValue(UserContext.getCurrentNamespaceId(),"pay.zuolin.refound", "POST /EDS_PAY/rest/pay_common/refund/save_refundInfo_record");
 		String appKey = configProvider.getValue(UserContext.getCurrentNamespaceId(),"pay.appKey", "");
@@ -1907,7 +1907,7 @@ public class ParkingServiceImpl implements ParkingService {
 		refundCmd.setOrderType(OrderType.OrderTypeEnum.PARKING.getPycode());
 		boolean flag = configProvider.getBooleanValue("parking.order.amount", false);
 		if (flag) {
-			refundCmd.setRefundAmount(new BigDecimal(0.02).setScale(2, RoundingMode.FLOOR));
+			refundCmd.setRefundAmount(new BigDecimal(0.01).setScale(2, RoundingMode.FLOOR));
 		}else {
 			refundCmd.setRefundAmount(order.getPrice());
 		}
@@ -1993,7 +1993,8 @@ public class ParkingServiceImpl implements ParkingService {
 
 				String respStr = (String) pingResponse;
 
-				ParkingRechargeOrderDTO dto = ConvertHelper.convert(respStr, ParkingRechargeOrderDTO.class);
+//				ParkingRechargeOrderDTO dto = ConvertHelper.convert(respStr, ParkingRechargeOrderDTO.class);
+				ParkingRechargeOrderDTO dto = JSONObject.parseObject(respStr, ParkingRechargeOrderDTO.class);
 				ParkingLot parkingLot = checkParkingLot(order.getOwnerType(), order.getOwnerId(), order.getParkingLotId());
 				dto.setParkingLotName(parkingLot.getName());
 				dto.setContact(parkingLot.getContact());

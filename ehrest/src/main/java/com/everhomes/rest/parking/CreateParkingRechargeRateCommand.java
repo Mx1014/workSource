@@ -13,25 +13,26 @@ import com.everhomes.util.StringHelper;
  * <li>ownerId: 归属的ID，如小区ID</li>
  * <li>parkingLotId: 停车场ID</li>
  * <li>rateName: 费率名称</li>
+ * <li>cardType: cardType</li>
  * <li>monthCount: 月数</li>
  * <li>price: 总价格</li>
  * </ul>
  */
 public class CreateParkingRechargeRateCommand {
-	@NotNull
+    @NotNull
     private String ownerType;
-	@NotNull
+    @NotNull
     private Long ownerId;
-	@NotNull
+    @NotNull
     private Long parkingLotId;
     private String rateName;
-	@NotNull
-	private String cardType;
-	@NotNull
+    @NotNull
+    private String cardType;
+    @NotNull
     private BigDecimal monthCount;
-	@NotNull
+    @NotNull
     private BigDecimal price;
-    
+
     public CreateParkingRechargeRateCommand() {
     }
 
@@ -88,12 +89,12 @@ public class CreateParkingRechargeRateCommand {
         return StringHelper.toJsonString(this);
     }
 
-	public String getCardType() {
-		return cardType;
-	}
+    public String getCardType() {
+        return cardType;
+    }
 
-	public void setCardType(String cardType) {
-		this.cardType = cardType;
-	}
-    
+    public void setCardType(String cardType) {
+        this.cardType = cardType;
+    }
+
 }

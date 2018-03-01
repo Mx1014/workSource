@@ -10,11 +10,16 @@ import org.springframework.web.bind.annotation.RestController;
 
 import com.everhomes.acl.AclProvider;
 import com.everhomes.acl.Privilege;
+import com.everhomes.comment.CommentService;
 import com.everhomes.constants.ErrorCodes;
 import com.everhomes.controller.ControllerBase;
 import com.everhomes.discover.RestDoc;
 import com.everhomes.discover.RestReturn;
 import com.everhomes.rest.RestResponse;
+import com.everhomes.rest.comment.DeleteCommonCommentCommand;
+import com.everhomes.rest.comment.OwnerTokenDTO;
+import com.everhomes.rest.comment.OwnerType;
+import com.everhomes.rest.forum.*;
 import com.everhomes.search.PostSearcher;
 import com.everhomes.search.SearchSyncManager;
 import com.everhomes.search.SearchSyncType;
@@ -22,8 +27,12 @@ import com.everhomes.server.schema.tables.pojos.EhUsers;
 import com.everhomes.user.UserContext;
 import com.everhomes.util.RequireAuthentication;
 import com.everhomes.util.RuntimeErrorException;
+import com.everhomes.util.WebTokenGenerator;
+import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.web.bind.annotation.RequestMapping;
+import org.springframework.web.bind.annotation.RestController;
 
-import java.util.List;
+import javax.validation.Valid;
 
 @RestDoc(value="Forum controller", site="forum")
 @RestController
@@ -41,7 +50,10 @@ public class ForumController extends ControllerBase {
     
     @Autowired
     private SearchSyncManager searchSyncManager;
-    
+
+    @Autowired
+    private CommentService commentService;
+
     /**
      * <b>URL: /forum/newTopic</b>
      * <p>创建新帖</p>
@@ -284,7 +296,18 @@ public class ForumController extends ControllerBase {
     @RequestMapping("deleteComment")
     @RestReturn(value=String.class)
     public RestResponse deleteComment(DeleteCommentCommand cmd) {
-        this.forumService.deletePost(cmd.getForumId(), cmd.getCommentId(), cmd.getCurrentOrgId(), cmd.getOwnerType(), cmd.getOwnerId());
+
+        OwnerTokenDTO tokenDTO = new OwnerTokenDTO();
+        tokenDTO.setId(cmd.getCommentId());
+        tokenDTO.setType(OwnerType.FORUM.getCode());
+
+        DeleteCommonCommentCommand delCmd = new DeleteCommonCommentCommand();
+        delCmd.setId(cmd.getCommentId());
+        delCmd.setOwnerToken(WebTokenGenerator.getInstance().toWebToken(tokenDTO));
+
+        commentService.deleteComment(delCmd);
+
+        // this.forumService.deletePost(cmd.getForumId(), cmd.getCommentId(), cmd.getCurrentOrgId(), cmd.getOwnerType(), cmd.getOwnerId());
         
         RestResponse response = new RestResponse();
         response.setErrorCode(ErrorCodes.SUCCESS);
@@ -471,7 +494,7 @@ public class ForumController extends ControllerBase {
 
     /**
      * <b>URL: /forum/listForumServiceTypes</b>
-     * <p>获取论坛服务类型</p></p>
+     * <p>获取论坛服务类型</p>
      * @return
      */
     @RequestMapping("listForumServiceTypes")

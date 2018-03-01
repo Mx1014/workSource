@@ -8,11 +8,14 @@ import com.everhomes.rest.asset.PushUsersResponse;
 import com.everhomes.rest.asset.TargetDTO;
 import com.everhomes.rest.family.FamilyDTO;
 import com.everhomes.rest.link.RichLinkDTO;
+import com.everhomes.rest.openapi.FunctionCardDto;
 import com.everhomes.rest.organization.OrganizationDTO;
+import com.everhomes.rest.qrcode.QRCodeDTO;
 import com.everhomes.rest.ui.organization.SetCurrentCommunityForSceneCommand;
 import com.everhomes.rest.ui.user.*;
 import com.everhomes.rest.user.*;
 import com.everhomes.rest.user.admin.*;
+import org.springframework.web.context.request.async.DeferredResult;
 
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
@@ -247,7 +250,7 @@ public interface UserService {
      * created by wentian
      * 根据客户名和地址定位唯一用户
      */
-    TargetDTO findTargetByNameAndAddress(String contractNum, String targetName , Long ownerId,String tel,String ownerType,String targetType);
+    TargetDTO findTargetByNameAndAddress(String contractNum, String targetName , Long ownerId,String tel,String ownerType,String targetType,Integer namespaceId);
 
     Long getCommunityIdBySceneToken(SceneTokenDTO sceneTokenDTO);
 
@@ -295,4 +298,14 @@ public interface UserService {
     PushUsersResponse createUsersForAnBang(PushUsersCommand cmd);
 
     void pushUserDemo();
+	
+    QRCodeDTO querySubjectIdForScan();
+
+    DeferredResult<Object> waitScanForLogon(String subjectId);
+
+    String getSercetKeyForScan(String args);
+
+    void logonByScan(String subjectId, String message);
+
+    List<FunctionCardDto> listUserRelatedCards();
 }

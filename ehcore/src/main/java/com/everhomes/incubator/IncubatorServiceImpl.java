@@ -206,6 +206,15 @@ public class IncubatorServiceImpl implements IncubatorService {
 					"ERROR_INVALID_PARAMS");
 		}
 
+		IncubatorApplyDTO incubatorAppling = findIncubatorAppling();
+
+		//一个人只允许一个申请中的记录，如果是他的父节点是OK的（申请中的重新申请，后面会删除的），
+		if(incubatorAppling != null && !incubatorAppling.getId().equals(cmd.getParentId())){
+			LOGGER.error("incubatorAppling id={}", incubatorAppling.getId());
+			throw RuntimeErrorException.errorWith(IncubatorServiceErrorCode.SCOPE, IncubatorServiceErrorCode.ERROR_HAVE_WAITTING_APPLY,
+					"ERROR_HAVE_WAITTING_APPLY");
+		}
+
 		IncubatorApply incubatorApply = ConvertHelper.convert(cmd, IncubatorApply.class);
 		User user = UserContext.current().getUser();
 		incubatorApply.setApplyUserId(user.getId());
@@ -346,7 +355,7 @@ public class IncubatorServiceImpl implements IncubatorService {
 
 		//自己不是审核中，一个用户只允许一个审核中的，已经有的话不允许在申请
 		List<IncubatorApply> incubatorApplies = incubatorProvider.listIncubatorAppling(dto.getApplyUserId());
-		if(incubatorApplies == null && incubatorApplies.size() == 0){
+		if(incubatorApplies == null || incubatorApplies.size() == 0){
 			dto.setReApplyFlag(TrueOrFalseFlag.TRUE.getCode());
 		}else {
 			dto.setReApplyFlag(TrueOrFalseFlag.FALSE.getCode());

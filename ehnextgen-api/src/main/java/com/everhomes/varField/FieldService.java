@@ -3,17 +3,14 @@ package com.everhomes.varField;
 
 import java.util.List;
 
+import com.everhomes.rest.dynamicExcel.DynamicImportResponse;
 import com.everhomes.rest.asset.ImportFieldsExcelResponse;
 import com.everhomes.rest.field.ExportFieldsExcelCommand;
-import com.everhomes.rest.varField.*;
 import org.springframework.web.multipart.MultipartFile;
 
 
 import javax.servlet.http.HttpServletResponse;
 
-import org.springframework.web.multipart.MultipartFile;
-
-import com.everhomes.rest.field.ExportFieldsExcelCommand;
 import com.everhomes.rest.varField.FieldDTO;
 import com.everhomes.rest.varField.FieldGroupDTO;
 import com.everhomes.rest.varField.FieldItemDTO;
@@ -59,7 +56,7 @@ public interface FieldService {
     void exportFieldsExcel(ExportFieldsExcelCommand cmd, HttpServletResponse response);
 
     void exportExcelTemplate(ListFieldGroupCommand cmd,HttpServletResponse response);
-
+    List<FieldGroupDTO> getAllGroups(ExportFieldsExcelCommand cmd,boolean onlyLeaf, boolean filter);
 
 
 
@@ -71,4 +68,11 @@ public interface FieldService {
     List<SystemFieldItemDTO> listSystemFieldItems(ListSystemFieldItemCommand cmd);
 
 
+    void exportDynamicExcelTemplate(ListFieldGroupCommand cmd, HttpServletResponse response);
+
+    void exportDynamicExcel(ExportFieldsExcelCommand cmd, HttpServletResponse response);
+
+    List<List<String>> getDataOnFields(FieldGroupDTO group, Long customerId, Byte customerType,List<FieldDTO> fields,Long communityId,Integer namespaceId,String moduleName, Long orgId, Object params);
+
+    DynamicImportResponse importDynamicExcel(ImportFieldExcelCommand cmd, MultipartFile file);
 }

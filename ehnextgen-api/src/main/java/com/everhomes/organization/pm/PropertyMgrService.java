@@ -357,11 +357,14 @@ public interface PropertyMgrService {
     OrganizationOwnerAddress createOrganizationOwnerAddress(Long addressId, Byte livingStatus, Integer namespaceId,
                                                             Long ownerId, OrganizationOwnerAddressAuthType authType);
 
+    void addAddressToOrganizationOwner(Integer namespaceId, Long addressId, Long orgOwnerId);
+
     /**
      * 移除业主与地址的之间的关系
      * @param cmd
      */
     void deleteOrganizationOwnerAddress(DeleteOrganizationOwnerAddressCommand cmd);
+    void deleteAddressToOrgOwner(Integer namespaceId, Long addressId, Long orgOwnerId);
 
     /**
      * 获取业主类型列表

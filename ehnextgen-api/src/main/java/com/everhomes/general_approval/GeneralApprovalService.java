@@ -67,14 +67,7 @@ public interface GeneralApprovalService {
 
     GeneralApprovalDTO verifyApprovalName(VerifyApprovalNameCommand cmd);
 
-//	/**
-//	 * 直接通过表单id获取表单
-//	 */
-//	GetTemplateByApprovalIdResponse getActiveGeneralFormByOriginId(GetActiveGeneralFormByOriginIdCommand cmd);
-//
-//	/**
-//	 * 没关联工作流的表单提交数据
-//	 */
-//	GetTemplateByApprovalIdResponse postForm(PostFormCommand cmd);
+    void disableApprovalByFormOriginId(Long formOriginId, Long moduleId, String moduleType);
 
+    String getUserRealName(GetUserRealNameCommand cmd);
 }

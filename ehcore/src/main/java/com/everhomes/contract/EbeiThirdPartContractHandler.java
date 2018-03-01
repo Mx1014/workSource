@@ -2,32 +2,44 @@ package com.everhomes.contract;
 
 import com.alibaba.fastjson.JSONObject;
 import com.alibaba.fastjson.TypeReference;
+import com.everhomes.aclink.DoorAccessService;
 import com.everhomes.address.Address;
 import com.everhomes.address.AddressProvider;
 import com.everhomes.bootstrap.PlatformContext;
+import com.everhomes.building.Building;
+import com.everhomes.building.BuildingProvider;
 import com.everhomes.community.Community;
 import com.everhomes.community.CommunityProvider;
 import com.everhomes.configuration.ConfigurationProvider;
 import com.everhomes.constants.ErrorCodes;
+import com.everhomes.customer.CustomerService;
 import com.everhomes.customer.EnterpriseCustomer;
 import com.everhomes.customer.EnterpriseCustomerProvider;
+import com.everhomes.customer.SyncDataTask;
+import com.everhomes.customer.SyncDataTaskProvider;
 import com.everhomes.db.DbProvider;
 import com.everhomes.http.HttpUtils;
 import com.everhomes.openapi.*;
+import com.everhomes.organization.*;
 import com.everhomes.organization.pm.CommunityAddressMapping;
 import com.everhomes.organization.pm.PropertyMgrProvider;
 import com.everhomes.rest.address.NamespaceAddressType;
 import com.everhomes.rest.approval.CommonStatus;
 import com.everhomes.rest.community.NamespaceCommunityType;
 import com.everhomes.rest.contract.*;
-import com.everhomes.rest.customer.CustomerType;
-import com.everhomes.rest.customer.EbeiJsonEntity;
-import com.everhomes.rest.customer.NamespaceCustomerType;
+import com.everhomes.rest.customer.*;
 import com.everhomes.rest.openapi.shenzhou.DataType;
 import com.everhomes.rest.openapi.shenzhou.SyncFlag;
+import com.everhomes.rest.organization.OrganizationAddressStatus;
+import com.everhomes.rest.organization.OrganizationCommunityRequestStatus;
+import com.everhomes.rest.organization.OrganizationMemberStatus;
+import com.everhomes.rest.organization.OrganizationStatus;
 import com.everhomes.rest.organization.pm.AddressMappingStatus;
 import com.everhomes.search.ContractSearcher;
+import com.everhomes.search.OrganizationSearcher;
 import com.everhomes.user.UserContext;
+import com.everhomes.userOrganization.UserOrganizationProvider;
+import com.everhomes.userOrganization.UserOrganizations;
 import com.everhomes.util.ConvertHelper;
 import com.everhomes.util.DateHelper;
 import com.everhomes.util.RuntimeErrorException;
@@ -36,17 +48,16 @@ import org.apache.commons.lang.StringUtils;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.scheduling.annotation.Scheduled;
 import org.springframework.stereotype.Component;
+import org.springframework.transaction.TransactionStatus;
 
 import java.io.IOException;
 import java.sql.Date;
 import java.sql.Timestamp;
 import java.time.LocalDate;
 import java.time.format.DateTimeFormatter;
-import java.util.ArrayList;
-import java.util.HashMap;
-import java.util.List;
-import java.util.Map;
+import java.util.*;
 import java.util.stream.Collectors;
 
 /**
@@ -61,6 +72,11 @@ public class EbeiThirdPartContractHandler implements ThirdPartContractHandler {
     private static final Integer NAMESPACE_ID = 999983;
 
     private static final String SYNC_CONTRACTS = "/rest/LeaseContractChargeInfo/getLeaseContractInfo";
+
+    private static final String GET_OWNER_STATUS = "/rest/LeaseContractChargeInfo/getOwnerStatus";
+
+    private static final String SYNC_APARTMENT_STATUS = "/rest/LeaseContractChargeInfo/getLeaseContractHouseAddrInfo";
+
     DateTimeFormatter dateSF = DateTimeFormatter.ofPattern("yyyy-MM-dd");
     @Autowired
     private ConfigurationProvider configurationProvider;
@@ -93,8 +109,29 @@ public class EbeiThirdPartContractHandler implements ThirdPartContractHandler {
     @Autowired
     private DbProvider dbProvider;
 
+    @Autowired
+    private OrganizationProvider organizationProvider;
+
+    @Autowired
+    private BuildingProvider buildingProvider;
+
+    @Autowired
+    private OrganizationService organizationService;
+
+    @Autowired
+    private UserOrganizationProvider userOrganizationProvider;
+
+    @Autowired
+    private OrganizationSearcher organizationSearcher;
+
+    @Autowired
+    private DoorAccessService doorAccessService;
+
+    @Autowired
+    private SyncDataTaskProvider syncDataTaskProvider;
+
     @Override
-    public void syncContractsFromThirdPart(String pageOffset, String version, String communityIdentifier) {
+    public void syncContractsFromThirdPart(String pageOffset, String version, String communityIdentifier, Long taskId) {
         Map<String, String> params= new HashMap<String,String>();
         if(communityIdentifier == null) {
             communityIdentifier = "";
@@ -130,23 +167,139 @@ public class EbeiThirdPartContractHandler implements ThirdPartContractHandler {
 
                 //数据有下一页则继续请求
                 if(entity.getHasNextPag() == 1) {
-                    syncContractsFromThirdPart(String.valueOf(entity.getCurrentPage()+1), version, communityIdentifier);
+                    syncContractsFromThirdPart(String.valueOf(entity.getCurrentPage()+1), version, communityIdentifier, taskId);
                 }
             }
 
             //如果到最后一页了，则开始更新到我们数据库中
             if(entity.getHasNextPag() == 0) {
-                syncDataToDb(DataType.CONTRACT.getCode(), communityIdentifier);
+                syncDataToDb(DataType.CONTRACT.getCode(), communityIdentifier, taskId);
             }
         }
 
     }
 
-    private void syncDataToDb(Byte dataType, String communityIdentifier) {
-//        queueThreadPool.execute(()->{
-//        if (LOGGER.isDebugEnabled()) {
-//            LOGGER.debug("dataType {} enter into thread=================", dataType);
-//        }
+
+    private void getOwnerStatus(String communityIdentifier, String ownerIds) {
+        Map<String, String> params= new HashMap<String,String>();
+        if(communityIdentifier == null) {
+            communityIdentifier = "";
+        }
+        params.put("projectId", communityIdentifier);
+        params.put("ownerIds", ownerIds);
+
+        String ownerStatus = null;
+        String url = configurationProvider.getValue("ebei.url", "");
+//        String url = "http://183.62.222.87:5902/sf";
+        try {
+            ownerStatus = HttpUtils.post(url+GET_OWNER_STATUS, params, 600, "UTF-8");
+        } catch (Exception e) {
+            LOGGER.error("sync owner status from ebei error: {}", e);
+            throw RuntimeErrorException.errorWith(ErrorCodes.SCOPE_GENERAL, ErrorCodes.ERROR_GENERAL_EXCEPTION, "sync owner status from ebei error");
+        }
+
+        EbeiJsonEntity<List<Map<String, Long>>> entity = JSONObject.parseObject(ownerStatus, new TypeReference<EbeiJsonEntity<List<Map<String, Long>>>>(){});
+
+        if(SUCCESS_CODE.equals(entity.getResponseCode())) {
+            List<Map<String, Long>> dtos = entity.getData();
+            if(dtos != null && dtos.size() > 0) {
+                dtos.forEach(dto -> {
+                    for(String key : dto.keySet()){
+                        if(dto.get(key) == 0L) {
+                            //删除客户及企业
+                            deleteEnterprise(key);
+                        }
+
+                    }
+
+                });
+            }
+
+        }
+
+    }
+
+    private void deleteEnterprise(String key) {
+        EnterpriseCustomer customer = customerProvider.findByNamespaceToken(NamespaceCustomerType.EBEI.getCode(), key);
+        if(customer == null) {
+            return;
+        }
+        Organization organization = organizationProvider.findOrganizationById(customer.getOrganizationId());
+        if(organization == null) {
+            return;
+        }
+
+        dbProvider.execute((TransactionStatus status) -> {
+            //已删除则直接跳出
+            if(OrganizationStatus.DELETED.equals(OrganizationStatus.fromCode(organization.getStatus()))) {
+                return null;
+            }
+
+            //删客户
+            customer.setStatus(CommonStatus.INACTIVE.getCode());
+            customerProvider.updateEnterpriseCustomer(customer);
+
+            //删企业
+            organization.setStatus(OrganizationStatus.DELETED.getCode());
+            Timestamp now = new Timestamp(DateHelper.currentGMTTime().getTime());
+            organization.setUpdateTime(now);
+            organizationProvider.updateOrganization(organization);
+
+            OrganizationCommunityRequest r = organizationProvider.getOrganizationCommunityRequestByOrganizationId(organization.getId());
+
+            if (null != r) {
+                r.setMemberStatus(OrganizationCommunityRequestStatus.INACTIVE.getCode());
+                r.setUpdateTime(now);
+                organizationProvider.updateOrganizationCommunityRequest(r);
+            }
+
+            List<OrganizationMember> members = organizationProvider.listOrganizationMembers(organization.getId(), null);
+            //把user_organization表中的相应记录更新为失效
+            for (OrganizationMember member : members) {
+                UserOrganizations userOrganizations = userOrganizationProvider.findUserOrganizations(member.getNamespaceId(), member.getOrganizationId(), member.getTargetId());
+                if (userOrganizations != null) {
+                    userOrganizationProvider.inactiveUserOrganizations(userOrganizations);
+                }
+            }
+
+            List<OrganizationAddress> organizationAddresses = organizationProvider.findOrganizationAddressByOrganizationId(organization.getId());
+
+            if (null != organizationAddresses && 0 != organizationAddresses.size()) {
+                for (OrganizationAddress organizationAddress : organizationAddresses) {
+                    organizationAddress.setStatus(OrganizationAddressStatus.INACTIVE.getCode());
+                    organizationAddress.setUpdateTime(now);
+                    organizationProvider.updateOrganizationAddress(organizationAddress);
+                }
+            }
+
+            //删除organizaiton时，需要把organizaiton下面的所有机构状态置为无效，而且把人员和机构的关系置为无效状态
+            List<Organization> underOrganiztions = organizationProvider.findOrganizationByPath(organization.getPath());
+            underOrganiztions.stream().map((o) -> {
+                //更新机构
+                o.setStatus(OrganizationStatus.INACTIVE.getCode());
+                o.setUpdateTime(now);
+                organizationProvider.updateOrganization(o);
+                //更新人员
+                List<OrganizationMember> underOrganiztionsMembers = organizationProvider.listOrganizationMembersByOrgIdWithAllStatus(o.getId());
+                for (OrganizationMember m : underOrganiztionsMembers) {
+                    m.setStatus(OrganizationMemberStatus.INACTIVE.getCode());
+                    m.setUpdateTime(now);
+                    m.setOperatorUid(1L);
+                    organizationProvider.updateOrganizationMember(m);
+                    //解除门禁权限
+                    doorAccessService.deleteAuthWhenLeaveFromOrg(NAMESPACE_ID, m.getOrganizationId(), m.getTargetId());
+                }
+                return null;
+            }).collect(Collectors.toList());
+
+            organizationSearcher.deleteById(organization.getId());
+            return null;
+        });
+    }
+
+
+    private void syncDataToDb(Byte dataType, String communityIdentifier, Long taskId) {
+
 
         List<ZjSyncdataBackup> backupList = zjSyncdataBackupProvider.listZjSyncdataBackupByParam(NAMESPACE_ID, communityIdentifier, dataType);
 
@@ -159,6 +312,23 @@ public class EbeiThirdPartContractHandler implements ThirdPartContractHandler {
             updateAllData(dataType, NAMESPACE_ID, communityIdentifier, backupList);
         } finally {
             zjSyncdataBackupProvider.updateZjSyncdataBackupInactive(backupList);
+
+            //万一同步时间太长transaction断掉 在这里也要更新下
+//            SyncDataTask task = syncDataTaskProvider.findSyncDataTaskById(taskId);
+//            Community community = communityProvider.findCommunityByNamespaceToken(NamespaceCommunityType.EBEI.getCode(), communityIdentifier);
+//            if(community != null) {
+//                SyncDataTask task = syncDataTaskProvider.findExecutingSyncDataTask(community.getId(), SyncDataTaskType.fromName(dataType).getCode());
+//
+//                if(task != null) {
+//                    task.setStatus(SyncDataTaskStatus.FINISH.getCode());
+//                    task.setResult("同步成功");
+//                    task.setUpdateTime(new Timestamp(DateHelper.currentGMTTime().getTime()));
+//                    syncDataTaskProvider.updateSyncDataTask(task);
+//                }
+//            }
+
+            //同步完要再调一个接口更新客户的状态 暂时不做
+
         }
 
         if (LOGGER.isDebugEnabled()) {
@@ -175,7 +345,9 @@ public class EbeiThirdPartContractHandler implements ThirdPartContractHandler {
                 LOGGER.debug("syncDataToDb SYNC CONTRACT");
                 syncAllContracts(namespaceId, communityIdentifier, backupList);
                 break;
-
+            case APARTMENT_LIVING_STATUS:
+                syncApartmentLivingStatus(namespaceId, backupList);
+                break;
             default:
                 throw RuntimeErrorException.errorWith(ErrorCodes.SCOPE_GENERAL, ErrorCodes.ERROR_GENERAL_EXCEPTION,
                         "error data type");
@@ -199,6 +371,14 @@ public class EbeiThirdPartContractHandler implements ThirdPartContractHandler {
             syncAllContracts(namespaceId, community.getId(), myContractList, mergeContractList);
             return true;
         });
+
+        if(mergeContractList != null && mergeContractList.size() > 0) {
+            List<String> ownerIdList = mergeContractList.stream().map(contract -> {
+                return contract.getOwnerId();
+            }).collect(Collectors.toList());
+            String ownerIds = ownerIdList.toString().substring(1, ownerIdList.toString().length()-1);
+            getOwnerStatus(communityIdentifier, ownerIds);
+        }
     }
 
     //ebei同步数据规则：两次之间所有的改动会同步过来，所以以一碑同步过来数据作为参照：
@@ -281,6 +461,9 @@ public class EbeiThirdPartContractHandler implements ThirdPartContractHandler {
     private void deleteContract(Contract contract) {
         DeleteContractCommand command = new DeleteContractCommand();
         command.setId(contract.getId());
+        command.setCommunityId(contract.getCommunityId());
+        command.setNamespaceId(contract.getNamespaceId());
+        command.setCheckAuth(false);
         getContractService(contract.getNamespaceId()).deleteContract(command);
 
         if(contract.getCustomerId() != null) {
@@ -288,6 +471,10 @@ public class EbeiThirdPartContractHandler implements ThirdPartContractHandler {
             if(customer != null) {
                 customer.setContactAddress("");
                 customerProvider.updateEnterpriseCustomer(customer);
+                List<OrganizationAddress> myOrganizationAddressList = organizationProvider.listOrganizationAddressByOrganizationId(customer.getOrganizationId());
+                for (OrganizationAddress organizationAddress : myOrganizationAddressList) {
+                    deleteOrganizationAddress(organizationAddress);
+                }
             }
         }
 
@@ -339,6 +526,7 @@ public class EbeiThirdPartContractHandler implements ThirdPartContractHandler {
             }
             customer.setContactAddress(ebeiContract.getBuildingRename());
             customerProvider.updateEnterpriseCustomer(customer);
+            insertOrUpdateOrganizationAddresses(ebeiContract.getHouseInfoList(),customer);
             contract.setCustomerId(customer.getId());
         }
         contract.setCreateUid(UserContext.currentUserId());
@@ -469,10 +657,179 @@ public class EbeiThirdPartContractHandler implements ThirdPartContractHandler {
             }
             customer.setContactAddress(ebeiContract.getBuildingRename());
             customerProvider.updateEnterpriseCustomer(customer);
+            insertOrUpdateOrganizationAddresses(ebeiContract.getHouseInfoList(),customer);
             contract.setCustomerId(customer.getId());
         }
         contractProvider.updateContract(contract);
         dealContractApartments(contract, ebeiContract.getHouseInfoList());
         contractSearcher.feedDoc(contract);
+    }
+
+    private void insertOrUpdateOrganizationAddresses(List<EbeiContractRoomInfo> apartmentIdentifier, EnterpriseCustomer customer){
+        List<OrganizationAddress> myOrganizationAddressList = organizationProvider.listOrganizationAddressByOrganizationId(customer.getOrganizationId());
+        List<EbeiContractRoomInfo> apartments = apartmentIdentifier.stream().collect(Collectors.toList());
+        LOGGER.debug("insertOrUpdateOrganizationAddresses customer: {}, myOrganizationAddressList: {}, apartments: {}",
+                customer.getName(), StringHelper.toJsonString(myOrganizationAddressList), StringHelper.toJsonString(apartments));
+        for (OrganizationAddress organizationAddress : myOrganizationAddressList) {
+            Address address = addressProvider.findAddressById(organizationAddress.getAddressId());
+            if (address != null && address.getNamespaceAddressType() != null && address.getNamespaceAddressToken() != null) {
+                if (address.getNamespaceAddressType().equals(NamespaceAddressType.EBEI.getCode())) {
+                    for(EbeiContractRoomInfo identifier : apartmentIdentifier) {
+                        if(address.getNamespaceAddressToken().equals(identifier.getInfoId())) {
+                            apartments.remove(identifier);
+                        }
+                    }
+                }
+            } else {
+                deleteOrganizationAddress(organizationAddress);
+            }
+        }
+        LOGGER.debug("insertOrUpdateOrganizationAddresses after remove apartments: {}", StringHelper.toJsonString(apartmentIdentifier));
+        if(apartments != null && apartments.size() > 0) {
+            apartments.forEach(apartment -> {
+                insertOrganizationAddress(apartment, customer);
+            });
+        }
+
+    }
+
+    private void insertOrganizationAddress(EbeiContractRoomInfo apartmentIdentifier, EnterpriseCustomer customer) {
+        if (apartmentIdentifier == null) {
+            return;
+        }
+        Long before = System.currentTimeMillis();
+        Address address = addressProvider.findAddressByNamespaceTypeAndName(NamespaceAddressType.EBEI.getCode(), apartmentIdentifier.getInfoId());
+        Long after = System.currentTimeMillis();
+        LOGGER.info("address time before index:{}", after-before);
+        if (address == null) {
+            return;
+        }
+        Building building = buildingProvider.findBuildingByName(customer.getNamespaceId(), address.getCommunityId(), address.getBuildingName());
+
+        OrganizationAddress organizationAddress = new OrganizationAddress();
+        organizationAddress.setOrganizationId(customer.getOrganizationId());
+        organizationAddress.setStatus(OrganizationAddressStatus.ACTIVE.getCode());
+        organizationAddress.setCreatorUid(1L);
+        organizationAddress.setCreateTime(new Timestamp(DateHelper.currentGMTTime().getTime()));
+        organizationAddress.setOperatorUid(1L);
+        organizationAddress.setUpdateTime(organizationAddress.getCreateTime());
+        organizationAddress.setAddressId(address.getId());
+        if (building == null) {
+            organizationAddress.setBuildingId(0L);
+        }else {
+            organizationAddress.setBuildingId(building.getId());
+            organizationAddress.setBuildingName(building.getName());
+        }
+
+        organizationProvider.createOrganizationAddress(organizationAddress);
+    }
+
+    private void deleteOrganizationAddress(OrganizationAddress organizationAddress) {
+        if (OrganizationAddressStatus.fromCode(organizationAddress.getStatus()) != OrganizationAddressStatus.INACTIVE) {
+            organizationAddress.setStatus(OrganizationAddressStatus.INACTIVE.getCode());
+            organizationAddress.setOperatorUid(1L);
+            organizationAddress.setUpdateTime(new Timestamp(DateHelper.currentGMTTime().getTime()));
+            organizationProvider.updateOrganizationAddress(organizationAddress);
+        }
+    }
+
+    //每天凌晨一点半更新
+    @Scheduled(cron = "0 30 1 * * ?")
+    public void syncApartmentsLivingStatus() {
+        List<Community> communities = communityProvider.listNamespaceCommunities(NAMESPACE_ID);
+        if(communities != null && communities.size() > 0) {
+            for (Community community : communities) {
+                String version = addressProvider.findLastVersionByNamespace(NAMESPACE_ID, community.getId());
+                syncUserApartmentsLivingStatus(version, community.getNamespaceCommunityToken(), "1");
+            }
+        }
+    }
+
+    private void syncUserApartmentsLivingStatus(String version, String communityToken, String pageOffset) {
+
+        Map<String, String> params= new HashMap<String,String>();
+        if(communityToken == null) {
+            communityToken = "";
+        }
+        params.put("projectId", communityToken);
+        if(pageOffset == null || "".equals(pageOffset)) {
+            pageOffset = "1";
+        }
+        params.put("currentPage", pageOffset);
+        params.put("pageSize", PAGE_SIZE);
+
+        if(version == null || "".equals(version)) {
+            version = "0";
+        }
+        params.put("version", version);
+
+        String apartments = null;
+        String url = configurationProvider.getValue("ebei.url", "");
+//        String url = "http://183.62.222.87:5902/sf";
+        try {
+            apartments = HttpUtils.get(url+SYNC_APARTMENT_STATUS, params, 600, "UTF-8");
+        } catch (Exception e) {
+            LOGGER.error("sync apartment status from ebei error: {}", e);
+            throw RuntimeErrorException.errorWith(ErrorCodes.SCOPE_GENERAL, ErrorCodes.ERROR_GENERAL_EXCEPTION, "sync apartment status from ebei error");
+        }
+
+        EbeiJsonEntity<List<EbeiApartment>> entity = JSONObject.parseObject(apartments, new TypeReference<EbeiJsonEntity<List<EbeiApartment>>>(){});
+
+        if(SUCCESS_CODE.equals(entity.getResponseCode())) {
+            List<EbeiApartment> dtos = entity.getData();
+            if(dtos != null && dtos.size() > 0) {
+                syncData(entity, DataType.APARTMENT_LIVING_STATUS.getCode(), communityToken);
+
+                //数据有下一页则继续请求
+                if(entity.getHasNextPag() == 1) {
+                    syncUserApartmentsLivingStatus(version, communityToken, String.valueOf(entity.getCurrentPage()+1));
+                }
+            }
+
+            //如果到最后一页了，则开始更新到我们数据库中
+            if(entity.getHasNextPag() == 0) {
+                syncDataToDb(DataType.APARTMENT_LIVING_STATUS.getCode(), communityToken, null);
+            }
+        }
+    }
+
+    private void syncApartmentLivingStatus(Integer namespaceId, List<ZjSyncdataBackup> backupList) {
+        //只更新我们系统中有的门牌的状态，如果在我们系统中找不到则不管
+        List<EbeiApartment> theirApartmentList = mergeBackupList(backupList, EbeiApartment.class);
+        if(theirApartmentList != null && theirApartmentList.size() > 0) {
+            theirApartmentList.forEach(apartment -> {
+                Address address = addressProvider.findAddressByNamespaceTypeAndName(NamespaceAddressType.EBEI.getCode(), apartment.getInfoId());
+                if(address != null) {
+                    //更新地址表
+                    Byte livingStatus = convertEbeiApartmentState(apartment.getState());
+                    address.setLivingStatus(livingStatus);
+                    addressProvider.updateAddress(address);
+                    //更新物业公司-地址映射表
+                    CommunityAddressMapping addressMapping = this.organizationProvider.findOrganizationAddressMappingByAddressId(address.getId());
+                    if(addressMapping != null){
+                        updateOrganizationAddressMapping(addressMapping, address);
+                    }
+
+                }
+            });
+
+        }
+    }
+
+    private Byte convertEbeiApartmentState(Byte state) {
+//        1-在租——已租状态,2-待租——未租状态
+        if(state == 1) {
+            return AddressMappingStatus.RENT.getCode();
+        } else if(state == 2) {
+            return AddressMappingStatus.FREE.getCode();
+        }
+
+        return AddressMappingStatus.DEFAULT.getCode();
+    }
+
+    private void updateOrganizationAddressMapping(CommunityAddressMapping organizationAddressMapping, Address address) {
+        organizationAddressMapping.setOrganizationAddress(address.getAddress());
+        organizationAddressMapping.setLivingStatus(address.getLivingStatus());
+        organizationProvider.updateOrganizationAddressMapping(organizationAddressMapping);
     }
 }

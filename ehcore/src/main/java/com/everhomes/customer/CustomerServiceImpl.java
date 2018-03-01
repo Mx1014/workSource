@@ -16,26 +16,39 @@ import java.util.stream.Collectors;
 import com.everhomes.address.Address;
 import com.everhomes.address.AddressProvider;
 import com.everhomes.bootstrap.PlatformContext;
-import com.everhomes.contract.ContractService;
+import com.everhomes.openapi.ZjSyncdataBackupProvider;
+
+import com.everhomes.dynamicExcel.DynamicExcelService;
+import com.everhomes.dynamicExcel.DynamicExcelStrings;
+
 import com.everhomes.organization.*;
+import com.everhomes.organization.pm.CommunityAddressMapping;
+import com.everhomes.organization.pm.PropertyMgrProvider;
 import com.everhomes.portal.PortalService;
 import com.everhomes.rest.acl.PrivilegeConstants;
-import com.everhomes.rest.acl.PrivilegeServiceErrorCode;
+
 import com.everhomes.rest.common.ServiceModuleConstants;
+import com.everhomes.rest.common.SyncDataResponse;
 import com.everhomes.rest.contract.ContractStatus;
 import com.everhomes.rest.customer.*;
+import com.everhomes.rest.field.ExportFieldsExcelCommand;
 import com.everhomes.rest.launchpad.ActionType;
+import com.everhomes.rest.openapi.shenzhou.DataType;
 import com.everhomes.rest.organization.*;
+import com.everhomes.rest.organization.pm.AddressMappingStatus;
 
-import com.everhomes.rest.portal.ListServiceModuleAppsCommand;
-import com.everhomes.rest.portal.ListServiceModuleAppsResponse;
+
+import com.everhomes.user.*;
+
+import com.everhomes.rest.varField.FieldGroupDTO;
 import com.everhomes.user.UserPrivilegeMgr;
 
 import com.everhomes.user.UserProvider;
 
+
 import org.apache.commons.lang.StringUtils;
 import org.apache.lucene.spatial.geohash.GeoHashUtils;
-import org.apache.tomcat.jni.Time;
+
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -79,9 +92,6 @@ import com.everhomes.scheduler.ScheduleProvider;
 import com.everhomes.search.ContractSearcher;
 import com.everhomes.search.EnterpriseCustomerSearcher;
 import com.everhomes.settings.PaginationConfigHelper;
-import com.everhomes.user.User;
-import com.everhomes.user.UserContext;
-import com.everhomes.user.UserService;
 import com.everhomes.util.ConvertHelper;
 import com.everhomes.util.DateHelper;
 import com.everhomes.util.ExecutorUtil;
@@ -92,6 +102,8 @@ import com.everhomes.util.excel.handler.PropMrgOwnerHandler;
 import com.everhomes.varField.FieldProvider;
 import com.everhomes.varField.FieldService;
 import com.everhomes.varField.ScopeFieldItem;
+
+import javax.servlet.http.HttpServletResponse;
 
 /**
  * Created by ying.xiong on 2017/8/15.
@@ -169,10 +181,23 @@ public class CustomerServiceImpl implements CustomerService {
     private UserProvider userProvider;
 
     @Autowired
+    private PropertyMgrProvider propertyMgrProvider;
+
+    @Autowired
     private PortalService portalService;
 
     @Autowired
     private UserPrivilegeMgr userPrivilegeMgr;
+
+    @Autowired
+    private ZjSyncdataBackupProvider zjSyncdataBackupProvider;
+
+    @Autowired
+    private SyncDataTaskService syncDataTaskService;
+
+    @Autowired
+    private DynamicExcelService dynamicExcelService;
+
 
     @Override
     public void checkCustomerAuth(Integer namespaceId, Long privilegeId, Long orgId, Long communityId) {
@@ -240,6 +265,26 @@ public class CustomerServiceImpl implements CustomerService {
     public SearchEnterpriseCustomerResponse queryEnterpriseCustomers(SearchEnterpriseCustomerCommand cmd) {
         checkCustomerAuth(cmd.getNamespaceId(), PrivilegeConstants.ENTERPRISE_CUSTOMER_LIST, cmd.getOrgId(), cmd.getCommunityId());
         return enterpriseCustomerSearcher.queryEnterpriseCustomers(cmd);
+    }
+
+    @Override
+    public ListCommunitySyncResultResponse listCommunitySyncResult(ListCommunitySyncResultCommand cmd) {
+        int pageSize = PaginationConfigHelper.getPageSize(configurationProvider, cmd.getPageSize());
+        ListCommunitySyncResultResponse response = syncDataTaskService.listCommunitySyncResult(cmd.getCommunityId(), cmd.getSyncType(), pageSize, cmd.getPageAnchor());
+        return response;
+    }
+
+    @Override
+    public void exportEnterpriseCustomer(ExportEnterpriseCustomerCommand cmd, HttpServletResponse response) {
+        ExportFieldsExcelCommand command = ConvertHelper.convert(cmd, ExportFieldsExcelCommand.class);
+        command.setIncludedGroupIds("10,11,12");
+        List<FieldGroupDTO> results = fieldService.getAllGroups(command,false,true);
+        if(results != null && results.size() > 0) {
+            List<String> sheetNames = results.stream().map(result -> {
+                return result.getGroupDisplayName();
+            }).collect(Collectors.toList());
+            dynamicExcelService.exportDynamicExcel(response, DynamicExcelStrings.CUSTOEMR, null, sheetNames, cmd, true, true, null);
+        }
     }
 
     @Override
@@ -471,7 +516,9 @@ public class CustomerServiceImpl implements CustomerService {
         }
         enterpriseCustomerProvider.updateEnterpriseCustomer(updateCustomer);
         enterpriseCustomerSearcher.feedDoc(updateCustomer);
-        
+
+        //保存之后重查一遍 因为数据类型导致 fix 22978
+        updateCustomer = checkEnterpriseCustomer(cmd.getId());
         //保存客户事件
         saveCustomerEvent( 3  ,updateCustomer ,customer);
 
@@ -500,19 +547,22 @@ public class CustomerServiceImpl implements CustomerService {
         if(!customer.getName().equals(cmd.getName())) {
             List<Contract> contracts = contractProvider.listContractByCustomerId(updateCustomer.getCommunityId(), updateCustomer.getId(), CustomerType.ENTERPRISE.getCode());
             if(contracts != null && contracts.size() > 0) {
-                contracts.forEach(contract -> {
+                for(Contract contract : contracts) {
                     contract.setCustomerName(updateCustomer.getName());
                     contractProvider.updateContract(contract);
                     contractSearcher.feedDoc(contract);
-                });
+                }
             }
         }
         return convertToDTO(updateCustomer);
     }
 
     @Override
-    public void deleteEnterpriseCustomer(DeleteEnterpriseCustomerCommand cmd) {
-        checkCustomerAuth(cmd.getNamespaceId(), PrivilegeConstants.ENTERPRISE_CUSTOMER_DELETE, cmd.getOrgId(), cmd.getCommunityId());
+    public void deleteEnterpriseCustomer(DeleteEnterpriseCustomerCommand cmd, Boolean checkAuth) {
+        if(checkAuth) {
+            checkCustomerAuth(cmd.getNamespaceId(), PrivilegeConstants.ENTERPRISE_CUSTOMER_DELETE, cmd.getOrgId(), cmd.getCommunityId());
+        }
+
         EnterpriseCustomer customer = checkEnterpriseCustomer(cmd.getId());
         checkPrivilege(customer.getNamespaceId());
         //产品功能 #20796 同步过来的不能删
@@ -1792,7 +1842,47 @@ public class CustomerServiceImpl implements CustomerService {
             entryInfo.setContractStartDate(new Timestamp(cmd.getContractStartDate()));
         }
         enterpriseCustomerProvider.createCustomerEntryInfo(entryInfo);
+
+        EnterpriseCustomer customer = enterpriseCustomerProvider.findById(cmd.getCustomerId());
+        if(customer != null && customer.getOrganizationId() != null && customer.getOrganizationId() != 0L) {
+            Organization organization = organizationProvider.findOrganizationById(customer.getOrganizationId());
+            if(organization != null) {
+                updateOrganizationAddress(organization.getId(), entryInfo.getBuildingId(), entryInfo.getAddressId());
+            }
+        }
     }
+
+    // 企业管理楼栋与客户tab页的入驻信息双向同步 产品功能22898
+    private void updateOrganizationAddress(Long orgId, Long buildingId, Long addressId) {
+        Long userId = UserContext.currentUserId();
+        OrganizationAddress address = organizationProvider.findOrganizationAddressByOrganizationIdAndAddressId(orgId, addressId);
+        if(address != null) {
+            return;
+        }
+        address = new OrganizationAddress();
+        Address addr = this.addressProvider.findAddressById(addressId);
+        if(addr != null) {
+            address.setBuildingName(addr.getBuildingName());
+        }
+        address.setOrganizationId(orgId);
+        address.setAddressId(addressId);
+        address.setBuildingId(buildingId);
+        address.setCreatorUid(userId);
+        address.setCreateTime(new Timestamp(DateHelper.currentGMTTime().getTime()));
+        address.setUpdateTime(new Timestamp(DateHelper.currentGMTTime().getTime()));
+        address.setStatus(OrganizationAddressStatus.ACTIVE.getCode());
+
+        this.organizationProvider.createOrganizationAddress(address);
+    }
+
+    // 企业管理楼栋与客户tab页的入驻信息双向同步 产品功能22898
+    private void deleteOrganizationAddress(Long orgId, Long buildingId, Long addressId) {
+        OrganizationAddress address = organizationProvider.findOrganizationAddressByOrganizationIdAndAddressId(orgId, addressId);
+        if(address != null) {
+            organizationProvider.deleteOrganizationAddress(address);
+        }
+    }
+
 
     @Override
     public void deleteCustomerDepartureInfo(DeleteCustomerDepartureInfoCommand cmd) {
@@ -1806,6 +1896,14 @@ public class CustomerServiceImpl implements CustomerService {
         checkCustomerAuth(cmd.getNamespaceId(), PrivilegeConstants.ENTERPRISE_CUSTOMER_MANAGE_DELETE, cmd.getOrgId(), cmd.getCommunityId());
         CustomerEntryInfo entryInfo = checkCustomerEntryInfo(cmd.getId(), cmd.getCustomerId());
         enterpriseCustomerProvider.deleteCustomerEntryInfo(entryInfo);
+
+        EnterpriseCustomer customer = enterpriseCustomerProvider.findById(cmd.getCustomerId());
+        if(customer != null && customer.getOrganizationId() != null && customer.getOrganizationId() != 0L) {
+            Organization organization = organizationProvider.findOrganizationById(customer.getOrganizationId());
+            if(organization != null) {
+                deleteOrganizationAddress(organization.getId(), entryInfo.getBuildingId(), entryInfo.getAddressId());
+            }
+        }
     }
 
     private CustomerEntryInfo checkCustomerEntryInfo(Long id, Long customerId) {
@@ -1882,6 +1980,21 @@ public class CustomerServiceImpl implements CustomerService {
             Address address = addressProvider.findAddressById(dto.getAddressId());
             if(address != null) {
                 dto.setAddressName(address.getAddress());
+                dto.setBuilding(address.getBuildingName());
+                dto.setAddressId(address.getId());
+                dto.setApartment(address.getApartmentName());
+                dto.setChargeArea(address.getChargeArea());
+                dto.setOrientation(address.getOrientation());
+                if (address.getLivingStatus() == null) {
+                    CommunityAddressMapping mapping =  propertyMgrProvider.findAddressMappingByAddressId(address.getId());
+                    if(mapping != null){
+                        address.setLivingStatus(mapping.getLivingStatus());
+                    }
+                    else{
+                        address.setLivingStatus(AddressMappingStatus.LIVING.getCode());
+                    }
+                }
+                dto.setApartmentLivingStatus(address.getLivingStatus());
             }
         }
 
@@ -1891,6 +2004,17 @@ public class CustomerServiceImpl implements CustomerService {
     @Override
     public List<CustomerEntryInfoDTO> listCustomerEntryInfos(ListCustomerEntryInfosCommand cmd) {
         checkCustomerAuth(cmd.getNamespaceId(), PrivilegeConstants.ENTERPRISE_CUSTOMER_MANAGE_LIST, cmd.getOrgId(), cmd.getCommunityId());
+        List<CustomerEntryInfo> entryInfos = enterpriseCustomerProvider.listCustomerEntryInfos(cmd.getCustomerId());
+        if(entryInfos != null && entryInfos.size() > 0) {
+            return entryInfos.stream().map(entryInfo -> {
+                return convertCustomerEntryInfoDTO(entryInfo);
+            }).collect(Collectors.toList());
+        }
+        return null;
+    }
+
+    @Override
+    public List<CustomerEntryInfoDTO> listCustomerEntryInfosWithoutAuth(ListCustomerEntryInfosCommand cmd) {
         List<CustomerEntryInfo> entryInfos = enterpriseCustomerProvider.listCustomerEntryInfos(cmd.getCustomerId());
         if(entryInfos != null && entryInfos.size() > 0) {
             return entryInfos.stream().map(entryInfo -> {
@@ -1929,6 +2053,14 @@ public class CustomerServiceImpl implements CustomerService {
         entryInfo.setCreateUid(exist.getCreateUid());
         entryInfo.setStatus(exist.getStatus());
         enterpriseCustomerProvider.updateCustomerEntryInfo(entryInfo);
+
+        EnterpriseCustomer customer = enterpriseCustomerProvider.findById(cmd.getCustomerId());
+        if(customer != null && customer.getOrganizationId() != null && customer.getOrganizationId() != 0L) {
+            Organization organization = organizationProvider.findOrganizationById(customer.getOrganizationId());
+            if(organization != null) {
+                updateOrganizationAddress(organization.getId(), entryInfo.getBuildingId(), entryInfo.getAddressId());
+            }
+        }
     }
 
     @Override
@@ -2250,77 +2382,177 @@ public class CustomerServiceImpl implements CustomerService {
     }
 
     @Override
-    public void syncEnterpriseCustomers(SyncCustomersCommand cmd) {
+    public String syncEnterpriseCustomers(SyncCustomersCommand cmd) {
         checkCustomerAuth(cmd.getNamespaceId(), PrivilegeConstants.ENTERPRISE_CUSTOMER_SYNC, cmd.getOrgId(), cmd.getCommunityId());
         if(cmd.getNamespaceId() == 999971) {
-            this.coordinationProvider.getNamedLock(CoordinationLocks.SYNC_ENTERPRISE_CUSTOMER.getCode() + cmd.getNamespaceId() + cmd.getCommunityId()).tryEnter(()-> {
-                ExecutorUtil.submit(new Runnable() {
-                    @Override
-                    public void run() {
-                        try{
-                            if(cmd.getCommunityId() == null) {
-                                zjgkOpenService.syncEnterprises("0", null);
-                            } else {
-                                Community community = communityProvider.findCommunityById(cmd.getCommunityId());
-                                if(community != null) {
-                                    zjgkOpenService.syncEnterprises("0", community.getNamespaceCommunityToken());
-                                }
 
-                            }
-                        }catch (Exception e){
-                            LOGGER.error("syncEnterpriseCustomers error.", e);
-                        }
-                    }
-                });
-            });
+            Community community = communityProvider.findCommunityById(cmd.getCommunityId());
+            if(community != null) {
+                int syncCount = zjSyncdataBackupProvider.listZjSyncdataBackupActiveCountByParam(community.getNamespaceId(), community.getNamespaceCommunityToken(), DataType.ENTERPRISE.getCode());
+                if(syncCount > 0) {
+                    return "1";
+                }
+
+                SyncDataTask task = new SyncDataTask();
+                task.setOwnerType(EntityType.COMMUNITY.getCode());
+                task.setOwnerId(community.getId());
+                task.setType(SyncDataTaskType.CUSTOMER.getCode());
+                task.setCreatorUid(UserContext.currentUserId());
+                syncDataTaskService.executeTask(() -> {
+                    SyncDataResponse response = new SyncDataResponse();
+                    zjgkOpenService.syncEnterprises("0", community.getNamespaceCommunityToken(), task.getId());
+                    return response;
+                }, task);
+            }
         } else {
-            this.coordinationProvider.getNamedLock(CoordinationLocks.SYNC_ENTERPRISE_CUSTOMER.getCode() + cmd.getNamespaceId() + cmd.getCommunityId()).tryEnter(()-> {
-                ExecutorUtil.submit(new Runnable() {
-                    @Override
-                    public void run() {
-                        try{
-                            Community community = communityProvider.findCommunityById(cmd.getCommunityId());
-                            if(community == null) {
-                                return;
-                            }
-                            String version = enterpriseCustomerProvider.findLastEnterpriseCustomerVersionByCommunity(cmd.getNamespaceId(), community.getId());
-                            CustomerHandle customerHandle = PlatformContext.getComponent(CustomerHandle.CUSTOMER_PREFIX + cmd.getNamespaceId());
-                            if(customerHandle != null) {
-                                customerHandle.syncEnterprises("1", version, community.getNamespaceCommunityToken());
-                            }
-
-                        }catch (Exception e){
-                            LOGGER.error("syncEnterpriseCustomers error.", e);
-                        }
-                    }
-                });
-            });
+            Community community = communityProvider.findCommunityById(cmd.getCommunityId());
+            if(community == null) {
+                return "0";
+            }
+            int syncCount = zjSyncdataBackupProvider.listZjSyncdataBackupActiveCountByParam(community.getNamespaceId(), community.getNamespaceCommunityToken(), DataType.ENTERPRISE.getCode());
+            if(syncCount > 0) {
+                return "1";
+            }
+            String version = enterpriseCustomerProvider.findLastEnterpriseCustomerVersionByCommunity(cmd.getNamespaceId(), community.getId());
+            CustomerHandle customerHandle = PlatformContext.getComponent(CustomerHandle.CUSTOMER_PREFIX + cmd.getNamespaceId());
+            if(customerHandle != null) {
+                SyncDataTask task = new SyncDataTask();
+                task.setOwnerType(EntityType.COMMUNITY.getCode());
+                task.setOwnerId(community.getId());
+                task.setType(SyncDataTaskType.CUSTOMER.getCode());
+                task.setCreatorUid(UserContext.currentUserId());
+                syncDataTaskService.executeTask(() -> {
+                    SyncDataResponse response = new SyncDataResponse();
+                    customerHandle.syncEnterprises("1", version, community.getNamespaceCommunityToken(), task.getId());
+                    return response;
+                }, task);
+            }
         }
+        return "0";
+//        if(cmd.getNamespaceId() == 999971) {
+//            this.coordinationProvider.getNamedLock(CoordinationLocks.SYNC_ENTERPRISE_CUSTOMER.getCode() + cmd.getNamespaceId() + cmd.getCommunityId()).tryEnter(()-> {
+//                ExecutorUtil.submit(new Runnable() {
+//                    @Override
+//                    public void run() {
+//                        try{
+//                            if(cmd.getCommunityId() == null) {
+//                                int syncCount = zjSyncdataBackupProvider.listZjSyncdataBackupActiveCountByParam(cmd.getNamespaceId(), null, DataType.ENTERPRISE.getCode());
+//                                if(syncCount > 0) {
+//                                    return ;
+//                                }
+//                                SyncDataTask task = new SyncDataTask();
+//                                task.setType(SyncDataTaskType.CUSTOMER.getCode());
+//                                task.setCreatorUid(UserContext.currentUserId());
+//                                task = syncDataTaskService.executeTask(() -> {
+//                                    SyncDataResponse response = new SyncDataResponse();
+//                                    zjgkOpenService.syncEnterprises("0", null);
+//                                    return response;
+//                                }, task);
+//
+//                            } else {
+//                                Community community = communityProvider.findCommunityById(cmd.getCommunityId());
+//                                if(community != null) {
+//                                    int syncCount = zjSyncdataBackupProvider.listZjSyncdataBackupActiveCountByParam(community.getNamespaceId(), community.getNamespaceCommunityToken(), DataType.ENTERPRISE.getCode());
+//                                    if(syncCount > 0) {
+//                                        return ;
+//                                    }
+//                                    task.setOwnerType(EntityType.COMMUNITY.getCode());
+//                                    task.setOwnerId(community.getId());
+//                                    zjgkOpenService.syncEnterprises("0", community.getNamespaceCommunityToken());
+//
+//                                }
+//
+//                            }
+//                        }catch (Exception e){
+//                            LOGGER.error("syncEnterpriseCustomers error.", e);
+//                        }
+//                    }
+//                });
+//            });
+//        } else {
+//            this.coordinationProvider.getNamedLock(CoordinationLocks.SYNC_ENTERPRISE_CUSTOMER.getCode() + cmd.getNamespaceId() + cmd.getCommunityId()).tryEnter(()-> {
+//                ExecutorUtil.submit(new Runnable() {
+//                    @Override
+//                    public void run() {
+//                        try{
+//                            Community community = communityProvider.findCommunityById(cmd.getCommunityId());
+//                            if(community == null) {
+//                                return;
+//                            }
+//                            int syncCount = zjSyncdataBackupProvider.listZjSyncdataBackupActiveCountByParam(community.getNamespaceId(), community.getNamespaceCommunityToken(), DataType.ENTERPRISE.getCode());
+//                            if(syncCount > 0) {
+//                                return ;
+//                            }
+//                            String version = enterpriseCustomerProvider.findLastEnterpriseCustomerVersionByCommunity(cmd.getNamespaceId(), community.getId());
+//                            CustomerHandle customerHandle = PlatformContext.getComponent(CustomerHandle.CUSTOMER_PREFIX + cmd.getNamespaceId());
+//                            if(customerHandle != null) {
+//                                task.setOwnerType(EntityType.COMMUNITY.getCode());
+//                                task.setOwnerId(community.getId());
+//                                customerHandle.syncEnterprises("1", version, community.getNamespaceCommunityToken());
+//                            }
+//
+//                        }catch (Exception e){
+//                            LOGGER.error("syncEnterpriseCustomers error.", e);
+//                        }
+//                    }
+//                });
+//            });
+//        }
 
     }
 
     @Override
-    public void syncIndividualCustomers(SyncCustomersCommand cmd) {
-        if(cmd.getNamespaceId() == 999971) {
-            ExecutorUtil.submit(new Runnable() {
-                @Override
-                public void run() {
-                    try{
-                        if(cmd.getCommunityId() == null) {
-                            zjgkOpenService.syncIndividuals("0", null);
-                        } else {
-                            Community community = communityProvider.findCommunityById(cmd.getCommunityId());
-                            if(community != null) {
-                                zjgkOpenService.syncIndividuals("0", community.getNamespaceCommunityToken());
-                            }
-                        }
-                    }catch (Exception e){
-                        LOGGER.error("syncIndividualCustomers error.", e);
-                    }
-                }
-            });
+    public String syncIndividualCustomers(SyncCustomersCommand cmd) {
+        Community community = communityProvider.findCommunityById(cmd.getCommunityId());
+        if(community != null) {
+            int syncCount = zjSyncdataBackupProvider.listZjSyncdataBackupActiveCountByParam(community.getNamespaceId(), community.getNamespaceCommunityToken(), DataType.INDIVIDUAL.getCode());
+            if(syncCount > 0) {
+                return "1";
+            }
+
+            SyncDataTask task = new SyncDataTask();
+            task.setOwnerType(EntityType.COMMUNITY.getCode());
+            task.setOwnerId(community.getId());
+            task.setType(SyncDataTaskType.INDIVIDUAL.getCode());
+            task.setCreatorUid(UserContext.currentUserId());
+            syncDataTaskService.executeTask(() -> {
+                SyncDataResponse response = new SyncDataResponse();
+                zjgkOpenService.syncIndividuals("0", community.getNamespaceCommunityToken(), task.getId());
+                return response;
+            }, task);
 
         }
+
+        return "0";
+
+//        if(cmd.getNamespaceId() == 999971) {
+//            ExecutorUtil.submit(new Runnable() {
+//                @Override
+//                public void run() {
+//                    try{
+//                        if(cmd.getCommunityId() == null) {
+//                            int syncCount = zjSyncdataBackupProvider.listZjSyncdataBackupActiveCountByParam(cmd.getNamespaceId(), null, DataType.INDIVIDUAL.getCode());
+//                            if(syncCount > 0) {
+//                                return ;
+//                            }
+//                            zjgkOpenService.syncIndividuals("0", null);
+//                        } else {
+//                            Community community = communityProvider.findCommunityById(cmd.getCommunityId());
+//                            if(community != null) {
+//                                int syncCount = zjSyncdataBackupProvider.listZjSyncdataBackupActiveCountByParam(community.getNamespaceId(), community.getNamespaceCommunityToken(), DataType.INDIVIDUAL.getCode());
+//                                if(syncCount > 0) {
+//                                    return ;
+//                                }
+//                                zjgkOpenService.syncIndividuals("0", community.getNamespaceCommunityToken());
+//                            }
+//                        }
+//                    }catch (Exception e){
+//                        LOGGER.error("syncIndividualCustomers error.", e);
+//                    }
+//                }
+//            });
+//
+//        }
     }
 
     
@@ -2456,6 +2688,7 @@ public class CustomerServiceImpl implements CustomerService {
 		CustomerTrackingPlanDTO dto = ConvertHelper.convert(plan, CustomerTrackingPlanDTO.class);
         if(dto.getTrackingType() != null) {
         	String trackingTypeName = localeTemplateService.getLocaleTemplateString(CustomerTrackingTemplateCode.SCOPE, Integer.parseInt(dto.getTrackingType().toString()) , UserContext.current().getUser().getLocale(), new HashMap<>(), "");
+//        	String trackingTypeName = fieldProvider.findScopeFieldItemByBusinessValue(plan.getNamespaceId(), communityId, ModuleName.ENTERPRISE_CUSTOMER.getName(), , plan.getTrackingType());
         	dto.setTrackingTypeName(trackingTypeName);
         }
         return dto;
@@ -2785,6 +3018,4 @@ public class CustomerServiceImpl implements CustomerService {
 	    calendar.set(Calendar.MILLISECOND, 0);
 		return calendar.getTime().getTime();
 	}
-	
-	
 }

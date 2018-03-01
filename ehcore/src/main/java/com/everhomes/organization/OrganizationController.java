@@ -7,6 +7,7 @@ import com.everhomes.constants.ErrorCodes;
 import com.everhomes.controller.ControllerBase;
 import com.everhomes.discover.RestReturn;
 import com.everhomes.rest.RestResponse;
+import com.everhomes.rest.address.ListBuildingsByKeywordAndNameSpaceCommand;
 import com.everhomes.rest.archives.UpdateArchivesEmployeeCommand;
 import com.everhomes.rest.community.CreateResourceCategoryCommand;
 import com.everhomes.rest.enterprise.LeaveEnterpriseCommand;
@@ -23,6 +24,7 @@ import com.everhomes.search.OrganizationSearcher;
 import com.everhomes.user.User;
 import com.everhomes.user.UserContext;
 import com.everhomes.user.admin.SystemUserPrivilegeMgr;
+import com.everhomes.util.FrequencyControl;
 import com.everhomes.util.RequireAuthentication;
 import com.everhomes.util.RuntimeErrorException;
 import org.slf4j.Logger;
@@ -638,6 +640,20 @@ public class OrganizationController extends ControllerBase {
 		return res;
 	}
 
+    /**
+     * <b>URL: /org/listPmOrganizationsByNamespaceId</b>
+     * <p>查询 域空间的PM公司</p>
+     */
+    @RequestMapping("listPmOrganizationsByNamespaceId")
+    @RestReturn(value=OrganizationTreeDTO.class)
+    public RestResponse listPmOrganizationsByNamespaceId(ListBuildingsByKeywordAndNameSpaceCommand cmd){
+        //TODO:加权限校验
+        RestResponse res = new RestResponse(organizationService.listPmOrganizationsByNamespaceId(cmd.getNamespaceId()));
+        res.setErrorCode(ErrorCodes.SUCCESS);
+        res.setErrorDescription("OK");
+        return res;
+    }
+
 
     /**
      * <b>URL: /org/setOrgTopicStatus</b>
@@ -808,6 +824,7 @@ public class OrganizationController extends ControllerBase {
      * <b>URL: /org/applyForEnterpriseContact</b>
      * <p>申请加入企业</p>
      */
+    @FrequencyControl(count = 1 , key={"#cmd.organizationId","#cmd.targetId","cmd.contactToken", "cmd.contactName"})
     @RequestMapping("applyForEnterpriseContact")
     @RestReturn(value = OrganizationDTO.class)
     public RestResponse applyForEnterpriseContact(@Valid CreateOrganizationMemberCommand cmd) {

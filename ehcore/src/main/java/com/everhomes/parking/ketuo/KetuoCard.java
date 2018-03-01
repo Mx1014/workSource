@@ -1,5 +1,17 @@
 package com.everhomes.parking.ketuo;
 
+/**
+ * <ul>
+ * <li>cardId: 充值车ID 续费充值时使用</li>
+ * <li>plateNo: 车牌号</li>
+ * <li>carType: 车类型 2:月租</li>
+ * <li>validFrom: 有效开始时间 yyyy-MM-dd HH:mm:ss</li>
+ * <li>validTo: 有效结束时间 yyyy-MM-dd HH:mm:ss</li>
+ * <li>freeMoney: 免费金额(单位分) 注意：每个月的免费金额</li>
+ * <li>isAllow: 0:不允许 1：允许</li>
+ * <li>name: 车主姓名</li>
+ * </ul>
+ */
 public class KetuoCard {
 	private Integer cardId;
 	private String plateNo;

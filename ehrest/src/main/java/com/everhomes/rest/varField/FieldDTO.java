@@ -52,6 +52,16 @@ public class FieldDTO {
     @ItemType(FieldItemDTO.class)
     private List<FieldItemDTO> items;
 
+    private String dateFormat;
+
+    public String getDateFormat() {
+        return dateFormat;
+    }
+
+    public void setDateFormat(String dateFormat) {
+        this.dateFormat = dateFormat;
+    }
+
     public List<FieldItemDTO> getItems() {
         return items;
     }

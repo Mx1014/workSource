@@ -14,21 +14,17 @@ import java.util.List;
  * <li>ownerId: 归属的ID，如小区ID</li>
  * <li>parkingLotId: 停车场ID</li>
  * <li>requestorEnterpriseId: 申请人所在公司ID</li>
+ * <li>requestorEnterpriseName: requestorEnterpriseName</li>
  * <li>requestorUid: 申请人用户ID</li>
- * <li>requestorName: 申请人名称</li>
  * <li>plateNumber: 车牌号</li>
- * <li>plateOwnerEntperiseName: 车主所在公司名称</li>
  * <li>plateOwnerName: 车主名称</li>
  * <li>plateOwnerPhone: 车主手机号</li>
- * <li>ranking: 当前排位号</li>
  * <li>status: 申请状态，{@link ParkingCardRequestStatus}</li>
- * <li>issueFlag: 充值状态， {@link ParkingCardIssueFlag}</li>
- * <li>issueTime: 领卡时间</li>
+ * <li>creatorUid: creatorUid</li>
  * <li>createTime: 订单创建时间</li>
- * <li>carBrand: 车品牌</li>
- * <li>carSerieName: 车系列</li>
- * <li>carColor: 车颜色</li>
- * <li>attachments: 申请资料</li>
+ * <li>flowCaseId: flowCaseId</li>
+ * <li>identityCard: identityCard</li>
+ * <li>attachments: 申请资料 {@link com.everhomes.rest.parking.ParkingAttachmentDTO}</li>
  * </ul>
  */
 public class ParkingCarVerificationDTO {
@@ -49,7 +45,15 @@ public class ParkingCarVerificationDTO {
     private Long flowCaseId;
     @ItemType(ParkingAttachmentDTO.class)
     private List<ParkingAttachmentDTO> attachments;
+    private String identityCard;
 
+    public String getIdentityCard() {
+        return identityCard;
+    }
+
+    public void setIdentityCard(String identityCard) {
+        this.identityCard = identityCard;
+    }
     public Long getId() {
         return id;
     }

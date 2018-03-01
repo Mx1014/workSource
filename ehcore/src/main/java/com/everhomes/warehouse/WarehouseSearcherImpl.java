@@ -119,7 +119,8 @@ public class WarehouseSearcherImpl extends AbstractElasticSearch implements Ware
 
     @Override
     public SearchWarehousesResponse query(SearchWarehousesCommand cmd) {
-        checkAssetPriviledgeForPropertyOrg(cmd.getCommunityId(),PrivilegeConstants.WAREHOUSE_REPO_VIEW,cmd.getOwnerId());
+        //不再校验
+//        checkAssetPriviledgeForPropertyOrg(cmd.getCommunityId(),PrivilegeConstants.WAREHOUSE_REPO_VIEW,cmd.getOwnerId());
         SearchRequestBuilder builder = getClient().prepareSearch(getIndexName()).setTypes(getIndexType());
         QueryBuilder qb = null;
         if(cmd.getName() == null || cmd.getName().isEmpty()) {

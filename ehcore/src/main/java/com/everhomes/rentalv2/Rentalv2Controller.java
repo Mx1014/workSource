@@ -454,7 +454,7 @@ public class Rentalv2Controller extends ControllerBase {
 
 	/**
 	 *
-	 * <b>URL: /rental/getResourceRuleById<b>
+	 * <b>URL: /rental/getResourceRuleById</b>
 	 * <p>
 	 * 查询资源的规则
 	 * </p>

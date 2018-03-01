@@ -1,8 +1,7 @@
 package com.everhomes.scheduler;
 
-import com.everhomes.asset.AssetPaymentStrings;
+import com.everhomes.asset.AssetPaymentConstants;
 import com.everhomes.asset.AssetService;
-import com.everhomes.configuration.ConfigConstants;
 import com.everhomes.contract.ContractChargingItem;
 import com.everhomes.contract.ContractChargingItemAddress;
 import com.everhomes.contract.ContractChargingItemAddressProvider;
@@ -25,17 +24,15 @@ import com.everhomes.rest.approval.MeterFormulaVariable;
 import com.everhomes.rest.approval.TrueOrFalseFlag;
 import com.everhomes.rest.asset.*;
 import com.everhomes.rest.contract.ChargingVariablesDTO;
-import com.everhomes.rest.contract.ContractChargingItemDTO;
-import com.everhomes.rest.contract.PeriodUnit;
 import com.everhomes.rest.customer.CustomerType;
 import com.everhomes.rest.energy.*;
 import com.everhomes.rest.organization.pm.DefaultChargingItemPropertyType;
 import com.everhomes.search.EnergyMeterTaskSearcher;
 import com.everhomes.user.UserIdentifier;
 import com.everhomes.user.UserProvider;
-import com.everhomes.util.ConvertHelper;
 import com.everhomes.util.DateHelper;
 import com.everhomes.util.ExecutorUtil;
+import com.everhomes.util.StringHelper;
 import com.google.gson.Gson;
 import com.google.gson.reflect.TypeToken;
 import org.quartz.JobExecutionContext;
@@ -45,7 +42,6 @@ import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.scheduling.quartz.QuartzJobBean;
 import org.springframework.stereotype.Component;
-import org.springframework.transaction.TransactionStatus;
 
 import javax.script.ScriptEngine;
 import javax.script.ScriptEngineManager;
@@ -299,7 +295,7 @@ public class EnergyTaskScheduleJob extends QuartzJobBean {
                 generateFlag = true;
             } else {//门牌有没有默认计价条款、所属楼栋有没有默认计价条款、所属园区有没有默认计价条款 eh_default_charging_item_properties
                 List<DefaultChargingItemProperty> properties = defaultChargingItemProvider.findByPropertyId(DefaultChargingItemPropertyType.APARTMENT.getCode(), address.getAddressId(), meter.getMeterType());
-                if(properties != null) {
+                if(properties != null && properties.size() > 0) {
                     List<FeeRules> feeRules = new ArrayList<>();
                     properties.forEach(property -> {
                         DefaultChargingItem item = defaultChargingItemProvider.findById(property.getDefaultChargingItemId());
@@ -312,7 +308,7 @@ public class EnergyTaskScheduleJob extends QuartzJobBean {
                     generateFlag = true;
                 } else {
                     properties = defaultChargingItemProvider.findByPropertyId(DefaultChargingItemPropertyType.BUILDING.getCode(), address.getBuildingId(), meter.getMeterType());
-                    if(properties != null) {
+                    if(properties != null && properties.size() > 0) {
                         List<FeeRules> feeRules = new ArrayList<>();
                         properties.forEach(property -> {
                             DefaultChargingItem item = defaultChargingItemProvider.findById(property.getDefaultChargingItemId());
@@ -324,8 +320,8 @@ public class EnergyTaskScheduleJob extends QuartzJobBean {
                         paymentExpectancies_re_struct(task, address, feeRules, null);
                         generateFlag = true;
                     } else {
-                        properties = defaultChargingItemProvider.findByPropertyId(DefaultChargingItemPropertyType.BUILDING.getCode(), meter.getCommunityId(), meter.getMeterType());
-                        if(properties != null) {
+                        properties = defaultChargingItemProvider.findByPropertyId(DefaultChargingItemPropertyType.COMMUNITY.getCode(), meter.getCommunityId(), meter.getMeterType());
+                        if(properties != null && properties.size() > 0) {
                             List<FeeRules> feeRules = new ArrayList<>();
                             properties.forEach(property -> {
                                 DefaultChargingItem item = defaultChargingItemProvider.findById(property.getDefaultChargingItemId());
@@ -367,6 +363,7 @@ public class EnergyTaskScheduleJob extends QuartzJobBean {
 //      没合同时  eh_organization_owner_address eh_organization_addresses
         if(command.getContractIdType() == 0) {
             OrganizationAddress organizationAddress = organizationProvider.findActiveOrganizationAddressByAddressId(address.getAddressId());
+            LOGGER.debug("paymentExpectancies_re_struct organizationAddress: {}", StringHelper.toJsonString(organizationAddress));
             if(organizationAddress != null) {
                 command.setTargetType("eh_organization");
                 command.setTargetId(organizationAddress.getOrganizationId());
@@ -374,19 +371,29 @@ public class EnergyTaskScheduleJob extends QuartzJobBean {
                 command.setTargetName(detail.getDisplayName());
                 command.setNoticeTel(detail.getContact());
             } else {
-                List<CommunityPmOwner> pmOwners = propertyMgrProvider.listCommunityPmOwners(task.getTargetId(), address.getAddressId());
-                if(pmOwners != null && pmOwners.size() > 0) {
+                List<OrganizationOwnerAddress> addresses = propertyMgrProvider.listOrganizationOwnerAuthAddressByAddressId(task.getNamespaceId(), address.getAddressId());
+                LOGGER.debug("paymentExpectancies_re_struct organizationAddress: {}", StringHelper.toJsonString(addresses));
+                if(addresses != null && addresses.size() > 0) {
                     command.setTargetType("eh_user");
-                    command.setTargetName(pmOwners.get(0).getContactName());
-                    command.setNoticeTel(pmOwners.get(0).getContactToken());
-                    UserIdentifier identifier = userProvider.findClaimedIdentifierByToken(pmOwners.get(0).getNamespaceId(), pmOwners.get(0).getContactToken());
-                    if(identifier != null) {
-                        command.setTargetId(identifier.getOwnerUid());
+                    for(OrganizationOwnerAddress ownerAddress : addresses) {
+                        CommunityPmOwner pmOwner = propertyMgrProvider.findPropOwnerById(ownerAddress.getOrganizationOwnerId());
+                        if(pmOwner != null) {
+                            command.setTargetName(pmOwner.getContactName());
+                            command.setNoticeTel(pmOwner.getContactToken());
+                            UserIdentifier identifier = userProvider.findClaimedIdentifierByToken(pmOwner.getNamespaceId(), pmOwner.getContactToken());
+                            if(identifier != null) {
+                                command.setTargetId(identifier.getOwnerUid());
+                                break ;
+                            }
+                        }
+
                     }
+
                 }
             }
         } else {
             Contract contract = contractProvider.findContractById(command.getContractId());
+            command.setContractNum(contract.getContractNumber());
             if(CustomerType.ENTERPRISE.equals(CustomerType.fromStatus(contract.getCustomerType()))) {
                 command.setTargetType("eh_organization");
                 EnterpriseCustomer customer = enterpriseCustomerProvider.findById(contract.getCustomerId());
@@ -410,7 +417,7 @@ public class EnergyTaskScheduleJob extends QuartzJobBean {
         }
 
         LOGGER.debug("paymentExpectancies_re_struct command: {}", command);
-        assetService.upodateBillStatusOnContractStatusChange(command.getContractId(),AssetPaymentStrings.CONTRACT_CANCEL);
+        assetService.upodateBillStatusOnContractStatusChange(command.getContractId(), AssetPaymentConstants.CONTRACT_CANCEL);
         assetService.paymentExpectancies_re_struct(command);
     }
 

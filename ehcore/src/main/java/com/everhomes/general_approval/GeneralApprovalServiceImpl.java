@@ -22,6 +22,7 @@ import com.everhomes.entity.EntityType;
 import com.everhomes.flow.*;
 import com.everhomes.general_form.GeneralForm;
 import com.everhomes.general_form.GeneralFormProvider;
+import com.everhomes.general_form.GeneralFormService;
 import com.everhomes.general_form.GeneralFormTemplate;
 import com.everhomes.organization.Organization;
 import com.everhomes.organization.OrganizationMember;
@@ -34,6 +35,8 @@ import com.everhomes.settings.PaginationConfigHelper;
 import com.everhomes.techpark.punch.PunchService;
 import com.everhomes.user.User;
 import com.everhomes.util.DateHelper;
+import com.everhomes.util.StringHelper;
+import com.everhomes.workReport.WorkReportService;
 import com.everhomes.yellowPage.ServiceAllianceCategories;
 import com.everhomes.yellowPage.YellowPageProvider;
 import freemarker.cache.StringTemplateLoader;
@@ -111,6 +114,9 @@ public class GeneralApprovalServiceImpl implements GeneralApprovalService {
     private GeneralFormProvider generalFormProvider;
 
     @Autowired
+    private GeneralFormService generalFormService;
+
+    @Autowired
     private GeneralApprovalProvider generalApprovalProvider;
 
     @Autowired
@@ -142,6 +148,9 @@ public class GeneralApprovalServiceImpl implements GeneralApprovalService {
 
     @Autowired
     private PunchService punchService;
+
+    @Autowired
+    private WorkReportService workReportService;
 
     private StringTemplateLoader templateLoader;
 
@@ -230,16 +239,12 @@ public class GeneralApprovalServiceImpl implements GeneralApprovalService {
             cmd21.setContent(JSON.toJSONString(cmd));
             cmd21.setCurrentOrganizationId(cmd.getOrganizationId());
             cmd21.setTitle(ga.getApprovalName());
-            
 
-            //  存储更多的信息 added by approval1.6
+            /*****************  存储更多的信息 start by nan.rong for approval-1.6  *****************/
             GeneralApprovalFlowCaseAdditionalFieldDTO fieldDTO = new GeneralApprovalFlowCaseAdditionalFieldDTO();
-            List<OrganizationMember> member = organizationProvider.listOrganizationMembersByUId(user.getId());
-            member = member.stream().filter(r -> {
-                return OrganizationGroupType.DEPARTMENT.getCode().equals(r.getGroupType());
-            }).collect(Collectors.toList());
-            if (member != null && member.size() > 0) {
-                Organization department = organizationProvider.findOrganizationById(member.get(0).getOrganizationId());
+            OrganizationMember member = organizationProvider.findDepartmentMemberByTargetIdAndOrgId(user.getId(), cmd.getOrganizationId());
+            if (member != null ) {
+                Organization department = organizationProvider.findOrganizationById(member.getOrganizationId());
                 //  存储部门 id 及名称
                 fieldDTO.setDepartment(department.getName());
                 fieldDTO.setDepartmentId(department.getId());
@@ -262,8 +267,9 @@ public class GeneralApprovalServiceImpl implements GeneralApprovalService {
             approvalNo += count;
             op.increment(countKey, 1L);
             fieldDTO.setApprovalNo(Long.valueOf(approvalNo));
-            cmd21.setAdditionalFieldDTO(fieldDTO);
+            /*****************  存储更多的信息 end by nan.rong for approval-1.6  *****************/
 
+            cmd21.setAdditionalFieldDTO(fieldDTO);
             ServiceAllianceCategories category = yellowPageProvider.findCategoryById(ga.getModuleId());
             if (category != null) {
                 cmd21.setServiceType(category.getName());
@@ -542,6 +548,11 @@ public class GeneralApprovalServiceImpl implements GeneralApprovalService {
 		//  删除与表单相关控件组
 		this.generalFormProvider.deleteGeneralFormGroupsByFormOriginId(cmd.getFormOriginId());
 
+        /***    更改与表单相关业务的状态    ***/
+        //  流程审批
+        disableApprovalByFormOriginId(cmd.getFormOriginId(), 52000L, "any-module");
+        //  工作汇报
+        workReportService.disableWorkReportByFormOriginId(cmd.getFormOriginId(), 54000L, "any-module");
     }
 
     @Override
@@ -762,13 +773,13 @@ public class GeneralApprovalServiceImpl implements GeneralApprovalService {
     @Override
     public VerifyApprovalTemplatesResponse verifyApprovalTemplates(VerifyApprovalTemplatesCommand cmd) {
         VerifyApprovalTemplatesResponse response = new VerifyApprovalTemplatesResponse();
-        response.setResult(1L);
+        response.setResult(TrueOrFalseFlag.TRUE.getCode());
         List<GeneralApprovalTemplate> templates = generalApprovalProvider.listGeneralApprovalTemplateByModuleId(cmd.getModuleId());
         for (GeneralApprovalTemplate template : templates) {
             GeneralApproval ga = generalApprovalProvider.getGeneralApprovalByTemplateId(UserContext.getCurrentNamespaceId(), cmd.getModuleId(), cmd.getOwnerId(),
                     cmd.getOwnerType(), template.getId());
             if (ga == null) {
-                response.setResult(0L);
+                response.setResult(TrueOrFalseFlag.FALSE.getCode());
                 break;
             }
         }
@@ -784,15 +795,15 @@ public class GeneralApprovalServiceImpl implements GeneralApprovalService {
         //  3.有则先创建表单拿去表单 id,在创建审批与生成的 id 关联
         if (templates != null || templates.size() > 0) {
             dbProvider.execute((TransactionStatus status) -> {
-                for (GeneralApprovalTemplate approval : templates) {
-                    if (approval.getFormTemplateId().longValue() == 0) {
+                for (GeneralApprovalTemplate template : templates) {
+                    if (template.getFormTemplateId().longValue() == 0) {
                         //  Create Approvals directly.
-                        createGeneralApprovalByTemplate(approval, null, cmd);
+                        createGeneralApprovalByTemplate(template, null, cmd);
                     } else {
                         //  Create Forms before creating approvals.
-                        Long formOriginId = createGeneralFormByTemplate(approval, cmd);
+                        Long formOriginId = generalFormService.createGeneralFormByTemplate(template.getFormTemplateId(), ConvertHelper.convert(cmd, CreateFormTemplatesCommand.class));
                         //  Then, start to create approvals.
-                        createGeneralApprovalByTemplate(approval, formOriginId, cmd);
+                        createGeneralApprovalByTemplate(template, formOriginId, cmd);
                     }
                 }
                 return null;
@@ -813,25 +824,6 @@ public class GeneralApprovalServiceImpl implements GeneralApprovalService {
         }
     }
 
-    private Long createGeneralFormByTemplate(GeneralApprovalTemplate approval, CreateApprovalTemplatesCommand cmd) {
-        GeneralFormTemplate form = generalFormProvider.findGeneralFormTemplateByIdAndModuleId(
-                approval.getFormTemplateId(), cmd.getModuleId());
-        GeneralForm gf = generalFormProvider.getGeneralFormByTemplateId(cmd.getModuleId(), cmd.getOwnerId(),
-                cmd.getOwnerType(), form.getId());
-        if (gf != null) {
-            gf = convertFormFromTemplate(gf, form, cmd);
-            generalFormProvider.updateGeneralForm(gf);
-            return gf.getFormOriginId();
-        } else {
-            gf = ConvertHelper.convert(form, GeneralForm.class);
-            gf = convertFormFromTemplate(gf, form, cmd);
-            gf.setStatus(GeneralFormStatus.CONFIG.getCode());
-            gf.setFormVersion(0L);
-            Long formOriginId = generalFormProvider.createGeneralForm(gf);
-            return formOriginId;
-        }
-    }
-
     private GeneralApproval convertApprovalFromTemplate(GeneralApproval ga, GeneralApprovalTemplate approval, Long formOriginId, CreateApprovalTemplatesCommand cmd) {
         ga.setNamespaceId(UserContext.getCurrentNamespaceId());
         ga.setStatus(GeneralApprovalStatus.INVALID.getCode());
@@ -845,18 +837,6 @@ public class GeneralApprovalServiceImpl implements GeneralApprovalService {
             ga.setFormOriginId(formOriginId);
         ga.setSupportType(cmd.getSupportType());
         return ga;
-    }
-
-    private GeneralForm convertFormFromTemplate(GeneralForm gf, GeneralFormTemplate form, CreateApprovalTemplatesCommand cmd) {
-        gf.setFormAttribute(GeneralApprovalAttribute.DEFAULT.getCode());
-        gf.setNamespaceId(UserContext.getCurrentNamespaceId());
-        gf.setFormTemplateId(form.getId());
-        gf.setFormTemplateVersion(form.getVersion());
-        gf.setOwnerId(cmd.getOwnerId());
-        gf.setOwnerId(cmd.getOwnerId());
-        gf.setOwnerType(cmd.getOwnerType());
-        gf.setOrganizationId(cmd.getOrganizationId());
-        return gf;
     }
 
     @Override
@@ -896,6 +876,7 @@ public class GeneralApprovalServiceImpl implements GeneralApprovalService {
     @Override
     public ListGeneralApprovalRecordsResponse listGeneralApprovalRecords(ListGeneralApprovalRecordsCommand cmd) {
         ListGeneralApprovalRecordsResponse response = new ListGeneralApprovalRecordsResponse();
+        List<GeneralApprovalRecordDTO> results = new ArrayList<>();
         ListingLocator locator = new ListingLocator();
         SearchFlowCaseCommand command = new SearchFlowCaseCommand();
 
@@ -929,16 +910,15 @@ public class GeneralApprovalServiceImpl implements GeneralApprovalService {
                 query.addConditions(GeneralApprovalFlowCaseCustomField.CREATOR_DEPARTMENT_ID.getField().eq(cmd.getCreatorDepartmentId()));
             return query;
         });
-        if (details != null && details.size() > 0) {
-            List<GeneralApprovalRecordDTO> results = details.stream().map(r -> {
 
+        if (details != null && details.size() > 0) {
+            results = details.stream().map(r -> {
                 GeneralApprovalRecordDTO dto = convertGeneralApprovalRecordDTO(r);
                 return dto;
             }).collect(Collectors.toList());
-            response.setRecords(results);
-            response.setNextPageAnchor(locator.getAnchor());
-
         }
+        response.setRecords(results);
+        response.setNextPageAnchor(locator.getAnchor());
         return response;
     }
 
@@ -1043,7 +1023,7 @@ public class GeneralApprovalServiceImpl implements GeneralApprovalService {
 
         //  1. basic data from flowCases
         Cell approvalNoCell = dataRow.createCell(0);
-        approvalNoCell.setCellValue(data.getApprovalNo().toString());
+        approvalNoCell.setCellValue(data.getApprovalNo() != null ? data.getApprovalNo().toString() : "");
         dataRow.createCell(1).setCellValue(data.getCreateTime());
         dataRow.createCell(2).setCellValue(data.getCreatorName());
         dataRow.createCell(3).setCellValue(data.getCreatorDepartment());
@@ -1133,5 +1113,20 @@ public class GeneralApprovalServiceImpl implements GeneralApprovalService {
                 LOGGER.error("close error", e);
             }
         }
+    }
+
+    @Override
+    public void disableApprovalByFormOriginId(Long formOriginId, Long moduleId, String moduleType){
+        generalApprovalProvider.disableApprovalByFormOriginId(formOriginId, moduleId, moduleType);
+    }
+
+    @Override
+    public String getUserRealName(GetUserRealNameCommand cmd){
+        User user = UserContext.current().getUser();
+        OrganizationMember member = organizationProvider.findOrganizationMemberByOrgIdAndUId(user.getId(), cmd.getOwnerId());
+        if(member != null)
+            return member.getContactName();
+        //  若没有真实姓名则返回昵称
+        return user.getNickName();
     }
 }

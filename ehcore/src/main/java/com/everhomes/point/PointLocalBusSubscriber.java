@@ -3,10 +3,13 @@ package com.everhomes.point;
 import com.everhomes.bus.LocalBusSubscriber;
 import com.everhomes.bus.LocalEvent;
 import com.everhomes.bus.LocalEventBus;
+import com.everhomes.configuration.ConfigurationProvider;
 import com.everhomes.coordinator.CoordinationLocks;
 import com.everhomes.coordinator.CoordinationProvider;
+import com.everhomes.rest.approval.TrueOrFalseFlag;
 import com.everhomes.rest.point.PointEventLogStatus;
 import com.everhomes.user.UserContext;
+import com.everhomes.util.ConvertHelper;
 import com.everhomes.util.DateUtils;
 import com.everhomes.util.StringHelper;
 import org.slf4j.Logger;
@@ -18,10 +21,7 @@ import org.springframework.context.event.ContextRefreshedEvent;
 import org.springframework.scheduling.concurrent.CustomizableThreadFactory;
 import org.springframework.stereotype.Component;
 
-import java.util.ArrayList;
-import java.util.HashMap;
-import java.util.List;
-import java.util.Map;
+import java.util.*;
 import java.util.concurrent.CopyOnWriteArrayList;
 import java.util.concurrent.Executors;
 import java.util.concurrent.ScheduledExecutorService;
@@ -36,6 +36,10 @@ import java.util.stream.Collectors;
 public class PointLocalBusSubscriber implements LocalBusSubscriber, ApplicationListener<ContextRefreshedEvent> {
 
     private static final Logger LOGGER = LoggerFactory.getLogger(PointLocalBusSubscriber.class);
+
+    private static int SCHEDULE_DURATION_SECONDS = 60;
+
+    private final static Random random = new Random();
 
     @Value("${core.server.id:}")
     private String serverId;
@@ -66,6 +70,12 @@ public class PointLocalBusSubscriber implements LocalBusSubscriber, ApplicationL
     @Autowired
     private PointRuleToEventMappingProvider pointRuleToEventMappingProvider;
 
+    @Autowired
+    private PointEventLogScheduler pointEventLogScheduler;
+
+    @Autowired
+    private ConfigurationProvider configurationProvider;
+
     @Override
     public void onApplicationEvent(ContextRefreshedEvent event) {
         if (event.getApplicationContext().getParent() == null
@@ -74,35 +84,56 @@ public class PointLocalBusSubscriber implements LocalBusSubscriber, ApplicationL
             registerPointRuleCategory();
             initPointRuleCategoryQueue();
             initScheduledExecutorService();
+            initVMShutdownHook();
         }
     }
 
     private void initScheduledExecutorService() {
-        scheduledExecutorService.schedule(this::persistAllEventLog, 60, TimeUnit.SECONDS);
+        scheduledExecutorService.schedule(() -> this.persistAllEventLog(true), scheduleDurationSeconds(), TimeUnit.SECONDS);
     }
 
-    private void persistAllEventLog() {
+    private int scheduleDurationSeconds() {
         try {
-            lock.lock();
+            SCHEDULE_DURATION_SECONDS =
+                    configurationProvider.getIntValue(
+                            "point.persistLog.durationSeconds",
+                            SCHEDULE_DURATION_SECONDS);
+        } catch (Exception e) {
+            // ignore
+        }
+        return SCHEDULE_DURATION_SECONDS;
+    }
+
+    private void initVMShutdownHook() {
+        // 系统终止hook
+        Runtime.getRuntime().addShutdownHook(new Thread(() -> {
+            LOGGER.info("Point event log persist VM shutdown hook are triggered.");
+            persistAllEventLog(false);
+        }, "PointEventLogShutdownHookThread"));
+    }
+
+    private void persistAllEventLog(boolean next) {
+        try {
             pointEventGroupCache.keySet().forEach(this::persistGroupEventLog);
         } catch (Exception e) {
             LOGGER.error("Point persist group event log error", e);
         } finally {
-            lock.unlock();
-            scheduledExecutorService.schedule(this::persistAllEventLog, 60, TimeUnit.SECONDS);
+            if (next) {
+                scheduledExecutorService.schedule(() -> this.persistAllEventLog(true), scheduleDurationSeconds(), TimeUnit.SECONDS);
+            }
         }
     }
 
     private void persistGroupEventLog(PointEventGroup eventGroup) {
         if (eventGroup.tryLock()) {
-            int random = (int) (Math.random() * 5);
-            if (random == 4) {
+            int i = random.nextInt(100);
+            if (i == 1) {
                 LOGGER.info("Start to persist point event log");
             }
 
-            CopyOnWriteArrayList<PointEventLog> eventList = pointEventGroupCache.get(eventGroup);
             List<PointEventLog> removeLogs = new ArrayList<>();
             try {
+                CopyOnWriteArrayList<PointEventLog> eventList = pointEventGroupCache.get(eventGroup);
                 if (eventList.size() > 0) {
                     removeLogs.addAll(eventList);
                     eventList.removeAll(removeLogs);
@@ -110,7 +141,7 @@ public class PointLocalBusSubscriber implements LocalBusSubscriber, ApplicationL
             } finally {
                 eventGroup.unlock();
             }
-            if (random == 4) {
+            if (i == 1) {
                 LOGGER.info("Persist point event log size {}", removeLogs.size());
             }
             pointEventLogProvider.createPointEventLogsWithId(removeLogs);
@@ -118,8 +149,8 @@ public class PointLocalBusSubscriber implements LocalBusSubscriber, ApplicationL
     }
 
     void initPointRuleCategoryQueue() {
+        lock.lock();
         try {
-            lock.lock();
             List<PointRuleCategory> pointRuleCategoryList = pointRuleCategoryProvider.listPointRuleCategories();
             // 事件队列
             for (PointRuleCategory category : pointRuleCategoryList) {
@@ -185,10 +216,18 @@ public class PointLocalBusSubscriber implements LocalBusSubscriber, ApplicationL
 
     @Override
     public Action onLocalBusMessage(Object sender, String subject, Object args, String subscriptionPath) {
+        LocalEvent localEvent = (LocalEvent) args;
+
+        PointEventProcessorHolder processorHolder = pointEventLogScheduler.getPointEventProcessor(localEvent.getEventName());
+        PointEventProcessorHolder processorHolder1 = pointEventLogScheduler.getPointEventProcessor(subscriptionPath);
+
+        // 是否允许树形调用
+        if (!processorHolder.isContinue(processorHolder1)) {
+            return Action.none;
+        }
+
         Integer currentNamespaceId = UserContext.getCurrentNamespaceId();
         Long currentUserId = UserContext.currentUserId();
-
-        LocalEvent localEvent = (LocalEvent) args;
 
         Integer namespaceId = localEvent.getContext() != null
                 && localEvent.getContext().getNamespaceId() != null
@@ -199,7 +238,6 @@ public class PointLocalBusSubscriber implements LocalBusSubscriber, ApplicationL
                 ? localEvent.getContext().getUid() : currentUserId;
 
         PointEventLog log = new PointEventLog();
-        log.setId(pointEventLogProvider.getNextEventLogId());
         log.setNamespaceId(namespaceId);
         log.setEventName(localEvent.getEventName());
         log.setSubscriptionPath(subscriptionPath);
@@ -209,25 +247,47 @@ public class PointLocalBusSubscriber implements LocalBusSubscriber, ApplicationL
         log.setStatus(PointEventLogStatus.WAITING_FOR_PROCESS.getCode());
         log.setEventJson(StringHelper.toJsonString(localEvent));
 
-        PointEventGroup eventGroup = eventNameToPointEventGroupMap.get(subscriptionPath);
-        pointEventGroupCache.computeIfPresent(eventGroup, (group, pointEventLogs) -> {
-            log.setCategoryId(eventGroup.getCategory().getId());
-            pointEventLogs.add(log);
-
-            if (pointEventLogs.size() >= 1000) {
-                scheduledExecutorService.schedule(() -> this.persistGroupEventLog(eventGroup), 0, TimeUnit.SECONDS);
-            }
-            return pointEventLogs;
-        });
-
         // 同步事件
-        // boolean sync = TrueOrFalseFlag.fromCode(localEvent.getSyncFlag()) == TrueOrFalseFlag.TRUE;
-        // if (sync) {
-        //     this.persistGroupEventLog(eventGroup);
-        //     // List<PointRuleCategory> categories = new ArrayList<>();
-        //     // categories.add(eventGroup.getCategory());
-        //     // eventLogProcessor.doProcessGroup(categories);
-        // }
+        if (Objects.equals(localEvent.getSyncFlag(), TrueOrFalseFlag.TRUE.getCode())) {
+            doSyncEvent(processorHolder, localEvent, log);
+            return Action.none;
+        }
+
+        processorHolder.doProcess(processor -> {
+            PointEventGroup eventGroup = processor.getEventGroup(eventNameToPointEventGroupMap, localEvent, subscriptionPath);
+            pointEventGroupCache.computeIfPresent(eventGroup, (group, pointEventLogs) -> {
+                // copy
+                PointEventLog eventLog = ConvertHelper.convert(log, PointEventLog.class);
+                eventLog.setId(pointEventLogProvider.getNextEventLogId());
+                eventLog.setCategoryId(eventGroup.getCategory().getId());
+                pointEventLogs.add(eventLog);
+
+                if (pointEventLogs.size() >= 1000) {
+                    scheduledExecutorService.schedule(() -> this.persistGroupEventLog(eventGroup), 0, TimeUnit.SECONDS);
+                }
+                return pointEventLogs;
+            });
+        });
         return Action.none;
+    }
+
+    private void doSyncEvent(PointEventProcessorHolder processorHolder, LocalEvent localEvent, PointEventLog log) {
+        processorHolder.doProcess(processor -> {
+            List<PointRule> pointRules = processor.getPointRules(localEvent);
+
+            if (pointRules.size() > 0) {
+                // copy
+                PointEventLog eventLog = ConvertHelper.convert(log, PointEventLog.class);
+                eventLog.setId(pointEventLogProvider.getNextEventLogId());
+                eventLog.setCategoryId(pointRules.get(0).getCategoryId());
+                pointEventLogProvider.createPointEventLogsWithId(Collections.singletonList(eventLog));
+
+                List<Long> cateIds = pointRules.stream().map(PointRule::getCategoryId).distinct().collect(Collectors.toList());
+                for (Long cateId : cateIds) {
+                    PointRuleCategory category = pointRuleCategoryProvider.findById(cateId);
+                    pointEventLogScheduler.doProcessGroup(category, eventLog.getNamespaceId());
+                }
+            }
+        });
     }
 }

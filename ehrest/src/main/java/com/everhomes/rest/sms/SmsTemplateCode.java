@@ -7,6 +7,7 @@ public interface SmsTemplateCode {
     String YZX_SUFFIX = "yzx";
     String YOU_XUN_TONG_SUFFIX = "YouXunTong";
     String LIAN_XIN_TONG_SUFFIX = "LianXinTong";
+    String YUN_PIAN_SUFFIX = "YunPian";
 
     String SCOPE_YZX = SCOPE + "." + YZX_SUFFIX;
 

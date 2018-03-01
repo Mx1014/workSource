@@ -1,14 +1,13 @@
 // @formatter:off
 package com.everhomes.rest.menu;
 
-import com.everhomes.rest.acl.WebMenuDTO;
 import com.everhomes.util.StringHelper;
 
 
 /**
  * <ul>
  *     <li>namespaceId: namespaceId</li>
- *     <li>jsonDtos: jsonDtos，将list类型的WebMenuDTO转成json的格式传输过来，系统原因无法直接接收List<WebMenuDTO>  参考{@link WebMenuDTO}</li>
+ *     <li>jsonDtos: jsonDtos，将list类型的WebMenuDTO转成json的格式传输过来，系统原因无法直接接收WebMenuDTO列表  参考{@link com.everhomes.rest.acl.WebMenuDTO}</li>
  * </ul>
  */
 public class UpdateMenuScopesByNamespaceCommand {

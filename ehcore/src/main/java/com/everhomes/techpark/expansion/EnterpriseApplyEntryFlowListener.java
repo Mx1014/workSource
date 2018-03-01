@@ -17,9 +17,12 @@ import com.everhomes.locale.LocaleTemplateService;
 import com.everhomes.openapi.Contract;
 import com.everhomes.openapi.ContractBuildingMappingProvider;
 import com.everhomes.openapi.ContractProvider;
+import com.everhomes.portal.PortalService;
 import com.everhomes.rest.contract.BuildingApartmentDTO;
 import com.everhomes.rest.flow.*;
 import com.everhomes.rest.general_approval.GetGeneralFormValuesCommand;
+import com.everhomes.rest.portal.ListServiceModuleAppsCommand;
+import com.everhomes.rest.portal.ListServiceModuleAppsResponse;
 import com.everhomes.rest.sms.SmsTemplateCode;
 import com.everhomes.rest.techpark.expansion.*;
 import com.everhomes.rest.user.IdentifierType;
@@ -81,6 +84,10 @@ public class EnterpriseApplyEntryFlowListener implements FlowModuleListener {
     private EnterpriseOpRequestBuildingProvider enterpriseOpRequestBuildingProvider;
     @Autowired
     private CommunityProvider communityProvider;
+
+
+    @Autowired
+    private PortalService portalService;
     @Override
     public void onFlowCaseStart(FlowCaseState ctx) {
 
@@ -384,7 +391,18 @@ public class EnterpriseApplyEntryFlowListener implements FlowModuleListener {
         List<FlowServiceTypeDTO> result = new ArrayList<>();
         FlowServiceTypeDTO dto = new FlowServiceTypeDTO();
         dto.setNamespaceId(namespaceId);
-        dto.setServiceName("园区入驻");
+
+
+        ListServiceModuleAppsCommand listServiceModuleAppsCommand = new ListServiceModuleAppsCommand();
+        listServiceModuleAppsCommand.setNamespaceId(namespaceId);
+        listServiceModuleAppsCommand.setModuleId(40100L);
+        ListServiceModuleAppsResponse apps = portalService.listServiceModuleAppsWithConditon(listServiceModuleAppsCommand);
+
+        if (apps!=null && apps.getServiceModuleApps().size()>0)
+            dto.setServiceName(apps.getServiceModuleApps().get(0).getName());
+        else
+            return null;
+
         result.add(dto);
         return result;
     }

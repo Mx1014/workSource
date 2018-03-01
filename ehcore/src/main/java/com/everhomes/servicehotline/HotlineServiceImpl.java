@@ -9,9 +9,10 @@ import java.util.Set;
 import java.util.stream.Collectors;
 
 import com.everhomes.community.Community;
+import com.everhomes.organization.OrganizationMember;
+import com.everhomes.organization.OrganizationProvider;
 import com.everhomes.region.Region;
 import com.everhomes.rest.servicehotline.*;
-import com.everhomes.rest.user.GetUserInfoByIdCommand;
 import com.everhomes.rest.user.IdentifierType;
 import com.everhomes.user.*;
 import org.aspectj.internal.lang.annotation.ajcDeclareAnnotation;
@@ -29,7 +30,6 @@ import com.everhomes.entity.EntityType;
 import com.everhomes.listing.ListingLocator;
 import com.everhomes.listing.ListingQueryBuilderCallback;
 import com.everhomes.rest.rentalv2.NormalFlag;
-import com.everhomes.rest.user.UserInfo;
 import com.everhomes.server.schema.Tables;
 import com.everhomes.techpark.servicehotline.HotlineService;
 import com.everhomes.techpark.servicehotline.ServiceConfiguration;
@@ -63,9 +63,13 @@ public class HotlineServiceImpl implements HotlineService {
 	@Autowired
 	private DbProvider dbProvider;
 
+	@Autowired
+	private OrganizationProvider organizationProvider;
+
 	@Override
 	public GetHotlineSubjectResponse getHotlineSubject(
 			GetHotlineSubjectCommand cmd) {
+		Integer namespaceId = cmd.getNamespaceId()==null?UserContext.getCurrentNamespaceId():cmd.getNamespaceId();
 		List<ServiceConfiguration> sConfigurations = serviceConfigurationsProvider
 				.queryServiceConfigurations(null, 1,
 						new ListingQueryBuilderCallback() {
@@ -79,7 +83,7 @@ public class HotlineServiceImpl implements HotlineService {
 								query.addConditions(Tables.EH_SERVICE_CONFIGURATIONS.OWNER_ID
 										.eq(cmd.getOwnerId()));
 								query.addConditions(Tables.EH_SERVICE_CONFIGURATIONS.NAMESPACE_ID
-										.eq(UserContext.getCurrentNamespaceId()));
+										.eq(namespaceId));
 								query.addConditions(Tables.EH_SERVICE_CONFIGURATIONS.NAME
 										.eq(HOTLINE_SCOPE));
 								return query;
@@ -109,6 +113,7 @@ public class HotlineServiceImpl implements HotlineService {
 	}
 
 	private void setShowSubjects(GetHotlineSubjectCommand cmd ,GetHotlineSubjectResponse response){
+		Integer namespaceId = cmd.getNamespaceId()==null?UserContext.getCurrentNamespaceId():cmd.getNamespaceId();
 		List<ServiceConfiguration> sConfigurations = serviceConfigurationsProvider
 				.queryServiceConfigurations(null, 1,
 						new ListingQueryBuilderCallback() {
@@ -122,7 +127,7 @@ public class HotlineServiceImpl implements HotlineService {
 								query.addConditions(Tables.EH_SERVICE_CONFIGURATIONS.OWNER_ID
 										.eq(cmd.getOwnerId()));
 								query.addConditions(Tables.EH_SERVICE_CONFIGURATIONS.NAMESPACE_ID
-										.eq(UserContext.getCurrentNamespaceId()));
+										.eq(namespaceId));
 								query.addConditions(Tables.EH_SERVICE_CONFIGURATIONS.NAME
 										.eq(HOTLINE_NOTSHOW_SCOPE));
 								return query;
@@ -142,6 +147,7 @@ public class HotlineServiceImpl implements HotlineService {
 
 	@Override
 	public GetHotlineListResponse getHotlineList(GetHotlineListCommand cmd) {
+		Integer namespaceId = cmd.getNamespaceId()==null?UserContext.getCurrentNamespaceId():cmd.getNamespaceId();
 		GetHotlineListResponse resp = new GetHotlineListResponse();
 		List<HotlineDTO> hotlines = new ArrayList<HotlineDTO>();
 		this.serviceHotlinesProvider.queryServiceHotlines(null,
@@ -156,7 +162,7 @@ public class HotlineServiceImpl implements HotlineService {
 						query.addConditions(Tables.EH_SERVICE_HOTLINES.OWNER_ID
 								.eq(cmd.getOwnerId()));
 						query.addConditions(Tables.EH_SERVICE_HOTLINES.NAMESPACE_ID
-								.eq(UserContext.getCurrentNamespaceId())); 
+								.eq(namespaceId));
 						query.addConditions(Tables.EH_SERVICE_HOTLINES.SERVICE_TYPE
 								.eq(cmd.getServiceType().intValue()));
 						return query;
@@ -167,6 +173,8 @@ public class HotlineServiceImpl implements HotlineService {
 				User user = this.userProvider.findUserById(r.getUserId());
 				if (null != user)
 					dto.setAvatar(populateUserAvatar ( user,user.getAvatar()));
+				UserIdentifier userIdentifier = userProvider.findClaimedIdentifierByOwnerAndType(user.getId(), IdentifierType.MOBILE.getCode());
+				dto.setPhone(userIdentifier.getIdentifierToken());
 			}
 			hotlines.add(dto);
 		});
@@ -189,6 +197,7 @@ public class HotlineServiceImpl implements HotlineService {
 	public void addHotline(AddHotlineCommand cmd) {
 		ServiceHotline hotline = ConvertHelper.convert(cmd,
 				ServiceHotline.class);
+		Integer namespaceId = cmd.getNamespaceId()==null?UserContext.getCurrentNamespaceId():cmd.getNamespaceId();
 		//查询是否有重复的
 		List<ServiceHotline> tmp = this.serviceHotlinesProvider.queryServiceHotlines(null,
 				Integer.MAX_VALUE - 1, new ListingQueryBuilderCallback() {
@@ -202,7 +211,7 @@ public class HotlineServiceImpl implements HotlineService {
 						query.addConditions(Tables.EH_SERVICE_HOTLINES.OWNER_ID
 								.eq(cmd.getOwnerId()));
 						query.addConditions(Tables.EH_SERVICE_HOTLINES.NAMESPACE_ID
-								.eq(UserContext.getCurrentNamespaceId()));
+								.eq(namespaceId));
 						query.addConditions(Tables.EH_SERVICE_HOTLINES.SERVICE_TYPE
 								.eq(cmd.getServiceType().intValue()));
 						query.addConditions(Tables.EH_SERVICE_HOTLINES.CONTACT
@@ -218,7 +227,7 @@ public class HotlineServiceImpl implements HotlineService {
 
 		hotline.setCreateTime(new Timestamp( DateHelper.currentGMTTime().getTime()));
 		hotline.setCreatorUid(UserContext.current().getUser().getId());
-		hotline.setNamespaceId(UserContext.getCurrentNamespaceId());
+		hotline.setNamespaceId(namespaceId);
 		hotline.setUpdateTime(new Timestamp( DateHelper.currentGMTTime().getTime()));
 		this.serviceHotlinesProvider.createServiceHotline(hotline);
 
@@ -250,7 +259,7 @@ public class HotlineServiceImpl implements HotlineService {
 							ErrorCodes.ERROR_INVALID_PARAMETER,
 							"Invalid paramter id can not be null or hotline can not found");
 		}
-
+		Integer namespaceId = cmd.getNamespaceId()==null?UserContext.getCurrentNamespaceId():cmd.getNamespaceId();
 		//查询是否有重复的
 		List<ServiceHotline> tmp = this.serviceHotlinesProvider.queryServiceHotlines(null,
 				Integer.MAX_VALUE - 1, new ListingQueryBuilderCallback() {
@@ -264,7 +273,7 @@ public class HotlineServiceImpl implements HotlineService {
 						query.addConditions(Tables.EH_SERVICE_HOTLINES.OWNER_ID
 								.eq(cmd.getOwnerId()));
 						query.addConditions(Tables.EH_SERVICE_HOTLINES.NAMESPACE_ID
-								.eq(UserContext.getCurrentNamespaceId()));
+								.eq(namespaceId));
 						query.addConditions(Tables.EH_SERVICE_HOTLINES.SERVICE_TYPE
 								.eq(cmd.getServiceType().intValue()));
 						query.addConditions(Tables.EH_SERVICE_HOTLINES.CONTACT
@@ -281,7 +290,7 @@ public class HotlineServiceImpl implements HotlineService {
 
 		ServiceHotline hotline = ConvertHelper.convert(cmd,
 				ServiceHotline.class);
-		hotline.setNamespaceId(UserContext.getCurrentNamespaceId());
+		hotline.setNamespaceId(namespaceId);
 		hotline.setUpdateTime(new Timestamp( DateHelper.currentGMTTime().getTime()));
 		this.serviceHotlinesProvider.updateServiceHotline(hotline);
 	}
@@ -298,12 +307,13 @@ public class HotlineServiceImpl implements HotlineService {
 
 	@Override
 	public void setHotlineSubject(SetHotlineSubjectCommand cmd) {
+		Integer namespaceId = cmd.getNamespaceId()==null?UserContext.getCurrentNamespaceId():cmd.getNamespaceId();
 		switch (NormalFlag.fromCode(cmd.getSwitchFlag())) {
 		case NEED:
 			ServiceConfiguration obj = new ServiceConfiguration();
 			obj.setOwnerType(cmd.getOwnerType());
 			obj.setOwnerId(cmd.getOwnerId());
-			obj.setNamespaceId(UserContext.getCurrentNamespaceId());
+			obj.setNamespaceId(namespaceId);
 			obj.setName(HOTLINE_SCOPE);
 			obj.setValue(cmd.getServiceType() + "");
 			obj.setDisplayName(cmd.getDisplayName());
@@ -323,8 +333,7 @@ public class HotlineServiceImpl implements HotlineService {
 									query.addConditions(Tables.EH_SERVICE_CONFIGURATIONS.OWNER_ID
 											.eq(cmd.getOwnerId()));
 									query.addConditions(Tables.EH_SERVICE_CONFIGURATIONS.NAMESPACE_ID
-											.eq(UserContext
-													.getCurrentNamespaceId()));
+											.eq(namespaceId));
 									query.addConditions(Tables.EH_SERVICE_CONFIGURATIONS.NAME
 											.eq(HOTLINE_SCOPE));
 									query.addConditions(Tables.EH_SERVICE_CONFIGURATIONS.VALUE
@@ -360,7 +369,7 @@ public class HotlineServiceImpl implements HotlineService {
 	}
 
 	@Override
-	public UserInfo getUserInfoById(GetUserInfoByIdCommand cmd) {
+	public GetUserInfoByIdResponse getUserInfoById(GetUserInfoByIdCommand cmd) {
 		User queryUser = userProvider.findUserById(cmd.getId());
 		if(queryUser == null){
 			return null;
@@ -368,8 +377,14 @@ public class HotlineServiceImpl implements HotlineService {
 		List<UserIdentifier> identifiers = this.userProvider.listUserIdentifiersOfUser(queryUser.getId());
 		List<String> phones = identifiers.stream().filter((r)-> { return IdentifierType.fromCode(r.getIdentifierType()) == IdentifierType.MOBILE; })
 				.map(r->r.getIdentifierToken()).collect(Collectors.toList());
-		UserInfo info=ConvertHelper.convert(queryUser, UserInfo.class);
+		GetUserInfoByIdResponse info=ConvertHelper.convert(queryUser, GetUserInfoByIdResponse.class);
 		info.setPhones(phones);
+
+		if (cmd.getOrgId()!=null) {
+			OrganizationMember member = organizationProvider.findOrganizationMemberByOrgIdAndUId(cmd.getId(), cmd.getOrgId());
+			if (member!=null)
+				info.setContractName(member.getContactName());
+		}
 		return info;
 	}
 
