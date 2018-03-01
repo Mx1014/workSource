@@ -347,6 +347,7 @@ public class WebMenuServiceImpl implements WebMenuService {
 			appOriginIds = appIds;
 		}
 
+		LOGGER.debug("Method listPmWebMenu's appOriginIds:" + appOriginIds.toString());
 
 		// 根据应用id拿菜单
 		List<WebMenuDTO> webMenuDTOS = listWebMenuByApp(WebMenuType.PARK.getCode(), appOriginIds);
