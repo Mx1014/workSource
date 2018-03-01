@@ -3607,10 +3607,12 @@ private void checkUserPrivilege(Long orgId, Long privilegeId, Long communityId) 
 //			return null;
 //		}).filter(Objects::nonNull).collect(Collectors.toList());
 
-		List<EquipmentTaskDTO> dtos = tasks.stream().map((r) ->
-				ConvertHelper.convert(r, EquipmentTaskDTO.class))
-				.collect(Collectors.toList());
-
+		List<EquipmentTaskDTO> dtos = new ArrayList<>();
+		if (allTasks.size() > 0) {
+			dtos = tasks.stream().map((r) ->
+					ConvertHelper.convert(r, EquipmentTaskDTO.class))
+					.collect(Collectors.toList());
+		}
 		response.setTasks(dtos);
 
 		return response;
