@@ -1014,25 +1014,22 @@ public class FieldServiceImpl implements FieldService {
         LOGGER.debug("field name: {} index uid: {}, fieldName length-3: {}", fieldName, fieldName.indexOf("Uid"), fieldName.length()-3);
         if(fieldName.indexOf("Uid") == fieldName.length()-3) {
             long uid = Long.parseLong(invoke.toString());
-            if(uid == -1) {
-                invoke = "";
-            } else {
-                OrganizationMemberDetails detail = organizationProvider.findOrganizationMemberDetailsByTargetId(uid);
-                if(null != detail && null != detail.getContactName()){
-                    invoke = String.valueOf(detail.getContactName());
-                }else{
-                    if(uid > 0) {
-                        UserInfo userInfo = userService.getUserInfo(uid);
-                        if(userInfo != null){
-                            invoke = String.valueOf(userInfo.getNickName());
-                        } else {
-                            LOGGER.error("field "+ fieldName+" find name in organization member failed ,uid is "+ uid);
-                        }
+            OrganizationMemberDetails detail = organizationProvider.findOrganizationMemberDetailsByTargetId(uid);
+            if(null != detail && null != detail.getContactName()){
+                invoke = String.valueOf(detail.getContactName());
+            }else{
+                if(uid > 0) {
+                    UserInfo userInfo = userService.getUserInfo(uid);
+                    if(userInfo != null){
+                        invoke = String.valueOf(userInfo.getNickName());
+                    } else {
+                        LOGGER.error("field "+ fieldName+" find name in organization member failed ,uid is "+ uid);
                     }
-
+                } else {
+                    invoke = "";
                 }
-            }
 
+            }
         }
 
         //处理addressId
