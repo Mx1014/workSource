@@ -25,8 +25,10 @@ import com.everhomes.organization.OrganizationCommunity;
 import com.everhomes.organization.OrganizationCommunityRequest;
 import com.everhomes.rest.acl.PrivilegeConstants;
 import com.everhomes.rest.acl.ProjectDTO;
+import com.everhomes.rest.common.TrueOrFalseFlag;
 import com.everhomes.rest.family.FamilyDTO;
 import com.everhomes.rest.news.*;
+import com.everhomes.user.*;
 import com.everhomes.user.admin.SystemUserPrivilegeMgr;
 import org.jooq.util.derby.sys.Sys;
 import org.slf4j.Logger;
@@ -69,13 +71,6 @@ import com.everhomes.search.SearchUtils;
 import com.everhomes.server.schema.tables.pojos.EhNewsAttachments;
 import com.everhomes.server.schema.tables.pojos.EhNewsComment;
 import com.everhomes.settings.PaginationConfigHelper;
-import com.everhomes.user.SearchTypes;
-import com.everhomes.user.User;
-import com.everhomes.user.UserActivityProvider;
-import com.everhomes.user.UserContext;
-import com.everhomes.user.UserLike;
-import com.everhomes.user.UserProvider;
-import com.everhomes.user.UserService;
 import com.everhomes.util.ConvertHelper;
 import com.everhomes.util.DateHelper;
 import com.everhomes.util.RuntimeErrorException;
@@ -83,6 +78,8 @@ import com.everhomes.util.StringHelper;
 import com.everhomes.util.WebTokenGenerator;
 import com.everhomes.util.excel.RowResult;
 import com.everhomes.util.excel.handler.PropMrgOwnerHandler;
+import sun.reflect.CallerSensitive;
+import sun.reflect.Reflection;
 
 @Component
 public class NewsServiceImpl implements NewsService {
@@ -132,6 +129,9 @@ public class NewsServiceImpl implements NewsService {
 
 	@Autowired
 	private FamilyProvider familyProvider;
+
+	@Autowired
+	private UserPrivilegeMgr userPrivilegeMgr;
 
 	@Override
 	public CreateNewsResponse createNews(CreateNewsCommand cmd) {
@@ -450,7 +450,10 @@ public class NewsServiceImpl implements NewsService {
 	public ListNewsResponse listNews(ListNewsCommand cmd) {
 		final Long userId = UserContext.current().getUser().getId();
 		final Integer namespaceId = checkOwner(userId, cmd.getOwnerId(), cmd.getOwnerType());
-
+		if(TrueOrFalseFlag.fromCode(cmd.getCheckPrivilegeFlag())==TrueOrFalseFlag.TRUE) {
+			LOGGER.info("news check privilege");
+			boolean b = userPrivilegeMgr.checkUserPrivilege(userId, cmd.getOwnerId(), 10005L, 10800L,null,""+cmd.getCategoryId(), null, null);
+		}
 		if (StringUtils.isEmpty(cmd.getKeyword()) && cmd.getTagIds()==null ) {
 			NewsOwnerType newsOwnerType = NewsOwnerType.fromCode(cmd.getOwnerType());
 			if (newsOwnerType == NewsOwnerType.ORGANIZATION) {
