@@ -1011,7 +1011,7 @@ public class FieldServiceImpl implements FieldService {
         }
 
         //处理uid的
-        LOGGER.debug("field name index uid: {}, fieldName length-3: {}", fieldName.indexOf("Uid"), fieldName.length()-3);
+        LOGGER.debug("field name: {} index uid: {}, fieldName length-3: {}", fieldName, fieldName.indexOf("Uid"), fieldName.length()-3);
         if(fieldName.indexOf("Uid") == fieldName.length()-3) {
             long uid = Long.parseLong(invoke.toString());
             OrganizationMemberDetails detail = organizationProvider.findOrganizationMemberDetailsByTargetId(uid);
