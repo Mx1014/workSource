@@ -867,28 +867,29 @@ public class SocialSecurityServiceImpl implements SocialSecurityService {
     private void saveSocialSecurityPayment(SocialSecurityPaymentDetailDTO socialSecurityPayment, Long detailId, Byte afterPay, Byte accumOrSocial) {
         OrganizationMemberDetails detail = organizationProvider.findOrganizationMemberDetailsByDetailId(detailId);
         String paymentMonth = getPayMonthByOwner(detail.getOrganizationId());
-        for (SocialSecurityItemDTO itemDTO : socialSecurityPayment.getItems()) {
-            SocialSecurityPayment payment = socialSecurityPaymentProvider.findSocialSecurityPayment(detailId, itemDTO.getPayItem(), accumOrSocial);
+        List<SocialSecuritySetting> settings = socialSecuritySettingProvider.listSocialSecuritySetting(detailId);
+        for (SocialSecuritySetting setting : settings) {
+            SocialSecurityPayment payment = socialSecurityPaymentProvider.findSocialSecurityPayment(detailId, setting.getPayItem(), accumOrSocial);
             if (null == payment) {
-                createSocialSecurityPayment(itemDTO, detailId, accumOrSocial, paymentMonth, afterPay);
+                createSocialSecurityPayment(setting, detailId, accumOrSocial, paymentMonth, afterPay);
             } else {
-                copyRadixAndRatio(payment, itemDTO);
+                copyRadixAndRatio(payment, setting);
                 socialSecurityPaymentProvider.updateSocialSecurityPayment(payment);
             }
         }
         socialSecurityPaymentProvider.setUserCityAndHTByAccumOrSocial(detailId, accumOrSocial, socialSecurityPayment.getCityId(), socialSecurityPayment.getHouseholdType());
     }
 
-    private void createSocialSecurityPayment(SocialSecurityItemDTO itemDTO, Long detailId, Byte accumOrSocial, String paymentMonth, Byte afterPay) {
+    private void createSocialSecurityPayment(SocialSecuritySetting setting, Long detailId, Byte accumOrSocial, String paymentMonth, Byte afterPay) {
 //        SocialSecuritySetting setting = socialSecuritySettingProvider.findSocialSecuritySettingByDetailIdAndItem(detailId, itemDTO, accumOrSocial);
-        SocialSecurityPayment payment = processSocialSecurityPayment(itemDTO, paymentMonth, afterPay);
+        SocialSecurityPayment payment = processSocialSecurityPayment(setting, paymentMonth, afterPay);
         payment.setDetailId(detailId);
         OrganizationMemberDetails detail = organizationProvider.findOrganizationMemberDetailsByDetailId(detailId);
         payment.setNamespaceId(detail.getNamespaceId());
         payment.setOrganizationId(detail.getOrganizationId());
         payment.setUserId(detail.getTargetId());
         payment.setAccumOrSocail(accumOrSocial);
-        copyRadixAndRatio(payment, itemDTO);
+//        copyRadixAndRatio(payment, itemDTO);
         payment.setIsFiled(NormalFlag.NO.getCode());
         socialSecurityPaymentProvider.createSocialSecurityPayment(payment);
 
@@ -909,7 +910,7 @@ public class SocialSecurityServiceImpl implements SocialSecurityService {
         return payment;
     }
 
-    private void copyRadixAndRatio(SocialSecurityPayment target, SocialSecurityItemDTO itemDTO) {
+    private void copyRadixAndRatio(SocialSecurityPayment target, SocialSecuritySetting itemDTO) {
         target.setCompanyRadix(itemDTO.getCompanyRadix());
         target.setEmployeeRadix(itemDTO.getEmployeeRadix());
         target.setCompanyRatio(itemDTO.getCompanyRatio());
