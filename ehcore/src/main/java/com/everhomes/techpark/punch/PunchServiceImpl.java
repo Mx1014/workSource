@@ -4818,7 +4818,7 @@ public class PunchServiceImpl implements PunchService {
 //		return download(wb,filePath,response);
 //	}
 	 @Override
-	 public OutputStream getPunchDetailsOutputStream(Long startDay,Long endDay,Byte exceptionStatus, String userName,String ownerType,Long ownerId, Long taskId) {
+	 public OutputStream getPunchDetailsOutputStream(Long startDay,Long endDay,Byte exceptionStatus, String userName,String ownerType,Long ownerId, Long taskId,Long userId) {
 
 			ListPunchDetailsCommand cmd = new ListPunchDetailsCommand() ;
 			cmd .setPageSize(Integer.MAX_VALUE-1);
@@ -4828,6 +4828,7 @@ public class PunchServiceImpl implements PunchService {
 			cmd.setUserName(userName);
 			cmd.setOwnerId(ownerId);
 			cmd.setOwnerType(ownerType);
+			cmd.setUserId(userId);
 			taskService.updateTaskProcess(taskId, 2);
 			ListPunchDetailsResponse resp = listPunchDetails(cmd);
 			taskService.updateTaskProcess(taskId, 50);
@@ -4854,6 +4855,7 @@ public class PunchServiceImpl implements PunchService {
 	        params.put("ownerId", cmd.getOwnerId());
 	        params.put("startDay", cmd.getStartDay());
 	        params.put("endDay", cmd.getEndDay());
+	        params.put("userId", cmd.getUserId());
 	        params.put("exceptionStatus", cmd.getExceptionStatus());
 	        params.put("userName", cmd.getUserName()); 
 	        params.put("reportType", "exportPunchDetails");
