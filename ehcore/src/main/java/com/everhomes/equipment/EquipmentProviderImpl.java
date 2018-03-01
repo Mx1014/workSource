@@ -2984,10 +2984,12 @@ public class EquipmentProviderImpl implements EquipmentProvider {
         dateDao.update(reviewDate);
     }
 
-    public EquipmentInspectionReviewDate getEquipmentInspectiomExpireDaysById(Long id) {
+    public EquipmentInspectionReviewDate getEquipmentInspectiomExpireDaysById(Long id, Byte scopeType, Long scopeId) {
         DSLContext context = this.dbProvider.getDslContext(AccessSpec.readWrite());
-        EhEquipmentInspectionReviewDateDao dateDao = new EhEquipmentInspectionReviewDateDao(context.configuration());
-        return ConvertHelper.convert(dateDao.findById(id), EquipmentInspectionReviewDate.class);
+        context.selectFrom(Tables.EH_EQUIPMENT_INSPECTION_REVIEW_DATE)
+                .where(Tables.EH_EQUIPMENT_INSPECTION_REVIEW_DATE.SCOPE_TYPE.eq(scopeType))
+                .and(Tables.EH_EQUIPMENT_INSPECTION_REVIEW_DATE.SCOPE_ID.eq(scopeId))
+                .fetchInto(EquipmentInspectionReviewDate.class);
     }
 
     @Override
