@@ -1622,7 +1622,7 @@ public class SalaryServiceImpl implements SalaryService {
         calendar.add(Calendar.MONTH, -1);
         SalaryDepartStatistic lastMonth = salaryDepartStatisticProvider.findSalaryDepartStatisticByDptAndMonth(dpt.getId(), monthSF.get().format(calendar.getTime()));
         if (null!=statistic.getCostSalary() && null != lastMonth && lastMonth.getCostSalary() != null && lastMonth.getCostSalary().compareTo(new BigDecimal(0)) > 0) {
-            statistic.setCostMomSalary(statistic.getCostSalary().subtract(lastMonth.getCostSalary()).divide(lastMonth.getCostSalary()).multiply(new BigDecimal(100)));
+            statistic.setCostMomSalary(statistic.getCostSalary().subtract(lastMonth.getCostSalary()).divide(lastMonth.getCostSalary(),2).multiply(new BigDecimal(100)));
         }
         LOGGER.debug("计算[{}]公司的汇总数据,人员列表[{}] ,结果[{}] ",dpt.getName(),StringHelper.toJsonString(detailIds), StringHelper.toJsonString(statistic));
         return statistic;
