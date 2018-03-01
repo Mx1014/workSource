@@ -2715,6 +2715,8 @@ public class PunchServiceImpl implements PunchService {
 	}
 	@Override
 	public PunchTimeRule getPunchTimeRuleByRuleIdAndDate(PunchRule pr,Date date,Long userId){
+		if(pr == null)
+			return null;
 		Long id = getPunchTimeRuleIdByRuleIdAndDate(pr, date, userId);
 		if(null != id && !id.equals(0L))
 			return punchProvider.getPunchTimeRuleById(id);
