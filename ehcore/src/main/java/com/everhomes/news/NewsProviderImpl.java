@@ -144,14 +144,15 @@ public class NewsProviderImpl implements NewsProvider {
 	}
 
 	@Override
-	public List<News> listNews(Long communityId, Long categoryId, Integer namespaceId, Long from, Integer pageSize,boolean isSearchDraft) {
+	public List<News> listNews(Long communityId, Long categoryId, Integer namespaceId, Long from, Integer pageSize,Byte status) {
 		SelectJoinStep<Record> step =  getReadOnlyContext().select().from(Tables.EH_NEWS);
 
 		Condition cond = Tables.EH_NEWS.NAMESPACE_ID.eq(namespaceId);
-		if(isSearchDraft){
+		if(status!=null){
+			cond = cond.and(Tables.EH_NEWS.STATUS.eq(status));
+		}
+		else{
 			cond = cond.and(Tables.EH_NEWS.STATUS.eq(NewsStatus.ACTIVE.getCode()).or(Tables.EH_NEWS.STATUS.eq(NewsStatus.DRAFT.getCode())));
-		}else{
-			cond = cond.and(Tables.EH_NEWS.STATUS.eq(NewsStatus.ACTIVE.getCode()));
 		}
 		if(null != categoryId) {
 			cond = cond.and(Tables.EH_NEWS.CATEGORY_ID.eq(categoryId));

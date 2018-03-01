@@ -1,6 +1,10 @@
 package com.everhomes.PmNotify;
 
-import com.everhomes.energy.*;
+import com.everhomes.energy.EnergyConsumptionService;
+import com.everhomes.energy.EnergyMeter;
+import com.everhomes.energy.EnergyMeterProvider;
+import com.everhomes.energy.EnergyMeterTask;
+import com.everhomes.energy.EnergyMeterTaskProvider;
 import com.everhomes.entity.EntityType;
 import com.everhomes.equipment.EquipmentInspectionTasks;
 import com.everhomes.equipment.EquipmentProvider;
@@ -23,12 +27,17 @@ import com.everhomes.rest.messaging.MessageBodyType;
 import com.everhomes.rest.messaging.MessageChannel;
 import com.everhomes.rest.messaging.MessageDTO;
 import com.everhomes.rest.messaging.MessagingConstants;
-import com.everhomes.rest.pmNotify.*;
+import com.everhomes.rest.pmNotify.PmNotifyMode;
+import com.everhomes.rest.pmNotify.PmNotifyReceiver;
+import com.everhomes.rest.pmNotify.PmNotifyReceiverList;
+import com.everhomes.rest.pmNotify.PmNotifyReceiverType;
+import com.everhomes.rest.pmNotify.PmNotifyType;
 import com.everhomes.rest.quality.QualityGroupType;
 import com.everhomes.rest.sms.SmsTemplateCode;
 import com.everhomes.rest.user.IdentifierType;
 import com.everhomes.rest.user.MessageChannelType;
 import com.everhomes.scheduler.ScheduleProvider;
+import com.everhomes.search.EquipmentTasksSearcher;
 import com.everhomes.sms.SmsProvider;
 import com.everhomes.user.User;
 import com.everhomes.user.UserIdentifier;
@@ -45,8 +54,13 @@ import org.springframework.stereotype.Component;
 import javax.annotation.PostConstruct;
 import java.sql.Timestamp;
 import java.text.SimpleDateFormat;
-import java.util.*;
+import java.util.ArrayList;
 import java.util.Date;
+import java.util.HashMap;
+import java.util.HashSet;
+import java.util.List;
+import java.util.Map;
+import java.util.Set;
 
 /**
  * Created by ying.xiong on 2017/9/12.
@@ -96,6 +110,9 @@ public class PmNotifyServiceImpl implements PmNotifyService, ApplicationListener
 
     @Autowired
     private EnergyMeterProvider energyMeterProvider;
+
+    @Autowired
+    private EquipmentTasksSearcher equipmentTasksSearcher;
 
     private String queueDelay = "pmtaskdelays";
     private String queueNoDelay = "pmtasknodelays";
@@ -203,6 +220,8 @@ public class PmNotifyServiceImpl implements PmNotifyService, ApplicationListener
                     smsCode = SmsTemplateCode.PM_NOTIFY_AFTER_TASK_DELAY;
                     //过期提醒的notifytime即为任务的截止时间，所以先关掉任务
                     equipmentProvider.closeTask(task);
+                    //add at 20180205
+                    equipmentTasksSearcher.feedDoc(task);
                 }
             }
 

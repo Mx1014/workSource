@@ -25,6 +25,15 @@ public class BillItemsExpectancy {
     private String billDateGeneration;
     private String billCycleStart;
     private String billCycleEnd;
+    private Long lateFineStandardId;
+
+    public Long getLateFineStandardId() {
+        return lateFineStandardId;
+    }
+
+    public void setLateFineStandardId(Long lateFineStandardId) {
+        this.lateFineStandardId = lateFineStandardId;
+    }
 
     private ContractProperty property;
     private PaymentBillGroupRule groupRule;

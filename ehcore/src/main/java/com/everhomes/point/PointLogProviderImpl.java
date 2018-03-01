@@ -184,7 +184,7 @@ public class PointLogProviderImpl implements PointLogProvider {
     }
 
     @Override
-    public PointLog isExist(Integer namespaceId, Long systemId, Long targetUid, Long ruleId, String entityType, Long entityId) {
+    public PointLog isExist(Integer namespaceId, Long systemId, Long targetUid, Long categoryId, Long ruleId, String entityType, Long entityId) {
         com.everhomes.server.schema.tables.EhPointLogs t = Tables.EH_POINT_LOGS;
 
         List<PointLog> logList = this.query(new ListingLocator(), 1, (locator, query) -> {
@@ -196,6 +196,9 @@ public class PointLogProviderImpl implements PointLogProvider {
             }
             if (targetUid != null) {
                 query.addConditions(t.TARGET_UID.eq(targetUid));
+            }
+            if (categoryId != null) {
+                query.addConditions(t.CATEGORY_ID.eq(categoryId));
             }
             if (ruleId != null) {
                 query.addConditions(t.RULE_ID.eq(ruleId));

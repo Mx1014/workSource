@@ -76,6 +76,7 @@ import com.everhomes.rest.app.AppConstants;
 import com.everhomes.rest.asset.TargetDTO;
 import com.everhomes.rest.business.ShopDTO;
 import com.everhomes.rest.community.CommunityType;
+import com.everhomes.rest.contentserver.ContentCacheConfigDTO;
 import com.everhomes.rest.contentserver.CsFileLocationDTO;
 import com.everhomes.rest.energy.util.ParamErrorCodes;
 import com.everhomes.rest.family.FamilyDTO;
@@ -112,7 +113,6 @@ import com.everhomes.sms.*;
 import com.everhomes.user.admin.SystemUserPrivilegeMgr;
 import com.everhomes.util.*;
 import org.apache.commons.lang.StringUtils;
-import org.elasticsearch.common.geo.GeoHashUtils;
 import org.jooq.DSLContext;
 import org.jooq.Record;
 import org.slf4j.Logger;
@@ -326,6 +326,9 @@ public class UserServiceImpl implements UserService {
 	private NamespaceResourceService namespaceResourceService;
 
 	@Autowired
+	private RolePrivilegeService rolePrivilegeService;
+
+	@Autowired
 	List<FunctionCardHandler> functionCardHandlers;
 
 	@Autowired
@@ -436,7 +439,7 @@ public class UserServiceImpl implements UserService {
         });
 
         LOGGER.info("Send verfication code: " + identifier.getVerificationCode() + " for new user: " + identifierToken);
-        sendVerificationCodeSms(identifier.getNamespaceId(), this.getYzxRegionPhoneNumber(identifierToken, cmd.getRegionCode()), identifier.getVerificationCode());
+        sendVerificationCodeSms(identifier.getNamespaceId(), this.getRegionPhoneNumber(identifierToken, cmd.getRegionCode()), identifier.getVerificationCode());
 
         SignupToken signupToken = new SignupToken(identifier.getOwnerUid(), identifierType, identifierToken);
 		if(StringUtils.isEmpty(signupToken.getIdentifierToken())) {
@@ -674,14 +677,14 @@ public class UserServiceImpl implements UserService {
 				//                String templateId = configurationProvider.getValue(YZX_VCODE_TEMPLATE_ID, "");
 				//                smmProvider.sendSms( identifier.getIdentifierToken(), verificationCode, templateId);
 				//增加区号发送短信 by sfyan 20161012
-				sendVerificationCodeSms(namespaceId, this.getYzxRegionPhoneNumber(identifier.getIdentifierToken(), regionCode), verificationCode);
+				sendVerificationCodeSms(namespaceId, this.getRegionPhoneNumber(identifier.getIdentifierToken(), regionCode), verificationCode);
 			} else {
 
 				// TODO
 				LOGGER.debug("Send notification code " + identifier.getVerificationCode() + " to " + identifier.getIdentifierToken());
 				//                String templateId = configurationProvider.getValue(YZX_VCODE_TEMPLATE_ID, "");
 				//                smmProvider.sendSms( identifier.getIdentifierToken(), identifier.getVerificationCode(),templateId);
-				sendVerificationCodeSms(namespaceId, this.getYzxRegionPhoneNumber(identifier.getIdentifierToken(), regionCode), identifier.getVerificationCode());
+				sendVerificationCodeSms(namespaceId, this.getRegionPhoneNumber(identifier.getIdentifierToken(), regionCode), identifier.getVerificationCode());
 			}
 
 			identifier.setNotifyTime(new Timestamp(DateHelper.currentGMTTime().getTime()));
@@ -1657,6 +1660,9 @@ public class UserServiceImpl implements UserService {
 	public void setUserInfo(SetUserInfoCommand cmd) {
 		User user = this.userProvider.findUserById(UserContext.current().getUser().getId());
 
+		// 修改用户信息之前的user
+        User oldUser = ConvertHelper.convert(user, User.class);
+
 		user.setAvatar(cmd.getAvatarUri());
 		String birthdayString = cmd.getBirthday();
 		if(StringUtils.isNotEmpty(birthdayString)) {
@@ -1689,6 +1695,9 @@ public class UserServiceImpl implements UserService {
             event.setEntityType(EntityType.USER.getCode());
             event.setEntityId(user.getId());
             event.setEventName(SystemEvent.ACCOUNT_COMPLETE_INFO.dft());
+
+            event.addParam("oldUser", StringHelper.toJsonString(oldUser));
+            event.addParam("newUser", StringHelper.toJsonString(user));
         });
 	}
 
@@ -1847,7 +1856,7 @@ public class UserServiceImpl implements UserService {
         userIdentifier.setRegionCode(cmd.getRegionCode());
         userIdentifier.setNotifyTime(new Timestamp(DateHelper.currentGMTTime().getTime()));
 
-        sendVerificationCodeSms(userIdentifier.getNamespaceId(), this.getYzxRegionPhoneNumber(userIdentifier.getIdentifierToken(), userIdentifier.getRegionCode()), verificationCode);
+        sendVerificationCodeSms(userIdentifier.getNamespaceId(), this.getRegionPhoneNumber(userIdentifier.getIdentifierToken(), userIdentifier.getRegionCode()), verificationCode);
 
         this.userProvider.updateIdentifier(userIdentifier);
 
@@ -2627,7 +2636,7 @@ public class UserServiceImpl implements UserService {
 	    String value = configurationProvider.getValue(namespaceId, "sms.vcodetest.flag", "false");
 	    if("true".equalsIgnoreCase(value)) {
 	        String verificationCode = RandomGenerator.getRandomDigitalString(6);
-	        sendVerificationCodeSms(namespaceId,this.getYzxRegionPhoneNumber(phoneNumber, cmd.getRegionCode()), verificationCode);
+	        sendVerificationCodeSms(namespaceId,this.getRegionPhoneNumber(phoneNumber, cmd.getRegionCode()), verificationCode);
 	    }
 	}
 
@@ -2999,10 +3008,6 @@ public class UserServiceImpl implements UserService {
 			}
 		}
 	}
-
-    public static void main(String[] args) {
-        System.out.println(GeoHashUtils.encode(121.643166, 31.223298));
-    }
 
 	@Override
 	public SceneDTO toOrganizationSceneDTO(Integer namespaceId, Long userId, OrganizationDTO organizationDto, SceneType sceneType) {
@@ -4173,7 +4178,7 @@ public class UserServiceImpl implements UserService {
                 log.setOwnerUid(currUserId);
                 userIdentifierLogProvider.createUserIdentifierLog(log);
             }
-            this.sendVerificationCodeSms(namespaceId, getYzxRegionPhoneNumber(oldIdentifier, oldRegionCode), verificationCode);
+            this.sendVerificationCodeSms(namespaceId, getRegionPhoneNumber(oldIdentifier, oldRegionCode), verificationCode);
         }
         // 给新手机号发送短信验证码
         else {
@@ -4197,7 +4202,7 @@ public class UserServiceImpl implements UserService {
                         "please try again to the first step");
             }
 
-            this.sendVerificationCodeSms(namespaceId, getYzxRegionPhoneNumber(newIdentifier, newRegionCode), verificationCode);
+            this.sendVerificationCodeSms(namespaceId, getRegionPhoneNumber(newIdentifier, newRegionCode), verificationCode);
         }
     }
 
@@ -4395,7 +4400,7 @@ public class UserServiceImpl implements UserService {
                 List<Tuple<String, Object>> variables = smsProvider.toTupleList("newIdentifier", log.getNewIdentifier());
                 String templateScope = SmsTemplateCode.SCOPE;
                 int templateId = SmsTemplateCode.RESET_IDENTIFIER_APPEAL_SUCCESS_CODE;
-                smsProvider.sendSms(log.getNamespaceId(), getYzxRegionPhoneNumber(log.getNewIdentifier(), log.getNewRegionCode()), templateScope, templateId, locale, variables);
+                smsProvider.sendSms(log.getNamespaceId(), getRegionPhoneNumber(log.getNewIdentifier(), log.getNewRegionCode()), templateScope, templateId, locale, variables);
                 break;
             case INACTIVE:
                 String messageBody = localeStringService.getLocalizedString(UserLocalStringCode.SCOPE, UserLocalStringCode.REJECT_APPEAL_IDENTIFIER_CODE, locale, "");
@@ -4443,9 +4448,9 @@ public class UserServiceImpl implements UserService {
 		return sign;
 	}
 
-	private String getYzxRegionPhoneNumber(String identifierToken, Integer regionCode){
+	private String getRegionPhoneNumber(String identifierToken, Integer regionCode){
 		//国内电话不要拼区号，发送短信走国内通道，便宜
-		if(null == regionCode || 86 == regionCode ){
+		if(null == regionCode || 86 == regionCode){
 			return identifierToken;
 		}
 		return "00" + regionCode + identifierToken;
@@ -4768,12 +4773,14 @@ public class UserServiceImpl implements UserService {
 							.listOrganizationAdministrators(cmd1);
 					if(organizationContactDTOS != null && organizationContactDTOS.size() > 0){
 						Long contactId = organizationContactDTOS.get(0).getTargetId();
-						User enterpriseAdmin = userProvider.findUserById(contactId);
-						dto.setUserIdentifier(enterpriseAdmin.getIdentifierToken());
+						String enterpriseAdminTel = userProvider.findMobileByUid(contactId);
+						dto.setUserIdentifier(enterpriseAdminTel);
 					}
 				}
 				return dto;
 			}
+		}else{
+        	return dto;
 		}
             //确定客户的优先度， 查到合同算查到人，楼栋门牌只是为了填写账单的地址用
 //            List<AddressIdAndName> addressByPossibleName = addressService.findAddressByPossibleName(UserContext.getCurrentNamespaceId(), communityId, buildingName, apartmentName);
@@ -5431,12 +5438,19 @@ public class UserServiceImpl implements UserService {
 	}
 
     @Override
-    public SystemInfoResponse updateUserBySystemInfo(SystemInfoCommand cmd,
-            HttpServletRequest request, HttpServletResponse response) {
+    public SystemInfoResponse updateUserBySystemInfo(
+            SystemInfoCommand cmd, HttpServletRequest request, HttpServletResponse response) {
+
+        Integer namespaceId = UserContext.getCurrentNamespaceId(cmd.getNamespaceId());
         User user = UserContext.current().getUser();
         UserLogin login = UserContext.current().getLogin();
+
         SystemInfoResponse resp = new SystemInfoResponse();
-        String urlInBrowser = configProvider.getValue(UserContext.getCurrentNamespaceId(cmd.getNamespaceId()), ConfigConstants.APP_SYSTEM_UPLOAD_URL_IN_BROWSER, "https://upload.zuolin.com");
+        String urlInBrowser = configProvider.getValue(
+                namespaceId,
+                ConfigConstants.APP_SYSTEM_UPLOAD_URL_IN_BROWSER,
+                "https://upload.zuolin.com");
+
         resp.setUploadUrlInBrowser(urlInBrowser);
         
         if(user != null && user.getId() >= User.MAX_SYSTEM_USER_ID && login != null) {
@@ -5472,16 +5486,22 @@ public class UserServiceImpl implements UserService {
             resp.setContentServer(contentServerService.getContentServer());
         }
 
-        Long l = configurationProvider.getLongValue(UserContext.getCurrentNamespaceId(cmd.getNamespaceId()), ConfigConstants.PAY_PLATFORM, 0l);
-
+        Long l = configurationProvider.getLongValue(namespaceId, ConfigConstants.PAY_PLATFORM, 0L);
         resp.setPaymentPlatform(l);
 
-		Integer mypublishFlag = configurationProvider.getIntValue(UserContext.getCurrentNamespaceId(cmd.getNamespaceId()), ConfigConstants.MY_PUBLISH_FLAG, 1);
-
+		Integer mypublishFlag = configurationProvider.getIntValue(namespaceId, ConfigConstants.MY_PUBLISH_FLAG, 1);
 		resp.setMyPublishFlag(mypublishFlag.byteValue());
 
 		resp.setScanForLogonServer("https://web.zuolin.com");
-        
+
+		// 客户端资源缓存配置
+		String clientCacheConfig = configurationProvider.getValue(
+		        namespaceId, ConfigConstants.CONTENT_CLIENT_CACHE_CONFIG,
+                // Default config
+                "{\"ignoreParameters\":[\"token\",\"auth_key\"]}");
+		resp.setContentCacheConfig(
+		        (ContentCacheConfigDTO) StringHelper.fromJsonString(clientCacheConfig, ContentCacheConfigDTO.class));
+
         return resp;
     }
 

@@ -1417,7 +1417,7 @@ public class UserController extends ControllerBase {
 	
 	/**
      * <b>URL: /user/systemInfo</b>
-     * <p>登录</p>
+     * <p>SystemInfo</p>
      * @return {@link SystemInfoResponse}
      */
     @RequestMapping("systemInfo")

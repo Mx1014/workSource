@@ -3187,7 +3187,7 @@ public class Rentalv2ServiceImpl implements Rentalv2Service {
 						refundCmd.setOnlinePayStyleNo(VendorType.fromCode(billMap.getVendorType()).getStyleNo());
 						refundCmd.setOrderType(OrderType.OrderTypeEnum.RENTALORDER.getPycode());
 						//已付金额乘以退款比例除以100
-						refundCmd.setRefundAmount(order.getPaidMoney().multiply(new BigDecimal(rs.getRefundRatio() / 100)));
+						refundCmd.setRefundAmount(order.getPaidMoney().multiply(new BigDecimal(rs.getRefundRatio() / 100.0)));
 						refundCmd.setRefundMsg("预订单取消退款");
 						this.setSignatureParam(refundCmd);
 						RentalRefundOrder rentalRefundOrder = ConvertHelper.convert(refundCmd, RentalRefundOrder.class);
@@ -3262,7 +3262,6 @@ public class Rentalv2ServiceImpl implements Rentalv2Service {
 		});
 		}
 	}
-
 
 
 	private Long createOrderNo(Long time) {

@@ -12,6 +12,9 @@ import com.everhomes.contentserver.ContentServerService;
 import com.everhomes.coordinator.CoordinationLocks;
 import com.everhomes.coordinator.CoordinationProvider;
 import com.everhomes.core.AppConfig;
+import com.everhomes.customer.CustomerEntryInfo;
+import com.everhomes.customer.EnterpriseCustomer;
+import com.everhomes.customer.EnterpriseCustomerProvider;
 import com.everhomes.db.AccessSpec;
 import com.everhomes.db.DaoAction;
 import com.everhomes.db.DaoHelper;
@@ -33,6 +36,10 @@ import com.everhomes.listing.ListingQueryBuilderCallback;
 import com.everhomes.namespace.Namespace;
 import com.everhomes.namespace.NamespaceResource;
 import com.everhomes.namespace.NamespaceResourceProvider;
+import com.everhomes.openapi.Contract;
+import com.everhomes.openapi.ContractBuildingMapping;
+import com.everhomes.openapi.ContractBuildingMappingProvider;
+import com.everhomes.openapi.ContractProvider;
 import com.everhomes.organization.ImportFileService;
 import com.everhomes.organization.ImportFileTask;
 import com.everhomes.organization.OrganizationProvider;
@@ -48,6 +55,10 @@ import com.everhomes.rest.address.admin.ImportAddressCommand;
 import com.everhomes.rest.common.ImportFileResponse;
 import com.everhomes.rest.community.CommunityDoc;
 import com.everhomes.rest.community.CommunityType;
+import com.everhomes.rest.community.ListApartmentEnterpriseCustomersCommand;
+import com.everhomes.rest.contract.ContractStatus;
+import com.everhomes.rest.customer.CustomerType;
+import com.everhomes.rest.customer.EnterpriseCustomerDTO;
 import com.everhomes.rest.family.FamilyDTO;
 import com.everhomes.rest.family.LeaveFamilyCommand;
 import com.everhomes.rest.group.GroupMemberStatus;
@@ -71,6 +82,8 @@ import com.everhomes.util.excel.RowResult;
 import com.everhomes.util.excel.handler.PropMrgOwnerHandler;
 import com.everhomes.util.file.DataFileHandler;
 import com.everhomes.util.file.DataProcessConstants;
+import com.everhomes.varField.FieldService;
+import com.everhomes.varField.ScopeFieldItem;
 import org.apache.commons.lang.StringUtils;
 import org.apache.lucene.spatial.geohash.GeoHashUtils;
 import org.jooq.*;
@@ -166,6 +179,18 @@ public class AddressServiceImpl implements AddressService, LocalBusSubscriber {
 
     @Autowired
     private NamespaceResourceProvider namespaceResourceProvider;
+
+    @Autowired
+    private ContractBuildingMappingProvider contractBuildingMappingProvider;
+
+    @Autowired
+    private ContractProvider contractProvider;
+
+    @Autowired
+    private EnterpriseCustomerProvider enterpriseCustomerProvider;
+
+    @Autowired
+    private FieldService fieldService;
 
     @PostConstruct
     public void setup() {
@@ -2464,5 +2489,57 @@ public class AddressServiceImpl implements AddressService, LocalBusSubscriber {
 
         attachment.setDownloadCount(attachment.getDownloadCount() + 1);
         addressProvider.updateAddressAttachment(attachment);
+    }
+
+    @Override
+    public List<EnterpriseCustomerDTO> listApartmentEnterpriseCustomers(ListApartmentEnterpriseCustomersCommand cmd) {
+        List<EnterpriseCustomerDTO> dtos = new ArrayList<>();
+//    3.在门牌管理页面中新增企业客户信息tab页，该门牌关联的企业信息来源于3处，详见!新增企业客户信息tab.png!：
+//    a) 企业客户基本信息中关联了楼栋门牌的企业
+//    b) 入驻信息tab页中关联了楼栋门牌的企业
+//    c) 合同中关联了楼栋门牌的企业；
+        Set<Long> customerIds = new HashSet<>();
+        Timestamp now = new Timestamp(DateHelper.currentGMTTime().getTime());
+
+        List<ContractBuildingMapping> mappings = contractBuildingMappingProvider.listByAddress(cmd.getAddressId());
+        if(mappings != null && mappings.size() > 0) {
+            mappings.forEach(mapping -> {
+                Contract contract = contractProvider.findContractById(mapping.getContractId());
+                if(ContractStatus.ACTIVE.equals(ContractStatus.fromStatus(contract.getStatus()))
+                        && now.after(contract.getContractStartDate()) && now.before(contract.getContractEndDate())
+                        && CustomerType.ENTERPRISE.equals(CustomerType.fromStatus(contract.getCustomerType()))) {
+                    customerIds.add(contract.getCustomerId());
+                }
+            });
+        }
+
+        List<CustomerEntryInfo> entryInfos = enterpriseCustomerProvider.listAddressEntryInfos(cmd.getAddressId());
+        if(entryInfos != null && entryInfos.size() > 0) {
+            entryInfos.forEach(entryInfo -> {
+                if(CustomerType.ENTERPRISE.equals(CustomerType.fromStatus(entryInfo.getCustomerType()))) {
+                    customerIds.add(entryInfo.getCustomerId());
+                }
+            });
+        }
+
+        if(customerIds != null && customerIds.size() > 0) {
+            List<EnterpriseCustomer> customers = enterpriseCustomerProvider.listEnterpriseCustomers(customerIds);
+            if(customers != null && customers.size() > 0) {
+                customers.forEach(customer -> {
+                    EnterpriseCustomerDTO dto = ConvertHelper.convert(customer, EnterpriseCustomerDTO.class);
+                    ScopeFieldItem categoryItem = fieldService.findScopeFieldItemByFieldItemId(customer.getNamespaceId(), customer.getCommunityId(), customer.getCategoryItemId());
+                    if(categoryItem != null) {
+                        dto.setCategoryItemName(categoryItem.getItemDisplayName());
+                    }
+                    ScopeFieldItem levelItem = fieldService.findScopeFieldItemByFieldItemId(customer.getNamespaceId(), customer.getCommunityId(), customer.getLevelItemId());
+                    if(levelItem != null) {
+                        dto.setLevelItemName(levelItem.getItemDisplayName());
+                    }
+
+                    dtos.add(dto);
+                });
+            }
+        }
+        return dtos;
     }
 }

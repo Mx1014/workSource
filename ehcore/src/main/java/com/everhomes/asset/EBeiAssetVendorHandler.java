@@ -2,11 +2,14 @@ package com.everhomes.asset;
 
 import com.everhomes.community.CommunityProvider;
 import com.everhomes.constants.ErrorCodes;
+import com.everhomes.openapi.ContractProvider;
 import com.everhomes.pmkexing.PmKeXingBillService;
 import com.everhomes.rest.asset.*;
+import com.everhomes.rest.contract.NamespaceContractType;
 import com.everhomes.rest.order.PreOrderDTO;
 import com.everhomes.rest.pmkexing.*;
 import com.everhomes.util.RuntimeErrorException;
+import org.jooq.tools.StringUtils;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -33,9 +36,7 @@ public class EBeiAssetVendorHandler implements AssetVendorHandler {
     private AssetProvider assetProvider;
 
     @Autowired
-    private CommunityProvider communityProvider;
-
-    private static ZuolinAssetVendorHandler zuolinAssetVendorHandler = new ZuolinAssetVendorHandler();
+    private ContractProvider contractProvider;
 
     @Override
     public ListSimpleAssetBillsResponse listSimpleAssetBills(Long ownerId, String ownerType, Long targetId, String targetType, Long organizationId, Long addressId, String tenant, Byte status, Long startTime, Long endTime, Long pageAnchor, Integer pageSize) {
@@ -132,7 +133,7 @@ public class EBeiAssetVendorHandler implements AssetVendorHandler {
     @Override
     public List<ListBillsDTO> listBills(String contractNum, Integer currentNamespaceId, Long ownerId, String ownerType, String buildingName, String apartmentName, Long addressId, String billGroupName, Long billGroupId, Byte billStatus, String dateStrBegin, String dateStrEnd, Long pageAnchor, Integer pageSize, String targetName, Byte status, String targetType, ListBillsResponse response) {
         List<ListBillsDTO> list = new ArrayList<>();
-        if(targetType!=null && targetType.equals(AssetPaymentStrings.EH_USER)) {
+        if(targetType!=null && targetType.equals(AssetPaymentConstants.EH_USER)) {
             return list;
         }
         if(pageAnchor==null || pageAnchor == 0l){
@@ -455,7 +456,7 @@ public class EBeiAssetVendorHandler implements AssetVendorHandler {
         if(data == null) return list;
         for(int i = 0; i < data.size(); i++){
             GetLeaseContractBillOnFiPropertyData source = data.get(i);
-            String key = source.getContractId()+"-"+source.getFiProperty();
+            String key = source.getContractId()+"$"+source.getFiProperty();
             if(tabs.containsKey(key)){
                 tabs.get(key).add(source);
             }else{
@@ -465,8 +466,12 @@ public class EBeiAssetVendorHandler implements AssetVendorHandler {
             }
         }
         for(Map.Entry<String,List<GetLeaseContractBillOnFiPropertyData>> entry : tabs.entrySet()){
-            String[] fiPropertyAndContractId = entry.getKey().split("-");
-            ShowBillForClientV2DTO dto = new ShowBillForClientV2DTO(getFiPropertyName(fiPropertyAndContractId[0]),fiPropertyAndContractId[1]);
+            LOGGER.info("tab key is = {}",entry.getKey());
+            String[] fiPropertyAndContractId = entry.getKey().split("\\$");
+            ShowBillForClientV2DTO dto = new ShowBillForClientV2DTO(getFiPropertyName(fiPropertyAndContractId[1]),fiPropertyAndContractId[0]);
+            //把正中会传过来的contratId转为左邻存储的contractId
+            String zuolinContractId = contractProvider.findContractIdByThirdPartyId(dto.getContractId(), NamespaceContractType.EBEI.getCode());
+            dto.setContractId(zuolinContractId);
             List<GetLeaseContractBillOnFiPropertyData> values = entry.getValue();
             List<BillForClientV2> bills = new ArrayList<>();
             BigDecimal overallOwedAmount = new BigDecimal("0");
@@ -484,7 +489,7 @@ public class EBeiAssetVendorHandler implements AssetVendorHandler {
                 addresses.add(value.getBuildingRename());
                 bills.add(bill);
             }
-            dto.setBillGroupName(getFiPropertyName(values.get(0).getFiProperty()));
+//            dto.setBillGroupName(getFiPropertyName(values.get(0).getFiProperty()));
             dto.setBills(bills);
             dto.setOverAllAmountOwed(overallOwedAmount.toString());
             Iterator<String> it = addresses.iterator();

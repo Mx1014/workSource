@@ -401,7 +401,7 @@ public class EnterpriseApplyEntryFlowListener implements FlowModuleListener {
         if (apps!=null && apps.getServiceModuleApps().size()>0)
             dto.setServiceName(apps.getServiceModuleApps().get(0).getName());
         else
-            dto.setServiceName("园区入驻");
+            return null;
 
         result.add(dto);
         return result;

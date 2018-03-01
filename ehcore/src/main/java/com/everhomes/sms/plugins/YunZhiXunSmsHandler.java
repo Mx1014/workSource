@@ -260,7 +260,7 @@ public class YunZhiXunSmsHandler implements SmsHandler, ApplicationListener<Cont
 
     private List<SmsLog> buildSmsLogs(Integer namespaceId, String[] phoneNumbers, String templateScope, int templateId,
                                       String templateLocale, String variables, RspMessage rspMessage) {
-        List<SmsLog> smsLogs = new ArrayList<>();
+        List<SmsLog> smsLogs = new ArrayList<>(phoneNumbers.length);
         YzxSmsResult res = new YzxSmsResult();
         String result = "failed";
 

@@ -8,7 +8,13 @@ import org.springframework.web.context.request.async.DeferredResult;
 import org.springframework.web.multipart.MultipartFile;
 
 import com.everhomes.rest.RestResponse;
+import com.everhomes.rest.contentserver.*;
 import com.everhomes.rest.messaging.ImageBody;
+import org.springframework.web.context.request.async.DeferredResult;
+import org.springframework.web.multipart.MultipartFile;
+
+import java.io.InputStream;
+import java.util.List;
 
 public interface ContentServerService {
 
@@ -40,7 +46,6 @@ public interface ContentServerService {
      * 
      * <p>把文件（图片、语音、视频、普通文件）上传到Content Server，并得到结果URI和URL。</p>
      * @param fileStream 文件流
-     * @param fileSuffix 文件后缀
      * @param token 用户登录token
      * @return 如果上传成功则返回
      */

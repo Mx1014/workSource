@@ -8,6 +8,7 @@ import java.math.BigDecimal;
 import java.sql.Timestamp;
 import java.util.List;
 import java.util.Map;
+import java.util.Set;
 
 /**
  * Created by ying.xiong on 2017/8/11.
@@ -26,6 +27,7 @@ public interface EnterpriseCustomerProvider {
     Map<Long, EnterpriseCustomer> listEnterpriseCustomersByIds(List<Long> ids);
     Map<Long, Long> listEnterpriseCustomerSourceByCommunityId(Long communityId);
     Map<Long, Long> listEnterpriseCustomerIndustryByCommunityId(Long communityId);
+    List<EnterpriseCustomer> listEnterpriseCustomers(Set<Long> customerIds);
 
     void createCustomerAccount(CustomerAccount account);
     void updateCustomerAccount(CustomerAccount account);
@@ -90,7 +92,9 @@ public interface EnterpriseCustomerProvider {
     void updateCustomerEntryInfo(CustomerEntryInfo entryInfo);
     void deleteCustomerEntryInfo(CustomerEntryInfo entryInfo);
     CustomerEntryInfo findCustomerEntryInfoById(Long id);
+    CustomerEntryInfo findCustomerEntryInfoByAddressId(Long customerId, Byte customerType, Long addressId);
     List<CustomerEntryInfo> listCustomerEntryInfos(Long customerId);
+    List<CustomerEntryInfo> listAddressEntryInfos(Long addressId);
 
     void createCustomerDepartureInfo(CustomerDepartureInfo departureInfo);
     void updateCustomerDepartureInfo(CustomerDepartureInfo departureInfo);
