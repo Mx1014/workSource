@@ -3596,21 +3596,23 @@ private void checkUserPrivilege(Long orgId, Long privilegeId, Long communityId) 
 			response.setNextPageAnchor((long) (offset + 1));
 		}
 
-		tasks = allTasks.stream().map(r -> {
-			if ((EquipmentTaskStatus.WAITING_FOR_EXECUTING.equals(EquipmentTaskStatus.fromStatus(r.getStatus())))
-					|| EquipmentTaskStatus.DELAY.equals(EquipmentTaskStatus.fromStatus(r.getStatus()))) {
-				return r;
-			} else if (EquipmentTaskStatus.CLOSE.equals(EquipmentTaskStatus.fromStatus(r.getStatus()))
-					|| (EquipmentTaskStatus.REVIEW_DELAY.equals(EquipmentTaskStatus.fromStatus(r.getStatus())))) {
-				return r;
-			}
-			return null;
-		}).filter(Objects::nonNull).collect(Collectors.toList());
+//		tasks = allTasks.stream().map(r -> {
+//			if ((EquipmentTaskStatus.WAITING_FOR_EXECUTING.equals(EquipmentTaskStatus.fromStatus(r.getStatus())))
+//					|| EquipmentTaskStatus.DELAY.equals(EquipmentTaskStatus.fromStatus(r.getStatus()))) {
+//				return r;
+//			} else if (EquipmentTaskStatus.CLOSE.equals(EquipmentTaskStatus.fromStatus(r.getStatus()))
+//					|| (EquipmentTaskStatus.REVIEW_DELAY.equals(EquipmentTaskStatus.fromStatus(r.getStatus())))) {
+//				return r;
+//			}
+//			return null;
+//		}).filter(Objects::nonNull).collect(Collectors.toList());
 
-		List<EquipmentTaskDTO> dtos = tasks.stream().map((r) ->
-				ConvertHelper.convert(r, EquipmentTaskDTO.class))
-				.collect(Collectors.toList());
-
+		List<EquipmentTaskDTO> dtos = new ArrayList<>();
+		if (allTasks.size() > 0) {
+			dtos = tasks.stream().map((r) ->
+					ConvertHelper.convert(r, EquipmentTaskDTO.class))
+					.collect(Collectors.toList());
+		}
 		response.setTasks(dtos);
 
 		return response;
@@ -5818,11 +5820,13 @@ private void checkUserPrivilege(Long orgId, Long privilegeId, Long communityId) 
 
 		OfflineTaskCountStat todayComplete = new OfflineTaskCountStat();
 		todayComplete.setCount(response.getTodayCompleteCount());
-		todayComplete.setId(1L);
+		todayComplete.setId(Long.valueOf(new SimpleDateFormat("yyMMddhhmmssSSS").format(DateHelper.currentGMTTime())) * 10000);
+		todayComplete.setTargetId(cmd.getTargetId());
 
 		OfflineTaskCountStat todayTaskCount = new OfflineTaskCountStat();
 		todayTaskCount.setCount(response.getTotayTasksCount());
-		todayTaskCount.setId(1L);
+		todayTaskCount.setId(Long.valueOf(new SimpleDateFormat("yyMMddhhmmssSSS").format(DateHelper.currentGMTTime())) * 10000);
+		todayTaskCount.setTargetId(cmd.getTargetId());
 
 		offlineResponse.setTodayCompleteCount(new ArrayList<>(Collections.singletonList(todayComplete)));
 		offlineResponse.setTodayTasksCount(new ArrayList<>(Collections.singletonList(todayTaskCount)));
@@ -5844,9 +5848,10 @@ private void checkUserPrivilege(Long orgId, Long privilegeId, Long communityId) 
 				EquipmentInspectionPlanDTO planDTO = ConvertHelper.convert(plan, EquipmentInspectionPlanDTO.class);
 				//填充巡检计划相关的巡检对象(需排序)
 				processEquipmentInspectionObjectsByPlanId(task.getPlanId(), planDTO);
+				if(planDTO.getEquipmentStandardRelations()!=null)
 				equipments.addAll(planDTO.getEquipmentStandardRelations());
 			}else {
-				//兼容旧任务
+				//兼容旧任务 可以去掉了
 				EquipmentInspectionEquipments equipment = equipmentProvider.findEquipmentById(task.getEquipmentId());
 				EquipmentInspectionStandards standard = equipmentProvider.findStandardById(task.getStandardId());
 				if (equipment != null && standard != null) {
