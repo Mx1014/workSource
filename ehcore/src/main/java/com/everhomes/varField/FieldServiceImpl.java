@@ -197,7 +197,7 @@ public class FieldServiceImpl implements FieldService {
         if(results != null && results.size() > 0) {
             List<String> sheetNames = results.stream().map(FieldGroupDTO::getGroupDisplayName).collect(Collectors.toList());
             // for equipment inspection dynamicExcelTemplate
-            String excelTemplateName = null;
+            String excelTemplateName = "客户管理模板" + new SimpleDateFormat("yyyy-MM-dd-HH-mm").format(Calendar.getInstance().getTime()) + ".xls";;
             if (StringUtils.isNotEmpty(cmd.getEquipmentCategoryName())) {
                 sheetNames.removeIf((s) -> !s.equals(cmd.getEquipmentCategoryName()));
                 excelTemplateName = cmd.getEquipmentCategoryName() +
