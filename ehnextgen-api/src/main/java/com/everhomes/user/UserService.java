@@ -294,8 +294,14 @@ public interface UserService {
 
     void syncUsersFromAnBangWuYe(SyncUsersFromAnBangWuYeCommand cmd);
 
-
     PushUsersResponse createUsersForAnBang(PushUsersCommand cmd);
+
+
+    //通过安邦提供的token调用他方接口进行验证，并拿到用户信息
+    UserLogin verifyUserByTokenFromAnBang(String token);
+
+    //通过安邦提供的token获取本地用户并登录
+    void logonBuAnBangToken();
 
     void pushUserDemo();
 	

@@ -135,11 +135,10 @@ import org.springframework.util.MultiValueMap;
 import org.springframework.util.concurrent.ListenableFuture;
 import org.springframework.util.concurrent.ListenableFutureCallback;
 import org.springframework.web.client.AsyncRestTemplate;
+import org.springframework.web.client.RestTemplate;
 import org.springframework.web.context.request.async.DeferredResult;
 
 import javax.annotation.PostConstruct;
-import javax.crypto.Mac;
-import javax.crypto.spec.SecretKeySpec;
 import javax.servlet.http.Cookie;
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
@@ -152,9 +151,6 @@ import java.io.UnsupportedEncodingException;
 import java.net.URLDecoder;
 import java.net.URLEncoder;
 import java.nio.charset.Charset;
-import java.security.InvalidKeyException;
-import java.security.InvalidParameterException;
-import java.security.NoSuchAlgorithmException;
 import java.sql.Timestamp;
 import java.text.ParseException;
 import java.text.SimpleDateFormat;
@@ -203,6 +199,7 @@ public class UserServiceImpl implements UserService {
 	private static String ANBANG_CLIENTSECRET = "enVvbGluMjAxODAxMDI=";
 	private static String ANBANG_OAUTH_URL = "http://139.196.255.176:8000/api/auth/oauth/token";
 	private static String ANBANG_USERS_URL = "http://139.196.255.176:8000/api/permission/user/synchronization";
+	private static String ANBANG_CURRENT_USER_URL = "http://139.196.255.176:8000/api/auth/current-user";
 
 
 	@Autowired
@@ -5713,6 +5710,70 @@ public class UserServiceImpl implements UserService {
 		return null;
 	}
 
+	@Override
+	public UserLogin verifyUserByTokenFromAnBang(String token) {
+
+		List<UserLogin> logins = new ArrayList<>();
+		StringBuffer getUrl = new StringBuffer(ANBANG_USERS_URL);
+		Map headerParam = new HashMap();
+		headerParam.put("Authorization", "bearer " + token);
+
+		dbProvider.execute(r -> {
+			try {
+				restCallSync(HttpMethod.GET, MediaType.APPLICATION_JSON, getUrl.toString(), headerParam, null, new ListenableFutureCallback<ResponseEntity<String>>() {
+
+					@Override
+					public void onSuccess(ResponseEntity<String> result) {
+						Map currentUser = (Map) JSON.parseObject(result.getBody().toString()).get("data");
+						String userIdentifierToken = currentUser.get("login").toString();
+
+						int regionCode = 86;
+						int namespaceId = Namespace.DEFAULT_NAMESPACE;
+
+
+						User user = userProvider.findUserByAccountName(userIdentifierToken);
+						if (user == null) {
+							UserIdentifier userIdentifier = userProvider.findClaimedIdentifierByToken(namespaceId, userIdentifierToken);
+							// 把regionCode的检查加上，之前是没有检查的    add by xq.tian 2017/07/12
+							if (userIdentifier != null && Objects.equals((userIdentifier.getRegionCode() != null ? userIdentifier.getRegionCode() : 86), regionCode)) {
+								user = userProvider.findUserById(userIdentifier.getOwnerUid());
+								if (user == null) {
+									LOGGER.error("Unable to find owner user of identifier record,  namespaceId={}, userIdentifierToken={}, deviceIdentifier={}, pusherIdentify={}",
+											namespaceId, userIdentifierToken, null, null);
+									throw errorWith(UserServiceErrorCode.SCOPE, UserServiceErrorCode.ERROR_USER_NOT_EXIST, "User does not exist");
+								}
+							} else {
+								LOGGER.warn("Unable to find identifier record,  namespaceId={}, userIdentifierToken={}, deviceIdentifier={}, pusherIdentify={}",
+										namespaceId, userIdentifierToken, null, null);
+								throw errorWith(UserServiceErrorCode.SCOPE, UserServiceErrorCode.ERROR_UNABLE_TO_LOCATE_USER, "Unable to locate user");
+							}
+						}
+
+						if (UserStatus.fromCode(user.getStatus()) != UserStatus.ACTIVE)
+							throw errorWith(UserServiceErrorCode.SCOPE, UserServiceErrorCode.ERROR_ACCOUNT_NOT_ACTIVATED, "User acount has not been activated yet");
+
+
+						UserLogin login = createLogin(namespaceId, user, null, null);
+						login.setStatus(UserLoginStatus.LOGGED_IN);
+						logins.add(login);
+					}
+
+					@Override
+					public void onFailure(Throwable ex) {
+						LOGGER.error(ex.getMessage());
+						throw RuntimeErrorException.errorWith(ErrorCodes.SCOPE_GENERAL, ErrorCodes.ERROR_GENERAL_EXCEPTION,
+								"Unable to sync2");
+					}
+				});
+			} catch (UnsupportedEncodingException e) {
+				e.printStackTrace();
+			}
+			return null;
+
+		});
+		return logins.size() > 1 ? logins.get(0) : null;
+	}
+
 	public ListenableFuture<ResponseEntity<String>> restCall(HttpMethod method, MediaType mediaType, String url, Map headerParam, Map bodyParam, ListenableFutureCallback<ResponseEntity<String>> responseCallback) throws UnsupportedEncodingException {
 		AsyncRestTemplate template = new AsyncRestTemplate();
 		HttpHeaders headers = new HttpHeaders();
@@ -5720,22 +5781,7 @@ public class UserServiceImpl implements UserService {
 		headerParam.forEach((k,v)->{
 			headers.add(k.toString(), v.toString().replace("[","").replace("]",""));
 		});
-//        headers.add("Content-Type", "application/x-www-form-urlencoded;charset=UTF-8");
 
-//        AclinkLinglingRequest linglingReq = new AclinkLinglingRequest();
-//
-//        if(params != null) {
-//            linglingReq.setRequestParam(params);
-//        }
-//
-//        Map<String, String> authHeader = new HashMap<String, String>();
-//        authHeader.put("signature", signature);
-//        authHeader.put("token", token);
-//        linglingReq.setHeader(authHeader);
-
-//        String body = "MESSAGE=" + URLEncoder.encode(gson.toJson(linglingReq, AclinkLinglingRequest.class));
-		//String body = "MESSAGE=" + URLEncoder.encode("{requestParam:{deviceIds:[1008], keyEffecDay:200}, header:{signature:'f2877f02-5638-45ab-8425-8bd198f36a9b', token:1461381932233}}");
-//		HttpEntity<MultiValueMap<String,String>> requestEntity = new HttpEntity<MultiValueMap<String,String>>(bodyParam, headers);
  		HttpEntity<Map<String,String>> requestEntity = new HttpEntity<Map<String,String>>(bodyParam, headers);
 		ListenableFuture<ResponseEntity<String>> future = template.exchange(url, method, requestEntity, String.class);
 
@@ -5746,6 +5792,19 @@ public class UserServiceImpl implements UserService {
 		return future;
 	}
 
+	public ResponseEntity<String> restCallSync(HttpMethod method, MediaType mediaType, String url, Map headerParam, Map bodyParam, ListenableFutureCallback<ResponseEntity<String>> responseCallback) throws UnsupportedEncodingException {
+		RestTemplate template = new RestTemplate();
+		HttpHeaders headers = new HttpHeaders();
+		headers.setContentType(mediaType);
+		headerParam.forEach((k,v)->{
+			headers.add(k.toString(), v.toString().replace("[","").replace("]",""));
+		});
+
+		HttpEntity<Map<String,String>> requestEntity = new HttpEntity<Map<String,String>>(bodyParam, headers);
+		ResponseEntity<String> future = template.exchange(url, method, requestEntity, String.class);
+
+		return future;
+	}
 
 	private void createUsersAndUserIdentifiers(List<User> users){
 		for (User user : users) {
