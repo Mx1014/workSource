@@ -977,7 +977,7 @@ public class ArchivesServiceImpl implements ArchivesService {
         response.setEmployeeCase(getArchivesEmployeeCase(employee));
 
         //  5.获取档案记录
-        if (cmd.getIsExport() != 1) {
+        if (cmd.getIsExport() == null || cmd.getIsExport() != 1) {
             response.setLogs(listArchivesLogs(employee.getOrganizationId(), employee.getId()));
         }
 
