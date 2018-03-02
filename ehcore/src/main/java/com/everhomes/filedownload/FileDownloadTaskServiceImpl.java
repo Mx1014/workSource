@@ -83,8 +83,12 @@ public class FileDownloadTaskServiceImpl implements FileDownloadTaskService  {
             dto.setUrl(url);
             dto.setSize(task.getResultLong1());
 
-            //有效期
-            dto.setValidTime(new Timestamp(dto.getCreateTime().getTime() + intervalTime));
+            //文件有效期
+            if(TaskStatus.SUCCESS == TaskStatus.fromCode(task.getStatus()) && dto.getFinishTime() != null){
+                long validTime = dto.getFinishTime().getTime() + intervalTime;
+                long zero = validTime/(1000*3600*24)*(1000*3600*24);
+                dto.setValidTime(new Timestamp(zero));
+            }
 
             //排队数，id比它小的在等待中任务数 = 排队数
             if(TaskStatus.WAITING == TaskStatus.fromCode(task.getStatus())){

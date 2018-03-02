@@ -106,8 +106,8 @@ public class TaskServiceImpl implements TaskService, ApplicationListener<Context
         }
 
         //取消任务
-        String taskName = "fileDownload_" + task.getId();
-        scheduleProvider.unscheduleJob(taskName);;
+        String taskName = "task_" + task.getType() + task.getId();
+        scheduleProvider.unscheduleJob(taskName);
 
         updateTaskStatus(taskId, TaskStatus.CANCEL.getCode(),  null);
     }
