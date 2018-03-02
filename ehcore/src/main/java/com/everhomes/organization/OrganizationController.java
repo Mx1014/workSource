@@ -1400,10 +1400,10 @@ public class OrganizationController extends ControllerBase {
 
 /*New*/
 
-    /**
+   /* *//**
      * <b>URL: /org/listOrganizationPersonnelsV2</b>
      * <p>查看(查找)员工列表</p>
-     */
+     *//*
     @RequestMapping("listOrganizationPersonnelsV2")
     @RestReturn(value = ListPersonnelsV2CommandResponse.class)
     public RestResponse listOrganizationPersonnelsV2(ListPersonnelsV2Command cmd) {
@@ -1414,10 +1414,10 @@ public class OrganizationController extends ControllerBase {
         return response;
     }
 
-    /**
+    *//**
      * <b>URL: /org/getOrganizationPersonnelDetailsV2</b>
      * <p>查看员工完整档案</p>
-     */
+     *//*
     @RequestMapping("getOrganizationPersonnelDetailsV2")
     @RestReturn(value = PersonnelsDetailsV2Response.class)
     public RestResponse getOrganizationPersonnelDetailsV2(GetPersonnelDetailsV2Command cmd) {
@@ -1428,10 +1428,10 @@ public class OrganizationController extends ControllerBase {
         return response;
     }
 
-    /**
+    *//**
      * <b>URL: /admin/org/addOrganizationPersonnelV2</b>
      * <p>添加成员到多部门多岗位</p>
-     */
+     *//*
     @RequestMapping("addOrganizationPersonnelV2")
     @RestReturn(value = OrganizationDTO.class)
     public RestResponse addOrganizationPersonnelV2(@Valid AddOrganizationPersonnelV2Command cmd) {
@@ -1441,11 +1441,11 @@ public class OrganizationController extends ControllerBase {
         return response;
     }
 
-    /**
+    *//**
      * <b>URL: /org/getOrganizationMemberBasicInfo</b>
      * <p>获取员工基本信息</p>
-     */
-/*    @RequestMapping("getOrganizationMemberBasicInfo")
+     *//*
+*//*    @RequestMapping("getOrganizationMemberBasicInfo")
     @RestReturn(value = OrganizationMemberBasicDTO.class)
     public RestResponse getOrganizationMemberBasicInfo(@Valid GetOrganizationMemberInfoCommand cmd) {
         OrganizationMemberBasicDTO res = this.organizationService.getOrganizationMemberBasicInfo(cmd);
@@ -1453,12 +1453,12 @@ public class OrganizationController extends ControllerBase {
         response.setErrorCode(ErrorCodes.SUCCESS);
         response.setErrorDescription("OK");
         return response;
-    }*/
+    }*//*
 
-    /**
+    *//**
      * <b>URL: /org/updateOrganizationMemberBackGround</b>
      * <p>修改员工背景信息</p>
-     */
+     *//*
     @RequestMapping("updateOrganizationMemberBackGround")
     @RestReturn(value = String.class)
     //@Valid
@@ -1470,10 +1470,10 @@ public class OrganizationController extends ControllerBase {
         return response;
     }
 
-    /**
+    *//**
      * <b>URL: /org/addOrganizationMemberEducations</b>
      * <p>新增员工教育信息</p>
-     */
+     *//*
     @RequestMapping("addOrganizationMemberEducations")
     @RestReturn(value = OrganizationMemberEducationsDTO.class)
     public RestResponse addOrganizationMemberEducations(@Valid AddOrganizationMemberEducationsCommand cmd) {
@@ -1484,10 +1484,10 @@ public class OrganizationController extends ControllerBase {
         return response;
     }
 
-    /**
+    *//**
      * <b>URL: /org/deleteOrganizationMemberEducations</b>
      * <p>删除员工教育信息</p>
-     */
+     *//*
     @RequestMapping("deleteOrganizationMemberEducations")
     @RestReturn(value = String.class)
     public RestResponse deleteOrganizationMemberEducations(@Valid DeleteOrganizationMemberEducationsCommand cmd) {
@@ -1498,10 +1498,10 @@ public class OrganizationController extends ControllerBase {
         return response;
     }
 
-    /**
+    *//**
      * <b>URL: /org/updateOrganizationMemberEducations</b>
      * <p>修改员工教育信息</p>
-     */
+     *//*
     @RequestMapping("updateOrganizationMemberEducations")
     @RestReturn(value = String.class)
     public RestResponse updateOrganizationMemberEducations(@Valid UpdateOrganizationMemberEducationsCommand cmd) {
@@ -1512,10 +1512,10 @@ public class OrganizationController extends ControllerBase {
         return response;
     }
 
-    /**
+    *//**
      * <b>URL: /org/listOrganizationMemberEducations</b>
      * <p>列出员工教育信息</p>
-     */
+     *//*
     @RequestMapping("listOrganizationMemberEducations")
     @RestReturn(value = OrganizationMemberEducationsDTO.class, collection = true)
     public RestResponse listOrganizationMemberEducations(@Valid ListOrganizationMemberEducationsCommand cmd) {
@@ -1526,10 +1526,10 @@ public class OrganizationController extends ControllerBase {
         return response;
     }
 
-    /**
+    *//**
      * <b>URL: /org/addOrganizationMemberWorkExperiences</b>
      * <p>新增员工工作经历</p>
-     */
+     *//*
     @RequestMapping("addOrganizationMemberWorkExperiences")
     @RestReturn(value = OrganizationMemberWorkExperiencesDTO.class)
     public RestResponse addOrganizationMemberWorkExperiences(@Valid AddOrganizationMemberWorkExperiencesCommand cmd) {
@@ -1540,10 +1540,10 @@ public class OrganizationController extends ControllerBase {
         return response;
     }
 
-    /**
+    *//**
      * <b>URL: /org/deleteOrganizationMemberWorkExperiences</b>
      * <p>删除员工工作经历</p>
-     */
+     *//*
     @RequestMapping("deleteOrganizationMemberWorkExperiences")
     @RestReturn(value = String.class)
     public RestResponse deleteOrganizationMemberWorkExperiences(@Valid DeleteOrganizationMemberWorkExperiencesCommand cmd) {
@@ -1554,10 +1554,10 @@ public class OrganizationController extends ControllerBase {
         return response;
     }
 
-    /**
+    *//**
      * <b>URL: /org/updateOrganizationMemberWorkExperiences</b>
      * <p>修改员工工作经历</p>
-     */
+     *//*
     @RequestMapping("updateOrganizationMemberWorkExperiences")
     @RestReturn(value = String.class)
     public RestResponse updateOrganizationMemberWorkExperiences(@Valid UpdateOrganizationMemberWorkExperiencesCommand cmd) {
@@ -1568,10 +1568,10 @@ public class OrganizationController extends ControllerBase {
         return response;
     }
 
-    /**
+    *//**
      * <b>URL: /org/listOrganizationMemberWorkExperiences</b>
      * <p>列出员工工作经历</p>
-     */
+     *//*
     @RequestMapping("listOrganizationMemberWorkExperiences")
     @RestReturn(value = OrganizationMemberWorkExperiencesDTO.class, collection = true)
     public RestResponse listOrganizationMemberWorkExperiences(@Valid ListOrganizationMemberWorkExperiencesCommand cmd) {
@@ -1582,10 +1582,10 @@ public class OrganizationController extends ControllerBase {
         return response;
     }
 
-    /**
+    *//**
      * <b>URL: /org/addOrganizationMemberInsurances</b>
      * <p>新增员工保险信息</p>
-     */
+     *//*
     @RequestMapping("addOrganizationMemberInsurances")
     @RestReturn(value = OrganizationMemberInsurancesDTO.class)
     public RestResponse addOrganizationMemberInsurances(@Valid AddOrganizationMemberInsurancesCommand cmd) {
@@ -1596,10 +1596,10 @@ public class OrganizationController extends ControllerBase {
         return response;
     }
 
-    /**
+    *//**
      * <b>URL: /org/deleteOrganizationMemberInsurances</b>
      * <p>删除员工保险信息</p>
-     */
+     *//*
     @RequestMapping("deleteOrganizationMemberInsurances")
     @RestReturn(value = String.class)
     public RestResponse deleteOrganizationMemberInsurances(@Valid DeleteOrganizationMemberInsurancesCommand cmd) {
@@ -1610,10 +1610,10 @@ public class OrganizationController extends ControllerBase {
         return response;
     }
 
-    /**
+    *//**
      * <b>URL: /org/updateOrganizationMemberInsurance</b>
      * <p>修改员工保险信息</p>
-     */
+     *//*
     @RequestMapping("updateOrganizationMemberInsurances")
     @RestReturn(value = String.class)
     public RestResponse updateOrganizationMemberInsurances(@Valid UpdateOrganizationMemberInsurancesCommand cmd) {
@@ -1624,10 +1624,10 @@ public class OrganizationController extends ControllerBase {
         return response;
     }
 
-    /**
+    *//**
      * <b>URL: /org/listOrganizationMemberInsurances</b>
      * <p>列举员工保险信息</p>
-     */
+     *//*
     @RequestMapping("listOrganizationMemberInsurances")
     @RestReturn(value = OrganizationMemberInsurancesDTO.class, collection = true)
     public RestResponse listOrganizationMemberInsurances(@Valid ListOrganizationMemberInsurancesCommand cmd) {
@@ -1639,10 +1639,10 @@ public class OrganizationController extends ControllerBase {
     }
 
 
-    /**
+    *//**
      * <b>URL: /org/addOrganizationMemberContracts</b>
      * <p>新增员工合同信息</p>
-     */
+     *//*
     @RequestMapping("addOrganizationMemberContracts")
     @RestReturn(value = OrganizationMemberContractsDTO.class)
     public RestResponse addOrganizationMemberContracts(@Valid AddOrganizationMemberContractsCommand cmd) {
@@ -1653,10 +1653,10 @@ public class OrganizationController extends ControllerBase {
         return response;
     }
 
-    /**
+    *//**
      * <b>URL: /org/deleteOrganizationMemberContracts</b>
      * <p>删除员工合同信息</p>
-     */
+     *//*
     @RequestMapping("deleteOrganizationMemberContracts")
     @RestReturn(value = String.class)
     public RestResponse deleteOrganizationMemberContracts(@Valid DeleteOrganizationMemberContractsCommand cmd) {
@@ -1667,10 +1667,10 @@ public class OrganizationController extends ControllerBase {
         return response;
     }
 
-    /**
+    *//**
      * <b>URL: /org/updateOrganizationMemberContracts</b>
      * <p>修改员工合同信息</p>
-     */
+     *//*
     @RequestMapping("updateOrganizationMemberContracts")
     @RestReturn(value = String.class)
     public RestResponse updateOrganizationMemberContracts(@Valid UpdateOrganizationMemberContractsCommand cmd) {
@@ -1681,10 +1681,10 @@ public class OrganizationController extends ControllerBase {
         return response;
     }
 
-    /**
+    *//**
      * <b>URL: /org/listOrganizationMemberContracts</b>
      * <p>列举员工合同信息</p>
-     */
+     *//*
     @RequestMapping("listOrganizationMemberContracts")
     @RestReturn(value = OrganizationMemberContractsDTO.class, collection = true)
     public RestResponse listOrganizationMemberContracts(@Valid ListOrganizationMemberContractsCommand cmd) {
@@ -1696,10 +1696,10 @@ public class OrganizationController extends ControllerBase {
     }
 
 
-    /**
+    *//**
      * <b>URL: /org/updateOrganizationEmployeeStatus</b>
      * <p>修改员工状态</p>
-     */
+     *//*
     @RequestMapping("updateOrganizationEmployeeStatus")
     @RestReturn(value = String.class)
     public RestResponse updateOrganizationEmployeeStatus(@Valid UpdateOrganizationEmployeeStatusCommand cmd) {
@@ -1710,10 +1710,10 @@ public class OrganizationController extends ControllerBase {
         return response;
     }
 
-    /**
+    *//**
      * <b>URL: /org/listMemberRecordChangesByJob</b>
      * <p>查看在职变动记录</p>
-     */
+     *//*
     @RequestMapping("listMemberRecordChangesByJob")
     @RestReturn(value = MemberRecordChangesByJobDTO.class, collection = true)
     public RestResponse listMemberJobRecords(@Valid ListMemberRecordChangesByJobCommand cmd) {
@@ -1724,10 +1724,10 @@ public class OrganizationController extends ControllerBase {
         return response;
     }
 
-    /**
+    *//**
      * <b>URL: /org/listMemberRecordChangesByProfile</b>
      * <p>查看档案修改记录</p>
-     */
+     *//*
     @RequestMapping("listMemberRecordChangesByProfile")
     @RestReturn(value = ListMemberProfileRecordsCommandResponse.class)
     public RestResponse listMemberProfileRecords(@Valid ListMemberProfileRecordsCommand cmd) {
@@ -1736,7 +1736,7 @@ public class OrganizationController extends ControllerBase {
         response.setErrorCode(ErrorCodes.SUCCESS);
         response.setErrorDescription("OK");
         return response;
-    }
+    }*/
 
     //  查看档案完整度接口暂时舍弃
 /*    @RequestMapping("getProfileIntegrity")
@@ -1752,7 +1752,6 @@ public class OrganizationController extends ControllerBase {
     /**
      * <b>URL: /org/importOrganizationPersonnelFiles</b>
      * <p>通讯录成员导入</p>
-     */
     @RequestMapping("importOrganizationPersonnelFiles")
     @RestReturn(value = ImportFileTaskDTO.class)
     public RestResponse importOrganizationPersonelFiles(@Valid ImportOrganizationPersonnelDataCommand cmd, @RequestParam(value = "attachment") MultipartFile[] files) {
@@ -1770,10 +1769,10 @@ public class OrganizationController extends ControllerBase {
         return response;
     }
 
-    /**
+    *//**
      * <b>URL: /org/exportOrganizationPersonnelFiles</b>
      * <p>通讯录成员导出</p>
-     */
+     *//*
     @RequestMapping("exportOrganizationPersonnelFiles")
     @RestReturn(value = String.class)
     public RestResponse exportOrganizationPersonnelFiles(@Valid ExcelOrganizationPersonnelCommand cmd, HttpServletResponse httpResponse) {
@@ -1782,7 +1781,7 @@ public class OrganizationController extends ControllerBase {
         response.setErrorCode(ErrorCodes.SUCCESS);
         response.setErrorDescription("OK");
         return response;
-    }
+    }*/
 
     /**
      * <b>URL: /org/leaveTheJob</b>

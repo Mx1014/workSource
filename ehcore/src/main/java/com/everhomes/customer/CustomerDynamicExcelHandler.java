@@ -3,6 +3,7 @@ package com.everhomes.customer;
 import com.everhomes.address.Address;
 import com.everhomes.address.AddressProvider;
 import com.everhomes.dynamicExcel.*;
+import com.everhomes.listing.CrossShardListingLocator;
 import com.everhomes.rest.customer.*;
 import com.everhomes.rest.dynamicExcel.DynamicImportResponse;
 import com.everhomes.rest.field.ExportFieldsExcelCommand;
@@ -10,6 +11,8 @@ import com.everhomes.rest.varField.FieldDTO;
 import com.everhomes.rest.varField.FieldGroupDTO;
 import com.everhomes.rest.varField.ImportFieldExcelCommand;
 import com.everhomes.rest.varField.ListFieldCommand;
+import com.everhomes.user.User;
+import com.everhomes.user.UserProvider;
 import com.everhomes.util.ConvertHelper;
 import com.everhomes.util.StringHelper;
 import com.everhomes.varField.*;
@@ -53,6 +56,9 @@ public class CustomerDynamicExcelHandler implements DynamicExcelHandler {
 
     @Autowired
     private AddressProvider addressProvider;
+
+    @Autowired
+    private UserProvider userProvider;
 
     @Override
     public List<DynamicSheet> getDynamicSheet(String sheetName, Object params, List<String> headers, boolean isImport) {
@@ -425,6 +431,14 @@ public class CustomerDynamicExcelHandler implements DynamicExcelHandler {
                                     ScopeFieldItem item = fieldService.findScopeFieldItemByDisplayName(namespaceId, communityId, moduleName, column.getValue());
                                     if(item != null) {
                                         column.setValue(item.getBusinessValue().toString());
+                                    }
+                                }
+                                if("trackingUid".equals(column.getFieldName())) {
+                                    List<User> users = userProvider.listUserByKeyword(column.getValue(), namespaceId, new CrossShardListingLocator(), 2);
+                                    if(users != null && users.size() > 0) {
+                                        column.setValue(users.get(0).getId().toString());
+                                    } else {
+                                        column.setValue("0");
                                     }
                                 }
                                 try {
