@@ -11,6 +11,15 @@ package com.everhomes.rest.requisition;
  */
 public class GetRequisitionDetailCommand {
     private Long requisitionId;
+    private Long communityId;
+
+    public Long getCommunityId() {
+        return communityId;
+    }
+
+    public void setCommunityId(Long communityId) {
+        this.communityId = communityId;
+    }
 
     public Long getRequisitionId() {
         return requisitionId;

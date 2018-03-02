@@ -9,10 +9,20 @@ import com.everhomes.util.StringHelper;
 /**
  *<ul>
  * <li>purchaseRequestId:采购单id</li>
+ * <li>communityId:园区id</li>
  *</ul>
  */
 public class EntryWarehouseCommand {
     private Long purchaseRequestId;
+    private Long communityId;
+
+    public Long getCommunityId() {
+        return communityId;
+    }
+
+    public void setCommunityId(Long communityId) {
+        this.communityId = communityId;
+    }
 
     @Override
     public String toString() {

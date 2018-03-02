@@ -2,10 +2,12 @@
 package com.everhomes.supplier;
 
 import com.everhomes.naming.NameMapper;
+import com.everhomes.rest.acl.PrivilegeConstants;
 import com.everhomes.rest.supplier.*;
 import com.everhomes.sequence.SequenceProvider;
 import com.everhomes.server.schema.tables.EhWarehouseSuppliers;
 import com.everhomes.user.UserContext;
+import com.everhomes.user.UserPrivilegeMgr;
 import com.everhomes.util.DateHelper;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
@@ -24,9 +26,12 @@ public class SupplierServiceImpl implements SupplierService{
     private SupplierProvider supplierProvider;
     @Autowired
     private SequenceProvider sequenceProvider;
+    @Autowired
+    private UserPrivilegeMgr userPrivilegeMgr;
 
     @Override
     public void createOrUpdateOneSupplier(CreateOrUpdateOneSupplierCommand cmd) {
+        checkAssetPriviledgeForPropertyOrg(cmd.getCommunityId(),PrivilegeConstants.SUPPLIER_OPERATION);
         WarehouseSupplier supplier = null;
         boolean create = true;
         if(cmd.getId() == null){
@@ -72,11 +77,13 @@ public class SupplierServiceImpl implements SupplierService{
 
     @Override
     public void deleteSupplier(DeleteOneSupplierCommand cmd) {
+        checkAssetPriviledgeForPropertyOrg(cmd.getCommunityId(),PrivilegeConstants.SUPPLIER_OPERATION);
         supplierProvider.deleteSupplier(cmd.getId());
     }
 
     @Override
     public ListSuppliersResponse listSuppliers(ListSuppliersCommand cmd) {
+        checkAssetPriviledgeForPropertyOrg(cmd.getCommunityId(),PrivilegeConstants.SUPPLIER_VIEW);
         ListSuppliersResponse response = new ListSuppliersResponse();
         Long pageAnchor = cmd.getPageAnchor();
         Integer pageSize = cmd.getPageSize();
@@ -96,6 +103,7 @@ public class SupplierServiceImpl implements SupplierService{
 
     @Override
     public GetSupplierDetailDTO getSupplierDetail(GetSupplierDetailCommand cmd) {
+        checkAssetPriviledgeForPropertyOrg(cmd.getCommunityId(),PrivilegeConstants.SUPPLIER_VIEW);
         GetSupplierDetailDTO dto = new GetSupplierDetailDTO();
         WarehouseSupplier supplier = supplierProvider.findSupplierById(cmd.getSupplierId());
         dto.setAccountNumber(supplier.getBankCardNumber());
@@ -119,7 +127,12 @@ public class SupplierServiceImpl implements SupplierService{
     }
 
     @Override
-    public List<SearchSuppliersDTO> searchSuppliers(String nameKeyword) {
-        return supplierProvider.findSuppliersByKeyword(nameKeyword);
+    public List<SearchSuppliersDTO> searchSuppliers(SearchSuppliersCommand cmd) {
+        checkAssetPriviledgeForPropertyOrg(cmd.getCommunityId(),PrivilegeConstants.SUPPLIER_VIEW);
+        return supplierProvider.findSuppliersByKeyword(cmd.getNameKeyword());
+    }
+
+    private void checkAssetPriviledgeForPropertyOrg(Long communityId, Long priviledgeId) {
+        userPrivilegeMgr.checkUserPrivilege(UserContext.currentUserId(), null, priviledgeId, PrivilegeConstants.SUPPLIER_MODULE, (byte)13, null, null, communityId);
     }
 }
