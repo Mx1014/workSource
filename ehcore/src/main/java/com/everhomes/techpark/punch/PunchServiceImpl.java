@@ -1478,7 +1478,7 @@ public class PunchServiceImpl implements PunchService {
 	}
 
 	private void calculateArriveStatus(Calendar arriveCalendar, Calendar startTime, PunchLogsDay pdl) {
-		if(arriveCalendar.before(startTime)){
+		if(!arriveCalendar.after(startTime)){
 			pdl.setPunchStatus(PunchStatus.NORMAL.getCode());
 			pdl.setExceptionStatus(ExceptionStatus.NORMAL.getCode());
 		}else{
