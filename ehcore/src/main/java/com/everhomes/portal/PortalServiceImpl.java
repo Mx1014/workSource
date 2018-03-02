@@ -219,6 +219,7 @@ public class PortalServiceImpl implements PortalService {
 		moduleApp.setCreatorUid(UserContext.current().getUser().getId());
 		moduleApp.setOperatorUid(moduleApp.getCreatorUid());
 		moduleApp.setActionType(serviceModule.getActionType());
+		moduleApp.setModuleControlType(serviceModule.getModuleControlType());
 
 		//todo
 		moduleApp.setCustomTag(cmd.getCustomTag());
@@ -252,6 +253,7 @@ public class PortalServiceImpl implements PortalService {
 			//todo
 			moduleApp.setCustomTag(createModuleApp.getCustomTag());
 			moduleApp.setCustomPath(createModuleApp.getCustomPath());
+			moduleApp.setModuleControlType(serviceModule.getModuleControlType());
 
 			serviceModuleApps.add(moduleApp);
 		}
@@ -2807,6 +2809,7 @@ public class PortalServiceImpl implements PortalService {
 		//模块则根据模块id等配置查找已存在的应用，没有则根据actiontype和actionData查询
 		if(serviceModule != null){
 			moduleApp.setModuleId(serviceModule.getId());
+			moduleApp.setModuleControlType(serviceModule.getModuleControlType());
 			if(StringUtils.isEmpty(itemLabel)){
 				moduleApp.setName(serviceModule.getName());
 			}

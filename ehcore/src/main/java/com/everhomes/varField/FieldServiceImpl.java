@@ -275,8 +275,8 @@ public class FieldServiceImpl implements FieldService {
         ListFieldGroupCommand cmd1 = ConvertHelper.convert(cmd, ListFieldGroupCommand.class);
         //获得客户所拥有的sheet
         List<FieldGroupDTO> allParentGroups = listFieldGroups(cmd1);
-        List<FieldGroupDTO> allGroups = new ArrayList<>();
-        getAllGroups(allParentGroups,allGroups);
+
+
 //        List<FieldGroupDTO> groups = new ArrayList<>();
         List<FieldGroupDTO> targetGroups = new ArrayList<>();
         if(filter){
@@ -287,17 +287,20 @@ public class FieldServiceImpl implements FieldService {
             String[] split = cmd.getIncludedGroupIds().split(",");
             for(int i = 0 ; i < split.length; i ++){
                 long targetGroupId = Long.parseLong(split[i]);
-                for(int j = 0; j < allGroups.size(); j++){
-                    Long id = allGroups.get(j).getGroupId();
+                for(int j = 0; j < allParentGroups.size(); j++){
+                    Long id = allParentGroups.get(j).getGroupId();
                     if(id.compareTo(targetGroupId) == 0){
-                        targetGroups.add(allGroups.get(j));
+                        targetGroups.add(allParentGroups.get(j));
                     }
                 }
             }
         }else{
-            targetGroups = allGroups;
+            targetGroups = allParentGroups;
         }
-        return targetGroups;
+        //前面匹配父节点的group，得到目标节点，然后拓展为子节点
+        List<FieldGroupDTO> allGroups = new ArrayList<>();
+        getAllGroups(targetGroups,allGroups);
+        return allGroups;
 //        if(onlyLeaf){
 //            getAllGroups(targetGroups,groups);
 //        }else{

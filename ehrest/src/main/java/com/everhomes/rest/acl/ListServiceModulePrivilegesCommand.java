@@ -12,6 +12,7 @@ import java.util.List;
  * <li>ownerId：范围具体Id，域名对应的机构id，后面需要讨论是否直接通过域名来获取当前公司</li>
  * <li>moduleId:模块Id，不传查询全部</li>
  * <li>types:需要的模块类型，不传就查询左邻运营后台的全部模块，即园区模块和管理模块， 参考{@link com.everhomes.rest.module.ServiceModuleType}</li>
+ * <li>appId: 应用id</li>
  * </ul>
  */
 public class ListServiceModulePrivilegesCommand {
@@ -21,6 +22,8 @@ public class ListServiceModulePrivilegesCommand {
 	private Long ownerId;
 
 	private Long moduleId;
+
+	private Long appId;
 
 	@ItemType(Byte.class)
 	private List<Byte> types;
@@ -62,5 +65,12 @@ public class ListServiceModulePrivilegesCommand {
         return StringHelper.toJsonString(this);
     }
 
-    
+
+	public Long getAppId() {
+		return appId;
+	}
+
+	public void setAppId(Long appId) {
+		this.appId = appId;
+	}
 }

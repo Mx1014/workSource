@@ -250,14 +250,18 @@ public class CustomerDynamicExcelHandler implements DynamicExcelHandler {
                         if(columns != null && columns.size() > 0) {
                             for(DynamicColumnDTO column : columns) {
                                 if("projectSource".equals(column.getFieldName())) {
-                                    column.getValue().replace("，", ",");
+                                    if(column.getValue() != null && column.getValue().contains("，")) {
+                                        column.getValue().replace("，", ",");
+                                    }
+
                                     String[] sources = column.getValue().split(",");
                                     String displayName = column.getValue();
                                     if(sources.length > 0) {
+                                        column.setValue("");
                                         for(int i = 0; i < sources.length; i++) {
                                             ScopeFieldItem item = fieldService.findScopeFieldItemByDisplayName(namespaceId, communityId, moduleName, displayName);
                                             if(item != null) {
-                                                if(i == 0) {
+                                                if("".equals(column.getValue())) {
                                                     column.setValue(item.getItemId().toString());
                                                 } else {
                                                     column.setValue(column.getValue() + "," + item.getItemId());
@@ -520,8 +524,8 @@ public class CustomerDynamicExcelHandler implements DynamicExcelHandler {
                 }
 
             }
-            response.setSuccessRowNumber(rowDatas.size() - failedNumber);
-            response.setFailedRowNumber(failedNumber);
+            response.setSuccessRowNumber(response.getSuccessRowNumber() + rowDatas.size() - failedNumber);
+            response.setFailedRowNumber(response.getFailedRowNumber() + failedNumber);
         }
     }
 

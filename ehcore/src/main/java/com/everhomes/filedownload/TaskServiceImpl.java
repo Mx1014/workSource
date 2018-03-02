@@ -106,8 +106,8 @@ public class TaskServiceImpl implements TaskService, ApplicationListener<Context
         }
 
         //取消任务
-        String taskName = "fileDownload_" + task.getId();
-        scheduleProvider.unscheduleJob(taskName);;
+        String taskName = "task_" + task.getType() + task.getId();
+        scheduleProvider.unscheduleJob(taskName);
 
         updateTaskStatus(taskId, TaskStatus.CANCEL.getCode(),  null);
     }
@@ -119,6 +119,7 @@ public class TaskServiceImpl implements TaskService, ApplicationListener<Context
         task.setStatus(status);
         if(TaskStatus.fromCode(status) == TaskStatus.SUCCESS){
             task.setProcess(100);
+            task.setFinishTime(new Timestamp(System.currentTimeMillis()));
         }
         task.setErrorDescription(errorDesc);
         taskProvider.updateTask(task);
