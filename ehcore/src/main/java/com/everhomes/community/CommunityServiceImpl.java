@@ -1494,7 +1494,7 @@ public class CommunityServiceImpl implements CommunityService {
 
     private List<GroupMemberDTO> listCommunityWaitingApproveUserAddress(CommunityAuthUserAddressCommand cmd, List<Long> groupIds, CrossShardListingLocator locator, int pageSize) {
         List<GroupMemberDTO> memberDTOList;
-        List<GroupMember> groupMembers = groupProvider.listGroupMemberByGroupIds(groupIds, locator, pageSize, (loc, query) -> {
+        List<GroupMember> groupMembers = groupProvider.listGroupMemberByGroupIds(groupIds, locator, pageSize + 1, (loc, query) -> {
             Condition c = Tables.EH_GROUP_MEMBERS.MEMBER_TYPE.eq(EntityType.USER.getCode());
             c = c.and(Tables.EH_GROUP_MEMBERS.MEMBER_STATUS.eq(cmd.getMemberStatus()));
 
@@ -1520,6 +1520,12 @@ public class CommunityServiceImpl implements CommunityService {
             return query;
         });
         memberDTOList = groupMembers.stream().map(this::toGroupMemberDTO).collect(Collectors.toList());
+		if (memberDTOList != null && memberDTOList.size() > pageSize) {
+			locator.setAnchor(memberDTOList.get(memberDTOList.size() - 1).getId());
+			memberDTOList = memberDTOList.subList(0, pageSize);
+		} else {
+			locator.setAnchor(null);
+		}
         return memberDTOList;
     }
 

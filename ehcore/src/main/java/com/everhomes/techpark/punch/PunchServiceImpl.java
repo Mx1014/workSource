@@ -47,6 +47,7 @@ import com.everhomes.server.schema.tables.pojos.EhRentalv2Cells;
 import com.everhomes.uniongroup.*;
 import com.everhomes.util.*;
 
+import com.google.gson.Gson;
 import org.apache.lucene.spatial.geohash.GeoHashUtils;
 import org.apache.poi.hssf.usermodel.DVConstraint;
 import org.apache.poi.hssf.usermodel.HSSFDataValidation;
@@ -61,6 +62,7 @@ import org.apache.poi.xssf.usermodel.XSSFRow;
 import org.apache.poi.xssf.usermodel.XSSFSheet;
 import org.apache.poi.xssf.usermodel.XSSFWorkbook;
 import org.elasticsearch.client.transport.NoNodeAvailableException;
+import org.elasticsearch.common.util.DoubleArray;
 import org.jooq.Record;
 import org.jooq.SelectQuery;
 import org.slf4j.Logger;
@@ -3218,7 +3220,7 @@ public class PunchServiceImpl implements PunchService {
 			return wb;
 		for (PunchCountDTO statistic : results ){
 			this.setNewPunchStatisticsBookRow(sheet, statistic);
-			taskService.updateTaskProcess(taskId,55 + (int)(++num / (results.size()/45)));
+			taskService.updateTaskProcess(taskId,55 + (int)(++num / (Double.valueOf(results.size())/45.00)));
 		}
 		return wb;
 //		try {
@@ -4549,8 +4551,14 @@ public class PunchServiceImpl implements PunchService {
 //				BigDecimal b = new BigDecimal(statistic.getOverTimeSum()/3600000.0);
 //				dto.setOverTimeSum(b.setScale(2,BigDecimal.ROUND_HALF_UP).doubleValue());
 //			}
-			dto.setExceptionRequestCount(punchProvider.countExceptionRequests(statistic.getUserId(),statistic.getOwnerType(),statistic.getOwnerId(),statistic.getPunchMonth()));
-			dto.setOverTimeSum(approvalRequestProvider.countOvertimeDurationByUserAndMonth(statistic.getUserId(),statistic.getOwnerType(),statistic.getOwnerId(),statistic.getPunchMonth()));
+			dto.setExceptionRequestCount(punchProvider.countExceptionRequests(statistic.getUserId(), statistic.getOwnerType(), statistic.getOwnerId(), statistic.getPunchMonth()));
+			if (null == dto.getExceptionRequestCount()) {
+				dto.setExceptionDayCount(0);
+			}
+			dto.setOverTimeSum(approvalRequestProvider.countOvertimeDurationByUserAndMonth(statistic.getUserId(), statistic.getOwnerType(), statistic.getOwnerId(), statistic.getPunchMonth()));
+			if (null == dto.getOverTimeSum()) {
+				dto.setOverTimeSum(0.0);
+			}
 //			List<ApprovalRangeStatistic> abscentStats = approvalRangeStatisticProvider.queryApprovalRangeStatistics(null, Integer.MAX_VALUE,new ListingQueryBuilderCallback()  {
 //				@Override
 //				public SelectQuery<? extends Record> buildCondition(ListingLocator locator,
@@ -4818,7 +4826,7 @@ public class PunchServiceImpl implements PunchService {
 //		return download(wb,filePath,response);
 //	}
 	 @Override
-	 public OutputStream getPunchDetailsOutputStream(Long startDay,Long endDay,Byte exceptionStatus, String userName,String ownerType,Long ownerId, Long taskId) {
+	 public OutputStream getPunchDetailsOutputStream(Long startDay,Long endDay,Byte exceptionStatus, String userName,String ownerType,Long ownerId, Long taskId,Long userId) {
 
 			ListPunchDetailsCommand cmd = new ListPunchDetailsCommand() ;
 			cmd .setPageSize(Integer.MAX_VALUE-1);
@@ -4828,6 +4836,7 @@ public class PunchServiceImpl implements PunchService {
 			cmd.setUserName(userName);
 			cmd.setOwnerId(ownerId);
 			cmd.setOwnerType(ownerType);
+			cmd.setUserId(userId);
 			taskService.updateTaskProcess(taskId, 2);
 			ListPunchDetailsResponse resp = listPunchDetails(cmd);
 			taskService.updateTaskProcess(taskId, 50);
@@ -4854,10 +4863,17 @@ public class PunchServiceImpl implements PunchService {
 	        params.put("ownerId", cmd.getOwnerId());
 	        params.put("startDay", cmd.getStartDay());
 	        params.put("endDay", cmd.getEndDay());
+	        params.put("userId", cmd.getUserId());
 	        params.put("exceptionStatus", cmd.getExceptionStatus());
-	        params.put("userName", cmd.getUserName()); 
+	        params.put("userName", cmd.getUserName());
 	        params.put("reportType", "exportPunchDetails");
-	        String fileName = String.format("按日统计导出报表_%s.xlsx", DateUtil.dateToStr(new Date(), DateUtil.NO_SLASH));
+			String fileName = "";
+			if (null != cmd.getUserId()) {
+				fileName = String.format("按日统计导出报表_%s到%s.xlsx", DateUtil.dateToStr(new Date(cmd.getStartDay()), DateUtil.NO_SLASH)
+				,DateUtil.dateToStr(new Date(cmd.getEndDay()), DateUtil.NO_SLASH));
+			}else{
+				fileName = String.format("个人按日统计导出报表_%s月.xlsx", monthSF.get().format(new Date(cmd.getStartDay())));
+			}
 
 	        taskService.createTask(fileName, TaskType.FILEDOWNLOAD.getCode(), PunchExportTaskHandler.class, params, TaskRepeatFlag.REPEAT.getCode(), new Date());
 	        return response;
@@ -4909,7 +4925,7 @@ public class PunchServiceImpl implements PunchService {
 		for (PunchDayDetailDTO dto : dtos ){
 			this.setNewPunchDetailsBookRow(sheet, dto);
 
-			taskService.updateTaskProcess(taskId,55 + (int)(++num / (dtos.size()/45)));
+			taskService.updateTaskProcess(taskId,55 + (int)(++num / (Double.valueOf(dtos.size())/45.00)));
 		}
 		return wb;
 	}
@@ -6470,16 +6486,37 @@ public class PunchServiceImpl implements PunchService {
 //			throw RuntimeErrorException.errorWith(ErrorCodes.SCOPE_GENERAL,ErrorCodes.ERROR_INVALID_PARAMETER,
 //					"Invalid owner type or  Id parameter in the command");
 //		}
-        LocaleString scheduleLocaleString = localeStringProvider.find( PunchConstants.PUNCH_EXCEL_SCOPE, PunchConstants.EXCEL_SCHEDULE,
-                UserContext.current().getUser().getLocale());
-		String filePath = "schedule " + monthSF.get().format(new Date(cmd.getQueryTime())) + ".xlsx";
-		//新建了一个文件
 
-        Workbook wb = createPunchSchedulingsBook(cmd.getQueryTime(),cmd.getEmployees(),cmd.getTimeRules());
+		Map<String, Object> params = new HashMap();
 
-        return download(wb, filePath, response);
+		//如果是null的话会被传成“null”
+		params.put("queryTime", cmd.getQueryTime());
+		params.put("employees", cmd.getEmployees());
+		params.put("timeRules", cmd.getTimeRules());
+		params.put("reportType", "exportPunchScheduling");
+		String fileName = String.format("考勤排班_%s.xlsx", DateUtil.dateToStr(new Date(cmd.getQueryTime()), DateUtil.NO_SLASH));
+
+		taskService.createTask(fileName, TaskType.FILEDOWNLOAD.getCode(), PunchExportTaskHandler.class, params, TaskRepeatFlag.REPEAT.getCode(), new Date());
+		return response;
 
     }
+
+	@Override
+	public OutputStream getPunchSchedulingOutputStream(Long queryTime,
+											  List<PunchSchedulingEmployeeDTO> employees, List<PunchTimeRuleDTO> timeRules, Long taskId) {
+
+		Workbook wb = createPunchSchedulingsBook(queryTime,employees,timeRules);
+		taskService.updateTaskProcess(taskId, 50);
+		ByteArrayOutputStream out = new ByteArrayOutputStream();
+		try {
+			wb.write(out);
+		} catch (IOException e) {
+			LOGGER.error("something woring with build output stream");
+			e.printStackTrace();
+		}
+		return out;
+
+	}
 
 
     @Override

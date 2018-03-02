@@ -787,7 +787,8 @@ CREATE TABLE `eh_warehouse_orders`(
   PRIMARY KEY (`id`),
   KEY `i_service_type` (`service_type`) COMMENT '出入库状态得索引，用于搜索'
 ) ENGINE=INNODB DEFAULT CHARSET=utf8mb4;
-
+-- 仓库出入库单增加community_id字段
+-- ALTER TABLE `eh_warehouse_orders` ADD COLUMN `community_id` BIGINT DEFAULT NULL COMMENT '园区id';
 -- 增加出入库记录关联出入库单的字段
 ALTER TABLE `eh_warehouse_stock_logs` ADD COLUMN `warehouse_order_id` BIGINT DEFAULT NULL COMMENT '关联的出入库单的id';
 ALTER TABLE `eh_warehouse_requests` ADD COLUMN `requisition_id` BIGINT DEFAULT NULL COMMENT '关联的请示单的id';
@@ -1679,15 +1680,11 @@ ALTER TABLE eh_archives_dismiss_employees MODIFY department VARCHAR(128) COMMENT
 
 ALTER TABLE eh_archives_dismiss_employees MODIFY employee_status TINYINT NOT NULL DEFAULT 0 COMMENT '0:probation, 1:on the job, 2:internship, 3:dismissal';
 
-ALTER TABLE eh_archives_dismiss_employees ADD COLUMN department_ids VARCHAR(128) COMMENT '离职前部门id';
+ALTER TABLE eh_archives_dismiss_employees ADD COLUMN department_id BIGINT COMMENT '离职前部门id';
 
 ALTER TABLE eh_archives_dismiss_employees ADD COLUMN job_position VARCHAR(128) COMMENT '离职前职位';
 
-ALTER TABLE eh_archives_dismiss_employees ADD COLUMN job_position_ids VARCHAR(128) COMMENT '离职前职位id';
-
 ALTER TABLE eh_archives_dismiss_employees ADD COLUMN job_level VARCHAR(128) COMMENT '离职前职级';
-
-ALTER TABLE eh_archives_dismiss_employees ADD COLUMN job_level_ids VARCHAR(128) COMMENT '离职前职级id';
 
 -- end by nan.rong
 

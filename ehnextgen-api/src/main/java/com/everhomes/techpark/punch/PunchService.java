@@ -241,6 +241,9 @@ public interface PunchService {
 
 	public DeferredResult<RestResponse> getPunchQRCodeResult(GetPunchQRCodeCommand cmd);
 
+	OutputStream getPunchSchedulingOutputStream(Long queryTime,
+									   List<PunchSchedulingEmployeeDTO> employees, List<PunchTimeRuleDTO> timeRules, Long taskId);
+
 	HttpServletResponse exportPunchSchedulingTemplate(ListPunchSchedulingMonthCommand cmd, HttpServletResponse response);
 
 	void invalidPunchQRCode(GetPunchQRCodeCommand cmd);
@@ -260,7 +263,7 @@ public interface PunchService {
 	void checkAppPrivilege(Long orgId, Long checkOrgId, Long privilege);
 
 	OutputStream getPunchDetailsOutputStream(Long startDay, Long endDay, Byte exceptionStatus,
-			String userName, String ownerType, Long ownerId, Long taskId);
+			String userName, String ownerType, Long ownerId, Long taskId, Long userId);
 
 	OutputStream getPunchStatisticsOutputStream(Long startDay, Long endDay, Byte exceptionStatus,
 			String userName, String ownerType, Long ownerId, Long taskId);

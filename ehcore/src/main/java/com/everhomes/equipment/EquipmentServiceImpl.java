@@ -4835,6 +4835,7 @@ private void checkUserPrivilege(Long orgId, Long privilegeId, Long communityId) 
 		response.setReviewedTasks(response.getReviewUnqualified() + response.getReviewQualified());
 		response.setUnReviewedTasks(statTasks.getCompleteWaitingForApproval());
 		response.setReviewTasks(response.getUnReviewedTasks() + response.getReviewedTasks());
+		response.setCompleteInspection(statTasks.getCompleteWaitingForApproval());
 
 		Double maintanceRate = response.getCompleteInspection().equals(0L) ? 0.00 : (double)response.getCompleteMaintance()/(double)response.getCompleteInspection();
 		response.setMaintanceRate(maintanceRate);
@@ -5148,13 +5149,11 @@ private void checkUserPrivilege(Long orgId, Long privilegeId, Long communityId) 
 	public EquipmentInspectionReviewDateDTO listReviewExpireDays(SetReviewExpireDaysCommand cmd) {
 		Byte scopeType = PmNotifyScopeType.NAMESPACE.getCode();
 		Long scopeId = cmd.getNamespaceId().longValue();
-		EquipmentInspectionReviewDate reviewDate = null;
 		if (cmd.getCommunityId() != null && cmd.getCommunityId() != 0L) {
 			scopeType = PmNotifyScopeType.COMMUNITY.getCode();
 			scopeId = cmd.getCommunityId();
-			 reviewDate = equipmentProvider.getEquipmentInspectiomExpireDays(scopeId, scopeType);
-
 		}
+		EquipmentInspectionReviewDate reviewDate = equipmentProvider.getEquipmentInspectiomExpireDays(scopeId, scopeType);
 		if (reviewDate != null) {
 			return ConvertHelper.convert(reviewDate, EquipmentInspectionReviewDateDTO.class);
 		} else {

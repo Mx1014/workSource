@@ -867,28 +867,29 @@ public class SocialSecurityServiceImpl implements SocialSecurityService {
     private void saveSocialSecurityPayment(SocialSecurityPaymentDetailDTO socialSecurityPayment, Long detailId, Byte afterPay, Byte accumOrSocial) {
         OrganizationMemberDetails detail = organizationProvider.findOrganizationMemberDetailsByDetailId(detailId);
         String paymentMonth = getPayMonthByOwner(detail.getOrganizationId());
-        for (SocialSecurityItemDTO itemDTO : socialSecurityPayment.getItems()) {
-            SocialSecurityPayment payment = socialSecurityPaymentProvider.findSocialSecurityPayment(detailId, itemDTO.getPayItem(), accumOrSocial);
+        List<SocialSecuritySetting> settings = socialSecuritySettingProvider.listSocialSecuritySetting(detailId);
+        for (SocialSecuritySetting setting : settings) {
+            SocialSecurityPayment payment = socialSecurityPaymentProvider.findSocialSecurityPayment(detailId, setting.getPayItem(), accumOrSocial);
             if (null == payment) {
-                createSocialSecurityPayment(itemDTO, detailId, accumOrSocial, paymentMonth, afterPay);
+                createSocialSecurityPayment(setting, detailId, accumOrSocial, paymentMonth, afterPay);
             } else {
-                copyRadixAndRatio(payment, itemDTO);
+                copyRadixAndRatio(payment, setting);
                 socialSecurityPaymentProvider.updateSocialSecurityPayment(payment);
             }
         }
         socialSecurityPaymentProvider.setUserCityAndHTByAccumOrSocial(detailId, accumOrSocial, socialSecurityPayment.getCityId(), socialSecurityPayment.getHouseholdType());
     }
 
-    private void createSocialSecurityPayment(SocialSecurityItemDTO itemDTO, Long detailId, Byte accumOrSocial, String paymentMonth, Byte afterPay) {
+    private void createSocialSecurityPayment(SocialSecuritySetting setting, Long detailId, Byte accumOrSocial, String paymentMonth, Byte afterPay) {
 //        SocialSecuritySetting setting = socialSecuritySettingProvider.findSocialSecuritySettingByDetailIdAndItem(detailId, itemDTO, accumOrSocial);
-        SocialSecurityPayment payment = processSocialSecurityPayment(itemDTO, paymentMonth, afterPay);
+        SocialSecurityPayment payment = processSocialSecurityPayment(setting, paymentMonth, afterPay);
         payment.setDetailId(detailId);
         OrganizationMemberDetails detail = organizationProvider.findOrganizationMemberDetailsByDetailId(detailId);
         payment.setNamespaceId(detail.getNamespaceId());
         payment.setOrganizationId(detail.getOrganizationId());
         payment.setUserId(detail.getTargetId());
         payment.setAccumOrSocail(accumOrSocial);
-        copyRadixAndRatio(payment, itemDTO);
+//        copyRadixAndRatio(payment, itemDTO);
         payment.setIsFiled(NormalFlag.NO.getCode());
         socialSecurityPaymentProvider.createSocialSecurityPayment(payment);
 
@@ -909,7 +910,7 @@ public class SocialSecurityServiceImpl implements SocialSecurityService {
         return payment;
     }
 
-    private void copyRadixAndRatio(SocialSecurityPayment target, SocialSecurityItemDTO itemDTO) {
+    private void copyRadixAndRatio(SocialSecurityPayment target, SocialSecuritySetting itemDTO) {
         target.setCompanyRadix(itemDTO.getCompanyRadix());
         target.setEmployeeRadix(itemDTO.getEmployeeRadix());
         target.setCompanyRatio(itemDTO.getCompanyRatio());
@@ -1194,6 +1195,14 @@ public class SocialSecurityServiceImpl implements SocialSecurityService {
                 String afCityName = r.getD();
                 Long afCItyId = getZuolinNamespaceCityId(afCityName);
                 String houseType = r.getE();
+                if (null == houseType) {
+                    LOGGER.error("没有这个城市 " + r.getC() );
+                    log.setErrorLog("没有这个户籍类型");
+                    log.setCode(SocialSecurityConstants.ERROR_CHECK_SOCIAL_CITY);
+                    log.setErrorDescription(log.getErrorLog());
+                    response.getLogs().add(log);
+                    continue;
+                }
                 List<SocialSecurityBase> ssBases = socialSecurityBaseProvider.listSocialSecurityBase(ssCityId, houseType, AccumOrSocial.SOCAIL.getCode());
                 if (null == ssBases) {
                     LOGGER.error("没有这个城市或者户籍档次 " + ssCityName + houseType);
@@ -1556,7 +1565,9 @@ public class SocialSecurityServiceImpl implements SocialSecurityService {
         if (detailIds != null) {
             for (Long detailId : detailIds) {
                 OrganizationMemberDetails detail = organizationProvider.findOrganizationMemberDetailsByDetailId(detailId);
-                SocialSecurityInoutReport report = createInoutReport(detail, month);
+                if(null != detail){
+                	SocialSecurityInoutReport report = createInoutReport(detail, month);
+                }
             }
         }
 //        if (outDetails != null) {
@@ -2078,48 +2089,48 @@ public class SocialSecurityServiceImpl implements SocialSecurityService {
         row.createCell(++i).setCellValue(r.getPayMonth());
         row.createCell(++i).setCellValue(checkNullBigDecimal(r.getAccumulationFundRadix()));
         row.createCell(++i).setCellValue(checkNullBigDecimal(r.getAccumulationFundCompanyRadix()));
-        row.createCell(++i).setCellValue(checkNull(r.getAccumulationFundCompanyRatio()));
+        row.createCell(++i).setCellValue(checkNullRatio(r.getAccumulationFundCompanyRatio()));
         row.createCell(++i).setCellValue(checkNullBigDecimal(r.getAccumulationFundEmployeeRadix()));
-        row.createCell(++i).setCellValue(checkNull(r.getAccumulationFundEmployeeRatio()));
+        row.createCell(++i).setCellValue(checkNullRatio(r.getAccumulationFundEmployeeRatio()));
         row.createCell(++i).setCellValue(checkNullBigDecimal(r.getAccumulationFundSum()));
         row.createCell(++i).setCellValue(checkNullBigDecimal(r.getAccumulationFundCompanySum()));
         row.createCell(++i).setCellValue(checkNullBigDecimal(r.getAccumulationFundEmployeeSum()));
-        row.createCell(++i).setCellValue("");
+//        row.createCell(++i).setCellValue("");
         //养老
         row.createCell(++i).setCellValue(checkNullBigDecimal(r.getPensionCompanyRadix()));
-        row.createCell(++i).setCellValue(checkNullInteger(r.getPensionCompanyRatio()));
+        row.createCell(++i).setCellValue(checkNullRatio(r.getPensionCompanyRatio()));
         row.createCell(++i).setCellValue(checkNullBigDecimal(r.getPensionCompanySum()));
         row.createCell(++i).setCellValue(checkNullBigDecimal(r.getPensionEmployeeRadix()));
-        row.createCell(++i).setCellValue(checkNullInteger(r.getPensionEmployeeRatio()));
+        row.createCell(++i).setCellValue(checkNullRatio(r.getPensionEmployeeRatio()));
         row.createCell(++i).setCellValue(checkNullBigDecimal(r.getPensionEmployeeSum()));
         //失业
         row.createCell(++i).setCellValue(checkNullBigDecimal(r.getUnemploymentCompanyRadix()));
-        row.createCell(++i).setCellValue(checkNullInteger(r.getUnemploymentCompanyRatio()));
+        row.createCell(++i).setCellValue(checkNullRatio(r.getUnemploymentCompanyRatio()));
         row.createCell(++i).setCellValue(checkNullBigDecimal(r.getUnemploymentCompanySum()));
         row.createCell(++i).setCellValue(checkNullBigDecimal(r.getUnemploymentEmployeeRadix()));
-        row.createCell(++i).setCellValue(checkNullInteger(r.getUnemploymentEmployeeRatio()));
+        row.createCell(++i).setCellValue(checkNullRatio(r.getUnemploymentEmployeeRatio()));
         row.createCell(++i).setCellValue(checkNullBigDecimal(r.getUnemploymentEmployeeSum()));
         //医疗
         row.createCell(++i).setCellValue(checkNullBigDecimal(r.getMedicalCompanyRadix()));
-        row.createCell(++i).setCellValue(checkNullInteger(r.getMedicalCompanyRatio()));
+        row.createCell(++i).setCellValue(checkNullRatio(r.getMedicalCompanyRatio()));
         row.createCell(++i).setCellValue(checkNullBigDecimal(r.getMedicalCompanySum()));
         row.createCell(++i).setCellValue(checkNullBigDecimal(r.getMedicalEmployeeRadix()));
-        row.createCell(++i).setCellValue(checkNullInteger(r.getMedicalEmployeeRatio()));
+        row.createCell(++i).setCellValue(checkNullRatio(r.getMedicalEmployeeRatio()));
         row.createCell(++i).setCellValue(checkNullBigDecimal(r.getMedicalEmployeeSum()));
         //工伤
         row.createCell(++i).setCellValue(checkNullBigDecimal(r.getInjuryCompanyRadix()));
-        row.createCell(++i).setCellValue(checkNullInteger(r.getInjuryCompanyRatio()));
+        row.createCell(++i).setCellValue(checkNullRatio(r.getInjuryCompanyRatio()));
         row.createCell(++i).setCellValue(checkNullBigDecimal(r.getInjuryCompanySum()));
         //生育
         row.createCell(++i).setCellValue(checkNullBigDecimal(r.getBirthCompanyRadix()));
-        row.createCell(++i).setCellValue(checkNullInteger(r.getBirthCompanyRatio()));
+        row.createCell(++i).setCellValue(checkNullRatio(r.getBirthCompanyRatio()));
         row.createCell(++i).setCellValue(checkNullBigDecimal(r.getBirthCompanySum()));
         //大病
         row.createCell(++i).setCellValue(checkNullBigDecimal(r.getCriticalIllnessCompanyRadix()));
-        row.createCell(++i).setCellValue(checkNullInteger(r.getCriticalIllnessCompanyRatio()));
+        row.createCell(++i).setCellValue(checkNullRatio(r.getCriticalIllnessCompanyRatio()));
         row.createCell(++i).setCellValue(checkNullBigDecimal(r.getCriticalIllnessCompanySum()));
         row.createCell(++i).setCellValue(checkNullBigDecimal(r.getCriticalIllnessEmployeeRadix()));
-        row.createCell(++i).setCellValue(checkNullInteger(r.getCriticalIllnessEmployeeRatio()));
+        row.createCell(++i).setCellValue(checkNullRatio(r.getCriticalIllnessEmployeeRatio()));
         row.createCell(++i).setCellValue(checkNullBigDecimal(r.getCriticalIllnessEmployeeSum()));
 
         //补缴
@@ -2141,6 +2152,14 @@ public class SocialSecurityServiceImpl implements SocialSecurityService {
         row.createCell(++i).setCellValue(checkNullBigDecimal(r.getDisabilitySum()));
         row.createCell(++i).setCellValue(checkNullBigDecimal(r.getCommercialInsurance()));
         return sheet;
+    }
+
+    private String checkNullRatio(Integer ratio) {
+        if (null == ratio) {
+            return "";
+        }
+
+        return new BigDecimal(ratio).divide(new BigDecimal(100),2).toString()+"%";
     }
 
     private String checkNull(Object o) {
@@ -2181,7 +2200,7 @@ public class SocialSecurityServiceImpl implements SocialSecurityService {
         row.createCell(++i).setCellValue("公积金合计");
         row.createCell(++i).setCellValue("公积金企业");
         row.createCell(++i).setCellValue("公积金个人");
-        row.createCell(++i).setCellValue("公积金需纳税额");
+//        row.createCell(++i).setCellValue("公积金需纳税额");
         row.createCell(++i).setCellValue("养老企业基数");
         row.createCell(++i).setCellValue("养老企业比例");
         row.createCell(++i).setCellValue("养老企业");

@@ -144,6 +144,10 @@ public class NewsServiceImpl implements NewsService {
 		checkBlacklist(null, null);
 
 		Integer namespaceId = checkOwner(userId, cmd.getOwnerId(), cmd.getOwnerType());
+		
+		if(cmd.getCurrentProjectId()!=null){
+			userPrivilegeMgr.checkUserPrivilege(userId, cmd.getCurrentPMId(), 10005L, 10800L,null,""+cmd.getCategoryId(), null, cmd.getCurrentProjectId());
+		}
 
 		News news = processNewsCommand(userId, namespaceId, cmd);
 
@@ -181,6 +185,9 @@ public class NewsServiceImpl implements NewsService {
 	public void updateNews(UpdateNewsCommand cmd) {
 		final Long userId = UserContext.current().getUser().getId();
 		Integer namespaceId = checkOwner(userId, cmd.getOwnerId(), cmd.getOwnerType());
+		if(cmd.getCurrentProjectId()!=null){
+			userPrivilegeMgr.checkUserPrivilege(userId, cmd.getCurrentPMId(), 10005L, 10800L,null,""+cmd.getCategoryId(), null, cmd.getCurrentProjectId());
+		}
 		News news = ConvertHelper.convert(cmd, News.class);
 		news.setNamespaceId(namespaceId);
 		news.setContentType(NewsContentType.RICH_TEXT.getCode());
@@ -328,6 +335,9 @@ public class NewsServiceImpl implements NewsService {
 	public void importNews(ImportNewsCommand cmd, MultipartFile[] files) {
 		Long userId = UserContext.current().getUser().getId();
 		Integer namespaceId = checkOwner(userId, cmd.getOwnerId(), cmd.getOwnerType());
+		if(cmd.getCurrentProjectId()!=null){
+			userPrivilegeMgr.checkUserPrivilege(userId, cmd.getCurrentPMId(), 10005L, 10800L,null,""+cmd.getCategoryId(), null, cmd.getCurrentProjectId());
+		}
 		// 读取Excel数据
 		List<News> newsList = getNewsFromExcel(userId, namespaceId, cmd, files);
 
@@ -452,7 +462,9 @@ public class NewsServiceImpl implements NewsService {
 		final Integer namespaceId = checkOwner(userId, cmd.getOwnerId(), cmd.getOwnerType());
 		if(TrueOrFalseFlag.fromCode(cmd.getCheckPrivilegeFlag())==TrueOrFalseFlag.TRUE) {
 			LOGGER.info("news check privilege");
-			boolean b = userPrivilegeMgr.checkUserPrivilege(userId, cmd.getOwnerId(), 10005L, 10800L,null,""+cmd.getCategoryId(), null, null);
+			if(cmd.getCurrentProjectId()!=null){
+				userPrivilegeMgr.checkUserPrivilege(userId, cmd.getCurrentPMId(), 10005L, 10800L,null,""+cmd.getCategoryId(), null, cmd.getCurrentProjectId());
+			}
 		}
 		if (StringUtils.isEmpty(cmd.getKeyword()) && cmd.getTagIds()==null ) {
 			NewsOwnerType newsOwnerType = NewsOwnerType.fromCode(cmd.getOwnerType());
