@@ -4533,6 +4533,7 @@ public class QualityServiceImpl implements QualityService {
 		Set<QualityInspectionSpecificationDTO> tempSet = new HashSet<>();
 		tempSet.addAll(specifications);
 		List<QualityInspectionSpecificationDTO> specificationList = new ArrayList<>(tempSet);
+		specificationList.forEach((s)->parentSpecificationIds.add(s.getId()));
 		populateSpecificationDetails(specificationList, parentSpecificationIds);
 		offlineTaskDetailsResponse.setSpecifications(specificationList);
 
