@@ -5460,6 +5460,10 @@ public class PropertyMgrServiceImpl implements PropertyMgrService {
         OrganizationOwnerCarDTO dto = ConvertHelper.convert(ownerCar, OrganizationOwnerCarDTO.class);
         ParkingCardCategory category = propertyMgrProvider.findParkingCardCategory(ownerCar.getParkingType());
         dto.setParkingType(category != null ? category.getCategoryName() : "");
+
+		if(dto.getContentUri() != null) {
+			dto.setContentUrl(parserUri(dto.getContentUri(), EhOrganizationOwners.class.getSimpleName(), dto.getId()));
+		}
         return dto;
     }
 
