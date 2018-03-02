@@ -5352,27 +5352,38 @@ public class PropertyMgrServiceImpl implements PropertyMgrService {
         validate(cmd);
         checkCurrentUserNotInOrg(cmd.getOrganizationId());
 
-        Integer namespaceId = currentNamespaceId();
+//        Integer namespaceId = currentNamespaceId();
+        Integer namespaceId = cmd.getNamespaceId();
         OrganizationOwnerOwnerCar ownerOwnerCar = propertyMgrProvider.findOrganizationOwnerOwnerCarByOwnerIdAndCarId(
                 namespaceId, cmd.getOrgOwnerId(), cmd.getCarId());
-        if (ownerOwnerCar != null) {
-            CommunityPmOwner pmOwner = propertyMgrProvider.findPropOwnerById(cmd.getOrgOwnerId());
-            OrganizationOwnerCar ownerCar = propertyMgrProvider.findOrganizationOwnerCar(namespaceId, cmd.getCarId());
-            OrganizationOwnerOwnerCar primaryUser = propertyMgrProvider.findOrganizationOwnerCarPrimaryUser(namespaceId, cmd.getCarId());
-            dbProvider.execute(status -> {
-                // 如果现已经有首要联系人,则设置当前首要联系人为非首要联系人
-                if (primaryUser != null) {
-                    primaryUser.setPrimaryFlag(OrganizationOwnerOwnerCarPrimaryFlag.NORMAL.getCode());
-                    propertyMgrProvider.updateOrganizationOwnerOwnerCar(primaryUser);
-                }
-                ownerOwnerCar.setPrimaryFlag(OrganizationOwnerOwnerCarPrimaryFlag.PRIMARY.getCode());
-                propertyMgrProvider.updateOrganizationOwnerOwnerCar(ownerOwnerCar);
 
-                ownerCar.setContactNumber(pmOwner.getContactToken());
-                propertyMgrProvider.updateOrganizationOwnerCar(ownerCar);
-                return null;
-            });
-        }
+		CommunityPmOwner pmOwner = propertyMgrProvider.findPropOwnerById(cmd.getOrgOwnerId());
+		OrganizationOwnerCar ownerCar = propertyMgrProvider.findOrganizationOwnerCar(namespaceId, cmd.getCarId());
+		OrganizationOwnerOwnerCar primaryUser = propertyMgrProvider.findOrganizationOwnerCarPrimaryUser(namespaceId, cmd.getCarId());
+		dbProvider.execute(status -> {
+			// 如果现已经有首要联系人,则设置当前首要联系人为非首要联系人
+			if (primaryUser != null) {
+				primaryUser.setPrimaryFlag(OrganizationOwnerOwnerCarPrimaryFlag.NORMAL.getCode());
+				propertyMgrProvider.updateOrganizationOwnerOwnerCar(primaryUser);
+			} else {
+				//没有的话要new一个
+				OrganizationOwnerOwnerCar newPrimaryUser = new OrganizationOwnerOwnerCar();
+				newPrimaryUser.setNamespaceId(namespaceId);
+				newPrimaryUser.setCarId(cmd.getCarId());
+				newPrimaryUser.setOrganizationOwnerId(pmOwner.getId());
+				newPrimaryUser.setPrimaryFlag(OrganizationOwnerOwnerCarPrimaryFlag.PRIMARY.getCode());
+				propertyMgrProvider.createOrganizationOwnerOwnerCar(newPrimaryUser);
+			}
+			if (ownerOwnerCar != null) {
+				ownerOwnerCar.setPrimaryFlag(OrganizationOwnerOwnerCarPrimaryFlag.PRIMARY.getCode());
+				propertyMgrProvider.updateOrganizationOwnerOwnerCar(ownerOwnerCar);
+			}
+
+			ownerCar.setContactNumber(pmOwner.getContactToken());
+			propertyMgrProvider.updateOrganizationOwnerCar(ownerCar);
+			return null;
+		});
+
     }
 
     @Override
@@ -5380,7 +5391,8 @@ public class PropertyMgrServiceImpl implements PropertyMgrService {
         validate(cmd);
         checkCurrentUserNotInOrg(cmd.getOrganizationId());
 
-        Integer namespaceId = currentNamespaceId();
+//        Integer namespaceId = currentNamespaceId();
+        Integer namespaceId = cmd.getNamespaceId();
         OrganizationOwnerOwnerCar ownerOwnerCar = propertyMgrProvider.findOrganizationOwnerOwnerCarByOwnerIdAndCarId(
                 namespaceId, cmd.getOrgOwnerId(), cmd.getCarId());
         if (ownerOwnerCar != null) {
