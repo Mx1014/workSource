@@ -306,6 +306,7 @@ public class SalaryServiceImpl implements SalaryService {
                     continue;
                 }
                 salaryGroupEntityProvider.deleteSalaryGroupEntity(entity);
+
             } else {
                 if (entity.getStatus() != (byte) 2) {
                     entity.setStatus(dto.getStatus());
@@ -329,11 +330,13 @@ public class SalaryServiceImpl implements SalaryService {
                     entity.setName(dto.getName());
                 }
                 salaryGroupEntityProvider.updateSalaryGroupEntity(entity);
-                salaryGroupEntityProvider.updateSalaryGroupEntityOperator(cmd.getOrganizationId());
             }
         }
+
         //新增
         addNewGroupEntities(cmd.getOrganizationId(), cmd.getEntities());
+        salaryGroupEntityProvider.updateSalaryGroupEntityOperator(cmd.getOrganizationId());
+
 
     }
 
