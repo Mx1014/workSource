@@ -190,6 +190,7 @@ public class SalaryServiceImpl implements SalaryService {
         }
         return s;
     }
+
     @Override
     public String getDptPathNameByDetailId(Long detailId) {
         Long departmentId = organizationService.getDepartmentByDetailId(detailId);
@@ -201,7 +202,7 @@ public class SalaryServiceImpl implements SalaryService {
         if (department.getPath().contains("/")) {
             StringBuilder sb = new StringBuilder();
             String[] dptIds = department.getPath().split("/");
-            for(String dptId : dptIds){
+            for (String dptId : dptIds) {
                 try {
                     Organization dpt1 = organizationProvider.findOrganizationById(Long.valueOf(dptId));
                     if (null != dpt1) {
@@ -210,13 +211,13 @@ public class SalaryServiceImpl implements SalaryService {
                         }
                         sb.append(dpt1.getName());
                     }
-                }catch (Exception e ){
-                    LOGGER.error("找部门的路径名称出了错",e);
+                } catch (Exception e) {
+                    LOGGER.error("找部门的路径名称出了错", e);
                 }
             }
             return sb.toString();
-        }else
-        return department.getName();
+        } else
+            return department.getName();
     }
 
 
@@ -732,7 +733,7 @@ public class SalaryServiceImpl implements SalaryService {
 //                LOGGER.debug("第[{}]个gourpEntities数据[{}]的值是:[{}]列是{}", i+"",groupEntity.getName(), val,GetExcelLetter(i + 3));
                 SalaryEmployeeOriginVal salaryVal = salaryEmployeeOriginValProvider.findSalaryEmployeeOriginValByDetailId(groupEntity.getId(), detailId);
                 if (null == salaryVal) {
-                    salaryVal = processSalaryEmployeeOriginVal(groupEntity, detailId, val,ownerId);
+                    salaryVal = processSalaryEmployeeOriginVal(groupEntity, detailId, val, ownerId);
                     salaryEmployeeOriginValProvider.createSalaryEmployeeOriginVal(salaryVal);
                 } else {
                     salaryVal.setSalaryValue(val);
@@ -1040,7 +1041,7 @@ public class SalaryServiceImpl implements SalaryService {
         NormalFlag isFile = isMonthFile(month);
         List<SalaryGroupEntity> groupEntities = new ArrayList<>();
 //        if (isFile == NormalFlag.NO) {
-            groupEntities = salaryGroupEntityProvider.listOpenSalaryGroupEntityByOrgId(ownerId);
+        groupEntities = salaryGroupEntityProvider.listOpenSalaryGroupEntityByOrgId(ownerId);
 //        } else {
 //            groupEntities = salaryEmployeePeriodValProvider.listOpenSalaryGroupEntityByOrgId(ownerId, month);
 //        }
@@ -1087,7 +1088,7 @@ public class SalaryServiceImpl implements SalaryService {
         Row row = sheet.createRow(sheet.getLastRowNum() + 1);
         int i = -1;
         if (null == detail) {
-            LOGGER.error("没有找到这个人 detailId = "+detailId);
+            LOGGER.error("没有找到这个人 detailId = " + detailId);
             return;
         } else {
             row.createCell(++i).setCellValue(detail.getContactName());
@@ -1188,7 +1189,7 @@ public class SalaryServiceImpl implements SalaryService {
         row.createCell(++i).setCellValue("工资卡号");
         row.createCell(++i).setCellValue("在职离职状态");
 
-        if (null != categories && null!=groupEntities) {
+        if (null != categories && null != groupEntities) {
             for (SalaryEntityCategory category : categories) {
                 if (!category.getId().equals(SalaryConstants.CATEGORY_REDU)) {
                     row.createCell(++i).setCellValue(category.getCategoryName() + "合计");
@@ -1318,7 +1319,7 @@ public class SalaryServiceImpl implements SalaryService {
 
     @Override
     public OutputStream getEmployeeSalaryOutPut(Long ownerId, Long taskId, Integer namespaceId) {
-        XSSFWorkbook wb = getEmployeeSalaryWB(ownerId,taskId,namespaceId);
+        XSSFWorkbook wb = getEmployeeSalaryWB(ownerId, taskId, namespaceId);
 
         // 设置response的Header
 //        OutputStream outputStream = new ByteArrayOutputStream(out);
@@ -1421,14 +1422,14 @@ public class SalaryServiceImpl implements SalaryService {
         SalaryGroupsReportResource resource = salaryGroupsReportResourceProvider.findSalaryGroupsReportResourceByPeriodAndType(ownerId, month, SalaryReportType.SALARY_DETAIL.getCode());
         if (null != resource) {
             result.add(new ExportExcelDTO(SalaryReportType.SALARY_DETAIL.getDescri(), String.valueOf(SalaryReportType.SALARY_DETAIL.getCode()), contentServerService.parserUri(resource.getUrl())));
-        }else{
+        } else {
             result.add(new ExportExcelDTO(SalaryReportType.SALARY_DETAIL.getDescri(), String.valueOf(SalaryReportType.SALARY_DETAIL.getCode())));
         }
 
         resource = salaryGroupsReportResourceProvider.findSalaryGroupsReportResourceByPeriodAndType(ownerId, month, SalaryReportType.DPT_STATISTIC.getCode());
         if (null != resource) {
             result.add(new ExportExcelDTO(SalaryReportType.DPT_STATISTIC.getDescri(), String.valueOf(SalaryReportType.SALARY_DETAIL.getCode()), contentServerService.parserUri(resource.getUrl())));
-        }else{
+        } else {
             result.add(new ExportExcelDTO(SalaryReportType.DPT_STATISTIC.getDescri(), String.valueOf(SalaryReportType.SALARY_DETAIL.getCode())));
         }
 
@@ -1479,7 +1480,7 @@ public class SalaryServiceImpl implements SalaryService {
         TimeUnit unit = TimeUnit.MINUTES;
         final Long userId = UserContext.currentUserId();
         final String token = WebTokenGenerator.getInstance().toWebToken(UserContext.current().getLogin().getLoginToken());
-
+        Integer namespaceId = UserContext.getCurrentNamespaceId();
         // 先放一个和key一样的值,表示这个人key有效
         valueOperations.set(key, key, timeout, unit);
         //线程池中处理计算规则
@@ -1491,7 +1492,7 @@ public class SalaryServiceImpl implements SalaryService {
                     calculateReports(cmd.getOwnerId(), month, userId);
 
                     //归档
-                    fileSalaryGroup(cmd.getOwnerId(), month, cmd.getOrganizationId(), userId,token);
+                    fileSalaryGroup(cmd.getOwnerId(), month, cmd.getOrganizationId(), userId, token, namespaceId);
                 } catch (Exception e) {
                     LOGGER.error("calculate reports error!! cmd is  :" + cmd, e);
                 } finally {
@@ -1504,7 +1505,7 @@ public class SalaryServiceImpl implements SalaryService {
         return new FileSalaryGroupResponse(key);
     }
 
-    private void fileSalaryGroup(Long ownerId, String month, Long organizationId, Long userId, String token) {
+    private void fileSalaryGroup(Long ownerId, String month, Long organizationId, Long userId, String token, Integer namespaceId) {
 
         //表:groupfile employeefile employeePeriodVal dptStatistics
 //        Long userId = UserContext.currentUserId();
@@ -1540,11 +1541,11 @@ public class SalaryServiceImpl implements SalaryService {
         createEmployeePeriodVals(ownerId, month, ses);
         //保存excel到contentServer ,以后直接给归档excel
         //工资明细表
-        OutputStream ops = getSalaryDetailsOutPut(ownerId, month, null, UserContext.getCurrentNamespaceId());
+        OutputStream ops = getSalaryDetailsOutPut(ownerId, month, null, namespaceId);
 
         String fileName = month + org.getName() +
                 SalaryReportType.SALARY_DETAIL.getDescri() + ".xlsx";
-        ByteArrayOutputStream os = (ByteArrayOutputStream)ops;
+        ByteArrayOutputStream os = (ByteArrayOutputStream) ops;
         InputStream ins = new ByteArrayInputStream(os.toByteArray());
         UploadCsFileResponse resp = contentServerService.uploadFileToContentServer(ins, fileName, token);
         LOGGER.debug("上传文件,content serverresponse " + resp);
@@ -1555,7 +1556,7 @@ public class SalaryServiceImpl implements SalaryService {
 
         fileName = month + org.getName() +
                 SalaryReportType.DPT_STATISTIC.getDescri() + ".xlsx";
-        os = (ByteArrayOutputStream)ops;
+        os = (ByteArrayOutputStream) ops;
         ins = new ByteArrayInputStream(os.toByteArray());
         resp = contentServerService.uploadFileToContentServer(ins, fileName, token);
 //        contentServerService.parserUri(token)
@@ -1643,8 +1644,8 @@ public class SalaryServiceImpl implements SalaryService {
         }
         calendar.add(Calendar.MONTH, -12);
         SalaryDepartStatistic lastYear = salaryDepartStatisticProvider.findSalaryDepartStatisticByDptAndMonth(dpt.getId(), monthSF.get().format(calendar.getTime()));
-        if (null!=statistic.getCostSalary() && null != lastYear && lastYear.getCostSalary() != null && lastYear.getCostSalary().compareTo(new BigDecimal(0)) > 0) {
-            statistic.setCostYoySalary(statistic.getCostSalary().subtract(lastYear.getCostSalary()).divide(lastYear.getCostSalary(),2).multiply(new BigDecimal(100)));
+        if (null != statistic.getCostSalary() && null != lastYear && lastYear.getCostSalary() != null && lastYear.getCostSalary().compareTo(new BigDecimal(0)) > 0) {
+            statistic.setCostYoySalary(statistic.getCostSalary().subtract(lastYear.getCostSalary()).divide(lastYear.getCostSalary(), 2).multiply(new BigDecimal(100)));
 
         }
         //环比
@@ -1655,10 +1656,10 @@ public class SalaryServiceImpl implements SalaryService {
         }
         calendar.add(Calendar.MONTH, -1);
         SalaryDepartStatistic lastMonth = salaryDepartStatisticProvider.findSalaryDepartStatisticByDptAndMonth(dpt.getId(), monthSF.get().format(calendar.getTime()));
-        if (null!=statistic.getCostSalary() && null != lastMonth && lastMonth.getCostSalary() != null && lastMonth.getCostSalary().compareTo(new BigDecimal(0)) > 0) {
-            statistic.setCostMomSalary(statistic.getCostSalary().subtract(lastMonth.getCostSalary()).divide(lastMonth.getCostSalary(),2).multiply(new BigDecimal(100)));
+        if (null != statistic.getCostSalary() && null != lastMonth && lastMonth.getCostSalary() != null && lastMonth.getCostSalary().compareTo(new BigDecimal(0)) > 0) {
+            statistic.setCostMomSalary(statistic.getCostSalary().subtract(lastMonth.getCostSalary()).divide(lastMonth.getCostSalary(), 2).multiply(new BigDecimal(100)));
         }
-        LOGGER.debug("计算[{}]公司的汇总数据,人员列表[{}] ,结果[{}] ",dpt.getName(),StringHelper.toJsonString(detailIds), StringHelper.toJsonString(statistic));
+        LOGGER.debug("计算[{}]公司的汇总数据,人员列表[{}] ,结果[{}] ", dpt.getName(), StringHelper.toJsonString(detailIds), StringHelper.toJsonString(statistic));
         return statistic;
     }
 
