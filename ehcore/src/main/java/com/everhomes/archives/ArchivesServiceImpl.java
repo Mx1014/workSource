@@ -1291,8 +1291,8 @@ public class ArchivesServiceImpl implements ArchivesService {
             }
         } else {
             Map<Long, String> department = getEmployeeDepartment(employee.getContactToken(), employee.getOrganizationId());
-            Map<Long, String> jobPosition = getEmployeeDepartment(employee.getContactToken(), employee.getOrganizationId());
-            Map<Long, String> jobLevel = getEmployeeDepartment(employee.getContactToken(), employee.getOrganizationId());
+            Map<Long, String> jobPosition = getEmployeeJobPosition(employee.getContactToken(), employee.getOrganizationId());
+            Map<Long, String> jobLevel = getEmployeeJobLevel(employee.getContactToken(), employee.getOrganizationId());
 
             valueMap.put(ArchivesParameter.DEPARTMENT, convertToOrgNames(department));
             valueMap.put(ArchivesParameter.JOB_POSITION, convertToOrgNames(jobPosition));
