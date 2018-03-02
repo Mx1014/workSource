@@ -254,7 +254,7 @@ public class ServiceModuleServiceImpl implements ServiceModuleService {
         // 根据应用id进行过滤不需要的权限项
         BanPrivilegeHandler handler = getBanPrivilegeHandler();
         if (null != handler && results != null && results.size() > 0) {
-            List<Long> banPrivilegeIds = handler.listBanPrivilegesByModuleIdAndAppId(UserContext.getCurrentNamespaceId(), cmd.getModuleId(), cmd.getAppId());
+            List<Long> banPrivilegeIds = handler.listBanPrivilegesByModuleIdAndAppId(cmd.getNamespaceId(), cmd.getModuleId(), cmd.getAppId());
 
             Iterator<ServiceModuleDTO> it = results.iterator();
             while (it.hasNext()) {
