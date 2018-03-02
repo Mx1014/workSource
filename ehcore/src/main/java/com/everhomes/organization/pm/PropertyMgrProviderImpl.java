@@ -1844,7 +1844,7 @@ public class PropertyMgrProviderImpl implements PropertyMgrProvider {
                 .where(Tables.EH_ORGANIZATION_OWNER_OWNER_CAR.NAMESPACE_ID.eq(namespaceId))
                 .and(Tables.EH_ORGANIZATION_OWNER_OWNER_CAR.CAR_ID.eq(carId))
                 .and(Tables.EH_ORGANIZATION_OWNER_OWNER_CAR.ORGANIZATION_OWNER_ID.eq(ownerId))
-                .fetchOneInto(OrganizationOwnerOwnerCar.class);
+                .fetchAnyInto(OrganizationOwnerOwnerCar.class);
     }
 
     @Override
