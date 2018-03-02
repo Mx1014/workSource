@@ -257,15 +257,16 @@ public class CustomerDynamicExcelHandler implements DynamicExcelHandler {
                                     String[] sources = column.getValue().split(",");
                                     String displayName = column.getValue();
                                     if(sources.length > 0) {
+                                        column.setValue("");
                                         for(int i = 0; i < sources.length; i++) {
                                             ScopeFieldItem item = fieldService.findScopeFieldItemByDisplayName(namespaceId, communityId, moduleName, displayName);
                                             if(item != null) {
-                                                if(i == 0) {
+                                                if("".equals(column.getValue())) {
                                                     column.setValue(item.getItemId().toString());
                                                 } else {
                                                     column.setValue(column.getValue() + "," + item.getItemId());
                                                 }
-                                            }
+                                            } 
                                         }
                                     }
                                 }
