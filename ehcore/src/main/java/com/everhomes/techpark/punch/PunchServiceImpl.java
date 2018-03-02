@@ -3220,7 +3220,7 @@ public class PunchServiceImpl implements PunchService {
 			return wb;
 		for (PunchCountDTO statistic : results ){
 			this.setNewPunchStatisticsBookRow(sheet, statistic);
-			taskService.updateTaskProcess(taskId,55 + (int)(++num / (results.size()/45)));
+			taskService.updateTaskProcess(taskId,55 + (int)(++num / (Double.valueOf(results.size())/45.00)));
 		}
 		return wb;
 //		try {
