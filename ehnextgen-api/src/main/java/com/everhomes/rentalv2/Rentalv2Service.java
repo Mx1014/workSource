@@ -62,50 +62,7 @@ import com.everhomes.rest.rentalv2.RentalBillRuleDTO;
 import com.everhomes.rest.rentalv2.RentalOrderDTO;
 import com.everhomes.rest.rentalv2.RentalSiteDTO;
 import com.everhomes.rest.rentalv2.UpdateItemAdminCommand;
-import com.everhomes.rest.rentalv2.admin.AddDefaultRuleAdminCommand;
-import com.everhomes.rest.rentalv2.admin.AddRentalSiteRulesAdminCommand;
-import com.everhomes.rest.rentalv2.admin.AddResourceAdminCommand;
-import com.everhomes.rest.rentalv2.admin.ConfirmRefundCommand;
-import com.everhomes.rest.rentalv2.admin.DeleteResourceCommand;
-import com.everhomes.rest.rentalv2.admin.GetRefundOrderListCommand;
-import com.everhomes.rest.rentalv2.admin.GetRefundOrderListResponse;
-import com.everhomes.rest.rentalv2.admin.GetRefundUrlCommand;
-import com.everhomes.rest.rentalv2.admin.GetRentalBillCommand;
-import com.everhomes.rest.rentalv2.admin.GetResourceAttachmentCommand;
-import com.everhomes.rest.rentalv2.admin.GetResourceListAdminCommand;
-import com.everhomes.rest.rentalv2.admin.GetResourceListAdminResponse;
-import com.everhomes.rest.rentalv2.admin.GetResourceOrderRuleCommand;
-import com.everhomes.rest.rentalv2.admin.GetResourcePriceRuleCommand;
-import com.everhomes.rest.rentalv2.admin.GetResourceRentalRuleCommand;
-import com.everhomes.rest.rentalv2.admin.GetResourceRuleAdminCommand;
-import com.everhomes.rest.rentalv2.admin.GetResourceSiteNumbersCommand;
-import com.everhomes.rest.rentalv2.admin.GetResourceTimeRuleCommand;
-import com.everhomes.rest.rentalv2.admin.GetResourceTypeListCommand;
-import com.everhomes.rest.rentalv2.admin.GetResourceTypeListResponse;
-import com.everhomes.rest.rentalv2.admin.QueryDefaultRuleAdminCommand;
-import com.everhomes.rest.rentalv2.admin.QueryDefaultRuleAdminResponse;
-import com.everhomes.rest.rentalv2.admin.ResourceAttachmentDTO;
-import com.everhomes.rest.rentalv2.admin.ResourceOrderRuleDTO;
-import com.everhomes.rest.rentalv2.admin.ResourcePriceRuleDTO;
-import com.everhomes.rest.rentalv2.admin.ResourceRentalRuleDTO;
-import com.everhomes.rest.rentalv2.admin.ResourceSiteNumbersDTO;
-import com.everhomes.rest.rentalv2.admin.ResourceTimeRuleDTO;
-import com.everhomes.rest.rentalv2.admin.SearchRentalOrdersCommand;
-import com.everhomes.rest.rentalv2.admin.SearchRentalOrdersResponse;
-import com.everhomes.rest.rentalv2.admin.UpdateDefaultAttachmentRuleAdminCommand;
-import com.everhomes.rest.rentalv2.admin.UpdateDefaultDateRuleAdminCommand;
-import com.everhomes.rest.rentalv2.admin.UpdateDefaultRuleAdminCommand;
-import com.everhomes.rest.rentalv2.admin.UpdateItemsAdminCommand;
-import com.everhomes.rest.rentalv2.admin.UpdateRentalDateCommand;
-import com.everhomes.rest.rentalv2.admin.UpdateRentalSiteCellRuleAdminCommand;
-import com.everhomes.rest.rentalv2.admin.UpdateResourceAdminCommand;
-import com.everhomes.rest.rentalv2.admin.UpdateResourceAttachmentCommand;
-import com.everhomes.rest.rentalv2.admin.UpdateResourceOrderAdminCommand;
-import com.everhomes.rest.rentalv2.admin.UpdateResourceOrderRuleCommand;
-import com.everhomes.rest.rentalv2.admin.UpdateResourcePriceRuleCommand;
-import com.everhomes.rest.rentalv2.admin.UpdateResourceRentalRuleCommand;
-import com.everhomes.rest.rentalv2.admin.UpdateResourceSiteNumbersCommand;
-import com.everhomes.rest.rentalv2.admin.UpdateResourceTimeRuleCommand;
+import com.everhomes.rest.rentalv2.admin.*;
 
 import javax.servlet.http.HttpServletResponse;
 import java.util.List;
@@ -189,6 +146,9 @@ public interface Rentalv2Service {
 
 	GetResourceTypeListResponse getResourceTypeList(
 			GetResourceTypeListCommand cmd);
+
+	ResourceTypeDTO getResourceType(
+			GetResourceTypeCommand cmd);
 
 //	void createResourceType(CreateResourceTypeCommand cmd);
 //
