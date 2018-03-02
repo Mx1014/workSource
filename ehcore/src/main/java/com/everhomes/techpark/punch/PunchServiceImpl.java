@@ -8220,12 +8220,12 @@ public class PunchServiceImpl implements PunchService {
 					return oldTis;
 				}
 				//如果request有开始时间在ti时间区间内,把request的结束时间代替ti的结束时间
-				else if (request.getBeginTime().after(ti.getBeginTime()) && request.getBeginTime().before(ti.getEndTime())) {
+				else if (!request.getBeginTime().before(ti.getBeginTime()) && !request.getBeginTime().after(ti.getEndTime())) {
 					ti.setEndTime(request.getEndTime());
 					return oldTis;
 				}
 				//如果request的结束时间在ti时间区间,把request的开始时间代替ti的开始时间
-				else if (request.getEndTime().after(ti.getBeginTime()) && request.getEndTime().before(ti.getEndTime())) {
+				else if (!request.getEndTime().before(ti.getBeginTime()) && !request.getEndTime().after(ti.getEndTime())) {
 					ti.setBeginTime(request.getBeginTime());
 
 					return oldTis;
