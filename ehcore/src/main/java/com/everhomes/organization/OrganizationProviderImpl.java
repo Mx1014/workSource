@@ -5538,6 +5538,7 @@ public class OrganizationProviderImpl implements OrganizationProvider {
                 .from(Tables.EH_ORGANIZATION_MEMBER_DETAILS)
                 .where(Tables.EH_ORGANIZATION_MEMBER_DETAILS.ORGANIZATION_ID.eq(enterpriseId))
                 .and(Tables.EH_ORGANIZATION_MEMBER_DETAILS.NAMESPACE_ID.eq(namespaceId))
+                .and(Tables.EH_ORGANIZATION_MEMBER_DETAILS.EMPLOYEE_STATUS.ne(EmployeeStatus.DISMISSAL.getCode()))
                 .fetchInto(Long.class);
     }
 

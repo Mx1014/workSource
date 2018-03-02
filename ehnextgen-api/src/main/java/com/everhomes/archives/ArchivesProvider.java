@@ -23,7 +23,7 @@ public interface ArchivesProvider {
 
     void deleteArchivesDismissEmployees(ArchivesDismissEmployees dismissEmployee);
 
-    ArchivesDismissEmployees getArchivesDismissEmployeesByDetailId(Long organizationId, Long detailId);
+    ArchivesDismissEmployees getArchivesDismissEmployeesByDetailId(Long detailId);
 
     void createArchivesDismissEmployee(ArchivesDismissEmployees archivesDismissEmployee);
 

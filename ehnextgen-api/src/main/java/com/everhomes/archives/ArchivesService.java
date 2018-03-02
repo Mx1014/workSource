@@ -5,6 +5,7 @@ import com.everhomes.rest.common.ImportFileResponse;
 import com.everhomes.rest.general_approval.GeneralFormDTO;
 import com.everhomes.rest.organization.GetImportFileResultCommand;
 import com.everhomes.rest.organization.ImportFileTaskDTO;
+import com.everhomes.rest.organization.OrganizationDTO;
 import org.springframework.web.multipart.MultipartFile;
 
 import javax.servlet.http.HttpServletResponse;
@@ -38,19 +39,31 @@ public interface ArchivesService {
 
     ListArchivesEmployeesResponse listArchivesEmployees(ListArchivesEmployeesCommand cmd);
 
+    //  获取员工在企业的真实名称
     String getEmployeeRealName(Long userId, Long organizationId);
 
+    //  获取员工的部门
     Map<Long, String> getEmployeeDepartment(String phone, Long organizationId);
 
+    //  获取员工的职位
     Map<Long, String> getEmployeeJobPosition(String phone, Long organizationId);
 
+    //  获取员工的职级
     Map<Long, String> getEmployeeJobLevel(String phone, Long organizationId);
+
+    //  转化员工的部门、职位、职级信息文本
+    String convertToOrgNames(Map<Long, String> map);
+
+    //  转化员工的部门、职位、职级id
+    List<Long> convertToOrgIds(Map<Long, String> map);
 
     ArchivesEmployeeDTO addArchivesEmployee(AddArchivesEmployeeCommand cmd);
 
     void updateArchivesEmployee(UpdateArchivesEmployeeCommand cmd);
 
     GetArchivesEmployeeResponse getArchivesEmployee(GetArchivesEmployeeCommand cmd);
+
+    List<ArchivesLogDTO> listArchivesLogs(Long organizationId, Long detailId);
 
     ListArchivesDismissEmployeesResponse listArchivesDismissEmployees(ListArchivesDismissEmployeesCommand cmd);
 
