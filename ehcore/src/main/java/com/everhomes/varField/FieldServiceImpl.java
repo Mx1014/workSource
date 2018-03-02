@@ -284,7 +284,7 @@ public class FieldServiceImpl implements FieldService {
         if(filter){
             //双重循环匹配浏览器所传的sheetName，获得目标sheet集合
             if(StringUtils.isEmpty(cmd.getIncludedGroupIds())) {
-                return allGroups;
+                return targetGroups;
             }
             String[] split = cmd.getIncludedGroupIds().split(",");
             for(int i = 0 ; i < split.length; i ++){
