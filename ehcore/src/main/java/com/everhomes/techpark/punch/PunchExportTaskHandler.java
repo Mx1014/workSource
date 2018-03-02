@@ -1,6 +1,7 @@
 package com.everhomes.techpark.punch;
 
 
+import com.alibaba.fastjson.JSONArray;
 import com.everhomes.filedownload.FileDownloadTaskHandler;
 import com.everhomes.filedownload.FileDownloadTaskService;
 import com.everhomes.filedownload.Task;
@@ -14,6 +15,8 @@ import com.everhomes.sms.DateUtil;
 import com.everhomes.util.ConvertHelper;
 import com.everhomes.util.excel.ExcelUtils;
 
+import com.google.gson.Gson;
+import com.google.gson.JsonArray;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
 
@@ -77,11 +80,11 @@ public class PunchExportTaskHandler implements FileDownloadTaskHandler {
 
         List<PunchSchedulingEmployeeDTO> employees = null;
         if (params.get("employees") != null) {
-            employees = (List<PunchSchedulingEmployeeDTO>) params.get("employees");
+            employees = JSONArray.parseArray((String) params.get("employees"), PunchSchedulingEmployeeDTO.class);
         }
         List<PunchTimeRuleDTO> timeRules = null;
         if (params.get("timeRules") != null) {
-            timeRules = (List<PunchTimeRuleDTO>) params.get("timeRules");
+            timeRules = JSONArray.parseArray((String) params.get("timeRules"), PunchTimeRuleDTO.class);
         }
 
 

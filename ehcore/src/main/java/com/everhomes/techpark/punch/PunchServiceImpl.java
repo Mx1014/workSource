@@ -47,6 +47,7 @@ import com.everhomes.server.schema.tables.pojos.EhRentalv2Cells;
 import com.everhomes.uniongroup.*;
 import com.everhomes.util.*;
 
+import com.google.gson.Gson;
 import org.apache.lucene.spatial.geohash.GeoHashUtils;
 import org.apache.poi.hssf.usermodel.DVConstraint;
 import org.apache.poi.hssf.usermodel.HSSFDataValidation;
@@ -4856,8 +4857,8 @@ public class PunchServiceImpl implements PunchService {
 	        params.put("startDay", cmd.getStartDay());
 	        params.put("endDay", cmd.getEndDay());
 	        params.put("userId", cmd.getUserId());
-	        params.put("exceptionStatus", cmd.getExceptionStatus());
-	        params.put("userName", cmd.getUserName()); 
+	        params.put("exceptionStatus", StringHelper.toJsonString(cmd.getExceptionStatus()));
+	        params.put("userName", StringHelper.toJsonString(cmd.getUserName()));
 	        params.put("reportType", "exportPunchDetails");
 			String fileName = "";
 			if (null != cmd.getUserId()) {
