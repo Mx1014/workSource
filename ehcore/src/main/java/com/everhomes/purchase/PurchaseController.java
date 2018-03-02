@@ -40,7 +40,7 @@ public class PurchaseController extends ControllerBase{
     @RequestMapping("entryWarehouse")
     @RestReturn(value = String.class)
     private RestResponse entryWarehouse(EntryWarehouseCommand cmd){
-        purchaseService.entryWarehouse(cmd.getPurchaseRequestId());
+        purchaseService.entryWarehouse(cmd.getPurchaseRequestId(),cmd.getCommunityId());
         RestResponse restResponse = new RestResponse();
         restResponse.setErrorCode(200);
         restResponse.setErrorDescription("OK");
@@ -82,7 +82,7 @@ public class PurchaseController extends ControllerBase{
     @RequestMapping("deletePurchaseOrder")
     @RestReturn(value = String.class)
     private RestResponse deletePurchaseOrder(DeletePurchaseOrderCommand cmd){
-        purchaseService.deletePurchaseOrder(cmd.getPurchaseRequestId());
+        purchaseService.deletePurchaseOrder(cmd);
         RestResponse restResponse = new RestResponse();
         restResponse.setErrorCode(200);
         restResponse.setErrorDescription("OK");

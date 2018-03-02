@@ -30,6 +30,7 @@ import java.sql.Timestamp;
  * <li>namespaceId:域空间id</li>
  * <li>ownerType:所属者类型，园区：EhCommunities</li>
  * <li>ownerId:所属者id</li>
+ * <li>communityId:园区id</li>
  *</ul>
  */
 public class CreateOrUpdateOneSupplierCommand {
@@ -53,6 +54,15 @@ public class CreateOrUpdateOneSupplierCommand {
     private String ownerType;
     private Long ownerId;
     private String attachmentUrl;
+    private Long communityId;
+
+    public Long getCommunityId() {
+        return communityId;
+    }
+
+    public void setCommunityId(Long communityId) {
+        this.communityId = communityId;
+    }
 
     @Override
     public String toString() {
