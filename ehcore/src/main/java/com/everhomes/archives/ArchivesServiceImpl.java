@@ -811,9 +811,11 @@ public class ArchivesServiceImpl implements ArchivesService {
     @Override
     public String convertToOrgNames(Map<Long, String> map) {
         String names = "";
-        if (map != null && map.size() > 0)
+        if (map != null && map.size() > 0){
             for (String value : map.values())
-                names += "," + value;
+                names += value + ",";
+            names = names.substring(0, names.length()-1);
+        }
         return names;
     }
 
