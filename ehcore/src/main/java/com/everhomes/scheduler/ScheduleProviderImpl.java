@@ -296,9 +296,9 @@ public class ScheduleProviderImpl implements ScheduleProvider {
         boolean result = false;
         try {
             result = getScheduler().unscheduleJob(TriggerKey.triggerKey(triggerName, DEFAULT_GROUP));
-            //if(LOGGER.isInfoEnabled()) {
+            if(LOGGER.isInfoEnabled()) {
                 LOGGER.info("Unschedule the job, triggerName={}, groupName={}, result={}", triggerName, DEFAULT_GROUP, result);
-            //}
+            }
         } catch (Exception e) {
             LOGGER.error("Failed to unschedule the job, triggerName={}, groupName={}", 
                 triggerName, DEFAULT_GROUP, e);

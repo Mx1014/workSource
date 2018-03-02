@@ -241,6 +241,9 @@ public interface PunchService {
 
 	public DeferredResult<RestResponse> getPunchQRCodeResult(GetPunchQRCodeCommand cmd);
 
+	OutputStream getPunchSchedulingOutputStream(Long queryTime,
+									   List<PunchSchedulingEmployeeDTO> employees, List<PunchTimeRuleDTO> timeRules, Long taskId);
+
 	HttpServletResponse exportPunchSchedulingTemplate(ListPunchSchedulingMonthCommand cmd, HttpServletResponse response);
 
 	void invalidPunchQRCode(GetPunchQRCodeCommand cmd);

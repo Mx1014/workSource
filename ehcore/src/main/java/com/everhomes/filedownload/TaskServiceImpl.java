@@ -106,9 +106,13 @@ public class TaskServiceImpl implements TaskService, ApplicationListener<Context
         }
 
         //取消任务
-        String taskName = "task_" + task.getType() + task.getId();
-        LOGGER.info("cancel task triggerName={}", taskName);
-        scheduleProvider.unscheduleJob(taskName);
+        String taskName = "task_" + task.getType() + "_" + task.getId();
+        boolean result = scheduleProvider.unscheduleJob(taskName);
+        if(!result){
+            LOGGER.error("task cancel fail, taskId={}", taskId);
+            throw RuntimeErrorException.errorWith(TaskServiceErrorCode.SCOPE,
+                    TaskServiceErrorCode.TASK_CANCEL_FAIL, "task cancel fail");
+        }
 
         updateTaskStatus(taskId, TaskStatus.CANCEL.getCode(),  null);
     }
@@ -157,7 +161,7 @@ public class TaskServiceImpl implements TaskService, ApplicationListener<Context
         parameters.put("process", task.getProcess() == null ? 0: task.getProcess());
         parameters.put("className", task.getClassName());
         parameters.put("params", task.getParams());
-        String taskName = "task_" + task.getType() + task.getId();
+        String taskName = "task_" + task.getType() + "_" + task.getId();
         scheduleProvider.scheduleSimpleJob(taskName, taskName, new Date(), TaskScheduleJob.class, parameters);
     }
 
@@ -176,7 +180,6 @@ public class TaskServiceImpl implements TaskService, ApplicationListener<Context
         Task task = findById(taskId);
         if(fileLocationDTO != null && fileLocationDTO.getUri() != null){
             task.setProcess(100);
-            task.setStatus(TaskStatus.SUCCESS.getCode());
             task.setResultString1(fileLocationDTO.getUri());
             if(fileLocationDTO.getSize() != null){
                 task.setResultLong1(fileLocationDTO.getSize().longValue());
