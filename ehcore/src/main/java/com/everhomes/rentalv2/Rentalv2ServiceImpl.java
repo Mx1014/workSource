@@ -173,67 +173,7 @@ import com.everhomes.rest.rentalv2.SiteRuleStatus;
 import com.everhomes.rest.rentalv2.UpdateItemAdminCommand;
 import com.everhomes.rest.rentalv2.VipParkingUseInfoDTO;
 import com.everhomes.rest.rentalv2.VisibleFlag;
-import com.everhomes.rest.rentalv2.admin.AddDefaultRuleAdminCommand;
-import com.everhomes.rest.rentalv2.admin.AddRentalSiteRulesAdminCommand;
-import com.everhomes.rest.rentalv2.admin.AddResourceAdminCommand;
-import com.everhomes.rest.rentalv2.admin.AttachmentConfigDTO;
-import com.everhomes.rest.rentalv2.admin.AttachmentType;
-import com.everhomes.rest.rentalv2.admin.ConfirmRefundCommand;
-import com.everhomes.rest.rentalv2.admin.DeleteResourceCommand;
-import com.everhomes.rest.rentalv2.admin.DiscountType;
-import com.everhomes.rest.rentalv2.admin.GetRefundOrderListCommand;
-import com.everhomes.rest.rentalv2.admin.GetRefundOrderListResponse;
-import com.everhomes.rest.rentalv2.admin.GetRefundUrlCommand;
-import com.everhomes.rest.rentalv2.admin.GetRentalBillCommand;
-import com.everhomes.rest.rentalv2.admin.GetResourceAttachmentCommand;
-import com.everhomes.rest.rentalv2.admin.GetResourceListAdminCommand;
-import com.everhomes.rest.rentalv2.admin.GetResourceListAdminResponse;
-import com.everhomes.rest.rentalv2.admin.GetResourceOrderRuleCommand;
-import com.everhomes.rest.rentalv2.admin.GetResourcePriceRuleCommand;
-import com.everhomes.rest.rentalv2.admin.GetResourceRentalRuleCommand;
-import com.everhomes.rest.rentalv2.admin.GetResourceRuleAdminCommand;
-import com.everhomes.rest.rentalv2.admin.GetResourceSiteNumbersCommand;
-import com.everhomes.rest.rentalv2.admin.GetResourceTimeRuleCommand;
-import com.everhomes.rest.rentalv2.admin.GetResourceTypeListCommand;
-import com.everhomes.rest.rentalv2.admin.GetResourceTypeListResponse;
-import com.everhomes.rest.rentalv2.admin.PayMode;
-import com.everhomes.rest.rentalv2.admin.PricePackageDTO;
-import com.everhomes.rest.rentalv2.admin.PriceRuleDTO;
-import com.everhomes.rest.rentalv2.admin.QueryDefaultRuleAdminCommand;
-import com.everhomes.rest.rentalv2.admin.QueryDefaultRuleAdminResponse;
-import com.everhomes.rest.rentalv2.admin.RefundOrderDTO;
-import com.everhomes.rest.rentalv2.admin.RentalDurationType;
-import com.everhomes.rest.rentalv2.admin.RentalDurationUnit;
-import com.everhomes.rest.rentalv2.admin.RentalOpenTimeDTO;
-import com.everhomes.rest.rentalv2.admin.RentalOrderHandleType;
-import com.everhomes.rest.rentalv2.admin.RentalOrderRuleDTO;
-import com.everhomes.rest.rentalv2.admin.RentalOrderStrategy;
-import com.everhomes.rest.rentalv2.admin.ResourceAttachmentDTO;
-import com.everhomes.rest.rentalv2.admin.ResourceOrderRuleDTO;
-import com.everhomes.rest.rentalv2.admin.ResourcePriceRuleDTO;
-import com.everhomes.rest.rentalv2.admin.ResourceRentalRuleDTO;
-import com.everhomes.rest.rentalv2.admin.ResourceSiteNumbersDTO;
-import com.everhomes.rest.rentalv2.admin.ResourceTimeRuleDTO;
-import com.everhomes.rest.rentalv2.admin.ResourceTypeDTO;
-import com.everhomes.rest.rentalv2.admin.SearchRentalOrdersCommand;
-import com.everhomes.rest.rentalv2.admin.SearchRentalOrdersResponse;
-import com.everhomes.rest.rentalv2.admin.SiteNumberDTO;
-import com.everhomes.rest.rentalv2.admin.SiteOwnerDTO;
-import com.everhomes.rest.rentalv2.admin.TimeIntervalDTO;
-import com.everhomes.rest.rentalv2.admin.UpdateDefaultAttachmentRuleAdminCommand;
-import com.everhomes.rest.rentalv2.admin.UpdateDefaultDateRuleAdminCommand;
-import com.everhomes.rest.rentalv2.admin.UpdateDefaultRuleAdminCommand;
-import com.everhomes.rest.rentalv2.admin.UpdateItemsAdminCommand;
-import com.everhomes.rest.rentalv2.admin.UpdateRentalDateCommand;
-import com.everhomes.rest.rentalv2.admin.UpdateRentalSiteCellRuleAdminCommand;
-import com.everhomes.rest.rentalv2.admin.UpdateResourceAdminCommand;
-import com.everhomes.rest.rentalv2.admin.UpdateResourceAttachmentCommand;
-import com.everhomes.rest.rentalv2.admin.UpdateResourceOrderAdminCommand;
-import com.everhomes.rest.rentalv2.admin.UpdateResourceOrderRuleCommand;
-import com.everhomes.rest.rentalv2.admin.UpdateResourcePriceRuleCommand;
-import com.everhomes.rest.rentalv2.admin.UpdateResourceRentalRuleCommand;
-import com.everhomes.rest.rentalv2.admin.UpdateResourceSiteNumbersCommand;
-import com.everhomes.rest.rentalv2.admin.UpdateResourceTimeRuleCommand;
+import com.everhomes.rest.rentalv2.admin.*;
 import com.everhomes.rest.sms.SmsTemplateCode;
 import com.everhomes.rest.ui.user.SceneTokenDTO;
 import com.everhomes.rest.ui.user.SceneType;
@@ -7113,7 +7053,12 @@ public class Rentalv2ServiceImpl implements Rentalv2Service {
 		return response;
 	}
 
-//	@Override
+	@Override
+	public ResourceTypeDTO getResourceType(GetResourceTypeCommand cmd) {
+		return ConvertHelper.convert(this.rentalv2Provider.findRentalResourceTypeById(cmd.getId()),ResourceTypeDTO.class);
+	}
+
+	//	@Override
 //	public void createResourceType(CreateResourceTypeCommand cmd) {
 //		cmd.setStatus(ResourceTypeStatus.DISABLE.getCode());
 //		RentalResourceType rsType = ConvertHelper.convert(cmd, RentalResourceType.class);
