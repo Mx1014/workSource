@@ -266,7 +266,7 @@ public class CustomerDynamicExcelHandler implements DynamicExcelHandler {
                                                 } else {
                                                     column.setValue(column.getValue() + "," + item.getItemId());
                                                 }
-                                            } 
+                                            }
                                         }
                                     }
                                 }
@@ -524,8 +524,8 @@ public class CustomerDynamicExcelHandler implements DynamicExcelHandler {
                 }
 
             }
-            response.setSuccessRowNumber(rowDatas.size() - failedNumber);
-            response.setFailedRowNumber(failedNumber);
+            response.setSuccessRowNumber(response.getSuccessRowNumber() + rowDatas.size() - failedNumber);
+            response.setFailedRowNumber(response.getFailedRowNumber() + failedNumber);
         }
     }
 
