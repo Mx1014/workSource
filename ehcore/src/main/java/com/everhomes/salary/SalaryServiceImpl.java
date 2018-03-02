@@ -1055,6 +1055,8 @@ public class SalaryServiceImpl implements SalaryService {
         List<Long> detailIds = organizationService.listDetailIdWithEnterpriseExclude(null,
                 namespaceId, ownerId, null, null, null, null, null, Integer.MAX_VALUE - 1, null, null
         );
+        LOGGER.debug("getSalaryDetailsWB detailIds : " + StringHelper.toJsonString(detailIds));
+
         int processNum = 0;
         for (Long detailId : detailIds) {
             createSalaryDetailRow(sheet, detailId, groupEntities, categories, isFile, month, ownerId);
