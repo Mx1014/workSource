@@ -421,6 +421,12 @@ public class CustomerDynamicExcelHandler implements DynamicExcelHandler {
                         tracking.setNamespaceId(namespaceId);
                         if(columns != null && columns.size() > 0) {
                             for(DynamicColumnDTO column : columns) {
+                                if("trackingType".equals(column.getFieldName())) {
+                                    ScopeFieldItem item = fieldService.findScopeFieldItemByDisplayName(namespaceId, communityId, moduleName, column.getValue());
+                                    if(item != null) {
+                                        column.setValue(item.getBusinessValue().toString());
+                                    }
+                                }
                                 try {
                                     setToObj(column.getFieldName(), tracking, column.getValue());
                                 } catch(Exception e){
@@ -450,6 +456,12 @@ public class CustomerDynamicExcelHandler implements DynamicExcelHandler {
                         plan.setReadStatus(TrackingPlanReadStatus.UNREAD.getCode());
                         if(columns != null && columns.size() > 0) {
                             for(DynamicColumnDTO column : columns) {
+                                if("trackingType".equals(column.getFieldName())) {
+                                    ScopeFieldItem item = fieldService.findScopeFieldItemByDisplayName(namespaceId, communityId, moduleName, column.getValue());
+                                    if(item != null) {
+                                        column.setValue(item.getBusinessValue().toString());
+                                    }
+                                }
                                 try {
                                     setToObj(column.getFieldName(), plan, column.getValue());
                                 } catch(Exception e){
@@ -554,7 +566,7 @@ public class CustomerDynamicExcelHandler implements DynamicExcelHandler {
                         break;
                     }
                     Date date = new Date();
-                    SimpleDateFormat sdf = new SimpleDateFormat("yyyy-MM-dd");
+                    SimpleDateFormat sdf = new SimpleDateFormat("yyyy-MM-dd HH:mm:ss");
                     try {
                         date = sdf.parse((String) value);
                     } catch (ParseException e) {
