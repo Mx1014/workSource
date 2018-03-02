@@ -92,6 +92,9 @@ public class CustomerDynamicExcelHandler implements DynamicExcelHandler {
                 } else {
                     DynamicField df = ConvertHelper.convert(fieldDTO, DynamicField.class);
                     df.setDisplayName(fieldDTO.getFieldDisplayName());
+                    if("trackingTime".equals(fieldDTO.getFieldName()) || "notifyTime".equals(fieldDTO.getFieldName())) {
+                        df.setDateFormat("yyyy-MM-dd HH:mm");
+                    }
                     //boolean isMandatory 数据库是0和1 默认false
                     if(fieldDTO.getMandatoryFlag() == 1) {
                         df.setMandatory(true);
