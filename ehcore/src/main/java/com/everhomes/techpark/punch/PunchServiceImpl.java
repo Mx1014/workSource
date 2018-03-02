@@ -4857,8 +4857,8 @@ public class PunchServiceImpl implements PunchService {
 	        params.put("startDay", cmd.getStartDay());
 	        params.put("endDay", cmd.getEndDay());
 	        params.put("userId", cmd.getUserId());
-	        params.put("exceptionStatus", StringHelper.toJsonString(cmd.getExceptionStatus()));
-	        params.put("userName", StringHelper.toJsonString(cmd.getUserName()));
+	        params.put("exceptionStatus", cmd.getExceptionStatus());
+	        params.put("userName", cmd.getUserName();
 	        params.put("reportType", "exportPunchDetails");
 			String fileName = "";
 			if (null != cmd.getUserId()) {
