@@ -5,12 +5,8 @@ ALTER TABLE eh_archives_dismiss_employees MODIFY department VARCHAR(128) COMMENT
 
 ALTER TABLE eh_archives_dismiss_employees MODIFY employee_status TINYINT NOT NULL DEFAULT 0 COMMENT '0:probation, 1:on the job, 2:internship, 3:dismissal';
 
-ALTER TABLE eh_archives_dismiss_employees ADD COLUMN department_ids VARCHAR(128) COMMENT '离职前部门id';
+ALTER TABLE eh_archives_dismiss_employees ADD COLUMN department_id BIGINT COMMENT '离职前部门id';
 
 ALTER TABLE eh_archives_dismiss_employees ADD COLUMN job_position VARCHAR(128) COMMENT '离职前职位';
 
-ALTER TABLE eh_archives_dismiss_employees ADD COLUMN job_position_ids VARCHAR(128) COMMENT '离职前职位id';
-
 ALTER TABLE eh_archives_dismiss_employees ADD COLUMN job_level VARCHAR(128) COMMENT '离职前职级';
-
-ALTER TABLE eh_archives_dismiss_employees ADD COLUMN job_level_ids VARCHAR(128) COMMENT '离职前职级id';

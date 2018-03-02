@@ -5149,12 +5149,10 @@ private void checkUserPrivilege(Long orgId, Long privilegeId, Long communityId) 
 	public EquipmentInspectionReviewDateDTO listReviewExpireDays(SetReviewExpireDaysCommand cmd) {
 		Byte scopeType = PmNotifyScopeType.NAMESPACE.getCode();
 		Long scopeId = cmd.getNamespaceId().longValue();
-		EquipmentInspectionReviewDate reviewDate = null;
+		EquipmentInspectionReviewDate reviewDate = equipmentProvider.getEquipmentInspectiomExpireDays(scopeId, scopeType);
 		if (cmd.getCommunityId() != null && cmd.getCommunityId() != 0L) {
 			scopeType = PmNotifyScopeType.COMMUNITY.getCode();
 			scopeId = cmd.getCommunityId();
-			 reviewDate = equipmentProvider.getEquipmentInspectiomExpireDays(scopeId, scopeType);
-
 		}
 		if (reviewDate != null) {
 			return ConvertHelper.convert(reviewDate, EquipmentInspectionReviewDateDTO.class);
