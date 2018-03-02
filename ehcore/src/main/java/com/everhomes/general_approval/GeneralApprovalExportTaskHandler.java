@@ -6,10 +6,12 @@ import com.everhomes.filedownload.TaskService;
 import com.everhomes.rest.contentserver.CsFileLocationDTO;
 import com.everhomes.rest.general_approval.ListGeneralApprovalRecordsCommand;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.stereotype.Component;
 
 import java.io.OutputStream;
 import java.util.Map;
 
+@Component
 public class GeneralApprovalExportTaskHandler implements FileDownloadTaskHandler{
 
     @Autowired

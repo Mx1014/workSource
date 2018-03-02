@@ -277,7 +277,7 @@ public class CustomerServiceImpl implements CustomerService {
     @Override
     public void exportEnterpriseCustomer(ExportEnterpriseCustomerCommand cmd, HttpServletResponse response) {
         ExportFieldsExcelCommand command = ConvertHelper.convert(cmd, ExportFieldsExcelCommand.class);
-        command.setIncludedGroupIds("10,11,12");
+//        command.setIncludedGroupIds("10,11,12");
         List<FieldGroupDTO> results = fieldService.getAllGroups(command,false,true);
         if(results != null && results.size() > 0) {
             List<String> sheetNames = results.stream().map(result -> {
