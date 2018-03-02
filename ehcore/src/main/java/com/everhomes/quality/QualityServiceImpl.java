@@ -4526,13 +4526,16 @@ public class QualityServiceImpl implements QualityService {
 				QualityInspectionSpecifications specification = qualityProvider.getSpecificationById(task.getCategoryId());
 				if (specification != null) {
 					specifications.add(ConvertHelper.convert(specification, QualityInspectionSpecificationDTO.class));
-					parentSpecificationIds.add(specification.getId());
 				}
 			});
 		}
+		//去除重复specification
+		Set<QualityInspectionSpecificationDTO> tempSet = new HashSet<>();
+		tempSet.addAll(specifications);
+		List<QualityInspectionSpecificationDTO> specificationList = new ArrayList<>(tempSet);
+		populateSpecificationDetails(specificationList, parentSpecificationIds);
+		offlineTaskDetailsResponse.setSpecifications(specificationList);
 
-		populateSpecificationDetails(specifications,parentSpecificationIds);
-		offlineTaskDetailsResponse.setSpecifications(specifications);
 		return offlineTaskDetailsResponse;
 	}
 
@@ -4543,11 +4546,19 @@ public class QualityServiceImpl implements QualityService {
 	 */
 	private void populateSpecificationDetails(List<QualityInspectionSpecificationDTO> specifications, List<Long> parentSpecificationIds) {
 		if (specifications != null && parentSpecificationIds != null && parentSpecificationIds.size() > 0) {
-			List<QualityInspectionSpecifications> qualityInspectionSpecifications = qualityProvider.listSpecifitionByParentIds(parentSpecificationIds);
-			if (qualityInspectionSpecifications != null && qualityInspectionSpecifications.size() > 0) {
-				qualityInspectionSpecifications.forEach((q) -> {
-					specifications.add(ConvertHelper.convert(q, QualityInspectionSpecificationDTO.class));
-				});
+			List<QualityInspectionSpecificationDTO> qualityInspectionSpecificationDTOS = new ArrayList<>();// items
+			parentSpecificationIds.forEach((d) -> {
+				GetQualitySpecificationCommand command = new GetQualitySpecificationCommand();
+				command.setSpecificationId(d);
+				qualityInspectionSpecificationDTOS.add(getQualitySpecification(command));
+			});
+			List<QualityInspectionSpecificationDTO> details = new ArrayList<>();
+			qualityInspectionSpecificationDTOS.forEach(q -> {
+				if (q.getChildrens() != null && q.getChildrens().size() > 0)
+					details.addAll(q.getChildrens());
+			});
+			if (details.size() > 0) {
+				specifications.addAll(details);
 			}
 		}
 	}
@@ -4625,7 +4636,10 @@ public class QualityServiceImpl implements QualityService {
 
 		//只保留子节点详细内容 子节点为items 父节点为规范
 		List<QualityInspectionSpecificationDTO> details = new ArrayList<>();
-		qualityInspectionSpecificationDTOS.forEach(q->details.addAll(q.getChildrens()));
+		qualityInspectionSpecificationDTOS.forEach(q->{
+			if (q.getChildrens() != null && q.getChildrens().size() > 0)
+				details.addAll(q.getChildrens());
+		});
 		//offlineResponse.setSpecificationsDetail(details);
 		offlineResponse.getSpecifications().addAll(details);
 
