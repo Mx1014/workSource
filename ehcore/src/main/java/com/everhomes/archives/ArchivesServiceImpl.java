@@ -1743,10 +1743,14 @@ public class ArchivesServiceImpl implements ArchivesService {
                 ArchivesDismissEmployees dismissEmployee = processDismissEmployee(employee, cmd);
                 archivesProvider.createArchivesDismissEmployee(dismissEmployee);
 
-                //  2.删除置顶信息
+                //  2.改为离职状态
+                employee.setEmployeeStatus(EmployeeStatus.DISMISSAL.getCode());
+                organizationProvider.updateOrganizationMemberDetails(employee, employee.getId());
+
+                //  3.删除置顶信息
                 archivesProvider.deleteArchivesStickyContactsByDetailId(namespaceId, detailId);
 
-                //  3.删除员工权限
+                //  4.删除员工权限
                 DeleteOrganizationPersonnelByContactTokenCommand deleteOrganizationPersonnelByContactTokenCommand = new DeleteOrganizationPersonnelByContactTokenCommand();
                 deleteOrganizationPersonnelByContactTokenCommand.setOrganizationId(employee.getOrganizationId());
                 deleteOrganizationPersonnelByContactTokenCommand.setContactToken(employee.getContactToken());
