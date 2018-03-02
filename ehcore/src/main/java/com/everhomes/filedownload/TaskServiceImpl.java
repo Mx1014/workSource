@@ -119,6 +119,7 @@ public class TaskServiceImpl implements TaskService, ApplicationListener<Context
         task.setStatus(status);
         if(TaskStatus.fromCode(status) == TaskStatus.SUCCESS){
             task.setProcess(100);
+            task.setFinishTime(new Timestamp(System.currentTimeMillis()));
         }
         task.setErrorDescription(errorDesc);
         taskProvider.updateTask(task);

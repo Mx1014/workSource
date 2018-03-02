@@ -84,8 +84,8 @@ public class FileDownloadTaskServiceImpl implements FileDownloadTaskService  {
             dto.setSize(task.getResultLong1());
 
             //文件有效期
-            if(TaskStatus.SUCCESS == TaskStatus.fromCode(task.getStatus()) && dto.getFinishTime() != null){
-                long validTime = dto.getFinishTime().getTime() + intervalTime;
+            if(TaskStatus.SUCCESS == TaskStatus.fromCode(task.getStatus()) && dto.getCreateTime() != null){
+                long validTime = dto.getCreateTime().getTime() + intervalTime;
                 long zero = validTime/(1000*3600*24)*(1000*3600*24);
                 dto.setValidTime(new Timestamp(zero));
             }
