@@ -62,6 +62,7 @@ import org.apache.poi.xssf.usermodel.XSSFRow;
 import org.apache.poi.xssf.usermodel.XSSFSheet;
 import org.apache.poi.xssf.usermodel.XSSFWorkbook;
 import org.elasticsearch.client.transport.NoNodeAvailableException;
+import org.elasticsearch.common.util.DoubleArray;
 import org.jooq.Record;
 import org.jooq.SelectQuery;
 import org.slf4j.Logger;
@@ -3219,7 +3220,7 @@ public class PunchServiceImpl implements PunchService {
 			return wb;
 		for (PunchCountDTO statistic : results ){
 			this.setNewPunchStatisticsBookRow(sheet, statistic);
-			taskService.updateTaskProcess(taskId,55 + (int)(++num / (results.size()/45)));
+			taskService.updateTaskProcess(taskId,55 + (int)(++num / (Double.valueOf(results.size())/45.00)));
 		}
 		return wb;
 //		try {
@@ -4918,7 +4919,7 @@ public class PunchServiceImpl implements PunchService {
 		for (PunchDayDetailDTO dto : dtos ){
 			this.setNewPunchDetailsBookRow(sheet, dto);
 
-			taskService.updateTaskProcess(taskId,55 + (int)(++num / (dtos.size()/45)));
+			taskService.updateTaskProcess(taskId,55 + (int)(++num / (Double.valueOf(dtos.size())/45.00)));
 		}
 		return wb;
 	}
