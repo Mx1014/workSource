@@ -39,6 +39,7 @@ import com.everhomes.rest.organization.ListOrganizationContactByJobPositionIdCom
 import com.everhomes.rest.organization.OrganizationContactDTO;
 import com.everhomes.rest.organization.OrganizationDTO;
 import com.everhomes.rest.organization.OrganizationGroupType;
+import com.everhomes.rest.organization.OrganizationMemberDTO;
 import com.everhomes.rest.organization.OrganizationMemberTargetType;
 import com.everhomes.rest.portal.ListServiceModuleAppsCommand;
 import com.everhomes.rest.portal.ListServiceModuleAppsResponse;
@@ -93,6 +94,7 @@ import com.everhomes.rest.quality.ListSampleQualityInspectionTasksCommand;
 import com.everhomes.rest.quality.ListUserHistoryTasksCommand;
 import com.everhomes.rest.quality.ListUserQualityInspectionTaskTemplatesCommand;
 import com.everhomes.rest.quality.OfflineDeleteTablesInfo;
+import com.everhomes.rest.quality.OfflineReportDetailDTO;
 import com.everhomes.rest.quality.OfflineSampleQualityInspectionResponse;
 import com.everhomes.rest.quality.OfflineTaskReportCommand;
 import com.everhomes.rest.quality.OwnerType;
@@ -105,6 +107,7 @@ import com.everhomes.rest.quality.QualityInspectionLogProcessType;
 import com.everhomes.rest.quality.QualityInspectionLogType;
 import com.everhomes.rest.quality.QualityInspectionSpecificationDTO;
 import com.everhomes.rest.quality.QualityInspectionSpecificationItemResultsDTO;
+import com.everhomes.rest.quality.QualityInspectionStandardGroupMapDTO;
 import com.everhomes.rest.quality.QualityInspectionTaskAttachmentDTO;
 import com.everhomes.rest.quality.QualityInspectionTaskDTO;
 import com.everhomes.rest.quality.QualityInspectionTaskRecordsDTO;
@@ -142,7 +145,6 @@ import com.everhomes.rest.quality.UpdateQualityCategoryCommand;
 import com.everhomes.rest.quality.UpdateQualitySpecificationCommand;
 import com.everhomes.rest.quality.UpdateQualityStandardCommand;
 import com.everhomes.rest.quality.UpdateSampleQualityInspectionCommand;
-import com.everhomes.rest.quality.OfflineReportDetailDTO;
 import com.everhomes.rest.repeat.RepeatSettingsDTO;
 import com.everhomes.rest.repeat.TimeRangeDTO;
 import com.everhomes.rest.user.MessageChannelType;
@@ -4507,8 +4509,10 @@ public class QualityServiceImpl implements QualityService {
 		QualityOfflineTaskDetailsResponse offlineTaskDetailsResponse = new QualityOfflineTaskDetailsResponse();
 		offlineTaskDetailsResponse.setTasks(tasksResponse.getTasks());
 		offlineTaskDetailsResponse.setNextPageAnchor(tasksResponse.getNextPageAnchor());
+
 		List<QualityInspectionSpecificationDTO> specifications = new ArrayList<>();
 		List<Long> parentSpecificationIds = new ArrayList<>();
+		List<QualityInspectionStandards> standards = new ArrayList<>();
 
 		if(tasksResponse.getTasks()!=null && tasksResponse.getTasks().size()>0) {
 			tasksResponse.getTasks().forEach((task) -> {
@@ -4527,6 +4531,8 @@ public class QualityServiceImpl implements QualityService {
 				if (specification != null) {
 					specifications.add(ConvertHelper.convert(specification, QualityInspectionSpecificationDTO.class));
 				}
+				QualityInspectionStandards standard = qualityProvider.findStandardById(task.getStandardId());
+				standards.add(standard);
 			});
 		}
 		//去除重复specification
@@ -4536,14 +4542,63 @@ public class QualityServiceImpl implements QualityService {
 		specificationList.forEach((s)->parentSpecificationIds.add(s.getId()));
 		populateSpecificationDetails(specificationList, parentSpecificationIds);
 		offlineTaskDetailsResponse.setSpecifications(specificationList);
+		//处理组织架构人员
 
+		processOrganizationsAndMembers(offlineTaskDetailsResponse,standards);
+		//再增加计划和groupId的关系表
+		processPlansAndGroupRelations(offlineTaskDetailsResponse,standards);
 		return offlineTaskDetailsResponse;
 	}
 
 	/**
+	 * 增加任务中的计划id和groupId
+	 * @param offlineTaskDetailsResponse  离线结果
+	 * @param standards  计划
+	 */
+	private void processPlansAndGroupRelations(QualityOfflineTaskDetailsResponse offlineTaskDetailsResponse, List<QualityInspectionStandards> standards) {
+		List<QualityInspectionStandardGroupMapDTO> groupMapDTOS = new ArrayList<>();
+		List<QualityInspectionStandardGroupMap> groupMaps = new ArrayList<>();
+		if(standards!=null && standards.size()>0){
+			standards.forEach((standard)-> groupMaps.addAll(standard.getExecutiveGroup()));
+			groupMaps.forEach((groupMap)-> groupMapDTOS.add(ConvertHelper.convert(groupMap,QualityInspectionStandardGroupMapDTO.class)));
+		}
+		offlineTaskDetailsResponse.setGroupMaps(groupMapDTOS);
+	}
+
+	/**
+	 * 返回所有任务相关的组织菜单和人员
+	 *
+	 * @param offlineTaskDetailsResponse 离线结果
+	 */
+	private void processOrganizationsAndMembers(QualityOfflineTaskDetailsResponse offlineTaskDetailsResponse, List<QualityInspectionStandards> standards) {
+		if (standards != null && standards.size() > 0) {
+			qualityProvider.populateStandardsGroups(standards);
+			List<OrganizationDTO> organizationList = new ArrayList<>();
+			List<OrganizationMemberDTO> memberList = new ArrayList<>();
+			standards.forEach((standard) -> {
+				if (standard.getExecutiveGroup() != null) {
+					standard.getExecutiveGroup().forEach((executiveGroup) -> {
+						Organization group = organizationProvider.findOrganizationById(executiveGroup.getGroupId());
+						if (group != null) {
+							organizationList.add(ConvertHelper.convert(group, OrganizationDTO.class));
+						}
+						//拿到所有人员（不包含子级）
+						List<OrganizationMember> members = organizationProvider.listOrganizationMembers(executiveGroup.getGroupId(), null);
+						if (members != null && members.size() > 0) {
+							memberList.addAll(members.stream().map((m) -> ConvertHelper.convert(m, OrganizationMemberDTO.class)).collect(Collectors.toList()));
+						}
+					});
+				}
+			});
+			offlineTaskDetailsResponse.setOrganizations(organizationList);
+			offlineTaskDetailsResponse.setOrganizationMembers(memberList);
+		}
+	}
+
+	/**
 	 * 增加具体类型下的规范
-	 * @param specifications
-	 * @param parentSpecificationIds
+	 * @param specifications  总结果集合包括类型和规范
+	 * @param parentSpecificationIds  父级
 	 */
 	private void populateSpecificationDetails(List<QualityInspectionSpecificationDTO> specifications, List<Long> parentSpecificationIds) {
 		if (specifications != null && parentSpecificationIds != null && parentSpecificationIds.size() > 0) {
