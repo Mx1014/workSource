@@ -3941,6 +3941,7 @@ public class QualityServiceImpl implements QualityService {
 
 	@Override
 	public CountSampleTaskScoresResponse countSampleTaskScores(CountSampleTaskScoresCommand cmd) {
+		// 不基于项目  但是使用项目id校验权限
 		checkUserPrivilege(cmd.getOwnerId(), PrivilegeConstants.QUALITY_STAT_SAMPLE, cmd.getTargetId());
 		CountSampleTaskScoresResponse response = sampleSearcher.queryCount(cmd);
 		List<SampleTaskScoreDTO> dtos = response.getSampleTasks();
