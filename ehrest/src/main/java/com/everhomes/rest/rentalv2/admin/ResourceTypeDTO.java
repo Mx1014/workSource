@@ -13,6 +13,7 @@ import com.everhomes.util.StringHelper;
  * <li>status: 状态 0 关闭 2 开启</li>
  * <li>namespaceId: 域空间</li>
  * <li>payMode: 支付模式 (工作流模式) {@link com.everhomes.rest.rentalv2.admin.PayMode}</li>
+ * <li>identify: 资源类型的类型 {@link com.everhomes.rest.rentalv2.RentalV2ResourceType}</li>
  * </ul>
  */
 public class ResourceTypeDTO {
@@ -24,6 +25,7 @@ public class ResourceTypeDTO {
 	private java.lang.String  iconUrl;
 	private java.lang.Byte    status;
 	private java.lang.Integer namespaceId;
+	private String identify;
 
 	private Byte payMode;
 	
@@ -96,5 +98,11 @@ public class ResourceTypeDTO {
 		this.payMode = payMode;
 	}
 
+	public String getIdentify() {
+		return identify;
+	}
 
+	public void setIdentify(String identify) {
+		this.identify = identify;
+	}
 }

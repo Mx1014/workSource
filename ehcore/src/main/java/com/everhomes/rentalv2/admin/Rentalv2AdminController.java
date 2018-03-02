@@ -56,6 +56,23 @@ public class Rentalv2AdminController extends ControllerBase {
 		return response;
 	}
 
+	/**
+	 *
+	 * <b>URL: /rental/admin/getResourceType</b>
+	 * <p>
+	 * 查询资源类型
+	 * </p>
+	 */
+	@RequestMapping("getResourceType")
+	@RestReturn(ResourceTypeDTO.class)
+	public RestResponse getResourceType(@Valid GetResourceTypeCommand cmd) {
+		ResourceTypeDTO resp = this.rentalService.getResourceType(cmd);
+		RestResponse response = new RestResponse(resp);
+		response.setErrorCode(ErrorCodes.SUCCESS);
+		response.setErrorDescription("OK");
+		return response;
+	}
+
 //	/**
 //	 *
 //	 * <b>URL: /rental/admin/createResourceType</b>
