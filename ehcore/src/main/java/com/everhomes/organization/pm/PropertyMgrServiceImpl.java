@@ -5364,7 +5364,15 @@ public class PropertyMgrServiceImpl implements PropertyMgrService {
                 if (primaryUser != null) {
                     primaryUser.setPrimaryFlag(OrganizationOwnerOwnerCarPrimaryFlag.NORMAL.getCode());
                     propertyMgrProvider.updateOrganizationOwnerOwnerCar(primaryUser);
-                }
+                } else {
+					//没有的话要new一个
+					OrganizationOwnerOwnerCar newPrimaryUser = new OrganizationOwnerOwnerCar();
+					newPrimaryUser.setNamespaceId(namespaceId);
+					newPrimaryUser.setCarId(cmd.getCarId());
+					newPrimaryUser.setOrganizationOwnerId(pmOwner.getId());
+					newPrimaryUser.setPrimaryFlag(OrganizationOwnerOwnerCarPrimaryFlag.NORMAL.getCode());
+					propertyMgrProvider.createOrganizationOwnerOwnerCar(newPrimaryUser);
+				}
                 ownerOwnerCar.setPrimaryFlag(OrganizationOwnerOwnerCarPrimaryFlag.PRIMARY.getCode());
                 propertyMgrProvider.updateOrganizationOwnerOwnerCar(ownerOwnerCar);
 
