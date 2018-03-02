@@ -251,6 +251,26 @@ public class ServiceModuleServiceImpl implements ServiceModuleService {
             }
         }
 
+        // 根据应用id进行过滤不需要的权限项
+        BanPrivilegeHandler handler = getBanPrivilegeHandler();
+        if (null != handler && results != null && results.size() > 0) {
+            List<Long> banPrivilegeIds = handler.listBanPrivilegesByModuleIdAndAppId(UserContext.getCurrentNamespaceId(), cmd.getModuleId(), cmd.getAppId());
+
+            Iterator<ServiceModuleDTO> it = results.iterator();
+            while (it.hasNext()) {
+                // 进入禁止权限显示的方法
+                if (it.next().getServiceModules() != null && it.next().getServiceModules().size() > 0 && banPrivilegeIds != null && banPrivilegeIds.size() > 0) {
+                    it.next().getServiceModules().forEach(r -> {
+                        if (r.getType() == ServiceModuleTreeVType.PRIVILEGE.getCode() && banPrivilegeIds.contains(r.getId())) {
+                            LOGGER.debug("privilegeId ban, privilegeId = {}, namespaceId= {}, moduleId= {}, appId = {}", r.getId(), UserContext.getCurrentNamespaceId(), cmd.getModuleId(), cmd.getAppId());
+                            results.remove(it.next());
+                        }
+                    });
+                }
+            }
+        }
+
+
         return results;
     }
 
@@ -291,6 +311,7 @@ public class ServiceModuleServiceImpl implements ServiceModuleService {
             dto.setServiceModules(childrens);
         else {
             List<ServiceModulePrivilege> modulePrivileges = serviceModuleProvider.listServiceModulePrivileges(dto.getId(), ServiceModulePrivilegeType.ORDINARY);
+
             List<ServiceModuleDTO> ps = new ArrayList<ServiceModuleDTO>();
             for (ServiceModulePrivilege modulePrivilege : modulePrivileges) {
                 ServiceModuleDTO p = new ServiceModuleDTO();
@@ -1176,4 +1197,12 @@ public class ServiceModuleServiceImpl implements ServiceModuleService {
 
     }
 
+    public BanPrivilegeHandler getBanPrivilegeHandler() {
+        BanPrivilegeHandler handler = null;
+
+        String handlerPrefix = BanPrivilegeHandler.BAN_PRIVILEGE_OBJECT_PREFIX;
+        handler = PlatformContext.getComponent(handlerPrefix);
+
+        return handler;
+    }
 }
