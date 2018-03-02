@@ -313,13 +313,13 @@ public class WarehouseController extends ControllerBase {
     @RestReturn(value = SearchWarehouseStockLogsResponse.class)
     public RestResponse searchWarehouseStockLogs(SearchWarehouseStockLogsCommand cmd) {
 
-        SearchWarehouseStockLogsResponse logs = warehouseStockLogSearcher.query(cmd);
+    SearchWarehouseStockLogsResponse logs = warehouseStockLogSearcher.query(cmd);
 
-        RestResponse response = new RestResponse(logs);
+    RestResponse response = new RestResponse(logs);
         response.setErrorCode(ErrorCodes.SUCCESS);
         response.setErrorDescription("OK");
         return response;
-    }
+}
 
 
     /**
@@ -350,6 +350,22 @@ public class WarehouseController extends ControllerBase {
         WarehouseRequestDetailsDTO request = warehouseService.findRequest(cmd);
 
         RestResponse response = new RestResponse(request);
+        response.setErrorCode(ErrorCodes.SUCCESS);
+        response.setErrorDescription("OK");
+        return response;
+    }
+
+    /**
+     * <b>URL: /warehouse/deleteRequest</b>
+     * <p>根据id删除申请</p>
+     */
+    @RequestMapping("deleteRequest")
+    @RestReturn(value = String.class)
+    public RestResponse deleteRequest(DeleteRequestCommand cmd) {
+
+        warehouseService.deleteRequest(cmd);
+
+        RestResponse response = new RestResponse();
         response.setErrorCode(ErrorCodes.SUCCESS);
         response.setErrorDescription("OK");
         return response;
