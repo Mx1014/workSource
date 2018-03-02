@@ -4859,7 +4859,13 @@ public class PunchServiceImpl implements PunchService {
 	        params.put("exceptionStatus", cmd.getExceptionStatus());
 	        params.put("userName", cmd.getUserName()); 
 	        params.put("reportType", "exportPunchDetails");
-	        String fileName = String.format("按日统计导出报表_%s.xlsx", DateUtil.dateToStr(new Date(), DateUtil.NO_SLASH));
+			String fileName = "";
+			if (null != cmd.getUserId()) {
+				fileName = String.format("按日统计导出报表_%s到%s.xlsx", DateUtil.dateToStr(new Date(cmd.getStartDay()), DateUtil.NO_SLASH)
+				,DateUtil.dateToStr(new Date(cmd.getEndDay()), DateUtil.NO_SLASH));
+			}else{
+				fileName = String.format("个人按日统计导出报表_%s月.xlsx", monthSF.get().format(new Date(cmd.getStartDay())));
+			}
 
 	        taskService.createTask(fileName, TaskType.FILEDOWNLOAD.getCode(), PunchExportTaskHandler.class, params, TaskRepeatFlag.REPEAT.getCode(), new Date());
 	        return response;
@@ -6472,16 +6478,37 @@ public class PunchServiceImpl implements PunchService {
 //			throw RuntimeErrorException.errorWith(ErrorCodes.SCOPE_GENERAL,ErrorCodes.ERROR_INVALID_PARAMETER,
 //					"Invalid owner type or  Id parameter in the command");
 //		}
-        LocaleString scheduleLocaleString = localeStringProvider.find( PunchConstants.PUNCH_EXCEL_SCOPE, PunchConstants.EXCEL_SCHEDULE,
-                UserContext.current().getUser().getLocale());
-		String filePath = "schedule " + monthSF.get().format(new Date(cmd.getQueryTime())) + ".xlsx";
-		//新建了一个文件
 
-        Workbook wb = createPunchSchedulingsBook(cmd.getQueryTime(),cmd.getEmployees(),cmd.getTimeRules());
+		Map<String, Object> params = new HashMap();
 
-        return download(wb, filePath, response);
+		//如果是null的话会被传成“null”
+		params.put("queryTime", cmd.getQueryTime());
+		params.put("employees", cmd.getEmployees());
+		params.put("timeRules", cmd.getTimeRules());
+		params.put("reportType", "exportPunchScheduling");
+		String fileName = String.format("考勤排班_%s.xlsx", DateUtil.dateToStr(new Date(cmd.getQueryTime()), DateUtil.NO_SLASH));
+
+		taskService.createTask(fileName, TaskType.FILEDOWNLOAD.getCode(), PunchExportTaskHandler.class, params, TaskRepeatFlag.REPEAT.getCode(), new Date());
+		return response;
 
     }
+
+	@Override
+	public OutputStream getPunchSchedulingOutputStream(Long queryTime,
+											  List<PunchSchedulingEmployeeDTO> employees, List<PunchTimeRuleDTO> timeRules, Long taskId) {
+
+		Workbook wb = createPunchSchedulingsBook(queryTime,employees,timeRules);
+		taskService.updateTaskProcess(taskId, 50);
+		ByteArrayOutputStream out = new ByteArrayOutputStream();
+		try {
+			wb.write(out);
+		} catch (IOException e) {
+			LOGGER.error("something woring with build output stream");
+			e.printStackTrace();
+		}
+		return out;
+
+	}
 
 
     @Override
