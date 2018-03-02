@@ -5352,7 +5352,8 @@ public class PropertyMgrServiceImpl implements PropertyMgrService {
         validate(cmd);
         checkCurrentUserNotInOrg(cmd.getOrganizationId());
 
-        Integer namespaceId = currentNamespaceId();
+//        Integer namespaceId = currentNamespaceId();
+        Integer namespaceId = cmd.getNamespaceId();
         OrganizationOwnerOwnerCar ownerOwnerCar = propertyMgrProvider.findOrganizationOwnerOwnerCarByOwnerIdAndCarId(
                 namespaceId, cmd.getOrgOwnerId(), cmd.getCarId());
         if (ownerOwnerCar != null) {
@@ -5364,7 +5365,15 @@ public class PropertyMgrServiceImpl implements PropertyMgrService {
                 if (primaryUser != null) {
                     primaryUser.setPrimaryFlag(OrganizationOwnerOwnerCarPrimaryFlag.NORMAL.getCode());
                     propertyMgrProvider.updateOrganizationOwnerOwnerCar(primaryUser);
-                }
+                } else {
+					//没有的话要new一个
+					OrganizationOwnerOwnerCar newPrimaryUser = new OrganizationOwnerOwnerCar();
+					newPrimaryUser.setNamespaceId(namespaceId);
+					newPrimaryUser.setCarId(cmd.getCarId());
+					newPrimaryUser.setOrganizationOwnerId(pmOwner.getId());
+					newPrimaryUser.setPrimaryFlag(OrganizationOwnerOwnerCarPrimaryFlag.NORMAL.getCode());
+					propertyMgrProvider.createOrganizationOwnerOwnerCar(newPrimaryUser);
+				}
                 ownerOwnerCar.setPrimaryFlag(OrganizationOwnerOwnerCarPrimaryFlag.PRIMARY.getCode());
                 propertyMgrProvider.updateOrganizationOwnerOwnerCar(ownerOwnerCar);
 
@@ -5380,7 +5389,8 @@ public class PropertyMgrServiceImpl implements PropertyMgrService {
         validate(cmd);
         checkCurrentUserNotInOrg(cmd.getOrganizationId());
 
-        Integer namespaceId = currentNamespaceId();
+//        Integer namespaceId = currentNamespaceId();
+        Integer namespaceId = cmd.getNamespaceId();
         OrganizationOwnerOwnerCar ownerOwnerCar = propertyMgrProvider.findOrganizationOwnerOwnerCarByOwnerIdAndCarId(
                 namespaceId, cmd.getOrgOwnerId(), cmd.getCarId());
         if (ownerOwnerCar != null) {
@@ -5460,6 +5470,10 @@ public class PropertyMgrServiceImpl implements PropertyMgrService {
         OrganizationOwnerCarDTO dto = ConvertHelper.convert(ownerCar, OrganizationOwnerCarDTO.class);
         ParkingCardCategory category = propertyMgrProvider.findParkingCardCategory(ownerCar.getParkingType());
         dto.setParkingType(category != null ? category.getCategoryName() : "");
+
+		if(dto.getContentUri() != null) {
+			dto.setContentUrl(parserUri(dto.getContentUri(), EhOrganizationOwners.class.getSimpleName(), dto.getId()));
+		}
         return dto;
     }
 

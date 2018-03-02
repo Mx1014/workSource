@@ -14,6 +14,7 @@ import org.elasticsearch.action.admin.indices.optimize.OptimizeResponse;
 import org.elasticsearch.action.admin.indices.refresh.RefreshRequest;
 import org.elasticsearch.action.admin.indices.refresh.RefreshResponse;
 import org.elasticsearch.action.count.CountResponse;
+import org.elasticsearch.action.delete.DeleteRequestBuilder;
 import org.elasticsearch.action.index.IndexRequestBuilder;
 import org.elasticsearch.action.search.SearchResponse;
 import org.elasticsearch.client.Client;
@@ -112,7 +113,9 @@ public abstract class AbstractElasticSearch {
     }
 
     public String delete(String indexName, String type, String id) {
-        return getClient().prepareDelete(indexName, type, id).execute().actionGet()
+        DeleteRequestBuilder deleteRequestBuilder = getClient().prepareDelete(indexName, type, id);
+        //add refresh action by rui.jia
+        return deleteRequestBuilder.setRefresh(true).execute().actionGet()
                 .getId();
     }
 

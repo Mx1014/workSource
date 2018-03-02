@@ -292,19 +292,21 @@ public class EnergyConsumptionServiceImpl implements EnergyConsumptionService {
     private PortalService portalService;
 
     private void checkEnergyAuth(Integer namespaceId, Long privilegeId, Long orgId, Long communityId) {
-        ListServiceModuleAppsCommand cmd = new ListServiceModuleAppsCommand();
-        cmd.setNamespaceId(namespaceId);
-        cmd.setModuleId(ServiceModuleConstants.ENERGY_MODULE);
-        cmd.setActionType(ActionType.OFFICIAL_URL.getCode());
-        ListServiceModuleAppsResponse apps = portalService.listServiceModuleAppsWithConditon(cmd);
-        Long appId = apps.getServiceModuleApps().get(0).getOriginId();
-        if(!userPrivilegeMgr.checkUserPrivilege(UserContext.currentUserId(), EntityType.ORGANIZATIONS.getCode(), orgId,
-                orgId, privilegeId, appId, null, communityId)) {
-            LOGGER.error("Permission is prohibited, namespaceId={}, orgId={}, ownerType={}, ownerId={}, privilegeId={}",
-                    namespaceId, orgId, EntityType.COMMUNITY.getCode(), communityId, privilegeId);
-            throw RuntimeErrorException.errorWith(PrivilegeServiceErrorCode.SCOPE, PrivilegeServiceErrorCode.ERROR_CHECK_APP_PRIVILEGE,
-                    "check user privilege error");
-        }
+//        ListServiceModuleAppsCommand cmd = new ListServiceModuleAppsCommand();
+//        cmd.setNamespaceId(namespaceId);
+//        cmd.setModuleId(ServiceModuleConstants.ENERGY_MODULE);
+//        cmd.setActionType(ActionType.OFFICIAL_URL.getCode());
+//        ListServiceModuleAppsResponse apps = portalService.listServiceModuleAppsWithConditon(cmd);
+//        Long appId = apps.getServiceModuleApps().get(0).getOriginId();
+//        if(!userPrivilegeMgr.checkUserPrivilege(UserContext.currentUserId(), EntityType.ORGANIZATIONS.getCode(), orgId,
+//                orgId, privilegeId, appId, null, communityId)) {
+//            LOGGER.error("Permission is prohibited, namespaceId={}, orgId={}, ownerType={}, ownerId={}, privilegeId={}",
+//                    namespaceId, orgId, EntityType.COMMUNITY.getCode(), communityId, privilegeId);
+//            throw RuntimeErrorException.errorWith(PrivilegeServiceErrorCode.SCOPE, PrivilegeServiceErrorCode.ERROR_CHECK_APP_PRIVILEGE,
+//                    "check user privilege error");
+//        }
+
+        userPrivilegeMgr.checkUserPrivilege(UserContext.currentUserId(), orgId, privilegeId, ServiceModuleConstants.ENERGY_MODULE, ActionType.OFFICIAL_URL.getCode(), null, orgId, communityId);
     }
 
     @PostConstruct

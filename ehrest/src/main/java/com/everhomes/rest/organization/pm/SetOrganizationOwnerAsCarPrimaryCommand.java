@@ -15,6 +15,16 @@ public class SetOrganizationOwnerAsCarPrimaryCommand {
     @NotNull private Long orgOwnerId;
     @NotNull private Long organizationId;
 
+    private Integer namespaceId;
+
+    public Integer getNamespaceId() {
+        return namespaceId;
+    }
+
+    public void setNamespaceId(Integer namespaceId) {
+        this.namespaceId = namespaceId;
+    }
+
     public Long getOrgOwnerId() {
         return orgOwnerId;
     }

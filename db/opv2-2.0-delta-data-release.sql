@@ -616,3 +616,27 @@ update eh_var_field_groups set name = 'com.everhomes.customer.CustomerAccount' w
 set @id = (select max(id) from eh_service_module_privileges);
 INSERT INTO `eh_service_module_privileges` (`id`, `module_id`, `privilege_type`, `privilege_id`, `remark`, `default_order`, `create_time`) VALUES (@id:=@id+1, '10800', '0', '10005', '全部权限', '0', now());
 
+-- by dengs,20180302,服务联盟权限项添加
+INSERT INTO `eh_service_modules` (`id`, `name`, `parent_id`, `path`, `type`, `level`, `status`, `default_order`, `create_time`, `instance_config`, `action_type`, `update_time`, `operator_uid`, `creator_uid`, `description`, `multiple_flag`, `module_control_type`) VALUES ('40510', '样式设置', '40500', '/40000/40500/40510', '1', '3', '2', '0', now(), NULL, NULL, now(), '0', '1', '1', NULL, '');
+INSERT INTO `eh_service_modules` (`id`, `name`, `parent_id`, `path`, `type`, `level`, `status`, `default_order`, `create_time`, `instance_config`, `action_type`, `update_time`, `operator_uid`, `creator_uid`, `description`, `multiple_flag`, `module_control_type`) VALUES ('40520', '服务管理', '40500', '/40000/40500/40520', '1', '3', '2', '0', now(), NULL, NULL, now(), '0', '1', '1', NULL, '');
+INSERT INTO `eh_service_modules` (`id`, `name`, `parent_id`, `path`, `type`, `level`, `status`, `default_order`, `create_time`, `instance_config`, `action_type`, `update_time`, `operator_uid`, `creator_uid`, `description`, `multiple_flag`, `module_control_type`) VALUES ('40530', '消息通知', '40500', '/40000/40500/40530', '1', '3', '2', '0', now(), NULL, NULL, now(), '0', '1', '1', NULL, '');
+INSERT INTO `eh_service_modules` (`id`, `name`, `parent_id`, `path`, `type`, `level`, `status`, `default_order`, `create_time`, `instance_config`, `action_type`, `update_time`, `operator_uid`, `creator_uid`, `description`, `multiple_flag`, `module_control_type`) VALUES ('40540', '申请记录', '40500', '/40000/40500/40540', '1', '3', '2', '0', now(), NULL, NULL, now(), '0', '1', '1', NULL, '');
+
+set @privilege_id = (select max(id) from eh_service_module_privileges);
+INSERT INTO `eh_service_module_privileges` (`id`, `module_id`, `privilege_type`, `privilege_id`, `remark`, `default_order`, `create_time`) VALUES (@privilege_id:=@privilege_id+1, '40500', '0', '10024', '全部权限', '0', now());
+
+INSERT INTO `eh_acl_privileges` (`id`, `app_id`, `name`, `description`, `tag`) VALUES (4050040510, '0', '服务联盟 样式设置权限', '服务联盟 样式设置权限', NULL);
+INSERT INTO `eh_service_module_privileges` (`id`, `module_id`, `privilege_type`, `privilege_id`, `remark`, `default_order`, `create_time`) VALUES (@privilege_id:=@privilege_id+1, '40510', '0', 4050040510, '全部权限', '0', now());
+
+INSERT INTO `eh_acl_privileges` (`id`, `app_id`, `name`, `description`, `tag`) VALUES (4050040520, '0', '服务联盟 服务管理权限', '服务联盟 服务管理权限', NULL);
+INSERT INTO `eh_service_module_privileges` (`id`, `module_id`, `privilege_type`, `privilege_id`, `remark`, `default_order`, `create_time`) VALUES (@privilege_id:=@privilege_id+1, '40520', '0', 4050040520, '全部权限', '0', now());
+
+INSERT INTO `eh_acl_privileges` (`id`, `app_id`, `name`, `description`, `tag`) VALUES (4050040530, '0', '服务联盟 消息通知权限', '服务联盟 消息通知权限', NULL);
+INSERT INTO `eh_service_module_privileges` (`id`, `module_id`, `privilege_type`, `privilege_id`, `remark`, `default_order`, `create_time`) VALUES (@privilege_id:=@privilege_id+1, '40530', '0', 4050040530, '全部权限', '0', now());
+
+INSERT INTO `eh_acl_privileges` (`id`, `app_id`, `name`, `description`, `tag`) VALUES (4050040540, '0', '服务联盟 申请记录权限', '服务联盟 申请记录权限', NULL);
+INSERT INTO `eh_service_module_privileges` (`id`, `module_id`, `privilege_type`, `privilege_id`, `remark`, `default_order`, `create_time`) VALUES (@privilege_id:=@privilege_id+1, '40540', '0', 4050040540, '全部权限', '0', now());
+
+-- fix 24668 xiongying20180302
+update eh_var_field_groups set title = '客户信息' where id = 1;
+
