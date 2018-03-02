@@ -1405,8 +1405,7 @@ public class ArchivesServiceImpl implements ArchivesService {
                     return "男";
                 else if (gender.equals(UserGender.FEMALE.getCode()))
                     return "女";
-                else
-                    return "";
+                break;
             case ArchivesParameter.MARITAL_FLAG:
                 Byte maritalFlag = (Byte) obj;
                 if (StringUtils.isEmpty(maritalFlag))
@@ -1419,6 +1418,7 @@ public class ArchivesServiceImpl implements ArchivesService {
                     return "未婚";
                 else if (maritalFlag.equals(MaritalFlag.DIVORCE.getCode()))
                     return "离异";
+                break;
             case ArchivesParameter.EMPLOYEE_TYPE:
                 Byte employeeType = (Byte) obj;
                 if (StringUtils.isEmpty(employeeType))
@@ -1431,6 +1431,7 @@ public class ArchivesServiceImpl implements ArchivesService {
                     return "实习";
                 else if (employeeType.equals(EmployeeType.LABORDISPATCH.getCode()))
                     return "劳动派遣";
+                break;
             case ArchivesParameter.EMPLOYEE_STATUS:
                 Byte employeeStatus = (Byte) obj;
                 if (StringUtils.isEmpty(employeeStatus))
@@ -1441,6 +1442,9 @@ public class ArchivesServiceImpl implements ArchivesService {
                     return "在职";
                 else if (employeeStatus.equals(EmployeeStatus.INTERNSHIP.getCode()))
                     return "实习";
+                else if (employeeStatus.equals(EmployeeStatus.DISMISSAL.getCode()))
+                    return "离职";
+                break;
             case ArchivesParameter.DEPARTMENT:
                 List<OrganizationDTO> departments = (List<OrganizationDTO>) obj;
                 if (departments != null && departments.size() > 0) {
@@ -1451,6 +1455,7 @@ public class ArchivesServiceImpl implements ArchivesService {
                     departmentString = departmentString.substring(0, departmentString.length() - 1);
                     return departmentString;
                 }
+                break;
             case ArchivesParameter.DEPARTMENT_IDS:
                 List<Long> ids = (List<Long>) obj;
                 String departmentName = "";
@@ -1464,6 +1469,7 @@ public class ArchivesServiceImpl implements ArchivesService {
                     departmentName = departmentName.substring(0, departmentName.length() - 1);
                     return departmentName;
                 }
+                break;
             case ArchivesParameter.CONTRACT_PARTY_ID:
                 if (obj != null) {
                     Long id = (Long) obj;
@@ -1472,6 +1478,7 @@ public class ArchivesServiceImpl implements ArchivesService {
                         return org.getName();
                     }
                 }
+                break;
             case ArchivesParameter.DISMISS_REASON:
                 Byte dismissReason = (Byte) obj;
                 if (dismissReason.equals(ArchivesDismissReason.SALARY.getCode()))
@@ -1492,8 +1499,7 @@ public class ArchivesServiceImpl implements ArchivesService {
                     return "违纪";
                 else if (dismissReason.equals(ArchivesDismissReason.OTHER.getCode()))
                     return "其他";
-            default:
-                return "";
+                break;
         }
         /*if (type.equals(ArchivesParameter.GENDER)) {
 
@@ -1526,6 +1532,7 @@ public class ArchivesServiceImpl implements ArchivesService {
         if (type.equals(ArchivesParameter.DISMISS_REASON)) {
 
         }*/
+        return "";
     }
 
     /********************    assistant function end    ********************/
