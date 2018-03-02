@@ -3941,6 +3941,7 @@ public class QualityServiceImpl implements QualityService {
 
 	@Override
 	public CountSampleTaskScoresResponse countSampleTaskScores(CountSampleTaskScoresCommand cmd) {
+		checkUserPrivilege(cmd.getOwnerId(), PrivilegeConstants.QUALITY_STAT_SAMPLE, cmd.getTargetId());
 		CountSampleTaskScoresResponse response = sampleSearcher.queryCount(cmd);
 		List<SampleTaskScoreDTO> dtos = response.getSampleTasks();
 		if(dtos != null && dtos.size() > 0) {
