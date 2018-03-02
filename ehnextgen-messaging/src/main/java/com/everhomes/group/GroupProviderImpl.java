@@ -168,6 +168,31 @@ public class GroupProviderImpl implements GroupProvider {
 		
         return groupList;
     }
+
+    @Override
+    public Group findGroupByForumId(long forumId) {
+        List<Group> groupList = new ArrayList<Group>();
+        dbProvider.mapReduce(AccessSpec.readOnlyWith(EhGroups.class),
+                groupList, (DSLContext context, Object reducingContext) -> {
+                    List<Group> list = context.select().from(Tables.EH_GROUPS)
+                            .where(Tables.EH_GROUPS.INTEGRAL_TAG4.eq(forumId))
+                            .fetch().map((r) -> {
+                                return ConvertHelper.convert(r, Group.class);
+                            });
+
+                    if (list != null && !list.isEmpty()) {
+                        groupList.addAll(list);
+                        return false;
+                    }
+
+                    return true;
+                });
+
+        if(groupList.size() > 0){
+            return groupList.get(0);
+        }
+        return null;
+    }
     
     @Override
     public List<Group> queryPulbicGroups(int maxCount, ListingQueryBuilderCallback callback) {

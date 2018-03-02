@@ -665,6 +665,11 @@ public class GroupServiceImpl implements GroupService {
 
         }
     }
+
+    @Override
+    public Group findGroupByForumId(long forumId) {
+        return groupProvider.findGroupByForumId(forumId);
+    }
     
     @Override
     public ListGroupCommandResponse listGroupsByNamespaceId(ListGroupsByNamespaceIdCommand cmd){

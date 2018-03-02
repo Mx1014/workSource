@@ -2345,7 +2345,7 @@ public class ForumServiceImpl implements ForumService {
         User operator = UserContext.current().getUser();
         Long operatorId = operator.getId();
 
-        checkStickPostPrivilege(operatorId, cmd.getOrganizationId());
+        checkStickPostPrivilege(operatorId, cmd.getOrganizationId(), cmd.getPostId());
         checkStickPostParameter(operatorId, cmd.getPostId(), cmd.getStickFlag());
 
         dbProvider.execute((status) -> {
@@ -2376,7 +2376,7 @@ public class ForumServiceImpl implements ForumService {
         });
     }
 
-    private void checkStickPostPrivilege(Long operatorId, Long organizationId) {
+    private void checkStickPostPrivilege(Long operatorId, Long organizationId, Long postId) {
 
         SystemUserPrivilegeMgr resolver = PlatformContext.getComponent("SystemUser");
 
@@ -2384,9 +2384,33 @@ public class ForumServiceImpl implements ForumService {
         if(resolver.checkSuperAdmin(operatorId, organizationId)){
             return;
         }
+
+        //检查该用户是否是该该帖子所在群组的创建者。
+        boolean result = checkGroupCreater(operatorId, postId);
+        if(result){
+            return;
+        }
+
         //检查超级管理员，此处不成立会报错
         resolver.checkUserPrivilege(operatorId, 0);
 
+    }
+
+
+    private boolean checkGroupCreater(Long userId, Long postId){
+
+        boolean result = false;
+
+        Post postById = forumProvider.findPostById(postId);
+        Group group = null;
+        if(postById != null){
+            group = groupService.findGroupByForumId(postById.getForumId());
+        }
+
+        if(group != null && userId != null && userId.equals(group.getCreatorUid())){
+            result = true;
+        }
+        return result;
     }
 
     private Post checkStickPostParameter(Long operatorId, Long postId, Byte stickFlag) {

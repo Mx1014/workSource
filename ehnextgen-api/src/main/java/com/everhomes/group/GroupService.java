@@ -113,6 +113,9 @@ public interface GroupService {
     //Just for route message
     List<GroupMember> listMessageGroupMembers(ListingLocator locator, int pageSize);
     void deleteGroupByCreator(long groupId);
+
+    Group findGroupByForumId(long forumId);
+
     ListGroupCommandResponse listGroupsByNamespaceId(ListGroupsByNamespaceIdCommand cmd);
     ListNearbyGroupCommandResponse listNearbyGroupsByScene(ListNearbyGroupBySceneCommand cmd);
 	void quitAndTransferPrivilege(QuitAndTransferPrivilegeCommand cmd);
