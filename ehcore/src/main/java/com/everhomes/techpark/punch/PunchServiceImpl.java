@@ -204,6 +204,7 @@ public class PunchServiceImpl implements PunchService {
 		timeIntervalApprovalAttribute.add(GeneralApprovalAttribute.ASK_FOR_LEAVE.getCode());
 		timeIntervalApprovalAttribute.add(GeneralApprovalAttribute.BUSINESS_TRIP.getCode());
 		timeIntervalApprovalAttribute.add(GeneralApprovalAttribute.GO_OUT.getCode());
+		timeIntervalApprovalAttribute.add(GeneralApprovalAttribute.OVERTIME.getCode());
 	}
 	@Override
 	public List<String> getTimeIntervalApprovalAttribute(){
