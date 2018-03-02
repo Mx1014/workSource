@@ -5352,7 +5352,8 @@ public class PropertyMgrServiceImpl implements PropertyMgrService {
         validate(cmd);
         checkCurrentUserNotInOrg(cmd.getOrganizationId());
 
-        Integer namespaceId = currentNamespaceId();
+//        Integer namespaceId = currentNamespaceId();
+        Integer namespaceId = cmd.getNamespaceId();
         OrganizationOwnerOwnerCar ownerOwnerCar = propertyMgrProvider.findOrganizationOwnerOwnerCarByOwnerIdAndCarId(
                 namespaceId, cmd.getOrgOwnerId(), cmd.getCarId());
         if (ownerOwnerCar != null) {
@@ -5388,7 +5389,8 @@ public class PropertyMgrServiceImpl implements PropertyMgrService {
         validate(cmd);
         checkCurrentUserNotInOrg(cmd.getOrganizationId());
 
-        Integer namespaceId = currentNamespaceId();
+//        Integer namespaceId = currentNamespaceId();
+        Integer namespaceId = cmd.getNamespaceId();
         OrganizationOwnerOwnerCar ownerOwnerCar = propertyMgrProvider.findOrganizationOwnerOwnerCarByOwnerIdAndCarId(
                 namespaceId, cmd.getOrgOwnerId(), cmd.getCarId());
         if (ownerOwnerCar != null) {
