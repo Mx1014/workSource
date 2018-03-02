@@ -62,6 +62,7 @@ import org.apache.poi.xssf.usermodel.XSSFRow;
 import org.apache.poi.xssf.usermodel.XSSFSheet;
 import org.apache.poi.xssf.usermodel.XSSFWorkbook;
 import org.elasticsearch.client.transport.NoNodeAvailableException;
+import org.elasticsearch.common.util.DoubleArray;
 import org.jooq.Record;
 import org.jooq.SelectQuery;
 import org.slf4j.Logger;
@@ -203,6 +204,7 @@ public class PunchServiceImpl implements PunchService {
 		timeIntervalApprovalAttribute.add(GeneralApprovalAttribute.ASK_FOR_LEAVE.getCode());
 		timeIntervalApprovalAttribute.add(GeneralApprovalAttribute.BUSINESS_TRIP.getCode());
 		timeIntervalApprovalAttribute.add(GeneralApprovalAttribute.GO_OUT.getCode());
+		timeIntervalApprovalAttribute.add(GeneralApprovalAttribute.OVERTIME.getCode());
 	}
 	@Override
 	public List<String> getTimeIntervalApprovalAttribute(){
@@ -3219,7 +3221,7 @@ public class PunchServiceImpl implements PunchService {
 			return wb;
 		for (PunchCountDTO statistic : results ){
 			this.setNewPunchStatisticsBookRow(sheet, statistic);
-			taskService.updateTaskProcess(taskId,55 + (int)(++num / (results.size()/45)));
+			taskService.updateTaskProcess(taskId,55 + (int)(++num / (Double.valueOf(results.size())/45.00)));
 		}
 		return wb;
 //		try {
@@ -4550,8 +4552,14 @@ public class PunchServiceImpl implements PunchService {
 //				BigDecimal b = new BigDecimal(statistic.getOverTimeSum()/3600000.0);
 //				dto.setOverTimeSum(b.setScale(2,BigDecimal.ROUND_HALF_UP).doubleValue());
 //			}
-			dto.setExceptionRequestCount(punchProvider.countExceptionRequests(statistic.getUserId(),statistic.getOwnerType(),statistic.getOwnerId(),statistic.getPunchMonth()));
-			dto.setOverTimeSum(approvalRequestProvider.countOvertimeDurationByUserAndMonth(statistic.getUserId(),statistic.getOwnerType(),statistic.getOwnerId(),statistic.getPunchMonth()));
+			dto.setExceptionRequestCount(punchProvider.countExceptionRequests(statistic.getUserId(), statistic.getOwnerType(), statistic.getOwnerId(), statistic.getPunchMonth()));
+			if (null == dto.getExceptionRequestCount()) {
+				dto.setExceptionDayCount(0);
+			}
+			dto.setOverTimeSum(approvalRequestProvider.countOvertimeDurationByUserAndMonth(statistic.getUserId(), statistic.getOwnerType(), statistic.getOwnerId(), statistic.getPunchMonth()));
+			if (null == dto.getOverTimeSum()) {
+				dto.setOverTimeSum(0.0);
+			}
 //			List<ApprovalRangeStatistic> abscentStats = approvalRangeStatisticProvider.queryApprovalRangeStatistics(null, Integer.MAX_VALUE,new ListingQueryBuilderCallback()  {
 //				@Override
 //				public SelectQuery<? extends Record> buildCondition(ListingLocator locator,
@@ -4857,8 +4865,8 @@ public class PunchServiceImpl implements PunchService {
 	        params.put("startDay", cmd.getStartDay());
 	        params.put("endDay", cmd.getEndDay());
 	        params.put("userId", cmd.getUserId());
-	        params.put("exceptionStatus", StringHelper.toJsonString(cmd.getExceptionStatus()));
-	        params.put("userName", StringHelper.toJsonString(cmd.getUserName()));
+	        params.put("exceptionStatus", cmd.getExceptionStatus());
+	        params.put("userName", cmd.getUserName());
 	        params.put("reportType", "exportPunchDetails");
 			String fileName = "";
 			if (null != cmd.getUserId()) {
@@ -4918,7 +4926,7 @@ public class PunchServiceImpl implements PunchService {
 		for (PunchDayDetailDTO dto : dtos ){
 			this.setNewPunchDetailsBookRow(sheet, dto);
 
-			taskService.updateTaskProcess(taskId,55 + (int)(++num / (dtos.size()/45)));
+			taskService.updateTaskProcess(taskId,55 + (int)(++num / (Double.valueOf(dtos.size())/45.00)));
 		}
 		return wb;
 	}

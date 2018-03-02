@@ -1055,6 +1055,8 @@ public class SalaryServiceImpl implements SalaryService {
         List<Long> detailIds = organizationService.listDetailIdWithEnterpriseExclude(null,
                 namespaceId, ownerId, null, null, null, null, null, Integer.MAX_VALUE - 1, null, null
         );
+        LOGGER.debug("getSalaryDetailsWB detailIds : " + StringHelper.toJsonString(detailIds));
+
         int processNum = 0;
         for (Long detailId : detailIds) {
             createSalaryDetailRow(sheet, detailId, groupEntities, categories, isFile, month, ownerId);
@@ -1082,17 +1084,19 @@ public class SalaryServiceImpl implements SalaryService {
     private void createSalaryDetailRow(XSSFSheet sheet, Long detailId, List<SalaryGroupEntity> groupEntities, List<SalaryEntityCategory> categories, NormalFlag isFile, String month, Long ownerId) {
 
         OrganizationMemberDetails detail = organizationProvider.findOrganizationMemberDetailsByDetailId(detailId);
-        if (null == detail) {
-            return;
-        }
         Row row = sheet.createRow(sheet.getLastRowNum() + 1);
         int i = -1;
-        row.createCell(++i).setCellValue(detail.getContactName());
-        row.createCell(++i).setCellValue(detail.getContactToken());
-        row.createCell(++i).setCellValue(detail.getEmployeeNo());
-        row.createCell(++i).setCellValue(getDepartmentName(detail.getId()));
-        row.createCell(++i).setCellValue(detail.getIdNumber());
-        row.createCell(++i).setCellValue(detail.getSalaryCardNumber());
+        if (null == detail) {
+            LOGGER.error("没有找到这个人 detailId = "+detailId);
+            return;
+        } else {
+            row.createCell(++i).setCellValue(detail.getContactName());
+            row.createCell(++i).setCellValue(detail.getContactToken());
+            row.createCell(++i).setCellValue(detail.getEmployeeNo());
+            row.createCell(++i).setCellValue(getDepartmentName(detail.getId()));
+            row.createCell(++i).setCellValue(detail.getIdNumber());
+            row.createCell(++i).setCellValue(detail.getSalaryCardNumber());
+        }
         row.createCell(++i).setCellValue("在职不在职荣楠没跟我说");
 
         if (null != categories && null != groupEntities) {

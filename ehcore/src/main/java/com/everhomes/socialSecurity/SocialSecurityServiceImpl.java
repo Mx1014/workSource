@@ -1195,6 +1195,14 @@ public class SocialSecurityServiceImpl implements SocialSecurityService {
                 String afCityName = r.getD();
                 Long afCItyId = getZuolinNamespaceCityId(afCityName);
                 String houseType = r.getE();
+                if (null == houseType) {
+                    LOGGER.error("没有这个城市 " + r.getC() );
+                    log.setErrorLog("没有这个户籍类型");
+                    log.setCode(SocialSecurityConstants.ERROR_CHECK_SOCIAL_CITY);
+                    log.setErrorDescription(log.getErrorLog());
+                    response.getLogs().add(log);
+                    continue;
+                }
                 List<SocialSecurityBase> ssBases = socialSecurityBaseProvider.listSocialSecurityBase(ssCityId, houseType, AccumOrSocial.SOCAIL.getCode());
                 if (null == ssBases) {
                     LOGGER.error("没有这个城市或者户籍档次 " + ssCityName + houseType);
@@ -1557,7 +1565,9 @@ public class SocialSecurityServiceImpl implements SocialSecurityService {
         if (detailIds != null) {
             for (Long detailId : detailIds) {
                 OrganizationMemberDetails detail = organizationProvider.findOrganizationMemberDetailsByDetailId(detailId);
-                SocialSecurityInoutReport report = createInoutReport(detail, month);
+                if(null != detail){
+                	SocialSecurityInoutReport report = createInoutReport(detail, month);
+                }
             }
         }
 //        if (outDetails != null) {

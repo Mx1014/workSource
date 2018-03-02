@@ -510,13 +510,12 @@ public class QualityServiceImpl implements QualityService {
 
 		this.qualityProvider.populateStandardsGroups(standards);
 		this.qualityProvider.populateStandardsSpecifications(standards);
-
-
-        Long nextPageAnchor = null;
+Long nextPageAnchor = null;
         if(standards.size() > pageSize) {
         	standards.remove(standards.size() - 1);
             nextPageAnchor = standards.get(standards.size() - 1).getId();
         }
+
 
         List<QualityStandardsDTO> qaStandards = standards.stream().map((r) -> {
 
@@ -3884,8 +3883,7 @@ public class QualityServiceImpl implements QualityService {
 		Double averageScore = 0D;
 		if (response.getScores() != null && response.getScores().size() > 0) {
 			for (ScoreGroupByTargetDTO score : response.getScores()) {
-				if (score != null && score.getTotalScore() != null)
-					sum = sum + score.getTotalScore();
+				sum = sum + score.getTotalScore();
 			}
 			averageScore = sum / response.getScores().size();
 		}
@@ -3943,6 +3941,8 @@ public class QualityServiceImpl implements QualityService {
 
 	@Override
 	public CountSampleTaskScoresResponse countSampleTaskScores(CountSampleTaskScoresCommand cmd) {
+		// 不基于项目  但是使用项目id校验权限
+		checkUserPrivilege(cmd.getOwnerId(), PrivilegeConstants.QUALITY_STAT_SAMPLE, cmd.getTargetId());
 		CountSampleTaskScoresResponse response = sampleSearcher.queryCount(cmd);
 		List<SampleTaskScoreDTO> dtos = response.getSampleTasks();
 		if(dtos != null && dtos.size() > 0) {
@@ -4500,33 +4500,70 @@ public class QualityServiceImpl implements QualityService {
 	public QualityOfflineTaskDetailsResponse getOfflineTaskDetail(ListQualityInspectionTasksCommand cmd) {
 		//处理传过来的lastSyncTime
 //		cmd.setPageSize(Integer.MAX_VALUE - 1);
-		cmd.setLatestUpdateTime(dateStrToTimestamp(cmd.getLastSyncTime()));
+		if (cmd.getLastSyncTime() != null) {
+			cmd.setLatestUpdateTime(dateStrToTimestamp(cmd.getLastSyncTime()));
+		}
 		ListQualityInspectionTasksResponse tasksResponse = listQualityInspectionTasks(cmd);
 		QualityOfflineTaskDetailsResponse offlineTaskDetailsResponse = new QualityOfflineTaskDetailsResponse();
 		offlineTaskDetailsResponse.setTasks(tasksResponse.getTasks());
 		offlineTaskDetailsResponse.setNextPageAnchor(tasksResponse.getNextPageAnchor());
 		List<QualityInspectionSpecificationDTO> specifications = new ArrayList<>();
+		List<Long> parentSpecificationIds = new ArrayList<>();
 
-		if(tasksResponse.getTasks()!=null && tasksResponse.getTasks().size()>0)
-		tasksResponse.getTasks().forEach((task) -> {
-			//处理任务
-			if (task.getExecutiveTime() == null) {
-				task.setLastSyncTime(task.getCreateTime().toLocalDateTime().format(dateSF));
-			} else {
-				if (task.getProcessTime() == null) {
-					task.setLastSyncTime(task.getExecutiveTime().toLocalDateTime().format(dateSF));
+		if(tasksResponse.getTasks()!=null && tasksResponse.getTasks().size()>0) {
+			tasksResponse.getTasks().forEach((task) -> {
+				//处理任务 获取任务更新最大时间
+				if (task.getExecutiveTime() == null) {
+					task.setLastSyncTime(task.getCreateTime().toLocalDateTime().format(dateSF));
 				} else {
-					task.setLastSyncTime(task.getProcessTime().toLocalDateTime().format(dateSF));
+					if (task.getProcessTime() == null) {
+						task.setLastSyncTime(task.getExecutiveTime().toLocalDateTime().format(dateSF));
+					} else {
+						task.setLastSyncTime(task.getProcessTime().toLocalDateTime().format(dateSF));
+					}
 				}
-			}
-			//处理规范
-			QualityInspectionSpecifications specification = qualityProvider.getSpecificationById(task.getCategoryId());
-			if (specification != null)
-				specifications.add(ConvertHelper.convert(specification, QualityInspectionSpecificationDTO.class));
-		});
-		offlineTaskDetailsResponse.setSpecifications(specifications);
+				//处理规范
+				QualityInspectionSpecifications specification = qualityProvider.getSpecificationById(task.getCategoryId());
+				if (specification != null) {
+					specifications.add(ConvertHelper.convert(specification, QualityInspectionSpecificationDTO.class));
+				}
+			});
+		}
+		//去除重复specification
+		Set<QualityInspectionSpecificationDTO> tempSet = new HashSet<>();
+		tempSet.addAll(specifications);
+		List<QualityInspectionSpecificationDTO> specificationList = new ArrayList<>(tempSet);
+		specificationList.forEach((s)->parentSpecificationIds.add(s.getId()));
+		populateSpecificationDetails(specificationList, parentSpecificationIds);
+		offlineTaskDetailsResponse.setSpecifications(specificationList);
+
 		return offlineTaskDetailsResponse;
 	}
+
+	/**
+	 * 增加具体类型下的规范
+	 * @param specifications
+	 * @param parentSpecificationIds
+	 */
+	private void populateSpecificationDetails(List<QualityInspectionSpecificationDTO> specifications, List<Long> parentSpecificationIds) {
+		if (specifications != null && parentSpecificationIds != null && parentSpecificationIds.size() > 0) {
+			List<QualityInspectionSpecificationDTO> qualityInspectionSpecificationDTOS = new ArrayList<>();// items
+			parentSpecificationIds.forEach((d) -> {
+				GetQualitySpecificationCommand command = new GetQualitySpecificationCommand();
+				command.setSpecificationId(d);
+				qualityInspectionSpecificationDTOS.add(getQualitySpecification(command));
+			});
+			List<QualityInspectionSpecificationDTO> details = new ArrayList<>();
+			qualityInspectionSpecificationDTOS.forEach(q -> {
+				if (q.getChildrens() != null && q.getChildrens().size() > 0)
+					details.addAll(q.getChildrens());
+			});
+			if (details.size() > 0) {
+				specifications.addAll(details);
+			}
+		}
+	}
+
 	private Timestamp dateStrToTimestamp(String str) {
 		LocalDate localDate = LocalDate.parse(str,dateSF);
 		return  new Timestamp(Date.valueOf(localDate).getTime());
@@ -4600,7 +4637,10 @@ public class QualityServiceImpl implements QualityService {
 
 		//只保留子节点详细内容 子节点为items 父节点为规范
 		List<QualityInspectionSpecificationDTO> details = new ArrayList<>();
-		qualityInspectionSpecificationDTOS.forEach(q->details.addAll(q.getChildrens()));
+		qualityInspectionSpecificationDTOS.forEach(q->{
+			if (q.getChildrens() != null && q.getChildrens().size() > 0)
+				details.addAll(q.getChildrens());
+		});
 		//offlineResponse.setSpecificationsDetail(details);
 		offlineResponse.getSpecifications().addAll(details);
 

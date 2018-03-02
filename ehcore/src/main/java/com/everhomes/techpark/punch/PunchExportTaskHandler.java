@@ -80,11 +80,11 @@ public class PunchExportTaskHandler implements FileDownloadTaskHandler {
 
         List<PunchSchedulingEmployeeDTO> employees = null;
         if (params.get("employees") != null) {
-            employees = JSONArray.parseArray((String) params.get("employees"), PunchSchedulingEmployeeDTO.class);
+            employees = JSONArray.parseArray(String.valueOf(params.get("employees")), PunchSchedulingEmployeeDTO.class);
         }
         List<PunchTimeRuleDTO> timeRules = null;
         if (params.get("timeRules") != null) {
-            timeRules = JSONArray.parseArray((String) params.get("timeRules"), PunchTimeRuleDTO.class);
+            timeRules = JSONArray.parseArray(String.valueOf(params.get("timeRules")), PunchTimeRuleDTO.class);
         }
 
 

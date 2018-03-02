@@ -124,6 +124,14 @@ UPDATE eh_service_module_privileges
 SET remark = REPLACE(remark,'标准','计划')
 where id in (120,121,122,123,125);
 
+UPDATE  eh_acl_privileges
+SET name = '品质核查 考核统计查看权限'
+WHERE id = 30066;
+
+UPDATE   eh_service_module_privileges
+SET remark = '品质核查 考核统计查看权限'
+WHERE  privilege_id = 30066;
+
 -- add by sw 20180122 vip车位
 INSERT INTO `eh_rentalv2_resource_types` (`id`, `name`, `page_type`, `icon_uri`, `status`, `namespace_id`, `pay_mode`, `unauth_visible`, `menu_type`, `identify`)
 	VALUES ('12500', 'VIP车位预约', '0', NULL, '2', '1000000', '0', '0', '1', 'vip_parking');

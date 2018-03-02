@@ -28,3 +28,11 @@ WHERE id = 20660;
 UPDATE eh_service_module_privileges
 SET remark = REPLACE(remark,'标准','计划')
 where id in (120,121,122,123,125);
+
+UPDATE  eh_acl_privileges
+SET name = '品质核查 考核统计查看权限'
+WHERE id = 30066;
+
+UPDATE   eh_service_module_privileges
+SET remark = '品质核查 考核统计查看权限'
+WHERE  privilege_id = 30066;
