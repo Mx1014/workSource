@@ -613,7 +613,6 @@ public class ContractServiceImpl implements ContractService {
 		dealContractAttachments(contract.getId(), cmd.getAttachments());
 		dealContractChargingChanges(contract, cmd.getAdjusts(), cmd.getFrees());
 
-
 		contract.setRentSize(totalSize);
 		contractProvider.updateContract(contract);
 		contractSearcher.feedDoc(contract);
@@ -1247,7 +1246,7 @@ public class ContractServiceImpl implements ContractService {
 		contract.setStatus(ContractStatus.DENUNCIATION.getCode());
 		contract.setDenunciationReason(cmd.getDenunciationReason());
 		contract.setDenunciationUid(cmd.getDenunciationUid());
-		contract.setDenunciationTime(new Timestamp(DateHelper.currentGMTTime().getTime()));
+		contract.setDenunciationTime(new Timestamp(cmd.getDenunciationTime()));
 		contractProvider.updateContract(contract);
 		contractSearcher.feedDoc(contract);
 		if(cmd.getPaymentFlag() == 1) {

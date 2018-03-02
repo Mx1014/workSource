@@ -637,5 +637,6 @@ INSERT INTO `eh_service_module_privileges` (`id`, `module_id`, `privilege_type`,
 INSERT INTO `eh_acl_privileges` (`id`, `app_id`, `name`, `description`, `tag`) VALUES (4050040540, '0', '服务联盟 申请记录权限', '服务联盟 申请记录权限', NULL);
 INSERT INTO `eh_service_module_privileges` (`id`, `module_id`, `privilege_type`, `privilege_id`, `remark`, `default_order`, `create_time`) VALUES (@privilege_id:=@privilege_id+1, '40540', '0', 4050040540, '全部权限', '0', now());
 
-
+-- fix 24668 xiongying20180302
+update eh_var_field_groups set title = '客户信息' where id = 1;
 
