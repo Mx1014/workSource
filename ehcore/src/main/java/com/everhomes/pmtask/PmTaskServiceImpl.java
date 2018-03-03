@@ -887,6 +887,8 @@ public class PmTaskServiceImpl implements PmTaskService {
 		category.setPath(path);
 		category.setParentId(parentId);
 		category.setStatus(CategoryAdminStatus.ACTIVE.getCode());
+		category.setOwnerId(cmd.getOwnerId());
+		category.setOwnerType(cmd.getOwnerType());
 		categoryProvider.createCategory(category);
 		
 		return ConvertHelper.convert(category, CategoryDTO.class);
