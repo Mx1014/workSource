@@ -6,6 +6,7 @@ import com.everhomes.entity.EntityType;
 import com.everhomes.flow.Flow;
 import com.everhomes.flow.FlowService;
 import com.everhomes.naming.NameMapper;
+import com.everhomes.rest.acl.PrivilegeConstants;
 import com.everhomes.rest.flow.CreateFlowCaseCommand;
 import com.everhomes.rest.requisition.*;
 import com.everhomes.rest.flow.FlowConstants;
@@ -15,6 +16,7 @@ import com.everhomes.sequence.SequenceProvider;
 import com.everhomes.server.schema.tables.pojos.EhRequisitions;
 import com.everhomes.supplier.SupplierHelper;
 import com.everhomes.user.UserContext;
+import com.everhomes.user.UserPrivilegeMgr;
 import com.everhomes.util.ConvertHelper;
 import com.everhomes.util.DateHelper;
 import com.everhomes.util.RuntimeErrorException;
@@ -43,9 +45,12 @@ public class RequisitionServiceImpl implements RequisitionService {
     private DbProvider dbProvider;
     @Autowired
     private FlowService flowService;
+    @Autowired
+    private UserPrivilegeMgr userPrivilegeMgr;
 
     @Override
     public void createRequisition(CreateRequisitionCommand cmd) {
+        checkAssetPriviledgeForPropertyOrg(cmd.getCommunityId(),PrivilegeConstants.REQUISITION_CREATE);
         Requisition req = ConvertHelper.convert(cmd, Requisition.class);
         req.setCreateUid(UserContext.currentUserId());
         long nextReqId = this.sequenceProvider.getNextSequence(NameMapper.getSequenceDomainFromTablePojo
@@ -85,6 +90,7 @@ public class RequisitionServiceImpl implements RequisitionService {
 
     @Override
     public ListRequisitionsResponse listRequisitions(ListRequisitionsCommand cmd) {
+        checkAssetPriviledgeForPropertyOrg(cmd.getCommunityId(), PrivilegeConstants.REQUISITION_VIEW);
         ListRequisitionsResponse response = new ListRequisitionsResponse();
         Long pageAnchor = cmd.getPageAnchor();
         Integer pageSize = cmd.getPageSize();
@@ -102,6 +108,7 @@ public class RequisitionServiceImpl implements RequisitionService {
 
     @Override
     public GetRequisitionDetailResponse getRequisitionDetail(GetRequisitionDetailCommand cmd) {
+        checkAssetPriviledgeForPropertyOrg(cmd.getCommunityId(),PrivilegeConstants.REQUISITION_VIEW);
         Requisition requisition = requisitionProvider.findRequisitionById(cmd.getRequisitionId());
         GetRequisitionDetailResponse response = new GetRequisitionDetailResponse();
         response.setAmount(requisition.getAmount().toPlainString());
@@ -137,4 +144,7 @@ public class RequisitionServiceImpl implements RequisitionService {
         return requisitionProvider.getNameById(requisitionId);
     }
 
+    private void checkAssetPriviledgeForPropertyOrg(Long communityId, Long priviledgeId) {
+        userPrivilegeMgr.checkUserPrivilege(UserContext.currentUserId(), null, priviledgeId, PrivilegeConstants.REQUISITION_MODULE, (byte)13, null, null, communityId);
+    }
 }

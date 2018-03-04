@@ -204,6 +204,7 @@ public class PunchServiceImpl implements PunchService {
 		timeIntervalApprovalAttribute.add(GeneralApprovalAttribute.ASK_FOR_LEAVE.getCode());
 		timeIntervalApprovalAttribute.add(GeneralApprovalAttribute.BUSINESS_TRIP.getCode());
 		timeIntervalApprovalAttribute.add(GeneralApprovalAttribute.GO_OUT.getCode());
+		timeIntervalApprovalAttribute.add(GeneralApprovalAttribute.OVERTIME.getCode());
 	}
 	@Override
 	public List<String> getTimeIntervalApprovalAttribute(){
@@ -1477,7 +1478,7 @@ public class PunchServiceImpl implements PunchService {
 	}
 
 	private void calculateArriveStatus(Calendar arriveCalendar, Calendar startTime, PunchLogsDay pdl) {
-		if(arriveCalendar.before(startTime)){
+		if(!arriveCalendar.after(startTime)){
 			pdl.setPunchStatus(PunchStatus.NORMAL.getCode());
 			pdl.setExceptionStatus(ExceptionStatus.NORMAL.getCode());
 		}else{
@@ -4551,8 +4552,14 @@ public class PunchServiceImpl implements PunchService {
 //				BigDecimal b = new BigDecimal(statistic.getOverTimeSum()/3600000.0);
 //				dto.setOverTimeSum(b.setScale(2,BigDecimal.ROUND_HALF_UP).doubleValue());
 //			}
-			dto.setExceptionRequestCount(punchProvider.countExceptionRequests(statistic.getUserId(),statistic.getOwnerType(),statistic.getOwnerId(),statistic.getPunchMonth()));
-			dto.setOverTimeSum(approvalRequestProvider.countOvertimeDurationByUserAndMonth(statistic.getUserId(),statistic.getOwnerType(),statistic.getOwnerId(),statistic.getPunchMonth()));
+			dto.setExceptionRequestCount(punchProvider.countExceptionRequests(statistic.getUserId(), statistic.getOwnerType(), statistic.getOwnerId(), statistic.getPunchMonth()));
+			if (null == dto.getExceptionRequestCount()) {
+				dto.setExceptionDayCount(0);
+			}
+			dto.setOverTimeSum(approvalRequestProvider.countOvertimeDurationByUserAndMonth(statistic.getUserId(), statistic.getOwnerType(), statistic.getOwnerId(), statistic.getPunchMonth()));
+			if (null == dto.getOverTimeSum()) {
+				dto.setOverTimeSum(0.0);
+			}
 //			List<ApprovalRangeStatistic> abscentStats = approvalRangeStatisticProvider.queryApprovalRangeStatistics(null, Integer.MAX_VALUE,new ListingQueryBuilderCallback()  {
 //				@Override
 //				public SelectQuery<? extends Record> buildCondition(ListingLocator locator,
@@ -8213,12 +8220,12 @@ public class PunchServiceImpl implements PunchService {
 					return oldTis;
 				}
 				//如果request有开始时间在ti时间区间内,把request的结束时间代替ti的结束时间
-				else if (request.getBeginTime().after(ti.getBeginTime()) && request.getBeginTime().before(ti.getEndTime())) {
+				else if (!request.getBeginTime().before(ti.getBeginTime()) && !request.getBeginTime().after(ti.getEndTime())) {
 					ti.setEndTime(request.getEndTime());
 					return oldTis;
 				}
 				//如果request的结束时间在ti时间区间,把request的开始时间代替ti的开始时间
-				else if (request.getEndTime().after(ti.getBeginTime()) && request.getEndTime().before(ti.getEndTime())) {
+				else if (!request.getEndTime().before(ti.getBeginTime()) && !request.getEndTime().after(ti.getEndTime())) {
 					ti.setBeginTime(request.getBeginTime());
 
 					return oldTis;

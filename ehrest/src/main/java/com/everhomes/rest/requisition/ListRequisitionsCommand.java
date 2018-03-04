@@ -12,6 +12,7 @@ import com.everhomes.util.StringHelper;
  * <li>ownerType:所属者类型</li>
  * <li>ownerId:所属者id</li>
  * <li>namespaceId:域名id</li>
+ * <li>communityId:园区id</li>
  * </ul>
  */
 public class ListRequisitionsCommand {
@@ -22,6 +23,15 @@ public class ListRequisitionsCommand {
     private String ownerType;
     private Long ownerId;
     private Integer namespaceId;
+    private Long communityId;
+
+    public Long getCommunityId() {
+        return communityId;
+    }
+
+    public void setCommunityId(Long communityId) {
+        this.communityId = communityId;
+    }
 
     public String getTheme() {
         return theme;

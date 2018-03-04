@@ -78,6 +78,9 @@ public interface OrganizationProvider {
 
 	List<OrganizationMember> findOrganizationMembersByOrgIdAndUId(Long userId, Long organizationId);
 	OrganizationMember findOrganizationMemberByOrgIdAndToken(String contactPhone, Long organizationId);
+	OrganizationMember findDepartmentMemberByTokenAndOrgId(String phone, Long organizationId);
+	List<OrganizationMember> findJobPositionMemberByTokenAndOrgId(String phone, Long organizationId);
+	List<OrganizationMember> findJobLevelMemberByTokenAndOrgId(String phone, Long organizationId);
 	List<OrganizationMember> listOrganizationMembersByPhones(List<String> phones, Long departmentId);
 	void createOrganizationTask(OrganizationTask task);
 	OrganizationTask findOrganizationTaskById(Long taskId);
@@ -366,57 +369,27 @@ public interface OrganizationProvider {
 	Integer countUsersOfEnterprise(CrossShardListingLocator locator, ListingQueryBuilderCallback queryBuilderCallback);
 	List<OrganizationMember> convertMemberListAsDetailList(List<OrganizationMember> old_list);
 	/**New**/
-	List<Object[]> findContractEndTimeById(List<Long> detailIds);
 	List<OrganizationMemberDetails> findDetailInfoListByIdIn(List<Long> detailIds);
-	List<OrganizationMemberDetails> listOrganizationMembersV2(CrossShardListingLocator locator,Integer pageSize,Organization org, List<String> groupTypes, String keywords);
 
 	OrganizationMemberDetails findOrganizationMemberDetailsByDetailId(Long detailId);
+
 	Long createOrganizationMemberDetails(OrganizationMemberDetails memberDetails);
+
 	void updateOrganizationMemberDetails(OrganizationMemberDetails organizationMemberDetails, Long detailId);
+
 	void deleteOrganizationMemberDetails(OrganizationMemberDetails organizationMemberDetails);
-	void createOrganizationMemberV2(OrganizationMember organizationMember, Long detailId);
-
-
-
-	void createOranizationMemberEducationInfo(OrganizationMemberEducations education);
-	OrganizationMemberEducations findOrganizationEducationInfoById(Long id);
-	void deleteOranizationMemberEducationInfo(OrganizationMemberEducations education);
-	void updateOranizationMemberEducationInfo(OrganizationMemberEducations education);
-	List<OrganizationMemberEducations> listOrganizationMemberEducations(Long detailId);
-
-	void createOranizationMemberWorkExperience(OrganizationMemberWorkExperiences experience);
-	OrganizationMemberWorkExperiences findOrganizationWorkExperienceById(Long id);
-	void deleteOranizationMemberWorkExperience(OrganizationMemberWorkExperiences experience);
-	void updateOranizationMemberWorkExperience(OrganizationMemberWorkExperiences experience);
-	List<OrganizationMemberWorkExperiences> listOrganizationMemberWorkExperiences(Long detailId);
-
-
-	void createOranizationMemberInsurance(OrganizationMemberInsurances insurance);
-	OrganizationMemberInsurances  findOrganizationInsuranceById(Long id);
-	void deleteOranizationMemberInsurance(OrganizationMemberInsurances insurance);
-	void updateOrganizationMemberInsurance(OrganizationMemberInsurances insurance);
-	List<OrganizationMemberInsurances> listOrganizationMemberInsurances(Long detailId);
-
-
-	void createOranizationMemberContract(OrganizationMemberContracts contract);
-	OrganizationMemberContracts findOrganizationContractById(Long id);
-	void deleteOranizationMemberContract(OrganizationMemberContracts contract);
-	void updateOrganizationMemberContract(OrganizationMemberContracts contract);
 
     void updateOrganizationEmploymentTime(Long detailId, java.sql.Date employeeTime);
-	boolean updateOrganizationEmployeeStatus(Long detailId,Byte employeeStatus);
-	void updateProfileIntegrity(Long detailId, Integer integrity);
-	void createProfileLogs(OrganizationMemberProfileLogs log);
 
-	List<OrganizationMemberContracts> listOrganizationMemberContracts(Long detailId);
+	boolean updateOrganizationEmployeeStatus(Long detailId,Byte employeeStatus);
+
+	void updateProfileIntegrity(Long detailId, Integer integrity);
 
 	OrganizationMemberDetails findOrganizationMemberDetailsByOrganizationIdAndContactToken(Long organizationId, String contactToken);
 
 	Long createOrUpdateOrganizationMemberDetail(OrganizationMemberDetails organizationMemberDetails);
 
 	Long createOrUpdateOrganizationMemberDetail(OrganizationMemberDetails organizationMemberDetails, Boolean needUpdate);
-
-	List<OrganizationMemberProfileLogs> listMemberRecordChanges(Long detailId);
 
 	Organization findUnderOrganizationByParentOrgId(Long parentOrgId);
 

@@ -486,10 +486,17 @@ public class EbeiPmTaskHandle extends DefaultPmTaskHandle{
 
 
     private void createFlowCase(PmTask task) {
-        Integer namespaceId = UserContext.getCurrentNamespaceId();
+        Integer namespaceId = UserContext.getCurrentNamespaceId(task.getNamespaceId());
 
-        Flow flow = flowService.getEnabledFlow(namespaceId, FlowConstants.PM_TASK_MODULE,
-                FlowModuleType.REPAIR_MODULE.getCode(), task.getOwnerId(), FlowOwnerType.PMTASK.getCode());
+        Flow flow = null;
+        Long parentTaskId = categoryProvider.findCategoryById(task.getTaskCategoryId()).getParentId();
+
+        if (parentTaskId == PmTaskAppType.SUGGESTION_ID)
+            flow = flowService.getEnabledFlow(namespaceId, FlowConstants.PM_TASK_MODULE,
+                    FlowModuleType.SUGGESTION_MODULE.getCode(), task.getOwnerId(), FlowOwnerType.PMTASK.getCode());
+        else
+             flow = flowService.getEnabledFlow(namespaceId, FlowConstants.PM_TASK_MODULE,
+                 FlowModuleType.NO_MODULE.getCode(), task.getOwnerId(), FlowOwnerType.PMTASK.getCode());
         if(null == flow) {
             LOGGER.error("Enable pmtask flow not found, moduleId={}", FlowConstants.PM_TASK_MODULE);
             throw RuntimeErrorException.errorWith(PmTaskErrorCode.SCOPE, PmTaskErrorCode.ERROR_ENABLE_FLOW,

@@ -86,7 +86,7 @@ public class SupplierController extends ControllerBase {
     @RequestMapping("searchSuppliers")
     @RestReturn(value = SearchSuppliersDTO.class,collection = true)
     private RestResponse searchSuppliers(SearchSuppliersCommand cmd){
-        List<SearchSuppliersDTO> dtos = supplierService.searchSuppliers(cmd.getNameKeyword());
+        List<SearchSuppliersDTO> dtos = supplierService.searchSuppliers(cmd);
         RestResponse restResponse = new RestResponse(dtos);
         restResponse.setErrorCode(200);
         restResponse.setErrorDescription("OK");

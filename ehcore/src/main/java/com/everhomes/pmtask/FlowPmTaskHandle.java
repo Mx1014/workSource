@@ -50,7 +50,7 @@ class FlowPmTaskHandle extends DefaultPmTaskHandle {
 		PmTask task1 = dbProvider.execute((TransactionStatus status) -> {
 			PmTask task = pmTaskCommonService.createTask(cmd, requestorUid, requestorName, requestorPhone);
 			//新建flowcase
-			Integer namespaceId = UserContext.getCurrentNamespaceId();
+			Integer namespaceId = UserContext.getCurrentNamespaceId(cmd.getNamespaceId());
 			Flow flow = null;
 
             Long parentTaskId = categoryProvider.findCategoryById(cmd.getTaskCategoryId()).getParentId();
