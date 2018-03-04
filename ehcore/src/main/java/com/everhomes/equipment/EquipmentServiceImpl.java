@@ -5973,7 +5973,7 @@ private void checkUserPrivilege(Long orgId, Long privilegeId, Long communityId) 
 				reportLogs.add(reportLog);
 			});
 		}
-		reportLogs.addAll(processOfflineTaskLogsAndReportDetails(command.getEquipmentTaskReportDetails(), command.getTasks()));
+		reportLogs.addAll(processOfflineTaskLogsAndReportDetails(command.getEquipmentTaskReportDetails(), taskIds));
 		return reportLogs;
 	}
 
@@ -5988,7 +5988,7 @@ private void checkUserPrivilege(Long orgId, Long privilegeId, Long communityId) 
 		return reportLog;
 	}
 
-	private List<OfflineEquipmentTaskReportLog> processOfflineTaskLogsAndReportDetails(List<EquipmentTaskReportDetail> equipmentTaskReportDetails, List<EquipmentTaskDTO> tasks) {
+	private List<OfflineEquipmentTaskReportLog> processOfflineTaskLogsAndReportDetails(List<EquipmentTaskReportDetail> equipmentTaskReportDetails, List<Long> taskIds) {
 		//reserve relations of  taskId and reportDetails
 		Map<Long, EquipmentTaskReportDetail> taskAndDetailsMap = new HashMap<>();
 		if (equipmentTaskReportDetails != null && equipmentTaskReportDetails.size() > 0) {
@@ -5996,15 +5996,15 @@ private void checkUserPrivilege(Long orgId, Long privilegeId, Long communityId) 
 		}
 		List<OfflineEquipmentTaskReportLog> reportLogs = new ArrayList<>();
 		OfflineEquipmentTaskReportLog reportLog = new OfflineEquipmentTaskReportLog();
-		if (tasks != null && tasks.size() > 0) {
-			for (EquipmentTaskDTO taskDTO : tasks) {
-				EquipmentInspectionTasks task = verifyEquipmentTask(taskDTO.getId(), taskDTO.getOwnerType(), taskDTO.getOwnerId());
+		if (taskIds != null && taskIds.size() > 0) {
+			for (Long taskId : taskIds) {
+				EquipmentInspectionTasks task = verifyEquipmentTask(taskId, null, null);
 				EquipmentInspectionTasksLogs log = new EquipmentInspectionTasksLogs();
-				log.setTaskId(taskDTO.getId());
+				log.setTaskId(task.getId());
 				log.setOperatorType(OwnerType.USER.getCode());
 				log.setOperatorId(UserContext.currentUserId());
 				log.setProcessType(EquipmentTaskProcessType.COMPLETE.getCode());
-				if (taskDTO.getExecutiveExpireTime() == null || taskDTO.getExecutiveTime().before(task.getExecutiveExpireTime())) {
+				if (task.getExecutiveExpireTime() == null || task.getExecutiveTime().before(task.getExecutiveExpireTime())) {
 					log.setProcessResult(EquipmentTaskProcessResult.COMPLETE_OK.getCode());
 				} else {
 					log.setProcessResult(EquipmentTaskProcessResult.COMPLETE_DELAY.getCode());
