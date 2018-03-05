@@ -155,7 +155,7 @@ public class SocialSecurityServiceImpl implements SocialSecurityService {
                         month.setTime(monthSF.get().parse(paymentMonth));
                         month.add(Calendar.MONTH, 1);
                         String newPayMonth = monthSF.get().format(month.getTime());
-                        checkSocialSercurityFiled(ownerId);
+//                        checkSocialSercurityFiled(ownerId);
                         deleteOldMonthPayments(ownerId);
                         addNewMonthPayments(newPayMonth, ownerId);
                         newSocialSecurityGroup(ownerId, newPayMonth);

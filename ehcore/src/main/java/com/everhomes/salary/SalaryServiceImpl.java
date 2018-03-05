@@ -1596,7 +1596,7 @@ public class SalaryServiceImpl implements SalaryService {
 
     private void calculateReports(Long ownerId, String month, Long userId) {
         //重新计算每个人的数据
-        List<SalaryEmployee> employees = salaryEmployeeProvider.listSalaryEmployees(ownerId, month);
+        List<SalaryEmployee> employees = salaryEmployeeProvider.listSalaryEmployees(ownerId, month,SalaryEmployeeStatus.NORMAL);
 
         if (null != employees) {
             for (SalaryEmployee e : employees) {

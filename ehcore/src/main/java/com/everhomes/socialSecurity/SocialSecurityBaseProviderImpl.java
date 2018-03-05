@@ -136,8 +136,12 @@ public class SocialSecurityBaseProviderImpl implements SocialSecurityBaseProvide
             step.and(Tables.EH_SOCIAL_SECURITY_BASES.HOUSEHOLD_TYPE.eq(householdType));
 
         }
-        return step.orderBy(Tables.EH_SOCIAL_SECURITY_BASES.ID.asc())
+        List<SocialSecurityBase> records = step.orderBy(Tables.EH_SOCIAL_SECURITY_BASES.ID.asc())
                 .fetch().map(r -> ConvertHelper.convert(r, SocialSecurityBase.class));
+        if (records.size() == 0) {
+            return null;
+        }
+        return records;
     }
 
     private EhSocialSecurityBasesDao getReadWriteDao() {

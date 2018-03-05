@@ -1573,6 +1573,8 @@ public class WarehouseServiceImpl implements WarehouseService {
             long nextSequence = this.sequenceProvider.getNextSequence(NameMapper.getSequenceDomainFromTablePojo(EhWarehouseOrders.class));
             order.setId(nextSequence);
             order.setCreateTime(new Timestamp(DateHelper.currentGMTTime().getTime()));
+            //此时就是执行时间吗
+
             order.setCreateUid(UserContext.currentUserId());
             order.setOwnerType(cmd.getOwnerType());
             order.setOwnerId(cmd.getOwnerId());
