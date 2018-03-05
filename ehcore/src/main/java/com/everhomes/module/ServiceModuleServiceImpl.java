@@ -255,15 +255,17 @@ public class ServiceModuleServiceImpl implements ServiceModuleService {
         BanPrivilegeHandler handler = getBanPrivilegeHandler();
         if (null != handler && results != null && results.size() > 0) {
             List<Long> banPrivilegeIds = handler.listBanPrivilegesByModuleIdAndAppId(cmd.getNamespaceId(), cmd.getModuleId(), cmd.getAppId());
+            banPrivilegeIds = banPrivilegeIds.stream().filter(r-> r != 0L).collect(Collectors.toList());
             if(banPrivilegeIds != null && banPrivilegeIds.size() > 0){
                 Iterator<ServiceModuleDTO> it = results.iterator();
                 while (it.hasNext()) {
                     // 进入禁止权限显示的方法
-                    if (it.next().getServiceModules() != null && it.next().getServiceModules().size() > 0 && banPrivilegeIds != null && banPrivilegeIds.size() > 0) {
-                        it.next().getServiceModules().forEach(r -> {
+                    ServiceModuleDTO nextDto = it.next();
+                    if (nextDto.getServiceModules() != null && nextDto.getServiceModules().size() > 0 && banPrivilegeIds != null && banPrivilegeIds.size() > 0) {
+                        nextDto.getServiceModules().forEach(r -> {
                             if (r.getType() == ServiceModuleTreeVType.PRIVILEGE.getCode() && banPrivilegeIds.contains(r.getId())) {
                                 LOGGER.debug("privilegeId ban, privilegeId = {}, namespaceId= {}, moduleId= {}, appId = {}", r.getId(), UserContext.getCurrentNamespaceId(), cmd.getModuleId(), cmd.getAppId());
-                                results.remove(it.next());
+                                results.remove(nextDto);
                             }
                         });
                     }
