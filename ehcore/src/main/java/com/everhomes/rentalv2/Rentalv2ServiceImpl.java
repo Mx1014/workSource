@@ -6798,8 +6798,9 @@ public class Rentalv2ServiceImpl implements Rentalv2Service {
 						//每天循环的
 						if (cmd.getRentalType().equals(RentalType.HOUR.getCode())) {
 							//按小时
-							Timestamp beginTime = Timestamp.valueOf(datetimeSF.get().format(choseRSR.getBeginTime().getTime()));
-							Timestamp endTime = Timestamp.valueOf(datetimeSF.get().format(choseRSR.getEndTime().getTime()));
+
+							Timestamp beginTime = new Timestamp(start.getTime().getTime()+choseRSR.getBeginTime().getTime()%(24*3600*1000));
+							Timestamp endTime =  new Timestamp(start.getTime().getTime()+choseRSR.getEndTime().getTime()%(24*3600*1000));
 							changeRentalSiteRules = findRentalSiteRuleByDate(choseRSR.getRentalResourceId(), choseRSR.getResourceNumber(), beginTime, endTime,
 									null, null);
 						} else if (cmd.getRentalType().equals(RentalType.HALFDAY.getCode()) ||
