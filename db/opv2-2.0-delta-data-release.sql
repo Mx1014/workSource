@@ -712,3 +712,11 @@ VALUES
 
 -- dengs 2018.03.05文件管理的模块id添加。
 update eh_web_menus SET module_id=41500 WHERE NAME='文件管理';
+
+
+-- 修改三级菜单的排序
+update eh_service_modules set default_order = 1 where id = 49110;
+update eh_service_modules set default_order = 3 where id = 49120;
+update eh_service_modules set default_order = 4 where id = 49130;
+update eh_service_modules set default_order = 5 where id = 49140;
+update eh_service_modules set default_order = 2 where id = 49150;
