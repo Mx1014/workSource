@@ -1407,7 +1407,7 @@ public class SiyinPrintServiceImpl implements SiyinPrintService {
 	public void getPrintQrcode(HttpServletRequest req, HttpServletResponse rps) {
 		GetPrintQrcodeCommand cmd = getParamsFromReq(req);
 		NewQRCodeCommand nQRCmd = new NewQRCodeCommand();
-		String cloudprinturl = configurationProvider.getValue("print.siyin.actiondata", "{\"url\":\"http://printtest.zuolin.com/cloud-print/build/index.html#/home#sign_suffix\"}");
+		String cloudprinturl = configurationProvider.getValue("print.siyin.actiondata", "{\"url\":\"https://core.zuolin.com/cloud-print/build/index.html#/home#sign_suffix\"}");
 		nQRCmd.setActionData(cloudprinturl);
 		nQRCmd.setActionType(ActionType.OFFICIAL_URL.getCode());
 		nQRCmd.setDescription("cloud print");
