@@ -580,7 +580,7 @@ public class CustomerDynamicExcelHandler implements DynamicExcelHandler {
                         break;
                     }
                     Date date = new Date();
-                    SimpleDateFormat sdf = new SimpleDateFormat("yyyy-MM-dd HH:mm:ss");
+                    SimpleDateFormat sdf = new SimpleDateFormat("yyyy-MM-dd HH:mm");
                     try {
                         date = sdf.parse((String) value);
                     } catch (ParseException e) {
