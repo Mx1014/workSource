@@ -4812,31 +4812,40 @@ Long nextPageAnchor = null;
 		record.setOperatorType(OwnerType.USER.getCode());
 		record.setOperatorId(UserContext.currentUserId());
 
-		task.setExecutiveTime(taskDTO.getExecutiveTime());
-		task.setExecutorType(OrganizationMemberTargetType.USER.getCode());
-		task.setExecutorId(UserContext.currentUserId());
-		if (taskDTO.getOperatorType() != null) {
-			task.setOperatorType(taskDTO.getOperatorType());
-			record.setTargetType(taskDTO.getOperatorType());
-		}
-
-		if (taskDTO.getOperatorId() != null) {
-			task.setOperatorId(taskDTO.getOperatorId());
-			record.setTargetId(taskDTO.getOperatorId());
-		}
-
-		if (taskDTO.getProcessExpireTime() != null) {
-			task.setProcessExpireTime(taskDTO.getProcessExpireTime());
-			record.setProcessEndTime(task.getProcessExpireTime());
-		}
-
+		//客户端增加VerificationResult 辨别是核查完成、转发、整改完成
 		if (QualityInspectionTaskResult.CORRECT.getCode() == taskDTO.getVerificationResult()) {
-			task.setStatus(QualityInspectionTaskStatus.WAITING_FOR_EXECUTING.getCode());
-			task.setResult(QualityInspectionTaskResult.CORRECT.getCode());
-			record.setProcessResult(QualityInspectionTaskResult.CORRECT.getCode());
-			record.setProcessType(ProcessType.INSPECT.getCode());
+			if (QualityInspectionTaskResult.CORRECT.equals(QualityInspectionTaskResult.fromStatus(task.getResult()))) {
+				//转发
+				task.setStatus(QualityInspectionTaskStatus.WAITING_FOR_EXECUTING.getCode());
+				task.setResult(QualityInspectionTaskResult.CORRECT.getCode());
+				if(taskDTO.getOperatorType() != null) {
+					task.setOperatorType(taskDTO.getOperatorType());
+					record.setTargetType(taskDTO.getOperatorType());
+				}
 
+				if(taskDTO.getOperatorId() != null) {
+					task.setOperatorId(taskDTO.getOperatorId());
+					record.setTargetId(taskDTO.getOperatorId());
+				}
+
+				if(taskDTO.getProcessExpireTime() != null) {
+					task.setProcessExpireTime(taskDTO.getProcessExpireTime());
+					record.setProcessEndTime(task.getProcessExpireTime());
+				}
+				record.setProcessResult(QualityInspectionTaskResult.NONE.getCode());
+				record.setProcessType(ProcessType.FORWARD.getCode());
+			}
+		} else if (QualityInspectionTaskResult.CORRECT_COMPLETE.getCode() == taskDTO.getVerificationResult()) {
+			//整改完成
+			task.setStatus(QualityInspectionTaskStatus.EXECUTED.getCode());
+			task.setResult(QualityInspectionTaskResult.CORRECT_COMPLETE.getCode());
+			record.setProcessResult(QualityInspectionTaskResult.CORRECT_COMPLETE.getCode());
+			record.setProcessType(ProcessType.RETIFY.getCode());
 		} else if (QualityInspectionTaskResult.INSPECT_COMPLETE.getCode() == taskDTO.getVerificationResult()) {
+			//核查完成
+			task.setExecutiveTime(new Timestamp(DateHelper.currentGMTTime().getTime()));
+			task.setExecutorType(OrganizationMemberTargetType.USER.getCode());
+			task.setExecutorId(UserContext.currentUserId());
 			task.setResult(QualityInspectionTaskResult.INSPECT_COMPLETE.getCode());
 			task.setStatus(QualityInspectionTaskStatus.EXECUTED.getCode());
 			record.setProcessResult(QualityInspectionTaskResult.INSPECT_COMPLETE.getCode());
@@ -4848,7 +4857,7 @@ Long nextPageAnchor = null;
 				&& taskDTO.getProcessExpireTime() != null) {
 			sendMessageToProcessor(task, taskDTO, record);
 		}
-
+		//处理具体结果集
 		OfflineReportDetailDTO reportDetailDTO = taskDetailMaps.get(task.getId());
 		if (reportDetailDTO.getMessage() != null) {
 			String attText = localeStringService.getLocalizedString(
@@ -4864,7 +4873,7 @@ Long nextPageAnchor = null;
 				record.setProcessMessage(msg);
 			}
 		}
-		updateVerificationTasks(task, record, reportDetailDTO.getAttachments(), reportDetailDTO.getItemResults(), reportDetailDTO.getNamespaceId());
+		updateVerificationTasks(task, record, reportDetailDTO.getAttachments(), reportDetailDTO.getItemResults(), task.getNamespaceId());
 	}
 
 	private void sendMessageToProcessor(QualityInspectionTasks task, QualityInspectionTaskDTO taskDTO, QualityInspectionTaskRecords record) {
