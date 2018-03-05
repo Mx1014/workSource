@@ -179,7 +179,7 @@ public class FlowCaseProviderImpl implements FlowCaseProvider {
     		cond = cond.and(Tables.EH_FLOW_CASES.DELETE_FLAG.eq(TrueOrFalseFlag.FALSE.getCode()));
 
     	    if(locator.getAnchor() != null) {
-    	    	cond = cond.and(Tables.EH_FLOW_CASES.ID.lt(locator.getAnchor()));
+    	    	cond = cond.and(Tables.EH_FLOW_CASES.ID.le(locator.getAnchor()));
             }
     	    
         	if(cmd.getModuleId() != null) {
@@ -231,7 +231,7 @@ public class FlowCaseProviderImpl implements FlowCaseProvider {
                 callback.buildCondition(locator, query);
             }
             query.addOrderBy(Tables.EH_FLOW_CASES.ID.desc());
-            query.addLimit(count);
+            query.addLimit(count + 1);
 
             List<FlowCaseDetail> objs = query.fetchInto(FlowCaseDetail.class);
 
@@ -239,12 +239,12 @@ public class FlowCaseProviderImpl implements FlowCaseProvider {
     		// 	return ConvertHelper.convert(r, FlowCaseDetail.class);
     		// }).collect(Collectors.toList());
 
-            if(objs.size() >= count) {
+            if(objs.size() > count) {
                 locator.setAnchor(objs.get(objs.size() - 1).getId());
+                objs.remove(objs.size() - 1);
             } else {
                 locator.setAnchor(null);
             }
-            
             return objs;
     		
     	} else {
@@ -317,7 +317,7 @@ public class FlowCaseProviderImpl implements FlowCaseProvider {
             }
 
             if(locator.getAnchor() != null) {
-                cond = cond.and(Tables.EH_FLOW_CASES.ID.lt(locator.getAnchor()));
+                cond = cond.and(Tables.EH_FLOW_CASES.ID.le(locator.getAnchor()));
             }
             if(cmd.getModuleId() != null) {
                 cond = cond.and(Tables.EH_FLOW_CASES.MODULE_ID.eq(cmd.getModuleId()));
@@ -362,9 +362,9 @@ public class FlowCaseProviderImpl implements FlowCaseProvider {
 
             List<FlowCaseDetail> objs = query.fetchInto(FlowCaseDetail.class);
 
-            if(objs.size() >= count) {
-                objs.remove(objs.size() - 1);
+            if(objs.size() > count) {
                 locator.setAnchor(objs.get(objs.size() - 1).getId());
+                objs.remove(objs.size() - 1);
             } else {
                 locator.setAnchor(null);
             }

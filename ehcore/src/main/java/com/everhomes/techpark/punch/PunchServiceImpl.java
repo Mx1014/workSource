@@ -3215,8 +3215,8 @@ public class PunchServiceImpl implements PunchService {
 		if (null == results || results.size() == 0)
 			return wb;
 		for (PunchCountDTO statistic : results ){
-			this.setNewPunchStatisticsBookRow(sheet, statistic);
-			taskService.updateTaskProcess(taskId,55 + (int)(++num / (results.size()/45)));
+			this.setNewPunchStatisticsBookRow(sheet, statistic); 
+			taskService.updateTaskProcess(taskId,55 + (int)(++num / (Double.valueOf(results.size())/45.00)));
 		}
 		return wb;
 //		try {
@@ -4906,7 +4906,7 @@ public class PunchServiceImpl implements PunchService {
 		for (PunchDayDetailDTO dto : dtos ){
 			this.setNewPunchDetailsBookRow(sheet, dto);
 
-			taskService.updateTaskProcess(taskId,55 + (int)(++num / (dtos.size()/45)));
+			taskService.updateTaskProcess(taskId,55 + (int)(++num / (Double.valueOf(dtos.size())/45.00)));
 		}
 		return wb;
 	}
