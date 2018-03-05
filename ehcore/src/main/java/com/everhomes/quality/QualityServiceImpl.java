@@ -4538,14 +4538,19 @@ public class QualityServiceImpl implements QualityService {
 			});
 		}
 		//去除重复specification
-		Set<QualityInspectionSpecificationDTO> tempSet = new HashSet<>();
-		tempSet.addAll(specifications);
-		List<QualityInspectionSpecificationDTO> specificationList = new ArrayList<>(tempSet);
-		specificationList.forEach((s)->parentSpecificationIds.add(s.getId()));
+//		Set<QualityInspectionSpecificationDTO> tempSet = new HashSet<>();
+//		tempSet.addAll(specifications);
+		Map<Long, QualityInspectionSpecificationDTO> specificationDTOMap = new HashMap<>();
+		specifications.forEach((s)-> specificationDTOMap.putIfAbsent(s.getId(), s));
+		List<QualityInspectionSpecificationDTO> specificationList = null;
+		if(specificationDTOMap.size()>0){
+			specificationList = new ArrayList<>(specificationDTOMap.values());
+			specificationList.forEach((s)->parentSpecificationIds.add(s.getId()));
+		}
+
 		populateSpecificationDetails(specificationList, parentSpecificationIds);
 		offlineTaskDetailsResponse.setSpecifications(specificationList);
 		//处理组织架构人员
-
 		processOrganizationsAndMembers(offlineTaskDetailsResponse,standards);
 		//再增加计划和groupId的关系表
 		processPlansAndGroupRelations(offlineTaskDetailsResponse,standards);
@@ -4577,24 +4582,43 @@ public class QualityServiceImpl implements QualityService {
 			qualityProvider.populateStandardsGroups(standards);
 			List<OrganizationDTO> organizationList = new ArrayList<>();
 			List<OrganizationMemberDTO> memberList = new ArrayList<>();
-			standards.forEach((standard) -> {
-				if (standard.getExecutiveGroup() != null) {
-					standard.getExecutiveGroup().forEach((executiveGroup) -> {
-						Organization group = organizationProvider.findOrganizationById(executiveGroup.getGroupId());
-						if (group != null) {
-							organizationList.add(ConvertHelper.convert(group, OrganizationDTO.class));
-						}
-						//拿到所有人员（不包含子级）
-						List<OrganizationMember> members = organizationProvider.listOrganizationMembers(executiveGroup.getGroupId(), null);
-						if (members != null && members.size() > 0) {
-							memberList.addAll(members.stream().map((m) -> ConvertHelper.convert(m, OrganizationMemberDTO.class)).collect(Collectors.toList()));
-						}
-					});
-				}
-			});
+			//先去重  standard里面的groupId相同的
+			List<Long> executiveGroups = removeDuplicatedStandardGroups(standards);
+			if(executiveGroups!=null && executiveGroups.size()>0) {
+				executiveGroups.forEach((executiveGroup) -> {
+					Organization group = organizationProvider.findOrganizationById(executiveGroup);
+					if (group != null) {
+						organizationList.add(ConvertHelper.convert(group, OrganizationDTO.class));
+					}
+					//拿到所有人员（不包含子级）
+					List<OrganizationMember> members = organizationProvider.listOrganizationMembers(executiveGroup, null);
+					if (members != null && members.size() > 0) {
+						memberList.addAll(members.stream().map((m) -> ConvertHelper.convert(m, OrganizationMemberDTO.class)).collect(Collectors.toList()));
+					}
+				});
+			}
 			offlineTaskDetailsResponse.setOrganizations(organizationList);
 			offlineTaskDetailsResponse.setOrganizationMembers(memberList);
 		}
+	}
+
+	private List<Long> removeDuplicatedStandardGroups(List<QualityInspectionStandards> standards) {
+		if (standards != null && standards.size() > 0) {
+			List<QualityInspectionStandardGroupMap> executiveGroupMaps = new ArrayList<>();
+			standards.forEach((standard) -> {
+				if (standard.getExecutiveGroup() != null && standard.getExecutiveGroup().size() > 0) {
+					executiveGroupMaps.addAll(standard.getExecutiveGroup());
+				}
+			});
+			Map<Long, QualityInspectionStandardGroupMap> groupDTOMap = new HashMap<>();
+			if (executiveGroupMaps.size() > 0) {
+				executiveGroupMaps.forEach((map) -> groupDTOMap.putIfAbsent(map.getGroupId(), map));
+			}
+			if(groupDTOMap.size()>0){
+				return new ArrayList<>(groupDTOMap.keySet());
+			}
+		}
+		return null;
 	}
 
 	/**
