@@ -4532,7 +4532,9 @@ public class QualityServiceImpl implements QualityService {
 					specifications.add(ConvertHelper.convert(specification, QualityInspectionSpecificationDTO.class));
 				}
 				QualityInspectionStandards standard = qualityProvider.findStandardById(task.getStandardId());
-				standards.add(standard);
+				if(standard!=null){
+					standards.add(standard);
+				}
 			});
 		}
 		//去除重复specification
