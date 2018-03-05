@@ -4554,7 +4554,23 @@ public class QualityServiceImpl implements QualityService {
 		processOrganizationsAndMembers(offlineTaskDetailsResponse,standards);
 		//再增加计划和groupId的关系表
 		processPlansAndGroupRelations(offlineTaskDetailsResponse,standards);
+		//增加类型
+		processSpecifications(offlineTaskDetailsResponse,cmd.getTargetId(),cmd.getOwnerId());
 		return offlineTaskDetailsResponse;
+	}
+
+	private void processSpecifications(QualityOfflineTaskDetailsResponse offlineTaskDetailsResponse, Long targetId, Long ownerId) {
+		List<QualityInspectionSpecifications> specifications = qualityProvider.listAllChildrenSpecifications("/%", null,
+				ownerId, SpecificationScopeCode.ALL.getCode(), 0L, SpecificationScopeCode.ALL.getCode());
+		List<QualityInspectionSpecificationDTO> categories = new ArrayList<>();
+		if (specifications != null && specifications.size() > 0) {
+			specifications.forEach((s) -> {
+				if (s.getParentId() == 0L) {
+					categories.add(ConvertHelper.convert(s, QualityInspectionSpecificationDTO.class));
+				}
+			});
+		}
+		offlineTaskDetailsResponse.setCategories(categories);
 	}
 
 	/**
