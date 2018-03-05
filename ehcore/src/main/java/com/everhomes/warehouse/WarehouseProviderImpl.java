@@ -561,7 +561,11 @@ public class WarehouseProviderImpl implements WarehouseProvider {
         query.fetch()
                 .forEach(r ->{
                     WarehouseStockOrderDTO dto = new WarehouseStockOrderDTO();
-                    dto.setExecutionTime(sdf.format(r.getValue(Tables.EH_WAREHOUSE_ORDERS.EXECUTOR_TIME)));
+                    try{
+                        dto.setExecutionTime(sdf.format(r.getValue(Tables.EH_WAREHOUSE_ORDERS.EXECUTOR_TIME)));
+                    }catch (Exception e){
+
+                    }
                     dto.setExecutor(r.getValue(Tables.EH_WAREHOUSE_ORDERS.EXECUTOR_NAME));
                     dto.setId(r.getValue(Tables.EH_WAREHOUSE_ORDERS.ID));
                     dto.setIdentity(r.getValue(Tables.EH_WAREHOUSE_ORDERS.IDENTITY));
