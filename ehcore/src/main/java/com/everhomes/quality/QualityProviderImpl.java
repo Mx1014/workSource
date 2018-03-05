@@ -2850,7 +2850,7 @@ public class QualityProviderImpl implements QualityProvider {
 		if (groupDtos != null) {//isAdmin =false
 			Long executeUid = UserContext.currentUserId();
 			if (executeUid != null && executeUid != 0) {
-				Condition con = Tables.EH_QUALITY_INSPECTION_TASKS.EXECUTOR_ID.eq(executeUid);
+				Condition con = Tables.EH_QUALITY_INSPECTION_TASKS.OPERATOR_ID.eq(executeUid);
 				con = con.and(Tables.EH_QUALITY_INSPECTION_TASKS.RESULT.eq(QualityInspectionTaskResult.CORRECT.getCode()));
 
 				if (executeStandardIds != null) {
