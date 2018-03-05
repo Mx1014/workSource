@@ -262,12 +262,12 @@ public class ServiceModuleServiceImpl implements ServiceModuleService {
                     // 进入禁止权限显示的方法
                     ServiceModuleDTO nextDto = it.next();
                     if (nextDto.getServiceModules() != null && nextDto.getServiceModules().size() > 0 && banPrivilegeIds != null && banPrivilegeIds.size() > 0) {
-                        nextDto.getServiceModules().forEach(r -> {
-                            if (r.getType() == ServiceModuleTreeVType.PRIVILEGE.getCode() && banPrivilegeIds.contains(r.getId())) {
-                                LOGGER.debug("privilegeId ban, privilegeId = {}, namespaceId= {}, moduleId= {}, appId = {}", r.getId(), UserContext.getCurrentNamespaceId(), cmd.getModuleId(), cmd.getAppId());
+                        for (ServiceModuleDTO dto : nextDto.getServiceModules()) {
+                            if (dto.getType() == ServiceModuleTreeVType.PRIVILEGE.getCode() && banPrivilegeIds.contains(dto.getId())) {
+                                LOGGER.debug("privilegeId ban, privilegeId = {}, namespaceId= {}, moduleId= {}, appId = {}", dto.getId(), UserContext.getCurrentNamespaceId(), cmd.getModuleId(), cmd.getAppId());
                                 results.remove(nextDto);
                             }
-                        });
+                        }
                     }
                 }
             }
