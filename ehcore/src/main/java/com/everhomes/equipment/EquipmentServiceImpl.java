@@ -5927,6 +5927,7 @@ private void checkUserPrivilege(Long orgId, Long privilegeId, Long communityId) 
 		String ownerType = command.getOwnerType();
 		List<OfflineEquipmentTaskReportLog> reportLogs = new ArrayList<>();
 		List<Long> taskIds = new ArrayList<>();
+		Map<Long, EquipmentInspectionTasks> tasksMap = new HashMap<>();
 		if (command.getEquipmentTaskReportDetails() != null && command.getEquipmentTaskReportDetails().size() > 0) {
 			command.getEquipmentTaskReportDetails().forEach((t) -> taskIds.add(t.getTaskId()));
 		}
@@ -5937,6 +5938,7 @@ private void checkUserPrivilege(Long orgId, Long privilegeId, Long communityId) 
 				OfflineEquipmentTaskReportLog reportLog = null;
 				try {
 					task = verifyEquipmentTask(r, ownerType, ownerId);
+					tasksMap.put(r, task);
 				} catch (Exception e) {
 					LOGGER.error("equipmentInspection task  not exist, id = {}", r);
 					e.printStackTrace();
@@ -5973,7 +5975,7 @@ private void checkUserPrivilege(Long orgId, Long privilegeId, Long communityId) 
 				reportLogs.add(reportLog);
 			});
 		}
-		reportLogs.addAll(processOfflineTaskLogsAndReportDetails(command.getEquipmentTaskReportDetails(), command.getTasks()));
+		reportLogs.addAll(processOfflineTaskLogsAndReportDetails(command.getEquipmentTaskReportDetails(), tasksMap));
 		return reportLogs;
 	}
 
@@ -5988,7 +5990,7 @@ private void checkUserPrivilege(Long orgId, Long privilegeId, Long communityId) 
 		return reportLog;
 	}
 
-	private List<OfflineEquipmentTaskReportLog> processOfflineTaskLogsAndReportDetails(List<EquipmentTaskReportDetail> equipmentTaskReportDetails, List<EquipmentTaskDTO> tasks) {
+	private List<OfflineEquipmentTaskReportLog> processOfflineTaskLogsAndReportDetails(List<EquipmentTaskReportDetail> equipmentTaskReportDetails, Map<Long, EquipmentInspectionTasks> tasksMap) {
 		//reserve relations of  taskId and reportDetails
 		Map<Long, EquipmentTaskReportDetail> taskAndDetailsMap = new HashMap<>();
 		if (equipmentTaskReportDetails != null && equipmentTaskReportDetails.size() > 0) {
@@ -5996,15 +5998,15 @@ private void checkUserPrivilege(Long orgId, Long privilegeId, Long communityId) 
 		}
 		List<OfflineEquipmentTaskReportLog> reportLogs = new ArrayList<>();
 		OfflineEquipmentTaskReportLog reportLog = new OfflineEquipmentTaskReportLog();
-		if (tasks != null && tasks.size() > 0) {
-			for (EquipmentTaskDTO taskDTO : tasks) {
-				EquipmentInspectionTasks task = verifyEquipmentTask(taskDTO.getId(), taskDTO.getOwnerType(), taskDTO.getOwnerId());
+		if (tasksMap != null) {
+			for (EquipmentInspectionTasks task  : tasksMap.values()) {
+				//EquipmentInspectionTasks task = verifyEquipmentTask(taskId, null, null);
 				EquipmentInspectionTasksLogs log = new EquipmentInspectionTasksLogs();
-				log.setTaskId(taskDTO.getId());
+				log.setTaskId(task.getId());
 				log.setOperatorType(OwnerType.USER.getCode());
 				log.setOperatorId(UserContext.currentUserId());
 				log.setProcessType(EquipmentTaskProcessType.COMPLETE.getCode());
-				if (taskDTO.getExecutiveExpireTime() == null || taskDTO.getExecutiveTime().before(task.getExecutiveExpireTime())) {
+				if (task.getExecutiveExpireTime() == null || task.getExecutiveTime().before(task.getExecutiveExpireTime())) {
 					log.setProcessResult(EquipmentTaskProcessResult.COMPLETE_OK.getCode());
 				} else {
 					log.setProcessResult(EquipmentTaskProcessResult.COMPLETE_DELAY.getCode());

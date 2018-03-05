@@ -354,7 +354,6 @@ public class FlowCaseProviderImpl implements FlowCaseProvider {
                 locator.setAnchor(null);
             }
             return objs;
-    		
     	} else {
     		return null;
     	}

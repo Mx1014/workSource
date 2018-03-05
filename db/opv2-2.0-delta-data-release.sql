@@ -554,7 +554,7 @@ VALUE(@id+1,1,57000,'公告管理','EhNamespaces',1,2);
 
 -- volgo 添加公告图标.
 SET @item_id = (SELECT MAX(id) FROM eh_launch_pad_items);
-INSERT INTO `eh_launch_pad_items` (`id`, `namespace_id`, `app_id`, `scope_code`, `scope_id`, `item_location`, `item_group`, `item_name`, `item_label`, `icon_uri`, `item_width`, `item_height`, `action_type`, `action_data`, `default_order`, `apply_policy`, `min_version`, `display_flag`, `display_layout`, `bgcolor`, `tag`, `target_type`, `target_id`, `delete_flag`, `scene_type`, `scale_type`, `service_categry_id`, `selected_icon_uri`, `more_order`, `alias_icon_uri`, `categry_name`) VALUES (@item_id := @item_id + 1, '1', '0', '0', '0', '/home', 'Bizs', '公告', '公告', 'cs://1/image/aW1hZ2UvTVRvNE5XWmpNakV4TW1VNFlUbG1aR0ppWWpoaU16RmxNekUxWWpFMk1XRXlZUQ', '1', '1', '70', '{"title":"公告管理"}', '10', '0', '1', '1', '', '0', NULL, NULL, NULL, '1', 'pm_admin', '0', NULL, NULL, '0', NULL,NULL);
+INSERT INTO `eh_launch_pad_items` (`id`, `namespace_id`, `app_id`, `scope_code`, `scope_id`, `item_location`, `item_group`, `item_name`, `item_label`, `icon_uri`, `item_width`, `item_height`, `action_type`, `action_data`, `default_order`, `apply_policy`, `min_version`, `display_flag`, `display_layout`, `bgcolor`, `tag`, `target_type`, `target_id`, `delete_flag`, `scene_type`, `scale_type`, `service_categry_id`, `selected_icon_uri`, `more_order`, `alias_icon_uri`, `categry_name`) VALUES (@item_id := @item_id + 1, '1', '0', '0', '0', '/home', 'Bizs', '公告', '公告', 'cs://1/image/aW1hZ2UvTVRvNE5XWXdPVFl6Wm1SaVpqWmxaVFJpT0RkaE56WXpNR1EyTnpsa1ptSmpZZw', '1', '1', '70', '{"title":"公告管理"}', '10', '0', '1', '1', '', '0', NULL, NULL, NULL, '1', 'pm_admin', '0', NULL, NULL, '0', NULL,NULL);
 
 -- end by zhiwei.zhang
 
@@ -648,3 +648,67 @@ INSERT INTO `eh_service_module_privileges` (`id`, `module_id`, `privilege_type`,
 -- fix 24668 xiongying20180302
 update eh_var_field_groups set title = '客户信息' where id = 1;
 
+
+-- 供应商，采购，请示单的规则的细化 by wentian
+-- 采购的权限细化
+set @module_id = 26000;
+set @p_id = 260001001;
+INSERT INTO `eh_acl_privileges` (`id`, `app_id`, `name`, `description`, `tag`) VALUES (@p_id, null, '查看详情', '查看详情', NULL);
+set @mp_id = (select MAX(id) from eh_service_module_privileges);
+INSERT INTO `eh_service_module_privileges` (`id`, `module_id`, `privilege_type`, `privilege_id`, `remark`, `default_order`, `create_time`)
+VALUES
+	(@mp_id:=@mp_id+1, @module_id, '0', @p_id, '查看详情', '0', NOW());
+
+set @module_id = 26000;
+set @p_id = 260001002;
+INSERT INTO `eh_acl_privileges` (`id`, `app_id`, `name`, `description`, `tag`) VALUES (@p_id, null, '新增、修改、删除申请', '新增、修改、删除申请', NULL);
+set @mp_id = (select MAX(id) from eh_service_module_privileges);
+INSERT INTO `eh_service_module_privileges` (`id`, `module_id`, `privilege_type`, `privilege_id`, `remark`, `default_order`, `create_time`)
+VALUES
+	(@mp_id:=@mp_id+1, @module_id, '0', @p_id, '新增、修改、删除申请', '0', NOW());
+
+set @module_id = 26000;
+set @p_id = 260001003;
+INSERT INTO `eh_acl_privileges` (`id`, `app_id`, `name`, `description`, `tag`) VALUES (@p_id, null, '入库', '入库', NULL);
+set @mp_id = (select MAX(id) from eh_service_module_privileges);
+INSERT INTO `eh_service_module_privileges` (`id`, `module_id`, `privilege_type`, `privilege_id`, `remark`, `default_order`, `create_time`)
+VALUES
+	(@mp_id:=@mp_id+1, @module_id, '0', @p_id, '入库', '0', NOW());
+
+
+-- 供应商的权限细化规则
+set @module_id = 27000;
+set @p_id = 270001001;
+INSERT INTO `eh_acl_privileges` (`id`, `app_id`, `name`, `description`, `tag`) VALUES (@p_id, null, '查看详情', '查看详情', NULL);
+set @mp_id = (select MAX(id) from eh_service_module_privileges);
+INSERT INTO `eh_service_module_privileges` (`id`, `module_id`, `privilege_type`, `privilege_id`, `remark`, `default_order`, `create_time`)
+VALUES
+	(@mp_id:=@mp_id+1, @module_id, '0', @p_id, '查看详情', '0', NOW());
+
+set @module_id = 27000;
+set @p_id = 270001002;
+INSERT INTO `eh_acl_privileges` (`id`, `app_id`, `name`, `description`, `tag`) VALUES (@p_id, null, '新增、修改、删除供应商', '新增、修改、删除供应商', NULL);
+set @mp_id = (select MAX(id) from eh_service_module_privileges);
+INSERT INTO `eh_service_module_privileges` (`id`, `module_id`, `privilege_type`, `privilege_id`, `remark`, `default_order`, `create_time`)
+VALUES
+	(@mp_id:=@mp_id+1, @module_id, '0', @p_id, '新增、修改、删除供应商', '0', NOW());
+
+-- 请示单管理
+set @module_id = 25000;
+set @p_id = 250001001;
+INSERT INTO `eh_acl_privileges` (`id`, `app_id`, `name`, `description`, `tag`) VALUES (@p_id, null, '查看详情', '查看详情', NULL);
+set @mp_id = (select MAX(id) from eh_service_module_privileges);
+INSERT INTO `eh_service_module_privileges` (`id`, `module_id`, `privilege_type`, `privilege_id`, `remark`, `default_order`, `create_time`)
+VALUES
+	(@mp_id:=@mp_id+1, @module_id, '0', @p_id, '查看详情', '0', NOW());
+
+set @module_id = 25000;
+set @p_id = 250001002;
+INSERT INTO `eh_acl_privileges` (`id`, `app_id`, `name`, `description`, `tag`) VALUES (@p_id, null, '新增请示', '新增请示', NULL);
+set @mp_id = (select MAX(id) from eh_service_module_privileges);
+INSERT INTO `eh_service_module_privileges` (`id`, `module_id`, `privilege_type`, `privilege_id`, `remark`, `default_order`, `create_time`)
+VALUES
+	(@mp_id:=@mp_id+1, @module_id, '0', @p_id, '新增请示', '0', NOW());
+
+-- dengs 2018.03.05文件管理的模块id添加。
+update eh_web_menus SET module_id=41500 WHERE NAME='文件管理';

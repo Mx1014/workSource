@@ -1502,7 +1502,7 @@ public class WarehouseServiceImpl implements WarehouseService {
         }
         //通过请示单id获得请示单名称
         String requisitionName = requisitionService.getRequisitionNameById(dto.getRequisitionId());
-        dto.setRequestOrganizationName(requisitionName);
+        dto.setRequisitionName(requisitionName);
         return dto;
     }
 
@@ -1625,15 +1625,15 @@ public class WarehouseServiceImpl implements WarehouseService {
     }
 
     @Override
-    public ListWarehouseStockOrdersResponse listWarehouseStockOrders(ListWarehouseStockOrdersCommand cmd) {
-        ListWarehouseStockOrdersResponse response = new ListWarehouseStockOrdersResponse();
-        Long pageAnchor = cmd.getPageAnchor();
-        Integer pageSize = cmd.getPageSize();
-        if (pageAnchor == null) pageAnchor = 0l;
-        if (pageSize == null) pageSize = 20;
-        List<WarehouseStockOrderDTO> dtos = warehouseProvider.listWarehouseStockOrders(cmd.getExecutor(), cmd.getNamespaceId(), cmd.getOwnerType(), cmd.getOwnerId(), cmd.getServiceType(), pageAnchor, pageSize + 1);
-        if (dtos.size() > pageSize) {
-            dtos.remove(dtos.size() - 1);
+        public ListWarehouseStockOrdersResponse listWarehouseStockOrders(ListWarehouseStockOrdersCommand cmd) {
+            ListWarehouseStockOrdersResponse response = new ListWarehouseStockOrdersResponse();
+            Long pageAnchor = cmd.getPageAnchor();
+            Integer pageSize = cmd.getPageSize();
+            if (pageAnchor == null) pageAnchor = 0l;
+            if (pageSize == null) pageSize = 20;
+            List<WarehouseStockOrderDTO> dtos = warehouseProvider.listWarehouseStockOrders(cmd.getExecutor(), cmd.getNamespaceId(), cmd.getOwnerType(), cmd.getOwnerId(), cmd.getServiceType(), pageAnchor, pageSize + 1);
+            if (dtos.size() > pageSize) {
+                dtos.remove(dtos.size() - 1);
             response.setNextPageAnchor(pageAnchor + pageSize);
         }
         response.setDtos(dtos);
@@ -1643,6 +1643,11 @@ public class WarehouseServiceImpl implements WarehouseService {
     @Override
     public void deleteWarehouseStockOrder(Long id) {
          warehouseProvider.deleteWarehouseOrderById(id);
+    }
+
+    @Override
+    public void deleteRequest(DeleteRequestCommand cmd) {
+        warehouseProvider.deleteWarehouseRequest(cmd.getRequestId());
     }
 
     private SearchRequestsResponse getWarehouseRequestMaterials(List<Long> ids, String ownerType, Long ownerId, Integer pageSize, Long anchor, Long communityId) {

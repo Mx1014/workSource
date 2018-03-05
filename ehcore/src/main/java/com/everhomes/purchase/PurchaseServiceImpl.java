@@ -6,6 +6,7 @@ import com.everhomes.entity.EntityType;
 import com.everhomes.flow.Flow;
 import com.everhomes.flow.FlowService;
 import com.everhomes.naming.NameMapper;
+import com.everhomes.rest.acl.PrivilegeConstants;
 import com.everhomes.rest.flow.CreateFlowCaseCommand;
 import com.everhomes.rest.flow.FlowConstants;
 import com.everhomes.rest.flow.FlowModuleType;
@@ -17,6 +18,7 @@ import com.everhomes.server.schema.tables.pojos.EhWarehousePurchaseItems;
 import com.everhomes.server.schema.tables.pojos.EhWarehousePurchaseOrders;
 import com.everhomes.supplier.SupplierProvider;
 import com.everhomes.user.UserContext;
+import com.everhomes.user.UserPrivilegeMgr;
 import com.everhomes.util.DateHelper;
 import com.everhomes.util.RuntimeErrorException;
 import com.everhomes.warehouse.WarehouseMaterials;
@@ -53,11 +55,14 @@ public class PurchaseServiceImpl implements PurchaseService {
     private WarehouseProvider warehouseProvider;
     @Autowired
     private SupplierProvider supplierProvider;
+    @Autowired
+    private UserPrivilegeMgr userPrivilegeMgr;
 
 
 
     @Override
     public void CreateOrUpdatePurchaseOrderCommand(CreateOrUpdatePurchaseOrderCommand cmd) {
+        checkAssetPriviledgeForPropertyOrg(cmd.getCommunityId(), PrivilegeConstants.PURCHASE_OPERATION);
         if(cmd.getPurchaseRequestId() != null){
             //删除
             purchaseProvider.deleteOrderById(cmd.getPurchaseRequestId());
@@ -151,6 +156,7 @@ public class PurchaseServiceImpl implements PurchaseService {
 
     @Override
     public SearchPurchasesResponse searchPurchases(SearchPurchasesCommand cmd) {
+        checkAssetPriviledgeForPropertyOrg(cmd.getCommunityId(), PrivilegeConstants.PURCHASE_VIEW);
         SearchPurchasesResponse response = new SearchPurchasesResponse();
         Long pageAnchor = cmd.getPageAnchor();
         Integer pageSize = cmd.getPageSize();
@@ -167,7 +173,8 @@ public class PurchaseServiceImpl implements PurchaseService {
     }
 
     @Override
-    public void entryWarehouse(Long purchaseRequestId) {
+    public void entryWarehouse(Long purchaseRequestId,Long communityId) {
+        checkAssetPriviledgeForPropertyOrg(communityId, PrivilegeConstants.PURCHASE_ENTRY_STOCK);
         PurchaseOrder order = purchaseProvider.getPurchaseOrderById(purchaseRequestId);
         if(!order.getSubmissionStatus().equals(PurchaseSubmissionStatus.FINISH.getCode())){
             throw RuntimeErrorException.errorWith(PurchaseErrorCodes.SCOPE,PurchaseErrorCodes.UNABLE_ENTRY_WAREHOUSE
@@ -184,6 +191,8 @@ public class PurchaseServiceImpl implements PurchaseService {
 
     @Override
     public GetPurchaseOrderDTO getPurchaseOrder(GetPurchaseOrderCommand cmd) {
+        //校验权限
+        checkAssetPriviledgeForPropertyOrg(cmd.getCommunityId(), PrivilegeConstants.PURCHASE_VIEW);
         PurchaseOrder order = purchaseProvider.getPurchaseOrderById(cmd.getPurchaseRequestId());
         List<PurchaseItem> items = purchaseProvider.getPurchaseItemsByOrderId(cmd.getPurchaseRequestId());
         //组装数据 TODO api字段和jooq字段保持一致可以节省代码
@@ -222,13 +231,18 @@ public class PurchaseServiceImpl implements PurchaseService {
     }
 
     @Override
-    public void deletePurchaseOrder(Long purchaseRequestId) {
+    public void deletePurchaseOrder(DeletePurchaseOrderCommand cmd) {
+        checkAssetPriviledgeForPropertyOrg(cmd.getCommunityId(),PrivilegeConstants.PURCHASE_OPERATION);
         this.dbProvider.execute((TransactionStatus status) -> {
             //删除采购单表个
-            purchaseProvider.deleteOrderById(purchaseRequestId);
+            purchaseProvider.deleteOrderById(cmd.getPurchaseRequestId());
             //删除采购单中的item
-            purchaseProvider.deleteOrderItemsByOrderId(purchaseRequestId);
+            purchaseProvider.deleteOrderItemsByOrderId(cmd.getPurchaseRequestId());
             return null;
         });
+    }
+
+    private void checkAssetPriviledgeForPropertyOrg(Long communityId, Long priviledgeId) {
+        userPrivilegeMgr.checkUserPrivilege(UserContext.currentUserId(), null, priviledgeId, PrivilegeConstants.PURCHASE_MODULE, (byte)13, null, null, communityId);
     }
 }

@@ -12,9 +12,9 @@ public interface PurchaseService {
 
     SearchPurchasesResponse searchPurchases(SearchPurchasesCommand cmd);
 
-    void entryWarehouse(Long purchaseRequestId);
+    void entryWarehouse(Long purchaseRequestId,Long communityId);
 
     GetPurchaseOrderDTO getPurchaseOrder(GetPurchaseOrderCommand cmd);
 
-    void deletePurchaseOrder(Long purchaseRequestId);
+    void deletePurchaseOrder(DeletePurchaseOrderCommand cmd);
 }
