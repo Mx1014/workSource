@@ -674,49 +674,62 @@ public class PunchServiceImpl implements PunchService {
 			if (null != punchDayLog && punchDayLog.getTimeRuleId() != null) {
 				ptr = punchProvider.getPunchTimeRuleById(punchDayLog.getTimeRuleId());
 			}
-			PunchLogsDay pdl = new PunchLogsDay();
-			pdl.setExceptionStatus(ExceptionStatus.NORMAL.getCode());
-			pdl.setPunchDay(String.valueOf(logDay.get(Calendar.DAY_OF_MONTH)));
-			pdl.setPunchLogs(new ArrayList<PunchLogDTO>());
-
-			pdl = calculateDayLog(userId, companyId, logDay, pdl, newPunchDayLog,ptr);
-			if (null == pdl) {
-				return null;
-			}
-			newPunchDayLog.setApprovalStatusList(pdl.getApprovalStatusList());
-			newPunchDayLog.setStatusList(pdl.getStatusList());
-			if (null != pdl.getArriveTime())
-				newPunchDayLog.setArriveTime(new Time(pdl.getArriveTime()));
-			if (null != pdl.getLeaveTime())
-				newPunchDayLog.setLeaveTime(new Time(pdl.getLeaveTime()));
-			newPunchDayLog.setPunchCount(pdl.getPunchCount());
-			newPunchDayLog.setUserId(userId);
-			newPunchDayLog.setEnterpriseId(companyId);
-			newPunchDayLog.setCreatorUid(userId);
-			newPunchDayLog.setPunchDate(java.sql.Date.valueOf(dateSF.get().format(logDay
-					.getTime())));
-			newPunchDayLog.setCreateTime(new Timestamp(DateHelper.currentGMTTime()
-					.getTime()));
-			newPunchDayLog.setPunchTimesPerDay(pdl.getPunchTimesPerDay());
-			newPunchDayLog.setStatus(pdl.getPunchStatus());
-			newPunchDayLog.setMorningStatus(pdl.getMorningPunchStatus());
-			newPunchDayLog.setAfternoonStatus(pdl.getAfternoonPunchStatus());
-			newPunchDayLog.setViewFlag(ViewFlags.NOTVIEW.getCode());
-			newPunchDayLog.setExceptionStatus(pdl.getExceptionStatus());
-			newPunchDayLog.setDeviceChangeFlag(getDeviceChangeFlag(userId, java.sql.Date.valueOf(dateSF.get().format(logDay
-					.getTime())), companyId));
-			if (null == punchDayLog) {
-				// 数据库没有计算好的数据
-				punchProvider.createPunchDayLog(newPunchDayLog);
-
-			} else {
-				// 数据库有计算好的数据
-				newPunchDayLog.setId(punchDayLog.getId());
-				punchProvider.updatePunchDayLog(newPunchDayLog);
-			}
+			refreshPunchDayLog(userId,companyId,punchDayLog,logDay,ptr,newPunchDayLog);
 			return null;
 		});
 		return newPunchDayLog;
+	}
+	/**
+	 *
+	 * @param ptr : 传参就是保持原本的打卡规则,不传参就是用新的打卡规则
+	 * */
+	private void refreshPunchDayLog(Long userId, Long companyId, PunchDayLog punchDayLog, Calendar logDay, PunchTimeRule ptr,PunchDayLog newPunchDayLog ) {
+
+
+		PunchLogsDay pdl = new PunchLogsDay();
+		pdl.setExceptionStatus(ExceptionStatus.NORMAL.getCode());
+		pdl.setPunchDay(String.valueOf(logDay.get(Calendar.DAY_OF_MONTH)));
+		pdl.setPunchLogs(new ArrayList<PunchLogDTO>());
+
+		try {
+			pdl = calculateDayLog(userId, companyId, logDay, pdl, newPunchDayLog,ptr);
+		} catch (ParseException e) {
+			LOGGER.error("error",e);
+		}
+		if (null == pdl) {
+			return  ;
+		}
+		newPunchDayLog.setApprovalStatusList(pdl.getApprovalStatusList());
+		newPunchDayLog.setStatusList(pdl.getStatusList());
+		if (null != pdl.getArriveTime())
+			newPunchDayLog.setArriveTime(new Time(pdl.getArriveTime()));
+		if (null != pdl.getLeaveTime())
+			newPunchDayLog.setLeaveTime(new Time(pdl.getLeaveTime()));
+		newPunchDayLog.setPunchCount(pdl.getPunchCount());
+		newPunchDayLog.setUserId(userId);
+		newPunchDayLog.setEnterpriseId(companyId);
+		newPunchDayLog.setCreatorUid(userId);
+		newPunchDayLog.setPunchDate(java.sql.Date.valueOf(dateSF.get().format(logDay
+				.getTime())));
+		newPunchDayLog.setCreateTime(new Timestamp(DateHelper.currentGMTTime()
+				.getTime()));
+		newPunchDayLog.setPunchTimesPerDay(pdl.getPunchTimesPerDay());
+		newPunchDayLog.setStatus(pdl.getPunchStatus());
+		newPunchDayLog.setMorningStatus(pdl.getMorningPunchStatus());
+		newPunchDayLog.setAfternoonStatus(pdl.getAfternoonPunchStatus());
+		newPunchDayLog.setViewFlag(ViewFlags.NOTVIEW.getCode());
+		newPunchDayLog.setExceptionStatus(pdl.getExceptionStatus());
+		newPunchDayLog.setDeviceChangeFlag(getDeviceChangeFlag(userId, java.sql.Date.valueOf(dateSF.get().format(logDay
+				.getTime())), companyId));
+		if (null == punchDayLog) {
+			// 数据库没有计算好的数据
+			punchProvider.createPunchDayLog(newPunchDayLog);
+
+		} else {
+			// 数据库有计算好的数据
+			newPunchDayLog.setId(punchDayLog.getId());
+			punchProvider.updatePunchDayLog(newPunchDayLog);
+		}
 	}
 
 	private Byte getDeviceChangeFlag(Long userId, java.sql.Date punchDate,
@@ -5130,7 +5143,15 @@ public class PunchServiceImpl implements PunchService {
 				LOGGER.debug("refresh day log : userid =["+userId
 						+"] day is ["+dateSF.get().format(start.getTime())+"] enddate ["
 						+dateSF.get().format(end.getTime())+"]");
-				this.refreshPunchDayLog(userId, companyId, start);
+				PunchDayLog newPunchDayLog = new PunchDayLog();
+				this.coordinationProvider.getNamedLock(CoordinationLocks.CREATE_PUNCH_LOG.getCode() + userId).enter(() -> {
+					PunchDayLog punchDayLog = punchProvider.getDayPunchLogByDate(userId,
+							companyId, dateSF.get().format(start.getTime()));
+					PunchTimeRule ptr = null;
+					refreshPunchDayLog(userId,companyId,punchDayLog,start,ptr,newPunchDayLog);
+					return null;
+				});
+
 			} catch (Exception e) {
 				LOGGER.error("refresh day log wrong  userId["+userId+"],  day"+start.getTime(),e);
 			}
