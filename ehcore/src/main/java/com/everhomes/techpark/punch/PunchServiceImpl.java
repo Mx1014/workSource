@@ -2770,6 +2770,7 @@ public class PunchServiceImpl implements PunchService {
 
         if(null != pr.getChinaHolidayFlag() && pr.getChinaHolidayFlag().equals(NormalFlag.YES.getCode())){
             PunchHoliday holiday = punchProvider.findHolidayByDate(punchDate);
+			LOGGER.debug("2018年03月05日 临时debug ,holiday = {} ; punchDate = {}",holiday,punchDate);
             if(null != holiday){
                 if(holiday.getStatus().equals(NormalFlag.YES.getCode())){
                     return null;
