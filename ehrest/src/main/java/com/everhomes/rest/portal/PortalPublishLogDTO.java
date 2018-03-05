@@ -2,9 +2,13 @@ package com.everhomes.rest.portal;
 
 /**
  * <ul>
- * <li>id: 发布日志id</li>
- * <li>namespaceId: 域空间</li>
- * <li>status: 状态，0: 正在发布 1: 发布失败 2: 发布成功</li>
+ *     <li>id: 发布日志id</li>
+ *     <li>namespaceId: 域空间</li>
+ *     <li>contentType: contentType</li>
+ *     <li>contentData: contentData</li>
+ *     <li>versionId: 版本号</li>
+ *     <li>process: 进度</li>
+ *     <li>status: 状态，0: 正在发布 1: 发布失败 2: 发布成功</li>
  * </ul>
  */
 public class PortalPublishLogDTO {
@@ -13,6 +17,8 @@ public class PortalPublishLogDTO {
     private Integer namespaceId;
     private String contentType;
     private String contentData;
+    private Long versionId;
+    private Integer process;
     private Byte status;
 
     public Long getId() {
@@ -53,5 +59,21 @@ public class PortalPublishLogDTO {
 
     public void setStatus(Byte status) {
         this.status = status;
+    }
+
+    public Long getVersionId() {
+        return versionId;
+    }
+
+    public void setVersionId(Long versionId) {
+        this.versionId = versionId;
+    }
+
+    public Integer getProcess() {
+        return process;
+    }
+
+    public void setProcess(Integer process) {
+        this.process = process;
     }
 }

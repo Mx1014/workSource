@@ -7,6 +7,7 @@ import java.util.List;
 import javax.validation.constraints.NotNull;
 
 import com.everhomes.discover.ItemType;
+import com.everhomes.rest.common.TrueOrFalseFlag;
 import com.everhomes.util.StringHelper;
 
 /**
@@ -20,6 +21,8 @@ import com.everhomes.util.StringHelper;
  * <li>keyword: 搜索关键字</li>
  * <li>tagIds: 需要筛选的标签id</li>
  * <li>status: 状态，参考 {@link NewsStatus}</li>
+ * <li>currentPMId: 当前管理公司ID</li>
+ * <li>currentProjectId: 当前选中项目Id，如果是全部则不传</li>
  * </ul>
  */
 public class ListNewsCommand {
@@ -34,7 +37,35 @@ public class ListNewsCommand {
 	@ItemType(Long.class)
 	private List<Long> tagIds;	
 	private Byte status;
-	
+	private Byte checkPrivilegeFlag = TrueOrFalseFlag.FALSE.getCode();
+	private Long currentPMId;
+	private Long currentProjectId;
+
+	public Long getCurrentPMId() {
+		return currentPMId;
+	}
+
+	public void setCurrentPMId(Long currentPMId) {
+		this.currentPMId = currentPMId;
+	}
+
+	public Long getCurrentProjectId() {
+		return currentProjectId;
+	}
+
+	public void setCurrentProjectId(Long currentProjectId) {
+		this.currentProjectId = currentProjectId;
+	}
+
+
+	public Byte getCheckPrivilegeFlag() {
+		return checkPrivilegeFlag;
+	}
+
+	public void setCheckPrivilegeFlag(Byte checkPrivilegeFlag) {
+		this.checkPrivilegeFlag = checkPrivilegeFlag;
+	}
+
 	public Byte getStatus() {
 		return status;
 	}

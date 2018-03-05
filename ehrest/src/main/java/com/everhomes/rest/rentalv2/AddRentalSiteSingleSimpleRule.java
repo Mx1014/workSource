@@ -10,34 +10,30 @@ import com.everhomes.rest.rentalv2.admin.AttachmentConfigDTO;
 import com.everhomes.rest.rentalv2.admin.SiteNumberDTO;
 import com.everhomes.rest.rentalv2.admin.TimeIntervalDTO;
 import com.everhomes.util.StringHelper;
+
 /**
- * <ul> 
- * <li>beginTime：开始时间(hour)</li>
- * <li>endTime：结束时间(hour)</li>
+ * <ul>
+ * <li>beginTime: 开始时间(hour)</li>
+ * <li>endTime: 结束时间(hour)</li>
  * <li>rentalSiteId: 资源id</li>
- * <li>resourceTypeId: 图标id</li>
- * <li>exclusiveFlag: 是否是独占资源</li>
- * <li>unit: 1整租，0.5可半租</li>
  * <li>autoAssign: 是否需要自动分配资源</li>
  * <li>multiUnit: 是否允许预约多个场所</li>
  * <li>needPay: 是否需要支付</li>
- * <li>attachments: 预约需要提交的信息</li>
+ * <li>multiTimeInterval: multiTimeInterval</li>
  * <li>rentalType: 预约类型，参考{@link com.everhomes.rest.rentalv2.RentalType}</li>
  * <li>priceType: 0 按时长定价 1 起步价模式</li>
- * <li>initiatePrice: 起步后价格</li>
  * <li>rentalEndTime: 至少提前预约时间</li>
  * <li>rentalStartTime: 最多提前预约时间</li>
- * <li>rentalStep: 最短可预约时长</li>
- * <li>timeIntervals: 开放时段</li>
+ * <li>timeStep: timeStep</li>
  * <li>beginDate: 开放日期始</li>
  * <li>endDate: 开放日期终</li>
  * <li>openWeekday: 开放日期，从周日到周六是1234567，开放哪天就在数组传哪天List< Integer></li>
  * <li>closeDates: 关闭日期</li>
  * <li>workdayPrice: 工作日价格</li>
  * <li>weekendPrice: 周末价格</li>
+ * <li>initiatePrice: 起步后价格</li>
  * <li>siteCounts: 可预约个数</li>
- * <li>siteNumbers: 用户填写的可预约个数个场所编号</li>
- * <li>cancelTime: 至少提前取消时间</li>
+ * <li>siteNumbers: 用户填写的可预约个数个场所编号 {@link com.everhomes.rest.rentalv2.admin.SiteNumberDTO}</li>
  * <li>refundFlag: 是否允许退款</li>
  * <li>refundRatio: 退款比例</li>
  * <li>rentalStartTimeFlag: 最多提前预约时间标志 1：限制 0：不限制 {@link com.everhomes.rest.rentalv2.NormalFlag}</li>
@@ -45,34 +41,34 @@ import com.everhomes.util.StringHelper;
  * <li>orgMemberWorkdayPrice: 企业内部工作日价格</li>
  * <li>orgMemberWeekendPrice: 企业内部节假日价格</li>
  * <li>orgMemberInitiatePrice: 集团内部起步后价格</li>
+ * <li>approvingUserInitiatePrice: 外部客户起步后价格</li>
  * <li>approvingUserWorkdayPrice: 外部客户工作日价格</li>
  * <li>approvingUserWeekendPrice: 外部客户节假日价格</li>
- * <li>approvingUserInitiatePrice: 外部客户起步后价格</li>
  * <li>halfDayTimeIntervals: 半天时间设置 {@link com.everhomes.rest.rentalv2.admin.TimeIntervalDTO}</li>
  * </ul>
  */
 public class AddRentalSiteSingleSimpleRule {
- 
-	private Double beginTime; 
+
+	private Double beginTime;
 	private Double endTime;
-	 
+
 	@NotNull
 	private Long rentalSiteId;
-	private Byte exclusiveFlag;
-	private Double unit;
+	//	private Byte exclusiveFlag;
+//	private Double unit;
 	private Byte autoAssign;
 	private Byte multiUnit;
 	private Byte needPay;
 	private Byte multiTimeInterval;
-	@ItemType(AttachmentConfigDTO.class)
-	private List<AttachmentConfigDTO> attachments;
+	//	@ItemType(AttachmentConfigDTO.class)
+//	private List<AttachmentConfigDTO> attachments;
 	private Byte rentalType;
 	private Byte priceType;
 	private Long rentalEndTime;
 	private Long rentalStartTime;
 	private Double timeStep;
-	@ItemType(TimeIntervalDTO.class)
-	private List<TimeIntervalDTO> timeIntervals;
+	//	@ItemType(TimeIntervalDTO.class) 生成单元格时不需要 小时的参数，
+//	private List<TimeIntervalDTO> timeIntervals;
 	private Long beginDate;
 	private Long endDate;
 
@@ -81,32 +77,30 @@ public class AddRentalSiteSingleSimpleRule {
 	@ItemType(Long.class)
 	private List<Long> closeDates;
 	private BigDecimal workdayPrice;
-	private BigDecimal weekendPrice;
 	private BigDecimal initiatePrice;
 	private Double siteCounts;
 	@ItemType(SiteNumberDTO.class)
 	private List<SiteNumberDTO> siteNumbers;
-	private Long cancelTime;
+	//	private Long cancelTime;
 	private Byte refundFlag;
 	private Integer refundRatio;
 
 	private Byte rentalStartTimeFlag;
 	private Byte rentalEndTimeFlag;
 	private BigDecimal orgMemberWorkdayPrice;
-	private BigDecimal orgMemberWeekendPrice;
 	private BigDecimal orgMemberInitiatePrice;
-	private BigDecimal approvingUserInitiatePrice;
 
+	private BigDecimal approvingUserInitiatePrice;
 	private BigDecimal approvingUserWorkdayPrice;
-	private BigDecimal approvingUserWeekendPrice;
+	private Byte userPriceType;
 
 	@ItemType(TimeIntervalDTO.class)
 	private List<TimeIntervalDTO> halfDayTimeIntervals;
 
 	@Override
-    public String toString() {
-        return StringHelper.toJsonString(this);
-    }
+	public String toString() {
+		return StringHelper.toJsonString(this);
+	}
 
 
 	public Double getBeginTime() {
@@ -136,26 +130,6 @@ public class AddRentalSiteSingleSimpleRule {
 
 	public void setRentalSiteId(Long rentalSiteId) {
 		this.rentalSiteId = rentalSiteId;
-	}
-
-
-	public Byte getExclusiveFlag() {
-		return exclusiveFlag;
-	}
-
-
-	public void setExclusiveFlag(Byte exclusiveFlag) {
-		this.exclusiveFlag = exclusiveFlag;
-	}
-
-
-	public Double getUnit() {
-		return unit;
-	}
-
-
-	public void setUnit(Double unit) {
-		this.unit = unit;
 	}
 
 
@@ -198,17 +172,6 @@ public class AddRentalSiteSingleSimpleRule {
 		this.multiTimeInterval = multiTimeInterval;
 	}
 
-
-	public List<AttachmentConfigDTO> getAttachments() {
-		return attachments;
-	}
-
-
-	public void setAttachments(List<AttachmentConfigDTO> attachments) {
-		this.attachments = attachments;
-	}
-
-
 	public Byte getRentalType() {
 		return rentalType;
 	}
@@ -237,17 +200,6 @@ public class AddRentalSiteSingleSimpleRule {
 	public void setRentalStartTime(Long rentalStartTime) {
 		this.rentalStartTime = rentalStartTime;
 	}
- 
-
-	public List<TimeIntervalDTO> getTimeIntervals() {
-		return timeIntervals;
-	}
-
-
-	public void setTimeIntervals(List<TimeIntervalDTO> timeIntervals) {
-		this.timeIntervals = timeIntervals;
-	}
-
 
 	public Long getBeginDate() {
 		return beginDate;
@@ -299,16 +251,6 @@ public class AddRentalSiteSingleSimpleRule {
 	}
 
 
-	public BigDecimal getWeekendPrice() {
-		return weekendPrice;
-	}
-
-
-	public void setWeekendPrice(BigDecimal weekendPrice) {
-		this.weekendPrice = weekendPrice;
-	}
-
-
 	public Double getSiteCounts() {
 		return siteCounts;
 	}
@@ -316,16 +258,6 @@ public class AddRentalSiteSingleSimpleRule {
 
 	public void setSiteCounts(Double siteCounts) {
 		this.siteCounts = siteCounts;
-	}
-
-
-	public Long getCancelTime() {
-		return cancelTime;
-	}
-
-
-	public void setCancelTime(Long cancelTime) {
-		this.cancelTime = cancelTime;
 	}
 
 
@@ -393,28 +325,12 @@ public class AddRentalSiteSingleSimpleRule {
 		this.orgMemberWorkdayPrice = orgMemberWorkdayPrice;
 	}
 
-	public BigDecimal getOrgMemberWeekendPrice() {
-		return orgMemberWeekendPrice;
-	}
-
-	public void setOrgMemberWeekendPrice(BigDecimal orgMemberWeekendPrice) {
-		this.orgMemberWeekendPrice = orgMemberWeekendPrice;
-	}
-
 	public BigDecimal getApprovingUserWorkdayPrice() {
 		return approvingUserWorkdayPrice;
 	}
 
 	public void setApprovingUserWorkdayPrice(BigDecimal approvingUserWorkdayPrice) {
 		this.approvingUserWorkdayPrice = approvingUserWorkdayPrice;
-	}
-
-	public BigDecimal getApprovingUserWeekendPrice() {
-		return approvingUserWeekendPrice;
-	}
-
-	public void setApprovingUserWeekendPrice(BigDecimal approvingUserWeekendPrice) {
-		this.approvingUserWeekendPrice = approvingUserWeekendPrice;
 	}
 
 	public List<TimeIntervalDTO> getHalfDayTimeIntervals() {
@@ -455,5 +371,13 @@ public class AddRentalSiteSingleSimpleRule {
 
 	public void setHalfDayTimeIntervals(List<TimeIntervalDTO> halfDayTimeIntervals) {
 		this.halfDayTimeIntervals = halfDayTimeIntervals;
+	}
+
+	public Byte getUserPriceType() {
+		return userPriceType;
+	}
+
+	public void setUserPriceType(Byte userPriceType) {
+		this.userPriceType = userPriceType;
 	}
 }

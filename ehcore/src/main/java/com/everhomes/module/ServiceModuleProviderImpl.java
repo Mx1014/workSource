@@ -8,7 +8,8 @@ import com.everhomes.db.DbProvider;
 import com.everhomes.listing.CrossShardListingLocator;
 import com.everhomes.listing.ListingQueryBuilderCallback;
 import com.everhomes.naming.NameMapper;
-import com.everhomes.portal.ServiceModuleApp;
+import com.everhomes.rest.acl.ServiceModuleDTO;
+import com.everhomes.serviceModuleApp.ServiceModuleApp;
 import com.everhomes.rest.module.ServiceModuleStatus;
 import com.everhomes.rest.portal.ServiceModuleAppDTO;
 import com.everhomes.rest.portal.ServiceModuleAppStatus;
@@ -407,6 +408,21 @@ public class ServiceModuleProviderImpl implements ServiceModuleProvider {
     }
 
     @Override
+    public List<ServiceModuleDTO> listServiceModuleDtos(List<Long> ids) {
+        List<ServiceModuleDTO> results = new ArrayList<>();
+        DSLContext context = dbProvider.getDslContext(AccessSpec.readOnlyWith(EhServiceModules.class));
+        SelectQuery<EhServiceModulesRecord> query = context.selectQuery(Tables.EH_SERVICE_MODULES);
+        Condition cond = Tables.EH_SERVICE_MODULES.STATUS.eq(ServiceModuleStatus.ACTIVE.getCode());
+        cond = cond.and(Tables.EH_SERVICE_MODULES.ID.in(ids));
+        query.addConditions(cond);
+        query.fetch().map((r) -> {
+            results.add(ConvertHelper.convert(r, ServiceModuleDTO.class));
+            return null;
+        });
+        return results;
+    }
+
+    @Override
     public List<ServiceModule> listServiceModule(Byte actionType) {
         List<ServiceModule> results = new ArrayList<>();
         DSLContext context = dbProvider.getDslContext(AccessSpec.readOnlyWith(EhServiceModules.class));
@@ -720,6 +736,20 @@ public class ServiceModuleProviderImpl implements ServiceModuleProvider {
             return null;
         });
         return appMap;
+    }
+
+    @Override
+    public List<ServiceModuleFunction> listFunctionsByIds(List<Long> ids) {
+        List<ServiceModuleFunction> results = new ArrayList<>();
+        DSLContext context = dbProvider.getDslContext(AccessSpec.readOnlyWith(EhServiceModuleFunctions.class));
+        SelectQuery<EhServiceModuleFunctionsRecord> query = context.selectQuery(Tables.EH_SERVICE_MODULE_FUNCTIONS);
+        query.addConditions(Tables.EH_SERVICE_MODULE_FUNCTIONS.ID.in(ids));
+
+        query.fetch().map((r) -> {
+            results.add(ConvertHelper.convert(r, ServiceModuleFunction.class));
+            return null;
+        });
+        return results;
     }
 
     @Override

@@ -277,7 +277,7 @@ public class CustomerServiceImpl implements CustomerService {
     @Override
     public void exportEnterpriseCustomer(ExportEnterpriseCustomerCommand cmd, HttpServletResponse response) {
         ExportFieldsExcelCommand command = ConvertHelper.convert(cmd, ExportFieldsExcelCommand.class);
-        command.setIncludedGroupIds("10,11,12");
+//        command.setIncludedGroupIds("10,11,12");
         List<FieldGroupDTO> results = fieldService.getAllGroups(command,false,true);
         if(results != null && results.size() > 0) {
             List<String> sheetNames = results.stream().map(result -> {
@@ -2120,12 +2120,13 @@ public class CustomerServiceImpl implements CustomerService {
         Map<Long, Long> properties = enterpriseCustomerProvider.listCustomerPatentsByCustomerIds(customerIds);
         properties.forEach((categoryId, count) -> {
             CustomerIntellectualPropertyStatisticsDTO dto = new CustomerIntellectualPropertyStatisticsDTO();
+            dto.setPropertyType("专利");
             dto.setPropertyCount(count);
 //            ScopeFieldItem item = fieldProvider.findScopeFieldItemByFieldItemId(cmd.getNamespaceId(), categoryId);
-            ScopeFieldItem item = fieldService.findScopeFieldItemByFieldItemId(cmd.getNamespaceId(), cmd.getCommunityId(), categoryId);
-            if(item != null) {
-                dto.setPropertyType(item.getItemDisplayName());
-            }
+//            ScopeFieldItem item = fieldService.findScopeFieldItemByFieldItemId(cmd.getNamespaceId(), cmd.getCommunityId(), categoryId);
+//            if(item != null) {
+//                dto.setPropertyType(item.getItemDisplayName());
+//            }
             dtos.add(dto);
             response.setPropertyTotalCount(response.getPropertyTotalCount() + count);
         });

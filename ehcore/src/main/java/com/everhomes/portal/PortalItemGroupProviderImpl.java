@@ -7,6 +7,7 @@ import java.util.List;
 
 import com.everhomes.rest.portal.PortalItemGroupStatus;
 import org.jooq.DSLContext;
+import org.jooq.DeleteQuery;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -55,12 +56,22 @@ public class PortalItemGroupProviderImpl implements PortalItemGroupProvider {
 		if(portalItemGroups.size() == 0){
 			return;
 		}
-		Long id = sequenceProvider.getNextSequenceBlock(NameMapper.getSequenceDomainFromTablePojo(EhPortalItemGroups.class), (long)portalItemGroups.size());
+
+		/**
+		 * 有id使用原来的id，没有则生成新的
+		 */
+		Long id = sequenceProvider.getNextSequenceBlock(NameMapper.getSequenceDomainFromTablePojo(EhPortalItemGroups.class), (long)portalItemGroups.size() + 1);
 		List<EhPortalItemGroups> groups = new ArrayList<>();
 		for (PortalItemGroup group: portalItemGroups) {
-			id ++;
-			group.setId(id);
-			group.setName(EhPortalItemGroups.class.getSimpleName() + id);
+			if(group.getId() == null){
+				id ++;
+				group.setId(id);
+			}
+
+			if(group.getName() == null){
+				group.setName(EhPortalItemGroups.class.getSimpleName() + group.getId());
+			}
+
 			group.setCreateTime(new Timestamp(DateHelper.currentGMTTime().getTime()));
 			group.setUpdateTime(group.getCreateTime());
 			groups.add(ConvertHelper.convert(group, EhPortalItemGroups.class));
@@ -79,9 +90,27 @@ public class PortalItemGroupProviderImpl implements PortalItemGroupProvider {
 	}
 
 	@Override
+	public void deleteByVersionId(Long versionId){
+		DeleteQuery query = getReadWriteContext().deleteQuery(Tables.EH_PORTAL_ITEM_GROUPS);
+		query.addConditions(Tables.EH_PORTAL_ITEM_GROUPS.VERSION_ID.eq(versionId));
+		query.execute();
+		DaoHelper.publishDaoAction(DaoAction.MODIFY, EhPortalItemGroups.class, null);
+	}
+
+	@Override
 	public PortalItemGroup findPortalItemGroupById(Long id) {
 		assert (id != null);
 		return ConvertHelper.convert(getReadOnlyDao().findById(id), PortalItemGroup.class);
+	}
+
+	@Override
+	public Integer findMaxDefaultOrder(Long layoutId) {
+		Integer defaultOrder = getReadOnlyContext().select(Tables.EH_PORTAL_ITEM_GROUPS.DEFAULT_ORDER.max())
+				.from(Tables.EH_PORTAL_ITEM_GROUPS)
+				.where(Tables.EH_PORTAL_ITEM_GROUPS.LAYOUT_ID.eq(layoutId))
+				.fetchOne().value1();
+
+		return defaultOrder;
 	}
 	
 	@Override
@@ -90,6 +119,14 @@ public class PortalItemGroupProviderImpl implements PortalItemGroupProvider {
 				.where(Tables.EH_PORTAL_ITEM_GROUPS.STATUS.eq(PortalItemGroupStatus.ACTIVE.getCode()))
 				.and(Tables.EH_PORTAL_ITEM_GROUPS.LAYOUT_ID.eq(layoutId))
 				.orderBy(Tables.EH_PORTAL_ITEM_GROUPS.DEFAULT_ORDER.asc(), Tables.EH_PORTAL_ITEM_GROUPS.ID.asc())
+				.fetch().map(r -> ConvertHelper.convert(r, PortalItemGroup.class));
+	}
+
+	@Override
+	public List<PortalItemGroup> listPortalItemGroupByVersion(Integer namespaceId, Long versionId) {
+		return getReadOnlyContext().select().from(Tables.EH_PORTAL_ITEM_GROUPS)
+				.where(Tables.EH_PORTAL_ITEM_GROUPS.NAMESPACE_ID.eq(namespaceId))
+				.and(Tables.EH_PORTAL_ITEM_GROUPS.VERSION_ID.eq(versionId))
 				.fetch().map(r -> ConvertHelper.convert(r, PortalItemGroup.class));
 	}
 	

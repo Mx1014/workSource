@@ -1156,6 +1156,8 @@ public class AddressServiceImpl implements AddressService, LocalBusSubscriber {
 
     private void checkUserPrivilege(long userId, long communityId) {
         boolean flag = false;
+        if (userId == 1) //超级管理员
+            return;
         List<FamilyDTO> familydtos = this.familyProvider.getUserFamiliesByUserId(userId);
         if (familydtos == null) {
             throw RuntimeErrorException.errorWith(ErrorCodes.SCOPE_GENERAL, ErrorCodes.ERROR_ACCESS_DENIED,
@@ -1181,7 +1183,7 @@ public class AddressServiceImpl implements AddressService, LocalBusSubscriber {
                     "Invalid communityId, buildingName parameter");
 
         User user = UserContext.current().getUser();
-        long userId = user.getId();
+        long userId = cmd.getUserId()==null?user.getId():cmd.getUserId();
 
         checkUserPrivilege(userId, cmd.getCommunityId());
 

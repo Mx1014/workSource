@@ -45,6 +45,7 @@ public class RentalSitePackagesDTO {
     private BigDecimal halfOrgMemberPrice;
     private BigDecimal halfApprovingUserOriginalPrice;
     private BigDecimal halfApprovingUserPrice;
+    private Byte userPriceType;
 
     public Long getId() {
         return id;
@@ -204,5 +205,13 @@ public class RentalSitePackagesDTO {
 
     public void setApprovingUserInitiatePrice(BigDecimal approvingUserInitiatePrice) {
         this.approvingUserInitiatePrice = approvingUserInitiatePrice;
+    }
+
+    public Byte getUserPriceType() {
+        return userPriceType;
+    }
+
+    public void setUserPriceType(Byte userPriceType) {
+        this.userPriceType = userPriceType;
     }
 }

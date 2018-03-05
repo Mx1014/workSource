@@ -17,9 +17,9 @@ import com.everhomes.util.StringHelper;
  * <li>pageSize: 每页的数量</li>
  * </ul>
  */
-public class ListRentalBillsCommand { 
-	@NotNull
-	private Long organizationId; 
+public class ListRentalBillsCommand {
+	private Long organizationId;
+	private Long communityId;
 	private Long rentalSiteId ;
 	private java.lang.Long       resourceTypeId; 
 	
@@ -33,8 +33,6 @@ public class ListRentalBillsCommand {
 	
 	@Override
     public String toString() {
-
-		
         return StringHelper.toJsonString(this);
     }
 
@@ -92,6 +90,14 @@ public class ListRentalBillsCommand {
 
 	public void setBillStatus(Byte billStatus) {
 		this.billStatus = billStatus;
+	}
+
+	public Long getCommunityId() {
+		return communityId;
+	}
+
+	public void setCommunityId(Long communityId) {
+		this.communityId = communityId;
 	}
 
 	public Long getPageAnchor() {

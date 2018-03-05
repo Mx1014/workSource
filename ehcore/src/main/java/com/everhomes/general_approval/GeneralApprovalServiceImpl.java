@@ -19,36 +19,36 @@ import com.everhomes.bootstrap.PlatformContext;
 import com.everhomes.configuration.ConfigurationProvider;
 import com.everhomes.contentserver.ContentServerService;
 import com.everhomes.entity.EntityType;
+import com.everhomes.filedownload.TaskService;
 import com.everhomes.flow.*;
 import com.everhomes.general_form.GeneralForm;
 import com.everhomes.general_form.GeneralFormProvider;
 import com.everhomes.general_form.GeneralFormService;
-import com.everhomes.general_form.GeneralFormTemplate;
 import com.everhomes.organization.Organization;
 import com.everhomes.organization.OrganizationMember;
 import com.everhomes.rest.approval.TrueOrFalseFlag;
+import com.everhomes.rest.filedownload.TaskRepeatFlag;
+import com.everhomes.rest.filedownload.TaskType;
 import com.everhomes.rest.flow.*;
 import com.everhomes.rest.general_approval.*;
-import com.everhomes.rest.organization.OrganizationGroupType;
+import com.everhomes.rest.uniongroup.UniongroupTargetType;
 import com.everhomes.rest.user.UserInfo;
 import com.everhomes.settings.PaginationConfigHelper;
+import com.everhomes.sms.DateUtil;
 import com.everhomes.techpark.punch.PunchService;
 import com.everhomes.user.User;
 import com.everhomes.util.DateHelper;
-import com.everhomes.util.StringHelper;
 import com.everhomes.workReport.WorkReportService;
 import com.everhomes.yellowPage.ServiceAllianceCategories;
 import com.everhomes.yellowPage.YellowPageProvider;
 import freemarker.cache.StringTemplateLoader;
 import freemarker.template.Configuration;
 import freemarker.template.Template;
-import org.apache.juli.logging.Log;
 import org.apache.poi.ss.usermodel.Cell;
 import org.apache.poi.ss.usermodel.CellStyle;
 import org.apache.poi.ss.usermodel.Row;
 import org.apache.poi.ss.usermodel.Sheet;
 import org.apache.poi.ss.util.CellRangeAddress;
-import org.apache.poi.xssf.usermodel.XSSFCell;
 import org.apache.poi.xssf.usermodel.XSSFCellStyle;
 import org.apache.poi.xssf.usermodel.XSSFWorkbook;
 import org.jooq.Condition;
@@ -152,6 +152,9 @@ public class GeneralApprovalServiceImpl implements GeneralApprovalService {
     @Autowired
     private WorkReportService workReportService;
 
+    @Autowired
+    private TaskService taskService;
+
     private StringTemplateLoader templateLoader;
 
     private Configuration templateConfig;
@@ -243,7 +246,7 @@ public class GeneralApprovalServiceImpl implements GeneralApprovalService {
             /*****************  存储更多的信息 start by nan.rong for approval-1.6  *****************/
             GeneralApprovalFlowCaseAdditionalFieldDTO fieldDTO = new GeneralApprovalFlowCaseAdditionalFieldDTO();
             OrganizationMember member = organizationProvider.findDepartmentMemberByTargetIdAndOrgId(user.getId(), cmd.getOrganizationId());
-            if (member != null ) {
+            if (member != null) {
                 Organization department = organizationProvider.findOrganizationById(member.getOrganizationId());
                 //  存储部门 id 及名称
                 fieldDTO.setDepartment(department.getName());
@@ -295,7 +298,10 @@ public class GeneralApprovalServiceImpl implements GeneralApprovalService {
                 GeneralModuleInfo gm = ConvertHelper.convert(ga, GeneralModuleInfo.class);
                 gm.setOwnerId(ga.getId());
                 gm.setOwnerType(FlowOwnerType.GENERAL_APPROVAL.getCode());
+                cmd21.setFlowCaseId(flowCaseId);
                 flowCase = flowService.createDumpFlowCase(gm, cmd21);
+                flowCase.setStatus(FlowCaseStatus.FINISHED.getCode());
+                flowCaseProvider.updateFlowCase(flowCase);
             } else {
                 cmd21.setFlowMainId(flow.getFlowMainId());
                 cmd21.setFlowVersion(flow.getFlowVersion());
@@ -545,8 +551,8 @@ public class GeneralApprovalServiceImpl implements GeneralApprovalService {
         // 删除是状态置为invalid
         this.generalFormProvider.invalidForms(cmd.getFormOriginId());
 
-		//  删除与表单相关控件组
-		this.generalFormProvider.deleteGeneralFormGroupsByFormOriginId(cmd.getFormOriginId());
+        //  删除与表单相关控件组
+        this.generalFormProvider.deleteGeneralFormGroupsByFormOriginId(cmd.getFormOriginId());
 
         /***    更改与表单相关业务的状态    ***/
         //  流程审批
@@ -557,113 +563,154 @@ public class GeneralApprovalServiceImpl implements GeneralApprovalService {
 
     @Override
     public GeneralApprovalDTO createGeneralApproval(CreateGeneralApprovalCommand cmd) {
-        //
+
+        //  1.set the general approval
         GeneralApproval ga = ConvertHelper.convert(cmd, GeneralApproval.class);
-        ga.setNamespaceId(UserContext.getCurrentNamespaceId());
+        Long userId = UserContext.currentUserId();
+        Integer namespaceId = UserContext.getCurrentNamespaceId();
+        ga.setNamespaceId(namespaceId);
         ga.setStatus(GeneralApprovalStatus.INVALID.getCode());
-        if (cmd.getApprovalAttribute() == null)
-            ga.setApprovalAttribute(GeneralApprovalAttribute.CUSTOMIZE.getCode());
-        if (cmd.getModifyFlag() == null)
-            ga.setModifyFlag(Byte.valueOf("1"));
-        if (cmd.getDeleteFlag() == null)
-            ga.setDeleteFlag(Byte.valueOf("1"));
+        ga.setOperatorUid(userId);
+        ga.setOperatorName(getUserRealName(userId, ga.getOwnerId()));
         if (cmd.getIconUri() == null)
             ga.setIconUri("cs://1/image/aW1hZ2UvTVRvMU9EVTBNR1psWW1Kak1XSTNZalUwT0RVeVlUQXdOak0zWWpObE1ERmpZUQ");
-        // 新增加审批的时候可能并为设置 formId
-        // GeneralForm form =
-        // this.generalFormProvider.getActiveGeneralFormByOriginId(cmd
-        // .getFormOriginId());
-        // ga.setFormVersion(form.getFormVersion());// 目前这个值并没用到
 
-        this.generalApprovalProvider.createGeneralApproval(ga);
+        dbProvider.execute((TransactionStatus status) -> {
+            //  2.create it into the database
+            Long approvalId = generalApprovalProvider.createGeneralApproval(ga);
+            //  3.update the scope
+            updateGeneralApprovalScope(ga.getNamespaceId(), approvalId, cmd.getScopes());
+            return null;
+        });
 
         return processApproval(ga);
     }
 
     @Override
     public GeneralApprovalDTO updateGeneralApproval(UpdateGeneralApprovalCommand cmd) {
-        GeneralApproval ga = this.generalApprovalProvider.getGeneralApprovalById(cmd
-                .getApprovalId());
-
+        Long userId = UserContext.currentUserId();
+        GeneralApproval ga = this.generalApprovalProvider.getGeneralApprovalById(cmd.getApprovalId());
+        if (ga == null)
+            return null;
+        ga.setApprovalName(cmd.getApprovalName());
+        ga.setApprovalRemark(cmd.getApprovalRemark());
+        ga.setOperatorUid(userId);
+        ga.setOperatorName(getUserRealName(userId, ga.getOwnerId()));
         if (null != cmd.getSupportType())
             ga.setSupportType(cmd.getSupportType());
-        if (null != cmd.getFormOriginId())
-            ga.setFormOriginId(cmd.getFormOriginId());
-        if (null != cmd.getApprovalName())
-            ga.setApprovalName(cmd.getApprovalName());
-        this.generalApprovalProvider.updateGeneralApproval(ga);
+
+        dbProvider.execute((TransactionStatus status) -> {
+            //  1.update the approval
+            generalApprovalProvider.updateGeneralApproval(ga);
+            //  2.update the scope
+            updateGeneralApprovalScope(ga.getNamespaceId(), ga.getId(), cmd.getScopes());
+            return null;
+        });
+        return processApproval(ga);
+    }
+
+    private void updateGeneralApprovalScope(Integer namespaceId, Long approvalId, List<GeneralApprovalScopeMapDTO> dtos) {
+        //  1.set the temporary array to save ids
+        List<Long> detailIds = new ArrayList<>();
+        List<Long> organizationIds = new ArrayList<>();
+
+        if (dtos == null || dtos.size() == 0)
+            return;
+
+        for (GeneralApprovalScopeMapDTO dto : dtos) {
+            GeneralApprovalScopeMap scope = generalApprovalProvider.findGeneralApprovalScopeMap(namespaceId, approvalId,
+                    dto.getSourceId(), dto.getSourceType());
+
+            //  2.save ids under the sourceType condition
+            if (dto.getSourceType().equals(UniongroupTargetType.ORGANIZATION.getCode()))
+                organizationIds.add(dto.getSourceId());
+            else if (dto.getSourceType().equals(UniongroupTargetType.MEMBERDETAIL.getCode()))
+                detailIds.add(dto.getSourceId());
+
+            //  3.create or update the scope
+            if (scope != null) {
+                scope.setSourceDescription(dto.getSourceDescription());
+                generalApprovalProvider.updateGeneralApprovalScopeMap(scope);
+            } else {
+                scope = new GeneralApprovalScopeMap();
+                scope.setApprovalId(approvalId);
+                scope.setNamespaceId(namespaceId);
+                scope.setSourceId(dto.getSourceId());
+                scope.setSourceType(dto.getSourceType());
+                scope.setSourceDescription(dto.getSourceDescription());
+                generalApprovalProvider.createGeneralApprovalScopeMap(scope);
+            }
+        }
+
+        //  4.delete the scope which is not in the array
+        if (detailIds.size() > 0)
+            generalApprovalProvider.deleteOddGeneralApprovalDetailScope(namespaceId, approvalId, detailIds);
+        if (organizationIds.size() > 0)
+            generalApprovalProvider.deleteOddGeneralApprovalOrganizationScope(namespaceId, approvalId, organizationIds);
+    }
+
+    private String getUserRealName(Long userId, Long ownerId) {
+        OrganizationMember member = organizationProvider.findOrganizationMemberByOrgIdAndUId(userId, ownerId);
+        if (member != null)
+            return member.getContactName();
+        //  若没有真实姓名则返回空
+        return null;
+    }
+
+    @Override
+    public GeneralApprovalDTO setGeneralApprovalForm(SetGeneralApprovalFormCommand cmd) {
+        GeneralApproval ga = generalApprovalProvider.getGeneralApprovalById(cmd.getApprovalId());
+        if (ga == null)
+            return null;
+        ga.setFormOriginId(cmd.getFormOriginId());
+        generalApprovalProvider.updateGeneralApproval(ga);
         return processApproval(ga);
     }
 
     @Override
+    public void orderGeneralApprovals(OrderGeneralApprovalsCommand cmd) {
+        if (cmd.getDtos() == null || cmd.getDtos().size() == 0)
+            return;
+        for (GeneralApprovalDTO dto : cmd.getDtos()) {
+            GeneralApproval ga = generalApprovalProvider.getGeneralApprovalById(dto.getId());
+            if (ga == null)
+                continue;
+            //  update the order
+            ga.setDefaultOrder(dto.getDefaultOrder());
+            generalApprovalProvider.updateGeneralApproval(ga);
+        }
+    }
+
+    @Override
     public ListGeneralApprovalResponse listGeneralApproval(ListGeneralApprovalCommand cmd) {
-
-        //modify by dengs. 20170428 如果OwnerType是 organaization，则转成所管理的  community做查询
-
-        List<GeneralApproval> gas = this.generalApprovalProvider.queryGeneralApprovals(new ListingLocator(),
-                Integer.MAX_VALUE - 1, new ListingQueryBuilderCallback() {
-
-                    @Override
-                    public SelectQuery<? extends Record> buildCondition(ListingLocator locator,
-                                                                        SelectQuery<? extends Record> query) {
-                        List<OrganizationCommunity> communityList = null;
-
-                        //modify by dengs. 20170428 如果OwnerType是 organaization，则转成所管理的  community做查询
-                        if (EntityType.ORGANIZATIONS.getCode().equals(cmd.getOwnerType())
-                                && FlowModuleType.SERVICE_ALLIANCE.getCode().equals(cmd.getModuleType())) {
-                            communityList = organizationProvider.listOrganizationCommunities(cmd.getOwnerId());
-                            Condition conditionOR = null;
-                            for (OrganizationCommunity organizationCommunity : communityList) {
-                                Condition condition = Tables.EH_GENERAL_APPROVALS.OWNER_ID.eq(organizationCommunity.getCommunityId())
-                                        .and(Tables.EH_GENERAL_APPROVALS.OWNER_TYPE.eq(ServiceAllianceBelongType.COMMUNITY.getCode()));
-                                if (conditionOR == null) {
-                                    conditionOR = condition;
-                                } else {
-                                    conditionOR = conditionOR.or(condition);
-                                }
-                            }
-                            if (conditionOR != null) {
-                                Condition condition = Tables.EH_GENERAL_APPROVALS.OWNER_ID.eq(cmd.getOwnerId()).and(
-                                        Tables.EH_GENERAL_APPROVALS.OWNER_TYPE.eq(cmd.getOwnerType())
-                                );
-                                conditionOR = conditionOR.or(condition);
-                                query.addConditions(conditionOR);
-                            }
-                        } else {
-                            query.addConditions(Tables.EH_GENERAL_APPROVALS.OWNER_ID.eq(cmd
-                                    .getOwnerId()));
-                            query.addConditions(Tables.EH_GENERAL_APPROVALS.OWNER_TYPE.eq(cmd
-                                    .getOwnerType()));
-                        }
-                        query.addConditions(Tables.EH_GENERAL_APPROVALS.STATUS
-                                .ne(GeneralApprovalStatus.DELETED.getCode()));
-                        query.addConditions(Tables.EH_GENERAL_APPROVALS.MODULE_ID.eq(cmd
-                                .getModuleId()));
-                        query.addConditions(Tables.EH_GENERAL_APPROVALS.MODULE_TYPE.eq(cmd
-                                .getModuleType()));
-
-                        if (null != cmd.getProjectId())
-                            query.addConditions(Tables.EH_GENERAL_APPROVALS.PROJECT_ID.eq(cmd.getProjectId()));
-                        if (null != cmd.getProjectType())
-                            query.addConditions(Tables.EH_GENERAL_APPROVALS.PROJECT_TYPE.eq(cmd.getProjectType()));
-                        if (null != cmd.getStatus())
-                            query.addConditions(Tables.EH_GENERAL_APPROVALS.STATUS.eq(cmd
-                                    .getStatus()));
-                        //注释掉, 2017年6月16日 不想过滤的条件就不要传好了,不用在这里假先知
-//						EntityType entityType = EntityType.fromCode(cmd.getProjectType());
-//						//by dengs, 20170509 如果是园区才匹配查询园区相关信息，如果是公司，则不匹配。
-//						if(entityType == EntityType.COMMUNITY){
-//							query.addConditions(Tables.EH_GENERAL_APPROVALS.PROJECT_ID.eq(cmd
-//									.getProjectId()));
-//							query.addConditions(Tables.EH_GENERAL_APPROVALS.PROJECT_TYPE.eq(cmd
-//									.getProjectType()));
-//						}
-                        return query;
-                    }
-                });
-
         ListGeneralApprovalResponse resp = new ListGeneralApprovalResponse();
-        resp.setDtos(gas.stream().map((r) -> {
+
+        List<GeneralApproval> results = this.generalApprovalProvider.queryGeneralApprovals(new ListingLocator(), Integer.MAX_VALUE - 1, (locator, query) -> {
+            //  1-(1)when ownerType is ORGANIZATION then process it like community (dengs at 20170428)
+            if (EntityType.ORGANIZATIONS.getCode().equals(cmd.getOwnerType()) && FlowModuleType.SERVICE_ALLIANCE.getCode().equals(cmd.getModuleType())) {
+                setServiceAllianceQuery(cmd, query);
+            } else {
+                //  1-(2)normal operation (nan.rong at 10/16/2017)
+                query.addConditions(Tables.EH_GENERAL_APPROVALS.OWNER_ID.eq(cmd.getOwnerId()));
+                query.addConditions(Tables.EH_GENERAL_APPROVALS.OWNER_TYPE.eq(cmd.getOwnerType()));
+                query.addOrderBy(Tables.EH_GENERAL_APPROVALS.DEFAULT_ORDER.asc());
+                query.addOrderBy(Tables.EH_GENERAL_APPROVALS.ID.desc());
+            }
+            query.addConditions(Tables.EH_GENERAL_APPROVALS.STATUS.ne(GeneralApprovalStatus.DELETED.getCode()));
+            query.addConditions(Tables.EH_GENERAL_APPROVALS.MODULE_ID.eq(cmd.getModuleId()));
+            query.addConditions(Tables.EH_GENERAL_APPROVALS.MODULE_TYPE.eq(cmd.getModuleType()));
+
+            if (null != cmd.getProjectId())
+                query.addConditions(Tables.EH_GENERAL_APPROVALS.PROJECT_ID.eq(cmd.getProjectId()));
+            if (null != cmd.getProjectType())
+                query.addConditions(Tables.EH_GENERAL_APPROVALS.PROJECT_TYPE.eq(cmd.getProjectType()));
+            if (null != cmd.getStatus())
+                query.addConditions(Tables.EH_GENERAL_APPROVALS.STATUS.eq(cmd.getStatus()));
+            return query;
+        });
+
+        resp.setDtos(results.stream().map((r) -> {
+            //  2-(1)service alliance special operation
             if (FlowModuleType.SERVICE_ALLIANCE.getCode().equals(r.getModuleType())) {
                 long oid = r.getModuleId();
                 r.setModuleId(40500L);
@@ -672,27 +719,58 @@ public class GeneralApprovalServiceImpl implements GeneralApprovalService {
                 dto.setModuleId(oid);
                 dto.setModuleType(FlowModuleType.SERVICE_ALLIANCE.getCode());
                 return dto;
+            } else {
+                //  2-(2)
+                GeneralApprovalDTO dto = processApproval(r);
+                dto.setScopes(listGeneralApprovalScopes(r.getNamespaceId(), r.getId()));
+                return dto;
             }
-            return processApproval(r);
         }).collect(Collectors.toList()));
         return resp;
+    }
+
+    private void setServiceAllianceQuery(ListGeneralApprovalCommand cmd, SelectQuery<? extends Record> query) {
+        List<OrganizationCommunity> communityList = organizationProvider.listOrganizationCommunities(cmd.getOwnerId());
+        Condition conditionOR = null;
+        for (OrganizationCommunity organizationCommunity : communityList) {
+            Condition condition = Tables.EH_GENERAL_APPROVALS.OWNER_ID.eq(organizationCommunity.getCommunityId())
+                    .and(Tables.EH_GENERAL_APPROVALS.OWNER_TYPE.eq(ServiceAllianceBelongType.COMMUNITY.getCode()));
+            if (conditionOR == null) {
+                conditionOR = condition;
+            } else {
+                conditionOR = conditionOR.or(condition);
+            }
+        }
+        if (conditionOR != null) {
+            Condition condition = Tables.EH_GENERAL_APPROVALS.OWNER_ID.eq(cmd.getOwnerId())
+                    .and(Tables.EH_GENERAL_APPROVALS.OWNER_TYPE.eq(cmd.getOwnerType())
+                    );
+            conditionOR = conditionOR.or(condition);
+            query.addConditions(conditionOR);
+        }
+        query.addConditions(Tables.EH_GENERAL_APPROVALS.STATUS.ne(GeneralApprovalStatus.DELETED.getCode()));
+        query.addConditions(Tables.EH_GENERAL_APPROVALS.MODULE_ID.eq(cmd.getModuleId()));
+        query.addConditions(Tables.EH_GENERAL_APPROVALS.MODULE_TYPE.eq(cmd.getModuleType()));
+
+        if (null != cmd.getProjectId())
+            query.addConditions(Tables.EH_GENERAL_APPROVALS.PROJECT_ID.eq(cmd.getProjectId()));
+        if (null != cmd.getProjectType())
+            query.addConditions(Tables.EH_GENERAL_APPROVALS.PROJECT_TYPE.eq(cmd.getProjectType()));
+        if (null != cmd.getStatus())
+            query.addConditions(Tables.EH_GENERAL_APPROVALS.STATUS.eq(cmd.getStatus()));
     }
 
     private GeneralApprovalDTO processApproval(GeneralApproval r) {
         GeneralApprovalDTO result = ConvertHelper.convert(r, GeneralApprovalDTO.class);
         // form name
-        if (r.getFormOriginId() != null && !r.getFormOriginId().equals(0l)) {
-            GeneralForm form = this.generalFormProvider.getActiveGeneralFormByOriginId(r
-                    .getFormOriginId());
-            if (form != null) {
-                result.setFormName(form.getFormName());
-            }
+        GeneralForm form = this.generalFormProvider.getActiveGeneralFormByOriginId(r.getFormOriginId());
+        if (form != null) {
+            result.setFormName(form.getFormName());
         }
 
         // flow
-        Flow flow = flowService.getEnabledFlow(r.getNamespaceId(), r.getModuleId(),
-                r.getModuleType(), r.getId(), FlowOwnerType.GENERAL_APPROVAL.getCode());
-
+        Flow flow = flowService.getEnabledFlow(r.getNamespaceId(), r.getModuleId(), r.getModuleType(), r.getId(),
+                FlowOwnerType.GENERAL_APPROVAL.getCode());
         if (null != flow) {
             result.setFlowName(flow.getFlowName());
         }
@@ -701,6 +779,19 @@ public class GeneralApprovalServiceImpl implements GeneralApprovalService {
         if (result.getIconUri() != null)
             result.setIconUrl(contentServerService.parserUri(result.getIconUri()));
         return result;
+    }
+
+    @Override
+    public List<GeneralApprovalScopeMapDTO> listGeneralApprovalScopes(Integer namespaceId, Long approvalId) {
+        List<GeneralApprovalScopeMap> results = generalApprovalProvider.listGeneralApprovalScopes(namespaceId, approvalId);
+        if (results != null && results.size() > 0) {
+            List<GeneralApprovalScopeMapDTO> scopes = results.stream().map(r -> {
+                GeneralApprovalScopeMapDTO dto = ConvertHelper.convert(r, GeneralApprovalScopeMapDTO.class);
+                return dto;
+            }).collect(Collectors.toList());
+            return scopes;
+        }
+        return null;
     }
 
     @Override
@@ -723,17 +814,23 @@ public class GeneralApprovalServiceImpl implements GeneralApprovalService {
 
     @Override
     public void enableGeneralApproval(GeneralApprovalIdCommand cmd) {
+        Long userId = UserContext.currentUserId();
         GeneralApproval ga = this.generalApprovalProvider.getGeneralApprovalById(cmd
                 .getApprovalId());
         ga.setStatus(GeneralApprovalStatus.RUNNING.getCode());
+        ga.setOperatorUid(userId);
+        ga.setOperatorName(getUserRealName(userId, ga.getOwnerId()));
         this.generalApprovalProvider.updateGeneralApproval(ga);
     }
 
     @Override
     public void disableGeneralApproval(GeneralApprovalIdCommand cmd) {
+        Long userId = UserContext.currentUserId();
         GeneralApproval ga = this.generalApprovalProvider.getGeneralApprovalById(cmd
                 .getApprovalId());
         ga.setStatus(GeneralApprovalStatus.INVALID.getCode());
+        ga.setOperatorUid(userId);
+        ga.setOperatorName(getUserRealName(userId, ga.getOwnerId()));
         this.generalApprovalProvider.updateGeneralApproval(ga);
     }
 
@@ -897,8 +994,8 @@ public class GeneralApprovalServiceImpl implements GeneralApprovalService {
 
         List<FlowCaseDetail> details = flowCaseProvider.findAdminFlowCases(locator, count, command, (locator1, query) -> {
             //  审批类型
-            if (cmd.getApprovalType() != null)
-                query.addConditions(Tables.EH_FLOW_CASES.TITLE.eq(cmd.getApprovalType()));
+            if (cmd.getApprovalId() != null)
+                query.addConditions(Tables.EH_FLOW_CASES.REFER_ID.eq(cmd.getApprovalId()));
             //  申请人姓名
             if (cmd.getCreatorName() != null)
                 query.addConditions(Tables.EH_FLOW_CASES.APPLIER_NAME.eq(cmd.getCreatorName()));
@@ -923,9 +1020,8 @@ public class GeneralApprovalServiceImpl implements GeneralApprovalService {
     }
 
 
-
     @Override
-    public GeneralApprovalRecordDTO convertGeneralApprovalRecordDTO(FlowCase r){
+    public GeneralApprovalRecordDTO convertGeneralApprovalRecordDTO(FlowCase r) {
         GeneralApprovalFlowCase flowCase = ConvertHelper.convert(r, GeneralApprovalFlowCase.class);
         GeneralApprovalRecordDTO dto = new GeneralApprovalRecordDTO();
         dto.setId(r.getId());
@@ -941,13 +1037,38 @@ public class GeneralApprovalServiceImpl implements GeneralApprovalService {
         dto.setApprovalNo(flowCase.getApprovalNo());
         dto.setApprovalStatus(r.getStatus());
         dto.setFlowCaseId(flowCase.getId());
+        dto.setApprovalId(r.getReferId());
         return dto;
     }
+
     @Override
-    public void exportGeneralApprovalRecords(ListGeneralApprovalRecordsCommand cmd, HttpServletResponse httpResponse) {
+    public void exportGeneralApprovalRecords(ListGeneralApprovalRecordsCommand cmd) {
+
+        //  export with te file download center
+        Map<String, Object> params = new HashMap<>();
+
+        //  the value could be null if it is not exist.
+        params.put("organizationId", cmd.getOrganizationId());
+        params.put("moduleId", cmd.getModuleId());
+        params.put("startTime", cmd.getStartTime());
+        params.put("endTime", cmd.getEndTime());
+        params.put("approvalStatus", cmd.getApprovalStatus());
+        params.put("approvalId", cmd.getApprovalId());
+        params.put("creatorDepartmentId", cmd.getCreatorDepartmentId());
+        params.put("creatorName", cmd.getCreatorName());
+        params.put("approvalNo", cmd.getApprovalNo());
+        String fileName = String.format("审批记录_%s.xlsx", DateUtil.dateToStr(new Date(), DateUtil.NO_SLASH));
+
+        taskService.createTask(fileName, TaskType.FILEDOWNLOAD.getCode(), GeneralApprovalExportTaskHandler.class, params, TaskRepeatFlag.REPEAT.getCode(), new Date());
+
+    }
+
+    @Override
+    public OutputStream getGeneralApprovalOutputStream(ListGeneralApprovalRecordsCommand cmd, Long taskId) {
         cmd.setPageAnchor(null);
-        cmd.setPageSize(1000000);
+        cmd.setPageSize(Integer.MAX_VALUE - 1);
         ListGeneralApprovalRecordsResponse response = listGeneralApprovalRecords(cmd);
+        taskService.updateTaskProcess(taskId, 10);
         //  1. Set the main title of the sheet
         String mainTitle = "审批记录";
         //  2. Set the subtitle of the sheet
@@ -956,8 +1077,8 @@ public class GeneralApprovalServiceImpl implements GeneralApprovalService {
         List<String> titles = Arrays.asList("审批编号", "提交时间", "申请人", "申请人部门", "表单内容",
                 "审批状态", "审批记录", "当前审批人", "督办人");
         //  4. Start to write the excel
-        XSSFWorkbook workbook = exportGeneralApprovalRecordsFile(mainTitle, subTitle, titles, response.getRecords());
-        writeExcel(workbook, httpResponse);
+        XSSFWorkbook workbook = createApprovalRecordsBook(mainTitle, subTitle, titles, response.getRecords(), taskId);
+        return writeExcel(workbook);
     }
 
     public List<FlowCaseEntity> getApprovalDetails(Long flowCaseId) {
@@ -965,20 +1086,22 @@ public class GeneralApprovalServiceImpl implements GeneralApprovalService {
         return generalApprovalFlowModuleListener.onFlowCaseDetailRender(flowCase, null);
     }
 
-    private XSSFWorkbook exportGeneralApprovalRecordsFile(
-            String mainTitle, String subTitle, List<String> titles, List<GeneralApprovalRecordDTO> data) {
+    private XSSFWorkbook createApprovalRecordsBook(
+            String mainTitle, String subTitle, List<String> titles, List<GeneralApprovalRecordDTO> data, Long taskId) {
         XSSFWorkbook workbook = new XSSFWorkbook();
         Sheet sheet = workbook.createSheet("审批记录");
         sheet.addMergedRegion(new CellRangeAddress(0, 0, 0, 8));
         sheet.addMergedRegion(new CellRangeAddress(1, 1, 0, 8));
         //  1. Write titles
         createGeneralApprovalRecordsFileTitle(workbook, sheet, mainTitle, subTitle, titles);
+        taskService.updateTaskProcess(taskId, 30);
         //  2. Write data
         if (data != null && data.size() > 0) {
             for (int rowIndex = 0; rowIndex < data.size(); rowIndex++) {
                 Row dataRow = sheet.createRow(rowIndex + 3);
                 createGeneralApprovalRecordsFileData(workbook, dataRow, data.get(rowIndex));
             }
+            taskService.updateTaskProcess(taskId, 95);
         }
         return workbook;
     }
@@ -1090,19 +1213,19 @@ public class GeneralApprovalServiceImpl implements GeneralApprovalService {
         }
     }
 
-    private void writeExcel(XSSFWorkbook workbook, HttpServletResponse httpResponse) {
+    private ByteArrayOutputStream writeExcel(XSSFWorkbook workbook) {
         ByteArrayOutputStream out = null;
         try {
             out = new ByteArrayOutputStream();
             workbook.write(out);
-            String fileName = "审批记录.xlsx";
+            /*String fileName = "审批记录.xlsx";
             httpResponse.setContentType("application/msexcel");
             httpResponse.setHeader("Content-Disposition", "attachment; filename=" + URLEncoder.encode(fileName, "UTF-8").replaceAll("\\+", "%20"));
             OutputStream excelStream = new BufferedOutputStream(httpResponse.getOutputStream());
             httpResponse.setContentType("application/msexcel");
             excelStream.write(out.toByteArray());
             excelStream.flush();
-            excelStream.close();
+            excelStream.close();*/
         } catch (Exception e) {
             LOGGER.error("export error, e = {}", e);
         } finally {
@@ -1113,18 +1236,84 @@ public class GeneralApprovalServiceImpl implements GeneralApprovalService {
                 LOGGER.error("close error", e);
             }
         }
+        return out;
     }
 
     @Override
-    public void disableApprovalByFormOriginId(Long formOriginId, Long moduleId, String moduleType){
+    public void disableApprovalByFormOriginId(Long formOriginId, Long moduleId, String moduleType) {
         generalApprovalProvider.disableApprovalByFormOriginId(formOriginId, moduleId, moduleType);
     }
 
     @Override
-    public String getUserRealName(GetUserRealNameCommand cmd){
+    public void initializeGeneralApprovalScope() {
+        Integer count = Integer.MAX_VALUE - 1;
+        List<GeneralApproval> approvals = generalApprovalProvider.queryGeneralApprovals(new ListingLocator(), count, ((locator, query) -> {
+            query.addConditions(Tables.EH_GENERAL_APPROVALS.MODULE_ID.eq(52000L));
+            query.addConditions(Tables.EH_GENERAL_APPROVALS.MODULE_TYPE.eq("any-module"));
+            return query;
+        }));
+        if (approvals == null || approvals.size() == 0)
+            return;
+        for (GeneralApproval approval : approvals) {
+            Organization organization = organizationProvider.findOrganizationById(approval.getOwnerId());
+            if (organization == null)
+                continue;
+            GeneralApprovalScopeMap scope = generalApprovalProvider.findGeneralApprovalScopeMap(approval.getNamespaceId(),
+                    approval.getId(), organization.getId(), UniongroupTargetType.ORGANIZATION.getCode());
+            if (scope == null) {
+                scope = new GeneralApprovalScopeMap();
+                scope.setSourceId(organization.getId());
+                scope.setSourceType(UniongroupTargetType.ORGANIZATION.getCode());
+                scope.setSourceDescription(organization.getName());
+                scope.setApprovalId(approval.getId());
+                scope.setNamespaceId(approval.getNamespaceId());
+                generalApprovalProvider.createGeneralApprovalScopeMap(scope);
+            }
+        }
+    }
+
+    @Override
+    public ListGeneralApprovalResponse listAvailableGeneralApprovals(ListGeneralApprovalCommand cmd) {
+        ListGeneralApprovalResponse res = new ListGeneralApprovalResponse();
+        List<GeneralApprovalDTO> dtos = new ArrayList<>();
+        cmd.setStatus(GeneralApprovalStatus.RUNNING.getCode());
+        if (null == cmd.getModuleType())
+            cmd.setModuleType(FlowModuleType.NO_MODULE.getCode());
+        if (null == cmd.getModuleId())
+            cmd.setModuleId(GeneralApprovalController.MODULE_ID);
+        ListGeneralApprovalResponse response = listGeneralApproval(cmd);
+        List<GeneralApprovalDTO> approvals = response.getDtos();
+        OrganizationMember member = organizationProvider.findDepartmentMemberByTargetIdAndOrgId(UserContext.currentUserId(), cmd.getOwnerId());
+        approvals.forEach(r -> {
+            if (checkTheScope(r.getScopes(), member))
+                dtos.add(r);
+        });
+        res.setDtos(dtos);
+        return res;
+    }
+
+    private boolean checkTheScope(List<GeneralApprovalScopeMapDTO> scopes, OrganizationMember member) {
+        if (member == null)
+            return false;
+        List<Long> scopeUserIds = scopes.stream()
+                .filter(p1 -> p1.getSourceType().equals(UniongroupTargetType.MEMBERDETAIL.getCode()))
+                .map(GeneralApprovalScopeMapDTO::getSourceId).collect(Collectors.toList());
+        List<Long> scopeDepartmentIds = scopes.stream()
+                .filter(p1 -> p1.getSourceType().equals(UniongroupTargetType.ORGANIZATION.getCode()))
+                .map(GeneralApprovalScopeMapDTO::getSourceId).collect(Collectors.toList());
+        if (scopeUserIds.contains(member.getDetailId()))
+            return true;
+        for (Long departmentId : scopeDepartmentIds)
+            if (member.getGroupPath().contains(String.valueOf(departmentId)))
+                return true;
+        return false;
+    }
+
+    @Override
+    public String getUserRealName(GetUserRealNameCommand cmd) {
         User user = UserContext.current().getUser();
         OrganizationMember member = organizationProvider.findOrganizationMemberByOrgIdAndUId(user.getId(), cmd.getOwnerId());
-        if(member != null)
+        if (member != null)
             return member.getContactName();
         //  若没有真实姓名则返回昵称
         return user.getNickName();

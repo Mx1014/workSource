@@ -6,7 +6,8 @@ import java.util.Map;
 
 import com.everhomes.listing.CrossShardListingLocator;
 import com.everhomes.listing.ListingQueryBuilderCallback;
-import com.everhomes.portal.ServiceModuleApp;
+import com.everhomes.rest.acl.ServiceModuleDTO;
+import com.everhomes.serviceModuleApp.ServiceModuleApp;
 import com.everhomes.rest.portal.ServiceModuleAppDTO;
 import org.jooq.Condition;
 
@@ -44,6 +45,7 @@ public interface ServiceModuleProvider {
 
     List<ServiceModule> listServiceModule(Integer startLevel, List<Byte> types);
     List<ServiceModule> listServiceModule(List<Long> ids);
+    List<ServiceModuleDTO> listServiceModuleDtos(List<Long> ids);
 
     Long createModuleAssignmentRetion(ServiceModuleAssignmentRelation reltaion);
 
@@ -102,5 +104,6 @@ public interface ServiceModuleProvider {
     Map<Long, ServiceModuleApp> listReflectionAcitveAppIdByNamespaceId(Integer namespaceId);
 
     List<ServiceModuleFunction> listFunctions(Long moduleId, List<Long> privilegeIds);
+    List<ServiceModuleFunction> listFunctionsByIds(List<Long> ids);
     List<ServiceModuleExcludeFunction> listExcludeFunctions(Integer namespaceId, Long comunityId, Long moduleId);
 }

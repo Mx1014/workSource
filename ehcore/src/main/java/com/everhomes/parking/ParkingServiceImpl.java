@@ -22,16 +22,16 @@ import com.everhomes.bus.LocalBusOneshotSubscriberBuilder;
 import com.everhomes.configuration.ConfigConstants;
 import com.everhomes.order.PayService;
 import com.everhomes.parking.handler.DefaultParkingVendorHandler;
-import com.everhomes.rentalv2.RentalUtils;
+import com.everhomes.parking.vip_parking.DingDingParkingLockHandler;
+import com.everhomes.rentalv2.*;
+import com.everhomes.rentalv2.utils.RentalUtils;
 import com.everhomes.rest.RestResponse;
 import com.everhomes.rest.activity.ActivityRosterPayVersionFlag;
 import com.everhomes.rest.order.*;
 import com.everhomes.rest.parking.*;
 import com.everhomes.rest.pay.controller.CreateOrderRestResponse;
 import com.everhomes.rest.pmtask.PmTaskErrorCode;
-import com.everhomes.rest.rentalv2.PayZuolinRefundCommand;
-import com.everhomes.rest.rentalv2.PayZuolinRefundResponse;
-import com.everhomes.rest.rentalv2.RentalServiceErrorCode;
+import com.everhomes.rest.rentalv2.*;
 
 import com.everhomes.server.schema.Tables;
 import com.everhomes.util.*;
@@ -117,6 +117,12 @@ public class ParkingServiceImpl implements ParkingService {
 	private LocalBusOneshotSubscriberBuilder localBusSubscriberBuilder;
 	@Autowired
 	private PayService payService;
+	@Autowired
+	private RentalCommonServiceImpl rentalCommonService;
+	@Autowired
+	private Rentalv2Provider rentalv2Provider;
+	@Autowired
+	private DingDingParkingLockHandler dingDingParkingLockHandler;
 
 	@Override
 	public List<ParkingCardDTO> listParkingCards(ListParkingCardsCommand cmd) {
@@ -233,6 +239,18 @@ public class ParkingServiceImpl implements ParkingService {
 
 		List<ParkingLotDTO> parkingLotList = list.stream().map(r -> {
 			ParkingLotDTO dto = ConvertHelper.convert(r, ParkingLotDTO.class);
+
+			if (r.getVipParkingFlag() == ParkingConfigFlag.SUPPORT.getCode()) {
+				String homeUrl = configProvider.getValue(ConfigConstants.HOME_URL, "");
+				String detailUrl = configProvider.getValue(ConfigConstants.RENTAL_ORDER_DETAIL_URL, "");
+
+				RentalResourceType type = rentalv2Provider.findRentalResourceTypes(UserContext.getCurrentNamespaceId(),
+						RentalV2ResourceType.VIP_PARKING.getCode());
+
+				detailUrl = String.format(detailUrl, RentalV2ResourceType.VIP_PARKING.getCode(), type.getId(),
+						RuleSourceType.RESOURCE.getCode(), dto.getId());
+				dto.setVipParkingUrl(homeUrl + detailUrl);
+			}
 
 			Flow flow = flowService.getEnabledFlow(user.getNamespaceId(), ParkingFlowConstant.PARKING_RECHARGE_MODULE,
 					FlowModuleType.NO_MODULE.getCode(), r.getId(), FlowOwnerType.PARKING.getCode());
@@ -2325,5 +2343,245 @@ public class ParkingServiceImpl implements ParkingService {
 		FlowCase flowCase = flowService.createFlowCase(createFlowCaseCommand);
 
 		return flowCase;
+	}
+
+	@Override
+	public ParkingSpaceDTO addParkingSpace(AddParkingSpaceCommand cmd) {
+
+		ParkingLot parkingLot = parkingProvider.findParkingLotById(cmd.getParkingLotId());
+
+		ParkingSpace parkingSpace = parkingProvider.findParkingSpaceBySpaceNo(cmd.getSpaceNo());
+
+		if (null != parkingSpace) {
+			LOGGER.error("SpaceNo exist, cmd={}", cmd);
+			throw RuntimeErrorException.errorWith(ErrorCodes.SCOPE_GENERAL, ErrorCodes.ERROR_INVALID_PARAMETER,
+					"SpaceNo exist.");
+		}
+
+		parkingSpace = parkingProvider.findParkingSpaceByLockId(cmd.getLockId());
+
+		if (null != parkingSpace) {
+			LOGGER.error("LockId exist, cmd={}", cmd);
+			throw RuntimeErrorException.errorWith(ErrorCodes.SCOPE_GENERAL, ErrorCodes.ERROR_INVALID_PARAMETER,
+					"LockId exist.");
+		}
+
+		parkingSpace = ConvertHelper.convert(cmd, ParkingSpace.class);
+
+		parkingProvider.createParkingSpace(parkingSpace);
+
+		RentalResourceHandler handler = rentalCommonService.getRentalResourceHandler(RentalV2ResourceType.VIP_PARKING.getCode());
+
+		handler.updateRentalResource(JSONObject.toJSONString(parkingLot));
+		return ConvertHelper.convert(parkingSpace, ParkingSpaceDTO.class);
+	}
+
+	@Override
+	public ParkingSpaceDTO updateParkingSpace(UpdateParkingSpaceCommand cmd) {
+		ParkingSpace parkingSpace = parkingProvider.findParkingSpaceById(cmd.getId());
+
+		if (null == parkingSpace) {
+			LOGGER.error("ParkingSpace not found, cmd={}", cmd);
+			throw RuntimeErrorException.errorWith(ErrorCodes.SCOPE_GENERAL, ErrorCodes.ERROR_INVALID_PARAMETER,
+					"ParkingSpace not found.");
+		}
+
+		parkingSpace.setSpaceAddress(cmd.getSpaceAddress());
+		parkingSpace.setLockId(cmd.getLockId());
+
+		parkingProvider.updateParkingSpace(parkingSpace);
+
+		return ConvertHelper.convert(parkingSpace, ParkingSpaceDTO.class);
+	}
+
+	@Override
+	public void updateParkingSpaceStatus(UpdateParkingSpaceStatusCommand cmd) {
+		ParkingSpace parkingSpace = parkingProvider.findParkingSpaceById(cmd.getId());
+
+		if (null == parkingSpace) {
+			LOGGER.error("ParkingSpace not found, cmd={}", cmd);
+			throw RuntimeErrorException.errorWith(ErrorCodes.SCOPE_GENERAL, ErrorCodes.ERROR_INVALID_PARAMETER,
+					"ParkingSpace not found.");
+		}
+
+		parkingSpace.setStatus(cmd.getStatus());
+
+		parkingProvider.updateParkingSpace(parkingSpace);
+
+	}
+
+	@Override
+	public void deleteParkingSpace(DeleteParkingSpaceCommand cmd) {
+		ParkingSpace parkingSpace = parkingProvider.findParkingSpaceById(cmd.getId());
+
+		if (null == parkingSpace) {
+			LOGGER.error("ParkingSpace not found, cmd={}", cmd);
+			throw RuntimeErrorException.errorWith(ErrorCodes.SCOPE_GENERAL, ErrorCodes.ERROR_INVALID_PARAMETER,
+					"ParkingSpace not found.");
+		}
+
+		if (parkingSpace.getStatus() == ParkingSpaceStatus.IN_USING.getCode()) {
+			LOGGER.error("ParkingSpace in use, cmd={}", cmd);
+			throw RuntimeErrorException.errorWith(ErrorCodes.SCOPE_GENERAL, ErrorCodes.ERROR_INVALID_PARAMETER,
+					"ParkingSpace in use.");
+		}
+
+		parkingSpace.setStatus(ParkingSpaceStatus.DELETED.getCode());
+		parkingProvider.updateParkingSpace(parkingSpace);
+	}
+
+	@Override
+	public SearchParkingSpacesResponse searchParkingSpaces(SearchParkingSpacesCommand cmd) {
+
+		SearchParkingSpacesResponse response = new SearchParkingSpacesResponse();
+
+		Integer pageSize = PaginationConfigHelper.getPageSize(configProvider, cmd.getPageSize());
+
+		List<ParkingSpace> spaces = parkingProvider.searchParkingSpaces(cmd.getNamespaceId(), cmd.getOwnerType(), cmd.getOwnerId(),
+				cmd.getParkingLotId(), cmd.getKeyword(), cmd.getLockStatus(), cmd.getPageAnchor(), pageSize);
+
+		int size = spaces.size();
+		if(size > 0){
+			response.setSpaceDTOS(spaces.stream().map(r -> {
+				ParkingSpaceDTO dto = ConvertHelper.convert(r, ParkingSpaceDTO.class);
+				if (dto.getStatus() == ParkingSpaceStatus.IN_USING.getCode()) {
+					dto.setStatus(ParkingSpaceStatus.OPEN.getCode());
+				}
+				return dto;
+			}).collect(Collectors.toList()));
+
+			if(size != pageSize){
+				response.setNextPageAnchor(null);
+			}else{
+				response.setNextPageAnchor(spaces.get(size-1).getId());
+			}
+		}
+
+		return response;
+	}
+
+	@Override
+	public ListParkingSpaceLogsResponse listParkingSpaceLogs(ListParkingSpaceLogsCommand cmd) {
+		ListParkingSpaceLogsResponse response = new ListParkingSpaceLogsResponse();
+
+		Integer pageSize = PaginationConfigHelper.getPageSize(configProvider, cmd.getPageSize());
+
+		List<ParkingSpaceLog> spaceLogs = parkingProvider.listParkingSpaceLogs(cmd.getSpaceNo(), cmd.getStartTime(),
+				cmd.getEndTime(), cmd.getPageAnchor(), pageSize);
+
+		int size = spaceLogs.size();
+		if(size > 0){
+			response.setLogDTOS(spaceLogs.stream().map(r -> {
+				ParkingSpaceLogDTO dto = ConvertHelper.convert(r, ParkingSpaceLogDTO.class);
+				return dto;
+			}).collect(Collectors.toList()));
+
+			if(size != pageSize){
+				response.setNextPageAnchor(null);
+			}else{
+				response.setNextPageAnchor(spaceLogs.get(size-1).getOperateTime().getTime());
+			}
+		}
+
+		return response;
+	}
+
+	@Override
+	public void raiseParkingSpaceLock(RaiseParkingSpaceLockCommand cmd) {
+
+		handleParkingSpaceLock(cmd.getOrderId(), cmd.getLockId(), ParkingSpaceLockOperateUserType.RESERVE_PERSON,
+				ParkingSpaceLockOperateType.UP);
+	}
+
+	private void handleParkingSpaceLock(Long orderId, String lockId, ParkingSpaceLockOperateUserType userType,
+										ParkingSpaceLockOperateType operateType) {
+		RentalOrder order = rentalv2Provider.findRentalBillById(orderId);
+
+		if (order.getStatus() != SiteBillStatus.IN_USING.getCode()) {
+			throw RuntimeErrorException.errorWith(ErrorCodes.SCOPE_GENERAL,ErrorCodes.ERROR_INVALID_PARAMETER,
+					"Invalid parameter");
+		}
+
+		boolean flag;
+
+		if (operateType == ParkingSpaceLockOperateType.UP) {
+			flag = dingDingParkingLockHandler.raiseParkingSpaceLock(lockId);
+		}else {
+			flag = dingDingParkingLockHandler.downParkingSpaceLock(lockId);
+		}
+
+		//TODO:
+		if (flag) {
+			ParkingSpace space = parkingProvider.findParkingSpaceByLockId(lockId);
+
+			ParkingSpaceLog log;
+			if (userType == ParkingSpaceLockOperateUserType.RESERVE_PERSON) {
+				log = buildParkingSpaceLog(space, order);
+			}else {
+				log = buildParkingSpaceLogForWeb(space, order);
+			}
+			log.setOperateType(operateType.getCode());
+
+			parkingProvider.createParkingSpaceLog(log);
+		}else {
+			if (operateType == ParkingSpaceLockOperateType.UP) {
+				throw RuntimeErrorException.errorWith(ParkingErrorCode.SCOPE,ParkingErrorCode.ERROR_RAISE_PARKING_LOCK,
+						"Raise parking lock failed");
+			}else {
+				throw RuntimeErrorException.errorWith(ParkingErrorCode.SCOPE,ParkingErrorCode.ERROR_DOWN_PARKING_LOCK,
+						"Down parking lock failed");
+			}
+		}
+	}
+
+	private ParkingSpaceLog buildParkingSpaceLog(ParkingSpace space, RentalOrder order) {
+		ParkingSpaceLog log = new ParkingSpaceLog();
+
+		log.setLockId(space.getLockId());
+		log.setSpaceNo(space.getSpaceNo());
+		log.setContactPhone(order.getUserPhone());
+		log.setContactName(order.getUserName());
+		log.setContactEnterpriseName(order.getUserEnterpriseName());
+		log.setUserType(ParkingSpaceLockOperateUserType.RESERVE_PERSON.getCode());
+		log.setOperateTime(new Timestamp(System.currentTimeMillis()));
+
+		return log;
+	}
+
+	private ParkingSpaceLog buildParkingSpaceLogForWeb(ParkingSpace space, RentalOrder order) {
+		String customJson = order.getCustomObject();
+		VipParkingUseInfoDTO useInfoDTO = JSONObject.parseObject(customJson, VipParkingUseInfoDTO.class);
+
+		ParkingSpaceLog log = new ParkingSpaceLog();
+
+		log.setLockId(space.getLockId());
+		log.setSpaceNo(space.getSpaceNo());
+		log.setContactPhone(useInfoDTO.getPlateOwnerPhone());
+		log.setContactName(useInfoDTO.getPlateOwnerName());
+		log.setContactEnterpriseName(useInfoDTO.getPlateOwnerEnterpriseName());
+		log.setUserType(ParkingSpaceLockOperateUserType.PLATE_OWNER.getCode());
+		log.setOperateTime(new Timestamp(System.currentTimeMillis()));
+
+		return log;
+	}
+
+	@Override
+	public void downParkingSpaceLock(DownParkingSpaceLockCommand cmd) {
+
+		handleParkingSpaceLock(cmd.getOrderId(), cmd.getLockId(), ParkingSpaceLockOperateUserType.RESERVE_PERSON,
+				ParkingSpaceLockOperateType.DOWN);
+	}
+
+	@Override
+	public void raiseParkingSpaceLockForWeb(RaiseParkingSpaceLockCommand cmd) {
+
+		handleParkingSpaceLock(cmd.getOrderId(), cmd.getLockId(), ParkingSpaceLockOperateUserType.PLATE_OWNER,
+				ParkingSpaceLockOperateType.UP);
+	}
+
+	@Override
+	public void downParkingSpaceLockForWeb(DownParkingSpaceLockCommand cmd) {
+		handleParkingSpaceLock(cmd.getOrderId(), cmd.getLockId(), ParkingSpaceLockOperateUserType.PLATE_OWNER,
+				ParkingSpaceLockOperateType.DOWN);
 	}
 }

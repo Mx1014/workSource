@@ -76,6 +76,16 @@ public class ContractDTO {
 	private String namespaceContractType;
 	private String namespaceContractToken;
 
+	private Byte paymentFlag;
+
+	public Byte getPaymentFlag() {
+		return paymentFlag;
+	}
+
+	public void setPaymentFlag(Byte paymentFlag) {
+		this.paymentFlag = paymentFlag;
+	}
+
 	public String getNamespaceContractType() {
 		return namespaceContractType;
 	}

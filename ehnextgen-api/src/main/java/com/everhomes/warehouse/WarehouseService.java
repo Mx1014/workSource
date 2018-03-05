@@ -43,4 +43,12 @@ public interface WarehouseService {
 
     SearchRequestsResponse searchOneselfRequests(SearchOneselfRequestsCommand cmd);
     SearchRequestsResponse searchRequests(SearchRequestsCommand cmd);
+
+    void createOrUpdateWarehouseEntryOrder(CreateOrUpdateWarehouseEntryOrderCommand cmd);
+
+    ListWarehouseStockOrdersResponse listWarehouseStockOrders(ListWarehouseStockOrdersCommand cmd);
+
+    void deleteWarehouseStockOrder(Long id);
+
+    void deleteRequest(DeleteRequestCommand cmd);
 }

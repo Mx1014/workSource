@@ -5,6 +5,8 @@ import java.util.List;
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
 
+import com.everhomes.rest.address.ListApartmentByBuildingNameCommand;
+import com.everhomes.rest.address.ListApartmentByBuildingNameCommandResponse;
 import com.everhomes.rest.category.CategoryDTO;
 import com.everhomes.rest.community.ListBuildingCommand;
 import com.everhomes.rest.community.ListBuildingCommandResponse;
@@ -23,6 +25,8 @@ public interface PmTaskService {
 //	void closeTask(CloseTaskCommand cmd);
 
 //	void assignTask(AssignTaskCommand cmd);
+
+	ListApartmentByBuildingNameCommandResponse listApartmentsByBuildingName(ListApartmentByBuildingNameCommand cmd);
 	
 	PmTaskDTO getTaskDetail(GetTaskDetailCommand cmd);
 	
@@ -74,6 +78,8 @@ public interface PmTaskService {
 
 	NamespaceHandlerDTO getNamespaceHandler(GetNamespaceHandlerCommand cmd);
 
+	GetIfHideRepresentResponse getIfHideRepresent(GetIfHideRepresentCommand cmd);
+
 //	void synchronizedData(SearchTasksCommand cmd);
 
 	void deleteTaskHistoryAddress(DeleteTaskHistoryAddressCommand cmd);
@@ -88,5 +94,9 @@ public interface PmTaskService {
 
 	ListAuthorizationCommunityByUserResponse listOrganizationCommunityByUser(ListOrganizationCommunityByUserCommand cmd);
 
+	ListOrganizationCommunityBySceneTokenResponse listOrganizationCommunityBySceneToken(ListOrganizationCommunityBySceneTokenCommand cmd);
+
 	void syncTaskStatistics(HttpServletResponse resp);
+
+	void syncCategories();
 }

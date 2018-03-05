@@ -114,7 +114,12 @@ public enum CoordinationLocks {
 
     SYNC_CONTRACT("sync.contract"),
     FORUM_SETTING("forum.setting"),
-    AUTH_RELATION("auth_relation")
+    AUTH_RELATION("auth_relation"),
+
+    SOCIAL_SECURITY_LIST_PAYMENTS("social_security_list_payments"),
+    SOCIAL_SECURITY_INCRESE("social_security_increse"),
+    SOCIAL_SECURITY_ADD("social_security_add")
+
     ;
 
     private String code;

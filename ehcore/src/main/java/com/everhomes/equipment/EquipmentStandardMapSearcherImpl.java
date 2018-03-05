@@ -1,14 +1,15 @@
 package com.everhomes.equipment;
 
-import com.everhomes.community.Community;
 import com.everhomes.community.CommunityProvider;
 import com.everhomes.configuration.ConfigurationProvider;
 import com.everhomes.listing.CrossShardListingLocator;
-import com.everhomes.organization.OrganizationMember;
 import com.everhomes.organization.OrganizationProvider;
 import com.everhomes.portal.PortalService;
-import com.everhomes.rest.acl.PrivilegeConstants;
-import com.everhomes.rest.equipment.*;
+import com.everhomes.rest.equipment.EquipmentStandardRelationDTO;
+import com.everhomes.rest.equipment.InspectionStandardMapTargetType;
+import com.everhomes.rest.equipment.SearchEquipmentStandardRelationsCommand;
+import com.everhomes.rest.equipment.SearchEquipmentStandardRelationsResponse;
+import com.everhomes.rest.equipment.Status;
 import com.everhomes.rest.quality.OwnerType;
 import com.everhomes.search.AbstractElasticSearch;
 import com.everhomes.search.EquipmentStandardMapSearcher;
@@ -60,7 +61,7 @@ public class EquipmentStandardMapSearcherImpl extends AbstractElasticSearch impl
 
 	@Autowired
 	private PortalService portalService;
-	
+
 	@Override
 	public void deleteById(Long id) {
 		deleteById(id.toString());
@@ -129,7 +130,7 @@ public class EquipmentStandardMapSearcherImpl extends AbstractElasticSearch impl
 		} else {
 			userPrivilegeMgr.checkCurrentUserAuthority(null, null, cmd.getOwnerId(), privilegeId);
 		}*/
-		checkUserPrivilege(cmd.getOwnerId(), PrivilegeConstants.EQUIPMENT_RELATION_LIST,cmd.getTargetId());
+		//checkUserPrivilege(cmd.getOwnerId(), PrivilegeConstants.EQUIPMENT_RELATION_LIST,cmd.getTargetId());
 
 		SearchRequestBuilder builder = getClient().prepareSearch(getIndexName()).setTypes(getIndexType());
 		QueryBuilder qb = null;
@@ -138,18 +139,22 @@ public class EquipmentStandardMapSearcherImpl extends AbstractElasticSearch impl
         } else {
             qb = QueryBuilders.multiMatchQuery(cmd.getKeyword())
             		.field("equipmentName", 1.2f)
-                    .field("standardNumber", 1.0f);
-            
+                    .field("standardNumber", 1.0f)
+                    .field("standardName", 1.2f);
+
             builder.setHighlighterFragmentSize(60);
             builder.setHighlighterNumOfFragments(8);
             builder.addHighlightedField("equipmentName").addHighlightedField("standardNumber");
         }
 
         FilterBuilder fb = null;
-        FilterBuilder nfb = FilterBuilders.termFilter("reviewStatus", EquipmentReviewStatus.DELETE.getCode());
+        //V3.0.2去掉设备和标准关联审批
+       /* FilterBuilder nfb = FilterBuilders.termFilter("reviewStatus", EquipmentReviewStatus.DELETE.getCode());
+    	fb = FilterBuilders.notFilter(nfb);*/
+        FilterBuilder nfb = FilterBuilders.termFilter("status", Status.INACTIVE.getCode());
     	fb = FilterBuilders.notFilter(nfb);
 		//总公司分公司的原因改用namespaceId by xiongying20170328
-		fb = FilterBuilders.andFilter(fb, FilterBuilders.termFilter("namespaceId", UserContext.getCurrentNamespaceId()));
+		fb = FilterBuilders.termFilter("namespaceId", cmd.getNamespaceId());
 //    	fb = FilterBuilders.andFilter(fb, FilterBuilders.termFilter("ownerId", cmd.getOwnerId()));
 //        fb = FilterBuilders.andFilter(fb, FilterBuilders.termFilter("ownerType", OwnerType.fromCode(cmd.getOwnerType()).getCode()));
         if(cmd.getTargetId() != null)
@@ -157,15 +162,19 @@ public class EquipmentStandardMapSearcherImpl extends AbstractElasticSearch impl
         
         if(!StringUtils.isNullOrEmpty(cmd.getTargetType()))
         	fb = FilterBuilders.andFilter(fb, FilterBuilders.termFilter("targetType", OwnerType.fromCode(cmd.getTargetType()).getCode()));
-        
-        if(cmd.getReviewStatus() != null)
-        	fb = FilterBuilders.andFilter(fb, FilterBuilders.termFilter("reviewStatus", cmd.getReviewStatus()));
 
-		if(cmd.getReviewResult() != null)
-        	fb = FilterBuilders.andFilter(fb, FilterBuilders.termFilter("reviewResult", cmd.getReviewResult()));
+		//增加  V3.0.2  inspectionCategoryId   repeatType 过滤
+		if (cmd.getRepeatType() != null)
+			fb = FilterBuilders.andFilter(fb, FilterBuilders.termFilter("repeatType", cmd.getRepeatType()));
 
-        int pageSize = PaginationConfigHelper.getPageSize(configProvider, cmd.getPageSize());
-        Long anchor = 0l;
+		if (cmd.getInspectionCategoryId() != null)
+			fb = FilterBuilders.andFilter(fb, FilterBuilders.termFilter("inspectionCategoryId", cmd.getInspectionCategoryId()));
+		//只有巡检对象为设备的时候才根据categoryId过滤
+		if (cmd.getCategoryId() != null)
+			fb = FilterBuilders.andFilter(fb, FilterBuilders.termFilter("categoryId", cmd.getCategoryId()));
+
+		int pageSize = PaginationConfigHelper.getPageSize(configProvider, cmd.getPageSize());
+        Long anchor = 0L;
         if(cmd.getPageAnchor() != null) {
             anchor = cmd.getPageAnchor();
         }
@@ -187,7 +196,9 @@ public class EquipmentStandardMapSearcherImpl extends AbstractElasticSearch impl
         if(ids.size() > pageSize) {
         	response.setNextPageAnchor(anchor + 1);
             ids.remove(ids.size() - 1);
-         } 
+         } else {
+        	response.setNextPageAnchor(null);
+		}
         
         List<EquipmentStandardRelationDTO> dtos = new ArrayList<EquipmentStandardRelationDTO>();
         for(Long id : ids) {
@@ -195,33 +206,39 @@ public class EquipmentStandardMapSearcherImpl extends AbstractElasticSearch impl
         	if(map != null) {
 	        	EquipmentInspectionEquipments equipment = equipmentProvider.findEquipmentById(map.getTargetId());
 	        	EquipmentStandardRelationDTO dto = new EquipmentStandardRelationDTO();
-	        	dto.setId(map.getId());
-	        	dto.setEquipmentId(equipment.getId());
-	        	dto.setTargetId(equipment.getTargetId());
+				dto.setId(map.getId());
+				if (equipment != null) {
+					dto.setEquipmentId(equipment.getId());
+					dto.setTargetId(equipment.getTargetId());
 //	        	Organization group = organizationProvider.findOrganizationById(dto.getTargetId());
-				Community community = communityProvider.findCommunityById(dto.getTargetId());
-	    		if(community != null)
-	    			dto.setTargetName(community.getName());
-	    		
-	    		dto.setEquipmentName(equipment.getName());
-	    		dto.setEquipmentModel(equipment.getEquipmentModel());
-	    		dto.setStatus(equipment.getStatus());
-	    		dto.setStandardId(map.getStandardId());
-	    		EquipmentInspectionStandards standard = equipmentProvider.findStandardById(map.getStandardId());
-	            if(standard != null) {
-	            	dto.setStandardName(standard.getName());
-	            }
-	            
-	            dto.setReviewResult(map.getReviewResult());
-	            dto.setReviewStatus(map.getReviewStatus());
-				dto.setReviewTime(map.getReviewTime());
+				/*Community community = communityProvider.findCommunityById(dto.getTargetId());
+				if(community != null)
+	    			dto.setTargetName(community.getName());*/
 
-				if(map.getReviewerUid() != null && map.getReviewerUid() != 0L) {
+					dto.setEquipmentName(equipment.getName());
+					dto.setLocation(equipment.getLocation());
+					dto.setEquipmentModel(equipment.getEquipmentModel());
+					dto.setLocation(equipment.getLocation());
+					dto.setStatus(equipment.getStatus());
+					dto.setSequenceNo(equipment.getSequenceNo());
+				}
+				EquipmentInspectionStandards standard = equipmentProvider.findStandardById(map.getStandardId());
+				if (standard != null) {
+					dto.setStandardName(standard.getName());
+					dto.setRepeatType(standard.getRepeatType());
+					dto.setStandardId(standard.getId());
+				}
+	            
+	            /*dto.setReviewResult(map.getReviewResult());
+	            dto.setReviewStatus(map.getReviewStatus());
+				dto.setReviewTime(map.getReviewTime());*/
+
+				/*if(map.getReviewerUid() != null && map.getReviewerUid() != 0L) {
 					OrganizationMember member = organizationProvider.findOrganizationMemberByOrgIdAndUId(map.getReviewerUid(), equipment.getOwnerId());
 					if(member != null) {
 						dto.setReviewer(member.getContactName());
 					}
-				}
+				}*/
 	    		dtos.add(dto);
         	}
         }
@@ -258,15 +275,15 @@ public class EquipmentStandardMapSearcherImpl extends AbstractElasticSearch impl
 	private XContentBuilder createDoc(EquipmentStandardMap map){
 		try {
             XContentBuilder b = XContentFactory.jsonBuilder().startObject();
-           
-            b.field("reviewStatus", map.getReviewStatus());
-			b.field("reviewResult", map.getReviewResult());
-            b.field("status", map.getStatus());
             
             EquipmentInspectionStandards standard = equipmentProvider.findStandardById(map.getStandardId());
             if(standard != null) {
             	b.field("standardNumber", standard.getStandardNumber());
+            	b.field("standardName", standard.getName());
+            	//add repeatType
+				b.field("repeatType", standard.getRepeatType());
 				b.field("namespaceId", standard.getNamespaceId());
+				b.field("status", standard.getStatus());
             } else {
             	b.field("standardNumber", "");
             }
@@ -278,8 +295,11 @@ public class EquipmentStandardMapSearcherImpl extends AbstractElasticSearch impl
 				b.field("namespaceId", equipment.getNamespaceId());
             	b.field("targetId", equipment.getTargetId());
             	b.field("targetType", equipment.getTargetType());
-            	b.field("equipmentName", equipment.getName());
-            } else {
+            	b.field("equipmentName", equipment.getName()).field("index","not_analyzed");
+            	//add equipment   inspectionCategoryId and categoryId  V3.0.2
+				b.field("inspectionCategoryId", equipment.getInspectionCategoryId());
+				b.field("categoryId", equipment.getCategoryId());
+			} else {
             	b.field("ownerId", "");
                 b.field("ownerType", "");
                 b.field("targetId", "");

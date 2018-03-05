@@ -5,7 +5,7 @@ package com.everhomes.rest.general_approval;
  * <li>startTime: 申请开始时间</li>
  * <li>endTime: 申请结束时间</li>
  * <li>approvalStatus: 审批状态 {@link com.everhomes.rest.flow.FlowCaseStatus }</li>
- * <li>approvalType: 审批类型</li>
+ * <li>approvalId: 审批类型(传id)</li>
  * <li>creatorDepartmentId: 申请人部门id</li>
  * <li>creatorName: 申请人</li>
  * <li>approvalNo: 审批编号</li>
@@ -25,7 +25,7 @@ public class  ListGeneralApprovalRecordsCommand {
 
     private Byte approvalStatus;
 
-    private String approvalType;
+    private Long approvalId;
 
     private Long creatorDepartmentId;
 
@@ -80,12 +80,12 @@ public class  ListGeneralApprovalRecordsCommand {
         this.approvalStatus = approvalStatus;
     }
 
-    public String getApprovalType() {
-        return approvalType;
+    public Long getApprovalId() {
+        return approvalId;
     }
 
-    public void setApprovalType(String approvalType) {
-        this.approvalType = approvalType;
+    public void setApprovalId(Long approvalId) {
+        this.approvalId = approvalId;
     }
 
     public Long getCreatorDepartmentId() {

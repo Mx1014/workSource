@@ -2,7 +2,8 @@ package com.everhomes.rest.flow;
 
 public enum FlowReferType {
 
-	RENTAL( "rental.order"),APPROVAL("approval"),PUNCH_APPROVAL("punch_approval"),COMMUNITY_APPROVE("community_approve");
+	RENTAL( "rental.order"),APPROVAL("approval"),PUNCH_APPROVAL("punch_approval"),COMMUNITY_APPROVE("community_approve"),
+	OFFICE_CUBICLE("office_cubicle");
 	
 	private String code;
     private FlowReferType(String code) {

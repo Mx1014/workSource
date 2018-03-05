@@ -78,6 +78,9 @@ public interface OrganizationProvider {
 
 	List<OrganizationMember> findOrganizationMembersByOrgIdAndUId(Long userId, Long organizationId);
 	OrganizationMember findOrganizationMemberByOrgIdAndToken(String contactPhone, Long organizationId);
+	OrganizationMember findDepartmentMemberByTokenAndOrgId(String phone, Long organizationId);
+	List<OrganizationMember> findJobPositionMemberByTokenAndOrgId(String phone, Long organizationId);
+	List<OrganizationMember> findJobLevelMemberByTokenAndOrgId(String phone, Long organizationId);
 	List<OrganizationMember> listOrganizationMembersByPhones(List<String> phones, Long departmentId);
 	void createOrganizationTask(OrganizationTask task);
 	OrganizationTask findOrganizationTaskById(Long taskId);
@@ -313,6 +316,8 @@ public interface OrganizationProvider {
 	Organization findOrganizationByNameAndNamespaceIdForJindie(String name, Integer namespaceId, String namespaceToken,
 															   String namespaceType);
 
+	List<Organization> listOrganizationByGroupTypesOrderByLevel(String superiorPath, List<String> groupTypes);
+
 	List<Organization> listOrganizationByGroupType(Long parentId, OrganizationGroupType groupType);
 
 	List<OrganizationMember> listOrganizationMemberByPath(String keywords, String path, List<String> groupTypes, VisibleFlag visibleFlag, CrossShardListingLocator locator,Integer pageSize);
@@ -364,57 +369,27 @@ public interface OrganizationProvider {
 	Integer countUsersOfEnterprise(CrossShardListingLocator locator, ListingQueryBuilderCallback queryBuilderCallback);
 	List<OrganizationMember> convertMemberListAsDetailList(List<OrganizationMember> old_list);
 	/**New**/
-	List<Object[]> findContractEndTimeById(List<Long> detailIds);
 	List<OrganizationMemberDetails> findDetailInfoListByIdIn(List<Long> detailIds);
-	List<OrganizationMemberDetails> listOrganizationMembersV2(CrossShardListingLocator locator,Integer pageSize,Organization org, List<String> groupTypes, String keywords);
 
 	OrganizationMemberDetails findOrganizationMemberDetailsByDetailId(Long detailId);
+
 	Long createOrganizationMemberDetails(OrganizationMemberDetails memberDetails);
+
 	void updateOrganizationMemberDetails(OrganizationMemberDetails organizationMemberDetails, Long detailId);
+
 	void deleteOrganizationMemberDetails(OrganizationMemberDetails organizationMemberDetails);
-	void createOrganizationMemberV2(OrganizationMember organizationMember, Long detailId);
-
-
-
-	void createOranizationMemberEducationInfo(OrganizationMemberEducations education);
-	OrganizationMemberEducations findOrganizationEducationInfoById(Long id);
-	void deleteOranizationMemberEducationInfo(OrganizationMemberEducations education);
-	void updateOranizationMemberEducationInfo(OrganizationMemberEducations education);
-	List<OrganizationMemberEducations> listOrganizationMemberEducations(Long detailId);
-
-	void createOranizationMemberWorkExperience(OrganizationMemberWorkExperiences experience);
-	OrganizationMemberWorkExperiences findOrganizationWorkExperienceById(Long id);
-	void deleteOranizationMemberWorkExperience(OrganizationMemberWorkExperiences experience);
-	void updateOranizationMemberWorkExperience(OrganizationMemberWorkExperiences experience);
-	List<OrganizationMemberWorkExperiences> listOrganizationMemberWorkExperiences(Long detailId);
-
-
-	void createOranizationMemberInsurance(OrganizationMemberInsurances insurance);
-	OrganizationMemberInsurances  findOrganizationInsuranceById(Long id);
-	void deleteOranizationMemberInsurance(OrganizationMemberInsurances insurance);
-	void updateOrganizationMemberInsurance(OrganizationMemberInsurances insurance);
-	List<OrganizationMemberInsurances> listOrganizationMemberInsurances(Long detailId);
-
-
-	void createOranizationMemberContract(OrganizationMemberContracts contract);
-	OrganizationMemberContracts findOrganizationContractById(Long id);
-	void deleteOranizationMemberContract(OrganizationMemberContracts contract);
-	void updateOrganizationMemberContract(OrganizationMemberContracts contract);
 
     void updateOrganizationEmploymentTime(Long detailId, java.sql.Date employeeTime);
-	boolean updateOrganizationEmployeeStatus(Long detailId,Byte employeeStatus);
-	void updateProfileIntegrity(Long detailId, Integer integrity);
-	void createProfileLogs(OrganizationMemberProfileLogs log);
 
-	List<OrganizationMemberContracts> listOrganizationMemberContracts(Long detailId);
+	boolean updateOrganizationEmployeeStatus(Long detailId,Byte employeeStatus);
+
+	void updateProfileIntegrity(Long detailId, Integer integrity);
 
 	OrganizationMemberDetails findOrganizationMemberDetailsByOrganizationIdAndContactToken(Long organizationId, String contactToken);
 
 	Long createOrUpdateOrganizationMemberDetail(OrganizationMemberDetails organizationMemberDetails);
 
 	Long createOrUpdateOrganizationMemberDetail(OrganizationMemberDetails organizationMemberDetails, Boolean needUpdate);
-
-	List<OrganizationMemberProfileLogs> listMemberRecordChanges(Long detailId);
 
 	Organization findUnderOrganizationByParentOrgId(Long parentOrgId);
 
@@ -443,6 +418,8 @@ public interface OrganizationProvider {
 
 	Set<Long> listMemberDetailIdWithExclude(Integer namespaceId, String big_path, List<String> small_path);
 
+	List<Long> listMemberDetailIdWithExclude(String keywords, Integer namespaceId, String big_path, List<String> small_path, Timestamp checkinTimeStart, Timestamp checkinTimeEnd, Timestamp dissmissTimeStart, Timestamp dissmissTimeEnd, CrossShardListingLocator locator, Integer pageSize, List<Long> notinDetails, List<Long> inDetails,List<String> groupTypes );
+
 	boolean checkIfLastOnNode(Integer namespaceId, Long organizationId, String contactToken, String path);
 
 	boolean checkOneOfOrganizationWithContextToken(String path, String contactToken);
@@ -455,6 +432,8 @@ public interface OrganizationProvider {
 
 	// 根据人事档案id和orgId获取members，智辉获取到该公司下的人
 	List<OrganizationMember> listOrganizationMembersByDetailIdAndOrgId(Long detailId, Long orgId, List<String> groupTypes);
+
+	List<OrganizationMember> listOrganizationMembersByDetailIdAndPath(Long detailId, String path, List<String> groupTypes);
 
 	Integer countUserOrganization(Integer namespaceId, Long communityId, Byte userOrganizationStatus, String namespaceUserType, Byte gender);
 	Integer countUserOrganization(Integer namespaceId, Long communityId, Byte userOrganizationStatus);
@@ -542,4 +521,16 @@ public interface OrganizationProvider {
 	void createCommunityOrganizationDetailDisplay(CommunityOrganizationDetailDisplay detailDisplay);
 	void updateCommunityOrganizationDetailDisplay(CommunityOrganizationDetailDisplay detailDisplay);
 	List checkOrgExistInOrgOrPaths(Integer namespaceId, Long organizationId, List<Long> orgIds, List<String> orgPaths);
+ 
+	
+	List<OrganizationMemberDetails> listOrganizationMemberDetails(Long ownerId);
+
+	Integer queryOrganizationPersonnelCounts(ListingLocator locator, Long organizationId, ListingQueryBuilderCallback queryBuilderCallback);
+	
+	List<OrganizationMember> queryOrganizationPersonnels(ListingLocator locator, Long organizationId, ListingQueryBuilderCallback queryBuilderCallback);
+ 
+
+	List<Organization> listPMOrganizations(Integer namespaceId);
+
+	Organization findOrganizationByName(String groupType, String name, Long directlyEnterpriseId);
 }

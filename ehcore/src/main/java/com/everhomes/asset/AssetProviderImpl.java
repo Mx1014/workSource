@@ -3683,6 +3683,7 @@ public class AssetProviderImpl implements AssetProvider {
         query.addConditions(bill.TARGET_ID.eq(targetId));
         query.addConditions(bill.SWITCH.eq((byte)1));
         query.addOrderBy(bill.DATE_STR.desc());
+
         query.fetch()
                 .map(r -> {
                     ListAllBillsForClientDTO dto = new ListAllBillsForClientDTO();

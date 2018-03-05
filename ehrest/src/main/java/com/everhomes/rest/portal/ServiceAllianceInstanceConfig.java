@@ -17,6 +17,8 @@ import java.util.List;
 public class ServiceAllianceInstanceConfig {
 
 	private Long type;
+	
+	private Long entryId;
 
 	private String displayType;
 
@@ -24,6 +26,14 @@ public class ServiceAllianceInstanceConfig {
 
 	@ItemType(ServiceAllianceJump.class)
 	private List<ServiceAllianceJump> jumps;
+
+	public Long getEntryId() {
+		return entryId;
+	}
+
+	public void setEntryId(Long entryId) {
+		this.entryId = entryId;
+	}
 
 	public Long getType() {
 		return type;

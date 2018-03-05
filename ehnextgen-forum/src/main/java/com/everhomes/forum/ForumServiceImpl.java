@@ -1651,7 +1651,14 @@ public class ForumServiceImpl implements ForumService {
 
          //获取园区id和论坛Id,并返回orgId，因为当查询域空间时需要orgid来查发送到“全部”的帖子 edit by yanjun 20170830
          organizationId = populateCommunityIdAndForumId(communityId, organizationId, namespaceId, communityIdList, forumIds);
-         
+
+         //重复了，去重
+         Set forumIdset = new HashSet();
+        forumIdset.addAll(forumIds);
+        forumIdset.remove(null);
+        forumIds = new ArrayList<Long>();
+        forumIds.addAll(forumIdset);
+
          if(null != cmd.getEmbeddedAppId() && cmd.getEmbeddedAppId().longValue() == AppConstants.APPID_ACTIVITY) {
         	 ListActivitiesReponse response = activityService.listOfficialActivities(cmd);
         	 
@@ -1939,7 +1946,7 @@ public class ForumServiceImpl implements ForumService {
         List<Long> communityIdList = new ArrayList<Long>();
         if(null == communityId){
         	ListCommunitiesByOrganizationIdCommand command = new ListCommunitiesByOrganizationIdCommand();
-        	command.setOrganizationId(organization.getId());;
+        	command.setOrganizationId(organization.getId());
         	List<CommunityDTO> communities = organizationService.listAllChildrenOrganizationCoummunities(organization.getId());
         	if(null != communities){
         		for (CommunityDTO communityDTO : communities) {
@@ -6919,6 +6926,28 @@ public class ForumServiceImpl implements ForumService {
         }
 
         res.setFlag(TrueOrFalseFlag.FALSE.getCode());
+        return res;
+    }
+
+
+
+    @Override
+    public FindDefaultForumResponse findDefaultForum(FindDefaultForumCommand cmd) {
+        CrossShardListingLocator locator = new CrossShardListingLocator();
+        List<Community> communities = communityProvider.listCommunities(cmd.getNamespaceId(), locator, 1, null);
+
+        FindDefaultForumResponse res = new FindDefaultForumResponse();
+        if(communities != null && communities.size() > 0){
+            Forum defaultForum = forumProvider.findForumById(communities.get(0).getDefaultForumId());
+            if(defaultForum != null){
+                res.setDefaultForum(ConvertHelper.convert(defaultForum, ForumDTO.class));
+            }
+
+            Forum feedbackForum = forumProvider.findForumById(communities.get(0).getFeedbackForumId());
+            if(feedbackForum != null){
+                res.setFeedbackForum(ConvertHelper.convert(feedbackForum, ForumDTO.class));
+            }
+        }
         return res;
     }
 

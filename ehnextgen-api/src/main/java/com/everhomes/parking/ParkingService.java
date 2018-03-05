@@ -112,4 +112,23 @@ public interface ParkingService {
 
     void deleteCarVerification(DeleteCarVerificationCommand cmd);
 
+    ParkingSpaceDTO addParkingSpace(AddParkingSpaceCommand cmd);
+
+    ParkingSpaceDTO updateParkingSpace(UpdateParkingSpaceCommand cmd);
+
+    void updateParkingSpaceStatus(UpdateParkingSpaceStatusCommand cmd);
+
+    void deleteParkingSpace(DeleteParkingSpaceCommand cmd);
+
+    SearchParkingSpacesResponse searchParkingSpaces(SearchParkingSpacesCommand cmd);
+
+    ListParkingSpaceLogsResponse listParkingSpaceLogs(ListParkingSpaceLogsCommand cmd);
+
+    void raiseParkingSpaceLock(RaiseParkingSpaceLockCommand cmd);
+
+    void downParkingSpaceLock(DownParkingSpaceLockCommand cmd);
+
+    void raiseParkingSpaceLockForWeb(RaiseParkingSpaceLockCommand cmd);
+
+    void downParkingSpaceLockForWeb(DownParkingSpaceLockCommand cmd);
 }

@@ -1,0 +1,105 @@
+//@formatter:off
+package com.everhomes.requisition;
+
+import com.everhomes.flow.*;
+import com.everhomes.rest.flow.*;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
+import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.context.ApplicationListener;
+import org.springframework.context.event.ContextRefreshedEvent;
+import org.springframework.stereotype.Component;
+
+import java.util.ArrayList;
+import java.util.List;
+import java.util.Map;
+
+/**
+ * Created by Wentian Wang on 2018/2/5.
+ */
+@Component
+public class RequistionFLowCaseListener implements FlowModuleListener {
+    private static final Logger LOGGER = LoggerFactory.getLogger(RequistionFLowCaseListener.class);
+
+    @Autowired
+    private FlowService flowService;
+    @Autowired
+    private RequisitionProvider requisitionProvider;
+//    @Autowired
+//    private List<RequistionListener> reqListeners;
+//
+//    private Map<String, RequistionListener> map;
+
+    @Override
+    public FlowModuleInfo initModule() {
+        FlowModuleInfo module = new FlowModuleInfo();
+        FlowModuleDTO moduleDTO = flowService.getModuleById(FlowConstants.REQUISITION_MODULE);
+        module.setModuleName(moduleDTO.getDisplayName());
+        module.setModuleId(FlowConstants.REQUISITION_MODULE);
+        return module;
+    }
+
+    @Override
+    public List<FlowServiceTypeDTO> listServiceTypes(Integer namespaceId, String ownerType, Long ownerId) {
+        List<FlowServiceTypeDTO> result = new ArrayList<>();
+        FlowServiceTypeDTO dto = new FlowServiceTypeDTO();
+        dto.setNamespaceId(namespaceId);
+        dto.setServiceName("请示单申请");
+        return result;
+    }
+
+    /**
+     * 工作流步骤走完后，更改请示单的状态
+     */
+    @Override
+    public void onFlowCaseEnd(FlowCaseState ctx) {
+        FlowCase flowCase = ctx.getFlowCase();
+        Long referId = flowCase.getReferId();
+        requisitionProvider.changeRequisitionStatus2Target(RequisitionStatus.FINISH.getCode(),referId);
+//        String owner = requisitionProvider.getOwnerById(referId);
+//        RequistionListener lis = map.get(owner);
+//        lis.onRequisitionEnd();
+    }
+
+    @Override
+    public void onFlowCaseAbsorted(FlowCaseState ctx) {
+        FlowCase flowCase = ctx.getFlowCase();
+        Long referId = flowCase.getReferId();
+        requisitionProvider.changeRequisitionStatus2Target(RequisitionStatus.CANCELED.getCode(),referId);
+    }
+
+    @Override
+    public void onFlowCaseStart(FlowCaseState ctx) {
+        FlowCase flowCase = ctx.getFlowCase();
+        Long referId = flowCase.getReferId();
+        requisitionProvider.changeRequisitionStatus2Target(RequisitionStatus.HANDLING.getCode(),referId);
+    }
+
+    @Override
+    public String onFlowCaseBriefRender(FlowCase flowCase, FlowUserType flowUserType) {
+        return null;
+    }
+
+    @Override
+    public List<FlowCaseEntity> onFlowCaseDetailRender(FlowCase flowCase, FlowUserType flowUserType) {
+        return null;
+    }
+
+    @Override
+    public void onFlowButtonFired(FlowCaseState ctx) {
+
+    }
+
+//    @Override
+//    public void onApplicationEvent(ContextRefreshedEvent event) {
+//        for(RequistionListener req : reqListeners){
+//            try{
+//                Integer moduleId = req.initModule();
+//                map.put(moduleId,req);
+//            }catch (Exception e){
+//                LOGGER.info("class implements RequisitionListener failed, class name = {}, timestamp is = {} "
+//                        ,req.getClass().getSimpleName(),event.getTimestamp());
+//            }
+//        }
+//    }
+}

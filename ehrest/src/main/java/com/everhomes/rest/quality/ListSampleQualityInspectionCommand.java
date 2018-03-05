@@ -3,14 +3,17 @@ package com.everhomes.rest.quality;
 import com.everhomes.util.StringHelper;
 
 import javax.validation.constraints.NotNull;
+import java.sql.Timestamp;
 
 /**
  * <ul>
- *     <li>ownerId: 例行检查所属owner id</li>
- *     <li>ownerType: 例行检查所属owner类型例如PM</li>
- *     <li>communityId: 小区id</li>
- *     <li>pageAnchor: 锚点</li>
- *     <li>pageSize: 页面大小</li>
+ * <li>ownerId: 例行检查所属owner id</li>
+ * <li>ownerType: 例行检查所属owner类型例如PM</li>
+ * <li>communityId: 小区id</li>
+ * <li>pageAnchor: 锚点</li>
+ * <li>pageSize: 页面大小</li>
+ * <li>namespaceId: namespaceId</li>
+ * <li>lastSyncTime: 同步时间</li>
  * </ul>
  * Created by ying.xiong on 2017/6/9.
  */
@@ -26,6 +29,12 @@ public class ListSampleQualityInspectionCommand {
     private Long pageAnchor;
 
     private Integer pageSize;
+
+    private Integer namespaceId;
+
+    private String lastSyncTime;
+
+    private Timestamp lastUpdateSyncTime;
 
     public Long getCommunityId() {
         return communityId;
@@ -65,6 +74,30 @@ public class ListSampleQualityInspectionCommand {
 
     public void setPageSize(Integer pageSize) {
         this.pageSize = pageSize;
+    }
+
+    public String getLastSyncTime() {
+        return lastSyncTime;
+    }
+
+    public void setLastSyncTime(String lastSyncTime) {
+        this.lastSyncTime = lastSyncTime;
+    }
+
+    public Timestamp getLastUpdateSyncTime() {
+        return lastUpdateSyncTime;
+    }
+
+    public void setLastUpdateSyncTime(Timestamp lastUpdateSyncTime) {
+        this.lastUpdateSyncTime = lastUpdateSyncTime;
+    }
+
+    public Integer getNamespaceId() {
+        return namespaceId;
+    }
+
+    public void setNamespaceId(Integer namespaceId) {
+        this.namespaceId = namespaceId;
     }
 
     @Override

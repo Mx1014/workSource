@@ -11,6 +11,7 @@ import java.util.List;
 import javax.servlet.http.HttpServletResponse;
 
 import com.everhomes.organization.Organization;
+import com.everhomes.organization.OrganizationMember;
 import com.everhomes.rest.RestResponse;
 import com.everhomes.rest.general_approval.GeneralApprovalAttribute;
 import com.everhomes.rest.techpark.punch.*;
@@ -196,6 +197,8 @@ public interface PunchService {
 
 	public CheckPunchAdminResponse checkPunchAdmin(CheckPunchAdminCommand cmd);
 
+	OrganizationMember findOrganizationMemberByOrgIdAndUId(Long targetId, String path);
+
 	Long getTopEnterpriseId(Long organizationId);
 
 	void importPunchLogs(MultipartFile[] files);
@@ -238,6 +241,9 @@ public interface PunchService {
 
 	public DeferredResult<RestResponse> getPunchQRCodeResult(GetPunchQRCodeCommand cmd);
 
+	OutputStream getPunchSchedulingOutputStream(Long queryTime,
+									   List<PunchSchedulingEmployeeDTO> employees, List<PunchTimeRuleDTO> timeRules, Long taskId);
+
 	HttpServletResponse exportPunchSchedulingTemplate(ListPunchSchedulingMonthCommand cmd, HttpServletResponse response);
 
 	void invalidPunchQRCode(GetPunchQRCodeCommand cmd);
@@ -257,7 +263,7 @@ public interface PunchService {
 	void checkAppPrivilege(Long orgId, Long checkOrgId, Long privilege);
 
 	OutputStream getPunchDetailsOutputStream(Long startDay, Long endDay, Byte exceptionStatus,
-			String userName, String ownerType, Long ownerId, Long taskId);
+			String userName, String ownerType, Long ownerId, Long taskId, Long userId);
 
 	OutputStream getPunchStatisticsOutputStream(Long startDay, Long endDay, Byte exceptionStatus,
 			String userName, String ownerType, Long ownerId, Long taskId);

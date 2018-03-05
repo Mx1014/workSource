@@ -22,7 +22,9 @@ public interface WorkReportProvider {
 
     void createWorkReportScopeMap(WorkReportScopeMap scopeMap);
 
-    void deleteWorkReportScopeMapNotInIds(Long reportId, List<Long> sourceIds);
+    void deleteOddWorkReportDetailScope(Integer namespaceId, Long reportId, List<Long> sourceIds);
+
+    void deleteOddWorkReportOrganizationScope(Integer namespaceId, Long reportId, List<Long> sourceIds);
 
     WorkReportScopeMap getWorkReportScopeMapById(Long id);
 

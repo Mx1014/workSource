@@ -4,45 +4,53 @@ import java.math.BigDecimal;
 import java.util.List;
 
 import com.everhomes.discover.ItemType;
-import com.everhomes.rest.rentalv2.admin.AttachmentConfigDTO;
 import com.everhomes.util.StringHelper;
+
 /**
  * <ul>
- * 订单DTO
- * <li>rentalBillId：订单id</li>
- * <li>orderNo：订单编号</li>
- * <li>siteName：场所名称</li>
- * <li>buildingName：楼栋名称</li>
- * <li>address：地址</li>
- * <li>spec：规格</li>
- * <li>contactPhonenum：电话号码</li>
- * <li>startTime：开始时间</li>
- * <li>endTime：结束时间</li> 
- * <li>reserveTime:预订时间</li> 
- * <li>payStartTime:支付开始时间</li> 
- * <li>payTime：支付时间</li> 
- * <li>cancelTime：取消时间</li> 
- * <li>payDeadLineTime：最后支付时间</li> 
- * <li>sitePrice：场所总价</li>
- * <li>totalPrice：全部总价包含物品</li>
- * <li>reservePrice：订金</li>
- * <li>paidPrice：已付金额</li>
- * <li>unPayPrice：未付金额</li>
- * <li>status：订单状态  0待付订金1已付定金2已付清 3待付全款 4已取消 参考{@link com.everhomes.rest.rentalv2.SiteBillStatus}</li>  
- * <li>rentalCount：场所预定数量</li> 
- * <li>useDetail：使用详情</li> 
- * <li>refundFlag：是否退款 0-否 1-是</li> 
- * <li>refundRatio：退款比例 百分比 </li> 
- * <li>cancelFlag：是否允许取消,永远为1</li> 
- * <li>vendorType：支付方式,10001-支付宝，10002-微信</li> 
- * <li>resourceTypeId：广场图标id</li> 
- * <li>siteItems：场所商品</li> 
- * <li>rentalSiteRules：场所时间段</li>
- * <li>billAttachments：订单附加信息</li> 
- * <li>unpayCancelTime：未支付取消时间</li>
- * <li>confirmationPrompt: 确认提示(非必填)</li>
+ * <li>rentalBillId: 订单id</li>
+ * <li>orderNo: 订单编号</li>
+ * <li>siteName: 场所名称</li>
+ * <li>buildingName: 楼栋名称</li>
+ * <li>address: 地址</li>
+ * <li>spec: 规格</li>
+ * <li>companyName: companyName</li>
+ * <li>contactName: contactName</li>
+ * <li>contactPhonenum: 电话号码</li>
+ * <li>userName: userName</li>
+ * <li>userPhone: userPhone</li>
+ * <li>introduction: introduction</li>
+ * <li>notice: notice</li>
+ * <li>startTime: 开始时间</li>
+ * <li>endTime: 结束时间</li>
+ * <li>reserveTime: 预订时间</li>
+ * <li>payTime: 支付时间</li>
+ * <li>cancelTime: 取消时间</li>
+ * <li>sitePrice: 场所总价</li>
+ * <li>totalPrice: 全部总价包含物品</li>
+ * <li>paidPrice: 已付金额</li>
+ * <li>unPayPrice: 未付金额</li>
+ * <li>invoiceFlag: invoiceFlag</li>
+ * <li>status: 订单状态  0待付订金1已付定金2已付清 3待付全款 4已取消 参考{@link com.everhomes.rest.rentalv2.SiteBillStatus}</li>
+ * <li>rentalCount: 场所预定数量</li>
+ * <li>refundFlag: 是否退款 0-否 1-是</li>
+ * <li>refundRatio: 退款比例 百分比</li>
+ * <li>refundAmount: 退款金额</li>
+ * <li>cancelFlag: 是否允许取消,永远为1</li>
+ * <li>useDetail: 使用详情</li>
+ * <li>vendorType: 支付方式,10001-支付宝，10002-微信</li>
+ * <li>resourceTypeId: 广场图标id</li>
+ * <li>unpayCancelTime: 未支付取消时间</li>
  * <li>doorAuthTime: 门禁二维码有效期</li>
  * <li>packageName: 套餐名称</li>
+ * <li>siteItems: 场所商品 {@link com.everhomes.rest.rentalv2.SiteItemDTO}</li>
+ * <li>rentalSiteRules: 场所时间段 {@link com.everhomes.rest.rentalv2.RentalSiteRulesDTO}</li>
+ * <li>billAttachments: 订单附加信息 {@link com.everhomes.rest.rentalv2.BillAttachmentDTO}</li>
+ * <li>toastFlag: toastFlag</li>
+ * <li>confirmationPrompt: 确认提示(非必填)</li>
+ * <li>flowCaseId: flowCaseId</li>
+ * <li>resourceType: resourceType {@link RentalV2ResourceType}</li>
+ * <li>customObject: 业务资源数据</li>
  * </ul>
  */
 public class RentalBillDTO {
@@ -58,48 +66,67 @@ public class RentalBillDTO {
 	private String userName;
 	private String userPhone;
 	private String introduction;
-	private String notice; 
+	private String notice;
 	private Long startTime;
 	private Long endTime;
 	private Long reserveTime;
-	private Long payStartTime;
+	//	private Long payStartTime;
 	private Long payTime;
 	private Long cancelTime;
-	private Long payDeadLineTime;
-	private BigDecimal  sitePrice;
-	private BigDecimal  totalPrice;
-	private BigDecimal  reservePrice;
+	//	private Long payDeadLineTime;
+	private BigDecimal sitePrice;
+	private BigDecimal totalPrice;
+	//	private BigDecimal reservePrice;
 	private BigDecimal paidPrice;
 	private BigDecimal unPayPrice;
 	private Byte invoiceFlag;
 	private Byte status;
-	private Double rentalCount; 
-    private Byte refundFlag;
-    private Integer refundRatio;
-    private Byte cancelFlag;
-	private java.lang.String     useDetail;
-	private java.lang.String     vendorType;
-	private java.lang.Long       resourceTypeId; 
+	private Double rentalCount;
+	private Byte refundFlag;
+//	private Integer refundRatio;
+	private BigDecimal refundAmount;
+	private Byte cancelFlag;
+	private java.lang.String useDetail;
+	private java.lang.String vendorType;
+	private java.lang.Long resourceTypeId;
 	private Long unpayCancelTime;
 	private String doorAuthTime;
 	private String packageName;
 	@ItemType(SiteItemDTO.class)
-	private List<SiteItemDTO> siteItems; 
+	private List<SiteItemDTO> siteItems;
 
 	@ItemType(RentalSiteRulesDTO.class)
-	private List<RentalSiteRulesDTO> rentalSiteRules; 
-	
+	private List<RentalSiteRulesDTO> rentalSiteRules;
+
 	@ItemType(BillAttachmentDTO.class)
-	private List<BillAttachmentDTO> billAttachments; 
+	private List<BillAttachmentDTO> billAttachments;
 
 	private Byte toastFlag;
 	private String confirmationPrompt;
 	private Long flowCaseId;
-	
+	private String resourceType;
+	private String customObject;
+
 	@Override
-    public String toString() {
-        return StringHelper.toJsonString(this);
-    }
+	public String toString() {
+		return StringHelper.toJsonString(this);
+	}
+
+	public String getResourceType() {
+		return resourceType;
+	}
+
+	public void setResourceType(String resourceType) {
+		this.resourceType = resourceType;
+	}
+
+	public String getCustomObject() {
+		return customObject;
+	}
+
+	public void setCustomObject(String customObject) {
+		this.customObject = customObject;
+	}
 
 	public Long getFlowCaseId() {
 		return flowCaseId;
@@ -132,7 +159,7 @@ public class RentalBillDTO {
 	public void setSpec(String spec) {
 		this.spec = spec;
 	}
- 
+
 
 	public String getContactPhonenum() {
 		return contactPhonenum;
@@ -149,7 +176,7 @@ public class RentalBillDTO {
 	public void setSiteItems(List<SiteItemDTO> siteItems) {
 		this.siteItems = siteItems;
 	}
- 
+
 	public String getSiteName() {
 		return siteName;
 	}
@@ -181,14 +208,6 @@ public class RentalBillDTO {
 	public void setInvoiceFlag(Byte invoiceFlag) {
 		this.invoiceFlag = invoiceFlag;
 	}
- 
-	public Long getPayDeadLineTime() {
-		return payDeadLineTime;
-	}
-
-	public void setPayDeadLineTime(Long payDeadLineTime) {
-		this.payDeadLineTime = payDeadLineTime;
-	}
 
 	public Long getCancelTime() {
 		return cancelTime;
@@ -204,14 +223,6 @@ public class RentalBillDTO {
 
 	public void setPayTime(Long payTime) {
 		this.payTime = payTime;
-	}
-
-	public Long getPayStartTime() {
-		return payStartTime;
-	}
-
-	public void setPayStartTime(Long payStartTime) {
-		this.payStartTime = payStartTime;
 	}
 
 	public Long getReserveTime() {
@@ -278,14 +289,6 @@ public class RentalBillDTO {
 		this.totalPrice = totalPrice;
 	}
 
-	public BigDecimal getReservePrice() {
-		return reservePrice;
-	}
-
-	public void setReservePrice(BigDecimal reservePrice) {
-		this.reservePrice = reservePrice;
-	}
-
 	public BigDecimal getPaidPrice() {
 		return paidPrice;
 	}
@@ -301,7 +304,7 @@ public class RentalBillDTO {
 	public void setUnPayPrice(BigDecimal unPayPrice) {
 		this.unPayPrice = unPayPrice;
 	}
- 
+
 	public Double getRentalCount() {
 		return rentalCount;
 	}
@@ -427,15 +430,13 @@ public class RentalBillDTO {
 	}
 
 
-	public Integer getRefundRatio() {
-		return refundRatio;
+	public BigDecimal getRefundAmount() {
+		return refundAmount;
 	}
 
-
-	public void setRefundRatio(Integer refundRatio) {
-		this.refundRatio = refundRatio;
+	public void setRefundAmount(BigDecimal refundAmount) {
+		this.refundAmount = refundAmount;
 	}
-
 
 	public Byte getCancelFlag() {
 		return cancelFlag;

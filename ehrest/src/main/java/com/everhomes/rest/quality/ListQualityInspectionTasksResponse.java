@@ -1,10 +1,10 @@
 package com.everhomes.rest.quality;
 
-import java.sql.Timestamp;
-import java.util.List;
-
 import com.everhomes.discover.ItemType;
 import com.everhomes.util.StringHelper;
+
+import java.sql.Timestamp;
+import java.util.List;
 
 /**
  * <ul>
@@ -14,7 +14,7 @@ import com.everhomes.util.StringHelper;
  *  <li>communityCount: 例行检查关联项目数</li>
  *  <li>startTime: 例行检查开始时间</li>
  *  <li>endTime: 例行检查结束时间</li>
- *  <li>pageAnchor: 下一页的锚点，没有下一页则没有</li>
+ *  <li>nextPageAnchor: 下一页的锚点，没有下一页则没有</li>
  * </ul>
  */
 public class ListQualityInspectionTasksResponse {

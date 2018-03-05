@@ -76,7 +76,7 @@ public class Rentalv2Controller extends ControllerBase {
 		response.setErrorDescription("OK");
 		return response;
 	}
-
+/*-------------------------------------- start ---------------------------------------------------*/
 	/**
 	 * <b>URL: /rental/findRentalSiteWeekStatus</b>
 	 * <p>
@@ -243,6 +243,8 @@ public class Rentalv2Controller extends ControllerBase {
 		return response;
 	}
 
+	/*-------------------------------------- end---------------------------------------------------*/
+
 	/**
 	 * <b>URL: /rental/addRentalBill</b>
 	 * <p>
@@ -267,7 +269,7 @@ public class Rentalv2Controller extends ControllerBase {
 	 */
 	@RequestMapping("findRentalSiteItemsAndAttachments")
 	@RestReturn(value = FindRentalSiteItemsAndAttachmentsResponse.class)
-	public RestResponse findRentalSiteItems(@Valid FindRentalSiteItemsAndAttachmentsCommand cmd) { 
+	public RestResponse findRentalSiteItems(@Valid FindRentalSiteItemsAndAttachmentsCommand cmd) {
 		FindRentalSiteItemsAndAttachmentsResponse findRentalSiteItemsCommandResponse = rentalService.findRentalSiteItems(cmd);
 		RestResponse response = new RestResponse(
 				findRentalSiteItemsCommandResponse);
@@ -447,9 +449,8 @@ public class Rentalv2Controller extends ControllerBase {
 	 * </p>
 	 */
 	@RequestMapping("exportRentalBills")
-	public String exportRentalBills(@Valid ListRentalBillsCommand cmd,HttpServletResponse response) {
-		HttpServletResponse commandResponse = rentalService.exportRentalBills(cmd, response );
-		return null;
+	public void exportRentalBills(@Valid ListRentalBillsCommand cmd,HttpServletResponse response) {
+		rentalService.exportRentalBills(cmd, response );
 	}
 
 	/**
@@ -473,5 +474,164 @@ public class Rentalv2Controller extends ControllerBase {
 	public String testSch(HttpServletRequest request,HttpServletResponse response){
 		rentalService.rentalSchedule();
 		return null;
+	}
+
+	/*--------------------------------start ---------------------------*/
+
+	/**
+	 * <b>URL: /rental/addRentalOrderUsingInfo</b>
+	 * <p>
+	 * 添加订单使用信息
+	 * </p>
+	 */
+	@RequestMapping("addRentalOrderUsingInfo")
+	@RestReturn(value = AddRentalOrderUsingInfoResponse.class)
+	public RestResponse addRentalOrderUsingInfo(AddRentalOrderUsingInfoCommand cmd) {
+
+		RestResponse response = new RestResponse(rentalService.addRentalOrderUsingInfo(cmd));
+		response.setErrorCode(ErrorCodes.SUCCESS);
+		response.setErrorDescription("OK");
+		return response;
+	}
+
+	/**
+	 * <b>URL: /rental/addRentalOrderUsingInfoV2</b>
+	 * <p>
+	 * 添加订单使用信息
+	 * </p>
+	 */
+	@RequestMapping("addRentalOrderUsingInfoV2")
+	@RestReturn(value = AddRentalOrderUsingInfoV2Response.class)
+	public RestResponse addRentalOrderUsingInfoV2(AddRentalOrderUsingInfoCommand cmd) {
+
+		RestResponse response = new RestResponse(rentalService.addRentalOrderUsingInfoV2(cmd));
+		response.setErrorCode(ErrorCodes.SUCCESS);
+		response.setErrorDescription("OK");
+		return response;
+	}
+
+	/**
+	 * <b>URL: /rental/listRentalOrders</b>
+	 * <p>
+	 * 查询订单
+	 * </p>
+	 */
+	@RequestMapping("listRentalOrders")
+	@RestReturn(value = ListRentalOrdersResponse.class)
+	public RestResponse listRentalOrders(ListRentalOrdersCommand cmd) {
+
+		RestResponse response = new RestResponse(rentalService.listRentalOrders(cmd));
+		response.setErrorCode(ErrorCodes.SUCCESS);
+		response.setErrorDescription("OK");
+		return response;
+	}
+
+	/**
+	 * <b>URL: /rental/getRentalOrderDetail</b>
+	 * <p>
+	 * 查询单个订单
+	 * </p>
+	 */
+	@RequestMapping("getRentalOrderDetail")
+	@RestReturn(value = RentalOrderDTO.class)
+	@RequireAuthentication(false)
+	public RestResponse getRentalOrderDetail(GetRentalOrderDetailCommand cmd) {
+		RestResponse response = new RestResponse(rentalService.getRentalOrderDetail(cmd));
+		response.setErrorCode(ErrorCodes.SUCCESS);
+		response.setErrorDescription("OK");
+		return response;
+	}
+
+	/**
+	 * <b>URL: /rental/getRenewRentalOrderInfo</b>
+	 * <p>校验并获取续费信息</p>
+	 */
+	@RequestMapping("getRenewRentalOrderInfo")
+	@RestReturn(value = GetRenewRentalOrderInfoResponse.class)
+	public RestResponse getRenewRentalOrderInfo(GetRenewRentalOrderInfoCommand cmd) {
+		RestResponse response = new RestResponse(rentalService.getRenewRentalOrderInfo(cmd));
+		response.setErrorCode(ErrorCodes.SUCCESS);
+		response.setErrorDescription("OK");
+		return response;
+	}
+
+	/**
+	 * <b>URL: /rental/renewRentalOrder</b>
+	 * <p>订单续费</p>
+	 */
+	@RequestMapping("renewRentalOrder")
+	@RestReturn(value = CommonOrderDTO.class)
+	public RestResponse renewRentalOrder(RenewRentalOrderCommand cmd) {
+		RestResponse response = new RestResponse(rentalService.renewRentalOrder(cmd));
+		response.setErrorCode(ErrorCodes.SUCCESS);
+		response.setErrorDescription("OK");
+		return response;
+	}
+
+	/**
+	 * <b>URL: /rental/renewRentalOrderV2</b>
+	 * <p>订单续费</p>
+	 */
+	@RequestMapping("renewRentalOrderV2")
+	@RestReturn(value = PreOrderDTO.class)
+	public RestResponse renewRentalOrderV2(RenewRentalOrderCommand cmd) {
+		RestResponse response = new RestResponse(rentalService.renewRentalOrderV2(cmd));
+		response.setErrorCode(ErrorCodes.SUCCESS);
+		response.setErrorDescription("OK");
+		return response;
+	}
+
+	/**
+	 * <b>URL: /rental/completeRentalOrder</b>
+	 * <p>完成订单</p>
+	 */
+	@RequestMapping("completeRentalOrder")
+	@RestReturn(value = RentalOrderDTO.class)
+	public RestResponse completeRentalOrder(CompleteRentalOrderCommand cmd) {
+		RestResponse response = new RestResponse(rentalService.completeRentalOrder(cmd));
+		response.setErrorCode(ErrorCodes.SUCCESS);
+		response.setErrorDescription("OK");
+		return response;
+	}
+
+
+	/**
+	 *
+	 * <b>URL: /rental/getResourceRuleV2<b>
+	 * <p>查询资源的规则</p>
+	 */
+	@RequestMapping("getResourceRuleV2")
+	@RestReturn(GetResourceRuleV2Response.class)
+	@RequireAuthentication(false)
+	public RestResponse getResourceRuleV2(GetResourceRuleV2Command cmd) {
+		RestResponse response = new RestResponse(rentalService.getResourceRuleV2(cmd));
+		response.setErrorCode(ErrorCodes.SUCCESS);
+		response.setErrorDescription("OK");
+		return response;
+	}
+
+	/**
+	 *
+	 * <b>URL: /rental/getCancelOrderTip<b>
+	 * <p>获取订单取消文本</p>
+	 */
+	@RequestMapping("getCancelOrderTip")
+	@RestReturn(GetCancelOrderTipResponse.class)
+	public RestResponse getCancelOrderTip(GetCancelOrderTipCommand cmd) {
+		RestResponse response = new RestResponse(rentalService.getCancelOrderTip(cmd));
+		response.setErrorCode(ErrorCodes.SUCCESS);
+		response.setErrorDescription("OK");
+		return response;
+	}
+
+	/**
+	 *
+	 * <b>URL: /rental/test<b>
+	 * <p>test</p>
+	 */
+	@RequestMapping("test")
+	public void test() {
+		rentalService.test();
+
 	}
 }

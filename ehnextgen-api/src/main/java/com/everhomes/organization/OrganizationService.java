@@ -1,6 +1,7 @@
 // @formatter:off
 package com.everhomes.organization;
 
+import java.sql.Timestamp;
 import java.util.List;
 import java.util.Map;
 import java.util.Set;
@@ -451,66 +452,18 @@ public interface OrganizationService {
 
     /****** new interfac for archives-1.0  START******/
 
-    ListPersonnelsV2CommandResponse listOrganizationPersonnelsV2(ListPersonnelsV2Command cmd);
-
-    PersonnelsDetailsV2Response getOrganizationPersonnelDetailsV2(GetPersonnelDetailsV2Command cmd);
-
-	OrganizationMemberDTO addOrganizationPersonnelV2(AddOrganizationPersonnelV2Command cmd);
-
-    OrganizationMemberBasicDTO getOrganizationMemberBasicInfo(GetOrganizationMemberInfoCommand cmd);
-
-    void updateOrganizationMemberBackGround(UpdateOrganizationMemberBackGroundCommand cmd);
-
-    OrganizationMemberEducationsDTO addOrganizationMemberEducations(AddOrganizationMemberEducationsCommand cmd);
-
-    List<OrganizationMemberEducationsDTO> listOrganizationMemberEducations(ListOrganizationMemberEducationsCommand cmd);
-
-    void deleteOrganizationMemberEducations(DeleteOrganizationMemberEducationsCommand cmd);
-
-    void updateOrganizationMemberEducations(UpdateOrganizationMemberEducationsCommand cmd);
-
-    OrganizationMemberWorkExperiencesDTO addOrganizationMemberWorkExperiences(AddOrganizationMemberWorkExperiencesCommand cmd);
-
-    List<OrganizationMemberWorkExperiencesDTO> listOrganizationMemberWorkExperiences(ListOrganizationMemberWorkExperiencesCommand cmd);
-
-    void deleteOrganizationMemberWorkExperiences(DeleteOrganizationMemberWorkExperiencesCommand cmd);
-
-    void updateOrganizationMemberWorkExperiences(UpdateOrganizationMemberWorkExperiencesCommand cmd);
-
-    OrganizationMemberInsurancesDTO addOrganizationMemberInsurances(AddOrganizationMemberInsurancesCommand cmd);
-
-    List<OrganizationMemberInsurancesDTO> listOrganizationMemberInsurances(ListOrganizationMemberInsurancesCommand cmd);
-
-    void updateOrganizationMemberInsurances(UpdateOrganizationMemberInsurancesCommand cmd);
-
-    void deleteOrganizationMemberInsurances(DeleteOrganizationMemberInsurancesCommand cmd);
-
-    OrganizationMemberContractsDTO addOrganizationMemberContracts(AddOrganizationMemberContractsCommand cmd);
-
-    List<OrganizationMemberContractsDTO> listOrganizationMemberContracts(ListOrganizationMemberContractsCommand cmd);
-
-    void updateOrganizationMemberContracts (UpdateOrganizationMemberContractsCommand cmd);
-
-    void deleteOrganizationMemberContracts(DeleteOrganizationMemberContractsCommand cmd);
-
-    void updateOrganizationEmployeeStatus(UpdateOrganizationEmployeeStatusCommand cmd);
-
-    List<MemberRecordChangesByJobDTO> listMemberRecordChangesByJob(ListMemberRecordChangesByJobCommand cmd);
-
-    ListMemberProfileRecordsCommandResponse listMemberRecordChangesByProfile(ListMemberProfileRecordsCommand cmd);
-
     //  暂时舍弃 by R 20170718
 //    OrganizationMemberProfileIntegrity getProfileIntegrity(GetProfileIntegrityCommand cmd);
 
+/*
 	ImportFileTaskDTO importOrganizationPersonnelFiles(MultipartFile mfile,
 													   Long userId, ImportOrganizationPersonnelDataCommand cmd);
     Byte getOrganizationMemberVisibleFlag(String contactToken, Long organizationId);
 
     void exportOrganizationPersonnelFiles(ExcelOrganizationPersonnelCommand cmd, HttpServletResponse httpResponse);
+*/
 
 	/****** new interfac for archives-1.0 END******/
-
-
 
 	ImportFileTaskDTO importEnterpriseData(ImportEnterpriseDataCommand cmd, MultipartFile multipartFile, Long userId);
 	void exportEnterprises(ListEnterprisesCommand cmd, HttpServletResponse response);
@@ -537,8 +490,8 @@ public interface OrganizationService {
  
 	 
 	// added by R, for salaryGroup 20170630
-	public Organization createSalaryGroupOrganization(Long organizationId, String name);
-	public ListOrganizationMemberCommandResponse listOrganizationMemberByPathHavingDetailId(String keywords, Long pageAnchorLong, Long organizationId, Integer pageSize);
+	Organization createSalaryGroupOrganization(Long organizationId, String name);
+	ListOrganizationMemberCommandResponse listOrganizationMemberByPathHavingDetailId(String keywords, Long pageAnchorLong, Long organizationId, Integer pageSize);
 	Organization createUniongroupOrganization(Long organizationId, String name, String groupType);
 	 
 	/**人事管理-离职**/
@@ -592,6 +545,10 @@ public interface OrganizationService {
 
 	// 根据detailId获取部门
 	Long getDepartmentByDetailId(Long detailId);
+
+	ListPMOrganizationsResponse listPMOrganizations(ListPMOrganizationsCommand cmd);
+
+	List<Long> listDetailIdWithEnterpriseExclude(String keywords, Integer namespaceId, Long enterpriseId, Timestamp checkinTimeStart, Timestamp checkinTimeEnd, Timestamp dissmissTimeStart, Timestamp dissmissTimeEnd, CrossShardListingLocator locator, Integer pageSize,List<Long> notinDetails,List<Long> inDetails);
 
 	// 根据detailId获取部门
 	Long getDepartmentByDetailIdAndOrgId(Long detailId, Long OrgId);
