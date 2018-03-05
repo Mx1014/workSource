@@ -710,3 +710,5 @@ INSERT INTO `eh_service_module_privileges` (`id`, `module_id`, `privilege_type`,
 VALUES
 	(@mp_id:=@mp_id+1, @module_id, '0', @p_id, '新增请示', '0', NOW());
 
+-- dengs 2018.03.05文件管理的模块id添加。
+update eh_web_menus SET module_id=41500 WHERE NAME='文件管理';
