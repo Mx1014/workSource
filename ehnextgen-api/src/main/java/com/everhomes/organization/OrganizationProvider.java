@@ -433,6 +433,8 @@ public interface OrganizationProvider {
 	// 根据人事档案id和orgId获取members，智辉获取到该公司下的人
 	List<OrganizationMember> listOrganizationMembersByDetailIdAndOrgId(Long detailId, Long orgId, List<String> groupTypes);
 
+	List<OrganizationMember> listOrganizationMembersByDetailIdAndPath(Long detailId, String path, List<String> groupTypes);
+
 	Integer countUserOrganization(Integer namespaceId, Long communityId, Byte userOrganizationStatus, String namespaceUserType, Byte gender);
 	Integer countUserOrganization(Integer namespaceId, Long communityId, Byte userOrganizationStatus);
 	Integer countUserOrganization(Integer namespaceId, Long communityId);

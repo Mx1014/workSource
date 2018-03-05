@@ -106,6 +106,8 @@ public class PmTaskServiceImpl implements PmTaskService {
 	private static final String CATEGORY_SEPARATOR = "/";
 
 	public static final String HANDLER = "pmtask.handler-";
+
+	public static Integer flag = 0;
 	
     private SimpleDateFormat datetimeSF = new SimpleDateFormat("yyyy-MM-dd HH:mm:ss");
     private SimpleDateFormat dateSF = new SimpleDateFormat("yyyy-MM-dd");
@@ -887,6 +889,8 @@ public class PmTaskServiceImpl implements PmTaskService {
 		category.setPath(path);
 		category.setParentId(parentId);
 		category.setStatus(CategoryAdminStatus.ACTIVE.getCode());
+		category.setOwnerId(cmd.getOwnerId());
+		category.setOwnerType(cmd.getOwnerType());
 		categoryProvider.createCategory(category);
 		
 		return ConvertHelper.convert(category, CategoryDTO.class);
@@ -2705,6 +2709,13 @@ public class PmTaskServiceImpl implements PmTaskService {
 
 	@Override
 	public void syncCategories() {
+		if (flag==0) {
+			LOGGER.info("syncCategories test:flag = "+flag);
+			flag = 1;
+		}else{
+			LOGGER.info("syncCategories test:flag = "+flag);
+			return;
+		}
 		List<Category> list = categoryProvider.listTaskCategories(null,null,null, 6L, null,
 				null, null);
 		List<Category> list2 = new ArrayList<>();
@@ -2724,6 +2735,9 @@ public class PmTaskServiceImpl implements PmTaskService {
 					category.setOwnerId(p.getId());
 					categoryProvider.createCategory(category);
 				});
+				LOGGER.info("syncCategories test: categoryId="+c.getId()+", communitySize="
+						+ communities.size() + ", categorySize=" + list3.size() + ", namespaceId=" + namespaceId
+				+ ", list2Size=" + list2.size());
 			}
 			list = list2;
 			list2 = new ArrayList<>();
