@@ -629,7 +629,7 @@ public class OrganizationServiceImpl implements OrganizationService {
         if(!StringUtils.isEmpty(cmd.getName())){
             //同级重名校验
             Organization down_organization = organizationProvider.findOrganizationByParentAndName(modifyOrg.getParentId(), cmd.getName());
-            if(down_organization != null){
+            if(down_organization.getId() != cmd.getId()){
                 OrganizationDTO orgDto_error = new OrganizationDTO();
                 orgDto_error.setErrorCode(OrganizationServiceErrorCode.ERROR_DEPARTMENT_EXISTS);
                 LOGGER.error("name repeat, cmd = {}", cmd);
@@ -11696,7 +11696,7 @@ public class OrganizationServiceImpl implements OrganizationService {
             List<String> groupTypes = new ArrayList<>();
             groupTypes.add(OrganizationGroupType.DEPARTMENT.getCode());
             groupTypes.add(OrganizationGroupType.DIRECT_UNDER_ENTERPRISE.getCode());
-            List<OrganizationMember> departs = this.organizationProvider.listOrganizationMembersByDetailIdAndOrgId(dto.getDetailId(), cmd.getOrganizationId(), groupTypes);
+            List<OrganizationMember> departs = this.organizationProvider.listOrganizationMembersByDetailIdAndPath(dto.getDetailId(), organization.getPath(), groupTypes);
             if(departs != null && departs.size() > 0){
                 for (OrganizationMember depart:departs){
                     Organization org = this.organizationProvider.findOrganizationById(depart.getOrganizationId());
