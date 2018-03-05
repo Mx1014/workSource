@@ -2559,10 +2559,9 @@ public class ArchivesServiceImpl implements ArchivesService {
                 continue;
             result.setEmployeeStatus(detail.getEmployeeStatus());
             result.setDepartment(detail.getDepartment());
-            if (detail.getDepartmentIds() != null) {
-                String departmentId = detail.getDepartmentIds().substring(1, detail.getDepartmentIds().length() - 1);
-                result.setDepartmentId(Long.valueOf(departmentId));
-            }
+            List<Long> departmentIds = JSONObject.parseArray(detail.getDepartmentIds(), Long.class);
+            if (departmentIds != null && departmentIds.size() > 0)
+                result.setDepartmentId(departmentIds.get(0));
             result.setJobPosition(detail.getJobPosition());
             result.setJobLevel(detail.getJobLevel());
             archivesProvider.updateArchivesDismissEmployee(result);

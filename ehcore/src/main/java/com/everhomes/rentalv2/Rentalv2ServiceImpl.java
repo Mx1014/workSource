@@ -6798,8 +6798,8 @@ public class Rentalv2ServiceImpl implements Rentalv2Service {
 						//每天循环的
 						if (cmd.getRentalType().equals(RentalType.HOUR.getCode())) {
 							//按小时
-							Timestamp beginTime = Timestamp.valueOf(datetimeSF.get().format(choseRSR.getBeginTime().getTime()));
-							Timestamp endTime = Timestamp.valueOf(datetimeSF.get().format(choseRSR.getEndTime().getTime()));
+							Timestamp beginTime = new Timestamp(start.getTime().getTime()+getDayTime(choseRSR.getBeginTime().getTime()));
+							Timestamp endTime =  new Timestamp(start.getTime().getTime()+getDayTime(choseRSR.getEndTime().getTime()));
 							changeRentalSiteRules = findRentalSiteRuleByDate(choseRSR.getRentalResourceId(), choseRSR.getResourceNumber(), beginTime, endTime,
 									null, null);
 						} else if (cmd.getRentalType().equals(RentalType.HALFDAY.getCode()) ||
@@ -6829,6 +6829,17 @@ public class Rentalv2ServiceImpl implements Rentalv2Service {
 		});
 
 		cellList.get().clear();
+	}
+
+	//输入时间戳 返回现在是当天的几时几分几秒(毫秒数)
+	private  Long getDayTime(Long timeStamp){
+		SimpleDateFormat trueDay = new SimpleDateFormat("yyyy-MM-dd");
+		try {
+			return timeStamp - trueDay.parse(trueDay.format(new Date(timeStamp))).getTime();
+		}catch (Exception e){
+			e.printStackTrace();
+		}
+		return 0l;
 	}
 
 	private  Long createCellPricePackage(List<PricePackageDTO> pricePackages, String resourceType){
