@@ -1417,8 +1417,8 @@ public class SiyinPrintServiceImpl implements SiyinPrintService {
 		if(restResponse.getErrorCode() == 200){
 			GetQRCodeImageCommand gQRcmd = new GetQRCodeImageCommand();
 			QRCodeDTO dto = (QRCodeDTO)restResponse.getResponseObject();
-			gQRcmd.setHeight(cmd.getHeight());
-			gQRcmd.setWidth(cmd.getWidth());
+			gQRcmd.setHeight(cmd.getHeight()==null?300:cmd.getHeight());
+			gQRcmd.setWidth(cmd.getWidth()==null?300:cmd.getWidth());
 			gQRcmd.setQrid(dto.getQrid());
 			try {
 				qrController.getQRCodeImage(gQRcmd, req, rps);
