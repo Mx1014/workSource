@@ -255,8 +255,8 @@ public class ServiceModuleServiceImpl implements ServiceModuleService {
         BanPrivilegeHandler handler = getBanPrivilegeHandler();
         if (null != handler && results != null && results.size() > 0) {
             List<Long> banPrivilegeIds = handler.listBanPrivilegesByModuleIdAndAppId(cmd.getNamespaceId(), cmd.getModuleId(), cmd.getAppId());
-            banPrivilegeIds = banPrivilegeIds.stream().filter(r-> r != 0L).collect(Collectors.toList());
             if(banPrivilegeIds != null && banPrivilegeIds.size() > 0){
+                banPrivilegeIds = banPrivilegeIds.stream().filter(r-> r != 0L).collect(Collectors.toList());
                 Iterator<ServiceModuleDTO> it = results.iterator();
                 while (it.hasNext()) {
                     // 进入禁止权限显示的方法
