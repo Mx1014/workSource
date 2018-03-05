@@ -5774,6 +5774,11 @@ public class UserServiceImpl implements UserService {
 		return logins.size() > 1 ? logins.get(0) : null;
 	}
 
+	@Override
+	public void logonBuAnBangToken() {
+
+	}
+
 	public ListenableFuture<ResponseEntity<String>> restCall(HttpMethod method, MediaType mediaType, String url, Map headerParam, Map bodyParam, ListenableFutureCallback<ResponseEntity<String>> responseCallback) throws UnsupportedEncodingException {
 		AsyncRestTemplate template = new AsyncRestTemplate();
 		HttpHeaders headers = new HttpHeaders();

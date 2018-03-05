@@ -8472,8 +8472,7 @@ public class OrganizationServiceImpl implements OrganizationService {
 
 
     @Override
-    public OrganizationMenuResponse listAllChildrenOrganizationMenus(Long id,
-                                                                     List<String> groupTypes, Byte naviFlag) {
+    public OrganizationMenuResponse listAllChildrenOrganizationMenus(Long id, List<String> groupTypes, Byte naviFlag) {
         Long startTime = System.currentTimeMillis();
         if (null == naviFlag) {
             naviFlag = OrganizationNaviFlag.SHOW_NAVI.getCode();
