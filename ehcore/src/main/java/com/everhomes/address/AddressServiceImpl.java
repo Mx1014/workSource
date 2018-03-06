@@ -1193,9 +1193,9 @@ public class AddressServiceImpl implements AddressService, LocalBusSubscriber {
                 AppConfig.DEFAULT_PAGINATION_PAGE_SIZE) : cmd.getPageSize();
         int offset = (int) PaginationHelper.offsetFromPageOffset((long) pageOffset, (long) pageSize);
         ListApartmentByBuildingNameCommandResponse response = new ListApartmentByBuildingNameCommandResponse();
-        //修改为整个小区有人住门牌数
+
         int totalCount = this.addressProvider.countApartmentsByBuildingName(cmd.getCommunityId(), cmd.getBuildingName());
-        if (totalCount == 0) return response;
+//        if (totalCount == 0) return response;
 
         List<ApartmentDTO> list = this.addressProvider.listApartmentsByBuildingName(cmd.getCommunityId(),
                 cmd.getBuildingName(), offset, pageSize);
@@ -1923,8 +1923,8 @@ public class AddressServiceImpl implements AddressService, LocalBusSubscriber {
 				continue;
 			}
 
-            Address address = addressProvider.findAddressByBuildingApartmentName(community.getNamespaceId(), community.getId(), data.getBuildingName(), data.getApartmentName());
-			if(address != null && address.getStatus() != AddressAdminStatus.INACTIVE.getCode()) {
+            Address address = addressProvider.findActiveAddressByBuildingApartmentName(community.getNamespaceId(), community.getId(), data.getBuildingName(), data.getApartmentName());
+			if(address != null) {
                 log.setData(data);
                 log.setErrorLog("apartment name is exist in building");
                 log.setCode(AddressServiceErrorCode.ERROR_EXISTS_APARTMENT_NAME);
