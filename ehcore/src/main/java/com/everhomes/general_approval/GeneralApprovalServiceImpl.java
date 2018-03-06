@@ -1069,6 +1069,7 @@ public class GeneralApprovalServiceImpl implements GeneralApprovalService {
         List<String> titles = Arrays.asList("审批编号", "提交时间", "申请人", "申请人部门", "表单内容",
                 "审批状态", "审批记录", "当前审批人", "督办人");
         //  4. Start to write the excel
+        LOGGER.debug("generalApproval++++++++++++++++++++++++++++++: ", response.getRecords().size());
         XSSFWorkbook workbook = createApprovalRecordsBook(mainTitle, subTitle, titles, response.getRecords(), taskId);
         return writeExcel(workbook);
     }
