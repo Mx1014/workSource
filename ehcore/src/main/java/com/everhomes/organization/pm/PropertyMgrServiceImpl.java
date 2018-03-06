@@ -2537,7 +2537,7 @@ public class PropertyMgrServiceImpl implements PropertyMgrService {
 		statistics.setSaledCount(map.get(AddressMappingStatus.SALED.getCode()));
 		statistics.setUnsaleCount(map.get(AddressMappingStatus.UNSALE.getCode()));
 		statistics.setOccupiedCount(map.get(AddressMappingStatus.OCCUPIED.getCode()));
-		statistics.setAptCount(statistics.getDefaultCount() + statistics.getLiveCount() + statistics.getRentCount() + statistics.getFreeCount() + statistics.getSaledCount() + statistics.getUnsaleCount());
+		statistics.setAptCount(statistics.getDefaultCount() + statistics.getLiveCount() + statistics.getRentCount() + statistics.getFreeCount() + statistics.getSaledCount() + statistics.getUnsaleCount() + statistics.getOccupiedCount());
 		statistics.setUserCount(userCount);
 		statistics.setHasOwnerCount(statistics.getLiveCount() + statistics.getRentCount() + statistics.getSaledCount());
 		statistics.setNoOwnerCount(statistics.getFreeCount() + statistics.getUnsaleCount());
