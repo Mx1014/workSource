@@ -309,7 +309,8 @@ public class ContractController extends ControllerBase {
 	@RestReturn(value = ListContractsBySupplierResponse.class)
 	public RestResponse listContractsBySupplier(ListContractsBySupplierCommand cmd) {
 		ContractService contractService = getContractService(UserContext.getCurrentNamespaceId(0));
-		RestResponse response = new RestResponse();
+		ListContractsBySupplierResponse res = contractService.listContractsBySupplier(cmd);
+		RestResponse response = new RestResponse(res);
 		response.setErrorCode(ErrorCodes.SUCCESS);
 		response.setErrorDescription("OK");
 		return response;

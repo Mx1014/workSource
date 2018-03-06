@@ -835,6 +835,7 @@ CREATE TABLE `eh_requisition_types`(
   PRIMARY KEY (`id`)
 ) ENGINE=INNODB DEFAULT CHARSET=utf8mb4;
 
+ALTER TABLE `eh_requisitions` ADD COLUMN `community_id` BIGINT COMMENT '园区id';
 -- 仓库管理2.0 end of the script
 
 -- 增加版本号 201801252125
@@ -1691,6 +1692,13 @@ ALTER TABLE eh_archives_dismiss_employees ADD COLUMN job_level VARCHAR(128) COMM
 ALTER TABLE eh_archives_logs MODIFY operation_reason VARCHAR(1024) COMMENT 'the reason of the operation';
 
 -- end by nan.rong
+
+-- add by zheng
+ALTER TABLE `eh_rentalv2_resources`
+CHANGE COLUMN `aclink_id` `aclink_id` VARCHAR(128) NULL DEFAULT NULL ;
+
+ALTER TABLE `eh_rentalv2_orders`
+CHANGE COLUMN `door_auth_id` `door_auth_id` VARCHAR(128) NULL DEFAULT NULL ;
 
 
 

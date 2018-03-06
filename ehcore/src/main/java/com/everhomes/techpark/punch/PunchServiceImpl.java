@@ -6517,7 +6517,7 @@ public class PunchServiceImpl implements PunchService {
 		params.put("employees", cmd.getEmployees());
 		params.put("timeRules", cmd.getTimeRules());
 		params.put("reportType", "exportPunchScheduling");
-		String fileName = String.format("考勤排班_%s.xlsx", DateUtil.dateToStr(new Date(cmd.getQueryTime()), DateUtil.NO_SLASH));
+		String fileName = String.format(cmd.getPunchRuleName()+"考勤排班_%s.xlsx", DateUtil.dateToStr(new Date(cmd.getQueryTime()), DateUtil.NO_SLASH));
 
 		taskService.createTask(fileName, TaskType.FILEDOWNLOAD.getCode(), PunchExportTaskHandler.class, params, TaskRepeatFlag.REPEAT.getCode(), new Date());
 		return response;

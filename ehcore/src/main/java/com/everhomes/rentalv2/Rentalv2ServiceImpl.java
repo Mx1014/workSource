@@ -539,7 +539,7 @@ public class Rentalv2ServiceImpl implements Rentalv2Service {
 		RentalDefaultRule rule = this.rentalv2Provider.getRentalDefaultRule(cmd.getOwnerType(), cmd.getOwnerId(),
 				cmd.getResourceType(), cmd.getResourceTypeId(), cmd.getSourceType(), cmd.getSourceId());
 
-		if(null == rule ){
+		if(null == rule && RuleSourceType.DEFAULT.getCode().equals(cmd.getSourceType())){
 			addDefaultRule(cmd.getOwnerType(), cmd.getOwnerId(), cmd.getResourceType(), cmd.getResourceTypeId(),
 					cmd.getSourceType(), cmd.getSourceId());
 			rule = this.rentalv2Provider.getRentalDefaultRule(cmd.getOwnerType(), cmd.getOwnerId(),
@@ -1273,8 +1273,15 @@ public class Rentalv2ServiceImpl implements Rentalv2Service {
 		rSiteDTO.setPayMode(resourceType.getPayMode());
 		rSiteDTO.setIdentify(resourceType.getIdentify());
 		rSiteDTO.setAclinkId(rentalSite.getAclinkId());
-		if (rSiteDTO.getAclinkId()!=null)
-			rSiteDTO.setAclinkName(doorAccessProvider.getDoorAccessById(rentalSite.getAclinkId()).getName());
+		if (!StringUtils.isEmpty(rSiteDTO.getAclinkId())) {
+			String[] ids = rSiteDTO.getAclinkId().split(",");
+			if (ids.length>0) {
+				String aclinkName = "";
+				for (String id:ids)
+					aclinkName += doorAccessProvider.getDoorAccessById(Long.parseLong(id)).getName()+",";
+				rSiteDTO.setAclinkName(aclinkName.substring(0,aclinkName.length()-1));
+			}
+		}
 //		if(null!=rentalSite.getDayBeginTime()) {
 //			rSiteDTO.setDayBeginTime(convertTimeToGMTMillisecond(rentalSite.getDayBeginTime()));
 //		}
@@ -2306,10 +2313,15 @@ public class Rentalv2ServiceImpl implements Rentalv2Service {
 		if (SiteBillStatus.SUCCESS.getCode() == status){
 
 //			RentalResource rs = this.rentalv2Provider.getRentalSiteById(order.getRentalResourceId());
-			if (rs.getAclinkId()!=null) {
-				Long doorAuthId = createDoorAuth(order.getRentalUid(), order.getAuthStartTime().getTime(), order.getAuthEndTime().getTime(),
-						rs.getAclinkId(), rs.getCreatorUid());
-				rentalv2Provider.setAuthDoorId(order.getId(), doorAuthId);
+			if (!StringUtils.isEmpty(rs.getAclinkId())) {
+				String[] ids = rs.getAclinkId().split(",");
+				if (ids.length > 0) {
+					String doorAuthId = "";
+					for (String id : ids)
+						doorAuthId += createDoorAuth(order.getRentalUid(), order.getAuthStartTime().getTime(), order.getAuthEndTime().getTime(),
+								Long.parseLong(id), rs.getCreatorUid()) + ",";
+					rentalv2Provider.setAuthDoorId(order.getId(), doorAuthId.substring(0, doorAuthId.length() - 1));
+				}
 			}
 			//用户积分
 			LocalEventBus.publish(event -> {
@@ -2407,13 +2419,13 @@ public class Rentalv2ServiceImpl implements Rentalv2Service {
 
 
 
-	@Override
-	public void sendMessageCode(Long uid, String locale, Map<String, String> map, int code) {
-		String scope = RentalNotificationTemplateCode.SCOPE;
+		@Override
+		public void sendMessageCode(Long uid, String locale, Map<String, String> map, int code) {
+			String scope = RentalNotificationTemplateCode.SCOPE;
 
-		String notifyTextForOther = localeTemplateService.getLocaleTemplateString(scope, code, locale, map, "");
-		sendMessageToUser(uid, notifyTextForOther);
-	}
+			String notifyTextForOther = localeTemplateService.getLocaleTemplateString(scope, code, locale, map, "");
+			sendMessageToUser(uid, notifyTextForOther);
+		}
 
 	private void sendMessageToUser(Long userId, String content) {
 		if(null == userId)
@@ -3683,8 +3695,11 @@ public class Rentalv2ServiceImpl implements Rentalv2Service {
 			handler.releaseOrderResourceStatus(order);
 			//只要退款就给管理员发消息,不管是退款中还是已退款
 			onOrderCancel(order);
-			if (order.getDoorAuthId() != null) //解除门禁授权
-				doorAccessService.deleteDoorAuth(order.getDoorAuthId());
+			if (!StringUtils.isEmpty(order.getDoorAuthId())) {//解除门禁授权
+				String[] ids = order.getDoorAuthId().split(",");
+				for (String id:ids)
+					doorAccessService.deleteDoorAuth(Long.parseLong(id));
+			}
 			rentalv2Provider.setAuthDoorId(order.getId(), null);
 			//用户积分
 			LocalEventBus.publish(event -> {
@@ -4162,16 +4177,23 @@ public class Rentalv2ServiceImpl implements Rentalv2Service {
 			cmd.setFlowMainId(flow.getFlowMainId());
 			cmd.setFlowVersion(flow.getFlowVersion());
 			return flowService.createFlowCase(cmd);
-		}else if (PayMode.ONLINE_PAY.getCode()==order.getPayMode()){
+		}else if (PayMode.ONLINE_PAY.getCode()==order.getPayMode()) {
 			//预约成功 授权门禁
 			RentalResource rentalResource = rentalCommonService.getRentalResource(order.getResourceType(), order.getRentalResourceId());
 
 //			RentalResource rentalResource = rentalv2Provider.getRentalSiteById(order.getRentalResourceId());
-			if (rentalResource.getAclinkId()!=null) {
-				Long doorAuthId = createDoorAuth(order.getRentalUid(), order.getAuthStartTime().getTime(), order.getAuthEndTime().getTime(),
-						rentalResource.getAclinkId(), rentalResource.getCreatorUid());
-				order.setDoorAuthId(doorAuthId);
+			if (!StringUtils.isEmpty(rentalResource.getAclinkId())) {
+				String[] ids = rentalResource.getAclinkId().split(",");
+				if (ids.length > 0) {
+					String doorAuthId = "";
+					for (String id : ids)
+						doorAuthId += createDoorAuth(order.getRentalUid(), order.getAuthStartTime().getTime(), order.getAuthEndTime().getTime(),
+								Long.parseLong(id), rentalResource.getCreatorUid()) + ",";
+					order.setDoorAuthId(doorAuthId.substring(0, doorAuthId.length() - 1));
+				}
 			}
+
+
 
             //用户积分
             LocalEventBus.publish(event -> {
@@ -6333,7 +6355,6 @@ public class Rentalv2ServiceImpl implements Rentalv2Service {
 			RentalResource resource = ConvertHelper.convert(cmd, RentalResource.class);
 			resource.setResourceName(cmd.getSiteName());
 			resource.setStatus(RentalSiteStatus.NORMAL.getCode());
-			resource.setAclinkId(cmd.getAclinkId());
 			//设置资源时 默认为1
 			resource.setResourceCounts(1.0);
 			resource.setAutoAssign((byte)0);
@@ -6407,7 +6428,7 @@ public class Rentalv2ServiceImpl implements Rentalv2Service {
 		//查询默认规则，创建资源规则
 		cmd2.setResourceTypeId(resource.getResourceTypeId());
 		cmd2.setResourceType(resource.getResourceType());
-		cmd2.setSourceId(resource.getId());
+		//cmd2.setSourceType(RuleSourceType.DEFAULT.getCode());
 		QueryDefaultRuleAdminResponse rule = this.queryDefaultRule(cmd2);
 
 		if (null == rule) {
