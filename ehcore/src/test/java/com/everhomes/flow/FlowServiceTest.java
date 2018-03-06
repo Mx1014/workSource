@@ -113,10 +113,10 @@ public class FlowServiceTest extends LoginAuthTestCase {
     	cmd.setModuleType(FlowModuleType.NO_MODULE.getCode());
     	cmd.setNamespaceId(0);
     	
-    	Flow findFlow = flowProvider.findFlowByName(cmd.getNamespaceId(), cmd.getModuleId(), cmd.getModuleType(), cmd.getOwnerId(), cmd.getOwnerType(), "no exists");
+    	Flow findFlow = flowProvider.findFlowByName(cmd.getNamespaceId(), cmd.getModuleId(), cmd.getModuleType(), cmd.getProjectType(), cmd.getProjectId(), cmd.getOwnerId(), cmd.getOwnerType(), "no exists");
     	Assert.assertTrue(findFlow == null);
     	
-    	findFlow = flowProvider.findFlowByName(cmd.getNamespaceId(), cmd.getModuleId(), cmd.getModuleType(), cmd.getOwnerId(), cmd.getOwnerType(), cmd.getFlowName());
+    	findFlow = flowProvider.findFlowByName(cmd.getNamespaceId(), cmd.getModuleId(), cmd.getModuleType(), cmd.getProjectType(), cmd.getProjectId(), cmd.getOwnerId(), cmd.getOwnerType(), cmd.getFlowName());
     	Assert.assertTrue(findFlow != null);
     	
     	try {
