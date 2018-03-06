@@ -15,6 +15,8 @@ package com.everhomes.rest.general_approval;
  */
 public class  ListGeneralApprovalRecordsCommand {
 
+    private Integer namespaceId;
+
     private Long organizationId;
 
     private Long moduleId;
@@ -38,6 +40,14 @@ public class  ListGeneralApprovalRecordsCommand {
     private Integer pageSize;
 
     public ListGeneralApprovalRecordsCommand() {
+    }
+
+    public Integer getNamespaceId() {
+        return namespaceId;
+    }
+
+    public void setNamespaceId(Integer namespaceId) {
+        this.namespaceId = namespaceId;
     }
 
     public Long getOrganizationId() {
