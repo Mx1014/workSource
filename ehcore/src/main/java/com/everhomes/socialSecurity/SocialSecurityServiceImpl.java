@@ -1368,13 +1368,16 @@ public class SocialSecurityServiceImpl implements SocialSecurityService {
             }
             importCalculateRadix(radix, base, item, setting);
             String errorString = null;
-            if (null != item.getCompanyRatio()) {
-                errorString = importCalculateCompanyRatio(item.getCompanyRatio(), base, item, setting);
+            if (null == item.getCompanyRatio()) {
+                item.setCompanyRatio(setting.getCompanyRatio());
+            }
+            errorString = importCalculateCompanyRatio(item.getCompanyRatio(), base, item, setting);
 
+            if (null == item.getEmployeeRatio()) {
+                item.setEmployeeRatio(setting.getEmployeeRatio());
             }
-            if (null != item.getEmployeeRatio()) {
-                errorString = importCalculateEmployeeRatio(item.getEmployeeRatio(), base, item, setting);
-            }
+            errorString = importCalculateEmployeeRatio(item.getEmployeeRatio(), base, item, setting);
+
             if (null != errorString) {
                 LOGGER.error(errorString);
                 log.setErrorLog(errorString);
@@ -1407,6 +1410,9 @@ public class SocialSecurityServiceImpl implements SocialSecurityService {
     }
 
     private String importCalculateEmployeeRatio(Integer employeeRatio, SocialSecurityBase base, SocialSecurityItemDTO itemDTO, SocialSecuritySetting setting) {
+        if (null == employeeRatio) {
+            employeeRatio = 0;
+        }
         if (null != base) {
             if (employeeRatio.compareTo(base.getEmployeeRatioMin()) < 0) {
                 setting.setEmployeeRatio(base.getEmployeeRatioMin());
@@ -1433,6 +1439,9 @@ public class SocialSecurityServiceImpl implements SocialSecurityService {
     }
 
     private String importCalculateCompanyRatio(Integer companyRatio, SocialSecurityBase base, SocialSecurityItemDTO itemDTO, SocialSecuritySetting setting) {
+        if (null == companyRatio) {
+            companyRatio = 0;
+        }
         LOGGER.debug("base : " + StringHelper.toJsonString(base) + " ratio " + companyRatio);
         if (null != base) {
             if (companyRatio.compareTo(base.getCompanyRatioMin()) < 0) {
@@ -1951,7 +1960,6 @@ public class SocialSecurityServiceImpl implements SocialSecurityService {
         report.setDeptName(detail.getDepartment());
         List<SocialSecuritySetting> settings = socialSecuritySettingProvider.listSocialSecuritySetting(detail.getId());
         if (null != settings) {
-            report.setHouseholdType(settings.get(0).getHouseholdType());
             for (SocialSecuritySetting setting : settings) {
                 if (AccumOrSocial.ACCUM == AccumOrSocial.fromCode(setting.getAccumOrSocail())) {
                     report.setAccumulationFundCityId(setting.getCityId());
@@ -1961,6 +1969,7 @@ public class SocialSecurityServiceImpl implements SocialSecurityService {
                     }
                     report.setAccumulationFundRadix(setting.getRadix());
                 } else {
+                    report.setHouseholdType(setting.getHouseholdType());
                     report.setSocialSecurityCityId(setting.getCityId());
                     Region city = regionProvider.findRegionById(setting.getCityId());
                     if (null != city) {
