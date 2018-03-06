@@ -68,6 +68,7 @@ import com.everhomes.util.*;
 import freemarker.cache.StringTemplateLoader;
 import freemarker.template.Configuration;
 import freemarker.template.Template;
+import org.apache.commons.lang.StringUtils;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.BeanUtils;
@@ -2968,12 +2969,15 @@ public class FlowServiceImpl implements FlowService {
                 if (flowNode != null) {
                     updateCaseDTO(detail, flowNode, dto, type);
                 }
-                if (dto.getTitle() == null || dto.getTitle().isEmpty()) {
-                    if (detail.getServiceType() != null && detail.getServiceType().length() > 0) {
+                if (StringUtils.isEmpty(dto.getTitle())) {
+                    if (StringUtils.isNotBlank(detail.getServiceType())) {
                         dto.setTitle(detail.getServiceType());
                     } else {
                         dto.setTitle(detail.getModuleName());
                     }
+                }
+                if (StringUtils.isEmpty(dto.getServiceType())) {
+                    dto.setServiceType(dto.getTitle());
                 }
                 dtos.add(dto);
             }

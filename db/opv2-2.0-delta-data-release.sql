@@ -720,3 +720,7 @@ update eh_service_modules set default_order = 3 where id = 49120;
 update eh_service_modules set default_order = 4 where id = 49130;
 update eh_service_modules set default_order = 5 where id = 49140;
 update eh_service_modules set default_order = 2 where id = 49150;
+
+-- 要求修改严军负责的三个模块的类型 by lei.lv
+update eh_service_modules set module_control_type = 'unlimit_control' where id in(10100,10300,10600);
+update eh_reflection_service_module_apps set module_control_type = 'unlimit_control' where module_id in(10100,10300,10600);
