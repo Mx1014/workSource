@@ -2,6 +2,7 @@
 package com.everhomes.openapi;
 
 import java.sql.Timestamp;
+import java.text.SimpleDateFormat;
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
@@ -10,6 +11,7 @@ import java.util.Map;
 import com.everhomes.contract.ContractParam;
 import com.everhomes.contract.ContractParamGroupMap;
 import com.everhomes.listing.CrossShardListingLocator;
+import com.everhomes.rest.contract.ContractLogDTO;
 import com.everhomes.rest.contract.ContractStatus;
 import com.everhomes.rest.customer.CustomerType;
 import com.everhomes.server.schema.tables.*;
@@ -481,6 +483,41 @@ public class ContractProviderImpl implements ContractProvider {
 				.fetchOne(Tables.EH_CONTRACTS.ID);
 		if(zuolinContractId == null) return null;
 		return String.valueOf(zuolinContractId);
+	}
+
+	@Override
+	public List<ContractLogDTO> listContractsBySupplier(Long supplierId, Long pageAnchor, Integer pageSize) {
+		DSLContext context = getReadOnlyContext();
+		List<ContractLogDTO> list = new ArrayList<>();
+		SimpleDateFormat sdf = new SimpleDateFormat("yyyy-MM-dd");
+		context.select(Tables.EH_CONTRACTS.CONTRACT_NUMBER,Tables.EH_CONTRACTS.CONTRACT_START_DATE
+                ,Tables.EH_CONTRACTS.CONTRACT_END_DATE,Tables.EH_CONTRACTS.CONTRACT_TYPE
+                ,Tables.EH_CONTRACTS.NAME,Tables.EH_CONTRACTS.STATUS,Tables.EH_CONTRACTS.RENT)
+				.from(Tables.EH_CONTRACTS)
+				.where(Tables.EH_CONTRACTS.CUSTOMER_ID.eq(supplierId))
+				.and(Tables.EH_CONTRACTS.CUSTOMER_TYPE.eq(CustomerType.SUPPLIER.getCode()))
+				.limit(pageAnchor.intValue(),pageSize)
+				.fetch()
+				.forEach(r -> {
+					ContractLogDTO dto = new ContractLogDTO();
+					dto.setContractNumber(r.getValue(Tables.EH_CONTRACTS.CONTRACT_NUMBER));
+                    Timestamp startDate = r.getValue(Tables.EH_CONTRACTS.CONTRACT_START_DATE);
+                    Timestamp endDate = r.getValue(Tables.EH_CONTRACTS.CONTRACT_END_DATE);
+                    if(startDate != null){
+                        String startDateFormatted = sdf.format(startDate);
+                        dto.setContractStartDate(startDateFormatted);
+                    }
+                    if(endDate != null){
+                        String endDateFormatted = sdf.format(endDate);
+                        dto.setContractEndDate(endDateFormatted);
+                    }
+                    dto.setContractType(r.getValue(Tables.EH_CONTRACTS.CONTRACT_TYPE));
+                    dto.setName(r.getValue(Tables.EH_CONTRACTS.NAME));
+                    dto.setStatus(r.getValue(Tables.EH_CONTRACTS.STATUS));
+                    dto.setTotalAmount(r.getValue(Tables.EH_CONTRACTS.RENT).toString());
+                    list.add(dto);
+				});
+		return list;
 	}
 
 	@Override

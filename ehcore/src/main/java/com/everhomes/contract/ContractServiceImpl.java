@@ -1517,6 +1517,21 @@ public class ContractServiceImpl implements ContractService {
 		return null;
 	}
 
+	@Override
+	public ListContractsBySupplierResponse listContractsBySupplier(ListContractsBySupplierCommand cmd) {
+		ListContractsBySupplierResponse response = new ListContractsBySupplierResponse();
+		if(cmd.getPageAnchor() == null) cmd.setPageAnchor(0l);
+		if(cmd.getPageSize() == null) cmd.setPageSize(20);
+		List<ContractLogDTO> dtos = contractProvider.listContractsBySupplier(cmd.getSupplierId()
+				,cmd.getPageAnchor(),cmd.getPageSize() + 1);
+		if(dtos.size() > cmd.getPageSize()){
+			response.setNextPageAnchor(cmd.getPageAnchor() + cmd.getPageSize());
+			dtos.remove(dtos.size() - 1);
+		}
+		response.setDtos(dtos);
+		return null;
+	}
+
 	private ContractParamDTO toContractParamDTO(ContractParam param) {
 		ContractParamDTO dto = ConvertHelper.convert(param, ContractParamDTO.class);
 		List<ContractParamGroupMap> notifyGroups = contractProvider.listByParamId(param.getId(), ContractParamGroupType.NOTIFY_GROUP.getCode());
