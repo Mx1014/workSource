@@ -70,7 +70,7 @@ public class AddResourceAdminCommand {
 	private String confirmationPrompt;
     private String offlineCashierAddress;
     private String offlinePayeeUid;
-    private Long aclinkId;
+    private String aclinkId;
 	private Byte multiUnit;
 	private java.lang.Byte       autoAssign;
 	private Double siteCounts;
@@ -241,11 +241,11 @@ public class AddResourceAdminCommand {
 		this.offlinePayeeUid = offlinePayeeUid;
 	}
 
-	public Long getAclinkId() {
+	public String getAclinkId() {
 		return aclinkId;
 	}
 
-	public void setAclinkId(Long aclinkId) {
+	public void setAclinkId(String aclinkId) {
 		this.aclinkId = aclinkId;
 	}
 
