@@ -9,6 +9,7 @@ import com.everhomes.rest.acl.PrivilegeConstants;
 import com.everhomes.rest.equipment.EquipmentInspectionPlanDTO;
 import com.everhomes.rest.equipment.EquipmentStandardRelationDTO;
 import com.everhomes.rest.equipment.EquipmentTaskDTO;
+import com.everhomes.rest.equipment.EquipmentTaskStatus;
 import com.everhomes.rest.equipment.ListEquipmentTasksResponse;
 import com.everhomes.rest.equipment.SearchEquipmentTasksCommand;
 import com.everhomes.rest.quality.OwnerType;
@@ -143,7 +144,9 @@ public class EquipmentTasksSearcherImpl extends AbstractElasticSearch implements
 
         }
 
-        FilterBuilder fb = FilterBuilders.termFilter("namespaceId", cmd.getNamespaceId());
+        FilterBuilder nfb = FilterBuilders.termFilter("status", EquipmentTaskStatus.NONE.getCode());
+        FilterBuilder fb = FilterBuilders.notFilter(nfb);
+        fb = FilterBuilders.termFilter("namespaceId", cmd.getNamespaceId());
         if (cmd.getTargetId() != null && cmd.getTargetId() != 0L) {
             fb = FilterBuilders.andFilter(fb, FilterBuilders.termFilter("targetId", cmd.getTargetId()));
 
