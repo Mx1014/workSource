@@ -1692,5 +1692,8 @@ ALTER TABLE eh_archives_logs MODIFY operation_reason VARCHAR(1024) COMMENT 'the 
 
 -- end by nan.rong
 
+-- add by zheng
+ALTER TABLE `eh_rentalv2_resources`
+CHANGE COLUMN `aclink_id` `aclink_id` VARCHAR(128) NULL DEFAULT NULL ;
 
 
