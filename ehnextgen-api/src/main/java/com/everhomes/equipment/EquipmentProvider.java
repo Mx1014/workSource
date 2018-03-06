@@ -219,6 +219,8 @@ public interface EquipmentProvider {
 
 	void deleteReviewExpireDaysByScope(Byte scopeType, Long scopeId);
 
+	void deleteReviewExpireDaysByReferId(Long id);
+
 	EquipmentInspectionReviewDate getEquipmentInspectiomExpireDaysById(Long id);
 
 	List<EquipmentInspectionReviewDate> getEquipmentInspectiomExpireDays(Long scopeId, Byte scopeType);
