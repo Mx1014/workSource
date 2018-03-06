@@ -763,7 +763,7 @@ public class EquipmentProviderImpl implements EquipmentProvider {
         }
         this.dbProvider.iterationMapReduce(locator.getShardIterator(), null, (context, obj) -> {
             SelectQuery<EhEquipmentInspectionTasksRecord> query = context.selectQuery(Tables.EH_EQUIPMENT_INSPECTION_TASKS);
-
+            query.addConditions(Tables.EH_EQUIPMENT_INSPECTION_TASKS.STATUS.ne(EquipmentTaskStatus.NONE.getCode()));
             if (locator.getAnchor() != null && locator.getAnchor() != 0L) {
                 query.addConditions(Tables.EH_EQUIPMENT_INSPECTION_TASKS.ID.lt(locator.getAnchor()));
             }

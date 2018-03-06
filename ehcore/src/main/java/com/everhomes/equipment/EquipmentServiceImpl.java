@@ -5421,7 +5421,7 @@ private void checkUserPrivilege(Long orgId, Long privilegeId, Long communityId) 
 
 			if(tasks.size() > 0) {
 				for(EquipmentInspectionTasks task : tasks) {
-					equipmentTasksSearcher.feedDoc(task);
+					equipmentTasksSearcher.deleteById(task.getId());
 				}
 			}
 
