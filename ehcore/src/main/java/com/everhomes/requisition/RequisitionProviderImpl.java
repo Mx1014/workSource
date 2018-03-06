@@ -34,8 +34,8 @@ public class RequisitionProviderImpl implements RequisitionProvider {
     }
 
     @Override
-    public List<ListRequisitionsDTO> listRequisitions(Integer namespaceId, String ownerType, Long ownerId, String theme
-            , Long typeId, Long pageAnchor, Integer pageSize) {
+    public List<ListRequisitionsDTO> listRequisitions(Integer namespaceId, String ownerType, Long ownerId
+            , Long communityId, String theme, Long typeId, Long pageAnchor, Integer pageSize) {
         List<ListRequisitionsDTO> list = new ArrayList<>();
         DSLContext context = getReadOnlyContext();
         SelectQuery<Record> query = context.selectQuery();
@@ -50,6 +50,7 @@ public class RequisitionProviderImpl implements RequisitionProvider {
         if(typeId!=null){
             query.addConditions(req.REQUISITION_TYPE_ID.eq(typeId));
         }
+        query.addConditions(req.COMMUNITYID.eq(communityId));
         query.addLimit(pageAnchor.intValue(),pageSize);
         SimpleDateFormat sdf = new SimpleDateFormat("yyyy-MM-dd HH:mm");
         query.fetch().forEach(r -> {
