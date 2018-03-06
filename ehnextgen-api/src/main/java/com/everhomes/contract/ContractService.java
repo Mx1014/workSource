@@ -50,4 +50,5 @@ public interface ContractService {
 
 	List<OrganizationDTO> getUserGroups(GetUserGroupsCommand cmd);
 
+    ListContractsBySupplierResponse listContractsBySupplier(ListContractsBySupplierCommand cmd);
 }

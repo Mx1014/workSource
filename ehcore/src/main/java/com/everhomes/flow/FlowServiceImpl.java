@@ -252,7 +252,8 @@ public class FlowServiceImpl implements FlowService {
             cmd.setModuleType(FlowModuleType.NO_MODULE.getCode());
         }
 
-        Flow flow = flowProvider.findFlowByName(cmd.getNamespaceId(), cmd.getModuleId(), cmd.getModuleType(), cmd.getOwnerId(), cmd.getOwnerType(), cmd.getFlowName());
+        Flow flow = flowProvider.findFlowByName(cmd.getNamespaceId(), cmd.getModuleId(), cmd.getModuleType(),
+                cmd.getProjectType(), cmd.getProjectId(), cmd.getOwnerId(), cmd.getOwnerType(), cmd.getFlowName());
         if (flow != null) {
             throw RuntimeErrorException.errorWith(FlowServiceErrorCode.SCOPE, FlowServiceErrorCode.ERROR_FLOW_NAME_EXISTS, "flow name exists");
         }
@@ -274,7 +275,7 @@ public class FlowServiceImpl implements FlowService {
         flowListenerManager.onFlowCreating(obj);
 
         Flow resultObj = this.dbProvider.execute(status -> {
-            Flow execObj = flowProvider.findFlowByName(cmd.getNamespaceId(), cmd.getModuleId(), cmd.getModuleType(), cmd.getOwnerId(), cmd.getOwnerType(), cmd.getFlowName());
+            Flow execObj = flowProvider.findFlowByName(cmd.getNamespaceId(), cmd.getModuleId(), cmd.getModuleType(), cmd.getProjectType(), cmd.getProjectId(), cmd.getOwnerId(), cmd.getOwnerType(), cmd.getFlowName());
             if (execObj != null) {
                 //already exists
                 return null;
@@ -302,7 +303,8 @@ public class FlowServiceImpl implements FlowService {
             throw RuntimeErrorException.errorWith(FlowServiceErrorCode.SCOPE, FlowServiceErrorCode.ERROR_FLOW_NOT_EXISTS, "flowId not exists");
         }
 
-        Flow flow = flowProvider.findFlowByName(oldFlow.getNamespaceId(), oldFlow.getModuleId(), oldFlow.getModuleType(), oldFlow.getOwnerId(), oldFlow.getOwnerType(), cmd.getNewFlowName());
+        Flow flow = flowProvider.findFlowByName(oldFlow.getNamespaceId(), oldFlow.getModuleId(), oldFlow.getModuleType(),
+                oldFlow.getProjectType(), oldFlow.getProjectId(), oldFlow.getOwnerId(), oldFlow.getOwnerType(), cmd.getNewFlowName());
         if (flow != null && !flow.getId().equals(cmd.getFlowId())) {
             throw RuntimeErrorException.errorWith(FlowServiceErrorCode.SCOPE, FlowServiceErrorCode.ERROR_FLOW_NAME_EXISTS, "flow name exists");
         }
