@@ -244,7 +244,7 @@ public class SalaryServiceImpl implements SalaryService {
         response.setCategories(new ArrayList<>());
         List<SalaryEntityCategory> categories = salaryEntityCategoryProvider.listSalaryEntityCategory();
         List<SalaryGroupEntity> entities = salaryGroupEntityProvider.listSalaryGroupEntityByOrgId(cmd.getOrganizationId());
-        if (null == entities) {
+        if (null == entities || entities.size() < 10) {
             entities = copyDefaultEntities2Org(cmd.getOrganizationId());
         }
         response.setUpdateTime(entities.get(0).getUpdateTime().getTime());
@@ -278,6 +278,7 @@ public class SalaryServiceImpl implements SalaryService {
             entity.setDefaultFlag(NormalFlag.YES.getCode());
             entity.setOrganizationId(organizationId);
             entity.setId(null);
+            entity.setOriginEntityId(de.getId());
             if (entity.getStatus() == null) {
                 entity.setStatus((byte) 1);
             }
@@ -1596,7 +1597,7 @@ public class SalaryServiceImpl implements SalaryService {
 
     private void calculateReports(Long ownerId, String month, Long userId) {
         //重新计算每个人的数据
-        List<SalaryEmployee> employees = salaryEmployeeProvider.listSalaryEmployees(ownerId, month);
+        List<SalaryEmployee> employees = salaryEmployeeProvider.listSalaryEmployees(ownerId, month,SalaryEmployeeStatus.NORMAL);
 
         if (null != employees) {
             for (SalaryEmployee e : employees) {

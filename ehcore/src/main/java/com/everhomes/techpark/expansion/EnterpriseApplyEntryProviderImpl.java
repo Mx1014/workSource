@@ -150,7 +150,7 @@ public class EnterpriseApplyEntryProviderImpl implements EnterpriseApplyEntryPro
 				if (cond2 == null)
 					cond2 = Tables.EH_LEASE_PROMOTIONS.HOUSE_RESOURCE_TYPE.like("%"+s+"%");
 				else
-					cond2 = cond2.or(Tables.EH_LEASE_PROMOTIONS.HOUSE_RESOURCE_TYPE.like("%"+s+"%"));
+					cond2 = cond2.and(Tables.EH_LEASE_PROMOTIONS.HOUSE_RESOURCE_TYPE.like("%"+s+"%"));
 			if (cond2!=null)
 				cond = cond.and(cond2);
 		}

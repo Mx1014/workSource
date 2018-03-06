@@ -83,15 +83,16 @@ CREATE TABLE `eh_equipment_inspection_plan_group_map` (
 -- 巡检计划 审批时间表 end  by jiarui
 
 CREATE TABLE `eh_equipment_inspection_review_date` (
-  `id` BIGINT(20) NOT NULL,
-  `owner_type` VARCHAR(64) NOT NULL COMMENT 'refer to object type EhEquipmentInspectionTasksReviewExpireDays...',
-  `scope_type` TINYINT(4) NOT NULL DEFAULT '0' COMMENT '0: all; 1: namespace; 2: community',
-  `scope_id` BIGINT(20) NOT NULL,
-  `review_expired_days` INT(11) NOT NULL DEFAULT '0' COMMENT 'review_expired_days',
-  `status` TINYINT(4) NOT NULL DEFAULT '0' COMMENT '0: invalid, 1: valid',
-  `create_time` DATETIME  COMMENT 'record create time',
+  `id` bigint(20) NOT NULL,
+  `owner_type` varchar(64) NOT NULL COMMENT 'refer to object type EhEquipmentInspectionTasksReviewExpireDays...',
+  `scope_type` tinyint(4) NOT NULL DEFAULT '0' COMMENT '0: all; 1: namespace; 2: community',
+  `scope_id` bigint(20) NOT NULL,
+  `review_expired_days` int(11) NOT NULL DEFAULT '0' COMMENT 'review_expired_days',
+  `status` tinyint(4) NOT NULL DEFAULT '0' COMMENT '0: invalid, 1: valid',
+  `refer_id` bigint(20) NOT NULL DEFAULT '0',
+  `create_time` datetime  COMMENT 'record create time',
   PRIMARY KEY (`id`)
-) ENGINE=INNODB DEFAULT CHARSET=utf8mb4;
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4;
 
 -- 设备操作记录表   by jiarui
 CREATE TABLE `eh_equipment_inspection_equipment_logs` (
@@ -272,7 +273,8 @@ CREATE TABLE `eh_parking_space_logs` (
 ) ENGINE=INNODB DEFAULT CHARSET=utf8mb4;
 
 ALTER TABLE `eh_rentalv2_resource_types`
-ADD COLUMN `menu_type` TINYINT(4) DEFAULT 1 COMMENT '1: 通用 2:公司会议室',
+ADD COLUMN `menu_type` TINYINT(4) DEFAULT 1 COMMENT '1: 通用 2:公司会议室';
+ALTER TABLE `eh_rentalv2_resource_types`
 ADD COLUMN `identify` VARCHAR(64) DEFAULT NULL COMMENT '类型标识';
 
 CREATE TABLE `eh_rentalv2_order_rules` (
@@ -1685,6 +1687,8 @@ ALTER TABLE eh_archives_dismiss_employees ADD COLUMN department_id BIGINT COMMEN
 ALTER TABLE eh_archives_dismiss_employees ADD COLUMN job_position VARCHAR(128) COMMENT '离职前职位';
 
 ALTER TABLE eh_archives_dismiss_employees ADD COLUMN job_level VARCHAR(128) COMMENT '离职前职级';
+
+ALTER TABLE eh_archives_logs MODIFY operation_reason VARCHAR(1024) COMMENT 'the reason of the operation';
 
 -- end by nan.rong
 

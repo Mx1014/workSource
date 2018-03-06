@@ -39,6 +39,7 @@ import com.everhomes.rest.organization.ListOrganizationContactByJobPositionIdCom
 import com.everhomes.rest.organization.OrganizationContactDTO;
 import com.everhomes.rest.organization.OrganizationDTO;
 import com.everhomes.rest.organization.OrganizationGroupType;
+import com.everhomes.rest.organization.OrganizationMemberDTO;
 import com.everhomes.rest.organization.OrganizationMemberTargetType;
 import com.everhomes.rest.portal.ListServiceModuleAppsCommand;
 import com.everhomes.rest.portal.ListServiceModuleAppsResponse;
@@ -93,6 +94,7 @@ import com.everhomes.rest.quality.ListSampleQualityInspectionTasksCommand;
 import com.everhomes.rest.quality.ListUserHistoryTasksCommand;
 import com.everhomes.rest.quality.ListUserQualityInspectionTaskTemplatesCommand;
 import com.everhomes.rest.quality.OfflineDeleteTablesInfo;
+import com.everhomes.rest.quality.OfflineReportDetailDTO;
 import com.everhomes.rest.quality.OfflineSampleQualityInspectionResponse;
 import com.everhomes.rest.quality.OfflineTaskReportCommand;
 import com.everhomes.rest.quality.OwnerType;
@@ -105,6 +107,7 @@ import com.everhomes.rest.quality.QualityInspectionLogProcessType;
 import com.everhomes.rest.quality.QualityInspectionLogType;
 import com.everhomes.rest.quality.QualityInspectionSpecificationDTO;
 import com.everhomes.rest.quality.QualityInspectionSpecificationItemResultsDTO;
+import com.everhomes.rest.quality.QualityInspectionStandardGroupMapDTO;
 import com.everhomes.rest.quality.QualityInspectionTaskAttachmentDTO;
 import com.everhomes.rest.quality.QualityInspectionTaskDTO;
 import com.everhomes.rest.quality.QualityInspectionTaskRecordsDTO;
@@ -142,7 +145,6 @@ import com.everhomes.rest.quality.UpdateQualityCategoryCommand;
 import com.everhomes.rest.quality.UpdateQualitySpecificationCommand;
 import com.everhomes.rest.quality.UpdateQualityStandardCommand;
 import com.everhomes.rest.quality.UpdateSampleQualityInspectionCommand;
-import com.everhomes.rest.quality.OfflineReportDetailDTO;
 import com.everhomes.rest.repeat.RepeatSettingsDTO;
 import com.everhomes.rest.repeat.TimeRangeDTO;
 import com.everhomes.rest.user.MessageChannelType;
@@ -4507,8 +4509,10 @@ Long nextPageAnchor = null;
 		QualityOfflineTaskDetailsResponse offlineTaskDetailsResponse = new QualityOfflineTaskDetailsResponse();
 		offlineTaskDetailsResponse.setTasks(tasksResponse.getTasks());
 		offlineTaskDetailsResponse.setNextPageAnchor(tasksResponse.getNextPageAnchor());
+
 		List<QualityInspectionSpecificationDTO> specifications = new ArrayList<>();
 		List<Long> parentSpecificationIds = new ArrayList<>();
+		List<QualityInspectionStandards> standards = new ArrayList<>();
 
 		if(tasksResponse.getTasks()!=null && tasksResponse.getTasks().size()>0) {
 			tasksResponse.getTasks().forEach((task) -> {
@@ -4527,23 +4531,116 @@ Long nextPageAnchor = null;
 				if (specification != null) {
 					specifications.add(ConvertHelper.convert(specification, QualityInspectionSpecificationDTO.class));
 				}
+				QualityInspectionStandards standard = qualityProvider.findStandardById(task.getStandardId());
+				if(standard!=null){
+					standards.add(standard);
+				}
 			});
 		}
 		//去除重复specification
-		Set<QualityInspectionSpecificationDTO> tempSet = new HashSet<>();
-		tempSet.addAll(specifications);
-		List<QualityInspectionSpecificationDTO> specificationList = new ArrayList<>(tempSet);
-		specificationList.forEach((s)->parentSpecificationIds.add(s.getId()));
+//		Set<QualityInspectionSpecificationDTO> tempSet = new HashSet<>();
+//		tempSet.addAll(specifications);
+		Map<Long, QualityInspectionSpecificationDTO> specificationDTOMap = new HashMap<>();
+		specifications.forEach((s)-> specificationDTOMap.putIfAbsent(s.getId(), s));
+		List<QualityInspectionSpecificationDTO> specificationList = null;
+		if(specificationDTOMap.size()>0){
+			specificationList = new ArrayList<>(specificationDTOMap.values());
+			specificationList.forEach((s)->parentSpecificationIds.add(s.getId()));
+		}
+
 		populateSpecificationDetails(specificationList, parentSpecificationIds);
 		offlineTaskDetailsResponse.setSpecifications(specificationList);
-
+		//处理组织架构人员
+		processOrganizationsAndMembers(offlineTaskDetailsResponse,standards);
+		//再增加计划和groupId的关系表
+		processPlansAndGroupRelations(offlineTaskDetailsResponse,standards);
+		//增加类型
+		processSpecifications(offlineTaskDetailsResponse,cmd.getTargetId(),cmd.getOwnerId());
 		return offlineTaskDetailsResponse;
+	}
+
+	private void processSpecifications(QualityOfflineTaskDetailsResponse offlineTaskDetailsResponse, Long targetId, Long ownerId) {
+		List<QualityInspectionSpecifications> specifications = qualityProvider.listAllChildrenSpecifications("/%", null,
+				ownerId, SpecificationScopeCode.ALL.getCode(), 0L, SpecificationScopeCode.ALL.getCode());
+		List<QualityInspectionSpecificationDTO> categories = new ArrayList<>();
+		if (specifications != null && specifications.size() > 0) {
+			specifications.forEach((s) -> {
+				if (s.getParentId() == 0L) {
+					categories.add(ConvertHelper.convert(s, QualityInspectionSpecificationDTO.class));
+				}
+			});
+		}
+		offlineTaskDetailsResponse.setCategories(categories);
+	}
+
+	/**
+	 * 增加任务中的计划id和groupId
+	 * @param offlineTaskDetailsResponse  离线结果
+	 * @param standards  计划
+	 */
+	private void processPlansAndGroupRelations(QualityOfflineTaskDetailsResponse offlineTaskDetailsResponse, List<QualityInspectionStandards> standards) {
+		List<QualityInspectionStandardGroupMapDTO> groupMapDTOS = new ArrayList<>();
+		List<QualityInspectionStandardGroupMap> groupMaps = new ArrayList<>();
+		if(standards!=null && standards.size()>0){
+			standards.forEach((standard)-> groupMaps.addAll(standard.getExecutiveGroup()));
+			groupMaps.forEach((groupMap)-> groupMapDTOS.add(ConvertHelper.convert(groupMap,QualityInspectionStandardGroupMapDTO.class)));
+		}
+		offlineTaskDetailsResponse.setGroupMaps(groupMapDTOS);
+	}
+
+	/**
+	 * 返回所有任务相关的组织菜单和人员
+	 *
+	 * @param offlineTaskDetailsResponse 离线结果
+	 */
+	private void processOrganizationsAndMembers(QualityOfflineTaskDetailsResponse offlineTaskDetailsResponse, List<QualityInspectionStandards> standards) {
+		if (standards != null && standards.size() > 0) {
+			qualityProvider.populateStandardsGroups(standards);
+			List<OrganizationDTO> organizationList = new ArrayList<>();
+			List<OrganizationMemberDTO> memberList = new ArrayList<>();
+			//先去重  standard里面的groupId相同的
+			List<Long> executiveGroups = removeDuplicatedStandardGroups(standards);
+			if(executiveGroups!=null && executiveGroups.size()>0) {
+				executiveGroups.forEach((executiveGroup) -> {
+					Organization group = organizationProvider.findOrganizationById(executiveGroup);
+					if (group != null) {
+						organizationList.add(ConvertHelper.convert(group, OrganizationDTO.class));
+					}
+					//拿到所有人员（不包含子级）
+					List<OrganizationMember> members = organizationProvider.listOrganizationMembers(executiveGroup, null);
+					if (members != null && members.size() > 0) {
+						memberList.addAll(members.stream().map((m) -> ConvertHelper.convert(m, OrganizationMemberDTO.class)).collect(Collectors.toList()));
+					}
+				});
+			}
+			offlineTaskDetailsResponse.setOrganizations(organizationList);
+			offlineTaskDetailsResponse.setOrganizationMembers(memberList);
+		}
+	}
+
+	private List<Long> removeDuplicatedStandardGroups(List<QualityInspectionStandards> standards) {
+		if (standards != null && standards.size() > 0) {
+			List<QualityInspectionStandardGroupMap> executiveGroupMaps = new ArrayList<>();
+			standards.forEach((standard) -> {
+				if (standard.getExecutiveGroup() != null && standard.getExecutiveGroup().size() > 0) {
+					executiveGroupMaps.addAll(standard.getExecutiveGroup());
+				}
+			});
+			Map<Long, QualityInspectionStandardGroupMap> groupDTOMap = new HashMap<>();
+			if (executiveGroupMaps.size() > 0) {
+				executiveGroupMaps.forEach((map) -> groupDTOMap.putIfAbsent(map.getGroupId(), map));
+			}
+			if(groupDTOMap.size()>0){
+				return new ArrayList<>(groupDTOMap.keySet());
+			}
+		}
+		return null;
 	}
 
 	/**
 	 * 增加具体类型下的规范
-	 * @param specifications
-	 * @param parentSpecificationIds
+	 * @param specifications  总结果集合包括类型和规范
+	 * @param parentSpecificationIds  父级
 	 */
 	private void populateSpecificationDetails(List<QualityInspectionSpecificationDTO> specifications, List<Long> parentSpecificationIds) {
 		if (specifications != null && parentSpecificationIds != null && parentSpecificationIds.size() > 0) {
@@ -4755,31 +4852,40 @@ Long nextPageAnchor = null;
 		record.setOperatorType(OwnerType.USER.getCode());
 		record.setOperatorId(UserContext.currentUserId());
 
-		task.setExecutiveTime(taskDTO.getExecutiveTime());
-		task.setExecutorType(OrganizationMemberTargetType.USER.getCode());
-		task.setExecutorId(UserContext.currentUserId());
-		if (taskDTO.getOperatorType() != null) {
-			task.setOperatorType(taskDTO.getOperatorType());
-			record.setTargetType(taskDTO.getOperatorType());
-		}
-
-		if (taskDTO.getOperatorId() != null) {
-			task.setOperatorId(taskDTO.getOperatorId());
-			record.setTargetId(taskDTO.getOperatorId());
-		}
-
-		if (taskDTO.getProcessExpireTime() != null) {
-			task.setProcessExpireTime(taskDTO.getProcessExpireTime());
-			record.setProcessEndTime(task.getProcessExpireTime());
-		}
-
+		//客户端增加VerificationResult 辨别是核查完成、转发、整改完成
 		if (QualityInspectionTaskResult.CORRECT.getCode() == taskDTO.getVerificationResult()) {
-			task.setStatus(QualityInspectionTaskStatus.WAITING_FOR_EXECUTING.getCode());
-			task.setResult(QualityInspectionTaskResult.CORRECT.getCode());
-			record.setProcessResult(QualityInspectionTaskResult.CORRECT.getCode());
-			record.setProcessType(ProcessType.INSPECT.getCode());
+			if (QualityInspectionTaskResult.CORRECT.equals(QualityInspectionTaskResult.fromStatus(task.getResult()))) {
+				//转发
+				task.setStatus(QualityInspectionTaskStatus.WAITING_FOR_EXECUTING.getCode());
+				task.setResult(QualityInspectionTaskResult.CORRECT.getCode());
+				if(taskDTO.getOperatorType() != null) {
+					task.setOperatorType(taskDTO.getOperatorType());
+					record.setTargetType(taskDTO.getOperatorType());
+				}
 
+				if(taskDTO.getOperatorId() != null) {
+					task.setOperatorId(taskDTO.getOperatorId());
+					record.setTargetId(taskDTO.getOperatorId());
+				}
+
+				if(taskDTO.getProcessExpireTime() != null) {
+					task.setProcessExpireTime(taskDTO.getProcessExpireTime());
+					record.setProcessEndTime(task.getProcessExpireTime());
+				}
+				record.setProcessResult(QualityInspectionTaskResult.NONE.getCode());
+				record.setProcessType(ProcessType.FORWARD.getCode());
+			}
+		} else if (QualityInspectionTaskResult.CORRECT_COMPLETE.getCode() == taskDTO.getVerificationResult()) {
+			//整改完成
+			task.setStatus(QualityInspectionTaskStatus.EXECUTED.getCode());
+			task.setResult(QualityInspectionTaskResult.CORRECT_COMPLETE.getCode());
+			record.setProcessResult(QualityInspectionTaskResult.CORRECT_COMPLETE.getCode());
+			record.setProcessType(ProcessType.RETIFY.getCode());
 		} else if (QualityInspectionTaskResult.INSPECT_COMPLETE.getCode() == taskDTO.getVerificationResult()) {
+			//核查完成
+			task.setExecutiveTime(new Timestamp(DateHelper.currentGMTTime().getTime()));
+			task.setExecutorType(OrganizationMemberTargetType.USER.getCode());
+			task.setExecutorId(UserContext.currentUserId());
 			task.setResult(QualityInspectionTaskResult.INSPECT_COMPLETE.getCode());
 			task.setStatus(QualityInspectionTaskStatus.EXECUTED.getCode());
 			record.setProcessResult(QualityInspectionTaskResult.INSPECT_COMPLETE.getCode());
@@ -4791,7 +4897,7 @@ Long nextPageAnchor = null;
 				&& taskDTO.getProcessExpireTime() != null) {
 			sendMessageToProcessor(task, taskDTO, record);
 		}
-
+		//处理具体结果集
 		OfflineReportDetailDTO reportDetailDTO = taskDetailMaps.get(task.getId());
 		if (reportDetailDTO.getMessage() != null) {
 			String attText = localeStringService.getLocalizedString(
@@ -4807,7 +4913,7 @@ Long nextPageAnchor = null;
 				record.setProcessMessage(msg);
 			}
 		}
-		updateVerificationTasks(task, record, reportDetailDTO.getAttachments(), reportDetailDTO.getItemResults(), reportDetailDTO.getNamespaceId());
+		updateVerificationTasks(task, record, reportDetailDTO.getAttachments(), reportDetailDTO.getItemResults(), task.getNamespaceId());
 	}
 
 	private void sendMessageToProcessor(QualityInspectionTasks task, QualityInspectionTaskDTO taskDTO, QualityInspectionTaskRecords record) {

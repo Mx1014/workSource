@@ -572,7 +572,7 @@ SET @field_id = (SELECT MAX(id) FROM eh_var_fields);
 INSERT INTO `eh_var_fields` (`id`, `module_name`, `name`, `display_name`, `field_type`, `group_id`, `group_path`, `mandatory_flag`, `default_order`, `status`, `creator_uid`, `create_time`, `operator_uid`, `update_time`, `field_param`) VALUES ((@field_id := @field_id + 1), 'contract', 'parentId', '原合同', 'Long', '31', '/30/31/', '0', NULL, '2', '1', NOW(), NULL, NULL, '{\"fieldParamType\": \"text\", \"length\": 32}');
 INSERT INTO `eh_var_fields` (`id`, `module_name`, `name`, `display_name`, `field_type`, `group_id`, `group_path`, `mandatory_flag`, `default_order`, `status`, `creator_uid`, `create_time`, `operator_uid`, `update_time`, `field_param`) VALUES ((@field_id := @field_id + 1), 'contract', 'rootParentId', '初始合同', 'Long', '31', '/30/31/', '0', NULL, '2', '1', NOW(), NULL, NULL, '{\"fieldParamType\": \"text\", \"length\": 32}');
 
---bY zheng
+-- bY zheng
 UPDATE eh_rentalv2_default_rules SET rental_start_time = 7776000000 WHERE rental_start_time = 0;
 UPDATE eh_rentalv2_default_rules SET rental_start_time_flag = 1;
 
@@ -710,3 +710,17 @@ INSERT INTO `eh_service_module_privileges` (`id`, `module_id`, `privilege_type`,
 VALUES
 	(@mp_id:=@mp_id+1, @module_id, '0', @p_id, '新增请示', '0', NOW());
 
+-- dengs 2018.03.05文件管理的模块id添加。
+update eh_web_menus SET module_id=41500 WHERE NAME='文件管理';
+
+
+-- 修改三级菜单的排序
+update eh_service_modules set default_order = 1 where id = 49110;
+update eh_service_modules set default_order = 3 where id = 49120;
+update eh_service_modules set default_order = 4 where id = 49130;
+update eh_service_modules set default_order = 5 where id = 49140;
+update eh_service_modules set default_order = 2 where id = 49150;
+
+-- 要求修改严军负责的三个模块的类型 by lei.lv
+update eh_service_modules set module_control_type = 'unlimit_control' where id in(10100,10300,10600);
+update eh_reflection_service_module_apps set module_control_type = 'unlimit_control' where module_id in(10100,10300,10600);

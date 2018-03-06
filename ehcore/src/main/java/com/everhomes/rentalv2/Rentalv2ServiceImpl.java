@@ -539,7 +539,7 @@ public class Rentalv2ServiceImpl implements Rentalv2Service {
 		RentalDefaultRule rule = this.rentalv2Provider.getRentalDefaultRule(cmd.getOwnerType(), cmd.getOwnerId(),
 				cmd.getResourceType(), cmd.getResourceTypeId(), cmd.getSourceType(), cmd.getSourceId());
 
-		if(null == rule ){
+		if(null == rule && RuleSourceType.DEFAULT.getCode().equals(cmd.getSourceType())){
 			addDefaultRule(cmd.getOwnerType(), cmd.getOwnerId(), cmd.getResourceType(), cmd.getResourceTypeId(),
 					cmd.getSourceType(), cmd.getSourceId());
 			rule = this.rentalv2Provider.getRentalDefaultRule(cmd.getOwnerType(), cmd.getOwnerId(),
@@ -3784,7 +3784,7 @@ public class Rentalv2ServiceImpl implements Rentalv2Service {
 			cmd.setResourceType(RentalV2ResourceType.DEFAULT.getCode());
 		}
 
-		if (cmd.getResourceType().equals(RentalV2ResourceType.DEFAULT.getCode())){
+		if (cmd.getSourceType().equals(RuleSourceType.DEFAULT.getCode())){
 			RentalDefaultRule rule = this.rentalv2Provider.getRentalDefaultRule(cmd.getOwnerType(), cmd.getOwnerId(),
 					cmd.getResourceType(), cmd.getResourceTypeId(), cmd.getSourceType(), cmd.getSourceId());
 			if (rule == null)
@@ -6407,7 +6407,7 @@ public class Rentalv2ServiceImpl implements Rentalv2Service {
 		//查询默认规则，创建资源规则
 		cmd2.setResourceTypeId(resource.getResourceTypeId());
 		cmd2.setResourceType(resource.getResourceType());
-		cmd2.setSourceId(resource.getId());
+		//cmd2.setSourceType(RuleSourceType.DEFAULT.getCode());
 		QueryDefaultRuleAdminResponse rule = this.queryDefaultRule(cmd2);
 
 		if (null == rule) {
@@ -6798,8 +6798,8 @@ public class Rentalv2ServiceImpl implements Rentalv2Service {
 						//每天循环的
 						if (cmd.getRentalType().equals(RentalType.HOUR.getCode())) {
 							//按小时
-							Timestamp beginTime = Timestamp.valueOf(datetimeSF.get().format(choseRSR.getBeginTime().getTime()));
-							Timestamp endTime = Timestamp.valueOf(datetimeSF.get().format(choseRSR.getEndTime().getTime()));
+							Timestamp beginTime = new Timestamp(start.getTime().getTime()+getDayTime(choseRSR.getBeginTime().getTime()));
+							Timestamp endTime =  new Timestamp(start.getTime().getTime()+getDayTime(choseRSR.getEndTime().getTime()));
 							changeRentalSiteRules = findRentalSiteRuleByDate(choseRSR.getRentalResourceId(), choseRSR.getResourceNumber(), beginTime, endTime,
 									null, null);
 						} else if (cmd.getRentalType().equals(RentalType.HALFDAY.getCode()) ||
@@ -6829,6 +6829,17 @@ public class Rentalv2ServiceImpl implements Rentalv2Service {
 		});
 
 		cellList.get().clear();
+	}
+
+	//输入时间戳 返回现在是当天的几时几分几秒(毫秒数)
+	private  Long getDayTime(Long timeStamp){
+		SimpleDateFormat trueDay = new SimpleDateFormat("yyyy-MM-dd");
+		try {
+			return timeStamp - trueDay.parse(trueDay.format(new Date(timeStamp))).getTime();
+		}catch (Exception e){
+			e.printStackTrace();
+		}
+		return 0l;
 	}
 
 	private  Long createCellPricePackage(List<PricePackageDTO> pricePackages, String resourceType){
