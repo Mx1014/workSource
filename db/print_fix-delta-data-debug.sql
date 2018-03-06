@@ -1,0 +1,1 @@
+INSERT INTO `eh_configurations` (`name`, `value`, `description`, `namespace_id`, `display_name`) VALUES ('print.siyin.actiondata', '{\"url\":\"http://printtest.zuolin.com/cloud-print/build/index.html#/home#sign_suffix\"}', '打印二维码获取接口', 0, NULL);
