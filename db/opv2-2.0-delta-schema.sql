@@ -1696,4 +1696,8 @@ ALTER TABLE eh_archives_logs MODIFY operation_reason VARCHAR(1024) COMMENT 'the 
 ALTER TABLE `eh_rentalv2_resources`
 CHANGE COLUMN `aclink_id` `aclink_id` VARCHAR(128) NULL DEFAULT NULL ;
 
+ALTER TABLE `eh_rentalv2_orders`
+CHANGE COLUMN `door_auth_id` `door_auth_id` VARCHAR(128) NULL DEFAULT NULL ;
+
+
 
