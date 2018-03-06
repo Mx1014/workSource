@@ -50,7 +50,7 @@ public class RequisitionProviderImpl implements RequisitionProvider {
         if(typeId!=null){
             query.addConditions(req.REQUISITION_TYPE_ID.eq(typeId));
         }
-        query.addConditions(req.COMMUNITYID.eq(communityId));
+        query.addConditions(req.COMMUNITY_ID.eq(communityId));
         query.addLimit(pageAnchor.intValue(),pageSize);
         SimpleDateFormat sdf = new SimpleDateFormat("yyyy-MM-dd HH:mm");
         query.fetch().forEach(r -> {
