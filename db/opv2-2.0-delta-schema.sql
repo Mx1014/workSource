@@ -835,6 +835,7 @@ CREATE TABLE `eh_requisition_types`(
   PRIMARY KEY (`id`)
 ) ENGINE=INNODB DEFAULT CHARSET=utf8mb4;
 
+ALTER TABLE `eh_requisitions` ADD COLUMN `community_id` BIGINT COMMENT '园区id';
 -- 仓库管理2.0 end of the script
 
 -- 增加版本号 201801252125

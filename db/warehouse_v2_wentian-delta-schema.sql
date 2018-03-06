@@ -149,3 +149,5 @@ CREATE TABLE `eh_requisition_types`(
   PRIMARY KEY (`id`)
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4;
 
+ALTER TABLE `eh_requisitions` ADD COLUMN `community_id` BIGINT COMMENT '园区id';
+
