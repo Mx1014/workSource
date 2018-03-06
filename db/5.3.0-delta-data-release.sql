@@ -712,3 +712,6 @@ VALUES
 
 -- dengs 2018.03.05文件管理的模块id添加。
 update eh_web_menus SET module_id=41500 WHERE NAME='文件管理';
+
+-- dengs,新闻分享的url调整。2018.03.06
+update eh_configurations set `value`='/park-news-web/build/index.html?ns=%s&isFS=1&widget=News&timeWidgetStyle=time/#/newsDetail?newsToken=%s' WHERE `name`='news.url';
