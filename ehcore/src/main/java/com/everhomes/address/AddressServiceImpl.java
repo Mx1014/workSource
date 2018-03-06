@@ -1923,8 +1923,8 @@ public class AddressServiceImpl implements AddressService, LocalBusSubscriber {
 				continue;
 			}
 
-            Address address = addressProvider.findAddressByBuildingApartmentName(community.getNamespaceId(), community.getId(), data.getBuildingName(), data.getApartmentName());
-			if(address != null && address.getStatus() != AddressAdminStatus.INACTIVE.getCode()) {
+            Address address = addressProvider.findActiveAddressByBuildingApartmentName(community.getNamespaceId(), community.getId(), data.getBuildingName(), data.getApartmentName());
+			if(address != null) {
                 log.setData(data);
                 log.setErrorLog("apartment name is exist in building");
                 log.setCode(AddressServiceErrorCode.ERROR_EXISTS_APARTMENT_NAME);

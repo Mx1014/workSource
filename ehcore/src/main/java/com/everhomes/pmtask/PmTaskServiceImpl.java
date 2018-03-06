@@ -2264,13 +2264,13 @@ public class PmTaskServiceImpl implements PmTaskService {
 			User user = UserContext.current().getUser();
 			sceneTokenDTO = userService.checkSceneToken(user.getId(), cmd.getSceneToken());
 		}
-		Integer ifAdmain = 0;
+		Integer ifAdmain = 1;
 		if (sceneTokenDTO != null) {
 			String scene = sceneTokenDTO.getScene();
 			if (SceneType.PM_ADMIN.getCode().equals(scene))
-				ifAdmain = 1;
+				ifAdmain = 0;
 		}
-		response.setIfHide(response.getIfHide()&ifAdmain);
+		response.setIfHide(response.getIfHide()|ifAdmain);
 		return response;
 	}
 
