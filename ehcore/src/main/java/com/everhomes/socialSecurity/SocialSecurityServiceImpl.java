@@ -1931,7 +1931,7 @@ public class SocialSecurityServiceImpl implements SocialSecurityService {
                         report.setCommercialInsurance(userPayment.getCompanyRadix());
 //                        report.setCommercialInsurance(calculateAmount(userPayment.getCompanyRadix(), userPayment.getCompanyRatio())
 //                                .add(calculateAmount(userPayment.getEmployeeRadix(), userPayment.getEmployeeRatio(), report.getCommercialInsurance())));
-
+                        break;
                 }
             }
         }
@@ -2168,7 +2168,7 @@ public class SocialSecurityServiceImpl implements SocialSecurityService {
             return "";
         }
 
-        return new BigDecimal(ratio).divide(new BigDecimal(100),2).toString()+"%";
+        return new BigDecimal(ratio).divide(new BigDecimal(100.00),2, BigDecimal.ROUND_HALF_UP).toString()+"%";
     }
 
     private String checkNull(Object o) {
