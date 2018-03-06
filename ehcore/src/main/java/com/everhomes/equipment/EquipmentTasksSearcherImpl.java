@@ -144,9 +144,10 @@ public class EquipmentTasksSearcherImpl extends AbstractElasticSearch implements
 
         }
 
+
+        FilterBuilder fb = FilterBuilders.termFilter("namespaceId", cmd.getNamespaceId());
         FilterBuilder nfb = FilterBuilders.termFilter("status", EquipmentTaskStatus.NONE.getCode());
-        FilterBuilder fb = FilterBuilders.notFilter(nfb);
-        fb = FilterBuilders.termFilter("namespaceId", cmd.getNamespaceId());
+        fb = FilterBuilders.andFilter(fb,FilterBuilders.notFilter(nfb));
         if (cmd.getTargetId() != null && cmd.getTargetId() != 0L) {
             fb = FilterBuilders.andFilter(fb, FilterBuilders.termFilter("targetId", cmd.getTargetId()));
 
