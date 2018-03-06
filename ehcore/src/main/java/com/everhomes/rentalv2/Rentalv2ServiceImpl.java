@@ -3784,7 +3784,7 @@ public class Rentalv2ServiceImpl implements Rentalv2Service {
 			cmd.setResourceType(RentalV2ResourceType.DEFAULT.getCode());
 		}
 
-		if (cmd.getResourceType().equals(RentalV2ResourceType.DEFAULT.getCode())){
+		if (cmd.getSourceType().equals(RuleSourceType.DEFAULT.getCode())){
 			RentalDefaultRule rule = this.rentalv2Provider.getRentalDefaultRule(cmd.getOwnerType(), cmd.getOwnerId(),
 					cmd.getResourceType(), cmd.getResourceTypeId(), cmd.getSourceType(), cmd.getSourceId());
 			if (rule == null)
