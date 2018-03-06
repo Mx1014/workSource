@@ -1,10 +1,8 @@
 package com.everhomes.general_approval;
 
-import java.io.BufferedOutputStream;
 import java.io.ByteArrayOutputStream;
 import java.io.IOException;
 import java.io.OutputStream;
-import java.net.URLEncoder;
 import java.text.SimpleDateFormat;
 import java.time.LocalDate;
 import java.util.*;
@@ -99,8 +97,6 @@ import com.everhomes.server.schema.Tables;
 import com.everhomes.user.UserContext;
 import com.everhomes.util.ConvertHelper;
 import com.everhomes.util.RuntimeErrorException;
-
-import javax.servlet.http.HttpServletResponse;
 
 
 @Component
@@ -588,25 +584,29 @@ public class GeneralApprovalServiceImpl implements GeneralApprovalService {
 
     @Override
     public GeneralApprovalDTO updateGeneralApproval(UpdateGeneralApprovalCommand cmd) {
-        Long userId = UserContext.currentUserId();
         GeneralApproval ga = this.generalApprovalProvider.getGeneralApprovalById(cmd.getApprovalId());
         if (ga == null)
             return null;
         ga.setApprovalName(cmd.getApprovalName());
         ga.setApprovalRemark(cmd.getApprovalRemark());
-        ga.setOperatorUid(userId);
-        ga.setOperatorName(getUserRealName(userId, ga.getOwnerId()));
         if (null != cmd.getSupportType())
             ga.setSupportType(cmd.getSupportType());
 
         dbProvider.execute((TransactionStatus status) -> {
             //  1.update the approval
-            generalApprovalProvider.updateGeneralApproval(ga);
+            updateGeneralApproval(ga);
             //  2.update the scope
             updateGeneralApprovalScope(ga.getNamespaceId(), ga.getId(), cmd.getScopes());
             return null;
         });
         return processApproval(ga);
+    }
+
+    private void updateGeneralApproval(GeneralApproval ga){
+        Long userId = UserContext.currentUserId();
+        ga.setOperatorUid(userId);
+        ga.setOperatorName(getUserRealName(userId, ga.getOrganizationId()));
+        generalApprovalProvider.updateGeneralApproval(ga);
     }
 
     private void updateGeneralApprovalScope(Integer namespaceId, Long approvalId, List<GeneralApprovalScopeMapDTO> dtos) {
@@ -663,7 +663,7 @@ public class GeneralApprovalServiceImpl implements GeneralApprovalService {
         if (ga == null)
             return null;
         ga.setFormOriginId(cmd.getFormOriginId());
-        generalApprovalProvider.updateGeneralApproval(ga);
+        updateGeneralApproval(ga);
         return processApproval(ga);
     }
 
@@ -801,7 +801,7 @@ public class GeneralApprovalServiceImpl implements GeneralApprovalService {
         GeneralApproval ga = this.generalApprovalProvider.getGeneralApprovalById(cmd
                 .getApprovalId());
         ga.setStatus(GeneralApprovalStatus.DELETED.getCode());
-        this.generalApprovalProvider.updateGeneralApproval(ga);
+        updateGeneralApproval(ga);
     }
 
     @Override
@@ -814,24 +814,16 @@ public class GeneralApprovalServiceImpl implements GeneralApprovalService {
 
     @Override
     public void enableGeneralApproval(GeneralApprovalIdCommand cmd) {
-        Long userId = UserContext.currentUserId();
-        GeneralApproval ga = this.generalApprovalProvider.getGeneralApprovalById(cmd
-                .getApprovalId());
+        GeneralApproval ga = this.generalApprovalProvider.getGeneralApprovalById(cmd.getApprovalId());
         ga.setStatus(GeneralApprovalStatus.RUNNING.getCode());
-        ga.setOperatorUid(userId);
-        ga.setOperatorName(getUserRealName(userId, ga.getOwnerId()));
-        this.generalApprovalProvider.updateGeneralApproval(ga);
+        updateGeneralApproval(ga);
     }
 
     @Override
     public void disableGeneralApproval(GeneralApprovalIdCommand cmd) {
-        Long userId = UserContext.currentUserId();
-        GeneralApproval ga = this.generalApprovalProvider.getGeneralApprovalById(cmd
-                .getApprovalId());
+        GeneralApproval ga = this.generalApprovalProvider.getGeneralApprovalById(cmd.getApprovalId());
         ga.setStatus(GeneralApprovalStatus.INVALID.getCode());
-        ga.setOperatorUid(userId);
-        ga.setOperatorName(getUserRealName(userId, ga.getOwnerId()));
-        this.generalApprovalProvider.updateGeneralApproval(ga);
+        updateGeneralApproval(ga);
     }
 
     /**
@@ -1077,13 +1069,34 @@ public class GeneralApprovalServiceImpl implements GeneralApprovalService {
         List<String> titles = Arrays.asList("审批编号", "提交时间", "申请人", "申请人部门", "表单内容",
                 "审批状态", "审批记录", "当前审批人", "督办人");
         //  4. Start to write the excel
+        LOGGER.debug("generalApproval++++++++++++++++++++++++++++++: {}", response.getRecords().size());
         XSSFWorkbook workbook = createApprovalRecordsBook(mainTitle, subTitle, titles, response.getRecords(), taskId);
         return writeExcel(workbook);
     }
 
-    public List<FlowCaseEntity> getApprovalDetails(Long flowCaseId) {
-        FlowCase flowCase = flowCaseProvider.getFlowCaseById(flowCaseId);
-        return generalApprovalFlowModuleListener.onFlowCaseDetailRender(flowCase, null);
+    private ByteArrayOutputStream writeExcel(XSSFWorkbook workbook) {
+        ByteArrayOutputStream out = new ByteArrayOutputStream();
+        try {
+            workbook.write(out);
+            /*String fileName = "审批记录.xlsx";
+            httpResponse.setContentType("application/msexcel");
+            httpResponse.setHeader("Content-Disposition", "attachment; filename=" + URLEncoder.encode(fileName, "UTF-8").replaceAll("\\+", "%20"));
+            OutputStream excelStream = new BufferedOutputStream(httpResponse.getOutputStream());
+            httpResponse.setContentType("application/msexcel");
+            excelStream.write(out.toByteArray());
+            excelStream.flush();
+            excelStream.close();*/
+        } catch (Exception e) {
+            LOGGER.error("export error, e = {}", e);
+        } /*finally {
+            try {
+                workbook.close();
+                out.close();
+            } catch (IOException e) {
+                LOGGER.error("close error", e);
+            }
+        }return*/
+        return out;
     }
 
     private XSSFWorkbook createApprovalRecordsBook(
@@ -1213,30 +1226,9 @@ public class GeneralApprovalServiceImpl implements GeneralApprovalService {
         }
     }
 
-    private ByteArrayOutputStream writeExcel(XSSFWorkbook workbook) {
-        ByteArrayOutputStream out = null;
-        try {
-            out = new ByteArrayOutputStream();
-            workbook.write(out);
-            /*String fileName = "审批记录.xlsx";
-            httpResponse.setContentType("application/msexcel");
-            httpResponse.setHeader("Content-Disposition", "attachment; filename=" + URLEncoder.encode(fileName, "UTF-8").replaceAll("\\+", "%20"));
-            OutputStream excelStream = new BufferedOutputStream(httpResponse.getOutputStream());
-            httpResponse.setContentType("application/msexcel");
-            excelStream.write(out.toByteArray());
-            excelStream.flush();
-            excelStream.close();*/
-        } catch (Exception e) {
-            LOGGER.error("export error, e = {}", e);
-        } finally {
-            try {
-                workbook.close();
-                out.close();
-            } catch (IOException e) {
-                LOGGER.error("close error", e);
-            }
-        }
-        return out;
+    public List<FlowCaseEntity> getApprovalDetails(Long flowCaseId) {
+        FlowCase flowCase = flowCaseProvider.getFlowCaseById(flowCaseId);
+        return generalApprovalFlowModuleListener.onFlowCaseDetailRender(flowCase, null);
     }
 
     @Override

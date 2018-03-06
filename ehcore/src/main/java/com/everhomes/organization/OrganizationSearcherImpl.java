@@ -334,10 +334,10 @@ public class OrganizationSearcherImpl extends AbstractElasticSearch implements O
             fbList.add(adminFlagFilter);
         }
 
-        if (cmd.getExistAddressFlag() != null && cmd.getExistAddressFlag() == ExistAddressFlag.EXIST.getCode()) {
-            FilterBuilder addressFilter = FilterBuilders.existsFilter("addresses");
-            fbList.add(addressFilter);
-        }
+//        if (cmd.getExistAddressFlag() != null && cmd.getExistAddressFlag() == ExistAddressFlag.EXIST.getCode()) {
+//            FilterBuilder addressFilter = FilterBuilders.existsFilter("addresses");
+//            fbList.add(addressFilter);
+//        }
 
         fb = FilterBuilders.andFilter(fbList.toArray(new FilterBuilder[fbList.size()]));
 

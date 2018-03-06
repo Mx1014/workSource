@@ -2948,6 +2948,8 @@ public class EquipmentProviderImpl implements EquipmentProvider {
         }else {
             locator.setAnchor(null);
         }
+        LOGGER.debug("listTasksByPlanId sql={} ",query.getSQL());
+        LOGGER.debug("listTasksByPlanId bindValues={} ",query.getBindValues());
         return  tasks;
     }
 
