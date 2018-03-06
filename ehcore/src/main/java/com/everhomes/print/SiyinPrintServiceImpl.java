@@ -908,8 +908,8 @@ public class SiyinPrintServiceImpl implements SiyinPrintService {
 			else if(settingtype == PrintSettingType.COURSE_HOTLINE){
 				//设置教程/热线
 				response.setHotline(siyinPrintSetting.getHotline());
-				response.setPrintCourseList(Arrays.asList(siyinPrintSetting.getPrintCourse().split("\\|")));
-				response.setScanCopyCourseList(Arrays.asList(siyinPrintSetting.getScanCopyCourse().split("\\|")));
+//				response.setPrintCourseList(Arrays.asList(siyinPrintSetting.getPrintCourse().split("\\|")));
+//				response.setScanCopyCourseList(Arrays.asList(siyinPrintSetting.getScanCopyCourse().split("\\|")));
 			}
 		}
 		return response;
