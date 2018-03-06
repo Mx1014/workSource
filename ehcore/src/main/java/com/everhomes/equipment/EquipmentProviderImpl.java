@@ -2938,7 +2938,7 @@ public class EquipmentProviderImpl implements EquipmentProvider {
             query.addConditions(Tables.EH_EQUIPMENT_INSPECTION_TASKS.ID.lt(locator.getAnchor()));
         }
         query.addConditions(Tables.EH_EQUIPMENT_INSPECTION_TASKS.PLAN_ID.eq(planId));
-        query.addConditions(Tables.EH_EQUIPMENT_INSPECTION_TASKS.STATUS.ne(EquipmentTaskStatus.NONE.getCode()));
+        query.addConditions(Tables.EH_EQUIPMENT_INSPECTION_TASKS.STATUS.eq(EquipmentTaskStatus.NONE.getCode()));
         query.addOrderBy(Tables.EH_EQUIPMENT_INSPECTION_TASKS.ID.desc());
         query.addLimit(pageSize+1);
         tasks =  query.fetchInto(EquipmentInspectionTasks.class);
