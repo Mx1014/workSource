@@ -5183,7 +5183,7 @@ private void checkUserPrivilege(Long orgId, Long privilegeId, Long communityId) 
 				reviewDate = equipmentProvider.getEquipmentInspectiomExpireDays(scopeId, scopeType);
 				if (reviewDate != null && reviewDate.size() > 0) {
 					if (!referId.contains(reviewDate.get(0).getId())) {
-						return ConvertHelper.convert(reviewDate, EquipmentInspectionReviewDateDTO.class);
+						return ConvertHelper.convert(reviewDate.get(0), EquipmentInspectionReviewDateDTO.class);
 					}
 				}
 			}
