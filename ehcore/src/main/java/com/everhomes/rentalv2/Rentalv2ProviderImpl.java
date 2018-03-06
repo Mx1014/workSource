@@ -2065,7 +2065,7 @@ public class Rentalv2ProviderImpl implements Rentalv2Provider {
 	}
 
 	@Override
-	public void setAuthDoorId(Long orderId, Long AuthDoorId) {
+	public void setAuthDoorId(Long orderId, String AuthDoorId) {
 		DSLContext context = dbProvider.getDslContext(AccessSpec.readWrite());
 		context.update(Tables.EH_RENTALV2_ORDERS).set(Tables.EH_RENTALV2_ORDERS.DOOR_AUTH_ID,AuthDoorId).where(
 				Tables.EH_RENTALV2_ORDERS.ID.eq(orderId)
