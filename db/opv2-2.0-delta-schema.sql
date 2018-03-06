@@ -272,7 +272,8 @@ CREATE TABLE `eh_parking_space_logs` (
 ) ENGINE=INNODB DEFAULT CHARSET=utf8mb4;
 
 ALTER TABLE `eh_rentalv2_resource_types`
-ADD COLUMN `menu_type` TINYINT(4) DEFAULT 1 COMMENT '1: 通用 2:公司会议室',
+ADD COLUMN `menu_type` TINYINT(4) DEFAULT 1 COMMENT '1: 通用 2:公司会议室';
+ALTER TABLE `eh_rentalv2_resource_types`
 ADD COLUMN `identify` VARCHAR(64) DEFAULT NULL COMMENT '类型标识';
 
 CREATE TABLE `eh_rentalv2_order_rules` (
