@@ -5116,6 +5116,7 @@ private void checkUserPrivilege(Long orgId, Long privilegeId, Long communityId) 
 				reviewDate.setScopeId(cmd.getNamespaceId().longValue());
 				reviewDate.setScopeType(PmNotifyScopeType.NAMESPACE.getCode());
 			}
+			equipmentProvider.deleteReviewExpireDaysByScope(reviewDate.getScopeType(),reviewDate.getScopeId());
 			if(cmd.getId() == null) {
 				reviewDate.setStatus(PmNotifyConfigurationStatus.VAILD.getCode());
 				equipmentProvider.createReviewExpireDays(reviewDate);
@@ -5138,10 +5139,19 @@ private void checkUserPrivilege(Long orgId, Long privilegeId, Long communityId) 
 			scopeType = PmNotifyScopeType.COMMUNITY.getCode();
 			scopeId = cmd.getCommunityId();
 		}
-		EquipmentInspectionReviewDate reviewDate = equipmentProvider.getEquipmentInspectiomExpireDaysById(cmd.getId(), scopeType, scopeId);
+		EquipmentInspectionReviewDate reviewDate = equipmentProvider.getEquipmentInspectiomExpireDaysById(cmd.getId());
 		if (reviewDate != null) {
-			reviewDate.setStatus(PmNotifyConfigurationStatus.INVAILD.getCode());
-			equipmentProvider.updateReviewExpireDays(reviewDate);
+			if (!reviewDate.getScopeId().equals(scopeId) && !reviewDate.getScopeType().equals(scopeType)) {
+				//项目自定义删除
+				reviewDate.setReferId(reviewDate.getId());
+				reviewDate.setScopeId(scopeId);
+				reviewDate.setScopeType(scopeType);
+				reviewDate.setStatus(PmNotifyConfigurationStatus.VAILD.getCode());
+				equipmentProvider.createReviewExpireDays(reviewDate);
+			}else {
+				reviewDate.setStatus(PmNotifyConfigurationStatus.INVAILD.getCode());
+				equipmentProvider.updateReviewExpireDays(reviewDate);
+			}
 		}
 	}
 
@@ -5153,21 +5163,33 @@ private void checkUserPrivilege(Long orgId, Long privilegeId, Long communityId) 
 			scopeType = PmNotifyScopeType.COMMUNITY.getCode();
 			scopeId = cmd.getCommunityId();
 		}
-		EquipmentInspectionReviewDate reviewDate = equipmentProvider.getEquipmentInspectiomExpireDays(scopeId, scopeType);
-		if (reviewDate != null) {
-			return ConvertHelper.convert(reviewDate, EquipmentInspectionReviewDateDTO.class);
+		List<EquipmentInspectionReviewDate> reviewDate = equipmentProvider.getEquipmentInspectiomExpireDays(scopeId, scopeType);
+		List<Long> referId = new ArrayList<>();
+		if (reviewDate != null && reviewDate.size() > 0) {
+			reviewDate.forEach((r) -> {
+				if (r.getReferId() != null && r.getReferId() != 0L) {
+					referId.add(r.getReferId());
+				}
+			});
+		}
+		if (reviewDate != null && reviewDate.size() > 0) {
+			reviewDate.removeIf((r) -> r.getReferId() != 0L && r.getReferId() != null);
+			return ConvertHelper.convert(reviewDate.get(0), EquipmentInspectionReviewDateDTO.class);
 		} else {
 			//scopeType是community的情况下 如果拿不到数据，则返回该域空间下的设置
 			if (PmNotifyScopeType.COMMUNITY.equals(PmNotifyScopeType.fromCode(scopeType))) {
 				scopeType = PmNotifyScopeType.NAMESPACE.getCode();
 				scopeId = cmd.getNamespaceId().longValue();
 				reviewDate = equipmentProvider.getEquipmentInspectiomExpireDays(scopeId, scopeType);
-				return ConvertHelper.convert(reviewDate, EquipmentInspectionReviewDateDTO.class);
+				if (reviewDate != null && reviewDate.size() > 0) {
+					if (!referId.contains(reviewDate.get(0).getId())) {
+						return ConvertHelper.convert(reviewDate, EquipmentInspectionReviewDateDTO.class);
+					}
+				}
 			}
 		}
 
 		return null;
-
 	}
 
 	@Override
