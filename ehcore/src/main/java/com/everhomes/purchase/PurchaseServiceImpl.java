@@ -6,11 +6,14 @@ import com.everhomes.entity.EntityType;
 import com.everhomes.flow.Flow;
 import com.everhomes.flow.FlowService;
 import com.everhomes.naming.NameMapper;
+import com.everhomes.organization.OrganizationService;
 import com.everhomes.rest.acl.PrivilegeConstants;
 import com.everhomes.rest.flow.CreateFlowCaseCommand;
 import com.everhomes.rest.flow.FlowConstants;
 import com.everhomes.rest.flow.FlowModuleType;
 import com.everhomes.rest.flow.FlowOwnerType;
+import com.everhomes.rest.organization.ListPMOrganizationsCommand;
+import com.everhomes.rest.organization.ListPMOrganizationsResponse;
 import com.everhomes.rest.purchase.*;
 import com.everhomes.rest.warehouse.WarehouseMaterialStock;
 import com.everhomes.sequence.SequenceProvider;
@@ -22,8 +25,8 @@ import com.everhomes.user.UserPrivilegeMgr;
 import com.everhomes.util.DateHelper;
 import com.everhomes.util.RuntimeErrorException;
 import com.everhomes.warehouse.WarehouseMaterials;
-import com.everhomes.warehouse.WarehouseProvider;
 import com.everhomes.warehouse.WarehouseOrderStatus;
+import com.everhomes.warehouse.WarehouseProvider;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -57,6 +60,8 @@ public class PurchaseServiceImpl implements PurchaseService {
     private SupplierProvider supplierProvider;
     @Autowired
     private UserPrivilegeMgr userPrivilegeMgr;
+    @Autowired
+    private OrganizationService organizationService;
 
 
 
@@ -243,6 +248,14 @@ public class PurchaseServiceImpl implements PurchaseService {
     }
 
     private void checkAssetPriviledgeForPropertyOrg(Long communityId, Long priviledgeId) {
-        userPrivilegeMgr.checkUserPrivilege(UserContext.currentUserId(), null, priviledgeId, PrivilegeConstants.PURCHASE_MODULE, (byte)13, null, null, communityId);
+        ListPMOrganizationsCommand cmd = new ListPMOrganizationsCommand();
+        cmd.setNamespaceId(UserContext.getCurrentNamespaceId());
+        ListPMOrganizationsResponse listPMOrganizationsResponse = organizationService.listPMOrganizations(cmd);
+        Long currentOrgId = null;
+        try{
+            currentOrgId = listPMOrganizationsResponse.getDtos().get(0).getId();
+        }catch (ArrayIndexOutOfBoundsException e){
+        }
+        userPrivilegeMgr.checkUserPrivilege(UserContext.currentUserId(),currentOrgId, priviledgeId, PrivilegeConstants.PURCHASE_MODULE, (byte)13, null, null, communityId);
     }
 }
