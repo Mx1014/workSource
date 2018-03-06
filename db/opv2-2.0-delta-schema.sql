@@ -1687,6 +1687,8 @@ ALTER TABLE eh_archives_dismiss_employees ADD COLUMN job_position VARCHAR(128) C
 
 ALTER TABLE eh_archives_dismiss_employees ADD COLUMN job_level VARCHAR(128) COMMENT '离职前职级';
 
+ALTER TABLE eh_archives_logs MODIFY operation_reason VARCHAR(1024) COMMENT 'the reason of the operation';
+
 -- end by nan.rong
 
 
