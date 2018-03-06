@@ -1688,5 +1688,9 @@ ALTER TABLE eh_archives_dismiss_employees ADD COLUMN job_level VARCHAR(128) COMM
 
 -- end by nan.rong
 
+-- by dengs,云打印添加字段 2018.03.06
+ALTER TABLE eh_siyin_print_printers ADD COLUMN qrcode_logo_uri VARCHAR(500);
+ALTER TABLE eh_siyin_print_printers ADD COLUMN qrcode_logo_url VARCHAR(500);
+
 
 
