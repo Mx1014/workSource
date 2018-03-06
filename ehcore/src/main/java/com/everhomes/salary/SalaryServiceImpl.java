@@ -278,6 +278,7 @@ public class SalaryServiceImpl implements SalaryService {
             entity.setDefaultFlag(NormalFlag.YES.getCode());
             entity.setOrganizationId(organizationId);
             entity.setId(null);
+            entity.setOriginEntityId(de.getId());
             if (entity.getStatus() == null) {
                 entity.setStatus((byte) 1);
             }
