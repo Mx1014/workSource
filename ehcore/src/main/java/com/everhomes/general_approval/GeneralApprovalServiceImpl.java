@@ -974,7 +974,7 @@ public class GeneralApprovalServiceImpl implements GeneralApprovalService {
         command.setOrganizationId(cmd.getOrganizationId());
         command.setModuleId(cmd.getModuleId());
         command.setFlowCaseSearchType(FlowCaseSearchType.ADMIN.getCode());
-        command.setNamespaceId(UserContext.getCurrentNamespaceId());
+        command.setNamespaceId(cmd.getNamespaceId());
         //  审批状态
         if (cmd.getApprovalStatus() != null)
             command.setFlowCaseStatus(cmd.getApprovalStatus());
@@ -1049,6 +1049,7 @@ public class GeneralApprovalServiceImpl implements GeneralApprovalService {
         params.put("creatorDepartmentId", cmd.getCreatorDepartmentId());
         params.put("creatorName", cmd.getCreatorName());
         params.put("approvalNo", cmd.getApprovalNo());
+        params.put("namespaceId", UserContext.getCurrentNamespaceId());
         String fileName = String.format("审批记录_%s.xlsx", DateUtil.dateToStr(new Date(), DateUtil.NO_SLASH));
 
         taskService.createTask(fileName, TaskType.FILEDOWNLOAD.getCode(), GeneralApprovalExportTaskHandler.class, params, TaskRepeatFlag.REPEAT.getCode(), new Date());
