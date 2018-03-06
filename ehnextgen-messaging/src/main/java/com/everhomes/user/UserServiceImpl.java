@@ -5714,64 +5714,55 @@ public class UserServiceImpl implements UserService {
 	public UserLogin verifyUserByTokenFromAnBang(String token) {
 
 		List<UserLogin> logins = new ArrayList<>();
-		StringBuffer getUrl = new StringBuffer(ANBANG_USERS_URL);
+		StringBuffer getUrl = new StringBuffer(ANBANG_CURRENT_USER_URL);
 		Map headerParam = new HashMap();
 		headerParam.put("Authorization", "bearer " + token);
 
 		dbProvider.execute(r -> {
 			try {
-				restCallSync(HttpMethod.GET, MediaType.APPLICATION_JSON, getUrl.toString(), headerParam, null, new ListenableFutureCallback<ResponseEntity<String>>() {
+				ResponseEntity<String> result = restCallSync(HttpMethod.GET, MediaType.APPLICATION_JSON, getUrl.toString(), headerParam, null);
+				Map currentUser = (Map) JSON.parseObject(result.getBody().toString()).get("data");
+				String userIdentifierToken = currentUser.get("login").toString();
 
-					@Override
-					public void onSuccess(ResponseEntity<String> result) {
-						Map currentUser = (Map) JSON.parseObject(result.getBody().toString()).get("data");
-						String userIdentifierToken = currentUser.get("login").toString();
-
-						int regionCode = 86;
-						int namespaceId = Namespace.DEFAULT_NAMESPACE;
+				int regionCode = 86;
+				int namespaceId = Namespace.DEFAULT_NAMESPACE;
 
 
-						User user = userProvider.findUserByAccountName(userIdentifierToken);
+				User user = userProvider.findUserByAccountName(userIdentifierToken);
+				if (user == null) {
+					UserIdentifier userIdentifier = userProvider.findClaimedIdentifierByToken(namespaceId, userIdentifierToken);
+					// 把regionCode的检查加上，之前是没有检查的    add by xq.tian 2017/07/12
+					if (userIdentifier != null && Objects.equals((userIdentifier.getRegionCode() != null ? userIdentifier.getRegionCode() : 86), regionCode)) {
+						user = userProvider.findUserById(userIdentifier.getOwnerUid());
 						if (user == null) {
-							UserIdentifier userIdentifier = userProvider.findClaimedIdentifierByToken(namespaceId, userIdentifierToken);
-							// 把regionCode的检查加上，之前是没有检查的    add by xq.tian 2017/07/12
-							if (userIdentifier != null && Objects.equals((userIdentifier.getRegionCode() != null ? userIdentifier.getRegionCode() : 86), regionCode)) {
-								user = userProvider.findUserById(userIdentifier.getOwnerUid());
-								if (user == null) {
-									LOGGER.error("Unable to find owner user of identifier record,  namespaceId={}, userIdentifierToken={}, deviceIdentifier={}, pusherIdentify={}",
-											namespaceId, userIdentifierToken, null, null);
-									throw errorWith(UserServiceErrorCode.SCOPE, UserServiceErrorCode.ERROR_USER_NOT_EXIST, "User does not exist");
-								}
-							} else {
-								LOGGER.warn("Unable to find identifier record,  namespaceId={}, userIdentifierToken={}, deviceIdentifier={}, pusherIdentify={}",
-										namespaceId, userIdentifierToken, null, null);
-								throw errorWith(UserServiceErrorCode.SCOPE, UserServiceErrorCode.ERROR_UNABLE_TO_LOCATE_USER, "Unable to locate user");
-							}
+							LOGGER.error("Unable to find owner user of identifier record,  namespaceId={}, userIdentifierToken={}, deviceIdentifier={}, pusherIdentify={}",
+									namespaceId, userIdentifierToken, null, null);
+							throw errorWith(UserServiceErrorCode.SCOPE, UserServiceErrorCode.ERROR_USER_NOT_EXIST, "User does not exist");
 						}
-
-						if (UserStatus.fromCode(user.getStatus()) != UserStatus.ACTIVE)
-							throw errorWith(UserServiceErrorCode.SCOPE, UserServiceErrorCode.ERROR_ACCOUNT_NOT_ACTIVATED, "User acount has not been activated yet");
-
-
-						UserLogin login = createLogin(namespaceId, user, null, null);
-						login.setStatus(UserLoginStatus.LOGGED_IN);
-						logins.add(login);
+					} else {
+						LOGGER.warn("Unable to find identifier record,  namespaceId={}, userIdentifierToken={}, deviceIdentifier={}, pusherIdentify={}",
+								namespaceId, userIdentifierToken, null, null);
+						throw errorWith(UserServiceErrorCode.SCOPE, UserServiceErrorCode.ERROR_UNABLE_TO_LOCATE_USER, "Unable to locate user");
 					}
+				}
 
-					@Override
-					public void onFailure(Throwable ex) {
-						LOGGER.error(ex.getMessage());
-						throw RuntimeErrorException.errorWith(ErrorCodes.SCOPE_GENERAL, ErrorCodes.ERROR_GENERAL_EXCEPTION,
-								"Unable to sync2");
-					}
-				});
-			} catch (UnsupportedEncodingException e) {
-				e.printStackTrace();
-			}
+				if (UserStatus.fromCode(user.getStatus()) != UserStatus.ACTIVE)
+					throw errorWith(UserServiceErrorCode.SCOPE, UserServiceErrorCode.ERROR_ACCOUNT_NOT_ACTIVATED, "User acount has not been activated yet");
+
+
+				UserLogin login = createLogin(namespaceId, user, null, null);
+				login.setStatus(UserLoginStatus.LOGGED_IN);
+				logins.add(login);
+
+			} catch (Exception ex) {
+				LOGGER.error(ex.getMessage());
+				throw RuntimeErrorException.errorWith(ErrorCodes.SCOPE_GENERAL, ErrorCodes.ERROR_GENERAL_EXCEPTION,
+						"Unable to sync2");
+			};
 			return null;
-
 		});
-		return logins.size() > 1 ? logins.get(0) : null;
+		return logins.size() > 0 ? logins.get(0) : null;
+
 	}
 
 	@Override
@@ -5797,7 +5788,7 @@ public class UserServiceImpl implements UserService {
 		return future;
 	}
 
-	public ResponseEntity<String> restCallSync(HttpMethod method, MediaType mediaType, String url, Map headerParam, Map bodyParam, ListenableFutureCallback<ResponseEntity<String>> responseCallback) throws UnsupportedEncodingException {
+	public ResponseEntity<String> restCallSync(HttpMethod method, MediaType mediaType, String url, Map headerParam, Map bodyParam) throws UnsupportedEncodingException {
 		RestTemplate template = new RestTemplate();
 		HttpHeaders headers = new HttpHeaders();
 		headers.setContentType(mediaType);
