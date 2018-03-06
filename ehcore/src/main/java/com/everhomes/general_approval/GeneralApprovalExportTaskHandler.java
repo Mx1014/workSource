@@ -12,7 +12,7 @@ import java.io.OutputStream;
 import java.util.Map;
 
 @Component
-public class GeneralApprovalExportTaskHandler implements FileDownloadTaskHandler{
+public class GeneralApprovalExportTaskHandler implements FileDownloadTaskHandler {
 
     @Autowired
     private FileDownloadTaskService fileDownloadTaskService;
@@ -56,7 +56,7 @@ public class GeneralApprovalExportTaskHandler implements FileDownloadTaskHandler
         Long approvalNo = null;
         if (params.get("approvalNo") != null)
             approvalNo = (Long) params.get("approvalNo");
-        Integer namespaceId = (Integer) params.get("namespaceId");
+        Integer namespaceId = Integer.valueOf(String.valueOf(params.get("namespaceId")));
 
         ListGeneralApprovalRecordsCommand cmd = new ListGeneralApprovalRecordsCommand();
         cmd.setNamespaceId(namespaceId);
