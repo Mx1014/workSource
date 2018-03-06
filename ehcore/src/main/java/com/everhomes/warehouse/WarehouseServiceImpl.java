@@ -204,23 +204,30 @@ public class WarehouseServiceImpl implements WarehouseService {
         checkAssetPriviledgeForPropertyOrg(cmd.getCommunityId(), PrivilegeConstants.WAREHOUSE_REPO_OPERATION, cmd.getOwnerId());
         Warehouses warehouse = verifyWarehouses(cmd.getWarehouseId(), cmd.getOwnerType(), cmd.getOwnerId(), cmd.getCommunityId());
 
-        //库存不为0时不能删除
-        Long amount = warehouseProvider.getWarehouseStockAmount(cmd.getWarehouseId(), cmd.getOwnerType(), cmd.getOwnerId());
-        if (amount != null && amount > 0) {
-            LOGGER.error("warehouse stock is not null, warehouseId = " + cmd.getWarehouseId()
-                    + ", ownerType = " + cmd.getOwnerType() + ", ownerId = " + cmd.getOwnerId()
-                    + ", count stocks = " + amount);
-            throw RuntimeErrorException.errorWith(WarehouseServiceErrorCode.SCOPE, WarehouseServiceErrorCode.ERROR_WAREHOUSE_STOCK_NOT_NULL,
-                    localeStringService.getLocalizedString(String.valueOf(WarehouseServiceErrorCode.SCOPE),
-                            String.valueOf(WarehouseServiceErrorCode.ERROR_WAREHOUSE_STOCK_NOT_NULL),
-                            UserContext.current().getUser().getLocale(), "仓库库存不为0"));
-
+        //库存不为0时不能删除 @deprecated
+//        Long amount = warehouseProvider.getWarehouseStockAmount(cmd.getWarehouseId(), cmd.getOwnerType(), cmd.getOwnerId());
+//        if (amount != null && amount > 0) {
+//            LOGGER.error("warehouse stock is not null, warehouseId = " + cmd.getWarehouseId()
+//                    + ", ownerType = " + cmd.getOwnerType() + ", ownerId = " + cmd.getOwnerId()
+//                    + ", count stocks = " + amount);
+//            throw RuntimeErrorException.errorWith(WarehouseServiceErrorCode.SCOPE, WarehouseServiceErrorCode.ERROR_WAREHOUSE_STOCK_NOT_NULL,
+//                    localeStringService.getLocalizedString(String.valueOf(WarehouseServiceErrorCode.SCOPE),
+//                            String.valueOf(WarehouseServiceErrorCode.ERROR_WAREHOUSE_STOCK_NOT_NULL),
+//                            UserContext.current().getUser().getLocale(), "仓库库存不为0"));
+//
+//        }
+        // 仓库关闭时可以删除
+        if(warehouse.getStatus().byteValue() == WarehouseStatus.DISABLE.getCode()){
+            warehouse.setStatus(WarehouseStatus.INACTIVE.getCode());
+            warehouse.setDeleteUid(UserContext.current().getUser().getId());
+            warehouse.setDeleteTime(new Timestamp(DateHelper.currentGMTTime().getTime()));
+            warehouseProvider.updateWarehouse(warehouse);
+            warehouseSearcher.deleteById((warehouse.getId()));
+        }else{
+            throw RuntimeErrorException.errorWith(WarehouseServiceErrorCode.SCOPE
+                    ,WarehouseServiceErrorCode.ERROR_WAREHOUSE_IS_RUNNING
+                    ,"warehouse cannot be deleted when it's enabled");
         }
-        warehouse.setStatus(WarehouseStatus.INACTIVE.getCode());
-        warehouse.setDeleteUid(UserContext.current().getUser().getId());
-        warehouse.setDeleteTime(new Timestamp(DateHelper.currentGMTTime().getTime()));
-        warehouseProvider.updateWarehouse(warehouse);
-        warehouseSearcher.deleteById((warehouse.getId()));
 
     }
 
