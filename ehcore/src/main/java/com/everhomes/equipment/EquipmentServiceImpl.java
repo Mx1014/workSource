@@ -5152,6 +5152,9 @@ private void checkUserPrivilege(Long orgId, Long privilegeId, Long communityId) 
 				reviewDate.setStatus(PmNotifyConfigurationStatus.INVAILD.getCode());
 				equipmentProvider.updateReviewExpireDays(reviewDate);
 			}
+			if(PmNotifyScopeType.NAMESPACE.equals(PmNotifyScopeType.fromCode(scopeType))){
+				equipmentProvider.deleteReviewExpireDaysByReferId(reviewDate.getId());
+			}
 		}
 	}
 
@@ -5171,9 +5174,9 @@ private void checkUserPrivilege(Long orgId, Long privilegeId, Long communityId) 
 					referId.add(r.getReferId());
 				}
 			});
+			reviewDate.removeIf((r) -> r.getReferId() != 0L && r.getReferId() != null);
 		}
 		if (reviewDate != null && reviewDate.size() > 0) {
-			reviewDate.removeIf((r) -> r.getReferId() != 0L && r.getReferId() != null);
 			return ConvertHelper.convert(reviewDate.get(0), EquipmentInspectionReviewDateDTO.class);
 		} else {
 			//scopeType是community的情况下 如果拿不到数据，则返回该域空间下的设置

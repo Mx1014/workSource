@@ -2996,6 +2996,14 @@ public class EquipmentProviderImpl implements EquipmentProvider {
         });
     }
 
+    @Override
+    public void deleteReviewExpireDaysByReferId(Long id) {
+        DSLContext context = this.dbProvider.getDslContext(AccessSpec.readWrite());
+        context.delete(Tables.EH_EQUIPMENT_INSPECTION_REVIEW_DATE)
+                .where(Tables.EH_EQUIPMENT_INSPECTION_REVIEW_DATE.REFER_ID.eq(id))
+                .execute();
+    }
+
     private void deleteReviewExpireDays(Long id) {
         DSLContext context = this.dbProvider.getDslContext(AccessSpec.readWrite());
         context.delete(Tables.EH_EQUIPMENT_INSPECTION_REVIEW_DATE)
