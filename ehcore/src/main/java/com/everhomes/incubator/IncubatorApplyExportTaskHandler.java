@@ -67,11 +67,22 @@ public class IncubatorApplyExportTaskHandler implements FileDownloadTaskHandler 
 			applyType = Byte.valueOf(String.valueOf(params.get("applyType")));
 		}
 
+		Long startTime = null;
+		if(params.get("startTime") != null){
+			startTime = Long.valueOf(String.valueOf(params.get("startTime")));
+		}
+
+		Long endTime = null;
+		if(params.get("endTime") != null){
+			endTime = Long.valueOf(String.valueOf(params.get("endTime")));
+		}
+
 		String fileName = (String) params.get("name");
 		Long taskId = (Long) params.get("taskId");
 
 
-		List<IncubatorApply> incubatorApplies = incubatorProvider.listIncubatorApplies(namespaceId, null, keyWord, approveStatus, needReject, null, null, orderBy, applyType);
+		List<IncubatorApply> incubatorApplies = incubatorProvider.listIncubatorApplies(namespaceId, null, keyWord, approveStatus,
+				needReject, null, null, orderBy, applyType, startTime, endTime);
 		List<IncubatorApplyDTO> dtos = new ArrayList<>();
 		if(incubatorApplies != null && incubatorApplies.size() > 0){
 			incubatorApplies.forEach(r -> {
