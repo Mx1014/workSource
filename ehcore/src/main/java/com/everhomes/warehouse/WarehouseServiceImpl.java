@@ -1652,6 +1652,22 @@ public class WarehouseServiceImpl implements WarehouseService {
         warehouseProvider.deleteWarehouseRequest(cmd.getRequestId());
     }
 
+    @Override
+    public ListMaterialLogsBySupplierResponse listMaterialLogsBySupplier(ListMaterialLogsBySupplierCommand cmd) {
+        ListMaterialLogsBySupplierResponse response = new ListMaterialLogsBySupplierResponse();
+        Long pageAnchor = cmd.getPageAnchor();
+        Integer pageSize = cmd.getPageSize();
+        if(pageAnchor == null) pageAnchor = 0l;
+        if(pageSize == null) pageSize = 20;
+        List<WarehouseLogDTO> dtos = warehouseProvider.listMaterialLogsBySupplier(cmd.getSupplierId(),pageAnchor,++ pageSize);
+        if(dtos.size() > pageSize){
+            response.setNextPageAnchor(pageAnchor + pageSize);
+            dtos.remove(dtos.size() - 1);
+        }
+        response.setDtos(dtos);
+        return response;
+    }
+
     private SearchRequestsResponse getWarehouseRequestMaterials(List<Long> ids, String ownerType, Long ownerId, Integer pageSize, Long anchor, Long communityId) {
         SearchRequestsResponse response = new SearchRequestsResponse();
         if (ids.size() > pageSize) {

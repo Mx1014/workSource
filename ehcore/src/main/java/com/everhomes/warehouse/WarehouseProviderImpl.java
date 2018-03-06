@@ -10,8 +10,17 @@ import com.everhomes.naming.NameMapper;
 import com.everhomes.rest.warehouse.*;
 import com.everhomes.sequence.SequenceProvider;
 import com.everhomes.server.schema.Tables;
+import com.everhomes.server.schema.tables.*;
 import com.everhomes.server.schema.tables.daos.*;
 import com.everhomes.server.schema.tables.pojos.*;
+import com.everhomes.server.schema.tables.pojos.EhWarehouseMaterialCategories;
+import com.everhomes.server.schema.tables.pojos.EhWarehouseMaterials;
+import com.everhomes.server.schema.tables.pojos.EhWarehouseRequestMaterials;
+import com.everhomes.server.schema.tables.pojos.EhWarehouseRequests;
+import com.everhomes.server.schema.tables.pojos.EhWarehouseStockLogs;
+import com.everhomes.server.schema.tables.pojos.EhWarehouseStocks;
+import com.everhomes.server.schema.tables.pojos.EhWarehouseUnits;
+import com.everhomes.server.schema.tables.pojos.EhWarehouses;
 import com.everhomes.server.schema.tables.records.*;
 import com.everhomes.sharding.ShardIterator;
 import com.everhomes.sharding.ShardingProvider;
@@ -706,6 +715,53 @@ public class WarehouseProviderImpl implements WarehouseProvider {
         context.delete(Tables.EH_WAREHOUSE_REQUEST_MATERIALS)
                 .where(Tables.EH_WAREHOUSE_REQUEST_MATERIALS.REQUEST_ID.eq(requestId))
                 .execute();
+    }
+
+    @Override
+    public List<WarehouseLogDTO> listMaterialLogsBySupplier(Long supplierId, Long pageAnchor, Integer pageSize) {
+        List<WarehouseLogDTO> list = new ArrayList<>();
+        DSLContext context = dbProvider.getDslContext(AccessSpec.readOnly());
+        com.everhomes.server.schema.tables.EhWarehouseMaterials m = Tables.EH_WAREHOUSE_MATERIALS.as("m");
+        com.everhomes.server.schema.tables.EhWarehouseRequestMaterials rm = Tables.EH_WAREHOUSE_REQUEST_MATERIALS.as("rm");
+        SimpleDateFormat sdf = new SimpleDateFormat("yyyy-MM-dd");
+        context.select(rm.REQUEST_ID,m.NAME,rm.AMOUNT,m.REFERENCE_PRICE)
+                .from(rm,m)
+                .where(rm.MATERIAL_ID.eq(m.ID))
+                .and(m.SUPPLIER_ID.eq(supplierId))
+                .limit(pageAnchor.intValue(),pageSize)
+                .fetch()
+                .forEach(r -> {
+                    WarehouseLogDTO dto = new WarehouseLogDTO();
+                    Long requestId = r.getValue(rm.REQUEST_ID);
+                    context.select(Tables.EH_WAREHOUSE_REQUESTS.CREATE_TIME,Tables.EH_USERS.NICK_NAME)
+                            .from(Tables.EH_WAREHOUSE_REQUESTS,Tables.EH_USERS)
+                            .where(Tables.EH_WAREHOUSE_REQUESTS.ID.eq(requestId))
+                            .and(Tables.EH_USERS.ID.eq(Tables.EH_WAREHOUSE_REQUESTS.REQUEST_UID))
+                            .fetch()
+                            .forEach(r1 ->{
+                                dto.setApplicantName(r1.getValue(Tables.EH_USERS.NICK_NAME));
+                                if(r1.getValue(Tables.EH_WAREHOUSE_REQUESTS.CREATE_TIME) != null){
+                                    dto.setApplicationTime(sdf.format
+                                            (r1.getValue(Tables.EH_WAREHOUSE_REQUESTS.CREATE_TIME)));
+                                };
+                            });
+                    dto.setMaterialCategory(findWarehouseMaterialCategoryNameById(r.getValue(m.CATEGORY_ID)));
+                    dto.setMaterialName(r.getValue(m.NAME));
+                    dto.setPurchaseQuantity(r.getValue(rm.AMOUNT));
+                    dto.setUnitPrice(r.getValue(m.REFERENCE_PRICE).toString());
+                    list.add(dto);
+                });
+
+        return list;
+    }
+
+    @Override
+    public String findWarehouseMaterialCategoryNameById(Long value) {
+        DSLContext context = dbProvider.getDslContext(AccessSpec.readOnly());
+        return context.select(Tables.EH_WAREHOUSE_MATERIAL_CATEGORIES.NAME)
+                .from(Tables.EH_WAREHOUSE_MATERIAL_CATEGORIES)
+                .where(Tables.EH_WAREHOUSE_MATERIAL_CATEGORIES.ID.eq(value))
+                .fetchOne(Tables.EH_WAREHOUSE_MATERIAL_CATEGORIES.NAME);
     }
 
     @Override
