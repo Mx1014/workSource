@@ -135,7 +135,7 @@ public class RentalSiteDTO {
 
     private Byte unauthVisible;
 
-	private Long aclinkId;
+	private String aclinkId;
 	private String aclinkName;
     @ItemType(SitePriceRuleDTO.class)
     private List<SitePriceRuleDTO> sitePriceRules;
@@ -690,11 +690,11 @@ public class RentalSiteDTO {
 		this.rentalEndTime = rentalEndTime;
 	}
 
-	public Long getAclinkId() {
+	public String getAclinkId() {
 		return aclinkId;
 	}
 
-	public void setAclinkId(Long aclinkId) {
+	public void setAclinkId(String aclinkId) {
 		this.aclinkId = aclinkId;
 	}
 

@@ -720,3 +720,45 @@ update eh_service_modules set default_order = 3 where id = 49120;
 update eh_service_modules set default_order = 4 where id = 49130;
 update eh_service_modules set default_order = 5 where id = 49140;
 update eh_service_modules set default_order = 2 where id = 49150;
+
+-- 要求修改严军负责的三个模块的类型 by lei.lv
+update eh_service_modules set module_control_type = 'unlimit_control' where id in(10100,10300,10600);
+update eh_reflection_service_module_apps set module_control_type = 'unlimit_control' where module_id in(10100,10300,10600);
+
+-- 增加仓库错误码 by wentian
+set @eh_locale_strings_id = (select max(id) from eh_locale_strings);
+INSERT INTO `eh_locale_strings` (`id`, `scope`, `code`, `locale`, `text`) VALUES ((@eh_locale_strings_id:=@eh_locale_strings_id+1), 'warehouse', '10026', 'zh_CN', '改仓库正在运行中，不能删除');
+
+-- 供应商,请示单和采购管理的权限细化规则 by wentian
+set @module_id = 27000;
+set @p_id = 270001001;
+INSERT INTO `eh_acl_privileges` (`id`, `app_id`, `name`, `description`, `tag`) VALUES (@p_id, null, '查看详情', '查看详情', NULL);
+set @mp_id = (select MAX(id) from eh_service_module_privileges);
+INSERT INTO `eh_service_module_privileges` (`id`, `module_id`, `privilege_type`, `privilege_id`, `remark`, `default_order`, `create_time`)
+VALUES
+	(@mp_id:=@mp_id+1, @module_id, '0', @p_id, '查看详情', '0', NOW());
+
+set @module_id = 27000;
+set @p_id = 270001002;
+INSERT INTO `eh_acl_privileges` (`id`, `app_id`, `name`, `description`, `tag`) VALUES (@p_id, null, '新增、修改、删除供应商', '新增、修改、删除供应商', NULL);
+set @mp_id = (select MAX(id) from eh_service_module_privileges);
+INSERT INTO `eh_service_module_privileges` (`id`, `module_id`, `privilege_type`, `privilege_id`, `remark`, `default_order`, `create_time`)
+VALUES
+	(@mp_id:=@mp_id+1, @module_id, '0', @p_id, '新增、修改、删除供应商', '0', NOW());
+
+-- 请示单管理
+set @module_id = 25000;
+set @p_id = 250001001;
+INSERT INTO `eh_acl_privileges` (`id`, `app_id`, `name`, `description`, `tag`) VALUES (@p_id, null, '查看详情', '查看详情', NULL);
+set @mp_id = (select MAX(id) from eh_service_module_privileges);
+INSERT INTO `eh_service_module_privileges` (`id`, `module_id`, `privilege_type`, `privilege_id`, `remark`, `default_order`, `create_time`)
+VALUES
+	(@mp_id:=@mp_id+1, @module_id, '0', @p_id, '查看详情', '0', NOW());
+
+set @module_id = 25000;
+set @p_id = 250001002;
+INSERT INTO `eh_acl_privileges` (`id`, `app_id`, `name`, `description`, `tag`) VALUES (@p_id, null, '新增请示', '新增请示', NULL);
+set @mp_id = (select MAX(id) from eh_service_module_privileges);
+INSERT INTO `eh_service_module_privileges` (`id`, `module_id`, `privilege_type`, `privilege_id`, `remark`, `default_order`, `create_time`)
+VALUES
+	(@mp_id:=@mp_id+1, @module_id, '0', @p_id, '新增请示', '0', NOW());

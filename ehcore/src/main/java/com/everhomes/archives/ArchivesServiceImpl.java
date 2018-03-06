@@ -811,10 +811,10 @@ public class ArchivesServiceImpl implements ArchivesService {
     @Override
     public String convertToOrgNames(Map<Long, String> map) {
         String names = "";
-        if (map != null && map.size() > 0){
+        if (map != null && map.size() > 0) {
             for (String value : map.values())
                 names += value + ",";
-            names = names.substring(0, names.length()-1);
+            names = names.substring(0, names.length() - 1);
         }
         return names;
     }
@@ -853,23 +853,25 @@ public class ArchivesServiceImpl implements ArchivesService {
                 detailId = memberDTO.getDetailId();
             OrganizationMemberDetails memberDetail = organizationProvider.findOrganizationMemberDetailsByDetailId(detailId);
             if (memberDetail != null) {
-                if (cmd.getCheckInTime() != null)
-                    memberDetail.setCheckInTime(ArchivesUtil.parseDate(cmd.getCheckInTime()));
-                else
-                    memberDetail.setCheckInTime(ArchivesUtil.currentDate());
                 memberDetail.setEmployeeType(cmd.getEmployeeType());
                 memberDetail.setEmployeeStatus(cmd.getEmployeeStatus());
-                if (cmd.getEmploymentTime() == null)
-                    memberDetail.setEmploymentTime(ArchivesUtil.parseDate(cmd.getCheckInTime()));
-                else
-                    memberDetail.setEmploymentTime(ArchivesUtil.parseDate(cmd.getEmploymentTime()));
                 memberDetail.setEmployeeNo(cmd.getEmployeeNo());
                 memberDetail.setEnName(cmd.getEnName());
                 memberDetail.setContactShortToken(cmd.getContactShortToken());
                 memberDetail.setWorkEmail(cmd.getWorkEmail());
-                memberDetail.setContractPartyId(cmd.getContractPartyId());
                 memberDetail.setRegionCode(cmd.getRegionCode());
-                memberDetail.setContractPartyId(cmd.getOrganizationId());
+                if (cmd.getCheckInTime() != null)
+                    memberDetail.setCheckInTime(ArchivesUtil.parseDate(cmd.getCheckInTime()));
+                else
+                    memberDetail.setCheckInTime(ArchivesUtil.currentDate());
+                if (cmd.getEmploymentTime() == null)
+                    memberDetail.setEmploymentTime(ArchivesUtil.parseDate(cmd.getCheckInTime()));
+                else
+                    memberDetail.setEmploymentTime(ArchivesUtil.parseDate(cmd.getEmploymentTime()));
+                if (cmd.getContractPartyId() != null)
+                    memberDetail.setContractPartyId(cmd.getContractPartyId());
+                else
+                    memberDetail.setContractPartyId(cmd.getOrganizationId());
                 organizationProvider.updateOrganizationMemberDetails(memberDetail, memberDetail.getId());
                 dto.setDetailId(detailId);
                 dto.setContactName(memberDetail.getContactName());
@@ -963,7 +965,7 @@ public class ArchivesServiceImpl implements ArchivesService {
 
         //  4.赋值
 
-            //  4-1.处理部门.岗位.职级字段及id
+        //  4-1.处理部门.岗位.职级字段及id
         processEmployeeOrganization(employeeDefaultMaps, response, employee);
         for (GeneralFormFieldDTO dto : form.getFormFields()) {
             //  4-2.赋值给系统默认字段
@@ -975,7 +977,7 @@ public class ArchivesServiceImpl implements ArchivesService {
                 dto.setFieldValue(employeeDynamicMaps.get(dto.getFieldName()));
             }
         }
-            //  4-4.员工状态赋值
+        //  4-4.员工状态赋值
         response.setEmployeeCase(getArchivesEmployeeCase(employee));
 
         //  5.获取档案记录

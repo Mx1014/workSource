@@ -513,6 +513,11 @@ public class ZJContractHandler implements ContractService{
     }
 
     @Override
+    public ListContractsBySupplierResponse listContractsBySupplier(ListContractsBySupplierCommand cmd) {
+        return null;
+    }
+
+    @Override
     public String syncContractsFromThirdPart(SyncContractsFromThirdPartCommand cmd) {
         LOGGER.error("Insufficient privilege, zjgkhandler syncContractsFromThirdPart");
         throw RuntimeErrorException.errorWith(ErrorCodes.SCOPE_GENERAL, ErrorCodes.ERROR_ACCESS_DENIED,
