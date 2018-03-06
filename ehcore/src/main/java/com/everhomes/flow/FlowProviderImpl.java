@@ -118,7 +118,7 @@ public class FlowProviderImpl implements FlowProvider {
 
     @Override
     public Flow findFlowByName(Integer namespaceId, Long moduleId,
-                               String moduleType, Long ownerId, String ownerType, String name) {
+                               String moduleType, String projectType, Long projectId, Long ownerId, String ownerType, String name) {
         ListingLocator locator = new ListingLocator();
         List<Flow> flows = this.queryFlows(locator, 1, new ListingQueryBuilderCallback() {
 
@@ -129,6 +129,12 @@ public class FlowProviderImpl implements FlowProvider {
                 query.addConditions(Tables.EH_FLOWS.MODULE_ID.eq(moduleId));
                 if (moduleType != null) {
                     query.addConditions(Tables.EH_FLOWS.MODULE_TYPE.eq(moduleType));
+                }
+                if (projectType != null) {
+                    query.addConditions(Tables.EH_FLOWS.PROJECT_TYPE.eq(projectType));
+                }
+                if (projectId != null) {
+                    query.addConditions(Tables.EH_FLOWS.PROJECT_ID.eq(projectId));
                 }
                 query.addConditions(Tables.EH_FLOWS.OWNER_TYPE.eq(ownerType));
                 query.addConditions(Tables.EH_FLOWS.OWNER_ID.eq(ownerId));

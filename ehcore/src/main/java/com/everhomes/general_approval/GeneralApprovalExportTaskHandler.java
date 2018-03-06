@@ -12,7 +12,7 @@ import java.io.OutputStream;
 import java.util.Map;
 
 @Component
-public class GeneralApprovalExportTaskHandler implements FileDownloadTaskHandler{
+public class GeneralApprovalExportTaskHandler implements FileDownloadTaskHandler {
 
     @Autowired
     private FileDownloadTaskService fileDownloadTaskService;
@@ -56,8 +56,10 @@ public class GeneralApprovalExportTaskHandler implements FileDownloadTaskHandler
         Long approvalNo = null;
         if (params.get("approvalNo") != null)
             approvalNo = (Long) params.get("approvalNo");
+        Integer namespaceId = Integer.valueOf(String.valueOf(params.get("namespaceId")));
 
         ListGeneralApprovalRecordsCommand cmd = new ListGeneralApprovalRecordsCommand();
+        cmd.setNamespaceId(namespaceId);
         cmd.setOrganizationId(organizationId);
         cmd.setModuleId(moduleId);
         cmd.setStartTime(startTime);
@@ -67,6 +69,8 @@ public class GeneralApprovalExportTaskHandler implements FileDownloadTaskHandler
         cmd.setCreatorDepartmentId(creatorDepartmentId);
         cmd.setCreatorName(creatorName);
         cmd.setApprovalNo(approvalNo);
+        cmd.setPageAnchor(null);
+        cmd.setPageSize(Integer.MAX_VALUE - 1);
 
         //  get the out put stream before start download
         String fileName = (String) params.get("name");

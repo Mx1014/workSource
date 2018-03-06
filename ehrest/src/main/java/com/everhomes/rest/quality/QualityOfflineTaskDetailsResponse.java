@@ -10,6 +10,7 @@ import java.util.List;
  * <ul>
  * <li>tasks:任务列表</li>
  * <li>specifications:specifications</li>
+ * <li>categories:categories</li>
  * <li>organizations:组织架构</li>
  * <li>organizationMembers:人员</li>
  * <li>groupMaps:计划和group关系</li>
@@ -26,6 +27,9 @@ public class QualityOfflineTaskDetailsResponse {
     @ItemType(QualityInspectionSpecificationDTO.class)
     private List<QualityInspectionSpecificationDTO> specifications;
 
+    @ItemType(QualityInspectionSpecificationDTO.class)
+    private List<QualityInspectionSpecificationDTO> categories;
+
     @ItemType(OrganizationDTO.class)
     private List<OrganizationDTO> organizations;
 
@@ -33,7 +37,7 @@ public class QualityOfflineTaskDetailsResponse {
     private List<OrganizationMemberDTO> organizationMembers;
 
     @ItemType(QualityInspectionStandardGroupMapDTO.class)
-    List<QualityInspectionStandardGroupMapDTO> groupMaps;
+    private List<QualityInspectionStandardGroupMapDTO> groupMaps;
 
     private Long nextPageAnchor;
 
@@ -51,6 +55,14 @@ public class QualityOfflineTaskDetailsResponse {
 
     public void setSpecifications(List<QualityInspectionSpecificationDTO> specifications) {
         this.specifications = specifications;
+    }
+
+    public List<QualityInspectionSpecificationDTO> getCategories() {
+        return categories;
+    }
+
+    public void setCategories(List<QualityInspectionSpecificationDTO> categories) {
+        this.categories = categories;
     }
 
     public List<OrganizationDTO> getOrganizations() {

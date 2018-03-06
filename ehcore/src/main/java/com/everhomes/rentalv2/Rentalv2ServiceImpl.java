@@ -74,106 +74,9 @@ import com.everhomes.rest.order.PreOrderDTO;
 import com.everhomes.rest.organization.VendorType;
 import com.everhomes.rest.parking.ParkingSpaceDTO;
 import com.everhomes.rest.parking.ParkingSpaceLockStatus;
-import com.everhomes.rest.rentalv2.AddItemAdminCommand;
-import com.everhomes.rest.rentalv2.AddRentalBillCommand;
-import com.everhomes.rest.rentalv2.AddRentalBillItemCommand;
-import com.everhomes.rest.rentalv2.AddRentalBillItemCommandResponse;
-import com.everhomes.rest.rentalv2.AddRentalBillItemV2Response;
-import com.everhomes.rest.rentalv2.AddRentalOrderUsingInfoCommand;
-import com.everhomes.rest.rentalv2.AddRentalOrderUsingInfoResponse;
-import com.everhomes.rest.rentalv2.AddRentalOrderUsingInfoV2Response;
-import com.everhomes.rest.rentalv2.AddRentalSiteSingleSimpleRule;
-import com.everhomes.rest.rentalv2.AmorpmFlag;
-import com.everhomes.rest.rentalv2.AttachmentDTO;
-import com.everhomes.rest.rentalv2.BillAttachmentDTO;
-import com.everhomes.rest.rentalv2.BillQueryStatus;
-import com.everhomes.rest.rentalv2.CancelRentalBillCommand;
-import com.everhomes.rest.rentalv2.ChangeRentalBillPayInfoCommand;
-import com.everhomes.rest.rentalv2.CompleteRentalOrderCommand;
-import com.everhomes.rest.rentalv2.DateLength;
-import com.everhomes.rest.rentalv2.DeleteItemAdminCommand;
-import com.everhomes.rest.rentalv2.DeleteRentalBillCommand;
-import com.everhomes.rest.rentalv2.FindAutoAssignRentalSiteDayStatusCommand;
-import com.everhomes.rest.rentalv2.FindAutoAssignRentalSiteDayStatusResponse;
-import com.everhomes.rest.rentalv2.FindAutoAssignRentalSiteMonthStatusByWeekCommand;
-import com.everhomes.rest.rentalv2.FindAutoAssignRentalSiteMonthStatusByWeekResponse;
-import com.everhomes.rest.rentalv2.FindAutoAssignRentalSiteMonthStatusCommand;
-import com.everhomes.rest.rentalv2.FindAutoAssignRentalSiteMonthStatusResponse;
-import com.everhomes.rest.rentalv2.FindAutoAssignRentalSiteWeekStatusCommand;
-import com.everhomes.rest.rentalv2.FindAutoAssignRentalSiteWeekStatusResponse;
-import com.everhomes.rest.rentalv2.FindAutoAssignRentalSiteYearStatusCommand;
-import com.everhomes.rest.rentalv2.FindAutoAssignRentalSiteYearStatusResponse;
-import com.everhomes.rest.rentalv2.FindRentalBillsCommand;
-import com.everhomes.rest.rentalv2.FindRentalBillsCommandResponse;
-import com.everhomes.rest.rentalv2.FindRentalSiteByIdCommand;
-import com.everhomes.rest.rentalv2.FindRentalSiteItemsAndAttachmentsCommand;
-import com.everhomes.rest.rentalv2.FindRentalSiteItemsAndAttachmentsResponse;
-import com.everhomes.rest.rentalv2.FindRentalSiteMonthStatusByWeekCommand;
-import com.everhomes.rest.rentalv2.FindRentalSiteMonthStatusByWeekCommandResponse;
-import com.everhomes.rest.rentalv2.FindRentalSiteMonthStatusCommand;
-import com.everhomes.rest.rentalv2.FindRentalSiteMonthStatusCommandResponse;
-import com.everhomes.rest.rentalv2.FindRentalSiteWeekStatusCommand;
-import com.everhomes.rest.rentalv2.FindRentalSiteWeekStatusCommandResponse;
-import com.everhomes.rest.rentalv2.FindRentalSiteYearStatusCommand;
-import com.everhomes.rest.rentalv2.FindRentalSiteYearStatusCommandResponse;
-import com.everhomes.rest.rentalv2.FindRentalSitesCommand;
-import com.everhomes.rest.rentalv2.FindRentalSitesCommandResponse;
-import com.everhomes.rest.rentalv2.GetCancelOrderTipCommand;
-import com.everhomes.rest.rentalv2.GetCancelOrderTipResponse;
-import com.everhomes.rest.rentalv2.GetItemListAdminCommand;
-import com.everhomes.rest.rentalv2.GetItemListCommandResponse;
-import com.everhomes.rest.rentalv2.GetRenewRentalOrderInfoCommand;
-import com.everhomes.rest.rentalv2.GetRenewRentalOrderInfoResponse;
-import com.everhomes.rest.rentalv2.GetRentalBillPayInfoCommand;
-import com.everhomes.rest.rentalv2.GetRentalOrderDetailCommand;
-import com.everhomes.rest.rentalv2.GetResourceRuleV2Command;
-import com.everhomes.rest.rentalv2.GetResourceRuleV2Response;
-import com.everhomes.rest.rentalv2.InvoiceFlag;
-import com.everhomes.rest.rentalv2.ListRentalBillsCommand;
-import com.everhomes.rest.rentalv2.ListRentalBillsCommandResponse;
-import com.everhomes.rest.rentalv2.ListRentalOrdersCommand;
-import com.everhomes.rest.rentalv2.ListRentalOrdersResponse;
-import com.everhomes.rest.rentalv2.LoopType;
-import com.everhomes.rest.rentalv2.MaxMinPrice;
-import com.everhomes.rest.rentalv2.NormalFlag;
-import com.everhomes.rest.rentalv2.OnlinePayCallbackCommand;
-import com.everhomes.rest.rentalv2.OnlinePayCallbackCommandResponse;
-import com.everhomes.rest.rentalv2.PayZuolinRefundCommand;
-import com.everhomes.rest.rentalv2.PayZuolinRefundResponse;
-import com.everhomes.rest.rentalv2.PriceRuleType;
-import com.everhomes.rest.rentalv2.RenewRentalOrderCommand;
-import com.everhomes.rest.rentalv2.RentalBillDTO;
-import com.everhomes.rest.rentalv2.RentalBillRuleDTO;
-import com.everhomes.rest.rentalv2.RentalBriefOrderDTO;
-import com.everhomes.rest.rentalv2.RentalGoodItem;
-import com.everhomes.rest.rentalv2.RentalItemType;
-import com.everhomes.rest.rentalv2.RentalOrderDTO;
-import com.everhomes.rest.rentalv2.RentalPriceType;
-import com.everhomes.rest.rentalv2.RentalRecommendUser;
-import com.everhomes.rest.rentalv2.RentalServiceErrorCode;
-import com.everhomes.rest.rentalv2.RentalSiteDTO;
-import com.everhomes.rest.rentalv2.RentalSiteDayRulesDTO;
-import com.everhomes.rest.rentalv2.RentalSiteNumberDayRulesDTO;
-import com.everhomes.rest.rentalv2.RentalSiteNumberRuleDTO;
-import com.everhomes.rest.rentalv2.RentalSitePackagesDTO;
-import com.everhomes.rest.rentalv2.RentalSitePicDTO;
-import com.everhomes.rest.rentalv2.RentalSiteRulesDTO;
-import com.everhomes.rest.rentalv2.RentalSiteStatus;
-import com.everhomes.rest.rentalv2.RentalTimeIntervalOwnerType;
-import com.everhomes.rest.rentalv2.RentalType;
-import com.everhomes.rest.rentalv2.RentalUserPriceType;
-import com.everhomes.rest.rentalv2.RentalV2ResourceType;
-import com.everhomes.rest.rentalv2.ResourceOrderStatus;
-import com.everhomes.rest.rentalv2.RuleSourceType;
-import com.everhomes.rest.rentalv2.SiteBillStatus;
-import com.everhomes.rest.rentalv2.SiteItemDTO;
-import com.everhomes.rest.rentalv2.SitePricePackageDTO;
-import com.everhomes.rest.rentalv2.SitePriceRuleDTO;
-import com.everhomes.rest.rentalv2.SiteRuleStatus;
-import com.everhomes.rest.rentalv2.UpdateItemAdminCommand;
-import com.everhomes.rest.rentalv2.VipParkingUseInfoDTO;
-import com.everhomes.rest.rentalv2.VisibleFlag;
+import com.everhomes.rest.rentalv2.*;
 import com.everhomes.rest.rentalv2.admin.*;
+import com.everhomes.rest.rentalv2.admin.AttachmentType;
 import com.everhomes.rest.sms.SmsTemplateCode;
 import com.everhomes.rest.ui.user.SceneTokenDTO;
 import com.everhomes.rest.ui.user.SceneType;
@@ -539,7 +442,7 @@ public class Rentalv2ServiceImpl implements Rentalv2Service {
 		RentalDefaultRule rule = this.rentalv2Provider.getRentalDefaultRule(cmd.getOwnerType(), cmd.getOwnerId(),
 				cmd.getResourceType(), cmd.getResourceTypeId(), cmd.getSourceType(), cmd.getSourceId());
 
-		if(null == rule ){
+		if(null == rule && RuleSourceType.DEFAULT.getCode().equals(cmd.getSourceType())){
 			addDefaultRule(cmd.getOwnerType(), cmd.getOwnerId(), cmd.getResourceType(), cmd.getResourceTypeId(),
 					cmd.getSourceType(), cmd.getSourceId());
 			rule = this.rentalv2Provider.getRentalDefaultRule(cmd.getOwnerType(), cmd.getOwnerId(),
@@ -1273,8 +1176,15 @@ public class Rentalv2ServiceImpl implements Rentalv2Service {
 		rSiteDTO.setPayMode(resourceType.getPayMode());
 		rSiteDTO.setIdentify(resourceType.getIdentify());
 		rSiteDTO.setAclinkId(rentalSite.getAclinkId());
-		if (rSiteDTO.getAclinkId()!=null)
-			rSiteDTO.setAclinkName(doorAccessProvider.getDoorAccessById(rentalSite.getAclinkId()).getName());
+		if (!StringUtils.isEmpty(rSiteDTO.getAclinkId())) {
+			String[] ids = rSiteDTO.getAclinkId().split(",");
+			if (ids.length>0) {
+				String aclinkName = "";
+				for (String id:ids)
+					aclinkName += doorAccessProvider.getDoorAccessById(Long.parseLong(id)).getName()+",";
+				rSiteDTO.setAclinkName(aclinkName.substring(0,aclinkName.length()-1));
+			}
+		}
 //		if(null!=rentalSite.getDayBeginTime()) {
 //			rSiteDTO.setDayBeginTime(convertTimeToGMTMillisecond(rentalSite.getDayBeginTime()));
 //		}
@@ -2306,10 +2216,15 @@ public class Rentalv2ServiceImpl implements Rentalv2Service {
 		if (SiteBillStatus.SUCCESS.getCode() == status){
 
 //			RentalResource rs = this.rentalv2Provider.getRentalSiteById(order.getRentalResourceId());
-			if (rs.getAclinkId()!=null) {
-				Long doorAuthId = createDoorAuth(order.getRentalUid(), order.getAuthStartTime().getTime(), order.getAuthEndTime().getTime(),
-						rs.getAclinkId(), rs.getCreatorUid());
-				rentalv2Provider.setAuthDoorId(order.getId(), doorAuthId);
+			if (!StringUtils.isEmpty(rs.getAclinkId())) {
+				String[] ids = rs.getAclinkId().split(",");
+				if (ids.length > 0) {
+					String doorAuthId = "";
+					for (String id : ids)
+						doorAuthId += createDoorAuth(order.getRentalUid(), order.getAuthStartTime().getTime(), order.getAuthEndTime().getTime(),
+								Long.parseLong(id), rs.getCreatorUid()) + ",";
+					rentalv2Provider.setAuthDoorId(order.getId(), doorAuthId.substring(0, doorAuthId.length() - 1));
+				}
 			}
 			//用户积分
 			LocalEventBus.publish(event -> {
@@ -2407,13 +2322,13 @@ public class Rentalv2ServiceImpl implements Rentalv2Service {
 
 
 
-	@Override
-	public void sendMessageCode(Long uid, String locale, Map<String, String> map, int code) {
-		String scope = RentalNotificationTemplateCode.SCOPE;
+		@Override
+		public void sendMessageCode(Long uid, String locale, Map<String, String> map, int code) {
+			String scope = RentalNotificationTemplateCode.SCOPE;
 
-		String notifyTextForOther = localeTemplateService.getLocaleTemplateString(scope, code, locale, map, "");
-		sendMessageToUser(uid, notifyTextForOther);
-	}
+			String notifyTextForOther = localeTemplateService.getLocaleTemplateString(scope, code, locale, map, "");
+			sendMessageToUser(uid, notifyTextForOther);
+		}
 
 	private void sendMessageToUser(Long userId, String content) {
 		if(null == userId)
@@ -3683,8 +3598,11 @@ public class Rentalv2ServiceImpl implements Rentalv2Service {
 			handler.releaseOrderResourceStatus(order);
 			//只要退款就给管理员发消息,不管是退款中还是已退款
 			onOrderCancel(order);
-			if (order.getDoorAuthId() != null) //解除门禁授权
-				doorAccessService.deleteDoorAuth(order.getDoorAuthId());
+			if (!StringUtils.isEmpty(order.getDoorAuthId())) {//解除门禁授权
+				String[] ids = order.getDoorAuthId().split(",");
+				for (String id:ids)
+					doorAccessService.deleteDoorAuth(Long.parseLong(id));
+			}
 			rentalv2Provider.setAuthDoorId(order.getId(), null);
 			//用户积分
 			LocalEventBus.publish(event -> {
@@ -3784,7 +3702,7 @@ public class Rentalv2ServiceImpl implements Rentalv2Service {
 			cmd.setResourceType(RentalV2ResourceType.DEFAULT.getCode());
 		}
 
-		if (cmd.getResourceType().equals(RentalV2ResourceType.DEFAULT.getCode())){
+		if (cmd.getSourceType().equals(RuleSourceType.DEFAULT.getCode())){
 			RentalDefaultRule rule = this.rentalv2Provider.getRentalDefaultRule(cmd.getOwnerType(), cmd.getOwnerId(),
 					cmd.getResourceType(), cmd.getResourceTypeId(), cmd.getSourceType(), cmd.getSourceId());
 			if (rule == null)
@@ -4162,16 +4080,23 @@ public class Rentalv2ServiceImpl implements Rentalv2Service {
 			cmd.setFlowMainId(flow.getFlowMainId());
 			cmd.setFlowVersion(flow.getFlowVersion());
 			return flowService.createFlowCase(cmd);
-		}else if (PayMode.ONLINE_PAY.getCode()==order.getPayMode()){
+		}else if (PayMode.ONLINE_PAY.getCode()==order.getPayMode()) {
 			//预约成功 授权门禁
 			RentalResource rentalResource = rentalCommonService.getRentalResource(order.getResourceType(), order.getRentalResourceId());
 
 //			RentalResource rentalResource = rentalv2Provider.getRentalSiteById(order.getRentalResourceId());
-			if (rentalResource.getAclinkId()!=null) {
-				Long doorAuthId = createDoorAuth(order.getRentalUid(), order.getAuthStartTime().getTime(), order.getAuthEndTime().getTime(),
-						rentalResource.getAclinkId(), rentalResource.getCreatorUid());
-				order.setDoorAuthId(doorAuthId);
+			if (!StringUtils.isEmpty(rentalResource.getAclinkId())) {
+				String[] ids = rentalResource.getAclinkId().split(",");
+				if (ids.length > 0) {
+					String doorAuthId = "";
+					for (String id : ids)
+						doorAuthId += createDoorAuth(order.getRentalUid(), order.getAuthStartTime().getTime(), order.getAuthEndTime().getTime(),
+								Long.parseLong(id), rentalResource.getCreatorUid()) + ",";
+					order.setDoorAuthId(doorAuthId.substring(0, doorAuthId.length() - 1));
+				}
 			}
+
+
 
             //用户积分
             LocalEventBus.publish(event -> {
@@ -6333,7 +6258,6 @@ public class Rentalv2ServiceImpl implements Rentalv2Service {
 			RentalResource resource = ConvertHelper.convert(cmd, RentalResource.class);
 			resource.setResourceName(cmd.getSiteName());
 			resource.setStatus(RentalSiteStatus.NORMAL.getCode());
-			resource.setAclinkId(cmd.getAclinkId());
 			//设置资源时 默认为1
 			resource.setResourceCounts(1.0);
 			resource.setAutoAssign((byte)0);
@@ -6407,7 +6331,9 @@ public class Rentalv2ServiceImpl implements Rentalv2Service {
 		//查询默认规则，创建资源规则
 		cmd2.setResourceTypeId(resource.getResourceTypeId());
 		cmd2.setResourceType(resource.getResourceType());
-		cmd2.setSourceId(resource.getId());
+		cmd2.setOwnerType(RentalOwnerType.ORGANIZATION.getCode());
+		cmd2.setOwnerId(resource.getOrganizationId());
+		//cmd2.setSourceType(RuleSourceType.DEFAULT.getCode());
 		QueryDefaultRuleAdminResponse rule = this.queryDefaultRule(cmd2);
 
 		if (null == rule) {

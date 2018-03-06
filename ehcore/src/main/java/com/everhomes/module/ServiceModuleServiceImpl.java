@@ -58,10 +58,7 @@ import org.springframework.stereotype.Service;
 
 import java.lang.reflect.Type;
 import java.sql.Timestamp;
-import java.util.ArrayList;
-import java.util.Collections;
-import java.util.Iterator;
-import java.util.List;
+import java.util.*;
 import java.util.stream.Collectors;
 
 import static com.everhomes.rest.oauth2.ControlTargetOption.ALL_COMMUNITY;
@@ -223,12 +220,14 @@ public class ServiceModuleServiceImpl implements ServiceModuleService {
         if(null != cmd.getModuleId()){
             ServiceModule module = serviceModuleProvider.findServiceModuleById(cmd.getModuleId());
             startLevel = module.getLevel() + 1;
-            if(null != module)//查找三级菜单
+            if(null != module){//查找三级菜单
                 serviceModules = serviceModuleProvider.listServiceModule(module.getPath() + "/%");
+                serviceModules.sort(Comparator.comparingInt(ServiceModule::getDefaultOrder));
                 if(serviceModules == null || serviceModules.size() == 0){//如果三级菜单不存在，则直接使用二级菜单
                     serviceModules = Collections.singletonList(module);
                     startLevel --;
                 }
+            }
         }else{
             serviceModules =  serviceModuleProvider.listServiceModule(startLevel, types);
         }

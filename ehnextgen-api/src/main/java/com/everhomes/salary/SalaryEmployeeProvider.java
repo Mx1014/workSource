@@ -2,6 +2,7 @@
 package com.everhomes.salary;
 
 import com.everhomes.listing.CrossShardListingLocator;
+import com.everhomes.rest.salary.SalaryEmployeeStatus;
 
 import java.util.List;
 
@@ -22,6 +23,8 @@ public interface SalaryEmployeeProvider {
 	String getMonthByOwnerId(Long ownerId);
  
 	List<Long> listEmployeeDetailIdsByStatus(Long ownerId, Byte status);
+
+	List<SalaryEmployee> listSalaryEmployees(Long ownerId, String month, SalaryEmployeeStatus status);
 
 	SalaryDepartStatistic calculateDptReport(List<Long> detailIds, SalaryDepartStatistic statistic, Long ownerId, String month);
 

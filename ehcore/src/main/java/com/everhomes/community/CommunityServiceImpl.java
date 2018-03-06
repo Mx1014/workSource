@@ -1155,6 +1155,7 @@ public class CommunityServiceImpl implements CommunityService {
 	private List<ImportFileResultLog<ImportBuildingDataDTO>> importBuildingData(List<ImportBuildingDataDTO> datas,
 			Long userId, Long communityId) {
 		OrganizationDTO org = this.organizationService.getUserCurrentOrganization();
+		Community community = communityProvider.findCommunityById(communityId);
 		List<OrganizationMember> orgMem = this.organizationProvider.listOrganizationMembersByOrgId(org.getId());
 		Map<String, OrganizationMember> ct = new HashMap<String, OrganizationMember>();
 		if(orgMem != null) {
@@ -1201,7 +1202,7 @@ public class CommunityServiceImpl implements CommunityService {
 					building.setLatitude(Double.parseDouble(temp[1]));
 				}
 				
-				building.setNamespaceId(org.getNamespaceId());
+				building.setNamespaceId(community.getNamespaceId());
 				building.setStatus(CommunityAdminStatus.ACTIVE.getCode());
 				
 				communityProvider.createBuilding(userId, building);
@@ -1234,7 +1235,7 @@ public class CommunityServiceImpl implements CommunityService {
 
 				building.setNamespaceBuildingType(data.getNamespaceBuildingType());
 				building.setNamespaceBuildingToken(data.getNamespaceBuildingToken());
-				building.setNamespaceId(org.getNamespaceId());
+				building.setNamespaceId(community.getNamespaceId());
 				building.setStatus(CommunityAdminStatus.ACTIVE.getCode());
 				
 				communityProvider.updateBuilding(building);
