@@ -183,7 +183,7 @@ public class EquipmentTasksSearcherImpl extends AbstractElasticSearch implements
         }
 
         qb = QueryBuilders.filteredQuery(qb, fb);
-        LOGGER.debug(fb.toString());
+        LOGGER.debug("queryBuilder:",qb.toString());
         builder.setSearchType(SearchType.QUERY_THEN_FETCH);
         builder.setFrom(anchor.intValue() * pageSize).setSize(pageSize + 1);
         builder.setQuery(qb);
