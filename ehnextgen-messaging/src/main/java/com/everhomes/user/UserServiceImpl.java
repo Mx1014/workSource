@@ -5519,7 +5519,7 @@ public class UserServiceImpl implements UserService {
     }
 
 	@Override
-	public void syncUsersFromAnBangWuYe(SyncUsersFromAnBangWuYeCommand cmd) {
+	public void syncUsersFromAnBangWuYe( SyncUsersFromAnBangWuYeCommand cmd) {
 		//调用授权接口
 		String timestamp = null;
 		if(cmd.getIsAll() == 1){//全量
@@ -5546,7 +5546,7 @@ public class UserServiceImpl implements UserService {
 
 		dbProvider.execute(r -> {
 			try {
-				ListenableFuture<ResponseEntity<String>> auth_result = restCall(HttpMethod.POST, MediaType.APPLICATION_FORM_URLENCODED, ANBANG_OAUTH_URL, headerParam, bodyParam, new ListenableFutureCallback<ResponseEntity<String>>() {
+				restCall(HttpMethod.POST, MediaType.APPLICATION_FORM_URLENCODED, ANBANG_OAUTH_URL, headerParam, bodyParam, new ListenableFutureCallback<ResponseEntity<String>>() {
 
 					@Override
 					public void onSuccess(ResponseEntity<String> result) {

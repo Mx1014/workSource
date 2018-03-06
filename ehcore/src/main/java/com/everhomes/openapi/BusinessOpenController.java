@@ -841,6 +841,7 @@ public class BusinessOpenController extends ControllerBase {
     }
 
     @RequestMapping("verifyUserByTokenFromAnBang")
+    @RequireAuthentication(false)
     @RestReturn(value = UserLogin.class)
     public RestResponse verifyUserByTokenFromAnBang(LogonCommand cmd, HttpServletRequest request, HttpServletResponse response) {
         UserLogin login = this.userService.verifyUserByTokenFromAnBang(cmd.getUserIdentifier());
