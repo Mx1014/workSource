@@ -6,6 +6,8 @@ import com.everhomes.bigcollection.BigCollectionProvider;
 import com.everhomes.configuration.ConfigurationProvider;
 import com.everhomes.contentserver.ContentServer;
 import com.everhomes.contentserver.ContentServerService;
+import com.everhomes.coordinator.CoordinationLocks;
+import com.everhomes.coordinator.CoordinationProvider;
 import com.everhomes.db.DbProvider;
 import com.everhomes.filedownload.TaskService;
 import com.everhomes.listing.CrossShardListingLocator;
@@ -31,8 +33,11 @@ import com.everhomes.user.UserProvider;
 import com.everhomes.util.*;
 import com.everhomes.util.excel.RowResult;
 import com.everhomes.util.excel.handler.PropMrgOwnerHandler;
+import com.itextpdf.text.pdf.PdfStructTreeController.returnType;
+
 import freemarker.cache.StringTemplateLoader;
 import freemarker.template.Configuration;
+
 import org.apache.commons.collections.map.HashedMap;
 import org.apache.commons.lang.StringUtils;
 import org.apache.commons.logging.Log;
@@ -52,6 +57,7 @@ import org.springframework.stereotype.Component;
 import org.springframework.web.multipart.MultipartFile;
 
 import javax.servlet.http.HttpServletResponse;
+
 import java.io.*;
 import java.math.BigDecimal;
 import java.net.URLEncoder;
@@ -153,6 +159,9 @@ public class SalaryServiceImpl implements SalaryService {
     @Autowired
     private PunchService punchService;
 
+	@Autowired
+    private CoordinationProvider coordinationProvider;
+	
     @Autowired
     private OrganizationService organizationService;
 
@@ -1691,29 +1700,32 @@ public class SalaryServiceImpl implements SalaryService {
 
     @Override
     public void newSalaryMonth(NewSalaryMonthCommand cmd) {
-        String month = salaryGroupProvider.getMonthByOwnerId(cmd.getOwnerId());
-        if (null == month) {
-            throw RuntimeErrorException.errorWith(SalaryConstants.SCOPE, SalaryConstants.ERROR_SALARY_GROUP_NO_DATA,
-                    "本月没有数据不能新建报表");
-        }
-        Calendar calendar = Calendar.getInstance();
-        try {
-            calendar.setTime(monthSF.get().parse(month));
-            calendar.add(Calendar.MONTH, 1);
-            month = monthSF.get().format(calendar.getTime());
-        } catch (ParseException e) {
-            LOGGER.error("月份出错了!{} 不是YYYYMM" + month);
-        }
-        //重新计算group
-        salaryGroupProvider.deleteSalaryGroup(cmd.getOwnerId());
-        createMonthSalaryGroup(cmd.getOwnerId(), month);
-        //把vals的次月清空数据清零
-        salaryEmployeeOriginValProvider.setValueBlank(cmd.getOwnerId());
-        //重新计算employee
-        calculateEmployees(cmd.getOwnerId(), cmd.getOrganizationId(), UserContext.getCurrentNamespaceId());
-
-        //删除未归档的汇总
-        salaryDepartStatisticProvider.deleteSalaryDepartStatistic(cmd.getOwnerId(), NormalFlag.NO.getCode(), null);
+    	this.coordinationProvider.getNamedLock(CoordinationLocks.SALARY_NEWMONTH_LOCK.getCode() + cmd.getOwnerId()).enter(() -> {
+	        String month = salaryGroupProvider.getMonthByOwnerId(cmd.getOwnerId());
+	        if (null == month) {
+	            throw RuntimeErrorException.errorWith(SalaryConstants.SCOPE, SalaryConstants.ERROR_SALARY_GROUP_NO_DATA,
+	                    "本月没有数据不能新建报表");
+	        }
+	        Calendar calendar = Calendar.getInstance();
+	        try {
+	            calendar.setTime(monthSF.get().parse(month));
+	            calendar.add(Calendar.MONTH, 1);
+	            month = monthSF.get().format(calendar.getTime());
+	        } catch (ParseException e) {
+	            LOGGER.error("月份出错了!{} 不是YYYYMM" + month);
+	        }
+	        //重新计算group
+	        salaryGroupProvider.deleteSalaryGroup(cmd.getOwnerId());
+	        createMonthSalaryGroup(cmd.getOwnerId(), month);
+	        //把vals的次月清空数据清零
+	        salaryEmployeeOriginValProvider.setValueBlank(cmd.getOwnerId());
+	        //重新计算employee
+	        calculateEmployees(cmd.getOwnerId(), cmd.getOrganizationId(), UserContext.getCurrentNamespaceId());
+	
+	        //删除未归档的汇总
+	        salaryDepartStatisticProvider.deleteSalaryDepartStatistic(cmd.getOwnerId(), NormalFlag.NO.getCode(), null);
+	    
+    	return null;});
     }
 
     private void calculateEmployees(Long ownerId, Long organizationId, Integer namespaceId) {
