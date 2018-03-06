@@ -1951,7 +1951,6 @@ public class SocialSecurityServiceImpl implements SocialSecurityService {
         report.setDeptName(detail.getDepartment());
         List<SocialSecuritySetting> settings = socialSecuritySettingProvider.listSocialSecuritySetting(detail.getId());
         if (null != settings) {
-            report.setHouseholdType(settings.get(0).getHouseholdType());
             for (SocialSecuritySetting setting : settings) {
                 if (AccumOrSocial.ACCUM == AccumOrSocial.fromCode(setting.getAccumOrSocail())) {
                     report.setAccumulationFundCityId(setting.getCityId());
@@ -1961,6 +1960,7 @@ public class SocialSecurityServiceImpl implements SocialSecurityService {
                     }
                     report.setAccumulationFundRadix(setting.getRadix());
                 } else {
+                    report.setHouseholdType(setting.getHouseholdType());
                     report.setSocialSecurityCityId(setting.getCityId());
                     Region city = regionProvider.findRegionById(setting.getCityId());
                     if (null != city) {
