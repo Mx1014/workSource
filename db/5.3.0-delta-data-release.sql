@@ -723,4 +723,6 @@ update eh_launch_pad_items SET action_data=CONCAT('{"url":"',@home_url,'/station
 update eh_service_modules SET instance_config=CONCAT('{"url":"',@home_url,'/station-booking-web/build/index.html#/home#sign_suffix"}') WHERE id=40200;
 update eh_service_module_apps SET instance_config=CONCAT('{"url":"',@home_url,'/station-booking-web/build/index.html#/home#sign_suffix"}') WHERE module_id=40200;
 
+-- 文件管理添加菜单，dengs，2018.03.07
+INSERT INTO `eh_web_menus` (`id`, `name`, `parent_id`, `icon_url`, `data_type`, `leaf_flag`, `status`, `path`, `type`, `sort_num`, `module_id`, `level`, `condition_type`, `category`, `config_type`) VALUES ('74060000', '文件管理', '74000000', NULL, 'file-management', '1', '2', '/74000000/74060000', 'organization', '6', '41500', '2', 'system', 'module', '2');
 
