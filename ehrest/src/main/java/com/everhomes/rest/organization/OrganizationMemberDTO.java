@@ -2,7 +2,6 @@
 package com.everhomes.rest.organization;
 
 import java.sql.Date;
-import java.sql.Time;
 import java.util.List;
 
 import javax.validation.constraints.NotNull;
@@ -11,9 +10,7 @@ import com.everhomes.discover.ItemType;
 import com.everhomes.rest.acl.admin.RoleDTO;
 import com.everhomes.util.StringHelper;
 
-import javax.validation.constraints.NotNull;
 import java.sql.Timestamp;
-import java.util.List;
 
 /**
  * <ul>
