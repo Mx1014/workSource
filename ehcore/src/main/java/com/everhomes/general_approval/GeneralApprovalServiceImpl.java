@@ -959,7 +959,8 @@ public class GeneralApprovalServiceImpl implements GeneralApprovalService {
 
     @Override
     public GeneralApprovalDTO verifyApprovalName(VerifyApprovalNameCommand cmd) {
-        GeneralApproval approval = this.generalApprovalProvider.getGeneralApprovalByName(UserContext.getCurrentNamespaceId(),
+        Integer namespaceId = UserContext.getCurrentNamespaceId();
+        GeneralApproval approval = this.generalApprovalProvider.getGeneralApprovalByName(namespaceId,
                 cmd.getModuleId(), cmd.getOwnerId(), cmd.getOwnerType(), cmd.getApprovalName());
         if (approval == null)
             return null;
