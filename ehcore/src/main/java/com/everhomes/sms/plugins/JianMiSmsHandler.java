@@ -212,7 +212,7 @@ public class JianMiSmsHandler extends BaseSmsHandler {
         }
 
         SmsReportResponse response = new SmsReportResponse(reportDTOS);
-        response.setResponseContentType("SUCCESS");
+        response.setResponseBody("SUCCESS");
         return response;
     }
 }
