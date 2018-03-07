@@ -2946,14 +2946,6 @@ public class SocialSecurityServiceImpl implements SocialSecurityService {
         }
     }
 
-    private String getDepartmentName(Long detailId) {
-        Long departmentId = organizationService.getDepartmentByDetailId(detailId);
-        Organization department = organizationProvider.findOrganizationById(departmentId);
-        if (department != null)
-            return department.getName();
-        return null;
-    }
-
     @Override
     public SocialSecurityEmployeeDTO getSocialSecurityEmployeeInfo(Long detailId) {
         SocialSecurityEmployeeDTO dto = new SocialSecurityEmployeeDTO();
