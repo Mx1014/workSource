@@ -1,5 +1,6 @@
 package com.everhomes.banner;
 
+import com.everhomes.listing.ListingLocator;
 import com.everhomes.rest.banner.BannerDTO;
 import com.everhomes.rest.banner.BannerScope;
 import com.everhomes.rest.banner.BannerStatus;
@@ -62,4 +63,12 @@ public interface BannerProvider {
     Banner findAnyCustomizedBanner(Integer namespaceId, Byte scopeCode, Long scopeId, String sceneType);
 
     List<Banner> listBannersByNamespace(Integer namespaceId);
+
+    List<Banner> listBannersByCommunityId(Integer namespaceId, Long communityId);
+
+    Integer getMaxOrderByCommunityId(Integer namespaceId, Long communityId);
+
+    List<Banner> listBannersByCommunityId(Integer namespaceId, Long communityId, int pageSize, ListingLocator locator);
+
+    Map<Long,Integer> countEnabledBannersByScope(Integer namespaceId);
 }

@@ -6,10 +6,12 @@ import com.everhomes.db.AccessSpec;
 import com.everhomes.db.DaoAction;
 import com.everhomes.db.DaoHelper;
 import com.everhomes.db.DbProvider;
+import com.everhomes.listing.ListingLocator;
 import com.everhomes.naming.NameMapper;
 import com.everhomes.rest.banner.BannerDTO;
 import com.everhomes.rest.banner.BannerScope;
 import com.everhomes.rest.banner.BannerStatus;
+import com.everhomes.rest.common.ScopeType;
 import com.everhomes.rest.launchpad.ApplyPolicy;
 import com.everhomes.sequence.SequenceProvider;
 import com.everhomes.server.schema.Tables;
@@ -81,7 +83,6 @@ public class BannerProviderImpl implements BannerProvider {
         DSLContext context = dbProvider.getDslContext(AccessSpec.readWrite());
         EhBannersDao dao = new EhBannersDao(context.configuration());
         dao.delete(banner);
-        
     }
 
     @Override
@@ -393,4 +394,79 @@ public class BannerProviderImpl implements BannerProvider {
                 .fetchInto(Banner.class);
     }
 
+    @Override
+    public List<Banner> listBannersByCommunityId(Integer namespaceId, Long communityId) {
+        DSLContext context = dbProvider.getDslContext(AccessSpec.readOnly());
+        com.everhomes.server.schema.tables.EhBanners t = EH_BANNERS;
+
+        SelectQuery<EhBannersRecord> query = context.selectFrom(t).getQuery();
+        query.addConditions(t.NAMESPACE_ID.eq(namespaceId));
+
+        query.addConditions(t.SCOPE_CODE.eq(ScopeType.COMMUNITY.getCode()));
+        query.addConditions(t.SCOPE_ID.eq(communityId));
+
+        query.addConditions(t.STATUS.eq(BannerStatus.ACTIVE.getCode()));
+        query.addOrderBy(t.ORDER);
+
+        return query.fetchInto(Banner.class);
+    }
+
+    @Override
+    public Integer getMaxOrderByCommunityId(Integer namespaceId, Long communityId) {
+        DSLContext context = dbProvider.getDslContext(AccessSpec.readOnly());
+        com.everhomes.server.schema.tables.EhBanners t = EH_BANNERS;
+
+        SelectQuery<Record1<Integer>> query = context.select(DSL.max(t.ORDER)).from(t).getQuery();
+        query.addConditions(t.NAMESPACE_ID.eq(namespaceId));
+
+        query.addConditions(t.SCOPE_CODE.eq(ScopeType.COMMUNITY.getCode()));
+        query.addConditions(t.SCOPE_ID.eq(communityId));
+
+        query.addConditions(t.STATUS.eq(BannerStatus.ACTIVE.getCode()));
+        return query.fetchOneInto(Integer.class);
+    }
+
+    @Override
+    public List<Banner> listBannersByCommunityId(Integer namespaceId, Long communityId, int pageSize, ListingLocator locator) {
+        DSLContext context = dbProvider.getDslContext(AccessSpec.readOnly());
+        com.everhomes.server.schema.tables.EhBanners t = EH_BANNERS;
+
+        SelectQuery<EhBannersRecord> query = context.selectFrom(t).getQuery();
+        query.addConditions(t.NAMESPACE_ID.eq(namespaceId));
+        query.addConditions(t.SCOPE_CODE.eq(ScopeType.COMMUNITY.getCode()));
+
+        if (communityId != null && communityId != 0) {
+            query.addConditions(t.SCOPE_ID.eq(communityId));
+        }
+        if (locator.getAnchor() != null) {
+            query.addConditions(t.ID.le(locator.getAnchor()));
+        }
+        if (pageSize > 0) {
+            query.addLimit(pageSize + 1);
+        }
+        query.addOrderBy(t.STATUS, t.ORDER, t.CREATE_TIME);
+
+        List<Banner> list = query.fetchInto(Banner.class);
+        if (list.size() > pageSize && pageSize > 0) {
+            locator.setAnchor(list.get(list.size() - 1).getId());
+            list.remove(list.size() - 1);
+        } else {
+            locator.setAnchor(null);
+        }
+        return list;
+    }
+
+    @Override
+    public Map<Long, Integer> countEnabledBannersByScope(Integer namespaceId) {
+        DSLContext context = dbProvider.getDslContext(AccessSpec.readOnly());
+        com.everhomes.server.schema.tables.EhBanners t = EH_BANNERS;
+
+        return context.select(t.SCOPE_ID, DSL.count(t.ID))
+                .from(t)
+                .where(t.NAMESPACE_ID.eq(namespaceId))
+                .and(t.SCOPE_CODE.eq(ScopeType.COMMUNITY.getCode()))
+                .and(t.STATUS.eq(BannerStatus.ACTIVE.getCode()))
+                .groupBy(t.SCOPE_ID)
+                .fetchMap(t.SCOPE_ID, DSL.count(t.ID));
+    }
 }

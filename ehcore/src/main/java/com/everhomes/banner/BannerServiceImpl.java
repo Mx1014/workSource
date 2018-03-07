@@ -4,16 +4,17 @@ package com.everhomes.banner;
 import com.everhomes.auditlog.AuditLog;
 import com.everhomes.auditlog.AuditLogOperator;
 import com.everhomes.auditlog.AuditLogProvider;
+import com.everhomes.bootstrap.PlatformContext;
 import com.everhomes.community.Community;
 import com.everhomes.community.CommunityProvider;
 import com.everhomes.configuration.ConfigurationProvider;
 import com.everhomes.constants.ErrorCodes;
 import com.everhomes.contentserver.ContentServerService;
-import com.everhomes.core.AppConfig;
 import com.everhomes.db.DbProvider;
 import com.everhomes.entity.EntityType;
 import com.everhomes.family.FamilyProvider;
 import com.everhomes.launchpad.LaunchPadConstants;
+import com.everhomes.listing.ListingLocator;
 import com.everhomes.organization.OrganizationCommunityRequest;
 import com.everhomes.organization.OrganizationProvider;
 import com.everhomes.organization.OrganizationService;
@@ -21,7 +22,10 @@ import com.everhomes.organization.pm.PropertyMgrService;
 import com.everhomes.rest.app.AppConstants;
 import com.everhomes.rest.banner.*;
 import com.everhomes.rest.banner.BannerOrder;
+import com.everhomes.rest.banner.admin.CreateBannerCommand;
+import com.everhomes.rest.banner.admin.DeleteBannerCommand;
 import com.everhomes.rest.banner.admin.*;
+import com.everhomes.rest.banner.admin.UpdateBannerCommand;
 import com.everhomes.rest.common.ScopeType;
 import com.everhomes.rest.community.CommunityType;
 import com.everhomes.rest.family.FamilyDTO;
@@ -36,12 +40,11 @@ import com.everhomes.rest.user.IdentifierType;
 import com.everhomes.scene.SceneService;
 import com.everhomes.scene.SceneTypeInfo;
 import com.everhomes.server.schema.Tables;
+import com.everhomes.settings.PaginationConfigHelper;
 import com.everhomes.user.User;
 import com.everhomes.user.UserContext;
 import com.everhomes.user.UserService;
-import com.everhomes.util.ConvertHelper;
-import com.everhomes.util.DateHelper;
-import com.everhomes.util.RuntimeErrorException;
+import com.everhomes.util.*;
 import org.json.simple.JSONObject;
 import org.json.simple.JSONValue;
 import org.slf4j.Logger;
@@ -361,8 +364,7 @@ public class BannerServiceImpl implements BannerService {
     
     @Override
     public List<BannerDTO> getBannersByScene(GetBannersBySceneCommand cmd, HttpServletRequest request) {
-        User user = UserContext.current().getUser();
-        SceneTokenDTO sceneToken = userService.checkSceneToken(user.getId(), cmd.getSceneToken());
+        SceneTokenDTO sceneToken = userService.checkSceneToken(UserContext.currentUserId(), cmd.getSceneToken());
         
         GetBannersCommand getCmd = new GetBannersCommand();
 
@@ -438,6 +440,133 @@ public class BannerServiceImpl implements BannerService {
         }
         
         return bannerList;
+    }
+
+    @Override
+    public List<BannerDTO> getBannersBySceneNew(GetBannersBySceneCommand cmd) {
+        SceneTokenDTO sceneToken = userService.checkSceneToken(UserContext.currentUserId(), cmd.getSceneToken());
+
+        Long communityId = parseCommunityIdFromSceneToken(sceneToken);
+
+        if (communityId != null) {
+            List<Banner> bannerList = bannerProvider.listBannersByCommunityId(sceneToken.getNamespaceId(), communityId);
+            return bannerList.stream().map(r -> {
+                BannerDTO dto = toBannerDTO(r);
+                // 本来posterPath是 cs:// 开头的
+                // 但是客户端用来下载图片的字段是posterPath, 所以在这里要特殊处理一下
+                dto.setPosterPath(dto.getPosterUrl());
+                dto.setPosterUrl(null);
+                return dto;
+            }).collect(Collectors.toList());
+        }
+        return new ArrayList<>();
+    }
+
+    @Override
+    public CountEnabledBannersByScopeResponse countEnabledBannersByScope(CountEnabledBannersByScopeCommand cmd) {
+	    ValidatorUtil.validate(cmd);
+
+        Map<Long, Integer> communityIdTOEnabledCountMap = bannerProvider.countEnabledBannersByScope(cmd.getNamespaceId());
+
+        List<EnabledBannersDTO> list = new ArrayList<>();
+        communityIdTOEnabledCountMap.forEach((k, v) -> list.add(new EnabledBannersDTO(k, v)));
+
+        CountEnabledBannersByScopeResponse response = new CountEnabledBannersByScopeResponse();
+        response.setList(list);
+        return response;
+    }
+
+    @Override
+    public void reorderBanners(ReorderBannersCommand cmd) {
+        ValidatorUtil.validate(cmd);
+
+        Banner banner1 = bannerProvider.findBannerById(cmd.getId());
+        if (banner1 == null) {
+            throw RuntimeErrorException.errorWith(BannerServiceErrorCode.SCOPE,
+                    BannerServiceErrorCode.ERROR_BANNER_NOT_EXISTS, "Banner is not exists.");
+        }
+        Banner banner2 = bannerProvider.findBannerById(cmd.getExchangeId());
+        if (banner2 == null) {
+            throw RuntimeErrorException.errorWith(BannerServiceErrorCode.SCOPE,
+                    BannerServiceErrorCode.ERROR_BANNER_NOT_EXISTS, "Banner is not exists.");
+        }
+
+        Integer order1 = banner1.getOrder();
+        Integer order2 = banner2.getOrder();
+
+        banner1.setOrder(order2);
+        banner2.setOrder(order1);
+
+        dbProvider.execute(status -> {
+            bannerProvider.updateBanner(banner1);
+            bannerProvider.updateBanner(banner2);
+            return true;
+        });
+    }
+
+    @Override
+    public BannerDTO updateBannerStatus(UpdateBannerStatusCommand cmd) {
+	    ValidatorUtil.validate(cmd);
+        Banner banner = bannerProvider.findBannerById(cmd.getId());
+        if (banner == null) {
+            throw RuntimeErrorException.errorWith(BannerServiceErrorCode.SCOPE,
+                    BannerServiceErrorCode.ERROR_BANNER_NOT_EXISTS, "Banner is not exists.");
+        }
+
+        if (!Objects.equals(banner.getStatus(), cmd.getStatus())) {
+            banner.setStatus(cmd.getStatus());
+            bannerProvider.updateBanner(banner);
+        }
+        return toBannerDTO(banner);
+    }
+
+    private Long parseCommunityIdFromSceneToken(SceneTokenDTO sceneToken) {
+        SceneType sceneType = SceneType.fromCode(sceneToken.getScene());
+        if (sceneType == null) {
+            return null;
+        }
+        Long communityId = null;
+        switch (sceneType) {
+            case DEFAULT:
+            case PARK_TOURIST: {
+                Community community = communityProvider.findCommunityById(sceneToken.getEntityId());
+                if (community != null) {
+                    communityId = community.getId();
+                }
+                break;
+            }
+            case FAMILY: {
+                FamilyDTO family = familyProvider.getFamilyById(sceneToken.getEntityId());
+                if (family != null) {
+                    Community community = communityProvider.findCommunityById(family.getCommunityId());
+                    if (community != null) {
+                        communityId = community.getId();
+                    }
+                }
+                break;
+            }
+            case PM_ADMIN:// 无小区ID
+            case ENTERPRISE: // 增加两场景，与园区企业保持一致 by lqs 20160517
+            case ENTERPRISE_NOAUTH: { // 增加两场景，与园区企业保持一致 by lqs 20160517
+                OrganizationCommunityRequest organizationCommunityRequest =
+                        organizationProvider.getOrganizationCommunityRequestByOrganizationId(sceneToken.getEntityId());
+                if (organizationCommunityRequest != null) {
+                    communityId = organizationCommunityRequest.getCommunityId();
+                }
+                break;
+            }
+            default: {
+                LOGGER.error("Unsupported scene for simple user, sceneToken=" + sceneToken);
+                break;
+            }
+        }
+        return communityId;
+    }
+
+    private BannerDTO toBannerDTO(Banner banner) {
+        BannerDTO dto = ConvertHelper.convert(banner, BannerDTO.class);
+        dto.setPosterUrl(parserUri(banner.getPosterPath(), Banner.class.getSimpleName(), banner.getId()));
+        return dto;
     }
     
     @SuppressWarnings("unchecked")
@@ -558,119 +687,96 @@ public class BannerServiceImpl implements BannerService {
 //    }
     
     @Override
-    public void createBanner(CreateBannerAdminCommand cmd){
-        if(cmd.getScopes() == null || cmd.getScopes().isEmpty()){
-            throw RuntimeErrorException.errorWith(ErrorCodes.SCOPE_GENERAL,
-                    ErrorCodes.ERROR_INVALID_PARAMETER, "Invalid scopes paramter.");
+    public void createBanner(CreateBannerCommand cmd) {
+        ValidatorUtil.validate(cmd);
+
+        BannerTargetType targetType = BannerTargetType.fromCode(cmd.getTargetType());
+        if (targetType == null) {
+            throw RuntimeErrorException.errorWith(ErrorCodes.SCOPE_GENERAL, ErrorCodes.ERROR_INVALID_PARAMETER,
+                    "Invalid parameter targetType: %s.", cmd.getTargetType());
         }
-        if(cmd.getBannerLocation() == null){
-            throw RuntimeErrorException.errorWith(ErrorCodes.SCOPE_GENERAL,
-                    ErrorCodes.ERROR_INVALID_PARAMETER, "Invalid bannerLocation paramter.");
-        }
-        if(cmd.getBannerGroup() == null){
-            throw RuntimeErrorException.errorWith(ErrorCodes.SCOPE_GENERAL,
-                    ErrorCodes.ERROR_INVALID_PARAMETER, "Invalid bannerGroup paramter.");
-        }
-        if(cmd.getStartTime() != null && cmd.getEndTime() != null && cmd.getStartTime() > cmd.getEndTime()){
-            throw RuntimeErrorException.errorWith(ErrorCodes.SCOPE_GENERAL,
-                    ErrorCodes.ERROR_INVALID_PARAMETER, "Invalid startTime and endTime paramter.");
-        }
-        
-        // 增加场景信息，由于jooq生成的pojo不带默认值，场景类型是not null类型，故在没值时需要补充默认值 by lqs 2010505
-        List<String> sceneTypeList = cmd.getSceneTypeList();
-        if(sceneTypeList == null) {
-            sceneTypeList = new ArrayList<String>();
-            sceneTypeList.add(SceneType.DEFAULT.getCode());
-        }
-        
-        User user = UserContext.current().getUser();
-        long userId = user.getId();
-        List<BannerScope> scopes = cmd.getScopes();
-        for(String sceneStr : sceneTypeList) {
-            SceneType sceneType = SceneType.fromCode(sceneStr);
-            if(sceneType == null) {
-                LOGGER.error("Invalid scene type, userId={}, sceneType={}, cmd={}", userId, sceneStr, cmd);
-                continue;
+        Long userId = UserContext.currentUserId();
+
+        for (Long communityId : cmd.getScopes()) {
+            Banner banner = ConvertHelper.convert(cmd, Banner.class);
+
+            BannerTargetHandler handler = PlatformContext.getComponent(
+                    BannerTargetHandler.BANNER_TARGET_HANDLER_PREFIX + targetType.getCode());
+
+            BannerTargetHandleResult result = null;
+            try {
+                result = handler.evaluate(cmd.getTargetData());
+            } catch (Exception e) {
+                throw RuntimeErrorException.errorWith(e,
+                        BannerServiceErrorCode.SCOPE,
+                        BannerServiceErrorCode.ERROR_TARGET_HANDLE_ERROR,
+                        "Parse targetData error, targetData: %s.", cmd.getTargetType());
             }
-            scopes.forEach(scope ->{
-                Banner banner = new Banner();
-                banner.setActionType(cmd.getActionType());
-                banner.setActionData(cmd.getActionData());
-                banner.setAppid(cmd.getAppid());
-                banner.setCreatorUid(userId);
-                banner.setBannerLocation(cmd.getBannerLocation());
-                banner.setBannerGroup(cmd.getBannerGroup());
-                banner.setName(cmd.getName());
-                banner.setNamespaceId(cmd.getNamespaceId());
-                if(cmd.getStartTime() != null)
-                    banner.setStartTime(new Timestamp(cmd.getStartTime()));
-                if(cmd.getEndTime() != null)
-                    banner.setEndTime(new Timestamp(cmd.getEndTime()));
-                banner.setStatus(cmd.getStatus());
-                banner.setPosterPath(cmd.getPosterPath());
-                banner.setScopeCode(scope.getScopeCode());
-                banner.setScopeId(scope.getScopeId());
-                banner.setOrder(scope.getOrder());
-                banner.setVendorTag(cmd.getVendorTag());
-                
-                // 在3.7.0版本，banner也需要能够为某指定园区配置不同的banner，故需要支持apply_policy  by yanshaofan
-                ApplyPolicy applyPolicy = ApplyPolicy.fromCode(cmd.getApplyPolicy());
-                if(applyPolicy == null) {
-                    applyPolicy = ApplyPolicy.DEFAULT;
-                }
-                banner.setApplyPolicy(applyPolicy.getCode());
-                
-                banner.setSceneType(sceneType.getCode());
-                bannerProvider.createBanner(banner);
-            });
+
+            banner.setActionType(result.getActionType());
+            banner.setActionData(result.getActionData());
+
+            banner.setCreatorUid(userId);
+            banner.setBannerGroup("Default");
+            banner.setStatus(BannerStatus.ACTIVE.getCode());
+            banner.setScopeCode(ScopeType.COMMUNITY.getCode());
+            banner.setScopeId(communityId);
+
+
+            Integer maxOrder = bannerProvider.getMaxOrderByCommunityId(cmd.getNamespaceId(), communityId);
+            banner.setOrder(maxOrder == null ? 1 : maxOrder + 1);
+            bannerProvider.createBanner(banner);
         }
     }
     
 	@Override
-    public void updateBanner(UpdateBannerAdminCommand cmd){
-        if(cmd.getId() == null){
-            throw RuntimeErrorException.errorWith(ErrorCodes.SCOPE_GENERAL,
-                    ErrorCodes.ERROR_INVALID_PARAMETER, "Invalid id paramter.");
+    public BannerDTO updateBanner(UpdateBannerCommand cmd) {
+	    ValidatorUtil.validate(cmd);
+
+        BannerTargetType targetType = BannerTargetType.fromCode(cmd.getTargetType());
+        if (targetType == null) {
+            throw RuntimeErrorException.errorWith(ErrorCodes.SCOPE_GENERAL, ErrorCodes.ERROR_INVALID_PARAMETER,
+                    "Invalid parameter targetType: %s.", cmd.getTargetType());
         }
+
         Banner banner = bannerProvider.findBannerById(cmd.getId());
-        if(banner == null){
+        if (banner == null) {
             throw RuntimeErrorException.errorWith(BannerServiceErrorCode.SCOPE,
                     BannerServiceErrorCode.ERROR_BANNER_NOT_EXISTS, "Banner is not exists.");
         }
-        if(cmd.getStartTime() != null && cmd.getEndTime() != null && cmd.getStartTime() > cmd.getEndTime()){
-            throw RuntimeErrorException.errorWith(ErrorCodes.SCOPE_GENERAL,
-                    ErrorCodes.ERROR_INVALID_PARAMETER, "Invalid startTime and endTime paramter.");
+        banner.setName(cmd.getName());
+        banner.setPosterPath(cmd.getPosterPath());
+
+        if (!Objects.equals(banner.getTargetType(), cmd.getTargetType())
+                || !Objects.equals(banner.getTargetData(), cmd.getTargetData())) {
+            BannerTargetHandler handler = PlatformContext.getComponent(
+                    BannerTargetHandler.BANNER_TARGET_HANDLER_PREFIX + targetType.getCode());
+
+            BannerTargetHandleResult result = null;
+            try {
+                result = handler.evaluate(cmd.getTargetData());
+            } catch (Exception e) {
+                throw RuntimeErrorException.errorWith(e,
+                        BannerServiceErrorCode.SCOPE,
+                        BannerServiceErrorCode.ERROR_TARGET_HANDLE_ERROR,
+                        "Parse targetData error, targetData: %s.", cmd.getTargetType());
+            }
+
+            banner.setActionType(result.getActionType());
+            banner.setActionData(result.getActionData());
         }
-        if(cmd.getActionType() != null)
-            banner.setActionType(cmd.getActionType());
-        if(cmd.getActionData() != null)
-            banner.setActionData(cmd.getActionData());
-        if(cmd.getStartTime() != null)
-            banner.setStartTime(new Timestamp(cmd.getStartTime()));
-        if(cmd.getEndTime() != null)
-            banner.setEndTime(new Timestamp(cmd.getEndTime()));
-        if(cmd.getOrder() != null)
-            banner.setOrder(cmd.getOrder());
-        if(cmd.getPosterPath() != null)
-            banner.setPosterPath(cmd.getPosterPath());
-        if(cmd.getScopeCode() != null)
-            banner.setScopeCode(cmd.getScopeCode());
-        if(cmd.getScopeId() != null)
-            banner.setScopeId(cmd.getScopeId());
-        if(cmd.getStatus() != null)
-            banner.setStatus(cmd.getStatus());
-        
         bannerProvider.updateBanner(banner);
+        return toBannerDTO(banner);
     }
 	
 	@Override
-    public void deleteBannerById(DeleteBannerAdminCommand cmd){
-        if(cmd.getId() == null){
+    public void deleteBannerById(DeleteBannerCommand cmd) {
+        if(cmd.getId() == null) {
             throw RuntimeErrorException.errorWith(ErrorCodes.SCOPE_GENERAL,
                     ErrorCodes.ERROR_INVALID_PARAMETER, "Invalid id paramter.");
         }
         Banner banner = bannerProvider.findBannerById(cmd.getId());
-        if(banner == null){
+        if(banner == null) {
             throw RuntimeErrorException.errorWith(BannerServiceErrorCode.SCOPE,
                     BannerServiceErrorCode.ERROR_BANNER_NOT_EXISTS, "Banner is not exists.");
         }
@@ -714,33 +820,27 @@ public class BannerServiceImpl implements BannerService {
     }
     
     @Override
-    public ListBannersAdminCommandResponse listBanners(ListBannersAdminCommand cmd) {
-        User user = UserContext.current().getUser();
-        long userId = user.getId();
-        final Integer pageSize = cmd.getPageSize() == null ? this.configurationProvider.getIntValue("pagination.page.size",
-                AppConfig.DEFAULT_PAGINATION_PAGE_SIZE) : cmd.getPageSize();
+    public ListBannersResponse listBanners(ListBannersCommand cmd) {
+	    ValidatorUtil.validate(cmd);
 
-        Integer namespaceId = cmd.getNamespaceId() != null ? cmd.getNamespaceId() : UserContext.getCurrentNamespaceId();
+        int pageSize = PaginationConfigHelper.getPageSize(configurationProvider, cmd.getPageSize());
+        ListingLocator locator = new ListingLocator();
+        locator.setAnchor(cmd.getPageAnchor());
 
-        List<BannerDTO> result = bannerProvider.listBannersByOwner(
-                namespaceId, cmd.getScope(), cmd.getSceneType(), cmd.getPageAnchor(),
-                pageSize + 1, null);
+        List<Banner> bannerList = bannerProvider.listBannersByCommunityId(
+                cmd.getNamespaceId(), cmd.getScope(), pageSize, locator);
 
-        for (BannerDTO dto : result) {
-            dto.setPosterPath(parserUri(dto.getPosterPath(), EntityType.USER.getCode(), userId));
-        }
+        List<BannerDTO> dtoList = bannerList.stream().map(this::toBannerDTO).collect(Collectors.toList());
 
-        ListBannersAdminCommandResponse response = new ListBannersAdminCommandResponse();
-        if(result.size() >= pageSize) {
-            response.setNextPageAnchor(result.get(result.size() - 1).getCreateTime().getTime());
-            result.remove(result.size() - 1);
-        }
-        response.setRequests(result);
+        ListBannersResponse response = new ListBannersResponse();
+        response.setBanners(dtoList);
+        response.setNextPageAnchor(locator.getAnchor());
+
         return response;
     }
     
     @Override
-    public BannerClickDTO findBannerClickByToken(String token){
+    public BannerClickDTO findBannerClickByToken(String token) {
         BannerClick bannerClick = this.bannerProvider.findBannerClickByToken(token);
         BannerClickDTO dto = ConvertHelper.convert(bannerClick, BannerClickDTO.class);
         return dto;
@@ -769,7 +869,7 @@ public class BannerServiceImpl implements BannerService {
 
 	@Override
 	public ListBannersByOwnerCommandResponse listBannersByOwner(ListBannersByOwnerCommand cmd) {
-		checkUserNotInOrg(cmd.getOwnerType(), cmd.getOwnerId());
+		/*checkUserNotInOrg(cmd.getOwnerType(), cmd.getOwnerId());
 		
 		if(cmd.getScope() == null || cmd.getScope().getScopeCode() == null || cmd.getScope().getScopeId() == null) {
             throw RuntimeErrorException.errorWith(ErrorCodes.SCOPE_GENERAL,
@@ -804,7 +904,8 @@ public class BannerServiceImpl implements BannerService {
 			resp.setNextPageAnchor(bannerList.get(bannerList.size() - 1).getCreateTime().getTime());
 			bannerList.remove(bannerList.size() - 1);
 		}
-		return resp;
+		return resp;*/
+        return null;
 	}
 
 	private void bannerDTOSort(List<BannerDTO> result) {
@@ -875,8 +976,8 @@ public class BannerServiceImpl implements BannerService {
          	});
         }
 	}
-	
-	/**
+
+    /**
 	 * 复制默认的banner为用户可见范围下customized的banner
 	 * 
 	 * @param scope 复制过后新的banner的可见范围

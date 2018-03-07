@@ -7,10 +7,7 @@ import com.everhomes.discover.RestDoc;
 import com.everhomes.discover.RestReturn;
 import com.everhomes.rest.RestResponse;
 import com.everhomes.rest.banner.BannerDTO;
-import com.everhomes.rest.banner.GetBannerByIdCommand;
 import com.everhomes.rest.banner.admin.*;
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RestController;
@@ -21,7 +18,8 @@ import javax.validation.Valid;
 @RestController
 @RequestMapping("/admin/banner")
 public class BannerAdminController extends ControllerBase {
-    private static final Logger LOGGER = LoggerFactory.getLogger(BannerAdminController.class);
+
+    // private static final Logger LOGGER = LoggerFactory.getLogger(BannerAdminController.class);
 
     @Autowired
     private BannerService bannerService;
@@ -31,12 +29,8 @@ public class BannerAdminController extends ControllerBase {
      * <p>创建banner</p>
      */
     @RequestMapping("createBanner")
-    @RestReturn(value = String.class)
-    public RestResponse createBanner(@Valid CreateBannerAdminCommand cmd) {
-
-        // SystemUserPrivilegeMgr resolver = PlatformContext.getComponent("SystemUser");
-        // resolver.checkUserPrivilege(UserContext.current().getUser().getId(), 0);
-
+    @RestReturn(value = BannerDTO.class)
+    public RestResponse createBanner(@Valid CreateBannerCommand cmd) {
         bannerService.createBanner(cmd);
         RestResponse response = new RestResponse();
         response.setErrorCode(ErrorCodes.SUCCESS);
@@ -45,29 +39,14 @@ public class BannerAdminController extends ControllerBase {
     }
 
     /**
-     * <b>URL: /admin/banner/getBannerById</b>
-     * <p>根据bannerId获取banner信息</p>
-     */
-    @RequestMapping("getBannerById")
-    @RestReturn(value = BannerDTO.class)
-    public RestResponse getBannerById(@Valid GetBannerByIdCommand cmd) {
-        BannerDTO bannerDto = bannerService.getBannerById(cmd);
-        RestResponse response = new RestResponse(bannerDto);
-        response.setErrorCode(ErrorCodes.SUCCESS);
-        response.setErrorDescription("OK");
-        return response;
-    }
-
-    /**
      * <b>URL: /admin/banner/updateBanner</b>
-     * <p>更新banner</p>
+     * <p>更新 banner</p>
      */
     @RequestMapping("updateBanner")
-    @RestReturn(value = String.class)
-    public RestResponse updateBanner(@Valid UpdateBannerAdminCommand cmd) {
-
-        bannerService.updateBanner(cmd);
-        RestResponse response = new RestResponse();
+    @RestReturn(value = BannerDTO.class)
+    public RestResponse updateBanner(@Valid UpdateBannerCommand cmd) {
+        BannerDTO dto = bannerService.updateBanner(cmd);
+        RestResponse response = new RestResponse(dto);
         response.setErrorCode(ErrorCodes.SUCCESS);
         response.setErrorDescription("OK");
         return response;
@@ -75,12 +54,11 @@ public class BannerAdminController extends ControllerBase {
 
     /**
      * <b>URL: /admin/banner/deleteBanner</b>
-     * <p>删除banner</p>
+     * <p>删除 banner</p>
      */
     @RequestMapping("deleteBanner")
     @RestReturn(value = String.class)
-    public RestResponse deleteBanner(@Valid DeleteBannerAdminCommand cmd) {
-
+    public RestResponse deleteBanner(@Valid DeleteBannerCommand cmd) {
         bannerService.deleteBannerById(cmd);
         RestResponse response = new RestResponse();
         response.setErrorCode(ErrorCodes.SUCCESS);
@@ -90,15 +68,57 @@ public class BannerAdminController extends ControllerBase {
 
     /**
      * <b>URL: /admin/banner/listBanners</b>
-     * <p>获取所有banner</p>
+     * <p>获取banner列表</p>
      */
     @RequestMapping("listBanners")
-    @RestReturn(value = ListBannersAdminCommandResponse.class)
-    public RestResponse listBanners(ListBannersAdminCommand cmd) {
-        ListBannersAdminCommandResponse result = bannerService.listBanners(cmd);
+    @RestReturn(value = ListBannersResponse.class)
+    public RestResponse listBanners(ListBannersCommand cmd) {
+        ListBannersResponse result = bannerService.listBanners(cmd);
         RestResponse response = new RestResponse(result);
         response.setErrorCode(ErrorCodes.SUCCESS);
         response.setErrorDescription("OK");
         return response;
+    }
+
+    /**
+     * <b>URL: /admin/banner/countEnabledBannersByScope</b>
+     * <p>获取开启的banner数量，按照小区列出来</p>
+     */
+    @RequestMapping("countEnabledBannersByScope")
+    @RestReturn(value = CountEnabledBannersByScopeResponse.class)
+    public RestResponse countEnabledBannersByScope(CountEnabledBannersByScopeCommand cmd) {
+        CountEnabledBannersByScopeResponse res = bannerService.countEnabledBannersByScope(cmd);
+        RestResponse response = new RestResponse(res);
+        response.setErrorCode(ErrorCodes.SUCCESS);
+        response.setErrorDescription("OK");
+        return response;
+    }
+
+    /**
+     * <b>URL: /admin/banner/reorderBanners</b>
+     * <p>调整banner的顺序</p>
+     */
+    @RequestMapping("reorderBanners")
+    @RestReturn(value = String.class)
+    public RestResponse reorderBanners(@Valid ReorderBannersCommand cmd) {
+        bannerService.reorderBanners(cmd);
+        RestResponse resp = new RestResponse();
+        resp.setErrorCode(ErrorCodes.SUCCESS);
+        resp.setErrorDescription("OK");
+        return resp;
+    }
+
+    /**
+     * <b>URL: /admin/banner/updateBannerStatus</b>
+     * <p>banner的开关</p>
+     */
+    @RequestMapping("updateBannerStatus")
+    @RestReturn(value = BannerDTO.class)
+    public RestResponse updateBannerStatus(@Valid UpdateBannerStatusCommand cmd) {
+        BannerDTO dto = bannerService.updateBannerStatus(cmd);
+        RestResponse resp = new RestResponse(dto);
+        resp.setErrorCode(ErrorCodes.SUCCESS);
+        resp.setErrorDescription("OK");
+        return resp;
     }
 }
