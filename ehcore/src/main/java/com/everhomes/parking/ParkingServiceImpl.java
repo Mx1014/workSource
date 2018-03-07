@@ -1496,7 +1496,7 @@ public class ParkingServiceImpl implements ParkingService {
 
 			if (parkingFlow.getCardAgreementFlag() == ParkingConfigFlag.SUPPORT.getCode()) {
 //				dto.setCardAgreementUrl(host + "/web/lib/html/park_payment_review.html?configId=" + parkingFlow.getId());
-				dto.setCardAgreementUrl(host + "/web/lib/html/park_payment_review.html?configId=" + parkingFlow.getId());
+				dto.setCardAgreementUrl(host + configProvider.getValue("parking.agreement.url", "/park_payment_review/index.html?configId=") + parkingFlow.getId());
 			}
 		}else {
 			dto = ConvertHelper.convert(cmd, ParkingRequestCardConfigDTO.class);
