@@ -5868,7 +5868,7 @@ public class OrganizationServiceImpl implements OrganizationService {
         groupTypes.add(OrganizationGroupType.DEPARTMENT.getCode());
         groupTypes.add(OrganizationGroupType.GROUP.getCode());
         groupTypes.add(OrganizationGroupType.JOB_POSITION.getCode());
-//        groupTypes.add(OrganizationGroupType.JOB_LEVEL.getCode());
+        groupTypes.add(OrganizationGroupType.JOB_LEVEL.getCode());
         List<String> tokens = organizationMembers.stream().map(r -> {
             return r.getContactToken();
         }).collect(Collectors.toList());
@@ -5932,6 +5932,21 @@ public class OrganizationServiceImpl implements OrganizationService {
 //                                jobPositions = orgDto_target.getJobPositions();
 //                                jobPositions.add(positionDTO_now);
 //                                orgDto_target.setJobPositions(jobPositions);
+                        }
+                    }
+                    break;
+                case JOB_LEVEL:
+                    List<OrganizationDTO> jobLevels = new ArrayList<>();
+                    if (orgDto_target == null) {  //首次拼装
+                        jobLevels.add(orgDTO_now);
+                        dto.setJobLevels(jobLevels);
+                        target_map.put(dto.getContactToken(), dto);
+                    }else{
+                        if(orgDto_target.getJobLevels() == null){
+                            jobLevels.add(orgDTO_now);
+                            orgDto_target.setJobLevels(jobLevels);
+                        }else{
+                            orgDto_target.getJobLevels().add(orgDTO_now);
                         }
                     }
                     break;
