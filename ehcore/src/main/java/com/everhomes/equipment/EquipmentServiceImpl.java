@@ -6133,6 +6133,7 @@ private void checkUserPrivilege(Long orgId, Long privilegeId, Long communityId) 
                     LOGGER.info("create repair tasks command ={}", repairCommand);
 					PmTaskDTO pmTaskDTO = pmTaskService.createTask(repairCommand);
                     tasksLog.setPmTaskId(pmTaskDTO.getId());
+                    tasksLog.setFlowCaseId(pmTaskDTO.getFlowCaseId());
 					equipmentProvider.createEquipmentInspectionTasksLogs(tasksLog);
                     //update equipment status to inMaintance
                     equipmentProvider.updateEquipmentStatus(cmd.getEquipmentId(), EquipmentStatus.IN_MAINTENANCE.getCode());
