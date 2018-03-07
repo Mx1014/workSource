@@ -641,7 +641,7 @@ public class SiyinPrintServiceImpl implements SiyinPrintService {
 				response.setSourceType(PrintScanTarget.UL_CLIENT.getCode());
 			}else{
 				response.setSourceType(PrintScanTarget.UL_PRINTER.getCode());
-				mappingReaderToUser(readerName);
+				mappingReaderToUser(readerName,UserContext.getCurrentNamespaceId());
 			}
 		}catch (Exception e) {
 			LOGGER.error("parse json error, qrcode = {}", dto.getExtra(),e);
