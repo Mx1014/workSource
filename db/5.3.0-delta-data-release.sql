@@ -716,3 +716,8 @@ update eh_web_menus SET module_id=41500 WHERE NAME='文件管理';
 -- dengs,新闻分享的url调整。2018.03.06
 update eh_configurations set `value`='/park-news-web/build/index.html?ns=%s&isFS=1&widget=News&timeWidgetStyle=time/#/newsDetail?newsToken=%s' WHERE `name`='news.url';
 update eh_configurations SET `value`='/html/news_text_review.html' WHERE `name`='news.content.url';
+
+-- dengs,工位预定的url修改，2018.03.07
+SET @home_url=(SELECT `value` from eh_configurations WHERE `NAME`='home.url');
+update eh_launch_pad_items SET action_data=CONCAT('{"url":"',@home_url,'/station-booking-web/build/index.html#/home#sign_suffix"}') WHERE action_type in (13,14) AND action_data LIKE '%station-booking/index.html%';
+
