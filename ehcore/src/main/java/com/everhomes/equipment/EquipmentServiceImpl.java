@@ -2951,9 +2951,9 @@ private void checkUserPrivilege(Long orgId, Long privilegeId, Long communityId) 
 		List<String> fieldOrders = new ArrayList<>();
 		for (FieldDTO field : fieldsDTO) {
 			//去除附件 和 经纬度
-			if (!(field.getFieldName().equals("attachments") && field.getFieldName().equals("geohash"))){
+			//if (!(field.getFieldName().equals("attachments") && field.getFieldName().equals("geohash"))){
 				fieldOrders.add(field.getFieldName());
-			}
+			//}
 		}
 		int flag = 0;
 		//因为有注意事项  一行 从第二行开始
