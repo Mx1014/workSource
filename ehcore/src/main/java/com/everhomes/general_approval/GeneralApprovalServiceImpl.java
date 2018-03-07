@@ -795,17 +795,22 @@ public class GeneralApprovalServiceImpl implements GeneralApprovalService {
     @Override
     public void deleteGeneralApproval(GeneralApprovalIdCommand cmd) {
 
-        // 删除是状态置为deleted
-        GeneralApproval ga = this.generalApprovalProvider.getGeneralApprovalById(cmd
-                .getApprovalId());
+        // change the status
+        GeneralApproval ga = this.generalApprovalProvider.getGeneralApprovalById(cmd.getApprovalId());
         ga.setStatus(GeneralApprovalStatus.DELETED.getCode());
-        updateGeneralApproval(ga);
+        dbProvider.execute((TransactionStatus status)->{
+            //  1.delete the approval
+            updateGeneralApproval(ga);
+            //  2.delete the scope
+            generalApprovalProvider.deleteApprovalScopeMapByApprovalId(cmd.getApprovalId());
+            return null;
+        });
+
     }
 
     @Override
     public GeneralFormDTO getApprovalForm(ApprovalFormIdCommand cmd) {
-        GeneralForm form = this.generalFormProvider.getActiveGeneralFormByOriginId(cmd
-                .getFormOriginId());
+        GeneralForm form = this.generalFormProvider.getActiveGeneralFormByOriginId(cmd.getFormOriginId());
         return processGeneralFormDTO(form);
     }
 
