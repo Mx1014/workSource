@@ -2823,6 +2823,8 @@ public class AssetServiceImpl implements AssetService {
             namespaceId = UserContext.getCurrentNamespaceId();
         }
         switch (namespaceId){
+            case 999958:
+                hasPay = 0;
             case 999971:
                 if(cmd.getOwnerType()!=null && cmd.getOwnerType().equals(AssetPaymentStrings.EH_ORGANIZATION)) hasPay = 0;
                 break;

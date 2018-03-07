@@ -40,6 +40,7 @@ import java.sql.Timestamp;
  *     <li>evaluateBtn: 评价按钮，替代原来的needEvaluate字段，统一使用fireButton接口提交评价 {@link com.everhomes.rest.flow.FlowButtonDTO}</li>
  *     <li>concurrentFlag: 是否是并发执行标记</li>
  *     <li>routeUri: 路由跳转</li>
+ *     <li>serviceType: 业务类型</li>
  * </ul>
  */
 public class FlowCaseDTO {
@@ -80,6 +81,7 @@ public class FlowCaseDTO {
     private Byte concurrentFlag;
 
     private String routeUri;
+    private String serviceType;
 
     public Long getId() {
         return id;
@@ -343,6 +345,14 @@ public class FlowCaseDTO {
 
     public void setEvaluateBtn(FlowButtonDTO evaluateBtn) {
         this.evaluateBtn = evaluateBtn;
+    }
+
+    public String getServiceType() {
+        return serviceType;
+    }
+
+    public void setServiceType(String serviceType) {
+        this.serviceType = serviceType;
     }
 
     @Override
