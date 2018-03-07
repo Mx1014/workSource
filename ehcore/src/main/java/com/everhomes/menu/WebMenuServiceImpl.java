@@ -365,19 +365,18 @@ public class WebMenuServiceImpl implements WebMenuService {
 
 	private List<WebMenuDTO> listWebMenuByApp(String webMenuType, List<Long> appOriginIds){
 
-		Integer namespaceId = UserContext.getCurrentNamespaceId();
-
-		//TODO for test waiting for delete
-		if(appOriginIds == null || appOriginIds.size() == 0){
-			List<ServiceModuleApp> serviceModuleApps = serviceModuleAppService.listReleaseServiceModuleApps(namespaceId);
-			if(serviceModuleApps == null || serviceModuleApps.size() == 0){
-				return null;
-			}
-
-			appOriginIds = serviceModuleApps.stream().map(r -> r.getOriginId()).collect(Collectors.toList());
+		if(appOriginIds == null || appOriginIds.size() == 0 ){
+			return null;
 		}
 
+		Integer namespaceId = UserContext.getCurrentNamespaceId();
+
 		List<WebMenu> webMenus = listWebMenuByAppOriginIds(namespaceId, webMenuType, appOriginIds);
+
+		if(webMenus == null || webMenus.size() == 0){
+			return null;
+		}
+
 		List<WebMenu> parentMenus = listParentMenus(webMenus);
 		webMenus.addAll(parentMenus);
 
@@ -418,10 +417,21 @@ public class WebMenuServiceImpl implements WebMenuService {
 //		}).collect(Collectors.toList()), ConvertHelper.convert(menu, WebMenuDTO.class)).getDtos();
 
 
+		//TODO 暂时普通公司是按照所有应用找菜单的
+		List<Long> appOriginIds = null;
+		if(appOriginIds == null || appOriginIds.size() == 0){
+			List<ServiceModuleApp> serviceModuleApps = serviceModuleAppService.listReleaseServiceModuleApps(UserContext.getCurrentNamespaceId());
+			if(serviceModuleApps == null || serviceModuleApps.size() == 0){
+				return null;
+			}
+
+			appOriginIds = serviceModuleApps.stream().map(r -> r.getOriginId()).collect(Collectors.toList());
+		}
+
+
 		//TODO 前面的代码需要提供当前用户有权限的appOriginIds，其他的所有逻辑都不要了
 		//全部appOriginIds   参考serviceModuleAppService.listReleaseServiceModuleApps
 
-		List<Long> appOriginIds = null;
 		List<WebMenuDTO> webMenuDTOS = listWebMenuByApp(WebMenuType.ORGANIZATION.getCode(), appOriginIds);
 		return webMenuDTOS;
 

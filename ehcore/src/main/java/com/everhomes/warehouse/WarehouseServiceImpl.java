@@ -204,23 +204,30 @@ public class WarehouseServiceImpl implements WarehouseService {
         checkAssetPriviledgeForPropertyOrg(cmd.getCommunityId(), PrivilegeConstants.WAREHOUSE_REPO_OPERATION, cmd.getOwnerId());
         Warehouses warehouse = verifyWarehouses(cmd.getWarehouseId(), cmd.getOwnerType(), cmd.getOwnerId(), cmd.getCommunityId());
 
-        //库存不为0时不能删除
-        Long amount = warehouseProvider.getWarehouseStockAmount(cmd.getWarehouseId(), cmd.getOwnerType(), cmd.getOwnerId());
-        if (amount != null && amount > 0) {
-            LOGGER.error("warehouse stock is not null, warehouseId = " + cmd.getWarehouseId()
-                    + ", ownerType = " + cmd.getOwnerType() + ", ownerId = " + cmd.getOwnerId()
-                    + ", count stocks = " + amount);
-            throw RuntimeErrorException.errorWith(WarehouseServiceErrorCode.SCOPE, WarehouseServiceErrorCode.ERROR_WAREHOUSE_STOCK_NOT_NULL,
-                    localeStringService.getLocalizedString(String.valueOf(WarehouseServiceErrorCode.SCOPE),
-                            String.valueOf(WarehouseServiceErrorCode.ERROR_WAREHOUSE_STOCK_NOT_NULL),
-                            UserContext.current().getUser().getLocale(), "仓库库存不为0"));
-
+        //库存不为0时不能删除 @deprecated
+//        Long amount = warehouseProvider.getWarehouseStockAmount(cmd.getWarehouseId(), cmd.getOwnerType(), cmd.getOwnerId());
+//        if (amount != null && amount > 0) {
+//            LOGGER.error("warehouse stock is not null, warehouseId = " + cmd.getWarehouseId()
+//                    + ", ownerType = " + cmd.getOwnerType() + ", ownerId = " + cmd.getOwnerId()
+//                    + ", count stocks = " + amount);
+//            throw RuntimeErrorException.errorWith(WarehouseServiceErrorCode.SCOPE, WarehouseServiceErrorCode.ERROR_WAREHOUSE_STOCK_NOT_NULL,
+//                    localeStringService.getLocalizedString(String.valueOf(WarehouseServiceErrorCode.SCOPE),
+//                            String.valueOf(WarehouseServiceErrorCode.ERROR_WAREHOUSE_STOCK_NOT_NULL),
+//                            UserContext.current().getUser().getLocale(), "仓库库存不为0"));
+//
+//        }
+        // 仓库关闭时可以删除
+        if(warehouse.getStatus().byteValue() == WarehouseStatus.DISABLE.getCode()){
+            warehouse.setStatus(WarehouseStatus.INACTIVE.getCode());
+            warehouse.setDeleteUid(UserContext.current().getUser().getId());
+            warehouse.setDeleteTime(new Timestamp(DateHelper.currentGMTTime().getTime()));
+            warehouseProvider.updateWarehouse(warehouse);
+            warehouseSearcher.deleteById((warehouse.getId()));
+        }else{
+            throw RuntimeErrorException.errorWith(WarehouseServiceErrorCode.SCOPE
+                    ,WarehouseServiceErrorCode.ERROR_WAREHOUSE_IS_RUNNING
+                    ,"warehouse cannot be deleted when it's enabled");
         }
-        warehouse.setStatus(WarehouseStatus.INACTIVE.getCode());
-        warehouse.setDeleteUid(UserContext.current().getUser().getId());
-        warehouse.setDeleteTime(new Timestamp(DateHelper.currentGMTTime().getTime()));
-        warehouseProvider.updateWarehouse(warehouse);
-        warehouseSearcher.deleteById((warehouse.getId()));
 
     }
 
@@ -562,6 +569,8 @@ public class WarehouseServiceImpl implements WarehouseService {
         order.setNamespaceId(cmd.getNamespaceId());
         order.setIdentity(SupplierHelper.getIdentity());
         order.setExecutorId(UserContext.currentUserId());
+        order.setExecutorName(UserContext.current().getUser().getNickName());
+        order.setExecutorTime(new Timestamp(DateHelper.currentGMTTime().getTime()));
         order.setServiceType(cmd.getServiceType());
         warehouseProvider.insertWarehouseOrder(order);
 
@@ -1573,6 +1582,8 @@ public class WarehouseServiceImpl implements WarehouseService {
             long nextSequence = this.sequenceProvider.getNextSequence(NameMapper.getSequenceDomainFromTablePojo(EhWarehouseOrders.class));
             order.setId(nextSequence);
             order.setCreateTime(new Timestamp(DateHelper.currentGMTTime().getTime()));
+            //此时就是执行时间吗
+
             order.setCreateUid(UserContext.currentUserId());
             order.setOwnerType(cmd.getOwnerType());
             order.setOwnerId(cmd.getOwnerId());
@@ -1648,6 +1659,22 @@ public class WarehouseServiceImpl implements WarehouseService {
     @Override
     public void deleteRequest(DeleteRequestCommand cmd) {
         warehouseProvider.deleteWarehouseRequest(cmd.getRequestId());
+    }
+
+    @Override
+    public ListMaterialLogsBySupplierResponse listMaterialLogsBySupplier(ListMaterialLogsBySupplierCommand cmd) {
+        ListMaterialLogsBySupplierResponse response = new ListMaterialLogsBySupplierResponse();
+        Long pageAnchor = cmd.getPageAnchor();
+        Integer pageSize = cmd.getPageSize();
+        if(pageAnchor == null) pageAnchor = 0l;
+        if(pageSize == null) pageSize = 20;
+        List<WarehouseLogDTO> dtos = warehouseProvider.listMaterialLogsBySupplier(cmd.getSupplierId(),pageAnchor,++ pageSize);
+        if(dtos.size() > pageSize){
+            response.setNextPageAnchor(pageAnchor + pageSize);
+            dtos.remove(dtos.size() - 1);
+        }
+        response.setDtos(dtos);
+        return response;
     }
 
     private SearchRequestsResponse getWarehouseRequestMaterials(List<Long> ids, String ownerType, Long ownerId, Integer pageSize, Long anchor, Long communityId) {

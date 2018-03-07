@@ -61,6 +61,7 @@ CREATE TABLE `eh_equipment_inspection_review_date` (
   `scope_id` bigint(20) NOT NULL,
   `review_expired_days` int(11) NOT NULL DEFAULT '0' COMMENT 'review_expired_days',
   `status` tinyint(4) NOT NULL DEFAULT '0' COMMENT '0: invalid, 1: valid',
+  `refer_id` bigint(20) NOT NULL DEFAULT '0',
   `create_time` datetime  COMMENT 'record create time',
   PRIMARY KEY (`id`)
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4;
@@ -109,6 +110,11 @@ CREATE TABLE `eh_equipment_inspection_equipment_logs` (
 ALTER TABLE `eh_equipment_inspection_equipments`
   ADD COLUMN `coordinate`  varchar(1024) NULL AFTER `geohash`;
 -- 设备增加经纬度字符串  by jiarui
+
+-- 附件增加附件名称 jiarui
+ALTER TABLE `eh_equipment_inspection_equipment_attachments`
+  ADD COLUMN `name`  varchar(255) NULL DEFAULT '' AFTER `content_uri`;
+
 
 -- by st.zheng
 ALTER TABLE `eh_pm_tasks`

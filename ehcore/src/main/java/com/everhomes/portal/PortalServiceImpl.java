@@ -1783,6 +1783,8 @@ public class PortalServiceImpl implements PortalService {
 			UrlActionData data = new UrlActionData();
 			data.setUrl(instanceConfig.getBizUrl());
 			item.setActionData(StringHelper.toJsonString(data));
+		}else if(instanceConfig.getModuleAppId() == null){
+			return;
 		}else{
 			ServiceModuleApp moduleApp = serviceModuleAppProvider.findServiceModuleAppById(instanceConfig.getModuleAppId());
 			if(null != moduleApp){
@@ -2609,8 +2611,9 @@ public class PortalServiceImpl implements PortalService {
 								ServiceModuleApp moduleApp = syncServiceModuleApp(itemGroup.getNamespaceId(), padItem.getActionData(), padItem.getActionType(), padItem.getItemLabel(), newVersion);
 								config.setModuleAppId(moduleApp.getId());
 							}
-							itemGroup.setInstanceConfig(StringHelper.toJsonString(config));
 						}
+
+						itemGroup.setInstanceConfig(StringHelper.toJsonString(config));
 
 						portalItemGroupProvider.createPortalItemGroup(itemGroup);
 					}else if(Widget.fromCode(padLayoutGroup.getWidget()) == Widget.TAB){

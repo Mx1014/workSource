@@ -12,6 +12,8 @@ import java.util.List;
  * <li>taskId:任务id</li>
  * <li>ownerType:ownerType</li>
  * <li>ownerId:ownerId</li>
+ * <li>targetType:targetType</li>
+ * <li>targetId:targetId</li>
  * <li>content:内容</li>
  * <li>categoryId:子类型id</li>
  * <li>taskCategoryId:任务类型</li>
@@ -26,6 +28,8 @@ public class CreateEquipmentRepairCommand {
 
     private Long equipmentId;
     private Long taskId;
+    private String targetType;
+    private Long targetId;
     /**以下为报修参数*/
     private String ownerType;
     private Long ownerId;
@@ -133,6 +137,22 @@ public class CreateEquipmentRepairCommand {
 
     public void setMaintanceType(String maintanceType) {
         this.maintanceType = maintanceType;
+    }
+
+    public String getTargetType() {
+        return targetType;
+    }
+
+    public void setTargetType(String targetType) {
+        this.targetType = targetType;
+    }
+
+    public Long getTargetId() {
+        return targetId;
+    }
+
+    public void setTargetId(Long targetId) {
+        this.targetId = targetId;
     }
 
     @Override

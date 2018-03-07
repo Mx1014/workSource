@@ -51,4 +51,6 @@ public interface WarehouseService {
     void deleteWarehouseStockOrder(Long id);
 
     void deleteRequest(DeleteRequestCommand cmd);
+
+    ListMaterialLogsBySupplierResponse listMaterialLogsBySupplier(ListMaterialLogsBySupplierCommand cmd);
 }

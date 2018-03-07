@@ -677,7 +677,8 @@ public class WarehouseController extends ControllerBase {
     @RequestMapping("listMaterialLogsBySupplier")
     @RestReturn(value=ListMaterialLogsBySupplierResponse.class)
     public RestResponse listMaterialLogsBySupplier(ListMaterialLogsBySupplierCommand cmd) {
-        RestResponse res = new RestResponse();
+        ListMaterialLogsBySupplierResponse response = warehouseService.listMaterialLogsBySupplier(cmd);
+        RestResponse res = new RestResponse(response);
         res.setErrorCode(ErrorCodes.SUCCESS);
         res.setErrorDescription("OK");
         return res;

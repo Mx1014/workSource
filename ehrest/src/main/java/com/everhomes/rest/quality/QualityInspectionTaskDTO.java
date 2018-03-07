@@ -49,6 +49,7 @@ import java.util.List;
  *  <li>createTime : 创建时间</li>
  *  <li>executiveTime : 执行时间</li>
  *  <li>processTime : 整改时间</li>
+ *  <li>reviewTime : 审阅时间</li>
  *  <li>lastSyncTime : 上次最大同步时间</li>
  *  <li>verificationResult :offline CORRECT((byte)1), INSPECT_COMPLETE((byte)2)</li>
  * </ul>
@@ -140,6 +141,8 @@ public class QualityInspectionTaskDTO {
 	private Timestamp executiveTime;
 
 	private Timestamp processTime;
+
+	private Timestamp reviewTime;
 
 	private String lastSyncTime;
 
@@ -479,6 +482,14 @@ public class QualityInspectionTaskDTO {
 
 	public void setProcessTime(Timestamp processTime) {
 		this.processTime = processTime;
+	}
+
+	public Timestamp getReviewTime() {
+		return reviewTime;
+	}
+
+	public void setReviewTime(Timestamp reviewTime) {
+		this.reviewTime = reviewTime;
 	}
 
 	public String getLastSyncTime() {

@@ -217,9 +217,13 @@ public interface EquipmentProvider {
 
 	void updateReviewExpireDays(EquipmentInspectionReviewDate reviewDate);
 
-	EquipmentInspectionReviewDate getEquipmentInspectiomExpireDaysById(Long id,Byte scopeType, Long scopeId);
+	void deleteReviewExpireDaysByScope(Byte scopeType, Long scopeId);
 
-    EquipmentInspectionReviewDate getEquipmentInspectiomExpireDays(Long scopeId, Byte scopeType);
+	void deleteReviewExpireDaysByReferId(Long id);
+
+	EquipmentInspectionReviewDate getEquipmentInspectiomExpireDaysById(Long id);
+
+	List<EquipmentInspectionReviewDate> getEquipmentInspectiomExpireDays(Long scopeId, Byte scopeType);
 
     void deleteEquipmentPlansMapByEquipmentId(Long equipmentId);
 
@@ -248,4 +252,5 @@ public interface EquipmentProvider {
 	void batchUpdateUnusedTaskStatus();
 
     void updateEquipmentTaskByPlanId(Long planId);
+
 }

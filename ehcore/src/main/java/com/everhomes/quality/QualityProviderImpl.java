@@ -2850,19 +2850,19 @@ public class QualityProviderImpl implements QualityProvider {
 		if (groupDtos != null) {//isAdmin =false
 			Long executeUid = UserContext.currentUserId();
 			if (executeUid != null && executeUid != 0) {
-				Condition con = Tables.EH_QUALITY_INSPECTION_TASKS.EXECUTOR_ID.eq(executeUid);
+				Condition con = Tables.EH_QUALITY_INSPECTION_TASKS.OPERATOR_ID.eq(executeUid);
 				con = con.and(Tables.EH_QUALITY_INSPECTION_TASKS.RESULT.eq(QualityInspectionTaskResult.CORRECT.getCode()));
 
 				if (executeStandardIds != null) {
 					Condition con1 = Tables.EH_QUALITY_INSPECTION_TASKS.STANDARD_ID.in(executeStandardIds)
-							.and(Tables.EH_EQUIPMENT_INSPECTION_TASKS.STATUS.eq(QualityInspectionTaskStatus.WAITING_FOR_EXECUTING.getCode()));
+							.and(Tables.EH_QUALITY_INSPECTION_TASKS.STATUS.eq(QualityInspectionTaskStatus.WAITING_FOR_EXECUTING.getCode()));
 					con = con.or(con1);
 				}
 
 				if (reviewStandardIds != null) {
 					Condition con2 = Tables.EH_QUALITY_INSPECTION_TASKS.STANDARD_ID.in(reviewStandardIds)
-							.and(Tables.EH_EQUIPMENT_INSPECTION_TASKS.STATUS.eq(QualityInspectionTaskStatus.EXECUTED.getCode()))
-							.and(Tables.EH_EQUIPMENT_INSPECTION_TASKS.REVIEW_RESULT.eq(QualityInspectionTaskReviewResult.NONE.getCode()));
+							.and(Tables.EH_QUALITY_INSPECTION_TASKS.STATUS.eq(QualityInspectionTaskStatus.EXECUTED.getCode()))
+							.and(Tables.EH_QUALITY_INSPECTION_TASKS.REVIEW_RESULT.eq(QualityInspectionTaskReviewResult.NONE.getCode()));
 					con = con.or(con2);
 				}
 

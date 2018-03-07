@@ -20,7 +20,7 @@ public interface FlowProvider {
 			ListingQueryBuilderCallback queryBuilderCallback);
 
 	Flow findFlowByName(Integer namespaceId, Long moduleId, String moduleType,
-			Long ownerId, String ownerType, String name);
+                        String projectType, Long projectId, Long ownerId, String ownerType, String name);
 
 	List<Flow> findFlowsByModule(ListingLocator locator, ListFlowCommand cmd);
 

@@ -10,3 +10,7 @@ ALTER TABLE eh_archives_dismiss_employees ADD COLUMN department_id BIGINT COMMEN
 ALTER TABLE eh_archives_dismiss_employees ADD COLUMN job_position VARCHAR(128) COMMENT '离职前职位';
 
 ALTER TABLE eh_archives_dismiss_employees ADD COLUMN job_level VARCHAR(128) COMMENT '离职前职级';
+
+ALTER TABLE eh_archives_logs MODIFY operation_reason VARCHAR(1024) COMMENT 'the reason of the operation';
+
+ALTER TABLE eh_archives_logs MODIFY operation_remark VARCHAR(1024) COMMENT 'the remark';

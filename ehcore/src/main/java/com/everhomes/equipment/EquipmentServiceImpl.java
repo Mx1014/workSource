@@ -196,6 +196,7 @@ import com.everhomes.rest.pmtask.ListTaskCategoriesCommand;
 import com.everhomes.rest.pmtask.ListTaskCategoriesResponse;
 import com.everhomes.rest.pmtask.PmTaskAddressType;
 import com.everhomes.rest.pmtask.PmTaskDTO;
+import com.everhomes.rest.pmtask.PmTaskFlowStatus;
 import com.everhomes.rest.quality.OwnerType;
 import com.everhomes.rest.quality.ProcessType;
 import com.everhomes.rest.quality.QualityGroupType;
@@ -1381,8 +1382,7 @@ private void checkUserPrivilege(Long orgId, Long privilegeId, Long communityId) 
 
 	private void updateEquipmentAttachment(EquipmentAttachmentDTO dto, Long uid) {
 
-		EquipmentInspectionEquipmentAttachments attachment = ConvertHelper.convert(dto,
-				EquipmentInspectionEquipmentAttachments.class);
+		EquipmentInspectionEquipmentAttachments attachment = ConvertHelper.convert(dto, EquipmentInspectionEquipmentAttachments.class);
 
 //		if(dto.getId() != null) {
 //			equipmentProvider.deleteEquipmentAttachmentById(dto.getId());
@@ -2814,23 +2814,32 @@ private void checkUserPrivilege(Long orgId, Long privilegeId, Long communityId) 
 		List<EquipmentInspectionItemResults> itemResults = equipmentProvider.findEquipmentInspectionItemResultsByLogId(dto.getId());
 
 		List<InspectionItemResult> results = new ArrayList<>();
+		EquipmentInspectionEquipments equipment = new EquipmentInspectionEquipments();
 		if (itemResults != null && itemResults.size() > 0) {
-            results = itemResults.stream()
-                    .map(result -> ConvertHelper.convert(result, InspectionItemResult.class))
-                    .collect(Collectors.toList());
-            //兼容上一版 只有在result表中才有equipmentId
-            EquipmentInspectionEquipments equipment = new EquipmentInspectionEquipments();
-            if (log.getEquipmentId() != null && log.getEquipmentId() != 0) {
-                equipment = equipmentProvider.findEquipmentById(log.getEquipmentId());
-            } else {
-                equipment = equipmentProvider.findEquipmentById(itemResults.get(0).getEquipmentId());
-            }
-            if (equipment != null){
-                dto.setEquipmentName(equipment.getName());
-                dto.setLocation(equipment.getLocation());
-                dto.setEquipmentId(equipment.getId());
-            }
-        }
+			results = itemResults.stream()
+					.map(result -> ConvertHelper.convert(result, InspectionItemResult.class))
+					.collect(Collectors.toList());
+//            //兼容上一版 只有在result表中才有equipmentId
+//
+//            if (log.getEquipmentId() != null && log.getEquipmentId() != 0) {
+//                equipment = equipmentProvider.findEquipmentById(log.getEquipmentId());
+//            } else {
+//                equipment = equipmentProvider.findEquipmentById(itemResults.get(0).getEquipmentId());
+//            }
+//            if (equipment != null){
+//                dto.setEquipmentName(equipment.getName());
+//                dto.setLocation(equipment.getLocation());
+//                dto.setEquipmentId(equipment.getId());
+//            }
+		}
+		if (log.getEquipmentId() != null && log.getEquipmentId() != 0) {
+			equipment = equipmentProvider.findEquipmentById(log.getEquipmentId());
+			if (equipment != null){
+				dto.setEquipmentName(equipment.getName());
+				dto.setLocation(equipment.getLocation());
+				dto.setEquipmentId(equipment.getId());
+			}
+		}
 		dto.setItemResults(results);
 	}
 
@@ -2942,9 +2951,9 @@ private void checkUserPrivilege(Long orgId, Long privilegeId, Long communityId) 
 		List<String> fieldOrders = new ArrayList<>();
 		for (FieldDTO field : fieldsDTO) {
 			//去除附件 和 经纬度
-			if (!(field.getFieldName().equals("attachments") && field.getFieldName().equals("geohash"))){
+			//if (!(field.getFieldName().equals("attachments") && field.getFieldName().equals("geohash"))){
 				fieldOrders.add(field.getFieldName());
-			}
+			//}
 		}
 		int flag = 0;
 		//因为有注意事项  一行 从第二行开始
@@ -3873,7 +3882,7 @@ private void checkUserPrivilege(Long orgId, Long privilegeId, Long communityId) 
 
         ListAttachmentsByEquipmentIdCommand command = new ListAttachmentsByEquipmentIdCommand();
         command.setEquipmentId(dto.getId());
-        command.setAttachmentType((byte) 1);
+        //command.setAttachmentType((byte) 1);
         List<EquipmentAttachmentDTO> attachments = listAttachmentsByEquipmentId(command);
         dto.setAttachments(attachments);
 
@@ -5116,6 +5125,7 @@ private void checkUserPrivilege(Long orgId, Long privilegeId, Long communityId) 
 				reviewDate.setScopeId(cmd.getNamespaceId().longValue());
 				reviewDate.setScopeType(PmNotifyScopeType.NAMESPACE.getCode());
 			}
+			equipmentProvider.deleteReviewExpireDaysByScope(reviewDate.getScopeType(),reviewDate.getScopeId());
 			if(cmd.getId() == null) {
 				reviewDate.setStatus(PmNotifyConfigurationStatus.VAILD.getCode());
 				equipmentProvider.createReviewExpireDays(reviewDate);
@@ -5138,10 +5148,22 @@ private void checkUserPrivilege(Long orgId, Long privilegeId, Long communityId) 
 			scopeType = PmNotifyScopeType.COMMUNITY.getCode();
 			scopeId = cmd.getCommunityId();
 		}
-		EquipmentInspectionReviewDate reviewDate = equipmentProvider.getEquipmentInspectiomExpireDaysById(cmd.getId(), scopeType, scopeId);
+		EquipmentInspectionReviewDate reviewDate = equipmentProvider.getEquipmentInspectiomExpireDaysById(cmd.getId());
 		if (reviewDate != null) {
-			reviewDate.setStatus(PmNotifyConfigurationStatus.INVAILD.getCode());
-			equipmentProvider.updateReviewExpireDays(reviewDate);
+			if (!reviewDate.getScopeId().equals(scopeId) && !reviewDate.getScopeType().equals(scopeType)) {
+				//项目自定义删除
+				reviewDate.setReferId(reviewDate.getId());
+				reviewDate.setScopeId(scopeId);
+				reviewDate.setScopeType(scopeType);
+				reviewDate.setStatus(PmNotifyConfigurationStatus.VAILD.getCode());
+				equipmentProvider.createReviewExpireDays(reviewDate);
+			}else {
+				reviewDate.setStatus(PmNotifyConfigurationStatus.INVAILD.getCode());
+				equipmentProvider.updateReviewExpireDays(reviewDate);
+			}
+			if(PmNotifyScopeType.NAMESPACE.equals(PmNotifyScopeType.fromCode(scopeType))){
+				equipmentProvider.deleteReviewExpireDaysByReferId(reviewDate.getId());
+			}
 		}
 	}
 
@@ -5153,21 +5175,33 @@ private void checkUserPrivilege(Long orgId, Long privilegeId, Long communityId) 
 			scopeType = PmNotifyScopeType.COMMUNITY.getCode();
 			scopeId = cmd.getCommunityId();
 		}
-		EquipmentInspectionReviewDate reviewDate = equipmentProvider.getEquipmentInspectiomExpireDays(scopeId, scopeType);
-		if (reviewDate != null) {
-			return ConvertHelper.convert(reviewDate, EquipmentInspectionReviewDateDTO.class);
+		List<EquipmentInspectionReviewDate> reviewDate = equipmentProvider.getEquipmentInspectiomExpireDays(scopeId, scopeType);
+		List<Long> referId = new ArrayList<>();
+		if (reviewDate != null && reviewDate.size() > 0) {
+			reviewDate.forEach((r) -> {
+				if (r.getReferId() != null && r.getReferId() != 0L) {
+					referId.add(r.getReferId());
+				}
+			});
+			reviewDate.removeIf((r) -> r.getReferId() != 0L && r.getReferId() != null);
+		}
+		if (reviewDate != null && reviewDate.size() > 0) {
+			return ConvertHelper.convert(reviewDate.get(0), EquipmentInspectionReviewDateDTO.class);
 		} else {
 			//scopeType是community的情况下 如果拿不到数据，则返回该域空间下的设置
 			if (PmNotifyScopeType.COMMUNITY.equals(PmNotifyScopeType.fromCode(scopeType))) {
 				scopeType = PmNotifyScopeType.NAMESPACE.getCode();
 				scopeId = cmd.getNamespaceId().longValue();
 				reviewDate = equipmentProvider.getEquipmentInspectiomExpireDays(scopeId, scopeType);
-				return ConvertHelper.convert(reviewDate, EquipmentInspectionReviewDateDTO.class);
+				if (reviewDate != null && reviewDate.size() > 0) {
+					if (!referId.contains(reviewDate.get(0).getId())) {
+						return ConvertHelper.convert(reviewDate.get(0), EquipmentInspectionReviewDateDTO.class);
+					}
+				}
 			}
 		}
 
 		return null;
-
 	}
 
 	@Override
@@ -5393,10 +5427,10 @@ private void checkUserPrivilege(Long orgId, Long privilegeId, Long communityId) 
 		CrossShardListingLocator locator = new CrossShardListingLocator();
 		for(;;) {
 			List<EquipmentInspectionTasks> tasks = equipmentProvider.listTasksByPlanId(planId, locator, pageSize);
-
+			LOGGER.debug("inActiveTaskByPlanId tasks size={}",tasks.size());
 			if(tasks.size() > 0) {
 				for(EquipmentInspectionTasks task : tasks) {
-					equipmentTasksSearcher.feedDoc(task);
+					equipmentTasksSearcher.deleteById(task.getId());
 				}
 			}
 
@@ -6081,6 +6115,7 @@ private void checkUserPrivilege(Long orgId, Long privilegeId, Long communityId) 
 			tasksLog.setProcessType(EquipmentTaskProcessType.NEED_MAINTENANCE.getCode());
 			tasksLog.setProcessMessage(cmd.getContent());
 			tasksLog.setMaintanceType(cmd.getMaintanceType());
+			tasksLog.setMaintanceStatus(PmTaskFlowStatus.ACCEPTING.getCode());
 			tasksLog.setProcessResult(EquipmentTaskProcessResult.NONE.getCode());
 			EquipmentInspectionTasks task = tasks;
 
@@ -6090,11 +6125,15 @@ private void checkUserPrivilege(Long orgId, Long privilegeId, Long communityId) 
                     EquipmentInspectionEquipments equipment = verifyEquipment(cmd.getEquipmentId(), null, null);
                     CreateTaskCommand repairCommand = new CreateTaskCommand();
                     repairCommand = ConvertHelper.convert(cmd, CreateTaskCommand.class);
+                    repairCommand.setOwnerId(cmd.getTargetId());
+                    repairCommand.setOwnerType(cmd.getOwnerType());
                     repairCommand.setAddress(equipment.getLocation());
                     repairCommand.setAddressType(PmTaskAddressType.FAMILY.getCode());
                     repairCommand.setReferId(cmd.getEquipmentId());
                     repairCommand.setReferType(EquipmentConstant.EQUIPMENT_REPAIR);
                     repairCommand.setTaskCategoryId(cmd.getCategoryId());
+                    repairCommand.setFlowOrganizationId(cmd.getOwnerId());
+                    repairCommand.setOrganizationId(cmd.getOwnerId());
 
                     List<OrganizationMember> members = organizationProvider.listOrganizationMembersByUId(UserContext.currentUserId());
                     if (members != null && members.size() > 0) {
@@ -6104,6 +6143,7 @@ private void checkUserPrivilege(Long orgId, Long privilegeId, Long communityId) 
                     LOGGER.info("create repair tasks command ={}", repairCommand);
 					PmTaskDTO pmTaskDTO = pmTaskService.createTask(repairCommand);
                     tasksLog.setPmTaskId(pmTaskDTO.getId());
+                    tasksLog.setFlowCaseId(pmTaskDTO.getFlowCaseId());
 					equipmentProvider.createEquipmentInspectionTasksLogs(tasksLog);
                     //update equipment status to inMaintance
                     equipmentProvider.updateEquipmentStatus(cmd.getEquipmentId(), EquipmentStatus.IN_MAINTENANCE.getCode());

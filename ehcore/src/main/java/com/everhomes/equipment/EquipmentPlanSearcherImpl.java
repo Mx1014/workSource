@@ -8,7 +8,6 @@ import com.everhomes.repeat.RepeatService;
 import com.everhomes.repeat.RepeatSettings;
 import com.everhomes.rest.acl.PrivilegeConstants;
 import com.everhomes.rest.equipment.EquipmentInspectionPlanDTO;
-import com.everhomes.rest.equipment.EquipmentPlanStatus;
 import com.everhomes.rest.equipment.SearchEquipmentInspectionPlansCommand;
 import com.everhomes.rest.equipment.searchEquipmentInspectionPlansResponse;
 import com.everhomes.rest.quality.OwnerType;
@@ -139,10 +138,7 @@ public class EquipmentPlanSearcherImpl extends AbstractElasticSearch implements 
                     .addHighlightedField("planNumber");
 
         }
-        FilterBuilder nfb = FilterBuilders.termFilter("status", EquipmentPlanStatus.INACTIVE.getCode());
-        FilterBuilder fb = FilterBuilders.notFilter(nfb);
-        fb = FilterBuilders.termFilter("namespaceId", cmd.getNamespaceId());
-
+        FilterBuilder fb = FilterBuilders.termFilter("namespaceId", cmd.getNamespaceId());
         if (cmd.getTargetId() != null && cmd.getTargetId() != 0L) {
             fb = FilterBuilders.andFilter(fb, FilterBuilders.termFilter("targetId", cmd.getTargetId()));
             if (!StringUtils.isNullOrEmpty(cmd.getTargetType()))

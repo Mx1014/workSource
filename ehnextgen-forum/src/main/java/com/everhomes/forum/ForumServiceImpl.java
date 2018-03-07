@@ -823,6 +823,13 @@ public class ForumServiceImpl implements ForumService {
 	            
 	            //add favoriteflag of topic and activity is also a topic modified by xiongying 20160629
 	            PostDTO dto = ConvertHelper.convert(post, PostDTO.class);
+	            if(post.getStartTime() != null){
+                    dto.setStartTime(post.getStartTime().getTime());
+                }
+
+                if(post.getEndTime() != null){
+                    dto.setEndTime(post.getEndTime().getTime());
+                }
 	            
 	            //attachment也要转成dto modified by xiongying 20160920
 	            List<AttachmentDTO> attachments = new ArrayList<AttachmentDTO>();

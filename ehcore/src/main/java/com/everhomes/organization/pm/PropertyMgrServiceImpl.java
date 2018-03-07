@@ -2537,7 +2537,7 @@ public class PropertyMgrServiceImpl implements PropertyMgrService {
 		statistics.setSaledCount(map.get(AddressMappingStatus.SALED.getCode()));
 		statistics.setUnsaleCount(map.get(AddressMappingStatus.UNSALE.getCode()));
 		statistics.setOccupiedCount(map.get(AddressMappingStatus.OCCUPIED.getCode()));
-		statistics.setAptCount(statistics.getDefaultCount() + statistics.getLiveCount() + statistics.getRentCount() + statistics.getFreeCount() + statistics.getSaledCount() + statistics.getUnsaleCount());
+		statistics.setAptCount(statistics.getDefaultCount() + statistics.getLiveCount() + statistics.getRentCount() + statistics.getFreeCount() + statistics.getSaledCount() + statistics.getUnsaleCount() + statistics.getOccupiedCount());
 		statistics.setUserCount(userCount);
 		statistics.setHasOwnerCount(statistics.getLiveCount() + statistics.getRentCount() + statistics.getSaledCount());
 		statistics.setNoOwnerCount(statistics.getFreeCount() + statistics.getUnsaleCount());
@@ -6240,7 +6240,7 @@ public class PropertyMgrServiceImpl implements PropertyMgrService {
     @Override
     public void importOrganizationOwners(@Valid ImportOrganizationsOwnersCommand cmd, MultipartFile[] file) {
         User user = UserContext.current().getUser();
-		if(user.getNamespaceId() == 999971) {
+		if(cmd.getNamespaceId() == 999971) {
 			LOGGER.error("Insufficient privilege, importOrganizationOwners");
 			throw RuntimeErrorException.errorWith(ErrorCodes.SCOPE_GENERAL, ErrorCodes.ERROR_ACCESS_DENIED,
 					"Insufficient privilege");
@@ -6252,7 +6252,7 @@ public class PropertyMgrServiceImpl implements PropertyMgrService {
 
         ArrayList resultList = processorExcel(file[0]);
         List<CommunityPmOwner> ownerList = dbProvider.execute(status -> processorOrganizationOwner(user.getId(),
-                cmd.getOrganizationId(), cmd.getCommunityId(), resultList));
+                cmd.getOrganizationId(), cmd.getCommunityId(), cmd.getNamespaceId(), resultList));
 		//用 bulkUpdate不会更新 by xiongying20171009
 //        pmOwnerSearcher.bulkUpdate(ownerList);
     }
@@ -6268,7 +6268,7 @@ public class PropertyMgrServiceImpl implements PropertyMgrService {
         }
 	}
 
-	private List<CommunityPmOwner> processorOrganizationOwner(long userId, long organizationId, Long communityId, ArrayList resultList) {
+	private List<CommunityPmOwner> processorOrganizationOwner(long userId, long organizationId, Long communityId, Integer namespaceId, ArrayList resultList) {
 		if(resultList != null && resultList.size() > 0) {
             List<CommunityPmOwner> ownerList = new ArrayList<>();
             List<String> contactTokenList = new ArrayList<>();
@@ -6282,12 +6282,12 @@ public class PropertyMgrServiceImpl implements PropertyMgrService {
                 if (contactTokenList.contains(RowResult.trimString(result.getC()))) {
                 	// 支持同一个人导入多行，但只能生成一个业主信息，add by tt, 170427
                 	String contactToken = RowResult.trimString(result.getC());
-                	List<CommunityPmOwner> pmOwners = propertyMgrProvider.listCommunityPmOwnersByToken(currentNamespaceId(), communityId, contactToken);
+                	List<CommunityPmOwner> pmOwners = propertyMgrProvider.listCommunityPmOwnersByToken(namespaceId, communityId, contactToken);
                 	if (pmOwners != null && !pmOwners.isEmpty()) {
                 		CommunityPmOwner pmOwner = pmOwners.get(0);
-                		Address address = parseAddress(currentNamespaceId(), communityId, RowResult.trimString(result.getD()), RowResult.trimString(result.getE()));
+                		Address address = parseAddress(namespaceId, communityId, RowResult.trimString(result.getD()), RowResult.trimString(result.getE()));
                 		Byte livingStatus = parseLivingStatus(RowResult.trimString(result.getF()));
-        				createOrganizationOwnerAddress(address.getId(), livingStatus, currentNamespaceId(), pmOwner.getId(), OrganizationOwnerAddressAuthType.INACTIVE);
+        				createOrganizationOwnerAddress(address.getId(), livingStatus, namespaceId, pmOwner.getId(), OrganizationOwnerAddressAuthType.INACTIVE);
         				if (StringUtils.hasLength(result.getG())) {
         					long time = parseDate(RowResult.trimString(result.getG())).getTime();
         					createOrganizationOwnerBehavior(pmOwner.getId(), address.getId(), time, OrganizationOwnerBehaviorType.IMMIGRATION);
@@ -6305,7 +6305,7 @@ public class PropertyMgrServiceImpl implements PropertyMgrService {
                 CommunityPmOwner owner = new CommunityPmOwner();
                 owner.setContactName(RowResult.trimString(result.getA()));
                 owner.setContactToken(RowResult.trimString(result.getC()));
-                Address address = parseAddress(currentNamespaceId(), communityId, RowResult.trimString(result.getD()), RowResult.trimString(result.getE()));
+                Address address = parseAddress(namespaceId, communityId, RowResult.trimString(result.getD()), RowResult.trimString(result.getE()));
                 owner.setGender(parseGender(RowResult.trimString(result.getH())));
                 owner.setBirthday(parseDate(RowResult.trimString(result.getI())));
                 owner.setOrgOwnerTypeId(parseOrgOwnerTypeId(RowResult.trimString(result.getB())));
@@ -6314,7 +6314,7 @@ public class PropertyMgrServiceImpl implements PropertyMgrService {
                 owner.setCompany(RowResult.trimString(result.getL()));
                 owner.setIdCardNumber(RowResult.trimString(result.getM()));
                 owner.setRegisteredResidence(RowResult.trimString(result.getN()));
-                owner.setNamespaceId(currentNamespaceId());
+                owner.setNamespaceId(namespaceId);
                 owner.setCreatorUid(userId);
                 owner.setOrganizationId(organizationId);
                 owner.setCommunityId(communityId == null ? null : communityId.toString());
@@ -6323,7 +6323,7 @@ public class PropertyMgrServiceImpl implements PropertyMgrService {
 				long ownerId = propertyMgrProvider.createPropOwner(owner);
 				pmOwnerSearcher.feedDoc(owner);
 				Byte livingStatus = parseLivingStatus(RowResult.trimString(result.getF()));
-				createOrganizationOwnerAddress(address.getId(), livingStatus, currentNamespaceId(), ownerId, OrganizationOwnerAddressAuthType.INACTIVE);
+				createOrganizationOwnerAddress(address.getId(), livingStatus, namespaceId, ownerId, OrganizationOwnerAddressAuthType.INACTIVE);
 
 				if (StringUtils.hasLength(result.getG())) {
 					long time = parseDate(RowResult.trimString(result.getG())).getTime();

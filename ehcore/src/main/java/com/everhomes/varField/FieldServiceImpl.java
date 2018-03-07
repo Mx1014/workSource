@@ -278,37 +278,8 @@ public class FieldServiceImpl implements FieldService {
 
         // 传来的cmd中有子节点，所以先得到所有子节点group，的version
         //然后拓展为子节点
-        List<FieldGroupDTO> allGroups = new ArrayList<>();
-        getAllGroups(allParentGroups,allGroups);
-        List<FieldGroupDTO> targetGroups = new ArrayList<>();
-        if(filter){
-            //双重循环匹配浏览器所传的sheetName，获得目标sheet集合
-            if(StringUtils.isEmpty(cmd.getIncludedGroupIds())) {
-                return targetGroups;
-            }
-            String[] split = cmd.getIncludedGroupIds().split(",");
-            for(int i = 0 ; i < split.length; i ++){
-                long targetGroupId = Long.parseLong(split[i]);
-                for(int j = 0; j < allGroups.size(); j++){
-                    Long id = allGroups.get(j).getGroupId();
-                    if(id.compareTo(targetGroupId) == 0){
-                        targetGroups.add(allGroups.get(j));
-                    }
-                }
-            }
-        }else{
-            targetGroups = allGroups;
-        }
-        return targetGroups;
-//        if(onlyLeaf){
-//            getAllGroups(targetGroups,groups);
-//        }else{
-//            groups = targetGroups;
-//        }
-//        return groups;
-
-        // 先匹配目标父节点，再得到所有子节点， 的 version
-////        List<FieldGroupDTO> groups = new ArrayList<>();
+//        List<FieldGroupDTO> allGroups = new ArrayList<>();
+//        getAllGroups(allParentGroups,allGroups);
 //        List<FieldGroupDTO> targetGroups = new ArrayList<>();
 //        if(filter){
 //            //双重循环匹配浏览器所传的sheetName，获得目标sheet集合
@@ -318,26 +289,55 @@ public class FieldServiceImpl implements FieldService {
 //            String[] split = cmd.getIncludedGroupIds().split(",");
 //            for(int i = 0 ; i < split.length; i ++){
 //                long targetGroupId = Long.parseLong(split[i]);
-//                for(int j = 0; j < allParentGroups.size(); j++){
-//                    Long id = allParentGroups.get(j).getGroupId();
+//                for(int j = 0; j < allGroups.size(); j++){
+//                    Long id = allGroups.get(j).getGroupId();
 //                    if(id.compareTo(targetGroupId) == 0){
-//                        targetGroups.add(allParentGroups.get(j));
+//                        targetGroups.add(allGroups.get(j));
 //                    }
 //                }
 //            }
 //        }else{
-//            targetGroups = allParentGroups;
+//            targetGroups = allGroups;
 //        }
-//        //前面匹配父节点的group，得到目标节点，然后拓展为子节点
-//        List<FieldGroupDTO> allGroups = new ArrayList<>();
-//        getAllGroups(targetGroups,allGroups);
-//        return allGroups;
-////        if(onlyLeaf){
-////            getAllGroups(targetGroups,groups);
-////        }else{
-////            groups = targetGroups;
-////        }
-////        return groups;
+//        return targetGroups;
+//        if(onlyLeaf){
+//            getAllGroups(targetGroups,groups);
+//        }else{
+//            groups = targetGroups;
+//        }
+//        return groups;
+
+        // 先匹配目标父节点，再得到所有子节点， 的 version
+//        List<FieldGroupDTO> groups = new ArrayList<>();
+        List<FieldGroupDTO> targetGroups = new ArrayList<>();
+        if(filter){
+            //双重循环匹配浏览器所传的sheetName，获得目标sheet集合
+            if(StringUtils.isEmpty(cmd.getIncludedGroupIds())) {
+                return targetGroups;
+            }
+            String[] split = cmd.getIncludedGroupIds().split(",");
+            for(int i = 0 ; i < split.length; i ++){
+                long targetGroupId = Long.parseLong(split[i]);
+                for(int j = 0; j < allParentGroups.size(); j++){
+                    Long id = allParentGroups.get(j).getGroupId();
+                    if(id.compareTo(targetGroupId) == 0){
+                        targetGroups.add(allParentGroups.get(j));
+                    }
+                }
+            }
+        }else{
+            targetGroups = allParentGroups;
+        }
+        //前面匹配父节点的group，得到目标节点，然后拓展为子节点
+        List<FieldGroupDTO> allGroups = new ArrayList<>();
+        getAllGroups(targetGroups,allGroups);
+        return allGroups;
+//        if(onlyLeaf){
+//            getAllGroups(targetGroups,groups);
+//        }else{
+//            groups = targetGroups;
+//        }
+//        return groups;
     }
 
     @Override
@@ -1484,7 +1484,7 @@ public class FieldServiceImpl implements FieldService {
             boolean isRealSheet = true;
             FieldGroupDTO group = groups.get(i);
             //如果有叶节点，则送去轮回
-            if(group.getChildrenGroup()!=null && group.getChildrenGroup().size()>0){
+            if(group.getChildrenGroup()!=null && group.getChildrenGroup().size()>0 && !group.getGroupDisplayName().equals("客户信息")){
                 getAllGroups(group.getChildrenGroup(), allGroups);
                 //父节点的标识改为false
                 isRealSheet = false;
