@@ -3926,7 +3926,7 @@ public class Rentalv2ServiceImpl implements Rentalv2Service {
 
 		List<RentalItemsOrder> items = this.rentalv2Provider.findRentalItemsBillBySiteBillId(bill.getId(), bill.getResourceType());
 
-		if (null != items && null != rentalItems) {
+		if (null == items && null != rentalItems) {
 
 			Tuple<Boolean, Boolean> tuple = this.coordinationProvider.getNamedLock(CoordinationLocks.CREATE_RENTAL_BILL.getCode()
 					+ bill.getRentalResourceId())
