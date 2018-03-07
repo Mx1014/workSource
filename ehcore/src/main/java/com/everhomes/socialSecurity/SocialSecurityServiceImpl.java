@@ -2906,6 +2906,7 @@ public class SocialSecurityServiceImpl implements SocialSecurityService {
             dto.setCheckInTime(r.getCheckInTime());
             dto.setSocialSecurityStatus(r.getSocialSecurityStatus());
             dto.setAccumulationFundStatus(r.getAccumulationFundStatus());
+            dto.setDismissTime(r.getDismissTime());
             results.add(dto);
         });
         return results;
