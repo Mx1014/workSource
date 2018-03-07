@@ -721,5 +721,6 @@ update eh_configurations SET `value`='/html/news_text_review.html' WHERE `name`=
 SET @home_url=(SELECT `value` from eh_configurations WHERE `NAME`='home.url');
 update eh_launch_pad_items SET action_data=CONCAT('{"url":"',@home_url,'/station-booking-web/build/index.html#/home#sign_suffix"}') WHERE action_type in (13,14) AND action_data LIKE '%station-booking/index.html%';
 update eh_service_modules SET instance_config=CONCAT('{"url":"',@home_url,'/station-booking-web/build/index.html#/home#sign_suffix"}') WHERE id=40200;
-update eh_service_module_apps SET instance_config=CONCAT('{"url":"',@home_url,'/station-booking-web/build/index.html#/home#sign_suffix"}') WHERE id=40200;
+update eh_service_module_apps SET instance_config=CONCAT('{"url":"',@home_url,'/station-booking-web/build/index.html#/home#sign_suffix"}') WHERE module_id=40200;
+
 
