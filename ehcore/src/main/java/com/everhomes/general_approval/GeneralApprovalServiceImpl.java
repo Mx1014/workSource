@@ -974,7 +974,7 @@ public class GeneralApprovalServiceImpl implements GeneralApprovalService {
         command.setOrganizationId(cmd.getOrganizationId());
         command.setModuleId(cmd.getModuleId());
         command.setFlowCaseSearchType(FlowCaseSearchType.ADMIN.getCode());
-        command.setNamespaceId(UserContext.getCurrentNamespaceId());
+        command.setNamespaceId(cmd.getNamespaceId());
         //  审批状态
         if (cmd.getApprovalStatus() != null)
             command.setFlowCaseStatus(cmd.getApprovalStatus());
@@ -1049,6 +1049,7 @@ public class GeneralApprovalServiceImpl implements GeneralApprovalService {
         params.put("creatorDepartmentId", cmd.getCreatorDepartmentId());
         params.put("creatorName", cmd.getCreatorName());
         params.put("approvalNo", cmd.getApprovalNo());
+        params.put("namespaceId", UserContext.getCurrentNamespaceId());
         String fileName = String.format("审批记录_%s.xlsx", DateUtil.dateToStr(new Date(), DateUtil.NO_SLASH));
 
         taskService.createTask(fileName, TaskType.FILEDOWNLOAD.getCode(), GeneralApprovalExportTaskHandler.class, params, TaskRepeatFlag.REPEAT.getCode(), new Date());
@@ -1069,13 +1070,34 @@ public class GeneralApprovalServiceImpl implements GeneralApprovalService {
         List<String> titles = Arrays.asList("审批编号", "提交时间", "申请人", "申请人部门", "表单内容",
                 "审批状态", "审批记录", "当前审批人", "督办人");
         //  4. Start to write the excel
+        LOGGER.debug("generalApproval++++++++++++++++++++++++++++++: {}", response.getRecords().size());
         XSSFWorkbook workbook = createApprovalRecordsBook(mainTitle, subTitle, titles, response.getRecords(), taskId);
         return writeExcel(workbook);
     }
 
-    public List<FlowCaseEntity> getApprovalDetails(Long flowCaseId) {
-        FlowCase flowCase = flowCaseProvider.getFlowCaseById(flowCaseId);
-        return generalApprovalFlowModuleListener.onFlowCaseDetailRender(flowCase, null);
+    private ByteArrayOutputStream writeExcel(XSSFWorkbook workbook) {
+        ByteArrayOutputStream out = new ByteArrayOutputStream();
+        try {
+            workbook.write(out);
+            /*String fileName = "审批记录.xlsx";
+            httpResponse.setContentType("application/msexcel");
+            httpResponse.setHeader("Content-Disposition", "attachment; filename=" + URLEncoder.encode(fileName, "UTF-8").replaceAll("\\+", "%20"));
+            OutputStream excelStream = new BufferedOutputStream(httpResponse.getOutputStream());
+            httpResponse.setContentType("application/msexcel");
+            excelStream.write(out.toByteArray());
+            excelStream.flush();
+            excelStream.close();*/
+        } catch (Exception e) {
+            LOGGER.error("export error, e = {}", e);
+        } /*finally {
+            try {
+                workbook.close();
+                out.close();
+            } catch (IOException e) {
+                LOGGER.error("close error", e);
+            }
+        }return*/
+        return out;
     }
 
     private XSSFWorkbook createApprovalRecordsBook(
@@ -1205,30 +1227,9 @@ public class GeneralApprovalServiceImpl implements GeneralApprovalService {
         }
     }
 
-    private ByteArrayOutputStream writeExcel(XSSFWorkbook workbook) {
-        ByteArrayOutputStream out = null;
-        try {
-            out = new ByteArrayOutputStream();
-            workbook.write(out);
-            /*String fileName = "审批记录.xlsx";
-            httpResponse.setContentType("application/msexcel");
-            httpResponse.setHeader("Content-Disposition", "attachment; filename=" + URLEncoder.encode(fileName, "UTF-8").replaceAll("\\+", "%20"));
-            OutputStream excelStream = new BufferedOutputStream(httpResponse.getOutputStream());
-            httpResponse.setContentType("application/msexcel");
-            excelStream.write(out.toByteArray());
-            excelStream.flush();
-            excelStream.close();*/
-        } catch (Exception e) {
-            LOGGER.error("export error, e = {}", e);
-        } finally {
-            try {
-                workbook.close();
-                out.close();
-            } catch (IOException e) {
-                LOGGER.error("close error", e);
-            }
-        }
-        return out;
+    public List<FlowCaseEntity> getApprovalDetails(Long flowCaseId) {
+        FlowCase flowCase = flowCaseProvider.getFlowCaseById(flowCaseId);
+        return generalApprovalFlowModuleListener.onFlowCaseDetailRender(flowCase, null);
     }
 
     @Override

@@ -5418,10 +5418,10 @@ private void checkUserPrivilege(Long orgId, Long privilegeId, Long communityId) 
 		CrossShardListingLocator locator = new CrossShardListingLocator();
 		for(;;) {
 			List<EquipmentInspectionTasks> tasks = equipmentProvider.listTasksByPlanId(planId, locator, pageSize);
-
+			LOGGER.debug("inActiveTaskByPlanId tasks size={}",tasks.size());
 			if(tasks.size() > 0) {
 				for(EquipmentInspectionTasks task : tasks) {
-					equipmentTasksSearcher.feedDoc(task);
+					equipmentTasksSearcher.deleteById(task.getId());
 				}
 			}
 
@@ -6122,6 +6122,8 @@ private void checkUserPrivilege(Long orgId, Long privilegeId, Long communityId) 
                     repairCommand.setReferId(cmd.getEquipmentId());
                     repairCommand.setReferType(EquipmentConstant.EQUIPMENT_REPAIR);
                     repairCommand.setTaskCategoryId(cmd.getCategoryId());
+                    repairCommand.setFlowOrganizationId(cmd.getOwnerId());
+                    repairCommand.setOrganizationId(cmd.getOwnerId());
 
                     List<OrganizationMember> members = organizationProvider.listOrganizationMembersByUId(UserContext.currentUserId());
                     if (members != null && members.size() > 0) {
