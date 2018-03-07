@@ -1691,6 +1691,8 @@ ALTER TABLE eh_archives_dismiss_employees ADD COLUMN job_level VARCHAR(128) COMM
 
 ALTER TABLE eh_archives_logs MODIFY operation_reason VARCHAR(1024) COMMENT 'the reason of the operation';
 
+ALTER TABLE eh_archives_logs MODIFY operation_remark VARCHAR(1024) COMMENT 'the remark';
+
 -- end by nan.rong
 
 -- add by zheng
