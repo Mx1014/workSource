@@ -859,6 +859,7 @@ public class EquipmentProviderImpl implements EquipmentProvider {
         DSLContext context = dbProvider.getDslContext(AccessSpec.readOnly());
         SelectQuery<EhEquipmentInspectionEquipmentAttachmentsRecord> query = context.selectQuery(Tables.EH_EQUIPMENT_INSPECTION_EQUIPMENT_ATTACHMENTS);
         query.addConditions(Tables.EH_EQUIPMENT_INSPECTION_EQUIPMENT_ATTACHMENTS.EQUIPMENT_ID.eq(equipmentId));
+        if(attachmentType!=null)
         query.addConditions(Tables.EH_EQUIPMENT_INSPECTION_EQUIPMENT_ATTACHMENTS.ATTACHMENT_TYPE.eq(attachmentType));
 
         List<EquipmentInspectionEquipmentAttachments> result = new ArrayList<EquipmentInspectionEquipmentAttachments>();

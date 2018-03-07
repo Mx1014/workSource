@@ -1382,8 +1382,7 @@ private void checkUserPrivilege(Long orgId, Long privilegeId, Long communityId) 
 
 	private void updateEquipmentAttachment(EquipmentAttachmentDTO dto, Long uid) {
 
-		EquipmentInspectionEquipmentAttachments attachment = ConvertHelper.convert(dto,
-				EquipmentInspectionEquipmentAttachments.class);
+		EquipmentInspectionEquipmentAttachments attachment = ConvertHelper.convert(dto, EquipmentInspectionEquipmentAttachments.class);
 
 //		if(dto.getId() != null) {
 //			equipmentProvider.deleteEquipmentAttachmentById(dto.getId());
@@ -3883,7 +3882,7 @@ private void checkUserPrivilege(Long orgId, Long privilegeId, Long communityId) 
 
         ListAttachmentsByEquipmentIdCommand command = new ListAttachmentsByEquipmentIdCommand();
         command.setEquipmentId(dto.getId());
-        command.setAttachmentType((byte) 1);
+        //command.setAttachmentType((byte) 1);
         List<EquipmentAttachmentDTO> attachments = listAttachmentsByEquipmentId(command);
         dto.setAttachments(attachments);
 
