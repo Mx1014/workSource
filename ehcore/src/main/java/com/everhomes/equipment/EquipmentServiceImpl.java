@@ -196,6 +196,7 @@ import com.everhomes.rest.pmtask.ListTaskCategoriesCommand;
 import com.everhomes.rest.pmtask.ListTaskCategoriesResponse;
 import com.everhomes.rest.pmtask.PmTaskAddressType;
 import com.everhomes.rest.pmtask.PmTaskDTO;
+import com.everhomes.rest.pmtask.PmTaskFlowStatus;
 import com.everhomes.rest.quality.OwnerType;
 import com.everhomes.rest.quality.ProcessType;
 import com.everhomes.rest.quality.QualityGroupType;
@@ -6115,6 +6116,7 @@ private void checkUserPrivilege(Long orgId, Long privilegeId, Long communityId) 
 			tasksLog.setProcessType(EquipmentTaskProcessType.NEED_MAINTENANCE.getCode());
 			tasksLog.setProcessMessage(cmd.getContent());
 			tasksLog.setMaintanceType(cmd.getMaintanceType());
+			tasksLog.setMaintanceStatus(PmTaskFlowStatus.ACCEPTING.getCode());
 			tasksLog.setProcessResult(EquipmentTaskProcessResult.NONE.getCode());
 			EquipmentInspectionTasks task = tasks;
 
