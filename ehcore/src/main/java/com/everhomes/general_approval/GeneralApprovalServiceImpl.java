@@ -643,10 +643,8 @@ public class GeneralApprovalServiceImpl implements GeneralApprovalService {
         }
 
         //  4.delete the scope which is not in the array
-        if (detailIds.size() > 0)
-            generalApprovalProvider.deleteOddGeneralApprovalDetailScope(namespaceId, approvalId, detailIds);
-        if (organizationIds.size() > 0)
-            generalApprovalProvider.deleteOddGeneralApprovalOrganizationScope(namespaceId, approvalId, organizationIds);
+        generalApprovalProvider.deleteOddGeneralApprovalDetailScope(namespaceId, approvalId, detailIds);
+        generalApprovalProvider.deleteOddGeneralApprovalOrganizationScope(namespaceId, approvalId, organizationIds);
     }
 
     private String getUserRealName(Long userId, Long ownerId) {
