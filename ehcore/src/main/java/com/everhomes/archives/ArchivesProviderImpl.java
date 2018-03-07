@@ -175,6 +175,18 @@ public class ArchivesProviderImpl implements ArchivesProvider {
     }
 
     @Override
+    public List<Long> listDismissEmployeeDetailIdsByDepartmentId(Long departmentId){
+        DSLContext context = dbProvider.getDslContext(AccessSpec.readOnly());
+        SelectQuery<EhArchivesDismissEmployeesRecord> query = context.selectQuery(Tables.EH_ARCHIVES_DISMISS_EMPLOYEES);
+        query.addSelect(Tables.EH_ARCHIVES_DISMISS_EMPLOYEES.DETAIL_ID);
+        query.addConditions(Tables.EH_ARCHIVES_DISMISS_EMPLOYEES.DEPARTMENT_ID.eq(departmentId));
+        List<Long> results = query.fetchInto(Long.class);
+        if (null == results || results.size() == 0)
+            return null;
+        return results;
+    }
+
+    @Override
     public void createArchivesForm(ArchivesFroms form) {
         Long id = sequenceProvider.getNextSequence(NameMapper.getSequenceDomainFromTablePojo(EhArchivesForms.class));
         form.setId(id);
