@@ -1692,5 +1692,11 @@ ALTER TABLE eh_archives_dismiss_employees ADD COLUMN job_level VARCHAR(128) COMM
 ALTER TABLE eh_siyin_print_printers ADD COLUMN qrcode_logo_uri VARCHAR(500);
 ALTER TABLE eh_siyin_print_printers ADD COLUMN qrcode_logo_url VARCHAR(500);
 
+-- add by zheng
+ALTER TABLE `eh_rentalv2_resources`
+CHANGE COLUMN `aclink_id` `aclink_id` VARCHAR(128) NULL DEFAULT NULL ;
+
+ALTER TABLE `eh_rentalv2_orders`
+CHANGE COLUMN `door_auth_id` `door_auth_id` VARCHAR(128) NULL DEFAULT NULL ;
 
 
