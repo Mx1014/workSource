@@ -81,7 +81,7 @@ class FlowPmTaskHandle extends DefaultPmTaskHandle {
 			else
 				createFlowCaseCommand.setTitle(taskCategory.getName());
 			createFlowCaseCommand.setServiceType(taskCategory.getName());
-			createFlowCaseCommand.setApplyUserId(task.getCreatorUid());
+			createFlowCaseCommand.setApplyUserId(UserContext.currentUserId());
 			createFlowCaseCommand.setFlowMainId(flow.getFlowMainId());
 			createFlowCaseCommand.setFlowVersion(flow.getFlowVersion());
 			createFlowCaseCommand.setReferId(task.getId());
