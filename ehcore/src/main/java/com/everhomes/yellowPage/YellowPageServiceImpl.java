@@ -987,6 +987,12 @@ public class YellowPageServiceImpl implements YellowPageService {
 				sa.setDescription(cmd.getDescription());
 				sa.setPosterUri(cmd.getPosterUri());
 				this.yellowPageProvider.updateServiceAlliances(sa);
+				
+				ServiceAllianceCategories categorys = this.yellowPageProvider.findCategoryById(sa.getType());
+				if(categorys!=null){
+					categorys.setDisplayMode(cmd.getDisplayMode());
+					this.yellowPageProvider.updateCategory(categorys);
+				}
 			}
 			if(cmd.getSkipType()!=null){
 				setSkipRules(cmd.getSkipType(),sa.getType());
