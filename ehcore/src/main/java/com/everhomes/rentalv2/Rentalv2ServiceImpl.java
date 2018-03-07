@@ -591,7 +591,7 @@ public class Rentalv2ServiceImpl implements Rentalv2Service {
 //		addCmd.setSiteCounts(1.0);
 //		addCmd.setAutoAssign(NormalFlag.NONEED.getCode());
 //        addCmd.setMultiUnit(NormalFlag.NONEED.getCode());
-        addCmd.setNeedPay(NormalFlag.NEED.getCode());
+        addCmd.setNeedPay(NormalFlag.NONEED.getCode());
         addCmd.setMultiTimeInterval(NormalFlag.NEED.getCode());
 		//设置默认开放时间，当前时间+100天
 		addCmd.setBeginDate(new java.util.Date().getTime());
