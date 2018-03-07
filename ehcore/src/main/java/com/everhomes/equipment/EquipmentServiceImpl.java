@@ -2817,23 +2817,32 @@ private void checkUserPrivilege(Long orgId, Long privilegeId, Long communityId) 
 		List<EquipmentInspectionItemResults> itemResults = equipmentProvider.findEquipmentInspectionItemResultsByLogId(dto.getId());
 
 		List<InspectionItemResult> results = new ArrayList<>();
+		EquipmentInspectionEquipments equipment = new EquipmentInspectionEquipments();
 		if (itemResults != null && itemResults.size() > 0) {
-            results = itemResults.stream()
-                    .map(result -> ConvertHelper.convert(result, InspectionItemResult.class))
-                    .collect(Collectors.toList());
-            //兼容上一版 只有在result表中才有equipmentId
-            EquipmentInspectionEquipments equipment = new EquipmentInspectionEquipments();
-            if (log.getEquipmentId() != null && log.getEquipmentId() != 0) {
-                equipment = equipmentProvider.findEquipmentById(log.getEquipmentId());
-            } else {
-                equipment = equipmentProvider.findEquipmentById(itemResults.get(0).getEquipmentId());
-            }
-            if (equipment != null){
-                dto.setEquipmentName(equipment.getName());
-                dto.setLocation(equipment.getLocation());
-                dto.setEquipmentId(equipment.getId());
-            }
-        }
+			results = itemResults.stream()
+					.map(result -> ConvertHelper.convert(result, InspectionItemResult.class))
+					.collect(Collectors.toList());
+//            //兼容上一版 只有在result表中才有equipmentId
+//
+//            if (log.getEquipmentId() != null && log.getEquipmentId() != 0) {
+//                equipment = equipmentProvider.findEquipmentById(log.getEquipmentId());
+//            } else {
+//                equipment = equipmentProvider.findEquipmentById(itemResults.get(0).getEquipmentId());
+//            }
+//            if (equipment != null){
+//                dto.setEquipmentName(equipment.getName());
+//                dto.setLocation(equipment.getLocation());
+//                dto.setEquipmentId(equipment.getId());
+//            }
+		}
+		if (log.getEquipmentId() != null && log.getEquipmentId() != 0) {
+			equipment = equipmentProvider.findEquipmentById(log.getEquipmentId());
+			if (equipment != null){
+				dto.setEquipmentName(equipment.getName());
+				dto.setLocation(equipment.getLocation());
+				dto.setEquipmentId(equipment.getId());
+			}
+		}
 		dto.setItemResults(results);
 	}
 
