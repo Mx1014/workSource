@@ -6122,6 +6122,8 @@ private void checkUserPrivilege(Long orgId, Long privilegeId, Long communityId) 
                     repairCommand.setReferId(cmd.getEquipmentId());
                     repairCommand.setReferType(EquipmentConstant.EQUIPMENT_REPAIR);
                     repairCommand.setTaskCategoryId(cmd.getCategoryId());
+                    repairCommand.setFlowOrganizationId(cmd.getOwnerId());
+                    repairCommand.setOrganizationId(cmd.getOwnerId());
 
                     List<OrganizationMember> members = organizationProvider.listOrganizationMembersByUId(UserContext.currentUserId());
                     if (members != null && members.size() > 0) {
