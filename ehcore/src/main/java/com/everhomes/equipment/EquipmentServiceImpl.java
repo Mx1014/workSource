@@ -196,6 +196,7 @@ import com.everhomes.rest.pmtask.ListTaskCategoriesCommand;
 import com.everhomes.rest.pmtask.ListTaskCategoriesResponse;
 import com.everhomes.rest.pmtask.PmTaskAddressType;
 import com.everhomes.rest.pmtask.PmTaskDTO;
+import com.everhomes.rest.pmtask.PmTaskFlowStatus;
 import com.everhomes.rest.quality.OwnerType;
 import com.everhomes.rest.quality.ProcessType;
 import com.everhomes.rest.quality.QualityGroupType;
@@ -2814,23 +2815,32 @@ private void checkUserPrivilege(Long orgId, Long privilegeId, Long communityId) 
 		List<EquipmentInspectionItemResults> itemResults = equipmentProvider.findEquipmentInspectionItemResultsByLogId(dto.getId());
 
 		List<InspectionItemResult> results = new ArrayList<>();
+		EquipmentInspectionEquipments equipment = new EquipmentInspectionEquipments();
 		if (itemResults != null && itemResults.size() > 0) {
-            results = itemResults.stream()
-                    .map(result -> ConvertHelper.convert(result, InspectionItemResult.class))
-                    .collect(Collectors.toList());
-            //兼容上一版 只有在result表中才有equipmentId
-            EquipmentInspectionEquipments equipment = new EquipmentInspectionEquipments();
-            if (log.getEquipmentId() != null && log.getEquipmentId() != 0) {
-                equipment = equipmentProvider.findEquipmentById(log.getEquipmentId());
-            } else {
-                equipment = equipmentProvider.findEquipmentById(itemResults.get(0).getEquipmentId());
-            }
-            if (equipment != null){
-                dto.setEquipmentName(equipment.getName());
-                dto.setLocation(equipment.getLocation());
-                dto.setEquipmentId(equipment.getId());
-            }
-        }
+			results = itemResults.stream()
+					.map(result -> ConvertHelper.convert(result, InspectionItemResult.class))
+					.collect(Collectors.toList());
+//            //兼容上一版 只有在result表中才有equipmentId
+//
+//            if (log.getEquipmentId() != null && log.getEquipmentId() != 0) {
+//                equipment = equipmentProvider.findEquipmentById(log.getEquipmentId());
+//            } else {
+//                equipment = equipmentProvider.findEquipmentById(itemResults.get(0).getEquipmentId());
+//            }
+//            if (equipment != null){
+//                dto.setEquipmentName(equipment.getName());
+//                dto.setLocation(equipment.getLocation());
+//                dto.setEquipmentId(equipment.getId());
+//            }
+		}
+		if (log.getEquipmentId() != null && log.getEquipmentId() != 0) {
+			equipment = equipmentProvider.findEquipmentById(log.getEquipmentId());
+			if (equipment != null){
+				dto.setEquipmentName(equipment.getName());
+				dto.setLocation(equipment.getLocation());
+				dto.setEquipmentId(equipment.getId());
+			}
+		}
 		dto.setItemResults(results);
 	}
 
@@ -6106,6 +6116,7 @@ private void checkUserPrivilege(Long orgId, Long privilegeId, Long communityId) 
 			tasksLog.setProcessType(EquipmentTaskProcessType.NEED_MAINTENANCE.getCode());
 			tasksLog.setProcessMessage(cmd.getContent());
 			tasksLog.setMaintanceType(cmd.getMaintanceType());
+			tasksLog.setMaintanceStatus(PmTaskFlowStatus.ACCEPTING.getCode());
 			tasksLog.setProcessResult(EquipmentTaskProcessResult.NONE.getCode());
 			EquipmentInspectionTasks task = tasks;
 
