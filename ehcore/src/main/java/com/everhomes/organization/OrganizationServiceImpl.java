@@ -822,10 +822,6 @@ public class OrganizationServiceImpl implements OrganizationService {
         if (!StringUtils.isEmpty(dto.getPostUri()))
             dto.setPostUrl(contentServerService.parserUri(dto.getPostUri(), EntityType.ORGANIZATIONS.getCode(), dto.getOrganizationId()));
 
-        if(dto.getServiceUserId() != null) {
-            dto.setServiceUserName();
-        }
-
         List<OrganizationAddress> organizationAddresses = organizationProvider.findOrganizationAddressByOrganizationId(dto.getOrganizationId());
         List<AddressDTO> addresses = organizationAddresses.stream().map(r -> {
             OrganizationAddressDTO address = ConvertHelper.convert(r, OrganizationAddressDTO.class);
