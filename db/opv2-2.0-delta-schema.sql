@@ -1688,5 +1688,12 @@ ALTER TABLE eh_archives_dismiss_employees ADD COLUMN job_level VARCHAR(128) COMM
 
 -- end by nan.rong
 
+-- add by zheng
+ALTER TABLE `eh_rentalv2_resources`
+CHANGE COLUMN `aclink_id` `aclink_id` VARCHAR(128) NULL DEFAULT NULL ;
+
+ALTER TABLE `eh_rentalv2_orders`
+CHANGE COLUMN `door_auth_id` `door_auth_id` VARCHAR(128) NULL DEFAULT NULL ;
+
 
 
