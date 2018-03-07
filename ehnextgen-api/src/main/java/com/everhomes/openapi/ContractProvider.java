@@ -4,6 +4,7 @@ package com.everhomes.openapi;
 import com.everhomes.contract.ContractParam;
 import com.everhomes.contract.ContractParamGroupMap;
 import com.everhomes.listing.CrossShardListingLocator;
+import com.everhomes.rest.contract.ContractLogDTO;
 
 import java.sql.Timestamp;
 import java.util.List;
@@ -65,4 +66,6 @@ public interface ContractProvider {
 	List<Contract> listContractsByAddressId(Long addressId);
 
     String findContractIdByThirdPartyId(String contractId, String code);
+
+    List<ContractLogDTO> listContractsBySupplier(Long supplierId, Long pageAnchor, Integer pageSize);
 }

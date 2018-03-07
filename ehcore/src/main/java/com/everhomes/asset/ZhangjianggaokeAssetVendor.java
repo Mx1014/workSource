@@ -360,13 +360,13 @@ public class ZhangjianggaokeAssetVendor implements AssetVendorHandler{
                     amountOwed = amountOwed.add(sourceDto.getAmountOwed()==null?new BigDecimal("0"):new BigDecimal(sourceDto.getAmountOwed()));
                     amountReceivable = amountReceivable.add(sourceDto.getAmountReceivable()==null?new BigDecimal("0"):new BigDecimal(sourceDto.getAmountReceivable()));
                     List<CommunityAddressDTO> apartments = sourceDto.getApartments();
-                    String buildingName = "";
-                    String apartmentName = "";
+                    String buildingName = null;
+                    String apartmentName = null;
                     if(apartments!=null&&apartments.size()>0){
                         buildingName = apartments.get(0).getBuildingName()==null?"":apartments.get(0).getBuildingName();
                         apartmentName = apartments.get(0).getApartmentName()==null?"":apartments.get(0).getApartmentName();
                     }
-                    dto.setAddressName(buildingName+apartmentName);
+                    dto.setAddressName(buildingName==null?"":buildingName+apartmentName==null?"":apartmentName);
                     dto.setPayStatus(sourceDto.getStatus()!=null?sourceDto.getStatus().equals(PaymentStatus.SUSPEND.getCode())?PaymentStatus.IN_PROCESS.getCode():null:null);
                     dto.setDateStr(sourceDto.getBillDate());
                     dto.setDateStrBegin(sourceDto.getDateStrBegin());

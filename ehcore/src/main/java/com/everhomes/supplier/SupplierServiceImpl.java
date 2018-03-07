@@ -2,7 +2,10 @@
 package com.everhomes.supplier;
 
 import com.everhomes.naming.NameMapper;
+import com.everhomes.organization.OrganizationService;
 import com.everhomes.rest.acl.PrivilegeConstants;
+import com.everhomes.rest.organization.ListPMOrganizationsCommand;
+import com.everhomes.rest.organization.ListPMOrganizationsResponse;
 import com.everhomes.rest.supplier.*;
 import com.everhomes.sequence.SequenceProvider;
 import com.everhomes.server.schema.tables.EhWarehouseSuppliers;
@@ -28,6 +31,8 @@ public class SupplierServiceImpl implements SupplierService{
     private SequenceProvider sequenceProvider;
     @Autowired
     private UserPrivilegeMgr userPrivilegeMgr;
+    @Autowired
+    private OrganizationService organizationService;
 
     @Override
     public void createOrUpdateOneSupplier(CreateOrUpdateOneSupplierCommand cmd) {
@@ -133,6 +138,14 @@ public class SupplierServiceImpl implements SupplierService{
     }
 
     private void checkAssetPriviledgeForPropertyOrg(Long communityId, Long priviledgeId) {
-        userPrivilegeMgr.checkUserPrivilege(UserContext.currentUserId(), null, priviledgeId, PrivilegeConstants.SUPPLIER_MODULE, (byte)13, null, null, communityId);
+        ListPMOrganizationsCommand cmd = new ListPMOrganizationsCommand();
+        cmd.setNamespaceId(UserContext.getCurrentNamespaceId());
+        ListPMOrganizationsResponse listPMOrganizationsResponse = organizationService.listPMOrganizations(cmd);
+        Long currentOrgId = null;
+        try{
+            currentOrgId = listPMOrganizationsResponse.getDtos().get(0).getId();
+        }catch (ArrayIndexOutOfBoundsException e){
+        }
+        userPrivilegeMgr.checkUserPrivilege(UserContext.currentUserId(), currentOrgId, priviledgeId, PrivilegeConstants.SUPPLIER_MODULE, (byte)13, null, null, communityId);
     }
 }

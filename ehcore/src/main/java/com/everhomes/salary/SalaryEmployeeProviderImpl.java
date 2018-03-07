@@ -142,6 +142,17 @@ public class SalaryEmployeeProviderImpl implements SalaryEmployeeProvider {
 
 
     @Override
+    public List<SalaryEmployee> listSalaryEmployees(Long ownerId, String month, SalaryEmployeeStatus status) {
+
+        SelectConditionStep<Record> step = getReadOnlyContext().select().from(Tables.EH_SALARY_EMPLOYEES)
+                .where(Tables.EH_SALARY_EMPLOYEES.OWNER_ID.eq(ownerId))
+                .and(Tables.EH_SALARY_EMPLOYEES.SALARY_PERIOD.eq(month))
+                .and(Tables.EH_SALARY_EMPLOYEES.STATUS.eq(status.getCode()));
+        return step.orderBy(Tables.EH_SALARY_EMPLOYEES.ID.asc()).fetch().map(r -> ConvertHelper.convert(r, SalaryEmployee.class));
+    }
+
+
+    @Override
     public SalaryDepartStatistic calculateDptReport(List<Long> detailIds, SalaryDepartStatistic statistic, Long ownerId, String month) {
         Result<Record8<Long, Long, Integer, String, BigDecimal, BigDecimal, BigDecimal, BigDecimal>> r =
                 getReadOnlyContext().select(Tables.EH_SALARY_EMPLOYEES.ORGANIZATION_ID, Tables.EH_SALARY_EMPLOYEES.OWNER_ID,
