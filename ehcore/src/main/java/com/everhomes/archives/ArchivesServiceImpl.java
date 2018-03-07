@@ -366,6 +366,7 @@ public class ArchivesServiceImpl implements ArchivesService {
                 dto.setContactName(r.getContactName());
                 dto.setDepartments(r.getDepartments());
                 dto.setJobPositions(r.getJobPositions());
+                dto.setJobLevels(r.getJobLevels());
                 dto.setGender(r.getGender());
                 dto.setRegionCode(r.getRegionCode());
                 dto.setContactToken(r.getContactToken());
