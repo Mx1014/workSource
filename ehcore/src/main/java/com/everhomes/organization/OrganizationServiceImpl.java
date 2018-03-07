@@ -10093,8 +10093,9 @@ public class OrganizationServiceImpl implements OrganizationService {
 
     @Override
     public OrganizationDetailDTO getOrganizationDetailById(GetOrganizationDetailByIdCommand cmd) {
-
-        return toOrganizationDetailDTO(cmd.getId(), false);
+        OrganizationDetailDTO organizationDetailDTO = toOrganizationDetailDTO(cmd.getId(), false);
+        addExtraInfo(organizationDetailDTO);
+        return organizationDetailDTO;
     }
 
     @Override

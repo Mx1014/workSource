@@ -1691,6 +1691,8 @@ ALTER TABLE eh_archives_dismiss_employees ADD COLUMN job_level VARCHAR(128) COMM
 
 ALTER TABLE eh_archives_logs MODIFY operation_reason VARCHAR(1024) COMMENT 'the reason of the operation';
 
+ALTER TABLE eh_archives_logs MODIFY operation_remark VARCHAR(1024) COMMENT 'the remark';
+
 -- end by nan.rong
 
 -- add by zheng
@@ -1699,6 +1701,11 @@ CHANGE COLUMN `aclink_id` `aclink_id` VARCHAR(128) NULL DEFAULT NULL ;
 
 ALTER TABLE `eh_rentalv2_orders`
 CHANGE COLUMN `door_auth_id` `door_auth_id` VARCHAR(128) NULL DEFAULT NULL ;
+
+
+-- 附件增加附件名称 jiarui
+ALTER TABLE `eh_equipment_inspection_equipment_attachments`
+  ADD COLUMN `name`  varchar(255) NULL DEFAULT '' AFTER `content_uri`;
 
 
 
