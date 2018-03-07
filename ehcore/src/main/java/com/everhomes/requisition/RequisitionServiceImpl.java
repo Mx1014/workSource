@@ -9,6 +9,7 @@ import com.everhomes.naming.NameMapper;
 import com.everhomes.organization.OrganizationService;
 import com.everhomes.rest.acl.PrivilegeConstants;
 import com.everhomes.rest.flow.CreateFlowCaseCommand;
+import com.everhomes.rest.flow.FlowCaseDetailDTOV2;
 import com.everhomes.rest.flow.FlowConstants;
 import com.everhomes.rest.flow.FlowModuleType;
 import com.everhomes.rest.organization.ListPMOrganizationsCommand;
@@ -79,8 +80,8 @@ public class RequisitionServiceImpl implements RequisitionService {
         createFlowCaseCommand.setApplyUserId(req.getCreateUid());
         createFlowCaseCommand.setFlowMainId(flow.getFlowMainId());
         createFlowCaseCommand.setFlowVersion(flow.getFlowVersion());
-        createFlowCaseCommand.setReferId(req.getId());
-        createFlowCaseCommand.setReferType(EntityType.WAREHOUSE_REQUEST.getCode());
+//        createFlowCaseCommand.setReferId(req.getId());
+//        createFlowCaseCommand.setReferType(EntityType.WAREHOUSE_REQUEST.getCode());
         createFlowCaseCommand.setServiceType("requisition");
         createFlowCaseCommand.setProjectId(req.getOwnerId());
         createFlowCaseCommand.setProjectType(req.getOwnerType());
@@ -122,6 +123,8 @@ public class RequisitionServiceImpl implements RequisitionService {
         response.setDescription(requisition.getDescription());
         response.setTheme(requisition.getTheme());
         response.setTypeId(requisition.getRequisitionTypeId());
+        FlowCaseDetailDTOV2 flowcase = flowService.getFlowCaseDetailByRefer(PrivilegeConstants.REQUISITION_MODULE, null, null, "requisitionId", cmd.getRequisitionId(), true);
+        response.setFlowCaseId(flowcase.getId());
         return response;
     }
 

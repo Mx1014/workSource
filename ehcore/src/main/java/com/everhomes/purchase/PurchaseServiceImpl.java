@@ -8,10 +8,7 @@ import com.everhomes.flow.FlowService;
 import com.everhomes.naming.NameMapper;
 import com.everhomes.organization.OrganizationService;
 import com.everhomes.rest.acl.PrivilegeConstants;
-import com.everhomes.rest.flow.CreateFlowCaseCommand;
-import com.everhomes.rest.flow.FlowConstants;
-import com.everhomes.rest.flow.FlowModuleType;
-import com.everhomes.rest.flow.FlowOwnerType;
+import com.everhomes.rest.flow.*;
 import com.everhomes.rest.organization.ListPMOrganizationsCommand;
 import com.everhomes.rest.organization.ListPMOrganizationsResponse;
 import com.everhomes.rest.purchase.*;
@@ -144,13 +141,12 @@ public class PurchaseServiceImpl implements PurchaseService {
                 createFlowCaseCommand.setReferId(nextPurchaseOrderId);
                 createFlowCaseCommand.setReferType("purchaseId");
                 createFlowCaseCommand.setCurrentOrganizationId(order.getOwnerId());
-                createFlowCaseCommand.setTitle("请示单申请");
+                createFlowCaseCommand.setTitle("采购单申请");
                 createFlowCaseCommand.setApplyUserId(order.getCreateUid());
                 createFlowCaseCommand.setFlowMainId(flow.getFlowMainId());
                 createFlowCaseCommand.setFlowVersion(flow.getFlowVersion());
-                createFlowCaseCommand.setReferId(order.getId());
-                createFlowCaseCommand.setReferType(EntityType.WAREHOUSE_REQUEST.getCode());
-                createFlowCaseCommand.setServiceType("requisition");
+
+                createFlowCaseCommand.setServiceType("purchase");
                 createFlowCaseCommand.setProjectId(order.getOwnerId());
                 createFlowCaseCommand.setProjectType(order.getOwnerType());
                 flowService.createFlowCase(createFlowCaseCommand);
@@ -230,6 +226,8 @@ public class PurchaseServiceImpl implements PurchaseService {
             itemDtos.add(pto);
         }
         dto.setDtos(itemDtos);
+        FlowCaseDetailDTOV2 purchaseId = flowService.getFlowCaseDetailByRefer(PrivilegeConstants.PURCHASE_MODULE, null, null, "purchaseId", order.getId(), false);
+        dto.setFlowCaseId(purchaseId.getId());
         return dto;
 
 

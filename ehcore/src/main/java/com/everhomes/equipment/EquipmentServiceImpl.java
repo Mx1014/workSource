@@ -196,6 +196,7 @@ import com.everhomes.rest.pmtask.ListTaskCategoriesCommand;
 import com.everhomes.rest.pmtask.ListTaskCategoriesResponse;
 import com.everhomes.rest.pmtask.PmTaskAddressType;
 import com.everhomes.rest.pmtask.PmTaskDTO;
+import com.everhomes.rest.pmtask.PmTaskFlowStatus;
 import com.everhomes.rest.quality.OwnerType;
 import com.everhomes.rest.quality.ProcessType;
 import com.everhomes.rest.quality.QualityGroupType;
@@ -2702,16 +2703,13 @@ private void checkUserPrivilege(Long orgId, Long privilegeId, Long communityId) 
 			logs = getLatestTaskLogs(logs);
 
 			List<EquipmentTaskLogsDTO> dtos = new ArrayList<>();
-			LOGGER.info("Equipment repair Logs:{}",logs);
 			//为了查看特定设备详情和批量审阅的总览  增加以下
 			if (cmd.getEquipmentId() != null) {
 				dtos = processEquipmentTaskLogsDTOS(logs);
-				LOGGER.info("Equipment repair Logs:{}",logs);
 			} else {
 				if (logs != null && logs.size() > 0)
 					dtos = logs.stream().map((r) -> {
 						EquipmentTaskLogsDTO dto = ConvertHelper.convert(r, EquipmentTaskLogsDTO.class);
-						LOGGER.info("Equipment repair LogsDTO:{}",dto);
 						populateItemResultToTasklog(r, dto);
 						return dto;
 					}).collect(Collectors.toList());
@@ -6118,6 +6116,7 @@ private void checkUserPrivilege(Long orgId, Long privilegeId, Long communityId) 
 			tasksLog.setProcessType(EquipmentTaskProcessType.NEED_MAINTENANCE.getCode());
 			tasksLog.setProcessMessage(cmd.getContent());
 			tasksLog.setMaintanceType(cmd.getMaintanceType());
+			tasksLog.setMaintanceStatus(PmTaskFlowStatus.ACCEPTING.getCode());
 			tasksLog.setProcessResult(EquipmentTaskProcessResult.NONE.getCode());
 			EquipmentInspectionTasks task = tasks;
 
