@@ -3,6 +3,10 @@ package com.everhomes.purchase;
 
 import com.everhomes.db.AccessSpec;
 import com.everhomes.db.DbProvider;
+import com.everhomes.flow.FlowCase;
+import com.everhomes.flow.FlowCaseProvider;
+import com.everhomes.flow.FlowProvider;
+import com.everhomes.rest.acl.PrivilegeConstants;
 import com.everhomes.rest.purchase.SearchPurchasesDTO;
 import com.everhomes.server.schema.Tables;
 import com.everhomes.server.schema.tables.EhWarehousePurchaseItems;
@@ -30,6 +34,8 @@ import java.util.List;
 public class PurchaseProviderImpl implements PurchaseProvider {
     @Autowired
     private DbProvider dbProvider;
+    @Autowired
+    private FlowCaseProvider flowCaseProvider;
 
     @Override
     public void insertPurchaseOrder(PurchaseOrder order) {
@@ -78,6 +84,10 @@ public class PurchaseProviderImpl implements PurchaseProvider {
                     dto.setSubmissionStatus(r.getValue(purchase.SUBMISSION_STATUS));
                     dto.setTotalAmount(r.getValue(purchase.TOTAL_AMOUNT).toPlainString());
                     dto.setWarehouseStatus(r.getValue(purchase.WAREHOUSE_STATUS));
+                    //flow case id get
+                    FlowCase flowcase = flowCaseProvider.findFlowCaseByReferId(dto.getPurchaseRequestId()
+                            , "purchaseId", PrivilegeConstants.PURCHASE_MODULE);
+                    dto.setFlowCaseId(flowcase.getId());
                     list.add(dto);
                 });
         return list;

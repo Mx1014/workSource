@@ -591,7 +591,7 @@ public class Rentalv2ServiceImpl implements Rentalv2Service {
 //		addCmd.setSiteCounts(1.0);
 //		addCmd.setAutoAssign(NormalFlag.NONEED.getCode());
 //        addCmd.setMultiUnit(NormalFlag.NONEED.getCode());
-        addCmd.setNeedPay(NormalFlag.NEED.getCode());
+        addCmd.setNeedPay(NormalFlag.NONEED.getCode());
         addCmd.setMultiTimeInterval(NormalFlag.NEED.getCode());
 		//设置默认开放时间，当前时间+100天
 		addCmd.setBeginDate(new java.util.Date().getTime());
@@ -3926,7 +3926,7 @@ public class Rentalv2ServiceImpl implements Rentalv2Service {
 
 		List<RentalItemsOrder> items = this.rentalv2Provider.findRentalItemsBillBySiteBillId(bill.getId(), bill.getResourceType());
 
-		if (null != items && null != rentalItems) {
+		if (null == items && null != rentalItems) {
 
 			Tuple<Boolean, Boolean> tuple = this.coordinationProvider.getNamedLock(CoordinationLocks.CREATE_RENTAL_BILL.getCode()
 					+ bill.getRentalResourceId())

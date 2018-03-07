@@ -569,6 +569,8 @@ public class WarehouseServiceImpl implements WarehouseService {
         order.setNamespaceId(cmd.getNamespaceId());
         order.setIdentity(SupplierHelper.getIdentity());
         order.setExecutorId(UserContext.currentUserId());
+        order.setExecutorName(UserContext.current().getUser().getNickName());
+        order.setExecutorTime(new Timestamp(DateHelper.currentGMTTime().getTime()));
         order.setServiceType(cmd.getServiceType());
         warehouseProvider.insertWarehouseOrder(order);
 
