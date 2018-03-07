@@ -83,13 +83,14 @@ CREATE TABLE `eh_equipment_inspection_plan_group_map` (
 -- 巡检计划 审批时间表 end  by jiarui
 
 CREATE TABLE `eh_equipment_inspection_review_date` (
-  `id` BIGINT(20) NOT NULL,
-  `owner_type` VARCHAR(64) NOT NULL COMMENT 'refer to object type EhEquipmentInspectionTasksReviewExpireDays...',
-  `scope_type` TINYINT(4) NOT NULL DEFAULT '0' COMMENT '0: all; 1: namespace; 2: community',
-  `scope_id` BIGINT(20) NOT NULL,
-  `review_expired_days` INT(11) NOT NULL DEFAULT '0' COMMENT 'review_expired_days',
-  `status` TINYINT(4) NOT NULL DEFAULT '0' COMMENT '0: invalid, 1: valid',
-  `create_time` DATETIME  COMMENT 'record create time',
+  `id` bigint(20) NOT NULL,
+  `owner_type` varchar(64) NOT NULL COMMENT 'refer to object type EhEquipmentInspectionTasksReviewExpireDays...',
+  `scope_type` tinyint(4) NOT NULL DEFAULT '0' COMMENT '0: all; 1: namespace; 2: community',
+  `scope_id` bigint(20) NOT NULL,
+  `review_expired_days` int(11) NOT NULL DEFAULT '0' COMMENT 'review_expired_days',
+  `status` tinyint(4) NOT NULL DEFAULT '0' COMMENT '0: invalid, 1: valid',
+  `refer_id` bigint(20) NOT NULL DEFAULT '0',
+  `create_time` datetime  COMMENT 'record create time',
   PRIMARY KEY (`id`)
 ) ENGINE=INNODB DEFAULT CHARSET=utf8mb4;
 
