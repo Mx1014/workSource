@@ -822,6 +822,10 @@ public class OrganizationServiceImpl implements OrganizationService {
         if (!StringUtils.isEmpty(dto.getPostUri()))
             dto.setPostUrl(contentServerService.parserUri(dto.getPostUri(), EntityType.ORGANIZATIONS.getCode(), dto.getOrganizationId()));
 
+        if(dto.getServiceUserId() != null) {
+            dto.setServiceUserName();
+        }
+
         List<OrganizationAddress> organizationAddresses = organizationProvider.findOrganizationAddressByOrganizationId(dto.getOrganizationId());
         List<AddressDTO> addresses = organizationAddresses.stream().map(r -> {
             OrganizationAddressDTO address = ConvertHelper.convert(r, OrganizationAddressDTO.class);
@@ -10093,8 +10097,9 @@ public class OrganizationServiceImpl implements OrganizationService {
 
     @Override
     public OrganizationDetailDTO getOrganizationDetailById(GetOrganizationDetailByIdCommand cmd) {
-
-        return toOrganizationDetailDTO(cmd.getId(), false);
+        OrganizationDetailDTO organizationDetailDTO = toOrganizationDetailDTO(cmd.getId(), false);
+        addExtraInfo(organizationDetailDTO);
+        return organizationDetailDTO;
     }
 
     @Override
