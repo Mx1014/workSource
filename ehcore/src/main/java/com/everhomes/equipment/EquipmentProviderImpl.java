@@ -384,8 +384,7 @@ public class EquipmentProviderImpl implements EquipmentProvider {
     }
 
     @Override
-    public void creatEquipmentAttachment(
-            EquipmentInspectionEquipmentAttachments eqAttachment) {
+    public void creatEquipmentAttachment(EquipmentInspectionEquipmentAttachments eqAttachment) {
         long id = this.sequenceProvider.getNextSequence(NameMapper.getSequenceDomainFromTablePojo(EhEquipmentInspectionEquipmentAttachments.class));
 
         eqAttachment.setId(id);
