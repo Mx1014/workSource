@@ -1703,4 +1703,9 @@ ALTER TABLE `eh_rentalv2_orders`
 CHANGE COLUMN `door_auth_id` `door_auth_id` VARCHAR(128) NULL DEFAULT NULL ;
 
 
+-- 附件增加附件名称 jiarui
+ALTER TABLE `eh_equipment_inspection_equipment_attachments`
+  ADD COLUMN `name`  varchar(255) NULL DEFAULT '' AFTER `content_uri`;
+
+
 
