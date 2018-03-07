@@ -3,6 +3,10 @@ package com.everhomes.requisition;
 
 import com.everhomes.db.AccessSpec;
 import com.everhomes.db.DbProvider;
+import com.everhomes.flow.FlowCase;
+import com.everhomes.flow.FlowCaseProvider;
+import com.everhomes.rest.acl.PrivilegeConstants;
+import com.everhomes.rest.flow.FlowCaseDetailDTOV2;
 import com.everhomes.rest.requisition.ListRequisitionsDTO;
 import com.everhomes.server.schema.Tables;
 import com.everhomes.server.schema.tables.EhRequisitionTypes;
@@ -27,6 +31,9 @@ import java.util.List;
 public class RequisitionProviderImpl implements RequisitionProvider {
     @Autowired
     private DbProvider dbProvider;
+    @Autowired
+    private FlowCaseProvider flowCaseProvider;
+
     @Override
     public void saveRequisition(Requisition req) {
         EhRequisitionsDao dao = getRequisitionDao();
@@ -65,6 +72,11 @@ public class RequisitionProviderImpl implements RequisitionProvider {
             dto.setType(r.getValue(reqType.NAME));
             dto.setTheme(r.getValue(req.THEME));
             dto.setAmount(r.getValue(req.AMOUNT).toPlainString());
+
+            //flow case id get
+            FlowCase flowcase = flowCaseProvider.findFlowCaseByReferId(r.getValue(req.ID)
+                    , "requisitionId", PrivilegeConstants.REQUISITION_MODULE);
+            dto.setFlowCaseId(flowcase.getId());
 
             dto.setId(r.getValue(req.ID));
             list.add(dto);

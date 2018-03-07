@@ -198,6 +198,7 @@ import java.util.Iterator;
 import java.util.LinkedHashMap;
 import java.util.List;
 import java.util.Map;
+import java.util.Objects;
 import java.util.Set;
 import java.util.stream.Collectors;
 
@@ -1016,6 +1017,7 @@ Long nextPageAnchor = null;
 		}
 		if (cmd.getLatestUpdateTime() != null)
             query.addConditions(Tables.EH_QUALITY_INSPECTION_TASKS.CREATE_TIME.gt(cmd.getLatestUpdateTime())
+					.or(Tables.EH_QUALITY_INSPECTION_TASKS.REVIEW_TIME.gt(cmd.getLatestUpdateTime()))
                     .or(Tables.EH_QUALITY_INSPECTION_TASKS.EXECUTIVE_TIME.gt(cmd.getLatestUpdateTime()))
                     .or(Tables.EH_QUALITY_INSPECTION_TASKS.PROCESS_TIME.gt(cmd.getLatestUpdateTime())));
 	}
@@ -2847,22 +2849,7 @@ Long nextPageAnchor = null;
 			dtos.removeIf((dto) -> dto.getCreateTime().before(syncTime)
 					&& dto.getUpdateTime().before(syncTime) && dto.getDeleteTime().before(syncTime));
 		}
-		//非真实分页
-		/*if (cmd.getPageAnchor() == null) {
-			cmd.setPageAnchor(0L);
-		}
-		int pageSize = PaginationConfigHelper.getPageSize(configurationProvider, cmd.getPageSize());
-		if (pageSize < dtos.size()) {
-			if (pageSize * cmd.getPageAnchor() <= dtos.size()) {
-				dtos = dtos.subList(cmd.getPageAnchor().intValue() * pageSize, cmd.getPageAnchor().intValue() * pageSize + pageSize);
-				response.setNextPageAnchor(cmd.getPageAnchor() + 1);
-			} else {
-				dtos = dtos.subList(cmd.getPageAnchor().intValue() * pageSize, dtos.size()-1);
-				response.setNextPageAnchor(null);
-			}
-		} else {
-			response.setNextPageAnchor(null);
-		}*/
+
 		//返回数据中添加所属项目
 		processSepcificationScopeName(dtos);
 		List<QualityInspectionSpecificationDTO> result = null;
@@ -4517,15 +4504,25 @@ Long nextPageAnchor = null;
 		if(tasksResponse.getTasks()!=null && tasksResponse.getTasks().size()>0) {
 			tasksResponse.getTasks().forEach((task) -> {
 				//处理任务 获取任务更新最大时间
-				if (task.getExecutiveTime() == null) {
-					task.setLastSyncTime(task.getCreateTime().toLocalDateTime().format(dateSF));
-				} else {
-					if (task.getProcessTime() == null) {
-						task.setLastSyncTime(task.getExecutiveTime().toLocalDateTime().format(dateSF));
-					} else {
-						task.setLastSyncTime(task.getProcessTime().toLocalDateTime().format(dateSF));
-					}
+				List<Long> timestampList = new ArrayList<>();
+				timestampList.add(task.getCreateTime().getTime());
+				if (task.getExecutiveTime() != null) {
+					timestampList.add(task.getExecutiveTime().getTime());
 				}
+				if (task.getProcessTime() != null) {
+					timestampList.add(task.getProcessTime().getTime());
+				}
+				if (task.getReviewTime() != null) {
+					timestampList.add(task.getReviewTime().getTime());
+				}
+				List<Long> temp = timestampList.stream()
+						.filter(Objects::isNull)
+						.sorted(Comparator.comparing(Long::longValue).reversed())
+						.collect(Collectors.toList());
+				if(temp!=null && temp.size()>0){
+					task.setLastSyncTime(new Timestamp(temp.get(0)).toLocalDateTime().format(dateSF));
+				}
+
 				//处理规范
 				QualityInspectionSpecifications specification = qualityProvider.getSpecificationById(task.getCategoryId());
 				if (specification != null) {
@@ -4551,26 +4548,48 @@ Long nextPageAnchor = null;
 		populateSpecificationDetails(specificationList, parentSpecificationIds);
 		offlineTaskDetailsResponse.setSpecifications(specificationList);
 		//处理组织架构人员
-		processOrganizationsAndMembers(offlineTaskDetailsResponse,standards);
+		processOrganizationsAndMembers(offlineTaskDetailsResponse, standards);
 		//再增加计划和groupId的关系表
-		processPlansAndGroupRelations(offlineTaskDetailsResponse,standards);
+		processPlansAndGroupRelations(offlineTaskDetailsResponse, standards);
 		//增加类型
-		processSpecifications(offlineTaskDetailsResponse,cmd.getTargetId(),cmd.getOwnerId());
+		processSpecifications(offlineTaskDetailsResponse, cmd.getTargetId(), cmd.getOwnerId());
 		return offlineTaskDetailsResponse;
 	}
 
 	private void processSpecifications(QualityOfflineTaskDetailsResponse offlineTaskDetailsResponse, Long targetId, Long ownerId) {
-		List<QualityInspectionSpecifications> specifications = qualityProvider.listAllChildrenSpecifications("/%", null,
-				ownerId, SpecificationScopeCode.ALL.getCode(), 0L, SpecificationScopeCode.ALL.getCode());
+		//先查全公司的该节点下的所有子节点,再查该项目下的所有子节点
+		QualityInspectionSpecifications parent = new QualityInspectionSpecifications();
+		List<QualityInspectionSpecifications> specifications = new ArrayList<>();
+		List<QualityInspectionSpecifications> scopeSpecifications = new ArrayList<>();
+		parent.setId(0L);
+		parent.setReferId(0L);
+		specifications = qualityProvider.listAllChildrenSpecifications("/%", null, null, SpecificationScopeCode.ALL.getCode(), 0L, (byte) 0);
+		scopeSpecifications = qualityProvider.listAllChildrenSpecifications("/%", null, null, SpecificationScopeCode.COMMUNITY.getCode(), targetId, (byte) 0);
+
+		List<QualityInspectionSpecificationDTO> dtos = new ArrayList<>();
+		//只有在项目中才会处理ALL和SCOPE
+		dtos = dealWithScopeSpecifications(specifications, scopeSpecifications);
+
+		QualityInspectionSpecificationDTO parentDto = ConvertHelper.convert(parent, QualityInspectionSpecificationDTO.class);
+		parentDto = processQualitySpecificationTree(dtos, parentDto);
+		dtos = parentDto.getChildrens();
+
 		List<QualityInspectionSpecificationDTO> categories = new ArrayList<>();
-		if (specifications != null && specifications.size() > 0) {
-			specifications.forEach((s) -> {
-				if (s.getParentId() == 0L) {
-					categories.add(ConvertHelper.convert(s, QualityInspectionSpecificationDTO.class));
-				}
+		if (dtos != null && dtos.size() > 0) {
+			dtos.forEach((s) -> {
+				addChildrensToCategories(s, categories);
+				categories.add(ConvertHelper.convert(s, QualityInspectionSpecificationDTO.class));
 			});
 		}
 		offlineTaskDetailsResponse.setCategories(categories);
+	}
+
+	private void addChildrensToCategories(QualityInspectionSpecificationDTO s, List<QualityInspectionSpecificationDTO> categories) {
+		if (s.getChildrens()!=null && s.getChildrens().size()>0){
+			categories.add(s);
+			categories.addAll(s.getChildrens());
+			s.getChildrens().forEach((c)-> addChildrensToCategories(c,categories));
+		}
 	}
 
 	/**

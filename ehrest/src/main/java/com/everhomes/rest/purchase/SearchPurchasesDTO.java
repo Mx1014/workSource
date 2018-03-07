@@ -14,6 +14,7 @@ import com.everhomes.util.StringHelper;
  * <li>submissionStatus:审核状态，1：处理中；2：已完成；3：已取消；4:未完成</li>
  * <li>totalAmount:总金额</li>
  * <li>warehouseStatus:入库状态, 1:未入库；2：已入库</li>
+ * <li>flowCaseId: 工作流id</li>
  *</ul>
  */
 public class SearchPurchasesDTO {
@@ -23,6 +24,7 @@ public class SearchPurchasesDTO {
     private Byte submissionStatus;
     private String totalAmount;
     private Byte warehouseStatus;
+    private Long flowCaseId;
 
     @Override
     public String toString() {
@@ -75,5 +77,13 @@ public class SearchPurchasesDTO {
 
     public void setWarehouseStatus(Byte warehouseStatus) {
         this.warehouseStatus = warehouseStatus;
+    }
+
+    public Long getFlowCaseId() {
+        return flowCaseId;
+    }
+
+    public void setFlowCaseId(Long flowCaseId) {
+        this.flowCaseId = flowCaseId;
     }
 }
