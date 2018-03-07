@@ -2702,13 +2702,16 @@ private void checkUserPrivilege(Long orgId, Long privilegeId, Long communityId) 
 			logs = getLatestTaskLogs(logs);
 
 			List<EquipmentTaskLogsDTO> dtos = new ArrayList<>();
+			LOGGER.info("Equipment repair Logs:{}",logs);
 			//为了查看特定设备详情和批量审阅的总览  增加以下
 			if (cmd.getEquipmentId() != null) {
 				dtos = processEquipmentTaskLogsDTOS(logs);
+				LOGGER.info("Equipment repair Logs:{}",logs);
 			} else {
 				if (logs != null && logs.size() > 0)
 					dtos = logs.stream().map((r) -> {
 						EquipmentTaskLogsDTO dto = ConvertHelper.convert(r, EquipmentTaskLogsDTO.class);
+						LOGGER.info("Equipment repair LogsDTO:{}",dto);
 						populateItemResultToTasklog(r, dto);
 						return dto;
 					}).collect(Collectors.toList());
