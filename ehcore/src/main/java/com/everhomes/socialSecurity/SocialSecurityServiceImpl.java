@@ -2869,7 +2869,7 @@ public class SocialSecurityServiceImpl implements SocialSecurityService {
                 query.addConditions(Tables.EH_ORGANIZATION_MEMBER_DETAILS.CHECK_IN_TIME.between(getTheFirstDate(cmd.getCheckInMonth()), getTheLastDate(cmd.getCheckInMonth())));
             }
             if (cmd.getDismissMonth() != null) {
-                query.addConditions(Tables.EH_ORGANIZATION_MEMBER_DETAILS.DISMISS_TIME.between(getTheFirstDate(cmd.getCheckInMonth()), getTheLastDate(cmd.getCheckInMonth())));
+                query.addConditions(Tables.EH_ORGANIZATION_MEMBER_DETAILS.DISMISS_TIME.between(getTheFirstDate(cmd.getDismissMonth()), getTheLastDate(cmd.getDismissMonth())));
                 query.addConditions(Tables.EH_ORGANIZATION_MEMBER_DETAILS.EMPLOYEE_STATUS.eq(EmployeeStatus.DISMISSAL.getCode()));
             }
             if (cmd.getKeywords() != null) {
