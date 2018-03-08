@@ -5850,6 +5850,41 @@ public class OrganizationProviderImpl implements OrganizationProvider {
     }
 
     @Override
+    public Integer queryOrganizationMemberDetailCounts(ListingLocator locator, Long organizationId, ListingQueryBuilderCallback queryBuilderCallback){
+        DSLContext context = this.dbProvider.getDslContext(AccessSpec.readOnly());
+        SelectQuery<EhOrganizationMemberDetailsRecord> query = context.selectQuery(Tables.EH_ORGANIZATION_MEMBER_DETAILS);
+        queryBuilderCallback.buildCondition(locator, query);
+        query.addConditions(Tables.EH_ORGANIZATION_MEMBER_DETAILS.ORGANIZATION_ID.eq(organizationId));
+        return query.fetchCount();
+    }
+
+    @Override
+    public List<OrganizationMemberDetails> queryOrganizationMemberDetails(ListingLocator locator, Long organizationId, ListingQueryBuilderCallback queryBuilderCallback){
+        DSLContext context = this.dbProvider.getDslContext(AccessSpec.readOnly());
+        SelectQuery<EhOrganizationMemberDetailsRecord> query = context.selectQuery(Tables.EH_ORGANIZATION_MEMBER_DETAILS);
+        queryBuilderCallback.buildCondition(locator, query);
+        query.addConditions(Tables.EH_ORGANIZATION_MEMBER_DETAILS.ORGANIZATION_ID.eq(organizationId));
+        List<OrganizationMemberDetails> results = query.fetchInto(OrganizationMemberDetails.class);
+        if (null == results || results.size() == 0)
+            return null;
+        return results;
+    }
+
+    @Override
+    public List<Long> listOrganizationPersonnelDetailIdsByDepartmentId(Long departmentId){
+        DSLContext context = this.dbProvider.getDslContext(AccessSpec.readOnly());
+        SelectQuery<EhOrganizationMembersRecord> query = context.selectQuery(Tables.EH_ORGANIZATION_MEMBERS);
+        query.addSelect(Tables.EH_ORGANIZATION_MEMBERS.DETAIL_ID);
+        query.addConditions(Tables.EH_ORGANIZATION_MEMBERS.ORGANIZATION_ID.eq(departmentId));
+        query.addConditions(Tables.EH_ORGANIZATION_MEMBERS.STATUS.eq(OrganizationMemberStatus.ACTIVE.getCode()));
+        query.addConditions(Tables.EH_ORGANIZATION_MEMBERS.DETAIL_ID.isNotNull());
+        List<Long> results = query.fetchInto(Long.class);
+        if (null == results || results.size() == 0)
+            return null;
+        return results;
+    }
+
+    @Override
     public Integer queryOrganizationPersonnelCounts(ListingLocator locator, Long organizationId, ListingQueryBuilderCallback queryBuilderCallback) {
         DSLContext context = dbProvider.getDslContext(AccessSpec.readOnly());
         SelectQuery<Record> query = context.selectQuery();

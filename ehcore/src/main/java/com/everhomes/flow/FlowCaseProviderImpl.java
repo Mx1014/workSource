@@ -254,6 +254,12 @@ public class FlowCaseProviderImpl implements FlowCaseProvider {
         if(cmd.getOrganizationId() != null) {
             cond = cond.and(Tables.EH_FLOW_CASES.ORGANIZATION_ID.eq(cmd.getOrganizationId()));
         }
+        if(cmd.getProjectId() != null) {
+            cond = cond.and(Tables.EH_FLOW_CASES.PROJECT_ID.eq(cmd.getProjectId()));
+        }
+        if(cmd.getProjectType() != null) {
+            cond = cond.and(Tables.EH_FLOW_CASES.PROJECT_TYPE.eq(cmd.getProjectType()));
+        }
         if(cmd.getOwnerId() != null) {
             cond = cond.and(Tables.EH_FLOW_CASES.OWNER_ID.eq(cmd.getOwnerId()));
         }

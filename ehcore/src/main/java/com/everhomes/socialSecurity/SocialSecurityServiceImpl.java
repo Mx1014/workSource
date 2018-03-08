@@ -2,11 +2,11 @@
 package com.everhomes.socialSecurity;
 
 import com.alibaba.fastjson.JSONObject;
+import com.everhomes.archives.ArchivesService;
 import com.everhomes.bigcollection.Accessor;
 import com.everhomes.bigcollection.BigCollectionProvider;
 import com.everhomes.community.Community;
 import com.everhomes.community.CommunityProvider;
-import com.everhomes.configuration.ConfigurationProvider;
 import com.everhomes.coordinator.CoordinationLocks;
 import com.everhomes.coordinator.CoordinationProvider;
 import com.everhomes.db.AccessSpec;
@@ -25,7 +25,6 @@ import com.everhomes.rest.organization.*;
 import com.everhomes.rest.socialSecurity.*;
 import com.everhomes.sequence.SequenceProvider;
 import com.everhomes.server.schema.Tables;
-import com.everhomes.server.schema.tables.EhOrganizationMemberDetails;
 import com.everhomes.server.schema.tables.pojos.EhSocialSecurityPaymentLogs;
 import com.everhomes.server.schema.tables.pojos.EhSocialSecurityPayments;
 import com.everhomes.server.schema.tables.pojos.EhSocialSecuritySettings;
@@ -98,8 +97,6 @@ public class SocialSecurityServiceImpl implements SocialSecurityService {
     @Autowired
     private RegionProvider regionProvider;
     @Autowired
-    private OrganizationService organizationService;
-    @Autowired
     private OrganizationProvider organizationProvider;
     @Autowired
     private UserProvider userProvider;
@@ -108,28 +105,20 @@ public class SocialSecurityServiceImpl implements SocialSecurityService {
     @Autowired
     private BigCollectionProvider bigCollectionProvider;
     @Autowired
-    private ConfigurationProvider configurationProvider;
-    @Autowired
     private SequenceProvider sequenceProvider;
     @Autowired
     private CoordinationProvider coordinationProvider;
     @Autowired
     private SocialSecurityGroupProvider socialSecurityGroupProvider;
+    @Autowired
+    private ArchivesService archivesService;
     /**
      * 处理计算的线程池,预设最大值是5
      */
     private static ExecutorService calculateExecutorPool = Executors.newFixedThreadPool(5);
-    private static ThreadLocal<SimpleDateFormat> monthSF = new ThreadLocal<SimpleDateFormat>() {
-        protected SimpleDateFormat initialValue() {
-            return new SimpleDateFormat("yyyyMM");
-        }
-    };
+    private static ThreadLocal<SimpleDateFormat> monthSF = ThreadLocal.withInitial(() -> new SimpleDateFormat("yyyyMM"));
 
-    private static ThreadLocal<SimpleDateFormat> dateSF = new ThreadLocal<SimpleDateFormat>() {
-        protected SimpleDateFormat initialValue() {
-            return new SimpleDateFormat("yyyy-MM-dd");
-        }
-    };
+    private static ThreadLocal<SimpleDateFormat> dateSF = ThreadLocal.withInitial(() -> new SimpleDateFormat("yyyy-MM-dd"));
 
     private static final Logger LOGGER = LoggerFactory.getLogger(SocialSecurityServiceImpl.class);
 
@@ -609,15 +598,26 @@ public class SocialSecurityServiceImpl implements SocialSecurityService {
 
         Integer inWorkNumber = 0;
         if (cmd.getSocialSecurityMonth() != null)
-            inWorkNumber = organizationProvider.queryOrganizationPersonnelCounts(new ListingLocator(), cmd.getOwnerId(), ((locator, query) -> {
+            inWorkNumber = organizationProvider.queryOrganizationPersonnelCounts(new ListingLocator(), cmd.getOwnerId(), (locator, query) -> {
                 query.addConditions(Tables.EH_ORGANIZATION_MEMBER_DETAILS.CHECK_IN_TIME.ge(getTheFirstDate(cmd.getSocialSecurityMonth())));
                 query.addConditions(Tables.EH_ORGANIZATION_MEMBER_DETAILS.CHECK_IN_TIME.le(getTheLastDate(cmd.getSocialSecurityMonth())));
                 return query;
-            }));
+            });
+
+        Integer outWorkNumber = 0;
+        if (cmd.getSocialSecurityMonth() != null){
+            outWorkNumber = organizationProvider.queryOrganizationMemberDetailCounts(new ListingLocator(), cmd.getOwnerId(), (locator, query) -> {
+                query.addConditions(Tables.EH_ORGANIZATION_MEMBER_DETAILS.EMPLOYEE_STATUS.eq(EmployeeStatus.DISMISSAL.getCode()));
+                query.addConditions(Tables.EH_ORGANIZATION_MEMBER_DETAILS.DISMISS_TIME.ge(getTheFirstDate(cmd.getSocialSecurityMonth())));
+                query.addConditions(Tables.EH_ORGANIZATION_MEMBER_DETAILS.DISMISS_TIME.le(getTheLastDate(cmd.getSocialSecurityMonth())));
+                return query;
+            });
+        }
+
         response.setPaySocialSecurityNumber(paySocialSecurityNumber);
         response.setPayAccumulationFundNumber(accumulationFundNumber);
         response.setInWorkNumber(inWorkNumber);
-        response.setOutWorkNumber(7);
+        response.setOutWorkNumber(outWorkNumber);
         return response;
     }
 
@@ -2856,42 +2856,37 @@ public class SocialSecurityServiceImpl implements SocialSecurityService {
     @Override
     public List<SocialSecurityEmployeeDTO> listSocialSecurityEmployees(ListSocialSecurityPaymentsCommand cmd) {
         List<SocialSecurityEmployeeDTO> results = new ArrayList<>();
-        EhOrganizationMemberDetails t2 = Tables.EH_ORGANIZATION_MEMBER_DETAILS.as("t2");
         Integer pageSize;
         if (cmd.getPageSize() != null)
             pageSize = cmd.getPageSize();
         else
             pageSize = 20;
-        //  set the departmentId
-        Long organizationId = cmd.getOwnerId();
-        if (cmd.getDeptId() != null)
-            organizationId = cmd.getDeptId();
 
-        List<OrganizationMember> records = organizationProvider.queryOrganizationPersonnels(new ListingLocator(), organizationId, (locator, query) -> {
+        List<OrganizationMemberDetails> records = archivesService.queryArchivesEmployees(new ListingLocator(), cmd.getOwnerId(), cmd.getDeptId(), (locator, query) -> {
             if (cmd.getSocialSecurityStatus() != null)
-                query.addConditions(t2.SOCIAL_SECURITY_STATUS.eq(cmd.getSocialSecurityStatus()));
+                query.addConditions(Tables.EH_ORGANIZATION_MEMBER_DETAILS.SOCIAL_SECURITY_STATUS.eq(cmd.getSocialSecurityStatus()));
             if (cmd.getAccumulationFundStatus() != null)
-                query.addConditions(t2.ACCUMULATION_FUND_STATUS.eq(cmd.getAccumulationFundStatus()));
+                query.addConditions(Tables.EH_ORGANIZATION_MEMBER_DETAILS.ACCUMULATION_FUND_STATUS.eq(cmd.getAccumulationFundStatus()));
             if (cmd.getCheckInMonth() != null) {
-                query.addConditions(t2.CHECK_IN_TIME.ge(getTheFirstDate(cmd.getCheckInMonth())).and(t2.CHECK_IN_TIME.le(getTheLastDate(cmd.getCheckInMonth()))));
+                query.addConditions(Tables.EH_ORGANIZATION_MEMBER_DETAILS.CHECK_IN_TIME.ge(getTheFirstDate(cmd.getCheckInMonth())).and(Tables.EH_ORGANIZATION_MEMBER_DETAILS.CHECK_IN_TIME.le(getTheLastDate(cmd.getCheckInMonth()))));
             }
             if (cmd.getKeywords() != null) {
-                query.addConditions(t2.CONTACT_TOKEN.eq(cmd.getKeywords()).or(t2.CONTACT_NAME.like(cmd.getKeywords())));
+                query.addConditions(Tables.EH_ORGANIZATION_MEMBER_DETAILS.CONTACT_TOKEN.eq(cmd.getKeywords()).or(Tables.EH_ORGANIZATION_MEMBER_DETAILS.CONTACT_NAME.like(cmd.getKeywords())));
             }
             if (cmd.getAccumulationFundCityId() != null) {
-                query.addConditions(t2.ID.in(dbProvider.getDslContext(AccessSpec.readOnly()).selectDistinct(Tables.EH_SOCIAL_SECURITY_SETTINGS.DETAIL_ID)
+                query.addConditions(Tables.EH_ORGANIZATION_MEMBER_DETAILS.ID.in(dbProvider.getDslContext(AccessSpec.readOnly()).selectDistinct(Tables.EH_SOCIAL_SECURITY_SETTINGS.DETAIL_ID)
                         .from(Tables.EH_SOCIAL_SECURITY_SETTINGS).where(Tables.EH_SOCIAL_SECURITY_SETTINGS.ORGANIZATION_ID.eq(cmd.getOwnerId()))
                         .and(Tables.EH_SOCIAL_SECURITY_SETTINGS.CITY_ID.eq(cmd.getAccumulationFundCityId()))
                         .and(Tables.EH_SOCIAL_SECURITY_SETTINGS.ACCUM_OR_SOCAIL.eq(AccumOrSocial.ACCUM.getCode()))));
             }
             if (cmd.getSocialSecurityCityId() != null) {
-                query.addConditions(t2.ID.in(dbProvider.getDslContext(AccessSpec.readOnly()).selectDistinct(Tables.EH_SOCIAL_SECURITY_SETTINGS.DETAIL_ID)
+                query.addConditions(Tables.EH_ORGANIZATION_MEMBER_DETAILS.ID.in(dbProvider.getDslContext(AccessSpec.readOnly()).selectDistinct(Tables.EH_SOCIAL_SECURITY_SETTINGS.DETAIL_ID)
                         .from(Tables.EH_SOCIAL_SECURITY_SETTINGS).where(Tables.EH_SOCIAL_SECURITY_SETTINGS.ORGANIZATION_ID.eq(cmd.getOwnerId()))
                         .and(Tables.EH_SOCIAL_SECURITY_SETTINGS.CITY_ID.eq(cmd.getSocialSecurityCityId()))
                         .and(Tables.EH_SOCIAL_SECURITY_SETTINGS.ACCUM_OR_SOCAIL.eq(AccumOrSocial.SOCAIL.getCode()))));
             }
             int offset = ((cmd.getPageOffset() == null ? 1 : cmd.getPageOffset()) - 1) * (pageSize);
-            query.addOrderBy(t2.field("check_in_time").desc());
+            query.addOrderBy(Tables.EH_ORGANIZATION_MEMBER_DETAILS.CHECK_IN_TIME.desc());
             query.addLimit(offset, pageSize + 1);
             return query;
         });
@@ -2900,12 +2895,13 @@ public class SocialSecurityServiceImpl implements SocialSecurityService {
             SocialSecurityEmployeeDTO dto = new SocialSecurityEmployeeDTO();
             dto.setContactName(r.getContactName());
             dto.setUserId(r.getTargetId());
-            dto.setDetailId(r.getDetailId());
+            dto.setDetailId(r.getId());
             dto.setNamespaceId(r.getNamespaceId());
-            dto.setDepartmentName(getDepartmentName(r.getDetailId()));
+            dto.setDepartmentName(r.getDepartmentName());
             dto.setCheckInTime(r.getCheckInTime());
             dto.setSocialSecurityStatus(r.getSocialSecurityStatus());
             dto.setAccumulationFundStatus(r.getAccumulationFundStatus());
+            dto.setDismissTime(r.getDismissTime());
             results.add(dto);
         });
         return results;
@@ -2943,14 +2939,6 @@ public class SocialSecurityServiceImpl implements SocialSecurityService {
             LOGGER.error("transfer format error");
             return null;
         }
-    }
-
-    private String getDepartmentName(Long detailId) {
-        Long departmentId = organizationService.getDepartmentByDetailId(detailId);
-        Organization department = organizationProvider.findOrganizationById(departmentId);
-        if (department != null)
-            return department.getName();
-        return null;
     }
 
     @Override
