@@ -2546,11 +2546,10 @@ public class ArchivesServiceImpl implements ArchivesService {
         //  get the department name.
         if (employees != null && employees.size() > 0) {
             for (OrganizationMemberDetails employee : employees) {
-                if (employee.getEmployeeStatus().equals(EmployeeStatus.DISMISSAL)) {
+                if (employee.getEmployeeStatus().equals(EmployeeStatus.DISMISSAL.getCode())) {
                     ArchivesDismissEmployees dismissEmployee = archivesProvider.getArchivesDismissEmployeesByDetailId(employee.getId());
-                    if (dismissEmployee == null)
-                        continue;
-                    employee.setDepartmentName(dismissEmployee.getDepartment());
+                    if (dismissEmployee != null)
+                        employee.setDepartmentName(dismissEmployee.getDepartment());
                 } else
                     employee.setDepartmentName(convertToOrgNames(getEmployeeDepartment(employee.getContactToken(), employee.getOrganizationId())));
             }
