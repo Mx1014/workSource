@@ -306,10 +306,7 @@ public class QualityController extends ControllerBase {
 	 */
 	@RequestMapping("exportInspectionTasks")
 	public HttpServletResponse exportInspectionTasks(@Valid ListQualityInspectionTasksCommand cmd,HttpServletResponse response) {
-		
-		HttpServletResponse commandResponse = qualityService.exportInspectionTasks(cmd, response);
-		
-		return commandResponse;
+		return qualityService.exportInspectionTasks(cmd, response);
 	}
 	
 	/**
