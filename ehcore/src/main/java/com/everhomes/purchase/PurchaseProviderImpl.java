@@ -7,6 +7,7 @@ import com.everhomes.flow.FlowCase;
 import com.everhomes.flow.FlowCaseProvider;
 import com.everhomes.flow.FlowProvider;
 import com.everhomes.rest.acl.PrivilegeConstants;
+import com.everhomes.rest.purchase.GetWarehouseMaterialPurchaseHistoryDTO;
 import com.everhomes.rest.purchase.SearchPurchasesDTO;
 import com.everhomes.server.schema.Tables;
 import com.everhomes.server.schema.tables.EhWarehousePurchaseItems;
@@ -16,6 +17,7 @@ import com.everhomes.server.schema.tables.daos.EhWarehousePurchaseItemsDao;
 import com.everhomes.server.schema.tables.daos.EhWarehousePurchaseOrdersDao;
 import com.everhomes.server.schema.tables.daos.EhWarehouseSuppliersDao;
 import com.everhomes.user.UserContext;
+import com.everhomes.util.ExceptionUtils;
 import org.jooq.DSLContext;
 import org.jooq.Record;
 import org.jooq.SelectQuery;
@@ -87,7 +89,9 @@ public class PurchaseProviderImpl implements PurchaseProvider {
                     //flow case id get
                     FlowCase flowcase = flowCaseProvider.findFlowCaseByReferId(dto.getPurchaseRequestId()
                             , "purchaseId", PrivilegeConstants.PURCHASE_MODULE);
-                    dto.setFlowCaseId(flowcase.getId());
+                    if(flowcase!=null){
+                        dto.setFlowCaseId(flowcase.getId());
+                    }
                     list.add(dto);
                 });
         return list;
@@ -122,6 +126,39 @@ public class PurchaseProviderImpl implements PurchaseProvider {
         context.delete(purchaseItems)
                 .where(purchaseItems.PURCHASE_REQUEST_ID.eq(purchaseRequestId))
                 .execute();
+    }
+
+    @Override
+    public List<GetWarehouseMaterialPurchaseHistoryDTO> getWarehouseMaterialPurchaseHistory(Long communityId, Long ownerId, String ownerType, Long materialId) {
+        //后台自洽，减少空指针，空指针带来了定位问题的时间成本
+        ExceptionUtils.nullProhibited(communityId,"communityId");
+        ExceptionUtils.nullProhibited(ownerId,"ownerId");
+        ExceptionUtils.nullProhibited(ownerType,"ownerType");
+        ExceptionUtils.nullProhibited(materialId,"materialId");
+        DSLContext context = getReadOnlyContext();
+        SimpleDateFormat sdf = new SimpleDateFormat("yyyy-MM-dd");
+        List<GetWarehouseMaterialPurchaseHistoryDTO> list = new ArrayList<>();
+        context.select(purchase.APPLICANT_NAME,purchase.APPLICANT_TIME,purchaseItems.PURCHASE_QUANTITY
+        ,purchase.SUBMISSION_STATUS,purchaseItems.UNIT_PRICE)
+                .from(purchase,purchaseItems)
+                .where(purchase.COMMUNITY_ID.eq(communityId))
+                .and(purchase.OWNER_ID.eq(ownerId))
+                .and(purchase.OWNER_TYPE.eq(ownerType))
+                .and(purchaseItems.MATERIAL_ID.eq(materialId))
+                .and(purchaseItems.PURCHASE_REQUEST_ID.eq(purchase.ID))
+                .fetch()
+                .forEach(r -> {
+                    GetWarehouseMaterialPurchaseHistoryDTO dto = new GetWarehouseMaterialPurchaseHistoryDTO();
+                    dto.setApplicantName(r.getValue(purchase.APPLICANT_NAME));
+                    try{
+                        dto.setApplicatTime(sdf.format(r.getValue(purchase.APPLICANT_TIME)));
+                    }catch (Exception e){}
+                    dto.setQuantity(String.valueOf(r.getValue(purchaseItems.PURCHASE_QUANTITY)));
+                    dto.setSubmissionStatus(r.getValue(purchase.SUBMISSION_STATUS));
+                    dto.setUnitPrice(r.getValue(purchaseItems.UNIT_PRICE).toString());
+                    list.add(dto);
+                });
+        return list;
     }
 
     private DSLContext getReadOnlyContext(){
