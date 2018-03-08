@@ -35,6 +35,7 @@ import com.everhomes.server.schema.tables.records.EhVarFieldGroupScopesRecord;
 
 import com.everhomes.server.schema.tables.records.EhVarFieldItemScopesRecord;
 import com.everhomes.server.schema.tables.records.EhVarFieldScopesRecord;
+import com.everhomes.server.schema.tables.records.EhVarFieldsRecord;
 import com.everhomes.util.ConvertHelper;
 import com.everhomes.util.DateHelper;
 import com.everhomes.util.StringHelper;
@@ -375,6 +376,28 @@ public class FieldProviderImpl implements FieldProvider {
         return fields.get(0);
     }
 
+    @Override
+    public Field findField(String moduleName, String name, String groupPath) {
+        DSLContext context = this.dbProvider.getDslContext(AccessSpec.readOnly());
+
+        List<Field> fields = new ArrayList<>();
+        SelectQuery<EhVarFieldsRecord> query = context.selectQuery(Tables.EH_VAR_FIELDS);
+        query.addConditions(Tables.EH_VAR_FIELDS.MODULE_NAME.eq(moduleName));
+        query.addConditions(Tables.EH_VAR_FIELDS.NAME.eq(name));
+        query.addConditions(Tables.EH_VAR_FIELDS.GROUP_PATH.like(groupPath + "%"));
+        query.addConditions(Tables.EH_VAR_FIELDS.STATUS.eq(VarFieldStatus.ACTIVE.getCode()));
+
+        query.fetch().map((record)-> {
+            fields.add(ConvertHelper.convert(record, Field.class));
+            return null;
+        });
+
+        if(fields == null || fields.size() == 0) {
+            return null;
+        }
+        return fields.get(0);
+    }
+
     /**
      *
      *
@@ -473,6 +496,14 @@ public class FieldProviderImpl implements FieldProvider {
         DSLContext context = this.dbProvider.getDslContext(AccessSpec.readOnly());
         return context.select().from(Tables.EH_VAR_FIELD_GROUPS)
                 .where(Tables.EH_VAR_FIELD_GROUPS.TITLE.eq(groupDisplayName))
+                .fetchAnyInto(FieldGroup.class);
+    }
+
+    @Override
+    public FieldGroup findGroupByGroupLogicName(String groupLogicName) {
+        DSLContext context = this.dbProvider.getDslContext(AccessSpec.readOnly());
+        return context.select().from(Tables.EH_VAR_FIELD_GROUPS)
+                .where(Tables.EH_VAR_FIELD_GROUPS.NAME.eq(groupLogicName))
                 .fetchAnyInto(FieldGroup.class);
     }
 
