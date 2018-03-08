@@ -273,7 +273,8 @@ CREATE TABLE `eh_parking_space_logs` (
 ) ENGINE=INNODB DEFAULT CHARSET=utf8mb4;
 
 ALTER TABLE `eh_rentalv2_resource_types`
-ADD COLUMN `menu_type` TINYINT(4) DEFAULT 1 COMMENT '1: 通用 2:公司会议室',
+ADD COLUMN `menu_type` TINYINT(4) DEFAULT 1 COMMENT '1: 通用 2:公司会议室';
+ALTER TABLE `eh_rentalv2_resource_types`
 ADD COLUMN `identify` VARCHAR(64) DEFAULT NULL COMMENT '类型标识';
 
 CREATE TABLE `eh_rentalv2_order_rules` (
@@ -1689,6 +1690,10 @@ ALTER TABLE eh_archives_dismiss_employees ADD COLUMN job_position VARCHAR(128) C
 
 ALTER TABLE eh_archives_dismiss_employees ADD COLUMN job_level VARCHAR(128) COMMENT '离职前职级';
 
+ALTER TABLE eh_archives_logs MODIFY operation_reason VARCHAR(1024) COMMENT 'the reason of the operation';
+
+ALTER TABLE eh_archives_logs MODIFY operation_remark VARCHAR(1024) COMMENT 'the remark';
+
 -- end by nan.rong
 
 -- by dengs,云打印添加字段 2018.03.06
@@ -1701,5 +1706,11 @@ CHANGE COLUMN `aclink_id` `aclink_id` VARCHAR(128) NULL DEFAULT NULL ;
 
 ALTER TABLE `eh_rentalv2_orders`
 CHANGE COLUMN `door_auth_id` `door_auth_id` VARCHAR(128) NULL DEFAULT NULL ;
+
+
+-- 附件增加附件名称 jiarui
+ALTER TABLE `eh_equipment_inspection_equipment_attachments`
+  ADD COLUMN `name`  varchar(255) NULL DEFAULT '' AFTER `content_uri`;
+
 
 
