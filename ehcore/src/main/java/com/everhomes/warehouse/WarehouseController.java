@@ -313,13 +313,29 @@ public class WarehouseController extends ControllerBase {
     @RestReturn(value = SearchWarehouseStockLogsResponse.class)
     public RestResponse searchWarehouseStockLogs(SearchWarehouseStockLogsCommand cmd) {
 
-    SearchWarehouseStockLogsResponse logs = warehouseStockLogSearcher.query(cmd);
+        SearchWarehouseStockLogsResponse logs = warehouseStockLogSearcher.query(cmd);
 
-    RestResponse response = new RestResponse(logs);
+        RestResponse response = new RestResponse(logs);
         response.setErrorCode(ErrorCodes.SUCCESS);
         response.setErrorDescription("OK");
         return response;
-}
+    }
+
+    /**
+     * <b>URL: /warehouse/searchWarehouseStockLogsByOrder</b>
+     * <p>通过出入库单查看库存日志</p>
+     */
+    @RequestMapping("searchWarehouseStockLogsByOrder")
+    @RestReturn(value = SearchWarehouseStockLogsResponse.class)
+    public RestResponse searchWarehouseStockLogsByOrder(SearchWarehouseStockLogsCommand cmd) {
+
+        SearchWarehouseStockLogsResponse logs = warehouseStockLogSearcher.queryByOrder(cmd);
+
+        RestResponse response = new RestResponse(logs);
+        response.setErrorCode(ErrorCodes.SUCCESS);
+        response.setErrorDescription("OK");
+        return response;
+    }
 
 
     /**

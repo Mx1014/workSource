@@ -1063,7 +1063,9 @@ public class WarehouseServiceImpl implements WarehouseService {
 
     private List<ImportFileResultLog<ImportWarehouseMaterialDataDTO>> importWarehouseMaterialsData(ImportOwnerCommand cmd, List<ImportWarehouseMaterialDataDTO> list, Long userId) {
         List<ImportFileResultLog<ImportWarehouseMaterialDataDTO>> errorDataLogs = new ArrayList<>();
-        Integer namespaceId = UserContext.getCurrentNamespaceId();
+//        Integer namespaceId = UserContext.getCurrentNamespaceId();
+        //在左邻新运营后台，此接口传递了namespaceId，usercontext中的namespaceId为错误的。 2018/3/8 by vin. wang
+        Integer namespaceId = cmd.getNamespaceId();
 
         for (ImportWarehouseMaterialDataDTO str : list) {
             ImportFileResultLog<ImportWarehouseMaterialDataDTO> log = new ImportFileResultLog<>(WarehouseServiceErrorCode.SCOPE);
