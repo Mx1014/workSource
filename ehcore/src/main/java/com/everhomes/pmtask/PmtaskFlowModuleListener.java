@@ -292,7 +292,7 @@ public class PmtaskFlowModuleListener implements FlowModuleListener {
 			for(PmTaskAttachmentDTO s: dto.getAttachments()) {
 				e = new FlowCaseEntity();
 				e.setEntityType(FlowCaseEntityType.IMAGE.getCode());
-				e.setKey("");
+				e.setKey("图片附件");
 				e.setValue(s.getContentUrl());
 				entities.add(e);
 			}

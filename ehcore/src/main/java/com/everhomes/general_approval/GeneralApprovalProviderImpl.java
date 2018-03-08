@@ -206,29 +206,41 @@ public class GeneralApprovalProviderImpl implements GeneralApprovalProvider {
         return query.fetchAnyInto(GeneralApprovalScopeMap.class);
     }
 
+    @Override
+    @Caching(evict = {@CacheEvict(value = "GeneralApprovalScopes", key = "#approvalId")})
+    public void deleteApprovalScopeMapByApprovalId(Long approvalId){
+        DSLContext context = dbProvider.getDslContext(AccessSpec.readWrite());
+        DeleteQuery<EhGeneralApprovalScopeMapRecord> query = context.deleteQuery(Tables.EH_GENERAL_APPROVAL_SCOPE_MAP);
+        query.addConditions(Tables.EH_GENERAL_APPROVAL_SCOPE_MAP.APPROVAL_ID.eq(approvalId));
+        query.execute();
+        DaoHelper.publishDaoAction(DaoAction.MODIFY, EhGeneralApprovalScopeMap.class, null);
+    }
+
     //  delete odd detail source data
     @Caching(evict = {@CacheEvict(value = "GeneralApprovalScopes", key = "#approvalId")})
     @Override
-    public void deleteOddGeneralApprovalDetailScope(Integer namespaceId, Long approvalId, List<Long> detailIds){
+    public void deleteOddGeneralApprovalDetailScope(Integer namespaceId, Long approvalId, List<Long> detailIds) {
         DSLContext context = dbProvider.getDslContext(AccessSpec.readWrite());
         DeleteQuery<EhGeneralApprovalScopeMapRecord> query = context.deleteQuery(Tables.EH_GENERAL_APPROVAL_SCOPE_MAP);
         query.addConditions(Tables.EH_GENERAL_APPROVAL_SCOPE_MAP.NAMESPACE_ID.eq(namespaceId));
         query.addConditions(Tables.EH_GENERAL_APPROVAL_SCOPE_MAP.APPROVAL_ID.eq(approvalId));
         query.addConditions(Tables.EH_GENERAL_APPROVAL_SCOPE_MAP.SOURCE_TYPE.eq(UniongroupTargetType.MEMBERDETAIL.getCode()));
-        query.addConditions(Tables.EH_GENERAL_APPROVAL_SCOPE_MAP.SOURCE_ID.notIn(detailIds));
+        if (detailIds.size() > 0)
+            query.addConditions(Tables.EH_GENERAL_APPROVAL_SCOPE_MAP.SOURCE_ID.notIn(detailIds));
         query.execute();
         DaoHelper.publishDaoAction(DaoAction.MODIFY, EhGeneralApprovalScopeMap.class, null);
     }
 
     @Caching(evict = {@CacheEvict(value = "GeneralApprovalScopes", key = "#approvalId")})
     @Override
-    public void deleteOddGeneralApprovalOrganizationScope(Integer namespaceId, Long approvalId, List<Long> detailIds){
+    public void deleteOddGeneralApprovalOrganizationScope(Integer namespaceId, Long approvalId, List<Long> detailIds) {
         DSLContext context = dbProvider.getDslContext(AccessSpec.readWrite());
         DeleteQuery<EhGeneralApprovalScopeMapRecord> query = context.deleteQuery(Tables.EH_GENERAL_APPROVAL_SCOPE_MAP);
         query.addConditions(Tables.EH_GENERAL_APPROVAL_SCOPE_MAP.NAMESPACE_ID.eq(namespaceId));
         query.addConditions(Tables.EH_GENERAL_APPROVAL_SCOPE_MAP.APPROVAL_ID.eq(approvalId));
         query.addConditions(Tables.EH_GENERAL_APPROVAL_SCOPE_MAP.SOURCE_TYPE.eq(UniongroupTargetType.ORGANIZATION.getCode()));
-        query.addConditions(Tables.EH_GENERAL_APPROVAL_SCOPE_MAP.SOURCE_ID.notIn(detailIds));
+        if (detailIds.size() > 0)
+            query.addConditions(Tables.EH_GENERAL_APPROVAL_SCOPE_MAP.SOURCE_ID.notIn(detailIds));
         query.execute();
         DaoHelper.publishDaoAction(DaoAction.MODIFY, EhGeneralApprovalScopeMap.class, null);
     }

@@ -31,6 +31,8 @@ public interface ArchivesProvider {
 
     List<ArchivesDismissEmployees> listArchivesDismissEmployees(Integer offset, Integer count, Integer namespaceId, Condition condition);
 
+    List<Long> listDismissEmployeeDetailIdsByDepartmentId(Long departmentId);
+
     void createArchivesForm(ArchivesFroms form);
 
     void updateArchivesForm(ArchivesFroms form);

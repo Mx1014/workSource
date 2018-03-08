@@ -7,6 +7,8 @@ import com.everhomes.configuration.ConfigurationProvider;
 import com.everhomes.constants.ErrorCodes;
 import com.everhomes.db.DbProvider;
 import com.everhomes.general_form.*;
+import com.everhomes.listing.ListingLocator;
+import com.everhomes.listing.ListingQueryBuilderCallback;
 import com.everhomes.locale.LocaleTemplateService;
 import com.everhomes.organization.*;
 import com.everhomes.rest.acl.PrivilegeConstants;
@@ -20,6 +22,7 @@ import com.everhomes.rest.user.UserGender;
 import com.everhomes.rest.user.UserServiceErrorCode;
 import com.everhomes.rest.user.UserStatus;
 import com.everhomes.server.schema.Tables;
+import com.everhomes.server.schema.tables.EhOrganizationMemberDetails;
 import com.everhomes.user.*;
 import com.everhomes.util.ConvertHelper;
 import com.everhomes.util.DateHelper;
@@ -366,6 +369,7 @@ public class ArchivesServiceImpl implements ArchivesService {
                 dto.setContactName(r.getContactName());
                 dto.setDepartments(r.getDepartments());
                 dto.setJobPositions(r.getJobPositions());
+                dto.setJobLevels(r.getJobLevels());
                 dto.setGender(r.getGender());
                 dto.setRegionCode(r.getRegionCode());
                 dto.setContactToken(r.getContactToken());
@@ -758,15 +762,17 @@ public class ArchivesServiceImpl implements ArchivesService {
      */
     @Override
     public Map<Long, String> getEmployeeDepartment(String phone, Long organizationId) {
-        if (phone == null)
-            return null;
-        Map<Long, String> map = new HashMap<>();
-        OrganizationMember member = organizationProvider.findDepartmentMemberByTokenAndOrgId(phone, organizationId);
-        Organization department = organizationProvider.findOrganizationById(member.getOrganizationId());
-        if (department == null)
-            return null;
-        map.put(department.getId(), department.getName());
-        return map;
+        if (phone != null) {
+            Map<Long, String> map = new HashMap<>();
+            OrganizationMember member = organizationProvider.findDepartmentMemberByTokenAndOrgId(phone, organizationId);
+            if (member != null) {
+                Organization department = organizationProvider.findOrganizationById(member.getOrganizationId());
+                if (department != null)
+                    map.put(department.getId(), department.getName());
+                return map;
+            }
+        }
+        return null;
     }
 
     /*
@@ -2511,6 +2517,47 @@ public class ArchivesServiceImpl implements ArchivesService {
     }
 
     /********************    import function end    ********************/
+
+    @Override
+    public List<OrganizationMemberDetails> queryArchivesEmployees(ListingLocator locator, Long organizationId, Long departmentId, ListingQueryBuilderCallback queryBuilderCallback) {
+        List<OrganizationMemberDetails> employees = organizationProvider.queryOrganizationMemberDetails(new ListingLocator(), organizationId, (locator1, query) -> {
+            queryBuilderCallback.buildCondition(locator, query);
+            if (departmentId != null) {
+                Organization department = organizationProvider.findOrganizationById(departmentId);
+                if (department.getGroupType().equals(OrganizationGroupType.ENTERPRISE.getCode())) {
+                    // get the hidden department of the company which has the same name
+                    Organization under_department = organizationProvider.findUnderOrganizationByParentOrgId(department.getId());
+                    if (under_department != null)
+                        department = under_department;
+                }
+                List<Long> workGroups = organizationProvider.listOrganizationPersonnelDetailIdsByDepartmentId(department.getId());
+                List<Long> dismissGroups = archivesProvider.listDismissEmployeeDetailIdsByDepartmentId(department.getId());
+                Condition con1 = Tables.EH_ORGANIZATION_MEMBER_DETAILS.ID.in(0L);
+                Condition con2 = Tables.EH_ORGANIZATION_MEMBER_DETAILS.ID.in(0L);
+                if (workGroups != null)
+                    con1 = Tables.EH_ORGANIZATION_MEMBER_DETAILS.ID.in(workGroups);
+                if (dismissGroups != null)
+                    con2 = Tables.EH_ORGANIZATION_MEMBER_DETAILS.ID.in(dismissGroups);
+                query.addConditions(con1.or(con2));
+            }
+            return query;
+        });
+
+        //  get the department name.
+        if (employees != null && employees.size() > 0) {
+            for (OrganizationMemberDetails employee : employees) {
+                if (employee.getEmployeeStatus().equals(EmployeeStatus.DISMISSAL)) {
+                    ArchivesDismissEmployees dismissEmployee = archivesProvider.getArchivesDismissEmployeesByDetailId(employee.getId());
+                    if (dismissEmployee == null)
+                        continue;
+                    employee.setDepartmentName(dismissEmployee.getDepartment());
+                } else
+                    employee.setDepartmentName(convertToOrgNames(getEmployeeDepartment(employee.getContactToken(), employee.getOrganizationId())));
+            }
+            return employees;
+        }
+        return new ArrayList<>();
+    }
 
     @Override
     public void remindArchivesEmployee(RemindArchivesEmployeeCommand cmd) {

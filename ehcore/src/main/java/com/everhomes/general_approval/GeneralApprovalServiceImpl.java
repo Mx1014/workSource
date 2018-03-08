@@ -643,10 +643,8 @@ public class GeneralApprovalServiceImpl implements GeneralApprovalService {
         }
 
         //  4.delete the scope which is not in the array
-        if (detailIds.size() > 0)
-            generalApprovalProvider.deleteOddGeneralApprovalDetailScope(namespaceId, approvalId, detailIds);
-        if (organizationIds.size() > 0)
-            generalApprovalProvider.deleteOddGeneralApprovalOrganizationScope(namespaceId, approvalId, organizationIds);
+        generalApprovalProvider.deleteOddGeneralApprovalDetailScope(namespaceId, approvalId, detailIds);
+        generalApprovalProvider.deleteOddGeneralApprovalOrganizationScope(namespaceId, approvalId, organizationIds);
     }
 
     private String getUserRealName(Long userId, Long ownerId) {
@@ -797,17 +795,22 @@ public class GeneralApprovalServiceImpl implements GeneralApprovalService {
     @Override
     public void deleteGeneralApproval(GeneralApprovalIdCommand cmd) {
 
-        // 删除是状态置为deleted
-        GeneralApproval ga = this.generalApprovalProvider.getGeneralApprovalById(cmd
-                .getApprovalId());
+        // change the status
+        GeneralApproval ga = this.generalApprovalProvider.getGeneralApprovalById(cmd.getApprovalId());
         ga.setStatus(GeneralApprovalStatus.DELETED.getCode());
-        updateGeneralApproval(ga);
+        dbProvider.execute((TransactionStatus status)->{
+            //  1.delete the approval
+            updateGeneralApproval(ga);
+            //  2.delete the scope
+            generalApprovalProvider.deleteApprovalScopeMapByApprovalId(cmd.getApprovalId());
+            return null;
+        });
+
     }
 
     @Override
     public GeneralFormDTO getApprovalForm(ApprovalFormIdCommand cmd) {
-        GeneralForm form = this.generalFormProvider.getActiveGeneralFormByOriginId(cmd
-                .getFormOriginId());
+        GeneralForm form = this.generalFormProvider.getActiveGeneralFormByOriginId(cmd.getFormOriginId());
         return processGeneralFormDTO(form);
     }
 
@@ -862,10 +865,11 @@ public class GeneralApprovalServiceImpl implements GeneralApprovalService {
     @Override
     public VerifyApprovalTemplatesResponse verifyApprovalTemplates(VerifyApprovalTemplatesCommand cmd) {
         VerifyApprovalTemplatesResponse response = new VerifyApprovalTemplatesResponse();
+        Integer namespaceId = UserContext.getCurrentNamespaceId();
         response.setResult(TrueOrFalseFlag.TRUE.getCode());
         List<GeneralApprovalTemplate> templates = generalApprovalProvider.listGeneralApprovalTemplateByModuleId(cmd.getModuleId());
         for (GeneralApprovalTemplate template : templates) {
-            GeneralApproval ga = generalApprovalProvider.getGeneralApprovalByTemplateId(UserContext.getCurrentNamespaceId(), cmd.getModuleId(), cmd.getOwnerId(),
+            GeneralApproval ga = generalApprovalProvider.getGeneralApprovalByTemplateId(namespaceId, cmd.getModuleId(), cmd.getOwnerId(),
                     cmd.getOwnerType(), template.getId());
             if (ga == null) {
                 response.setResult(TrueOrFalseFlag.FALSE.getCode());
@@ -955,11 +959,14 @@ public class GeneralApprovalServiceImpl implements GeneralApprovalService {
 
     @Override
     public GeneralApprovalDTO verifyApprovalName(VerifyApprovalNameCommand cmd) {
-        GeneralApproval approval = this.generalApprovalProvider.getGeneralApprovalByName(UserContext.getCurrentNamespaceId(),
+        Integer namespaceId = UserContext.getCurrentNamespaceId();
+        GeneralApproval approval = this.generalApprovalProvider.getGeneralApprovalByName(namespaceId,
                 cmd.getModuleId(), cmd.getOwnerId(), cmd.getOwnerType(), cmd.getApprovalName());
-        if (approval != null)
-            return ConvertHelper.convert(approval, GeneralApprovalDTO.class);
-        return null;
+        if (approval == null)
+            return null;
+        if (approval.getId().equals(cmd.getApprovalId()))
+            return null;
+        return ConvertHelper.convert(approval, GeneralApprovalDTO.class);
     }
 
     @Override

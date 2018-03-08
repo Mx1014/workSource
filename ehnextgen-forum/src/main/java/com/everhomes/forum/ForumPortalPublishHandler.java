@@ -58,7 +58,16 @@ public class ForumPortalPublishHandler implements PortalPublishHandler {
 
 	@Override
 	public String getAppInstanceConfig(Integer namespaceId, String actionData) {
-		return actionData;
+
+		ForumActionData forumActionData = (ForumActionData) StringHelper.fromJsonString(actionData, ForumActionData.class);
+		if(forumActionData == null){
+			forumActionData = new ForumActionData();
+		}
+
+		if(forumActionData.getForumEntryId() == null){
+			forumActionData.setForumEntryId(0L);
+		}
+		return forumActionData.toString();
 	}
 
 	@Override

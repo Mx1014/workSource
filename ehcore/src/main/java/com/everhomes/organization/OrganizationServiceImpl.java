@@ -629,7 +629,7 @@ public class OrganizationServiceImpl implements OrganizationService {
         if(!StringUtils.isEmpty(cmd.getName())){
             //同级重名校验
             Organization down_organization = organizationProvider.findOrganizationByParentAndName(modifyOrg.getParentId(), cmd.getName());
-            if(!down_organization.getId().equals(cmd.getId())){
+            if(down_organization.getId() != cmd.getId()){
                 OrganizationDTO orgDto_error = new OrganizationDTO();
                 orgDto_error.setErrorCode(OrganizationServiceErrorCode.ERROR_DEPARTMENT_EXISTS);
                 LOGGER.error("name repeat, cmd = {}", cmd);
@@ -5749,6 +5749,7 @@ public class OrganizationServiceImpl implements OrganizationService {
 
         List<Long> detailIds = cmd.getDetailIds();
 
+        //:todo 调整组织架构
         if(departmentIds != null && departmentIds.size() > 0){
 
             // 需要添加直属的企业ID集合
@@ -5788,7 +5789,16 @@ public class OrganizationServiceImpl implements OrganizationService {
 
         }
 
-        if (cmd.getJobPositionIds() != null && cmd.getJobPositionIds().size() > 0) {
+        //:todo 根据通用岗位ID和detailIds进行批量调岗
+        if (cmd.getJobPositionIds() != null) {
+            //1. 删除通用岗位+detailIds所确认的部门岗位条目
+//            List<OrganizationJobPositionMap> jobPositionMaps = organizationProvider.listOrganizationJobPositionMapsByJobPositionId(cmd.getCommonJobPositionId());
+//            if(jobPositionMaps!=null && jobPositionMaps.size() > 0){
+//                List<Long> organizationJobPositionIds = jobPositionMaps.stream().map(r->{
+//                    return r.getOrganizationId();
+//                }).collect(Collectors.toList());
+//                organizationProvider.deleteOrganizationPersonelByJobPositionIdsAndDetailIds(organizationJobPositionIds, cmd.getDetailIds());
+//            }
             //1.统一删除所有的部门岗位条目
             this.organizationProvider.deleteOrganizationMembersByGroupTypeWithDetailIds(namespaceId, cmd.getDetailIds(), OrganizationGroupType.JOB_POSITION.getCode());
             //2. 统一新增岗位
@@ -5804,7 +5814,8 @@ public class OrganizationServiceImpl implements OrganizationService {
             });
         }
 
-        if (cmd.getJobLevelIds() != null && cmd.getJobLevelIds().size() > 0) {
+        //:todo 调整职级
+        if (cmd.getJobLevelIds() != null) {
             //1.统一删除原有职级
             this.organizationProvider.deleteOrganizationMembersByGroupTypeWithDetailIds(namespaceId, cmd.getDetailIds(), OrganizationGroupType.JOB_LEVEL.getCode());
             //2.统一新增职级
@@ -5868,7 +5879,7 @@ public class OrganizationServiceImpl implements OrganizationService {
         groupTypes.add(OrganizationGroupType.DEPARTMENT.getCode());
         groupTypes.add(OrganizationGroupType.GROUP.getCode());
         groupTypes.add(OrganizationGroupType.JOB_POSITION.getCode());
-//        groupTypes.add(OrganizationGroupType.JOB_LEVEL.getCode());
+        groupTypes.add(OrganizationGroupType.JOB_LEVEL.getCode());
         List<String> tokens = organizationMembers.stream().map(r -> {
             return r.getContactToken();
         }).collect(Collectors.toList());

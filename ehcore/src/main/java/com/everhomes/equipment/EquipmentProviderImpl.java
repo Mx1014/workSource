@@ -384,8 +384,7 @@ public class EquipmentProviderImpl implements EquipmentProvider {
     }
 
     @Override
-    public void creatEquipmentAttachment(
-            EquipmentInspectionEquipmentAttachments eqAttachment) {
+    public void creatEquipmentAttachment(EquipmentInspectionEquipmentAttachments eqAttachment) {
         long id = this.sequenceProvider.getNextSequence(NameMapper.getSequenceDomainFromTablePojo(EhEquipmentInspectionEquipmentAttachments.class));
 
         eqAttachment.setId(id);
@@ -763,7 +762,7 @@ public class EquipmentProviderImpl implements EquipmentProvider {
         }
         this.dbProvider.iterationMapReduce(locator.getShardIterator(), null, (context, obj) -> {
             SelectQuery<EhEquipmentInspectionTasksRecord> query = context.selectQuery(Tables.EH_EQUIPMENT_INSPECTION_TASKS);
-
+            query.addConditions(Tables.EH_EQUIPMENT_INSPECTION_TASKS.STATUS.ne(EquipmentTaskStatus.NONE.getCode()));
             if (locator.getAnchor() != null && locator.getAnchor() != 0L) {
                 query.addConditions(Tables.EH_EQUIPMENT_INSPECTION_TASKS.ID.lt(locator.getAnchor()));
             }
@@ -859,6 +858,7 @@ public class EquipmentProviderImpl implements EquipmentProvider {
         DSLContext context = dbProvider.getDslContext(AccessSpec.readOnly());
         SelectQuery<EhEquipmentInspectionEquipmentAttachmentsRecord> query = context.selectQuery(Tables.EH_EQUIPMENT_INSPECTION_EQUIPMENT_ATTACHMENTS);
         query.addConditions(Tables.EH_EQUIPMENT_INSPECTION_EQUIPMENT_ATTACHMENTS.EQUIPMENT_ID.eq(equipmentId));
+        if(attachmentType!=null)
         query.addConditions(Tables.EH_EQUIPMENT_INSPECTION_EQUIPMENT_ATTACHMENTS.ATTACHMENT_TYPE.eq(attachmentType));
 
         List<EquipmentInspectionEquipmentAttachments> result = new ArrayList<EquipmentInspectionEquipmentAttachments>();

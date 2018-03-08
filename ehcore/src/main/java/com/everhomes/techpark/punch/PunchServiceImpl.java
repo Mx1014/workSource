@@ -7383,7 +7383,6 @@ public class PunchServiceImpl implements PunchService {
 //		List<OrganizationMemberDetails> details = uniongroupConfigureProvider.listDetailNotInUniongroup(org.getNamespaceId(), org.getId());
 //		if (null != details && details.size()>0)
 //			response.setUnjoinPunchGroupEmployees(details.stream().map(r ->{
-//				OrganizationMemberDetailDTO dto = ConvertHelper.convert(r, OrganizationMemberDetailDTO.class);
 //				String department = getDepartment(org.getNamespaceId(), r.getId());
 //				dto.setDepartment(department);
 //				return dto;
