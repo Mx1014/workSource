@@ -1,6 +1,7 @@
 // @formatter:off
 package com.everhomes.organization;
 
+import com.alibaba.fastjson.JSON;
 import com.everhomes.acl.*;
 import com.everhomes.aclink.DoorAccessService;
 import com.everhomes.address.Address;
@@ -134,10 +135,7 @@ import com.everhomes.util.excel.ExcelUtils;
 import com.everhomes.util.excel.RowResult;
 import com.everhomes.util.excel.handler.PropMrgOwnerHandler;
 import org.apache.poi.ss.usermodel.Font;
-import org.apache.poi.xssf.usermodel.XSSFCellStyle;
-import org.apache.poi.xssf.usermodel.XSSFRow;
-import org.apache.poi.xssf.usermodel.XSSFSheet;
-import org.apache.poi.xssf.usermodel.XSSFWorkbook;
+import org.apache.poi.xssf.usermodel.*;
 import org.jooq.Condition;
 import org.jooq.Record;
 import org.jooq.SelectQuery;
@@ -154,12 +152,14 @@ import org.springframework.web.multipart.MultipartFile;
 import javax.servlet.http.HttpServletResponse;
 import java.io.*;
 import java.sql.Timestamp;
+import java.text.DateFormat;
 import java.text.ParseException;
 import java.text.SimpleDateFormat;
 import java.util.*;
 import java.util.concurrent.ExecutorService;
 import java.util.concurrent.Executors;
 import java.util.stream.Collectors;
+import java.util.stream.Stream;
 
 import static com.everhomes.util.RuntimeErrorException.errorWith;
 
@@ -5749,6 +5749,7 @@ public class OrganizationServiceImpl implements OrganizationService {
 
         List<Long> detailIds = cmd.getDetailIds();
 
+        //:todo 调整组织架构
         if(departmentIds != null && departmentIds.size() > 0){
 
             // 需要添加直属的企业ID集合
@@ -5788,7 +5789,16 @@ public class OrganizationServiceImpl implements OrganizationService {
 
         }
 
-        if (cmd.getJobPositionIds() != null && cmd.getJobPositionIds().size() > 0) {
+        //:todo 根据通用岗位ID和detailIds进行批量调岗
+        if (cmd.getJobPositionIds() != null) {
+            //1. 删除通用岗位+detailIds所确认的部门岗位条目
+//            List<OrganizationJobPositionMap> jobPositionMaps = organizationProvider.listOrganizationJobPositionMapsByJobPositionId(cmd.getCommonJobPositionId());
+//            if(jobPositionMaps!=null && jobPositionMaps.size() > 0){
+//                List<Long> organizationJobPositionIds = jobPositionMaps.stream().map(r->{
+//                    return r.getOrganizationId();
+//                }).collect(Collectors.toList());
+//                organizationProvider.deleteOrganizationPersonelByJobPositionIdsAndDetailIds(organizationJobPositionIds, cmd.getDetailIds());
+//            }
             //1.统一删除所有的部门岗位条目
             this.organizationProvider.deleteOrganizationMembersByGroupTypeWithDetailIds(namespaceId, cmd.getDetailIds(), OrganizationGroupType.JOB_POSITION.getCode());
             //2. 统一新增岗位
@@ -5804,7 +5814,8 @@ public class OrganizationServiceImpl implements OrganizationService {
             });
         }
 
-        if (cmd.getJobLevelIds() != null && cmd.getJobLevelIds().size() > 0) {
+        //:todo 调整职级
+        if (cmd.getJobLevelIds() != null) {
             //1.统一删除原有职级
             this.organizationProvider.deleteOrganizationMembersByGroupTypeWithDetailIds(namespaceId, cmd.getDetailIds(), OrganizationGroupType.JOB_LEVEL.getCode());
             //2.统一新增职级
@@ -5868,7 +5879,7 @@ public class OrganizationServiceImpl implements OrganizationService {
         groupTypes.add(OrganizationGroupType.DEPARTMENT.getCode());
         groupTypes.add(OrganizationGroupType.GROUP.getCode());
         groupTypes.add(OrganizationGroupType.JOB_POSITION.getCode());
-//        groupTypes.add(OrganizationGroupType.JOB_LEVEL.getCode());
+        groupTypes.add(OrganizationGroupType.JOB_LEVEL.getCode());
         List<String> tokens = organizationMembers.stream().map(r -> {
             return r.getContactToken();
         }).collect(Collectors.toList());
@@ -10094,7 +10105,7 @@ public class OrganizationServiceImpl implements OrganizationService {
     @Override
     public OrganizationDetailDTO getOrganizationDetailById(GetOrganizationDetailByIdCommand cmd) {
         OrganizationDetailDTO organizationDetailDTO = toOrganizationDetailDTO(cmd.getId(), false);
-        addExtraInfo(organizationDetailDTO);
+        addServiceUser(organizationDetailDTO);
         return organizationDetailDTO;
     }
 
@@ -13844,9 +13855,7 @@ public class OrganizationServiceImpl implements OrganizationService {
         List<Organization> underEnterprises = this.organizationProvider.listOrganizationByGroupTypesAndPath(org.getPath() + "/%", groupTypes, null, null, null);
         List<String> smallPath = new ArrayList();
         underEnterprises.forEach(r -> smallPath.add(r.getPath()));
-        groupTypes.clear();
         groupTypes.add(OrganizationGroupType.DEPARTMENT.getCode());
-        groupTypes.add(OrganizationGroupType.DIRECT_UNDER_ENTERPRISE.getCode());
         return this.organizationProvider.listMemberDetailIdWithExclude(keywords, namespaceId, org.getPath(), smallPath, checkinTimeStart,
                 checkinTimeEnd, dissmissTimeStart, dissmissTimeEnd, locator, pageSize,notinDetails,inDetails,groupTypes);
     }

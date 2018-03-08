@@ -272,7 +272,7 @@ public class AuthorizationProviderImpl implements AuthorizationProvider {
 		DSLContext context = dbProvider.getDslContext(AccessSpec.readOnly());
 		List<Tuple<Long,String>> result = new ArrayList<>();
 		SelectQuery<EhAuthorizationsRecord> query = context.selectQuery(Tables.EH_AUTHORIZATIONS);
-		Condition cond = Tables.EH_AUTHORIZATIONS.AUTH_TYPE.eq(EntityType.SERVICE_MODULE_APP.getCode()).and(Tables.EH_AUTHORIZATIONS.IDENTITY_TYPE.eq(IdentityType.MANAGE.getCode()));
+		Condition cond = Tables.EH_AUTHORIZATIONS.AUTH_TYPE.eq(EntityType.SERVICE_MODULE_APP.getCode());
 		Condition targetCond = null;
 		for (Target target:targets) {
 			if(null == targetCond){

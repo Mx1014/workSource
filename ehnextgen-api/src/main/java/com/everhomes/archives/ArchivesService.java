@@ -1,11 +1,15 @@
 package com.everhomes.archives;
 
+import com.everhomes.listing.ListingLocator;
+import com.everhomes.listing.ListingQueryBuilderCallback;
+import com.everhomes.organization.OrganizationMemberDetails;
 import com.everhomes.rest.archives.*;
 import com.everhomes.rest.common.ImportFileResponse;
 import com.everhomes.rest.general_approval.GeneralFormDTO;
 import com.everhomes.rest.organization.GetImportFileResultCommand;
 import com.everhomes.rest.organization.ImportFileTaskDTO;
 import com.everhomes.rest.organization.OrganizationDTO;
+import org.jooq.Condition;
 import org.springframework.web.multipart.MultipartFile;
 
 import javax.servlet.http.HttpServletResponse;
@@ -43,13 +47,13 @@ public interface ArchivesService {
     String getEmployeeRealName(Long userId, Long organizationId);
 
     //  获取员工的部门
-    Map<Long, String> getEmployeeDepartment(String phone, Long organizationId);
+    Map<Long, String> getEmployeeDepartment(Long detailId);
 
     //  获取员工的职位
-    Map<Long, String> getEmployeeJobPosition(String phone, Long organizationId);
+    Map<Long, String> getEmployeeJobPosition(Long detailId);
 
     //  获取员工的职级
-    Map<Long, String> getEmployeeJobLevel(String phone, Long organizationId);
+    Map<Long, String> getEmployeeJobLevel(Long detailId);
 
     //  转化员工的部门、职位、职级信息文本
     String convertToOrgNames(Map<Long, String> map);
@@ -98,6 +102,8 @@ public interface ArchivesService {
     void exportArchivesEmployeesTemplate(ExportArchivesEmployeesTemplateCommand cmd,HttpServletResponse httpResponse);
 
     ImportFileResponse<ImportArchivesEmployeesDTO> getImportEmployeesResult(GetImportFileResultCommand cmd);
+
+    List<OrganizationMemberDetails> queryArchivesEmployees(ListingLocator locator, Long organizationId, Long departmentId, ListingQueryBuilderCallback queryBuilderCallback);
 
     void remindArchivesEmployee(RemindArchivesEmployeeCommand cmd);
 

@@ -78,9 +78,9 @@ public interface OrganizationProvider {
 
 	List<OrganizationMember> findOrganizationMembersByOrgIdAndUId(Long userId, Long organizationId);
 	OrganizationMember findOrganizationMemberByOrgIdAndToken(String contactPhone, Long organizationId);
-	OrganizationMember findDepartmentMemberByTokenAndOrgId(String phone, Long organizationId);
-	List<OrganizationMember> findJobPositionMemberByTokenAndOrgId(String phone, Long organizationId);
-	List<OrganizationMember> findJobLevelMemberByTokenAndOrgId(String phone, Long organizationId);
+	OrganizationMember findMemberDepartmentByDetailId(Long detailId);
+	List<OrganizationMember> findMemberJobPositionByDetailId(Long detailId);
+	OrganizationMember findMemberJobLevelByDetailId(Long detailId);
 	List<OrganizationMember> listOrganizationMembersByPhones(List<String> phones, Long departmentId);
 	void createOrganizationTask(OrganizationTask task);
 	OrganizationTask findOrganizationTaskById(Long taskId);
@@ -525,10 +525,15 @@ public interface OrganizationProvider {
 	
 	List<OrganizationMemberDetails> listOrganizationMemberDetails(Long ownerId);
 
+    Integer queryOrganizationMemberDetailCounts(ListingLocator locator, Long organizationId, ListingQueryBuilderCallback queryBuilderCallback);
+
+	List<OrganizationMemberDetails> queryOrganizationMemberDetails(ListingLocator locator, Long organizationId, ListingQueryBuilderCallback queryBuilderCallback);
+
+    List<Long> listOrganizationPersonnelDetailIdsByDepartmentId(Long departmentId);
+
 	Integer queryOrganizationPersonnelCounts(ListingLocator locator, Long organizationId, ListingQueryBuilderCallback queryBuilderCallback);
 	
 	List<OrganizationMember> queryOrganizationPersonnels(ListingLocator locator, Long organizationId, ListingQueryBuilderCallback queryBuilderCallback);
- 
 
 	List<Organization> listPMOrganizations(Integer namespaceId);
 

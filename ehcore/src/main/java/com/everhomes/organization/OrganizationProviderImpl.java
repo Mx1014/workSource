@@ -2300,11 +2300,10 @@ public class OrganizationProviderImpl implements OrganizationProvider {
     }
 
     @Override
-    public OrganizationMember findDepartmentMemberByTokenAndOrgId(String phone, Long organizationId) {
+    public OrganizationMember findMemberDepartmentByDetailId(Long detailId) {
 
         DSLContext context = this.dbProvider.getDslContext(AccessSpec.readOnly());
-        Condition condition = Tables.EH_ORGANIZATION_MEMBERS.CONTACT_TOKEN.eq(phone)
-                .and(Tables.EH_ORGANIZATION_MEMBERS.GROUP_PATH.like("/" + organizationId + "%"))
+        Condition condition = Tables.EH_ORGANIZATION_MEMBERS.DETAIL_ID.eq(detailId)
                 .and(Tables.EH_ORGANIZATION_MEMBERS.STATUS.eq(OrganizationMemberStatus.ACTIVE.getCode()))
                 .and(Tables.EH_ORGANIZATION_MEMBERS.GROUP_TYPE.eq(OrganizationGroupType.DEPARTMENT.getCode()).or(Tables.EH_ORGANIZATION_MEMBERS.GROUP_TYPE.eq(OrganizationGroupType.DIRECT_UNDER_ENTERPRISE.getCode())));
 
@@ -2316,13 +2315,12 @@ public class OrganizationProviderImpl implements OrganizationProvider {
     }
 
     @Override
-    public List<OrganizationMember> findJobPositionMemberByTokenAndOrgId(String phone, Long organizationId) {
+    public List<OrganizationMember> findMemberJobPositionByDetailId(Long detailId) {
         List<OrganizationMember> results = new ArrayList<>();
 
         DSLContext context = this.dbProvider.getDslContext(AccessSpec.readOnly());
         SelectQuery<EhOrganizationMembersRecord> query = context.selectQuery(Tables.EH_ORGANIZATION_MEMBERS);
-        Condition condition = Tables.EH_ORGANIZATION_MEMBERS.CONTACT_TOKEN.eq(phone)
-                .and(Tables.EH_ORGANIZATION_MEMBERS.GROUP_PATH.like("/" + organizationId + "%"))
+        Condition condition = Tables.EH_ORGANIZATION_MEMBERS.DETAIL_ID.eq(detailId)
                 .and(Tables.EH_ORGANIZATION_MEMBERS.STATUS.eq(OrganizationMemberStatus.ACTIVE.getCode()))
                 .and(Tables.EH_ORGANIZATION_MEMBERS.GROUP_TYPE.eq(OrganizationGroupType.JOB_POSITION.getCode()));
         query.addConditions(condition);
@@ -2337,23 +2335,19 @@ public class OrganizationProviderImpl implements OrganizationProvider {
     }
 
     @Override
-    public List<OrganizationMember> findJobLevelMemberByTokenAndOrgId(String phone, Long organizationId) {
+    public OrganizationMember findMemberJobLevelByDetailId(Long detailId) {
         List<OrganizationMember> results = new ArrayList<>();
 
         DSLContext context = this.dbProvider.getDslContext(AccessSpec.readOnly());
         SelectQuery<EhOrganizationMembersRecord> query = context.selectQuery(Tables.EH_ORGANIZATION_MEMBERS);
-        Condition condition = Tables.EH_ORGANIZATION_MEMBERS.CONTACT_TOKEN.eq(phone)
-                .and(Tables.EH_ORGANIZATION_MEMBERS.GROUP_PATH.like("/" + organizationId + "%"))
+        Condition condition = Tables.EH_ORGANIZATION_MEMBERS.DETAIL_ID.eq(detailId)
                 .and(Tables.EH_ORGANIZATION_MEMBERS.STATUS.eq(OrganizationMemberStatus.ACTIVE.getCode()))
                 .and(Tables.EH_ORGANIZATION_MEMBERS.GROUP_TYPE.eq(OrganizationGroupType.JOB_LEVEL.getCode()));
         query.addConditions(condition);
-        query.fetch().map(r -> {
-            results.add(ConvertHelper.convert(r, OrganizationMember.class));
-            return null;
-        });
+        Record r = context.select().from(Tables.EH_ORGANIZATION_MEMBERS).where(condition).fetchAny();
 
-        if (results.size() > 0)
-            return results;
+        if (r != null)
+            return ConvertHelper.convert(r, OrganizationMember.class);
         return null;
     }
 
@@ -5844,6 +5838,41 @@ public class OrganizationProviderImpl implements OrganizationProvider {
         List<OrganizationMemberDetails> results = context.select().from(Tables.EH_ORGANIZATION_MEMBER_DETAILS)
                 .where(Tables.EH_ORGANIZATION_MEMBER_DETAILS.ORGANIZATION_ID.eq(ownerId))
                 .fetchInto(OrganizationMemberDetails.class);
+        if (null == results || results.size() == 0)
+            return null;
+        return results;
+    }
+
+    @Override
+    public Integer queryOrganizationMemberDetailCounts(ListingLocator locator, Long organizationId, ListingQueryBuilderCallback queryBuilderCallback){
+        DSLContext context = this.dbProvider.getDslContext(AccessSpec.readOnly());
+        SelectQuery<EhOrganizationMemberDetailsRecord> query = context.selectQuery(Tables.EH_ORGANIZATION_MEMBER_DETAILS);
+        queryBuilderCallback.buildCondition(locator, query);
+        query.addConditions(Tables.EH_ORGANIZATION_MEMBER_DETAILS.ORGANIZATION_ID.eq(organizationId));
+        return query.fetchCount();
+    }
+
+    @Override
+    public List<OrganizationMemberDetails> queryOrganizationMemberDetails(ListingLocator locator, Long organizationId, ListingQueryBuilderCallback queryBuilderCallback){
+        DSLContext context = this.dbProvider.getDslContext(AccessSpec.readOnly());
+        SelectQuery<EhOrganizationMemberDetailsRecord> query = context.selectQuery(Tables.EH_ORGANIZATION_MEMBER_DETAILS);
+        queryBuilderCallback.buildCondition(locator, query);
+        query.addConditions(Tables.EH_ORGANIZATION_MEMBER_DETAILS.ORGANIZATION_ID.eq(organizationId));
+        List<OrganizationMemberDetails> results = query.fetchInto(OrganizationMemberDetails.class);
+        if (null == results || results.size() == 0)
+            return null;
+        return results;
+    }
+
+    @Override
+    public List<Long> listOrganizationPersonnelDetailIdsByDepartmentId(Long departmentId){
+        DSLContext context = this.dbProvider.getDslContext(AccessSpec.readOnly());
+        SelectQuery<EhOrganizationMembersRecord> query = context.selectQuery(Tables.EH_ORGANIZATION_MEMBERS);
+        query.addSelect(Tables.EH_ORGANIZATION_MEMBERS.DETAIL_ID);
+        query.addConditions(Tables.EH_ORGANIZATION_MEMBERS.ORGANIZATION_ID.eq(departmentId));
+        query.addConditions(Tables.EH_ORGANIZATION_MEMBERS.STATUS.eq(OrganizationMemberStatus.ACTIVE.getCode()));
+        query.addConditions(Tables.EH_ORGANIZATION_MEMBERS.DETAIL_ID.isNotNull());
+        List<Long> results = query.fetchInto(Long.class);
         if (null == results || results.size() == 0)
             return null;
         return results;

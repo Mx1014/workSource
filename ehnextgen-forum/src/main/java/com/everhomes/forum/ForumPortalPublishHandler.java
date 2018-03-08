@@ -58,7 +58,16 @@ public class ForumPortalPublishHandler implements PortalPublishHandler {
 
 	@Override
 	public String getAppInstanceConfig(Integer namespaceId, String actionData) {
-		return actionData;
+
+		ForumActionData forumActionData = (ForumActionData) StringHelper.fromJsonString(actionData, ForumActionData.class);
+		if(forumActionData == null){
+			forumActionData = new ForumActionData();
+		}
+
+		if(forumActionData.getForumEntryId() == null){
+			forumActionData.setForumEntryId(0L);
+		}
+		return forumActionData.toString();
 	}
 
 	@Override
@@ -70,6 +79,10 @@ public class ForumPortalPublishHandler implements PortalPublishHandler {
 	public String getCustomTag(Integer namespaceId, Long moudleId, String actionData, String instanceConfig) {
 
 		ForumActionData actionDataObj = (ForumActionData) StringHelper.fromJsonString(actionData, ForumActionData.class);
+
+		if(actionDataObj == null || actionDataObj.getForumEntryId() == null){
+			actionDataObj = (ForumActionData) StringHelper.fromJsonString(instanceConfig, ForumActionData.class);
+		}
 
 		if(actionDataObj != null && actionDataObj.getForumEntryId() != null){
 			return String.valueOf(actionDataObj.getForumEntryId());
