@@ -3077,11 +3077,14 @@ private void checkUserPrivilege(Long orgId, Long privilegeId, Long communityId) 
 	private void setToObj(String fieldName, Object dto,Object value) throws NoSuchFieldException, IntrospectionException, InvocationTargetException, IllegalAccessException {
 		Class<?> clz = dto.getClass().getSuperclass();
 		Object val = value;
+		if (Objects.equals(fieldName, "attachments") || Objects.equals(fieldName, "geohash")) {
+			return;
+		}
 		String type = clz.getDeclaredField(fieldName).getType().getSimpleName();
-		LOGGER.info("export equipments setToObj type={}" + type);
-		if(StringUtils.isEmpty((String)value)){
+		LOGGER.info("export equipments setToObj type={}", type);
+		if (StringUtils.isEmpty((String) value)) {
 			val = null;
-		}else{
+		} else {
 			switch(type){
 				case "BigDecimal":
 					val = new BigDecimal((String)value);
