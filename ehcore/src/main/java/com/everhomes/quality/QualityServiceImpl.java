@@ -361,6 +361,7 @@ public class QualityServiceImpl implements QualityService {
 		standard.setReviewerUid(0L);
 		standard.setReviewResult(ReviewResult.NONE.getCode());
 		standard.setStatus(QualityStandardStatus.WAITING.getCode());
+		updateStandardRepeatSetting(standard, cmd.getRepeat());
 		qualityProvider.updateQualityInspectionStandards(standard);
 
 		createQualityInspectionStandardLogs(standard, QualityInspectionLogProcessType.UPDATE.getCode(),
@@ -373,6 +374,13 @@ public class QualityServiceImpl implements QualityService {
 		QualityStandardsDTO dto = ConvertHelper.convert(standard, QualityStandardsDTO.class);
 		convertSpecificationToDTO(standard, dto);
 		return dto;
+	}
+
+	private void updateStandardRepeatSetting(QualityInspectionStandards standard, RepeatSettingsDTO repeat) {
+		repeatService.deleteRepeatSettingsById(standard.getRepeatSettingId());
+		RepeatSettings repeatSetting = ConvertHelper.convert(repeat, RepeatSettings.class);
+		repeatService.createRepeatSettings(repeatSetting);
+		standard.setRepeatSettingId(repeatSetting.getId());
 	}
 
 	private void convertSpecificationToDTO(QualityInspectionStandards standard, QualityStandardsDTO dto) {

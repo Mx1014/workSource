@@ -357,6 +357,10 @@ public class ActivityPortalPublishHandler implements PortalPublishHandler {
 
 		ActivityActionData actionDataObj = (ActivityActionData)StringHelper.fromJsonString(actionData, ActivityActionData.class);
 
+		if(actionDataObj == null || actionDataObj.getCategoryId() == null){
+			actionDataObj = (ActivityActionData) StringHelper.fromJsonString(instanceConfig, ActivityActionData.class);
+		}
+
 		if(actionDataObj != null && actionDataObj.getCategoryId() != null){
 			return String.valueOf(actionDataObj.getCategoryId());
 		}

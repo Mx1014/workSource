@@ -80,6 +80,10 @@ public class ForumPortalPublishHandler implements PortalPublishHandler {
 
 		ForumActionData actionDataObj = (ForumActionData) StringHelper.fromJsonString(actionData, ForumActionData.class);
 
+		if(actionDataObj == null || actionDataObj.getForumEntryId() == null){
+			actionDataObj = (ForumActionData) StringHelper.fromJsonString(instanceConfig, ForumActionData.class);
+		}
+
 		if(actionDataObj != null && actionDataObj.getForumEntryId() != null){
 			return String.valueOf(actionDataObj.getForumEntryId());
 		}
