@@ -987,12 +987,14 @@ public class QualityServiceImpl implements QualityService {
 		cal.setTime(DateHelper.currentGMTTime());
 		Timestamp todayBegin = getDayBegin(cal);
 		Set<Long> taskIds =  qualityProvider.listRecordsTaskIdByOperatorId(user.getId(), todayBegin, targetId);
-
 		List<QualityInspectionTaskDTO> dtoList = convertQualityInspectionTaskToDTO(tasks, user.getId());
 		ListQualityInspectionTasksResponse response = new ListQualityInspectionTasksResponse(nextPageAnchor, dtoList);
 		response.setTodayExecutedCount(0);
 		if(taskIds != null) {
 			response.setTodayExecutedCount(taskIds.size());
+		}
+		if(dtoList!=null && dtoList.size()>0){
+			response.setTodayTotalCount(dtoList.size());
 		}
         return response;
 	}
