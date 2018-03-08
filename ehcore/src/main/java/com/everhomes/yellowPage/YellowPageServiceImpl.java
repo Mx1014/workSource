@@ -1839,7 +1839,17 @@ public class YellowPageServiceImpl implements YellowPageService {
             List<ServiceAllianceRequestInfo> list = saRequestInfoSearcher.generateUpdateServiceAllianceFlowCaseRequests(details);
             	
             for (ServiceAllianceRequestInfo request : list) {
-            	 saapplicationRecordProvider.createServiceAllianceApplicationRecord(ConvertHelper.convert(request, ServiceAllianceApplicationRecord.class));
+            	ServiceAllianceApplicationRecord appRecord = ConvertHelper.convert(request, ServiceAllianceApplicationRecord.class);
+            	appRecord.setCreateDate(appRecord.getCreateTime());
+            	Organization org = organizationProvider.findOrganizationById(request.getCreatorOrganizationId());
+                if(org!=null){
+                  appRecord.setCreatorOrganization(org.getName());
+                }
+                ServiceAlliances sa = yellowPageProvider.findServiceAllianceById(request.getServiceAllianceId(), request.getOwnerType(), request.getOwnerId());
+                if(sa!=null){
+                  appRecord.setServiceOrganization(sa.getName());
+                }
+            	 saapplicationRecordProvider.createServiceAllianceApplicationRecord(appRecord);
 			}
             
             if(locator.getAnchor() == null) {
