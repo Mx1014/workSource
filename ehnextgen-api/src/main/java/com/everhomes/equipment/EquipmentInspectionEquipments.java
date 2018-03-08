@@ -9,7 +9,7 @@ public class EquipmentInspectionEquipments extends EhEquipmentInspectionEquipmen
 
 	//invoke 赋值时候防止异常
 	private  String attachments;
-	private  String geohash;
+	//private  String geohash;
 
     public String getAttachments() {
         return attachments;
@@ -17,16 +17,6 @@ public class EquipmentInspectionEquipments extends EhEquipmentInspectionEquipmen
 
     public void setAttachments(String attachments) {
         this.attachments = attachments;
-    }
-
-    @Override
-    public String getGeohash() {
-        return geohash;
-    }
-
-    @Override
-    public void setGeohash(String geohash) {
-        this.geohash = geohash;
     }
 
     @Override
