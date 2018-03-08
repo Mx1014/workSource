@@ -2000,7 +2000,7 @@ public class Rentalv2ServiceImpl implements Rentalv2Service {
 
 		SimpleDateFormat beginTimeSF = new SimpleDateFormat("yyyy-MM-dd HH:mm");
 		SimpleDateFormat beginDateSF = new SimpleDateFormat("yyyy-MM-dd");
-		SimpleDateFormat endTimeSF = new SimpleDateFormat("yyyy-MM-dd HH:mm");
+		SimpleDateFormat endTimeSF = new SimpleDateFormat("HH:mm");
 
 		StringBuilder useDetailSB = new StringBuilder();
 		Collections.sort(siteRuleIds);
