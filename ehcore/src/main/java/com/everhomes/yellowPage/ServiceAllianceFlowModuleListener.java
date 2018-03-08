@@ -50,6 +50,7 @@ import com.everhomes.general_form.GeneralForm;
 import com.everhomes.module.ServiceModule;
 import com.everhomes.rest.user.IdentifierType;
 import com.everhomes.search.ServiceAllianceRequestInfoSearcher;
+import com.everhomes.util.ConvertHelper;
 import com.everhomes.util.DateHelper;
 import com.everhomes.util.Tuple;
 @Component
@@ -73,6 +74,8 @@ public class ServiceAllianceFlowModuleListener extends GeneralApprovalFlowModule
 
 	@Autowired
 	private OrganizationProvider organizationProvider;
+	@Autowired
+	private ServiceAllianceApplicationRecordProvider saapplicationRecordProvider;
 
 	@Override
 	public FlowModuleInfo initModule() {
@@ -183,19 +186,30 @@ public class ServiceAllianceFlowModuleListener extends GeneralApprovalFlowModule
 		request.setCreatorName(user.getNickName());
 		request.setCreatorOrganizationId(Long.valueOf(JSON.parseObject(organizationVal.getFieldValue(), PostApprovalFormTextValue.class).getText()));
 		request.setCreatorMobile(identifier.getIdentifierToken());
-		if (EntityType.COMMUNITY.getCode().equals(flowCase.getProjectType()) || "community".equals(flowCase.getProjectType())){
-	       	request.setOwnerType(ServiceAllianceBelongType.COMMUNITY.getCode());
-	       	request.setOwnerId(flowCase.getProjectId());
+		
+		//flowCase.getApplierOrganizationId() 在客户端没有加入公司的时候，是园区id，加入了公司，是公司id
+		OrganizationCommunityRequest ocr =organizationProvider.getOrganizationCommunityRequestByOrganizationId(flowCase.getApplierOrganizationId());
+		//查询出来，如果公司没有在园区，那么flowCase.getApplierOrganizationId()这就是园区id。
+		if(ocr == null){
+			request.setOwnerType(ServiceAllianceBelongType.COMMUNITY.getCode());
+        	request.setOwnerId(flowCase.getApplierOrganizationId());
 		}else{
-			OrganizationCommunityRequest ocr =organizationProvider.getOrganizationCommunityRequestByOrganizationId(flowCase.getProjectId());
-        	if(ocr != null){
-        		request.setOwnerType(ServiceAllianceBelongType.COMMUNITY.getCode());
-            	request.setOwnerId(ocr.getCommunityId());
-        	}else{
-        		request.setOwnerType(flowCase.getProjectType());
-            	request.setOwnerId(flowCase.getProjectId());
-        	}
+			request.setOwnerType(ServiceAllianceBelongType.COMMUNITY.getCode());
+        	request.setOwnerId(ocr.getCommunityId());
 		}
+//		if (EntityType.COMMUNITY.getCode().equals(flowCase.getProjectType()) || "community".equals(flowCase.getProjectType())){
+//	       	request.setOwnerType(ServiceAllianceBelongType.COMMUNITY.getCode());
+//	       	request.setOwnerId(flowCase.getProjectId());
+//		}else{
+//			OrganizationCommunityRequest ocr =organizationProvider.getOrganizationCommunityRequestByOrganizationId(flowCase.getProjectId());
+//        	if(ocr != null){
+//        		request.setOwnerType(ServiceAllianceBelongType.COMMUNITY.getCode());
+//            	request.setOwnerId(ocr.getCommunityId());
+//        	}else{
+//        		request.setOwnerType(flowCase.getProjectType());
+//            	request.setOwnerId(flowCase.getProjectId());
+//        	}
+//		}
 		request.setFlowCaseId(flowCase.getId());
 		request.setCreatorUid(UserContext.current().getUser().getId());
 		request.setSecondCategoryId(sa.getCategoryId());
@@ -204,6 +218,7 @@ public class ServiceAllianceFlowModuleListener extends GeneralApprovalFlowModule
 		request.setWorkflowStatus(status);
 		request.setId(flowCase.getId());
 		request.setTemplateType("flowCase");
+		saapplicationRecordProvider.createServiceAllianceApplicationRecord(ConvertHelper.convert(request, ServiceAllianceApplicationRecord.class));
 		serviceAllianceRequestInfoSearcher.feedDoc(request);
 	}
 

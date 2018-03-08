@@ -25,6 +25,8 @@ import org.apache.http.impl.client.CloseableHttpClient;
 import org.apache.http.impl.client.HttpClients;
 import org.apache.http.util.EntityUtils;
 import org.apache.lucene.spatial.geohash.GeoHashUtils;
+import org.elasticsearch.client.Requests;
+import org.elasticsearch.common.xcontent.XContentBuilder;
 import org.jooq.Condition;
 import org.jooq.impl.DSL;
 import org.slf4j.Logger;
@@ -49,14 +51,18 @@ import com.everhomes.constants.ErrorCodes;
 import com.everhomes.contentserver.ContentServerService;
 import com.everhomes.db.DbProvider;
 import com.everhomes.entity.EntityType;
+import com.everhomes.flow.FlowCaseDetail;
+import com.everhomes.flow.FlowCaseProvider;
 import com.everhomes.general_approval.GeneralApproval;
 import com.everhomes.general_approval.GeneralApprovalProvider;
+import com.everhomes.general_approval.GeneralApprovalVal;
 import com.everhomes.general_form.GeneralForm;
 import com.everhomes.general_form.GeneralFormProvider;
 import com.everhomes.listing.CrossShardListingLocator;
 import com.everhomes.locale.LocaleStringService;
 import com.everhomes.organization.Organization;
 import com.everhomes.organization.OrganizationCommunity;
+import com.everhomes.organization.OrganizationCommunityRequest;
 import com.everhomes.organization.OrganizationProvider;
 import com.everhomes.parking.bosigao.BosigaoCardInfo;
 import com.everhomes.parking.bosigao.BosigaoJsonEntity;
@@ -66,11 +72,15 @@ import com.everhomes.rest.approval.CommonStatus;
 import com.everhomes.rest.category.CategoryAdminStatus;
 import com.everhomes.rest.comment.OwnerTokenDTO;
 import com.everhomes.rest.comment.OwnerType;
+import com.everhomes.rest.flow.FlowCaseSearchType;
+import com.everhomes.rest.flow.FlowCaseType;
 import com.everhomes.rest.flow.FlowModuleType;
+import com.everhomes.rest.flow.SearchFlowCaseCommand;
 import com.everhomes.rest.forum.PostContentType;
 import com.everhomes.rest.general_approval.GeneralApprovalAttribute;
 import com.everhomes.rest.general_approval.GeneralApprovalStatus;
 import com.everhomes.rest.general_approval.GeneralApprovalSupportType;
+import com.everhomes.rest.general_approval.GeneralFormDataSourceType;
 import com.everhomes.rest.general_approval.GeneralFormDataVisibleType;
 import com.everhomes.rest.general_approval.GeneralFormFieldDTO;
 import com.everhomes.rest.general_approval.GeneralFormFieldType;
@@ -79,12 +89,15 @@ import com.everhomes.rest.general_approval.GeneralFormSourceType;
 import com.everhomes.rest.general_approval.GeneralFormStatus;
 import com.everhomes.rest.general_approval.GeneralFormTemplateType;
 import com.everhomes.rest.general_approval.GeneralFormValidatorType;
+import com.everhomes.rest.general_approval.PostApprovalFormItem;
+import com.everhomes.rest.general_approval.PostApprovalFormTextValue;
 import com.everhomes.rest.servicehotline.GetHotlineListCommand;
 import com.everhomes.rest.servicehotline.GetHotlineListResponse;
 import com.everhomes.rest.servicehotline.ServiceType;
 import com.everhomes.rest.techpark.company.ContactType;
 import com.everhomes.rest.user.FieldDTO;
 import com.everhomes.rest.user.FieldTemplateDTO;
+import com.everhomes.rest.user.IdentifierType;
 import com.everhomes.rest.yellowPage.AddNotifyTargetCommand;
 import com.everhomes.rest.yellowPage.AddYellowPageCommand;
 import com.everhomes.rest.yellowPage.AttachmentDTO;
@@ -122,6 +135,7 @@ import com.everhomes.rest.yellowPage.ServiceAllianceListResponse;
 import com.everhomes.rest.yellowPage.ServiceAllianceLocalStringCode;
 import com.everhomes.rest.yellowPage.ServiceAllianceOwnerType;
 import com.everhomes.rest.yellowPage.ServiceAllianceSourceRequestType;
+import com.everhomes.rest.yellowPage.ServiceAllianceWorkFlowStatus;
 import com.everhomes.rest.yellowPage.SetNotifyTargetStatusCommand;
 import com.everhomes.rest.yellowPage.UpdateServiceAllianceCategoryCommand;
 import com.everhomes.rest.yellowPage.UpdateServiceAllianceCommand;
@@ -136,11 +150,14 @@ import com.everhomes.rest.yellowPage.YellowPageListResponse;
 import com.everhomes.rest.yellowPage.YellowPageServiceErrorCode;
 import com.everhomes.rest.yellowPage.YellowPageStatus;
 import com.everhomes.rest.yellowPage.YellowPageType;
+import com.everhomes.search.ServiceAllianceRequestInfoSearcher;
 import com.everhomes.sequence.SequenceProvider;
 import com.everhomes.server.schema.Tables;
+import com.everhomes.server.schema.tables.pojos.EhCommunities;
 import com.everhomes.server.schema.tables.pojos.EhServiceAlliances;
 import com.everhomes.settings.PaginationConfigHelper;
 import com.everhomes.techpark.servicehotline.HotlineService;
+import com.everhomes.user.CustomRequestConstants;
 import com.everhomes.user.RequestTemplates;
 import com.everhomes.user.User;
 import com.everhomes.user.UserActivityProvider;
@@ -148,10 +165,12 @@ import com.everhomes.user.UserContext;
 import com.everhomes.user.UserIdentifier;
 import com.everhomes.user.UserProvider;
 import com.everhomes.util.ConvertHelper;
+import com.everhomes.util.DateHelper;
 import com.everhomes.util.RuntimeErrorException;
 import com.everhomes.util.SignatureHelper;
 import com.everhomes.util.StringHelper;
 import com.everhomes.util.WebTokenGenerator;
+import com.everhomes.yellowPage.ServiceAllianceApplicationRecord;
 import com.google.gson.Gson;
 import com.google.gson.reflect.TypeToken;
 
@@ -214,7 +233,16 @@ public class YellowPageServiceImpl implements YellowPageService {
 	
 	@Autowired
 	private DbProvider dbProvider;
+	
+	@Autowired
+	private ServiceAllianceApplicationRecordProvider saapplicationRecordProvider;
 
+    @Autowired
+    private FlowCaseProvider flowCaseProvider;
+    
+	@Autowired
+	private ServiceAllianceRequestInfoSearcher saRequestInfoSearcher;
+    
 	private void populateYellowPage(YellowPage yellowPage) { 
 		this.yellowPageProvider.populateYellowPagesAttachment(yellowPage);
 		 
@@ -1785,5 +1813,199 @@ public class YellowPageServiceImpl implements YellowPageService {
 		if(matches){
 			System.out.println(url.substring(0,url.lastIndexOf('&')));
 		}
+	}
+
+	@Override
+	public void syncServiceAllianceApplicationRecords() {
+		if(saapplicationRecordProvider.listServiceAllianceApplicationRecord(0L,1).size()>0){
+			throw RuntimeErrorException.errorWith(ErrorCodes.SCOPE_GENERAL, ErrorCodes.ERROR_GENERAL_EXCEPTION,
+					"已迁移过数据了！");
+		}
+		generateApplicationRecordsFromServiceAlliance();
+		generateApplicationRecordsFromReservation();
+		generateApplicationRecordsFromSettleRequestInfoSearcherDb();
+		generateApplicationRecordsFromServiceAllianceApartment();
+		generateApplicationRecordsFromServiceAllianceInvest();
+		generateApplicationRecordsFromServiceAllianceFlowCases();
+	}
+
+	private void generateApplicationRecordsFromServiceAllianceFlowCases() {
+        CrossShardListingLocator locator = new CrossShardListingLocator();
+        SearchFlowCaseCommand cmd = new SearchFlowCaseCommand();
+        cmd.setFlowCaseSearchType(FlowCaseSearchType.APPLIER.getCode());
+        cmd.setModuleId(ServiceAllianceFlowModuleListener.MODULE_ID);
+        for(;;) {
+            List<FlowCaseDetail> details = flowCaseProvider.listFlowCasesByModuleId(locator, 200, cmd);
+            List<ServiceAllianceRequestInfo> list = saRequestInfoSearcher.generateUpdateServiceAllianceFlowCaseRequests(details);
+            	
+            for (ServiceAllianceRequestInfo request : list) {
+            	 saapplicationRecordProvider.createServiceAllianceApplicationRecord(ConvertHelper.convert(request, ServiceAllianceApplicationRecord.class));
+			}
+            
+            if(locator.getAnchor() == null) {
+                break;
+            }
+        }
+
+		
+	}
+
+	private void generateApplicationRecordsFromServiceAllianceInvest() {
+
+		CrossShardListingLocator locator = new CrossShardListingLocator();
+        for(;;) {
+        	 List<ServiceAllianceInvestRequests> requests = yellowPageProvider.listInvestRequests(locator, 200);
+            if(requests.size() > 0) {
+            	for (ServiceAllianceInvestRequests request : requests) {
+	                  ServiceAllianceApplicationRecord appRecord = ConvertHelper.convert(request, ServiceAllianceApplicationRecord.class);
+	                  appRecord.setJumpType(JumpType.TEMPLATE.getCode());
+	                  appRecord.setTemplateType(CustomRequestConstants.INVEST_REQUEST_CUSTOM);
+	                  appRecord.setCreateTime(request.getCreateTime());
+	                  appRecord.setCreateDate(request.getCreateTime());
+	                  appRecord.setCreatorUid(request.getCreatorUid());
+	                  appRecord.setFlowCaseId(null);
+	                  appRecord.setSecondCategoryId(request.getCategoryId());
+	                  ServiceAllianceCategories categories = yellowPageProvider.findCategoryById(request.getCategoryId());
+	                  appRecord.setSecondCategoryName(categories==null?null:categories.getName());
+	                  appRecord.setWorkflowStatus(ServiceAllianceWorkFlowStatus.NONE.getCode());
+	                  Organization org = organizationProvider.findOrganizationById(request.getCreatorOrganizationId());
+	                  appRecord.setCreatorOrganization(org.getName());
+	      			  ServiceAlliances sa = yellowPageProvider.findServiceAllianceById(request.getServiceAllianceId(), request.getOwnerType(), request.getOwnerId());
+	                  appRecord.setServiceOrganization(sa.getName());
+	                  saapplicationRecordProvider.createServiceAllianceApplicationRecord(appRecord);
+	              }
+            }
+            if(locator.getAnchor() == null) {
+                break;
+            }
+        }
+	
+		
+	}
+
+	private void generateApplicationRecordsFromServiceAllianceApartment() {
+		CrossShardListingLocator locator = new CrossShardListingLocator();
+        for(;;) {
+        	 List<ServiceAllianceApartmentRequests> requests = yellowPageProvider.listApartmentRequests(locator, 200);
+            if(requests.size() > 0) {
+            	for (ServiceAllianceApartmentRequests request : requests) {
+	                  ServiceAllianceApplicationRecord appRecord = ConvertHelper.convert(request, ServiceAllianceApplicationRecord.class);
+	                  appRecord.setJumpType(JumpType.TEMPLATE.getCode());
+	                  appRecord.setTemplateType(CustomRequestConstants.APARTMENT_REQUEST_CUSTOM);
+	                  appRecord.setCreateTime(request.getCreateTime());
+	                  appRecord.setCreateDate(request.getCreateTime());
+	                  appRecord.setCreatorUid(request.getCreatorUid());
+	                  appRecord.setFlowCaseId(null);
+	                  appRecord.setSecondCategoryId(request.getCategoryId());
+	                  ServiceAllianceCategories categories = yellowPageProvider.findCategoryById(request.getCategoryId());
+	                  appRecord.setSecondCategoryName(categories==null?null:categories.getName());
+	                  appRecord.setWorkflowStatus(ServiceAllianceWorkFlowStatus.NONE.getCode());
+	                  Organization org = organizationProvider.findOrganizationById(request.getCreatorOrganizationId());
+	                  appRecord.setCreatorOrganization(org.getName());
+	      			  ServiceAlliances sa = yellowPageProvider.findServiceAllianceById(request.getServiceAllianceId(), request.getOwnerType(), request.getOwnerId());
+	                  appRecord.setServiceOrganization(sa.getName());
+	                  saapplicationRecordProvider.createServiceAllianceApplicationRecord(appRecord);
+	              }
+            }
+            if(locator.getAnchor() == null) {
+                break;
+            }
+        }
+	}
+
+	private void generateApplicationRecordsFromReservation() {
+		CrossShardListingLocator locator = new CrossShardListingLocator();
+        for(;;) {
+        	 List<ReservationRequests> requests = yellowPageProvider.listReservationRequests(locator, 200);
+            if(requests.size() > 0) {
+	        	  for (ReservationRequests request : requests) {
+	                  ServiceAllianceApplicationRecord appRecord = ConvertHelper.convert(request, ServiceAllianceApplicationRecord.class);
+	                  appRecord.setJumpType(JumpType.TEMPLATE.getCode());
+	                  appRecord.setTemplateType(CustomRequestConstants.RESERVE_REQUEST_CUSTOM);
+	                  appRecord.setCreateTime(request.getCreateTime());
+	                  appRecord.setCreateDate(request.getCreateTime());
+	                  appRecord.setCreatorUid(request.getCreatorUid());
+	                  appRecord.setFlowCaseId(null);
+	                  appRecord.setSecondCategoryId(request.getCategoryId());
+	                  ServiceAllianceCategories categories = yellowPageProvider.findCategoryById(request.getCategoryId());
+	                  appRecord.setSecondCategoryName(categories==null?null:categories.getName());
+	                  appRecord.setWorkflowStatus(ServiceAllianceWorkFlowStatus.NONE.getCode());
+	                  Organization org = organizationProvider.findOrganizationById(request.getCreatorOrganizationId());
+	                  appRecord.setCreatorOrganization(org.getName());
+	      			  ServiceAlliances sa = yellowPageProvider.findServiceAllianceById(request.getServiceAllianceId(), request.getOwnerType(), request.getOwnerId());
+	                  appRecord.setServiceOrganization(sa.getName());
+	                  saapplicationRecordProvider.createServiceAllianceApplicationRecord(appRecord);
+	              }
+            }
+            if(locator.getAnchor() == null) {
+                break;
+            }
+        }
+	}
+
+	private void generateApplicationRecordsFromSettleRequestInfoSearcherDb() {
+		CrossShardListingLocator locator = new CrossShardListingLocator();
+        for(;;) {
+        	List<SettleRequests> requests = yellowPageProvider.listSettleRequests(locator, 200);
+            if(requests.size() > 0) {
+            	 for (SettleRequests request : requests) {
+	                  ServiceAllianceApplicationRecord appRecord = ConvertHelper.convert(request, ServiceAllianceApplicationRecord.class);
+	                  appRecord.setJumpType(JumpType.TEMPLATE.getCode());
+	                  appRecord.setTemplateType(CustomRequestConstants.SETTLE_REQUEST_CUSTOM);
+	                  appRecord.setCreateTime(request.getCreateTime());
+	                  appRecord.setCreateDate(request.getCreateTime());
+	                  appRecord.setCreatorUid(request.getCreatorUid());
+	                  appRecord.setFlowCaseId(null);
+	                  appRecord.setSecondCategoryId(request.getCategoryId());
+	                  ServiceAllianceCategories categories = yellowPageProvider.findCategoryById(request.getCategoryId());
+	                  appRecord.setSecondCategoryName(categories==null?null:categories.getName());
+	                  appRecord.setWorkflowStatus(ServiceAllianceWorkFlowStatus.NONE.getCode());
+	                  Organization org = organizationProvider.findOrganizationById(request.getCreatorOrganizationId());
+	                  appRecord.setCreatorOrganization(org.getName());
+	      			  ServiceAlliances sa = yellowPageProvider.findServiceAllianceById(request.getServiceAllianceId(), request.getOwnerType(), request.getOwnerId());
+	                  appRecord.setServiceOrganization(sa.getName());
+	                  saapplicationRecordProvider.createServiceAllianceApplicationRecord(appRecord);
+	              }
+            }
+            if(locator.getAnchor() == null) {
+                break;
+            }
+        }
+	}
+
+	private void generateApplicationRecordsFromServiceAlliance() {
+		CrossShardListingLocator locator = new CrossShardListingLocator();
+        for(;;) {
+            List<ServiceAllianceRequests> requests = yellowPageProvider.listServiceAllianceRequests(locator, 200);
+            if(requests.size() > 0) {
+	        	  for (ServiceAllianceRequests request : requests) {
+	                  ServiceAllianceApplicationRecord appRecord = new ServiceAllianceApplicationRecord();
+	                  appRecord.setJumpType(JumpType.TEMPLATE.getCode());
+	                  appRecord.setTemplateType(CustomRequestConstants.SERVICE_ALLIANCE_REQUEST_CUSTOM);
+	                  appRecord.setType(request.getType());
+	                  appRecord.setOwnerType(request.getOwnerType());
+	                  appRecord.setOwnerId(request.getOwnerId());
+	                  appRecord.setCreatorName(request.getCreatorName());
+	                  appRecord.setCreatorOrganizationId(request.getCreatorOrganizationId());
+	                  appRecord.setCreatorMobile(request.getCreatorMobile());
+	                  appRecord.setCreateTime(request.getCreateTime());
+	                  appRecord.setCreateDate(request.getCreateTime());
+	                  appRecord.setCreatorUid(request.getCreatorUid());
+	                  appRecord.setFlowCaseId(null);
+	                  appRecord.setSecondCategoryId(request.getCategoryId());
+	                  ServiceAllianceCategories categories = yellowPageProvider.findCategoryById(request.getCategoryId());
+	                  appRecord.setSecondCategoryName(categories==null?null:categories.getName());
+	                  appRecord.setWorkflowStatus(ServiceAllianceWorkFlowStatus.NONE.getCode());
+	                  Organization org = organizationProvider.findOrganizationById(request.getCreatorOrganizationId());
+	                  appRecord.setCreatorOrganization(org.getName());
+	      			  ServiceAlliances sa = yellowPageProvider.findServiceAllianceById(request.getServiceAllianceId(), request.getOwnerType(), request.getOwnerId());
+	                  appRecord.setServiceOrganization(sa.getName());
+	                  saapplicationRecordProvider.createServiceAllianceApplicationRecord(appRecord);
+	              }
+            }
+            if(locator.getAnchor() == null) {
+                break;
+            }
+        }
 	}
 }
