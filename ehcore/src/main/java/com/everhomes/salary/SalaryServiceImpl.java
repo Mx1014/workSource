@@ -737,7 +737,8 @@ public class SalaryServiceImpl implements SalaryService {
                 if (SalaryEntityType.REDUN != SalaryEntityType.fromCode(groupEntity.getType())) {
                     BigDecimal decimal = new BigDecimal(0);
                     try {
-                        decimal = new BigDecimal(val);
+                    	if(val!=null)
+                    		decimal = new BigDecimal(val);
                     } catch (Exception e) {
                         LOGGER.error("转化导入数据出错", e);
                     }
