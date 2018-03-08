@@ -1114,7 +1114,7 @@ public class SalaryServiceImpl implements SalaryService {
             row.createCell(++i).setCellValue(detail.getContactName());
             row.createCell(++i).setCellValue(detail.getContactToken());
             row.createCell(++i).setCellValue(detail.getEmployeeNo());
-            row.createCell(++i).setCellValue(getDepartmentName(detail.getId()));
+            row.createCell(++i).setCellValue(depName);
             row.createCell(++i).setCellValue(detail.getIdNumber());
             row.createCell(++i).setCellValue(detail.getSalaryCardNumber());
         }
