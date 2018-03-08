@@ -38,6 +38,7 @@ import com.everhomes.rest.organization.*;
 import com.everhomes.rest.organization.pm.AddressMappingStatus;
 
 
+import com.everhomes.rest.varField.ListFieldGroupCommand;
 import com.everhomes.user.*;
 
 import com.everhomes.rest.varField.FieldGroupDTO;
@@ -285,6 +286,14 @@ public class CustomerServiceImpl implements CustomerService {
             }).collect(Collectors.toList());
             dynamicExcelService.exportDynamicExcel(response, DynamicExcelStrings.CUSTOEMR, null, sheetNames, cmd, true, true, null);
         }
+    }
+
+    @Override
+    public void exportEnterpriseCustomerTemplate(ListFieldGroupCommand cmd, HttpServletResponse response) {
+        List<String> sheetNames = new ArrayList<>();
+        sheetNames.add("客户信息");
+        String excelTemplateName = "客户模板" + new SimpleDateFormat("yyyy-MM-dd-HH-mm").format(Calendar.getInstance().getTime()) + ".xls";
+        dynamicExcelService.exportDynamicExcel(response, DynamicExcelStrings.CUSTOEMR, null, sheetNames, cmd, true, false, excelTemplateName);
     }
 
     @Override
