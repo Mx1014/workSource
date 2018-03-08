@@ -1722,3 +1722,28 @@ ALTER TABLE `eh_equipment_inspection_equipment_attachments`
 ALTER TABLE `eh_incubator_applies` ADD COLUMN `check_flag`  tinyint(4) NULL DEFAULT 0 COMMENT '查看状态，0-未查看、1-已查看。这是一个很傻逼的功能，用于区分都是未审核的时候，管理员有没有看过这条记录。';
 
 -- merge from incubator-1.4 end
+
+-- 服务联盟申请记录表创建
+-- DROP TABLE IF EXISTS `eh_service_alliance_application_records`;
+CREATE TABLE `eh_service_alliance_application_records` (
+		`id` BIGINT COMMENT 'id',
+    `jump_type` BIGINT COMMENT '', 
+    `template_type` VARCHAR(128) COMMENT '', 
+    `type` BIGINT COMMENT '', 
+    `owner_type` VARCHAR(128) COMMENT '', 
+    `owner_id` BIGINT COMMENT '', 
+    `creator_name` VARCHAR(128) COMMENT '', 
+    `creator_organization_id` BIGINT COMMENT '', 
+    `creator_mobile` VARCHAR(128) COMMENT '', 
+    `create_time` DATETIME COMMENT '', 
+    `create_date` DATETIME COMMENT '', 
+    `creator_uid` BIGINT COMMENT '', 
+    `flow_case_id` BIGINT COMMENT '', 
+    `second_category_id` BIGINT COMMENT '', 
+    `second_category_name` VARCHAR(128) COMMENT '', 
+    `workflow_status` TINYINT COMMENT '', 
+    `creator_organization` VARCHAR(128) COMMENT '', 
+    `service_organization` VARCHAR(128) COMMENT '',
+  
+  PRIMARY KEY (`id`)
+) ENGINE = INNODB DEFAULT CHARSET = utf8mb4 ;
