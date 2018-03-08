@@ -6129,7 +6129,7 @@ private void checkUserPrivilege(Long orgId, Long privilegeId, Long communityId) 
                     CreateTaskCommand repairCommand = new CreateTaskCommand();
                     repairCommand = ConvertHelper.convert(cmd, CreateTaskCommand.class);
                     repairCommand.setOwnerId(cmd.getTargetId());
-                    repairCommand.setOwnerType(cmd.getOwnerType());
+                    repairCommand.setOwnerType(cmd.getTargetType());
                     repairCommand.setAddress(equipment.getLocation());
                     repairCommand.setAddressType(PmTaskAddressType.FAMILY.getCode());
                     repairCommand.setReferId(cmd.getEquipmentId());
