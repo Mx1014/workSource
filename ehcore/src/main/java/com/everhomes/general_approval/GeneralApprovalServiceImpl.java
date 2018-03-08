@@ -237,6 +237,7 @@ public class GeneralApprovalServiceImpl implements GeneralApprovalService {
             // 把command作为json传到content里，给flowcase的listener进行处理
             cmd21.setContent(JSON.toJSONString(cmd));
             cmd21.setCurrentOrganizationId(cmd.getOrganizationId());
+            cmd21.setApplierOrganizationId(cmd.getOrganizationId());
             cmd21.setTitle(ga.getApprovalName());
 
             /*****************  存储更多的信息 start by nan.rong for approval-1.6  *****************/

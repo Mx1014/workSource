@@ -1835,7 +1835,7 @@ public class YellowPageServiceImpl implements YellowPageService {
         cmd.setFlowCaseSearchType(FlowCaseSearchType.APPLIER.getCode());
         cmd.setModuleId(ServiceAllianceFlowModuleListener.MODULE_ID);
         for(;;) {
-            List<FlowCaseDetail> details = flowCaseProvider.listFlowCasesByModuleId(locator, 200, cmd);
+            List<FlowCaseDetail> details = flowCaseProvider.listFlowCasesByModuleId(locator, 20, cmd);
             List<ServiceAllianceRequestInfo> list = saRequestInfoSearcher.generateUpdateServiceAllianceFlowCaseRequests(details);
             	
             for (ServiceAllianceRequestInfo request : list) {
@@ -1864,7 +1864,7 @@ public class YellowPageServiceImpl implements YellowPageService {
 
 		CrossShardListingLocator locator = new CrossShardListingLocator();
         for(;;) {
-        	 List<ServiceAllianceInvestRequests> requests = yellowPageProvider.listInvestRequests(locator, 200);
+        	 List<ServiceAllianceInvestRequests> requests = yellowPageProvider.listInvestRequests(locator, 20);
             if(requests.size() > 0) {
             	for (ServiceAllianceInvestRequests request : requests) {
 	                  ServiceAllianceApplicationRecord appRecord = ConvertHelper.convert(request, ServiceAllianceApplicationRecord.class);
@@ -1900,7 +1900,7 @@ public class YellowPageServiceImpl implements YellowPageService {
 	private void generateApplicationRecordsFromServiceAllianceApartment() {
 		CrossShardListingLocator locator = new CrossShardListingLocator();
         for(;;) {
-        	 List<ServiceAllianceApartmentRequests> requests = yellowPageProvider.listApartmentRequests(locator, 200);
+        	 List<ServiceAllianceApartmentRequests> requests = yellowPageProvider.listApartmentRequests(locator, 20);
             if(requests.size() > 0) {
             	for (ServiceAllianceApartmentRequests request : requests) {
 	                  ServiceAllianceApplicationRecord appRecord = ConvertHelper.convert(request, ServiceAllianceApplicationRecord.class);
@@ -1934,7 +1934,7 @@ public class YellowPageServiceImpl implements YellowPageService {
 	private void generateApplicationRecordsFromReservation() {
 		CrossShardListingLocator locator = new CrossShardListingLocator();
         for(;;) {
-        	 List<ReservationRequests> requests = yellowPageProvider.listReservationRequests(locator, 200);
+        	 List<ReservationRequests> requests = yellowPageProvider.listReservationRequests(locator, 20);
             if(requests.size() > 0) {
 	        	  for (ReservationRequests request : requests) {
 	                  ServiceAllianceApplicationRecord appRecord = ConvertHelper.convert(request, ServiceAllianceApplicationRecord.class);
@@ -1968,7 +1968,7 @@ public class YellowPageServiceImpl implements YellowPageService {
 	private void generateApplicationRecordsFromSettleRequestInfoSearcherDb() {
 		CrossShardListingLocator locator = new CrossShardListingLocator();
         for(;;) {
-        	List<SettleRequests> requests = yellowPageProvider.listSettleRequests(locator, 200);
+        	List<SettleRequests> requests = yellowPageProvider.listSettleRequests(locator, 20);
             if(requests.size() > 0) {
             	 for (SettleRequests request : requests) {
 	                  ServiceAllianceApplicationRecord appRecord = ConvertHelper.convert(request, ServiceAllianceApplicationRecord.class);
@@ -2002,7 +2002,7 @@ public class YellowPageServiceImpl implements YellowPageService {
 	private void generateApplicationRecordsFromServiceAlliance() {
 		CrossShardListingLocator locator = new CrossShardListingLocator();
         for(;;) {
-            List<ServiceAllianceRequests> requests = yellowPageProvider.listServiceAllianceRequests(locator, 200);
+            List<ServiceAllianceRequests> requests = yellowPageProvider.listServiceAllianceRequests(locator, 20);
             if(requests.size() > 0) {
 	        	  for (ServiceAllianceRequests request : requests) {
 	                  ServiceAllianceApplicationRecord appRecord = new ServiceAllianceApplicationRecord();
