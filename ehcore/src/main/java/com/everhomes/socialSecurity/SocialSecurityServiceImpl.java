@@ -599,8 +599,7 @@ public class SocialSecurityServiceImpl implements SocialSecurityService {
         Integer inWorkNumber = 0;
         if (cmd.getSocialSecurityMonth() != null)
             inWorkNumber = organizationProvider.queryOrganizationPersonnelCounts(new ListingLocator(), cmd.getOwnerId(), (locator, query) -> {
-                query.addConditions(Tables.EH_ORGANIZATION_MEMBER_DETAILS.CHECK_IN_TIME.ge(getTheFirstDate(cmd.getSocialSecurityMonth())));
-                query.addConditions(Tables.EH_ORGANIZATION_MEMBER_DETAILS.CHECK_IN_TIME.le(getTheLastDate(cmd.getSocialSecurityMonth())));
+                query.addConditions(Tables.EH_ORGANIZATION_MEMBER_DETAILS.CHECK_IN_TIME.between(getTheFirstDate(cmd.getSocialSecurityMonth()), getTheLastDate(cmd.getSocialSecurityMonth())));
                 return query;
             });
 
@@ -608,8 +607,7 @@ public class SocialSecurityServiceImpl implements SocialSecurityService {
         if (cmd.getSocialSecurityMonth() != null){
             outWorkNumber = organizationProvider.queryOrganizationMemberDetailCounts(new ListingLocator(), cmd.getOwnerId(), (locator, query) -> {
                 query.addConditions(Tables.EH_ORGANIZATION_MEMBER_DETAILS.EMPLOYEE_STATUS.eq(EmployeeStatus.DISMISSAL.getCode()));
-                query.addConditions(Tables.EH_ORGANIZATION_MEMBER_DETAILS.DISMISS_TIME.ge(getTheFirstDate(cmd.getSocialSecurityMonth())));
-                query.addConditions(Tables.EH_ORGANIZATION_MEMBER_DETAILS.DISMISS_TIME.le(getTheLastDate(cmd.getSocialSecurityMonth())));
+                query.addConditions(Tables.EH_ORGANIZATION_MEMBER_DETAILS.DISMISS_TIME.between(getTheFirstDate(cmd.getSocialSecurityMonth()), getTheLastDate(cmd.getSocialSecurityMonth())));
                 return query;
             });
         }
@@ -2868,7 +2866,11 @@ public class SocialSecurityServiceImpl implements SocialSecurityService {
             if (cmd.getAccumulationFundStatus() != null)
                 query.addConditions(Tables.EH_ORGANIZATION_MEMBER_DETAILS.ACCUMULATION_FUND_STATUS.eq(cmd.getAccumulationFundStatus()));
             if (cmd.getCheckInMonth() != null) {
-                query.addConditions(Tables.EH_ORGANIZATION_MEMBER_DETAILS.CHECK_IN_TIME.ge(getTheFirstDate(cmd.getCheckInMonth())).and(Tables.EH_ORGANIZATION_MEMBER_DETAILS.CHECK_IN_TIME.le(getTheLastDate(cmd.getCheckInMonth()))));
+                query.addConditions(Tables.EH_ORGANIZATION_MEMBER_DETAILS.CHECK_IN_TIME.between(getTheFirstDate(cmd.getCheckInMonth()), getTheLastDate(cmd.getCheckInMonth())));
+            }
+            if (cmd.getDismissMonth() != null) {
+                query.addConditions(Tables.EH_ORGANIZATION_MEMBER_DETAILS.DISMISS_TIME.between(getTheFirstDate(cmd.getCheckInMonth()), getTheLastDate(cmd.getCheckInMonth())));
+                query.addConditions(Tables.EH_ORGANIZATION_MEMBER_DETAILS.EMPLOYEE_STATUS.eq(EmployeeStatus.DISMISSAL.getCode()));
             }
             if (cmd.getKeywords() != null) {
                 query.addConditions(Tables.EH_ORGANIZATION_MEMBER_DETAILS.CONTACT_TOKEN.eq(cmd.getKeywords()).or(Tables.EH_ORGANIZATION_MEMBER_DETAILS.CONTACT_NAME.like(cmd.getKeywords())));
