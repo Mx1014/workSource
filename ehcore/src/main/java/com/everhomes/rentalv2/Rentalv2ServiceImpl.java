@@ -2000,7 +2000,7 @@ public class Rentalv2ServiceImpl implements Rentalv2Service {
 
 		SimpleDateFormat beginTimeSF = new SimpleDateFormat("yyyy-MM-dd HH:mm");
 		SimpleDateFormat beginDateSF = new SimpleDateFormat("yyyy-MM-dd");
-		SimpleDateFormat endTimeSF = new SimpleDateFormat("yyyy-MM-dd HH:mm");
+		SimpleDateFormat endTimeSF = new SimpleDateFormat("HH:mm");
 
 		StringBuilder useDetailSB = new StringBuilder();
 		Collections.sort(siteRuleIds);
@@ -3809,7 +3809,8 @@ public class Rentalv2ServiceImpl implements Rentalv2Service {
 			createOrderItems(cmd.getRentalItems(), bill);
 			//set业务信息
 			bill.setCustomObject(cmd.getCustomObject());
-			bill.setUserEnterpriseId(cmd.getUserEnterpriseId());
+			if (cmd.getUserEnterpriseId()!=null)
+				bill.setUserEnterpriseId(cmd.getUserEnterpriseId());
 			bill.setUserEnterpriseName(cmd.getUserEnterpriseName());
 			bill.setUserName(cmd.getUserName());
 			bill.setUserPhone(cmd.getUserPhone());
