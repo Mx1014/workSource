@@ -10,7 +10,8 @@ import java.util.List;
  * <ul>
  * <li>tasks:任务列表</li>
  * <li>specifications:specifications</li>
- * <li>categories:categories</li>
+ * <li>categories:规范类型</li>
+ * <li>taskCount:任务数目统计</li>
  * <li>organizations:组织架构</li>
  * <li>organizationMembers:人员</li>
  * <li>groupMaps:计划和group关系</li>
@@ -29,6 +30,9 @@ public class QualityOfflineTaskDetailsResponse {
 
     @ItemType(QualityInspectionSpecificationDTO.class)
     private List<QualityInspectionSpecificationDTO> categories;
+
+    @ItemType(OfflineTaskCount.class)
+    private List<OfflineTaskCount> taskCount;
 
     @ItemType(OrganizationDTO.class)
     private List<OrganizationDTO> organizations;
@@ -63,6 +67,14 @@ public class QualityOfflineTaskDetailsResponse {
 
     public void setCategories(List<QualityInspectionSpecificationDTO> categories) {
         this.categories = categories;
+    }
+
+    public List<OfflineTaskCount> getTaskCount() {
+        return taskCount;
+    }
+
+    public void setTaskCount(List<OfflineTaskCount> taskCount) {
+        this.taskCount = taskCount;
     }
 
     public List<OrganizationDTO> getOrganizations() {

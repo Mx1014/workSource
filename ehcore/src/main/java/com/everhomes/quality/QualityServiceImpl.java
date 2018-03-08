@@ -96,6 +96,7 @@ import com.everhomes.rest.quality.ListUserQualityInspectionTaskTemplatesCommand;
 import com.everhomes.rest.quality.OfflineDeleteTablesInfo;
 import com.everhomes.rest.quality.OfflineReportDetailDTO;
 import com.everhomes.rest.quality.OfflineSampleQualityInspectionResponse;
+import com.everhomes.rest.quality.OfflineTaskCount;
 import com.everhomes.rest.quality.OfflineTaskReportCommand;
 import com.everhomes.rest.quality.OwnerType;
 import com.everhomes.rest.quality.ProcessType;
@@ -189,6 +190,7 @@ import java.text.SimpleDateFormat;
 import java.time.LocalDate;
 import java.time.format.DateTimeFormatter;
 import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.Calendar;
 import java.util.Collections;
 import java.util.Comparator;
@@ -4505,6 +4507,16 @@ public class QualityServiceImpl implements QualityService {
 		ListQualityInspectionTasksResponse tasksResponse = listQualityInspectionTasks(cmd);
 		QualityOfflineTaskDetailsResponse offlineTaskDetailsResponse = new QualityOfflineTaskDetailsResponse();
 		offlineTaskDetailsResponse.setTasks(tasksResponse.getTasks());
+		OfflineTaskCount executed = new OfflineTaskCount();
+		executed.setId(Long.valueOf(new SimpleDateFormat("yyMMddhhmmssSSS").format(DateHelper.currentGMTTime())) * 10000);
+		executed.setTargetId(cmd.getTargetId());
+		executed.setCount(tasksResponse.getTodayExecutedCount().longValue());
+		OfflineTaskCount totalTaskCount = new OfflineTaskCount();
+		totalTaskCount.setId(Long.valueOf(new SimpleDateFormat("yyMMddhhmmssSSS").format(DateHelper.currentGMTTime())) * 1000);
+		totalTaskCount.setTargetId(cmd.getTargetId());
+		totalTaskCount.setCount(tasksResponse.getTodayTotalCount().longValue());
+
+		offlineTaskDetailsResponse.setTaskCount(Arrays.asList(totalTaskCount,executed));
 		offlineTaskDetailsResponse.setNextPageAnchor(tasksResponse.getNextPageAnchor());
 
 		List<QualityInspectionSpecificationDTO> specifications = new ArrayList<>();
