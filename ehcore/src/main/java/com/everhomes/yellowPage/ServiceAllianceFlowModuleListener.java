@@ -228,6 +228,8 @@ public class ServiceAllianceFlowModuleListener extends GeneralApprovalFlowModule
           if(sas!=null){
         	  record.setServiceOrganization(sas.getName());
           }
+          record.setNamespaceId(flowCase.getNamespaceId());
+          record.setServiceAllianceId(request.getServiceAllianceId());
 		saapplicationRecordProvider.createServiceAllianceApplicationRecord(record);
 		serviceAllianceRequestInfoSearcher.feedDoc(request);
 	}
