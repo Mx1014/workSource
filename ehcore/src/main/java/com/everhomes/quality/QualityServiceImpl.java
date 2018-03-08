@@ -96,6 +96,7 @@ import com.everhomes.rest.quality.ListUserQualityInspectionTaskTemplatesCommand;
 import com.everhomes.rest.quality.OfflineDeleteTablesInfo;
 import com.everhomes.rest.quality.OfflineReportDetailDTO;
 import com.everhomes.rest.quality.OfflineSampleQualityInspectionResponse;
+import com.everhomes.rest.quality.OfflineTaskCount;
 import com.everhomes.rest.quality.OfflineTaskReportCommand;
 import com.everhomes.rest.quality.OwnerType;
 import com.everhomes.rest.quality.ProcessType;
@@ -189,6 +190,7 @@ import java.text.SimpleDateFormat;
 import java.time.LocalDate;
 import java.time.format.DateTimeFormatter;
 import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.Calendar;
 import java.util.Collections;
 import java.util.Comparator;
@@ -987,12 +989,14 @@ Long nextPageAnchor = null;
 		cal.setTime(DateHelper.currentGMTTime());
 		Timestamp todayBegin = getDayBegin(cal);
 		Set<Long> taskIds =  qualityProvider.listRecordsTaskIdByOperatorId(user.getId(), todayBegin, targetId);
-
 		List<QualityInspectionTaskDTO> dtoList = convertQualityInspectionTaskToDTO(tasks, user.getId());
 		ListQualityInspectionTasksResponse response = new ListQualityInspectionTasksResponse(nextPageAnchor, dtoList);
 		response.setTodayExecutedCount(0);
 		if(taskIds != null) {
 			response.setTodayExecutedCount(taskIds.size());
+		}
+		if(dtoList!=null && dtoList.size()>0){
+			response.setTodayTotalCount(dtoList.size());
 		}
         return response;
 	}
@@ -4503,6 +4507,18 @@ Long nextPageAnchor = null;
 		ListQualityInspectionTasksResponse tasksResponse = listQualityInspectionTasks(cmd);
 		QualityOfflineTaskDetailsResponse offlineTaskDetailsResponse = new QualityOfflineTaskDetailsResponse();
 		offlineTaskDetailsResponse.setTasks(tasksResponse.getTasks());
+		OfflineTaskCount executed = new OfflineTaskCount();
+		executed.setId(Long.valueOf(new SimpleDateFormat("yyMMddhhmmssSSS").format(DateHelper.currentGMTTime())) * 10000);
+		executed.setTargetId(cmd.getTargetId());
+		executed.setCount(tasksResponse.getTodayExecutedCount().longValue());
+		executed.setType((byte)0);
+		OfflineTaskCount totalTaskCount = new OfflineTaskCount();
+		totalTaskCount.setId(Long.valueOf(new SimpleDateFormat("yyMMddhhmmssSSS").format(DateHelper.currentGMTTime())) * 1000);
+		totalTaskCount.setTargetId(cmd.getTargetId());
+		totalTaskCount.setCount(tasksResponse.getTodayTotalCount().longValue());
+		totalTaskCount.setType((byte)1);
+
+		offlineTaskDetailsResponse.setTaskCount(Arrays.asList(totalTaskCount,executed));
 		offlineTaskDetailsResponse.setNextPageAnchor(tasksResponse.getNextPageAnchor());
 
 		List<QualityInspectionSpecificationDTO> specifications = new ArrayList<>();

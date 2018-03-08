@@ -1,6 +1,7 @@
 // @formatter:off
 package com.everhomes.salary;
 
+import com.everhomes.archives.ArchivesService;
 import com.everhomes.bigcollection.Accessor;
 import com.everhomes.bigcollection.BigCollectionProvider;
 import com.everhomes.configuration.ConfigurationProvider;
@@ -133,6 +134,9 @@ public class SalaryServiceImpl implements SalaryService {
 
     @Autowired
     private TaskService taskService;
+
+    @Autowired
+    private ArchivesService archivesService;
 
 
     @Autowired
@@ -1099,6 +1103,8 @@ public class SalaryServiceImpl implements SalaryService {
     private void createSalaryDetailRow(XSSFSheet sheet, Long detailId, List<SalaryGroupEntity> groupEntities, List<SalaryEntityCategory> categories, NormalFlag isFile, String month, Long ownerId) {
 
         OrganizationMemberDetails detail = organizationProvider.findOrganizationMemberDetailsByDetailId(detailId);
+        //  获取部门名称
+        String depName = archivesService.convertToOrgNames(archivesService.getEmployeeDepartment(detailId));
         Row row = sheet.createRow(sheet.getLastRowNum() + 1);
         int i = -1;
         if (null == detail) {
@@ -1108,11 +1114,27 @@ public class SalaryServiceImpl implements SalaryService {
             row.createCell(++i).setCellValue(detail.getContactName());
             row.createCell(++i).setCellValue(detail.getContactToken());
             row.createCell(++i).setCellValue(detail.getEmployeeNo());
-            row.createCell(++i).setCellValue(getDepartmentName(detail.getId()));
+            row.createCell(++i).setCellValue(depName);
             row.createCell(++i).setCellValue(detail.getIdNumber());
             row.createCell(++i).setCellValue(detail.getSalaryCardNumber());
         }
-        row.createCell(++i).setCellValue("在职不在职荣楠没跟我说");
+        //  添加在职离职状态
+        String employeeStatus = "";
+        switch (EmployeeStatus.fromCode(detail.getEmployeeStatus())){
+            case DISMISSAL:
+                employeeStatus = "离职";
+                break;
+            case INTERNSHIP:
+                employeeStatus = "实习";
+                break;
+            case ON_THE_JOB:
+                employeeStatus = "在职";
+                break;
+            default:
+                employeeStatus = "实习";
+                break;
+        }
+        row.createCell(++i).setCellValue(employeeStatus);
 
         if (null != categories && null != groupEntities) {
             for (SalaryEntityCategory category : categories) {
