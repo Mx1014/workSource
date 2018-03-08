@@ -50,7 +50,8 @@ SELECT @appid := @appid + 1, namespace_id, namespace_id + 100,  `active_app_id`,
 -- UPDATE eh_service_module_apps set custom_tag = 0, instance_config = '{"forumEntryId":0}' where module_id = 10100 and (instance_config is NULL or instance_config not LIKE '%forumEntryId%');
 
 
--- 8、同步服务联盟和工位预定数据，以下接口请勿重复调用！！
+-- 8、同步服务联盟和工位预定数据，以下接口请勿重复调用！！请按照顺序调用。
 -- /yellowPage/syncOldForm
+-- /yellowPage/syncServiceAllianceApplicationRecords
 -- /yellowPage/syncSARequestInfo
 -- /officecubicle/dataMigration

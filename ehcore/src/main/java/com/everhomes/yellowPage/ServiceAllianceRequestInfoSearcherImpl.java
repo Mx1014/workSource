@@ -137,6 +137,9 @@ public class ServiceAllianceRequestInfoSearcherImpl extends AbstractElasticSearc
 
     @Autowired
     private UserProvider userProvider;
+    
+    @Autowired
+	private ServiceAllianceApplicationRecordProvider saapplicationRecordProvider;
 
 	private SimpleDateFormat format = new SimpleDateFormat("yyyy-MM-dd HH:mm");
 	
@@ -149,14 +152,26 @@ public class ServiceAllianceRequestInfoSearcherImpl extends AbstractElasticSearc
 	@Override
 	public void syncFromDb() {
 		int pageSize = 200;      
+		long pageAnchor = 0;
         this.deleteAll();
-
-        syncFromServiceAllianceRequestsDb(pageSize);
-        syncFromReservationRequestsDb(pageSize);
-        syncFromSettleRequestInfoSearcherDb(pageSize);
-        syncFromServiceAllianceApartmentRequestsDb(pageSize);
-        syncFromServiceAllianceInvestRequestsDb(pageSize);
-        syncFromServiceAllianceFlowCasesDb(pageSize);//同步通过工作流审批的申请记录。
+        
+        while(true){
+        	List<ServiceAllianceApplicationRecord> list = saapplicationRecordProvider.listServiceAllianceApplicationRecord(pageAnchor,pageSize);
+        	for (ServiceAllianceApplicationRecord record : list) {
+        		feedDoc(ConvertHelper.convert(record, ServiceAllianceRequestInfo.class));
+			}
+        	if(list.size()<pageSize){
+        		break;
+        	}
+        	pageAnchor = list.get(list.size()-1).getId();
+        }
+        	
+//        syncFromServiceAllianceRequestsDb(pageSize);
+//        syncFromReservationRequestsDb(pageSize);
+//        syncFromSettleRequestInfoSearcherDb(pageSize);
+//        syncFromServiceAllianceApartmentRequestsDb(pageSize);
+//        syncFromServiceAllianceInvestRequestsDb(pageSize);
+//        syncFromServiceAllianceFlowCasesDb(pageSize);//同步通过工作流审批的申请记录。
 
 	}
 
@@ -189,8 +204,9 @@ public class ServiceAllianceRequestInfoSearcherImpl extends AbstractElasticSearc
         }
         return null;
     }
-
-    private void bulkUpdateServiceAllianceFlowCaseRequests(List<FlowCaseDetail> details){
+    
+    public List<ServiceAllianceRequestInfo> generateUpdateServiceAllianceFlowCaseRequests(List<FlowCaseDetail> details){
+    	List<ServiceAllianceRequestInfo> list = new ArrayList<>();
         for (FlowCaseDetail flowCase : details) {
             // 服务联盟的审批拼接工作流 content字符串
             ServiceAllianceRequestInfo request = new ServiceAllianceRequestInfo();
@@ -268,7 +284,15 @@ public class ServiceAllianceRequestInfoSearcherImpl extends AbstractElasticSearc
     			status = ServiceAllianceWorkFlowStatus.NONE.getCode();
     		}
     		request.setWorkflowStatus(status);
-            feedDoc(request);
+            list.add(request);
+        }
+        return list;
+    }
+
+    private void bulkUpdateServiceAllianceFlowCaseRequests(List<FlowCaseDetail> details){
+    	 List<ServiceAllianceRequestInfo> list = generateUpdateServiceAllianceFlowCaseRequests(details);
+    	 for (ServiceAllianceRequestInfo request : list) {
+    		feedDoc(request);
             LOGGER.debug("request = "+request);
         }
     }

@@ -67,4 +67,6 @@ public interface YellowPageService {
 	GetCategoryIdByEntryIdResponse getCategoryIdByEntryId(GetCategoryIdByEntryIdCommand cmd);
 
 	void syncOldForm();
+
+	void syncServiceAllianceApplicationRecords();
 }
