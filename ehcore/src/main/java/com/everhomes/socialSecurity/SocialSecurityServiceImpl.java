@@ -598,7 +598,7 @@ public class SocialSecurityServiceImpl implements SocialSecurityService {
 
         Integer inWorkNumber = 0;
         if (cmd.getSocialSecurityMonth() != null)
-            inWorkNumber = organizationProvider.queryOrganizationPersonnelCounts(new ListingLocator(), cmd.getOwnerId(), (locator, query) -> {
+            inWorkNumber = organizationProvider.queryOrganizationMemberDetailCounts(new ListingLocator(), cmd.getOwnerId(), (locator, query) -> {
                 query.addConditions(Tables.EH_ORGANIZATION_MEMBER_DETAILS.CHECK_IN_TIME.between(getTheFirstDate(cmd.getSocialSecurityMonth()), getTheLastDate(cmd.getSocialSecurityMonth())));
                 return query;
             });

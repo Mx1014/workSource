@@ -78,9 +78,9 @@ public interface OrganizationProvider {
 
 	List<OrganizationMember> findOrganizationMembersByOrgIdAndUId(Long userId, Long organizationId);
 	OrganizationMember findOrganizationMemberByOrgIdAndToken(String contactPhone, Long organizationId);
-	OrganizationMember findDepartmentMemberByTokenAndOrgId(String phone, Long organizationId);
-	List<OrganizationMember> findJobPositionMemberByTokenAndOrgId(String phone, Long organizationId);
-	List<OrganizationMember> findJobLevelMemberByTokenAndOrgId(String phone, Long organizationId);
+	OrganizationMember findMemberDepartmentByDetailId(Long detailId);
+	List<OrganizationMember> findMemberJobPositionByDetailId(Long detailId);
+	OrganizationMember findMemberJobLevelByDetailId(Long detailId);
 	List<OrganizationMember> listOrganizationMembersByPhones(List<String> phones, Long departmentId);
 	void createOrganizationTask(OrganizationTask task);
 	OrganizationTask findOrganizationTaskById(Long taskId);
