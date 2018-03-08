@@ -1869,10 +1869,14 @@ public class YellowPageServiceImpl implements YellowPageService {
 	                  appRecord.setSecondCategoryName(categories==null?null:categories.getName());
 	                  appRecord.setWorkflowStatus(ServiceAllianceWorkFlowStatus.NONE.getCode());
 	                  Organization org = organizationProvider.findOrganizationById(request.getCreatorOrganizationId());
-	                  appRecord.setCreatorOrganization(org.getName());
-	      			  ServiceAlliances sa = yellowPageProvider.findServiceAllianceById(request.getServiceAllianceId(), request.getOwnerType(), request.getOwnerId());
-	                  appRecord.setServiceOrganization(sa.getName());
-	                  saapplicationRecordProvider.createServiceAllianceApplicationRecord(appRecord);
+                      if(org!=null){
+                        appRecord.setCreatorOrganization(org.getName());
+                      }
+                      ServiceAlliances sa = yellowPageProvider.findServiceAllianceById(request.getServiceAllianceId(), request.getOwnerType(), request.getOwnerId());
+                      if(sa!=null){
+                        appRecord.setServiceOrganization(sa.getName());
+                      }
+                      saapplicationRecordProvider.createServiceAllianceApplicationRecord(appRecord);
 	              }
             }
             if(locator.getAnchor() == null) {
@@ -1901,10 +1905,14 @@ public class YellowPageServiceImpl implements YellowPageService {
 	                  appRecord.setSecondCategoryName(categories==null?null:categories.getName());
 	                  appRecord.setWorkflowStatus(ServiceAllianceWorkFlowStatus.NONE.getCode());
 	                  Organization org = organizationProvider.findOrganizationById(request.getCreatorOrganizationId());
-	                  appRecord.setCreatorOrganization(org.getName());
-	      			  ServiceAlliances sa = yellowPageProvider.findServiceAllianceById(request.getServiceAllianceId(), request.getOwnerType(), request.getOwnerId());
-	                  appRecord.setServiceOrganization(sa.getName());
-	                  saapplicationRecordProvider.createServiceAllianceApplicationRecord(appRecord);
+                      if(org!=null){
+                        appRecord.setCreatorOrganization(org.getName());
+                      }
+                      ServiceAlliances sa = yellowPageProvider.findServiceAllianceById(request.getServiceAllianceId(), request.getOwnerType(), request.getOwnerId());
+                      if(sa!=null){
+                        appRecord.setServiceOrganization(sa.getName());
+                      }
+                      saapplicationRecordProvider.createServiceAllianceApplicationRecord(appRecord);
 	              }
             }
             if(locator.getAnchor() == null) {
@@ -1931,10 +1939,14 @@ public class YellowPageServiceImpl implements YellowPageService {
 	                  appRecord.setSecondCategoryName(categories==null?null:categories.getName());
 	                  appRecord.setWorkflowStatus(ServiceAllianceWorkFlowStatus.NONE.getCode());
 	                  Organization org = organizationProvider.findOrganizationById(request.getCreatorOrganizationId());
-	                  appRecord.setCreatorOrganization(org.getName());
-	      			  ServiceAlliances sa = yellowPageProvider.findServiceAllianceById(request.getServiceAllianceId(), request.getOwnerType(), request.getOwnerId());
-	                  appRecord.setServiceOrganization(sa.getName());
-	                  saapplicationRecordProvider.createServiceAllianceApplicationRecord(appRecord);
+                      if(org!=null){
+                        appRecord.setCreatorOrganization(org.getName());
+                      }
+                      ServiceAlliances sa = yellowPageProvider.findServiceAllianceById(request.getServiceAllianceId(), request.getOwnerType(), request.getOwnerId());
+                      if(sa!=null){
+                        appRecord.setServiceOrganization(sa.getName());
+                      }
+                      saapplicationRecordProvider.createServiceAllianceApplicationRecord(appRecord);
 	              }
             }
             if(locator.getAnchor() == null) {
@@ -1961,10 +1973,14 @@ public class YellowPageServiceImpl implements YellowPageService {
 	                  appRecord.setSecondCategoryName(categories==null?null:categories.getName());
 	                  appRecord.setWorkflowStatus(ServiceAllianceWorkFlowStatus.NONE.getCode());
 	                  Organization org = organizationProvider.findOrganizationById(request.getCreatorOrganizationId());
-	                  appRecord.setCreatorOrganization(org.getName());
-	      			  ServiceAlliances sa = yellowPageProvider.findServiceAllianceById(request.getServiceAllianceId(), request.getOwnerType(), request.getOwnerId());
-	                  appRecord.setServiceOrganization(sa.getName());
-	                  saapplicationRecordProvider.createServiceAllianceApplicationRecord(appRecord);
+                      if(org!=null){
+                        appRecord.setCreatorOrganization(org.getName());
+                      }
+                      ServiceAlliances sa = yellowPageProvider.findServiceAllianceById(request.getServiceAllianceId(), request.getOwnerType(), request.getOwnerId());
+                      if(sa!=null){
+                        appRecord.setServiceOrganization(sa.getName());
+                      }
+                      saapplicationRecordProvider.createServiceAllianceApplicationRecord(appRecord);
 	              }
             }
             if(locator.getAnchor() == null) {
@@ -1997,10 +2013,14 @@ public class YellowPageServiceImpl implements YellowPageService {
 	                  appRecord.setSecondCategoryName(categories==null?null:categories.getName());
 	                  appRecord.setWorkflowStatus(ServiceAllianceWorkFlowStatus.NONE.getCode());
 	                  Organization org = organizationProvider.findOrganizationById(request.getCreatorOrganizationId());
-	                  appRecord.setCreatorOrganization(org.getName());
-	      			  ServiceAlliances sa = yellowPageProvider.findServiceAllianceById(request.getServiceAllianceId(), request.getOwnerType(), request.getOwnerId());
-	                  appRecord.setServiceOrganization(sa.getName());
-	                  saapplicationRecordProvider.createServiceAllianceApplicationRecord(appRecord);
+                      if(org!=null){
+                        appRecord.setCreatorOrganization(org.getName());
+                      }
+                      ServiceAlliances sa = yellowPageProvider.findServiceAllianceById(request.getServiceAllianceId(), request.getOwnerType(), request.getOwnerId());
+                      if(sa!=null){
+                        appRecord.setServiceOrganization(sa.getName());
+                      }
+                      saapplicationRecordProvider.createServiceAllianceApplicationRecord(appRecord);
 	              }
             }
             if(locator.getAnchor() == null) {
