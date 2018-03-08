@@ -161,7 +161,6 @@ public class ArchivesProviderImpl implements ArchivesProvider {
     public ArchivesDismissEmployees getArchivesDismissEmployeesByDetailId(Long detailId) {
         DSLContext context = dbProvider.getDslContext(AccessSpec.readOnly());
         SelectQuery<EhArchivesDismissEmployeesRecord> query = context.selectQuery(Tables.EH_ARCHIVES_DISMISS_EMPLOYEES);
-        query.addConditions(Tables.EH_ARCHIVES_DISMISS_EMPLOYEES.NAMESPACE_ID.eq(UserContext.getCurrentNamespaceId()));
         query.addConditions(Tables.EH_ARCHIVES_DISMISS_EMPLOYEES.DETAIL_ID.eq(detailId));
         return query.fetchAnyInto(ArchivesDismissEmployees.class);
     }

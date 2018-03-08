@@ -7,7 +7,6 @@ import com.everhomes.bigcollection.Accessor;
 import com.everhomes.bigcollection.BigCollectionProvider;
 import com.everhomes.community.Community;
 import com.everhomes.community.CommunityProvider;
-import com.everhomes.configuration.ConfigurationProvider;
 import com.everhomes.coordinator.CoordinationLocks;
 import com.everhomes.coordinator.CoordinationProvider;
 import com.everhomes.db.AccessSpec;
@@ -26,7 +25,6 @@ import com.everhomes.rest.organization.*;
 import com.everhomes.rest.socialSecurity.*;
 import com.everhomes.sequence.SequenceProvider;
 import com.everhomes.server.schema.Tables;
-import com.everhomes.server.schema.tables.EhOrganizationMemberDetails;
 import com.everhomes.server.schema.tables.pojos.EhSocialSecurityPaymentLogs;
 import com.everhomes.server.schema.tables.pojos.EhSocialSecurityPayments;
 import com.everhomes.server.schema.tables.pojos.EhSocialSecuritySettings;
@@ -42,8 +40,6 @@ import org.apache.poi.ss.usermodel.Row;
 import org.apache.poi.ss.usermodel.Workbook;
 import org.apache.poi.xssf.usermodel.XSSFSheet;
 import org.apache.poi.xssf.usermodel.XSSFWorkbook;
-import org.jooq.Condition;
-import org.jooq.TableLike;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -101,8 +97,6 @@ public class SocialSecurityServiceImpl implements SocialSecurityService {
     @Autowired
     private RegionProvider regionProvider;
     @Autowired
-    private OrganizationService organizationService;
-    @Autowired
     private OrganizationProvider organizationProvider;
     @Autowired
     private UserProvider userProvider;
@@ -110,8 +104,6 @@ public class SocialSecurityServiceImpl implements SocialSecurityService {
     private CommunityProvider communityProvider;
     @Autowired
     private BigCollectionProvider bigCollectionProvider;
-    @Autowired
-    private ConfigurationProvider configurationProvider;
     @Autowired
     private SequenceProvider sequenceProvider;
     @Autowired
@@ -124,17 +116,9 @@ public class SocialSecurityServiceImpl implements SocialSecurityService {
      * 处理计算的线程池,预设最大值是5
      */
     private static ExecutorService calculateExecutorPool = Executors.newFixedThreadPool(5);
-    private static ThreadLocal<SimpleDateFormat> monthSF = new ThreadLocal<SimpleDateFormat>() {
-        protected SimpleDateFormat initialValue() {
-            return new SimpleDateFormat("yyyyMM");
-        }
-    };
+    private static ThreadLocal<SimpleDateFormat> monthSF = ThreadLocal.withInitial(() -> new SimpleDateFormat("yyyyMM"));
 
-    private static ThreadLocal<SimpleDateFormat> dateSF = new ThreadLocal<SimpleDateFormat>() {
-        protected SimpleDateFormat initialValue() {
-            return new SimpleDateFormat("yyyy-MM-dd");
-        }
-    };
+    private static ThreadLocal<SimpleDateFormat> dateSF = ThreadLocal.withInitial(() -> new SimpleDateFormat("yyyy-MM-dd"));
 
     private static final Logger LOGGER = LoggerFactory.getLogger(SocialSecurityServiceImpl.class);
 
@@ -614,15 +598,24 @@ public class SocialSecurityServiceImpl implements SocialSecurityService {
 
         Integer inWorkNumber = 0;
         if (cmd.getSocialSecurityMonth() != null)
-            inWorkNumber = organizationProvider.queryOrganizationPersonnelCounts(new ListingLocator(), cmd.getOwnerId(), ((locator, query) -> {
-                query.addConditions(Tables.EH_ORGANIZATION_MEMBER_DETAILS.CHECK_IN_TIME.ge(getTheFirstDate(cmd.getSocialSecurityMonth())));
-                query.addConditions(Tables.EH_ORGANIZATION_MEMBER_DETAILS.CHECK_IN_TIME.le(getTheLastDate(cmd.getSocialSecurityMonth())));
+            inWorkNumber = organizationProvider.queryOrganizationMemberDetailCounts(new ListingLocator(), cmd.getOwnerId(), (locator, query) -> {
+                query.addConditions(Tables.EH_ORGANIZATION_MEMBER_DETAILS.CHECK_IN_TIME.between(getTheFirstDate(cmd.getSocialSecurityMonth()), getTheLastDate(cmd.getSocialSecurityMonth())));
                 return query;
-            }));
+            });
+
+        Integer outWorkNumber = 0;
+        if (cmd.getSocialSecurityMonth() != null){
+            outWorkNumber = organizationProvider.queryOrganizationMemberDetailCounts(new ListingLocator(), cmd.getOwnerId(), (locator, query) -> {
+                query.addConditions(Tables.EH_ORGANIZATION_MEMBER_DETAILS.EMPLOYEE_STATUS.eq(EmployeeStatus.DISMISSAL.getCode()));
+                query.addConditions(Tables.EH_ORGANIZATION_MEMBER_DETAILS.DISMISS_TIME.between(getTheFirstDate(cmd.getSocialSecurityMonth()), getTheLastDate(cmd.getSocialSecurityMonth())));
+                return query;
+            });
+        }
+
         response.setPaySocialSecurityNumber(paySocialSecurityNumber);
         response.setPayAccumulationFundNumber(accumulationFundNumber);
         response.setInWorkNumber(inWorkNumber);
-        response.setOutWorkNumber(7);
+        response.setOutWorkNumber(outWorkNumber);
         return response;
     }
 
@@ -2873,7 +2866,11 @@ public class SocialSecurityServiceImpl implements SocialSecurityService {
             if (cmd.getAccumulationFundStatus() != null)
                 query.addConditions(Tables.EH_ORGANIZATION_MEMBER_DETAILS.ACCUMULATION_FUND_STATUS.eq(cmd.getAccumulationFundStatus()));
             if (cmd.getCheckInMonth() != null) {
-                query.addConditions(Tables.EH_ORGANIZATION_MEMBER_DETAILS.CHECK_IN_TIME.ge(getTheFirstDate(cmd.getCheckInMonth())).and(Tables.EH_ORGANIZATION_MEMBER_DETAILS.CHECK_IN_TIME.le(getTheLastDate(cmd.getCheckInMonth()))));
+                query.addConditions(Tables.EH_ORGANIZATION_MEMBER_DETAILS.CHECK_IN_TIME.between(getTheFirstDate(cmd.getCheckInMonth()), getTheLastDate(cmd.getCheckInMonth())));
+            }
+            if (cmd.getDismissMonth() != null) {
+                query.addConditions(Tables.EH_ORGANIZATION_MEMBER_DETAILS.DISMISS_TIME.between(getTheFirstDate(cmd.getDismissMonth()), getTheLastDate(cmd.getDismissMonth())));
+                query.addConditions(Tables.EH_ORGANIZATION_MEMBER_DETAILS.EMPLOYEE_STATUS.eq(EmployeeStatus.DISMISSAL.getCode()));
             }
             if (cmd.getKeywords() != null) {
                 query.addConditions(Tables.EH_ORGANIZATION_MEMBER_DETAILS.CONTACT_TOKEN.eq(cmd.getKeywords()).or(Tables.EH_ORGANIZATION_MEMBER_DETAILS.CONTACT_NAME.like(cmd.getKeywords())));

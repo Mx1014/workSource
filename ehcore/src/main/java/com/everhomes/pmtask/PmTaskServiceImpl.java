@@ -1335,17 +1335,17 @@ public class PmTaskServiceImpl implements PmTaskService {
 
 	private void createTaskStatistics(List<Namespace> namespaces, Timestamp startDate, Timestamp endDate, long now) {
 		for (Namespace n : namespaces) {
-			for (Long id: PmTaskAppType.TYPES) {
+			for (Long id : PmTaskAppType.TYPES) {
 				Category ancestor = categoryProvider.findCategoryById(id);
 
 				if (null != ancestor) {
-					List<Category> categories = categoryProvider.listTaskCategories(n.getId(),null,null, ancestor.getId(), null, null, null);
-					if (null != categories && !categories.isEmpty()) {
-						List<Community> communities = communityProvider.listCommunitiesByNamespaceId(n.getId());
-						for (Community community : communities) {
+					List<Community> communities = communityProvider.listCommunitiesByNamespaceId(n.getId());
+					for (Community community : communities) {
+						List<Category> categories = categoryProvider.listTaskCategories(n.getId(), "community", community.getId(), ancestor.getId(), null, null, null);
+						if (null != categories && !categories.isEmpty()) {
 							for (Category taskCategory : categories) {
 								createTaskStatistics(community.getId(), taskCategory.getId(), 0L, startDate, endDate, now, n.getId());
-								List<Category> tempCategories = categoryProvider.listTaskCategories(n.getId(), null,null,taskCategory.getId(), null, null, null);
+								List<Category> tempCategories = categoryProvider.listTaskCategories(n.getId(), "community", community.getId(), taskCategory.getId(), null, null, null);
 								for (Category category : tempCategories) {
 									createTaskStatistics(community.getId(), taskCategory.getId(), category.getId(), startDate, endDate, now, n.getId());
 								}

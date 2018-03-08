@@ -629,7 +629,7 @@ public class OrganizationServiceImpl implements OrganizationService {
         if(!StringUtils.isEmpty(cmd.getName())){
             //同级重名校验
             Organization down_organization = organizationProvider.findOrganizationByParentAndName(modifyOrg.getParentId(), cmd.getName());
-            if(down_organization.getId() != cmd.getId()){
+            if(down_organization != null && !down_organization.getId().equals(cmd.getId())){
                 OrganizationDTO orgDto_error = new OrganizationDTO();
                 orgDto_error.setErrorCode(OrganizationServiceErrorCode.ERROR_DEPARTMENT_EXISTS);
                 LOGGER.error("name repeat, cmd = {}", cmd);
@@ -10104,8 +10104,9 @@ public class OrganizationServiceImpl implements OrganizationService {
 
     @Override
     public OrganizationDetailDTO getOrganizationDetailById(GetOrganizationDetailByIdCommand cmd) {
-
-        return toOrganizationDetailDTO(cmd.getId(), false);
+        OrganizationDetailDTO organizationDetailDTO = toOrganizationDetailDTO(cmd.getId(), false);
+        addServiceUser(organizationDetailDTO);
+        return organizationDetailDTO;
     }
 
     @Override
