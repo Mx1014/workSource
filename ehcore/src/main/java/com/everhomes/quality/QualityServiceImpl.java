@@ -4511,10 +4511,12 @@ public class QualityServiceImpl implements QualityService {
 		executed.setId(Long.valueOf(new SimpleDateFormat("yyMMddhhmmssSSS").format(DateHelper.currentGMTTime())) * 10000);
 		executed.setTargetId(cmd.getTargetId());
 		executed.setCount(tasksResponse.getTodayExecutedCount().longValue());
+		executed.setType((byte)0);
 		OfflineTaskCount totalTaskCount = new OfflineTaskCount();
 		totalTaskCount.setId(Long.valueOf(new SimpleDateFormat("yyMMddhhmmssSSS").format(DateHelper.currentGMTTime())) * 1000);
 		totalTaskCount.setTargetId(cmd.getTargetId());
 		totalTaskCount.setCount(tasksResponse.getTodayTotalCount().longValue());
+		totalTaskCount.setType((byte)1);
 
 		offlineTaskDetailsResponse.setTaskCount(Arrays.asList(totalTaskCount,executed));
 		offlineTaskDetailsResponse.setNextPageAnchor(tasksResponse.getNextPageAnchor());
