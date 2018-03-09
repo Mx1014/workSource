@@ -46,6 +46,15 @@ public class GetSupplierDetailDTO {
     private Byte evaluationLeval;
     private String mainBizScope;
     private String attachmentUrl;
+    private String fileName;
+
+    public String getFileName() {
+        return fileName;
+    }
+
+    public void setFileName(String fileName) {
+        this.fileName = fileName;
+    }
 
     @Override
     public String toString() {

@@ -1710,6 +1710,9 @@ ALTER TABLE `eh_equipment_inspection_equipment_attachments`
 -- 工作流修改字段长度    add by xq.tian  2018/03/09
 ALTER TABLE eh_flow_actions MODIFY COLUMN render_text TEXT COMMENT 'the content for this message that have variables';
 
--- 对采购单中物品增加字段warehouseId
+-- 对采购单中物品增加字段warehouseId by wentian 2018/03/09
 ALTER TABLE `eh_warehouse_purchase_items` ADD COLUMN `warehouse_id` BIGINT COMMENT '仓库id';
 
+-- 请示和供应商增加fileName字段 by wentian 2018/03/09
+ALTER TABLE  `eh_requisitions` ADD COLUMN  `file_name` VARCHAR(256) COMMENT '文件名称';
+ALTER TABLE  `eh_warehouse_suppliers` ADD COLUMN  `file_name` VARCHAR(256) COMMENT '文件名称';

@@ -22,6 +22,7 @@ import java.math.BigDecimal;
  * <li>attachmentUrl:附件的地址</li>
  * <li>flowOwnerType:工作流的ownerType</li>
  * <li>communityId:园区id</li>
+ * <li>fileName:附件名称</li>
  *</ul>
  */
 public class CreateRequisitionCommand {
@@ -37,6 +38,15 @@ public class CreateRequisitionCommand {
     private String attachmentUrl;
     private String flowOwnerType;
     private Long communityId;
+    private String fileName;
+
+    public String getFileName() {
+        return fileName;
+    }
+
+    public void setFileName(String fileName) {
+        this.fileName = fileName;
+    }
 
     public Long getCommunityId() {
         return communityId;

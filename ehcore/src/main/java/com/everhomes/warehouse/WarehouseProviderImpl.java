@@ -25,6 +25,7 @@ import com.everhomes.server.schema.tables.records.*;
 import com.everhomes.sharding.ShardIterator;
 import com.everhomes.sharding.ShardingProvider;
 import com.everhomes.user.UserContext;
+import com.everhomes.user.UserProvider;
 import com.everhomes.util.ConvertHelper;
 import com.everhomes.util.DateHelper;
 import com.everhomes.util.IterationMapReduceCallback;
@@ -62,6 +63,8 @@ public class WarehouseProviderImpl implements WarehouseProvider {
 
     @Autowired
     private ShardingProvider shardingProvider;
+    @Autowired
+    private UserProvider userProvider;
 
     @Override
     public void creatWarehouse(Warehouses warehouse) {
@@ -733,28 +736,54 @@ public class WarehouseProviderImpl implements WarehouseProvider {
         DSLContext context = dbProvider.getDslContext(AccessSpec.readOnly());
         com.everhomes.server.schema.tables.EhWarehouseMaterials m = Tables.EH_WAREHOUSE_MATERIALS.as("m");
         com.everhomes.server.schema.tables.EhWarehouseRequestMaterials rm = Tables.EH_WAREHOUSE_REQUEST_MATERIALS.as("rm");
-        SimpleDateFormat sdf = new SimpleDateFormat("yyyy-MM-dd");
-        context.select(rm.REQUEST_ID,m.NAME,rm.AMOUNT,m.REFERENCE_PRICE)
-                .from(rm,m)
-                .where(rm.MATERIAL_ID.eq(m.ID))
+        com.everhomes.server.schema.tables.EhWarehouseStockLogs logs = Tables.EH_WAREHOUSE_STOCK_LOGS.as("log");
+        SimpleDateFormat sdf = new SimpleDateFormat("yyyy-MM-dd HH:mm");
+//        context.select(rm.REQUEST_ID,m.NAME,rm.AMOUNT,m.REFERENCE_PRICE)
+//                .from(rm,m)
+//                .where(rm.MATERIAL_ID.eq(m.ID))
+//                .and(m.SUPPLIER_ID.eq(supplierId))
+//                .limit(pageAnchor.intValue(),pageSize)
+//                .fetch()
+//                .forEach(r -> {
+//                    WarehouseLogDTO dto = new WarehouseLogDTO();
+//                    Long requestId = r.getValue(rm.REQUEST_ID);
+//                    context.select(Tables.EH_WAREHOUSE_REQUESTS.CREATE_TIME,Tables.EH_USERS.NICK_NAME)
+//                            .from(Tables.EH_WAREHOUSE_REQUESTS,Tables.EH_USERS)
+//                            .where(Tables.EH_WAREHOUSE_REQUESTS.ID.eq(requestId))
+//                            .and(Tables.EH_USERS.ID.eq(Tables.EH_WAREHOUSE_REQUESTS.REQUEST_UID))
+//                            .fetch()
+//                            .forEach(r1 ->{
+//                                dto.setApplicantName(r1.getValue(Tables.EH_USERS.NICK_NAME));
+//                                if(r1.getValue(Tables.EH_WAREHOUSE_REQUESTS.CREATE_TIME) != null){
+//                                    dto.setApplicationTime(sdf.format
+//                                            (r1.getValue(Tables.EH_WAREHOUSE_REQUESTS.CREATE_TIME)));
+//                                };
+//                            });
+//                    dto.setMaterialCategory(findWarehouseMaterialCategoryNameById(r.getValue(m.CATEGORY_ID)));
+//                    dto.setMaterialName(r.getValue(m.NAME));
+//                    dto.setPurchaseQuantity(r.getValue(rm.AMOUNT));
+//                    dto.setUnitPrice(r.getValue(m.REFERENCE_PRICE).toString());
+//                    list.add(dto);
+//                });
+        //实际上是从库存记录中查的
+        context.select(m.NAME,logs.DELIVERY_AMOUNT,m.REFERENCE_PRICE,logs.CREATE_TIME,logs.DELIVERY_UID,logs.REQUEST_ID)
+                .from(logs,m)
+                .where(logs.MATERIAL_ID.eq(m.ID))
                 .and(m.SUPPLIER_ID.eq(supplierId))
                 .limit(pageAnchor.intValue(),pageSize)
                 .fetch()
                 .forEach(r -> {
                     WarehouseLogDTO dto = new WarehouseLogDTO();
-                    Long requestId = r.getValue(rm.REQUEST_ID);
-                    context.select(Tables.EH_WAREHOUSE_REQUESTS.CREATE_TIME,Tables.EH_USERS.NICK_NAME)
-                            .from(Tables.EH_WAREHOUSE_REQUESTS,Tables.EH_USERS)
-                            .where(Tables.EH_WAREHOUSE_REQUESTS.ID.eq(requestId))
-                            .and(Tables.EH_USERS.ID.eq(Tables.EH_WAREHOUSE_REQUESTS.REQUEST_UID))
-                            .fetch()
-                            .forEach(r1 ->{
-                                dto.setApplicantName(r1.getValue(Tables.EH_USERS.NICK_NAME));
-                                if(r1.getValue(Tables.EH_WAREHOUSE_REQUESTS.CREATE_TIME) != null){
-                                    dto.setApplicationTime(sdf.format
-                                            (r1.getValue(Tables.EH_WAREHOUSE_REQUESTS.CREATE_TIME)));
-                                };
-                            });
+                    String nickName = "";
+                    if(r.getValue(logs.REQUEST_ID)!=null){
+                        nickName = userProvider.findUserById(r.getValue(logs.REQUEST_ID)).getNickName();
+                    }else if(r.getValue(logs.DELIVERY_UID) != null){
+                        nickName = userProvider.findUserById(r.getValue(logs.DELIVERY_UID)).getNickName();
+                    }
+                    dto.setApplicantName(nickName);
+                    if(r.getValue(logs.CREATE_TIME)!=null){
+                        dto.setApplicationTime(sdf.format(logs.CREATE_TIME));
+                    }
                     dto.setMaterialCategory(findWarehouseMaterialCategoryNameById(r.getValue(m.CATEGORY_ID)));
                     dto.setMaterialName(r.getValue(m.NAME));
                     dto.setPurchaseQuantity(r.getValue(rm.AMOUNT));

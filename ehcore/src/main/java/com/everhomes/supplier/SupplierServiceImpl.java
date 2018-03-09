@@ -55,6 +55,7 @@ public class SupplierServiceImpl implements SupplierService{
             create = false;
             supplier = this.supplierProvider.findSupplierById(cmd.getId());
         }
+        supplier.setFileName(cmd.getFileName());
         supplier.setAttachmentUrl(cmd.getAttachmentUrl());
         supplier.setBankCardNumber(cmd.getAccountNumber());
         supplier.setBankName(cmd.getBankOfDeposit());
@@ -128,6 +129,7 @@ public class SupplierServiceImpl implements SupplierService{
         dto.setMainBizScope(supplier.getMainBizScope());
         dto.setName(supplier.getName());
         dto.setRegisterAddress(supplier.getEnterpriseRegisterAddress());
+        dto.setFileName(supplier.getFileName());
         return dto;
     }
 

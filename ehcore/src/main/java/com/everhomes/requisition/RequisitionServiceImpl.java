@@ -123,6 +123,7 @@ public class RequisitionServiceImpl implements RequisitionService {
         response.setDescription(requisition.getDescription());
         response.setTheme(requisition.getTheme());
         response.setTypeId(requisition.getRequisitionTypeId());
+        response.setFileName(requisition.getFileName());
         FlowCaseDetailDTOV2 flowcase = flowService.getFlowCaseDetailByRefer(PrivilegeConstants.REQUISITION_MODULE, null, null, "requisitionId", cmd.getRequisitionId(), true);
         if(flowcase!=null){
             response.setFlowCaseId(flowcase.getId());
