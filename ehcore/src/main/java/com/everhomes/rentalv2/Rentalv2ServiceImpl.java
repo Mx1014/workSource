@@ -2762,8 +2762,10 @@ public class Rentalv2ServiceImpl implements Rentalv2Service {
 		}
 
 		//加上资源类型的类型
-		RentalResourceType resourceType = this.rentalv2Provider.getRentalResourceTypeById(rs.getResourceTypeId());
-		dto.setResourceType(resourceType.getIdentify());
+		if (bill.getResourceTypeId()!=null) {
+			RentalResourceType resourceType = this.rentalv2Provider.getRentalResourceTypeById(bill.getResourceTypeId());
+			dto.setResourceType(resourceType.getIdentify());
+		}
 	}
 
 	@Override

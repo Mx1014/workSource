@@ -3077,11 +3077,14 @@ private void checkUserPrivilege(Long orgId, Long privilegeId, Long communityId) 
 	private void setToObj(String fieldName, Object dto,Object value) throws NoSuchFieldException, IntrospectionException, InvocationTargetException, IllegalAccessException {
 		Class<?> clz = dto.getClass().getSuperclass();
 		Object val = value;
+		if (Objects.equals(fieldName, "attachments") || Objects.equals(fieldName, "geohash")) {
+			return;
+		}
 		String type = clz.getDeclaredField(fieldName).getType().getSimpleName();
-		LOGGER.info("export equipments setToObj type={}" + type);
-		if(StringUtils.isEmpty((String)value)){
+		LOGGER.info("export equipments setToObj type={}", type);
+		if (StringUtils.isEmpty((String) value)) {
 			val = null;
-		}else{
+		} else {
 			switch(type){
 				case "BigDecimal":
 					val = new BigDecimal((String)value);
@@ -5701,9 +5704,10 @@ private void checkUserPrivilege(Long orgId, Long privilegeId, Long communityId) 
 				relations.setOrder(map.getDefaultOrder());
 				relations.setPlanId(planId);
 
-				if (equipmentStandardMaps != null && equipmentStandardMaps.size() > 0) {
-					relations.setId(equipmentStandardMaps.get(0).getId());
-				}
+//				if (equipmentStandardMaps != null && equipmentStandardMaps.size() > 0) {
+//					relations.setId(equipmentStandardMaps.get(0).getId());
+//				}
+				relations.setId(map.getId());
 				relationDTOS.add(relations);
 			}
 			//sort equipmentStandardRelations
@@ -5935,6 +5939,8 @@ private void checkUserPrivilege(Long orgId, Long privilegeId, Long communityId) 
 		categoriesCommand.setPageSize(Integer.MAX_VALUE - 1);
 		categoriesCommand.setTaskCategoryId(6L);
 		categoriesCommand.setNamespaceId(cmd.getNamespaceId());
+		categoriesCommand.setOwnerId(cmd.getTargetId());
+		categoriesCommand.setOwnerType(cmd.getTargetType());
 		ListTaskCategoriesResponse categories = pmTaskService.listTaskCategories(categoriesCommand);
 		offlineResponse.setRepiarCategories(categories.getRequests());
 	}
@@ -6126,7 +6132,7 @@ private void checkUserPrivilege(Long orgId, Long privilegeId, Long communityId) 
                     CreateTaskCommand repairCommand = new CreateTaskCommand();
                     repairCommand = ConvertHelper.convert(cmd, CreateTaskCommand.class);
                     repairCommand.setOwnerId(cmd.getTargetId());
-                    repairCommand.setOwnerType(cmd.getOwnerType());
+                    repairCommand.setOwnerType(cmd.getTargetType());
                     repairCommand.setAddress(equipment.getLocation());
                     repairCommand.setAddressType(PmTaskAddressType.FAMILY.getCode());
                     repairCommand.setReferId(cmd.getEquipmentId());

@@ -427,7 +427,8 @@ public class CustomerServiceImpl implements CustomerService {
         return dto;
     }
 
-    private OrganizationDTO createOrganization(EnterpriseCustomer customer) {
+    @Override
+    public OrganizationDTO createOrganization(EnterpriseCustomer customer) {
         Organization org = organizationProvider.findOrganizationByName(customer.getName(), customer.getNamespaceId());
         if(org != null && OrganizationStatus.ACTIVE.equals(OrganizationStatus.fromCode(org.getStatus()))) {
             //已存在则更新 地址、官网地址、企业logo
@@ -2757,7 +2758,8 @@ public class CustomerServiceImpl implements CustomerService {
         enterpriseCustomerProvider.createCustomerTrackingPlan(plan);
 	}
 
-	private void saveCustomerEvent(int i,  EnterpriseCustomer customer, EnterpriseCustomer exist) {
+    @Override
+	public void saveCustomerEvent(int i,  EnterpriseCustomer customer, EnterpriseCustomer exist) {
 		enterpriseCustomerProvider.saveCustomerEvent(i,customer,exist);
 	}
 	

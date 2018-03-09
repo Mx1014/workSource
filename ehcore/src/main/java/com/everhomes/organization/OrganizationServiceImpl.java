@@ -5946,6 +5946,21 @@ public class OrganizationServiceImpl implements OrganizationService {
                         }
                     }
                     break;
+                case JOB_LEVEL:
+                    List<OrganizationDTO> jobLevels = new ArrayList<>();
+                    if (orgDto_target == null) {  //首次拼装
+                        jobLevels.add(orgDTO_now);
+                        dto.setJobLevels(jobLevels);
+                        target_map.put(dto.getContactToken(), dto);
+                    }else{
+                        if(orgDto_target.getJobLevels() == null){
+                            jobLevels.add(orgDTO_now);
+                            orgDto_target.setJobLevels(jobLevels);
+                        }else{
+                            orgDto_target.getJobLevels().add(orgDTO_now);
+                        }
+                    }
+                    break;
                 default:
                     break;
             }
@@ -13855,7 +13870,9 @@ public class OrganizationServiceImpl implements OrganizationService {
         List<Organization> underEnterprises = this.organizationProvider.listOrganizationByGroupTypesAndPath(org.getPath() + "/%", groupTypes, null, null, null);
         List<String> smallPath = new ArrayList();
         underEnterprises.forEach(r -> smallPath.add(r.getPath()));
+        groupTypes.clear();
         groupTypes.add(OrganizationGroupType.DEPARTMENT.getCode());
+        groupTypes.add(OrganizationGroupType.DIRECT_UNDER_ENTERPRISE.getCode());
         return this.organizationProvider.listMemberDetailIdWithExclude(keywords, namespaceId, org.getPath(), smallPath, checkinTimeStart,
                 checkinTimeEnd, dissmissTimeStart, dissmissTimeEnd, locator, pageSize,notinDetails,inDetails,groupTypes);
     }

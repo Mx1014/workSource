@@ -10,6 +10,7 @@ import java.util.stream.Collectors;
 import com.everhomes.listing.CrossShardListingLocator;
 import com.everhomes.locale.LocaleTemplateService;
 import com.everhomes.messaging.MessagingService;
+import com.everhomes.organization.Organization;
 import com.everhomes.organization.OrganizationCommunityRequest;
 import com.everhomes.organization.OrganizationMember;
 import com.everhomes.organization.OrganizationProvider;
@@ -218,7 +219,18 @@ public class ServiceAllianceFlowModuleListener extends GeneralApprovalFlowModule
 		request.setWorkflowStatus(status);
 		request.setId(flowCase.getId());
 		request.setTemplateType("flowCase");
-		saapplicationRecordProvider.createServiceAllianceApplicationRecord(ConvertHelper.convert(request, ServiceAllianceApplicationRecord.class));
+		ServiceAllianceApplicationRecord record = ConvertHelper.convert(request, ServiceAllianceApplicationRecord.class);
+		Organization org = organizationProvider.findOrganizationById(request.getCreatorOrganizationId());
+		if(org!=null){
+			record.setCreatorOrganization(org.getName());
+          }
+          ServiceAlliances sas = yellowPageProvider.findServiceAllianceById(request.getServiceAllianceId(), request.getOwnerType(), request.getOwnerId());
+          if(sas!=null){
+        	  record.setServiceOrganization(sas.getName());
+          }
+          record.setNamespaceId(flowCase.getNamespaceId());
+          record.setServiceAllianceId(request.getServiceAllianceId());
+		saapplicationRecordProvider.createServiceAllianceApplicationRecord(record);
 		serviceAllianceRequestInfoSearcher.feedDoc(request);
 	}
 
