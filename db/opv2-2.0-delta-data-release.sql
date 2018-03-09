@@ -729,3 +729,5 @@ update eh_reflection_service_module_apps set module_control_type = 'unlimit_cont
 set @eh_locale_strings_id = (select max(id) from eh_locale_strings);
 INSERT INTO `eh_locale_strings` (`id`, `scope`, `code`, `locale`, `text`) VALUES ((@eh_locale_strings_id:=@eh_locale_strings_id+1), 'warehouse', '10026', 'zh_CN', '改仓库正在运行中，不能删除');
 
+-- 更新活动详情页页面路径。 add by yanjun 201803091110
+UPDATE eh_configurations SET `value` = '/html/activity_text_review.html' WHERE `name` = 'activity.content.url';
