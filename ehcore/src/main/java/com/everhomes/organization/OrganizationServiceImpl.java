@@ -5946,6 +5946,21 @@ public class OrganizationServiceImpl implements OrganizationService {
                         }
                     }
                     break;
+                case JOB_LEVEL:
+                    List<OrganizationDTO> jobLevels = new ArrayList<>();
+                    if (orgDto_target == null) {  //首次拼装
+                        jobLevels.add(orgDTO_now);
+                        dto.setJobLevels(jobLevels);
+                        target_map.put(dto.getContactToken(), dto);
+                    }else{
+                        if(orgDto_target.getJobLevels() == null){
+                            jobLevels.add(orgDTO_now);
+                            orgDto_target.setJobLevels(jobLevels);
+                        }else{
+                            orgDto_target.getJobLevels().add(orgDTO_now);
+                        }
+                    }
+                    break;
                 default:
                     break;
             }
