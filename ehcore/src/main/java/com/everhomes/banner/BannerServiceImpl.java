@@ -722,7 +722,6 @@ public class BannerServiceImpl implements BannerService {
             banner.setScopeCode(ScopeType.COMMUNITY.getCode());
             banner.setScopeId(communityId);
 
-
             Integer maxOrder = bannerProvider.getMaxOrderByCommunityId(cmd.getNamespaceId(), communityId);
             banner.setOrder(maxOrder == null ? 1 : maxOrder + 1);
             bannerProvider.createBanner(banner);

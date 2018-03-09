@@ -422,7 +422,7 @@ public class BannerProviderImpl implements BannerProvider {
         query.addConditions(t.SCOPE_CODE.eq(ScopeType.COMMUNITY.getCode()));
         query.addConditions(t.SCOPE_ID.eq(communityId));
 
-        query.addConditions(t.STATUS.eq(BannerStatus.ACTIVE.getCode()));
+        // query.addConditions(t.STATUS.eq(BannerStatus.ACTIVE.getCode()));
         return query.fetchOneInto(Integer.class);
     }
 

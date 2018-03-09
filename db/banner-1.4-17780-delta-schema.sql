@@ -3,4 +3,4 @@ ALTER TABLE eh_banners ADD COLUMN target_type VARCHAR(32) NOT NULL COMMENT 'e.g:
 ALTER TABLE eh_banners ADD COLUMN target_data VARCHAR(1024) DEFAULT NULL COMMENT 'It is different by different target_type';
 
 ALTER TABLE eh_banners MODIFY COLUMN scene_type VARCHAR(32) DEFAULT NULL;
-ALTER TABLE eh_banners MODIFY COLUMN apply_policy VARCHAR(32) DEFAULT NULL;
+ALTER TABLE eh_banners MODIFY COLUMN apply_policy TINYINT DEFAULT NULL;
