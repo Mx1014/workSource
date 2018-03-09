@@ -1771,9 +1771,17 @@ public class CommunityServiceImpl implements CommunityService {
 			if(addressDTO != null){
 				if(GroupMemberStatus.fromCode(userGroup.getMemberStatus()) == GroupMemberStatus.ACTIVE){
 					addressDTO.setUserAuth(AuthFlag.AUTHENTICATED.getCode().byteValue());
+
+					//有一个地址认证了就是认证了
 					dto.setIsAuth(AuthFlag.AUTHENTICATED.getCode());
 				}else if(GroupMemberStatus.fromCode(userGroup.getMemberStatus()) == GroupMemberStatus.WAITING_FOR_ACCEPTANCE || GroupMemberStatus.fromCode(userGroup.getMemberStatus()) == GroupMemberStatus.WAITING_FOR_APPROVAL){
 					addressDTO.setUserAuth(AuthFlag.PENDING_AUTHENTICATION.getCode().byteValue());
+
+					//有一个地址是认证中，则状态是认证中或者已认证
+					if(!AuthFlag.AUTHENTICATED.getCode().equals(dto.getIsAuth())){
+						dto.setIsAuth(AuthFlag.PENDING_AUTHENTICATION.getCode());
+					}
+
 				}else {
 					addressDTO.setUserAuth(AuthFlag.UNAUTHORIZED.getCode().byteValue());
 				}
