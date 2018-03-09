@@ -6533,7 +6533,8 @@ public class Rentalv2ServiceImpl implements Rentalv2Service {
 			rentalSite.setAddress(cmd.getAddress());
 			rentalSite.setLatitude(cmd.getLatitude());
 			rentalSite.setLongitude(cmd.getLongitude());
-			rentalSite.setCommunityId(cmd.getCommunityId());
+			if (cmd.getCommunityId()!=null)
+				rentalSite.setCommunityId(cmd.getCommunityId());
 			rentalSite.setContactPhonenum(cmd.getContactPhonenum());
 			rentalSite.setIntroduction(cmd.getIntroduction());
 			rentalSite.setNotice(cmd.getNotice());
