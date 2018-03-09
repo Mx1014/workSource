@@ -2760,6 +2760,10 @@ public class Rentalv2ServiceImpl implements Rentalv2Service {
 			attachmentDTO.setId(attachment.getId());
 			dto.getBillAttachments().add(attachmentDTO);
 		}
+
+		//加上资源类型的类型
+		RentalResourceType resourceType = this.rentalv2Provider.getRentalResourceTypeById(rs.getResourceTypeId());
+		dto.setResourceType(resourceType.getIdentify());
 	}
 
 	@Override

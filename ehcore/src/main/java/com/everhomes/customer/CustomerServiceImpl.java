@@ -38,6 +38,7 @@ import com.everhomes.rest.organization.*;
 import com.everhomes.rest.organization.pm.AddressMappingStatus;
 
 
+import com.everhomes.rest.varField.ListFieldGroupCommand;
 import com.everhomes.user.*;
 
 import com.everhomes.rest.varField.FieldGroupDTO;
@@ -288,6 +289,14 @@ public class CustomerServiceImpl implements CustomerService {
     }
 
     @Override
+    public void exportEnterpriseCustomerTemplate(ListFieldGroupCommand cmd, HttpServletResponse response) {
+        List<String> sheetNames = new ArrayList<>();
+        sheetNames.add("客户信息");
+        String excelTemplateName = "客户模板" + new SimpleDateFormat("yyyy-MM-dd-HH-mm").format(Calendar.getInstance().getTime()) + ".xls";
+        dynamicExcelService.exportDynamicExcel(response, DynamicExcelStrings.CUSTOEMR, null, sheetNames, cmd, true, false, excelTemplateName);
+    }
+
+    @Override
     public EnterpriseCustomerDTO createEnterpriseCustomer(CreateEnterpriseCustomerCommand cmd) {
         checkPrivilege(cmd.getNamespaceId());
         checkCustomerAuth(cmd.getNamespaceId(), PrivilegeConstants.ENTERPRISE_CUSTOMER_CREATE, cmd.getOrgId(), cmd.getCommunityId());
@@ -418,7 +427,8 @@ public class CustomerServiceImpl implements CustomerService {
         return dto;
     }
 
-    private OrganizationDTO createOrganization(EnterpriseCustomer customer) {
+    @Override
+    public OrganizationDTO createOrganization(EnterpriseCustomer customer) {
         Organization org = organizationProvider.findOrganizationByName(customer.getName(), customer.getNamespaceId());
         if(org != null && OrganizationStatus.ACTIVE.equals(OrganizationStatus.fromCode(org.getStatus()))) {
             //已存在则更新 地址、官网地址、企业logo
@@ -2748,7 +2758,8 @@ public class CustomerServiceImpl implements CustomerService {
         enterpriseCustomerProvider.createCustomerTrackingPlan(plan);
 	}
 
-	private void saveCustomerEvent(int i,  EnterpriseCustomer customer, EnterpriseCustomer exist) {
+    @Override
+	public void saveCustomerEvent(int i,  EnterpriseCustomer customer, EnterpriseCustomer exist) {
 		enterpriseCustomerProvider.saveCustomerEvent(i,customer,exist);
 	}
 	

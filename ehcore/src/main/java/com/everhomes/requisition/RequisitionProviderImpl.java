@@ -76,7 +76,10 @@ public class RequisitionProviderImpl implements RequisitionProvider {
             //flow case id get
             FlowCase flowcase = flowCaseProvider.findFlowCaseByReferId(r.getValue(req.ID)
                     , "requisitionId", PrivilegeConstants.REQUISITION_MODULE);
-            dto.setFlowCaseId(flowcase.getId());
+            //忘记校验空指针了，其他接口查询来的对象
+            if(flowcase != null){
+                dto.setFlowCaseId(flowcase.getId());
+            }
 
             dto.setId(r.getValue(req.ID));
             list.add(dto);

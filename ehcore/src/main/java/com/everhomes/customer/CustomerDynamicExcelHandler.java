@@ -7,16 +7,19 @@ import com.everhomes.listing.CrossShardListingLocator;
 import com.everhomes.rest.customer.*;
 import com.everhomes.rest.dynamicExcel.DynamicImportResponse;
 import com.everhomes.rest.field.ExportFieldsExcelCommand;
+import com.everhomes.rest.organization.OrganizationDTO;
 import com.everhomes.rest.varField.FieldDTO;
 import com.everhomes.rest.varField.FieldGroupDTO;
 import com.everhomes.rest.varField.ImportFieldExcelCommand;
 import com.everhomes.rest.varField.ListFieldCommand;
 import com.everhomes.user.User;
+import com.everhomes.user.UserContext;
 import com.everhomes.user.UserProvider;
 import com.everhomes.util.ConvertHelper;
 import com.everhomes.util.StringHelper;
 import com.everhomes.varField.*;
 import org.apache.commons.lang.StringUtils;
+import org.apache.lucene.spatial.geohash.GeoHashUtils;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
@@ -131,6 +134,7 @@ public class CustomerDynamicExcelHandler implements DynamicExcelHandler {
         Integer namespaceId = customerInfo.getNamespaceId();
         Long communityId = customerInfo.getCommunityId();
         String moduleName = customerInfo.getModuleName();
+        Long uid = UserContext.currentUserId();
         if(rowDatas != null && rowDatas.size() > 0) {
             CustomerDynamicSheetClass sheet = CustomerDynamicSheetClass.fromStatus(ds.getClassName());
             if(sheet == null) {
@@ -140,6 +144,67 @@ public class CustomerDynamicExcelHandler implements DynamicExcelHandler {
             for(DynamicRowDTO rowData : rowDatas) {
                 List<DynamicColumnDTO> columns = rowData.getColumns();
                 switch (sheet) {
+                    case CUSTOMER:
+                        EnterpriseCustomer enterpriseCustomer = new EnterpriseCustomer();
+                        enterpriseCustomer.setNamespaceId(namespaceId);
+                        enterpriseCustomer.setCommunityId(communityId);
+                        enterpriseCustomer.setCreatorUid(uid);
+
+                        if(columns != null && columns.size() > 0) {
+                            for(DynamicColumnDTO column : columns) {
+                                LOGGER.warn("CUSTOMER: cellvalue: {}, namespaceId: {}, communityId: {}, moduleName: {}", column.getValue(), namespaceId, communityId, moduleName);
+                                if("categoryItemId".equals(column.getFieldName()) || "levelItemId".equals(column.getFieldName())
+                                        || "sourceItemId".equals(column.getFieldName()) || "contactGenderItemId".equals(column.getFieldName())
+                                        || "corpNatureItemId".equals(column.getFieldName()) || "corpIndustryItemId".equals(column.getFieldName())
+                                        || "corpPurposeItemId".equals(column.getFieldName()) || "corpProductCategoryItemId".equals(column.getFieldName())
+                                        || "corpQualificationItemId".equals(column.getFieldName()) || "propertyType".equals(column.getFieldName())
+                                        || "registrationTypeId".equals(column.getFieldName()) || "technicalFieldId".equals(column.getFieldName())
+                                        || "taxpayerTypeId".equals(column.getFieldName()) || "relationWillingId".equals(column.getFieldName())
+                                        || "highAndNewTechId".equals(column.getFieldName()) || "entrepreneurialCharacteristicsId".equals(column.getFieldName())
+                                        || "serialEntrepreneurId".equals(column.getFieldName())) {
+                                    ScopeFieldItem item = fieldService.findScopeFieldItemByDisplayName(namespaceId, communityId, moduleName, column.getValue());
+                                    if(item != null) {
+                                        column.setValue(item.getItemId().toString());
+                                    }
+                                }
+
+                                if("trackingUid".equals(column.getFieldName())) {
+                                    enterpriseCustomer.setTrackingName(column.getValue());
+                                    List<User> users = userProvider.listUserByKeyword(column.getValue(), namespaceId, new CrossShardListingLocator(), 2);
+                                    if(users != null && users.size() > 0) {
+                                        column.setValue(users.get(0).getId().toString());
+                                    } else {
+                                        column.setValue("-1");
+                                    }
+                                }
+                                try {
+                                    setToObj(column.getFieldName(), enterpriseCustomer, column.getValue());
+                                } catch(Exception e){
+                                    LOGGER.warn("one row invoke set method for EnterpriseCustomer failed");
+                                    failedNumber ++;
+                                }
+
+                                continue;
+                            }
+                        }
+
+                        if(null != enterpriseCustomer.getLongitude() && null != enterpriseCustomer.getLatitude()){
+                            String geohash  = GeoHashUtils.encode(enterpriseCustomer.getLatitude(), enterpriseCustomer.getLongitude());
+                            enterpriseCustomer.setGeohash(geohash);
+                        }
+
+                        customerProvider.createEnterpriseCustomer(enterpriseCustomer);
+
+                        //企业客户新增成功,保存客户事件
+                        customerService.saveCustomerEvent( 1  ,enterpriseCustomer ,null);
+
+                        OrganizationDTO organizationDTO = customerService.createOrganization(enterpriseCustomer);
+                        enterpriseCustomer.setOrganizationId(organizationDTO.getId());
+
+                        customerProvider.updateEnterpriseCustomer(enterpriseCustomer);
+                        customerSearcher.feedDoc(enterpriseCustomer);
+
+                        break;
                     case CUSTOMER_TAX:
                         CustomerTax tax = new CustomerTax();
                         tax.setCustomerId(customerId);

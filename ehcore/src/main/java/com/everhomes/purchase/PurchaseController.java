@@ -9,6 +9,8 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RestController;
 
+import java.util.List;
+
 /**
  * Created by Wentian Wang on 2018/1/10.
  */
@@ -84,6 +86,20 @@ public class PurchaseController extends ControllerBase{
     private RestResponse deletePurchaseOrder(DeletePurchaseOrderCommand cmd){
         purchaseService.deletePurchaseOrder(cmd);
         RestResponse restResponse = new RestResponse();
+        restResponse.setErrorCode(200);
+        restResponse.setErrorDescription("OK");
+        return restResponse;
+    }
+
+    /**
+     * <b>URL: /purchase/getWarehouseMaterialPurchaseHistory</b>
+     * <p>获得一个物品的采购历史清单</p>
+     */
+    @RequestMapping("getWarehouseMaterialPurchaseHistory")
+    @RestReturn(value = GetWarehouseMaterialPurchaseHistoryDTO.class, collection = true)
+    private RestResponse getWarehouseMaterialPurchaseHistory(GetWarehouseMaterialPurchaseHistoryCommand cmd){
+        List<GetWarehouseMaterialPurchaseHistoryDTO> list = purchaseService.getWarehouseMaterialPurchaseHistory(cmd);
+        RestResponse restResponse = new RestResponse(list);
         restResponse.setErrorCode(200);
         restResponse.setErrorDescription("OK");
         return restResponse;
