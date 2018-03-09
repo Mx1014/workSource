@@ -2669,8 +2669,12 @@ public class Rentalv2ServiceImpl implements Rentalv2Service {
 			Organization org = this.organizationProvider.findOrganizationById(bill.getUserEnterpriseId());
 			dto.setCompanyName(org.getName());
 			List<OrganizationAddress> addresses = this.organizationProvider.findOrganizationAddressByOrganizationId(bill.getUserEnterpriseId());
-			if (addresses!=null && addresses.size()>0)
+			if (addresses!=null && addresses.size()>0) {
 				dto.setBuildingName(addresses.get(0).getBuildingName());
+				Address add = this.addressProvider.findAddressById(addresses.get(0).getAddressId());
+				if (add!=null)
+					dto.setAddress(add.getAddress());
+			}
 		}
 
 		dto.setTotalPrice(bill.getPayTotalMoney());

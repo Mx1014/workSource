@@ -28,6 +28,8 @@ import com.everhomes.rest.family.FamilyDTO;
 public class CategoryDTO {
     private Long     id;
     private Long     parentId;
+    private Long    ownerId;
+    private String ownerType;
     private String   name;
     private String   path;
     private Integer  defaultOrder;
@@ -150,7 +152,23 @@ public class CategoryDTO {
         }
         return EqualsBuilder.reflectionEquals(this, obj);
     }
-    
+
+    public Long getOwnerId() {
+        return ownerId;
+    }
+
+    public void setOwnerId(Long ownerId) {
+        this.ownerId = ownerId;
+    }
+
+    public String getOwnerType() {
+        return ownerType;
+    }
+
+    public void setOwnerType(String ownerType) {
+        this.ownerType = ownerType;
+    }
+
     @Override
     public int hashCode(){
         return HashCodeBuilder.reflectionHashCode(this);
