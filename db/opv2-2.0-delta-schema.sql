@@ -1707,5 +1707,6 @@ CHANGE COLUMN `door_auth_id` `door_auth_id` VARCHAR(128) NULL DEFAULT NULL ;
 ALTER TABLE `eh_equipment_inspection_equipment_attachments`
   ADD COLUMN `name`  varchar(255) NULL DEFAULT '' AFTER `content_uri`;
 
-
+-- 工作流修改字段长度    add by xq.tian  2018/03/09
+ALTER TABLE eh_flow_actions MODIFY COLUMN render_text TEXT COMMENT 'the content for this message that have variables';
 
