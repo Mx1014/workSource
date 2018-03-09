@@ -40,7 +40,8 @@ public class LinkEmbeddedHandler implements ForumEmbeddedHandler {
             	if(link.getContentType().equals(LinkContentType.CREATE.getCode())){
             		link.setRichContent(link.getContent());
             		String homeUrl = configurationProvider.getValue(ConfigConstants.HOME_URL, "");
-            		link.setContent(homeUrl + "/web/lib/html/rich_text_review.html?id=" + link.getId());
+					String contentUrl = configurationProvider.getValue(ConfigConstants.ACTIVITY_CONTENT_URL, "/html/activity_text_review.html");
+					link.setContent(homeUrl + contentUrl + "?id=" + link.getId());
             	}
             	return StringHelper.toJsonString(link);
 	        }
@@ -63,7 +64,8 @@ public class LinkEmbeddedHandler implements ForumEmbeddedHandler {
             	if(link.getContentType().equals(LinkContentType.CREATE.getCode())){
             		link.setRichContent(link.getContent());
             		String homeUrl = configurationProvider.getValue(ConfigConstants.HOME_URL, "");
-            		link.setContent(homeUrl + "/web/lib/html/rich_text_review.html?id=" + link.getId());
+					String contentUrl = configurationProvider.getValue(ConfigConstants.ACTIVITY_CONTENT_URL, "/html/activity_text_review.html");
+					link.setContent(homeUrl + contentUrl + "?id=" + link.getId());
             	}
             	return StringHelper.toJsonString(link);
 	        }
