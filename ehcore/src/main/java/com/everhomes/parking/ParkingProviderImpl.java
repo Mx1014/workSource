@@ -1087,7 +1087,9 @@ public class ParkingProviderImpl implements ParkingProvider {
 		query.addConditions(Tables.EH_PARKING_SPACES.PARKING_LOT_ID.eq(parkingLotId));
 		query.addConditions(Tables.EH_PARKING_SPACES.STATUS.eq(ParkingSpaceStatus.OPEN.getCode())
 			.or(Tables.EH_PARKING_SPACES.STATUS.eq(ParkingSpaceStatus.IN_USING.getCode())));
-		query.addConditions(Tables.EH_PARKING_SPACES.SPACE_NO.notIn(spaces));
+		if(spaces!=null && spaces.size()>0){
+			query.addConditions(Tables.EH_PARKING_SPACES.SPACE_NO.notIn(spaces));
+		}
 		//排序 优先取 空余的车位分配
 		query.addOrderBy(Tables.EH_PARKING_SPACES.STATUS.asc());
 		query.addLimit(1);
