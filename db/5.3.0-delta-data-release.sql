@@ -621,8 +621,8 @@ update eh_var_field_groups set name = 'com.everhomes.customer.CustomerTax' where
 update eh_var_field_groups set name = 'com.everhomes.customer.CustomerAccount' where title = '银行账号';
 
 -- by dengs,20180301,园区快讯权限项添加
-set @id = (select max(id) from eh_service_module_privileges);
-INSERT INTO `eh_service_module_privileges` (`id`, `module_id`, `privilege_type`, `privilege_id`, `remark`, `default_order`, `create_time`) VALUES (@id:=@id+1, '10800', '0', '10005', '全部权限', '0', now());
+-- set @id = (select max(id) from eh_service_module_privileges);
+-- INSERT INTO `eh_service_module_privileges` (`id`, `module_id`, `privilege_type`, `privilege_id`, `remark`, `default_order`, `create_time`) VALUES (@id:=@id+1, '10800', '0', '10005', '全部权限', '0', now());
 
 -- by dengs,20180302,服务联盟权限项添加
 INSERT INTO `eh_service_modules` (`id`, `name`, `parent_id`, `path`, `type`, `level`, `status`, `default_order`, `create_time`, `instance_config`, `action_type`, `update_time`, `operator_uid`, `creator_uid`, `description`, `multiple_flag`, `module_control_type`) VALUES ('40510', '样式设置', '40500', '/40000/40500/40510', '1', '3', '2', '0', now(), NULL, NULL, now(), '0', '1', '1', NULL, '');
