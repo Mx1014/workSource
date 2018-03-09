@@ -729,3 +729,7 @@ INSERT INTO `eh_web_menus` (`id`, `name`, `parent_id`, `icon_url`, `data_type`, 
 
 -- st.zheng 服务联盟物业报修跳转调整
 update eh_service_alliance_jump_module set  module_url = REPLACE(module_url,'taskCategoryId=0', 'taskCategoryId=6') where module_url like '%zl://propertyrepair/create?type=user&taskCategoryId=0&displayName=%';
+
+
+-- 更新活动详情页页面路径。 add by yanjun 201803091110
+UPDATE eh_configurations SET `value` = '/html/activity_text_review.html' WHERE `name` = 'activity.content.url';
