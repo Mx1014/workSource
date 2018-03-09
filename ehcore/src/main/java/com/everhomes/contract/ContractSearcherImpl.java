@@ -138,9 +138,9 @@ public class ContractSearcherImpl extends AbstractElasticSearch implements Contr
             builder.field("customerType", contract.getCustomerType());
             builder.field("paymentFlag", contract.getPaymentFlag());
             if(contract.getRent() != null) {
-                builder.field("amount", contract.getRent());
+                builder.field("rent", contract.getRent());
             } else {
-                builder.field("amount", "");
+                builder.field("rent", "");
             }
 
             builder.endObject();

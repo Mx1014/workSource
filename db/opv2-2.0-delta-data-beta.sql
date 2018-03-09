@@ -57,3 +57,5 @@ SELECT @appid := @appid + 1, namespace_id, namespace_id + 100,  `active_app_id`,
 -- /yellowPage/syncServiceAllianceApplicationRecords
 -- /yellowPage/syncSARequestInfo
 -- /officecubicle/dataMigration
+
+-- 10、执行文件 db/search/enterpriseCustomer.sh 然后同步/customer/syncEnterpriseCustomer

@@ -880,11 +880,13 @@ public class SalaryServiceImpl implements SalaryService {
             BigDecimal salaryTax = calculateSalaryTax(salary);
             BigDecimal bonusTax = calculateBonusTax(bonus, salary);
             //保存计税
-            SalaryGroupEntity groupEntity = salaryGroupEntityProvider.findSalaryGroupEntityByOrgANdDefaultId(ownerId, SalaryConstants.ENTITY_ID_SALARYTAX);
+            // Long organizationId = punchService.getTopEnterpriseId(ownerId);
+            SalaryGroupEntity groupEntity = salaryGroupEntityProvider.findSalaryGroupEntityByOrgANdDefaultId(organizationId, SalaryConstants.ENTITY_ID_SALARYTAX);
             if (null == groupEntity) {
                 SalaryDefaultEntity de = salaryDefaultEntityProvider.findSalaryDefaultEntityById(SalaryConstants.ENTITY_ID_SALARYTAX);
                 groupEntity = ConvertHelper.convert(de, SalaryGroupEntity.class);
                 groupEntity.setDefaultId(de.getId());
+                groupEntity.setEditableFlag(NormalFlag.NO.getCode());
                 groupEntity.setOrganizationId(organizationId);
                 groupEntity.setId(null);
                 if (groupEntity.getStatus() == null) {
@@ -903,6 +905,7 @@ public class SalaryServiceImpl implements SalaryService {
                 groupEntity = ConvertHelper.convert(de, SalaryGroupEntity.class);
                 groupEntity.setDefaultId(de.getId());
                 groupEntity.setOrganizationId(organizationId);
+                groupEntity.setEditableFlag(NormalFlag.NO.getCode());
                 groupEntity.setId(null);
                 if (groupEntity.getStatus() == null) {
                     groupEntity.setStatus((byte) 1);
@@ -993,21 +996,21 @@ public class SalaryServiceImpl implements SalaryService {
 
     private String checkImportEmployeeSalaryTitle(Map<String, String> titleMap, Long organizationId) {
         List<SalaryGroupEntity> groupEntities = salaryGroupEntityProvider.listOpenSalaryGroupEntityByOrgId(organizationId);
-        List<String> titleList = new ArrayList<String>(titleMap.values());
-        if (!"手机".equals(titleList.get(0))) {
-            LOGGER.error("第一列不是手机而是" + titleList.get(0));
+//        List<String> titleList = new ArrayList<String>(titleMap.values());
+        if (!"手机".equals(titleMap.get("A"))) {
+            LOGGER.error("第一列不是手机而是" + titleMap.get("A"));
             return ImportFileErrorType.TITLE_ERROE.getCode();
         }
-        if (!"姓名".equals(titleList.get(1))) {
-            LOGGER.error("第2列不是姓名而是" + titleList.get(1));
+        if (!"姓名".equals(titleMap.get("B"))) {
+            LOGGER.error("第2列不是姓名而是" + titleMap.get("B"));
 
             return ImportFileErrorType.TITLE_ERROE.getCode();
         }
         if (null != groupEntities) {
             for (int i = 0; i < groupEntities.size(); i++) {
                 try {
-                    if (!groupEntities.get(i).getName().equals(titleList.get(i + 2))) {
-                        LOGGER.error("第{}列不是{}而是{}", (i + 1), groupEntities.get(i).getName(), titleList.get(i));
+                    if (!groupEntities.get(i).getName().equals(titleMap.get(GetExcelLetter(i + 3)))) {
+                        LOGGER.error("第{}列不是{}而是{}", (i + 1), groupEntities.get(i).getName(), titleMap.get(GetExcelLetter(i + 1)));
                         return ImportFileErrorType.TITLE_ERROE.getCode();
                     }
                 } catch (Exception e) {
