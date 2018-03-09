@@ -479,7 +479,8 @@ public class OfficeCubicleServiceImpl implements OfficeCubicleService {
 		// 工位类别
 		row.createCell(++i).setCellValue(OfficeRentType.fromCode(dto.getRentType()).getMsg());
 		// 工位数/面积
-		row.createCell(++i).setCellValue(dto.getSpaceSize() + OfficeSpaceType.fromCode(dto.getSpaceType()).getMsg());
+		OfficeSpaceType spaceType = OfficeSpaceType.fromCode(dto.getSpaceType());
+		row.createCell(++i).setCellValue(dto.getSpaceSize() + spaceType==null?"":spaceType.getMsg());
 		// 预订人
 		row.createCell(++i).setCellValue(dto.getReserverName());
 
