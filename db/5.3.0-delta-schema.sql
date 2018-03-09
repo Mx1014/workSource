@@ -1726,7 +1726,8 @@ ALTER TABLE `eh_incubator_applies` ADD COLUMN `check_flag`  tinyint(4) NULL DEFA
 -- 服务联盟申请记录表创建
 -- DROP TABLE IF EXISTS `eh_service_alliance_application_records`;
 CREATE TABLE `eh_service_alliance_application_records` (
-		`id` BIGINT COMMENT 'id',
+	`id` BIGINT COMMENT 'id',
+	`namespace_id` INTEGER COMMENT '',
     `jump_type` BIGINT COMMENT '', 
     `template_type` VARCHAR(128) COMMENT '', 
     `type` BIGINT COMMENT '', 
@@ -1744,6 +1745,7 @@ CREATE TABLE `eh_service_alliance_application_records` (
     `workflow_status` TINYINT COMMENT '', 
     `creator_organization` VARCHAR(128) COMMENT '', 
     `service_organization` VARCHAR(128) COMMENT '',
+    `service_alliance_id` BIGINT COMMENT '', 
   
   PRIMARY KEY (`id`)
 ) ENGINE = INNODB DEFAULT CHARSET = utf8mb4 ;
