@@ -1663,6 +1663,15 @@ public class AssetServiceImpl implements AssetService {
                         Calendar start_copy = getCopyCalendar(start);
                         if(separationTime<1) separationTime = 1f;
                         start_copy.add(Calendar.DAY_OF_MONTH,separationTime.intValue());
+                        //version 1
+//                        while(start_copy.compareTo(end)==-1){
+//                            Calendar start_copy_copy =Calendar.getInstance();
+//                            start_copy_copy.setTime(start_copy.getTime());
+//                            insertTimes.add(start_copy_copy);
+//                            start_copy.add(Calendar.DAY_OF_MONTH,separationTime.intValue());
+//                        }
+                        //version 2
+                        start_copy.add(Calendar.DAY_OF_MONTH,separationTime.intValue());
                         while(start_copy.compareTo(end)==-1){
                             Calendar start_copy_copy =Calendar.getInstance();
                             start_copy_copy.setTime(start_copy.getTime());
@@ -1679,7 +1688,17 @@ public class AssetServiceImpl implements AssetService {
 
 //                        String test1 = yyyyMMdd.format(start_copy_1.getTime());
 //                        String test2 = yyyyMMdd.format(end.getTime());
-
+                        //version 1
+//                        while(start_copy_1.compareTo(end)==-1){
+//                            Calendar start_copy_1_copy =Calendar.getInstance();
+//                            start_copy_1_copy.setTime(start_copy_1.getTime());
+//                            insertTimes.add(start_copy_1_copy);
+//                            start_copy_1.add(Calendar.MONTH,(Integer) interAndFloat[0]);
+//                            start_copy_1.add(Calendar.DAY_OF_MONTH,(int)((float) start_copy_1.getActualMaximum(Calendar.DAY_OF_MONTH) * (float) interAndFloat[1]));
+//                        }
+                        //version 2
+                        start_copy_1.add(Calendar.MONTH,(Integer) interAndFloat[0]);
+                        start_copy_1.add(Calendar.DAY_OF_MONTH,(int)((float) start_copy_1.getActualMaximum(Calendar.DAY_OF_MONTH) * (float) interAndFloat[1]));
                         while(start_copy_1.compareTo(end)==-1){
                             Calendar start_copy_1_copy =Calendar.getInstance();
                             start_copy_1_copy.setTime(start_copy_1.getTime());
@@ -1687,6 +1706,7 @@ public class AssetServiceImpl implements AssetService {
                             start_copy_1.add(Calendar.MONTH,(Integer) interAndFloat[0]);
                             start_copy_1.add(Calendar.DAY_OF_MONTH,(int)((float) start_copy_1.getActualMaximum(Calendar.DAY_OF_MONTH) * (float) interAndFloat[1]));
                         }
+                        // break
                         break;
                     case 3:
                         Calendar start_copy_2 = getCopyCalendar(start);
@@ -1696,7 +1716,21 @@ public class AssetServiceImpl implements AssetService {
                         Object[] interAndFloat_2 = IntegerUtil.getIntegerAndFloatPartFromFloat(((float) interAndFloat_1[1]) * 12f);
                         start_copy_2.add(Calendar.MONTH,(Integer) interAndFloat_2[0]);
                         start_copy_2.add(Calendar.DAY_OF_MONTH,(int)((float) start_copy_2.getActualMaximum(Calendar.DAY_OF_MONTH) * (float) interAndFloat_2[1]));
+                        // version 1
+//                        while(start_copy_2.compareTo(end)==-1){
+//                            Calendar start_copy_2_copy =Calendar.getInstance();
+//                            start_copy_2_copy.setTime(start_copy_2.getTime());
+//                            insertTimes.add(start_copy_2_copy);
+//
+//                            start_copy_2.add(Calendar.YEAR,(Integer) interAndFloat_1[0]);
+//                            start_copy_2.add(Calendar.MONTH,(Integer) interAndFloat_2[0]);
+//                            start_copy_2.add(Calendar.DAY_OF_MONTH,(int)((float) start_copy_2.getActualMaximum(Calendar.DAY_OF_MONTH) * (float) interAndFloat_2[1]));
+//                        }
 
+                        // version 2
+                        start_copy_2.add(Calendar.YEAR,(Integer) interAndFloat_1[0]);
+                        start_copy_2.add(Calendar.MONTH,(Integer) interAndFloat_2[0]);
+                        start_copy_2.add(Calendar.DAY_OF_MONTH,(int)((float) start_copy_2.getActualMaximum(Calendar.DAY_OF_MONTH) * (float) interAndFloat_2[1]));
                         while(start_copy_2.compareTo(end)==-1){
                             Calendar start_copy_2_copy =Calendar.getInstance();
                             start_copy_2_copy.setTime(start_copy_2.getTime());
