@@ -3077,6 +3077,8 @@ public class EquipmentProviderImpl implements EquipmentProvider {
         updateQuery.addConditions(Tables.EH_EQUIPMENT_INSPECTION_TASK_LOGS.ID.eq(taskLogId));
         updateQuery.addConditions(Tables.EH_EQUIPMENT_INSPECTION_TASK_LOGS.PROCESS_TYPE.eq(EquipmentTaskProcessType.NEED_MAINTENANCE.getCode()));
         updateQuery.execute();
+        LOGGER.debug("updateMaintanceInspectionLogsById：{}",updateQuery.getSQL());
+        LOGGER.debug("updateMaintanceInspectionLogsById bindValues：{}",updateQuery.getBindValues());
     }
 
     @Override
