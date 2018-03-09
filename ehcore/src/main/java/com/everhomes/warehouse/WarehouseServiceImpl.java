@@ -32,6 +32,7 @@ import com.everhomes.search.*;
 import com.everhomes.sequence.SequenceProvider;
 import com.everhomes.server.schema.tables.EhWarehouseOrders;
 import com.everhomes.server.schema.tables.pojos.EhWarehouseStockLogs;
+import com.everhomes.server.schema.tables.pojos.EhWarehouseStocks;
 import com.everhomes.settings.PaginationConfigHelper;
 import com.everhomes.supplier.SupplierHelper;
 import com.everhomes.user.User;
@@ -40,6 +41,7 @@ import com.everhomes.user.UserPrivilegeMgr;
 import com.everhomes.user.UserProvider;
 import com.everhomes.util.ConvertHelper;
 import com.everhomes.util.DateHelper;
+import com.everhomes.util.DateUtils;
 import com.everhomes.util.RuntimeErrorException;
 import com.everhomes.util.excel.RowResult;
 import com.everhomes.util.excel.handler.PropMrgOwnerHandler;
@@ -1628,9 +1630,34 @@ public class WarehouseServiceImpl implements WarehouseService {
             stockLog.setWarehouseId(dto.getWarehouseId());
             stockLog.setRequestUid(UserContext.currentUserId());
             list.add(stockLog);
+
+            warehouseProvider.insertWarehouseStockLogs(list);
+            //更改物品的库存
+            //寻找库存
+            boolean stockExists = warehouseProvider.checkStockExists(dto.getWarehouseId(),dto.getMaterialId());
+            WarehouseStocks stock = null;
+            if(stockExists){
+                //如果库存已经有了，则增加库存
+                warehouseProvider.updateWarehouseStockByPurchase(dto.getWarehouseId(),dto.getMaterialId(),dto.getQuantity());
+            }else{
+                //如果没有，则新增库存
+                stock = new WarehouseStocks();
+                stock.setAmount(dto.getQuantity());
+                stock.setCommunityId(order.getCommunityId());
+                stock.setCreateTime(DateUtils.currentTimestamp());
+                stock.setCreatorUid(order.getCreateUid());
+                stock.setId(this.sequenceProvider.getNextSequence(NameMapper.getSequenceDomainFromTablePojo(
+                        EhWarehouseStocks.class
+                )));
+                stock.setMaterialId(dto.getMaterialId());
+                stock.setNamespaceId(order.getNamespaceId());
+                stock.setOwnerId(order.getOwnerId());
+                stock.setOwnerType(order.getOwnerType());
+                stock.setStatus(Status.ACTIVE.getCode());
+                stock.setWarehouseId(dto.getWarehouseId());
+                warehouseProvider.insertWarehouseStock(stock);
+            }
         }
-        warehouseProvider.insertWarehouseStockLogs(list);
-        //更改物品的库存
 
         // end
 

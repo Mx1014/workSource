@@ -10,7 +10,7 @@ import com.everhomes.util.StringHelper;
  * Created by ying.xiong on 2017/5/11.
  */
 public enum WarehouseStockRequestSource {
-    REQUEST((byte)0), MANUAL_INPUT((byte)1);
+    REQUEST((byte)0), MANUAL_INPUT((byte)1), PURCHASE((byte)2);
 
     private byte code;
 

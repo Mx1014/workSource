@@ -89,7 +89,7 @@ public interface WarehouseProvider {
 
     List<Long> findAllMaterialLogIds(Long warehouseOrderId, Long anchor, int pageSize, SearchWarehouseStockLogsResponse response);
 
-    void updateWarehouseStockByPurchase(Long materialId, Long purchaseQuantity);
+    WarehouseStocks updateWarehouseStockByPurchase(Long warehouseId, Long materialId, Long purchaseQuantity);
 
     String findWarehouseNameByMaterialId(Long materialId);
 
@@ -106,4 +106,10 @@ public interface WarehouseProvider {
     List<WarehouseLogDTO> listMaterialLogsBySupplier(Long supplierId, Long pageAnchor, Integer integer);
 
     String findWarehouseMaterialCategoryNameById(Long value);
+
+    boolean checkStockExists(Long warehouseId, Long materialId);
+
+    void insertWarehouseStock(WarehouseStocks stock);
+
+    void insertWarehouseStockLog(WarehouseStockLogs logs);
 }

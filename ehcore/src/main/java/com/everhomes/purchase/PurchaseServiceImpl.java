@@ -12,18 +12,25 @@ import com.everhomes.rest.flow.*;
 import com.everhomes.rest.organization.ListPMOrganizationsCommand;
 import com.everhomes.rest.organization.ListPMOrganizationsResponse;
 import com.everhomes.rest.purchase.*;
-import com.everhomes.rest.warehouse.WarehouseMaterialStock;
+import com.everhomes.rest.warehouse.*;
 import com.everhomes.sequence.SequenceProvider;
+import com.everhomes.server.schema.tables.EhWarehouseOrders;
 import com.everhomes.server.schema.tables.pojos.EhWarehousePurchaseItems;
 import com.everhomes.server.schema.tables.pojos.EhWarehousePurchaseOrders;
+import com.everhomes.server.schema.tables.pojos.EhWarehouseStockLogs;
+import com.everhomes.server.schema.tables.pojos.EhWarehouseStocks;
+import com.everhomes.sms.DateUtil;
+import com.everhomes.supplier.SupplierHelper;
 import com.everhomes.supplier.SupplierProvider;
+import com.everhomes.user.User;
 import com.everhomes.user.UserContext;
 import com.everhomes.user.UserPrivilegeMgr;
+import com.everhomes.user.UserProvider;
+import com.everhomes.util.ConvertHelper;
 import com.everhomes.util.DateHelper;
+import com.everhomes.util.DateUtils;
 import com.everhomes.util.RuntimeErrorException;
-import com.everhomes.warehouse.WarehouseMaterials;
-import com.everhomes.warehouse.WarehouseOrderStatus;
-import com.everhomes.warehouse.WarehouseProvider;
+import com.everhomes.warehouse.*;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -59,6 +66,8 @@ public class PurchaseServiceImpl implements PurchaseService {
     private UserPrivilegeMgr userPrivilegeMgr;
     @Autowired
     private OrganizationService organizationService;
+    @Autowired
+    private UserProvider userProvider;
 
 
 
@@ -124,6 +133,8 @@ public class PurchaseServiceImpl implements PurchaseService {
                     EhWarehousePurchaseItems.class
             )));
             item.setMaterialId(dto.getMaterialId());
+            //预录入入库的仓库
+            item.setWarehouseId(dto.getWarehouseId());
             item.setNamespaceId(cmd.getNamespaceId());
             item.setOwnerId(cmd.getOwnerId());
             item.setOwnerType(cmd.getOwnerType());
@@ -185,17 +196,71 @@ public class PurchaseServiceImpl implements PurchaseService {
     @Override
     public void entryWarehouse(Long purchaseRequestId,Long communityId) {
         checkAssetPriviledgeForPropertyOrg(communityId, PrivilegeConstants.PURCHASE_ENTRY_STOCK);
-        PurchaseOrder order = purchaseProvider.getPurchaseOrderById(purchaseRequestId);
-        if(!order.getSubmissionStatus().equals(PurchaseSubmissionStatus.FINISH.getCode())){
+        PurchaseOrder purchaseOrder = purchaseProvider.getPurchaseOrderById(purchaseRequestId);
+        if(!purchaseOrder.getSubmissionStatus().equals(PurchaseSubmissionStatus.FINISH.getCode())){
             throw RuntimeErrorException.errorWith(PurchaseErrorCodes.SCOPE,PurchaseErrorCodes.UNABLE_ENTRY_WAREHOUSE
             ,"unabale to continue instock operation since this order had been canceld or not finished yet");
         }
-        //增加库存
+        //增加一个入库单
+        WarehouseOrder order = new WarehouseOrder();
+        long warehouseOrderId = this.sequenceProvider.getNextSequence(NameMapper.getSequenceDomainFromTablePojo(EhWarehouseOrders.class));
+        order.setId(warehouseOrderId);
+        order.setCreateTime(new Timestamp(DateHelper.currentGMTTime().getTime()));
+        order.setCreateUid(UserContext.currentUserId());
+        order.setOwnerType(purchaseOrder.getOwnerType());
+        order.setOwnerId(purchaseOrder.getOwnerId());
+        order.setNamespaceId(purchaseOrder.getNamespaceId());
+        order.setIdentity(SupplierHelper.getIdentity());
+        order.setExecutorId(UserContext.currentUserId());
+        order.setServiceType(OrderServiceType.PURCHASE_ENTRY.getCode());
+        order.setCommunityId(purchaseOrder.getCommunityId());
+        User userById = userProvider.findUserById(UserContext.currentUserId());
+        order.setExecutorName(userById.getNickName());
+        order.setExecutorTime(new Timestamp(DateHelper.currentGMTTime().getTime()));
+        //增加库存,增加库存日志
         List<PurchaseItem> items = purchaseProvider.getPurchaseItemsByOrderId(purchaseRequestId);
         for(PurchaseItem item : items){
             Long materialId = item.getMaterialId();
             Long purchaseQuantity = item.getPurchaseQuantity();
-            warehouseProvider.updateWarehouseStockByPurchase(materialId,purchaseQuantity);
+            Long warehouseId = item.getWarehouseId();
+            //寻找库存
+            boolean stockExists = warehouseProvider.checkStockExists(warehouseId,materialId);
+            WarehouseStocks stock = null;
+            if(stockExists){
+                //如果库存已经有了，则增加库存
+                stock = warehouseProvider.updateWarehouseStockByPurchase(warehouseId,materialId,purchaseQuantity);
+            }else{
+                //如果没有，则新增库存
+                stock = new WarehouseStocks();
+                stock.setAmount(item.getPurchaseQuantity());
+                stock.setCommunityId(order.getCommunityId());
+                stock.setCreateTime(DateUtils.currentTimestamp());
+                stock.setCreatorUid(order.getCreateUid());
+                stock.setId(this.sequenceProvider.getNextSequence(NameMapper.getSequenceDomainFromTablePojo(
+                        EhWarehouseStocks.class
+                )));
+                stock.setMaterialId(item.getMaterialId());
+                stock.setNamespaceId(order.getNamespaceId());
+                stock.setOwnerId(order.getOwnerId());
+                stock.setOwnerType(order.getOwnerType());
+                stock.setStatus(Status.ACTIVE.getCode());
+                stock.setWarehouseId(item.getWarehouseId());
+                warehouseProvider.insertWarehouseStock(stock);
+            }
+            //出入库记录
+            WarehouseStockLogs logs = ConvertHelper.convert(stock, WarehouseStockLogs.class);
+            logs.setWarehouseOrderId(warehouseOrderId);
+            logs.setRequestUid(order.getCreateUid());
+            logs.setId(this.sequenceProvider.getNextSequence(NameMapper.getSequenceDomainFromTablePojo(
+                    EhWarehouseStockLogs.class
+            )));
+            logs.setDeliveryUid(logs.getRequestUid());
+            logs.setDeliveryAmount(purchaseQuantity);
+            logs.setStockAmount(stock.getAmount());
+            logs.setRequestType(WarehouseStockRequestType.STOCK_IN.getCode());
+            logs.setRequestSource(WarehouseStockRequestSource.PURCHASE.getCode());
+            logs.setRequestId(purchaseOrder.getId());
+            warehouseProvider.insertWarehouseStockLog(logs);
         }
     }
 

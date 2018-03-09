@@ -645,12 +645,22 @@ public class WarehouseProviderImpl implements WarehouseProvider {
     }
 
     @Override
-    public void updateWarehouseStockByPurchase(Long materialId, Long purchaseQuantity) {
+    public WarehouseStocks updateWarehouseStockByPurchase(Long warehouseId, Long materialId, Long purchaseQuantity) {
         DSLContext context = this.dbProvider.getDslContext(AccessSpec.readWrite());
         context.update(Tables.EH_WAREHOUSE_STOCKS)
                 .set(Tables.EH_WAREHOUSE_STOCKS.AMOUNT,Tables.EH_WAREHOUSE_STOCKS.AMOUNT.add(purchaseQuantity))
                 .where(Tables.EH_WAREHOUSE_STOCKS.ID.eq(materialId))
+                .and(Tables.EH_WAREHOUSE_STOCKS.WAREHOUSE_ID.eq(warehouseId))
                 .execute();
+        List<WarehouseStocks> warehouseStocks = context.select(Tables.EH_WAREHOUSE_STOCKS.fields())
+                .from(Tables.EH_WAREHOUSE_STOCKS)
+                .where(Tables.EH_WAREHOUSE_STOCKS.ID.eq(materialId))
+                .and(Tables.EH_WAREHOUSE_STOCKS.WAREHOUSE_ID.eq(warehouseId))
+                .fetchInto(WarehouseStocks.class);
+        if(warehouseStocks != null && warehouseStocks.size() > 0){
+            return warehouseStocks.get(0);
+        }
+        return null;
     }
 
     @Override
@@ -762,6 +772,32 @@ public class WarehouseProviderImpl implements WarehouseProvider {
                 .from(Tables.EH_WAREHOUSE_MATERIAL_CATEGORIES)
                 .where(Tables.EH_WAREHOUSE_MATERIAL_CATEGORIES.ID.eq(value))
                 .fetchOne(Tables.EH_WAREHOUSE_MATERIAL_CATEGORIES.NAME);
+    }
+
+    @Override
+    public boolean checkStockExists(Long warehouseId, Long materialId) {
+        DSLContext context = dbProvider.getDslContext(AccessSpec.readOnly());
+        List<Long> fetch = context.select(Tables.EH_WAREHOUSE_STOCKS.ID)
+                .from(Tables.EH_WAREHOUSE_STOCKS)
+                .where(Tables.EH_WAREHOUSE_STOCKS.MATERIAL_ID.eq(materialId))
+                .and(Tables.EH_WAREHOUSE_STOCKS.WAREHOUSE_ID.eq(warehouseId))
+                .fetch(Tables.EH_WAREHOUSE_STOCKS.ID);
+        if(fetch!=null && fetch.size() > 0) return true;
+        return false;
+    }
+
+    @Override
+    public void insertWarehouseStock(WarehouseStocks stock) {
+        DSLContext context = dbProvider.getDslContext(AccessSpec.readWrite());
+        EhWarehouseStocksDao dao = new EhWarehouseStocksDao(context.configuration());
+        dao.insert(stock);
+    }
+
+    @Override
+    public void insertWarehouseStockLog(WarehouseStockLogs logs) {
+        DSLContext context = dbProvider.getDslContext(AccessSpec.readWrite());
+        EhWarehouseStockLogsDao dao = new EhWarehouseStockLogsDao(context.configuration());
+        dao.insert(logs);
     }
 
     @Override

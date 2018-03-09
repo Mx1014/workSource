@@ -9,12 +9,22 @@ package com.everhomes.rest.purchase;
  * <li>materialId:物品id</li>
  * <li>purchaseQuantity:采购数量</li>
  * <li>unitPrice:单价</li>
+ * <li>warehouseId:仓库id</li>
  *</ul>
  */
 public class PurchaseMaterialDTO {
     private Long materialId;
     private Long purchaseQuantity;
     private String unitPrice;
+    private Long warehouseId;
+
+    public Long getWarehouseId() {
+        return warehouseId;
+    }
+
+    public void setWarehouseId(Long warehouseId) {
+        this.warehouseId = warehouseId;
+    }
 
     public Long getMaterialId() {
         return materialId;

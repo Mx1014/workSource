@@ -1749,3 +1749,6 @@ CREATE TABLE `eh_service_alliance_application_records` (
   
   PRIMARY KEY (`id`)
 ) ENGINE = INNODB DEFAULT CHARSET = utf8mb4 ;
+
+-- 对采购单中物品增加字段warehouseId
+ALTER TABLE `eh_warehouse_purchase_items` ADD COLUMN `warehouse_id` BIGINT COMMENT '仓库id';
