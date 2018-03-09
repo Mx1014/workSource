@@ -7,12 +7,20 @@ import com.everhomes.db.DbProvider;
 import com.everhomes.equipment.EquipmentInspectionStandards;
 import com.everhomes.listing.CrossShardListingLocator;
 import com.everhomes.naming.NameMapper;
-import com.everhomes.rest.warehouse.DeliveryFlag;
-import com.everhomes.rest.warehouse.Status;
+import com.everhomes.rest.warehouse.*;
 import com.everhomes.sequence.SequenceProvider;
 import com.everhomes.server.schema.Tables;
+import com.everhomes.server.schema.tables.*;
 import com.everhomes.server.schema.tables.daos.*;
 import com.everhomes.server.schema.tables.pojos.*;
+import com.everhomes.server.schema.tables.pojos.EhWarehouseMaterialCategories;
+import com.everhomes.server.schema.tables.pojos.EhWarehouseMaterials;
+import com.everhomes.server.schema.tables.pojos.EhWarehouseRequestMaterials;
+import com.everhomes.server.schema.tables.pojos.EhWarehouseRequests;
+import com.everhomes.server.schema.tables.pojos.EhWarehouseStockLogs;
+import com.everhomes.server.schema.tables.pojos.EhWarehouseStocks;
+import com.everhomes.server.schema.tables.pojos.EhWarehouseUnits;
+import com.everhomes.server.schema.tables.pojos.EhWarehouses;
 import com.everhomes.server.schema.tables.records.*;
 import com.everhomes.sharding.ShardIterator;
 import com.everhomes.sharding.ShardingProvider;
@@ -20,15 +28,19 @@ import com.everhomes.user.UserContext;
 import com.everhomes.util.ConvertHelper;
 import com.everhomes.util.DateHelper;
 import com.everhomes.util.IterationMapReduceCallback;
+import freemarker.template.SimpleDate;
 import org.jooq.DSLContext;
 import org.jooq.Record;
 import org.jooq.SelectQuery;
+import org.jooq.Table;
+import org.jooq.impl.DSL;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
 
 import java.sql.Timestamp;
+import java.text.SimpleDateFormat;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Set;
@@ -536,6 +548,220 @@ public class WarehouseProviderImpl implements WarehouseProvider {
         query.addFrom(Tables.EH_WEB_MENUS);
         query.addConditions(Tables.EH_WEB_MENUS.ID.eq(WarehouseMenuIds.WAREHOUSE_MANAGEMENT));
         return query.fetchOne(Tables.EH_WEB_MENUS.NAME);
+    }
+
+    @Override
+    public List<WarehouseStockOrderDTO> listWarehouseStockOrders(String executor, Integer namespaceId, String ownerType, Long ownerId, Byte serviceType, Long pageAnchor, Integer pageSize) {
+        List<WarehouseStockOrderDTO> list = new ArrayList<>();
+        DSLContext context = dbProvider.getDslContext(AccessSpec.readOnly());
+        SelectQuery<Record> query = context.selectQuery();
+        query.addFrom(Tables.EH_WAREHOUSE_ORDERS);
+        if(executor!=null){
+            query.addConditions(Tables.EH_WAREHOUSE_ORDERS.EXECUTOR_NAME.eq(executor));
+        }
+        if(serviceType!=null){
+            query.addConditions(Tables.EH_WAREHOUSE_ORDERS.SERVICE_TYPE.eq(serviceType));
+        }
+        query.addConditions(Tables.EH_WAREHOUSE_ORDERS.OWNER_TYPE.eq(ownerType));
+        query.addConditions(Tables.EH_WAREHOUSE_ORDERS.OWNER_ID.eq(ownerId));
+        query.addConditions(Tables.EH_WAREHOUSE_ORDERS.NAMESPACE_ID.eq(namespaceId));
+        query.addLimit(pageAnchor.intValue(),pageSize);
+        SimpleDateFormat sdf = new SimpleDateFormat("yyyy-MM-dd");
+        query.fetch()
+                .forEach(r ->{
+                    WarehouseStockOrderDTO dto = new WarehouseStockOrderDTO();
+                    try{
+                        dto.setExecutionTime(sdf.format(r.getValue(Tables.EH_WAREHOUSE_ORDERS.EXECUTOR_TIME)));
+                    }catch (Exception e){
+
+                    }
+                    dto.setExecutor(r.getValue(Tables.EH_WAREHOUSE_ORDERS.EXECUTOR_NAME));
+                    dto.setId(r.getValue(Tables.EH_WAREHOUSE_ORDERS.ID));
+                    dto.setIdentity(r.getValue(Tables.EH_WAREHOUSE_ORDERS.IDENTITY));
+                    dto.setServiceType(r.getValue(Tables.EH_WAREHOUSE_ORDERS.SERVICE_TYPE));
+                    list.add(dto);
+                });
+        return list;
+    }
+
+    @Override
+    public WarehouseOrder findWarehouseOrderById(Long id) {
+        DSLContext context = this.dbProvider.getDslContext(AccessSpec.readOnly());
+        return context.selectFrom(Tables.EH_WAREHOUSE_ORDERS).where(Tables.EH_WAREHOUSE_ORDERS.ID.eq(id))
+                .fetchOneInto(WarehouseOrder.class);
+    }
+
+    @Override
+    public void insertWarehouseOrder(WarehouseOrder order) {
+        DSLContext context = this.dbProvider.getDslContext(AccessSpec.readWrite());
+        EhWarehouseOrdersDao dao = new EhWarehouseOrdersDao(context.configuration());
+        dao.insert(order);
+    }
+
+    @Override
+    public void updateWarehouseOrder(WarehouseOrder order) {
+        DSLContext context = this.dbProvider.getDslContext(AccessSpec.readWrite());
+        EhWarehouseOrdersDao dao = new EhWarehouseOrdersDao(context.configuration());
+        dao.update(order);
+    }
+
+    @Override
+    public void deleteWarehouseStockLogs(Long id) {
+        DSLContext context = this.dbProvider.getDslContext(AccessSpec.readWrite());
+        context.delete(Tables.EH_WAREHOUSE_STOCK_LOGS)
+                .where(Tables.EH_WAREHOUSE_STOCK_LOGS.WAREHOUSE_ORDER_ID.eq(id))
+                .execute();
+    }
+
+    @Override
+    public void insertWarehouseStockLogs(List<EhWarehouseStockLogs> list) {
+        DSLContext context = this.dbProvider.getDslContext(AccessSpec.readWrite());
+        EhWarehouseStockLogsDao dao = new EhWarehouseStockLogsDao(context.configuration());
+        dao.insert(list);
+    }
+
+    @Override
+    public void deleteWarehouseOrderById(Long id) {
+        DSLContext context = this.dbProvider.getDslContext(AccessSpec.readWrite());
+        context.delete(Tables.EH_WAREHOUSE_ORDERS)
+                .where(Tables.EH_WAREHOUSE_ORDERS.ID.eq(id))
+                .execute();
+    }
+
+    @Override
+    public List<Long> findAllMaterialLogIds(Long warehouseOrderId, Long anchor, int pageSize, SearchWarehouseStockLogsResponse response) {
+        Integer pageOffset = (anchor.intValue() - 1) * pageSize;
+        DSLContext context = this.dbProvider.getDslContext(AccessSpec.readOnly());
+        Integer total = context.select(DSL.count(Tables.EH_WAREHOUSE_STOCK_LOGS.ID))
+                .from(Tables.EH_WAREHOUSE_STOCK_LOGS)
+                .where(Tables.EH_WAREHOUSE_STOCK_LOGS.WAREHOUSE_ORDER_ID.eq(warehouseOrderId))
+                .fetchOne(DSL.count(Tables.EH_WAREHOUSE_STOCK_LOGS.ID));
+        response.setTotal(total.longValue());
+        return context.select(Tables.EH_WAREHOUSE_STOCK_LOGS.ID)
+                .from(Tables.EH_WAREHOUSE_STOCK_LOGS)
+                .where(Tables.EH_WAREHOUSE_STOCK_LOGS.WAREHOUSE_ORDER_ID.eq(warehouseOrderId))
+                .limit(pageOffset,pageSize)
+                .fetch(Tables.EH_WAREHOUSE_STOCK_LOGS.ID);
+    }
+
+    @Override
+    public void updateWarehouseStockByPurchase(Long materialId, Long purchaseQuantity) {
+        DSLContext context = this.dbProvider.getDslContext(AccessSpec.readWrite());
+        context.update(Tables.EH_WAREHOUSE_STOCKS)
+                .set(Tables.EH_WAREHOUSE_STOCKS.AMOUNT,Tables.EH_WAREHOUSE_STOCKS.AMOUNT.add(purchaseQuantity))
+                .where(Tables.EH_WAREHOUSE_STOCKS.ID.eq(materialId))
+                .execute();
+    }
+
+    @Override
+    public String findWarehouseNameByMaterialId(Long materialId) {
+        DSLContext context = this.dbProvider.getDslContext(AccessSpec.readOnly());
+        List<Long> list = context.select(Tables.EH_WAREHOUSE_STOCKS.WAREHOUSE_ID)
+                .from(Tables.EH_WAREHOUSE_STOCKS)
+                .where(Tables.EH_WAREHOUSE_STOCKS.MATERIAL_ID.eq(materialId))
+                .fetch(Tables.EH_WAREHOUSE_STOCKS.WAREHOUSE_ID);
+        if(list.size() < 1) return null;
+        return context.select(Tables.EH_WAREHOUSES.NAME)
+                .from(Tables.EH_WAREHOUSES)
+                .where(Tables.EH_WAREHOUSES.ID.eq(list.get(0)))
+                .fetchOne(Tables.EH_WAREHOUSES.NAME);
+    }
+
+    @Override
+    public String findWarehouseMaterialCategoryByMaterialId(Long materialId) {
+        DSLContext context = this.dbProvider.getDslContext(AccessSpec.readOnly());
+        Long categoryId = context.select(Tables.EH_WAREHOUSE_MATERIALS.CATEGORY_ID)
+                .from(Tables.EH_WAREHOUSE_MATERIALS)
+                .where(Tables.EH_WAREHOUSE_MATERIALS.ID.eq(materialId))
+                .fetchOne(Tables.EH_WAREHOUSE_MATERIALS.CATEGORY_ID);
+        return context.select(Tables.EH_WAREHOUSE_MATERIAL_CATEGORIES.NAME)
+                .from(Tables.EH_WAREHOUSE_MATERIAL_CATEGORIES)
+                .where(Tables.EH_WAREHOUSE_MATERIAL_CATEGORIES.ID.eq(categoryId))
+                .fetchOne(Tables.EH_WAREHOUSE_MATERIAL_CATEGORIES.NAME);
+
+    }
+
+    @Override
+    public String findWarehouseUnitNameById(Long unitId) {
+        DSLContext context = dbProvider.getDslContext(AccessSpec.readOnly());
+        return context.select(Tables.EH_WAREHOUSE_UNITS.NAME)
+                .from(Tables.EH_WAREHOUSE_UNITS)
+                .where(Tables.EH_WAREHOUSE_UNITS.ID.eq(unitId))
+                .fetchOne(Tables.EH_WAREHOUSE_UNITS.NAME);
+    }
+
+    @Override
+    public WarehouseMaterials findWarehouseMaterialById(Long materialId) {
+        DSLContext context = dbProvider.getDslContext(AccessSpec.readOnly());
+        return context.selectFrom(Tables.EH_WAREHOUSE_MATERIALS)
+                .where(Tables.EH_WAREHOUSE_MATERIALS.ID.eq(materialId))
+                .fetchOneInto(WarehouseMaterials.class);
+    }
+
+    @Override
+    public WarehouseMaterialStock findWarehouseStocksByMaterialId(Long materialId) {
+        DSLContext context = dbProvider.getDslContext(AccessSpec.readOnly());
+        return context.selectFrom(Tables.EH_WAREHOUSE_STOCKS)
+                .where(Tables.EH_WAREHOUSE_STOCKS.MATERIAL_ID.eq(materialId))
+                .fetchOneInto(WarehouseMaterialStock.class);
+    }
+
+    @Override
+    public void deleteWarehouseRequest(Long requestId) {
+        DSLContext context = dbProvider.getDslContext(AccessSpec.readWrite());
+        context.delete(Tables.EH_WAREHOUSE_REQUESTS)
+                .where(Tables.EH_WAREHOUSE_REQUESTS.ID.eq(requestId))
+                .execute();
+        context.delete(Tables.EH_WAREHOUSE_REQUEST_MATERIALS)
+                .where(Tables.EH_WAREHOUSE_REQUEST_MATERIALS.REQUEST_ID.eq(requestId))
+                .execute();
+    }
+
+    @Override
+    public List<WarehouseLogDTO> listMaterialLogsBySupplier(Long supplierId, Long pageAnchor, Integer pageSize) {
+        List<WarehouseLogDTO> list = new ArrayList<>();
+        DSLContext context = dbProvider.getDslContext(AccessSpec.readOnly());
+        com.everhomes.server.schema.tables.EhWarehouseMaterials m = Tables.EH_WAREHOUSE_MATERIALS.as("m");
+        com.everhomes.server.schema.tables.EhWarehouseRequestMaterials rm = Tables.EH_WAREHOUSE_REQUEST_MATERIALS.as("rm");
+        SimpleDateFormat sdf = new SimpleDateFormat("yyyy-MM-dd");
+        context.select(rm.REQUEST_ID,m.NAME,rm.AMOUNT,m.REFERENCE_PRICE)
+                .from(rm,m)
+                .where(rm.MATERIAL_ID.eq(m.ID))
+                .and(m.SUPPLIER_ID.eq(supplierId))
+                .limit(pageAnchor.intValue(),pageSize)
+                .fetch()
+                .forEach(r -> {
+                    WarehouseLogDTO dto = new WarehouseLogDTO();
+                    Long requestId = r.getValue(rm.REQUEST_ID);
+                    context.select(Tables.EH_WAREHOUSE_REQUESTS.CREATE_TIME,Tables.EH_USERS.NICK_NAME)
+                            .from(Tables.EH_WAREHOUSE_REQUESTS,Tables.EH_USERS)
+                            .where(Tables.EH_WAREHOUSE_REQUESTS.ID.eq(requestId))
+                            .and(Tables.EH_USERS.ID.eq(Tables.EH_WAREHOUSE_REQUESTS.REQUEST_UID))
+                            .fetch()
+                            .forEach(r1 ->{
+                                dto.setApplicantName(r1.getValue(Tables.EH_USERS.NICK_NAME));
+                                if(r1.getValue(Tables.EH_WAREHOUSE_REQUESTS.CREATE_TIME) != null){
+                                    dto.setApplicationTime(sdf.format
+                                            (r1.getValue(Tables.EH_WAREHOUSE_REQUESTS.CREATE_TIME)));
+                                };
+                            });
+                    dto.setMaterialCategory(findWarehouseMaterialCategoryNameById(r.getValue(m.CATEGORY_ID)));
+                    dto.setMaterialName(r.getValue(m.NAME));
+                    dto.setPurchaseQuantity(r.getValue(rm.AMOUNT));
+                    dto.setUnitPrice(r.getValue(m.REFERENCE_PRICE).toString());
+                    list.add(dto);
+                });
+
+        return list;
+    }
+
+    @Override
+    public String findWarehouseMaterialCategoryNameById(Long value) {
+        DSLContext context = dbProvider.getDslContext(AccessSpec.readOnly());
+        return context.select(Tables.EH_WAREHOUSE_MATERIAL_CATEGORIES.NAME)
+                .from(Tables.EH_WAREHOUSE_MATERIAL_CATEGORIES)
+                .where(Tables.EH_WAREHOUSE_MATERIAL_CATEGORIES.ID.eq(value))
+                .fetchOne(Tables.EH_WAREHOUSE_MATERIAL_CATEGORIES.NAME);
     }
 
     @Override

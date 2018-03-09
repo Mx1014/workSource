@@ -16,6 +16,7 @@ public class RentalRecommendUser {
     private String mobile;
     private String iconUri;
     private String iconUrl;
+    private Integer defaultOrder;
 
     public Long getId() {
         return id;
@@ -55,5 +56,13 @@ public class RentalRecommendUser {
 
     public void setIconUrl(String iconUrl) {
         this.iconUrl = iconUrl;
+    }
+
+    public Integer getDefaultOrder() {
+        return defaultOrder;
+    }
+
+    public void setDefaultOrder(Integer defaultOrder) {
+        this.defaultOrder = defaultOrder;
     }
 }

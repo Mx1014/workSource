@@ -1101,16 +1101,22 @@ public class BannerServiceImpl implements BannerService {
                  banner.setBannerLocation(cmd.getBannerLocation());
                  banner.setBannerGroup(cmd.getBannerGroup());
                  banner.setName(cmd.getName());
-                 banner.setNamespaceId(user.getNamespaceId());
+                 Integer namespaceId = UserContext.getCurrentNamespaceId();
+                 banner.setNamespaceId(namespaceId);
                  banner.setStatus(cmd.getStatus());
                  banner.setPosterPath(cmd.getPosterPath());
                  banner.setScopeCode(cmd.getScope().getScopeCode());
                  banner.setScopeId(cmd.getScope().getScopeId());
                  banner.setOrder(cmd.getDefaultOrder());
                  // 设置最大的order值
-                 List<BannerDTO> bannerDTOList = bannerProvider.listBannersByOwner(UserContext.getCurrentNamespaceId(),
+                 List<BannerDTO> bannerDTOList = bannerProvider.listBannersByOwner(namespaceId,
                          cmd.getScope(), sceneStr, null, null, ApplyPolicy.CUSTOMIZED);
-                 bannerDTOList.stream().mapToInt(BannerDTO::getOrder).distinct().reduce(Math::max).ifPresent(r -> banner.setOrder(r + 1));
+
+                 bannerDTOList.stream()
+                         .mapToInt(BannerDTO::getOrder)
+                         .distinct()
+                         .reduce(Math::max)
+                         .ifPresent(r -> banner.setOrder(r + 1));
 
                  banner.setApplyPolicy(ApplyPolicy.CUSTOMIZED.getCode());
                  banner.setSceneType(sceneType.getCode());
@@ -1146,7 +1152,7 @@ public class BannerServiceImpl implements BannerService {
 	public void updateBannerByOwner(UpdateBannerByOwnerCommand cmd) {
 		checkUserNotInOrg(cmd.getOwnerType(), cmd.getOwnerId());
 		
-		if(cmd.getId() == null){
+		if(cmd.getId() == null) {
             throw RuntimeErrorException.errorWith(ErrorCodes.SCOPE_GENERAL,
                     ErrorCodes.ERROR_INVALID_PARAMETER, "Invalid id parameter.");
         }
@@ -1155,11 +1161,12 @@ public class BannerServiceImpl implements BannerService {
                      ErrorCodes.ERROR_INVALID_PARAMETER, "Invalid scope parameter.");
         }
         Banner banner = bannerProvider.findBannerById(cmd.getId());
-        if(banner == null){
+        if(banner == null) {
             throw RuntimeErrorException.errorWith(BannerServiceErrorCode.SCOPE,
                     BannerServiceErrorCode.ERROR_BANNER_NOT_EXISTS, "Banner is not exists.");
         }
-        if(cmd.getStatus() == BannerStatus.ACTIVE.getCode()) {
+        if(banner.getStatus() == BannerStatus.CLOSE.getCode()
+                && cmd.getStatus() == BannerStatus.ACTIVE.getCode()) {
         	// 检查最大banner的激活数量是否超限
 			checkBannerActivationCount(cmd.getScope(), Collections.singletonList(banner.getSceneType()));
 		}

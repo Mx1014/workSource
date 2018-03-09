@@ -1,12 +1,12 @@
 package com.everhomes.rest.rentalv2.admin;
 
-import java.math.BigDecimal;
 import java.util.List;
 
-import javax.validation.constraints.NotNull;
-
 import com.everhomes.discover.ItemType;
+import com.everhomes.rest.rentalv2.SiteItemDTO;
 import com.everhomes.util.StringHelper;
+
+import javax.validation.constraints.NotNull;
 
 /**
  * <ul>
@@ -50,42 +50,62 @@ import com.everhomes.util.StringHelper;
  * <li>rentalTypes: 时间单元类型列表 {@link com.everhomes.rest.rentalv2.RentalType}</li>
  * <li>priceRules: 价格策略列表 {@link com.everhomes.rest.rentalv2.admin.PriceRuleDTO}</li>
  * <li>pricePackages: 套餐价格表{@link com.everhomes.rest.rentalv2.admin.PricePackageDTO}</li>
+ * <li>refundStrategies: 退款规则{@link com.everhomes.rest.rentalv2.admin.RentalOrderRuleDTO}</li>
+ * <li>overtimeStrategies: 超时规则{@link com.everhomes.rest.rentalv2.admin.RentalOrderRuleDTO}</li>
+ * <li>siteItems: 付费物资</li>
  * </ul>
  */
 public class QueryDefaultRuleAdminResponse {
-	private Byte exclusiveFlag;
-	private Double unit;
-	private Byte autoAssign;
-	private Byte multiUnit;
-	private Byte needPay;
-	private Byte multiTimeInterval;
+
+	@NotNull
+	private String ownerType;
+	@NotNull
+	private Long ownerId;
+
+	private String resourceType;
+
+	private String sourceType;
+	private Long sourceId;
+
+	@NotNull
+	private Long resourceTypeId;
+
+//	private Byte exclusiveFlag;
+//	private Double unit;
+
 	@ItemType(AttachmentConfigDTO.class)
 	private List<AttachmentConfigDTO> attachments;
 
+//	@ItemType(SiteNumberDTO.class)
+//	private List<SiteNumberDTO> siteNumbers;
+//
+//	private Byte multiUnit;
+//	private Byte autoAssign;
+//	private Double siteCounts;
+	private Byte needPay;
+	private Byte multiTimeInterval;
+
+	private Byte rentalStartTimeFlag;
+	private Byte rentalEndTimeFlag;
 	private Long rentalEndTime;
 	private Long rentalStartTime;
-	private Double timeStep;
+//	private Double timeStep;
 	@ItemType(TimeIntervalDTO.class)
 	private List<TimeIntervalDTO> timeIntervals;
 	private Long beginDate;
 	private Long endDate;
-	private Double dayOpenTime;
-	private Double dayCloseTime;
+	private Byte holidayOpenFlag;
+	private Byte holidayType;
+//	private Double dayOpenTime;
+//	private Double dayCloseTime;
 	@ItemType(Integer.class)
 	private List<Integer> openWeekday;
 	@ItemType(Long.class)
 	private List<Long> closeDates;
 
-	private Double siteCounts;
-
-	@ItemType(SiteNumberDTO.class)
-	private List<SiteNumberDTO> siteNumbers;
-	private Long cancelTime;
+//	private Long cancelTime;
 	private Byte refundFlag;
 	private Integer refundRatio;
-
-	private Byte rentalStartTimeFlag;
-	private Byte rentalEndTimeFlag;
 
 	@ItemType(Byte.class)
 	private List<Byte> rentalTypes;
@@ -94,144 +114,108 @@ public class QueryDefaultRuleAdminResponse {
 	@ItemType(PricePackageDTO.class)
 	private List<PricePackageDTO> pricePackages;
 
-	@Deprecated
-	private Byte rentalType;
-	@Deprecated
-	private BigDecimal workdayPrice;
-	@Deprecated
-	private BigDecimal weekendPrice;
-	@Deprecated
-	private BigDecimal orgMemberWorkdayPrice;
-	@Deprecated
-	private BigDecimal orgMemberWeekendPrice;
-	@Deprecated
-	private BigDecimal approvingUserWorkdayPrice;
-	@Deprecated
-	private BigDecimal approvingUserWeekendPrice;
-	@Deprecated
-	private Byte discountType;
-	@Deprecated
-	private java.math.BigDecimal fullPrice;
-	@Deprecated
-	private java.math.BigDecimal cutPrice;
-	@Deprecated
-    private Double discountRatio;
+//	@Deprecated
+//	private Byte rentalType;
+//	@Deprecated
+//	private BigDecimal workdayPrice;
+//	@Deprecated
+//	private BigDecimal weekendPrice;
+//	@Deprecated
+//	private BigDecimal orgMemberWorkdayPrice;
+//	@Deprecated
+//	private BigDecimal orgMemberWeekendPrice;
+//	@Deprecated
+//	private BigDecimal approvingUserWorkdayPrice;
+//	@Deprecated
+//	private BigDecimal approvingUserWeekendPrice;
+//	@Deprecated
+//	private Byte discountType;
+//	@Deprecated
+//	private java.math.BigDecimal fullPrice;
+//	@Deprecated
+//	private java.math.BigDecimal cutPrice;
+//	@Deprecated
+//    private Double discountRatio;
 
 	@ItemType(TimeIntervalDTO.class)
 	private List<TimeIntervalDTO> halfDayTimeIntervals;
+	private Byte refundStrategy;
+	private Byte overtimeStrategy;
+	@ItemType(RentalOrderRuleDTO.class)
+	private List<RentalOrderRuleDTO> refundStrategies;
+	@ItemType(RentalOrderRuleDTO.class)
+	private List<RentalOrderRuleDTO> overtimeStrategies;
+	@ItemType(SiteItemDTO.class)
+	private List<SiteItemDTO> siteItems;
 
-	public Byte getRentalType() {
-		return rentalType;
-	}
-	public void setRentalType(Byte rentalType) {
-		this.rentalType = rentalType;
-	}
-	public BigDecimal getWorkdayPrice() {
-		return workdayPrice;
-	}
-	public void setWorkdayPrice(BigDecimal workdayPrice) {
-		this.workdayPrice = workdayPrice;
-	}
-	public BigDecimal getWeekendPrice() {
-		return weekendPrice;
-	}
-	public void setWeekendPrice(BigDecimal weekendPrice) {
-		this.weekendPrice = weekendPrice;
-	}
-	public BigDecimal getOrgMemberWorkdayPrice() {
-		return orgMemberWorkdayPrice;
-	}
-	public void setOrgMemberWorkdayPrice(BigDecimal orgMemberWorkdayPrice) {
-		this.orgMemberWorkdayPrice = orgMemberWorkdayPrice;
-	}
-	public BigDecimal getOrgMemberWeekendPrice() {
-		return orgMemberWeekendPrice;
-	}
-	public void setOrgMemberWeekendPrice(BigDecimal orgMemberWeekendPrice) {
-		this.orgMemberWeekendPrice = orgMemberWeekendPrice;
-	}
-	public BigDecimal getApprovingUserWorkdayPrice() {
-		return approvingUserWorkdayPrice;
-	}
-	public void setApprovingUserWorkdayPrice(BigDecimal approvingUserWorkdayPrice) {
-		this.approvingUserWorkdayPrice = approvingUserWorkdayPrice;
-	}
-	public BigDecimal getApprovingUserWeekendPrice() {
-		return approvingUserWeekendPrice;
-	}
-	public void setApprovingUserWeekendPrice(BigDecimal approvingUserWeekendPrice) {
-		this.approvingUserWeekendPrice = approvingUserWeekendPrice;
-	}
-	public Byte getDiscountType() {
-		return discountType;
-	}
-	public void setDiscountType(Byte discountType) {
-		this.discountType = discountType;
-	}
-	public java.math.BigDecimal getFullPrice() {
-		return fullPrice;
-	}
-	public void setFullPrice(java.math.BigDecimal fullPrice) {
-		this.fullPrice = fullPrice;
-	}
-	public java.math.BigDecimal getCutPrice() {
-		return cutPrice;
-	}
-	public void setCutPrice(java.math.BigDecimal cutPrice) {
-		this.cutPrice = cutPrice;
-	}
-	public Double getDiscountRatio() {
-		return discountRatio;
-	}
-	public void setDiscountRatio(Double discountRatio) {
-		this.discountRatio = discountRatio;
-	}
-	public List<Byte> getRentalTypes() {
-		return rentalTypes;
-	}
-	public void setRentalTypes(List<Byte> rentalTypes) {
-		this.rentalTypes = rentalTypes;
-	}
-	public List<PriceRuleDTO> getPriceRules() {
-		return priceRules;
-	}
-	public void setPriceRules(List<PriceRuleDTO> priceRules) {
-		this.priceRules = priceRules;
-	}
+
 	@Override
     public String toString() {
         return StringHelper.toJsonString(this);
     }
-	public Byte getExclusiveFlag() {
-		return exclusiveFlag;
+
+	public String getOwnerType() {
+		return ownerType;
 	}
 
-	public void setExclusiveFlag(Byte exclusiveFlag) {
-		this.exclusiveFlag = exclusiveFlag;
+	public void setOwnerType(String ownerType) {
+		this.ownerType = ownerType;
 	}
 
-	public Double getUnit() {
-		return unit;
+	public Long getOwnerId() {
+		return ownerId;
 	}
 
-	public void setUnit(Double unit) {
-		this.unit = unit;
+	public void setOwnerId(Long ownerId) {
+		this.ownerId = ownerId;
 	}
 
-	public Byte getAutoAssign() {
-		return autoAssign;
+	public String getResourceType() {
+		return resourceType;
 	}
 
-	public void setAutoAssign(Byte autoAssign) {
-		this.autoAssign = autoAssign;
+	public void setResourceType(String resourceType) {
+		this.resourceType = resourceType;
 	}
 
-	public Byte getMultiUnit() {
-		return multiUnit;
+	public String getSourceType() {
+		return sourceType;
 	}
 
-	public void setMultiUnit(Byte multiUnit) {
-		this.multiUnit = multiUnit;
+	public void setSourceType(String sourceType) {
+		this.sourceType = sourceType;
+	}
+
+	public Long getSourceId() {
+		return sourceId;
+	}
+
+	public void setSourceId(Long sourceId) {
+		this.sourceId = sourceId;
+	}
+
+	public Long getResourceTypeId() {
+		return resourceTypeId;
+	}
+
+	public void setResourceTypeId(Long resourceTypeId) {
+		this.resourceTypeId = resourceTypeId;
+	}
+
+	public List<Byte> getRentalTypes() {
+		return rentalTypes;
+	}
+
+	public void setRentalTypes(List<Byte> rentalTypes) {
+		this.rentalTypes = rentalTypes;
+	}
+
+	public List<PriceRuleDTO> getPriceRules() {
+		return priceRules;
+	}
+
+	public void setPriceRules(List<PriceRuleDTO> priceRules) {
+		this.priceRules = priceRules;
 	}
 
 	public Byte getNeedPay() {
@@ -258,31 +242,6 @@ public class QueryDefaultRuleAdminResponse {
 		this.attachments = attachments;
 	}
 
-	public Double getDayOpenTime() {
-		return dayOpenTime;
-	}
-
-	public void setDayOpenTime(Double dayOpenTime) {
-		this.dayOpenTime = dayOpenTime;
-	}
-
-	public Double getDayCloseTime() {
-		return dayCloseTime;
-	}
-
-	public void setDayCloseTime(Double dayCloseTime) {
-		this.dayCloseTime = dayCloseTime;
-	}
-
-	//
-//	public Byte getRentalType() {
-//		return rentalType;
-//	}
-//
-//	public void setRentalType(Byte rentalType) {
-//		this.rentalType = rentalType;
-//	}
-
 	public Long getRentalEndTime() {
 		return rentalEndTime;
 	}
@@ -298,14 +257,7 @@ public class QueryDefaultRuleAdminResponse {
 	public void setRentalStartTime(Long rentalStartTime) {
 		this.rentalStartTime = rentalStartTime;
 	}
-	
 
-	public Double getTimeStep() {
-		return timeStep;
-	}
-	public void setTimeStep(Double timeStep) {
-		this.timeStep = timeStep;
-	}
 	public List<TimeIntervalDTO> getTimeIntervals() {
 		return timeIntervals;
 	}
@@ -329,52 +281,37 @@ public class QueryDefaultRuleAdminResponse {
 	public void setEndDate(Long endDate) {
 		this.endDate = endDate;
 	}
- 
+
+	public Byte getHolidayOpenFlag() {
+		return holidayOpenFlag;
+	}
+
+	public void setHolidayOpenFlag(Byte holidayOpenFlag) {
+		this.holidayOpenFlag = holidayOpenFlag;
+	}
+
+	public Byte getHolidayType() {
+		return holidayType;
+	}
+
+	public void setHolidayType(Byte holidayType) {
+		this.holidayType = holidayType;
+	}
 
 	public List<Integer> getOpenWeekday() {
 		return openWeekday;
 	}
+
 	public void setOpenWeekday(List<Integer> openWeekday) {
 		this.openWeekday = openWeekday;
 	}
+
 	public List<Long> getCloseDates() {
 		return closeDates;
 	}
 
 	public void setCloseDates(List<Long> closeDates) {
 		this.closeDates = closeDates;
-	}
-//
-//	public BigDecimal getWorkdayPrice() {
-//		return workdayPrice;
-//	}
-//
-//	public void setWorkdayPrice(BigDecimal workdayPrice) {
-//		this.workdayPrice = workdayPrice;
-//	}
-//
-//	public BigDecimal getWeekendPrice() {
-//		return weekendPrice;
-//	}
-//
-//	public void setWeekendPrice(BigDecimal weekendPrice) {
-//		this.weekendPrice = weekendPrice;
-//	}
-
-	public Double getSiteCounts() {
-		return siteCounts;
-	}
-
-	public void setSiteCounts(Double siteCounts) {
-		this.siteCounts = siteCounts;
-	}
-
-	public Long getCancelTime() {
-		return cancelTime;
-	}
-
-	public void setCancelTime(Long cancelTime) {
-		this.cancelTime = cancelTime;
 	}
 
 	public Byte getRefundFlag() {
@@ -392,12 +329,6 @@ public class QueryDefaultRuleAdminResponse {
 	public void setRefundRatio(Integer refundRatio) {
 		this.refundRatio = refundRatio;
 	}
-	public List<SiteNumberDTO> getSiteNumbers() {
-		return siteNumbers;
-	}
-	public void setSiteNumbers(List<SiteNumberDTO> siteNumbers) {
-		this.siteNumbers = siteNumbers;
-	}
 
 	public List<PricePackageDTO> getPricePackages() {
 		return pricePackages;
@@ -406,31 +337,6 @@ public class QueryDefaultRuleAdminResponse {
 	public void setPricePackages(List<PricePackageDTO> pricePackages) {
 		this.pricePackages = pricePackages;
 	}
-
-	//	public Byte getDiscountType() {
-//		return discountType;
-//	}
-//	public void setDiscountType(Byte discountType) {
-//		this.discountType = discountType;
-//	}
-//	public java.math.BigDecimal getFullPrice() {
-//		return fullPrice;
-//	}
-//	public void setFullPrice(java.math.BigDecimal fullPrice) {
-//		this.fullPrice = fullPrice;
-//	}
-//	public java.math.BigDecimal getCutPrice() {
-//		return cutPrice;
-//	}
-//	public void setCutPrice(java.math.BigDecimal cutPrice) {
-//		this.cutPrice = cutPrice;
-//	}
-//	public Double getDiscountRatio() {
-//		return discountRatio;
-//	}
-//	public void setDiscountRatio(Double discountRatio) {
-//		this.discountRatio = discountRatio;
-//	}
 
 	public Byte getRentalStartTimeFlag() {
 		return rentalStartTimeFlag;
@@ -447,38 +353,6 @@ public class QueryDefaultRuleAdminResponse {
 	public void setRentalEndTimeFlag(Byte rentalEndTimeFlag) {
 		this.rentalEndTimeFlag = rentalEndTimeFlag;
 	}
-//
-//	public BigDecimal getOrgMemberWorkdayPrice() {
-//		return orgMemberWorkdayPrice;
-//	}
-//
-//	public void setOrgMemberWorkdayPrice(BigDecimal orgMemberWorkdayPrice) {
-//		this.orgMemberWorkdayPrice = orgMemberWorkdayPrice;
-//	}
-//
-//	public BigDecimal getOrgMemberWeekendPrice() {
-//		return orgMemberWeekendPrice;
-//	}
-//
-//	public void setOrgMemberWeekendPrice(BigDecimal orgMemberWeekendPrice) {
-//		this.orgMemberWeekendPrice = orgMemberWeekendPrice;
-//	}
-//
-//	public BigDecimal getApprovingUserWorkdayPrice() {
-//		return approvingUserWorkdayPrice;
-//	}
-//
-//	public void setApprovingUserWorkdayPrice(BigDecimal approvingUserWorkdayPrice) {
-//		this.approvingUserWorkdayPrice = approvingUserWorkdayPrice;
-//	}
-//
-//	public BigDecimal getApprovingUserWeekendPrice() {
-//		return approvingUserWeekendPrice;
-//	}
-//
-//	public void setApprovingUserWeekendPrice(BigDecimal approvingUserWeekendPrice) {
-//		this.approvingUserWeekendPrice = approvingUserWeekendPrice;
-//	}
 
 	public List<TimeIntervalDTO> getHalfDayTimeIntervals() {
 		return halfDayTimeIntervals;
@@ -486,5 +360,45 @@ public class QueryDefaultRuleAdminResponse {
 
 	public void setHalfDayTimeIntervals(List<TimeIntervalDTO> halfDayTimeIntervals) {
 		this.halfDayTimeIntervals = halfDayTimeIntervals;
+	}
+
+	public List<RentalOrderRuleDTO> getRefundStrategies() {
+		return refundStrategies;
+	}
+
+	public void setRefundStrategies(List<RentalOrderRuleDTO> refundStrategies) {
+		this.refundStrategies = refundStrategies;
+	}
+
+	public List<RentalOrderRuleDTO> getOvertimeStrategies() {
+		return overtimeStrategies;
+	}
+
+	public void setOvertimeStrategies(List<RentalOrderRuleDTO> overtimeStrategies) {
+		this.overtimeStrategies = overtimeStrategies;
+	}
+
+	public List<SiteItemDTO> getSiteItems() {
+		return siteItems;
+	}
+
+	public void setSiteItems(List<SiteItemDTO> siteItems) {
+		this.siteItems = siteItems;
+	}
+
+	public Byte getRefundStrategy() {
+		return refundStrategy;
+	}
+
+	public void setRefundStrategy(Byte refundStrategy) {
+		this.refundStrategy = refundStrategy;
+	}
+
+	public Byte getOvertimeStrategy() {
+		return overtimeStrategy;
+	}
+
+	public void setOvertimeStrategy(Byte overtimeStrategy) {
+		this.overtimeStrategy = overtimeStrategy;
 	}
 }

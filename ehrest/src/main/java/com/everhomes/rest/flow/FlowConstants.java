@@ -25,4 +25,13 @@ public interface FlowConstants {
     Long RELOCATION_MODULE = 49200L;
     //组织架构
     Long ORGANIZATION_MODULE = 50100L;
+
+    //付款申请
+    Long PAYMENT_APPLICATION_MODULE = 21300L;
+    //请示单模块id
+    Long REQUISITION_MODULE = 25000L;
+    //电子报
+    Long JOURNAL_MODULE = 10400L;
+    //采购管理模块id
+    Long PURCHASE_MODULE= 26000L;
 }

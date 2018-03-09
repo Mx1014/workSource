@@ -2,10 +2,8 @@
 package com.everhomes.print;
 
 import java.io.IOException;
-import java.io.UnsupportedEncodingException;
 import java.math.BigDecimal;
 import java.math.RoundingMode;
-import java.net.URLEncoder;
 import java.sql.Timestamp;
 import java.util.ArrayList;
 import java.util.Arrays;
@@ -20,6 +18,7 @@ import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 import java.util.stream.Collectors;
 
+import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
 
 import org.slf4j.Logger;
@@ -53,8 +52,11 @@ import com.everhomes.order.PayService;
 import com.everhomes.organization.OrganizationCommunity;
 import com.everhomes.organization.OrganizationProvider;
 import com.everhomes.organization.OrganizationService;
+import com.everhomes.qrcode.QRCodeController;
+import com.everhomes.qrcode.QRCodeService;
 import com.everhomes.rest.RestResponse;
 import com.everhomes.rest.approval.CommonStatus;
+import com.everhomes.rest.launchpad.ActionType;
 import com.everhomes.rest.order.CommonOrderCommand;
 import com.everhomes.rest.order.CommonOrderDTO;
 import com.everhomes.rest.order.OrderType;
@@ -64,6 +66,7 @@ import com.everhomes.rest.organization.OrganizationSimpleDTO;
 import com.everhomes.rest.print.DeleteQueueJobsCommand;
 import com.everhomes.rest.print.GetPrintLogonUrlCommand;
 import com.everhomes.rest.print.GetPrintLogonUrlResponse;
+import com.everhomes.rest.print.GetPrintQrcodeCommand;
 import com.everhomes.rest.print.GetPrintSettingCommand;
 import com.everhomes.rest.print.GetPrintSettingResponse;
 import com.everhomes.rest.print.GetPrintStatCommand;
@@ -100,6 +103,7 @@ import com.everhomes.rest.print.PrintOrderStatusType;
 import com.everhomes.rest.print.PrintOwnerType;
 import com.everhomes.rest.print.PrintPaperSizeType;
 import com.everhomes.rest.print.PrintRecordDTO;
+import com.everhomes.rest.print.PrintScanTarget;
 import com.everhomes.rest.print.PrintSettingColorTypeDTO;
 import com.everhomes.rest.print.PrintSettingPaperSizePriceDTO;
 import com.everhomes.rest.print.PrintSettingType;
@@ -109,15 +113,19 @@ import com.everhomes.rest.print.UnlockPrinterCommand;
 import com.everhomes.rest.print.UnlockPrinterResponse;
 import com.everhomes.rest.print.UpdatePrintSettingCommand;
 import com.everhomes.rest.print.UpdatePrintUserEmailCommand;
+import com.everhomes.rest.qrcode.GetQRCodeImageCommand;
+import com.everhomes.rest.qrcode.NewQRCodeCommand;
+import com.everhomes.rest.qrcode.QRCodeDTO;
+import com.everhomes.rest.qrcode.QRCodeHandler;
 import com.everhomes.settings.PaginationConfigHelper;
 import com.everhomes.user.User;
 import com.everhomes.user.UserContext;
 import com.everhomes.util.ConvertHelper;
 import com.everhomes.util.ExecutorUtil;
 import com.everhomes.util.RuntimeErrorException;
-import com.everhomes.util.StringHelper;
 import com.everhomes.util.Tuple;
 import com.everhomes.util.xml.XMLToJSON;
+import com.google.gson.JsonObject;
 /**
  * 
  *  @author:dengs 2017年6月22日
@@ -188,7 +196,11 @@ public class SiyinPrintServiceImpl implements SiyinPrintService {
 	
 	@Autowired
 	private DbProvider dbProvider;
-
+	
+	@Autowired
+	private QRCodeController qrController;
+	@Autowired
+	private QRCodeService qrcodeService;
 	@Override
 	public GetPrintSettingResponse getPrintSetting(GetPrintSettingCommand cmd) {
 		//检查参数
@@ -586,9 +598,59 @@ public class SiyinPrintServiceImpl implements SiyinPrintService {
 		if(PrintLogonStatusType.HAVE_UNPAID_ORDER == checkUnpaidOrder(cmd.getOwnerType(), cmd.getOwnerId())){
 			throw RuntimeErrorException.errorWith(ErrorCodes.SCOPE_GENERAL, ErrorCodes.ERROR_GENERAL_EXCEPTION, "Have unpaid order");
 		}
-		return unlockPrinter(cmd,false);
+//		return unlockPrinter(cmd,false);
+		return unlockByOauthLogin(cmd);
 	}
 	
+	private UnlockPrinterResponse unlockByOauthLogin(UnlockPrinterCommand cmd) {
+		Map<String, String> params = new HashMap<>();
+		User user = UserContext.current().getUser();
+		QRCodeDTO dto = qrcodeService.getQRCodeInfoById(cmd.getQrid(), null);
+		if(dto==null){
+			LOGGER.error("QRCodeDTO is null, qrid = "+cmd.getQrid());
+			throw RuntimeErrorException.errorWith(ErrorCodes.SCOPE_GENERAL, ErrorCodes.ERROR_GENERAL_EXCEPTION, "QRCodeDTO is null, qrid = "+cmd.getQrid());
+		
+		}
+		String loginAccount = user.getId().toString()+PRINT_LOGON_ACCOUNT_SPLIT+cmd.getOwnerId();
+		params.put("user_name", loginAccount);
+		params.put("email", "");
+		params.put("feature", configurationProvider.getValue("print.siyin.feature","MONOPRINT;COLORPRINT;MONOCOPY;COLORCOPY;SCAN;FAX"));
+		params.put("qrcode_param", dto.getExtra());
+		params.put("copy_mono_limit", String.valueOf(configurationProvider.getIntValue("print.siyin.copy_mono_limit", 50)));
+		params.put("copy_color_limit", String.valueOf(configurationProvider.getIntValue("print.siyin.copy_color_limit", 50)));
+		StringBuffer buffer = new StringBuffer();
+		String siyinUrl =  configurationProvider.getValue(PrintErrorCode.PRINT_SIYIN_SERVER_URL, "http://siyin.zuolin.com:8119");
+
+		String url = buffer.append(siyinUrl).append("/authagent/oauthLogin").toString();
+		try {
+			String result = HttpUtils.post(url, params, 30);
+			if(!result.equals("OK")){
+				LOGGER.error("siyin api:"+url+"request failed : "+result);
+				throw RuntimeErrorException.errorWith(ErrorCodes.SCOPE_GENERAL, ErrorCodes.ERROR_GENERAL_EXCEPTION, url+" request failed, message = "+result);
+			}
+		} catch (IOException e) {
+			LOGGER.error("siyin api:"+url+" request exception : "+e.getMessage());
+			throw RuntimeErrorException.errorWith(ErrorCodes.SCOPE_GENERAL, ErrorCodes.ERROR_GENERAL_EXCEPTION, url+" return exception, message = "+e.getMessage());
+		}
+		
+		UnlockPrinterResponse response = new UnlockPrinterResponse();
+		try{
+			JSONObject jsObject = JSONObject.parseObject(dto.getExtra());
+			String readerName = jsObject.getString("readerName");
+			if(StringUtils.isEmpty(readerName)){
+				response.setSourceType(PrintScanTarget.UL_CLIENT.getCode());
+			}else{
+				response.setSourceType(PrintScanTarget.UL_PRINTER.getCode());
+				mappingReaderToUser(readerName,UserContext.getCurrentNamespaceId());
+			}
+		}catch (Exception e) {
+			LOGGER.error("parse json error, qrcode = {}", dto.getExtra(),e);
+		}
+		
+		return response;
+	}
+
+
 	/**
 	 * 整个回调可能频繁发生，由于是非用户登录接口，完全可以放到后台任务中去做。
 	 */
@@ -680,6 +742,7 @@ public class SiyinPrintServiceImpl implements SiyinPrintService {
 		return tuple.first();
 	}
 
+	@Deprecated //使用司印二维码定制。，此接口废弃
 	private UnlockPrinterResponse unlockPrinter(UnlockPrinterCommand cmd, boolean isDirectPrint) {
         String siyinUrl =  configurationProvider.getValue(PrintErrorCode.PRINT_SIYIN_SERVER_URL, "http://siyin.zuolin.com:8119");
         String moduleIp = getSiyinModuleIp(siyinUrl, cmd.getReaderName());
@@ -854,8 +917,8 @@ public class SiyinPrintServiceImpl implements SiyinPrintService {
 			else if(settingtype == PrintSettingType.COURSE_HOTLINE){
 				//设置教程/热线
 				response.setHotline(siyinPrintSetting.getHotline());
-				response.setPrintCourseList(Arrays.asList(siyinPrintSetting.getPrintCourse().split("\\|")));
-				response.setScanCopyCourseList(Arrays.asList(siyinPrintSetting.getScanCopyCourse().split("\\|")));
+//				response.setPrintCourseList(Arrays.asList(siyinPrintSetting.getPrintCourse().split("\\|")));
+//				response.setScanCopyCourseList(Arrays.asList(siyinPrintSetting.getScanCopyCourse().split("\\|")));
 			}
 		}
 		return response;
@@ -1359,6 +1422,50 @@ public class SiyinPrintServiceImpl implements SiyinPrintService {
 			throw RuntimeErrorException.errorWith(ErrorCodes.SCOPE_GENERAL, ErrorCodes.ERROR_GENERAL_EXCEPTION, "/console/jobHandler return exception, message = "+e.getMessage());
 		}
 	
+	}
+	
+	@Override
+	public void getPrintQrcode(HttpServletRequest req, HttpServletResponse rps) {
+		GetPrintQrcodeCommand cmd = getParamsFromReq(req);
+		NewQRCodeCommand nQRCmd = new NewQRCodeCommand();
+		String cloudprinturl = configurationProvider.getValue("print.siyin.actiondata", "{\"url\":\"https://core.zuolin.com/cloud-print/build/index.html#/home#sign_suffix\"}");
+		nQRCmd.setActionData(cloudprinturl);
+		nQRCmd.setActionType(ActionType.OFFICIAL_URL.getCode());
+		nQRCmd.setDescription("cloud print");
+		nQRCmd.setExtra(cmd.getData());
+		nQRCmd.setHandler(QRCodeHandler.PRINT.getCode());
+		RestResponse restResponse = qrController.newQRCode(nQRCmd);
+		if(restResponse.getErrorCode() == 200){
+			GetQRCodeImageCommand gQRcmd = new GetQRCodeImageCommand();
+			QRCodeDTO dto = (QRCodeDTO)restResponse.getResponseObject();
+			gQRcmd.setHeight(cmd.getHeight()==null?300:cmd.getHeight());
+			gQRcmd.setWidth(cmd.getWidth()==null?300:cmd.getWidth());
+			gQRcmd.setQrid(dto.getQrid());
+			try {
+				qrController.getQRCodeImage(gQRcmd, req, rps);
+			} catch (Exception e) {
+				LOGGER.error("e",e);
+			}
+		}else{
+			LOGGER.error("create qrcode error "+restResponse);
+		}
+	}
+
+
+	private GetPrintQrcodeCommand getParamsFromReq(HttpServletRequest req) {
+		GetPrintQrcodeCommand cmd = new GetPrintQrcodeCommand();
+		Object object = req.getParameter("data");
+		if(object==null){
+			throw RuntimeErrorException.errorWith(ErrorCodes.SCOPE_GENERAL, ErrorCodes.ERROR_INVALID_PARAMETER, "unknow param data=null");
+		}
+		cmd.setData(object.toString());
+		Object width = req.getParameter("width");
+		Object height = req.getParameter("height");
+		if(width!=null && height!=null){
+			cmd.setHeight(Integer.valueOf(height.toString()));
+			cmd.setWidth(Integer.valueOf(width.toString()));
+		}
+		return cmd;
 	}
 
 

@@ -2,6 +2,7 @@
 package com.everhomes.rest.common;
 
 import com.everhomes.rest.launchpad.ActionType;
+import com.everhomes.rest.notice.EnterpriseNoticeDetailActionData;
 import com.everhomes.rest.workReport.WorkReportDetailsActionData;
 
 /**
@@ -252,12 +253,20 @@ public enum Router {
     VIDEO_CONFERENCE_MAIN(ActionType.VIDEO_MEETING,
             "zl://video-conference/main", NoParamActionData.class),
 
+    RENTAL_ORDER_DETAIL(ActionType.RENTAL,
+            "zl://resource-reservation/detail", RentalOrderActionData.class),
     /**
      * video-conference
      */
     WORK_REPORT_DETAILS(
             "zl://work-report/details", WorkReportDetailsActionData.class),
-    ;
+
+
+    /**
+     * enterprise-notice
+     */
+    ENTERPRISE_NOTICE_DETAIL(
+            "zl://enterprise-bulletin/detail", EnterpriseNoticeDetailActionData.class);
 
     // 此actionType不是必须的，
     // 有这个字段只是为了将之前的actionType形式的转换成router形式时的对照

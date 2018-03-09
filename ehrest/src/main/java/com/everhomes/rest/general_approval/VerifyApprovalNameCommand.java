@@ -9,6 +9,7 @@ import com.everhomes.util.StringHelper;
  * <li>ownerId: 目前是 organizationId</li>
  * <li>ownerType: 目前默认是： EhOrganizations</li>
  * <li>approvalName: 审批名称</li>
+ * <li>approvalId: 审批id</li>
  * </ul>
  */
 public class VerifyApprovalNameCommand {
@@ -22,6 +23,8 @@ public class VerifyApprovalNameCommand {
     private String ownerType;
 
     private String approvalName;
+
+    private Long approvalId;
 
     public VerifyApprovalNameCommand() {
     }
@@ -64,6 +67,14 @@ public class VerifyApprovalNameCommand {
 
     public void setApprovalName(String approvalName) {
         this.approvalName = approvalName;
+    }
+
+    public Long getApprovalId() {
+        return approvalId;
+    }
+
+    public void setApprovalId(Long approvalId) {
+        this.approvalId = approvalId;
     }
 
     @Override

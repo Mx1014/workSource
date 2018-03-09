@@ -27,7 +27,7 @@ public class RentalRefundEmbeddedHandler implements RefundEmbeddedHandler {
 	@Override
 	public void paySuccess(RefundCallbackCommand cmd) {
 		this.dbProvider.execute((TransactionStatus status) -> {
-			RentalRefundOrder rentalRefundOrder = this.rentalProvider.getRentalRefundOrderByRefoundNo(cmd.getRefundOrderNo());
+			RentalRefundOrder rentalRefundOrder = this.rentalProvider.getRentalRefundOrderByRefundNo(cmd.getRefundOrderNo());
 			RentalOrder bill = this.rentalProvider.findRentalBillById(rentalRefundOrder.getOrderId());
 			rentalRefundOrder.setStatus(SiteBillStatus.REFUNDED.getCode());
 			bill.setStatus(SiteBillStatus.REFUNDED.getCode());

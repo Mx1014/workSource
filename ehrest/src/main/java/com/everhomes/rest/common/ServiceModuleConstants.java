@@ -5,7 +5,7 @@ package com.everhomes.rest.common;
  */
 public interface ServiceModuleConstants {
 
-    long TOPIC_NOTICE_MODULE = 10100; //论坛公告模块
+    long FORUM_MODULE = 10100; //论坛模块
 
     long PM_TASK_MODULE = 20100L; // 物业报修模块id
 
@@ -20,5 +20,6 @@ public interface ServiceModuleConstants {
     long ENTERPRISE_CUSTOMER_MODULE = 21100L;
     long CONTRACT_MODULE = 21200L;
     long ENERGY_MODULE = 49100L;
+    long PAYMENT_APPLICATION_MODULE = 21300L;
 
 }

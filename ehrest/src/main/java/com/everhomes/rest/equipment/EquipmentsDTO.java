@@ -36,7 +36,7 @@ import java.util.List;
  *  <li>sequenceNo: 编号</li>
  *  <li>versionNo: 版号</li>
  *  <li>manager: 责任人编号</li>
- *  <li>attachments: 操作图示和说明书 参考{@link com.everhomes.rest.equipment.EquipmentAttachmentDTO}</li>
+ *  <li>attachments: 操作图示说明书 参考{@link com.everhomes.rest.equipment.EquipmentAttachmentDTO}</li>
  *  <li>remarks: 备注</li>
  *  <li>eqAccessoryMap: 设备备品配件 参考{@link com.everhomes.rest.equipment.EquipmentAccessoryMapDTO}</li>
  *  <li>eqStandardMap: 设备-标准关联 参考{@link com.everhomes.rest.equipment.EquipmentStandardMapDTO}</li>
@@ -51,6 +51,8 @@ import java.util.List;
  *  <li>price: 购买价格</li>
  *  <li>buyTime: 购买日期</li>
  *  <li>depreciationYears: 折旧年限</li>
+ *  <li>coordinate: 坐标信息</li>
+ *  <li>inspectionCategoryId: 巡检类型</li>
  * </ul>
  */
 public class EquipmentsDTO {
@@ -111,8 +113,10 @@ public class EquipmentsDTO {
     private String versionNo;
     
     private String manager;
-    
-    @ItemType(EquipmentAttachmentDTO.class)
+
+	private Long  inspectionCategoryId;
+
+	@ItemType(EquipmentAttachmentDTO.class)
     private List<EquipmentAttachmentDTO> attachments;
     @ItemType(EquipmentAccessoryMapDTO.class)
     private List<EquipmentAccessoryMapDTO> eqAccessoryMap;
@@ -142,6 +146,8 @@ public class EquipmentsDTO {
 	private Timestamp buyTime;
 
 	private Long depreciationYear;
+
+	private String coordinate;
 
 
 	public Long getId() {
@@ -478,6 +484,22 @@ public class EquipmentsDTO {
 
 	public void setDepreciationYear(Long depreciationYear) {
 		this.depreciationYear = depreciationYear;
+	}
+
+	public String getCoordinate() {
+		return coordinate;
+	}
+
+	public void setCoordinate(String coordinate) {
+		this.coordinate = coordinate;
+	}
+
+	public Long getInspectionCategoryId() {
+		return inspectionCategoryId;
+	}
+
+	public void setInspectionCategoryId(Long inspectionCategoryId) {
+		this.inspectionCategoryId = inspectionCategoryId;
 	}
 
 	@Override

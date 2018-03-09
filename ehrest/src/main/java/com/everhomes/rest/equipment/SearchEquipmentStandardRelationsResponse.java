@@ -1,13 +1,13 @@
 package com.everhomes.rest.equipment;
 
-import java.util.List;
-
 import com.everhomes.discover.ItemType;
 import com.everhomes.util.StringHelper;
 
+import java.util.List;
+
 /**
  * <ul>
- *  <li>relations: 设备-标准关系列表 参考{@link com.everhomes.rest.equipment.EquipmentStandardRelationDTO}</li>
+ *  <li>relations: 设备-标准关系列表  用于新建计划选择关联巡检对象  参考{@link com.everhomes.rest.equipment.EquipmentStandardRelationDTO}</li>
  *  <li>nextPageAnchor: 下一页的锚点，没有下一页则没有</li>
  * </ul>
  */

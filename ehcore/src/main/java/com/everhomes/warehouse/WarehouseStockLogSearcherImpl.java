@@ -137,7 +137,7 @@ public class WarehouseStockLogSearcherImpl extends AbstractElasticSearch impleme
             builder.addHighlightedField("materialName");
 
         }
-        FilterBuilder fb = FilterBuilders.termFilter("namespaceId", UserContext.getCurrentNamespaceId());
+        FilterBuilder fb = FilterBuilders.termFilter("namespaceId", cmd.getNamespaceId());
         fb = FilterBuilders.andFilter(fb, FilterBuilders.termFilter("ownerId", cmd.getOwnerId()));
         fb = FilterBuilders.andFilter(fb, FilterBuilders.termFilter("ownerType", cmd.getOwnerType()));
         //新增， 兼容性还没有
@@ -164,10 +164,11 @@ public class WarehouseStockLogSearcherImpl extends AbstractElasticSearch impleme
         }
         int pageSize = PaginationConfigHelper.getPageSize(configProvider, cmd.getPageSize());
         Long anchor = 0l;
+//        Long anchor = 1l;
         if(cmd.getPageAnchor() != null) {
             anchor = cmd.getPageAnchor();
         }
-
+//
         qb = QueryBuilders.filteredQuery(qb, fb);
         builder.setSearchType(SearchType.QUERY_THEN_FETCH);
         builder.setFrom(anchor.intValue() * pageSize).setSize(pageSize + 1);
@@ -186,7 +187,67 @@ public class WarehouseStockLogSearcherImpl extends AbstractElasticSearch impleme
         List<Long> ids = getIds(rsp);
         Long total = getTotal(rsp);
         SearchWarehouseStockLogsResponse response = new SearchWarehouseStockLogsResponse();
-        response.setTotal(total);
+//        List<Long> ids = warehouseProvider.findAllMaterialLogIds(
+//                cmd.getWarehouseOrderId(),anchor,pageSize,response);
+//        if(ids.size() > pageSize) {
+//            response.setNextPageAnchor(anchor + 1);
+//            ids.remove(ids.size() - 1);
+//        } else {
+//            response.setNextPageAnchor(null);
+//        }
+
+        List<WarehouseStockLogDTO> logDTOs = new ArrayList<WarehouseStockLogDTO>();
+        for(Long id : ids) {
+            WarehouseStockLogs log = warehouseProvider.findWarehouseStockLogs(id, cmd.getOwnerType(), cmd.getOwnerId());
+            WarehouseStockLogDTO dto = ConvertHelper.convert(log, WarehouseStockLogDTO.class);
+
+            if(log.getRequestUid() != null) {
+                List<OrganizationMember> requests = organizationProvider.listOrganizationMembers(log.getRequestUid());
+                if(requests != null && requests.size() > 0) {
+                    dto.setRequestUserName(requests.get(0).getContactName());
+                }
+            }
+
+            List<OrganizationMember> deliveries = organizationProvider.listOrganizationMembers(log.getDeliveryUid());
+            if(deliveries != null && deliveries.size() > 0) {
+                dto.setDeliveryUserName(deliveries.get(0).getContactName());
+            }
+
+            Warehouses warehouse = warehouseProvider.findWarehouse(dto.getWarehouseId(), cmd.getOwnerType(), cmd.getOwnerId(),cmd.getCommunityId());
+            if(warehouse != null) {
+                dto.setWarehouseName(warehouse.getName());
+            }
+
+            WarehouseMaterials material = warehouseProvider.findWarehouseMaterials(dto.getMaterialId(), cmd.getOwnerType(), cmd.getOwnerId(),cmd.getCommunityId());
+            if(material != null) {
+                dto.setMaterialName(material.getName());
+                dto.setMaterialNumber(material.getMaterialNumber());
+                dto.setUnitId(material.getUnitId());
+                dto.setSupplierName(material.getSupplierName());
+
+                WarehouseUnits unit = warehouseProvider.findWarehouseUnits(material.getUnitId(), cmd.getOwnerType(), cmd.getOwnerId());
+                if(unit != null) {
+                    dto.setUnitName(unit.getName());
+                }
+            }
+            logDTOs.add(dto);
+        }
+        response.setStockLogDTOs(logDTOs);
+        return response;
+    }
+
+    @Override
+    public SearchWarehouseStockLogsResponse queryByOrder(SearchWarehouseStockLogsCommand cmd) {
+        checkAssetPriviledgeForPropertyOrg(cmd.getCommunityId(),PrivilegeConstants.WAREHOUSE_REPO_MAINTAIN_SEARCH,cmd.getOwnerId());
+        int pageSize = PaginationConfigHelper.getPageSize(configProvider, cmd.getPageSize());
+//        Long anchor = 0l;
+        Long anchor = 1l;
+        if(cmd.getPageAnchor() != null) {
+            anchor = cmd.getPageAnchor();
+        }
+        SearchWarehouseStockLogsResponse response = new SearchWarehouseStockLogsResponse();
+        List<Long> ids = warehouseProvider.findAllMaterialLogIds(
+                cmd.getWarehouseOrderId(),anchor,pageSize,response);
         if(ids.size() > pageSize) {
             response.setNextPageAnchor(anchor + 1);
             ids.remove(ids.size() - 1);
@@ -221,6 +282,7 @@ public class WarehouseStockLogSearcherImpl extends AbstractElasticSearch impleme
                 dto.setMaterialName(material.getName());
                 dto.setMaterialNumber(material.getMaterialNumber());
                 dto.setUnitId(material.getUnitId());
+                dto.setSupplierName(material.getSupplierName());
 
                 WarehouseUnits unit = warehouseProvider.findWarehouseUnits(material.getUnitId(), cmd.getOwnerType(), cmd.getOwnerId());
                 if(unit != null) {
@@ -288,7 +350,7 @@ public class WarehouseStockLogSearcherImpl extends AbstractElasticSearch impleme
         cmd1.setModuleId(PrivilegeConstants.WAREHOUSE_MODULE_ID);
         cmd1.setNamespaceId(UserContext.getCurrentNamespaceId());
         ListServiceModuleAppsResponse res = portalService.listServiceModuleAppsWithConditon(cmd1);
-        Long appId = res.getServiceModuleApps().get(0).getId();
+        Long appId = res.getServiceModuleApps().get(0).getOriginId();
         if(!userPrivilegeMgr.checkUserPrivilege(UserContext.currentUserId(), EntityType.ORGANIZATIONS.getCode(), OrganizationId, OrganizationId,priviledgeId , appId, null,communityId )){
             throw RuntimeErrorException.errorWith(PrivilegeServiceErrorCode.SCOPE, PrivilegeServiceErrorCode.ERROR_CHECK_APP_PRIVILEGE,
                     "check app privilege error");

@@ -4,11 +4,12 @@ package com.everhomes.rest.qrcode;
 /**
  * <ul>
  *     <li>FLOW("FLOW"): FLOW</li>
+ *     <li>PRINT("PRINT"): PRINT</li>
  * </ul>
  */
 public enum QRCodeHandler {
 
-    FLOW("FLOW");
+    FLOW("FLOW"),PRINT("PRINT");
 
     private String code;
 

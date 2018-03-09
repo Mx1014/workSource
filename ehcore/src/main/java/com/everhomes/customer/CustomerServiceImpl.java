@@ -38,6 +38,7 @@ import com.everhomes.rest.organization.*;
 import com.everhomes.rest.organization.pm.AddressMappingStatus;
 
 
+import com.everhomes.rest.varField.ListFieldGroupCommand;
 import com.everhomes.user.*;
 
 import com.everhomes.rest.varField.FieldGroupDTO;
@@ -277,7 +278,7 @@ public class CustomerServiceImpl implements CustomerService {
     @Override
     public void exportEnterpriseCustomer(ExportEnterpriseCustomerCommand cmd, HttpServletResponse response) {
         ExportFieldsExcelCommand command = ConvertHelper.convert(cmd, ExportFieldsExcelCommand.class);
-        command.setIncludedGroupIds("10,11,12");
+//        command.setIncludedGroupIds("10,11,12");
         List<FieldGroupDTO> results = fieldService.getAllGroups(command,false,true);
         if(results != null && results.size() > 0) {
             List<String> sheetNames = results.stream().map(result -> {
@@ -285,6 +286,14 @@ public class CustomerServiceImpl implements CustomerService {
             }).collect(Collectors.toList());
             dynamicExcelService.exportDynamicExcel(response, DynamicExcelStrings.CUSTOEMR, null, sheetNames, cmd, true, true, null);
         }
+    }
+
+    @Override
+    public void exportEnterpriseCustomerTemplate(ListFieldGroupCommand cmd, HttpServletResponse response) {
+        List<String> sheetNames = new ArrayList<>();
+        sheetNames.add("客户信息");
+        String excelTemplateName = "客户模板" + new SimpleDateFormat("yyyy-MM-dd-HH-mm").format(Calendar.getInstance().getTime()) + ".xls";
+        dynamicExcelService.exportDynamicExcel(response, DynamicExcelStrings.CUSTOEMR, null, sheetNames, cmd, true, false, excelTemplateName);
     }
 
     @Override
@@ -2120,12 +2129,13 @@ public class CustomerServiceImpl implements CustomerService {
         Map<Long, Long> properties = enterpriseCustomerProvider.listCustomerPatentsByCustomerIds(customerIds);
         properties.forEach((categoryId, count) -> {
             CustomerIntellectualPropertyStatisticsDTO dto = new CustomerIntellectualPropertyStatisticsDTO();
+            dto.setPropertyType("专利");
             dto.setPropertyCount(count);
 //            ScopeFieldItem item = fieldProvider.findScopeFieldItemByFieldItemId(cmd.getNamespaceId(), categoryId);
-            ScopeFieldItem item = fieldService.findScopeFieldItemByFieldItemId(cmd.getNamespaceId(), cmd.getCommunityId(), categoryId);
-            if(item != null) {
-                dto.setPropertyType(item.getItemDisplayName());
-            }
+//            ScopeFieldItem item = fieldService.findScopeFieldItemByFieldItemId(cmd.getNamespaceId(), cmd.getCommunityId(), categoryId);
+//            if(item != null) {
+//                dto.setPropertyType(item.getItemDisplayName());
+//            }
             dtos.add(dto);
             response.setPropertyTotalCount(response.getPropertyTotalCount() + count);
         });

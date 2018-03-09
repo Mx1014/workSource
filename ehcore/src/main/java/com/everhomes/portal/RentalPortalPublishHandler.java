@@ -8,6 +8,7 @@ import com.everhomes.rest.acl.WebMenuType;
 import com.everhomes.rest.common.RentalActionData;
 import com.everhomes.rest.common.ServiceModuleConstants;
 import com.everhomes.rest.portal.RentalInstanceConfig;
+import com.everhomes.rest.rentalv2.RentalV2ResourceType;
 import com.everhomes.rest.rentalv2.admin.ResourceTypeStatus;
 import com.everhomes.util.StringHelper;
 import org.slf4j.Logger;
@@ -37,10 +38,14 @@ public class RentalPortalPublishHandler implements PortalPublishHandler{
     public String publish(Integer namespaceId, String instanceConfig, String itemLabel) {
         RentalInstanceConfig rentalInstanceConfig = (RentalInstanceConfig)StringHelper.fromJsonString(instanceConfig, RentalInstanceConfig.class);
         if(null == rentalInstanceConfig.getResourceTypeId()){
-            RentalResourceType rentalResourceType = createRentalResourceType(namespaceId, itemLabel, rentalInstanceConfig.getPageType());
+            RentalResourceType rentalResourceType = createRentalResourceType(namespaceId, itemLabel, rentalInstanceConfig.getPageType(),
+                    rentalInstanceConfig.getPayMode(),rentalInstanceConfig.getIdentify());
             rentalInstanceConfig.setResourceTypeId(rentalResourceType.getId());
+            rentalInstanceConfig.setPayMode(rentalResourceType.getPayMode());
+            rentalInstanceConfig.setIdentify(rentalResourceType.getIdentify());
         }else{
-            updateRentalResourceType(namespaceId, rentalInstanceConfig.getResourceTypeId(), rentalInstanceConfig.getPageType(), itemLabel);
+            updateRentalResourceType(namespaceId, rentalInstanceConfig.getResourceTypeId(), rentalInstanceConfig.getPageType(), itemLabel,
+                    rentalInstanceConfig.getPayMode(),rentalInstanceConfig.getIdentify());
         }
         return StringHelper.toJsonString(rentalInstanceConfig);
     }
@@ -55,25 +60,36 @@ public class RentalPortalPublishHandler implements PortalPublishHandler{
         return instanceConfig;
     }
 
-    private RentalResourceType createRentalResourceType(Integer namespaceId, String name, Byte pageType){
+    private RentalResourceType createRentalResourceType(Integer namespaceId, String name, Byte pageType,Byte payMode,String identify){
         RentalResourceType rentalResourceType = new RentalResourceType();
         rentalResourceType.setNamespaceId(namespaceId);
         rentalResourceType.setName(name);
         if(null == pageType){
             pageType = 0;
         }
+        if (null == payMode)
+            payMode = 0;
+        if (null == identify)
+            identify = RentalV2ResourceType.DEFAULT.getCode();
         rentalResourceType.setPageType(pageType);
+        rentalResourceType.setPageType(payMode);
+        rentalResourceType.setIdentify(identify);
         rentalResourceType.setStatus(ResourceTypeStatus.NORMAL.getCode());
         rentalv2Provider.createRentalResourceType(rentalResourceType);
         return rentalResourceType;
     }
 
-    private RentalResourceType updateRentalResourceType(Integer namespaceId, Long resourceTypeId, Byte pageType, String name){
+    private RentalResourceType updateRentalResourceType(Integer namespaceId, Long resourceTypeId, Byte pageType, String name
+            ,Byte payMode,String identify){
         RentalResourceType rentalResourceType = rentalv2Provider.findRentalResourceTypeById(resourceTypeId);
         if(null != rentalResourceType){
             if(null == pageType){
                 pageType = 0;
             }
+            if (null != payMode)
+                rentalResourceType.setPayMode(payMode);
+            if (null != identify)
+                rentalResourceType.setIdentify(identify);
             rentalResourceType.setPageType(pageType);
             rentalResourceType.setName(name);
             rentalv2Provider.updateRentalResourceType(rentalResourceType);

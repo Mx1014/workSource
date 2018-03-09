@@ -2,6 +2,7 @@
 package com.everhomes.news;
 
 import com.alibaba.fastjson.JSONObject;
+import com.everhomes.rest.common.TrueOrFalseFlag;
 import com.everhomes.rest.news.*;
 import com.everhomes.util.StringHelper;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -102,6 +103,7 @@ public class NewsController extends ControllerBase {
 	@RequestMapping("listNews")
 	@RestReturn(ListNewsResponse.class)
 	public RestResponse listNews(ListNewsCommand cmd) {
+		cmd.setCheckPrivilegeFlag(TrueOrFalseFlag.TRUE.getCode());
 		ListNewsResponse listNewsResponse = newsService.listNews(cmd);
 
 		RestResponse response = new RestResponse(listNewsResponse);

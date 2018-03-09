@@ -26,6 +26,7 @@ import java.sql.Timestamp;
  *     <li>materialNumber: 物品编号</li>
  *     <li>unitId: 单位id</li>
  *     <li>unitName: 单位名</li>
+ *     <li>supplierName: 供应商</li>
  * </ul>
  * Created by ying.xiong on 2017/5/11.
  */
@@ -70,6 +71,16 @@ public class WarehouseStockLogDTO {
     private String deliveryUserName;
 
     private Timestamp createTime;
+
+    private String supplierName;
+
+    public String getSupplierName() {
+        return supplierName;
+    }
+
+    public void setSupplierName(String supplierName) {
+        this.supplierName = supplierName;
+    }
 
     public Timestamp getCreateTime() {
         return createTime;

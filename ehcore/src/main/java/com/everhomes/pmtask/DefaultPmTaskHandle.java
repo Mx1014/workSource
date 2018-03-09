@@ -13,6 +13,8 @@ import java.util.List;
 
 import java.util.stream.Collectors;
 
+import com.everhomes.flow.FlowCase;
+import com.everhomes.flow.FlowService;
 import com.everhomes.rest.category.CategoryAdminStatus;
 import com.everhomes.rest.pmtask.*;
 import org.apache.commons.lang.StringUtils;
@@ -58,7 +60,9 @@ abstract class DefaultPmTaskHandle implements PmTaskHandle {
     ConfigurationProvider configProvider;
 	@Autowired
 	PmTaskCommonServiceImpl pmTaskCommonService;
-	
+	@Autowired
+	private FlowService flowService;
+
 	@Override
 	public PmTaskDTO createTask(CreateTaskCommand cmd, Long requestorUid, String requestorName, String requestorPhone){
 
@@ -228,14 +232,14 @@ abstract class DefaultPmTaskHandle implements PmTaskHandle {
 			}
 
 		}
-		List<Category> list = categoryProvider.listTaskCategories(namespaceId, parentId, cmd.getKeyword(),
-				cmd.getPageAnchor(), cmd.getPageSize());
+		List<Category> list = categoryProvider.listTaskCategories(namespaceId,cmd.getOwnerType(),cmd.getOwnerId(),
+				parentId, cmd.getKeyword(), cmd.getPageAnchor(), cmd.getPageSize());
 		int size = list.size();
 		if(size > 0){
     		response.setRequests(list.stream().map(r -> {
     			CategoryDTO dto = ConvertHelper.convert(r, CategoryDTO.class);
-    			List<Category> tempList = categoryProvider.listTaskCategories(namespaceId, null, r.getPath(),
-    					null, null);
+    			List<Category> tempList = categoryProvider.listTaskCategories(namespaceId,r.getOwnerType(),r.getOwnerId(),
+						null, r.getPath(), null, null);
     			getChildCategories(tempList.stream().map(k -> ConvertHelper.convert(k, CategoryDTO.class))
     					.collect(Collectors.toList()), dto);
     			
@@ -258,7 +262,8 @@ abstract class DefaultPmTaskHandle implements PmTaskHandle {
 		checkNamespaceId(namespaceId);
 		Long defaultId = PmTaskAppType.REPAIR_ID;
 
-		List<Category> categories = categoryProvider.listTaskCategories(namespaceId, null, null, null, null);
+		List<Category> categories = categoryProvider.listTaskCategories(namespaceId, cmd.getOwnerType(),cmd.getOwnerId(),
+				null, null, null, null);
 		
 		List<CategoryDTO> dtos = categories.stream().map(r -> {
 			CategoryDTO dto = ConvertHelper.convert(r, CategoryDTO.class);
@@ -304,7 +309,7 @@ abstract class DefaultPmTaskHandle implements PmTaskHandle {
 
 		SearchTasksResponse response = new SearchTasksResponse();
 		List<PmTaskDTO> list = pmTaskSearch.searchDocsByType(cmd.getStatus(), cmd.getKeyword(), cmd.getOwnerId(), cmd.getOwnerType(), 
-				cmd.getTaskCategoryId(), cmd.getStartDate(), cmd.getEndDate(), cmd.getAddressId(), cmd.getBuildingName(), 
+				cmd.getTaskCategoryId(), cmd.getStartDate(), cmd.getEndDate(), cmd.getAddressId(), cmd.getBuildingName(), cmd.getCreatorType(),
 				cmd.getPageAnchor(), pageSize+1);
 		int listSize = list.size();
 		if (listSize > 0) {
@@ -319,7 +324,15 @@ abstract class DefaultPmTaskHandle implements PmTaskHandle {
 						dto.setTaskCategoryName(taskCategory.getName());
 					}
 
+					if (null!=task.getFlowCaseId()) {
+						FlowCase flowCase = flowService.getFlowCaseById(task.getFlowCaseId());
+						if (flowCase!=null)
+							dto.setStatus(flowCase.getStatus());
+					}
 				}
+				
+				if (dto.getOrganizationUid()==0)
+					dto.setOrganizationUid(null);
 
     			return dto;
     		}).collect(Collectors.toList()));

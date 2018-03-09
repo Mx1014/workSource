@@ -97,7 +97,7 @@ public class ArchivesProviderImpl implements ArchivesProvider {
         query.addConditions(Tables.EH_ARCHIVES_STICKY_CONTACTS.ORGANIZATION_ID.eq(organizationId));
         query.addConditions(Tables.EH_ARCHIVES_STICKY_CONTACTS.DETAIL_ID.eq(detailId));
         if (query.fetch() != null) {
-            return ConvertHelper.convert(query.fetchOne(), ArchivesStickyContacts.class);
+            return ConvertHelper.convert(query.fetchAny(), ArchivesStickyContacts.class);
         } else
             return null;
     }
@@ -125,9 +125,19 @@ public class ArchivesProviderImpl implements ArchivesProvider {
     }
 
     @Override
+    public void updateArchivesDismissEmployee(ArchivesDismissEmployees dismissEmployee){
+        DSLContext context = dbProvider.getDslContext(AccessSpec.readWrite());
+        EhArchivesDismissEmployeesDao dao = new EhArchivesDismissEmployeesDao(context.configuration());
+        dao.update(dismissEmployee);
+
+        DaoHelper.publishDaoAction(DaoAction.MODIFY, EhArchivesDismissEmployees.class, dismissEmployee.getId());
+    }
+
+    @Override
     public List<ArchivesDismissEmployees> listArchivesDismissEmployees(Integer offset, Integer count, Integer namespaceId, Condition condition) {
         DSLContext context = dbProvider.getDslContext(AccessSpec.readOnly());
         SelectQuery<EhArchivesDismissEmployeesRecord> query = context.selectQuery(Tables.EH_ARCHIVES_DISMISS_EMPLOYEES);
+        if(namespaceId != null && namespaceId.longValue() != 0)
         query.addConditions(Tables.EH_ARCHIVES_DISMISS_EMPLOYEES.NAMESPACE_ID.eq(namespaceId));
         query.addConditions(condition);
 
@@ -148,13 +158,11 @@ public class ArchivesProviderImpl implements ArchivesProvider {
     }
 
     @Override
-    public ArchivesDismissEmployees getArchivesDismissEmployeesByDetailId(Long organizationId, Long detailId) {
+    public ArchivesDismissEmployees getArchivesDismissEmployeesByDetailId(Long detailId) {
         DSLContext context = dbProvider.getDslContext(AccessSpec.readOnly());
         SelectQuery<EhArchivesDismissEmployeesRecord> query = context.selectQuery(Tables.EH_ARCHIVES_DISMISS_EMPLOYEES);
-        query.addConditions(Tables.EH_ARCHIVES_DISMISS_EMPLOYEES.NAMESPACE_ID.eq(UserContext.getCurrentNamespaceId()));
-        query.addConditions(Tables.EH_ARCHIVES_DISMISS_EMPLOYEES.ORGANIZATION_ID.eq(organizationId));
         query.addConditions(Tables.EH_ARCHIVES_DISMISS_EMPLOYEES.DETAIL_ID.eq(detailId));
-        return query.fetchOneInto(ArchivesDismissEmployees.class);
+        return query.fetchAnyInto(ArchivesDismissEmployees.class);
     }
 
     @Override
@@ -163,6 +171,18 @@ public class ArchivesProviderImpl implements ArchivesProvider {
         EhArchivesDismissEmployeesDao dao = new EhArchivesDismissEmployeesDao(context.configuration());
         dao.deleteById(dismissEmployee.getId());
         DaoHelper.publishDaoAction(DaoAction.MODIFY, EhArchivesDismissEmployees.class, dismissEmployee.getId());
+    }
+
+    @Override
+    public List<Long> listDismissEmployeeDetailIdsByDepartmentId(Long departmentId){
+        DSLContext context = dbProvider.getDslContext(AccessSpec.readOnly());
+        SelectQuery<EhArchivesDismissEmployeesRecord> query = context.selectQuery(Tables.EH_ARCHIVES_DISMISS_EMPLOYEES);
+        query.addSelect(Tables.EH_ARCHIVES_DISMISS_EMPLOYEES.DETAIL_ID);
+        query.addConditions(Tables.EH_ARCHIVES_DISMISS_EMPLOYEES.DEPARTMENT_ID.eq(departmentId));
+        List<Long> results = query.fetchInto(Long.class);
+        if (null == results || results.size() == 0)
+            return null;
+        return results;
     }
 
     @Override

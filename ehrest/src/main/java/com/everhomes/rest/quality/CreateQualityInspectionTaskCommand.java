@@ -2,10 +2,10 @@ package com.everhomes.rest.quality;
 
 
 
-import javax.validation.constraints.NotNull;
-
 import com.everhomes.discover.ItemType;
 import com.everhomes.util.StringHelper;
+
+import javax.validation.constraints.NotNull;
 
 /**
  * <ul>
@@ -21,6 +21,7 @@ import com.everhomes.util.StringHelper;
  *  <li>group: 业务组信息 com.everhomes.rest.quality.StandardGroupDTO</li>
  *  <li>executiveExpireTime: 任务截止时间</li>
  *  <li>templateFlag: 是否存为模板 true: 是; false: 否</li>
+ *  <li>namespaceId: namespaceId</li>
  * </ul>
  */
 public class CreateQualityInspectionTaskCommand {
@@ -55,6 +56,8 @@ public class CreateQualityInspectionTaskCommand {
 	private Long executorId;
 	
 	private Boolean templateFlag;
+
+	private Integer namespaceId;
 
 	public Long getSampleId() {
 		return sampleId;
@@ -168,6 +171,13 @@ public class CreateQualityInspectionTaskCommand {
 		this.executorId = executorId;
 	}
 
+	public Integer getNamespaceId() {
+		return namespaceId;
+	}
+
+	public void setNamespaceId(Integer namespaceId) {
+		this.namespaceId = namespaceId;
+	}
 
 	@Override
     public String toString() {
