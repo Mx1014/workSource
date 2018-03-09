@@ -3102,10 +3102,7 @@ public class EquipmentProviderImpl implements EquipmentProvider {
         query.addConditions(Tables.EH_EQUIPMENT_INSPECTION_TASK_LOGS.NAMESPACE_ID.eq(cmd.getNamespaceId()));
 
         if (cmd.getTargetId() != null) {
-            query.addConditions(Tables.EH_EQUIPMENT_INSPECTION_TASK_LOGS.TARGET_ID.eq(cmd.getTargetId()));
-        }
-        if (!StringUtils.isNullOrEmpty(cmd.getTargetType())) {
-            query.addConditions(Tables.EH_EQUIPMENT_INSPECTION_TASK_LOGS.TARGET_TYPE.eq(cmd.getTargetType()));
+            query.addConditions(Tables.EH_EQUIPMENT_INSPECTION_TASK_LOGS.COMMUNITY_ID.eq(cmd.getTargetId()));
         }
 
         if (cmd.getInspectionCategoryId() != null && cmd.getInspectionCategoryId() != 0L) {
