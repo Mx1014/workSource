@@ -247,7 +247,7 @@ public class ServiceAllianceRequestInfoSearcherImpl extends AbstractElasticSearc
             if(lists!=null && lists.size()>0) {
                 request.setCreateTime(lists.get(0).getCreateTime());
             }
-            request.setCreatorName(user.getNickName());
+            request.setCreatorName(user!=null?user.getNickName():"");
             if(organizationVal!= null && organizationVal.getFieldValue() != null){
                 PostApprovalFormTextValue organizationvalue = JSON.parseObject(organizationVal.getFieldValue(), PostApprovalFormTextValue.class);
                 if(organizationvalue != null) {
