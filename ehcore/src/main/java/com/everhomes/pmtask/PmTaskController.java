@@ -685,10 +685,10 @@ public class PmTaskController extends ControllerBase {
             listServiceModuleAppsCommand.setModuleId(FlowConstants.PM_TASK_MODULE);
             listServiceModuleAppsCommand.setCustomTag(String.valueOf(cmd.getTaskCategoryId()));
             ListServiceModuleAppsResponse apps = portalService.listServiceModuleAppsWithConditon(listServiceModuleAppsCommand);
-            if (null != apps && null != apps.getServiceModuleApps() && apps.getServiceModuleApps().size() > 0) {
-                flag = userPrivilegeMgr.checkUserPrivilege(UserContext.currentUserId(), EntityType.ORGANIZATIONS.getCode(), cmd.getOwnerId(), cmd.getCurrentOrgId(), PrivilegeConstants.PMTASK_LIST, apps.getServiceModuleApps().get(0).getOriginId(), null,cmd.getCurrentCommunityId());
-                System.out.print(flag) ;
-            }
+//            if (null != apps && null != apps.getServiceModuleApps() && apps.getServiceModuleApps().size() > 0) {
+//                flag = userPrivilegeMgr.checkUserPrivilege(UserContext.currentUserId(), EntityType.ORGANIZATIONS.getCode(), cmd.getOwnerId(), cmd.getCurrentOrgId(), PrivilegeConstants.PMTASK_LIST, apps.getServiceModuleApps().get(0).getOriginId(), null,cmd.getCurrentCommunityId());
+//                System.out.print(flag) ;
+//            }
         }
         RestResponse resp = new RestResponse(flag);
         resp.setErrorCode(ErrorCodes.SUCCESS);

@@ -703,41 +703,45 @@ public class PmTaskServiceImpl implements PmTaskService {
 		}
 		return response;
 	}
-
+	
 	private boolean checkAppPrivilege(Integer namespaceId, Long taskCategoryId, Long orgId, String ownerType, Long ownerId, Long privilege) {
-
-		if (null != taskCategoryId ) {
-			//找到根节点, 多入口应用id是根节点id
-			boolean flag = true;
-			while (flag) {
-				Category category = categoryProvider.findCategoryById(taskCategoryId);
-				if (null != category && category.getParentId() != 0L) {
-					taskCategoryId = category.getParentId();
-				}else {
-					flag = false;
-				}
-			}
-
-			if (Arrays.asList(PmTaskAppType.TYPES).contains(taskCategoryId)) {
-//				ListServiceModuleAppsCommand listServiceModuleAppsCommand = new ListServiceModuleAppsCommand();
-//				listServiceModuleAppsCommand.setNamespaceId(namespaceId);
-//				listServiceModuleAppsCommand.setModuleId(FlowConstants.PM_TASK_MODULE);
-//				listServiceModuleAppsCommand.setCustomTag(String.valueOf(taskCategoryId));
-//				ListServiceModuleAppsResponse apps = portalService.listServiceModuleAppsWithConditon(listServiceModuleAppsCommand);
-//				Long appId = null;
-//				if(null != apps && apps.getServiceModuleApps().size() > 0){
-//					appId = apps.getServiceModuleApps().get(0).getId();
-//				}
-//				if (null != apps) {
-//					return userPrivilegeMgr.checkUserPrivilege(UserContext.currentUserId(), EntityType.ORGANIZATIONS.getCode(), orgId,
-//							orgId, privilege, appId, null, ownerId);
-//				}
-				return userPrivilegeMgr.checkUserPrivilege(UserContext.currentUserId(), orgId, privilege, FlowConstants.PM_TASK_MODULE, null, String.valueOf(taskCategoryId), null, ownerId);
-			}
-		}
-
-		return false;
+		return true;
 	}
+
+//	private boolean checkAppPrivilege(Integer namespaceId, Long taskCategoryId, Long orgId, String ownerType, Long ownerId, Long privilege) {
+//
+//		if (null != taskCategoryId ) {
+//			//找到根节点, 多入口应用id是根节点id
+//			boolean flag = true;
+//			while (flag) {
+//				Category category = categoryProvider.findCategoryById(taskCategoryId);
+//				if (null != category && category.getParentId() != 0L) {
+//					taskCategoryId = category.getParentId();
+//				}else {
+//					flag = false;
+//				}
+//			}
+//
+//			if (Arrays.asList(PmTaskAppType.TYPES).contains(taskCategoryId)) {
+////				ListServiceModuleAppsCommand listServiceModuleAppsCommand = new ListServiceModuleAppsCommand();
+////				listServiceModuleAppsCommand.setNamespaceId(namespaceId);
+////				listServiceModuleAppsCommand.setModuleId(FlowConstants.PM_TASK_MODULE);
+////				listServiceModuleAppsCommand.setCustomTag(String.valueOf(taskCategoryId));
+////				ListServiceModuleAppsResponse apps = portalService.listServiceModuleAppsWithConditon(listServiceModuleAppsCommand);
+////				Long appId = null;
+////				if(null != apps && apps.getServiceModuleApps().size() > 0){
+////					appId = apps.getServiceModuleApps().get(0).getId();
+////				}
+////				if (null != apps) {
+////					return userPrivilegeMgr.checkUserPrivilege(UserContext.currentUserId(), EntityType.ORGANIZATIONS.getCode(), orgId,
+////							orgId, privilege, appId, null, ownerId);
+////				}
+//				return userPrivilegeMgr.checkUserPrivilege(UserContext.currentUserId(), orgId, privilege, FlowConstants.PM_TASK_MODULE, null, String.valueOf(taskCategoryId), null, ownerId);
+//			}
+//		}
+//
+//		return false;
+//	}
 
 	@Override
 	public PmTaskDTO createTaskByOrg(CreateTaskCommand cmd) {
