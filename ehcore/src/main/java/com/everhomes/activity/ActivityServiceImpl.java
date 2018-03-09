@@ -5216,6 +5216,7 @@ public class ActivityServiceImpl implements ActivityService {
 
 		//更新评论开关
 		forumService.saveInteractSetting(cmd.getNamespaceId(), ForumModuleType.ACTIVITY.getCode(), cmd.getCategoryId(), cmd.getInteractFlag());
+		timeResponse.setInteractFlag(cmd.getInteractFlag());
 
 		return timeResponse;
 	}
