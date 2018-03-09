@@ -4061,7 +4061,7 @@ public class Rentalv2ServiceImpl implements Rentalv2Service {
 		String ownerType = FlowOwnerType.RENTALRESOURCETYPE.getCode();
 		Flow flow = flowService.getEnabledFlow(order.getNamespaceId(),EntityType.COMMUNITY.getCode(),order.getCommunityId(),
                 Rentalv2Controller.moduleId, moduleType, ownerId, ownerType);
-		LOGGER.debug("param : " +order.getNamespaceId()+"*"+ Rentalv2Controller.moduleId+"*"+ moduleType+"*"+ ownerId+"*"+ ownerType );
+		LOGGER.debug("param : " +order.getNamespaceId()+"*"+ order.getCommunityId()+"*"+ moduleType+"*"+ ownerId+"*"+ ownerType );
 		LOGGER.debug("\n flow is "+flow);
 
 			CreateFlowCaseCommand cmd = new CreateFlowCaseCommand();
