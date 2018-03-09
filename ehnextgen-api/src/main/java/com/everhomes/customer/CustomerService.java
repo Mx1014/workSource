@@ -3,6 +3,7 @@ package com.everhomes.customer;
 import com.alibaba.fastjson.JSONObject;
 import com.everhomes.rest.customer.*;
 import com.everhomes.rest.organization.ImportFileTaskDTO;
+import com.everhomes.rest.organization.OrganizationDTO;
 import com.everhomes.rest.varField.ListFieldGroupCommand;
 import org.springframework.web.multipart.MultipartFile;
 
@@ -141,6 +142,10 @@ public interface CustomerService {
 
     void exportEnterpriseCustomer(ExportEnterpriseCustomerCommand cmd, HttpServletResponse response);
     void exportEnterpriseCustomerTemplate(ListFieldGroupCommand cmd, HttpServletResponse response);
+
+    void saveCustomerEvent(int i,  EnterpriseCustomer customer, EnterpriseCustomer exist);
+    OrganizationDTO createOrganization(EnterpriseCustomer customer);
+
 
 
 }
