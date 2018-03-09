@@ -75,7 +75,16 @@ public class PurchaseServiceImpl implements PurchaseService {
         order.setApplicantTime(new Timestamp(DateHelper.currentGMTTime().getTime()));
 
         order.setCreateUid(UserContext.currentUserId());
-        order.setDeliveryDate(cmd.getDeliveryDate());
+        //前端传递的时间戳转化异常，报string转sql.timestamp异常，后台采用string接收，先cover问题
+//        order.setDeliveryDate(cmd.getDeliveryDate());
+        try{
+            long l = Long.parseLong(cmd.getDeliveryDate());
+            Timestamp timestamp = new Timestamp(l);
+            order.setDeliveryDate(timestamp);
+        }catch (Exception e){
+            LOGGER.info("delivery date transferred failed for the create of purchase, command = {}",cmd);
+        };
+
         long nextPurchaseOrderId = this.sequenceProvider.getNextSequence(NameMapper.getSequenceDomainFromTablePojo(
                 EhWarehousePurchaseOrders.class));
         order.setId(nextPurchaseOrderId);
@@ -227,7 +236,9 @@ public class PurchaseServiceImpl implements PurchaseService {
         }
         dto.setDtos(itemDtos);
         FlowCaseDetailDTOV2 purchaseId = flowService.getFlowCaseDetailByRefer(PrivilegeConstants.PURCHASE_MODULE, null, null, "purchaseId", order.getId(), false);
-        dto.setFlowCaseId(purchaseId.getId());
+        if(purchaseId!=null){
+            dto.setFlowCaseId(purchaseId.getId());
+        }
         return dto;
 
 
@@ -243,6 +254,12 @@ public class PurchaseServiceImpl implements PurchaseService {
             purchaseProvider.deleteOrderItemsByOrderId(cmd.getPurchaseRequestId());
             return null;
         });
+    }
+
+    @Override
+    public List<GetWarehouseMaterialPurchaseHistoryDTO> getWarehouseMaterialPurchaseHistory(GetWarehouseMaterialPurchaseHistoryCommand cmd) {
+        return purchaseProvider.getWarehouseMaterialPurchaseHistory(cmd.getCommunityId()
+                ,cmd.getOwnerId(),cmd.getOwnerType(),cmd.getMaterialId());
     }
 
     private void checkAssetPriviledgeForPropertyOrg(Long communityId, Long priviledgeId) {

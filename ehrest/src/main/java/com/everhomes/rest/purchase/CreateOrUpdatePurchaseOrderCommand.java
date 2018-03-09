@@ -29,7 +29,7 @@ import java.util.List;
 public class CreateOrUpdatePurchaseOrderCommand {
     private Long purchaseRequestId;
     private Long supplierId;
-    private Timestamp deliveryDate;
+    private String deliveryDate;
     private String remark;
     private Long approvalSheetId;
     private List<PurchaseMaterialDTO> dtos;
@@ -118,11 +118,11 @@ public class CreateOrUpdatePurchaseOrderCommand {
         this.supplierId = supplierId;
     }
 
-    public Timestamp getDeliveryDate() {
+    public String getDeliveryDate() {
         return deliveryDate;
     }
 
-    public void setDeliveryDate(Timestamp deliveryDate) {
+    public void setDeliveryDate(String deliveryDate) {
         this.deliveryDate = deliveryDate;
     }
 
