@@ -5704,9 +5704,10 @@ private void checkUserPrivilege(Long orgId, Long privilegeId, Long communityId) 
 				relations.setOrder(map.getDefaultOrder());
 				relations.setPlanId(planId);
 
-				if (equipmentStandardMaps != null && equipmentStandardMaps.size() > 0) {
-					relations.setId(equipmentStandardMaps.get(0).getId());
-				}
+//				if (equipmentStandardMaps != null && equipmentStandardMaps.size() > 0) {
+//					relations.setId(equipmentStandardMaps.get(0).getId());
+//				}
+				relations.setId(map.getId());
 				relationDTOS.add(relations);
 			}
 			//sort equipmentStandardRelations
