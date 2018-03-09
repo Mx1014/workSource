@@ -6113,6 +6113,8 @@ private void checkUserPrivilege(Long orgId, Long privilegeId, Long communityId) 
 			tasksLog.setEquipmentId(cmd.getEquipmentId());
 			tasksLog.setOperatorType(OwnerType.USER.getCode());
 			tasksLog.setOperatorId(UserContext.currentUserId());
+			tasksLog.setTargetId(cmd.getTargetId());
+			tasksLog.setTargetType(cmd.getTargetType());
 			tasksLog.setInspectionCategoryId(tasks.getInspectionCategoryId());
 			tasksLog.setCommunityId(tasks.getTargetId());
 			tasksLog.setNamespaceId(cmd.getNamespaceId());
