@@ -2983,7 +2983,10 @@ public class AssetServiceImpl implements AssetService {
         s.setNamespaceId(cmd.getNamespaceId());
         s.setUpdateTime(new Timestamp(DateHelper.currentGMTTime().getTime()));
         s.setBrotherStandardId(brotherStandardId);
-        assetProvider.createChargingStandard(c,s,f);
+        this.dbProvider.execute((TransactionStatus status) ->{
+            assetProvider.createChargingStandard(c,s,f);
+            return null;
+        });
         return nextStandardId;
 
     }

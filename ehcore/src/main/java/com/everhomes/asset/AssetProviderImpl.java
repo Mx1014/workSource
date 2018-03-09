@@ -2443,18 +2443,18 @@ public class AssetProviderImpl implements AssetProvider {
     @Override
     public void createChargingStandard(com.everhomes.server.schema.tables.pojos.EhPaymentChargingStandards c, com.everhomes.server.schema.tables.pojos.EhPaymentChargingStandardsScopes s, List<EhPaymentFormula> f) {
         DSLContext context = this.dbProvider.getDslContext(AccessSpec.readWrite());
-        if(c!=null){
+//        if(c!=null){
             EhPaymentChargingStandardsDao ChargingStandardsDao = new EhPaymentChargingStandardsDao(context.configuration());
             ChargingStandardsDao.insert(c);
-        }
-        if(s != null){
+//        }
+//        if(s != null){
             EhPaymentChargingStandardsScopesDao chargingStandardsScopesDao = new EhPaymentChargingStandardsScopesDao(context.configuration());
             chargingStandardsScopesDao.insert(s);
-        }
-        if(f!=null){
+//        }
+//        if(f!=null){
             EhPaymentFormulaDao paymentFormulaDao = new EhPaymentFormulaDao(context.configuration());
             paymentFormulaDao.insert(f);
-        }
+//        }
     }
 
     @Override
