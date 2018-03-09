@@ -475,9 +475,11 @@ public class OfficeCubicleServiceImpl implements OfficeCubicleService {
 		// 订单时间
 		row.createCell(++i).setCellValue(datetimeSF.format(new Timestamp(dto.getReserveTime())));
 		// 预定类别
-		row.createCell(++i).setCellValue(OfficeOrderType.fromCode(dto.getOrderType()).getMsg());
+		OfficeOrderType ordertype = OfficeOrderType.fromCode(dto.getOrderType());
+		row.createCell(++i).setCellValue(ordertype==null?"":ordertype.getMsg());
 		// 工位类别
-		row.createCell(++i).setCellValue(OfficeRentType.fromCode(dto.getRentType()).getMsg());
+		OfficeRentType renttype = OfficeRentType.fromCode(dto.getRentType());
+		row.createCell(++i).setCellValue(renttype==null?"":renttype.getMsg());
 		// 工位数/面积
 		OfficeSpaceType spaceType = OfficeSpaceType.fromCode(dto.getSpaceType());
 		row.createCell(++i).setCellValue(dto.getSpaceSize() + spaceType==null?"":spaceType.getMsg());
