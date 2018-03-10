@@ -5693,7 +5693,7 @@ public class GroupServiceImpl implements GroupService {
 	}
 
 	private Category checkDuplicationGroupCategoryName(Integer namespaceId, String categoryName, Long id) {
-		Category category = categoryProvider.findCategoryByNamespaceAndName(2L, namespaceId, categoryName);
+		Category category = categoryProvider.findCategoryByNamespaceAndName(2L, namespaceId,null,null, categoryName);
 		if (category != null && (id == null || id.longValue() != category.getId().longValue())) {
 			throw RuntimeErrorException.errorWith(GroupServiceErrorCode.SCOPE, GroupServiceErrorCode.ERROR_GROUP_CATEGORY_NAME_EXIST,
 					"exist name, name="+categoryName);
