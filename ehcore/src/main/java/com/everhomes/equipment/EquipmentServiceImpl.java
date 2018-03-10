@@ -4108,7 +4108,7 @@ private void checkUserPrivilege(Long orgId, Long privilegeId, Long communityId) 
 		Category category = getEquipmentCategory(parentId);
 		path = category.getPath() + "/" + cmd.getName();
 
-		category = categoryProvider.findCategoryByNamespaceAndName(parentId, namespaceId, cmd.getName());
+		category = categoryProvider.findCategoryByNamespaceAndName(parentId, namespaceId, null,null,cmd.getName());
 //		category = categoryProvider.findCategoryByPath(namespaceId, path);
 		if(category != null) {
 			LOGGER.error("equipment category have been in existing");
