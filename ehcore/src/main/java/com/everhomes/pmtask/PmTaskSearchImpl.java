@@ -6,6 +6,7 @@ import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.List;
 import java.util.Map;
+import java.util.stream.Collectors;
 
 import com.everhomes.category.Category;
 import com.everhomes.category.CategoryProvider;
@@ -127,7 +128,7 @@ public class PmTaskSearchImpl extends AbstractElasticSearch implements PmTaskSea
         this.deleteAll();
         for(;;){
             List<PmTask> tasks = pmTaskProvider.listPmTask(null, null, null, nextPageAnchor, pageSize);
-        	
+        	tasks = tasks.stream().filter(r-> r.getFlowCaseId()!=null && r.getFlowCaseId()>0).collect(Collectors.toList());
         	if(tasks.size() > 0){
 
         		if(tasks.size() == pageSize){
