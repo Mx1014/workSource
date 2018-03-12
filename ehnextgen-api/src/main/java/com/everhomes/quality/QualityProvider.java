@@ -4,6 +4,7 @@ import com.everhomes.listing.CrossShardListingLocator;
 import com.everhomes.listing.ListingLocator;
 import com.everhomes.listing.ListingQueryBuilderCallback;
 import com.everhomes.rest.quality.ExecuteGroupAndPosition;
+import com.everhomes.rest.quality.ListQualityInspectionTasksResponse;
 import com.everhomes.rest.quality.ScoreDTO;
 import com.everhomes.rest.quality.TaskCountDTO;
 
@@ -192,4 +193,7 @@ public interface QualityProvider {
 															   Timestamp startDate, Timestamp endDate,
 															   List<Long> executeStandardIds, List<Long> reviewStandardIds,
 															   List<ExecuteGroupAndPosition> groupDtos, ListingQueryBuilderCallback builderCallback);
+
+	void getTodayTaskCountStat(ListQualityInspectionTasksResponse response,List<Long> executeStandardIds, List<Long> reviewStandardIds,
+							   List<ExecuteGroupAndPosition> groupDtos, Timestamp todayBegin,ListingQueryBuilderCallback builderCallback);
 }

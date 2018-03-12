@@ -341,7 +341,7 @@ public class ActivityPortalPublishHandler implements PortalPublishHandler {
 	@Override
 	public String processInstanceConfig(String instanceConfig) {
 		ActivityEntryConfigulation config = (ActivityEntryConfigulation)StringHelper.fromJsonString(instanceConfig, ActivityEntryConfigulation.class);
-		if(null != config.getCategoryDTOList() && config.getCategoryDTOList().size() > 0){
+		if(config != null && null != config.getCategoryDTOList() && config.getCategoryDTOList().size() > 0){
 			for (ActivityCategoryDTO dto: config.getCategoryDTOList()) {
 				String iconUrl = contentServerService.parserUri(dto.getIconUri(), EntityType.USER.getCode(), UserContext.current().getUser().getId());
 				dto.setIconUrl(iconUrl);

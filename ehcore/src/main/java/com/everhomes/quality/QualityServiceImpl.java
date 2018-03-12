@@ -200,7 +200,6 @@ import java.util.Iterator;
 import java.util.LinkedHashMap;
 import java.util.List;
 import java.util.Map;
-import java.util.Objects;
 import java.util.Set;
 import java.util.stream.Collectors;
 
@@ -937,11 +936,21 @@ Long nextPageAnchor = null;
 		LOGGER.info("listQualityInspectionTasks: checkAdmin:{}" + isAdmin);
 
 		List<QualityInspectionTasks> tasks = new ArrayList<>();
+		ListQualityInspectionTasksResponse response = new ListQualityInspectionTasksResponse();
+		//查找当日已执行任务数
+		Calendar cal = Calendar.getInstance();
+		cal.setTime(DateHelper.currentGMTTime());
+		Timestamp todayBegin = getDayBegin(cal);
 		if (isAdmin) {
 			//管理员查询所有任务 减少了下参数数量
 			tasks = qualityProvider.listVerificationTasksRefactor(offset, pageSize, startDate, endDate,
 					null, null, null, (loc, query) -> {
 				listTasksQueryBuilder(cmd, query);
+				return null;
+			});
+
+			qualityProvider.getTodayTaskCountStat(response,null, null, null,todayBegin,(loc, query) -> {
+				listTasksCountQueryBuilder(cmd, query);
 				return null;
 			});
 		} else {
@@ -960,6 +969,10 @@ Long nextPageAnchor = null;
 				tasks = qualityProvider.listVerificationTasksRefactor(offset, pageSize, startDate, endDate,
 						executeStandardIds, reviewStandardIds, groupDtos, (loc, query) -> {
 					listTasksQueryBuilder(cmd, query);
+					return null;
+				});
+				qualityProvider.getTodayTaskCountStat(response,executeStandardIds, reviewStandardIds, groupDtos,todayBegin,(loc, query) -> {
+					listTasksCountQueryBuilder(cmd, query);
 					return null;
 				});
 			}
@@ -984,21 +997,42 @@ Long nextPageAnchor = null;
 		for (QualityInspectionTaskRecords record : records) {
 			populateRecordAttachements(record, record.getAttachments());
 		}
-		//查找当日已执行任务数
-		Calendar cal = Calendar.getInstance();
-		cal.setTime(DateHelper.currentGMTTime());
-		Timestamp todayBegin = getDayBegin(cal);
-		Set<Long> taskIds =  qualityProvider.listRecordsTaskIdByOperatorId(user.getId(), todayBegin, targetId);
+
+//		Set<Long> taskIds =  qualityProvider.listRecordsTaskIdByOperatorId(user.getId(), todayBegin, targetId);
 		List<QualityInspectionTaskDTO> dtoList = convertQualityInspectionTaskToDTO(tasks, user.getId());
-		ListQualityInspectionTasksResponse response = new ListQualityInspectionTasksResponse(nextPageAnchor, dtoList);
-		response.setTodayExecutedCount(0);
-		if(taskIds != null) {
-			response.setTodayExecutedCount(taskIds.size());
-		}
-		if(dtoList!=null && dtoList.size()>0){
-			response.setTodayTotalCount(dtoList.size());
-		}
+
+		response.setNextPageAnchor(nextPageAnchor);
+		response.setTasks(dtoList);
+//		response.setTodayExecutedCount(0);
+//		if(taskIds != null) {
+//			response.setTodayExecutedCount(taskIds.size());
+//		}
         return response;
+	}
+
+	private void listTasksCountQueryBuilder(ListQualityInspectionTasksCommand cmd, SelectQuery<? extends Record> query) {
+		if (cmd.getOwnerId()!= null)
+			query.addConditions(Tables.EH_QUALITY_INSPECTION_TASKS.OWNER_ID.eq(cmd.getOwnerId()));
+		if (cmd.getOwnerType() != null)
+			query.addConditions(Tables.EH_QUALITY_INSPECTION_TASKS.OWNER_TYPE.eq(cmd.getOwnerType()));
+		if (cmd.getTargetId() != null && cmd.getTargetId() != 0L)
+			query.addConditions(Tables.EH_QUALITY_INSPECTION_TASKS.TARGET_ID.eq(cmd.getTargetId()));
+		if (!StringUtils.isNullOrEmpty(cmd.getTargetType()))
+			query.addConditions(Tables.EH_QUALITY_INSPECTION_TASKS.TARGET_TYPE.eq(cmd.getTargetType()));
+		if (cmd.getTaskType() != null)
+			query.addConditions(Tables.EH_QUALITY_INSPECTION_TASKS.TASK_TYPE.eq(cmd.getTaskType()));
+		if (cmd.getExecuteStatus() != null)
+			query.addConditions(Tables.EH_QUALITY_INSPECTION_TASKS.STATUS.eq(cmd.getExecuteStatus()));
+		if (cmd.getManualFlag() != null)
+			query.addConditions(Tables.EH_QUALITY_INSPECTION_TASKS.MANUAL_FLAG.eq(Long.valueOf(cmd.getManualFlag())));
+		if (cmd.getNamespaceId() != null)
+			query.addConditions(Tables.EH_QUALITY_INSPECTION_TASKS.NAMESPACE_ID.eq(cmd.getNamespaceId()));
+		if (cmd.getExecuteFlag()!=null && cmd.getExecuteFlag() == 1) {
+			query.addConditions(Tables.EH_QUALITY_INSPECTION_TASKS.EXECUTIVE_EXPIRE_TIME.ge(new Timestamp(DateHelper.currentGMTTime().getTime()))
+					.or(Tables.EH_QUALITY_INSPECTION_TASKS.EXECUTIVE_EXPIRE_TIME.isNull())
+					.or(Tables.EH_QUALITY_INSPECTION_TASKS.PROCESS_EXPIRE_TIME.ge(new Timestamp(DateHelper.currentGMTTime().getTime()))));
+			query.addConditions(Tables.EH_QUALITY_INSPECTION_TASKS.STATUS.eq(QualityInspectionTaskStatus.WAITING_FOR_EXECUTING.getCode()));
+		}
 	}
 
 	private void listTasksQueryBuilder(ListQualityInspectionTasksCommand cmd, SelectQuery<? extends Record> query) {
@@ -4540,7 +4574,6 @@ Long nextPageAnchor = null;
 					timestampList.add(task.getReviewTime().getTime());
 				}
 				List<Long> temp = timestampList.stream()
-						.filter(Objects::isNull)
 						.sorted(Comparator.comparing(Long::longValue).reversed())
 						.collect(Collectors.toList());
 				if(temp!=null && temp.size()>0){

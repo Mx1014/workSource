@@ -29,6 +29,9 @@ WHERE `status` = 4 AND review_result = 4;
 UPDATE eh_equipment_inspection_task_logs
 SET equipment_id = (SELECT  equipment_id FROM eh_equipment_inspection_tasks WHERE id = task_id);
 
+UPDATE eh_equipment_inspection_task_logs
+SET standard_id = (SELECT  standard_id FROM eh_equipment_inspection_tasks WHERE id = task_id);
+
 -- 巡检任务状态统一 end by jiarui 20180105
 
 -- 增加经纬度动态表单  jiarui   20180122
@@ -733,3 +736,7 @@ update eh_service_alliance_jump_module set  module_url = REPLACE(module_url,'tas
 
 -- 更新活动详情页页面路径。 add by yanjun 201803091110
 UPDATE eh_configurations SET `value` = '/html/activity_text_review.html' WHERE `name` = 'activity.content.url';
+
+-- 富文本链接路径  add by yanjun 201803121105
+SET @id = (SELECT MAX(id) from eh_configurations);
+INSERT INTO `eh_configurations` (`id`, `name`, `value`, `description`, `namespace_id`, `display_name`) VALUES ((@id := @id + 1), 'rich.text.content.url', '/mobile/static/rich_text_view/index.html', 'rich.text.content.url', '0', NULL);
