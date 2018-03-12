@@ -74,6 +74,7 @@ import com.everhomes.util.excel.handler.PropMrgOwnerHandler;
 
 import com.google.gson.Gson;
 
+import org.apache.commons.lang.time.*;
 import org.apache.poi.ss.usermodel.Row;
 import org.apache.poi.ss.usermodel.Sheet;
 import org.apache.poi.ss.usermodel.Workbook;
@@ -1699,7 +1700,14 @@ public class AssetServiceImpl implements AssetService {
                         //version 2
                         start_copy_1.add(Calendar.MONTH,(Integer) interAndFloat[0]);
                         start_copy_1.add(Calendar.DAY_OF_MONTH,(int)((float) start_copy_1.getActualMaximum(Calendar.DAY_OF_MONTH) * (float) interAndFloat[1]));
-                        while(start_copy_1.before(end)){
+                        start_copy_1 = org.apache.commons.lang.time.DateUtils.truncate(start_copy_1,Calendar.DATE);
+                        end = org.apache.commons.lang.time.DateUtils.truncate(end,Calendar.DATE);
+                        int t1 = start_copy_1.compareTo(end);
+                        if(t1!=-1){
+                            start_copy_1.clear(Calendar.MILLISECOND);
+                            end.clear(Calendar.MILLISECOND);
+                        }
+                        while(start_copy_1.compareTo(end) == -1){
                             Calendar start_copy_1_copy =Calendar.getInstance();
                             start_copy_1_copy.setTime(start_copy_1.getTime());
                             insertTimes.add(start_copy_1_copy);
