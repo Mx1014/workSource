@@ -3381,8 +3381,8 @@ public class Rentalv2ServiceImpl implements Rentalv2Service {
 				//获取每周的开放天
 				Integer weekday = start.get(Calendar.DAY_OF_WEEK);
 
-				if (cmd.getOpenWeekday().contains(weekday) &&
-						(null == closeDates || !closeDates.contains(start.getTimeInMillis()))) {
+//				if (cmd.getOpenWeekday().contains(weekday) &&
+						if (null == closeDates || !closeDates.contains(start.getTimeInMillis())) {
 
 					RentalCell rsr = ConvertHelper.convert(cmd, RentalCell.class);
 					//单元格通用设置
