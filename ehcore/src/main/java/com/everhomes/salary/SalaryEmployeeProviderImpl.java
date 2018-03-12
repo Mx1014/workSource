@@ -9,6 +9,7 @@ import java.util.stream.Collectors;
 import com.everhomes.listing.CrossShardListingLocator;
 import com.everhomes.rest.salary.SalaryEmployeeStatus;
 import com.everhomes.rest.techpark.punch.NormalFlag;
+
 import org.jooq.*;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -154,8 +155,7 @@ public class SalaryEmployeeProviderImpl implements SalaryEmployeeProvider {
 
     @Override
     public SalaryDepartStatistic calculateDptReport(List<Long> detailIds, SalaryDepartStatistic statistic, Long ownerId, String month) {
-        Result<Record8<Long, Long, Integer, String, BigDecimal, BigDecimal, BigDecimal, BigDecimal>> r =
-                getReadOnlyContext().select(Tables.EH_SALARY_EMPLOYEES.ORGANIZATION_ID, Tables.EH_SALARY_EMPLOYEES.OWNER_ID,
+    	SelectHavingStep<Record8<Long, Long, Integer, String, BigDecimal, BigDecimal, BigDecimal, BigDecimal>> step = getReadOnlyContext().select(Tables.EH_SALARY_EMPLOYEES.ORGANIZATION_ID, Tables.EH_SALARY_EMPLOYEES.OWNER_ID,
                         Tables.EH_SALARY_EMPLOYEES.NAMESPACE_ID, Tables.EH_SALARY_EMPLOYEES.SALARY_PERIOD,
                         Tables.EH_SALARY_EMPLOYEES.REGULAR_SALARY.sum(), Tables.EH_SALARY_EMPLOYEES.SHOULD_PAY_SALARY.sum(),
                         Tables.EH_SALARY_EMPLOYEES.REAL_PAY_SALARY.sum(), Tables.EH_SALARY_EMPLOYEES.COST_SALARY.sum()
@@ -163,8 +163,9 @@ public class SalaryEmployeeProviderImpl implements SalaryEmployeeProvider {
                         .and(Tables.EH_SALARY_EMPLOYEES.OWNER_ID.eq(ownerId))
                         .and(Tables.EH_SALARY_EMPLOYEES.SALARY_PERIOD.eq(month))
                         .groupBy(Tables.EH_SALARY_EMPLOYEES.ORGANIZATION_ID, Tables.EH_SALARY_EMPLOYEES.OWNER_ID,
-                                Tables.EH_SALARY_EMPLOYEES.NAMESPACE_ID, Tables.EH_SALARY_EMPLOYEES.SALARY_PERIOD)
-                        .fetch();
+                                Tables.EH_SALARY_EMPLOYEES.NAMESPACE_ID, Tables.EH_SALARY_EMPLOYEES.SALARY_PERIOD);
+        LOGGER.debug("计算统计部门的数据sql:"+step);
+        Result<Record8<Long, Long, Integer, String, BigDecimal, BigDecimal, BigDecimal, BigDecimal>> r = step.fetch();
         if (r.size() > 1) {
             LOGGER.error("大于一条的部门记录被查出来了!",r);
         }
