@@ -2886,4 +2886,56 @@ public class QualityProviderImpl implements QualityProvider {
 
 		return tasks;
 	}
+
+	@Override
+	public void getTodayTaskCountStat(ListQualityInspectionTasksResponse response, List<Long> executeStandardIds, List<Long> reviewStandardIds, List<ExecuteGroupAndPosition> groupDtos, Timestamp todayBegin,ListingQueryBuilderCallback builderCallback) {
+		DSLContext context = this.dbProvider.getDslContext(AccessSpec.readOnlyWith(EhQualityInspectionTasks.class));
+		SelectQuery<EhQualityInspectionTasksRecord> query = context.selectQuery(Tables.EH_QUALITY_INSPECTION_TASKS);
+
+		Set<Long> taskIds = new HashSet<>();
+		Set<Long> taskExecuted = new HashSet<>();
+		if (groupDtos != null) {//isAdmin =false
+			Long executeUid = UserContext.currentUserId();
+			if (executeUid != null && executeUid != 0) {
+				Condition con = Tables.EH_QUALITY_INSPECTION_TASKS.OPERATOR_ID.eq(executeUid);
+				con = con.and(Tables.EH_QUALITY_INSPECTION_TASKS.RESULT.eq(QualityInspectionTaskResult.CORRECT.getCode()));
+
+				if (executeStandardIds != null) {
+					Condition con1 = Tables.EH_QUALITY_INSPECTION_TASKS.STANDARD_ID.in(executeStandardIds)
+							.and(Tables.EH_QUALITY_INSPECTION_TASKS.STATUS.eq(QualityInspectionTaskStatus.WAITING_FOR_EXECUTING.getCode()));
+					con = con.or(con1);
+				}
+
+				if (reviewStandardIds != null) {
+					Condition con2 = Tables.EH_QUALITY_INSPECTION_TASKS.STANDARD_ID.in(reviewStandardIds)
+							.and(Tables.EH_QUALITY_INSPECTION_TASKS.STATUS.eq(QualityInspectionTaskStatus.EXECUTED.getCode()))
+							.and(Tables.EH_QUALITY_INSPECTION_TASKS.REVIEW_RESULT.eq(QualityInspectionTaskReviewResult.NONE.getCode()));
+					con = con.or(con2);
+				}
+
+				query.addConditions(con);
+			}
+		}
+
+		builderCallback.buildCondition(null, query);
+		query.addConditions(Tables.EH_QUALITY_INSPECTION_TASKS.EXECUTIVE_EXPIRE_TIME.lt(todayBegin));
+
+		if (LOGGER.isDebugEnabled()) {
+			LOGGER.debug("Query tasks count, sql=" + query.getSQL());
+			LOGGER.debug("Query tasks count, bindValues=" + query.getBindValues());
+		}
+
+		query.fetch().map((EhQualityInspectionTasksRecord record) -> {
+			if(QualityInspectionTaskStatus.WAITING_FOR_EXECUTING.equals(QualityInspectionTaskStatus.fromStatus(record.getStatus()))){
+				taskIds.add(record.getId());
+			}
+			if(QualityInspectionTaskStatus.EXECUTED.equals(QualityInspectionTaskStatus.fromStatus(record.getStatus()))){
+				taskExecuted.add(record.getId());
+			}
+			return null;
+		});
+		response.setTodayTotalCount(taskIds.size());
+		response.setTodayExecutedCount(taskExecuted.size());
+
+	}
 }
