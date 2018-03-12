@@ -1699,7 +1699,7 @@ public class AssetServiceImpl implements AssetService {
                         //version 2
                         start_copy_1.add(Calendar.MONTH,(Integer) interAndFloat[0]);
                         start_copy_1.add(Calendar.DAY_OF_MONTH,(int)((float) start_copy_1.getActualMaximum(Calendar.DAY_OF_MONTH) * (float) interAndFloat[1]));
-                        while(start_copy_1.compareTo(end)==-1){
+                        while(start_copy_1.before(end)){
                             Calendar start_copy_1_copy =Calendar.getInstance();
                             start_copy_1_copy.setTime(start_copy_1.getTime());
                             insertTimes.add(start_copy_1_copy);
