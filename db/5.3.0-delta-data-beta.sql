@@ -39,15 +39,15 @@ SELECT @appid := @appid + 1, namespace_id, namespace_id + 100,  `active_app_id`,
 
 */
 
--- 5、同步数据库id
--- /evh/admin/syncSequence
-
--- 6、同步运营后台数据
--- /evh/portal/syncLaunchPadData
-
--- 7、在运营后台添加活动或论坛的主页签应用后需要刷新应用id（选做）
+-- 5、在运营后台添加活动或论坛的主页签应用后需要刷新应用id
 -- UPDATE eh_service_module_apps set custom_tag = 1, instance_config = '{"categoryId":1,"publishPrivilege":1,"livePrivilege":0,"listStyle":2,"scope":3,"style":4,"title": "活动管理"}' where module_id = 10600 and (instance_config is NULL or instance_config not LIKE '%categoryId%');
 -- UPDATE eh_service_module_apps set custom_tag = 0, instance_config = '{"forumEntryId":0}' where module_id = 10100 and (instance_config is NULL or instance_config not LIKE '%forumEntryId%');
+
+-- 6、同步数据库id
+-- /evh/admin/syncSequence
+
+-- 7、同步运营后台数据
+-- /evh/portal/syncLaunchPadData
 
 
 -- 8、同步服务联盟和工位预定数据，以下接口请勿重复调用！！请按照顺序调用。
