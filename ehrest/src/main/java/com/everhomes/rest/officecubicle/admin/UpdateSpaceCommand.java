@@ -30,6 +30,9 @@ import com.everhomes.util.StringHelper;
  * <li>attachments: banner图的urls{@link com.everhomes.rest.officecubicle.OfficeAttachmentDTO} </li> 
  * <li>categories: 工位空间list{@link com.everhomes.rest.officecubicle.OfficeCategoryDTO}</li> 
  * <li>ranges: 空间可见范围{@link OfficeRangeDTO}</li>
+ * <li>currentPMId: 当前管理公司ID</li>
+ * <li>currentProjectId: 当前选中项目Id，如果是全部则不传</li>
+ * <li>appId: 应用id</li>
  * </ul>
  */
 public class UpdateSpaceCommand { 
@@ -55,6 +58,33 @@ public class UpdateSpaceCommand {
 	private List<OfficeCategoryDTO> categories;
 	@ItemType(OfficeRangeDTO.class)
 	private List<OfficeRangeDTO> ranges;
+	private Long currentPMId;
+	private Long currentProjectId;
+	private Long appId;
+
+	public Long getCurrentPMId() {
+		return currentPMId;
+	}
+
+	public void setCurrentPMId(Long currentPMId) {
+		this.currentPMId = currentPMId;
+	}
+
+	public Long getCurrentProjectId() {
+		return currentProjectId;
+	}
+
+	public void setCurrentProjectId(Long currentProjectId) {
+		this.currentProjectId = currentProjectId;
+	}
+	
+	public Long getAppId() {
+		return appId;
+	}
+
+	public void setAppId(Long appId) {
+		this.appId = appId;
+	}
 	
 	public Integer getNamespaceId() {
 		return namespaceId;

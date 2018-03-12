@@ -13,6 +13,9 @@ import com.everhomes.util.StringHelper;
  * <li>ownerId: 所属id</li>
  * <li>organizationId: 管理公司id</li>
  * <li>id: id</li>
+ * <li>currentPMId: 当前管理公司ID</li>
+ * <li>currentProjectId: 当前选中项目Id，如果是全部则不传</li>
+ * <li>appId: 应用id</li>
  * </ul>
  */
 public class DeleteTalentCommand {
@@ -25,6 +28,33 @@ public class DeleteTalentCommand {
 	private Long organizationId;
 	@NotNull
 	private Long id;
+	private Long currentPMId;
+	private Long currentProjectId;
+	private Long appId;
+
+	public Long getCurrentPMId() {
+		return currentPMId;
+	}
+
+	public void setCurrentPMId(Long currentPMId) {
+		this.currentPMId = currentPMId;
+	}
+
+	public Long getCurrentProjectId() {
+		return currentProjectId;
+	}
+
+	public void setCurrentProjectId(Long currentProjectId) {
+		this.currentProjectId = currentProjectId;
+	}
+	
+	public Long getAppId() {
+		return appId;
+	}
+
+	public void setAppId(Long appId) {
+		this.appId = appId;
+	}
 
 	public DeleteTalentCommand() {
 
