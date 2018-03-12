@@ -1684,8 +1684,6 @@ public class AssetServiceImpl implements AssetService {
                         Calendar start_copy_1 = getCopyCalendar(start);
                         Object[] interAndFloat = IntegerUtil.getIntegerAndFloatPartFromFloat(separationTime);
 
-                        start_copy_1.add(Calendar.MONTH,(Integer) interAndFloat[0]);
-                        start_copy_1.add(Calendar.DAY_OF_MONTH,(int)((float) start_copy_1.getActualMaximum(Calendar.DAY_OF_MONTH) * (float) interAndFloat[1]));
 
 //                        String test1 = yyyyMMdd.format(start_copy_1.getTime());
 //                        String test2 = yyyyMMdd.format(end.getTime());
@@ -1700,13 +1698,6 @@ public class AssetServiceImpl implements AssetService {
                         //version 2
                         start_copy_1.add(Calendar.MONTH,(Integer) interAndFloat[0]);
                         start_copy_1.add(Calendar.DAY_OF_MONTH,(int)((float) start_copy_1.getActualMaximum(Calendar.DAY_OF_MONTH) * (float) interAndFloat[1]));
-                        start_copy_1 = org.apache.commons.lang.time.DateUtils.truncate(start_copy_1,Calendar.DATE);
-                        end = org.apache.commons.lang.time.DateUtils.truncate(end,Calendar.DATE);
-                        int t1 = start_copy_1.compareTo(end);
-                        if(t1!=-1){
-                            start_copy_1.clear(Calendar.MILLISECOND);
-                            end.clear(Calendar.MILLISECOND);
-                        }
                         while(start_copy_1.compareTo(end) == -1){
                             Calendar start_copy_1_copy =Calendar.getInstance();
                             start_copy_1_copy.setTime(start_copy_1.getTime());
@@ -2099,6 +2090,7 @@ public class AssetServiceImpl implements AssetService {
 
     private Calendar getCopyCalendar(Calendar raw) {
         Calendar copy = Calendar.getInstance();
+        copy.clear();
         copy.setTime(raw.getTime());
         return copy;
     }
