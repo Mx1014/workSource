@@ -59,3 +59,7 @@ SELECT @appid := @appid + 1, namespace_id, namespace_id + 100,  `active_app_id`,
 -- /officecubicle/dataMigration
 
 -- 10、执行文件 db/search/enterpriseCustomer.sh 然后同步/customer/syncEnterpriseCustomer
+
+-- 11、同步审批范围及离职人员状态
+-- /admin/general_approval/initializeGeneralApprovalScope
+-- /archives/syncArchivesDismissStatus

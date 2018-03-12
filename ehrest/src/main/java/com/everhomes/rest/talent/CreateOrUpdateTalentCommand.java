@@ -23,6 +23,9 @@ import com.everhomes.util.StringHelper;
  * <li>degree: 学历，参考{@link com.everhomes.rest.talent.TalentDegreeEnum}</li>
  * <li>phone: 联系电话</li>
  * <li>remark: 详细介绍</li>
+ * <li>currentPMId: 当前管理公司ID</li>
+ * <li>currentProjectId: 当前选中项目Id，如果是全部则不传</li>
+ * <li>appId: 应用id</li>
  * </ul>
  */
 public class CreateOrUpdateTalentCommand {
@@ -60,6 +63,33 @@ public class CreateOrUpdateTalentCommand {
 	@NotNull
 	@Size(min=1)
 	private String remark;
+	private Long currentPMId;
+	private Long currentProjectId;
+	private Long appId;
+
+	public Long getCurrentPMId() {
+		return currentPMId;
+	}
+
+	public void setCurrentPMId(Long currentPMId) {
+		this.currentPMId = currentPMId;
+	}
+
+	public Long getCurrentProjectId() {
+		return currentProjectId;
+	}
+
+	public void setCurrentProjectId(Long currentProjectId) {
+		this.currentProjectId = currentProjectId;
+	}
+	
+	public Long getAppId() {
+		return appId;
+	}
+
+	public void setAppId(Long appId) {
+		this.appId = appId;
+	}
 
 	public CreateOrUpdateTalentCommand() {
 

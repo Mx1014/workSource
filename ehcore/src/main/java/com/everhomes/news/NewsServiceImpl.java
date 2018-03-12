@@ -460,12 +460,12 @@ public class NewsServiceImpl implements NewsService {
 	public ListNewsResponse listNews(ListNewsCommand cmd) {
 		final Long userId = UserContext.current().getUser().getId();
 		final Integer namespaceId = checkOwner(userId, cmd.getOwnerId(), cmd.getOwnerType());
-		if(TrueOrFalseFlag.fromCode(cmd.getCheckPrivilegeFlag())==TrueOrFalseFlag.TRUE) {
-			LOGGER.info("news check privilege");
-			if(cmd.getCurrentProjectId()!=null){
-				userPrivilegeMgr.checkUserPrivilege(userId, cmd.getCurrentPMId(), 10005L, 10800L,null,""+cmd.getCategoryId(), null, cmd.getCurrentProjectId());
-			}
-		}
+//		if(TrueOrFalseFlag.fromCode(cmd.getCheckPrivilegeFlag())==TrueOrFalseFlag.TRUE) {
+//			LOGGER.info("news check privilege");
+//			if(cmd.getCurrentProjectId()!=null){
+//				userPrivilegeMgr.checkUserPrivilege(userId, cmd.getCurrentPMId(), 10005L, 10800L,null,""+cmd.getCategoryId(), null, cmd.getCurrentProjectId());
+//			}
+//		}
 		if (StringUtils.isEmpty(cmd.getKeyword()) && cmd.getTagIds()==null ) {
 			NewsOwnerType newsOwnerType = NewsOwnerType.fromCode(cmd.getOwnerType());
 			if (newsOwnerType == NewsOwnerType.ORGANIZATION) {
