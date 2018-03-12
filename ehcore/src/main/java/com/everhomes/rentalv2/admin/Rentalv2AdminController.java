@@ -3,6 +3,7 @@ package com.everhomes.rentalv2.admin;
 import javax.servlet.http.HttpServletResponse;
 import javax.validation.Valid;
 
+import com.everhomes.rest.rentalv2.*;
 import com.everhomes.rest.rentalv2.admin.*;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.web.bind.annotation.RequestMapping;
@@ -14,14 +15,6 @@ import com.everhomes.discover.RestDoc;
 import com.everhomes.discover.RestReturn;
 import com.everhomes.rentalv2.Rentalv2Service;
 import com.everhomes.rest.RestResponse;
-import com.everhomes.rest.rentalv2.AddItemAdminCommand;
-import com.everhomes.rest.rentalv2.DeleteItemAdminCommand;
-import com.everhomes.rest.rentalv2.GetItemListAdminCommand;
-import com.everhomes.rest.rentalv2.GetItemListCommandResponse;
-import com.everhomes.rest.rentalv2.ListRentalBillsCommand;
-import com.everhomes.rest.rentalv2.ListRentalBillsCommandResponse;
-import com.everhomes.rest.rentalv2.RentalBillDTO;
-import com.everhomes.rest.rentalv2.UpdateItemAdminCommand;
 
 /**
  * <ul>
@@ -810,6 +803,19 @@ public class Rentalv2AdminController extends ControllerBase {
 	public RestResponse searchRentalOrders(SearchRentalOrdersCommand cmd) {
 
 		RestResponse response = new RestResponse(rentalService.searchRentalOrders(cmd));
+		response.setErrorCode(ErrorCodes.SUCCESS);
+		response.setErrorDescription("OK");
+		return response;
+	}
+
+	/**
+	 * <b>URL: /rental/admin/getRentalOrderById</b>
+	 * <p>通过id查询订单</p>
+	 */
+	@RequestMapping("getRentalOrderById")
+	@RestReturn(value = RentalOrderDTO.class)
+	public RestResponse getRentalOrderById(GetRentalBillCommand cmd) {
+		RestResponse response = new RestResponse(rentalService.getRentalOrderById(cmd));
 		response.setErrorCode(ErrorCodes.SUCCESS);
 		response.setErrorDescription("OK");
 		return response;
