@@ -1004,7 +1004,7 @@ Long nextPageAnchor = null;
 
 		response.setNextPageAnchor(nextPageAnchor);
 		response.setTasks(dtoList);
-		response.setTodayExecutedCount(0);
+//		response.setTodayExecutedCount(0);
 //		if(taskIds != null) {
 //			response.setTodayExecutedCount(taskIds.size());
 //		}
