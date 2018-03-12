@@ -1684,7 +1684,7 @@ public class Rentalv2ServiceImpl implements Rentalv2Service {
 		rentalBill.setVisibleFlag(VisibleFlag.VISIBLE.getCode());
 
 		//计算并设置设置订单金额
-		setOrderAmount(rs, cmd.getRules(), rentalBill, cellAmountMap);
+		setOrderAmount(rs, cmd.getRules(), rentalBill, cellAmountMap,rule);
 		//设置只用详情
 		setUseDetailStr(cmd.getRules(), rs, rentalBill);
 		//设置订单提醒时间
@@ -1746,9 +1746,10 @@ public class Rentalv2ServiceImpl implements Rentalv2Service {
 	}
 
 	private void setOrderAmount(RentalResource rs, List<RentalBillRuleDTO> rules, RentalOrder rentalBill,
-									  Map<Long, BigDecimal> cellAmountMap) {
-
-		BigDecimal amount = calculateOrderAmount(rs, rules, rentalBill, cellAmountMap);
+									  Map<Long, BigDecimal> cellAmountMap,RentalDefaultRule rule) {
+		BigDecimal amount = new BigDecimal(0);
+		if (NormalFlag.NEED.equals(rule.getNeedPay()))
+			 amount = calculateOrderAmount(rs, rules, rentalBill, cellAmountMap);
 
 		rentalBill.setPaidMoney(new BigDecimal(0));
 		rentalBill.setResourceTotalMoney(amount);
@@ -6533,7 +6534,8 @@ public class Rentalv2ServiceImpl implements Rentalv2Service {
 			rentalSite.setAddress(cmd.getAddress());
 			rentalSite.setLatitude(cmd.getLatitude());
 			rentalSite.setLongitude(cmd.getLongitude());
-			rentalSite.setCommunityId(cmd.getCommunityId());
+			if (cmd.getCommunityId()!=null)
+				rentalSite.setCommunityId(cmd.getCommunityId());
 			rentalSite.setContactPhonenum(cmd.getContactPhonenum());
 			rentalSite.setIntroduction(cmd.getIntroduction());
 			rentalSite.setNotice(cmd.getNotice());

@@ -5612,7 +5612,7 @@ public class PropertyMgrServiceImpl implements PropertyMgrService {
         totalDtoMap.values().forEach(r -> r.setThird((int)((Double.valueOf(r.getSecond()) / totalNum[0] * 100)) + ""));
 
         // 为了把101+的放在最后面
-        ListOrganizationOwnerStatisticDTO otherAgeDto = totalDtoMap.remove("101+");
+        ListOrganizationOwnerStatisticDTO otherAgeDto = totalDtoMap.remove("未知");
 
         List<ListOrganizationOwnerStatisticDTO> totalList = totalDtoMap.values().stream().collect(Collectors.toList());
         totalList.sort(Comparator.comparing(ListOrganizationOwnerStatisticDTO::getFirst));
