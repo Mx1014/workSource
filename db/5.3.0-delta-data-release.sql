@@ -733,3 +733,7 @@ update eh_service_alliance_jump_module set  module_url = REPLACE(module_url,'tas
 
 -- 更新活动详情页页面路径。 add by yanjun 201803091110
 UPDATE eh_configurations SET `value` = '/html/activity_text_review.html' WHERE `name` = 'activity.content.url';
+
+-- 富文本链接路径  add by yanjun 201803121105
+SET @id = (SELECT MAX(id) from eh_configurations);
+INSERT INTO `eh_configurations` (`id`, `name`, `value`, `description`, `namespace_id`, `display_name`) VALUES ((@id := @id + 1), 'rich.text.content.url', '/mobile/static/rich_text_view/index.html', 'rich.text.content.url', '0', NULL);
