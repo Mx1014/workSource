@@ -1089,8 +1089,8 @@ public class AssetServiceImpl implements AssetService {
             feeRule:for(int i = 0; i < feesRules.size(); i++) {
                 // 是錯
 
-                List<BillItemsExpectancy> billItemsExpectancies_inner = new ArrayList<>();
-                Map<BillDateAndGroupId,BillItemsExpectancy> uniqueRecorder_inner = new HashMap<>();
+//                List<BillItemsExpectancy> billItemsExpectancies_inner = new ArrayList<>();
+//                Map<BillDateAndGroupId,BillItemsExpectancy> uniqueRecorder_inner = new HashMap<>();
 
                 // 是錯
                 //获取单一包裹
@@ -1188,7 +1188,7 @@ public class AssetServiceImpl implements AssetService {
                             throw RuntimeErrorException.errorWith(ErrorCodes.SCOPE_GENERAL,ErrorCodes.ERROR_INVALID_PARAMETER,"目前计费周期只支持按月，按季，按年");
                     }
                     //计算
-                    assetFeeHandler(billItemsExpectancies_inner,var2,formula,groupRule,group,rule,cycle,cmd,property,standard,formulaCondition,billingCycle,itemScope);
+                    assetFeeHandler(billItemsExpectancies,var2,formula,groupRule,group,rule,cycle,cmd,property,standard,formulaCondition,billingCycle,itemScope);
 
                 }
                 Integer cycleForBill = 0;
@@ -1208,10 +1208,10 @@ public class AssetServiceImpl implements AssetService {
                         assetProvider.deleteContractPayment(contractId);
                         throw RuntimeErrorException.errorWith(ErrorCodes.SCOPE_GENERAL,ErrorCodes.ERROR_INVALID_PARAMETER,"目前计费周期只支持按月，按季，按年");
                 }
-                assetFeeHandlerForBillCycles(uniqueRecorder_inner,var2,formula,groupRule,group,rule,cycleForBill,cmd,standard,formulaCondition,billingCycle,itemScope);
+                assetFeeHandlerForBillCycles(uniqueRecorder,var2,formula,groupRule,group,rule,cycleForBill,cmd,standard,formulaCondition,billingCycle,itemScope);
                 // 試試解耦和，也許計算本身沒有錯誤
-                billItemsExpectancies_inner.addAll(billItemsExpectancies);
-                uniqueRecorder.putAll(uniqueRecorder_inner);
+//                billItemsExpectancies.addAll(billItemsExpectancies_inner);
+//                uniqueRecorder.putAll(uniqueRecorder_inner);
             }
             //先算出所有的item
             for(int g = 0; g < billItemsExpectancies.size(); g++){
