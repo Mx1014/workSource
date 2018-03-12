@@ -1902,6 +1902,9 @@ private void checkUserPrivilege(Long orgId, Long privilegeId, Long communityId) 
 				EquipmentStandardRelationDTO relationDTO = new EquipmentStandardRelationDTO();
 				relationDTO.setEquipmentName(equipment.getName());
 				relationDTO.setLocation(equipment.getLocation());
+				relationDTO.setEquipmentId(equipment.getId());
+				relationDTO.setStandardId(map.getStandardId());
+				relationDTO.setQrCodeFlag(equipment.getQrCodeFlag());
 				equipmentStandardRelations.add(relationDTO);
 			}
 		}
