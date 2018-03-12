@@ -1060,9 +1060,9 @@ public class SalaryServiceImpl implements SalaryService {
 
 
         NormalFlag isFile = isMonthFile(month);
-        List<SalaryGroupEntity> groupEntities = new ArrayList<>();
 //        if (isFile == NormalFlag.NO) {
-        groupEntities = salaryGroupEntityProvider.listOpenSalaryGroupEntityByOrgId(ownerId);
+    	Long organizationId = punchService.getTopEnterpriseId(ownerId);
+        List<SalaryGroupEntity> groupEntities = salaryGroupEntityProvider.listOpenSalaryGroupEntityByOrgId(organizationId);
 //        } else {
 //            groupEntities = salaryEmployeePeriodValProvider.listOpenSalaryGroupEntityByOrgId(ownerId, month);
 //        }
@@ -1367,8 +1367,8 @@ public class SalaryServiceImpl implements SalaryService {
     }
 
     private XSSFWorkbook getEmployeeSalaryWB(Long ownerId, Long taskId, Integer namespaceId) {
-
-        List<SalaryGroupEntity> groupEntities = salaryGroupEntityProvider.listOpenSalaryGroupEntityByOrgId(ownerId);
+    	Long organizationId = punchService.getTopEnterpriseId(ownerId);
+        List<SalaryGroupEntity> groupEntities = salaryGroupEntityProvider.listOpenSalaryGroupEntityByOrgId(organizationId);
 
         XSSFWorkbook wb = new XSSFWorkbook();
         XSSFSheet sheet = wb.createSheet("sheet1");
