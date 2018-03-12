@@ -6032,9 +6032,11 @@ private void checkUserPrivilege(Long orgId, Long privilegeId, Long communityId) 
 
 	private List<OfflineEquipmentTaskReportLog> processOfflineTaskLogsAndReportDetails(List<EquipmentTaskReportDetail> equipmentTaskReportDetails, Map<Long, EquipmentInspectionTasks> tasksMap) {
 		//reserve relations of  taskId and reportDetails
-		Map<Long, EquipmentTaskReportDetail> taskAndDetailsMap = new HashMap<>();
+		Map<Long, List<EquipmentTaskReportDetail>> taskAndDetailsMap = new HashMap<>();
 		if (equipmentTaskReportDetails != null && equipmentTaskReportDetails.size() > 0) {
-			equipmentTaskReportDetails.forEach((e) -> taskAndDetailsMap.put(e.getTaskId(), e));
+			if (tasksMap.keySet().size() > 0) {
+				tasksMap.keySet().forEach((taskId) -> taskAndDetailsMap.put(taskId, getTaskDetailListByTaskId(taskId,equipmentTaskReportDetails)));
+			}
 		}
 		List<OfflineEquipmentTaskReportLog> reportLogs = new ArrayList<>();
 		OfflineEquipmentTaskReportLog reportLog = new OfflineEquipmentTaskReportLog();
@@ -6051,32 +6053,47 @@ private void checkUserPrivilege(Long orgId, Long privilegeId, Long communityId) 
 				} else {
 					log.setProcessResult(EquipmentTaskProcessResult.COMPLETE_DELAY.getCode());
 				}
-				EquipmentTaskReportDetail reportDetail = taskAndDetailsMap.get(task.getId());
-				if (reportDetail.getMessage() != null) {
-					log.setProcessMessage(reportDetail.getMessage());
-				}
-				//process  attachements and   logs
-				log.setEquipmentId(reportDetail.getEquipmentId());
-				updateEquipmentTasksAttachmentAndLogs(task, log, reportDetail.getAttachments());
-
-				List<InspectionItemResult> itemResults = reportDetail.getItemResults();
-				if (itemResults != null && itemResults.size() > 0) {
-					for (InspectionItemResult itemResult : itemResults) {
-						EquipmentInspectionItemResults result = ConvertHelper.convert(itemResult, EquipmentInspectionItemResults.class);
-						result.setTaskLogId(log.getId());
-						result.setCommunityId(task.getTargetId());
-						result.setEquipmentId(reportDetail.getEquipmentId());
-						result.setStandardId(reportDetail.getStandardId());
-						result.setInspectionCategoryId(task.getInspectionCategoryId());
-						result.setNamespaceId(task.getNamespaceId());
-						equipmentProvider.createEquipmentInspectionItemResults(result);
+				List<EquipmentTaskReportDetail> reportDetails = taskAndDetailsMap.get(task.getId());
+				reportDetails.forEach((reportDetail) -> {
+					if (reportDetail.getMessage() != null) {
+						log.setProcessMessage(reportDetail.getMessage());
 					}
-				}
+					//process  attachements and   logs
+					log.setEquipmentId(reportDetail.getEquipmentId());
+					updateEquipmentTasksAttachmentAndLogs(task, log, reportDetail.getAttachments());
+
+					List<InspectionItemResult> itemResults = reportDetail.getItemResults();
+					if (itemResults != null && itemResults.size() > 0) {
+						for (InspectionItemResult itemResult : itemResults) {
+							EquipmentInspectionItemResults result = ConvertHelper.convert(itemResult, EquipmentInspectionItemResults.class);
+							result.setTaskLogId(log.getId());
+							result.setCommunityId(task.getTargetId());
+							result.setEquipmentId(reportDetail.getEquipmentId());
+							result.setStandardId(reportDetail.getStandardId());
+							result.setInspectionCategoryId(task.getInspectionCategoryId());
+							result.setNamespaceId(task.getNamespaceId());
+							equipmentProvider.createEquipmentInspectionItemResults(result);
+						}
+					}
+				});
 				reportLog.setSucessIds(task.getId());
 				reportLogs.add(reportLog);
 			}
 		}
 		return reportLogs;
+	}
+
+	private List<EquipmentTaskReportDetail> getTaskDetailListByTaskId(Long taskId, List<EquipmentTaskReportDetail> equipmentTaskReportDetails) {
+		List<EquipmentTaskReportDetail> details = new ArrayList<>();
+		if (equipmentTaskReportDetails != null && equipmentTaskReportDetails.size() > 0) {
+			equipmentTaskReportDetails.forEach((detail) -> {
+				if (detail.getTaskId().equals(taskId)) {
+					details.add(detail);
+				}
+			});
+			return details;
+		}
+		return null;
 	}
 
 	private List<OfflineEquipmentTaskReportLog> processEquipmentRepairTasks(List<CreateEquipmentRepairCommand> equipmentRepairReportDetail) {
@@ -6213,4 +6230,6 @@ private void checkUserPrivilege(Long orgId, Long privilegeId, Long communityId) 
 		//增加设备的操作记录
 		createEquipmentOperateLogs(equipment.getNamespaceId(), cmd.getOwnerId(), cmd.getOwnerType(), equipment.getId(), EquipmentOperateActionType.UPDATE.getCode());
 	}
+
+
 }

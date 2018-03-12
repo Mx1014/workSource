@@ -544,7 +544,9 @@ public class SocialSecurityServiceImpl implements SocialSecurityService {
 //        SocialSecurityEmployeeDTO detail = findSocialSecurityEmployeeDTO(members, detailId);
 //        if (null != detail) {
         dto.setUserName(detail.getContactName());
-        dto.setDeptName(detail.getDepartmentName());
+
+        String depName = archivesService.convertToOrgNames(archivesService.getEmployeeDepartment(detail.getDetailId()));
+        dto.setDeptName(depName);
         dto.setAccumulationFundStatus(detail.getAccumulationFundStatus());
         dto.setSocialSecurityStatus(detail.getSocialSecurityStatus());
         //// TODO: 2017/12/27  入职离职日期
@@ -1955,7 +1957,8 @@ public class SocialSecurityServiceImpl implements SocialSecurityService {
         report.setUserId(detail.getTargetId());
         report.setUserName(detail.getContactName());
         report.setEntryDate(detail.getCheckInTime());
-        report.setDeptName(detail.getDepartment());
+        String depName = archivesService.convertToOrgNames(archivesService.getEmployeeDepartment(detail.getId()));
+        report.setDeptName(depName);
         List<SocialSecuritySetting> settings = socialSecuritySettingProvider.listSocialSecuritySetting(detail.getId());
         if (null != settings) {
             for (SocialSecuritySetting setting : settings) {
