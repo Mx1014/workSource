@@ -1483,7 +1483,8 @@ public class AssetServiceImpl implements AssetService {
 
 
         //先算开始a
-        Calendar a = getCopyCalendar(dateStrBegin);
+        Calendar a = newClearedCalendar(Calendar.DATE);
+        a.setTime(dateStrBegin.getTime());
 
 
         timeLoop:while(a.compareTo(dateStrEnd)<0){
@@ -1863,6 +1864,14 @@ public class AssetServiceImpl implements AssetService {
         }
     }
 
+    private Calendar newClearedCalendar(Integer level) {
+        Calendar instance = Calendar.getInstance();
+        if(level == null){
+            instance.clear();
+        }
+        instance.clear(level);
+        return instance;
+    }
     private Calendar newClearedCalendar() {
         Calendar instance = Calendar.getInstance();
         instance.clear();
@@ -1887,7 +1896,7 @@ public class AssetServiceImpl implements AssetService {
 
 
         //先算开始a
-        Calendar a = newClearedCalendar();
+        Calendar a = newClearedCalendar(Calendar.DATE);
         a.setTime(dateStrBegin.getTime());
 
         timeLoop:while(a.compareTo(dateStrEnd)<0){
@@ -2097,14 +2106,14 @@ public class AssetServiceImpl implements AssetService {
     }
 
     private Calendar getCopyCalendar(Calendar raw) {
-        Calendar copy = newClearedCalendar();
+        Calendar copy = newClearedCalendar(null);
         copy.clear();
         copy.setTime(raw.getTime());
         return copy;
     }
 
     private boolean checkCycle(Calendar d2, Calendar a, Integer cycle) {
-        Calendar a_assist = newClearedCalendar();
+        Calendar a_assist = newClearedCalendar(null);
         a_assist.setTime(a.getTime());
         a_assist.set(Calendar.MONTH,a_assist.get(Calendar.MONTH)+cycle);
         a_assist.set(Calendar.DAY_OF_MONTH,a_assist.get(Calendar.DAY_OF_MONTH)-1);
@@ -2141,23 +2150,23 @@ public class AssetServiceImpl implements AssetService {
         String propertyName = property.getPropertyName();
         Date dateStrBegin = rule.getDateStrBegin();
         Date dateStrEnd = rule.getDateStrEnd();
-        Calendar c1 = newClearedCalendar();
-        Calendar c2 = newClearedCalendar();
+        Calendar c1 = newClearedCalendar(null);
+        Calendar c2 = newClearedCalendar(null);
         // c1 is the start of the contract
         c1.setTime(dateStrBegin);
         // c2 is the end date of the contract
         c2.setTime(dateStrEnd);
-        Calendar c3 = newClearedCalendar();
+        Calendar c3 = newClearedCalendar(null);
         // c3 starts as the begin of the contract
         c3.setTime(dateStrBegin);
         //define duration for cal
         float duration = 0;
         //define the end of the date the calculation should take as multiply
-        Calendar c5 = newClearedCalendar();
+        Calendar c5 = newClearedCalendar(null);
         //first to check if the whole period is less than one month
 
-        Calendar c7 = newClearedCalendar();
-        Calendar c8 = newClearedCalendar();
+        Calendar c7 = newClearedCalendar(null);
+        Calendar c8 = newClearedCalendar(null);
 //        c7.setTime(c1.getTime());
 //        c8.setTime(c8.getTime());
         if(c1.get(Calendar.YEAR)==c2.get(Calendar.YEAR)&&c1.get(Calendar.MONTH)==c2.get(Calendar.MONTH)){
