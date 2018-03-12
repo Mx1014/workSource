@@ -224,7 +224,9 @@ public class SalaryServiceImpl implements SalaryService {
                         }
                         sb.append(dpt1.getName());
                     }
-                } catch (Exception e) {
+                } catch(NumberFormatException e){
+                	//不用处理字符串为""的
+                }catch (Exception e) {
                     LOGGER.error("找部门的路径名称出了错", e);
                 }
             }
