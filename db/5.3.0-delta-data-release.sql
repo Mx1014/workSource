@@ -582,6 +582,9 @@ UPDATE eh_rentalv2_default_rules SET rental_start_time_flag = 1;
 UPDATE eh_rentalv2_resource_types SET identify = 'conference' WHERE NAME LIKE '%会议室%';
 UPDATE eh_rentalv2_resource_types SET identify = 'screen' WHERE NAME LIKE '%电子屏%';
 UPDATE eh_rentalv2_resource_types SET identify = 'area' WHERE NAME LIKE '%场地%';
+
+-- 周末预约全部打开
+update eh_rentalv2_default_rules set open_weekday = '1111111';
 -- beta 和 现网执行
 UPDATE eh_rentalv2_resource_types SET identify = 'conference' WHERE id IN (10819,12030);
 UPDATE eh_rentalv2_resource_types SET identify = 'screen' WHERE id IN (11,12168);
