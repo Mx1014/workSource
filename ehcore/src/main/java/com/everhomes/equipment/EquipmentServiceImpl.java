@@ -2729,9 +2729,9 @@ private void checkUserPrivilege(Long orgId, Long privilegeId, Long communityId) 
 	}
 
 	private List<EquipmentInspectionTasksLogs> getLatestTaskLogs(List<EquipmentInspectionTasksLogs> logs) {
-		Map<Long, EquipmentInspectionTasksLogs> logsMap = new ConcurrentHashMap<>();
+		Map<String, EquipmentInspectionTasksLogs> logsMap = new ConcurrentHashMap<>();
 		if(logs!=null && logs.size()>0){
-			logs.forEach((log)-> logsMap.putIfAbsent(log.getEquipmentId(), log));
+			logs.forEach((log)-> logsMap.putIfAbsent(log.getEquipmentId().toString()+log.getStandardId().toString(), log));
 			return new ArrayList<>(logsMap.values());
 		}
 		return null;
@@ -6060,6 +6060,7 @@ private void checkUserPrivilege(Long orgId, Long privilegeId, Long communityId) 
 					}
 					//process  attachements and   logs
 					log.setEquipmentId(reportDetail.getEquipmentId());
+					log.setStandardId(reportDetail.getStandardId());
 					updateEquipmentTasksAttachmentAndLogs(task, log, reportDetail.getAttachments());
 
 					List<InspectionItemResult> itemResults = reportDetail.getItemResults();

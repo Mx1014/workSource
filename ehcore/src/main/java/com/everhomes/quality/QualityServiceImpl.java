@@ -200,7 +200,6 @@ import java.util.Iterator;
 import java.util.LinkedHashMap;
 import java.util.List;
 import java.util.Map;
-import java.util.Objects;
 import java.util.Set;
 import java.util.stream.Collectors;
 
@@ -4575,7 +4574,6 @@ Long nextPageAnchor = null;
 					timestampList.add(task.getReviewTime().getTime());
 				}
 				List<Long> temp = timestampList.stream()
-						.filter(Objects::isNull)
 						.sorted(Comparator.comparing(Long::longValue).reversed())
 						.collect(Collectors.toList());
 				if(temp!=null && temp.size()>0){
