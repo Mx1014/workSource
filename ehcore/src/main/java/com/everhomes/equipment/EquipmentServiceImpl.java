@@ -2678,26 +2678,26 @@ private void checkUserPrivilege(Long orgId, Long privilegeId, Long communityId) 
 		ListLogsByTaskIdResponse response = new ListLogsByTaskIdResponse();
 
 		tasks.forEach((task -> {
-			EquipmentInspectionPlans plan = new EquipmentInspectionPlans();
-			List<Long> equipmentIds = new ArrayList<>();
-			if (cmd.getEquipmentId() == null) {
-				if (task.getPlanId() != null && task.getPlanId() != 0L) {
-					plan = equipmentProvider.getEquipmmentInspectionPlanById(task.getPlanId());
-					if (null != plan) {
-						List<EquipmentInspectionEquipmentPlanMap> planMaps = equipmentProvider.getEquipmentInspectionPlanMap(plan.getId());
-						if (planMaps != null && planMaps.size() > 0) {
-							planMaps.forEach((r) -> equipmentIds.add(r.getEquipmentId()));
-						}
-					}
-				} else if (task.getPlanId() == null || task.getPlanId() == 0) {
-					//兼容
-					equipmentIds.add(task.getEquipmentId());
-				}
-			} else {
-				equipmentIds.addAll(new ArrayList<>(Collections.singletonList(cmd.getEquipmentId())));
-			}
+//			EquipmentInspectionPlans plan = new EquipmentInspectionPlans();
+//			List<Long> equipmentIds = new ArrayList<>();
+//			if (cmd.getEquipmentId() == null) {
+//				if (task.getPlanId() != null && task.getPlanId() != 0L) {
+//					plan = equipmentProvider.getEquipmmentInspectionPlanById(task.getPlanId());
+//					if (null != plan) {
+//						List<EquipmentInspectionEquipmentPlanMap> planMaps = equipmentProvider.getEquipmentInspectionPlanMap(plan.getId());
+//						if (planMaps != null && planMaps.size() > 0) {
+//							planMaps.forEach((r) -> equipmentIds.add(r.getEquipmentId()));
+//						}
+//					}
+//				} else if (task.getPlanId() == null || task.getPlanId() == 0) {
+//					//兼容
+//					equipmentIds.add(task.getEquipmentId());
+//				}
+//			} else {
+//				equipmentIds.addAll(new ArrayList<>(Collections.singletonList(cmd.getEquipmentId())));
+//			}
 			List<EquipmentInspectionTasksLogs> logs = equipmentProvider.listLogsByTaskId(locator, pageSize + 1,
-					task.getId(), cmd.getProcessType(), equipmentIds);
+					task.getId(), cmd.getProcessType(), null);
 			//展示最新一次的任务日志记录
 			logs = getLatestTaskLogs(logs);
 
@@ -2707,11 +2707,12 @@ private void checkUserPrivilege(Long orgId, Long privilegeId, Long communityId) 
 				dtos = processEquipmentTaskLogsDTOS(logs);
 			} else {
 				if (logs != null && logs.size() > 0)
-					dtos = logs.stream().map((r) -> {
-						EquipmentTaskLogsDTO dto = ConvertHelper.convert(r, EquipmentTaskLogsDTO.class);
-						populateItemResultToTasklog(r, dto);
-						return dto;
-					}).collect(Collectors.toList());
+//					dtos = logs.stream().map((r) -> {
+//						EquipmentTaskLogsDTO dto = ConvertHelper.convert(r, EquipmentTaskLogsDTO.class);
+//						populateItemResultToTasklog(r, dto);
+//						return dto;
+//					}).collect(Collectors.toList());
+					dtos = processEquipmentTaskLogsDTOS(logs);
 				//增加正常异常数
 				calculateAbnormalCount(dtos);
 			}
@@ -2729,9 +2730,9 @@ private void checkUserPrivilege(Long orgId, Long privilegeId, Long communityId) 
 	}
 
 	private List<EquipmentInspectionTasksLogs> getLatestTaskLogs(List<EquipmentInspectionTasksLogs> logs) {
-		Map<Long, EquipmentInspectionTasksLogs> logsMap = new ConcurrentHashMap<>();
+		Map<String, EquipmentInspectionTasksLogs> logsMap = new ConcurrentHashMap<>();
 		if(logs!=null && logs.size()>0){
-			logs.forEach((log)-> logsMap.putIfAbsent(log.getEquipmentId(), log));
+			logs.forEach((log)-> logsMap.putIfAbsent(log.getEquipmentId().toString()+log.getStandardId().toString(), log));
 			return new ArrayList<>(logsMap.values());
 		}
 		return null;
@@ -6060,6 +6061,7 @@ private void checkUserPrivilege(Long orgId, Long privilegeId, Long communityId) 
 					}
 					//process  attachements and   logs
 					log.setEquipmentId(reportDetail.getEquipmentId());
+					log.setStandardId(reportDetail.getStandardId());
 					updateEquipmentTasksAttachmentAndLogs(task, log, reportDetail.getAttachments());
 
 					List<InspectionItemResult> itemResults = reportDetail.getItemResults();
