@@ -103,7 +103,7 @@ public class NewsController extends ControllerBase {
 	@RequestMapping("listNews")
 	@RestReturn(ListNewsResponse.class)
 	public RestResponse listNews(ListNewsCommand cmd) {
-		cmd.setCheckPrivilegeFlag(TrueOrFalseFlag.TRUE.getCode());
+//		cmd.setCheckPrivilegeFlag(TrueOrFalseFlag.TRUE.getCode());
 		ListNewsResponse listNewsResponse = newsService.listNews(cmd);
 
 		RestResponse response = new RestResponse(listNewsResponse);
