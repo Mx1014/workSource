@@ -128,6 +128,8 @@ ALTER TABLE `eh_equipment_inspection_standards`
 ALTER TABLE `eh_equipment_inspection_task_logs`
   ADD COLUMN `equipment_id`  BIGINT(20) NULL DEFAULT 0 ;
 ALTER TABLE `eh_equipment_inspection_task_logs`
+  ADD COLUMN `standard_id`  bigint(20) NULL DEFAULT 0 ;
+ALTER TABLE `eh_equipment_inspection_task_logs`
   ADD COLUMN `maintance_type`  VARCHAR(255) NULL DEFAULT '';
 ALTER TABLE `eh_equipment_inspection_task_logs`
   ADD COLUMN `flow_case_id`  BIGINT(20) NULL AFTER `equipment_id`;
