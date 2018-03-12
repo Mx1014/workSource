@@ -2,6 +2,8 @@
 package com.everhomes.user;
 
 
+import com.everhomes.PictureValidate.PictureValidateService;
+import com.everhomes.PictureValidate.PictureValidateServiceErrorCode;
 import com.everhomes.acl.AclProvider;
 import com.everhomes.acl.PortalRoleResolver;
 import com.everhomes.acl.Role;
@@ -342,6 +344,9 @@ public class UserServiceImpl implements UserService {
 
     @Autowired
     private CommunityService communityService;
+
+	@Autowired
+    private PictureValidateService pictureValidateService;
 
 
 	private static final String DEVICE_KEY = "device_login";
@@ -1859,6 +1864,27 @@ public class UserServiceImpl implements UserService {
         if(LOGGER.isDebugEnabled()) {
             LOGGER.debug("Send notification code " + verificationCode + " to " + userIdentifier.getIdentifierToken());
         }
+	}
+
+
+
+	@Override
+	public void sendCodeWithPictureValidate(SendCodeWithPictureValidateCommand cmd, HttpServletRequest request) {
+
+		//校验图片验证码
+		Boolean validateFlag = pictureValidateService.validateCode(request, cmd.getPictureCode());
+		if(!validateFlag){
+			LOGGER.error("invalid picture code, validate fail");
+			throw errorWith(PictureValidateServiceErrorCode.SCOPE,
+					PictureValidateServiceErrorCode.ERROR_INVALID_CODE, "invalid picture code");
+		}
+
+		//发送手机验证码
+		ResendVerificationCodeByIdentifierCommand sendcmd = new ResendVerificationCodeByIdentifierCommand();
+		sendcmd.setNamespaceId(cmd.getNamespaceId());
+		sendcmd.setIdentifier(cmd.getIdentifier());
+		sendcmd.setRegionCode(cmd.getRegionCode());
+		resendVerficationCode(sendcmd, request);
 	}
 
 	@Override
