@@ -39,9 +39,10 @@ SELECT @appid := @appid + 1, namespace_id, namespace_id + 100,  `active_app_id`,
 
 */
 
--- 5、在运营后台添加活动或论坛的主页签应用后需要刷新应用id
+-- 5、在运营后台添加活动或论坛的主页签应用后需要刷新应用id，配置为空的应用设置为'{}'
 -- UPDATE eh_service_module_apps set custom_tag = 1, instance_config = '{"categoryId":1,"publishPrivilege":1,"livePrivilege":0,"listStyle":2,"scope":3,"style":4,"title": "活动管理"}' where module_id = 10600 and (instance_config is NULL or instance_config not LIKE '%categoryId%');
 -- UPDATE eh_service_module_apps set custom_tag = 0, instance_config = '{"forumEntryId":0}' where module_id = 10100 and (instance_config is NULL or instance_config not LIKE '%forumEntryId%');
+-- UPDATE eh_service_module_apps set instance_config = '{}' where instance_config is NULL or instance_config = '';
 
 -- 6、同步数据库id
 -- /evh/admin/syncSequence
