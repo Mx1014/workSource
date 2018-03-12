@@ -1483,8 +1483,7 @@ public class AssetServiceImpl implements AssetService {
 
 
         //先算开始a
-        Calendar a = newClearedCalendar();
-        a.setTime(dateStrBegin.getTime());
+        Calendar a = getCopyCalendar(dateStrBegin);
 
 
         timeLoop:while(a.compareTo(dateStrEnd)<0){
