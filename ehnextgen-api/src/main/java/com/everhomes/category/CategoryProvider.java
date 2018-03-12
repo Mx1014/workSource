@@ -9,7 +9,7 @@ import com.everhomes.util.Tuple;
 
 @SuppressWarnings("unchecked")
 public interface CategoryProvider {
-    void createCategory(Category category);
+    Long createCategory(Category category);
     void updateCategory(Category category);
     void deleteCategory(Category category);
     void deleteCategoryById(long id);
