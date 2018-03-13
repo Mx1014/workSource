@@ -130,8 +130,8 @@ public class NewsServiceImpl implements NewsService {
 	@Autowired
 	private FamilyProvider familyProvider;
 
-//	@Autowired
-//	private UserPrivilegeMgr userPrivilegeMgr;
+	@Autowired
+	private UserPrivilegeMgr userPrivilegeMgr;
 
 	@Override
 	public CreateNewsResponse createNews(CreateNewsCommand cmd) {
@@ -145,9 +145,9 @@ public class NewsServiceImpl implements NewsService {
 
 		Integer namespaceId = checkOwner(userId, cmd.getOwnerId(), cmd.getOwnerType());
 		
-//		if(cmd.getCurrentProjectId()!=null){
+		if(cmd.getCurrentProjectId()!=null){
 //			userPrivilegeMgr.checkUserPrivilege(userId, cmd.getCurrentPMId(), 10005L, 10800L,null,""+cmd.getCategoryId(), null, cmd.getCurrentProjectId());
-//		}
+		}
 
 		News news = processNewsCommand(userId, namespaceId, cmd);
 
@@ -185,9 +185,9 @@ public class NewsServiceImpl implements NewsService {
 	public void updateNews(UpdateNewsCommand cmd) {
 		final Long userId = UserContext.current().getUser().getId();
 		Integer namespaceId = checkOwner(userId, cmd.getOwnerId(), cmd.getOwnerType());
-//		if(cmd.getCurrentProjectId()!=null){
+		if(cmd.getCurrentProjectId()!=null){
 //			userPrivilegeMgr.checkUserPrivilege(userId, cmd.getCurrentPMId(), 10005L, 10800L,null,""+cmd.getCategoryId(), null, cmd.getCurrentProjectId());
-//		}
+		}
 		News news = ConvertHelper.convert(cmd, News.class);
 		news.setNamespaceId(namespaceId);
 		news.setContentType(NewsContentType.RICH_TEXT.getCode());
@@ -335,9 +335,9 @@ public class NewsServiceImpl implements NewsService {
 	public void importNews(ImportNewsCommand cmd, MultipartFile[] files) {
 		Long userId = UserContext.current().getUser().getId();
 		Integer namespaceId = checkOwner(userId, cmd.getOwnerId(), cmd.getOwnerType());
-//		if(cmd.getCurrentProjectId()!=null){
+		if(cmd.getCurrentProjectId()!=null){
 //			userPrivilegeMgr.checkUserPrivilege(userId, cmd.getCurrentPMId(), 10005L, 10800L,null,""+cmd.getCategoryId(), null, cmd.getCurrentProjectId());
-//		}
+		}
 		// 读取Excel数据
 		List<News> newsList = getNewsFromExcel(userId, namespaceId, cmd, files);
 
