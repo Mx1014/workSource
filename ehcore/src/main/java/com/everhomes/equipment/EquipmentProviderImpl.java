@@ -3271,6 +3271,7 @@ public class EquipmentProviderImpl implements EquipmentProvider {
         context.update(Tables.EH_EQUIPMENT_INSPECTION_TASKS)
                 .set(Tables.EH_EQUIPMENT_INSPECTION_TASKS.STATUS, EquipmentTaskStatus.NONE.getCode())
                 .where(Tables.EH_EQUIPMENT_INSPECTION_TASKS.PLAN_ID.eq(planId))
+                .and(Tables.EH_EQUIPMENT_INSPECTION_TASKS.STATUS.eq(EquipmentTaskStatus.WAITING_FOR_EXECUTING.getCode()))
                 .execute();
     }
 }
