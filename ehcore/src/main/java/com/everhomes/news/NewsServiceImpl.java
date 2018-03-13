@@ -130,7 +130,7 @@ public class NewsServiceImpl implements NewsService {
 	@Autowired
 	private FamilyProvider familyProvider;
 
-	@Autowired
+//	@Autowired
 //	private UserPrivilegeMgr userPrivilegeMgr;
 
 	@Override

@@ -105,15 +105,15 @@ public class RentalPortalPublishHandler implements PortalPublishHandler{
     }
 
     @Override
-    public String getCustomTag(Integer namespaceId, Long moudleId, String actionData, String instanceConfig) {
-        RentalActionData actionDataObject = (RentalActionData)StringHelper.fromJsonString(actionData,RentalActionData.class);
+    public String getCustomTag(Integer namespaceId, Long moudleId, String instanceConfig) {
+        RentalActionData actionDataObject = (RentalActionData)StringHelper.fromJsonString(instanceConfig,RentalActionData.class);
         if (actionDataObject!=null && actionDataObject.getResourceTypeId()!=null)
             return String.valueOf(actionDataObject.getResourceTypeId());
         return null;
     }
 
     @Override
-    public Long getWebMenuId(Integer namespaceId, Long moudleId, String actionData, String instanceConfig) {
+    public Long getWebMenuId(Integer namespaceId, Long moudleId, String instanceConfig) {
         List<WebMenu> menus = webMenuProvider.listWebMenuByType(WebMenuType.PARK.getCode(), null, "/40000%", Collections.singletonList(40400L));
         if (menus!=null && menus.size()>0)
             return menus.get(0).getId();

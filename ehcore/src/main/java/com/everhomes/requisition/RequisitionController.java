@@ -49,6 +49,20 @@ public class RequisitionController extends ControllerBase {
     }
 
     /**
+     * <b>URL: /requisition/listRequisitionsForSecondParty</b>
+     * <p>展示请示单列表</p>
+     */
+    @RequestMapping("listRequisitionsForSecondParty")
+    @RestReturn(value = ListRequisitionsResponse.class)
+    public RestResponse listRequisitionsForSecondParty(ListRequisitionsCommand cmd){
+        ListRequisitionsResponse response = requisitionService.listRequisitionsForSecondParty(cmd);
+        RestResponse restResponse = new RestResponse(response);
+        restResponse.setErrorCode(200);
+        restResponse.setErrorDescription("OK");
+        return restResponse;
+    }
+
+    /**
      * <b>URL: /requisition/getRequisitionDetail</b>
      * <p>查看请示单</p>
      */
