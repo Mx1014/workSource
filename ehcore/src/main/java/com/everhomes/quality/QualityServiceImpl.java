@@ -4963,17 +4963,17 @@ Long nextPageAnchor = null;
 				//转发
 				task.setStatus(QualityInspectionTaskStatus.WAITING_FOR_EXECUTING.getCode());
 				task.setResult(QualityInspectionTaskResult.CORRECT.getCode());
-				if(taskDTO.getOperatorType() != null) {
+				if (taskDTO.getOperatorType() != null) {
 					task.setOperatorType(taskDTO.getOperatorType());
 					record.setTargetType(taskDTO.getOperatorType());
 				}
 
-				if(taskDTO.getOperatorId() != null) {
+				if (taskDTO.getOperatorId() != null) {
 					task.setOperatorId(taskDTO.getOperatorId());
 					record.setTargetId(taskDTO.getOperatorId());
 				}
 
-				if(taskDTO.getProcessExpireTime() != null) {
+				if (taskDTO.getProcessExpireTime() != null) {
 					task.setProcessExpireTime(taskDTO.getProcessExpireTime());
 					record.setProcessEndTime(task.getProcessExpireTime());
 				}
@@ -5009,32 +5009,36 @@ Long nextPageAnchor = null;
 		// send message to processor and bind recored mesaage to record
 		if (!StringUtils.isNullOrEmpty(taskDTO.getOperatorType()) && taskDTO.getOperatorId() != null && taskDTO.getProcessExpireTime() != null) {
 			sendMessageToProcessor(task, taskDTO, record);
-		}else {
-			//这里是针对非转发的任务的 processMessage 处理
-			if (reportDetailDTO.getMessage() != null) {
-				String attText = localeStringService.getLocalizedString(
-						String.valueOf(QualityServiceErrorCode.SCOPE),
-						String.valueOf(QualityServiceErrorCode.ATTACHMENT_TEXT),
-						UserContext.current().getUser().getLocale(),
-						"text:");
-				if (record.getProcessMessage() != null) {
-					String msg = record.getProcessMessage() + "<br/>" + attText + reportDetailDTO.getMessage();
-					record.setProcessMessage(msg);
-				} else {
-					String msg = attText + reportDetailDTO.getMessage();
-					record.setProcessMessage(msg);
-				}
-			}
+		} else {
+			ProccessNoForwardTaskMessage(record, reportDetailDTO);
 		}
 		try {
 			updateVerificationTasks(task, record, reportDetailDTO.getAttachments(), reportDetailDTO.getItemResults(), task.getNamespaceId());
 		} catch (Exception e) {
 			e.printStackTrace();
-			LOGGER.error("updateTasks task record and details erro :{}",e);
+			LOGGER.error("updateTasks task record and details erro :{}", e);
 			return getOfflineQualityTaskReportLogObject(task.getId(), ErrorCodes.ERROR_GENERAL_EXCEPTION,
 					QualityServiceErrorCode.ERROR_OFFLINE_SYNC_TASK, QualityTaskType.VERIFY_TASK.getCode());
 		}
 		return null;
+	}
+
+	private void ProccessNoForwardTaskMessage(QualityInspectionTaskRecords record, OfflineReportDetailDTO reportDetailDTO) {
+		//这里是针对非转发的任务的 processMessage 处理
+		if (reportDetailDTO.getMessage() != null) {
+            String attText = localeStringService.getLocalizedString(
+                    String.valueOf(QualityServiceErrorCode.SCOPE),
+                    String.valueOf(QualityServiceErrorCode.ATTACHMENT_TEXT),
+                    UserContext.current().getUser().getLocale(),
+                    "text:");
+            if (record.getProcessMessage() != null) {
+                String msg = record.getProcessMessage() + "<br/>" + attText + reportDetailDTO.getMessage();
+                record.setProcessMessage(msg);
+            } else {
+                String msg = attText + reportDetailDTO.getMessage();
+                record.setProcessMessage(msg);
+            }
+        }
 	}
 
 	private void sendMessageToProcessor(QualityInspectionTasks task, QualityInspectionTaskDTO taskDTO, QualityInspectionTaskRecords record) {
