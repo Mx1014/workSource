@@ -5010,7 +5010,7 @@ Long nextPageAnchor = null;
 		if (!StringUtils.isNullOrEmpty(taskDTO.getOperatorType()) && taskDTO.getOperatorId() != null && taskDTO.getProcessExpireTime() != null) {
 			sendMessageToProcessor(task, taskDTO, record);
 		} else {
-			ProccessNoForwardTaskMessage(record, reportDetailDTO);
+			proccessNoForwardTaskMessage(record, reportDetailDTO);
 		}
 		try {
 			updateVerificationTasks(task, record, reportDetailDTO.getAttachments(), reportDetailDTO.getItemResults(), task.getNamespaceId());
@@ -5023,7 +5023,7 @@ Long nextPageAnchor = null;
 		return null;
 	}
 
-	private void ProccessNoForwardTaskMessage(QualityInspectionTaskRecords record, OfflineReportDetailDTO reportDetailDTO) {
+	private void proccessNoForwardTaskMessage(QualityInspectionTaskRecords record, OfflineReportDetailDTO reportDetailDTO) {
 		//这里是针对非转发的任务的 processMessage 处理
 		if (reportDetailDTO.getMessage() != null) {
             String attText = localeStringService.getLocalizedString(
