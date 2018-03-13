@@ -55,7 +55,7 @@ public class CategoryProviderImpl implements CategoryProvider {
             @CacheEvict(value="listAllCategory", allEntries=true),
             @CacheEvict(value="listBusinessSubCategories", allEntries=true)})
     @Override
-    public void createCategory(Category category) {
+    public Long createCategory(Category category) {
         DSLContext context = dbProvider.getDslContext(AccessSpec.readWrite());
         
         long id = sequenceProvider.getNextSequence(NameMapper
@@ -72,6 +72,7 @@ public class CategoryProviderImpl implements CategoryProvider {
         dao.insert(category);
         
         DaoHelper.publishDaoAction(DaoAction.CREATE, EhCategories.class, null);
+        return id;
     }
 
     @Caching(evict = { /*@CacheEvict(value="Category", key="#category.id"),*/

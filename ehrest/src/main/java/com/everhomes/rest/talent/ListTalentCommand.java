@@ -21,6 +21,9 @@ import com.everhomes.util.StringHelper;
  * <li>pageSize: 每页大小</li>
  * <li>historyFlag: 1是0否，是否添加到历史记录，参考{@link com.everhomes.rest.approval.TrueOrFalseFlag}</li>
  * <li>appFlag: 1是0否，是否为app端调用，参考{@link com.everhomes.rest.approval.TrueOrFalseFlag}</li>
+ * <li>currentPMId: 当前管理公司ID</li>
+ * <li>currentProjectId: 当前选中项目Id，如果是全部则不传</li>
+ * <li>appId: 应用id</li>
  * </ul>
  */
 public class ListTalentCommand {
@@ -49,6 +52,33 @@ public class ListTalentCommand {
 	private Byte historyFlag;
 	
 	private Byte appFlag;
+	private Long currentPMId;
+	private Long currentProjectId;
+	private Long appId;
+
+	public Long getCurrentPMId() {
+		return currentPMId;
+	}
+
+	public void setCurrentPMId(Long currentPMId) {
+		this.currentPMId = currentPMId;
+	}
+
+	public Long getCurrentProjectId() {
+		return currentProjectId;
+	}
+
+	public void setCurrentProjectId(Long currentProjectId) {
+		this.currentProjectId = currentProjectId;
+	}
+	
+	public Long getAppId() {
+		return appId;
+	}
+
+	public void setAppId(Long appId) {
+		this.appId = appId;
+	}
 
 	public ListTalentCommand() {
 

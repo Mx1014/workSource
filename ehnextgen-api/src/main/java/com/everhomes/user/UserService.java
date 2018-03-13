@@ -61,7 +61,9 @@ public interface UserService {
     void deleteUserIdentifier(long identifierId);
     
     void resendVerficationCode(ResendVerificationCodeByIdentifierCommand cmd, HttpServletRequest request);
-    
+
+    void sendCodeWithPictureValidate(SendCodeWithPictureValidateCommand cmd, HttpServletRequest request);
+
     UserInvitationsDTO createInvatation(CreateInvitationCommand cmd);
     
     void assumePortalRole(AssumePortalRoleCommand cmd);

@@ -2918,7 +2918,7 @@ public class QualityProviderImpl implements QualityProvider {
 		}
 
 		builderCallback.buildCondition(null, query);
-		query.addConditions(Tables.EH_QUALITY_INSPECTION_TASKS.EXECUTIVE_EXPIRE_TIME.lt(todayBegin));
+		//query.addConditions(Tables.EH_QUALITY_INSPECTION_TASKS.EXECUTIVE_EXPIRE_TIME.lt(todayBegin));
 
 		if (LOGGER.isDebugEnabled()) {
 			LOGGER.debug("Query tasks count, sql=" + query.getSQL());

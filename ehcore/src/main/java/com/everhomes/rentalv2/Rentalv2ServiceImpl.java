@@ -1748,7 +1748,7 @@ public class Rentalv2ServiceImpl implements Rentalv2Service {
 	private void setOrderAmount(RentalResource rs, List<RentalBillRuleDTO> rules, RentalOrder rentalBill,
 									  Map<Long, BigDecimal> cellAmountMap,RentalDefaultRule rule) {
 		BigDecimal amount = new BigDecimal(0);
-		if (NormalFlag.NEED.equals(rule.getNeedPay()))
+		if (NormalFlag.NEED.getCode()==rule.getNeedPay())
 			 amount = calculateOrderAmount(rs, rules, rentalBill, cellAmountMap);
 
 		rentalBill.setPaidMoney(new BigDecimal(0));
@@ -3381,8 +3381,8 @@ public class Rentalv2ServiceImpl implements Rentalv2Service {
 				//获取每周的开放天
 				Integer weekday = start.get(Calendar.DAY_OF_WEEK);
 
-				if (cmd.getOpenWeekday().contains(weekday) &&
-						(null == closeDates || !closeDates.contains(start.getTimeInMillis()))) {
+//				if (cmd.getOpenWeekday().contains(weekday) &&
+						if (null == closeDates || !closeDates.contains(start.getTimeInMillis())) {
 
 					RentalCell rsr = ConvertHelper.convert(cmd, RentalCell.class);
 					//单元格通用设置
@@ -7980,6 +7980,23 @@ public class Rentalv2ServiceImpl implements Rentalv2Service {
 
 		return response;
 
+	}
+
+	@Override
+	public RentalOrderDTO getRentalOrderById(GetRentalBillCommand cmd) {
+		if(null == cmd.getBillId()) {
+			throw RuntimeErrorException.errorWith(ErrorCodes.SCOPE_GENERAL,
+					ErrorCodes.ERROR_INVALID_PARAMETER, "Invalid parameter : bill id is null");
+		}
+		RentalOrder bill = this.rentalv2Provider.findRentalBillById(cmd.getBillId());
+		if(null == bill) {
+			throw RuntimeErrorException.errorWith(ErrorCodes.SCOPE_GENERAL,
+					ErrorCodes.ERROR_INVALID_PARAMETER, "Invalid parameter : bill id can not find bill");
+		}
+		RentalOrderDTO dto = ConvertHelper.convert(bill, RentalOrderDTO.class);
+		convertRentalOrderDTO(dto, bill);
+
+		return dto;
 	}
 
 	@Override
