@@ -79,6 +79,7 @@ import com.everhomes.settings.PaginationConfigHelper;
 import com.everhomes.user.User;
 import com.everhomes.user.UserContext;
 import com.everhomes.user.UserIdentifier;
+import com.everhomes.user.UserPrivilegeMgr;
 import com.everhomes.user.UserProvider;
 import org.springframework.web.context.request.async.DeferredResult;
 
@@ -123,7 +124,8 @@ public class ParkingServiceImpl implements ParkingService {
 	private Rentalv2Provider rentalv2Provider;
 	@Autowired
 	private DingDingParkingLockHandler dingDingParkingLockHandler;
-
+	@Autowired
+	private UserPrivilegeMgr userPrivilegeMgr;
 	@Override
 	public List<ParkingCardDTO> listParkingCards(ListParkingCardsCommand cmd) {
 
@@ -798,7 +800,11 @@ public class ParkingServiceImpl implements ParkingService {
 
 	@Override
 	public ListParkingRechargeOrdersResponse searchParkingRechargeOrders(SearchParkingRechargeOrdersCommand cmd){
-
+		if(cmd.getCurrentPMId()!=null && configProvider.getBooleanValue("privilege.community.checkflag", true)){
+			//订单记录权限
+			userPrivilegeMgr.checkUserPrivilege(UserContext.current().getUser().getId(), cmd.getCurrentPMId(), 4080040840L, cmd.getAppId(), null,cmd.getCurrentProjectId());
+		}
+		
 		ListParkingRechargeOrdersResponse response = new ListParkingRechargeOrdersResponse();
 		ParkingLot parkingLot = checkParkingLot(cmd.getOwnerType(), cmd.getOwnerId(), cmd.getParkingLotId());
 		Timestamp startDate = null;
@@ -844,6 +850,9 @@ public class ParkingServiceImpl implements ParkingService {
 
 	@Override
 	public ListParkingCardRequestResponse searchParkingCardRequests(SearchParkingCardRequestsCommand cmd) {
+		if(cmd.getCurrentPMId()!=null && configProvider.getBooleanValue("privilege.community.checkflag", true)){
+			userPrivilegeMgr.checkUserPrivilege(UserContext.current().getUser().getId(), cmd.getCurrentPMId(), 4080040810L, cmd.getAppId(), null,cmd.getCurrentProjectId());//月卡申请权限
+		}
 		ListParkingCardRequestResponse response = new ListParkingCardRequestResponse();
 		Timestamp startDate = null;
 		Timestamp endDate = null;
@@ -2130,6 +2139,10 @@ public class ParkingServiceImpl implements ParkingService {
 
 	@Override
 	public SearchParkingCarVerificationResponse searchParkingCarVerifications(SearchParkingCarVerificationsCommand cmd) {
+		if(cmd.getCurrentPMId()!=null && configProvider.getBooleanValue("privilege.community.checkflag", true)){
+			//车辆认证申请
+			userPrivilegeMgr.checkUserPrivilege(UserContext.current().getUser().getId(), cmd.getCurrentPMId(), 4080040820L, cmd.getAppId(), null,cmd.getCurrentProjectId());
+		}
 		checkParkingLot(cmd.getOwnerType(), cmd.getOwnerId(), cmd.getParkingLotId());
 
 		Integer pageSize = PaginationConfigHelper.getPageSize(configProvider, cmd.getPageSize());
@@ -2433,7 +2446,10 @@ public class ParkingServiceImpl implements ParkingService {
 
 	@Override
 	public SearchParkingSpacesResponse searchParkingSpaces(SearchParkingSpacesCommand cmd) {
-
+		if(cmd.getCurrentPMId()!=null && configProvider.getBooleanValue("privilege.community.checkflag", true)){
+			//VIP车位管理权限
+			userPrivilegeMgr.checkUserPrivilege(UserContext.current().getUser().getId(), cmd.getCurrentPMId(), 4080040830L, cmd.getAppId(), null,cmd.getCurrentProjectId());
+		}
 		SearchParkingSpacesResponse response = new SearchParkingSpacesResponse();
 
 		Integer pageSize = PaginationConfigHelper.getPageSize(configProvider, cmd.getPageSize());
