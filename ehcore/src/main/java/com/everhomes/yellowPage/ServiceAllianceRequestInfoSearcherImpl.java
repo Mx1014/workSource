@@ -95,6 +95,7 @@ import com.everhomes.user.User;
 import com.everhomes.user.UserActivityService;
 import com.everhomes.user.UserContext;
 import com.everhomes.user.UserIdentifier;
+import com.everhomes.user.UserPrivilegeMgr;
 import com.everhomes.user.UserProvider;
 import com.everhomes.util.ConvertHelper;
 import com.everhomes.util.DateHelper;
@@ -111,6 +112,8 @@ public class ServiceAllianceRequestInfoSearcherImpl extends AbstractElasticSearc
 	@Autowired
 	private OrganizationProvider organizationProvider;
 	
+	@Autowired
+	private UserPrivilegeMgr userPrivilegeMgr;
 	@Autowired
 	private ConfigurationProvider configProvider;
 	
@@ -523,6 +526,10 @@ public class ServiceAllianceRequestInfoSearcherImpl extends AbstractElasticSearc
 	@Override
 	public SearchRequestInfoResponse searchRequestInfo(
 			SearchRequestInfoCommand cmd) {
+		
+		if(cmd.getCurrentPMId()!=null && configProvider.getBooleanValue("privilege.community.checkflag", true)){
+			userPrivilegeMgr.checkUserPrivilege(UserContext.current().getUser().getId(), cmd.getCurrentPMId(), 4050040540L, cmd.getAppId(), null,0L);//申请记录权限
+		}
 
 		SearchRequestBuilder builder = getClient().prepareSearch(getIndexName()).setTypes(getIndexType());
         

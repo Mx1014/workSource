@@ -4701,7 +4701,7 @@ Long nextPageAnchor = null;
 						groupTypes.add(OrganizationGroupType.ENTERPRISE.getCode());
 						groupTypes.add(OrganizationGroupType.DIRECT_UNDER_ENTERPRISE.getCode());
 						groupTypes.add(OrganizationGroupType.DEPARTMENT.getCode());
-						List<Organization> organizations = organizationProvider.listOrganizationByGroupTypesAndPath(group.getPath(), groupTypes, null, null, Integer.MAX_VALUE - 1);
+						List<Organization> organizations = organizationProvider.listOrganizationByGroupTypesAndPath(group.getPath()+"%", groupTypes, null, null, Integer.MAX_VALUE - 1);
 						if (organizations != null) {
 							organizations.forEach((o) -> {
 								organizationList.add(ConvertHelper.convert(o, OrganizationDTO.class));
