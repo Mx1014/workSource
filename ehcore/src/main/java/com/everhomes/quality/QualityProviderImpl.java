@@ -2872,7 +2872,7 @@ public class QualityProviderImpl implements QualityProvider {
 
 		builderCallback.buildCondition(null, query);
 
-		query.addOrderBy(Tables.EH_QUALITY_INSPECTION_TASKS.EXECUTIVE_EXPIRE_TIME);
+		query.addOrderBy(Tables.EH_QUALITY_INSPECTION_TASKS.STATUS,Tables.EH_QUALITY_INSPECTION_TASKS.EXECUTIVE_EXPIRE_TIME);
 		query.addLimit(offset * (pageSize), pageSize + 1);
 		if (LOGGER.isDebugEnabled()) {
 			LOGGER.debug("Query tasks by count, sql=" + query.getSQL());
