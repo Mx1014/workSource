@@ -2827,8 +2827,7 @@ public class PortalServiceImpl implements PortalService {
 			}
 
 			// 同步reflectionServiceModule表
-			this.serviceModuleService.getOrCreateReflectionServiceModuleApp(namespaceId, actionData, moduleApp.getInstanceConfig(), itemLabel, serviceModule);
-
+			//this.serviceModuleService.getOrCreateReflectionServiceModuleApp(namespaceId, actionData, moduleApp.getInstanceConfig(), itemLabel, serviceModule);
 
 			//查找设置多入口入口标识
 			String customTag = null;
