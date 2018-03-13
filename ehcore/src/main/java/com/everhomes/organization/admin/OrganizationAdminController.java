@@ -865,7 +865,21 @@ public class OrganizationAdminController extends ControllerBase {
         response.setErrorDescription("OK");
         return response;
     }
-    
+
+    /**
+     * <b>URL: /admin/org/checkSetAdminPrivilege</b>
+     * <p>后台管理 企业列表 校验是否有设置管理员的权限</p>
+     */
+    @RequestMapping("checkSetAdminPrivilege")
+    @RestReturn(value = String.class)
+    public RestResponse checkSetAdminPrivilege(@Valid CheckSetAdminPrivilegeCommand cmd) {
+        userPrivilegeMgr.checkUserPrivilege(UserContext.currentUserId(), cmd.getManageOrganizationId(), PrivilegeConstants.ORGANIZATION_SET_ADMIN, ServiceModuleConstants.ORGANIZATION_MODULE, ActionType.OFFICIAL_URL.getCode(), null, cmd.getManageOrganizationId(), cmd.getCommunityId());
+        RestResponse response = new RestResponse();
+        response.setErrorCode(ErrorCodes.SUCCESS);
+        response.setErrorDescription("OK");
+        return response;
+    }
+
     /**
      * <b>URL: /admin/org/exportEnterpriseByCommunityId</b>
      * <p>后台管理 企业列表 和对于的管理员信息</p>
