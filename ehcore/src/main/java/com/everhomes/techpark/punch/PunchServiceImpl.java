@@ -134,11 +134,14 @@ import com.everhomes.rest.techpark.punch.admin.AddPunchGroupCommand;
 import com.everhomes.rest.techpark.punch.admin.AddPunchPointCommand;
 import com.everhomes.rest.techpark.punch.admin.AddPunchTimeRuleCommand;
 import com.everhomes.rest.techpark.punch.admin.AddPunchWiFiCommand;
+import com.everhomes.rest.techpark.punch.admin.BatchUpdateVacationBalancesCommand;
 import com.everhomes.rest.techpark.punch.admin.DeleteCommonCommand;
 import com.everhomes.rest.techpark.punch.admin.DeletePunchRuleMapCommand;
+import com.everhomes.rest.techpark.punch.admin.ExportVacationBalancesCommand;
 import com.everhomes.rest.techpark.punch.admin.GetPunchGroupCommand;
 import com.everhomes.rest.techpark.punch.admin.GetTargetPunchAllRuleCommand;
 import com.everhomes.rest.techpark.punch.admin.GetTargetPunchAllRuleResponse;
+import com.everhomes.rest.techpark.punch.admin.ImportVacationBalancesCommand;
 import com.everhomes.rest.techpark.punch.admin.ListApprovalCategoriesResponse;
 import com.everhomes.rest.techpark.punch.admin.ListPunchDetailsCommand;
 import com.everhomes.rest.techpark.punch.admin.ListPunchDetailsResponse;
@@ -157,6 +160,10 @@ import com.everhomes.rest.techpark.punch.admin.ListPunchSchedulingMonthResponse;
 import com.everhomes.rest.techpark.punch.admin.ListPunchWiFiRuleListResponse;
 import com.everhomes.rest.techpark.punch.admin.ListPunchWiFisResponse;
 import com.everhomes.rest.techpark.punch.admin.ListPunchWorkdayRuleListResponse;
+import com.everhomes.rest.techpark.punch.admin.ListVacationBalanceLogsCommand;
+import com.everhomes.rest.techpark.punch.admin.ListVacationBalanceLogsResponse;
+import com.everhomes.rest.techpark.punch.admin.ListVacationBalancesCommand;
+import com.everhomes.rest.techpark.punch.admin.ListVacationBalancesResponse;
 import com.everhomes.rest.techpark.punch.admin.PunchDayDetailDTO;
 import com.everhomes.rest.techpark.punch.admin.PunchGroupDTO;
 import com.everhomes.rest.techpark.punch.admin.PunchLocationRuleDTO;
@@ -172,6 +179,7 @@ import com.everhomes.rest.techpark.punch.admin.UpdatePunchPointCommand;
 import com.everhomes.rest.techpark.punch.admin.UpdatePunchSchedulingMonthCommand;
 import com.everhomes.rest.techpark.punch.admin.UpdatePunchTimeRuleCommand;
 import com.everhomes.rest.techpark.punch.admin.UpdateTargetPunchAllRuleCommand;
+import com.everhomes.rest.techpark.punch.admin.UpdateVacationBalancesCommand;
 import com.everhomes.rest.techpark.punch.admin.UserMonthLogsDTO;
 import com.everhomes.rest.techpark.punch.admin.listPunchTimeRuleListResponse;
 import com.everhomes.rest.ui.user.ContactSignUpStatus;
@@ -8968,4 +8976,41 @@ public class PunchServiceImpl implements PunchService {
         response.setPunchLogs(dtos);
         return response;
     }
+
+	@Override
+	public ListVacationBalancesResponse listVacationBalances(ListVacationBalancesCommand cmd) {
+		// TODO Auto-generated method stub
+		return null;
+	}
+
+	@Override
+	public void updateVacationBalances(UpdateVacationBalancesCommand cmd) {
+		// TODO Auto-generated method stub
+		
+	}
+
+	@Override
+	public void batchUpdateVacationBalances(BatchUpdateVacationBalancesCommand cmd) {
+		// TODO Auto-generated method stub
+		
+	}
+
+	@Override
+	public ListVacationBalanceLogsResponse listVacationBalanceLogs(
+			ListVacationBalanceLogsCommand cmd) {
+		// TODO Auto-generated method stub
+		return null;
+	}
+
+	@Override
+	public void exportVacationBalances(ExportVacationBalancesCommand cmd) {
+		// TODO Auto-generated method stub
+		
+	}
+
+	@Override
+	public void importVacationBalances(ImportVacationBalancesCommand cmd) {
+		// TODO Auto-generated method stub
+		
+	}
 }
