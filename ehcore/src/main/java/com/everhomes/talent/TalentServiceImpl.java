@@ -591,8 +591,8 @@ public class TalentServiceImpl implements TalentService {
 	@Override
 	public ListTalentRequestResponse listTalentRequest(ListTalentRequestCommand cmd) {
 		if(cmd.getCurrentPMId()!=null && configProvider.getBooleanValue("privilege.community.checkflag", true)){
-//			userPrivilegeMgr.checkUserPrivilege(UserContext.current().getUser().getId(), cmd.getCurrentPMId(), 4073040733L, cmd.getAppId(), null,cmd.getCurrentProjectId());//人才管理权限
-			userPrivilegeMgr.checkUserPrivilege(UserContext.current().getUser().getId(), cmd.getCurrentPMId(), 4073040733L, 40730L,null,null,null,cmd.getCurrentProjectId());//人才管理权限
+			userPrivilegeMgr.checkUserPrivilege(UserContext.current().getUser().getId(), cmd.getCurrentPMId(), 4073040733L, cmd.getAppId(), null,cmd.getCurrentProjectId());//人才管理权限
+//			userPrivilegeMgr.checkUserPrivilege(UserContext.current().getUser().getId(), cmd.getCurrentPMId(), 4073040733L, 40730L,null,null,null,cmd.getCurrentProjectId());//人才管理权限
 		}
 		
 		int pageSize = PaginationConfigHelper.getPageSize(configurationProvider, cmd.getPageSize());
