@@ -8324,13 +8324,12 @@ public class Rentalv2ServiceImpl implements Rentalv2Service {
 
 		RentalDefaultRule rule = this.rentalv2Provider.getRentalDefaultRule(cmd.getOwnerType(), cmd.getOwnerId(),
 				cmd.getResourceType(), cmd.getResourceTypeId(), cmd.getSourceType(), cmd.getSourceId());
+		QueryDefaultRuleAdminResponse queryDefaultRuleAdminResponse = convert(rule, cmd.getSourceType());
 
 		GetResourceOrderRuleCommand getResourceOrderRuleCommand = ConvertHelper.convert(cmd, GetResourceOrderRuleCommand.class);
 		ResourceOrderRuleDTO orderRuleDTO = getResourceOrderRule(getResourceOrderRuleCommand);
 
 		GetResourceRuleV2Response response = ConvertHelper.convert(orderRuleDTO, GetResourceRuleV2Response.class);
-		response.setDayOpenTime(rule.getDayOpenTime());
-		response.setDayCloseTime(rule.getDayCloseTime());
 		response.setHolidayOpenFlag(rule.getHolidayOpenFlag());
 		response.setHolidayType(rule.getHolidayType());
 
@@ -8339,6 +8338,14 @@ public class Rentalv2ServiceImpl implements Rentalv2Service {
 		List<Byte> rentalTypes = priceRules.stream().map(Rentalv2PriceRule::getRentalType).collect(Collectors.toList());
 		response.setRentalType(rentalTypes.get(0));
 		response.setPrice(priceRules.get(0).getWorkdayPrice());
+
+		if (RentalType.HOUR.getCode() == response.getRentalType()){
+			response.setTimeIntervals(queryDefaultRuleAdminResponse.getTimeIntervals());
+		}else
+			if (RentalType.DAY.getCode() == response.getRentalType()){
+				response.setDayOpenTime(rule.getDayOpenTime());
+				response.setDayCloseTime(rule.getDayCloseTime());
+			}
 
 		return response;
 	}
