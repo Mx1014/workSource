@@ -217,8 +217,8 @@ public class TalentServiceImpl implements TalentService {
 	@Override
 	public ListTalentResponse listTalent(ListTalentCommand cmd) {
 		if(cmd.getCurrentPMId()!=null && configProvider.getBooleanValue("privilege.community.checkflag", true)){
-//			userPrivilegeMgr.checkUserPrivilege(UserContext.current().getUser().getId(), cmd.getCurrentPMId(), 4073040731L, cmd.getAppId(), null,cmd.getCurrentProjectId());//人才管理权限
-			userPrivilegeMgr.checkUserPrivilege(UserContext.current().getUser().getId(), cmd.getCurrentPMId(),4073040731L,40730L,null,null,null,cmd.getCurrentProjectId());
+			userPrivilegeMgr.checkUserPrivilege(UserContext.current().getUser().getId(), cmd.getCurrentPMId(), 4073040731L, cmd.getAppId(), null,cmd.getCurrentProjectId());//人才管理权限
+//			userPrivilegeMgr.checkUserPrivilege(UserContext.current().getUser().getId(), cmd.getCurrentPMId(),4073040731L,40730L,null,null,null,cmd.getCurrentProjectId());
 		}
 		
 		int pageSize = PaginationConfigHelper.getPageSize(configurationProvider, cmd.getPageSize());
@@ -260,8 +260,8 @@ public class TalentServiceImpl implements TalentService {
 	@Override
 	public TalentDTO createOrUpdateTalent(CreateOrUpdateTalentCommand cmd) {
 		if(cmd.getCurrentPMId()!=null && configProvider.getBooleanValue("privilege.community.checkflag", true)){
-//			userPrivilegeMgr.checkUserPrivilege(UserContext.current().getUser().getId(), cmd.getCurrentPMId(), 4073040731L, cmd.getAppId(), null,cmd.getCurrentProjectId());//人才管理权限
-			userPrivilegeMgr.checkUserPrivilege(UserContext.current().getUser().getId(), cmd.getCurrentPMId(), 4073040731L, 40730L,null,null,null,cmd.getCurrentProjectId());//人才管理权限
+			userPrivilegeMgr.checkUserPrivilege(UserContext.current().getUser().getId(), cmd.getCurrentPMId(), 4073040731L, cmd.getAppId(), null,cmd.getCurrentProjectId());//人才管理权限
+//			userPrivilegeMgr.checkUserPrivilege(UserContext.current().getUser().getId(), cmd.getCurrentPMId(), 4073040731L, 40730L,null,null,null,cmd.getCurrentProjectId());//人才管理权限
 		}
 		Talent talent = null;
 		if (cmd.getId() == null) {
@@ -323,8 +323,8 @@ public class TalentServiceImpl implements TalentService {
 	@Override
 	public void deleteTalent(DeleteTalentCommand cmd) {
 		if(cmd.getCurrentPMId()!=null && configProvider.getBooleanValue("privilege.community.checkflag", true)){
-//			userPrivilegeMgr.checkUserPrivilege(UserContext.current().getUser().getId(), cmd.getCurrentPMId(), 4073040731L, cmd.getAppId(), null,cmd.getCurrentProjectId());//人才管理权限
-			userPrivilegeMgr.checkUserPrivilege(UserContext.current().getUser().getId(), cmd.getCurrentPMId(), 4073040731L, 40730L,null,null,null,cmd.getCurrentProjectId());//人才管理权限
+			userPrivilegeMgr.checkUserPrivilege(UserContext.current().getUser().getId(), cmd.getCurrentPMId(), 4073040731L, cmd.getAppId(), null,cmd.getCurrentProjectId());//人才管理权限
+//			userPrivilegeMgr.checkUserPrivilege(UserContext.current().getUser().getId(), cmd.getCurrentPMId(), 4073040731L, 40730L,null,null,null,cmd.getCurrentProjectId());//人才管理权限
 		}
 		Talent talent = findTalentById(cmd.getId(), namespaceId(), cmd.getOwnerType(), cmd.getOwnerId());
 		talent.setStatus(CommonStatus.INACTIVE.getCode());
@@ -581,8 +581,8 @@ public class TalentServiceImpl implements TalentService {
 	@Override
 	public ListMessageSenderResponse listMessageSender(ListMessageSenderCommand cmd) {
 		if(cmd.getCurrentPMId()!=null && configProvider.getBooleanValue("privilege.community.checkflag", true)){
-//			userPrivilegeMgr.checkUserPrivilege(UserContext.current().getUser().getId(), cmd.getCurrentPMId(), 4073040732L, cmd.getAppId(), null,cmd.getCurrentProjectId());//人才管理权限
-			userPrivilegeMgr.checkUserPrivilege(UserContext.current().getUser().getId(), cmd.getCurrentPMId(), 4073040732L, 40730L,null,null,null,cmd.getCurrentProjectId());//人才管理权限
+			userPrivilegeMgr.checkUserPrivilege(UserContext.current().getUser().getId(), cmd.getCurrentPMId(), 4073040732L, cmd.getAppId(), null,cmd.getCurrentProjectId());//人才管理权限
+//			userPrivilegeMgr.checkUserPrivilege(UserContext.current().getUser().getId(), cmd.getCurrentPMId(), 4073040732L, 40730L,null,null,null,cmd.getCurrentProjectId());//人才管理权限
 		}
 		List<TalentMessageSender> talentMessageSenders = talentMessageSenderProvider.listTalentMessageSenderByOwner(cmd.getOwnerType(), cmd.getOwnerId());
 		return new ListMessageSenderResponse(talentMessageSenders.stream().map(this::convert).collect(Collectors.toList()));
@@ -591,8 +591,8 @@ public class TalentServiceImpl implements TalentService {
 	@Override
 	public ListTalentRequestResponse listTalentRequest(ListTalentRequestCommand cmd) {
 		if(cmd.getCurrentPMId()!=null && configProvider.getBooleanValue("privilege.community.checkflag", true)){
-//			userPrivilegeMgr.checkUserPrivilege(UserContext.current().getUser().getId(), cmd.getCurrentPMId(), 4073040733L, cmd.getAppId(), null,cmd.getCurrentProjectId());//人才管理权限
-			userPrivilegeMgr.checkUserPrivilege(UserContext.current().getUser().getId(), cmd.getCurrentPMId(), 4073040733L, 40730L,null,null,null,cmd.getCurrentProjectId());//人才管理权限
+			userPrivilegeMgr.checkUserPrivilege(UserContext.current().getUser().getId(), cmd.getCurrentPMId(), 4073040733L, cmd.getAppId(), null,cmd.getCurrentProjectId());//人才管理权限
+//			userPrivilegeMgr.checkUserPrivilege(UserContext.current().getUser().getId(), cmd.getCurrentPMId(), 4073040733L, 40730L,null,null,null,cmd.getCurrentProjectId());//人才管理权限
 		}
 		
 		int pageSize = PaginationConfigHelper.getPageSize(configurationProvider, cmd.getPageSize());
