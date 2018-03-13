@@ -4955,16 +4955,7 @@ Long nextPageAnchor = null;
 			Map<Long, OfflineReportDetailDTO> taskDetailMaps = getTaskDetailMaps(cmd.getOfflineReportDetail());
 			cmd.getTasks().forEach((task) -> {
 				OfflineEquipmentTaskReportLog log = null;
-				try {
-					QualityInspectionTasks inspectionTask = verifiedTaskById(task.getId());
-					log = syncTaskInfoToServer(inspectionTask, task, taskDetailMaps);
-				} catch (Exception e) {
-					e.printStackTrace();
-					LOGGER.error("syncTaskInfoToServer Erro:{}", e);
-					taskReportLog.add(getOfflineQualityTaskReportLogObject(task.getId(), ErrorCodes.ERROR_GENERAL_EXCEPTION,
-							QualityServiceErrorCode.ERROR_TASK_NOT_EXIST, QualityTaskType.VERIFY_TASK.getCode()));
-				}
-				if (log != null)
+				log = syncTaskInfoToServer(task, taskDetailMaps);
 				taskReportLog.add(log);
 			});
 		}
@@ -4988,7 +4979,17 @@ Long nextPageAnchor = null;
 		return taskDetailMaps;
 	}
 
-	private OfflineEquipmentTaskReportLog syncTaskInfoToServer(QualityInspectionTasks task, QualityInspectionTaskDTO taskDTO, Map<Long, OfflineReportDetailDTO> taskDetailMaps) {
+	private OfflineEquipmentTaskReportLog syncTaskInfoToServer(QualityInspectionTaskDTO taskDTO, Map<Long, OfflineReportDetailDTO> taskDetailMaps) {
+		QualityInspectionTasks task = null;
+		try {
+			task = verifiedTaskById(taskDTO.getId());
+		} catch (Exception e) {
+			e.printStackTrace();
+			LOGGER.error("syncTaskInfoToServer Erro:{}", e);
+			return getOfflineQualityTaskReportLogObject(taskDTO.getId(), ErrorCodes.ERROR_GENERAL_EXCEPTION,
+					QualityServiceErrorCode.ERROR_TASK_NOT_EXIST, QualityTaskType.VERIFY_TASK.getCode());
+		}
+
 		QualityInspectionTaskRecords record = new QualityInspectionTaskRecords();
 		record.setTaskId(task.getId());
 		record.setOperatorType(OwnerType.USER.getCode());
