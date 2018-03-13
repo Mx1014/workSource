@@ -50,7 +50,39 @@ SELECT @appid := @appid + 1, namespace_id, namespace_id + 100,  `active_app_id`,
 -- UPDATE eh_service_module_apps set custom_tag = 1, instance_config = '{"categoryId":1,"publishPrivilege":1,"livePrivilege":0,"listStyle":2,"scope":3,"style":4,"title": "活动管理"}' where module_id = 10600 and (instance_config is NULL or instance_config not LIKE '%categoryId%');
 -- UPDATE eh_service_module_apps set custom_tag = 0, instance_config = '{"forumEntryId":0}' where module_id = 10100 and (instance_config is NULL or instance_config not LIKE '%forumEntryId%');
 
--- 8、调用/pmtask/syncFromDb  /pmtask/syncCategories 同步数据
+/*8、
+1)/pmtask/syncCategories
+ 2)UPDATE eh_pm_tasks
+        LEFT JOIN
+    (SELECT
+       distinct (a.id) as aid,b.id as bid,b.owner_id as owner_id
+    FROM
+        eh_categories a, eh_categories b
+    WHERE
+        a.path = b.path ) c ON eh_pm_tasks.task_category_id = c.aid
+        AND eh_pm_tasks.owner_id = c.owner_id
+SET
+    eh_pm_tasks.task_category_id = c.bid
+WHERE
+    eh_pm_tasks.task_category_id!=0;
+
+UPDATE eh_pm_tasks
+        RIGHT JOIN
+    (SELECT
+       distinct (a.id) as aid,b.id as bid,b.owner_id as owner_id
+    FROM
+        eh_categories a, eh_categories b
+    WHERE
+        a.path = b.path ) c ON eh_pm_tasks.category_id = c.aid
+        AND eh_pm_tasks.owner_id = c.owner_id
+SET
+    eh_pm_tasks.category_id = c.bid
+WHERE
+    eh_pm_tasks.category_id!=0;
+
+ 3)/pmtask/syncFromDb
+*/
+
 
 -- 9、同步服务联盟和工位预定数据，以下接口请勿重复调用！！请按照顺序调用。
 -- /yellowPage/syncOldForm
