@@ -1873,6 +1873,38 @@ public class Rentalv2ServiceImpl implements Rentalv2Service {
 			}
 		}
 
+		//优惠
+		if(priceRule.getDiscountType()!=null) {
+			if(priceRule.getDiscountType().equals(DiscountType.FULL_MOENY_CUT_MONEY.getCode())){
+				//满减优惠
+				//满了多少次,都只减一个
+				if(siteTotalMoneys[0].compareTo(priceRule.getFullPrice())>= 0) {
+					siteTotalMoneys[0] = siteTotalMoneys[0].subtract(priceRule.getCutPrice());
+				}
+			}else if(DiscountType.FULL_DAY_CUT_MONEY.getCode().equals(priceRule.getDiscountType()) ){
+				double multiple =0.0;
+				//满天减免
+				if(priceRule.getRentalType().equals(RentalType.HALFDAY.getCode())){
+					for(Date rentalDate:dayMap.keySet()){
+						for(String resourceNumber : dayMap.get(rentalDate).keySet()) {
+							if(dayMap.get(rentalDate).get(resourceNumber).size()>=2) {
+								multiple = multiple+rules.get(0).getRentalCount();
+							}
+						}
+					}
+				}else if (priceRule.getRentalType().equals(RentalType.THREETIMEADAY.getCode())){
+					for(Date rentalDate:dayMap.keySet()){
+						for(String resourceNumber : dayMap.get(rentalDate).keySet()) {
+							if(dayMap.get(rentalDate).get(resourceNumber).size()>=3) {
+								multiple =multiple+rules.get(0).getRentalCount();
+							}
+						}
+					}
+				}
+				siteTotalMoneys[0] = siteTotalMoneys[0].subtract(priceRule.getCutPrice().multiply(new BigDecimal(multiple)));
+			}
+		}
+
 		return siteTotalMoneys[0];
 	}
 
