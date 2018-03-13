@@ -154,6 +154,23 @@ public class RequisitionServiceImpl implements RequisitionService {
         return requisitionProvider.getNameById(requisitionId);
     }
 
+    @Override
+    public ListRequisitionsResponse listRequisitionsForSecondParty(ListRequisitionsCommand cmd) {
+        ListRequisitionsResponse response = new ListRequisitionsResponse();
+        Long pageAnchor = cmd.getPageAnchor();
+        Integer pageSize = cmd.getPageSize();
+        if(pageAnchor == null) pageAnchor = 0l;
+        if(pageSize == null) pageSize = 20;
+        List<ListRequisitionsDTO> result = requisitionProvider.listRequisitions(cmd.getNamespaceId(),cmd.getOwnerType()
+                ,cmd.getOwnerId(),cmd.getCommunityId(),cmd.getTheme(),cmd.getTypeId(),pageAnchor,++pageSize);
+        if(result.size() > pageSize){
+            result.remove(result.size()-1);
+            response.setNextPageAnchor(pageSize + pageAnchor);
+        }
+        response.setList(result);
+        return response;
+    }
+
     private void checkAssetPriviledgeForPropertyOrg(Long communityId, Long priviledgeId) {
         ListPMOrganizationsCommand cmd = new ListPMOrganizationsCommand();
         cmd.setNamespaceId(UserContext.getCurrentNamespaceId());
