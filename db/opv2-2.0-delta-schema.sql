@@ -1695,6 +1695,7 @@ ALTER TABLE eh_archives_logs MODIFY operation_reason VARCHAR(1024) COMMENT 'the 
 
 ALTER TABLE eh_archives_logs MODIFY operation_remark VARCHAR(1024) COMMENT 'the remark';
 
+ALTER TABLE eh_archives_dismiss_employees MODIFY dismiss_remarks VARCHAR(1024) COMMENT '备注';
 -- end by nan.rong
 
 -- add by zheng

@@ -3549,7 +3549,7 @@ private void checkUserPrivilege(Long orgId, Long privilegeId, Long communityId) 
 		if(isAdmin) {
 			String cacheKey = convertListEquipmentInspectionTasksCache(cmd.getTaskStatus(), cmd.getInspectionCategoryId(),
 					targetTypes, targetIds, null, null, offset, pageSize, lastSyncTime, 0L);
-			LOGGER.info("listEquipmentInspectionTasks is  Admin  cacheKey = {}" + cacheKey);
+			LOGGER.info("listEquipmentInspectionTasks is  Admin  cacheKey = {}" , cacheKey);
 			allTasks = equipmentProvider.listEquipmentInspectionTasksUseCache(cmd.getTaskStatus(), cmd.getInspectionCategoryId(),
 					targetTypes, targetIds, null, null, offset, pageSize + 1, cacheKey, AdminFlag.YES.getCode(),lastSyncTime);
 
@@ -3586,7 +3586,7 @@ private void checkUserPrivilege(Long orgId, Long privilegeId, Long communityId) 
 
 			String cacheKey = convertListEquipmentInspectionTasksCache(cmd.getTaskStatus(), cmd.getInspectionCategoryId(), targetTypes, targetIds,
 					executePlanIds, reviewPlanIds, offset, pageSize, lastSyncTime,userId);
-            LOGGER.info("listEquipmentInspectionTasks is not Admin  cacheKey = {}" + cacheKey);
+            LOGGER.info("listEquipmentInspectionTasks is not Admin  cacheKey = {}" , cacheKey);
 			allTasks = equipmentProvider.listEquipmentInspectionTasksUseCache(cmd.getTaskStatus(), cmd.getInspectionCategoryId(),
 					targetTypes, targetIds, executePlanIds, reviewPlanIds, offset, pageSize + 1, cacheKey, AdminFlag.NO.getCode(),lastSyncTime);
 
@@ -3683,7 +3683,7 @@ private void checkUserPrivilege(Long orgId, Long privilegeId, Long communityId) 
 			Collections.sort(reviewStandardIds);
 			sb.append(reviewStandardIds);
 		}
-		if(lastSyncTime!=null){
+		if (lastSyncTime != null) {
 			sb.append(lastSyncTime.toString());
 		}
 
@@ -5934,11 +5934,11 @@ private void checkUserPrivilege(Long orgId, Long privilegeId, Long communityId) 
 		//remove duplicated
 		offlineResponse.setItems(new ArrayList<>(items));
 		syncGroupOfflineData(offlineResponse,cmd);
-		syncRepairCategoryDate(offlineResponse,cmd);
+		syncRepairCategoryData(offlineResponse,cmd);
 		return offlineResponse;
 	}
 
-	private void syncRepairCategoryDate(EquipmentTaskOfflineResponse offlineResponse, ListEquipmentTasksCommand cmd) {
+	private void syncRepairCategoryData(EquipmentTaskOfflineResponse offlineResponse, ListEquipmentTasksCommand cmd) {
 		ListTaskCategoriesCommand categoriesCommand = new ListTaskCategoriesCommand();
 		categoriesCommand.setPageSize(Integer.MAX_VALUE - 1);
 		categoriesCommand.setTaskCategoryId(6L);

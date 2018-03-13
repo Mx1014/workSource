@@ -1798,7 +1798,7 @@ public class Rentalv2ServiceImpl implements Rentalv2Service {
 				//设置起步后价格
 				if (pricePackage.getPriceType().equals(RentalPriceType.INITIATE.getCode()) && initiateFlag){
 					rentalCell.setPrice(pricePackage.getInitiatePrice());
-					rentalCell.setOrgMemberOriginalPrice(pricePackage.getOrgMemberInitiatePrice());
+					rentalCell.setOrgMemberPrice(pricePackage.getOrgMemberInitiatePrice());
 					rentalCell.setApprovingUserPrice(pricePackage.getApprovingUserInitiatePrice());
 				}
 
@@ -3940,9 +3940,9 @@ public class Rentalv2ServiceImpl implements Rentalv2Service {
 
 		if (null == items && null != rentalItems) {
 
-			Tuple<Boolean, Boolean> tuple = this.coordinationProvider.getNamedLock(CoordinationLocks.CREATE_RENTAL_BILL.getCode()
-					+ bill.getRentalResourceId())
-					.enter(() -> {
+//			Tuple<Boolean, Boolean> tuple = this.coordinationProvider.getNamedLock(CoordinationLocks.CREATE_RENTAL_BILL.getCode()
+//					+ bill.getRentalResourceId())
+//					.enter(() -> {
 						BigDecimal itemMoney = new BigDecimal(0);
 						for (SiteItemDTO siDto : rentalItems) {
 
@@ -3970,21 +3970,22 @@ public class Rentalv2ServiceImpl implements Rentalv2Service {
 							itemMoney  = itemMoney.add(rib.getTotalMoney());
 							//用基于服务器平台的锁添加订单（包括验证和添加）
 							//先验证后添加，由于锁机制，可以保证同时只有一个线程验证和添加
-							if(this.validateItem(rib))
-								return true;
+							//付费商品没有库存管理了
+//							if(this.validateItem(rib))
+//								return true;
 							rentalv2Provider.createRentalItemBill(rib);
 						}
 
 						if (itemMoney.doubleValue() > 0) {
 							bill.setPayTotalMoney(bill.getResourceTotalMoney().add(itemMoney));
 						}
-						return false;
-					});
-			Boolean validateBoolean = tuple.first();
-			if(validateBoolean) {
-				throw RuntimeErrorException.errorWith(RentalServiceErrorCode.SCOPE,
-						RentalServiceErrorCode.ERROR_NO_ENOUGH_ITEMS,"no enough items");
-			}
+//						return false;
+//					});
+//			Boolean validateBoolean = tuple.first();
+//			if(validateBoolean) {
+//				throw RuntimeErrorException.errorWith(RentalServiceErrorCode.SCOPE,
+//						RentalServiceErrorCode.ERROR_NO_ENOUGH_ITEMS,"no enough items");
+//			}
 		}
 	}
 
