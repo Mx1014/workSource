@@ -4745,8 +4745,14 @@ public class PropertyMgrServiceImpl implements PropertyMgrService {
 					LOGGER.error("CreateOrganizationOwner: address id is wrong! addressId = {}", addressCmd.getAddressId());
 				}
 			} else {
-				if(ownerAddressList != null) {
-					ownerAddressList.remove(ownerAddress);
+				if(ownerAddressList != null && ownerAddressList.size() > 0) {
+					for(OrganizationOwnerAddress address : ownerAddressList) {
+						if(address.getId().equals(ownerAddress.getId())) {
+							ownerAddressList.remove(address);
+							break;
+						}
+					}
+
 				}
 
 				ownerAddress.setLivingStatus(addressCmd.getLivingStatus());
