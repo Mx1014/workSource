@@ -1664,7 +1664,6 @@ public class AssetServiceImpl implements AssetService {
                     case 1:
                         Calendar start_copy = getCopyCalendar(start);
                         if(separationTime<1) separationTime = 1f;
-                        start_copy.add(Calendar.DAY_OF_MONTH,separationTime.intValue());
                         //version 1
 //                        while(start_copy.compareTo(end)==-1){
 //                            Calendar start_copy_copy =newClearedCalendar();
@@ -1712,10 +1711,8 @@ public class AssetServiceImpl implements AssetService {
                         Calendar start_copy_2 = getCopyCalendar(start);
 
                         Object[] interAndFloat_1 = IntegerUtil.getIntegerAndFloatPartFromFloat(separationTime);
-                        start_copy_2.add(Calendar.YEAR,(Integer) interAndFloat_1[0]);
                         Object[] interAndFloat_2 = IntegerUtil.getIntegerAndFloatPartFromFloat(((float) interAndFloat_1[1]) * 12f);
-                        start_copy_2.add(Calendar.MONTH,(Integer) interAndFloat_2[0]);
-                        start_copy_2.add(Calendar.DAY_OF_MONTH,(int)((float) start_copy_2.getActualMaximum(Calendar.DAY_OF_MONTH) * (float) interAndFloat_2[1]));
+
                         // version 1
 //                        while(start_copy_2.compareTo(end)==-1){
 //                            Calendar start_copy_2_copy =newClearedCalendar();
