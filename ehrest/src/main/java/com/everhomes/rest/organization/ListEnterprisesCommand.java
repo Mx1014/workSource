@@ -3,6 +3,7 @@ package com.everhomes.rest.organization;
 
 /**
  * <ul>查询园区的企业
+ *  <li>manageOrganizationId: 物业管理公司id</li>
  * <li>namespaceId: 域</li>
  * <li>communityId: 小区ID</li>
  * <li>buildingId: 楼栋ID</li>
@@ -13,6 +14,7 @@ package com.everhomes.rest.organization;
  *
  */
 public class ListEnterprisesCommand {
+	private Long manageOrganizationId;
 	
 	private Integer namespaceId;
 	
@@ -32,7 +34,15 @@ public class ListEnterprisesCommand {
     
     private Integer pageSize;
 
-    public Byte getSetAdminFlag() {
+	public Long getManageOrganizationId() {
+		return manageOrganizationId;
+	}
+
+	public void setManageOrganizationId(Long manageOrganizationId) {
+		this.manageOrganizationId = manageOrganizationId;
+	}
+
+	public Byte getSetAdminFlag() {
 		return setAdminFlag;
 	}
 

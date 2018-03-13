@@ -1449,6 +1449,8 @@ public class PortalServiceImpl implements PortalService {
 			if(null != handler){
 				String instanceConfig = handler.publish(app.getNamespaceId(), app.getInstanceConfig(), app.getName());
 				app.setInstanceConfig(instanceConfig);
+				String customTag = handler.getCustomTag(app.getNamespaceId(), app.getModuleId(), app.getInstanceConfig());
+				app.setCustomTag(customTag);
 				serviceModuleAppProvider.updateServiceModuleApp(app);
 			}
 		}
@@ -2833,7 +2835,7 @@ public class PortalServiceImpl implements PortalService {
 			String handlerPrefix = PortalPublishHandler.PORTAL_PUBLISH_OBJECT_PREFIX;
 			PortalPublishHandler handler = PlatformContext.getComponent(handlerPrefix + serviceModule.getId());
 			if(null != handler){
-				customTag = handler.getCustomTag(namespaceId, serviceModule.getId(), actionData, moduleApp.getInstanceConfig());
+				customTag = handler.getCustomTag(namespaceId, serviceModule.getId(), moduleApp.getInstanceConfig());
 				LOGGER.debug("get customTag from handler = {}, customTag =s {}",handler,customTag);
 			}
 			moduleApp.setCustomTag(customTag);

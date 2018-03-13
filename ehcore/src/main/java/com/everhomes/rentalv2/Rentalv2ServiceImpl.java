@@ -1748,7 +1748,7 @@ public class Rentalv2ServiceImpl implements Rentalv2Service {
 	private void setOrderAmount(RentalResource rs, List<RentalBillRuleDTO> rules, RentalOrder rentalBill,
 									  Map<Long, BigDecimal> cellAmountMap,RentalDefaultRule rule) {
 		BigDecimal amount = new BigDecimal(0);
-		if (NormalFlag.NEED.equals(rule.getNeedPay()))
+		if (NormalFlag.NEED.getCode()==rule.getNeedPay())
 			 amount = calculateOrderAmount(rs, rules, rentalBill, cellAmountMap);
 
 		rentalBill.setPaidMoney(new BigDecimal(0));
