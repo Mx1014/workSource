@@ -752,7 +752,7 @@ INSERT INTO `eh_web_menus`  (`id`, `name`, `parent_id`, `icon_url`, `data_type`,
 -- 企业管理对接权限 25065 add by xiongying20180313
 SET @module_privilege_id = (SELECT MAX(id) FROM `eh_service_module_privileges`);
 SET @privilege_id = (SELECT MAX(id) FROM `eh_acl_privileges`);
-INSERT INTO `eh_acl_privileges` (`id`, `app_id`, `name`, `description`, `tag`) VALUES (33000, '0', '企业管理 管理员', '企业管理 全部权限', NULL);
+INSERT INTO `eh_acl_privileges` (`id`, `app_id`, `name`, `description`, `tag`) VALUES (33000, '0', '企业管理 全部权限', '企业管理 全部权限', NULL);
 INSERT INTO `eh_service_module_privileges` (`id`, `module_id`, `privilege_type`, `privilege_id`, `remark`, `default_order`, `create_time`) VALUES((@module_privilege_id := @module_privilege_id + 1),'33000','1','33000','企业管理管理权限','0',NOW());
 INSERT INTO `eh_service_module_privileges` (`id`, `module_id`, `privilege_type`, `privilege_id`, `remark`, `default_order`, `create_time`) VALUES((@module_privilege_id := @module_privilege_id + 1),'33000','2','33000','企业管理全部权限','0',NOW());
 
