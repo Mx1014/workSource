@@ -1748,7 +1748,7 @@ public class Rentalv2ServiceImpl implements Rentalv2Service {
 	private void setOrderAmount(RentalResource rs, List<RentalBillRuleDTO> rules, RentalOrder rentalBill,
 									  Map<Long, BigDecimal> cellAmountMap,RentalDefaultRule rule) {
 		BigDecimal amount = new BigDecimal(0);
-		if (NormalFlag.NEED.equals(rule.getNeedPay()))
+		if (NormalFlag.NEED.getCode()==rule.getNeedPay())
 			 amount = calculateOrderAmount(rs, rules, rentalBill, cellAmountMap);
 
 		rentalBill.setPaidMoney(new BigDecimal(0));
@@ -3381,8 +3381,8 @@ public class Rentalv2ServiceImpl implements Rentalv2Service {
 				//获取每周的开放天
 				Integer weekday = start.get(Calendar.DAY_OF_WEEK);
 
-				if (cmd.getOpenWeekday().contains(weekday) &&
-						(null == closeDates || !closeDates.contains(start.getTimeInMillis()))) {
+//				if (cmd.getOpenWeekday().contains(weekday) &&
+						if (null == closeDates || !closeDates.contains(start.getTimeInMillis())) {
 
 					RentalCell rsr = ConvertHelper.convert(cmd, RentalCell.class);
 					//单元格通用设置

@@ -1,5 +1,5 @@
--- 1、覆盖eh_web_menus、eh_service_modules和eh_domains，从88覆盖到新的数据库表
--- 2、更新eh_domains中namespace_id等于0的数据的domain的值为服务器实际的ip
+
+-- 2、根据实际域名更新eh_domains表
 
 -- 3、清理老数据
 /*
