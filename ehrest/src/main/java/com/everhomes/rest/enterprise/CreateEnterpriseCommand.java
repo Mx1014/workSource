@@ -8,6 +8,7 @@ import com.everhomes.rest.organization.OrganizationAddressDTO;
 
 /**
  * <ul>管理后台使用，应该使用批量添加实现
+ *  <li>manageOrganizationId: 物业管理公司id</li>
  *  <li>name: 公司名称</li>
  *  <li>displayName: 公司简称</li>
  *  <li>avatar: 公司头像</li>
@@ -34,6 +35,7 @@ import com.everhomes.rest.organization.OrganizationAddressDTO;
  */
 
 public class CreateEnterpriseCommand {
+	private Long manageOrganizationId;
     private java.lang.String   name;
     private java.lang.String   displayName;
     private java.lang.String   avatar;
@@ -64,6 +66,14 @@ public class CreateEnterpriseCommand {
 
 	private String website;
 	private String unifiedSocialCreditCode;
+
+	public Long getManageOrganizationId() {
+		return manageOrganizationId;
+	}
+
+	public void setManageOrganizationId(Long manageOrganizationId) {
+		this.manageOrganizationId = manageOrganizationId;
+	}
 
 	public String getUnifiedSocialCreditCode() {
 		return unifiedSocialCreditCode;
