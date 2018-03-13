@@ -64,6 +64,7 @@ import com.everhomes.settings.PaginationConfigHelper;
 import com.everhomes.user.User;
 import com.everhomes.user.UserContext;
 import com.everhomes.user.UserIdentifier;
+import com.everhomes.user.UserPrivilegeMgr;
 import com.everhomes.user.UserProvider;
 import com.everhomes.util.ConvertHelper;
 import com.everhomes.util.RuntimeErrorException;
@@ -113,6 +114,10 @@ public class TalentServiceImpl implements TalentService {
 	@Autowired
 	private GeneralFormService generalFormService;
 	
+	@Autowired
+	private UserPrivilegeMgr userPrivilegeMgr;
+	@Autowired
+	private ConfigurationProvider configProvider;
 	@Override
 	public ListTalentCategoryResponse listTalentCategory(ListTalentCategoryCommand cmd) {
 		List<TalentCategory> talentCategories = talentCategoryProvider.listTalentCategoryByNamespace(namespaceId());
@@ -211,6 +216,10 @@ public class TalentServiceImpl implements TalentService {
 
 	@Override
 	public ListTalentResponse listTalent(ListTalentCommand cmd) {
+		if(cmd.getCurrentPMId()!=null && configProvider.getBooleanValue("privilege.community.checkflag", true)){
+			userPrivilegeMgr.checkUserPrivilege(UserContext.current().getUser().getId(), cmd.getCurrentPMId(), 4073040731L, cmd.getAppId(), null,cmd.getCurrentProjectId());//人才管理权限
+		}
+		
 		int pageSize = PaginationConfigHelper.getPageSize(configurationProvider, cmd.getPageSize());
 		cmd.setPageSize(pageSize+1);
 		List<Talent> talents = talentProvider.listTalent(namespaceId(), cmd);
@@ -249,6 +258,9 @@ public class TalentServiceImpl implements TalentService {
 
 	@Override
 	public TalentDTO createOrUpdateTalent(CreateOrUpdateTalentCommand cmd) {
+		if(cmd.getCurrentPMId()!=null && configProvider.getBooleanValue("privilege.community.checkflag", true)){
+			userPrivilegeMgr.checkUserPrivilege(UserContext.current().getUser().getId(), cmd.getCurrentPMId(), 4073040731L, cmd.getAppId(), null,cmd.getCurrentProjectId());//人才管理权限
+		}
 		Talent talent = null;
 		if (cmd.getId() == null) {
 			talent = createTalent(cmd);
@@ -308,6 +320,9 @@ public class TalentServiceImpl implements TalentService {
 	
 	@Override
 	public void deleteTalent(DeleteTalentCommand cmd) {
+		if(cmd.getCurrentPMId()!=null && configProvider.getBooleanValue("privilege.community.checkflag", true)){
+			userPrivilegeMgr.checkUserPrivilege(UserContext.current().getUser().getId(), cmd.getCurrentPMId(), 4073040731L, cmd.getAppId(), null,cmd.getCurrentProjectId());//人才管理权限
+		}
 		Talent talent = findTalentById(cmd.getId(), namespaceId(), cmd.getOwnerType(), cmd.getOwnerId());
 		talent.setStatus(CommonStatus.INACTIVE.getCode());
 		talentProvider.updateTalent(talent);
@@ -562,12 +577,19 @@ public class TalentServiceImpl implements TalentService {
 
 	@Override
 	public ListMessageSenderResponse listMessageSender(ListMessageSenderCommand cmd) {
+		if(cmd.getCurrentPMId()!=null && configProvider.getBooleanValue("privilege.community.checkflag", true)){
+			userPrivilegeMgr.checkUserPrivilege(UserContext.current().getUser().getId(), cmd.getCurrentPMId(), 4073040732L, cmd.getAppId(), null,cmd.getCurrentProjectId());//消息推送权限
+		}
 		List<TalentMessageSender> talentMessageSenders = talentMessageSenderProvider.listTalentMessageSenderByOwner(cmd.getOwnerType(), cmd.getOwnerId());
 		return new ListMessageSenderResponse(talentMessageSenders.stream().map(this::convert).collect(Collectors.toList()));
 	}
 	
 	@Override
 	public ListTalentRequestResponse listTalentRequest(ListTalentRequestCommand cmd) {
+		if(cmd.getCurrentPMId()!=null && configProvider.getBooleanValue("privilege.community.checkflag", true)){
+			userPrivilegeMgr.checkUserPrivilege(UserContext.current().getUser().getId(), cmd.getCurrentPMId(), 4073040733L, cmd.getAppId(), null,cmd.getCurrentProjectId());//申请记录权限
+		}
+		
 		int pageSize = PaginationConfigHelper.getPageSize(configurationProvider, cmd.getPageSize());
 		cmd.setPageSize(pageSize+1);
 		List<TalentRequest> talentRequests = talentRequestProvider.listTalentRequestByCondition(namespaceId(), cmd);
