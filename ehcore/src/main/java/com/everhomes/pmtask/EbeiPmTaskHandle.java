@@ -19,6 +19,7 @@ import com.everhomes.address.AddressProvider;
 import com.everhomes.building.Building;
 import com.everhomes.building.BuildingProvider;
 import com.everhomes.category.Category;
+import com.everhomes.community.Community;
 import com.everhomes.community.CommunityProvider;
 import com.everhomes.community.ResourceCategoryAssignment;
 import com.everhomes.flow.*;
@@ -311,6 +312,18 @@ public class EbeiPmTaskHandle extends DefaultPmTaskHandle{
         param.put("type", "1");
         param.put("remarks", task.getContent());
         param.put("projectId", projectId);
+        //把科兴的园区映射到一碑的projectId
+        if ("community".equals(task.getOwnerType())){
+            String jsonString = configProvider.getValue("pmtask.projectId.mapping","{}");
+            JSONObject object = JSONObject.parseObject(jsonString);
+            Community community = communityProvider.findCommunityById(task.getOwnerId());
+            if (community!=null) {
+                String pid = object.getString(community.getName());
+                if (!StringUtils.isEmpty(pid))
+                    param.put("projectId", pid);
+            }
+
+        }
         param.put("anonymous", "0");
         param.put("fileAddrs", fileAddrs);
         param.put("callBackUrl", configProvider.getValue(999983,"pmtask.ebei.callback", ""));
