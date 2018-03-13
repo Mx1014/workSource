@@ -261,4 +261,16 @@ public interface PunchService {
 
 	OutputStream getPunchStatisticsOutputStream(Long startDay, Long endDay, Byte exceptionStatus,
 			String userName, String ownerType, Long ownerId, Long taskId);
+
+	public ListVacationBalancesResponse listVacationBalances(ListVacationBalancesCommand cmd);
+
+	public void updateVacationBalances(UpdateVacationBalancesCommand cmd);
+
+	public void batchUpdateVacationBalances(BatchUpdateVacationBalancesCommand cmd);
+
+	public ListVacationBalanceLogsResponse listVacationBalanceLogs(ListVacationBalanceLogsCommand cmd);
+
+	public void exportVacationBalances(ExportVacationBalancesCommand cmd);
+
+	public void importVacationBalances(ImportVacationBalancesCommand cmd);
 }

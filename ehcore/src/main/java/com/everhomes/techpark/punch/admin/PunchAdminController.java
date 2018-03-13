@@ -1073,5 +1073,70 @@ public class PunchAdminController extends ControllerBase {
 		response.setErrorCode(ErrorCodes.SUCCESS);
 		response.setErrorDescription("OK");
 		return response;
+	} 
+	
+	/**
+	 * <p>查询假期余额列表</p>
+	 * <b>URL: /punch/listVacationBalances</b>
+	 */
+	@RequestMapping("listVacationBalances")
+	@RestReturn(ListVacationBalancesResponse.class)
+	public RestResponse listVacationBalances(ListVacationBalancesCommand cmd){
+		return new RestResponse(punchService.listVacationBalances(cmd));
 	}
+
+	/**
+	 * <p>修改余额</p>
+	 * <b>URL: /punch/updateVacationBalances</b>
+	 */
+	@RequestMapping("updateVacationBalances")
+	@RestReturn(String.class)
+	public RestResponse updateVacationBalances(UpdateVacationBalancesCommand cmd){
+		punchService.updateVacationBalances(cmd);
+		return new RestResponse();
+	}
+
+	/**
+	 * <p>批量修改余额</p>
+	 * <b>URL: /punch/batchUpdateVacationBalances</b>
+	 */
+	@RequestMapping("batchUpdateVacationBalances")
+	@RestReturn(String.class)
+	public RestResponse batchUpdateVacationBalances(BatchUpdateVacationBalancesCommand cmd){
+		punchService.batchUpdateVacationBalances(cmd);
+		return new RestResponse();
+	}
+
+	/**
+	 * <p>分页查询操作日志</p>
+	 * <b>URL: /punch/listVacationBalanceLogs</b>
+	 */
+	@RequestMapping("listVacationBalanceLogs")
+	@RestReturn(ListVacationBalanceLogsResponse.class)
+	public RestResponse listVacationBalanceLogs(ListVacationBalanceLogsCommand cmd){
+		return new RestResponse(punchService.listVacationBalanceLogs(cmd));
+	}
+
+	/**
+	 * <p>批量导出</p>
+	 * <b>URL: /punch/exportVacationBalances</b>
+	 */
+	@RequestMapping("exportVacationBalances")
+	@RestReturn(String.class)
+	public RestResponse exportVacationBalances(ExportVacationBalancesCommand cmd){
+		punchService.exportVacationBalances(cmd);
+		return new RestResponse();
+	}
+
+	/**
+	 * <p>批量导入</p>
+	 * <b>URL: /punch/importVacationBalances</b>
+	 */
+	@RequestMapping("importVacationBalances")
+	@RestReturn(String.class)
+	public RestResponse importVacationBalances(@RequestParam(value = "attachment") MultipartFile[] files,ImportVacationBalancesCommand cmd){
+		punchService.importVacationBalances(cmd);
+		return new RestResponse();
+	}
+
 }
