@@ -38,7 +38,34 @@ public class GetServiceAllianceEnterpriseListCommand {
 	private Long type;
 	
 	private Byte sourceRequestType;
+	private Long currentPMId;
+	private Long currentProjectId;
+	private Long appId;
 
+	public Long getCurrentPMId() {
+		return currentPMId;
+	}
+
+	public void setCurrentPMId(Long currentPMId) {
+		this.currentPMId = currentPMId;
+	}
+
+	public Long getCurrentProjectId() {
+		return currentProjectId;
+	}
+
+	public void setCurrentProjectId(Long currentProjectId) {
+		this.currentProjectId = currentProjectId;
+	}
+	
+	public Long getAppId() {
+		return appId;
+	}
+
+	public void setAppId(Long appId) {
+		this.appId = appId;
+	}
+	
 	public Long getCommunityId() {
 		return communityId;
 	}
