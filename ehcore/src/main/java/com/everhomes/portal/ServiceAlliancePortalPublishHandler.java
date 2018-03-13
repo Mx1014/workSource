@@ -340,21 +340,21 @@ public class ServiceAlliancePortalPublishHandler implements PortalPublishHandler
     
     final Pattern pattern = Pattern.compile("^.*\"parentId\":[\\s]*([\\d]*)");
     @Override
-    public String getCustomTag(Integer namespaceId, Long moudleId, String actionData, String instanceConfig) {
-    	if(actionData == null || actionData.length() == 0){
+    public String getCustomTag(Integer namespaceId, Long moudleId, String instanceConfig) {
+    	if(instanceConfig == null || instanceConfig.length() == 0){
     		return null;
     	}
-    	Matcher m = pattern.matcher(actionData);
+    	Matcher m = pattern.matcher(instanceConfig);
     	if(m.find()){
     		return m.group(1);
     	}
-    	LOGGER.info("ServiceAlliancePortalPublishHandler actionData = "+actionData);
+    	LOGGER.info("ServiceAlliancePortalPublishHandler actionData = "+instanceConfig);
     	return null;
     }
 
     @Override
-    public Long getWebMenuId(Integer namespaceId, Long moudleId, String actionData, String instanceConfig) {
-       String categoriesId = this.getCustomTag(namespaceId,moudleId,actionData,instanceConfig);
+    public Long getWebMenuId(Integer namespaceId, Long moudleId, String instanceConfig) {
+       String categoriesId = this.getCustomTag(namespaceId,moudleId,instanceConfig);
        ServiceAllianceCategories category = yellowPageProvider.findCategoryById(Long.valueOf(categoriesId));
        if(category == null || category.getEntryId() == null){
            return null;

@@ -353,14 +353,14 @@ public class ActivityPortalPublishHandler implements PortalPublishHandler {
 	}
 
 	@Override
-	public String getCustomTag(Integer namespaceId, Long moudleId, String actionData, String instanceConfig) {
+	public String getCustomTag(Integer namespaceId, Long moudleId, String instanceConfig) {
 
-		ActivityActionData actionDataObj = (ActivityActionData)StringHelper.fromJsonString(actionData, ActivityActionData.class);
+		ActivityActionData actionDataObj = (ActivityActionData)StringHelper.fromJsonString(instanceConfig, ActivityActionData.class);
 
-
-		if(actionDataObj == null || actionDataObj.getCategoryId() == null){
-			actionDataObj = (ActivityActionData) StringHelper.fromJsonString(instanceConfig, ActivityActionData.class);
-		}
+//
+//		if(actionDataObj == null || actionDataObj.getCategoryId() == null){
+//			actionDataObj = (ActivityActionData) StringHelper.fromJsonString(instanceConfig, ActivityActionData.class);
+//		}
 
 		if(actionDataObj != null && actionDataObj.getCategoryId() != null){
 			return String.valueOf(actionDataObj.getCategoryId());
@@ -370,7 +370,7 @@ public class ActivityPortalPublishHandler implements PortalPublishHandler {
 	}
 
 	@Override
-	public Long getWebMenuId(Integer namespaceId, Long moudleId, String actionData, String instanceConfig) {
+	public Long getWebMenuId(Integer namespaceId, Long moudleId, String instanceConfig) {
 		return 42040000L;
 	}
 }

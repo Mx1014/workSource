@@ -76,13 +76,13 @@ public class ForumPortalPublishHandler implements PortalPublishHandler {
 	}
 
 	@Override
-	public String getCustomTag(Integer namespaceId, Long moudleId, String actionData, String instanceConfig) {
+	public String getCustomTag(Integer namespaceId, Long moudleId, String instanceConfig) {
 
-		ForumActionData actionDataObj = (ForumActionData) StringHelper.fromJsonString(actionData, ForumActionData.class);
+		ForumActionData actionDataObj = (ForumActionData) StringHelper.fromJsonString(instanceConfig, ForumActionData.class);
 
-		if(actionDataObj == null || actionDataObj.getForumEntryId() == null){
-			actionDataObj = (ForumActionData) StringHelper.fromJsonString(instanceConfig, ForumActionData.class);
-		}
+//		if(actionDataObj == null || actionDataObj.getForumEntryId() == null){
+//			actionDataObj = (ForumActionData) StringHelper.fromJsonString(instanceConfig, ForumActionData.class);
+//		}
 
 		if(actionDataObj != null && actionDataObj.getForumEntryId() != null){
 			return String.valueOf(actionDataObj.getForumEntryId());
@@ -92,7 +92,7 @@ public class ForumPortalPublishHandler implements PortalPublishHandler {
 	}
 
 	@Override
-	public Long getWebMenuId(Integer namespaceId, Long moudleId, String actionData, String instanceConfig) {
+	public Long getWebMenuId(Integer namespaceId, Long moudleId, String instanceConfig) {
 		return 42050000L;
 	}
 
