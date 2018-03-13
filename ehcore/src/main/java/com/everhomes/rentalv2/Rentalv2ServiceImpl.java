@@ -1798,7 +1798,7 @@ public class Rentalv2ServiceImpl implements Rentalv2Service {
 				//设置起步后价格
 				if (pricePackage.getPriceType().equals(RentalPriceType.INITIATE.getCode()) && initiateFlag){
 					rentalCell.setPrice(pricePackage.getInitiatePrice());
-					rentalCell.setOrgMemberOriginalPrice(pricePackage.getOrgMemberInitiatePrice());
+					rentalCell.setOrgMemberPrice(pricePackage.getOrgMemberInitiatePrice());
 					rentalCell.setApprovingUserPrice(pricePackage.getApprovingUserInitiatePrice());
 				}
 
