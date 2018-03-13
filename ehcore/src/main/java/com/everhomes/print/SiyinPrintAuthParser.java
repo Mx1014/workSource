@@ -19,8 +19,9 @@ public class SiyinPrintAuthParser implements PortalUrlParser {
 	 
     @Override
     public Long getModuleId(Integer namespaceId, String actionData, Byte actionType, String itemLabel) {
+    	LOGGER.info("SiyinPrintAuthParser actionData={},actionType={},namespaceId={}",actionData,actionType,namespaceId);
         if(actionType == 13 || actionType == 14){
-        	LOGGER.info("actionData:"+actionData);;
+        	LOGGER.info("actionData:"+actionData);
             Map<String,String> data= new Gson().fromJson(actionData,new TypeToken<HashMap<String,String>>(){}.getType());
             if(data!=null && data.size() > 0 && data.get("url")!=null){
                 String wd = data.get("url");
