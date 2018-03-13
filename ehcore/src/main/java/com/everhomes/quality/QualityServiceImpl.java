@@ -2807,12 +2807,22 @@ Long nextPageAnchor = null;
 	@Override
 	public void deleteQualitySpecification(DeleteQualitySpecificationCommand cmd) {
 
-		QualityInspectionSpecifications specification =
-				verifiedSpecificationById(cmd.getSpecificationId(), cmd.getOwnerType(), cmd.getOwnerId(),null);
+		QualityInspectionSpecifications specification = verifiedSpecificationById(cmd.getSpecificationId(), cmd.getOwnerType(), cmd.getOwnerId(),null);
 		if(SpecificationInspectionType.CATEGORY.equals(SpecificationInspectionType.fromStatus(specification.getInspectionType()))) {
 			checkUserPrivilege(cmd.getOwnerId(),PrivilegeConstants.QUALITY_CATEGORY_DELETE,cmd.getScopeId());
 		} else {
 			checkUserPrivilege(cmd.getOwnerId(),PrivilegeConstants.QUALITY_SPECIFICATION_DELETE,cmd.getScopeId());
+		}
+
+		List<QualityInspectionSpecifications> childrens = qualityProvider.listChildrenSpecifications(cmd.getOwnerType(), cmd.getOwnerId(), specification.getScopeCode(), specification.getScopeId(), specification.getId(), null);
+		if (childrens != null && childrens.size() > 0) {
+			throw RuntimeErrorException.errorWith(QualityServiceErrorCode.SCOPE,
+					QualityServiceErrorCode.ERROR_DELETE_SPECIFICATION,
+					localeStringService.getLocalizedString(
+							String.valueOf(QualityServiceErrorCode.SCOPE),
+							String.valueOf(QualityServiceErrorCode.ERROR_DELETE_SPECIFICATION),
+							UserContext.current().getUser().getLocale(),
+							"delete is not allowed!"));
 		}
 
 		if(SpecificationScopeCode.fromCode(specification.getScopeCode()).equals(SpecificationScopeCode.fromCode(cmd.getScopeCode()))
