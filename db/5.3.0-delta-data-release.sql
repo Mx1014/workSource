@@ -1188,3 +1188,7 @@ END
 DELIMITER ;
 CALL create_app;
 DROP PROCEDURE IF EXISTS create_app;    
+
+-- 校验开关 by dengs,
+INSERT INTO `eh_configurations` (`name`, `value`, `description`, `namespace_id`, `display_name`) VALUES ('privilege.community.checkflag', 'false', NULL, '0', NULL);
+
