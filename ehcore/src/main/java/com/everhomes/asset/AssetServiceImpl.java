@@ -1866,15 +1866,17 @@ public class AssetServiceImpl implements AssetService {
 
     private Calendar newClearedCalendar(Integer level) {
         Calendar instance = Calendar.getInstance();
-        if(level == null){
-            instance.clear();
-        }
-        instance.clear(level);
+//        if(level == null){
+//            instance.clear();
+//        }else{
+//            instance.clear(level);
+//        }
+        instance.clear(Calendar.DATE);
         return instance;
     }
     private Calendar newClearedCalendar() {
         Calendar instance = Calendar.getInstance();
-        instance.clear();
+        instance.clear(Calendar.DATE);
         return instance;
     }
 
@@ -2113,7 +2115,7 @@ public class AssetServiceImpl implements AssetService {
     }
 
     private boolean checkCycle(Calendar d2, Calendar a, Integer cycle) {
-        Calendar a_assist = newClearedCalendar(null);
+        Calendar a_assist = newClearedCalendar(Calendar.DATE);
         a_assist.setTime(a.getTime());
         a_assist.set(Calendar.MONTH,a_assist.get(Calendar.MONTH)+cycle);
         a_assist.set(Calendar.DAY_OF_MONTH,a_assist.get(Calendar.DAY_OF_MONTH)-1);
