@@ -1544,7 +1544,7 @@ public class PropertyMgrProviderImpl implements PropertyMgrProvider {
                 .where(Tables.EH_ORGANIZATION_OWNER_ADDRESS.NAMESPACE_ID.eq(namespaceId))
                 .and(Tables.EH_ORGANIZATION_OWNER_ADDRESS.ORGANIZATION_OWNER_ID.eq(ownerId))
                 .and(Tables.EH_ORGANIZATION_OWNER_ADDRESS.ADDRESS_ID.eq(addressId))
-                .fetchOneInto(OrganizationOwnerAddress.class);
+                .fetchAnyInto(OrganizationOwnerAddress.class);
     }
 
     @Override

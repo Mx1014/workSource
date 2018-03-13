@@ -25,6 +25,7 @@ import com.everhomes.sequence.SequenceProvider;
 import com.everhomes.server.schema.tables.pojos.EhLeaseBuildings;
 import com.everhomes.settings.PaginationConfigHelper;
 import com.everhomes.user.UserContext;
+import com.everhomes.user.UserPrivilegeMgr;
 import com.everhomes.util.ConvertHelper;
 import com.everhomes.util.RuntimeErrorException;
 import org.slf4j.Logger;
@@ -66,6 +67,8 @@ public class EnterpriseApplyBuildingServiceImpl implements EnterpriseApplyBuildi
 	private RegionProvider regionProvider;
 	@Autowired
 	private EnterpriseApplyEntryService enterpriseApplyEntryService;
+	@Autowired
+	private UserPrivilegeMgr userPrivilegeMgr;
 
 	@Override
 	public ListLeaseBuildingsResponse listLeaseBuildings(ListLeaseBuildingsCommand cmd) {
@@ -75,7 +78,9 @@ public class EnterpriseApplyBuildingServiceImpl implements EnterpriseApplyBuildi
 		if (null == cmd.getNamespaceId()) {
 			cmd.setNamespaceId(UserContext.getCurrentNamespaceId());
 		}
-
+		if(cmd.getCurrentPMId()!=null){
+			userPrivilegeMgr.checkUserPrivilege(UserContext.current().getUser().getId(), cmd.getCurrentPMId(), 4010040120L, cmd.getAppId(), null,0L);//楼栋介绍权限
+		}
 		if (null == cmd.getCategoryId()) {
 			cmd.setCategoryId(DEFAULT_CATEGORY_ID);
 		}
@@ -108,6 +113,10 @@ public class EnterpriseApplyBuildingServiceImpl implements EnterpriseApplyBuildi
 
 		if (null == cmd.getNamespaceId()) {
 			cmd.setNamespaceId(UserContext.getCurrentNamespaceId());
+		}
+		
+		if(cmd.getCurrentPMId()!=null){
+			userPrivilegeMgr.checkUserPrivilege(UserContext.current().getUser().getId(), cmd.getCurrentPMId(), 4010040120L, cmd.getAppId(), null,0L);//楼栋介绍权限
 		}
 
 		if (null == cmd.getCategoryId()) {
@@ -144,7 +153,9 @@ public class EnterpriseApplyBuildingServiceImpl implements EnterpriseApplyBuildi
 
 	@Override
 	public LeaseBuildingDTO updateLeaseBuilding(UpdateLeaseBuildingCommand cmd) {
-
+		if(cmd.getCurrentPMId()!=null){
+			userPrivilegeMgr.checkUserPrivilege(UserContext.current().getUser().getId(), cmd.getCurrentPMId(), 4010040120L, cmd.getAppId(), null,0L);//楼栋介绍权限
+		}
 		LeaseBuilding leaseBuilding = enterpriseApplyBuildingProvider.findLeaseBuildingById(cmd.getId());
 
 		BeanUtils.copyProperties(cmd, leaseBuilding);
@@ -365,6 +376,10 @@ public class EnterpriseApplyBuildingServiceImpl implements EnterpriseApplyBuildi
 
 		if (null == cmd.getNamespaceId()) {
 			cmd.setNamespaceId(UserContext.getCurrentNamespaceId());
+		}
+		
+		if(cmd.getCurrentPMId()!=null){
+			userPrivilegeMgr.checkUserPrivilege(UserContext.current().getUser().getId(), cmd.getCurrentPMId(), 4010040110L, cmd.getAppId(), null,0L);//项目介绍权限
 		}
 
 		if (null == cmd.getCategoryId()) {
