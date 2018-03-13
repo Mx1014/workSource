@@ -11684,7 +11684,7 @@ public class OrganizationServiceImpl implements OrganizationService {
             List<String> groupTypes = new ArrayList<>();
             groupTypes.add(OrganizationGroupType.DEPARTMENT.getCode());
             groupTypes.add(OrganizationGroupType.DIRECT_UNDER_ENTERPRISE.getCode());
-            List<OrganizationMember> departs = this.organizationProvider.listOrganizationMembersByDetailId(dto.getDetailId(), groupTypes);
+            List<OrganizationMember> departs = this.organizationProvider.listOrganizationMembersByDetailIdAndOrgId(dto.getDetailId(), cmd.getOrganizationId(), groupTypes);
             if(departs != null && departs.size() > 0){
                 for (OrganizationMember depart:departs){
                     Organization org = this.organizationProvider.findOrganizationById(depart.getOrganizationId());
@@ -14306,6 +14306,7 @@ public class OrganizationServiceImpl implements OrganizationService {
     }
 
     @Override
+    @Deprecated
     public Long getDepartmentByDetailId(Long detailId){
         List<String> groupTypes = new ArrayList<>();
         groupTypes.add(OrganizationGroupType.DEPARTMENT.getCode());
@@ -14319,6 +14320,25 @@ public class OrganizationServiceImpl implements OrganizationService {
             List<OrganizationMember> member_enterprise = organizationProvider.listOrganizationMembersByDetailId(detailId, groupTypes);
             if(member_enterprise != null && member_enterprise.size() > 0){
                return member_enterprise.get(0).getOrganizationId();
+            }
+        }
+        return null;
+    }
+
+    @Override
+    public Long getDepartmentByDetailIdAndOrgId(Long detailId, Long orgId) {
+        List<String> groupTypes = new ArrayList<>();
+        groupTypes.add(OrganizationGroupType.DEPARTMENT.getCode());
+        groupTypes.add(OrganizationGroupType.DIRECT_UNDER_ENTERPRISE.getCode());
+        List<OrganizationMember> members = organizationProvider.listOrganizationMembersByDetailIdAndOrgId(detailId, orgId, groupTypes);
+        if(members != null && members.size() > 0){
+            return members.get(0).getOrganizationId();
+        }else{
+            groupTypes.clear();
+            groupTypes.add(OrganizationGroupType.ENTERPRISE.getCode());
+            List<OrganizationMember> member_enterprise = organizationProvider.listOrganizationMembersByDetailIdAndOrgId(detailId, orgId, groupTypes);
+            if(member_enterprise != null && member_enterprise.size() > 0){
+                return member_enterprise.get(0).getOrganizationId();
             }
         }
         return null;

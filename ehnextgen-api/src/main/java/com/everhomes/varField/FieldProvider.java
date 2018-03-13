@@ -21,6 +21,7 @@ public interface FieldProvider {
 
     String findClassNameByGroupDisplayName(String groupDisplayName);
     FieldGroup findGroupByGroupDisplayName(String groupDisplayName);
+    FieldGroup findGroupByGroupLogicName(String groupLogicName);
 
     List<FieldItem> listFieldItems(Long fieldId);
     List<ScopeFieldItem> listScopeFieldItems(Long fieldId, Integer namespaceId, Long communityId);
@@ -47,5 +48,6 @@ public interface FieldProvider {
 
     void createFieldItem(FieldItem item);
     ScopeField findScopeField(Integer namespaceId, Long communityId, Long groupId, String fieldDisplayName);
+    Field findField(String moduleName, String name, String groupPath);
 
 }

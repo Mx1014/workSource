@@ -22,6 +22,8 @@ public class SimpleAndAliCDNContentURLVendor implements ContentURLVendor {
      */
     private static final Version SEPARATION_VERSION = Version.fromVersionString("5.3.0");
 
+    private static final Version ZERO_VERSION = Version.fromVersionString("0.0.0");
+
     @Override
     public String evaluate(
             String scheme, String domain, Integer port, String uri, Map<String, Object> uriParams) {
@@ -32,12 +34,15 @@ public class SimpleAndAliCDNContentURLVendor implements ContentURLVendor {
 
         // 小于此版本的客户端因为做了本地资源缓存，如果提供CDN链接会导致缓存全部失效
         // 所以小于此版本的客户端提供原来的资源链接
-        if (versionStr != null
-                && Version.fromVersionString(versionStr).getEncodedValue()
-                        < SEPARATION_VERSION.getEncodedValue()) {
-            vendor = PlatformContext.getComponent(SimpleContentURLVendor.class);
+        if (versionStr != null) {
+            if (Version.fromVersionString(versionStr).getEncodedValue() == ZERO_VERSION.getEncodedValue()
+                    || Version.fromVersionString(versionStr).getEncodedValue() > SEPARATION_VERSION.getEncodedValue()) {
+                vendor = PlatformContext.getComponent(AliCDNContentURLVendor.class);
+            } else {
+                vendor = PlatformContext.getComponent(SimpleContentURLVendor.class);
+            }
         } else {
-            vendor = PlatformContext.getComponent(AliCDNContentURLVendor.class);
+            vendor = PlatformContext.getComponent(SimpleContentURLVendor.class);
         }
         return vendor.evaluate(scheme, domain, port, uri, uriParams);
     }

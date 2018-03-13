@@ -9285,6 +9285,7 @@ CREATE TABLE `eh_payment_bill_items` (
   `date_str_generation` VARCHAR(40) COMMENT '费用产生日期',
   `bill_group_rule_id` BIGINT,
   `contract_id_type` TINYINT DEFAULT 1 COMMENT '1:contract_id为合同id；0：不是',
+  `late_fine_standard_id` BIGINT DEFAULT NULL COMMENT '滞纳金标准id',
   PRIMARY KEY (`id`)
 ) ENGINE=INNODB DEFAULT CHARSET=utf8mb4 COMMENT='明细';
 
@@ -16416,4 +16417,23 @@ CREATE TABLE `eh_zj_syncdata_backup` (
   PRIMARY KEY (`id`),
   KEY `i_eh_namespaceid_data_type` (`namespace_id`,`update_community`,`data_type`)
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4;
+
+DROP TABLE IF EXISTS `eh_payment_late_fine`;
+
+
+CREATE TABLE `eh_payment_late_fine`(
+  `id` BIGINT NOT NULL COMMENT 'primary key',
+  `name` VARCHAR(20) COMMENT '滞纳金名称',
+  `amount` DECIMAL(10,2) NOT NULL DEFAULT '0.00' COMMENT 'amount of overdue payment',
+  `bill_id` BIGINT NOT NULL COMMENT 'the id of the corresponding bill, one to one',
+  `bill_item_id` BIGINT NOT NULL COMMENT 'the id of the corresponding bill item id, one to one',
+  `create_time` DATETIME DEFAULT NOW(),
+  `upate_time` DATETIME DEFAULT NOW(),
+  `update_uid` BIGINT DEFAULT NULL,
+  `namespace_id` INTEGER DEFAULT NULL COMMENT 'location info, for possible statistics later',
+  `community_id` BIGINT DEFAULT NULL,
+  `customer_id` BIGINT NOT NULL COMMENT 'allows searching taking advantage of it',
+  `customer_type` VARCHAR(20) NOT NULL COMMENT 'break of user info benefits',
+  PRIMARY KEY (`id`)
+) ENGINE = InnoDB DEFAULT CHARSET = utf8mb4;
 
