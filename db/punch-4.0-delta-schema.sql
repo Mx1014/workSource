@@ -1,4 +1,4 @@
-DROP TABLE eh_punch_vacation_balances;
+
 CREATE TABLE `eh_punch_vacation_balances` (
   `id` BIGINT NOT NULL,
   `owner_id` BIGINT COMMENT 'organization_id',
