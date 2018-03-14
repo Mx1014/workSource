@@ -22,6 +22,7 @@ import com.everhomes.rest.user.NamespaceUserType;
 import com.everhomes.scheduler.ScheduleProvider;
 import com.everhomes.user.User;
 import com.everhomes.user.UserIdentifier;
+import com.everhomes.user.UserPrivilegeMgr;
 import com.everhomes.user.UserProvider;
 import com.everhomes.util.*;
 import jdk.nashorn.internal.runtime.regexp.joni.Regex;
@@ -89,7 +90,8 @@ public class QuestionnaireServiceImpl implements QuestionnaireService {
 	
 	@Autowired
 	private ConfigurationProvider configurationProvider;
-	
+	@Autowired
+	private UserPrivilegeMgr userPrivilegeMgr;
 	@Autowired
 	private OrganizationProvider organizationProvider;
 
@@ -123,6 +125,15 @@ public class QuestionnaireServiceImpl implements QuestionnaireService {
 	@Override
 	public ListQuestionnairesResponse listQuestionnaires(ListQuestionnairesCommand cmd) {
 //		checkOwner(cmd.getNamespaceId(), cmd.getOwnerType(), cmd.getOwnerId());
+		if(QuestionnaireStatus.fromCode(cmd.getStatus())==QuestionnaireStatus.ACTIVE){
+			if(cmd.getCurrentPMId()!=null && configurationProvider.getBooleanValue("privilege.community.checkflag", true)){
+				userPrivilegeMgr.checkUserPrivilege(UserContext.current().getUser().getId(), cmd.getCurrentPMId(), 4170041710L, cmd.getAppId(), null,0L);//已发布权限
+			}
+		}else if(QuestionnaireStatus.fromCode(cmd.getStatus())==QuestionnaireStatus.DRAFT){
+			if(cmd.getCurrentPMId()!=null && configurationProvider.getBooleanValue("privilege.community.checkflag", true)){
+				userPrivilegeMgr.checkUserPrivilege(UserContext.current().getUser().getId(), cmd.getCurrentPMId(), 4170041720L, cmd.getAppId(), null,0L);//草稿箱权限
+			}
+		}
 		checkListQuestionnairesCommand(cmd);
 
 		int pageSize = PaginationConfigHelper.getPageSize(configurationProvider, cmd.getPageSize());
@@ -279,6 +290,9 @@ public class QuestionnaireServiceImpl implements QuestionnaireService {
 
 	@Override
 	public CreateQuestionnaireResponse createQuestionnaire(CreateQuestionnaireCommand cmd) {
+		if(cmd.getCurrentPMId()!=null && configurationProvider.getBooleanValue("privilege.community.checkflag", true)){
+			userPrivilegeMgr.checkUserPrivilege(UserContext.current().getUser().getId(), cmd.getCurrentPMId(), 4170041710L, cmd.getAppId(), null,0L);//已发布权限
+		}
 		QuestionnaireDTO questionnaireDTO = cmd.getQuestionnaire();
 		checkQuestionnaireParameters(questionnaireDTO);
 		QuestionnaireDTO result = (QuestionnaireDTO)dbProvider.execute(s->{
