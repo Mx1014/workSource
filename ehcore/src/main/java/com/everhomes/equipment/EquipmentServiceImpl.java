@@ -5137,6 +5137,7 @@ private void checkUserPrivilege(Long orgId, Long privilegeId, Long communityId) 
 				reviewDate.setStatus(PmNotifyConfigurationStatus.VAILD.getCode());
 				equipmentProvider.createReviewExpireDays(reviewDate);
 			} else {
+				reviewDate.setId(cmd.getId());
 				reviewDate.setStatus(PmNotifyConfigurationStatus.VAILD.getCode());
 				equipmentProvider.updateReviewExpireDays(reviewDate);
 			}
