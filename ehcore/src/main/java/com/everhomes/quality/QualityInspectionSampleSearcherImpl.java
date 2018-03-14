@@ -124,12 +124,12 @@ public class QualityInspectionSampleSearcherImpl extends AbstractElasticSearch i
             if (creator != null && creator.size() > 0) {
                 String userName = creator.get(0).getContactName();
                 if (userName != null && !userName.equals("")) {
-                    dto.setCreatorName(creator.get(0).getContactName());
-                } else {
-                    User user = userProvider.findUserById(sample.getCreatorUid());
-                    if (user != null) {
-                        dto.setCreatorName(user.getNickName());
-                    }
+                    dto.setCreatorName(userName);
+                }
+            } else {
+                User user = userProvider.findUserById(sample.getCreatorUid());
+                if (user != null) {
+                    dto.setCreatorName(user.getNickName());
                 }
             }
 
