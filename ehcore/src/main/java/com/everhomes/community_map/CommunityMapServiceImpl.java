@@ -52,6 +52,8 @@ public class CommunityMapServiceImpl implements CommunityMapService {
     private CommunityProvider communityProvider;
     @Autowired
     private ConfigurationProvider configurationProvider;
+	@Autowired
+	private UserPrivilegeMgr userPrivilegeMgr;
     @Autowired
     private CommunityService communityService;
     @Autowired
@@ -453,6 +455,9 @@ public class CommunityMapServiceImpl implements CommunityMapService {
 
     @Override
     public CommunityMapShopDetailDTO updateCommunityMapShop(UpdateCommunityMapShopCommand cmd) {
+    	if(cmd.getCurrentPMId()!=null && configurationProvider.getBooleanValue("privilege.community.checkflag", true)){
+			userPrivilegeMgr.checkUserPrivilege(UserContext.current().getUser().getId(), cmd.getCurrentPMId(), 4007040071L, cmd.getAppId(), null,cmd.getCurrentProjectId());//商户管理权限
+		}
         CommunityMapShopDetail shop = communityMapProvider.getCommunityMapShopDetailById(cmd.getShopId());
         if (null == shop) {
             LOGGER.error("Shop not found, cmd={}", cmd);
@@ -466,6 +471,9 @@ public class CommunityMapServiceImpl implements CommunityMapService {
 
     @Override
     public CommunityMapShopDetailDTO createCommunityMapShop(CreateCommunityMapShopCommand cmd) {
+    	if(cmd.getCurrentPMId()!=null && configurationProvider.getBooleanValue("privilege.community.checkflag", true)){
+			userPrivilegeMgr.checkUserPrivilege(UserContext.current().getUser().getId(), cmd.getCurrentPMId(), 4007040071L, cmd.getAppId(), null,cmd.getCurrentProjectId());//商户管理权限
+		}
         CommunityMapShopDetail shop = ConvertHelper.convert(cmd, CommunityMapShopDetail.class);
         shop.setNamespaceId(UserContext.getCurrentNamespaceId());
         communityMapProvider.createCommunityMapShop(shop);
@@ -508,6 +516,9 @@ public class CommunityMapServiceImpl implements CommunityMapService {
 
     @Override
     public SearchCommunityMapShopsResponse searchCommunityMapShops(SearchCommunityMapShopsCommand cmd) {
+    	if(cmd.getCurrentPMId()!=null && configurationProvider.getBooleanValue("privilege.community.checkflag", true)){
+			userPrivilegeMgr.checkUserPrivilege(UserContext.current().getUser().getId(), cmd.getCurrentPMId(), 4007040071L, cmd.getAppId(), null,cmd.getCurrentProjectId());//商户管理权限
+		}
         SearchCommunityMapShopsResponse response = new SearchCommunityMapShopsResponse();
         Integer pageSize = PaginationConfigHelper.getPageSize(configurationProvider, cmd.getPageSize());
 
