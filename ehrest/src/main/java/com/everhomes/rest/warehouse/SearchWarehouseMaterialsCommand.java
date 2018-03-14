@@ -32,6 +32,16 @@ public class SearchWarehouseMaterialsCommand {
 
     private Long communityId;
 
+    private Long namespaceId;
+
+    public Long getNamespaceId() {
+        return namespaceId;
+    }
+
+    public void setNamespaceId(Long namespaceId) {
+        this.namespaceId = namespaceId;
+    }
+
     public Long getCommunityId() {
         return communityId;
     }

@@ -11,7 +11,9 @@ public interface PortalService {
 	//todo
 	ListServiceModuleAppsResponse listServiceModuleApps(ListServiceModuleAppsCommand cmd);
 
-	ListServiceModuleAppsResponse listServiceModuleAppsWithConditon(ListServiceModuleAppsCommand cmd);
+    PortalVersion findReleaseVersion(Integer namespaceId);
+
+    ListServiceModuleAppsResponse listServiceModuleAppsWithConditon(ListServiceModuleAppsCommand cmd);
 
 	ServiceModuleAppDTO createServiceModuleApp(CreateServiceModuleAppCommand cmd);
 
@@ -122,4 +124,14 @@ public interface PortalService {
 	PortalItemDTO getAllOrMoreItem(GetItemAllOrMoreCommand cmd);
 
 	void syncLaunchPadData(SyncLaunchPadDataCommand cmd);
+
+    PortalVersionDTO findPortalVersionById(Long versionId);
+
+    ListPortalVersionResponse listPortalVersions(ListPortalVersionCommand cmd);
+
+	void updatePortalVersionUsers(UpdatePortalVersionUsersCommand cmd);
+
+	ListPortalVersionUsersResponse listPortalVersionUsers(ListPortalVersionUsersCommand cmd);
+
+    void revertVersion(RevertVersionCommand cmd);
 }

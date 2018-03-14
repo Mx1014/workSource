@@ -17,8 +17,8 @@ import com.everhomes.namespace.Namespace;
 import com.everhomes.organization.*;
 import com.everhomes.payment.util.DownloadUtil;
 import com.everhomes.portal.AuthorizationsAppControl;
-import com.everhomes.portal.ServiceModuleApp;
-import com.everhomes.portal.ServiceModuleAppProvider;
+import com.everhomes.serviceModuleApp.ServiceModuleApp;
+import com.everhomes.serviceModuleApp.ServiceModuleAppProvider;
 import com.everhomes.rest.acl.*;
 import com.everhomes.rest.acl.admin.*;
 import com.everhomes.rest.address.CommunityDTO;
@@ -27,6 +27,7 @@ import com.everhomes.rest.approval.TrueOrFalseFlag;
 import com.everhomes.rest.common.ActivationFlag;
 import com.everhomes.rest.common.AllFlagType;
 import com.everhomes.rest.common.IncludeChildFlagType;
+import com.everhomes.rest.community.CommunityFetchType;
 import com.everhomes.rest.community.ListChildProjectCommand;
 import com.everhomes.rest.community.ResourceCategoryType;
 import com.everhomes.rest.messaging.*;
@@ -41,6 +42,7 @@ import com.everhomes.rest.user.admin.ImportDataResponse;
 import com.everhomes.search.OrganizationSearcher;
 import com.everhomes.sequence.SequenceProvider;
 import com.everhomes.server.schema.Tables;
+import com.everhomes.serviceModuleApp.ServiceModuleAppService;
 import com.everhomes.settings.PaginationConfigHelper;
 import com.everhomes.user.User;
 import com.everhomes.user.UserContext;
@@ -50,7 +52,6 @@ import com.everhomes.user.admin.SystemUserPrivilegeMgr;
 import com.everhomes.util.*;
 import com.everhomes.util.excel.RowResult;
 import com.everhomes.util.excel.handler.PropMrgOwnerHandler;
-import com.itextpdf.text.PageSize;
 import org.apache.poi.xssf.usermodel.XSSFWorkbook;
 import org.jooq.Condition;
 import org.jooq.Record;
@@ -137,6 +138,9 @@ public class RolePrivilegeServiceImpl implements RolePrivilegeService {
 
 	@Autowired
 	private CoordinationProvider coordinationProvider;
+
+	@Autowired
+	private ServiceModuleAppService serviceModuleAppService;
 
 	@Override
 	public ListWebMenuResponse listWebMenu(ListWebMenuCommand cmd) {
@@ -2375,77 +2379,96 @@ public class RolePrivilegeServiceImpl implements RolePrivilegeService {
 
 	@Override
 	public List<ProjectDTO> getTreeProjectCategories(Integer namespaceId, List<ProjectDTO> projects){
-		Long startTime = System.currentTimeMillis();
-		List<ProjectDTO> entityts = new ArrayList<>();
+		return handleTreeProject(projects);
+	}
+
+	@Override
+	public List<ProjectDTO> getTreeProjectCategories(Integer namespaceId, List<ProjectDTO> projects, CommunityFetchType fetchType){
+
+		// return communities
+		if(fetchType.equals(CommunityFetchType.ONLY_COMMUNITY)){
+			return projects;
+		}
+
+		List<ProjectDTO> projectTrees = handleTreeProject(projects);
+
+		if (fetchType.equals(CommunityFetchType.CATEGORY_COMMUNITY)){		// return resouceCategory and communities
+			projectTrees.forEach(r->{
+				fliterProjectTrees(r, EntityType.CHILD_PROJECT.getCode());
+			});
+		}else if(fetchType.equals(CommunityFetchType.CATEGORY_COMMUNITY_CHILDPROJECT)){   // return resouceCategory and communities and childProject
+			projectTrees.forEach(r->{
+				fliterProjectTrees(r, EntityType.BUILDING.getCode());
+			});
+		}else if(fetchType.equals(CommunityFetchType.ALL)){  // return all
+
+		}
+		return projectTrees;
+	}
+
+	private List<ProjectDTO> handleTreeProject(List<ProjectDTO> projects) {
+		List<ProjectDTO> projectTrees = new ArrayList<>();
 		List<Long> categoryIds = new ArrayList<>();
 		List<Long> projectIds = new ArrayList<>();
 
 		if(0 != projects.size()){
+			//如果存在项目分类，获得项目分类
 			for (ProjectDTO project: projects) {
-				// 获得关联了project(域空间下所有项目)的assignment
-				ResourceCategoryAssignment categoryAssignment = communityProvider.findResourceCategoryAssignment(project.getProjectId(), project.getProjectType(),namespaceId);
-
-				if(null != categoryAssignment){
-					ResourceCategory category = communityProvider.findResourceCategoryById(categoryAssignment.getResourceCategryId());
-					if(null != category && !StringUtils.isEmpty(category.getPath())){
-						String[] idStrs = category.getPath().split("/");
-						for (String idStr:idStrs) {
-							if(!StringUtils.isEmpty(idStr) && !categoryIds.contains(Long.valueOf(idStr)))
-								// 获得所有有关联的分类categoryIds
-								categoryIds.add(Long.valueOf(idStr));
-						}
-					}
-				}else{
-					entityts.add(project);
-				}
-
-				//project(域空间下所有项目)的ids
+				// 顺便拿project(域空间下所有项目)的ids
 				projectIds.add(project.getProjectId());
+				// try get categories
+				ResourceCategoryAssignment categoryAssignment = communityProvider.findResourceCategoryAssignment(project.getProjectId(), project.getProjectType(), UserContext.getCurrentNamespaceId());
+				if(categoryAssignment != null)
+					categoryIds.add(categoryAssignment.getResourceCategryId());
 			}
-		}
-		List<ProjectDTO> projectTrees = new ArrayList<>();
-		// 存在项目分类时的解析
-		if(0 != categoryIds.size()){
-			//把分类下的每一个项目树形化，并加入到resource
-			List<ProjectDTO> temp = communityProvider.listResourceCategory(null, null, categoryIds, ResourceCategoryType.CATEGORY.getCode())
-					.stream().map(r -> {
-						ProjectDTO dto = ConvertHelper.convert(r, ProjectDTO.class);
-						dto.setProjectType(EntityType.RESOURCE_CATEGORY.getCode());
-						dto.setProjectName(r.getName());
-						dto.setProjectId(r.getId());
-						return dto;
-					}).collect(Collectors.toList());
 
-			for(ProjectDTO project: temp) {
-				// 树形结构化
-				getChildCategories(temp, project);
-				if(project.getParentId() == 0L) {
-					projectTrees.add(project);
-				}
+			// 存在项目分类时
+			if(categoryIds.size() > 0) {
+				//把分类下的每一个项目树形化，并加入到resource
+				List<ProjectDTO> temp = communityProvider.listResourceCategory(null, null, categoryIds, ResourceCategoryType.CATEGORY.getCode())
+						.stream().map(r -> {
+							ProjectDTO dto = ConvertHelper.convert(r, ProjectDTO.class);
+							dto.setProjectType(EntityType.RESOURCE_CATEGORY.getCode());
+							dto.setProjectName(r.getName());
+							dto.setProjectId(r.getId());
+							return dto;
+						}).collect(Collectors.toList());
+
+				// 以项目分类为第一层进行递归
+				projectTrees.addAll(temp);
+				setResourceDTOs(projectTrees, projectIds, UserContext.getCurrentNamespaceId());
+			}else {
+				// 如果不存在项目分类，以项目为第一层进行递归
+				projects.stream().filter(r -> EntityType.COMMUNITY == EntityType.fromCode(r.getProjectType())).map(r -> {
+					ListChildProjectCommand cmd = new ListChildProjectCommand();
+					cmd.setProjectType(EntityType.COMMUNITY.getCode());
+					cmd.setProjectId(r.getProjectId());
+					List<ProjectDTO> childDto = this.communityService.listChildProjects(cmd);
+					if (childDto != null && childDto.size() > 0)
+						r.setProjects(childDto);
+					return r;
+				}).collect(Collectors.toList());
+
+				projectTrees.addAll(projects);
 			}
-			setResourceDTOs(projectTrees, projectIds, namespaceId);
-		}
-
-		// 不存在项目分类时的解析
-		//添加子项目
-		entityts.stream().filter(r -> EntityType.COMMUNITY == EntityType.fromCode(r.getProjectType())).map(r -> {
-			//获取园区下的子项目
-			ListChildProjectCommand cmd = new ListChildProjectCommand();
-			cmd.setProjectType(EntityType.COMMUNITY.getCode());
-			cmd.setProjectId(r.getProjectId());
-			List<ProjectDTO> childDto = this.communityService.listChildProjects(cmd);
-			if (childDto != null && childDto.size() > 0)
-				r.setProjects(childDto);
-			return r;
-		}).collect(Collectors.toList());
-		projectTrees.addAll(entityts);
-
-		Long endTime = System.currentTimeMillis();
-		if(LOGGER.isInfoEnabled()){
-			LOGGER.debug("Track: getProjectCategoryTree: get project category tree:{}", endTime - startTime);
 		}
 
 		return projectTrees;
+	}
+
+	private void fliterProjectTrees(ProjectDTO dto, String type){
+		if(dto.getProjects() != null){
+			for (ProjectDTO r : dto.getProjects()) {
+				if (r.getProjectType().equals(type)) {
+					dto.setProjects(null);
+					break;
+				}else{
+					for (ProjectDTO d : dto.getProjects()) {
+						fliterProjectTrees(d, type);
+					}
+				}
+			}
+		}
 	}
 
 	private ProjectDTO getChildCategories(List<ProjectDTO> list, ProjectDTO dto){
@@ -2771,6 +2794,8 @@ public class RolePrivilegeServiceImpl implements RolePrivilegeService {
 		CrossShardListingLocator locator = new CrossShardListingLocator();
 		if(cmd.getPageAnchor() != null){
 			locator.setAnchor(cmd.getPageAnchor());
+		}else{
+			locator.setAnchor(99999L);
 		}
 		Integer pageSize = 20;//默认20条
 		if(cmd.getPageSize() != null){
@@ -3480,7 +3505,8 @@ public class RolePrivilegeServiceImpl implements RolePrivilegeService {
 				return authorizationsAppControl;
 			}
 
-			ServiceModuleApp serviceModuleApp = serviceModuleProvider.findReflectionServiceModuleAppByActiveAppId(authorization.getModuleAppId());
+//			ServiceModuleApp serviceModuleApp = serviceModuleProvider.findReflectionServiceModuleAppByActiveAppId(authorization.getModuleAppId());
+			ServiceModuleApp serviceModuleApp  = serviceModuleAppService.findReleaseServiceModuleAppByOriginId(authorization.getModuleAppId());
 			if(null != serviceModuleApp){
 				serviceModuleApps.add(serviceModuleApp);
 			}

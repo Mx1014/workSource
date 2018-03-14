@@ -85,11 +85,12 @@ public class QualityInspectionSampleSearcherImpl extends AbstractElasticSearch i
 
     @Override
     public ListSampleQualityInspectionResponse query(SearchSampleQualityInspectionCommand cmd) {
+        LOGGER.debug("SearchSampleQualityInspectionCommand time :{}"+System.currentTimeMillis());
         SearchResponse rsp = search(cmd);
         List<Long> ids = getIds(rsp);
 
         int pageSize = PaginationConfigHelper.getPageSize(configProvider, cmd.getPageSize());
-        Long anchor = 0l;
+        Long anchor = 0L;
         if(cmd.getPageAnchor() != null) {
             anchor = cmd.getPageAnchor();
         }
@@ -138,14 +139,17 @@ public class QualityInspectionSampleSearcherImpl extends AbstractElasticSearch i
         List<SampleTaskScoreDTO> dtos = new ArrayList<>();
         //可能是这里导致Alpha环境空指针
         if (ids.size() > 0) {
-            for(Long id : ids) {
+            for (Long id : ids) {
                 QualityInspectionSamples sample = qualityProvider.findQualityInspectionSample(id, cmd.getOwnerType(), cmd.getOwnerId());
-                SampleTaskScoreDTO dto = ConvertHelper.convert(sample, SampleTaskScoreDTO.class);
-                List<OrganizationMember> members = organizationProvider.listOrganizationMembersByUId(dto.getCreatorUid());
-                if(members != null && members.size() > 0) {
-                    dto.setCreatorName(members.get(0).getContactName());
+                if (sample != null) {
+                    SampleTaskScoreDTO dto = ConvertHelper.convert(sample, SampleTaskScoreDTO.class);
+                    List<OrganizationMember> members = organizationProvider.listOrganizationMembersByUId(dto.getCreatorUid());
+                    if (members != null && members.size() > 0) {
+                        dto.setCreatorName(members.get(0).getContactName());
+                    }
+                    dtos.add(dto);
                 }
-                dtos.add(dto);
+
             }
         }
         response.setSampleTasks(dtos);

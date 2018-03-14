@@ -30,9 +30,15 @@ import com.everhomes.util.StringHelper;
  * <li>offlineCashierAddress: 线下支付收银地址</li>
  * <li>offlinePayeeUid: 线下支付收款人id</li>
  * <li>aclinkId: 门禁组id</li>
+ * <li>multiUnit: 是否允许预约多个场所</li>
+ * <li>	autoAssign：       	是否动态分配 1是 0否	</li>
+ * <li>	siteCounts：资源数量</li>
+ * <li>	siteNumbers：资源编号列表 {String}</li>
  * </ul>
  */
-public class AddResourceAdminCommand { 
+public class AddResourceAdminCommand {
+
+	private String resourceType;
 	@NotNull
 	private Long resourceTypeId;
 	@NotNull
@@ -64,11 +70,24 @@ public class AddResourceAdminCommand {
 	private String confirmationPrompt;
     private String offlineCashierAddress;
     private String offlinePayeeUid;
-    private Long aclinkId;
+    private String aclinkId;
+	private Byte multiUnit;
+	private java.lang.Byte       autoAssign;
+	private Double siteCounts;
+	@ItemType(SiteNumberDTO.class)
+	private List<SiteNumberDTO> siteNumbers;
 	@Override
     public String toString() {
         return StringHelper.toJsonString(this);
     }
+
+	public String getResourceType() {
+		return resourceType;
+	}
+
+	public void setResourceType(String resourceType) {
+		this.resourceType = resourceType;
+	}
 
 	public Long getResourceTypeId() {
 		return resourceTypeId;
@@ -222,11 +241,43 @@ public class AddResourceAdminCommand {
 		this.offlinePayeeUid = offlinePayeeUid;
 	}
 
-	public Long getAclinkId() {
+	public String getAclinkId() {
 		return aclinkId;
 	}
 
-	public void setAclinkId(Long aclinkId) {
+	public void setAclinkId(String aclinkId) {
 		this.aclinkId = aclinkId;
+	}
+
+	public Byte getMultiUnit() {
+		return multiUnit;
+	}
+
+	public void setMultiUnit(Byte multiUnit) {
+		this.multiUnit = multiUnit;
+	}
+
+	public Byte getAutoAssign() {
+		return autoAssign;
+	}
+
+	public void setAutoAssign(Byte autoAssign) {
+		this.autoAssign = autoAssign;
+	}
+
+	public Double getSiteCounts() {
+		return siteCounts;
+	}
+
+	public void setSiteCounts(Double siteCounts) {
+		this.siteCounts = siteCounts;
+	}
+
+	public List<SiteNumberDTO> getSiteNumbers() {
+		return siteNumbers;
+	}
+
+	public void setSiteNumbers(List<SiteNumberDTO> siteNumbers) {
+		this.siteNumbers = siteNumbers;
 	}
 }

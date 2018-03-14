@@ -86,6 +86,7 @@ public enum CoordinationLocks {
 
     USER_APPEAL_LOG("user.appeal.log"),
 	SALARY_GROUP_LOCK("salary.group"), 
+	SALARY_NEWMONTH_LOCK("salary.newmonth"), 
     UNION_GROUP_LOCK("union.group"),
     UNION_GROUP_CLONE_LOCK("union_group_clone"),
 
@@ -114,7 +115,12 @@ public enum CoordinationLocks {
 
     SYNC_CONTRACT("sync.contract"),
     FORUM_SETTING("forum.setting"),
-    AUTH_RELATION("auth_relation")
+    AUTH_RELATION("auth_relation"),
+
+    SOCIAL_SECURITY_LIST_PAYMENTS("social_security_list_payments"),
+    SOCIAL_SECURITY_INCRESE("social_security_increse"),
+    SOCIAL_SECURITY_ADD("social_security_add")
+
     ;
 
     private String code;

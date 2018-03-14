@@ -6,11 +6,12 @@ import com.everhomes.util.StringHelper;
 
 /**
  * <ul>
- * <li>menuId：菜单id，只查询menuId下面的子菜单，不填写，默认全部</li>
- * <li>levelStart：第几级开始，左邻运营后台一般都是从1级开始，物业公司管理后台从2级开始，不填写，默认从1级开始</li>
+ *     <li>menuId: 菜单id，只查询menuId下面的子菜单，不填写，默认全部</li>
+ *     <li>userId: userId</li>
+ *     <li>currentOrgId: currentOrgId</li>
  * </ul>
  */
-public class ListUserRelatedWebMenusCommand extends PortalCommand{
+public class ListUserRelatedWebMenusCommand extends PortalCommand {
 
 	private Long menuId;
 
@@ -53,7 +54,7 @@ public class ListUserRelatedWebMenusCommand extends PortalCommand{
 	}
 
 	@Override
-    public String toString() {
-        return StringHelper.toJsonString(this);
-    }
+	public String toString() {
+		return StringHelper.toJsonString(this);
+	}
 }

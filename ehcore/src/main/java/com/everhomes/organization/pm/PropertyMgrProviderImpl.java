@@ -1692,7 +1692,7 @@ public class PropertyMgrProviderImpl implements PropertyMgrProvider {
         return context.select().from(Tables.EH_ORGANIZATION_OWNER_CARS)
                 .where(Tables.EH_ORGANIZATION_OWNER_CARS.NAMESPACE_ID.eq(namespaceId))
                 .and(Tables.EH_ORGANIZATION_OWNER_CARS.ID.eq(id))
-                .fetchOneInto(OrganizationOwnerCar.class);
+                .fetchAnyInto(OrganizationOwnerCar.class);
     }
 
     @Override
@@ -1844,7 +1844,7 @@ public class PropertyMgrProviderImpl implements PropertyMgrProvider {
                 .where(Tables.EH_ORGANIZATION_OWNER_OWNER_CAR.NAMESPACE_ID.eq(namespaceId))
                 .and(Tables.EH_ORGANIZATION_OWNER_OWNER_CAR.CAR_ID.eq(carId))
                 .and(Tables.EH_ORGANIZATION_OWNER_OWNER_CAR.ORGANIZATION_OWNER_ID.eq(ownerId))
-                .fetchOneInto(OrganizationOwnerOwnerCar.class);
+                .fetchAnyInto(OrganizationOwnerOwnerCar.class);
     }
 
     @Override
@@ -1871,7 +1871,7 @@ public class PropertyMgrProviderImpl implements PropertyMgrProvider {
                 .where(Tables.EH_ORGANIZATION_OWNER_OWNER_CAR.NAMESPACE_ID.eq(namespaceId))
                 .and(Tables.EH_ORGANIZATION_OWNER_OWNER_CAR.CAR_ID.eq(carId))
                 .and(Tables.EH_ORGANIZATION_OWNER_OWNER_CAR.PRIMARY_FLAG.eq(OrganizationOwnerOwnerCarPrimaryFlag.PRIMARY.getCode()))
-                .fetchOneInto(OrganizationOwnerOwnerCar.class);
+                .fetchAnyInto(OrganizationOwnerOwnerCar.class);
     }
 
     @Override
@@ -1960,7 +1960,7 @@ public class PropertyMgrProviderImpl implements PropertyMgrProvider {
                 .when(age.between(71, 80), "71-80")
                 .when(age.between(81, 90), "81-90")
                 .when(age.between(91, 100), "91-100")
-                .otherwise("101+").as("ageGroups");
+                .otherwise("未知").as("ageGroups");
 
         if (livingStatus != null) {
             subQuery.addConditions(Tables.EH_ORGANIZATION_OWNER_ADDRESS.LIVING_STATUS.eq(livingStatus));

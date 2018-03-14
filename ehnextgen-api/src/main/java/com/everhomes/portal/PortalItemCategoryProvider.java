@@ -7,11 +7,17 @@ public interface PortalItemCategoryProvider {
 
 	void createPortalItemCategory(PortalItemCategory portalItemCategory);
 
-	void updatePortalItemCategory(PortalItemCategory portalItemCategory);
+    void createPortalItemCategories(List<PortalItemCategory> portalItemCategories);
 
-	PortalItemCategory findPortalItemCategoryById(Long id);
+    void updatePortalItemCategory(PortalItemCategory portalItemCategory);
+
+    void deleteByVersionId(Long versionId);
+
+    PortalItemCategory findPortalItemCategoryById(Long id);
 
 	List<PortalItemCategory> listPortalItemCategory(Integer namespaceId, Long itemGroupId);
 
 	PortalItemCategory getPortalItemCategoryByName(Integer namespaceId, Long itemGroupId, String name);
+
+    List<PortalItemCategory> listPortalItemCategoryByVersion(Integer namespaceId, Long versionId);
 }

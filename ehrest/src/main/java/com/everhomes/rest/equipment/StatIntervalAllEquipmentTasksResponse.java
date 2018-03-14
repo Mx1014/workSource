@@ -7,12 +7,10 @@ import com.everhomes.util.StringHelper;
  *     <li>totalTasks: 任务总数</li>
  *     <li>waitingForExecuting: 待执行任务</li>
  *     <li>inMaintance: 整改中任务</li>
- *     <li>complete: 已执行完成任务</li>
  *     <li>completeInspection: 巡检完成</li>
  *     <li>completeMaintance: 整改完成任务</li>
- *     <li>delay: 已延误任务</li>
  *     <li>delayInspection: 巡检延误任务</li>
- *     <li>delayMaintance: 整改延误任务</li>
+ *     <li>delayInspectionRate: 巡检延误任务率</li>
  *     <li>reviewTasks: 审核任务总数</li>
  *     <li>unReviewedTasks: 待审核任务</li>
  *     <li>reviewedTasks: 已审核任务</li>
@@ -20,11 +18,9 @@ import com.everhomes.util.StringHelper;
  *     <li>reviewQualified: 审核通过任务</li>
  *     <li>reviewUnqualified: 审核不通过任务</li>
  *     <li>maintanceRate: 整改率</li>
- *     <li>delayRate: 延误率</li>
  *     <li>reviewQualifiedRate: 审核通过率</li>
  *     <li>reviewDalayRate: 审核延误率</li>
- *     <li>needMaintanceReviewDelay: 整改审核延误</li>
- *     <li>completeReviewDelay: 巡检核查延误</li>
+ *     <li>completeReviewDelay: 巡检审批延误数目</li>
  * </ul>
  * Created by ying.xiong on 2017/4/19.
  */
@@ -36,17 +32,11 @@ public class StatIntervalAllEquipmentTasksResponse {
 
     private Long inMaintance;
 
-    private Long complete;
-
     private Long completeInspection;
 
     private Long completeMaintance;
 
-    private Long delay;
-
     private Long delayInspection;
-
-    private Long delayMaintance;
 
     private Long reviewTasks;
 
@@ -62,14 +52,13 @@ public class StatIntervalAllEquipmentTasksResponse {
 
     private Double maintanceRate;
 
-    private Double delayRate;
-
     private Double reviewQualifiedRate;
 
     private Double reviewDalayRate;
 
-    private Long needMaintanceReviewDelay;
     private Long completeReviewDelay;
+
+    private Double delayInspectionRate;
 
     public Long getCompleteReviewDelay() {
         return completeReviewDelay;
@@ -77,22 +66,6 @@ public class StatIntervalAllEquipmentTasksResponse {
 
     public void setCompleteReviewDelay(Long completeReviewDelay) {
         this.completeReviewDelay = completeReviewDelay;
-    }
-
-    public Long getNeedMaintanceReviewDelay() {
-        return needMaintanceReviewDelay;
-    }
-
-    public void setNeedMaintanceReviewDelay(Long needMaintanceReviewDelay) {
-        this.needMaintanceReviewDelay = needMaintanceReviewDelay;
-    }
-
-    public Double getDelayRate() {
-        return delayRate;
-    }
-
-    public void setDelayRate(Double delayRate) {
-        this.delayRate = delayRate;
     }
 
     public Double getMaintanceRate() {
@@ -117,22 +90,6 @@ public class StatIntervalAllEquipmentTasksResponse {
 
     public void setReviewQualifiedRate(Double reviewQualifiedRate) {
         this.reviewQualifiedRate = reviewQualifiedRate;
-    }
-
-    public Long getComplete() {
-        return complete;
-    }
-
-    public void setComplete(Long complete) {
-        this.complete = complete;
-    }
-
-    public Long getDelay() {
-        return delay;
-    }
-
-    public void setDelay(Long delay) {
-        this.delay = delay;
     }
 
     public Long getInMaintance() {
@@ -231,12 +188,13 @@ public class StatIntervalAllEquipmentTasksResponse {
         this.delayInspection = delayInspection;
     }
 
-    public Long getDelayMaintance() {
-        return delayMaintance;
+
+    public Double getDelayInspectionRate() {
+        return delayInspectionRate;
     }
 
-    public void setDelayMaintance(Long delayMaintance) {
-        this.delayMaintance = delayMaintance;
+    public void setDelayInspectionRate(Double delayInspectionRate) {
+        this.delayInspectionRate = delayInspectionRate;
     }
 
     @Override

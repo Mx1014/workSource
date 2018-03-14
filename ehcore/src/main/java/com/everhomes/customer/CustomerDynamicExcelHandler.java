@@ -3,17 +3,23 @@ package com.everhomes.customer;
 import com.everhomes.address.Address;
 import com.everhomes.address.AddressProvider;
 import com.everhomes.dynamicExcel.*;
+import com.everhomes.listing.CrossShardListingLocator;
 import com.everhomes.rest.customer.*;
 import com.everhomes.rest.dynamicExcel.DynamicImportResponse;
 import com.everhomes.rest.field.ExportFieldsExcelCommand;
+import com.everhomes.rest.organization.OrganizationDTO;
 import com.everhomes.rest.varField.FieldDTO;
 import com.everhomes.rest.varField.FieldGroupDTO;
 import com.everhomes.rest.varField.ImportFieldExcelCommand;
 import com.everhomes.rest.varField.ListFieldCommand;
+import com.everhomes.user.User;
+import com.everhomes.user.UserContext;
+import com.everhomes.user.UserProvider;
 import com.everhomes.util.ConvertHelper;
 import com.everhomes.util.StringHelper;
 import com.everhomes.varField.*;
 import org.apache.commons.lang.StringUtils;
+import org.apache.lucene.spatial.geohash.GeoHashUtils;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
@@ -46,10 +52,16 @@ public class CustomerDynamicExcelHandler implements DynamicExcelHandler {
     private CustomerService customerService;
 
     @Autowired
+    private EnterpriseCustomerSearcherImpl customerSearcher;
+
+    @Autowired
     private EnterpriseCustomerProvider customerProvider;
 
     @Autowired
     private AddressProvider addressProvider;
+
+    @Autowired
+    private UserProvider userProvider;
 
     @Override
     public List<DynamicSheet> getDynamicSheet(String sheetName, Object params, List<String> headers, boolean isImport) {
@@ -89,6 +101,9 @@ public class CustomerDynamicExcelHandler implements DynamicExcelHandler {
                 } else {
                     DynamicField df = ConvertHelper.convert(fieldDTO, DynamicField.class);
                     df.setDisplayName(fieldDTO.getFieldDisplayName());
+                    if("trackingTime".equals(fieldDTO.getFieldName()) || "notifyTime".equals(fieldDTO.getFieldName())) {
+                        df.setDateFormat("yyyy-MM-dd HH:mm");
+                    }
                     //boolean isMandatory 数据库是0和1 默认false
                     if(fieldDTO.getMandatoryFlag() == 1) {
                         df.setMandatory(true);
@@ -119,12 +134,77 @@ public class CustomerDynamicExcelHandler implements DynamicExcelHandler {
         Integer namespaceId = customerInfo.getNamespaceId();
         Long communityId = customerInfo.getCommunityId();
         String moduleName = customerInfo.getModuleName();
+        Long uid = UserContext.currentUserId();
         if(rowDatas != null && rowDatas.size() > 0) {
             CustomerDynamicSheetClass sheet = CustomerDynamicSheetClass.fromStatus(ds.getClassName());
+            if(sheet == null) {
+                return;
+            }
             int failedNumber = 0;
             for(DynamicRowDTO rowData : rowDatas) {
                 List<DynamicColumnDTO> columns = rowData.getColumns();
                 switch (sheet) {
+                    case CUSTOMER:
+                        EnterpriseCustomer enterpriseCustomer = new EnterpriseCustomer();
+                        enterpriseCustomer.setNamespaceId(namespaceId);
+                        enterpriseCustomer.setCommunityId(communityId);
+                        enterpriseCustomer.setCreatorUid(uid);
+
+                        if(columns != null && columns.size() > 0) {
+                            for(DynamicColumnDTO column : columns) {
+                                LOGGER.warn("CUSTOMER: cellvalue: {}, namespaceId: {}, communityId: {}, moduleName: {}", column.getValue(), namespaceId, communityId, moduleName);
+                                if("categoryItemId".equals(column.getFieldName()) || "levelItemId".equals(column.getFieldName())
+                                        || "sourceItemId".equals(column.getFieldName()) || "contactGenderItemId".equals(column.getFieldName())
+                                        || "corpNatureItemId".equals(column.getFieldName()) || "corpIndustryItemId".equals(column.getFieldName())
+                                        || "corpPurposeItemId".equals(column.getFieldName()) || "corpProductCategoryItemId".equals(column.getFieldName())
+                                        || "corpQualificationItemId".equals(column.getFieldName()) || "propertyType".equals(column.getFieldName())
+                                        || "registrationTypeId".equals(column.getFieldName()) || "technicalFieldId".equals(column.getFieldName())
+                                        || "taxpayerTypeId".equals(column.getFieldName()) || "relationWillingId".equals(column.getFieldName())
+                                        || "highAndNewTechId".equals(column.getFieldName()) || "entrepreneurialCharacteristicsId".equals(column.getFieldName())
+                                        || "serialEntrepreneurId".equals(column.getFieldName())) {
+                                    ScopeFieldItem item = fieldService.findScopeFieldItemByDisplayName(namespaceId, communityId, moduleName, column.getValue());
+                                    if(item != null) {
+                                        column.setValue(item.getItemId().toString());
+                                    }
+                                }
+
+                                if("trackingUid".equals(column.getFieldName())) {
+                                    enterpriseCustomer.setTrackingName(column.getValue());
+                                    List<User> users = userProvider.listUserByKeyword(column.getValue(), namespaceId, new CrossShardListingLocator(), 2);
+                                    if(users != null && users.size() > 0) {
+                                        column.setValue(users.get(0).getId().toString());
+                                    } else {
+                                        column.setValue("-1");
+                                    }
+                                }
+                                try {
+                                    setToObj(column.getFieldName(), enterpriseCustomer, column.getValue());
+                                } catch(Exception e){
+                                    LOGGER.warn("one row invoke set method for EnterpriseCustomer failed");
+                                    failedNumber ++;
+                                }
+
+                                continue;
+                            }
+                        }
+
+                        if(null != enterpriseCustomer.getLongitude() && null != enterpriseCustomer.getLatitude()){
+                            String geohash  = GeoHashUtils.encode(enterpriseCustomer.getLatitude(), enterpriseCustomer.getLongitude());
+                            enterpriseCustomer.setGeohash(geohash);
+                        }
+
+                        customerProvider.createEnterpriseCustomer(enterpriseCustomer);
+
+                        //企业客户新增成功,保存客户事件
+                        customerService.saveCustomerEvent( 1  ,enterpriseCustomer ,null);
+
+                        OrganizationDTO organizationDTO = customerService.createOrganization(enterpriseCustomer);
+                        enterpriseCustomer.setOrganizationId(organizationDTO.getId());
+
+                        customerProvider.updateEnterpriseCustomer(enterpriseCustomer);
+                        customerSearcher.feedDoc(enterpriseCustomer);
+
+                        break;
                     case CUSTOMER_TAX:
                         CustomerTax tax = new CustomerTax();
                         tax.setCustomerId(customerId);
@@ -244,14 +324,18 @@ public class CustomerDynamicExcelHandler implements DynamicExcelHandler {
                         if(columns != null && columns.size() > 0) {
                             for(DynamicColumnDTO column : columns) {
                                 if("projectSource".equals(column.getFieldName())) {
-                                    column.getValue().replace("，", ",");
+                                    if(column.getValue() != null && column.getValue().contains("，")) {
+                                        column.getValue().replace("，", ",");
+                                    }
+
                                     String[] sources = column.getValue().split(",");
                                     String displayName = column.getValue();
                                     if(sources.length > 0) {
+                                        column.setValue("");
                                         for(int i = 0; i < sources.length; i++) {
                                             ScopeFieldItem item = fieldService.findScopeFieldItemByDisplayName(namespaceId, communityId, moduleName, displayName);
                                             if(item != null) {
-                                                if(i == 0) {
+                                                if("".equals(column.getValue())) {
                                                     column.setValue(item.getItemId().toString());
                                                 } else {
                                                     column.setValue(column.getValue() + "," + item.getItemId());
@@ -361,8 +445,7 @@ public class CustomerDynamicExcelHandler implements DynamicExcelHandler {
 
                         if(columns != null && columns.size() > 0) {
                             for(DynamicColumnDTO column : columns) {
-                                if("enterpriseTypeItemId".equals(column.getFieldName()) || "shareTypeItemId".equals(column.getFieldName())
-                                        || "propertyType".equals(column.getFieldName())) {
+                                if("patentStatusItemId".equals(column.getFieldName()) || "patentTypeItemId".equals(column.getFieldName())) {
                                     ScopeFieldItem item = fieldService.findScopeFieldItemByDisplayName(namespaceId, communityId, moduleName, column.getValue());
                                     if(item != null) {
                                         column.setValue(item.getItemId().toString());
@@ -401,6 +484,78 @@ public class CustomerDynamicExcelHandler implements DynamicExcelHandler {
                         }
 
                         customerProvider.createCustomerCertificate(certificate);
+                        break;
+                    case CUSTOMER_TRACKING:
+                        CustomerTracking tracking = new CustomerTracking();
+                        tracking.setCustomerId(customerId);
+                        tracking.setCustomerType(customerType);
+                        tracking.setNamespaceId(namespaceId);
+                        if(columns != null && columns.size() > 0) {
+                            for(DynamicColumnDTO column : columns) {
+                                if("trackingType".equals(column.getFieldName())) {
+                                    ScopeFieldItem item = fieldService.findScopeFieldItemByDisplayName(namespaceId, communityId, moduleName, column.getValue());
+                                    if(item != null) {
+                                        column.setValue(item.getBusinessValue().toString());
+                                    }
+                                }
+                                if("trackingUid".equals(column.getFieldName())) {
+                                    List<User> users = userProvider.listUserByKeyword(column.getValue(), namespaceId, new CrossShardListingLocator(), 2);
+                                    if(users != null && users.size() > 0) {
+                                        column.setValue(users.get(0).getId().toString());
+                                    } else {
+                                        column.setValue("0");
+                                    }
+                                }
+                                try {
+                                    setToObj(column.getFieldName(), tracking, column.getValue());
+                                } catch(Exception e){
+                                    LOGGER.warn("one row invoke set method for CustomerTracking failed");
+                                    failedNumber ++;
+                                }
+
+                                continue;
+                            }
+                        }
+                        customerProvider.createCustomerTracking(tracking);
+                        EnterpriseCustomer customer = customerProvider.findById(customerId);
+                        if(customer != null) {
+                            customer.setLastTrackingTime(tracking.getTrackingTime());
+                            //更细客户表的最后跟进时间
+                            customerProvider.updateCustomerLastTrackingTime(customer);
+                            customerSearcher.feedDoc(customer);
+                        }
+
+                        break;
+                    case CUSTOMER_TRACKING_PLAN:
+                        CustomerTrackingPlan plan = new CustomerTrackingPlan();
+                        plan.setCustomerId(customerId);
+                        plan.setCustomerType(customerType);
+                        plan.setNamespaceId(namespaceId);
+                        plan.setNotifyStatus(TrackingPlanNotifyStatus.INVAILD.getCode());
+                        plan.setReadStatus(TrackingPlanReadStatus.UNREAD.getCode());
+                        if(columns != null && columns.size() > 0) {
+                            for(DynamicColumnDTO column : columns) {
+                                if("trackingType".equals(column.getFieldName())) {
+                                    ScopeFieldItem item = fieldService.findScopeFieldItemByDisplayName(namespaceId, communityId, moduleName, column.getValue());
+                                    if(item != null) {
+                                        column.setValue(item.getBusinessValue().toString());
+                                    }
+                                }
+                                try {
+                                    setToObj(column.getFieldName(), plan, column.getValue());
+                                } catch(Exception e){
+                                    LOGGER.warn("one row invoke set method for CustomerTrackingPlan failed");
+                                    failedNumber ++;
+                                }
+
+                                continue;
+                            }
+                        }
+                        if(plan.getNotifyTime() != null ){
+                            plan.setNotifyStatus(TrackingPlanNotifyStatus.WAITING_FOR_SEND_OUT.getCode());
+                        }
+                        customerProvider.createCustomerTrackingPlan(plan);
+
                         break;
                     case CUSTOMER_ENTRY_INFO:
                         CustomerEntryInfo entryInfo = new CustomerEntryInfo();
@@ -463,8 +618,8 @@ public class CustomerDynamicExcelHandler implements DynamicExcelHandler {
                 }
 
             }
-            response.setSuccessRowNumber(rowDatas.size() - failedNumber);
-            response.setFailedRowNumber(failedNumber);
+            response.setSuccessRowNumber(response.getSuccessRowNumber() + rowDatas.size() - failedNumber);
+            response.setFailedRowNumber(response.getFailedRowNumber() + failedNumber);
         }
     }
 
@@ -490,7 +645,7 @@ public class CustomerDynamicExcelHandler implements DynamicExcelHandler {
                         break;
                     }
                     Date date = new Date();
-                    SimpleDateFormat sdf = new SimpleDateFormat("yyyy-MM-dd");
+                    SimpleDateFormat sdf = new SimpleDateFormat("yyyy-MM-dd HH:mm");
                     try {
                         date = sdf.parse((String) value);
                     } catch (ParseException e) {

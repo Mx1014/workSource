@@ -17,7 +17,7 @@ import java.util.List;
  *  <li>inspectionType: 规范类型 0: 类型, 1: 规范, 2: 规范事项</li>
  *  <li>scopeType: specification可见范围类型 0: all, 1: community</li>
  *  <li>scopeId: 看见范围具体Id，全部为0</li>
- *  <li>communities: 应用的项目id列表</li>
+ *  <li>namespaceId: namespaceId</li>
  * </ul>
  */
 public class CreateQualitySpecificationCommand {
@@ -44,6 +44,8 @@ public class CreateQualitySpecificationCommand {
 
 	@ItemType(Long.class)
 	private List<Long> communities;
+
+	private Integer namespaceId;
 
 	public String getOwnerType() {
 		return ownerType;
@@ -131,6 +133,14 @@ public class CreateQualitySpecificationCommand {
 
 	public void setCommunities(List<Long> communities) {
 		this.communities = communities;
+	}
+
+	public Integer getNamespaceId() {
+		return namespaceId;
+	}
+
+	public void setNamespaceId(Integer namespaceId) {
+		this.namespaceId = namespaceId;
 	}
 
 	@Override

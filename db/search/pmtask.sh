@@ -1,5 +1,5 @@
 ELASTIC=elasticsearch:9200
-INDEX=everhomesv32x
+INDEX=everhomesv3
 
 curl -XDELETE http://$ELASTIC/$INDEX/_mapping/pmtask
 curl -XPUT "http://$ELASTIC/$INDEX/_mapping/pmtask" -d '
@@ -49,6 +49,10 @@ curl -XPUT "http://$ELASTIC/$INDEX/_mapping/pmtask" -d '
           },
           "taskCategoryId" : {
             "type" : "long"
+          },
+          "organizationUid":{
+             "type" : "long",
+             "null_value": 0
           }
         }
       }

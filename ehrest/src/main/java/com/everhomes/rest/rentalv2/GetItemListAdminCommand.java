@@ -1,37 +1,87 @@
 package com.everhomes.rest.rentalv2;
 
-import java.util.List;
-
-import com.everhomes.discover.ItemType;
 import com.everhomes.util.StringHelper;
 
 /**
  * <ul>
- * <li>rentalSiteId：场所id</li>
+ * <li>ownerType: ownerType {@link com.everhomes.rest.rentalv2.RentalOwnerType}</li>
+ * <li>ownerId: 园区id</li>
+ * <li>resourceTypeId: 图标id</li>
+ * <li>sourceType：default_rule:默认规则  resource_rule:资源规则</li>
+ * <li>sourceId：资源规则时 场所id 默认规则时 规则id </li>
  * <li>pageAnchor: 锚点</li>
  * <li>pageSize:每页数量 </li>
  * </ul>
  */
 public class GetItemListAdminCommand {
 
-	private Long rentalSiteId;
+	private String ownerType;
+
+	private Long ownerId;
+
+	private String sourceType;
+
+	private Long sourceId;
+
+	private String resourceType;
+
+	private Long resourceTypeId;
 
 	private Long pageAnchor;
     
 	private Integer pageSize;
-	
-	
+
 	@Override
     public String toString() {
         return StringHelper.toJsonString(this);
     }
- 
-	public Long getRentalSiteId() {
-		return rentalSiteId;
+
+	public String getOwnerType() {
+		return ownerType;
 	}
 
-	public void setRentalSiteId(Long rentalSiteId) {
-		this.rentalSiteId = rentalSiteId;
+	public void setOwnerType(String ownerType) {
+		this.ownerType = ownerType;
+	}
+
+	public Long getOwnerId() {
+		return ownerId;
+	}
+
+	public void setOwnerId(Long ownerId) {
+		this.ownerId = ownerId;
+	}
+
+	public Long getResourceTypeId() {
+		return resourceTypeId;
+	}
+
+	public void setResourceTypeId(Long resourceTypeId) {
+		this.resourceTypeId = resourceTypeId;
+	}
+
+	public String getResourceType() {
+		return resourceType;
+	}
+
+	public void setResourceType(String resourceType) {
+		this.resourceType = resourceType;
+	}
+
+	public String getSourceType() {
+		return sourceType;
+	}
+
+	public void setSourceType(String sourceType) {
+		this.sourceType = sourceType;
+	}
+
+	public Long getSourceId() {
+		return sourceId;
+	}
+
+	public void setSourceId(Long sourceId) {
+		this.sourceId = sourceId;
 	}
 
 	public Long getPageAnchor() {

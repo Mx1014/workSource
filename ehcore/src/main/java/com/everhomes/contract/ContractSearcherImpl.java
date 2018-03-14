@@ -136,10 +136,11 @@ public class ContractSearcherImpl extends AbstractElasticSearch implements Contr
             builder.field("contractStartDate", contract.getContractStartDate());
             builder.field("contractEndDate", contract.getContractEndDate());
             builder.field("customerType", contract.getCustomerType());
+            builder.field("paymentFlag", contract.getPaymentFlag());
             if(contract.getRent() != null) {
-                builder.field("amount", contract.getRent());
+                builder.field("rent", contract.getRent());
             } else {
-                builder.field("amount", "");
+                builder.field("rent", "");
             }
 
             builder.endObject();
@@ -179,7 +180,7 @@ public class ContractSearcherImpl extends AbstractElasticSearch implements Contr
         cmd.setModuleId(ServiceModuleConstants.CONTRACT_MODULE);
         cmd.setActionType(ActionType.OFFICIAL_URL.getCode());
         ListServiceModuleAppsResponse apps = portalService.listServiceModuleAppsWithConditon(cmd);
-        Long appId = apps.getServiceModuleApps().get(0).getId();
+        Long appId = apps.getServiceModuleApps().get(0).getOriginId();
         if(!userPrivilegeMgr.checkUserPrivilege(UserContext.currentUserId(), EntityType.ORGANIZATIONS.getCode(), orgId,
                 orgId, privilegeId, appId, null, communityId)) {
             LOGGER.error("Permission is prohibited, namespaceId={}, orgId={}, ownerType={}, ownerId={}, privilegeId={}",
@@ -191,7 +192,12 @@ public class ContractSearcherImpl extends AbstractElasticSearch implements Contr
 
     @Override
     public ListContractsResponse queryContracts(SearchContractCommand cmd) {
-        checkContractAuth(cmd.getNamespaceId(), PrivilegeConstants.CONTRACT_LIST, cmd.getOrgId(), cmd.getCommunityId());
+        if(cmd.getPaymentFlag() == 1) {
+            checkContractAuth(cmd.getNamespaceId(), PrivilegeConstants.PAYMENT_CONTRACT_LIST, cmd.getOrgId(), cmd.getCommunityId());
+        } else {
+            checkContractAuth(cmd.getNamespaceId(), PrivilegeConstants.CONTRACT_LIST, cmd.getOrgId(), cmd.getCommunityId());
+        }
+
         SearchRequestBuilder builder = getClient().prepareSearch(getIndexName()).setTypes(getIndexType());
         QueryBuilder qb = null;
         if(cmd.getKeywords() == null || cmd.getKeywords().isEmpty()) {
@@ -212,6 +218,7 @@ public class ContractSearcherImpl extends AbstractElasticSearch implements Contr
         fb = FilterBuilders.notFilter(nfb);
         fb = FilterBuilders.andFilter(fb, FilterBuilders.termFilter("namespaceId", cmd.getNamespaceId()));
         fb = FilterBuilders.andFilter(fb, FilterBuilders.termFilter("communityId", cmd.getCommunityId()));
+        fb = FilterBuilders.andFilter(fb, FilterBuilders.termFilter("paymentFlag", cmd.getPaymentFlag()));
 
         if(cmd.getStatus() != null)
             fb = FilterBuilders.andFilter(fb, FilterBuilders.termFilter("status", cmd.getStatus()));

@@ -1,15 +1,15 @@
 package com.everhomes.scheduler;
 
 
-import java.sql.Timestamp;
-import java.util.ArrayList;
-import java.util.List;
-import java.util.TimeZone;
-
 import com.everhomes.configuration.ConfigConstants;
 import com.everhomes.configuration.ConfigurationProvider;
+import com.everhomes.quality.QualityInspectionStandards;
 import com.everhomes.quality.QualityInspectionTasks;
+import com.everhomes.quality.QualityProvider;
+import com.everhomes.quality.QualityService;
+import com.everhomes.repeat.RepeatService;
 import com.everhomes.util.CronDateUtils;
+import com.everhomes.util.DateHelper;
 import org.quartz.JobExecutionContext;
 import org.quartz.JobExecutionException;
 import org.slf4j.Logger;
@@ -19,12 +19,9 @@ import org.springframework.context.annotation.Scope;
 import org.springframework.scheduling.quartz.QuartzJobBean;
 import org.springframework.stereotype.Component;
 
-import com.everhomes.bootstrap.PlatformContext;
-import com.everhomes.quality.QualityInspectionStandards;
-import com.everhomes.quality.QualityProvider;
-import com.everhomes.quality.QualityService;
-import com.everhomes.repeat.RepeatService;
-import com.everhomes.util.DateHelper;
+import java.sql.Timestamp;
+import java.util.List;
+import java.util.TimeZone;
 
 @Component
 @Scope("prototype")
@@ -64,7 +61,12 @@ public class QualityInspectionScheduleJob  extends QuartzJobBean {
 			List<QualityInspectionStandards> activeStandards = qualityProvider.listActiveStandards();
 
 			for (QualityInspectionStandards standard : activeStandards) {
-				boolean isRepeat = repeatService.isRepeatSettingActive(standard.getRepeatSettingId());
+				boolean isRepeat = false;
+				try {
+					isRepeat = repeatService.isRepeatSettingActive(standard.getRepeatSettingId());
+				}catch (Exception e){
+					LOGGER.info("repeatSetting  analyzed erro :",e.getMessage());
+				}
 				LOGGER.info("QualityInspectionScheduleJob: standard id = " + standard.getId()
 						+ "repeat setting id = " + standard.getRepeatSettingId() + "is repeat setting active: " + isRepeat);
 				if (isRepeat) {

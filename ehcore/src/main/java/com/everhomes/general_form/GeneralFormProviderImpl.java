@@ -260,4 +260,21 @@ public class GeneralFormProviderImpl implements GeneralFormProvider {
         query.addOrderBy(Tables.EH_GENERAL_FORMS.FORM_VERSION.desc());
         return query.fetchAnyInto(GeneralForm.class);
     }
+    
+    @Override
+    public GeneralForm getGeneralFormByTag1(Integer namespaceId, String moduleType, Long moduleId, String stringTag1) {
+    	DSLContext context = this.dbProvider.getDslContext(AccessSpec.readOnly());
+
+		SelectQuery<EhGeneralFormsRecord> query = context.selectQuery(Tables.EH_GENERAL_FORMS);
+		query.addConditions(Tables.EH_GENERAL_FORMS.MODULE_ID.eq(moduleId));
+		query.addConditions(Tables.EH_GENERAL_FORMS.NAMESPACE_ID.eq(namespaceId));
+		query.addConditions(Tables.EH_GENERAL_FORMS.MODULE_TYPE.eq(moduleType));
+		query.addConditions(Tables.EH_GENERAL_FORMS.STRING_TAG1.eq(stringTag1));
+		List<GeneralForm> results = query.fetch().map(r -> {
+			return ConvertHelper.convert(r, GeneralForm.class);
+		});
+		if (results != null && results.size() > 0)
+			return results.get(0);
+		return null;
+    }
 }

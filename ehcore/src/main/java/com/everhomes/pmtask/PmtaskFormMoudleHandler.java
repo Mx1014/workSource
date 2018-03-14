@@ -16,6 +16,8 @@ import com.google.gson.Gson;
 import org.apache.commons.lang.StringUtils;
 import org.jooq.Record;
 import org.jooq.SelectQuery;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
 
@@ -27,7 +29,7 @@ import java.util.List;
  */
 @Component(GeneralFormModuleHandler.GENERAL_FORM_MODULE_HANDLER_PREFIX + "EhPmTasks")
 public class PmtaskFormMoudleHandler implements GeneralFormModuleHandler {
-
+    private static final Logger LOGGER = LoggerFactory.getLogger(PmtaskFormMoudleHandler.class);
     @Autowired
     private GeneralFormProvider generalFormProvider;
     @Autowired
@@ -78,6 +80,15 @@ public class PmtaskFormMoudleHandler implements GeneralFormModuleHandler {
         response.setValues(items);
 
         FlowCase flowCase = flowCaseProvider.findFlowCaseByReferId(pmTask.getId(), EntityType.PM_TASK.getCode(), moduleId);
+        FlowCaseTree tree = flowService.getProcessingFlowCaseTree(flowCase.getId());
+        flowCase = tree.getLeafNodes().get(0).getFlowCase();
+        LOGGER.info("target:"+JSONObject.toJSONString(flowCase));
+//        while (tree.getNodes()!=null){
+//            LOGGER.info("trace:"+JSONObject.toJSONString(tree));
+//            tree = tree.getNodes().get(0);
+//        }
+//        LOGGER.info("trace:"+JSONObject.toJSONString(tree));
+
         FlowNodeDetailDTO detail = flowService.getFlowNodeDetail(flowCase.getCurrentNodeId());
         String params = detail.getParams();
         String nodeType = "";
