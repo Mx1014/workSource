@@ -1579,23 +1579,30 @@ public class PortalServiceImpl implements PortalService {
 				config.setItemGroup(itemGroup.getName());
 				group.setInstanceConfig(config);
 			}else if(Widget.fromCode(group.getWidget()) == Widget.NEWS){
-//				String instanceConf = setItemModuleAppActionData(itemGroup.getLabel(), instanceConfig.getModuleAppId());
+				NewsInstanceConfig config  =  new NewsInstanceConfig();
 				ServiceModuleApp moduleApp = serviceModuleAppProvider.findServiceModuleAppById(instanceConfig.getModuleAppId());
 				if(moduleApp != null && moduleApp.getInstanceConfig() != null){
-					NewsInstanceConfig config = (NewsInstanceConfig)StringHelper.fromJsonString(moduleApp.getInstanceConfig(), NewsInstanceConfig.class);
-					config.setItemGroup(itemGroup.getName());
-					config.setTimeWidgetStyle(instanceConfig.getTimeWidgetStyle());
-					group.setInstanceConfig(config);
+					config = (NewsInstanceConfig)StringHelper.fromJsonString(moduleApp.getInstanceConfig(), NewsInstanceConfig.class);
+				}else if(itemGroup.getInstanceConfig() != null){
+					config = (NewsInstanceConfig)StringHelper.fromJsonString(itemGroup.getInstanceConfig(), NewsInstanceConfig.class);
 				}
+				config.setItemGroup(itemGroup.getName());
+				config.setTimeWidgetStyle(instanceConfig.getTimeWidgetStyle());
+				group.setInstanceConfig(config);
+
 			}else if(Widget.fromCode(group.getWidget()) == Widget.NEWS_FLASH){
+
+				NewsFlashInstanceConfig config = new NewsFlashInstanceConfig();
 				ServiceModuleApp moduleApp = serviceModuleAppProvider.findServiceModuleAppById(instanceConfig.getModuleAppId());
 				if(moduleApp != null && moduleApp.getInstanceConfig() != null){
-					NewsFlashInstanceConfig config = (NewsFlashInstanceConfig)StringHelper.fromJsonString(moduleApp.getInstanceConfig(), NewsFlashInstanceConfig.class);
-					config.setItemGroup(itemGroup.getName());
-					config.setTimeWidgetStyle(instanceConfig.getTimeWidgetStyle());
-					config.setNewsSize(instanceConfig.getNewsSize());
-					group.setInstanceConfig(config);
+					config = (NewsFlashInstanceConfig)StringHelper.fromJsonString(moduleApp.getInstanceConfig(), NewsFlashInstanceConfig.class);
+				}else  if(itemGroup.getInstanceConfig() != null){
+					config = (NewsFlashInstanceConfig)StringHelper.fromJsonString(itemGroup.getInstanceConfig(), NewsFlashInstanceConfig.class);
 				}
+				config.setItemGroup(itemGroup.getName());
+				config.setTimeWidgetStyle(instanceConfig.getTimeWidgetStyle());
+				config.setNewsSize(instanceConfig.getNewsSize());
+				group.setInstanceConfig(config);
 
 			}else if(Widget.fromCode(group.getWidget()) == Widget.BULLETINS){
 				BulletinsInstanceConfig config = (BulletinsInstanceConfig)StringHelper.fromJsonString(itemGroup.getInstanceConfig(), BulletinsInstanceConfig.class);

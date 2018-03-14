@@ -1247,7 +1247,9 @@ public class OrganizationServiceImpl implements OrganizationService {
 
     @Override
     public OrganizationDTO createEnterprise(CreateEnterpriseCommand cmd) {
-        userPrivilegeMgr.checkUserPrivilege(UserContext.currentUserId(), cmd.getManageOrganizationId(), PrivilegeConstants.ORGANIZATION_CREATE, ServiceModuleConstants.ORGANIZATION_MODULE, ActionType.OFFICIAL_URL.getCode(), null, cmd.getManageOrganizationId(), cmd.getCommunityId());
+        if(cmd.getCheckPrivilege() != null && cmd.getCheckPrivilege()) {
+            userPrivilegeMgr.checkUserPrivilege(UserContext.currentUserId(), cmd.getManageOrganizationId(), PrivilegeConstants.ORGANIZATION_CREATE, ServiceModuleConstants.ORGANIZATION_MODULE, ActionType.OFFICIAL_URL.getCode(), null, cmd.getManageOrganizationId(), cmd.getCommunityId());
+        }
         User user = UserContext.current().getUser();
 
         Integer namespaceId = UserContext.getCurrentNamespaceId(cmd.getNamespaceId());
