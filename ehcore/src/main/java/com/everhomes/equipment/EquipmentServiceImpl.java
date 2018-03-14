@@ -1876,11 +1876,13 @@ private void checkUserPrivilege(Long orgId, Long privilegeId, Long communityId) 
 	}
 
 	private List<EquipmentTaskDTO> convertEquipmentTasksToDTO(List<EquipmentInspectionTasks> tasks) {
-
-		return tasks.stream().
-				map(this::convertEquipmentTaskToDTO).
-				filter(Objects::nonNull).
-				collect(Collectors.toList());
+		if (tasks != null && tasks.size() > 0) {
+			return tasks.stream().
+                    map(this::convertEquipmentTaskToDTO).
+                    filter(Objects::nonNull).
+                    collect(Collectors.toList());
+		}
+		return null;
 	}
 
 	private EquipmentTaskDTO convertEquipmentTaskToDTO(EquipmentInspectionTasks task) {
@@ -5870,7 +5872,7 @@ private void checkUserPrivilege(Long orgId, Long privilegeId, Long communityId) 
 
 		OfflineTaskCountStat todayComplete = new OfflineTaskCountStat();
 		todayComplete.setCount(response.getTodayCompleteCount());
-		todayComplete.setId(Long.valueOf(new SimpleDateFormat("yyMMddhhmmssSSS").format(DateHelper.currentGMTTime())) * 10000);
+		todayComplete.setId(Long.valueOf(new SimpleDateFormat("yyMMddhhmmssSSS").format(DateHelper.currentGMTTime())) * 1000);
 		todayComplete.setTargetId(cmd.getTargetId());
 
 		OfflineTaskCountStat todayTaskCount = new OfflineTaskCountStat();
