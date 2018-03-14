@@ -113,6 +113,8 @@ public class ExpressServiceImpl implements ExpressService {
 	
 	@Autowired
     private ConfigurationProvider configProvider;
+	@Autowired
+	private UserPrivilegeMgr userPrivilegeMgr;
 	
 	@Autowired
     private UserActivityProvider userProvider;
@@ -303,6 +305,9 @@ public class ExpressServiceImpl implements ExpressService {
 
 	@Override
 	public ListExpressOrderResponse listExpressOrder(ListExpressOrderCommand cmd) {
+		if(cmd.getCurrentPMId()!=null && cmd.getAppId()!=null && configProvider.getBooleanValue("privilege.community.checkflag", true)){
+			userPrivilegeMgr.checkUserPrivilege(UserContext.current().getUser().getId(), cmd.getCurrentPMId(), 4070040720L, cmd.getAppId(), null,cmd.getCurrentProjectId());//参数设置权限
+		}
 		ExpressOwner owner = checkOwner(cmd.getOwnerType(), cmd.getOwnerId());
 		checkPrivilege(owner, cmd.getServiceAddressId(), cmd.getExpressCompanyId());
 		int pageSize = PaginationConfigHelper.getPageSize(configurationProvider, cmd.getPageSize());
@@ -1025,6 +1030,9 @@ public class ExpressServiceImpl implements ExpressService {
 
 	@Override
 	public GetExpressBusinessNoteResponse getExpressBusinessNote(GetExpressBusinessNoteCommand cmd) {
+		if(cmd.getCurrentPMId()!=null && cmd.getAppId()!=null && configProvider.getBooleanValue("privilege.community.checkflag", true)){
+			userPrivilegeMgr.checkUserPrivilege(UserContext.current().getUser().getId(), cmd.getCurrentPMId(), 4070040710L, cmd.getAppId(), null,cmd.getCurrentProjectId());//参数设置权限
+		}
 		ExpressOwner owner = checkOwner(cmd.getOwnerType(), cmd.getOwnerId());
 		ExpressParamSetting setting = expressParamSettingProvider.getExpressParamSettingByOwner(owner.getNamespaceId(),owner.getOwnerType().getCode(),owner.getOwnerId());
 		return ConvertHelper.convert(setting, GetExpressBusinessNoteResponse.class);
@@ -1032,6 +1040,9 @@ public class ExpressServiceImpl implements ExpressService {
 
 	@Override
 	public void updateExpressBusinessNote(UpdateExpressBusinessNoteCommand cmd) {
+		if(cmd.getCurrentPMId()!=null && cmd.getAppId()!=null && configProvider.getBooleanValue("privilege.community.checkflag", true)){
+			userPrivilegeMgr.checkUserPrivilege(UserContext.current().getUser().getId(), cmd.getCurrentPMId(), 4070040710L, cmd.getAppId(), null,cmd.getCurrentProjectId());//参数设置权限
+		}
 		ExpressOwner owner = checkOwner(cmd.getOwnerType(), cmd.getOwnerId());
 		if(cmd.getBusinessNote() != null){
 			expressParamSettingProvider.updateExpressBusinessNoteByOwner(owner,cmd.getBusinessNote());
@@ -1051,6 +1062,9 @@ public class ExpressServiceImpl implements ExpressService {
 
 	@Override
 	public ListExpressHotlinesResponse listExpressHotlines(ListExpressHotlinesCommand cmd) {
+		if(cmd.getCurrentPMId()!=null && cmd.getAppId()!=null && configProvider.getBooleanValue("privilege.community.checkflag", true)){
+			userPrivilegeMgr.checkUserPrivilege(UserContext.current().getUser().getId(), cmd.getCurrentPMId(), 4070040710L, cmd.getAppId(), null,cmd.getCurrentProjectId());//参数设置权限
+		}
 		ExpressOwner owner = checkOwner(cmd.getOwnerType(), cmd.getOwnerId());
 		int pageSize = PaginationConfigHelper.getPageSize(configurationProvider, cmd.getPageSize());
 		List<ExpressHotline> hotlineList = expressHotlineProvider.listHotLinesByOwner(owner,pageSize+1,cmd.getPageAnchor());
@@ -1072,6 +1086,9 @@ public class ExpressServiceImpl implements ExpressService {
 
 	@Override
 	public CreateOrUpdateExpressHotlineResponse createOrUpdateExpressHotline(CreateOrUpdateExpressHotlineCommand cmd) {
+		if(cmd.getCurrentPMId()!=null && cmd.getAppId()!=null && configProvider.getBooleanValue("privilege.community.checkflag", true)){
+			userPrivilegeMgr.checkUserPrivilege(UserContext.current().getUser().getId(), cmd.getCurrentPMId(), 4070040710L, cmd.getAppId(), null,cmd.getCurrentProjectId());//参数设置权限
+		}
 		ExpressOwner owner = checkOwner(cmd.getOwnerType(), cmd.getOwnerId());
 		ExpressHotline hotline = generateHotline(owner,cmd);
 		if(cmd.getId() != null){

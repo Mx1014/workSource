@@ -120,6 +120,7 @@ import com.everhomes.rest.qrcode.QRCodeHandler;
 import com.everhomes.settings.PaginationConfigHelper;
 import com.everhomes.user.User;
 import com.everhomes.user.UserContext;
+import com.everhomes.user.UserPrivilegeMgr;
 import com.everhomes.util.ConvertHelper;
 import com.everhomes.util.ExecutorUtil;
 import com.everhomes.util.RuntimeErrorException;
@@ -201,8 +202,13 @@ public class SiyinPrintServiceImpl implements SiyinPrintService {
 	private QRCodeController qrController;
 	@Autowired
 	private QRCodeService qrcodeService;
+	@Autowired
+	private UserPrivilegeMgr userPrivilegeMgr;
 	@Override
 	public GetPrintSettingResponse getPrintSetting(GetPrintSettingCommand cmd) {
+		if(cmd.getCurrentPMId()!=null && cmd.getAppId()!=null && configurationProvider.getBooleanValue("privilege.community.checkflag", true)){
+			userPrivilegeMgr.checkUserPrivilege(UserContext.current().getUser().getId(), cmd.getCurrentPMId(), 4140041430L, cmd.getAppId(), null,cmd.getCurrentProjectId());//打印设置权限
+		}
 		//检查参数
 		checkOwner(cmd.getOwnerType(),cmd.getOwnerId());
 		
@@ -225,6 +231,9 @@ public class SiyinPrintServiceImpl implements SiyinPrintService {
 
 	@Override
 	public GetPrintStatResponse getPrintStat(GetPrintStatCommand cmd) {
+		if(cmd.getCurrentPMId()!=null && cmd.getAppId()!=null && configurationProvider.getBooleanValue("privilege.community.checkflag", true)){
+			userPrivilegeMgr.checkUserPrivilege(UserContext.current().getUser().getId(), cmd.getCurrentPMId(), 4140041420L, cmd.getAppId(), null,cmd.getCurrentProjectId());//打印统计权限
+		}
 		PrintOwnerType printOwnerType = checkOwner(cmd.getOwnerType(), cmd.getOwnerId());
 		
 		Map<String,List<Object>> map = getCommunitiesByOrg(cmd.getOwnerType(), cmd.getOwnerId());
@@ -240,6 +249,9 @@ public class SiyinPrintServiceImpl implements SiyinPrintService {
 
 	@Override
 	public ListPrintRecordsResponse listPrintRecords(ListPrintRecordsCommand cmd) {
+		if(cmd.getCurrentPMId()!=null && cmd.getAppId()!=null && configurationProvider.getBooleanValue("privilege.community.checkflag", true)){
+			userPrivilegeMgr.checkUserPrivilege(UserContext.current().getUser().getId(), cmd.getCurrentPMId(), 4140041410L, cmd.getAppId(), null,cmd.getCurrentProjectId());//订单记录权限
+		}
 		checkOwner(cmd.getOwnerType(), cmd.getOwnerId());
 		
 		int pageSize = PaginationConfigHelper.getPageSize(configurationProvider, cmd.getPageSize());

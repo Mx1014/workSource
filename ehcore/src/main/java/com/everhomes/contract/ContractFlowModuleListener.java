@@ -195,7 +195,7 @@ public class ContractFlowModuleListener implements FlowModuleListener {
     }
 
     private String timeToStr(Timestamp time) {
-        SimpleDateFormat sdf = new SimpleDateFormat("yyyy-MM-dd HH:mm:ss");
+        SimpleDateFormat sdf = new SimpleDateFormat("yyyy-MM-dd");
         return sdf.format(time);
     }
 

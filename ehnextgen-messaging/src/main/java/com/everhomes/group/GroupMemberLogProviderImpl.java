@@ -98,7 +98,7 @@ public class GroupMemberLogProviderImpl implements GroupMemberLogProvider {
         }
 
         if(locator.getAnchor() != null) {
-            query.addConditions(Tables.EH_GROUP_MEMBER_LOGS.ID.gt(locator.getAnchor()));
+            query.addConditions(Tables.EH_GROUP_MEMBER_LOGS.ID.lt(locator.getAnchor()));
         }
 
         query.addLimit(pageSize + 1);

@@ -92,6 +92,7 @@ import com.everhomes.user.EncryptionUtils;
 import com.everhomes.user.User;
 import com.everhomes.user.UserContext;
 import com.everhomes.user.UserIdentifier;
+import com.everhomes.user.UserPrivilegeMgr;
 import com.everhomes.user.UserProvider;
 import com.everhomes.util.ConvertHelper;
 import com.everhomes.util.RandomGenerator;
@@ -116,7 +117,9 @@ public class PaymentCardServiceImpl implements PaymentCardService{
     
     @Autowired
     private ConfigurationProvider configProvider;
-    
+
+	@Autowired
+	private UserPrivilegeMgr userPrivilegeMgr;
     @Autowired
 	private SmsProvider smsProvider;
     @Autowired
@@ -447,6 +450,10 @@ public class PaymentCardServiceImpl implements PaymentCardService{
     
     @Override
     public SearchCardUsersResponse searchCardUsers(SearchCardUsersCommand cmd){
+    	if(cmd.getCurrentPMId()!=null && cmd.getAppId()!=null && configProvider.getBooleanValue("privilege.community.checkflag", true)){
+			userPrivilegeMgr.checkUserPrivilege(UserContext.current().getUser().getId(), cmd.getCurrentPMId(), 4120041210L, cmd.getAppId(), null,cmd.getCurrentProjectId());//开卡用户权限
+		}
+
     	SearchCardUsersResponse response = new SearchCardUsersResponse();
 		
 		Integer pageSize = PaginationConfigHelper.getPageSize(configProvider, cmd.getPageSize());
@@ -468,6 +475,9 @@ public class PaymentCardServiceImpl implements PaymentCardService{
     }
     @Override
     public GetCardUserStatisticsDTO getCardUserStatistics(GetCardUserStatisticsCommand cmd){
+    	if(cmd.getCurrentPMId()!=null && cmd.getAppId()!=null && configProvider.getBooleanValue("privilege.community.checkflag", true)){
+			userPrivilegeMgr.checkUserPrivilege(UserContext.current().getUser().getId(), cmd.getCurrentPMId(), 4120041210L, cmd.getAppId(), null,cmd.getCurrentProjectId());//开卡用户权限
+		}
     	checkParam(cmd.getOwnerType(), cmd.getOwnerId());
     	GetCardUserStatisticsDTO dto = new GetCardUserStatisticsDTO();
     	User user = UserContext.current().getUser();
@@ -480,6 +490,9 @@ public class PaymentCardServiceImpl implements PaymentCardService{
     }
     @Override
     public SearchCardRechargeOrderResponse searchCardRechargeOrder(SearchCardRechargeOrderCommand cmd){
+    	if(cmd.getCurrentPMId()!=null && cmd.getAppId()!=null && configProvider.getBooleanValue("privilege.community.checkflag", true)){
+			userPrivilegeMgr.checkUserPrivilege(UserContext.current().getUser().getId(), cmd.getCurrentPMId(), 4120041230L, cmd.getAppId(), null,cmd.getCurrentProjectId());//充值记录权限
+		}
     	SearchCardRechargeOrderResponse response = new SearchCardRechargeOrderResponse();
 		Timestamp startDate = null;
 		Timestamp endDate = null;
@@ -507,6 +520,9 @@ public class PaymentCardServiceImpl implements PaymentCardService{
     }
     @Override
     public SearchCardTransactionsResponse searchCardTransactions(SearchCardTransactionsCommand cmd){
+    	if(cmd.getCurrentPMId()!=null && cmd.getAppId()!=null && configProvider.getBooleanValue("privilege.community.checkflag", true)){
+			userPrivilegeMgr.checkUserPrivilege(UserContext.current().getUser().getId(), cmd.getCurrentPMId(), 4120041240L, cmd.getAppId(), null,cmd.getCurrentProjectId());//消费记录权限
+		}
     	SearchCardTransactionsResponse response = new SearchCardTransactionsResponse();
 		Timestamp startDate = null;
 		Timestamp endDate = null;
@@ -547,6 +563,9 @@ public class PaymentCardServiceImpl implements PaymentCardService{
     
     @Override
     public void exportCardUsers(SearchCardUsersCommand cmd,HttpServletResponse response){
+    	if(cmd.getCurrentPMId()!=null && cmd.getAppId()!=null && configProvider.getBooleanValue("privilege.community.checkflag", true)){
+			userPrivilegeMgr.checkUserPrivilege(UserContext.current().getUser().getId(), cmd.getCurrentPMId(), 4120041220L, cmd.getAppId(), null,cmd.getCurrentProjectId());//开卡用户权限
+		}
     	Integer pageSize = PaginationConfigHelper.getPageSize(configProvider, cmd.getPageSize());
 		//User user = UserContext.current().getUser();
 		List<PaymentCard> list = paymentCardProvider.searchCardUsers(cmd.getOwnerId(),cmd.getOwnerType(),
@@ -591,6 +610,9 @@ public class PaymentCardServiceImpl implements PaymentCardService{
 	@Override
 	public void exportCardRechargeOrder(SearchCardRechargeOrderCommand cmd,
 			HttpServletResponse response) {
+		if(cmd.getCurrentPMId()!=null && cmd.getAppId()!=null && configProvider.getBooleanValue("privilege.community.checkflag", true)){
+			userPrivilegeMgr.checkUserPrivilege(UserContext.current().getUser().getId(), cmd.getCurrentPMId(), 4120041230L, cmd.getAppId(), null,cmd.getCurrentProjectId());//充值记录权限
+		}
 		Timestamp startDate = null;
 		Timestamp endDate = null;
 		if(cmd.getStartDate() != null)
@@ -663,6 +685,9 @@ public class PaymentCardServiceImpl implements PaymentCardService{
 	@Override
 	public void exportCardTransactions(SearchCardTransactionsCommand cmd,
 			HttpServletResponse response) {
+		if(cmd.getCurrentPMId()!=null && cmd.getAppId()!=null && configProvider.getBooleanValue("privilege.community.checkflag", true)){
+			userPrivilegeMgr.checkUserPrivilege(UserContext.current().getUser().getId(), cmd.getCurrentPMId(), 4120041240L, cmd.getAppId(), null,cmd.getCurrentProjectId());//消费记录权限
+		}
 		Timestamp startDate = null;
 		Timestamp endDate = null;
 		if(cmd.getStartDate() != null)

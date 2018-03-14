@@ -3885,8 +3885,8 @@ Long nextPageAnchor = null;
 							}
 							totalScore = totalScore + score.getScore();
 						}
-						scoreGroupDto.setTotalScore(totalScore);
 					}
+					scoreGroupDto.setTotalScore(totalScore);
 				}
 				scoresByTarget.add(scoreGroupDto);
 			}
