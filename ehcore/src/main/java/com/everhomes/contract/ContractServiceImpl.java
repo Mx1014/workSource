@@ -1272,6 +1272,7 @@ public class ContractServiceImpl implements ContractService {
 			} else {
 				checkContractAuth(cmd.getNamespaceId(), PrivilegeConstants.CONTRACT_INVALID, cmd.getOrgId(), cmd.getCommunityId());
 			}
+			contract.setInvalidReason(cmd.getInvalidReason());
 			contract.setInvalidTime(new Timestamp(DateHelper.currentGMTTime().getTime()));
 			contract.setInvalidUid(UserContext.currentUserId());
 			contract.setStatus(cmd.getResult());

@@ -371,6 +371,31 @@ public class WarehouseProviderImpl implements WarehouseProvider {
     }
 
     @Override
+    public WarehouseStockLogs findWarehouseStockLogs(Long id, String ownerType, Long ownerId, String materialName) {
+        DSLContext context = dbProvider.getDslContext(AccessSpec.readOnly());
+        SelectQuery<EhWarehouseStockLogsRecord> query = context.selectQuery(Tables.EH_WAREHOUSE_STOCK_LOGS);
+        query.addConditions(Tables.EH_WAREHOUSE_STOCK_LOGS.ID.eq(id));
+        query.addConditions(Tables.EH_WAREHOUSE_STOCK_LOGS.OWNER_TYPE.eq(ownerType));
+        query.addConditions(Tables.EH_WAREHOUSE_STOCK_LOGS.OWNER_ID.eq(ownerId));
+        if(materialName != null){
+            List<Long> fetch = context.select(Tables.EH_WAREHOUSE_MATERIALS.ID)
+                    .from(Tables.EH_WAREHOUSE_MATERIALS)
+                    .where(Tables.EH_WAREHOUSE_MATERIALS.NAME.like("%" + materialName + "%"))
+                    .fetch(Tables.EH_WAREHOUSE_MATERIALS.ID);
+            query.addConditions(Tables.EH_WAREHOUSE_STOCK_LOGS.MATERIAL_ID.in(fetch));
+        }
+        List<WarehouseStockLogs> result = new ArrayList<>();
+        query.fetch().map((r) -> {
+            result.add(ConvertHelper.convert(r, WarehouseStockLogs.class));
+            return null;
+        });
+        if(result.size()==0)
+            return null;
+
+        return result.get(0);
+    }
+
+    @Override
     public List<WarehouseStockLogs> listWarehouseStockLogs(CrossShardListingLocator locator, Integer pageSize) {
         List<WarehouseStockLogs> logs = new ArrayList<>();
 
