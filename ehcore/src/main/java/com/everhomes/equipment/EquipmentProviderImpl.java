@@ -2516,14 +2516,14 @@ public class EquipmentProviderImpl implements EquipmentProvider {
             Condition con2 = Tables.EH_EQUIPMENT_INSPECTION_TASKS.STATUS.ne(EquipmentTaskStatus.NONE.getCode());
             query.addConditions(con2);
             //测试使用
-            query.addConditions(Tables.EH_EQUIPMENT_INSPECTION_TASKS.CREATE_TIME.ge(addMonths(new Timestamp(System.currentTimeMillis()), -1)));
+            query.addConditions(Tables.EH_EQUIPMENT_INSPECTION_TASKS.CREATE_TIME.ge(addMonths(new Timestamp(System.currentTimeMillis()), -3)));
         }
 
         Condition con = null;
         if (AdminFlag.NO.equals(AdminFlag.fromStatus(adminFlag)) && executeStandardIds != null && executeStandardIds.size() > 0) {
             Condition con4 = Tables.EH_EQUIPMENT_INSPECTION_TASKS.PLAN_ID.in(executeStandardIds);
             con4 = con4.and(Tables.EH_EQUIPMENT_INSPECTION_TASKS.STATUS.in(EquipmentTaskStatus.WAITING_FOR_EXECUTING.getCode(),
-                    EquipmentTaskStatus.DELAY.getCode()));
+                    EquipmentTaskStatus.DELAY.getCode(),EquipmentTaskStatus.NONE.getCode()));
             con = con4;
         }
 
@@ -2531,7 +2531,7 @@ public class EquipmentProviderImpl implements EquipmentProvider {
             Condition con3 = Tables.EH_EQUIPMENT_INSPECTION_TASKS.PLAN_ID.in(reviewStandardIds);
             //巡检完成关闭的任务
             Condition con1 = Tables.EH_EQUIPMENT_INSPECTION_TASKS.STATUS.in(EquipmentTaskStatus.CLOSE.getCode(),
-                     EquipmentTaskStatus.REVIEW_DELAY.getCode());
+                     EquipmentTaskStatus.REVIEW_DELAY.getCode(),EquipmentTaskStatus.NONE.getCode());
             con3 = con3.and(con1);
             if (con == null) {
                 con = con3;
@@ -3270,6 +3270,7 @@ public class EquipmentProviderImpl implements EquipmentProvider {
         DSLContext context = this.dbProvider.getDslContext(AccessSpec.readWrite());
         context.update(Tables.EH_EQUIPMENT_INSPECTION_TASKS)
                 .set(Tables.EH_EQUIPMENT_INSPECTION_TASKS.STATUS, EquipmentTaskStatus.NONE.getCode())
+                .set(Tables.EH_EQUIPMENT_INSPECTION_TASKS.EXECUTIVE_TIME, new Timestamp(DateHelper.currentGMTTime().getTime()))
                 .where(Tables.EH_EQUIPMENT_INSPECTION_TASKS.PLAN_ID.eq(planId))
                 .and(Tables.EH_EQUIPMENT_INSPECTION_TASKS.STATUS.eq(EquipmentTaskStatus.WAITING_FOR_EXECUTING.getCode()))
                 .execute();
