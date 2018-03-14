@@ -2650,7 +2650,7 @@ Long nextPageAnchor = null;
 
 		QualityInspectionTasks task = new QualityInspectionTasks();
 		task.setNamespaceId(UserContext.getCurrentNamespaceId());
-		task.setNamespaceId(cmd.getNamespaceId());
+		//task.setNamespaceId(cmd.getNamespaceId());
 		task.setOwnerType(cmd.getOwnerType());
 		task.setOwnerId(cmd.getOwnerId());
 		task.setTargetId(cmd.getTargetId());
