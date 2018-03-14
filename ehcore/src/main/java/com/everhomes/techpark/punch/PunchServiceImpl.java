@@ -46,8 +46,8 @@ import com.everhomes.server.schema.tables.pojos.EhPunchSchedulings;
 import com.everhomes.server.schema.tables.pojos.EhRentalv2Cells;
 import com.everhomes.uniongroup.*;
 import com.everhomes.util.*;
-
 import com.google.gson.Gson;
+
 import org.apache.lucene.spatial.geohash.GeoHashUtils;
 import org.apache.poi.hssf.usermodel.DVConstraint;
 import org.apache.poi.hssf.usermodel.HSSFDataValidation;
@@ -86,6 +86,7 @@ import com.everhomes.approval.ApprovalRequestDefaultHandler;
 import com.everhomes.approval.ApprovalRequestProvider;
 import com.everhomes.approval.ApprovalRule;
 import com.everhomes.approval.ApprovalRuleProvider;
+import com.everhomes.archives.ArchivesService;
 import com.everhomes.bootstrap.PlatformContext;
 import com.everhomes.configuration.ConfigurationProvider;
 import com.everhomes.constants.ErrorCodes;
@@ -4884,10 +4885,10 @@ public class PunchServiceImpl implements PunchService {
 	        params.put("reportType", "exportPunchDetails");
 			String fileName = "";
 			if (null != cmd.getUserId()) {
-				fileName = String.format("按日统计导出报表_%s到%s.xlsx", DateUtil.dateToStr(new Date(cmd.getStartDay()), DateUtil.NO_SLASH)
+				fileName = String.format("个人按月统计报表_%s到%s.xlsx", DateUtil.dateToStr(new Date(cmd.getStartDay()), DateUtil.NO_SLASH)
 				,DateUtil.dateToStr(new Date(cmd.getEndDay()), DateUtil.NO_SLASH));
 			}else{
-				fileName = String.format("个人按日统计导出报表_%s月.xlsx", monthSF.get().format(new Date(cmd.getStartDay())));
+				fileName = String.format("按日统计报表_%s月.xlsx", monthSF.get().format(new Date(cmd.getStartDay())));
 			}
 
 	        taskService.createTask(fileName, TaskType.FILEDOWNLOAD.getCode(), PunchExportTaskHandler.class, params, TaskRepeatFlag.REPEAT.getCode(), new Date());
@@ -5288,6 +5289,10 @@ public class PunchServiceImpl implements PunchService {
 		}
         return result;
     }
+
+    @Autowired
+    private ArchivesService archivesService;
+    
 	public PunchDayDetailDTO convertToPunchDayDetailDTO(PunchDayLog r ){
 		PunchDayDetailDTO dto =  ConvertHelper.convert(r,PunchDayDetailDTO.class);
 		PunchRule pr = getPunchRule(PunchOwnerType.ORGANIZATION.getCode(), r.getEnterpriseId(), r.getUserId());
@@ -5310,7 +5315,6 @@ public class PunchServiceImpl implements PunchService {
 		//请假之类的审批单
 		PunchTimeRule ptr = punchProvider.getPunchTimeRuleById(r.getTimeRuleId());
 		if (null != ptr) {
-
 			Timestamp dayStart = new Timestamp(r.getPunchDate().getTime() - (ptr.getBeginPunchTime()==null?14400000L:ptr.getBeginPunchTime()));
 			Timestamp dayEnd = new Timestamp(r.getPunchDate().getTime() +(ptr.getDaySplitTimeLong()==null?104400000L:ptr.getDaySplitTimeLong()));
 			List<PunchExceptionRequest> exceptionRequests = punchProvider.listPunchExceptionRequestBetweenBeginAndEndTime(r.getUserId(),
@@ -7348,15 +7352,17 @@ public class PunchServiceImpl implements PunchService {
 		return getPunchGroupDTOByOrg(org);
 	}
 	public String getDepartment(Integer namespaceId, Long detailId){
-		Map<Long,String> departMap = this.organizationProvider.listOrganizationsOfDetail(namespaceId,detailId,OrganizationGroupType.DEPARTMENT.getCode());
-		String department = "";
-		if(!org.springframework.util.StringUtils.isEmpty(departMap)){
-			for(Long k : departMap.keySet()){
-				department += (departMap.get(k) + ",");
-			}
-			department = department.substring(0,department.length()-1);
-		}
-		return department;
+//		Map<Long,String> departMap = this.organizationProvider.listOrganizationsOfDetail(namespaceId,detailId,OrganizationGroupType.DEPARTMENT.getCode());
+//		String department = "";
+//		if(!org.springframework.util.StringUtils.isEmpty(departMap)){
+//			for(Long k : departMap.keySet()){
+//				department += (departMap.get(k) + ",");
+//			}
+//			department = department.substring(0,department.length()-1);
+//		}
+//		return department;
+
+	   return archivesService.convertToOrgNames(archivesService.getEmployeeDepartment(detailId)); 
 	}
 	@Override
 	public ListPunchGroupsResponse listPunchGroups(ListPunchGroupsCommand cmd) {
