@@ -26,6 +26,7 @@ import com.everhomes.rest.wifi.WifiSettingStatus;
 import com.everhomes.settings.PaginationConfigHelper;
 import com.everhomes.user.User;
 import com.everhomes.user.UserContext;
+import com.everhomes.user.UserPrivilegeMgr;
 import com.everhomes.util.ConvertHelper;
 import com.everhomes.util.RuntimeErrorException;
 
@@ -39,9 +40,14 @@ public class WifiServiceImpl implements WifiService{
 	
 	@Autowired
     private ConfigurationProvider configProvider;
+	@Autowired
+	private UserPrivilegeMgr userPrivilegeMgr;
 	
 	@Override
 	public ListWifiSettingResponse listWifiSetting(ListWifiSettingCommand cmd){
+		if(cmd.getCurrentPMId()!=null && configProvider.getBooleanValue("privilege.community.checkflag", true)){
+			userPrivilegeMgr.checkUserPrivilege(UserContext.current().getUser().getId(), cmd.getCurrentPMId(), 4110041100L, cmd.getAppId(), null,cmd.getCurrentProjectId());//一键上网（全部权限）权限权限
+		}
 		if(cmd.getOwnerId() == null || StringUtils.isBlank(cmd.getOwnerType())){
     		LOGGER.error("ownerId or ownertype cannot be null.");
 			throw RuntimeErrorException.errorWith(ErrorCodes.SCOPE_GENERAL, ErrorCodes.ERROR_INVALID_PARAMETER,
@@ -67,6 +73,9 @@ public class WifiServiceImpl implements WifiService{
 	
 	@Override
 	public WifiSettingDTO createWifiSetting(CreateWifiSettingCommand cmd){
+		if(cmd.getCurrentPMId()!=null && configProvider.getBooleanValue("privilege.community.checkflag", true)){
+			userPrivilegeMgr.checkUserPrivilege(UserContext.current().getUser().getId(), cmd.getCurrentPMId(), 4110041100L, cmd.getAppId(), null,cmd.getCurrentProjectId());//一键上网（全部权限）权限权限
+		}
 		if(cmd.getOwnerId() == null || StringUtils.isBlank(cmd.getOwnerType())){
     		LOGGER.error("ownerId or ownertype cannot be null.");
 			throw RuntimeErrorException.errorWith(ErrorCodes.SCOPE_GENERAL, ErrorCodes.ERROR_INVALID_PARAMETER,
@@ -99,6 +108,9 @@ public class WifiServiceImpl implements WifiService{
 	
 	@Override
 	public WifiSettingDTO editWifiSetting(EditWifiSettingCommand cmd){
+		if(cmd.getCurrentPMId()!=null && configProvider.getBooleanValue("privilege.community.checkflag", true)){
+			userPrivilegeMgr.checkUserPrivilege(UserContext.current().getUser().getId(), cmd.getCurrentPMId(), 4110041100L, cmd.getAppId(), null,cmd.getCurrentProjectId());//一键上网（全部权限）权限
+		}
 		WifiSetting wifiSetting = checkId(cmd.getId(),cmd.getOwnerId(),cmd.getOwnerType());
 		wifiSetting.setSsid(cmd.getSsid());
 		
