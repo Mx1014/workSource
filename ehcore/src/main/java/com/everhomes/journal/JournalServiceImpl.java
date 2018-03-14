@@ -28,6 +28,7 @@ import com.everhomes.rest.journal.UpdateJournalConfigCommand;
 import com.everhomes.settings.PaginationConfigHelper;
 import com.everhomes.user.User;
 import com.everhomes.user.UserContext;
+import com.everhomes.user.UserPrivilegeMgr;
 import com.everhomes.user.UserProvider;
 import com.everhomes.util.ConvertHelper;
 import com.everhomes.util.RuntimeErrorException;
@@ -46,9 +47,13 @@ public class JournalServiceImpl implements JournalService{
 	private UserProvider userProvider;
 	@Autowired
     private ContentServerService contentServerService;
-	
+	@Autowired
+	private UserPrivilegeMgr userPrivilegeMgr;
 	@Override
 	public ListJournalsResponse listJournals(ListJournalsCommand cmd) {
+		if(cmd.getCurrentPMId()!=null && configProvider.getBooleanValue("privilege.community.checkflag", true)){
+			userPrivilegeMgr.checkUserPrivilege(UserContext.current().getUser().getId(), cmd.getCurrentPMId(), 1050010510L, cmd.getAppId(), null,0L);//园区报管理权限
+		}
 		ListJournalsResponse response = new ListJournalsResponse();
 		Integer pageSize = PaginationConfigHelper.getPageSize(configProvider, cmd.getPageSize());
 
@@ -127,6 +132,9 @@ public class JournalServiceImpl implements JournalService{
 
 	@Override
 	public void updateJournalConfig(UpdateJournalConfigCommand cmd) {
+		if(cmd.getCurrentPMId()!=null && configProvider.getBooleanValue("privilege.community.checkflag", true)){
+			userPrivilegeMgr.checkUserPrivilege(UserContext.current().getUser().getId(), cmd.getCurrentPMId(), 1050010520L, cmd.getAppId(), null,0L);//约稿须知权限
+		}
 		if(null == cmd.getNamespaceId()) {
         	LOGGER.error("NamespaceId cannot be null.");
     		throw RuntimeErrorException.errorWith(ErrorCodes.SCOPE_GENERAL, ErrorCodes.ERROR_INVALID_PARAMETER,
@@ -151,6 +159,9 @@ public class JournalServiceImpl implements JournalService{
 
 	@Override
 	public JournalConfigDTO getJournalConfig(GetJournalConfigCommand cmd) {
+		if(cmd.getCurrentPMId()!=null && configProvider.getBooleanValue("privilege.community.checkflag", true)){
+			userPrivilegeMgr.checkUserPrivilege(UserContext.current().getUser().getId(), cmd.getCurrentPMId(), 1050010520L, cmd.getAppId(), null,0L);//约稿须知权限
+		}
 		if(null == cmd.getNamespaceId()) {
         	LOGGER.error("NamespaceId cannot be null, cmd={}", cmd);
     		throw RuntimeErrorException.errorWith(ErrorCodes.SCOPE_GENERAL, ErrorCodes.ERROR_INVALID_PARAMETER,
@@ -209,6 +220,9 @@ public class JournalServiceImpl implements JournalService{
 
 	@Override
 	public void createJournal(CreateJournalCommand cmd) {
+		if(cmd.getCurrentPMId()!=null && configProvider.getBooleanValue("privilege.community.checkflag", true)){
+			userPrivilegeMgr.checkUserPrivilege(UserContext.current().getUser().getId(), cmd.getCurrentPMId(), 1050010510L, cmd.getAppId(), null,0L);//园区报管理权限
+		}
 		if(null == cmd.getNamespaceId()) {
         	LOGGER.error("NamespaceId cannot be null.");
     		throw RuntimeErrorException.errorWith(ErrorCodes.SCOPE_GENERAL, ErrorCodes.ERROR_INVALID_PARAMETER,
