@@ -96,6 +96,7 @@ import com.everhomes.techpark.rental.IncompleteUnsuccessRentalBillAction;
 import com.everhomes.user.User;
 import com.everhomes.user.UserContext;
 import com.everhomes.user.UserIdentifier;
+import com.everhomes.user.UserPrivilegeMgr;
 import com.everhomes.user.UserProvider;
 import com.everhomes.user.UserService;
 import com.everhomes.util.ConvertHelper;
@@ -233,6 +234,9 @@ public class Rentalv2ServiceImpl implements Rentalv2Service {
 	private RentalCommonServiceImpl rentalCommonService;
 	@Autowired
 	private DingDingParkingLockHandler dingDingParkingLockHandler;
+	
+	@Autowired
+	private UserPrivilegeMgr userPrivilegeMgr;
 
 	private ExecutorService executorPool =  Executors.newFixedThreadPool(5);
 	private Time convertTime(Long TimeLong) {
@@ -4211,6 +4215,9 @@ public class Rentalv2ServiceImpl implements Rentalv2Service {
 
 	@Override
 	public ListRentalBillsCommandResponse listRentalBills(ListRentalBillsCommand cmd) {
+		if(cmd.getCurrentPMId()!=null && configurationProvider.getBooleanValue("privilege.community.checkflag", true)){
+			userPrivilegeMgr.checkUserPrivilege(UserContext.current().getUser().getId(), cmd.getCurrentPMId(), 4040040420L, cmd.getAppId(), null,cmd.getCurrentProjectId());//订单记录权限
+		}
 		ListRentalBillsCommandResponse response = new ListRentalBillsCommandResponse();
 		if(cmd.getPageAnchor() == null)
 			cmd.setPageAnchor(Long.MAX_VALUE); 
@@ -6007,7 +6014,9 @@ public class Rentalv2ServiceImpl implements Rentalv2Service {
 
 	@Override
 	public void exportRentalBills(ListRentalBillsCommand cmd, HttpServletResponse response) {
-
+		if(cmd.getCurrentPMId()!=null && configurationProvider.getBooleanValue("privilege.community.checkflag", true)){
+			userPrivilegeMgr.checkUserPrivilege(UserContext.current().getUser().getId(), cmd.getCurrentPMId(), 4040040420L, cmd.getAppId(), null,cmd.getCurrentProjectId());//订单记录权限
+		}
 		Integer pageSize = Integer.MAX_VALUE; 
 		List<RentalOrder> bills = rentalv2Provider.listRentalBills(cmd.getResourceTypeId(), cmd.getOrganizationId(), cmd.getCommunityId(),
 				cmd.getRentalSiteId(), new CrossShardListingLocator(), cmd.getBillStatus(), cmd.getVendorType(), pageSize, cmd.getStartTime(), cmd.getEndTime(),
@@ -6172,6 +6181,9 @@ public class Rentalv2ServiceImpl implements Rentalv2Service {
 
 	@Override
 	public GetResourceListAdminResponse getResourceList(GetResourceListAdminCommand cmd) {
+		if(cmd.getCurrentPMId()!=null && configurationProvider.getBooleanValue("privilege.community.checkflag", true)){
+			userPrivilegeMgr.checkUserPrivilege(UserContext.current().getUser().getId(), cmd.getCurrentPMId(), 4040040410L, cmd.getAppId(), null,cmd.getCurrentProjectId());//资源管理权限
+		}
 		GetResourceListAdminResponse response = new GetResourceListAdminResponse();
 		if(null==cmd.getOrganizationId())
 			throw RuntimeErrorException.errorWith(ErrorCodes.SCOPE_GENERAL,
@@ -6242,6 +6254,9 @@ public class Rentalv2ServiceImpl implements Rentalv2Service {
 
 	@Override
 	public void addResource(AddResourceAdminCommand cmd) {
+		if(cmd.getCurrentPMId()!=null && configurationProvider.getBooleanValue("privilege.community.checkflag", true)){
+			userPrivilegeMgr.checkUserPrivilege(UserContext.current().getUser().getId(), cmd.getCurrentPMId(), 4040040410L, cmd.getAppId(), null,cmd.getCurrentProjectId());//资源管理权限
+		}
 		if(null == cmd.getOrganizationId()) {
 			throw RuntimeErrorException.errorWith(ErrorCodes.SCOPE_GENERAL,
 					ErrorCodes.ERROR_INVALID_PARAMETER, "Invalid organizationId parameter in the command");
