@@ -328,6 +328,10 @@ public class PunchServiceImpl implements PunchService {
 	private PortalService portalService;
 	@Autowired
 	private UserPrivilegeMgr userPrivilegeMgr;
+	@Autowired
+	private PunchVacationBalanceLogProvider punchVacationBalanceLogProvider;
+	@Autowired
+	private PunchVacationBalanceProvider punchVacationBalanceProvider;
 	@Override
 	public void checkAppPrivilege(Long orgId,Long checkOrgId, Long privilege){
 		if(checkBooleanAppPrivilege(orgId,checkOrgId,privilege)){
@@ -8979,7 +8983,7 @@ public class PunchServiceImpl implements PunchService {
 
 	@Override
 	public ListVacationBalancesResponse listVacationBalances(ListVacationBalancesCommand cmd) {
-		// TODO Auto-generated method stub
+		
 		return null;
 	}
 
