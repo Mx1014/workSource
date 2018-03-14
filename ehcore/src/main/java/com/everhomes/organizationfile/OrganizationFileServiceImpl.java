@@ -32,6 +32,7 @@ import com.everhomes.server.schema.Tables;
 import com.everhomes.settings.PaginationConfigHelper;
 import com.everhomes.user.User;
 import com.everhomes.user.UserContext;
+import com.everhomes.user.UserPrivilegeMgr;
 import com.everhomes.user.UserProvider;
 import com.everhomes.util.ConvertHelper;
 import com.everhomes.util.Tuple;
@@ -80,7 +81,8 @@ public class OrganizationFileServiceImpl implements OrganizationFileService {
 
     @Autowired
     private ConfigurationProvider configurationProvider;
-
+	@Autowired
+	private UserPrivilegeMgr userPrivilegeMgr;
     @Autowired
     private CoordinationProvider coordinationProvider;
 
@@ -180,6 +182,9 @@ public class OrganizationFileServiceImpl implements OrganizationFileService {
 
     @Override
     public SearchOrganizationFileResponse searchOrganizationFileByCommunity(SearchOrganizationFileByCommunityCommand cmd) {
+    	if(cmd.getCurrentPMId()!=null && configurationProvider.getBooleanValue("privilege.community.checkflag", true)){
+			userPrivilegeMgr.checkUserPrivilege(UserContext.current().getUser().getId(), cmd.getCurrentPMId(), 4150041500L, cmd.getAppId(), null,cmd.getCurrentProjectId());//文件管理权限
+		}
         validate(cmd);
         this.checkCurrentUserNotInOrg(cmd.getOrganizationId());
 
@@ -287,6 +292,9 @@ public class OrganizationFileServiceImpl implements OrganizationFileService {
 
     @Override
     public ListOrganizationFileDownloadLogsResponse listOrganizationFileDownloadLogs(ListOrganizationFileDownloadLogsCommand cmd) {
+    	if(cmd.getCurrentPMId()!=null && configurationProvider.getBooleanValue("privilege.community.checkflag", true)){
+			userPrivilegeMgr.checkUserPrivilege(UserContext.current().getUser().getId(), cmd.getCurrentPMId(), 4150041500L, cmd.getAppId(), null,cmd.getCurrentProjectId());//文件管理权限
+		}
         validate(cmd);
         checkCurrentUserNotInOrg(cmd.getOrganizationId());
 
