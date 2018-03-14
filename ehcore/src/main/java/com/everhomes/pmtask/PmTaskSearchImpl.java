@@ -6,10 +6,12 @@ import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.List;
 import java.util.Map;
+import java.util.stream.Collectors;
 
 import com.everhomes.category.Category;
 import com.everhomes.category.CategoryProvider;
 import com.everhomes.rest.pmtask.PmTaskAppType;
+import com.everhomes.rest.pmtask.PmtaskCreatorType;
 import org.apache.commons.lang.StringUtils;
 import org.elasticsearch.action.bulk.BulkRequestBuilder;
 import org.elasticsearch.action.search.SearchRequestBuilder;
@@ -71,6 +73,7 @@ public class PmTaskSearchImpl extends AbstractElasticSearch implements PmTaskSea
             b.field("requestorName", task.getRequestorName());
             b.field("requestorPhone", task.getRequestorPhone());
             b.field("buildingName", task.getBuildingName());
+            b.field("organizationUid",task.getOrganizationUid()==null?0:task.getOrganizationUid());
 
             Category appType = categoryProvider.findCategoryById(task.getTaskCategoryId());
             //多入口查全部数据
@@ -125,7 +128,7 @@ public class PmTaskSearchImpl extends AbstractElasticSearch implements PmTaskSea
         this.deleteAll();
         for(;;){
             List<PmTask> tasks = pmTaskProvider.listPmTask(null, null, null, nextPageAnchor, pageSize);
-        	
+        	tasks = tasks.stream().filter(r-> r.getFlowCaseId()!=null && r.getFlowCaseId()>0).collect(Collectors.toList());
         	if(tasks.size() > 0){
 
         		if(tasks.size() == pageSize){
@@ -151,7 +154,7 @@ public class PmTaskSearchImpl extends AbstractElasticSearch implements PmTaskSea
 
     @Override
     public List<PmTaskDTO> searchDocsByType(Byte status, String queryString,Long ownerId, String ownerType, Long categoryId, Long startDate, 
-    		Long endDate, Long addressId, String buildingName, Long pageAnchor, Integer pageSize) {
+    		Long endDate, Long addressId, String buildingName,Byte creatorType, Long pageAnchor, Integer pageSize) {
         SearchRequestBuilder builder = getClient().prepareSearch(getIndexName()).setTypes(getIndexType());
         
         
@@ -182,6 +185,13 @@ public class PmTaskSearchImpl extends AbstractElasticSearch implements PmTaskSea
         	if(null == rb)
         		rb = QueryBuilders.rangeQuery("createTime");
             rb.lt(endDate);
+            qb = qb.must(rb);
+        }
+        if (null!=creatorType){
+            if (creatorType.equals(PmtaskCreatorType.SELF.getCode()))
+                rb = QueryBuilders.rangeQuery("organizationUid").lte(0l);
+            if (creatorType.equals(PmtaskCreatorType.OTHERS.getCode()))
+                rb = QueryBuilders.rangeQuery("organizationUid").gt(0l);
             qb = qb.must(rb);
         }
 
@@ -251,6 +261,7 @@ public class PmTaskSearchImpl extends AbstractElasticSearch implements PmTaskSea
             doc.setRequestorPhone((String)source.get("requestorPhone"));
             doc.setFlowCaseId(SearchUtils.getLongField(source.get("flowCaseId")));
             doc.setBuildingName((String)source.get("buildingName"));
+            doc.setOrganizationUid(SearchUtils.getLongField(source.get("organizationUid")));
             
             return doc;
         }catch (Exception ex) {

@@ -16,11 +16,13 @@ import com.everhomes.util.ConvertHelper;
 import com.everhomes.util.DateHelper;
 import org.jooq.Condition;
 import org.jooq.DSLContext;
+import org.jooq.DeleteQuery;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
 import org.springframework.util.StringUtils;
 
 import java.sql.Timestamp;
+import java.util.ArrayList;
 import java.util.List;
 
 @Component
@@ -45,6 +47,30 @@ public class PortalItemCategoryProviderImpl implements PortalItemCategoryProvide
 		DaoHelper.publishDaoAction(DaoAction.CREATE, EhPortalItemCategories.class, null);
 	}
 
+
+	@Override
+	public void createPortalItemCategories(List<PortalItemCategory> portalItemCategories) {
+		if(portalItemCategories.size() == 0){
+			return;
+		}
+		/**
+		 * 有id使用原来的id，没有则生成新的
+		 */
+		Long id = sequenceProvider.getNextSequenceBlock(NameMapper.getSequenceDomainFromTablePojo(EhPortalItemCategories.class), (long)portalItemCategories.size() + 1);
+		List<EhPortalItemCategories> categories = new ArrayList<>();
+		for (PortalItemCategory category: portalItemCategories) {
+			if(category.getId() == null){
+				id ++;
+				category.setId(id);
+			}
+			category.setCreateTime(new Timestamp(DateHelper.currentGMTTime().getTime()));
+			category.setUpdateTime(category.getCreateTime());
+			categories.add(ConvertHelper.convert(category, EhPortalItemCategories.class));
+		}
+		getReadWriteDao().insert(categories);
+		DaoHelper.publishDaoAction(DaoAction.CREATE, EhPortalItemCategories.class, null);
+	}
+
 	@Override
 	public void updatePortalItemCategory(PortalItemCategory portalItemCategory) {
 		assert (portalItemCategory.getId() != null);
@@ -52,6 +78,15 @@ public class PortalItemCategoryProviderImpl implements PortalItemCategoryProvide
 		getReadWriteDao().update(portalItemCategory);
 		DaoHelper.publishDaoAction(DaoAction.MODIFY, EhPortalItemCategories.class, portalItemCategory.getId());
 	}
+
+	@Override
+	public void deleteByVersionId(Long versionId){
+		DeleteQuery query = getReadWriteContext().deleteQuery(Tables.EH_PORTAL_ITEM_CATEGORIES);
+		query.addConditions(Tables.EH_PORTAL_ITEM_CATEGORIES.VERSION_ID.eq(versionId));
+		query.execute();
+		DaoHelper.publishDaoAction(DaoAction.MODIFY, EhPortalItemCategories.class, null);
+	}
+
 
 	@Override
 	public PortalItemCategory findPortalItemCategoryById(Long id) {
@@ -82,10 +117,23 @@ public class PortalItemCategoryProviderImpl implements PortalItemCategoryProvide
 			cond = cond.and(Tables.EH_PORTAL_ITEM_CATEGORIES.NAME.eq(name));
 		}
 
+//		if(!StringUtils.isEmpty(name)){
+//			cond = cond.and(Tables.EH_PORTAL_ITEM_CATEGORIES.VERSION_ID.eq(versionId));
+//		}
+
 		return getReadOnlyContext().select().from(Tables.EH_PORTAL_ITEM_CATEGORIES)
 				.where(Tables.EH_PORTAL_ITEM_CATEGORIES.NAMESPACE_ID.eq(namespaceId))
 				.and(cond)
 				.orderBy(Tables.EH_PORTAL_ITEM_CATEGORIES.ID.asc())
+				.fetch().map(r -> ConvertHelper.convert(r, PortalItemCategory.class));
+	}
+
+
+	@Override
+	public List<PortalItemCategory> listPortalItemCategoryByVersion(Integer namespaceId, Long versionId) {
+		return getReadOnlyContext().select().from(Tables.EH_PORTAL_ITEM_CATEGORIES)
+				.where(Tables.EH_PORTAL_ITEM_CATEGORIES.NAMESPACE_ID.eq(namespaceId))
+				.and(Tables.EH_PORTAL_ITEM_CATEGORIES.VERSION_ID.eq(versionId))
 				.fetch().map(r -> ConvertHelper.convert(r, PortalItemCategory.class));
 	}
 	

@@ -4,8 +4,12 @@ import javax.validation.constraints.NotNull;
 
 import com.everhomes.util.StringHelper;
 /**
- * <ul> 
- * <li>rentalSiteId：场所id</li>
+ * <ul>
+ * <li>ownerType: ownerType {@link com.everhomes.rest.rentalv2.RentalOwnerType}</li>
+ * <li>ownerId: 园区id</li>
+ * <li>sourceType：default_rule:默认规则  resource_rule:资源规则</li>
+ * <li>sourceId：资源规则时 场所id 默认规则时 规则id </li>
+ * <li>resourceTypeId: 图标id</li>
  * <li>itemName：商品名称</li>
  * <li>itemPrice：商品价格</li>
  * <li>counts：商品数量</li>
@@ -14,9 +18,15 @@ import com.everhomes.util.StringHelper;
  * <li>itemType：商品类型 参考{@link com.everhomes.rest.rentalv2.RentalItemType}}</li>
  * </ul>
  */
-public class AddItemAdminCommand { 
+public class AddItemAdminCommand {
+
+	private String ownerType;
+
+	private Long ownerId;
 	@NotNull
-	private Long rentalSiteId;
+	private String sourceType;
+	@NotNull
+	private Long sourceId;
 	@NotNull
 	private String itemName;
 	@NotNull
@@ -27,16 +37,30 @@ public class AddItemAdminCommand {
 	private java.lang.Integer    defaultOrder;
 	private java.lang.Byte       itemType;
 	private String description;
+	private String resourceType;
+	private Long resourceTypeId;
+
 	@Override
     public String toString() {
         return StringHelper.toJsonString(this);
     }
-	public Long getRentalSiteId() {
-		return rentalSiteId;
+
+	public String getSourceType() {
+		return sourceType;
 	}
-	public void setRentalSiteId(Long rentalSiteId) {
-		this.rentalSiteId = rentalSiteId;
+
+	public void setSourceType(String sourceType) {
+		this.sourceType = sourceType;
 	}
+
+	public Long getSourceId() {
+		return sourceId;
+	}
+
+	public void setSourceId(Long sourceId) {
+		this.sourceId = sourceId;
+	}
+
 	public String getItemName() {
 		return itemName;
 	}
@@ -81,5 +105,37 @@ public class AddItemAdminCommand {
 
 	public void setDescription(String description) {
 		this.description = description;
+	}
+
+	public String getResourceType() {
+		return resourceType;
+	}
+
+	public void setResourceType(String resourceType) {
+		this.resourceType = resourceType;
+	}
+
+	public String getOwnerType() {
+		return ownerType;
+	}
+
+	public void setOwnerType(String ownerType) {
+		this.ownerType = ownerType;
+	}
+
+	public Long getOwnerId() {
+		return ownerId;
+	}
+
+	public void setOwnerId(Long ownerId) {
+		this.ownerId = ownerId;
+	}
+
+	public Long getResourceTypeId() {
+		return resourceTypeId;
+	}
+
+	public void setResourceTypeId(Long resourceTypeId) {
+		this.resourceTypeId = resourceTypeId;
 	}
 }

@@ -14,6 +14,8 @@ public class CreateTaskCategoryCommand {
 	private Integer namespaceId;
 	private String name;
 	private Long parentId;
+	private Long ownerId;
+	private String ownerType;
 
 	private  Long currentOrgId;
 	public Long getParentId() {
@@ -42,6 +44,22 @@ public class CreateTaskCategoryCommand {
 
 	public void setCurrentOrgId(Long currentOrgId) {
 		this.currentOrgId = currentOrgId;
+	}
+
+	public Long getOwnerId() {
+		return ownerId;
+	}
+
+	public void setOwnerId(Long ownerId) {
+		this.ownerId = ownerId;
+	}
+
+	public String getOwnerType() {
+		return ownerType;
+	}
+
+	public void setOwnerType(String ownerType) {
+		this.ownerType = ownerType;
 	}
 
 	@Override

@@ -413,4 +413,18 @@ public class ArchivesController extends ControllerBase{
         response.setErrorDescription("OK");
         return response;
     }
+
+    /**
+     * <b>URL: /archives/syncArchivesDismissStatus</b>
+     * <p>同步员工的离职状态（上线时执行一次）</p>
+     */
+    @RequestMapping("syncArchivesDismissStatus")
+    @RestReturn(value = String.class)
+    public RestResponse syncArchivesDismissStatus(){
+        archivesService.syncArchivesDismissStatus();
+        RestResponse response = new RestResponse();
+        response.setErrorCode(ErrorCodes.SUCCESS);
+        response.setErrorDescription("OK");
+        return response;
+    }
 }

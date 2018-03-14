@@ -1,14 +1,15 @@
 package com.everhomes.rest.quality;
 
-import javax.validation.constraints.NotNull;
-
 import com.everhomes.util.StringHelper;
+
+import javax.validation.constraints.NotNull;
 
 /**
  * <ul>
  *  <li>specificationId: 规范id</li>
  *  <li>ownerId: 规范所属组织等的id</li>
  *  <li>ownerType: 规范所属组织类型，如enterprise</li>
+ *  <li>namespaceId: namespaceId</li>
  * </ul>
  */
 public class GetQualitySpecificationCommand {
@@ -21,6 +22,8 @@ public class GetQualitySpecificationCommand {
 	
 	@NotNull
 	private String ownerType;
+
+	private Integer namespaceId;
 
 	public Long getSpecificationId() {
 		return specificationId;
@@ -44,6 +47,14 @@ public class GetQualitySpecificationCommand {
 
 	public void setOwnerType(String ownerType) {
 		this.ownerType = ownerType;
+	}
+
+	public Integer getNamespaceId() {
+		return namespaceId;
+	}
+
+	public void setNamespaceId(Integer namespaceId) {
+		this.namespaceId = namespaceId;
 	}
 
 	@Override

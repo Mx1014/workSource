@@ -1,15 +1,10 @@
 package com.everhomes.rest.quality;
 
-import java.sql.Timestamp;
-import java.util.List;
-
-
-
-
-
-
 import com.everhomes.discover.ItemType;
 import com.everhomes.util.StringHelper;
+
+import java.sql.Timestamp;
+import java.util.List;
 
 /**
  * <ul>
@@ -30,6 +25,7 @@ import com.everhomes.util.StringHelper;
  *  <li>executorName:核查人姓名</li>
  *  <li>operatorId:整改人id</li>
  *  <li>operatorName:整改人姓名</li>
+ *  <li>operatorType:整改执行人类型</li>
  *  <li>reviewerId:审核人id</li>
  *  <li>reviewerName:审核人姓名</li>
  *  <li>executiveStartTime: 核查开始时间</li>
@@ -51,6 +47,11 @@ import com.everhomes.util.StringHelper;
  *  <li>creatorUid : 创建者uid</li>
  *  <li>creatorName : 创建者姓名</li>
  *  <li>createTime : 创建时间</li>
+ *  <li>executiveTime : 执行时间</li>
+ *  <li>processTime : 整改时间</li>
+ *  <li>reviewTime : 审阅时间</li>
+ *  <li>lastSyncTime : 上次最大同步时间</li>
+ *  <li>verificationResult :offline CORRECT((byte)1), INSPECT_COMPLETE((byte)2)</li>
  * </ul>
  */
 public class QualityInspectionTaskDTO {
@@ -94,6 +95,8 @@ public class QualityInspectionTaskDTO {
 	private Long operatorId;
 	
 	private String operatorName;
+
+	private String operatorType;
 	
 	private Timestamp executiveStartTime;
 	
@@ -134,6 +137,16 @@ public class QualityInspectionTaskDTO {
 	private String categoryDescription;
 	
 	private Timestamp createTime;
+
+	private Timestamp executiveTime;
+
+	private Timestamp processTime;
+
+	private Timestamp reviewTime;
+
+	private String lastSyncTime;
+
+	private Byte verificationResult;
 
 	public Long getId() {
 		return id;
@@ -277,6 +290,14 @@ public class QualityInspectionTaskDTO {
 
 	public void setOperatorName(String operatorName) {
 		this.operatorName = operatorName;
+	}
+
+	public String getOperatorType() {
+		return operatorType;
+	}
+
+	public void setOperatorType(String operatorType) {
+		this.operatorType = operatorType;
 	}
 
 	public Timestamp getExecutiveStartTime() {
@@ -445,6 +466,46 @@ public class QualityInspectionTaskDTO {
 
 	public void setExecutiveGroupName(String executiveGroupName) {
 		this.executiveGroupName = executiveGroupName;
+	}
+
+	public Timestamp getExecutiveTime() {
+		return executiveTime;
+	}
+
+	public void setExecutiveTime(Timestamp executiveTime) {
+		this.executiveTime = executiveTime;
+	}
+
+	public Timestamp getProcessTime() {
+		return processTime;
+	}
+
+	public void setProcessTime(Timestamp processTime) {
+		this.processTime = processTime;
+	}
+
+	public Timestamp getReviewTime() {
+		return reviewTime;
+	}
+
+	public void setReviewTime(Timestamp reviewTime) {
+		this.reviewTime = reviewTime;
+	}
+
+	public String getLastSyncTime() {
+		return lastSyncTime;
+	}
+
+	public void setLastSyncTime(String lastSyncTime) {
+		this.lastSyncTime = lastSyncTime;
+	}
+
+	public Byte getVerificationResult() {
+		return verificationResult;
+	}
+
+	public void setVerificationResult(Byte verificationResult) {
+		this.verificationResult = verificationResult;
 	}
 
 	@Override

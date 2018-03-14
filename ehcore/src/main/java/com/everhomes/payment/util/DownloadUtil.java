@@ -18,12 +18,16 @@ public class DownloadUtil{
 	private static final Logger LOGGER = LoggerFactory.getLogger(DownloadUtil.class);
 	
 	public static HttpServletResponse download(ByteArrayOutputStream out, HttpServletResponse response) {
+		return download(out, response,System.currentTimeMillis()+"");
+	}
+	
+	public static HttpServletResponse download(ByteArrayOutputStream out, HttpServletResponse response,String filename) {
         try {
 
             // 清空response
             //response.reset();
             // 设置response的Header
-            response.addHeader("Content-Disposition", "attachment;filename=" + System.currentTimeMillis()+".xlsx");
+            response.addHeader("Content-Disposition", "attachment;filename=" + filename+".xlsx");
             //response.addHeader("Content-Length", "" + out.);
             OutputStream toClient = new BufferedOutputStream(response.getOutputStream());
             response.setContentType("application/msexcel");

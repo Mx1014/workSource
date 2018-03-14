@@ -17,6 +17,13 @@ public class  OrganizationMemberDetails extends EhOrganizationMemberDetails {
     private Date endTime;
     private String nickName;
 
+    //  add by ryan for socialSecurity
+    private String departmentName;
+
+    private String jobPositionName;
+
+    private String jobLevelName;
+
     public OrganizationMemberDetails() {
     }
 
@@ -66,6 +73,30 @@ public class  OrganizationMemberDetails extends EhOrganizationMemberDetails {
 
     public void setNickName(String nickName) {
         this.nickName = nickName;
+    }
+
+    public String getDepartmentName() {
+        return departmentName;
+    }
+
+    public void setDepartmentName(String departmentName) {
+        this.departmentName = departmentName;
+    }
+
+    public String getJobPositionName() {
+        return jobPositionName;
+    }
+
+    public void setJobPositionName(String jobPositionName) {
+        this.jobPositionName = jobPositionName;
+    }
+
+    public String getJobLevelName() {
+        return jobLevelName;
+    }
+
+    public void setJobLevelName(String jobLevelName) {
+        this.jobLevelName = jobLevelName;
     }
 
     @Override

@@ -2,7 +2,9 @@
 package com.everhomes.openapi;
 
 import com.everhomes.contract.ContractParam;
+import com.everhomes.contract.ContractParamGroupMap;
 import com.everhomes.listing.CrossShardListingLocator;
+import com.everhomes.rest.contract.ContractLogDTO;
 
 import java.sql.Timestamp;
 import java.util.List;
@@ -51,6 +53,12 @@ public interface ContractProvider {
 	void createContractParam(ContractParam param);
 	void updateContractParam(ContractParam param);
 	ContractParam findContractParamByCommunityId(Integer namespaceId, Long communityId);
+
+	void createContractParamGroupMap(ContractParamGroupMap map);
+	void deleteContractParamGroupMap(ContractParamGroupMap map);
+	List<ContractParamGroupMap> listByParamId(Long paramId, Byte groupType);
+
+
 	Map<Long, List<Contract>> listContractGroupByCommunity();
 	String findLastContractVersionByCommunity(Integer namespaceId, Long communityId);
 
@@ -58,4 +66,6 @@ public interface ContractProvider {
 	List<Contract> listContractsByAddressId(Long addressId);
 
     String findContractIdByThirdPartyId(String contractId, String code);
+
+    List<ContractLogDTO> listContractsBySupplier(Long supplierId, Long pageAnchor, Integer pageSize);
 }

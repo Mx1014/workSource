@@ -13,7 +13,16 @@ public interface PortalPublishHandler {
      * @param instanceConfig 具体模块配置的参数
      * @return instanceConfig 把json对象里面个个实体需要的id补充返回
      */
-    String publish(Integer namespaceId, String instanceConfig,String itemLabel);
+    String publish(Integer namespaceId, String instanceConfig,String appName);
+
+    /**
+     * 配置应用的信息，比如说是icon的url等
+     * 注：去查询应用的时候会将config传给业务，让业务填充一些配置信息返回，类似于group变成groupDTO对象的过程。
+     * @param instanceConfig
+     * @return
+     */
+    String processInstanceConfig(String instanceConfig);
+
 
     /**
      * 处理成服务广场item需要的actionData
@@ -30,8 +39,6 @@ public interface PortalPublishHandler {
      * @return
      */
     String getAppInstanceConfig(Integer namespaceId, String actionData);
-
-    String processInstanceConfig(String instanceConfig);
 
     /**
      * 根据图标信息，传回多入口的标志ID

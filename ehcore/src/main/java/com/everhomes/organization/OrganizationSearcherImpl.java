@@ -236,12 +236,12 @@ public class OrganizationSearcherImpl extends AbstractElasticSearch implements O
 //        }
 
 
-        if(cmd.getBuildingName() != null) {
-            //fix bug for #15397
-            qbs.add(QueryBuilders.queryString(cmd.getBuildingName()).field("buildings"));
-//            FilterBuilder buildFilter = FilterBuilders.termFilter("buildings", cmd.getBuildingName());
-//            fbList.add(buildFilter);
-        }
+//        if(cmd.getBuildingName() != null) {
+//            //fix bug for #15397
+//            qbs.add(QueryBuilders.queryString(cmd.getBuildingName()).field("buildings"));
+////            FilterBuilder buildFilter = FilterBuilders.termFilter("buildings", cmd.getBuildingName());
+////            fbList.add(buildFilter);
+//        }
 
         if(StringUtils.isEmpty(cmd.getKeyword())) {
             if (StringUtils.isEmpty(cmd.getBuildingName())) {
@@ -305,12 +305,12 @@ public class OrganizationSearcherImpl extends AbstractElasticSearch implements O
         FilterBuilder fb = FilterBuilders.termFilter("namespaceId", namespaceId);
         fbList.add(fb);
 
-//        if(cmd.getBuildingName() != null) {
-//            //fix bug for #15397
+        if(cmd.getBuildingName() != null) {
+            //fix bug for #15397
 //            qbs.add(QueryBuilders.queryString(cmd.getBuildingName()).field("buildings"));
-////            FilterBuilder buildFilter = FilterBuilders.termFilter("buildings", cmd.getBuildingName());
-////            fbList.add(buildFilter);
-//        }
+            FilterBuilder buildFilter = FilterBuilders.termFilter("buildings", cmd.getBuildingName());
+            fbList.add(buildFilter);
+        }
 
         // 每个企业（含物业管理公司）都有可能在某个园区内，当客户端提供园区作为过滤条件时，则在园区范围内挑选园区 by lqs 20160512
         if(cmd.getCommunityId() != null) {
@@ -334,10 +334,10 @@ public class OrganizationSearcherImpl extends AbstractElasticSearch implements O
             fbList.add(adminFlagFilter);
         }
 
-        if (cmd.getExistAddressFlag() != null && cmd.getExistAddressFlag() == ExistAddressFlag.EXIST.getCode()) {
-            FilterBuilder addressFilter = FilterBuilders.existsFilter("addresses");
-            fbList.add(addressFilter);
-        }
+//        if (cmd.getExistAddressFlag() != null && cmd.getExistAddressFlag() == ExistAddressFlag.EXIST.getCode()) {
+//            FilterBuilder addressFilter = FilterBuilders.existsFilter("addresses");
+//            fbList.add(addressFilter);
+//        }
 
         fb = FilterBuilders.andFilter(fbList.toArray(new FilterBuilder[fbList.size()]));
 

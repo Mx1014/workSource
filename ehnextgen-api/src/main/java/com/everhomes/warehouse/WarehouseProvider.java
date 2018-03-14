@@ -1,6 +1,11 @@
 package com.everhomes.warehouse;
 
 import com.everhomes.listing.CrossShardListingLocator;
+import com.everhomes.rest.warehouse.SearchWarehouseStockLogsResponse;
+import com.everhomes.rest.warehouse.WarehouseLogDTO;
+import com.everhomes.rest.warehouse.WarehouseMaterialStock;
+import com.everhomes.rest.warehouse.WarehouseStockOrderDTO;
+import com.everhomes.server.schema.tables.pojos.EhWarehouseStockLogs;
 
 import java.util.List;
 import java.util.Set;
@@ -67,4 +72,38 @@ public interface WarehouseProvider {
     Set<Long> findWarehouseNamespace();
 
     String findWarehouseMenuName();
+
+    List<WarehouseStockOrderDTO> listWarehouseStockOrders(String executor, Integer namespaceId, String ownerType, Long ownerId, Byte serviceType, Long pageAnchor, Integer pageSize);
+
+    WarehouseOrder findWarehouseOrderById(Long id);
+
+    void insertWarehouseOrder(WarehouseOrder order);
+
+    void updateWarehouseOrder(WarehouseOrder order);
+
+    void deleteWarehouseStockLogs(Long id);
+
+    void insertWarehouseStockLogs(List<EhWarehouseStockLogs> list);
+
+    void deleteWarehouseOrderById(Long id);
+
+    List<Long> findAllMaterialLogIds(Long warehouseOrderId, Long anchor, int pageSize, SearchWarehouseStockLogsResponse response);
+
+    void updateWarehouseStockByPurchase(Long materialId, Long purchaseQuantity);
+
+    String findWarehouseNameByMaterialId(Long materialId);
+
+    String findWarehouseMaterialCategoryByMaterialId(Long materialId);
+
+    String findWarehouseUnitNameById(Long unitId);
+
+    WarehouseMaterials findWarehouseMaterialById(Long materialId);
+
+    WarehouseMaterialStock findWarehouseStocksByMaterialId(Long materialId);
+
+    void deleteWarehouseRequest(Long requestId);
+
+    List<WarehouseLogDTO> listMaterialLogsBySupplier(Long supplierId, Long pageAnchor, Integer integer);
+
+    String findWarehouseMaterialCategoryNameById(Long value);
 }

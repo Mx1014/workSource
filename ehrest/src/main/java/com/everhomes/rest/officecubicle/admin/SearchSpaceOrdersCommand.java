@@ -5,24 +5,72 @@ import com.everhomes.util.StringHelper;
 /**
  * <ul>
  * 列出工位预定空间的请求参数
+  * <li>namespaceId : namespaceId </li>
+  * <li>ownerType : community 工位发布的范围</li>
+ * <li>ownerId : communityId 范围的id</li>
  * <li>beginDate: 查询开始时间</li>
  * <li>endDate: 查询结束时间</li>
  * <li>spaceName: 查询空间名</li>
  * <li>reserveKeyword: 查询预订人关键字</li>
+ * <li>workFlowStatus: 工作流状态， {@link com.everhomes.rest.officecubicle.OfficeOrderWorkFlowStatus}</li>
  * <li>pageAnchor: 锚点</li>
  * <li>pageSize: 一页的大小</li> 
  * </ul>
  */
 public class SearchSpaceOrdersCommand {
+	private Integer namespaceId;
+	private String ownerType;
+	private Long ownerId;
 	private Long beginDate;
 	private Long endDate;
 	private String spaceName;
 	private String reserveKeyword;
+	private Byte workFlowStatus;
 	private Long pageAnchor;
     
 	private Integer pageSize;
 	
  
+
+	public Integer getNamespaceId() {
+		return namespaceId;
+	}
+
+
+	public void setNamespaceId(Integer namespaceId) {
+		this.namespaceId = namespaceId;
+	}
+
+
+	public String getOwnerType() {
+		return ownerType;
+	}
+
+
+	public void setOwnerType(String ownerType) {
+		this.ownerType = ownerType;
+	}
+
+
+	public Long getOwnerId() {
+		return ownerId;
+	}
+
+
+	public void setOwnerId(Long ownerId) {
+		this.ownerId = ownerId;
+	}
+
+
+	public Byte getWorkFlowStatus() {
+		return workFlowStatus;
+	}
+
+
+	public void setWorkFlowStatus(Byte workFlowStatus) {
+		this.workFlowStatus = workFlowStatus;
+	}
+
 
 	public Long getBeginDate() {
 		return beginDate;

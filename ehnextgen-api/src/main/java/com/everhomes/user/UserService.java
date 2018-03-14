@@ -289,6 +289,8 @@ public interface UserService {
     SystemInfoResponse updateUserBySystemInfo(SystemInfoCommand cmd,
             HttpServletRequest request, HttpServletResponse response);
 
+    SearchUserByIdentifierResponse searchUserByIdentifier(SearchUserByIdentifierCommand cmd);
+
     QRCodeDTO querySubjectIdForScan();
 
     DeferredResult<Object> waitScanForLogon(String subjectId);

@@ -8,6 +8,9 @@ import com.everhomes.util.StringHelper;
 /**
  * <ul>
  * 列出工位预定的空间
+  * <li>namespaceId : namespaceId</li>
+ * <li>ownerType : community 工位发布的范围</li>
+ * <li>ownerId : communityId 范围的id</li>
  *<li> id: id	</li>
  *<li> name: 工位空间名称	</li>
 *<li> provinceId : 省份id	</li>
@@ -27,9 +30,13 @@ import com.everhomes.util.StringHelper;
 *<li> status : space 状态 2-普通 0-删除</li> 
  * <li>attachments: banner图的urls{@link com.everhomes.rest.officecubicle.OfficeAttachmentDTO} </li> 
  * <li>categories: 工位空间list{@link com.everhomes.rest.officecubicle.OfficeCategoryDTO}</li> 
+ * <li>ranges: 空间可见范围{@link OfficeRangeDTO}</li>
  * </ul>
  */
 public class OfficeSpaceDTO {
+	private Integer namespaceId;
+	private String ownerType;
+	private Long ownerId;
 	private Long id;
 	private String name;
 	private Long provinceId;
@@ -51,6 +58,42 @@ public class OfficeSpaceDTO {
 	@ItemType(OfficeCategoryDTO.class)
 	private List<OfficeCategoryDTO> categories;
 	private Byte status;
+	
+	@ItemType(OfficeRangeDTO.class)
+	private List<OfficeRangeDTO> ranges;
+	
+	public Integer getNamespaceId() {
+		return namespaceId;
+	}
+
+	public void setNamespaceId(Integer namespaceId) {
+		this.namespaceId = namespaceId;
+	}
+
+	public String getOwnerType() {
+		return ownerType;
+	}
+
+	public void setOwnerType(String ownerType) {
+		this.ownerType = ownerType;
+	}
+
+	public Long getOwnerId() {
+		return ownerId;
+	}
+
+	public void setOwnerId(Long ownerId) {
+		this.ownerId = ownerId;
+	}
+
+	public List<OfficeRangeDTO> getRanges() {
+		return ranges;
+	}
+
+	public void setRanges(List<OfficeRangeDTO> ranges) {
+		this.ranges = ranges;
+	}
+
 	@Override
     public String toString() {
         return StringHelper.toJsonString(this);

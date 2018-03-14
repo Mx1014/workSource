@@ -6,6 +6,7 @@ import com.everhomes.util.StringHelper;
 public class OrganizationDTO {
     private Long id;
     private String name;
+    private String groupType;
 
     public Long getId() {
         return id;
@@ -21,6 +22,14 @@ public class OrganizationDTO {
 
     public void setName(String name) {
         this.name = name;
+    }
+
+    public String getGroupType() {
+        return groupType;
+    }
+
+    public void setGroupType(String groupType) {
+        this.groupType = groupType;
     }
 
     @Override

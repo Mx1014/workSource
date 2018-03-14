@@ -828,6 +828,15 @@ public class TaotaoguPaymentCardVendorHandler implements PaymentCardVendorHandle
 		}
 		return result;
 	}
+
+	public static void main(String[] args){
+		try {
+			AESCoder.encrypt("111111".getBytes("GBK"), "309c9ec2851e86d373184f54e824e286".getBytes());
+		}catch (Exception e){
+			e.printStackTrace();
+		}
+	}
+
 	//订单接口，http请求方法
 	private Map<String,Object> post(String method,String token,String aesKey,JSONObject json){
 		String orderUrl = configProvider.getValue("taotaogu.order.url", "");

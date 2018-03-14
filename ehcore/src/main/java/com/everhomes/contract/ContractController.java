@@ -68,6 +68,7 @@ public class ContractController extends ControllerBase {
 			ListContractsCommand command = ConvertHelper.convert(cmd, ListContractsCommand.class);
 			return new RestResponse(contractService.listContracts(command));
 		}
+		cmd.setPaymentFlag((byte)0);
 		return new RestResponse(contractSearcher.queryContracts(cmd));
 	}
 
@@ -297,6 +298,22 @@ public class ContractController extends ControllerBase {
 	private ContractService getContractService(Integer namespaceId) {
 		String handler = configurationProvider.getValue(namespaceId, "contractService", "");
 		return PlatformContext.getComponent(ContractService.CONTRACT_PREFIX + handler);
+	}
+
+	//通过供应商查看合同 -- by wentian
+	/**
+	 * <b>URL: /contract/listContractsBySupplier</b>
+	 * <p>通过供应商查看合同列表</p>
+	 */
+	@RequestMapping("listContractsBySupplier")
+	@RestReturn(value = ListContractsBySupplierResponse.class)
+	public RestResponse listContractsBySupplier(ListContractsBySupplierCommand cmd) {
+		ContractService contractService = getContractService(UserContext.getCurrentNamespaceId(0));
+		ListContractsBySupplierResponse res = contractService.listContractsBySupplier(cmd);
+		RestResponse response = new RestResponse(res);
+		response.setErrorCode(ErrorCodes.SUCCESS);
+		response.setErrorDescription("OK");
+		return response;
 	}
 
 }

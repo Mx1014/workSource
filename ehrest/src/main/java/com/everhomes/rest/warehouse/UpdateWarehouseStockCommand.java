@@ -12,6 +12,8 @@ import java.util.List;
  *     <li>communityId: 园区id</li>
  *     <li>requestType: 操作类型 参考{@link com.everhomes.rest.warehouse.WarehouseStockRequestType}</li>
  *     <li>stocks: 库存列表 参考{@link com.everhomes.rest.warehouse.WarehouseMaterialStock}</li>
+ *     <li>serviceType:服务类型，1. 普通入库,2.领用出库，3.采购入库</li>
+ *     <li>namespaceId:域空间id</li>
  * </ul>
  * Created by ying.xiong on 2017/5/11.
  */
@@ -30,8 +32,29 @@ public class UpdateWarehouseStockCommand {
 
     private Long communityId;
 
+    private Integer namespaceId;
+
+    private Byte serviceType;
+
+
+    public Integer getNamespaceId() {
+        return namespaceId;
+    }
+
+    public void setNamespaceId(Integer namespaceId) {
+        this.namespaceId = namespaceId;
+    }
+
     public Long getCommunityId() {
         return communityId;
+    }
+
+    public Byte getServiceType() {
+        return serviceType;
+    }
+
+    public void setServiceType(Byte serviceType) {
+        this.serviceType = serviceType;
     }
 
     public void setCommunityId(Long communityId) {

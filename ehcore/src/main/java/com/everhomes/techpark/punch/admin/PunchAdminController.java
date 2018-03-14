@@ -402,12 +402,12 @@ public class PunchAdminController extends ControllerBase {
 	 * </p>
 	 */
 	@RequestMapping("exportPunchScheduling")
-	public  HttpServletResponse exportPunchScheduling(@Valid ListPunchSchedulingMonthCommand cmd,HttpServletResponse response ) {
-		HttpServletResponse commandResponse = punchService.exportPunchScheduling(cmd, response );
+	public  RestResponse exportPunchScheduling(@Valid ListPunchSchedulingMonthCommand cmd,HttpServletResponse response ) {
+		punchService.exportPunchScheduling(cmd, response );
 //		RestResponse response = new RestResponse(commandResponse);
 //		response.setErrorCode(ErrorCodes.SUCCESS);
 //		response.setErrorDescription("OK");
-		return commandResponse;
+		return new RestResponse();
 	}
 
 

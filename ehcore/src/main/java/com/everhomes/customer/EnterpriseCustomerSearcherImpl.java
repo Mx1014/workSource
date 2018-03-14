@@ -175,7 +175,7 @@ public class EnterpriseCustomerSearcherImpl extends AbstractElasticSearch implem
         cmd.setModuleId(ServiceModuleConstants.ENTERPRISE_CUSTOMER_MODULE);
         cmd.setActionType(ActionType.OFFICIAL_URL.getCode());
         ListServiceModuleAppsResponse apps = portalService.listServiceModuleAppsWithConditon(cmd);
-        Long appId = apps.getServiceModuleApps().get(0).getId();
+        Long appId = apps.getServiceModuleApps().get(0).getOriginId();
         if(!userPrivilegeMgr.checkUserPrivilege(UserContext.currentUserId(), EntityType.ORGANIZATIONS.getCode(), orgId,
                 orgId, privilegeId, appId, null, communityId)) {
             LOGGER.error("Permission is prohibited, namespaceId={}, orgId={}, ownerType={}, ownerId={}, privilegeId={}",
@@ -208,7 +208,7 @@ public class EnterpriseCustomerSearcherImpl extends AbstractElasticSearch implem
         FilterBuilder fb = null;
         FilterBuilder nfb = FilterBuilders.termFilter("status", CommonStatus.INACTIVE.getCode());
         fb = FilterBuilders.notFilter(nfb);
-        fb = FilterBuilders.andFilter(fb, FilterBuilders.termFilter("namespaceId", UserContext.getCurrentNamespaceId()));
+        fb = FilterBuilders.andFilter(fb, FilterBuilders.termFilter("namespaceId", cmd.getNamespaceId()));
         fb = FilterBuilders.andFilter(fb, FilterBuilders.termFilter("communityId", cmd.getCommunityId()));
 
         if(cmd.getCustomerCategoryId() != null)
@@ -282,6 +282,8 @@ public class EnterpriseCustomerSearcherImpl extends AbstractElasticSearch implem
             } else if(cmd.getSortType() == 1) {
                 builder.addSort(cmd.getSortField(), SortOrder.DESC);
             }
+        } else {
+            builder.addSort("id", SortOrder.DESC);
         }
         SearchResponse rsp = builder.execute().actionGet();
 

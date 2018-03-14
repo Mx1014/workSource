@@ -28,6 +28,8 @@ import com.everhomes.util.StringHelper;
  * <li>reservePerson: 预订人姓名 </li> 
  * <li>reserveContact:  预订人联系方式</li> 
  * <li>reservceCompany: 预订人公司</li> 
+ * <li>flowCaseId: 工作流id</li> 
+ * <li>workFlowStatus: 工作流状态， {@link com.everhomes.rest.officecubicle.OfficeOrderWorkFlowStatus}</li>
  * </ul>
  */
 public class OfficeOrderDTO {
@@ -52,6 +54,24 @@ public class OfficeOrderDTO {
     private String reserverName;
     private String reserveContactToken;
     private String reserveEnterprise;
+	private Byte workFlowStatus;
+	private Long flowCaseId;
+	
+	public Long getFlowCaseId() {
+		return flowCaseId;
+	}
+
+	public void setFlowCaseId(Long flowCaseId) {
+		this.flowCaseId = flowCaseId;
+	}
+
+	public Byte getWorkFlowStatus() {
+		return workFlowStatus;
+	}
+
+	public void setWorkFlowStatus(Byte workFlowStatus) {
+		this.workFlowStatus = workFlowStatus;
+	}
 
 	@Override
     public String toString() {
