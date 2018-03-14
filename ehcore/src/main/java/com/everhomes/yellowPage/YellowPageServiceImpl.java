@@ -709,7 +709,7 @@ public class YellowPageServiceImpl implements YellowPageService {
 
 	@Override
 	public ServiceAllianceDTO getServiceAlliance(GetServiceAllianceCommand cmd) {
-		if(cmd.getCurrentPMId()!=null && configProvider.getBooleanValue("privilege.community.checkflag", true)){
+		if(cmd.getCurrentPMId()!=null && cmd.getAppId()!=null && configProvider.getBooleanValue("privilege.community.checkflag", true)){
 			userPrivilegeMgr.checkUserPrivilege(UserContext.current().getUser().getId(), cmd.getCurrentPMId(), 4050040510L, cmd.getAppId(), null,0L);//样式设置权限
 		}
 		ServiceAlliances sa = this.yellowPageProvider.queryServiceAllianceTopic(null,null,cmd.getType());
@@ -750,7 +750,7 @@ public class YellowPageServiceImpl implements YellowPageService {
 	@Override
 	public ServiceAllianceListResponse getServiceAllianceEnterpriseList(
 			GetServiceAllianceEnterpriseListCommand cmd) {
-		if(cmd.getCurrentPMId()!=null && configProvider.getBooleanValue("privilege.community.checkflag", true)){
+		if(cmd.getCurrentPMId()!=null && cmd.getAppId()!=null && configProvider.getBooleanValue("privilege.community.checkflag", true)){
 			userPrivilegeMgr.checkUserPrivilege(UserContext.current().getUser().getId(), cmd.getCurrentPMId(), 4050040520L, cmd.getAppId(), null,0L);//服务管理权限
 		}
 		if(null != cmd.getCommunityId()) {
@@ -1330,7 +1330,7 @@ public class YellowPageServiceImpl implements YellowPageService {
 	public ListNotifyTargetsResponse listNotifyTargets(
 			ListNotifyTargetsCommand cmd) {
 		
-		if(cmd.getCurrentPMId()!=null && configProvider.getBooleanValue("privilege.community.checkflag", true)){
+		if(cmd.getCurrentPMId()!=null && cmd.getAppId()!=null && configProvider.getBooleanValue("privilege.community.checkflag", true)){
 			userPrivilegeMgr.checkUserPrivilege(UserContext.current().getUser().getId(), cmd.getCurrentPMId(), 4050040530L, cmd.getAppId(), null,0L);//消息通知权限
 		}
 		ListNotifyTargetsResponse response = new ListNotifyTargetsResponse();
