@@ -1187,4 +1187,8 @@ END
 //
 DELIMITER ;
 CALL create_app;
-DROP PROCEDURE IF EXISTS create_app;    
+DROP PROCEDURE IF EXISTS create_app;
+
+-- 更新普通公司论坛、活动的菜单路由  add by yanjun 201803141806
+update eh_web_menus set data_type = 'forum-management' where id = 71020000;
+update eh_web_menus set data_type = 'activity-application' where id = 71030000;
