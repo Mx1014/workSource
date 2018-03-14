@@ -5890,7 +5890,12 @@ private void checkUserPrivilege(Long orgId, Long privilegeId, Long communityId) 
 				if (task.getExecutiveTime() != null) {
 					task.setLastSyncTime(task.getExecutiveTime().toLocalDateTime().format(dateSF));
 				} else {
-					task.setLastSyncTime(task.getCreateTime().toLocalDateTime().format(dateSF));
+					if(task.getProcessTime() ==null) {
+						task.setLastSyncTime(task.getCreateTime().toLocalDateTime().format(dateSF));
+					}else {
+						//when delete plans and schedule job  close delay tasks  updating process time
+						task.setLastSyncTime(task.getProcessTime().toLocalDateTime().format(dateSF));
+					}
 				}
 			} else {
 				task.setLastSyncTime(task.getReviewTime().toLocalDateTime().format(dateSF));
@@ -5912,9 +5917,7 @@ private void checkUserPrivilege(Long orgId, Long privilegeId, Long communityId) 
 					relationDTO.setLocation(equipment.getLocation());
 					relationDTO.setEquipmentName(equipment.getName());
 					relationDTO.setStandardId(standard.getId());
-					List<EquipmentStandardMap> equipmentStandardMaps = equipmentProvider.
-							findEquipmentStandardMap(standard.getId(), equipment.getId(),
-									InspectionStandardMapTargetType.EQUIPMENT.getCode());
+					List<EquipmentStandardMap> equipmentStandardMaps = equipmentProvider.findEquipmentStandardMap(standard.getId(), equipment.getId(), InspectionStandardMapTargetType.EQUIPMENT.getCode());
 					if(equipmentStandardMaps!=null){
 						relationDTO.setId(equipmentStandardMaps.get(0).getId());
 					}
@@ -5926,7 +5929,7 @@ private void checkUserPrivilege(Long orgId, Long privilegeId, Long communityId) 
 		offlineResponse.setOfflineTasks(tasks);
 		offlineResponse.setEquipments(equipments);
 		ListParametersByStandardIdCommand listParametersByStandardIdCommand = new ListParametersByStandardIdCommand();
-		//去除重复的
+		//remove duplicated
 		Map<Long, Long> standardIds = new HashMap<>();
 		equipments.forEach((relation) -> standardIds.put(relation.getStandardId(),relation.getStandardId()));
 		standardIds.forEach((k,v)->{
@@ -5934,7 +5937,7 @@ private void checkUserPrivilege(Long orgId, Long privilegeId, Long communityId) 
 			List<InspectionItemDTO> itemDTOS = listParametersByStandardId(listParametersByStandardIdCommand);
 			items.addAll(itemDTOS);
 		});
-		//remove duplicated
+
 		offlineResponse.setItems(new ArrayList<>(items));
 		syncGroupOfflineData(offlineResponse,cmd);
 		syncRepairCategoryData(offlineResponse,cmd);
