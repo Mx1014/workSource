@@ -1876,11 +1876,13 @@ private void checkUserPrivilege(Long orgId, Long privilegeId, Long communityId) 
 	}
 
 	private List<EquipmentTaskDTO> convertEquipmentTasksToDTO(List<EquipmentInspectionTasks> tasks) {
-
-		return tasks.stream().
-				map(this::convertEquipmentTaskToDTO).
-				filter(Objects::nonNull).
-				collect(Collectors.toList());
+		if (tasks != null && tasks.size() > 0) {
+			return tasks.stream().
+                    map(this::convertEquipmentTaskToDTO).
+                    filter(Objects::nonNull).
+                    collect(Collectors.toList());
+		}
+		return null;
 	}
 
 	private EquipmentTaskDTO convertEquipmentTaskToDTO(EquipmentInspectionTasks task) {
