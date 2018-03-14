@@ -483,7 +483,7 @@ public class PollServiceImpl implements PollService {
             java.sql.Date voteDate = new java.sql.Date(vo.getCreateTime().getTime());
 
             //如果当前日期在下次投票日期之前则报异常
-            if(now.toLocalDate().isAfter(voteDate.toLocalDate().plusDays(poll.getRepeatPeriod()))){
+            if(now.toLocalDate().isAfter(voteDate.toLocalDate().plusDays(poll.getRepeatPeriod() - 1))){
                 return true;
             }
         }

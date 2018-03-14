@@ -139,6 +139,25 @@ public class SupplierServiceImpl implements SupplierService{
         return supplierProvider.findSuppliersByKeyword(cmd.getNameKeyword());
     }
 
+    @Override
+    public ListSuppliersResponse listSuppliersForSecondeParty(ListSuppliersCommand cmd) {
+        ListSuppliersResponse response = new ListSuppliersResponse();
+        Long pageAnchor = cmd.getPageAnchor();
+        Integer pageSize = cmd.getPageSize();
+        if(pageAnchor == null) pageAnchor = 0l;
+        if(pageSize == null) pageSize = 20;
+        TreeMap<Long, ListSuppliersDTO> data = supplierProvider.findSuppliers(cmd.getOwnerType(),cmd.getOwnerId(),cmd.getNamespaceId(),cmd.getContactName(),cmd.getSupplierName(),pageAnchor,pageSize);
+        if(data.size() >= pageSize){
+            data.remove(data.lastKey());
+            pageAnchor = data.lastKey();
+        }else{
+            pageAnchor = null;
+        }
+        response.setNextPageAnchor(pageAnchor);
+        response.setDtos(new ArrayList<>(data.values()));
+        return response;
+    }
+
     private void checkAssetPriviledgeForPropertyOrg(Long communityId, Long priviledgeId) {
         ListPMOrganizationsCommand cmd = new ListPMOrganizationsCommand();
         cmd.setNamespaceId(UserContext.getCurrentNamespaceId());

@@ -8,9 +8,13 @@ import java.util.Map;
 import javax.servlet.http.HttpServletResponse;
 import javax.validation.Valid;
 
+import com.everhomes.rest.acl.PrivilegeConstants;
 import com.everhomes.rest.common.ImportFileResponse;
+import com.everhomes.rest.common.ServiceModuleConstants;
+import com.everhomes.rest.launchpad.ActionType;
 import com.everhomes.rest.organization.*;
 
+import com.everhomes.user.UserPrivilegeMgr;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -63,6 +67,9 @@ public class OrganizationAdminController extends ControllerBase {
 
     @Autowired
     OrganizationService organizationService;
+
+    @Autowired
+    UserPrivilegeMgr userPrivilegeMgr;
 
     /**
      * <b>URL: /admin/org/createOrganization</b>
@@ -403,6 +410,7 @@ public class OrganizationAdminController extends ControllerBase {
     @RequestMapping("createEnterprise")
     @RestReturn(value = String.class)
     public RestResponse createEnterprise(@Valid CreateEnterpriseCommand cmd) {
+        cmd.setCheckPrivilege(true);
         organizationService.createEnterprise(cmd);
         RestResponse response = new RestResponse();
         response.setErrorCode(ErrorCodes.SUCCESS);
@@ -851,13 +859,28 @@ public class OrganizationAdminController extends ControllerBase {
     @RestReturn(value = OrganizationDetailDTO.class, collection = true)
     public RestResponse listEnterpriseByCommunityId(@Valid ListEnterprisesCommand cmd) {
 //        cmd.setQryAdminRoleFlag(false);
+        userPrivilegeMgr.checkUserPrivilege(UserContext.currentUserId(), cmd.getManageOrganizationId(), PrivilegeConstants.ORGANIZATION_LIST, ServiceModuleConstants.ORGANIZATION_MODULE, ActionType.OFFICIAL_URL.getCode(), null, cmd.getManageOrganizationId(), cmd.getCommunityId());
         ListEnterprisesCommandResponse res = organizationService.listEnterprises(cmd);
         RestResponse response = new RestResponse(res);
         response.setErrorCode(ErrorCodes.SUCCESS);
         response.setErrorDescription("OK");
         return response;
     }
-    
+
+    /**
+     * <b>URL: /admin/org/checkSetAdminPrivilege</b>
+     * <p>后台管理 企业列表 校验是否有设置管理员的权限</p>
+     */
+    @RequestMapping("checkSetAdminPrivilege")
+    @RestReturn(value = String.class)
+    public RestResponse checkSetAdminPrivilege(@Valid CheckSetAdminPrivilegeCommand cmd) {
+        userPrivilegeMgr.checkUserPrivilege(UserContext.currentUserId(), cmd.getManageOrganizationId(), PrivilegeConstants.ORGANIZATION_SET_ADMIN, ServiceModuleConstants.ORGANIZATION_MODULE, ActionType.OFFICIAL_URL.getCode(), null, cmd.getManageOrganizationId(), cmd.getCommunityId());
+        RestResponse response = new RestResponse();
+        response.setErrorCode(ErrorCodes.SUCCESS);
+        response.setErrorDescription("OK");
+        return response;
+    }
+
     /**
      * <b>URL: /admin/org/exportEnterpriseByCommunityId</b>
      * <p>后台管理 企业列表 和对于的管理员信息</p>

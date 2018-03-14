@@ -233,7 +233,7 @@ public class EnterpriseApplyEntryFlowListener implements FlowModuleListener {
             }
         } else if (ApplyEntrySourceType.FOR_RENT.getCode().equals(applyEntry.getSourceType())) {
 
-            Community community = communityProvider.findCommunityById(applyEntry.getCommunityId());
+
 
             LeasePromotion leasePromotion = enterpriseApplyEntryProvider.getLeasePromotionById(applyEntry.getSourceId());
 
@@ -242,8 +242,9 @@ public class EnterpriseApplyEntryFlowListener implements FlowModuleListener {
                 buildingName = leasePromotion.getBuildingName();
             } else {
                 LeaseBuilding leaseBuilding = enterpriseApplyBuildingProvider.findLeaseBuildingById(leasePromotion.getBuildingId());
+                Community community = communityProvider.findCommunityById(leaseBuilding.getCommunityId());
                 if (null != leaseBuilding) {
-                    buildingName = leaseBuilding.getName();
+                    buildingName = community.getName()+leaseBuilding.getName();
                 }
             }
 
@@ -252,7 +253,7 @@ public class EnterpriseApplyEntryFlowListener implements FlowModuleListener {
             if (null != address) {
                 apartmentName = address.getApartmentName();
             }
-            buildingName = community.getName() + buildingName + apartmentName;
+            buildingName = buildingName + apartmentName;
         } else if (ApplyEntrySourceType.MARKET_ZONE.getCode().equals(applyEntry.getSourceType())) {
             //创客入驻处的申请，申请来源=“创客申请” 创客入驻处的申请，楼栋=创客空间所在的楼栋
             YellowPage yellowPage = yellowPageProvider.getYellowPageById(applyEntry.getSourceId());

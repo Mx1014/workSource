@@ -1619,8 +1619,7 @@ public class QualityProviderImpl implements QualityProvider {
 	}
 
 	@Override
-	public void inactiveQualityInspectionStandardSpecificationMapBySpecificationId(
-			Long specificationId) {
+	public void inactiveQualityInspectionStandardSpecificationMapBySpecificationId(Long specificationId) {
 		Long userId = UserContext.current().getUser().getId();
 		dbProvider.mapReduce(AccessSpec.readOnlyWith(EhQualityInspectionStandardSpecificationMap.class), null, 
 				(DSLContext context, Object reducingContext) -> {
@@ -1633,12 +1632,21 @@ public class QualityProviderImpl implements QualityProvider {
 						map.setDeleterUid(userId);
 						map.setDeleteTime(new Timestamp(DateHelper.currentGMTTime().getTime()));
 						updateQualityInspectionStandardSpecificationMap(map);
-		            	return null;
+						deleteQualityInspectionTaskByStandardId(map.getStandardId());
+						return null;
 					});
 
 					return true;
 				});
 		
+	}
+
+	private void deleteQualityInspectionTaskByStandardId(Long standardId) {
+		DSLContext context = this.dbProvider.getDslContext(AccessSpec.readWrite());
+		context.update(Tables.EH_QUALITY_INSPECTION_TASKS)
+				.set(Tables.EH_QUALITY_INSPECTION_TASKS.STATUS, QualityInspectionTaskStatus.NONE.getCode())
+				.where(Tables.EH_EQUIPMENT_INSPECTION_TASKS.STANDARD_ID.eq(standardId))
+				.execute();
 	}
 
 	@Override
@@ -2872,7 +2880,7 @@ public class QualityProviderImpl implements QualityProvider {
 
 		builderCallback.buildCondition(null, query);
 
-		query.addOrderBy(Tables.EH_QUALITY_INSPECTION_TASKS.EXECUTIVE_EXPIRE_TIME);
+		query.addOrderBy(Tables.EH_QUALITY_INSPECTION_TASKS.STATUS,Tables.EH_QUALITY_INSPECTION_TASKS.EXECUTIVE_EXPIRE_TIME);
 		query.addLimit(offset * (pageSize), pageSize + 1);
 		if (LOGGER.isDebugEnabled()) {
 			LOGGER.debug("Query tasks by count, sql=" + query.getSQL());
@@ -2918,7 +2926,7 @@ public class QualityProviderImpl implements QualityProvider {
 		}
 
 		builderCallback.buildCondition(null, query);
-		query.addConditions(Tables.EH_QUALITY_INSPECTION_TASKS.EXECUTIVE_EXPIRE_TIME.lt(todayBegin));
+		//query.addConditions(Tables.EH_QUALITY_INSPECTION_TASKS.EXECUTIVE_EXPIRE_TIME.lt(todayBegin));
 
 		if (LOGGER.isDebugEnabled()) {
 			LOGGER.debug("Query tasks count, sql=" + query.getSQL());

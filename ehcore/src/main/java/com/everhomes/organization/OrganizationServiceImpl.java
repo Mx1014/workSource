@@ -92,6 +92,7 @@ import com.everhomes.rest.group.GroupDiscriminator;
 import com.everhomes.rest.group.GroupJoinPolicy;
 import com.everhomes.rest.group.GroupMemberStatus;
 import com.everhomes.rest.group.GroupPrivacy;
+import com.everhomes.rest.launchpad.ActionType;
 import com.everhomes.rest.launchpad.ItemKind;
 import com.everhomes.rest.messaging.*;
 import com.everhomes.rest.module.Project;
@@ -1042,6 +1043,7 @@ public class OrganizationServiceImpl implements OrganizationService {
 
     @Override
     public void exportEnterprises(ListEnterprisesCommand cmd, HttpServletResponse response) {
+        userPrivilegeMgr.checkUserPrivilege(UserContext.currentUserId(), cmd.getManageOrganizationId(), PrivilegeConstants.ORGANIZATION_EXPORT, ServiceModuleConstants.ORGANIZATION_MODULE, ActionType.OFFICIAL_URL.getCode(), null, cmd.getManageOrganizationId(), cmd.getCommunityId());
         cmd.setPageSize(10000);
         List<OrganizationDetailDTO> organizationDetailDTOs = listEnterprises(cmd).getDtos();
         if (organizationDetailDTOs != null && organizationDetailDTOs.size() > 0) {
@@ -1245,6 +1247,9 @@ public class OrganizationServiceImpl implements OrganizationService {
 
     @Override
     public OrganizationDTO createEnterprise(CreateEnterpriseCommand cmd) {
+        if(cmd.getCheckPrivilege() != null && cmd.getCheckPrivilege()) {
+            userPrivilegeMgr.checkUserPrivilege(UserContext.currentUserId(), cmd.getManageOrganizationId(), PrivilegeConstants.ORGANIZATION_CREATE, ServiceModuleConstants.ORGANIZATION_MODULE, ActionType.OFFICIAL_URL.getCode(), null, cmd.getManageOrganizationId(), cmd.getCommunityId());
+        }
         User user = UserContext.current().getUser();
 
         Integer namespaceId = UserContext.getCurrentNamespaceId(cmd.getNamespaceId());
@@ -1512,6 +1517,7 @@ public class OrganizationServiceImpl implements OrganizationService {
 
     @Override
     public void updateEnterprise(UpdateEnterpriseCommand cmd) {
+        userPrivilegeMgr.checkUserPrivilege(UserContext.currentUserId(), cmd.getManageOrganizationId(), PrivilegeConstants.ORGANIZATION_UPDATE, ServiceModuleConstants.ORGANIZATION_MODULE, ActionType.OFFICIAL_URL.getCode(), null, cmd.getManageOrganizationId(), cmd.getCommunityId());
         updateEnterprise(cmd, true);
     }
 
@@ -1643,6 +1649,7 @@ public class OrganizationServiceImpl implements OrganizationService {
 
     @Override
     public void deleteEnterpriseById(DeleteOrganizationIdCommand cmd) {
+        userPrivilegeMgr.checkUserPrivilege(UserContext.currentUserId(), cmd.getManageOrganizationId(), PrivilegeConstants.ORGANIZATION_DELETE, ServiceModuleConstants.ORGANIZATION_MODULE, ActionType.OFFICIAL_URL.getCode(), null, cmd.getManageOrganizationId(), cmd.getCommunityId());
         Organization organization = checkOrganization(cmd.getId());
         //产品功能 #20796
 //        if(organization.getNamespaceId() == 999971 || organization.getNamespaceId() == 999983) {
@@ -7564,6 +7571,7 @@ public class OrganizationServiceImpl implements OrganizationService {
 
     @Override
     public ImportFileTaskDTO importEnterpriseData(ImportEnterpriseDataCommand cmd, MultipartFile file, Long userId) {
+        userPrivilegeMgr.checkUserPrivilege(UserContext.currentUserId(), cmd.getManageOrganizationId(), PrivilegeConstants.ORGANIZATION_IMPORT, ServiceModuleConstants.ORGANIZATION_MODULE, ActionType.OFFICIAL_URL.getCode(), null, cmd.getManageOrganizationId(), cmd.getCommunityId());
         Long communityId = cmd.getCommunityId();
         ImportFileTask task = new ImportFileTask();
         try {

@@ -970,10 +970,10 @@ public class ServiceModuleServiceImpl implements ServiceModuleService {
                 String handlerPrefix = PortalPublishHandler.PORTAL_PUBLISH_OBJECT_PREFIX;
                 PortalPublishHandler handler = PlatformContext.getComponent(handlerPrefix + serviceModule.getId());
                 if(null != handler){
-                    customTag = handler.getCustomTag(namespaceId, serviceModule.getId(), actionData, instanceConfig);
+                    customTag = handler.getCustomTag(namespaceId, serviceModule.getId(), instanceConfig);
                     LOGGER.debug("get customTag from handler = {}, customTag =s {}",handler,customTag);
                     // 取多入口的模块的菜单id
-                    webMenuId = handler.getWebMenuId(namespaceId, serviceModule.getId(), actionData, instanceConfig);
+                    webMenuId = handler.getWebMenuId(namespaceId, serviceModule.getId(), instanceConfig);
                 }
                 reflectionApp = this.serviceModuleProvider.findReflectionServiceModuleAppByParam(namespaceId, serviceModule.getId(), customTag);
                 break;
