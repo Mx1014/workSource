@@ -1114,7 +1114,7 @@ public class PropertyMgrServiceImpl implements PropertyMgrService {
 	@Override
 	public void sendNoticeToFamily(PropCommunityBuildAddessCommand cmd) {
 
-//		this.checkCommunityIdIsNull(cmd.getCommunityId());
+		this.checkCommunityIdIsNull(cmd.getCommunityId());
 
 		/*List<String> buildingNames = cmd.getBuildingNames();
 		List<Long> buildingIds = cmd.getBuildingIds();
