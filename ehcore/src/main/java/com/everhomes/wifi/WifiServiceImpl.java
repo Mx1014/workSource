@@ -45,7 +45,7 @@ public class WifiServiceImpl implements WifiService{
 	
 	@Override
 	public ListWifiSettingResponse listWifiSetting(ListWifiSettingCommand cmd){
-		if(cmd.getCurrentPMId()!=null && configProvider.getBooleanValue("privilege.community.checkflag", true)){
+		if(cmd.getCurrentPMId()!=null && cmd.getAppId()!=null && configProvider.getBooleanValue("privilege.community.checkflag", true)){
 			userPrivilegeMgr.checkUserPrivilege(UserContext.current().getUser().getId(), cmd.getCurrentPMId(), 4110041100L, cmd.getAppId(), null,cmd.getCurrentProjectId());//一键上网（全部权限）权限权限
 		}
 		if(cmd.getOwnerId() == null || StringUtils.isBlank(cmd.getOwnerType())){
@@ -73,7 +73,7 @@ public class WifiServiceImpl implements WifiService{
 	
 	@Override
 	public WifiSettingDTO createWifiSetting(CreateWifiSettingCommand cmd){
-		if(cmd.getCurrentPMId()!=null && configProvider.getBooleanValue("privilege.community.checkflag", true)){
+		if(cmd.getCurrentPMId()!=null && cmd.getAppId()!=null && configProvider.getBooleanValue("privilege.community.checkflag", true)){
 			userPrivilegeMgr.checkUserPrivilege(UserContext.current().getUser().getId(), cmd.getCurrentPMId(), 4110041100L, cmd.getAppId(), null,cmd.getCurrentProjectId());//一键上网（全部权限）权限权限
 		}
 		if(cmd.getOwnerId() == null || StringUtils.isBlank(cmd.getOwnerType())){
@@ -108,7 +108,7 @@ public class WifiServiceImpl implements WifiService{
 	
 	@Override
 	public WifiSettingDTO editWifiSetting(EditWifiSettingCommand cmd){
-		if(cmd.getCurrentPMId()!=null && configProvider.getBooleanValue("privilege.community.checkflag", true)){
+		if(cmd.getCurrentPMId()!=null && cmd.getAppId()!=null && configProvider.getBooleanValue("privilege.community.checkflag", true)){
 			userPrivilegeMgr.checkUserPrivilege(UserContext.current().getUser().getId(), cmd.getCurrentPMId(), 4110041100L, cmd.getAppId(), null,cmd.getCurrentProjectId());//一键上网（全部权限）权限
 		}
 		WifiSetting wifiSetting = checkId(cmd.getId(),cmd.getOwnerId(),cmd.getOwnerType());

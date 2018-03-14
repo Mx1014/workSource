@@ -98,7 +98,7 @@ public class RelocationServiceImpl implements RelocationService, ApplicationList
 
 	@Override
 	public SearchRelocationRequestsResponse searchRelocationRequests(SearchRelocationRequestsCommand cmd) {
-		if(cmd.getCurrentPMId()!=null && configProvider.getBooleanValue("privilege.community.checkflag", true)){
+		if(cmd.getCurrentPMId()!=null && cmd.getAppId()!=null && configProvider.getBooleanValue("privilege.community.checkflag", true)){
 			userPrivilegeMgr.checkUserPrivilege(UserContext.current().getUser().getId(), cmd.getCurrentPMId(), 4920049200L, cmd.getAppId(), null,cmd.getCurrentProjectId());//物品搬迁全部权限
 		}
 		if (null == cmd.getNamespaceId()) {

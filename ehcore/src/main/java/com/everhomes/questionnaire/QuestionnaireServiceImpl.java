@@ -126,11 +126,11 @@ public class QuestionnaireServiceImpl implements QuestionnaireService {
 	public ListQuestionnairesResponse listQuestionnaires(ListQuestionnairesCommand cmd) {
 //		checkOwner(cmd.getNamespaceId(), cmd.getOwnerType(), cmd.getOwnerId());
 		if(QuestionnaireStatus.fromCode(cmd.getStatus())==QuestionnaireStatus.ACTIVE){
-			if(cmd.getCurrentPMId()!=null && configurationProvider.getBooleanValue("privilege.community.checkflag", true)){
+			if(cmd.getCurrentPMId()!=null && cmd.getAppId()!=null && configurationProvider.getBooleanValue("privilege.community.checkflag", true)){
 				userPrivilegeMgr.checkUserPrivilege(UserContext.current().getUser().getId(), cmd.getCurrentPMId(), 4170041710L, cmd.getAppId(), null,0L);//已发布权限
 			}
 		}else if(QuestionnaireStatus.fromCode(cmd.getStatus())==QuestionnaireStatus.DRAFT){
-			if(cmd.getCurrentPMId()!=null && configurationProvider.getBooleanValue("privilege.community.checkflag", true)){
+			if(cmd.getCurrentPMId()!=null && cmd.getAppId()!=null && configurationProvider.getBooleanValue("privilege.community.checkflag", true)){
 				userPrivilegeMgr.checkUserPrivilege(UserContext.current().getUser().getId(), cmd.getCurrentPMId(), 4170041720L, cmd.getAppId(), null,0L);//草稿箱权限
 			}
 		}
@@ -290,7 +290,7 @@ public class QuestionnaireServiceImpl implements QuestionnaireService {
 
 	@Override
 	public CreateQuestionnaireResponse createQuestionnaire(CreateQuestionnaireCommand cmd) {
-		if(cmd.getCurrentPMId()!=null && configurationProvider.getBooleanValue("privilege.community.checkflag", true)){
+		if(cmd.getCurrentPMId()!=null && cmd.getAppId()!=null && configurationProvider.getBooleanValue("privilege.community.checkflag", true)){
 			userPrivilegeMgr.checkUserPrivilege(UserContext.current().getUser().getId(), cmd.getCurrentPMId(), 4170041710L, cmd.getAppId(), null,0L);//已发布权限
 		}
 		QuestionnaireDTO questionnaireDTO = cmd.getQuestionnaire();

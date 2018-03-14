@@ -206,7 +206,7 @@ public class SiyinPrintServiceImpl implements SiyinPrintService {
 	private UserPrivilegeMgr userPrivilegeMgr;
 	@Override
 	public GetPrintSettingResponse getPrintSetting(GetPrintSettingCommand cmd) {
-		if(cmd.getCurrentPMId()!=null && configurationProvider.getBooleanValue("privilege.community.checkflag", true)){
+		if(cmd.getCurrentPMId()!=null && cmd.getAppId()!=null && configurationProvider.getBooleanValue("privilege.community.checkflag", true)){
 			userPrivilegeMgr.checkUserPrivilege(UserContext.current().getUser().getId(), cmd.getCurrentPMId(), 4140041430L, cmd.getAppId(), null,cmd.getCurrentProjectId());//打印设置权限
 		}
 		//检查参数
@@ -231,7 +231,7 @@ public class SiyinPrintServiceImpl implements SiyinPrintService {
 
 	@Override
 	public GetPrintStatResponse getPrintStat(GetPrintStatCommand cmd) {
-		if(cmd.getCurrentPMId()!=null && configurationProvider.getBooleanValue("privilege.community.checkflag", true)){
+		if(cmd.getCurrentPMId()!=null && cmd.getAppId()!=null && configurationProvider.getBooleanValue("privilege.community.checkflag", true)){
 			userPrivilegeMgr.checkUserPrivilege(UserContext.current().getUser().getId(), cmd.getCurrentPMId(), 4140041420L, cmd.getAppId(), null,cmd.getCurrentProjectId());//打印统计权限
 		}
 		PrintOwnerType printOwnerType = checkOwner(cmd.getOwnerType(), cmd.getOwnerId());
@@ -249,7 +249,7 @@ public class SiyinPrintServiceImpl implements SiyinPrintService {
 
 	@Override
 	public ListPrintRecordsResponse listPrintRecords(ListPrintRecordsCommand cmd) {
-		if(cmd.getCurrentPMId()!=null && configurationProvider.getBooleanValue("privilege.community.checkflag", true)){
+		if(cmd.getCurrentPMId()!=null && cmd.getAppId()!=null && configurationProvider.getBooleanValue("privilege.community.checkflag", true)){
 			userPrivilegeMgr.checkUserPrivilege(UserContext.current().getUser().getId(), cmd.getCurrentPMId(), 4140041410L, cmd.getAppId(), null,cmd.getCurrentProjectId());//订单记录权限
 		}
 		checkOwner(cmd.getOwnerType(), cmd.getOwnerId());

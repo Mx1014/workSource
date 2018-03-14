@@ -4215,7 +4215,7 @@ public class Rentalv2ServiceImpl implements Rentalv2Service {
 
 	@Override
 	public ListRentalBillsCommandResponse listRentalBills(ListRentalBillsCommand cmd) {
-		if(cmd.getCurrentPMId()!=null && configurationProvider.getBooleanValue("privilege.community.checkflag", true)){
+		if(cmd.getCurrentPMId()!=null && cmd.getAppId()!=null && configurationProvider.getBooleanValue("privilege.community.checkflag", true)){
 			userPrivilegeMgr.checkUserPrivilege(UserContext.current().getUser().getId(), cmd.getCurrentPMId(), 4040040420L, cmd.getAppId(), null,cmd.getCurrentProjectId());//订单记录权限
 		}
 		ListRentalBillsCommandResponse response = new ListRentalBillsCommandResponse();
@@ -6014,7 +6014,7 @@ public class Rentalv2ServiceImpl implements Rentalv2Service {
 
 	@Override
 	public void exportRentalBills(ListRentalBillsCommand cmd, HttpServletResponse response) {
-		if(cmd.getCurrentPMId()!=null && configurationProvider.getBooleanValue("privilege.community.checkflag", true)){
+		if(cmd.getCurrentPMId()!=null && cmd.getAppId()!=null && configurationProvider.getBooleanValue("privilege.community.checkflag", true)){
 			userPrivilegeMgr.checkUserPrivilege(UserContext.current().getUser().getId(), cmd.getCurrentPMId(), 4040040420L, cmd.getAppId(), null,cmd.getCurrentProjectId());//订单记录权限
 		}
 		Integer pageSize = Integer.MAX_VALUE; 
@@ -6181,7 +6181,7 @@ public class Rentalv2ServiceImpl implements Rentalv2Service {
 
 	@Override
 	public GetResourceListAdminResponse getResourceList(GetResourceListAdminCommand cmd) {
-		if(cmd.getCurrentPMId()!=null && configurationProvider.getBooleanValue("privilege.community.checkflag", true)){
+		if(cmd.getCurrentPMId()!=null && cmd.getAppId()!=null && configurationProvider.getBooleanValue("privilege.community.checkflag", true)){
 			userPrivilegeMgr.checkUserPrivilege(UserContext.current().getUser().getId(), cmd.getCurrentPMId(), 4040040410L, cmd.getAppId(), null,cmd.getCurrentProjectId());//资源管理权限
 		}
 		GetResourceListAdminResponse response = new GetResourceListAdminResponse();
@@ -6254,7 +6254,7 @@ public class Rentalv2ServiceImpl implements Rentalv2Service {
 
 	@Override
 	public void addResource(AddResourceAdminCommand cmd) {
-		if(cmd.getCurrentPMId()!=null && configurationProvider.getBooleanValue("privilege.community.checkflag", true)){
+		if(cmd.getCurrentPMId()!=null && cmd.getAppId()!=null && configurationProvider.getBooleanValue("privilege.community.checkflag", true)){
 			userPrivilegeMgr.checkUserPrivilege(UserContext.current().getUser().getId(), cmd.getCurrentPMId(), 4040040410L, cmd.getAppId(), null,cmd.getCurrentProjectId());//资源管理权限
 		}
 		if(null == cmd.getOrganizationId()) {

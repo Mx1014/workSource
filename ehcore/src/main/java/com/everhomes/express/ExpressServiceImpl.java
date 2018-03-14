@@ -305,7 +305,7 @@ public class ExpressServiceImpl implements ExpressService {
 
 	@Override
 	public ListExpressOrderResponse listExpressOrder(ListExpressOrderCommand cmd) {
-		if(cmd.getCurrentPMId()!=null && configProvider.getBooleanValue("privilege.community.checkflag", true)){
+		if(cmd.getCurrentPMId()!=null && cmd.getAppId()!=null && configProvider.getBooleanValue("privilege.community.checkflag", true)){
 			userPrivilegeMgr.checkUserPrivilege(UserContext.current().getUser().getId(), cmd.getCurrentPMId(), 4070040720L, cmd.getAppId(), null,cmd.getCurrentProjectId());//参数设置权限
 		}
 		ExpressOwner owner = checkOwner(cmd.getOwnerType(), cmd.getOwnerId());
@@ -1030,7 +1030,7 @@ public class ExpressServiceImpl implements ExpressService {
 
 	@Override
 	public GetExpressBusinessNoteResponse getExpressBusinessNote(GetExpressBusinessNoteCommand cmd) {
-		if(cmd.getCurrentPMId()!=null && configProvider.getBooleanValue("privilege.community.checkflag", true)){
+		if(cmd.getCurrentPMId()!=null && cmd.getAppId()!=null && configProvider.getBooleanValue("privilege.community.checkflag", true)){
 			userPrivilegeMgr.checkUserPrivilege(UserContext.current().getUser().getId(), cmd.getCurrentPMId(), 4070040710L, cmd.getAppId(), null,cmd.getCurrentProjectId());//参数设置权限
 		}
 		ExpressOwner owner = checkOwner(cmd.getOwnerType(), cmd.getOwnerId());
@@ -1040,7 +1040,7 @@ public class ExpressServiceImpl implements ExpressService {
 
 	@Override
 	public void updateExpressBusinessNote(UpdateExpressBusinessNoteCommand cmd) {
-		if(cmd.getCurrentPMId()!=null && configProvider.getBooleanValue("privilege.community.checkflag", true)){
+		if(cmd.getCurrentPMId()!=null && cmd.getAppId()!=null && configProvider.getBooleanValue("privilege.community.checkflag", true)){
 			userPrivilegeMgr.checkUserPrivilege(UserContext.current().getUser().getId(), cmd.getCurrentPMId(), 4070040710L, cmd.getAppId(), null,cmd.getCurrentProjectId());//参数设置权限
 		}
 		ExpressOwner owner = checkOwner(cmd.getOwnerType(), cmd.getOwnerId());
@@ -1062,7 +1062,7 @@ public class ExpressServiceImpl implements ExpressService {
 
 	@Override
 	public ListExpressHotlinesResponse listExpressHotlines(ListExpressHotlinesCommand cmd) {
-		if(cmd.getCurrentPMId()!=null && configProvider.getBooleanValue("privilege.community.checkflag", true)){
+		if(cmd.getCurrentPMId()!=null && cmd.getAppId()!=null && configProvider.getBooleanValue("privilege.community.checkflag", true)){
 			userPrivilegeMgr.checkUserPrivilege(UserContext.current().getUser().getId(), cmd.getCurrentPMId(), 4070040710L, cmd.getAppId(), null,cmd.getCurrentProjectId());//参数设置权限
 		}
 		ExpressOwner owner = checkOwner(cmd.getOwnerType(), cmd.getOwnerId());
@@ -1086,7 +1086,7 @@ public class ExpressServiceImpl implements ExpressService {
 
 	@Override
 	public CreateOrUpdateExpressHotlineResponse createOrUpdateExpressHotline(CreateOrUpdateExpressHotlineCommand cmd) {
-		if(cmd.getCurrentPMId()!=null && configProvider.getBooleanValue("privilege.community.checkflag", true)){
+		if(cmd.getCurrentPMId()!=null && cmd.getAppId()!=null && configProvider.getBooleanValue("privilege.community.checkflag", true)){
 			userPrivilegeMgr.checkUserPrivilege(UserContext.current().getUser().getId(), cmd.getCurrentPMId(), 4070040710L, cmd.getAppId(), null,cmd.getCurrentProjectId());//参数设置权限
 		}
 		ExpressOwner owner = checkOwner(cmd.getOwnerType(), cmd.getOwnerId());

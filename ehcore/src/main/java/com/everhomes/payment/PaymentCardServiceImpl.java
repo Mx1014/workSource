@@ -450,7 +450,7 @@ public class PaymentCardServiceImpl implements PaymentCardService{
     
     @Override
     public SearchCardUsersResponse searchCardUsers(SearchCardUsersCommand cmd){
-    	if(cmd.getCurrentPMId()!=null && configProvider.getBooleanValue("privilege.community.checkflag", true)){
+    	if(cmd.getCurrentPMId()!=null && cmd.getAppId()!=null && configProvider.getBooleanValue("privilege.community.checkflag", true)){
 			userPrivilegeMgr.checkUserPrivilege(UserContext.current().getUser().getId(), cmd.getCurrentPMId(), 4120041210L, cmd.getAppId(), null,cmd.getCurrentProjectId());//开卡用户权限
 		}
 
@@ -475,7 +475,7 @@ public class PaymentCardServiceImpl implements PaymentCardService{
     }
     @Override
     public GetCardUserStatisticsDTO getCardUserStatistics(GetCardUserStatisticsCommand cmd){
-    	if(cmd.getCurrentPMId()!=null && configProvider.getBooleanValue("privilege.community.checkflag", true)){
+    	if(cmd.getCurrentPMId()!=null && cmd.getAppId()!=null && configProvider.getBooleanValue("privilege.community.checkflag", true)){
 			userPrivilegeMgr.checkUserPrivilege(UserContext.current().getUser().getId(), cmd.getCurrentPMId(), 4120041210L, cmd.getAppId(), null,cmd.getCurrentProjectId());//开卡用户权限
 		}
     	checkParam(cmd.getOwnerType(), cmd.getOwnerId());
@@ -490,7 +490,7 @@ public class PaymentCardServiceImpl implements PaymentCardService{
     }
     @Override
     public SearchCardRechargeOrderResponse searchCardRechargeOrder(SearchCardRechargeOrderCommand cmd){
-    	if(cmd.getCurrentPMId()!=null && configProvider.getBooleanValue("privilege.community.checkflag", true)){
+    	if(cmd.getCurrentPMId()!=null && cmd.getAppId()!=null && configProvider.getBooleanValue("privilege.community.checkflag", true)){
 			userPrivilegeMgr.checkUserPrivilege(UserContext.current().getUser().getId(), cmd.getCurrentPMId(), 4120041230L, cmd.getAppId(), null,cmd.getCurrentProjectId());//充值记录权限
 		}
     	SearchCardRechargeOrderResponse response = new SearchCardRechargeOrderResponse();
@@ -520,7 +520,7 @@ public class PaymentCardServiceImpl implements PaymentCardService{
     }
     @Override
     public SearchCardTransactionsResponse searchCardTransactions(SearchCardTransactionsCommand cmd){
-    	if(cmd.getCurrentPMId()!=null && configProvider.getBooleanValue("privilege.community.checkflag", true)){
+    	if(cmd.getCurrentPMId()!=null && cmd.getAppId()!=null && configProvider.getBooleanValue("privilege.community.checkflag", true)){
 			userPrivilegeMgr.checkUserPrivilege(UserContext.current().getUser().getId(), cmd.getCurrentPMId(), 4120041240L, cmd.getAppId(), null,cmd.getCurrentProjectId());//消费记录权限
 		}
     	SearchCardTransactionsResponse response = new SearchCardTransactionsResponse();
@@ -563,7 +563,7 @@ public class PaymentCardServiceImpl implements PaymentCardService{
     
     @Override
     public void exportCardUsers(SearchCardUsersCommand cmd,HttpServletResponse response){
-    	if(cmd.getCurrentPMId()!=null && configProvider.getBooleanValue("privilege.community.checkflag", true)){
+    	if(cmd.getCurrentPMId()!=null && cmd.getAppId()!=null && configProvider.getBooleanValue("privilege.community.checkflag", true)){
 			userPrivilegeMgr.checkUserPrivilege(UserContext.current().getUser().getId(), cmd.getCurrentPMId(), 4120041220L, cmd.getAppId(), null,cmd.getCurrentProjectId());//开卡用户权限
 		}
     	Integer pageSize = PaginationConfigHelper.getPageSize(configProvider, cmd.getPageSize());
@@ -610,7 +610,7 @@ public class PaymentCardServiceImpl implements PaymentCardService{
 	@Override
 	public void exportCardRechargeOrder(SearchCardRechargeOrderCommand cmd,
 			HttpServletResponse response) {
-		if(cmd.getCurrentPMId()!=null && configProvider.getBooleanValue("privilege.community.checkflag", true)){
+		if(cmd.getCurrentPMId()!=null && cmd.getAppId()!=null && configProvider.getBooleanValue("privilege.community.checkflag", true)){
 			userPrivilegeMgr.checkUserPrivilege(UserContext.current().getUser().getId(), cmd.getCurrentPMId(), 4120041230L, cmd.getAppId(), null,cmd.getCurrentProjectId());//充值记录权限
 		}
 		Timestamp startDate = null;
@@ -685,7 +685,7 @@ public class PaymentCardServiceImpl implements PaymentCardService{
 	@Override
 	public void exportCardTransactions(SearchCardTransactionsCommand cmd,
 			HttpServletResponse response) {
-		if(cmd.getCurrentPMId()!=null && configProvider.getBooleanValue("privilege.community.checkflag", true)){
+		if(cmd.getCurrentPMId()!=null && cmd.getAppId()!=null && configProvider.getBooleanValue("privilege.community.checkflag", true)){
 			userPrivilegeMgr.checkUserPrivilege(UserContext.current().getUser().getId(), cmd.getCurrentPMId(), 4120041240L, cmd.getAppId(), null,cmd.getCurrentProjectId());//消费记录权限
 		}
 		Timestamp startDate = null;
