@@ -129,15 +129,7 @@ import java.sql.Date;
 import java.sql.Time;
 import java.sql.Timestamp;
 import java.text.SimpleDateFormat;
-import java.util.ArrayList;
-import java.util.Arrays;
-import java.util.Calendar;
-import java.util.Collections;
-import java.util.HashMap;
-import java.util.HashSet;
-import java.util.List;
-import java.util.Map;
-import java.util.Optional;
+import java.util.*;
 import java.util.concurrent.ExecutorService;
 import java.util.concurrent.Executors;
 import java.util.stream.Collectors;
@@ -1870,6 +1862,57 @@ public class Rentalv2ServiceImpl implements Rentalv2Service {
 				if(siteTotalMoneys[0].compareTo(priceRule.getFullPrice()) >= 0) {
 					siteTotalMoneys[0] = siteTotalMoneys[0].subtract(priceRule.getCutPrice());
 				}
+			}
+		}
+
+		//优惠
+		if(priceRule.getDiscountType()!=null) {
+			if(priceRule.getDiscountType().equals(DiscountType.FULL_MOENY_CUT_MONEY.getCode())){
+				//满减优惠
+				//满了多少次,都只减一个
+				if(siteTotalMoneys[0].compareTo(priceRule.getFullPrice())>= 0) {
+					siteTotalMoneys[0] = siteTotalMoneys[0].subtract(priceRule.getCutPrice());
+				}
+			}else if(DiscountType.FULL_DAY_CUT_MONEY.getCode().equals(priceRule.getDiscountType()) ){
+//				//不允许一个用户预约一个时段多个资源的情况
+//				Map<java.sql.Date, Map<String,Set<Byte>>> dayMap= new HashMap<>();
+//				//给半天预定的日期map加入am和pm的byte
+//				if(rentalBill.getRentalType().equals(RentalType.HALFDAY.getCode()) ||
+//						rentalBill.getRentalType().equals(RentalType.THREETIMEADAY.getCode())){
+//					dayMap.putIfAbsent(rentalSiteRule.getResourceRentalDate(), new HashMap<>());
+//					if(rs.getAutoAssign().equals(NormalFlag.NONEED.getCode())){
+//						String key = "无场所";
+//						dayMap.get(rentalSiteRule.getResourceRentalDate()).putIfAbsent(key, new HashSet<>());
+//						dayMap.get(rentalSiteRule.getResourceRentalDate()).get(key).add(rentalSiteRule.getAmorpm());
+//					}
+//					else{
+//						dayMap.get(rentalSiteRule.getResourceRentalDate()).putIfAbsent(rentalSiteRule.getResourceNumber(), new HashSet<>());
+//						dayMap.get(rentalSiteRule.getResourceRentalDate()).get(rentalSiteRule.getResourceNumber()).add(rentalSiteRule.getAmorpm());
+//					}
+//
+//				}
+//
+//
+//				double multiple =0.0;
+//				//满天减免
+//				if(priceRule.getRentalType().equals(RentalType.HALFDAY.getCode())){
+//					for(Date rentalDate:dayMap.keySet()){
+//						for(String resourceNumber : dayMap.get(rentalDate).keySet()) {
+//							if(dayMap.get(rentalDate).get(resourceNumber).size()>=2) {
+//								multiple = multiple+rules.get(0).getRentalCount();
+//							}
+//						}
+//					}
+//				}else if (priceRule.getRentalType().equals(RentalType.THREETIMEADAY.getCode())){
+//					for(Date rentalDate:dayMap.keySet()){
+//						for(String resourceNumber : dayMap.get(rentalDate).keySet()) {
+//							if(dayMap.get(rentalDate).get(resourceNumber).size()>=3) {
+//								multiple =multiple+rules.get(0).getRentalCount();
+//							}
+//						}
+//					}
+//				}
+//				siteTotalMoneys[0] = siteTotalMoneys[0].subtract(priceRule.getCutPrice().multiply(new BigDecimal(multiple)));
 			}
 		}
 

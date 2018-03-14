@@ -26,6 +26,11 @@ public class LeaseProjectPublicshHandler implements PortalPublishHandler {
     @Override
     public String publish(Integer namespaceId, String instanceConfig, String appName) {
         LeaseProjectInstanceConfig leaseProjectInstanceConfig = (LeaseProjectInstanceConfig) StringHelper.fromJsonString(instanceConfig,LeaseProjectInstanceConfig.class);
+
+        if(leaseProjectInstanceConfig == null){
+            leaseProjectInstanceConfig = new LeaseProjectInstanceConfig();
+        }
+
         if (leaseProjectInstanceConfig.getCategoryId()!=null){
             return instanceConfig;
         }else{
