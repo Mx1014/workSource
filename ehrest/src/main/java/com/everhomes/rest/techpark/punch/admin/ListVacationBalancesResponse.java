@@ -10,7 +10,7 @@ import com.everhomes.util.StringHelper;
  * 
  * <ul>返回值:
  * <li>vacationBalances: 假期余额列表</li>
- * <li>nextPageAnchor: nextPageAnchor</li>
+ * <li>nextPageOffset: 下页页码</li>
  * </ul>
  */
 public class ListVacationBalancesResponse {
@@ -18,7 +18,7 @@ public class ListVacationBalancesResponse {
 	@ItemType(VacationBalanceDTO.class)
 	private List<VacationBalanceDTO> vacationBalances;
 
-	private Long nextPageAnchor;
+	private Integer nextPageOffset;
 	public ListVacationBalancesResponse() {
 
 	}
@@ -41,12 +41,12 @@ public class ListVacationBalancesResponse {
 		return StringHelper.toJsonString(this);
 	}
 
-	public Long getNextPageAnchor() {
-		return nextPageAnchor;
+
+	public Integer getNextPageOffset() {
+		return nextPageOffset;
 	}
 
-	public void setNextPageAnchor(Long nextPageAnchor) {
-		this.nextPageAnchor = nextPageAnchor;
+	public void setNextPageOffset(Integer nextPageOffset) {
+		this.nextPageOffset = nextPageOffset;
 	}
-
 }
