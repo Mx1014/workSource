@@ -35,6 +35,7 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
 import org.springframework.transaction.TransactionStatus;
 
+import java.util.ArrayList;
 import java.util.List;
 import java.util.stream.Collectors;
 
@@ -395,13 +396,21 @@ public class EnterpriseApplyBuildingServiceImpl implements EnterpriseApplyBuildi
 
 		int size = communities.size();
 
-		response.setProjects(communities.stream().map(r -> {
+		response.setProjects(new ArrayList<>());
+		for (Community community:communities){
+			LeaseProject leaseProject = enterpriseApplyBuildingProvider.findLeaseProjectByProjectId(community.getId(), cmd.getCategoryId());
+			if (leaseProject!=null && cmd.getCommunityId()!=null){
+				List<Long> communityIds = enterpriseApplyBuildingProvider.listLeaseProjectCommunities(leaseProject.getId(),cmd.getCategoryId());
+				if (!communityIds.contains(cmd.getCommunityId()))
+					continue;
+			}
+
 			LeaseProjectDTO dto = new LeaseProjectDTO();
-			populateProjectBasicInfo(dto, r, cmd.getCategoryId());
+			populateProjectBasicInfo(dto, community, cmd.getCategoryId());
 
 			processProjectDetailUrl(dto, cmd.getCategoryId());
-			return dto;
-		}).collect(Collectors.toList()));
+			response.getProjects().add(dto);
+		}
 
 		if(size != pageSize){
 			response.setNextPageAnchor(null);
