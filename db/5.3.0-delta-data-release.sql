@@ -1490,3 +1490,6 @@ update eh_service_module_apps SET module_id=20100 WHERE action_type=13 AND insta
 -- 更新
 update eh_service_module_apps set module_id=41700 where module_id = 40150;
 update eh_reflection_service_module_apps set module_id=41700 where module_id = 40150;
+
+-- add by yanjun 201803151646 能耗管理改配置
+update eh_service_modules set instance_config = '{"url":"${home.url}/energy-management/build/index/energy-management/build/index.html?hideNavigationBar=1#/address_choose#sign_suffix"}' where id = 49100;
