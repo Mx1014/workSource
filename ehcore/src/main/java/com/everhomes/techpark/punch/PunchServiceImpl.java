@@ -9202,6 +9202,9 @@ public class PunchServiceImpl implements PunchService {
     public void updateVacationBalances(UpdateVacationBalancesCommand cmd) {
         PunchVacationBalance balance = punchVacationBalanceProvider.findPunchVacationBalanceByDetailId(cmd.getDetailId());
         OrganizationMemberDetails detail = organizationProvider.findOrganizationMemberDetailsByDetailId(cmd.getDetailId());
+        if (null == detail) {
+            return ;
+        }
         if (null == balance) {
             balance = new PunchVacationBalance();
             balance.setDetailId(detail.getId());

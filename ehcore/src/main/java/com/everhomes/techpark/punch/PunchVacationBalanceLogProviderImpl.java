@@ -73,9 +73,9 @@ public class PunchVacationBalanceLogProviderImpl implements PunchVacationBalance
 		SelectConditionStep<Record> step = getReadOnlyContext().select().from(Tables.EH_PUNCH_VACATION_BALANCE_LOGS)
 				.where(Tables.EH_PUNCH_VACATION_BALANCE_LOGS.DETAIL_ID.eq(detailId));
 		if(locator != null && locator.getAnchor() != null)  {
-			step = step.and(Tables.EH_PUNCH_RULES.ID.lt(locator.getAnchor()));
+			step = step.and(Tables.EH_PUNCH_VACATION_BALANCE_LOGS.ID.lt(locator.getAnchor()));
 		}
-		Result<Record> records = step.orderBy(Tables.EH_PUNCH_RULES.ID.desc()).limit(pageSize).fetch();
+		Result<Record> records = step.orderBy(Tables.EH_PUNCH_VACATION_BALANCE_LOGS.ID.desc()).limit(pageSize).fetch();
 		if (records == null || records.size() == 0) {
 			return null;
 		}
