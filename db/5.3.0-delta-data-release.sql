@@ -1452,11 +1452,11 @@ set @privilege_id = (select max(id) from eh_service_module_privileges);
 INSERT INTO `eh_acl_privileges` (`id`, `app_id`, `name`, `description`, `tag`) VALUES (4070040700, '0', '快递服务 全部权限', '快递服务 全部权限', NULL);
 INSERT INTO `eh_service_module_privileges` (`id`, `module_id`, `privilege_type`, `privilege_id`, `remark`, `default_order`, `create_time`) VALUES (@privilege_id:=@privilege_id+1, '40700', '0', 4070040700, '全部权限', '0', now());
 
-INSERT INTO `eh_acl_privileges` (`id`, `app_id`, `name`, `description`, `tag`) VALUES (4070040710, '0', '快递服务 开卡用户权限', '快递服务 开卡用户权限', NULL);
-INSERT INTO `eh_service_module_privileges` (`id`, `module_id`, `privilege_type`, `privilege_id`, `remark`, `default_order`, `create_time`) VALUES (@privilege_id:=@privilege_id+1, '40710', '0', 4070040710, '开卡用户权限', '0', now());
+INSERT INTO `eh_acl_privileges` (`id`, `app_id`, `name`, `description`, `tag`) VALUES (4070040710, '0', '快递服务 参数设置权限', '快递服务 参数设置权限', NULL);
+INSERT INTO `eh_service_module_privileges` (`id`, `module_id`, `privilege_type`, `privilege_id`, `remark`, `default_order`, `create_time`) VALUES (@privilege_id:=@privilege_id+1, '40710', '0', 4070040710, '参数设置权限', '0', now());
 
-INSERT INTO `eh_acl_privileges` (`id`, `app_id`, `name`, `description`, `tag`) VALUES (4070040720, '0', '快递服务 导出用户权限', '快递服务 导出用户权限', NULL);
-INSERT INTO `eh_service_module_privileges` (`id`, `module_id`, `privilege_type`, `privilege_id`, `remark`, `default_order`, `create_time`) VALUES (@privilege_id:=@privilege_id+1, '40720', '0', 4070040720, '导出用户权限', '0', now());
+INSERT INTO `eh_acl_privileges` (`id`, `app_id`, `name`, `description`, `tag`) VALUES (4070040720, '0', '快递服务 订单管理权限', '快递服务 订单管理权限', NULL);
+INSERT INTO `eh_service_module_privileges` (`id`, `module_id`, `privilege_type`, `privilege_id`, `remark`, `default_order`, `create_time`) VALUES (@privilege_id:=@privilege_id+1, '40720', '0', 4070040720, '订单管理权限', '0', now());
 
 -- 41100 文件管理 web有点问题--------------------------------------------------------------------------------------------
 set @privilege_id = (select max(id) from eh_service_module_privileges);
