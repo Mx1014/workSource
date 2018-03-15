@@ -1052,9 +1052,8 @@ public class PunchServiceImpl implements PunchService {
 		List<PunchLog> punchLogs = punchProvider.listPunchLogsByDate(userId,
 			companyId, dateSF.get().format(punchDate), ClockCode.SUCESS.getCode());
 		if(null != punchLogs){
-			pdl.setPunchCount(punchLogs.size());
 			for (PunchLog log : punchLogs){
-				if (log.getPunchTime() == null) {
+				if (log.getPunchTime() == null ) {
 					continue;
 				}
 				pdl.getPunchLogs().add(ConvertHelper.convert(log,PunchLogDTO.class ));
@@ -1063,6 +1062,7 @@ public class PunchServiceImpl implements PunchService {
 				if(null == pdl.getLeaveTime()||pdl.getLeaveTime() < log.getPunchTime().getTime())
 					pdl.setLeaveTime(log.getPunchTime().getTime());
 			}
+			pdl.setPunchCount(pdl.getPunchLogs().size());
 
 		}else{
 			pdl.setPunchCount(0);
