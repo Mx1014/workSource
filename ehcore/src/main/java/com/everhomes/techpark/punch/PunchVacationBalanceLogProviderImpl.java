@@ -4,7 +4,11 @@ package com.everhomes.techpark.punch;
 import java.sql.Timestamp;
 import java.util.List;
 
+import com.everhomes.listing.CrossShardListingLocator;
 import org.jooq.DSLContext;
+import org.jooq.Record;
+import org.jooq.Result;
+import org.jooq.SelectConditionStep;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
 
@@ -63,7 +67,21 @@ public class PunchVacationBalanceLogProviderImpl implements PunchVacationBalance
 				.orderBy(Tables.EH_PUNCH_VACATION_BALANCE_LOGS.ID.asc())
 				.fetch().map(r -> ConvertHelper.convert(r, PunchVacationBalanceLog.class));
 	}
-	
+
+	@Override
+	public List<PunchVacationBalanceLog> listPunchVacationBalanceLog(Long detailId, CrossShardListingLocator locator, int pageSize) {
+		SelectConditionStep<Record> step = getReadOnlyContext().select().from(Tables.EH_PUNCH_VACATION_BALANCE_LOGS)
+				.where(Tables.EH_PUNCH_VACATION_BALANCE_LOGS.DETAIL_ID.eq(detailId));
+		if(locator != null && locator.getAnchor() != null)  {
+			step = step.and(Tables.EH_PUNCH_RULES.ID.lt(locator.getAnchor()));
+		}
+		Result<Record> records = step.orderBy(Tables.EH_PUNCH_RULES.ID.desc()).limit(pageSize).fetch();
+		if (records == null || records.size() == 0) {
+			return null;
+		}
+		return records.map(r -> ConvertHelper.convert(r, PunchVacationBalanceLog.class));
+	}
+
 	private EhPunchVacationBalanceLogsDao getReadWriteDao() {
 		return getDao(getReadWriteContext());
 	}

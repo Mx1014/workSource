@@ -48,6 +48,7 @@ import com.everhomes.rest.uniongroup.*;
 import com.everhomes.sequence.SequenceProvider;
 import com.everhomes.server.schema.tables.pojos.EhPunchSchedulings;
 import com.everhomes.server.schema.tables.pojos.EhRentalv2Cells;
+import com.everhomes.socialSecurity.SocialSecurityService;
 import com.everhomes.uniongroup.*;
 import com.everhomes.util.*;
 
@@ -336,6 +337,9 @@ public class PunchServiceImpl implements PunchService {
     private PunchVacationBalanceLogProvider punchVacationBalanceLogProvider;
     @Autowired
     private PunchVacationBalanceProvider punchVacationBalanceProvider;
+
+    @Autowired
+    private SocialSecurityService socialSecurityService;
 
     @Override
     public void checkAppPrivilege(Long orgId, Long checkOrgId, Long privilege) {
@@ -9249,15 +9253,36 @@ public class PunchServiceImpl implements PunchService {
             }
             return null;
         });
-
-
     }
 
     @Override
     public ListVacationBalanceLogsResponse listVacationBalanceLogs(
             ListVacationBalanceLogsCommand cmd) {
-        // TODO Auto-generated method stub
-        return null;
+        ListVacationBalanceLogsResponse response = new ListVacationBalanceLogsResponse();
+        if (cmd.getPageAnchor() == null)
+            cmd.setPageAnchor(0L);
+        int pageSize = getPageSize(configurationProvider, cmd.getPageSize());
+
+        CrossShardListingLocator locator = new CrossShardListingLocator();
+        locator.setAnchor(cmd.getPageAnchor());
+        List<PunchVacationBalanceLog> results = punchVacationBalanceLogProvider.listPunchVacationBalanceLog(cmd.getDetailId(),
+                locator, pageSize + 1);
+        if (null == results)
+            return response;
+        Long nextPageAnchor = null;
+        if (results != null && results.size() > pageSize) {
+            results.remove(results.size() - 1);
+            nextPageAnchor = results.get(results.size() - 1).getId();
+        }
+        response.setNextPageAnchor(nextPageAnchor);
+        response.setVacationBalanceLogs(new ArrayList<>());
+        for (PunchVacationBalanceLog r : results) {
+            VacationBalanceLogDTO dto = ConvertHelper.convert(r, VacationBalanceLogDTO.class);
+            dto.setCreatorName(socialSecurityService.findNameByOwnerAndUser(cmd.getOrganizationId(), r.getCreatorUid()));
+            dto.setCreateTime(r.getCreateTime().getTime());
+            response.getVacationBalanceLogs().add(dto);
+        }
+        return response;
     }
 
     @Override
