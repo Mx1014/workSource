@@ -3,6 +3,7 @@ package com.everhomes.rest.quality;
 import com.everhomes.discover.ItemType;
 import com.everhomes.util.StringHelper;
 
+import java.sql.Timestamp;
 import java.util.List;
 
 /**
@@ -54,94 +55,94 @@ import java.util.List;
  * </ul>
  */
 public class QualityInspectionTaskDTO {
-	
+
 	private Long id;
-	
+
 	private Long standardId;
-	
+
 	private Long parentId;
-	
+
 	private Long childCount;
 
 	private String ownerType;
-	
+
 	private Long ownerId;
-	
+
 	private String targetType;
-	
+
 	private Long targetId;
 
 	private String targetName;
-	
+
 	private String taskName;
-	
+
 	private String taskNumber;
-	
+
 	private String executiveGroupName;
 
 	private String groupName;
 
 	private String categoryName;
-	
+
 	private Long executiveGroupId;
-	
+
 	private Long executivePositionId;
-	
+
 	private Long executorId;
-	
+
 	private String executorName;
 
 	private Long operatorId;
-	
+
 	private String operatorName;
 
 	private String operatorType;
-	
-	private Long executiveStartTime;
-	
-	private Long executiveExpireTime;
-	
-	private Long processExpireTime;
-	
+
+	private Timestamp executiveStartTime;
+
+	private Timestamp executiveExpireTime;
+
+	private Timestamp processExpireTime;
+
 	private Byte status;
-	
+
 	private Byte result;
-	
+
 	private Byte processResult;
-	
+
 	private Byte reviewResult;
-	
+
 	private Long reviewerId;
-	
+
 	private String reviewerName;
-	
+
 	private Long categoryId;
-	
+
 	@ItemType(QualityInspectionTaskRecordsDTO.class)
-    private QualityInspectionTaskRecordsDTO record;
-	
+	private QualityInspectionTaskRecordsDTO record;
+
 	@ItemType(GroupUserDTO.class)
 	private List<GroupUserDTO> groupUsers;
-	
+
 	private Byte taskFlag;
-	
+
 	private Long manualFlag;
-	
+
 	private Long creatorUid;
-	
+
 	private String creatorName;
-	
+
 	private String standardDescription;
-	
+
 	private String categoryDescription;
-	
-	private Long createTime;
 
-	private Long executiveTime;
+	private Timestamp createTime;
 
-	private Long processTime;
+	private Timestamp executiveTime;
 
-	private Long reviewTime;
+	private Timestamp processTime;
+
+	private Timestamp reviewTime;
 
 	private String lastSyncTime;
 
@@ -299,51 +300,27 @@ public class QualityInspectionTaskDTO {
 		this.operatorType = operatorType;
 	}
 
-	public String getExecutiveGroupName() {
-		return executiveGroupName;
-	}
-
-	public void setExecutiveGroupName(String executiveGroupName) {
-		this.executiveGroupName = executiveGroupName;
-	}
-
-	public Long getExecutiveGroupId() {
-		return executiveGroupId;
-	}
-
-	public void setExecutiveGroupId(Long executiveGroupId) {
-		this.executiveGroupId = executiveGroupId;
-	}
-
-	public Long getExecutivePositionId() {
-		return executivePositionId;
-	}
-
-	public void setExecutivePositionId(Long executivePositionId) {
-		this.executivePositionId = executivePositionId;
-	}
-
-	public Long getExecutiveStartTime() {
+	public Timestamp getExecutiveStartTime() {
 		return executiveStartTime;
 	}
 
-	public void setExecutiveStartTime(Long executiveStartTime) {
+	public void setExecutiveStartTime(Timestamp executiveStartTime) {
 		this.executiveStartTime = executiveStartTime;
 	}
 
-	public Long getExecutiveExpireTime() {
+	public Timestamp getExecutiveExpireTime() {
 		return executiveExpireTime;
 	}
 
-	public void setExecutiveExpireTime(Long executiveExpireTime) {
+	public void setExecutiveExpireTime(Timestamp executiveExpireTime) {
 		this.executiveExpireTime = executiveExpireTime;
 	}
 
-	public Long getProcessExpireTime() {
+	public Timestamp getProcessExpireTime() {
 		return processExpireTime;
 	}
 
-	public void setProcessExpireTime(Long processExpireTime) {
+	public void setProcessExpireTime(Timestamp processExpireTime) {
 		this.processExpireTime = processExpireTime;
 	}
 
@@ -387,20 +364,28 @@ public class QualityInspectionTaskDTO {
 		this.reviewerName = reviewerName;
 	}
 
-	public Long getCategoryId() {
-		return categoryId;
-	}
-
-	public void setCategoryId(Long categoryId) {
-		this.categoryId = categoryId;
-	}
-
 	public QualityInspectionTaskRecordsDTO getRecord() {
 		return record;
 	}
 
 	public void setRecord(QualityInspectionTaskRecordsDTO record) {
 		this.record = record;
+	}
+
+	public Long getExecutiveGroupId() {
+		return executiveGroupId;
+	}
+
+	public void setExecutiveGroupId(Long executiveGroupId) {
+		this.executiveGroupId = executiveGroupId;
+	}
+
+	public Long getExecutivePositionId() {
+		return executivePositionId;
+	}
+
+	public void setExecutivePositionId(Long executivePositionId) {
+		this.executivePositionId = executivePositionId;
 	}
 
 	public List<GroupUserDTO> getGroupUsers() {
@@ -419,12 +404,36 @@ public class QualityInspectionTaskDTO {
 		this.taskFlag = taskFlag;
 	}
 
+	public String getStandardDescription() {
+		return standardDescription;
+	}
+
+	public void setStandardDescription(String standardDescription) {
+		this.standardDescription = standardDescription;
+	}
+
+	public Long getCategoryId() {
+		return categoryId;
+	}
+
+	public void setCategoryId(Long categoryId) {
+		this.categoryId = categoryId;
+	}
+
 	public Long getManualFlag() {
 		return manualFlag;
 	}
 
 	public void setManualFlag(Long manualFlag) {
 		this.manualFlag = manualFlag;
+	}
+
+	public String getCategoryDescription() {
+		return categoryDescription;
+	}
+
+	public void setCategoryDescription(String categoryDescription) {
+		this.categoryDescription = categoryDescription;
 	}
 
 	public Long getCreatorUid() {
@@ -443,51 +452,43 @@ public class QualityInspectionTaskDTO {
 		this.creatorName = creatorName;
 	}
 
-	public String getStandardDescription() {
-		return standardDescription;
-	}
-
-	public void setStandardDescription(String standardDescription) {
-		this.standardDescription = standardDescription;
-	}
-
-	public String getCategoryDescription() {
-		return categoryDescription;
-	}
-
-	public void setCategoryDescription(String categoryDescription) {
-		this.categoryDescription = categoryDescription;
-	}
-
-	public Long getCreateTime() {
+	public Timestamp getCreateTime() {
 		return createTime;
 	}
 
-	public void setCreateTime(Long createTime) {
+	public void setCreateTime(Timestamp createTime) {
 		this.createTime = createTime;
 	}
 
-	public Long getExecutiveTime() {
+	public String getExecutiveGroupName() {
+		return executiveGroupName;
+	}
+
+	public void setExecutiveGroupName(String executiveGroupName) {
+		this.executiveGroupName = executiveGroupName;
+	}
+
+	public Timestamp getExecutiveTime() {
 		return executiveTime;
 	}
 
-	public void setExecutiveTime(Long executiveTime) {
+	public void setExecutiveTime(Timestamp executiveTime) {
 		this.executiveTime = executiveTime;
 	}
 
-	public Long getProcessTime() {
+	public Timestamp getProcessTime() {
 		return processTime;
 	}
 
-	public void setProcessTime(Long processTime) {
+	public void setProcessTime(Timestamp processTime) {
 		this.processTime = processTime;
 	}
 
-	public Long getReviewTime() {
+	public Timestamp getReviewTime() {
 		return reviewTime;
 	}
 
-	public void setReviewTime(Long reviewTime) {
+	public void setReviewTime(Timestamp reviewTime) {
 		this.reviewTime = reviewTime;
 	}
 
@@ -508,8 +509,8 @@ public class QualityInspectionTaskDTO {
 	}
 
 	@Override
-    public String toString() {
-        return StringHelper.toJsonString(this);
-    }
+	public String toString() {
+		return StringHelper.toJsonString(this);
+	}
 
 }
