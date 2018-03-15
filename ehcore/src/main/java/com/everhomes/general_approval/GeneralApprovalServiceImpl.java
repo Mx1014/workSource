@@ -916,11 +916,13 @@ public class GeneralApprovalServiceImpl implements GeneralApprovalService {
         }
 
         Organization org = organizationProvider.findOrganizationById(cmd.getOwnerId());
-        GeneralApprovalScopeMapDTO dto = new GeneralApprovalScopeMapDTO();
-        dto.setSourceId(cmd.getOwnerId());
-        dto.setSourceType(UniongroupTargetType.ORGANIZATION.getCode());
-        dto.setSourceDescription(org.getName());
-        updateGeneralApprovalScope(ga.getNamespaceId(), ga.getId(), Arrays.asList(dto));
+        if (org != null) {
+            GeneralApprovalScopeMapDTO dto = new GeneralApprovalScopeMapDTO();
+            dto.setSourceId(cmd.getOwnerId());
+            dto.setSourceType(UniongroupTargetType.ORGANIZATION.getCode());
+            dto.setSourceDescription(org.getName());
+            updateGeneralApprovalScope(ga.getNamespaceId(), ga.getId(), Arrays.asList(dto));
+        }
     }
 
     private GeneralApproval convertApprovalFromTemplate(GeneralApproval ga, GeneralApprovalTemplate approval, Long formOriginId, CreateApprovalTemplatesCommand cmd) {
