@@ -257,7 +257,7 @@ public class WarehouseStockLogSearcherImpl extends AbstractElasticSearch impleme
 
         List<WarehouseStockLogDTO> logDTOs = new ArrayList<WarehouseStockLogDTO>();
         for(Long id : ids) {
-            WarehouseStockLogs log = warehouseProvider.findWarehouseStockLogs(id, cmd.getOwnerType(), cmd.getOwnerId());
+            WarehouseStockLogs log = warehouseProvider.findWarehouseStockLogs(id, cmd.getOwnerType(), cmd.getOwnerId(), cmd.getMaterialName());
             WarehouseStockLogDTO dto = ConvertHelper.convert(log, WarehouseStockLogDTO.class);
 
             if(log.getRequestUid() != null) {

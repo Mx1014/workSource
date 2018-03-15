@@ -1,7 +1,17 @@
 -- 0、执行search文件夹下的pmtask.sh脚本
 -- 1、覆盖eh_web_menus、eh_service_modules和eh_domains，从88覆盖到新的数据库表
 -- 2、更新eh_domains中namespace_id等于0的数据的domain的值为服务器实际的ip
+-- offline  by jiarui  {home.url}换成域名 这里需要换成部署环境的域名信息 如：core.zuolin.com
+/*SET  @id = (SELECT  MAX(id) FROM eh_version_realm);
+INSERT INTO `eh_version_realm` VALUES (@id:=@id+1, 'equipmentInspection', NULL, NOW(), '0');
 
+SET  @vId = (SELECT  MAX(id) FROM eh_version_urls);
+INSERT INTO `eh_version_urls` VALUES (@vId:=@vId+1, @id, '1.0.0', 'http://{home.url}/nar/equipmentInspection/inspectionOffLine/equipmentInspection-1-0-0.zip', 'http://opv2-test.zuolin.com/nar/equipmentInspection/inspectionOffLine/equipmentInspection-1-0-0.zip', '物业巡检巡检离线', '0', '物业巡检', NOW(), NULL, '0');
+
+UPDATE eh_launch_pad_items
+SET action_data = '{\"realm\":\"equipmentInspection\",\"entryUrl\":\"http://{home.url}/nar/equipmentInspection/dist/index.html?hideNavigationBar=1#sign_suffix\"}'
+WHERE item_label LIKE '%巡检%';*/
+-- offline  by jiarui
 -- 3、清理老数据
 /*
 
@@ -50,7 +60,39 @@ SELECT @appid := @appid + 1, namespace_id, namespace_id + 100,  `active_app_id`,
 -- UPDATE eh_service_module_apps set custom_tag = 1, instance_config = '{"categoryId":1,"publishPrivilege":1,"livePrivilege":0,"listStyle":2,"scope":3,"style":4,"title": "活动管理"}' where module_id = 10600 and (instance_config is NULL or instance_config not LIKE '%categoryId%');
 -- UPDATE eh_service_module_apps set custom_tag = 0, instance_config = '{"forumEntryId":0}' where module_id = 10100 and (instance_config is NULL or instance_config not LIKE '%forumEntryId%');
 
--- 8、调用/pmtask/syncFromDb  /pmtask/syncCategories 同步数据
+/*8、
+1)/pmtask/syncCategories
+ 2)UPDATE eh_pm_tasks
+        LEFT JOIN
+    (SELECT
+       distinct (a.id) as aid,b.id as bid,b.owner_id as owner_id
+    FROM
+        eh_categories a, eh_categories b
+    WHERE
+        a.path = b.path ) c ON eh_pm_tasks.task_category_id = c.aid
+        AND eh_pm_tasks.owner_id = c.owner_id
+SET
+    eh_pm_tasks.task_category_id = c.bid
+WHERE
+    eh_pm_tasks.task_category_id!=0;
+
+UPDATE eh_pm_tasks
+        RIGHT JOIN
+    (SELECT
+       distinct (a.id) as aid,b.id as bid,b.owner_id as owner_id
+    FROM
+        eh_categories a, eh_categories b
+    WHERE
+        a.path = b.path ) c ON eh_pm_tasks.category_id = c.aid
+        AND eh_pm_tasks.owner_id = c.owner_id
+SET
+    eh_pm_tasks.category_id = c.bid
+WHERE
+    eh_pm_tasks.category_id!=0;
+
+ 3)/pmtask/syncFromDb
+*/
+
 
 -- 9、同步服务联盟和工位预定数据，以下接口请勿重复调用！！请按照顺序调用。
 -- /yellowPage/syncOldForm
@@ -63,3 +105,22 @@ SELECT @appid := @appid + 1, namespace_id, namespace_id + 100,  `active_app_id`,
 -- 11、同步审批范围及离职人员状态
 -- /admin/general_approval/initializeGeneralApprovalScope
 -- /archives/syncArchivesDismissStatus
+
+-- 12、以下按照顺序执行
+
+-- flush redis    清空掉redis
+
+-- 同步以下接口 （执行完sql之后）
+
+-- /equipment/syscStandardToEqiupmentPlan
+
+-- /equipment/syncEquipmentStandardIndex
+
+-- /equipment/syncEquipmentStandardMapIndex
+
+-- /equipment/syncEquipmentPlansIndex
+
+-- /equipment/syncEquipmentTasksIndex
+
+-- syscStandardToEqiupmentPlan 同步如果发生异常 eh_equipment_inspection_plans    eh_equipment_inspection_equipment_plan_map eh_equipment_inspection_plan_group_map 清空重新同步
+-- 执行脚本物业巡检离线的脚本equipment-inspection改成equipmentInspection，放到nar下面

@@ -13,13 +13,17 @@ import com.everhomes.coordinator.CoordinationProvider;
 import com.everhomes.entity.EntityType;
 import com.everhomes.listing.ListingLocator;
 import com.everhomes.listing.ListingQueryBuilderCallback;
+import com.everhomes.module.ServiceModuleService;
 import com.everhomes.objectstorage.ObjectStorageService;
 import com.everhomes.objectstorage.OsObject;
 import com.everhomes.objectstorage.OsObjectDownloadLog;
 import com.everhomes.organization.OrganizationCommunityRequest;
 import com.everhomes.organization.OrganizationProvider;
 import com.everhomes.organization.OrganizationService;
+import com.everhomes.rest.acl.ProjectDTO;
+import com.everhomes.rest.address.CommunityDTO;
 import com.everhomes.rest.energy.util.ParamErrorCodes;
+import com.everhomes.rest.module.ListUserRelatedProjectByModuleCommand;
 import com.everhomes.rest.objectstorage.OsObjectDownloadLogQuery;
 import com.everhomes.rest.objectstorage.OsObjectQuery;
 import com.everhomes.rest.objectstorage.OsObjectStatus;
@@ -32,6 +36,7 @@ import com.everhomes.server.schema.Tables;
 import com.everhomes.settings.PaginationConfigHelper;
 import com.everhomes.user.User;
 import com.everhomes.user.UserContext;
+import com.everhomes.user.UserPrivilegeMgr;
 import com.everhomes.user.UserProvider;
 import com.everhomes.util.ConvertHelper;
 import com.everhomes.util.Tuple;
@@ -68,6 +73,9 @@ public class OrganizationFileServiceImpl implements OrganizationFileService {
 
     @Autowired
     private ObjectStorageService objectStorageService;
+    
+    @Autowired
+    private ServiceModuleService serviceModuleService;
 
     @Autowired
     private ContentServerService contentServerService;
@@ -80,7 +88,8 @@ public class OrganizationFileServiceImpl implements OrganizationFileService {
 
     @Autowired
     private ConfigurationProvider configurationProvider;
-
+	@Autowired
+	private UserPrivilegeMgr userPrivilegeMgr;
     @Autowired
     private CoordinationProvider coordinationProvider;
 
@@ -180,6 +189,9 @@ public class OrganizationFileServiceImpl implements OrganizationFileService {
 
     @Override
     public SearchOrganizationFileResponse searchOrganizationFileByCommunity(SearchOrganizationFileByCommunityCommand cmd) {
+//    	if(cmd.getCurrentPMId()!=null && cmd.getAppId()!=null && configurationProvider.getBooleanValue("privilege.community.checkflag", true)){
+//			userPrivilegeMgr.checkUserPrivilege(UserContext.current().getUser().getId(), cmd.getCurrentPMId(), 4150041500L, cmd.getAppId(), null,cmd.getCurrentProjectId());//文件管理权限
+//		}
         validate(cmd);
         this.checkCurrentUserNotInOrg(cmd.getOrganizationId());
 
@@ -190,20 +202,31 @@ public class OrganizationFileServiceImpl implements OrganizationFileService {
         query.setPageSize(pageSize);
         query.setStatus(OsObjectStatus.ACTIVE.getCode());
         query.setServiceType(EntityType.ORGANIZATION_FILE.getCode());
+        query.setNamespaceId(UserContext.getCurrentNamespaceId());
 
-        Community community = communityProvider.findCommunityById(cmd.getCommunityId());
-        if (community != null) {
-            query.setOwnerType(EntityType.COMMUNITY.getCode());
-            query.setOwnerId(cmd.getCommunityId());
-        } else {
-            query.setOwnerType(EntityType.NAMESPACE.getCode());
-            query.setOwnerId(Long.valueOf(currNamespaceId()));
-        }
+//        Community community = communityProvider.findCommunityById(cmd.getCommunityId());
+//        if (community != null) {
+//            query.setOwnerType(EntityType.COMMUNITY.getCode());
+//            query.setOwnerId(cmd.getCommunityId());
+//        } else {
+//            query.setOwnerType(EntityType.NAMESPACE.getCode());
+//            query.setOwnerId(Long.valueOf(currNamespaceId()));
+//        }
+        
+        ListUserRelatedProjectByModuleCommand listProjectCmd = new ListUserRelatedProjectByModuleCommand();
+        listProjectCmd.setOwnerType("EhOrganizations");
+        listProjectCmd.setOwnerId(cmd.getCurrentPMId());
+        listProjectCmd.setCommunityFetchType("ONLY_COMMUNITY");
+        listProjectCmd.setModuleId(41500L);
+        listProjectCmd.setOrganizationId(cmd.getCurrentPMId());
+        List<ProjectDTO> privilegeCommunities = serviceModuleService.listUserRelatedProjectByModuleId(listProjectCmd);
 
         ListingLocator locator = new ListingLocator();
         locator.setAnchor(cmd.getPageAnchor());
+        
+        LOGGER.info("searchOrganizationFileByCommunity is {}", privilegeCommunities);
 
-        List<OsObject> list = objectStorageService.listOsObject(query, locator);
+        List<OsObject> list = objectStorageService.listOsObject(query, locator, privilegeCommunities);
 
         SearchOrganizationFileResponse response = new SearchOrganizationFileResponse();
         response.setNextPageAnchor(locator.getAnchor());
@@ -239,7 +262,7 @@ public class OrganizationFileServiceImpl implements OrganizationFileService {
         ListingLocator locator = new ListingLocator();
         locator.setAnchor(cmd.getPageAnchor());
 
-        List<OsObject> list = objectStorageService.listOsObject(query, locator, callback);
+        List<OsObject> list = objectStorageService.listOsObject(query, locator, callback,null);
 
         SearchOrganizationFileResponse response = new SearchOrganizationFileResponse();
         response.setNextPageAnchor(locator.getAnchor());
@@ -287,6 +310,9 @@ public class OrganizationFileServiceImpl implements OrganizationFileService {
 
     @Override
     public ListOrganizationFileDownloadLogsResponse listOrganizationFileDownloadLogs(ListOrganizationFileDownloadLogsCommand cmd) {
+    	if(cmd.getCurrentPMId()!=null && cmd.getAppId()!=null && configurationProvider.getBooleanValue("privilege.community.checkflag", true)){
+			userPrivilegeMgr.checkUserPrivilege(UserContext.current().getUser().getId(), cmd.getCurrentPMId(), 4150041500L, cmd.getAppId(), null,cmd.getCurrentProjectId());//文件管理权限
+		}
         validate(cmd);
         checkCurrentUserNotInOrg(cmd.getOrganizationId());
 

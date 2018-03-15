@@ -2649,8 +2649,8 @@ Long nextPageAnchor = null;
 		String day = sdf.format(current);
 
 		QualityInspectionTasks task = new QualityInspectionTasks();
-		//task.setNamespaceId(user.getNamespaceId());
-		task.setNamespaceId(cmd.getNamespaceId());
+		task.setNamespaceId(UserContext.getCurrentNamespaceId());
+		//task.setNamespaceId(cmd.getNamespaceId());
 		task.setOwnerType(cmd.getOwnerType());
 		task.setOwnerId(cmd.getOwnerId());
 		task.setTargetId(cmd.getTargetId());
@@ -3885,8 +3885,8 @@ Long nextPageAnchor = null;
 							}
 							totalScore = totalScore + score.getScore();
 						}
-						scoreGroupDto.setTotalScore(totalScore);
 					}
+					scoreGroupDto.setTotalScore(totalScore);
 				}
 				scoresByTarget.add(scoreGroupDto);
 			}
@@ -4701,7 +4701,7 @@ Long nextPageAnchor = null;
 						groupTypes.add(OrganizationGroupType.ENTERPRISE.getCode());
 						groupTypes.add(OrganizationGroupType.DIRECT_UNDER_ENTERPRISE.getCode());
 						groupTypes.add(OrganizationGroupType.DEPARTMENT.getCode());
-						List<Organization> organizations = organizationProvider.listOrganizationByGroupTypesAndPath(group.getPath(), groupTypes, null, null, Integer.MAX_VALUE - 1);
+						List<Organization> organizations = organizationProvider.listOrganizationByGroupTypesAndPath(group.getPath()+"%", groupTypes, null, null, Integer.MAX_VALUE - 1);
 						if (organizations != null) {
 							organizations.forEach((o) -> {
 								organizationList.add(ConvertHelper.convert(o, OrganizationDTO.class));
@@ -4955,16 +4955,7 @@ Long nextPageAnchor = null;
 			Map<Long, OfflineReportDetailDTO> taskDetailMaps = getTaskDetailMaps(cmd.getOfflineReportDetail());
 			cmd.getTasks().forEach((task) -> {
 				OfflineEquipmentTaskReportLog log = null;
-				try {
-					QualityInspectionTasks inspectionTask = verifiedTaskById(task.getId());
-					log = syncTaskInfoToServer(inspectionTask, task, taskDetailMaps);
-				} catch (Exception e) {
-					e.printStackTrace();
-					LOGGER.error("syncTaskInfoToServer Erro:{}", e);
-					taskReportLog.add(getOfflineQualityTaskReportLogObject(task.getId(), ErrorCodes.ERROR_GENERAL_EXCEPTION,
-							QualityServiceErrorCode.ERROR_TASK_NOT_EXIST, QualityTaskType.VERIFY_TASK.getCode()));
-				}
-				if (log != null)
+				log = syncTaskInfoToServer(task, taskDetailMaps);
 				taskReportLog.add(log);
 			});
 		}
@@ -4988,7 +4979,17 @@ Long nextPageAnchor = null;
 		return taskDetailMaps;
 	}
 
-	private OfflineEquipmentTaskReportLog syncTaskInfoToServer(QualityInspectionTasks task, QualityInspectionTaskDTO taskDTO, Map<Long, OfflineReportDetailDTO> taskDetailMaps) {
+	private OfflineEquipmentTaskReportLog syncTaskInfoToServer(QualityInspectionTaskDTO taskDTO, Map<Long, OfflineReportDetailDTO> taskDetailMaps) {
+		QualityInspectionTasks task = null;
+		try {
+			task = verifiedTaskById(taskDTO.getId());
+		} catch (Exception e) {
+			e.printStackTrace();
+			LOGGER.error("syncTaskInfoToServer Erro:{}", e);
+			return getOfflineQualityTaskReportLogObject(taskDTO.getId(), ErrorCodes.ERROR_GENERAL_EXCEPTION,
+					QualityServiceErrorCode.ERROR_TASK_NOT_EXIST, QualityTaskType.VERIFY_TASK.getCode());
+		}
+
 		QualityInspectionTaskRecords record = new QualityInspectionTaskRecords();
 		record.setTaskId(task.getId());
 		record.setOperatorType(OwnerType.USER.getCode());

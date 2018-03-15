@@ -361,9 +361,10 @@ public class LaunchPadProviderImpl implements LaunchPadProvider {
 		
 
 		if(keyword != null && !keyword.trim().equals("")){
-			Condition keyCondition = Tables.EH_LAUNCH_PAD_ITEMS.ITEM_NAME.like("%" + keyword + "%");
-			keyCondition = keyCondition.or(Tables.EH_LAUNCH_PAD_ITEMS.ITEM_LABEL.like("%" + keyword + "%"));
-			condition = condition.and(keyCondition);
+			condition = condition.and(Tables.EH_LAUNCH_PAD_ITEMS.ITEM_LABEL.like("%" + keyword + "%"));
+//			Condition keyCondition = Tables.EH_LAUNCH_PAD_ITEMS.ITEM_NAME.like("%" + keyword + "%");
+//			keyCondition = keyCondition.or(Tables.EH_LAUNCH_PAD_ITEMS.ITEM_LABEL.like("%" + keyword + "%"));
+//			condition = condition.and(keyCondition);
 		}
 		if(condition != null)
 			step.where(condition);

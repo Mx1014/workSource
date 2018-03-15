@@ -32,8 +32,8 @@ curl -XPUT "http://$ELASTIC/$INDEX/_mapping/contract" -d '
             "paymentFlag":{"type":"byte"},
             "categoryItemId":{"type":"long"},
             "customerType":{"type":"byte"},
-			"contractStartDate":{"type":"date"}
-			"contractEndDate":{"type":"date"}
+			"contractStartDate":{"type":"date"},
+			"contractEndDate":{"type":"date"},
 			"rent":{"type":"double"}
 		}
 	}
