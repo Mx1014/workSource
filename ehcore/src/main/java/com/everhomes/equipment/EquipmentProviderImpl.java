@@ -2528,7 +2528,7 @@ public class EquipmentProviderImpl implements EquipmentProvider {
             Condition con3 = Tables.EH_EQUIPMENT_INSPECTION_TASKS.PLAN_ID.in(reviewStandardIds);
             //巡检完成关闭的任务
             Condition con1 = Tables.EH_EQUIPMENT_INSPECTION_TASKS.STATUS.in(EquipmentTaskStatus.CLOSE.getCode(),
-                     EquipmentTaskStatus.REVIEW_DELAY.getCode());
+                     EquipmentTaskStatus.REVIEW_DELAY.getCode(),EquipmentTaskStatus.QUALIFIED.getCode());
             con3 = con3.and(con1);
             if (con == null) {
                 con = con3;
@@ -3159,11 +3159,6 @@ public class EquipmentProviderImpl implements EquipmentProvider {
 
         DSLContext context = dbProvider.getDslContext(AccessSpec.readOnly());
         SelectQuery<Record> query = context.selectQuery();
-
-//        if (AdminFlag.YES.equals(AdminFlag.fromStatus(adminFlag))) {
-//            Condition con = Tables.EH_EQUIPMENT_INSPECTION_TASKS.STATUS.ne(EquipmentTaskStatus.NONE.getCode());
-//            query.addConditions(con);
-//        }
         queryBuilderCallback.buildCondition(null, query);
 
         Condition con = null;
@@ -3187,6 +3182,48 @@ public class EquipmentProviderImpl implements EquipmentProvider {
                 EquipmentTaskStatus.WAITING_FOR_EXECUTING.getCode());
         final Field<?> totayTasksCount = DSL.decode().when(Tables.EH_EQUIPMENT_INSPECTION_TASKS.STATUS.eq(EquipmentTaskStatus.WAITING_FOR_EXECUTING.getCode()),
                 EquipmentTaskStatus.WAITING_FOR_EXECUTING.getCode());
+        final Field<?>[] fields = {DSL.count(totayTasksCount).as("totayTasksCount"),
+                DSL.count(todayCompleteCount).as("todayCompleteCount")};
+
+        query.addSelect(fields);
+        query.addFrom(Tables.EH_EQUIPMENT_INSPECTION_TASKS);
+
+        if (LOGGER.isDebugEnabled()) {
+            LOGGER.debug("Query Today tasks count , sql=" + query.getSQL());
+            LOGGER.debug("Query Today tasks count =" + query.getBindValues());
+        }
+        query.fetch().map((r)->{
+            response.setTodayCompleteCount(r.getValue("todayCompleteCount",Long.class));
+            response.setTotayTasksCount(r.getValue("totayTasksCount",Long.class));
+            return null;
+        });
+    }
+
+    @Override
+    public void populateReviewTaskStatusCount(List<Long> executePlanIds, List<Long> reviewPlanIds, Byte adminFlag, ListEquipmentTasksResponse response, ListingQueryBuilderCallback queryBuilderCallback) {
+        DSLContext context = dbProvider.getDslContext(AccessSpec.readOnly());
+        SelectQuery<Record> query = context.selectQuery();
+        queryBuilderCallback.buildCondition(null, query);
+
+        Condition con = null;
+        if (AdminFlag.NO.equals(AdminFlag.fromStatus(adminFlag)) && reviewPlanIds != null && reviewPlanIds.size() > 0) {
+                Condition con4 = Tables.EH_EQUIPMENT_INSPECTION_TASKS.PLAN_ID.in(reviewPlanIds);
+            con4 = con4.and(Tables.EH_EQUIPMENT_INSPECTION_TASKS.STATUS.in(EquipmentTaskStatus.CLOSE.getCode(),
+                    EquipmentTaskStatus.QUALIFIED.getCode(),EquipmentTaskStatus.REVIEW_DELAY.getCode()));
+            con = con4;
+        }
+        if (AdminFlag.NO.equals(AdminFlag.fromStatus(adminFlag)) && (reviewPlanIds == null || reviewPlanIds.size() == 0)) {
+            response.setTotayTasksCount(0L);
+            response.setTodayCompleteCount(0L);
+            return;
+        }
+
+        if (con != null) {
+            query.addConditions(con);
+        }
+        final Field<?> todayCompleteCount = DSL.decode().when(Tables.EH_EQUIPMENT_INSPECTION_TASKS.STATUS.eq(EquipmentTaskStatus.QUALIFIED.getCode()), EquipmentTaskStatus.QUALIFIED.getCode());
+        final Field<?> totayTasksCount = DSL.decode().when(Tables.EH_EQUIPMENT_INSPECTION_TASKS.STATUS.in(EquipmentTaskStatus.REVIEW_DELAY.getCode(),
+                EquipmentTaskStatus.CLOSE.getCode(), EquipmentTaskStatus.QUALIFIED.getCode()), EquipmentTaskStatus.QUALIFIED.getCode());
         final Field<?>[] fields = {DSL.count(totayTasksCount).as("totayTasksCount"),
                 DSL.count(todayCompleteCount).as("todayCompleteCount")};
 

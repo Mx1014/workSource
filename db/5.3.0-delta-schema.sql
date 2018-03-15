@@ -126,9 +126,9 @@ ALTER TABLE `eh_equipment_inspection_standards`
 
 -- 任务操作记录表增加设备id表   by jiarui
 ALTER TABLE `eh_equipment_inspection_task_logs`
-  ADD COLUMN `equipment_id`  BIGINT(20) NULL DEFAULT 0 ;
+  ADD COLUMN `equipment_id`  BIGINT(20) NOT NULL DEFAULT 0 ;
 ALTER TABLE `eh_equipment_inspection_task_logs`
-  ADD COLUMN `standard_id`  bigint(20) NULL DEFAULT 0 ;
+  ADD COLUMN `standard_id`  bigint(20) NOT NULL DEFAULT 0 ;
 ALTER TABLE `eh_equipment_inspection_task_logs`
   ADD COLUMN `maintance_type`  VARCHAR(255) NULL DEFAULT '';
 ALTER TABLE `eh_equipment_inspection_task_logs`

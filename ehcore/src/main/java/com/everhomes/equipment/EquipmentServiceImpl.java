@@ -3554,19 +3554,11 @@ private void checkUserPrivilege(Long orgId, Long privilegeId, Long communityId) 
 			LOGGER.info("listEquipmentInspectionTasks is  Admin  cacheKey = {}" , cacheKey);
 			allTasks = equipmentProvider.listEquipmentInspectionTasksUseCache(cmd.getTaskStatus(), cmd.getInspectionCategoryId(),
 					targetTypes, targetIds, null, null, offset, pageSize + 1, cacheKey, AdminFlag.YES.getCode(),lastSyncTime);
+			if (cmd.getTaskStatus().size() > 1) {
+				populateTaskStatusCount(cmd, null, null, response, targetTypes, targetIds);
+			}else {
 
-			equipmentProvider.populateTodayTaskStatusCount(null, null, AdminFlag.YES.getCode(), response,(loc,query)->{
-				if (targetTypes.size() > 0)
-					query.addConditions(Tables.EH_EQUIPMENT_INSPECTION_TASKS.TARGET_TYPE.in(targetTypes));
-
-				if (targetIds.size() > 0)
-					query.addConditions(Tables.EH_EQUIPMENT_INSPECTION_TASKS.TARGET_ID.in(targetIds));
-
-				if (cmd.getInspectionCategoryId() != null) {
-					query.addConditions(Tables.EH_EQUIPMENT_INSPECTION_TASKS.INSPECTION_CATEGORY_ID.eq(cmd.getInspectionCategoryId()));
-				}
-				return query;
-			});
+			}
 		}
 		if(!isAdmin) {
 			List<Long> executePlanIds = new ArrayList<>();
@@ -3591,39 +3583,17 @@ private void checkUserPrivilege(Long orgId, Long privilegeId, Long communityId) 
             LOGGER.info("listEquipmentInspectionTasks is not Admin  cacheKey = {}" , cacheKey);
 			allTasks = equipmentProvider.listEquipmentInspectionTasksUseCache(cmd.getTaskStatus(), cmd.getInspectionCategoryId(),
 					targetTypes, targetIds, executePlanIds, reviewPlanIds, offset, pageSize + 1, cacheKey, AdminFlag.NO.getCode(),lastSyncTime);
-
-			equipmentProvider.populateTodayTaskStatusCount(executePlanIds, reviewPlanIds, AdminFlag.NO.getCode(), response,(loc,query)->{
-				if (targetTypes.size() > 0)
-					query.addConditions(Tables.EH_EQUIPMENT_INSPECTION_TASKS.TARGET_TYPE.in(targetTypes));
-
-				if (targetIds.size() > 0)
-					query.addConditions(Tables.EH_EQUIPMENT_INSPECTION_TASKS.TARGET_ID.in(targetIds));
-
-				if (cmd.getInspectionCategoryId() != null) {
-					query.addConditions(Tables.EH_EQUIPMENT_INSPECTION_TASKS.INSPECTION_CATEGORY_ID.eq(cmd.getInspectionCategoryId()));
-				}
-				Calendar calendar = Calendar.getInstance();
-				calendar.setTime(new Date(DateHelper.currentGMTTime().getTime()));
-				query.addConditions(Tables.EH_EQUIPMENT_INSPECTION_TASKS.CREATE_TIME.gt(getDayBegin(calendar, 0)));
-				return query;
-			});
+			if (cmd.getTaskStatus().size() > 1) {
+				populateTaskStatusCount(cmd, executePlanIds, reviewPlanIds, response, targetTypes, targetIds);
+			} else {
+				populateReviewTaskStatusCount(cmd, executePlanIds, reviewPlanIds, response, targetTypes, targetIds);
+			}
 		}
 
 		if (allTasks.size() > pageSize) {
 			allTasks.remove(allTasks.size() - 1);
 			response.setNextPageAnchor((long) (offset + 1));
 		}
-
-//		tasks = allTasks.stream().map(r -> {
-//			if ((EquipmentTaskStatus.WAITING_FOR_EXECUTING.equals(EquipmentTaskStatus.fromStatus(r.getStatus())))
-//					|| EquipmentTaskStatus.DELAY.equals(EquipmentTaskStatus.fromStatus(r.getStatus()))) {
-//				return r;
-//			} else if (EquipmentTaskStatus.CLOSE.equals(EquipmentTaskStatus.fromStatus(r.getStatus()))
-//					|| (EquipmentTaskStatus.REVIEW_DELAY.equals(EquipmentTaskStatus.fromStatus(r.getStatus())))) {
-//				return r;
-//			}
-//			return null;
-//		}).filter(Objects::nonNull).collect(Collectors.toList());
 
 		List<EquipmentTaskDTO> dtos = new ArrayList<>();
 		if (allTasks.size() > 0) {
@@ -3635,6 +3605,36 @@ private void checkUserPrivilege(Long orgId, Long privilegeId, Long communityId) 
 
 		return response;
 
+	}
+
+	private void populateReviewTaskStatusCount(ListEquipmentTasksCommand cmd, List<Long> executePlanIds, List<Long> reviewPlanIds, ListEquipmentTasksResponse response, List<String> targetTypes, List<Long> targetIds) {
+		equipmentProvider.populateReviewTaskStatusCount(executePlanIds, reviewPlanIds, AdminFlag.YES.getCode(), response, (loc, query) -> {
+			if (targetTypes.size() > 0)
+				query.addConditions(Tables.EH_EQUIPMENT_INSPECTION_TASKS.TARGET_TYPE.in(targetTypes));
+
+			if (targetIds.size() > 0)
+				query.addConditions(Tables.EH_EQUIPMENT_INSPECTION_TASKS.TARGET_ID.in(targetIds));
+
+			if (cmd.getInspectionCategoryId() != null) {
+				query.addConditions(Tables.EH_EQUIPMENT_INSPECTION_TASKS.INSPECTION_CATEGORY_ID.eq(cmd.getInspectionCategoryId()));
+			}
+			return query;
+		});
+	}
+
+	private void populateTaskStatusCount(ListEquipmentTasksCommand cmd, List<Long> executePlanIds, List<Long> reviewPlanIds, ListEquipmentTasksResponse response, List<String> targetTypes, List<Long> targetIds) {
+		equipmentProvider.populateTodayTaskStatusCount(executePlanIds, reviewPlanIds, AdminFlag.YES.getCode(), response, (loc, query) -> {
+			if (targetTypes.size() > 0)
+				query.addConditions(Tables.EH_EQUIPMENT_INSPECTION_TASKS.TARGET_TYPE.in(targetTypes));
+
+			if (targetIds.size() > 0)
+				query.addConditions(Tables.EH_EQUIPMENT_INSPECTION_TASKS.TARGET_ID.in(targetIds));
+
+			if (cmd.getInspectionCategoryId() != null) {
+				query.addConditions(Tables.EH_EQUIPMENT_INSPECTION_TASKS.INSPECTION_CATEGORY_ID.eq(cmd.getInspectionCategoryId()));
+			}
+			return query;
+		});
 	}
 
 	private boolean checkCurrentUserisAdmin(Long ownerId, Long userId) {
@@ -6139,6 +6139,7 @@ private void checkUserPrivilege(Long orgId, Long privilegeId, Long communityId) 
 			//报修后log表中需维修状态保留
 			EquipmentInspectionTasksLogs tasksLog = new EquipmentInspectionTasksLogs();
 			tasksLog.setEquipmentId(cmd.getEquipmentId());
+			tasksLog.setStandardId(cmd.getStandardId());
 			tasksLog.setOperatorType(OwnerType.USER.getCode());
 			tasksLog.setOperatorId(UserContext.currentUserId());
 			tasksLog.setInspectionCategoryId(tasks.getInspectionCategoryId());

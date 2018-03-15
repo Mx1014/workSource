@@ -62,7 +62,8 @@ SELECT @appid := @appid + 1, namespace_id, namespace_id + 100,  `active_app_id`,
 
 /*8、
 1)/pmtask/syncCategories
- 2)UPDATE eh_pm_tasks
+2) 备份eh_pm_tasks表
+ 3)UPDATE eh_pm_tasks
         LEFT JOIN
     (SELECT
        distinct (a.id) as aid,b.id as bid,b.owner_id as owner_id
@@ -90,7 +91,7 @@ SET
 WHERE
     eh_pm_tasks.category_id!=0;
 
- 3)/pmtask/syncFromDb
+ 4)/pmtask/syncFromDb
 */
 
 

@@ -1197,7 +1197,11 @@ update eh_web_menus set data_type = 'forum-management' where id = 71020000;
 update eh_web_menus set data_type = 'activity-application' where id = 71030000;
 
 -- 园区客户线，权限对接开始 by dengs.
--- by dengs,20180302,服务联盟权限项添加
+-- by dengs,20180302,服务联盟权限项添加 和 yan.jun sql冲突，我的屏蔽
+DELETE from eh_service_modules WHERE id in (40510,40520,40530,40540);
+DELETE from eh_acl_privileges WHERE id in (4050040510,4050040520,4050040530,4050040540);
+DELETE from eh_service_module_privileges WHERE module_id in (40510,40520,40530,40540); 
+
 INSERT INTO `eh_service_modules` (`id`, `name`, `parent_id`, `path`, `type`, `level`, `status`, `default_order`, `create_time`, `instance_config`, `action_type`, `update_time`, `operator_uid`, `creator_uid`, `description`, `multiple_flag`, `module_control_type`) VALUES ('40510', '样式设置', '40500', '/40000/40500/40510', '1', '3', '2', '0', now(), NULL, NULL, now(), '0', '1', '1', NULL, '');
 INSERT INTO `eh_service_modules` (`id`, `name`, `parent_id`, `path`, `type`, `level`, `status`, `default_order`, `create_time`, `instance_config`, `action_type`, `update_time`, `operator_uid`, `creator_uid`, `description`, `multiple_flag`, `module_control_type`) VALUES ('40520', '服务管理', '40500', '/40000/40500/40520', '1', '3', '2', '0', now(), NULL, NULL, now(), '0', '1', '1', NULL, '');
 INSERT INTO `eh_service_modules` (`id`, `name`, `parent_id`, `path`, `type`, `level`, `status`, `default_order`, `create_time`, `instance_config`, `action_type`, `update_time`, `operator_uid`, `creator_uid`, `description`, `multiple_flag`, `module_control_type`) VALUES ('40530', '消息通知', '40500', '/40000/40500/40530', '1', '3', '2', '0', now(), NULL, NULL, now(), '0', '1', '1', NULL, '');
@@ -1452,11 +1456,11 @@ set @privilege_id = (select max(id) from eh_service_module_privileges);
 INSERT INTO `eh_acl_privileges` (`id`, `app_id`, `name`, `description`, `tag`) VALUES (4070040700, '0', '快递服务 全部权限', '快递服务 全部权限', NULL);
 INSERT INTO `eh_service_module_privileges` (`id`, `module_id`, `privilege_type`, `privilege_id`, `remark`, `default_order`, `create_time`) VALUES (@privilege_id:=@privilege_id+1, '40700', '0', 4070040700, '全部权限', '0', now());
 
-INSERT INTO `eh_acl_privileges` (`id`, `app_id`, `name`, `description`, `tag`) VALUES (4070040710, '0', '快递服务 开卡用户权限', '快递服务 开卡用户权限', NULL);
-INSERT INTO `eh_service_module_privileges` (`id`, `module_id`, `privilege_type`, `privilege_id`, `remark`, `default_order`, `create_time`) VALUES (@privilege_id:=@privilege_id+1, '40710', '0', 4070040710, '开卡用户权限', '0', now());
+INSERT INTO `eh_acl_privileges` (`id`, `app_id`, `name`, `description`, `tag`) VALUES (4070040710, '0', '快递服务 参数设置权限', '快递服务 参数设置权限', NULL);
+INSERT INTO `eh_service_module_privileges` (`id`, `module_id`, `privilege_type`, `privilege_id`, `remark`, `default_order`, `create_time`) VALUES (@privilege_id:=@privilege_id+1, '40710', '0', 4070040710, '参数设置权限', '0', now());
 
-INSERT INTO `eh_acl_privileges` (`id`, `app_id`, `name`, `description`, `tag`) VALUES (4070040720, '0', '快递服务 导出用户权限', '快递服务 导出用户权限', NULL);
-INSERT INTO `eh_service_module_privileges` (`id`, `module_id`, `privilege_type`, `privilege_id`, `remark`, `default_order`, `create_time`) VALUES (@privilege_id:=@privilege_id+1, '40720', '0', 4070040720, '导出用户权限', '0', now());
+INSERT INTO `eh_acl_privileges` (`id`, `app_id`, `name`, `description`, `tag`) VALUES (4070040720, '0', '快递服务 订单管理权限', '快递服务 订单管理权限', NULL);
+INSERT INTO `eh_service_module_privileges` (`id`, `module_id`, `privilege_type`, `privilege_id`, `remark`, `default_order`, `create_time`) VALUES (@privilege_id:=@privilege_id+1, '40720', '0', 4070040720, '订单管理权限', '0', now());
 
 -- 41100 文件管理 web有点问题--------------------------------------------------------------------------------------------
 set @privilege_id = (select max(id) from eh_service_module_privileges);
@@ -1483,3 +1487,9 @@ update eh_service_module_apps SET module_id=20100 WHERE action_type=13 AND insta
 update eh_service_module_apps SET module_id=20100 WHERE action_type=13 AND instance_config LIKE '%/property-repair-web/build/index.html%';
 
 -- 园区客户线，权限对接结束 by dengs. 
+-- 更新
+update eh_service_module_apps set module_id=41700 where module_id = 40150;
+update eh_reflection_service_module_apps set module_id=41700 where module_id = 40150;
+
+-- add by yanjun 201803151646 能耗管理改配置
+update eh_service_modules set action_type = 44, instance_config = '{"realm":"energyManagement","entryUrl":"https://core.zuolin.com/nar/energyManagement/build/index.html#/?_k=ckcscj"}' where id = 49100;
