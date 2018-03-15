@@ -6139,6 +6139,7 @@ private void checkUserPrivilege(Long orgId, Long privilegeId, Long communityId) 
 			//报修后log表中需维修状态保留
 			EquipmentInspectionTasksLogs tasksLog = new EquipmentInspectionTasksLogs();
 			tasksLog.setEquipmentId(cmd.getEquipmentId());
+			tasksLog.setStandardId(cmd.getStandardId());
 			tasksLog.setOperatorType(OwnerType.USER.getCode());
 			tasksLog.setOperatorId(UserContext.currentUserId());
 			tasksLog.setInspectionCategoryId(tasks.getInspectionCategoryId());
