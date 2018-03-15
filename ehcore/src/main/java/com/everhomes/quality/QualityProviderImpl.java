@@ -1173,7 +1173,7 @@ public class QualityProviderImpl implements QualityProvider {
 	@Override
 	public int countVerificationTasks(Long ownerId, String ownerType,
 			Byte taskType, Long executeUid, Timestamp startDate,
-			Timestamp endDate, Long groupId, Byte executeStatus,
+			Timestamp endDate, Long groupId, List<Byte> executeStatus,
 			Byte reviewStatus) {
 		DSLContext context = dbProvider.getDslContext(AccessSpec.readOnly());
         SelectJoinStep<Record1<Integer>> step = context.selectCount().from(Tables.EH_QUALITY_INSPECTION_TASKS);
@@ -1205,7 +1205,7 @@ public class QualityProviderImpl implements QualityProvider {
 			condition = condition.and(Tables.EH_QUALITY_INSPECTION_TASKS.EXECUTIVE_GROUP_ID.eq(groupId));
 		}
 		if(executeStatus != null) {
-			condition = condition.and(Tables.EH_QUALITY_INSPECTION_TASKS.STATUS.eq(executeStatus));
+			condition = condition.and(Tables.EH_QUALITY_INSPECTION_TASKS.STATUS.in(executeStatus));
 		}
 		if(reviewStatus != null) {
 			if(QualityInspectionTaskReviewStatus.NONE.equals(reviewStatus))
@@ -1645,6 +1645,7 @@ public class QualityProviderImpl implements QualityProvider {
 		DSLContext context = this.dbProvider.getDslContext(AccessSpec.readWrite());
 		context.update(Tables.EH_QUALITY_INSPECTION_TASKS)
 				.set(Tables.EH_QUALITY_INSPECTION_TASKS.STATUS, QualityInspectionTaskStatus.NONE.getCode())
+				.set(Tables.EH_QUALITY_INSPECTION_TASKS.EXECUTIVE_TIME, new Timestamp(DateHelper.currentGMTTime().getTime()))
 				.where(Tables.EH_EQUIPMENT_INSPECTION_TASKS.STANDARD_ID.eq(standardId))
 				.execute();
 	}
