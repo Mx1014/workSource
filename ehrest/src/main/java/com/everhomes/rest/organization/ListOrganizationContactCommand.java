@@ -27,6 +27,7 @@ import java.util.List;
  *     <li>employeeStatus:员工状态</li>
  *     <li>contractPartyId:合同主体</li>
  *     <li>workPlaceId:工作地点</li>
+ *     <li>enterpriseId:公司id</li>
  * </ul>
  */
 public class ListOrganizationContactCommand {
@@ -62,6 +63,8 @@ public class ListOrganizationContactCommand {
     private List<Long> exceptIds;
 
     private Integer namespaceId;
+
+    private Long enterpriseId;
 
     public Integer getNamespaceId() {
         return namespaceId;
@@ -245,5 +248,13 @@ public class ListOrganizationContactCommand {
 
     public void setExceptIds(List<Long> exceptIds) {
         this.exceptIds = exceptIds;
+    }
+
+    public Long getEnterpriseId() {
+        return enterpriseId;
+    }
+
+    public void setEnterpriseId(Long enterpriseId) {
+        this.enterpriseId = enterpriseId;
     }
 }
