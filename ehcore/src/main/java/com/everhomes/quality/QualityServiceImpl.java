@@ -3833,6 +3833,7 @@ Long nextPageAnchor = null;
 
 				ScoreGroupByTargetDTO scoreGroupDto = new ScoreGroupByTargetDTO();
 				scoreGroupDto.setTargetId(target);
+				scoreGroupDto.setTotalScore(0D);
 				Community community = communityProvider.findCommunityById(target);
 				if(community != null) {
 					scoreGroupDto.setTargetName(community.getName());
