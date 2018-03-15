@@ -2528,7 +2528,7 @@ public class EquipmentProviderImpl implements EquipmentProvider {
             Condition con3 = Tables.EH_EQUIPMENT_INSPECTION_TASKS.PLAN_ID.in(reviewStandardIds);
             //巡检完成关闭的任务
             Condition con1 = Tables.EH_EQUIPMENT_INSPECTION_TASKS.STATUS.in(EquipmentTaskStatus.CLOSE.getCode(),
-                     EquipmentTaskStatus.REVIEW_DELAY.getCode());
+                     EquipmentTaskStatus.REVIEW_DELAY.getCode(),EquipmentTaskStatus.QUALIFIED.getCode());
             con3 = con3.and(con1);
             if (con == null) {
                 con = con3;
