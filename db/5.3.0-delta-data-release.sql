@@ -1280,10 +1280,11 @@ INSERT INTO `eh_acl_privileges` (`id`, `app_id`, `name`, `description`, `tag`) V
 INSERT INTO `eh_service_module_privileges` (`id`, `module_id`, `privilege_type`, `privilege_id`, `remark`, `default_order`, `create_time`) VALUES (@privilege_id:=@privilege_id+1, '20900', '0', 2090020900, '全部权限', '0', now());
 
 -- 10800 园区快讯 --------------------------------------------------------------------------------------------
+DELETE from eh_service_module_privileges WHERE module_id = 10800 and privilege_id=10005;
+
 set @privilege_id = (select max(id) from eh_service_module_privileges);
 INSERT INTO `eh_acl_privileges` (`id`, `app_id`, `name`, `description`, `tag`) VALUES (1080010800, '0', '园区快讯 全部权限', '园区快讯 全部权限', NULL);
 INSERT INTO `eh_service_module_privileges` (`id`, `module_id`, `privilege_type`, `privilege_id`, `remark`, `default_order`, `create_time`) VALUES (@privilege_id:=@privilege_id+1, '10800', '0', 1080010800, '全部权限', '0', now());
-
 
 -- 40100 园区入驻（招租管理） --------------------------------------------------------------------------------------------
 INSERT INTO `eh_service_modules` (`id`, `name`, `parent_id`, `path`, `type`, `level`, `status`, `default_order`, `create_time`, `instance_config`, `action_type`, `update_time`, `operator_uid`, `creator_uid`, `description`, `multiple_flag`, `module_control_type`) VALUES ('40110', '项目介绍', '40100', '/40000/40100/40410', '1', '3', '2', '0', now(), NULL, NULL, now(), '0', '1', '1', NULL, '');
