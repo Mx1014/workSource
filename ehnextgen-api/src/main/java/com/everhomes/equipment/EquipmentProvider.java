@@ -241,6 +241,8 @@ public interface EquipmentProvider {
 
     void populateTodayTaskStatusCount(List<Long> executePlanIds, List<Long> reviewPlanIds, Byte  adminFlag, ListEquipmentTasksResponse response, ListingQueryBuilderCallback queryBuilderCallback);
 
+    void populateReviewTaskStatusCount(List<Long> executePlanIds, List<Long> reviewPlanIds, Byte  adminFlag, ListEquipmentTasksResponse response, ListingQueryBuilderCallback queryBuilderCallback);
+
     List<EquipmentInspectionStandards> listEquipmentStandardWithReferId(Long targetId, String targetType);
 
     void deletePlanMapByEquipmentIdAndStandardId(Long equipmentId, Long standardId);

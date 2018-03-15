@@ -96,6 +96,7 @@ import com.everhomes.rest.quality.ListSampleQualityInspectionTasksCommand;
 import com.everhomes.rest.quality.ListUserHistoryTasksCommand;
 import com.everhomes.rest.quality.ListUserQualityInspectionTaskTemplatesCommand;
 import com.everhomes.rest.quality.OfflineDeleteTablesInfo;
+import com.everhomes.rest.quality.OfflineJobPositionDTO;
 import com.everhomes.rest.quality.OfflineReportDetailDTO;
 import com.everhomes.rest.quality.OfflineSampleQualityInspectionResponse;
 import com.everhomes.rest.quality.OfflineTaskCount;
@@ -917,7 +918,7 @@ Long nextPageAnchor = null;
 		checkUserPrivilege(cmd.getOwnerId(),PrivilegeConstants.QUALITY_TASK_LIST,cmd.getTargetId());
 
 		User user = UserContext.current().getUser();
-		Long targetId = cmd.getTargetId();
+		//Long targetId = cmd.getTargetId();
 		int pageSize = PaginationConfigHelper.getPageSize(configurationProvider, cmd.getPageSize());
 
 		if(null == cmd.getPageAnchor()) {
@@ -935,7 +936,7 @@ Long nextPageAnchor = null;
 
 		//新后台对接权限修改
 		boolean isAdmin = checkAdmin(cmd.getOwnerId(), cmd.getOwnerType(), cmd.getNamespaceId());
-		LOGGER.info("listQualityInspectionTasks: checkAdmin:{}" + isAdmin);
+		LOGGER.info("listQualityInspectionTasks: checkAdmin:{}" , isAdmin);
 
 		List<QualityInspectionTasks> tasks = new ArrayList<>();
 		ListQualityInspectionTasksResponse response = new ListQualityInspectionTasksResponse();
@@ -1024,7 +1025,7 @@ Long nextPageAnchor = null;
 		if (cmd.getTaskType() != null)
 			query.addConditions(Tables.EH_QUALITY_INSPECTION_TASKS.TASK_TYPE.eq(cmd.getTaskType()));
 		if (cmd.getExecuteStatus() != null)
-			query.addConditions(Tables.EH_QUALITY_INSPECTION_TASKS.STATUS.eq(cmd.getExecuteStatus()));
+			query.addConditions(Tables.EH_QUALITY_INSPECTION_TASKS.STATUS.in(cmd.getExecuteStatus()));
 		if (cmd.getManualFlag() != null)
 			query.addConditions(Tables.EH_QUALITY_INSPECTION_TASKS.MANUAL_FLAG.eq(Long.valueOf(cmd.getManualFlag())));
 		if (cmd.getNamespaceId() != null)
@@ -1049,7 +1050,7 @@ Long nextPageAnchor = null;
 		if (cmd.getTaskType() != null)
             query.addConditions(Tables.EH_QUALITY_INSPECTION_TASKS.TASK_TYPE.eq(cmd.getTaskType()));
 		if (cmd.getExecuteStatus() != null)
-            query.addConditions(Tables.EH_QUALITY_INSPECTION_TASKS.STATUS.eq(cmd.getExecuteStatus()));
+            query.addConditions(Tables.EH_QUALITY_INSPECTION_TASKS.STATUS.in(cmd.getExecuteStatus()));
 		if (cmd.getManualFlag() != null)
             query.addConditions(Tables.EH_QUALITY_INSPECTION_TASKS.MANUAL_FLAG.eq(Long.valueOf(cmd.getManualFlag())));
 		if (cmd.getNamespaceId() != null)
@@ -2648,8 +2649,8 @@ Long nextPageAnchor = null;
 		String day = sdf.format(current);
 
 		QualityInspectionTasks task = new QualityInspectionTasks();
-		//task.setNamespaceId(user.getNamespaceId());
-		task.setNamespaceId(cmd.getNamespaceId());
+		task.setNamespaceId(UserContext.getCurrentNamespaceId());
+		//task.setNamespaceId(cmd.getNamespaceId());
 		task.setOwnerType(cmd.getOwnerType());
 		task.setOwnerId(cmd.getOwnerId());
 		task.setTargetId(cmd.getTargetId());
@@ -2806,12 +2807,22 @@ Long nextPageAnchor = null;
 	@Override
 	public void deleteQualitySpecification(DeleteQualitySpecificationCommand cmd) {
 
-		QualityInspectionSpecifications specification =
-				verifiedSpecificationById(cmd.getSpecificationId(), cmd.getOwnerType(), cmd.getOwnerId(),null);
+		QualityInspectionSpecifications specification = verifiedSpecificationById(cmd.getSpecificationId(), cmd.getOwnerType(), cmd.getOwnerId(),null);
 		if(SpecificationInspectionType.CATEGORY.equals(SpecificationInspectionType.fromStatus(specification.getInspectionType()))) {
 			checkUserPrivilege(cmd.getOwnerId(),PrivilegeConstants.QUALITY_CATEGORY_DELETE,cmd.getScopeId());
 		} else {
 			checkUserPrivilege(cmd.getOwnerId(),PrivilegeConstants.QUALITY_SPECIFICATION_DELETE,cmd.getScopeId());
+		}
+
+		List<QualityInspectionSpecifications> childrens = qualityProvider.listChildrenSpecifications(cmd.getOwnerType(), cmd.getOwnerId(), specification.getScopeCode(), specification.getScopeId(), specification.getId(), null);
+		if (childrens != null && childrens.size() > 0) {
+			throw RuntimeErrorException.errorWith(QualityServiceErrorCode.SCOPE,
+					QualityServiceErrorCode.ERROR_DELETE_SPECIFICATION,
+					localeStringService.getLocalizedString(
+							String.valueOf(QualityServiceErrorCode.SCOPE),
+							String.valueOf(QualityServiceErrorCode.ERROR_DELETE_SPECIFICATION),
+							UserContext.current().getUser().getLocale(),
+							"delete is not allowed!"));
 		}
 
 		if(SpecificationScopeCode.fromCode(specification.getScopeCode()).equals(SpecificationScopeCode.fromCode(cmd.getScopeCode()))
@@ -3874,8 +3885,8 @@ Long nextPageAnchor = null;
 							}
 							totalScore = totalScore + score.getScore();
 						}
-						scoreGroupDto.setTotalScore(totalScore);
 					}
+					scoreGroupDto.setTotalScore(totalScore);
 				}
 				scoresByTarget.add(scoreGroupDto);
 			}
@@ -4050,7 +4061,7 @@ Long nextPageAnchor = null;
 		List<QualityInspectionSpecificationItemResults> results = qualityProvider.listSpecifitionItemResultsBySampleId(scoreStat.getSampleId(), scoreStat.getUpdateTime(), now);
 
 		LOGGER.info("deduct sample id:{}, start time : {}, results: {}",scoreStat.getSampleId(), scoreStat.getUpdateTime(), results);
-		if(results != null) {
+		if (results != null && results.size() > 0) {
 			List<Long> categoryIds = new ArrayList<>();
 			results.forEach(result -> {
 				String path = result.getSpecificationPath();
@@ -4679,27 +4690,53 @@ Long nextPageAnchor = null;
 			qualityProvider.populateStandardsGroups(standards);
 			List<OrganizationDTO> organizationList = new ArrayList<>();
 			List<OrganizationMemberDTO> memberList = new ArrayList<>();
+			List<OfflineJobPositionDTO> jobPositions = new ArrayList<>();
 			//先去重  standard里面的groupId相同的
-			List<Long> executiveGroups = removeDuplicatedStandardGroups(standards);
-			if(executiveGroups!=null && executiveGroups.size()>0) {
+			List<QualityInspectionStandardGroupMap> executiveGroups = removeDuplicatedStandardGroups(standards);
+			if (executiveGroups != null && executiveGroups.size() > 0) {
 				executiveGroups.forEach((executiveGroup) -> {
-					Organization group = organizationProvider.findOrganizationById(executiveGroup);
-					if (group != null) {
-						organizationList.add(ConvertHelper.convert(group, OrganizationDTO.class));
-					}
-					//拿到所有人员（不包含子级）
-					List<OrganizationMember> members = organizationProvider.listOrganizationMembers(executiveGroup, null);
-					if (members != null && members.size() > 0) {
-						memberList.addAll(members.stream().map((m) -> ConvertHelper.convert(m, OrganizationMemberDTO.class)).collect(Collectors.toList()));
+					if (executiveGroup.getPositionId() == null || executiveGroup.getPositionId() == 0) {
+						Organization group = organizationProvider.findOrganizationById(executiveGroup.getGroupId());
+						List<String> groupTypes = new ArrayList<>();
+						groupTypes.add(OrganizationGroupType.ENTERPRISE.getCode());
+						groupTypes.add(OrganizationGroupType.DIRECT_UNDER_ENTERPRISE.getCode());
+						groupTypes.add(OrganizationGroupType.DEPARTMENT.getCode());
+						List<Organization> organizations = organizationProvider.listOrganizationByGroupTypesAndPath(group.getPath()+"%", groupTypes, null, null, Integer.MAX_VALUE - 1);
+						if (organizations != null) {
+							organizations.forEach((o) -> {
+								organizationList.add(ConvertHelper.convert(o, OrganizationDTO.class));
+								List<OrganizationMember> members = organizationProvider.listOrganizationMembers(o.getId(), null);
+								if (members != null && members.size() > 0) {
+									memberList.addAll(members.stream().map((m) -> ConvertHelper.convert(m, OrganizationMemberDTO.class)).collect(Collectors.toList()));
+								}
+							});
+						}
+					} else {
+						//岗位下所有的人
+						ListOrganizationContactByJobPositionIdCommand command = new ListOrganizationContactByJobPositionIdCommand();
+						command.setOrganizationId(executiveGroup.getGroupId());
+						command.setJobPositionId(executiveGroup.getPositionId());
+						//包含岗位id和人员关系 targetID 为人员id
+						List<OrganizationContactDTO> contacts = organizationService.listOrganizationContactByJobPositionId(command);
+						List<OfflineJobPositionDTO> positions = new ArrayList<>();
+						if (contacts != null && contacts.size() > 0) {
+							contacts.forEach((c) -> {
+								OfflineJobPositionDTO positionDTO = ConvertHelper.convert(c, OfflineJobPositionDTO.class);
+								positionDTO.setStandardId(executiveGroup.getStandardId());
+								positions.add(positionDTO);
+							});
+							jobPositions.addAll(positions);
+						}
 					}
 				});
 			}
 			offlineTaskDetailsResponse.setOrganizations(organizationList);
 			offlineTaskDetailsResponse.setOrganizationMembers(memberList);
+			offlineTaskDetailsResponse.setJobPositions(jobPositions);
 		}
 	}
 
-	private List<Long> removeDuplicatedStandardGroups(List<QualityInspectionStandards> standards) {
+	private List<QualityInspectionStandardGroupMap> removeDuplicatedStandardGroups(List<QualityInspectionStandards> standards) {
 		if (standards != null && standards.size() > 0) {
 			List<QualityInspectionStandardGroupMap> executiveGroupMaps = new ArrayList<>();
 			standards.forEach((standard) -> {
@@ -4707,12 +4744,12 @@ Long nextPageAnchor = null;
 					executiveGroupMaps.addAll(standard.getExecutiveGroup());
 				}
 			});
-			Map<Long, QualityInspectionStandardGroupMap> groupDTOMap = new HashMap<>();
+			Map<String, QualityInspectionStandardGroupMap> groupDTOMap = new HashMap<>();
 			if (executiveGroupMaps.size() > 0) {
-				executiveGroupMaps.forEach((map) -> groupDTOMap.putIfAbsent(map.getGroupId(), map));
+				executiveGroupMaps.forEach((map) -> groupDTOMap.putIfAbsent(map.getGroupId().toString()+map.getPositionId().toString(), map));
 			}
 			if(groupDTOMap.size()>0){
-				return new ArrayList<>(groupDTOMap.keySet());
+				return new ArrayList<>(groupDTOMap.values());
 			}
 		}
 		return null;
@@ -4918,16 +4955,7 @@ Long nextPageAnchor = null;
 			Map<Long, OfflineReportDetailDTO> taskDetailMaps = getTaskDetailMaps(cmd.getOfflineReportDetail());
 			cmd.getTasks().forEach((task) -> {
 				OfflineEquipmentTaskReportLog log = null;
-				try {
-					QualityInspectionTasks inspectionTask = verifiedTaskById(task.getId());
-					log = syncTaskInfoToServer(inspectionTask, task, taskDetailMaps);
-				} catch (Exception e) {
-					e.printStackTrace();
-					LOGGER.error("syncTaskInfoToServer Erro:{}", e);
-					taskReportLog.add(getOfflineQualityTaskReportLogObject(task.getId(), ErrorCodes.ERROR_GENERAL_EXCEPTION,
-							QualityServiceErrorCode.ERROR_TASK_NOT_EXIST, QualityTaskType.VERIFY_TASK.getCode()));
-				}
-				if (log != null)
+				log = syncTaskInfoToServer(task, taskDetailMaps);
 				taskReportLog.add(log);
 			});
 		}
@@ -4951,7 +4979,17 @@ Long nextPageAnchor = null;
 		return taskDetailMaps;
 	}
 
-	private OfflineEquipmentTaskReportLog syncTaskInfoToServer(QualityInspectionTasks task, QualityInspectionTaskDTO taskDTO, Map<Long, OfflineReportDetailDTO> taskDetailMaps) {
+	private OfflineEquipmentTaskReportLog syncTaskInfoToServer(QualityInspectionTaskDTO taskDTO, Map<Long, OfflineReportDetailDTO> taskDetailMaps) {
+		QualityInspectionTasks task = null;
+		try {
+			task = verifiedTaskById(taskDTO.getId());
+		} catch (Exception e) {
+			e.printStackTrace();
+			LOGGER.error("syncTaskInfoToServer Erro:{}", e);
+			return getOfflineQualityTaskReportLogObject(taskDTO.getId(), ErrorCodes.ERROR_GENERAL_EXCEPTION,
+					QualityServiceErrorCode.ERROR_TASK_NOT_EXIST, QualityTaskType.VERIFY_TASK.getCode());
+		}
+
 		QualityInspectionTaskRecords record = new QualityInspectionTaskRecords();
 		record.setTaskId(task.getId());
 		record.setOperatorType(OwnerType.USER.getCode());
@@ -4974,7 +5012,7 @@ Long nextPageAnchor = null;
 				}
 
 				if (taskDTO.getProcessExpireTime() != null) {
-					task.setProcessExpireTime(taskDTO.getProcessExpireTime());
+					task.setProcessExpireTime(new Timestamp(taskDTO.getProcessExpireTime().getTime()));
 					record.setProcessEndTime(task.getProcessExpireTime());
 				}
 				record.setProcessResult(QualityInspectionTaskResult.NONE.getCode());
@@ -5047,7 +5085,7 @@ Long nextPageAnchor = null;
 		Map<String, Object> map = new HashMap<>();
 		map.put("userName", operators.get(0).getContactName());
 		map.put("taskName", task.getTaskName());
-		map.put("deadline", timeToStr(taskDTO.getProcessExpireTime()));
+		map.put("deadline", timeToStr(new Timestamp(taskDTO.getProcessExpireTime().getTime())));
 		String scope = QualityNotificationTemplateCode.SCOPE;
 		int code = QualityNotificationTemplateCode.ASSIGN_TASK_NOTIFY_OPERATOR;
 		String locale = "zh_CN";
@@ -5060,7 +5098,7 @@ Long nextPageAnchor = null;
 		msgMap.put("operator", operators.get(0).getContactName());
 		msgMap.put("target", targets.get(0).getContactName());
 		msgMap.put("taskName", task.getTaskName());
-		map.put("deadline", timeToStr(taskDTO.getProcessExpireTime()));
+		map.put("deadline", timeToStr(new Timestamp(taskDTO.getProcessExpireTime().getTime())));
 		int msgCode = QualityNotificationTemplateCode.ASSIGN_TASK_MSG;
 		String msg = localeTemplateService.getLocaleTemplateString(scope, msgCode, locale, msgMap, "");
 		record.setProcessMessage(msg);
