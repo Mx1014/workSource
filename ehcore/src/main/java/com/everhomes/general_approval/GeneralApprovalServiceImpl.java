@@ -875,14 +875,6 @@ public class GeneralApprovalServiceImpl implements GeneralApprovalService {
                 cmd.getOwnerType(), templates.get(0).getId());
         if (ga == null)
             response.setResult(TrueOrFalseFlag.FALSE.getCode());
-        /*for (GeneralApprovalTemplate template : templates) {
-            GeneralApproval ga = generalApprovalProvider.getGeneralApprovalByTemplateId(namespaceId, cmd.getModuleId(), cmd.getOwnerId(),
-                    cmd.getOwnerType(), template.getId());
-            if (ga == null) {
-                response.setResult(TrueOrFalseFlag.FALSE.getCode());
-                break;
-            }
-        }*/
         return response;
     }
 
@@ -921,6 +913,15 @@ public class GeneralApprovalServiceImpl implements GeneralApprovalService {
             ga = ConvertHelper.convert(approval, GeneralApproval.class);
             ga = convertApprovalFromTemplate(ga, approval, formOriginId, cmd);
             generalApprovalProvider.createGeneralApproval(ga);
+        }
+
+        Organization org = organizationProvider.findOrganizationById(cmd.getOwnerId());
+        if (org != null) {
+            GeneralApprovalScopeMapDTO dto = new GeneralApprovalScopeMapDTO();
+            dto.setSourceId(cmd.getOwnerId());
+            dto.setSourceType(UniongroupTargetType.ORGANIZATION.getCode());
+            dto.setSourceDescription(org.getName());
+            updateGeneralApprovalScope(ga.getNamespaceId(), ga.getId(), Arrays.asList(dto));
         }
     }
 

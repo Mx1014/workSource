@@ -2008,13 +2008,10 @@ public class EquipmentProviderImpl implements EquipmentProvider {
         DSLContext context = dbProvider.getDslContext(AccessSpec.readOnly());
 
         if (task.getStatus().equals(EquipmentTaskStatus.WAITING_FOR_EXECUTING.getCode()))
-            //task.setResult(EquipmentTaskResult.COMPLETE_DELAY.getCode());
-//        if (task.getStatus().equals(EquipmentTaskStatus.IN_MAINTENANCE.getCode()))
-//            task.setResult(EquipmentTaskResult.NEED_MAINTENANCE_OK_COMPLETE_DELAY.getCode());
 
         task.setStatus(EquipmentTaskStatus.DELAY.getCode());
-//		task.setReviewResult(ReviewResult.NONE.getCode());
-//		task.setExecutiveTime(new Timestamp(System.currentTimeMillis()));
+        //processTime for deleteing plan and update delay status recording  updateTime
+        task.setProcessTime(new Timestamp(DateHelper.currentGMTTime().getTime()));
         EhEquipmentInspectionTasks t = ConvertHelper.convert(task, EhEquipmentInspectionTasks.class);
         EhEquipmentInspectionTasksDao dao = new EhEquipmentInspectionTasksDao(context.configuration());
         dao.update(t);
@@ -2492,7 +2489,7 @@ public class EquipmentProviderImpl implements EquipmentProvider {
         if (AdminFlag.NO.equals(AdminFlag.fromStatus(adminFlag))
                 && (executeStandardIds == null || executeStandardIds.size() == 0)
                 && (reviewStandardIds == null || reviewStandardIds.size() == 0)) {
-            return result;
+            return null;
         }
 
         DSLContext context = dbProvider.getDslContext(AccessSpec.readOnly());
@@ -2516,14 +2513,14 @@ public class EquipmentProviderImpl implements EquipmentProvider {
             Condition con2 = Tables.EH_EQUIPMENT_INSPECTION_TASKS.STATUS.ne(EquipmentTaskStatus.NONE.getCode());
             query.addConditions(con2);
             //测试使用
-            query.addConditions(Tables.EH_EQUIPMENT_INSPECTION_TASKS.CREATE_TIME.ge(addMonths(new Timestamp(System.currentTimeMillis()), -1)));
+            query.addConditions(Tables.EH_EQUIPMENT_INSPECTION_TASKS.CREATE_TIME.ge(addMonths(new Timestamp(System.currentTimeMillis()), -3)));
         }
 
         Condition con = null;
         if (AdminFlag.NO.equals(AdminFlag.fromStatus(adminFlag)) && executeStandardIds != null && executeStandardIds.size() > 0) {
             Condition con4 = Tables.EH_EQUIPMENT_INSPECTION_TASKS.PLAN_ID.in(executeStandardIds);
             con4 = con4.and(Tables.EH_EQUIPMENT_INSPECTION_TASKS.STATUS.in(EquipmentTaskStatus.WAITING_FOR_EXECUTING.getCode(),
-                    EquipmentTaskStatus.DELAY.getCode()));
+                    EquipmentTaskStatus.DELAY.getCode(),EquipmentTaskStatus.NONE.getCode()));
             con = con4;
         }
 
@@ -2545,9 +2542,10 @@ public class EquipmentProviderImpl implements EquipmentProvider {
         }
 
         if(lastSyncTime!=null){
-            query.addConditions(Tables.EH_EQUIPMENT_INSPECTION_TASKS.CREATE_TIME.gt(lastSyncTime).
-                    or(Tables.EH_EQUIPMENT_INSPECTION_TASKS.EXECUTIVE_TIME.gt(lastSyncTime))
-                    .or(Tables.EH_EQUIPMENT_INSPECTION_TASKS.REVIEW_TIME.gt(lastSyncTime)));
+            query.addConditions(Tables.EH_EQUIPMENT_INSPECTION_TASKS.CREATE_TIME.gt(lastSyncTime)
+                    .or(Tables.EH_EQUIPMENT_INSPECTION_TASKS.EXECUTIVE_TIME.gt(lastSyncTime))
+                    .or(Tables.EH_EQUIPMENT_INSPECTION_TASKS.REVIEW_TIME.gt(lastSyncTime))
+                     .or(Tables.EH_EQUIPMENT_INSPECTION_TASKS.PROCESS_TIME.gt(lastSyncTime)));
         }
         query.addOrderBy(Tables.EH_EQUIPMENT_INSPECTION_TASKS.EXECUTIVE_EXPIRE_TIME);
         query.addLimit(offset * (pageSize-1), pageSize);
@@ -3270,6 +3268,7 @@ public class EquipmentProviderImpl implements EquipmentProvider {
         DSLContext context = this.dbProvider.getDslContext(AccessSpec.readWrite());
         context.update(Tables.EH_EQUIPMENT_INSPECTION_TASKS)
                 .set(Tables.EH_EQUIPMENT_INSPECTION_TASKS.STATUS, EquipmentTaskStatus.NONE.getCode())
+                .set(Tables.EH_EQUIPMENT_INSPECTION_TASKS.PROCESS_TIME, new Timestamp(DateHelper.currentGMTTime().getTime()))
                 .where(Tables.EH_EQUIPMENT_INSPECTION_TASKS.PLAN_ID.eq(planId))
                 .and(Tables.EH_EQUIPMENT_INSPECTION_TASKS.STATUS.eq(EquipmentTaskStatus.WAITING_FOR_EXECUTING.getCode()))
                 .execute();

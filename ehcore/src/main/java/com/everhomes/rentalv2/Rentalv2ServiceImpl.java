@@ -99,12 +99,7 @@ import com.everhomes.user.UserIdentifier;
 import com.everhomes.user.UserPrivilegeMgr;
 import com.everhomes.user.UserProvider;
 import com.everhomes.user.UserService;
-import com.everhomes.util.ConvertHelper;
-import com.everhomes.util.DateHelper;
-import com.everhomes.util.DownloadUtils;
-import com.everhomes.util.RuntimeErrorException;
-import com.everhomes.util.SignatureHelper;
-import com.everhomes.util.Tuple;
+import com.everhomes.util.*;
 import net.greghaines.jesque.Job;
 import org.apache.commons.lang.StringUtils;
 import org.apache.poi.ss.usermodel.Row;
@@ -7927,6 +7922,11 @@ public class Rentalv2ServiceImpl implements Rentalv2Service {
 
 		RentalOrderDTO dto = ConvertHelper.convert(bill, RentalOrderDTO.class);
 		convertRentalOrderDTO(dto, bill);
+		if (!RentalV2ResourceType.VIP_PARKING.getCode().equals(bill.getResourceType())) {
+			RentalBillDTO billDto = processOrderDTO(bill);
+			String json = StringHelper.toJsonString(billDto);
+			dto.setCustomObject(json);
+		}
 
 		return dto;
 	}
