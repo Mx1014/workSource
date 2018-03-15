@@ -2,6 +2,8 @@ package com.everhomes.customer;
 
 import com.everhomes.address.Address;
 import com.everhomes.address.AddressProvider;
+import com.everhomes.community.Building;
+import com.everhomes.community.CommunityProvider;
 import com.everhomes.dynamicExcel.*;
 import com.everhomes.listing.CrossShardListingLocator;
 import com.everhomes.rest.customer.*;
@@ -62,6 +64,9 @@ public class CustomerDynamicExcelHandler implements DynamicExcelHandler {
 
     @Autowired
     private UserProvider userProvider;
+
+    @Autowired
+    private CommunityProvider communityProvider;
 
     @Override
     public List<DynamicSheet> getDynamicSheet(String sheetName, Object params, List<String> headers, boolean isImport) {
@@ -571,6 +576,10 @@ public class CustomerDynamicExcelHandler implements DynamicExcelHandler {
                                         Address address = addressProvider.findAddressByBuildingApartmentName(namespaceId, communityId, value[0], value[1]);
                                         if(address != null) {
                                             column.setValue(address.getId().toString());
+                                        }
+                                        Building building = communityProvider.findBuildingByCommunityIdAndName(communityId, value[0]);
+                                        if(building != null) {
+                                            entryInfo.setBuildingId(building.getId());
                                         }
                                     }
 
