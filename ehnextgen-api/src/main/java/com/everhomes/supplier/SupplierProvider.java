@@ -22,7 +22,7 @@ public interface SupplierProvider {
     void deleteSupplier(Long id);
 
     TreeMap<Long,ListSuppliersDTO> findSuppliers(String ownerType, Long ownerId, Integer namespaceId, String contactName, String supplierName
-            , Long pageAnchor, Integer pageSize);
+            , Long pageAnchor, Integer pageSize, Long communityId);
 
     String findSupplierNameById(Long supplierId);
 
