@@ -1762,5 +1762,5 @@ ALTER TABLE  `eh_warehouse_suppliers` ADD COLUMN  `file_name` VARCHAR(256) COMME
 -- 增加公式的名称最大长度 by wentian 2018/03/09
 ALTER TABLE `eh_payment_formula` MODIFY COLUMN `name` VARCHAR(1024) COMMENT '公式名称';
 -- 供应商增加园区id by wentian 2018/03/15
-ALTER TABLE  `eh_warehouse_suppliers` ADD COLUMN  `community_id` VARCHAR(256) COMMENT '供应商所在园区的id';
+ALTER TABLE  `eh_warehouse_suppliers` ADD COLUMN  `community_id` BIGINT COMMENT '供应商所在园区的id';
 
