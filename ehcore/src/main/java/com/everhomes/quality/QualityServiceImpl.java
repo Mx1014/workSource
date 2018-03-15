@@ -3898,6 +3898,7 @@ Long nextPageAnchor = null;
 					s.setBuildArea(0D);
 			});
 			//sort  scoreByTarget
+			LOGGER.debug("scoresByTarget:{}", scoresByTarget);
 			scoresByTarget.sort((o1, o2) -> {
 				if (!o1.getTotalScore().equals(o2.getTotalScore())) {
 					return o2.getTotalScore().compareTo(o1.getTotalScore());
