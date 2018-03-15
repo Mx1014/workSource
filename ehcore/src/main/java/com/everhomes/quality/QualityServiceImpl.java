@@ -4062,7 +4062,7 @@ Long nextPageAnchor = null;
 		List<QualityInspectionSpecificationItemResults> results = qualityProvider.listSpecifitionItemResultsBySampleId(scoreStat.getSampleId(), scoreStat.getUpdateTime(), now);
 
 		LOGGER.info("deduct sample id:{}, start time : {}, results: {}",scoreStat.getSampleId(), scoreStat.getUpdateTime(), results);
-		if(results != null) {
+		if (results != null && results.size() > 0) {
 			List<Long> categoryIds = new ArrayList<>();
 			results.forEach(result -> {
 				String path = result.getSpecificationPath();
@@ -4580,15 +4580,15 @@ Long nextPageAnchor = null;
 			tasksResponse.getTasks().forEach((task) -> {
 				//处理任务 获取任务更新最大时间
 				List<Long> timestampList = new ArrayList<>();
-				timestampList.add(task.getCreateTime());
+				timestampList.add(task.getCreateTime().getTime());
 				if (task.getExecutiveTime() != null) {
-					timestampList.add(task.getExecutiveTime());
+					timestampList.add(task.getExecutiveTime().getTime());
 				}
 				if (task.getProcessTime() != null) {
-					timestampList.add(task.getProcessTime());
+					timestampList.add(task.getProcessTime().getTime());
 				}
 				if (task.getReviewTime() != null) {
-					timestampList.add(task.getReviewTime());
+					timestampList.add(task.getReviewTime().getTime());
 				}
 				List<Long> temp = timestampList.stream()
 						.sorted(Comparator.comparing(Long::longValue).reversed())
@@ -5013,7 +5013,7 @@ Long nextPageAnchor = null;
 				}
 
 				if (taskDTO.getProcessExpireTime() != null) {
-					task.setProcessExpireTime(new Timestamp(taskDTO.getProcessExpireTime()));
+					task.setProcessExpireTime(new Timestamp(taskDTO.getProcessExpireTime().getTime()));
 					record.setProcessEndTime(task.getProcessExpireTime());
 				}
 				record.setProcessResult(QualityInspectionTaskResult.NONE.getCode());
@@ -5086,7 +5086,7 @@ Long nextPageAnchor = null;
 		Map<String, Object> map = new HashMap<>();
 		map.put("userName", operators.get(0).getContactName());
 		map.put("taskName", task.getTaskName());
-		map.put("deadline", timeToStr(new Timestamp(taskDTO.getProcessExpireTime())));
+		map.put("deadline", timeToStr(new Timestamp(taskDTO.getProcessExpireTime().getTime())));
 		String scope = QualityNotificationTemplateCode.SCOPE;
 		int code = QualityNotificationTemplateCode.ASSIGN_TASK_NOTIFY_OPERATOR;
 		String locale = "zh_CN";
@@ -5099,7 +5099,7 @@ Long nextPageAnchor = null;
 		msgMap.put("operator", operators.get(0).getContactName());
 		msgMap.put("target", targets.get(0).getContactName());
 		msgMap.put("taskName", task.getTaskName());
-		map.put("deadline", timeToStr(new Timestamp(taskDTO.getProcessExpireTime())));
+		map.put("deadline", timeToStr(new Timestamp(taskDTO.getProcessExpireTime().getTime())));
 		int msgCode = QualityNotificationTemplateCode.ASSIGN_TASK_MSG;
 		String msg = localeTemplateService.getLocaleTemplateString(scope, msgCode, locale, msgMap, "");
 		record.setProcessMessage(msg);

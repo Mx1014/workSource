@@ -65,7 +65,7 @@ public class PurchaseProviderImpl implements PurchaseProvider {
         SelectQuery<Record> query = context.selectQuery();
         List<SearchPurchasesDTO> list = new ArrayList<>();
         query.addFrom(purchase);
-        if(submissionStatus == null){
+        if(submissionStatus != null){
             query.addConditions(purchase.SUBMISSION_STATUS.eq(submissionStatus));
         }
         if(warehouseStatus != null){
