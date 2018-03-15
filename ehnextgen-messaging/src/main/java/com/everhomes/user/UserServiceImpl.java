@@ -912,14 +912,14 @@ public class UserServiceImpl implements UserService {
 	}
 
 	@Override
-	public User logonDryrun(String userIdentifierToken, String password) {
+	public User logonDryrun(Integer namespaceId, String userIdentifierToken, String password) {
 		User user;
 		user = this.userProvider.findUserByAccountName(userIdentifierToken);
 		if(user == null) {
             if (LOGGER.isDebugEnabled()) {
                 LOGGER.debug("findUserByAccountName user is null");
             }
-			UserIdentifier identifier = this.userProvider.findClaimedIdentifierByToken(Namespace.DEFAULT_NAMESPACE, userIdentifierToken);
+			UserIdentifier identifier = this.userProvider.findClaimedIdentifierByToken(namespaceId, userIdentifierToken);
 			if(identifier != null) {
                 if (LOGGER.isDebugEnabled()) {
                     LOGGER.debug("findClaimedIdentifierByToken identifier is null");
