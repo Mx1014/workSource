@@ -1188,3 +1188,6 @@ END
 DELIMITER ;
 CALL create_app;
 DROP PROCEDURE IF EXISTS create_app;    
+
+-- fix 25656 by xiongying20180315
+update eh_var_fields set field_type = 'String' where name = 'buildingRename';

@@ -55,7 +55,8 @@ public class EnergyMeterDefaultSettingProviderImpl implements EnergyMeterDefault
                 .where(EH_ENERGY_METER_DEFAULT_SETTINGS.NAMESPACE_ID.eq(namespaceId))
 //                .and(EH_ENERGY_METER_DEFAULT_SETTINGS.OWNER_ID.eq(ownerId))
 //                .and(EH_ENERGY_METER_DEFAULT_SETTINGS.OWNER_TYPE.eq(ownerType))
-                .and(EH_ENERGY_METER_DEFAULT_SETTINGS.COMMUNITY_ID.eq(communityId))
+                .and(EH_ENERGY_METER_DEFAULT_SETTINGS.COMMUNITY_ID.eq(communityId)
+                        .or(EH_ENERGY_METER_DEFAULT_SETTINGS.COMMUNITY_ID.eq(0L)))
                 .getQuery();
         if (meterType != null) {
             query.addConditions(EH_ENERGY_METER_DEFAULT_SETTINGS.METER_TYPE.eq(meterType));

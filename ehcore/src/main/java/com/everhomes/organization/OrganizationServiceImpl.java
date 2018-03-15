@@ -1648,8 +1648,11 @@ public class OrganizationServiceImpl implements OrganizationService {
     }
 
     @Override
-    public void deleteEnterpriseById(DeleteOrganizationIdCommand cmd) {
-        userPrivilegeMgr.checkUserPrivilege(UserContext.currentUserId(), cmd.getManageOrganizationId(), PrivilegeConstants.ORGANIZATION_DELETE, ServiceModuleConstants.ORGANIZATION_MODULE, ActionType.OFFICIAL_URL.getCode(), null, cmd.getManageOrganizationId(), cmd.getCommunityId());
+    public void deleteEnterpriseById(DeleteOrganizationIdCommand cmd, Boolean checkAuth) {
+        if(checkAuth) {
+            userPrivilegeMgr.checkUserPrivilege(UserContext.currentUserId(), cmd.getManageOrganizationId(), PrivilegeConstants.ORGANIZATION_DELETE, ServiceModuleConstants.ORGANIZATION_MODULE, ActionType.OFFICIAL_URL.getCode(), null, cmd.getManageOrganizationId(), cmd.getCommunityId());
+        }
+
         Organization organization = checkOrganization(cmd.getId());
         //产品功能 #20796
 //        if(organization.getNamespaceId() == 999971 || organization.getNamespaceId() == 999983) {

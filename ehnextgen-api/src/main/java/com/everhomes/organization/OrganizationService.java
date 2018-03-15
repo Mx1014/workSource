@@ -173,7 +173,7 @@ public interface OrganizationService {
 	void setAclRoleAssignmentRole(SetAclRoleAssignmentCommand cmd, EntityType entityType);
 	void updateEnterprise(UpdateEnterpriseCommand cmd);
 	void updateEnterprise(UpdateEnterpriseCommand cmd, boolean updateAttachmentAndAddress);
-	void deleteEnterpriseById(DeleteOrganizationIdCommand cmd);
+	void deleteEnterpriseById(DeleteOrganizationIdCommand cmd, Boolean checkAuth);
 	
 	ListOrganizationMemberCommandResponse listOrgAuthPersonnels(ListOrganizationContactCommand cmd);
 	ListOrganizationMemberCommandResponse listOrganizationPersonnels(
