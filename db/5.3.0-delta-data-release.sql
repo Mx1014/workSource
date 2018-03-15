@@ -1187,7 +1187,10 @@ END
 //
 DELIMITER ;
 CALL create_app;
-DROP PROCEDURE IF EXISTS create_app;
+DROP PROCEDURE IF EXISTS create_app;    
+
+-- fix 25656 by xiongying20180315
+update eh_var_fields set field_type = 'String' where name = 'buildingRename';
 
 -- 更新普通公司论坛、活动的菜单路由  add by yanjun 201803141806
 update eh_web_menus set data_type = 'forum-management' where id = 71020000;
@@ -1480,4 +1483,3 @@ update eh_service_module_apps SET module_id=20100 WHERE action_type=13 AND insta
 update eh_service_module_apps SET module_id=20100 WHERE action_type=13 AND instance_config LIKE '%/property-repair-web/build/index.html%';
 
 -- 园区客户线，权限对接结束 by dengs. 
-

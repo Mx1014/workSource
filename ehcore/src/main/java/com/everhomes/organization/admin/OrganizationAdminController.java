@@ -439,7 +439,7 @@ public class OrganizationAdminController extends ControllerBase {
     @RequestMapping("deleteEnterpriseById")
     @RestReturn(value = String.class)
     public RestResponse deleteEnterpriseById(@Valid DeleteOrganizationIdCommand cmd) {
-        organizationService.deleteEnterpriseById(cmd);
+        organizationService.deleteEnterpriseById(cmd, true);
         RestResponse response = new RestResponse();
         response.setErrorCode(ErrorCodes.SUCCESS);
         response.setErrorDescription("OK");

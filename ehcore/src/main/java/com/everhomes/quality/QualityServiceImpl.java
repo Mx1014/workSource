@@ -918,7 +918,7 @@ Long nextPageAnchor = null;
 		checkUserPrivilege(cmd.getOwnerId(),PrivilegeConstants.QUALITY_TASK_LIST,cmd.getTargetId());
 
 		User user = UserContext.current().getUser();
-		Long targetId = cmd.getTargetId();
+		//Long targetId = cmd.getTargetId();
 		int pageSize = PaginationConfigHelper.getPageSize(configurationProvider, cmd.getPageSize());
 
 		if(null == cmd.getPageAnchor()) {
@@ -936,7 +936,7 @@ Long nextPageAnchor = null;
 
 		//新后台对接权限修改
 		boolean isAdmin = checkAdmin(cmd.getOwnerId(), cmd.getOwnerType(), cmd.getNamespaceId());
-		LOGGER.info("listQualityInspectionTasks: checkAdmin:{}" + isAdmin);
+		LOGGER.info("listQualityInspectionTasks: checkAdmin:{}" , isAdmin);
 
 		List<QualityInspectionTasks> tasks = new ArrayList<>();
 		ListQualityInspectionTasksResponse response = new ListQualityInspectionTasksResponse();
@@ -1025,7 +1025,7 @@ Long nextPageAnchor = null;
 		if (cmd.getTaskType() != null)
 			query.addConditions(Tables.EH_QUALITY_INSPECTION_TASKS.TASK_TYPE.eq(cmd.getTaskType()));
 		if (cmd.getExecuteStatus() != null)
-			query.addConditions(Tables.EH_QUALITY_INSPECTION_TASKS.STATUS.eq(cmd.getExecuteStatus()));
+			query.addConditions(Tables.EH_QUALITY_INSPECTION_TASKS.STATUS.in(cmd.getExecuteStatus()));
 		if (cmd.getManualFlag() != null)
 			query.addConditions(Tables.EH_QUALITY_INSPECTION_TASKS.MANUAL_FLAG.eq(Long.valueOf(cmd.getManualFlag())));
 		if (cmd.getNamespaceId() != null)
@@ -1050,7 +1050,7 @@ Long nextPageAnchor = null;
 		if (cmd.getTaskType() != null)
             query.addConditions(Tables.EH_QUALITY_INSPECTION_TASKS.TASK_TYPE.eq(cmd.getTaskType()));
 		if (cmd.getExecuteStatus() != null)
-            query.addConditions(Tables.EH_QUALITY_INSPECTION_TASKS.STATUS.eq(cmd.getExecuteStatus()));
+            query.addConditions(Tables.EH_QUALITY_INSPECTION_TASKS.STATUS.in(cmd.getExecuteStatus()));
 		if (cmd.getManualFlag() != null)
             query.addConditions(Tables.EH_QUALITY_INSPECTION_TASKS.MANUAL_FLAG.eq(Long.valueOf(cmd.getManualFlag())));
 		if (cmd.getNamespaceId() != null)

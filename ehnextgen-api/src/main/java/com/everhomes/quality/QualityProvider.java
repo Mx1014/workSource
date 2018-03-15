@@ -24,7 +24,7 @@ public interface QualityProvider {
     		Byte taskType, Long executeUid, Timestamp startDate, Timestamp endDate, Byte executeStatus, Byte reviewStatus, boolean timeCompared,
 			List<Long> standardIds, Byte manualFlag, List<ExecuteGroupAndPosition> groupDtos,Integer namespaceId,String taskName,Timestamp latestUpdateTime);
 	int countVerificationTasks(Long ownerId, String ownerType, Byte taskType, Long executeUid, 
-			Timestamp startDate, Timestamp endDate, Long groupId, Byte executeStatus, Byte reviewStatus);
+			Timestamp startDate, Timestamp endDate, Long groupId, List<Byte> executeStatus, Byte reviewStatus);
 
 
 	void createQualityInspectionStandards(QualityInspectionStandards standard);

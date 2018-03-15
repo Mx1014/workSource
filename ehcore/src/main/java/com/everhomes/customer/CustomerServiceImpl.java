@@ -602,7 +602,7 @@ public class CustomerServiceImpl implements CustomerService {
         if(customer.getOrganizationId() != null) {
             DeleteOrganizationIdCommand command = new DeleteOrganizationIdCommand();
             command.setId(customer.getOrganizationId());
-            organizationService.deleteEnterpriseById(command);
+            organizationService.deleteEnterpriseById(command, false);
         }
 
     }
