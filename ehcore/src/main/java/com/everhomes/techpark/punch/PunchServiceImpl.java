@@ -9141,13 +9141,16 @@ public class PunchServiceImpl implements PunchService {
         }
         List<VacationBalanceDTO> result = listVacationBalanceDTOs(cmd.getOrganizationId(), cmd.getCheckInStartDay(),
                 cmd.getCheckInEndDay(), cmd.getDepartmentId(), cmd.getKeyWords(), cmd.getPageSize(), cmd.getPageOffset());
-
+        if (null == result || result.size() == 0) {
+            return response;
+        }
         Integer nextPageOffset = null;
         if (result != null && result.size() > cmd.getPageSize()) {
             result.remove(result.size() - 1);
             nextPageOffset = cmd.getPageOffset() + 1;
         }
         response.setNextPageOffset(nextPageOffset);
+        response.setVacationBalances(result);
         return response;
     }
 
