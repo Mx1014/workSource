@@ -4061,7 +4061,7 @@ Long nextPageAnchor = null;
 		List<QualityInspectionSpecificationItemResults> results = qualityProvider.listSpecifitionItemResultsBySampleId(scoreStat.getSampleId(), scoreStat.getUpdateTime(), now);
 
 		LOGGER.info("deduct sample id:{}, start time : {}, results: {}",scoreStat.getSampleId(), scoreStat.getUpdateTime(), results);
-		if(results != null) {
+		if (results != null && results.size() > 0) {
 			List<Long> categoryIds = new ArrayList<>();
 			results.forEach(result -> {
 				String path = result.getSpecificationPath();
