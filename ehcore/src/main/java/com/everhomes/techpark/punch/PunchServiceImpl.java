@@ -9136,7 +9136,9 @@ public class PunchServiceImpl implements PunchService {
         ListVacationBalancesResponse response = new ListVacationBalancesResponse();
         if (cmd.getPageSize() == null)
             cmd.setPageSize(20);
-
+        if (cmd.getPageOffset() == null) {
+            cmd.setPageOffset(1);
+        }
         List<VacationBalanceDTO> result = listVacationBalanceDTOs(cmd.getOrganizationId(), cmd.getCheckInStartDay(),
                 cmd.getCheckInEndDay(), cmd.getDepartmentId(), cmd.getKeyWords(), cmd.getPageSize(), cmd.getPageOffset());
 
