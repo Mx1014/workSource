@@ -1306,7 +1306,7 @@ public class GeneralApprovalServiceImpl implements GeneralApprovalService {
     }
 
     private boolean checkTheScope(List<GeneralApprovalScopeMapDTO> scopes, OrganizationMember member) {
-        if (member == null)
+        if (member == null || scopes == null || scopes.size() == 0)
             return false;
         List<Long> scopeUserIds = scopes.stream()
                 .filter(p1 -> p1.getSourceType().equals(UniongroupTargetType.MEMBERDETAIL.getCode()))
