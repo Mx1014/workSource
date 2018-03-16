@@ -140,7 +140,7 @@ public class XiaomaoKeXingParkingVendorHandler extends DefaultParkingVendorHandl
             TreeMap<String, String> params = new TreeMap<String,String>();
             params.put("memberType", card.getMemberType());
             params.put("beginTime", validStart);
-            params.put("stopTime", validEnd);
+            params.put("endTime", validEnd);
             params.put("licenseNumber", card.getLicenseNumber());
 
             String json = post(OPEN_MONTHCARD,params);
