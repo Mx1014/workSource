@@ -775,7 +775,9 @@ public class ServiceModuleServiceImpl implements ServiceModuleService {
             return true;
         }
 
-        if (resolver.checkSuperAdmin(userId, organizationId) || resolver.checkModuleAdmin(EntityType.ORGANIZATIONS.getCode(), organizationId, userId, moduleId)) {
+        // by lei.lv 不再支持模块管理员
+       // if (resolver.checkSuperAdmin(userId, organizationId) || resolver.checkModuleAdmin(EntityType.ORGANIZATIONS.getCode(), organizationId, userId, moduleId)) {
+        if (resolver.checkSuperAdmin(userId, organizationId)) {
             return true;
         }
         return false;
