@@ -1,0 +1,6 @@
+INSERT INTO `eh_parking_lots` (`id`, `owner_type`, `owner_id`, `name`, `vendor_name`, `vendor_lot_token`, `status`, `creator_uid`, `create_time`, `namespace_id`, `recharge_json`, `config_json`) VALUES ('10027', 'community', '240111044332061164', '正中时代广场停车场', 'KEXIN_XIAOMAO', '', '2', '1', NOW(), '999983', '', '{\"tempfeeFlag\": 0, \"rateFlag\": 0, \"lockCarFlag\": 0, \"searchCarFlag\": 0, \"currentInfoType\": 0,\"identityCardFlag\":0}');
+
+INSERT INTO `eh_configurations` (`name`, `value`, `description`, `namespace_id`, `display_name`) VALUES ('parking.kexinxiaomao.url', 'http://119.23.144.8', '科兴正中时代广场停车场url', 0, NULL);
+INSERT INTO `eh_configurations` (`name`, `value`, `description`, `namespace_id`, `display_name`) VALUES ('parking.kexinxiaomao.parkId', '07550000161454379616', '科兴正中时代广场停车场id', 0, NULL);
+INSERT INTO `eh_configurations` (`name`, `value`, `description`, `namespace_id`, `display_name`) VALUES ('parking.kexinxiaomao.accessKeyId', 'zzsd0312', '科兴正中时代广场停车场访问者标识', 0, NULL);
+INSERT INTO `eh_configurations` (`name`, `value`, `description`, `namespace_id`, `display_name`) VALUES ('parking.kexinxiaomao.accessKeyValue', '671d0ebd58e119383eed4b161e6f7a4c', '科兴正中时代广场停车场加密后的-accessKeyValue', 0, NULL);
