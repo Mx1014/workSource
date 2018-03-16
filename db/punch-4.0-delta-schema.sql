@@ -24,7 +24,7 @@ CREATE TABLE `eh_punch_vacation_balance_logs` (
   `user_id` BIGINT COMMENT 'user_id',
   `detail_id` BIGINT COMMENT 'user_id',
   `annual_leave_balance_correction` DOUBLE COMMENT'年假余额修改',
-  `overtime_compensation_balanc_correctione` DOUBLE COMMENT '调休余额修改',
+  `overtime_compensation_balance_correctione` DOUBLE COMMENT '调休余额修改',
   `annual_leave_balance` DOUBLE COMMENT '修改后年假余额',
   `overtime_compensation_balance` DOUBLE COMMENT '修改后调休余额',
   `description` TEXT COMMENT '备注',
