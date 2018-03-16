@@ -11,6 +11,8 @@ import com.everhomes.util.StringHelper;
  * <li>checkInEndDay: 入职结束时间</li>
  * <li>departmentId: 部门id</li>
  * <li>keyWords: 员工姓名</li>
+ * <li>pageSize: 每页条数</li>
+ * <li>pageOffset: 页码</li>
  * </ul>
  */
 public class ListVacationBalancesCommand {
@@ -24,6 +26,11 @@ public class ListVacationBalancesCommand {
 	private Long departmentId;
 
 	private String keyWords;
+
+	private Integer pageOffset;
+
+	private Integer pageSize;
+
 
 	public ListVacationBalancesCommand() {
 
@@ -83,4 +90,20 @@ public class ListVacationBalancesCommand {
 		return StringHelper.toJsonString(this);
 	}
 
+	public Integer getPageSize() {
+		return pageSize;
+	}
+
+	public void setPageSize(Integer pageSize) {
+		this.pageSize = pageSize;
+	}
+
+
+	public Integer getPageOffset() {
+		return pageOffset;
+	}
+
+	public void setPageOffset(Integer pageOffset) {
+		this.pageOffset = pageOffset;
+	}
 }

@@ -25,5 +25,7 @@ public interface PunchServiceErrorCode {
 
     static final int ERROR_PUNCH_TOKEN_TIMEOUT = 10100;  //token过期了,返回首页
 
-    
+
+    static final int ERROR_ANNUAL_LEAVE_CORRECTION_TOO_SMALL = 10200;
+    static final int ERROR_OVERTIME_CORRECTION_TOO_SMALL = 10201;
 }

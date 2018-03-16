@@ -5,6 +5,7 @@ import java.sql.Timestamp;
 import java.util.List;
 
 import org.jooq.DSLContext;
+import org.jooq.Record;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
 
@@ -63,7 +64,19 @@ public class PunchVacationBalanceProviderImpl implements PunchVacationBalancePro
 				.orderBy(Tables.EH_PUNCH_VACATION_BALANCES.ID.asc())
 				.fetch().map(r -> ConvertHelper.convert(r, PunchVacationBalance.class));
 	}
-	
+
+	@Override
+	public PunchVacationBalance findPunchVacationBalanceByDetailId(Long id) {
+		Record record = getReadOnlyContext().select().from(Tables.EH_PUNCH_VACATION_BALANCES)
+				.where(Tables.EH_PUNCH_VACATION_BALANCES.DETAIL_ID.eq(id))
+				.orderBy(Tables.EH_PUNCH_VACATION_BALANCES.ID.asc())
+				.fetchAny();
+		if (null == record) {
+			return null;
+		}
+		return ConvertHelper.convert(record, PunchVacationBalance.class);
+	}
+
 	private EhPunchVacationBalancesDao getReadWriteDao() {
 		return getDao(getReadWriteContext());
 	}

@@ -1,6 +1,8 @@
 // @formatter:off
 package com.everhomes.techpark.punch;
 
+import com.everhomes.listing.CrossShardListingLocator;
+
 import java.util.List;
 
 public interface PunchVacationBalanceLogProvider {
@@ -13,4 +15,5 @@ public interface PunchVacationBalanceLogProvider {
 
 	List<PunchVacationBalanceLog> listPunchVacationBalanceLog();
 
+	List<PunchVacationBalanceLog> listPunchVacationBalanceLog(Long detailId, CrossShardListingLocator locator, int pageSize);
 }
