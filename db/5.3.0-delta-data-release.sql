@@ -48,6 +48,15 @@ INSERT INTO `eh_version_urls` VALUES (@vId:=@vId+1, @id, '1.0.0', 'http://{home.
 UPDATE eh_launch_pad_items
 SET action_data = '{\"realm\":\"equipmentInspection\",\"entryUrl\":\"http://{home.url}/nar/equipmentInspection/dist/index.html?hideNavigationBar=1#sign_suffix\"}'
 WHERE item_label LIKE '%巡检%';
+
+update eh_service_module_apps
+set instance_config = '{\"realm\":\"quality\",\"entryUrl\":\"http://{home.url}/nar/quality/index.html?hideNavigationBar=1#/select_community#sign_suffix\"}'
+where module_id = 20600;
+
+
+update eh_service_module_apps
+set instance_config = '{\"realm\":\"equipmentInspection\",\"entryUrl\":\"http://{home.url}/nar/equipmentInspection/dist/index.html?hideNavigationBar=1#sign_suffix\"}'
+where module_id = 20800;
 -- offline  by jiarui
 
 UPDATE eh_launch_pad_items
