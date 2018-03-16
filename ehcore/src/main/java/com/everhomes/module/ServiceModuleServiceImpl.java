@@ -693,7 +693,6 @@ public class ServiceModuleServiceImpl implements ServiceModuleService {
         User user = UserContext.current().getUser();
         List<CommunityDTO> dtos = new ArrayList<>();
         List<ProjectDTO> projects = getUserProjectsByModuleId(user.getId(), cmd.getOrganizationId(), cmd.getModuleId(), null);
-        LOGGER.debug("listAuthorizationCommunityByUser step3"+ DateHelper.currentGMTTime());
         for (ProjectDTO project: projects) {
             if(EntityType.fromCode(project.getProjectType()) == EntityType.COMMUNITY){
                 Community community = communityProvider.findCommunityById(project.getProjectId());
@@ -806,18 +805,19 @@ public class ServiceModuleServiceImpl implements ServiceModuleService {
                 targets.add(new Target(com.everhomes.entity.EntityType.ORGANIZATIONS.getCode(), orgId));
             }
 
-            //获取人员和人员所有机构所赋予模块的所属项目范围(模块管理)
-            List<Project> projects = authorizationProvider.getAuthorizationProjectsByAuthIdAndTargets(EntityType.SERVICE_MODULE.getCode(), moduleId, targets);
-            for (Project project: projects) {
-                //在模块下拥有全部项目权限
-                if(EntityType.ALL == EntityType.fromCode(project.getProjectType())){
-                    allProjectFlag = true;
-                    break;
-                }else {
-                    processProject(project);
-                    dtos.add(ConvertHelper.convert(project, ProjectDTO.class));
-                }
-            }
+           // by lei.lv 取消掉模块管理员的逻辑
+//            //获取人员和人员所有机构所赋予模块的所属项目范围(模块管理)
+//            List<Project> projects = authorizationProvider.getAuthorizationProjectsByAuthIdAndTargets(EntityType.SERVICE_MODULE.getCode(), moduleId, targets);
+//            for (Project project: projects) {
+//                //在模块下拥有全部项目权限
+//                if(EntityType.ALL == EntityType.fromCode(project.getProjectType())){
+//                    allProjectFlag = true;
+//                    break;
+//                }else {
+//                    processProject(project);
+//                    dtos.add(ConvertHelper.convert(project, ProjectDTO.class));
+//                }
+//            }
 
 
             //获取人员和人员所有机构所赋予模块的所属项目范围(应用管理员) -- add by lei.lv
@@ -1162,14 +1162,15 @@ public class ServiceModuleServiceImpl implements ServiceModuleService {
                 targets.add(new Target(com.everhomes.entity.EntityType.ORGANIZATIONS.getCode(), orgId));
             }
 
-            //获取人员和人员所有机构所赋予模块的所属项目范围(模块管理)
-            List<Project> projects = authorizationProvider.getAuthorizationProjectsByAuthIdAndTargets(EntityType.SERVICE_MODULE.getCode(), cmd.getModuleId(), targets);
-            for (Project project: projects) {
-                //在模块下拥有全部项目权限
-                if(EntityType.ALL == EntityType.fromCode(project.getProjectType())){
-                    return AllFlag.ALL.getCode();
-                }
-            }
+            // by lei.lv 取消掉模块管理员的逻辑
+//            //获取人员和人员所有机构所赋予模块的所属项目范围(模块管理)
+//            List<Project> projects = authorizationProvider.getAuthorizationProjectsByAuthIdAndTargets(EntityType.SERVICE_MODULE.getCode(), cmd.getModuleId(), targets);
+//            for (Project project: projects) {
+//                //在模块下拥有全部项目权限
+//                if(EntityType.ALL == EntityType.fromCode(project.getProjectType())){
+//                    return AllFlag.ALL.getCode();
+//                }
+//            }
             //获取人员和人员所有机构所赋予模块的所属项目范围(应用管理员) -- add by lei.lv
             List<Authorization> authorizations_apps =  authorizationProvider.listAuthorizations(EntityType.ORGANIZATIONS.getCode(), cmd.getOrganizationId(), EntityType.USER.getCode(), userId, com.everhomes.entity.EntityType.SERVICE_MODULE_APP.getCode(), null, IdentityType.MANAGE.getCode(), true, null, null);
             if(authorizations_apps != null && authorizations_apps.size() > 0){
