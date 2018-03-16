@@ -1295,16 +1295,18 @@ public class GeneralApprovalServiceImpl implements GeneralApprovalService {
         ListGeneralApprovalResponse response = listGeneralApproval(cmd);
         List<GeneralApprovalDTO> approvals = response.getDtos();
         OrganizationMember member = organizationProvider.findDepartmentMemberByTargetIdAndOrgId(UserContext.currentUserId(), cmd.getOwnerId());
-        approvals.forEach(r -> {
-            if (checkTheScope(r.getScopes(), member))
-                dtos.add(r);
-        });
+        if (approvals != null && approvals.size() > 0) {
+            approvals.forEach(r -> {
+                if (checkTheScope(r.getScopes(), member))
+                    dtos.add(r);
+            });
+        }
         res.setDtos(dtos);
         return res;
     }
 
     private boolean checkTheScope(List<GeneralApprovalScopeMapDTO> scopes, OrganizationMember member) {
-        if (member == null)
+        if (member == null || scopes == null || scopes.size() == 0)
             return false;
         List<Long> scopeUserIds = scopes.stream()
                 .filter(p1 -> p1.getSourceType().equals(UniongroupTargetType.MEMBERDETAIL.getCode()))

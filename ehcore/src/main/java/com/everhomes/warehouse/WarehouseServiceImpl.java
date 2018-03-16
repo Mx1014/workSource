@@ -559,8 +559,7 @@ public class WarehouseServiceImpl implements WarehouseService {
             checkAssetPriviledgeForPropertyOrg(cmd.getCommunityId(), PrivilegeConstants.WAREHOUSE_REPO_MAINTAIN_OUTSTOCK, cmd.getOwnerId());
         }
         //增加普通入库单
-        WarehouseOrder order = new WarehouseOrder();
-        order = new WarehouseOrder();
+        WarehouseOrder order = ConvertHelper.convert(cmd, WarehouseOrder.class);
         long warehouseOrderId = this.sequenceProvider.getNextSequence(NameMapper
                 .getSequenceDomainFromTablePojo(EhWarehouseOrders.class));
         order.setId(warehouseOrderId);
@@ -569,6 +568,8 @@ public class WarehouseServiceImpl implements WarehouseService {
         order.setOwnerType(cmd.getOwnerType());
         order.setOwnerId(cmd.getOwnerId());
         order.setNamespaceId(cmd.getNamespaceId());
+        //增加communityId
+        order.setCommunityId(cmd.getCommunityId());
         order.setIdentity(SupplierHelper.getIdentity());
         order.setExecutorId(UserContext.currentUserId());
         order.setExecutorName(UserContext.current().getUser().getNickName());
@@ -1671,7 +1672,7 @@ public class WarehouseServiceImpl implements WarehouseService {
             Integer pageSize = cmd.getPageSize();
             if (pageAnchor == null) pageAnchor = 0l;
             if (pageSize == null) pageSize = 20;
-            List<WarehouseStockOrderDTO> dtos = warehouseProvider.listWarehouseStockOrders(cmd.getExecutor(), cmd.getNamespaceId(), cmd.getOwnerType(), cmd.getOwnerId(), cmd.getServiceType(), pageAnchor, pageSize + 1);
+            List<WarehouseStockOrderDTO> dtos = warehouseProvider.listWarehouseStockOrders(cmd.getExecutor(), cmd.getNamespaceId(), cmd.getOwnerType(), cmd.getOwnerId(), cmd.getServiceType(), pageAnchor, pageSize + 1,cmd.getCommunityId() );
             if (dtos.size() > pageSize) {
                 dtos.remove(dtos.size() - 1);
             response.setNextPageAnchor(pageAnchor + pageSize);

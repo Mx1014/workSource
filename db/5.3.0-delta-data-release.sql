@@ -1493,4 +1493,4 @@ update eh_service_module_apps set module_id=41700 where module_id = 40150;
 update eh_reflection_service_module_apps set module_id=41700 where module_id = 40150;
 
 -- add by yanjun 201803151646 能耗管理改配置
-update eh_service_modules set action_type = 44, instance_config = '{"realm":"energyManagement","entryUrl":"https://core.zuolin.com/nar/energyManagement/build/index.html#/?_k=ckcscj"}' where id = 49100;
+update eh_service_modules set action_type = 44, instance_config = '{"realm":"energyManagement","entryUrl":"https://core.zuolin.com/nar/energyManagement/build/index.html?hideNavigationBar=1#/address_choose#sign_suffix"}' where id = 49100;

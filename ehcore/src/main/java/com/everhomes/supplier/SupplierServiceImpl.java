@@ -38,7 +38,7 @@ public class SupplierServiceImpl implements SupplierService{
     @Override
     public void createOrUpdateOneSupplier(CreateOrUpdateOneSupplierCommand cmd) {
         checkAssetPriviledgeForPropertyOrg(cmd.getCommunityId(),PrivilegeConstants.SUPPLIER_OPERATION);
-        WarehouseSupplier supplier = ConvertHelper.convert(cmd, WarehouseSupplier.class);
+        WarehouseSupplier supplier = null;
         boolean create = true;
         if(cmd.getId() == null){
             supplier = new WarehouseSupplier();
@@ -51,6 +51,8 @@ public class SupplierServiceImpl implements SupplierService{
             supplier.setNamespaceId(cmd.getNamespaceId());
             supplier.setOwnerId(cmd.getOwnerId());
             supplier.setOwnerType(cmd.getOwnerType());
+            //增加communityId
+            supplier.setCommunityId(cmd.getCommunityId());
             supplier.setIdentity(supplierProvider.getNewIdentity());
         }else{
             create = false;

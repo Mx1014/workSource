@@ -1053,7 +1053,7 @@ public class PunchServiceImpl implements PunchService {
 			companyId, dateSF.get().format(punchDate), ClockCode.SUCESS.getCode());
 		if(null != punchLogs){
 			for (PunchLog log : punchLogs){
-				if (log.getPunchTime() == null ) {
+				if (log.getPunchTime() == null || log.getPunchStatus().equals(PunchStatus.UNPUNCH.getCode())) {
 					continue;
 				}
 				pdl.getPunchLogs().add(ConvertHelper.convert(log,PunchLogDTO.class ));
