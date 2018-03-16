@@ -1795,7 +1795,7 @@ public class PunchServiceImpl implements PunchService {
 		if (null == pr  )
 			throw RuntimeErrorException.errorWith(PunchServiceErrorCode.SCOPE,
  					PunchServiceErrorCode.ERROR_ENTERPRISE_DIDNOT_SETTING,
- 				"公司没有设置打卡规则");
+ 				"公司没有设置打卡规则 userId =["+userId+"] orgId=["+cmd.getEnterpriseId()+"]");
 		//是否有wifi打卡,如果是判断wifi是否符合
 
 		List<PunchGeopoint> punchGeopoints = punchProvider.listPunchGeopointsByOwner(PunchOwnerType.ORGANIZATION.getCode(),pr.getPunchOrganizationId());
