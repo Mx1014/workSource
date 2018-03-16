@@ -1,7 +1,7 @@
 -- 0、执行search文件夹下的pmtask.sh脚本
 -- 1、覆盖eh_web_menus、eh_service_modules和eh_domains，从88覆盖到新的数据库表
 -- 2、更新eh_domains中namespace_id等于0的数据的domain的值为服务器实际的ip
--- offline  by jiarui  {home.url}换成域名 这里需要换成部署环境的域名信息 如：core.zuolin.com
+-- offline  by jiarui  {home.url}换成域名 这里需要换成部署环境的域名信息 如：core.zuolin.com  下面两句insert语句一起执行
 /*SET  @id = (SELECT  MAX(id) FROM eh_version_realm);
 INSERT INTO `eh_version_realm` VALUES (@id:=@id+1, 'equipmentInspection', NULL, NOW(), '0');
 

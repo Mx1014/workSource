@@ -38,7 +38,7 @@ SET standard_id = (SELECT  standard_id FROM eh_equipment_inspection_tasks WHERE 
 INSERT  INTO  `eh_var_fields` VALUES (11999, 'equipment_inspection', 'geohash', '经纬度', 'Long', 10000, CONCAT('/',10000,'/'), 1, NULL, 2, 1, NOW(),NULL ,NULL,'{\"fieldParamType\": \"map\", \"length\": 32}');
 -- 增加经纬度动态表单  jiarui  20180122
 
--- offline  by jiarui  {home.url}换成域名
+-- offline  by jiarui  {home.url}换成域名 insert两个一起执行
 SET  @id = (SELECT  MAX(id) FROM eh_version_realm);
 INSERT INTO `eh_version_realm` VALUES (@id:=@id+1, 'equipmentInspection', NULL, NOW(), '0');
 
