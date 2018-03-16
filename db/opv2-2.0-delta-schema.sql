@@ -126,9 +126,9 @@ ALTER TABLE `eh_equipment_inspection_standards`
 
 -- 任务操作记录表增加设备id表   by jiarui
 ALTER TABLE `eh_equipment_inspection_task_logs`
-  ADD COLUMN `equipment_id`  BIGINT(20) NULL DEFAULT 0 ;
+  ADD COLUMN `equipment_id`  BIGINT(20) NOT NULL DEFAULT 0 ;
 ALTER TABLE `eh_equipment_inspection_task_logs`
-  ADD COLUMN `standard_id`  bigint(20) NULL DEFAULT 0 ;
+  ADD COLUMN `standard_id`  bigint(20) NOT NULL DEFAULT 0 ;
 ALTER TABLE `eh_equipment_inspection_task_logs`
   ADD COLUMN `maintance_type`  VARCHAR(255) NULL DEFAULT '';
 ALTER TABLE `eh_equipment_inspection_task_logs`
@@ -1719,3 +1719,4 @@ ALTER TABLE `eh_warehouse_purchase_items` ADD COLUMN `warehouse_id` BIGINT COMME
 -- 请示和供应商增加fileName字段 by wentian 2018/03/09
 ALTER TABLE  `eh_requisitions` ADD COLUMN  `file_name` VARCHAR(256) COMMENT '文件名称';
 ALTER TABLE  `eh_warehouse_suppliers` ADD COLUMN  `file_name` VARCHAR(256) COMMENT '文件名称';
+ALTER TABLE  `eh_warehouse_suppliers` ADD COLUMN  `community_id` BIGINT COMMENT '供应商所在园区的id';

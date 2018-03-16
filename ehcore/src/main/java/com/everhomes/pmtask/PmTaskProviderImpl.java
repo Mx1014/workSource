@@ -196,7 +196,7 @@ public class PmTaskProviderImpl implements PmTaskProvider{
 			Long pageAnchor, Integer pageSize){
         DSLContext context = dbProvider.getDslContext(AccessSpec.readOnlyWith(EhPmTasks.class));
         SelectQuery<EhPmTasksRecord> query = context.selectQuery(Tables.EH_PM_TASKS);
-
+		query.addConditions(Tables.EH_PM_TASKS.FLOW_CASE_ID.gt(0l));
         if(StringUtils.isNotBlank(ownerType))
         	query.addConditions(Tables.EH_PM_TASKS.OWNER_TYPE.eq(ownerType));
         if(null != ownerId)

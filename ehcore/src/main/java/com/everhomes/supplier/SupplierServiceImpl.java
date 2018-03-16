@@ -11,6 +11,7 @@ import com.everhomes.sequence.SequenceProvider;
 import com.everhomes.server.schema.tables.EhWarehouseSuppliers;
 import com.everhomes.user.UserContext;
 import com.everhomes.user.UserPrivilegeMgr;
+import com.everhomes.util.ConvertHelper;
 import com.everhomes.util.DateHelper;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
@@ -37,7 +38,7 @@ public class SupplierServiceImpl implements SupplierService{
     @Override
     public void createOrUpdateOneSupplier(CreateOrUpdateOneSupplierCommand cmd) {
         checkAssetPriviledgeForPropertyOrg(cmd.getCommunityId(),PrivilegeConstants.SUPPLIER_OPERATION);
-        WarehouseSupplier supplier = null;
+        WarehouseSupplier supplier = ConvertHelper.convert(cmd, WarehouseSupplier.class);
         boolean create = true;
         if(cmd.getId() == null){
             supplier = new WarehouseSupplier();
@@ -95,7 +96,7 @@ public class SupplierServiceImpl implements SupplierService{
         Integer pageSize = cmd.getPageSize();
         if(pageAnchor == null) pageAnchor = 0l;
         if(pageSize == null) pageSize = 20;
-        TreeMap<Long, ListSuppliersDTO> data = supplierProvider.findSuppliers(cmd.getOwnerType(),cmd.getOwnerId(),cmd.getNamespaceId(),cmd.getContactName(),cmd.getSupplierName(),pageAnchor,pageSize);
+        TreeMap<Long, ListSuppliersDTO> data = supplierProvider.findSuppliers(cmd.getOwnerType(),cmd.getOwnerId(),cmd.getNamespaceId(),cmd.getContactName(),cmd.getSupplierName(),pageAnchor,pageSize,cmd.getCommunityId());
         if(data.size() >= pageSize){
             data.remove(data.lastKey());
             pageAnchor = data.lastKey();
@@ -146,7 +147,7 @@ public class SupplierServiceImpl implements SupplierService{
         Integer pageSize = cmd.getPageSize();
         if(pageAnchor == null) pageAnchor = 0l;
         if(pageSize == null) pageSize = 20;
-        TreeMap<Long, ListSuppliersDTO> data = supplierProvider.findSuppliers(cmd.getOwnerType(),cmd.getOwnerId(),cmd.getNamespaceId(),cmd.getContactName(),cmd.getSupplierName(),pageAnchor,pageSize);
+        TreeMap<Long, ListSuppliersDTO> data = supplierProvider.findSuppliers(cmd.getOwnerType(),cmd.getOwnerId(),cmd.getNamespaceId(),cmd.getContactName(),cmd.getSupplierName(),pageAnchor,pageSize,cmd.getCommunityId());
         if(data.size() >= pageSize){
             data.remove(data.lastKey());
             pageAnchor = data.lastKey();
