@@ -5392,8 +5392,7 @@ public class UserServiceImpl implements UserService {
 		CheckContactAdminResponse response = new CheckContactAdminResponse();
 		SystemUserPrivilegeMgr resolver = PlatformContext.getComponent("SystemUser");
 
-		if(resolver.checkSuperAdmin(UserContext.current().getUser().getId(), cmd.getOrganizationId())
-				|| resolver.checkOrganizationAdmin(UserContext.current().getUser().getId(), cmd.getOrganizationId()))
+		if(resolver.checkSuperAdmin(UserContext.current().getUser().getId(), cmd.getOrganizationId()))
 			response.setIsAdmin(ContactAdminFlag.YES.getCode());
 		else
 			response.setIsAdmin(ContactAdminFlag.NO.getCode());

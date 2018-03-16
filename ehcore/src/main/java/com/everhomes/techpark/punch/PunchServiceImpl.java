@@ -6925,8 +6925,7 @@ public class PunchServiceImpl implements PunchService {
 		CheckPunchAdminResponse response = new CheckPunchAdminResponse();
 		response.setIsAdminFlag(NormalFlag.NO.getCode());
 		try{
-			if(resolver.checkSuperAdmin(UserContext.current().getUser().getId(), cmd.getOrganizationId())
-					|| resolver.checkOrganizationAdmin(UserContext.current().getUser().getId(), cmd.getOrganizationId()))
+			if(resolver.checkSuperAdmin(UserContext.current().getUser().getId(), cmd.getOrganizationId()))
 				response.setIsAdminFlag(NormalFlag.YES.getCode());
 		}
 		catch(Exception e){
