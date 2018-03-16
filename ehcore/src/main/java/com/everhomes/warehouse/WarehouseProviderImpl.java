@@ -579,7 +579,7 @@ public class WarehouseProviderImpl implements WarehouseProvider {
     }
 
     @Override
-    public List<WarehouseStockOrderDTO> listWarehouseStockOrders(String executor, Integer namespaceId, String ownerType, Long ownerId, Byte serviceType, Long pageAnchor, Integer pageSize) {
+    public List<WarehouseStockOrderDTO> listWarehouseStockOrders(String executor, Integer namespaceId, String ownerType, Long ownerId, Byte serviceType, Long pageAnchor, Integer pageSize,Long communityId) {
         List<WarehouseStockOrderDTO> list = new ArrayList<>();
         DSLContext context = dbProvider.getDslContext(AccessSpec.readOnly());
         SelectQuery<Record> query = context.selectQuery();
@@ -589,6 +589,9 @@ public class WarehouseProviderImpl implements WarehouseProvider {
         }
         if(serviceType!=null){
             query.addConditions(Tables.EH_WAREHOUSE_ORDERS.SERVICE_TYPE.eq(serviceType));
+        }
+        if(communityId!=null){
+            query.addConditions(Tables.EH_WAREHOUSE_ORDERS.COMMUNITY_ID.eq(communityId));
         }
         query.addConditions(Tables.EH_WAREHOUSE_ORDERS.OWNER_TYPE.eq(ownerType));
         query.addConditions(Tables.EH_WAREHOUSE_ORDERS.OWNER_ID.eq(ownerId));

@@ -74,7 +74,7 @@ public interface WarehouseProvider {
 
     String findWarehouseMenuName();
 
-    List<WarehouseStockOrderDTO> listWarehouseStockOrders(String executor, Integer namespaceId, String ownerType, Long ownerId, Byte serviceType, Long pageAnchor, Integer pageSize);
+    List<WarehouseStockOrderDTO> listWarehouseStockOrders(String executor, Integer namespaceId, String ownerType, Long ownerId, Byte serviceType, Long pageAnchor, Integer pageSize, Long communityId);
 
     WarehouseOrder findWarehouseOrderById(Long id);
 
