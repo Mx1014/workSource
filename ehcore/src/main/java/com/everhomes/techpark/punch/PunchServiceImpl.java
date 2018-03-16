@@ -9203,7 +9203,7 @@ public class PunchServiceImpl implements PunchService {
         PunchVacationBalance balance = punchVacationBalanceProvider.findPunchVacationBalanceByDetailId(cmd.getDetailId());
         OrganizationMemberDetails detail = organizationProvider.findOrganizationMemberDetailsByDetailId(cmd.getDetailId());
         if (null == detail) {
-            return ;
+            return;
         }
         if (null == balance) {
             balance = new PunchVacationBalance();
@@ -9267,12 +9267,14 @@ public class PunchServiceImpl implements PunchService {
     public ListVacationBalanceLogsResponse listVacationBalanceLogs(
             ListVacationBalanceLogsCommand cmd) {
         ListVacationBalanceLogsResponse response = new ListVacationBalanceLogsResponse();
-        if (cmd.getPageAnchor() == null)
-            cmd.setPageAnchor(0L);
+
         int pageSize = getPageSize(configurationProvider, cmd.getPageSize());
 
-        CrossShardListingLocator locator = new CrossShardListingLocator();
-        locator.setAnchor(cmd.getPageAnchor());
+        CrossShardListingLocator locator = null;
+        if (cmd.getPageAnchor() == null) {
+            locator = new CrossShardListingLocator();
+            locator.setAnchor(cmd.getPageAnchor());
+        }
         List<PunchVacationBalanceLog> results = punchVacationBalanceLogProvider.listPunchVacationBalanceLog(cmd.getDetailId(),
                 locator, pageSize + 1);
         if (null == results)
