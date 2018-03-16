@@ -9270,11 +9270,9 @@ public class PunchServiceImpl implements PunchService {
 
         int pageSize = getPageSize(configurationProvider, cmd.getPageSize());
 
-        CrossShardListingLocator locator = null;
-        if (cmd.getPageAnchor() == null) {
-            locator = new CrossShardListingLocator();
-            locator.setAnchor(cmd.getPageAnchor());
-        }
+        CrossShardListingLocator locator = new CrossShardListingLocator();
+        locator.setAnchor(cmd.getPageAnchor());
+
         List<PunchVacationBalanceLog> results = punchVacationBalanceLogProvider.listPunchVacationBalanceLog(cmd.getDetailId(),
                 locator, pageSize + 1);
         if (null == results)
