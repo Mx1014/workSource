@@ -13,18 +13,18 @@ import java.util.List;
  */
 
 public class OfflineTaskReportCommand {
-    @ItemType(QualityInspectionTaskDTO.class)
-    private List<QualityInspectionTaskDTO> tasks;
+    @ItemType(OfflineQualityTaskCommand.class)
+    private List<OfflineQualityTaskCommand> tasks;
 
     @ItemType(OfflineReportDetailDTO.class)
     private List<OfflineReportDetailDTO> offlineReportDetail;
 
 
-    public List<QualityInspectionTaskDTO> getTasks() {
+    public List<OfflineQualityTaskCommand> getTasks() {
         return tasks;
     }
 
-    public void setTasks(List<QualityInspectionTaskDTO> tasks) {
+    public void setTasks(List<OfflineQualityTaskCommand> tasks) {
         this.tasks = tasks;
     }
 

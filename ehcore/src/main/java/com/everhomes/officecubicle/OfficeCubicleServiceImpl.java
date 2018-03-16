@@ -472,12 +472,12 @@ public class OfficeCubicleServiceImpl implements OfficeCubicleService {
 		Row row = sheet.createRow(sheet.getLastRowNum());
 		int i = -1;
 		row.createCell(++i).setCellValue("序号");
-		row.createCell(++i).setCellValue("项目名称");
+		row.createCell(++i).setCellValue("空间名称");
 		row.createCell(++i).setCellValue("所在城市");
 		row.createCell(++i).setCellValue("订单时间");
 		row.createCell(++i).setCellValue("预定类别");
 		row.createCell(++i).setCellValue("工位类别");
-		row.createCell(++i).setCellValue("工位数/面积");
+//		row.createCell(++i).setCellValue("工位数/面积");
 		row.createCell(++i).setCellValue("预订人");
 		row.createCell(++i).setCellValue("联系电话");
 		row.createCell(++i).setCellValue("公司名称");
@@ -501,8 +501,8 @@ public class OfficeCubicleServiceImpl implements OfficeCubicleService {
 		OfficeRentType renttype = OfficeRentType.fromCode(dto.getRentType());
 		row.createCell(++i).setCellValue(renttype==null?"":renttype.getMsg());
 		// 工位数/面积
-		OfficeSpaceType spaceType = OfficeSpaceType.fromCode(dto.getSpaceType()==null?(byte)1:(byte)2);
-		row.createCell(++i).setCellValue(dto.getSpaceSize() + spaceType==null?"":spaceType.getMsg());
+//		OfficeSpaceType spaceType = OfficeSpaceType.fromCode(dto.getSpaceType()==null?(byte)1:(byte)2);
+//		row.createCell(++i).setCellValue(dto.getSpaceSize() + spaceType==null?"":spaceType.getMsg());
 		// 预订人
 		row.createCell(++i).setCellValue(dto.getReserverName());
 

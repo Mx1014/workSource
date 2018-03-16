@@ -1923,8 +1923,9 @@ public class EnterpriseContactServiceImpl implements EnterpriseContactService {
 		}
 		
 		response.setNextPageAnchor(locator.getAnchor());
-		
-		response.setMembers(this.convertDTO(organizationMembers, org));
+
+		Organization enterPrise = this.checkOrganization(cmd.getEnterpriseId());
+		response.setMembers(this.convertDTO(organizationMembers, enterPrise));
 		
 		return response;
 	}

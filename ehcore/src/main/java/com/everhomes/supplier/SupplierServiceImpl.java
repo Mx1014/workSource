@@ -147,7 +147,7 @@ public class SupplierServiceImpl implements SupplierService{
         Integer pageSize = cmd.getPageSize();
         if(pageAnchor == null) pageAnchor = 0l;
         if(pageSize == null) pageSize = 20;
-        TreeMap<Long, ListSuppliersDTO> data = supplierProvider.findSuppliers(cmd.getOwnerType(),cmd.getOwnerId(),cmd.getNamespaceId(),cmd.getContactName(),cmd.getSupplierName(),pageAnchor,pageSize);
+        TreeMap<Long, ListSuppliersDTO> data = supplierProvider.findSuppliers(cmd.getOwnerType(),cmd.getOwnerId(),cmd.getNamespaceId(),cmd.getContactName(),cmd.getSupplierName(),pageAnchor,pageSize,cmd.getCommunityId());
         if(data.size() >= pageSize){
             data.remove(data.lastKey());
             pageAnchor = data.lastKey();
