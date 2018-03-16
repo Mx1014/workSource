@@ -92,6 +92,7 @@ public class RentalBillDTO {
 	private Long unpayCancelTime;
 	private String doorAuthTime;
 	private String packageName;
+	private Byte payMode;
 	@ItemType(SiteItemDTO.class)
 	private List<SiteItemDTO> siteItems;
 
@@ -467,4 +468,11 @@ public class RentalBillDTO {
 		this.confirmationPrompt = confirmationPrompt;
 	}
 
+	public Byte getPayMode() {
+		return payMode;
+	}
+
+	public void setPayMode(Byte payMode) {
+		this.payMode = payMode;
+	}
 }
