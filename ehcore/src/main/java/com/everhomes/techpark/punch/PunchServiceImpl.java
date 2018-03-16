@@ -9226,8 +9226,8 @@ public class PunchServiceImpl implements PunchService {
         }
         balance.setAnnualLeaveBalance(newALB);
 
-        if (cmd.getAnnualLeaveBalanceCorrection() == null) {
-            cmd.setAnnualLeaveBalanceCorrection(0.0);
+        if (cmd.getOvertimeCompensationBalanceCorrection() == null) {
+            cmd.setOvertimeCompensationBalanceCorrection(0.0);
         }
         Double newOCB = cmd.getOvertimeCompensationBalanceCorrection() + balance.getOvertimeCompensationBalance();
 
