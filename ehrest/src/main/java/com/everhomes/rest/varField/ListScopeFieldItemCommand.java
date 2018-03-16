@@ -7,7 +7,7 @@ import com.everhomes.util.StringHelper;
  *     <li>namespaceId: 域空间id</li>
  *     <li>communityId: 项目id</li>
  *     <li>groupId: 在系统里的所属组id</li>
- *     <li>fieldDisplayName: 字段名</li>
+ *     <li>fieldName: 字段逻辑名</li>
  * </ul>
  * Created by ying.xiong on 2018/3/16.
  */
@@ -19,7 +19,7 @@ public class ListScopeFieldItemCommand {
 
     private Long groupId;
 
-    private String fieldDisplayName;
+    private String fieldName;
 
     public Long getCommunityId() {
         return communityId;
@@ -37,12 +37,12 @@ public class ListScopeFieldItemCommand {
         this.groupId = groupId;
     }
 
-    public String getFieldDisplayName() {
-        return fieldDisplayName;
+    public String getFieldName() {
+        return fieldName;
     }
 
-    public void setFieldDisplayName(String fieldDisplayName) {
-        this.fieldDisplayName = fieldDisplayName;
+    public void setFieldName(String fieldName) {
+        this.fieldName = fieldName;
     }
 
     public Integer getNamespaceId() {

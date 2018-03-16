@@ -47,5 +47,6 @@ public interface FieldProvider {
 
     void createFieldItem(FieldItem item);
     ScopeField findScopeField(Integer namespaceId, Long communityId, Long groupId, String fieldDisplayName);
+    Field findField(Long groupId, String fieldName);
 
 }

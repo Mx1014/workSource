@@ -35,6 +35,7 @@ import com.everhomes.server.schema.tables.records.EhVarFieldGroupScopesRecord;
 
 import com.everhomes.server.schema.tables.records.EhVarFieldItemScopesRecord;
 import com.everhomes.server.schema.tables.records.EhVarFieldScopesRecord;
+import com.everhomes.server.schema.tables.records.EhVarFieldsRecord;
 import com.everhomes.util.ConvertHelper;
 import com.everhomes.util.DateHelper;
 import com.everhomes.util.StringHelper;
@@ -338,6 +339,27 @@ public class FieldProviderImpl implements FieldProvider {
         }
         query.fetch().map((record)-> {
             fields.add(ConvertHelper.convert(record, ScopeField.class));
+            return null;
+        });
+
+        if(fields == null || fields.size() == 0) {
+            return null;
+        }
+        return fields.get(0);
+    }
+
+    @Override
+    public Field findField(Long groupId, String fieldName) {
+        DSLContext context = this.dbProvider.getDslContext(AccessSpec.readOnly());
+
+        List<Field> fields = new ArrayList<>();
+        SelectQuery<EhVarFieldsRecord> query = context.selectQuery(Tables.EH_VAR_FIELDS);
+        query.addConditions(Tables.EH_VAR_FIELDS.NAME.eq(fieldName));
+        query.addConditions(Tables.EH_VAR_FIELDS.GROUP_ID.eq(groupId));
+        query.addConditions(Tables.EH_VAR_FIELDS.STATUS.eq(VarFieldStatus.ACTIVE.getCode()));
+
+        query.fetch().map((record)-> {
+            fields.add(ConvertHelper.convert(record, Field.class));
             return null;
         });
 

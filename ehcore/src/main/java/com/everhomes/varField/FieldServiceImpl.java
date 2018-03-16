@@ -473,12 +473,12 @@ public class FieldServiceImpl implements FieldService {
 
     @Override
     public List<FieldItemDTO> listScopeFieldItems(ListScopeFieldItemCommand cmd) {
-        ScopeField field = fieldProvider.findScopeField(cmd.getNamespaceId(), cmd.getCommunityId(), cmd.getGroupId(), cmd.getFieldDisplayName());
+        Field field = fieldProvider.findField(cmd.getGroupId(), cmd.getFieldName());
         if(field != null) {
             ListFieldItemCommand command = new ListFieldItemCommand();
             command.setCommunityId(cmd.getCommunityId());
             command.setNamespaceId(cmd.getNamespaceId());
-            command.setFieldId(field.getFieldId());
+            command.setFieldId(field.getId());
             return listFieldItems(command);
         }
         return null;
