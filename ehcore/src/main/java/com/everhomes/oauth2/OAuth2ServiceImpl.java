@@ -45,6 +45,9 @@ public class OAuth2ServiceImpl implements OAuth2Service {
         if(cmd.getclient_id() != null && cmd.getclient_id().equals(AppConstants.APPKEY_BIZ)) {
             namespaceId = 2;
         }
+        if(cmd.getclient_id() != null && cmd.getclient_id().equals("f32e706e-28f6-11e8-a883-b083fe4e159f")) {
+            namespaceId = 999972;
+        }
         User user = userService.logonDryrun(namespaceId, identifier, password);
         if(user == null)
             return null;
