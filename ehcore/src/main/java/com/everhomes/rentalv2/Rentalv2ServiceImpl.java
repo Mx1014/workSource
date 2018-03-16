@@ -1869,16 +1869,6 @@ public class Rentalv2ServiceImpl implements Rentalv2Service {
 			}
 		}
 
-		if(priceRule.getDiscountType() != null) {
-			if(priceRule.getDiscountType().equals(DiscountType.FULL_MOENY_CUT_MONEY.getCode())){
-				//满减优惠
-				//满了多少次,都只减一个
-				if(siteTotalMoneys[0].compareTo(priceRule.getFullPrice()) >= 0) {
-					siteTotalMoneys[0] = siteTotalMoneys[0].subtract(priceRule.getCutPrice());
-				}
-			}
-		}
-
 		//优惠
 		if(priceRule.getDiscountType()!=null) {
 			if(priceRule.getDiscountType().equals(DiscountType.FULL_MOENY_CUT_MONEY.getCode())){
