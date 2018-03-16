@@ -3557,7 +3557,7 @@ private void checkUserPrivilege(Long orgId, Long privilegeId, Long communityId) 
 			if (cmd.getTaskStatus().size() > 1) {
 				populateTaskStatusCount(cmd, null, null, response, targetTypes, targetIds);
 			}else {
-
+				populateReviewTaskStatusCount(cmd, null, null, response, targetTypes, targetIds);
 			}
 		}
 		if(!isAdmin) {
