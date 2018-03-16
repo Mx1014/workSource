@@ -34,6 +34,8 @@ import com.everhomes.user.UserPrivilegeMgr;
 import com.everhomes.util.ConvertHelper;
 import com.everhomes.util.DateHelper;
 import com.everhomes.util.RuntimeErrorException;
+import com.everhomes.varField.FieldProvider;
+import com.everhomes.varField.ScopeFieldItem;
 import org.apache.commons.lang.math.RandomUtils;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -82,6 +84,9 @@ public class PaymentApplicationServiceImpl implements PaymentApplicationService 
 
     @Autowired
     private ConfigurationProvider configurationProvider;
+
+    @Autowired
+    private FieldProvider fieldProvider;
 
     @Override
     public String generatePaymentApplicationNumber() {
@@ -142,6 +147,13 @@ public class PaymentApplicationServiceImpl implements PaymentApplicationService 
             dto.setContractName(contract.getName());
             dto.setContractNumber(contract.getContractNumber());
             dto.setContractAmount(contract.getRent());
+            if(contract.getCategoryItemId() != null) {
+                ScopeFieldItem item = fieldProvider.findScopeFieldItemByFieldItemId(contract.getNamespaceId(), contract.getCommunityId(), Long.valueOf(contract.getCategoryItemId()));
+                if(item != null) {
+                    dto.setCategoryItemName(item.getItemDisplayName());
+                }
+            }
+
             if(CustomerType.SUPPLIER.equals(CustomerType.fromStatus(contract.getCustomerType()))) {
                 WarehouseSupplier supplier = supplierProvider.findSupplierById(contract.getCustomerId());
                 if(supplier != null) {
