@@ -97,6 +97,7 @@ import com.everhomes.rest.quality.ListUserHistoryTasksCommand;
 import com.everhomes.rest.quality.ListUserQualityInspectionTaskTemplatesCommand;
 import com.everhomes.rest.quality.OfflineDeleteTablesInfo;
 import com.everhomes.rest.quality.OfflineJobPositionDTO;
+import com.everhomes.rest.quality.OfflineQualityTaskCommand;
 import com.everhomes.rest.quality.OfflineReportDetailDTO;
 import com.everhomes.rest.quality.OfflineSampleQualityInspectionResponse;
 import com.everhomes.rest.quality.OfflineTaskCount;
@@ -3833,6 +3834,7 @@ Long nextPageAnchor = null;
 
 				ScoreGroupByTargetDTO scoreGroupDto = new ScoreGroupByTargetDTO();
 				scoreGroupDto.setTargetId(target);
+				scoreGroupDto.setTotalScore(0D);
 				Community community = communityProvider.findCommunityById(target);
 				if(community != null) {
 					scoreGroupDto.setTargetName(community.getName());
@@ -3896,6 +3898,8 @@ Long nextPageAnchor = null;
 			scoresByTarget.forEach((s) -> {
 				if (s.getBuildArea() == null)
 					s.setBuildArea(0D);
+				if (s.getTotalScore() == null)
+					s.setTotalScore(0D);
 			});
 			//sort  scoreByTarget
 			LOGGER.debug("scoresByTarget:{}", scoresByTarget);
@@ -4980,7 +4984,7 @@ Long nextPageAnchor = null;
 		return taskDetailMaps;
 	}
 
-	private OfflineEquipmentTaskReportLog syncTaskInfoToServer(QualityInspectionTaskDTO taskDTO, Map<Long, OfflineReportDetailDTO> taskDetailMaps) {
+	private OfflineEquipmentTaskReportLog syncTaskInfoToServer(OfflineQualityTaskCommand taskDTO, Map<Long, OfflineReportDetailDTO> taskDetailMaps) {
 		QualityInspectionTasks task = null;
 		try {
 			task = verifiedTaskById(taskDTO.getId());
@@ -5013,7 +5017,7 @@ Long nextPageAnchor = null;
 				}
 
 				if (taskDTO.getProcessExpireTime() != null) {
-					task.setProcessExpireTime(new Timestamp(taskDTO.getProcessExpireTime().getTime()));
+					task.setProcessExpireTime(new Timestamp(taskDTO.getProcessExpireTime()));
 					record.setProcessEndTime(task.getProcessExpireTime());
 				}
 				record.setProcessResult(QualityInspectionTaskResult.NONE.getCode());
@@ -5080,13 +5084,13 @@ Long nextPageAnchor = null;
         }
 	}
 
-	private void sendMessageToProcessor(QualityInspectionTasks task, QualityInspectionTaskDTO taskDTO, QualityInspectionTaskRecords record) {
+	private void sendMessageToProcessor(QualityInspectionTasks task, OfflineQualityTaskCommand taskDTO, QualityInspectionTaskRecords record) {
 		//ASSIGN_TASK_NOTIFY_OPERATOR
 		List<OrganizationMember> operators = organizationProvider.listOrganizationMembersByUId(UserContext.currentUserId());
 		Map<String, Object> map = new HashMap<>();
 		map.put("userName", operators.get(0).getContactName());
 		map.put("taskName", task.getTaskName());
-		map.put("deadline", timeToStr(new Timestamp(taskDTO.getProcessExpireTime().getTime())));
+		map.put("deadline", timeToStr(new Timestamp(taskDTO.getProcessExpireTime())));
 		String scope = QualityNotificationTemplateCode.SCOPE;
 		int code = QualityNotificationTemplateCode.ASSIGN_TASK_NOTIFY_OPERATOR;
 		String locale = "zh_CN";
@@ -5099,7 +5103,7 @@ Long nextPageAnchor = null;
 		msgMap.put("operator", operators.get(0).getContactName());
 		msgMap.put("target", targets.get(0).getContactName());
 		msgMap.put("taskName", task.getTaskName());
-		map.put("deadline", timeToStr(new Timestamp(taskDTO.getProcessExpireTime().getTime())));
+		map.put("deadline", timeToStr(new Timestamp(taskDTO.getProcessExpireTime())));
 		int msgCode = QualityNotificationTemplateCode.ASSIGN_TASK_MSG;
 		String msg = localeTemplateService.getLocaleTemplateString(scope, msgCode, locale, msgMap, "");
 		record.setProcessMessage(msg);
