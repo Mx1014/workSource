@@ -9240,7 +9240,7 @@ public class PunchServiceImpl implements PunchService {
         PunchVacationBalanceLog log = ConvertHelper.convert(balance, PunchVacationBalanceLog.class);
         log.setDescription(cmd.getDescription());
         log.setAnnualLeaveBalanceCorrection(cmd.getAnnualLeaveBalanceCorrection());
-        log.setOvertimeCompensationBalancCorrectione(cmd.getOvertimeCompensationBalanceCorrection());
+        log.setOvertimeCompensationBalanceCorrectione(cmd.getOvertimeCompensationBalanceCorrection());
         if (balance.getId() == null) {
             punchVacationBalanceProvider.createPunchVacationBalance(balance);
         } else {
