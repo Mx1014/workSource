@@ -3898,6 +3898,8 @@ Long nextPageAnchor = null;
 			scoresByTarget.forEach((s) -> {
 				if (s.getBuildArea() == null)
 					s.setBuildArea(0D);
+				if (s.getTotalScore() == null)
+					s.setTotalScore(0D);
 			});
 			//sort  scoreByTarget
 			LOGGER.debug("scoresByTarget:{}", scoresByTarget);
