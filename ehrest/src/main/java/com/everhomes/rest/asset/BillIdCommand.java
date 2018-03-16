@@ -9,6 +9,7 @@ import com.everhomes.util.StringHelper;
  * <li>ownerType:所属者类型</li>
  * <li>billId:账单id</li>
  * <li>targetType:客户类型，个人eh_user;企业：eh_organization</li>
+ * <li>organizationId:</li>
  *</ul>
  */
 public class BillIdCommand {
@@ -16,6 +17,15 @@ public class BillIdCommand {
     private Long ownerId;
     private String billId;
     private String targetType;
+    private Long organizationId;
+
+    public Long getOrganizationId() {
+        return organizationId;
+    }
+
+    public void setOrganizationId(Long organizationId) {
+        this.organizationId = organizationId;
+    }
 
     @Override
     public String toString() {

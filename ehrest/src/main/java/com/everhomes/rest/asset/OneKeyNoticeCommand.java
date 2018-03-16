@@ -26,6 +26,7 @@ import java.util.Date;
  * <li>status:账单属性，0:未出账单;1:已出账单</li>
  * <li>contractNum:合同编号</li>
  * <li>targetType:客户类型，个人eh_user;企业：eh_organization</li>
+ * <li>organizationId:公司id,权限用</li>
  *</ul>
  */
 public class OneKeyNoticeCommand {
@@ -48,6 +49,15 @@ public class OneKeyNoticeCommand {
     private Byte status;
     private String contractNum;
     private String targetType;
+    private Long organizationId;
+
+    public Long getOrganizationId() {
+        return organizationId;
+    }
+
+    public void setOrganizationId(Long organizationId) {
+        this.organizationId = organizationId;
+    }
 
     public Long getBillGroupId() {
         return billGroupId;
