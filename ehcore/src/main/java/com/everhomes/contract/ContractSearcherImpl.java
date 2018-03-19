@@ -125,6 +125,7 @@ public class ContractSearcherImpl extends AbstractElasticSearch implements Contr
             XContentBuilder builder = XContentFactory.jsonBuilder();
             builder.startObject();
 
+            builder.field("id", contract.getId());
             builder.field("communityId", contract.getCommunityId());
             builder.field("namespaceId", contract.getNamespaceId());
             builder.field("name", contract.getName());
@@ -248,6 +249,8 @@ public class ContractSearcherImpl extends AbstractElasticSearch implements Contr
             } else if(cmd.getSortType() == 1) {
                 builder.addSort(cmd.getSortField(), SortOrder.DESC);
             }
+        } else {
+            builder.addSort("id", SortOrder.DESC);
         }
         SearchResponse rsp = builder.execute().actionGet();
 
