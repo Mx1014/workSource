@@ -125,6 +125,22 @@ VALUES (@mp_id:=@mp_id+1, '20840', '0', 30087, '设备巡检 巡检计划审批'
 
 -- 新增权限  by jiarui 20180205
 
+-- 品质权限项顺序调整  by jiarui 20180319
+
+UPDATE `eh_service_modules` SET `default_order`='0' WHERE `id`=20650;
+
+UPDATE `eh_service_modules` SET `default_order`='1' WHERE `id`=20630;
+
+UPDATE `eh_service_modules` SET `default_order`='2' WHERE `id`=20610;
+UPDATE `eh_service_modules` SET `default_order`='3' WHERE `id`=20620;
+
+UPDATE `eh_service_modules` SET `default_order`='4' WHERE `id`=20660;
+UPDATE `eh_service_modules` SET `default_order`='5' WHERE `id`=20670;
+
+UPDATE `eh_service_module_privileges` SET  `module_id`=20630 WHERE `id`=125;
+
+-- 品质权限项顺序调整  by jiarui 20180319
+
 
 -- 品质核查操作日志 jiarui
 UPDATE  `eh_quality_inspection_logs`
