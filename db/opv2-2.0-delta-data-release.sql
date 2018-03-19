@@ -39,6 +39,7 @@ INSERT  INTO  `eh_var_fields` VALUES (11999, 'equipment_inspection', 'geohash', 
 -- 增加经纬度动态表单  jiarui  20180122
 
 -- offline  by jiarui  {home.url}换成域名
+-- 巡检离线
 SET  @id = (SELECT  MAX(id) FROM eh_version_realm);
 INSERT INTO `eh_version_realm` VALUES (@id:=@id+1, 'equipmentInspection', NULL, NOW(), '0');
 
@@ -50,18 +51,36 @@ SET action_data = '{\"realm\":\"equipmentInspection\",\"entryUrl\":\"http://{hom
 WHERE item_label LIKE '%巡检%';
 
 update eh_service_module_apps
-set instance_config = '{\"realm\":\"quality\",\"entryUrl\":\"http://{home.url}/nar/quality/index.html?hideNavigationBar=1#/select_community#sign_suffix\"}'
-where module_id = 20600;
-
-
-update eh_service_module_apps
 set instance_config = '{\"realm\":\"equipmentInspection\",\"entryUrl\":\"http://{home.url}/nar/equipmentInspection/dist/index.html?hideNavigationBar=1#sign_suffix\"}'
 where module_id = 20800;
--- offline  by jiarui
 
 UPDATE eh_launch_pad_items
 SET action_type = 44
 WHERE item_label LIKE '%巡检%';
+
+
+-- 品质核查离线  {home.url}换成域名
+
+SET  @id = (SELECT  MAX(id) FROM eh_version_realm);
+INSERT INTO `eh_version_realm` VALUES (@id:=@id+1, 'qualityInspection', NULL, NOW(), '0');
+
+SET  @vId = (SELECT  MAX(id) FROM eh_version_urls);
+INSERT INTO `eh_version_urls` VALUES (@vId:=@vId+1, @id, '1.0.0', 'http://{home.url}/nar/qualityInspect/offline/qualityInspect-1-0-0.zip', 'http://{home.url}/nar/qualityInspect/offline/qualityInspect-1-0-0.zip', '品质核查离线', '0', '品质核查', NOW(), NULL, '0');
+
+UPDATE eh_launch_pad_items
+SET action_data = '{\"realm\":\"qualityInspection\",\"entryUrl\":\"http://{home.url}/nar/qualityInspect/build/index.html?hideNavigationBar=1#/home#sign_suffix\"}'
+WHERE item_label LIKE '%巡检%';
+
+update eh_service_module_apps
+set instance_config = '{\"realm\":\"qualityInspection\",\"entryUrl\":\"http://{home.url}/nar/qualityInspect/build/index.html?hideNavigationBar=1#/home#sign_suffix\"}'
+where module_id = 20600;
+
+UPDATE eh_launch_pad_items
+SET action_type = 44
+WHERE item_label LIKE '%品质%';
+-- offline  by jiarui
+
+
 
 -- 新增权限  by jiarui 20180205
 
