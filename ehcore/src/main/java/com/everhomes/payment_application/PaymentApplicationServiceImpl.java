@@ -15,6 +15,7 @@ import com.everhomes.requisition.Requisition;
 import com.everhomes.requisition.RequisitionProvider;
 import com.everhomes.rest.acl.PrivilegeConstants;
 import com.everhomes.rest.common.ServiceModuleConstants;
+import com.everhomes.rest.contract.ContractErrorCode;
 import com.everhomes.rest.customer.CustomerType;
 import com.everhomes.rest.flow.CreateFlowCaseCommand;
 import com.everhomes.rest.flow.FlowConstants;
@@ -189,10 +190,10 @@ public class PaymentApplicationServiceImpl implements PaymentApplicationService 
         Flow flow = flowService.getEnabledFlow(application.getNamespaceId(), FlowConstants.PAYMENT_APPLICATION_MODULE,
                 FlowModuleType.NO_MODULE.getCode(), application.getCommunityId(), FlowOwnerType.PAYMENT_APPLICATION.getCode());
         if(null == flow) {
-            LOGGER.error("Enable request flow not found, moduleId={}", FlowConstants.CONTRACT_MODULE);
-            throw RuntimeErrorException.errorWith(PaymentApplicationErrorCode.SCOPE, PaymentApplicationErrorCode.ERROR_ENABLE_FLOW,
-                    localeStringService.getLocalizedString(String.valueOf(PaymentApplicationErrorCode.SCOPE),
-                            String.valueOf(PaymentApplicationErrorCode.ERROR_ENABLE_FLOW),
+            LOGGER.error("Enable request flow not found, moduleId={}", FlowConstants.PAYMENT_APPLICATION_MODULE);
+            throw RuntimeErrorException.errorWith(ContractErrorCode.SCOPE, ContractErrorCode.ERROR_ENABLE_FLOW,
+                    localeStringService.getLocalizedString(String.valueOf(ContractErrorCode.SCOPE),
+                            String.valueOf(ContractErrorCode.ERROR_ENABLE_FLOW),
                             UserContext.current().getUser().getLocale(),"Enable request flow not found."));
         }
         CreateFlowCaseCommand createFlowCaseCommand = new CreateFlowCaseCommand();
