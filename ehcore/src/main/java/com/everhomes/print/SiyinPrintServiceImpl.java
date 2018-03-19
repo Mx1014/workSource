@@ -645,7 +645,7 @@ public class SiyinPrintServiceImpl implements SiyinPrintService {
 		        if(namespaceId == null){
 		        	namespaceId = UserContext.getCurrentNamespaceId();
 				}
-		        mappingReaderToUser(cmd.getReaderName(),namespaceId);
+		        mappingReaderToUser(readerName,namespaceId);
 			}
 		}catch (Exception e) {
 			LOGGER.error("parse json error, qrcode = {}", dto.getExtra(),e);
