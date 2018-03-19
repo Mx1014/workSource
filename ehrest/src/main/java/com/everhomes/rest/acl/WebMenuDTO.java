@@ -48,7 +48,7 @@ public class WebMenuDTO {
 
 	private String path;
 
-	private Long sortNum;
+	private Integer sortNum;
 
 	public Long getId() {
 		return id;
@@ -170,11 +170,11 @@ public class WebMenuDTO {
 		this.path = path;
 	}
 
-	public Long getSortNum() {
+	public Integer getSortNum() {
 		return sortNum;
 	}
 
-	public void setSortNum(Long sortNum) {
+	public void setSortNum(Integer sortNum) {
 		this.sortNum = sortNum;
 	}
 }
