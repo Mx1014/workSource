@@ -8394,6 +8394,7 @@ public class OrganizationServiceImpl implements OrganizationService {
         groupTypes.add(OrganizationGroupType.DEPARTMENT.getCode());
         groupTypes.add(OrganizationGroupType.GROUP.getCode());
         groupTypes.add(OrganizationGroupType.ENTERPRISE.getCode());
+        groupTypes.add(OrganizationGroupType.DIRECT_UNDER_ENTERPRISE.getCode());
         List<OrganizationDTO> orgs = getOrganizationMemberGroups(groupTypes, userId, organizationId);
         for (OrganizationDTO dto : orgs) {
             addPathOrganizationId(dto.getPath(), orgnaizationIds);

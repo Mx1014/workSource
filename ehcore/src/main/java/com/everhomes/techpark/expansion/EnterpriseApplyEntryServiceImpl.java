@@ -4,7 +4,6 @@ import com.alibaba.fastjson.JSONObject;
 import com.everhomes.acl.RolePrivilegeService;
 import com.everhomes.address.Address;
 import com.everhomes.address.AddressProvider;
-import com.everhomes.bootstrap.PlatformContext;
 import com.everhomes.building.BuildingProvider;
 import com.everhomes.community.Building;
 import com.everhomes.community.Community;
@@ -13,7 +12,6 @@ import com.everhomes.community.ResourceCategoryAssignment;
 import com.everhomes.configuration.ConfigConstants;
 import com.everhomes.configuration.ConfigurationProvider;
 import com.everhomes.constants.ErrorCodes;
-
 import com.everhomes.contentserver.ContentServerService;
 import com.everhomes.db.DbProvider;
 import com.everhomes.enterprise.EnterpriseAttachment;
@@ -62,7 +60,6 @@ import com.everhomes.user.User;
 import com.everhomes.user.UserContext;
 import com.everhomes.user.UserIdentifier;
 import com.everhomes.user.UserProvider;
-import com.everhomes.user.admin.SystemUserPrivilegeMgr;
 import com.everhomes.util.*;
 import com.everhomes.yellowPage.YellowPage;
 import com.everhomes.yellowPage.YellowPageProvider;
@@ -1539,16 +1536,17 @@ public class EnterpriseApplyEntryServiceImpl implements EnterpriseApplyEntryServ
 			dto.setFlag(LeasePromotionFlag.ENABLED.getCode());
 		}
 
-		if (null != organizationId) {
-			//检查是不是招租发行公司
-			if (null != enterpriseLeaseIssuerProvider.fingLeaseIssuersByOrganizationId(cmd.getNamespaceId(), organizationId,
-					cmd.getCategoryId())) {
-				SystemUserPrivilegeMgr resolver = PlatformContext.getComponent("SystemUser");
-				if (resolver.checkOrganizationAdmin(user.getId(), organizationId)) {
-					dto.setFlag(LeasePromotionFlag.ENABLED.getCode());
-				}
-			}
-		}
+		// by lei.lv 去除了普通企业管理员
+//		if (null != organizationId) {
+//			//检查是不是招租发行公司
+//			if (null != enterpriseLeaseIssuerProvider.fingLeaseIssuersByOrganizationId(cmd.getNamespaceId(), organizationId,
+//					cmd.getCategoryId())) {
+//				SystemUserPrivilegeMgr resolver = PlatformContext.getComponent("SystemUser");
+//				if (resolver.checkOrganizationAdmin(user.getId(), organizationId)) {
+//					dto.setFlag(LeasePromotionFlag.ENABLED.getCode());
+//				}
+//			}
+//		}
 
         return dto;
     }
@@ -1590,26 +1588,26 @@ public class EnterpriseApplyEntryServiceImpl implements EnterpriseApplyEntryServ
 			});
 		}
 
-		if (null != organizationId)  {
-			if (null != enterpriseLeaseIssuerProvider.fingLeaseIssuersByOrganizationId(cmd.getNamespaceId(), organizationId,
-					cmd.getCategoryId())) {
-				SystemUserPrivilegeMgr resolver = PlatformContext.getComponent("SystemUser");
-				if (resolver.checkOrganizationAdmin(user.getId(), organizationId)) {
-					List<OrganizationAddress> organizationAddresses = organizationProvider.findOrganizationAddressByOrganizationId(organizationId);
-
-					organizationAddresses.stream().map(a -> {
-						Address address = addressProvider.findAddressById(a.getAddressId());
-						com.everhomes.building.Building building = buildingProvider.findBuildingByName(address.getNamespaceId(),
-								address.getCommunityId(), address.getBuildingName());
-						return ConvertHelper.convert(building, BuildingDTO.class);
-					}).collect(Collectors.toSet()).forEach(b -> {
-						if (null != b) {
-							buildingDTOs.add(b);
-						}
-					});
-				}
-			}
-		}
+//		if (null != organizationId)  {
+//			if (null != enterpriseLeaseIssuerProvider.fingLeaseIssuersByOrganizationId(cmd.getNamespaceId(), organizationId,
+//					cmd.getCategoryId())) {
+//				SystemUserPrivilegeMgr resolver = PlatformContext.getComponent("SystemUser");
+//				if (resolver.checkOrganizationAdmin(user.getId(), organizationId)) {
+//					List<OrganizationAddress> organizationAddresses = organizationProvider.findOrganizationAddressByOrganizationId(organizationId);
+//
+//					organizationAddresses.stream().map(a -> {
+//						Address address = addressProvider.findAddressById(a.getAddressId());
+//						com.everhomes.building.Building building = buildingProvider.findBuildingByName(address.getNamespaceId(),
+//								address.getCommunityId(), address.getBuildingName());
+//						return ConvertHelper.convert(building, BuildingDTO.class);
+//					}).collect(Collectors.toSet()).forEach(b -> {
+//						if (null != b) {
+//							buildingDTOs.add(b);
+//						}
+//					});
+//				}
+//			}
+//		}
 
 		response.setBuildings(buildingDTOs);
         return response;
@@ -1642,24 +1640,25 @@ public class EnterpriseApplyEntryServiceImpl implements EnterpriseApplyEntryServ
 			}).collect(Collectors.toList()));
 		}
 
-		if (null != organizationId)  {
-			if (null != enterpriseLeaseIssuerProvider.fingLeaseIssuersByOrganizationId(cmd.getNamespaceId(), organizationId,
-					cmd.getCategoryId())) {
-				SystemUserPrivilegeMgr resolver = PlatformContext.getComponent("SystemUser");
-				if (resolver.checkOrganizationAdmin(user.getId(), organizationId)) {
-					List<OrganizationAddress> organizationAddresses = organizationProvider.findOrganizationAddressByOrganizationId(organizationId);
-
-					com.everhomes.building.Building building = buildingProvider.findBuildingById(cmd.getBuildingId());
-
-					dtos.addAll(organizationAddresses.stream().filter(a -> {
-						return a.getBuildingName().equals(building.getName());
-					}).map(a -> {
-						Address address = addressProvider.findAddressById(a.getAddressId());
-						return ConvertHelper.convert(address, AddressDTO.class);
-					}).collect(Collectors.toSet()));
-				}
-			}
-		}
+		// by lei.lv 去除了普通企业管理员
+//		if (null != organizationId)  {
+//			if (null != enterpriseLeaseIssuerProvider.fingLeaseIssuersByOrganizationId(cmd.getNamespaceId(), organizationId,
+//					cmd.getCategoryId())) {
+//				SystemUserPrivilegeMgr resolver = PlatformContext.getComponent("SystemUser");
+//				if (resolver.checkOrganizationAdmin(user.getId(), organizationId)) {
+//					List<OrganizationAddress> organizationAddresses = organizationProvider.findOrganizationAddressByOrganizationId(organizationId);
+//
+//					com.everhomes.building.Building building = buildingProvider.findBuildingById(cmd.getBuildingId());
+//
+//					dtos.addAll(organizationAddresses.stream().filter(a -> {
+//						return a.getBuildingName().equals(building.getName());
+//					}).map(a -> {
+//						Address address = addressProvider.findAddressById(a.getAddressId());
+//						return ConvertHelper.convert(address, AddressDTO.class);
+//					}).collect(Collectors.toSet()));
+//				}
+//			}
+//		}
 
 		return dtos;
 	}

@@ -1,23 +1,20 @@
 // @formatter:off
 package com.everhomes.acl;
 
-import java.util.List;
-
-import javax.servlet.http.HttpServletResponse;
-
 import com.everhomes.module.ServiceModulePrivilegeType;
 import com.everhomes.rest.acl.*;
 import com.everhomes.rest.acl.admin.*;
 import com.everhomes.rest.address.CommunityDTO;
 import com.everhomes.rest.community.CommunityFetchType;
 import com.everhomes.rest.module.ListServiceModuleAppsAdministratorResponse;
-import com.everhomes.rest.organization.OrganizationContactDTO;
-
-import org.springframework.web.multipart.MultipartFile;
-
 import com.everhomes.rest.organization.ListOrganizationAdministratorCommand;
 import com.everhomes.rest.organization.ListOrganizationMemberCommandResponse;
+import com.everhomes.rest.organization.OrganizationContactDTO;
 import com.everhomes.rest.user.admin.ImportDataResponse;
+import org.springframework.web.multipart.MultipartFile;
+
+import javax.servlet.http.HttpServletResponse;
+import java.util.List;
 
 public interface RolePrivilegeService {
 	
@@ -161,11 +158,12 @@ public interface RolePrivilegeService {
      */
 	OrganizationContactDTO createOrganizationAdmin(CreateOrganizationAdminCommand cmd);
 
-	/**
-	 * 创建业务模块管理员
-	 * @param cmd
-     */
-	void createServiceModuleAdministrators(CreateServiceModuleAdministratorsCommand cmd);
+//	/**
+//	 * 创建业务模块管理员
+//	 * @param cmd
+//     */
+//	@Deprecated
+//	void createServiceModuleAdministrators(CreateServiceModuleAdministratorsCommand cmd);
 
 
 	/**
@@ -405,7 +403,8 @@ public interface RolePrivilegeService {
 	AclPrivilegeInfoResponse getPrivilegeInfosByRoleId(
 			ListPrivilegesByRoleIdCommand cmd);
 
-	void updateServiceModuleAdministrators(UpdateServiceModuleAdministratorsCommand cmd);
+//	@Deprecated
+//	void updateServiceModuleAdministrators(UpdateServiceModuleAdministratorsCommand cmd);
 
 	void createAuthorizationRelation(CreateAuthorizationRelationCommand cmd);
 

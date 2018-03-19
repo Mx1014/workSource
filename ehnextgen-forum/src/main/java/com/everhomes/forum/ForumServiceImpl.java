@@ -6926,11 +6926,11 @@ public class ForumServiceImpl implements ForumService {
             return res;
         }
 
-        if(userPrivilegeMgr.checkModuleAdmin(EntityType.ORGANIZATIONS.getCode(), cmd.getCurrentOrgId(), userId, moduleId)){
-            LOGGER.debug("check moduleApp admin privilege success. ownerType={}, ownerId={}, userId={}, moduleId={}" , EntityType.ORGANIZATIONS.getCode(), cmd.getCurrentOrgId(), userId, moduleId);
-            res.setFlag(TrueOrFalseFlag.TRUE.getCode());
-            return res;
-        }
+//        if(userPrivilegeMgr.checkModuleAdmin(EntityType.ORGANIZATIONS.getCode(), cmd.getCurrentOrgId(), userId, moduleId)){
+//            LOGGER.debug("check moduleApp admin privilege success. ownerType={}, ownerId={}, userId={}, moduleId={}" , EntityType.ORGANIZATIONS.getCode(), cmd.getCurrentOrgId(), userId, moduleId);
+//            res.setFlag(TrueOrFalseFlag.TRUE.getCode());
+//            return res;
+//        }
 
         res.setFlag(TrueOrFalseFlag.FALSE.getCode());
         return res;

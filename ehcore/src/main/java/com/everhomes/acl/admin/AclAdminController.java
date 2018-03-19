@@ -3,21 +3,6 @@ package com.everhomes.acl.admin;
 
 
 
-import java.sql.Timestamp;
-import java.util.ArrayList;
-import java.util.List;
-import java.util.stream.Collectors;
-
-import javax.servlet.http.HttpServletResponse;
-import javax.validation.Valid;
-
-import com.everhomes.rest.acl.admin.*;
-import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.web.bind.annotation.RequestMapping;
-import org.springframework.web.bind.annotation.RequestParam;
-import org.springframework.web.bind.annotation.RestController;
-import org.springframework.web.multipart.MultipartFile;
-
 import com.everhomes.acl.AclProvider;
 import com.everhomes.acl.Role;
 import com.everhomes.acl.RoleAssignment;
@@ -32,6 +17,7 @@ import com.everhomes.discover.RestReturn;
 import com.everhomes.entity.EntityType;
 import com.everhomes.rest.RestResponse;
 import com.everhomes.rest.acl.PrivilegeConstants;
+import com.everhomes.rest.acl.admin.*;
 import com.everhomes.rest.organization.ListOrganizationAdministratorCommand;
 import com.everhomes.rest.organization.ListOrganizationMemberCommandResponse;
 import com.everhomes.user.User;
@@ -41,6 +27,18 @@ import com.everhomes.user.admin.SystemUserPrivilegeMgr;
 import com.everhomes.util.ConvertHelper;
 import com.everhomes.util.DateHelper;
 import com.everhomes.util.RuntimeErrorException;
+import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.web.bind.annotation.RequestMapping;
+import org.springframework.web.bind.annotation.RequestParam;
+import org.springframework.web.bind.annotation.RestController;
+import org.springframework.web.multipart.MultipartFile;
+
+import javax.servlet.http.HttpServletResponse;
+import javax.validation.Valid;
+import java.sql.Timestamp;
+import java.util.ArrayList;
+import java.util.List;
+import java.util.stream.Collectors;
 
 
 
@@ -227,36 +225,36 @@ public class AclAdminController extends ControllerBase {
         return response;
     }
     
-    /**
-     * <b>URL: /admin/acl/createOrganizationSuperAdmin </b>
-     * <p>创建超级管理员</p>
-     */
-    @RequestMapping("createOrganizationSuperAdmin")
-    @RestReturn(value=String.class)
-    public RestResponse createOrganizationSuperAdmin(@Valid CreateOrganizationAdminCommand cmd) {
-    	rolePrivilegeService.checkAuthority(EntityType.ORGANIZATIONS.getCode(), cmd.getOrganizationId(), PrivilegeConstants.OrgAdminUpdate);
-    	rolePrivilegeService.createOrganizationSuperAdmin(cmd);
-    	RestResponse response =  new RestResponse();
-        response.setErrorCode(ErrorCodes.SUCCESS);
-        response.setErrorDescription("OK");
-        return response;
-    }
+//    /**
+//     * <b>URL: /admin/acl/createOrganizationSuperAdmin </b>
+//     * <p>创建超级管理员</p>
+//     */
+//    @RequestMapping("createOrganizationSuperAdmin")
+//    @RestReturn(value=String.class)
+//    public RestResponse createOrganizationSuperAdmin(@Valid CreateOrganizationAdminCommand cmd) {
+//    	rolePrivilegeService.checkAuthority(EntityType.ORGANIZATIONS.getCode(), cmd.getOrganizationId(), PrivilegeConstants.OrgAdminUpdate);
+//    	rolePrivilegeService.createOrganizationSuperAdmin(cmd);
+//    	RestResponse response =  new RestResponse();
+//        response.setErrorCode(ErrorCodes.SUCCESS);
+//        response.setErrorDescription("OK");
+//        return response;
+//    }
 
-    /**
-     * <b>URL: /admin/acl/createOrganizationOrdinaryAdmin  </b>
-     * <p>创建普通管理员</p>
-     */
-    @RequestMapping("createOrganizationOrdinaryAdmin")
-    @RestReturn(value=String.class)
-    public RestResponse createOrganizationOrdinaryAdmin(@Valid CreateOrganizationAdminCommand cmd) {
-    	rolePrivilegeService.checkAuthority(EntityType.ORGANIZATIONS.getCode(), cmd.getOrganizationId(), PrivilegeConstants.OrgAdminUpdate);
-    	rolePrivilegeService.createOrganizationOrdinaryAdmin(cmd);
-    	RestResponse response =  new RestResponse();
-        response.setErrorCode(ErrorCodes.SUCCESS);
-        response.setErrorDescription("OK");
-        return response;
-    }
-    
+//    /**
+//     * <b>URL: /admin/acl/createOrganizationOrdinaryAdmin  </b>
+//     * <p>创建普通管理员</p>
+//     */
+//    @RequestMapping("createOrganizationOrdinaryAdmin")
+//    @RestReturn(value=String.class)
+//    public RestResponse createOrganizationOrdinaryAdmin(@Valid CreateOrganizationAdminCommand cmd) {
+//    	rolePrivilegeService.checkAuthority(EntityType.ORGANIZATIONS.getCode(), cmd.getOrganizationId(), PrivilegeConstants.OrgAdminUpdate);
+//    	rolePrivilegeService.createOrganizationOrdinaryAdmin(cmd);
+//    	RestResponse response =  new RestResponse();
+//        response.setErrorCode(ErrorCodes.SUCCESS);
+//        response.setErrorDescription("OK");
+//        return response;
+//    }
+
     /**
      * <b>URL: /admin/acl/updateOrganizationSuperAdmin </b>
      * <p>修改超级管理员</p>
