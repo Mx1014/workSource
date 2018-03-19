@@ -1199,3 +1199,7 @@ update eh_service_modules set action_type = 44, instance_config = '{"realm":"ene
 SET @configurations_id = IFNULL((SELECT MAX(id) FROM `eh_configurations`), 0);
 INSERT INTO `eh_configurations` (`id`, `name`, `value`, `description`, `namespace_id`, `display_name`)
   VALUES ((@configurations_id := @configurations_id + 1), 'content.cdn.separation_version', '5.3.0', '新旧版本客户端cdn支持的分界版本', 0, NULL);
+  
+-- fix 25724 by xiongying 20180319
+SET @field_id = IFNULL((SELECT MAX(id) FROM `eh_var_fields`), 0);
+INSERT INTO `eh_var_fields` (`id`, `module_name`, `name`, `display_name`, `field_type`, `group_id`, `group_path`, `mandatory_flag`, `default_order`, `status`, `creator_uid`, `create_time`, `operator_uid`, `update_time`, `field_param`) VALUES ((@field_id := @field_id + 1), 'enterprise_customer', 'buildingId', '楼栋', 'Long', '28', '/28/', '0', NULL, '2', '1', NOW(), NULL, NULL, '{\"fieldParamType\": \"text\", \"length\": 32}');
