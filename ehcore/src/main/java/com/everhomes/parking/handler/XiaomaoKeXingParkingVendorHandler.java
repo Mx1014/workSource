@@ -85,11 +85,11 @@ public class XiaomaoKeXingParkingVendorHandler extends DefaultParkingVendorHandl
 	public List<ParkingRechargeRateDTO> getParkingRechargeRates(ParkingLot parkingLot, String plateNumber,
 			String cardNo) {
 		KexinXiaomaoCard card = getCardInfo(plateNumber);
+		List<ParkingRechargeRateDTO> dtos = new ArrayList<>();
 		if (card == null || !card.isSuccess()) {
-			return null;
+			return dtos;
 		}
 		
-		List<ParkingRechargeRateDTO> dtos = new ArrayList<>();
 //    	TreeMap<String, String> params = new TreeMap<String,String>();
 //    	String result = post(GET_MONTHCARD_TYPE, params);
 //		LOGGER.info("Card type from kexin xiaomao={}", result);
