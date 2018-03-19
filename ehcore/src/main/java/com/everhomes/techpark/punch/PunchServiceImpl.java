@@ -1795,7 +1795,7 @@ public class PunchServiceImpl implements PunchService {
 		if (null == pr  )
 			throw RuntimeErrorException.errorWith(PunchServiceErrorCode.SCOPE,
  					PunchServiceErrorCode.ERROR_ENTERPRISE_DIDNOT_SETTING,
- 				"公司没有设置打卡规则");
+ 				"公司没有设置打卡规则 userId =["+userId+"] orgId=["+cmd.getEnterpriseId()+"]");
 		//是否有wifi打卡,如果是判断wifi是否符合
 
 		List<PunchGeopoint> punchGeopoints = punchProvider.listPunchGeopointsByOwner(PunchOwnerType.ORGANIZATION.getCode(),pr.getPunchOrganizationId());
@@ -6521,7 +6521,7 @@ public class PunchServiceImpl implements PunchService {
 		params.put("employees", cmd.getEmployees());
 		params.put("timeRules", cmd.getTimeRules());
 		params.put("reportType", "exportPunchScheduling");
-		String fileName = String.format(cmd.getPunchRuleName()+"考勤排班_%s.xlsx", DateUtil.dateToStr(new Date(cmd.getQueryTime()), DateUtil.NO_SLASH));
+		String fileName = String.format( DateUtil.dateToStr(new Date(cmd.getQueryTime()), DateUtil.YM_NO_SLASH)+cmd.getPunchRuleName()+"考勤排班.xlsx");
 
 		taskService.createTask(fileName, TaskType.FILEDOWNLOAD.getCode(), PunchExportTaskHandler.class, params, TaskRepeatFlag.REPEAT.getCode(), new Date());
 		return response;

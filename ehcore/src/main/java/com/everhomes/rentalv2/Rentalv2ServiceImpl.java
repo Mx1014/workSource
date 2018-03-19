@@ -1194,6 +1194,7 @@ public class Rentalv2ServiceImpl implements Rentalv2Service {
 		if(null != rentalSite.getOfflinePayeeUid()){
 			OrganizationMember member = organizationProvider.findOrganizationMemberByOrgIdAndUId(rSiteDTO.getOfflinePayeeUid(), rentalSite.getOrganizationId());
 			if(null!=member){
+
 				rSiteDTO.setOfflinePayeeName(member.getContactName());
 			}
 		}
@@ -2638,6 +2639,18 @@ public class Rentalv2ServiceImpl implements Rentalv2Service {
 			dto.setDoorAuthTime(dateFormat.format(new java.util.Date(bill.getAuthStartTime().getTime()))+"到"+
 					dateFormat.format(new java.util.Date(bill.getAuthEndTime().getTime())));
 		}}
+
+		//设置退款人姓名 联系方式
+		RentalResource rs = rentalv2Provider.getRentalSiteById(bill.getRentalResourceId());
+		if (rs.getOfflinePayeeUid()!=null){
+			OrganizationMember member = organizationProvider.findOrganizationMemberByOrgIdAndUId(rs.getOfflinePayeeUid(), rs.getOrganizationId());
+			if(null!=member){
+				dto.setOfflinePayName(member.getContactName());
+				UserIdentifier userIdentifier = userProvider.findClaimedIdentifierByOwnerAndType(member.getTargetId(), IdentifierType.MOBILE.getCode());
+				if (userIdentifier!=null)
+					dto.setOfflinePayName(userIdentifier.getIdentifierToken());
+			}
+		}
 		return dto;
 	}
 
