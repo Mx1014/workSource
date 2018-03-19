@@ -24,6 +24,7 @@ public class UpdateVacationBalancesCommand {
 	private Double overtimeCompensationBalanceCorrection;
 
 	private String description;
+	private Byte isBatch;
 
 	public UpdateVacationBalancesCommand() {
 
@@ -83,4 +84,11 @@ public class UpdateVacationBalancesCommand {
 		return StringHelper.toJsonString(this);
 	}
 
+	public Byte getIsBatch() {
+		return isBatch;
+	}
+
+	public void setIsBatch(Byte isBatch) {
+		this.isBatch = isBatch;
+	}
 }

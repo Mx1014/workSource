@@ -27,32 +27,30 @@ import com.everhomes.archives.ArchivesService;
 import com.everhomes.bigcollection.Accessor;
 import com.everhomes.bigcollection.BigCollectionProvider;
 import com.everhomes.bus.*;
-import com.everhomes.db.AccessSpec;
 import com.everhomes.locale.LocaleStringService;
 import com.everhomes.locale.LocaleTemplateService;
 import com.everhomes.naming.NameMapper;
+import com.everhomes.organization.*;
 import com.everhomes.rentalv2.RentalNotificationTemplateCode;
 import com.everhomes.rest.acl.PrivilegeConstants;
 import com.everhomes.rest.acl.PrivilegeServiceErrorCode;
 import com.everhomes.rest.approval.*;
+import com.everhomes.rest.common.ImportFileResponse;
 import com.everhomes.rest.general_approval.GeneralApprovalRecordDTO;
 import com.everhomes.rest.organization.*;
 import com.everhomes.rest.portal.ListServiceModuleAppsCommand;
 import com.everhomes.rest.portal.ListServiceModuleAppsResponse;
 import com.everhomes.rest.print.PrintErrorCode;
-import com.everhomes.rest.socialSecurity.SocialSecurityEmployeeDTO;
 import com.everhomes.rest.techpark.punch.*;
 import com.everhomes.rest.techpark.punch.ApprovalStatus;
 import com.everhomes.rest.techpark.punch.admin.*;
 import com.everhomes.rest.uniongroup.*;
 import com.everhomes.sequence.SequenceProvider;
 import com.everhomes.server.schema.tables.pojos.EhPunchSchedulings;
-import com.everhomes.server.schema.tables.pojos.EhRentalv2Cells;
 import com.everhomes.socialSecurity.SocialSecurityService;
 import com.everhomes.uniongroup.*;
 import com.everhomes.util.*;
 
-import com.google.gson.Gson;
 import org.apache.lucene.spatial.geohash.GeoHashUtils;
 import org.apache.poi.hssf.usermodel.DVConstraint;
 import org.apache.poi.hssf.usermodel.HSSFDataValidation;
@@ -67,7 +65,6 @@ import org.apache.poi.xssf.usermodel.XSSFRow;
 import org.apache.poi.xssf.usermodel.XSSFSheet;
 import org.apache.poi.xssf.usermodel.XSSFWorkbook;
 import org.elasticsearch.client.transport.NoNodeAvailableException;
-import org.elasticsearch.common.util.DoubleArray;
 import org.jooq.Record;
 import org.jooq.SelectQuery;
 import org.slf4j.Logger;
@@ -110,16 +107,9 @@ import com.everhomes.listing.ListingQueryBuilderCallback;
 import com.everhomes.locale.LocaleString;
 import com.everhomes.locale.LocaleStringProvider;
 import com.everhomes.messaging.MessagingService;
-import com.everhomes.organization.Organization;
-import com.everhomes.organization.OrganizationMember;
-import com.everhomes.organization.OrganizationMemberDetails;
-import com.everhomes.organization.OrganizationMemberLog;
-import com.everhomes.organization.OrganizationProvider;
-import com.everhomes.organization.OrganizationService;
 import com.everhomes.portal.PortalService;
 import com.everhomes.rest.RestResponse;
 import com.everhomes.rest.app.AppConstants;
-import com.everhomes.rest.blacklist.BlacklistErrorCode;
 import com.everhomes.rest.filedownload.TaskRepeatFlag;
 import com.everhomes.rest.filedownload.TaskType;
 import com.everhomes.rest.flow.FlowUserType;
@@ -197,7 +187,6 @@ import com.everhomes.user.UserProvider;
 import com.everhomes.user.admin.SystemUserPrivilegeMgr;
 import com.everhomes.util.excel.RowResult;
 import com.everhomes.util.excel.handler.PropMrgOwnerHandler;
-import com.itextpdf.text.pdf.PdfStructTreeController.returnType;
 
 @Service
 public class PunchServiceImpl implements PunchService {
@@ -9206,14 +9195,7 @@ public class PunchServiceImpl implements PunchService {
             return;
         }
         if (null == balance) {
-            balance = new PunchVacationBalance();
-            balance.setDetailId(detail.getId());
-            balance.setNamespaceId(detail.getNamespaceId());
-            balance.setOwnerId(cmd.getOrganizationId());
-            balance.setOwnerType("organization");
-            balance.setUserId(detail.getTargetId());
-            balance.setAnnualLeaveBalance(0.0);
-            balance.setOvertimeCompensationBalance(0.0);
+            balance = newVacationBalance(detail, cmd.getOrganizationId());
 
         }
         if (cmd.getAnnualLeaveBalanceCorrection() == null) {
@@ -9221,8 +9203,12 @@ public class PunchServiceImpl implements PunchService {
         }
         Double newALB = cmd.getAnnualLeaveBalanceCorrection() + balance.getAnnualLeaveBalance();
         if (newALB < 0) {
-            throw RuntimeErrorException.errorWith(
-                    PunchServiceErrorCode.SCOPE, PunchServiceErrorCode.ERROR_ANNUAL_LEAVE_CORRECTION_TOO_SMALL, "年假余额不足");
+            if (NormalFlag.YES == NormalFlag.fromCode(cmd.getIsBatch())) {
+                newALB = 0.0;
+            }else {
+                throw RuntimeErrorException.errorWith(
+                        PunchServiceErrorCode.SCOPE, PunchServiceErrorCode.ERROR_ANNUAL_LEAVE_CORRECTION_TOO_SMALL, "年假余额不足");
+            }
         }
         balance.setAnnualLeaveBalance(newALB);
 
@@ -9232,27 +9218,50 @@ public class PunchServiceImpl implements PunchService {
         Double newOCB = cmd.getOvertimeCompensationBalanceCorrection() + balance.getOvertimeCompensationBalance();
 
         if (newOCB < 0) {
-            throw RuntimeErrorException.errorWith(
-                    PunchServiceErrorCode.SCOPE, PunchServiceErrorCode.ERROR_OVERTIME_CORRECTION_TOO_SMALL, "调休余额不足");
+            if (NormalFlag.YES == NormalFlag.fromCode(cmd.getIsBatch())) {
+                newOCB = 0.0;
+            }else {
+                throw RuntimeErrorException.errorWith(
+                        PunchServiceErrorCode.SCOPE, PunchServiceErrorCode.ERROR_OVERTIME_CORRECTION_TOO_SMALL, "调休余额不足");
+            }
         }
         balance.setOvertimeCompensationBalance(newOCB);
+        saveBalanceAndLog(balance, cmd.getDescription(), cmd.getAnnualLeaveBalanceCorrection(), cmd.getOvertimeCompensationBalanceCorrection());
 
+
+    }
+
+    private void saveBalanceAndLog(PunchVacationBalance balance, String description, Double annualLeaveBalanceCorrection,
+                                   Double overtimeCompensationBalanceCorrection) {
         PunchVacationBalanceLog log = ConvertHelper.convert(balance, PunchVacationBalanceLog.class);
-        log.setDescription(cmd.getDescription());
-        log.setAnnualLeaveBalanceCorrection(cmd.getAnnualLeaveBalanceCorrection());
-        log.setOvertimeCompensationBalanceCorrectione(cmd.getOvertimeCompensationBalanceCorrection());
+        log.setDescription(description);
+        log.setAnnualLeaveBalanceCorrection(annualLeaveBalanceCorrection);
+        log.setOvertimeCompensationBalanceCorrectione(overtimeCompensationBalanceCorrection);
         if (balance.getId() == null) {
             punchVacationBalanceProvider.createPunchVacationBalance(balance);
         } else {
             punchVacationBalanceProvider.updatePunchVacationBalance(balance);
         }
         punchVacationBalanceLogProvider.createPunchVacationBalanceLog(log);
+    }
 
+    private PunchVacationBalance newVacationBalance(OrganizationMemberDetails detail, Long organizationId) {
+
+        PunchVacationBalance balance = new PunchVacationBalance();
+        balance.setDetailId(detail.getId());
+        balance.setNamespaceId(detail.getNamespaceId());
+        balance.setOwnerId(organizationId);
+        balance.setOwnerType("organization");
+        balance.setUserId(detail.getTargetId());
+        balance.setAnnualLeaveBalance(0.0);
+        balance.setOvertimeCompensationBalance(0.0);
+        return balance;
     }
 
     @Override
     public void batchUpdateVacationBalances(BatchUpdateVacationBalancesCommand cmd) {
         UpdateVacationBalancesCommand cmd1 = ConvertHelper.convert(cmd, UpdateVacationBalancesCommand.class);
+        cmd1.setIsBatch(NormalFlag.YES.getCode());
         this.dbProvider.execute((TransactionStatus status) -> {
             for (Long detailId : cmd.getDetailIds()) {
                 cmd1.setDetailId(detailId);
@@ -9293,15 +9302,186 @@ public class PunchServiceImpl implements PunchService {
         return response;
     }
 
+    private List processorExcel(MultipartFile file) {
+        try {
+            List resultList = PropMrgOwnerHandler.processorExcel(file.getInputStream());
+            if (resultList.isEmpty()) {
+                LOGGER.error("File content is empty");
+                throw RuntimeErrorException.errorWith(PunchServiceErrorCode.SCOPE, PunchServiceErrorCode.ERROR_FILE_IS_EMPTY,
+                        "File content is empty");
+            }
+            return resultList;
+        } catch (IOException e) {
+            LOGGER.error("file process excel error ", e);
+            e.printStackTrace();
+        }
+
+        return null;
+    }
     @Override
     public void exportVacationBalances(ExportVacationBalancesCommand cmd) {
-        // TODO Auto-generated method stub
+        Map<String, Object> params = new HashMap();
 
+        //如果是null的话会被传成“null”
+        params.put("ownerId", cmd.getOrganizationId());
+        params.put("reportType", "exportVacationBalances");
+        String fileName = "";
+        fileName = String.format("假期余额_%s.xlsx", DateUtil.dateToStr(DateHelper.currentGMTTime(), DateUtil.NO_SLASH)
+                    );
+        taskService.createTask(fileName, TaskType.FILEDOWNLOAD.getCode(), PunchExportTaskHandler.class, params, TaskRepeatFlag.REPEAT.getCode(), new Date());
+    }
+    @Autowired
+    private ImportFileService importFileService;
+
+    @Override
+    public ImportFileTaskDTO importVacationBalances(MultipartFile[] files, ImportVacationBalancesCommand cmd) {
+        ImportFileTask task = new ImportFileTask();
+        List resultList = processorExcel(files[0]);
+        task.setOwnerType("PUNCH_VACATION");
+        task.setOwnerId(cmd.getOrganizationId());
+        task.setType(ImportFileTaskType.PUNCH_VACATION.getCode());
+        task.setCreatorUid(UserContext.currentUserId());
+
+        importFileService.executeTask(new ExecuteImportTaskCallback() {
+            @Override
+            public ImportFileResponse importFile() {
+                ImportFileResponse response = new ImportFileResponse();
+                String fileLog = "";
+                if (resultList.size() > 0) {
+                    RowResult title = (RowResult) resultList.get(0);
+                    Map<String, String> titleMap = title.getCells();
+                    response.setTitle(titleMap);
+                    fileLog = checkImportVacationTitle(titleMap, cmd.getOrganizationId());
+                    if (!StringUtils.isEmpty(fileLog)) {
+                        response.setFileLog(fileLog);
+                        return response;
+                    }
+                    saveImportVacation(resultList, cmd.getOrganizationId(), fileLog, response);
+                } else {
+                    response.setFileLog(ImportFileErrorType.TITLE_ERROE.getCode());
+                }
+                return response;
+            }
+
+
+        }, task);
+        return ConvertHelper.convert(task, ImportFileTaskDTO.class);
     }
 
     @Override
-    public void importVacationBalances(ImportVacationBalancesCommand cmd) {
-        // TODO Auto-generated method stub
-
+    public OutputStream getVacationBalanceOutputStream(Long ownerId, Long taskId) {
+        
+        return null;
     }
+
+    private void saveImportVacation(List resultList, Long organizationId, String fileLog, ImportFileResponse response) {
+        Long ownerId = getTopEnterpriseId(organizationId);
+        response.setLogs(new ArrayList<>());
+        int coverNum = 0;
+        for (int i = 1; i < resultList.size(); i++) {
+            RowResult r = (RowResult) resultList.get(i);
+            ImportFileResultLog<Map<String, String>> log = new ImportFileResultLog<>(PunchServiceErrorCode.SCOPE);
+            Map<String, String> data = new HashMap();
+            for (Map.Entry<String, String> entry : ((Map<String, String>) response.getTitle()).entrySet()) {
+                data.put(entry.getKey(), (r.getCells().get(entry.getKey()) == null) ? "" : r.getCells().get(entry.getKey()));
+            }
+            log.setData(data);
+            String userContact = r.getA().trim();
+            OrganizationMemberDetails detail = organizationProvider.findOrganizationMemberDetailsByOrganizationIdAndContactToken(ownerId, userContact);
+            if (null == detail) {
+//                response.setFileLog("找不到用户: 手机号" + userContact);
+                LOGGER.error("can not find organization member ,contact token is " + userContact);
+                log.setErrorLog("找不到用户: 手机号" + userContact);
+                log.setCode(PunchServiceErrorCode.ERROR_CHECK_CONTACT);
+                log.setErrorDescription(log.getErrorLog());
+                response.getLogs().add(log);
+                continue;
+            } else {
+                //// TODO: 2018/1/26  检验权限 是否有操作此用户的权限
+                PunchVacationBalance balance = punchVacationBalanceProvider.findPunchVacationBalanceByDetailId(detail.getId());
+
+                if (null != balance ) {
+                    //有balance的就算覆盖
+                    coverNum++;
+                }else{
+                    balance = newVacationBalance(detail, organizationId);
+                }
+
+                saveImportEmployeeSalary(balance, r, log, response);
+            }
+        }
+        response.setTotalCount((long) (resultList.size() - 1));
+        response.setFailCount((long) response.getLogs().size());
+        response.setCoverCount((long) coverNum);
+        LOGGER.debug("import resp" + response);
+    }
+
+    private void saveImportEmployeeSalary(PunchVacationBalance balance, RowResult r, ImportFileResultLog<Map<String, String>> log, ImportFileResponse response) {
+        Double annalBalance = 0.0;
+        annalBalance = convertVacationCellToDouble(annalBalance, response, log, r.getC().trim());
+        if (null == annalBalance) {
+            return;
+        }
+        Double overBalance = 0.0;
+        overBalance= convertVacationCellToDouble(overBalance, response, log, r.getD().trim());
+        if (null == overBalance) {
+            return;
+        }
+        Double annualLeaveBalanceCorrection = annalBalance - balance.getAnnualLeaveBalance();
+        Double overtimeCompensationBalanceCorrection = overBalance - balance.getOvertimeCompensationBalance();
+        balance.setAnnualLeaveBalance(annalBalance);
+        balance.setOvertimeCompensationBalance(overBalance);
+        saveBalanceAndLog(balance,"批量导入",annualLeaveBalanceCorrection,overtimeCompensationBalanceCorrection);
+    }
+
+    private Double convertVacationCellToDouble(Double annalBalance, ImportFileResponse response,
+                                               ImportFileResultLog<Map<String, String>> log, String r) {
+
+        try {
+            annalBalance = Double.valueOf(r);
+            if (annalBalance < 0) {
+                String errorString = "年假余额不可以是负数";
+                LOGGER.error(errorString);
+                log.setErrorLog(errorString);
+                log.setCode(PunchServiceErrorCode.ERROR_IS_MINUS);
+                log.setErrorDescription(log.getErrorLog());
+                response.getLogs().add(log);
+                return null ;
+            }
+        } catch (Exception e) {
+            String errorString = "年假余额不是数字";
+            LOGGER.error(errorString);
+            log.setErrorLog(errorString);
+            log.setCode(PunchServiceErrorCode.ERROR_NOT_DOUBLE);
+            log.setErrorDescription(log.getErrorLog());
+            response.getLogs().add(log);
+            return null;
+        }
+        return annalBalance;
+    }
+
+    private String checkImportVacationTitle(Map<String, String> titleMap, Long organizationId) {
+        if (!"手机".equals(titleMap.get("A"))) {
+            LOGGER.error("第一列不是手机而是" + titleMap.get("A"));
+            return ImportFileErrorType.TITLE_ERROE.getCode();
+        }
+        if (!"姓名".equals(titleMap.get("B"))) {
+            LOGGER.error("第2列不是姓名而是" + titleMap.get("B"));
+
+            return ImportFileErrorType.TITLE_ERROE.getCode();
+        }
+        if (!"年假余额".equals(titleMap.get("C"))) {
+            LOGGER.error("第3列不是年假余额而是" + titleMap.get("C"));
+
+            return ImportFileErrorType.TITLE_ERROE.getCode();
+        }
+        if (!"调休余额".equals(titleMap.get("D"))) {
+            LOGGER.error("第4列不是调休余额而是" + titleMap.get("D"));
+
+            return ImportFileErrorType.TITLE_ERROE.getCode();
+        }
+        return null;
+    }
+
+
 }

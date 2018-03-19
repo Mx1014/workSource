@@ -1135,7 +1135,7 @@ public class PunchAdminController extends ControllerBase {
 	@RequestMapping("importVacationBalances")
 	@RestReturn(String.class)
 	public RestResponse importVacationBalances(@RequestParam(value = "attachment") MultipartFile[] files,ImportVacationBalancesCommand cmd){
-		punchService.importVacationBalances(cmd);
+		punchService.importVacationBalances(files,cmd);
 		return new RestResponse();
 	}
 

@@ -7,7 +7,7 @@ public interface PunchServiceErrorCode {
     static final int ERROR_PUNCH_RULE = 10003;  //打卡规则有问题
     static final int ERROR_PUNCH_ADD_DAYLOG = 10004;  //计算打卡日志有问题
     static final int ERROR_PUNCH_REFRESH_DAYLOG = 10005;  //计算打卡日志有问题
-    
+
 
     static final int ERROR_NAME_REPEAT = 12000;  //名称重复
     static final int ERROR_RULE_USING = 12001;  //规则被使用
@@ -28,4 +28,8 @@ public interface PunchServiceErrorCode {
 
     static final int ERROR_ANNUAL_LEAVE_CORRECTION_TOO_SMALL = 10200;
     static final int ERROR_OVERTIME_CORRECTION_TOO_SMALL = 10201;
+    static final int ERROR_FILE_IS_EMPTY = 10202;
+    static final int ERROR_CHECK_CONTACT = 10203;
+    static final int ERROR_NOT_DOUBLE = 10204;
+    static final int ERROR_IS_MINUS = 10205;
 }
