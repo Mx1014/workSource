@@ -119,16 +119,19 @@ public class PaymentApplicationSearcherImpl extends AbstractElasticSearch implem
 
         SearchRequestBuilder builder = getClient().prepareSearch(getIndexName()).setTypes(getIndexType());
         QueryBuilder qb = null;
-        if(cmd.getApplicantName() == null || cmd.getApplicantName().isEmpty()) {
+        if(cmd.getKeyword() == null || cmd.getKeyword().isEmpty()) {
             qb = QueryBuilders.matchAllQuery();
         } else {
-            qb = QueryBuilders.multiMatchQuery(cmd.getApplicantName())
-                    .field("applicantName", 5.0f)
-                    .field("applicantName.pinyin_prefix", 2.0f)
-                    .field("applicantName.pinyin_gram", 1.0f);
+            qb = QueryBuilders.multiMatchQuery(cmd.getKeyword())
+                    .field("title", 5.0f)
+                    .field("contractName", 5.0f)
+                    .field("title.pinyin_prefix", 2.0f)
+                    .field("contractName.pinyin_prefix", 2.0f)
+                    .field("title.pinyin_gram", 1.0f)
+                    .field("contractName.pinyin_gram", 1.0f);
             builder.setHighlighterFragmentSize(60);
             builder.setHighlighterNumOfFragments(8);
-            builder.addHighlightedField("applicantName");
+            builder.addHighlightedField("title").addHighlightedField("contractName");
 
         }
 
@@ -138,6 +141,11 @@ public class PaymentApplicationSearcherImpl extends AbstractElasticSearch implem
         if(cmd.getStatus() != null) {
             fb = FilterBuilders.andFilter(fb, FilterBuilders.termFilter("status", cmd.getStatus()));
         }
+
+        if(cmd.getApplicantNumber() != null) {
+            fb = FilterBuilders.andFilter(fb, FilterBuilders.termFilter("applicationNumber", cmd.getApplicantNumber()));
+        }
+
         int pageSize = PaginationConfigHelper.getPageSize(configProvider, cmd.getPageSize());
         Long anchor = 0l;
         if(cmd.getPageAnchor() != null) {

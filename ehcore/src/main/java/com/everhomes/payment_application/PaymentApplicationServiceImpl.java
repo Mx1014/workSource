@@ -191,7 +191,6 @@ public class PaymentApplicationServiceImpl implements PaymentApplicationService 
                 FlowModuleType.NO_MODULE.getCode(), application.getCommunityId(), FlowOwnerType.PAYMENT_APPLICATION.getCode());
         if(null == flow) {
             LOGGER.error("Enable request flow not found, moduleId={}", FlowConstants.PAYMENT_APPLICATION_MODULE);
-            throw RuntimeErrorException.errorWith(PaymentApplicationErrorCode.SCOPE, PaymentApplicationErrorCode.ERROR_ENABLE_FLOW,
             throw RuntimeErrorException.errorWith(ContractErrorCode.SCOPE, ContractErrorCode.ERROR_ENABLE_FLOW,
                     localeStringService.getLocalizedString(String.valueOf(ContractErrorCode.SCOPE),
                             String.valueOf(ContractErrorCode.ERROR_ENABLE_FLOW),
