@@ -362,6 +362,26 @@ public class SystemUserPrivilegeMgr implements UserPrivilegeMgr {
         }
     }
 
+    @Override
+    public boolean checkUserPrivilege(Long userId, Long currentOrgId, Long privilegeId, Long appId, Long checkOrgId, Long checkCommunityId) {
+        LOGGER.debug("checkUserPrivilege get appId = {}", appId);
+        if(appId ==  null){
+            throw RuntimeErrorException.errorWith(PrivilegeServiceErrorCode.SCOPE, PrivilegeServiceErrorCode.ERROR_CHECK_APP_PRIVILEGE,
+                    "cannot find app for it, namespaceId = "+UserContext.getCurrentNamespaceId()+",  appId " + appId);
+        }
+        if(currentOrgId == null){
+            OrganizationMember member = organizationProvider.findAnyOrganizationMemberByNamespaceIdAndUserId(UserContext.getCurrentNamespaceId(), userId, OrganizationType.ENTERPRISE.getCode());
+            if(member != null  && !StringUtils.isEmpty(member.getGroupPath())){
+                currentOrgId = Long.valueOf(member.getGroupPath().split("/")[1]);
+            }
+        }
+        if(!checkUserPrivilege(userId, EntityType.ORGANIZATIONS.getCode(), currentOrgId, currentOrgId, privilegeId, appId, checkOrgId,  checkCommunityId)){
+            throw RuntimeErrorException.errorWith(PrivilegeServiceErrorCode.SCOPE, PrivilegeServiceErrorCode.ERROR_CHECK_APP_PRIVILEGE,
+                    "check app privilege error");
+        }else{
+            return true;
+        }
+    }
 
 
     @Override
