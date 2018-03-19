@@ -1,9 +1,11 @@
 package com.everhomes.contentserver.urlvendor;
 
 import com.everhomes.bootstrap.PlatformContext;
+import com.everhomes.configuration.ConfigurationProvider;
 import com.everhomes.contentserver.ContentURLVendor;
 import com.everhomes.user.UserContext;
 import com.everhomes.util.Version;
+import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
 
 import java.util.Map;
@@ -20,9 +22,12 @@ public class SimpleAndAliCDNContentURLVendor implements ContentURLVendor {
      * 所以小于此版本的客户端提供原来的资源链接
      * </pre>
      */
-    private static final Version SEPARATION_VERSION = Version.fromVersionString("5.3.0");
+    private static Version SEPARATION_VERSION = Version.fromVersionString("5.3.0");
 
     private static final Version ZERO_VERSION = Version.fromVersionString("0.0.0");
+
+    @Autowired
+    private ConfigurationProvider configurationProvider;
 
     @Override
     public String evaluate(
@@ -32,11 +37,13 @@ public class SimpleAndAliCDNContentURLVendor implements ContentURLVendor {
         UserContext current = UserContext.current();
         String versionStr = current.getVersion();
 
+        initSeparationVersion();
+
         // 小于此版本的客户端因为做了本地资源缓存，如果提供CDN链接会导致缓存全部失效
         // 所以小于此版本的客户端提供原来的资源链接
         if (versionStr != null) {
             if (Version.fromVersionString(versionStr).getEncodedValue() == ZERO_VERSION.getEncodedValue()
-                    || Version.fromVersionString(versionStr).getEncodedValue() > SEPARATION_VERSION.getEncodedValue()) {
+                    || Version.fromVersionString(versionStr).getEncodedValue() >= SEPARATION_VERSION.getEncodedValue()) {
                 vendor = PlatformContext.getComponent(AliCDNContentURLVendor.class);
             } else {
                 vendor = PlatformContext.getComponent(SimpleContentURLVendor.class);
@@ -45,5 +52,14 @@ public class SimpleAndAliCDNContentURLVendor implements ContentURLVendor {
             vendor = PlatformContext.getComponent(SimpleContentURLVendor.class);
         }
         return vendor.evaluate(scheme, domain, port, uri, uriParams);
+    }
+
+    private void initSeparationVersion() {
+        try {
+            String sepVersionConfig = configurationProvider.getValue("content.cdn.separation_version", "5.3.0");
+            SEPARATION_VERSION = Version.fromVersionString(sepVersionConfig);
+        } catch (Exception e) {
+            // ignore
+        }
     }
 }

@@ -39,6 +39,7 @@ INSERT  INTO  `eh_var_fields` VALUES (11999, 'equipment_inspection', 'geohash', 
 -- 增加经纬度动态表单  jiarui  20180122
 
 -- offline  by jiarui  {home.url}换成域名
+-- 巡检离线
 SET  @id = (SELECT  MAX(id) FROM eh_version_realm);
 INSERT INTO `eh_version_realm` VALUES (@id:=@id+1, 'equipmentInspection', NULL, NOW(), '0');
 
@@ -50,18 +51,34 @@ SET action_data = '{\"realm\":\"equipmentInspection\",\"entryUrl\":\"http://{hom
 WHERE item_label LIKE '%巡检%';
 
 update eh_service_module_apps
-set instance_config = '{\"realm\":\"quality\",\"entryUrl\":\"http://{home.url}/nar/quality/index.html?hideNavigationBar=1#/select_community#sign_suffix\"}'
-where module_id = 20600;
-
-
-update eh_service_module_apps
 set instance_config = '{\"realm\":\"equipmentInspection\",\"entryUrl\":\"http://{home.url}/nar/equipmentInspection/dist/index.html?hideNavigationBar=1#sign_suffix\"}'
 where module_id = 20800;
--- offline  by jiarui
 
 UPDATE eh_launch_pad_items
 SET action_type = 44
 WHERE item_label LIKE '%巡检%';
+
+
+-- 品质核查离线  {home.url}换成域名  by jiarui
+
+SET  @id = (SELECT  MAX(id) FROM eh_version_realm);
+INSERT INTO `eh_version_realm` VALUES (@id:=@id+1, 'qualityInspection', NULL, NOW(), '0');
+
+SET  @vId = (SELECT  MAX(id) FROM eh_version_urls);
+INSERT INTO `eh_version_urls` VALUES (@vId:=@vId+1, @id, '1.0.0', 'http://{home.url}/nar/qualityInspect/offline/qualityInspect-1-0-0.zip', 'http://{home.url}/nar/qualityInspect/offline/qualityInspect-1-0-0.zip', '品质核查离线', '0', '品质核查', NOW(), NULL, '0');
+
+UPDATE eh_launch_pad_items
+SET action_data = '{\"realm\":\"qualityInspection\",\"entryUrl\":\"http://{home.url}/nar/qualityInspect/build/index.html?hideNavigationBar=1#/home#sign_suffix\"}'
+WHERE item_label LIKE '%巡检%';
+
+update eh_service_module_apps
+set instance_config = '{\"realm\":\"qualityInspection\",\"entryUrl\":\"http://{home.url}/nar/qualityInspect/build/index.html?hideNavigationBar=1#/home#sign_suffix\"}'
+where module_id = 20600;
+
+UPDATE eh_launch_pad_items
+SET action_type = 44
+WHERE item_label LIKE '%品质%';
+-- offline  end  by jiarui
 
 -- 新增权限  by jiarui 20180205
 
@@ -107,6 +124,22 @@ INSERT INTO `eh_service_module_privileges` (`id`, `module_id`, `privilege_type`,
 VALUES (@mp_id:=@mp_id+1, '20840', '0', 30087, '设备巡检 巡检计划审批', '0', NOW());
 
 -- 新增权限  by jiarui 20180205
+
+-- 品质权限项顺序调整  by jiarui 20180319
+
+UPDATE `eh_service_modules` SET `default_order`='0' WHERE `id`=20650;
+
+UPDATE `eh_service_modules` SET `default_order`='1' WHERE `id`=20630;
+
+UPDATE `eh_service_modules` SET `default_order`='2' WHERE `id`=20610;
+UPDATE `eh_service_modules` SET `default_order`='3' WHERE `id`=20620;
+
+UPDATE `eh_service_modules` SET `default_order`='4' WHERE `id`=20660;
+UPDATE `eh_service_modules` SET `default_order`='5' WHERE `id`=20670;
+
+UPDATE `eh_service_module_privileges` SET  `module_id`=20630 WHERE `id`=125;
+
+-- 品质权限项顺序调整  by jiarui 20180319
 
 
 -- 品质核查操作日志 jiarui
@@ -1217,3 +1250,9 @@ update eh_reflection_service_module_apps set module_id=41700 where module_id = 4
 
 -- add by yanjun 201803151646 能耗管理改配置
 update eh_service_modules set action_type = 44, instance_config = '{"realm":"energyManagement","entryUrl":"https://core.zuolin.com/nar/energyManagement/build/index.html?hideNavigationBar=1#/address_choose#sign_suffix"}' where id = 49100;
+
+
+-- CDN 配置   add by xq.tian  2018/03/19
+SET @configurations_id = IFNULL((SELECT MAX(id) FROM `eh_configurations`), 0);
+INSERT INTO `eh_configurations` (`id`, `name`, `value`, `description`, `namespace_id`, `display_name`)
+  VALUES ((@configurations_id := @configurations_id + 1), 'content.cdn.separation_version', '5.3.0', '新旧版本客户端cdn支持的分界版本', 0, NULL);

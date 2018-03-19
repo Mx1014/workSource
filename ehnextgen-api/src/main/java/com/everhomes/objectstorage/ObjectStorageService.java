@@ -2,8 +2,6 @@ package com.everhomes.objectstorage;
 
 import com.everhomes.listing.ListingLocator;
 import com.everhomes.listing.ListingQueryBuilderCallback;
-import com.everhomes.rest.acl.ProjectDTO;
-import com.everhomes.rest.address.CommunityDTO;
 import com.everhomes.rest.objectstorage.OsObjectDTO;
 import com.everhomes.rest.objectstorage.OsObjectDownloadLogQuery;
 import com.everhomes.rest.objectstorage.OsObjectQuery;
@@ -33,7 +31,7 @@ public interface ObjectStorageService {
      * @param query
      * @return
      */
-    List<OsObject> listOsObject(OsObjectQuery query, ListingLocator locator,List<ProjectDTO> privilegeCommunities);
+    List<OsObject> listOsObject(OsObjectQuery query, ListingLocator locator);
 
     /**
      * 可以根据callback进行自定义查询条件, 其他跟上面的类似
@@ -42,7 +40,7 @@ public interface ObjectStorageService {
      * @param callback
      * @return
      */
-    List<OsObject> listOsObject(OsObjectQuery query, ListingLocator locator, ListingQueryBuilderCallback callback,List<ProjectDTO> privilegeCommunities);
+    List<OsObject> listOsObject(OsObjectQuery query, ListingLocator locator, ListingQueryBuilderCallback callback);
 
     /**
      * 根据id查询
