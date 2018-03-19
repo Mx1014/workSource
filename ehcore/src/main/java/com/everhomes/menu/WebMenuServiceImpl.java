@@ -576,8 +576,17 @@ public class WebMenuServiceImpl implements WebMenuService {
 			}
 		}
 
-		//排序
-		Collections.sort(dtos, Comparator.comparing(WebMenuDTO::getSortNum));
+		Collections.sort(dtos,new Comparator<WebMenuDTO>(){
+			public int compare(WebMenuDTO arg0, WebMenuDTO arg1) {
+				if(arg0.getSortNum() == null){
+					arg0.setSortNum(0);
+				}
+				if (arg1.getSortNum() == null){
+					arg1.setSortNum(0);
+				}
+				return arg0.getSortNum().compareTo(arg1.getSortNum());
+			}
+		});
 
 		dto.setDtos(dtos);
 		
