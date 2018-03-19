@@ -80,10 +80,6 @@ SET action_type = 44
 WHERE item_label LIKE '%品质%';
 -- offline  end  by jiarui
 
-UPDATE eh_launch_pad_items
-SET action_type = 44
-WHERE item_label LIKE '%巡检%';
-
 -- 新增权限  by jiarui 20180205
 
 DELETE FROM  eh_service_module_privileges
