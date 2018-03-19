@@ -16,6 +16,7 @@ import com.everhomes.util.StringHelper;
  */
 public class VacationBalanceDTO {
 	private String contactName;
+	private String contactToken;
 	private Long detailId;
 	private String departName;
 	private String employeeNo;
@@ -71,6 +72,13 @@ public class VacationBalanceDTO {
 	public void setOvertimeCompensationBalance(Double overtimeCompensationBalance) {
 		this.overtimeCompensationBalance = overtimeCompensationBalance;
 	}
-	
-	
+
+
+	public String getContactToken() {
+		return contactToken;
+	}
+
+	public void setContactToken(String contactToken) {
+		this.contactToken = contactToken;
+	}
 }

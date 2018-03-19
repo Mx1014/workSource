@@ -9164,6 +9164,7 @@ public class PunchServiceImpl implements PunchService {
 
         records.forEach(r -> {
             VacationBalanceDTO dto = new VacationBalanceDTO();
+            dto.setContactToken(r.getContactToken());
             dto.setContactName(r.getContactName());
             dto.setDetailId(r.getId());
             if (null != r.getCheckInTime()) {
@@ -9370,8 +9371,51 @@ public class PunchServiceImpl implements PunchService {
 
     @Override
     public OutputStream getVacationBalanceOutputStream(Long ownerId, Long taskId) {
-        
-        return null;
+        List<VacationBalanceDTO> balances = listVacationBalanceDTOs(ownerId, null, null, null, null, Integer.MAX_VALUE - 1, 1);
+        taskService.updateTaskProcess(taskId, 54);
+        Workbook wb = createVacationBook(balances, taskId);
+        ByteArrayOutputStream out = new ByteArrayOutputStream();
+        try {
+            wb.write(out);
+        } catch (IOException e) {
+            LOGGER.error("something woring with build output stream");
+            e.printStackTrace();
+        }
+        return out;
+    }
+
+    private Workbook createVacationBook(List<VacationBalanceDTO> balances, Long taskId) {
+
+        XSSFWorkbook wb = new XSSFWorkbook();
+        XSSFSheet sheet = wb.createSheet("punchDetails");
+        this.createVacationBookSheetHead(sheet);
+        int num = 0;
+        if (null == balances || balances.size() == 0)
+            return wb;
+        for (VacationBalanceDTO dto : balances) {
+            setNewVacationBookRow(sheet, dto);
+
+            taskService.updateTaskProcess(taskId, 54 + (int) (++num / (Double.valueOf(balances.size()) / 45.00)));
+        }
+        return wb;
+    }
+
+    private void createVacationBookSheetHead(XSSFSheet sheet) {
+        Row row = sheet.createRow(sheet.getLastRowNum() + 1);
+        int i = -1;
+        row.createCell(++i).setCellValue("手机");
+        row.createCell(++i).setCellValue("姓名");
+        row.createCell(++i).setCellValue("年假余额");
+        row.createCell(++i).setCellValue("调休余额");
+    }
+
+    private void setNewVacationBookRow(XSSFSheet sheet, VacationBalanceDTO dto) {
+        Row row = sheet.createRow(sheet.getLastRowNum() + 1);
+        int i = -1;
+        row.createCell(++i).setCellValue(dto.getContactToken());
+        row.createCell(++i).setCellValue(dto.getContactName());
+        row.createCell(++i).setCellValue(dto.getAnnualLeaveBalance());
+        row.createCell(++i).setCellValue(dto.getOvertimeCompensationBalance());
     }
 
     private void saveImportVacation(List resultList, Long organizationId, String fileLog, ImportFileResponse response) {
