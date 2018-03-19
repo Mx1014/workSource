@@ -59,7 +59,7 @@ SET action_type = 44
 WHERE item_label LIKE '%巡检%';
 
 
--- 品质核查离线  {home.url}换成域名
+-- 品质核查离线  {home.url}换成域名  by jiarui
 
 SET  @id = (SELECT  MAX(id) FROM eh_version_realm);
 INSERT INTO `eh_version_realm` VALUES (@id:=@id+1, 'qualityInspection', NULL, NOW(), '0');
@@ -78,7 +78,7 @@ where module_id = 20600;
 UPDATE eh_launch_pad_items
 SET action_type = 44
 WHERE item_label LIKE '%品质%';
--- offline  by jiarui
+-- offline  end  by jiarui
 
 
 
