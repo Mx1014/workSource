@@ -575,6 +575,10 @@ public class WebMenuServiceImpl implements WebMenuService {
 				dtos.add(menuDto);
 			}
 		}
+
+		//排序
+		Collections.sort(dtos, Comparator.comparing(WebMenuDTO::getSortNum));
+
 		dto.setDtos(dtos);
 		
 		return dto;
