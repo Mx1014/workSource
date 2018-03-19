@@ -451,12 +451,12 @@ public class SystemUserPrivilegeMgr implements UserPrivilegeMgr {
 
 
 
-@Override
-public boolean checkUserPrivilege(Long userId, String ownerType, Long ownerId, Long currentOrgId, Long privilegeId){
+    @Override
+    public boolean checkUserPrivilege(Long userId, String ownerType, Long ownerId, Long currentOrgId, Long privilegeId){
         return  checkUserPrivilege(userId, ownerType, ownerId, currentOrgId, privilegeId, null, null, null);
-        }
+    }
 
-@Override
+    @Override
     public boolean checkUserPrivilege(Long userId, String ownerType, Long ownerId, Long currentOrgId, Long privilegeId, Long appId, Long checkOrgId, Long checkCommunityId){
         LOGGER.debug("checkUserPrivilege start.userId={}, ownerType={}, ownerId={}, organizationId={}, privilegeId={}, appId={}, checkOrgId={}, checkCommunityId= {}" , userId, ownerType, ownerId, currentOrgId, privilegeId, appId, checkOrgId, checkCommunityId);
 
@@ -470,35 +470,28 @@ public boolean checkUserPrivilege(Long userId, String ownerType, Long ownerId, L
                     currentOrgId = Long.valueOf(organization.getPath().split("/")[1]);
                 }
                 if(null != organization){
-                    if(OrganizationType.PM == OrganizationType.fromCode(organization.getOrganizationType())){
-                        if (this.aclProvider.checkAccess("system", null, com.everhomes.server.schema.tables.pojos.EhUsers.class.getSimpleName(), UserContext.current().getUser().getId(), Privilege.Write, null)) {
-                            LOGGER.debug("check root privilege success.userId={}, ownerType={}, ownerId={}, organizationId={}, privilegeId={}", userId, ownerType, ownerId, currentOrgId, privilegeId);
-                            return true;
-                        }
+                    if (this.aclProvider.checkAccess("system", null, com.everhomes.server.schema.tables.pojos.EhUsers.class.getSimpleName(), UserContext.current().getUser().getId(), Privilege.Write, null)) {
+                        LOGGER.debug("check root privilege success.userId={}, ownerType={}, ownerId={}, organizationId={}, privilegeId={}", userId, ownerType, ownerId, currentOrgId, privilegeId);
+                        return true;
+                    }
 
-                        if(checkSuperAdmin(userId, currentOrgId)){
-                            LOGGER.debug("check super admin privilege success.userId={}, ownerType={}, ownerId={}, organizationId={}, privilegeId={}" , userId, ownerType, ownerId, currentOrgId, privilegeId);
+                    if(checkSuperAdmin(userId, currentOrgId)){
+                        LOGGER.debug("check super admin privilege success.userId={}, ownerType={}, ownerId={}, organizationId={}, privilegeId={}" , userId, ownerType, ownerId, currentOrgId, privilegeId);
+                        return true;
+                    }
+                    if(checkModuleAdmin(userId, EntityType.ORGANIZATIONS.getCode(), currentOrgId, privilegeId)){
+                        LOGGER.debug("check module admin privilege success.userId={}, ownerType={}, ownerId={}, organizationId={}, privilegeId={}" , userId, ownerType, ownerId, currentOrgId, privilegeId);
+                        return true;
+                    }
+                    // 当需要校验appId，by lei.lv
+                    if(appId != null){
+                        if(checkModuleAppAdmin(ownerType, ownerId, userId, privilegeId, appId, checkCommunityId, checkOrgId)){
+                            LOGGER.debug("check moduleApp admin privilege success.userId={}, ownerType={}, ownerId={}, organizationId={}, checkCommunityId={}, checkOrgId={}, privilegeId={}, appId={}" , userId, ownerType, ownerId, currentOrgId, checkCommunityId, checkOrgId, privilegeId, appId);
                             return true;
                         }
-                        if(checkModuleAdmin(userId, EntityType.ORGANIZATIONS.getCode(), currentOrgId, privilegeId)){
-                            LOGGER.debug("check module admin privilege success.userId={}, ownerType={}, ownerId={}, organizationId={}, privilegeId={}" , userId, ownerType, ownerId, currentOrgId, privilegeId);
-                            return true;
-                        }
-                        // 当需要校验appId，by lei.lv
-                        if(appId != null){
-                            if(checkModuleAppAdmin(ownerType, ownerId, userId, privilegeId, appId, checkCommunityId, checkOrgId)){
-                                LOGGER.debug("check moduleApp admin privilege success.userId={}, ownerType={}, ownerId={}, organizationId={}, checkCommunityId={}, checkOrgId={}, privilegeId={}, appId={}" , userId, ownerType, ownerId, currentOrgId, checkCommunityId, checkOrgId, privilegeId, appId);
-                                return true;
-                            }
-                            // 校验权限细化
-                            if(checkAccess(userId, EntityType.COMMUNITY.getCode(), checkCommunityId, currentOrgId, privilegeId)){
-                                LOGGER.debug("check moduleApp relation privilege success.userId={}, ownerType={}, ownerId={}, organizationId={}, checkCommunityId={}, checkOrgId={}, privilegeId={}, appId={}" , userId, ownerType, ownerId, currentOrgId, checkCommunityId, checkOrgId, privilegeId, appId);
-                                return true;
-                            }
-                        }
-                    }else{
-                        if(checkOrganizationAdmin(userId, currentOrgId)){
-                            LOGGER.debug("check organization admin privilege success.userId={}, ownerType={}, ownerId={}, organizationId={}, privilegeId={}" , userId, ownerType, ownerId, currentOrgId, privilegeId);
+                        // 校验权限细化
+                        if(checkAccess(userId, EntityType.COMMUNITY.getCode(), checkCommunityId, currentOrgId, privilegeId)){
+                            LOGGER.debug("check moduleApp relation privilege success.userId={}, ownerType={}, ownerId={}, organizationId={}, checkCommunityId={}, checkOrgId={}, privilegeId={}, appId={}" , userId, ownerType, ownerId, currentOrgId, checkCommunityId, checkOrgId, privilegeId, appId);
                             return true;
                         }
                     }
@@ -514,7 +507,6 @@ public boolean checkUserPrivilege(Long userId, String ownerType, Long ownerId, L
             }
         }
 
-        //校验权限细化
         if(checkAccess(userId, ownerType, ownerId, currentOrgId, privilegeId)){
             LOGGER.debug("check privilege success.userId={}, ownerType={}, ownerId={}, organizationId={}, privilegeId={}" , userId, ownerType, ownerId, currentOrgId, privilegeId);
             return true;
