@@ -2,7 +2,7 @@
 -- 1、覆盖eh_web_menus、eh_service_modules和eh_domains，从88覆盖到新的数据库表
 -- 2、更新eh_domains中namespace_id等于0的数据的domain的值为服务器实际的ip
 -- offline  by jiarui  {home.url}换成域名 这里需要换成部署环境的域名信息 如：core.zuolin.com
--- 物业巡检和品质核查的两条insert语句同时执行
+-- 物业巡检和品质核查的分别有两条insert语句，分别同时执行
 -- offline  by jiarui
 -- 3、清理老数据
 /*
