@@ -17,7 +17,9 @@ public interface UserProvider {
     void updateUser(User user);
     void deleteUser(User user);
     void deleteUser(long id);
+    void deleteUserAndUserIdentifiers(Integer namespaceId, List<String> namespaceUserTokens, String namespaceUserType);
     User findUserById(long id);
+    User findUserByNamespaceUserTokenAndType(String token, String type);
     User findUserByAccountName(String accountName);
     List<User> queryUsers(CrossShardListingLocator locator, int count, ListingQueryBuilderCallback queryBuilderCallback);
     
@@ -26,8 +28,10 @@ public interface UserProvider {
 
     void createIdentifier(UserIdentifier userIdentifier);
     void updateIdentifier(UserIdentifier userIdentifier);
+    void updateIdentifierByUid(UserIdentifier userIdentifier);
     void deleteIdentifier(UserIdentifier userIdentifier);
     void deleteIdentifier(long id);
+    void deleteIdentifier(Integer namespaceId, List<Long> uIds);
     UserIdentifier findIdentifierById(long id);
     List<UserIdentifier> findClaimingIdentifierByToken(String identifierToken);
     List<UserIdentifier> findClaimedIdentifiersByToken(String identifierToken);
@@ -48,7 +52,8 @@ public interface UserProvider {
     
     void createUserLike(UserLike userLike);
     void updateUserLike(UserLike userLike);
-    void deleteUserLike(UserLike userLike);    void deleteUserLikeById(long id);
+    void deleteUserLike(UserLike userLike);
+    void deleteUserLikeById(long id);
     UserLike findUserLikeById(long id);
     UserLike findUserLike(long uid, String targetType, long targetId);
     List<UserLike> listUserLikes(long uid, String targetType);
@@ -134,7 +139,9 @@ public interface UserProvider {
 
     List<TargetDTO> findUesrIdByNameAndAddressId(String targetName, List<Long> ids, String tel);
 
-    TargetDTO findUserByToken(String tel,Integer namespaceId);
+    TargetDTO findUserByTokenAndName(String tel, String targetName);
+	
+	TargetDTO findUserByToken(String tel,Integer namespaceId);
 
     /**
      * 查询非当前userId的正常用户数据
@@ -157,5 +164,7 @@ public interface UserProvider {
      */
     void updateCacheStatus();
 
-    String findMobileByUid(Long contactId);
+    List<Long> listUsersByNamespaceUserInfo(Integer namespaceId, List<String> namespaceUserTokens, String namespaceUserType);
+	
+	String findMobileByUid(Long contactId);
 }

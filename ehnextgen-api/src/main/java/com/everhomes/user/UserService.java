@@ -3,6 +3,8 @@ package com.everhomes.user;
 
 import com.everhomes.community.Community;
 import com.everhomes.rest.address.CommunityDTO;
+import com.everhomes.rest.asset.PushUsersCommand;
+import com.everhomes.rest.asset.PushUsersResponse;
 import com.everhomes.rest.asset.TargetDTO;
 import com.everhomes.rest.family.FamilyDTO;
 import com.everhomes.rest.link.RichLinkDTO;
@@ -289,6 +291,20 @@ public interface UserService {
     SystemInfoResponse updateUserBySystemInfo(SystemInfoCommand cmd,
             HttpServletRequest request, HttpServletResponse response);
 
+
+    void syncUsersFromAnBangWuYe(SyncUsersFromAnBangWuYeCommand cmd);
+
+    PushUsersResponse createUsersForAnBang(PushUsersCommand cmd);
+
+
+    //通过安邦提供的token调用他方接口进行验证，并拿到用户信息
+    UserLogin verifyUserByTokenFromAnBang(String token);
+
+    //通过安邦提供的token获取本地用户并登录
+    void logonBuAnBangToken();
+
+    void pushUserDemo();
+	
     QRCodeDTO querySubjectIdForScan();
 
     DeferredResult<Object> waitScanForLogon(String subjectId);
