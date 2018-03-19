@@ -1234,3 +1234,9 @@ update eh_reflection_service_module_apps set module_id=41700 where module_id = 4
 
 -- add by yanjun 201803151646 能耗管理改配置
 update eh_service_modules set action_type = 44, instance_config = '{"realm":"energyManagement","entryUrl":"https://core.zuolin.com/nar/energyManagement/build/index.html?hideNavigationBar=1#/address_choose#sign_suffix"}' where id = 49100;
+
+
+-- CDN 配置   add by xq.tian  2018/03/19
+SET @configurations_id = IFNULL((SELECT MAX(id) FROM `eh_configurations`), 0);
+INSERT INTO `eh_configurations` (`id`, `name`, `value`, `description`, `namespace_id`, `display_name`)
+  VALUES ((@configurations_id := @configurations_id + 1), 'content.cdn.separation_version', '5.3.0', '新旧版本客户端cdn支持的分界版本', 0, NULL);
