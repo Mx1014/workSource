@@ -5886,20 +5886,7 @@ private void checkUserPrivilege(Long orgId, Long privilegeId, Long communityId) 
 
 		List<EquipmentTaskDTO> tasks = response.getTasks();
 		tasks.forEach((task) -> {
-			if (task.getReviewTime() == null) {
-				if (task.getExecutiveTime() != null) {
-					task.setLastSyncTime(task.getExecutiveTime().toLocalDateTime().format(dateSF));
-				} else {
-					if(task.getProcessTime() ==null) {
-						task.setLastSyncTime(task.getCreateTime().toLocalDateTime().format(dateSF));
-					}else {
-						//when delete plans and schedule job  close delay tasks  updating process time
-						task.setLastSyncTime(task.getProcessTime().toLocalDateTime().format(dateSF));
-					}
-				}
-			} else {
-				task.setLastSyncTime(task.getReviewTime().toLocalDateTime().format(dateSF));
-			}
+			setTaskMaxUpdatedTime(task);
 			EquipmentInspectionPlans plan = equipmentProvider.getEquipmmentInspectionPlanById(task.getPlanId());
 			if (plan != null) {
 				EquipmentInspectionPlanDTO planDTO = ConvertHelper.convert(plan, EquipmentInspectionPlanDTO.class);
@@ -5942,6 +5929,26 @@ private void checkUserPrivilege(Long orgId, Long privilegeId, Long communityId) 
 		syncGroupOfflineData(offlineResponse,cmd);
 		syncRepairCategoryData(offlineResponse,cmd);
 		return offlineResponse;
+	}
+
+	private void setTaskMaxUpdatedTime(EquipmentTaskDTO task) {
+		List<Long> timeList = new ArrayList<>();
+		if (task.getCreateTime() != null) {
+			timeList.add(task.getCreateTime().getTime());
+		}
+		if (task.getExecutiveTime() != null) {
+			timeList.add(task.getExecutiveTime().getTime());
+		}
+		if (task.getReviewTime() != null) {
+			timeList.add(task.getReviewTime().getTime());
+		}
+		if (task.getProcessTime() != null) {
+			timeList.add(task.getProcessTime().getTime());
+		}
+		if (timeList.size() > 0) {
+			List<Long> result = timeList.stream().sorted(Comparator.comparing(Long::longValue).reversed()).collect(Collectors.toList());
+			task.setLastSyncTime(new Timestamp(result.get(0)).toLocalDateTime().format(dateSF));
+		}
 	}
 
 	private void syncRepairCategoryData(EquipmentTaskOfflineResponse offlineResponse, ListEquipmentTasksCommand cmd) {
