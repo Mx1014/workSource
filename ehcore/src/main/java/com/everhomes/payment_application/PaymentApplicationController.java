@@ -5,6 +5,7 @@ import com.everhomes.discover.RestDoc;
 import com.everhomes.discover.RestReturn;
 import com.everhomes.rest.RestResponse;
 import com.everhomes.rest.payment_application.*;
+import com.everhomes.search.PaymentApplicationSearcher;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RestController;
@@ -19,6 +20,8 @@ public class PaymentApplicationController extends ControllerBase {
 
     @Autowired
     private PaymentApplicationService paymentApplicationService;
+    @Autowired
+    private PaymentApplicationSearcher paymentApplicationSearcher;
     /**
      * <p>创建付款请示单</p>
      * <b>URL: /payment_application/createPaymentApplication</b>
@@ -37,6 +40,17 @@ public class PaymentApplicationController extends ControllerBase {
     @RestReturn(SearchPaymentApplicationResponse.class)
     public RestResponse searchPaymentApplications(SearchPaymentApplicationCommand cmd){
         return new RestResponse(paymentApplicationService.searchPaymentApplications(cmd));
+    }
+
+    /**
+     * <p>付款请示单同步es</p>
+     * <b>URL: /payment_application/syncIndex</b>
+     */
+    @RequestMapping("syncIndex")
+    @RestReturn(String.class)
+    public RestResponse syncIndex(){
+        paymentApplicationSearcher.syncFromDb();
+        return new RestResponse();
     }
 
     /**
