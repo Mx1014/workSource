@@ -557,6 +557,22 @@ public class CommunityAdminController extends ControllerBase {
 		return response;
 	}
 
+    /**
+     * <b>URL: /admin/community/createCommunities</b>
+     * <p>
+     * 创建小区
+     * </p>
+     */
+    @RequestMapping("createCommunities")
+    @RestReturn(value = CreateCommunityResponse.class)
+    public RestResponse createCommunities(CreateCommunityCommand cmd) {
+//        CreateCommunityResponse result = communityService.createCommunities(cmd);
+        RestResponse response = new RestResponse();
+        response.setErrorCode(ErrorCodes.SUCCESS);
+        response.setErrorDescription("OK");
+        return response;
+    }
+
 	/**
 	 * <b>URL: /admin/community/importCommunity</b>
 	 * <p>
