@@ -80,6 +80,7 @@ import com.everhomes.user.UserPrivilegeMgr;
 import com.everhomes.util.ConvertHelper;
 import com.everhomes.util.RequireAuthentication;
 import com.everhomes.util.RuntimeErrorException;
+import com.everhomes.util.SignatureHelper;
 
 @RestDoc(value="Aclink controller", site="core")
 @RestController
@@ -722,8 +723,8 @@ public class AclinkController extends ControllerBase {
     @RequireAuthentication(false)
     @RequestMapping("faceTest")
     public String faceTest(HttpServletRequest request) {
-        doorAccessService.test();
-        return "";
+        //doorAccessService.test();
+        return SignatureHelper.generateSecretKey();
     }
     
     /**

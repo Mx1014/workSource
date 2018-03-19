@@ -11297,6 +11297,8 @@ public class OrganizationServiceImpl implements OrganizationService {
         cmd2.setOrganizationId(cmd.getOrganizationId());
         cmd2.setTargetType(OrganizationMemberTargetType.USER.getCode());
         cmd2.setTargetId(userId);
+        cmd2.setContactDescription(cmd.getContactDescription());
+        cmd2.setContactName(cmd.getContactName());
         applyForEnterpriseContact(cmd2);
         //目前写死30分钟
         dto.setEndTime(DateHelper.currentGMTTime().getTime() + 30 * 60 * 1000L);

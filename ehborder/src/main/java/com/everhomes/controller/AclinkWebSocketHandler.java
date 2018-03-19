@@ -31,10 +31,10 @@ import com.everhomes.util.StringHelper;
 
 public class AclinkWebSocketHandler extends BinaryWebSocketHandler {
     private static final Logger LOGGER = LoggerFactory.getLogger(AclinkWebSocketHandler.class);
-    
+
     @Autowired
     private HttpRestCallProvider httpRestCallProvider;
-    
+
     private ConcurrentHashMap<String, AclinkSessionInfo> uuid2Session = new ConcurrentHashMap<>();
     private ConcurrentHashMap<WebSocketSession, AclinkWebSocketState> session2State = new ConcurrentHashMap<>();
 
@@ -45,10 +45,10 @@ public class AclinkWebSocketHandler extends BinaryWebSocketHandler {
         if(rlt != null) {
             return false;
         }
-        
+
         return true;
     }
-    
+
     private String uuidFromSession(WebSocketSession session) {
         String path = session.getUri().getPath();
         String[] vs = path.split("/");
@@ -57,37 +57,37 @@ public class AclinkWebSocketHandler extends BinaryWebSocketHandler {
         }
         return vs[2];
     }
-    
+
     public void sendPing(WebSocketSession session) {
         PingMessage pingMessage = new PingMessage();
         try {
             synchronized(session) {
-                session.sendMessage(pingMessage);    
+                session.sendMessage(pingMessage);
                 }
-            
+
         } catch (IOException e) {
             LOGGER.info("send ping error", e);
         }
     }
-    
+
     public void aclinkRemote(WebSocketSession serverSession, AclinkRemotePdu pdu) {
         if(null == pdu) {
             LOGGER.error("aclinkRemote pdu is null");
             return;
         }
-        
+
         AclinkSessionInfo aclinkSession = uuid2Session.get(pdu.getUuid());
         if(aclinkSession == null) {
             LOGGER.error("aclink session is null uuid=" + pdu.getUuid());
             return;
         }
-        
+
         WebSocketSession session = aclinkSession.getSession();
         if(session == null) {
             LOGGER.error("session is null uuid=" + pdu.getUuid());
             return;
         }
-        
+
         try {
             synchronized(session) {
                 BinaryMessage wsMessage = new BinaryMessage(Base64.decodeBase64(pdu.getBody()));
@@ -98,39 +98,39 @@ public class AclinkWebSocketHandler extends BinaryWebSocketHandler {
             LOGGER.error("sendMessage error", e);
             }
     }
-    
+
     @Override
     public void afterConnectionEstablished(WebSocketSession session) throws Exception {
         String uuid = uuidFromSession(session);
-        
+
         LOGGER.info("Aclink connecting: uuid= " + uuid);
-        
+
         AclinkSessionInfo sInfo = uuid2Session.get(uuid);
         if(sInfo == null) {
             session.close(CloseStatus.SERVER_ERROR);
             return;
         }
-        
+
         AclinkWebSocketState state = new AclinkWebSocketState();
         state.setHardwareId(sInfo.getDto().getHardwareId());
         state.setId(sInfo.getDto().getId());
         state.setUuid(uuid);
         sInfo.setSession(session);
-        
+
         session2State.put(session, state);
-        
+
         //sendPing(session);
-        
+
         LOGGER.info("Aclink connected: id= " + sInfo.getDto().getId() + ", uuid=" + uuid);
     }
-    
+
     private void disConnected(WebSocketSession session, String info) throws Exception {
         String uuid = uuidFromSession(session);
         AclinkWebSocketState state = session2State.remove(session);
         uuid2Session.remove(uuid);
-        
+
         LOGGER.info("Aclink disConnected: uuid= " + uuid + " info=" + info);
-        
+
         if(state != null) {
             Map<String, String> params = new HashMap<String, String>();
             params.put("id", state.getId().toString());
@@ -144,36 +144,36 @@ public class AclinkWebSocketHandler extends BinaryWebSocketHandler {
                 }
             });
         }
-        
-        
+
+
     }
-    
+
     @Override
     public void afterConnectionClosed(WebSocketSession session, CloseStatus arg1) throws Exception {
         disConnected(session, "normal closed");
     }
-    
+
     @Override
     public void handleTransportError(WebSocketSession session, Throwable arg1) throws Exception {
         disConnected(session, "error closed=" + arg1.getMessage());
     }
-    
+
     @Scheduled(fixedDelay=20000, initialDelay=5000)
     public void tickCheck() {
         this.session2State.forEach((WebSocketSession session, AclinkWebSocketState state) -> {
             state.onTick(session, this);
         });
     }
-    
+
     public void nextMessage(AclinkWebSocketMessage cmd, WebSocketSession session, AclinkWebSocketState state) {
         Map<String, String> params = new HashMap<String, String>();
         StringHelper.toStringMap(null, cmd, params);
         final AclinkWebSocketHandler handler = this;
-        
+
         if(cmd.getPayload() != null) {
-            LOGGER.info("Got reply=" + cmd);    
+            LOGGER.info("Got reply=" + cmd);
         }
-        
+
         httpRestCallProvider.restCall("/aclink/syncWebsocketMessages", params, new ListenableFutureCallback<ResponseEntity<String>> () {
 
         @Override
@@ -207,7 +207,7 @@ public class AclinkWebSocketHandler extends BinaryWebSocketHandler {
                 }
 
             }
-            
+
         }
 
         @Override
@@ -216,38 +216,40 @@ public class AclinkWebSocketHandler extends BinaryWebSocketHandler {
         }
       });
     }
-    
+
     @Override
     protected void handleBinaryMessage(WebSocketSession session, BinaryMessage message) {
         AclinkWebSocketState state = session2State.get(session);
         if(state == null) {
-            try { 
+            LOGGER.info("Aclink state is null, closing");
+            try {
                 session.close();
             } catch (IOException e) {
                 LOGGER.error("closed error", e);
             }
         }
-        
+
         ByteBuffer buffer = message.getPayload();
         byte[] buf = buffer.array();
+        LOGGER.info("Aclink recv binary bytes:" + Arrays.toString(buf));
         int len = message.getPayloadLength() - 4;
         if(len <= 6) {
             LOGGER.info("Message error, ignored, len=" + len);
             return;
         }
-        
+
         byte[] bDataSize = Arrays.copyOfRange(buf, 0, 4);
         int dataSize = DataUtil.byteArrayToInt(bDataSize);
         if(dataSize != len) {
             LOGGER.info("Message error length, ignored, dataSize=" + dataSize + ", len=" + len);
             return;
         }
-        
+
         state.onMessage(buf, session, this);
     }
-    
-    
-    
+
+
+
     @Override
     protected void handlePongMessage(WebSocketSession session, PongMessage message) throws Exception {
         LOGGER.info("Got pong message from " + uuidFromSession(session));

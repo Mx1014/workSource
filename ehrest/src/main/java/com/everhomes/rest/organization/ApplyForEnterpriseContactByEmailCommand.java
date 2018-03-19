@@ -9,6 +9,8 @@ import com.everhomes.util.StringHelper;
  * <li>sceneToken: 场景标识，用一个标识代替原来用多个字段共同表示的标识，以使传参数简单一些（只需要传一个参数）</li>
  * <li>email: 邮箱地址-通过这个验证用户是否在本小区的某公司</li>
  * <li>organizationId: 加入公司的id</li>
+ * <li>contactName：成员名称</li>
+ * <li>contactDescription：描述</li>
  * </ul>
  * @author wh
  *
@@ -20,6 +22,9 @@ public class ApplyForEnterpriseContactByEmailCommand {
 //	private String sceneToken; 
     private String email;
     private Long organizationId;
+    
+    private String contactName;
+    private String contactDescription;
      
 //    public String getSceneToken() {
 //		return sceneToken;
@@ -48,5 +53,22 @@ public class ApplyForEnterpriseContactByEmailCommand {
 
 	public void setOrganizationId(Long organizationId) {
 		this.organizationId = organizationId;
-	} 
+	}
+
+    public String getContactName() {
+        return contactName;
+    }
+
+    public void setContactName(String contactName) {
+        this.contactName = contactName;
+    }
+
+    public String getContactDescription() {
+        return contactDescription;
+    }
+
+    public void setContactDescription(String contactDescription) {
+        this.contactDescription = contactDescription;
+    } 
+
 }
