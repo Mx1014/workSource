@@ -8,9 +8,6 @@ import com.everhomes.db.DbProvider;
 import com.everhomes.listing.ListingLocator;
 import com.everhomes.listing.ListingQueryBuilderCallback;
 import com.everhomes.naming.NameMapper;
-import com.everhomes.organizationfile.OrganizationFileServiceImpl;
-import com.everhomes.rest.acl.ProjectDTO;
-import com.everhomes.rest.address.CommunityDTO;
 import com.everhomes.rest.objectstorage.OsObjectQuery;
 import com.everhomes.rest.objectstorage.OsObjectStatus;
 import com.everhomes.sequence.SequenceProvider;
@@ -22,13 +19,9 @@ import com.everhomes.user.User;
 import com.everhomes.user.UserContext;
 import com.everhomes.util.ConvertHelper;
 import com.everhomes.util.DateHelper;
-
-import org.jooq.Condition;
 import org.jooq.DSLContext;
 import org.jooq.SelectQuery;
 import org.jooq.impl.DSL;
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Repository;
 
@@ -47,8 +40,7 @@ class OsObjectProviderImpl implements OsObjectProvider {
 
     @Autowired
     private SequenceProvider sequenceProvider;
-    
-    private final static Logger LOGGER = LoggerFactory.getLogger(OsObjectProviderImpl.class);
+
     @Override
     public void createOsObject(OsObject obj) {
         long nextId = sequenceProvider.getNextSequence(NameMapper.getSequenceDomainFromTablePojo(EhOsObjects.class));
@@ -63,10 +55,10 @@ class OsObjectProviderImpl implements OsObjectProvider {
     }
 
     @Override
-    public List<OsObject> listOsObject(OsObjectQuery query, ListingLocator locator, ListingQueryBuilderCallback callback,List<ProjectDTO> privilegeCommunities) {
+    public List<OsObject> listOsObject(OsObjectQuery query, ListingLocator locator, ListingQueryBuilderCallback callback) {
         SelectQuery<EhOsObjectsRecord> selectQuery = context().selectFrom(Tables.EH_OS_OBJECTS).getQuery();
 
-        buildQueryConditions(query, locator, selectQuery,privilegeCommunities);
+        buildQueryConditions(query, locator, selectQuery);
 
         if (callback != null) {
             callback.buildCondition(locator, selectQuery);
@@ -74,8 +66,6 @@ class OsObjectProviderImpl implements OsObjectProvider {
 
         selectQuery.addConditions(Tables.EH_OS_OBJECTS.STATUS.eq(OsObjectStatus.ACTIVE.getCode()));
         selectQuery.addOrderBy(Tables.EH_OS_OBJECTS.CREATE_TIME.desc());
-        
-        LOGGER.info("listOsObject sql = {}, data = {}",selectQuery.getSQL(),selectQuery.getBindValues());
         List<OsObject> osObjects = selectQuery.fetchInto(OsObject.class);
 
         if (osObjects.size() > query.getPageSize()) {
@@ -103,25 +93,11 @@ class OsObjectProviderImpl implements OsObjectProvider {
         DaoHelper.publishDaoAction(DaoAction.MODIFY, EhOsObjects.class, obj.getId());
     }
 
-    private void buildQueryConditions(OsObjectQuery query, ListingLocator locator, SelectQuery<EhOsObjectsRecord> selectQuery, List<ProjectDTO> privilegeCommunities) {
+    private void buildQueryConditions(OsObjectQuery query, ListingLocator locator, SelectQuery<EhOsObjectsRecord> selectQuery) {
         ifNotNull(query.getNamespaceId(), () -> selectQuery.addConditions(Tables.EH_OS_OBJECTS.NAMESPACE_ID.eq(query.getNamespaceId())));
         ifNotNull(query.getStatus(), () -> selectQuery.addConditions(Tables.EH_OS_OBJECTS.STATUS.eq(query.getStatus())));
-        if(privilegeCommunities!=null && privilegeCommunities.size()>0){
-        	//管理企业后台，用户被赋予部分项目权限
-        	Condition condition = DSL.trueCondition();
-        	for (ProjectDTO projectDTO : privilegeCommunities) {
-        		condition = condition.or(Tables.EH_OS_OBJECTS.OWNER_TYPE.eq("EhCommunities").and((Tables.EH_OS_OBJECTS.OWNER_ID.eq(projectDTO.getProjectId()))));
-        	}
-        	condition = condition.or(Tables.EH_OS_OBJECTS.OWNER_TYPE.eq("EhNamespaces").and((Tables.EH_OS_OBJECTS.OWNER_ID.eq(Long.valueOf(query.getNamespaceId())))));
-        	selectQuery.addConditions(condition);
-        }
-        else if((privilegeCommunities==null || privilegeCommunities.size()==0) && locator==null){
-        	//管理企业后台，用户被没有赋予任何项目权限，此时，全部查询应该为空
-        	selectQuery.addConditions(Tables.EH_OS_OBJECTS.OWNER_TYPE.isNull());
-        	selectQuery.addConditions(Tables.EH_OS_OBJECTS.OWNER_ID.isNull());
-        }else{
-        	//普通企业后台，无关
-        }
+        ifNotNull(query.getOwnerType(), () -> selectQuery.addConditions(Tables.EH_OS_OBJECTS.OWNER_TYPE.eq(query.getOwnerType())));
+        ifNotNull(query.getOwnerId(), () -> selectQuery.addConditions(Tables.EH_OS_OBJECTS.OWNER_ID.eq(query.getOwnerId())));
         ifNotNull(query.getServiceType(), () -> selectQuery.addConditions(Tables.EH_OS_OBJECTS.SERVICE_TYPE.eq(query.getServiceType())));
         ifNotNull(query.getServiceId(), () -> selectQuery.addConditions(Tables.EH_OS_OBJECTS.SERVICE_ID.eq(query.getServiceId())));
         ifNotNull(query.getParentId(), () -> selectQuery.addConditions(Tables.EH_OS_OBJECTS.PARENT_ID.eq(query.getParentId())));
