@@ -34,6 +34,7 @@ public interface WarehouseProvider {
 
     void creatWarehouseStockLogs(WarehouseStockLogs log);
     WarehouseStockLogs findWarehouseStockLogs(Long id, String ownerType, Long ownerId);
+    WarehouseStockLogs findWarehouseStockLogs(Long id, String ownerType, Long ownerId, String materialName);
 
     void creatWarehouseStock(WarehouseStocks stock);
     void updateWarehouseStock(WarehouseStocks stock);
@@ -73,7 +74,7 @@ public interface WarehouseProvider {
 
     String findWarehouseMenuName();
 
-    List<WarehouseStockOrderDTO> listWarehouseStockOrders(String executor, Integer namespaceId, String ownerType, Long ownerId, Byte serviceType, Long pageAnchor, Integer pageSize);
+    List<WarehouseStockOrderDTO> listWarehouseStockOrders(String executor, Integer namespaceId, String ownerType, Long ownerId, Byte serviceType, Long pageAnchor, Integer pageSize, Long communityId);
 
     WarehouseOrder findWarehouseOrderById(Long id);
 

@@ -38,6 +38,7 @@ public class CustomerTrackingDTO {
     private Long trackingUid;
     private String trackingUidName;
     private Integer intentionGrade;
+    private String intentionGradeName;
     private Timestamp trackingTime;
     private String content;
     
@@ -46,9 +47,16 @@ public class CustomerTrackingDTO {
     
     @ItemType(String.class)
     private List<String> contentImgUrlList;
-    
 
-    public Long getId() {
+	public String getIntentionGradeName() {
+		return intentionGradeName;
+	}
+
+	public void setIntentionGradeName(String intentionGradeName) {
+		this.intentionGradeName = intentionGradeName;
+	}
+
+	public Long getId() {
 		return id;
 	}
 

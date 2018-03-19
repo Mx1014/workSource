@@ -181,10 +181,24 @@ public class PaymentApplicationSearcherImpl extends AbstractElasticSearch implem
             b.field("id", application.getId());
             b.field("namespaceId", application.getNamespaceId());
             b.field("communityId", application.getCommunityId());
-            b.field("title", application.getTitle());
-            b.field("applicationNumber", application.getApplicationNumber());
+            if(application.getTitle() != null) {
+                b.field("title", application.getTitle());
+            } else {
+                b.field("title", "");
+            }
+
+            if(application.getApplicationNumber() != null) {
+                b.field("applicationNumber", application.getApplicationNumber());
+            } else {
+                b.field("applicationNumber", "");
+            }
+
+            if(application.getPaymentAmount() != null) {
+                b.field("paymentAmount", application.getPaymentAmount());
+            } else {
+                b.field("paymentAmount", "");
+            }
             b.field("createTime", application.getCreateTime().getTime());
-            b.field("paymentAmount", application.getPaymentAmount());
             b.field("status", application.getStatus());
 
             OrganizationMember member = organizationProvider.findOrganizationMemberByOrgIdAndUId(application.getApplicantUid(), application.getApplicantOrgId());

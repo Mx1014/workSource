@@ -72,6 +72,7 @@ import com.everhomes.settings.PaginationConfigHelper;
 import com.everhomes.user.User;
 import com.everhomes.user.UserContext;
 import com.everhomes.user.UserIdentifier;
+import com.everhomes.user.UserPrivilegeMgr;
 import com.everhomes.user.UserProvider;
 import com.everhomes.util.ConvertHelper;
 import com.everhomes.util.DateHelper;
@@ -109,6 +110,9 @@ public class OfficeCubicleServiceImpl implements OfficeCubicleService {
 	private OfficeCubicleRangeProvider officeCubicleRangeProvider;
 	@Autowired
 	private FlowService flowService;
+	
+	@Autowired
+	private UserPrivilegeMgr userPrivilegeMgr;
 
 	@Autowired private CommunityProvider communityProvider;
 
@@ -121,6 +125,9 @@ public class OfficeCubicleServiceImpl implements OfficeCubicleService {
 
 	@Override
 	public SearchSpacesAdminResponse searchSpaces(SearchSpacesAdminCommand cmd) {
+		if(cmd.getCurrentPMId()!=null && cmd.getAppId()!=null && configurationProvider.getBooleanValue("privilege.community.checkflag", true)){
+			userPrivilegeMgr.checkUserPrivilege(UserContext.current().getUser().getId(), cmd.getCurrentPMId(), 4020040210L, cmd.getAppId(), null,cmd.getCurrentProjectId());//空间管理权限
+		}
 		SearchSpacesAdminResponse response = new SearchSpacesAdminResponse();
 		if (cmd.getPageAnchor() == null)
 			cmd.setPageAnchor(Long.MAX_VALUE);
@@ -203,6 +210,9 @@ public class OfficeCubicleServiceImpl implements OfficeCubicleService {
 
 	@Override
 	public void addSpace(AddSpaceCommand cmd) {
+		if(cmd.getCurrentPMId()!=null && cmd.getAppId()!=null && configurationProvider.getBooleanValue("privilege.community.checkflag", true)){
+			userPrivilegeMgr.checkUserPrivilege(UserContext.current().getUser().getId(), cmd.getCurrentPMId(), 4020040210L, cmd.getAppId(), null,cmd.getCurrentProjectId());//空间管理权限
+		}
 		if (null == cmd.getManagerUid())
 			throw RuntimeErrorException.errorWith(ErrorCodes.SCOPE_GENERAL, ErrorCodes.ERROR_INVALID_PARAMETER,
 					"Invalid paramter of Categories error: null ");
@@ -244,6 +254,9 @@ public class OfficeCubicleServiceImpl implements OfficeCubicleService {
 
 	@Override
 	public void updateSpace(UpdateSpaceCommand cmd) {
+		if(cmd.getCurrentPMId()!=null && cmd.getAppId()!=null && configurationProvider.getBooleanValue("privilege.community.checkflag", true)){
+			userPrivilegeMgr.checkUserPrivilege(UserContext.current().getUser().getId(), cmd.getCurrentPMId(), 4020040210L, cmd.getAppId(), null,cmd.getCurrentProjectId());//空间管理权限
+		}
 		if (null == cmd.getManagerUid())
 			throw RuntimeErrorException.errorWith(ErrorCodes.SCOPE_GENERAL, ErrorCodes.ERROR_INVALID_PARAMETER,
 					"Invalid paramter of Categories error: null ");
@@ -327,6 +340,10 @@ public class OfficeCubicleServiceImpl implements OfficeCubicleService {
 
 	@Override
 	public SearchSpaceOrdersResponse searchSpaceOrders(SearchSpaceOrdersCommand cmd) {
+		if(cmd.getCurrentPMId()!=null && cmd.getAppId()!=null && configurationProvider.getBooleanValue("privilege.community.checkflag", true)){
+			userPrivilegeMgr.checkUserPrivilege(UserContext.current().getUser().getId(), cmd.getCurrentPMId(), 4020040220L, cmd.getAppId(), null,cmd.getCurrentProjectId());//预定详情权限
+		}
+
 		SearchSpaceOrdersResponse response = new SearchSpaceOrdersResponse();
 		if (cmd.getPageAnchor() == null)
 			cmd.setPageAnchor(Long.MAX_VALUE);
@@ -355,6 +372,9 @@ public class OfficeCubicleServiceImpl implements OfficeCubicleService {
 
 	@Override
 	public HttpServletResponse exportSpaceOrders(SearchSpaceOrdersCommand cmd, HttpServletResponse response) {
+		if(cmd.getCurrentPMId()!=null && cmd.getAppId()!=null && configurationProvider.getBooleanValue("privilege.community.checkflag", true)){
+			userPrivilegeMgr.checkUserPrivilege(UserContext.current().getUser().getId(), cmd.getCurrentPMId(), 4020040220L, cmd.getAppId(), null,cmd.getCurrentProjectId());//预定详情权限
+		}
 		Integer pageSize = Integer.MAX_VALUE;
 		List<OfficeCubicleOrder> orders = this.officeCubicleProvider.searchOrders(cmd.getOwnerType(),cmd.getOwnerId(),cmd.getBeginDate(), cmd.getEndDate(),
 				cmd.getReserveKeyword(), cmd.getSpaceName(), new CrossShardListingLocator(), pageSize,
@@ -452,12 +472,12 @@ public class OfficeCubicleServiceImpl implements OfficeCubicleService {
 		Row row = sheet.createRow(sheet.getLastRowNum());
 		int i = -1;
 		row.createCell(++i).setCellValue("序号");
-		row.createCell(++i).setCellValue("项目名称");
+		row.createCell(++i).setCellValue("空间名称");
 		row.createCell(++i).setCellValue("所在城市");
 		row.createCell(++i).setCellValue("订单时间");
 		row.createCell(++i).setCellValue("预定类别");
 		row.createCell(++i).setCellValue("工位类别");
-		row.createCell(++i).setCellValue("工位数/面积");
+//		row.createCell(++i).setCellValue("工位数/面积");
 		row.createCell(++i).setCellValue("预订人");
 		row.createCell(++i).setCellValue("联系电话");
 		row.createCell(++i).setCellValue("公司名称");
@@ -481,8 +501,8 @@ public class OfficeCubicleServiceImpl implements OfficeCubicleService {
 		OfficeRentType renttype = OfficeRentType.fromCode(dto.getRentType());
 		row.createCell(++i).setCellValue(renttype==null?"":renttype.getMsg());
 		// 工位数/面积
-		OfficeSpaceType spaceType = OfficeSpaceType.fromCode(dto.getSpaceType()==null?(byte)1:(byte)2);
-		row.createCell(++i).setCellValue(dto.getSpaceSize() + spaceType==null?"":spaceType.getMsg());
+//		OfficeSpaceType spaceType = OfficeSpaceType.fromCode(dto.getSpaceType()==null?(byte)1:(byte)2);
+//		row.createCell(++i).setCellValue(dto.getSpaceSize() + spaceType==null?"":spaceType.getMsg());
 		// 预订人
 		row.createCell(++i).setCellValue(dto.getReserverName());
 

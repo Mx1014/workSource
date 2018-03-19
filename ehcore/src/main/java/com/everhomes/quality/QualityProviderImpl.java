@@ -1173,7 +1173,7 @@ public class QualityProviderImpl implements QualityProvider {
 	@Override
 	public int countVerificationTasks(Long ownerId, String ownerType,
 			Byte taskType, Long executeUid, Timestamp startDate,
-			Timestamp endDate, Long groupId, Byte executeStatus,
+			Timestamp endDate, Long groupId, List<Byte> executeStatus,
 			Byte reviewStatus) {
 		DSLContext context = dbProvider.getDslContext(AccessSpec.readOnly());
         SelectJoinStep<Record1<Integer>> step = context.selectCount().from(Tables.EH_QUALITY_INSPECTION_TASKS);
@@ -1205,7 +1205,7 @@ public class QualityProviderImpl implements QualityProvider {
 			condition = condition.and(Tables.EH_QUALITY_INSPECTION_TASKS.EXECUTIVE_GROUP_ID.eq(groupId));
 		}
 		if(executeStatus != null) {
-			condition = condition.and(Tables.EH_QUALITY_INSPECTION_TASKS.STATUS.eq(executeStatus));
+			condition = condition.and(Tables.EH_QUALITY_INSPECTION_TASKS.STATUS.in(executeStatus));
 		}
 		if(reviewStatus != null) {
 			if(QualityInspectionTaskReviewStatus.NONE.equals(reviewStatus))
@@ -1619,8 +1619,7 @@ public class QualityProviderImpl implements QualityProvider {
 	}
 
 	@Override
-	public void inactiveQualityInspectionStandardSpecificationMapBySpecificationId(
-			Long specificationId) {
+	public void inactiveQualityInspectionStandardSpecificationMapBySpecificationId(Long specificationId) {
 		Long userId = UserContext.current().getUser().getId();
 		dbProvider.mapReduce(AccessSpec.readOnlyWith(EhQualityInspectionStandardSpecificationMap.class), null, 
 				(DSLContext context, Object reducingContext) -> {
@@ -1633,12 +1632,22 @@ public class QualityProviderImpl implements QualityProvider {
 						map.setDeleterUid(userId);
 						map.setDeleteTime(new Timestamp(DateHelper.currentGMTTime().getTime()));
 						updateQualityInspectionStandardSpecificationMap(map);
-		            	return null;
+						deleteQualityInspectionTaskByStandardId(map.getStandardId());
+						return null;
 					});
 
 					return true;
 				});
 		
+	}
+
+	private void deleteQualityInspectionTaskByStandardId(Long standardId) {
+		DSLContext context = this.dbProvider.getDslContext(AccessSpec.readWrite());
+		context.update(Tables.EH_QUALITY_INSPECTION_TASKS)
+				.set(Tables.EH_QUALITY_INSPECTION_TASKS.STATUS, QualityInspectionTaskStatus.NONE.getCode())
+				.set(Tables.EH_QUALITY_INSPECTION_TASKS.EXECUTIVE_TIME, new Timestamp(DateHelper.currentGMTTime().getTime()))
+				.where(Tables.EH_EQUIPMENT_INSPECTION_TASKS.STANDARD_ID.eq(standardId))
+				.execute();
 	}
 
 	@Override
@@ -2855,7 +2864,8 @@ public class QualityProviderImpl implements QualityProvider {
 
 				if (executeStandardIds != null) {
 					Condition con1 = Tables.EH_QUALITY_INSPECTION_TASKS.STANDARD_ID.in(executeStandardIds)
-							.and(Tables.EH_QUALITY_INSPECTION_TASKS.STATUS.eq(QualityInspectionTaskStatus.WAITING_FOR_EXECUTING.getCode()));
+							.and(Tables.EH_QUALITY_INSPECTION_TASKS.STATUS.in(QualityInspectionTaskStatus.WAITING_FOR_EXECUTING.getCode(),
+									QualityInspectionTaskStatus.EXECUTED.getCode(),QualityInspectionTaskStatus.DELAY.getCode()));
 					con = con.or(con1);
 				}
 
@@ -2872,7 +2882,7 @@ public class QualityProviderImpl implements QualityProvider {
 
 		builderCallback.buildCondition(null, query);
 
-		query.addOrderBy(Tables.EH_QUALITY_INSPECTION_TASKS.EXECUTIVE_EXPIRE_TIME);
+		query.addOrderBy(Tables.EH_QUALITY_INSPECTION_TASKS.STATUS,Tables.EH_QUALITY_INSPECTION_TASKS.EXECUTIVE_EXPIRE_TIME);
 		query.addLimit(offset * (pageSize), pageSize + 1);
 		if (LOGGER.isDebugEnabled()) {
 			LOGGER.debug("Query tasks by count, sql=" + query.getSQL());

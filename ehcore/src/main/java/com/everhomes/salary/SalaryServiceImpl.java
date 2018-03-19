@@ -1686,7 +1686,7 @@ public class SalaryServiceImpl implements SalaryService {
         calendar.add(Calendar.MONTH, -12);
         SalaryDepartStatistic lastYear = salaryDepartStatisticProvider.findSalaryDepartStatisticByDptAndMonth(dpt.getId(), monthSF.get().format(calendar.getTime()));
         if (null != statistic.getCostSalary() && null != lastYear && lastYear.getCostSalary() != null && lastYear.getCostSalary().compareTo(new BigDecimal(0)) > 0) {
-            statistic.setCostYoySalary(statistic.getCostSalary().subtract(lastYear.getCostSalary()).divide(lastYear.getCostSalary(), 2).multiply(new BigDecimal(100)));
+            statistic.setCostYoySalary(statistic.getCostSalary().subtract(lastYear.getCostSalary()).divide(lastYear.getCostSalary(), 4).multiply(new BigDecimal(100)));
 
         }
         //环比
@@ -1698,7 +1698,7 @@ public class SalaryServiceImpl implements SalaryService {
         calendar.add(Calendar.MONTH, -1);
         SalaryDepartStatistic lastMonth = salaryDepartStatisticProvider.findSalaryDepartStatisticByDptAndMonth(dpt.getId(), monthSF.get().format(calendar.getTime()));
         if (null != statistic.getCostSalary() && null != lastMonth && lastMonth.getCostSalary() != null && lastMonth.getCostSalary().compareTo(new BigDecimal(0)) > 0) {
-            statistic.setCostMomSalary(statistic.getCostSalary().subtract(lastMonth.getCostSalary()).divide(lastMonth.getCostSalary(), 2).multiply(new BigDecimal(100)));
+            statistic.setCostMomSalary(statistic.getCostSalary().subtract(lastMonth.getCostSalary()).divide(lastMonth.getCostSalary(), 4).multiply(new BigDecimal(100)));
         }
         LOGGER.debug("计算[{}]公司的汇总数据,人员列表[{}] ,结果[{}] ", dpt.getName(), StringHelper.toJsonString(detailIds), StringHelper.toJsonString(statistic));
         return statistic;

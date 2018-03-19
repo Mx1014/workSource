@@ -121,7 +121,7 @@ public abstract class AbstractElasticSearch {
 
     public void deleteById(String id) {
         getClient()
-                .prepareDelete(getIndexName(), getIndexType(), id).execute()
+                .prepareDelete(getIndexName(), getIndexType(), id).setRefresh(true).execute()
                 .actionGet();
     }
 

@@ -410,6 +410,7 @@ public class OrganizationAdminController extends ControllerBase {
     @RequestMapping("createEnterprise")
     @RestReturn(value = String.class)
     public RestResponse createEnterprise(@Valid CreateEnterpriseCommand cmd) {
+        cmd.setCheckPrivilege(true);
         organizationService.createEnterprise(cmd);
         RestResponse response = new RestResponse();
         response.setErrorCode(ErrorCodes.SUCCESS);
@@ -438,7 +439,7 @@ public class OrganizationAdminController extends ControllerBase {
     @RequestMapping("deleteEnterpriseById")
     @RestReturn(value = String.class)
     public RestResponse deleteEnterpriseById(@Valid DeleteOrganizationIdCommand cmd) {
-        organizationService.deleteEnterpriseById(cmd);
+        organizationService.deleteEnterpriseById(cmd, true);
         RestResponse response = new RestResponse();
         response.setErrorCode(ErrorCodes.SUCCESS);
         response.setErrorDescription("OK");

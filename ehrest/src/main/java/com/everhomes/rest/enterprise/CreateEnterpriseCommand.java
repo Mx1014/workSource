@@ -35,6 +35,7 @@ import com.everhomes.rest.organization.OrganizationAddressDTO;
  */
 
 public class CreateEnterpriseCommand {
+	private Boolean checkPrivilege;
 	private Long manageOrganizationId;
     private java.lang.String   name;
     private java.lang.String   displayName;
@@ -66,6 +67,14 @@ public class CreateEnterpriseCommand {
 
 	private String website;
 	private String unifiedSocialCreditCode;
+
+	public Boolean getCheckPrivilege() {
+		return checkPrivilege;
+	}
+
+	public void setCheckPrivilege(Boolean checkPrivilege) {
+		this.checkPrivilege = checkPrivilege;
+	}
 
 	public Long getManageOrganizationId() {
 		return manageOrganizationId;

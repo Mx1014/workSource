@@ -1932,9 +1932,14 @@ public class AddressServiceImpl implements AddressService, LocalBusSubscriber {
                 continue;
             }
 
+            double areaSize = 0;
+            double chargeArea = 0;
+            double rentArea = 0;
+            double shareArea = 0;
+
 			if (StringUtils.isNotEmpty(data.getAreaSize())) {
 				try {
-					Double.parseDouble(data.getAreaSize());
+                    areaSize = Double.parseDouble(data.getAreaSize());
 				} catch (Exception e) {
 					log.setData(data);
 					log.setErrorLog("area size is not number");
@@ -1946,7 +1951,7 @@ public class AddressServiceImpl implements AddressService, LocalBusSubscriber {
 
             if (StringUtils.isNotEmpty(data.getChargeArea())) {
                 try {
-                    Double.parseDouble(data.getChargeArea());
+                    chargeArea = Double.parseDouble(data.getChargeArea());
                 } catch (Exception e) {
                     log.setData(data);
                     log.setErrorLog("charge area is not number");
@@ -1958,7 +1963,7 @@ public class AddressServiceImpl implements AddressService, LocalBusSubscriber {
 
             if (StringUtils.isNotEmpty(data.getRentArea())) {
                 try {
-                    Double.parseDouble(data.getRentArea());
+                    rentArea = Double.parseDouble(data.getRentArea());
                 } catch (Exception e) {
                     log.setData(data);
                     log.setErrorLog("rent area is not number");
@@ -1970,7 +1975,7 @@ public class AddressServiceImpl implements AddressService, LocalBusSubscriber {
 
             if (StringUtils.isNotEmpty(data.getSharedArea())) {
                 try {
-                    Double.parseDouble(data.getSharedArea());
+                    shareArea = Double.parseDouble(data.getSharedArea());
                 } catch (Exception e) {
                     log.setData(data);
                     log.setErrorLog("share area is not number");
@@ -1980,7 +1985,7 @@ public class AddressServiceImpl implements AddressService, LocalBusSubscriber {
                 }
             }
 			
-			importApartment(community, data);
+			importApartment(community, data, areaSize, chargeArea, rentArea, shareArea);
 		}
 
         updateCommunityAptCount(community);
@@ -1988,7 +1993,7 @@ public class AddressServiceImpl implements AddressService, LocalBusSubscriber {
 		return errorLogs;
 	}
 	
-	private void importApartment(Community community, ImportApartmentDataDTO data) {
+	private void importApartment(Community community, ImportApartmentDataDTO data, double areaSize, double chargeArea, double rentArea, double shareArea) {
 		Long organizationId = findOrganizationByCommunity(community);
 
         Building building = communityProvider.findBuildingByCommunityIdAndName(community.getId(), data.getBuildingName());
@@ -2004,18 +2009,6 @@ public class AddressServiceImpl implements AddressService, LocalBusSubscriber {
             if(LOGGER.isDebugEnabled()) {
                 LOGGER.debug("Add new building, communityId={}, buildingName={}, building={}", community.getId(), data.getBuildingName(), building);
             }
-        }
-
-        double areaSize = 0;
-        double chargeArea = 0;
-        double rentArea = 0;
-        double shareArea = 0;
-        try {
-            areaSize = Double.parseDouble(data.getAreaSize());
-            chargeArea = Double.parseDouble(data.getChargeArea());
-            rentArea = Double.parseDouble(data.getRentArea());
-            shareArea = Double.parseDouble(data.getSharedArea());
-        } catch (Exception e) {
         }
 
         Address address = addressProvider.findAddressByCommunityAndAddress(community.getCityId(), community.getAreaId(), community.getId(), building.getName() + "-" + data.getApartmentName());

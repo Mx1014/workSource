@@ -46,8 +46,8 @@ import com.everhomes.server.schema.tables.pojos.EhPunchSchedulings;
 import com.everhomes.server.schema.tables.pojos.EhRentalv2Cells;
 import com.everhomes.uniongroup.*;
 import com.everhomes.util.*;
-
 import com.google.gson.Gson;
+
 import org.apache.lucene.spatial.geohash.GeoHashUtils;
 import org.apache.poi.hssf.usermodel.DVConstraint;
 import org.apache.poi.hssf.usermodel.HSSFDataValidation;
@@ -86,6 +86,7 @@ import com.everhomes.approval.ApprovalRequestDefaultHandler;
 import com.everhomes.approval.ApprovalRequestProvider;
 import com.everhomes.approval.ApprovalRule;
 import com.everhomes.approval.ApprovalRuleProvider;
+import com.everhomes.archives.ArchivesService;
 import com.everhomes.bootstrap.PlatformContext;
 import com.everhomes.configuration.ConfigurationProvider;
 import com.everhomes.constants.ErrorCodes;
@@ -1051,9 +1052,8 @@ public class PunchServiceImpl implements PunchService {
 		List<PunchLog> punchLogs = punchProvider.listPunchLogsByDate(userId,
 			companyId, dateSF.get().format(punchDate), ClockCode.SUCESS.getCode());
 		if(null != punchLogs){
-			pdl.setPunchCount(punchLogs.size());
 			for (PunchLog log : punchLogs){
-				if (log.getPunchTime() == null) {
+				if (log.getPunchTime() == null || log.getPunchStatus().equals(PunchStatus.UNPUNCH.getCode())) {
 					continue;
 				}
 				pdl.getPunchLogs().add(ConvertHelper.convert(log,PunchLogDTO.class ));
@@ -1062,6 +1062,7 @@ public class PunchServiceImpl implements PunchService {
 				if(null == pdl.getLeaveTime()||pdl.getLeaveTime() < log.getPunchTime().getTime())
 					pdl.setLeaveTime(log.getPunchTime().getTime());
 			}
+			pdl.setPunchCount(pdl.getPunchLogs().size());
 
 		}else{
 			pdl.setPunchCount(0);
@@ -1794,7 +1795,7 @@ public class PunchServiceImpl implements PunchService {
 		if (null == pr  )
 			throw RuntimeErrorException.errorWith(PunchServiceErrorCode.SCOPE,
  					PunchServiceErrorCode.ERROR_ENTERPRISE_DIDNOT_SETTING,
- 				"公司没有设置打卡规则");
+ 				"公司没有设置打卡规则 userId =["+userId+"] orgId=["+cmd.getEnterpriseId()+"]");
 		//是否有wifi打卡,如果是判断wifi是否符合
 
 		List<PunchGeopoint> punchGeopoints = punchProvider.listPunchGeopointsByOwner(PunchOwnerType.ORGANIZATION.getCode(),pr.getPunchOrganizationId());
@@ -4884,10 +4885,10 @@ public class PunchServiceImpl implements PunchService {
 	        params.put("reportType", "exportPunchDetails");
 			String fileName = "";
 			if (null != cmd.getUserId()) {
-				fileName = String.format("按日统计导出报表_%s到%s.xlsx", DateUtil.dateToStr(new Date(cmd.getStartDay()), DateUtil.NO_SLASH)
+				fileName = String.format("个人按月统计报表_%s到%s.xlsx", DateUtil.dateToStr(new Date(cmd.getStartDay()), DateUtil.NO_SLASH)
 				,DateUtil.dateToStr(new Date(cmd.getEndDay()), DateUtil.NO_SLASH));
 			}else{
-				fileName = String.format("个人按日统计导出报表_%s月.xlsx", monthSF.get().format(new Date(cmd.getStartDay())));
+				fileName = String.format("按日统计报表_%s月.xlsx", monthSF.get().format(new Date(cmd.getStartDay())));
 			}
 
 	        taskService.createTask(fileName, TaskType.FILEDOWNLOAD.getCode(), PunchExportTaskHandler.class, params, TaskRepeatFlag.REPEAT.getCode(), new Date());
@@ -5288,6 +5289,10 @@ public class PunchServiceImpl implements PunchService {
 		}
         return result;
     }
+
+    @Autowired
+    private ArchivesService archivesService;
+    
 	public PunchDayDetailDTO convertToPunchDayDetailDTO(PunchDayLog r ){
 		PunchDayDetailDTO dto =  ConvertHelper.convert(r,PunchDayDetailDTO.class);
 		PunchRule pr = getPunchRule(PunchOwnerType.ORGANIZATION.getCode(), r.getEnterpriseId(), r.getUserId());
@@ -5310,7 +5315,6 @@ public class PunchServiceImpl implements PunchService {
 		//请假之类的审批单
 		PunchTimeRule ptr = punchProvider.getPunchTimeRuleById(r.getTimeRuleId());
 		if (null != ptr) {
-
 			Timestamp dayStart = new Timestamp(r.getPunchDate().getTime() - (ptr.getBeginPunchTime()==null?14400000L:ptr.getBeginPunchTime()));
 			Timestamp dayEnd = new Timestamp(r.getPunchDate().getTime() +(ptr.getDaySplitTimeLong()==null?104400000L:ptr.getDaySplitTimeLong()));
 			List<PunchExceptionRequest> exceptionRequests = punchProvider.listPunchExceptionRequestBetweenBeginAndEndTime(r.getUserId(),
@@ -6517,7 +6521,7 @@ public class PunchServiceImpl implements PunchService {
 		params.put("employees", cmd.getEmployees());
 		params.put("timeRules", cmd.getTimeRules());
 		params.put("reportType", "exportPunchScheduling");
-		String fileName = String.format(cmd.getPunchRuleName()+"考勤排班_%s.xlsx", DateUtil.dateToStr(new Date(cmd.getQueryTime()), DateUtil.NO_SLASH));
+		String fileName = String.format( DateUtil.dateToStr(new Date(cmd.getQueryTime()), DateUtil.YM_NO_SLASH)+cmd.getPunchRuleName()+"考勤排班.xlsx");
 
 		taskService.createTask(fileName, TaskType.FILEDOWNLOAD.getCode(), PunchExportTaskHandler.class, params, TaskRepeatFlag.REPEAT.getCode(), new Date());
 		return response;
@@ -7347,15 +7351,17 @@ public class PunchServiceImpl implements PunchService {
 		return getPunchGroupDTOByOrg(org);
 	}
 	public String getDepartment(Integer namespaceId, Long detailId){
-		Map<Long,String> departMap = this.organizationProvider.listOrganizationsOfDetail(namespaceId,detailId,OrganizationGroupType.DEPARTMENT.getCode());
-		String department = "";
-		if(!org.springframework.util.StringUtils.isEmpty(departMap)){
-			for(Long k : departMap.keySet()){
-				department += (departMap.get(k) + ",");
-			}
-			department = department.substring(0,department.length()-1);
-		}
-		return department;
+//		Map<Long,String> departMap = this.organizationProvider.listOrganizationsOfDetail(namespaceId,detailId,OrganizationGroupType.DEPARTMENT.getCode());
+//		String department = "";
+//		if(!org.springframework.util.StringUtils.isEmpty(departMap)){
+//			for(Long k : departMap.keySet()){
+//				department += (departMap.get(k) + ",");
+//			}
+//			department = department.substring(0,department.length()-1);
+//		}
+//		return department;
+
+	   return archivesService.convertToOrgNames(archivesService.getEmployeeDepartment(detailId)); 
 	}
 	@Override
 	public ListPunchGroupsResponse listPunchGroups(ListPunchGroupsCommand cmd) {

@@ -869,14 +869,12 @@ public class GeneralApprovalServiceImpl implements GeneralApprovalService {
         Integer namespaceId = UserContext.getCurrentNamespaceId();
         response.setResult(TrueOrFalseFlag.TRUE.getCode());
         List<GeneralApprovalTemplate> templates = generalApprovalProvider.listGeneralApprovalTemplateByModuleId(cmd.getModuleId());
-        for (GeneralApprovalTemplate template : templates) {
-            GeneralApproval ga = generalApprovalProvider.getGeneralApprovalByTemplateId(namespaceId, cmd.getModuleId(), cmd.getOwnerId(),
-                    cmd.getOwnerType(), template.getId());
-            if (ga == null) {
-                response.setResult(TrueOrFalseFlag.FALSE.getCode());
-                break;
-            }
-        }
+        if (templates == null || templates.size() == 0)
+            return response;
+        GeneralApproval ga = generalApprovalProvider.getGeneralApprovalByTemplateId(namespaceId, cmd.getModuleId(), cmd.getOwnerId(),
+                cmd.getOwnerType(), templates.get(0).getId());
+        if (ga == null)
+            response.setResult(TrueOrFalseFlag.FALSE.getCode());
         return response;
     }
 
@@ -916,9 +914,19 @@ public class GeneralApprovalServiceImpl implements GeneralApprovalService {
             ga = convertApprovalFromTemplate(ga, approval, formOriginId, cmd);
             generalApprovalProvider.createGeneralApproval(ga);
         }
+
+        Organization org = organizationProvider.findOrganizationById(cmd.getOwnerId());
+        if (org != null) {
+            GeneralApprovalScopeMapDTO dto = new GeneralApprovalScopeMapDTO();
+            dto.setSourceId(cmd.getOwnerId());
+            dto.setSourceType(UniongroupTargetType.ORGANIZATION.getCode());
+            dto.setSourceDescription(org.getName());
+            updateGeneralApprovalScope(ga.getNamespaceId(), ga.getId(), Arrays.asList(dto));
+        }
     }
 
     private GeneralApproval convertApprovalFromTemplate(GeneralApproval ga, GeneralApprovalTemplate approval, Long formOriginId, CreateApprovalTemplatesCommand cmd) {
+        Long userId = UserContext.currentUserId();
         ga.setNamespaceId(UserContext.getCurrentNamespaceId());
         ga.setStatus(GeneralApprovalStatus.INVALID.getCode());
         ga.setOwnerId(cmd.getOwnerId());
@@ -930,6 +938,8 @@ public class GeneralApprovalServiceImpl implements GeneralApprovalService {
         if (formOriginId != null)
             ga.setFormOriginId(formOriginId);
         ga.setSupportType(cmd.getSupportType());
+        ga.setOperatorUid(userId);
+        ga.setOperatorName(getUserRealName(userId, ga.getOrganizationId()));
         return ga;
     }
 
@@ -1285,16 +1295,18 @@ public class GeneralApprovalServiceImpl implements GeneralApprovalService {
         ListGeneralApprovalResponse response = listGeneralApproval(cmd);
         List<GeneralApprovalDTO> approvals = response.getDtos();
         OrganizationMember member = organizationProvider.findDepartmentMemberByTargetIdAndOrgId(UserContext.currentUserId(), cmd.getOwnerId());
-        approvals.forEach(r -> {
-            if (checkTheScope(r.getScopes(), member))
-                dtos.add(r);
-        });
+        if (approvals != null && approvals.size() > 0) {
+            approvals.forEach(r -> {
+                if (checkTheScope(r.getScopes(), member))
+                    dtos.add(r);
+            });
+        }
         res.setDtos(dtos);
         return res;
     }
 
     private boolean checkTheScope(List<GeneralApprovalScopeMapDTO> scopes, OrganizationMember member) {
-        if (member == null)
+        if (member == null || scopes == null || scopes.size() == 0)
             return false;
         List<Long> scopeUserIds = scopes.stream()
                 .filter(p1 -> p1.getSourceType().equals(UniongroupTargetType.MEMBERDETAIL.getCode()))

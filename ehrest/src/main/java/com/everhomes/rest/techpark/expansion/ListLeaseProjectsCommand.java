@@ -19,6 +19,7 @@ public class ListLeaseProjectsCommand {
 	private Long currentPMId;
 	private Long currentProjectId;
 	private Long appId;
+	private Long communityId;
 
 	public Long getCurrentPMId() {
 		return currentPMId;
@@ -103,5 +104,13 @@ public class ListLeaseProjectsCommand {
 
     public void setPageSize(Integer pageSize) {
         this.pageSize = pageSize;
+    }
+
+    public Long getCommunityId() {
+        return communityId;
+    }
+
+    public void setCommunityId(Long communityId) {
+        this.communityId = communityId;
     }
 }

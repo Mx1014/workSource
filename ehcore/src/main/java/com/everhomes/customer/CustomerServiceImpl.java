@@ -47,6 +47,7 @@ import com.everhomes.user.UserPrivilegeMgr;
 import com.everhomes.user.UserProvider;
 
 
+import com.everhomes.varField.Field;
 import org.apache.commons.lang.StringUtils;
 import org.apache.lucene.spatial.geohash.GeoHashUtils;
 
@@ -602,7 +603,7 @@ public class CustomerServiceImpl implements CustomerService {
         if(customer.getOrganizationId() != null) {
             DeleteOrganizationIdCommand command = new DeleteOrganizationIdCommand();
             command.setId(customer.getOrganizationId());
-            organizationService.deleteEnterpriseById(command);
+            organizationService.deleteEnterpriseById(command, false);
         }
 
     }
@@ -2573,7 +2574,7 @@ public class CustomerServiceImpl implements CustomerService {
 		List<CustomerTracking> trackings = enterpriseCustomerProvider.listCustomerTrackingsByCustomerId(cmd.getCustomerId());
         if(trackings != null && trackings.size() > 0) {
             return trackings.stream().map(tracking -> {
-                return convertCustomerTrackingDTO(tracking);
+                return convertCustomerTrackingDTO(tracking, cmd.getCommunityId());
             }).collect(Collectors.toList());
         }
         return null;
@@ -2583,11 +2584,11 @@ public class CustomerServiceImpl implements CustomerService {
 	public CustomerTrackingDTO getCustomerTracking(GetCustomerTrackingCommand cmd) {
         checkCustomerAuth(cmd.getNamespaceId(), PrivilegeConstants.ENTERPRISE_CUSTOMER_MANAGE_LIST, cmd.getOrgId(), cmd.getCommunityId());
 		CustomerTracking tracking = checkCustomerTracking(cmd.getId(), cmd.getCustomerId());
-        return convertCustomerTrackingDTO(tracking);
+        return convertCustomerTrackingDTO(tracking, cmd.getCommunityId());
 	}
 
-	private CustomerTrackingDTO convertCustomerTrackingDTO(CustomerTracking talent) {
-		CustomerTrackingDTO dto = ConvertHelper.convert(talent, CustomerTrackingDTO.class);
+	private CustomerTrackingDTO convertCustomerTrackingDTO(CustomerTracking tracking, Long communityId) {
+		CustomerTrackingDTO dto = ConvertHelper.convert(tracking, CustomerTrackingDTO.class);
         if(dto.getTrackingType() != null) {
         	String trackingTypeName = localeTemplateService.getLocaleTemplateString(CustomerTrackingTemplateCode.SCOPE, Integer.parseInt(dto.getTrackingType().toString()) , UserContext.current().getUser().getLocale(), new HashMap<>(), "");
         	dto.setTrackingTypeName(trackingTypeName);
@@ -2603,10 +2604,19 @@ public class CustomerServiceImpl implements CustomerService {
             	}
         	}
         }
+        if(dto.getIntentionGrade() != null) {
+            Field field = fieldProvider.findField(19L, "intentionGrade");
+            if(field != null) {
+                ScopeFieldItem item = fieldProvider.findScopeFieldItemByBusinessValue(tracking.getNamespaceId(), communityId, ModuleName.ENTERPRISE_CUSTOMER.getName(), field.getId(), dto.getIntentionGrade().byteValue());
+                if(item != null) {
+                    dto.setIntentionGradeName(item.getItemDisplayName());
+                }
+            }
+        }
         List<String> urlList = new ArrayList<>();
         List<String> uriList = new ArrayList<>();
-        if(StringUtils.isNotEmpty(talent.getContentImgUri())){
-        	String[] uriArray = talent.getContentImgUri().split(",");
+        if(StringUtils.isNotEmpty(tracking.getContentImgUri())){
+        	String[] uriArray = tracking.getContentImgUri().split(",");
         	for(String  uri : uriArray){
         		uriList.add(uri);
         		String contentUrl = contentServerService.parserUri(uri, EntityType.CUSTOMER_TRACKING.getCode(), dto.getId());
