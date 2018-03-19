@@ -2530,7 +2530,7 @@ public class ParkingServiceImpl implements ParkingService {
 		//TODO:
 		if (flag) {
 			ParkingSpace space = parkingProvider.findParkingSpaceByLockId(lockId);
-
+			space.setLockStatus(operateType.getStatus());
 			ParkingSpaceLog log;
 			if (userType == ParkingSpaceLockOperateUserType.RESERVE_PERSON) {
 				log = buildParkingSpaceLog(space, order);
@@ -2540,6 +2540,7 @@ public class ParkingServiceImpl implements ParkingService {
 			log.setOperateType(operateType.getCode());
 
 			parkingProvider.createParkingSpaceLog(log);
+			parkingProvider.updateParkingSpace(space);
 		}else {
 			if (operateType == ParkingSpaceLockOperateType.UP) {
 				throw RuntimeErrorException.errorWith(ParkingErrorCode.SCOPE,ParkingErrorCode.ERROR_RAISE_PARKING_LOCK,
