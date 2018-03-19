@@ -19,19 +19,6 @@ import javax.validation.Valid;
 public class LaunchPadBaseController extends ControllerBase {
 
     /**
-     * <b>URL: /launchpad/listIndex</b>
-     * <p>获取主页签</p>
-     */
-    @RequestMapping("listIndex")
-    @RestReturn(value=IndexDTO.class)
-    public RestResponse listIndex() {
-        RestResponse response =  new RestResponse();
-        response.setErrorCode(ErrorCodes.SUCCESS);
-        response.setErrorDescription("OK");
-        return response;
-    }
-
-    /**
      * <b>URL: /launchpad/getLaunchPadLayout</b>
      * <p>根据id获取服务市场样式</p>
      */
@@ -51,33 +38,6 @@ public class LaunchPadBaseController extends ControllerBase {
     @RequestMapping("listLaunchPadApps")
     @RestReturn(value=AppDTO.class)
     public RestResponse listLaunchPadApps(ListLaunchPadAppsCommand cmd) {
-        RestResponse response =  new RestResponse();
-        response.setErrorCode(ErrorCodes.SUCCESS);
-        response.setErrorDescription("OK");
-        return response;
-    }
-
-
-    /**
-     * <b>URL: /launchpad/listLaunchPadOAApps</b>
-     * <p>工作台获取OA应用</p>
-     */
-    @RequestMapping("listLaunchPadOAApps")
-    @RestReturn(value=AppDTO.class)
-    public RestResponse listLaunchPadOAApps(ListLaunchPadOAAppsCommand cmd) {
-        RestResponse response =  new RestResponse();
-        response.setErrorCode(ErrorCodes.SUCCESS);
-        response.setErrorDescription("OK");
-        return response;
-    }
-
-    /**
-     * <b>URL: /launchpad/listLaunchPadManagerApps</b>
-     * <p>工作台获取园区管理应用</p>
-     */
-    @RequestMapping("listLaunchPadManagerApps")
-    @RestReturn(value=AppDTO.class)
-    public RestResponse listLaunchPadManagerApps(ListLaunchPadManagerAppsCommand cmd) {
         RestResponse response =  new RestResponse();
         response.setErrorCode(ErrorCodes.SUCCESS);
         response.setErrorDescription("OK");

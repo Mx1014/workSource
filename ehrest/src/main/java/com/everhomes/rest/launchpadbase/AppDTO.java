@@ -4,36 +4,18 @@ import com.everhomes.util.StringHelper;
 
 /**
  * <ul>
- *     <li>id: 模块应用id</li>
- *     <li>originId: 应用跨版本不变id</li>
- *     <li>name: 模块应用名称</li>
- *     <li>moduleId: 模块id</li>
+ *     <li>name: 应用名称</li>
+ *     <li>iconUrl: iconUrl</li>
+ *     <li>router: router</li>
  *     <li>instanceConfig: 参数json</li>
  * </ul>
  */
 public class AppDTO {
 
-    private Long id;
-    private Long originId;
     private String name;
-    private Long moduleId;
+    private String iconUrl;
+    private String router;
     private String instanceConfig;
-
-    public Long getId() {
-        return id;
-    }
-
-    public void setId(Long id) {
-        this.id = id;
-    }
-
-    public Long getOriginId() {
-        return originId;
-    }
-
-    public void setOriginId(Long originId) {
-        this.originId = originId;
-    }
 
     public String getName() {
         return name;
@@ -43,12 +25,20 @@ public class AppDTO {
         this.name = name;
     }
 
-    public Long getModuleId() {
-        return moduleId;
+    public String getIconUrl() {
+        return iconUrl;
     }
 
-    public void setModuleId(Long moduleId) {
-        this.moduleId = moduleId;
+    public void setIconUrl(String iconUrl) {
+        this.iconUrl = iconUrl;
+    }
+
+    public String getRouter() {
+        return router;
+    }
+
+    public void setRouter(String router) {
+        this.router = router;
     }
 
     public String getInstanceConfig() {

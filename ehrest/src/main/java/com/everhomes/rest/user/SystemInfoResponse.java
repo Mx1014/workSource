@@ -11,10 +11,11 @@ import java.util.List;
  *     <li>contentServer: 内容服务器地址。如果用户为登录，则此字段不返回</li>
  *     <li>uploadUrlInBrowser: 通过 pc 上传文件的 url 链接地址</li>
  *     <li>paymentPlatform: 0旧支付  1新支付</li>
+ *     <li>scanForLogonServer: 扫码登录服务器地址</li>
  *     <li>accessPoints: borderServer 的链接地址。如果用户不登录，则此地址不返回</li>
  *     <li>myPublishFlag: "我"-"我的发布"是否显示，参考{@link MyPublishFlag}</li>
- *     <li>scanForLogonServer: 扫码登录服务器地址</li>
  *     <li>contentCacheConfig: 资源缓存配置 {@link com.everhomes.rest.contentserver.ContentCacheConfigDTO}</li>
+ *     <li>indexDtos: 主页签信息{@link IndexDTO}</li>
  * </ul>
  */
 public class SystemInfoResponse {
@@ -30,6 +31,8 @@ public class SystemInfoResponse {
     private Byte myPublishFlag;
 
     private ContentCacheConfigDTO contentCacheConfig;
+
+    private List<IndexDTO> indexDtos;
 
     public ContentCacheConfigDTO getContentCacheConfig() {
         return contentCacheConfig;
@@ -77,6 +80,14 @@ public class SystemInfoResponse {
 
     public void setMyPublishFlag(Byte myPublishFlag) {
         this.myPublishFlag = myPublishFlag;
+    }
+
+    public List<IndexDTO> getIndexDtos() {
+        return indexDtos;
+    }
+
+    public void setIndexDtos(List<IndexDTO> indexDtos) {
+        this.indexDtos = indexDtos;
     }
 
     @Override
