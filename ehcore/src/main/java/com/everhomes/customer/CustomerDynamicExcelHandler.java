@@ -569,20 +569,20 @@ public class CustomerDynamicExcelHandler implements DynamicExcelHandler {
                         entryInfo.setNamespaceId(namespaceId);
 
                         if(columns != null && columns.size() > 0) {
+                            String buildingName = "";
                             for(DynamicColumnDTO column : columns) {
                                 if("addressId".equals(column.getFieldName()) ) {
-                                    String[] value = column.getValue().split("-");
-                                    if(value.length == 2) {
-                                        Address address = addressProvider.findAddressByBuildingApartmentName(namespaceId, communityId, value[0], value[1]);
-                                        if(address != null) {
-                                            column.setValue(address.getId().toString());
-                                        }
-                                        Building building = communityProvider.findBuildingByCommunityIdAndName(communityId, value[0]);
-                                        if(building != null) {
-                                            entryInfo.setBuildingId(building.getId());
-                                        }
+                                    Address address = addressProvider.findAddressByBuildingApartmentName(namespaceId, communityId, buildingName, column.getValue());
+                                    if(address != null) {
+                                        column.setValue(address.getId().toString());
                                     }
-
+                                }
+                                if("buildingId".equals(column.getFieldName()) ) {
+                                    buildingName = column.getValue();
+                                    Building building = communityProvider.findBuildingByCommunityIdAndName(communityId, column.getValue());
+                                    if(building != null) {
+                                        entryInfo.setBuildingId(building.getId());
+                                    }
                                 }
                                 try {
                                     setToObj(column.getFieldName(), entryInfo, column.getValue(), null);

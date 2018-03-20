@@ -1071,6 +1071,8 @@ public class Rentalv2ServiceImpl implements Rentalv2Service {
 				EhRentalv2Resources.class.getSimpleName(),cmd.getRentalSiteId(),null);
 		RentalResource rs = this.rentalv2Provider.getRentalSiteById(cmd.getRentalSiteId());
 
+		//删掉除物资 和 推销员的内容
+		attachments = attachments.stream().filter(r-> r.getAttachmentType()>AttachmentType.ATTACHMENT.getCode()).collect(Collectors.toList());
 		setAttachmentsByResourceType(attachments,rs.getResourceTypeId());
 		response.setAttachments(convertAttachments(attachments));
 		
@@ -1080,8 +1082,6 @@ public class Rentalv2ServiceImpl implements Rentalv2Service {
 	//根据业务设置自定义提交内容
 	private void setAttachmentsByResourceType(List<RentalConfigAttachment> attachments,Long resourceTypeId){
 		RentalResourceType resourceType = this.rentalv2Provider.getRentalResourceTypeById(resourceTypeId);
-		//删掉除物资 和 推销员的内容
-		attachments = attachments.stream().filter(r-> r.getAttachmentType()>AttachmentType.ATTACHMENT.getCode()).collect(Collectors.toList());
 		RentalConfigAttachment attachment = new RentalConfigAttachment();
 		attachment.setAttachmentType(AttachmentType.TEXT_REMARK.getCode());
 		attachment.setMustOptions((byte)0);
