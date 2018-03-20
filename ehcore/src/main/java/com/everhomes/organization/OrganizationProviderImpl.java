@@ -45,6 +45,7 @@ import com.everhomes.util.DateHelper;
 import com.everhomes.util.IterationMapReduceCallback.AfterAction;
 import com.everhomes.util.RecordHelper;
 import com.everhomes.util.RuntimeErrorException;
+import com.hp.hpl.sparta.xpath.Step;
 
 import org.jooq.*;
 import org.jooq.impl.DSL;
@@ -5946,13 +5947,17 @@ public class OrganizationProviderImpl implements OrganizationProvider {
 	}
 
     @Override
-    public Organization findOrganizationByName(String groupType, String name, Long directlyEnterpriseId) {
+    public Organization findOrganizationByName(String groupType, String name, Long directlyEnterpriseId,Long groupId) {
         DSLContext context = this.dbProvider.getDslContext(AccessSpec.readOnly());
-        Record r = context.select().from(Tables.EH_ORGANIZATIONS).where(Tables.EH_ORGANIZATIONS.NAME.eq(name))
+        SelectConditionStep<Record> step = context.select().from(Tables.EH_ORGANIZATIONS).where(Tables.EH_ORGANIZATIONS.NAME.eq(name))
                 .and(Tables.EH_ORGANIZATIONS.DIRECTLY_ENTERPRISE_ID.eq(directlyEnterpriseId))
                 .and(Tables.EH_ORGANIZATIONS.GROUP_TYPE.eq(groupType))
-                .and(Tables.EH_ORGANIZATIONS.STATUS.eq(OrganizationStatus.ACTIVE.getCode()))
-                .fetchAny();
+                .and(Tables.EH_ORGANIZATIONS.STATUS.eq(OrganizationStatus.ACTIVE.getCode()));
+        if(null !=groupId){
+        	step = step.and(Tables.EH_ORGANIZATIONS.ID.ne(groupId));
+        }
+        
+        Record r = step.fetchAny();
         if (r != null)
             return ConvertHelper.convert(r, Organization.class);
         return null;

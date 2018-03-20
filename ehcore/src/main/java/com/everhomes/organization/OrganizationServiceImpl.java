@@ -13630,7 +13630,7 @@ public class OrganizationServiceImpl implements OrganizationService {
     
     @Override
     public Organization createUniongroupOrganization(Long organizationId, String name,String groupType) {
-        checkNameRepeat(organizationId, name, groupType);
+        checkNameRepeat(organizationId, name, groupType,null);
         User user = UserContext.current().getUser();
         Organization parOrg = this.checkOrganization(organizationId);
         Organization organization = ConvertHelper.convert(parOrg, Organization.class);
@@ -13647,9 +13647,9 @@ public class OrganizationServiceImpl implements OrganizationService {
 
         return organization;
     }
-
-    private void checkNameRepeat(Long organizationId, String name, String groupType) {
-        Organization org = organizationProvider.findOrganizationByName(groupType, name, organizationId);
+    @Override
+    public void checkNameRepeat(Long organizationId, String name, String groupType,Long groupId) {
+        Organization org = organizationProvider.findOrganizationByName(groupType, name, organizationId,groupId);
         if (null != org) {
             throw RuntimeErrorException.errorWith(OrganizationServiceErrorCode.SCOPE,
                     OrganizationServiceErrorCode.ERROR_ORG_NAME_REPEAT,  "名称重复错误");
