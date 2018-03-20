@@ -113,6 +113,9 @@ public class EnterpriseContactServiceImpl implements EnterpriseContactService {
     
     @Autowired
     private AclProvider aclProvider;
+
+    @Autowired
+	private OrganizationService organizationService;
     
     
 
@@ -1966,25 +1969,25 @@ public class EnterpriseContactServiceImpl implements EnterpriseContactService {
 		return response;
 	}
 	
-	@Override
-	public ListOrganizationMemberCommandResponse ListParentOrganizationPersonnels(
-			ListOrganizationMemberCommand cmd) {
-		ListOrganizationMemberCommandResponse response = new ListOrganizationMemberCommandResponse();
-		Organization org = this.checkOrganization(cmd.getOrganizationId());
-		if(null == org)
-			return response;
-		
-		int pageSize = PaginationConfigHelper.getPageSize(configProvider, cmd.getPageSize());
-		
-		CrossShardListingLocator locator = new CrossShardListingLocator();
-		locator.setAnchor(cmd.getPageAnchor());
-		List<OrganizationMember> organizationMembers = this.organizationProvider.listParentOrganizationMembers(org.getPath(), cmd.getGroupTypes(), locator, pageSize);
-		response.setNextPageAnchor(locator.getAnchor());
-		
-		response.setMembers(this.convertDTO(organizationMembers, org));
-		
-		return response;
-	}
+//	@Override
+//	public ListOrganizationMemberCommandResponse ListParentOrganizationPersonnels(
+//			ListOrganizationMemberCommand cmd) {
+//		ListOrganizationMemberCommandResponse response = new ListOrganizationMemberCommandResponse();
+//		Organization org = this.checkOrganization(cmd.getOrganizationId());
+//		if(null == org)
+//			return response;
+//
+//		int pageSize = PaginationConfigHelper.getPageSize(configProvider, cmd.getPageSize());
+//
+//		CrossShardListingLocator locator = new CrossShardListingLocator();
+//		locator.setAnchor(cmd.getPageAnchor());
+//		List<OrganizationMember> organizationMembers = this.organizationProvider.listParentOrganizationMembers(org.getPath(), cmd.getGroupTypes(), locator, pageSize);
+//		response.setNextPageAnchor(locator.getAnchor());
+//
+//		response.setMembers(this.convertDTO(organizationMembers, org));
+//
+//		return response;
+//	}
 	
 	@Override
 	public VerifyPersonnelByPhoneCommandResponse verifyPersonnelByPhone(VerifyPersonnelByPhoneCommand cmd){
@@ -2141,30 +2144,15 @@ public class EnterpriseContactServiceImpl implements EnterpriseContactService {
 	 * @return
 	 */
 	private List<OrganizationMemberDTO> convertDTO(List<OrganizationMember> organizationMembers, Organization org){
-		List<Organization> depts = organizationProvider.listDepartments(org.getPath().split("/")[1]+"/%", 1, 1000);
-//		Long orgId = null;
-
-//		if(org.getGroupType().equals(OrganizationGroupType.DEPARTMENT.getCode())){
-//			orgId = organizationMembers.get(0).getOrganizationId();
-//		}else{
-//			orgId = org.getId();
-//		}
-		
-//		List<OrganizationRoleMap> organizationRoleMaps = organizationRoleMapProvider.listOrganizationRoleMaps(orgId, EntityType.ORGANIZATIONS, PrivateFlag.PUBLIC);
-		
-//	    Map<Long, OrganizationRoleMap> roleMap =  this.convertOrganizationRoleMap(organizationRoleMaps);
-		
-		Map<Long, Organization> deptMaps = this.convertListToMap(depts);
 		return organizationMembers.stream().map((c) ->{
 			OrganizationMemberDTO dto =  ConvertHelper.convert(c, OrganizationMemberDTO.class);
-			Organization organization = deptMaps.get(c.getOrganizationId());
-			if(null != organization)
-				dto.setOrganizationName(organization.getName());
-			
-			Organization group = deptMaps.get(c.getGroupId());
-			if(null != group)
-				dto.setGroupName(group.getName());
-			
+			/**
+			 * 补充用户部门
+			 */
+			if(c.getDetailId() != null){
+				Long departmentId = organizationService.getDepartmentByDetailIdAndOrgId(c.getDetailId(), org.getId());
+				dto.setOrganizationName(checkOrganization(departmentId).getName());
+			}
 			/**
 			 * 补充用户角色
 			 */
@@ -2175,11 +2163,8 @@ public class EnterpriseContactServiceImpl implements EnterpriseContactService {
 					for (Long roleId : resources) {
 						AclRoleAssignmentsDTO aclRoleAssignmentsDTO = new AclRoleAssignmentsDTO();
 						aclRoleAssignmentsDTO.setRoleId(roleId);
-//						OrganizationRoleMap role = roleMap.get(roleId);
-//						aclRoleAssignmentsDTO.setRoleName(null == role ? "" : role.getRoleName());
 						aclRoles.add(aclRoleAssignmentsDTO);
 					}
-//					dto.setAclRoles(aclRoles);
 				}
 			}
 			return dto;
