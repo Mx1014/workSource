@@ -1,5 +1,5 @@
 ELASTIC=elasticsearch:9200
-INDEX=everhomesv32x
+INDEX=everhomesv3
 
 curl -XDELETE http://$ELASTIC/$INDEX/_mapping/paymentApplication
 curl -XPUT "http://$ELASTIC/$INDEX/_mapping/paymentApplication" -d '

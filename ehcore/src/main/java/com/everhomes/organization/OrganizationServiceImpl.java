@@ -304,6 +304,9 @@ public class OrganizationServiceImpl implements OrganizationService {
     @Autowired
     private UserPrivilegeMgr userPrivilegeMgr;
 
+    @Autowired
+    private EnterpriseCustomerProvider customerProvider;
+
 
     private int getPageCount(int totalCount, int pageSize) {
         int pageCount = totalCount / pageSize;
@@ -7869,7 +7872,6 @@ public class OrganizationServiceImpl implements OrganizationService {
                 continue;
             }
 
-
             if (null == org) {
                 OrganizationDTO dto = this.createEnterprise(enterpriseCommand);
                 org = ConvertHelper.convert(dto, Organization.class);
@@ -7896,6 +7898,19 @@ public class OrganizationServiceImpl implements OrganizationService {
                 orgAddress.setOperatorUid(user.getId());
                 organizationProvider.createOrganizationAddress(orgAddress);
                 orgAddressIds.get(org.getId()).add(address.getId());
+
+                EnterpriseCustomer customer = customerProvider.findByOrganizationId(org.getId());
+                if(customer != null) {
+                    CustomerEntryInfo entryInfo = new CustomerEntryInfo();
+                    entryInfo.setNamespaceId(cmd.getNamespaceId());
+                    entryInfo.setCustomerId(customer.getId());
+                    entryInfo.setCustomerType(CustomerType.ENTERPRISE.getCode());
+                    entryInfo.setCustomerName(customer.getName());
+                    entryInfo.setAddressId(address.getId());
+                    entryInfo.setAddress(address.getAddress());
+                    entryInfo.setBuildingId(building.getId());
+                    enterpriseCustomerProvider.createCustomerEntryInfo(entryInfo);
+                }
             }
 
             //添加管理员
