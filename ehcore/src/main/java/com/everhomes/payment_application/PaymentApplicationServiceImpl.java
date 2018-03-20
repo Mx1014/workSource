@@ -204,7 +204,7 @@ public class PaymentApplicationServiceImpl implements PaymentApplicationService 
         createFlowCaseCommand.setFlowVersion(flow.getFlowVersion());
         createFlowCaseCommand.setReferId(application.getId());
         createFlowCaseCommand.setReferType(EntityType.PAYMENT_APPLICATION.getCode());
-        createFlowCaseCommand.setContent(application.getRemark());
+        createFlowCaseCommand.setContent(application.getApplicationNumber());
         createFlowCaseCommand.setServiceType("付款申请");
         createFlowCaseCommand.setProjectId(application.getCommunityId());
         createFlowCaseCommand.setProjectType(EntityType.COMMUNITY.getCode());
