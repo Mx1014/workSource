@@ -12,8 +12,8 @@ import com.everhomes.rest.archives.TransferArchivesEmployeesCommand;
 import com.everhomes.rest.business.listUsersOfEnterpriseCommand;
 import com.everhomes.rest.common.ImportFileResponse;
 import com.everhomes.rest.organization.*;
-
 import com.everhomes.rest.techpark.expansion.ListEnterpriseDetailResponse;
+
 import org.apache.poi.xssf.usermodel.XSSFWorkbook;
 import org.springframework.web.multipart.MultipartFile;
 
@@ -551,5 +551,6 @@ public interface OrganizationService {
 	List<Long> listDetailIdWithEnterpriseExclude(String keywords, Integer namespaceId, Long enterpriseId, Timestamp checkinTimeStart, Timestamp checkinTimeEnd, Timestamp dissmissTimeStart, Timestamp dissmissTimeEnd, CrossShardListingLocator locator, Integer pageSize,List<Long> notinDetails,List<Long> inDetails);
 
 	// 根据detailId获取部门
-	Long getDepartmentByDetailIdAndOrgId(Long detailId, Long OrgId);
+	Long getDepartmentByDetailIdAndOrgId(Long detailId, Long OrgId); 
+	void checkNameRepeat(Long organizationId, String name, String groupType, Long groupId);
 }

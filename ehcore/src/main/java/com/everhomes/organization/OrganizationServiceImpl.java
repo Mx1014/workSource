@@ -5296,51 +5296,51 @@ public class OrganizationServiceImpl implements OrganizationService {
     }
 
 
-    @Override
-    public ListDepartmentsCommandResponse listDepartments(
-            ListDepartmentsCommand cmd) {
-        ListDepartmentsCommandResponse response = new ListDepartmentsCommandResponse();
-        cmd.setPageOffset(cmd.getPageOffset() == null ? 1 : cmd.getPageOffset());
-        Organization org = organizationProvider.findOrganizationById(cmd.getParentId());
-        if (org != null) {
-            int totalCount = organizationProvider.countDepartments(org.getPath() + "/%");
-            if (totalCount == 0) return response;
-
-            int pageSize = PaginationConfigHelper.getPageSize(configurationProvider, cmd.getPageSize());
-            int pageCount = getPageCount(totalCount, pageSize);
-
-            List<Organization> result = organizationProvider.listDepartments(org.getPath() + "/%", cmd.getPageOffset(), pageSize);
-            List<Organization> depts = organizationProvider.listDepartments(org.getPath() + "/%", 1, 1000);
-
-            if (result != null && result.size() > 0) {
-                List<RoleAssignment> roleAssignments = this.aclProvider.getAllRoleAssignments();
-                Map<Long, RoleAssignment> roleAssignmentMap = new HashMap<Long, RoleAssignment>();
-                for (RoleAssignment roleass : roleAssignments) {
-                    if (EntityType.ORGANIZATIONS.getCode().equals(roleass.getTargetType()))
-                        roleAssignmentMap.put(roleass.getTargetId(), roleass);
-                }
-                Map<Long, Organization> deptMaps = this.convertDeptListToMap(depts);
-                response.setDepartments(result.stream().map(r -> {
-                    DepartmentDTO department = new DepartmentDTO();
-                    department.setId(r.getId());
-                    department.setDepartmentName(r.getName());
-                    department.setDepartmentType(r.getDepartmentType());
-                    department.setSuperiorDepartment(null == deptMaps.get(r.getParentId()) ? "" : deptMaps.get(r.getParentId()).getName());
-                    if (roleAssignmentMap.get(department.getId()) != null) {
-                        Long roleId = roleAssignmentMap.get(department.getId()).getRoleId();
-                        Role role = this.aclProvider.getRoleById(roleId);
-                        if (role != null)
-                            department.setRole(role.getName());
-                    }
-
-                    return department;
-                }).collect(Collectors.toList()));
-            }
-            response.setNextPageOffset(cmd.getPageOffset() == pageCount ? null : cmd.getPageOffset() + 1);
-        }
-
-        return response;
-    }
+//    @Override
+//    public ListDepartmentsCommandResponse listDepartments(
+//            ListDepartmentsCommand cmd) {
+//        ListDepartmentsCommandResponse response = new ListDepartmentsCommandResponse();
+//        cmd.setPageOffset(cmd.getPageOffset() == null ? 1 : cmd.getPageOffset());
+//        Organization org = organizationProvider.findOrganizationById(cmd.getParentId());
+//        if (org != null) {
+//            int totalCount = organizationProvider.countDepartments(org.getPath() + "/%");
+//            if (totalCount == 0) return response;
+//
+//            int pageSize = PaginationConfigHelper.getPageSize(configurationProvider, cmd.getPageSize());
+//            int pageCount = getPageCount(totalCount, pageSize);
+//
+//            List<Organization> result = organizationProvider.listDepartments(org.getPath() + "/%", cmd.getPageOffset(), pageSize);
+//            List<Organization> depts = organizationProvider.listDepartments(org.getPath() + "/%", 1, 1000);
+//
+//            if (result != null && result.size() > 0) {
+//                List<RoleAssignment> roleAssignments = this.aclProvider.getAllRoleAssignments();
+//                Map<Long, RoleAssignment> roleAssignmentMap = new HashMap<Long, RoleAssignment>();
+//                for (RoleAssignment roleass : roleAssignments) {
+//                    if (EntityType.ORGANIZATIONS.getCode().equals(roleass.getTargetType()))
+//                        roleAssignmentMap.put(roleass.getTargetId(), roleass);
+//                }
+//                Map<Long, Organization> deptMaps = this.convertDeptListToMap(depts);
+//                response.setDepartments(result.stream().map(r -> {
+//                    DepartmentDTO department = new DepartmentDTO();
+//                    department.setId(r.getId());
+//                    department.setDepartmentName(r.getName());
+//                    department.setDepartmentType(r.getDepartmentType());
+//                    department.setSuperiorDepartment(null == deptMaps.get(r.getParentId()) ? "" : deptMaps.get(r.getParentId()).getName());
+//                    if (roleAssignmentMap.get(department.getId()) != null) {
+//                        Long roleId = roleAssignmentMap.get(department.getId()).getRoleId();
+//                        Role role = this.aclProvider.getRoleById(roleId);
+//                        if (role != null)
+//                            department.setRole(role.getName());
+//                    }
+//
+//                    return department;
+//                }).collect(Collectors.toList()));
+//            }
+//            response.setNextPageOffset(cmd.getPageOffset() == pageCount ? null : cmd.getPageOffset() + 1);
+//        }
+//
+//        return response;
+//    }
 
     private Map<Long, Organization> convertDeptListToMap(List<Organization> depts) {
         Map<Long, Organization> map = new HashMap<Long, Organization>();
@@ -13645,7 +13645,7 @@ public class OrganizationServiceImpl implements OrganizationService {
     
     @Override
     public Organization createUniongroupOrganization(Long organizationId, String name,String groupType) {
-        checkNameRepeat(organizationId, name, groupType);
+        checkNameRepeat(organizationId, name, groupType,null);
         User user = UserContext.current().getUser();
         Organization parOrg = this.checkOrganization(organizationId);
         Organization organization = ConvertHelper.convert(parOrg, Organization.class);
@@ -13662,9 +13662,9 @@ public class OrganizationServiceImpl implements OrganizationService {
 
         return organization;
     }
-
-    private void checkNameRepeat(Long organizationId, String name, String groupType) {
-        Organization org = organizationProvider.findOrganizationByName(groupType, name, organizationId);
+    @Override
+    public void checkNameRepeat(Long organizationId, String name, String groupType,Long groupId) {
+        Organization org = organizationProvider.findOrganizationByName(groupType, name, organizationId,groupId);
         if (null != org) {
             throw RuntimeErrorException.errorWith(OrganizationServiceErrorCode.SCOPE,
                     OrganizationServiceErrorCode.ERROR_ORG_NAME_REPEAT,  "名称重复错误");

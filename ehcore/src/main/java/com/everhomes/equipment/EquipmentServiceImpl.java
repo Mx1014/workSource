@@ -4501,16 +4501,18 @@ private void checkUserPrivilege(Long orgId, Long privilegeId, Long communityId) 
 							.map(EquipmentInspectionEquipmentPlanMap::getPlanId)
 							.collect(Collectors.toList());
 			}
+			if (planIds == null || planIds.size() == 0) {
+				return null;
+			}
 			tasks = equipmentProvider.listTaskByPlanMaps(planIds, null, null, locator, pageSize + 1,taskStatus);
 		} else {
 			//扫码任务做权限控制 只能扫出设备下有执行权限的任务
 			List<StandardAndStatus> standards = new ArrayList<>();
 			List<Byte> executeTaskStatus = new ArrayList<Byte>();
 			executeTaskStatus.add(EquipmentTaskStatus.WAITING_FOR_EXECUTING.getCode());
-			executeTaskStatus.add(EquipmentTaskStatus.IN_MAINTENANCE.getCode());
 
 			List<Byte> reviewTaskStatus = new ArrayList<Byte>();
-			reviewTaskStatus.add(EquipmentTaskStatus.NEED_MAINTENANCE.getCode());
+			reviewTaskStatus.add(EquipmentTaskStatus.CLOSE.getCode());
 
 			List<ExecuteGroupAndPosition> groupDtos = listUserRelateGroups();
 			//List<EquipmentInspectionStandardGroupMap> maps = equipmentProvider.listEquipmentInspectionStandardGroupMapByGroupAndPosition(groupDtos, null);
@@ -4529,8 +4531,7 @@ private void checkUserPrivilege(Long orgId, Long privilegeId, Long communityId) 
 					standards.add(standardAndStatus);
 				}
 			}
-			//tasks = equipmentProvider.listTasksByEquipmentIdAndStandards(equipment.getId(), standards, null, null, locator, pageSize+1);
-			tasks = equipmentProvider.listTasksByEquipmentIdAndStandards(equipment.getId(), standards, null, null, locator, pageSize+1);
+			tasks = equipmentProvider.listTasksByEquipmentIdAndStandards(standards, null, null, locator, pageSize+1);
 		}
 
 		if(tasks.size() > pageSize) {

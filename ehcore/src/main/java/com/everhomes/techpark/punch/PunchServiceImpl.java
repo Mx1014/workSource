@@ -7716,6 +7716,7 @@ public class PunchServiceImpl implements PunchService {
         checkAppPrivilege(punchOrg.getDirectlyEnterpriseId(),punchOrg.getDirectlyEnterpriseId(),PrivilegeConstants.PUNCH_RULE_UPDATE);
 
         punchOrg.setName(cmd.getGroupName());
+        	organizationService.checkNameRepeat(punchOrg.getDirectlyEnterpriseId(), cmd.getGroupName(), punchOrg.getGroupType(), punchOrg.getId());
 			organizationProvider.updateOrganization(punchOrg);
 //			Long t1 = System.currentTimeMillis();
 //			LOGGER.debug("saveUnion Time1 "+  t1 + "cost: "+ (t1-t0));
