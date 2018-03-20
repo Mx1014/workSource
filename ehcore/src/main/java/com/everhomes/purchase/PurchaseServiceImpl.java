@@ -291,8 +291,12 @@ public class PurchaseServiceImpl implements PurchaseService {
             //还没有入库的话
             if(stock != null){
                 pto.setStock(stock.getAmount());
-                pto.setBelongedWarehouse(warehouseProvider.findWarehouseNameByMaterialId(item.getMaterialId()));
+            }else{
+                pto.setStock(0l);
             }
+//            pto.setBelongedWarehouse(warehouseProvider.findWarehouseNameByMaterialId(item.getMaterialId()));
+            //拿填单的时候的仓库id
+            pto.setBelongedWarehouse(warehouseProvider.findWarehouseNameById(item.getWarehouseId()));
             pto.setMaterialCategory(warehouseProvider.findWarehouseMaterialCategoryByMaterialId(item.getMaterialId()));
             pto.setMaterialId(item.getMaterialId());
             pto.setMaterialName(material.getName());
