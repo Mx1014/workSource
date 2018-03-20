@@ -288,13 +288,16 @@ public class PurchaseServiceImpl implements PurchaseService {
             PurchaseMaterialDetailDTO pto = new PurchaseMaterialDetailDTO();
             WarehouseMaterials material = warehouseProvider.findWarehouseMaterialById(item.getMaterialId());
             WarehouseMaterialStock stock = warehouseProvider.findWarehouseStocksByMaterialId(item.getMaterialId());
-            pto.setBelongedWarehouse(warehouseProvider.findWarehouseNameByMaterialId(item.getMaterialId()));
+            //还没有入库的话
+            if(stock != null){
+                pto.setStock(stock.getAmount());
+                pto.setBelongedWarehouse(warehouseProvider.findWarehouseNameByMaterialId(item.getMaterialId()));
+            }
             pto.setMaterialCategory(warehouseProvider.findWarehouseMaterialCategoryByMaterialId(item.getMaterialId()));
             pto.setMaterialId(item.getMaterialId());
             pto.setMaterialName(material.getName());
             pto.setMaterialNumber(material.getMaterialNumber());
             pto.setPurchaseQuantity(item.getPurchaseQuantity());
-            pto.setStock(stock.getAmount());
             pto.setSupplierName(material.getSupplierName());
             pto.setTotalAmount(String.valueOf((item.getUnitPrice().longValue() * item.getPurchaseQuantity())));
             pto.setUnit(warehouseProvider.findWarehouseUnitNameById(material.getUnitId()));
