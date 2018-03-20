@@ -858,6 +858,19 @@ public class WarehouseProviderImpl implements WarehouseProvider {
     }
 
     @Override
+    public String findWarehouseNameById(Long warehouseId) {
+        DSLContext context = dbProvider.getDslContext(AccessSpec.readOnly());
+        List<String> fetch = context.select(Tables.EH_WAREHOUSES.NAME)
+                .from(Tables.EH_WAREHOUSES)
+                .where(Tables.EH_WAREHOUSES.ID.eq(warehouseId))
+                .fetch(Tables.EH_WAREHOUSES.NAME);
+        if(fetch.size() == 1){
+            return fetch.get(0);
+        }
+        return "";
+    }
+
+    @Override
     public Long getWarehouseStockAmount(Long warehouseId, String ownerType, Long ownerId) {
         DSLContext context = dbProvider.getDslContext(AccessSpec.readOnly());
         SelectQuery<EhWarehouseStocksRecord> query = context.selectQuery(Tables.EH_WAREHOUSE_STOCKS);

@@ -113,4 +113,6 @@ public interface WarehouseProvider {
     void insertWarehouseStock(WarehouseStocks stock);
 
     void insertWarehouseStockLog(WarehouseStockLogs logs);
+
+    String findWarehouseNameById(Long warehouseId);
 }
