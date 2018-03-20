@@ -4530,7 +4530,7 @@ private void checkUserPrivilege(Long orgId, Long privilegeId, Long communityId) 
 				}
 			}
 			//tasks = equipmentProvider.listTasksByEquipmentIdAndStandards(equipment.getId(), standards, null, null, locator, pageSize+1);
-			tasks = equipmentProvider.listTasksByEquipmentIdAndStandards(equipment.getId(), standards, null, null, locator, pageSize+1);
+			tasks = equipmentProvider.listTasksByEquipmentIdAndStandards(standards, null, null, locator, pageSize+1);
 		}
 
 		if(tasks.size() > pageSize) {

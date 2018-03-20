@@ -1096,7 +1096,7 @@ public class EquipmentProviderImpl implements EquipmentProvider {
     }
 
     @Override
-    public List<EquipmentInspectionTasks> listTasksByEquipmentIdAndStandards(Long equipmentId, List<StandardAndStatus> standards, Timestamp startDate, Timestamp endDate, CrossShardListingLocator locator, Integer pageSize) {
+    public List<EquipmentInspectionTasks> listTasksByEquipmentIdAndStandards(List<StandardAndStatus> standards, Timestamp startDate, Timestamp endDate, CrossShardListingLocator locator, Integer pageSize) {
         List<EquipmentInspectionTasks> tasks = new ArrayList<EquipmentInspectionTasks>();
 
         if (locator.getShardIterator() == null) {
@@ -1110,8 +1110,6 @@ public class EquipmentProviderImpl implements EquipmentProvider {
             if (locator.getAnchor() != null && locator.getAnchor() != 0L) {
                 query.addConditions(Tables.EH_EQUIPMENT_INSPECTION_TASKS.ID.lt(locator.getAnchor()));
             }
-
-            query.addConditions(Tables.EH_EQUIPMENT_INSPECTION_TASKS.EQUIPMENT_ID.eq(equipmentId));
 
             if (standards != null && standards.size() > 0) {
                 Condition standardCon = null;
