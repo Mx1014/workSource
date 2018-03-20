@@ -204,6 +204,7 @@ import java.util.Iterator;
 import java.util.LinkedHashMap;
 import java.util.List;
 import java.util.Map;
+import java.util.Objects;
 import java.util.Set;
 import java.util.stream.Collectors;
 
@@ -1177,7 +1178,7 @@ Long nextPageAnchor = null;
              	}
     		}
 
-         }).filter(member->member!=null).collect(Collectors.toList());
+         }).filter(Objects::nonNull).collect(Collectors.toList());
 
     	return groupUsers;
 	}
@@ -1231,7 +1232,7 @@ Long nextPageAnchor = null;
 						}
 
 						if(position != null) {
-							if(sb != null && sb.length() > 0) {
+							if(sb.length() > 0) {
 								sb.append("-");
 								sb.append(position.getName());
 							} else {
@@ -1240,7 +1241,7 @@ Long nextPageAnchor = null;
 							}
 						}
 
-						if(sb != null && sb.length() > 0) {
+						if(sb.length() > 0) {
 							if(dto.getGroupName() != null) {
 								dto.setGroupName(dto.getGroupName() + "," + sb.toString());
 							} else {
@@ -1310,22 +1311,18 @@ Long nextPageAnchor = null;
 		        	}
 	        	}
 	        	if(r.getRecord().getAttachments() != null) {
-		        	List<QualityInspectionTaskAttachmentDTO> attachments = r.getRecord().getAttachments().stream().map((attach) -> {
-						QualityInspectionTaskAttachmentDTO attachment = ConvertHelper.convert(attach, QualityInspectionTaskAttachmentDTO.class);
-						return attachment;
-					}).collect(Collectors.toList());
-
-		        	recordDto.setAttachments(attachments);
-	        	}
-				if(r.getRecord().getItemResults() != null) {
-					List<QualityInspectionSpecificationItemResultsDTO> results = r.getRecord().getItemResults().stream().map((result) -> {
-						QualityInspectionSpecificationItemResultsDTO itemResult = ConvertHelper.convert(result, QualityInspectionSpecificationItemResultsDTO.class);
-						return itemResult;
-					}).collect(Collectors.toList());
-
-					recordDto.setItemResults(results);
+		        	List<QualityInspectionTaskAttachmentDTO> attachments = r.getRecord().getAttachments().stream().map((attach) -> ConvertHelper.convert(attach, QualityInspectionTaskAttachmentDTO.class)).collect(Collectors.toList());
+					if (recordDto != null) {
+						recordDto.setAttachments(attachments);
+					}
 				}
-	        	dto.setRecord(recordDto);
+				if (r.getRecord().getItemResults() != null) {
+					List<QualityInspectionSpecificationItemResultsDTO> results = r.getRecord().getItemResults().stream().map((result) -> ConvertHelper.convert(result, QualityInspectionSpecificationItemResultsDTO.class)).collect(Collectors.toList());
+					if (recordDto != null) {
+						recordDto.setItemResults(results);
+					}
+				}
+				dto.setRecord(recordDto);
 			}
 
 			if(r.getExecutorId() != null && r.getExecutorId() != 0) {
@@ -1358,14 +1355,21 @@ Long nextPageAnchor = null;
         	}
 
         	return dto;
-        }).filter(task->task!=null).collect(Collectors.toList());
+        }).filter(Objects::nonNull).collect(Collectors.toList());
 		return dtoList;
 	}
 
 	@Override
 	public QualityInspectionTaskDTO reportVerificationResult(ReportVerificationResultCommand cmd) {
+		Long taskId = 0L;
+		if(cmd.getCreateTask()!=null){
+			QualityInspectionTaskDTO createdTask = createQualityInspectionTask(cmd.getCreateTask());
+			taskId = createdTask.getId();
+		}else {
+			taskId = cmd.getTaskId();
+		}
 		User user = UserContext.current().getUser();
-		QualityInspectionTasks task = verifiedTaskById(cmd.getTaskId());
+		QualityInspectionTasks task = verifiedTaskById(taskId);
 		if(!QualityInspectionTaskStatus.WAITING_FOR_EXECUTING.equals(QualityInspectionTaskStatus.fromStatus(task.getStatus()))) {
 			LOGGER.error("the task which id="+task.getId()+" can not execute!");
 			throw RuntimeErrorException
