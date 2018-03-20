@@ -6,7 +6,7 @@ import com.everhomes.util.StringHelper;
  * <ul>
  * <li>namespaceId: 域空间id</li>
  * <li>orgId: 机构id</li>
- * <li>applicantNumber: 申请单号</li>
+ * <li>applicationNumber: 申请单号</li>
  * <li>keyword: 关键字，主题或合同名称</li>
  * <li>status: 审核状态 {@link com.everhomes.rest.payment_application.PaymentApplicationStatus}</li>
  * <li>pageAnchor: 分页的瞄</li>
@@ -17,7 +17,7 @@ import com.everhomes.util.StringHelper;
 public class SearchPaymentApplicationCommand {
     private Integer namespaceId;
     private Long orgId;
-    private String applicantNumber;
+    private String applicationNumber;
     private String keyword;
     private Byte status;
     private Long pageAnchor;
@@ -42,12 +42,12 @@ public class SearchPaymentApplicationCommand {
         this.ownerId = ownerId;
     }
 
-    public String getApplicantNumber() {
-        return applicantNumber;
+    public String getApplicationNumber() {
+        return applicationNumber;
     }
 
-    public void setApplicantNumber(String applicantNumber) {
-        this.applicantNumber = applicantNumber;
+    public void setApplicationNumber(String applicationNumber) {
+        this.applicationNumber = applicationNumber;
     }
 
     public String getKeyword() {

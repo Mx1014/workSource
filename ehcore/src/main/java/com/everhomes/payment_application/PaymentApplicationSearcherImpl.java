@@ -142,8 +142,8 @@ public class PaymentApplicationSearcherImpl extends AbstractElasticSearch implem
             fb = FilterBuilders.andFilter(fb, FilterBuilders.termFilter("status", cmd.getStatus()));
         }
 
-        if(cmd.getApplicantNumber() != null) {
-            fb = FilterBuilders.andFilter(fb, FilterBuilders.termFilter("applicationNumber", cmd.getApplicantNumber()));
+        if(cmd.getApplicationNumber() != null) {
+            fb = FilterBuilders.andFilter(fb, FilterBuilders.termFilter("applicationNumber", cmd.getApplicationNumber()));
         }
 
         int pageSize = PaginationConfigHelper.getPageSize(configProvider, cmd.getPageSize());
