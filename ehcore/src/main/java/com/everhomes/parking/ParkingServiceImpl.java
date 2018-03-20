@@ -7,6 +7,7 @@ import java.math.BigDecimal;
 import java.math.RoundingMode;
 import java.sql.Timestamp;
 import java.text.SimpleDateFormat;
+import java.time.format.DateTimeFormatter;
 import java.util.*;
 import java.util.stream.Collectors;
 
@@ -2501,6 +2502,72 @@ public class ParkingServiceImpl implements ParkingService {
 		}
 
 		return response;
+	}
+	
+	@Override
+	public ListParkingSpaceLogsResponse exportParkingSpaceLogs(ListParkingSpaceLogsCommand cmd,HttpServletResponse response) {
+		ListParkingSpaceLogsResponse resp =  listParkingSpaceLogs(cmd);
+
+		List<ParkingSpaceLogDTO> requests = resp.getLogDTOS();
+
+		Workbook wb = new XSSFWorkbook();
+
+		Font font = wb.createFont();
+		font.setFontName("黑体");
+		font.setFontHeightInPoints((short) 16);
+		CellStyle style = wb.createCellStyle();
+		style.setFont(font);
+
+		Sheet sheet = wb.createSheet("parkingSpaceLogDTOs");
+		sheet.setDefaultColumnWidth(20);
+		sheet.setDefaultRowHeightInPoints(20);
+		Row row = sheet.createRow(0);
+		row.createCell(0).setCellValue("操作");
+		row.createCell(1).setCellValue("操作时间");
+		row.createCell(2).setCellValue("操作人");
+		row.createCell(3).setCellValue("手机号");
+		row.createCell(4).setCellValue("用户类型");
+		row.createCell(5).setCellValue("公司名称");
+
+		DateTimeFormatter datetimeSF = DateTimeFormatter.ofPattern("yyyy/MM/dd HH:mm");
+		if (null != requests) {
+			for(int i = 0, size = requests.size(); i < size; i++){
+				Row tempRow = sheet.createRow(i + 1);
+				ParkingSpaceLogDTO logDto = requests.get(i);
+				
+				tempRow.createCell(0).setCellValue(getOperateTypeChineseDesc(logDto.getOperateType()));
+				tempRow.createCell(1).setCellValue(logDto.getOperateTime().toLocalDateTime().format(datetimeSF));
+				tempRow.createCell(2).setCellValue(logDto.getContactName());
+				tempRow.createCell(3).setCellValue(logDto.getContactPhone());
+				ParkingSpaceLockOperateUserType enumOperateUserType = ParkingSpaceLockOperateUserType.fromCode(logDto.getUserType());
+				tempRow.createCell(4).setCellValue(enumOperateUserType==null?"未知类型":enumOperateUserType.getDesc());
+				tempRow.createCell(5).setCellValue(logDto.getContactEnterpriseName());
+			}
+		}
+
+		ByteArrayOutputStream out = null;
+		try {
+			out = new ByteArrayOutputStream();
+			wb.write(out);
+			DownloadUtils.download(out, response);
+		} catch (IOException e) {
+			LOGGER.error("exportParkingCardRequests is fail. {}",e);
+			throw RuntimeErrorException.errorWith(ErrorCodes.SCOPE_GENERAL, ErrorCodes.ERROR_GENERAL_EXCEPTION,
+					"exportParkingCardRequests is fail.");
+		}
+		return resp;
+
+	}
+
+	private String getOperateTypeChineseDesc(Byte operateType) {
+		ParkingSpaceLockOperateType enumOperateType = ParkingSpaceLockOperateType.fromCode(operateType);
+		if(enumOperateType == ParkingSpaceLockOperateType.UP){
+			return "车锁升起";
+		}
+		if(enumOperateType == ParkingSpaceLockOperateType.DOWN){
+			return "车锁降下";
+		}
+		return "未知操作";
 	}
 
 	@Override

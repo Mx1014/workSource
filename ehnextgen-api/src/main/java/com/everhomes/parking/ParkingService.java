@@ -131,4 +131,6 @@ public interface ParkingService {
     void raiseParkingSpaceLockForWeb(RaiseParkingSpaceLockCommand cmd);
 
     void downParkingSpaceLockForWeb(DownParkingSpaceLockCommand cmd);
+
+    ListParkingSpaceLogsResponse exportParkingSpaceLogs(ListParkingSpaceLogsCommand cmd,HttpServletResponse response);
 }
