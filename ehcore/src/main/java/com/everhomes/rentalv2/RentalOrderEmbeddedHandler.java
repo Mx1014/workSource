@@ -79,7 +79,7 @@ public class RentalOrderEmbeddedHandler implements OrderEmbeddedHandler {
 //				orderMap.setOperateTime(new Timestamp(DateHelper.currentGMTTime().getTime()));
 //				rentalProvider.updateRentalOrderPayorderMap(orderMap);
 
-				if(order.getStatus().equals(SiteBillStatus.PAYINGFINAL.getCode())){
+				if (order.getStatus().equals(SiteBillStatus.PAYINGFINAL.getCode())) {
 					//判断支付金额与订单金额是否相同
 					if (order.getPayTotalMoney().compareTo(order.getPaidMoney()) == 0) {
 
@@ -93,7 +93,7 @@ public class RentalOrderEmbeddedHandler implements OrderEmbeddedHandler {
 
 							handler.sendRentalSuccessSms(order);
 
-						}else {
+						} else {
 
 //							rentalv2Service.changeRentalOrderStatus(order, SiteBillStatus.SUCCESS.getCode(), true);
 
@@ -124,23 +124,29 @@ public class RentalOrderEmbeddedHandler implements OrderEmbeddedHandler {
 							smsProvider.addToTupleList(variables, "resourceName", order.getResourceName());
 
 							UserIdentifier userIdentifier = this.userProvider.findClaimedIdentifierByOwnerAndType(order.getCreatorUid(),
-									IdentifierType.MOBILE.getCode()) ;
-							if(null == userIdentifier){
+									IdentifierType.MOBILE.getCode());
+							if (null == userIdentifier) {
 								LOGGER.error("userIdentifier is null...userId = " + order.getCreatorUid());
-							}else{
+							} else {
 								smsProvider.sendSms(order.getNamespaceId(), userIdentifier.getIdentifierToken(), templateScope,
 										templateId, templateLocale, variables);
 							}
 						}
-					}else {
-						LOGGER.error("待付款订单:id ["+order.getId()+"]付款金额有问题： 应该付款金额："+order.getPayTotalMoney()+"实际付款金额："+order.getPaidMoney());
+					} else {
+						LOGGER.error("待付款订单:id [" + order.getId() + "]付款金额有问题： 应该付款金额：" + order.getPayTotalMoney() + "实际付款金额：" + order.getPaidMoney());
 					}
-				}else if(order.getStatus().equals(SiteBillStatus.SUCCESS.getCode())){
-					LOGGER.error("待付款订单:id ["+order.getId()+"] 状态已经是成功预约");
-				}else{
-					LOGGER.error("待付款订单:id ["+order.getId()+"]状态有问题： 订单状态是："+order.getStatus());
-				}
-
+				} else if (order.getStatus().equals(SiteBillStatus.SUCCESS.getCode())) {
+					LOGGER.error("待付款订单:id [" + order.getId() + "] 状态已经是成功预约");
+				} else if (order.getStatus().equals(SiteBillStatus.IN_USING) || (order.getStatus().equals(SiteBillStatus.OWING_FEE))) {//vip停车的欠费和续费
+					if (order.getPayTotalMoney().compareTo(order.getPaidMoney()) == 0) {
+						if (order.getStatus().equals(SiteBillStatus.OWING_FEE))
+							order.setStatus(SiteBillStatus.COMPLETE.getCode());
+						rentalProvider.updateRentalBill(order);
+					}else{
+						LOGGER.error("待付款订单:id [" + order.getId() + "]付款金额有问题： 应该付款金额：" + order.getPayTotalMoney() + "实际付款金额：" + order.getPaidMoney());
+					}
+				} else
+					LOGGER.error("待付款订单:id [" + order.getId() + "]状态有问题： 订单状态是：" + order.getStatus());
 				return null;
 			});
 		}
