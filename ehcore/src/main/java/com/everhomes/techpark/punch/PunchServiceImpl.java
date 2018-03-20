@@ -9206,7 +9206,7 @@ public class PunchServiceImpl implements PunchService {
         if (newALB < 0) {
             if (NormalFlag.YES == NormalFlag.fromCode(cmd.getIsBatch())) {
                 newALB = 0.0;
-            }else {
+            } else {
                 throw RuntimeErrorException.errorWith(
                         PunchServiceErrorCode.SCOPE, PunchServiceErrorCode.ERROR_ANNUAL_LEAVE_CORRECTION_TOO_SMALL, "年假余额不足");
             }
@@ -9221,28 +9221,36 @@ public class PunchServiceImpl implements PunchService {
         if (newOCB < 0) {
             if (NormalFlag.YES == NormalFlag.fromCode(cmd.getIsBatch())) {
                 newOCB = 0.0;
-            }else {
+            } else {
                 throw RuntimeErrorException.errorWith(
                         PunchServiceErrorCode.SCOPE, PunchServiceErrorCode.ERROR_OVERTIME_CORRECTION_TOO_SMALL, "调休余额不足");
             }
         }
         balance.setOvertimeCompensationBalance(newOCB);
-        saveBalanceAndLog(balance, cmd.getDescription(), cmd.getAnnualLeaveBalanceCorrection(), cmd.getOvertimeCompensationBalanceCorrection());
+        saveBalanceAndLog(balance, cmd.getDescription(), cmd.getAnnualLeaveBalanceCorrection(), cmd.getOvertimeCompensationBalanceCorrection(), userId);
 
 
     }
 
     private void saveBalanceAndLog(PunchVacationBalance balance, String description, Double annualLeaveBalanceCorrection,
-                                   Double overtimeCompensationBalanceCorrection) {
+                                   Double overtimeCompensationBalanceCorrection, Long userId) {
         PunchVacationBalanceLog log = ConvertHelper.convert(balance, PunchVacationBalanceLog.class);
         log.setDescription(description);
         log.setAnnualLeaveBalanceCorrection(annualLeaveBalanceCorrection);
         log.setOvertimeCompensationBalanceCorrectione(overtimeCompensationBalanceCorrection);
         if (balance.getId() == null) {
+            balance.setCreateTime(new Timestamp(DateHelper.currentGMTTime().getTime()));
+            balance.setCreatorUid(userId);
+            balance.setUpdateTime(balance.getCreateTime());
+            balance.setOperatorUid(balance.getCreatorUid());
             punchVacationBalanceProvider.createPunchVacationBalance(balance);
         } else {
+            balance.setUpdateTime(new Timestamp(DateHelper.currentGMTTime().getTime()));
+            balance.setOperatorUid(userId);
             punchVacationBalanceProvider.updatePunchVacationBalance(balance);
         }
+        log.setCreateTime(new Timestamp(DateHelper.currentGMTTime().getTime()));
+        log.setCreatorUid(userId);
         punchVacationBalanceLogProvider.createPunchVacationBalanceLog(log);
     }
 
@@ -9319,6 +9327,7 @@ public class PunchServiceImpl implements PunchService {
 
         return null;
     }
+
     @Override
     public void exportVacationBalances(ExportVacationBalancesCommand cmd) {
         Map<String, Object> params = new HashMap();
@@ -9328,9 +9337,10 @@ public class PunchServiceImpl implements PunchService {
         params.put("reportType", "exportVacationBalances");
         String fileName = "";
         fileName = String.format("假期余额_%s.xlsx", DateUtil.dateToStr(DateHelper.currentGMTTime(), DateUtil.NO_SLASH)
-                    );
+        );
         taskService.createTask(fileName, TaskType.FILEDOWNLOAD.getCode(), PunchExportTaskHandler.class, params, TaskRepeatFlag.REPEAT.getCode(), new Date());
     }
+
     @Autowired
     private ImportFileService importFileService;
 
@@ -9342,7 +9352,7 @@ public class PunchServiceImpl implements PunchService {
         task.setOwnerId(cmd.getOrganizationId());
         task.setType(ImportFileTaskType.PUNCH_VACATION.getCode());
         task.setCreatorUid(UserContext.currentUserId());
-
+        Long userId = UserContext.currentUserId();
         importFileService.executeTask(new ExecuteImportTaskCallback() {
             @Override
             public ImportFileResponse importFile() {
@@ -9357,7 +9367,7 @@ public class PunchServiceImpl implements PunchService {
                         response.setFileLog(fileLog);
                         return response;
                     }
-                    saveImportVacation(resultList, cmd.getOrganizationId(), fileLog, response);
+                    saveImportVacation(resultList, cmd.getOrganizationId(), fileLog, response, userId);
                 } else {
                     response.setFileLog(ImportFileErrorType.TITLE_ERROE.getCode());
                 }
@@ -9418,7 +9428,7 @@ public class PunchServiceImpl implements PunchService {
         row.createCell(++i).setCellValue(dto.getOvertimeCompensationBalance());
     }
 
-    private void saveImportVacation(List resultList, Long organizationId, String fileLog, ImportFileResponse response) {
+    private void saveImportVacation(List resultList, Long organizationId, String fileLog, ImportFileResponse response, Long userId) {
         Long ownerId = getTopEnterpriseId(organizationId);
         response.setLogs(new ArrayList<>());
         int coverNum = 0;
@@ -9444,14 +9454,14 @@ public class PunchServiceImpl implements PunchService {
                 //// TODO: 2018/1/26  检验权限 是否有操作此用户的权限
                 PunchVacationBalance balance = punchVacationBalanceProvider.findPunchVacationBalanceByDetailId(detail.getId());
 
-                if (null != balance ) {
+                if (null != balance) {
                     //有balance的就算覆盖
                     coverNum++;
-                }else{
+                } else {
                     balance = newVacationBalance(detail, organizationId);
                 }
 
-                saveImportEmployeeSalary(balance, r, log, response);
+                saveImportEmployeeSalary(balance, r, log, response, userId);
             }
         }
         response.setTotalCount((long) (resultList.size() - 1));
@@ -9460,14 +9470,14 @@ public class PunchServiceImpl implements PunchService {
         LOGGER.debug("import resp" + response);
     }
 
-    private void saveImportEmployeeSalary(PunchVacationBalance balance, RowResult r, ImportFileResultLog<Map<String, String>> log, ImportFileResponse response) {
+    private void saveImportEmployeeSalary(PunchVacationBalance balance, RowResult r, ImportFileResultLog<Map<String, String>> log, ImportFileResponse response, Long userId) {
         Double annalBalance = 0.0;
         annalBalance = convertVacationCellToDouble(annalBalance, response, log, r.getC().trim());
         if (null == annalBalance) {
             return;
         }
         Double overBalance = 0.0;
-        overBalance= convertVacationCellToDouble(overBalance, response, log, r.getD().trim());
+        overBalance = convertVacationCellToDouble(overBalance, response, log, r.getD().trim());
         if (null == overBalance) {
             return;
         }
@@ -9475,7 +9485,7 @@ public class PunchServiceImpl implements PunchService {
         Double overtimeCompensationBalanceCorrection = overBalance - balance.getOvertimeCompensationBalance();
         balance.setAnnualLeaveBalance(annalBalance);
         balance.setOvertimeCompensationBalance(overBalance);
-        saveBalanceAndLog(balance,"批量导入",annualLeaveBalanceCorrection,overtimeCompensationBalanceCorrection);
+        saveBalanceAndLog(balance, "批量导入", annualLeaveBalanceCorrection, overtimeCompensationBalanceCorrection, userId);
     }
 
     private Double convertVacationCellToDouble(Double annalBalance, ImportFileResponse response,
@@ -9490,7 +9500,7 @@ public class PunchServiceImpl implements PunchService {
                 log.setCode(PunchServiceErrorCode.ERROR_IS_MINUS);
                 log.setErrorDescription(log.getErrorLog());
                 response.getLogs().add(log);
-                return null ;
+                return null;
             }
         } catch (Exception e) {
             String errorString = "年假余额不是数字";

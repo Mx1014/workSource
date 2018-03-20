@@ -38,10 +38,12 @@ public class PunchVacationBalanceLogProviderImpl implements PunchVacationBalance
 	public void createPunchVacationBalanceLog(PunchVacationBalanceLog punchVacationBalanceLog) {
 		Long id = sequenceProvider.getNextSequence(NameMapper.getSequenceDomainFromTablePojo(EhPunchVacationBalanceLogs.class));
 		punchVacationBalanceLog.setId(id);
-		punchVacationBalanceLog.setCreateTime(new Timestamp(DateHelper.currentGMTTime().getTime()));
-		punchVacationBalanceLog.setCreatorUid(UserContext.current().getUser().getId());
-		punchVacationBalanceLog.setUpdateTime(punchVacationBalanceLog.getCreateTime());
-		punchVacationBalanceLog.setOperatorUid(punchVacationBalanceLog.getCreatorUid());
+		if (null != UserContext.currentUserId()) {
+			punchVacationBalanceLog.setCreateTime(new Timestamp(DateHelper.currentGMTTime().getTime()));
+			punchVacationBalanceLog.setCreatorUid(UserContext.current().getUser().getId());
+			punchVacationBalanceLog.setUpdateTime(punchVacationBalanceLog.getCreateTime());
+			punchVacationBalanceLog.setOperatorUid(punchVacationBalanceLog.getCreatorUid());
+		}
 		getReadWriteDao().insert(punchVacationBalanceLog);
 		DaoHelper.publishDaoAction(DaoAction.CREATE, EhPunchVacationBalanceLogs.class, null);
 	}

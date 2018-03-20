@@ -35,10 +35,12 @@ public class PunchVacationBalanceProviderImpl implements PunchVacationBalancePro
 	public void createPunchVacationBalance(PunchVacationBalance punchVacationBalance) {
 		Long id = sequenceProvider.getNextSequence(NameMapper.getSequenceDomainFromTablePojo(EhPunchVacationBalances.class));
 		punchVacationBalance.setId(id);
-		punchVacationBalance.setCreateTime(new Timestamp(DateHelper.currentGMTTime().getTime()));
-		punchVacationBalance.setCreatorUid(UserContext.current().getUser().getId());
-		punchVacationBalance.setUpdateTime(punchVacationBalance.getCreateTime());
-		punchVacationBalance.setOperatorUid(punchVacationBalance.getCreatorUid());
+		if (null == punchVacationBalance.getCreatorUid()) {
+			punchVacationBalance.setCreateTime(new Timestamp(DateHelper.currentGMTTime().getTime()));
+			punchVacationBalance.setCreatorUid(UserContext.currentUserId());
+			punchVacationBalance.setUpdateTime(punchVacationBalance.getCreateTime());
+			punchVacationBalance.setOperatorUid(punchVacationBalance.getCreatorUid());
+		}
 		getReadWriteDao().insert(punchVacationBalance);
 		DaoHelper.publishDaoAction(DaoAction.CREATE, EhPunchVacationBalances.class, null);
 	}
@@ -46,8 +48,11 @@ public class PunchVacationBalanceProviderImpl implements PunchVacationBalancePro
 	@Override
 	public void updatePunchVacationBalance(PunchVacationBalance punchVacationBalance) {
 		assert (punchVacationBalance.getId() != null);
+		Long userId = UserContext.currentUserId();
 		punchVacationBalance.setUpdateTime(new Timestamp(DateHelper.currentGMTTime().getTime()));
-		punchVacationBalance.setOperatorUid(UserContext.current().getUser().getId());
+		if (null != userId) {
+			punchVacationBalance.setOperatorUid(UserContext.currentUserId());
+		}
 		getReadWriteDao().update(punchVacationBalance);
 		DaoHelper.publishDaoAction(DaoAction.MODIFY, EhPunchVacationBalances.class, punchVacationBalance.getId());
 	}
