@@ -14,7 +14,20 @@ import com.everhomes.listing.ListingQueryBuilderCallback;
 import com.everhomes.naming.NameMapper;
 import com.everhomes.rest.equipment.ReviewResult;
 import com.everhomes.rest.equipment.Status;
-import com.everhomes.rest.quality.*;
+import com.everhomes.rest.quality.ExecuteGroupAndPosition;
+import com.everhomes.rest.quality.ListQualityInspectionTasksResponse;
+import com.everhomes.rest.quality.QualityGroupType;
+import com.everhomes.rest.quality.QualityInspectionCategoryStatus;
+import com.everhomes.rest.quality.QualityInspectionTaskResult;
+import com.everhomes.rest.quality.QualityInspectionTaskReviewResult;
+import com.everhomes.rest.quality.QualityInspectionTaskReviewStatus;
+import com.everhomes.rest.quality.QualityInspectionTaskStatus;
+import com.everhomes.rest.quality.QualityStandardStatus;
+import com.everhomes.rest.quality.ScoreDTO;
+import com.everhomes.rest.quality.SpecificationApplyPolicy;
+import com.everhomes.rest.quality.SpecificationInspectionType;
+import com.everhomes.rest.quality.SpecificationScopeCode;
+import com.everhomes.rest.quality.TaskCountDTO;
 import com.everhomes.scheduler.QualityInspectionScheduleJob;
 import com.everhomes.scheduler.QualityInspectionStatScheduleJob;
 import com.everhomes.scheduler.QualityInspectionTaskNotifyScheduleJob;
@@ -22,9 +35,63 @@ import com.everhomes.scheduler.ScheduleProvider;
 import com.everhomes.search.QualityTaskSearcher;
 import com.everhomes.sequence.SequenceProvider;
 import com.everhomes.server.schema.Tables;
-import com.everhomes.server.schema.tables.daos.*;
-import com.everhomes.server.schema.tables.pojos.*;
-import com.everhomes.server.schema.tables.records.*;
+import com.everhomes.server.schema.tables.daos.EhQualityInspectionCategoriesDao;
+import com.everhomes.server.schema.tables.daos.EhQualityInspectionEvaluationFactorsDao;
+import com.everhomes.server.schema.tables.daos.EhQualityInspectionEvaluationsDao;
+import com.everhomes.server.schema.tables.daos.EhQualityInspectionLogsDao;
+import com.everhomes.server.schema.tables.daos.EhQualityInspectionModelCommunityMapDao;
+import com.everhomes.server.schema.tables.daos.EhQualityInspectionSampleCommunityMapDao;
+import com.everhomes.server.schema.tables.daos.EhQualityInspectionSampleCommunitySpecificationStatDao;
+import com.everhomes.server.schema.tables.daos.EhQualityInspectionSampleGroupMapDao;
+import com.everhomes.server.schema.tables.daos.EhQualityInspectionSampleScoreStatDao;
+import com.everhomes.server.schema.tables.daos.EhQualityInspectionSamplesDao;
+import com.everhomes.server.schema.tables.daos.EhQualityInspectionSpecificationItemResultsDao;
+import com.everhomes.server.schema.tables.daos.EhQualityInspectionSpecificationsDao;
+import com.everhomes.server.schema.tables.daos.EhQualityInspectionStandardGroupMapDao;
+import com.everhomes.server.schema.tables.daos.EhQualityInspectionStandardSpecificationMapDao;
+import com.everhomes.server.schema.tables.daos.EhQualityInspectionStandardsDao;
+import com.everhomes.server.schema.tables.daos.EhQualityInspectionTaskAttachmentsDao;
+import com.everhomes.server.schema.tables.daos.EhQualityInspectionTaskRecordsDao;
+import com.everhomes.server.schema.tables.daos.EhQualityInspectionTaskTemplatesDao;
+import com.everhomes.server.schema.tables.daos.EhQualityInspectionTasksDao;
+import com.everhomes.server.schema.tables.pojos.EhOrganizations;
+import com.everhomes.server.schema.tables.pojos.EhQualityInspectionCategories;
+import com.everhomes.server.schema.tables.pojos.EhQualityInspectionEvaluationFactors;
+import com.everhomes.server.schema.tables.pojos.EhQualityInspectionEvaluations;
+import com.everhomes.server.schema.tables.pojos.EhQualityInspectionLogs;
+import com.everhomes.server.schema.tables.pojos.EhQualityInspectionModelCommunityMap;
+import com.everhomes.server.schema.tables.pojos.EhQualityInspectionSampleCommunityMap;
+import com.everhomes.server.schema.tables.pojos.EhQualityInspectionSampleCommunitySpecificationStat;
+import com.everhomes.server.schema.tables.pojos.EhQualityInspectionSampleGroupMap;
+import com.everhomes.server.schema.tables.pojos.EhQualityInspectionSampleScoreStat;
+import com.everhomes.server.schema.tables.pojos.EhQualityInspectionSamples;
+import com.everhomes.server.schema.tables.pojos.EhQualityInspectionSpecificationItemResults;
+import com.everhomes.server.schema.tables.pojos.EhQualityInspectionSpecifications;
+import com.everhomes.server.schema.tables.pojos.EhQualityInspectionStandardGroupMap;
+import com.everhomes.server.schema.tables.pojos.EhQualityInspectionStandardSpecificationMap;
+import com.everhomes.server.schema.tables.pojos.EhQualityInspectionStandards;
+import com.everhomes.server.schema.tables.pojos.EhQualityInspectionTaskAttachments;
+import com.everhomes.server.schema.tables.pojos.EhQualityInspectionTaskRecords;
+import com.everhomes.server.schema.tables.pojos.EhQualityInspectionTaskTemplates;
+import com.everhomes.server.schema.tables.pojos.EhQualityInspectionTasks;
+import com.everhomes.server.schema.tables.records.EhQualityInspectionCategoriesRecord;
+import com.everhomes.server.schema.tables.records.EhQualityInspectionEvaluationFactorsRecord;
+import com.everhomes.server.schema.tables.records.EhQualityInspectionEvaluationsRecord;
+import com.everhomes.server.schema.tables.records.EhQualityInspectionLogsRecord;
+import com.everhomes.server.schema.tables.records.EhQualityInspectionSampleCommunityMapRecord;
+import com.everhomes.server.schema.tables.records.EhQualityInspectionSampleCommunitySpecificationStatRecord;
+import com.everhomes.server.schema.tables.records.EhQualityInspectionSampleGroupMapRecord;
+import com.everhomes.server.schema.tables.records.EhQualityInspectionSampleScoreStatRecord;
+import com.everhomes.server.schema.tables.records.EhQualityInspectionSamplesRecord;
+import com.everhomes.server.schema.tables.records.EhQualityInspectionSpecificationItemResultsRecord;
+import com.everhomes.server.schema.tables.records.EhQualityInspectionSpecificationsRecord;
+import com.everhomes.server.schema.tables.records.EhQualityInspectionStandardGroupMapRecord;
+import com.everhomes.server.schema.tables.records.EhQualityInspectionStandardSpecificationMapRecord;
+import com.everhomes.server.schema.tables.records.EhQualityInspectionStandardsRecord;
+import com.everhomes.server.schema.tables.records.EhQualityInspectionTaskAttachmentsRecord;
+import com.everhomes.server.schema.tables.records.EhQualityInspectionTaskRecordsRecord;
+import com.everhomes.server.schema.tables.records.EhQualityInspectionTaskTemplatesRecord;
+import com.everhomes.server.schema.tables.records.EhQualityInspectionTasksRecord;
 import com.everhomes.sharding.ShardIterator;
 import com.everhomes.sharding.ShardingProvider;
 import com.everhomes.user.UserContext;
@@ -33,7 +100,14 @@ import com.everhomes.util.CronDateUtils;
 import com.everhomes.util.DateHelper;
 import com.everhomes.util.IterationMapReduceCallback.AfterAction;
 import com.mysql.jdbc.StringUtils;
-import org.jooq.*;
+import org.jooq.Condition;
+import org.jooq.DSLContext;
+import org.jooq.DeleteQuery;
+import org.jooq.Field;
+import org.jooq.Record;
+import org.jooq.Record1;
+import org.jooq.SelectJoinStep;
+import org.jooq.SelectQuery;
 import org.jooq.impl.DSL;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -44,7 +118,13 @@ import org.springframework.stereotype.Component;
 
 import javax.annotation.PostConstruct;
 import java.sql.Timestamp;
-import java.util.*;
+import java.util.ArrayList;
+import java.util.Calendar;
+import java.util.HashMap;
+import java.util.HashSet;
+import java.util.List;
+import java.util.Map;
+import java.util.Set;
 
 
 
@@ -2900,10 +2980,8 @@ public class QualityProviderImpl implements QualityProvider {
 	@Override
 	public void getTodayTaskCountStat(ListQualityInspectionTasksResponse response, List<Long> executeStandardIds, List<Long> reviewStandardIds, List<ExecuteGroupAndPosition> groupDtos, Timestamp todayBegin,ListingQueryBuilderCallback builderCallback) {
 		DSLContext context = this.dbProvider.getDslContext(AccessSpec.readOnlyWith(EhQualityInspectionTasks.class));
-		SelectQuery<EhQualityInspectionTasksRecord> query = context.selectQuery(Tables.EH_QUALITY_INSPECTION_TASKS);
+		SelectQuery<Record> query = context.selectQuery();
 
-		Set<Long> taskIds = new HashSet<>();
-		Set<Long> taskExecuted = new HashSet<>();
 		if (groupDtos != null) {//isAdmin =false
 			Long executeUid = UserContext.currentUserId();
 			if (executeUid != null && executeUid != 0) {
@@ -2916,36 +2994,54 @@ public class QualityProviderImpl implements QualityProvider {
 					con = con.or(con1);
 				}
 
-				if (reviewStandardIds != null) {
-					Condition con2 = Tables.EH_QUALITY_INSPECTION_TASKS.STANDARD_ID.in(reviewStandardIds)
-							.and(Tables.EH_QUALITY_INSPECTION_TASKS.STATUS.eq(QualityInspectionTaskStatus.EXECUTED.getCode()))
-							.and(Tables.EH_QUALITY_INSPECTION_TASKS.REVIEW_RESULT.eq(QualityInspectionTaskReviewResult.NONE.getCode()));
-					con = con.or(con2);
-				}
+//				if (reviewStandardIds != null) {
+//					Condition con2 = Tables.EH_QUALITY_INSPECTION_TASKS.STANDARD_ID.in(reviewStandardIds)
+//							.and(Tables.EH_QUALITY_INSPECTION_TASKS.STATUS.eq(QualityInspectionTaskStatus.EXECUTED.getCode()))
+//							.and(Tables.EH_QUALITY_INSPECTION_TASKS.REVIEW_RESULT.eq(QualityInspectionTaskReviewResult.NONE.getCode()));
+//					con = con.or(con2);
+//				}
 
 				query.addConditions(con);
 			}
 		}
 
+		// 设置成当天的执行任务
+		Calendar calendar = Calendar.getInstance();
+		calendar.setTime(new Timestamp(DateHelper.currentGMTTime().getTime()));
+		final Field<?> todayCompleteCount = DSL.decode().when(Tables.EH_QUALITY_INSPECTION_TASKS.STATUS.in(
+				QualityInspectionTaskStatus.EXECUTED.getCode())
+						.and(Tables.EH_QUALITY_INSPECTION_TASKS.EXECUTIVE_TIME.gt(getDayBegin(calendar))),
+				QualityInspectionTaskStatus.EXECUTED.getCode());
+
+		final Field<?> totayTasksCount = DSL.decode().when(Tables.EH_QUALITY_INSPECTION_TASKS.STATUS.eq(QualityInspectionTaskStatus.WAITING_FOR_EXECUTING.getCode()),
+				QualityInspectionTaskStatus.WAITING_FOR_EXECUTING.getCode());
+
+
+		final Field<?>[] fields = {DSL.count(totayTasksCount).as("totayTasksCount"),
+				DSL.count(todayCompleteCount).as("todayCompleteCount")};
+
 		builderCallback.buildCondition(null, query);
-		//query.addConditions(Tables.EH_QUALITY_INSPECTION_TASKS.EXECUTIVE_EXPIRE_TIME.lt(todayBegin));
+
+		query.addSelect(fields);
+		query.addFrom(Tables.EH_QUALITY_INSPECTION_TASKS);
 
 		if (LOGGER.isDebugEnabled()) {
 			LOGGER.debug("Query tasks count, sql=" + query.getSQL());
 			LOGGER.debug("Query tasks count, bindValues=" + query.getBindValues());
 		}
 
-		query.fetch().map((EhQualityInspectionTasksRecord record) -> {
-			if(QualityInspectionTaskStatus.WAITING_FOR_EXECUTING.equals(QualityInspectionTaskStatus.fromStatus(record.getStatus()))){
-				taskIds.add(record.getId());
-			}
-			if(QualityInspectionTaskStatus.EXECUTED.equals(QualityInspectionTaskStatus.fromStatus(record.getStatus()))){
-				taskExecuted.add(record.getId());
-			}
+		query.fetch().map((r)->{
+			response.setTodayTotalCount(r.getValue("todayCompleteCount",Integer.class));
+			response.setTodayTotalCount(r.getValue("totayTasksCount",Integer.class));
 			return null;
 		});
-		response.setTodayTotalCount(taskIds.size());
-		response.setTodayExecutedCount(taskExecuted.size());
+	}
 
+	private Timestamp getDayBegin(Calendar todayStart) {
+		todayStart.set(Calendar.HOUR_OF_DAY, 0);
+		todayStart.set(Calendar.MINUTE, 0);
+		todayStart.set(Calendar.SECOND, 0);
+		todayStart.set(Calendar.MILLISECOND, 0);
+		return new Timestamp(todayStart.getTime().getTime());
 	}
 }

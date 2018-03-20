@@ -3152,19 +3152,18 @@ public class EquipmentProviderImpl implements EquipmentProvider {
     }
 
     @Override
-    public void populateTodayTaskStatusCount(List<Long> executePlanIds, List<Long> reviewPlanIds, Byte adminFlag,
-                                             ListEquipmentTasksResponse response, ListingQueryBuilderCallback queryBuilderCallback) {
+    public void populateTodayTaskStatusCount(List<Long> executePlanIds, List<Long> reviewPlanIds, Byte adminFlag, ListEquipmentTasksResponse response, ListingQueryBuilderCallback queryBuilderCallback) {
 
         DSLContext context = dbProvider.getDslContext(AccessSpec.readOnly());
         SelectQuery<Record> query = context.selectQuery();
         queryBuilderCallback.buildCondition(null, query);
 
         Condition con = null;
-        if (AdminFlag.NO.equals(AdminFlag.fromStatus(adminFlag)) && executePlanIds!=null &&  executePlanIds.size()>0) {
-            Condition con4 = Tables.EH_EQUIPMENT_INSPECTION_TASKS.PLAN_ID.in(executePlanIds);
-            con4 = con4.and(Tables.EH_EQUIPMENT_INSPECTION_TASKS.STATUS.in(EquipmentTaskStatus.WAITING_FOR_EXECUTING.getCode(),
-                    EquipmentTaskStatus.DELAY.getCode()));
-            con = con4;
+        if (AdminFlag.NO.equals(AdminFlag.fromStatus(adminFlag)) && executePlanIds != null && executePlanIds.size() > 0) {
+            con = Tables.EH_EQUIPMENT_INSPECTION_TASKS.PLAN_ID.in(executePlanIds);
+//            con4 = con4.and(Tables.EH_EQUIPMENT_INSPECTION_TASKS.STATUS.in(EquipmentTaskStatus.WAITING_FOR_EXECUTING.getCode(),
+//                    EquipmentTaskStatus.DELAY.getCode()));
+//            con = con4;
         }
         if (AdminFlag.NO.equals(AdminFlag.fromStatus(adminFlag)) && (executePlanIds == null || executePlanIds.size() == 0)) {
             response.setTotayTasksCount(0L);
@@ -3175,11 +3174,21 @@ public class EquipmentProviderImpl implements EquipmentProvider {
         if (con != null) {
             query.addConditions(con);
         }
+
+        // 设置成当天的执行任务
+        Calendar calendar = Calendar.getInstance();
+        calendar.setTime(new Timestamp(DateHelper.currentGMTTime().getTime()));
         final Field<?> todayCompleteCount = DSL.decode().when(Tables.EH_EQUIPMENT_INSPECTION_TASKS.STATUS.in(
-                EquipmentTaskStatus.CLOSE.getCode(), EquipmentTaskStatus.QUALIFIED.getCode()),
-                EquipmentTaskStatus.WAITING_FOR_EXECUTING.getCode());
+                EquipmentTaskStatus.CLOSE.getCode(),
+                EquipmentTaskStatus.QUALIFIED.getCode(),
+                EquipmentTaskStatus.REVIEW_DELAY.getCode())
+                        .and(Tables.EH_EQUIPMENT_INSPECTION_TASKS.EXECUTIVE_TIME.gt(getDayBegin(calendar))),
+                EquipmentTaskStatus.CLOSE.getCode());
+
         final Field<?> totayTasksCount = DSL.decode().when(Tables.EH_EQUIPMENT_INSPECTION_TASKS.STATUS.eq(EquipmentTaskStatus.WAITING_FOR_EXECUTING.getCode()),
                 EquipmentTaskStatus.WAITING_FOR_EXECUTING.getCode());
+
+
         final Field<?>[] fields = {DSL.count(totayTasksCount).as("totayTasksCount"),
                 DSL.count(todayCompleteCount).as("todayCompleteCount")};
 
@@ -3219,9 +3228,18 @@ public class EquipmentProviderImpl implements EquipmentProvider {
         if (con != null) {
             query.addConditions(con);
         }
-        final Field<?> todayCompleteCount = DSL.decode().when(Tables.EH_EQUIPMENT_INSPECTION_TASKS.STATUS.eq(EquipmentTaskStatus.QUALIFIED.getCode()), EquipmentTaskStatus.QUALIFIED.getCode());
-        final Field<?> totayTasksCount = DSL.decode().when(Tables.EH_EQUIPMENT_INSPECTION_TASKS.STATUS.in(EquipmentTaskStatus.REVIEW_DELAY.getCode(),
-                EquipmentTaskStatus.CLOSE.getCode(), EquipmentTaskStatus.QUALIFIED.getCode()), EquipmentTaskStatus.QUALIFIED.getCode());
+
+        // 设置成当天任务
+        Calendar calendar = Calendar.getInstance();
+        calendar.setTime(new Timestamp(DateHelper.currentGMTTime().getTime()));
+        final Field<?> todayCompleteCount = DSL.decode()
+                .when(Tables.EH_EQUIPMENT_INSPECTION_TASKS.STATUS.eq(EquipmentTaskStatus.QUALIFIED.getCode())
+                .and(Tables.EH_EQUIPMENT_INSPECTION_TASKS.REVIEW_TIME.gt(getDayBegin(calendar))),
+                        EquipmentTaskStatus.QUALIFIED.getCode());
+        final Field<?> totayTasksCount = DSL.decode().when(Tables.EH_EQUIPMENT_INSPECTION_TASKS.STATUS.in(EquipmentTaskStatus.CLOSE.getCode()),
+                EquipmentTaskStatus.QUALIFIED.getCode());
+
+
         final Field<?>[] fields = {DSL.count(totayTasksCount).as("totayTasksCount"),
                 DSL.count(todayCompleteCount).as("todayCompleteCount")};
 
@@ -3229,14 +3247,22 @@ public class EquipmentProviderImpl implements EquipmentProvider {
         query.addFrom(Tables.EH_EQUIPMENT_INSPECTION_TASKS);
 
         if (LOGGER.isDebugEnabled()) {
-            LOGGER.debug("Query Today tasks count , sql=" + query.getSQL());
-            LOGGER.debug("Query Today tasks count =" + query.getBindValues());
+            LOGGER.debug("Query Today review tasks count , sql=" + query.getSQL());
+            LOGGER.debug("Query Today review tasks count =" + query.getBindValues());
         }
         query.fetch().map((r)->{
             response.setTodayCompleteCount(r.getValue("todayCompleteCount",Long.class));
             response.setTotayTasksCount(r.getValue("totayTasksCount",Long.class));
             return null;
         });
+    }
+
+    private Timestamp getDayBegin(Calendar todayStart) {
+        todayStart.set(Calendar.HOUR_OF_DAY, 0);
+        todayStart.set(Calendar.MINUTE, 0);
+        todayStart.set(Calendar.SECOND, 0);
+        todayStart.set(Calendar.MILLISECOND, 0);
+        return new Timestamp(todayStart.getTime().getTime());
     }
 
     @Override
