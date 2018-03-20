@@ -1125,13 +1125,15 @@ public class EquipmentProviderImpl implements EquipmentProvider {
                     }
                 }
                 query.addConditions(standardCon);
+            }else {
+                return null;
             }
 
-            if (startDate != null && !"".equals(startDate)) {
+            if (startDate != null) {
                 query.addConditions(Tables.EH_EQUIPMENT_INSPECTION_TASKS.EXECUTIVE_START_TIME.ge(startDate));
             }
 
-            if (endDate != null && !"".equals(endDate)) {
+            if (endDate != null) {
                 query.addConditions(Tables.EH_EQUIPMENT_INSPECTION_TASKS.EXECUTIVE_EXPIRE_TIME.le(endDate));
             }
             query.addOrderBy(Tables.EH_EQUIPMENT_INSPECTION_TASKS.ID.desc());
