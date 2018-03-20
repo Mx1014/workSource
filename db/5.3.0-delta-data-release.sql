@@ -1203,3 +1203,8 @@ INSERT INTO `eh_configurations` (`id`, `name`, `value`, `description`, `namespac
 -- fix 25724 by xiongying 20180319
 SET @field_id = IFNULL((SELECT MAX(id) FROM `eh_var_fields`), 0);
 INSERT INTO `eh_var_fields` (`id`, `module_name`, `name`, `display_name`, `field_type`, `group_id`, `group_path`, `mandatory_flag`, `default_order`, `status`, `creator_uid`, `create_time`, `operator_uid`, `update_time`, `field_param`) VALUES ((@field_id := @field_id + 1), 'enterprise_customer', 'buildingId', '楼栋', 'Long', '28', '/28/', '0', NULL, '2', '1', NOW(), NULL, NULL, '{\"fieldParamType\": \"text\", \"length\": 32}');
+
+-- 增加企业用户模块，add by yanjun 201803191834
+INSERT INTO `eh_service_modules` (`id`, `name`, `parent_id`, `path`, `type`, `level`, `status`, `default_order`, `create_time`, `instance_config`, `action_type`, `update_time`, `operator_uid`, `creator_uid`, `description`, `multiple_flag`, `module_control_type`) VALUES ('58000', '企业账户', '50000', '/50000/58000', '1', '2', '2', '0', '2018-03-19 17:52:57', NULL, NULL, '2018-03-19 17:53:11', '0', '0', '0', '0', 'org_control');
+INSERT INTO `eh_web_menus` (`id`, `name`, `parent_id`, `icon_url`, `data_type`, `leaf_flag`, `status`, `path`, `type`, `sort_num`, `module_id`, `level`, `condition_type`, `category`, `config_type`) VALUES ('16070000', '企业账户模块', '16000000', NULL, 'enterprise-account', '1', '2', '/16000000/16070000', 'zuolin', '7', '58000', '2', 'system', 'module', NULL);
+INSERT INTO `eh_web_menus` (`id`, `name`, `parent_id`, `icon_url`, `data_type`, `leaf_flag`, `status`, `path`, `type`, `sort_num`, `module_id`, `level`, `condition_type`, `category`, `config_type`) VALUES ('52000000', '企业账户', '0', '', 'enterprise-account', '0', '2', '/52000000', 'park', '12', '58000', '1', 'system', 'module', '2');

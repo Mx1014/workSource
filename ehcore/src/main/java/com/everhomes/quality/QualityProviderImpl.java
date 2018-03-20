@@ -2865,7 +2865,7 @@ public class QualityProviderImpl implements QualityProvider {
 				if (executeStandardIds != null) {
 					Condition con1 = Tables.EH_QUALITY_INSPECTION_TASKS.STANDARD_ID.in(executeStandardIds)
 							.and(Tables.EH_QUALITY_INSPECTION_TASKS.STATUS.in(QualityInspectionTaskStatus.WAITING_FOR_EXECUTING.getCode(),
-									QualityInspectionTaskStatus.EXECUTED.getCode(),QualityInspectionTaskStatus.DELAY.getCode()));
+									QualityInspectionTaskStatus.EXECUTED.getCode(),QualityInspectionTaskStatus.DELAY.getCode(),QualityInspectionTaskStatus.NONE.getCode()));
 					con = con.or(con1);
 				}
 
