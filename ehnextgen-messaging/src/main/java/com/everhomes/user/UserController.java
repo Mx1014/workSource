@@ -794,6 +794,7 @@ public class UserController extends ControllerBase {
 	 * @return OK
 	 */
 	@RequestMapping("sendCodeWithPictureValidate")
+	@RequireAuthentication(false)
 	@RestReturn(String.class)
 	public RestResponse sendCodeWithPictureValidate(SendCodeWithPictureValidateCommand cmd, HttpServletRequest request){
 		assert StringUtils.isNotEmpty(cmd.getIdentifier());
