@@ -441,4 +441,21 @@ public class CommunityController extends ControllerBase {
         return response;
 
     }
+
+    /**
+     * <b>URL: /community/listAllCommunities</b>
+     * <p>查询所有园区、小区</p>
+     */
+    @RequestMapping("listAllCommunities")
+    @RestReturn(value=CommunityUserDTO.class, collection = true)
+    public RestResponse listAllCommunities() {
+
+        List<CommunityUserDTO> res = null;
+        RestResponse response =  new RestResponse(res);
+        response.setErrorCode(ErrorCodes.SUCCESS);
+        response.setErrorDescription("OK");
+        return response;
+
+    }
+
 }
