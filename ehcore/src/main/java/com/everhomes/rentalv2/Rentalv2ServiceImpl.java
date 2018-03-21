@@ -2090,6 +2090,8 @@ public class Rentalv2ServiceImpl implements Rentalv2Service {
 					calendar.setTime(lastRsr.getResourceRentalDate());
 					calendar.set(Calendar.DAY_OF_WEEK,7);
 					useDetailSB.append(beginDateSF.format(calendar.getTime()));
+				}else if (rentalBill.getRentalType() == RentalType.DAY.getCode()){
+					useDetailSB.append(beginDateSF.format(lastRsr.getResourceRentalDate()));
 				}
 			}
 		}
