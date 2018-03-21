@@ -505,7 +505,8 @@ public class Rentalv2ServiceImpl implements Rentalv2Service {
 		List<RentalCloseDate> closeDates = rentalv2Provider.queryRentalCloseDateByOwner(rule.getResourceType(),
 				ruleType, id);
 		if(null != closeDates){
-			response.setCloseDates(closeDates.stream().filter(d -> null != d.getCloseDate()).map(c -> c.getCloseDate().getTime())
+			Long timestamp = System.currentTimeMillis();
+			response.setCloseDates(closeDates.stream().filter(d -> null != d.getCloseDate() && d.getCloseDate().getTime()>timestamp).map(c -> c.getCloseDate().getTime())
 					.collect(Collectors.toList()));
 		}
 		//set 物资
