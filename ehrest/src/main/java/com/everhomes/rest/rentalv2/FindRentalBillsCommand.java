@@ -6,14 +6,17 @@ import com.everhomes.util.StringHelper;
 /**
  * <ul>查询订单
  * <li>resourceTypeId：广场图标id</li>
+ * <li>rentalSiteId：资源id</li>
  * <li>pageAnchor: 分页的锚点，本次开始取的位置</li>
  * <li>pageSize: 每页的数量</li>
+ *
  * <li>billStatus：订单状态 list 0待付订金1已付定金2已付清 3待付全款 4已取消 参考{@link com.everhomes.rest.rentalv2.SiteBillStatus}</li>
  * </ul>
  */
 public class FindRentalBillsCommand {
 
     private Long id;
+    private Long rentalSiteId;
     private String resourceType;
     private Long resourceTypeId;
     private Long pageAnchor;
@@ -79,5 +82,13 @@ public class FindRentalBillsCommand {
 
     public void setId(Long id) {
         this.id = id;
+    }
+
+    public Long getRentalSiteId() {
+        return rentalSiteId;
+    }
+
+    public void setRentalSiteId(Long rentalSiteId) {
+        this.rentalSiteId = rentalSiteId;
     }
 }

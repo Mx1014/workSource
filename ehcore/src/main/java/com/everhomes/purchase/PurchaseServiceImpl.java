@@ -146,13 +146,6 @@ public class PurchaseServiceImpl implements PurchaseService {
         }
 
         this.dbProvider.execute((TransactionStatus status) -> {
-            if(cmd.getPurchaseRequestId() != null){
-                //删除
-                purchaseProvider.deleteOrderById(cmd.getPurchaseRequestId());
-                purchaseProvider.deleteOrderItemsByOrderId(cmd.getPurchaseRequestId());
-            }
-            purchaseProvider.insertPurchaseOrder(order);
-            purchaseProvider.insertPurchaseItems(list);
             if(cmd.getStartFlow().byteValue() == (byte)1){
                 //工作流case
                 //创建工作流
@@ -177,6 +170,14 @@ public class PurchaseServiceImpl implements PurchaseService {
                 createFlowCaseCommand.setProjectType(order.getOwnerType());
                 flowService.createFlowCase(createFlowCaseCommand);
             }
+            if(cmd.getPurchaseRequestId() != null){
+                //删除
+                purchaseProvider.deleteOrderById(cmd.getPurchaseRequestId());
+                purchaseProvider.deleteOrderItemsByOrderId(cmd.getPurchaseRequestId());
+            }
+            purchaseProvider.insertPurchaseOrder(order);
+            purchaseProvider.insertPurchaseItems(list);
+
             return null;
         });
     }

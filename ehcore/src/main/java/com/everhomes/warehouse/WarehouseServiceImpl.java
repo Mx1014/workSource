@@ -6,6 +6,8 @@ import com.everhomes.coordinator.CoordinationProvider;
 import com.everhomes.db.DbProvider;
 import com.everhomes.entity.EntityType;
 import com.everhomes.flow.Flow;
+import com.everhomes.flow.FlowCase;
+import com.everhomes.flow.FlowCaseProvider;
 import com.everhomes.flow.FlowService;
 import com.everhomes.locale.LocaleStringService;
 import com.everhomes.naming.NameMapper;
@@ -51,6 +53,7 @@ import org.apache.poi.ss.usermodel.Row;
 import org.apache.poi.ss.usermodel.Sheet;
 import org.apache.poi.ss.usermodel.Workbook;
 import org.apache.poi.xssf.usermodel.XSSFWorkbook;
+import org.jooq.Transaction;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -137,6 +140,8 @@ public class WarehouseServiceImpl implements WarehouseService {
     @Autowired
     private RequisitionService requisitionService;
 
+    @Autowired
+    private FlowCaseProvider flowCaseProvider;
 
     @Override
     public WarehouseDTO updateWarehouse(UpdateWarehouseCommand cmd) {
@@ -223,8 +228,13 @@ public class WarehouseServiceImpl implements WarehouseService {
             warehouse.setStatus(WarehouseStatus.INACTIVE.getCode());
             warehouse.setDeleteUid(UserContext.current().getUser().getId());
             warehouse.setDeleteTime(new Timestamp(DateHelper.currentGMTTime().getTime()));
-            warehouseProvider.updateWarehouse(warehouse);
-            warehouseSearcher.deleteById((warehouse.getId()));
+            this.dbProvider.execute((status) ->{
+                warehouseProvider.updateWarehouse(warehouse);
+                warehouseSearcher.deleteById((warehouse.getId()));
+                //仓库删除时，把仓库里的库存也删除掉  by wentian 2018/3/21   from redmine #26047
+                warehouseProvider.deleteWarehouseStocks(warehouse.getId());
+                return null;
+            });
         }else{
             throw RuntimeErrorException.errorWith(WarehouseServiceErrorCode.SCOPE
                     ,WarehouseServiceErrorCode.ERROR_WAREHOUSE_IS_RUNNING
@@ -624,7 +634,7 @@ public class WarehouseServiceImpl implements WarehouseService {
                         log.setStockAmount(materialStock.getAmount());
                         log.setRequestSource(WarehouseStockRequestSource.MANUAL_INPUT.getCode());
                         log.setDeliveryUid(uid);
-                        log.setWarehouseOrderId(warehouseOrderId);
+                        log.setWarehouseOrderId(order.getId());
                         warehouseProvider.creatWarehouseStockLogs(log);
                         //更新入库log，增加园区id到es中
                         warehouseStockLogSearcher.feedDoc(log);
@@ -1509,6 +1519,8 @@ public class WarehouseServiceImpl implements WarehouseService {
                     WarehouseRequestMaterialDetailDTO materialDetailDTO = convertToDetail(material);
                     materialDetailDTO.setRequestUid(request.getRequestUid());
                     materialDetailDTO.setRequestUserName(requestUserName);
+                    String supplierName = warehouseProvider.findMaterialSupplierNameByMaterialId(material.getMaterialId());
+                    materialDetailDTO.setSupplierName(supplierName==null?"":supplierName);
                     return materialDetailDTO;
                 }).collect(Collectors.toList());
                 dto.setMaterialDetailDTOs(materialDetailDTOs);
@@ -1558,7 +1570,7 @@ public class WarehouseServiceImpl implements WarehouseService {
         if (cmd.getPageAnchor() != null) {
             anchor = cmd.getPageAnchor();
         }
-        SearchRequestsResponse response = getWarehouseRequestMaterials(ids, cmd.getOwnerType(), cmd.getOwnerId(), pageSize, anchor, cmd.getCommunityId());
+        SearchRequestsResponse response = getWarehouseRequestMaterials(ids, cmd.getOwnerType(), cmd.getOwnerId(), pageSize, anchor, cmd.getCommunityId(),cmd.getRequestId());
         return response;
     }
 
@@ -1572,7 +1584,7 @@ public class WarehouseServiceImpl implements WarehouseService {
         if (cmd.getPageAnchor() != null) {
             anchor = cmd.getPageAnchor();
         }
-        SearchRequestsResponse response = getWarehouseRequestMaterials(ids, cmd.getOwnerType(), cmd.getOwnerId(), pageSize, anchor, cmd.getCommunityId());
+        SearchRequestsResponse response = getWarehouseRequestMaterials(ids, cmd.getOwnerType(), cmd.getOwnerId(), pageSize, anchor, cmd.getCommunityId(),cmd.getRequestId());
         return response;
     }
 
@@ -1707,7 +1719,7 @@ public class WarehouseServiceImpl implements WarehouseService {
         return response;
     }
 
-    private SearchRequestsResponse getWarehouseRequestMaterials(List<Long> ids, String ownerType, Long ownerId, Integer pageSize, Long anchor, Long communityId) {
+    private SearchRequestsResponse getWarehouseRequestMaterials(List<Long> ids, String ownerType, Long ownerId, Integer pageSize, Long anchor, Long communityId, Long requestId) {
         SearchRequestsResponse response = new SearchRequestsResponse();
         if (ids.size() > pageSize) {
             response.setNextPageAnchor(anchor + 1);
@@ -1720,22 +1732,30 @@ public class WarehouseServiceImpl implements WarehouseService {
             List<WarehouseRequestMaterialDTO> requestDTOs = requestMaterials.stream().map(requestMaterial -> {
                 WarehouseRequestMaterialDTO dto = ConvertHelper.convert(requestMaterial, WarehouseRequestMaterialDTO.class);
                 dto.setRequestAmount(requestMaterial.getAmount());
-
+                //增加flowCaseId
+                //flow case id get
+                FlowCase flowcase = flowCaseProvider.findFlowCaseByReferId(requestMaterial.getRequestId()
+                        , EntityType.WAREHOUSE_REQUEST.getCode(), PrivilegeConstants.PURCHASE_MODULE);
+                if(flowcase!=null){
+                    dto.setFlowCaseId(flowcase.getId());
+                }
+                // 找到物品
                 WarehouseMaterials warehouseMaterial = warehouseProvider.findWarehouseMaterials(requestMaterial.getMaterialId(), requestMaterial.getOwnerType(), requestMaterial.getOwnerId(), requestMaterial.getCommunityId());
                 if (warehouseMaterial != null) {
                     dto.setMaterialName(warehouseMaterial.getName());
                     dto.setMaterialNumber(warehouseMaterial.getMaterialNumber());
                 }
+                // 找到仓库
                 Warehouses warehouse = warehouseProvider.findWarehouse(requestMaterial.getWarehouseId(), requestMaterial.getOwnerType(), requestMaterial.getOwnerId(), requestMaterial.getCommunityId());
                 if (warehouse != null) {
                     dto.setWarehouseName(warehouse.getName());
                 }
-
+                //找到库存
                 WarehouseStocks stock = warehouseProvider.findWarehouseStocksByWarehouseAndMaterial(requestMaterial.getWarehouseId(), requestMaterial.getMaterialId(), requestMaterial.getOwnerType(), requestMaterial.getOwnerId(), requestMaterial.getCommunityId());
                 if (stock != null) {
                     dto.setStockAmount(stock.getAmount());
                 }
-
+                // 找到领用
                 WarehouseRequests request = warehouseProvider.findWarehouseRequests(requestMaterial.getRequestId(), requestMaterial.getOwnerType(), requestMaterial.getOwnerId(), requestMaterial.getCommunityId());
                 if (request != null) {
                     dto.setRequestUid(request.getRequestUid());
