@@ -1214,3 +1214,8 @@ INSERT INTO `eh_web_menus` (`id`, `name`, `parent_id`, `icon_url`, `data_type`, 
 
 -- 应彬哥要求删除"文件下载中心"菜单 add by yanjun 201803211012
 DELETE from eh_web_menus WHERE data_type = 'file-center' and id in (11030000, 51030000);
+
+-- dengs,20180321.车位，车锁id已存在提示
+
+INSERT INTO `eh_locale_strings` (`scope`, `code`, `locale`, `text`) VALUES ('parking', '10024', 'zh_CN', '您输入的车位编号已存在，请重新输入');
+INSERT INTO `eh_locale_strings` (`scope`, `code`, `locale`, `text`) VALUES ('parking', '10025', 'zh_CN', '您输入的车锁ID已存在，请重新输入');
