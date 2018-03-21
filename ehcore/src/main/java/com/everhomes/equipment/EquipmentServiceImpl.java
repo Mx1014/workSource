@@ -1114,6 +1114,7 @@ private void checkUserPrivilege(Long orgId, Long privilegeId, Long communityId) 
 			equipment.setCreateTime(exist.getCreateTime());
 			equipment.setCreatorUid(exist.getCreatorUid());
 			equipment.setOperatorUid(user.getId());
+			equipment.setQrCodeToken(exist.getQrCodeToken());
 			equipment.setUpdateTime(new Timestamp(DateHelper.currentGMTTime().getTime()));
 
 			dealEquipmentRelateTime(cmd, equipment);
@@ -3535,7 +3536,6 @@ private void checkUserPrivilege(Long orgId, Long privilegeId, Long communityId) 
 		}
 		Integer offset = cmd.getPageAnchor().intValue();
 
-		List<EquipmentInspectionTasks> tasks = new ArrayList<>();
 		List<String> targetTypes = new ArrayList<>();
 		List<Long> targetIds = new ArrayList<>();
 		if(cmd.getTargetType() != null)
@@ -3548,46 +3548,11 @@ private void checkUserPrivilege(Long orgId, Long privilegeId, Long communityId) 
 		boolean isAdmin = checkCurrentUserisAdmin(cmd.getOwnerId(), userId);
 
 		List<EquipmentInspectionTasks> allTasks = null;
-		if(isAdmin) {
-			String cacheKey = convertListEquipmentInspectionTasksCache(cmd.getTaskStatus(), cmd.getInspectionCategoryId(),
-					targetTypes, targetIds, null, null, offset, pageSize, lastSyncTime, 0L);
-			LOGGER.info("listEquipmentInspectionTasks is  Admin  cacheKey = {}" , cacheKey);
-			allTasks = equipmentProvider.listEquipmentInspectionTasksUseCache(cmd.getTaskStatus(), cmd.getInspectionCategoryId(),
-					targetTypes, targetIds, null, null, offset, pageSize + 1, cacheKey, AdminFlag.YES.getCode(),lastSyncTime);
-			if (cmd.getTaskStatus().size() > 1) {
-				populateTaskStatusCount(cmd, null, null, response, targetTypes, targetIds);
-			}else {
-				populateReviewTaskStatusCount(cmd, null, null, response, targetTypes, targetIds);
-			}
+		if (isAdmin) {
+			allTasks = getAdminEquipmentInspectionTasks(cmd, lastSyncTime, response, pageSize, offset, targetTypes, targetIds);
 		}
-		if(!isAdmin) {
-			List<Long> executePlanIds = new ArrayList<>();
-			List<Long> reviewPlanIds = new ArrayList<>();
-			List<ExecuteGroupAndPosition> groupDtos = listUserRelateGroups();
-			//List<EquipmentInspectionStandardGroupMap> maps = equipmentProvider.listEquipmentInspectionStandardGroupMapByGroupAndPosition(groupDtos, null);
-			//get execute and review members from plans  20180129
-			List<EquipmentInspectionPlanGroupMap> maps = equipmentProvider.listEquipmentInspectionPlanGroupMapByGroupAndPosition(groupDtos, null);
-			if (maps != null && maps.size() > 0) {
-				for (EquipmentInspectionPlanGroupMap r : maps) {
-					if (QualityGroupType.REVIEW_GROUP.equals(QualityGroupType.fromStatus(r.getGroupType()))) {
-						reviewPlanIds.add(r.getPlanId());
-					}
-					if (QualityGroupType.EXECUTIVE_GROUP.equals(QualityGroupType.fromStatus(r.getGroupType()))) {
-						executePlanIds.add(r.getPlanId());
-					}
-				}
-			}
-
-			String cacheKey = convertListEquipmentInspectionTasksCache(cmd.getTaskStatus(), cmd.getInspectionCategoryId(), targetTypes, targetIds,
-					executePlanIds, reviewPlanIds, offset, pageSize, lastSyncTime,userId);
-            LOGGER.info("listEquipmentInspectionTasks is not Admin  cacheKey = {}" , cacheKey);
-			allTasks = equipmentProvider.listEquipmentInspectionTasksUseCache(cmd.getTaskStatus(), cmd.getInspectionCategoryId(),
-					targetTypes, targetIds, executePlanIds, reviewPlanIds, offset, pageSize + 1, cacheKey, AdminFlag.NO.getCode(),lastSyncTime);
-			if (cmd.getTaskStatus().size() > 1) {
-				populateTaskStatusCount(cmd, executePlanIds, reviewPlanIds, response, targetTypes, targetIds);
-			} else {
-				populateReviewTaskStatusCount(cmd, executePlanIds, reviewPlanIds, response, targetTypes, targetIds);
-			}
+		if (!isAdmin) {
+			allTasks = getNoAdminEquipmentInspectionTasks(cmd, lastSyncTime, response, pageSize, offset, targetTypes, targetIds, userId);
 		}
 
 		if (allTasks.size() > pageSize) {
@@ -3607,8 +3572,56 @@ private void checkUserPrivilege(Long orgId, Long privilegeId, Long communityId) 
 
 	}
 
-	private void populateReviewTaskStatusCount(ListEquipmentTasksCommand cmd, List<Long> executePlanIds, List<Long> reviewPlanIds, ListEquipmentTasksResponse response, List<String> targetTypes, List<Long> targetIds) {
-		equipmentProvider.populateReviewTaskStatusCount(executePlanIds, reviewPlanIds, AdminFlag.YES.getCode(), response, (loc, query) -> {
+	private List<EquipmentInspectionTasks> getNoAdminEquipmentInspectionTasks(ListEquipmentTasksCommand cmd, Timestamp lastSyncTime, ListEquipmentTasksResponse response, int pageSize, Integer offset, List<String> targetTypes, List<Long> targetIds, Long userId) {
+		List<EquipmentInspectionTasks> allTasks;
+		List<Long> executePlanIds = new ArrayList<>();
+		List<Long> reviewPlanIds = new ArrayList<>();
+		List<ExecuteGroupAndPosition> groupDtos = listUserRelateGroups();
+		//get execute and review members from plans  20180129
+		List<EquipmentInspectionPlanGroupMap> maps = equipmentProvider.listEquipmentInspectionPlanGroupMapByGroupAndPosition(groupDtos, null);
+		if (maps != null && maps.size() > 0) {
+            for (EquipmentInspectionPlanGroupMap r : maps) {
+                if (QualityGroupType.REVIEW_GROUP.equals(QualityGroupType.fromStatus(r.getGroupType()))) {
+                    reviewPlanIds.add(r.getPlanId());
+                }
+                if (QualityGroupType.EXECUTIVE_GROUP.equals(QualityGroupType.fromStatus(r.getGroupType()))) {
+                    executePlanIds.add(r.getPlanId());
+                }
+            }
+        }
+
+		String cacheKey = convertListEquipmentInspectionTasksCache(cmd.getTaskStatus(), cmd.getInspectionCategoryId(), targetTypes, targetIds,
+				executePlanIds, reviewPlanIds, offset, pageSize, lastSyncTime, userId);
+		LOGGER.info("listEquipmentInspectionTasks is not Admin  cacheKey = {}", cacheKey);
+		allTasks = equipmentProvider.listEquipmentInspectionTasksUseCache(cmd.getTaskStatus(), cmd.getInspectionCategoryId(),
+				targetTypes, targetIds, executePlanIds, reviewPlanIds, offset, pageSize + 1, cacheKey, AdminFlag.NO.getCode(), lastSyncTime);
+		if (cmd.getTaskStatus().size() > 1) {
+			populateTaskStatusCount(cmd, executePlanIds, reviewPlanIds, AdminFlag.NO.getCode(), response, targetTypes, targetIds);
+		} else {
+			populateReviewTaskStatusCount(cmd, executePlanIds, reviewPlanIds, AdminFlag.NO.getCode(), response, targetTypes, targetIds);
+		}
+		return allTasks;
+	}
+
+	private List<EquipmentInspectionTasks> getAdminEquipmentInspectionTasks(ListEquipmentTasksCommand cmd, Timestamp lastSyncTime, ListEquipmentTasksResponse response, int pageSize, Integer offset, List<String> targetTypes, List<Long> targetIds) {
+		List<EquipmentInspectionTasks> allTasks;
+		String cacheKey = convertListEquipmentInspectionTasksCache(cmd.getTaskStatus(), cmd.getInspectionCategoryId(),
+                targetTypes, targetIds, null, null, offset, pageSize, lastSyncTime, 0L);
+		LOGGER.info("listEquipmentInspectionTasks is  Admin  cacheKey = {}", cacheKey);
+
+		allTasks = equipmentProvider.listEquipmentInspectionTasksUseCache(cmd.getTaskStatus(), cmd.getInspectionCategoryId(),
+                targetTypes, targetIds, null, null, offset, pageSize + 1, cacheKey, AdminFlag.YES.getCode(), lastSyncTime);
+
+		if (cmd.getTaskStatus().size() > 1) {
+			populateTaskStatusCount(cmd, null, null, AdminFlag.YES.getCode(), response, targetTypes, targetIds);
+		} else {
+			populateReviewTaskStatusCount(cmd, null, null, AdminFlag.YES.getCode(), response, targetTypes, targetIds);
+		}
+		return allTasks;
+	}
+
+	private void populateReviewTaskStatusCount(ListEquipmentTasksCommand cmd, List<Long> executePlanIds, List<Long> reviewPlanIds, Byte isAdmin, ListEquipmentTasksResponse response, List<String> targetTypes, List<Long> targetIds) {
+		equipmentProvider.populateReviewTaskStatusCount(executePlanIds, reviewPlanIds, isAdmin, response, (loc, query) -> {
 			if (targetTypes.size() > 0)
 				query.addConditions(Tables.EH_EQUIPMENT_INSPECTION_TASKS.TARGET_TYPE.in(targetTypes));
 
@@ -3622,8 +3635,8 @@ private void checkUserPrivilege(Long orgId, Long privilegeId, Long communityId) 
 		});
 	}
 
-	private void populateTaskStatusCount(ListEquipmentTasksCommand cmd, List<Long> executePlanIds, List<Long> reviewPlanIds, ListEquipmentTasksResponse response, List<String> targetTypes, List<Long> targetIds) {
-		equipmentProvider.populateTodayTaskStatusCount(executePlanIds, reviewPlanIds, AdminFlag.YES.getCode(), response, (loc, query) -> {
+	private void populateTaskStatusCount(ListEquipmentTasksCommand cmd, List<Long> executePlanIds, List<Long> reviewPlanIds, Byte adminFlag, ListEquipmentTasksResponse response, List<String> targetTypes, List<Long> targetIds) {
+		equipmentProvider.populateTodayTaskStatusCount(executePlanIds, reviewPlanIds, adminFlag, response, (loc, query) -> {
 			if (targetTypes.size() > 0)
 				query.addConditions(Tables.EH_EQUIPMENT_INSPECTION_TASKS.TARGET_TYPE.in(targetTypes));
 
@@ -5871,18 +5884,7 @@ private void checkUserPrivilege(Long orgId, Long privilegeId, Long communityId) 
 		//巡检item表包含standardId
 		List<InspectionItemDTO> items = new ArrayList<>();
 
-		OfflineTaskCountStat todayComplete = new OfflineTaskCountStat();
-		todayComplete.setCount(response.getTodayCompleteCount());
-		todayComplete.setId(Long.valueOf(new SimpleDateFormat("yyMMddhhmmssSSS").format(DateHelper.currentGMTTime())) * 1000);
-		todayComplete.setTargetId(cmd.getTargetId());
-
-		OfflineTaskCountStat todayTaskCount = new OfflineTaskCountStat();
-		todayTaskCount.setCount(response.getTotayTasksCount());
-		todayTaskCount.setId(Long.valueOf(new SimpleDateFormat("yyMMddhhmmssSSS").format(DateHelper.currentGMTTime())) * 10000);
-		todayTaskCount.setTargetId(cmd.getTargetId());
-
-		offlineResponse.setTodayCompleteCount(new ArrayList<>(Collections.singletonList(todayComplete)));
-		offlineResponse.setTodayTasksCount(new ArrayList<>(Collections.singletonList(todayTaskCount)));
+		obtainTodayTaskCount(cmd, response, offlineResponse);
 		offlineResponse.setNextPageAnchor(response.getNextPageAnchor());
 
 		List<EquipmentTaskDTO> tasks = response.getTasks();
@@ -5930,6 +5932,21 @@ private void checkUserPrivilege(Long orgId, Long privilegeId, Long communityId) 
 		syncGroupOfflineData(offlineResponse,cmd);
 		syncRepairCategoryData(offlineResponse,cmd);
 		return offlineResponse;
+	}
+
+	private void obtainTodayTaskCount(ListEquipmentTasksCommand cmd, ListEquipmentTasksResponse response, EquipmentTaskOfflineResponse offlineResponse) {
+		OfflineTaskCountStat todayComplete = new OfflineTaskCountStat();
+		todayComplete.setCount(response.getTodayCompleteCount());
+		todayComplete.setId(Long.valueOf(new SimpleDateFormat("yyMMddhhmmssSSS").format(DateHelper.currentGMTTime())) * 1000);
+		todayComplete.setTargetId(cmd.getTargetId());
+
+		OfflineTaskCountStat todayTaskCount = new OfflineTaskCountStat();
+		todayTaskCount.setCount(response.getTotayTasksCount());
+		todayTaskCount.setId(Long.valueOf(new SimpleDateFormat("yyMMddhhmmssSSS").format(DateHelper.currentGMTTime())) * 10000);
+		todayTaskCount.setTargetId(cmd.getTargetId());
+
+		offlineResponse.setTodayCompleteCount(new ArrayList<>(Collections.singletonList(todayComplete)));
+		offlineResponse.setTodayTasksCount(new ArrayList<>(Collections.singletonList(todayTaskCount)));
 	}
 
 	private void setTaskMaxUpdatedTime(EquipmentTaskDTO task) {

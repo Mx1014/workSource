@@ -204,6 +204,7 @@ import java.util.Iterator;
 import java.util.LinkedHashMap;
 import java.util.List;
 import java.util.Map;
+import java.util.Objects;
 import java.util.Set;
 import java.util.stream.Collectors;
 
@@ -1177,7 +1178,7 @@ Long nextPageAnchor = null;
              	}
     		}
 
-         }).filter(member->member!=null).collect(Collectors.toList());
+         }).filter(Objects::nonNull).collect(Collectors.toList());
 
     	return groupUsers;
 	}
@@ -1231,7 +1232,7 @@ Long nextPageAnchor = null;
 						}
 
 						if(position != null) {
-							if(sb != null && sb.length() > 0) {
+							if(sb.length() > 0) {
 								sb.append("-");
 								sb.append(position.getName());
 							} else {
@@ -1240,7 +1241,7 @@ Long nextPageAnchor = null;
 							}
 						}
 
-						if(sb != null && sb.length() > 0) {
+						if(sb.length() > 0) {
 							if(dto.getGroupName() != null) {
 								dto.setGroupName(dto.getGroupName() + "," + sb.toString());
 							} else {
@@ -1310,22 +1311,18 @@ Long nextPageAnchor = null;
 		        	}
 	        	}
 	        	if(r.getRecord().getAttachments() != null) {
-		        	List<QualityInspectionTaskAttachmentDTO> attachments = r.getRecord().getAttachments().stream().map((attach) -> {
-						QualityInspectionTaskAttachmentDTO attachment = ConvertHelper.convert(attach, QualityInspectionTaskAttachmentDTO.class);
-						return attachment;
-					}).collect(Collectors.toList());
-
-		        	recordDto.setAttachments(attachments);
-	        	}
-				if(r.getRecord().getItemResults() != null) {
-					List<QualityInspectionSpecificationItemResultsDTO> results = r.getRecord().getItemResults().stream().map((result) -> {
-						QualityInspectionSpecificationItemResultsDTO itemResult = ConvertHelper.convert(result, QualityInspectionSpecificationItemResultsDTO.class);
-						return itemResult;
-					}).collect(Collectors.toList());
-
-					recordDto.setItemResults(results);
+		        	List<QualityInspectionTaskAttachmentDTO> attachments = r.getRecord().getAttachments().stream().map((attach) -> ConvertHelper.convert(attach, QualityInspectionTaskAttachmentDTO.class)).collect(Collectors.toList());
+					if (recordDto != null) {
+						recordDto.setAttachments(attachments);
+					}
 				}
-	        	dto.setRecord(recordDto);
+				if (r.getRecord().getItemResults() != null) {
+					List<QualityInspectionSpecificationItemResultsDTO> results = r.getRecord().getItemResults().stream().map((result) -> ConvertHelper.convert(result, QualityInspectionSpecificationItemResultsDTO.class)).collect(Collectors.toList());
+					if (recordDto != null) {
+						recordDto.setItemResults(results);
+					}
+				}
+				dto.setRecord(recordDto);
 			}
 
 			if(r.getExecutorId() != null && r.getExecutorId() != 0) {
@@ -1358,14 +1355,21 @@ Long nextPageAnchor = null;
         	}
 
         	return dto;
-        }).filter(task->task!=null).collect(Collectors.toList());
+        }).filter(Objects::nonNull).collect(Collectors.toList());
 		return dtoList;
 	}
 
 	@Override
 	public QualityInspectionTaskDTO reportVerificationResult(ReportVerificationResultCommand cmd) {
+		Long taskId = 0L;
+		if(cmd.getCreateTask()!=null){
+			QualityInspectionTaskDTO createdTask = createQualityInspectionTask(cmd.getCreateTask());
+			taskId = createdTask.getId();
+		}else {
+			taskId = cmd.getTaskId();
+		}
 		User user = UserContext.current().getUser();
-		QualityInspectionTasks task = verifiedTaskById(cmd.getTaskId());
+		QualityInspectionTasks task = verifiedTaskById(taskId);
 		if(!QualityInspectionTaskStatus.WAITING_FOR_EXECUTING.equals(QualityInspectionTaskStatus.fromStatus(task.getStatus()))) {
 			LOGGER.error("the task which id="+task.getId()+" can not execute!");
 			throw RuntimeErrorException
@@ -4554,15 +4558,79 @@ Long nextPageAnchor = null;
 
 	@Override
 	public QualityOfflineTaskDetailsResponse getOfflineTaskDetail(ListQualityInspectionTasksCommand cmd) {
-		//处理传过来的lastSyncTime
-//		cmd.setPageSize(Integer.MAX_VALUE - 1);
+		//deal lastSyncTime  dast String to Timestamp
 		if (cmd.getLastSyncTime() != null) {
 			cmd.setLatestUpdateTime(dateStrToTimestamp(cmd.getLastSyncTime()));
 		}
+		// get personal related tasks detail
 		ListQualityInspectionTasksResponse tasksResponse = listQualityInspectionTasks(cmd);
+
 		QualityOfflineTaskDetailsResponse offlineTaskDetailsResponse = new QualityOfflineTaskDetailsResponse();
 		offlineTaskDetailsResponse.setTasks(tasksResponse.getTasks());
 		OfflineTaskCount executed = new OfflineTaskCount();
+		// obtain today executed and total task count
+		setTaskCountStat(cmd, tasksResponse, offlineTaskDetailsResponse, executed);
+		offlineTaskDetailsResponse.setNextPageAnchor(tasksResponse.getNextPageAnchor());
+
+		List<QualityInspectionSpecificationDTO> specifications = new ArrayList<>();
+		List<Long> parentSpecificationIds = new ArrayList<>();
+		List<QualityInspectionStandards> standards = new ArrayList<>();
+
+		if(tasksResponse.getTasks()!=null && tasksResponse.getTasks().size()>0) {
+			tasksResponse.getTasks().forEach((task) -> {
+				// for offline support
+				getMaxUpdatedTimeForTasks(task);
+				QualityInspectionSpecifications specification = qualityProvider.getSpecificationById(task.getCategoryId());
+				if (specification != null) {
+					specifications.add(ConvertHelper.convert(specification, QualityInspectionSpecificationDTO.class));
+				}
+				QualityInspectionStandards standard = qualityProvider.findStandardById(task.getStandardId());
+				if(standard!=null){
+					standards.add(standard);
+				}
+			});
+		}
+		//remove duplicated specifications
+		Map<Long, QualityInspectionSpecificationDTO> specificationDTOMap = new HashMap<>();
+		specifications.forEach((s)-> specificationDTOMap.putIfAbsent(s.getId(), s));
+		List<QualityInspectionSpecificationDTO> specificationList = null;
+		if(specificationDTOMap.size()>0){
+			specificationList = new ArrayList<>(specificationDTOMap.values());
+			specificationList.forEach((s)->parentSpecificationIds.add(s.getId()));
+		}
+		//get children specifications which inspection type are two
+		populateSpecificationDetails(specificationList, parentSpecificationIds);
+		offlineTaskDetailsResponse.setSpecifications(specificationList);
+		//处理组织架构人员
+		processOrganizationsAndMembers(offlineTaskDetailsResponse, standards);
+		//增加计划和groupId的关系表
+		processPlansAndGroupRelations(offlineTaskDetailsResponse, standards);
+		//增加类型
+		processSpecifications(offlineTaskDetailsResponse, cmd.getTargetId(), cmd.getOwnerId());
+		return offlineTaskDetailsResponse;
+	}
+
+	private void getMaxUpdatedTimeForTasks(QualityInspectionTaskDTO task) {
+		List<Long> timestampList = new ArrayList<>();
+		timestampList.add(task.getCreateTime().getTime());
+		if (task.getExecutiveTime() != null) {
+            timestampList.add(task.getExecutiveTime().getTime());
+        }
+		if (task.getProcessTime() != null) {
+            timestampList.add(task.getProcessTime().getTime());
+        }
+		if (task.getReviewTime() != null) {
+            timestampList.add(task.getReviewTime().getTime());
+        }
+		List<Long> temp = timestampList.stream()
+                .sorted(Comparator.comparing(Long::longValue).reversed())
+                .collect(Collectors.toList());
+		if(temp!=null && temp.size()>0){
+            task.setLastSyncTime(new Timestamp(temp.get(0)).toLocalDateTime().format(dateSF));
+        }
+	}
+
+	private void setTaskCountStat(ListQualityInspectionTasksCommand cmd, ListQualityInspectionTasksResponse tasksResponse, QualityOfflineTaskDetailsResponse offlineTaskDetailsResponse, OfflineTaskCount executed) {
 		executed.setId(Long.valueOf(new SimpleDateFormat("yyMMddhhmmssSSS").format(DateHelper.currentGMTTime())) * 10000);
 		executed.setTargetId(cmd.getTargetId());
 		executed.setCount(tasksResponse.getTodayExecutedCount().longValue());
@@ -4574,64 +4642,6 @@ Long nextPageAnchor = null;
 		totalTaskCount.setType((byte)1);
 
 		offlineTaskDetailsResponse.setTaskCount(Arrays.asList(totalTaskCount,executed));
-		offlineTaskDetailsResponse.setNextPageAnchor(tasksResponse.getNextPageAnchor());
-
-		List<QualityInspectionSpecificationDTO> specifications = new ArrayList<>();
-		List<Long> parentSpecificationIds = new ArrayList<>();
-		List<QualityInspectionStandards> standards = new ArrayList<>();
-
-		if(tasksResponse.getTasks()!=null && tasksResponse.getTasks().size()>0) {
-			tasksResponse.getTasks().forEach((task) -> {
-				//处理任务 获取任务更新最大时间
-				List<Long> timestampList = new ArrayList<>();
-				timestampList.add(task.getCreateTime().getTime());
-				if (task.getExecutiveTime() != null) {
-					timestampList.add(task.getExecutiveTime().getTime());
-				}
-				if (task.getProcessTime() != null) {
-					timestampList.add(task.getProcessTime().getTime());
-				}
-				if (task.getReviewTime() != null) {
-					timestampList.add(task.getReviewTime().getTime());
-				}
-				List<Long> temp = timestampList.stream()
-						.sorted(Comparator.comparing(Long::longValue).reversed())
-						.collect(Collectors.toList());
-				if(temp!=null && temp.size()>0){
-					task.setLastSyncTime(new Timestamp(temp.get(0)).toLocalDateTime().format(dateSF));
-				}
-
-				//处理规范
-				QualityInspectionSpecifications specification = qualityProvider.getSpecificationById(task.getCategoryId());
-				if (specification != null) {
-					specifications.add(ConvertHelper.convert(specification, QualityInspectionSpecificationDTO.class));
-				}
-				QualityInspectionStandards standard = qualityProvider.findStandardById(task.getStandardId());
-				if(standard!=null){
-					standards.add(standard);
-				}
-			});
-		}
-		//去除重复specification
-//		Set<QualityInspectionSpecificationDTO> tempSet = new HashSet<>();
-//		tempSet.addAll(specifications);
-		Map<Long, QualityInspectionSpecificationDTO> specificationDTOMap = new HashMap<>();
-		specifications.forEach((s)-> specificationDTOMap.putIfAbsent(s.getId(), s));
-		List<QualityInspectionSpecificationDTO> specificationList = null;
-		if(specificationDTOMap.size()>0){
-			specificationList = new ArrayList<>(specificationDTOMap.values());
-			specificationList.forEach((s)->parentSpecificationIds.add(s.getId()));
-		}
-
-		populateSpecificationDetails(specificationList, parentSpecificationIds);
-		offlineTaskDetailsResponse.setSpecifications(specificationList);
-		//处理组织架构人员
-		processOrganizationsAndMembers(offlineTaskDetailsResponse, standards);
-		//再增加计划和groupId的关系表
-		processPlansAndGroupRelations(offlineTaskDetailsResponse, standards);
-		//增加类型
-		processSpecifications(offlineTaskDetailsResponse, cmd.getTargetId(), cmd.getOwnerId());
-		return offlineTaskDetailsResponse;
 	}
 
 	private void processSpecifications(QualityOfflineTaskDetailsResponse offlineTaskDetailsResponse, Long targetId, Long ownerId) {
@@ -4654,19 +4664,19 @@ Long nextPageAnchor = null;
 
 		List<QualityInspectionSpecificationDTO> categories = new ArrayList<>();
 		if (dtos != null && dtos.size() > 0) {
-			dtos.forEach((s) -> {
-				addChildrensToCategories(s, categories);
-				categories.add(ConvertHelper.convert(s, QualityInspectionSpecificationDTO.class));
-			});
+			addChildrensToCategories(dtos, categories);
 		}
 		offlineTaskDetailsResponse.setCategories(categories);
 	}
 
-	private void addChildrensToCategories(QualityInspectionSpecificationDTO s, List<QualityInspectionSpecificationDTO> categories) {
-		if (s.getChildrens()!=null && s.getChildrens().size()>0){
-			categories.add(s);
-			categories.addAll(s.getChildrens());
-			s.getChildrens().forEach((c)-> addChildrensToCategories(c,categories));
+	private void addChildrensToCategories(List<QualityInspectionSpecificationDTO> specificationDTOS, List<QualityInspectionSpecificationDTO> categories) {
+		if (specificationDTOS != null && specificationDTOS.size() > 0) {
+			specificationDTOS.forEach((s) -> {
+				categories.add(s);
+				if (s.getChildrens() != null && s.getChildrens().size() > 0) {
+					addChildrensToCategories(s.getChildrens(), categories);
+				}
+			});
 		}
 	}
 
