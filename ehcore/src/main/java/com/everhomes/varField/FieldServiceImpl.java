@@ -3,6 +3,8 @@ package com.everhomes.varField;
 
 import com.everhomes.address.Address;
 import com.everhomes.address.AddressProvider;
+import com.everhomes.community.Building;
+import com.everhomes.community.CommunityProvider;
 import com.everhomes.constants.ErrorCodes;
 import com.everhomes.customer.CustomerService;
 import com.everhomes.dynamicExcel.DynamicExcelService;
@@ -134,6 +136,9 @@ public class FieldServiceImpl implements FieldService {
 
     @Autowired
     private AddressProvider addressProvider;
+
+    @Autowired
+    private CommunityProvider communityProvider;
 
     @Override
     public List<SystemFieldGroupDTO> listSystemFieldGroups(ListSystemFieldGroupCommand cmd) {
@@ -935,7 +940,9 @@ public class FieldServiceImpl implements FieldService {
         if(fieldName.equals("addressId")){
             fieldName = "addressName";
         }
-
+        if(fieldName.equals("buildingId")){
+            fieldName = "buildingName";
+        }
         try {
             //获得get方法并使用获得field的值
             LOGGER.debug("field: {}", StringHelper.toJsonString(field));
@@ -1064,9 +1071,20 @@ public class FieldServiceImpl implements FieldService {
             long addressId = Long.parseLong(invoke.toString());
             Address address = addressProvider.findAddressById(addressId);
             if(address != null){
-                invoke = String.valueOf(address.getAddress());
+                invoke = String.valueOf(address.getApartmentName());
             }else{
                 LOGGER.error("field "+ fieldName+" find name in address failed ,addressId is "+ addressId);
+            }
+        }
+
+        //处理buildingId
+        if("buildingId".equals(fieldName)) {
+            long buildingId = Long.parseLong(invoke.toString());
+            Building building = communityProvider.findBuildingById(buildingId);
+            if(building != null){
+                invoke = String.valueOf(building.getName());
+            }else{
+                LOGGER.error("field "+ fieldName+" find name in building failed ,buildingId is "+ buildingId);
             }
         }
         return String.valueOf(invoke);

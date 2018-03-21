@@ -2090,6 +2090,8 @@ public class Rentalv2ServiceImpl implements Rentalv2Service {
 					calendar.setTime(lastRsr.getResourceRentalDate());
 					calendar.set(Calendar.DAY_OF_WEEK,7);
 					useDetailSB.append(beginDateSF.format(calendar.getTime()));
+				}else if (rentalBill.getRentalType() == RentalType.DAY.getCode()){
+					useDetailSB.append(beginDateSF.format(lastRsr.getResourceRentalDate()));
 				}
 			}
 		}
@@ -3899,8 +3901,8 @@ public class Rentalv2ServiceImpl implements Rentalv2Service {
 					bill.setFlowCaseId(flowCase.getId());
 				}else{
 					LOGGER.error("Enable rental flow not found, moduleId={}", FlowConstants.PM_TASK_MODULE);
-					throw RuntimeErrorException.errorWith(ErrorCodes.SCOPE_GENERAL,
-							ErrorCodes.ERROR_INVALID_PARAMETER, "请开启工作流后重试");
+					throw RuntimeErrorException.errorWith("Rentalv2",
+							10001, "请开启工作流后重试");
 
 				}
 
