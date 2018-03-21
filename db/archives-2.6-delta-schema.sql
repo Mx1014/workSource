@@ -1766,3 +1766,12 @@ ALTER TABLE  `eh_warehouse_suppliers` ADD COLUMN  `community_id` BIGINT COMMENT 
 
 -- 合同增加修改时间 by xiongying 2018/03/21
 ALTER TABLE  `eh_contracts` ADD COLUMN  `update_time` DATETIME;
+
+-- 人事2.6新需求 by ryan 03/21/2018
+ALTER TABLE `eh_organization_member_details` DROP COLUMN `profile_integrity`;
+ALTER TABLE `eh_organization_member_details` DROP COLUMN `department`;
+ALTER TABLE `eh_organization_member_details` DROP COLUMN `department_ids`;
+ALTER TABLE `eh_organization_member_details` DROP COLUMN `job_position`;
+ALTER TABLE `eh_organization_member_details` DROP COLUMN `job_position_ids`;
+ALTER TABLE `eh_organization_member_details` DROP COLUMN `job_level`;
+ALTER TABLE `eh_organization_member_details` DROP COLUMN `job_level_ids`;
