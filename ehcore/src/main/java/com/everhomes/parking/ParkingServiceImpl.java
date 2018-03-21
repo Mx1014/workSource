@@ -2401,6 +2401,14 @@ public class ParkingServiceImpl implements ParkingService {
 					"ParkingSpace not found.");
 		}
 
+		ParkingSpace parkingSpaceByLockId = parkingProvider.findParkingSpaceByLockId(cmd.getLockId());
+
+		if (null != parkingSpaceByLockId && !cmd.getId().equals(parkingSpaceByLockId.getId())) {
+			LOGGER.error("LockId exist, cmd={}", cmd);
+			throw RuntimeErrorException.errorWith(ParkingErrorCode.SCOPE, ParkingErrorCode.ERROR_REPEAT_LOCK_ID,
+					"LockId exist.");
+		}
+
 		parkingSpace.setSpaceAddress(cmd.getSpaceAddress());
 		parkingSpace.setLockId(cmd.getLockId());
 
