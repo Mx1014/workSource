@@ -9,7 +9,7 @@ import com.everhomes.util.StringHelper;
 /**
  * 
  * <ul>返回值:
- * <li>vacationBalances: 假期余额列表</li>
+ * <li>vacationBalances: 假期余额列表 参考{@link com.everhomes.rest.techpark.punch.admin.VacationBalanceDTO}</li>
  * <li>nextPageOffset: 下页页码</li>
  * </ul>
  */
