@@ -2597,7 +2597,7 @@ public class Rentalv2ServiceImpl implements Rentalv2Service {
 		}
 		ListingLocator locator = new CrossShardListingLocator();
 		locator.setAnchor(cmd.getPageAnchor());
-		List<RentalOrder> billList = this.rentalv2Provider.listRentalBills(cmd.getId(), userId, cmd.getResourceType(),
+		List<RentalOrder> billList = this.rentalv2Provider.listRentalBills(cmd.getId(), userId, cmd.getRentalSiteId(),cmd.getResourceType(),
 				cmd.getResourceTypeId(), locator, pageSize + 1, status,null);
 		FindRentalBillsCommandResponse response = new FindRentalBillsCommandResponse();
 		if (null == billList)
@@ -7888,7 +7888,7 @@ public class Rentalv2ServiceImpl implements Rentalv2Service {
 
 		ListingLocator locator = new CrossShardListingLocator();
 		locator.setAnchor(cmd.getPageAnchor());
-		List<RentalOrder> billList = this.rentalv2Provider.listRentalBills(null, userId, cmd.getResourceType(),
+		List<RentalOrder> billList = this.rentalv2Provider.listRentalBills(null, userId, cmd.getRentalSiteId(),cmd.getResourceType(),
 				cmd.getResourceTypeId(), locator, pageSize + 1,null, null);
 
 		if (null == billList)
