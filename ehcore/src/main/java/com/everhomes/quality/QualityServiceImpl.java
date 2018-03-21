@@ -4760,7 +4760,7 @@ Long nextPageAnchor = null;
 			});
 			Map<String, QualityInspectionStandardGroupMap> groupDTOMap = new HashMap<>();
 			if (executiveGroupMaps.size() > 0) {
-				executiveGroupMaps.forEach((map) -> groupDTOMap.putIfAbsent(map.getGroupId().toString()+map.getPositionId().toString(), map));
+				executiveGroupMaps.forEach((map) -> groupDTOMap.putIfAbsent(map.getGroupId().toString() +"-"+map.getPositionId().toString(), map));
 			}
 			if(groupDTOMap.size()>0){
 				return new ArrayList<>(groupDTOMap.values());
