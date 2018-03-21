@@ -6047,7 +6047,9 @@ private void checkUserPrivilege(Long orgId, Long privilegeId, Long communityId) 
 					}
 					equipmentTasksSearcher.feedDoc(task);
 				}
-				reportLogs.add(reportLog);
+				if (reportLog != null) {
+					reportLogs.add(reportLog);
+				}
 			});
 		}
 		reportLogs.addAll(processOfflineTaskLogsAndReportDetails(command.getEquipmentTaskReportDetails(), tasksMap));
