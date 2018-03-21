@@ -707,7 +707,7 @@ update eh_configurations set `value`='/park-news-web/build/index.html?ns=%s&isFS
 update eh_configurations SET `value`='/html/news_text_review.html' WHERE `name`='news.content.url';
 
 -- dengs,工位预定的url修改，2018.03.07
-SET @home_url=(SELECT `value` from eh_configurations WHERE `NAME`='home.url');
+SET @home_url=(SELECT `value` from eh_configurations WHERE `NAME`='home.url' and namespace_id=0);
 update eh_launch_pad_items SET action_data=CONCAT('{"url":"',@home_url,'/station-booking-web/build/index.html#/home#sign_suffix"}') WHERE action_type in (13,14) AND action_data LIKE '%station-booking/index.html%';
 update eh_service_modules SET instance_config=CONCAT('{"url":"',@home_url,'/station-booking-web/build/index.html#/home#sign_suffix"}') WHERE id=40200;
 update eh_service_module_apps SET instance_config=CONCAT('{"url":"',@home_url,'/station-booking-web/build/index.html#/home#sign_suffix"}') WHERE module_id=40200;
