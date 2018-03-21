@@ -883,6 +883,15 @@ public class WarehouseProviderImpl implements WarehouseProvider {
     }
 
     @Override
+    public String findMaterialSupplierNameByMaterialId(Long materialId) {
+        DSLContext context = this.dbProvider.getDslContext(AccessSpec.readOnly());
+        return context.select(Tables.EH_WAREHOUSE_MATERIALS.SUPPLIER_NAME)
+                .from(Tables.EH_WAREHOUSE_MATERIALS)
+                .where(Tables.EH_WAREHOUSE_MATERIALS.ID.eq(materialId))
+                .fetchOne(Tables.EH_WAREHOUSE_MATERIALS.SUPPLIER_NAME);
+    }
+
+    @Override
     public Long getWarehouseStockAmount(Long warehouseId, String ownerType, Long ownerId) {
         DSLContext context = dbProvider.getDslContext(AccessSpec.readOnly());
         SelectQuery<EhWarehouseStocksRecord> query = context.selectQuery(Tables.EH_WAREHOUSE_STOCKS);
