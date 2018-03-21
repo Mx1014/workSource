@@ -1,5 +1,6 @@
 package com.everhomes.rentalv2;
 
+import java.math.BigDecimal;
 import java.util.List;
 
 import com.everhomes.listing.CrossShardListingLocator;
@@ -188,8 +189,10 @@ public interface Rentalv2Provider {
 	List<RentalOrderRule> listRentalOrderRules(String resourceType, String ownerType, Long ownerId, Byte handleType);
 
 	List<RentalOrder> searchRentalOrders(Long resourceTypeId, String resourceType, Long rentalSiteId, Byte billStatus,
-										 Long startTime, Long endTime,String tag1, String tag2, Long pageAnchor ,
+										 Long startTime, Long endTime,String tag1, String tag2,String keyword, Long pageAnchor ,
 										 Integer pageSize);
+	BigDecimal getRentalOrdersTotalAmount(Long resourceTypeId, String resourceType, Long rentalSiteId, Byte billStatus,
+										  Long startTime, Long endTime,String tag1, String tag2,String keyword);
 
 	List<String> listOverTimeSpaces(Integer namespaceId, Long resourceTypeId, String resourceType,
 									Long rentalSiteId);
