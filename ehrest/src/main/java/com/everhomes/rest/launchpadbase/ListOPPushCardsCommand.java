@@ -11,7 +11,7 @@ import javax.validation.constraints.NotNull;
  *     <li>communityId: 小区id</li>
  *     <li>orgId: 公司id</li>
  *     <li>layoutId: layoutId</li>
- *     <li>instanceConfig: instanceConfig，其中包含了组件信息</li>
+ *     <li>instanceConfig: 从layout的group中获取，其中包含了组件信息</li>
  * </ul>
  */
 public class ListOPPushCardsCommand {

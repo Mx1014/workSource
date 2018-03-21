@@ -9,19 +9,19 @@ import java.util.List;
 
 /**
  * <ul>
- *     <li>listCardJson: listCardJson</li>
+ *     <li>cardJsons: cardJsons 具体的业务提供卡片信息，模型由各个业务跟客户端定</li>
  * </ul>
  */
 public class OPPushCards {
 
-    private List<String> listCardJson;
+    private List<String> cardJsons;
 
-    public List<String> getListCardJson() {
-        return listCardJson;
+    public List<String> getCardJsons() {
+        return cardJsons;
     }
 
-    public void setListCardJson(List<String> listCardJson) {
-        this.listCardJson = listCardJson;
+    public void setCardJsons(List<String> cardJsons) {
+        this.cardJsons = cardJsons;
     }
 
     @Override
