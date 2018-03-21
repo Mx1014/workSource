@@ -632,7 +632,7 @@ public class Rentalv2ProviderImpl implements Rentalv2Provider {
 	}
 
 	@Override
-	public List<RentalOrder> listRentalBills(Long id, Long userId, String resourceType, Long resourceTypeId,
+	public List<RentalOrder> listRentalBills(Long id, Long userId,Long rentalSiteId, String resourceType, Long resourceTypeId,
 			ListingLocator locator, int count, List<Byte> status, Byte payMode) {
 		final List<RentalOrder> result = new ArrayList<>();
 		Condition condition = Tables.EH_RENTALV2_ORDERS.STATUS.ne(SiteBillStatus.INACTIVE.getCode());
@@ -647,6 +647,8 @@ public class Rentalv2ProviderImpl implements Rentalv2Provider {
 		if (StringUtils.isNotBlank(resourceType)) {
 			condition = condition.and(Tables.EH_RENTALV2_ORDERS.RESOURCE_TYPE.eq(resourceType));
 		}
+		if (null != rentalSiteId)
+			condition = condition.and(Tables.EH_RENTALV2_ORDERS.RENTAL_RESOURCE_ID.eq(rentalSiteId));
 		if (null != id)
 			condition = condition.and(Tables.EH_RENTALV2_ORDERS.ID.eq(id));
 		if (null != payMode) {
