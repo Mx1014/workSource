@@ -42,7 +42,7 @@ public class RequisitionProviderImpl implements RequisitionProvider {
 
     @Override
     public List<ListRequisitionsDTO> listRequisitions(Integer namespaceId, String ownerType, Long ownerId
-            , Long communityId, String theme, Long typeId, Long pageAnchor, Integer pageSize) {
+            , Long communityId, String theme, Long typeId, Long pageAnchor, Integer pageSize, Byte requisitionStatus) {
         List<ListRequisitionsDTO> list = new ArrayList<>();
         DSLContext context = getReadOnlyContext();
         SelectQuery<Record> query = context.selectQuery();
@@ -51,6 +51,9 @@ public class RequisitionProviderImpl implements RequisitionProvider {
         query.addConditions(req.NAMESPACE_ID.eq(namespaceId));
         query.addConditions(req.OWNER_ID.eq(ownerId));
         query.addConditions(req.OWNER_TYPE.eq(ownerType));
+        if(RequisitionStatus.fromCode(requisitionStatus) != null){
+            query.addConditions(req.STATUS.eq(requisitionStatus));
+        }
         if(StringUtils.isNotBlank(theme)){
             query.addConditions(req.THEME.eq(theme));
         }
