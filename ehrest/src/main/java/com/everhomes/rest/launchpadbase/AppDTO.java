@@ -7,7 +7,6 @@ import com.everhomes.util.StringHelper;
  *     <li>name: 应用名称</li>
  *     <li>iconUrl: iconUrl</li>
  *     <li>router: router</li>
- *     <li>instanceConfig: 参数json</li>
  * </ul>
  */
 public class AppDTO {
@@ -15,7 +14,6 @@ public class AppDTO {
     private String name;
     private String iconUrl;
     private String router;
-    private String instanceConfig;
 
     public String getName() {
         return name;
@@ -39,14 +37,6 @@ public class AppDTO {
 
     public void setRouter(String router) {
         this.router = router;
-    }
-
-    public String getInstanceConfig() {
-        return instanceConfig;
-    }
-
-    public void setInstanceConfig(String instanceConfig) {
-        this.instanceConfig = instanceConfig;
     }
 
     @Override

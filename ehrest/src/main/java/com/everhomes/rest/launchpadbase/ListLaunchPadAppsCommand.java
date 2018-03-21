@@ -8,16 +8,24 @@ import javax.validation.constraints.NotNull;
 
 /**
  * <ul>
+ *     <li>layoutId: layoutId</li>
  *     <li>itemGroup: 当前item归属哪个组，来源layout里的itemGroup</li>
  *     <li>communityId: 小区id</li>
  * </ul>
  */
 public class ListLaunchPadAppsCommand {
 
-    @NotNull
-    private Long communityId;
-    @NotNull
+    private Long layoutId;
     private String itemGroup;
+    private Long communityId;
+
+    public Long getLayoutId() {
+        return layoutId;
+    }
+
+    public void setLayoutId(Long layoutId) {
+        this.layoutId = layoutId;
+    }
 
     public String getItemGroup() {
         return itemGroup;

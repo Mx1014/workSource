@@ -443,12 +443,12 @@ public class CommunityController extends ControllerBase {
     }
 
     /**
-     * <b>URL: /community/listAllCommunities</b>
+     * <b>URL: /community/listAllCommunityUsers</b>
      * <p>查询所有园区、小区</p>
      */
-    @RequestMapping("listAllCommunities")
+    @RequestMapping("listAllCommunityUsers")
     @RestReturn(value=CommunityUserDTO.class, collection = true)
-    public RestResponse listAllCommunities() {
+    public RestResponse listAllCommunityUsers() {
 
         List<CommunityUserDTO> res = null;
         RestResponse response =  new RestResponse(res);

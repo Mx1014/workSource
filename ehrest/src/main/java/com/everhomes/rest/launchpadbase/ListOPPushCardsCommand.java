@@ -9,7 +9,9 @@ import javax.validation.constraints.NotNull;
 /**
  * <ul>
  *     <li>communityId: 小区id</li>
- *     <li>orgId: orgId</li>
+ *     <li>orgId: 公司id</li>
+ *     <li>layoutId: layoutId</li>
+ *     <li>instanceConfig: instanceConfig，其中包含了组件信息</li>
  * </ul>
  */
 public class ListOPPushCardsCommand {
@@ -19,7 +21,7 @@ public class ListOPPushCardsCommand {
 
     private Long orgId;
 
-    private String style;
+    private Long layoutId;
 
     private String instanceConfig;
 
@@ -39,12 +41,12 @@ public class ListOPPushCardsCommand {
         this.orgId = orgId;
     }
 
-    public String getStyle() {
-        return style;
+    public Long getLayoutId() {
+        return layoutId;
     }
 
-    public void setStyle(String style) {
-        this.style = style;
+    public void setLayoutId(Long layoutId) {
+        this.layoutId = layoutId;
     }
 
     public String getInstanceConfig() {

@@ -3,14 +3,15 @@ package com.everhomes.rest.user;
 
 /**
  * <ul>
- *     <li>work((byte) 1): 工作台</li>
- *     <li>square((byte) 2): 广场</li>
- *     <li>message((byte) 3): 消息</li>
- *     <li>me((byte) 4): 我</li>
+ *     <li>WORK((byte) 1): 工作台</li>
+ *     <li>SQUARE((byte) 2): 广场</li>
+ *     <li>MESSAGE((byte) 3): 消息</li>
+ *     <li>ME((byte) 4): 我的</li>
+ *     <li>CONTAINER((byte) 5): 容器</li>
  * </ul>
  */
 public enum IndexType {
-    work((byte) 1), square((byte) 2), message((byte) 3), me((byte) 4);
+    WORK((byte) 1), SQUARE((byte) 2), MESSAGE((byte) 3), ME((byte) 4), CONTAINER((byte) 5);
 
     private byte code;
 

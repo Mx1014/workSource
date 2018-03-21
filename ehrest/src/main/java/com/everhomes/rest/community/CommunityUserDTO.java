@@ -15,7 +15,6 @@ import com.everhomes.util.StringHelper;
  *     <li>CapitalPinyin: 拼音首写字母</li>
  *     <li>managementFlag: 管理项目标志 参考{@link com.everhomes.rest.common.TrueOrFalseFlag}</li>
  *     <li>siteFlag: 办公标志 参考{@link com.everhomes.rest.common.TrueOrFalseFlag}</li>
- *     <li>nearbyFlag: 附近标志 参考{@link com.everhomes.rest.common.TrueOrFalseFlag}</li>
  * </ul>
  */
 public class CommunityUserDTO {
@@ -29,7 +28,6 @@ public class CommunityUserDTO {
     private String CapitalPinyin;
     private Byte managementFlag;
     private Byte siteFlag;
-    private Byte nearbyFlag;
 
     public Long getId() {
         return id;
@@ -111,13 +109,6 @@ public class CommunityUserDTO {
         this.siteFlag = siteFlag;
     }
 
-    public Byte getNearbyFlag() {
-        return nearbyFlag;
-    }
-
-    public void setNearbyFlag(Byte nearbyFlag) {
-        this.nearbyFlag = nearbyFlag;
-    }
 
     @Override
     public String toString() {
