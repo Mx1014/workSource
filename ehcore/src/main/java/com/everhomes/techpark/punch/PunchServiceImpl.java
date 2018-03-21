@@ -9227,7 +9227,7 @@ public class PunchServiceImpl implements PunchService {
             }
         }
         balance.setOvertimeCompensationBalance(newOCB);
-        saveBalanceAndLog(balance, cmd.getDescription(), cmd.getAnnualLeaveBalanceCorrection(), cmd.getOvertimeCompensationBalanceCorrection(), userId);
+        saveBalanceAndLog(balance, cmd.getDescription(), cmd.getAnnualLeaveBalanceCorrection(), cmd.getOvertimeCompensationBalanceCorrection(), UserContext.currentUserId());
 
 
     }
