@@ -298,8 +298,6 @@ public interface OrganizationService {
 	ListOrganizationsCommandResponse listChildrenOrganizations(Long id,
 			List<String> groupTypes, String keywords);
 
-    public ListDepartmentsCommandResponse listDepartments(ListDepartmentsCommand cmd);
-
 	ListEnterprisesCommandResponse listEnterprises(ListEnterprisesCommand cmd);
 	ListEnterpriseDetailResponse listEnterprisesAbstract(ListEnterprisesCommand cmd);
 	OrganizationDTO createEnterprise(CreateEnterpriseCommand cmd);

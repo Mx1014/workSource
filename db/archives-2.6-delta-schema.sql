@@ -1764,4 +1764,5 @@ ALTER TABLE `eh_payment_formula` MODIFY COLUMN `name` VARCHAR(1024) COMMENT '公
 -- 供应商增加园区id by wentian 2018/03/15
 ALTER TABLE  `eh_warehouse_suppliers` ADD COLUMN  `community_id` BIGINT COMMENT '供应商所在园区的id';
 
-
+-- 合同增加修改时间 by xiongying 2018/03/21
+ALTER TABLE  `eh_contracts` ADD COLUMN  `update_time` DATETIME;
