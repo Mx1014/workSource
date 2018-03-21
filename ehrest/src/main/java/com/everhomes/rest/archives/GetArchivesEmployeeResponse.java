@@ -9,6 +9,7 @@ import java.util.List;
 /**
  * <ul>
  * <li>employeeCase: 员工状况</li>
+ * <li>avatar: 员工头像</li>
  * <li>form: 档案详情表单(包含字段名、组名及值) 参考{@link com.everhomes.rest.general_approval.GeneralFormDTO}</li>
  * <li>departmentIds: 员工部门ids</li>
  * <li>jobPositionIds: 员工岗位ids</li>
@@ -19,6 +20,8 @@ import java.util.List;
 public class GetArchivesEmployeeResponse {
 
     private String employeeCase;
+
+    private String avatar;
 
     private GeneralFormDTO form;
 
@@ -43,6 +46,14 @@ public class GetArchivesEmployeeResponse {
 
     public void setEmployeeCase(String employeeCase) {
         this.employeeCase = employeeCase;
+    }
+
+    public String getAvatar() {
+        return avatar;
+    }
+
+    public void setAvatar(String avatar) {
+        this.avatar = avatar;
     }
 
     public GeneralFormDTO getForm() {

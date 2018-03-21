@@ -401,6 +401,20 @@ public class ArchivesController extends ControllerBase{
     }
 
     /**
+     * <b>URL: /archives/updateArchivesEmployeeAvatar</b>
+     * <p>15.更新员工头像</p>
+     */
+    @RequestMapping("updateArchivesEmployeeAvatar")
+    @RestReturn(value = String.class)
+    public RestResponse updateArchivesEmployeeAvatar(UpdateArchivesEmployeeCommand cmd){
+        archivesService.updateArchivesEmployeeAvatar(cmd);
+        RestResponse response = new RestResponse();
+        response.setErrorCode(ErrorCodes.SUCCESS);
+        response.setErrorDescription("OK");
+        return response;
+    }
+
+    /**
      * <b>URL: /archives/executeArchivesConfiguration</b>
      * <p>(转正,调整,离职 配置项手动调用定时器)</p>
      */

@@ -1,7 +1,6 @@
 package com.everhomes.archives;
 
 import com.alibaba.fastjson.JSON;
-import com.alibaba.fastjson.JSONObject;
 import com.everhomes.configuration.ConfigConstants;
 import com.everhomes.configuration.ConfigurationProvider;
 import com.everhomes.constants.ErrorCodes;
@@ -22,7 +21,6 @@ import com.everhomes.rest.user.UserGender;
 import com.everhomes.rest.user.UserServiceErrorCode;
 import com.everhomes.rest.user.UserStatus;
 import com.everhomes.server.schema.Tables;
-import com.everhomes.server.schema.tables.EhOrganizationMemberDetails;
 import com.everhomes.user.*;
 import com.everhomes.util.ConvertHelper;
 import com.everhomes.util.DateHelper;
@@ -970,7 +968,7 @@ public class ArchivesServiceImpl implements ArchivesService {
 
         //  4.赋值
 
-        //  4-1.处理部门.岗位.职级字段及id
+        //  4-1.处理部门.岗位.职级字段
         processEmployeeOrganization(employeeDefaultMaps, response, employee);
         for (GeneralFormFieldDTO dto : form.getFormFields()) {
             //  4-2.赋值给系统默认字段
@@ -982,7 +980,11 @@ public class ArchivesServiceImpl implements ArchivesService {
                 dto.setFieldValue(employeeDynamicMaps.get(dto.getFieldName()));
             }
         }
-        //  4-4.员工状态赋值
+
+        //  4-4.员工头像赋值
+        response.setAvatar(employee.getAvatar());
+
+        //  4-5.员工状态赋值
         response.setEmployeeCase(getArchivesEmployeeCase(employee));
 
         //  5.获取档案记录
@@ -1306,9 +1308,10 @@ public class ArchivesServiceImpl implements ArchivesService {
             valueMap.put(ArchivesParameter.DEPARTMENT, convertToOrgNames(department));
             valueMap.put(ArchivesParameter.JOB_POSITION, convertToOrgNames(jobPosition));
             valueMap.put(ArchivesParameter.JOB_LEVEL, convertToOrgNames(jobLevel));
-            response.setDepartmentIds(convertToOrgIds(department));
+            //  do not need the id, changed by ryan..
+           /* response.setDepartmentIds(convertToOrgIds(department));
             response.setJobPositionIds(convertToOrgIds(jobPosition));
-            response.setJobLevelIds(convertToOrgIds(jobLevel));
+            response.setJobLevelIds(convertToOrgIds(jobLevel));*/
         }
     }
 
@@ -2555,6 +2558,15 @@ public class ArchivesServiceImpl implements ArchivesService {
             return employees;
         }
         return new ArrayList<>();
+    }
+
+    @Override
+    public void updateArchivesEmployeeAvatar(UpdateArchivesEmployeeCommand cmd) {
+        OrganizationMemberDetails employee = organizationProvider.findOrganizationMemberDetailsByDetailId(cmd.getDetailId());
+        if(employee != null) {
+            employee.setAvatar(cmd.getAvatar());
+            organizationProvider.updateOrganizationMemberDetails(employee, employee.getId());
+        }
     }
 
     @Override

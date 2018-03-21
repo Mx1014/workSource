@@ -105,6 +105,8 @@ public interface ArchivesService {
 
     List<OrganizationMemberDetails> queryArchivesEmployees(ListingLocator locator, Long organizationId, Long departmentId, ListingQueryBuilderCallback queryBuilderCallback);
 
+    void updateArchivesEmployeeAvatar(UpdateArchivesEmployeeCommand cmd);
+
     void remindArchivesEmployee(RemindArchivesEmployeeCommand cmd);
 
     void syncArchivesDismissStatus();
