@@ -15,6 +15,7 @@ import com.everhomes.rest.ui.organization.SetCurrentCommunityForSceneCommand;
 import com.everhomes.rest.ui.user.*;
 import com.everhomes.rest.user.*;
 import com.everhomes.rest.user.admin.*;
+
 import org.springframework.web.context.request.async.DeferredResult;
 
 import javax.servlet.http.HttpServletRequest;
@@ -314,4 +315,6 @@ public interface UserService {
     void logonByScan(String subjectId, String message);
 
     List<FunctionCardDto> listUserRelatedCards();
+    User getUserFromAnBangToken(String token);
+    List<SceneDTO> listAnbangRelatedScenes(ListAnBangRelatedScenesCommand cmd);
 }

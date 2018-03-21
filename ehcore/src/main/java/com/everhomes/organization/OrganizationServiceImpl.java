@@ -724,7 +724,11 @@ public class OrganizationServiceImpl implements OrganizationService {
         resp.setNextPageAnchor(rlt.getPageAnchor());
         List<OrganizationDetailDTO> dtos = new ArrayList<OrganizationDetailDTO>();
         for (Long id : rlt.getIds()) {
-            dtos.add(toOrganizationDetailDTO(id, false));
+            OrganizationDetailDTO detail = toOrganizationDetailDTO(id, false);
+            if(detail != null) {
+                dtos.add(detail);    
+            }
+            
         }
         resp.setDtos(dtos);
         return resp;

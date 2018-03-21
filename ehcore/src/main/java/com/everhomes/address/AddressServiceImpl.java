@@ -84,6 +84,7 @@ import com.everhomes.util.file.DataFileHandler;
 import com.everhomes.util.file.DataProcessConstants;
 import com.everhomes.varField.FieldService;
 import com.everhomes.varField.ScopeFieldItem;
+
 import org.apache.commons.lang.StringUtils;
 import org.apache.lucene.spatial.geohash.GeoHashUtils;
 import org.jooq.*;
@@ -96,6 +97,7 @@ import org.springframework.transaction.TransactionStatus;
 import org.springframework.web.multipart.MultipartFile;
 
 import javax.annotation.PostConstruct;
+
 import java.io.IOException;
 import java.sql.Timestamp;
 import java.util.*;
@@ -330,6 +332,13 @@ public class AddressServiceImpl implements AddressService, LocalBusSubscriber {
 
                     return true;
                 });
+        
+        for(CommunityDTO result : results) {
+            if(result.getName() != null && result.getName().length() > 1) {
+                result.setFirstLatterOfName(PinYinHelper.getCapitalInitial(PinYinHelper.getPinYin(result.getName().substring(0, 1))));    
+            }
+            
+        }
 
 
         return new Tuple<>(ErrorCodes.SUCCESS, results);

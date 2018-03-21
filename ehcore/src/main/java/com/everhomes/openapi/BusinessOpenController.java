@@ -1,5 +1,6 @@
 package com.everhomes.openapi;
 
+import com.everhomes.aclink.DoorAuth;
 import com.everhomes.business.BusinessService;
 import com.everhomes.category.Category;
 import com.everhomes.category.CategoryProvider;
@@ -13,6 +14,8 @@ import com.everhomes.flow.FlowService;
 import com.everhomes.messaging.MessagingService;
 import com.everhomes.organization.OrganizationService;
 import com.everhomes.rest.RestResponse;
+import com.everhomes.rest.aclink.DoorAccessDriverType;
+import com.everhomes.rest.aclink.GetVisitorCommand;
 import com.everhomes.rest.address.*;
 import com.everhomes.rest.address.admin.ListBuildingByCommunityIdsCommand;
 import com.everhomes.rest.app.AppConstants;
@@ -39,13 +42,23 @@ import com.everhomes.rest.region.ListRegionByKeywordCommand;
 import com.everhomes.rest.region.ListRegionCommand;
 import com.everhomes.rest.region.RegionDTO;
 import com.everhomes.rest.reserver.CreateReserverOrderCommand;
+import com.everhomes.rest.ui.user.ListAnBangRelatedScenesCommand;
+import com.everhomes.rest.ui.user.GetUserRelatedAddressCommand;
+import com.everhomes.rest.ui.user.GetUserRelatedAddressResponse;
+import com.everhomes.rest.ui.user.ListUserRelatedScenesCommand;
+import com.everhomes.rest.ui.user.SceneDTO;
 import com.everhomes.rest.ui.user.UserProfileDTO;
 import com.everhomes.rest.user.*;
 import com.everhomes.user.*;
 import com.everhomes.util.*;
+
+import org.jooq.tools.StringUtils;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.http.HttpHeaders;
+import org.springframework.http.HttpStatus;
+import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RestController;
 
@@ -53,6 +66,9 @@ import javax.servlet.http.Cookie;
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
 import javax.validation.Valid;
+
+import java.net.URI;
+import java.net.URISyntaxException;
 import java.text.SimpleDateFormat;
 import java.util.*;
 import java.util.stream.Collectors;
@@ -841,7 +857,7 @@ public class BusinessOpenController extends ControllerBase {
     }
 
     @RequestMapping("verifyUserByTokenFromAnBang")
-    @RequireAuthentication(true)
+    @RequireAuthentication(false)
     @RestReturn(value = UserLogin.class)
     public RestResponse verifyUserByTokenFromAnBang(LogonCommand cmd, HttpServletRequest request, HttpServletResponse response) {
         UserLogin login = this.userService.verifyUserByTokenFromAnBang(cmd.getUserIdentifier());
@@ -852,6 +868,54 @@ public class BusinessOpenController extends ControllerBase {
         restResponse.setErrorCode(ErrorCodes.SUCCESS);
         restResponse.setErrorDescription("OK");
         return restResponse;
+    }
+    
+    @RequestMapping("abdir")
+    @RequireAuthentication(false)
+    public Object anbangRedirect(AnBangTokenCommand cmd, HttpServletRequest request, HttpServletResponse response) {
+        HttpHeaders httpHeaders = new HttpHeaders();
+        try {
+            UserLogin login = this.userService.verifyUserByTokenFromAnBang(cmd.getAbtoken());
+            if(login != null && cmd.getRedirect() != null) {
+                String location = cmd.getRedirect();
+                LoginToken token = new LoginToken(login.getUserId(), login.getLoginId(), login.getLoginInstanceNumber(), login.getImpersonationId());
+                String tokenString = WebTokenGenerator.getInstance().toWebToken(token);
+                
+                Map<String, String[]> paramMap = request.getParameterMap();
+                List<String> params = new ArrayList<String>();
+                for (Map.Entry<String, String[]> entry : paramMap.entrySet()) {
+                    if (!entry.getKey().equals("token") && !entry.getKey().equals("redirect") && !entry.getKey().equals("abtoken")) {
+                        params.add(entry.getKey() + "=" + StringUtils.join(entry.getValue(), ','));
+                        }
+                    }
+                
+                setCookieInResponse("token", tokenString, request, response);
+                httpHeaders.setLocation(new URI(location));
+             
+                return new ResponseEntity<>(httpHeaders, HttpStatus.SEE_OTHER);                
+            }
+
+        } catch (URISyntaxException e) {
+        }
+        
+        RestResponse restResponse = new RestResponse();
+        restResponse.setErrorCode(ErrorCodes.ERROR_INVALID_PARAMETER);
+        restResponse.setErrorDescription("invalid abtoken or redirect");
+        return restResponse;
+    }
+    
+    /**
+     * <b>URL: /openapi/listAnBangRelatedAddresses</b>
+     * <p>根据用户域空间场景获取用户相关的地址列表</p>
+     */
+    @RequestMapping("listAnBangRelatedAddresses")
+    @RequireAuthentication(false)
+    @RestReturn(value=SceneDTO.class, collection=true)
+    public RestResponse listAnbangRelatedScenes(ListAnBangRelatedScenesCommand cmd) {
+        RestResponse response = new RestResponse(userService.listAnbangRelatedScenes(cmd));
+        response.setErrorCode(ErrorCodes.SUCCESS);
+        response.setErrorDescription("OK");
+        return response;
     }
 
     private static void setCookieInResponse(String name, String value, HttpServletRequest request, HttpServletResponse response) {

@@ -71,6 +71,7 @@ import com.everhomes.point.UserPointService;
 import com.everhomes.qrcode.QRCodeService;
 import com.everhomes.region.Region;
 import com.everhomes.region.RegionProvider;
+import com.everhomes.rest.RestResponse;
 import com.everhomes.rest.acl.ListServiceModuleAdministratorsCommand;
 import com.everhomes.rest.address.*;
 import com.everhomes.rest.app.AppConstants;
@@ -115,6 +116,7 @@ import com.everhomes.settings.PaginationConfigHelper;
 import com.everhomes.sms.*;
 import com.everhomes.user.admin.SystemUserPrivilegeMgr;
 import com.everhomes.util.*;
+
 import org.apache.commons.lang.StringUtils;
 import org.jooq.DSLContext;
 import org.jooq.Record;
@@ -147,6 +149,7 @@ import javax.validation.Validation;
 import javax.validation.Validator;
 import javax.validation.constraints.Size;
 import javax.validation.metadata.ConstraintDescriptor;
+
 import java.io.UnsupportedEncodingException;
 import java.net.URLDecoder;
 import java.net.URLEncoder;
@@ -200,6 +203,7 @@ public class UserServiceImpl implements UserService {
 	private static String ANBANG_OAUTH_URL = "http://139.196.255.176:8000/api/auth/oauth/token";
 	private static String ANBANG_USERS_URL = "http://139.196.255.176:8000/api/permission/user/synchronization";
 	private static String ANBANG_CURRENT_USER_URL = "http://139.196.255.176:8000/api/auth/current-user";
+	private static Integer ANBANG_NAMESPACE_ID = 999992;
 
 
 	@Autowired
@@ -5582,20 +5586,20 @@ public class UserServiceImpl implements UserService {
 //										}
 										LOGGER.debug("AnBang user size" + userList.size());
 
-										List<User> users = userList.stream().map(r -> {
+										List<User> users = userList.stream().map(r2 -> {
 											User user = new User();
-											user.setNamespaceId(0);
-											user.setNickName(r.get("nickname") != null ? r.get("nickname").toString() : "");
-											user.setIdentifierToken(r.get("login") != null ? r.get("login").toString() : "");
-											user.setAvatar(r.get("avatar") != null ? r.get("avatar").toString() : "");
-											user.setCreateTime(r.get("createdDate") != null ?Timestamp.valueOf(r.get("createdDate").toString()) : null);
-											user.setPasswordHash(r.get("password") != null ? r.get("password").toString() : "");
+											user.setNamespaceId(ANBANG_NAMESPACE_ID);
+											user.setNickName(r2.get("nickname") != null ? r2.get("nickname").toString() : "");
+											user.setIdentifierToken(r2.get("login") != null ? r2.get("login").toString() : "");
+											user.setAvatar(r2.get("avatar") != null ? r2.get("avatar").toString() : "");
+											user.setCreateTime(r2.get("createdDate") != null ?Timestamp.valueOf(r2.get("createdDate").toString()) : null);
+											user.setPasswordHash(r2.get("password") != null ? r2.get("password").toString() : "");
 											user.setStatus(UserStatus.ACTIVE.getCode());
 											user.setLocale(Locale.CHINA.toString());
-											user.setNamespaceUserToken(r.get("id") != null ? r.get("id").toString() : "");
+											user.setNamespaceUserToken(r2.get("id") != null ? r2.get("id").toString() : "");
 											user.setUpdateTime(new Timestamp(DateHelper.currentGMTTime().getTime()));
 											user.setNamespaceUserType(NamespaceUserType.ANBANG.getCode());
-											user.setThirdData(r.toString());
+											user.setThirdData(r2.toString());
 											return user;
 										}).collect(Collectors.toList());
 
@@ -5709,61 +5713,74 @@ public class UserServiceImpl implements UserService {
 		});
 		return null;
 	}
+	
+	@Override
+	public User getUserFromAnBangToken(String token) {
+        StringBuffer getUrl = new StringBuffer(ANBANG_CURRENT_USER_URL);
+        Map headerParam = new HashMap();
+        headerParam.put("Authorization", "bearer " + token);
+
+	    try {
+            ResponseEntity<String> result = restCallSync(HttpMethod.GET, MediaType.APPLICATION_JSON, getUrl.toString(), headerParam, null);
+            Map currentUser = (Map) JSON.parseObject(result.getBody().toString()).get("data");
+            String userIdentifierToken = currentUser.get("login").toString();
+            int regionCode = 86;
+            int namespaceId = ANBANG_NAMESPACE_ID;
+            User user = userProvider.findUserByAccountName(userIdentifierToken);
+            if (user == null) {
+                UserIdentifier userIdentifier = userProvider.findClaimedIdentifierByToken(namespaceId, userIdentifierToken);
+                // 把 regionCode 的检查加上，之前是没有检查的    add by xq.tian 2017/07/12
+                if (userIdentifier != null && Objects.equals((userIdentifier.getRegionCode() != null ? userIdentifier.getRegionCode() : 86), regionCode)) {
+                    user = userProvider.findUserById(userIdentifier.getOwnerUid());
+                }
+                
+            }
+            
+            if (UserStatus.fromCode(user.getStatus()) != UserStatus.ACTIVE) {
+                return null;
+            }
+            
+            return user;
+            
+	    } catch(Exception ex) {
+	        LOGGER.error("anbang error", ex);
+	        return null;
+	    }
+	    
+	}
 
 	@Override
 	public UserLogin verifyUserByTokenFromAnBang(String token) {
-
 		List<UserLogin> logins = new ArrayList<>();
-		StringBuffer getUrl = new StringBuffer(ANBANG_CURRENT_USER_URL);
-		Map headerParam = new HashMap();
-		headerParam.put("Authorization", "bearer " + token);
-
+		User user = getUserFromAnBangToken(token);
+		if(user == null) {
+		    return null;
+		}
+		
 		dbProvider.execute(r -> {
-			try {
-				ResponseEntity<String> result = restCallSync(HttpMethod.GET, MediaType.APPLICATION_JSON, getUrl.toString(), headerParam, null);
-				Map currentUser = (Map) JSON.parseObject(result.getBody().toString()).get("data");
-				String userIdentifierToken = currentUser.get("login").toString();
-
-				int regionCode = 86;
-				int namespaceId = Namespace.DEFAULT_NAMESPACE;
-
-
-				User user = userProvider.findUserByAccountName(userIdentifierToken);
-				if (user == null) {
-					UserIdentifier userIdentifier = userProvider.findClaimedIdentifierByToken(namespaceId, userIdentifierToken);
-					// 把regionCode的检查加上，之前是没有检查的    add by xq.tian 2017/07/12
-					if (userIdentifier != null && Objects.equals((userIdentifier.getRegionCode() != null ? userIdentifier.getRegionCode() : 86), regionCode)) {
-						user = userProvider.findUserById(userIdentifier.getOwnerUid());
-						if (user == null) {
-							LOGGER.error("Unable to find owner user of identifier record,  namespaceId={}, userIdentifierToken={}, deviceIdentifier={}, pusherIdentify={}",
-									namespaceId, userIdentifierToken, null, null);
-							throw errorWith(UserServiceErrorCode.SCOPE, UserServiceErrorCode.ERROR_USER_NOT_EXIST, "User does not exist");
-						}
-					} else {
-						LOGGER.warn("Unable to find identifier record,  namespaceId={}, userIdentifierToken={}, deviceIdentifier={}, pusherIdentify={}",
-								namespaceId, userIdentifierToken, null, null);
-						throw errorWith(UserServiceErrorCode.SCOPE, UserServiceErrorCode.ERROR_UNABLE_TO_LOCATE_USER, "Unable to locate user");
-					}
-				}
-
-				if (UserStatus.fromCode(user.getStatus()) != UserStatus.ACTIVE)
-					throw errorWith(UserServiceErrorCode.SCOPE, UserServiceErrorCode.ERROR_ACCOUNT_NOT_ACTIVATED, "User acount has not been activated yet");
-
-
-				UserLogin login = createLogin(namespaceId, user, null, null);
+				UserLogin login = createLogin(ANBANG_NAMESPACE_ID, user, null, null);
 				login.setStatus(UserLoginStatus.LOGGED_IN);
 				logins.add(login);
-
-			} catch (Exception ex) {
-				LOGGER.error(ex.getMessage());
-				throw RuntimeErrorException.errorWith(ErrorCodes.SCOPE_GENERAL, ErrorCodes.ERROR_GENERAL_EXCEPTION,
-						"Unable to sync2");
-			};
-			return null;
+				return null;
 		});
 		return logins.size() > 0 ? logins.get(0) : null;
 
 	}
+	
+	@Override
+	public List<SceneDTO> listAnbangRelatedScenes(ListAnBangRelatedScenesCommand cmd) {
+        User user = getUserFromAnBangToken(cmd.getAbtoken());
+        if(user != null) {
+            ListUserRelatedScenesCommand cmd2 = new ListUserRelatedScenesCommand();
+            cmd2.setDefaultFlag(0);
+            UserContext.current().setUser(user);
+            UserContext.current().setNamespaceId(ANBANG_NAMESPACE_ID);
+            List<SceneDTO> sceneDtoList = listUserRelatedScenes(cmd2);
+            return sceneDtoList;
+        }
+        
+        return null;
+   }
 
 	@Override
 	public void logonBuAnBangToken() {
