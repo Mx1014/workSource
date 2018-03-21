@@ -1211,3 +1211,6 @@ update eh_var_fields set mandatory_flag = 1 where group_id = 28 and name = 'buil
 INSERT INTO `eh_service_modules` (`id`, `name`, `parent_id`, `path`, `type`, `level`, `status`, `default_order`, `create_time`, `instance_config`, `action_type`, `update_time`, `operator_uid`, `creator_uid`, `description`, `multiple_flag`, `module_control_type`) VALUES ('58000', '企业账户', '50000', '/50000/58000', '1', '2', '2', '0', '2018-03-19 17:52:57', NULL, NULL, '2018-03-19 17:53:11', '0', '0', '0', '0', 'org_control');
 INSERT INTO `eh_web_menus` (`id`, `name`, `parent_id`, `icon_url`, `data_type`, `leaf_flag`, `status`, `path`, `type`, `sort_num`, `module_id`, `level`, `condition_type`, `category`, `config_type`) VALUES ('16070000', '企业账户模块', '16000000', NULL, 'enterprise-account', '1', '2', '/16000000/16070000', 'zuolin', '7', '58000', '2', 'system', 'module', NULL);
 INSERT INTO `eh_web_menus` (`id`, `name`, `parent_id`, `icon_url`, `data_type`, `leaf_flag`, `status`, `path`, `type`, `sort_num`, `module_id`, `level`, `condition_type`, `category`, `config_type`) VALUES ('52000000', '企业账户', '0', '', 'enterprise-account', '0', '2', '/52000000', 'park', '12', '58000', '1', 'system', 'module', '2');
+
+-- 应彬哥要求删除"文件下载中心"菜单 add by yanjun 201803211012
+DELETE from eh_web_menus WHERE data_type = 'file-center' and id in (11030000, 51030000);
