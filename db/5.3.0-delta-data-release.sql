@@ -68,11 +68,11 @@ SET  @vId = (SELECT  MAX(id) FROM eh_version_urls);
 INSERT INTO `eh_version_urls` VALUES (@vId:=@vId+1, @id, '1.0.0', 'http://{home.url}/nar/qualityInspect/offline/qualityInspection-1-0-0.zip', 'http://{home.url}/nar/qualityInspect/offline/qualityInspection-1-0-0.zip', '品质核查离线', '0', '品质核查', NOW(), NULL, '0');
 
 UPDATE eh_launch_pad_items
-SET action_data = '{\"realm\":\"qualityInspection\",\"entryUrl\":\"http://{home.url}/nar/qualityInspect/build/index.html?hideNavigationBar=1#/home#sign_suffix\"}'
+SET action_data = '{\"realm\":\"qualityInspection\",\"entryUrl\":\"http://{home.url}/nar/qualityInspection/build/index.html?hideNavigationBar=1#/home#sign_suffix\"}'
 WHERE item_label LIKE '%巡检%';
 
 UPDATE eh_service_module_apps
-SET instance_config = '{\"realm\":\"qualityInspection\",\"entryUrl\":\"http://{home.url}/nar/qualityInspect/build/index.html?hideNavigationBar=1#/home#sign_suffix\"}'
+SET instance_config = '{\"realm\":\"qualityInspection\",\"entryUrl\":\"http://{home.url}/nar/qualityInspection/build/index.html?hideNavigationBar=1#/home#sign_suffix\"}'
 WHERE module_id = 20600;
 
 UPDATE eh_launch_pad_items
