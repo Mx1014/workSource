@@ -742,9 +742,13 @@ public class WarehouseProviderImpl implements WarehouseProvider {
     @Override
     public WarehouseMaterialStock findWarehouseStocksByMaterialId(Long materialId) {
         DSLContext context = dbProvider.getDslContext(AccessSpec.readOnly());
-        return context.selectFrom(Tables.EH_WAREHOUSE_STOCKS)
+        List<WarehouseMaterialStock> warehouseMaterialStocks = context.selectFrom(Tables.EH_WAREHOUSE_STOCKS)
                 .where(Tables.EH_WAREHOUSE_STOCKS.MATERIAL_ID.eq(materialId))
-                .fetchOneInto(WarehouseMaterialStock.class);
+                .fetchInto(WarehouseMaterialStock.class);
+        if(warehouseMaterialStocks.size() > 0){
+            return warehouseMaterialStocks.get(0);
+        }
+        return null;
     }
 
     @Override
