@@ -5296,51 +5296,51 @@ public class OrganizationServiceImpl implements OrganizationService {
     }
 
 
-//    @Override
-//    public ListDepartmentsCommandResponse listDepartments(
-//            ListDepartmentsCommand cmd) {
-//        ListDepartmentsCommandResponse response = new ListDepartmentsCommandResponse();
-//        cmd.setPageOffset(cmd.getPageOffset() == null ? 1 : cmd.getPageOffset());
-//        Organization org = organizationProvider.findOrganizationById(cmd.getParentId());
-//        if (org != null) {
-//            int totalCount = organizationProvider.countDepartments(org.getPath() + "/%");
-//            if (totalCount == 0) return response;
-//
-//            int pageSize = PaginationConfigHelper.getPageSize(configurationProvider, cmd.getPageSize());
-//            int pageCount = getPageCount(totalCount, pageSize);
-//
-//            List<Organization> result = organizationProvider.listDepartments(org.getPath() + "/%", cmd.getPageOffset(), pageSize);
-//            List<Organization> depts = organizationProvider.listDepartments(org.getPath() + "/%", 1, 1000);
-//
-//            if (result != null && result.size() > 0) {
-//                List<RoleAssignment> roleAssignments = this.aclProvider.getAllRoleAssignments();
-//                Map<Long, RoleAssignment> roleAssignmentMap = new HashMap<Long, RoleAssignment>();
-//                for (RoleAssignment roleass : roleAssignments) {
-//                    if (EntityType.ORGANIZATIONS.getCode().equals(roleass.getTargetType()))
-//                        roleAssignmentMap.put(roleass.getTargetId(), roleass);
-//                }
-//                Map<Long, Organization> deptMaps = this.convertDeptListToMap(depts);
-//                response.setDepartments(result.stream().map(r -> {
-//                    DepartmentDTO department = new DepartmentDTO();
-//                    department.setId(r.getId());
-//                    department.setDepartmentName(r.getName());
-//                    department.setDepartmentType(r.getDepartmentType());
-//                    department.setSuperiorDepartment(null == deptMaps.get(r.getParentId()) ? "" : deptMaps.get(r.getParentId()).getName());
-//                    if (roleAssignmentMap.get(department.getId()) != null) {
-//                        Long roleId = roleAssignmentMap.get(department.getId()).getRoleId();
-//                        Role role = this.aclProvider.getRoleById(roleId);
-//                        if (role != null)
-//                            department.setRole(role.getName());
-//                    }
-//
-//                    return department;
-//                }).collect(Collectors.toList()));
-//            }
-//            response.setNextPageOffset(cmd.getPageOffset() == pageCount ? null : cmd.getPageOffset() + 1);
-//        }
-//
-//        return response;
-//    }
+/*    @Override
+    public ListDepartmentsCommandResponse listDepartments(
+            ListDepartmentsCommand cmd) {
+        ListDepartmentsCommandResponse response = new ListDepartmentsCommandResponse();
+        cmd.setPageOffset(cmd.getPageOffset() == null ? 1 : cmd.getPageOffset());
+        Organization org = organizationProvider.findOrganizationById(cmd.getParentId());
+        if (org != null) {
+            int totalCount = organizationProvider.countDepartments(org.getPath() + "/%");
+            if (totalCount == 0) return response;
+
+            int pageSize = PaginationConfigHelper.getPageSize(configurationProvider, cmd.getPageSize());
+            int pageCount = getPageCount(totalCount, pageSize);
+
+            List<Organization> result = organizationProvider.listDepartments(org.getPath() + "/%", cmd.getPageOffset(), pageSize);
+            List<Organization> depts = organizationProvider.listDepartments(org.getPath() + "/%", 1, 1000);
+
+            if (result != null && result.size() > 0) {
+                List<RoleAssignment> roleAssignments = this.aclProvider.getAllRoleAssignments();
+                Map<Long, RoleAssignment> roleAssignmentMap = new HashMap<Long, RoleAssignment>();
+                for (RoleAssignment roleass : roleAssignments) {
+                    if (EntityType.ORGANIZATIONS.getCode().equals(roleass.getTargetType()))
+                        roleAssignmentMap.put(roleass.getTargetId(), roleass);
+                }
+                Map<Long, Organization> deptMaps = this.convertDeptListToMap(depts);
+                response.setDepartments(result.stream().map(r -> {
+                    DepartmentDTO department = new DepartmentDTO();
+                    department.setId(r.getId());
+                    department.setDepartmentName(r.getName());
+                    department.setDepartmentType(r.getDepartmentType());
+                    department.setSuperiorDepartment(null == deptMaps.get(r.getParentId()) ? "" : deptMaps.get(r.getParentId()).getName());
+                    if (roleAssignmentMap.get(department.getId()) != null) {
+                        Long roleId = roleAssignmentMap.get(department.getId()).getRoleId();
+                        Role role = this.aclProvider.getRoleById(roleId);
+                        if (role != null)
+                            department.setRole(role.getName());
+                    }
+
+                    return department;
+                }).collect(Collectors.toList()));
+            }
+            response.setNextPageOffset(cmd.getPageOffset() == pageCount ? null : cmd.getPageOffset() + 1);
+        }
+
+        return response;
+    }*/
 
     private Map<Long, Organization> convertDeptListToMap(List<Organization> depts) {
         Map<Long, Organization> map = new HashMap<Long, Organization>();
@@ -10767,24 +10767,6 @@ public class OrganizationServiceImpl implements OrganizationService {
                 jobPositions.addAll(repeatCreateOrganizationmembers(jobPositionIds, cmd.getContactToken(), enterpriseIds, organizationMember));
                 jobLevels.addAll(repeatCreateOrganizationmembers(jobLevelIds, cmd.getContactToken(), enterpriseIds, organizationMember));
 
-                /*//同步部门、岗位、职级的修改
-                OrganizationMemberDetails memberDetail = organizationProvider.findOrganizationMemberDetailsByDetailId(organizationMember.getDetailId());
-                // todo:去掉公司id
-                departmentIds.remove(memberDetail.getOrganizationId());
-                if (departmentIds != null && departmentIds.size() > 0)
-                    memberDetail.setDepartmentIds(JSON.toJSONString(departmentIds));
-                memberDetail.setDepartment(convertToOrganizationName(departmentIds));
-
-                if (jobPositionIds != null && jobPositionIds.size() > 0)
-                    memberDetail.setJobPositionIds(JSON.toJSONString(jobPositionIds));
-                memberDetail.setJobPosition(convertToOrganizationName(jobPositionIds));
-
-                if (jobLevelIds != null && jobLevelIds.size() > 0)
-                    memberDetail.setJobLevelIds(JSON.toJSONString(jobLevelIds));
-                memberDetail.setJobLevel(convertToOrganizationName(jobLevelIds));
-
-                organizationProvider.updateOrganizationMemberDetails(memberDetail, memberDetail.getId());*/
-
                 dto.setGroups(groups);
 
                 dto.setDepartments(departments);
@@ -10820,23 +10802,6 @@ public class OrganizationServiceImpl implements OrganizationService {
         }
         return dto;
     }
-
-    private String convertToOrganizationName(List<Long> ids) {
-        String departmentName = "";
-        if (ids != null && ids.size() > 0) {
-            for (Long id : ids) {
-                Organization org = organizationProvider.findOrganizationById(id);
-                if (org != null) {
-                    departmentName += org.getName() + ",";
-                }
-            }
-            if (!"".equals(departmentName))
-                departmentName = departmentName.substring(0, departmentName.length() - 1);
-            return departmentName;
-        } else
-            return "";
-    }
-
 
     /**
      * 去重
@@ -11886,13 +11851,6 @@ public class OrganizationServiceImpl implements OrganizationService {
 
     @Override
     public void exportImportFileFailResultXls(GetImportFileResultCommand cmd, HttpServletResponse httpResponse) {
-//		Map<String, String> titleMap = new HashMap<>();
-//		titleMap.put("contactName", "姓名");
-//		titleMap.put("contactToken", "手机号");
-//		titleMap.put("gender", "性别");
-//		titleMap.put("orgnaizationPath", "部门");
-//		titleMap.put("jobPosition", "岗位");
-//		titleMap.put("jobLevel", "职级");
         importFileService.exportImportFileFailResultXls(httpResponse, cmd.getTaskId());
     }
 
@@ -11976,12 +11934,13 @@ public class OrganizationServiceImpl implements OrganizationService {
             detail.setContactToken(member.getContactToken());
             detail.setContactDescription(member.getContactDescription());
             detail.setEmployeeNo(member.getEmployeeNo());
-            detail.setAvatar(member.getAvatar());
+            //  changed by ryan, there is a unique avatar for employee's archive
+            //  detail.setAvatar(member.getAvatar());
+            //  detail.setProfileIntegrity(member.getProfileIntegrity() != null ? member.getProfileIntegrity() : 0);
             detail.setGender(member.getGender());
             detail.setCheckInTime(member.getCheckInTime() != null ? member.getCheckInTime() : now);
             detail.setEmployeeStatus(member.getEmployeeStatus() != null ? member.getEmployeeStatus() : (byte) 0);
             detail.setEmploymentTime(member.getEmploymentTime() != null ? member.getEmploymentTime() : now);
-            detail.setProfileIntegrity(member.getProfileIntegrity() != null ? member.getProfileIntegrity() : 0);
             detail.setEmployeeType(member.getEmployeeType());
             detail.setTargetType(member.getTargetType());
             detail.setTargetId(member.getTargetId());
@@ -11991,7 +11950,7 @@ public class OrganizationServiceImpl implements OrganizationService {
             detail.setGender(member.getGender());
             detail.setEmployeeType(member.getEmployeeType());
             detail.setEmployeeNo(member.getEmployeeNo() != null ? member.getEmployeeNo() : "");
-            // changed by R, 20170720
+            // changed by ryan, 20170720
             detail.setCheckInTime(member.getCheckInTime() != null ? member.getCheckInTime() : now);
             if (member.getEmployeeStatus() != null)
                 detail.setEmployeeStatus(member.getEmployeeStatus());
@@ -12317,12 +12276,6 @@ public class OrganizationServiceImpl implements OrganizationService {
         deleteOrganizationPersonnelByContactTokenCommand.setContactToken(detail.getContactToken());
         deleteOrganizationPersonnelByContactTokenCommand.setScopeType(DeleteOrganizationContactScopeType.ALL_NOTE.getCode());
         deleteOrganizationPersonnelByContactToken(deleteOrganizationPersonnelByContactTokenCommand);
-        //更新人事管理状态
-//        UpdateOrganizationEmployeeStatusCommand updateOrganizationEmployeeStatusCommand = new UpdateOrganizationEmployeeStatusCommand();
-//        updateOrganizationEmployeeStatusCommand.setDetailId(cmd.getDetailId());
-//        updateOrganizationEmployeeStatusCommand.setEmployeeStatus(EmployeeStatus.LEAVETHEJOB.getCode());
-//        updateOrganizationEmployeeStatusCommand.setRemarks(cmd.getRemarks());
-//        updateOrganizationEmployeeStatus(updateOrganizationEmployeeStatusCommand);
         //离职时薪酬组相关的改动
         try{
             this.uniongroupService.syncUniongroupAfterLeaveTheJob(cmd.getDetailId());
@@ -12430,9 +12383,7 @@ public class OrganizationServiceImpl implements OrganizationService {
                     return listUnderOrganizations(i + 1, orgs_1, namespaceId, list);
                 }
                 return null;
-            }).filter(r -> {
-                return r != null;
-            }).collect(Collectors.toList());
+            }).filter(r -> r != null).collect(Collectors.toList());
 
             if(result != null && result.size()>0){
                 return result.get(0);
