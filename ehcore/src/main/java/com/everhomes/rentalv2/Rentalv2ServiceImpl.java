@@ -3899,8 +3899,8 @@ public class Rentalv2ServiceImpl implements Rentalv2Service {
 					bill.setFlowCaseId(flowCase.getId());
 				}else{
 					LOGGER.error("Enable rental flow not found, moduleId={}", FlowConstants.PM_TASK_MODULE);
-					throw RuntimeErrorException.errorWith(ErrorCodes.SCOPE_GENERAL,
-							ErrorCodes.ERROR_INVALID_PARAMETER, "请开启工作流后重试");
+					throw RuntimeErrorException.errorWith("Rentalv2",
+							10001, "请开启工作流后重试");
 
 				}
 
