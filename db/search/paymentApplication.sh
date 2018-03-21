@@ -42,7 +42,7 @@ curl -XPUT "http://$ELASTIC/$INDEX/_mapping/paymentApplication" -d '
                     }
                 }
             },            
-            "applicationNumber":{"type":"string","index":"no", "store":"yes"},
+            "applicationNumber":{"type":"string", "index":"not_analyzed"},
             "id": {"type":"long"},
             "communityId": {"type":"long"},
 			"namespaceId": {"type":"integer"},

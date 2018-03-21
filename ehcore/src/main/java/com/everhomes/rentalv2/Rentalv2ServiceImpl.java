@@ -2044,7 +2044,7 @@ public class Rentalv2ServiceImpl implements Rentalv2Service {
 			RentalCell lastRsr = findRentalSiteRuleById(siteRuleIds.get(size - 1));
 			if (null != firstRsr && null != lastRsr) {
 				useDetailSB.append(beginTimeSF.format(firstRsr.getBeginTime()));
-				useDetailSB.append(" ");
+				useDetailSB.append("-");
 				useDetailSB.append(endTimeSF.format(lastRsr.getEndTime()));
 
 //				if(rs.getAutoAssign() == NormalFlag.NEED.getCode()){
@@ -5924,7 +5924,7 @@ public class Rentalv2ServiceImpl implements Rentalv2Service {
 			// 如果超过一种规则，则需要计算其它规则下是否已经占用了此资源（前方高能，即将进入一个极其复杂的方法）
 			rentedCount = rentalv2Provider.countRentalSiteBillOfAllScene(rs, rentalCell, priceRules);
 		}
-		dto.setCounts(rentalCell.getCounts() - rentedCount<0?0:rentalCell.getCounts() - rentedCount);
+		dto.setCounts(rs.getResourceCounts() - rentedCount<0?0:rs.getResourceCounts() - rentedCount);
 	}
 
 	private void setRentalCellStatus(java.util.Date reserveTime, RentalSiteRulesDTO dto, RentalCell rsr, RentalDefaultRule rule) {

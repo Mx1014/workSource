@@ -2506,6 +2506,7 @@ public class ParkingServiceImpl implements ParkingService {
 	
 	@Override
 	public ListParkingSpaceLogsResponse exportParkingSpaceLogs(ListParkingSpaceLogsCommand cmd,HttpServletResponse response) {
+		cmd.setPageSize(1000);
 		ListParkingSpaceLogsResponse resp =  listParkingSpaceLogs(cmd);
 
 		List<ParkingSpaceLogDTO> requests = resp.getLogDTOS();
