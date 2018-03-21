@@ -191,6 +191,12 @@ public class EquipmentStandardSearcherImpl extends AbstractElasticSearch impleme
 
         List<EquipmentStandardsDTO> eqStandards = new ArrayList<>();
 
+        Long nextPageAnchor = null;
+        if (ids.size() > pageSize) {
+            nextPageAnchor = anchor + 1;
+            ids.remove(ids.size() - 1);
+        }
+
         for (Long id : ids) {
             EquipmentInspectionStandards standard = equipmentProvider.findStandardById(id);
 
@@ -234,29 +240,8 @@ public class EquipmentStandardSearcherImpl extends AbstractElasticSearch impleme
 
         }
 
-        Long nextPageAnchor = null;
-        if (ids.size() > pageSize) {
-            nextPageAnchor = anchor + 1;
-            ids.remove(ids.size() - 1);
-        } else {
-            /*if (cmd.getTargetId() != null && cmd.getTargetId() != 0) {
-                addApplyStandards(cmd, eqStandards);
-                if (eqStandards.size() <= pageSize) {
-                    nextPageAnchor = null;
-                } else {
-                    int offset = offsetHashMap.getOrDefault(cmd.getTargetId(), 0);
-                    if (offset + pageSize > eqStandards.size()) {
-                        eqStandards.subList(offset, eqStandards.size());
-                        nextPageAnchor = null;
-                    } else {
-                        eqStandards.subList(offset, offset + pageSize);
-                        offsetHashMap.put(cmd.getTargetId(), offset + pageSize);
-                        nextPageAnchor = anchor + 1;
-                    }
-                }
-            }*/
+        if (nextPageAnchor == null) {
             addApplyStandards(cmd, eqStandards);
-            nextPageAnchor = null;
         }
 
         return new SearchEquipmentStandardsResponse(nextPageAnchor, eqStandards);
