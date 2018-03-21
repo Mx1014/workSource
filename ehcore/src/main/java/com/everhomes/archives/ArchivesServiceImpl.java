@@ -2599,7 +2599,7 @@ public class ArchivesServiceImpl implements ArchivesService {
 
     @Override
     public void syncArchivesDismissStatus() {
-        List<ArchivesDismissEmployees> results = archivesProvider.listArchivesDismissEmployees(1, Integer.MAX_VALUE, null, null);
+        /*List<ArchivesDismissEmployees> results = archivesProvider.listArchivesDismissEmployees(1, Integer.MAX_VALUE, null, null);
         if (results != null) {
             for (ArchivesDismissEmployees result : results) {
                 OrganizationMemberDetails detail = organizationProvider.findOrganizationMemberDetailsByDetailId(result.getDetailId());
@@ -2617,6 +2617,6 @@ public class ArchivesServiceImpl implements ArchivesService {
                 organizationProvider.updateOrganizationMemberDetails(detail, detail.getId());
 
             }
-        }
+        }*/
     }
 }
