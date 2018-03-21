@@ -1579,4 +1579,19 @@ public class OrganizationController extends ControllerBase {
         response.setErrorDescription("OK");
         return response;
     }
+
+    /**
+     * <b>URL: /org/listOrganizationUsers</b>
+     * <p>获取用户所在公司</p>
+     */
+    @RequestMapping("listOrganizationUsers")
+    @RestReturn(value = OrganizationUserDTO.class, collection = true)
+    public RestResponse listOrganizationUsers() {
+        List<OrganizationUserDTO> res = null;
+        RestResponse response = new RestResponse(res);
+        response.setErrorCode(ErrorCodes.SUCCESS);
+        response.setErrorDescription("OK");
+        return response;
+    }
+
 }

@@ -1,35 +1,30 @@
-// @formatter:off
-package com.everhomes.rest.community;
+package com.everhomes.rest.organization;
 
 import com.everhomes.util.StringHelper;
+
 
 /**
  * <ul>
  *     <li>id: id</li>
  *     <li>name: 显示名称</li>
  *     <li>aliasName: 别名</li>
- *     <li>avatarUri: 显示头像URI</li>
+ *     <li>avatarUri: 头像Uri</li>
  *     <li>avatarUrl: 显示头像URL</li>
- *     <li>communityType: 园区类型</li>
  *     <li>fullPinyin: 拼音全拼</li>
  *     <li>CapitalPinyin: 拼音首写字母</li>
- *     <li>managementFlag: 管理项目标志 参考{@link com.everhomes.rest.common.TrueOrFalseFlag}</li>
- *     <li>siteFlag: 办公标志 参考{@link com.everhomes.rest.common.TrueOrFalseFlag}</li>
- *     <li>nearbyFlag: 附近标志 参考{@link com.everhomes.rest.common.TrueOrFalseFlag}</li>
+ *     <li>organizationType: 公司类型 {@link OrganizationType}</li>
  * </ul>
  */
-public class CommunityUserDTO {
+public class OrganizationUserDTO {
+
     private Long id;
     private String name;
     private String aliasName;
     private String avatarUri;
     private String avatarUrl;
-    private Byte communityType;
     private String fullPinyin;
     private String CapitalPinyin;
-    private Byte managementFlag;
-    private Byte siteFlag;
-    private Byte nearbyFlag;
+    private Byte organizationType;
 
     public Long getId() {
         return id;
@@ -71,14 +66,6 @@ public class CommunityUserDTO {
         this.avatarUrl = avatarUrl;
     }
 
-    public Byte getCommunityType() {
-        return communityType;
-    }
-
-    public void setCommunityType(Byte communityType) {
-        this.communityType = communityType;
-    }
-
     public String getFullPinyin() {
         return fullPinyin;
     }
@@ -95,34 +82,16 @@ public class CommunityUserDTO {
         CapitalPinyin = capitalPinyin;
     }
 
-    public Byte getManagementFlag() {
-        return managementFlag;
+    public Byte getOrganizationType() {
+        return organizationType;
     }
 
-    public void setManagementFlag(Byte managementFlag) {
-        this.managementFlag = managementFlag;
-    }
-
-    public Byte getSiteFlag() {
-        return siteFlag;
-    }
-
-    public void setSiteFlag(Byte siteFlag) {
-        this.siteFlag = siteFlag;
-    }
-
-    public Byte getNearbyFlag() {
-        return nearbyFlag;
-    }
-
-    public void setNearbyFlag(Byte nearbyFlag) {
-        this.nearbyFlag = nearbyFlag;
+    public void setOrganizationType(Byte organizationType) {
+        this.organizationType = organizationType;
     }
 
     @Override
     public String toString() {
         return StringHelper.toJsonString(this);
     }
-
-
 }

@@ -8,8 +8,7 @@ import javax.validation.constraints.NotNull;
 
 /**
  * <ul>
- *     <li>itemLocation: item的路径</li>
- *     <li>itemGroup: 当前item归属哪个组</li>
+ *     <li>itemGroup: 当前item归属哪个组，来源layout里的itemGroup</li>
  *     <li>communityId: 小区id</li>
  * </ul>
  */
@@ -18,17 +17,7 @@ public class ListLaunchPadAppsCommand {
     @NotNull
     private Long communityId;
     @NotNull
-    private String itemLocation;
-    @NotNull
     private String itemGroup;
-
-    public String getItemLocation() {
-        return itemLocation;
-    }
-
-    public void setItemLocation(String itemLocation) {
-        this.itemLocation = itemLocation;
-    }
 
     public String getItemGroup() {
         return itemGroup;
