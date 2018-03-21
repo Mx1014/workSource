@@ -51,6 +51,7 @@ import org.apache.poi.ss.usermodel.Row;
 import org.apache.poi.ss.usermodel.Sheet;
 import org.apache.poi.ss.usermodel.Workbook;
 import org.apache.poi.xssf.usermodel.XSSFWorkbook;
+import org.jooq.Transaction;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -223,8 +224,13 @@ public class WarehouseServiceImpl implements WarehouseService {
             warehouse.setStatus(WarehouseStatus.INACTIVE.getCode());
             warehouse.setDeleteUid(UserContext.current().getUser().getId());
             warehouse.setDeleteTime(new Timestamp(DateHelper.currentGMTTime().getTime()));
-            warehouseProvider.updateWarehouse(warehouse);
-            warehouseSearcher.deleteById((warehouse.getId()));
+            this.dbProvider.execute((status) ->{
+                warehouseProvider.updateWarehouse(warehouse);
+                warehouseSearcher.deleteById((warehouse.getId()));
+                //仓库删除时，把仓库里的库存也删除掉  by wentian 2018/3/21   from redmine #26047
+                warehouseProvider.deleteWarehouseStocks(warehouse.getId());
+                return null;
+            });
         }else{
             throw RuntimeErrorException.errorWith(WarehouseServiceErrorCode.SCOPE
                     ,WarehouseServiceErrorCode.ERROR_WAREHOUSE_IS_RUNNING
