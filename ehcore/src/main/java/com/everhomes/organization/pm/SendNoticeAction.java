@@ -22,6 +22,7 @@ public class SendNoticeAction implements Runnable {
     private String cmd;
     private Long userId;
     private String schema;
+    private Integer namespaceId;
 
     @Autowired
     private PropertyMgrService propertyMgrService;
@@ -35,6 +36,7 @@ public class SendNoticeAction implements Runnable {
         LOGGER.debug("Start scheduling a push to push...." + cmd);
 
         User user = userProvider.findUserById(userId);
+        user.setNamespaceId(namespaceId);
         UserContext.setCurrentUser(user);
         UserContext.current().setScheme(schema);
         UserContext.setCurrentNamespaceId(user.getNamespaceId());
@@ -49,9 +51,10 @@ public class SendNoticeAction implements Runnable {
         UserContext.current().setScheme(null);
     }
 
-    public SendNoticeAction(String cmd, String userId, String schema){
+    public SendNoticeAction(String cmd, String userId, String schema, Integer namespaceId){
         this.cmd = cmd;
         this.userId = Long.valueOf(userId);
         this.schema = schema;
+        this.namespaceId = namespaceId;
     }
 }

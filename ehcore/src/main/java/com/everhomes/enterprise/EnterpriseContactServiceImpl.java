@@ -2151,7 +2151,7 @@ public class EnterpriseContactServiceImpl implements EnterpriseContactService {
 			 */
 			if(c.getDetailId() != null){
 				Long departmentId = organizationService.getDepartmentByDetailIdAndOrgId(c.getDetailId(), org.getId());
-				dto.setOrganizationName(checkOrganization(departmentId).getName());
+				dto.setDepartmentName(checkOrganization(departmentId).getName());
 			}
 			/**
 			 * 补充用户角色

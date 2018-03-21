@@ -2369,7 +2369,7 @@ public class ParkingServiceImpl implements ParkingService {
 
 		if (null != parkingSpace) {
 			LOGGER.error("SpaceNo exist, cmd={}", cmd);
-			throw RuntimeErrorException.errorWith(ErrorCodes.SCOPE_GENERAL, ErrorCodes.ERROR_INVALID_PARAMETER,
+			throw RuntimeErrorException.errorWith(ParkingErrorCode.SCOPE, ParkingErrorCode.ERROR_REPEAT_SPACE_NO,
 					"SpaceNo exist.");
 		}
 
@@ -2377,7 +2377,7 @@ public class ParkingServiceImpl implements ParkingService {
 
 		if (null != parkingSpace) {
 			LOGGER.error("LockId exist, cmd={}", cmd);
-			throw RuntimeErrorException.errorWith(ErrorCodes.SCOPE_GENERAL, ErrorCodes.ERROR_INVALID_PARAMETER,
+			throw RuntimeErrorException.errorWith(ParkingErrorCode.SCOPE, ParkingErrorCode.ERROR_REPEAT_LOCK_ID,
 					"LockId exist.");
 		}
 
@@ -2399,6 +2399,14 @@ public class ParkingServiceImpl implements ParkingService {
 			LOGGER.error("ParkingSpace not found, cmd={}", cmd);
 			throw RuntimeErrorException.errorWith(ErrorCodes.SCOPE_GENERAL, ErrorCodes.ERROR_INVALID_PARAMETER,
 					"ParkingSpace not found.");
+		}
+
+		ParkingSpace parkingSpaceByLockId = parkingProvider.findParkingSpaceByLockId(cmd.getLockId());
+
+		if (null != parkingSpaceByLockId && !cmd.getId().equals(parkingSpaceByLockId.getId())) {
+			LOGGER.error("LockId exist, cmd={}", cmd);
+			throw RuntimeErrorException.errorWith(ParkingErrorCode.SCOPE, ParkingErrorCode.ERROR_REPEAT_LOCK_ID,
+					"LockId exist.");
 		}
 
 		parkingSpace.setSpaceAddress(cmd.getSpaceAddress());

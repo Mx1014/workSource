@@ -74,11 +74,7 @@ public class PurchaseServiceImpl implements PurchaseService {
     @Override
     public void CreateOrUpdatePurchaseOrderCommand(CreateOrUpdatePurchaseOrderCommand cmd) {
         checkAssetPriviledgeForPropertyOrg(cmd.getCommunityId(), PrivilegeConstants.PURCHASE_OPERATION);
-        if(cmd.getPurchaseRequestId() != null){
-            //删除
-            purchaseProvider.deleteOrderById(cmd.getPurchaseRequestId());
-            purchaseProvider.deleteOrderItemsByOrderId(cmd.getPurchaseRequestId());
-        }
+
         PurchaseOrder order = new PurchaseOrder();
         order.setApplicantId(UserContext.currentUserId());
         order.setApplicantTime(new Timestamp(DateHelper.currentGMTTime().getTime()));
@@ -140,11 +136,21 @@ public class PurchaseServiceImpl implements PurchaseService {
             item.setOwnerType(cmd.getOwnerType());
             item.setPurchaseQuantity(dto.getPurchaseQuantity());
             item.setPurchaseRequestId(nextPurchaseOrderId);
-            item.setUnitPrice(new BigDecimal(dto.getUnitPrice()));
+            try{
+                item.setUnitPrice(new BigDecimal(dto.getUnitPrice().trim()));
+            }catch (Exception e){
+                LOGGER.error("unit price input incorrect");
+
+            }
             list.add(item);
         }
 
         this.dbProvider.execute((TransactionStatus status) -> {
+            if(cmd.getPurchaseRequestId() != null){
+                //删除
+                purchaseProvider.deleteOrderById(cmd.getPurchaseRequestId());
+                purchaseProvider.deleteOrderItemsByOrderId(cmd.getPurchaseRequestId());
+            }
             purchaseProvider.insertPurchaseOrder(order);
             purchaseProvider.insertPurchaseItems(list);
             if(cmd.getStartFlow().byteValue() == (byte)1){

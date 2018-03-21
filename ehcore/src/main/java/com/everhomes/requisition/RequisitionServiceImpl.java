@@ -102,7 +102,7 @@ public class RequisitionServiceImpl implements RequisitionService {
         if(pageAnchor == null) pageAnchor = 0l;
         if(pageSize == null) pageSize = 20;
         List<ListRequisitionsDTO> result = requisitionProvider.listRequisitions(cmd.getNamespaceId(),cmd.getOwnerType()
-                ,cmd.getOwnerId(),cmd.getCommunityId(),cmd.getTheme(),cmd.getTypeId(),pageAnchor,++pageSize);
+                ,cmd.getOwnerId(),cmd.getCommunityId(),cmd.getTheme(),cmd.getTypeId(),pageAnchor,++pageSize, cmd.getRequisitionStatus());
         if(result.size() > pageSize){
             result.remove(result.size()-1);
             response.setNextPageAnchor(pageSize + pageAnchor);
@@ -162,7 +162,7 @@ public class RequisitionServiceImpl implements RequisitionService {
         if(pageAnchor == null) pageAnchor = 0l;
         if(pageSize == null) pageSize = 20;
         List<ListRequisitionsDTO> result = requisitionProvider.listRequisitions(cmd.getNamespaceId(),cmd.getOwnerType()
-                ,cmd.getOwnerId(),cmd.getCommunityId(),cmd.getTheme(),cmd.getTypeId(),pageAnchor,++pageSize);
+                ,cmd.getOwnerId(),cmd.getCommunityId(),cmd.getTheme(),cmd.getTypeId(),pageAnchor,++pageSize, cmd.getRequisitionStatus());
         if(result.size() > pageSize){
             result.remove(result.size()-1);
             response.setNextPageAnchor(pageSize + pageAnchor);

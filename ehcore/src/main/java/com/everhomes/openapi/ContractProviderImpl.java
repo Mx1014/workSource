@@ -81,6 +81,7 @@ public class ContractProviderImpl implements ContractProvider {
 	public void updateContract(Contract contract) {
 		assert (contract.getId() != null);
 		getReadWriteDao().update(contract);
+		contract.setUpdateTime(new Timestamp(DateHelper.currentGMTTime().getTime()));
 		DaoHelper.publishDaoAction(DaoAction.MODIFY, EhContracts.class, contract.getId());
 	}
 	
