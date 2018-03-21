@@ -1514,3 +1514,7 @@ SET @upgrade_id = (SELECT MAX(id) FROM `eh_version_upgrade_rules`);
 INSERT INTO `eh_version_realm` (`id`, `realm`, `description`, `create_time`, `namespace_id`) VALUES ((@realm_id := @realm_id + 1), 'energyManagement', NULL, NOW(), '0');
 INSERT INTO `eh_version_urls` (`id`, `realm_id`, `target_version`, `download_url`, `info_url`, `upgrade_description`, `namespace_id`, `app_name`, `publish_time`, `icon_url`, `version_encoded_value`) VALUES ((@url_id := @url_id + 1), @realm_id, '1.0.0', 'http://core.zuolin.com/nar/energyManagement/offline/energyManagement-1-0-0-tag.zip', 'http://core.zuolin.com/nar/energyManagement/offline/energyManagement-1-0-0-tag.zip', NULL, '0', NULL, NULL, NULL, '0');
 INSERT INTO `eh_version_upgrade_rules` (`id`, `realm_id`, `matching_lower_bound`, `matching_upper_bound`, `order`, `target_version`, `force_upgrade`, `create_time`, `namespace_id`) VALUES ((@upgrade_id := @upgrade_id + 1), @realm_id, '-0.1', '1048576', '0', '1.0.0', '0', NOW(), '0');
+
+
+-- 企业服务和办事指南没有模块，并且无人认领。暂时删除菜单对应的模块Id   add by yanjun 201803211701
+UPDATE eh_web_menus set module_id = NULL where `name`  in ('企业服务', '办事指南');
