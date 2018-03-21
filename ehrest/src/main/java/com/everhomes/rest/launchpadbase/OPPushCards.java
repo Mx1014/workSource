@@ -9,33 +9,12 @@ import java.util.List;
 
 /**
  * <ul>
- *     <li>communityId: 小区id</li>
- *     <li>orgId: orgId</li>
+ *     <li>listCardJson: listCardJson</li>
  * </ul>
  */
 public class OPPushCards {
 
-    private String style;
-
-    private String title;
-
     private List<String> listCardJson;
-
-    public String getStyle() {
-        return style;
-    }
-
-    public void setStyle(String style) {
-        this.style = style;
-    }
-
-    public String getTitle() {
-        return title;
-    }
-
-    public void setTitle(String title) {
-        this.title = title;
-    }
 
     public List<String> getListCardJson() {
         return listCardJson;

@@ -11,7 +11,7 @@ import com.everhomes.util.StringHelper;
  *     <li>avatarUri: 头像Uri</li>
  *     <li>avatarUrl: 显示头像URL</li>
  *     <li>fullPinyin: 拼音全拼</li>
- *     <li>CapitalPinyin: 拼音首写字母</li>
+ *     <li>capitalPinyin: capitalPinyin</li>
  *     <li>organizationType: 公司类型 {@link OrganizationType}</li>
  * </ul>
  */
@@ -23,7 +23,7 @@ public class OrganizationUserDTO {
     private String avatarUri;
     private String avatarUrl;
     private String fullPinyin;
-    private String CapitalPinyin;
+    private String capitalPinyin;
     private Byte organizationType;
 
     public Long getId() {
@@ -75,11 +75,11 @@ public class OrganizationUserDTO {
     }
 
     public String getCapitalPinyin() {
-        return CapitalPinyin;
+        return capitalPinyin;
     }
 
     public void setCapitalPinyin(String capitalPinyin) {
-        CapitalPinyin = capitalPinyin;
+        this.capitalPinyin = capitalPinyin;
     }
 
     public Byte getOrganizationType() {

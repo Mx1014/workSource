@@ -12,7 +12,7 @@ import com.everhomes.util.StringHelper;
  *     <li>avatarUrl: 显示头像URL</li>
  *     <li>communityType: 园区类型</li>
  *     <li>fullPinyin: 拼音全拼</li>
- *     <li>CapitalPinyin: 拼音首写字母</li>
+ *     <li>capitalPinyin: capitalPinyin</li>
  *     <li>managementFlag: 管理项目标志 参考{@link com.everhomes.rest.common.TrueOrFalseFlag}</li>
  *     <li>siteFlag: 办公标志 参考{@link com.everhomes.rest.common.TrueOrFalseFlag}</li>
  * </ul>
@@ -25,7 +25,7 @@ public class CommunityUserDTO {
     private String avatarUrl;
     private Byte communityType;
     private String fullPinyin;
-    private String CapitalPinyin;
+    private String capitalPinyin;
     private Byte managementFlag;
     private Byte siteFlag;
 
@@ -86,11 +86,11 @@ public class CommunityUserDTO {
     }
 
     public String getCapitalPinyin() {
-        return CapitalPinyin;
+        return capitalPinyin;
     }
 
     public void setCapitalPinyin(String capitalPinyin) {
-        CapitalPinyin = capitalPinyin;
+        this.capitalPinyin = capitalPinyin;
     }
 
     public Byte getManagementFlag() {
@@ -108,7 +108,6 @@ public class CommunityUserDTO {
     public void setSiteFlag(Byte siteFlag) {
         this.siteFlag = siteFlag;
     }
-
 
     @Override
     public String toString() {
