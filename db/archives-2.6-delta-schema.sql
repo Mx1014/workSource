@@ -92,7 +92,7 @@ CREATE TABLE `eh_equipment_inspection_review_date` (
   `refer_id` bigint(20) NOT NULL DEFAULT '0',
   `create_time` datetime  COMMENT 'record create time',
   PRIMARY KEY (`id`)
-) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4;
+) ENGINE=INNODB DEFAULT CHARSET=utf8mb4;
 
 -- 设备操作记录表   by jiarui
 CREATE TABLE `eh_equipment_inspection_equipment_logs` (
@@ -623,16 +623,16 @@ ALTER TABLE `eh_contracts` ADD COLUMN `payment_flag` TINYINT NOT NULL DEFAULT '0
 
 ALTER TABLE eh_contract_params ADD COLUMN `paid_period` INTEGER NOT NULL DEFAULT '0' COMMENT '付款日期';
 
-CREATE TABLE `eh_contract_param_group_map` (		
-  `id` BIGINT NOT NULL COMMENT 'id',	
-  `param_id` BIGINT NOT NULL DEFAULT 0 COMMENT 'refernece to the id of eh_contract_params',		
+CREATE TABLE `eh_contract_param_group_map` (
+  `id` BIGINT NOT NULL COMMENT 'id',
+  `param_id` BIGINT NOT NULL DEFAULT 0 COMMENT 'refernece to the id of eh_contract_params',
   `group_type` TINYINT NOT NULL DEFAULT '0' COMMENT '0: none, 1: notify group, 2: pay group',
-  `group_id` BIGINT NOT NULL DEFAULT 0 COMMENT 'refernece to the id of eh_organizations',		
+  `group_id` BIGINT NOT NULL DEFAULT 0 COMMENT 'refernece to the id of eh_organizations',
   `position_id` BIGINT NOT NULL DEFAULT 0 COMMENT 'refernece to the id of eh_organization_job_positions',
-  `name` VARCHAR(256) COMMENT '部门名',  
+  `name` VARCHAR(256) COMMENT '部门名',
   `create_time` DATETIME,
-  		
-  PRIMARY KEY (`id`)		
+
+  PRIMARY KEY (`id`)
 ) ENGINE=INNODB DEFAULT CHARSET=utf8mb4;
 
 CREATE TABLE `eh_contract_payment_plans` (
@@ -679,7 +679,7 @@ CREATE TABLE `eh_payment_applications` (
   `delete_time` DATETIME,
   PRIMARY KEY (`id`)
 ) ENGINE=INNODB DEFAULT CHARSET=utf8mb4;
--- add by xiongying end 
+-- add by xiongying end
 
 -- 在版本号中加入日期 add by yanjun 201801231805
 ALTER TABLE `eh_portal_versions` ADD COLUMN `date_version`  INT(11) NULL AFTER `parent_id`;
@@ -837,6 +837,7 @@ CREATE TABLE `eh_requisition_types`(
   PRIMARY KEY (`id`)
 ) ENGINE=INNODB DEFAULT CHARSET=utf8mb4;
 
+
 ALTER TABLE `eh_requisitions` ADD COLUMN `community_id` BIGINT COMMENT '园区id';
 -- 仓库管理2.0 end of the script
 
@@ -845,15 +846,15 @@ ALTER TABLE `eh_portal_content_scopes` ADD COLUMN `version_id`  BIGINT(20) NULL;
 ALTER TABLE `eh_portal_launch_pad_mappings` ADD COLUMN `version_id`  BIGINT(20) NULL;
 
 
--- 薪酬2.0 
+-- 薪酬2.0
 
- 
--- added by wh 
+
+-- added by wh
 -- drop语句是必须的,因为之前薪酬1.0的表要删掉,数据全不要
 -- 薪酬设置可以用的基础字段项(可以被公司继承,不可删除)
 DROP TABLE IF EXISTS eh_salary_default_entities;
 CREATE TABLE `eh_salary_default_entities` (
-  `id` BIGINT COMMENT 'id of the record', 
+  `id` BIGINT COMMENT 'id of the record',
   `editable_flag` TINYINT COMMENT '是否可编辑:-1 数值也不能编辑 0-否   1-是',
   `delete_flag` TINYINT COMMENT '是否可删除:0-否   1-是',
   `type` TINYINT COMMENT '字段类型:0-发放项;1-扣款项;2-成本项;3-冗余项',
@@ -862,12 +863,12 @@ CREATE TABLE `eh_salary_default_entities` (
   `tax_policy` TINYINT COMMENT '纳税策略:0-工资 1-年终',
   `category_id` BIGINT COMMENT '标签(薪酬结构) category表pk',
   `category_name` VARCHAR(64) COMMENT '标签(统计分类)名称 example:固定工资,浮动工资,津补贴',
-  `name` VARCHAR(64), 
+  `name` VARCHAR(64),
   `description` TEXT COMMENT '说明文字',
   `template_name` VARCHAR(32) COMMENT '',
   `default_order` INT,
   `creator_uid` BIGINT,
-  `create_time` DATETIME, 
+  `create_time` DATETIME,
   `status` TINYINT COMMENT '默认是否开启0不开启 2-开启',
   PRIMARY KEY (`id`)
 ) ENGINE=INNODB DEFAULT CHARSET=utf8mb4 ;
@@ -880,7 +881,7 @@ CREATE TABLE `eh_salary_entity_categories` (
   `id` BIGINT,
   `owner_type` VARCHAR(32) COMMENT 'organization',
   `owner_id` BIGINT,
-  `namespace_id` INT COMMENT '并不用,现在是所有域空间通用', 
+  `namespace_id` INT COMMENT '并不用,现在是所有域空间通用',
   `category_name` VARCHAR(64)  COMMENT 'name of category',
   `description` TEXT COMMENT '说明文字',
   `custom_flag` TINYINT COMMENT '是否可以自定义: 0-否 1-是',
@@ -889,7 +890,7 @@ CREATE TABLE `eh_salary_entity_categories` (
   `creator_uid` BIGINT,
   `create_time` DATETIME,
   `update_time` DATETIME,
-  `operator_uid` BIGINT, 
+  `operator_uid` BIGINT,
   PRIMARY KEY (`id`)
 ) ENGINE=INNODB DEFAULT CHARSET=utf8mb4 ;
 
@@ -897,11 +898,11 @@ CREATE TABLE `eh_salary_entity_categories` (
 -- 薪酬批次包含的选项
 DROP TABLE IF EXISTS eh_salary_group_entities;
 CREATE TABLE `eh_salary_group_entities` (
-  `id` BIGINT COMMENT 'id of the record', 
-  `default_id` BIGINT COMMENT 'id of the eh_salary_default_entities', 
+  `id` BIGINT COMMENT 'id of the record',
+  `default_id` BIGINT COMMENT 'id of the eh_salary_default_entities',
   `owner_type` VARCHAR(32) COMMENT 'organization',
   `owner_id` BIGINT COMMENT '属于哪一个分公司的',
-  `organization_id` BIGINT COMMENT '属于哪一个总公司的', 
+  `organization_id` BIGINT COMMENT '属于哪一个总公司的',
   `origin_entity_id` BIGINT,
   `namespace_id` INT COMMENT '并不用,现在是所有域空间通用',
   `default_flag` TINYINT COMMENT '是否是缺省启用参数:0-否 1-是',
@@ -913,12 +914,12 @@ CREATE TABLE `eh_salary_group_entities` (
   `tax_policy` TINYINT COMMENT '纳税策略:0-工资 1-年终',
   `category_id` BIGINT COMMENT '标签(薪酬结构) category表pk',
   `category_name` VARCHAR(64) COMMENT '标签(统计分类)名称 example:固定工资,浮动工资,津补贴',
-  `name` VARCHAR(64), 
+  `name` VARCHAR(64),
   `description` TEXT COMMENT '说明文字',
   `creator_uid` BIGINT,
-  `create_time` DATETIME, 
+  `create_time` DATETIME,
   `operator_uid` BIGINT,
-  `update_time` DATETIME, 
+  `update_time` DATETIME,
   `status` TINYINT ,
   PRIMARY KEY (`id`)
 ) ENGINE=INNODB DEFAULT CHARSET=utf8mb4 ;
@@ -927,14 +928,14 @@ CREATE TABLE `eh_salary_group_entities` (
 -- 某个人的薪酬设定
 DROP TABLE IF EXISTS eh_salary_employee_origin_vals;
 CREATE TABLE `eh_salary_employee_origin_vals` (
-  `id` BIGINT COMMENT 'id of the record', 
+  `id` BIGINT COMMENT 'id of the record',
   `owner_type` VARCHAR(32) COMMENT 'organization',
   `owner_id` BIGINT COMMENT '属于哪一个分公司的',
   `organization_id` BIGINT COMMENT '属于哪一个总公司的',
   `namespace_id` INT ,
   `user_id` BIGINT ,
-  `user_detail_id` BIGINT , 
-  `group_entity_id` BIGINT COMMENT '标签(统计分类) salary group entity表pk', 
+  `user_detail_id` BIGINT ,
+  `group_entity_id` BIGINT COMMENT '标签(统计分类) salary group entity表pk',
   `group_entity_name` VARCHAR(64),
   `type` TINYINT COMMENT '字段类型:0-发放项;1-扣款项;2-成本项;3-冗余项',
   `data_policy` TINYINT COMMENT '数据策略:0-次月延用 1-次月清空',
@@ -942,24 +943,24 @@ CREATE TABLE `eh_salary_employee_origin_vals` (
   `tax_policy` TINYINT COMMENT '纳税策略:0-工资 1-年终',
   `category_id` BIGINT COMMENT '标签(薪酬结构) category表pk',
   `category_name` VARCHAR(64) COMMENT '标签(统计分类)名称 example:固定工资,浮动工资,津补贴',
-  `salary_value` TEXT COMMENT '值:如果次月清空则在新建报表时候置为null', 
+  `salary_value` TEXT COMMENT '值:如果次月清空则在新建报表时候置为null',
   `creator_uid` BIGINT,
-  `create_time` DATETIME, 
+  `create_time` DATETIME,
   `status` TINYINT ,
   PRIMARY KEY (`id`)
 ) ENGINE=INNODB DEFAULT CHARSET=utf8mb4 ;
 
 
--- 薪酬批次每期的数据 
+-- 薪酬批次每期的数据
 DROP TABLE IF EXISTS eh_salary_groups;
 CREATE TABLE `eh_salary_groups` (
-  `id` BIGINT COMMENT 'id of the record', 
+  `id` BIGINT COMMENT 'id of the record',
   `owner_type` VARCHAR(32) COMMENT 'organization',
   `owner_id` BIGINT COMMENT '属于哪一个分公司的',
   `organization_id` BIGINT COMMENT '属于哪一个总公司的',
-  `salary_period` VARCHAR(8) COMMENT 'example:201705', 
+  `salary_period` VARCHAR(8) COMMENT 'example:201705',
   `creator_uid` BIGINT COMMENT'创建者',
-  `create_time` DATETIME,  
+  `create_time` DATETIME,
   `creator_Name` VARCHAR(128) COMMENT'创建者姓名',
   PRIMARY KEY (`id`)
 ) ENGINE=INNODB DEFAULT CHARSET=utf8mb4 ;
@@ -967,37 +968,37 @@ CREATE TABLE `eh_salary_groups` (
 -- 薪酬批次归档数据
 -- DROP TABLE IF EXISTS eh_salary_groups_files;
 CREATE TABLE `eh_salary_groups_files` (
-  `id` BIGINT COMMENT 'id of the record', 
+  `id` BIGINT COMMENT 'id of the record',
   `owner_type` VARCHAR(32) COMMENT 'organization',
   `owner_id` BIGINT COMMENT '属于哪一个分公司的',
   `organization_id` BIGINT COMMENT '属于哪一个总公司的',
-  `salary_period` VARCHAR(8) COMMENT 'example:201705', 
+  `salary_period` VARCHAR(8) COMMENT 'example:201705',
   `creator_Name` VARCHAR(128) COMMENT'创建者姓名',
   `creator_uid` BIGINT COMMENT'创建者',
-  `create_time` DATETIME,  
+  `create_time` DATETIME,
   `filer_Name` VARCHAR(128) COMMENT'归档者姓名',
   `filer_uid` BIGINT COMMENT'归档者',
-  `file_time` DATETIME,  
+  `file_time` DATETIME,
   PRIMARY KEY (`id`)
 ) ENGINE=INNODB DEFAULT CHARSET=utf8mb4 ;
 
 -- 薪酬批次每个人的每期数据
 DROP TABLE IF EXISTS eh_salary_employees;
 CREATE TABLE `eh_salary_employees` (
-  `id` BIGINT COMMENT 'id of the record', 
+  `id` BIGINT COMMENT 'id of the record',
   `owner_type` VARCHAR(32) COMMENT 'organization',
   `owner_id` BIGINT COMMENT '属于哪一个分公司的',
   `organization_id` BIGINT COMMENT '属于哪一个总公司的',
   `namespace_id` INT ,
   `salary_period` VARCHAR(8) COMMENT 'example:201705',
   `user_id` BIGINT ,
-  `user_detail_id` BIGINT , 
+  `user_detail_id` BIGINT ,
   `regular_salary` DECIMAL (10, 2) COMMENT '固定工资合计',
   `should_pay_salary` DECIMAL (10, 2) COMMENT '应发工资合计',
   `real_pay_salary` DECIMAL (10, 2) COMMENT '实发工资合计',
   `cost_salary` DECIMAL (10, 2) COMMENT '人工成本合计',
   `creator_uid` BIGINT COMMENT'人员id',
-  `create_time` DATETIME, 
+  `create_time` DATETIME,
   `status` TINYINT COMMENT '状态0-正常 1-实发合计为负  2-未定薪',
   PRIMARY KEY (`id`)
 ) ENGINE=INNODB DEFAULT CHARSET=utf8mb4 ;
@@ -1008,23 +1009,23 @@ CREATE TABLE `eh_salary_employees` (
 -- 薪酬批次每个人的归档数据
 DROP TABLE IF EXISTS eh_salary_employees_files;
 CREATE TABLE `eh_salary_employees_files` (
-  `id` BIGINT COMMENT 'id of the record', 
+  `id` BIGINT COMMENT 'id of the record',
   `owner_type` VARCHAR(32) COMMENT 'organization',
   `owner_id` BIGINT COMMENT '属于哪一个分公司的',
   `organization_id` BIGINT COMMENT '属于哪一个总公司的',
   `namespace_id` INT ,
   `salary_period` VARCHAR(8) COMMENT 'example:201705',
   `user_id` BIGINT ,
-  `user_detail_id` BIGINT , 
+  `user_detail_id` BIGINT ,
   `regular_salary` DECIMAL (10, 2) COMMENT '固定工资合计',
   `should_pay_salary` DECIMAL (10, 2) COMMENT '应发工资合计',
   `real_pay_salary` DECIMAL (10, 2) COMMENT '实发工资合计',
   `cost_salary` DECIMAL (10, 2) COMMENT '人工成本合计',
   `creator_uid` BIGINT COMMENT'人员id',
-  `create_time` DATETIME, 
+  `create_time` DATETIME,
   `status` TINYINT COMMENT '状态0-正常 1-实发合计为负  2-未定薪',
   `filer_uid` BIGINT COMMENT'创建者',
-  `file_time` DATETIME,  
+  `file_time` DATETIME,
   PRIMARY KEY (`id`)
 ) ENGINE=INNODB DEFAULT CHARSET=utf8mb4 ;
 
@@ -1032,14 +1033,14 @@ CREATE TABLE `eh_salary_employees_files` (
 -- 薪酬批次每个人的每期数据
 DROP TABLE IF EXISTS eh_salary_depart_statistics;
 CREATE TABLE `eh_salary_depart_statistics` (
-  `id` BIGINT COMMENT 'id of the record', 
+  `id` BIGINT COMMENT 'id of the record',
   `owner_type` VARCHAR(32) COMMENT 'organization',
   `owner_id` BIGINT COMMENT '属于哪一个分公司的',
   `organization_id` BIGINT COMMENT '属于哪一个总公司的',
   `dept_id` BIGINT (20) DEFAULT NULL COMMENT 'user department id',
   `dept_name` VARCHAR (128) DEFAULT NULL COMMENT 'user department name',
   `namespace_id` INT ,
-  `salary_period` VARCHAR(8) COMMENT 'example:201705', 
+  `salary_period` VARCHAR(8) COMMENT 'example:201705',
   `regular_salary` DECIMAL (10, 2) COMMENT '固定工资合计',
   `should_pay_salary` DECIMAL (10, 2) COMMENT '应发工资合计',
   `real_pay_salary` DECIMAL (10, 2) COMMENT '实发工资合计',
@@ -1047,25 +1048,25 @@ CREATE TABLE `eh_salary_depart_statistics` (
   `cost_mom_salary` DECIMAL (10, 2) COMMENT '人工成本环比',
   `cost_yoy_salary` DECIMAL (10, 2) COMMENT '人工成本同比',
   `creator_uid` BIGINT COMMENT'人员id',
-  `create_time` DATETIME, 
+  `create_time` DATETIME,
   `is_file` TINYINT COMMENT '0-普通 1-归档',
   `filer_uid` BIGINT COMMENT'创建者',
-  `file_time` DATETIME,  
+  `file_time` DATETIME,
   PRIMARY KEY (`id`)
 ) ENGINE=INNODB DEFAULT CHARSET=utf8mb4 ;
 
 -- 薪酬薪酬人员每期的实际值
 DROP TABLE IF EXISTS eh_salary_employee_period_vals;
 CREATE TABLE `eh_salary_employee_period_vals` (
-  `id` BIGINT COMMENT 'id of the record', 
+  `id` BIGINT COMMENT 'id of the record',
   `owner_type` VARCHAR(32) COMMENT 'organization',
   `owner_id` BIGINT,
   `namespace_id` INT ,
   `salary_period` VARCHAR(8) COMMENT 'example:201705',
   `user_id` BIGINT ,
-  `user_detail_id` BIGINT , 
-  `salary_employee_id` BIGINT COMMENT '标签(统计分类) salary_employee表pk', 
-  `group_entity_id` BIGINT COMMENT '标签(统计分类) salary group entity表pk', 
+  `user_detail_id` BIGINT ,
+  `salary_employee_id` BIGINT COMMENT '标签(统计分类) salary_employee表pk',
+  `group_entity_id` BIGINT COMMENT '标签(统计分类) salary group entity表pk',
   `group_entity_name` VARCHAR(64),
   `type` TINYINT COMMENT '字段类型:0-发放项;1-扣款项;2-成本项;3-冗余项',
   `data_policy` TINYINT COMMENT '数据策略:0-次月延用 1-次月清空',
@@ -1073,9 +1074,9 @@ CREATE TABLE `eh_salary_employee_period_vals` (
   `tax_policy` TINYINT COMMENT '纳税策略:0-工资 1-年终',
   `category_id` BIGINT COMMENT '标签(薪酬结构) category表pk',
   `category_name` VARCHAR(64) COMMENT '标签(统计分类)名称 example:固定工资,浮动工资,津补贴',
-  `salary_value` TEXT COMMENT '值:如果次月清空则在新建报表时候置为null', 
+  `salary_value` TEXT COMMENT '值:如果次月清空则在新建报表时候置为null',
   `creator_uid` BIGINT,
-  `create_time` DATETIME, 
+  `create_time` DATETIME,
   `status` TINYINT COMMENT '',
   PRIMARY KEY (`id`)
 ) ENGINE=INNODB DEFAULT CHARSET=utf8mb4 ;
@@ -1083,24 +1084,24 @@ CREATE TABLE `eh_salary_employee_period_vals` (
 -- 薪酬批次归档文件
 -- DROP TABLE IF EXISTS eh_salary_groups_report_resources;
 CREATE TABLE `eh_salary_groups_report_resources` (
-  `id` BIGINT COMMENT 'id of the record', 
+  `id` BIGINT COMMENT 'id of the record',
   `owner_type` VARCHAR(32) COMMENT 'organization',
   `owner_id` BIGINT COMMENT '属于哪一个分公司的',
   `organization_id` BIGINT COMMENT '属于哪一个总公司的',
-  `salary_period` VARCHAR(8) COMMENT 'example:201705', 
+  `salary_period` VARCHAR(8) COMMENT 'example:201705',
   `report_type` TINYINT COMMENT'文件类型:0-工资明细 1-部门汇总',
   `uri` VARCHAR(1024),
   `url` VARCHAR(1024),
   `creator_Name` VARCHAR(128) COMMENT'创建者姓名',
   `creator_uid` BIGINT COMMENT'创建者',
-  `create_time` DATETIME,  
+  `create_time` DATETIME,
   `filer_Name` VARCHAR(128) COMMENT'归档者姓名',
   `filer_uid` BIGINT COMMENT'归档者',
-  `file_time` DATETIME,  
+  `file_time` DATETIME,
   PRIMARY KEY (`id`)
 ) ENGINE=INNODB DEFAULT CHARSET=utf8mb4 ;
--- 薪酬2.0结束   
-   
+-- 薪酬2.0结束
+
 -- 请示单增加编号字段
 ALTER TABLE `eh_payment_applications` ADD COLUMN `application_number`  VARCHAR(32);
 
@@ -1110,7 +1111,7 @@ ADD COLUMN `house_resource_type` VARCHAR(256) NULL COMMENT '房源类型  rentHo
 
 
 
--- 公告管理 add by zhiwei.zhang 
+-- 公告管理 add by zhiwei.zhang
 -- 企业公告1.0
 -- 企业公告表
 CREATE TABLE `eh_enterprise_notices` (
@@ -1180,7 +1181,7 @@ CREATE TABLE `eh_enterprise_notice_receivers` (
 
 
 -- 社保开始
--- added by wh 
+-- added by wh
 -- 社保建表social_security
 -- 社保基准表
 -- DROP TABLE eh_social_security_bases;
@@ -1242,8 +1243,8 @@ CREATE TABLE `eh_social_security_settings` (
 -- 社保组表 存新建报表的人和归档的人
 -- DROP TABLE eh_social_security_groups;
 CREATE TABLE `eh_social_security_groups` (
-  `id` BIGINT, 
-  `organization_id` BIGINT, 
+  `id` BIGINT,
+  `organization_id` BIGINT,
   `pay_month` VARCHAR (8) DEFAULT NULL COMMENT 'yyyymm',
   `is_filed` TINYINT DEFAULT 0 COMMENT '是否归档 0-否 1是',
   `creator_uid` BIGINT  DEFAULT '0',
@@ -1311,7 +1312,7 @@ CREATE TABLE `eh_social_security_payment_logs` (
   `is_default` TINYINT COMMENT '是否是默认选项(1-是:普通社保;0-否:补充保险)',
   `accum_or_socail` TINYINT COMMENT '社保/公积金标识 : 1-社保 2-公积金',
   `is_new` TINYINT COMMENT '增减员:0正常,1增员,-1减员',
-  `is_work` TINYINT COMMENT '入职离职:0正常,1入职,-1离职', 
+  `is_work` TINYINT COMMENT '入职离职:0正常,1入职,-1离职',
   `creator_uid` BIGINT  DEFAULT '0',
   `create_time` DATETIME,
   `operator_uid` BIGINT,
@@ -1339,7 +1340,7 @@ CREATE TABLE `eh_social_security_summary` (
   `is_filed` TINYINT DEFAULT 0 COMMENT '是否归档 0-否 1是',
   `file_uid` BIGINT (20) COMMENT '归档人',
   `file_time` DATETIME COMMENT '归档时间',
-  PRIMARY KEY (`id`), 
+  PRIMARY KEY (`id`),
   KEY `i_eh_organization_id` (`organization_id`)
 ) ENGINE = INNODB DEFAULT CHARSET = utf8mb4 ;
 
@@ -1352,7 +1353,7 @@ CREATE TABLE `eh_social_security_department_summary` (
   `dept_id` BIGINT (20) DEFAULT NULL COMMENT 'user department id',
   `dept_name` VARCHAR (128) DEFAULT NULL COMMENT 'user department name',
   `pay_month` VARCHAR (8) DEFAULT NULL COMMENT 'yyyymm',
-  `employee_count` INT COMMENT '人数', 
+  `employee_count` INT COMMENT '人数',
   `social_security_sum` DECIMAL (10, 2) COMMENT '社保合计',
   `social_security_company_sum` DECIMAL (10, 2) COMMENT '社保企业合计',
   `social_security_employee_sum` DECIMAL (10, 2) COMMENT '社保个人合计',
@@ -1383,7 +1384,7 @@ CREATE TABLE `eh_social_security_department_summary` (
   `after_critical_illness_company_sum` DECIMAL (10, 2) COMMENT '补缴大病企业合计',
   `after_critical_illness_employee_sum` DECIMAL (10, 2) COMMENT '补缴大病个人合计',
   `disability_sum` DECIMAL (10, 2) COMMENT '残障金',
-  `commercial_insurance` DECIMAL (10, 2) COMMENT '商业保险', 
+  `commercial_insurance` DECIMAL (10, 2) COMMENT '商业保险',
   `accumulation_fund_sum` DECIMAL (10, 2) COMMENT '公积金合计',
   `accumulation_fund_company_sum` DECIMAL (10, 2) COMMENT '公积金企业合计',
   `accumulation_fund_employee_sum` DECIMAL (10, 2) COMMENT '公积金个人合计',
@@ -1695,8 +1696,11 @@ ALTER TABLE eh_archives_logs MODIFY operation_reason VARCHAR(1024) COMMENT 'the 
 
 ALTER TABLE eh_archives_logs MODIFY operation_remark VARCHAR(1024) COMMENT 'the remark';
 
-ALTER TABLE eh_archives_dismiss_employees MODIFY dismiss_remarks VARCHAR(1024) COMMENT '备注';
 -- end by nan.rong
+
+-- by dengs,云打印添加字段 2018.03.06
+ALTER TABLE eh_siyin_print_printers ADD COLUMN qrcode_logo_uri VARCHAR(500);
+ALTER TABLE eh_siyin_print_printers ADD COLUMN qrcode_logo_url VARCHAR(500);
 
 -- add by zheng
 ALTER TABLE `eh_rentalv2_resources`
@@ -1710,13 +1714,53 @@ CHANGE COLUMN `door_auth_id` `door_auth_id` VARCHAR(128) NULL DEFAULT NULL ;
 ALTER TABLE `eh_equipment_inspection_equipment_attachments`
   ADD COLUMN `name`  varchar(255) NULL DEFAULT '' AFTER `content_uri`;
 
--- 工作流修改字段长度    add by xq.tian  2018/03/09
-ALTER TABLE eh_flow_actions MODIFY COLUMN render_text TEXT COMMENT 'the content for this message that have variables';
 
--- 对采购单中物品增加字段warehouseId by wentian 2018/03/09
+
+
+
+-- merge from incubator-1.4 start 201803081007
+
+-- 增加记录查看字段 add by yanjun 20180306
+ALTER TABLE `eh_incubator_applies` ADD COLUMN `check_flag`  tinyint(4) NULL DEFAULT 0 COMMENT '查看状态，0-未查看、1-已查看。这是一个很傻逼的功能，用于区分都是未审核的时候，管理员有没有看过这条记录。';
+
+-- merge from incubator-1.4 end
+
+-- 服务联盟申请记录表创建
+-- DROP TABLE IF EXISTS `eh_service_alliance_application_records`;
+CREATE TABLE `eh_service_alliance_application_records` (
+	`id` BIGINT COMMENT 'id',
+	`namespace_id` INTEGER COMMENT '',
+    `jump_type` BIGINT COMMENT '',
+    `template_type` VARCHAR(128) COMMENT '',
+    `type` BIGINT COMMENT '',
+    `owner_type` VARCHAR(128) COMMENT '',
+    `owner_id` BIGINT COMMENT '',
+    `creator_name` VARCHAR(128) COMMENT '',
+    `creator_organization_id` BIGINT COMMENT '',
+    `creator_mobile` VARCHAR(128) COMMENT '',
+    `create_time` DATETIME COMMENT '',
+    `create_date` DATETIME COMMENT '',
+    `creator_uid` BIGINT COMMENT '',
+    `flow_case_id` BIGINT COMMENT '',
+    `second_category_id` BIGINT COMMENT '',
+    `second_category_name` VARCHAR(128) COMMENT '',
+    `workflow_status` TINYINT COMMENT '',
+    `creator_organization` VARCHAR(128) COMMENT '',
+    `service_organization` VARCHAR(128) COMMENT '',
+    `service_alliance_id` BIGINT COMMENT '',
+
+  PRIMARY KEY (`id`)
+) ENGINE = INNODB DEFAULT CHARSET = utf8mb4 ;
+
+-- 对采购单中物品增加字段warehouseId 2018/03/09
 ALTER TABLE `eh_warehouse_purchase_items` ADD COLUMN `warehouse_id` BIGINT COMMENT '仓库id';
 
 -- 请示和供应商增加fileName字段 by wentian 2018/03/09
 ALTER TABLE  `eh_requisitions` ADD COLUMN  `file_name` VARCHAR(256) COMMENT '文件名称';
 ALTER TABLE  `eh_warehouse_suppliers` ADD COLUMN  `file_name` VARCHAR(256) COMMENT '文件名称';
+
+-- 增加公式的名称最大长度 by wentian 2018/03/09
+ALTER TABLE `eh_payment_formula` MODIFY COLUMN `name` VARCHAR(1024) COMMENT '公式名称';
+-- 供应商增加园区id by wentian 2018/03/15
 ALTER TABLE  `eh_warehouse_suppliers` ADD COLUMN  `community_id` BIGINT COMMENT '供应商所在园区的id';
+
