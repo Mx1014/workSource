@@ -51,9 +51,17 @@ public class WarehouseRequestMaterialDTO {
     private Byte deliveryFlag;
 
     private Timestamp createTime;
-
+    private Long requisitionId;
     //增加flowCaseId
     private Long flowCaseId;
+
+    public Long getRequisitionId() {
+        return requisitionId;
+    }
+
+    public void setRequisitionId(Long requisitionId) {
+        this.requisitionId = requisitionId;
+    }
 
     public Long getFlowCaseId() {
         return flowCaseId;
