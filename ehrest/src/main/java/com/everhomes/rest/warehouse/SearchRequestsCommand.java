@@ -12,10 +12,13 @@ import com.everhomes.util.StringHelper;
  *     <li>requestUserName: 申请人姓名</li>
  *     <li>pageAnchor: 锚点</li>
  *     <li>pageSize: 页面大小</li>
+ *     <li>requestId: 申请单id</li>
  * </ul>
  * Created by ying.xiong on 2017/5/11.
  */
 public class SearchRequestsCommand {
+
+    private Long requestId;
 
     private String ownerType;
 
@@ -34,6 +37,14 @@ public class SearchRequestsCommand {
     private Integer pageSize;
 
     private Long communityId;
+
+    public Long getRequestId() {
+        return requestId;
+    }
+
+    public void setRequestId(Long requestId) {
+        this.requestId = requestId;
+    }
 
     public Long getCommunityId() {
         return communityId;
