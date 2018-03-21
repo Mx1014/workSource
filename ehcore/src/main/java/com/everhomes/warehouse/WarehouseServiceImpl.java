@@ -1734,7 +1734,7 @@ public class WarehouseServiceImpl implements WarehouseService {
                 dto.setRequestAmount(requestMaterial.getAmount());
                 //增加flowCaseId
                 //flow case id get
-                FlowCase flowcase = flowCaseProvider.findFlowCaseByReferId(requestId
+                FlowCase flowcase = flowCaseProvider.findFlowCaseByReferId(requestMaterial.getRequestId()
                         , EntityType.WAREHOUSE_REQUEST.getCode(), PrivilegeConstants.PURCHASE_MODULE);
                 if(flowcase!=null){
                     dto.setFlowCaseId(flowcase.getId());
