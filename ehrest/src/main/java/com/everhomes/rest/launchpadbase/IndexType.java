@@ -1,5 +1,5 @@
 // @formatter:off
-package com.everhomes.rest.user;
+package com.everhomes.rest.launchpadbase;
 
 /**
  * <ul>

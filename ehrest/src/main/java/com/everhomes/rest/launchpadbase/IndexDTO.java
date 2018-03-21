@@ -1,10 +1,8 @@
 // @formatter:off
-package com.everhomes.rest.user;
+package com.everhomes.rest.launchpadbase;
 
 
 import com.everhomes.util.StringHelper;
-
-import java.util.List;
 
 /**
  * <ul>
@@ -13,7 +11,7 @@ import java.util.List;
  *     <li>name: 名字</li>
  *     <li>iconUrl: Icon</li>
  *     <li>selectIconUrl: 被选中后的Icon</li>
- *     <li>configJson: 主页签内部配置信息，比如“工作台”的layoutId，“我”里面是否有“我的发布”</li>
+ *     <li>configJson: 主页签内部配置信息，根据type名字到com.everhomes.rest.launchpadbase.Indexconfigjson获取对象，比如“工作台”的layoutId，“我”里面是否有“我的发布”</li>
  * </ul>
  */
 public class IndexDTO {

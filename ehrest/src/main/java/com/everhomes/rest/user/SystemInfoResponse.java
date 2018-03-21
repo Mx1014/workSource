@@ -2,6 +2,7 @@ package com.everhomes.rest.user;
 
 import com.everhomes.discover.ItemType;
 import com.everhomes.rest.contentserver.ContentCacheConfigDTO;
+import com.everhomes.rest.launchpadbase.IndexDTO;
 import com.everhomes.util.StringHelper;
 
 import java.util.List;
