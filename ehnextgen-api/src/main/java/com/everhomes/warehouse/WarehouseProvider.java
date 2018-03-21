@@ -117,4 +117,6 @@ public interface WarehouseProvider {
     String findWarehouseNameById(Long warehouseId);
 
     void deleteWarehouseStocks(Long id);
+
+    String findMaterialSupplierNameByMaterialId(Long materialId);
 }

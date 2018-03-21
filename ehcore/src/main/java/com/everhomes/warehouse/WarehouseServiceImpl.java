@@ -1515,6 +1515,8 @@ public class WarehouseServiceImpl implements WarehouseService {
                     WarehouseRequestMaterialDetailDTO materialDetailDTO = convertToDetail(material);
                     materialDetailDTO.setRequestUid(request.getRequestUid());
                     materialDetailDTO.setRequestUserName(requestUserName);
+                    String supplierName = warehouseProvider.findMaterialSupplierNameByMaterialId(material.getMaterialId());
+                    materialDetailDTO.setSupplierName(supplierName==null?"":supplierName);
                     return materialDetailDTO;
                 }).collect(Collectors.toList());
                 dto.setMaterialDetailDTOs(materialDetailDTOs);
@@ -1726,22 +1728,23 @@ public class WarehouseServiceImpl implements WarehouseService {
             List<WarehouseRequestMaterialDTO> requestDTOs = requestMaterials.stream().map(requestMaterial -> {
                 WarehouseRequestMaterialDTO dto = ConvertHelper.convert(requestMaterial, WarehouseRequestMaterialDTO.class);
                 dto.setRequestAmount(requestMaterial.getAmount());
-
+                // 找到物品
                 WarehouseMaterials warehouseMaterial = warehouseProvider.findWarehouseMaterials(requestMaterial.getMaterialId(), requestMaterial.getOwnerType(), requestMaterial.getOwnerId(), requestMaterial.getCommunityId());
                 if (warehouseMaterial != null) {
                     dto.setMaterialName(warehouseMaterial.getName());
                     dto.setMaterialNumber(warehouseMaterial.getMaterialNumber());
                 }
+                // 找到仓库
                 Warehouses warehouse = warehouseProvider.findWarehouse(requestMaterial.getWarehouseId(), requestMaterial.getOwnerType(), requestMaterial.getOwnerId(), requestMaterial.getCommunityId());
                 if (warehouse != null) {
                     dto.setWarehouseName(warehouse.getName());
                 }
-
+                //找到库存
                 WarehouseStocks stock = warehouseProvider.findWarehouseStocksByWarehouseAndMaterial(requestMaterial.getWarehouseId(), requestMaterial.getMaterialId(), requestMaterial.getOwnerType(), requestMaterial.getOwnerId(), requestMaterial.getCommunityId());
                 if (stock != null) {
                     dto.setStockAmount(stock.getAmount());
                 }
-
+                // 找到领用
                 WarehouseRequests request = warehouseProvider.findWarehouseRequests(requestMaterial.getRequestId(), requestMaterial.getOwnerType(), requestMaterial.getOwnerId(), requestMaterial.getCommunityId());
                 if (request != null) {
                     dto.setRequestUid(request.getRequestUid());

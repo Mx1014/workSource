@@ -1222,7 +1222,7 @@ public class OrganizationAdminController extends ControllerBase {
 
     /**
      * <b>URL: /admin/org/exportImportFileFailResultXls</b>
-     * <p>查询导入的文件结果</p>
+     * <p>导出错误原因</p>
      */
     @RequestMapping("exportImportFileFailResultXls")
     @RestReturn(value = String.class)
