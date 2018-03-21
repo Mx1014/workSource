@@ -24,6 +24,15 @@ public class ListRequisitionsCommand {
     private Long ownerId;
     private Integer namespaceId;
     private Long communityId;
+    private Byte requisitionStatus;
+
+    public Byte getRequisitionStatus() {
+        return requisitionStatus;
+    }
+
+    public void setRequisitionStatus(Byte requisitionStatus) {
+        this.requisitionStatus = requisitionStatus;
+    }
 
     public Long getCommunityId() {
         return communityId;

@@ -3031,7 +3031,7 @@ public class QualityProviderImpl implements QualityProvider {
 		}
 
 		query.fetch().map((r)->{
-			response.setTodayTotalCount(r.getValue("todayCompleteCount",Integer.class));
+			response.setTodayExecutedCount(r.getValue("todayCompleteCount",Integer.class));
 			response.setTodayTotalCount(r.getValue("totayTasksCount",Integer.class));
 			return null;
 		});

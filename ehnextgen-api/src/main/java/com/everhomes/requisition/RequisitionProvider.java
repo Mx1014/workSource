@@ -13,7 +13,7 @@ public interface RequisitionProvider {
 
     List<ListRequisitionsDTO> listRequisitions(Integer namespaceId, String ownerType, Long ownerId, Long communityId,
                                                String theme
-            , Long typeId, Long pageAnchor, Integer integer);
+            , Long typeId, Long pageAnchor, Integer integer, Byte requisitionStatus);
 
     Requisition findRequisitionById(Long requisitionId);
 

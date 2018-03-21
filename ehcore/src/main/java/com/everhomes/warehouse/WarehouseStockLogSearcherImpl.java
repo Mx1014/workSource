@@ -42,7 +42,9 @@ import org.springframework.stereotype.Component;
 
 import java.io.IOException;
 import java.util.ArrayList;
+import java.util.Comparator;
 import java.util.List;
+import java.util.stream.Collectors;
 
 /**
  * Created by ying.xiong on 2017/5/16.
@@ -232,6 +234,9 @@ public class WarehouseStockLogSearcherImpl extends AbstractElasticSearch impleme
             }
             logDTOs.add(dto);
         }
+        // sort logDTOs on create time asc -- by vincent.wang 2018/3/21 on planet earth
+        logDTOs = logDTOs.stream().sorted(Comparator.comparing(WarehouseStockLogDTO::getCreateTime))
+                .collect(Collectors.toList());
         response.setStockLogDTOs(logDTOs);
         return response;
     }

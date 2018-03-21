@@ -150,6 +150,12 @@ public class ContractSearcherImpl extends AbstractElasticSearch implements Contr
                 builder.field("rent", "");
             }
 
+            if(contract.getUpdateTime() != null) {
+                builder.field("updateTime", contract.getUpdateTime());
+            } else {
+                builder.field("updateTime", contract.getCreateTime());
+            }
+
             builder.endObject();
             return builder;
         } catch (IOException e) {
@@ -256,7 +262,7 @@ public class ContractSearcherImpl extends AbstractElasticSearch implements Contr
                 builder.addSort(cmd.getSortField(), SortOrder.DESC);
             }
         } else {
-            builder.addSort("id", SortOrder.DESC);
+            builder.addSort("updateTime", SortOrder.DESC);
         }
         SearchResponse rsp = builder.execute().actionGet();
 

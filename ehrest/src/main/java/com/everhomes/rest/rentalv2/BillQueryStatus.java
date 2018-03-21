@@ -14,7 +14,8 @@ public enum BillQueryStatus {
 	VALID((byte)0),
 	CANCELED((byte)1),
 	FINISHED((byte)2),
-	UNPAY((byte)3);
+	UNPAY((byte)3),
+    OWNFEE((byte)4);
 	
     
     private byte code;

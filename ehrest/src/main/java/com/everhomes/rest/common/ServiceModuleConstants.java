@@ -22,6 +22,7 @@ public interface ServiceModuleConstants {
     long ENERGY_MODULE = 49100L;
     long PAYMENT_APPLICATION_MODULE = 21300L;
     long ORGANIZATION_MODULE = 33000L;
-    long LEASE_PROJECT_MODUKE = 40100L;
+    long LEASE_PROJECT_MODULE = 40100L;
+    long PARKING_MODULE = 40800L;
 
 }

@@ -4,6 +4,7 @@ import com.everhomes.discover.ItemType;
 import com.everhomes.rest.rentalv2.RentalOrderDTO;
 import com.everhomes.util.StringHelper;
 
+import java.math.BigDecimal;
 import java.util.List;
 
 /**
@@ -13,6 +14,7 @@ public class SearchRentalOrdersResponse {
     private Long nextPageAnchor;
     @ItemType(RentalOrderDTO.class)
     private List<RentalOrderDTO> rentalBills;
+    private BigDecimal totalAmount;
 
     @Override
     public String toString() {
@@ -33,5 +35,13 @@ public class SearchRentalOrdersResponse {
 
     public void setNextPageAnchor(Long nextPageAnchor) {
         this.nextPageAnchor = nextPageAnchor;
+    }
+
+    public BigDecimal getTotalAmount() {
+        return totalAmount;
+    }
+
+    public void setTotalAmount(BigDecimal totalAmount) {
+        this.totalAmount = totalAmount;
     }
 }

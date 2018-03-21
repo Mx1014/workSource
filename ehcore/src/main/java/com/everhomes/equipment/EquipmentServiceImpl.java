@@ -5920,9 +5920,9 @@ private void checkUserPrivilege(Long orgId, Long privilegeId, Long communityId) 
 		offlineResponse.setEquipments(equipments);
 		ListParametersByStandardIdCommand listParametersByStandardIdCommand = new ListParametersByStandardIdCommand();
 		//remove duplicated
-		Map<Long, Long> standardIds = new HashMap<>();
-		equipments.forEach((relation) -> standardIds.put(relation.getStandardId(),relation.getStandardId()));
-		standardIds.forEach((k,v)->{
+		Set<Long> standardIds = new HashSet<>();
+		equipments.forEach((relation) -> standardIds.add(relation.getStandardId()));
+		standardIds.forEach((k)->{
 			listParametersByStandardIdCommand.setStandardId(k);
 			List<InspectionItemDTO> itemDTOS = listParametersByStandardId(listParametersByStandardIdCommand);
 			items.addAll(itemDTOS);
@@ -6047,7 +6047,9 @@ private void checkUserPrivilege(Long orgId, Long privilegeId, Long communityId) 
 					}
 					equipmentTasksSearcher.feedDoc(task);
 				}
-				reportLogs.add(reportLog);
+				if (reportLog != null) {
+					reportLogs.add(reportLog);
+				}
 			});
 		}
 		reportLogs.addAll(processOfflineTaskLogsAndReportDetails(command.getEquipmentTaskReportDetails(), tasksMap));

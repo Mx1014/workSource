@@ -4761,7 +4761,7 @@ Long nextPageAnchor = null;
 			});
 			Map<String, QualityInspectionStandardGroupMap> groupDTOMap = new HashMap<>();
 			if (executiveGroupMaps.size() > 0) {
-				executiveGroupMaps.forEach((map) -> groupDTOMap.putIfAbsent(map.getGroupId().toString()+map.getPositionId().toString(), map));
+				executiveGroupMaps.forEach((map) -> groupDTOMap.putIfAbsent(map.getGroupId().toString() +"-"+map.getPositionId().toString(), map));
 			}
 			if(groupDTOMap.size()>0){
 				return new ArrayList<>(groupDTOMap.values());
@@ -4971,7 +4971,9 @@ Long nextPageAnchor = null;
 			cmd.getTasks().forEach((task) -> {
 				OfflineEquipmentTaskReportLog log = null;
 				log = syncTaskInfoToServer(task, taskDetailMaps);
-				taskReportLog.add(log);
+				if (log != null) {
+					taskReportLog.add(log);
+				}
 			});
 		}
 		reportResponse.setTaskReportLogs(taskReportLog);
