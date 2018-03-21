@@ -1,6 +1,7 @@
 // @formatter:off
 package com.everhomes.rest.launchpad;
 
+import com.everhomes.rest.launchpadbase.LayoutJsonDTO;
 import com.everhomes.util.StringHelper;
 
 import java.sql.Timestamp;
@@ -10,7 +11,7 @@ import java.sql.Timestamp;
  * <li>id: itemId</li>
  * <li>namespaceId: 命名空间</li>
  * <li>name: 名字</li>
- * <li>layoutJson: 服务市场版本风格</li>
+ * <li>layoutJson: 服务市场版本风格，参考{@link LayoutJsonDTO}</li>
  * <li>versionCode: 当前版本</li>
  * <li>minVersionCode: 最小支持版本</li>
  * <li>status: 状态</li>
