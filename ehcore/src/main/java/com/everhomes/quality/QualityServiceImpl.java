@@ -4970,7 +4970,9 @@ Long nextPageAnchor = null;
 			cmd.getTasks().forEach((task) -> {
 				OfflineEquipmentTaskReportLog log = null;
 				log = syncTaskInfoToServer(task, taskDetailMaps);
-				taskReportLog.add(log);
+				if (log != null) {
+					taskReportLog.add(log);
+				}
 			});
 		}
 		reportResponse.setTaskReportLogs(taskReportLog);
