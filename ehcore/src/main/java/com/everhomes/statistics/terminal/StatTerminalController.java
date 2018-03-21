@@ -7,6 +7,7 @@ import com.everhomes.discover.RestDoc;
 import com.everhomes.discover.RestReturn;
 import com.everhomes.rest.RestResponse;
 import com.everhomes.rest.statistics.terminal.*;
+import com.everhomes.user.UserContext;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RestController;
@@ -192,7 +193,8 @@ public class StatTerminalController extends ControllerBase {
     @RequestMapping("listTerminalDayStatisticsByDate")
     @RestReturn(value=TerminalDayStatisticsDTO.class, collection = true)
     public RestResponse listTerminalDayStatisticsByDate(@Valid ListTerminalStatisticsByDateCommand cmd) {
-        RestResponse response = new RestResponse(statTerminalService.listTerminalDayStatisticsByDate(cmd.getStartDate(), cmd.getEndDate()));
+        Integer namespaceId = cmd.getNamespaceId() != null ? cmd.getNamespaceId() : UserContext.getCurrentNamespaceId();
+        RestResponse response = new RestResponse(statTerminalService.listTerminalDayStatisticsByDate(cmd.getStartDate(), cmd.getEndDate(), namespaceId));
         response.setErrorCode(ErrorCodes.SUCCESS);
         response.setErrorDescription("OK");
         return response;
@@ -231,7 +233,8 @@ public class StatTerminalController extends ControllerBase {
     @RequestMapping("listTerminalAppVersionStatisticsByDay")
     @RestReturn(value=TerminalAppVersionStatisticsDTO.class)
     public RestResponse listTerminalAppVersionStatisticsByDay(@Valid ListTerminalStatisticsByDayCommand cmd) {
-        RestResponse response = new RestResponse(statTerminalService.listTerminalAppVersionStatistics(cmd.getDate()));
+        Integer namespaceId = cmd.getNamespaceId() != null ? cmd.getNamespaceId() : UserContext.getCurrentNamespaceId();
+        RestResponse response = new RestResponse(statTerminalService.listTerminalAppVersionStatistics(cmd.getDate(), namespaceId));
         response.setErrorCode(ErrorCodes.SUCCESS);
         response.setErrorDescription("OK");
         return response;
@@ -244,7 +247,50 @@ public class StatTerminalController extends ControllerBase {
     @RequestMapping("listTerminalAppPlatformStatistics")
     @RestReturn(value=TerminalAppVersionStatisticsDTO.class)
     public RestResponse listTerminalAppPlatformStatistics(@Valid ListTerminalStatisticsByDayCommand cmd) {
-        RestResponse response = new RestResponse(statTerminalService.listTerminalAppVersionStatistics(cmd.getDate()));
+        Integer namespaceId = cmd.getNamespaceId() != null ? cmd.getNamespaceId() : UserContext.getCurrentNamespaceId();
+        RestResponse response = new RestResponse(statTerminalService.listTerminalAppVersionStatistics(cmd.getDate(), namespaceId));
+        response.setErrorCode(ErrorCodes.SUCCESS);
+        response.setErrorDescription("OK");
+        return response;
+    }
+
+    /**
+     * <b>URL: /stat/terminal/exportTerminalHourLineChart</b>
+     * <p>导出终端24小时实时用户数据</p>
+     */
+    @RequestMapping("exportTerminalHourLineChart")
+    @RestReturn(value=String.class)
+    public RestResponse exportTerminalHourLineChart(@Valid TerminalStatisticsChartCommand cmd) {
+        statTerminalService.exportTerminalHourLineChart(cmd);
+        RestResponse response = new RestResponse();
+        response.setErrorCode(ErrorCodes.SUCCESS);
+        response.setErrorDescription("OK");
+        return response;
+    }
+
+    /**
+     * <b>URL: /stat/terminal/exportTerminalDayLineChart</b>
+     * <p>导出终端按天整体趋势用户数据</p>
+     */
+    @RequestMapping("exportTerminalDayLineChart")
+    @RestReturn(value=String.class)
+    public RestResponse exportTerminalDayLineChart(@Valid ListTerminalStatisticsByDateCommand cmd) {
+        statTerminalService.exportTerminalDayLineChart(cmd);
+        RestResponse response = new RestResponse();
+        response.setErrorCode(ErrorCodes.SUCCESS);
+        response.setErrorDescription("OK");
+        return response;
+    }
+
+    /**
+     * <b>URL: /stat/terminal/exportTerminalAppVersionPieChart</b>
+     * <p>导出终端版本数据</p>
+     */
+    @RequestMapping("exportTerminalAppVersionPieChart")
+    @RestReturn(value=String.class)
+    public RestResponse exportTerminalAppVersionPieChart(@Valid ListTerminalStatisticsByDayCommand cmd) {
+        statTerminalService.exportTerminalAppVersionPieChart(cmd);
+        RestResponse response = new RestResponse();
         response.setErrorCode(ErrorCodes.SUCCESS);
         response.setErrorDescription("OK");
         return response;

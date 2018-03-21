@@ -3,9 +3,12 @@ package com.everhomes.statistics.terminal;
 import com.everhomes.configuration.ConfigurationProvider;
 import com.everhomes.coordinator.CoordinationLocks;
 import com.everhomes.coordinator.CoordinationProvider;
+import com.everhomes.filedownload.TaskService;
 import com.everhomes.listing.CrossShardListingLocator;
 import com.everhomes.namespace.Namespace;
 import com.everhomes.namespace.NamespaceProvider;
+import com.everhomes.rest.filedownload.TaskRepeatFlag;
+import com.everhomes.rest.filedownload.TaskType;
 import com.everhomes.rest.statistics.terminal.*;
 import com.everhomes.scheduler.ScheduleProvider;
 import com.everhomes.server.schema.Tables;
@@ -22,6 +25,8 @@ import org.springframework.util.StringUtils;
 import javax.annotation.PostConstruct;
 import java.math.BigDecimal;
 import java.sql.Timestamp;
+import java.time.LocalDate;
+import java.time.format.DateTimeFormatter;
 import java.util.*;
 import java.util.stream.Collectors;
 
@@ -52,6 +57,9 @@ public class StatTerminalServiceImpl implements StatTerminalService {
 
     @Autowired
     private UserActivityProvider userActivityProvider;
+
+    @Autowired
+    private TaskService taskService;
 
     @PostConstruct
     public void setup() {
@@ -262,8 +270,184 @@ public class StatTerminalServiceImpl implements StatTerminalService {
     }
 
     @Override
-    public List<TerminalAppVersionStatisticsDTO> listTerminalAppVersionStatistics(String Date) {
-        Integer namespaceId = UserContext.getCurrentNamespaceId();
+    public void exportTerminalHourLineChart(TerminalStatisticsChartCommand cmd) {
+
+        Map<String, Object> params = new HashMap<>();
+        params.put("cmd", cmd);
+        params.put("exportType", "exportTerminalHourLineChart");
+
+        String today = DateTimeFormatter.ofPattern("yyyyMMdd").format(LocalDate.now());
+        Namespace namespace = namespaceProvider.findNamespaceById(cmd.getNamespaceId());
+
+        params.put("fileType", "newUser");
+        String fileName = namespace.getName() + "_时段分析_新增用户_" + today + ".xlsx";
+
+        taskService.createTask(
+                fileName,
+                TaskType.FILEDOWNLOAD.getCode(),
+                StatTerminalFileDownloadTaskHandler.class,
+                params,
+                TaskRepeatFlag.REPEAT.getCode(),
+                new Date()
+        );
+
+        params.put("fileType", "start");
+        fileName = namespace.getName() + "_时段分析_启动次数_" + today + ".xlsx";
+
+        taskService.createTask(
+                fileName,
+                TaskType.FILEDOWNLOAD.getCode(),
+                StatTerminalFileDownloadTaskHandler.class,
+                params,
+                TaskRepeatFlag.REPEAT.getCode(),
+                new Date()
+        );
+
+        params.put("fileType", "cumulativeUser");
+        fileName = namespace.getName() + "_时段分析_时段累计日活_" + today + ".xlsx";
+
+        taskService.createTask(
+                fileName,
+                TaskType.FILEDOWNLOAD.getCode(),
+                StatTerminalFileDownloadTaskHandler.class,
+                params,
+                TaskRepeatFlag.REPEAT.getCode(),
+                new Date()
+        );
+
+        params.put("fileType", "activeUser");
+        fileName = namespace.getName() + "_时段分析_分时活跃_" + today + ".xlsx";
+
+        taskService.createTask(
+                fileName,
+                TaskType.FILEDOWNLOAD.getCode(),
+                StatTerminalFileDownloadTaskHandler.class,
+                params,
+                TaskRepeatFlag.REPEAT.getCode(),
+                new Date()
+        );
+
+        /*List<RowResult> newUserRows = new ArrayList<>();
+        List<RowResult> startRows = new ArrayList<>();
+        List<RowResult> cumulativeUserRows = new ArrayList<>();
+        List<RowResult> activeUserRows = new ArrayList<>();
+
+        // cmd.getDates().sort(String::compareTo);
+        for (String date : cmd.getDates()) {
+            RowResult newUserRow = new RowResult();
+            newUserRow.setA(date);
+            RowResult startRow = new RowResult();
+            startRow.setA(date);
+            RowResult cumulativeUserRow = new RowResult();
+            cumulativeUserRow.setA(date);
+            RowResult activeUserRow = new RowResult();
+            activeUserRow.setA(date);
+
+            int A = 65;
+            List<TerminalHourStatistics> hourStatistics =
+                    statTerminalProvider.listTerminalHourStatisticsByDay(date, cmd.getNamespaceId());
+            for (TerminalHourStatistics stat : hourStatistics) {
+                try {
+                    A++;
+                    Method setter = newUserRow.getClass().getMethod("set" + String.format("%C", A), String.class);
+                    setter.invoke(newUserRow, String.valueOf(stat.getStartNumber()));
+
+                    setter = startRow.getClass().getMethod("set" + String.format("%C", A), String.class);
+                    setter.invoke(startRow, String.valueOf(stat.getStartNumber()));
+
+                    setter = cumulativeUserRow.getClass().getMethod("set" + String.format("%C", A), String.class);
+                    setter.invoke(cumulativeUserRow, String.valueOf(stat.getCumulativeUserNumber()));
+
+                    setter = activeUserRow.getClass().getMethod("set" + String.format("%C", A), String.class);
+                    setter.invoke(activeUserRow, String.valueOf(stat.getActiveUserNumber()));
+                } catch (Exception e) {
+                    if (LOGGER.isErrorEnabled()) {
+                        LOGGER.error("RowResult setter error, stat = " + stat, e);
+                    }
+                }
+            }
+            newUserRows.add(newUserRow);
+            startRows.add(startRow);
+            cumulativeUserRows.add(cumulativeUserRow);
+            activeUserRows.add(activeUserRow);
+        }
+
+        String[] propertyNames = {
+                "A", "B", "C", "D", "E", "F", "G",
+                "H", "I", "J", "K", "L", "M", "N",
+                "O", "P", "Q", "R", "S", "T", "U",
+                "V", "W", "X", "Y"
+        };
+        String[] titleName = {
+                "", "1:00", "2:00", "3:00", "4:00", "5:00", "6:00", "7:00",
+                "8:00", "9:00", "10:00", "11:00", "12:00", "13:00", "14:00",
+                "15:00", "16:00", "17:00", "18:00", "19:00", "20:00", "21:00",
+                "22:00", "23:00", "24:00"
+        };
+        int[] columnSizes = {
+                10, 8, 8, 8, 8, 8, 8,
+                8, 8, 8, 8, 8, 8, 8,
+                8, 8, 8, 8, 8, 8, 8,
+                8, 8, 8, 8
+        };
+
+        ExcelUtils utils = new ExcelUtils("D://"+namespace.getName() + "_时段分析_新增用户_" + today+".xlsx", "sheet");
+        utils.setNeedSequenceColumn(false);
+        utils.writeExcel(propertyNames, titleName, columnSizes, newUserRows);
+
+        utils = new ExcelUtils("D://"+namespace.getName() + "_时段分析_启动次数_" + today+".xlsx", "sheet");
+        utils.setNeedSequenceColumn(false);
+        utils.writeExcel(propertyNames, titleName, columnSizes, startRows);
+
+        utils = new ExcelUtils("D://"+namespace.getName() + "_时段分析_时段累计日活_" + today+".xlsx", "sheet");
+        utils.setNeedSequenceColumn(false);
+        utils.writeExcel(propertyNames, titleName, columnSizes, cumulativeUserRows);
+
+        utils = new ExcelUtils("D://"+namespace.getName() + "_时段分析_分时活跃_" + today+".xlsx", "sheet");
+        utils.setNeedSequenceColumn(false);
+        utils.writeExcel(propertyNames, titleName, columnSizes, activeUserRows);*/
+    }
+
+    @Override
+    public void exportTerminalDayLineChart(ListTerminalStatisticsByDateCommand cmd) {
+        Map<String, Object> params = new HashMap<>();
+        params.put("cmd", cmd);
+        params.put("exportType", "exportTerminalDayLineChart");
+
+        Namespace namespace = namespaceProvider.findNamespaceById(cmd.getNamespaceId());
+        String fileName = namespace.getName() + "_整体趋势_" + cmd.getStartDate() + "_" + cmd.getEndDate() + ".xlsx";
+
+        taskService.createTask(
+                fileName,
+                TaskType.FILEDOWNLOAD.getCode(),
+                StatTerminalFileDownloadTaskHandler.class,
+                params,
+                TaskRepeatFlag.REPEAT.getCode(),
+                new Date()
+        );
+    }
+
+    @Override
+    public void exportTerminalAppVersionPieChart(ListTerminalStatisticsByDayCommand cmd) {
+        Namespace namespace = namespaceProvider.findNamespaceById(cmd.getNamespaceId());
+        String fileName = namespace.getName() + "_版本分布_" + cmd.getDate() + ".xlsx";
+
+        Map<String, Object> params = new HashMap<>();
+        params.put("cmd", cmd);
+        params.put("exportType", "exportTerminalAppVersionPieChart");
+
+        taskService.createTask(
+                fileName,
+                TaskType.FILEDOWNLOAD.getCode(),
+                StatTerminalFileDownloadTaskHandler.class,
+                params,
+                TaskRepeatFlag.REPEAT.getCode(),
+                new Date()
+        );
+    }
+
+    @Override
+    public List<TerminalAppVersionStatisticsDTO> listTerminalAppVersionStatistics(String Date, Integer namespaceId) {
         List<TerminalAppVersionStatistics> appVersionAUNStatistics = statTerminalProvider.listTerminalAppVersionStatisticsByDay(Date, namespaceId);
         Map<String, TerminalAppVersionStatistics> appVersionAUNStatisticsMap = new HashMap<>();
         for (TerminalAppVersionStatistics appVersionStatistic : appVersionAUNStatistics) {
@@ -329,8 +513,7 @@ public class StatTerminalServiceImpl implements StatTerminalService {
     }
 
     @Override
-    public List<TerminalDayStatisticsDTO> listTerminalDayStatisticsByDate(String startDate, String endDate) {
-        Integer namespaceId = UserContext.getCurrentNamespaceId();
+    public List<TerminalDayStatisticsDTO> listTerminalDayStatisticsByDate(String startDate, String endDate, Integer namespaceId) {
         List<TerminalDayStatistics> dayStatistics = statTerminalProvider.listTerminalDayStatisticsByDate(startDate, endDate, namespaceId);
         return dayStatistics.stream().map(r -> {
             TerminalDayStatisticsDTO day = ConvertHelper.convert(r, TerminalDayStatisticsDTO.class);
