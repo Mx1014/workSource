@@ -5704,7 +5704,6 @@ private void checkUserPrivilege(Long orgId, Long privilegeId, Long communityId) 
 				EquipmentInspectionStandards standard = equipmentProvider.findStandardById(map.getStandardId());
 
 				EquipmentStandardRelationDTO relations = new EquipmentStandardRelationDTO();
-				List<EquipmentStandardMap> equipmentStandardMaps = new ArrayList<>();
 				//根据id查询计划的详情巡检对象栏  只需要如下几个字段
 				if (equipment != null) {
 					relations.setEquipmentName(equipment.getName());
@@ -5715,9 +5714,9 @@ private void checkUserPrivilege(Long orgId, Long privilegeId, Long communityId) 
 					relations.setLongitude(equipment.getLongitude());
 					relations.setVerifyDistance(configProvider.getIntValue("equipment.verify.distance", 100));
 					relations.setSequenceNo(equipment.getSequenceNo());
-					equipmentStandardMaps = equipmentProvider.
-							findEquipmentStandardMap(standard.getId(), equipment.getId(),
-									InspectionStandardMapTargetType.EQUIPMENT.getCode());
+//					equipmentStandardMaps = equipmentProvider.
+//							findEquipmentStandardMap(standard.getId(), equipment.getId(),
+//									InspectionStandardMapTargetType.EQUIPMENT.getCode());
 				}
 				if (standard != null) {
 					relations.setStandardName(standard.getName());
@@ -5727,10 +5726,6 @@ private void checkUserPrivilege(Long orgId, Long privilegeId, Long communityId) 
 
 				relations.setOrder(map.getDefaultOrder());
 				relations.setPlanId(planId);
-
-//				if (equipmentStandardMaps != null && equipmentStandardMaps.size() > 0) {
-//					relations.setId(equipmentStandardMaps.get(0).getId());
-//				}
 				relations.setId(map.getId());
 				relationDTOS.add(relations);
 			}
