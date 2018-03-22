@@ -12,6 +12,10 @@ import java.sql.Timestamp;
  *  <li>targetName: 标准所属管理处名</li>
  *  <li>equipmentName: 设备名称</li>
  *  <li>location: 设备位置</li>
+ *  <li>longitude: 经纬度</li>
+ *  <li>latitude: 经纬度</li>
+ *  <li>verifyDistance: 校验设备位置有效的距离默认值100m</li>
+ *  <li>qrCodeFlag:二维码标志</li>
  *  <li>sequenceNo: 编号</li>
  *  <li>status: 设备状态 参考{@link com.everhomes.rest.equipment.EquipmentStatus}</li>
  *  <li>standardId: 关联标准id</li>
@@ -40,8 +44,14 @@ public class EquipmentStandardRelationDTO {
 	private  String location;
 	@Deprecated
 	private String equipmentModel;
-	@Deprecated
+
 	private Byte qrCodeFlag;
+
+	private Double longitude;
+
+	private Double latitude;
+
+	private Integer verifyDistance;
 	
 	private Byte status;
 	
@@ -130,6 +140,30 @@ public class EquipmentStandardRelationDTO {
 
 	public void setQrCodeFlag(Byte qrCodeFlag) {
 		this.qrCodeFlag = qrCodeFlag;
+	}
+
+	public Double getLongitude() {
+		return longitude;
+	}
+
+	public void setLongitude(Double longitude) {
+		this.longitude = longitude;
+	}
+
+	public Double getLatitude() {
+		return latitude;
+	}
+
+	public void setLatitude(Double latitude) {
+		this.latitude = latitude;
+	}
+
+	public Integer getVerifyDistance() {
+		return verifyDistance;
+	}
+
+	public void setVerifyDistance(Integer verifyDistance) {
+		this.verifyDistance = verifyDistance;
 	}
 
 	public Byte getStatus() {
