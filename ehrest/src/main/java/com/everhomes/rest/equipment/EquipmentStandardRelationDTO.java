@@ -16,6 +16,7 @@ import java.sql.Timestamp;
  *  <li>latitude: 经纬度</li>
  *  <li>verifyDistance: 校验设备位置有效的距离默认值100m</li>
  *  <li>qrCodeFlag:二维码标志</li>
+ *  <li>qrCodeToken;:二维码token</li>
  *  <li>sequenceNo: 编号</li>
  *  <li>status: 设备状态 参考{@link com.everhomes.rest.equipment.EquipmentStatus}</li>
  *  <li>standardId: 关联标准id</li>
@@ -46,6 +47,8 @@ public class EquipmentStandardRelationDTO {
 	private String equipmentModel;
 
 	private Byte qrCodeFlag;
+
+	private String qrCodeToken;
 
 	private Double longitude;
 
@@ -140,6 +143,14 @@ public class EquipmentStandardRelationDTO {
 
 	public void setQrCodeFlag(Byte qrCodeFlag) {
 		this.qrCodeFlag = qrCodeFlag;
+	}
+
+	public String getQrCodeToken() {
+		return qrCodeToken;
+	}
+
+	public void setQrCodeToken(String qrCodeToken) {
+		this.qrCodeToken = qrCodeToken;
 	}
 
 	public Double getLongitude() {
