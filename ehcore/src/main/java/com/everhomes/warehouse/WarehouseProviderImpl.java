@@ -892,6 +892,15 @@ public class WarehouseProviderImpl implements WarehouseProvider {
     }
 
     @Override
+    public Long findRequisitionId(Long requestId) {
+        DSLContext context = this.dbProvider.getDslContext(AccessSpec.readOnly());
+        return context.select(Tables.EH_WAREHOUSE_REQUESTS.REQUISITION_ID)
+                .from(Tables.EH_WAREHOUSE_REQUESTS)
+                .where(Tables.EH_WAREHOUSE_REQUESTS.ID.eq(requestId))
+                .fetchOne(Tables.EH_WAREHOUSE_REQUESTS.REQUISITION_ID);
+    }
+
+    @Override
     public Long getWarehouseStockAmount(Long warehouseId, String ownerType, Long ownerId) {
         DSLContext context = dbProvider.getDslContext(AccessSpec.readOnly());
         SelectQuery<EhWarehouseStocksRecord> query = context.selectQuery(Tables.EH_WAREHOUSE_STOCKS);
@@ -1192,7 +1201,8 @@ public class WarehouseProviderImpl implements WarehouseProvider {
     public void creatWarehouseRequestMaterial(WarehouseRequestMaterials requestMaterial) {
         long id = this.sequenceProvider.getNextSequence(NameMapper.getSequenceDomainFromTablePojo(EhWarehouseRequestMaterials.class));
         requestMaterial.setId(id);
-        LOGGER.info("creatWarehouseRequestMaterial: " + requestMaterial);
+        //这里toString，会报错，requestId不能进入json
+//        LOGGER.info("creatWarehouseRequestMaterial: " + requestMaterial);
 
         DSLContext context = this.dbProvider.getDslContext(AccessSpec.readWriteWith(EhWarehouseRequestMaterials.class, id));
         EhWarehouseRequestMaterialsDao dao = new EhWarehouseRequestMaterialsDao(context.configuration());

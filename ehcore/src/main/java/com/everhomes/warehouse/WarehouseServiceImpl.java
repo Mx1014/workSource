@@ -1728,6 +1728,7 @@ public class WarehouseServiceImpl implements WarehouseService {
             response.setNextPageAnchor(null);
         }
         List<WarehouseRequestMaterials> requestMaterials = warehouseProvider.listWarehouseRequestMaterials(ids, ownerType, ownerId, communityId);
+
         if (requestMaterials != null && requestMaterials.size() > 0) {
             List<WarehouseRequestMaterialDTO> requestDTOs = requestMaterials.stream().map(requestMaterial -> {
                 WarehouseRequestMaterialDTO dto = ConvertHelper.convert(requestMaterial, WarehouseRequestMaterialDTO.class);
@@ -1735,10 +1736,12 @@ public class WarehouseServiceImpl implements WarehouseService {
                 //增加flowCaseId
                 //flow case id get
                 FlowCase flowcase = flowCaseProvider.findFlowCaseByReferId(requestMaterial.getRequestId()
-                        , EntityType.WAREHOUSE_REQUEST.getCode(), PrivilegeConstants.PURCHASE_MODULE);
+                        , EntityType.WAREHOUSE_REQUEST.getCode(), PrivilegeConstants.WAREHOUSE_MODULE_ID);
                 if(flowcase!=null){
                     dto.setFlowCaseId(flowcase.getId());
                 }
+                //返回requisitionId
+                dto.setRequestId(warehouseProvider.findRequisitionId(requestMaterial.getRequestId()));
                 // 找到物品
                 WarehouseMaterials warehouseMaterial = warehouseProvider.findWarehouseMaterials(requestMaterial.getMaterialId(), requestMaterial.getOwnerType(), requestMaterial.getOwnerId(), requestMaterial.getCommunityId());
                 if (warehouseMaterial != null) {
