@@ -189,8 +189,7 @@ public class FlowEventLogProviderImpl implements FlowEventLogProvider {
 
         FlowCaseSearchType searchType = FlowCaseSearchType.fromCode(cmd.getFlowCaseSearchType());
         if(FlowCaseSearchType.TODO_LIST.equals(searchType)) {
-            cond = cond.and(Tables.EH_FLOW_CASES.STATUS.in(
-                    FlowCaseStatus.INITIAL.getCode(),
+            cond = cond.and(Tables.EH_FLOW_CASES.STATUS.eq(
                     FlowCaseStatus.PROCESS.getCode())
             );
             cond = cond.and(Tables.EH_FLOW_EVENT_LOGS.LOG_TYPE.eq(FlowLogType.NODE_ENTER.getCode()))
@@ -200,7 +199,6 @@ public class FlowEventLogProviderImpl implements FlowEventLogProvider {
         } else if (FlowCaseSearchType.DONE_LIST.equals(searchType)) {
             // cond = cond.and(Tables.EH_FLOW_CASES.PARENT_ID.eq(0L));
             cond = cond.and(Tables.EH_FLOW_CASES.STATUS.in(
-                    FlowCaseStatus.INITIAL.getCode(),
                     FlowCaseStatus.PROCESS.getCode(),
                     FlowCaseStatus.FINISHED.getCode(),
                     FlowCaseStatus.ABSORTED.getCode())
@@ -211,7 +209,6 @@ public class FlowEventLogProviderImpl implements FlowEventLogProvider {
     	} else if(FlowCaseSearchType.SUPERVISOR.equals(searchType)) {
             cond = cond.and(Tables.EH_FLOW_CASES.PARENT_ID.eq(0L));
             cond = cond.and(Tables.EH_FLOW_CASES.STATUS.in(
-                    FlowCaseStatus.INITIAL.getCode(),
                     FlowCaseStatus.PROCESS.getCode(),
                     FlowCaseStatus.FINISHED.getCode(),
                     FlowCaseStatus.ABSORTED.getCode())
