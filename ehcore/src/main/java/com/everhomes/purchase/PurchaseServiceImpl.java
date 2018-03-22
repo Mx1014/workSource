@@ -106,8 +106,7 @@ public class PurchaseServiceImpl implements PurchaseService {
 
         BigDecimal totalAmount = new BigDecimal("0");
         for(PurchaseMaterialDTO dto : cmd.getDtos()) {
-            long l = Long.parseLong(dto.getUnitPrice()) * dto.getPurchaseQuantity();
-            totalAmount = totalAmount.add(new BigDecimal(l));
+             totalAmount = new BigDecimal(dto.getUnitPrice()).multiply(new BigDecimal(dto.getPurchaseQuantity()));
         }
         order.setTotalAmount(totalAmount);
 

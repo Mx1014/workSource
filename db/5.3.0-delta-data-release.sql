@@ -69,7 +69,7 @@ INSERT INTO `eh_version_urls` VALUES (@vId:=@vId+1, @id, '1.0.0', 'http://{home.
 
 UPDATE eh_launch_pad_items
 SET action_data = '{\"realm\":\"qualityInspection\",\"entryUrl\":\"http://{home.url}/nar/qualityInspect/build/index.html?hideNavigationBar=1#/home#sign_suffix\"}'
-WHERE item_label LIKE '%巡检%';
+WHERE item_label LIKE '%品质%';
 
 UPDATE eh_service_module_apps
 SET instance_config = '{\"realm\":\"qualityInspection\",\"entryUrl\":\"http://{home.url}/nar/qualityInspect/build/index.html?hideNavigationBar=1#/home#sign_suffix\"}'
