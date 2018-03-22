@@ -6020,6 +6020,8 @@ public class OrganizationServiceImpl implements OrganizationService {
 
         Integer namespaceId = UserContext.getCurrentNamespaceId();
 
+        LOGGER.debug("getOrganizationNameByNameAndType namespaceId = " + namespaceId);
+
         String[] list = name.split("/");
         if(list.length > 0) {
             Organization org = listUnderOrganizations(0, null, namespaceId, list);
@@ -14244,15 +14246,18 @@ public class OrganizationServiceImpl implements OrganizationService {
 
     //递归
     private Organization listUnderOrganizations(int i, List<Organization> orgs, Integer namespaceId, String[] list) {
+        LOGGER.debug("listUnderOrganizations start, i ={}, orgs = {}, namespaceId = {}, list={}" , i, orgs, namespaceId, list);
         if (orgs == null) {
             //:todo 第一次进入
             List<Organization> orgs_0 = this.organizationProvider.listOrganizationByName(list[0], null, null, namespaceId);
+            LOGGER.debug("listUnderOrganizations oneStep" + orgs_0.toString());
             if (orgs_0 != null) {
                 return listUnderOrganizations(i + 1, orgs_0, namespaceId, list);
             }
         }
         if (orgs.size() == 1 && i == list.length) {
             //:todo 获得1个结果 结束递归
+            LOGGER.debug("listUnderOrganizations threeStep" + orgs.get(0).toString());
             return orgs.get(0);
         }
         if (orgs.size() > 1 && i == list.length) {
@@ -14264,6 +14269,7 @@ public class OrganizationServiceImpl implements OrganizationService {
             //todo 递归
             List<Organization> result = orgs.stream().map(r -> {
                 List<Organization> orgs_1 = this.organizationProvider.listOrganizationByName(list[i], null, r.getId(), namespaceId);
+                LOGGER.debug("listUnderOrganizations twoStep" + orgs_1.toString());
                 if (orgs_1 != null && orgs_1.size() > 0) {
                     return listUnderOrganizations(i + 1, orgs_1, namespaceId, list);
                 }
