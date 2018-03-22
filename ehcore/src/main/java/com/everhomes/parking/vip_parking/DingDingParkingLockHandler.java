@@ -92,7 +92,7 @@ public class DingDingParkingLockHandler {
 
         DingDingResponseEntity entity = JSONObject.parseObject(json, DingDingResponseEntity.class);
 
-        if (null != entity && entity.getConnectResp().contains("oper disover Service")) {
+        if (null != entity && entity.getConnectResp()!=null && entity.getConnectResp().contains("oper disover Service")) {
             return true;
         }
         return false;
