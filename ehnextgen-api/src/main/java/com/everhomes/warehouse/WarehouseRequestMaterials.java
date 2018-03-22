@@ -11,12 +11,11 @@ public class WarehouseRequestMaterials extends EhWarehouseRequestMaterials {
 
     private Long requestId;
 
-    @Override
     public Long getRequestId() {
         return requestId;
     }
 
-    @Override
+
     public void setRequestId(Long requestId) {
         this.requestId = requestId;
     }

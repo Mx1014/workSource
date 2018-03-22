@@ -148,6 +148,7 @@ public class CustomerDynamicExcelHandler implements DynamicExcelHandler {
             int failedNumber = 0;
             for(DynamicRowDTO rowData : rowDatas) {
                 List<DynamicColumnDTO> columns = rowData.getColumns();
+                Boolean flag = true;
                 switch (sheet) {
                     case CUSTOMER:
                         EnterpriseCustomer enterpriseCustomer = new EnterpriseCustomer();
@@ -187,28 +188,31 @@ public class CustomerDynamicExcelHandler implements DynamicExcelHandler {
                                 } catch(Exception e){
                                     LOGGER.warn("one row invoke set method for EnterpriseCustomer failed");
                                     failedNumber ++;
+                                    flag = false;
+                                    break;
                                 }
 
                                 continue;
                             }
                         }
 
-                        if(null != enterpriseCustomer.getLongitude() && null != enterpriseCustomer.getLatitude()){
-                            String geohash  = GeoHashUtils.encode(enterpriseCustomer.getLatitude(), enterpriseCustomer.getLongitude());
-                            enterpriseCustomer.setGeohash(geohash);
+                        if(flag) {
+                            if(null != enterpriseCustomer.getLongitude() && null != enterpriseCustomer.getLatitude()){
+                                String geohash  = GeoHashUtils.encode(enterpriseCustomer.getLatitude(), enterpriseCustomer.getLongitude());
+                                enterpriseCustomer.setGeohash(geohash);
+                            }
+
+                            customerProvider.createEnterpriseCustomer(enterpriseCustomer);
+
+                            //企业客户新增成功,保存客户事件
+                            customerService.saveCustomerEvent( 1  ,enterpriseCustomer ,null);
+
+                            OrganizationDTO organizationDTO = customerService.createOrganization(enterpriseCustomer);
+                            enterpriseCustomer.setOrganizationId(organizationDTO.getId());
+
+                            customerProvider.updateEnterpriseCustomer(enterpriseCustomer);
+                            customerSearcher.feedDoc(enterpriseCustomer);
                         }
-
-                        customerProvider.createEnterpriseCustomer(enterpriseCustomer);
-
-                        //企业客户新增成功,保存客户事件
-                        customerService.saveCustomerEvent( 1  ,enterpriseCustomer ,null);
-
-                        OrganizationDTO organizationDTO = customerService.createOrganization(enterpriseCustomer);
-                        enterpriseCustomer.setOrganizationId(organizationDTO.getId());
-
-                        customerProvider.updateEnterpriseCustomer(enterpriseCustomer);
-                        customerSearcher.feedDoc(enterpriseCustomer);
-
                         break;
                     case CUSTOMER_TAX:
                         CustomerTax tax = new CustomerTax();
@@ -230,12 +234,16 @@ public class CustomerDynamicExcelHandler implements DynamicExcelHandler {
                                 } catch(Exception e){
                                     LOGGER.warn("one row invoke set method for CustomerTax failed");
                                     failedNumber ++;
+                                    flag = false;
+                                    break;
                                 }
 
                                 continue;
                             }
                         }
-                        customerProvider.createCustomerTax(tax);
+                        if(flag) {
+                            customerProvider.createCustomerTax(tax);
+                        }
                         break;
                     case CUSTOMER_ACCOUNT:
                         CustomerAccount account = new CustomerAccount();
@@ -255,13 +263,16 @@ public class CustomerDynamicExcelHandler implements DynamicExcelHandler {
                                 } catch(Exception e){
                                     LOGGER.warn("one row invoke set method for CustomerAccount failed");
                                     failedNumber ++;
+                                    flag = false;
+                                    break;
                                 }
 
                                 continue;
                             }
                         }
-
-                        customerProvider.createCustomerAccount(account);
+                        if(flag) {
+                            customerProvider.createCustomerAccount(account);
+                        }
                         break;
                     case CUSTOMER_TALENT:
                         CustomerTalent talent = new CustomerTalent();
@@ -285,13 +296,17 @@ public class CustomerDynamicExcelHandler implements DynamicExcelHandler {
                                 } catch(Exception e){
                                     LOGGER.warn("one row invoke set method for CustomerTalent failed");
                                     failedNumber ++;
+                                    flag = false;
+                                    break;
                                 }
 
                                 continue;
                             }
                         }
+                        if(flag) {
+                            customerProvider.createCustomerTalent(talent);
+                        }
 
-                        customerProvider.createCustomerTalent(talent);
                         break;
                     case CUSTOMER_TRADEMARK:
                         CustomerTrademark trademark = new CustomerTrademark();
@@ -312,13 +327,16 @@ public class CustomerDynamicExcelHandler implements DynamicExcelHandler {
                                 } catch(Exception e){
                                     LOGGER.warn("one row invoke set method for CustomerTrademark failed");
                                     failedNumber ++;
+                                    flag = false;
+                                    break;
                                 }
 
                                 continue;
                             }
                         }
-
-                        customerProvider.createCustomerTrademark(trademark);
+                        if(flag) {
+                            customerProvider.createCustomerTrademark(trademark);
+                        }
                         break;
                     case CUSTOMER_APPLY_PROJECT:
                         CustomerApplyProject project = new CustomerApplyProject();
@@ -364,13 +382,16 @@ public class CustomerDynamicExcelHandler implements DynamicExcelHandler {
                                 } catch(Exception e){
                                     LOGGER.warn("one row invoke set method for CustomerApplyProject failed");
                                     failedNumber ++;
+                                    flag = false;
+                                    break;
                                 }
 
                                 continue;
                             }
                         }
-
-                        customerProvider.createCustomerApplyProject(project);
+                        if(flag) {
+                            customerProvider.createCustomerApplyProject(project);
+                        }
                         break;
                     case CUSTOMER_COMMERCIAL:
                         CustomerCommercial commercial = new CustomerCommercial();
@@ -392,13 +413,17 @@ public class CustomerDynamicExcelHandler implements DynamicExcelHandler {
                                 } catch(Exception e){
                                     LOGGER.warn("one row invoke set method for CustomerCommercial failed");
                                     failedNumber ++;
+                                    flag = false;
+                                    break;
                                 }
 
                                 continue;
                             }
                         }
 
-                        customerProvider.createCustomerCommercial(commercial);
+                        if(flag) {
+                            customerProvider.createCustomerCommercial(commercial);
+                        }
                         break;
                     case CUSTOMER_INVESTMENT:
                         CustomerInvestment investment = new CustomerInvestment();
@@ -413,13 +438,17 @@ public class CustomerDynamicExcelHandler implements DynamicExcelHandler {
                                 } catch(Exception e){
                                     LOGGER.warn("one row invoke set method for CustomerInvestment failed");
                                     failedNumber ++;
+                                    flag = false;
+                                    break;
                                 }
 
                                 continue;
                             }
                         }
+                        if(flag) {
+                            customerProvider.createCustomerInvestment(investment);
+                        }
 
-                        customerProvider.createCustomerInvestment(investment);
                         break;
                     case CUSTOMER_ECONOMIC_INDICATOR:
                         CustomerEconomicIndicator indicator = new CustomerEconomicIndicator();
@@ -434,13 +463,16 @@ public class CustomerDynamicExcelHandler implements DynamicExcelHandler {
                                     } catch(Exception e){
                                         LOGGER.warn("one row invoke set method for CustomerEconomicIndicator failed");
                                         failedNumber ++;
+                                        flag = false;
+                                        break;
                                     }
 
                                     continue;
                                 }
                         }
-
-                        customerProvider.createCustomerEconomicIndicator(indicator);
+                        if(flag) {
+                            customerProvider.createCustomerEconomicIndicator(indicator);
+                        }
                         break;
                     case CUSTOMER_PATENT:
                         CustomerPatent patent = new CustomerPatent();
@@ -461,13 +493,16 @@ public class CustomerDynamicExcelHandler implements DynamicExcelHandler {
                                 } catch(Exception e){
                                     LOGGER.warn("one row invoke set method for CustomerPatent failed");
                                     failedNumber ++;
+                                    flag = false;
+                                    break;
                                 }
 
                                 continue;
                             }
                         }
-
-                        customerProvider.createCustomerPatent(patent);
+                        if(flag) {
+                            customerProvider.createCustomerPatent(patent);
+                        }
                         break;
                     case CUSTOMER_CERTIFICATE:
                         CustomerCertificate certificate = new CustomerCertificate();
@@ -482,13 +517,17 @@ public class CustomerDynamicExcelHandler implements DynamicExcelHandler {
                                 } catch(Exception e){
                                     LOGGER.warn("one row invoke set method for CustomerCertificate failed");
                                     failedNumber ++;
+                                    flag = false;
+                                    break;
                                 }
 
                                 continue;
                             }
                         }
+                        if(flag) {
+                            customerProvider.createCustomerCertificate(certificate);
+                        }
 
-                        customerProvider.createCustomerCertificate(certificate);
                         break;
                     case CUSTOMER_TRACKING:
                         CustomerTracking tracking = new CustomerTracking();
@@ -516,18 +555,22 @@ public class CustomerDynamicExcelHandler implements DynamicExcelHandler {
                                 } catch(Exception e){
                                     LOGGER.warn("one row invoke set method for CustomerTracking failed");
                                     failedNumber ++;
+                                    flag = false;
+                                    break;
                                 }
 
                                 continue;
                             }
                         }
-                        customerProvider.createCustomerTracking(tracking);
-                        EnterpriseCustomer customer = customerProvider.findById(customerId);
-                        if(customer != null) {
-                            customer.setLastTrackingTime(tracking.getTrackingTime());
-                            //更细客户表的最后跟进时间
-                            customerProvider.updateCustomerLastTrackingTime(customer);
-                            customerSearcher.feedDoc(customer);
+                        if(flag) {
+                            customerProvider.createCustomerTracking(tracking);
+                            EnterpriseCustomer customer = customerProvider.findById(customerId);
+                            if(customer != null) {
+                                customer.setLastTrackingTime(tracking.getTrackingTime());
+                                //更细客户表的最后跟进时间
+                                customerProvider.updateCustomerLastTrackingTime(customer);
+                                customerSearcher.feedDoc(customer);
+                            }
                         }
 
                         break;
@@ -551,15 +594,19 @@ public class CustomerDynamicExcelHandler implements DynamicExcelHandler {
                                 } catch(Exception e){
                                     LOGGER.warn("one row invoke set method for CustomerTrackingPlan failed");
                                     failedNumber ++;
+                                    flag = false;
+                                    break;
                                 }
 
                                 continue;
                             }
                         }
-                        if(plan.getNotifyTime() != null ){
-                            plan.setNotifyStatus(TrackingPlanNotifyStatus.WAITING_FOR_SEND_OUT.getCode());
+                        if(flag) {
+                            if(plan.getNotifyTime() != null ){
+                                plan.setNotifyStatus(TrackingPlanNotifyStatus.WAITING_FOR_SEND_OUT.getCode());
+                            }
+                            customerProvider.createCustomerTrackingPlan(plan);
                         }
-                        customerProvider.createCustomerTrackingPlan(plan);
 
                         break;
                     case CUSTOMER_ENTRY_INFO:
@@ -589,13 +636,16 @@ public class CustomerDynamicExcelHandler implements DynamicExcelHandler {
                                 } catch(Exception e){
                                     LOGGER.warn("one row invoke set method for CustomerEntryInfo failed");
                                     failedNumber ++;
+                                    flag = false;
+                                    break;
                                 }
 
                                 continue;
                             }
                         }
-
-                        customerProvider.createCustomerEntryInfo(entryInfo);
+                        if(flag) {
+                            customerProvider.createCustomerEntryInfo(entryInfo);
+                        }
                         break;
                     case CUSTOMER_DEPARTURE_INFO:
                         CustomerDepartureInfo departureInfo = new CustomerDepartureInfo();
@@ -616,13 +666,16 @@ public class CustomerDynamicExcelHandler implements DynamicExcelHandler {
                                 } catch(Exception e){
                                     LOGGER.warn("one row invoke set method for CustomerDepartureInfo failed");
                                     failedNumber ++;
+                                    flag = false;
+                                    break;
                                 }
 
                                 continue;
                             }
                         }
-
-                        customerProvider.createCustomerDepartureInfo(departureInfo);
+                        if(flag) {
+                            customerProvider.createCustomerDepartureInfo(departureInfo);
+                        }
                         break;
                 }
 
