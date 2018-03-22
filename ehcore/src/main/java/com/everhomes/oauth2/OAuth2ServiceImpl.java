@@ -3,6 +3,8 @@ package com.everhomes.oauth2;
 import com.everhomes.app.App;
 import com.everhomes.app.AppProvider;
 import com.everhomes.configuration.ConfigurationProvider;
+import com.everhomes.namespace.Namespace;
+import com.everhomes.rest.app.AppConstants;
 import com.everhomes.rest.oauth2.AuthorizationCommand;
 import com.everhomes.rest.oauth2.OAuth2ServiceErrorCode;
 import com.everhomes.user.User;
@@ -38,7 +40,15 @@ public class OAuth2ServiceImpl implements OAuth2Service {
 
     @Override
     public URI confirmAuthorization(String identifier, String password, AuthorizationCommand cmd) {
-        User user = userService.logonDryrun(identifier, password);
+        //Added by Janson, MUST be changed when xiaoqiang comeback
+        Integer namespaceId = Namespace.DEFAULT_NAMESPACE;
+        if(cmd.getclient_id() != null && cmd.getclient_id().equals(AppConstants.APPKEY_BIZ)) {
+            namespaceId = 2;
+        }
+        if(cmd.getclient_id() != null && cmd.getclient_id().equals("f32e706e-28f6-11e8-a883-b083fe4e159f")) {
+            namespaceId = 999972;
+        }
+        User user = userService.logonDryrun(namespaceId, identifier, password);
         if(user == null)
             return null;
 
