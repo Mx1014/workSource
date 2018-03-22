@@ -1741,7 +1741,7 @@ public class WarehouseServiceImpl implements WarehouseService {
                     dto.setFlowCaseId(flowcase.getId());
                 }
                 //返回requisitionId
-                dto.setRequestId(warehouseProvider.findRequisitionId(requestMaterial.getRequestId()));
+                dto.setRequisitionId(warehouseProvider.findRequisitionId(requestMaterial.getRequestId()));
                 // 找到物品
                 WarehouseMaterials warehouseMaterial = warehouseProvider.findWarehouseMaterials(requestMaterial.getMaterialId(), requestMaterial.getOwnerType(), requestMaterial.getOwnerId(), requestMaterial.getCommunityId());
                 if (warehouseMaterial != null) {
