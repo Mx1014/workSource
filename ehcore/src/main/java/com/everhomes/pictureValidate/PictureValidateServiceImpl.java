@@ -58,7 +58,7 @@ public class PictureValidateServiceImpl implements PictureValidateService {
         //测试待删  TODO
 //        this.showPic(pictureStr);
 
-        Accessor accessor = this.collectionProvider.getMapAccessor("seq", "abc");
+        Accessor accessor = this.collectionProvider.getMapAccessor("picturevalidate", "abc");
         RedisTemplate template = accessor.getTemplate(new StringRedisSerializer());
         template.opsForValue().set(sessionId, code, 2*60, TimeUnit.SECONDS);
         return pictureStr;
@@ -72,7 +72,7 @@ public class PictureValidateServiceImpl implements PictureValidateService {
 
     @Override
     public Boolean validateCode(String sessionId, String code) {
-        Accessor accessor = this.collectionProvider.getMapAccessor("seq", "abc");
+        Accessor accessor = this.collectionProvider.getMapAccessor("picturevalidate", "abc");
         RedisTemplate template = accessor.getTemplate(new StringRedisSerializer());
         String saveCode = (String) template.opsForValue().get(sessionId);
         if(code != null && saveCode != null && code.toLowerCase().equals(saveCode.toLowerCase())){
