@@ -56,3 +56,38 @@ SELECT @appid := @appid + 1, namespace_id, namespace_id + 100,  `active_app_id`,
 -- /yellowPage/syncServiceAllianceApplicationRecords
 -- /yellowPage/syncSARequestInfo
 -- /officecubicle/dataMigration
+
+/*9、
+1)/pmtask/syncCategories
+2) 备份eh_pm_tasks表
+ 3)UPDATE eh_pm_tasks
+        LEFT JOIN
+    (SELECT
+       distinct (a.id) as aid,b.id as bid,b.owner_id as owner_id
+    FROM
+        eh_categories a, eh_categories b
+    WHERE
+        a.path = b.path ) c ON eh_pm_tasks.task_category_id = c.aid
+        AND eh_pm_tasks.owner_id = c.owner_id
+SET
+    eh_pm_tasks.task_category_id = c.bid
+WHERE
+    eh_pm_tasks.task_category_id!=0;
+
+UPDATE eh_pm_tasks
+        RIGHT JOIN
+    (SELECT
+       distinct (a.id) as aid,b.id as bid,b.owner_id as owner_id
+    FROM
+        eh_categories a, eh_categories b
+    WHERE
+        a.path = b.path ) c ON eh_pm_tasks.category_id = c.aid
+        AND eh_pm_tasks.owner_id = c.owner_id
+SET
+    eh_pm_tasks.category_id = c.bid
+WHERE
+    eh_pm_tasks.category_id!=0;
+
+ 4)/pmtask/syncFromDb
+ 5)/pmtask/syncTaskStatistics
+*/

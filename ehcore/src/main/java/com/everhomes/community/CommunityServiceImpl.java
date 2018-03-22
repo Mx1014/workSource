@@ -272,6 +272,7 @@ public class CommunityServiceImpl implements CommunityService {
 		community.setAreaName(area.getName());
 		community.setCityName(city.getName());
 		community.setAreaSize(cmd.getAreaSize());
+		community.setName(cmd.getName());
 		this.dbProvider.execute((TransactionStatus status) ->  {
 			this.communityProvider.updateCommunity(community);
 			communitySearcher.feedDoc(community);

@@ -119,6 +119,9 @@ import java.sql.Date;
 import java.sql.Time;
 import java.sql.Timestamp;
 import java.text.SimpleDateFormat;
+import java.time.LocalDate;
+import java.time.LocalDateTime;
+import java.time.ZoneId;
 import java.util.*;
 import java.util.concurrent.ExecutorService;
 import java.util.concurrent.Executors;
@@ -505,8 +508,10 @@ public class Rentalv2ServiceImpl implements Rentalv2Service {
 		List<RentalCloseDate> closeDates = rentalv2Provider.queryRentalCloseDateByOwner(rule.getResourceType(),
 				ruleType, id);
 		if(null != closeDates){
-			Long timestamp = System.currentTimeMillis();
-			response.setCloseDates(closeDates.stream().filter(d -> null != d.getCloseDate() && d.getCloseDate().getTime()>timestamp).map(c -> c.getCloseDate().getTime())
+			LocalDate today = LocalDate.now();
+			Long firstDay = LocalDateTime.of(today.getYear(),1,1,0,0).atZone(ZoneId.systemDefault())
+					.toInstant().toEpochMilli();
+			response.setCloseDates(closeDates.stream().filter(d -> null != d.getCloseDate() && d.getCloseDate().getTime()>firstDay).map(c -> c.getCloseDate().getTime())
 					.collect(Collectors.toList()));
 		}
 		//set 物资
@@ -2089,6 +2094,7 @@ public class Rentalv2ServiceImpl implements Rentalv2Service {
 				}else if (rentalBill.getRentalType() == RentalType.WEEK.getCode()){
 					calendar.setTime(lastRsr.getResourceRentalDate());
 					calendar.set(Calendar.DAY_OF_WEEK,7);
+					calendar.add(Calendar.DATE,1);
 					useDetailSB.append(beginDateSF.format(calendar.getTime()));
 				}else if (rentalBill.getRentalType() == RentalType.DAY.getCode()){
 					useDetailSB.append(beginDateSF.format(lastRsr.getResourceRentalDate()));
