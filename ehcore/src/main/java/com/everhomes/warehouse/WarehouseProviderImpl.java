@@ -1201,7 +1201,8 @@ public class WarehouseProviderImpl implements WarehouseProvider {
     public void creatWarehouseRequestMaterial(WarehouseRequestMaterials requestMaterial) {
         long id = this.sequenceProvider.getNextSequence(NameMapper.getSequenceDomainFromTablePojo(EhWarehouseRequestMaterials.class));
         requestMaterial.setId(id);
-        LOGGER.info("creatWarehouseRequestMaterial: " + requestMaterial);
+        //这里toString，会报错，requestId不能进入json
+//        LOGGER.info("creatWarehouseRequestMaterial: " + requestMaterial);
 
         DSLContext context = this.dbProvider.getDslContext(AccessSpec.readWriteWith(EhWarehouseRequestMaterials.class, id));
         EhWarehouseRequestMaterialsDao dao = new EhWarehouseRequestMaterialsDao(context.configuration());
