@@ -1,10 +1,9 @@
 package com.everhomes.archives;
 
-import com.everhomes.rest.archives.SocialSecurityMonthType;
-
-import java.text.SimpleDateFormat;
+import java.time.DayOfWeek;
 import java.time.LocalDate;
 import java.time.format.DateTimeFormatter;
+import java.time.temporal.TemporalAccessor;
 
 public class ArchivesUtil {
 
@@ -28,39 +27,45 @@ public class ArchivesUtil {
         }
         if (pattern == null)
             return null;
-        SimpleDateFormat format = new SimpleDateFormat(pattern);
-        java.util.Date d = null;
-        try {
-            d = format.parse(strDate);
-        } catch (Exception e) {
-            e.printStackTrace();
-        }
-        java.sql.Date date = new java.sql.Date(d.getTime());
-        return date;
+        TemporalAccessor accessor = DateTimeFormatter.ofPattern(pattern).parse(strDate);
+//        DateTimeFormatter formatter = (DateTimeFormatter) accessor;
+//        LocalDateTime localDateTime = LocalDateTime.parse(strDate, formatter);
+//        java.util.Date d = java.util.Date.from(localDateTime.atZone(zone).toInstant());
+        LocalDate date = LocalDate.from(accessor);
+        return java.sql.Date.valueOf(date);
     }
 
     /**
-     * 当前日期( sql.Date 类型)
+     * 当前日期(sql.Date 类型)
      */
     public static java.sql.Date currentDate(){
-        java.util.Date now  = new java.util.Date();
-        java.sql.Date date = new java.sql.Date(now.getTime());
-        return date;
+        LocalDate date = LocalDate.now();
+        return java.sql.Date.valueOf(date);
     }
 
     /**
-     * 社保专用月份取值
+     * 当前日期+n天
      */
-    public static String socialSecurityMonth(Byte monthType) {
-        DateTimeFormatter format = DateTimeFormatter.ofPattern("yyyyMM");
-        //  当前月
-        if (monthType.equals(SocialSecurityMonthType.THIS_MONTH.getCode())) {
-            LocalDate date = LocalDate.now();
-            return date.format(format);
-        } else {
-            //  下一月
-            LocalDate date = LocalDate.now().plusMonths(1L);
-            return date.format(format);
-        }
+    public static java.sql.Date plusDate(int n){
+        LocalDate plusDate = LocalDate.now().plusDays(n);
+        return java.sql.Date.valueOf(plusDate);
+    }
+
+    /**
+     * 本周起始日
+     */
+    public static java.sql.Date firstOfWeek(){
+        LocalDate nowDate = LocalDate.now();
+        LocalDate date = nowDate.minusDays(nowDate.getDayOfWeek().getValue() - DayOfWeek.MONDAY.getValue());
+        return java.sql.Date.valueOf(date);
+    }
+
+    /**
+     * 本周截止日
+     */
+    public static java.sql.Date lastOfWeek(){
+        LocalDate nowDate = LocalDate.now();
+        LocalDate date = nowDate.plusDays(DayOfWeek.SUNDAY.getValue() - nowDate.getDayOfWeek().getValue());
+        return java.sql.Date.valueOf(date);
     }
 }

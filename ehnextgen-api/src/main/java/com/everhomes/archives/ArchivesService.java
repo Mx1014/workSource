@@ -109,5 +109,7 @@ public interface ArchivesService {
 
     void remindArchivesEmployee(RemindArchivesEmployeeCommand cmd);
 
+    void sendArchivesNotification();
+
     void syncArchivesDismissStatus();
 }

@@ -1,6 +1,7 @@
 package com.everhomes.archives;
 
 import com.alibaba.fastjson.JSON;
+import com.everhomes.bootstrap.PlatformContext;
 import com.everhomes.configuration.ConfigConstants;
 import com.everhomes.configuration.ConfigurationProvider;
 import com.everhomes.constants.ErrorCodes;
@@ -9,6 +10,7 @@ import com.everhomes.general_form.*;
 import com.everhomes.listing.ListingLocator;
 import com.everhomes.listing.ListingQueryBuilderCallback;
 import com.everhomes.locale.LocaleTemplateService;
+import com.everhomes.mail.MailHandler;
 import com.everhomes.organization.*;
 import com.everhomes.rest.acl.PrivilegeConstants;
 import com.everhomes.rest.archives.*;
@@ -52,6 +54,7 @@ import java.net.URLEncoder;
 import java.sql.Date;
 import java.sql.Timestamp;
 import java.text.SimpleDateFormat;
+import java.time.LocalDateTime;
 import java.util.*;
 import java.util.regex.Pattern;
 import java.util.stream.Collectors;
@@ -1970,28 +1973,25 @@ public class ArchivesServiceImpl implements ArchivesService {
         GeneralFormDTO form = generalFormService.getGeneralForm(formCommand);
 
         //  调用导入方法
-        importFileService.executeTask(new ExecuteImportTaskCallback() {
-            @Override
-            public ImportFileResponse importFile() {
-                ImportFileResponse response = new ImportFileResponse();
-                List<ImportArchivesEmployeesDTO> dataList = handleImportArchivesEmployees(resultList, form.getFormFields());
-                String fileLog;
-                if (dataList.size() > 0) {
-                    //  校验标题，若不合格直接返回错误
-                    fileLog = checkArchivesEmployeesTitle(dataList.get(0), form.getFormFields());
-                    if (!StringUtils.isEmpty(fileLog)) {
-                        response.setFileLog(fileLog);
-                        return response;
-                    }
-                    response.setTitle(convertListStringToMap(dataList.get(0)));
-                    dataList.remove(0);
+        importFileService.executeTask(() -> {
+            ImportFileResponse response = new ImportFileResponse();
+            List<ImportArchivesEmployeesDTO> dataList = handleImportArchivesEmployees(resultList, form.getFormFields());
+            String fileLog;
+            if (dataList.size() > 0) {
+                //  校验标题，若不合格直接返回错误
+                fileLog = checkArchivesEmployeesTitle(dataList.get(0), form.getFormFields());
+                if (!StringUtils.isEmpty(fileLog)) {
+                    response.setFileLog(fileLog);
+                    return response;
                 }
-
-                //  开始导入，同时设置导入结果
-                importArchivesEmployeesFiles(dataList, response, cmd.getFormOriginId(), cmd.getOrganizationId(), cmd.getDepartmentId(), form.getFormFields());
-                //  返回结果
-                return response;
+                response.setTitle(convertListStringToMap(dataList.get(0)));
+                dataList.remove(0);
             }
+
+            //  开始导入，同时设置导入结果
+            importArchivesEmployeesFiles(dataList, response, cmd.getFormOriginId(), cmd.getOrganizationId(), cmd.getDepartmentId(), form.getFormFields());
+            //  返回结果
+            return response;
         }, task);
         return ConvertHelper.convert(task, ImportFileTaskDTO.class);
     }
@@ -2591,15 +2591,76 @@ public class ArchivesServiceImpl implements ArchivesService {
         }
     }
 
-    public void sendArchivesNotification(){
-        // set the target email
-        String ryan = "nan.rong@zuolin.com";
-        Long ryanId = 309154L;
+    @Override
+    public void sendArchivesNotification() {
+        // time
+        Date firstOfWeek = ArchivesUtil.currentDate();
+        Date lastOfWeek = ArchivesUtil.plusDate(6);
+        String employmentName = "";
+        List<OrganizationMemberDetails> employmentMembers = organizationProvider.queryOrganizationMemberDetails(new ListingLocator(), 1023080L, (locator, query) -> {
+            query.addConditions(Tables.EH_ORGANIZATION_MEMBER_DETAILS.EMPLOYEE_STATUS.ne(EmployeeStatus.DISMISSAL.getCode()));
+            Condition con1 = Tables.EH_ORGANIZATION_MEMBER_DETAILS.EMPLOYMENT_TIME.between(firstOfWeek, lastOfWeek);
+            con1 = con1.or(Tables.EH_ORGANIZATION_MEMBER_DETAILS.BIRTHDAY.between(firstOfWeek, lastOfWeek));
+            ();
+            query.addConditions());
+            return query;
+        });
+        if (employmentMembers != null) {
+            for (int i = 0; i < employmentMembers.size(); i++)
+                employmentName += (employmentMembers.get(i).getContactName() + ",");
+            employmentName = employmentName.substring(0, employmentName.length() - 1);
+        }
 
+
+        //  1.set the target email or userId
+        Long ryanId = 309154L;
+        List<String> emails = Arrays.asList("lei.lv@zuolin.com", "oa@zuolin.com");
+
+        //  2.get the notification body.
+
+
+        //  3.send it
+        sendArchivesEmails(emails, employmentName);
     }
 
-    private void sendArchivesEmails(){
-
+    private void sendArchivesEmails(List<String> emails, String employmentName) {
+        String handlerName = MailHandler.MAIL_RESOLVER_PREFIX + MailHandler.HANDLER_JSMTP;
+        MailHandler handler = PlatformContext.getComponent(handlerName);
+        String body = "Hi Jay,\n " +
+                "\n" +
+                "\n" +
+                "本周需要注意的人事日程如下：" +
+                "\n" +
+                "\n" +
+                "\n" +
+                "即将转正的人为：" + employmentName;
+       /* String body ="你好，xxx\n" +
+                "\n" +
+                "\n" +
+                "\n" +
+                "$公司名称 $近一周需要注意的人事日程如下：\n" +
+                "\n" +
+                "\n" +
+                "\n" +
+                "2017-08-08   星期二\n" +
+                "\n" +
+                转正 +
+                "\n" +
+                "yyy 在${公司名称}工作满${入职时长}年\n" +
+                "\n" +
+                "zzz ${年龄，实岁}岁生日\n" +
+                "\n" +
+                "qqq 合同到期\n" +
+                "\n" +
+                "www 身份证到期\n" +
+                "\n" +
+                "\n" +
+                "\n" +
+                "2017-08-18  星期五\n" +
+                "\n" +
+                "aaa 转正";*/
+        for (String email : emails)
+            handler.sendMail(UserContext.getCurrentNamespaceId(), null, email, "人事提醒", body, null);
     }
 
     private void sendArchivesMessages(){}

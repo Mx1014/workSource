@@ -441,4 +441,14 @@ public class ArchivesController extends ControllerBase{
         response.setErrorDescription("OK");
         return response;
     }
+
+    @RequestMapping("testNotification")
+    @RestReturn(value = String.class)
+    public RestResponse testNotification(){
+        archivesService.sendArchivesNotification();
+        RestResponse response = new RestResponse();
+        response.setErrorCode(ErrorCodes.SUCCESS);
+        response.setErrorDescription("OK");
+        return response;
+    }
 }
