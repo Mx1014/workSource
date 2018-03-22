@@ -6,11 +6,42 @@ import com.everhomes.db.DbProvider;
 import com.everhomes.entity.EntityType;
 import com.everhomes.filemanagement.FileService;
 import com.everhomes.messaging.MessagingService;
-import com.everhomes.organization.*;
+import com.everhomes.organization.Organization;
+import com.everhomes.organization.OrganizationMember;
+import com.everhomes.organization.OrganizationMemberDetails;
+import com.everhomes.organization.OrganizationProvider;
+import com.everhomes.organization.OrganizationService;
 import com.everhomes.rest.app.AppConstants;
 import com.everhomes.rest.common.Router;
-import com.everhomes.rest.messaging.*;
-import com.everhomes.rest.notice.*;
+import com.everhomes.rest.messaging.ChannelType;
+import com.everhomes.rest.messaging.MessageBodyType;
+import com.everhomes.rest.messaging.MessageChannel;
+import com.everhomes.rest.messaging.MessageDTO;
+import com.everhomes.rest.messaging.MessageMetaConstant;
+import com.everhomes.rest.messaging.MessagingConstants;
+import com.everhomes.rest.messaging.MetaObjectType;
+import com.everhomes.rest.messaging.RouterMetaObject;
+import com.everhomes.rest.notice.CancelEnterpriseNoticeCommand;
+import com.everhomes.rest.notice.CreateEnterpriseNoticeCommand;
+import com.everhomes.rest.notice.DeleteEnterpriseNoticeCommand;
+import com.everhomes.rest.notice.EnterpriseNoticeAttachmentContentType;
+import com.everhomes.rest.notice.EnterpriseNoticeAttachmentDTO;
+import com.everhomes.rest.notice.EnterpriseNoticeContentType;
+import com.everhomes.rest.notice.EnterpriseNoticeDTO;
+import com.everhomes.rest.notice.EnterpriseNoticeDetailActionData;
+import com.everhomes.rest.notice.EnterpriseNoticePreviewDTO;
+import com.everhomes.rest.notice.EnterpriseNoticeReceiverDTO;
+import com.everhomes.rest.notice.EnterpriseNoticeReceiverType;
+import com.everhomes.rest.notice.EnterpriseNoticeSecretFlag;
+import com.everhomes.rest.notice.EnterpriseNoticeShowType;
+import com.everhomes.rest.notice.EnterpriseNoticeStatus;
+import com.everhomes.rest.notice.GetCurrentUserContactInfoCommand;
+import com.everhomes.rest.notice.ListEnterpriseNoticeAdminCommand;
+import com.everhomes.rest.notice.ListEnterpriseNoticeAdminResponse;
+import com.everhomes.rest.notice.ListEnterpriseNoticeCommand;
+import com.everhomes.rest.notice.ListEnterpriseNoticeResponse;
+import com.everhomes.rest.notice.UpdateEnterpriseNoticeCommand;
+import com.everhomes.rest.notice.UserContactSimpleInfoDTO;
 import com.everhomes.rest.organization.OrganizationGroupType;
 import com.everhomes.settings.PaginationConfigHelper;
 import com.everhomes.user.User;
@@ -27,7 +58,13 @@ import org.springframework.transaction.TransactionStatus;
 import org.springframework.util.CollectionUtils;
 import org.springframework.util.StringUtils;
 
-import java.util.*;
+import java.util.ArrayList;
+import java.util.Collections;
+import java.util.HashMap;
+import java.util.HashSet;
+import java.util.List;
+import java.util.Map;
+import java.util.Set;
 import java.util.concurrent.ExecutorService;
 import java.util.concurrent.Executors;
 
@@ -36,6 +73,9 @@ public class EnterpriseNoticeServiceImpl implements EnterpriseNoticeService {
 
     private static final Logger LOGGER = LoggerFactory.getLogger(EnterpriseNoticeServiceImpl.class);
 
+    private static final int TITLE_MAX_LENGTH = 40;
+    private static final int CONTENT_MAX_LENGTH = 2000;
+    private static final int PUBLISHER_MAX_LENGTH = 40;
     private static final int SUMMARY_CONTENT_MAX_SIZE = 140;
 
     @Autowired
@@ -122,7 +162,10 @@ public class EnterpriseNoticeServiceImpl implements EnterpriseNoticeService {
         if (EnterpriseNoticeContentType.fromCode(cmd.getContentType()) == null) {
             cmd.setContentType(EnterpriseNoticeContentType.TEXT.getCode());
         }
-
+        cmd.setTitle(splitLongString(cmd.getTitle(), TITLE_MAX_LENGTH));
+        cmd.setContent(splitLongString(cmd.getContent(), CONTENT_MAX_LENGTH));
+        cmd.setSummary(splitLongString(cmd.getSummary(), SUMMARY_CONTENT_MAX_SIZE));
+        cmd.setPublisher(splitLongString(cmd.getPublisher(), PUBLISHER_MAX_LENGTH));
         EnterpriseNotice sendEnterpriseNotice = dbProvider.execute((TransactionStatus status) -> {
             Integer namespaceId = UserContext.getCurrentNamespaceId();
             if (namespaceId == null) {
@@ -233,6 +276,10 @@ public class EnterpriseNoticeServiceImpl implements EnterpriseNoticeService {
             }
             return null;
         }
+        cmd.setTitle(splitLongString(cmd.getTitle(), TITLE_MAX_LENGTH));
+        cmd.setContent(splitLongString(cmd.getContent(), CONTENT_MAX_LENGTH));
+        cmd.setSummary(splitLongString(cmd.getSummary(), SUMMARY_CONTENT_MAX_SIZE));
+        cmd.setPublisher(splitLongString(cmd.getPublisher(), PUBLISHER_MAX_LENGTH));
         dbProvider.execute((TransactionStatus status) -> {
             updateEnterpriseNotice.setTitle(cmd.getTitle());
             updateEnterpriseNotice.setSummary(cmd.getSummary());
@@ -480,4 +527,17 @@ public class EnterpriseNoticeServiceImpl implements EnterpriseNoticeService {
         }
         return false;
     }
+
+    // 当字符串超过最大限制时，将此截取到最大长度
+    private String splitLongString(String original, int maxLength) {
+        if (!StringUtils.hasText(original)) {
+            return null;
+        }
+        String newString = original.trim();
+        if (newString.length() <= maxLength) {
+            return newString;
+        }
+        return newString.substring(0, maxLength);
+    }
+
 }
