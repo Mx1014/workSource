@@ -1,10 +1,11 @@
 package com.everhomes.module;
 
-import java.util.List;
-
-import javax.validation.Valid;
-
 import com.everhomes.bootstrap.PlatformContext;
+import com.everhomes.constants.ErrorCodes;
+import com.everhomes.controller.ControllerBase;
+import com.everhomes.discover.RestDoc;
+import com.everhomes.discover.RestReturn;
+import com.everhomes.rest.RestResponse;
 import com.everhomes.rest.acl.*;
 import com.everhomes.rest.module.*;
 import com.everhomes.rest.portal.ServiceModuleAppDTO;
@@ -14,12 +15,8 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RestController;
 
-import com.everhomes.acl.RolePrivilegeService;
-import com.everhomes.constants.ErrorCodes;
-import com.everhomes.controller.ControllerBase;
-import com.everhomes.discover.RestDoc;
-import com.everhomes.discover.RestReturn;
-import com.everhomes.rest.RestResponse;
+import javax.validation.Valid;
+import java.util.List;
 
 @RestDoc(value = "module controller", site = "core")
 @RestController
@@ -290,5 +287,55 @@ public class ModuleController extends ControllerBase {
         return response;
     }
 
+    /**
+     * <b>URL: /module/distributeServiceModuleAppAuthorization</b>
+     * 分配应用园区管理权
+     */
+    @RequestMapping("distributeServiceModuleAppAuthorization")
+    @RestReturn(value = String.class)
+    public RestResponse distributeServiceModuleAppAuthorization(@Valid DistributeServiceModuleAppAuthorizationCommand cmd) {
+        RestResponse response =  new RestResponse();
+        response.setErrorCode(ErrorCodes.SUCCESS);
+        response.setErrorDescription("OK");
+        return response;
+    }
 
+    /**
+     * <b>URL: /module/listProjectIdsByAppIdAndOrganizationId</b>
+     * 按应用和公司查询园区
+     */
+    @RequestMapping("listProjectIdsByAppIdAndOrganizationId")
+    @RestReturn(value = Long.class, collection = true)
+    public RestResponse listProjectIdsByAppIdAndOrganizationId(@Valid ListProjectIdsByAppIdAndOrganizationIdCommand cmd) {
+        RestResponse response =  new RestResponse();
+        response.setErrorCode(ErrorCodes.SUCCESS);
+        response.setErrorDescription("OK");
+        return response;
+    }
+
+    /**
+     * <b>URL: /module/listAppIdOfOrgId</b>
+     * 按公司查询应用
+     */
+    @RequestMapping("listAppIdOfOrgId")
+    @RestReturn(value = ServiceModuleAppDTO.class, collection = true)
+    public RestResponse listAppIdOfOrgId(@Valid ListProjectIdsByAppIdAndOrganizationIdCommand cmd) {
+        RestResponse response =  new RestResponse();
+        response.setErrorCode(ErrorCodes.SUCCESS);
+        response.setErrorDescription("OK");
+        return response;
+    }
+
+    /**
+     * <b>URL: /module/listCommunityRelationOfOrgId</b>
+     * 列出公司管理的所有园区
+     */
+    @RequestMapping("listCommunityRelationOfOrgId")
+    @RestReturn(value = ProjectDTO.class, collection = true)
+    public RestResponse listCommunityRelationOfOrgId(@Valid ListProjectIdsByAppIdAndOrganizationIdCommand cmd) {
+        RestResponse response =  new RestResponse();
+        response.setErrorCode(ErrorCodes.SUCCESS);
+        response.setErrorDescription("OK");
+        return response;
+    }
 }
