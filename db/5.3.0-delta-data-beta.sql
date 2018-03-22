@@ -20,6 +20,10 @@ delete from `eh_portal_version_users`;
 
 /*
 
+-- offline  by jiarui  {home.url}换成域名 这里需要换成部署环境的域名信息 如：core.zuolin.com
+-- 物业巡检和品质核查的分别有两条insert语句，分别同时执行
+-- offline  by jiarui
+
 -- 增加大版本，版本id取域空间id
 INSERT INTO `eh_portal_versions` (`id`, `namespace_id`, `parent_id`, `date_version`, `big_version`, `minor_version`, `create_time`, `sync_time`, `publish_time`, `status`)
 SELECT id, id, NULL, '20180227', '1', '0', NOW(), NOW(), NULL, '2' from eh_namespaces;
@@ -91,3 +95,22 @@ WHERE
  4)/pmtask/syncFromDb
  5)/pmtask/syncTaskStatistics
 */
+
+-- 12、以下按照顺序执行
+
+-- flush redis    清空掉redis
+
+-- 同步以下接口 （执行完sql之后）
+
+-- /equipment/syncStandardToEqiupmentPlan
+
+-- /equipment/syncEquipmentStandardIndex
+
+-- /equipment/syncEquipmentStandardMapIndex
+
+-- /equipment/syncEquipmentPlansIndex
+
+-- /equipment/syncEquipmentTasksIndex
+
+-- syncStandardToEqiupmentPlan 同步如果发生异常 eh_equipment_inspection_plans    eh_equipment_inspection_equipment_plan_map eh_equipment_inspection_plan_group_map 清空重新同步
+-- 执行脚本物业巡检离线的脚本equipment-inspection改成equipmentInspection，放到nar下面  品质核查的qualityInspection
