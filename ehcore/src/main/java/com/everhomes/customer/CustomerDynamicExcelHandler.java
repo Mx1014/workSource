@@ -628,7 +628,7 @@ public class CustomerDynamicExcelHandler implements DynamicExcelHandler {
                                     buildingName = column.getValue();
                                     Building building = communityProvider.findBuildingByCommunityIdAndName(communityId, column.getValue());
                                     if(building != null) {
-                                        entryInfo.setBuildingId(building.getId());
+                                        column.setValue(building.getId().toString());
                                     }
                                 }
                                 try {
