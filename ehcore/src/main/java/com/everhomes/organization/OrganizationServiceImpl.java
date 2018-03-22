@@ -12479,16 +12479,17 @@ public class OrganizationServiceImpl implements OrganizationService {
 
     @Override
     public Long getDepartmentByDetailIdAndOrgId(Long detailId, Long orgId) {
+        Organization org = checkOrganization(orgId);
         List<String> groupTypes = new ArrayList<>();
         groupTypes.add(OrganizationGroupType.DEPARTMENT.getCode());
         groupTypes.add(OrganizationGroupType.DIRECT_UNDER_ENTERPRISE.getCode());
-        List<OrganizationMember> members = organizationProvider.listOrganizationMembersByDetailIdAndOrgId(detailId, orgId, groupTypes);
+        List<OrganizationMember> members = organizationProvider.listOrganizationMembersByDetailIdAndPath(detailId, org.getPath(), groupTypes);
         if(members != null && members.size() > 0){
             return members.get(0).getOrganizationId();
         }else{
             groupTypes.clear();
             groupTypes.add(OrganizationGroupType.ENTERPRISE.getCode());
-            List<OrganizationMember> member_enterprise = organizationProvider.listOrganizationMembersByDetailIdAndOrgId(detailId, orgId, groupTypes);
+            List<OrganizationMember> member_enterprise = organizationProvider.listOrganizationMembersByDetailIdAndPath(detailId, org.getPath(), groupTypes);
             if(member_enterprise != null && member_enterprise.size() > 0){
                 return member_enterprise.get(0).getOrganizationId();
             }
