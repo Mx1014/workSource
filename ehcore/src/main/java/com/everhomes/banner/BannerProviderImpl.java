@@ -438,17 +438,22 @@ public class BannerProviderImpl implements BannerProvider {
         if (communityId != null && communityId != 0) {
             query.addConditions(t.SCOPE_ID.eq(communityId));
         }
-        if (locator.getAnchor() != null) {
-            query.addConditions(t.ID.le(locator.getAnchor()));
-        }
+
+        query.addOrderBy(t.STATUS, t.ORDER);
+        query.addOrderBy(t.ID.desc());
+
         if (pageSize > 0) {
-            query.addLimit(pageSize + 1);
+            if (locator.getAnchor() != null) {
+                query.addLimit(locator.getAnchor().intValue(), pageSize + 1);
+            } else {
+                query.addLimit(pageSize + 1);
+            }
         }
-        query.addOrderBy(t.STATUS, t.ORDER, t.CREATE_TIME);
 
         List<Banner> list = query.fetchInto(Banner.class);
         if (list.size() > pageSize && pageSize > 0) {
-            locator.setAnchor(list.get(list.size() - 1).getId());
+            long anchor = locator.getAnchor() != null ? locator.getAnchor() : 0;
+            locator.setAnchor(anchor + pageSize);
             list.remove(list.size() - 1);
         } else {
             locator.setAnchor(null);
