@@ -8,6 +8,7 @@ import com.everhomes.equipment.EquipmentInspectionStandards;
 import com.everhomes.listing.CrossShardListingLocator;
 import com.everhomes.naming.NameMapper;
 import com.everhomes.rest.warehouse.*;
+import com.everhomes.search.WarehouseStockSearcher;
 import com.everhomes.sequence.SequenceProvider;
 import com.everhomes.server.schema.Tables;
 import com.everhomes.server.schema.tables.*;
@@ -65,6 +66,8 @@ public class WarehouseProviderImpl implements WarehouseProvider {
     private ShardingProvider shardingProvider;
     @Autowired
     private UserProvider userProvider;
+    @Autowired
+    private WarehouseStockSearcher warehouseStockSearcher;
 
     @Override
     public void creatWarehouse(Warehouses warehouse) {
@@ -877,9 +880,16 @@ public class WarehouseProviderImpl implements WarehouseProvider {
     @Override
     public void deleteWarehouseStocks(Long id) {
         DSLContext context = this.dbProvider.getDslContext(AccessSpec.readWrite());
-        context.delete(Tables.EH_WAREHOUSE_STOCKS)
+        List<Long> fetch = context.select(Tables.EH_WAREHOUSE_STOCKS.ID)
+                .from(Tables.EH_WAREHOUSE_STOCKS)
                 .where(Tables.EH_WAREHOUSE_STOCKS.WAREHOUSE_ID.eq(id))
+                .fetch(Tables.EH_WAREHOUSE_STOCKS.ID);
+        context.delete(Tables.EH_WAREHOUSE_STOCKS)
+                .where(Tables.EH_WAREHOUSE_STOCKS.ID.in(fetch))
                 .execute();
+        for(Long stockId : fetch){
+            warehouseStockSearcher.deleteById(stockId);
+        }
     }
 
     @Override
@@ -1201,7 +1211,7 @@ public class WarehouseProviderImpl implements WarehouseProvider {
     public void creatWarehouseRequestMaterial(WarehouseRequestMaterials requestMaterial) {
         long id = this.sequenceProvider.getNextSequence(NameMapper.getSequenceDomainFromTablePojo(EhWarehouseRequestMaterials.class));
         requestMaterial.setId(id);
-        //这里toString，会报错，requestId不能进入json
+        //这里toString，会报错，requestId
 //        LOGGER.info("creatWarehouseRequestMaterial: " + requestMaterial);
 
         DSLContext context = this.dbProvider.getDslContext(AccessSpec.readWriteWith(EhWarehouseRequestMaterials.class, id));

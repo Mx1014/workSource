@@ -34,7 +34,7 @@ public interface UserService {
     UserLogin verifyAndLogon(VerifyAndLogonCommand cmd);
     UserLogin verifyAndLogonByIdentifier(VerifyAndLogonByIdentifierCommand cmd);
     
-    User logonDryrun(String userIdentifierToken, String password);
+    User logonDryrun(Integer namespaceId, String userIdentifierToken, String password);
     UserLogin logon(int namespaceId, Integer regionCode, String userIdentifierToken, String password, String deviceIdentifier, String pusherIdentify);
     UserLogin logonByToken(LoginToken loginToken);
     UserLogin findLoginByToken(LoginToken loginToken);

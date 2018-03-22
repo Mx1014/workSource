@@ -116,4 +116,4 @@ WHERE
 -- /equipment/syncEquipmentTasksIndex
 
 -- syncStandardToEqiupmentPlan 同步如果发生异常 eh_equipment_inspection_plans    eh_equipment_inspection_equipment_plan_map eh_equipment_inspection_plan_group_map 清空重新同步
--- 执行脚本物业巡检离线的脚本equipment-inspection改成equipmentInspection，放到nar下面
+-- 执行脚本物业巡检离线的脚本equipment-inspection改成equipmentInspection，放到nar下面  品质核查的qualityInspection

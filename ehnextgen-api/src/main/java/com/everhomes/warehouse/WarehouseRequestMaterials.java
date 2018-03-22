@@ -9,16 +9,6 @@ import com.everhomes.util.StringHelper;
 public class WarehouseRequestMaterials extends EhWarehouseRequestMaterials {
     private static final long serialVersionUID = 3757792319392563177L;
 
-    private Long requestId;
-
-    public Long getRequestId() {
-        return requestId;
-    }
-
-
-    public void setRequestId(Long requestId) {
-        this.requestId = requestId;
-    }
 
     @Override
     public String toString() {

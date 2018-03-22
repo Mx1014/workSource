@@ -1087,7 +1087,8 @@ public class PayServiceImpl implements PayService, ApplicationListener<ContextRe
         orderCmd.setPayeeUserId(paymentUser.getPaymentUserId());
         orderCmd.setSourceType(SourceType.MOBILE.getCode());
         orderCmd.setOrderType(com.everhomes.pay.order.OrderType.WITHDRAW.getCode());
-        orderCmd.setValidationType(ValidationType.NO_VERIFY.getCode());
+        // 由于支付系统传该值时有BUG，导致报银行卡没加密错误，而支付系统不好更新，故先暂时把该行注释掉来规避一下 by lqs 20180109
+        //orderCmd.setValidationType(ValidationType.NO_VERIFY.getCode());
         orderCmd.setBackUrl(backUrl);
         orderCmd.setCommitFlag(PaymentCommitFlag.YES.getCode());
         orderCmd.setPaymentType(PaymentType.WITHDRAW_AUTO.getCode());
@@ -1104,7 +1105,11 @@ public class PayServiceImpl implements PayService, ApplicationListener<ContextRe
                 orderCmd, 
                 CreateOrderRestResponse.class);     
         
-        if(CreateOrderRestResponse.isSuccess(createOrderResp)){
+        // 由于从支付系统里回来的CreateOrderRestResponse有可能没有errorScope，故不能直接使用CreateOrderRestResponse.isSuccess()来判断，
+        // CreateOrderRestResponse.isSuccess()里会对errorScope进行比较 by lqs 20180109
+        //if(CreateOrderRestResponse.isSuccess(createOrderResp)){
+        if(createOrderResp != null && createOrderResp.getErrorCode() != null 
+                && (createOrderResp.getErrorCode().intValue() == 200 || createOrderResp.getErrorCode().intValue() == 201)) {
             Long serviceConfigId = 0L; // 提现时不分具体业务，故没有此ID信息
             OrderCommandResponse  orderCommandResponse = createOrderResp.getResponse();
             saveOrderRecord(orderCommandResponse, orderNumber, orderType,  serviceConfigId, com.everhomes.pay.order.OrderType.PURCHACE.getCode());

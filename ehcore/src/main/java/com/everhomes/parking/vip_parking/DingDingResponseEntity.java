@@ -14,6 +14,24 @@ public class DingDingResponseEntity {
     private String battery;
     private String LockStatus;
     private String CarStatus;
+    private String connectResp;
+    private String errMessage;
+
+    public String getErrMessage() {
+        return errMessage;
+    }
+
+    public void setErrMessage(String errMessage) {
+        this.errMessage = errMessage;
+    }
+
+    public String getConnectResp() {
+        return connectResp;
+    }
+
+    public void setConnectResp(String connectResp) {
+        this.connectResp = connectResp;
+    }
 
     public String getOperTime() {
         return OperTime;

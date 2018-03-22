@@ -18,7 +18,8 @@ import org.springframework.stereotype.Service;
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
 import java.io.BufferedReader;
-import java.io.PrintWriter;
+import java.io.OutputStream;
+import java.nio.charset.Charset;
 import java.util.*;
 import java.util.stream.Collectors;
 
@@ -55,7 +56,7 @@ public class SmsServiceImpl implements SmsService {
     public void smsReport(String handlerName, HttpServletRequest request, HttpServletResponse response) {
         SmsHandler handler = handlers.get(handlerName);
         try (BufferedReader reader = request.getReader();
-             PrintWriter writer = response.getWriter()) {
+             OutputStream writer = response.getOutputStream()) {
 
             String line;
             StringBuilder body = new StringBuilder();
@@ -75,14 +76,13 @@ public class SmsServiceImpl implements SmsService {
                     doReportDTO(handlerName, reportRequest, report);
                 }
                 if (report.getResponseBody() != null) {
-                    writer.write(report.getResponseBody());
+                    writer.write(report.getResponseBody().getBytes(Charset.forName("UTF-8")));
                 }
             } else {
                 LOGGER.warn("sms report parse error handlerName = {}, reportBody = {}", handlerName, body.toString());
             }
         } catch (Exception e) {
-            LOGGER.error("sms report error handlerName = {}", handlerName);
-            LOGGER.error("sms report error", e);
+            LOGGER.error("sms report error handlerName = " + handlerName, e);
         }
     }
 

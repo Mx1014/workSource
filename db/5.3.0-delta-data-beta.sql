@@ -1,6 +1,11 @@
 
 -- 2、根据实际域名更新eh_domains表
 
+-- offline  by jiarui  {home.url}换成域名 这里需要换成部署环境的域名信息 如：core.zuolin.com
+-- 物业巡检和品质核查的分别有两条insert语句，分别同时执行
+-- offline  by jiarui
+
+
 -- 3、清理老数据
 /*
 
@@ -56,3 +61,57 @@ SELECT @appid := @appid + 1, namespace_id, namespace_id + 100,  `active_app_id`,
 -- /yellowPage/syncServiceAllianceApplicationRecords
 -- /yellowPage/syncSARequestInfo
 -- /officecubicle/dataMigration
+
+/*9、
+1)/pmtask/syncCategories
+2) 备份eh_pm_tasks表
+ 3)UPDATE eh_pm_tasks
+        LEFT JOIN
+    (SELECT
+       distinct (a.id) as aid,b.id as bid,b.owner_id as owner_id
+    FROM
+        eh_categories a, eh_categories b
+    WHERE
+        a.path = b.path ) c ON eh_pm_tasks.task_category_id = c.aid
+        AND eh_pm_tasks.owner_id = c.owner_id
+SET
+    eh_pm_tasks.task_category_id = c.bid
+WHERE
+    eh_pm_tasks.task_category_id!=0;
+
+UPDATE eh_pm_tasks
+        RIGHT JOIN
+    (SELECT
+       distinct (a.id) as aid,b.id as bid,b.owner_id as owner_id
+    FROM
+        eh_categories a, eh_categories b
+    WHERE
+        a.path = b.path ) c ON eh_pm_tasks.category_id = c.aid
+        AND eh_pm_tasks.owner_id = c.owner_id
+SET
+    eh_pm_tasks.category_id = c.bid
+WHERE
+    eh_pm_tasks.category_id!=0;
+
+ 4)/pmtask/syncFromDb
+ 5)/pmtask/syncTaskStatistics
+*/
+
+-- 12、以下按照顺序执行
+
+-- flush redis    清空掉redis
+
+-- 同步以下接口 （执行完sql之后）
+
+-- /equipment/syncStandardToEqiupmentPlan
+
+-- /equipment/syncEquipmentStandardIndex
+
+-- /equipment/syncEquipmentStandardMapIndex
+
+-- /equipment/syncEquipmentPlansIndex
+
+-- /equipment/syncEquipmentTasksIndex
+
+-- syncStandardToEqiupmentPlan 同步如果发生异常 eh_equipment_inspection_plans    eh_equipment_inspection_equipment_plan_map eh_equipment_inspection_plan_group_map 清空重新同步
+-- 执行脚本物业巡检离线的脚本equipment-inspection改成equipmentInspection，放到nar下面  品质核查的qualityInspection
