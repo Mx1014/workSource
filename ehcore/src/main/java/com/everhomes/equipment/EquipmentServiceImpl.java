@@ -5709,6 +5709,7 @@ private void checkUserPrivilege(Long orgId, Long privilegeId, Long communityId) 
 					relations.setEquipmentId(equipment.getId());
 					relations.setLocation(equipment.getLocation());
 					relations.setQrCodeFlag(equipment.getQrCodeFlag());
+					relations.setQrCodeToken(equipment.getQrCodeToken());
 					relations.setLatitude(equipment.getLatitude());
 					relations.setLongitude(equipment.getLongitude());
 					relations.setVerifyDistance(configProvider.getIntValue("equipment.verify.distance", 100));
