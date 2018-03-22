@@ -1767,3 +1767,6 @@ ALTER TABLE  `eh_warehouse_suppliers` ADD COLUMN  `community_id` BIGINT COMMENT 
 
 -- 合同增加修改时间 by xiongying 2018/03/21
 ALTER TABLE  `eh_contracts` ADD COLUMN  `update_time` DATETIME;
+
+-- 工作流修改字段长度    add by xq.tian  2018/03/09
+ALTER TABLE eh_flow_actions MODIFY COLUMN render_text TEXT COMMENT 'the content for this message that have variables';
