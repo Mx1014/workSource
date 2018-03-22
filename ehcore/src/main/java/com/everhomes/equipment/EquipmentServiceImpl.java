@@ -4776,14 +4776,13 @@ private void checkUserPrivilege(Long orgId, Long privilegeId, Long communityId) 
 		return new Timestamp(todayStart.getTime().getTime());
 	}
 
-	private Timestamp getDayEnd(Calendar cal, int period) {
+	private Timestamp getDayEnd(Calendar todayEnd, int period) {
 		/*cal.add(Calendar.DATE, period);
 		cal.set(Calendar.HOUR_OF_DAY, 23);
 		cal.set(Calendar.SECOND, 59);
 		cal.set(Calendar.MINUTE, 59);
 		cal.set(Calendar.MILLISECOND, 999);
 		return new Timestamp(cal.getTimeInMillis());*/
-		Calendar todayEnd = Calendar.getInstance();
 		todayEnd.set(Calendar.HOUR_OF_DAY, 23);
 		todayEnd.set(Calendar.MINUTE, 59);
 		todayEnd.set(Calendar.SECOND, 59);
@@ -5704,20 +5703,20 @@ private void checkUserPrivilege(Long orgId, Long privilegeId, Long communityId) 
 				EquipmentInspectionStandards standard = equipmentProvider.findStandardById(map.getStandardId());
 
 				EquipmentStandardRelationDTO relations = new EquipmentStandardRelationDTO();
-				List<EquipmentStandardMap> equipmentStandardMaps = new ArrayList<>();
 				//根据id查询计划的详情巡检对象栏  只需要如下几个字段
 				if (equipment != null) {
 					relations.setEquipmentName(equipment.getName());
 					relations.setEquipmentId(equipment.getId());
 					relations.setLocation(equipment.getLocation());
 					relations.setQrCodeFlag(equipment.getQrCodeFlag());
+					relations.setQrCodeToken(equipment.getQrCodeToken());
 					relations.setLatitude(equipment.getLatitude());
 					relations.setLongitude(equipment.getLongitude());
 					relations.setVerifyDistance(configProvider.getIntValue("equipment.verify.distance", 100));
 					relations.setSequenceNo(equipment.getSequenceNo());
-					equipmentStandardMaps = equipmentProvider.
-							findEquipmentStandardMap(standard.getId(), equipment.getId(),
-									InspectionStandardMapTargetType.EQUIPMENT.getCode());
+//					equipmentStandardMaps = equipmentProvider.
+//							findEquipmentStandardMap(standard.getId(), equipment.getId(),
+//									InspectionStandardMapTargetType.EQUIPMENT.getCode());
 				}
 				if (standard != null) {
 					relations.setStandardName(standard.getName());
@@ -5727,10 +5726,6 @@ private void checkUserPrivilege(Long orgId, Long privilegeId, Long communityId) 
 
 				relations.setOrder(map.getDefaultOrder());
 				relations.setPlanId(planId);
-
-//				if (equipmentStandardMaps != null && equipmentStandardMaps.size() > 0) {
-//					relations.setId(equipmentStandardMaps.get(0).getId());
-//				}
 				relations.setId(map.getId());
 				relationDTOS.add(relations);
 			}
