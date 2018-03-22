@@ -126,8 +126,10 @@ public class ContractFlowModuleListener implements FlowModuleListener {
         List<ContractBuildingMapping> mappings = contractBuildingMappingProvider.listByContract(contract.getId());
         mappings.forEach(mapping -> {
             CommunityAddressMapping addressMapping = propertyMgrProvider.findAddressMappingByAddressId(mapping.getAddressId());
-            addressMapping.setLivingStatus(livingStatus);
-            propertyMgrProvider.updateOrganizationAddressMapping(addressMapping);
+            if(!AddressMappingStatus.SALED.equals(AddressMappingStatus.fromCode(addressMapping.getLivingStatus()))) {
+                addressMapping.setLivingStatus(livingStatus);
+                propertyMgrProvider.updateOrganizationAddressMapping(addressMapping);
+            }
         });
     }
 
