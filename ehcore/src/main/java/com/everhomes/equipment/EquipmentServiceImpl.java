@@ -4776,14 +4776,13 @@ private void checkUserPrivilege(Long orgId, Long privilegeId, Long communityId) 
 		return new Timestamp(todayStart.getTime().getTime());
 	}
 
-	private Timestamp getDayEnd(Calendar cal, int period) {
+	private Timestamp getDayEnd(Calendar todayEnd, int period) {
 		/*cal.add(Calendar.DATE, period);
 		cal.set(Calendar.HOUR_OF_DAY, 23);
 		cal.set(Calendar.SECOND, 59);
 		cal.set(Calendar.MINUTE, 59);
 		cal.set(Calendar.MILLISECOND, 999);
 		return new Timestamp(cal.getTimeInMillis());*/
-		Calendar todayEnd = Calendar.getInstance();
 		todayEnd.set(Calendar.HOUR_OF_DAY, 23);
 		todayEnd.set(Calendar.MINUTE, 59);
 		todayEnd.set(Calendar.SECOND, 59);
