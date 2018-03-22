@@ -84,4 +84,17 @@ public class DingDingParkingLockHandler {
         return null;
     }
 
+    public boolean connParkingSpace(String lockId) {
+        String url = configProvider.getValue("parking.dingding.url", "");
+        String hubMac = configProvider.getValue("parking.dingding.hubMac", "");
+
+        String json = Utils.get(String.format(url + CONN_LOCK, hubMac, lockId), null);
+
+        DingDingResponseEntity entity = JSONObject.parseObject(json, DingDingResponseEntity.class);
+
+        if (null != entity && entity.getConnectResp().contains("oper disover Service")) {
+            return true;
+        }
+        return false;
+    }
 }
