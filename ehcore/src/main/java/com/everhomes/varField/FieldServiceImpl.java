@@ -937,12 +937,12 @@ public class FieldServiceImpl implements FieldService {
             fieldName += "Name";
         }
 
-        if(fieldName.equals("addressId")){
-            fieldName = "addressName";
-        }
-        if(fieldName.equals("buildingId")){
-            fieldName = "buildingName";
-        }
+//        if(fieldName.equals("addressId")){
+//            fieldName = "addressName";
+//        }
+//        if(fieldName.equals("buildingId")){
+//            fieldName = "buildingName";
+//        }
         try {
             //获得get方法并使用获得field的值
             LOGGER.debug("field: {}", StringHelper.toJsonString(field));

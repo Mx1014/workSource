@@ -65,14 +65,14 @@ SET  @id = (SELECT  MAX(id) FROM eh_version_realm);
 INSERT INTO `eh_version_realm` VALUES (@id:=@id+1, 'qualityInspection', NULL, NOW(), '0');
 
 SET  @vId = (SELECT  MAX(id) FROM eh_version_urls);
-INSERT INTO `eh_version_urls` VALUES (@vId:=@vId+1, @id, '1.0.0', 'http://{home.url}/nar/qualityInspect/offline/qualityInspect-1-0-0.zip', 'http://{home.url}/nar/qualityInspect/offline/qualityInspect-1-0-0.zip', '品质核查离线', '0', '品质核查', NOW(), NULL, '0');
+INSERT INTO `eh_version_urls` VALUES (@vId:=@vId+1, @id, '1.0.0', 'http://{home.url}/nar/qualityInspection/offline/qualityInspection-1-0-0.zip', 'http://{home.url}/nar/qualityInspection/offline/qualityInspection-1-0-0.zip', '品质核查离线', '0', '品质核查', NOW(), NULL, '0');
 
 UPDATE eh_launch_pad_items
-SET action_data = '{\"realm\":\"qualityInspection\",\"entryUrl\":\"http://{home.url}/nar/qualityInspect/build/index.html?hideNavigationBar=1#/home#sign_suffix\"}'
+SET action_data = '{\"realm\":\"qualityInspection\",\"entryUrl\":\"http://{home.url}/nar/qualityInspection/build/index.html?hideNavigationBar=1#/home#sign_suffix\"}'
 WHERE item_label LIKE '%品质%';
 
 UPDATE eh_service_module_apps
-SET instance_config = '{\"realm\":\"qualityInspection\",\"entryUrl\":\"http://{home.url}/nar/qualityInspect/build/index.html?hideNavigationBar=1#/home#sign_suffix\"}'
+SET instance_config = '{\"realm\":\"qualityInspection\",\"entryUrl\":\"http://{home.url}/nar/qualityInspection/build/index.html?hideNavigationBar=1#/home#sign_suffix\"}'
 WHERE module_id = 20600;
 
 UPDATE eh_launch_pad_items
@@ -432,8 +432,8 @@ DELETE FROM eh_service_module_privileges WHERE module_id = 10600;
 
 -- 薪酬结构基础数据
 
-INSERT INTO `eh_salary_entity_categories` (`id`, `owner_type`, `owner_id`, `namespace_id`, `category_name`, `description`, `custom_flag`, `custom_type`, `status`, `creator_uid`, `create_time`, `update_time`, `operator_uid`) VALUES('1',NULL,NULL,NULL,'固定工资',NULL,'1','1','2','1','2018-01-19 15:21:33','2018-01-19 15:21:37','1');
-INSERT INTO `eh_salary_entity_categories` (`id`, `owner_type`, `owner_id`, `namespace_id`, `category_name`, `description`, `custom_flag`, `custom_type`, `status`, `creator_uid`, `create_time`, `update_time`, `operator_uid`) VALUES('2',NULL,NULL,NULL,'浮动工资',NULL,'1','1','2','1','2018-01-19 15:23:19','2018-01-19 15:23:21','1');
+INSERT INTO `eh_salary_entity_categories` (`id`, `owner_type`, `owner_id`, `namespace_id`, `category_name`, `description`, `custom_flag`, `custom_type`, `status`, `creator_uid`, `create_time`, `update_time`, `operator_uid`) VALUES('1',NULL,NULL,NULL,'固定工资',NULL,'1','0','2','1','2018-01-19 15:21:33','2018-01-19 15:21:37','1');
+INSERT INTO `eh_salary_entity_categories` (`id`, `owner_type`, `owner_id`, `namespace_id`, `category_name`, `description`, `custom_flag`, `custom_type`, `status`, `creator_uid`, `create_time`, `update_time`, `operator_uid`) VALUES('2',NULL,NULL,NULL,'浮动工资',NULL,'1','0','2','1','2018-01-19 15:23:19','2018-01-19 15:23:21','1');
 INSERT INTO `eh_salary_entity_categories` (`id`, `owner_type`, `owner_id`, `namespace_id`, `category_name`, `description`, `custom_flag`, `custom_type`, `status`, `creator_uid`, `create_time`, `update_time`, `operator_uid`) VALUES('3',NULL,NULL,NULL,'考勤工资','在「津贴设置」中自动同步考勤数据，在「出勤扣款」中设置方案','0',NULL,'2','1','2018-01-19 15:23:19','2018-01-19 15:23:19','1');
 INSERT INTO `eh_salary_entity_categories` (`id`, `owner_type`, `owner_id`, `namespace_id`, `category_name`, `description`, `custom_flag`, `custom_type`, `status`, `creator_uid`, `create_time`, `update_time`, `operator_uid`) VALUES('4',NULL,NULL,NULL,'社保公积金代扣','自动同步社保数据','0',NULL,'2','1','2018-01-19 15:23:19','2018-01-19 15:23:19','1');
 INSERT INTO `eh_salary_entity_categories` (`id`, `owner_type`, `owner_id`, `namespace_id`, `category_name`, `description`, `custom_flag`, `custom_type`, `status`, `creator_uid`, `create_time`, `update_time`, `operator_uid`) VALUES('5',NULL,NULL,NULL,'个税代扣','根据国家法律自动扣减个税','0',NULL,'2','1','2018-01-19 15:23:19','2018-01-19 15:23:19','1');
@@ -1236,3 +1236,12 @@ update eh_service_modules set module_control_type = 'community_control' where id
 delete from eh_reflection_service_module_apps where module_id in(30500,31000,32000);
 delete from eh_service_module_apps where module_id in(30500,31000,32000);
 delete from eh_service_modules where id in(30500,31000,32000);
+
+
+-- 增加仓库错误码 by wentian
+set @eh_locale_strings_id = (select max(id) from eh_locale_strings);
+INSERT INTO `eh_locale_strings` (`id`, `scope`, `code`, `locale`, `text`) VALUES ((@eh_locale_strings_id:=@eh_locale_strings_id+1), 'warehouse', '10026', 'zh_CN', '改仓库正在运行中，不能删除');
+
+-- fix 24787
+update eh_var_field_groups set title = '客户信息' where id = 1;
+update eh_var_field_group_scopes set group_display_name = '客户信息' where group_id = 1;
