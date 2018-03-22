@@ -21,6 +21,9 @@ public class RemindArchivesEmployeeCommand {
 
     private Integer remindTime;
 
+    @ItemType(Long.class)
+    private List<Long> remindUserIds;
+
     @ItemType(String.class)
     private List<String> remindEmails;
 
@@ -49,6 +52,14 @@ public class RemindArchivesEmployeeCommand {
 
     public void setRemindTime(Integer remindTime) {
         this.remindTime = remindTime;
+    }
+
+    public List<Long> getRemindUserIds() {
+        return remindUserIds;
+    }
+
+    public void setRemindUserIds(List<Long> remindUserIds) {
+        this.remindUserIds = remindUserIds;
     }
 
     public List<String> getRemindEmails() {

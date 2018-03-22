@@ -40,6 +40,7 @@ import org.jooq.Condition;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.scheduling.annotation.Scheduled;
 import org.springframework.stereotype.Component;
 import org.springframework.transaction.TransactionStatus;
 import org.springframework.util.StringUtils;
@@ -1617,6 +1618,7 @@ public class ArchivesServiceImpl implements ArchivesService {
     }
 
     //  执行定时配置项
+    @Scheduled(cron = "0 0 4 * * ?")
     @Override
     public void executeArchivesConfiguration() {
         List<ArchivesConfigurations> configurations = archivesProvider.listArchivesConfigurations(ArchivesUtil.currentDate());
@@ -2589,7 +2591,21 @@ public class ArchivesServiceImpl implements ArchivesService {
         }
     }
 
-    //    @Scheduled(cron = "0 0 * * * ?")
+    public void sendArchivesNotification(){
+        // set the target email
+        String ryan = "nan.rong@zuolin.com";
+        Long ryanId = 309154L;
+
+    }
+
+    private void sendArchivesEmails(){
+
+    }
+
+    private void sendArchivesMessages(){}
+
+
+    /*//    @Scheduled(cron = "0 0 * * * ?")
     private void sendArchivesNotification() {
         //  1.读取当天 week
         Calendar c = Calendar.getInstance();
@@ -2608,7 +2624,7 @@ public class ArchivesServiceImpl implements ArchivesService {
     private void sendEmails(List<ArchivesNotifications> notifyLists) {
 
     }
-
+*/
     @Override
     public void syncArchivesDismissStatus() {
         /*List<ArchivesDismissEmployees> results = archivesProvider.listArchivesDismissEmployees(1, Integer.MAX_VALUE, null, null);

@@ -29,7 +29,7 @@ public class ArchivesConfigurationServiceImpl implements ArchivesConfigurationSe
         String triggerName = "ArchivesConfigurationTrigger-" + System.currentTimeMillis();
         String jobName = "ArchiveConfigurationName-" + System.currentTimeMillis();
         String cronExpression = "0 0 4 * * ?";
-        scheduleProvider.scheduleCronJob(triggerName, jobName, cronExpression, ArchivesConfigurationtJob.class, new HashMap());
+//        scheduleProvider.scheduleCronJob(triggerName, jobName, cronExpression, ArchivesConfigurationtJob.class, new HashMap());
     }
 
 
