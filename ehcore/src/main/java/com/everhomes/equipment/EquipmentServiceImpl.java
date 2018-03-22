@@ -5711,6 +5711,9 @@ private void checkUserPrivilege(Long orgId, Long privilegeId, Long communityId) 
 					relations.setEquipmentId(equipment.getId());
 					relations.setLocation(equipment.getLocation());
 					relations.setQrCodeFlag(equipment.getQrCodeFlag());
+					relations.setLatitude(equipment.getLatitude());
+					relations.setLongitude(equipment.getLongitude());
+					relations.setVerifyDistance(configProvider.getIntValue("equipment.verify.distance", 100));
 					relations.setSequenceNo(equipment.getSequenceNo());
 					equipmentStandardMaps = equipmentProvider.
 							findEquipmentStandardMap(standard.getId(), equipment.getId(),
@@ -5904,6 +5907,9 @@ private void checkUserPrivilege(Long orgId, Long privilegeId, Long communityId) 
 				if (equipment != null && standard != null) {
 					EquipmentStandardRelationDTO relationDTO = new EquipmentStandardRelationDTO();
 					relationDTO.setQrCodeFlag(equipment.getQrCodeFlag());
+					relationDTO.setLatitude(equipment.getLatitude());
+					relationDTO.setLongitude(equipment.getLongitude());
+					relationDTO.setVerifyDistance(configProvider.getIntValue("equipment.verify.distance", 100));
 					relationDTO.setLocation(equipment.getLocation());
 					relationDTO.setEquipmentName(equipment.getName());
 					relationDTO.setStandardId(standard.getId());
