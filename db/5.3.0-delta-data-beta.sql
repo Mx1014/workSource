@@ -1,6 +1,11 @@
 
 -- 2、根据实际域名更新eh_domains表
 
+-- offline  by jiarui  {home.url}换成域名 这里需要换成部署环境的域名信息 如：core.zuolin.com
+-- 物业巡检和品质核查的分别有两条insert语句，分别同时执行
+-- offline  by jiarui
+
+
 -- 3、清理老数据
 /*
 
@@ -19,10 +24,6 @@ delete from `eh_portal_version_users`;
 -- 4、刷新应用id
 
 /*
-
--- offline  by jiarui  {home.url}换成域名 这里需要换成部署环境的域名信息 如：core.zuolin.com
--- 物业巡检和品质核查的分别有两条insert语句，分别同时执行
--- offline  by jiarui
 
 -- 增加大版本，版本id取域空间id
 INSERT INTO `eh_portal_versions` (`id`, `namespace_id`, `parent_id`, `date_version`, `big_version`, `minor_version`, `create_time`, `sync_time`, `publish_time`, `status`)
