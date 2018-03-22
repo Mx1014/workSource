@@ -1236,3 +1236,8 @@ update eh_service_modules set module_control_type = 'community_control' where id
 delete from eh_reflection_service_module_apps where module_id in(30500,31000,32000);
 delete from eh_service_module_apps where module_id in(30500,31000,32000);
 delete from eh_service_modules where id in(30500,31000,32000);
+
+
+-- 增加仓库错误码 by wentian
+set @eh_locale_strings_id = (select max(id) from eh_locale_strings);
+INSERT INTO `eh_locale_strings` (`id`, `scope`, `code`, `locale`, `text`) VALUES ((@eh_locale_strings_id:=@eh_locale_strings_id+1), 'warehouse', '10026', 'zh_CN', '改仓库正在运行中，不能删除');
