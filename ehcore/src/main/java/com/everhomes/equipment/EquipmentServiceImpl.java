@@ -2014,7 +2014,8 @@ private void checkUserPrivilege(Long orgId, Long privilegeId, Long communityId) 
 			 if(contentUri != null && contentUri.length() > 0) {
 				 try{
 					 String url = contentServerService.parserUri(contentUri, EntityType.USER.getCode(), UserContext.current().getUser().getId());
-					 attachment.setContentUrl(convertAttachmentURL(url));
+					 //attachment.setContentUrl(convertAttachmentURL(url));
+					 attachment.setContentUrl(url);
 				 }catch(Exception e){
 					 LOGGER.error("Failed to parse attachment uri, logId=" + log.getId() + ", attachmentId=" + attachment.getId(), e);
 				 }
