@@ -54,7 +54,9 @@ import java.net.URLEncoder;
 import java.sql.Date;
 import java.sql.Timestamp;
 import java.text.SimpleDateFormat;
+import java.time.LocalDate;
 import java.time.LocalDateTime;
+import java.time.temporal.ChronoUnit;
 import java.util.*;
 import java.util.regex.Pattern;
 import java.util.stream.Collectors;
@@ -2596,13 +2598,14 @@ public class ArchivesServiceImpl implements ArchivesService {
         // time
         Date firstOfWeek = ArchivesUtil.currentDate();
         Date lastOfWeek = ArchivesUtil.plusDate(6);
+        Date previousYear = Date.valueOf(LocalDate.now().minus(1, ChronoUnit.YEARS));
         String employmentName = "";
         List<OrganizationMemberDetails> employmentMembers = organizationProvider.queryOrganizationMemberDetails(new ListingLocator(), 1023080L, (locator, query) -> {
             query.addConditions(Tables.EH_ORGANIZATION_MEMBER_DETAILS.EMPLOYEE_STATUS.ne(EmployeeStatus.DISMISSAL.getCode()));
             Condition con1 = Tables.EH_ORGANIZATION_MEMBER_DETAILS.EMPLOYMENT_TIME.between(firstOfWeek, lastOfWeek);
             con1 = con1.or(Tables.EH_ORGANIZATION_MEMBER_DETAILS.BIRTHDAY.between(firstOfWeek, lastOfWeek));
-            ();
-            query.addConditions());
+//            ();
+//            query.addConditions());
             return query;
         });
         if (employmentMembers != null) {
