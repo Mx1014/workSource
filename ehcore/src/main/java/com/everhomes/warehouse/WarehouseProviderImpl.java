@@ -599,6 +599,7 @@ public class WarehouseProviderImpl implements WarehouseProvider {
         query.addConditions(Tables.EH_WAREHOUSE_ORDERS.OWNER_TYPE.eq(ownerType));
         query.addConditions(Tables.EH_WAREHOUSE_ORDERS.OWNER_ID.eq(ownerId));
         query.addConditions(Tables.EH_WAREHOUSE_ORDERS.NAMESPACE_ID.eq(namespaceId));
+        query.addOrderBy(Tables.EH_WAREHOUSE_ORDERS.CREATE_TIME.desc());
         query.addLimit(pageAnchor.intValue(),pageSize);
         SimpleDateFormat sdf = new SimpleDateFormat("yyyy-MM-dd");
         query.fetch()
