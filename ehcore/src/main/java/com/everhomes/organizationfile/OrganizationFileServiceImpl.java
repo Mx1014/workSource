@@ -207,11 +207,12 @@ public class OrganizationFileServiceImpl implements OrganizationFileService {
 
         Community community = communityProvider.findCommunityById(cmd.getCommunityId());
         List<ProjectDTO> privilegeCommunities = new ArrayList<>();
-        if (community != null) {
+        if (cmd.getCommunityId()!=0 || community != null) {
             ProjectDTO dto = new ProjectDTO();
             dto.setProjectId(community.getId());
             privilegeCommunities.add(dto);
-        }else {
+        }
+        else {
             ListUserRelatedProjectByModuleCommand listProjectCmd = new ListUserRelatedProjectByModuleCommand();
             listProjectCmd.setOwnerType("EhOrganizations");
             listProjectCmd.setOwnerId(cmd.getCurrentPMId());
