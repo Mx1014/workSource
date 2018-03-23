@@ -317,6 +317,9 @@ public class Rentalv2ServiceImpl implements Rentalv2Service {
 				// set half day time intervals
 				setRentalRuleTimeIntervals(cmd.getResourceType(), RentalTimeIntervalOwnerType.RESOURCE_HALF_DAY.getCode(), rule.getSourceId(), cmd.getHalfDayTimeIntervals());
 
+				//创建资源时分配单元格
+				createResourceCells(cmd.getPriceRules());
+
 				createPriceRules(cmd.getResourceType(), PriceRuleType.RESOURCE, rule.getSourceId(), cmd.getPriceRules());
 
 				createPricePackages(cmd.getResourceType(), PriceRuleType.RESOURCE, rule.getSourceId(), cmd.getPricePackages());
@@ -430,7 +433,7 @@ public class Rentalv2ServiceImpl implements Rentalv2Service {
 		RentalDefaultRule rule = this.rentalv2Provider.getRentalDefaultRule(cmd.getOwnerType(), cmd.getOwnerId(),
 				cmd.getResourceType(), cmd.getResourceTypeId(), cmd.getSourceType(), cmd.getSourceId());
 
-		if(null == rule && RuleSourceType.DEFAULT.getCode().equals(cmd.getSourceType())){
+		if(null == rule){
 			addDefaultRule(cmd.getOwnerType(), cmd.getOwnerId(), cmd.getResourceType(), cmd.getResourceTypeId(),
 					cmd.getSourceType(), cmd.getSourceId());
 			rule = this.rentalv2Provider.getRentalDefaultRule(cmd.getOwnerType(), cmd.getOwnerId(),
@@ -2653,7 +2656,7 @@ public class Rentalv2ServiceImpl implements Rentalv2Service {
 		}}
 
 		//设置退款人姓名 联系方式
-		RentalResource rs = rentalv2Provider.getRentalSiteById(bill.getRentalResourceId());
+		RentalResource rs = rentalCommonService.getRentalResource(bill.getResourceType(),bill.getRentalResourceId());
 		if (rs.getOfflinePayeeUid()!=null){
 			OrganizationMember member = organizationProvider.findOrganizationMemberByOrgIdAndUId(rs.getOfflinePayeeUid(), rs.getOrganizationId());
 			if(null!=member){
@@ -2902,7 +2905,7 @@ public class Rentalv2ServiceImpl implements Rentalv2Service {
 			QueryDefaultRuleAdminResponse rule = queryDefaultRule(queryRuleCmd);
 
 			rs.setSiteNumbers(cmd.getSiteNumbers());
-			createResourceCells(rule, rs);
+			createResourceCells(rule.getPriceRules());
 			//先删除后添加, 创建单元格之后在重新添加一次价格，存cellBeginId和cellEndId
 			rentalv2PriceRuleProvider.deletePriceRuleByOwnerId(rule.getResourceType(), PriceRuleType.RESOURCE.getCode(), rs.getId());
 			createPriceRules(rule.getResourceType(), PriceRuleType.RESOURCE, rs.getId(), rule.getPriceRules());
@@ -6427,7 +6430,7 @@ public class Rentalv2ServiceImpl implements Rentalv2Service {
 		//单元格开始的时间为创建资源的时间
 		rule.setBeginDate(System.currentTimeMillis());
 		//先创建单元格，设置单元格开始id 和结束id
-		createResourceCells(rule, resource);
+		createResourceCells(rule.getPriceRules());
 
 		//添加资源规则
 		AddDefaultRuleAdminCommand addRuleCmd = ConvertHelper.convert(rule, AddDefaultRuleAdminCommand.class);
@@ -6436,10 +6439,10 @@ public class Rentalv2ServiceImpl implements Rentalv2Service {
 		addRule(addRuleCmd);
 	}
 
-	private void createResourceCells(QueryDefaultRuleAdminResponse rule, RentalResource resource) {
-		for (PriceRuleDTO priceRule : rule.getPriceRules()) {
+	private void createResourceCells(List<PriceRuleDTO> priceRules) {
+		for (PriceRuleDTO priceRule : priceRules) {
 
-			List<AddRentalSiteSingleSimpleRule> addSingleRules = createAddRuleParams(priceRule, rule, resource);
+			//List<AddRentalSiteSingleSimpleRule> addSingleRules = createAddRuleParams(priceRule, rule, resource);
 //			seqNum.set(0L);
 //			currentId.set(sequenceProvider.getCurrentSequence(NameMapper.getSequenceDomainFromTablePojo(EhRentalv2Cells.class)));
 			//TODO 预留1000000个id 以适应自增的结束时间 以后改为唯一标识不用id
@@ -7470,7 +7473,7 @@ public class Rentalv2ServiceImpl implements Rentalv2Service {
 			//设置新规则的时候就删除之前的旧单元格
 			this.rentalv2Provider.deleteRentalCellsByResourceId(rs.getResourceType(), rs.getId());
 
-			createResourceCells(queryRule, rs);
+			createResourceCells(queryRule.getPriceRules());
 			//先删除后添加, 创建单元格之后在重新添加一次价格，存cellBeginId和cellEndId
 			rentalv2PriceRuleProvider.deletePriceRuleByOwnerId(rs.getResourceType(), PriceRuleType.RESOURCE.getCode(), rs.getId());
 			createPriceRules(rs.getResourceType(), PriceRuleType.RESOURCE, rs.getId(), queryRule.getPriceRules());

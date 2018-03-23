@@ -1,5 +1,6 @@
 package com.everhomes.rentalv2;
 
+import java.math.BigDecimal;
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
@@ -88,6 +89,8 @@ public class Rentalv2FlowModuleListener implements FlowModuleListener {
 	private SmsProvider smsProvider;
 	@Autowired
 	private RentalCommonServiceImpl rentalCommonService;
+	@Autowired
+	private RentalOrderEmbeddedHandler rentalOrderEmbeddedHandler;
 
 	@Override
 	public FlowModuleInfo initModule() {
@@ -144,6 +147,9 @@ public class Rentalv2FlowModuleListener implements FlowModuleListener {
 							cancelOtherOrderFlag = true;
 						}
 						rentalv2Service.changeRentalOrderStatus(order, status, cancelOtherOrderFlag);
+						if (null != status && SiteBillStatus.PAYINGFINAL.getCode() == status &&
+								order.getPayTotalMoney().compareTo(BigDecimal.ZERO)==0)//免费资源 直接跳过付款步骤
+							rentalOrderEmbeddedHandler.onOrderSuccess(order);
 					}
 				}
 			}else if (FlowStepType.ABSORT_STEP.getCode().equals(stepType)){
