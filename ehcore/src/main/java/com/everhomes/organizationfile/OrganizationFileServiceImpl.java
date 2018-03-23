@@ -182,7 +182,7 @@ public class OrganizationFileServiceImpl implements OrganizationFileService {
 
     @Override
     public SearchOrganizationFileResponse searchOrganizationFileByCommunity(SearchOrganizationFileByCommunityCommand cmd) {
-    	if(cmd.getCurrentPMId()!=null && cmd.getAppId()!=null && configurationProvider.getBooleanValue("privilege.community.checkflag", true)){
+    	if(cmd.getCurrentPMId()!=null && cmd.getAppId()!=null && configurationProvider.getBooleanValue("privilege.community.checkflag", true) && cmd.getCurrentProjectId()!=0){
 			userPrivilegeMgr.checkUserPrivilege(UserContext.current().getUser().getId(), cmd.getCurrentPMId(), 4150041500L, cmd.getAppId(), null,cmd.getCurrentProjectId());//文件管理权限
 		}
         validate(cmd);
