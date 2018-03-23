@@ -736,6 +736,7 @@ public class WarehouseServiceImpl implements WarehouseService {
                 if (request != null) {
                     request.setDeliveryFlag(DeliveryFlag.YES.getCode());
                     request.setUpdateTime(current);
+                    request.setReviewResult(ReviewResult.QUALIFIED.getCode());
                     warehouseProvider.updateWarehouseRequest(request);
                 }
             }
@@ -1769,6 +1770,9 @@ public class WarehouseServiceImpl implements WarehouseService {
                 if (request != null) {
                     dto.setRequestUid(request.getRequestUid());
                     dto.setCreateTime(request.getCreateTime());
+                    if(request.getDeliveryFlag().byteValue() == DeliveryFlag.YES.getCode()){
+                        dto.setDeliveryTime(request.getUpdateTime());
+                    }
                     if (dto.getRequestUid() != null) {
                         List<OrganizationMember> members = organizationProvider.listOrganizationMembers(dto.getRequestUid());
                         if (members != null && members.size() > 0) {

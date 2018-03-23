@@ -2653,7 +2653,7 @@ public class Rentalv2ServiceImpl implements Rentalv2Service {
 		}}
 
 		//设置退款人姓名 联系方式
-		RentalResource rs = rentalv2Provider.getRentalSiteById(bill.getRentalResourceId());
+		RentalResource rs = rentalCommonService.getRentalResource(bill.getResourceType(),bill.getRentalResourceId());
 		if (rs.getOfflinePayeeUid()!=null){
 			OrganizationMember member = organizationProvider.findOrganizationMemberByOrgIdAndUId(rs.getOfflinePayeeUid(), rs.getOrganizationId());
 			if(null!=member){
