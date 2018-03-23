@@ -97,6 +97,18 @@ WHERE
  5)/pmtask/syncTaskStatistics
 */
 
+/* 搜索初始化脚本
+执行/db/search 下的文件：
+paymentApplication.sh
+contract.sh
+enterpriseCustomer.sh
+enterprise.sh
+并执行api：
+/org/syncIndex
+/contract/syncContracts
+/customer/syncEnterpriseCustomer
+/payment_application/syncIndex
+*/
 -- 12、以下按照顺序执行
 
 -- flush redis    清空掉redis

@@ -1505,10 +1505,15 @@ private void checkUserPrivilege(Long orgId, Long privilegeId, Long communityId) 
 	@Override
 	public void exportEquipments(SearchEquipmentsCommand cmd, HttpServletResponse response) {
 		List<EquipmentsDTO> dtos = null;
-		if(cmd.getEquipmentIds()!=null && cmd.getEquipmentIds().size()>0){
-			dtos = cmd.getEquipmentIds().stream().map((e) -> ConvertHelper.convert(equipmentProvider.findEquipmentById(e), EquipmentsDTO.class))
+		if (StringUtils.isNotEmpty(cmd.getEquipmentIds())) {
+			List<Long> equipmentIds = new ArrayList<>();
+			String[] ids = cmd.getEquipmentIds().split(",");
+			for (String id : ids) {
+				equipmentIds.add(Long.valueOf(id));
+			}
+			dtos = equipmentIds.stream().map((e) -> ConvertHelper.convert(equipmentProvider.findEquipmentById(e), EquipmentsDTO.class))
 					.collect(Collectors.toList());
-		}else {
+		} else {
 			SearchEquipmentsResponse equipments = equipmentSearcher.queryEquipments(cmd);
 			dtos = equipments.getEquipment();
 		}
@@ -4178,19 +4183,18 @@ private void checkUserPrivilege(Long orgId, Long privilegeId, Long communityId) 
 	}
 
 	@Override
-	public List<InspectionItemDTO> listParametersByStandardId(
-			ListParametersByStandardIdCommand cmd) {
+	public List<InspectionItemDTO> listParametersByStandardId(ListParametersByStandardIdCommand cmd) {
 		EquipmentInspectionStandards standard = verifyEquipmentStandard(cmd.getStandardId());
 
 		EquipmentInspectionTemplates template = equipmentProvider.findEquipmentInspectionTemplate(standard.getTemplateId(),
 				cmd.getOwnerId(), cmd.getOwnerType());
 		//解决之前的删除导致的任务查不到巡检template问题
-//		if(template == null || Status.INACTIVE.equals(Status.fromStatus(template.getStatus()))) {
 		if(template == null) {
-			throw RuntimeErrorException.errorWith(EquipmentServiceErrorCode.SCOPE,
-					EquipmentServiceErrorCode.ERROR_TEMPLATE_NOT_EXIST,
- 				"巡检项不存在");
-		}
+//			throw RuntimeErrorException.errorWith(EquipmentServiceErrorCode.SCOPE,
+//					EquipmentServiceErrorCode.ERROR_TEMPLATE_NOT_EXIST,
+// 				"巡检项不存在");
+            return null;
+        }
 		InspectionTemplateDTO dto = ConvertHelper.convert(template, InspectionTemplateDTO.class);
 
 		return  listTemplateItems(dto,cmd.getStandardId());
@@ -4776,14 +4780,13 @@ private void checkUserPrivilege(Long orgId, Long privilegeId, Long communityId) 
 		return new Timestamp(todayStart.getTime().getTime());
 	}
 
-	private Timestamp getDayEnd(Calendar cal, int period) {
+	private Timestamp getDayEnd(Calendar todayEnd, int period) {
 		/*cal.add(Calendar.DATE, period);
 		cal.set(Calendar.HOUR_OF_DAY, 23);
 		cal.set(Calendar.SECOND, 59);
 		cal.set(Calendar.MINUTE, 59);
 		cal.set(Calendar.MILLISECOND, 999);
 		return new Timestamp(cal.getTimeInMillis());*/
-		Calendar todayEnd = Calendar.getInstance();
 		todayEnd.set(Calendar.HOUR_OF_DAY, 23);
 		todayEnd.set(Calendar.MINUTE, 59);
 		todayEnd.set(Calendar.SECOND, 59);
@@ -5704,20 +5707,20 @@ private void checkUserPrivilege(Long orgId, Long privilegeId, Long communityId) 
 				EquipmentInspectionStandards standard = equipmentProvider.findStandardById(map.getStandardId());
 
 				EquipmentStandardRelationDTO relations = new EquipmentStandardRelationDTO();
-				List<EquipmentStandardMap> equipmentStandardMaps = new ArrayList<>();
 				//根据id查询计划的详情巡检对象栏  只需要如下几个字段
 				if (equipment != null) {
 					relations.setEquipmentName(equipment.getName());
 					relations.setEquipmentId(equipment.getId());
 					relations.setLocation(equipment.getLocation());
 					relations.setQrCodeFlag(equipment.getQrCodeFlag());
+					relations.setQrCodeToken(equipment.getQrCodeToken());
 					relations.setLatitude(equipment.getLatitude());
 					relations.setLongitude(equipment.getLongitude());
 					relations.setVerifyDistance(configProvider.getIntValue("equipment.verify.distance", 100));
 					relations.setSequenceNo(equipment.getSequenceNo());
-					equipmentStandardMaps = equipmentProvider.
-							findEquipmentStandardMap(standard.getId(), equipment.getId(),
-									InspectionStandardMapTargetType.EQUIPMENT.getCode());
+//					equipmentStandardMaps = equipmentProvider.
+//							findEquipmentStandardMap(standard.getId(), equipment.getId(),
+//									InspectionStandardMapTargetType.EQUIPMENT.getCode());
 				}
 				if (standard != null) {
 					relations.setStandardName(standard.getName());
@@ -5727,10 +5730,6 @@ private void checkUserPrivilege(Long orgId, Long privilegeId, Long communityId) 
 
 				relations.setOrder(map.getDefaultOrder());
 				relations.setPlanId(planId);
-
-//				if (equipmentStandardMaps != null && equipmentStandardMaps.size() > 0) {
-//					relations.setId(equipmentStandardMaps.get(0).getId());
-//				}
 				relations.setId(map.getId());
 				relationDTOS.add(relations);
 			}
@@ -5931,8 +5930,10 @@ private void checkUserPrivilege(Long orgId, Long privilegeId, Long communityId) 
 		standardIds.forEach((k)->{
 			listParametersByStandardIdCommand.setStandardId(k);
 			List<InspectionItemDTO> itemDTOS = listParametersByStandardId(listParametersByStandardIdCommand);
-			items.addAll(itemDTOS);
-		});
+            if (itemDTOS != null && itemDTOS.size()>0) {
+                items.addAll(itemDTOS);
+            }
+        });
 
 		offlineResponse.setItems(new ArrayList<>(items));
 		syncGroupOfflineData(offlineResponse,cmd);
