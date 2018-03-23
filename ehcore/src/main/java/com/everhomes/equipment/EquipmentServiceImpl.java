@@ -3930,23 +3930,7 @@ private void checkUserPrivilege(Long orgId, Long privilegeId, Long communityId) 
 	}
 
 	private String convertAttachmentURL(String url) {
-		String[] urls = url.split("&");
-		StringBuilder sb = new StringBuilder();
-		for(int i = 0; i < urls.length; i++) {
-			if(i == 0) {
-				sb.append(urls[i]);
-			} else if(i < urls.length-2) {
-				sb.append("&");
-				sb.append(urls[i]);
-			} else if(i == urls.length-2) {
-				sb.append("&w=600");
-			} else if(i == urls.length-1) {
-				sb.append("&h=800");
-			}
-
-		}
-
-		return sb.toString();
+		return url + "&w=600" + "&h=800";
 	}
 
 	@Override
