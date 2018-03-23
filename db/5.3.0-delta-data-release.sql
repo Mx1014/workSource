@@ -1531,3 +1531,17 @@ INSERT INTO `eh_locale_strings` (`id`, `scope`, `code`, `locale`, `text`) VALUES
 -- fix 24787
 update eh_var_field_groups set title = '客户信息' where id = 1;
 update eh_var_field_group_scopes set group_display_name = '客户信息' where group_id = 1;
+
+-- fix 26123 by xiongying20180323
+SET @field_id = (SELECT MAX(id) FROM `eh_var_fields`);
+SET @building_id = (select id from eh_var_fields where group_id = 28 and name = 'buildingId');
+SET @address_id = ((select id from eh_var_fields where group_id = 28 and name = 'addressId')-1);
+
+update eh_var_fields set id = (@field_id := @field_id + 1) where id = @address_id;
+update eh_var_fields set id = @address_id where group_id = 28 and name = 'buildingId';
+update eh_var_fields set id = @building_id where id = @field_id;
+
+update eh_service_modules set action_type = 44, instance_config = '{"realm":"energyManagement","entryUrl":"https://core.zuolin.com/nar/energyManagement/build/index.html?hideNavigationBar=1#/address_choose#sign_suffix"}' where id = 49100;
+update eh_launch_pad_items set action_type = 44, action_data = '{"realm":"energyManagement","entryUrl":"https://core.zuolin.com/nar/energyManagement/build/index.html?hideNavigationBar=1#/address_choose#sign_suffix"}' where item_label = '能耗管理';
+update eh_reflection_service_module_apps set action_type = 44, instance_config = '{"realm":"energyManagement","entryUrl":"https://core.zuolin.com/nar/energyManagement/build/index.html?hideNavigationBar=1#/address_choose#sign_suffix"}', action_data = '{"realm":"energyManagement","entryUrl":"https://core.zuolin.com/nar/energyManagement/build/index.html?hideNavigationBar=1#/address_choose#sign_suffix"}' where module_id = 49100;
+
