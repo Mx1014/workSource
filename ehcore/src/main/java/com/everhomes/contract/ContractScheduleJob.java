@@ -228,6 +228,7 @@ public class ContractScheduleJob extends QuartzJobBean {
     }
 
     private void sendMessageToUser(Long userId, String content) {
+        LOGGER.debug("contractScheduleJob sendMessageToUser, userId: {}, content: {}", userId, content);
         MessageDTO messageDto = new MessageDTO();
         messageDto.setAppId(AppConstants.APPID_MESSAGING);
         messageDto.setSenderUid(User.SYSTEM_USER_LOGIN.getUserId());
