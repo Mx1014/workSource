@@ -10,7 +10,6 @@ import java.util.List;
  *     <li>versionCode: versionCode</li>
  *     <li>layoutName: layoutName</li>
  *     <li>displayName: displayName</li>
- *     <li>groups: groups  参考 {@link ItemGroupDTO}</li>
  * </ul>
  */
 public class OPPush {
@@ -18,7 +17,6 @@ public class OPPush {
     private String versionCode;
     private String layoutName;
     private String displayName;
-    private List<ItemGroupDTO> groups;
 
     public String getVersionCode() {
         return versionCode;
@@ -42,14 +40,6 @@ public class OPPush {
 
     public void setDisplayName(String displayName) {
         this.displayName = displayName;
-    }
-
-    public List<ItemGroupDTO> getGroups() {
-        return groups;
-    }
-
-    public void setGroups(List<ItemGroupDTO> groups) {
-        this.groups = groups;
     }
 
     @Override

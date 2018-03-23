@@ -12,6 +12,14 @@ public class Me {
 
     private Byte myPublishFlag;
 
+    public Byte getMyPublishFlag() {
+        return myPublishFlag;
+    }
+
+    public void setMyPublishFlag(Byte myPublishFlag) {
+        this.myPublishFlag = myPublishFlag;
+    }
+
     @Override
     public String toString() {
         return StringHelper.toJsonString(this);
