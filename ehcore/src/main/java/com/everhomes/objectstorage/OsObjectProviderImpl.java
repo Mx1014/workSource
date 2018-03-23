@@ -108,11 +108,11 @@ class OsObjectProviderImpl implements OsObjectProvider {
         ifNotNull(query.getStatus(), () -> selectQuery.addConditions(Tables.EH_OS_OBJECTS.STATUS.eq(query.getStatus())));
         if(privilegeCommunities!=null && privilegeCommunities.size()>0){
             //管理企业后台，用户被赋予部分项目权限
-            Condition condition = DSL.trueCondition();
+            Condition condition = Tables.EH_OS_OBJECTS.OWNER_TYPE.eq("EhNamespaces").and((Tables.EH_OS_OBJECTS.OWNER_ID.eq(Long.valueOf(query.getNamespaceId()))));
+
             for (ProjectDTO projectDTO : privilegeCommunities) {
                 condition = condition.or(Tables.EH_OS_OBJECTS.OWNER_TYPE.eq("EhCommunities").and((Tables.EH_OS_OBJECTS.OWNER_ID.eq(projectDTO.getProjectId()))));
             }
-            condition = condition.or(Tables.EH_OS_OBJECTS.OWNER_TYPE.eq("EhNamespaces").and((Tables.EH_OS_OBJECTS.OWNER_ID.eq(Long.valueOf(query.getNamespaceId())))));
             selectQuery.addConditions(condition);
         }
         else if((privilegeCommunities==null || privilegeCommunities.size()==0) && locator==null){

@@ -55,6 +55,7 @@ import javax.validation.metadata.ConstraintDescriptor;
 import java.io.UnsupportedEncodingException;
 import java.text.DecimalFormat;
 import java.text.NumberFormat;
+import java.util.ArrayList;
 import java.util.Base64;
 import java.util.List;
 import java.util.Set;
@@ -204,23 +205,22 @@ public class OrganizationFileServiceImpl implements OrganizationFileService {
         query.setServiceType(EntityType.ORGANIZATION_FILE.getCode());
         query.setNamespaceId(UserContext.getCurrentNamespaceId());
 
-//        Community community = communityProvider.findCommunityById(cmd.getCommunityId());
-//        if (community != null) {
-//            query.setOwnerType(EntityType.COMMUNITY.getCode());
-//            query.setOwnerId(cmd.getCommunityId());
-//        } else {
-//            query.setOwnerType(EntityType.NAMESPACE.getCode());
-//            query.setOwnerId(Long.valueOf(currNamespaceId()));
-//        }
-
-        ListUserRelatedProjectByModuleCommand listProjectCmd = new ListUserRelatedProjectByModuleCommand();
-        listProjectCmd.setOwnerType("EhOrganizations");
-        listProjectCmd.setOwnerId(cmd.getCurrentPMId());
-        listProjectCmd.setCommunityFetchType("ONLY_COMMUNITY");
-        listProjectCmd.setModuleId(41500L);
-        listProjectCmd.setOrganizationId(cmd.getCurrentPMId());
-        List<ProjectDTO> privilegeCommunities = serviceModuleService.listUserRelatedProjectByModuleId(listProjectCmd);
-
+        Community community = communityProvider.findCommunityById(cmd.getCommunityId());
+        List<ProjectDTO> privilegeCommunities = new ArrayList<>();
+        if (cmd.getCommunityId()!=0 || community != null) {
+            ProjectDTO dto = new ProjectDTO();
+            dto.setProjectId(community.getId());
+            privilegeCommunities.add(dto);
+        }
+        else {
+            ListUserRelatedProjectByModuleCommand listProjectCmd = new ListUserRelatedProjectByModuleCommand();
+            listProjectCmd.setOwnerType("EhOrganizations");
+            listProjectCmd.setOwnerId(cmd.getCurrentPMId());
+            listProjectCmd.setCommunityFetchType("ONLY_COMMUNITY");
+            listProjectCmd.setModuleId(41500L);
+            listProjectCmd.setOrganizationId(cmd.getCurrentPMId());
+            privilegeCommunities = serviceModuleService.listUserRelatedProjectByModuleId(listProjectCmd);
+        }
         ListingLocator locator = new ListingLocator();
         locator.setAnchor(cmd.getPageAnchor());
 
