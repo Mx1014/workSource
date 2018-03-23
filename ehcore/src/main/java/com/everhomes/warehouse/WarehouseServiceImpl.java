@@ -730,6 +730,7 @@ public class WarehouseServiceImpl implements WarehouseService {
                     log.setStockAmount(materialStock.getAmount());
                     log.setRequestSource(WarehouseStockRequestSource.MANUAL_INPUT.getCode());
                     log.setDeliveryUid(uid);
+                    log.setWarehouseOrderId(finalOrder.getId());
                     warehouseProvider.creatWarehouseStockLogs(log);
                     warehouseStockLogSearcher.feedDoc(log);
                 }
