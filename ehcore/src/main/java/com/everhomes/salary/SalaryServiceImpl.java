@@ -5,7 +5,6 @@ import com.everhomes.archives.ArchivesService;
 import com.everhomes.bigcollection.Accessor;
 import com.everhomes.bigcollection.BigCollectionProvider;
 import com.everhomes.configuration.ConfigurationProvider;
-import com.everhomes.contentserver.ContentServer;
 import com.everhomes.contentserver.ContentServerService;
 import com.everhomes.coordinator.CoordinationLocks;
 import com.everhomes.coordinator.CoordinationProvider;
@@ -34,20 +33,17 @@ import com.everhomes.user.UserProvider;
 import com.everhomes.util.*;
 import com.everhomes.util.excel.RowResult;
 import com.everhomes.util.excel.handler.PropMrgOwnerHandler;
-import com.itextpdf.text.pdf.PdfStructTreeController.returnType;
 
 import freemarker.cache.StringTemplateLoader;
 import freemarker.template.Configuration;
 
 import org.apache.commons.collections.map.HashedMap;
 import org.apache.commons.lang.StringUtils;
-import org.apache.commons.logging.Log;
 import org.apache.poi.ss.usermodel.*;
 import org.apache.poi.xssf.usermodel.XSSFComment;
 import org.apache.poi.xssf.usermodel.XSSFDrawing;
 import org.apache.poi.xssf.usermodel.XSSFSheet;
 import org.apache.poi.xssf.usermodel.XSSFWorkbook;
-import org.apache.zookeeper.server.ByteBufferInputStream;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -1259,7 +1255,7 @@ public class SalaryServiceImpl implements SalaryService {
         XSSFSheet sheet = wb.createSheet("sheet1");
         String sheetName = "sheet1";
         createDepartStatisticsHead(wb, sheet);
-        List<SalaryDepartStatistic> departmentStats = salaryDepartStatisticProvider.listSalaryDepartStatistic(ownerId, month);
+        List<SalaryDepartStatistic> departmentStats = salaryDepartStatisticProvider.listFiledSalaryDepartStatistic(ownerId, month);
         if (null != departmentStats) {
             for (SalaryDepartStatistic stat : departmentStats) {
                 createDepartStatisticsRow(sheet, stat);
@@ -1556,7 +1552,15 @@ public class SalaryServiceImpl implements SalaryService {
         salaryEmployeePeriodValProvider.deleteEmployeePeriodVals(ownerId, month);
         // 由于部门汇总的归档未归档在一张表里,所以带上归档状态(删除归档的)
         salaryDepartStatisticProvider.deleteSalaryDepartStatistic(ownerId, NormalFlag.YES.getCode(), month);
-
+        List<SalaryDepartStatistic> dpts = salaryDepartStatisticProvider.listSalaryDepartStatistic(ownerId, NormalFlag.YES.getCode(), month);
+        if (null != dpts) {
+            for (SalaryDepartStatistic dpt : dpts) {
+                dpt.setIsFile(NormalFlag.YES.getCode());
+                dpt.setFileTime(filerTime);
+                dpt.setFilerUid(userId);
+                salaryDepartStatisticProvider.updateSalaryDepartStatistic(dpt);
+            }
+        }
         SalaryGroup group = salaryGroupProvider.findSalaryGroup(ownerId, month);
         SalaryGroupsFile sgf = ConvertHelper.convert(group, SalaryGroupsFile.class);
         sgf.setFileTime(filerTime);
@@ -1676,6 +1680,7 @@ public class SalaryServiceImpl implements SalaryService {
         statistic = salaryEmployeeProvider.calculateDptReport(detailIds, statistic, ownerId, month);
         statistic.setDeptName(getDptPathName(dpt));
         statistic.setDeptId(dpt.getId());
+        statistic.setIsFile(NormalFlag.NO.getCode());
         //同比
         Calendar calendar = Calendar.getInstance();
         try {
