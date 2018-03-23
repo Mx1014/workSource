@@ -1880,13 +1880,13 @@ public class Rentalv2ServiceImpl implements Rentalv2Service {
 				}
 			}else if(DiscountType.FULL_DAY_CUT_MONEY.getCode().equals(priceRule.getDiscountType()) ){
 				//不允许一个用户预约一个时段多个资源的情况
-				boolean multiple =false;
+				double multiple =0.0;
 				//满天减免
 				if(priceRule.getRentalType().equals(RentalType.HALFDAY.getCode())){
 					for(Date rentalDate:dayMap.keySet()){
 						for(String resourceNumber : dayMap.get(rentalDate).keySet()) {
 							if(dayMap.get(rentalDate).get(resourceNumber).size()>=2) {
-								multiple = true;
+								multiple = multiple+rules.get(0).getRentalCount();
 							}
 						}
 					}
@@ -1894,13 +1894,12 @@ public class Rentalv2ServiceImpl implements Rentalv2Service {
 					for(Date rentalDate:dayMap.keySet()){
 						for(String resourceNumber : dayMap.get(rentalDate).keySet()) {
 							if(dayMap.get(rentalDate).get(resourceNumber).size()>=3) {
-								multiple = true;
+								multiple =multiple+rules.get(0).getRentalCount();
 							}
 						}
 					}
 				}
-				if (multiple)
-					siteTotalMoneys[0] = siteTotalMoneys[0].subtract(priceRule.getCutPrice());
+					siteTotalMoneys[0] = siteTotalMoneys[0].subtract(priceRule.getCutPrice().multiply(new BigDecimal(multiple)));
 			}
 		}
 
