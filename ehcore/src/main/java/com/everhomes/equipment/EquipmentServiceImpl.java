@@ -4183,19 +4183,18 @@ private void checkUserPrivilege(Long orgId, Long privilegeId, Long communityId) 
 	}
 
 	@Override
-	public List<InspectionItemDTO> listParametersByStandardId(
-			ListParametersByStandardIdCommand cmd) {
+	public List<InspectionItemDTO> listParametersByStandardId(ListParametersByStandardIdCommand cmd) {
 		EquipmentInspectionStandards standard = verifyEquipmentStandard(cmd.getStandardId());
 
 		EquipmentInspectionTemplates template = equipmentProvider.findEquipmentInspectionTemplate(standard.getTemplateId(),
 				cmd.getOwnerId(), cmd.getOwnerType());
 		//解决之前的删除导致的任务查不到巡检template问题
-//		if(template == null || Status.INACTIVE.equals(Status.fromStatus(template.getStatus()))) {
 		if(template == null) {
-			throw RuntimeErrorException.errorWith(EquipmentServiceErrorCode.SCOPE,
-					EquipmentServiceErrorCode.ERROR_TEMPLATE_NOT_EXIST,
- 				"巡检项不存在");
-		}
+//			throw RuntimeErrorException.errorWith(EquipmentServiceErrorCode.SCOPE,
+//					EquipmentServiceErrorCode.ERROR_TEMPLATE_NOT_EXIST,
+// 				"巡检项不存在");
+            return null;
+        }
 		InspectionTemplateDTO dto = ConvertHelper.convert(template, InspectionTemplateDTO.class);
 
 		return  listTemplateItems(dto,cmd.getStandardId());
@@ -5931,8 +5930,10 @@ private void checkUserPrivilege(Long orgId, Long privilegeId, Long communityId) 
 		standardIds.forEach((k)->{
 			listParametersByStandardIdCommand.setStandardId(k);
 			List<InspectionItemDTO> itemDTOS = listParametersByStandardId(listParametersByStandardIdCommand);
-			items.addAll(itemDTOS);
-		});
+            if (itemDTOS != null && itemDTOS.size()>0) {
+                items.addAll(itemDTOS);
+            }
+        });
 
 		offlineResponse.setItems(new ArrayList<>(items));
 		syncGroupOfflineData(offlineResponse,cmd);
