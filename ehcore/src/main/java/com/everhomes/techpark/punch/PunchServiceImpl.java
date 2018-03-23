@@ -9411,7 +9411,7 @@ public class PunchServiceImpl implements PunchService {
     }
 
     private void createVacationBookSheetHead(XSSFSheet sheet) {
-        Row row = sheet.createRow(sheet.getLastRowNum() + 1);
+        Row row = sheet.createRow(sheet.getLastRowNum());
         int i = -1;
         row.createCell(++i).setCellValue("手机");
         row.createCell(++i).setCellValue("姓名");
