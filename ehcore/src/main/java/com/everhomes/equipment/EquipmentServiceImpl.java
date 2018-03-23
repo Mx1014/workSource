@@ -1505,10 +1505,15 @@ private void checkUserPrivilege(Long orgId, Long privilegeId, Long communityId) 
 	@Override
 	public void exportEquipments(SearchEquipmentsCommand cmd, HttpServletResponse response) {
 		List<EquipmentsDTO> dtos = null;
-		if(cmd.getEquipmentIds()!=null && cmd.getEquipmentIds().size()>0){
-			dtos = cmd.getEquipmentIds().stream().map((e) -> ConvertHelper.convert(equipmentProvider.findEquipmentById(e), EquipmentsDTO.class))
+		if (StringUtils.isNotEmpty(cmd.getEquipmentIds())) {
+			List<Long> equipmentIds = new ArrayList<>();
+			String[] ids = cmd.getEquipmentIds().split(",");
+			for (String id : ids) {
+				equipmentIds.add(Long.valueOf(id));
+			}
+			dtos = equipmentIds.stream().map((e) -> ConvertHelper.convert(equipmentProvider.findEquipmentById(e), EquipmentsDTO.class))
 					.collect(Collectors.toList());
-		}else {
+		} else {
 			SearchEquipmentsResponse equipments = equipmentSearcher.queryEquipments(cmd);
 			dtos = equipments.getEquipment();
 		}
