@@ -3,6 +3,8 @@ package com.everhomes.objectstorage;
 
 import com.everhomes.listing.ListingLocator;
 import com.everhomes.listing.ListingQueryBuilderCallback;
+import com.everhomes.rest.acl.ProjectDTO;
+import com.everhomes.rest.address.CommunityDTO;
 import com.everhomes.rest.objectstorage.OsObjectDTO;
 import com.everhomes.rest.objectstorage.OsObjectDownloadLogQuery;
 import com.everhomes.rest.objectstorage.OsObjectQuery;
@@ -40,13 +42,13 @@ public class ObjectStorageServiceImpl implements ObjectStorageService {
     }
 
     @Override
-    public List<OsObject> listOsObject(OsObjectQuery query, ListingLocator locator) {
-        return this.listOsObject(query, locator, null);
+    public List<OsObject> listOsObject(OsObjectQuery query, ListingLocator locator,List<ProjectDTO> privilegeCommunities) {
+        return this.listOsObject(query, locator, null,privilegeCommunities);
     }
 
     @Override
-    public List<OsObject> listOsObject(OsObjectQuery query, ListingLocator locator, ListingQueryBuilderCallback callback) {
-        return osObjectProvider.listOsObject(query, locator, callback);
+    public List<OsObject> listOsObject(OsObjectQuery query, ListingLocator locator, ListingQueryBuilderCallback callback,List<ProjectDTO> privilegeCommunities) {
+        return osObjectProvider.listOsObject(query, locator, callback,privilegeCommunities);
     }
 
     @Override
