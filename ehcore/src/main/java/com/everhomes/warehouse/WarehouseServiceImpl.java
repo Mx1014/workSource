@@ -1492,7 +1492,13 @@ public class WarehouseServiceImpl implements WarehouseService {
     @Override
     public WarehouseRequestDetailsDTO findRequest(FindRequestCommand cmd) {
         WarehouseRequestDetailsDTO dto = new WarehouseRequestDetailsDTO();
-        WarehouseRequests request = warehouseProvider.findWarehouseRequests(cmd.getRequestId(), cmd.getOwnerType(), cmd.getOwnerId(), cmd.getCommunityId());
+        Long requestId = cmd.getRequestId();
+        if(cmd.getRequestId() == null){
+            Long flowCaseId = cmd.getFlowCaseId();
+            FlowCase flowCase = flowCaseProvider.getFlowCaseById(flowCaseId);
+            requestId = flowCase.getReferId();
+        }
+        WarehouseRequests request = warehouseProvider.findWarehouseRequests(requestId, cmd.getOwnerType(), cmd.getOwnerId(), cmd.getCommunityId());
         if (request != null) {
             dto = ConvertHelper.convert(request, WarehouseRequestDetailsDTO.class);
             if (dto.getRequestUid() != null) {
