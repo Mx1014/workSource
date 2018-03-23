@@ -4888,7 +4888,7 @@ public class PunchServiceImpl implements PunchService {
 				fileName = String.format("个人按月统计报表_%s到%s.xlsx", DateUtil.dateToStr(new Date(cmd.getStartDay()), DateUtil.NO_SLASH)
 				,DateUtil.dateToStr(new Date(cmd.getEndDay()), DateUtil.NO_SLASH));
 			}else{
-				fileName = String.format("按日统计报表_%s月.xlsx", monthSF.get().format(new Date(cmd.getStartDay())));
+				fileName = String.format("按日统计报表_%s.xlsx", DateUtil.dateToStr(new Date(), DateUtil.NO_SLASH));
 			}
 
 	        taskService.createTask(fileName, TaskType.FILEDOWNLOAD.getCode(), PunchExportTaskHandler.class, params, TaskRepeatFlag.REPEAT.getCode(), new Date());
@@ -5469,7 +5469,7 @@ public class PunchServiceImpl implements PunchService {
         params.put("exceptionStatus", cmd.getExceptionStatus());
         params.put("userName", cmd.getUserName()); 
         params.put("reportType", "exportPunchStatistics");
-        String fileName = String.format("按月统计导出报表_%s.xlsx", DateUtil.dateToStr(new Date(), DateUtil.NO_SLASH));
+        String fileName = String.format("按月统计导出报表_%s月.xlsx", monthSF.get().format(new Date(cmd.getStartDay())));
 
         taskService.createTask(fileName, TaskType.FILEDOWNLOAD.getCode(), PunchExportTaskHandler.class, params, TaskRepeatFlag.REPEAT.getCode(), new Date());
         return response; 
