@@ -54,6 +54,14 @@ UPDATE eh_service_module_apps
 SET instance_config = '{\"realm\":\"equipmentInspection\",\"entryUrl\":\"http://{home.url}/nar/equipmentInspection/dist/index.html?hideNavigationBar=1#sign_suffix\"}'
 WHERE module_id = 20800;
 
+UPDATE eh_service_modules
+SET instance_config = '{\"realm\":\"equipmentInspection\",\"entryUrl\":\"http://{home.url}/nar/equipmentInspection/dist/index.html?hideNavigationBar=1#sign_suffix\"}'
+WHERE id = 20800;
+
+UPDATE eh_service_modules
+SET action_type = 44
+WHERE id = 20800;
+
 UPDATE eh_launch_pad_items
 SET action_type = 44
 WHERE item_label LIKE '%巡检%';
@@ -74,6 +82,14 @@ WHERE item_label LIKE '%品质%';
 UPDATE eh_service_module_apps
 SET instance_config = '{\"realm\":\"qualityInspection\",\"entryUrl\":\"http://{home.url}/nar/qualityInspection/build/index.html?hideNavigationBar=1#/home#sign_suffix\"}'
 WHERE module_id = 20600;
+
+UPDATE eh_service_modules
+SET instance_config = '{\"realm\":\"qualityInspection\",\"entryUrl\":\"http://{home.url}/nar/qualityInspection/build/index.html?hideNavigationBar=1#/home#sign_suffix\"}'
+WHERE id = 20600;
+
+UPDATE eh_service_modules
+SET action_type = 44
+WHERE id = 20600;
 
 UPDATE eh_launch_pad_items
 SET action_type = 44
