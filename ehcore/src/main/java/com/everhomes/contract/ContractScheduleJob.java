@@ -31,6 +31,7 @@ import com.everhomes.scheduler.ScheduleProvider;
 import com.everhomes.search.ContractSearcher;
 import com.everhomes.user.User;
 import com.everhomes.util.DateHelper;
+import com.everhomes.util.StringHelper;
 import org.quartz.JobExecutionContext;
 import org.quartz.JobExecutionException;
 import org.slf4j.Logger;
@@ -145,6 +146,7 @@ public class ContractScheduleJob extends QuartzJobBean {
 
                                                 }
                                             });
+                                            LOGGER.debug("ContractScheduleJob userIds: {}", StringHelper.toJsonString(userIds));
                                             if(userIds.size() > 0) {
                                                 String notifyText = getNotifyMessage(contract.getName(), contract.getContractEndDate());
                                                 userIds.forEach(userId -> {
@@ -186,6 +188,7 @@ public class ContractScheduleJob extends QuartzJobBean {
 
                                                     }
                                                 });
+                                                LOGGER.debug("ContractScheduleJob userIds: {}", StringHelper.toJsonString(userIds));
                                                 if(userIds.size() > 0) {
                                                     String notifyText = getMessage(contract.getName(), plan.getPaidTime(), plan.getPaidAmount(), ContractNotificationTemplateCode.SCOPE, locale, ContractNotificationTemplateCode.NOTIFY_CONTRACT_PAY);
                                                     userIds.forEach(userId -> {
@@ -228,6 +231,7 @@ public class ContractScheduleJob extends QuartzJobBean {
     }
 
     private void sendMessageToUser(Long userId, String content) {
+        LOGGER.debug("contractScheduleJob sendMessageToUser, userId: {}, content: {}", userId, content);
         MessageDTO messageDto = new MessageDTO();
         messageDto.setAppId(AppConstants.APPID_MESSAGING);
         messageDto.setSenderUid(User.SYSTEM_USER_LOGIN.getUserId());

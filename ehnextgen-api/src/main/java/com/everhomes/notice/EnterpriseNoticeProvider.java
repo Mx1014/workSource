@@ -10,9 +10,9 @@ public interface EnterpriseNoticeProvider {
 
     void updateEnterpriseNotice(EnterpriseNotice enterpriseNotice);
 
-    List<EnterpriseNotice> listEnterpriseNoticesByNamespaceId(Integer namespaceId, Integer offset, Integer pageSize);
+    List<EnterpriseNotice> listEnterpriseNoticesByNamespaceId(Integer namespaceId, Long organizationId, Integer offset, Integer pageSize);
 
-    int totalCountEnterpriseNoticesByNamespaceId(Integer namespaceId);
+    int totalCountEnterpriseNoticesByNamespaceId(Integer namespaceId, Long organizationId);
 
     List<EnterpriseNotice> listEnterpriseNoticesByOwnerId(List<EnterpriseNoticeReceiver> owner, Integer namespaceId, Integer offset, Integer pageSize);
 

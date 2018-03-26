@@ -4,6 +4,8 @@ package com.everhomes.purchase;
 import com.everhomes.db.DbProvider;
 import com.everhomes.entity.EntityType;
 import com.everhomes.flow.Flow;
+import com.everhomes.flow.FlowCase;
+import com.everhomes.flow.FlowCaseProvider;
 import com.everhomes.flow.FlowService;
 import com.everhomes.naming.NameMapper;
 import com.everhomes.organization.OrganizationService;
@@ -68,6 +70,8 @@ public class PurchaseServiceImpl implements PurchaseService {
     private OrganizationService organizationService;
     @Autowired
     private UserProvider userProvider;
+    @Autowired
+    private FlowCaseProvider flowCaseProvider;
 
 
 
@@ -189,7 +193,8 @@ public class PurchaseServiceImpl implements PurchaseService {
         Integer pageSize = cmd.getPageSize();
         if(pageAnchor == null) pageAnchor = 0l;
         if(pageSize == null || pageSize < 1) pageSize = 20;
-        List<SearchPurchasesDTO> dtos = purchaseProvider.findPurchaseOrders(pageAnchor,++pageSize,cmd.getSubmissionStatus()
+        int overloadPageSize = pageSize + 1;
+        List<SearchPurchasesDTO> dtos = purchaseProvider.findPurchaseOrders(pageAnchor,overloadPageSize,cmd.getSubmissionStatus()
                 ,cmd.getWarehouseStatus(),cmd.getApplicant(),cmd.getOwnerId(),cmd.getOwnerType(),cmd.getNamespaceId());
         if(dtos.size() > pageSize) {
             response.setNextPageAnchor(pageAnchor + pageSize);
@@ -274,6 +279,12 @@ public class PurchaseServiceImpl implements PurchaseService {
     public GetPurchaseOrderDTO getPurchaseOrder(GetPurchaseOrderCommand cmd) {
         //校验权限
         checkAssetPriviledgeForPropertyOrg(cmd.getCommunityId(), PrivilegeConstants.PURCHASE_VIEW);
+        Long requestId = cmd.getPurchaseRequestId();
+        if(requestId == null){
+            Long flowCaseId = cmd.getFlowCaseId();
+            FlowCase flowCase = flowCaseProvider.getFlowCaseById(flowCaseId);
+            cmd.setPurchaseRequestId(flowCase.getReferId());
+        }
         PurchaseOrder order = purchaseProvider.getPurchaseOrderById(cmd.getPurchaseRequestId());
         List<PurchaseItem> items = purchaseProvider.getPurchaseItemsByOrderId(cmd.getPurchaseRequestId());
         //组装数据 TODO api字段和jooq字段保持一致可以节省代码

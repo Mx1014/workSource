@@ -929,7 +929,8 @@ public class Rentalv2ProviderImpl implements Rentalv2Provider {
 		if (null != billStatus)
 			condition = condition.and(Tables.EH_RENTALV2_ORDERS.STATUS.equal(billStatus));
 		if (null != keyword)
-			condition = condition.and(Tables.EH_RENTALV2_ORDERS.CUSTOM_OBJECT.like("%"+keyword+"%"));
+			condition = condition.and(Tables.EH_RENTALV2_ORDERS.CUSTOM_OBJECT.like("%"+keyword+"%").
+					or(Tables.EH_RENTALV2_ORDERS.USER_NAME.eq(keyword)).or(Tables.EH_RENTALV2_ORDERS.USER_PHONE.eq(keyword)));
 
 		if(null != pageAnchor && pageAnchor != 0)
 			condition = condition.and(Tables.EH_RENTALV2_ORDERS.RESERVE_TIME.lt(new Timestamp(pageAnchor)));
@@ -968,7 +969,8 @@ public class Rentalv2ProviderImpl implements Rentalv2Provider {
 		if (null != billStatus)
 			condition = condition.and(Tables.EH_RENTALV2_ORDERS.STATUS.equal(billStatus));
 		if (null != keyword)
-			condition = condition.and(Tables.EH_RENTALV2_ORDERS.CUSTOM_OBJECT.like("%"+keyword+"%"));
+			condition = condition.and(Tables.EH_RENTALV2_ORDERS.CUSTOM_OBJECT.like("%"+keyword+"%").
+					or(Tables.EH_RENTALV2_ORDERS.USER_NAME.eq(keyword)).or(Tables.EH_RENTALV2_ORDERS.USER_PHONE.eq(keyword)));
 
 		count = step.where(condition).fetchOneInto(BigDecimal.class);
 

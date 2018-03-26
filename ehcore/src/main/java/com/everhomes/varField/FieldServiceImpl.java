@@ -666,6 +666,7 @@ public class FieldServiceImpl implements FieldService {
         //使用groupName来对应不同的接口
         String sheetName = group.getGroupDisplayName();
         switch (sheetName){
+            case "客户信息":
             case "基本信息":
             case "企业情况":
             case "员工情况":

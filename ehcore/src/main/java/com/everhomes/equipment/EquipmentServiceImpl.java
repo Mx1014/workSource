@@ -1505,10 +1505,15 @@ private void checkUserPrivilege(Long orgId, Long privilegeId, Long communityId) 
 	@Override
 	public void exportEquipments(SearchEquipmentsCommand cmd, HttpServletResponse response) {
 		List<EquipmentsDTO> dtos = null;
-		if(cmd.getEquipmentIds()!=null && cmd.getEquipmentIds().size()>0){
-			dtos = cmd.getEquipmentIds().stream().map((e) -> ConvertHelper.convert(equipmentProvider.findEquipmentById(e), EquipmentsDTO.class))
+		if (StringUtils.isNotEmpty(cmd.getEquipmentIds())) {
+			List<Long> equipmentIds = new ArrayList<>();
+			String[] ids = cmd.getEquipmentIds().split(",");
+			for (String id : ids) {
+				equipmentIds.add(Long.valueOf(id));
+			}
+			dtos = equipmentIds.stream().map((e) -> ConvertHelper.convert(equipmentProvider.findEquipmentById(e), EquipmentsDTO.class))
 					.collect(Collectors.toList());
-		}else {
+		} else {
 			SearchEquipmentsResponse equipments = equipmentSearcher.queryEquipments(cmd);
 			dtos = equipments.getEquipment();
 		}
@@ -1528,7 +1533,7 @@ private void checkUserPrivilege(Long orgId, Long privilegeId, Long communityId) 
 			//fieldService.listFields();
 			for (FieldDTO field : fields) {
 				//去除附件 经纬度cell
-				if (!(Objects.equals(field.getFieldName(), "attachments") && Objects.equals(field.getFieldName(), "geohash"))) {
+				if (!(Objects.equals(field.getFieldName(), "attachments") || Objects.equals(field.getFieldName(), "geohash"))) {
 					propertyNames.add(field.getFieldName());
 					titleNames.add(field.getFieldDisplayName());
 					titleSizes.add(20);
@@ -3930,23 +3935,7 @@ private void checkUserPrivilege(Long orgId, Long privilegeId, Long communityId) 
 	}
 
 	private String convertAttachmentURL(String url) {
-		String[] urls = url.split("&");
-		StringBuilder sb = new StringBuilder();
-		for(int i = 0; i < urls.length; i++) {
-			if(i == 0) {
-				sb.append(urls[i]);
-			} else if(i < urls.length-2) {
-				sb.append("&");
-				sb.append(urls[i]);
-			} else if(i == urls.length-2) {
-				sb.append("&w=600");
-			} else if(i == urls.length-1) {
-				sb.append("&h=800");
-			}
-
-		}
-
-		return sb.toString();
+		return url + "&w=600" + "&h=800";
 	}
 
 	@Override
@@ -4178,19 +4167,18 @@ private void checkUserPrivilege(Long orgId, Long privilegeId, Long communityId) 
 	}
 
 	@Override
-	public List<InspectionItemDTO> listParametersByStandardId(
-			ListParametersByStandardIdCommand cmd) {
+	public List<InspectionItemDTO> listParametersByStandardId(ListParametersByStandardIdCommand cmd) {
 		EquipmentInspectionStandards standard = verifyEquipmentStandard(cmd.getStandardId());
 
 		EquipmentInspectionTemplates template = equipmentProvider.findEquipmentInspectionTemplate(standard.getTemplateId(),
 				cmd.getOwnerId(), cmd.getOwnerType());
 		//解决之前的删除导致的任务查不到巡检template问题
-//		if(template == null || Status.INACTIVE.equals(Status.fromStatus(template.getStatus()))) {
 		if(template == null) {
-			throw RuntimeErrorException.errorWith(EquipmentServiceErrorCode.SCOPE,
-					EquipmentServiceErrorCode.ERROR_TEMPLATE_NOT_EXIST,
- 				"巡检项不存在");
-		}
+//			throw RuntimeErrorException.errorWith(EquipmentServiceErrorCode.SCOPE,
+//					EquipmentServiceErrorCode.ERROR_TEMPLATE_NOT_EXIST,
+// 				"巡检项不存在");
+            return null;
+        }
 		InspectionTemplateDTO dto = ConvertHelper.convert(template, InspectionTemplateDTO.class);
 
 		return  listTemplateItems(dto,cmd.getStandardId());
@@ -5926,8 +5914,10 @@ private void checkUserPrivilege(Long orgId, Long privilegeId, Long communityId) 
 		standardIds.forEach((k)->{
 			listParametersByStandardIdCommand.setStandardId(k);
 			List<InspectionItemDTO> itemDTOS = listParametersByStandardId(listParametersByStandardIdCommand);
-			items.addAll(itemDTOS);
-		});
+            if (itemDTOS != null && itemDTOS.size()>0) {
+                items.addAll(itemDTOS);
+            }
+        });
 
 		offlineResponse.setItems(new ArrayList<>(items));
 		syncGroupOfflineData(offlineResponse,cmd);

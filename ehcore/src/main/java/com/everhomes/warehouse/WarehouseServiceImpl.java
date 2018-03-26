@@ -564,28 +564,31 @@ public class WarehouseServiceImpl implements WarehouseService {
     @Override
     public void updateWarehouseStock(UpdateWarehouseStockCommand cmd) {
         if (cmd.getRequestType().byteValue() == WarehouseStockRequestType.STOCK_IN.getCode()) {
-            checkAssetPriviledgeForPropertyOrg(cmd.getCommunityId(), PrivilegeConstants.WAREHOUSE_REPO_MAINTAIN_INSTOCK, cmd.getOwnerId());
-        } else if (cmd.getRequestType().byteValue() == WarehouseStockRequestType.STOCK_OUT.getCode()) {
+            checkAssetPriviledgeForPropertyOrg(cmd.getCommunityId(), PrivilegeConstants.WAREHOUSE_REPO_MAINTAIN_INSTOCK, cmd.getOwnerId()); } else if (cmd.getRequestType().byteValue() == WarehouseStockRequestType.STOCK_OUT.getCode()) {
             checkAssetPriviledgeForPropertyOrg(cmd.getCommunityId(), PrivilegeConstants.WAREHOUSE_REPO_MAINTAIN_OUTSTOCK, cmd.getOwnerId());
         }
-        //增加普通入库单
-        WarehouseOrder order = ConvertHelper.convert(cmd, WarehouseOrder.class);
-        long warehouseOrderId = this.sequenceProvider.getNextSequence(NameMapper
+        WarehouseOrder order = null;
+        if(cmd.getRequestType().byteValue() == WarehouseStockRequestType.STOCK_IN.getCode()){
+             //增加普通入库单
+            order = ConvertHelper.convert(cmd, WarehouseOrder.class);
+            long warehouseOrderId = this.sequenceProvider.getNextSequence(NameMapper
                 .getSequenceDomainFromTablePojo(EhWarehouseOrders.class));
-        order.setId(warehouseOrderId);
-        order.setCreateTime(new Timestamp(DateHelper.currentGMTTime().getTime()));
-        order.setCreateUid(UserContext.currentUserId());
-        order.setOwnerType(cmd.getOwnerType());
-        order.setOwnerId(cmd.getOwnerId());
-        order.setNamespaceId(cmd.getNamespaceId());
-        //增加communityId
-        order.setCommunityId(cmd.getCommunityId());
-        order.setIdentity(SupplierHelper.getIdentity());
-        order.setExecutorId(UserContext.currentUserId());
-        order.setExecutorName(UserContext.current().getUser().getNickName());
-        order.setExecutorTime(new Timestamp(DateHelper.currentGMTTime().getTime()));
-        order.setServiceType(cmd.getServiceType());
-        warehouseProvider.insertWarehouseOrder(order);
+            order.setId(warehouseOrderId);
+            order.setCreateTime(new Timestamp(DateHelper.currentGMTTime().getTime()));
+            order.setCreateUid(UserContext.currentUserId());
+            order.setOwnerType(cmd.getOwnerType());
+            order.setOwnerId(cmd.getOwnerId());
+            order.setNamespaceId(cmd.getNamespaceId());
+            //增加communityId
+            order.setCommunityId(cmd.getCommunityId());
+            order.setIdentity(SupplierHelper.getIdentity());
+            order.setExecutorId(UserContext.currentUserId());
+            order.setExecutorName(UserContext.current().getUser().getNickName());
+            order.setExecutorTime(new Timestamp(DateHelper.currentGMTTime().getTime()));
+            order.setServiceType(cmd.getServiceType());
+            warehouseProvider.insertWarehouseOrder(order);
+        }
+
 
         if (cmd.getStocks() != null && cmd.getStocks().size() > 0) {
             cmd.getStocks().forEach(stock -> {
@@ -616,6 +619,7 @@ public class WarehouseServiceImpl implements WarehouseService {
             });
             Long uid = UserContext.current().getUser().getId();
             Timestamp current = new Timestamp(DateHelper.currentGMTTime().getTime());
+            WarehouseOrder finalOrder = order;
             cmd.getStocks().forEach(stock -> {
                 //增加园区维度 by wentian
                 WarehouseStocks materialStock = warehouseProvider.findWarehouseStocksByWarehouseAndMaterial(
@@ -634,7 +638,7 @@ public class WarehouseServiceImpl implements WarehouseService {
                         log.setStockAmount(materialStock.getAmount());
                         log.setRequestSource(WarehouseStockRequestSource.MANUAL_INPUT.getCode());
                         log.setDeliveryUid(uid);
-                        log.setWarehouseOrderId(order.getId());
+                        log.setWarehouseOrderId(finalOrder.getId());
                         warehouseProvider.creatWarehouseStockLogs(log);
                         //更新入库log，增加园区id到es中
                         warehouseStockLogSearcher.feedDoc(log);
@@ -679,6 +683,8 @@ public class WarehouseServiceImpl implements WarehouseService {
                         requestMaterial.setDeliveryFlag(DeliveryFlag.YES.getCode());
                         requestMaterial.setDeliveryUid(uid);
                         requestMaterial.setDeliveryTime(current);
+                        requestMaterial.setReviewTime(current);
+                        requestMaterial.setReviewResult(ReviewResult.QUALIFIED.getCode());
                         warehouseProvider.updateWarehouseRequestMaterial(requestMaterial);
                         //更新
                         warehouseRequestMaterialSearcher.feedDoc(requestMaterial);
@@ -724,19 +730,22 @@ public class WarehouseServiceImpl implements WarehouseService {
                     log.setStockAmount(materialStock.getAmount());
                     log.setRequestSource(WarehouseStockRequestSource.MANUAL_INPUT.getCode());
                     log.setDeliveryUid(uid);
+                    log.setWarehouseOrderId(finalOrder.getId());
                     warehouseProvider.creatWarehouseStockLogs(log);
                     warehouseStockLogSearcher.feedDoc(log);
                 }
             });
-
-            //申请下面的都出库了则申请也出库
-            List<WarehouseRequestMaterials> requestMaterials = warehouseProvider.listWarehouseRequestMaterials(cmd.getRequestId(), cmd.getOwnerType(), cmd.getOwnerId(), cmd.getCommunityId());
-            if (requestMaterials != null || requestMaterials.size() > 0) {
-                WarehouseRequests request = warehouseProvider.findWarehouseRequests(cmd.getRequestId(), cmd.getOwnerType(), cmd.getOwnerId(), cmd.getCommunityId());
-                if (request != null) {
-                    request.setDeliveryFlag(DeliveryFlag.YES.getCode());
-                    request.setUpdateTime(current);
-                    warehouseProvider.updateWarehouseRequest(request);
+            if(cmd.getRequestType().byteValue() == WarehouseStockRequestType.STOCK_OUT.getCode()){
+                //申请下面的都出库了则申请也出库
+                List<WarehouseRequestMaterials> requestMaterials = warehouseProvider.listWarehouseRequestMaterials(cmd.getRequestId(), cmd.getOwnerType(), cmd.getOwnerId(), cmd.getCommunityId());
+                if (requestMaterials != null || requestMaterials.size() > 0) {
+                    WarehouseRequests request = warehouseProvider.findWarehouseRequests(cmd.getRequestId(), cmd.getOwnerType(), cmd.getOwnerId(), cmd.getCommunityId());
+                    if (request != null) {
+                        request.setDeliveryFlag(DeliveryFlag.YES.getCode());
+                        request.setUpdateTime(current);
+                        request.setReviewResult(ReviewResult.QUALIFIED.getCode());
+                        warehouseProvider.updateWarehouseRequest(request);
+                    }
                 }
             }
         }
@@ -1492,7 +1501,13 @@ public class WarehouseServiceImpl implements WarehouseService {
     @Override
     public WarehouseRequestDetailsDTO findRequest(FindRequestCommand cmd) {
         WarehouseRequestDetailsDTO dto = new WarehouseRequestDetailsDTO();
-        WarehouseRequests request = warehouseProvider.findWarehouseRequests(cmd.getRequestId(), cmd.getOwnerType(), cmd.getOwnerId(), cmd.getCommunityId());
+        Long requestId = cmd.getRequestId();
+        if(cmd.getRequestId() == null){
+            Long flowCaseId = cmd.getFlowCaseId();
+            FlowCase flowCase = flowCaseProvider.getFlowCaseById(flowCaseId);
+            requestId = flowCase.getReferId();
+        }
+        WarehouseRequests request = warehouseProvider.findWarehouseRequests(requestId, cmd.getOwnerType(), cmd.getOwnerId(), cmd.getCommunityId());
         if (request != null) {
             dto = ConvertHelper.convert(request, WarehouseRequestDetailsDTO.class);
             if (dto.getRequestUid() != null) {
@@ -1763,6 +1778,9 @@ public class WarehouseServiceImpl implements WarehouseService {
                 if (request != null) {
                     dto.setRequestUid(request.getRequestUid());
                     dto.setCreateTime(request.getCreateTime());
+                    if(request.getDeliveryFlag().byteValue() == DeliveryFlag.YES.getCode()){
+                        dto.setDeliveryTime(request.getUpdateTime());
+                    }
                     if (dto.getRequestUid() != null) {
                         List<OrganizationMember> members = organizationProvider.listOrganizationMembers(dto.getRequestUid());
                         if (members != null && members.size() > 0) {

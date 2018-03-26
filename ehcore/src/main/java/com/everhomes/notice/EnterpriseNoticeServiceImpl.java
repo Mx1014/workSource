@@ -391,7 +391,7 @@ public class EnterpriseNoticeServiceImpl implements EnterpriseNoticeService {
 
         ListEnterpriseNoticeAdminResponse response = new ListEnterpriseNoticeAdminResponse();
 
-        List<EnterpriseNotice> enterpriseNotices = enterpriseNoticeProvider.listEnterpriseNoticesByNamespaceId(namespaceId, offset, pageSize);
+        List<EnterpriseNotice> enterpriseNotices = enterpriseNoticeProvider.listEnterpriseNoticesByNamespaceId(namespaceId, cmd.getOrganizationId(), offset, pageSize);
 
         if (enterpriseNotices != null && enterpriseNotices.size() > 0) {
             List<EnterpriseNoticeDTO> enterpriseNoticeDTOS = new ArrayList<>(enterpriseNotices.size());
@@ -401,7 +401,7 @@ public class EnterpriseNoticeServiceImpl implements EnterpriseNoticeService {
             response.setDtos(enterpriseNoticeDTOS);
         }
         response.setPageSize(pageSize);
-        response.setTotalCount(enterpriseNoticeProvider.totalCountEnterpriseNoticesByNamespaceId(namespaceId));
+        response.setTotalCount(enterpriseNoticeProvider.totalCountEnterpriseNoticesByNamespaceId(namespaceId, cmd.getOrganizationId()));
         return response;
     }
 

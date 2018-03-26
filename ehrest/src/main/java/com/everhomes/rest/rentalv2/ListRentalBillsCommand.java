@@ -8,7 +8,8 @@ import com.everhomes.util.StringHelper;
  * <ul>查询订单
  * <li>rentalSiteId：资源id</li>
  * <li>organizationId：机构id</li> 
- * <li>resourceTypeId：图标id</li> 
+ * <li>resourceTypeId：图标id</li>
+ * <li>resourceType：资源类型 {@link com.everhomes.rest.rentalv2.RentalV2ResourceType}</li>
  * <li>startTime：开始时间</li> 
  * <li>endTime：结束时间</li> 
  * <li>vendorType：支付方式,10001-支付宝，10002-微信</li> 
@@ -24,7 +25,8 @@ public class ListRentalBillsCommand {
 	private Long organizationId;
 	private Long communityId;
 	private Long rentalSiteId ;
-	private java.lang.Long       resourceTypeId; 
+	private java.lang.Long       resourceTypeId;
+	private String resourceType;
 	
 	private Long startTime; 
 	private Long endTime;
@@ -145,9 +147,12 @@ public class ListRentalBillsCommand {
 	public void setPageSize(Integer pageSize) {
 		this.pageSize = pageSize;
 	}
- 
-	  
- 
 
+	public String getResourceType() {
+		return resourceType;
+	}
 
+	public void setResourceType(String resourceType) {
+		this.resourceType = resourceType;
+	}
 }
