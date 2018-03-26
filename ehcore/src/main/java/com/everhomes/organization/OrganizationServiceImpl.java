@@ -1536,7 +1536,6 @@ public class OrganizationServiceImpl implements OrganizationService {
         EnterpriseCustomer customer = enterpriseCustomerProvider.findByOrganizationId(organization.getId());
         dbProvider.execute((TransactionStatus status) -> {
             //查到有关联的客户则同步修改过去
-
             if(customer != null) {
                 //产品功能 #20796 同步过来的客户名称不可改
                 if(NamespaceCustomerType.EBEI.equals(NamespaceCustomerType.fromCode(customer.getNamespaceCustomerType()))
@@ -1628,6 +1627,31 @@ public class OrganizationServiceImpl implements OrganizationService {
             // organization.setCommunityId(cmd.getCommunityId());
             organization.setDescription(organizationDetail.getDescription());
             organizationSearcher.feedDoc(organization);
+
+            //没有有关联的客户则新增一条
+            if(customer == null) {
+                List<OrganizationAddressDTO> addressDTOs = cmd.getAddressDTOs();
+                if (null != addressDTOs && 0 != addressDTOs.size()) {
+                    this.addAddresses(organization.getId(), addressDTOs, user.getId());
+                }
+
+                EnterpriseCustomer enterpriseCustomer = new EnterpriseCustomer();
+                enterpriseCustomer.setCommunityId(cmd.getCommunityId());
+                enterpriseCustomer.setNamespaceId(organization.getNamespaceId());
+                enterpriseCustomer.setOrganizationId(organization.getId());
+                enterpriseCustomer.setName(organization.getName());
+                enterpriseCustomer.setCorpWebsite(organization.getWebsite());
+                enterpriseCustomer.setCorpLogoUri(cmd.getAvatar());
+                enterpriseCustomer.setContactAddress(organizationDetail.getAddress());
+                enterpriseCustomer.setLatitude(organizationDetail.getLatitude());
+                enterpriseCustomer.setLongitude(organizationDetail.getLongitude());
+                enterpriseCustomer.setTrackingUid(-1L);
+                enterpriseCustomerProvider.createEnterpriseCustomer(enterpriseCustomer);
+                enterpriseCustomerSearcher.feedDoc(enterpriseCustomer);
+
+                //企业管理楼栋与客户tab页的入驻信息双向同步 产品功能22898
+                this.updateCustomerEntryInfo(enterpriseCustomer, addressDTOs);
+            }
 
             return null;
         });

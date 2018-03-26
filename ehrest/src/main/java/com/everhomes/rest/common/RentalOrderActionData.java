@@ -9,7 +9,7 @@ public class RentalOrderActionData implements Serializable{
 
     private Long orderId;
     private String resourceType;
-    private Long metaObject;
+    private String metaObject;
 
     public Long getOrderId() {
         return orderId;
@@ -27,11 +27,11 @@ public class RentalOrderActionData implements Serializable{
         this.resourceType = resourceType;
     }
 
-    public Long getMetaObject() {
+    public String getMetaObject() {
         return metaObject;
     }
 
-    public void setMetaObject(Long metaObject) {
+    public void setMetaObject(String metaObject) {
         this.metaObject = metaObject;
     }
 
