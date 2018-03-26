@@ -12,6 +12,15 @@ package com.everhomes.rest.requisition;
 public class GetRequisitionDetailCommand {
     private Long requisitionId;
     private Long communityId;
+    private Long flowCaseId;
+
+    public Long getFlowCaseId() {
+        return flowCaseId;
+    }
+
+    public void setFlowCaseId(Long flowCaseId) {
+        this.flowCaseId = flowCaseId;
+    }
 
     public Long getCommunityId() {
         return communityId;

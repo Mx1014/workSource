@@ -608,7 +608,7 @@ public class SocialSecurityServiceImpl implements SocialSecurityService {
         Integer outWorkNumber = 0;
         if (cmd.getSocialSecurityMonth() != null){
             outWorkNumber = organizationProvider.queryOrganizationMemberDetailCounts(new ListingLocator(), cmd.getOwnerId(), (locator, query) -> {
-                query.addConditions(Tables.EH_ORGANIZATION_MEMBER_DETAILS.EMPLOYEE_STATUS.eq(EmployeeStatus.DISMISSAL.getCode()));
+//                query.addConditions(Tables.EH_ORGANIZATION_MEMBER_DETAILS.EMPLOYEE_STATUS.eq(EmployeeStatus.DISMISSAL.getCode()));
                 query.addConditions(Tables.EH_ORGANIZATION_MEMBER_DETAILS.DISMISS_TIME.between(getTheFirstDate(cmd.getSocialSecurityMonth()), getTheLastDate(cmd.getSocialSecurityMonth())));
                 return query;
             });
