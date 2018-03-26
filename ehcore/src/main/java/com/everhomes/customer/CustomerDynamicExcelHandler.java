@@ -34,7 +34,11 @@ import java.math.BigDecimal;
 import java.sql.Timestamp;
 import java.text.ParseException;
 import java.text.SimpleDateFormat;
+import java.time.LocalDateTime;
+import java.time.format.DateTimeFormatter;
+import java.time.temporal.TemporalAccessor;
 import java.util.*;
+import java.util.regex.Pattern;
 import java.util.stream.Collectors;
 
 /**
@@ -43,6 +47,12 @@ import java.util.stream.Collectors;
 @Component(DynamicExcelStrings.DYNAMIC_EXCEL_HANDLER + DynamicExcelStrings.CUSTOEMR)
 public class CustomerDynamicExcelHandler implements DynamicExcelHandler {
     private static final org.slf4j.Logger LOGGER = LoggerFactory.getLogger(CustomerDynamicExcelHandler.class);
+
+    DateTimeFormatter formatter1 = DateTimeFormatter.ofPattern("yyyy/MM/dd HH:mm");
+    DateTimeFormatter formatter2 = DateTimeFormatter.ofPattern("yyyy-MM-dd HH:mm");
+    DateTimeFormatter formatter3 = DateTimeFormatter.ofPattern("yyyy-MM-dd");
+    DateTimeFormatter formatter4 = DateTimeFormatter.ofPattern("yyyy/MM/dd");
+
 
     @Autowired
     private FieldProvider fieldProvider;
@@ -706,19 +716,40 @@ public class CustomerDynamicExcelHandler implements DynamicExcelHandler {
                         val = null;
                         break;
                     }
-                    Date date = new Date();
-
-                    if(sdf == null) {
-                        sdf = new SimpleDateFormat("yyyy-MM-dd HH:mm");
+                    String regex2 = "^\\d{4}-\\d{2}-\\d{2}\\s?\\d{2}:\\d{2}$";
+                    String regex3 = "^\\d{4}-\\d{2}-\\d{2}\\s?$";
+                    String regex1 = "^\\d{4}/\\d{2}/\\d{2}\\s?\\d{2}:\\d{2}$";
+                    String regex4 = "^\\d{4}/\\d{2}/\\d{2}\\s?$";
+                    Pattern pattern1 = Pattern.compile(regex1);
+                    Pattern pattern2 = Pattern.compile(regex2);
+                    Pattern pattern3 = Pattern.compile(regex3);
+                    Pattern pattern4 = Pattern.compile(regex4);
+                    TemporalAccessor q = null;
+                    if(pattern1.matcher(value.toString()).matches()){
+                        q = formatter1.parse(value.toString());
+                    }else if(pattern2.matcher(value.toString()).matches()){
+                        q =formatter2.parse(value.toString());
+                    }else if(pattern3.matcher(value.toString()).matches()){
+                        q = formatter3.parse(value.toString());
+                    }else if(pattern4.matcher(value.toString()).matches()){
+                        q = formatter4.parse(value.toString());
                     }
-                    try {
-                        date = sdf.parse((String) value);
-                    } catch (ParseException e) {
-                        val = null;
-                        break;
-                    }
 
-                    val = new Timestamp(date.getTime());
+                    val = Timestamp.valueOf(LocalDateTime.from(q));
+
+//                    Date date = new Date();
+//
+//                    if(sdf == null) {
+//                        sdf = new SimpleDateFormat("yyyy-MM-dd HH:mm");
+//                    }
+//                    try {
+//                        date = sdf.parse((String) value);
+//                    } catch (ParseException e) {
+//                        val = null;
+//                        break;
+//                    }
+//
+//                    val = new Timestamp(date.getTime());
                     break;
                 case "Integer":
                     val = Integer.parseInt((String)value);

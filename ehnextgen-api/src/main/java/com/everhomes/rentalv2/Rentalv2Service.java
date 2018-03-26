@@ -119,7 +119,9 @@ public interface Rentalv2Service {
 //			BatchCompleteBillCommand cmd);
 
 	void exportRentalBills(ListRentalBillsCommand cmd,HttpServletResponse response);
+	void exportRentalBills(SearchRentalOrdersCommand cmd,HttpServletResponse response);
 	void mappingRentalBillDTO(RentalBillDTO dto, RentalOrder bill, RentalResource rs);
+	void convertRentalOrderDTO(RentalOrderDTO dto, RentalOrder bill);
 	void addRule(AddDefaultRuleAdminCommand cmd);
 	QueryDefaultRuleAdminResponse queryDefaultRule(QueryDefaultRuleAdminCommand cmd);
 	GetResourceListAdminResponse getResourceList(GetResourceListAdminCommand cmd);

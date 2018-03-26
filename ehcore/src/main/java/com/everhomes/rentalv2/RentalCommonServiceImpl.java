@@ -143,6 +143,7 @@ public class RentalCommonServiceImpl {
         RentalOrderActionData actionData = new RentalOrderActionData();
         actionData.setOrderId(orderId);
         actionData.setResourceType(resourceType);
+        actionData.setMetaObject("");
 
         String routerUri = RouterBuilder.build(Router.RENTAL_ORDER_DETAIL, actionData);
 
