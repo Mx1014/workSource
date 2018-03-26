@@ -1581,12 +1581,12 @@ public class OrganizationController extends ControllerBase {
     }
 
     /**
-     * <b>URL: /org/listOrganizationUsers</b>
-     * <p>获取用户所在公司</p>
+     * <b>URL: /org/listOrganizationsByUser</b>
+     * <p>获取用户所在的已认证公司及公司与人的相关信息</p>
      */
-    @RequestMapping("listOrganizationUsers")
+    @RequestMapping("listOrganizationsByUser")
     @RestReturn(value = OrganizationUserDTO.class, collection = true)
-    public RestResponse listOrganizationUsers() {
+    public RestResponse listOrganizationsByUser() {
         List<OrganizationUserDTO> res = null;
         RestResponse response = new RestResponse(res);
         response.setErrorCode(ErrorCodes.SUCCESS);
