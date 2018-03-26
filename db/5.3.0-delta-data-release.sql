@@ -1563,6 +1563,7 @@ update eh_reflection_service_module_apps set action_type = 44, instance_config =
 
 
 -- 重新布局模块分类  add by yanjun 201803262114 start
+
 INSERT INTO `eh_service_modules` (`id`, `name`, `parent_id`, `path`, `type`, `level`, `status`, `default_order`, `create_time`, `instance_config`, `action_type`, `update_time`, `operator_uid`, `creator_uid`, `description`, `multiple_flag`, `module_control_type`) VALUES ('80000', '社群运营', '0', '/80000', '1', '1', '2', 20, NOW(), NULL, NULL, NOW(), '0', '0', '0', '0', '');
 INSERT INTO `eh_service_modules` (`id`, `name`, `parent_id`, `path`, `type`, `level`, `status`, `default_order`, `create_time`, `instance_config`, `action_type`, `update_time`, `operator_uid`, `creator_uid`, `description`, `multiple_flag`, `module_control_type`) VALUES ('100000', '招商管理', '0', '/100000', '1', '1', '2', 30, NOW(), NULL, NULL, NOW(), '0', '0', '0', '0', '');
 INSERT INTO `eh_service_modules` (`id`, `name`, `parent_id`, `path`, `type`, `level`, `status`, `default_order`, `create_time`, `instance_config`, `action_type`, `update_time`, `operator_uid`, `creator_uid`, `description`, `multiple_flag`, `module_control_type`) VALUES ('110000', '租赁管理', '0', '/110000', '1', '1', '2', 40, NOW(), NULL, NULL, NOW(), '0', '0', '0', '0', '');
@@ -1632,6 +1633,9 @@ UPDATE eh_service_modules SET default_order = 110 WHERE id = 40070;
 UPDATE eh_service_modules SET default_order = 120 WHERE id = 40730;
 UPDATE eh_service_modules SET default_order = 130, `name` = '园区审批【定制】' WHERE id = 41600;
 UPDATE eh_service_modules SET default_order = 140, `name` = '一卡通【储能对接】' WHERE id = 41200;
+
+-- 服务联盟
+UPDATE eh_service_modules SET parent_id = 120000 , path = '/120000/40500', default_order = 10 WHERE id = 40500;
 
 -- 物业服务
 UPDATE eh_service_modules SET default_order = 10, `name` = '物业报修/投诉建议' WHERE id = 20100;
