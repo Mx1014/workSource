@@ -20,7 +20,9 @@ CREATE TABLE `eh_organization_apps` (
   `creator_uid` bigint(20) DEFAULT NULL,
   `create_time` datetime DEFAULT NULL,
   `operator_uid` bigint(20) DEFAULT NULL,
-  `operator_time` datetime DEFAULT NULL
+  `operator_time` datetime DEFAULT NULL,
+
+  PRIMARY KEY (`id`)
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4;
 
 ALTER TABLE `eh_organization_apps` ADD INDEX `org_app_orgid` (`org_id`) ;
@@ -36,7 +38,9 @@ CREATE TABLE `eh_app_community_config` (
   `creator_uid` bigint(20) DEFAULT NULL,
   `create_time` datetime DEFAULT NULL,
   `operator_uid` bigint(20) DEFAULT NULL,
-  `operator_time` datetime DEFAULT NULL
+  `operator_time` datetime DEFAULT NULL,
+
+  PRIMARY KEY (`id`)
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4;
 
 ALTER TABLE `eh_app_community_config` ADD INDEX `organization_app_id` (`organization_app_id`) ;
