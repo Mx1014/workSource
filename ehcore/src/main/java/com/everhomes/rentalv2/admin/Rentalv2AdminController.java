@@ -520,6 +520,16 @@ public class Rentalv2AdminController extends ControllerBase {
 		rentalService.exportRentalBills(cmd, response );
 	}
 
+	/**
+	 * <b>URL: /rental/admin/exportVipRentalBills</b>
+	 * <p>
+	 * 导出预订详情（vip车位预约用）
+	 * </p>
+	 */
+	@RequestMapping("exportVipRentalBills")
+	public void exportVipRentalBills(@Valid SearchRentalOrdersCommand cmd, HttpServletResponse response) {
+		rentalService.exportRentalBills(cmd, response );
+	}
 
 //	/**
 //	 * <b>URL: /rental/admin/findRentalSitesStatus</b>
