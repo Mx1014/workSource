@@ -2272,6 +2272,7 @@ public class Rentalv2ServiceImpl implements Rentalv2Service {
 					rentalv2Provider.setAuthDoorId(order.getId(), doorAuthId.substring(0, doorAuthId.length() - 1));
 				}
 			}
+			onOrderSuccess(order);
 			//用户积分
 			LocalEventBus.publish(event -> {
 				LocalEventContext context = new LocalEventContext();

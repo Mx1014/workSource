@@ -684,12 +684,12 @@ public class WarehouseProviderImpl implements WarehouseProvider {
         DSLContext context = this.dbProvider.getDslContext(AccessSpec.readWrite());
         context.update(Tables.EH_WAREHOUSE_STOCKS)
                 .set(Tables.EH_WAREHOUSE_STOCKS.AMOUNT,Tables.EH_WAREHOUSE_STOCKS.AMOUNT.add(purchaseQuantity))
-                .where(Tables.EH_WAREHOUSE_STOCKS.ID.eq(materialId))
+                .where(Tables.EH_WAREHOUSE_STOCKS.MATERIAL_ID.eq(materialId))
                 .and(Tables.EH_WAREHOUSE_STOCKS.WAREHOUSE_ID.eq(warehouseId))
                 .execute();
         List<WarehouseStocks> warehouseStocks = context.select(Tables.EH_WAREHOUSE_STOCKS.fields())
                 .from(Tables.EH_WAREHOUSE_STOCKS)
-                .where(Tables.EH_WAREHOUSE_STOCKS.ID.eq(materialId))
+                .where(Tables.EH_WAREHOUSE_STOCKS.MATERIAL_ID.eq(materialId))
                 .and(Tables.EH_WAREHOUSE_STOCKS.WAREHOUSE_ID.eq(warehouseId))
                 .fetchInto(WarehouseStocks.class);
         if(warehouseStocks != null && warehouseStocks.size() > 0){

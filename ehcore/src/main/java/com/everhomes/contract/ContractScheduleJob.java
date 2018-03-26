@@ -43,6 +43,7 @@ import org.springframework.stereotype.Component;
 
 import java.math.BigDecimal;
 import java.sql.Timestamp;
+import java.text.ParseException;
 import java.text.SimpleDateFormat;
 import java.util.*;
 
@@ -125,14 +126,23 @@ public class ContractScheduleJob extends QuartzJobBean {
                                 if(ContractStatus.ACTIVE.equals(ContractStatus.fromStatus(contract.getStatus()))) {
                                     //正常合同转即将过期
                                     Timestamp time = addPeriod(now, param.getExpiringPeriod(), param.getExpiringUnit());
-                                    if(time.after(contract.getContractEndDate())) {
+                                    SimpleDateFormat df = new SimpleDateFormat("yyyyMMdd");
+                                    Date date = new Date();
+                                    try {
+                                        date = df.parse(df.format(contract.getContractEndDate()));
+                                    } catch (ParseException e) {
+                                        LOGGER.error("contract end date ");
+                                    }
+
+                                    Timestamp contractEndTime = new Timestamp(date.getTime());
+                                    if(time.after(contractEndTime)) {
                                         contract.setStatus(ContractStatus.EXPIRING.getCode());
                                         contractProvider.updateContract(contract);
                                         contractSearcher.feedDoc(contract);
                                     }
 
                                     Timestamp notifyTime = addPeriod(now, param.getNotifyPeriod(), param.getNotifyUnit());
-                                    if(notifyTime.after(contract.getContractEndDate())) {
+                                    if(notifyTime.after(contractEndTime)) {
                                         List<ContractParamGroupMap> maps = contractProvider.listByParamId(param.getId(), ContractParamGroupType.NOTIFY_GROUP.getCode());
                                         if(maps != null && maps.size() > 0) {
                                             Set<Long> userIds = new HashSet<Long>();
