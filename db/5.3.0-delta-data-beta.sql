@@ -127,3 +127,19 @@ enterprise.sh
 
 -- syncStandardToEqiupmentPlan 同步如果发生异常 eh_equipment_inspection_plans    eh_equipment_inspection_equipment_plan_map eh_equipment_inspection_plan_group_map 清空重新同步
 -- 执行脚本物业巡检离线的脚本equipment-inspection改成equipmentInspection，放到nar下面  品质核查的qualityInspection
+
+--
+-- 以下SQL只在深圳湾独立部署的环境执行
+--
+-- 工作流新增两个变量 add by xq.tian  2017/06/09
+SET @flow_var_max_id = (SELECT MAX(id) FROM `eh_flow_variables`);
+INSERT INTO `eh_flow_variables` (`id`, `namespace_id`, `owner_id`, `owner_type`, `module_id`, `module_type`, `name`, `label`, `var_type`, `script_type`, `script_cls`, `status`)
+VALUES ((@flow_var_max_id := @flow_var_max_id + 1), 0, 0, '', 0, '', 'user_applier_organization_manager', '发起人的企业管理员', 'node_user_processor', 'bean_id', 'flow-variable-applier-organization-manager', 1);
+INSERT INTO `eh_flow_variables` (`id`, `namespace_id`, `owner_id`, `owner_type`, `module_id`, `module_type`, `name`, `label`, `var_type`, `script_type`, `script_cls`, `status`)
+VALUES ((@flow_var_max_id := @flow_var_max_id + 1), 0, 0, '', 0, '', 'user_applier_department_manager', '发起人的部门经理', 'node_user_processor', 'bean_id', 'flow-variable-applier-department-manager', 1);
+
+SET @eh_configurations_id = IFNULL((SELECT MAX(id) FROM `eh_configurations`), 0);
+INSERT INTO `eh_configurations` (`id`, `name`, `value`, `description`, `namespace_id`, `display_name`)
+    VALUES ((@eh_configurations_id := @eh_configurations_id + 1), 'flow.stepname.approve_step', '下一步', 'approve-step', 0, NULL);
+
+UPDATE eh_flow_buttons SET button_name = '下一步' WHERE button_name = 'approve_step';

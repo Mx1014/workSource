@@ -1533,7 +1533,7 @@ private void checkUserPrivilege(Long orgId, Long privilegeId, Long communityId) 
 			//fieldService.listFields();
 			for (FieldDTO field : fields) {
 				//去除附件 经纬度cell
-				if (!(Objects.equals(field.getFieldName(), "attachments") && Objects.equals(field.getFieldName(), "geohash"))) {
+				if (!(Objects.equals(field.getFieldName(), "attachments") || Objects.equals(field.getFieldName(), "geohash"))) {
 					propertyNames.add(field.getFieldName());
 					titleNames.add(field.getFieldDisplayName());
 					titleSizes.add(20);
