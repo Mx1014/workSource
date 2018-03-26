@@ -9,12 +9,22 @@ import java.util.List;
 
 /**
  * <ul>
+ *     <li>moreCardRouter: 更多</li>
  *     <li>cardJsons: cardJsons 具体的业务提供卡片信息，模型由各个业务跟客户端定</li>
  * </ul>
  */
 public class OPPushCards {
 
+    private String moreCardRouter;
     private List<String> cardJsons;
+
+    public String getMoreCardRouter() {
+        return moreCardRouter;
+    }
+
+    public void setMoreCardRouter(String moreCardRouter) {
+        this.moreCardRouter = moreCardRouter;
+    }
 
     public List<String> getCardJsons() {
         return cardJsons;
