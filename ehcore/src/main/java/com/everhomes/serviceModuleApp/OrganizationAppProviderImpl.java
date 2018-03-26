@@ -19,7 +19,7 @@ import org.springframework.stereotype.Component;
 
 import com.everhomes.server.schema.Tables;
 import com.everhomes.sequence.SequenceProvider;
-//import com.everhomes.server.schema.tables.daos.EhOrganizationAppsDao;
+import com.everhomes.server.schema.tables.daos.EhOrganizationAppsDao;
 import com.everhomes.server.schema.tables.pojos.EhOrganizationApps;
 import com.everhomes.server.schema.tables.records.EhOrganizationAppsRecord;
 import com.everhomes.sharding.ShardIterator;
@@ -29,7 +29,7 @@ import com.everhomes.util.IterationMapReduceCallback.AfterAction;
 
 @Component
 public class OrganizationAppProviderImpl implements OrganizationAppProvider {
-    /*@Autowired
+    @Autowired
     private DbProvider dbProvider;
 
     @Autowired
@@ -109,5 +109,5 @@ public class OrganizationAppProviderImpl implements OrganizationAppProvider {
     }
 
     private void prepareObj(OrganizationApp obj) {
-    } */
+    }
 }
