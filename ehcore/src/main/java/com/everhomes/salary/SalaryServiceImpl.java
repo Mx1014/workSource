@@ -1256,6 +1256,7 @@ public class SalaryServiceImpl implements SalaryService {
         String sheetName = "sheet1";
         createDepartStatisticsHead(wb, sheet);
         List<SalaryDepartStatistic> departmentStats = salaryDepartStatisticProvider.listFiledSalaryDepartStatistic(ownerId, month);
+        LOGGER.debug("归档薪酬部门文件的stats:\n"+StringHelper.toJsonString(departmentStats));
         if (null != departmentStats) {
             for (SalaryDepartStatistic stat : departmentStats) {
                 createDepartStatisticsRow(sheet, stat);
