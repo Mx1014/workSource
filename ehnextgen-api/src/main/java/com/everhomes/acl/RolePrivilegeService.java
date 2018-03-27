@@ -428,4 +428,6 @@ public interface RolePrivilegeService {
 
 	// 获取所有应用管理员的targetIds
 	List<Long> listServiceModuleAppsAdministratorTargetIds(ListServiceModuleAdministratorsCommand cmd);
+
+	List<ProjectDTO> handleTreeProject(List<ProjectDTO> projects);
 }

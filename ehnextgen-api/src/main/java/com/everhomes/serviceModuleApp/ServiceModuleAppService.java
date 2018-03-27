@@ -2,7 +2,7 @@
 package com.everhomes.serviceModuleApp;
 
 import com.everhomes.rest.acl.ProjectDTO;
-import com.everhomes.rest.module.DistributeServiceModuleAppAuthorizationCommand;
+import com.everhomes.rest.acl.DistributeServiceModuleAppAuthorizationCommand;
 import com.everhomes.rest.module.ListProjectIdsByAppIdAndOrganizationIdCommand;
 import com.everhomes.rest.portal.ServiceModuleAppDTO;
 
