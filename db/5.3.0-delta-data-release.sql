@@ -62,6 +62,10 @@ UPDATE eh_service_modules
 SET action_type = 44
 WHERE id = 20800;
 
+UPDATE eh_service_module_apps
+SET action_type = 44
+WHERE module_id = 20800;
+
 UPDATE eh_launch_pad_items
 SET action_type = 44
 WHERE item_label LIKE '%巡检%';
@@ -90,6 +94,10 @@ WHERE id = 20600;
 UPDATE eh_service_modules
 SET action_type = 44
 WHERE id = 20600;
+
+UPDATE eh_service_module_apps
+SET action_type = 44
+WHERE module_id = 20600;
 
 UPDATE eh_launch_pad_items
 SET action_type = 44
