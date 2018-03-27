@@ -12,11 +12,15 @@ import com.everhomes.listing.ListingQueryBuilderCallback;
 import com.everhomes.locale.LocaleStringService;
 import com.everhomes.locale.LocaleTemplateService;
 import com.everhomes.mail.MailHandler;
+import com.everhomes.message.MessageService;
+import com.everhomes.messaging.MessagingService;
 import com.everhomes.organization.*;
 import com.everhomes.rest.acl.PrivilegeConstants;
+import com.everhomes.rest.app.AppConstants;
 import com.everhomes.rest.archives.*;
 import com.everhomes.rest.common.ImportFileResponse;
 import com.everhomes.rest.general_approval.*;
+import com.everhomes.rest.messaging.*;
 import com.everhomes.rest.organization.*;
 import com.everhomes.rest.rentalv2.NormalFlag;
 import com.everhomes.rest.user.IdentifierType;
@@ -112,6 +116,9 @@ public class ArchivesServiceImpl implements ArchivesService {
 
     @Autowired
     private LocaleStringService localeStringService;
+
+    @Autowired
+    private MessagingService messagingService;
 
     @Override
     public ArchivesContactDTO addArchivesContact(AddArchivesContactCommand cmd) {
@@ -2599,6 +2606,7 @@ public class ArchivesServiceImpl implements ArchivesService {
 
         //  3.send it
         sendArchivesEmails(emails, body);
+        sendArchivesMessages(ryanId, body);
     }
     private String processNotificationBody(List<OrganizationMemberDetails> employees, Date date){
         String body = "", employment = "", anniversary = "", birthday = "", contract = "", idExpiry = "";
@@ -2654,8 +2662,24 @@ public class ArchivesServiceImpl implements ArchivesService {
             handler.sendMail(UserContext.getCurrentNamespaceId(), null, email, "人事提醒", body, null);
     }
 
-    private void sendArchivesMessages(){}
+    private void sendArchivesMessages(Long userId, String body) {
+        MessageDTO message = new MessageDTO();
+        message.setBodyType(MessageBodyType.TEXT.getCode());
+        message.setBody(body);
+        message.setMetaAppId(AppConstants.APPID_DEFAULT);
+        message.setChannels(new MessageChannel(ChannelType.USER.getCode(), String.valueOf(userId)));
 
+
+        //  send the message
+        messagingService.routeMessage(
+                User.SYSTEM_USER_LOGIN,
+                AppConstants.APPID_MESSAGING,
+                ChannelType.USER.getCode(),
+                String.valueOf(userId),
+                message,
+                MessagingConstants.MSG_FLAG_STORED.getCode()
+        );
+    }
 
     /*//    @Scheduled(cron = "0 0 * * * ?")
     private void sendArchivesNotification() {
