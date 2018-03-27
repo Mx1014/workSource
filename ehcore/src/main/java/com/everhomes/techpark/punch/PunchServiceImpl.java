@@ -9206,6 +9206,7 @@ public class PunchServiceImpl implements PunchService {
         if (newALB < 0) {
             if (NormalFlag.YES == NormalFlag.fromCode(cmd.getIsBatch())) {
                 newALB = 0.0;
+                cmd.setAnnualLeaveBalanceCorrection(balance.getAnnualLeaveBalance());
             } else {
                 throw RuntimeErrorException.errorWith(
                         PunchServiceErrorCode.SCOPE, PunchServiceErrorCode.ERROR_ANNUAL_LEAVE_CORRECTION_TOO_SMALL, "年假余额不足");
@@ -9215,6 +9216,8 @@ public class PunchServiceImpl implements PunchService {
 
         if (cmd.getOvertimeCompensationBalanceCorrection() == null) {
             cmd.setOvertimeCompensationBalanceCorrection(0.0);
+            cmd.setOvertimeCompensationBalanceCorrection(balance.getOvertimeCompensationBalance());
+
         }
         Double newOCB =new BigDecimal(cmd.getOvertimeCompensationBalanceCorrection()).add(new BigDecimal(balance.getOvertimeCompensationBalance())).doubleValue();
 
