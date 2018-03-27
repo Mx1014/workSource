@@ -9202,7 +9202,7 @@ public class PunchServiceImpl implements PunchService {
         if (cmd.getAnnualLeaveBalanceCorrection() == null) {
             cmd.setAnnualLeaveBalanceCorrection(0.0);
         }
-        Double newALB = cmd.getAnnualLeaveBalanceCorrection() + balance.getAnnualLeaveBalance();
+        Double newALB = new BigDecimal(cmd.getAnnualLeaveBalanceCorrection()).add(new BigDecimal(balance.getAnnualLeaveBalance())).doubleValue();
         if (newALB < 0) {
             if (NormalFlag.YES == NormalFlag.fromCode(cmd.getIsBatch())) {
                 newALB = 0.0;
@@ -9216,7 +9216,7 @@ public class PunchServiceImpl implements PunchService {
         if (cmd.getOvertimeCompensationBalanceCorrection() == null) {
             cmd.setOvertimeCompensationBalanceCorrection(0.0);
         }
-        Double newOCB = cmd.getOvertimeCompensationBalanceCorrection() + balance.getOvertimeCompensationBalance();
+        Double newOCB =new BigDecimal(cmd.getOvertimeCompensationBalanceCorrection()).add(new BigDecimal(balance.getOvertimeCompensationBalance())).doubleValue();
 
         if (newOCB < 0) {
             if (NormalFlag.YES == NormalFlag.fromCode(cmd.getIsBatch())) {
@@ -9481,8 +9481,8 @@ public class PunchServiceImpl implements PunchService {
         if (null == overBalance) {
             return;
         }
-        Double annualLeaveBalanceCorrection = annalBalance - balance.getAnnualLeaveBalance();
-        Double overtimeCompensationBalanceCorrection = overBalance - balance.getOvertimeCompensationBalance();
+        Double annualLeaveBalanceCorrection = new BigDecimal(annalBalance ).subtract(new BigDecimal(balance.getAnnualLeaveBalance())).doubleValue() ;
+        Double overtimeCompensationBalanceCorrection = new BigDecimal(overBalance).subtract(new BigDecimal(balance.getOvertimeCompensationBalance())).doubleValue();
         balance.setAnnualLeaveBalance(annalBalance);
         balance.setOvertimeCompensationBalance(overBalance);
         saveBalanceAndLog(balance, "批量导入", annualLeaveBalanceCorrection, overtimeCompensationBalanceCorrection, userId);
