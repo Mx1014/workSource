@@ -25,6 +25,11 @@ public class ServiceModuleAppController extends ControllerBase {
 	private ServiceModuleAppService serviceModuleAppService;
 
 
+	/**
+	 * banner定制的查询应用信息
+	 * @param cmd
+	 * @return
+	 */
 	@RequestMapping("listServiceModuleAppsForBanner")
 	@RestReturn(value=ListServiceModuleAppsForBannerResponse.class)
 	public RestResponse listServiceModuleAppsForBanner(ListServiceModuleAppsForBannerCommand cmd) {
