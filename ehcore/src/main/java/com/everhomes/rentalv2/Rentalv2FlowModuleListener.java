@@ -146,10 +146,12 @@ public class Rentalv2FlowModuleListener implements FlowModuleListener {
 						if (null != status && SiteBillStatus.SUCCESS.getCode() == status) {
 							cancelOtherOrderFlag = true;
 						}
-						rentalv2Service.changeRentalOrderStatus(order, status, cancelOtherOrderFlag);
-						if (null != status && SiteBillStatus.PAYINGFINAL.getCode() == status &&
-								order.getPayTotalMoney().compareTo(BigDecimal.ZERO)==0)//免费资源 直接跳过付款步骤
-							rentalOrderEmbeddedHandler.onOrderSuccess(order);
+						if (null != status && SiteBillStatus.PAYINGFINAL.getCode() == status){
+							if (order.getPayTotalMoney().compareTo(BigDecimal.ZERO)==0)//免费资源 直接跳过付款步骤
+								rentalOrderEmbeddedHandler.onOrderSuccess(order);
+						}else{
+							rentalv2Service.changeRentalOrderStatus(order, status, cancelOtherOrderFlag);
+						}
 					}
 				}
 			}else if (FlowStepType.ABSORT_STEP.getCode().equals(stepType)){
@@ -169,7 +171,7 @@ public class Rentalv2FlowModuleListener implements FlowModuleListener {
 
 		switch (nodeType) {
 			case "agree": return SiteBillStatus.APPROVING.getCode();
-			case "unpaid": return SiteBillStatus.APPROVING.getCode();//新的产品定义 待付款的订单仍然是审批中
+			case "unpaid": return SiteBillStatus.PAYINGFINAL.getCode();
 			case "paid": return SiteBillStatus.SUCCESS.getCode();
 			case "complete": return SiteBillStatus.COMPLETE.getCode();
 			default: return null;
