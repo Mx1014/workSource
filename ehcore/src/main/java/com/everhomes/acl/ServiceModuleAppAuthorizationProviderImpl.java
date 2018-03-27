@@ -2,24 +2,24 @@ package com.everhomes.acl;
 
 import com.everhomes.db.AccessSpec;
 import com.everhomes.db.DbProvider;
-import com.everhomes.naming.NameMapper;
 import com.everhomes.listing.ListingLocator;
 import com.everhomes.listing.ListingQueryBuilderCallback;
-
-import java.util.List;
-
-import org.jooq.DSLContext;
-import org.jooq.SelectQuery;
-import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.stereotype.Component;
-
-import com.everhomes.server.schema.Tables;
+import com.everhomes.naming.NameMapper;
 import com.everhomes.sequence.SequenceProvider;
+import com.everhomes.server.schema.Tables;
 import com.everhomes.server.schema.tables.daos.EhServiceModuleAppAuthorizationsDao;
 import com.everhomes.server.schema.tables.pojos.EhServiceModuleAppAuthorizations;
 import com.everhomes.server.schema.tables.records.EhServiceModuleAppAuthorizationsRecord;
 import com.everhomes.sharding.ShardingProvider;
 import com.everhomes.util.ConvertHelper;
+import org.jooq.DSLContext;
+import org.jooq.SelectQuery;
+import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.stereotype.Component;
+
+import java.util.ArrayList;
+import java.util.List;
+import java.util.stream.Collectors;
 
 @Component
 public class ServiceModuleAppAuthorizationProviderImpl implements ServiceModuleAppAuthorizationProvider {
@@ -44,10 +44,33 @@ public class ServiceModuleAppAuthorizationProviderImpl implements ServiceModuleA
     }
 
     @Override
+    public Long createServiceModuleAppAuthorizations(List<ServiceModuleAppAuthorization> objs) {
+        long id = this.sequenceProvider.getNextSequenceBlock(NameMapper.getSequenceDomainFromTablePojo(EhServiceModuleAppAuthorizations.class), (long)objs.size());
+        DSLContext context = this.dbProvider.getDslContext(AccessSpec.readWriteWith(EhServiceModuleAppAuthorizations.class));
+        List<EhServiceModuleAppAuthorizations> authorizations = new ArrayList<>();
+        for(ServiceModuleAppAuthorization r: objs){
+            r.setId(id);
+            prepareObj(r);
+            authorizations.add(ConvertHelper.convert(r, EhServiceModuleAppAuthorizations.class));
+            id++;
+        }
+        EhServiceModuleAppAuthorizationsDao dao = new EhServiceModuleAppAuthorizationsDao(context.configuration());
+        dao.insert(authorizations);
+        return id;
+    }
+
+    @Override
     public void updateServiceModuleAppAuthorization(ServiceModuleAppAuthorization obj) {
         DSLContext context = this.dbProvider.getDslContext(AccessSpec.readWriteWith(EhServiceModuleAppAuthorizations.class));
         EhServiceModuleAppAuthorizationsDao dao = new EhServiceModuleAppAuthorizationsDao(context.configuration());
         dao.update(obj);
+    }
+
+    @Override
+    public void updateServiceModuleAppAuthorizations(List<ServiceModuleAppAuthorization> objs) {
+        DSLContext context = this.dbProvider.getDslContext(AccessSpec.readWriteWith(EhServiceModuleAppAuthorizations.class));
+        EhServiceModuleAppAuthorizationsDao dao = new EhServiceModuleAppAuthorizationsDao(context.configuration());
+        dao.update(objs.stream().map(r-> ConvertHelper.convert(r, EhServiceModuleAppAuthorizations.class)).collect(Collectors.toList()));
     }
 
     @Override

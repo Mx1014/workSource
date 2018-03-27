@@ -6,6 +6,7 @@ import com.everhomes.listing.ListingLocator;
 import com.everhomes.listing.ListingQueryBuilderCallback;
 import com.everhomes.rest.acl.DistributeServiceModuleAppAuthorizationCommand;
 import com.everhomes.rest.acl.ProjectDTO;
+import com.everhomes.rest.oauth2.ModuleManagementType;
 import com.everhomes.server.schema.Tables;
 import org.jooq.Record;
 import org.jooq.SelectQuery;
@@ -75,15 +76,14 @@ public class ServiceModuleAppAuthorizationServiceImpl implements ServiceModuleAp
         return dtos;
     }
 
-    @Override
-    public List<ServiceModuleAppAuthorization> listCommunityRelationOfOrgIdAndAppId(Integer namespaceId, Long organizationId, Long appId, Long projectId) {
+    @Autowired
+    public List<ServiceModuleAppAuthorization> listCommunityRelationOfOwnerIdAndAppId(Integer namespaceId, Long ownerId, Long appId) {
         List<ServiceModuleAppAuthorization> authorizations = serviceModuleAppAuthorizationProvider.queryServiceModuleAppAuthorizations(new ListingLocator(), MAX_COUNT_IN_A_QUERY, new ListingQueryBuilderCallback() {
             @Override
             public SelectQuery<? extends Record> buildCondition(ListingLocator locator, SelectQuery<? extends Record> query) {
-                query.addConditions(Tables.EH_SERVICE_MODULE_APP_AUTHORIZATIONS.ORGANIZATION_ID.eq(organizationId));
+                query.addConditions(Tables.EH_SERVICE_MODULE_APP_AUTHORIZATIONS.OWNER_ID.eq(ownerId));
                 query.addConditions(Tables.EH_SERVICE_MODULE_APP_AUTHORIZATIONS.NAMESPACE_ID.eq(namespaceId));
                 query.addConditions(Tables.EH_SERVICE_MODULE_APP_AUTHORIZATIONS.APP_ID.eq(appId));
-                query.addConditions(Tables.EH_SERVICE_MODULE_APP_AUTHORIZATIONS.PROJECT_ID.eq(projectId));
                 return query;
             }
         });
@@ -105,8 +105,32 @@ public class ServiceModuleAppAuthorizationServiceImpl implements ServiceModuleAp
 
     @Override
     public void distributeServiceModuleAppAuthorization(DistributeServiceModuleAppAuthorizationCommand cmd) {
+        assert cmd.getProjectIds() != null;
         // 1.先查出对应原公司 + appId 是否有匹配的园区。如果有就更新，没有就新建
-        this.listCommunityRelationOfOrgIdAndAppId(cmd.getNamespaceId(), cmd.getFromOrgId(), cmd.getAppId(), cmd.get)
+        List<ServiceModuleAppAuthorization> all_authorization = this.listCommunityRelationOfOwnerIdAndAppId(cmd.getNamespaceId(), cmd.getOwnerId(), cmd.getAppId());
+       if(all_authorization != null && all_authorization.size() > 0){
+           List<ServiceModuleAppAuthorization> update_authorization = all_authorization.stream().filter(r-> cmd.getProjectIds().contains(r.getProjectId())).collect(Collectors.toList());
+           update_authorization.forEach(r->{
+               r.setOrganizationId(cmd.getToOrgId());
+           });
+           serviceModuleAppAuthorizationProvider.updateServiceModuleAppAuthorizations(update_authorization);
+
+           List<Long> all_community_ids = all_authorization.stream().map(ServiceModuleAppAuthorization::getProjectId).collect(Collectors.toList());
+           List<Long> create_community_ids = cmd.getProjectIds().stream().filter(r-> !all_community_ids.contains(r)).collect(Collectors.toList());
+           if(create_community_ids != null && create_community_ids.size() > 0){
+               List<ServiceModuleAppAuthorization> create_authorization = new ArrayList<>();
+               create_community_ids.forEach(r->{
+                   ServiceModuleAppAuthorization authorization = new ServiceModuleAppAuthorization();
+                   authorization.setOwnerId(cmd.getOwnerId());
+                   authorization.setOrganizationId(cmd.getToOrgId());
+                   authorization.setAppId(cmd.getAppId());
+                   authorization.setNamespaceId(cmd.getNamespaceId());
+                   authorization.setControlType(ModuleManagementType.COMMUNITY_CONTROL.getCode());
+                   create_authorization.add(authorization);
+               });
+               serviceModuleAppAuthorizationProvider.createServiceModuleAppAuthorizations(create_authorization);
+           }
+       }
     }
 
 }

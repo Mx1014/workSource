@@ -8,7 +8,7 @@ import java.util.List;
  * <ul>
  * <li>namespaceId：域空间id </li>
  * <li>appId：应用id </li>
- * <li>fromOrgId：原从属公司 </li>
+ * <li>ownerId：从属的物业公司 </li>
  * <li>toOrgId：分配公司 </li>
  * <li>projectIds：项目id集合 </li>
  * </ul>
@@ -17,7 +17,7 @@ import java.util.List;
 public class DistributeServiceModuleAppAuthorizationCommand {
     private Integer namespaceId;
     private Long appId;
-    private Long fromOrgId;
+    private Long ownerId;
     private Long toOrgId;
     private List<Long> projectIds;
 
@@ -42,14 +42,6 @@ public class DistributeServiceModuleAppAuthorizationCommand {
         this.appId = appId;
     }
 
-    public Long getFromOrgId() {
-        return fromOrgId;
-    }
-
-    public void setFromOrgId(Long fromOrgId) {
-        this.fromOrgId = fromOrgId;
-    }
-
     public Long getToOrgId() {
         return toOrgId;
     }
@@ -64,5 +56,13 @@ public class DistributeServiceModuleAppAuthorizationCommand {
 
     public void setProjectIds(List<Long> projectIds) {
         this.projectIds = projectIds;
+    }
+
+    public Long getOwnerId() {
+        return ownerId;
+    }
+
+    public void setOwnerId(Long ownerId) {
+        this.ownerId = ownerId;
     }
 }
