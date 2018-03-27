@@ -813,12 +813,34 @@ public class ArchivesServiceImpl implements ArchivesService {
         return map;
     }
 
+    private String processOrgPathName(String path) {
+        StringBuilder sb = null;
+        String[] orgArray = path.split("/");
+        for (String orgId : orgArray) {
+            if (org.apache.commons.lang.StringUtils.isNotEmpty(orgId)) {
+                Organization org = organizationProvider.findOrganizationById(Long.valueOf(orgId));
+                if (null != org) {
+                    if (null == sb) {
+                        sb = new StringBuilder();
+                    } else {
+                        sb.append("/");
+                    }
+                    sb.append(org.getName());
+                }
+            }
+        }
+
+        return sb.toString();
+    }
     @Override
     public String convertToOrgNames(Map<Long, String> map) {
         String names = "";
         if (map != null && map.size() > 0) {
-            for (String value : map.values())
-                names += value + ",";
+            for (Map.Entry<Long, String> entry : map.entrySet()){
+                Organization org = organizationProvider.findOrganizationById(entry.getKey());
+                names += processOrgPathName(org.getPath()) + ",";
+            }
+            //去掉逗号
             names = names.substring(0, names.length() - 1);
         }
         return names;
