@@ -1,0 +1,6 @@
+INSERT INTO `eh_parking_lots` (`id`, `owner_type`, `owner_id`, `name`, `vendor_name`, `vendor_lot_token`, `status`, `creator_uid`, `create_time`, `namespace_id`, `recharge_json`, `config_json`) VALUES ('10028', 'community', '240111044332060200', '银星工业区停车场', 'YINXINGZHIJIE_XIAOMAO', '', '2', '1', NOW(), '999950', null, '{"tempfeeFlag": 1, "rateFlag": 0, "lockCarFlag": 0, "searchCarFlag": 0, "currentInfoType": 0,"identityCardFlag":0}');
+
+INSERT INTO `eh_configurations` (`name`, `value`, `description`, `namespace_id`, `display_name`) VALUES ('parking.yinxingzhijiexiaomao.url', 'http://119.23.144.8', '银星工业区停车场url', 0, NULL);
+INSERT INTO `eh_configurations` (`name`, `value`, `description`, `namespace_id`, `display_name`) VALUES ('parking.yinxingzhijiexiaomao.parkId', '07550003711510207386', '银星工业区停车场id', 0, NULL);
+INSERT INTO `eh_configurations` (`name`, `value`, `description`, `namespace_id`, `display_name`) VALUES ('parking.yinxingzhijiexiaomao.accessKeyId', 'yinxing', '银星工业区停车场访问者标识', 0, NULL);
+INSERT INTO `eh_configurations` (`name`, `value`, `description`, `namespace_id`, `display_name`) VALUES ('parking.yinxingzhijiexiaomao.accessKeyValue', '5c22729d4dac76f382a65974294bc8cb', '银星工业区停车场加密后的-accessKeyValue', 0, NULL);
