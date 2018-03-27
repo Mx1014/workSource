@@ -1,9 +1,13 @@
 package com.everhomes.archives;
 
+import java.sql.Date;
 import java.time.DayOfWeek;
 import java.time.LocalDate;
 import java.time.format.DateTimeFormatter;
+import java.time.format.TextStyle;
+import java.time.temporal.ChronoUnit;
 import java.time.temporal.TemporalAccessor;
+import java.util.Locale;
 
 public class ArchivesUtil {
 
@@ -44,11 +48,19 @@ public class ArchivesUtil {
     }
 
     /**
-     * 当前日期+n天
+     * 日期+n天
      */
-    public static java.sql.Date plusDate(int n){
-        LocalDate plusDate = LocalDate.now().plusDays(n);
-        return java.sql.Date.valueOf(plusDate);
+    public static java.sql.Date plusDate(java.sql.Date date, int n){
+        LocalDate resultDate = date.toLocalDate().plusDays(n);
+        return java.sql.Date.valueOf(resultDate);
+    }
+
+    /**
+     * 当前日期一年期
+     */
+    public static java.sql.Date previousYear(java.sql.Date date){
+        LocalDate previousYear = date.toLocalDate().minusYears(1);
+        return java.sql.Date.valueOf(previousYear);
     }
 
     /**
