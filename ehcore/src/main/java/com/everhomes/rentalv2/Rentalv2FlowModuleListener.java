@@ -169,7 +169,7 @@ public class Rentalv2FlowModuleListener implements FlowModuleListener {
 
 		switch (nodeType) {
 			case "agree": return SiteBillStatus.APPROVING.getCode();
-			case "unpaid": return SiteBillStatus.PAYINGFINAL.getCode();
+			case "unpaid": return SiteBillStatus.APPROVING.getCode();//新的产品定义 待付款的订单仍然是审批中
 			case "paid": return SiteBillStatus.SUCCESS.getCode();
 			case "complete": return SiteBillStatus.COMPLETE.getCode();
 			default: return null;
