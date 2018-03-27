@@ -10,10 +10,13 @@ import java.text.SimpleDateFormat;
 import java.util.*;
 
 import com.everhomes.flow.*;
+import com.everhomes.flow.conditionvariable.FlowConditionNumberVariable;
+import com.everhomes.flow.conditionvariable.FlowConditionStringVariable;
 import com.everhomes.flow.node.FlowGraphNodeEnd;
 import com.everhomes.flow.node.FlowGraphNodeStart;
 import com.everhomes.organization.Organization;
 import com.everhomes.rest.flow.*;
+import com.everhomes.rest.general_approval.GeneralFormFieldType;
 import com.everhomes.rest.rentalv2.SiteBillStatus;
 import com.everhomes.rest.rentalv2.admin.ResourceTypeStatus;
 import com.everhomes.util.StringHelper;
@@ -146,12 +149,7 @@ public class Rentalv2FlowModuleListener implements FlowModuleListener {
 						if (null != status && SiteBillStatus.SUCCESS.getCode() == status) {
 							cancelOtherOrderFlag = true;
 						}
-						if (null != status && SiteBillStatus.PAYINGFINAL.getCode() == status){
-							if (order.getPayTotalMoney().compareTo(BigDecimal.ZERO)==0)//免费资源 直接跳过付款步骤
-								rentalOrderEmbeddedHandler.onOrderSuccess(order);
-						}else{
-							rentalv2Service.changeRentalOrderStatus(order, status, cancelOtherOrderFlag);
-						}
+						rentalv2Service.changeRentalOrderStatus(order, status, cancelOtherOrderFlag);
 					}
 				}
 			}else if (FlowStepType.ABSORT_STEP.getCode().equals(stepType)){
@@ -688,5 +686,31 @@ public class Rentalv2FlowModuleListener implements FlowModuleListener {
 			return dto;
 		}).collect(Collectors.toList());
 		return dtos;
+	}
+
+	@Override
+	public List<FlowConditionVariableDTO> listFlowConditionVariables(Flow flow, FlowEntityType flowEntityType, String ownerType, Long ownerId) {
+		List<FlowConditionVariableDTO> list = new ArrayList<>();
+		FlowConditionVariableDTO dto = new FlowConditionVariableDTO();
+		dto.setDisplayName("金额");
+		dto.setName("amount");
+		dto.setFieldType(GeneralFormFieldType.NUMBER_TEXT.getCode());
+		dto.setOperators(new ArrayList<>());
+		dto.getOperators().add(FlowConditionRelationalOperatorType.EQUAL.getCode());
+		dto.getOperators().add(FlowConditionRelationalOperatorType.GREATER_THEN.getCode());
+		list.add(dto);
+		return list;
+	}
+
+	@Override
+	public FlowConditionVariable onFlowConditionVariableRender(FlowCaseState ctx, String variable, String extra) {
+		//目前只有类型一个分支参数
+		if ("amount".equals(variable)) {
+			FlowCase flowcase = ctx.getFlowCase();
+			RentalOrder order = rentalv2Provider.findRentalBillById(flowcase.getReferId());
+			FlowConditionNumberVariable flowConditionNumberVariable = new FlowConditionNumberVariable(order.getPayTotalMoney());
+			return flowConditionNumberVariable;
+		}
+		return null;
 	}
 }

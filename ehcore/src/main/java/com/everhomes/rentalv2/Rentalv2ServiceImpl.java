@@ -3637,7 +3637,7 @@ public class Rentalv2ServiceImpl implements Rentalv2Service {
 						&& (order.getPaidMoney().compareTo(new BigDecimal(0)) == 1)){
 
 					BigDecimal orderAmount = handler.getRefundAmount(order, timestamp);
-					if (PayMode.ONLINE_PAY.equals(order.getPayMode())||PayMode.APPROVE_ONLINE_PAY.equals(order.getPayMode())) {
+					if (PayMode.ONLINE_PAY.getCode()==(order.getPayMode())||PayMode.APPROVE_ONLINE_PAY.getCode()==(order.getPayMode())) {
 						rentalCommonService.refundOrder(order, timestamp, orderAmount);
 						//更新bill状态
 						order.setStatus(SiteBillStatus.REFUNDED.getCode());
