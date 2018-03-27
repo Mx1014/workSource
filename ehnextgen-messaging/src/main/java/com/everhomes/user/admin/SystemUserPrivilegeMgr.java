@@ -77,6 +77,9 @@ public class SystemUserPrivilegeMgr implements UserPrivilegeMgr {
     @Autowired
     private ServiceModuleAppService serviceModuleAppService;
 
+    @Autowired
+    private ServiceModuleAppAuthorizationService serviceModuleAppAuthorizationService;
+
 
     @Override
     @Deprecated
@@ -473,7 +476,7 @@ public class SystemUserPrivilegeMgr implements UserPrivilegeMgr {
             if(null != organization){
                 // modify start
                 if(checkCommunityId != null){
-                    if(!checkCommunityRelationOfOrgId(namespaceId, currentOrgId, checkCommunityId))
+                    if(!serviceModuleAppAuthorizationService.checkCommunityRelationOfOrgId(UserContext.getCurrentNamespaceId(), currentOrgId, checkCommunityId))
                         return false;
                 }
                 // modify end
