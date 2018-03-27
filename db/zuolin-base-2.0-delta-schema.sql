@@ -2,6 +2,7 @@
  CREATE TABLE `eh_service_module_app_authorizations` (
   `id` BIGINT(20) NOT NULL,
   `namespace_id` INT(11) DEFAULT NULL,
+  `owner_id` BIGINT(20) NOT NULL DEFAULT '0' COMMENT 'owner_id',
   `organization_id` BIGINT(20) NOT NULL DEFAULT '0' COMMENT 'organization_id',
   `project_id` BIGINT(20) NOT NULL DEFAULT '0' COMMENT 'community_id',
   `app_id` BIGINT(20)  NOT NULL DEFAULT '0' COMMENT 'app_id',

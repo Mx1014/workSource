@@ -76,6 +76,21 @@ public class ServiceModuleAppAuthorizationServiceImpl implements ServiceModuleAp
     }
 
     @Override
+    public List<ServiceModuleAppAuthorization> listCommunityRelationOfOrgIdAndAppId(Integer namespaceId, Long organizationId, Long appId, Long projectId) {
+        List<ServiceModuleAppAuthorization> authorizations = serviceModuleAppAuthorizationProvider.queryServiceModuleAppAuthorizations(new ListingLocator(), MAX_COUNT_IN_A_QUERY, new ListingQueryBuilderCallback() {
+            @Override
+            public SelectQuery<? extends Record> buildCondition(ListingLocator locator, SelectQuery<? extends Record> query) {
+                query.addConditions(Tables.EH_SERVICE_MODULE_APP_AUTHORIZATIONS.ORGANIZATION_ID.eq(organizationId));
+                query.addConditions(Tables.EH_SERVICE_MODULE_APP_AUTHORIZATIONS.NAMESPACE_ID.eq(namespaceId));
+                query.addConditions(Tables.EH_SERVICE_MODULE_APP_AUTHORIZATIONS.APP_ID.eq(appId));
+                query.addConditions(Tables.EH_SERVICE_MODULE_APP_AUTHORIZATIONS.PROJECT_ID.eq(projectId));
+                return query;
+            }
+        });
+        return authorizations;
+    }
+
+    @Override
     public List<Long> listCommunityAppIdOfOrgId(Integer namespaceId, Long organizationId) {
         List<ServiceModuleAppAuthorization> authorizations = serviceModuleAppAuthorizationProvider.queryServiceModuleAppAuthorizations(new ListingLocator(), MAX_COUNT_IN_A_QUERY, new ListingQueryBuilderCallback() {
             @Override
@@ -90,7 +105,8 @@ public class ServiceModuleAppAuthorizationServiceImpl implements ServiceModuleAp
 
     @Override
     public void distributeServiceModuleAppAuthorization(DistributeServiceModuleAppAuthorizationCommand cmd) {
-
+        // 1.先查出对应原公司 + appId 是否有匹配的园区。如果有就更新，没有就新建
+        this.listCommunityRelationOfOrgIdAndAppId(cmd.getNamespaceId(), cmd.getFromOrgId(), cmd.getAppId(), cmd.get)
     }
 
 }
