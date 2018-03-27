@@ -88,9 +88,9 @@ public class RentalOrderEmbeddedHandler implements OrderEmbeddedHandler {
 					}
 				} else if (order.getStatus().equals(SiteBillStatus.SUCCESS.getCode())) {
 					LOGGER.error("待付款订单:id [" + order.getId() + "] 状态已经是成功预约");
-				} else if (order.getStatus().equals(SiteBillStatus.IN_USING) || (order.getStatus().equals(SiteBillStatus.OWING_FEE))) {//vip停车的欠费和续费
+				} else if (order.getStatus().equals(SiteBillStatus.IN_USING.getCode()) || (order.getStatus().equals(SiteBillStatus.OWING_FEE.getCode()))) {//vip停车的欠费和续费
 					if (order.getPayTotalMoney().compareTo(order.getPaidMoney()) == 0) {
-						if (order.getStatus().equals(SiteBillStatus.OWING_FEE))
+						if (order.getStatus().equals(SiteBillStatus.OWING_FEE.getCode()))
 							order.setStatus(SiteBillStatus.COMPLETE.getCode());
 						rentalProvider.updateRentalBill(order);
 					}else{
