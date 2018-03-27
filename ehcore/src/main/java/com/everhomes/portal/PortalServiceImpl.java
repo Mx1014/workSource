@@ -2921,6 +2921,7 @@ public class PortalServiceImpl implements PortalService {
 		return scope;
 	}
 
+	@Override
 	public PortalPublishHandler getPortalPublishHandler(Long moduleId) {
 		PortalPublishHandler handler = null;
 

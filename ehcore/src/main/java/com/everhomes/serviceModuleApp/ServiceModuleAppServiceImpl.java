@@ -8,10 +8,14 @@ import com.everhomes.db.DbProvider;
 import com.everhomes.module.ServiceModule;
 import com.everhomes.module.ServiceModuleProvider;
 import com.everhomes.naming.NameMapper;
+import com.everhomes.portal.PortalPublishHandler;
+import com.everhomes.portal.PortalService;
 import com.everhomes.portal.PortalVersion;
 import com.everhomes.portal.PortalVersionProvider;
 import com.everhomes.rest.portal.ServiceModuleAppDTO;
 import com.everhomes.rest.portal.ServiceModuleAppStatus;
+import com.everhomes.rest.servicemoduleapp.ListServiceModuleAppsForBannerCommand;
+import com.everhomes.rest.servicemoduleapp.ListServiceModuleAppsForBannerResponse;
 import com.everhomes.sequence.SequenceProvider;
 import com.everhomes.server.schema.Tables;
 import com.everhomes.server.schema.tables.daos.EhServiceModuleAppsDao;
@@ -46,6 +50,8 @@ public class ServiceModuleAppServiceImpl implements ServiceModuleAppService {
 
 	@Autowired
 	private PortalVersionProvider portalVersionProvider;
+	@Autowired
+	private PortalService portalService;
 
 
 	@Override
@@ -161,4 +167,32 @@ public class ServiceModuleAppServiceImpl implements ServiceModuleAppService {
 		return null;
 	}
 
+
+	@Override
+	public ListServiceModuleAppsForBannerResponse listServiceModuleAppsForBanner(ListServiceModuleAppsForBannerCommand cmd) {
+
+		List<ServiceModuleApp> apps = listReleaseServiceModuleApps(cmd.getNamespaceId());
+
+		if(apps == null){
+			return null;
+		}
+
+		List<ServiceModuleAppDTO> dtos = new ArrayList<>();
+		for (ServiceModuleApp app: apps){
+			if(app.getActionType() == null){
+				continue;
+			}
+			ServiceModuleAppDTO dto = ConvertHelper.convert(app, ServiceModuleAppDTO.class);
+			PortalPublishHandler handler = portalService.getPortalPublishHandler(app.getModuleId());
+
+			if(null != handler){
+				dto.setInstanceConfig(handler.getItemActionData(app.getNamespaceId(), app.getInstanceConfig()));
+			}
+			dtos.add(dto);
+		}
+
+		ListServiceModuleAppsForBannerResponse  response = new ListServiceModuleAppsForBannerResponse();
+		response.setApps(dtos);
+		return response;
+	}
 }
