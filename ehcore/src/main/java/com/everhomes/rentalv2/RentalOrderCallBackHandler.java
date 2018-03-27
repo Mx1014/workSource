@@ -148,7 +148,15 @@ public class RentalOrderCallBackHandler implements PaymentCallBackHandler {
 					}
 				}else if(order.getStatus().equals(SiteBillStatus.SUCCESS.getCode())){
 					LOGGER.error("待付款订单:id ["+order.getId()+"] 状态已经是成功预约");
-				}else{
+				}else if (order.getStatus().equals(SiteBillStatus.IN_USING) || (order.getStatus().equals(SiteBillStatus.OWING_FEE))) {//vip停车的欠费和续费
+					if (order.getPayTotalMoney().compareTo(order.getPaidMoney()) == 0) {
+						if (order.getStatus().equals(SiteBillStatus.OWING_FEE))
+							order.setStatus(SiteBillStatus.COMPLETE.getCode());
+						rentalProvider.updateRentalBill(order);
+					}else{
+						LOGGER.error("待付款订单:id [" + order.getId() + "]付款金额有问题： 应该付款金额：" + order.getPayTotalMoney() + "实际付款金额：" + order.getPaidMoney());
+					}
+				} else{
 					LOGGER.error("待付款订单:id ["+order.getId()+"]状态有问题： 订单状态是："+order.getStatus());
 				}
 

@@ -79,6 +79,7 @@ public class DingDingParkingLockHandler {
             }else if (entity.getLockStatus().equals("02")) {
                 lockInfo.setLockStatus(ParkingSpaceLockStatus.UP.getCode());
             }
+            return lockInfo;
         }
 
         return null;

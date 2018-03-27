@@ -78,6 +78,7 @@ public class PurchaseProviderImpl implements PurchaseProvider {
         query.addConditions(purchase.OWNER_TYPE.eq(ownerType));
         query.addConditions(purchase.NAMESPACE_ID.eq(namespaceId));
         query.addLimit(pageAnchor.intValue(), pageSize);
+        query.addOrderBy(purchase.CREATE_TIME.desc());
         SimpleDateFormat sdf = new SimpleDateFormat("yyyy-MM-dd HH:mm");
         query.fetch()
                 .forEach(r -> {

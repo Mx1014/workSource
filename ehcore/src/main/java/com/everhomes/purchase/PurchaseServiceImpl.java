@@ -273,6 +273,12 @@ public class PurchaseServiceImpl implements PurchaseService {
             logs.setRequestId(purchaseOrder.getId());
             warehouseProvider.insertWarehouseStockLog(logs);
         }
+        //将purchaseOrder的warehouseStatus状态改变
+        resetWarehouseStatusForPurchaseOrder(WarehouseStatus.ENABLE.getCode(), purchaseRequestId);
+    }
+
+    private void resetWarehouseStatusForPurchaseOrder(byte status, Long purchaseRequestId) {
+        warehouseProvider.resetWarehouseStatusForPurchaseOrder(status, purchaseRequestId);
     }
 
     @Override

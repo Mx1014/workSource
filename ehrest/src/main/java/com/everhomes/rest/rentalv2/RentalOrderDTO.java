@@ -25,6 +25,7 @@ import java.util.Date;
  * <li>actualEndTime: 实际结束时间</li>
  * <li>createTime: 订单创建时间</li>
  * <li>payTime: 支付时间</li>
+ * <li>payMode: 资源支付方式</li>
  * <li>overTime: 超时时间 单位分钟</li>
  * <li>cancelTime: cancelTime</li>
  * <li>totalAmount: 总金额</li>
@@ -64,6 +65,7 @@ public class RentalOrderDTO {
 	private Long payTime;
 	private Long overTime;
 	private Long cancelTime;
+	private Byte payMode;
 	private BigDecimal totalAmount;
 	private BigDecimal paidAmount;
 	private BigDecimal unPayAmount;
@@ -307,4 +309,11 @@ public class RentalOrderDTO {
 		this.orderNo = orderNo;
 	}
 
+	public Byte getPayMode() {
+		return payMode;
+	}
+
+	public void setPayMode(Byte payMode) {
+		this.payMode = payMode;
+	}
 }

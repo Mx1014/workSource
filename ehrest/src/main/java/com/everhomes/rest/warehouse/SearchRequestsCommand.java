@@ -18,7 +18,6 @@ import com.everhomes.util.StringHelper;
  */
 public class SearchRequestsCommand {
 
-    private Long requestId;
 
     private String ownerType;
 
@@ -38,13 +37,6 @@ public class SearchRequestsCommand {
 
     private Long communityId;
 
-    public Long getRequestId() {
-        return requestId;
-    }
-
-    public void setRequestId(Long requestId) {
-        this.requestId = requestId;
-    }
 
     public Long getCommunityId() {
         return communityId;
