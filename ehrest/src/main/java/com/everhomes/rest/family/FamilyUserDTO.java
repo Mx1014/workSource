@@ -1,27 +1,22 @@
-package com.everhomes.rest.organization;
+package com.everhomes.rest.family;
 
 import com.everhomes.rest.community.CommunityUserDTO;
-import com.everhomes.util.StringHelper;
-
-import java.util.List;
-
+import com.everhomes.rest.group.GroupMemberStatus;
 
 /**
  * <ul>
  *     <li>id: id</li>
- *     <li>name: 显示名称</li>
+ *     <li>name: 名称</li>
  *     <li>aliasName: 别名</li>
- *     <li>avatarUri: 头像Uri</li>
- *     <li>avatarUrl: 显示头像URL</li>
+ *     <li>avatarUri: 头像uri</li>
+ *     <li>avatarUrl: 头像url</li>
  *     <li>fullPinyin: 拼音全拼</li>
- *     <li>capitalPinyin: capitalPinyin</li>
- *     <li>organizationType: 公司类型 {@link OrganizationType}</li>
- *     <li>status: status  {@link OrganizationMemberStatus}</li>
- *     <li>communities: 公司所在园区</li>
+ *     <li>capitalPinyin: 拼音首写字母</li>
+ *     <li>status: status {@link GroupMemberStatus}</li>
+ *     <li>community: 家庭所在园区 {@link com.everhomes.rest.community.CommunityUserDTO}</li>
  * </ul>
  */
-public class OrganizationUserDTO {
-
+public class FamilyUserDTO {
     private Long id;
     private String name;
     private String aliasName;
@@ -29,9 +24,8 @@ public class OrganizationUserDTO {
     private String avatarUrl;
     private String fullPinyin;
     private String capitalPinyin;
-    private Byte organizationType;
     private Byte status;
-    private List<CommunityUserDTO> communities;
+    private CommunityUserDTO community;
 
     public Long getId() {
         return id;
@@ -89,14 +83,6 @@ public class OrganizationUserDTO {
         this.capitalPinyin = capitalPinyin;
     }
 
-    public Byte getOrganizationType() {
-        return organizationType;
-    }
-
-    public void setOrganizationType(Byte organizationType) {
-        this.organizationType = organizationType;
-    }
-
     public Byte getStatus() {
         return status;
     }
@@ -105,16 +91,11 @@ public class OrganizationUserDTO {
         this.status = status;
     }
 
-    public List<CommunityUserDTO> getCommunities() {
-        return communities;
+    public CommunityUserDTO getCommunity() {
+        return community;
     }
 
-    public void setCommunities(List<CommunityUserDTO> communities) {
-        this.communities = communities;
-    }
-
-    @Override
-    public String toString() {
-        return StringHelper.toJsonString(this);
+    public void setCommunity(CommunityUserDTO community) {
+        this.community = community;
     }
 }
