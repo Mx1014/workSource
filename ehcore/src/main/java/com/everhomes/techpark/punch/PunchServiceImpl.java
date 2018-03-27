@@ -9156,6 +9156,8 @@ public class PunchServiceImpl implements PunchService {
             if (keyWords != null) {
                 query.addConditions(Tables.EH_ORGANIZATION_MEMBER_DETAILS.CONTACT_TOKEN.eq(keyWords).or(Tables.EH_ORGANIZATION_MEMBER_DETAILS.CONTACT_NAME.like("%" + keyWords + "%")));
             }
+            query.addConditions(Tables.EH_ORGANIZATION_MEMBER_DETAILS.EMPLOYEE_STATUS.ne(EmployeeStatus.DISMISSAL.getCode()));
+
             int offset = ((pageOffSet == null ? 1 : pageOffSet) - 1) * (pageSize);
             query.addOrderBy(Tables.EH_ORGANIZATION_MEMBER_DETAILS.CHECK_IN_TIME.desc());
             query.addLimit(offset, pageSize + 1);
