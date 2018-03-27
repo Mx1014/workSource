@@ -9504,6 +9504,17 @@ public class PunchServiceImpl implements PunchService {
                 log.setErrorDescription(log.getErrorLog());
                 response.getLogs().add(log);
                 return null;
+            }else{
+                String annalBalanceStr = annalBalance + "";
+                if (annalBalanceStr.contains(".") && annalBalanceStr.length() - annalBalanceStr.indexOf(".") > 4) {
+                    String errorString = "年假余额小数点位数不超过3";
+                    LOGGER.error(errorString);
+                    log.setErrorLog(errorString);
+                    log.setCode(PunchServiceErrorCode.ERROR_IS_MINUS);
+                    log.setErrorDescription(log.getErrorLog());
+                    response.getLogs().add(log);
+                    return null;
+                }
             }
         } catch (Exception e) {
             String errorString = "年假余额不是数字";
