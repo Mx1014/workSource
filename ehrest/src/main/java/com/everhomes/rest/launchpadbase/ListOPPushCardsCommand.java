@@ -2,43 +2,32 @@
 package com.everhomes.rest.launchpadbase;
 
 
+import com.everhomes.rest.launchpadbase.groupinstanceconfig.OPPush;
 import com.everhomes.util.StringHelper;
 
 import javax.validation.constraints.NotNull;
 
 /**
  * <ul>
- *     <li>communityId: 小区id</li>
- *     <li>orgId: 公司id</li>
+ *     <li>content: content {@link com.everhomes.rest.launchpadbase.ContentDTO}</li>
  *     <li>layoutId: layoutId</li>
- *     <li>instanceConfig: 从layout的group中获取，其中包含了组件信息</li>
+ *     <li>instanceConfig: 从layout的group中获取，参考{@link OPPush}。其中itemGroup字段包含了组件信息，例如活动为OPPushActivity</li>
  * </ul>
  */
 public class ListOPPushCardsCommand {
-
-    @NotNull
-    private Long communityId;
-
-    private Long orgId;
 
     private Long layoutId;
 
     private String instanceConfig;
 
-    public Long getCommunityId() {
-        return communityId;
+    private ContentDTO content;
+
+    public ContentDTO getContent() {
+        return content;
     }
 
-    public void setCommunityId(Long communityId) {
-        this.communityId = communityId;
-    }
-
-    public Long getOrgId() {
-        return orgId;
-    }
-
-    public void setOrgId(Long orgId) {
-        this.orgId = orgId;
+    public void setContent(ContentDTO content) {
+        this.content = content;
     }
 
     public Long getLayoutId() {

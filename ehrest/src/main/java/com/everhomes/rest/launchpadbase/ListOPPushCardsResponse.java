@@ -9,14 +9,14 @@ import java.util.List;
 
 /**
  * <ul>
- *     <li>moreCardRouter: 更多</li>
- *     <li>cardJsons: cardJsons 具体的业务提供卡片信息，模型由各个业务跟客户端定</li>
+ *     <li>moreCardRouter: 跳转更多路由</li>
+ *     <li>cards: 卡片信息{@link OPPushCard} </li>
  * </ul>
  */
-public class OPPushCards {
+public class ListOPPushCardsResponse {
 
     private String moreCardRouter;
-    private List<String> cardJsons;
+    private List<OPPushCard> cards;
 
     public String getMoreCardRouter() {
         return moreCardRouter;
@@ -26,12 +26,12 @@ public class OPPushCards {
         this.moreCardRouter = moreCardRouter;
     }
 
-    public List<String> getCardJsons() {
-        return cardJsons;
+    public List<OPPushCard> getCards() {
+        return cards;
     }
 
-    public void setCardJsons(List<String> cardJsons) {
-        this.cardJsons = cardJsons;
+    public void setCards(List<OPPushCard> cards) {
+        this.cards = cards;
     }
 
     @Override

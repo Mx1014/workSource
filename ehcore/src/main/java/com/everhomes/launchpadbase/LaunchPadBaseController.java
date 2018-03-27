@@ -7,7 +7,6 @@ import com.everhomes.discover.RestReturn;
 import com.everhomes.rest.RestResponse;
 import com.everhomes.rest.launchpad.*;
 import com.everhomes.rest.launchpadbase.*;
-import com.everhomes.rest.portal.ServiceModuleAppDTO;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RestController;
 
@@ -36,7 +35,7 @@ public class LaunchPadBaseController extends ControllerBase {
      * <p>广场根据组件获取应用</p>
      */
     @RequestMapping("listLaunchPadApps")
-    @RestReturn(value=AppDTO.class)
+    @RestReturn(value=ListLaunchPadAppsResponse.class)
     public RestResponse listLaunchPadApps(ListLaunchPadAppsCommand cmd) {
         RestResponse response =  new RestResponse();
         response.setErrorCode(ErrorCodes.SUCCESS);
@@ -49,7 +48,7 @@ public class LaunchPadBaseController extends ControllerBase {
      * <p>获取运营板块信息</p>
      */
     @RequestMapping("listOPPushCards")
-    @RestReturn(value=OPPushCards.class)
+    @RestReturn(value=ListOPPushCardsResponse.class)
     public RestResponse listOPPushCards(ListOPPushCardsCommand cmd) {
         RestResponse response =  new RestResponse();
         response.setErrorCode(ErrorCodes.SUCCESS);

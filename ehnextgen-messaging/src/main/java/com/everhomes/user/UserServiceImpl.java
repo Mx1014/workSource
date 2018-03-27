@@ -5510,8 +5510,8 @@ public class UserServiceImpl implements UserService {
         Long l = configurationProvider.getLongValue(namespaceId, ConfigConstants.PAY_PLATFORM, 0L);
         resp.setPaymentPlatform(l);
 
-		Integer mypublishFlag = configurationProvider.getIntValue(namespaceId, ConfigConstants.MY_PUBLISH_FLAG, 1);
-		resp.setMyPublishFlag(mypublishFlag.byteValue());
+//		Integer mypublishFlag = configurationProvider.getIntValue(namespaceId, ConfigConstants.MY_PUBLISH_FLAG, 1);
+//		resp.setMyPublishFlag(mypublishFlag.byteValue());
 
 		// 客户端资源缓存配置
 		String clientCacheConfig = configurationProvider.getValue(

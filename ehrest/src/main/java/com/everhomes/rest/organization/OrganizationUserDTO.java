@@ -17,7 +17,7 @@ import java.util.List;
  *     <li>capitalPinyin: capitalPinyin</li>
  *     <li>organizationType: 公司类型 {@link OrganizationType}</li>
  *     <li>status: status  {@link OrganizationMemberStatus}</li>
- *     <li>communities: 公司所在园区</li>
+ *     <li>siteDtos: 办公地点site列表 参考{@link OrganizationSiteDTO}</li>
  * </ul>
  */
 public class OrganizationUserDTO {
@@ -31,7 +31,7 @@ public class OrganizationUserDTO {
     private String capitalPinyin;
     private Byte organizationType;
     private Byte status;
-    private List<CommunityUserDTO> communities;
+    private List<OrganizationSiteDTO> siteDtos;
 
     public Long getId() {
         return id;
@@ -105,12 +105,12 @@ public class OrganizationUserDTO {
         this.status = status;
     }
 
-    public List<CommunityUserDTO> getCommunities() {
-        return communities;
+    public List<OrganizationSiteDTO> getSiteDtos() {
+        return siteDtos;
     }
 
-    public void setCommunities(List<CommunityUserDTO> communities) {
-        this.communities = communities;
+    public void setSiteDtos(List<OrganizationSiteDTO> siteDtos) {
+        this.siteDtos = siteDtos;
     }
 
     @Override

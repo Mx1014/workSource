@@ -7,39 +7,20 @@ import java.util.List;
 
 /**
  * <ul>
- *     <li>versionCode: versionCode</li>
- *     <li>layoutName: layoutName</li>
- *     <li>displayName: displayName</li>
+ *     <li>OPPush的配置信息，现在的关键信息是itemGroup用于区分是哪个类型，其他字段以后再加</li>
+ *     <li>itemGroup: itemGroup，例如：活动为OPPushActivity</li>
  * </ul>
  */
 public class OPPush {
 
-    private String versionCode;
-    private String layoutName;
-    private String displayName;
+    private String itemGroup;
 
-    public String getVersionCode() {
-        return versionCode;
+    public String getItemGroup() {
+        return itemGroup;
     }
 
-    public void setVersionCode(String versionCode) {
-        this.versionCode = versionCode;
-    }
-
-    public String getLayoutName() {
-        return layoutName;
-    }
-
-    public void setLayoutName(String layoutName) {
-        this.layoutName = layoutName;
-    }
-
-    public String getDisplayName() {
-        return displayName;
-    }
-
-    public void setDisplayName(String displayName) {
-        this.displayName = displayName;
+    public void setItemGroup(String itemGroup) {
+        this.itemGroup = itemGroup;
     }
 
     @Override
