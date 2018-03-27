@@ -3099,11 +3099,12 @@ public class AssetServiceImpl implements AssetService {
             return dto;
         }
         // 各个：在工作的standard不能删除，不在工作的可以，并且查看是否有bro，有则干掉
-        boolean safe = checkSafeDeleteId(Tables.EH_PAYMENT_CHARGING_STANDARDS.getName(),cmd.getChargingStandardId(),cmd.getOwnerType(),cmd.getOwnerId());
-        if(!safe){
-            dto.setFailCause(AssetPaymentConstants.DELETE_CHARGING_STANDARD_UNSAFE);
-            return dto;
-        }
+        // 没有定时需要chargingStandard的，生成账单时的timing基本不会遇到，这是很少进行删除操作的后台
+//        boolean safe = checkSafeDeleteId(Tables.EH_PAYMENT_CHARGING_STANDARDS.getName(),cmd.getChargingStandardId(),cmd.getOwnerType(),cmd.getOwnerId());
+//        if(!safe){
+//            dto.setFailCause(AssetPaymentConstants.DELETE_CHARGING_STANDARD_UNSAFE);
+//            return dto;
+//        }f
         // 对于个体园区，删除c,s,f，对于id为standardid的，顺便查询是否有brother，有则干掉
         assetProvider.deleteChargingStandard(cmd.getChargingStandardId(),cmd.getOwnerId(),cmd.getOwnerType(),deCouplingFlag);
 //            dto.setFailCause(AssetPaymentConstants.DELETE_SUCCCESS);

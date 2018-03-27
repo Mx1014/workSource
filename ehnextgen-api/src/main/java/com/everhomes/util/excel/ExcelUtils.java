@@ -644,17 +644,17 @@ public class ExcelUtils {
         DecimalFormat df = new DecimalFormat("0");  //格式化number String字符
         String dateFormat = ds.getDateFormat();
         SimpleDateFormat sdf = null;
-        if(null == dateFormat){
-            sdf = new SimpleDateFormat("yyyy-MM-dd");
-        }else{
-            try{
-                sdf = new SimpleDateFormat(dateFormat);  //日期格式化
-            }catch (Exception e){
-                sdf = new SimpleDateFormat("yyyy-MM-dd");
-            }
-        }
-
-        DecimalFormat df2 = new DecimalFormat("0.00");  //格式化数字
+//        if(null == dateFormat){
+//            sdf = new SimpleDateFormat("yyyy-MM-dd");
+//        }else{
+//            try{
+//                sdf = new SimpleDateFormat(dateFormat);  //日期格式化
+//            }catch (Exception e){
+//                sdf = new SimpleDateFormat("yyyy-MM-dd");
+//            }
+//        }
+//
+//        DecimalFormat df2 = new DecimalFormat("0.00");  //格式化数字
         if(cell == null){
             return "";
         }
@@ -663,13 +663,14 @@ public class ExcelUtils {
                 value = cell.getRichStringCellValue().getString();
                 break;
             case Cell.CELL_TYPE_NUMERIC:
-                if("General".equals(cell.getCellStyle().getDataFormatString())){
-                    value = df.format(cell.getNumericCellValue());
-                }else if("m/d/yy".equals(cell.getCellStyle().getDataFormatString())){
-                    value = sdf.format(cell.getDateCellValue());
-                }else{
-                    value = df2.format(cell.getNumericCellValue());
-                }
+//                if("General".equals(cell.getCellStyle().getDataFormatString())){
+//                    value = df.format(cell.getNumericCellValue());
+//                }else if("m/d/yy".equals(cell.getCellStyle().getDataFormatString())){
+//                    value = sdf.format(cell.getDateCellValue());
+//                }else{
+//                    value = df2.format(cell.getNumericCellValue());
+//                }
+                value = cell.getStringCellValue();
                 break;
             case Cell.CELL_TYPE_BOOLEAN:
                 Boolean booleanCellValue = cell.getBooleanCellValue();

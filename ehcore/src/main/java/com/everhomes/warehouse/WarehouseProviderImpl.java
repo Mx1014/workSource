@@ -912,6 +912,15 @@ public class WarehouseProviderImpl implements WarehouseProvider {
     }
 
     @Override
+    public void resetWarehouseStatusForPurchaseOrder(byte status, Long purchaseRequestId) {
+        DSLContext context = this.dbProvider.getDslContext(AccessSpec.readWrite());
+        context.update(Tables.EH_WAREHOUSE_PURCHASE_ORDERS)
+                .set(Tables.EH_WAREHOUSE_PURCHASE_ORDERS.WAREHOUSE_STATUS, status)
+                .where(Tables.EH_WAREHOUSE_PURCHASE_ORDERS.ID.eq(purchaseRequestId))
+                .execute();
+    }
+
+    @Override
     public Long getWarehouseStockAmount(Long warehouseId, String ownerType, Long ownerId) {
         DSLContext context = dbProvider.getDslContext(AccessSpec.readOnly());
         SelectQuery<EhWarehouseStocksRecord> query = context.selectQuery(Tables.EH_WAREHOUSE_STOCKS);
