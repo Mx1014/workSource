@@ -1536,12 +1536,12 @@ public class UserController extends ControllerBase {
 	}
 
 	/**
-	 * <b>URL: /user/ListUserAddressResponse</b>
+	 * <b>URL: /user/listUserAddress</b>
 	 * <p>根据用户域空间场景获取用户相关的地址列表</p>
 	 */
-	@RequestMapping("ListUserAddressResponse")
+	@RequestMapping("listUserAddress")
 	@RestReturn(value=ListUserAddressResponse.class)
-	public RestResponse ListUserAddress() {
+	public RestResponse listUserAddress() {
 		//List<UserServiceAddressDTO> result = this.userActivityService.getUserRelateServiceAddress();
 		ListUserAddressResponse res = null;
 
