@@ -1585,7 +1585,7 @@ public class OrganizationController extends ControllerBase {
      * <p>获取用户所在的已认证公司及公司与人的相关信息</p>
      */
     @RequestMapping("listOrganizationsByUser")
-    @RestReturn(value = OrganizationUserDTO.class, collection = true)
+    @RestReturn(value = ListOrganizationsByUserResponse.class)
     public RestResponse listOrganizationsByUser() {
         List<OrganizationUserDTO> res = null;
         RestResponse response = new RestResponse(res);

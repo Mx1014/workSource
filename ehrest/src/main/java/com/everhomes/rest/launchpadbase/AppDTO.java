@@ -5,8 +5,8 @@ import com.everhomes.util.StringHelper;
 /**
  * <ul>
  *     <li>name: 应用名称</li>
- *     <li>iconUrl: iconUrl</li>
- *     <li>router: router</li>
+ *     <li>iconUrl: iconUrl，应用图标信息</li>
+ *     <li>router: router，跳转路由</li>
  * </ul>
  */
 public class AppDTO {

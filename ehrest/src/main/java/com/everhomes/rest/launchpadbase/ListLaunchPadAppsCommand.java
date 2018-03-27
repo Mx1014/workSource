@@ -10,14 +10,14 @@ import javax.validation.constraints.NotNull;
  * <ul>
  *     <li>layoutId: layoutId</li>
  *     <li>itemGroup: 当前item归属哪个组，来源layout里的itemGroup</li>
- *     <li>communityId: 小区id</li>
+ *     <li>content: 上下文信息content {@link com.everhomes.rest.launchpadbase.ContentDTO}</li>
  * </ul>
  */
 public class ListLaunchPadAppsCommand {
 
     private Long layoutId;
     private String itemGroup;
-    private Long communityId;
+    private ContentDTO content;
 
     public Long getLayoutId() {
         return layoutId;
@@ -35,12 +35,12 @@ public class ListLaunchPadAppsCommand {
         this.itemGroup = itemGroup;
     }
 
-    public Long getCommunityId() {
-        return communityId;
+    public ContentDTO getContent() {
+        return content;
     }
 
-    public void setCommunityId(Long communityId) {
-        this.communityId = communityId;
+    public void setContent(ContentDTO content) {
+        this.content = content;
     }
 
     @Override

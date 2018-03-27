@@ -447,7 +447,7 @@ public class CommunityController extends ControllerBase {
      * <p>查询所有园区、小区及园区和用户的相关信息</p>
      */
     @RequestMapping("listCommunitiesByUser")
-    @RestReturn(value=CommunityUserDTO.class, collection = true)
+    @RestReturn(value=ListCommunitiesByUserResponse.class)
     public RestResponse listCommunitiesByUser() {
 
         List<CommunityUserDTO> res = null;

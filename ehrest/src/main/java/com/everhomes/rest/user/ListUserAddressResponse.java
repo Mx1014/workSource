@@ -12,31 +12,29 @@ import java.util.List;
 
 /**
  * <ul>
- *     <li>familyList: 家庭列表，{@link FamilyDTO}</li>
- *     <li>organizationList: 机构列表，{@link OrganizationDTO}</li>
+ *     <li>families: 家庭列表，参考{@link FamilyUserDTO}</li>
+ *     <li>organizations: 公司列表，参考{@link OrganizationUserDTO}</li>
  * </ul>
  */
 public class ListUserAddressResponse {
-    @ItemType(FamilyUserDTO.class)
-    private List<FamilyUserDTO> familyList;
+    private List<FamilyUserDTO> families;
 
-    @ItemType(OrganizationDetailDTO.class)
-    private List<OrganizationUserDTO> organizationList;
+    private List<OrganizationUserDTO> organizations;
 
-    public List<FamilyUserDTO> getFamilyList() {
-        return familyList;
+    public List<FamilyUserDTO> getFamilies() {
+        return families;
     }
 
-    public void setFamilyList(List<FamilyUserDTO> familyList) {
-        this.familyList = familyList;
+    public void setFamilies(List<FamilyUserDTO> families) {
+        this.families = families;
     }
 
-    public List<OrganizationUserDTO> getOrganizationList() {
-        return organizationList;
+    public List<OrganizationUserDTO> getOrganizations() {
+        return organizations;
     }
 
-    public void setOrganizationList(List<OrganizationUserDTO> organizationList) {
-        this.organizationList = organizationList;
+    public void setOrganizations(List<OrganizationUserDTO> organizations) {
+        this.organizations = organizations;
     }
 
     @Override

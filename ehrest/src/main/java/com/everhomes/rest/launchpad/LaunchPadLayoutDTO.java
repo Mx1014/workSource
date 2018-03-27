@@ -8,7 +8,7 @@ import java.sql.Timestamp;
 
 /**
  * <ul>
- * <li>id: itemId</li>
+ * <li>id: 广场布局Id</li>
  * <li>namespaceId: 命名空间</li>
  * <li>name: 名字</li>
  * <li>layoutJson: 服务市场版本风格，参考{@link LayoutJsonDTO}</li>
@@ -16,9 +16,9 @@ import java.sql.Timestamp;
  * <li>minVersionCode: 最小支持版本</li>
  * <li>status: 状态</li>
  * <li>createTime: 创建时间</li>
- * <li>sceneType: 场景类型</li>
- * <li>bgImageUri: 背景图片</li>
- * <li>bgImageUrl: 背景图片</li>
+ * <li>sceneType: 场景类型（以前的字段，标准版不用）</li>
+ * <li>bgImageUri: 背景图片（以前的字段，标准版不用）</li>
+ * <li>bgImageUrl: 背景图片（以前的字段，标准版不用）</li>
  * </ul>
  */
 public class LaunchPadLayoutDTO {
