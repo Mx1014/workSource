@@ -893,7 +893,7 @@ public class ZuolinAssetVendorHandler implements AssetVendorHandler {
         cur++;
         headList.add("增收备注");
         cur++;
-        String[] headers = (String[]) headList.toArray();
+        String[] headers = headList.toArray(new String[headList.size()]);
         String fileName = webPage.getBillGroupName();
         ExcelUtils excelUtils = new ExcelUtils(response,"账单模板"+System.currentTimeMillis()+".xlxs",fileName+"模板");
         excelUtils.setMandatoryTitle(mandatoryIndex);
