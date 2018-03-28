@@ -9452,6 +9452,15 @@ public class PunchServiceImpl implements PunchService {
                 log.setErrorDescription(log.getErrorLog());
                 response.getLogs().add(log);
             }
+
+            if (null == r.getC() || null == r.getD()) {
+                LOGGER.error("余额不可以是空");
+                log.setErrorLog("余额不可以是空");
+                log.setCode(PunchServiceErrorCode.ERROR_CHECK_CONTACT);
+                log.setErrorDescription(log.getErrorLog());
+                response.getLogs().add(log);
+            }
+
             String userContact = r.getA().trim();
             OrganizationMemberDetails detail = organizationProvider.findOrganizationMemberDetailsByOrganizationIdAndContactToken(ownerId, userContact);
             if (null == detail) {
