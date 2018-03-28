@@ -6028,4 +6028,24 @@ public class ActivityServiceImpl implements ActivityService {
 //		excelUtils.setNeedSequenceColumn(false);
 //		excelUtils.writeExcel(propertyNames, titleNames, titleSizes, dtos);
 //	}
+
+
+    @Override
+    public ListActivitiesByCategoryIdResponse listActivitiesByCategoryId(ListActivitiesByCategoryIdCommand cmd) {
+
+	    if(cmd.getPageSize() == null){
+	        cmd.setPageSize(20L);
+        }
+        Condition condition = Tables.EH_ACTIVITIES.NAMESPACE_ID.eq(cmd.getNamespaceId());
+        condition = condition.and(Tables.EH_ACTIVITIES.CATEGORY_ID.eq(cmd.getCategoryId()));
+        condition = condition.and(Tables.EH_ACTIVITIES.CLONE_FLAG.in(PostCloneFlag.NORMAL.getCode(), PostCloneFlag.REAL.getCode()));
+        CrossShardListingLocator locator = new CrossShardListingLocator();
+        List<Activity> activities = this.activityProvider.listActivities(locator, cmd.getPageSize().intValue(), condition, null, null);
+
+        List<ActivityDTO> dtos = activities.stream().map(r -> ConvertHelper.convert(r, ActivityDTO.class)).collect(Collectors.toList());
+        ListActivitiesByCategoryIdResponse response = new ListActivitiesByCategoryIdResponse();
+        response.setDtos(dtos);
+        return response;
+
+    }
 }
