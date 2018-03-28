@@ -763,6 +763,9 @@ public class BannerServiceImpl implements BannerService {
 
             banner.setActionType(result.getActionType());
             banner.setActionData(result.getActionData());
+
+            banner.setTargetType(cmd.getTargetType());
+            banner.setTargetData(cmd.getTargetData());
         }
         bannerProvider.updateBanner(banner);
         return toBannerDTO(banner);

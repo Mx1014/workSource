@@ -4,16 +4,16 @@ import com.everhomes.util.StringHelper;
 
 /**
  * <ul>
- *     <li>appId: 应用id</li>
- *     <li>appName: 应用名称</li>
+ *     <li>originId: 应用id</li>
+ *     <li>name: 应用名称</li>
  *     <li>actionType: actionType</li>
  *     <li>actionData: actionData</li>
  * </ul>
  */
 public class BannerAppTargetData {
 
-    private Long appId;
-    private String appName;
+    private Long originId;
+    private String name;
 
     private Byte actionType;
     private String actionData;
@@ -34,20 +34,20 @@ public class BannerAppTargetData {
         this.actionData = actionData;
     }
 
-    public Long getAppId() {
-        return appId;
+    public Long getOriginId() {
+        return originId;
     }
 
-    public void setAppId(Long appId) {
-        this.appId = appId;
+    public void setOriginId(Long originId) {
+        this.originId = originId;
     }
 
-    public String getAppName() {
-        return appName;
+    public String getName() {
+        return name;
     }
 
-    public void setAppName(String appName) {
-        this.appName = appName;
+    public void setName(String name) {
+        this.name = name;
     }
 
     @Override

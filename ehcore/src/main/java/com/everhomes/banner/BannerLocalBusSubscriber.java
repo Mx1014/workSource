@@ -74,8 +74,8 @@ public class BannerLocalBusSubscriber implements LocalBusSubscriber, Application
             BannerTargetActivityDetailHandler handler = PlatformContext.getComponent(BannerTargetActivityDetailHandler.class);
 
             BannerActivityTargetData targetData = new BannerActivityTargetData();
-            targetData.setEntryId(forumId);
-            targetData.setActivityId(postId);
+            targetData.setForumId(forumId);
+            targetData.setPostId(postId);
 
             BannerTargetHandleResult result = handler.evaluate(StringHelper.toJsonString(targetData));
 
@@ -85,7 +85,7 @@ public class BannerLocalBusSubscriber implements LocalBusSubscriber, Application
             BannerTargetPostDetailHandler handler = PlatformContext.getComponent(BannerTargetPostDetailHandler.class);
 
             BannerPostTargetData targetData = new BannerPostTargetData();
-            targetData.setEntryId(forumId);
+            targetData.setForumId(forumId);
             targetData.setPostId(postId);
 
             BannerTargetHandleResult result = handler.evaluate(StringHelper.toJsonString(targetData));

@@ -4,33 +4,37 @@ import com.everhomes.util.StringHelper;
 
 /**
  * <ul>
- *     <li>entryId: 入口id</li>
- *     <li>entryName: 入口名称</li>
- *     <li>activityId: 活动id</li>
- *     <li>activityName: 活动名称</li>
+ *     <li>categoryId: 活动分类id</li>
+ *     <li>name: 活动应用名称</li>
+ *     <li>activityId: 活动id,可选参数</li>
+ *     <li>subject: 活动主题</li>
+ *     <li>postId: 帖子id</li>
+ *     <li>forumId: 论坛id</li>
  * </ul>
  */
 public class BannerActivityTargetData {
 
-    private Long entryId;
-    private String entryName;
+    private Long categoryId;
+    private String name;
     private Long activityId;
-    private String activityName;
+    private String subject;
+    private Long postId;
+    private Long forumId;
 
-    public Long getEntryId() {
-        return entryId;
+    public Long getCategoryId() {
+        return categoryId;
     }
 
-    public void setEntryId(Long entryId) {
-        this.entryId = entryId;
+    public void setCategoryId(Long categoryId) {
+        this.categoryId = categoryId;
     }
 
-    public String getEntryName() {
-        return entryName;
+    public String getName() {
+        return name;
     }
 
-    public void setEntryName(String entryName) {
-        this.entryName = entryName;
+    public void setName(String name) {
+        this.name = name;
     }
 
     public Long getActivityId() {
@@ -41,12 +45,28 @@ public class BannerActivityTargetData {
         this.activityId = activityId;
     }
 
-    public String getActivityName() {
-        return activityName;
+    public String getSubject() {
+        return subject;
     }
 
-    public void setActivityName(String activityName) {
-        this.activityName = activityName;
+    public void setSubject(String subject) {
+        this.subject = subject;
+    }
+
+    public Long getPostId() {
+        return postId;
+    }
+
+    public void setPostId(Long postId) {
+        this.postId = postId;
+    }
+
+    public Long getForumId() {
+        return forumId;
+    }
+
+    public void setForumId(Long forumId) {
+        this.forumId = forumId;
     }
 
     @Override

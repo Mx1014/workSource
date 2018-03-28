@@ -32,8 +32,8 @@ public class BannerTargetActivityDetailHandler implements BannerTargetHandler {
                 StringHelper.fromJsonString(targetData, BannerActivityTargetData.class);
 
         ActivityDetailActionData actionData = new ActivityDetailActionData();
-        actionData.setForumId(dataObj.getEntryId());
-        actionData.setTopicId(dataObj.getActivityId());
+        actionData.setForumId(dataObj.getForumId());
+        actionData.setTopicId(dataObj.getPostId());
 
         String uri = RouterBuilder.build(Router.ACTIVITY_DETAIL, actionData);
         res.setActionData(formatURI(uri));

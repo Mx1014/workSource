@@ -78,10 +78,10 @@ public class BannerServiceImplTest extends CoreServerTestCase {
         cmd.setTargetType(BannerTargetType.ACTIVITY_DETAIL.getCode());
 
         BannerActivityTargetData targetData = new BannerActivityTargetData();
-        targetData.setActivityId(1L);
-        targetData.setActivityName("name");
-        targetData.setEntryId(1L);
-        targetData.setEntryName("dasdasd");
+        targetData.setPostId(1L);
+        targetData.setForumId(1L);
+        targetData.setName("name");
+        targetData.setSubject("dasdasd");
 
         cmd.setTargetData(StringHelper.toJsonString(targetData));
 

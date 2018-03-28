@@ -17,6 +17,7 @@ import java.util.List;
  */
 public class CreateBannerCommand {
 
+    @NotNull
     private Integer namespaceId;
     @NotNull
     private String name;

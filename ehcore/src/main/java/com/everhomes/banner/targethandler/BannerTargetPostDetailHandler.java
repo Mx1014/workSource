@@ -33,7 +33,7 @@ public class BannerTargetPostDetailHandler implements BannerTargetHandler {
                 StringHelper.fromJsonString(targetData, BannerPostTargetData.class);
 
         PostDetailActionData actionData = new PostDetailActionData();
-        actionData.setForumId(dataObj.getEntryId());
+        actionData.setForumId(dataObj.getForumId());
         actionData.setTopicId(dataObj.getPostId());
 
         String uri = RouterBuilder.build(Router.POST_DETAIL, actionData);

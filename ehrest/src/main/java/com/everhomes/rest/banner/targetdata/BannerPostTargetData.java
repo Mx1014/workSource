@@ -4,33 +4,35 @@ import com.everhomes.util.StringHelper;
 
 /**
  * <ul>
- *     <li>entryId: 入口id</li>
- *     <li>entryName: 入口名称</li>
+ *     <li>forumEntryId: 论坛入口id</li>
+ *     <li>name: 应用入口名称</li>
  *     <li>postId: 帖子id</li>
- *     <li>postName: 帖子名称</li>
+ *     <li>forumId: 论坛id</li>
+ *     <li>subject: 帖子主题</li>
  * </ul>
  */
 public class BannerPostTargetData {
 
-    private Long entryId;
-    private String entryName;
+    private Long forumEntryId;
+    private String name;
     private Long postId;
-    private String postName;
+    private Long forumId;
+    private String subject;
 
-    public Long getEntryId() {
-        return entryId;
+    public Long getForumEntryId() {
+        return forumEntryId;
     }
 
-    public void setEntryId(Long entryId) {
-        this.entryId = entryId;
+    public void setForumEntryId(Long forumEntryId) {
+        this.forumEntryId = forumEntryId;
     }
 
-    public String getEntryName() {
-        return entryName;
+    public String getName() {
+        return name;
     }
 
-    public void setEntryName(String entryName) {
-        this.entryName = entryName;
+    public void setName(String name) {
+        this.name = name;
     }
 
     public Long getPostId() {
@@ -41,12 +43,20 @@ public class BannerPostTargetData {
         this.postId = postId;
     }
 
-    public String getPostName() {
-        return postName;
+    public String getSubject() {
+        return subject;
     }
 
-    public void setPostName(String postName) {
-        this.postName = postName;
+    public void setSubject(String subject) {
+        this.subject = subject;
+    }
+
+    public Long getForumId() {
+        return forumId;
+    }
+
+    public void setForumId(Long forumId) {
+        this.forumId = forumId;
     }
 
     @Override
