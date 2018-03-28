@@ -3641,6 +3641,7 @@ public class Rentalv2ServiceImpl implements Rentalv2Service {
 						rentalCommonService.refundOrder(order, timestamp, orderAmount);
 						//更新bill状态
 						order.setStatus(SiteBillStatus.REFUNDED.getCode());
+						order.setRefundAmount(orderAmount);
 					}
 					else {
 						order.setRefundAmount(orderAmount);
