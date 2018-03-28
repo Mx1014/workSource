@@ -1256,6 +1256,7 @@ public class SalaryServiceImpl implements SalaryService {
         String sheetName = "sheet1";
         createDepartStatisticsHead(wb, sheet);
         List<SalaryDepartStatistic> departmentStats = salaryDepartStatisticProvider.listFiledSalaryDepartStatistic(ownerId, month);
+        LOGGER.debug("归档薪酬部门文件的stats:\n"+StringHelper.toJsonString(departmentStats));
         if (null != departmentStats) {
             for (SalaryDepartStatistic stat : departmentStats) {
                 createDepartStatisticsRow(sheet, stat);
@@ -1552,7 +1553,7 @@ public class SalaryServiceImpl implements SalaryService {
         salaryEmployeePeriodValProvider.deleteEmployeePeriodVals(ownerId, month);
         // 由于部门汇总的归档未归档在一张表里,所以带上归档状态(删除归档的)
         salaryDepartStatisticProvider.deleteSalaryDepartStatistic(ownerId, NormalFlag.YES.getCode(), month);
-        List<SalaryDepartStatistic> dpts = salaryDepartStatisticProvider.listSalaryDepartStatistic(ownerId, NormalFlag.YES.getCode(), month);
+        List<SalaryDepartStatistic> dpts = salaryDepartStatisticProvider.listSalaryDepartStatistic(ownerId, NormalFlag.NO.getCode(), month);
         if (null != dpts) {
             for (SalaryDepartStatistic dpt : dpts) {
                 dpt.setIsFile(NormalFlag.YES.getCode());

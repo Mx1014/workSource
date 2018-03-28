@@ -121,4 +121,6 @@ public interface WarehouseProvider {
     String findMaterialSupplierNameByMaterialId(Long materialId);
 
     Long findRequisitionId(Long requestId);
+
+    void resetWarehouseStatusForPurchaseOrder(byte status, Long purchaseRequestId);
 }

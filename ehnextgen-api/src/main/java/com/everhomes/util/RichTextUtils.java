@@ -22,7 +22,7 @@ public class RichTextUtils {
      *      String rt = "<p>测试简介1</p><p><img src=\"https://content-1.zuolin.com/xxx/xxx\"/>";
      *      String processed = RichTextUtils.processImages(rt, csURI -> {
      *          // do some your action
-     *          return doSomeYourAction(url);
+     *          return doSomeYourAction(csURI);
      *      });
      * }
      * </pre>

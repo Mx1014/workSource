@@ -70,6 +70,7 @@ import java.time.LocalDateTime;
 import java.time.ZoneId;
 import java.time.format.DateTimeFormatter;
 import java.util.ArrayList;
+import java.util.HashSet;
 import java.util.List;
 import java.util.stream.Collectors;
 
@@ -1585,7 +1586,7 @@ public class WarehouseServiceImpl implements WarehouseService {
         if (cmd.getPageAnchor() != null) {
             anchor = cmd.getPageAnchor();
         }
-        SearchRequestsResponse response = getWarehouseRequestMaterials(ids, cmd.getOwnerType(), cmd.getOwnerId(), pageSize, anchor, cmd.getCommunityId(),cmd.getRequestId());
+        SearchRequestsResponse response = getWarehouseRequestMaterials(ids, cmd.getOwnerType(), cmd.getOwnerId(), pageSize, anchor, cmd.getCommunityId());
         return response;
     }
 
@@ -1599,7 +1600,74 @@ public class WarehouseServiceImpl implements WarehouseService {
         if (cmd.getPageAnchor() != null) {
             anchor = cmd.getPageAnchor();
         }
-        SearchRequestsResponse response = getWarehouseRequestMaterials(ids, cmd.getOwnerType(), cmd.getOwnerId(), pageSize, anchor, cmd.getCommunityId(),cmd.getRequestId());
+//        SearchRequestsResponse response = getWarehouseRequestMaterials(ids, cmd.getOwnerType(), cmd.getOwnerId(), pageSize, anchor, cmd.getCommunityId());
+        //改成找一个request,同样的request去重
+        SearchRequestsResponse response = getWarehouseRequests(ids, cmd.getOwnerType(), cmd.getOwnerId(), pageSize, anchor, cmd.getCommunityId());
+
+        return response;
+    }
+
+    private SearchRequestsResponse getWarehouseRequests(List<Long> ids, String ownerType, Long ownerId, int pageSize, Long anchor, Long communityId) {
+        SearchRequestsResponse response = new SearchRequestsResponse();
+        List<WarehouseRequestMaterialDTO> requestDTOs = new ArrayList<>();
+        if (ids.size() > pageSize) {
+            response.setNextPageAnchor(anchor + 1);
+            ids.remove(ids.size() - 1);
+        } else {
+            response.setNextPageAnchor(null);
+        }
+        List<WarehouseRequestMaterials> requestMaterials = warehouseProvider.listWarehouseRequestMaterials(ids, ownerType, ownerId, communityId);
+        HashSet<Long> repeadFilter = new HashSet<>();
+        for(WarehouseRequestMaterials requestMaterial : requestMaterials){
+            if(repeadFilter.contains(requestMaterial.getRequestId())){
+                continue;
+            }
+            WarehouseRequestMaterialDTO dto = ConvertHelper.convert(requestMaterial, WarehouseRequestMaterialDTO.class);
+            //增加flowCaseId
+            //flow case id get
+            FlowCase flowcase = flowCaseProvider.findFlowCaseByReferId(requestMaterial.getRequestId()
+                    , EntityType.WAREHOUSE_REQUEST.getCode(), PrivilegeConstants.WAREHOUSE_MODULE_ID);
+            if(flowcase!=null){
+                dto.setFlowCaseId(flowcase.getId());
+            }
+            // 找到物品
+            WarehouseMaterials warehouseMaterial = warehouseProvider.findWarehouseMaterials(requestMaterial.getMaterialId(), requestMaterial.getOwnerType(), requestMaterial.getOwnerId(), requestMaterial.getCommunityId());
+            if (warehouseMaterial != null) {
+                dto.setMaterialName(warehouseMaterial.getName());
+                dto.setMaterialNumber(warehouseMaterial.getMaterialNumber());
+            }
+            // 找到仓库
+            Warehouses warehouse = warehouseProvider.findWarehouse(requestMaterial.getWarehouseId(), requestMaterial.getOwnerType(), requestMaterial.getOwnerId(), requestMaterial.getCommunityId());
+            if (warehouse != null) {
+                dto.setWarehouseName(warehouse.getName());
+            }
+            //找到库存
+            WarehouseStocks stock = warehouseProvider.findWarehouseStocksByWarehouseAndMaterial(requestMaterial.getWarehouseId(), requestMaterial.getMaterialId(), requestMaterial.getOwnerType(), requestMaterial.getOwnerId(), requestMaterial.getCommunityId());
+            if (stock != null) {
+                dto.setStockAmount(stock.getAmount());
+            }
+            // 找到领用
+            WarehouseRequests request = warehouseProvider.findWarehouseRequests(requestMaterial.getRequestId(), requestMaterial.getOwnerType(), requestMaterial.getOwnerId(), requestMaterial.getCommunityId());
+            if (request != null) {
+                dto.setRequestId(request.getId());
+                dto.setRequestUid(request.getRequestUid());
+                dto.setCreateTime(request.getCreateTime());
+                if(request.getDeliveryFlag().byteValue() == DeliveryFlag.YES.getCode()){
+                    dto.setDeliveryTime(request.getUpdateTime());
+                }
+                if (dto.getRequestUid() != null) {
+                    List<OrganizationMember> members = organizationProvider.listOrganizationMembers(dto.getRequestUid());
+                    if (members != null && members.size() > 0) {
+                        dto.setRequestUserName(members.get(0).getContactName());
+                    }
+                }
+            }
+            //返回requisitionId
+            dto.setRequisitionId(warehouseProvider.findRequisitionId(requestMaterial.getRequestId()));
+            repeadFilter.add(requestMaterial.getRequestId());
+            requestDTOs.add(dto);
+        }
+        response.setRequestDTOs(requestDTOs);
         return response;
     }
 
@@ -1734,7 +1802,7 @@ public class WarehouseServiceImpl implements WarehouseService {
         return response;
     }
 
-    private SearchRequestsResponse getWarehouseRequestMaterials(List<Long> ids, String ownerType, Long ownerId, Integer pageSize, Long anchor, Long communityId, Long requestId) {
+    private SearchRequestsResponse getWarehouseRequestMaterials(List<Long> ids, String ownerType, Long ownerId, Integer pageSize, Long anchor, Long communityId) {
         SearchRequestsResponse response = new SearchRequestsResponse();
         if (ids.size() > pageSize) {
             response.setNextPageAnchor(anchor + 1);

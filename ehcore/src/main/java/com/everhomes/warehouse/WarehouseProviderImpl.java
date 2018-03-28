@@ -684,12 +684,12 @@ public class WarehouseProviderImpl implements WarehouseProvider {
         DSLContext context = this.dbProvider.getDslContext(AccessSpec.readWrite());
         context.update(Tables.EH_WAREHOUSE_STOCKS)
                 .set(Tables.EH_WAREHOUSE_STOCKS.AMOUNT,Tables.EH_WAREHOUSE_STOCKS.AMOUNT.add(purchaseQuantity))
-                .where(Tables.EH_WAREHOUSE_STOCKS.ID.eq(materialId))
+                .where(Tables.EH_WAREHOUSE_STOCKS.MATERIAL_ID.eq(materialId))
                 .and(Tables.EH_WAREHOUSE_STOCKS.WAREHOUSE_ID.eq(warehouseId))
                 .execute();
         List<WarehouseStocks> warehouseStocks = context.select(Tables.EH_WAREHOUSE_STOCKS.fields())
                 .from(Tables.EH_WAREHOUSE_STOCKS)
-                .where(Tables.EH_WAREHOUSE_STOCKS.ID.eq(materialId))
+                .where(Tables.EH_WAREHOUSE_STOCKS.MATERIAL_ID.eq(materialId))
                 .and(Tables.EH_WAREHOUSE_STOCKS.WAREHOUSE_ID.eq(warehouseId))
                 .fetchInto(WarehouseStocks.class);
         if(warehouseStocks != null && warehouseStocks.size() > 0){
@@ -909,6 +909,15 @@ public class WarehouseProviderImpl implements WarehouseProvider {
                 .from(Tables.EH_WAREHOUSE_REQUESTS)
                 .where(Tables.EH_WAREHOUSE_REQUESTS.ID.eq(requestId))
                 .fetchOne(Tables.EH_WAREHOUSE_REQUESTS.REQUISITION_ID);
+    }
+
+    @Override
+    public void resetWarehouseStatusForPurchaseOrder(byte status, Long purchaseRequestId) {
+        DSLContext context = this.dbProvider.getDslContext(AccessSpec.readWrite());
+        context.update(Tables.EH_WAREHOUSE_PURCHASE_ORDERS)
+                .set(Tables.EH_WAREHOUSE_PURCHASE_ORDERS.WAREHOUSE_STATUS, status)
+                .where(Tables.EH_WAREHOUSE_PURCHASE_ORDERS.ID.eq(purchaseRequestId))
+                .execute();
     }
 
     @Override

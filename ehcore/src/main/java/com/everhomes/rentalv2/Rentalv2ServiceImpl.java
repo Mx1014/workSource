@@ -2272,6 +2272,7 @@ public class Rentalv2ServiceImpl implements Rentalv2Service {
 					rentalv2Provider.setAuthDoorId(order.getId(), doorAuthId.substring(0, doorAuthId.length() - 1));
 				}
 			}
+			onOrderSuccess(order);
 			//用户积分
 			LocalEventBus.publish(event -> {
 				LocalEventContext context = new LocalEventContext();
@@ -3632,15 +3633,15 @@ public class Rentalv2ServiceImpl implements Rentalv2Service {
 		dbProvider.execute((TransactionStatus status) -> {
 			//如果是预约成功，则要判断是否退款，否则将订单置为已取消
 			if (order.getStatus().equals(SiteBillStatus.SUCCESS.getCode())) {
-				if ((order.getRefundFlag().equals(NormalFlag.NEED.getCode())
-						|| (null != order.getRefundStrategy() && order.getRefundStrategy() != RentalOrderStrategy.NONE.getCode()))
+				if (null != order.getRefundStrategy() && order.getRefundStrategy() != RentalOrderStrategy.NONE.getCode()
 						&& (order.getPaidMoney().compareTo(new BigDecimal(0)) == 1)){
 
 					BigDecimal orderAmount = handler.getRefundAmount(order, timestamp);
-					if (PayMode.ONLINE_PAY.equals(order.getPayMode())||PayMode.APPROVE_ONLINE_PAY.equals(order.getPayMode())) {
+					if (PayMode.ONLINE_PAY.getCode()==(order.getPayMode())||PayMode.APPROVE_ONLINE_PAY.getCode()==(order.getPayMode())) {
 						rentalCommonService.refundOrder(order, timestamp, orderAmount);
 						//更新bill状态
 						order.setStatus(SiteBillStatus.REFUNDED.getCode());
+						order.setRefundAmount(orderAmount);
 					}
 					else {
 						order.setRefundAmount(orderAmount);
