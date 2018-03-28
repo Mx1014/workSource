@@ -22,6 +22,7 @@ import javax.validation.Valid;
 @RequestMapping("/servicemoduleapp")
 public class ServiceModuleAppController extends ControllerBase {
 
+	@Autowired
 	private ServiceModuleAppService serviceModuleAppService;
 
 
