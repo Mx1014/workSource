@@ -16,6 +16,8 @@ import com.everhomes.rest.contract.FindContractCommand;
 import com.everhomes.rest.flow.*;
 import com.everhomes.rest.organization.pm.AddressMappingStatus;
 import com.everhomes.search.ContractSearcher;
+import com.everhomes.serviceModuleApp.ServiceModuleApp;
+import com.everhomes.serviceModuleApp.ServiceModuleAppService;
 import com.everhomes.user.UserProvider;
 import com.everhomes.util.Tuple;
 import org.slf4j.Logger;
@@ -58,6 +60,9 @@ public class ContractFlowModuleListener implements FlowModuleListener {
     @Autowired
     private ConfigurationProvider configurationProvider;
 
+    @Autowired
+    private ServiceModuleAppService serviceModuleAppService;
+
 
 //    @Autowired
 //    private ContractService contractService;
@@ -66,11 +71,13 @@ public class ContractFlowModuleListener implements FlowModuleListener {
     public List<FlowServiceTypeDTO> listServiceTypes(Integer namespaceId, String ownerType, Long ownerId) {
         List<FlowServiceTypeDTO> list = new ArrayList<>();
         FlowServiceTypeDTO dto = new FlowServiceTypeDTO();
-        Set<Long> namespaceIds = contractProvider.findContractNamespace();
-        if(namespaceIds.contains(Long.valueOf(namespaceId))){
+        List<Long> moduleIds = new ArrayList<>();
+        moduleIds.add(21200L);
+        List<ServiceModuleApp> apps = serviceModuleAppService.listReleaseServiceModuleAppByModuleIds(namespaceId, moduleIds);
+        if(apps != null && apps.size() > 0) {
             dto.setNamespaceId(namespaceId);
             dto.setId(null);
-            dto.setServiceName(contractProvider.findContractMenuName());
+            dto.setServiceName(apps.get(0).getName());
             list.add(dto);
         }
         return list;
