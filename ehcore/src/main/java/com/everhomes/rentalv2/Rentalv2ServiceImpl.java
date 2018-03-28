@@ -8183,11 +8183,9 @@ public class Rentalv2ServiceImpl implements Rentalv2Service {
 
 		RentalResource rs = rentalCommonService.getRentalResource(order.getResourceType(), order.getRentalResourceId());
 		RentalOrderHandler orderHandler = rentalCommonService.getRentalOrderHandler(order.getResourceType());
-		processCells(rs, order.getRentalType());
-
 
 		if (now > order.getEndTime().getTime()) {
-
+			processCells(rs, order.getRentalType());
 			long overTimeStartTime = order.getEndTime().getTime();
 			long overTimeEndTime = now;
 

@@ -109,6 +109,12 @@ enterprise.sh
 /customer/syncEnterpriseCustomer
 /payment_application/syncIndex
 */
+
+
+-- 11、同步审批范围及离职人员状态
+-- /admin/general_approval/initializeGeneralApprovalScope
+-- /archives/syncArchivesDismissStatus
+
 -- 12、以下按照顺序执行
 
 -- flush redis    清空掉redis
