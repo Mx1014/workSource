@@ -2563,11 +2563,16 @@ public class ArchivesServiceImpl implements ArchivesService {
     @Override
     public void sendArchivesNotification() {
         // time
+        DateTimeFormatter formatter = DateTimeFormatter.ofPattern("MMdd");
         Date firstOfWeek = ArchivesUtil.currentDate();
+        String firstOfWeekDate = formatter.format(firstOfWeek.toLocalDate());
         Date lastOfWeek = ArchivesUtil.plusDate(firstOfWeek,6);
+        String lastOfWeekDate = formatter.format(lastOfWeek.toLocalDate());
         List<OrganizationMemberDetails> employees = organizationProvider.queryOrganizationMemberDetails(new ListingLocator(), 1023080L, (locator, query) -> {
             query.addConditions(Tables.EH_ORGANIZATION_MEMBER_DETAILS.EMPLOYEE_STATUS.ne(EmployeeStatus.DISMISSAL.getCode()));
             Condition con = Tables.EH_ORGANIZATION_MEMBER_DETAILS.EMPLOYMENT_TIME.between(firstOfWeek, lastOfWeek);
+            //  TODO: 生日与周年的计算
+//            con = con.or(Tables.EH_ORGANIZATION_MEMBER_DETAILS.CHECK_IN_TIME_INDEX.between(firstOfWeekDate, lastOfWeekDate));
             con = con.or(Tables.EH_ORGANIZATION_MEMBER_DETAILS.CHECK_IN_TIME.between(ArchivesUtil.previousYear(firstOfWeek), ArchivesUtil.previousYear(lastOfWeek)));
             con = con.or(Tables.EH_ORGANIZATION_MEMBER_DETAILS.BIRTHDAY.between(firstOfWeek, lastOfWeek));
             con = con.or(Tables.EH_ORGANIZATION_MEMBER_DETAILS.CONTRACT_END_TIME.between(firstOfWeek, lastOfWeek));
