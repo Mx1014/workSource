@@ -233,26 +233,41 @@ public class ActivityPortalPublishHandler implements PortalPublishHandler {
 
 	private void updateContentCategory(ActivityEntryConfigulation config, Integer namespaceId){
 
-		//如果没有则增加默认分类、或者子分类关闭
-		if(config.getCategoryDTOList() == null || config.getCategoryDTOList().size() == 0){
+		List<ActivityCategoryDTO> categoryDtos = new ArrayList<>();
 
-			List<ActivityCategoryDTO> listDto = new ArrayList<>();
+		//获取有效的子分类
+		if(config.getCategoryDTOList() != null && config.getCategoryDTOList().size() > 0){
+			for(int i=0; i<config.getCategoryDTOList().size(); i++) {
+				ActivityCategoryDTO dto = config.getCategoryDTOList().get(i);
+
+				if (dto.getId() == null){
+					dto.setParentId(config.getCategoryId());
+					categoryDtos.add(dto);
+				}else {
+					ActivityCategories oldCategory = activityProvider.findActivityCategoriesById(dto.getId());
+					if(oldCategory != null && oldCategory.getParentId() != null && oldCategory.getParentId().equals(config.getCategoryId())){
+						dto.setParentId(config.getCategoryId());
+						categoryDtos.add(dto);
+					}
+				}
+			}
+		}
+
+
+		//如果没有则增加默认分类、或者子分类关闭
+		if(categoryDtos.size() == 0){
 			ActivityCategoryDTO newDto = new ActivityCategoryDTO();
 			newDto.setAllFlag(AllFlagType.YES.getCode());
 			newDto.setName("all");
 			newDto.setEnabled(TrueOrFalseFlag.TRUE.getCode());
-			listDto.add(newDto);
-			config.setCategoryDTOList(listDto);
+			newDto.setParentId(config.getCategoryId());
+			categoryDtos.add(newDto);
 		}
 
 //		//新增、更新入口
-//		Long maxEntryId = activityProvider.findActivityCategoriesMaxEntryId(namespaceId);
-//		if(maxEntryId == null){
-//			maxEntryId = 1L;
-//		}
 
-		for(int i=0; i<config.getCategoryDTOList().size(); i++){
-			ActivityCategoryDTO dto = config.getCategoryDTOList().get(i);
+		for(int i=0; i<categoryDtos.size(); i++){
+			ActivityCategoryDTO dto = categoryDtos.get(i);
 
 			if(dto.getId() != null){
 				ActivityCategories oldCategory = activityProvider.findActivityCategoriesById(dto.getId());
@@ -264,13 +279,16 @@ public class ActivityPortalPublishHandler implements PortalPublishHandler {
 				oldCategory.setEnabled(dto.getEnabled());
 				activityProvider.updateActivityCategories(oldCategory);
 			}else {
-				ActivityCategories newCategory = createActivityCategories(namespaceId, dto.getName(), config.getCategoryId(), null, (byte)1, dto.getAllFlag());
+				ActivityCategories newCategory = createActivityCategories(namespaceId, dto.getName(), dto.getParentId(), null, (byte)1, dto.getAllFlag());
 
 				dto.setId(newCategory.getId());
 				dto.setEntryId(newCategory.getEntryId());
 
 			}
 		}
+
+		//重新设置子分类
+		config.setCategoryDTOList(categoryDtos);
 
 	}
 
