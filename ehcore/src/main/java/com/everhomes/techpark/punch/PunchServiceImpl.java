@@ -9451,6 +9451,7 @@ public class PunchServiceImpl implements PunchService {
                 log.setCode(PunchServiceErrorCode.ERROR_CHECK_CONTACT);
                 log.setErrorDescription(log.getErrorLog());
                 response.getLogs().add(log);
+                continue;
             }
 
             if (null == r.getC() || null == r.getD()) {
@@ -9459,6 +9460,7 @@ public class PunchServiceImpl implements PunchService {
                 log.setCode(PunchServiceErrorCode.ERROR_CHECK_CONTACT);
                 log.setErrorDescription(log.getErrorLog());
                 response.getLogs().add(log);
+                continue;
             }
 
             String userContact = r.getA().trim();
