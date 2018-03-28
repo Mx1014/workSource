@@ -9445,6 +9445,13 @@ public class PunchServiceImpl implements PunchService {
                 data.put(entry.getKey(), (r.getCells().get(entry.getKey()) == null) ? "" : r.getCells().get(entry.getKey()));
             }
             log.setData(data);
+            if (null == r.getA()) {
+                LOGGER.error("手机号不可以是空");
+                log.setErrorLog("手机号不可以是空");
+                log.setCode(PunchServiceErrorCode.ERROR_CHECK_CONTACT);
+                log.setErrorDescription(log.getErrorLog());
+                response.getLogs().add(log);
+            }
             String userContact = r.getA().trim();
             OrganizationMemberDetails detail = organizationProvider.findOrganizationMemberDetailsByOrganizationIdAndContactToken(ownerId, userContact);
             if (null == detail) {
