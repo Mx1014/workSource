@@ -9,6 +9,7 @@ import com.everhomes.rest.contract.ContractLogDTO;
 import java.sql.Timestamp;
 import java.util.List;
 import java.util.Map;
+import java.util.Set;
 
 public interface ContractProvider {
 
@@ -68,4 +69,7 @@ public interface ContractProvider {
     String findContractIdByThirdPartyId(String contractId, String code);
 
     List<ContractLogDTO> listContractsBySupplier(Long supplierId, Long pageAnchor, Integer pageSize);
+
+	Set<Long> findContractNamespace();
+	String findContractMenuName();
 }

@@ -1688,3 +1688,6 @@ UPDATE eh_service_modules SET default_order = 20 WHERE id = 60200;
 UPDATE eh_service_modules set type = 0 where id in (70000, 70200, 70300, 70100, 10200, 61000, 30000, 50200, 40600);
 
 -- 重新布局模块分类  add by yanjun 201803262114 end
+
+-- 更新"入驻申请"菜单的路由 add by yanjun 201803281414
+UPDATE eh_web_menus set data_type = 'enter-apply' where id = 43020000;
