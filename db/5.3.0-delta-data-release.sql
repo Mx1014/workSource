@@ -1701,3 +1701,7 @@ INSERT INTO `eh_service_modules` (`id`, `name`, `parent_id`, `path`, `type`, `le
 INSERT INTO `eh_web_menus` (`id`, `name`, `parent_id`, `icon_url`, `data_type`, `leaf_flag`, `status`, `path`, `type`, `sort_num`, `module_id`, `level`, `condition_type`, `category`, `config_type`) VALUES ('76000000', '基础信息', '0', NULL, NULL, '1', '2', '/76000000', 'organization', '6', NULL, '1', 'system', 'classify', '2');
 
 INSERT INTO `eh_web_menus` (`id`, `name`, `parent_id`, `icon_url`, `data_type`, `leaf_flag`, `status`, `path`, `type`, `sort_num`, `module_id`, `level`, `condition_type`, `category`, `config_type`) VALUES ('76010000', '企业信息', '76000000', NULL, 'customer-management', '1', '2', '/76000000/76010000', 'organization', '10', '21400', '2', 'system', 'module', '2');
+
+-- 部分企业管理应用的名称为空导致菜单名称为空。add by yanjun 201803281555
+UPDATE eh_reflection_service_module_apps set `name` = '企业管理' WHERE module_id = 33000 and (`name` is NULL or `name` = '');
+UPDATE eh_service_module_apps set `name` = '企业管理' WHERE module_id = 33000 and (`name` is NULL or `name` = '');
