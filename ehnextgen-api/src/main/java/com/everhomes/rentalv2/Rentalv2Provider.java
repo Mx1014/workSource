@@ -53,7 +53,7 @@ public interface Rentalv2Provider {
 
 //	RentalOrderPayorderMap findRentalBillPaybillMapByOrderNo(String orderNo);
 
-	List<RentalOrder> listRentalBills(Long id, Long userId, String resourceType, Long resourceTypeId, ListingLocator locator,
+	List<RentalOrder> listRentalBills(Long id, Long userId, Long rentalSiteId,String resourceType, Long resourceTypeId, ListingLocator locator,
 			int count, List<Byte> status, Byte payMode);
 
 	List<RentalOrder> listRentalBills(Long resourceTypeId, Long organizationId,Long communityId, Long rentalSiteId, ListingLocator locator, Byte billStatus,

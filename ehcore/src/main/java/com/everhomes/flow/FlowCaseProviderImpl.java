@@ -268,6 +268,10 @@ public class FlowCaseProviderImpl implements FlowCaseProvider {
         }
         if(cmd.getFlowCaseStatus() != null) {
             cond = cond.and(Tables.EH_FLOW_CASES.STATUS.eq(cmd.getFlowCaseStatus()));
+        } else {
+           cond = cond.and(Tables.EH_FLOW_CASES.STATUS.notIn(
+                   FlowCaseStatus.INITIAL.getCode(), FlowCaseStatus.INVALID.getCode())
+           );
         }
         if(cmd.getServiceType() != null) {
             cond = cond.and(

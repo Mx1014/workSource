@@ -188,6 +188,9 @@ public class WarehouseStockSearcherImpl extends AbstractElasticSearch implements
         List<WarehouseStockDTO> stockDTOs = new ArrayList<WarehouseStockDTO>();
         for(Long id : ids) {
             WarehouseStocks stock = warehouseProvider.findWarehouseStocks(id, cmd.getOwnerType(), cmd.getOwnerId());
+            if(stock == null){
+                continue;
+            }
             WarehouseStockDTO dto = ConvertHelper.convert(stock, WarehouseStockDTO.class);
             Warehouses warehouse = warehouseProvider.findWarehouse(dto.getWarehouseId(), cmd.getOwnerType(), cmd.getOwnerId(),cmd.getCommunityId());
             if(warehouse != null) {

@@ -2381,6 +2381,12 @@ public class ParkingServiceImpl implements ParkingService {
 					"LockId exist.");
 		}
 
+		if(!dingDingParkingLockHandler.connParkingSpace(cmd.getLockId())){
+			LOGGER.error("LockId conn failed, cmd={}", cmd);
+			throw RuntimeErrorException.errorWith(ParkingErrorCode.SCOPE, ParkingErrorCode.ERROR_UNCONN_LOCK_ID,
+					"您输入的车锁ID无效，请重新输入");
+		}
+
 		parkingSpace = ConvertHelper.convert(cmd, ParkingSpace.class);
 
 		parkingProvider.createParkingSpace(parkingSpace);
@@ -2407,6 +2413,12 @@ public class ParkingServiceImpl implements ParkingService {
 			LOGGER.error("LockId exist, cmd={}", cmd);
 			throw RuntimeErrorException.errorWith(ParkingErrorCode.SCOPE, ParkingErrorCode.ERROR_REPEAT_LOCK_ID,
 					"LockId exist.");
+		}
+
+		if(!dingDingParkingLockHandler.connParkingSpace(cmd.getLockId())){
+			LOGGER.error("LockId conn failed, cmd={}", cmd);
+			throw RuntimeErrorException.errorWith(ParkingErrorCode.SCOPE, ParkingErrorCode.ERROR_UNCONN_LOCK_ID,
+					"您输入的车锁ID无效，请重新输入");
 		}
 
 		parkingSpace.setSpaceAddress(cmd.getSpaceAddress());

@@ -119,4 +119,8 @@ public interface WarehouseProvider {
     void deleteWarehouseStocks(Long id);
 
     String findMaterialSupplierNameByMaterialId(Long materialId);
+
+    Long findRequisitionId(Long requestId);
+
+    void resetWarehouseStatusForPurchaseOrder(byte status, Long purchaseRequestId);
 }

@@ -44,7 +44,7 @@ SET  @id = (SELECT  MAX(id) FROM eh_version_realm);
 INSERT INTO `eh_version_realm` VALUES (@id:=@id+1, 'equipmentInspection', NULL, NOW(), '0');
 
 SET  @vId = (SELECT  MAX(id) FROM eh_version_urls);
-INSERT INTO `eh_version_urls` VALUES (@vId:=@vId+1, @id, '1.0.0', 'http://{home.url}/nar/equipmentInspection/inspectionOffLine/equipmentInspection-1-0-0.zip', 'http://opv2-test.zuolin.com/nar/equipmentInspection/inspectionOffLine/equipmentInspection-1-0-0.zip', '物业巡检巡检离线', '0', '物业巡检', NOW(), NULL, '0');
+INSERT INTO `eh_version_urls` VALUES (@vId:=@vId+1, @id, '1.0.0', 'http://{home.url}/nar/equipmentInspection/inspectionOffLine/equipmentInspection-1-0-0.zip', 'http://{home.url}/nar/equipmentInspection/inspectionOffLine/equipmentInspection-1-0-0.zip', '物业巡检巡检离线', '0', '物业巡检', NOW(), NULL, '0');
 
 UPDATE eh_launch_pad_items
 SET action_data = '{\"realm\":\"equipmentInspection\",\"entryUrl\":\"http://{home.url}/nar/equipmentInspection/dist/index.html?hideNavigationBar=1#sign_suffix\"}'
@@ -52,6 +52,18 @@ WHERE item_label LIKE '%巡检%';
 
 UPDATE eh_service_module_apps
 SET instance_config = '{\"realm\":\"equipmentInspection\",\"entryUrl\":\"http://{home.url}/nar/equipmentInspection/dist/index.html?hideNavigationBar=1#sign_suffix\"}'
+WHERE module_id = 20800;
+
+UPDATE eh_service_modules
+SET instance_config = '{\"realm\":\"equipmentInspection\",\"entryUrl\":\"http://{home.url}/nar/equipmentInspection/dist/index.html?hideNavigationBar=1#sign_suffix\"}'
+WHERE id = 20800;
+
+UPDATE eh_service_modules
+SET action_type = 44
+WHERE id = 20800;
+
+UPDATE eh_service_module_apps
+SET action_type = 44
 WHERE module_id = 20800;
 
 UPDATE eh_launch_pad_items
@@ -65,14 +77,26 @@ SET  @id = (SELECT  MAX(id) FROM eh_version_realm);
 INSERT INTO `eh_version_realm` VALUES (@id:=@id+1, 'qualityInspection', NULL, NOW(), '0');
 
 SET  @vId = (SELECT  MAX(id) FROM eh_version_urls);
-INSERT INTO `eh_version_urls` VALUES (@vId:=@vId+1, @id, '1.0.0', 'http://{home.url}/nar/qualityInspect/offline/qualityInspect-1-0-0.zip', 'http://{home.url}/nar/qualityInspect/offline/qualityInspect-1-0-0.zip', '品质核查离线', '0', '品质核查', NOW(), NULL, '0');
+INSERT INTO `eh_version_urls` VALUES (@vId:=@vId+1, @id, '1.0.0', 'http://{home.url}/nar/qualityInspection/offline/qualityInspection-1-0-0.zip', 'http://{home.url}/nar/qualityInspection/offline/qualityInspection-1-0-0.zip', '品质核查离线', '0', '品质核查', NOW(), NULL, '0');
 
 UPDATE eh_launch_pad_items
-SET action_data = '{\"realm\":\"qualityInspection\",\"entryUrl\":\"http://{home.url}/nar/qualityInspect/build/index.html?hideNavigationBar=1#/home#sign_suffix\"}'
-WHERE item_label LIKE '%巡检%';
+SET action_data = '{\"realm\":\"qualityInspection\",\"entryUrl\":\"http://{home.url}/nar/qualityInspection/build/index.html?hideNavigationBar=1#/home#sign_suffix\"}'
+WHERE item_label LIKE '%品质%';
 
 UPDATE eh_service_module_apps
-SET instance_config = '{\"realm\":\"qualityInspection\",\"entryUrl\":\"http://{home.url}/nar/qualityInspect/build/index.html?hideNavigationBar=1#/home#sign_suffix\"}'
+SET instance_config = '{\"realm\":\"qualityInspection\",\"entryUrl\":\"http://{home.url}/nar/qualityInspection/build/index.html?hideNavigationBar=1#/home#sign_suffix\"}'
+WHERE module_id = 20600;
+
+UPDATE eh_service_modules
+SET instance_config = '{\"realm\":\"qualityInspection\",\"entryUrl\":\"http://{home.url}/nar/qualityInspection/build/index.html?hideNavigationBar=1#/home#sign_suffix\"}'
+WHERE id = 20600;
+
+UPDATE eh_service_modules
+SET action_type = 44
+WHERE id = 20600;
+
+UPDATE eh_service_module_apps
+SET action_type = 44
 WHERE module_id = 20600;
 
 UPDATE eh_launch_pad_items
@@ -250,7 +274,7 @@ INSERT INTO `eh_configurations` (`name`, `value`, `description`, `namespace_id`,
 UPDATE eh_parking_lots JOIN eh_communities ON eh_communities.id = eh_parking_lots.owner_id SET eh_parking_lots.namespace_id = eh_communities.namespace_id;
 
 INSERT INTO `eh_locale_strings` (`scope`, `code`, `locale`, `text`)
-  VALUES ('rental.notification', '12', 'zh_CN', '亲爱的用户，为保障资源使用效益，现在取消订单，系统将不予退款，恳请您谅解。\r\n\r\n确认要取消订单吗？');
+  VALUES ('rental.notification', '12', 'zh_CN', '亲爱的用户，为保障资源使用效益，现在取消订单，系统将不予退款，恳请您谅解。确认要取消订单吗？');
 
 INSERT INTO `eh_locale_strings` (`scope`, `code`, `locale`, `text`)
   VALUES ('parking', '10022', 'zh_CN', '升起车锁失败');
@@ -432,8 +456,8 @@ DELETE FROM eh_service_module_privileges WHERE module_id = 10600;
 
 -- 薪酬结构基础数据
 
-INSERT INTO `eh_salary_entity_categories` (`id`, `owner_type`, `owner_id`, `namespace_id`, `category_name`, `description`, `custom_flag`, `custom_type`, `status`, `creator_uid`, `create_time`, `update_time`, `operator_uid`) VALUES('1',NULL,NULL,NULL,'固定工资',NULL,'1','1','2','1','2018-01-19 15:21:33','2018-01-19 15:21:37','1');
-INSERT INTO `eh_salary_entity_categories` (`id`, `owner_type`, `owner_id`, `namespace_id`, `category_name`, `description`, `custom_flag`, `custom_type`, `status`, `creator_uid`, `create_time`, `update_time`, `operator_uid`) VALUES('2',NULL,NULL,NULL,'浮动工资',NULL,'1','1','2','1','2018-01-19 15:23:19','2018-01-19 15:23:21','1');
+INSERT INTO `eh_salary_entity_categories` (`id`, `owner_type`, `owner_id`, `namespace_id`, `category_name`, `description`, `custom_flag`, `custom_type`, `status`, `creator_uid`, `create_time`, `update_time`, `operator_uid`) VALUES('1',NULL,NULL,NULL,'固定工资',NULL,'1','0','2','1','2018-01-19 15:21:33','2018-01-19 15:21:37','1');
+INSERT INTO `eh_salary_entity_categories` (`id`, `owner_type`, `owner_id`, `namespace_id`, `category_name`, `description`, `custom_flag`, `custom_type`, `status`, `creator_uid`, `create_time`, `update_time`, `operator_uid`) VALUES('2',NULL,NULL,NULL,'浮动工资',NULL,'1','0','2','1','2018-01-19 15:23:19','2018-01-19 15:23:21','1');
 INSERT INTO `eh_salary_entity_categories` (`id`, `owner_type`, `owner_id`, `namespace_id`, `category_name`, `description`, `custom_flag`, `custom_type`, `status`, `creator_uid`, `create_time`, `update_time`, `operator_uid`) VALUES('3',NULL,NULL,NULL,'考勤工资','在「津贴设置」中自动同步考勤数据，在「出勤扣款」中设置方案','0',NULL,'2','1','2018-01-19 15:23:19','2018-01-19 15:23:19','1');
 INSERT INTO `eh_salary_entity_categories` (`id`, `owner_type`, `owner_id`, `namespace_id`, `category_name`, `description`, `custom_flag`, `custom_type`, `status`, `creator_uid`, `create_time`, `update_time`, `operator_uid`) VALUES('4',NULL,NULL,NULL,'社保公积金代扣','自动同步社保数据','0',NULL,'2','1','2018-01-19 15:23:19','2018-01-19 15:23:19','1');
 INSERT INTO `eh_salary_entity_categories` (`id`, `owner_type`, `owner_id`, `namespace_id`, `category_name`, `description`, `custom_flag`, `custom_type`, `status`, `creator_uid`, `create_time`, `update_time`, `operator_uid`) VALUES('5',NULL,NULL,NULL,'个税代扣','根据国家法律自动扣减个税','0',NULL,'2','1','2018-01-19 15:23:19','2018-01-19 15:23:19','1');
@@ -636,6 +660,7 @@ INSERT INTO `eh_service_module_privileges` (`id`, `module_id`, `privilege_type`,
 
 -- fix 24668 xiongying20180302
 update eh_var_field_groups set title = '客户信息' where id = 1;
+update eh_var_field_groups set name = 'com.everhomes.customer.EnterpriseCustomer' where id = 1;
 
 
 -- 供应商，采购，请示单的规则的细化 by wentian
@@ -740,7 +765,7 @@ INSERT INTO `eh_service_modules`(`id`, `name`, `parent_id`, `path`, `type`, `lev
 INSERT INTO `eh_service_modules`(`id`, `name`, `parent_id`, `path`, `type`, `level`, `status`, `default_order`, `create_time`, `instance_config`, `action_type`, `update_time`, `operator_uid`, `creator_uid`, `description`, `multiple_flag`, `module_control_type`) VALUES (10750, '俱乐部', 10000, '/10000/10750', 1, 2, 2, 0, '2016-12-06 11:43:04', NULL, 36, '2017-09-08 18:59:10', 0, 0, '0', 0, 'unlimit_control');
 INSERT INTO `eh_service_modules`(`id`, `name`, `parent_id`, `path`, `type`, `level`, `status`, `default_order`, `create_time`, `instance_config`, `action_type`, `update_time`, `operator_uid`, `creator_uid`, `description`, `multiple_flag`, `module_control_type`) VALUES (10760, '行业协会', 10000, '/10000/10760', 1, 2, 2, 0, '2017-11-24 14:40:35', NULL, 38, '2017-11-24 14:40:35', 0, 0, '0', 0, '');
 INSERT INTO `eh_service_modules`(`id`, `name`, `parent_id`, `path`, `type`, `level`, `status`, `default_order`, `create_time`, `instance_config`, `action_type`, `update_time`, `operator_uid`, `creator_uid`, `description`, `multiple_flag`, `module_control_type`) VALUES (10800, '园区快讯', 10000, '/10000/10800', 1, 2, 2, 0, '2016-12-06 11:40:50', '{\"timeWidgetStyle\":\"date\",\"entityCount\":0,\"subjectHeight\":0,\"descriptionHeight\":0}', 48, '2017-09-08 18:59:10', 0, 0, '0', 1, 'community_control');
-INSERT INTO `eh_service_modules`(`id`, `name`, `parent_id`, `path`, `type`, `level`, `status`, `default_order`, `create_time`, `instance_config`, `action_type`, `update_time`, `operator_uid`, `creator_uid`, `description`, `multiple_flag`, `module_control_type`) VALUES (10850, '园区报', 10000, '/10000/10850', 1, 2, 2, 0, '2016-12-06 11:40:50', '{\"url\":\"http://janson.lab.everhomes.com/energy-management/index.html?hideNavigationBar=1#/address_choose#sign_suffix\"}', 13, '2017-09-08 18:59:10', 0, 0, '0', 0, 'community_control');
+INSERT INTO `eh_service_modules`(`id`, `name`, `parent_id`, `path`, `type`, `level`, `status`, `default_order`, `create_time`, `instance_config`, `action_type`, `update_time`, `operator_uid`, `creator_uid`, `description`, `multiple_flag`, `module_control_type`) VALUES (10850, '园区报', 10000, '/10000/10850', 1, 2, 2, 0, '2016-12-06 11:40:50', '{\"url\":\"${home.url}/energy-management/index.html?hideNavigationBar=1#/address_choose#sign_suffix\"}', 13, '2017-09-08 18:59:10', 0, 0, '0', 0, 'community_control');
 INSERT INTO `eh_service_modules`(`id`, `name`, `parent_id`, `path`, `type`, `level`, `status`, `default_order`, `create_time`, `instance_config`, `action_type`, `update_time`, `operator_uid`, `creator_uid`, `description`, `multiple_flag`, `module_control_type`) VALUES (11000, '一键推送', 10000, '/10000/11000', 1, 2, 2, 0, '2016-12-06 11:40:50', NULL, NULL, '2017-09-08 18:59:10', 0, 0, '0', 0, 'community_control');
 INSERT INTO `eh_service_modules`(`id`, `name`, `parent_id`, `path`, `type`, `level`, `status`, `default_order`, `create_time`, `instance_config`, `action_type`, `update_time`, `operator_uid`, `creator_uid`, `description`, `multiple_flag`, `module_control_type`) VALUES (12200, '短信推送', 10000, '/10000/12200', 1, 2, 2, 0, '2016-12-06 11:43:45', NULL, NULL, '2017-09-08 18:59:10', 0, 0, '0', 0, 'community_control');
 INSERT INTO `eh_service_modules`(`id`, `name`, `parent_id`, `path`, `type`, `level`, `status`, `default_order`, `create_time`, `instance_config`, `action_type`, `update_time`, `operator_uid`, `creator_uid`, `description`, `multiple_flag`, `module_control_type`) VALUES (13000, '任务管理', 50000, '/50000/13000', 1, 2, 2, 0, '2017-04-10 10:54:08', NULL, 56, '2017-09-08 18:59:10', 0, 0, '0', 0, 'unlimit_control');
@@ -752,7 +777,7 @@ INSERT INTO `eh_service_modules`(`id`, `name`, `parent_id`, `path`, `type`, `lev
 INSERT INTO `eh_service_modules`(`id`, `name`, `parent_id`, `path`, `type`, `level`, `status`, `default_order`, `create_time`, `instance_config`, `action_type`, `update_time`, `operator_uid`, `creator_uid`, `description`, `multiple_flag`, `module_control_type`) VALUES (20190, '统计', 20100, '/20000/20100/20190', 1, 3, 2, 0, '2017-08-25 14:46:49', NULL, NULL, '2017-09-08 18:59:10', 0, 1, '1', NULL, '');
 INSERT INTO `eh_service_modules`(`id`, `name`, `parent_id`, `path`, `type`, `level`, `status`, `default_order`, `create_time`, `instance_config`, `action_type`, `update_time`, `operator_uid`, `creator_uid`, `description`, `multiple_flag`, `module_control_type`) VALUES (20400, '物业缴费', 20000, '/20000/20400', 1, 2, 2, 0, '2017-12-18 21:31:24', NULL, 13, '2017-12-18 21:31:24', 0, 0, '0', 0, 'community_control');
 INSERT INTO `eh_service_modules`(`id`, `name`, `parent_id`, `path`, `type`, `level`, `status`, `default_order`, `create_time`, `instance_config`, `action_type`, `update_time`, `operator_uid`, `creator_uid`, `description`, `multiple_flag`, `module_control_type`) VALUES (20430, '交易明细', 20400, '/20000/20400/20430', 1, 3, 2, 0, '2017-12-18 21:31:24', NULL, NULL, '2017-12-18 21:31:24', 0, 0, '0', 0, 'community_control');
-INSERT INTO `eh_service_modules`(`id`, `name`, `parent_id`, `path`, `type`, `level`, `status`, `default_order`, `create_time`, `instance_config`, `action_type`, `update_time`, `operator_uid`, `creator_uid`, `description`, `multiple_flag`, `module_control_type`) VALUES (20600, '品质核查', 20000, '/20000/20600', 1, 2, 2, 0, '2016-12-06 11:40:51', '{\"realm\":\"quality\",\"entryUrl\":\"http://janson.lab.everhomes.com/nar/quality/index.html?hideNavigationBar=1#/task_list#sign_suffix\"}', 44, '2017-09-08 18:59:10', 0, 0, '0', 0, 'community_control');
+INSERT INTO `eh_service_modules`(`id`, `name`, `parent_id`, `path`, `type`, `level`, `status`, `default_order`, `create_time`, `instance_config`, `action_type`, `update_time`, `operator_uid`, `creator_uid`, `description`, `multiple_flag`, `module_control_type`) VALUES (20600, '品质核查', 20000, '/20000/20600', 1, 2, 2, 0, '2016-12-06 11:40:51', '{\"realm\":\"qualityInspection\",\"entryUrl\":\"https://core.zuolin.com/nar/qualityInspection/build/index.html?hideNavigationBar=1#/home#sign_suffix\"}', 44, '2017-09-08 18:59:10', 0, 0, '0', 0, 'community_control');
 INSERT INTO `eh_service_modules`(`id`, `name`, `parent_id`, `path`, `type`, `level`, `status`, `default_order`, `create_time`, `instance_config`, `action_type`, `update_time`, `operator_uid`, `creator_uid`, `description`, `multiple_flag`, `module_control_type`) VALUES (20610, '类型管理', 20600, '/20000/20600/20610', 1, 3, 2, 0, '2017-08-25 10:05:19', NULL, NULL, '2017-09-08 18:59:10', 0, 1, '1', NULL, '');
 INSERT INTO `eh_service_modules`(`id`, `name`, `parent_id`, `path`, `type`, `level`, `status`, `default_order`, `create_time`, `instance_config`, `action_type`, `update_time`, `operator_uid`, `creator_uid`, `description`, `multiple_flag`, `module_control_type`) VALUES (20620, '规范管理', 20600, '/20000/20600/20620', 1, 3, 2, 0, '2017-08-25 10:05:19', NULL, NULL, '2017-09-08 18:59:10', 0, 1, '1', NULL, '');
 INSERT INTO `eh_service_modules`(`id`, `name`, `parent_id`, `path`, `type`, `level`, `status`, `default_order`, `create_time`, `instance_config`, `action_type`, `update_time`, `operator_uid`, `creator_uid`, `description`, `multiple_flag`, `module_control_type`) VALUES (20630, '计划管理', 20600, '/20000/20600/20630', 1, 3, 2, 0, '2017-08-25 10:05:19', NULL, NULL, '2017-09-08 18:59:10', 0, 1, '1', NULL, '');
@@ -764,7 +789,7 @@ INSERT INTO `eh_service_modules`(`id`, `name`, `parent_id`, `path`, `type`, `lev
 INSERT INTO `eh_service_modules`(`id`, `name`, `parent_id`, `path`, `type`, `level`, `status`, `default_order`, `create_time`, `instance_config`, `action_type`, `update_time`, `operator_uid`, `creator_uid`, `description`, `multiple_flag`, `module_control_type`) VALUES (20662, '任务数统计', 20600, '/20000/20600/20660/20662', 1, 4, 2, 0, '2017-08-25 10:05:19', NULL, NULL, '2017-09-08 18:59:10', 0, 1, '1', NULL, '');
 INSERT INTO `eh_service_modules`(`id`, `name`, `parent_id`, `path`, `type`, `level`, `status`, `default_order`, `create_time`, `instance_config`, `action_type`, `update_time`, `operator_uid`, `creator_uid`, `description`, `multiple_flag`, `module_control_type`) VALUES (20663, '检查统计', 20600, '/20000/20600/20660/20663', 1, 4, 2, 0, '2017-08-25 10:05:19', NULL, NULL, '2017-09-08 18:59:10', 0, 1, '1', NULL, '');
 INSERT INTO `eh_service_modules`(`id`, `name`, `parent_id`, `path`, `type`, `level`, `status`, `default_order`, `create_time`, `instance_config`, `action_type`, `update_time`, `operator_uid`, `creator_uid`, `description`, `multiple_flag`, `module_control_type`) VALUES (20670, '日志管理', 20600, '/20000/20600/20670', 1, 3, 2, 0, '2017-07-06 20:16:18', NULL, NULL, '2017-09-08 18:59:10', 0, 0, '0', NULL, '');
-INSERT INTO `eh_service_modules`(`id`, `name`, `parent_id`, `path`, `type`, `level`, `status`, `default_order`, `create_time`, `instance_config`, `action_type`, `update_time`, `operator_uid`, `creator_uid`, `description`, `multiple_flag`, `module_control_type`) VALUES (20800, '设备巡检', 20000, '/20000/20800', 1, 2, 2, 0, '2016-12-06 11:40:51', '{\"url\":\"http://janson.lab.everhomes.com/energy-management/index.html?hideNavigationBar=1#/address_choose#sign_suffix\"}', 13, '2017-09-08 18:59:10', 0, 0, '0', 0, 'community_control');
+INSERT INTO `eh_service_modules`(`id`, `name`, `parent_id`, `path`, `type`, `level`, `status`, `default_order`, `create_time`, `instance_config`, `action_type`, `update_time`, `operator_uid`, `creator_uid`, `description`, `multiple_flag`, `module_control_type`) VALUES (20800, '设备巡检', 20000, '/20000/20800', 1, 2, 2, 0, '2016-12-06 11:40:51', '{\"realm\":\"equipmentInspection\",\"entryUrl\":\"https://core.zuolin.com/nar/equipmentInspection/dist/index.html?hideNavigationBar=1#sign_suffix\"}', 44, '2017-09-08 18:59:10', 0, 0, '0', 0, 'community_control');
 INSERT INTO `eh_service_modules`(`id`, `name`, `parent_id`, `path`, `type`, `level`, `status`, `default_order`, `create_time`, `instance_config`, `action_type`, `update_time`, `operator_uid`, `creator_uid`, `description`, `multiple_flag`, `module_control_type`) VALUES (20810, '标准管理', 20800, '/20000/20800/20810', 1, 3, 2, 0, '2017-08-25 10:05:25', NULL, NULL, '2017-09-08 18:59:10', 0, 1, '1', NULL, '');
 INSERT INTO `eh_service_modules`(`id`, `name`, `parent_id`, `path`, `type`, `level`, `status`, `default_order`, `create_time`, `instance_config`, `action_type`, `update_time`, `operator_uid`, `creator_uid`, `description`, `multiple_flag`, `module_control_type`) VALUES (20811, '标准列表', 20800, '/20000/20800/20810/20811', 1, 4, 2, 0, '2017-08-25 10:05:25', NULL, NULL, '2017-09-08 18:59:10', 0, 1, '1', NULL, '');
 INSERT INTO `eh_service_modules`(`id`, `name`, `parent_id`, `path`, `type`, `level`, `status`, `default_order`, `create_time`, `instance_config`, `action_type`, `update_time`, `operator_uid`, `creator_uid`, `description`, `multiple_flag`, `module_control_type`) VALUES (20812, '巡检关联审批', 20800, '/20000/20800/20810/20812', 1, 4, 2, 0, '2017-08-25 10:05:25', NULL, NULL, '2017-09-08 18:59:10', 0, 1, '1', NULL, '');
@@ -826,7 +851,7 @@ INSERT INTO `eh_service_modules`(`id`, `name`, `parent_id`, `path`, `type`, `lev
 INSERT INTO `eh_service_modules`(`id`, `name`, `parent_id`, `path`, `type`, `level`, `status`, `default_order`, `create_time`, `instance_config`, `action_type`, `update_time`, `operator_uid`, `creator_uid`, `description`, `multiple_flag`, `module_control_type`) VALUES (40050, '位置预订', 40000, '/40000/40050', 1, 2, 0, 0, '2017-03-07 11:27:15', NULL, NULL, '2017-09-08 18:59:10', 0, 0, '0', 0, '');
 INSERT INTO `eh_service_modules`(`id`, `name`, `parent_id`, `path`, `type`, `level`, `status`, `default_order`, `create_time`, `instance_config`, `action_type`, `update_time`, `operator_uid`, `creator_uid`, `description`, `multiple_flag`, `module_control_type`) VALUES (40070, '园区地图', 40000, '/40000/40070', 1, 2, 2, 0, '2018-01-29 13:57:26', NULL, 67, '2018-01-29 13:57:26', 0, 0, '0', 0, 'community_control');
 INSERT INTO `eh_service_modules`(`id`, `name`, `parent_id`, `path`, `type`, `level`, `status`, `default_order`, `create_time`, `instance_config`, `action_type`, `update_time`, `operator_uid`, `creator_uid`, `description`, `multiple_flag`, `module_control_type`) VALUES (40100, '招租管理', 40000, '/40000/40100', 1, 2, 2, 0, '2016-12-06 11:40:51', '', 28, '2017-09-08 18:59:10', 0, 0, '0', 0, 'community_control');
-INSERT INTO `eh_service_modules`(`id`, `name`, `parent_id`, `path`, `type`, `level`, `status`, `default_order`, `create_time`, `instance_config`, `action_type`, `update_time`, `operator_uid`, `creator_uid`, `description`, `multiple_flag`, `module_control_type`) VALUES (40200, '工位预订', 40000, '/40000/40200', 1, 2, 2, 0, '2016-12-06 11:40:51', '{\"url\":\"http://janson.lab.everhomes.com/energy-management/index.html?hideNavigationBar=1#/address_choose#sign_suffix\"}', 13, '2017-09-08 18:59:10', 0, 0, '0', 0, 'community_control');
+INSERT INTO `eh_service_modules`(`id`, `name`, `parent_id`, `path`, `type`, `level`, `status`, `default_order`, `create_time`, `instance_config`, `action_type`, `update_time`, `operator_uid`, `creator_uid`, `description`, `multiple_flag`, `module_control_type`) VALUES (40200, '工位预订', 40000, '/40000/40200', 1, 2, 2, 0, '2016-12-06 11:40:51', '{"url":"${home.url}/station-booking-web/build/index.html#/home#sign_suffix"}', 13, '2017-09-08 18:59:10', 0, 0, '0', 0, 'community_control');
 INSERT INTO `eh_service_modules`(`id`, `name`, `parent_id`, `path`, `type`, `level`, `status`, `default_order`, `create_time`, `instance_config`, `action_type`, `update_time`, `operator_uid`, `creator_uid`, `description`, `multiple_flag`, `module_control_type`) VALUES (40300, '服务热线', 40000, '/40000/40300', 1, 2, 2, 0, '2016-12-06 11:40:51', '', 45, '2017-09-08 18:59:10', 0, 0, '0', 0, 'community_control');
 INSERT INTO `eh_service_modules`(`id`, `name`, `parent_id`, `path`, `type`, `level`, `status`, `default_order`, `create_time`, `instance_config`, `action_type`, `update_time`, `operator_uid`, `creator_uid`, `description`, `multiple_flag`, `module_control_type`) VALUES (40400, '资源预订', 40000, '/40000/40400', 1, 2, 2, 0, '2016-12-06 11:40:51', '{\"pageType\":0}', 49, '2017-09-08 18:59:10', 0, 0, '0', 1, 'community_control');
 INSERT INTO `eh_service_modules`(`id`, `name`, `parent_id`, `path`, `type`, `level`, `status`, `default_order`, `create_time`, `instance_config`, `action_type`, `update_time`, `operator_uid`, `creator_uid`, `description`, `multiple_flag`, `module_control_type`) VALUES (40500, '服务联盟', 40000, '/40000/40500', 1, 2, 2, 0, '2016-12-06 11:40:51', '{\"displayType\":\"grid\",\"detailFlag\":1}', 33, '2017-09-08 18:59:10', 0, 0, '0', 1, 'community_control');
@@ -835,8 +860,8 @@ INSERT INTO `eh_service_modules`(`id`, `name`, `parent_id`, `path`, `type`, `lev
 INSERT INTO `eh_service_modules`(`id`, `name`, `parent_id`, `path`, `type`, `level`, `status`, `default_order`, `create_time`, `instance_config`, `action_type`, `update_time`, `operator_uid`, `creator_uid`, `description`, `multiple_flag`, `module_control_type`) VALUES (40530, '消息通知', 40500, '/40000/40500/40530', 1, 3, 2, 0, '2018-03-02 11:00:50', NULL, NULL, '2018-03-02 11:00:50', 0, 1, '1', NULL, '');
 INSERT INTO `eh_service_modules`(`id`, `name`, `parent_id`, `path`, `type`, `level`, `status`, `default_order`, `create_time`, `instance_config`, `action_type`, `update_time`, `operator_uid`, `creator_uid`, `description`, `multiple_flag`, `module_control_type`) VALUES (40540, '申请记录', 40500, '/40000/40500/40540', 1, 3, 2, 0, '2018-03-02 11:00:50', NULL, NULL, '2018-03-02 11:00:50', 0, 1, '1', NULL, '');
 INSERT INTO `eh_service_modules`(`id`, `name`, `parent_id`, `path`, `type`, `level`, `status`, `default_order`, `create_time`, `instance_config`, `action_type`, `update_time`, `operator_uid`, `creator_uid`, `description`, `multiple_flag`, `module_control_type`) VALUES (40600, '创客空间', 40000, '/40000/40600', 1, 2, 2, 0, '2016-12-06 11:40:51', '{\"type\":1,\"forumId\":177000,\"categoryId\":1003,\"parentId\":110001,\"tag\":\"创客\"}', 32, '2017-09-08 18:59:10', 0, 0, '0', 0, 'community_control');
-INSERT INTO `eh_service_modules`(`id`, `name`, `parent_id`, `path`, `type`, `level`, `status`, `default_order`, `create_time`, `instance_config`, `action_type`, `update_time`, `operator_uid`, `creator_uid`, `description`, `multiple_flag`, `module_control_type`) VALUES (40700, '快递服务', 40000, '/40000/40700', 1, 2, 2, 0, '2017-07-18 03:51:18', '{\"url\":\"http://janson.lab.everhomes.com/energy-management/index.html?hideNavigationBar=1#/address_choose#sign_suffix\"}', 13, '2017-09-08 18:59:10', 2017, 0, '0', 0, 'community_control');
-INSERT INTO `eh_service_modules`(`id`, `name`, `parent_id`, `path`, `type`, `level`, `status`, `default_order`, `create_time`, `instance_config`, `action_type`, `update_time`, `operator_uid`, `creator_uid`, `description`, `multiple_flag`, `module_control_type`) VALUES (40730, '企业人才', 40000, '/40000/40730', 1, 2, 2, 0, '2018-01-29 13:57:26', NULL, NULL, '2018-01-29 13:57:26', 0, 0, '0', 0, 'community_control');
+INSERT INTO `eh_service_modules`(`id`, `name`, `parent_id`, `path`, `type`, `level`, `status`, `default_order`, `create_time`, `instance_config`, `action_type`, `update_time`, `operator_uid`, `creator_uid`, `description`, `multiple_flag`, `module_control_type`) VALUES (40700, '快递服务', 40000, '/40000/40700', 1, 2, 2, 0, '2017-07-18 03:51:18', '{"url":"${home.url}/deliver/dist/index.html#/home_page#sign_suffix"}', 13, '2017-09-08 18:59:10', 2017, 0, '0', 0, 'community_control');
+INSERT INTO `eh_service_modules`(`id`, `name`, `parent_id`, `path`, `type`, `level`, `status`, `default_order`, `create_time`, `instance_config`, `action_type`, `update_time`, `operator_uid`, `creator_uid`, `description`, `multiple_flag`, `module_control_type`) VALUES (40730, '企业人才', 40000, '/40000/40730', 1, 2, 2, 0, '2018-01-29 13:57:26', '{"url":"${home.url}/enterprise-talent/build/index.html?hideNavigationBar=1#/home_page#sign_suffix"}', 13, '2018-01-29 13:57:26', 0, 0, '0', 0, 'community_control');
 INSERT INTO `eh_service_modules`(`id`, `name`, `parent_id`, `path`, `type`, `level`, `status`, `default_order`, `create_time`, `instance_config`, `action_type`, `update_time`, `operator_uid`, `creator_uid`, `description`, `multiple_flag`, `module_control_type`) VALUES (40750, '运营统计', 40000, '/40000/40750', 1, 2, 0, 0, '2016-12-06 11:40:51', NULL, NULL, '2017-09-08 18:59:10', 0, 0, '0', 0, 'unlimit_control');
 INSERT INTO `eh_service_modules`(`id`, `name`, `parent_id`, `path`, `type`, `level`, `status`, `default_order`, `create_time`, `instance_config`, `action_type`, `update_time`, `operator_uid`, `creator_uid`, `description`, `multiple_flag`, `module_control_type`) VALUES (40800, '停车缴费', 40000, '/40000/40800', 1, 2, 2, 0, '2016-12-06 11:40:51', '', 30, '2017-09-08 18:59:10', 0, 0, '0', 0, 'community_control');
 INSERT INTO `eh_service_modules`(`id`, `name`, `parent_id`, `path`, `type`, `level`, `status`, `default_order`, `create_time`, `instance_config`, `action_type`, `update_time`, `operator_uid`, `creator_uid`, `description`, `multiple_flag`, `module_control_type`) VALUES (40900, '车辆管理', 40000, '/40000/40900', 1, 2, 2, 0, '2016-12-06 11:40:51', NULL, NULL, '2017-09-08 18:59:10', 0, 0, '0', 0, 'community_control');
@@ -844,15 +869,15 @@ INSERT INTO `eh_service_modules`(`id`, `name`, `parent_id`, `path`, `type`, `lev
 INSERT INTO `eh_service_modules`(`id`, `name`, `parent_id`, `path`, `type`, `level`, `status`, `default_order`, `create_time`, `instance_config`, `action_type`, `update_time`, `operator_uid`, `creator_uid`, `description`, `multiple_flag`, `module_control_type`) VALUES (41010, '大堂门禁', 40000, '/10000/41010', 1, 2, 2, 0, '2018-01-29 10:09:15', '{\"isSupportQR\":1,\"isSupportSmart\":0}', NULL, '2018-01-29 10:09:15', 0, 0, '0', 0, 'community_control');
 INSERT INTO `eh_service_modules`(`id`, `name`, `parent_id`, `path`, `type`, `level`, `status`, `default_order`, `create_time`, `instance_config`, `action_type`, `update_time`, `operator_uid`, `creator_uid`, `description`, `multiple_flag`, `module_control_type`) VALUES (41020, '公司门禁', 40000, '/10000/41020', 1, 2, 2, 0, '2018-01-29 10:09:15', '{\"isSupportQR\":1,\"isSupportSmart\":0}', NULL, '2018-01-29 10:09:15', 0, 0, '0', 0, 'community_control');
 INSERT INTO `eh_service_modules`(`id`, `name`, `parent_id`, `path`, `type`, `level`, `status`, `default_order`, `create_time`, `instance_config`, `action_type`, `update_time`, `operator_uid`, `creator_uid`, `description`, `multiple_flag`, `module_control_type`) VALUES (41100, 'Wifi热点', 40000, '/40000/41100', 1, 2, 2, 0, '2016-12-06 11:40:51', '', 47, '2017-09-08 18:59:10', 0, 0, '0', 0, 'community_control');
-INSERT INTO `eh_service_modules`(`id`, `name`, `parent_id`, `path`, `type`, `level`, `status`, `default_order`, `create_time`, `instance_config`, `action_type`, `update_time`, `operator_uid`, `creator_uid`, `description`, `multiple_flag`, `module_control_type`) VALUES (41200, '一卡通', 40000, '/40000/43500', 1, 2, 2, 0, '2016-12-06 11:40:51', '{\"url\":\"http://janson.lab.everhomes.com/energy-management/index.html?hideNavigationBar=1#/address_choose#sign_suffix\"}', 13, '2017-09-08 18:59:10', 0, 0, '0', 0, 'community_control');
+INSERT INTO `eh_service_modules`(`id`, `name`, `parent_id`, `path`, `type`, `level`, `status`, `default_order`, `create_time`, `instance_config`, `action_type`, `update_time`, `operator_uid`, `creator_uid`, `description`, `multiple_flag`, `module_control_type`) VALUES (41200, '一卡通', 40000, '/40000/43500', 1, 2, 2, 0, '2016-12-06 11:40:51', '{"url":"${home.url}/metro_card/index.html?hideNavigationBar=1#/wallet?sign_suffix"}', 13, '2017-09-08 18:59:10', 0, 0, '0', 0, 'community_control');
 INSERT INTO `eh_service_modules`(`id`, `name`, `parent_id`, `path`, `type`, `level`, `status`, `default_order`, `create_time`, `instance_config`, `action_type`, `update_time`, `operator_uid`, `creator_uid`, `description`, `multiple_flag`, `module_control_type`) VALUES (41300, '统计分析', 40000, '/40000/41300', 1, 2, 2, 0, '2016-12-28 10:45:07', NULL, NULL, '2017-09-08 18:59:10', 0, 0, '0', 0, '');
 INSERT INTO `eh_service_modules`(`id`, `name`, `parent_id`, `path`, `type`, `level`, `status`, `default_order`, `create_time`, `instance_config`, `action_type`, `update_time`, `operator_uid`, `creator_uid`, `description`, `multiple_flag`, `module_control_type`) VALUES (41330, '用户行为统计', 41300, '/40000/41300/41330', 0, 2, 2, 0, '2017-09-12 13:54:34', NULL, NULL, NULL, 0, 0, NULL, NULL, 'unlimit_control');
-INSERT INTO `eh_service_modules`(`id`, `name`, `parent_id`, `path`, `type`, `level`, `status`, `default_order`, `create_time`, `instance_config`, `action_type`, `update_time`, `operator_uid`, `creator_uid`, `description`, `multiple_flag`, `module_control_type`) VALUES (41400, '云打印', 40000, '/40000/41400', 1, 2, 2, 0, '2017-05-11 08:51:49', NULL, NULL, '2017-09-08 18:59:10', 0, 0, '0', 0, 'community_control');
+INSERT INTO `eh_service_modules`(`id`, `name`, `parent_id`, `path`, `type`, `level`, `status`, `default_order`, `create_time`, `instance_config`, `action_type`, `update_time`, `operator_uid`, `creator_uid`, `description`, `multiple_flag`, `module_control_type`) VALUES (41400, '云打印', 40000, '/40000/41400', 1, 2, 2, 0, '2017-05-11 08:51:49', '{"url":"${home.url}/cloud-print/build/index.html#/home#sign_suffix"}', 13, '2017-09-08 18:59:10', 0, 0, '0', 0, 'community_control');
 INSERT INTO `eh_service_modules`(`id`, `name`, `parent_id`, `path`, `type`, `level`, `status`, `default_order`, `create_time`, `instance_config`, `action_type`, `update_time`, `operator_uid`, `creator_uid`, `description`, `multiple_flag`, `module_control_type`) VALUES (41500, '文件管理', 40000, '/40000/41500', 1, 2, 2, 0, '2017-05-11 08:51:49', NULL, NULL, '2017-09-08 18:59:10', 0, 0, '0', 0, 'community_control');
 INSERT INTO `eh_service_modules`(`id`, `name`, `parent_id`, `path`, `type`, `level`, `status`, `default_order`, `create_time`, `instance_config`, `action_type`, `update_time`, `operator_uid`, `creator_uid`, `description`, `multiple_flag`, `module_control_type`) VALUES (41600, '园区审批', 40000, '/40000/41600', 1, 2, 2, 0, '2017-05-11 08:51:49', NULL, NULL, '2017-09-08 18:59:10', 0, 0, '0', 0, 'community_control');
-INSERT INTO `eh_service_modules`(`id`, `name`, `parent_id`, `path`, `type`, `level`, `status`, `default_order`, `create_time`, `instance_config`, `action_type`, `update_time`, `operator_uid`, `creator_uid`, `description`, `multiple_flag`, `module_control_type`) VALUES (41700, '问卷调查', 40000, '/40000/41700', 1, 2, 2, 0, '2017-05-11 08:51:49', NULL, NULL, '2017-09-08 18:59:10', 0, 0, '0', 0, 'community_control');
+INSERT INTO `eh_service_modules`(`id`, `name`, `parent_id`, `path`, `type`, `level`, `status`, `default_order`, `create_time`, `instance_config`, `action_type`, `update_time`, `operator_uid`, `creator_uid`, `description`, `multiple_flag`, `module_control_type`) VALUES (41700, '问卷调查', 40000, '/40000/41700', 1, 2, 2, 0, '2017-05-11 08:51:49', '{"url":"${home.url}/questionnaire-survey/build/index.html#/home#sign_suffix "}', 13, '2017-09-08 18:59:10', 0, 0, '0', 0, 'community_control');
 INSERT INTO `eh_service_modules`(`id`, `name`, `parent_id`, `path`, `type`, `level`, `status`, `default_order`, `create_time`, `instance_config`, `action_type`, `update_time`, `operator_uid`, `creator_uid`, `description`, `multiple_flag`, `module_control_type`) VALUES (47000, '积分管理', 40000, '/40000/47000', 0, 2, 2, 0, '2018-01-05 12:17:18', NULL, NULL, NULL, 0, 0, NULL, NULL, '');
-INSERT INTO `eh_service_modules`(`id`, `name`, `parent_id`, `path`, `type`, `level`, `status`, `default_order`, `create_time`, `instance_config`, `action_type`, `update_time`, `operator_uid`, `creator_uid`, `description`, `multiple_flag`, `module_control_type`) VALUES (49100, '能耗管理', 20000, '/20000/49100', 1, 2, 2, 0, '2016-12-06 11:46:41', '{\"url\":\"http://janson.lab.everhomes.com/energy-management/index.html?hideNavigationBar=1#/address_choose#sign_suffix\"}', 13, '2017-09-08 18:59:10', 0, 0, '0', 0, 'community_control');
+INSERT INTO `eh_service_modules`(`id`, `name`, `parent_id`, `path`, `type`, `level`, `status`, `default_order`, `create_time`, `instance_config`, `action_type`, `update_time`, `operator_uid`, `creator_uid`, `description`, `multiple_flag`, `module_control_type`) VALUES (49100, '能耗管理', 20000, '/20000/49100', 1, 2, 2, 0, '2016-12-06 11:46:41', '{"realm":"energyManagement","entryUrl":"https://core.zuolin.com/nar/energyManagement/build/index.html?hideNavigationBar=1#/address_choose#sign_suffix"}', 44, '2017-09-08 18:59:10', 0, 0, '0', 0, 'community_control');
 INSERT INTO `eh_service_modules`(`id`, `name`, `parent_id`, `path`, `type`, `level`, `status`, `default_order`, `create_time`, `instance_config`, `action_type`, `update_time`, `operator_uid`, `creator_uid`, `description`, `multiple_flag`, `module_control_type`) VALUES (49110, '表计管理', 49100, '/20000/49100/49110', 1, 3, 2, 1, '2017-11-16 19:09:05', NULL, NULL, NULL, 1, 1, NULL, NULL, '');
 INSERT INTO `eh_service_modules`(`id`, `name`, `parent_id`, `path`, `type`, `level`, `status`, `default_order`, `create_time`, `instance_config`, `action_type`, `update_time`, `operator_uid`, `creator_uid`, `description`, `multiple_flag`, `module_control_type`) VALUES (49120, '抄表记录', 49100, '/20000/49100/49120', 1, 3, 2, 3, '2017-11-16 19:09:05', NULL, NULL, NULL, 1, 1, NULL, NULL, '');
 INSERT INTO `eh_service_modules`(`id`, `name`, `parent_id`, `path`, `type`, `level`, `status`, `default_order`, `create_time`, `instance_config`, `action_type`, `update_time`, `operator_uid`, `creator_uid`, `description`, `multiple_flag`, `module_control_type`) VALUES (49130, '统计信息', 49100, '/20000/49100/49130', 1, 3, 2, 4, '2017-11-16 19:09:05', NULL, NULL, NULL, 1, 1, NULL, NULL, '');
@@ -1187,6 +1212,292 @@ DELETE from eh_service_modules WHERE id in (40510,40520,40530,40540);
 DELETE from eh_acl_privileges WHERE id in (4050040510,4050040520,4050040530,4050040540);
 DELETE from eh_service_module_privileges WHERE module_id in (40510,40520,40530,40540); 
 
+INSERT INTO `eh_service_modules` (`id`, `name`, `parent_id`, `path`, `type`, `level`, `status`, `default_order`, `create_time`, `instance_config`, `action_type`, `update_time`, `operator_uid`, `creator_uid`, `description`, `multiple_flag`, `module_control_type`) VALUES ('40510', '样式设置', '40500', '/40000/40500/40510', '1', '3', '2', '0', now(), NULL, NULL, now(), '0', '1', '1', NULL, '');
+INSERT INTO `eh_service_modules` (`id`, `name`, `parent_id`, `path`, `type`, `level`, `status`, `default_order`, `create_time`, `instance_config`, `action_type`, `update_time`, `operator_uid`, `creator_uid`, `description`, `multiple_flag`, `module_control_type`) VALUES ('40520', '服务管理', '40500', '/40000/40500/40520', '1', '3', '2', '0', now(), NULL, NULL, now(), '0', '1', '1', NULL, '');
+INSERT INTO `eh_service_modules` (`id`, `name`, `parent_id`, `path`, `type`, `level`, `status`, `default_order`, `create_time`, `instance_config`, `action_type`, `update_time`, `operator_uid`, `creator_uid`, `description`, `multiple_flag`, `module_control_type`) VALUES ('40530', '消息通知', '40500', '/40000/40500/40530', '1', '3', '2', '0', now(), NULL, NULL, now(), '0', '1', '1', NULL, '');
+INSERT INTO `eh_service_modules` (`id`, `name`, `parent_id`, `path`, `type`, `level`, `status`, `default_order`, `create_time`, `instance_config`, `action_type`, `update_time`, `operator_uid`, `creator_uid`, `description`, `multiple_flag`, `module_control_type`) VALUES ('40540', '申请记录', '40500', '/40000/40500/40540', '1', '3', '2', '0', now(), NULL, NULL, now(), '0', '1', '1', NULL, '');
+
+set @privilege_id = (select max(id) from eh_service_module_privileges);
+INSERT INTO `eh_service_module_privileges` (`id`, `module_id`, `privilege_type`, `privilege_id`, `remark`, `default_order`, `create_time`) VALUES (@privilege_id:=@privilege_id+1, '40500', '0', '10024', '全部权限', '0', now());
+
+INSERT INTO `eh_acl_privileges` (`id`, `app_id`, `name`, `description`, `tag`) VALUES (4050040510, '0', '服务联盟 样式设置权限', '服务联盟 样式设置权限', NULL);
+INSERT INTO `eh_service_module_privileges` (`id`, `module_id`, `privilege_type`, `privilege_id`, `remark`, `default_order`, `create_time`) VALUES (@privilege_id:=@privilege_id+1, '40510', '0', 4050040510, '样式设置权限', '0', now());
+
+INSERT INTO `eh_acl_privileges` (`id`, `app_id`, `name`, `description`, `tag`) VALUES (4050040520, '0', '服务联盟 服务管理权限', '服务联盟 服务管理权限', NULL);
+INSERT INTO `eh_service_module_privileges` (`id`, `module_id`, `privilege_type`, `privilege_id`, `remark`, `default_order`, `create_time`) VALUES (@privilege_id:=@privilege_id+1, '40520', '0', 4050040520, '服务管理权限', '0', now());
+
+INSERT INTO `eh_acl_privileges` (`id`, `app_id`, `name`, `description`, `tag`) VALUES (4050040530, '0', '服务联盟 消息通知权限', '服务联盟 消息通知权限', NULL);
+INSERT INTO `eh_service_module_privileges` (`id`, `module_id`, `privilege_type`, `privilege_id`, `remark`, `default_order`, `create_time`) VALUES (@privilege_id:=@privilege_id+1, '40530', '0', 4050040530, '消息通知权限', '0', now());
+
+INSERT INTO `eh_acl_privileges` (`id`, `app_id`, `name`, `description`, `tag`) VALUES (4050040540, '0', '服务联盟 申请记录权限', '服务联盟 申请记录权限', NULL);
+INSERT INTO `eh_service_module_privileges` (`id`, `module_id`, `privilege_type`, `privilege_id`, `remark`, `default_order`, `create_time`) VALUES (@privilege_id:=@privilege_id+1, '40540', '0', 4050040540, '申请记录权限', '0', now());
+
+-- 20100 物业报修 模块已有，重新给权限--------------------------------------------------------------------------------------------
+-- 删除物业报修老权限，启用新权限
+DELETE from eh_service_module_privileges WHERE module_id in (20140,20150,20190);
+
+set @privilege_id = (select max(id) from eh_service_module_privileges);
+INSERT INTO `eh_acl_privileges` (`id`, `app_id`, `name`, `description`, `tag`) VALUES (2010020140, '0', '物业报修 任务列表权限', '物业报修 任务列表权限', NULL);
+INSERT INTO `eh_service_module_privileges` (`id`, `module_id`, `privilege_type`, `privilege_id`, `remark`, `default_order`, `create_time`) VALUES (@privilege_id:=@privilege_id+1, '20140', '0', 2010020140, '任务列表权限', '0', now());
+
+INSERT INTO `eh_acl_privileges` (`id`, `app_id`, `name`, `description`, `tag`) VALUES (2010020150, '0', '物业报修 服务录入权限', '物业报修 服务录入权限', NULL);
+INSERT INTO `eh_service_module_privileges` (`id`, `module_id`, `privilege_type`, `privilege_id`, `remark`, `default_order`, `create_time`) VALUES (@privilege_id:=@privilege_id+1, '20150', '0', 2010020150, '服务录入权限', '0', now());
+
+INSERT INTO `eh_acl_privileges` (`id`, `app_id`, `name`, `description`, `tag`) VALUES (2010020190, '0', '物业报修 统计权限', '物业报修 统计权限', NULL);
+INSERT INTO `eh_service_module_privileges` (`id`, `module_id`, `privilege_type`, `privilege_id`, `remark`, `default_order`, `create_time`) VALUES (@privilege_id:=@privilege_id+1, '20190', '0', 2010020190, '统计权限', '0', now());
+
+
+-- 40800 停车缴费 模块已有，重新给权限--------------------------------------------------------------------------------------------
+INSERT INTO `eh_service_modules` (`id`, `name`, `parent_id`, `path`, `type`, `level`, `status`, `default_order`, `create_time`, `instance_config`, `action_type`, `update_time`, `operator_uid`, `creator_uid`, `description`, `multiple_flag`, `module_control_type`) VALUES ('40810', '月卡申请', '40800', '/40000/40800/40810', '1', '3', '2', '0', now(), NULL, NULL, now(), '0', '1', '1', NULL, '');
+INSERT INTO `eh_service_modules` (`id`, `name`, `parent_id`, `path`, `type`, `level`, `status`, `default_order`, `create_time`, `instance_config`, `action_type`, `update_time`, `operator_uid`, `creator_uid`, `description`, `multiple_flag`, `module_control_type`) VALUES ('40820', '车辆认证申请', '40800', '/40000/40800/40820', '1', '3', '2', '0', now(), NULL, NULL, now(), '0', '1', '1', NULL, '');
+INSERT INTO `eh_service_modules` (`id`, `name`, `parent_id`, `path`, `type`, `level`, `status`, `default_order`, `create_time`, `instance_config`, `action_type`, `update_time`, `operator_uid`, `creator_uid`, `description`, `multiple_flag`, `module_control_type`) VALUES ('40830', 'VIP车位管理', '40800', '/40000/40800/40830', '1', '3', '2', '0', now(), NULL, NULL, now(), '0', '1', '1', NULL, '');
+INSERT INTO `eh_service_modules` (`id`, `name`, `parent_id`, `path`, `type`, `level`, `status`, `default_order`, `create_time`, `instance_config`, `action_type`, `update_time`, `operator_uid`, `creator_uid`, `description`, `multiple_flag`, `module_control_type`) VALUES ('40840', '订单记录', '40800', '/40000/40800/40840', '1', '3', '2', '0', now(), NULL, NULL, now(), '0', '1', '1', NULL, '');
+
+set @privilege_id = (select max(id) from eh_service_module_privileges);
+INSERT INTO `eh_acl_privileges` (`id`, `app_id`, `name`, `description`, `tag`) VALUES (4080040800, '0', '停车缴费 全部权限', '停车缴费 全部权限', NULL);
+INSERT INTO `eh_service_module_privileges` (`id`, `module_id`, `privilege_type`, `privilege_id`, `remark`, `default_order`, `create_time`) VALUES (@privilege_id:=@privilege_id+1, '40800', '0', 4080040800, '全部权限', '0', now());
+
+INSERT INTO `eh_acl_privileges` (`id`, `app_id`, `name`, `description`, `tag`) VALUES (4080040810, '0', '停车缴费 月卡申请权限', '停车缴费 月卡申请权限', NULL);
+INSERT INTO `eh_service_module_privileges` (`id`, `module_id`, `privilege_type`, `privilege_id`, `remark`, `default_order`, `create_time`) VALUES (@privilege_id:=@privilege_id+1, '40810', '0', 4080040810, '月卡申请权限', '0', now());
+
+INSERT INTO `eh_acl_privileges` (`id`, `app_id`, `name`, `description`, `tag`) VALUES (4080040820, '0', '停车缴费 车辆认证申请权限', '停车缴费 车辆认证申请权限', NULL);
+INSERT INTO `eh_service_module_privileges` (`id`, `module_id`, `privilege_type`, `privilege_id`, `remark`, `default_order`, `create_time`) VALUES (@privilege_id:=@privilege_id+1, '40820', '0', 4080040820, '车辆认证申请权限', '0', now());
+
+INSERT INTO `eh_acl_privileges` (`id`, `app_id`, `name`, `description`, `tag`) VALUES (4080040830, '0', '停车缴费 VIP车位管理权限', '停车缴费 VIP车位管理权限', NULL);
+INSERT INTO `eh_service_module_privileges` (`id`, `module_id`, `privilege_type`, `privilege_id`, `remark`, `default_order`, `create_time`) VALUES (@privilege_id:=@privilege_id+1, '40830', '0', 4080040830, 'VIP车位管理权限', '0', now());
+
+INSERT INTO `eh_acl_privileges` (`id`, `app_id`, `name`, `description`, `tag`) VALUES (4080040840, '0', '停车缴费 订单记录权限', '停车缴费 订单记录权限', NULL);
+INSERT INTO `eh_service_module_privileges` (`id`, `module_id`, `privilege_type`, `privilege_id`, `remark`, `default_order`, `create_time`) VALUES (@privilege_id:=@privilege_id+1, '40840', '0', 4080040840, '订单记录权限', '0', now());
+
+
+-- 40400 资源预约 --------------------------------------------------------------------------------------------
+INSERT INTO `eh_service_modules` (`id`, `name`, `parent_id`, `path`, `type`, `level`, `status`, `default_order`, `create_time`, `instance_config`, `action_type`, `update_time`, `operator_uid`, `creator_uid`, `description`, `multiple_flag`, `module_control_type`) VALUES ('40410', '资源管理', '40400', '/40000/40400/40410', '1', '3', '2', '0', now(), NULL, NULL, now(), '0', '1', '1', NULL, '');
+INSERT INTO `eh_service_modules` (`id`, `name`, `parent_id`, `path`, `type`, `level`, `status`, `default_order`, `create_time`, `instance_config`, `action_type`, `update_time`, `operator_uid`, `creator_uid`, `description`, `multiple_flag`, `module_control_type`) VALUES ('40420', '订单记录', '40400', '/40000/40400/40420', '1', '3', '2', '0', now(), NULL, NULL, now(), '0', '1', '1', NULL, '');
+
+set @privilege_id = (select max(id) from eh_service_module_privileges);
+INSERT INTO `eh_acl_privileges` (`id`, `app_id`, `name`, `description`, `tag`) VALUES (4040040400, '0', '资源预约 全部权限', '资源预约 全部权限', NULL);
+INSERT INTO `eh_service_module_privileges` (`id`, `module_id`, `privilege_type`, `privilege_id`, `remark`, `default_order`, `create_time`) VALUES (@privilege_id:=@privilege_id+1, '40400', '0', 4040040400, '全部权限', '0', now());
+
+INSERT INTO `eh_acl_privileges` (`id`, `app_id`, `name`, `description`, `tag`) VALUES (4040040410, '0', '资源预约 资源管理权限', '资源预约 资源管理权限', NULL);
+INSERT INTO `eh_service_module_privileges` (`id`, `module_id`, `privilege_type`, `privilege_id`, `remark`, `default_order`, `create_time`) VALUES (@privilege_id:=@privilege_id+1, '40410', '0', 4040040410, '资源管理权限', '0', now());
+
+INSERT INTO `eh_acl_privileges` (`id`, `app_id`, `name`, `description`, `tag`) VALUES (4040040420, '0', '资源预约 订单记录权限', '资源预约 订单记录权限', NULL);
+INSERT INTO `eh_service_module_privileges` (`id`, `module_id`, `privilege_type`, `privilege_id`, `remark`, `default_order`, `create_time`) VALUES (@privilege_id:=@privilege_id+1, '40420', '0', 4040040420, '订单记录权限', '0', now());
+
+-- 40400 车辆放行 --------------------------------------------------------------------------------------------
+set @privilege_id = (select max(id) from eh_service_module_privileges);
+INSERT INTO `eh_acl_privileges` (`id`, `app_id`, `name`, `description`, `tag`) VALUES (2090020900, '0', '车辆放行 全部权限', '车辆放行 全部权限', NULL);
+INSERT INTO `eh_service_module_privileges` (`id`, `module_id`, `privilege_type`, `privilege_id`, `remark`, `default_order`, `create_time`) VALUES (@privilege_id:=@privilege_id+1, '20900', '0', 2090020900, '全部权限', '0', now());
+
+-- 10800 园区快讯 --------------------------------------------------------------------------------------------
+DELETE from eh_service_module_privileges WHERE module_id = 10800 and privilege_id=10005;
+
+set @privilege_id = (select max(id) from eh_service_module_privileges);
+INSERT INTO `eh_acl_privileges` (`id`, `app_id`, `name`, `description`, `tag`) VALUES (1080010800, '0', '园区快讯 全部权限', '园区快讯 全部权限', NULL);
+INSERT INTO `eh_service_module_privileges` (`id`, `module_id`, `privilege_type`, `privilege_id`, `remark`, `default_order`, `create_time`) VALUES (@privilege_id:=@privilege_id+1, '10800', '0', 1080010800, '全部权限', '0', now());
+
+-- 40100 园区入驻（招租管理） --------------------------------------------------------------------------------------------
+INSERT INTO `eh_service_modules` (`id`, `name`, `parent_id`, `path`, `type`, `level`, `status`, `default_order`, `create_time`, `instance_config`, `action_type`, `update_time`, `operator_uid`, `creator_uid`, `description`, `multiple_flag`, `module_control_type`) VALUES ('40110', '项目介绍', '40100', '/40000/40100/40410', '1', '3', '2', '0', now(), NULL, NULL, now(), '0', '1', '1', NULL, '');
+INSERT INTO `eh_service_modules` (`id`, `name`, `parent_id`, `path`, `type`, `level`, `status`, `default_order`, `create_time`, `instance_config`, `action_type`, `update_time`, `operator_uid`, `creator_uid`, `description`, `multiple_flag`, `module_control_type`) VALUES ('40120', '楼栋介绍', '40100', '/40000/40100/40420', '1', '3', '2', '0', now(), NULL, NULL, now(), '0', '1', '1', NULL, '');
+INSERT INTO `eh_service_modules` (`id`, `name`, `parent_id`, `path`, `type`, `level`, `status`, `default_order`, `create_time`, `instance_config`, `action_type`, `update_time`, `operator_uid`, `creator_uid`, `description`, `multiple_flag`, `module_control_type`) VALUES ('40130', '房源招租', '40100', '/40000/40100/40430', '1', '3', '2', '0', now(), NULL, NULL, now(), '0', '1', '1', NULL, '');
+INSERT INTO `eh_service_modules` (`id`, `name`, `parent_id`, `path`, `type`, `level`, `status`, `default_order`, `create_time`, `instance_config`, `action_type`, `update_time`, `operator_uid`, `creator_uid`, `description`, `multiple_flag`, `module_control_type`) VALUES ('40140', '申请记录', '40100', '/40000/40100/40440', '1', '3', '2', '0', now(), NULL, NULL, now(), '0', '1', '1', NULL, '');
+
+set @privilege_id = (select max(id) from eh_service_module_privileges);
+INSERT INTO `eh_acl_privileges` (`id`, `app_id`, `name`, `description`, `tag`) VALUES (4010040100, '0', '园区入驻 全部权限', '园区入驻 全部权限', NULL);
+INSERT INTO `eh_service_module_privileges` (`id`, `module_id`, `privilege_type`, `privilege_id`, `remark`, `default_order`, `create_time`) VALUES (@privilege_id:=@privilege_id+1, '40100', '0', 4010040100, '全部权限', '0', now());
+
+INSERT INTO `eh_acl_privileges` (`id`, `app_id`, `name`, `description`, `tag`) VALUES (4010040110, '0', '园区入驻 项目介绍权限', '园区入驻 项目介绍权限', NULL);
+INSERT INTO `eh_service_module_privileges` (`id`, `module_id`, `privilege_type`, `privilege_id`, `remark`, `default_order`, `create_time`) VALUES (@privilege_id:=@privilege_id+1, '40110', '0', 4010040110, '项目介绍权限', '0', now());
+
+INSERT INTO `eh_acl_privileges` (`id`, `app_id`, `name`, `description`, `tag`) VALUES (4010040120, '0', '园区入驻 楼栋介绍权限', '园区入驻 楼栋介绍权限', NULL);
+INSERT INTO `eh_service_module_privileges` (`id`, `module_id`, `privilege_type`, `privilege_id`, `remark`, `default_order`, `create_time`) VALUES (@privilege_id:=@privilege_id+1, '40120', '0', 4010040120, '楼栋介绍权限', '0', now());
+
+INSERT INTO `eh_acl_privileges` (`id`, `app_id`, `name`, `description`, `tag`) VALUES (4010040130, '0', '园区入驻 房源招租权限', '园区入驻 房源招租权限', NULL);
+INSERT INTO `eh_service_module_privileges` (`id`, `module_id`, `privilege_type`, `privilege_id`, `remark`, `default_order`, `create_time`) VALUES (@privilege_id:=@privilege_id+1, '40130', '0', 4010040130, '房源招租权限', '0', now());
+
+INSERT INTO `eh_acl_privileges` (`id`, `app_id`, `name`, `description`, `tag`) VALUES (4010040140, '0', '园区入驻 申请记录权限', '园区入驻 申请记录权限', NULL);
+INSERT INTO `eh_service_module_privileges` (`id`, `module_id`, `privilege_type`, `privilege_id`, `remark`, `default_order`, `create_time`) VALUES (@privilege_id:=@privilege_id+1, '40140', '0', 4010040140, '申请记录权限', '0', now());
+
+-- 40200 工位预订 --------------------------------------------------------------------------------------------
+INSERT INTO `eh_service_modules` (`id`, `name`, `parent_id`, `path`, `type`, `level`, `status`, `default_order`, `create_time`, `instance_config`, `action_type`, `update_time`, `operator_uid`, `creator_uid`, `description`, `multiple_flag`, `module_control_type`) VALUES ('40210', '空间管理', '40200', '/40000/40200/40210', '1', '3', '2', '0', now(), NULL, NULL, now(), '0', '1', '1', NULL, '');
+INSERT INTO `eh_service_modules` (`id`, `name`, `parent_id`, `path`, `type`, `level`, `status`, `default_order`, `create_time`, `instance_config`, `action_type`, `update_time`, `operator_uid`, `creator_uid`, `description`, `multiple_flag`, `module_control_type`) VALUES ('40220', '预定详情', '40200', '/40000/40200/40220', '1', '3', '2', '0', now(), NULL, NULL, now(), '0', '1', '1', NULL, '');
+
+set @privilege_id = (select max(id) from eh_service_module_privileges);
+INSERT INTO `eh_acl_privileges` (`id`, `app_id`, `name`, `description`, `tag`) VALUES (4020040200, '0', '工位预订 全部权限', '工位预订 全部权限', NULL);
+INSERT INTO `eh_service_module_privileges` (`id`, `module_id`, `privilege_type`, `privilege_id`, `remark`, `default_order`, `create_time`) VALUES (@privilege_id:=@privilege_id+1, '40200', '0', 4020040200, '全部权限', '0', now());
+
+INSERT INTO `eh_acl_privileges` (`id`, `app_id`, `name`, `description`, `tag`) VALUES (4020040210, '0', '工位预订 空间管理权限', '工位预订 空间管理权限', NULL);
+INSERT INTO `eh_service_module_privileges` (`id`, `module_id`, `privilege_type`, `privilege_id`, `remark`, `default_order`, `create_time`) VALUES (@privilege_id:=@privilege_id+1, '40210', '0', 4020040210, '空间管理权限', '0', now());
+
+INSERT INTO `eh_acl_privileges` (`id`, `app_id`, `name`, `description`, `tag`) VALUES (4020040220, '0', '工位预订 预定详情权限', '工位预订 预定详情权限', NULL);
+INSERT INTO `eh_service_module_privileges` (`id`, `module_id`, `privilege_type`, `privilege_id`, `remark`, `default_order`, `create_time`) VALUES (@privilege_id:=@privilege_id+1, '40220', '0', 4020040220, '预定详情权限', '0', now());
+
+-- 41400 云打印 --------------------------------------------------------------------------------------------
+INSERT INTO `eh_service_modules` (`id`, `name`, `parent_id`, `path`, `type`, `level`, `status`, `default_order`, `create_time`, `instance_config`, `action_type`, `update_time`, `operator_uid`, `creator_uid`, `description`, `multiple_flag`, `module_control_type`) VALUES ('41410', '打印记录', '41400', '/40000/41400/41410', '1', '3', '2', '0', now(), NULL, NULL, now(), '0', '1', '1', NULL, '');
+INSERT INTO `eh_service_modules` (`id`, `name`, `parent_id`, `path`, `type`, `level`, `status`, `default_order`, `create_time`, `instance_config`, `action_type`, `update_time`, `operator_uid`, `creator_uid`, `description`, `multiple_flag`, `module_control_type`) VALUES ('41420', '打印统计', '41400', '/40000/41400/41420', '1', '3', '2', '0', now(), NULL, NULL, now(), '0', '1', '1', NULL, '');
+INSERT INTO `eh_service_modules` (`id`, `name`, `parent_id`, `path`, `type`, `level`, `status`, `default_order`, `create_time`, `instance_config`, `action_type`, `update_time`, `operator_uid`, `creator_uid`, `description`, `multiple_flag`, `module_control_type`) VALUES ('41430', '打印设置', '41400', '/40000/41400/41430', '1', '3', '2', '0', now(), NULL, NULL, now(), '0', '1', '1', NULL, '');
+
+set @privilege_id = (select max(id) from eh_service_module_privileges);
+INSERT INTO `eh_acl_privileges` (`id`, `app_id`, `name`, `description`, `tag`) VALUES (4140041400, '0', '云打印 全部权限', '云打印 全部权限', NULL);
+INSERT INTO `eh_service_module_privileges` (`id`, `module_id`, `privilege_type`, `privilege_id`, `remark`, `default_order`, `create_time`) VALUES (@privilege_id:=@privilege_id+1, '41400', '0', 4140041400, '全部权限', '0', now());
+
+INSERT INTO `eh_acl_privileges` (`id`, `app_id`, `name`, `description`, `tag`) VALUES (4140041410, '0', '云打印 打印记录权限', '云打印 打印记录权限', NULL);
+INSERT INTO `eh_service_module_privileges` (`id`, `module_id`, `privilege_type`, `privilege_id`, `remark`, `default_order`, `create_time`) VALUES (@privilege_id:=@privilege_id+1, '41410', '0', 4140041410, '打印记录权限', '0', now());
+
+INSERT INTO `eh_acl_privileges` (`id`, `app_id`, `name`, `description`, `tag`) VALUES (4140041420, '0', '云打印 打印统计权限', '云打印 打印统计权限', NULL);
+INSERT INTO `eh_service_module_privileges` (`id`, `module_id`, `privilege_type`, `privilege_id`, `remark`, `default_order`, `create_time`) VALUES (@privilege_id:=@privilege_id+1, '41420', '0', 4140041420, '打印统计权限', '0', now());
+
+INSERT INTO `eh_acl_privileges` (`id`, `app_id`, `name`, `description`, `tag`) VALUES (4140041430, '0', '云打印 打印设置权限', '云打印 打印设置权限', NULL);
+INSERT INTO `eh_service_module_privileges` (`id`, `module_id`, `privilege_type`, `privilege_id`, `remark`, `default_order`, `create_time`) VALUES (@privilege_id:=@privilege_id+1, '41430', '0', 4140041430, '打印设置权限', '0', now());
+
+-- 49200 物品搬迁 --------------------------------------------------------------------------------------------
+set @privilege_id = (select max(id) from eh_service_module_privileges);
+INSERT INTO `eh_acl_privileges` (`id`, `app_id`, `name`, `description`, `tag`) VALUES (4920049200, '0', '物品搬迁 全部权限', '物品搬迁 全部权限', NULL);
+INSERT INTO `eh_service_module_privileges` (`id`, `module_id`, `privilege_type`, `privilege_id`, `remark`, `default_order`, `create_time`) VALUES (@privilege_id:=@privilege_id+1, '49200', '0', 4920049200, '全部权限', '0', now());
+
+-- 41700 问卷调查 --------------------------------------------------------------------------------------------
+INSERT INTO `eh_service_modules` (`id`, `name`, `parent_id`, `path`, `type`, `level`, `status`, `default_order`, `create_time`, `instance_config`, `action_type`, `update_time`, `operator_uid`, `creator_uid`, `description`, `multiple_flag`, `module_control_type`) VALUES ('41710', '已发布', '41700', '/40000/41700/41710', '1', '3', '2', '0', now(), NULL, NULL, now(), '0', '1', '1', NULL, '');
+INSERT INTO `eh_service_modules` (`id`, `name`, `parent_id`, `path`, `type`, `level`, `status`, `default_order`, `create_time`, `instance_config`, `action_type`, `update_time`, `operator_uid`, `creator_uid`, `description`, `multiple_flag`, `module_control_type`) VALUES ('41720', '草稿箱', '41700', '/40000/41700/41720', '1', '3', '2', '0', now(), NULL, NULL, now(), '0', '1', '1', NULL, '');
+
+set @privilege_id = (select max(id) from eh_service_module_privileges);
+INSERT INTO `eh_acl_privileges` (`id`, `app_id`, `name`, `description`, `tag`) VALUES (4170041700, '0', '问卷调查 全部权限', '问卷调查 全部权限', NULL);
+INSERT INTO `eh_service_module_privileges` (`id`, `module_id`, `privilege_type`, `privilege_id`, `remark`, `default_order`, `create_time`) VALUES (@privilege_id:=@privilege_id+1, '41700', '0', 4170041700, '全部权限', '0', now());
+
+INSERT INTO `eh_acl_privileges` (`id`, `app_id`, `name`, `description`, `tag`) VALUES (4170041710, '0', '问卷调查 已发布权限', '问卷调查 已发布权限', NULL);
+INSERT INTO `eh_service_module_privileges` (`id`, `module_id`, `privilege_type`, `privilege_id`, `remark`, `default_order`, `create_time`) VALUES (@privilege_id:=@privilege_id+1, '41710', '0', 4170041710, '已发布权限', '0', now());
+
+INSERT INTO `eh_acl_privileges` (`id`, `app_id`, `name`, `description`, `tag`) VALUES (4170041720, '0', '问卷调查 草稿箱权限', '问卷调查 草稿箱权限', NULL);
+INSERT INTO `eh_service_module_privileges` (`id`, `module_id`, `privilege_type`, `privilege_id`, `remark`, `default_order`, `create_time`) VALUES (@privilege_id:=@privilege_id+1, '41720', '0', 4170041720, '草稿箱权限', '0', now());
+
+
+-- 40300 服务热线--------------------------------------------------------------------------------------------
+set @privilege_id = (select max(id) from eh_service_module_privileges);
+INSERT INTO `eh_acl_privileges` (`id`, `app_id`, `name`, `description`, `tag`) VALUES (4030040300, '0', '服务热线 全部权限', '服务热线 全部权限', NULL);
+INSERT INTO `eh_service_module_privileges` (`id`, `module_id`, `privilege_type`, `privilege_id`, `remark`, `default_order`, `create_time`) VALUES (@privilege_id:=@privilege_id+1, '40300', '0', 4030040300, '全部权限', '0', now());
+
+
+-- 10500 园区电子报 --------------------------------------------------------------------------------------------
+INSERT INTO `eh_service_modules` (`id`, `name`, `parent_id`, `path`, `type`, `level`, `status`, `default_order`, `create_time`, `instance_config`, `action_type`, `update_time`, `operator_uid`, `creator_uid`, `description`, `multiple_flag`, `module_control_type`) VALUES ('10510', '园区报管理', '10500', '/10000/10500/10510', '1', '3', '2', '0', now(), NULL, NULL, now(), '0', '1', '1', NULL, '');
+INSERT INTO `eh_service_modules` (`id`, `name`, `parent_id`, `path`, `type`, `level`, `status`, `default_order`, `create_time`, `instance_config`, `action_type`, `update_time`, `operator_uid`, `creator_uid`, `description`, `multiple_flag`, `module_control_type`) VALUES ('10520', '约稿须知', '10500', '/10000/10500/10520', '1', '3', '2', '0', now(), NULL, NULL, now(), '0', '1', '1', NULL, '');
+
+set @privilege_id = (select max(id) from eh_service_module_privileges);
+INSERT INTO `eh_acl_privileges` (`id`, `app_id`, `name`, `description`, `tag`) VALUES (1050010500, '0', '园区电子报 全部权限', '园区电子报 全部权限', NULL);
+INSERT INTO `eh_service_module_privileges` (`id`, `module_id`, `privilege_type`, `privilege_id`, `remark`, `default_order`, `create_time`) VALUES (@privilege_id:=@privilege_id+1, '10500', '0', 1050010500, '全部权限', '0', now());
+
+INSERT INTO `eh_acl_privileges` (`id`, `app_id`, `name`, `description`, `tag`) VALUES (1050010510, '0', '园区电子报 园区报管理权限', '园区电子报 园区报管理权限', NULL);
+INSERT INTO `eh_service_module_privileges` (`id`, `module_id`, `privilege_type`, `privilege_id`, `remark`, `default_order`, `create_time`) VALUES (@privilege_id:=@privilege_id+1, '10510', '0', 1050010510, '园区报管理权限', '0', now());
+
+INSERT INTO `eh_acl_privileges` (`id`, `app_id`, `name`, `description`, `tag`) VALUES (1050010520, '0', '园区电子报 约稿须知权限', '园区电子报 约稿须知权限', NULL);
+INSERT INTO `eh_service_module_privileges` (`id`, `module_id`, `privilege_type`, `privilege_id`, `remark`, `default_order`, `create_time`) VALUES (@privilege_id:=@privilege_id+1, '10520', '0', 1050010520, '约稿须知权限', '0', now());
+
+update eh_web_menus SET module_id=10500 WHERE id=16021100 AND `name`='园区电子报';
+update eh_service_modules SET path='/10000/10500' WHERE id=10500;
+
+
+-- 40070 园区地图 web没有接入--------------------------------------------------------------------------------------------
+INSERT INTO `eh_service_modules` (`id`, `name`, `parent_id`, `path`, `type`, `level`, `status`, `default_order`, `create_time`, `instance_config`, `action_type`, `update_time`, `operator_uid`, `creator_uid`, `description`, `multiple_flag`, `module_control_type`) VALUES ('40071', '商户管理', '40070', '/40000/40070/40071', '1', '3', '2', '0', now(), NULL, NULL, now(), '0', '1', '1', NULL, '');
+
+set @privilege_id = (select max(id) from eh_service_module_privileges);
+INSERT INTO `eh_acl_privileges` (`id`, `app_id`, `name`, `description`, `tag`) VALUES (4007040070, '0', '园区地图 全部权限', '园区地图 全部权限', NULL);
+INSERT INTO `eh_service_module_privileges` (`id`, `module_id`, `privilege_type`, `privilege_id`, `remark`, `default_order`, `create_time`) VALUES (@privilege_id:=@privilege_id+1, '40070', '0', 4007040070, '全部权限', '0', now());
+
+INSERT INTO `eh_acl_privileges` (`id`, `app_id`, `name`, `description`, `tag`) VALUES (4007040071, '0', '园区地图 商户管理权限', '园区地图 商户管理权限', NULL);
+INSERT INTO `eh_service_module_privileges` (`id`, `module_id`, `privilege_type`, `privilege_id`, `remark`, `default_order`, `create_time`) VALUES (@privilege_id:=@privilege_id+1, '40071', '0', 4007040071, '商户管理权限', '0', now());
+
+
+-- 40730 企业人才 --------------------------------------------------------------------------------------------
+INSERT INTO `eh_service_modules` (`id`, `name`, `parent_id`, `path`, `type`, `level`, `status`, `default_order`, `create_time`, `instance_config`, `action_type`, `update_time`, `operator_uid`, `creator_uid`, `description`, `multiple_flag`, `module_control_type`) VALUES ('40731', '人才管理', '40730', '/40000/40730/40731', '1', '3', '2', '0', now(), NULL, NULL, now(), '0', '1', '1', NULL, '');
+INSERT INTO `eh_service_modules` (`id`, `name`, `parent_id`, `path`, `type`, `level`, `status`, `default_order`, `create_time`, `instance_config`, `action_type`, `update_time`, `operator_uid`, `creator_uid`, `description`, `multiple_flag`, `module_control_type`) VALUES ('40732', '消息推送', '40730', '/40000/40730/40732', '1', '3', '2', '0', now(), NULL, NULL, now(), '0', '1', '1', NULL, '');
+INSERT INTO `eh_service_modules` (`id`, `name`, `parent_id`, `path`, `type`, `level`, `status`, `default_order`, `create_time`, `instance_config`, `action_type`, `update_time`, `operator_uid`, `creator_uid`, `description`, `multiple_flag`, `module_control_type`) VALUES ('40733', '申请记录', '40730', '/40000/40730/40733', '1', '3', '2', '0', now(), NULL, NULL, now(), '0', '1', '1', NULL, '');
+
+set @privilege_id = (select max(id) from eh_service_module_privileges);
+INSERT INTO `eh_acl_privileges` (`id`, `app_id`, `name`, `description`, `tag`) VALUES (4073040730, '0', '企业人才 全部权限', '企业人才 全部权限', NULL);
+INSERT INTO `eh_service_module_privileges` (`id`, `module_id`, `privilege_type`, `privilege_id`, `remark`, `default_order`, `create_time`) VALUES (@privilege_id:=@privilege_id+1, '40730', '0', 4073040730, '全部权限', '0', now());
+
+INSERT INTO `eh_acl_privileges` (`id`, `app_id`, `name`, `description`, `tag`) VALUES (4073040731, '0', '企业人才 人才管理权限', '企业人才 人才管理权限', NULL);
+INSERT INTO `eh_service_module_privileges` (`id`, `module_id`, `privilege_type`, `privilege_id`, `remark`, `default_order`, `create_time`) VALUES (@privilege_id:=@privilege_id+1, '40731', '0', 4073040731, '人才管理权限', '0', now());
+
+INSERT INTO `eh_acl_privileges` (`id`, `app_id`, `name`, `description`, `tag`) VALUES (4073040732, '0', '企业人才 消息推送权限', '企业人才 消息推送权限', NULL);
+INSERT INTO `eh_service_module_privileges` (`id`, `module_id`, `privilege_type`, `privilege_id`, `remark`, `default_order`, `create_time`) VALUES (@privilege_id:=@privilege_id+1, '40732', '0', 4073040732, '消息推送权限', '0', now());
+
+INSERT INTO `eh_acl_privileges` (`id`, `app_id`, `name`, `description`, `tag`) VALUES (4073040733, '0', '企业人才 申请记录权限', '企业人才 申请记录权限', NULL);
+INSERT INTO `eh_service_module_privileges` (`id`, `module_id`, `privilege_type`, `privilege_id`, `remark`, `default_order`, `create_time`) VALUES (@privilege_id:=@privilege_id+1, '40733', '0', 4073040733, '申请记录权限', '0', now());
+
+update eh_web_menus SET module_id=40730 WHERE id=16031900 AND `name`='企业人才';
+set @homeurl = (select `value` from eh_configurations WHERE `name`='home.url' LIMIT 1);
+UPDATE eh_service_modules SET action_type=13,instance_config=CONCAT('{"url":"',@homeurl,'/enterprise-talent/build/index.html?hideNavigationBar=1#/home_page#sign_suffix"}') WHERE id=40730;
+
+-- 41200 一卡通 web没有接入--------------------------------------------------------------------------------------------
+INSERT INTO `eh_service_modules` (`id`, `name`, `parent_id`, `path`, `type`, `level`, `status`, `default_order`, `create_time`, `instance_config`, `action_type`, `update_time`, `operator_uid`, `creator_uid`, `description`, `multiple_flag`, `module_control_type`) VALUES ('41210', '开卡用户', '41200', '/40000/41200/41210', '1', '3', '2', '0', now(), NULL, NULL, now(), '0', '1', '1', NULL, '');
+INSERT INTO `eh_service_modules` (`id`, `name`, `parent_id`, `path`, `type`, `level`, `status`, `default_order`, `create_time`, `instance_config`, `action_type`, `update_time`, `operator_uid`, `creator_uid`, `description`, `multiple_flag`, `module_control_type`) VALUES ('41220', '导出用户', '41200', '/40000/41200/41220', '1', '3', '2', '0', now(), NULL, NULL, now(), '0', '1', '1', NULL, '');
+INSERT INTO `eh_service_modules` (`id`, `name`, `parent_id`, `path`, `type`, `level`, `status`, `default_order`, `create_time`, `instance_config`, `action_type`, `update_time`, `operator_uid`, `creator_uid`, `description`, `multiple_flag`, `module_control_type`) VALUES ('41230', '充值记录', '41200', '/40000/41200/41230', '1', '3', '2', '0', now(), NULL, NULL, now(), '0', '1', '1', NULL, '');
+INSERT INTO `eh_service_modules` (`id`, `name`, `parent_id`, `path`, `type`, `level`, `status`, `default_order`, `create_time`, `instance_config`, `action_type`, `update_time`, `operator_uid`, `creator_uid`, `description`, `multiple_flag`, `module_control_type`) VALUES ('41240', '消费记录', '41200', '/40000/41200/41240', '1', '3', '2', '0', now(), NULL, NULL, now(), '0', '1', '1', NULL, '');
+
+set @privilege_id = (select max(id) from eh_service_module_privileges);
+INSERT INTO `eh_acl_privileges` (`id`, `app_id`, `name`, `description`, `tag`) VALUES (4120041200, '0', '一卡通 全部权限', '一卡通 全部权限', NULL);
+INSERT INTO `eh_service_module_privileges` (`id`, `module_id`, `privilege_type`, `privilege_id`, `remark`, `default_order`, `create_time`) VALUES (@privilege_id:=@privilege_id+1, '41200', '0', 4120041200, '全部权限', '0', now());
+
+INSERT INTO `eh_acl_privileges` (`id`, `app_id`, `name`, `description`, `tag`) VALUES (4120041210, '0', '一卡通 开卡用户权限', '一卡通 开卡用户权限', NULL);
+INSERT INTO `eh_service_module_privileges` (`id`, `module_id`, `privilege_type`, `privilege_id`, `remark`, `default_order`, `create_time`) VALUES (@privilege_id:=@privilege_id+1, '41210', '0', 4120041210, '开卡用户权限', '0', now());
+
+INSERT INTO `eh_acl_privileges` (`id`, `app_id`, `name`, `description`, `tag`) VALUES (4120041220, '0', '一卡通 导出用户权限', '一卡通 导出用户权限', NULL);
+INSERT INTO `eh_service_module_privileges` (`id`, `module_id`, `privilege_type`, `privilege_id`, `remark`, `default_order`, `create_time`) VALUES (@privilege_id:=@privilege_id+1, '41220', '0', 4120041220, '导出用户权限', '0', now());
+
+INSERT INTO `eh_acl_privileges` (`id`, `app_id`, `name`, `description`, `tag`) VALUES (4120041230, '0', '一卡通 充值记录权限', '一卡通 充值记录权限', NULL);
+INSERT INTO `eh_service_module_privileges` (`id`, `module_id`, `privilege_type`, `privilege_id`, `remark`, `default_order`, `create_time`) VALUES (@privilege_id:=@privilege_id+1, '41230', '0', 4120041230, '充值记录权限', '0', now());
+
+INSERT INTO `eh_acl_privileges` (`id`, `app_id`, `name`, `description`, `tag`) VALUES (4120041240, '0', '一卡通 消费记录权限', '一卡通 消费记录权限', NULL);
+INSERT INTO `eh_service_module_privileges` (`id`, `module_id`, `privilege_type`, `privilege_id`, `remark`, `default_order`, `create_time`) VALUES (@privilege_id:=@privilege_id+1, '41240', '0', 4120041240, '消费记录权限', '0', now());
+
+update eh_service_modules SET path='/40000/41200' WHERE id=41200;
+update eh_web_menus SET module_id=41200 WHERE id=16032100;
+
+-- 41100 一键上网 web没有接入--------------------------------------------------------------------------------------------
+set @privilege_id = (select max(id) from eh_service_module_privileges);
+INSERT INTO `eh_acl_privileges` (`id`, `app_id`, `name`, `description`, `tag`) VALUES (4110041100, '0', 'Wifi热点 全部权限', 'Wifi热点 全部权限', NULL);
+INSERT INTO `eh_service_module_privileges` (`id`, `module_id`, `privilege_type`, `privilege_id`, `remark`, `default_order`, `create_time`) VALUES (@privilege_id:=@privilege_id+1, '41100', '0', 4110041100, '全部权限', '0', now());
+
+update eh_web_menus SET module_id=41100 WHERE id=16031700 or id=45100000;
+
+-- 40700 快递服务 --------------------------------------------------------------------------------------------
+INSERT INTO `eh_service_modules` (`id`, `name`, `parent_id`, `path`, `type`, `level`, `status`, `default_order`, `create_time`, `instance_config`, `action_type`, `update_time`, `operator_uid`, `creator_uid`, `description`, `multiple_flag`, `module_control_type`) VALUES ('40710', '参数设置', '40700', '/40000/40700/40710', '1', '3', '2', '0', now(), NULL, NULL, now(), '0', '1', '1', NULL, '');
+INSERT INTO `eh_service_modules` (`id`, `name`, `parent_id`, `path`, `type`, `level`, `status`, `default_order`, `create_time`, `instance_config`, `action_type`, `update_time`, `operator_uid`, `creator_uid`, `description`, `multiple_flag`, `module_control_type`) VALUES ('40720', '订单管理', '40700', '/40000/40700/40720', '1', '3', '2', '0', now(), NULL, NULL, now(), '0', '1', '1', NULL, '');
+
+set @privilege_id = (select max(id) from eh_service_module_privileges);
+INSERT INTO `eh_acl_privileges` (`id`, `app_id`, `name`, `description`, `tag`) VALUES (4070040700, '0', '快递服务 全部权限', '快递服务 全部权限', NULL);
+INSERT INTO `eh_service_module_privileges` (`id`, `module_id`, `privilege_type`, `privilege_id`, `remark`, `default_order`, `create_time`) VALUES (@privilege_id:=@privilege_id+1, '40700', '0', 4070040700, '全部权限', '0', now());
+
+INSERT INTO `eh_acl_privileges` (`id`, `app_id`, `name`, `description`, `tag`) VALUES (4070040710, '0', '快递服务 参数设置权限', '快递服务 参数设置权限', NULL);
+INSERT INTO `eh_service_module_privileges` (`id`, `module_id`, `privilege_type`, `privilege_id`, `remark`, `default_order`, `create_time`) VALUES (@privilege_id:=@privilege_id+1, '40710', '0', 4070040710, '参数设置权限', '0', now());
+
+INSERT INTO `eh_acl_privileges` (`id`, `app_id`, `name`, `description`, `tag`) VALUES (4070040720, '0', '快递服务 订单管理权限', '快递服务 订单管理权限', NULL);
+INSERT INTO `eh_service_module_privileges` (`id`, `module_id`, `privilege_type`, `privilege_id`, `remark`, `default_order`, `create_time`) VALUES (@privilege_id:=@privilege_id+1, '40720', '0', 4070040720, '订单管理权限', '0', now());
+
+-- 41100 文件管理 web有点问题--------------------------------------------------------------------------------------------
+set @privilege_id = (select max(id) from eh_service_module_privileges);
+INSERT INTO `eh_acl_privileges` (`id`, `app_id`, `name`, `description`, `tag`) VALUES (4150041500, '0', '文件管理 全部权限', '文件管理 全部权限', NULL);
+INSERT INTO `eh_service_module_privileges` (`id`, `module_id`, `privilege_type`, `privilege_id`, `remark`, `default_order`, `create_time`) VALUES (@privilege_id:=@privilege_id+1, '41500', '0', 4150041500, '全部权限', '0', now());
+
+-- 更新模块的权限方式 --------------------------------------------------------------------------------------------------------------------------
+update eh_service_modules SET module_control_type='community_control' WHERE id in (20100,40800,40400,40400,40200,41400,49200,40300,40070,40730,41200,41100,40700,41100);
+update eh_service_modules SET module_control_type='unlimit_control' WHERE id in (40500,10800,40100,41700,10500);
+
+update eh_service_module_apps SET module_control_type='community_control' WHERE module_id in (20100,40800,40400,40400,40200,41400,49200,40300,40070,40730,41200,41100,40700,41100);
+update eh_service_module_apps SET module_control_type='unlimit_control' WHERE module_id in (40500,10800,40100,41700,10500);
+
+-- service_module app加入module_id
+update eh_service_module_apps SET module_id=41400 WHERE action_type=13 AND instance_config LIKE '%/cloud-print/build/index.htm%';
+update eh_service_module_apps SET module_id=10200 WHERE action_type=13 AND instance_config LIKE '%/park-introduction/index.html%';
+update eh_service_module_apps SET module_id=10800 WHERE action_type=13 AND instance_config LIKE '%/park-news-web/build/index.html%';
+update eh_service_module_apps SET module_id=41700 WHERE action_type=13 AND instance_config LIKE '%/questionnaire-survey/build/index.htm%';
+update eh_service_module_apps SET module_id=40200 WHERE action_type=13 AND instance_config LIKE '%/station-booking/index.html%';
+update eh_service_module_apps SET module_id=49200 WHERE action_type=13 AND instance_config LIKE '%/goods-move/build/index.html%';
+update eh_service_module_apps SET module_id=40700 WHERE action_type=13 AND instance_config LIKE '%/deliver/dist/index.html%';
+update eh_service_module_apps SET module_id=41200 WHERE action_type=13 AND instance_config LIKE '%/metro_card/index.html%';
+update eh_service_module_apps SET module_id=20100 WHERE action_type=13 AND instance_config LIKE '%/property-repair-web/build/index.html%';
+update eh_service_module_apps SET module_id=20100 WHERE action_type=13 AND instance_config LIKE '%/property-repair-web/build/index.html%';
+
+-- 园区客户线，权限对接结束 by dengs. 
 -- 更新
 update eh_service_module_apps set module_id=41700 where module_id = 40150;
 update eh_reflection_service_module_apps set module_id=41700 where module_id = 40150;
@@ -1227,3 +1538,156 @@ SET @upgrade_id = (SELECT MAX(id) FROM `eh_version_upgrade_rules`);
 INSERT INTO `eh_version_realm` (`id`, `realm`, `description`, `create_time`, `namespace_id`) VALUES ((@realm_id := @realm_id + 1), 'energyManagement', NULL, NOW(), '0');
 INSERT INTO `eh_version_urls` (`id`, `realm_id`, `target_version`, `download_url`, `info_url`, `upgrade_description`, `namespace_id`, `app_name`, `publish_time`, `icon_url`, `version_encoded_value`) VALUES ((@url_id := @url_id + 1), @realm_id, '1.0.0', 'http://core.zuolin.com/nar/energyManagement/offline/energyManagement-1-0-0-tag.zip', 'http://core.zuolin.com/nar/energyManagement/offline/energyManagement-1-0-0-tag.zip', NULL, '0', NULL, NULL, NULL, '0');
 INSERT INTO `eh_version_upgrade_rules` (`id`, `realm_id`, `matching_lower_bound`, `matching_upper_bound`, `order`, `target_version`, `force_upgrade`, `create_time`, `namespace_id`) VALUES ((@upgrade_id := @upgrade_id + 1), @realm_id, '-0.1', '1048576', '0', '1.0.0', '0', NOW(), '0');
+
+-- fix 26107 by xiongying
+update eh_service_modules set module_control_type = 'community_control' where id = 21300;
+
+-- 删除项目 楼栋 门牌 fix 26203
+delete from eh_reflection_service_module_apps where module_id in(30500,31000,32000);
+delete from eh_service_module_apps where module_id in(30500,31000,32000);
+delete from eh_service_modules where id in(30500,31000,32000);
+
+
+-- 增加仓库错误码 by wentian
+set @eh_locale_strings_id = (select max(id) from eh_locale_strings);
+INSERT INTO `eh_locale_strings` (`id`, `scope`, `code`, `locale`, `text`) VALUES ((@eh_locale_strings_id:=@eh_locale_strings_id+1), 'warehouse', '10026', 'zh_CN', '改仓库正在运行中，不能删除');
+
+-- fix 24787
+update eh_var_field_groups set title = '客户信息' where id = 1;
+update eh_var_field_group_scopes set group_display_name = '客户信息' where group_id = 1;
+
+-- fix 26123 by xiongying20180323
+SET @field_id = (SELECT MAX(id) FROM `eh_var_fields`);
+SET @building_id = (select id from eh_var_fields where group_id = 28 and name = 'buildingId');
+SET @address_id = ((select id from eh_var_fields where group_id = 28 and name = 'addressId')-1);
+
+update eh_var_fields set id = (@field_id := @field_id + 1) where id = @address_id;
+update eh_var_fields set id = @address_id where group_id = 28 and name = 'buildingId';
+update eh_var_fields set id = @building_id where id = @field_id;
+
+update eh_service_modules set action_type = 44, instance_config = '{"realm":"energyManagement","entryUrl":"https://core.zuolin.com/nar/energyManagement/build/index.html?hideNavigationBar=1#/address_choose#sign_suffix"}' where id = 49100;
+update eh_launch_pad_items set action_type = 44, action_data = '{"realm":"energyManagement","entryUrl":"https://core.zuolin.com/nar/energyManagement/build/index.html?hideNavigationBar=1#/address_choose#sign_suffix"}' where item_label = '能耗管理';
+update eh_reflection_service_module_apps set action_type = 44, instance_config = '{"realm":"energyManagement","entryUrl":"https://core.zuolin.com/nar/energyManagement/build/index.html?hideNavigationBar=1#/address_choose#sign_suffix"}', action_data = '{"realm":"energyManagement","entryUrl":"https://core.zuolin.com/nar/energyManagement/build/index.html?hideNavigationBar=1#/address_choose#sign_suffix"}' where module_id = 49100;
+
+
+-- 重新布局模块分类  add by yanjun 201803262114 start
+
+INSERT INTO `eh_service_modules` (`id`, `name`, `parent_id`, `path`, `type`, `level`, `status`, `default_order`, `create_time`, `instance_config`, `action_type`, `update_time`, `operator_uid`, `creator_uid`, `description`, `multiple_flag`, `module_control_type`) VALUES ('80000', '社群运营', '0', '/80000', '1', '1', '2', 20, NOW(), NULL, NULL, NOW(), '0', '0', '0', '0', '');
+INSERT INTO `eh_service_modules` (`id`, `name`, `parent_id`, `path`, `type`, `level`, `status`, `default_order`, `create_time`, `instance_config`, `action_type`, `update_time`, `operator_uid`, `creator_uid`, `description`, `multiple_flag`, `module_control_type`) VALUES ('100000', '招商管理', '0', '/100000', '1', '1', '2', 30, NOW(), NULL, NULL, NOW(), '0', '0', '0', '0', '');
+INSERT INTO `eh_service_modules` (`id`, `name`, `parent_id`, `path`, `type`, `level`, `status`, `default_order`, `create_time`, `instance_config`, `action_type`, `update_time`, `operator_uid`, `creator_uid`, `description`, `multiple_flag`, `module_control_type`) VALUES ('110000', '租赁管理', '0', '/110000', '1', '1', '2', 40, NOW(), NULL, NULL, NOW(), '0', '0', '0', '0', '');
+INSERT INTO `eh_service_modules` (`id`, `name`, `parent_id`, `path`, `type`, `level`, `status`, `default_order`, `create_time`, `instance_config`, `action_type`, `update_time`, `operator_uid`, `creator_uid`, `description`, `multiple_flag`, `module_control_type`) VALUES ('120000', '服务联盟', '0', '/120000', '1', '1', '2', 60, NOW(), NULL, NULL, NOW(), '0', '0', '0', '0', '');
+INSERT INTO `eh_service_modules` (`id`, `name`, `parent_id`, `path`, `type`, `level`, `status`, `default_order`, `create_time`, `instance_config`, `action_type`, `update_time`, `operator_uid`, `creator_uid`, `description`, `multiple_flag`, `module_control_type`) VALUES ('130000', '运营统计', '0', '/130000', '1', '1', '2', 90, NOW(), NULL, NULL, NOW(), '0', '0', '0', '0', '');
+INSERT INTO `eh_service_modules` (`id`, `name`, `parent_id`, `path`, `type`, `level`, `status`, `default_order`, `create_time`, `instance_config`, `action_type`, `update_time`, `operator_uid`, `creator_uid`, `description`, `multiple_flag`, `module_control_type`) VALUES ('140000', '任务管理', '0', '/140000', '1', '1', '2', 100, NOW(), NULL, NULL, NOW(), '0', '0', '0', '0', '');
+
+UPDATE eh_service_modules set `name` = '企业OA', default_order = 80 where id = 50000;
+UPDATE eh_service_modules set default_order = 10  where id = 10000;
+UPDATE eh_service_modules set default_order = 50  where id = 40000;
+UPDATE eh_service_modules set default_order = 70  where id = 20000;
+UPDATE eh_service_modules set default_order = 110  where id = 60000;
+UPDATE eh_service_modules set default_order = 130  where id = 90000;
+
+-- 信息发布
+UPDATE eh_service_modules SET default_order = 10 WHERE id = 10300;
+UPDATE eh_service_modules SET default_order = 20 WHERE id = 10400;
+UPDATE eh_service_modules SET default_order = 30 WHERE id = 10800;
+UPDATE eh_service_modules SET default_order = 40 WHERE id = 10500;
+UPDATE eh_service_modules SET default_order = 50 WHERE id = 10850;
+UPDATE eh_service_modules SET default_order = 60 WHERE id = 11000;
+UPDATE eh_service_modules SET default_order = 70, `name` = '短信推送【科技园定制】' WHERE id = 12200;
+
+-- 社群运营
+UPDATE eh_service_modules SET parent_id = 80000 , path = '/80000/34000', default_order = 10 WHERE id = 34000;
+UPDATE eh_service_modules SET parent_id = 80000 , path = '/80000/35000', default_order = 20 WHERE id = 35000;
+UPDATE eh_service_modules SET parent_id = 80000 , path = '/80000/47000', default_order = 30, type = 1 WHERE id = 47000;
+UPDATE eh_service_modules SET parent_id = 80000 , path = '/80000/10600', NAME = '活动', default_order = 40 WHERE id = 10600;
+UPDATE eh_service_modules SET parent_id = 80000 , path = '/80000/10100', default_order = 50 WHERE id = 10100;
+UPDATE eh_service_modules SET parent_id = 80000 , path = '/80000/10750', default_order = 60 WHERE id = 10750;
+UPDATE eh_service_modules SET parent_id = 80000 , path = '/80000/10760', default_order = 70 WHERE id = 10760;
+UPDATE eh_service_modules SET parent_id = 80000 , path = '/80000/41700', default_order = 80 WHERE id = 41700;
+UPDATE eh_service_modules SET parent_id = 80000 , path = '/80000/30600', default_order = 90 WHERE id = 30600;
+UPDATE eh_service_modules SET parent_id = 80000 , path = '/80000/51000', default_order = 100 WHERE id = 51000;
+
+-- 招商管理
+UPDATE eh_service_modules SET parent_id = 100000 , path = '/100000/40100', default_order = 10 WHERE id = 40100;
+UPDATE eh_service_modules SET parent_id = 100000 , path = '/100000/36000', `name` = '入驻申请【创业场定制】', default_order = 20 WHERE id = 36000;
+UPDATE eh_service_modules SET parent_id = 100000 , path = '/100000/40200', default_order = 30 WHERE id = 40200;
+UPDATE eh_service_modules SET parent_id = 100000 , path = '/100000/22000', default_order = 40 WHERE id = 22000;
+UPDATE eh_service_modules SET parent_id = 100000 , path = '/100000/23000', default_order = 50 WHERE id = 23000;
+UPDATE eh_service_modules SET parent_id = 100000 , path = '/100000/24000', default_order = 60 WHERE id = 24000;
+
+-- 租赁管理
+UPDATE eh_service_modules SET parent_id = 110000 , path = '/110000/38000', default_order = 10 WHERE id = 38000;
+UPDATE eh_service_modules SET parent_id = 110000 , path = '/110000/33000', default_order = 20 WHERE id = 33000;
+UPDATE eh_service_modules SET parent_id = 110000 , path = '/110000/21100', default_order = 30 WHERE id = 21100;
+UPDATE eh_service_modules SET parent_id = 110000 , path = '/110000/37000', default_order = 40 WHERE id = 37000;
+UPDATE eh_service_modules SET parent_id = 110000 , path = '/110000/21200', default_order = 50 WHERE id = 21200;
+UPDATE eh_service_modules SET parent_id = 110000 , path = '/110000/32500',  default_order = 60, `name`= '合同管理【科技园对接】' WHERE id = 32500;
+UPDATE eh_service_modules SET parent_id = 110000 , path = '/110000/20400', default_order = 70 WHERE id = 20400;
+UPDATE eh_service_modules SET parent_id = 110000 , path = '/110000/21300', default_order = 80 WHERE id = 21300;
+UPDATE eh_service_modules SET parent_id = 110000 , path = '/110000/40900', default_order = 90, `name`= '车辆管理【定制】' WHERE id = 40900;
+
+-- 运营服务
+UPDATE eh_service_modules SET default_order = 10 WHERE id = 41010;
+UPDATE eh_service_modules SET default_order = 20 WHERE id = 40400;
+UPDATE eh_service_modules SET default_order = 30 WHERE id = 40800;
+UPDATE eh_service_modules SET default_order = 40 WHERE id = 20900;
+UPDATE eh_service_modules SET default_order = 50 WHERE id = 49200;
+UPDATE eh_service_modules SET default_order = 60 WHERE id = 40300;
+UPDATE eh_service_modules SET default_order = 70 WHERE id = 41400;
+UPDATE eh_service_modules SET default_order = 80 WHERE id = 40700;
+UPDATE eh_service_modules SET default_order = 90 WHERE id = 41500;
+UPDATE eh_service_modules SET default_order = 100 WHERE id = 41100;
+UPDATE eh_service_modules SET default_order = 110 WHERE id = 40070;
+UPDATE eh_service_modules SET default_order = 120 WHERE id = 40730;
+UPDATE eh_service_modules SET default_order = 130, `name` = '园区审批【定制】' WHERE id = 41600;
+UPDATE eh_service_modules SET default_order = 140, `name` = '一卡通【储能对接】' WHERE id = 41200;
+
+-- 服务联盟
+UPDATE eh_service_modules SET parent_id = 120000 , path = '/120000/40500', default_order = 10 WHERE id = 40500;
+
+-- 物业服务
+UPDATE eh_service_modules SET default_order = 10, `name` = '物业报修/投诉建议' WHERE id = 20100;
+UPDATE eh_service_modules SET default_order = 20, `name` = '物业巡检' WHERE id = 20800;
+UPDATE eh_service_modules SET default_order = 30 WHERE id = 20600;
+UPDATE eh_service_modules SET default_order = 40 WHERE id = 49100;
+UPDATE eh_service_modules SET default_order = 50 WHERE id = 21000;
+UPDATE eh_service_modules SET default_order = 60 WHERE id = 26000;
+UPDATE eh_service_modules SET default_order = 70 WHERE id = 27000;
+
+-- 企业OA
+UPDATE eh_service_modules SET default_order = 10 WHERE id = 50100;
+UPDATE eh_service_modules SET default_order = 20 WHERE id = 50300;
+UPDATE eh_service_modules SET default_order = 30 WHERE id = 50500;
+UPDATE eh_service_modules SET default_order = 40 WHERE id = 50400;
+UPDATE eh_service_modules SET default_order = 50 WHERE id = 50600;
+UPDATE eh_service_modules SET default_order = 60 WHERE id = 52000;
+UPDATE eh_service_modules SET default_order = 70 WHERE id = 54000;
+UPDATE eh_service_modules SET default_order = 80 WHERE id = 51300;
+UPDATE eh_service_modules SET default_order = 90 WHERE id = 51400;
+UPDATE eh_service_modules SET default_order = 100 WHERE id = 55000;
+UPDATE eh_service_modules SET default_order = 110 WHERE id = 56100;
+UPDATE eh_service_modules SET default_order = 120 WHERE id = 56200;
+UPDATE eh_service_modules SET default_order = 130, `name` = '待办事项【纯APP】' WHERE id = 56300;
+UPDATE eh_service_modules SET default_order = 140, parent_id = 50000 , path = '/50000/41020' WHERE id = 41020;
+UPDATE eh_service_modules SET default_order = 150 WHERE id = 50700;
+UPDATE eh_service_modules SET default_order = 160 WHERE id = 58000;
+UPDATE eh_service_modules SET default_order = 170, `name` = '企业公告' WHERE id = 57000;
+
+-- 运营统计
+UPDATE eh_service_modules SET parent_id = 130000 , path = '/130000/41300', default_order = 10, `name` = '应用活跃统计' WHERE id = 41300;
+UPDATE eh_service_modules SET parent_id = 130000 , path = '/130000/41330', default_order = 20, type = 1, `level` = 2 WHERE id = 41330;
+
+-- 任务管理
+UPDATE eh_service_modules SET parent_id = 140000 , path = '/140000/13000', default_order = 10 WHERE id = 13000;
+
+-- 系统管理
+UPDATE eh_service_modules SET default_order = 10 WHERE id = 60100;
+UPDATE eh_service_modules SET default_order = 20 WHERE id = 60200;
+
+-- 一些模块的应用不允许配置在园区或者已废弃旧模块，例如：“App配置”, “菜单配置”,“业务应用配置”,“园区简介”,“文件下载中心”
+UPDATE eh_service_modules set type = 0 where id in (70000, 70200, 70300, 70100, 10200, 61000, 30000, 50200, 40600);
+
+-- 重新布局模块分类  add by yanjun 201803262114 end
+
+-- 更新"入驻申请"菜单的路由 add by yanjun 201803281414
+UPDATE eh_web_menus set data_type = 'enter-apply' where id = 43020000;

@@ -9,7 +9,7 @@ package com.everhomes.rest.parking;
  * </ul>
  */
 public enum ParkingSpaceLockOperateType {
-    UP((byte)1,"up"), DOWN((byte)2,"down");
+    UP((byte)1,"up"), DOWN((byte)2,"down"),CONN((byte)3,"conn");;
 
     private byte code;
     private String status;

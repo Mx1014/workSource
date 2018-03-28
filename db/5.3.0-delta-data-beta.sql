@@ -1,6 +1,11 @@
 
 -- 2、根据实际域名更新eh_domains表
 
+-- offline  by jiarui  {home.url}换成域名 这里需要换成部署环境的域名信息 如：core.zuolin.com
+-- 物业巡检和品质核查的分别有两条insert语句，分别同时执行
+-- offline  by jiarui
+
+
 -- 3、清理老数据
 /*
 
@@ -56,3 +61,85 @@ SELECT @appid := @appid + 1, namespace_id, namespace_id + 100,  `active_app_id`,
 -- /yellowPage/syncServiceAllianceApplicationRecords
 -- /yellowPage/syncSARequestInfo
 -- /officecubicle/dataMigration
+
+/*9、
+1)/pmtask/syncCategories
+2) 备份eh_pm_tasks表
+ 3)UPDATE eh_pm_tasks
+        LEFT JOIN
+    (SELECT
+       distinct (a.id) as aid,b.id as bid,b.owner_id as owner_id
+    FROM
+        eh_categories a, eh_categories b
+    WHERE
+        a.path = b.path ) c ON eh_pm_tasks.task_category_id = c.aid
+        AND eh_pm_tasks.owner_id = c.owner_id
+SET
+    eh_pm_tasks.task_category_id = c.bid
+WHERE
+    eh_pm_tasks.task_category_id!=0;
+
+UPDATE eh_pm_tasks
+        RIGHT JOIN
+    (SELECT
+       distinct (a.id) as aid,b.id as bid,b.owner_id as owner_id
+    FROM
+        eh_categories a, eh_categories b
+    WHERE
+        a.path = b.path ) c ON eh_pm_tasks.category_id = c.aid
+        AND eh_pm_tasks.owner_id = c.owner_id
+SET
+    eh_pm_tasks.category_id = c.bid
+WHERE
+    eh_pm_tasks.category_id!=0;
+
+ 4)/pmtask/syncFromDb
+ 5)/pmtask/syncTaskStatistics
+*/
+
+/* 搜索初始化脚本
+执行/db/search 下的文件：
+paymentApplication.sh
+contract.sh
+enterpriseCustomer.sh
+enterprise.sh
+并执行api：
+/org/syncIndex
+/contract/syncContracts
+/customer/syncEnterpriseCustomer
+/payment_application/syncIndex
+*/
+-- 12、以下按照顺序执行
+
+-- flush redis    清空掉redis
+
+-- 同步以下接口 （执行完sql之后）
+
+-- /equipment/syncStandardToEqiupmentPlan
+
+-- /equipment/syncEquipmentStandardIndex
+
+-- /equipment/syncEquipmentStandardMapIndex
+
+-- /equipment/syncEquipmentPlansIndex
+
+-- /equipment/syncEquipmentTasksIndex
+
+-- syncStandardToEqiupmentPlan 同步如果发生异常 eh_equipment_inspection_plans    eh_equipment_inspection_equipment_plan_map eh_equipment_inspection_plan_group_map 清空重新同步
+-- 执行脚本物业巡检离线的脚本equipment-inspection改成equipmentInspection，放到nar下面  品质核查的qualityInspection
+
+--
+-- 以下SQL只在深圳湾独立部署的环境执行
+--
+-- 工作流新增两个变量 add by xq.tian  2017/06/09
+SET @flow_var_max_id = (SELECT MAX(id) FROM `eh_flow_variables`);
+INSERT INTO `eh_flow_variables` (`id`, `namespace_id`, `owner_id`, `owner_type`, `module_id`, `module_type`, `name`, `label`, `var_type`, `script_type`, `script_cls`, `status`)
+VALUES ((@flow_var_max_id := @flow_var_max_id + 1), 0, 0, '', 0, '', 'user_applier_organization_manager', '发起人的企业管理员', 'node_user_processor', 'bean_id', 'flow-variable-applier-organization-manager', 1);
+INSERT INTO `eh_flow_variables` (`id`, `namespace_id`, `owner_id`, `owner_type`, `module_id`, `module_type`, `name`, `label`, `var_type`, `script_type`, `script_cls`, `status`)
+VALUES ((@flow_var_max_id := @flow_var_max_id + 1), 0, 0, '', 0, '', 'user_applier_department_manager', '发起人的部门经理', 'node_user_processor', 'bean_id', 'flow-variable-applier-department-manager', 1);
+
+SET @eh_configurations_id = IFNULL((SELECT MAX(id) FROM `eh_configurations`), 0);
+INSERT INTO `eh_configurations` (`id`, `name`, `value`, `description`, `namespace_id`, `display_name`)
+    VALUES ((@eh_configurations_id := @eh_configurations_id + 1), 'flow.stepname.approve_step', '下一步', 'approve-step', 0, NULL);
+
+UPDATE eh_flow_buttons SET button_name = '下一步' WHERE button_name = 'approve_step';

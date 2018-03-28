@@ -338,7 +338,7 @@ public class ServiceAlliancePortalPublishHandler implements PortalPublishHandler
         return instanceConfig;
     }
     
-    final Pattern pattern = Pattern.compile("^.*\"parentId\":[\\s]*([\\d]*)");
+    final Pattern pattern = Pattern.compile("^.*\"type\":[\\s]*([\\d]*)");
     @Override
     public String getCustomTag(Integer namespaceId, Long moudleId, String instanceConfig) {
     	if(instanceConfig == null || instanceConfig.length() == 0){

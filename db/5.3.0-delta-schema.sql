@@ -1696,6 +1696,7 @@ ALTER TABLE eh_archives_logs MODIFY operation_reason VARCHAR(1024) COMMENT 'the 
 
 ALTER TABLE eh_archives_logs MODIFY operation_remark VARCHAR(1024) COMMENT 'the remark';
 
+ALTER TABLE eh_archives_dismiss_employees MODIFY dismiss_remarks VARCHAR(1024) COMMENT '备注';
 -- end by nan.rong
 
 -- by dengs,云打印添加字段 2018.03.06
@@ -1766,3 +1767,6 @@ ALTER TABLE  `eh_warehouse_suppliers` ADD COLUMN  `community_id` BIGINT COMMENT 
 
 -- 合同增加修改时间 by xiongying 2018/03/21
 ALTER TABLE  `eh_contracts` ADD COLUMN  `update_time` DATETIME;
+
+-- 工作流修改字段长度    add by xq.tian  2018/03/09
+ALTER TABLE eh_flow_actions MODIFY COLUMN render_text TEXT COMMENT 'the content for this message that have variables';

@@ -13,6 +13,15 @@ package com.everhomes.rest.purchase;
 public class GetPurchaseOrderCommand {
     private Long purchaseRequestId;
     private Long communityId;
+    private Long flowCaseId;
+
+    public Long getFlowCaseId() {
+        return flowCaseId;
+    }
+
+    public void setFlowCaseId(Long flowCaseId) {
+        this.flowCaseId = flowCaseId;
+    }
 
     public Long getCommunityId() {
         return communityId;

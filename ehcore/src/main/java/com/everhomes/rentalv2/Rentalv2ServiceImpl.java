@@ -119,6 +119,9 @@ import java.sql.Date;
 import java.sql.Time;
 import java.sql.Timestamp;
 import java.text.SimpleDateFormat;
+import java.time.LocalDate;
+import java.time.LocalDateTime;
+import java.time.ZoneId;
 import java.util.*;
 import java.util.concurrent.ExecutorService;
 import java.util.concurrent.Executors;
@@ -314,6 +317,9 @@ public class Rentalv2ServiceImpl implements Rentalv2Service {
 				// set half day time intervals
 				setRentalRuleTimeIntervals(cmd.getResourceType(), RentalTimeIntervalOwnerType.RESOURCE_HALF_DAY.getCode(), rule.getSourceId(), cmd.getHalfDayTimeIntervals());
 
+				//创建资源时分配单元格
+				createResourceCells(cmd.getPriceRules());
+
 				createPriceRules(cmd.getResourceType(), PriceRuleType.RESOURCE, rule.getSourceId(), cmd.getPriceRules());
 
 				createPricePackages(cmd.getResourceType(), PriceRuleType.RESOURCE, rule.getSourceId(), cmd.getPricePackages());
@@ -427,7 +433,7 @@ public class Rentalv2ServiceImpl implements Rentalv2Service {
 		RentalDefaultRule rule = this.rentalv2Provider.getRentalDefaultRule(cmd.getOwnerType(), cmd.getOwnerId(),
 				cmd.getResourceType(), cmd.getResourceTypeId(), cmd.getSourceType(), cmd.getSourceId());
 
-		if(null == rule && RuleSourceType.DEFAULT.getCode().equals(cmd.getSourceType())){
+		if(null == rule){
 			addDefaultRule(cmd.getOwnerType(), cmd.getOwnerId(), cmd.getResourceType(), cmd.getResourceTypeId(),
 					cmd.getSourceType(), cmd.getSourceId());
 			rule = this.rentalv2Provider.getRentalDefaultRule(cmd.getOwnerType(), cmd.getOwnerId(),
@@ -505,7 +511,10 @@ public class Rentalv2ServiceImpl implements Rentalv2Service {
 		List<RentalCloseDate> closeDates = rentalv2Provider.queryRentalCloseDateByOwner(rule.getResourceType(),
 				ruleType, id);
 		if(null != closeDates){
-			response.setCloseDates(closeDates.stream().filter(d -> null != d.getCloseDate()).map(c -> c.getCloseDate().getTime())
+			LocalDate today = LocalDate.now();
+			Long firstDay = LocalDateTime.of(today.getYear(),1,1,0,0).atZone(ZoneId.systemDefault())
+					.toInstant().toEpochMilli();
+			response.setCloseDates(closeDates.stream().filter(d -> null != d.getCloseDate() && d.getCloseDate().getTime()>firstDay).map(c -> c.getCloseDate().getTime())
 					.collect(Collectors.toList()));
 		}
 		//set 物资
@@ -1874,13 +1883,13 @@ public class Rentalv2ServiceImpl implements Rentalv2Service {
 				}
 			}else if(DiscountType.FULL_DAY_CUT_MONEY.getCode().equals(priceRule.getDiscountType()) ){
 				//不允许一个用户预约一个时段多个资源的情况
-				boolean multiple =false;
+				double multiple =0.0;
 				//满天减免
 				if(priceRule.getRentalType().equals(RentalType.HALFDAY.getCode())){
 					for(Date rentalDate:dayMap.keySet()){
 						for(String resourceNumber : dayMap.get(rentalDate).keySet()) {
 							if(dayMap.get(rentalDate).get(resourceNumber).size()>=2) {
-								multiple = true;
+								multiple = multiple+rules.get(0).getRentalCount();
 							}
 						}
 					}
@@ -1888,13 +1897,12 @@ public class Rentalv2ServiceImpl implements Rentalv2Service {
 					for(Date rentalDate:dayMap.keySet()){
 						for(String resourceNumber : dayMap.get(rentalDate).keySet()) {
 							if(dayMap.get(rentalDate).get(resourceNumber).size()>=3) {
-								multiple = true;
+								multiple =multiple+rules.get(0).getRentalCount();
 							}
 						}
 					}
 				}
-				if (multiple)
-					siteTotalMoneys[0] = siteTotalMoneys[0].subtract(priceRule.getCutPrice());
+					siteTotalMoneys[0] = siteTotalMoneys[0].subtract(priceRule.getCutPrice().multiply(new BigDecimal(multiple)));
 			}
 		}
 
@@ -2088,7 +2096,10 @@ public class Rentalv2ServiceImpl implements Rentalv2Service {
 				}else if (rentalBill.getRentalType() == RentalType.WEEK.getCode()){
 					calendar.setTime(lastRsr.getResourceRentalDate());
 					calendar.set(Calendar.DAY_OF_WEEK,7);
+					calendar.add(Calendar.DATE,1);
 					useDetailSB.append(beginDateSF.format(calendar.getTime()));
+				}else if (rentalBill.getRentalType() == RentalType.DAY.getCode()){
+					useDetailSB.append(beginDateSF.format(lastRsr.getResourceRentalDate()));
 				}
 			}
 		}
@@ -2261,6 +2272,7 @@ public class Rentalv2ServiceImpl implements Rentalv2Service {
 					rentalv2Provider.setAuthDoorId(order.getId(), doorAuthId.substring(0, doorAuthId.length() - 1));
 				}
 			}
+			onOrderSuccess(order);
 			//用户积分
 			LocalEventBus.publish(event -> {
 				LocalEventContext context = new LocalEventContext();
@@ -2597,7 +2609,7 @@ public class Rentalv2ServiceImpl implements Rentalv2Service {
 		}
 		ListingLocator locator = new CrossShardListingLocator();
 		locator.setAnchor(cmd.getPageAnchor());
-		List<RentalOrder> billList = this.rentalv2Provider.listRentalBills(cmd.getId(), userId, cmd.getResourceType(),
+		List<RentalOrder> billList = this.rentalv2Provider.listRentalBills(cmd.getId(), userId, cmd.getRentalSiteId(),cmd.getResourceType(),
 				cmd.getResourceTypeId(), locator, pageSize + 1, status,null);
 		FindRentalBillsCommandResponse response = new FindRentalBillsCommandResponse();
 		if (null == billList)
@@ -2645,7 +2657,7 @@ public class Rentalv2ServiceImpl implements Rentalv2Service {
 		}}
 
 		//设置退款人姓名 联系方式
-		RentalResource rs = rentalv2Provider.getRentalSiteById(bill.getRentalResourceId());
+		RentalResource rs = rentalCommonService.getRentalResource(bill.getResourceType(),bill.getRentalResourceId());
 		if (rs.getOfflinePayeeUid()!=null){
 			OrganizationMember member = organizationProvider.findOrganizationMemberByOrgIdAndUId(rs.getOfflinePayeeUid(), rs.getOrganizationId());
 			if(null!=member){
@@ -2894,7 +2906,7 @@ public class Rentalv2ServiceImpl implements Rentalv2Service {
 			QueryDefaultRuleAdminResponse rule = queryDefaultRule(queryRuleCmd);
 
 			rs.setSiteNumbers(cmd.getSiteNumbers());
-			createResourceCells(rule, rs);
+			createResourceCells(rule.getPriceRules());
 			//先删除后添加, 创建单元格之后在重新添加一次价格，存cellBeginId和cellEndId
 			rentalv2PriceRuleProvider.deletePriceRuleByOwnerId(rule.getResourceType(), PriceRuleType.RESOURCE.getCode(), rs.getId());
 			createPriceRules(rule.getResourceType(), PriceRuleType.RESOURCE, rs.getId(), rule.getPriceRules());
@@ -3621,27 +3633,25 @@ public class Rentalv2ServiceImpl implements Rentalv2Service {
 		dbProvider.execute((TransactionStatus status) -> {
 			//如果是预约成功，则要判断是否退款，否则将订单置为已取消
 			if (order.getStatus().equals(SiteBillStatus.SUCCESS.getCode())) {
-				if ((order.getRefundFlag().equals(NormalFlag.NEED.getCode())
-						|| (null != order.getRefundStrategy() && order.getRefundStrategy() != RentalOrderStrategy.NONE.getCode()))
+				if (null != order.getRefundStrategy() && order.getRefundStrategy() != RentalOrderStrategy.NONE.getCode()
 						&& (order.getPaidMoney().compareTo(new BigDecimal(0)) == 1)){
 
 					BigDecimal orderAmount = handler.getRefundAmount(order, timestamp);
-					if (PayMode.ONLINE_PAY.equals(order.getPayMode())||PayMode.APPROVE_ONLINE_PAY.equals(order.getPayMode())) {
-						rentalCommonService.refundOrder(order, timestamp, orderAmount);
-						//更新bill状态
-						order.setStatus(SiteBillStatus.REFUNDED.getCode());
-					}
-					else {
-						order.setRefundAmount(orderAmount);
-						order.setStatus(SiteBillStatus.REFUNDING.getCode());//线下支付人工退款
-					}
+					if (orderAmount.compareTo(new BigDecimal(0)) == 1)
+						if (PayMode.ONLINE_PAY.getCode()==(order.getPayMode())||PayMode.APPROVE_ONLINE_PAY.getCode()==(order.getPayMode())) {
+							rentalCommonService.refundOrder(order, timestamp, orderAmount);
+							//更新bill状态
+							order.setStatus(SiteBillStatus.REFUNDED.getCode());
+							order.setRefundAmount(orderAmount);
+						} else {
+							order.setRefundAmount(orderAmount);
+							order.setStatus(SiteBillStatus.REFUNDING.getCode());//线下支付人工退款
+						}
 
-
-
-				}else {
-					//如果不需要退款，直接状态为已取消
-					order.setStatus(SiteBillStatus.FAIL.getCode());
 				}
+				//如果不需要退款 或退款金额过小，直接状态为已取消
+				order.setStatus(SiteBillStatus.FAIL.getCode());
+
 			}else if (order.getStatus().equals(SiteBillStatus.PAYINGFINAL.getCode())||
 					order.getStatus().equals(SiteBillStatus.APPROVING.getCode())){
 				//如果不需要退款，直接状态为已取消
@@ -3898,8 +3908,8 @@ public class Rentalv2ServiceImpl implements Rentalv2Service {
 					bill.setFlowCaseId(flowCase.getId());
 				}else{
 					LOGGER.error("Enable rental flow not found, moduleId={}", FlowConstants.PM_TASK_MODULE);
-					throw RuntimeErrorException.errorWith(ErrorCodes.SCOPE_GENERAL,
-							ErrorCodes.ERROR_INVALID_PARAMETER, "请开启工作流后重试");
+					throw RuntimeErrorException.errorWith("Rentalv2",
+							10001, "请开启工作流后重试");
 
 				}
 
@@ -6063,170 +6073,27 @@ public class Rentalv2ServiceImpl implements Rentalv2Service {
 
 	@Override
 	public void exportRentalBills(ListRentalBillsCommand cmd, HttpServletResponse response) {
-		if(cmd.getCurrentPMId()!=null && cmd.getAppId()!=null && configurationProvider.getBooleanValue("privilege.community.checkflag", true)){
-			userPrivilegeMgr.checkUserPrivilege(UserContext.current().getUser().getId(), cmd.getCurrentPMId(), 4040040420L, cmd.getAppId(), null,cmd.getCurrentProjectId());//订单记录权限
+		if (cmd.getCurrentPMId() != null && cmd.getAppId() != null && configurationProvider.getBooleanValue("privilege.community.checkflag", true)) {
+			userPrivilegeMgr.checkUserPrivilege(UserContext.current().getUser().getId(), cmd.getCurrentPMId(), 4040040420L, cmd.getAppId(), null, cmd.getCurrentProjectId());//订单记录权限
 		}
-		Integer pageSize = Integer.MAX_VALUE; 
-		List<RentalOrder> bills = rentalv2Provider.listRentalBills(cmd.getResourceTypeId(), cmd.getOrganizationId(), cmd.getCommunityId(),
-				cmd.getRentalSiteId(), new CrossShardListingLocator(), cmd.getBillStatus(), cmd.getVendorType(), pageSize, cmd.getStartTime(), cmd.getEndTime(),
-				null, null); 
-		if(null == bills){
-			bills = new ArrayList<>();
+		if (StringUtils.isBlank(cmd.getResourceType())) {
+			cmd.setResourceType(RentalV2ResourceType.DEFAULT.getCode());
 		}
-		List<RentalBillDTO> dtos = new ArrayList<>();
-		for (RentalOrder bill : bills) {
-			// 在转换bill到dto的时候统一先convert一下  modify by wuhan 20160804
-			RentalBillDTO dto = ConvertHelper.convert(bill, RentalBillDTO.class);
-			mappingRentalBillDTO(dto, bill, null);
-			dto.setSiteItems(new ArrayList<>());
-			List<RentalItemsOrder> rentalSiteItems = rentalv2Provider
-					.findRentalItemsBillBySiteBillId(dto.getRentalBillId(), bill.getResourceType());
-			if(null != rentalSiteItems) 
-				for (RentalItemsOrder rib : rentalSiteItems) {
-					SiteItemDTO siDTO = new SiteItemDTO();
-					siDTO.setCounts(rib.getRentalCount());
 
-					siDTO.setItemName(rib.getItemName());
-					siDTO.setItemPrice(rib.getTotalMoney());
-					dto.getSiteItems().add(siDTO);
-				}
-			
-			dtos.add(dto);
-		}
-		
-//		URL rootPath = Rentalv2ServiceImpl.class.getResource("/");
-//		String filePath =rootPath.getPath() + downloadDir ;
-//		File file = new File(filePath);
-//		if(!file.exists())
-//			file.mkdirs();
-//		filePath = filePath + "RentalBills"+System.currentTimeMillis()+".xlsx";
-		//新建了一个文件
-		ByteArrayOutputStream out = createRentalBillsStream(dtos);
-
-		DownloadUtils.download(out, response);
-
-//		return download(filePath,response);
+		RentalResourceHandler handler = rentalCommonService.getRentalResourceHandler(cmd.getResourceType());
+		handler.exportRentalBills(cmd,response);
 	}
-	
-//	public HttpServletResponse download(String path, HttpServletResponse response) {
-//        try {
-//            // path是指欲下载的文件的路径。
-//            File file = new File(path);
-//            // 取得文件名。
-//            String filename = file.getName();
-//            // 取得文件的后缀名。
-//            String ext = filename.substring(filename.lastIndexOf(".") + 1).toUpperCase();
-//
-//            // 以流的形式下载文件。
-//            InputStream fis = new BufferedInputStream(new FileInputStream(path));
-//            byte[] buffer = new byte[fis.available()];
-//            fis.read(buffer);
-//            fis.close();
-//            // 清空response
-//            response.reset();
-//            // 设置response的Header
-//            response.addHeader("Content-Disposition", "attachment;filename=" + new String(filename.getBytes()));
-//            response.addHeader("Content-Length", "" + file.length());
-//            OutputStream toClient = new BufferedOutputStream(response.getOutputStream());
-//            response.setContentType("application/octet-stream");
-//            toClient.write(buffer);
-//            toClient.flush();
-//            toClient.close();
-//
-//            // 读取完成删除文件
-//            if (file.isFile() && file.exists()) {
-//                file.delete();
-//            }
-//        } catch (IOException ex) {
-// 			LOGGER.error(ex.getMessage());
-// 			throw RuntimeErrorException.errorWith(RentalServiceErrorCode.SCOPE,
-// 					RentalServiceErrorCode.ERROR_DOWNLOAD_EXCEL,
-// 					ex.getLocalizedMessage());
-//
-//        }
-//        return response;
-//    }
 
-	private ByteArrayOutputStream createRentalBillsStream(List<RentalBillDTO> dtos) {
-
-		ByteArrayOutputStream out = new ByteArrayOutputStream();
-
-		if (null == dtos || dtos.isEmpty()) {
-			return out;
+	@Override
+	public void exportRentalBills(SearchRentalOrdersCommand cmd, HttpServletResponse response) {
+		if (StringUtils.isBlank(cmd.getResourceType())) {
+			cmd.setResourceType(RentalV2ResourceType.DEFAULT.getCode());
 		}
-		Workbook wb = new XSSFWorkbook();
-		Sheet sheet = wb.createSheet("rentalBill");
-		
-		this.createRentalBillsBookSheetHead(sheet);
-		for (RentalBillDTO dto : dtos ) {
-			this.setNewRentalBillsBookRow(sheet, dto);
-		}
-		
-		try {
-			wb.write(out);
-			wb.close();
-
-		} catch (IOException e) {
-			LOGGER.error("export is fail", e);
-			throw RuntimeErrorException.errorWith(RentalServiceErrorCode.SCOPE, RentalServiceErrorCode.ERROR_CREATE_EXCEL,
-					"export is fail.");
-		}
-
-		return out;
+		RentalResourceHandler handler = rentalCommonService.getRentalResourceHandler(cmd.getResourceType());
+		handler.exportRentalBills(cmd,response);
 	}
-	
-	private void createRentalBillsBookSheetHead(Sheet sheet){
+	//    }
 
-		Row row = sheet.createRow(sheet.getLastRowNum());
-		int i =-1 ;
-		row.createCell(++i).setCellValue("序号");
-		row.createCell(++i).setCellValue("名称");
-		row.createCell(++i).setCellValue("下单时间");
-		row.createCell(++i).setCellValue("使用详情");
-		row.createCell(++i).setCellValue("预订人"); 
-		row.createCell(++i).setCellValue("总价");
-		row.createCell(++i).setCellValue("支付方式");
-		row.createCell(++i).setCellValue("订单状态");
-	}
-	
-	private void setNewRentalBillsBookRow(Sheet sheet ,RentalBillDTO dto){
-		Row row = sheet.createRow(sheet.getLastRowNum()+1);
-		int i = -1;
-		//序号
-		row.createCell(++i).setCellValue(row.getRowNum());
-		//名称 - 资源名称
-		row.createCell(++i).setCellValue(dto.getSiteName());
-		//下单时间 
-		if(null!=dto.getReserveTime())
-			row.createCell(++i).setCellValue(datetimeSF.get().format(new Timestamp(dto.getReserveTime())));
-		else 
-			row.createCell(++i).setCellValue("");
-		//使用详情
-		row.createCell(++i).setCellValue(dto.getUseDetail());
-		//预约人 
-		row.createCell(++i).setCellValue(dto.getUserName());
-		//总价 
-		if(null != dto.getTotalPrice())
-			row.createCell(++i).setCellValue(dto.getTotalPrice().toString());
-		else
-			row.createCell(++i).setCellValue("0");
-		//支付方式
-		if(null != dto.getVendorType())
-			row.createCell(++i).setCellValue(VendorType.fromCode(dto.getVendorType()).getDescribe());
-		else
-			row.createCell(++i).setCellValue("");
-		//订单状态
-		if(dto.getStatus() != null)
-			row.createCell(++i).setCellValue(statusToString(dto.getStatus()));
-		else
-			row.createCell(++i).setCellValue("");
-		 
-	} 
-	private String statusToString(Byte status) {
-
-		SiteBillStatus siteBillStatus = SiteBillStatus.fromCode(status);
-		return null != siteBillStatus ? siteBillStatus.getDescribe() : "";
-	}
 
 	@Override
 	public GetResourceListAdminResponse getResourceList(GetResourceListAdminCommand cmd) {
@@ -6418,8 +6285,6 @@ public class Rentalv2ServiceImpl implements Rentalv2Service {
 		}
 		//单元格开始的时间为创建资源的时间
 		rule.setBeginDate(System.currentTimeMillis());
-		//先创建单元格，设置单元格开始id 和结束id
-		createResourceCells(rule, resource);
 
 		//添加资源规则
 		AddDefaultRuleAdminCommand addRuleCmd = ConvertHelper.convert(rule, AddDefaultRuleAdminCommand.class);
@@ -6428,10 +6293,10 @@ public class Rentalv2ServiceImpl implements Rentalv2Service {
 		addRule(addRuleCmd);
 	}
 
-	private void createResourceCells(QueryDefaultRuleAdminResponse rule, RentalResource resource) {
-		for (PriceRuleDTO priceRule : rule.getPriceRules()) {
+	private void createResourceCells(List<PriceRuleDTO> priceRules) {
+		for (PriceRuleDTO priceRule : priceRules) {
 
-			List<AddRentalSiteSingleSimpleRule> addSingleRules = createAddRuleParams(priceRule, rule, resource);
+			//List<AddRentalSiteSingleSimpleRule> addSingleRules = createAddRuleParams(priceRule, rule, resource);
 //			seqNum.set(0L);
 //			currentId.set(sequenceProvider.getCurrentSequence(NameMapper.getSequenceDomainFromTablePojo(EhRentalv2Cells.class)));
 			//TODO 预留1000000个id 以适应自增的结束时间 以后改为唯一标识不用id
@@ -7462,7 +7327,7 @@ public class Rentalv2ServiceImpl implements Rentalv2Service {
 			//设置新规则的时候就删除之前的旧单元格
 			this.rentalv2Provider.deleteRentalCellsByResourceId(rs.getResourceType(), rs.getId());
 
-			createResourceCells(queryRule, rs);
+			createResourceCells(queryRule.getPriceRules());
 			//先删除后添加, 创建单元格之后在重新添加一次价格，存cellBeginId和cellEndId
 			rentalv2PriceRuleProvider.deletePriceRuleByOwnerId(rs.getResourceType(), PriceRuleType.RESOURCE.getCode(), rs.getId());
 			createPriceRules(rs.getResourceType(), PriceRuleType.RESOURCE, rs.getId(), queryRule.getPriceRules());
@@ -7888,11 +7753,27 @@ public class Rentalv2ServiceImpl implements Rentalv2Service {
 
 		ListingLocator locator = new CrossShardListingLocator();
 		locator.setAnchor(cmd.getPageAnchor());
-		List<RentalOrder> billList = this.rentalv2Provider.listRentalBills(null, userId, cmd.getResourceType(),
-				cmd.getResourceTypeId(), locator, pageSize + 1,null, null);
+		List<Byte> list = new ArrayList<>();
+
+
+		for (SiteBillStatus status :SiteBillStatus.values())
+			if (status!=SiteBillStatus.OWING_FEE)
+				list.add(status.getCode());
+		List<RentalOrder> billList = this.rentalv2Provider.listRentalBills(null, userId, cmd.getRentalSiteId(),cmd.getResourceType(),
+				cmd.getResourceTypeId(), locator, pageSize + 1,list, null);
 
 		if (null == billList)
 			return response;
+		if (cmd.getPageAnchor()==null){//第一页 把欠费订单拖到第一位
+			list = new ArrayList<>();
+			list.add(SiteBillStatus.OWING_FEE.getCode());
+			List<RentalOrder> billList2 = this.rentalv2Provider.listRentalBills(null, userId, cmd.getRentalSiteId(),cmd.getResourceType(),
+					cmd.getResourceTypeId(), locator, pageSize + 1,list, null);
+			if (list.size()>0){
+				billList2.addAll(billList);
+				billList = billList2;
+			}
+		}
 		response.setRentalBills(new ArrayList<>());
 
 		for (RentalOrder bill : billList) {
@@ -7907,6 +7788,11 @@ public class Rentalv2ServiceImpl implements Rentalv2Service {
 			dto.setStatus(bill.getStatus());
 
 			response.getRentalBills().add(dto);
+		}
+		response.setNextPageAnchor(null);
+		if(billList.size() > pageSize){
+			billList.remove(billList.size()-1);
+			response.setNextPageAnchor(billList.get(billList.size()-1).getId());
 		}
 		return response;
 	}
@@ -7943,7 +7829,8 @@ public class Rentalv2ServiceImpl implements Rentalv2Service {
 		return dto;
 	}
 
-	private void convertRentalOrderDTO(RentalOrderDTO dto, RentalOrder bill) {
+	@Override
+	public void convertRentalOrderDTO(RentalOrderDTO dto, RentalOrder bill) {
 
 		dto.setCustomObject(bill.getCustomObject());
 		dto.setUserEnterpriseId(bill.getUserEnterpriseId());
@@ -7981,6 +7868,9 @@ public class Rentalv2ServiceImpl implements Rentalv2Service {
 		if (null != bill.getCancelTime()) {
 			dto.setCancelTime(bill.getCancelTime().getTime());
 		}
+		if (SiteBillStatus.OWING_FEE.getCode()==bill.getStatus())
+			dto.setOverTime(bill.getActualEndTime().getTime()-bill.getEndTime().getTime());
+
 		dto.setTotalAmount(bill.getPayTotalMoney());
 		dto.setPaidAmount(bill.getPaidMoney());
 		dto.setUnPayAmount(bill.getPayTotalMoney().subtract(bill.getPaidMoney()));
@@ -8334,7 +8224,7 @@ public class Rentalv2ServiceImpl implements Rentalv2Service {
 					}
 					rs.setResourceCounts(rs.getResourceCounts()+1.0);//超时的订单会占用一个车位 补回去
 					updateRentalOrder(rs, order, null, rentalCount, false);
-
+					order.setEndTime(order.getOldEndTime());
 				}
 //				dto.setTimeIntervals(timeIntervals.stream().map(t -> ConvertHelper.convert(t, TimeIntervalDTO.class))
 //						.collect(Collectors.toList()));
@@ -8354,6 +8244,8 @@ public class Rentalv2ServiceImpl implements Rentalv2Service {
 				order.setStatus(SiteBillStatus.OWING_FEE.getCode());
 		}
 
+		order.setActualEndTime(new Timestamp(now));
+		order.setActualStartTime(order.getStartTime());
 		rentalv2Provider.updateRentalBill(order);
 
 		cellList.get().clear();

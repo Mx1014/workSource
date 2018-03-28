@@ -143,6 +143,7 @@ public class RentalCommonServiceImpl {
         RentalOrderActionData actionData = new RentalOrderActionData();
         actionData.setOrderId(orderId);
         actionData.setResourceType(resourceType);
+        actionData.setMetaObject("");
 
         String routerUri = RouterBuilder.build(Router.RENTAL_ORDER_DETAIL, actionData);
 
@@ -349,7 +350,7 @@ public class RentalCommonServiceImpl {
                 }
 
                 BigDecimal amount = order.getPaidMoney().multiply(new BigDecimal(orderRule.getFactor()))
-                        .divide(new BigDecimal(100), RoundingMode.HALF_UP);
+                        .divide(new BigDecimal(100),2, RoundingMode.HALF_UP);
 
                 processOrderCustomRefundTip(order, outerRules, innerRules, orderRule, amount);
 

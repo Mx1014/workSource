@@ -1536,7 +1536,6 @@ public class OrganizationServiceImpl implements OrganizationService {
         EnterpriseCustomer customer = enterpriseCustomerProvider.findByOrganizationId(organization.getId());
         dbProvider.execute((TransactionStatus status) -> {
             //查到有关联的客户则同步修改过去
-
             if(customer != null) {
                 //产品功能 #20796 同步过来的客户名称不可改
                 if(NamespaceCustomerType.EBEI.equals(NamespaceCustomerType.fromCode(customer.getNamespaceCustomerType()))
@@ -1628,6 +1627,31 @@ public class OrganizationServiceImpl implements OrganizationService {
             // organization.setCommunityId(cmd.getCommunityId());
             organization.setDescription(organizationDetail.getDescription());
             organizationSearcher.feedDoc(organization);
+
+            //没有有关联的客户则新增一条
+            if(customer == null) {
+                List<OrganizationAddressDTO> addressDTOs = cmd.getAddressDTOs();
+                if (null != addressDTOs && 0 != addressDTOs.size()) {
+                    this.addAddresses(organization.getId(), addressDTOs, user.getId());
+                }
+
+                EnterpriseCustomer enterpriseCustomer = new EnterpriseCustomer();
+                enterpriseCustomer.setCommunityId(cmd.getCommunityId());
+                enterpriseCustomer.setNamespaceId(organization.getNamespaceId());
+                enterpriseCustomer.setOrganizationId(organization.getId());
+                enterpriseCustomer.setName(organization.getName());
+                enterpriseCustomer.setCorpWebsite(organization.getWebsite());
+                enterpriseCustomer.setCorpLogoUri(cmd.getAvatar());
+                enterpriseCustomer.setContactAddress(organizationDetail.getAddress());
+                enterpriseCustomer.setLatitude(organizationDetail.getLatitude());
+                enterpriseCustomer.setLongitude(organizationDetail.getLongitude());
+                enterpriseCustomer.setTrackingUid(-1L);
+                enterpriseCustomerProvider.createEnterpriseCustomer(enterpriseCustomer);
+                enterpriseCustomerSearcher.feedDoc(enterpriseCustomer);
+
+                //企业管理楼栋与客户tab页的入驻信息双向同步 产品功能22898
+                this.updateCustomerEntryInfo(enterpriseCustomer, addressDTOs);
+            }
 
             return null;
         });
@@ -6082,6 +6106,8 @@ public class OrganizationServiceImpl implements OrganizationService {
         }
 
         Integer namespaceId = UserContext.getCurrentNamespaceId();
+
+        LOGGER.debug("getOrganizationNameByNameAndType namespaceId = " + namespaceId);
 
         String[] list = name.split("/");
         if(list.length > 0) {
@@ -12359,15 +12385,18 @@ public class OrganizationServiceImpl implements OrganizationService {
 
     //递归
     private Organization listUnderOrganizations(int i, List<Organization> orgs, Integer namespaceId, String[] list) {
+        LOGGER.debug("listUnderOrganizations start, i ={}, orgs = {}, namespaceId = {}, list={}" , i, orgs, namespaceId, list);
         if (orgs == null) {
             //:todo 第一次进入
             List<Organization> orgs_0 = this.organizationProvider.listOrganizationByName(list[0], null, null, namespaceId);
+            LOGGER.debug("listUnderOrganizations oneStep" + orgs_0.toString());
             if (orgs_0 != null) {
                 return listUnderOrganizations(i + 1, orgs_0, namespaceId, list);
             }
         }
         if (orgs.size() == 1 && i == list.length) {
             //:todo 获得1个结果 结束递归
+            LOGGER.debug("listUnderOrganizations threeStep" + orgs.get(0).toString());
             return orgs.get(0);
         }
         if (orgs.size() > 1 && i == list.length) {
@@ -12379,11 +12408,14 @@ public class OrganizationServiceImpl implements OrganizationService {
             //todo 递归
             List<Organization> result = orgs.stream().map(r -> {
                 List<Organization> orgs_1 = this.organizationProvider.listOrganizationByName(list[i], null, r.getId(), namespaceId);
+                LOGGER.debug("listUnderOrganizations twoStep" + orgs_1.toString());
                 if (orgs_1 != null && orgs_1.size() > 0) {
                     return listUnderOrganizations(i + 1, orgs_1, namespaceId, list);
                 }
                 return null;
-            }).filter(r -> r != null).collect(Collectors.toList());
+            }).filter(r -> {
+                return r != null;
+            }).collect(Collectors.toList());
 
             if(result != null && result.size()>0){
                 return result.get(0);
@@ -12392,6 +12424,7 @@ public class OrganizationServiceImpl implements OrganizationService {
             return null;
         }
     }
+
 
     @Override
     public Byte getOrganizationDetailFlag(GetOrganizationDetailFlagCommand cmd) {
@@ -12470,16 +12503,17 @@ public class OrganizationServiceImpl implements OrganizationService {
 
     @Override
     public Long getDepartmentByDetailIdAndOrgId(Long detailId, Long orgId) {
+        Organization org = checkOrganization(orgId);
         List<String> groupTypes = new ArrayList<>();
         groupTypes.add(OrganizationGroupType.DEPARTMENT.getCode());
         groupTypes.add(OrganizationGroupType.DIRECT_UNDER_ENTERPRISE.getCode());
-        List<OrganizationMember> members = organizationProvider.listOrganizationMembersByDetailIdAndOrgId(detailId, orgId, groupTypes);
+        List<OrganizationMember> members = organizationProvider.listOrganizationMembersByDetailIdAndPath(detailId, org.getPath(), groupTypes);
         if(members != null && members.size() > 0){
             return members.get(0).getOrganizationId();
         }else{
             groupTypes.clear();
             groupTypes.add(OrganizationGroupType.ENTERPRISE.getCode());
-            List<OrganizationMember> member_enterprise = organizationProvider.listOrganizationMembersByDetailIdAndOrgId(detailId, orgId, groupTypes);
+            List<OrganizationMember> member_enterprise = organizationProvider.listOrganizationMembersByDetailIdAndPath(detailId, org.getPath(), groupTypes);
             if(member_enterprise != null && member_enterprise.size() > 0){
                 return member_enterprise.get(0).getOrganizationId();
             }

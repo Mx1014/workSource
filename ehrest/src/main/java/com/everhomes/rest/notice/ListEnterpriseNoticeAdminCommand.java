@@ -5,7 +5,7 @@ import com.everhomes.util.StringHelper;
 /**
  * <p>获取当前域空间下所有的公告列表</p>
  * <ul>
- * <li>organizationId : 操作人所属部门ID</li>
+ * <li>organizationId : 总公司ID</li>
  * <li>pageOffset : 当前页码</li>
  * <li>pageSize :每页最大获取记录数</li>
  * </ul>

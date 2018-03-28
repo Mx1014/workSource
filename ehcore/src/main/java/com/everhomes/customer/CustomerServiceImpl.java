@@ -47,7 +47,7 @@ import com.everhomes.user.UserPrivilegeMgr;
 import com.everhomes.user.UserProvider;
 
 
-import com.everhomes.varField.Field;
+import com.everhomes.varField.*;
 import org.apache.commons.lang.StringUtils;
 import org.apache.lucene.spatial.geohash.GeoHashUtils;
 
@@ -101,9 +101,6 @@ import com.everhomes.util.RuntimeErrorException;
 import com.everhomes.util.StringHelper;
 import com.everhomes.util.excel.RowResult;
 import com.everhomes.util.excel.handler.PropMrgOwnerHandler;
-import com.everhomes.varField.FieldProvider;
-import com.everhomes.varField.FieldService;
-import com.everhomes.varField.ScopeFieldItem;
 
 import javax.servlet.http.HttpServletResponse;
 
@@ -2590,8 +2587,17 @@ public class CustomerServiceImpl implements CustomerService {
 	private CustomerTrackingDTO convertCustomerTrackingDTO(CustomerTracking tracking, Long communityId) {
 		CustomerTrackingDTO dto = ConvertHelper.convert(tracking, CustomerTrackingDTO.class);
         if(dto.getTrackingType() != null) {
-        	String trackingTypeName = localeTemplateService.getLocaleTemplateString(CustomerTrackingTemplateCode.SCOPE, Integer.parseInt(dto.getTrackingType().toString()) , UserContext.current().getUser().getLocale(), new HashMap<>(), "");
-        	dto.setTrackingTypeName(trackingTypeName);
+//        	String trackingTypeName = localeTemplateService.getLocaleTemplateString(CustomerTrackingTemplateCode.SCOPE, Integer.parseInt(dto.getTrackingType().toString()) , UserContext.current().getUser().getLocale(), new HashMap<>(), "");
+
+            FieldGroup group = fieldProvider.findGroupByGroupLogicName("com.everhomes.customer.CustomerTracking");
+            if(group != null) {
+                Field field = fieldProvider.findField(ModuleName.ENTERPRISE_CUSTOMER.getName(), "trackingType", group.getPath());
+                ScopeFieldItem item = fieldProvider.findScopeFieldItemByBusinessValue(tracking.getNamespaceId(),communityId,ModuleName.ENTERPRISE_CUSTOMER.getName(),field.getId(),dto.getTrackingType().byteValue());
+                if(item != null) {
+                    dto.setTrackingTypeName(item.getItemDisplayName());
+                }
+            }
+
         }
         if(dto.getTrackingUid() != null) {
         	OrganizationMemberDetails detail = organizationProvider.findOrganizationMemberDetailsByTargetId(dto.getTrackingUid());
