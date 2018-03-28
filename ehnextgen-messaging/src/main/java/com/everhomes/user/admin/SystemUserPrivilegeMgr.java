@@ -417,6 +417,12 @@ public class SystemUserPrivilegeMgr implements UserPrivilegeMgr {
      * @return
      */
     private boolean checkAccess(Long userId, String ownerType, Long ownerId, Long currentOrgId, Long privilegeId){
+
+        // modify start --凡是与community有关的校验，需要先在orgId管理的园区内查找，如果没有就直接返回失败
+        if(ownerType.equals(EntityType.COMMUNITY.getCode()) && !serviceModuleAppAuthorizationService.checkCommunityRelationOfOrgId(UserContext.getCurrentNamespaceId(), currentOrgId, ownerId)){
+            return false;
+        }
+
         List<AclRoleDescriptor> descriptors = new ArrayList<>();
         descriptors.add(new AclRoleDescriptor(EntityType.USER.getCode(), userId));
         if(null != currentOrgId){

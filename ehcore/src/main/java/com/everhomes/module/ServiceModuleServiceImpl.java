@@ -113,6 +113,9 @@ public class ServiceModuleServiceImpl implements ServiceModuleService {
     @Autowired
     private ServiceModuleAppService serviceModuleAppService;
 
+    @Autowired
+    private ServiceModuleAppAuthorizationService serviceModuleAppAuthorizationService;
+
 
     @Override
     public List<ServiceModuleDTO> listServiceModules(ListServiceModulesCommand cmd) {
@@ -879,7 +882,12 @@ public class ServiceModuleServiceImpl implements ServiceModuleService {
             }
             return null;
         }).collect(Collectors.toList());
-        return projectDtos;
+
+        //modify start
+        //获取公司管理的项目
+        List<ProjectDTO> org_communities = serviceModuleAppAuthorizationService.listCommunityRelationOfOrgId(UserContext.getCurrentNamespaceId(), organizationId);
+        List<Long> org_communityIds = org_communities.stream().map(r->r.getProjectId()).collect(Collectors.toList());
+        return projectDtos.stream().filter(r->org_communityIds.contains(r.getProjectId())).collect(Collectors.toList());
     }
 
 

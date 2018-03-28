@@ -5,10 +5,6 @@ import com.everhomes.module.ServiceModule;
 import com.everhomes.module.ServiceModuleProvider;
 import com.everhomes.portal.PortalVersion;
 import com.everhomes.portal.PortalVersionProvider;
-import com.everhomes.rest.acl.ProjectDTO;
-import com.everhomes.rest.acl.DistributeServiceModuleAppAuthorizationCommand;
-import com.everhomes.rest.module.ListProjectIdsByAppIdAndOrganizationIdCommand;
-import com.everhomes.rest.portal.ServiceModuleAppDTO;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -147,31 +143,5 @@ public class ServiceModuleAppServiceImpl implements ServiceModuleAppService {
 
 		return null;
 	}
-
-	@Override
-	public void distributeServiceModuleAppAuthorization(DistributeServiceModuleAppAuthorizationCommand cmd) {
-
-	}
-
-	@Override
-	public List<Long> listProjectIdsByAppIdAndOrganizationId(ListProjectIdsByAppIdAndOrganizationIdCommand cmd) {
-		return null;
-	}
-
-	@Override
-	public List<ServiceModuleAppDTO> listAppIdOfOrgId(ListProjectIdsByAppIdAndOrganizationIdCommand cmd) {
-		return null;
-	}
-
-	@Override
-	public List<ProjectDTO> listCommunityRelationOfOrgId(ListProjectIdsByAppIdAndOrganizationIdCommand cmd) {
-		return null;
-	}
-
-	@Override
-	public boolean checkCommunityRelationOfOrgId(Integer namespaceId, Long currentOrgId, Long checkCommunityId) {
-		return false;
-	}
-
 
 }

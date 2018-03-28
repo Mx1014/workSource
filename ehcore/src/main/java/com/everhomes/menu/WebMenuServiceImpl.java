@@ -1,9 +1,6 @@
 package com.everhomes.menu;
 
-import com.everhomes.acl.AuthorizationProvider;
-import com.everhomes.acl.WebMenu;
-import com.everhomes.acl.WebMenuPrivilegeProvider;
-import com.everhomes.acl.WebMenuScope;
+import com.everhomes.acl.*;
 import com.everhomes.bootstrap.PlatformContext;
 import com.everhomes.db.DbProvider;
 import com.everhomes.domain.Domain;
@@ -82,6 +79,9 @@ public class WebMenuServiceImpl implements WebMenuService {
 	@Autowired
 	private DomainService domainService;
 
+	@Autowired
+	private ServiceModuleAppAuthorizationService serviceModuleAppAuthorizationService;
+
 	@Override
 	public List<WebMenuDTO> listUserRelatedWebMenus(ListUserRelatedWebMenusCommand cmd){
 		Long userId = cmd.getUserId();
@@ -142,6 +142,9 @@ public class WebMenuServiceImpl implements WebMenuService {
 
 		List<Long> appOriginIds = null;
 
+		// 公司拥有所有权的园区集合
+		List<Long> auth_communityIds = serviceModuleAppAuthorizationService.listCommunityRelationOfOrgId(UserContext.getCurrentNamespaceId(), organizationId).stream().map(r->r.getProjectId()).collect(Collectors.toList());
+		List<Long> auth_organizationIds = serviceModuleAppAuthorizationService.listCommunityAppIdOfOrgId(UserContext.getCurrentNamespaceId(), organizationId);
 
 		// 超级管理员拿所有菜单
 		if(resolver.checkSuperAdmin(userId, organizationId) || null != path) {
@@ -152,26 +155,23 @@ public class WebMenuServiceImpl implements WebMenuService {
 
 			List<Long> appIds = new ArrayList<>();
 
-			//获取人员和人员所有机构所赋予的权限模块(模块管理员)
-//			List<Long> moduleIds = authorizationProvider.getAuthorizationModuleIdsByTarget(targets);
-//			if (moduleIds.contains(0L)) {
-//				moduleIds = serviceModuleAppService.listReleaseServiceModuleIdsByNamespace(UserContext.getCurrentNamespaceId());
-//			}
-//			if (moduleIds != null && moduleIds.size() > 0) {
-//				// 根据模块和域空间拿所有应用
-//				List<ServiceModuleApp> module_apps =this.serviceModuleAppService.listReleaseServiceModuleAppByModuleIds(UserContext.getCurrentNamespaceId(), moduleIds);
-//				if(module_apps != null && module_apps.size() > 0){
-//					appIds.addAll(module_apps.stream().map(r->r.getOriginId()).collect(Collectors.toList()));
-//				}
-//			}
-
 			// 获取人员和人员所有机构所赋予的应用模块权限(应用管理员 + 权限细化) 应用管理员拥有应用对应的菜单
 			List<Long> orgIds = organizationService.getIncludeOrganizationIdsByUserId(userId, organizationId);
 			for (Long orgId : orgIds) {
 				targets.add(new Target(EntityType.ORGANIZATIONS.getCode(), orgId));
 			}
 
-			List<Tuple<Long, String>> appTuples = authorizationProvider.getAuthorizationAppModuleIdsByTarget(targets);
+//			List<Tuple<Long, String>> appTuples = authorizationProvider.getAuthorizationAppModuleIdsByTarget(targets);
+
+			// 园区控制的应用和非园区控制的应用分开查询
+			List<String> types = new ArrayList<>();
+			types.add(ModuleManagementType.ORG_CONTROL.getCode());
+			types.add(ModuleManagementType.UNLIMIT_CONTROL.getCode());
+			List<Tuple<Long, String>> appTuples = authorizationProvider.getAuthorizationAppModuleIdsByTargetWithTypes(targets, types);
+
+			types.clear();
+			types.add(ModuleManagementType.COMMUNITY_CONTROL.getCode());
+			appTuples.addAll(authorizationProvider.getAuthorizationAppModuleIdsByTargetWithTypesAndConfigIds(targets,types, auth_communityIds));
 
 			//getVersion
 			PortalVersion version = this.portalService.findReleaseVersion(UserContext.getCurrentNamespaceId());
@@ -201,11 +201,11 @@ public class WebMenuServiceImpl implements WebMenuService {
 				return null;
 			}).collect(Collectors.toList());
 
-
-
-
 			appOriginIds = appIds;
 		}
+
+		// 取下交集
+		appOriginIds.retainAll(auth_organizationIds);
 
 		LOGGER.debug("Method listPmWebMenu's appOriginIds:" + appOriginIds.toString());
 
