@@ -56,11 +56,11 @@ public class ActivityPortalPublishHandler implements PortalPublishHandler {
 		ActivityEntryConfigulation config = (ActivityEntryConfigulation)StringHelper.fromJsonString(instanceConfig, ActivityEntryConfigulation.class);
 
 		//保存应用入口的信息，不存在则新增，存在则更新
-		ActivityCategories activityCategory = saveEntry(namespaceId, config.getEntryId(), appName);
+		ActivityCategories activityCategory = saveEntry(namespaceId, config.getCategoryId(), appName);
 
 		//将值组装到config中，用于后面返回服务广场
 		config.setId(activityCategory.getId());
-		config.setEntryId(activityCategory.getEntryId());
+		config.setCategoryId(activityCategory.getEntryId());
 
 		//新增、更新内容分类
 		saveContencategory(config, activityCategory, namespaceId);
@@ -87,8 +87,6 @@ public class ActivityPortalPublishHandler implements PortalPublishHandler {
 
 		ActivityActionData actionData = (ActivityActionData)StringHelper.fromJsonString(instanceConfig, ActivityActionData.class);
 
-		actionData.setCategoryId(config.getEntryId());
-
 		actionData.setTitle(config.getName());
 
 		LOGGER.info("ActivityPortalPublishHandler getItemActionData end actionData = {}", StringHelper.toJsonString(actionData));
@@ -113,15 +111,14 @@ public class ActivityPortalPublishHandler implements PortalPublishHandler {
 		ActivityEntryConfigulation config = (ActivityEntryConfigulation)StringHelper.fromJsonString(actionData, ActivityEntryConfigulation.class);
 
 		config.setName(actionDataObj.getTitle());
-		config.setEntryId(actionDataObj.getCategoryId());
 
 		//ActionData忘写或者老数据没有categoryId，会把它认为是入口1
-		if(config.getEntryId() == null){
-			config.setEntryId(1L);
+		if(config.getCategoryId() == null){
+			config.setCategoryId(1L);
 		}
 
 		//防止老数据可能没有ActivityCategories，先更新保存一下
-		ActivityCategories activityCategory = saveEntry(namespaceId, config.getEntryId(), config.getName());
+		ActivityCategories activityCategory = saveEntry(namespaceId, config.getCategoryId(), config.getName());
 
 		List<ActivityCategories> oldContentCategories = activityProvider.listActivityCategory(namespaceId, activityCategory.getEntryId());
 
@@ -284,7 +281,7 @@ public class ActivityPortalPublishHandler implements PortalPublishHandler {
 	 */
 	private void deleteContentCategory(ActivityEntryConfigulation config, Integer namespaceId){
 		//删除分类
-		List<ActivityCategories> oldContentCategories = activityProvider.listActivityCategory(namespaceId, config.getEntryId());
+		List<ActivityCategories> oldContentCategories = activityProvider.listActivityCategory(namespaceId, config.getCategoryId());
 
 		//原来没有则不用删除了
 		if(oldContentCategories == null || oldContentCategories.size() == 0){
