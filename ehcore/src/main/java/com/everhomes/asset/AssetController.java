@@ -1231,8 +1231,8 @@ public class AssetController extends ControllerBase {
      * <p>导出账单的模板</p>
      */
     @RequestMapping("exportBillTemplates")
-    public RestResponse exportBillTemplates(ExportBillTemplatesCommand cmd, HttpServletResponseWrapper response){
-        assetService.exportBillTemplates(cmd,response);
+    public RestResponse exportBillTemplates(ExportBillTemplatesCommand cmd){
+        assetService.exportBillTemplates(cmd);
         RestResponse restResponse = new RestResponse();
         restResponse.setErrorCode(ErrorCodes.SUCCESS);
         restResponse.setErrorDescription("OK");
