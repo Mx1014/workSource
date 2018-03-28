@@ -2579,7 +2579,7 @@ public class ArchivesServiceImpl implements ArchivesService {
         if (employees == null)
             return;
 
-        String body = "您好，周杰伦\n\n" + "杰威尔音乐公司需要注意的人事日程如下：\n\n";
+        String body = "您好，周杰伦\n\n" + "Google本周需要注意的人事日程如下：\n\n";
         for (int n = 0; n < 7; n++)
             body += (processNotificationBody(employees, ArchivesUtil.plusDate(firstOfWeek, n)) + "\n");
        /* body += processNotificationBody(employees, firstOfWeek);
@@ -2616,40 +2616,35 @@ public class ArchivesServiceImpl implements ArchivesService {
 
         for(OrganizationMemberDetails employee: employees){
             if(date.equals(employee.getEmploymentTime()))
-                employment += (" " + employee.getContactName() + ",");
+                employment += (employee.getContactName() + "，");
             if(ArchivesUtil.previousYear(date).equals(employee.getCheckInTime()))
-                anniversary += (" " + employee.getContactName() + ",");
+                anniversary += (employee.getContactName() + "，");
             if(date.equals(employee.getBirthday()))
-                birthday += (" " + employee.getContactName() + ",");
+                birthday += (employee.getContactName() + "，");
             if(date.equals(employee.getContractEndTime()))
-                contract += (" " + employee.getContactName() + ",");
+                contract += (employee.getContactName() + "，");
             if(date.equals(employee.getIdExpiryDate()))
-                idExpiry += (" " + employee.getContactName() + ",");
+                idExpiry += (employee.getContactName() + "，");
         }
         if(!employment.equals("")){
             employment = employment.substring(0, employment.length()-1);
-            employment += " 转正";
-            body += (employment + "\n");
+            body += ("转正：" + employment + "\n");
         }
         if(!anniversary.equals("")){
             anniversary = anniversary.substring(0, anniversary.length()-1);
-            anniversary += " 周年";
-            body += (anniversary + "\n");
+            body += ("周年：" + anniversary + "\n");
         }
         if(!birthday.equals("")){
             birthday = birthday.substring(0, birthday.length()-1);
-            birthday += " 生日";
-            body += (birthday + "\n");
+            body += ("生日：" + birthday + "\n");
         }
         if(!contract.equals("")){
             contract = contract.substring(0, contract.length()-1);
-            contract += " 合同到期";
-            body += (contract + "\n");
+            body += ("合同到期：" + contract + "\n");
         }
         if(!idExpiry.equals("")){
             idExpiry = idExpiry.substring(0, idExpiry.length()-1);
-            idExpiry += " 身份证到期";
-            body += (idExpiry + "\n");
+            body += ("身份证到期：" + idExpiry + "\n");
         }
 
         return body;
