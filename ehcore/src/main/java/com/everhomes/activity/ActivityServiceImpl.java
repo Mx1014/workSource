@@ -6040,7 +6040,7 @@ public class ActivityServiceImpl implements ActivityService {
         condition = condition.and(Tables.EH_ACTIVITIES.CATEGORY_ID.eq(cmd.getCategoryId()));
         condition = condition.and(Tables.EH_ACTIVITIES.CLONE_FLAG.in(PostCloneFlag.NORMAL.getCode(), PostCloneFlag.REAL.getCode()));
         CrossShardListingLocator locator = new CrossShardListingLocator();
-        List<Activity> activities = this.activityProvider.listActivities(locator, cmd.getPageSize().intValue(), condition, null, null);
+        List<Activity> activities = this.activityProvider.listActivities(locator, cmd.getPageSize().intValue(), condition, false, null);
 
         List<ActivityDTO> dtos = activities.stream().map(r -> ConvertHelper.convert(r, ActivityDTO.class)).collect(Collectors.toList());
         ListActivitiesByCategoryIdResponse response = new ListActivitiesByCategoryIdResponse();
