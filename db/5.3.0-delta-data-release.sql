@@ -1695,3 +1695,9 @@ UPDATE eh_web_menus set data_type = 'enter-apply' where id = 43020000;
 -- 更新成都创业场的“入驻申请”的actionType为71
 UPDATE eh_launch_pad_items set action_type = 71 where action_type = 68  and namespace_id = 999964;
 
+-- 增加一个模块“企业信息”及其菜单 add by yanjun 201803281519
+INSERT INTO `eh_service_modules` (`id`, `name`, `parent_id`, `path`, `type`, `level`, `status`, `default_order`, `create_time`, `instance_config`, `action_type`, `update_time`, `operator_uid`, `creator_uid`, `description`, `multiple_flag`, `module_control_type`) VALUES ('21400', '企业信息【企业后台】', '110000', '/110000/21400', '1', '2', '2', '35', '2018-03-28 14:49:34', NULL, '13', '2018-03-28 14:49:45', '0', '0', '0', '0', 'community_control');
+
+INSERT INTO `eh_web_menus` (`id`, `name`, `parent_id`, `icon_url`, `data_type`, `leaf_flag`, `status`, `path`, `type`, `sort_num`, `module_id`, `level`, `condition_type`, `category`, `config_type`) VALUES ('76000000', '基础信息', '0', NULL, NULL, '1', '2', '/76000000', 'organization', '6', NULL, '1', 'system', 'classify', '2');
+
+INSERT INTO `eh_web_menus` (`id`, `name`, `parent_id`, `icon_url`, `data_type`, `leaf_flag`, `status`, `path`, `type`, `sort_num`, `module_id`, `level`, `condition_type`, `category`, `config_type`) VALUES ('76010000', '企业信息', '76000000', NULL, 'customer-management', '1', '2', '/76000000/76010000', 'organization', '10', '21400', '2', 'system', 'module', '2');
