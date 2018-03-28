@@ -810,7 +810,7 @@ public class ZhangjianggaokeAssetVendor implements AssetVendorHandler{
     }
 
     @Override
-    public void exportBillTemplates(ExportBillTemplatesCommand cmd) {
+    public void exportBillTemplates(ExportBillTemplatesCommand cmd, HttpServletResponse response) {
         LOGGER.error("Insufficient privilege, zjgkhandler showCreateBill");
         throw RuntimeErrorException.errorWith(ErrorCodes.SCOPE_GENERAL, ErrorCodes.ERROR_ACCESS_DENIED,
                 "Insufficient privilege");

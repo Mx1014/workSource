@@ -2880,11 +2880,11 @@ public class AssetServiceImpl implements AssetService {
      * @param response
      */
     @Override
-    public void exportBillTemplates(ExportBillTemplatesCommand cmd) {
+    public void exportBillTemplates(ExportBillTemplatesCommand cmd, HttpServletResponse response) {
         AssetVendor assetVendor = checkAssetVendor(UserContext.getCurrentNamespaceId(),0);
         String vender = assetVendor.getVendorName();
         AssetVendorHandler handler = getAssetVendorHandler(vender);
-        handler.exportBillTemplates(cmd);
+        handler.exportBillTemplates(cmd, response);
     }
 
 

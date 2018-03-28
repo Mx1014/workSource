@@ -168,5 +168,5 @@ public interface AssetService {
 
     void activeLateFine();
 
-    void exportBillTemplates(ExportBillTemplatesCommand cmd);
+    void exportBillTemplates(ExportBillTemplatesCommand cmd, HttpServletResponse response);
 }

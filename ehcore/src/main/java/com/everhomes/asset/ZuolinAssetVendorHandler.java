@@ -850,7 +850,7 @@ public class ZuolinAssetVendorHandler implements AssetVendorHandler {
     }
 
     @Override
-    public void exportBillTemplates(ExportBillTemplatesCommand cmd) {
+    public void exportBillTemplates(ExportBillTemplatesCommand cmd, HttpServletResponse response) {
         ShowCreateBillDTO webPage = assetProvider.showCreateBill(cmd.getBillGroupId());
         List<String> headList = new ArrayList<>();
         List<Integer> mandatoryIndex = new ArrayList<>();
@@ -894,7 +894,8 @@ public class ZuolinAssetVendorHandler implements AssetVendorHandler {
         headList.add("增收备注");
         cur++;
         String[] headers = (String[]) headList.toArray();
-        ExcelUtils excelUtils = new ExcelUtils();
+        String fileName = webPage.getBillGroupName();
+        ExcelUtils excelUtils = new ExcelUtils(response,"账单模板"+System.currentTimeMillis()+".xlxs",fileName+"模板");
         excelUtils.setMandatoryTitle(mandatoryIndex);
         excelUtils.writeExcel(null, headers, true, null, null);
     }
