@@ -63,7 +63,7 @@ public class ActivityPortalPublishHandler implements PortalPublishHandler {
 		config.setCategoryId(activityCategory.getEntryId());
 
 		//新增、更新内容分类
-		saveContencategory(config, activityCategory, namespaceId);
+		saveContencategory(config, namespaceId);
 		//updateContentCategory(config, activityCategory, namespaceId);
 
 		LOGGER.info("ActivityPortalPublishHandler publish end instanceConfig = {}", StringHelper.toJsonString(config));
@@ -223,15 +223,15 @@ public class ActivityPortalPublishHandler implements PortalPublishHandler {
 	}
 
 
-	private void saveContencategory(ActivityEntryConfigulation config, ActivityCategories parentCategory, Integer namespaceId){
+	private void saveContencategory(ActivityEntryConfigulation config, Integer namespaceId){
 		//清理部分被删除的主题分类
 		deleteContentCategory(config, namespaceId);
 		//更新、新增主题分类
-		updateContentCategory(config, parentCategory, namespaceId);
+		updateContentCategory(config, namespaceId);
 
 	}
 
-	private void updateContentCategory(ActivityEntryConfigulation config, ActivityCategories parentCategory, Integer namespaceId){
+	private void updateContentCategory(ActivityEntryConfigulation config, Integer namespaceId){
 
 		//如果没有则增加默认分类、或者子分类关闭
 		if(config.getCategoryDTOList() == null || config.getCategoryDTOList().size() == 0){
@@ -264,7 +264,7 @@ public class ActivityPortalPublishHandler implements PortalPublishHandler {
 				oldCategory.setEnabled(dto.getEnabled());
 				activityProvider.updateActivityCategories(oldCategory);
 			}else {
-				ActivityCategories newCategory = createActivityCategories(namespaceId, dto.getName(), parentCategory.getEntryId(), null, (byte)1, dto.getAllFlag());
+				ActivityCategories newCategory = createActivityCategories(namespaceId, dto.getName(), config.getCategoryId(), null, (byte)1, dto.getAllFlag());
 
 				dto.setId(newCategory.getId());
 				dto.setEntryId(newCategory.getEntryId());
