@@ -1691,3 +1691,7 @@ UPDATE eh_service_modules set type = 0 where id in (70000, 70200, 70300, 70100, 
 
 -- 更新"入驻申请"菜单的路由 add by yanjun 201803281414
 UPDATE eh_web_menus set data_type = 'enter-apply' where id = 43020000;
+
+-- 更新成都创业场的“入驻申请”的actionType为71
+UPDATE eh_launch_pad_items set action_type = 71 where action_type = 68  and namespace_id = 999964;
+
