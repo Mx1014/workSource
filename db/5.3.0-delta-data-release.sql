@@ -274,7 +274,7 @@ INSERT INTO `eh_configurations` (`name`, `value`, `description`, `namespace_id`,
 UPDATE eh_parking_lots JOIN eh_communities ON eh_communities.id = eh_parking_lots.owner_id SET eh_parking_lots.namespace_id = eh_communities.namespace_id;
 
 INSERT INTO `eh_locale_strings` (`scope`, `code`, `locale`, `text`)
-  VALUES ('rental.notification', '12', 'zh_CN', '亲爱的用户，为保障资源使用效益，现在取消订单，系统将不予退款，恳请您谅解。\r\n\r\n确认要取消订单吗？');
+  VALUES ('rental.notification', '12', 'zh_CN', '亲爱的用户，为保障资源使用效益，现在取消订单，系统将不予退款，恳请您谅解。确认要取消订单吗？');
 
 INSERT INTO `eh_locale_strings` (`scope`, `code`, `locale`, `text`)
   VALUES ('parking', '10022', 'zh_CN', '升起车锁失败');
