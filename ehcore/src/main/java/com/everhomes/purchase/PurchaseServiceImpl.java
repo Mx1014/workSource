@@ -15,6 +15,8 @@ import com.everhomes.rest.organization.ListPMOrganizationsCommand;
 import com.everhomes.rest.organization.ListPMOrganizationsResponse;
 import com.everhomes.rest.purchase.*;
 import com.everhomes.rest.warehouse.*;
+import com.everhomes.search.WarehouseStockLogSearcher;
+import com.everhomes.search.WarehouseStockSearcher;
 import com.everhomes.sequence.SequenceProvider;
 import com.everhomes.server.schema.tables.EhWarehouseOrders;
 import com.everhomes.server.schema.tables.pojos.EhWarehousePurchaseItems;
@@ -72,7 +74,10 @@ public class PurchaseServiceImpl implements PurchaseService {
     private UserProvider userProvider;
     @Autowired
     private FlowCaseProvider flowCaseProvider;
-
+    @Autowired
+    private WarehouseStockSearcher warehouseStockSearcher;
+    @Autowired
+    private WarehouseStockLogSearcher warehouseStockLogSearcher;
 
 
     @Override
@@ -256,7 +261,7 @@ public class PurchaseServiceImpl implements PurchaseService {
                 stock.setOwnerType(order.getOwnerType());
                 stock.setStatus(Status.ACTIVE.getCode());
                 stock.setWarehouseId(item.getWarehouseId());
-                warehouseProvider.insertWarehouseStock(stock);
+
             }
             //出入库记录
             WarehouseStockLogs logs = ConvertHelper.convert(stock, WarehouseStockLogs.class);
@@ -271,8 +276,13 @@ public class PurchaseServiceImpl implements PurchaseService {
             logs.setRequestType(WarehouseStockRequestType.STOCK_IN.getCode());
             logs.setRequestSource(WarehouseStockRequestSource.PURCHASE.getCode());
             logs.setRequestId(purchaseOrder.getId());
+            // 忘记在es上feed一下了 by vincent wang 2018/3/28
+            warehouseProvider.insertWarehouseStock(stock);
+            warehouseStockSearcher.feedDoc(stock);
             warehouseProvider.insertWarehouseStockLog(logs);
+            warehouseStockLogSearcher.feedDoc(logs);
         }
+
         //将purchaseOrder的warehouseStatus状态改变
         resetWarehouseStatusForPurchaseOrder(WarehouseStatus.ENABLE.getCode(), purchaseRequestId);
     }
