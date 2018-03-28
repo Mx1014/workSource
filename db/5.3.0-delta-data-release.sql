@@ -44,7 +44,7 @@ SET  @id = (SELECT  MAX(id) FROM eh_version_realm);
 INSERT INTO `eh_version_realm` VALUES (@id:=@id+1, 'equipmentInspection', NULL, NOW(), '0');
 
 SET  @vId = (SELECT  MAX(id) FROM eh_version_urls);
-INSERT INTO `eh_version_urls` VALUES (@vId:=@vId+1, @id, '1.0.0', 'http://{home.url}/nar/equipmentInspection/inspectionOffLine/equipmentInspection-1-0-0.zip', 'http://opv2-test.zuolin.com/nar/equipmentInspection/inspectionOffLine/equipmentInspection-1-0-0.zip', '物业巡检巡检离线', '0', '物业巡检', NOW(), NULL, '0');
+INSERT INTO `eh_version_urls` VALUES (@vId:=@vId+1, @id, '1.0.0', 'http://{home.url}/nar/equipmentInspection/inspectionOffLine/equipmentInspection-1-0-0.zip', 'http://{home.url}/nar/equipmentInspection/inspectionOffLine/equipmentInspection-1-0-0.zip', '物业巡检巡检离线', '0', '物业巡检', NOW(), NULL, '0');
 
 UPDATE eh_launch_pad_items
 SET action_data = '{\"realm\":\"equipmentInspection\",\"entryUrl\":\"http://{home.url}/nar/equipmentInspection/dist/index.html?hideNavigationBar=1#sign_suffix\"}'
