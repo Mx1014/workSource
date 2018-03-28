@@ -365,6 +365,7 @@ public class RentalCommonServiceImpl {
         return order.getPaidMoney();
     }
 
+
     public void processOrderNotRefundTip(RentalOrder order) {
 
         String locale = UserContext.current().getUser().getLocale();
