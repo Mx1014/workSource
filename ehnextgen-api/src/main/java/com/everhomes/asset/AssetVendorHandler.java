@@ -4,6 +4,7 @@ import com.everhomes.rest.asset.*;
 import com.everhomes.rest.order.PreOrderDTO;
 
 import javax.servlet.http.HttpServletResponse;
+import javax.servlet.http.HttpServletResponseWrapper;
 import java.util.List;
 
 /**
@@ -65,4 +66,6 @@ public interface AssetVendorHandler {
     List<ShowBillForClientV2DTO> showBillForClientV2(ShowBillForClientV2Command cmd);
 
     List<ListAllBillsForClientDTO> listAllBillsForClient(ListAllBillsForClientCommand cmd);
+
+    void exportBillTemplates(ExportBillTemplatesCommand cmd);
 }

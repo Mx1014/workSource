@@ -38,6 +38,7 @@ import org.springframework.stereotype.Component;
 import org.springframework.transaction.TransactionStatus;
 
 import javax.servlet.http.HttpServletResponse;
+import javax.servlet.http.HttpServletResponseWrapper;
 import java.lang.reflect.Field;
 import java.math.BigDecimal;
 import java.sql.Timestamp;
@@ -846,6 +847,56 @@ public class ZuolinAssetVendorHandler implements AssetVendorHandler {
     @Override
     public List<ListAllBillsForClientDTO> listAllBillsForClient(ListAllBillsForClientCommand cmd) {
         return assetProvider.listAllBillsForClient(cmd.getNamespaceId(),cmd.getOwnerType(),cmd.getOwnerId(),cmd.getTargetType(),cmd.getOwnerType().equals(AssetPaymentConstants.EH_USER)?UserContext.currentUserId():cmd.getTargetId());
+    }
+
+    @Override
+    public void exportBillTemplates(ExportBillTemplatesCommand cmd) {
+        ShowCreateBillDTO webPage = assetProvider.showCreateBill(cmd.getBillGroupId());
+        List<String> headList = new ArrayList<>();
+        List<Integer> mandatoryIndex = new ArrayList<>();
+        Integer cur = -1;
+        headList.add("账期");
+        cur++;
+        mandatoryIndex.add(cur);
+        headList.add("账单开始时间");
+        cur++;
+        headList.add("账单结束时间");
+        cur++;
+        headList.add("客户属性");
+        cur++;
+        mandatoryIndex.add(cur);
+        headList.add("客户名称");
+        cur++;
+        mandatoryIndex.add(cur);
+        headList.add("合同编号");
+        cur++;
+        headList.add("客户手机号(个人客户必填)");
+        cur++;
+        headList.add("催缴手机号");
+        cur++;
+        //可变标题
+        List<BillItemDTO> billItemDTOList = webPage.getBillItemDTOList();
+        for(BillItemDTO dto : billItemDTOList){
+            headList.add(dto.getBillItemName()+"(元)");
+            cur++;
+            mandatoryIndex.add(cur);
+        }
+        headList.add("楼栋");
+        cur++;
+        headList.add("门牌");
+        cur++;
+        headList.add("减免金额(元)");
+        cur++;
+        headList.add("减免备注");
+        cur++;
+        headList.add("增收金额(元)");
+        cur++;
+        headList.add("增收备注");
+        cur++;
+        String[] headers = (String[]) headList.toArray();
+        ExcelUtils excelUtils = new ExcelUtils();
+        excelUtils.setMandatoryTitle(mandatoryIndex);
+        excelUtils.writeExcel(null, headers, true, null, null);
     }
 
 

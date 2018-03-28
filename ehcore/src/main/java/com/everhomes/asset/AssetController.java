@@ -1232,6 +1232,7 @@ public class AssetController extends ControllerBase {
      */
     @RequestMapping("exportBillTemplates")
     public RestResponse exportBillTemplates(ExportBillTemplatesCommand cmd, HttpServletResponseWrapper response){
+        assetService.exportBillTemplates(cmd,response);
         RestResponse restResponse = new RestResponse();
         restResponse.setErrorCode(ErrorCodes.SUCCESS);
         restResponse.setErrorDescription("OK");

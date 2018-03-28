@@ -89,6 +89,7 @@ import org.springframework.transaction.TransactionStatus;
 import org.springframework.web.multipart.MultipartFile;
 
 import javax.servlet.http.HttpServletResponse;
+import javax.servlet.http.HttpServletResponseWrapper;
 
 import java.io.*;
 import java.lang.reflect.Field;
@@ -2870,6 +2871,20 @@ public class AssetServiceImpl implements AssetService {
     @Override
     public void activeLateFine() {
         lateFineCal();
+    }
+
+    /**
+     *
+     * @param cmd includes communityId and namespaceId for locating the address and checking privileges, and billGroupId
+     *            for get bill items column.
+     * @param response
+     */
+    @Override
+    public void exportBillTemplates(ExportBillTemplatesCommand cmd) {
+        AssetVendor assetVendor = checkAssetVendor(UserContext.getCurrentNamespaceId(),0);
+        String vender = assetVendor.getVendorName();
+        AssetVendorHandler handler = getAssetVendorHandler(vender);
+        handler.exportBillTemplates(cmd);
     }
 
 

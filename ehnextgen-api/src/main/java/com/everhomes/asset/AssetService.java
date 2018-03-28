@@ -8,6 +8,7 @@ import com.everhomes.server.schema.tables.pojos.EhPaymentFormula;
 import org.springframework.web.multipart.MultipartFile;
 
 import javax.servlet.http.HttpServletResponse;
+import javax.servlet.http.HttpServletResponseWrapper;
 import java.util.List;
 
 /**
@@ -166,4 +167,6 @@ public interface AssetService {
     List<ListLateFineStandardsDTO> listLateFineStandards(ListLateFineStandardsCommand cmd);
 
     void activeLateFine();
+
+    void exportBillTemplates(ExportBillTemplatesCommand cmd, HttpServletResponseWrapper response);
 }

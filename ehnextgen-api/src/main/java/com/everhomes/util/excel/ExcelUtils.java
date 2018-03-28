@@ -160,7 +160,17 @@ public class ExcelUtils {
      */
     public void writeExcel(String[] propertyNames, String[] titleName, int[] columnSizes, List<?> dataList) {
         try (OutputStream out = getOutputStream();) {
-            ByteArrayOutputStream excelStream = buildExcel(propertyNames, titleName, columnSizes, dataList);
+            ByteArrayOutputStream excelStream = buildExcel(propertyNames, titleName, false, columnSizes, dataList);
+            out.write(excelStream.toByteArray());
+            out.flush();
+        } catch (Exception ex) {
+            ex.printStackTrace();
+        }
+    }
+    // 重载，可以在必填项前加星号
+    public void writeExcel(String[] propertyNames, String[] titleName, boolean withStar, int[] columnSizes, List<?> dataList) {
+        try (OutputStream out = getOutputStream();) {
+            ByteArrayOutputStream excelStream = buildExcel(propertyNames, titleName, withStar, columnSizes, dataList);
             out.write(excelStream.toByteArray());
             out.flush();
         } catch (Exception ex) {
@@ -175,7 +185,7 @@ public class ExcelUtils {
 
 	public OutputStream getOutputStream(List<String> propertyNames, List<String> titleName, List<Integer> columnSizes, List<?> dataList){
         try {
-            ByteArrayOutputStream excelStream = buildExcel(propertyNames.toArray(new String[propertyNames.size()]), titleName.toArray(new String[titleName.size()]), ArrayUtils.toPrimitive(columnSizes.toArray(new Integer[columnSizes.size()])), dataList);
+            ByteArrayOutputStream excelStream = buildExcel(propertyNames.toArray(new String[propertyNames.size()]), titleName.toArray(new String[titleName.size()]), false, ArrayUtils.toPrimitive(columnSizes.toArray(new Integer[columnSizes.size()])), dataList);
             return excelStream;
         } catch (Exception ex) {
             ex.printStackTrace();
@@ -200,7 +210,7 @@ public class ExcelUtils {
         response.setHeader("Content-Disposition", "attachment; filename=" + URLEncoder.encode(fileName, "UTF-8").replaceAll("\\+", "%20"));
     }
 
-    private ByteArrayOutputStream buildExcel(String[] propertyNames, String[] titleNames, int[] titleSize, List<?> dataList) throws NoSuchMethodException, IllegalAccessException, InvocationTargetException, IOException {
+    private ByteArrayOutputStream buildExcel(String[] propertyNames, String[] titleNames, boolean withStarAhead, int[] titleSize, List<?> dataList) throws NoSuchMethodException, IllegalAccessException, InvocationTargetException, IOException {
         Sheet sheet = workbook.createSheet(this.sheetName);
         // 表头
         Row titleNameRow = sheet.createRow(0);
@@ -211,18 +221,22 @@ public class ExcelUtils {
         XSSFCellStyle mandatoryTitleStyle = workbook.createCellStyle();
         setMandatoryTitleFont(mandatoryTitleStyle);
 
+
         if (needSequenceColumn) {
             Cell numberColumn = titleNameRow.createCell(0);
             numberColumn.setCellStyle(titleStyle);
             numberColumn.setCellValue(StringEscapeUtils.unescapeJava("\\u5e8f\\u53f7"));
         }
-
         for (int i = 0; i < titleNames.length; i++) {
-            sheet.setColumnWidth(needSequenceColumn ? i + 1 : i, titleSize[i] * 256);    //设置宽度
+            sheet.setColumnWidth(needSequenceColumn ? i + 1 : i, titleSize == null ? 20 * 256 : titleSize[i] * 256);    //设置宽度
             Cell cell = titleNameRow.createCell(needSequenceColumn ? i + 1 : i);
             if (needMandatoryTitle) {
-                if (mandatoryTitle.get(i) == 1)
+                if (mandatoryTitle.get(i) == 1){
                     cell.setCellStyle(mandatoryTitleStyle);
+                    if(withStarAhead){
+                        titleNames[i] = "*"+titleNames[i];
+                    }
+                }
             } else
                 cell.setCellStyle(titleStyle);
             cell.setCellValue(titleNames[i]);
