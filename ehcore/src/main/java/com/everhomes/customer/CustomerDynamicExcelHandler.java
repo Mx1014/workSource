@@ -18,6 +18,7 @@ import com.everhomes.user.User;
 import com.everhomes.user.UserContext;
 import com.everhomes.user.UserProvider;
 import com.everhomes.util.ConvertHelper;
+import com.everhomes.util.RuntimeErrorException;
 import com.everhomes.util.StringHelper;
 import com.everhomes.varField.*;
 import org.apache.commons.lang.StringUtils;
@@ -161,6 +162,11 @@ public class CustomerDynamicExcelHandler implements DynamicExcelHandler {
                 Boolean flag = true;
                 switch (sheet) {
                     case CUSTOMER:
+                        if(customerId != 0) {
+                            //不为0时为管理里面导入的 直接break
+                            break;
+                        }
+                        //列表里导入时：
                         EnterpriseCustomer enterpriseCustomer = new EnterpriseCustomer();
                         enterpriseCustomer.setNamespaceId(namespaceId);
                         enterpriseCustomer.setCommunityId(communityId);
@@ -206,12 +212,30 @@ public class CustomerDynamicExcelHandler implements DynamicExcelHandler {
                             }
                         }
 
+                        if(StringUtils.isNotBlank(enterpriseCustomer.getCustomerNumber())) {
+                            List<EnterpriseCustomer> customers = customerProvider.listEnterpriseCustomerByNamespaceIdAndNumber(namespaceId, enterpriseCustomer.getCustomerNumber());
+                            if(customers != null && customers.size() > 0) {
+                                LOGGER.error("customerNumber {} in namespace {} already exist!", enterpriseCustomer.getCustomerNumber(), namespaceId);
+                                failedNumber ++;
+                                flag = false;
+                                break;
+                            }
+                        }
+                        if(StringUtils.isNotBlank(enterpriseCustomer.getName())) {
+                            List<EnterpriseCustomer> customers = customerProvider.listEnterpriseCustomerByNamespaceIdAndName(namespaceId, enterpriseCustomer.getName());
+                            if(customers != null && customers.size() > 0) {
+                                LOGGER.error("customerName {} in namespace {} already exist!", enterpriseCustomer.getName(), namespaceId);
+                                failedNumber ++;
+                                flag = false;
+                                break;
+                            }
+                        }
+
                         if(flag) {
                             if(null != enterpriseCustomer.getLongitude() && null != enterpriseCustomer.getLatitude()){
                                 String geohash  = GeoHashUtils.encode(enterpriseCustomer.getLatitude(), enterpriseCustomer.getLongitude());
                                 enterpriseCustomer.setGeohash(geohash);
                             }
-
                             customerProvider.createEnterpriseCustomer(enterpriseCustomer);
 
                             //企业客户新增成功,保存客户事件

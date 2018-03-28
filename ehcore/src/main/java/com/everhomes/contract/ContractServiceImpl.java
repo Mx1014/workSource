@@ -1990,9 +1990,29 @@ public class ContractServiceImpl implements ContractService {
 		}
 	}
 
+	/**
+	 * 每天早上2点50,自动同步合同信息
+	 * */
+	@Scheduled(cron = "1 50 2 * * ?")
+	public void contractAutoSync() {
+		List<Community> communities = communityProvider.listAllCommunitiesWithNamespaceToken();
+		if(communities != null) {
+			for(Community community : communities) {
+				SyncContractsFromThirdPartCommand command = new SyncContractsFromThirdPartCommand();
+				command.setNamespaceId(community.getNamespaceId());
+				command.setCommunityId(community.getId());
+				syncContractsFromThirdPart(command, false);
+			}
+
+		}
+	}
+
 	@Override
-	public String syncContractsFromThirdPart(SyncContractsFromThirdPartCommand cmd) {
-		checkContractAuth(cmd.getNamespaceId(), PrivilegeConstants.CONTRACT_SYNC, cmd.getOrgId(), cmd.getCommunityId());
+	public String syncContractsFromThirdPart(SyncContractsFromThirdPartCommand cmd, Boolean authFlag) {
+		if(authFlag) {
+			checkContractAuth(cmd.getNamespaceId(), PrivilegeConstants.CONTRACT_SYNC, cmd.getOrgId(), cmd.getCommunityId());
+		}
+
 
 		Community community = communityProvider.findCommunityById(cmd.getCommunityId());
 		if(community == null) {
