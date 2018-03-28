@@ -44,7 +44,7 @@ SET  @id = (SELECT  MAX(id) FROM eh_version_realm);
 INSERT INTO `eh_version_realm` VALUES (@id:=@id+1, 'equipmentInspection', NULL, NOW(), '0');
 
 SET  @vId = (SELECT  MAX(id) FROM eh_version_urls);
-INSERT INTO `eh_version_urls` VALUES (@vId:=@vId+1, @id, '1.0.0', 'http://{home.url}/nar/equipmentInspection/inspectionOffLine/equipmentInspection-1-0-0.zip', 'http://opv2-test.zuolin.com/nar/equipmentInspection/inspectionOffLine/equipmentInspection-1-0-0.zip', '物业巡检巡检离线', '0', '物业巡检', NOW(), NULL, '0');
+INSERT INTO `eh_version_urls` VALUES (@vId:=@vId+1, @id, '1.0.0', 'http://{home.url}/nar/equipmentInspection/inspectionOffLine/equipmentInspection-1-0-0.zip', 'http://{home.url}/nar/equipmentInspection/inspectionOffLine/equipmentInspection-1-0-0.zip', '物业巡检巡检离线', '0', '物业巡检', NOW(), NULL, '0');
 
 UPDATE eh_launch_pad_items
 SET action_data = '{\"realm\":\"equipmentInspection\",\"entryUrl\":\"http://{home.url}/nar/equipmentInspection/dist/index.html?hideNavigationBar=1#sign_suffix\"}'
@@ -274,7 +274,7 @@ INSERT INTO `eh_configurations` (`name`, `value`, `description`, `namespace_id`,
 UPDATE eh_parking_lots JOIN eh_communities ON eh_communities.id = eh_parking_lots.owner_id SET eh_parking_lots.namespace_id = eh_communities.namespace_id;
 
 INSERT INTO `eh_locale_strings` (`scope`, `code`, `locale`, `text`)
-  VALUES ('rental.notification', '12', 'zh_CN', '亲爱的用户，为保障资源使用效益，现在取消订单，系统将不予退款，恳请您谅解。\r\n\r\n确认要取消订单吗？');
+  VALUES ('rental.notification', '12', 'zh_CN', '亲爱的用户，为保障资源使用效益，现在取消订单，系统将不予退款，恳请您谅解。确认要取消订单吗？');
 
 INSERT INTO `eh_locale_strings` (`scope`, `code`, `locale`, `text`)
   VALUES ('parking', '10022', 'zh_CN', '升起车锁失败');
@@ -1688,3 +1688,10 @@ UPDATE eh_service_modules SET default_order = 20 WHERE id = 60200;
 UPDATE eh_service_modules set type = 0 where id in (70000, 70200, 70300, 70100, 10200, 61000, 30000, 50200, 40600);
 
 -- 重新布局模块分类  add by yanjun 201803262114 end
+
+-- 更新"入驻申请"菜单的路由 add by yanjun 201803281414
+UPDATE eh_web_menus set data_type = 'enter-apply' where id = 43020000;
+
+-- 更新成都创业场的“入驻申请”的actionType为71
+UPDATE eh_launch_pad_items set action_type = 71 where action_type = 68  and namespace_id = 999964;
+

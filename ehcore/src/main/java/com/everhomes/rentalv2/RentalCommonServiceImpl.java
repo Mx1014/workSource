@@ -350,7 +350,7 @@ public class RentalCommonServiceImpl {
                 }
 
                 BigDecimal amount = order.getPaidMoney().multiply(new BigDecimal(orderRule.getFactor()))
-                        .divide(new BigDecimal(100), RoundingMode.HALF_UP);
+                        .divide(new BigDecimal(100),2, RoundingMode.HALF_UP);
 
                 processOrderCustomRefundTip(order, outerRules, innerRules, orderRule, amount);
 

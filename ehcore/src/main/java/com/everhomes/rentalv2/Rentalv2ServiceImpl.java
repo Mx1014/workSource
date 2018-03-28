@@ -3637,22 +3637,21 @@ public class Rentalv2ServiceImpl implements Rentalv2Service {
 						&& (order.getPaidMoney().compareTo(new BigDecimal(0)) == 1)){
 
 					BigDecimal orderAmount = handler.getRefundAmount(order, timestamp);
-					if (PayMode.ONLINE_PAY.getCode()==(order.getPayMode())||PayMode.APPROVE_ONLINE_PAY.getCode()==(order.getPayMode())) {
-						rentalCommonService.refundOrder(order, timestamp, orderAmount);
-						//更新bill状态
-						order.setStatus(SiteBillStatus.REFUNDED.getCode());
-					}
-					else {
-						order.setRefundAmount(orderAmount);
-						order.setStatus(SiteBillStatus.REFUNDING.getCode());//线下支付人工退款
-					}
+					if (orderAmount.compareTo(new BigDecimal(0)) == 1)
+						if (PayMode.ONLINE_PAY.getCode()==(order.getPayMode())||PayMode.APPROVE_ONLINE_PAY.getCode()==(order.getPayMode())) {
+							rentalCommonService.refundOrder(order, timestamp, orderAmount);
+							//更新bill状态
+							order.setStatus(SiteBillStatus.REFUNDED.getCode());
+							order.setRefundAmount(orderAmount);
+						} else {
+							order.setRefundAmount(orderAmount);
+							order.setStatus(SiteBillStatus.REFUNDING.getCode());//线下支付人工退款
+						}
 
-
-
-				}else {
-					//如果不需要退款，直接状态为已取消
-					order.setStatus(SiteBillStatus.FAIL.getCode());
 				}
+				//如果不需要退款 或退款金额过小，直接状态为已取消
+				order.setStatus(SiteBillStatus.FAIL.getCode());
+
 			}else if (order.getStatus().equals(SiteBillStatus.PAYINGFINAL.getCode())||
 					order.getStatus().equals(SiteBillStatus.APPROVING.getCode())){
 				//如果不需要退款，直接状态为已取消
