@@ -261,7 +261,9 @@ public class PurchaseServiceImpl implements PurchaseService {
                 stock.setOwnerType(order.getOwnerType());
                 stock.setStatus(Status.ACTIVE.getCode());
                 stock.setWarehouseId(item.getWarehouseId());
-
+                // 忘记在es上feed一下了 by vincent wang 2018/3/28
+                warehouseProvider.insertWarehouseStock(stock);
+                warehouseStockSearcher.feedDoc(stock);
             }
             //出入库记录
             WarehouseStockLogs logs = ConvertHelper.convert(stock, WarehouseStockLogs.class);
@@ -276,9 +278,7 @@ public class PurchaseServiceImpl implements PurchaseService {
             logs.setRequestType(WarehouseStockRequestType.STOCK_IN.getCode());
             logs.setRequestSource(WarehouseStockRequestSource.PURCHASE.getCode());
             logs.setRequestId(purchaseOrder.getId());
-            // 忘记在es上feed一下了 by vincent wang 2018/3/28
-            warehouseProvider.insertWarehouseStock(stock);
-            warehouseStockSearcher.feedDoc(stock);
+
             warehouseProvider.insertWarehouseStockLog(logs);
             warehouseStockLogSearcher.feedDoc(logs);
         }
