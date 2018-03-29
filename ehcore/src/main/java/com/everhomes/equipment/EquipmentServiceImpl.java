@@ -6312,7 +6312,7 @@ public class EquipmentServiceImpl implements EquipmentService {
 		ListingLocator locator = new ListingLocator();
 		int pageSize = Integer.MAX_VALUE - 1;
 		List<EquipmentInspectionTasksLogs> logs = equipmentProvider.listLogsByTaskId(locator, pageSize+1,
-				Long.valueOf(cmd.getTaskId()), new ArrayList<>(cmd.getProcessType()), null);
+				Long.valueOf(cmd.getTaskId()), Collections.singletonList(cmd.getProcessType()), null);
 		//展示最新一次的任务日志记录
 		logs = getLatestTaskLogs(logs);
 
