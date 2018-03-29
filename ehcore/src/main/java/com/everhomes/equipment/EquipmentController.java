@@ -27,6 +27,7 @@ import com.everhomes.rest.equipment.EquipmentTaskDTO;
 import com.everhomes.rest.equipment.EquipmentTaskOfflineResponse;
 import com.everhomes.rest.equipment.EquipmentsDTO;
 import com.everhomes.rest.equipment.ExportEquipmentsCardCommand;
+import com.everhomes.rest.equipment.ExportTaskLogsCommand;
 import com.everhomes.rest.equipment.GetInspectionObjectByQRCodeCommand;
 import com.everhomes.rest.equipment.ImportOwnerCommand;
 import com.everhomes.rest.equipment.InspectionItemDTO;
@@ -50,6 +51,7 @@ import com.everhomes.rest.equipment.ReviewEquipmentTaskCommand;
 import com.everhomes.rest.equipment.ReviewEquipmentTasksCommand;
 import com.everhomes.rest.equipment.SearchEquipmentAccessoriesCommand;
 import com.everhomes.rest.equipment.SearchEquipmentAccessoriesResponse;
+import com.everhomes.rest.equipment.SearchEquipmentInspectionPlansCommand;
 import com.everhomes.rest.equipment.SearchEquipmentStandardRelationsCommand;
 import com.everhomes.rest.equipment.SearchEquipmentStandardRelationsResponse;
 import com.everhomes.rest.equipment.SearchEquipmentStandardsCommand;
@@ -74,7 +76,6 @@ import com.everhomes.rest.equipment.UpdateEquipmentsCommand;
 import com.everhomes.rest.equipment.VerifyEquipmentLocationCommand;
 import com.everhomes.rest.equipment.VerifyEquipmentLocationResponse;
 import com.everhomes.rest.equipment.findScopeFieldItemCommand;
-import com.everhomes.rest.equipment.SearchEquipmentInspectionPlansCommand;
 import com.everhomes.rest.equipment.searchEquipmentInspectionPlansResponse;
 import com.everhomes.rest.pmNotify.DeletePmNotifyParamsCommand;
 import com.everhomes.rest.pmNotify.ListPmNotifyParamsCommand;
@@ -608,6 +609,17 @@ public class EquipmentController extends ControllerBase {
     public RestResponse listLogsByTaskId(ListLogsByTaskIdCommand cmd) {
         ListLogsByTaskIdResponse records = equipmentService.listLogsByTaskId(cmd);
         return getRestResponse(records);
+    }
+
+    /**
+     * <b>URL: /equipment/exportTaskLogs</b>
+     * <p>导出任务记录</p>
+     */
+    @RequestMapping("exportTaskLogs")
+    @RestReturn(value = String.class)
+    public RestResponse exportTaskLogs(ExportTaskLogsCommand cmd, HttpServletResponse response) {
+        equipmentService.exportTaskLogs(cmd, response);
+        return getSuccessResponse();
     }
 
     /**
