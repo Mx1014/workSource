@@ -93,7 +93,7 @@ public interface CustomerService {
     ListCustomerAnnualStatisticsResponse listCustomerAnnualStatistics(ListCustomerAnnualStatisticsCommand cmd);
     ListCustomerAnnualDetailsResponse listCustomerAnnualDetails(ListCustomerAnnualDetailsCommand cmd);
 
-    String syncEnterpriseCustomers(SyncCustomersCommand cmd);
+    String syncEnterpriseCustomers(SyncCustomersCommand cmd, Boolean authFlag);
     String syncIndividualCustomers(SyncCustomersCommand cmd);
     
     
