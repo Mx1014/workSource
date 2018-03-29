@@ -34,7 +34,7 @@ public interface BannerProvider {
     BannerClick findBannerClickByBannerIdAndUserId(long bannerId, long userId);
     BannerClick findBannerClickByToken(String token);
     List<Banner> listBanners(String keyword, long offset, long pageSize);
-	List<Banner> findBannerByNamespeaceId(Integer currentNamespaceId);
+	List<Banner> findBannerByNamespaceId(Integer currentNamespaceId);
 	
 	/**
 	 * 根据scopeId列表banner
@@ -67,6 +67,8 @@ public interface BannerProvider {
     List<Banner> listBannersByCommunityId(Integer namespaceId, Long communityId);
 
     Integer getMaxOrderByCommunityId(Integer namespaceId, Long communityId);
+
+    Integer getMinOrderByCommunityId(Integer namespaceId, Long scopeId);
 
     List<Banner> listBannersByCommunityId(Integer namespaceId, Long communityId, int pageSize, ListingLocator locator);
 

@@ -514,10 +514,49 @@ public class BannerServiceImpl implements BannerService {
         }
 
         if (!Objects.equals(banner.getStatus(), cmd.getStatus())) {
+            if (Objects.equals(BannerStatus.ACTIVE.getCode(), cmd.getStatus())) {
+                checkQuantityExceeded(banner);
+                setupOrderToBanner(banner, cmd.getStatus());
+            } else if (Objects.equals(BannerStatus.CLOSE.getCode(), cmd.getStatus())) {
+                setupOrderToBanner(banner, cmd.getStatus());
+            }
             banner.setStatus(cmd.getStatus());
             bannerProvider.updateBanner(banner);
         }
         return toBannerDTO(banner);
+    }
+
+    private void setupOrderToBanner(Banner banner, Byte status) {
+        if (Objects.equals(BannerStatus.ACTIVE.getCode(), status)) {
+            Integer maxOrder = bannerProvider.getMaxOrderByCommunityId(banner.getNamespaceId(), banner.getScopeId());
+            if (maxOrder != null) {
+                banner.setOrder(maxOrder + 1);
+            }
+        } else if (Objects.equals(BannerStatus.CLOSE.getCode(), status)) {
+            Integer minOrder = bannerProvider.getMinOrderByCommunityId(banner.getNamespaceId(), banner.getScopeId());
+            if (minOrder != null) {
+                banner.setOrder(minOrder - 1);
+            }
+        }
+    }
+
+    // 检查激活上限
+    private void checkQuantityExceeded(Banner banner) {
+        CountEnabledBannersByScopeCommand cmd = new CountEnabledBannersByScopeCommand();
+        cmd.setNamespaceId(banner.getNamespaceId());
+
+        CountEnabledBannersByScopeResponse enabledBanners = countEnabledBannersByScope(cmd);
+        enabledBanners.getList().stream()
+                .filter(r -> r.getScope().equals(banner.getScopeId()))
+                .findFirst()
+                .ifPresent(r -> {
+            if (r.getCount() >= 8) {
+                throw RuntimeErrorException.errorWith(
+                        BannerServiceErrorCode.SCOPE,
+                        BannerServiceErrorCode.ERROR_BANNER_MAX_ACTIVE,
+                        "Active banner quantity exceeded.");
+            }
+        });
     }
 
     private Long parseCommunityIdFromSceneToken(SceneTokenDTO sceneToken) {

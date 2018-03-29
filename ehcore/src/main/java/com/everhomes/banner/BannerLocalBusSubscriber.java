@@ -11,6 +11,7 @@ import com.everhomes.forum.Forum;
 import com.everhomes.forum.ForumProvider;
 import com.everhomes.forum.Post;
 import com.everhomes.rest.app.AppConstants;
+import com.everhomes.rest.banner.BannerTargetType;
 import com.everhomes.rest.banner.targetdata.BannerActivityTargetData;
 import com.everhomes.rest.banner.targetdata.BannerPostTargetData;
 import com.everhomes.rest.launchpad.ActionType;
@@ -67,7 +68,7 @@ public class BannerLocalBusSubscriber implements LocalBusSubscriber, Application
 
     private void checkBanner(Long appId, Long postId, Long forumId) {
         Forum forum = forumProvider.findForumById(forumId);
-        List<Banner> banners = bannerProvider.findBannerByNamespeaceId(forum.getNamespaceId());
+        List<Banner> banners = bannerProvider.findBannerByNamespaceId(forum.getNamespaceId());
 
         // 活动
         if (Objects.equals(appId, AppConstants.APPID_ACTIVITY)) {
@@ -97,6 +98,8 @@ public class BannerLocalBusSubscriber implements LocalBusSubscriber, Application
     private void updateBanner(List<Banner> banners, BannerTargetHandleResult result) {
         for (Banner banner : banners) {
             if (equals(result, banner)) {
+                banner.setTargetType(BannerTargetType.NONE.getCode());
+                banner.setTargetData("");
                 banner.setActionType(ActionType.NONE.getCode());
                 banner.setActionData(null);
                 bannerProvider.updateBanner(banner);
@@ -112,7 +115,7 @@ public class BannerLocalBusSubscriber implements LocalBusSubscriber, Application
     @Override
     public void onApplicationEvent(ContextRefreshedEvent event) {
         if (event.getApplicationContext().getParent() == null) {
-            LocalEventBus.subscribe(SystemEvent.FORUM_POST_DELETE.name(), this);
+            LocalEventBus.subscribe(SystemEvent.FORUM_POST_DELETE.getCode(), this);
         }
     }
 }

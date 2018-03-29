@@ -13,20 +13,20 @@ public enum BannerStatus {
 
     DELETE((byte) 0), WAITINGCONFIRM((byte) 1), ACTIVE((byte) 2), CLOSE((byte) 3);
 
-    private byte code;
+    private Byte code;
 
-    private BannerStatus(byte code) {
+    private BannerStatus(Byte code) {
         this.code = code;
     }
 
-    public byte getCode() {
+    public Byte getCode() {
         return this.code;
     }
 
     public static BannerStatus fromCode(Byte code) {
         if (code == null)
             return null;
-        switch (code.byteValue()) {
+        switch (code) {
             case 0:
                 return DELETE;
             case 1:

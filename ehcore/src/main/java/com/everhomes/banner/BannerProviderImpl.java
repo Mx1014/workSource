@@ -310,10 +310,10 @@ public class BannerProviderImpl implements BannerProvider {
     }
     
 	@Override
-	public List<Banner> findBannerByNamespeaceId(Integer namespaceId) {
+	public List<Banner> findBannerByNamespaceId(Integer namespaceId) {
 		List<Banner> banners = new ArrayList<>();
-		this.dbProvider.mapReduce(AccessSpec.readOnlyWith(EhUsers.class), namespaceId, (context, reducingContext) -> {
-          context.select().from(Tables.EH_BANNER_CLICKS)
+		this.dbProvider.mapReduce(AccessSpec.readOnlyWith(EhBanners.class), namespaceId, (context, reducingContext) -> {
+          context.select().from(Tables.EH_BANNERS)
             .where(Tables.EH_BANNERS.NAMESPACE_ID.eq(namespaceId))
             .fetch().map((r) ->{
             	banners.add(ConvertHelper.convert(r, Banner.class));
@@ -423,6 +423,20 @@ public class BannerProviderImpl implements BannerProvider {
         query.addConditions(t.SCOPE_ID.eq(communityId));
 
         // query.addConditions(t.STATUS.eq(BannerStatus.ACTIVE.getCode()));
+        return query.fetchOneInto(Integer.class);
+    }
+
+    @Override
+    public Integer getMinOrderByCommunityId(Integer namespaceId, Long scopeId) {
+        DSLContext context = dbProvider.getDslContext(AccessSpec.readOnly());
+        com.everhomes.server.schema.tables.EhBanners t = EH_BANNERS;
+
+        SelectQuery<Record1<Integer>> query = context.select(DSL.min(t.ORDER)).from(t).getQuery();
+        query.addConditions(t.NAMESPACE_ID.eq(namespaceId));
+
+        query.addConditions(t.SCOPE_CODE.eq(ScopeType.COMMUNITY.getCode()));
+        query.addConditions(t.SCOPE_ID.eq(scopeId));
+
         return query.fetchOneInto(Integer.class);
     }
 
