@@ -8222,7 +8222,7 @@ public class Rentalv2ServiceImpl implements Rentalv2Service {
 					if (interval % timeStep != 0) {
 						rentalCount = (int)rentalCount + 1;
 					}
-					rs.setResourceCounts(rs.getResourceCounts()+1.0);//超时的订单会占用一个车位 补回去
+					rs.setResourceCounts(rs.getResourceCounts()+9999999.0);//超时订单无视车锁数量
 					updateRentalOrder(rs, order, null, rentalCount, false);
 					order.setEndTime(order.getOldEndTime());
 				}
