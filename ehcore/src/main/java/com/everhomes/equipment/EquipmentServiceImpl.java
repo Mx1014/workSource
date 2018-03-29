@@ -223,7 +223,7 @@ import com.everhomes.server.schema.Tables;
 import com.everhomes.server.schema.tables.pojos.EhEquipmentInspectionTasks;
 import com.everhomes.settings.PaginationConfigHelper;
 import com.everhomes.sms.DateUtil;
-import com.everhomes.techpark.rental.RentalServiceImpl;
+import com.everhomes.techpark.rental.EquipmentServiceImpl;
 import com.everhomes.user.OSType;
 import com.everhomes.user.User;
 import com.everhomes.user.UserContext;
@@ -744,7 +744,7 @@ public class EquipmentServiceImpl implements EquipmentService {
 		SearchEquipmentStandardsResponse standards = equipmentStandardSearcher.query(cmd);
 		List<EquipmentStandardsDTO> eqStandards = standards.getEqStandards();
 
-		URL rootPath = RentalServiceImpl.class.getResource("/");
+		URL rootPath = EquipmentServiceImpl.class.getResource("/");
 		String filePath = rootPath.getPath() + this.downloadDir;
 		File file = new File(filePath);
 		if (!file.exists())
@@ -2579,7 +2579,7 @@ public class EquipmentServiceImpl implements EquipmentService {
 		ListEquipmentTasksResponse tasks = equipmentTasksSearcher.query(cmd);
 		List<EquipmentTaskDTO> dtos = tasks.getTasks();
 
-		URL rootPath = RentalServiceImpl.class.getResource("/");
+		URL rootPath = EquipmentServiceImpl.class.getResource("/");
 		String filePath = rootPath.getPath() + this.downloadDir;
 		File file = new File(filePath);
 		if (!file.exists())
@@ -6319,7 +6319,7 @@ public class EquipmentServiceImpl implements EquipmentService {
 		List<EquipmentTaskLogsDTO> dtos = new ArrayList<>();
 			dtos = processEquipmentTaskLogsDTOS(logs);
 
-			URL rootPath = RentalServiceImpl.class.getResource("/");
+			URL rootPath = EquipmentServiceImpl.class.getResource("/");
 			String filePath = rootPath.getPath() + this.downloadDir;
 			File file = new File(filePath);
 			if (!file.exists())
