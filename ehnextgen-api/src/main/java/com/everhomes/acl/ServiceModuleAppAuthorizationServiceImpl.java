@@ -11,11 +11,13 @@ import com.everhomes.server.schema.Tables;
 import org.jooq.Record;
 import org.jooq.SelectQuery;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.stereotype.Component;
 
 import java.util.ArrayList;
 import java.util.List;
 import java.util.stream.Collectors;
 
+@Component
 public class ServiceModuleAppAuthorizationServiceImpl implements ServiceModuleAppAuthorizationService{
 
     static final Integer MAX_COUNT_IN_A_QUERY = 1000000;
