@@ -1,8 +1,6 @@
 // @formatter:off
 package com.everhomes.user;
 
-
-<<<<<<< HEAD
 import com.alibaba.fastjson.JSON;
 import com.everhomes.PictureValidate.PictureValidateService;
 import com.everhomes.PictureValidate.PictureValidateServiceErrorCode;
