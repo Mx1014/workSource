@@ -341,14 +341,14 @@ public class ServiceAlliancePortalPublishHandler implements PortalPublishHandler
     final Pattern pattern = Pattern.compile("^.*\"type\":[\\s]*([\\d]*)");
     @Override
     public String getCustomTag(Integer namespaceId, Long moudleId, String instanceConfig) {
-    	if(instanceConfig == null || instanceConfig.length() == 0){
-    		return null;
-    	}
-    	Matcher m = pattern.matcher(instanceConfig);
-    	if(m.find()){
-    		return m.group(1);
-    	}
-    	LOGGER.info("ServiceAlliancePortalPublishHandler actionData = "+instanceConfig);
+        LOGGER.info("ServiceAlliancePortalPublishHandler instanceConfig = {}",instanceConfig);
+        if(instanceConfig == null || instanceConfig.length() == 0){
+            return null;
+        }
+        Matcher m = pattern.matcher(instanceConfig);
+        if(m.find()){
+            return m.group(1);
+        }
     	return null;
     }
 
