@@ -5,6 +5,8 @@ import com.alibaba.fastjson.JSONObject;
 import com.everhomes.constants.ErrorCodes;
 import com.everhomes.util.RuntimeErrorException;
 import org.apache.http.Header;
+import org.apache.http.HttpEntity;
+import org.apache.http.HttpStatus;
 import org.apache.http.NameValuePair;
 import org.apache.http.client.entity.UrlEncodedFormEntity;
 import org.apache.http.client.methods.CloseableHttpResponse;
@@ -42,21 +44,33 @@ public class ZhuzongPmTaskHandle extends DefaultPmTaskHandle {
         return super.getThirdAddress(req);
     }
 
-    public String postToZhuzong(JSONObject params,String method){
+    public String postToZhuzong(JSONObject params,String method) {
         String url = configProvider.getValue("pmtask.zhuzong.url", "");
         HttpPost httpPost = new HttpPost(url + method);
         CloseableHttpResponse response = null;
 
         String json = null;
         List<NameValuePair> nameValuePairs = new ArrayList<NameValuePair>();
-        params.keySet()
-        try {
+        for (Map.Entry<String, Object> entry : params.entrySet()) {
+            nameValuePairs.add(new BasicNameValuePair(entry.getKey(), (String) entry.getValue()));
+        }
 
-        }catch (IOException e) {
+        try {
+            httpPost.setEntity(new UrlEncodedFormEntity(nameValuePairs, "UTF-8"));
+            response = httpclient.execute(httpPost);
+            int status = response.getStatusLine().getStatusCode();
+            if(status == HttpStatus.SC_OK) {
+                HttpEntity entity = response.getEntity();
+                if (entity != null) {
+                    json = EntityUtils.toString(entity, "utf8");
+                }
+            }
+
+        } catch (IOException e) {
             LOGGER.error("Pmtask request error, param={}", params.toJSONString(), e);
             throw RuntimeErrorException.errorWith(ErrorCodes.SCOPE_GENERAL, ErrorCodes.ERROR_GENERAL_EXCEPTION,
                     "Pmtask request error.");
-        }finally {
+        } finally {
             if (null != response) {
                 try {
                     response.close();
@@ -64,7 +78,11 @@ public class ZhuzongPmTaskHandle extends DefaultPmTaskHandle {
                     LOGGER.error("Pmtask close instream, response error, param={}", params.toJSONString(), e);
                 }
             }
+
         }
+        if(LOGGER.isDebugEnabled())
+            LOGGER.debug("Data from zhuzong, param={}, json={}", params, json);
+        return json;
     }
 
     public static void main(String [] args){
