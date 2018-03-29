@@ -332,7 +332,7 @@ public class AuthorizationProviderImpl implements AuthorizationProvider {
 			}
 		}
 		cond = cond.and(targetCond);
-		Condition t2_condition = (t2.field("target_type").in(types).and(t2.field("target_id").in(configIds)).or(t2.field("control_id").eq(0));
+		Condition t2_condition = (t2.field("target_type").in(types).and(t2.field("target_id").in(configIds)).or(t2.field("control_id").eq(0)));
 		cond = cond.and(t2_condition);
 		step.where(cond).fetch().map((r) -> {
 			result.add(new Tuple<Long,String>((Long)r.getValue(t1.field("module_app_id")), (String)r.getValue(t1.field("module_control_type"))));
