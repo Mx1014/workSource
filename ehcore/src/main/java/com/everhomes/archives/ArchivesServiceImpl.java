@@ -2562,19 +2562,21 @@ public class ArchivesServiceImpl implements ArchivesService {
 
     @Override
     public void sendArchivesNotification() {
-        // time
-        DateTimeFormatter formatter = DateTimeFormatter.ofPattern("MMdd");
+        // set the time
         Date firstOfWeek = ArchivesUtil.currentDate();
-        String firstOfWeekDate = formatter.format(firstOfWeek.toLocalDate());
         Date lastOfWeek = ArchivesUtil.plusDate(firstOfWeek,6);
-        String lastOfWeekDate = formatter.format(lastOfWeek.toLocalDate());
+        DateTimeFormatter formatter = DateTimeFormatter.ofPattern("MMdd");
+        List<String> weekScopes = new ArrayList<>();
+        for(int i=0; i<7; i++){
+            weekScopes.add(formatter.format(ArchivesUtil.plusDate(firstOfWeek,i).toLocalDate()));
+        }
+
         List<OrganizationMemberDetails> employees = organizationProvider.queryOrganizationMemberDetails(new ListingLocator(), 1023080L, (locator, query) -> {
             query.addConditions(Tables.EH_ORGANIZATION_MEMBER_DETAILS.EMPLOYEE_STATUS.ne(EmployeeStatus.DISMISSAL.getCode()));
             Condition con = Tables.EH_ORGANIZATION_MEMBER_DETAILS.EMPLOYMENT_TIME.between(firstOfWeek, lastOfWeek);
             //  TODO: 生日与周年的计算
-//            con = con.or(Tables.EH_ORGANIZATION_MEMBER_DETAILS.CHECK_IN_TIME_INDEX.between(firstOfWeekDate, lastOfWeekDate));
-            con = con.or(Tables.EH_ORGANIZATION_MEMBER_DETAILS.CHECK_IN_TIME.between(ArchivesUtil.previousYear(firstOfWeek), ArchivesUtil.previousYear(lastOfWeek)));
-            con = con.or(Tables.EH_ORGANIZATION_MEMBER_DETAILS.BIRTHDAY.between(firstOfWeek, lastOfWeek));
+            con = con.or(Tables.EH_ORGANIZATION_MEMBER_DETAILS.CHECK_IN_TIME_INDEX.in(weekScopes));
+            con = con.or(Tables.EH_ORGANIZATION_MEMBER_DETAILS.BIRTHDAY_INDEX.in(weekScopes));
             con = con.or(Tables.EH_ORGANIZATION_MEMBER_DETAILS.CONTRACT_END_TIME.between(firstOfWeek, lastOfWeek));
             con = con.or(Tables.EH_ORGANIZATION_MEMBER_DETAILS.ID_EXPIRY_DATE.between(firstOfWeek, lastOfWeek));
             query.addConditions(con);
